@@ -10,16 +10,6 @@
 
 #include "act.h"
 
-
-/* extern variables */
-extern struct char_data *EDRAGON;
-extern int WISH[2];
-extern int DRAGONR;
-extern int DRAGONZ;
-extern int DRAGONC;
-extern int SHENRON;
-extern int SELFISHMETER;
-
 /* extern functions */
 extern struct time_info_data *real_time_passed(time_t t2, time_t t1);
 extern void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, char *name);

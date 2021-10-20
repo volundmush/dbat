@@ -3,8 +3,7 @@
 *  Usage: pseudo-random number generator                                  *
 ************************************************************************ */
 
-#include "conf.h"
-#include "sysdep.h"
+#include "random.h"
 
 /*
  * I am bothered by the non-portablility of 'rand' and 'random' -- rand
@@ -66,8 +65,7 @@
 static unsigned long seed;
 
 /* local functions */
-void circle_srandom(unsigned long initial_seed);
-unsigned long circle_random(void);
+
 
 
 void circle_srandom(unsigned long initial_seed)

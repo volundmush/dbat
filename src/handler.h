@@ -22,6 +22,7 @@
 #include "spells.h"
 #include "dg_scripts.h"
 #include "feats.h"
+#include "races.h"
 
 /* handling the affected-structures */
 void	affect_total(struct char_data *ch);
@@ -47,6 +48,7 @@ int	isname(const char *str, const char *namelist);
 int	is_name(const char *str, const char *namelist);
 char	*fname(const char *namelist);
 int	get_number(char **name);
+const char *get_i_name(struct char_data *ch, struct char_data *vict);
 
 /* ******** objects *********** */
 
