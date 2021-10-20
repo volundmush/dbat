@@ -65,4 +65,9 @@ ACMD(do_gen_comm);
 ACMD(do_qcomm);
 
 
+/* act.informative.c */
+
+// functions
+int readIntro(struct char_data *ch, struct char_data *vict);
+
 #endif //CIRCLE_ACT_H

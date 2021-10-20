@@ -14,7 +14,7 @@
 int extractions_pending = 0;
 
 /* external vars */
-extern const char *pc_race_types[NUM_RACES+1];
+
 extern struct char_data *combat_list;
 
 /* local functions */

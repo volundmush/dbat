@@ -15,8 +15,6 @@
 #include "conf.h"
 #include "sysdep.h"
 
-CVSHEADER("$CVSHeader: cwg/rasputin/src/comm.c,v 1.10 2005/01/02 20:20:19 fnord Exp $");
-
 #if CIRCLE_GNU_LIBC_MEMORY_TRACK
 # include <mcheck.h>
 #endif
@@ -127,6 +125,6 @@ void   show_help(struct descriptor_data *t, const char *entry);
 
 /* variables */
 extern unsigned long pulse;
-
+extern FILE *logfile;
 
 #endif

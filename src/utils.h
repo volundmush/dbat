@@ -33,14 +33,9 @@
 #include "feats.h"
 #include "constants.h"
 #include "oasis.h"
-
-/* external declarations and prototypes **********************************/
-
-extern struct weather_data weather_info;
-extern FILE *logfile;
-extern const char *d_race_types[NUM_RACES+1];
-extern int readIntro(struct char_data *ch, struct char_data *vict);
-extern const char *get_i_name(struct char_data *ch, struct char_data *vict);
+#include "races.h"
+#include "class.h"
+#include "random.h"
 
 #define log			basic_mud_log
 
@@ -50,7 +45,7 @@ extern const char *get_i_name(struct char_data *ch, struct char_data *vict);
 int masadv(char *tmp, struct char_data *ch);
 void demon_refill_lf(struct char_data *ch, cl_sint64 num);
 void dispel_ash(struct char_data *ch);
-void stable_check(void);
+
 int has_group(struct char_data *ch);
 const char *report_party_health(struct char_data *ch);
 int know_skill(struct char_data *ch, int skill);
@@ -138,10 +133,6 @@ char *strlwr(char *s);
 #undef strlwr
 #endif
 
-
-/* random functions in random.c */
-void circle_srandom(unsigned long initial_seed);
-unsigned long circle_random(void);
 
 /* undefine MAX and MIN so that our functions are used instead */
 #ifdef MAX
