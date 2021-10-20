@@ -1,0 +1,523 @@
+#8100
+Humming Bird~
+@yH@Du@wm@Wm@wi@Dn@yg @BB@wi@Wr@Bd@n~
+A humming bird is flying low here.
+~
+@D  @n
+~
+dgxyz 0 0 0 l 0 0 0 0 E
+2 0 10 0d10+0 0d0+0
+0 0 15 3
+8 8 1
+Size: 2
+Str: 9
+Dex: 14
+Int: 7
+Wis: 6
+Con: 6
+Cha: 9
+E
+#8101
+Butterfly~
+@CB@cu@Ytt@yer@Yf@cl@Cy@n~
+A butterfly flitters around in the air.
+~
+@D  @n
+~
+dgxyz 0 0 0 l 0 0 0 0 E
+2 0 10 0d12+0 0d0+0
+0 0 15 10
+8 8 1
+Str: 5
+Dex: 10
+Int: 7
+Wis: 7
+Con: 6
+Cha: 6
+E
+#8102
+Butterfly~
+@CB@cu@Ytt@yer@Yf@cl@Cy@n~
+A butterfly flitters around in the air.
+~
+@D  @n
+~
+dgxyz 0 0 0 l 0 0 0 0 E
+2 0 10 0d12+0 0d0+0
+0 0 15 10
+8 8 2
+Str: 6
+Dex: 10
+Int: 7
+Wis: 7
+Con: 10
+Cha: 8
+E
+#8103
+Endras~
+@DE@wn@Wd@Dr@wa@Ds@n~
+Endras is here, leaning on the counter.
+~
+@D   @n
+~
+bds 0 0 0 l 0 0 0 0 E
+100 0 10 0d4+0 0d0+0
+100000 0 3 6
+8 8 1
+Str: 64
+Dex: 99
+Int: 83
+Wis: 88
+Con: 96
+Cha: 69
+E
+#8104
+Lord Aranni~
+@wLord @GA@gr@wr@Wa@gn@Gi@n~
+Lord Aranni is looking over some documents here.
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 0 E
+1 0 10 0d6+0 0d0+0
+0 0 3 2
+8 8 1
+Str: 5
+Dex: 10
+Int: 18
+Wis: 7
+Con: 12
+Cha: 19
+E
+T 8139
+T 8140
+T 8141
+T 8142
+T 4015
+#8105
+Lorund~
+@rL@Ro@Dr@wu@Rn@rd@n~
+Lorund is polishing a sharp Katana here.
+~
+@D @n
+~
+bds 0 0 0 l 0 0 0 0 E
+100 0 10 0d10+0 0d0+0
+0 0 3 3
+8 8 1
+Str: 87
+Dex: 91
+Int: 100
+Wis: 90
+Con: 63
+Cha: 94
+E
+#8106
+Cirali~
+@CC@ci@Yr@ya@cl@Ci@n~
+Cirali the Smithy is leaning back on a chair, taking a break.
+~
+@D  @n
+~
+bds 0 0 0 l 0 0 0 0 E
+1 0 10 0d4+0 0d0+0
+0 0 3 6
+8 8 1
+Str: 10
+Dex: 10
+Int: 7
+Wis: 5
+Con: 13
+Cha: 13
+E
+T 8105
+#8107
+Gladroon~
+@DG@Wl@wa@Ydr@wo@Wo@Dn@n~
+Gladroon is wiping a shelf down.
+~
+@D @n
+~
+bcds 0 0 0 l 0 0 0 0 E
+50 0 10 0d8+0 0d0+0
+0 0 3 7
+8 8 1
+Str: 25
+Dex: 46
+Int: 30
+Wis: 43
+Con: 49
+Cha: 36
+E
+T 8144
+#8108
+Kirsty~
+@MK@mi@wr@Ws@mt@My@n~
+The shop keeper Kirsty is placing clothing items on the shelves.
+~
+@D @n
+~
+bds 0 0 0 l 0 0 0 0 E
+100 0 10 0d8+0 0d0+0
+0 0 3 4
+8 8 2
+Str: 63
+Dex: 100
+Int: 84
+Wis: 83
+Con: 74
+Cha: 92
+E
+#8109
+Borwen~
+@DB@wo@Wrw@we@Dn@n~
+Borwen the hostess is here.
+~
+@D  @n
+~
+bds 0 0 0 l 0 0 0 0 E
+100 0 10 0d8+0 0d0+0
+0 0 3 7
+8 8 2
+Str: 69
+Dex: 87
+Int: 100
+Wis: 99
+Con: 73
+Cha: 100
+E
+#8110
+Thaernd~
+@DT@Wh@wa@De@Wr@wnd@n~
+Thaernd the barkeep is here.
+~
+@D  @n
+~
+bds 0 0 0 l 0 0 0 0 E
+1 0 10 0d8+0 0d0+0
+0 0 3 7
+8 8 1
+Str: 8
+Dex: 20
+Int: 6
+Wis: 12
+Con: 8
+Cha: 13
+E
+#8111
+Geldii~
+@YG@ye@Wl@wd@Yi@yi@n~
+Geldii the Jeweler is here.
+~
+@D  @n
+~
+bds 0 0 0 l 0 0 0 0 E
+1 0 10 0d8+0 0d0+0
+0 0 3 7
+8 8 2
+Str: 5
+Dex: 20
+Int: 9
+Wis: 10
+Con: 8
+Cha: 20
+E
+#8112
+Olquar~
+@MO@ml@wq@Wu@ma@Mr@n~
+Olquar is walking around, polishing his furniture.
+~
+@D  @n
+~
+bcds 0 0 0 l 0 0 0 0 E
+50 0 10 0d10+0 0d0+0
+0 0 3 3
+8 8 1
+Str: 30
+Dex: 41
+Int: 48
+Wis: 37
+Con: 50
+Cha: 51
+E
+T 8143
+#8113
+Erissa~
+@CE@cr@wi@Cs@cs@wa@n~
+Erissa is sewing together an exquisite dress.
+~
+@D @n
+~
+bds 0 0 0 l 0 0 0 0 E
+1 0 10 0d8+0 0d0+0
+0 0 3 7
+8 8 2
+Str: 7
+Dex: 20
+Int: 10
+Wis: 15
+Con: 8
+Cha: 19
+E
+#8114
+Aengoth~
+@yA@De@yn@Wg@yo@Dt@yh@n~
+Aengoth is thumbing through a book.
+~
+@D  @n
+~
+bds 0 0 0 l 0 0 0 0 E
+100 0 10 0d10+0 0d0+0
+0 0 3 5
+8 8 1
+Str: 63
+Dex: 68
+Int: 93
+Wis: 85
+Con: 87
+Cha: 60
+E
+#8115
+Ordinator Armorer~
+@YO@yr@Dd@Yi@yn@Ya@Dt@yo@Yr@n Armorer~
+An @YO@yr@Dd@Yi@yn@Ya@Dt@yo@Yr@n in charge of the Indoril armory is here, selling gear.
+~
+@d @n
+~
+bde 0 0 0 l 0 0 0 0 E
+1 0 10 0d8+0 0d0+0
+0 0 3 7
+8 8 1
+Size: 5
+Str: 7
+Dex: 20
+Int: 8
+Wis: 9
+Con: 7
+Cha: 11
+E
+#8120
+Konatsu ticket seller~
+@DKo@wn@Wa@wt@Dsu@n ticket seller~
+A konatsu is selling tickets for the public transportation system here.
+~
+@d @n
+~
+bd 0 0 0 l 0 0 0 0 E
+1 0 10 0d0+0 0d0+0
+0 0 3 28
+8 8 1
+Str: 7
+Dex: 10
+Int: 7
+Wis: 8
+Con: 6
+Cha: 5
+E
+T 4016
+#8121
+Indoril Officer~
+@YI@yn@Yd@Do@Yr@yi@Yl @WOfficer@n~
+An Indoril Officer is sitting here, filing notes.
+~
+@D @n
+~
+bds 0 0 0 l 0 0 0 0 E
+1 0 10 0d8+0 0d0+0
+0 0 5 7
+8 8 1
+Str: 7
+Dex: 14
+Int: 6
+Wis: 13
+Con: 7
+Cha: 16
+E
+T 8100
+T 8101
+#8122
+Councillor Marias~
+@DC@Wo@wun@Wci@wll@Wo@Dr @YM@ya@Dr@wi@ya@Ys@n~
+Councillor Marias of House Indoril is here, performing her duties
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 50 E
+50 0 10 0d8+0 0d0+0
+0 0 3 7
+8 8 2
+Str: 37
+Dex: 47
+Int: 45
+Wis: 42
+Con: 46
+Cha: 46
+E
+T 8102
+T 8103
+T 8118
+T 8150
+#8123
+Ordinator Trainee~
+@YO@yr@Dd@Yi@yn@Ya@Dt@yo@Yr@n Trainee~
+An ordinator in training is practicing his fighting skills here.
+~
+@d @n
+~
+de 0 0 0 l 0 0 0 0 E
+5 0 10 0d8+0 0d0+0
+0 0 3 7
+8 8 1
+Size: 5
+Str: 7
+Dex: 21
+Int: 15
+Wis: 14
+Con: 5
+Cha: 18
+E
+T 8104
+#8124
+Hired Assassin~
+@WHired @RA@rs@Ds@wa@Ws@Rs@ri@Dn@n~
+A cloaked assassin like figure stands here looking uneasy.
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 0 E
+30 0 10 0d8+0 0d0+0
+0 0 3 7
+8 8 1
+Str: 19
+Dex: 36
+Int: 27
+Wis: 35
+Con: 15
+Cha: 28
+E
+T 8112
+#8125
+Shela Taesal~
+@CS@ch@We@cl@Ca @BT@ba@ce@Cs@ba@Bl@n~
+Mistress Shela Taesal is sitting on her bed here.
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 0 E
+50 0 10 0d8+0 0d0+0
+0 0 3 7
+8 6 2
+Str: 32
+Dex: 55
+Int: 45
+Wis: 49
+Con: 40
+Cha: 37
+E
+T 8119
+T 8146
+T 8147
+#8126
+taesal mercenary~
+@BT@ba@ce@Cs@ba@Bl @RM@re@Dr@wc@We@Rn@ra@Dr@Wy@n ~
+A mercenary working for House Taesal patrols here.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 0 E
+30 0 10 0d8+0 0d0+0
+0 0 0 7
+8 8 1
+Str: 20
+Dex: 36
+Int: 26
+Wis: 35
+Con: 20
+Cha: 28
+E
+#8127
+Lord Nikolash~
+@nLord @GN@gi@Rk@ro@Dl@Ra@gs@Gh@n~
+Lord Nikolash, head of House Sereg-Vanma stands here.
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 -20 E
+50 0 10 0d8+0 0d0+0
+0 0 3 7
+8 8 1
+Str: 31
+Dex: 47
+Int: 51
+Wis: 35
+Con: 38
+Cha: 36
+E
+T 8125
+#8128
+Mishie Shuro~
+@MM@mi@Ds@wh@mi@Me @cS@Ch@Wu@Cr@co@n~
+Mishie Shuro stands here, planning a feast.
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 0 E
+30 0 10 0d8+0 0d0+0
+0 0 3 7
+8 8 2
+Str: 19
+Dex: 40
+Int: 29
+Wis: 26
+Con: 16
+Cha: 39
+E
+T 8126
+T 8127
+T 8128
+T 8129
+#8129
+Trades Guild Leader~
+@DTrades @WGuild@n Leader~
+The leader of the Dye & Skinning Trades Guild is standing here, looking for someone.
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 0 E
+2 0 10 0d8+0 0d0+0
+0 0 3 7
+8 8 1
+Str: 6
+Dex: 21
+Int: 8
+Wis: 13
+Con: 5
+Cha: 14
+E
+T 8130
+#8130
+denton mutant~
+@gD@Wento@gn@n~
+@gD@Wento@gn@n, the @C[@WWTO@C]@n ambassador, stands here.
+~
+It looks unfinished.
+@gD@Wento@gn@n, the @C[@WWTO@C]@n ambassador, is a middle aged man with a colorful
+wardrobe.  Vibrant blues and greens dominate the colorscheme of his
+outfit, and his fingertips are well calloused from years of playing
+guitar.  He looks a little lost since he does not have an instrument.
+~
+bdnprs 0 0 0 l 0 0 0 0 E
+5 0 10 0d10+0 0d0+0
+0 0 5 5
+8 8 2
+Str: 5
+Dex: 13
+Int: 6
+Wis: 7
+Con: 20
+Cha: 19
+E
+T 1132
+T 1133
+T 1136
+$

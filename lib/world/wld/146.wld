@@ -1,0 +1,1692 @@
+#14600
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+146 z 0 0 0 0
+D3
+~
+~
+0 0 14599 0 0 0 0 0 0 0 0
+S
+#14601
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14598 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14602 0 0 0 0 0 0 0 0
+S
+#14602
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14601 0 0 0 0 0 0 0 0
+S
+#14603
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14604 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14598 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14606 0 0 0 0 0 0 0 0
+S
+#14604
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14605 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14603 0 0 0 0 0 0 0 0
+S
+#14605
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+146 z 0 0 0 0
+D3
+~
+~
+0 0 14604 0 0 0 0 0 0 0 0
+S
+#14606
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14603 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14607 0 0 0 0 0 0 0 0
+S
+#14607
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14606 0 0 0 0 0 0 0 0
+S
+#14608
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+
+@GThere is a sign here.@n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14609 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14613 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14611 0 0 0 0 0 0 0 0
+E
+look sign~
+To leave the training simulation, say leave in this room.
+~
+S
+T 13525
+#14609
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14610 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14608 0 0 0 0 0 0 0 0
+S
+#14610
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D3
+~
+~
+0 0 14609 0 0 0 0 0 0 0 0
+S
+#14611
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14608 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14612 0 0 0 0 0 0 0 0
+S
+#14612
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14611 0 0 0 0 0 0 0 0
+S
+#14613
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14608 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14614 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14618 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14616 0 0 0 0 0 0 0 0
+S
+#14614
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14615 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14613 0 0 0 0 0 0 0 0
+S
+#14615
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D3
+~
+~
+0 0 14614 0 0 0 0 0 0 0 0
+S
+#14616
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14613 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14617 0 0 0 0 0 0 0 0
+S
+#14617
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14616 0 0 0 0 0 0 0 0
+S
+#14618
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14613 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14619 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14621 0 0 0 0 0 0 0 0
+S
+#14619
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14620 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14618 0 0 0 0 0 0 0 0
+S
+#14620
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D3
+~
+~
+0 0 14619 0 0 0 0 0 0 0 0
+S
+#14621
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14618 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14622 0 0 0 0 0 0 0 0
+S
+#14622
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14621 0 0 0 0 0 0 0 0
+S
+#14623
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+
+@GThere is a sign here.@n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14624 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14628 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14626 0 0 0 0 0 0 0 0
+E
+look sign~
+To leave the training simulation, say leave in this room.
+~
+S
+T 13525
+#14624
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14625 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14623 0 0 0 0 0 0 0 0
+S
+#14625
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D3
+~
+~
+0 0 14624 0 0 0 0 0 0 0 0
+S
+#14626
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14623 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14627 0 0 0 0 0 0 0 0
+S
+#14627
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14626 0 0 0 0 0 0 0 0
+S
+#14628
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14623 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14629 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14633 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14631 0 0 0 0 0 0 0 0
+S
+#14629
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14630 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14628 0 0 0 0 0 0 0 0
+S
+#14630
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D3
+~
+~
+0 0 14629 0 0 0 0 0 0 0 0
+S
+#14631
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14628 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14632 0 0 0 0 0 0 0 0
+S
+#14632
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14631 0 0 0 0 0 0 0 0
+S
+#14633
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14628 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14634 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14636 0 0 0 0 0 0 0 0
+S
+#14634
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14635 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14633 0 0 0 0 0 0 0 0
+S
+#14635
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D3
+~
+~
+0 0 14634 0 0 0 0 0 0 0 0
+S
+#14636
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14633 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14637 0 0 0 0 0 0 0 0
+S
+#14637
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14636 0 0 0 0 0 0 0 0
+S
+#14638
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+
+@GThere is a sign here.@n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14639 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14643 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14641 0 0 0 0 0 0 0 0
+E
+look sign~
+To leave the training simulation, say leave in this room.
+~
+S
+T 13525
+#14639
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14640 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14638 0 0 0 0 0 0 0 0
+S
+#14640
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D3
+~
+~
+0 0 14639 0 0 0 0 0 0 0 0
+S
+#14641
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14638 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14642 0 0 0 0 0 0 0 0
+S
+#14642
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14641 0 0 0 0 0 0 0 0
+S
+#14643
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14638 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14644 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14648 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14646 0 0 0 0 0 0 0 0
+S
+#14644
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14645 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14643 0 0 0 0 0 0 0 0
+S
+#14645
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D3
+~
+~
+0 0 14644 0 0 0 0 0 0 0 0
+S
+#14646
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14643 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14647 0 0 0 0 0 0 0 0
+S
+#14647
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14646 0 0 0 0 0 0 0 0
+S
+#14648
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14643 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14649 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14651 0 0 0 0 0 0 0 0
+S
+#14649
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14650 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14648 0 0 0 0 0 0 0 0
+S
+#14650
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D3
+~
+~
+0 0 14649 0 0 0 0 0 0 0 0
+S
+#14651
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14648 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14652 0 0 0 0 0 0 0 0
+S
+#14652
+@gE@Gl@Yz@yth@Yu@ga@Gn @GF@go@wr@We@gs@Gt@n~
+ @GThis forest has served as training grounds for Konatsu warriors since the
+beginning of time.  Shadows dance around playfully, created by what little light
+shines down through the thick canopy above.  The ground is littered with leaves,
+moss, mushrooms and other assorted fauna and is quite damp.  Sounds of birds and
+insects ring out through the Elzthuan Forest melodically.  @n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14651 0 0 0 0 0 0 0 0
+S
+#14653
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+
+@WThere is a sign here.@n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14654 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14658 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14656 0 0 0 0 0 0 0 0
+E
+look sign~
+To leave the training simulation, say leave in this room.
+~
+S
+T 13527
+#14654
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14655 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14653 0 0 0 0 0 0 0 0
+S
+#14655
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D2
+~
+~
+0 0 14654 0 0 0 0 0 0 0 0
+S
+#14656
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14653 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14657 0 0 0 0 0 0 0 0
+S
+#14657
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14656 0 0 0 0 0 0 0 0
+S
+#14658
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14659 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14663 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14661 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14653 0 0 0 0 0 0 0 0
+S
+#14659
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14660 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14658 0 0 0 0 0 0 0 0
+S
+#14660
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D2
+~
+~
+0 0 14659 0 0 0 0 0 0 0 0
+S
+#14661
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14658 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14662 0 0 0 0 0 0 0 0
+S
+#14662
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14661 0 0 0 0 0 0 0 0
+S
+#14663
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14664 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14666 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14658 0 0 0 0 0 0 0 0
+S
+#14664
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14665 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14663 0 0 0 0 0 0 0 0
+S
+#14665
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D2
+~
+~
+0 0 14664 0 0 0 0 0 0 0 0
+S
+#14666
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14663 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14667 0 0 0 0 0 0 0 0
+S
+#14667
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14666 0 0 0 0 0 0 0 0
+S
+#14668
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+
+@WThere is a sign here.@n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14669 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14673 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14671 0 0 0 0 0 0 0 0
+E
+look sign~
+To leave the training simulation, say leave in this room.
+~
+S
+T 13527
+#14669
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14670 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14668 0 0 0 0 0 0 0 0
+S
+#14670
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D2
+~
+~
+0 0 14669 0 0 0 0 0 0 0 0
+S
+#14671
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14668 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14672 0 0 0 0 0 0 0 0
+S
+#14672
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14671 0 0 0 0 0 0 0 0
+S
+#14673
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14674 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14678 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14676 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14668 0 0 0 0 0 0 0 0
+S
+#14674
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14675 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14673 0 0 0 0 0 0 0 0
+S
+#14675
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D2
+~
+~
+0 0 14674 0 0 0 0 0 0 0 0
+S
+#14676
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14673 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14677 0 0 0 0 0 0 0 0
+S
+#14677
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14676 0 0 0 0 0 0 0 0
+S
+#14678
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14679 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14681 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14673 0 0 0 0 0 0 0 0
+S
+#14679
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14680 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14678 0 0 0 0 0 0 0 0
+S
+#14680
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D2
+~
+~
+0 0 14679 0 0 0 0 0 0 0 0
+S
+#14681
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14678 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14682 0 0 0 0 0 0 0 0
+S
+#14682
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14681 0 0 0 0 0 0 0 0
+S
+#14683
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+
+@WThere is a sign here.@n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14684 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14688 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14686 0 0 0 0 0 0 0 0
+E
+look sign~
+To leave the training simulation, say leave in this room.
+~
+S
+T 13527
+#14684
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14685 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14683 0 0 0 0 0 0 0 0
+S
+#14685
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D2
+~
+~
+0 0 14684 0 0 0 0 0 0 0 0
+S
+#14686
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14683 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14687 0 0 0 0 0 0 0 0
+S
+#14687
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14686 0 0 0 0 0 0 0 0
+S
+#14688
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14689 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14693 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14691 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14683 0 0 0 0 0 0 0 0
+S
+#14689
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14690 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14688 0 0 0 0 0 0 0 0
+S
+#14690
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D2
+~
+~
+0 0 14689 0 0 0 0 0 0 0 0
+S
+#14691
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14688 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14692 0 0 0 0 0 0 0 0
+S
+#14692
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14691 0 0 0 0 0 0 0 0
+S
+#14693
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14694 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14696 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14688 0 0 0 0 0 0 0 0
+S
+#14694
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14695 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14693 0 0 0 0 0 0 0 0
+S
+#14695
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D2
+~
+~
+0 0 14694 0 0 0 0 0 0 0 0
+S
+#14696
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14693 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14697 0 0 0 0 0 0 0 0
+S
+#14697
+@mY@Ma@wr@ndra @WCity@n~
+   @nThe cobble stone street that weaves through this area of Yardra City appears
+to receive little traffic as its stones are in perfect condition. Purple bushes
+dot the side of the street adding some color and decoration. @n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14696 0 0 0 0 0 0 0 0
+S
+#14698
+@GA@gn@Wc@wi@We@gn@Gt @YC@yo@Yl@Wis@Ye@yu@Ym@n~
+   @yBlood stains the dirt floor of this Ancient Coliseum where many battles have
+taken place over the years. High walls around the edges of the killing fields
+lead to the stands where spectators watch the brutal fighting. @n
+
+@yThere is a sign here.@n
+~
+146 z 0 0 0 0
+D0
+~
+~
+0 0 14703 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14699 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14701 0 0 0 0 0 0 0 0
+E
+look sign~
+To leave the training simulation, say leave in this room.
+~
+S
+T 13529
+#14699
+@GA@gn@Wc@wi@We@gn@Gt @YC@yo@Yl@Wis@Ye@yu@Ym@n~
+   @yBlood stains the dirt floor of this Ancient Coliseum where many battles have
+taken place over the years. High walls around the edges of the killing fields
+lead to the stands where spectators watch the brutal fighting. @n
+~
+146 z 0 0 0 0
+D1
+~
+~
+0 0 14700 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14698 0 0 0 0 0 0 0 0
+S
+$~

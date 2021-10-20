@@ -1,0 +1,79 @@
+CircleMUD v3.0 Shop File~
+#64365~
+64309
+64310
+64333
+64318
+64331
+64317
+64307
+64305
+64306
+64308
+64316
+64324
+64325
+64327
+64330
+-1
+0.75
+1.00
+-1
+%s I don't have any of those.~
+%s You don't have one? Quit wasting my time!~
+%s I don't need any of those.~
+%s I can't afford that, move along!~
+%s You don't have enough.~
+%s That's %d zenni, please.~
+%s Here's %d zenni, try not to die.~
+0
+0
+64308
+0 0 16384 0
+-1
+0
+0
+0
+0
+#64398~
+64316
+64312
+64330
+64327
+64324
+64325
+64309
+64310
+64318
+64333
+64305
+64306
+64307
+64308
+64317
+64331
+64311
+64319
+64334
+-1
+1.25
+0.75
+-1
+%s Sorry, I don't stock that item.~
+%s You don't seem to have that.~
+%s I don't trade in such items.~
+%s I can't afford that!~
+%s You are too poor!~
+%s That'll be %d zenni, thanks.~
+%s I'll give you %d zenni for that.~
+0
+0
+64398
+0 0 16384 0
+64398
+-1
+0
+28
+0
+0
+$~

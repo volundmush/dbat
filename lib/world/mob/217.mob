@@ -1,0 +1,794 @@
+#63200
+Heimdallr viking warrior~
+@YH@We@Yi@Wm@Yd@Wa@Yl@Wl@Yr@n~
+@nA large man wearing @Yg@yo@Wl@Yd@ye@Wn@n platemail stands here.@n
+~
+@nThis titan of a man has curly brown hair pulled back into a bun. He wields one
+sword, placed out in front of himself in the bridge itself. His expression
+never waivers as both of his hands are on the hilt of the blade. @n
+~
+bdvwxyz 0 0 0 0 0 0 0 0 E
+100 0 10 0d8+0 0d0+0
+0 0 0 7
+8 8 1
+Str: 98
+Dex: 63
+Int: 92
+Wis: 63
+Con: 50
+Cha: 80
+E
+T 63206
+#63201
+Wench~
+Bar Wench~
+A beautiful bar wench is serving ale here
+~
+   This valuptuous woman casts you a warm smile as she pours a large cup of Ale
+from her ever-pouring pitcher.
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+30 0 10 0d4+0 0d0+0
+0 0 3 6
+8 8 2
+Str: 16
+Dex: 29
+Int: 18
+Wis: 16
+Con: 27
+Cha: 27
+E
+#63202
+Scout~
+@GS@Cc@Go@Cu@Gt@n~
+A well armed scout is posted guard here
+~
+   This young man stands, his head held high. His eyes dash around the room,
+looking to protect the outpost.
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+30 0 10 0d0+0 0d0+0
+0 0 7 28
+8 8 1
+Str: 28
+Dex: 23
+Int: 29
+Wis: 30
+Con: 16
+Cha: 16
+E
+T 63204
+#63203
+Female Warrior~
+@MF@De@Mm@Da@Ml@De@n Warrior~
+A well armed Female Warrior stands here.
+~
+   This woman is garnished in leather armor. Her is hair pulled up and
+braided, so to stay out of the way. Her hands are bound with leather straps to
+prevent being disarmed. However she wears no sword only an empty sheath
+attached to her battle skirt.
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+35 0 10 0d8+0 0d0+0
+0 0 1 4
+8 8 2
+Str: 31
+Dex: 32
+Int: 25
+Wis: 22
+Con: 23
+Cha: 35
+E
+#63204
+Soldier~
+@RF@Do@Ro@Dt@W S@Do@Wl@Dd@Wi@De@Wr@n~
+@nA @RF@Do@Ro@Dt@W S@Do@Wl@Dd@Wi@De@Wr@n walks the battlements.@n
+~
+This average looking soldier, looks extremely drunk and has a horrible singing
+voice.
+~
+dlmvwxyz 0 0 0 0 0 0 0 0 E
+45 0 10 0d10+0 0d0+0
+0 0 0 5
+8 8 1
+Str: 27
+Dex: 25
+Int: 45
+Wis: 22
+Con: 39
+Cha: 26
+E
+#63205
+Lord Edward~
+@WL@Do@Wr@Dd@n @ME@Yd@Mw@Ya@Mr@Yd@n~
+A lord stands here using profanities against anyone and everyone.
+~
+   This man is six foot three. An afro about a foot in diameter covers the top
+of his head. Braclets and beads covers his left wrist. He isn't dressed like
+most of the oher warriors of the Outpost, instead he wears a white silk gi with
+red trim, and a katana at his hip. He's raise a brow if you challanged him.
+
+   @D(@rOOC@W:@r) @RThis is meant as a direct clone of the builder's closest friend. In
+no way is this supposed to be a racist stereotype. Thank you for
+understanding. @n
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+60 0 10 0d4+0 0d0+0
+0 0 7 12
+8 8 0
+Str: 41
+Dex: 42
+Int: 53
+Wis: 43
+Con: 37
+Cha: 50
+E
+T 63200
+#63206
+Ronnoc Blacksmith~
+@GR@Yo@Gn@Yn@Go@Yc@n~
+@GR@Yo@Gn@Yn@Go@Yc@n stands here, hammer in hand as he beats a piece of metal into shape.@n
+~
+@nThis titan stands at somewhere between ten and twelve feet tall. He has long
+blonde hair which only compliments his emerald green eyes. His body looks as
+though it was forged on this very anivil. With each swing of his hammer, his
+body tenses to prepare for the shock of hammer meeting metal. @n
+~
+bdsvwxyz 0 0 0 l n 0 0 0 E
+100 0 10 0d12+0 0d0+0
+0 0 1 10
+8 8 1
+Str: 67
+Dex: 53
+Int: 64
+Wis: 70
+Con: 68
+Cha: 77
+E
+T 63210
+T 63211
+T 63212
+T 63213
+#63207
+Elite Guard Guardsman~
+Elite Guardsman~
+An Elite Guardsman stands here protecting the Outpost.
+~
+   This man is adorned in a strange metal with the colors of gold and crimson.
+He keeps his post with vigilant eyes watching for any assualt on the Outpost.
+~
+cdvwxyz 0 0 0 l 0 0 0 0 E
+55 0 10 0d8+0 0d0+0
+0 0 4 1
+8 8 0
+Str: 41
+Dex: 32
+Int: 39
+Wis: 38
+Con: 30
+Cha: 39
+E
+T 63205
+#63208
+Dog~
+Guard Dog~
+A large dog sits here, watching and waiting for scraps.
+~
+   This large dog resembles the mix between a Pitbull and a German-Shepard. 
+Its jaws look like they'd easily break bones.
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+33 0 10 0d6+0 0d0+0
+0 0 15 27
+6 6 1
+Str: 19
+Dex: 23
+Int: 6
+Wis: 8
+Con: 24
+Cha: 16
+E
+#63209
+Foot Soldier~
+@RF@Do@Ro@Dt@W S@Do@Wl@Dd@Wi@De@Wr@n~
+@nA @RF@Do@Ro@Dt@W S@Do@Wl@Dd@Wi@De@Wr@n walks the battlements.@n
+~
+This average looking soldier, looks extremely drunk and has a horrible singing
+voice.
+~
+dlmvwxyz 0 0 0 0 0 0 0 0 E
+49 0 10 0d10+0 0d0+0
+0 0 0 5
+8 8 2
+Str: 43
+Dex: 42
+Int: 37
+Wis: 47
+Con: 35
+Cha: 39
+E
+#63210
+Dog~
+Guard Dog~
+A large dog sits here, watching and waiting for scraps.
+~
+   This large dog resembles the mix between a Pitbull and a German-Shepard. 
+Its jaws look like they'd easily break bones.
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+36 0 10 0d6+0 0d0+0
+0 0 15 27
+6 6 2
+Str: 33
+Dex: 25
+Int: 5
+Wis: 5
+Con: 27
+Cha: 24
+E
+#63211
+Scout~
+@GS@Cc@Go@Cu@Gt@n~
+A well armed scout is posted guard here
+~
+It looks unfinished.
+~
+bdsvwxyz 0 0 0 l 0 0 0 0 E
+38 0 10 0d0+0 0d0+0
+0 0 7 28
+8 8 2
+Str: 30
+Dex: 27
+Int: 33
+Wis: 35
+Con: 31
+Cha: 27
+E
+#63212
+Elite Guard Guardsman~
+Elite Guardsman~
+An Elite Guardsman stands here protecting the Outpost.
+~
+   This man is adorned in a strange metal with the colors of gold and crimson.
+He keeps his post with vigilant eyes watching for any assualt on the Outpost.
+~
+cdvwxyz 0 0 0 0 0 0 0 0 E
+57 0 10 0d8+0 0d0+0
+0 0 0 1
+8 8 2
+Str: 34
+Dex: 29
+Int: 55
+Wis: 42
+Con: 39
+Cha: 29
+E
+T 63205
+#63213
+Lord Sulong~
+Lord @RS@Du@Rl@Do@Rn@Dg@n~
+@DLord @RS@Du@Rl@Do@Rn@Dg@n stands here making sure his men are at their posts.@n
+~
+This man has a long black hair. He wears a leather black robe, made of some
+sort of scales. Underneath it all is a set of full-plate-mail. A scar starts
+from his forehead and stretches down his right cheek.
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+72 0 10 0d4+0 0d0+0
+0 0 1 6
+8 8 1
+Str: 55
+Dex: 40
+Int: 59
+Wis: 54
+Con: 68
+Cha: 50
+E
+T 63201
+#63214
+Sophia~
+@MS@mo@Mp@Mh@mi@Ma@n~
+@MS@mo@Mp@Mh@mi@Ma@n sits behind a small table polishing a sword.
+~
+   Sophia is a small woman with long curly blond hair. Her eye are violet and
+seem to be analyzing you as soon as you looked at her. She offers a soft warm
+smile as she gestures to all of the weapons and armor placed around the room.
+~
+bdsvwxyz 0 0 0 l 0 0 0 0 E
+80 0 10 0d8+0 0d0+0
+1000000 0 7 29
+8 8 2
+Str: 51
+Dex: 71
+Int: 79
+Wis: 42
+Con: 66
+Cha: 79
+E
+#63215
+heidrun goat~
+@WHei@Dd@Wrun@n~
+@WHei@Dd@Wrun@n the goat chews on the corner of an enormous book here.@n
+~
+@nThis is a large, but not unusual looking goat. Heidrun, known to some as an
+immortal God creature and a source of power for the entire universe. @n
+~
+bdlvwxyz 0 0 0 l 0 0 0 0 E
+50 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 4
+Str: 47
+Dex: 33
+Int: 5
+Wis: 9
+Con: 43
+Cha: 45
+E
+T 63214
+#63216
+dire lion~
+@DD@ri@Dr@re@Y L@yi@Yo@nn@n~
+@nAn over-large @Yl@yi@Yo@nn stands guard here.@n
+~
+   This large lion sits as tall as any standing man. Its golden mane macking
+it look twice as wide.
+~
+bdfvwxyz 0 0 0 l 0 0 0 0 E
+55 0 10 0d6+0 0d0+0
+0 0 15 26
+8 8 1
+Size: 5
+Str: 30
+Dex: 55
+Int: 8
+Wis: 9
+Con: 33
+Cha: 40
+E
+#63217
+large black bear~
+@nLarge@D Black@y B@nea@yr@n~
+@nA large black bear growls here as people approach.@n
+~
+   This large black bear has pearly white teeth and black as coal eyes. Its
+coat carrys a sheen with every step the bear takes through the oddly light
+rooms.
+~
+bdfvwxyz 0 0 0 l 0 0 0 0 E
+50 0 10 0d8+0 0d0+0
+0 0 15 30
+8 8 1
+Size: 5
+Str: 49
+Dex: 30
+Int: 8
+Wis: 8
+Con: 37
+Cha: 42
+E
+#63218
+Outpost Knight~
+@YOutpost@W K@Dn@Wi@Dg@Wh@nt@n~
+@nAn Outpost @WK@Dn@Wi@Dg@Wht@n patrols here.
+~
+This woman is garnished in silver platemail. She wears no helmet because of
+her long unbriaded, crimson hair. The Outpost seal in engraved into the right
+side of the brestplate.
+~
+cdvwxyz 0 0 0 0 0 0 0 0 E
+55 0 10 0d8+0 0d0+0
+0 0 0 7
+8 8 2
+Str: 55
+Dex: 48
+Int: 29
+Wis: 35
+Con: 51
+Cha: 34
+E
+T 63202
+#63219
+Outpost Knight~
+@YOutpost@W K@Dn@Wi@Dg@Wh@nt~
+@nAn Outpost @WK@Dn@Wi@Dg@Wht@n patrols here.
+~
+This man stands at an exact six feet tall. His bright red eyes burn with long
+awaited battle. He smirks at you as you look at him.
+~
+bcdvwxyz 0 0 0 0 0 0 0 0 E
+61 0 10 0d4+0 0d0+0
+0 0 0 0
+8 8 1
+Str: 39
+Dex: 58
+Int: 41
+Wis: 54
+Con: 61
+Cha: 54
+E
+#63220
+Honor Guard~
+@RH@Wo@Rn@Wo@Rr@W G@Du@Wa@Dr@Wd@n~
+@nA member of the @RH@Wo@Rn@Wo@Rr @WG@Du@Wa@Dr@Wd@n spars with others here.@n
+~
+   This man is equipped with Hyperion armor, the gold complementing the
+crimson. His eye pierce his surroundings as he looks to defend the Outpost. 
+~
+cdlvwxyz 0 0 0 0 0 0 0 0 E
+66 0 10 0d4+0 0d0+0
+0 0 0 0
+8 8 1
+Str: 33
+Dex: 53
+Int: 47
+Wis: 46
+Con: 37
+Cha: 48
+E
+T 63203
+#63221
+Honor Guard~
+@mH@Wo@mn@Wo@mr@W G@Du@Wa@Dr@Wd@n~
+@nA member of the @mH@Wo@mn@Wo@mr@W G@Du@Wa@Dr@Wd@n spars with others here.@n
+~
+   This woman is equipped with Valkyrie armor, the violet complementing the
+silver. Her eye pierce her surroundings as she looks to defend the Outpost.
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+68 0 10 0d8+0 0d0+0
+0 0 1 4
+8 8 2
+Str: 66
+Dex: 61
+Int: 56
+Wis: 62
+Con: 50
+Cha: 60
+E
+T 63203
+#63222
+Anansi Namekian~
+@RA@Dn@Ra@Dn@Rs@Di@n~
+@nThe Namekian @RA@Dn@Ra@Dn@Rs@Di@n stands here with a strange smirk on his face.
+~
+   This Namekian is old, far older than any Namekian you've probably ever seen.
+On top of his age he's short and fairly wrinkley. His skin is a pale green
+possibly because he is a spirit within this realm. A strange smile decorates
+his face as he makes eye contact with you before looking away altogether. He
+is dressed in black robes embroidered with a large red spider shaped symbol on
+his torso.
+~
+bdsvwxyz 0 0 0 l 0 0 0 0 E
+110 0 10 0d10+0 0d0+0
+0 0 4 3
+8 8 1
+Str: 56
+Dex: 100
+Int: 69
+Wis: 78
+Con: 91
+Cha: 76
+E
+T 63215
+T 63216
+T 63217
+#63223
+Bobby June~
+@GBobby@n @CJ@Ru@Cn@Re@n~
+a midle aged man with a finely groomed beard stands here
+~
+Picture Billy Mays here, and you're set.
+~
+bdsvwxyz 0 0 0 0 0 0 0 0 E
+10 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 12
+Dex: 11
+Int: 11
+Wis: 18
+Con: 10
+Cha: 9
+E
+#63224
+FQA Foot Soldier~
+@RF@MQ@RA@n Foot @GS@Col@Gdi@Cer@n~
+A well armed soldier stands here, ready for combat.
+~
+   This basic soldier is a mutant wearing generic Icerian combat armor.
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+43 0 10 0d4+0 0d0+0
+0 0 5 6
+8 8 0
+Str: 36
+Dex: 26
+Int: 40
+Wis: 21
+Con: 21
+Cha: 33
+E
+#63225
+FQA Lieutenant~
+@RF@MQ@RA @CLi@Reu@Cte@Rna@Cnt@n~
+A Lieutenant stand here with their arms crossed over their chest.
+~
+   An Icer stand here with F. Q. A etched into the chest piece of their armor
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+50 0 10 0d6+0 0d0+0
+0 0 2 2
+8 8 0
+Str: 33
+Dex: 47
+Int: 43
+Wis: 25
+Con: 47
+Cha: 44
+E
+#63226
+Captain Thomas~
+Thomas~
+Thomas stands here ready to fight.
+~
+   @nThis human has blond hair and blue eyes. He wears Icerian style armor
+around his body. A dragon tatto can be see coming from his neck stopping on
+his left cheek. A large black @MM@n seems to be stamped to his forehead as well.
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+85 0 10 0d4+0 0d0+0
+0 0 0 6
+8 8 1
+Str: 84
+Dex: 72
+Int: 56
+Wis: 58
+Con: 72
+Cha: 45
+E
+#63227
+Mutant Zanna~
+@DZa@Wnn@Da~
+A petite looking mutant stands here.
+~
+   This mutant looks young maybe sixteen, standing at about five seven. Her
+eyes are bright yellow, her skin pale white. She has long black hair with a
+solid white streak that falls in front of her face, its almost looks frizzy as
+if it were unkept. Her body is ample, toned, though still very petite looking.
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+95 0 10 0d10+0 0d0+0
+0 0 5 5
+8 8 2
+Str: 68
+Dex: 89
+Int: 63
+Wis: 48
+Con: 57
+Cha: 50
+E
+#63228
+Mutant Zanna~
+@DZa@Wnn@Da@n Transformed~
+A large wolf like huminoid sands here snarling, ready to kill.
+~
+   The young teen now stands at seven feet tall, covered in fur. Their eyes
+are now gold, and have long pointed ears on the top of their head. The clothes
+they once wore are now nothing more than rags draped around their body Their
+snout is full of razor sharp teeth, their hands are larger and tipped with
+three inch long claws. 
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+101 0 10 0d10+0 0d0+0
+0 0 5 5
+8 8 2
+Str: 86
+Dex: 56
+Int: 78
+Wis: 91
+Con: 83
+Cha: 73
+E
+#63229
+FQA Foot Soldier~
+@RF@MQ@RA@n Foot @GS@Col@Gdi@Cer@n~
+A well armed soldier stands here, ready for combat.
+~
+   This basic soldier is a mutant wearing generic Icerian combat armor.
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+98 0 10 0d4+0 0d0+0
+0 0 5 6
+8 8 0
+Str: 70
+Dex: 81
+Int: 52
+Wis: 64
+Con: 85
+Cha: 60
+E
+#63230
+Saiyan Tyri girl silver~
+@RT@Wyr@Ri@n~
+A young, half-Saiyan girl with silver hair stand here.
+~
+   With silver hair, silver fur on her tail, and silver eyes, Tyri is a few
+inches taller than the average eight year old, but is a little under weight as
+well. Her slight stature is owing to her time in captivity in the slave
+markets on Frigid where malnourishment and physical abuse were commonplace, and
+no ammount of her budding saiyan apatite has yet put the meat back on her
+bones, though she has fleshed out a bit since she was rescued. She wears a
+fairly simple set of clothing though the styles vary from different worlds as
+the four people who look after her all have different fashion senses, though
+she does not seem to mind the odd assortment. She has an easy smile and a
+delightful manner, though it sometimes spoiled slightly by a sharp wit and
+tongue owing to her adopted aunt.
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+1 0 10 0d4+0 0d0+0
+0 0 7 0
+8 8 2
+Str: 11
+Dex: 19
+Int: 10
+Wis: 7
+Con: 5
+Cha: 5
+E
+#63231
+NPC Dummy Namekian Elder~
+Namekian Elder~
+A Namekian Elder stands here.
+~
+   An old fat Namekian drapped in brown robes.
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+28 0 10 0d4+0 0d0+0
+0 0 4 0
+8 8 0
+Str: 20
+Dex: 15
+Int: 25
+Wis: 15
+Con: 16
+Cha: 20
+E
+#63232
+Namekian Defender~
+Namekian Defender~
+A Namekian defender stands here ready to fight.
+~
+   A well toned Namekian warrior dressed in a gi with the symbol of Neil on
+their back.
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+30 0 10 0d10+0 0d0+0
+0 0 4 3
+8 8 0
+Str: 24
+Dex: 29
+Int: 16
+Wis: 22
+Con: 28
+Cha: 15
+E
+#63233
+FQA Foot Soldier~
+@RF@MQ@RA@n Foot @GS@Col@Gdi@Cer@n~
+A well armed soldier stands here, ready for combat.
+~
+   This basic soldier is a mutant wearing generic Icerian combat armor.
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+65 0 10 0d4+0 0d0+0
+0 0 5 6
+8 8 0
+Str: 36
+Dex: 61
+Int: 65
+Wis: 49
+Con: 59
+Cha: 63
+E
+#63234
+Majin~
+Helix~
+A small blue majin floats here.
+~
+   This blue short statured Majin stands before you an arrogant smirk
+stretching across its face. It's eye are glowing gold color as a large black M
+seems engraved upon its forhead. It has two long forelocs stretching from it's
+head drapping donw past its waist. It wears only violet pants, which only
+compliment its natural skin tone.
+~
+bdsvwxyz 0 0 0 l 0 0 0 0 E
+110 0 10 0d4+0 0d0+0
+0 0 11 6
+8 8 0
+Str: 93
+Dex: 93
+Int: 60
+Wis: 81
+Con: 100
+Cha: 100
+E
+#63235
+Sophitia woman blond~
+@YSo@Wph@Yi@Wti@Ya@n~
+@YSo@Wph@Yi@Wti@Ya@n stands here.
+~
+   This woman stands at five three. Her hair is platinum blond with an almost
+radiant glow about it. Her eyes are purely white with no iris or pupil to be
+seen. She's dressed in valkkyrie styled armor with a sword at her hip.
+~
+bdsvwxyz 0 0 0 l 0 0 0 0 E
+115 0 10 0d8+0 0d0+0
+0 0 0 9
+8 8 2
+Str: 98
+Dex: 100
+Int: 91
+Wis: 92
+Con: 79
+Cha: 100
+E
+#63236
+Elite Class Warrior~
+@cE@Cl@Wi@wte @cC@Cl@Wa@wss @gWarrior@n~
+@wAn @ce@Cl@Wi@wte @cc@Cl@Wa@wss @gwarrior@w is standing here.@n
+~
+   @WThis saiyan soldier is the cream of the crop. Usually placed in charge of
+entire armies when there is any fighting to be done. @n
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+100 0 10 0d8+0 0d0+0
+0 0 1 4
+8 8 2
+Str: 70
+Dex: 82
+Int: 62
+Wis: 81
+Con: 93
+Cha: 67
+E
+#63237
+Super Vegeta~
+@YS@yu@Yp@ye@Yr @nVegeta~
+@YS@yu@Yp@ye@Yr @nVegeta stands here, arms crossed over his chest.
+~
+The King of Saiyan stands here, his aura rippling to his surroundings.
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+120 0 10 0d8+0 0d0+0
+0 0 1 4
+8 8 1
+Str: 100
+Dex: 74
+Int: 68
+Wis: 61
+Con: 67
+Cha: 89
+E
+#63238
+hyperion drake dragon~
+@RH@Wy@Rp@We@Rr@Wi@Ro@Wn@C D@cr@Ca@ck@Ce@n~
+@nA medium-sized @Cd@cr@Ca@ck@Ce@n darts in between the columns of the staircase.@n
+~
+@nThis is a medium-sized drake creature. It looks like a sinuous snake that
+sports a pair of leathery wings. This particular type of drake is cyan blue in
+color and it's breath is so cold it burns. @n
+~
+cdlxyz a 0 0 l 0 0 0 0 E
+55 0 10 0d4+0 0d0+0
+0 0 21 28
+8 8 2
+Size: 5
+Str: 33
+Dex: 40
+Int: 38
+Wis: 27
+Con: 41
+Cha: 29
+E
+$

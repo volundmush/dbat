@@ -1,0 +1,129 @@
+#6500
+Flaming Bag Weakling~
+a Flaming Bag Weakling~
+A Flaming Bag Weakling stands here, looking sorry for himself.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 -5 E
+14 20 10 0d4+0 0d0+0
+0 0 10 28
+8 8 1
+Str: 16
+Dex: 14
+Int: 16
+Wis: 16
+Con: 14
+Cha: 14
+E
+#6501
+Flaming Bag Bruiser~
+a Flaming Bag Bruiser~
+A Flaming Bag Bruiser is looking for someone to bully.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 -5 E
+15 20 10 0d4+0 0d0+0
+0 0 10 28
+8 8 1
+Str: 16
+Dex: 14
+Int: 16
+Wis: 16
+Con: 14
+Cha: 14
+E
+#6502
+Flaming Bag Butcher~
+a Flaming Bag Butcher~
+A Flaming Bag Butcher shows off his meat cleaver here.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 -5 E
+16 20 10 0d4+0 0d0+0
+0 0 10 28
+8 8 1
+Size: 5
+Str: 8
+Dex: 12
+Int: 8
+Wis: 8
+Con: 12
+Cha: 12
+E
+#6503
+Flaming Bag Elite~
+a Flaming Bag Elite~
+An Elite of the Flaming Bag Dojo is flexing his muscles here.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 -5 E
+17 20 10 0d4+0 0d0+0
+0 0 10 28
+8 8 1
+Str: 8
+Dex: 16
+Int: 8
+Wis: 8
+Con: 16
+Cha: 16
+E
+#6504
+Dojo Task Master~
+a Dojo Taskmaster~
+A Dojo Taskmaster is belching orders here.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 -5 E
+18 20 10 0d4+0 0d0+0
+0 0 10 28
+8 8 1
+Str: 12
+Dex: 11
+Int: 12
+Wis: 12
+Con: 11
+Cha: 11
+E
+#6505
+Steakhouse Butcher~
+the Steakhouse Butcher~
+The Butcher who runs the steakhouse stands here, drenched in blood.
+~
+@D @n
+~
+bcds 0 0 0 l 0 0 0 -5 E
+1 20 10 0d0+0 0d0+0
+0 0 10 28
+8 8 1
+Str: 14
+Dex: 13
+Int: 14
+Wis: 14
+Con: 13
+Cha: 13
+E
+T 6500
+#6506
+Undead Spartan~
+@RU@rn@Dd@We@ra@Rd @YS@yp@Da@wr@Wt@ya@Yn@n~
+An undead Spartan warrior is here, attending the store.
+~
+@D @n
+~
+bds 0 0 0 l 0 0 0 0 E
+100 20 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 11
+Dex: 8
+Int: 11
+Wis: 11
+Con: 8
+Cha: 8
+E
+$

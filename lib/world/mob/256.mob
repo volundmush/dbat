@@ -1,0 +1,407 @@
+#64300
+desert raptor~
+@YDe@ys@Yer@yt @Rr@yap@Rt@yor@n~
+@na sand colored raptor prowls around here.
+~
+@nThis desert raptor looks much like any other raptor lizard, but it's scaley
+hide is yellow and brown with perfect camoflauge for the desert environment. 
+They look feral or rabid, with wide rolling eyes and dirty looking teeth and
+claws.
+~
+dhvwxyz 0 0 0 l 0 0 0 0 E
+70 0 10 0d0+0 0d0+0
+200 0 15 28
+8 8 0
+Size: 5
+Str: 55
+Dex: 42
+Int: 29
+Wis: 24
+Con: 45
+Cha: 61
+E
+T 64302
+#64301
+lurker centipede insect insectoid strange~
+@gLu@Dr@gke@Dr@r centipede@n~
+@na strange centipede insect crawls along the walls above you.@n
+~
+   @DThis is an alien looking creature that looks made to thrive in the dark. 
+Its long and spindly hundred-legs crawl itself along the walls above and its
+insectoid head sports wicked and massive looking pincers. @n
+~
+cdhvwxyz 0 0 0 l 0 0 0 0 E
+85 0 10 0d0+0 0d0+0
+100 0 15 28
+8 8 0
+Size: 6
+Str: 64
+Dex: 74
+Int: 47
+Wis: 51
+Con: 66
+Cha: 62
+E
+#64302
+south galaxy refugee~
+@WS@Do@Wu@nt@Wh @DG@Wa@nl@Da@nx@Wy@y refugee@n~
+@na desperate looking refugee huddles here
+~
+@nThis alien creature is vaguely humanoid. Hair like a @YS@ya@Yi@yy@Ya@yn@n, his body is
+muscular but his eyes carry vertical, reptillian slits like some kind of hybrid
+experiment gone wrong. @n
+~
+cdhvwxyz 0 0 0 l 0 0 0 0 E
+50 0 10 0d0+0 0d0+0
+200 0 7 28
+8 8 1
+Str: 31
+Dex: 39
+Int: 44
+Wis: 27
+Con: 42
+Cha: 46
+E
+#64304
+radscorpion scorpion~
+@DR@ra@Dd@rs@Dc@ro@Dr@rp@Di@ro@Dn@n~
+a large, mutated scorpion burrows in the earth in wait of prey here
+~
+This large mutant scorpion is vicious, with jagged pincer claws and venom that
+drips with viscosity from the tip of its stinger. @n
+~
+bcdlvwxyz 0 0 0 l 0 0 0 0 E
+100 0 10 0d0+0 0d0+0
+300 0 15 28
+8 8 1
+Size: 6
+Str: 95
+Dex: 98
+Int: 32
+Wis: 33
+Con: 96
+Cha: 91
+E
+#64305
+grizzled hunter~
+@nGrizzled @yHunter@n~
+@nA wily, grizzled-looking @yhunter@n crouches here, sifting through sand
+~
+   @yThis is a lean, grizzled-looking hunter of some kind. The man is dressed in
+@Gs@gc@ya@gl@Gy@y leather and animal skins, and smells as wild as he looks; a hint of
+derangement glinting in his eye. @n
+~
+bcdglvwxyz 0 0 0 l 0 0 0 0 E
+90 0 10 0d10+0 0d0+0
+3000 0 5 5
+8 8 1
+Str: 67
+Dex: 98
+Int: 92
+Wis: 78
+Con: 62
+Cha: 90
+E
+T 64387
+T 64388
+T 64389
+T 64390
+#64306
+kesh keshian dog soldier~
+@DK@me@Dsh@mia@Dn@n dog soldier~
+a battle-weary soldier walks about in a daze
+~
+   A battled-ragged soldier walks around in a numb dace and stares blankly
+ahead of him, his eyes a thousand yards away. Atop his head is the fierce
+looking helmet cast in the visage of a snarling canine that gives the soldier
+his title.
+~
+cdhlvwxyz 0 0 0 l 0 0 0 0 E
+50 0 10 0d0+0 0d0+0
+75 0 5 28
+8 8 1
+Str: 49
+Dex: 48
+Int: 48
+Wis: 48
+Con: 35
+Cha: 26
+E
+T 64312
+#64307
+grolm frog creature~
+@gG@nr@go@nl@gm@n~
+a large frog-like creature with three eyes stalks prey here
+~
+   This strange creature is similar to a frog or toad, but is the size of a
+draft horse. It has three eyes on the front of its head that watch out for
+prey sharply, with keen sight. It's covered in thick, armored scales that are
+as tough as a dragon's hide. They lope across the ground with incredible
+endurance and speed, and are quick to adapt their hunting tactics to the prey
+they hunt.
+~
+dhlvwxyz 0 0 0 l 0 0 0 0 E
+100 0 10 0d0+0 0d0+0
+100 0 15 28
+8 8 0
+Size: 5
+Str: 62
+Dex: 89
+Int: 23
+Wis: 48
+Con: 68
+Cha: 93
+E
+T 64303
+#64308
+keshian sergeant~
+@DK@me@Dsh@mia@Dn@n @Wsergeant@n~
+a @DK@me@Dsh@mia@Dn@n @Wsergeant@n stands here guarding supplies
+~
+A @DK@me@Dsh@mia@Dn@n soldier stands here, bearing the appropriate stripes and bars to
+signify that he holds a minor rank of some sort. @n
+~
+bdhlsvwxyz 0 0 0 l 0 0 0 0 E
+55 0 10 0d0+0 0d0+0
+75 0 0 28
+8 8 1
+Str: 49
+Dex: 35
+Int: 50
+Wis: 31
+Con: 49
+Cha: 43
+E
+#64309
+robed wanderer figure~
+@DR@no@Db@ne@Dd@n @nWanderer~
+@nA @Dr@no@Db@ne@Dd@n figure wanders by.
+~
+   @DThis robed wanderer is tall, and covered from head to foot in a long,
+billowing robe of purest black. The cowl is deep, and covers the figure's face
+completely. @n
+~
+dsvwxyz 0 0 0 l 0 0 0 0 E
+110 0 10 0d0+0 0d0+0
+0 0 10 28
+8 8 1
+Str: 50
+Dex: 59
+Int: 98
+Wis: 79
+Con: 79
+Cha: 50
+E
+T 64304
+T 64305
+T 64306
+T 64323
+#64311
+hatch lizard~
+@DH@ma@Dtc@mh @gl@yi@gza@yr@gd@n~
+a large, aligator-like lizard lurks for prey here
+~
+   This aligator-like lizard is long and slender and often lurks in trap
+hatches similar to ground spiders. They have long jaws full of razor sharp
+teeth, all of which are venomous. They have scaly, armored hides and move
+lightning quick.
+~
+cdhlvwxyz 0 0 0 l 0 0 0 0 E
+87 0 10 0d0+0 0d0+0
+200 0 17 28
+8 8 1
+Size: 6
+Str: 75
+Dex: 72
+Int: 47
+Wis: 49
+Con: 59
+Cha: 45
+E
+#64312
+basilisk wyvern lizard~
+@WThe @RB@Ya@rs@Yi@Rl@yi@rs@Rk@n~
+a fierce looking wyvern searches for food here
+~
+   @nThis large, fierce looking liazard has blood-red scales that catch even the
+smallest light and give a fiery glow. Its eyes are intense, and seem to root
+you to the spot with @Rdragon-fear@n as if turned to stone when they catch you in
+their baleful gaze.
+~
+bdlvwxyz 0 0 0 l 0 0 0 0 E
+108 0 10 0d0+0 0d0+0
+100 0 15 28
+8 8 0
+Size: 5
+Str: 57
+Dex: 97
+Int: 36
+Wis: 61
+Con: 91
+Cha: 73
+E
+#64313
+tall warrior fighter Koraam~
+@DK@yor@Da@yam@n~
+@na very tall warrior with red hair and veiled face stands here.
+~
+@nThis man is very tall. He appears to be human, with bright red hair and a face
+covered by a simple veil that's been drawn across his face. He is lean but
+nothing but rock hard muscle, and on his back several spears rest in a leather
+case. @n
+~
+bcdlvwxyz 0 0 0 l 0 0 0 0 E
+110 0 10 0d0+0 0d0+0
+1000 0 0 28
+8 8 1
+Str: 85
+Dex: 76
+Int: 59
+Wis: 59
+Con: 58
+Cha: 99
+E
+T 64307
+T 64308
+T 64309
+#64314
+refugee leader~
+@DR@we@Df@wu@Dg@we@De@n leader~
+@na weary looking refugee stands here, a little more aware than the rest
+~
+@nThis refugee appears a little more aware than the rest, moving about slowly to
+check on the others around him trying not to let the weight of his tragedy bury
+him. @n
+~
+bcdhlvwxyz 0 0 0 l 0 0 0 0 E
+75 0 10 0d0+0 0d0+0
+100 0 7 28
+8 8 1
+Str: 75
+Dex: 54
+Int: 69
+Wis: 41
+Con: 53
+Cha: 70
+E
+#64395
+tamatori ryu~
+@MT@ma@Wma@Mt@mo@Wri@n @CR@gy@Bu@n~
+@MT@ma@Wma@Mt@mo@Wri@n, the @GD@Rra@Gg@Do@gn@n General's daughter hunts here.
+~
+This is a tall, feminine warrior woman who bears the sign of Dragon heritage.
+Her features are curved and curvy but it can be difficult to tell where the
+scaling of her armor and her skin end and begin.
+~
+dhlvwxyz 0 0 0 l 0 0 0 0 E
+120 0 10 0d12+0 0d0+0
+5000 0 12 10
+8 8 2
+Str: 95
+Dex: 93
+Int: 96
+Wis: 79
+Con: 71
+Cha: 97
+E
+T 64396
+T 64394
+#64396
+Paragus saiyan scar~
+@WP@ga@Gr@Da@Wg@gu@Gs@n~
+A @YS@ya@Yi@yy@Ya@yn@n with a @Ds@rc@Da@rr@n crossing one eye stands here.
+~
+   @DThis large @YS@ya@Yi@yy@Ya@yn@D looks gruff, and weathered. Short, spiky black hair is
+accompanied by a thick mustache adorning his upper lip. A large s@rc@Da@rr@D crosses
+his left eye, making it useless. He wears Saiyan battle armor, and a @Wwhite@D
+dust cloak. @n
+~
+dhlvwxyz c 0 0 l 0 0 0 0 E
+100 0 10 0d8+0 0d0+0
+200 0 1 4
+8 8 1
+Str: 70
+Dex: 84
+Int: 90
+Wis: 69
+Con: 86
+Cha: 80
+E
+T 64315
+T 64322
+#64397
+Broly, legendary super saiyan~
+@YB@Wr@Yo@Wl@Yy@n~
+the @YL@Ce@Wg@Ye@Cn@Wd@Ya@Cr@Wy@n @WS@nu@Wp@ne@Wr@Y S@ya@Yi@yy@Ya@yn@n floats here, staring off at something only he can see
+~
+   @DThis Saiyan warrior stands very tall, over nine feet in height. He is
+bare-chested, with muscle span that is nearly mind-boggling to see. A @rdeep red@D
+cloth is belted around his waist with @Yg@yo@Wl@Yd@ye@Yn@D adornments like a sash, and his
+@Wwhite@D trousers fit loosely into his boots. His hair is a pale gold, fanning
+out to either side of his head like a giant porcupine bristle. He is
+surrounded by an intense, pale @Ggreen@D aura; a pressure like nothing ever felt
+before. @n
+~
+bcdgvwxyz c 0 0 l 0 0 0 0 E
+150 0 10 0d8+0 0d0+0
+25000 0 1 4
+8 8 1
+Str: 99
+Dex: 80
+Int: 79
+Wis: 88
+Con: 88
+Cha: 92
+E
+T 64397
+T 64399
+T 64395
+T 64321
+#64398
+grim refugee~
+@DG@nr@Di@nm @DR@ne@Df@nu@Dg@ne@De@n~
+@na grim looking refugee sits here sorting equipment for sale
+~
+@nA grim looking refugee sits here, sorting through what equipment can be
+salvaged and occasionally peddling wares. @n
+~
+bdsvwxyz 0 0 0 l 0 0 0 0 E
+100 0 10 0d0+0 0d0+0
+100 0 13 28
+8 8 1
+Str: 84
+Dex: 77
+Int: 92
+Wis: 67
+Con: 81
+Cha: 86
+E
+#64399
+Broly legendary super saiyan~
+@YB@Wr@Yo@Wl@Yy@n~
+the @YL@Ce@Wg@Ye@Cn@Wd@Ya@Cr@Wy@n @WS@nu@Wp@ne@Wr@Y S@ya@Yi@yy@Ya@yn@n floats here, staring off at something only he can see
+~
+   @DThis Saiyan warrior stands very tall, over nine feet in height. He is
+bare-chested, with muscle span that is nearly mind-boggling to see. A @rdeep red@D
+cloth is belted around his waist with @Yg@yo@Wl@Yd@ye@Yn@D adornments like a sash, and his
+@Wwhite@D trousers fit loosely into his boots. His hair is a pale gold, fanning
+out to either side of his head like a giant porcupine bristle. He is
+surrounded by an intense, pale @Ggreen@D aura; a pressure like nothing ever felt
+before. @n
+~
+bcdpvwxyz efnqswzB aefjmnqsuvD befmnvyCD l 0 mnsvwCD abdfmnrtyACD 0 E
+120 0 9 0d8+0 0d0+0
+1000 0 1 4
+8 8 1
+Str: 90
+Dex: 95
+Int: 90
+Wis: 78
+Con: 74
+Cha: 76
+E
+T 64397
+T 64399
+T 64395
+T 64320
+$

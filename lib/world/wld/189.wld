@@ -1,0 +1,1553 @@
+#18900
+@cDeluxe House@D: @yEntrance Hallway@n~
+   @WThis small hallway has smooth marble tiles covering the floor, cherrywood
+walls, and a white painted ceiling. A sturdy steel door with a small window
+appears to lead outside and to the right of that door a small storage nook can
+be seen. Lastly a small set of stairs leading toward the basement can be seen
+along the east wall. @n
+~
+189 dhln 0 0 0 0
+D0
+~
+~
+0 0 18901 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18903 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 18904 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18902 0 0 0 0 0 0 0 0
+S
+#18901
+@cDeluxe House@D: @yKitchen@n~
+   @WThis small kitchen has marble tiles covering the floor, white plaster walls,
+and a white painted ceiling. A wooden countertop runs along the north wall,
+except for a small sextion for a stove and refrigerator. A single yellow light
+has been built into the ceiling at the center of the room. @n
+~
+189 dhlmn 0 0 0 0
+D2
+~
+~
+0 0 18900 0 0 0 0 0 0 0 0
+S
+#18902
+@cDeluxe House@D: @yBedroom@n~
+   @WThis small bedroom has a @rred@W carpeted floor, white plaster walls, and a
+white painted ceiling. A small closet has been built into the north wall and a
+door can be seen leading southeast to the main hallway. @n
+~
+189 dhl z 0 0 0
+D8
+~
+~
+0 0 18900 0 0 0 0 0 0 0 0
+S
+#18903
+@cDeluxe House@D: @yWorkout Room@n~
+   @WThis small room appears to have been built as sort of a cheap gym. The
+floor has a built in @Dblack@W rubber mat, the walls have been thickly padded with
+a soft @Dblack@W material, and a large bright white light has been built into the
+otherwise plain white ceiling. @n
+~
+189 dhl A 0 0 0
+D1
+~
+~
+0 0 18900 0 0 0 0 0 0 0 0
+S
+#18904
+@cDeluxe House@D: @yIndoor Garden@n~
+   @WThis basement has been converted into some sort of garden. Large UV lamps
+hang above several plastic bins that have been designed to hold soil and
+plants. The walls are made out of concrete and ventillation ducts have been
+run along the north wall. @n
+~
+189 dhl B 0 0 0
+D4
+~
+~
+0 0 18800 0 0 0 0 0 0 0 0
+S
+#18905
+@cDeluxe House@D: @yEntrance Hallway@n~
+   @WThis small hallway has smooth marble tiles covering the floor, cherrywood
+walls, and a white painted ceiling. A sturdy steel door with a small window
+appears to lead outside and to the right of that door a small storage nook can
+be seen. Lastly a small set of stairs leading toward the basement can be seen
+along the east wall. @n
+~
+189 dhln 0 b 0 0
+D0
+~
+~
+0 0 18906 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18908 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 18909 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18907 0 0 0 0 0 0 0 0
+S
+#18906
+@cDeluxe House@D: @yKitchen@n~
+   @WThis small kitchen has marble tiles covering the floor, white plaster walls,
+and a white painted ceiling. A wooden countertop runs along the north wall,
+except for a small sextion for a stove and refrigerator. A single yellow light
+has been built into the ceiling at the center of the room. @n
+~
+189 dhlmn 0 b 0 0
+D2
+~
+~
+0 0 18905 0 0 0 0 0 0 0 0
+S
+#18907
+@cDeluxe House@D: @yBedroom@n~
+   @WThis small bedroom has a @rred@W carpeted floor, white plaster walls, and a
+white painted ceiling. A small closet has been built into the north wall and a
+door can be seen leading southeast to the main hallway. @n
+~
+189 dhl z b 0 0
+D8
+~
+~
+0 0 18905 0 0 0 0 0 0 0 0
+S
+#18908
+@cDeluxe House@D: @yWorkout Room@n~
+   @WThis small room appears to have been built as sort of a cheap gym. The
+floor has a built in @Dblack@W rubber mat, the walls have been thickly padded with
+a soft @Dblack@W material, and a large bright white light has been built into the
+otherwise plain white ceiling. @n
+~
+189 dhl A b 0 0
+D1
+~
+~
+0 0 18905 0 0 0 0 0 0 0 0
+S
+#18909
+@cDeluxe House@D: @yIndoor Garden@n~
+   @WThis basement has been converted into some sort of garden. Large UV lamps
+hang above several plastic bins that have been designed to hold soil and
+plants. The walls are made out of concrete and ventillation ducts have been
+run along the north wall. @n
+~
+189 dhl B b 0 0
+D4
+~
+~
+0 0 18804 0 0 0 0 0 0 0 0
+S
+#18910
+@cDeluxe House@D: @yEntrance Hallway@n~
+   @WThis small hallway has smooth marble tiles covering the floor, cherrywood
+walls, and a white painted ceiling. A sturdy steel door with a small window
+appears to lead outside and to the right of that door a small storage nook can
+be seen. Lastly a small set of stairs leading toward the basement can be seen
+along the east wall. @n
+~
+189 dhln 0 0 0 0
+D0
+~
+~
+0 0 18911 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18913 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 18914 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18912 0 0 0 0 0 0 0 0
+S
+#18911
+@cDeluxe House@D: @yKitchen@n~
+   @WThis small kitchen has marble tiles covering the floor, white plaster walls,
+and a white painted ceiling. A wooden countertop runs along the north wall,
+except for a small sextion for a stove and refrigerator. A single yellow light
+has been built into the ceiling at the center of the room. @n
+~
+189 dhlmn 0 0 0 0
+D2
+~
+~
+0 0 18910 0 0 0 0 0 0 0 0
+S
+#18912
+@cDeluxe House@D: @yBedroom@n~
+   @WThis small bedroom has a @rred@W carpeted floor, white plaster walls, and a
+white painted ceiling. A small closet has been built into the north wall and a
+door can be seen leading southeast to the main hallway. @n
+~
+189 dhl z 0 0 0
+D8
+~
+~
+0 0 18910 0 0 0 0 0 0 0 0
+S
+#18913
+@cDeluxe House@D: @yWorkout Room@n~
+   @WThis small room appears to have been built as sort of a cheap gym. The
+floor has a built in @Dblack@W rubber mat, the walls have been thickly padded with
+a soft @Dblack@W material, and a large bright white light has been built into the
+otherwise plain white ceiling. @n
+~
+189 dhl A 0 0 0
+D1
+~
+~
+0 0 18910 0 0 0 0 0 0 0 0
+S
+#18914
+@cDeluxe House@D: @yIndoor Garden@n~
+   @WThis basement has been converted into some sort of garden. Large UV lamps
+hang above several plastic bins that have been designed to hold soil and
+plants. The walls are made out of concrete and ventillation ducts have been
+run along the north wall. @n
+~
+189 dhl B 0 0 0
+D4
+~
+~
+0 0 18808 0 0 0 0 0 0 0 0
+S
+#18915
+@cDeluxe House@D: @yEntrance Hallway~
+   @WThis small hallway has smooth marble tiles covering the floor, cherrywood
+walls, and a white painted ceiling. A sturdy steel door with a small window
+appears to lead outside and to the right of that door a small storage nook can
+be seen. Lastly a small set of stairs leading toward the basement can be seen
+along the east wall. 
+~
+189 dhln 0 b 0 0
+D0
+~
+~
+0 0 18916 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18918 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 18919 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18917 0 0 0 0 0 0 0 0
+E
+fire place fireplace~
+@DThis roaring brick fire place is built right into the southern wall of the
+cabin's living room, and is almost always filled with a cozy blazing fire that
+flickers its light throughout the living room. @n
+~
+E
+steel~
+@DThe steel of the door is silvery and looks sturdier than the regular stuff. 
+It's one of the only things on the cabin like home that's not made of wood or
+with a rustic design or feel, instead focusing on sturdiness and security. @n
+~
+S
+#18916
+@cDeluxe House@D: @yKitchen@n~
+   @WThis small kitchen has marble tiles covering the floor, white plaster walls,
+and a white painted ceiling. A wooden countertop runs along the north wall,
+except for a small sextion for a stove and refrigerator. A single yellow light
+has been built into the ceiling at the center of the room. @n
+~
+189 dhlmn 0 b 0 0
+D2
+~
+~
+0 0 18915 0 0 0 0 0 0 0 0
+S
+#18917
+@cDeluxe House@D: @yBedroom@n~
+   @WThis small bedroom has a @rred@W carpeted floor, white plaster walls, and a
+white painted ceiling. A small closet has been built into the north wall and a
+door can be seen leading southeast to the main hallway. @n
+~
+189 dhl z b 0 0
+D8
+~
+~
+0 0 18915 0 0 0 0 0 0 0 0
+S
+#18918
+@cDeluxe House@D: @yWorkout Room@n~
+   @WThis small room appears to have been built as sort of a cheap gym. The
+floor has a built in @Dblack@W rubber mat, the walls have been thickly padded with
+a soft @Dblack@W material, and a large bright white light has been built into the
+otherwise plain white ceiling. @n
+~
+189 dhl A b 0 0
+D1
+~
+~
+0 0 18915 0 0 0 0 0 0 0 0
+S
+#18919
+@cDeluxe House@D: @yIndoor Garden@n~
+   @WThis basement has been converted into some sort of garden. Large UV lamps
+hang above several plastic bins that have been designed to hold soil and
+plants. The walls are made out of concrete and ventillation ducts have been
+run along the north wall. @n
+~
+189 dhl B b 0 0
+D4
+~
+~
+0 0 18812 0 0 0 0 0 0 0 0
+S
+#18920
+@cDeluxe House@D: @yEntrance Hallway@n~
+   @WThis small hallway has smooth marble tiles covering the floor, cherrywood
+walls, and a white painted ceiling. A sturdy steel door with a small window
+appears to lead outside and to the right of that door a small storage nook can
+be seen. Lastly a small set of stairs leading toward the basement can be seen
+along the east wall. @n
+~
+189 dhln 0 0 0 0
+D0
+~
+~
+0 0 18921 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18923 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 18924 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18922 0 0 0 0 0 0 0 0
+S
+#18921
+@cDeluxe House@D: @yKitchen@n~
+   @WThis small kitchen has marble tiles covering the floor, white plaster walls,
+and a white painted ceiling. A wooden countertop runs along the north wall,
+except for a small sextion for a stove and refrigerator. A single yellow light
+has been built into the ceiling at the center of the room. @n
+~
+189 dhlmn 0 0 0 0
+D2
+~
+~
+0 0 18920 0 0 0 0 0 0 0 0
+S
+#18922
+@cDeluxe House@D: @yBedroom@n~
+   @WThis small bedroom has a @rred@W carpeted floor, white plaster walls, and a
+white painted ceiling. A small closet has been built into the north wall and a
+door can be seen leading southeast to the main hallway. @n
+~
+189 dhl z 0 0 0
+D8
+~
+~
+0 0 18920 0 0 0 0 0 0 0 0
+S
+#18923
+@cDeluxe House@D: @yWorkout Room@n~
+   @WThis small room appears to have been built as sort of a cheap gym. The
+floor has a built in @Dblack@W rubber mat, the walls have been thickly padded with
+a soft @Dblack@W material, and a large bright white light has been built into the
+otherwise plain white ceiling. @n
+~
+189 dhl A 0 0 0
+D1
+~
+~
+0 0 18920 0 0 0 0 0 0 0 0
+S
+#18924
+@cDeluxe House@D: @yIndoor Garden@n~
+   @WThis basement has been converted into some sort of garden. Large UV lamps
+hang above several plastic bins that have been designed to hold soil and
+plants. The walls are made out of concrete and ventillation ducts have been
+run along the north wall. @n
+~
+189 dhl B 0 0 0
+D4
+~
+~
+0 0 18816 0 0 0 0 0 0 0 0
+S
+#18925
+@cDeluxe House@D: @yEntrance Hallway@n~
+   @WThis small hallway has smooth marble tiles covering the floor, cherrywood
+walls, and a white painted ceiling. A sturdy steel door with a small window
+appears to lead outside and to the right of that door a small storage nook can
+be seen. Lastly a small set of stairs leading toward the basement can be seen
+along the east wall. @n
+~
+189 dhln 0 0 0 0
+D0
+~
+~
+0 0 18926 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18928 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 18929 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18927 0 0 0 0 0 0 0 0
+S
+#18926
+@cDeluxe House@D: @yKitchen@n~
+   @WThis small kitchen has marble tiles covering the floor, white plaster walls,
+and a white painted ceiling. A wooden countertop runs along the north wall,
+except for a small sextion for a stove and refrigerator. A single yellow light
+has been built into the ceiling at the center of the room. @n
+~
+189 dhlmn 0 0 0 0
+D2
+~
+~
+0 0 18925 0 0 0 0 0 0 0 0
+S
+#18927
+@cDeluxe House@D: @yBedroom@n~
+   @WThis small bedroom has a @rred@W carpeted floor, white plaster walls, and a
+white painted ceiling. A small closet has been built into the north wall and a
+door can be seen leading southeast to the main hallway. @n
+~
+189 dhl z 0 0 0
+D8
+~
+~
+0 0 18925 0 0 0 0 0 0 0 0
+S
+#18928
+@cDeluxe House@D: @yWorkout Room@n~
+   @WThis small room appears to have been built as sort of a cheap gym. The
+floor has a built in @Dblack@W rubber mat, the walls have been thickly padded with
+a soft @Dblack@W material, and a large bright white light has been built into the
+otherwise plain white ceiling. @n
+~
+189 dhl A 0 0 0
+D1
+~
+~
+0 0 18925 0 0 0 0 0 0 0 0
+S
+#18929
+@cDeluxe House@D: @yIndoor Garden@n~
+   @WThis basement has been converted into some sort of garden. Large UV lamps
+hang above several plastic bins that have been designed to hold soil and
+plants. The walls are made out of concrete and ventillation ducts have been
+run along the north wall. @n
+~
+189 dhl B 0 0 0
+D4
+~
+~
+0 0 18820 0 0 0 0 0 0 0 0
+S
+#18930
+@cDeluxe House@D: @yEntrance Hallway@n~
+   @WThis small hallway has smooth marble tiles covering the floor, cherrywood
+walls, and a white painted ceiling. A sturdy steel door with a small window
+appears to lead outside and to the right of that door a small storage nook can
+be seen. Lastly a small set of stairs leading toward the basement can be seen
+along the east wall. @n
+~
+189 dhln 0 b 0 0
+D0
+~
+~
+0 0 18931 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18933 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 18934 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18932 0 0 0 0 0 0 0 0
+S
+#18931
+@cDeluxe House@D: @yKitchen@n~
+   @WThis small kitchen has marble tiles covering the floor, white plaster walls,
+and a white painted ceiling. A wooden countertop runs along the north wall,
+except for a small sextion for a stove and refrigerator. A single yellow light
+has been built into the ceiling at the center of the room. @n
+~
+189 dhlmn 0 b 0 0
+D2
+~
+~
+0 0 18930 0 0 0 0 0 0 0 0
+S
+#18932
+@cDeluxe House@D:@y Bedroom@n~
+   Save @WThis small bedroom has a @rred@W carpeted floor, white plaster walls, and a
+white painted ceiling. A small closet has been built into the north wall and a
+door can be seen leading southeast to the main hallway.
+~
+189 dhl z b 0 0
+D8
+~
+~
+0 0 18930 0 0 0 0 0 0 0 0
+S
+#18933
+@cDeluxe House@D: @yWorkout Room@n~
+   @WThis small room appears to have been built as sort of a cheap gym. The
+floor has a built in @Dblack@W rubber mat, the walls have been thickly padded with
+a soft @Dblack@W material, and a large bright white light has been built into the
+otherwise plain white ceiling. @n
+~
+189 dhl A b 0 0
+D1
+~
+~
+0 0 18930 0 0 0 0 0 0 0 0
+S
+#18934
+@cDeluxe House@D: @yIndoor Garden@n~
+   @WThis basement has been converted into some sort of garden. Large UV lamps
+hang above several plastic bins that have been designed to hold soil and
+plants. The walls are made out of concrete and ventillation ducts have been
+run along the north wall. @n
+~
+189 dhl B b 0 0
+D4
+~
+~
+0 0 18824 0 0 0 0 0 0 0 0
+S
+#18935
+@cDeluxe House@D: @yEntrance Hallway@n~
+   @WThis small hallway has smooth marble tiles covering the floor, cherrywood
+walls, and a white painted ceiling. A sturdy steel door with a small window
+appears to lead outside and to the right of that door a small storage nook can
+be seen. Lastly a small set of stairs leading toward the basement can be seen
+along the east wall. @n
+~
+189 dhln 0 0 0 0
+D0
+~
+~
+0 0 18936 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18938 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 18939 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18937 0 0 0 0 0 0 0 0
+S
+#18936
+@cDeluxe House@D: @yKitchen@n~
+   @WThis small kitchen has marble tiles covering the floor, white plaster walls,
+and a white painted ceiling. A wooden countertop runs along the north wall,
+except for a small sextion for a stove and refrigerator. A single yellow light
+has been built into the ceiling at the center of the room. @n
+~
+189 dhlmn 0 0 0 0
+D2
+~
+~
+0 0 18935 0 0 0 0 0 0 0 0
+S
+#18937
+@cDeluxe House@D: @yBedroom@n~
+   @WThis small bedroom has a @rred@W carpeted floor, white plaster walls, and a
+white painted ceiling. A small closet has been built into the north wall and a
+door can be seen leading southeast to the main hallway. @n
+~
+189 dhl z 0 0 0
+D8
+~
+~
+0 0 18935 0 0 0 0 0 0 0 0
+S
+#18938
+@cDeluxe House@D: @yWorkout Room@n~
+   @WThis small room appears to have been built as sort of a cheap gym. The
+floor has a built in @Dblack@W rubber mat, the walls have been thickly padded with
+a soft @Dblack@W material, and a large bright white light has been built into the
+otherwise plain white ceiling. @n
+~
+189 dhl A 0 0 0
+D1
+~
+~
+0 0 18935 0 0 0 0 0 0 0 0
+S
+#18939
+@cDeluxe House@D: @yIndoor Garden@n~
+   @WThis basement has been converted into some sort of garden. Large UV lamps
+hang above several plastic bins that have been designed to hold soil and
+plants. The walls are made out of concrete and ventillation ducts have been
+run along the north wall. @n
+~
+189 dhl B 0 0 0
+D4
+~
+~
+0 0 18828 0 0 0 0 0 0 0 0
+S
+#18940
+@cDeluxe House@D: @yEntrance Hallway@n~
+   @WThis small hallway has smooth marble tiles covering the floor, cherrywood
+walls, and a white painted ceiling. A sturdy steel door with a small window
+appears to lead outside and to the right of that door a small storage nook can
+be seen. Lastly a small set of stairs leading toward the basement can be seen
+along the east wall. @n
+~
+189 dhln 0 0 0 0
+D0
+~
+~
+0 0 18941 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18943 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 18944 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18942 0 0 0 0 0 0 0 0
+S
+#18941
+@cDeluxe House@D: @yKitchen@n~
+   @WThis small kitchen has marble tiles covering the floor, white plaster walls,
+and a white painted ceiling. A wooden countertop runs along the north wall,
+except for a small sextion for a stove and refrigerator. A single yellow light
+has been built into the ceiling at the center of the room. @n
+~
+189 dhlmn 0 0 0 0
+D2
+~
+~
+0 0 18940 0 0 0 0 0 0 0 0
+S
+#18942
+@cDeluxe House@D: @yBedroom@n~
+   @WThis small bedroom has a @rred@W carpeted floor, white plaster walls, and a
+white painted ceiling. A small closet has been built into the north wall and a
+door can be seen leading southeast to the main hallway. @n
+~
+189 dhl z 0 0 0
+D8
+~
+~
+0 0 18940 0 0 0 0 0 0 0 0
+S
+#18943
+@cDeluxe House@D: @yWorkout Room@n~
+   @WThis small room appears to have been built as sort of a cheap gym. The
+floor has a built in @Dblack@W rubber mat, the walls have been thickly padded with
+a soft @Dblack@W material, and a large bright white light has been built into the
+otherwise plain white ceiling. @n
+~
+189 dhl A 0 0 0
+D1
+~
+~
+0 0 18940 0 0 0 0 0 0 0 0
+S
+#18944
+@cDeluxe House@D: @yIndoor Garden@n~
+   @WThis basement has been converted into some sort of garden. Large UV lamps
+hang above several plastic bins that have been designed to hold soil and
+plants. The walls are made out of concrete and ventillation ducts have been
+run along the north wall. @n
+~
+189 dhl B 0 0 0
+D4
+~
+~
+0 0 18832 0 0 0 0 0 0 0 0
+S
+#18945
+@cDeluxe House@D: @yEntrance Hallway@n~
+   @WThis small hallway has smooth marble tiles covering the floor, cherrywood
+walls, and a white painted ceiling. A sturdy steel door with a small window
+appears to lead outside and to the right of that door a small storage nook can
+be seen. Lastly a small set of stairs leading toward the basement can be seen
+along the east wall. @n
+~
+189 dhln 0 0 0 0
+D0
+~
+~
+0 0 18946 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18948 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 18949 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18947 0 0 0 0 0 0 0 0
+S
+#18946
+@cDeluxe House@D: @yKitchen@n~
+   @WThis small kitchen has marble tiles covering the floor, white plaster walls,
+and a white painted ceiling. A wooden countertop runs along the north wall,
+except for a small sextion for a stove and refrigerator. A single yellow light
+has been built into the ceiling at the center of the room. @n
+~
+189 dhlmn 0 0 0 0
+D2
+~
+~
+0 0 18945 0 0 0 0 0 0 0 0
+S
+#18947
+@cDeluxe House@D: @yBedroom@n~
+   @WThis small bedroom has a @rred@W carpeted floor, white plaster walls, and a
+white painted ceiling. A small closet has been built into the north wall and a
+door can be seen leading southeast to the main hallway. @n
+~
+189 dhl z 0 0 0
+D8
+~
+~
+0 0 18945 0 0 0 0 0 0 0 0
+S
+#18948
+@cDeluxe House@D: @yWorkout Room@n~
+   @WThis small room appears to have been built as sort of a cheap gym. The
+floor has a built in @Dblack@W rubber mat, the walls have been thickly padded with
+a soft @Dblack@W material, and a large bright white light has been built into the
+otherwise plain white ceiling. @n
+~
+189 dhl A 0 0 0
+D1
+~
+~
+0 0 18945 0 0 0 0 0 0 0 0
+S
+#18949
+@cDeluxe House@D: @yIndoor Garden@n~
+   @WThis basement has been converted into some sort of garden. Large UV lamps
+hang above several plastic bins that have been designed to hold soil and
+plants. The walls are made out of concrete and ventillation ducts have been
+run along the north wall. @n
+~
+189 dhl B 0 0 0
+D4
+~
+~
+0 0 18836 0 0 0 0 0 0 0 0
+S
+#18950
+@cDeluxe House@D: @yEntrance Hallway@n~
+   @WThis small hallway has smooth marble tiles covering the floor, cherrywood
+walls, and a white painted ceiling. A sturdy steel door with a small window
+appears to lead outside and to the right of that door a small storage nook can
+be seen. Lastly a small set of stairs leading toward the basement can be seen
+along the east wall. @n
+~
+189 dhln 0 0 0 0
+D0
+~
+~
+0 0 18951 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18953 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 18954 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18952 0 0 0 0 0 0 0 0
+S
+#18951
+@cDeluxe House@D: @yKitchen@n~
+   @WThis small kitchen has marble tiles covering the floor, white plaster walls,
+and a white painted ceiling. A wooden countertop runs along the north wall,
+except for a small sextion for a stove and refrigerator. A single yellow light
+has been built into the ceiling at the center of the room. @n
+~
+189 dhlmn 0 0 0 0
+D2
+~
+~
+0 0 18950 0 0 0 0 0 0 0 0
+S
+#18952
+@cDeluxe House@D: @yBedroom@n~
+   @WThis small bedroom has a @rred@W carpeted floor, white plaster walls, and a
+white painted ceiling. A small closet has been built into the north wall and a
+door can be seen leading southeast to the main hallway. @n
+~
+189 dhl z 0 0 0
+D8
+~
+~
+0 0 18950 0 0 0 0 0 0 0 0
+S
+#18953
+@cDeluxe House@D: @yWorkout Room@n~
+   @WThis small room appears to have been built as sort of a cheap gym. The
+floor has a built in @Dblack@W rubber mat, the walls have been thickly padded with
+a soft @Dblack@W material, and a large bright white light has been built into the
+otherwise plain white ceiling. @n
+~
+189 dhl A 0 0 0
+D1
+~
+~
+0 0 18950 0 0 0 0 0 0 0 0
+S
+#18954
+@cDeluxe House@D: @yIndoor Garden@n~
+   @WThis basement has been converted into some sort of garden. Large UV lamps
+hang above several plastic bins that have been designed to hold soil and
+plants. The walls are made out of concrete and ventillation ducts have been
+run along the north wall. @n
+~
+189 dhl B 0 0 0
+D4
+~
+~
+0 0 18840 0 0 0 0 0 0 0 0
+S
+#18955
+@cDeluxe House@D: @yEntrance Hallway@n~
+   @WThis small hallway has smooth marble tiles covering the floor, cherrywood
+walls, and a white painted ceiling. A sturdy steel door with a small window
+appears to lead outside and to the right of that door a small storage nook can
+be seen. Lastly a small set of stairs leading toward the basement can be seen
+along the east wall. @n
+~
+189 dhln 0 0 0 0
+D0
+~
+~
+0 0 18956 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18958 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 18959 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18957 0 0 0 0 0 0 0 0
+S
+#18956
+@cDeluxe House@D: @yKitchen@n~
+   @WThis small kitchen has marble tiles covering the floor, white plaster walls,
+and a white painted ceiling. A wooden countertop runs along the north wall,
+except for a small sextion for a stove and refrigerator. A single yellow light
+has been built into the ceiling at the center of the room. @n
+~
+189 dhlmn 0 0 0 0
+D2
+~
+~
+0 0 18955 0 0 0 0 0 0 0 0
+S
+#18957
+@cDeluxe House@D: @yBedroom@n~
+   @WThis small bedroom has a @rred@W carpeted floor, white plaster walls, and a
+white painted ceiling. A small closet has been built into the north wall and a
+door can be seen leading southeast to the main hallway. @n
+~
+189 dhl z 0 0 0
+D8
+~
+~
+0 0 18955 0 0 0 0 0 0 0 0
+S
+#18958
+@cDeluxe House@D: @yWorkout Room@n~
+   @WThis small room appears to have been built as sort of a cheap gym. The
+floor has a built in @Dblack@W rubber mat, the walls have been thickly padded with
+a soft @Dblack@W material, and a large bright white light has been built into the
+otherwise plain white ceiling. @n
+~
+189 dhl A 0 0 0
+D1
+~
+~
+0 0 18955 0 0 0 0 0 0 0 0
+S
+#18959
+@cDeluxe House@D: @yIndoor Garden@n~
+   @WThis basement has been converted into some sort of garden. Large UV lamps
+hang above several plastic bins that have been designed to hold soil and
+plants. The walls are made out of concrete and ventillation ducts have been
+run along the north wall. @n
+~
+189 dhl B 0 0 0
+D4
+~
+~
+0 0 18844 0 0 0 0 0 0 0 0
+S
+#18960
+@cDeluxe House@D: @yEntrance Hallway@n~
+   @WThis small hallway has smooth marble tiles covering the floor, cherrywood
+walls, and a white painted ceiling. A sturdy steel door with a small window
+appears to lead outside and to the right of that door a small storage nook can
+be seen. Lastly a small set of stairs leading toward the basement can be seen
+along the east wall. @n
+~
+189 dhln 0 0 0 0
+D0
+~
+~
+0 0 18961 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18963 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 18964 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18962 0 0 0 0 0 0 0 0
+S
+#18961
+@cDeluxe House@D: @yKitchen@n~
+   @WThis small kitchen has marble tiles covering the floor, white plaster walls,
+and a white painted ceiling. A wooden countertop runs along the north wall,
+except for a small sextion for a stove and refrigerator. A single yellow light
+has been built into the ceiling at the center of the room. @n
+~
+189 dhlmn 0 0 0 0
+D2
+~
+~
+0 0 18960 0 0 0 0 0 0 0 0
+S
+#18962
+@cDeluxe House@D: @yBedroom@n~
+   @WThis small bedroom has a @rred@W carpeted floor, white plaster walls, and a
+white painted ceiling. A small closet has been built into the north wall and a
+door can be seen leading southeast to the main hallway. @n
+~
+189 dhl z 0 0 0
+D8
+~
+~
+0 0 18960 0 0 0 0 0 0 0 0
+S
+#18963
+@cDeluxe House@D: @yWorkout Room@n~
+   @WThis small room appears to have been built as sort of a cheap gym. The
+floor has a built in @Dblack@W rubber mat, the walls have been thickly padded with
+a soft @Dblack@W material, and a large bright white light has been built into the
+otherwise plain white ceiling. @n
+~
+189 dhl A 0 0 0
+D1
+~
+~
+0 0 18960 0 0 0 0 0 0 0 0
+S
+#18964
+@cDeluxe House@D: @yIndoor Garden@n~
+   @WThis basement has been converted into some sort of garden. Large UV lamps
+hang above several plastic bins that have been designed to hold soil and
+plants. The walls are made out of concrete and ventillation ducts have been
+run along the north wall. @n
+~
+189 dhl B 0 0 0
+D4
+~
+~
+0 0 18848 0 0 0 0 0 0 0 0
+S
+#18965
+@cDeluxe House@D: @yEntrance Hallway@n~
+   @WThis small hallway has smooth marble tiles covering the floor, cherrywood
+walls, and a white painted ceiling. A sturdy steel door with a small window
+appears to lead outside and to the right of that door a small storage nook can
+be seen. Lastly a small set of stairs leading toward the basement can be seen
+along the east wall. @n
+~
+189 dhln 0 0 0 0
+D0
+~
+~
+0 0 18966 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18968 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 18969 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18967 0 0 0 0 0 0 0 0
+S
+#18966
+@cDeluxe House@D: @yKitchen@n~
+   @WThis small kitchen has marble tiles covering the floor, white plaster walls,
+and a white painted ceiling. A wooden countertop runs along the north wall,
+except for a small sextion for a stove and refrigerator. A single yellow light
+has been built into the ceiling at the center of the room. @n
+~
+189 dhlmn 0 0 0 0
+D2
+~
+~
+0 0 18965 0 0 0 0 0 0 0 0
+S
+#18967
+@cDeluxe House@D: @yBedroom@n~
+   @WThis small bedroom has a @rred@W carpeted floor, white plaster walls, and a
+white painted ceiling. A small closet has been built into the north wall and a
+door can be seen leading southeast to the main hallway. @n
+~
+189 dhl z 0 0 0
+D8
+~
+~
+0 0 18965 0 0 0 0 0 0 0 0
+S
+#18968
+@cDeluxe House@D: @yWorkout Room@n~
+   @WThis small room appears to have been built as sort of a cheap gym. The
+floor has a built in @Dblack@W rubber mat, the walls have been thickly padded with
+a soft @Dblack@W material, and a large bright white light has been built into the
+otherwise plain white ceiling. @n
+~
+189 dhl A 0 0 0
+D1
+~
+~
+0 0 18965 0 0 0 0 0 0 0 0
+S
+#18969
+@cDeluxe House@D: @yIndoor Garden@n~
+   @WThis basement has been converted into some sort of garden. Large UV lamps
+hang above several plastic bins that have been designed to hold soil and
+plants. The walls are made out of concrete and ventillation ducts have been
+run along the north wall. @n
+~
+189 dhl B 0 0 0
+D4
+~
+~
+0 0 18852 0 0 0 0 0 0 0 0
+S
+#18970
+@cDeluxe House@D: @yEntrance Hallway@n~
+   @WThis small hallway has smooth marble tiles covering the floor, cherrywood
+walls, and a white painted ceiling. A sturdy steel door with a small window
+appears to lead outside and to the right of that door a small storage nook can
+be seen. Lastly a small set of stairs leading toward the basement can be seen
+along the east wall. @n
+~
+189 dhln 0 0 0 0
+D0
+~
+~
+0 0 18971 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18973 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 18974 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18972 0 0 0 0 0 0 0 0
+S
+#18971
+@cDeluxe House@D: @yKitchen@n~
+   @WThis small kitchen has marble tiles covering the floor, white plaster walls,
+and a white painted ceiling. A wooden countertop runs along the north wall,
+except for a small sextion for a stove and refrigerator. A single yellow light
+has been built into the ceiling at the center of the room. @n
+~
+189 dhlmn 0 0 0 0
+D2
+~
+~
+0 0 18970 0 0 0 0 0 0 0 0
+S
+#18972
+@cDeluxe House@D: @yBedroom@n~
+   @WThis small bedroom has a @rred@W carpeted floor, white plaster walls, and a
+white painted ceiling. A small closet has been built into the north wall and a
+door can be seen leading southeast to the main hallway. @n
+~
+189 dhl z 0 0 0
+D8
+~
+~
+0 0 18970 0 0 0 0 0 0 0 0
+S
+#18973
+@cDeluxe House@D: @yWorkout Room@n~
+   @WThis small room appears to have been built as sort of a cheap gym. The
+floor has a built in @Dblack@W rubber mat, the walls have been thickly padded with
+a soft @Dblack@W material, and a large bright white light has been built into the
+otherwise plain white ceiling. @n
+~
+189 dhl A 0 0 0
+D1
+~
+~
+0 0 18970 0 0 0 0 0 0 0 0
+S
+#18974
+@cDeluxe House@D: @yIndoor Garden@n~
+   @WThis basement has been converted into some sort of garden. Large UV lamps
+hang above several plastic bins that have been designed to hold soil and
+plants. The walls are made out of concrete and ventillation ducts have been
+run along the north wall. @n
+~
+189 dhl B 0 0 0
+D4
+~
+~
+0 0 18856 0 0 0 0 0 0 0 0
+S
+#18975
+@cDeluxe House@D: @yEntrance Hallway@n~
+   @WThis small hallway has smooth marble tiles covering the floor, cherrywood
+walls, and a white painted ceiling. A sturdy steel door with a small window
+appears to lead outside and to the right of that door a small storage nook can
+be seen. Lastly a small set of stairs leading toward the basement can be seen
+along the east wall. @n
+~
+189 dhln 0 0 0 0
+D0
+~
+~
+0 0 18976 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18978 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 18979 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18977 0 0 0 0 0 0 0 0
+S
+#18976
+@cDeluxe House@D: @yKitchen@n~
+   @WThis small kitchen has marble tiles covering the floor, white plaster walls,
+and a white painted ceiling. A wooden countertop runs along the north wall,
+except for a small sextion for a stove and refrigerator. A single yellow light
+has been built into the ceiling at the center of the room. @n
+~
+189 dhlmn 0 0 0 0
+D2
+~
+~
+0 0 18975 0 0 0 0 0 0 0 0
+S
+#18977
+@cDeluxe House@D: @yBedroom@n~
+   @WThis small bedroom has a @rred@W carpeted floor, white plaster walls, and a
+white painted ceiling. A small closet has been built into the north wall and a
+door can be seen leading southeast to the main hallway. @n
+~
+189 dhl z 0 0 0
+D8
+~
+~
+0 0 18975 0 0 0 0 0 0 0 0
+S
+#18978
+@cDeluxe House@D: @yWorkout Room@n~
+   @WThis small room appears to have been built as sort of a cheap gym. The
+floor has a built in @Dblack@W rubber mat, the walls have been thickly padded with
+a soft @Dblack@W material, and a large bright white light has been built into the
+otherwise plain white ceiling. @n
+~
+189 dhl A 0 0 0
+D1
+~
+~
+0 0 18975 0 0 0 0 0 0 0 0
+S
+#18979
+@cDeluxe House@D: @yIndoor Garden@n~
+   @WThis basement has been converted into some sort of garden. Large UV lamps
+hang above several plastic bins that have been designed to hold soil and
+plants. The walls are made out of concrete and ventillation ducts have been
+run along the north wall. @n
+~
+189 dhl B 0 0 0
+D4
+~
+~
+0 0 18860 0 0 0 0 0 0 0 0
+S
+#18980
+@cDeluxe House@D: @yEntrance Hallway@n~
+   @WThis small hallway has smooth marble tiles covering the floor, cherrywood
+walls, and a white painted ceiling. A sturdy steel door with a small window
+appears to lead outside and to the right of that door a small storage nook can
+be seen. Lastly a small set of stairs leading toward the basement can be seen
+along the east wall. @n
+~
+189 dhln 0 0 0 0
+D0
+~
+~
+0 0 18981 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18983 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 18984 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18982 0 0 0 0 0 0 0 0
+S
+#18981
+@cDeluxe House@D: @yKitchen@n~
+   @WThis small kitchen has marble tiles covering the floor, white plaster walls,
+and a white painted ceiling. A wooden countertop runs along the north wall,
+except for a small sextion for a stove and refrigerator. A single yellow light
+has been built into the ceiling at the center of the room. @n
+~
+189 dhlmn 0 0 0 0
+D2
+~
+~
+0 0 18980 0 0 0 0 0 0 0 0
+S
+#18982
+@cDeluxe House@D: @yBedroom@n~
+   @WThis small bedroom has a @rred@W carpeted floor, white plaster walls, and a
+white painted ceiling. A small closet has been built into the north wall and a
+door can be seen leading southeast to the main hallway. @n
+~
+189 dhl z 0 0 0
+D8
+~
+~
+0 0 18980 0 0 0 0 0 0 0 0
+S
+#18983
+@cDeluxe House@D: @yWorkout Room@n~
+   @WThis small room appears to have been built as sort of a cheap gym. The
+floor has a built in @Dblack@W rubber mat, the walls have been thickly padded with
+a soft @Dblack@W material, and a large bright white light has been built into the
+otherwise plain white ceiling. @n
+~
+189 dhl A 0 0 0
+D1
+~
+~
+0 0 18980 0 0 0 0 0 0 0 0
+S
+#18984
+@cDeluxe House@D: @yIndoor Garden@n~
+   @WThis basement has been converted into some sort of garden. Large UV lamps
+hang above several plastic bins that have been designed to hold soil and
+plants. The walls are made out of concrete and ventillation ducts have been
+run along the north wall. @n
+~
+189 dhl B 0 0 0
+D4
+~
+~
+0 0 18864 0 0 0 0 0 0 0 0
+S
+#18985
+@cDeluxe House@D: @yEntrance Hallway@n~
+   @WThis small hallway has smooth marble tiles covering the floor, cherrywood
+walls, and a white painted ceiling. A sturdy steel door with a small window
+appears to lead outside and to the right of that door a small storage nook can
+be seen. Lastly a small set of stairs leading toward the basement can be seen
+along the east wall. @n
+~
+189 dhln 0 0 0 0
+D0
+~
+~
+0 0 18986 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18988 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 18989 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18987 0 0 0 0 0 0 0 0
+S
+#18986
+@cDeluxe House@D: @yKitchen@n~
+   @WThis small kitchen has marble tiles covering the floor, white plaster walls,
+and a white painted ceiling. A wooden countertop runs along the north wall,
+except for a small sextion for a stove and refrigerator. A single yellow light
+has been built into the ceiling at the center of the room. @n
+~
+189 dhlmn 0 0 0 0
+D2
+~
+~
+0 0 18985 0 0 0 0 0 0 0 0
+S
+#18987
+@cDeluxe House@D: @yBedroom@n~
+   @WThis small bedroom has a @rred@W carpeted floor, white plaster walls, and a
+white painted ceiling. A small closet has been built into the north wall and a
+door can be seen leading southeast to the main hallway. @n
+~
+189 dhl z 0 0 0
+D8
+~
+~
+0 0 18985 0 0 0 0 0 0 0 0
+S
+#18988
+@cDeluxe House@D: @yWorkout Room@n~
+   @WThis small room appears to have been built as sort of a cheap gym. The
+floor has a built in @Dblack@W rubber mat, the walls have been thickly padded with
+a soft @Dblack@W material, and a large bright white light has been built into the
+otherwise plain white ceiling. @n
+~
+189 dhl A 0 0 0
+D1
+~
+~
+0 0 18985 0 0 0 0 0 0 0 0
+S
+#18989
+@cDeluxe House@D: @yIndoor Garden@n~
+   @WThis basement has been converted into some sort of garden. Large UV lamps
+hang above several plastic bins that have been designed to hold soil and
+plants. The walls are made out of concrete and ventillation ducts have been
+run along the north wall. @n
+~
+189 dhl B 0 0 0
+D4
+~
+~
+0 0 18868 0 0 0 0 0 0 0 0
+S
+#18990
+@cDeluxe House@D: @yEntrance Hallway@n~
+   @WThis small hallway has smooth marble tiles covering the floor, cherrywood
+walls, and a white painted ceiling. A sturdy steel door with a small window
+appears to lead outside and to the right of that door a small storage nook can
+be seen. Lastly a small set of stairs leading toward the basement can be seen
+along the east wall. @n
+~
+189 dhln 0 0 0 0
+D0
+~
+~
+0 0 18991 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18993 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 18994 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18992 0 0 0 0 0 0 0 0
+S
+#18991
+@cDeluxe House@D: @yKitchen@n~
+   @WThis small kitchen has marble tiles covering the floor, white plaster walls,
+and a white painted ceiling. A wooden countertop runs along the north wall,
+except for a small sextion for a stove and refrigerator. A single yellow light
+has been built into the ceiling at the center of the room. @n
+~
+189 dhlmn 0 0 0 0
+D2
+~
+~
+0 0 18990 0 0 0 0 0 0 0 0
+S
+#18992
+@cDeluxe House@D: @yBedroom@n~
+   @WThis small bedroom has a @rred@W carpeted floor, white plaster walls, and a
+white painted ceiling. A small closet has been built into the north wall and a
+door can be seen leading southeast to the main hallway. @n
+~
+189 dhl z 0 0 0
+D8
+~
+~
+0 0 18990 0 0 0 0 0 0 0 0
+S
+#18993
+@cDeluxe House@D: @yWorkout Room@n~
+   @WThis small room appears to have been built as sort of a cheap gym. The
+floor has a built in @Dblack@W rubber mat, the walls have been thickly padded with
+a soft @Dblack@W material, and a large bright white light has been built into the
+otherwise plain white ceiling. @n
+~
+189 dhl A 0 0 0
+D1
+~
+~
+0 0 18990 0 0 0 0 0 0 0 0
+S
+#18994
+@cDeluxe House@D: @yIndoor Garden@n~
+   @WThis basement has been converted into some sort of garden. Large UV lamps
+hang above several plastic bins that have been designed to hold soil and
+plants. The walls are made out of concrete and ventillation ducts have been
+run along the north wall. @n
+~
+189 dhl B 0 0 0
+D4
+~
+~
+0 0 18872 0 0 0 0 0 0 0 0
+S
+#18995
+@cDeluxe House@D: @yEntrance Hallway@n~
+   @WThis small hallway has smooth marble tiles covering the floor, cherrywood
+walls, and a white painted ceiling. A sturdy steel door with a small window
+appears to lead outside and to the right of that door a small storage nook can
+be seen. Lastly a small set of stairs leading toward the basement can be seen
+along the east wall. @n
+~
+189 dhln 0 0 0 0
+D0
+~
+~
+0 0 18996 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18998 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 18999 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18997 0 0 0 0 0 0 0 0
+S
+#18996
+@cDeluxe House@D: @yKitchen@n~
+   @WThis small kitchen has marble tiles covering the floor, white plaster walls,
+and a white painted ceiling. A wooden countertop runs along the north wall,
+except for a small sextion for a stove and refrigerator. A single yellow light
+has been built into the ceiling at the center of the room. @n
+~
+189 dhlmn 0 0 0 0
+D2
+~
+~
+0 0 18995 0 0 0 0 0 0 0 0
+S
+#18997
+@cDeluxe House@D: @yBedroom@n~
+   @WThis small bedroom has a @rred@W carpeted floor, white plaster walls, and a
+white painted ceiling. A small closet has been built into the north wall and a
+door can be seen leading southeast to the main hallway. @n
+~
+189 dhl z 0 0 0
+D8
+~
+~
+0 0 18995 0 0 0 0 0 0 0 0
+S
+#18998
+@cDeluxe House@D: @yWorkout Room@n~
+   @WThis small room appears to have been built as sort of a cheap gym. The
+floor has a built in @Dblack@W rubber mat, the walls have been thickly padded with
+a soft @Dblack@W material, and a large bright white light has been built into the
+otherwise plain white ceiling. @n
+~
+189 dhl A 0 0 0
+D1
+~
+~
+0 0 18995 0 0 0 0 0 0 0 0
+S
+#18999
+@cDeluxe House@D: @yIndoor Garden@n~
+   @WThis basement has been converted into some sort of garden. Large UV lamps
+hang above several plastic bins that have been designed to hold soil and
+plants. The walls are made out of concrete and ventillation ducts have been
+run along the north wall. @n
+~
+189 dhl B 0 0 0
+D4
+~
+~
+0 0 18876 0 0 0 0 0 0 0 0
+S
+$~

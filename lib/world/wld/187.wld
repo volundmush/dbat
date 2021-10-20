@@ -1,0 +1,1169 @@
+#18700
+Blah~
+You are in an unfinished room.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18713 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 18701 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18714 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18709 0 0 0 0 0 0 0 0
+S
+#18701
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D1
+~
+~
+0 0 18702 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18700 0 0 0 0 0 0 0 0
+S
+#18702
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D1
+~
+~
+0 0 18703 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18701 0 0 0 0 0 0 0 0
+S
+#18703
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D1
+~
+~
+0 0 18704 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18702 0 0 0 0 0 0 0 0
+S
+#18704
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18705 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18703 0 0 0 0 0 0 0 0
+S
+#18705
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18706 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18704 0 0 0 0 0 0 0 0
+S
+#18706
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18707 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18705 0 0 0 0 0 0 0 0
+S
+#18707
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18708 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18706 0 0 0 0 0 0 0 0
+S
+#18708
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D2
+~
+~
+0 0 18707 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18719 0 0 0 0 0 0 0 0
+S
+#18709
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D1
+~
+~
+0 0 18700 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18710 0 0 0 0 0 0 0 0
+S
+#18710
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D1
+~
+~
+0 0 18709 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18711 0 0 0 0 0 0 0 0
+S
+#18711
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D1
+~
+~
+0 0 18710 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18712 0 0 0 0 0 0 0 0
+S
+#18712
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18715 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 18711 0 0 0 0 0 0 0 0
+S
+#18713
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D2
+~
+~
+0 0 18700 0 0 0 0 0 0 0 0
+S
+#18714
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18700 0 0 0 0 0 0 0 0
+S
+#18715
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18716 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18712 0 0 0 0 0 0 0 0
+S
+#18716
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18717 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18715 0 0 0 0 0 0 0 0
+S
+#18717
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18718 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18716 0 0 0 0 0 0 0 0
+S
+#18718
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D1
+~
+~
+0 0 18726 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18717 0 0 0 0 0 0 0 0
+S
+#18719
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D1
+~
+~
+0 0 18708 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18720 0 0 0 0 0 0 0 0
+S
+#18720
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D1
+~
+~
+0 0 18719 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18721 0 0 0 0 0 0 0 0
+S
+#18721
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D1
+~
+~
+0 0 18720 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18722 0 0 0 0 0 0 0 0
+S
+#18722
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D1
+~
+~
+0 0 18721 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18723 0 0 0 0 0 0 0 0
+S
+#18723
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D1
+~
+~
+0 0 18722 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18727 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18724 0 0 0 0 0 0 0 0
+S
+#18724
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D1
+~
+~
+0 0 18723 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18725 0 0 0 0 0 0 0 0
+S
+#18725
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D1
+~
+~
+0 0 18724 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18726 0 0 0 0 0 0 0 0
+S
+#18726
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D1
+~
+~
+0 0 18725 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18718 0 0 0 0 0 0 0 0
+S
+#18727
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18723 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18728 0 0 0 0 0 0 0 0
+S
+#18728
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18727 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 18729 0 0 0 0 0 0 0 0
+S
+#18729
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D2
+~
+~
+0 0 18730 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 18728 0 0 0 0 0 0 0 0
+S
+#18730
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18729 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18731 0 0 0 0 0 0 0 0
+S
+#18731
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18730 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 18733 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18736 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18732 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 18734 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 18738 0 0 0 0 0 0 0 0
+S
+#18732
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D1
+~
+~
+0 0 18731 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18738 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 18736 0 0 0 0 0 0 0 0
+S
+#18733
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D2
+~
+~
+0 0 18734 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18731 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 18736 0 0 0 0 0 0 0 0
+S
+#18734
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18733 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18735 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18736 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18731 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 18737 0 0 0 0 0 0 0 0
+S
+#18735
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18734 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18737 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18736 0 0 0 0 0 0 0 0
+S
+#18736
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18731 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 18734 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18737 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18738 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 18740 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18732 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 18733 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 18735 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 18739 0 0 0 0 0 0 0 0
+S
+#18737
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18736 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 18735 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18739 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18738 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 18734 0 0 0 0 0 0 0 0
+S
+#18738
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18732 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 18736 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18739 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 18731 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 18737 0 0 0 0 0 0 0 0
+S
+#18739
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18738 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 18737 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 18736 0 0 0 0 0 0 0 0
+S
+#18740
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18741 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 18736 0 0 0 0 0 0 0 0
+S
+#18741
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18742 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18740 0 0 0 0 0 0 0 0
+S
+#18742
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18743 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18741 0 0 0 0 0 0 0 0
+S
+#18743
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D1
+~
+~
+0 0 18754 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18742 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18744 0 0 0 0 0 0 0 0
+S
+#18744
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D1
+~
+~
+0 0 18743 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18745 0 0 0 0 0 0 0 0
+S
+#18745
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D1
+~
+~
+0 0 18744 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18746 0 0 0 0 0 0 0 0
+S
+#18746
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18745 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18747 0 0 0 0 0 0 0 0
+S
+#18747
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18746 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18748 0 0 0 0 0 0 0 0
+S
+#18748
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18747 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18749 0 0 0 0 0 0 0 0
+S
+#18749
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18748 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18750 0 0 0 0 0 0 0 0
+S
+#18750
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18749 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18751 0 0 0 0 0 0 0 0
+S
+#18751
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18750 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 18752 0 0 0 0 0 0 0 0
+S
+#18752
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D1
+~
+~
+0 0 18753 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18751 0 0 0 0 0 0 0 0
+S
+#18753
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18763 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 18762 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18752 0 0 0 0 0 0 0 0
+S
+#18754
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D1
+~
+~
+0 0 18755 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18743 0 0 0 0 0 0 0 0
+S
+#18755
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D2
+~
+~
+0 0 18756 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18754 0 0 0 0 0 0 0 0
+S
+#18756
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18755 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18757 0 0 0 0 0 0 0 0
+S
+#18757
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18756 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18758 0 0 0 0 0 0 0 0
+S
+#18758
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18757 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18759 0 0 0 0 0 0 0 0
+S
+#18759
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18758 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18760 0 0 0 0 0 0 0 0
+S
+#18760
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18759 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18761 0 0 0 0 0 0 0 0
+S
+#18761
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18760 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18762 0 0 0 0 0 0 0 0
+S
+#18762
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D1
+~
+~
+0 0 18761 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18753 0 0 0 0 0 0 0 0
+S
+#18763
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18764 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18753 0 0 0 0 0 0 0 0
+S
+#18764
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D2
+~
+~
+0 0 18763 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 18765 0 0 0 0 0 0 0 0
+S
+#18765
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18766 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 18764 0 0 0 0 0 0 0 0
+S
+#18766
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18767 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18765 0 0 0 0 0 0 0 0
+S
+#18767
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18770 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 18769 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18766 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18768 0 0 0 0 0 0 0 0
+S
+#18768
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D1
+~
+~
+0 0 18767 0 0 0 0 0 0 0 0
+S
+#18769
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D3
+~
+~
+0 0 18767 0 0 0 0 0 0 0 0
+S
+#18770
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18771 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18767 0 0 0 0 0 0 0 0
+S
+#18771
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18774 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 18773 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18770 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18772 0 0 0 0 0 0 0 0
+S
+#18772
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D1
+~
+~
+0 0 18771 0 0 0 0 0 0 0 0
+S
+#18773
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D3
+~
+~
+0 0 18771 0 0 0 0 0 0 0 0
+S
+#18774
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D0
+~
+~
+0 0 18775 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18771 0 0 0 0 0 0 0 0
+S
+#18775
+New BuildWalk Room~
+This unfinished room was created by Seddy.
+~
+187 0 0 0 0 0
+D2
+~
+~
+0 0 18774 0 0 0 0 0 0 0 0
+S
+$~

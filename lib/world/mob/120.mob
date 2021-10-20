@@ -1,0 +1,506 @@
+#12000
+Kibito~
+@RK@Wi@Db@wi@Wt@Ro@n~
+Kibito is standing here, arms crossed behind his back.
+~
+   @WExperience and wisdom is worn upon the face of Kibito, shown by his wrinkled
+forehead and cheeks. The tall, red skinned Kai has long, white hair, slicked
+back. @n
+~
+bcdsA b 0 0 l 0 0 0 0 E
+75 0 10 0d12+0 0d0+0
+0 0 12 10
+8 8 1
+Str: 39
+Dex: 55
+Int: 40
+Wis: 50
+Con: 37
+Cha: 54
+E
+T 12000
+T 1127
+T 12003
+T 12033
+#12001
+Sensuro~
+@BS@be@Wn@Bs@Wu@br@Bo@n~
+Sensuro stands guard here.
+~
+   @WThe short, pudgy blue skinned kai Sensuro is one of the few of Kibito's
+students that have stayed on and serves as his personal guard. @n
+~
+bds 0 0 0 l 0 0 0 0 E
+30 0 10 0d12+0 0d0+0
+0 0 12 10
+8 8 1
+Str: 19
+Dex: 25
+Int: 28
+Wis: 19
+Con: 29
+Cha: 17
+E
+T 12001
+T 12002
+T 1705
+T 12004
+T 12005
+#12002
+Survival Instincts Clerk~
+Survival Instincts Clerk~
+A survival instincts store clerk stands behind the counter here, waiting to serve customers.
+~
+@D @n
+~
+bcds 0 0 0 l 0 0 0 0 E
+1 0 10 0d0+0 0d0+0
+0 0 12 28
+8 8 1
+Str: 7
+Dex: 6
+Int: 7
+Wis: 8
+Con: 6
+Cha: 8
+E
+#12003
+Nimble Dodgings Clerk~
+Nimble Dodgings Clerk~
+A female clerk stands behind the counter here, wiping it down in slow, bored motions.
+~
+@D @n
+~
+bcds 0 0 0 l 0 0 0 0 E
+1 0 10 0d0+0 0d0+0
+0 0 12 28
+8 8 2
+Str: 8
+Dex: 9
+Int: 8
+Wis: 6
+Con: 8
+Cha: 6
+E
+#12004
+Makito~
+Makito~
+Makito is here, walking around the shop, trying to make sales.
+~
+@D @n
+~
+bcd 0 0 0 l 0 0 0 0 E
+1 0 10 0d0+0 0d0+0
+0 0 12 28
+8 8 1
+Str: 7
+Dex: 8
+Int: 6
+Wis: 6
+Con: 5
+Cha: 9
+E
+#12005
+Cutter~
+Cutter~
+Cutter stands here, polishing a scimitar.
+~
+@D @n
+~
+bcds 0 0 0 l 0 0 0 0 E
+1 0 10 0d0+0 0d0+0
+0 0 12 28
+8 8 1
+Str: 6
+Dex: 6
+Int: 10
+Wis: 10
+Con: 10
+Cha: 5
+E
+#12006
+Healthy Choices Checkout Chick~
+@GH@gealth@Gy C@ghoice@Gs @DCheckout @nChick~
+A female kai stands behind the counter, waiting to serve customers.
+~
+@D @n
+~
+bcds 0 0 0 l 0 0 0 0 E
+1 0 10 0d0+0 0d0+0
+0 0 12 28
+8 8 2
+Str: 8
+Dex: 7
+Int: 8
+Wis: 7
+Con: 9
+Cha: 6
+E
+#12007
+Haven Male Citizen Kai~
+Haven Male Citizen~
+A male kai is walking around here, admiring the cars that drive by.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 0 E
+2 0 10 0d12+0 0d0+0
+0 0 12 10
+8 8 1
+Str: 8
+Dex: 7
+Int: 7
+Wis: 7
+Con: 6
+Cha: 8
+E
+#12008
+Kai Fashionista~
+Kai Fashionista~
+A Kai Fashionista strolls around here, both arms carrying bags.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 0 E
+3 0 10 0d12+0 0d0+0
+0 0 12 10
+8 8 2
+Str: 5
+Dex: 8
+Int: 8
+Wis: 7
+Con: 7
+Cha: 8
+E
+#12009
+Car Enthusiast~
+Car Enthusiast~
+A small boy with a car on his shirt, wanders around here.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 0 E
+1 0 10 0d12+0 0d0+0
+0 0 12 10
+8 8 1
+Str: 5
+Dex: 8
+Int: 8
+Wis: 5
+Con: 9
+Cha: 5
+E
+#12010
+Lollipop girl~
+Lollipop Girl~
+A young girl sucking on a large multi-colored lollipop is here.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 0 E
+1 0 10 0d12+0 0d0+0
+0 0 12 10
+8 8 2
+Size: 3
+Str: 7
+Dex: 6
+Int: 9
+Wis: 6
+Con: 8
+Cha: 5
+E
+#12011
+Grease Monkey~
+Grease Monkey~
+A grease monkey stands here leaning on a car, combing his hair.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 0 E
+2 0 10 0d12+0 0d0+0
+0 0 12 10
+8 8 1
+Str: 8
+Dex: 6
+Int: 7
+Wis: 9
+Con: 7
+Cha: 5
+E
+#12012
+Aether Ticket Seller~
+@mAether @nTicket @WSeller@n~
+A female stands behind a counter here, selling tickets for space flights.
+~
+@D @n
+~
+bcds 0 0 0 l 0 0 0 0 E
+100 0 10 0d4+0 0d0+0
+0 0 12 28
+8 8 2
+Str: 55
+Dex: 52
+Int: 51
+Wis: 71
+Con: 84
+Cha: 95
+E
+T 4016
+#12034
+kai trainee~
+@BK@ca@Ci@W Trainee@n~
+@nA @BK@ca@Ci@W Trainee@n practices his techniques here
+~
+@nThis @BK@ca@Ci@W Trainee@n moves gracefully here, open hands in a knife-handed gesture as
+he traces patterns in the air with his movements with his fingertips. His
+clothing is very plain, signaling that he is probably a low ranking Kai of some
+kind. Perhaps his journey to train his body and mind has only just begun. @n
+~
+bcd 0 0 0 l 0 0 0 200 E
+2 0 10 0d12+0 0d0+0
+5 0 12 10
+8 8 1
+Str: 10
+Dex: 10
+Int: 7
+Wis: 7
+Con: 7
+Cha: 7
+E
+T 12099
+#12035
+Kinetic Kai Initiate~
+@gK@Gi@gn@We@gt@Gi@gc @BK@ca@Ci@W Initiate@n~
+A @gK@Gi@gn@We@gt@Gi@gc @BK@ca@Ci @WInitiate@n hovers here, practicing.
+~
+@D @n
+~
+bd 0 0 0 lx 0 0 0 0 E
+3 0 10 0d12+0 0d0+0
+5 0 12 10
+8 8 1
+Str: 8
+Dex: 9
+Int: 8
+Wis: 8
+Con: 8
+Cha: 7
+E
+T 12099
+#12036
+Kinetic Kai Initiate~
+@gK@Gi@gn@We@gt@Gi@gc @BK@ca@Ci @WInitiate@n~
+A @gK@Gi@gn@We@gt@Gi@gc @BK@ca@Ci @WInitiate@n hovers here, practicing.
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 0 E
+4 0 10 0d12+0 0d0+0
+9 0 12 10
+8 8 2
+Str: 9
+Dex: 10
+Int: 8
+Wis: 8
+Con: 7
+Cha: 8
+E
+T 12099
+#12037
+Kinetic Kai Intermediate~
+@gK@Gi@gn@We@gt@Gi@gc @BK@ca@Ci @WIntermediate@n~
+A @gK@Gi@gn@We@gt@Gi@gc @BK@ca@Ci @WIntermediate@n student is meditating here
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 0 E
+5 0 10 0d12+0 0d0+0
+9 0 12 10
+8 8 1
+Str: 7
+Dex: 9
+Int: 8
+Wis: 8
+Con: 5
+Cha: 6
+E
+T 12099
+T 12006
+#12038
+Kinetic Kai Intermediate~
+@gK@Gi@gn@We@gt@Gi@gc @BK@ca@Ci @WIntermediate@n~
+A @gK@Gi@gn@We@gt@Gi@gc @BK@ca@Ci @WIntermediate@n student meditates here.
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 0 E
+6 0 10 0d12+0 0d0+0
+12 0 12 10
+8 8 1
+Str: 6
+Dex: 7
+Int: 5
+Wis: 7
+Con: 7
+Cha: 7
+E
+T 12006
+T 12099
+#12039
+Kai Battle Instructor~
+@GK@Wa@Gi @GB@Wa@Gt@Gt@Wl@Ge @YI@Rn@Ws@Rtruct@Wo@Yr@n~
+@GK@Wa@Gi @GB@Wa@Gt@Gt@Wl@Ge @YI@Rn@Ws@Rtruct@Wo@Yr@n stands here
+~
+@GK@Wa@Gi @GB@Wa@Gt@Gt@Wl@Ge @YI@Rn@Ws@Rtruct@Wo@Yr@n is a regal looking, female Kai. Her face exudes patience
+and wisdom as she watches over the Kais and their guests as they train in
+combat.
+~
+bcd 0 0 0 l 0 0 0 0 E
+10 0 10 0d12+0 0d0+0
+0 0 12 10
+8 8 2
+Str: 5
+Dex: 8
+Int: 5
+Wis: 6
+Con: 8
+Cha: 10
+E
+T 12007
+#12040
+greasa mutant~
+@GG@Wreas@Ga@n~
+@GG@Wreas@Ga@n, the @C[@WWTO@C]@n ambassador, stands here.
+~
+It looks unfinished. @GG@Wreas@Ga@n, the @C[@WWTO@C]@n ambassador, is a kind looking mutant.
+Wisdom shines from her eyes, intelligence from her visage, and benevolence from
+her demeanor. 
+~
+bdnprs 0 0 0 l 0 0 0 0 E
+5 0 10 0d10+0 0d0+0
+0 0 5 5
+8 8 2
+Str: 6
+Dex: 12
+Int: 9
+Wis: 11
+Con: 19
+Cha: 16
+E
+T 1133
+T 1132
+T 1136
+#12050
+kizonno kai~
+@YK@Wizonn@Yo@n~
+@YK@Wizonn@Yo@n quietly practices @Rpunch@ning here
+~
+@YK@Wizonn@Yo@n is a female Kai. She somehow manages to look both stern and kind at
+the same time. Her eyes are soft, attentive, and full of intelligence. There
+is a strength in her jawline that indicates she isn't afraid to assert herself,
+though. @n
+~
+bcdnprs 0 0 0 0 0 0 0 0 E
+10 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 2
+Str: 6
+Dex: 5
+Int: 5
+Wis: 9
+Con: 10
+Cha: 9
+E
+T 12050
+#12051
+Kinetic Kai Advanced~
+@gK@Gi@gn@We@gt@Gi@gc @BK@ca@Ci @WAdvanced@n~
+An @Wadvanced@n @gK@Gi@gn@We@gt@Gi@gc @BK@ca@Ci@n student stands here, practicing.
+~
+An undefined string.~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+7 0 10 0d12+0 0d0+0
+0 0 12 10
+8 8 1
+Str: 5
+Dex: 9
+Int: 5
+Wis: 5
+Con: 9
+Cha: 8
+E
+#12052
+Kinetic Kai Advanced~
+@gK@Gi@gn@We@gt@Gi@gc @BK@ca@Ci @WAdvanced@n~
+An @Wadvanced@n @gK@Gi@gn@We@gt@Gi@gc @BK@ca@Ci@n student stands here, practicing.
+~
+An undefined string.~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+8 0 10 0d12+0 0d0+0
+0 0 12 10
+8 8 2
+Str: 10
+Dex: 5
+Int: 6
+Wis: 9
+Con: 7
+Cha: 9
+E
+#12053
+Kinetic Kai Instructor~
+@gK@Gi@gn@We@gt@Gi@gc @BK@ca@Ci @WInstructor@n~
+A @gK@Gi@gn@We@gt@Gi@gc @BK@ca@Ci @WInstructor@n stands here, observing the students
+~
+
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+9 0 10 0d12+0 0d0+0
+0 0 12 10
+8 8 1
+Str: 5
+Dex: 8
+Int: 5
+Wis: 7
+Con: 7
+Cha: 5
+E
+#12054
+Kinetic Kai Instructor~
+@gK@Gi@gn@We@gt@Gi@gc @BK@ca@Ci @WInstructor@n~
+A @gK@Gi@gn@We@gt@Gi@gc @BK@ca@Ci @WInstructor@n stands here, barking orders
+~
+
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+10 0 10 0d12+0 0d0+0
+0 0 12 10
+8 8 1
+Str: 7
+Dex: 7
+Int: 6
+Wis: 10
+Con: 8
+Cha: 7
+E
+#12055
+Master Heiwana Masuta~
+@WMaster @gH@Ge@gi@Ww@ga@Gn@ga@n @BM@ca@Cs@Wu@ct@Ba@n~
+@WMaster @gH@Ge@gi@Ww@ga@Gn@ga@n @BM@ca@Cs@Wu@ct@Ba@n observes the dojo from their place on high
+~
+   A student of the Gentle Fist who works with Kibito to train new recruits. 
+They appear to be young, though are quite old for a kai. Wrinkles form around
+the edges of their eyes as they smile. Master Heiwana wears a symbol of the
+Kinetic Kai- flowing script that resembles their techniques.
+~
+dvwxyz 0 0 0 lx 0 0 0 0 E
+15 0 10 0d12+0 0d0+0
+0 0 12 10
+8 8 0
+Str: 10
+Dex: 9
+Int: 14
+Wis: 15
+Con: 9
+Cha: 9
+E
+$

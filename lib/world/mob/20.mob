@@ -1,0 +1,643 @@
+#2000
+Kevin Dodge~
+@wKevin Dodge@n~
+@wKevin Dodge is standing here watching the monitors.@n
+~
+ @WThis tired man seems to run a pretty hard shift with his official workers.  @n
+~
+bds 0 0 0 0 0 0 0 1 E
+8 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 7
+Dex: 5
+Int: 18
+Wis: 8
+Con: 19
+Cha: 14
+E
+T 2004
+T 2005
+T 2008
+T 2011
+#2001
+Tired Mine Worker~
+@wA Tired Mine Worker@n~
+@wA tired mine worker is resting here.@n
+~
+ @WThis mine worker seems to be at the end of his shift.  @n
+~
+d 0 0 0 0 0 0 0 0 E
+12 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 7
+Dex: 20
+Int: 7
+Wis: 17
+Con: 14
+Cha: 8
+E
+#2002
+Minecart Operator Smammy~
+@wA Minecart Operator@n~
+@wA minecart operator is standing here.@n
+~
+ @WThis worker seems to have the main job of driving loads of ore to the surface
+and workers to the excavation sites.  @n
+~
+bds 0 0 0 0 0 0 0 0 E
+12 0 10 0d4+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 18
+Dex: 8
+Int: 14
+Wis: 11
+Con: 18
+Cha: 7
+E
+T 2000
+T 2001
+T 2002
+T 2007
+#2003
+Silver Worm~
+@wA @WS@Ci@wl@Wv@Ce@wr @gW@Go@Yr@gm@n~
+@wA @Ws@Ci@wl@Wv@Ce@wr @gw@Go@Yr@gm @wis burrowing here.@n
+~
+ @WThis long fat worm measures about six feet in length and is coated in shiney
+shell like protrusions that look similar to silver.  @n
+~
+dz 0 0 0 l 0 0 0 0 E
+25 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 0
+Size: 4
+Str: 17
+Dex: 22
+Int: 5
+Wis: 7
+Con: 19
+Cha: 15
+E
+T 2003
+#2004
+Greshal~
+@wA G@Wr@Be@bs@Bh@Wa@wl@n~
+@wA g@Wr@Be@bs@Bh@Wa@wl is scurrying across the wall here.@n
+~
+ @WThis large insect seems to make the mine its home.  Measuring about three
+feet long and two feet wide it has a body similar to cross between an ant and a
+spider.  @n
+~
+dxyz 0 0 0 l 0 0 0 0 E
+28 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 0
+Size: 3
+Str: 28
+Dex: 19
+Int: 8
+Wis: 6
+Con: 25
+Cha: 23
+E
+#2005
+Drill Operator~
+@wA Drill Operator@n~
+@wA drill operator is standing here.@n
+~
+ @WThis man appears to opperate the high powered drills used for breaking
+through mine walls.  @n
+~
+d 0 0 0 0 0 0 0 5 E
+15 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 9
+Dex: 9
+Int: 9
+Wis: 7
+Con: 11
+Cha: 11
+E
+#2006
+Haul Loader~
+@wA Haul Loader@n~
+@wA haul loader is standing here.@n
+~
+ @WThis miner appears to be responsible for hauling loads of ore to the
+minecart.  @n
+~
+d 0 0 0 0 0 0 0 8 E
+15 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 16
+Dex: 13
+Int: 11
+Wis: 10
+Con: 12
+Cha: 12
+E
+#2007
+Pickman~
+@wA Pickman@n~
+@wA pickman is standing here.@n
+~
+ @WThis miner uses a pick to break out exposed ore for the haulers to then take
+to the minecart.  @n
+~
+d 0 0 0 l 0 0 0 10 E
+16 0 10 0d6+0 0d0+0
+0 0 0 2
+8 8 1
+Str: 11
+Dex: 16
+Int: 19
+Wis: 18
+Con: 10
+Cha: 14
+E
+#2008
+Darkenn Broodling~
+@wA @mD@Ma@Wr@wk@We@Mn@mn @rB@Rr@Wo@wodl@Wi@Rn@rg@n~
+@wA @md@Ma@Wr@wk@We@Mn@mn @rb@Rr@Wo@wodl@Wi@Rn@rg @wis prowling here.@n
+~
+ @WThis vicious being is one of the young of the Darkenn, a race of subteranean
+monsters who eat just about anything.  @n
+~
+dfvwxyz 0 0 0 l 0 0 0 -15 E
+30 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 0
+Size: 3
+Str: 25
+Dex: 24
+Int: 6
+Wis: 5
+Con: 25
+Cha: 20
+E
+#2009
+Darkenn Adult~
+@wA @mD@Ma@Wr@wk@We@Mn@mn @wAdult@n~
+@wA @md@Ma@Wr@wk@We@Mn@mn @wadult is prowling here.@n
+~
+ @WThis is the adult form of the darkenn race.  A race of subteranean monsters
+that eat almost anything.  It is said they can devour a man before his heart
+stops beating.  @n
+~
+dfvwxyz 0 0 0 l 0 0 0 -25 E
+40 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 2
+Size: 5
+Str: 23
+Dex: 39
+Int: 5
+Wis: 7
+Con: 25
+Cha: 20
+E
+#2010
+Darkenn Alpha~
+@wAn @CAlpha @mD@Ma@Wr@wk@We@Mn@mn@n~
+@wAn @Calpha @md@Ma@Wr@wk@We@Mn@mn@w is prowling here.@n
+~
+ @WThis is the dominant darkenn, twice the size of the rest.  He fathers the
+rest until one arises to replace him.  @n
+~
+bdfvwxyz 0 0 0 l 0 0 0 -50 E
+50 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 6
+Str: 48
+Dex: 41
+Int: 20
+Wis: 5
+Con: 48
+Cha: 32
+E
+#2011
+Assistant Foreman~
+@wAssistant Foreman@n~
+@wThe assistant foreman is standing here giving orders.@n
+~
+ @WThis man is in charge of the actual work going on at the digs.  He ultimatly
+reports to the foreman who is watching via surveilance cameras.  @n
+~
+d 0 0 0 0 0 0 0 8 E
+20 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 20
+Dex: 10
+Int: 12
+Wis: 17
+Con: 15
+Cha: 18
+E
+#2012
+Technik Guard~
+@wTechnik Guard@n~
+@wThe Technik guard is standing here.@n
+~
+ @WThis big burly man is wearing nothing but black clothes.  On his black
+t-shirt a flaming skull design can be seen.  @n
+~
+bd 0 0 0 0 0 0 0 0 E
+20 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 11
+Dex: 18
+Int: 13
+Wis: 11
+Con: 11
+Cha: 12
+E
+T 2009
+T 2010
+T 2012
+T 2032
+#2013
+Technik Shopkeeper~
+@wTechnik Shopkeeper@n~
+@wThe Technik shopkeeper is sitting here.@n
+~
+ @WThis young man is wearing nothing but black.  On his black t-shirt a flaming
+skull logo can be seen.  @n
+~
+bds 0 0 0 0 0 0 0 0 E
+5 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 6
+Dex: 19
+Int: 12
+Wis: 7
+Con: 7
+Cha: 17
+E
+T 17313
+#2014
+Foun Smith~
+@wFoun@n~
+@wFoun the smith is working on something here.@n
+~
+ @WThis short burly man is wearing a leather apron and leather gloves.  His skin
+has been tanned from the heat of the forge as well as the dirt from smithing.  @n
+~
+bd 0 0 0 0 0 0 0 0 E
+40 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 33
+Dex: 25
+Int: 40
+Wis: 35
+Con: 40
+Cha: 26
+E
+T 2013
+T 2014
+T 2015
+T 2016
+#2015
+GAME MASTER~
+@RGAME MASTER@n~
+@wThe @RGAME MASTER@w, is floating here.@n
+~
+@WDO NOT LOOK, YOUR BRAIN CAN NOT HANDLE IT!@n
+~
+bds 0 0 0 0 0 0 0 0 E
+100 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 68
+Dex: 59
+Int: 52
+Wis: 99
+Con: 68
+Cha: 78
+E
+#2016
+Octorok~
+@wAn @ROctorok@n~
+@wAn @Roctorok @wis scurrying around here.@n
+~
+   @WThis blocky looking virtual enemy appears to be an octorok from The Legend of
+Zelda. @n
+~
+ds 0 0 0 l 0 0 0 0 E
+3 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Str: 18
+Dex: 6
+Int: 8
+Wis: 7
+Con: 6
+Cha: 5
+E
+#2017
+Stalfos~
+@wA @WStalfos@n~
+@wA S@Wt@wa@Wl@wf@Wo@ws is wandering here.@n
+~
+   @WThis blocky looking virtual enemy appears to be a Stalfos(Skeleton Warrior)
+from The Legend of Zelda. @n
+~
+ds 0 0 0 l 0 0 0 0 E
+5 0 10 0d4+0 0d0+0
+0 0 15 28
+8 8 1
+Str: 11
+Dex: 19
+Int: 5
+Wis: 5
+Con: 18
+Cha: 12
+E
+#2018
+Ironknuckle~
+@wAn @BIronknuckle@n~
+@wAn @Bironknuckle @wis standing guard here.@n
+~
+@WThis blocky looking virtual enemy appears to be a Ironknuckle from Zelda II.@n
+~
+dsA 0 0 0 l 0 0 0 0 E
+8 0 10 0d0+0 0d0+0
+0 0 22 28
+8 8 1
+Str: 13
+Dex: 11
+Int: 6
+Wis: 5
+Con: 11
+Cha: 6
+E
+#2019
+Goomba~
+@wA @yGoomba@n~
+@wA @ygoomba @wis wandering here.@n
+~
+   @WThis mushroom shaped enemy likes to walk back and forth@n
+~
+ds 0 0 0 l 0 0 0 0 E
+3 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Str: 10
+Dex: 10
+Int: 8
+Wis: 5
+Con: 14
+Cha: 10
+E
+#2020
+Koopa Troopa~
+@GKoopa @gTroopa@n~
+@wA @Gkoopa @gtroopa @wis walking here.@n
+~
+   @WThis turtle shaped enemy has a green shell. @n
+~
+ds 0 0 0 l 0 0 0 0 E
+5 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Str: 8
+Dex: 10
+Int: 8
+Wis: 7
+Con: 11
+Cha: 5
+E
+T 2029
+#2021
+Buzzy Beetle~
+@wA @bBuzzy @DBeetle@n~
+@wA @bbuzzy @Dbeetle @wis walking here.@n
+~
+   @WThis black shelled enemy has top notch defenses. @n
+~
+ds 0 0 0 l 0 0 0 0 E
+10 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Str: 8
+Dex: 10
+Int: 6
+Wis: 6
+Con: 15
+Cha: 17
+E
+T 2029
+#2022
+Shelled Koopa Troopa~
+@wA @gShelled @GKoopa @gTroopa@n~
+@wA @gshelled @Gkoopa @gtroopa @wis sitting here.@n
+~
+@WThis koopa troopa has been shelled!@n
+~
+ds 0 0 0 l 0 0 0 0 E
+1 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Str: 6
+Dex: 17
+Int: 7
+Wis: 6
+Con: 17
+Cha: 6
+E
+#2023
+Shelled Buzzy Beetle~
+@wA @gShelled @bBuzzy @DBeetle@n~
+@wA @gshelled @bbuzzy @Dbeetle @wis sitting here.@n
+~
+@WThis buzzy beetle has been shelled!@n
+~
+ds 0 0 0 l 0 0 0 0 E
+1 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Str: 8
+Dex: 9
+Int: 5
+Wis: 7
+Con: 17
+Cha: 19
+E
+#2050
+EDI Lancer~
+@DE@WD@wI @CLancer@n~
+@wAn @DE@WD@wI @CLancer@w is scouting for threats here.@n
+~
+   @WThis well built human has his face obscured by a black helmet. Only his
+eyes are visible through the clear glass visor of the helet. Matching black
+armor covers every inch of his body. @n
+~
+cd 0 0 0 0 0 0 0 0 E
+15 0 10 0d6+0 0d0+0
+0 0 0 2
+8 8 1
+Str: 15
+Dex: 16
+Int: 14
+Wis: 20
+Con: 14
+Cha: 20
+E
+T 64
+#2051
+EDI Dragoon~
+@DE@WD@wI @CDragoon@n~
+@wAn @DE@WD@wI @CDragoon@w is holding a defensive position here.@n
+~
+   @WThis well built human has his face obscured by a black helmet. Only his
+eyes are visible through the clear glass visor of the helet. Matching black
+armor covers every inch of his body. @n
+~
+bcd 0 0 0 0 0 0 0 0 E
+30 0 10 0d6+0 0d0+0
+0 0 0 2
+8 8 1
+Str: 22
+Dex: 15
+Int: 30
+Wis: 24
+Con: 27
+Cha: 18
+E
+T 64
+#2052
+EDI Terra~
+@DE@WD@wI @CTerra@n~
+@wAn @DE@WD@wI @CTerra@w is standing here.@n
+~
+   @WThis well built human has his face obscured by a black helmet. Only his
+eyes are visible through the clear glass visor of the helet. Matching black
+armor covers every inch of his body. @n
+~
+cd 0 0 0 0 0 0 0 0 E
+50 0 10 0d4+0 0d0+0
+0 0 0 0
+8 8 1
+Str: 35
+Dex: 41
+Int: 47
+Wis: 42
+Con: 38
+Cha: 49
+E
+T 64
+#2053
+EDI Alpha~
+@DE@WD@wI @CAlpha@n~
+@wAn @DE@WD@wI @CAlpha@w is in a fighting stance here.@n
+~
+   @WThis well built human has his face obscured by a black helmet. Only his
+eyes are visible through the clear glass visor of the helet. Matching black
+armor covers every inch of his body. @n
+~
+cd 0 0 0 0 0 0 0 0 E
+60 0 10 0d6+0 0d0+0
+0 0 0 2
+8 8 1
+Str: 35
+Dex: 45
+Int: 45
+Wis: 42
+Con: 45
+Cha: 42
+E
+T 64
+#2054
+EDI Lander Squad Leader~
+@DE@WD@wI @YSquad Leader@n~
+@DE@WD@wI @CLancer @wranked @YSquad Leader@w is looking into his scouter.@n
+~
+   @WThis well built human has his face obscured by a black helmet. Only his
+eyes are visible through the clear glass visor of the helet. Matching black
+armor covers every inch of his body. @n
+~
+cd 0 0 0 0 0 0 0 0 E
+19 0 10 0d6+0 0d0+0
+0 0 0 2
+8 8 1
+Str: 15
+Dex: 20
+Int: 19
+Wis: 15
+Con: 15
+Cha: 14
+E
+T 63
+#2055
+EDI Dragoon Squad Leader~
+@DE@WD@wI @YSquad Leader@n~
+@wAn @DE@WD@wI @CDragoon @wranked @YSquad Leader@w is standing here calmly.@n
+~
+   @WTher well built human has her face obscured by a black helmet. Only her
+eyes are visible through the clear glass visor of the helet. Matching black
+armor covers every inch of her body. @n
+~
+bcd 0 0 0 0 0 0 0 0 E
+35 0 10 0d6+0 0d0+0
+0 0 0 2
+8 8 2
+Str: 20
+Dex: 19
+Int: 26
+Wis: 27
+Con: 27
+Cha: 31
+E
+T 63
+#2056
+EDI Terra Squad Leader~
+@DE@WD@wI @YSquad Leader@n~
+@wAn @DE@WD@wI @CDragoon @wranked @YSquad Leader@w is standing here with his arms crossed.@n
+~
+   @WThis well built human has his face obscured by a black helmet. Only his
+eyes are visible through the clear glass visor of the helet. Matching black
+armor covers every inch of his body. @n
+~
+cd 0 0 0 0 0 0 0 0 E
+58 0 10 0d4+0 0d0+0
+0 0 0 0
+8 8 1
+Str: 53
+Dex: 58
+Int: 48
+Wis: 38
+Con: 49
+Cha: 42
+E
+T 63
+#2057
+EDI Alpha Squad Leader~
+@DE@WD@wI @YSquad Leader@n~
+An @DE@WD@wI @CAlpha @wranked @YSquad Leader@n is standing here.
+~
+   @WThis well built human has his face obscured by a black helmet. Only his
+eyes are visible through the clear glass visor of the helet. Matching black
+armor covers every inch of his body. @n
+~
+cd 0 0 0 0 0 0 0 0 E
+72 0 10 0d6+0 0d0+0
+0 0 0 2
+8 8 1
+Str: 44
+Dex: 62
+Int: 66
+Wis: 64
+Con: 50
+Cha: 72
+E
+T 63
+$

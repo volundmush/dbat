@@ -1,0 +1,1785 @@
+#16000
+@YJ@ya@Wn@wa@Wc@yr@Ye @D- @nOutside the Western Gate~
+   @yA massive sandy colored stone wall rises to the east, containing the City of
+Janacre inside. Inset into the wall is a large wooden gate that is starting to
+show its age. The road here leads right up to the gate to the east. The road
+looks poorly maintained and doesn't appear to get much travel. Further out
+to the west, the road appears to get swallowed up the wasteland that stretches
+for as far as the eye can see. @n
+~
+160 c h 0 0 1
+D1
+~
+~
+0 0 16001 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16500 0 0 0 0 0 0 0 0
+S
+#16001
+@YJ@ya@Wn@wa@Wc@yr@Ye @D- @nBefore the Western Gate~
+   @yThe road leading into and out of Janacre meets a road block here, as the
+massive sandy colored wall rises up above and travellers are greeted with a
+wooden gate built into it's surface. The gate looks as if it has seen better
+days, with chips and indents in places. @n
+~
+160 0 h 0 0 1
+D1
+~
+~
+0 0 16002 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16000 0 0 0 0 0 0 0 0
+S
+#16002
+@YJ@ya@Wn@wa@Wc@yr@Ye @D- @nBefore the Western Gate~
+   @yThe road here splits off from the main road that runs around the outskirts
+of Janacre. Either side of the road is a tower, rising up higher than even the
+stone walls to the west though connected via 'floating' battlements. @n
+~
+160 0 h 0 0 1
+D1
+~
+~
+0 0 16003 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16001 0 0 0 0 0 0 0 0
+S
+#16003
+@GC@ga@Yt@yac@Yh@ga@Gn @WR@wo@Da@wd@n~
+   @yCatachan road runs along the edge of the city of Janacre and is considered
+to be the main road, and safest route to travel, by the locals. Regular
+patrols of guards can be seen every few minutes, marching while keeping an eye
+out for trouble. Catachan road breaks into an intersection here, with the
+Coliseum Boulivard running to the East, where the Coliseum itself rises up into
+view. To the west, the road leads out of the city. @n
+~
+160 0 h 0 0 1
+D0
+~
+~
+0 0 16004 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16035 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16006 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16002 0 0 0 0 0 0 0 0
+S
+#16004
+@GC@ga@Yt@yac@Yh@ga@Gn @WR@wo@Da@wd@n~
+   @yCatachan road runs along the edge of the city of Janacre and is considered
+to be the main road, and safest route to travel, by the locals. Regular
+patrols of guards can be seen every few minutes, marching while keeping an eye
+out for trouble. Alleyways seem to break off at random intervals from the main
+road. @n
+~
+160 0 h 0 0 1
+D0
+~
+~
+0 0 16005 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16003 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16096 0 0 0 0 0 0 0 0
+S
+#16005
+@GC@ga@Yt@yac@Yh@ga@Gn @WR@wo@Da@wd@n~
+   @yCatachan road runs along the edge of the city of Janacre and is considered
+to be the main road, and safest route to travel, by the locals. Regular
+patrols of guards can be seen every few minutes, marching while keeping an eye
+out for trouble. Alleyways seem to break off at random intervals from the main
+road. @n
+~
+160 0 h 0 0 1
+D2
+~
+~
+0 0 16004 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16008 0 0 0 0 0 0 0 0
+S
+#16006
+@GC@ga@Yt@yac@Yh@ga@Gn @WR@wo@Da@wd@n~
+   @yCatachan road runs along the edge of the city of Janacre and is considered
+to be the main road, and safest route to travel, by the locals. Regular
+patrols of guards can be seen every few minutes, marching while keeping an eye
+out for trouble. Alleyways seem to break off at random intervals from the main
+road. @n
+~
+160 0 h 0 0 1
+D0
+~
+~
+0 0 16003 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16056 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16007 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16093 0 0 0 0 0 0 0 0
+S
+#16007
+@GC@ga@Yt@yac@Yh@ga@Gn @WR@wo@Da@wd@n~
+   @yCatachan road runs along the edge of the city of Janacre and is considered
+to be the main road, and safest route to travel, by the locals. Regular
+patrols of guards can be seen every few minutes, marching while keeping an eye
+out for trouble. Alleyways seem to break off at random intervals from the main
+road. @n
+~
+160 0 h 0 0 1
+D0
+~
+~
+0 0 16006 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16034 0 0 0 0 0 0 0 0
+S
+#16008
+@GC@ga@Yt@yac@Yh@ga@Gn @WR@wo@Da@wd@n~
+   @yCatachan road runs along the edge of the city of Janacre and is considered
+to be the main road, and safest route to travel, by the locals. Regular
+patrols of guards can be seen every few minutes, marching while keeping an eye
+out for trouble. Alleyways seem to break off at random intervals from the main
+road. @n
+~
+160 0 h 0 0 1
+D7
+~
+~
+0 0 16009 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16005 0 0 0 0 0 0 0 0
+S
+#16009
+@GC@ga@Yt@yac@Yh@ga@Gn @WR@wo@Da@wd@n~
+   @yCatachan road runs along the edge of the city of Janacre and is considered
+to be the main road, and safest route to travel, by the locals. Regular
+patrols of guards can be seen every few minutes, marching while keeping an eye
+out for trouble. Alleyways seem to break off at random intervals from the main
+road. @n
+~
+160 0 h 0 0 1
+D7
+~
+~
+0 0 16010 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16062 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16008 0 0 0 0 0 0 0 0
+S
+#16010
+@GC@ga@Yt@yac@Yh@ga@Gn @WR@wo@Da@wd@n~
+   @yCatachan road runs along the edge of the city of Janacre and is considered
+to be the main road, and safest route to travel, by the locals. Regular
+patrols of guards can be seen every few minutes, marching while keeping an eye
+out for trouble. Alleyways seem to break off at random intervals from the main
+road. @n
+~
+160 0 h 0 0 1
+D7
+~
+~
+0 0 16011 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16009 0 0 0 0 0 0 0 0
+S
+#16011
+@GC@ga@Yt@yac@Yh@ga@Gn @WR@wo@Da@wd@n~
+   @yCatachan road runs along the edge of the city of Janacre and is considered
+to be the main road, and safest route to travel, by the locals. Regular
+patrols of guards can be seen every few minutes, marching while keeping an eye
+out for trouble. Alleyways seem to break off at random intervals from the main
+road. @n
+~
+160 0 h 0 0 1
+D1
+~
+~
+0 0 16012 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16010 0 0 0 0 0 0 0 0
+S
+#16012
+@GC@ga@Yt@yac@Yh@ga@Gn @WR@wo@Da@wd@n~
+   @yCatachan road runs along the edge of the city of Janacre and is considered
+to be the main road, and safest route to travel, by the locals. Regular
+patrols of guards can be seen every few minutes, marching while keeping an eye
+out for trouble. Alleyways seem to break off at random intervals from the main
+road. @n
+~
+160 0 h 0 0 1
+D1
+~
+~
+0 0 16013 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16011 0 0 0 0 0 0 0 0
+S
+#16013
+@GC@ga@Yt@yac@Yh@ga@Gn @WR@wo@Da@wd@n~
+   @yCatachan road runs along the edge of the city of Janacre and is considered
+to be the main road, and safest route to travel, by the locals. Regular
+patrols of guards can be seen every few minutes, marching while keeping an eye
+out for trouble. Catachan road breaks into an intersection here, with the
+Coliseum Boulivard running to the south, where the Coliseum itself rises up
+into view. @n
+~
+160 0 h 0 0 1
+D0
+~
+~
+0 0 12667 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16014 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16044 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16012 0 0 0 0 0 0 0 0
+S
+#16014
+@GC@ga@Yt@yac@Yh@ga@Gn @WR@wo@Da@wd@n~
+   @yCatachan road runs along the edge of the city of Janacre and is considered
+to be the main road, and safest route to travel, by the locals. Regular
+patrols of guards can be seen every few minutes, marching while keeping an eye
+out for trouble. Alleyways seem to break off at random intervals from the main
+road. @n
+~
+160 0 h 0 0 1
+D1
+~
+~
+0 0 16015 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16013 0 0 0 0 0 0 0 0
+S
+#16015
+@GC@ga@Yt@yac@Yh@ga@Gn @WR@wo@Da@wd@n~
+   @yCatachan road runs along the edge of the city of Janacre and is considered
+to be the main road, and safest route to travel, by the locals. Regular
+patrols of guards can be seen every few minutes, marching while keeping an eye
+out for trouble. Alleyways seem to break off at random intervals from the main
+road. @n
+~
+160 0 h 0 0 1
+D2
+~
+~
+0 0 16076 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16014 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16016 0 0 0 0 0 0 0 0
+S
+#16016
+@GC@ga@Yt@yac@Yh@ga@Gn @WR@wo@Da@wd@n~
+   @yCatachan road runs along the edge of the city of Janacre and is considered
+to be the main road, and safest route to travel, by the locals. Regular
+patrols of guards can be seen every few minutes, marching while keeping an eye
+out for trouble. Alleyways seem to break off at random intervals from the main
+road. @n
+~
+160 0 h 0 0 1
+D6
+~
+~
+0 0 16015 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16017 0 0 0 0 0 0 0 0
+S
+#16017
+@GC@ga@Yt@yac@Yh@ga@Gn @WR@wo@Da@wd@n~
+   @yCatachan road runs along the edge of the city of Janacre and is considered
+to be the main road, and safest route to travel, by the locals. Regular
+patrols of guards can be seen every few minutes, marching while keeping an eye
+out for trouble. Alleyways seem to break off at random intervals from the main
+road. @n
+~
+160 0 h 0 0 1
+D6
+~
+~
+0 0 16016 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16018 0 0 0 0 0 0 0 0
+S
+#16018
+@GC@ga@Yt@yac@Yh@ga@Gn @WR@wo@Da@wd@n~
+   @yCatachan road runs along the edge of the city of Janacre and is considered
+to be the main road, and safest route to travel, by the locals. Regular
+patrols of guards can be seen every few minutes, marching while keeping an eye
+out for trouble. Alleyways seem to break off at random intervals from the main
+road. @n
+~
+160 0 h 0 0 1
+D6
+~
+~
+0 0 16017 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16019 0 0 0 0 0 0 0 0
+S
+#16019
+@GC@ga@Yt@yac@Yh@ga@Gn @WR@wo@Da@wd@n~
+   @yCatachan road runs along the edge of the city of Janacre and is considered
+to be the main road, and safest route to travel, by the locals. Regular
+patrols of guards can be seen every few minutes, marching while keeping an eye
+out for trouble. Alleyways seem to break off at random intervals from the main
+road. @n
+~
+160 0 h 0 0 1
+D2
+~
+~
+0 0 16020 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16018 0 0 0 0 0 0 0 0
+S
+#16020
+@GC@ga@Yt@yac@Yh@ga@Gn @WR@wo@Da@wd@n~
+   @yCatachan road runs along the edge of the city of Janacre and is considered
+to be the main road, and safest route to travel, by the locals. Regular
+patrols of guards can be seen every few minutes, marching while keeping an eye
+out for trouble. Alleyways seem to break off at random intervals from the main
+road. @n
+~
+160 0 h 0 0 1
+D0
+~
+~
+0 0 16019 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16021 0 0 0 0 0 0 0 0
+S
+#16021
+@GC@ga@Yt@yac@Yh@ga@Gn @WR@wo@Da@wd@n~
+   @yCatachan road runs along the edge of the city of Janacre and is considered
+to be the main road, and safest route to travel, by the locals. Regular
+patrols of guards can be seen every few minutes, marching while keeping an eye
+out for trouble. Catachan road breaks into an intersection here, with the
+Coliseum Boulivard running to the west, where the Coliseum itself rises up into
+view. To the east, the road leads out of the city. @n
+~
+160 0 h 0 0 1
+D0
+~
+~
+0 0 16020 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16043 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16022 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16039 0 0 0 0 0 0 0 0
+S
+#16022
+@GC@ga@Yt@yac@Yh@ga@Gn @WR@wo@Da@wd@n~
+   @yCatachan road runs along the edge of the city of Janacre and is considered
+to be the main road, and safest route to travel, by the locals. Regular
+patrols of guards can be seen every few minutes, marching while keeping an eye
+out for trouble. Alleyways seem to break off at random intervals from the main
+road. @n
+~
+160 0 h 0 0 1
+D0
+~
+~
+0 0 16021 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16023 0 0 0 0 0 0 0 0
+S
+#16023
+@GC@ga@Yt@yac@Yh@ga@Gn @WR@wo@Da@wd@n~
+   @yCatachan road runs along the edge of the city of Janacre and is considered
+to be the main road, and safest route to travel, by the locals. Regular
+patrols of guards can be seen every few minutes, marching while keeping an eye
+out for trouble. Alleyways seem to break off at random intervals from the main
+road. @n
+~
+160 0 h 0 0 1
+D0
+~
+~
+0 0 16022 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16024 0 0 0 0 0 0 0 0
+S
+#16024
+@GC@ga@Yt@yac@Yh@ga@Gn @WR@wo@Da@wd@n~
+   @yCatachan road runs along the edge of the city of Janacre and is considered
+to be the main road, and safest route to travel, by the locals. Regular
+patrols of guards can be seen every few minutes, marching while keeping an eye
+out for trouble. Alleyways seem to break off at random intervals from the main
+road. @n
+~
+160 0 h 0 0 1
+D7
+~
+~
+0 0 16023 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16025 0 0 0 0 0 0 0 0
+S
+#16025
+@GC@ga@Yt@yac@Yh@ga@Gn @WR@wo@Da@wd@n~
+   @yCatachan road runs along the edge of the city of Janacre and is considered
+to be the main road, and safest route to travel, by the locals. Regular
+patrols of guards can be seen every few minutes, marching while keeping an eye
+out for trouble. Alleyways seem to break off at random intervals from the main
+road. @n
+~
+160 0 h 0 0 1
+D7
+~
+~
+0 0 16024 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16026 0 0 0 0 0 0 0 0
+S
+#16026
+@GC@ga@Yt@yac@Yh@ga@Gn @WR@wo@Da@wd@n~
+   @yCatachan road runs along the edge of the city of Janacre and is considered
+to be the main road, and safest route to travel, by the locals. Regular
+patrols of guards can be seen every few minutes, marching while keeping an eye
+out for trouble. Alleyways seem to break off at random intervals from the main
+road. @n
+~
+160 0 h 0 0 1
+D7
+~
+~
+0 0 16025 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16027 0 0 0 0 0 0 0 0
+S
+#16027
+@GC@ga@Yt@yac@Yh@ga@Gn @WR@wo@Da@wd@n~
+   @yCatachan road runs along the edge of the city of Janacre and is considered
+to be the main road, and safest route to travel, by the locals. Regular
+patrols of guards can be seen every few minutes, marching while keeping an eye
+out for trouble. Alleyways seem to break off at random intervals from the main
+road. @n
+~
+160 0 h 0 0 1
+D3
+~
+~
+0 0 16028 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16026 0 0 0 0 0 0 0 0
+S
+#16028
+@GC@ga@Yt@yac@Yh@ga@Gn @WR@wo@Da@wd@n~
+   @yCatachan road runs along the edge of the city of Janacre and is considered
+to be the main road, and safest route to travel, by the locals. Regular
+patrols of guards can be seen every few minutes, marching while keeping an eye
+out for trouble. Alleyways seem to break off at random intervals from the main
+road. @n
+~
+160 0 h 0 0 1
+D1
+~
+~
+0 0 16027 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16029 0 0 0 0 0 0 0 0
+S
+#16029
+@GC@ga@Yt@yac@Yh@ga@Gn @WR@wo@Da@wd@n~
+   @yCatachan road runs along the edge of the city of Janacre and is considered
+to be the main road, and safest route to travel, by the locals. Regular
+patrols of guards can be seen every few minutes, marching while keeping an eye
+out for trouble. Catachan road breaks into an intersection here, with the
+Coliseum Boulivard running to the north, where the Coliseum itself rises up
+into view. @n
+~
+160 0 h 0 0 1
+D0
+~
+~
+0 0 16048 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16028 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16030 0 0 0 0 0 0 0 0
+S
+#16030
+@GC@ga@Yt@yac@Yh@ga@Gn @WR@wo@Da@wd@n~
+   @yCatachan road runs along the edge of the city of Janacre and is considered
+to be the main road, and safest route to travel, by the locals. Regular
+patrols of guards can be seen every few minutes, marching while keeping an eye
+out for trouble. Alleyways seem to break off at random intervals from the main
+road. @n
+~
+160 0 h 0 0 1
+D0
+~
+~
+0 0 16061 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16029 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16031 0 0 0 0 0 0 0 0
+S
+#16031
+@GC@ga@Yt@yac@Yh@ga@Gn @WR@wo@Da@wd@n~
+   @yCatachan road runs along the edge of the city of Janacre and is considered
+to be the main road, and safest route to travel, by the locals. Regular
+patrols of guards can be seen every few minutes, marching while keeping an eye
+out for trouble. Alleyways seem to break off at random intervals from the main
+road. @n
+~
+160 0 h 0 0 1
+D1
+~
+~
+0 0 16030 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16032 0 0 0 0 0 0 0 0
+S
+#16032
+@GC@ga@Yt@yac@Yh@ga@Gn @WR@wo@Da@wd@n~
+   @yCatachan road runs along the edge of the city of Janacre and is considered
+to be the main road, and safest route to travel, by the locals. Regular
+patrols of guards can be seen every few minutes, marching while keeping an eye
+out for trouble. Alleyways seem to break off at random intervals from the main
+road. @n
+~
+160 0 h 0 0 1
+D6
+~
+~
+0 0 16033 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16031 0 0 0 0 0 0 0 0
+S
+#16033
+@GC@ga@Yt@yac@Yh@ga@Gn @WR@wo@Da@wd@n~
+   @yCatachan road runs along the edge of the city of Janacre and is considered
+to be the main road, and safest route to travel, by the locals. Regular
+patrols of guards can be seen every few minutes, marching while keeping an eye
+out for trouble. Alleyways seem to break off at random intervals from the main
+road. @n
+~
+160 0 h 0 0 1
+D6
+~
+~
+0 0 16034 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16032 0 0 0 0 0 0 0 0
+S
+#16034
+@GC@ga@Yt@yac@Yh@ga@Gn @WR@wo@Da@wd@n~
+   @yCatachan road runs along the edge of the city of Janacre and is considered
+to be the main road, and safest route to travel, by the locals. Regular
+patrols of guards can be seen every few minutes, marching while keeping an eye
+out for trouble. Alleyways seem to break off at random intervals from the main
+road. @n
+~
+160 0 h 0 0 1
+D6
+~
+~
+0 0 16007 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16033 0 0 0 0 0 0 0 0
+S
+#16035
+@YW@ye@Ws@wt@We@yr@Yn @cC@Co@Wl@wi@cs@Ce@Wu@wm@n Boulevard~
+   @yThis Boulevard leads directly into the bowels of the Coliseum, which soars
+into view to the east. The surface of the boulevard is well kept, at least
+compared to other roads in Janacre. Either side of it, are regal flags
+flapping in the wind. @n
+~
+160 0 h 0 0 1
+D1
+~
+~
+0 0 16036 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16003 0 0 0 0 0 0 0 0
+S
+#16036
+@YW@ye@Ws@wt@We@yr@Yn @cC@Co@Wl@wi@cs@Ce@Wu@wm@n Boulevard~
+   @yThis Boulevard leads directly into the bowels of the Coliseum, which soars
+into view to the east. The surface of the boulevard is well kept, at least
+compared to other roads in Janacre. Either side of it, are regal flags
+flapping in the wind. @n
+~
+160 0 h 0 0 1
+D1
+~
+~
+0 0 16037 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16035 0 0 0 0 0 0 0 0
+S
+#16037
+@YW@ye@Ws@wt@We@yr@Yn @cC@Co@Wl@wi@cs@Ce@Wu@wm@n Boulevard~
+   @yThis Boulevard leads directly into the bowels of the Coliseum, which soars
+into view to the east. The surface of the boulevard is well kept, at least
+compared to other roads in Janacre. Either side of it, are regal flags
+flapping in the wind. @n
+~
+160 0 h 0 0 1
+D1
+~
+~
+0 0 16038 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16036 0 0 0 0 0 0 0 0
+S
+#16038
+@YW@ye@Ws@wt@We@yr@Yn @cC@Co@Wl@wi@cs@Ce@Wu@wm@n Boulevard~
+   @yThis Boulevard leads directly into the bowels of the Coliseum, which soars
+into view to the east. The surface of the boulevard is well kept, at least
+compared to other roads in Janacre. Either side of it, are regal flags
+flapping in the wind. @n
+~
+160 0 h 0 0 1
+D1
+~
+~
+0 0 16087 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16037 0 0 0 0 0 0 0 0
+S
+#16039
+@YE@ya@Ws@wt@We@yr@Yn @cC@Co@Wl@wi@cs@Ce@Wu@wm@n Boulevard~
+   @yThis Boulevard leads directly into the bowels of the Coliseum, which soars
+into view to the west. The surface of the boulevard is well kept, at least
+compared to other roads in Janacre. Either side of it, are regal flags
+flapping in the wind. @n
+~
+160 0 h 0 0 1
+D1
+~
+~
+0 0 16021 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16040 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16074 0 0 0 0 0 0 0 0
+S
+#16040
+@YE@ya@Ws@wt@We@yr@Yn @cC@Co@Wl@wi@cs@Ce@Wu@wm@n Boulevard~
+   @yThis Boulevard leads directly into the bowels of the Coliseum, which soars
+into view to the west. The surface of the boulevard is well kept, at least
+compared to other roads in Janacre. Either side of it, are regal flags
+flapping in the wind. @n
+~
+160 0 h 0 0 1
+D1
+~
+~
+0 0 16039 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16041 0 0 0 0 0 0 0 0
+S
+#16041
+@YE@ya@Ws@wt@We@yr@Yn @cC@Co@Wl@wi@cs@Ce@Wu@wm@n Boulevard~
+   @yThis Boulevard leads directly into the bowels of the Coliseum, which soars
+into view to the west. The surface of the boulevard is well kept, at least
+compared to other roads in Janacre. Either side of it, are regal flags
+flapping in the wind. @n
+~
+160 0 h 0 0 1
+D1
+~
+~
+0 0 16040 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16042 0 0 0 0 0 0 0 0
+S
+#16042
+@YE@ya@Ws@wt@We@yr@Yn @cC@Co@Wl@wi@cs@Ce@Wu@wm@n Boulevard~
+   @yThis Boulevard leads directly into the bowels of the Coliseum, which soars
+into view to the west. The surface of the boulevard is well kept, at least
+compared to other roads in Janacre. Either side of it, are regal flags
+flapping in the wind. @n
+~
+160 0 h 0 0 1
+D1
+~
+~
+0 0 16041 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16083 0 0 0 0 0 0 0 0
+S
+#16043
+@YJ@ya@Wn@wa@Wc@yr@Ye@D - @nBefore the Eastern Gate~
+   @yThe road leading east out of the city of Janacre abruptly ends, as it meets
+the Eastern Gate which seems to be in a state of disrepair. It doesn't appear
+like the guards here are allowing citizens to go beyond it. @n
+~
+160 c h 0 0 11
+D1
+~
+~
+0 0 16800 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16021 0 0 0 0 0 0 0 0
+S
+#16044
+@YN@yo@Wr@wt@Dh@We@yr@Yn @cC@Co@Wl@wi@cs@Ce@Wu@wm@n Boulevard~
+   @yThis Boulevard leads directly into the bowels of the Coliseum, which soars
+into view to the south. The surface of the boulevard is well kept, at least
+compared to other roads in Janacre. Either side of it, are regal flags
+flapping in the wind. @n
+~
+160 0 h 0 0 1
+D0
+~
+~
+0 0 16013 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16045 0 0 0 0 0 0 0 0
+S
+#16045
+@YN@yo@Wr@wt@Dh@We@yr@Yn @cC@Co@Wl@wi@cs@Ce@Wu@wm@n Boulevard~
+   @yThis Boulevard leads directly into the bowels of the Coliseum, which soars
+into view to the south. The surface of the boulevard is well kept, at least
+compared to other roads in Janacre. Either side of it, are regal flags
+flapping in the wind. @n
+~
+160 0 h 0 0 1
+D0
+~
+~
+0 0 16044 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16069 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16046 0 0 0 0 0 0 0 0
+S
+#16046
+@YN@yo@Wr@wt@Dh@We@yr@Yn @cC@Co@Wl@wi@cs@Ce@Wu@wm@n Boulevard~
+   @yThis Boulevard leads directly into the bowels of the Coliseum, which soars
+into view to the south. The surface of the boulevard is well kept, at least
+compared to other roads in Janacre. Either side of it, are regal flags
+flapping in the wind. @n
+~
+160 0 h 0 0 1
+D0
+~
+~
+0 0 16045 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16047 0 0 0 0 0 0 0 0
+S
+#16047
+@YN@yo@Wr@wt@Dh@We@yr@Yn @cC@Co@Wl@wi@cs@Ce@Wu@wm@n Boulevard~
+   @yThis Boulevard leads directly into the bowels of the Coliseum, which soars
+into view to the south. The surface of the boulevard is well kept, at least
+compared to other roads in Janacre. Either side of it, are regal flags
+flapping in the wind. @n
+~
+160 0 h 0 0 1
+D0
+~
+~
+0 0 16046 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16091 0 0 0 0 0 0 0 0
+S
+#16048
+@YS@yo@Du@Wt@wh@We@yr@Yn @cC@Co@Wl@wi@cs@Ce@Wu@wm@n Boulevard~
+   @yThis Boulevard leads directly into the bowels of the Coliseum, which soars
+into view to the north. The surface of the boulevard is well kept, at least
+compared to other roads in Janacre. Either side of it, are regal flags
+flapping in the wind. @n
+~
+160 0 h 0 0 1
+D0
+~
+~
+0 0 16049 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16029 0 0 0 0 0 0 0 0
+S
+#16049
+@YS@yo@Du@Wt@wh@We@yr@Yn @cC@Co@Wl@wi@cs@Ce@Wu@wm@n Boulevard~
+   @yThis Boulevard leads directly into the bowels of the Coliseum, which soars
+into view to the north. The surface of the boulevard is well kept, at least
+compared to other roads in Janacre. Either side of it, are regal flags
+flapping in the wind. @n
+~
+160 0 h 0 0 1
+D0
+~
+~
+0 0 16050 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16048 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16052 0 0 0 0 0 0 0 0
+S
+#16050
+@YS@yo@Du@Wt@wh@We@yr@Yn @cC@Co@Wl@wi@cs@Ce@Wu@wm@n Boulevard~
+   @yThis Boulevard leads directly into the bowels of the Coliseum, which soars
+into view to the north. The surface of the boulevard is well kept, at least
+compared to other roads in Janacre. Either side of it, are regal flags
+flapping in the wind. @n
+~
+160 0 h 0 0 1
+D0
+~
+~
+0 0 16051 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16049 0 0 0 0 0 0 0 0
+S
+#16051
+@YS@yo@Du@Wt@wh@We@yr@Yn @cC@Co@Wl@wi@cs@Ce@Wu@wm@n Boulevard~
+   @yThis Boulevard leads directly into the bowels of the Coliseum, which soars
+into view to the north. The surface of the boulevard is well kept, at least
+compared to other roads in Janacre. Either side of it, are regal flags
+flapping in the wind. @n
+~
+160 0 h 0 0 1
+D0
+~
+~
+0 0 16077 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16050 0 0 0 0 0 0 0 0
+S
+#16052
+@RB@Da@rc@Rk A@rl@wl@We@Ry@n~
+   @yLeading off one of the main streets, this alleyway seems to not get much in
+the way of travel. Houses loom either side of it and the trash of their
+residents can be seen littered about on the ground. There is little room for
+moving about, as the space between both sides of houses looks to be only able
+to accomodate two average sized people at best. Shadows dance and conceal,
+along the length of the alleyway. @n
+~
+160 0 h 0 0 1
+D1
+~
+~
+0 0 16049 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16053 0 0 0 0 0 0 0 0
+S
+#16053
+@RB@Da@rc@Rk A@rl@wl@We@Ry@n~
+   @yLeading off one of the main streets, this alleyway seems to not get much in
+the way of travel. Houses loom either side of it and the trash of their
+residents can be seen littered about on the ground. There is little room for
+moving about, as the space between both sides of houses looks to be only able
+to accomodate two average sized people at best. Shadows dance and conceal,
+along the length of the alleyway. @n
+~
+160 0 h 0 0 1
+D1
+~
+~
+0 0 16052 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16054 0 0 0 0 0 0 0 0
+S
+#16054
+@RB@Da@rc@Rk A@rl@wl@We@Ry@n~
+   @yLeading off one of the main streets, this alleyway seems to not get much in
+the way of travel. Houses loom either side of it and the trash of their
+residents can be seen littered about on the ground. There is little room for
+moving about, as the space between both sides of houses looks to be only able
+to accomodate two average sized people at best. Shadows dance and conceal,
+along the length of the alleyway. @n
+~
+160 0 h 0 0 1
+D0
+~
+~
+0 0 16055 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16053 0 0 0 0 0 0 0 0
+S
+#16055
+@RB@Da@rc@Rk A@rl@wl@We@Ry@n~
+   @yLeading off one of the main streets, this alleyway seems to not get much in
+the way of travel. Houses loom either side of it and the trash of their
+residents can be seen littered about on the ground. There is little room for
+moving about, as the space between both sides of houses looks to be only able
+to accomodate two average sized people at best. Shadows dance and conceal,
+along the length of the alleyway. @n
+~
+160 0 h 0 0 1
+D2
+~
+~
+0 0 16054 0 0 0 0 0 0 0 0
+S
+#16056
+@BR@boya@Bl @WDrive@n~
+   @yRoyal Drive was once home to the rich and powerful of Arlia, with mansions
+dotting either side of the road, including a very large one that served as the
+royal palace at some point. Since King Moai's reign however, many of the
+houses have become empty or being squatted in by impoverished Arlians. @n
+~
+160 0 h 0 0 0
+D1
+~
+~
+0 0 16057 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16006 0 0 0 0 0 0 0 0
+S
+#16057
+@BR@boya@Bl @WDrive@n~
+   @yRoyal Drive was once home to the rich and powerful of Arlia, with mansions
+dotting either side of the road, including a very large one that served as the
+royal palace at some point. Since King Moai's reign however, many of the
+houses have become empty or being squatted in by impoverished Arlians. @n
+~
+160 0 h 0 0 0
+D2
+~
+~
+0 0 16058 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16056 0 0 0 0 0 0 0 0
+S
+#16058
+@BR@boya@Bl @WDrive@n~
+   @yRoyal Drive was once home to the rich and powerful of Arlia, with mansions
+dotting either side of the road, including a very large one that served as the
+royal palace at some point. Since King Moai's reign however, many of the
+houses have become empty or being squatted in by impoverished Arlians. @n
+~
+160 0 h 0 0 0
+D0
+~
+~
+0 0 16057 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16059 0 0 0 0 0 0 0 0
+S
+#16059
+@BR@boya@Bl @WDrive@n~
+   @yRoyal Drive was once home to the rich and powerful of Arlia, with mansions
+dotting either side of the road, including a very large one that served as the
+royal palace at some point. Since King Moai's reign however, many of the
+houses have become empty or being squatted in by impoverished Arlians. @n
+~
+160 0 h 0 0 0
+D1
+~
+~
+0 0 16060 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16058 0 0 0 0 0 0 0 0
+S
+#16060
+@BR@boya@Bl @WDrive@n~
+   @yRoyal Drive was once home to the rich and powerful of Arlia, with mansions
+dotting either side of the road, including a very large one that served as the
+royal palace at some point. Since King Moai's reign however, many of the
+houses have become empty or being squatted in by impoverished Arlians. @n
+~
+160 0 h 0 0 0
+D2
+~
+~
+0 0 16061 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16059 0 0 0 0 0 0 0 0
+S
+#16061
+@BR@boya@Bl @WDrive@n~
+   @yRoyal Drive was once home to the rich and powerful of Arlia, with mansions
+dotting either side of the road, including a very large one that served as the
+royal palace at some point. Since King Moai's reign however, many of the
+houses have become empty or being squatted in by impoverished Arlians. @n
+~
+160 0 h 0 0 0
+D0
+~
+~
+0 0 16060 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16030 0 0 0 0 0 0 0 0
+S
+#16062
+@YJ@ya@Wn@wa@Wc@yr@Ye@D - @nStarport Drive~
+   @yThis road that leads into the starport seems to be heavily fortified and
+quarantined, almost as if the people here were trying to keep others out,
+either from visitors to the world or it's inhabitants from leaving. High
+fences line both sides of the road and appear to be electrified. Towers just
+beyond the fences can be seen, with figures moving about, as well as spotlights
+shining down. The city itself can be seen just behind the towers. @n
+~
+160 0 h 0 0 1
+D6
+~
+~
+0 0 16009 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16063 0 0 0 0 0 0 0 0
+S
+#16063
+@YJ@ya@Wn@wa@Wc@yr@Ye@D - @nStarport Drive~
+   @yThis road that leads into the starport seems to be heavily fortified and
+quarantined, almost as if the people here were trying to keep others out,
+either from visitors to the world or it's inhabiaents from leaving. High
+fences line both sides of the road and appear to be electrified. Towers just
+beyond the fences can be seen, with figures moving about, as well as spotlights
+shining down. The city itself can be seen just behind the towers. @n
+~
+160 c h 0 0 1
+D6
+~
+~
+0 0 16062 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16064 0 0 0 0 0 0 0 0
+S
+#16064
+@YJ@ya@Wn@wa@Wc@yr@Ye@D - @nStarport~
+   @yThis building appears to be the central area for the starport here in
+Janacre and although it has the appearance of a terminal, it has been modified to
+a more militaristic nature. There are several automated turrets at key
+locations throughout the building. Heading northwest leads out of the building
+and toward the city, while the 3 other gates that are heavily defended, lead
+out to the landing pads. @n
+~
+160 0 h 0 0 0
+D6
+~
+~
+0 0 16063 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16065 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16067 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16066 0 0 0 0 0 0 0 0
+S
+#16065
+@YJ@ya@Wn@wa@Wc@yr@Ye@D - @nPrivate Launchpad(1)~
+   @WOne of several launchpads in the walled starport, few ships can be seen
+coming and leaving. On the walls are several mounted automated turrets that
+can be used to fire upon transgressors. @n
+~
+160 0 h 0 0 0
+D7
+~
+~
+0 0 16068 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16064 0 0 0 0 0 0 0 0
+S
+#16066
+@YJ@ya@Wn@wa@Wc@yr@Ye@D - @nPrivate Launchpad(4)~
+   @WOne of several launchpads in the walled starport, few ships can be seen
+coming and leaving. On the walls are several mounted automated turrets that
+can be used to fire upon transgressors. @n
+~
+160 0 h 0 0 0
+D7
+~
+~
+0 0 16064 0 0 0 0 0 0 0 0
+S
+#16067
+@YJ@ya@Wn@wa@Wc@yr@Ye@D - @nPrivate Launchpad(3)~
+   @WOne of several launchpads in the walled starport, few ships can be seen
+coming and leaving. On the walls are several mounted automated turrets that
+can be used to fire upon transgressors. @n
+~
+160 0 h 0 0 0
+D6
+~
+~
+0 0 16064 0 0 0 0 0 0 0 0
+S
+#16068
+@YJ@ya@Wn@wa@Wc@yr@Ye@D - @nPrivate Launchpad(2)~
+   @WOne of several launchpads in the walled starport, few ships can be seen
+coming and leaving. On the walls are several mounted automated turrets that
+can be used to fire upon transgressors. @n
+~
+160 0 h 0 0 0
+D9
+~
+~
+0 0 16065 0 0 0 0 0 0 0 0
+S
+#16069
+@YM@yoa@Yi @nWay~
+   @yMoai Way, named after the Arlian tyrant King Moai, branches off the Northern
+Coliseum Road to the Catachan Road that runs around the outer city. This
+throughway was constructed through a residential area, which meant the
+destruction of many homes and left people homeless as a result. In a futher
+show of opulence, there are statues of the King himself lining the sides of the
+road though some have been defaced. @n
+~
+160 0 h 0 0 1
+D1
+~
+~
+0 0 16070 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16045 0 0 0 0 0 0 0 0
+S
+#16070
+@YM@yoa@Yi @nWay~
+   @yMoai Way, named after the Arlian tyrant King Moai, branches off the Northern
+Coliseum Road to the Catachan Road that runs around the outer city. This
+throughway was constructed through a residential area, which meant the
+destruction of many homes and left people homeless as a result. In a futher
+show of opulence, there are statues of the King himself lining the sides of the
+road though some have been defaced. @n
+~
+160 0 h 0 0 1
+D0
+~
+~
+0 0 16094 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16071 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16069 0 0 0 0 0 0 0 0
+S
+#16071
+@YM@yoa@Yi @nWay~
+   @yMoai Way, named after the Arlian tyrant King Moai, branches off the Northern
+Coliseum Road to the Catachan Road that runs around the outer city. This
+throughway was constructed through a residential area, which meant the
+destruction of many homes and left people homeless as a result. In a futher
+show of opulence, there are statues of the King himself lining the sides of the
+road though some have been defaced. @n
+~
+160 0 h 0 0 1
+D1
+~
+~
+0 0 16072 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16070 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16073 0 0 0 0 0 0 0 0
+S
+#16072
+@YM@yoa@Yi @nWay~
+   @yMoai Way, named after the Arlian tyrant King Moai, branches off the Northern
+Coliseum Road to the Catachan Road that runs around the outer city. This
+throughway was constructed through a residential area, which meant the
+destruction of many homes and left people homeless as a result. In a futher
+show of opulence, there are statues of the King himself lining the sides of the
+road though some have been defaced. @n
+~
+160 0 h 0 0 1
+D3
+~
+~
+0 0 16071 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16075 0 0 0 0 0 0 0 0
+S
+#16073
+@RB@Da@rc@Rk A@rl@wl@We@Ry@n~
+   @yLeading off one of the main streets, this alleyway seems to not get much in
+the way of travel. Houses loom either side of it and the trash of their
+residents can be seen littered about on the ground. There is little room for
+moving about, as the space between both sides of houses looks to be only able
+to accomodate two average sized people at best. Shadows dance and conceal,
+along the length of the alleyway. @n
+~
+160 0 h 0 0 1
+D6
+~
+~
+0 0 16071 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16074 0 0 0 0 0 0 0 0
+S
+#16074
+@RB@Da@rc@Rk A@rl@wl@We@Ry@n~
+   @yLeading off one of the main streets, this alleyway seems to not get much in
+the way of travel. Houses loom either side of it and the trash of their
+residents can be seen littered about on the ground. There is little room for
+moving about, as the space between both sides of houses looks to be only able
+to accomodate two average sized people at best. Shadows dance and conceal,
+along the length of the alleyway. @n
+~
+160 0 h 0 0 1
+D1
+~
+~
+0 0 16095 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16073 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16039 0 0 0 0 0 0 0 0
+S
+#16075
+@YM@yoa@Yi @nWay~
+   @yMoai Way, named after the Arlian tyrant King Moai, branches off the Northern
+Coliseum Road to the Catachan Road that runs around the outer city. This
+throughway was constructed through a residential area, which meant the
+destruction of many homes and left people homeless as a result. In a futher
+show of opulence, there are statues of the King himself lining the sides of the
+road though some have been defaced. @n
+~
+160 0 h 0 0 1
+D6
+~
+~
+0 0 16076 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16072 0 0 0 0 0 0 0 0
+S
+#16076
+@YM@yoa@Yi @nWay~
+   @yMoai Way, named after the Arlian tyrant King Moai, branches off the Northern
+Coliseum Road to the Catachan Road that runs around the outer city. This
+throughway was constructed through a residential area, which meant the
+destruction of many homes and left people homeless as a result. In a futher
+show of opulence, there are statues of the King himself lining the sides of the
+road though some have been defaced. @n
+~
+160 0 h 0 0 1
+D0
+~
+~
+0 0 16015 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16075 0 0 0 0 0 0 0 0
+S
+#16077
+@cC@Co@Wl@wi@cs@Ce@Wu@wm@n Boulevard~
+   @yThis throughway runs underneath the coliseum and provides a quicker route to
+all points of the city, as well as allowing access into the stands above and
+the prison below. Banners depicting the symbol of King Moai's royal house are
+hung up either side of the large road. @n
+~
+160 0 h 0 0 0
+D0
+~
+~
+0 0 16199 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16080 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16051 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16078 0 0 0 0 0 0 0 0
+S
+#16078
+@cC@Co@Wl@wi@cs@Ce@Wu@wm@n Boulevard~
+   @yThis throughway runs underneath the coliseum and provides a quicker route to
+all points of the city, as well as allowing access into the stands above and
+the prison below. Banners depicting the symbol of King Moai's royal house are
+hung up either side of the large road. @n
+~
+160 0 h 0 0 0
+D1
+~
+~
+0 0 16077 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16079 0 0 0 0 0 0 0 0
+S
+#16079
+@cC@Co@Wl@wi@cs@Ce@Wu@wm@n Boulevard~
+   @yThis throughway runs underneath the coliseum and provides a quicker route to
+all points of the city, as well as allowing access into the stands above and
+the prison below. Banners depicting the symbol of King Moai's royal house are
+hung up either side of the large road. @n
+~
+160 0 h 0 0 0
+D0
+~
+~
+0 0 16086 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16078 0 0 0 0 0 0 0 0
+S
+#16080
+@cC@Co@Wl@wi@cs@Ce@Wu@wm@n Boulevard~
+   @yThis throughway runs underneath the coliseum and provides a quicker route to
+all points of the city, as well as allowing access into the stands above and
+the prison below. Banners depicting the symbol of King Moai's royal house are
+hung up either side of the large road. @n
+~
+160 0 h 0 0 0
+D1
+~
+~
+0 0 16081 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16077 0 0 0 0 0 0 0 0
+S
+#16081
+@cC@Co@Wl@wi@cs@Ce@Wu@wm@n Boulevard~
+   @yThis throughway runs underneath the coliseum and provides a quicker route to
+all points of the city, as well as allowing access into the stands above and
+the prison below. Banners depicting the symbol of King Moai's royal house are
+hung up either side of the large road. @n
+~
+160 0 h 0 0 0
+D0
+~
+~
+0 0 16082 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16080 0 0 0 0 0 0 0 0
+S
+#16082
+@cC@Co@Wl@wi@cs@Ce@Wu@wm@n Boulevard~
+   @yThis throughway runs underneath the coliseum and provides a quicker route to
+all points of the city, as well as allowing access into the stands above and
+the prison below. Banners depicting the symbol of King Moai's royal house are
+hung up either side of the large road. @n
+~
+160 0 h 0 0 0
+D0
+~
+~
+0 0 16083 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16081 0 0 0 0 0 0 0 0
+S
+#16083
+@cC@Co@Wl@wi@cs@Ce@Wu@wm@n Boulevard~
+   @yThis throughway runs underneath the coliseum and provides a quicker route to
+all points of the city, as well as allowing access into the stands above and
+the prison below. Banners depicting the symbol of King Moai's royal house are
+hung up either side of the large road. @n
+~
+160 0 h 0 0 0
+D0
+~
+~
+0 0 16084 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16042 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16082 0 0 0 0 0 0 0 0
+S
+#16084
+@cC@Co@Wl@wi@cs@Ce@Wu@wm@n Boulevard~
+   @yThis throughway runs underneath the coliseum and provides a quicker route to
+all points of the city, as well as allowing access into the stands above and
+the prison below. Banners depicting the symbol of King Moai's royal house are
+hung up either side of the large road. @n
+~
+160 0 h 0 0 0
+D0
+~
+~
+0 0 16085 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16083 0 0 0 0 0 0 0 0
+S
+#16085
+@cC@Co@Wl@wi@cs@Ce@Wu@wm@n Boulevard~
+   @yThis throughway runs underneath the coliseum and provides a quicker route to
+all points of the city, as well as allowing access into the stands above and
+the prison below. Banners depicting the symbol of King Moai's royal house are
+hung up either side of the large road. @n
+~
+160 0 h 0 0 0
+D2
+~
+~
+0 0 16084 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16092 0 0 0 0 0 0 0 0
+S
+#16086
+@cC@Co@Wl@wi@cs@Ce@Wu@wm@n Boulevard~
+   @yThis throughway runs underneath the coliseum and provides a quicker route to
+all points of the city, as well as allowing access into the stands above and
+the prison below. Banners depicting the symbol of King Moai's royal house are
+hung up either side of the large road. @n
+~
+160 0 h 0 0 0
+D0
+~
+~
+0 0 16087 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16079 0 0 0 0 0 0 0 0
+S
+#16087
+@cC@Co@Wl@wi@cs@Ce@Wu@wm@n Boulevard~
+   @yThis throughway runs underneath the coliseum and provides a quicker route to
+all points of the city, as well as allowing access into the stands above and
+the prison below. Banners depicting the symbol of King Moai's royal house are
+hung up either side of the large road. @n
+~
+160 0 h 0 0 0
+D0
+~
+~
+0 0 16088 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16086 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16038 0 0 0 0 0 0 0 0
+S
+#16088
+@cC@Co@Wl@wi@cs@Ce@Wu@wm@n Boulevard~
+   @yThis throughway runs underneath the coliseum and provides a quicker route to
+all points of the city, as well as allowing access into the stands above and
+the prison below. Banners depicting the symbol of King Moai's royal house are
+hung up either side of the large road. @n
+~
+160 0 h 0 0 0
+D0
+~
+~
+0 0 16089 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16087 0 0 0 0 0 0 0 0
+S
+#16089
+@cC@Co@Wl@wi@cs@Ce@Wu@wm@n Boulevard~
+   @yThis throughway runs underneath the coliseum and provides a quicker route to
+all points of the city, as well as allowing access into the stands above and
+the prison below. Banners depicting the symbol of King Moai's royal house are
+hung up either side of the large road. @n
+~
+160 0 h 0 0 0
+D1
+~
+~
+0 0 16090 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16088 0 0 0 0 0 0 0 0
+S
+#16090
+@cC@Co@Wl@wi@cs@Ce@Wu@wm@n Boulevard~
+   @yThis throughway runs underneath the coliseum and provides a quicker route to
+all points of the city, as well as allowing access into the stands above and
+the prison below. Banners depicting the symbol of King Moai's royal house are
+hung up either side of the large road. @n
+~
+160 0 h 0 0 0
+D1
+~
+~
+0 0 16091 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16089 0 0 0 0 0 0 0 0
+S
+#16091
+@cC@Co@Wl@wi@cs@Ce@Wu@wm@n Boulevard~
+   @yThis throughway runs underneath the coliseum and provides a quicker route to
+all points of the city, as well as allowing access into the stands above and
+the prison below. Banners depicting the symbol of King Moai's royal house are
+hung up either side of the large road. @n
+~
+160 0 h 0 0 0
+D0
+~
+~
+0 0 16047 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16092 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16090 0 0 0 0 0 0 0 0
+S
+#16092
+@cC@Co@Wl@wi@cs@Ce@Wu@wm@n Boulevard~
+   @yThis throughway runs underneath the coliseum and provides a quicker route to
+all points of the city, as well as allowing access into the stands above and
+the prison below. Banners depicting the symbol of King Moai's royal house are
+hung up either side of the large road. @n
+~
+160 0 h 0 0 0
+D1
+~
+~
+0 0 16085 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16091 0 0 0 0 0 0 0 0
+S
+#16093
+@GT@ga@Du@Gs@g' @RW@re@Da@wp@Wo@Rn@rr@Dy@n~
+   @wThis small weapons store is run by a twitchy Arlian named Taus. Guns,
+swords and other assorted weaponry hang from the walls and it is clear that the
+majority are not Arlian in design. A layer of cigar smoke hangs just below the
+ceiling. @n
+~
+160 0 h 0 0 10
+D1
+~
+~
+0 0 16006 0 0 0 0 0 0 0 0
+S
+#16094
+@GG@gu@Wa@gr@Gd @COu@ctf@Wit@cte@Crs@n~
+   @wGuard uniforms worn by the Janacre City Guard can be seen all over the
+store, in complete sets as well as individual pieces. The store seems to only
+do business with the city guard but may sell to those with the coin. @n
+~
+160 0 h 0 0 10
+D2
+~
+~
+0 0 16070 0 0 0 0 0 0 0 0
+S
+#16095
+@WT@wi@Dk@mk@Mi@Ds@w' @nPawn Shop~
+   @wJust off what is likely a dangerous back alley, resides this small store. 
+It is not very well lit and shadows conceal many areas of the store. A counter
+across the far side of the room can be seen, that has metal bars rising from
+it's surface to the roof above. @n
+~
+160 0 h 0 0 10
+D3
+~
+~
+0 0 16074 0 0 0 0 0 0 0 0
+S
+#16096
+@GE@gn@wd@gos@wke@gl@Ge@gf@woo@gd@Gs@n~
+   @gThis right side of this shop is floored with dirt. The left side is floored
+with grass. An interesting choice, but the floor is only the first sign of
+division in the room. On the dirt side, several insectoid foods line shelves.
+Smaller morsels rest in boxes, while a few larger ones are placed on racks
+individually. On the grass side of the shop, oddly shaped vegetable matter is
+refrigerated behind glass doors. @n
+~
+160 0 h 0 0 10
+D1
+~
+~
+0 0 16004 0 0 0 0 0 0 0 0
+S
+$~

@@ -1,0 +1,2287 @@
+#1700
+@wA @DG@Wr@wav@We@Dl @wR@Wo@Da@wd@n~
+   @WThis narrow gravel road looks like it hasn't been renewed in quite some
+time. It runs through a mixture of hills and grassland near the northern
+mountain range. Cherry Blossom Mountain can be seen a good ways to the north
+east looming over the entire area. The road seems to wrap around towards Nexus
+Field to the north of Nexus City. To the south Shadow Forest can be seen, with
+murky mists rising up from all its vegetation. @n
+~
+17 cu 0 0 0 2
+D0
+~
+~
+0 0 1701 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1632 0 0 0 0 0 0 0 0
+S
+#1701
+@wA @DG@Wr@wav@We@Dl @wR@Wo@Da@wd@n~
+   @WThis narrow gravel road looks like it hasn't been renewed in quite some
+time. It runs through a mixture of hills and grassland near the northern
+mountain range. Cherry Blossom Mountain can be seen a good ways to the north
+east looming over the entire area. The road seems to wrap around towards Nexus
+Field to the north of Nexus City. To the south Shadow Forest can be seen, with
+murky mists rising up from all its vegetation. @n
+~
+17 u 0 0 0 2
+D0
+~
+~
+0 0 1702 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1700 0 0 0 0 0 0 0 0
+S
+#1702
+@wA @DG@Wr@wav@We@Dl @wR@Wo@Da@wd@n~
+   @WThis narrow gravel road looks like it hasn't been renewed in quite some
+time. It runs through a mixture of hills and grassland near the northern
+mountain range. Cherry Blossom Mountain can be seen a good ways to the north
+east looming over the entire area. The road seems to wrap around towards Nexus
+Field to the north of Nexus City. To the south Shadow Forest can be seen, with
+murky mists rising up from all its vegetation. @n
+~
+17 u 0 0 0 2
+D0
+~
+~
+0 0 1703 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1701 0 0 0 0 0 0 0 0
+S
+#1703
+@wA @DG@Wr@wav@We@Dl @wR@Wo@Da@wd@n~
+   @WThis narrow gravel road looks like it hasn't been renewed in quite some
+time. It runs through a mixture of hills and grassland near the northern
+mountain range. Cherry Blossom Mountain can be seen a good ways to the north
+east looming over the entire area. The road seems to wrap around towards Nexus
+Field to the north of Nexus City. To the south Shadow Forest can be seen, with
+murky mists rising up from all its vegetation. @n
+~
+17 u 0 0 0 2
+D0
+~
+~
+0 0 1704 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1702 0 0 0 0 0 0 0 0
+S
+#1704
+@wA @DG@Wr@wav@We@Dl @wR@Wo@Da@wd@n~
+   @WThis narrow gravel road looks like it hasn't been renewed in quite some
+time. It runs through a mixture of hills and grassland near the northern
+mountain range. Cherry Blossom Mountain can be seen a good ways to the north
+east looming over the entire area. The road seems to wrap around towards Nexus
+Field to the north of Nexus City. To the south Shadow Forest can be seen, with
+murky mists rising up from all its vegetation. @n
+
+@YThere is a @Rsign@Y on a post here.@n
+~
+17 u 0 0 0 2
+D1
+~
+~
+0 0 1706 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1703 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1705 0 0 0 0 0 0 0 0
+E
+sign~
+@G>@YA sign here reads:@G<@n
+@Y@n
+@RDecrepit Building@n @G> @YWest@n
+@CRosewater Park@n    @G> @YEast@n
+~
+S
+#1705
+@WBefore A @DDecrepit@W Building@n~
+ @WThe gravel road leads right up to a decrepit building that appears to be some
+sort of old garage slash gas station.  The pumps have been removed and there
+only appears to be one entrance.  There is a single light bulb lit above the
+entrance, hanging by its own cable.  @n
+
+@YThere is a @Rsign@Y on a post here.@n
+~
+17 eu 0 0 0 2
+D1
+~
+~
+0 0 1704 0 0 0 0 0 0 0 0
+D10
+~
+~
+0 0 1711 0 0 0 0 0 0 0 0
+E
+sign~
+@G>@YA sign here reads:@G<@n
+@Y@n
+@RDecrepit Building@n @G> @YInside@n
+@CRosewater Park@n    @G> @YEast@n
+~
+S
+#1706
+@wA @DG@Wr@wav@We@Dl @wR@Wo@Da@wd@n~
+   @WThis narrow gravel road looks like it hasn't been renewed in quite some
+time. It runs through a mixture of hills and grassland near the northern
+mountain range. Cherry Blossom Mountain can be seen a good ways to the north
+east looming over the entire area. The road seems to wrap around towards Nexus
+Field to the north of Nexus City. To the south Shadow Forest can be seen, with
+murky mists rising up from all its vegetation. @n
+~
+17 u 0 0 0 2
+D1
+~
+~
+0 0 1707 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1704 0 0 0 0 0 0 0 0
+S
+#1707
+@wA @DG@Wr@wav@We@Dl @wR@Wo@Da@wd@n~
+   @WThis narrow gravel road looks like it hasn't been renewed in quite some
+time. It runs through a mixture of hills and grassland near the northern
+mountain range. Cherry Blossom Mountain can be seen a good ways to the north
+east looming over the entire area. The road seems to wrap around towards Nexus
+Field to the north of Nexus City. To the south Shadow Forest can be seen, with
+murky mists rising up from all its vegetation. @n
+~
+17 u 0 0 0 2
+D1
+~
+~
+0 0 1708 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1706 0 0 0 0 0 0 0 0
+S
+#1708
+@wA @DG@Wr@wav@We@Dl @wR@Wo@Da@wd@n~
+   @WThis narrow gravel road looks like it hasn't been renewed in quite some
+time. It runs through a mixture of hills and grassland near the northern
+mountain range. Cherry Blossom Mountain can be seen a good ways to the north
+east looming over the entire area. The road seems to wrap around towards Nexus
+Field to the north of Nexus City. To the south Shadow Forest can be seen, with
+murky mists rising up from all its vegetation. @n
+~
+17 u 0 0 0 2
+D1
+~
+~
+0 0 1709 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1707 0 0 0 0 0 0 0 0
+S
+#1709
+@wA @DG@Wr@wav@We@Dl @wR@Wo@Da@wd@n~
+   @WThis narrow gravel road looks like it hasn't been renewed in quite some
+time. It runs through a mixture of hills and grassland near the northern
+mountain range. Cherry Blossom Mountain can be seen a good ways to the north
+east looming over the entire area. The road seems to wrap around towards Nexus
+Field to the north of Nexus City. To the south Shadow Forest can be seen, with
+murky mists rising up from all its vegetation. @n
+~
+17 u 0 0 0 2
+D1
+~
+~
+0 0 1710 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1708 0 0 0 0 0 0 0 0
+S
+#1710
+@wA @DG@Wr@wav@We@Dl @wR@Wo@Da@wd@n~
+   @WThis narrow gravel road looks like it hasn't been renewed in quite some
+time. It runs through a mixture of hills and grassland near the northern
+mountain range. Cherry Blossom Mountain can be seen a good ways to the north
+east looming over the entire area. The road seems to wrap around towards Nexus
+Field to the north of Nexus City. To the south Shadow Forest can be seen, with
+murky mists rising up from all its vegetation. @n
+~
+17 cu 0 0 0 2
+D1
+~
+~
+0 0 1152 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1709 0 0 0 0 0 0 0 0
+S
+#1711
+@DDecrepit @WBuilding@D: @GEntrance@n~
+ @WThis area is basicly a concrete floor that used to be where vehicles were
+parked.  Gas and oil stains cover sections of the floor, and row after row of
+white lights burn from the ceiling.  The entrance door resembles most garage
+doors, made of steel and rolls up across the ceiling.  @n
+~
+17 ehu 0 0 0 0
+D2
+~
+~
+0 0 1712 0 0 0 0 0 0 0 0
+D11
+~
+~
+0 0 1705 0 0 0 0 0 0 0 0
+S
+#1712
+@DDecrepit @WBuilding@D: @GMore Parking Area@n~
+ @WThis area is basicly a concrete floor that used to be where vehicles were
+parked.  Gas and oil stains cover sections of the floor, and row after row of
+white lights burn from the ceiling.  The entrance door resembles most garage
+doors, made of steel and rolls up across the ceiling.  @n
+~
+17 ehu 0 0 0 0
+D0
+~
+~
+0 0 1711 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1713 0 0 0 0 0 0 0 0
+S
+#1713
+@DDecrepit @WBuilding@D: @GMechanic Bay@n~
+ @WThis area is a solid concrete floor with metal pads built for lifting cars up
+and doing work on them.  One of the pads has been converted into a bed of some
+sort.  Made that way so that androids can repair or upgrade thierselves more
+easily.  @n
+~
+17 ehu 0 0 0 0
+D0
+~
+~
+0 0 1714 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1712 0 0 0 0 0 0 0 0
+S
+#1714
+@DDecrepit @WBuilding@D: @GWaiting Area@n~
+ @WThis area apparently used to be used by customers to wait on their vehicle
+tuneups.  A broken coffee machine sits on a table in the corner, and spots on
+the floor show where chairs used to be.  An old dusty magazine rack sits near
+the door leading into this room from the mechanic bay.  @n
+~
+17 ehuD 0 0 0 0
+D2
+~
+~
+0 0 1713 0 0 0 0 0 0 0 0
+S
+#1715
+@WShallow @cCave@n~
+ @WThis shallow cave is more like a deep cleft in the mountain side.  Light from
+outside pours in through the large opening, streaming onto a large steel door at
+the end of the cave.  A @Gpanel@W can be seen next to the door.  @n @WSomething can be
+seen written on the @Gdoorpost.  @n
+~
+17 cu 0 0 0 0
+D2
+~
+~
+0 0 1208 0 0 0 0 0 0 0 0
+D10
+~
+door~
+1 0 7701 0 0 0 0 0 0 0 0
+E
+doorpost post~
+@wThere seems to be faint letters scribbled on the doorpost. They go like this...@n
+
+@CThe first number is eight minus three
+@CThe second number is the first number plus two
+@CThe third number is the second number minus one
+@CThe fourth number is the third number divided by three
+The fifth number is greater than the third number divided by two, but less than the first number
+@n
+~
+E
+panel~
+@wThis panel has buttons with numbers 0 through 9 on it. Maybe you could try @Genter@wing some sort of code.@n
+~
+S
+T 1703
+#1716
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DEntrance@n~
+ @WThis area appears to be the entrance to Gero's Laboratory.  A shiny titanium
+plated floor gleams, reflecting the white lights burning on the ceiling.  The
+walls and ceiling appear to be some type of reinforced concrete with dark green
+paint on them.  A steel door with a @Gpanel@W next to it can be seen towards the
+south.  Next to the door a @Gsign@W has been hung.  @n @WA ladder leads down through a
+wide hole.  @n
+~
+17 u 0 0 0 0
+D5
+~
+~
+0 0 1717 0 0 0 0 0 0 0 0
+D11
+~
+door~
+1 0 1715 0 0 0 0 0 0 0 0
+E
+panel~
+ @WThis panel seems to be a keypad with buttons labeled 0 through 9.  @n
+~
+E
+sign~
+@RWarning, do not release this passcode to unauthorized personel.@n
+
+@cPasscode@D: @C57624@n
+~
+S
+T 1704
+T 310
+#1717
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DTesting Labs Hallway@n~
+ @WThis well lit hallway has titanium tiles bolted to the floor.  The walls and
+ceiling appear to be made of some form of reinforced concrete.  White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1718 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 1716 0 0 0 0 0 0 0 0
+S
+T 1800
+#1718
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DTesting Labs Hallway@n~
+ @WThis well lit hallway has titanium tiles bolted to the floor.  The walls and
+ceiling appear to be made of some form of reinforced concrete.  White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1721 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1720 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1717 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1719 0 0 0 0 0 0 0 0
+S
+#1719
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DTesting Labs Storage Room@n~
+ @WThis mostly concrete room has row after row of body sized metal capsules
+bolted to the floor.  The capsules look like metal caskets with glass windows
+about five inches by five inches built into their lids.  Panels controlling each
+capsule have been built into their respective sides, allowing any operator to
+open or close the capsules.  @n
+~
+17 u 0 0 0 0
+D1
+~
+~
+0 0 1718 0 0 0 0 0 0 0 0
+S
+#1720
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DTesting Labs Storage Room@n~
+ @WThis mostly concrete room has row after row of body sized metal capsules
+bolted to the floor.  The capsules look like metal caskets with glass windows
+about five inches by five inches built into their lids.  Panels controlling each
+capsule have been built into their respective sides, allowing any operator to
+open or close the capsules.  @n
+~
+17 u 0 0 0 0
+D3
+~
+~
+0 0 1718 0 0 0 0 0 0 0 0
+S
+#1721
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DTesting Labs Hallway@n~
+ @WThis well lit hallway has titanium tiles bolted to the floor.  The walls and
+ceiling appear to be made of some form of reinforced concrete.  White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1722 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1718 0 0 0 0 0 0 0 0
+S
+#1722
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DTesting Labs Hallway@n~
+ @WThis well lit hallway has titanium tiles bolted to the floor.  The walls and
+ceiling appear to be made of some form of reinforced concrete.  White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1725 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1724 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1721 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1723 0 0 0 0 0 0 0 0
+S
+#1723
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DTesting Labs Storage Room@n~
+ @WThis mostly concrete room has row after row of body sized metal capsules
+bolted to the floor.  The capsules look like metal caskets with glass windows
+about five inches by five inches built into their lids.  Panels controlling each
+capsule have been built into their respective sides, allowing any operator to
+open or close the capsules.  @n
+~
+17 u 0 0 0 0
+D1
+~
+~
+0 0 1722 0 0 0 0 0 0 0 0
+S
+#1724
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DTesting Labs Storage Room@n~
+ @WThis mostly concrete room has row after row of body sized metal capsules
+bolted to the floor.  The capsules look like metal caskets with glass windows
+about five inches by five inches built into their lids.  Panels controlling each
+capsule have been built into their respective sides, allowing any operator to
+open or close the capsules.  @n
+~
+17 u 0 0 0 0
+D3
+~
+~
+0 0 1722 0 0 0 0 0 0 0 0
+S
+#1725
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DTesting Labs Hallway@n~
+ @WThis well lit hallway has titanium tiles bolted to the floor.  The walls and
+ceiling appear to be made of some form of reinforced concrete.  White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall.  @n
+~
+17 cu 0 0 0 0
+D0
+~
+~
+0 0 1727 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1722 0 0 0 0 0 0 0 0
+S
+#1726
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DTesting Labs Lab-floor@n~
+ @WThis mostly concrete area appears to be where the actual testing of the
+testing labs is performed.  Steel tables with heavy duty equipment have been
+placed all around the wide expansive room.  Adjustable lights, computer
+monitors, and scanning equipment have been placed above or by each table.  On
+some of the tables half constructed androids can be seen, some as little
+complete as having only half a body.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1729 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1727 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1730 0 0 0 0 0 0 0 0
+S
+#1727
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DTesting Labs Lab-floor@n~
+ @WThis mostly concrete area appears to be where the actual testing of the
+testing labs is performed.  Steel tables with heavy duty equipment have been
+placed all around the wide expansive room.  Adjustable lights, computer
+monitors, and scanning equipment have been placed above or by each table.  On
+some of the tables half constructed androids can be seen, some as little
+complete as having only half a body.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1730 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1728 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1725 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1726 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1729 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1731 0 0 0 0 0 0 0 0
+S
+#1728
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DTesting Labs Lab-floor@n~
+ @WThis mostly concrete area appears to be where the actual testing of the
+testing labs is performed.  Steel tables with heavy duty equipment have been
+placed all around the wide expansive room.  Adjustable lights, computer
+monitors, and scanning equipment have been placed above or by each table.  On
+some of the tables half constructed androids can be seen, some as little
+complete as having only half a body.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1731 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1727 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1730 0 0 0 0 0 0 0 0
+S
+#1729
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DTesting Labs Lab-floor@n~
+ @WThis mostly concrete area appears to be where the actual testing of the
+testing labs is performed.  Steel tables with heavy duty equipment have been
+placed all around the wide expansive room.  Adjustable lights, computer
+monitors, and scanning equipment have been placed above or by each table.  On
+some of the tables half constructed androids can be seen, some as little
+complete as having only half a body.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1732 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1730 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1726 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1733 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1727 0 0 0 0 0 0 0 0
+S
+#1730
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DTesting Labs Lab-floor@n~
+ @WThis mostly concrete area appears to be where the actual testing of the
+testing labs is performed.  Steel tables with heavy duty equipment have been
+placed all around the wide expansive room.  Adjustable lights, computer
+monitors, and scanning equipment have been placed above or by each table.  On
+some of the tables half constructed androids can be seen, some as little
+complete as having only half a body.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1733 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1731 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1727 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1729 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1732 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1734 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1728 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1726 0 0 0 0 0 0 0 0
+S
+#1731
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DTesting Labs Lab-floor@n~
+ @WThis mostly concrete area appears to be where the actual testing of the
+testing labs is performed.  Steel tables with heavy duty equipment have been
+placed all around the wide expansive room.  Adjustable lights, computer
+monitors, and scanning equipment have been placed above or by each table.  On
+some of the tables half constructed androids can be seen, some as little
+complete as having only half a body.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1734 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1728 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1730 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1733 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1727 0 0 0 0 0 0 0 0
+S
+#1732
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DTesting Labs Lab-floor@n~
+ @WThis mostly concrete area appears to be where the actual testing of the
+testing labs is performed.  Steel tables with heavy duty equipment have been
+placed all around the wide expansive room.  Adjustable lights, computer
+monitors, and scanning equipment have been placed above or by each table.  On
+some of the tables half constructed androids can be seen, some as little
+complete as having only half a body.  @n
+~
+17 u 0 0 0 0
+D1
+~
+~
+0 0 1733 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1729 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1730 0 0 0 0 0 0 0 0
+S
+#1733
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DTesting Labs Lab-floor@n~
+ @WThis mostly concrete area appears to be where the actual testing of the
+testing labs is performed.  Steel tables with heavy duty equipment have been
+placed all around the wide expansive room.  Adjustable lights, computer
+monitors, and scanning equipment have been placed above or by each table.  On
+some of the tables half constructed androids can be seen, some as little
+complete as having only half a body.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1735 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1734 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1730 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1732 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1731 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1729 0 0 0 0 0 0 0 0
+S
+#1734
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DTesting Labs Lab-floor@n~
+ @WThis mostly concrete area appears to be where the actual testing of the
+testing labs is performed.  Steel tables with heavy duty equipment have been
+placed all around the wide expansive room.  Adjustable lights, computer
+monitors, and scanning equipment have been placed above or by each table.  On
+some of the tables half constructed androids can be seen, some as little
+complete as having only half a body.  @n
+~
+17 u 0 0 0 0
+D2
+~
+~
+0 0 1731 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1733 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1730 0 0 0 0 0 0 0 0
+S
+#1735
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DLevel 1 Stairwell@n~
+ @WThis concrete stairwell has no decorations and very little light.  The steps
+have a single steel rail running down the center of the stairs.  The stairs
+themselves do not drop that far, seemingly only a single floor in distance.  A
+@Gsign@W can be seen posted above the stairwell entrance.  @n
+~
+17 cu 0 0 0 0
+D2
+~
+~
+0 0 1733 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 1736 0 0 0 0 0 0 0 0
+E
+sign~
+@cLevel One@D:   @WTesting Labs @D(@CCurrent Floor@D)@n
+@cLevel Two@D:   @WObsolete Model Storage@n
+@cLevel Three@D: @WAdvanced Model Labs@n
+@cLevel Four@D:  @WBio-Android Labs@n
+@cLevel Five@D:  @WGero's Quarters@n
+@cLevel Six@D:   @WTesting Grounds@n
+~
+S
+#1736
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DLevel 2 Stairwell@n~
+ @WThis concrete stairwell has no decorations and very little light.  The steps
+have a single steel rail running down the center of the stairs.  The stairs
+themselves do not drop that far, seemingly only a single floor in distance.  A
+@Gsign@W can be seen posted above the stairwell entrance.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1737 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 1735 0 0 0 0 0 0 0 0
+E
+sign~
+@cLevel One@D:   @WTesting Labs@n
+@cLevel Two@D:   @WObsolete Model Storage @D(@CCurrent Floor@D)@n
+@cLevel Three@D: @WAdvanced Model Labs@n
+@cLevel Four@D:  @WBio-Android Labs@n
+@cLevel Five@D:  @WGero's Quarters@n
+@cLevel Six@D:   @WTesting Grounds@n
+~
+S
+#1737
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DObsolete Model Storage Hallway@n~
+ @WThis well lit hallway has titanium tiles bolted to the floor.  The walls and
+ceiling appear to be made of some form of reinforced concrete.  White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1740 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1739 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1736 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1738 0 0 0 0 0 0 0 0
+S
+#1738
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DObsolete Model Storage Room@n~
+ @DThis mostly concrete room has row after row of body sized metal capsules
+bolted to the floor.  The lights on all the capsules are dim, and the lights in
+the room are dimmer still.  It appears that this room hasn't been inspected for
+quite a while.  @n
+~
+17 u 0 0 0 0
+D1
+~
+~
+0 0 1737 0 0 0 0 0 0 0 0
+S
+#1739
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DObsolete Model Storage Room@n~
+ @DThis mostly concrete room has row after row of body sized metal capsules
+bolted to the floor.  The lights on all the capsules are dim, and the lights in
+the room are dimmer still.  It appears that this room hasn't been inspected for
+quite a while.  @n
+~
+17 u 0 0 0 0
+D3
+~
+~
+0 0 1737 0 0 0 0 0 0 0 0
+S
+#1740
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DObsolete Model Storage Hallway@n~
+ @WThis well lit hallway has titanium tiles bolted to the floor.  The walls and
+ceiling appear to be made of some form of reinforced concrete.  White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1741 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1737 0 0 0 0 0 0 0 0
+S
+#1741
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DObsolete Model Storage Hallway@n~
+ @WThis well lit hallway has titanium tiles bolted to the floor.  The walls and
+ceiling appear to be made of some form of reinforced concrete.  White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1744 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1743 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1740 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1742 0 0 0 0 0 0 0 0
+S
+#1742
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DObsolete Model Storage Room@n~
+ @DThis mostly concrete room has row after row of body sized metal capsules
+bolted to the floor.  The lights on all the capsules are dim, and the lights in
+the room are dimmer still.  It appears that this room hasn't been inspected for
+quite a while.  @n
+~
+17 u 0 0 0 0
+D1
+~
+~
+0 0 1741 0 0 0 0 0 0 0 0
+S
+#1743
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DObsolete Model Storage Room@n~
+ @DThis mostly concrete room has row after row of body sized metal capsules
+bolted to the floor.  The lights on all the capsules are dim, and the lights in
+the room are dimmer still.  It appears that this room hasn't been inspected for
+quite a while.  @n
+~
+17 u 0 0 0 0
+D3
+~
+~
+0 0 1741 0 0 0 0 0 0 0 0
+S
+#1744
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DObsolete Model Storage Hallway@n~
+ @WThis well lit hallway has titanium tiles bolted to the floor.  The walls and
+ceiling appear to be made of some form of reinforced concrete.  White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall.  @n
+~
+17 cu 0 0 0 0
+D0
+~
+~
+0 0 1746 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1741 0 0 0 0 0 0 0 0
+S
+#1745
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DObsolete Labs@n~
+ @WThe equipment in this lab appears to be outdated compared to what the rest of
+the facility has to offer.  Obsolete android models sit on metal construction
+tables with their bodies half built.  Some of the more finished models show
+signs of having their parts removed after installation, presumably since the
+parts were still good enough to use elsewhere.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1748 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1746 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1749 0 0 0 0 0 0 0 0
+S
+#1746
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DObsolete Labs@n~
+ @WThe equipment in this lab appears to be outdated compared to what the rest of
+the facility has to offer.  Obsolete android models sit on metal construction
+tables with their bodies half built.  Some of the more finished models show
+signs of having their parts removed after installation, presumably since the
+parts were still good enough to use elsewhere.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1749 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1747 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1744 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1745 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1748 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1750 0 0 0 0 0 0 0 0
+S
+#1747
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DObsolete Labs@n~
+ @WThe equipment in this lab appears to be outdated compared to what the rest of
+the facility has to offer.  Obsolete android models sit on metal construction
+tables with their bodies half built.  Some of the more finished models show
+signs of having their parts removed after installation, presumably since the
+parts were still good enough to use elsewhere.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1750 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1746 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1749 0 0 0 0 0 0 0 0
+S
+#1748
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DObsolete Labs@n~
+ @WThe equipment in this lab appears to be outdated compared to what the rest of
+the facility has to offer.  Obsolete android models sit on metal construction
+tables with their bodies half built.  Some of the more finished models show
+signs of having their parts removed after installation, presumably since the
+parts were still good enough to use elsewhere.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1751 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1749 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1745 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1752 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1746 0 0 0 0 0 0 0 0
+S
+#1749
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DObsolete Labs@n~
+ @WThe equipment in this lab appears to be outdated compared to what the rest of
+the facility has to offer.  Obsolete android models sit on metal construction
+tables with their bodies half built.  Some of the more finished models show
+signs of having their parts removed after installation, presumably since the
+parts were still good enough to use elsewhere.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1752 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1750 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1746 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1748 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1751 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1753 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1747 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1745 0 0 0 0 0 0 0 0
+S
+#1750
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DObsolete Labs@n~
+ @WThe equipment in this lab appears to be outdated compared to what the rest of
+the facility has to offer.  Obsolete android models sit on metal construction
+tables with their bodies half built.  Some of the more finished models show
+signs of having their parts removed after installation, presumably since the
+parts were still good enough to use elsewhere.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1753 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1754 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1747 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1749 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1752 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1746 0 0 0 0 0 0 0 0
+S
+#1751
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DObsolete Labs@n~
+ @WThe equipment in this lab appears to be outdated compared to what the rest of
+the facility has to offer.  Obsolete android models sit on metal construction
+tables with their bodies half built.  Some of the more finished models show
+signs of having their parts removed after installation, presumably since the
+parts were still good enough to use elsewhere.  @n
+~
+17 u 0 0 0 0
+D1
+~
+~
+0 0 1752 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1748 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1749 0 0 0 0 0 0 0 0
+S
+#1752
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DObsolete Labs@n~
+ @WThe equipment in this lab appears to be outdated compared to what the rest of
+the facility has to offer.  Obsolete android models sit on metal construction
+tables with their bodies half built.  Some of the more finished models show
+signs of having their parts removed after installation, presumably since the
+parts were still good enough to use elsewhere.  @n
+~
+17 u 0 0 0 0
+D1
+~
+~
+0 0 1753 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1749 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1751 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1750 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1748 0 0 0 0 0 0 0 0
+S
+#1753
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DObsolete Labs@n~
+ @WThe equipment in this lab appears to be outdated compared to what the rest of
+the facility has to offer.  Obsolete android models sit on metal construction
+tables with their bodies half built.  Some of the more finished models show
+signs of having their parts removed after installation, presumably since the
+parts were still good enough to use elsewhere.  @n
+~
+17 u 0 0 0 0
+D2
+~
+~
+0 0 1750 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1752 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1749 0 0 0 0 0 0 0 0
+S
+#1754
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DLevel 2 Stairwell@n~
+ @WThis concrete stairwell has no decorations and very little light.  The steps
+have a single steel rail running down the center of the stairs.  The stairs
+themselves do not drop that far, seemingly only a single floor in distance.  A
+@Gsign@W can be seen posted above the stairwell entrance.  @n
+~
+17 cu 0 0 0 0
+D3
+~
+~
+0 0 1750 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 1755 0 0 0 0 0 0 0 0
+E
+sign~
+@cLevel One@D:   @WTesting Labs@n
+@cLevel Two@D:   @WObsolete Model Storage @D(@CCurrent Floor@D)@n
+@cLevel Three@D: @WAdvanced Model Labs@n
+@cLevel Four@D:  @WBio-Android Labs@n
+@cLevel Five@D:  @WGero's Quarters@n
+@cLevel Six@D:   @WTesting Grounds@n
+~
+S
+#1755
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DLevel 3 Stairwell@n~
+ @WThis concrete stairwell has no decorations and very little light.  The steps
+have a single steel rail running down the center of the stairs.  The stairs
+themselves do not drop that far, seemingly only a single floor in distance.  A
+@Gsign@W can be seen posted above the stairwell entrance.  @n
+~
+17 u 0 0 0 0
+D1
+~
+~
+0 0 1756 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 1754 0 0 0 0 0 0 0 0
+E
+sign~
+@cLevel One@D:   @WTesting Labs@n
+@cLevel Two@D:   @WObsolete Model Storage@n
+@cLevel Three@D: @WAdvanced Model Labs @D(@CCurrent Floor@D)@n
+@cLevel Four@D:  @WBio-Android Labs@n
+@cLevel Five@D:  @WGero's Quarters@n
+@cLevel Six@D:   @WTesting Grounds@n
+~
+S
+#1756
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DAdvanced Model Labs Hallway@n~
+ @WThis well lit hallway has titanium tiles bolted to the floor.  The walls and
+ceiling appear to be made of some form of reinforced concrete.  White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1757 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1759 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1758 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1755 0 0 0 0 0 0 0 0
+S
+#1757
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DAdvanced Model Labs Storage Room@n~
+ @WThis mostly concrete room has row after row of body sized metal capsules
+bolted to the floor.  The capsules look like metal caskets with glass windows
+about five inches by five inches built into their lids.  Panels controlling each
+capsule have been built into their respective sides, allowing any operator to
+open or close the capsules.  @n
+~
+17 u 0 0 0 0
+D2
+~
+~
+0 0 1756 0 0 0 0 0 0 0 0
+S
+#1758
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DAdvanced Model Labs Storage Room@n~
+ @WThis mostly concrete room has row after row of body sized metal capsules
+bolted to the floor.  The capsules look like metal caskets with glass windows
+about five inches by five inches built into their lids.  Panels controlling each
+capsule have been built into their respective sides, allowing any operator to
+open or close the capsules.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1756 0 0 0 0 0 0 0 0
+S
+#1759
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DAdvanced Model Labs Hallway@n~
+ @WThis well lit hallway has titanium tiles bolted to the floor.  The walls and
+ceiling appear to be made of some form of reinforced concrete.  White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall.  @n
+~
+17 u 0 0 0 0
+D1
+~
+~
+0 0 1760 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1756 0 0 0 0 0 0 0 0
+S
+#1760
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DAdvanced Model Labs Hallway@n~
+ @WThis well lit hallway has titanium tiles bolted to the floor.  The walls and
+ceiling appear to be made of some form of reinforced concrete.  White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1761 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1763 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1762 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1759 0 0 0 0 0 0 0 0
+S
+#1761
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DAdvanced Model Labs Storage Room@n~
+ @WThis mostly concrete room has row after row of body sized metal capsules
+bolted to the floor.  The capsules look like metal caskets with glass windows
+about five inches by five inches built into their lids.  Panels controlling each
+capsule have been built into their respective sides, allowing any operator to
+open or close the capsules.  @n
+~
+17 u 0 0 0 0
+D2
+~
+~
+0 0 1760 0 0 0 0 0 0 0 0
+S
+#1762
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DAdvanced Model Labs Storage Room@n~
+ @WThis mostly concrete room has row after row of body sized metal capsules
+bolted to the floor.  The capsules look like metal caskets with glass windows
+about five inches by five inches built into their lids.  Panels controlling each
+capsule have been built into their respective sides, allowing any operator to
+open or close the capsules.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1760 0 0 0 0 0 0 0 0
+S
+#1763
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DAdvanced Model Labs Hallway@n~
+ @WThis well lit hallway has titanium tiles bolted to the floor.  The walls and
+ceiling appear to be made of some form of reinforced concrete.  White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall.  @n
+~
+17 cu 0 0 0 0
+D1
+~
+~
+0 0 1765 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1760 0 0 0 0 0 0 0 0
+S
+#1764
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DAdvanced Labs Lab-Floor@n~
+ @WThis mostly concrete area appears to be where the actual testing of the
+testing labs is performed.  Steel tables with heavy duty equipment have been
+placed all around the wide expansive room.  Adjustable lights, computer
+monitors, and scanning equipment have been placed above or by each table.  On
+some of the tables half constructed androids can be seen, some as little
+complete as having only half a body.  @n
+~
+17 u 0 0 0 0
+D1
+~
+~
+0 0 1767 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1765 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1768 0 0 0 0 0 0 0 0
+S
+#1765
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DAdvanced Labs Lab-Floor@n~
+ @WThis mostly concrete area appears to be where the actual testing of the
+testing labs is performed.  Steel tables with heavy duty equipment have been
+placed all around the wide expansive room.  Adjustable lights, computer
+monitors, and scanning equipment have been placed above or by each table.  On
+some of the tables half constructed androids can be seen, some as little
+complete as having only half a body.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1764 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1768 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1766 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1763 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1767 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1769 0 0 0 0 0 0 0 0
+S
+#1766
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DAdvanced Labs Lab-Floor@n~
+ @WThis mostly concrete area appears to be where the actual testing of the
+testing labs is performed.  Steel tables with heavy duty equipment have been
+placed all around the wide expansive room.  Adjustable lights, computer
+monitors, and scanning equipment have been placed above or by each table.  On
+some of the tables half constructed androids can be seen, some as little
+complete as having only half a body.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1765 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1769 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1768 0 0 0 0 0 0 0 0
+S
+#1767
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DAdvanced Labs Lab-Floor@n~
+ @WThis mostly concrete area appears to be where the actual testing of the
+testing labs is performed.  Steel tables with heavy duty equipment have been
+placed all around the wide expansive room.  Adjustable lights, computer
+monitors, and scanning equipment have been placed above or by each table.  On
+some of the tables half constructed androids can be seen, some as little
+complete as having only half a body.  @n
+~
+17 u 0 0 0 0
+D1
+~
+~
+0 0 1770 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1768 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1764 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1771 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1765 0 0 0 0 0 0 0 0
+S
+#1768
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DAdvanced Labs Lab-Floor@n~
+ @WThis mostly concrete area appears to be where the actual testing of the
+testing labs is performed.  Steel tables with heavy duty equipment have been
+placed all around the wide expansive room.  Adjustable lights, computer
+monitors, and scanning equipment have been placed above or by each table.  On
+some of the tables half constructed androids can be seen, some as little
+complete as having only half a body.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1767 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1771 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1769 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1765 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1764 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1770 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1772 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1766 0 0 0 0 0 0 0 0
+S
+#1769
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DAdvanced Labs Lab-Floor@n~
+ @WThis mostly concrete area appears to be where the actual testing of the
+testing labs is performed.  Steel tables with heavy duty equipment have been
+placed all around the wide expansive room.  Adjustable lights, computer
+monitors, and scanning equipment have been placed above or by each table.  On
+some of the tables half constructed androids can be seen, some as little
+complete as having only half a body.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1768 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1772 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1773 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1766 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1765 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1771 0 0 0 0 0 0 0 0
+S
+#1770
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DAdvanced Labs Lab-Floor@n~
+ @WThis mostly concrete area appears to be where the actual testing of the
+testing labs is performed.  Steel tables with heavy duty equipment have been
+placed all around the wide expansive room.  Adjustable lights, computer
+monitors, and scanning equipment have been placed above or by each table.  On
+some of the tables half constructed androids can be seen, some as little
+complete as having only half a body.  @n
+~
+17 u 0 0 0 0
+D2
+~
+~
+0 0 1771 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1767 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1768 0 0 0 0 0 0 0 0
+S
+#1771
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DAdvanced Labs Lab-Floor@n~
+ @WThis mostly concrete area appears to be where the actual testing of the
+testing labs is performed.  Steel tables with heavy duty equipment have been
+placed all around the wide expansive room.  Adjustable lights, computer
+monitors, and scanning equipment have been placed above or by each table.  On
+some of the tables half constructed androids can be seen, some as little
+complete as having only half a body.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1770 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1772 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1768 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1767 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1769 0 0 0 0 0 0 0 0
+S
+#1772
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DAdvanced Labs Lab-Floor@n~
+ @WThis mostly concrete area appears to be where the actual testing of the
+testing labs is performed.  Steel tables with heavy duty equipment have been
+placed all around the wide expansive room.  Adjustable lights, computer
+monitors, and scanning equipment have been placed above or by each table.  On
+some of the tables half constructed androids can be seen, some as little
+complete as having only half a body.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1771 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1769 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1768 0 0 0 0 0 0 0 0
+S
+#1773
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DLevel 3 Stairwell@n~
+ @WThis concrete stairwell has no decorations and very little light.  The steps
+have a single steel rail running down the center of the stairs.  The stairs
+themselves do not drop that far, seemingly only a single floor in distance.  A
+@Gsign@W can be seen posted above the stairwell entrance.  @n
+~
+17 cu 0 0 0 0
+D0
+~
+~
+0 0 1769 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 1774 0 0 0 0 0 0 0 0
+E
+sign~
+@cLevel One@D:   @WTesting Labs@n
+@cLevel Two@D:   @WObsolete Model Storage@n
+@cLevel Three@D: @WAdvanced Model Labs @D(@CCurrent Floor@D)@n
+@cLevel Four@D:  @WBio-Android Labs@n
+@cLevel Five@D:  @WGero's Quarters@n
+@cLevel Six@D:   @WTesting Grounds@n
+~
+S
+#1774
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DLevel 4 Stairwell@n~
+ @WThis concrete stairwell has no decorations and very little light.  The steps
+have a single steel rail running down the center of the stairs.  The stairs
+themselves do not drop that far, seemingly only a single floor in distance.  A
+@Gsign@W can be seen posted above the stairwell entrance.  @n
+~
+17 u 0 0 0 0
+D2
+~
+~
+0 0 1775 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 1773 0 0 0 0 0 0 0 0
+E
+sign~
+@cLevel One@D:   @WTesting Labs@n
+@cLevel Two@D:   @WObsolete Model Storage@n
+@cLevel Three@D: @WAdvanced Model Labs@n
+@cLevel Four@D:  @WBio-Android Labs @D(@CCurrent Floor@D)@n
+@cLevel Five@D:  @WGero's Quarters@n
+@cLevel Six@D:   @WTesting Grounds@n
+~
+S
+#1775
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBio-Android Labs Hallway@n~
+ @WThis well lit hallway has titanium tiles bolted to the floor.  The walls and
+ceiling appear to be made of some form of reinforced concrete.  White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1774 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1776 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1778 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1777 0 0 0 0 0 0 0 0
+S
+#1776
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBio-Android Containment Room@n~
+ @WThis mostly concrete room has rows of seven foot glass cylinders bolted to
+the floors along its walls.  Green liquid fills most of the cylinders, with
+partially formed organisms growing inside the ones that do.  Monitors built into
+the sides of the cylinders show the current progress and vital signs of the
+organisms inside.  @n
+~
+17 u 0 0 0 0
+D3
+~
+~
+0 0 1775 0 0 0 0 0 0 0 0
+S
+#1777
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBio-Android Containment Room@n~
+ @WThis mostly concrete room has rows of seven foot glass cylinders bolted to
+the floors along its walls.  Green liquid fills most of the cylinders, with
+partially formed organisms growing inside the ones that do.  Monitors built into
+the sides of the cylinders show the current progress and vital signs of the
+organisms inside.  @n
+~
+17 u 0 0 0 0
+D1
+~
+~
+0 0 1775 0 0 0 0 0 0 0 0
+S
+#1778
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBio-Android Labs Hallway@n~
+ @WThis well lit hallway has titanium tiles bolted to the floor.  The walls and
+ceiling appear to be made of some form of reinforced concrete.  White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1775 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1779 0 0 0 0 0 0 0 0
+S
+#1779
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBio-Android Labs Hallway@n~
+ @WThis well lit hallway has titanium tiles bolted to the floor.  The walls and
+ceiling appear to be made of some form of reinforced concrete.  White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1778 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1780 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1782 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1781 0 0 0 0 0 0 0 0
+S
+#1780
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBio-Android Containment Room@n~
+ @WThis mostly concrete room has rows of seven foot glass cylinders bolted to
+the floors along its walls.  Green liquid fills most of the cylinders, with
+partially formed organisms growing inside the ones that do.  Monitors built into
+the sides of the cylinders show the current progress and vital signs of the
+organisms inside.  @n
+~
+17 u 0 0 0 0
+D3
+~
+~
+0 0 1779 0 0 0 0 0 0 0 0
+S
+#1781
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBio-Android Containment Room@n~
+ @WThis mostly concrete room has rows of seven foot glass cylinders bolted to
+the floors along its walls.  Green liquid fills most of the cylinders, with
+partially formed organisms growing inside the ones that do.  Monitors built into
+the sides of the cylinders show the current progress and vital signs of the
+organisms inside.  @n
+~
+17 u 0 0 0 0
+D1
+~
+~
+0 0 1779 0 0 0 0 0 0 0 0
+S
+#1782
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBio-Android Labs Hallway@n~
+ @WThis well lit hallway has titanium tiles bolted to the floor.  The walls and
+ceiling appear to be made of some form of reinforced concrete.  White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1779 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1784 0 0 0 0 0 0 0 0
+S
+#1783
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBio-Android Labs Lab-floor@n~
+ @WThis wide open concrete area has steel tables bolted to the floor in
+different areas.  Surgical and medical diagnosis equipment can be seen built
+next to each table, allowing for work on many different bio-android specimens at
+a time.  @n
+~
+17 u 0 0 0 0
+D1
+~
+~
+0 0 1784 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1786 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1787 0 0 0 0 0 0 0 0
+S
+#1784
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBio-Android Labs Lab-floor@n~
+ @WThis wide open concrete area has steel tables bolted to the floor in
+different areas.  Surgical and medical diagnosis equipment can be seen built
+next to each table, allowing for work on many different bio-android specimens at
+a time.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1782 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1785 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1787 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1783 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1788 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1786 0 0 0 0 0 0 0 0
+S
+#1785
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBio-Android Labs Lab-floor@n~
+ @WThis wide open concrete area has steel tables bolted to the floor in
+different areas.  Surgical and medical diagnosis equipment can be seen built
+next to each table, allowing for work on many different bio-android specimens at
+a time.  @n
+~
+17 u 0 0 0 0
+D2
+~
+~
+0 0 1788 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1784 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1787 0 0 0 0 0 0 0 0
+S
+#1786
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBio-Android Labs Lab-floor@n~
+ @WThis wide open concrete area has steel tables bolted to the floor in
+different areas.  Surgical and medical diagnosis equipment can be seen built
+next to each table, allowing for work on many different bio-android specimens at
+a time.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1783 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1787 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1789 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1784 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1790 0 0 0 0 0 0 0 0
+S
+#1787
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBio-Android Labs Lab-floor@n~
+ @WThis wide open concrete area has steel tables bolted to the floor in
+different areas.  Surgical and medical diagnosis equipment can be seen built
+next to each table, allowing for work on many different bio-android specimens at
+a time.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1784 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1788 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1790 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1786 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1783 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1785 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1791 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1789 0 0 0 0 0 0 0 0
+S
+#1788
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBio-Android Labs Lab-floor@n~
+ @WThis wide open concrete area has steel tables bolted to the floor in
+different areas.  Surgical and medical diagnosis equipment can be seen built
+next to each table, allowing for work on many different bio-android specimens at
+a time.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1785 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1791 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1787 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1784 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1790 0 0 0 0 0 0 0 0
+S
+#1789
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBio-Android Labs Lab-floor@n~
+ @WThis wide open concrete area has steel tables bolted to the floor in
+different areas.  Surgical and medical diagnosis equipment can be seen built
+next to each table, allowing for work on many different bio-android specimens at
+a time.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1786 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1790 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1787 0 0 0 0 0 0 0 0
+S
+#1790
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBio-Android Labs Lab-floor@n~
+ @WThis wide open concrete area has steel tables bolted to the floor in
+different areas.  Surgical and medical diagnosis equipment can be seen built
+next to each table, allowing for work on many different bio-android specimens at
+a time.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1787 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1791 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1792 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1789 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1786 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1788 0 0 0 0 0 0 0 0
+S
+#1791
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBio-Android Labs Lab-floor@n~
+ @WThis wide open concrete area has steel tables bolted to the floor in
+different areas.  Surgical and medical diagnosis equipment can be seen built
+next to each table, allowing for work on many different bio-android specimens at
+a time.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1788 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1790 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1787 0 0 0 0 0 0 0 0
+S
+#1792
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DLevel 4 Stairwell@n~
+ @WThis concrete stairwell has no decorations and very little light.  The steps
+have a single steel rail running down the center of the stairs.  The stairs
+themselves do not drop that far, seemingly only a single floor in distance.  A
+@Gsign@W can be seen posted above the stairwell entrance.  @n
+~
+17 cu 0 0 0 0
+D0
+~
+~
+0 0 1790 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 1793 0 0 0 0 0 0 0 0
+E
+sign~
+@cLevel One@D:   @WTesting Labs@n
+@cLevel Two@D:   @WObsolete Model Storage@n
+@cLevel Three@D: @WAdvanced Model Labs@n
+@cLevel Four@D:  @WBio-Android Labs @D(@CCurrent Floor@D)@n
+@cLevel Five@D:  @WGero's Quarters@n
+@cLevel Six@D:   @WTesting Grounds@n
+~
+S
+#1793
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DLevel 5 Stairwell@n~
+ @WThis concrete stairwell has no decorations and very little light.  The steps
+have a single steel rail running down the center of the stairs.  The stairs
+themselves do not drop that far, seemingly only a single floor in distance.  A
+@Gsign@W can be seen posted above the stairwell entrance.  @n
+~
+17 u 0 0 0 0
+D2
+~
+~
+0 0 1794 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 1792 0 0 0 0 0 0 0 0
+E
+sign~
+@cLevel One@D:   @WTesting Labs@n
+@cLevel Two@D:   @WObsolete Model Storage@n
+@cLevel Three@D: @WAdvanced Model Labs@n
+@cLevel Four@D:  @WBio-Android Labs@n
+@cLevel Five@D:  @WGero's Quarters @D(@CCurrent Floor@D)@n
+@cLevel Six@D:   @WTesting Grounds@n
+~
+S
+#1794
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DGero's Quarters Hallway@n~
+ @WThis well lit hallway has titanium tiles bolted to the floor.  The walls and
+ceiling appear to be made of some form of reinforced concrete.  White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1793 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1795 0 0 0 0 0 0 0 0
+S
+#1795
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DGero's Quarters Hallway@n~
+ @WThis well lit hallway has titanium tiles bolted to the floor.  The walls and
+ceiling appear to be made of some form of reinforced concrete.  White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1794 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1797 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1798 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1796 0 0 0 0 0 0 0 0
+S
+#1796
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DGero's Room@n~
+ @WThis plain concrete room doesn't look as if its owner cares much for
+decorations.  Dull white lights illuminate several bookcases lined up near the
+entrance to the room.  Beyond those bookcases a study area and sleeping area can
+be seen with plain brown carpeting covering the floor in those two areas.  @n
+~
+17 u 0 0 0 0
+D1
+~
+~
+0 0 1795 0 0 0 0 0 0 0 0
+S
+#1797
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DGero's Planning Room@n~
+ @WHalf of this large room is filled with rows of bookshelves that reach nearly
+to the nine foot tall ceiling.  The other side of this concrete room a steel
+desk with many different computer monitors located on it can be seen.  On a
+clear spot of the desk blueprints and diagrams of android models can be seen.  @n
+~
+17 u 0 0 0 0
+D3
+~
+~
+0 0 1795 0 0 0 0 0 0 0 0
+S
+#1798
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DGero's Quarters Hallway@n~
+ @WThis well lit hallway has titanium tiles bolted to the floor.  The walls and
+ceiling appear to be made of some form of reinforced concrete.  White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1795 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1799 0 0 0 0 0 0 0 0
+S
+#1799
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DGero's Quarters Hallway@n~
+ @WThis well lit hallway has titanium tiles bolted to the floor.  The walls and
+ceiling appear to be made of some form of reinforced concrete.  White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall.  @n
+~
+17 u 0 0 0 0
+D0
+~
+~
+0 0 1798 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1874 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1800 0 0 0 0 0 0 0 0
+S
+$~

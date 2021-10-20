@@ -1,0 +1,28 @@
+CircleMUD v3.0 Shop File~
+#16492~
+16404
+16405
+16407
+-1
+0.75
+0.25
+19
+-1
+%s Get'cher mystery meat and go on somewhere!~
+%s What'chu tryin' tah sell me -that- for!?~
+%s Um.  What're you tryin' tah sell me stuff for?~
+%s I can't buy anything-- I'm flat broke!~
+%s Go get'chu some money and come back, kiddo!~
+%s That'll be %d zenni, now get goin'!~
+%s Fine, I could mights put that in next week's lunch... heh.~
+0
+0
+16496
+0 0 24576 0
+16492
+-1
+0
+28
+0
+0
+$~

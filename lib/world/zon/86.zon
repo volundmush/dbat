@@ -1,0 +1,24 @@
+@Version: 2
+#86
+Rillao~
+@MKonack@c: Colvian Farm@n~
+8600 8699 10 2 d 0 0 0 0 0
+M 0 8610 3 8635 3 20 	(@RD@yr@Ye@Rs @gG@Gu@Wa@Gr@gd@n)
+M 0 8611 1 8635 1 100 	(@RD@yr@Ye@Rs @gG@Gu@Wa@Gr@gd @CC@ca@Wp@wt@Wa@ci@Cn@n)
+D 0 8600 1 1 1 100 	(@cC@wo@Wl@Dv@Wi@ca@Cn @yF@Ya@Dr@ym@n - Gate)
+M 0 8612 1 8625 1 0 	(@RM@ra@Dt@rs@Ru @cC@wo@Wl@Dv@Wi@ca@Cn@n)
+O 0 8601 1 8637 1 0 	(@YY@Wa@yx@Ye @WMilking @DS@wt@Wa@wt@Wi@wo@Dn@n)
+D 0 8609 3 1 1 0 	(@cC@wo@Wl@Dv@Wi@ca@Cn @yF@Ya@Dr@ym@n - Gate)
+M 0 8606 5 8629 5 20 	(@cC@wo@Wl@Dv@Wi@ca@Cn @DW@wo@Wrk@we@Dr@n)
+M 0 8607 5 8629 5 20 	(@cC@wo@Wl@Dv@Wi@ca@Cn @DW@wo@Wrk@we@Dr@n)
+G 1 8600 100 -1 -1 70 	(a @DP@wai@Dl@n)
+M 0 8608 3 8629 3 15 	(@cC@wo@Wl@Dv@Wi@ca@Cn @MG@mir@Ml@n)
+M 0 8609 3 8629 3 15 	(@cC@wo@Wl@Dv@Wi@ca@Cn @Yb@yo@Yy@n)
+M 0 8604 3 8657 3 30 	(@cC@wo@Wl@Dv@Wi@ca@Cn@n steed)
+M 0 8605 3 8680 3 30 	(@cC@wo@Wl@Dv@Wi@ca@Cn@n steed)
+M 0 8602 3 8604 3 30 	(@cC@wo@Wl@Dv@Wi@ca@Cn @RD@ru@Dl@ri@Rn@n)
+M 0 8603 3 8604 3 30 	(@cC@wo@Wl@Dv@Wi@ca@Cn @RD@ru@Dl@ri@Rn@n)
+M 0 8600 3 8648 3 30 	(@cC@wo@Wl@Dv@Wi@ca@Cn @YY@Wa@yx@Ye@n)
+M 0 8601 3 8648 3 40 	(@cC@wo@Wl@Dv@Wi@ca@Cn @YY@Wa@yx@Ye@n)
+S
+$

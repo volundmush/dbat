@@ -1,0 +1,218 @@
+CircleMUD v3.0 Shop File~
+#2324~
+2210
+2211
+2212
+2213
+2214
+2215
+2216
+2217
+2218
+2219
+2220
+2221
+-1
+0.50
+0.20
+11
+-1
+%s Sorry, I don't stock that item.~
+%s You don't seem to have that.~
+%s I don't trade in such items.~
+%s I can't afford that!~
+%s You are too poor!~
+%s That'll be %d zenni, thanks.~
+%s I'll give you %d zenni for that.~
+0
+0
+2207
+0 0 16384 0
+2324
+-1
+0
+28
+0
+0
+#2325~
+2222
+2223
+2224
+2225
+2226
+2227
+2228
+2229
+2230
+2231
+-1
+0.50
+0.20
+11
+-1
+%s Sorry, I don't stock that item.~
+%s You don't seem to have that.~
+%s I don't trade in such items.~
+%s I can't afford that!~
+%s You are too poor!~
+%s That'll be %d zenni, thanks.~
+%s I'll give you %d zenni for that.~
+0
+0
+2208
+0 0 16384 0
+2325
+-1
+0
+28
+0
+0
+#2326~
+2232
+2233
+2234
+2235
+2236
+2237
+2238
+2239
+2240
+-1
+0.50
+0.20
+11
+-1
+%s Sorry, I don't stock that item.~
+%s You don't seem to have that.~
+%s I don't trade in such items.~
+%s I can't afford that!~
+%s You are too poor!~
+%s That'll be %d zenni, thanks.~
+%s I'll give you %d zenni for that.~
+0
+0
+2209
+0 0 16384 0
+2326
+-1
+0
+28
+0
+0
+#2327~
+2241
+2242
+2243
+-1
+0.50
+0.20
+11
+-1
+%s Sorry, I don't stock that item.~
+%s You don't seem to have that.~
+%s I don't trade in such items.~
+%s I can't afford that!~
+%s You are too poor!~
+%s That'll be %d zenni, thanks.~
+%s I'll give you %d zenni for that.~
+0
+0
+2210
+0 0 16384 0
+2327
+-1
+0
+28
+0
+0
+#2328~
+2244
+2245
+2246
+2247
+2248
+-1
+0.50
+0.20
+-1
+%s Sorry, I don't stock that item.~
+%s You don't seem to have that.~
+%s I don't trade in such items.~
+%s I can't afford that!~
+%s You are too poor!~
+%s That'll be %d zenni, thanks.~
+%s I'll give you %d zenni for that.~
+0
+0
+2211
+0 0 16384 0
+2328
+-1
+0
+28
+0
+0
+#2329~
+315
+316
+2251
+2252
+2253
+2254
+48
+1610
+-1
+0.50
+0.20
+-1
+%s Sorry, I don't stock that item.~
+%s You don't seem to have that.~
+%s I don't trade in such items.~
+%s I can't afford that!~
+%s You are too poor!~
+%s That'll be %d zenni, thanks.~
+%s I'll give you %d zenni for that.~
+0
+0
+2213
+0 0 16384 0
+2329
+-1
+0
+28
+0
+0
+#2330~
+2255
+2256
+2257
+2258
+2259
+2260
+2261
+2262
+2263
+2452
+-1
+0.50
+0.20
+11
+-1
+%s Sorry, I don't stock that item.~
+%s You don't seem to have that.~
+%s I don't trade in such items.~
+%s I can't afford that!~
+%s You are too poor!~
+%s That'll be %d zenni, thanks.~
+%s I'll give you %d zenni for that.~
+0
+0
+2214
+0 0 16384 0
+2330
+-1
+0
+28
+0
+0
+$~

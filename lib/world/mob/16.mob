@@ -1,0 +1,216 @@
+#1600
+Piccolo~
+@GP@giccol@Go@n~
+@GP@giccol@Go @wis standing here looking stern.@n
+~
+ @WThis tall namekian is wearing a white cape over heavy shoulder armor, a white
+turban wraped around a heavy helmet, purple shirt, purple pants, and orangish
+brown leather slip on shoes.  @n
+~
+bcdsA 0 0 0 l 0 0 0 0 E
+50 0 10 0d0+0 0d0+0
+0 0 4 28
+8 8 0
+Str: 46
+Dex: 50
+Int: 36
+Wis: 32
+Con: 48
+Cha: 40
+E
+T 1600
+T 1603
+T 1127
+T 1623
+#1601
+Gohan~
+@CG@coha@Cn@n~
+@CG@coha@Cn @wis standing guard here with a determined look.@n
+~
+ @WThis young boy looks to be holding back an awesome power inside.  He is
+wearing a white cape over purple shirt and pants with brown slip on shoes on his
+feet.  His hair is pretty long, trailing past his shoulders.  @n
+~
+bcdA 0 0 0 l 0 0 0 0 E
+32 0 10 0d0+0 0d0+0
+0 0 7 28
+8 8 1
+Str: 26
+Dex: 23
+Int: 24
+Wis: 29
+Con: 30
+Cha: 22
+E
+T 1601
+T 1602
+T 1618
+T 1705
+T 1620
+T 1622
+#1602
+Lonely Hunter~
+@wLonely @rHunter@n~
+@wA lonely @rhunter @wis examining pelts here.@n
+~
+ @WThis man looks like a classic hunter living in a wood cabin.  He is wearing
+thick wool clothes, with black boots, and a large knife at his hip.  @n
+~
+bd 0 0 0 0 0 0 0 20 E
+12 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 12
+Dex: 10
+Int: 8
+Wis: 12
+Con: 11
+Cha: 10
+E
+T 1606
+T 1607
+#1603
+Burly Lumberjack~
+@wBurly @yL@Yu@Wm@wber@Dj@Wa@wck@n~
+@wA burly @yl@Yu@Wm@wber@Dj@Wa@wck is lying here.@n
+~
+ @WThis large man looks like he could bring down trees with his teeth.  @n
+~
+bd 0 0 0 0 0 0 0 20 E
+16 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 13
+Dex: 11
+Int: 14
+Wis: 14
+Con: 8
+Cha: 9
+E
+T 1608
+T 1609
+T 1619
+#1604
+Deer~
+@wA @yDeer@n~
+@wA @ydeer @wis grazing here.@n
+~
+ @WA lithe deer of the wood.  @n
+~
+dxyz 0 0 0 l 0 0 0 0 E
+7 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 4
+Str: 6
+Dex: 10
+Int: 6
+Wis: 6
+Con: 10
+Cha: 5
+E
+#1605
+Raccoon~
+@wA @DR@Wa@wc@Wc@wo@Do@wn@n~
+@wA @Dr@Wa@wc@Wc@wo@Do@wn is sniffing the air here.@n
+~
+ @WThis large omnivore has a distinctive grey, black, and white pattern to its
+face and tail.  @n
+~
+dxyz 0 0 0 l 0 0 0 0 E
+6 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 3
+Str: 6
+Dex: 8
+Int: 7
+Wis: 7
+Con: 10
+Cha: 9
+E
+T 1621
+#1606
+Large Owl~
+@wA Large @yO@Yw@yl@n~
+@wA large @yo@Yw@yl @wis looking around here.@n
+~
+ @WThis large bird of prey has a distinctive shaped head with large golden eyes.
+It can't move its eyes to see, so it moves its entire head almost three hundred
+and sixty degrees.  @n
+~
+dxyz 0 0 0 l 0 0 0 0 E
+6 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 4
+Str: 7
+Dex: 10
+Int: 6
+Wis: 5
+Con: 8
+Cha: 9
+E
+#1607
+Giant Hornet~
+@wA Giant @YH@mo@Yrn@me@Yt@n~
+@wA giant @Yh@mo@Yrn@me@Yt@w is hovering here.@n
+~
+ @WThis hornet is massive for its kind, at over a foot, it is a special type
+that lives by its self.  @n
+~
+dxyz 0 0 0 l 0 0 0 0 E
+5 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 0
+Size: 4
+Str: 9
+Dex: 9
+Int: 7
+Wis: 7
+Con: 7
+Cha: 5
+E
+#1608
+Grey Wolf~
+@wA @WGrey @DWolf@n~
+@wA @Wgrey @Dwolf @wis sniffing the ground here.@n
+~
+ @WThis muscular wolf is a pretty good size, with bright golden eyes and sharp
+fangs.  @n
+~
+dxyz 0 0 0 l 0 0 0 0 E
+10 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 4
+Str: 8
+Dex: 10
+Int: 8
+Wis: 8
+Con: 10
+Cha: 8
+E
+#1609
+Jim Vaus Farmer~
+@wJim Vaus@n~
+@wJim Vaus, the farmer, is standing here.@n
+~
+ @WThis old man is wearing a heavy duty shirt, overall jeans, and thick dark
+leather boots.  @n
+~
+bd 0 0 0 0 0 0 0 15 E
+5 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 7
+Dex: 10
+Int: 7
+Wis: 10
+Con: 6
+Cha: 10
+E
+T 1611
+T 1614
+T 1615
+$

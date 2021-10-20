@@ -1,0 +1,2311 @@
+#12000
+@CH@ca@Wv@ce@Cn @DS@Wp@wa@Dc@We@wp@Do@Wr@wt @bEntrance@n~
+ This area is full of the mix of people entering the spaceport and the noise
+from the ships can be heard upon entering the area.  The amount of activity here
+draws the attention and looking ahead a large seating area is ahead where people
+wait for their ship.
+~
+120 c a 0 0 0
+D0
+~
+~
+0 0 12001 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 12007 0 0 0 0 0 0 0 0
+S
+#12001
+@CH@ca@Wv@ce@Cn @DS@Wp@wa@Dc@We@wp@Do@Wr@wt @WLobby~
+ Upon entering the lobby the noise substantially increases compared to the
+entrance area.  This area is larger than what appears at first especially with
+the large screens positioned everywhere to ensure people see the arrival and
+departure times of the ships.
+~
+120 0 a 0 0 0
+D0
+~
+~
+0 0 12002 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 12003 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12000 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12004 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 12006 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 12005 0 0 0 0 0 0 0 0
+S
+#12002
+@CH@ca@Wv@ce@Cn @DS@Wp@wa@Dc@We@wp@Do@Wr@wt @WPublic Launchpad~
+ A rather large stone launchpad is here where older spaceships dock for those
+who have purchased a public ticket.  A little run down the ships can still carry
+plenty of people safely to their destination with no worries.
+
+@RA sign about public transports has been posted here.@n
+~
+120 0 a 0 0 0
+D2
+~
+~
+0 0 12001 0 0 0 0 0 0 0 0
+E
+sign~
+@C(OOC)@W To view information about the Galactic Travels transports and how to
+board them, follow the help files contained in @Yhelp galactic@W. @n
+~
+S
+#12003
+@CH@ca@Wv@ce@Cn @DS@Wp@wa@Dc@We@wp@Do@Wr@wt @WPrivate Launchpad (1)~
+ This launchpad was made from sturdy metal and seems to be in good condition
+and taken care of nicely.  This launchpad is for private licensed ships only
+with separate landing pads provided for all private ships.
+~
+120 0 a 0 0 0
+D3
+~
+~
+0 0 12001 0 0 0 0 0 0 0 0
+S
+#12004
+@CH@ca@Wv@ce@Cn @DS@Wp@wa@Dc@We@wp@Do@Wr@wt @WPrivate Launchpad (2)~
+ This launchpad was made from sturdy metal and seems to be in good condition
+and taken care of nicely.  This launchpad is for private licensed ships only
+with separate landing pads provided for all private ships.
+~
+120 0 a 0 0 0
+D1
+~
+~
+0 0 12001 0 0 0 0 0 0 0 0
+S
+#12005
+@CH@ca@Wv@ce@Cn @DS@Wp@wa@Dc@We@wp@Do@Wr@wt @WPrivate Launchpad (4)~
+ This launchpad was made from sturdy metal and seems to be in good condition
+and taken care of nicely.  This launchpad is for private licensed ships only
+with separate landing pads provided for all private ships.
+~
+120 0 a 0 0 0
+D9
+~
+~
+0 0 12001 0 0 0 0 0 0 0 0
+S
+#12006
+@CH@ca@Wv@ce@Cn @DS@Wp@wa@Dc@We@wp@Do@Wr@wt @WPrivate Launchpad (3)~
+ This launchpad was made from sturdy metal and seems to be in good condition
+and taken care of nicely.  This launchpad is for private licensed ships only
+with separate landing pads provided for all private ships.
+~
+120 0 a 0 0 0
+D8
+~
+~
+0 0 12001 0 0 0 0 0 0 0 0
+S
+#12007
+@CO@cp@Wu@cl@Ce@Wn@cc@Ce @DS@Wt@wr@De@We@Dt@n~
+   @WOpulence street runs from Haven Starport in the north, to the Kaiju Forest in
+the south. To the east of the street, is a golden sandy beach making up the
+shoreline of the large body of water known as Serenity Lake. On the western
+side of Opulence street, are large houses. Opulence street is known as where
+the rich, glamorous and powerful live. @n
+~
+120 0 a 0 0 1
+D7
+~
+~
+0 0 12000 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 12008 0 0 0 0 0 0 0 0
+S
+#12008
+@CO@cp@Wu@cl@Ce@Wn@cc@Ce @DS@Wt@wr@De@We@Dt@n~
+   @WOpulence street runs from Haven Starport in the north, to the Kaiju Forest in
+the south. To the east of the street, is a golden sandy beach making up the
+shoreline of the large body of water known as Serenity Lake. On the western
+side of Opulence street, are large houses. Opulence street is known as where
+the rich, glamorous and powerful live. @n
+~
+120 0 a 0 0 1
+D7
+~
+~
+0 0 12007 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 12009 0 0 0 0 0 0 0 0
+S
+#12009
+@CO@cp@Wu@cl@Ce@Wn@cc@Ce @DS@Wt@wr@De@We@Dt@n~
+   @WOpulence street runs from Haven Starport in the north, to the Kaiju Forest in
+the south. To the east of the street, is a golden sandy beach making up the
+shoreline of the large body of water known as Serenity Lake. On the western
+side of Opulence street, are large houses. Opulence street is known as where
+the rich, glamorous and powerful live. @n
+~
+120 0 a 0 0 1
+D7
+~
+~
+0 0 12008 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 12010 0 0 0 0 0 0 0 0
+S
+#12010
+@WT-Intersection of @cOpulence Street@W and @cTranquility Avenue@n~
+   @WThis is the intersection of Opulence street and Tranquility avenue. A
+glowing orb of ki hovers at the stopping point of each direction that changes
+color depending on whether traffic can move or has to stop. The intersection is
+quite busy, with the popular Serenity Lake to the east and the Starport off to
+the north. @n
+~
+120 0 a 0 0 1
+D2
+~
+~
+0 0 12011 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12031 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 12009 0 0 0 0 0 0 0 0
+S
+#12011
+@CO@cp@Wu@cl@Ce@Wn@cc@Ce @DS@Wt@wr@De@We@Dt@n~
+   @WOpulence street runs from Haven Starport in the north, to the Kaiju Forest in
+the south. To the east of the street, is a golden sandy beach making up the
+shoreline of the large body of water known as Serenity Lake. On the western
+side of Opulence street, are large houses. Opulence street is known as where
+the rich, glamorous and powerful live. @n
+~
+120 0 a 0 0 1
+D0
+~
+~
+0 0 12010 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12012 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12082 0 0 0 0 0 0 0 0
+S
+#12012
+@CO@cp@Wu@cl@Ce@Wn@cc@Ce @DS@Wt@wr@De@We@Dt@n~
+   @WOpulence street runs from Haven Starport in the north, to the Kaiju Forest in
+the south. To the east of the street, is a golden sandy beach making up the
+shoreline of the large body of water known as Serenity Lake. On the western
+side of Opulence street, are large houses. Opulence street is known as where
+the rich, glamorous and powerful live. @n
+~
+120 0 a 0 0 1
+D0
+~
+~
+0 0 12011 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 12103 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12013 0 0 0 0 0 0 0 0
+S
+#12013
+@CO@cp@Wu@cl@Ce@Wn@cc@Ce @DS@Wt@wr@De@We@Dt@n~
+   @WOpulence street runs from Haven Starport in the north, to the Kaiju Forest in
+the south. To the east of the street, is a golden sandy beach making up the
+shoreline of the large body of water known as Serenity Lake. On the western
+side of Opulence street, are large houses. Opulence street is known as where
+the rich, glamorous and powerful live. @n
+~
+120 0 a 0 0 1
+D0
+~
+~
+0 0 12012 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12014 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12083 0 0 0 0 0 0 0 0
+S
+#12014
+@WT-Intersection of @cOpulence Street@W and @cPeace Drive@n~
+   @WThis is the intersection of Opulence street and Peace drive. The beach and
+Serenity Lake can be seen to the east of here. A glowing orb of ki hovers at
+the stopping point of each direction that changes color depending on whether
+traffic can move or has to stop. The intersection sees a lot of traffic coming
+from the west off Peace drive with kais looking to enjoy the nearby Lake. @n
+~
+120 0 a 0 0 1
+D0
+~
+~
+0 0 12013 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12015 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12017 0 0 0 0 0 0 0 0
+S
+#12015
+@CO@cp@Wu@cl@Ce@Wn@cc@Ce @DS@Wt@wr@De@We@Dt@n~
+   @WOpulence street runs from Haven Starport in the north, to the Kaiju Forest in
+the south. To the east of the street, is a golden sandy beach making up the
+shoreline of the large body of water known as Serenity Lake. On the western
+side of Opulence street, are large houses. Opulence street is known as where
+the rich, glamorous and powerful live. @n
+~
+120 0 a 0 0 1
+D0
+~
+~
+0 0 12014 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12016 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 85 0 0 0 0 0 0 0 0
+S
+#12016
+@CO@cp@Wu@cl@Ce@Wn@cc@Ce @DS@Wt@wr@De@We@Dt@n~
+   @WOpulence street runs from Haven Starport in the north, to the Kaiju Forest in
+the south. To the east of the street, is a golden sandy beach making up the
+shoreline of the large body of water known as Serenity Lake. On the western
+side of Opulence street, are large houses. Opulence street is known as where
+the rich, glamorous and powerful live. @n
+~
+120 0 a 0 0 1
+D0
+~
+~
+0 0 12015 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12300 0 0 0 0 0 0 0 0
+S
+#12017
+@CP@Ye@ya@Yc@Ce @DD@wr@Wi@wv@De@n~
+   @WAlong Peace drive, which runs from Opulence Street in the east to the Kinetic
+Kai dojo in the west, are where the majority of Haven's residents live. There
+are a few pot holes in the asphalt. @n
+~
+120 0 a 0 0 1
+D1
+~
+~
+0 0 12014 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12018 0 0 0 0 0 0 0 0
+S
+#12018
+@CP@Ye@ya@Yc@Ce @DD@wr@Wi@wv@De@n~
+   @WAlong Peace drive, which runs from Opulence Street in the east to the Kinetic
+Kai dojo in the west, are where the majority of Haven's residents live. There
+are a few pot holes in the asphalt. @n
+~
+120 0 a 0 0 1
+D0
+~
+~
+0 0 12081 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 12017 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 183 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12019 0 0 0 0 0 0 0 0
+S
+#12019
+@CP@Ye@ya@Yc@Ce @DD@wr@Wi@wv@De@n~
+   @WAlong Peace drive, which runs from Opulence Street in the east to the Kinetic
+Kai dojo in the west, are where the majority of Haven's residents live. There
+are a few pot holes in the asphalt. @n
+~
+120 0 a 0 0 1
+D1
+~
+~
+0 0 12018 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12020 0 0 0 0 0 0 0 0
+S
+#12020
+@CP@Ye@ya@Yc@Ce @DD@wr@Wi@wv@De@n~
+   @WAlong Peace drive, which runs from Opulence Street in the east to the Kinetic
+Kai dojo in the west, are where the majority of Haven's residents live. There
+are a few pot holes in the asphalt. @n
+~
+120 0 a 0 0 1
+D1
+~
+~
+0 0 12019 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12087 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12021 0 0 0 0 0 0 0 0
+S
+#12021
+@WIntersection of @cHarmony Street@W and @cPeace Drive@n~
+   @WThis is the intersection of Harmony Street that runs north to south and Peace
+Drive which runs from east to west. Traversing this intersection is difficult
+for both vehicles on the road and pedestrians using the crossings, being
+extremely busy. @n
+
+@YThere is a @Rsign@Y on a mounted pole here.@n
+~
+120 0 a 0 0 1
+D0
+~
+~
+0 0 12024 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 12020 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12022 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12033 0 0 0 0 0 0 0 0
+E
+sign~
+@G>@YA sign here reads:@G<@n
+@Y@n
+@RHarmony Park    @n    @G> @YNorth@n
+@CKinetic Kai Dojo@n    @G> @YWest@n
+~
+S
+#12022
+@RH@wa@rr@Rm@Wo@rn@Ry @DS@Wt@wr@De@We@Dt@n~
+   @WHarmony street runs from Tranquility Avenue to the north, all the way to the
+Kaiju Forest in the south. Cherry Blossom trees specially imported from Earth
+line both sides of the very well taken care of road. The harmony memorial can
+be seen jutting high into the sky to the northeast of here. @n
+~
+120 0 a 0 0 1
+D0
+~
+~
+0 0 12021 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12023 0 0 0 0 0 0 0 0
+S
+#12023
+@RH@wa@rr@Rm@Wo@rn@Ry @DS@Wt@wr@De@We@Dt@n~
+   @WHarmony street runs from Tranquility Avenue to the north, all the way to the
+Kaiju Forest in the south. Cherry Blossom trees specially imported from Earth
+line both sides of the very well taken care of road. The harmony memorial can
+be seen jutting high into the sky to the northeast of here. @n
+~
+120 0 a 0 0 1
+D0
+~
+~
+0 0 12022 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 12085 0 0 0 0 0 0 0 0
+S
+#12024
+@RH@wa@rr@Rm@Wo@rn@Ry @DS@Wt@wr@De@We@Dt@n~
+   @WHarmony street runs from Tranquility Avenue to the north, all the way to the
+Kaiju Forest in the south. Cherry Blossom trees specially imported from Earth
+line both sides of the very well taken care of road. The harmony memorial can
+be seen jutting high into the sky to the east of here. @n
+
+@YThere is a @Rsign@Y on a mounted pole here.@n
+~
+120 0 a 0 0 1
+D0
+~
+~
+0 0 12025 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12021 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 12088 0 0 0 0 0 0 0 0
+E
+sign~
+@G>@YA sign here reads:@G<@n
+@Y@n
+@RHarmony Park    @n    @G> @YNortheast@n
+@CKinetic Kai Dojo@n    @G> @YSouth@n
+~
+S
+#12025
+@RH@wa@rr@Rm@Wo@rn@Ry @DS@Wt@wr@De@We@Dt@n~
+   @WHarmony street runs from Tranquility Avenue to the north, all the way to the
+Kaiju Forest in the south. Cherry Blossom trees specially imported from Earth
+line both sides of the very well taken care of road. The harmony memorial can
+be seen jutting high into the sky to the east of here. @n
+~
+120 0 a 0 0 1
+D0
+~
+~
+0 0 12026 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12024 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 12088 0 0 0 0 0 0 0 0
+S
+#12026
+@WT-Intersection of @cTranquility Avenue@W and @cHarmony Street@n~
+   @WThis is the intersection of Tranquility avenue that runs east and west, and
+Harmony Street that runs south. A glowing orb of ki hovers above the
+intersection, changing color depending on whether traffic has to move or stop.
+The traffic flow here is quite quick as it appears this intersection isn't very
+busy. @n
+~
+120 0 a 0 0 1
+D1
+~
+~
+0 0 12028 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12025 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12027 0 0 0 0 0 0 0 0
+S
+#12027
+@BT@br@Wa@wn@Bq@bu@Bi@wl@Wi@bt@By @wA@Wv@De@wn@Wu@De@n~
+   @WTranquility Avenue runs from Opulence street in the east, to the silent glade
+in the west. Many of Haven's shops are located here. There are footpaths
+either side made of marble. @n
+~
+120 0 a 0 0 1
+D0
+~
+~
+0 0 12059 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 12026 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12032 0 0 0 0 0 0 0 0
+S
+#12028
+@BT@br@Wa@wn@Bq@bu@Bi@wl@Wi@bt@By @wA@Wv@De@wn@Wu@De@n~
+   @WTranquility Avenue runs from Opulence street in the east, to the silent glade
+in the west. Many of Haven's shops are located here. There are footpaths
+either side made of marble. @n
+~
+120 0 a 0 0 1
+D1
+~
+~
+0 0 12029 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12058 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12026 0 0 0 0 0 0 0 0
+S
+#12029
+@BT@br@Wa@wn@Bq@bu@Bi@wl@Wi@bt@By @wA@Wv@De@wn@Wu@De@n~
+   @WTranquility Avenue runs from Opulence street in the east, to the silent glade
+in the west. Many of Haven's shops are located here. There are footpaths
+either side made of marble. @n
+~
+120 0 a 0 0 1
+D1
+~
+~
+0 0 12030 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12080 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12028 0 0 0 0 0 0 0 0
+S
+#12030
+@BT@br@Wa@wn@Bq@bu@Bi@wl@Wi@bt@By @wA@Wv@De@wn@Wu@De@n~
+   @WTranquility Avenue runs from Opulence street in the east, to the silent glade
+in the west. Many of Haven's shops are located here. There are footpaths
+either side made of marble. @n
+~
+120 0 a 0 0 1
+D0
+~
+~
+0 0 12057 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 12031 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12029 0 0 0 0 0 0 0 0
+S
+#12031
+@BT@br@Wa@wn@Bq@bu@Bi@wl@Wi@bt@By @wA@Wv@De@wn@Wu@De@n~
+   @WTranquility Avenue runs from Opulence street in the east, to the silent glade
+in the west. Many of Haven's shops are located here. There are footpaths
+either side made of marble. @n
+~
+120 0 a 0 0 1
+D1
+~
+~
+0 0 12010 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 19005 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12030 0 0 0 0 0 0 0 0
+S
+#12032
+@BT@br@Wa@wn@Bq@bu@Bi@wl@Wi@bt@By @wA@Wv@De@wn@Wu@De@n~
+   @WTranquility Avenue runs from Opulence street in the east, to the silent glade
+in the west. Many of Haven's shops are located here. There are footpaths
+either side made of marble. The avenue comes to an end here and opens up into a
+meadow known as the Silent Glade. @n
+~
+120 0 a 0 0 1
+D1
+~
+~
+0 0 12027 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12480 0 0 0 0 0 0 0 0
+S
+#12033
+@CP@Ye@ya@Yc@Ce @DD@wr@Wi@wv@De@n~
+   @WAlong Peace drive, which runs from Opulence Street in the east to the Kinetic
+Kai dojo in the west, are where the majority of Haven's residents live. There
+are a few pot holes in the asphalt. @n
+~
+120 0 a 0 0 1
+D1
+~
+~
+0 0 12021 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12084 0 0 0 0 0 0 0 0
+S
+#12034
+@G[@gAether@G] @R- @YEntrance to the Combat Meadow@n~
+   @GTo the east, Aether City can be seen. The peaceful activity of the city
+makes for a serene scene, gently flowing around and to the west as if the
+tranquility of the combat meadow were somehow connected to Aether City itself.
+Even the sounds of combat from the west seem somewhat muted, as if the combat
+were only halfhazard and not performed with intent to kill. @n
+~
+120 d a 0 0 2
+D1
+~
+~
+0 0 12084 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12035 0 0 0 0 0 0 0 0
+S
+T 12008
+#12035
+@G[@gAether@G]@W - @RCombat Meadow@n~
+   @GLush, green grass carpets the flat ground here, softening the footfalls of
+anyone who treads within this meadow. On the outskirts of the meadow to the
+north and south, Kais and other students of Kibito can be seen training. Some
+meditate, focusing on the abilities of the mind. Others seem to be sparring to
+focus on the abilities of the body. Yet, even still, there is a peaceful and
+tranquil quality to the meadow. @n
+~
+120 d a 0 0 2
+D0
+~
+~
+0 0 12036 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 12034 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12037 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12061 0 0 0 0 0 0 0 0
+S
+#12036
+@G[@gAether@G]@W - @RCombat Meadow@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open.
+~
+120 d a 0 0 2
+D2
+~
+~
+0 0 12035 0 0 0 0 0 0 0 0
+S
+#12037
+@G[@gAether@G]@W - @RCombat Meadow@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open.
+~
+120 d a 0 0 2
+D0
+~
+~
+0 0 12035 0 0 0 0 0 0 0 0
+S
+#12038
+@G[@gAether@G] @W-@n @RCombat Meadow@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open.
+~
+120 d a 0 0 2
+D0
+~
+~
+0 0 12039 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 12061 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12040 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12041 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 12042 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 12043 0 0 0 0 0 0 0 0
+S
+#12039
+@G[@gAether@G]@W - @RCombat Meadow@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open.
+~
+120 d a 0 0 2
+D2
+~
+~
+0 0 12038 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12042 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 12041 0 0 0 0 0 0 0 0
+S
+#12040
+@G[@gAether@G]@W - @RCombat Meadow@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open.
+~
+120 d a 0 0 2
+D0
+~
+~
+0 0 12038 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12043 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 12041 0 0 0 0 0 0 0 0
+S
+#12041
+@G[@gAether@G]@W - @RCombat Meadow@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open.
+~
+120 cd a 0 0 2
+D0
+~
+~
+0 0 12042 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 12038 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12043 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12044 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 12079 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 12045 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 12039 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 12040 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 12046 0 0 0 0 0 0 0 0
+S
+#12042
+@G[@gAether@G]@W - @RCombat Meadow@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open.
+~
+120 d a 0 0 2
+D0
+~
+~
+0 0 12047 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 12039 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12041 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12045 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 12038 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 12044 0 0 0 0 0 0 0 0
+S
+#12043
+@G[@gAether@G]@W - @RCombat Meadow@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open.
+~
+120 d a 0 0 2
+D0
+~
+~
+0 0 12041 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 12040 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12049 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12046 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 12044 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 12038 0 0 0 0 0 0 0 0
+S
+#12044
+@G[@gAether@G]@W - @RCombat Meadow@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open.
+~
+120 d a 0 0 2
+D0
+~
+~
+0 0 12045 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 12041 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12046 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12055 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 12042 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 12043 0 0 0 0 0 0 0 0
+S
+#12045
+@G[@gAether@G]@W - @RCombat Meadow@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open.
+~
+120 d a 0 0 2
+D1
+~
+~
+0 0 12042 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12044 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 12041 0 0 0 0 0 0 0 0
+S
+#12046
+@G[@gAether@G]@W - @RCombat Meadow@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open.
+~
+120 d a 0 0 2
+D0
+~
+~
+0 0 12044 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 12043 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 12041 0 0 0 0 0 0 0 0
+S
+#12047
+@G[@gAether@G]@W - @RNorth Path from the Combat Meadow@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open.
+~
+120 d a 0 0 2
+D0
+~
+~
+0 0 12048 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12042 0 0 0 0 0 0 0 0
+S
+#12048
+@G[@gAether@G]@W - @RNorth Combat Clearing@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open.
+~
+120 d a 0 0 2
+D1
+~
+~
+0 0 12051 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12047 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12052 0 0 0 0 0 0 0 0
+S
+#12049
+@G[@gAether@G]@W - @RSouth Path from the Combat Meadow@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open.
+~
+120 d a 0 0 2
+D0
+~
+~
+0 0 12043 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12050 0 0 0 0 0 0 0 0
+S
+#12050
+@G[@gAether@G]@W - @RSouth Combat Clearing@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open.
+~
+120 d a 0 0 2
+D0
+~
+~
+0 0 12049 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 12053 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12054 0 0 0 0 0 0 0 0
+S
+#12051
+@G[@gAether@G]@W - @RNorth Combat Clearing@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open. An alcove in the western wall leads to a wide, spiral
+staircase.
+~
+120 d a 0 0 2
+D3
+~
+~
+0 0 12048 0 0 0 0 0 0 0 0
+S
+#12052
+@G[@gAether@G]@W - @RNorth Combat Clearing@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open.
+~
+120 d a 0 0 2
+D1
+~
+~
+0 0 12048 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 12062 0 0 0 0 0 0 0 0
+S
+#12053
+@G[@gAether@G]@W - @RSouth Combat Clearing@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open.
+~
+120 d a 0 0 2
+D3
+~
+~
+0 0 12050 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 12060 0 0 0 0 0 0 0 0
+S
+#12054
+@G[@gAether@G]@W - @RSouth Combat Clearing@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the alcove here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. Thick vines hold the mat securely
+against the walls of the room. A large spiral staircase dominates the majority
+of the walking space. It is comprised of bamboo-like rods, planks of wood, and
+thin vines that provide traction on the stairs.
+~
+120 cd a 0 0 2
+D1
+~
+~
+0 0 12050 0 0 0 0 0 0 0 0
+S
+#12055
+@G[@gAether@G]@W - @RWest Path from the Combat Meadow@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the alcove here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. Thick vines hold the mat securely
+against the walls of the room. A sizable hole in the floor reveals the
+beginnings of a spiral staircase.
+~
+120 cd a 0 0 2
+D1
+~
+~
+0 0 12044 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12056 0 0 0 0 0 0 0 0
+S
+#12056
+@G[@gAether@G]@W - @RWest Path from the Combat Meadow@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open. An alcove in the western wall leads to a wide, spiral
+staircase.
+~
+120 d a 0 0 2
+D1
+~
+~
+0 0 12055 0 0 0 0 0 0 0 0
+S
+#12057
+@RC@ru@Wtt@re@Rr@n's @rC@Dl@Ra@Ds@rh@n~
+   @WThis small store doesn't appear to have a wide selection of weaponry though
+both the eastern and western walls display the entire stock available. An empty
+glass counter on the north side of the shop is where customers are served. @n
+~
+120 0 a 0 0 10
+D2
+~
+~
+0 0 12030 0 0 0 0 0 0 0 0
+S
+#12058
+@WS@Du@rr@Rv@Wi@Dv@ra@Rl @rI@Rn@Ds@Wt@Ri@rn@Dc@Wt@ws@n~
+   @wA large round stall is set up in the middle of the room. It has a variety
+of armored pieces of clothing hanging from its sides and draped over parts of
+the counter. Oddly soft tile lines the floor and a harder version of what
+looks to be the same material forms the walls and ceiling. @wA newspaper
+clipping of an @Yad@w is pinned to a bulliten board. @n
+~
+120 0 a 0 0 10
+D0
+~
+~
+0 0 12028 0 0 0 0 0 0 0 0
+E
+newspaper clipping ad~
+@YSurvival Tips with Bartholomew Blackstone, 
+Adventurer Extraordinaire!@n
+@g-----------------------------------------------@n
+
+@WSurviving in the wilderness can be tough! Nights 
+can be cold, and without any light, you're at the
+mercy of the creatures that can see in the dark! 
+Not to fear, though, for good ol' Bart Blackstone 
+is here to help!
+
+@WMake sure to get plenty of wood! Without the 
+proper kiln dried logs, you may have trouble 
+keeping a fire that will last.
+
+@WYou'll need at least @w3 quartered logs@W built in 
+a pyramid to make a fire. With a little bitta elbow 
+grease and some patience, soon your fire will be 
+roaring like a lion!
+
+@WYoull also find that laying next to a fire is quite 
+relaxing, and it often gets me feeling energetic
+and ready for the next adventure!@n
+
+@g-----------------------------------------------@n
+@YThis has been survival tips with Bartholomew 
+Blackstone! Be safe, and good luck out there!@n
+~
+S
+#12059
+@CN@ci@Wm@wb@cl@Ce @WD@Do@Cd@cg@Wi@cn@Cg @WArmor Shop@n~
+   There are several mannequins standing around this shop, fully clothed in the
+sort of armor this shop sells. The stock must be kept in a back room however,
+as there are only clothing items in the store. Pinned up on the walls are
+various posters of warriors dodging attacks while wearing armor exclusive to
+this shop. On the northern wall a sign reads 'Nimble Dodgings'.
+~
+120 0 a 0 0 10
+D1
+~
+~
+0 0 -1 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12027 0 0 0 0 0 0 0 0
+S
+#12060
+@G[@gAether@G] @W- @RSerene Chamber@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be
+capable of withstanding a good deal of punishment. The walls of the chamber
+are an earthy brown, a few sections are padded with grass panels. Even beneath
+the meadow, the sounds of combat above are muted, as well as the gentle whir of
+the healing pools. Warriors visiting the dojo can use this chamber to rest and
+have a break. @n
+~
+120 dD a 0 0 0
+D4
+~
+~
+0 0 12053 0 0 0 0 0 0 0 0
+S
+#12061
+@G[@gAether@G] @W-@n @RCombat Meadow@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open.
+~
+120 d a 0 0 2
+D1
+~
+~
+0 0 12035 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12038 0 0 0 0 0 0 0 0
+S
+#12062
+@G[@gAether@G]@W - @RFree Room@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open.
+~
+120 d a 0 0 2
+D3
+~
+~
+0 0 12063 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 12052 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 12064 0 0 0 0 0 0 0 0
+S
+#12063
+@G[@gAether@G]@W - @RFree Room@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open. Unlike the rest the dojo, the ground here is marred with
+brownish-black burn spots and parts of the pillars that support the ceiling have
+splintered dents across their surface.
+~
+120 d a 0 0 2
+D1
+~
+~
+0 0 12062 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12064 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 12065 0 0 0 0 0 0 0 0
+S
+#12064
+@G[@gAether@G]@W - @RFree Room@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open. Unlike the rest the dojo, the ground here is marred with
+brownish-black burn spots and parts of the pillars that support the ceiling have
+splintered dents across their surface.
+~
+120 d a 0 0 2
+D0
+~
+~
+0 0 12063 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12079 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12065 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 12062 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 12066 0 0 0 0 0 0 0 0
+S
+#12065
+@G[@gAether@G]@W - @RFree Room@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open. Unlike the rest the dojo, the ground here is marred with
+brownish-black burn spots and parts of the pillars that support the ceiling have
+splintered dents across their surface.
+~
+120 d a 0 0 2
+D1
+~
+~
+0 0 12064 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12066 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 12063 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 12067 0 0 0 0 0 0 0 0
+S
+#12066
+@G[@gAether@G]@W - @RFree Room@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open.
+~
+120 d a 0 0 2
+D0
+~
+~
+0 0 12065 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 12079 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12069 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12067 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 12064 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 12079 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 12068 0 0 0 0 0 0 0 0
+S
+#12067
+@G[@gAether@G]@W - @RFree Room@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open.
+~
+120 d a 0 0 2
+D1
+~
+~
+0 0 12066 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12068 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 12065 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 12069 0 0 0 0 0 0 0 0
+S
+#12068
+@G[@gAether@G]@W - @RFree Room@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open. Unlike the rest the dojo, the ground here is marred with
+brownish-black burn spots and parts of the pillars that support the ceiling have
+splintered dents across their surface.
+~
+120 d a 0 0 2
+D0
+~
+~
+0 0 12067 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 12069 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 12066 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 12070 0 0 0 0 0 0 0 0
+S
+#12069
+@G[@gAether@G]@W - @RFree Room@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open. Unlike the rest the dojo, the ground here is marred with
+brownish-black burn spots and parts of the pillars that support the ceiling have
+splintered dents across their surface.
+~
+120 d a 0 0 2
+D0
+~
+~
+0 0 12066 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 12079 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12070 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12068 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 12067 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 12079 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 12071 0 0 0 0 0 0 0 0
+S
+#12070
+@G[@gAether@G]@W - @RFree Room@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open.
+~
+120 d a 0 0 2
+D0
+~
+~
+0 0 12069 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 12071 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 12068 0 0 0 0 0 0 0 0
+S
+#12071
+@G[@gAether@G]@W - @RFree Room@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open.
+~
+120 d a 0 0 2
+D0
+~
+~
+0 0 12079 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12070 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 12072 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 12069 0 0 0 0 0 0 0 0
+S
+#12072
+@G[@gAether@G]@W - @RFree Room@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open.
+~
+120 d a 0 0 2
+D0
+~
+~
+0 0 12079 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 12073 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 12071 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 12079 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 12074 0 0 0 0 0 0 0 0
+S
+#12073
+@G[@gAether@G]@W - @RFree Room@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open.
+~
+120 d a 0 0 2
+D0
+~
+~
+0 0 12079 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 12076 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12074 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12072 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 12079 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 12079 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 12075 0 0 0 0 0 0 0 0
+S
+#12074
+@G[@gAether@G]@W - @RFree Room@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open.
+~
+120 d a 0 0 2
+D0
+~
+~
+0 0 12073 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 12075 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 12072 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 12076 0 0 0 0 0 0 0 0
+S
+#12075
+@G[@gAether@G]@W - @RFree Room@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open.
+~
+120 d a 0 0 2
+D0
+~
+~
+0 0 12076 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12074 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 12073 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 12077 0 0 0 0 0 0 0 0
+S
+#12076
+@G[@gAether@G]@W - @RFree Room@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open.
+~
+120 d a 0 0 2
+D0
+~
+~
+0 0 12079 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 12077 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12075 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12073 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 12079 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 12079 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 12074 0 0 0 0 0 0 0 0
+S
+#12077
+@G[@gAether@G]@W - @RFree Room@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open.
+~
+120 cd a 0 0 2
+D0
+~
+~
+0 0 12079 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12076 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 12078 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 12079 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 12075 0 0 0 0 0 0 0 0
+S
+#12078
+@G[@gAether@G]@W - @RFree Room@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open.
+~
+120 d a 0 0 2
+D0
+~
+~
+0 0 12079 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 12077 0 0 0 0 0 0 0 0
+S
+#12079
+@G[@gAether@G]@n @W-@n @ROpen Air@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be capable
+of withstanding a good deal of punishment. The walls of the dojo are an earthy
+brown, a few sections are padded with grass panels. Large pillars formed from
+the core of some massive tree are spread about the dojo, holding up the ceiling
+overhead and removing the need for additional walls, so the majority of the dojo
+is left wide open.
+~
+120 d a 0 0 8
+D2
+~
+~
+0 0 12078 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 12041 0 0 0 0 0 0 0 0
+S
+#12080
+@GH@gealth@Gy C@ghoice@Gs@n~
+   A ruffled, blue sheet of fabric hangs from the counter on the south side of
+the shop, detailed in such a way as to look like free-flowing water from a
+distance. Four evenly spaced, stout sticks of bamboo looking wood curve upward
+to tapering tips with leaves to give them a palm tree feel. A banner reading
+'Healthy Choice' hangs between the two most northerly artificial trees.
+~
+120 0 a 0 0 10
+D0
+~
+~
+0 0 12029 0 0 0 0 0 0 0 0
+S
+#12081
+@yI@Yn@Wf@wo@Dr@ym@Ya@Dt@wi@Wo@Yn C@ye@Dn@Wt@ye@Yr@n~
+   @yThis room is quite small and cramped, only a small handful of people could
+enter and move about with any sort of freedom. A sign above the door reads
+'Information Center'. On the eastern and western walls are shelves containing
+books, pamphlets and other pieces of material about Aether. Pushed up against
+the northern wall is a bulletin board. @n
+~
+120 0 a 0 0 0
+D2
+~
+~
+0 0 12018 0 0 0 0 0 0 0 0
+S
+#12082
+@CH@ca@Wv@ce@Cn @WBuilding @DSociety@n~
+   A wide sign hanging in the northwest corner of the room clearly displays
+'@WHaven Building Society@n'. Occasionally a small circular robot will zip across
+the tiled floor, buffing out any scuffs in its path. Several automated teller
+machines are embedded in the northern and western walls. A small sign is affixed
+to the top of each, just above the screen.
+~
+120 0 a 0 0 10
+D1
+~
+~
+0 0 12011 0 0 0 0 0 0 0 0
+E
+sign~
+@W---------------------------------------
+
+@gHow to use@w: @Ybalance, withdraw, or deposit.
+@W
+---------------------------------------
+~
+S
+#12083
+@WP@wost @WO@wffice@n~
+   @wThis cozy little office has row after row of mail boxes bolted to the wall
+behind a large wooden counter. Stamps and package wrapping are displayed on top
+of the wooden counter. Before the counter is a long velvet rope that winds
+towards the entrance for easy line management.
+~
+120 0 a 0 0 10
+D1
+~
+~
+0 0 12013 0 0 0 0 0 0 0 0
+S
+#12084
+@CP@Ye@ya@Yc@Ce @DD@wr@Wi@wv@De@n~
+   @WAlong Peace drive, which runs from Opulence Street in the east to the Kinetic
+Kai dojo in the west, are where the majority of Haven's residents live. There
+are a few pot holes in the asphalt. @n
+~
+120 c a 0 0 1
+D1
+~
+~
+0 0 12033 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17743 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12034 0 0 0 0 0 0 0 0
+S
+#12085
+@RH@wa@rr@Rm@Wo@rn@Ry @DS@Wt@wr@De@We@Dt@n~
+   @WHarmony street runs from Tranquility Avenue to the north, all the way to the
+Kaiju Forest in the south. Cherry Blossom trees specially imported from Earth
+line both sides of the very well taken care of road. The harmony memorial can
+be seen jutting high into the sky to the northeast of here. @n
+~
+120 0 a 0 0 1
+D7
+~
+~
+0 0 12023 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 12086 0 0 0 0 0 0 0 0
+S
+#12086
+@RH@wa@rr@Rm@Wo@rn@Ry @DS@Wt@wr@De@We@Dt@n~
+   @WHarmony street runs from Tranquility Avenue to the north, all the way to the
+Kaiju Forest in the south. Cherry Blossom trees specially imported from Earth
+line both sides of the very well taken care of road. The harmony memorial can
+be seen jutting high into the sky to the northeast of here. @n
+~
+120 0 a 0 0 1
+D2
+~
+~
+0 0 12326 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 12085 0 0 0 0 0 0 0 0
+S
+#12087
+@CL@ca@Ws@wt @RH@ro@Wp@we @DArmor Store@n~
+   The Last Hope Armor Store is known around Haven to sell some of the finest
+armor available on Aether. On the western wall is a sign that appears to brag
+about how they have supplied armor to the Supreme Kais for several generations
+now. On the eastern wall hangs the various pieces of armor one can buy, while
+some also are hung up on the southern wall behind the counter. Two mannequins,
+one male and one female, are in the middle of the store showing off the complete
+set of which has subtle differences between the genders. @n
+~
+120 0 a 0 0 10
+D0
+~
+~
+0 0 12020 0 0 0 0 0 0 0 0
+S
+#12088
+@RH@wa@rr@Rm@Wo@rn@Ry @GP@Da@gr@Gk@n~
+   @WIn the very center of Harmony Park, a large statue of a Supreme Kai rises up
+into the sky. Either side of the footpath leading through the park are round
+braziers, not only lighting the way at night but are symbols of hope. The
+flames are magical, having burned since the first time the braziers were lit. 
+Trees with flowers of pink, white and red are further back off the path and make
+up the rest of the park. @n
+
+@YThere is a @Rsign@Y on a mounted pole here.@n
+~
+120 d a 0 0 2
+D1
+~
+~
+0 0 12089 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 12025 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 12024 0 0 0 0 0 0 0 0
+E
+sign~
+@G>@YA sign here reads:@G<@n
+@Y@n
+@RHarmony Park    @n    @G> @YEast@n
+@CKinetic Kai Dojo@n    @G> @YSouthwest@n
+~
+S
+#12089
+@RH@wa@rr@Rm@Wo@rn@Ry @GP@Da@gr@Gk@n~
+   @WIn the very center of Harmony Park, a large statue of a Supreme Kai rises up
+into the sky. Either side of the footpath leading through the park are round
+braziers, not only lighting the way at night but are symbols of hope. The
+flames are magical, having burned since the first time the braziers were lit. 
+Trees with flowers of pink, white and red are further back off the path and make
+up the rest of the park. @n
+~
+120 ch a 0 0 2
+D1
+~
+~
+0 0 12090 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12088 0 0 0 0 0 0 0 0
+S
+#12090
+@RH@wa@rr@Rm@Wo@rn@Ry @GP@Da@gr@Gk@n~
+   @WIn the very center of Harmony Park, a large statue of a Supreme Kai rises up
+into the sky. Either side of the footpath leading through the park are round
+braziers, not only lighting the way at night but are symbols of hope. The
+flames are magical, having burned since the first time the braziers were lit. 
+Trees with flowers of pink, white and red are further back off the path and make
+up the rest of the park. @n
+~
+120 h a 0 0 2
+D0
+~
+~
+0 0 12091 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12093 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12089 0 0 0 0 0 0 0 0
+S
+#12091
+@RH@wa@rr@Rm@Wo@rn@Ry @GP@Da@gr@Gk@n~
+   @WIn the very center of Harmony Park, a large statue of a Supreme Kai rises up
+into the sky. Either side of the footpath leading through the park are round
+braziers, not only lighting the way at night but are symbols of hope. The
+flames are magical, having burned since the first time the braziers were lit. 
+Trees with flowers of pink, white and red are further back off the path and make
+up the rest of the park. @n
+~
+120 h a 0 0 2
+D0
+~
+~
+0 0 12092 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12090 0 0 0 0 0 0 0 0
+S
+#12092
+@RH@wa@rr@Rm@Wo@rn@Ry @GP@Da@gr@Gk@n~
+   @WIn the very center of Harmony Park, a large statue of a Supreme Kai rises up
+into the sky. Either side of the footpath leading through the park are round
+braziers, not only lighting the way at night but are symbols of hope. The
+flames are magical, having burned since the first time the braziers were lit. 
+Trees with flowers of pink, white and red are further back off the path and make
+up the rest of the park. @n
+~
+120 h a 0 0 2
+D1
+~
+~
+0 0 12101 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12091 0 0 0 0 0 0 0 0
+S
+#12093
+@RH@wa@rr@Rm@Wo@rn@Ry @GP@Da@gr@Gk@n~
+   @WIn the very center of Harmony Park, a large statue of a Supreme Kai rises up
+into the sky. Either side of the footpath leading through the park are round
+braziers, not only lighting the way at night but are symbols of hope. The
+flames are magical, having burned since the first time the braziers were lit. 
+Trees with flowers of pink, white and red are further back off the path and make
+up the rest of the park. @n
+~
+120 h a 0 0 2
+D0
+~
+~
+0 0 12090 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12094 0 0 0 0 0 0 0 0
+S
+#12094
+@RH@wa@rr@Rm@Wo@rn@Ry @GP@Da@gr@Gk@n~
+   @WIn the very center of Harmony Park, a large statue of a Supreme Kai rises up
+into the sky. Either side of the footpath leading through the park are round
+braziers, not only lighting the way at night but are symbols of hope. The
+flames are magical, having burned since the first time the braziers were lit. 
+Trees with flowers of pink, white and red are further back off the path and make
+up the rest of the park. @n
+~
+120 h a 0 0 2
+D0
+~
+~
+0 0 12093 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 12095 0 0 0 0 0 0 0 0
+S
+#12095
+@RH@wa@rr@Rm@Wo@rn@Ry @GP@Da@gr@Gk@n~
+   @WIn the very center of Harmony Park, a large statue of a Supreme Kai rises up
+into the sky. Either side of the footpath leading through the park are round
+braziers, not only lighting the way at night but are symbols of hope. The
+flames are magical, having burned since the first time the braziers were lit. 
+Trees with flowers of pink, white and red are further back off the path and make
+up the rest of the park. @n
+~
+120 h a 0 0 2
+D1
+~
+~
+0 0 12096 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12094 0 0 0 0 0 0 0 0
+S
+#12096
+@RH@wa@rr@Rm@Wo@rn@Ry @GP@Da@gr@Gk@n~
+   @WIn the very center of Harmony Park, a large statue of a Supreme Kai rises up
+into the sky. Either side of the footpath leading through the park are round
+braziers, not only lighting the way at night but are symbols of hope. The
+flames are magical, having burned since the first time the braziers were lit. 
+Trees with flowers of pink, white and red are further back off the path and make
+up the rest of the park. @n
+~
+120 h a 0 0 2
+D0
+~
+~
+0 0 12097 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12095 0 0 0 0 0 0 0 0
+S
+#12097
+@RH@wa@rr@Rm@Wo@rn@Ry @GP@Da@gr@Gk@n~
+   @WIn the very center of Harmony Park, a large statue of a Supreme Kai rises up
+into the sky. Either side of the footpath leading through the park are round
+braziers, not only lighting the way at night but are symbols of hope. The
+flames are magical, having burned since the first time the braziers were lit. 
+Trees with flowers of pink, white and red are further back off the path and make
+up the rest of the park. @n
+~
+120 h a 0 0 2
+D0
+~
+~
+0 0 12098 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12096 0 0 0 0 0 0 0 0
+S
+#12098
+@RH@wa@rr@Rm@Wo@rn@Ry @GP@Da@gr@Gk@n~
+   @WIn the very center of Harmony Park, a large statue of a Supreme Kai rises up
+into the sky. Either side of the footpath leading through the park are round
+braziers, not only lighting the way at night but are symbols of hope. The
+flames are magical, having burned since the first time the braziers were lit. 
+Trees with flowers of pink, white and red are further back off the path and make
+up the rest of the park. @n
+~
+120 h a 0 0 2
+D0
+~
+~
+0 0 12099 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12097 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12102 0 0 0 0 0 0 0 0
+S
+#12099
+@RH@wa@rr@Rm@Wo@rn@Ry @GP@Da@gr@Gk@n~
+   @WIn the very center of Harmony Park, a large statue of a Supreme Kai rises up
+into the sky. Either side of the footpath leading through the park are round
+braziers, not only lighting the way at night but are symbols of hope. The
+flames are magical, having burned since the first time the braziers were lit. 
+Trees with flowers of pink, white and red are further back off the path and make
+up the rest of the park. @n
+~
+120 h a 0 0 2
+D0
+~
+~
+0 0 12100 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 12098 0 0 0 0 0 0 0 0
+S
+$~

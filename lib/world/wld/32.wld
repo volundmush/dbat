@@ -1,0 +1,2203 @@
+#3200
+@RR@rub@Ry @DC@Wa@wve@D: @cEntrance@n~
+   @DThis appears to be the semi-dark entrance to a cave. Darkness can be seen to
+the west obscuring the rest of the cave from view and a bright desert can be
+seen to the east of here. The walls of this cave are unique from most as they
+have a red color to them. @n
+~
+32 av 0 0 0 0
+D1
+~
+~
+0 0 2615 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3201 0 0 0 0 0 0 0 0
+S
+#3201
+@RR@rub@Ry @DC@Wa@wve@D: @cUpper Level@n~
+   @DThis dark area is close enough to the surface to have a steady supply of
+fresh air. The walls, stalactites, and stalagmites all have a unique red color
+to them. In this darkness seeing their details is difficult and what can be
+seen appears to be flecks of some sort of red minerals found within the rock
+surfaces. @n
+~
+32 av 0 0 0 0
+D1
+~
+~
+0 0 3200 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3202 0 0 0 0 0 0 0 0
+S
+#3202
+@RR@rub@Ry @DC@Wa@wve@D: @cUpper Level@n~
+   @DThis dark area is close enough to the surface to have a steady supply of
+fresh air. The walls, stalactites, and stalagmites all have a unique red color
+to them. In this darkness seeing their details is difficult and what can be
+seen appears to be flecks of some sort of red minerals found within the rock
+surfaces. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3203 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 3201 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3205 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3208 0 0 0 0 0 0 0 0
+S
+#3203
+@RR@rub@Ry @DC@Wa@wve@D: @cUpper Level@n~
+   @DThis dark area is close enough to the surface to have a steady supply of
+fresh air. The walls, stalactites, and stalagmites all have a unique red color
+to them. In this darkness seeing their details is difficult and what can be
+seen appears to be flecks of some sort of red minerals found within the rock
+surfaces. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3204 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3202 0 0 0 0 0 0 0 0
+S
+#3204
+@RR@rub@Ry @DC@Wa@wve@D: @cDead End@n~
+   @DThis dark area is close enough to the surface to have a steady supply of
+fresh air. The walls, stalactites, and stalagmites all have a unique red color
+to them. In this darkness seeing their details is difficult and what can be
+seen appears to be flecks of some sort of red minerals found within the rock
+surfaces. @n
+~
+32 av 0 0 0 0
+D2
+~
+~
+0 0 3203 0 0 0 0 0 0 0 0
+S
+#3205
+@RR@rub@Ry @DC@Wa@wve@D: @cUpper Level@n~
+   @DThis dark area is close enough to the surface to have a steady supply of
+fresh air. The walls, stalactites, and stalagmites all have a unique red color
+to them. In this darkness seeing their details is difficult and what can be
+seen appears to be flecks of some sort of red minerals found within the rock
+surfaces. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3202 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3206 0 0 0 0 0 0 0 0
+S
+#3206
+@RR@rub@Ry @DC@Wa@wve@D: @cUpper Level@n~
+   @DThis dark area is close enough to the surface to have a steady supply of
+fresh air. The walls, stalactites, and stalagmites all have a unique red color
+to them. In this darkness seeing their details is difficult and what can be
+seen appears to be flecks of some sort of red minerals found within the rock
+surfaces. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3205 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3207 0 0 0 0 0 0 0 0
+S
+#3207
+@RR@rub@Ry @DC@Wa@wve@D: @cDead End@n~
+   @DThis dark area is close enough to the surface to have a steady supply of
+fresh air. The walls, stalactites, and stalagmites all have a unique red color
+to them. In this darkness seeing their details is difficult and what can be
+seen appears to be flecks of some sort of red minerals found within the rock
+surfaces. @n
+~
+32 av 0 0 0 0
+D1
+~
+~
+0 0 3206 0 0 0 0 0 0 0 0
+S
+#3208
+@RR@rub@Ry @DC@Wa@wve@D: @cUpper Level@n~
+   @DThis dark area is close enough to the surface to have a steady supply of
+fresh air. The walls, stalactites, and stalagmites all have a unique red color
+to them. In this darkness seeing their details is difficult and what can be
+seen appears to be flecks of some sort of red minerals found within the rock
+surfaces. @n
+~
+32 av 0 0 0 0
+D1
+~
+~
+0 0 3202 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3209 0 0 0 0 0 0 0 0
+S
+#3209
+@RR@rub@Ry @DC@Wa@wve@D: @cUpper Level@n~
+   @DThis dark area is close enough to the surface to have a steady supply of
+fresh air. The walls, stalactites, and stalagmites all have a unique red color
+to them. In this darkness seeing their details is difficult and what can be
+seen appears to be flecks of some sort of red minerals found within the rock
+surfaces. @n
+~
+32 av 0 0 0 0
+D1
+~
+~
+0 0 3208 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3210 0 0 0 0 0 0 0 0
+S
+#3210
+@RR@rub@Ry @DC@Wa@wve@D: @cUpper Level@n~
+   @DThis dark area is close enough to the surface to have a steady supply of
+fresh air. The walls, stalactites, and stalagmites all have a unique red color
+to them. In this darkness seeing their details is difficult and what can be
+seen appears to be flecks of some sort of red minerals found within the rock
+surfaces. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3211 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 3209 0 0 0 0 0 0 0 0
+S
+#3211
+@RR@rub@Ry @DC@Wa@wve@D: @cUpper Level@n~
+   @DThis dark area is close enough to the surface to have a steady supply of
+fresh air. The walls, stalactites, and stalagmites all have a unique red color
+to them. In this darkness seeing their details is difficult and what can be
+seen appears to be flecks of some sort of red minerals found within the rock
+surfaces. @n
+~
+32 av 0 0 0 0
+D2
+~
+~
+0 0 3210 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3212 0 0 0 0 0 0 0 0
+S
+#3212
+@RR@rub@Ry @DC@Wa@wve@D: @cUpper Level@n~
+   @DThis dark area is close enough to the surface to have a steady supply of
+fresh air. The walls, stalactites, and stalagmites all have a unique red color
+to them. In this darkness seeing their details is difficult and what can be
+seen appears to be flecks of some sort of red minerals found within the rock
+surfaces. The west side of this area begins a steep decline to the lower
+reaches of the cave. @n
+~
+32 av 0 0 0 0
+D1
+~
+~
+0 0 3211 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 3213 0 0 0 0 0 0 0 0
+S
+#3213
+@RR@rub@Ry @DC@Wa@wve@D: @cMid Level@n~
+   @DThis area is bathed in darkness and very little fresh air from the surface
+has reached this far into the cave. The jagged stalactites and stalagmites are
+larger here as well making travel difficult. To the east of this area the cave
+begins a steep climb towards the upper level of the cave. @n
+~
+32 acv 0 0 0 0
+D3
+~
+~
+0 0 3214 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 3212 0 0 0 0 0 0 0 0
+S
+#3214
+@RR@rub@Ry @DC@Wa@wve@D: @cMid Level@n~
+   @DThis area is bathed in darkness and very little fresh air from the surface
+has reached this far into the cave. The jagged stalactites and stalagmites are
+larger here as well making travel difficult. The smell of this part of the cave
+is rather damp and tinged with mold. Lastly the sounds of various winged
+creatures can be heard echoing throughout the cave occasionally. @n
+~
+32 av 0 0 0 0
+D1
+~
+~
+0 0 3213 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3215 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3274 0 0 0 0 0 0 0 0
+S
+#3215
+@RR@rub@Ry @DC@Wa@wve@D: @cMid Level@n~
+   @DThis area is bathed in darkness and very little fresh air from the surface
+has reached this far into the cave. The jagged stalactites and stalagmites are
+larger here as well making travel difficult. The smell of this part of the cave
+is rather damp and tinged with mold. Lastly the sounds of various winged
+creatures can be heard echoing throughout the cave occasionally. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3214 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3216 0 0 0 0 0 0 0 0
+S
+#3216
+@RR@rub@Ry @DC@Wa@wve@D: @cMid Level@n~
+   @DThis area is bathed in darkness and very little fresh air from the surface
+has reached this far into the cave. The jagged stalactites and stalagmites are
+larger here as well making travel difficult. The smell of this part of the cave
+is rather damp and tinged with mold. Lastly the sounds of various winged
+creatures can be heard echoing throughout the cave occasionally. @n
+~
+32 acv 0 0 0 0
+D0
+~
+~
+0 0 3215 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3218 0 0 0 0 0 0 0 0
+S
+#3217
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D1
+~
+~
+0 0 3218 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3222 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 3221 0 0 0 0 0 0 0 0
+S
+#3218
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3216 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 3219 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3221 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3217 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 3220 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 3222 0 0 0 0 0 0 0 0
+S
+#3219
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D2
+~
+~
+0 0 3220 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3218 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 3221 0 0 0 0 0 0 0 0
+S
+#3220
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3219 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3225 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3221 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 3218 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 3224 0 0 0 0 0 0 0 0
+S
+#3221
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3218 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 3220 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3224 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3222 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 3217 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 3219 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 3225 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 3223 0 0 0 0 0 0 0 0
+S
+#3222
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3217 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 3221 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3223 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 3218 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 3224 0 0 0 0 0 0 0 0
+S
+#3223
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3222 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 3224 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 3221 0 0 0 0 0 0 0 0
+S
+#3224
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3221 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 3225 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3226 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3223 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 3222 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 3220 0 0 0 0 0 0 0 0
+S
+#3225
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3220 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3224 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 3221 0 0 0 0 0 0 0 0
+S
+#3226
+@RR@rub@Ry @DC@Wa@wve@D: @cMid Level@n~
+   @DThis area is bathed in darkness and very little fresh air from the surface
+has reached this far into the cave. The jagged stalactites and stalagmites are
+larger here as well making travel difficult. The smell of this part of the cave
+is rather damp and tinged with mold. Lastly the sounds of various winged
+creatures can be heard echoing throughout the cave occasionally. @n
+~
+32 acv 0 0 0 0
+D0
+~
+~
+0 0 3224 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3227 0 0 0 0 0 0 0 0
+S
+#3227
+@RR@rub@Ry @DC@Wa@wve@D: @cMid Level@n~
+   @DThis area is bathed in darkness and very little fresh air from the surface
+has reached this far into the cave. The jagged stalactites and stalagmites are
+larger here as well making travel difficult. The smell of this part of the cave
+is rather damp and tinged with mold. Lastly the sounds of various winged
+creatures can be heard echoing throughout the cave occasionally. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3226 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3259 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 3228 0 0 0 0 0 0 0 0
+S
+#3228
+@RR@rub@Ry @DC@Wa@wve@D: @cMid Level@n~
+   @DThis area is bathed in darkness and very little fresh air from the surface
+has reached this far into the cave. The jagged stalactites and stalagmites are
+larger here as well making travel difficult. The smell of this part of the cave
+is rather damp and tinged with mold. Lastly the sounds of various winged
+creatures can be heard echoing throughout the cave occasionally. @n
+~
+32 av 0 0 0 0
+D2
+~
+~
+0 0 3229 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 3227 0 0 0 0 0 0 0 0
+S
+#3229
+@RR@rub@Ry @DC@Wa@wve@D: @cMid Level@n~
+   @DThis area is bathed in darkness and very little fresh air from the surface
+has reached this far into the cave. The jagged stalactites and stalagmites are
+larger here as well making travel difficult. The smell of this part of the cave
+is rather damp and tinged with mold. Lastly the sounds of various winged
+creatures can be heard echoing throughout the cave occasionally. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3228 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3230 0 0 0 0 0 0 0 0
+S
+#3230
+@RR@rub@Ry @DC@Wa@wve@D: @cMid Level@n~
+   @DThis area is bathed in darkness and very little fresh air from the surface
+has reached this far into the cave. The jagged stalactites and stalagmites are
+larger here as well making travel difficult. The smell of this part of the cave
+is rather damp and tinged with mold. Lastly the sounds of various winged
+creatures can be heard echoing throughout the cave occasionally. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3229 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3231 0 0 0 0 0 0 0 0
+S
+#3231
+@RR@rub@Ry @DC@Wa@wve@D: @cMid Level@n~
+   @DThis area is bathed in darkness and very little fresh air from the surface
+has reached this far into the cave. The jagged stalactites and stalagmites are
+larger here as well making travel difficult. The smell of this part of the cave
+is rather damp and tinged with mold. Lastly the sounds of various winged
+creatures can be heard echoing throughout the cave occasionally. @n
+~
+32 acv 0 0 0 0
+D0
+~
+~
+0 0 3230 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3233 0 0 0 0 0 0 0 0
+S
+#3232
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D2
+~
+~
+0 0 3237 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3233 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 3236 0 0 0 0 0 0 0 0
+S
+#3233
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3231 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 3232 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3236 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3234 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 3237 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 3235 0 0 0 0 0 0 0 0
+S
+#3234
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D1
+~
+~
+0 0 3233 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3235 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 3236 0 0 0 0 0 0 0 0
+S
+#3235
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3234 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 3236 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3240 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3241 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 3233 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 3239 0 0 0 0 0 0 0 0
+S
+#3236
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3233 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 3237 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3239 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3235 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 3234 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 3232 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 3238 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 3240 0 0 0 0 0 0 0 0
+S
+#3237
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3232 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3238 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3236 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 3233 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 3239 0 0 0 0 0 0 0 0
+S
+#3238
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3237 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3239 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 3236 0 0 0 0 0 0 0 0
+S
+#3239
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3236 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 3238 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3240 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 3235 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 3237 0 0 0 0 0 0 0 0
+S
+#3240
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3235 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 3239 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 3236 0 0 0 0 0 0 0 0
+S
+#3241
+@RR@rub@Ry @DC@Wa@wve@D: @cMid Level@n~
+   @DThis area is bathed in darkness and very little fresh air from the surface
+has reached this far into the cave. The jagged stalactites and stalagmites are
+larger here as well making travel difficult. The smell of this part of the cave
+is rather damp and tinged with mold. Lastly the sounds of various winged
+creatures can be heard echoing throughout the cave occasionally. @n
+~
+32 acv 0 0 0 0
+D1
+~
+~
+0 0 3235 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3242 0 0 0 0 0 0 0 0
+S
+#3242
+@RR@rub@Ry @DC@Wa@wve@D: @cMid Level@n~
+   @DThis area is bathed in darkness and very little fresh air from the surface
+has reached this far into the cave. The jagged stalactites and stalagmites are
+larger here as well making travel difficult. The smell of this part of the cave
+is rather damp and tinged with mold. Lastly the sounds of various winged
+creatures can be heard echoing throughout the cave occasionally. @n
+~
+32 av 0 0 0 0
+D1
+~
+~
+0 0 3241 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3243 0 0 0 0 0 0 0 0
+S
+#3243
+@RR@rub@Ry @DC@Wa@wve@D: @cMid Level@n~
+   @DThis area is bathed in darkness and very little fresh air from the surface
+has reached this far into the cave. The jagged stalactites and stalagmites are
+larger here as well making travel difficult. The smell of this part of the cave
+is rather damp and tinged with mold. Lastly the sounds of various winged
+creatures can be heard echoing throughout the cave occasionally. @n
+~
+32 av 0 0 0 0
+D1
+~
+~
+0 0 3242 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3275 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3244 0 0 0 0 0 0 0 0
+S
+#3244
+@RR@rub@Ry @DC@Wa@wve@D: @cMid Level@n~
+   @DThis area is bathed in darkness and very little fresh air from the surface
+has reached this far into the cave. The jagged stalactites and stalagmites are
+larger here as well making travel difficult. The smell of this part of the cave
+is rather damp and tinged with mold. Lastly the sounds of various winged
+creatures can be heard echoing throughout the cave occasionally. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3245 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 3243 0 0 0 0 0 0 0 0
+S
+#3245
+@RR@rub@Ry @DC@Wa@wve@D: @cMid Level@n~
+   @DThis area is bathed in darkness and very little fresh air from the surface
+has reached this far into the cave. The jagged stalactites and stalagmites are
+larger here as well making travel difficult. The smell of this part of the cave
+is rather damp and tinged with mold. Lastly the sounds of various winged
+creatures can be heard echoing throughout the cave occasionally. @n
+~
+32 acv 0 0 0 0
+D0
+~
+~
+0 0 3247 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3244 0 0 0 0 0 0 0 0
+S
+#3246
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3251 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3247 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 3250 0 0 0 0 0 0 0 0
+S
+#3247
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3250 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 3246 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3245 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3248 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 3249 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 3251 0 0 0 0 0 0 0 0
+S
+#3248
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3249 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 3247 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 3250 0 0 0 0 0 0 0 0
+S
+#3249
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3254 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 3250 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3248 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 3253 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 3247 0 0 0 0 0 0 0 0
+S
+#3250
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3253 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 3251 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3247 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3249 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 3254 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 3252 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 3246 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 3248 0 0 0 0 0 0 0 0
+S
+#3251
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3252 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3246 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3250 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 3253 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 3247 0 0 0 0 0 0 0 0
+S
+#3252
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D2
+~
+~
+0 0 3251 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3253 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 3250 0 0 0 0 0 0 0 0
+S
+#3253
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3255 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 3252 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3250 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3254 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 3251 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 3249 0 0 0 0 0 0 0 0
+S
+#3254
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D1
+~
+~
+0 0 3253 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3249 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 3250 0 0 0 0 0 0 0 0
+S
+#3255
+@RR@rub@Ry @DC@Wa@wve@D: @cMid Level@n~
+   @DThis area is bathed in darkness and very little fresh air from the surface
+has reached this far into the cave. The jagged stalactites and stalagmites are
+larger here as well making travel difficult. The smell of this part of the cave
+is rather damp and tinged with mold. Lastly the sounds of various winged
+creatures can be heard echoing throughout the cave occasionally. @n
+~
+32 acv 0 0 0 0
+D0
+~
+~
+0 0 3256 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3253 0 0 0 0 0 0 0 0
+S
+#3256
+@RR@rub@Ry @DC@Wa@wve@D: @cMid Level@n~
+   @DThis area is bathed in darkness and very little fresh air from the surface
+has reached this far into the cave. The jagged stalactites and stalagmites are
+larger here as well making travel difficult. The smell of this part of the cave
+is rather damp and tinged with mold. Lastly the sounds of various winged
+creatures can be heard echoing throughout the cave occasionally. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3260 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 3257 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3255 0 0 0 0 0 0 0 0
+S
+#3257
+@RR@rub@Ry @DC@Wa@wve@D: @cMid Level@n~
+   @DThis area is bathed in darkness and very little fresh air from the surface
+has reached this far into the cave. The jagged stalactites and stalagmites are
+larger here as well making travel difficult. The smell of this part of the cave
+is rather damp and tinged with mold. Lastly the sounds of various winged
+creatures can be heard echoing throughout the cave occasionally. @n
+~
+32 av 0 0 0 0
+D1
+~
+~
+0 0 3258 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3256 0 0 0 0 0 0 0 0
+S
+#3258
+@RR@rub@Ry @DC@Wa@wve@D: @cMid Level@n~
+   @DThis area is bathed in darkness and very little fresh air from the surface
+has reached this far into the cave. The jagged stalactites and stalagmites are
+larger here as well making travel difficult. The smell of this part of the cave
+is rather damp and tinged with mold. Lastly the sounds of various winged
+creatures can be heard echoing throughout the cave occasionally. @n
+~
+32 av 0 0 0 0
+D1
+~
+~
+0 0 3259 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3257 0 0 0 0 0 0 0 0
+S
+#3259
+@RR@rub@Ry @DC@Wa@wve@D: @cMid Level@n~
+   @DThis area is bathed in darkness and very little fresh air from the surface
+has reached this far into the cave. The jagged stalactites and stalagmites are
+larger here as well making travel difficult. The smell of this part of the cave
+is rather damp and tinged with mold. Lastly the sounds of various winged
+creatures can be heard echoing throughout the cave occasionally. @n
+~
+32 av 0 0 0 0
+D1
+~
+~
+0 0 3227 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3258 0 0 0 0 0 0 0 0
+S
+#3260
+@RR@rub@Ry @DC@Wa@wve@D: @cMid Level@n~
+   @DThis area is bathed in darkness and very little fresh air from the surface
+has reached this far into the cave. The jagged stalactites and stalagmites are
+larger here as well making travel difficult. The smell of this part of the cave
+is rather damp and tinged with mold. Lastly the sounds of various winged
+creatures can be heard echoing throughout the cave occasionally. @n
+~
+32 acv 0 0 0 0
+D0
+~
+~
+0 0 3262 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3256 0 0 0 0 0 0 0 0
+S
+#3261
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3266 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 3262 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 3265 0 0 0 0 0 0 0 0
+S
+#3262
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3265 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 3263 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3260 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3261 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 3266 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 3264 0 0 0 0 0 0 0 0
+S
+#3263
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3264 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3262 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 3265 0 0 0 0 0 0 0 0
+S
+#3264
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3269 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3263 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3265 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 3268 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 3262 0 0 0 0 0 0 0 0
+S
+#3265
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3268 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 3264 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3262 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3266 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 3267 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 3269 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 3263 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 3261 0 0 0 0 0 0 0 0
+S
+#3266
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3267 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 3265 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3261 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 3268 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 3262 0 0 0 0 0 0 0 0
+S
+#3267
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D1
+~
+~
+0 0 3268 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3266 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 3265 0 0 0 0 0 0 0 0
+S
+#3268
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3270 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 3269 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3265 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3267 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 3264 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 3266 0 0 0 0 0 0 0 0
+S
+#3269
+@RR@rub@Ry @DC@Wa@wve@D: @cWide Expanse@n~
+   @DThis wide part of the cave stretches out into darkness. Without walls to
+reflect what little light has penetrated these depths the darkness is so thick
+here that it appears absolute. There are fewer stalagmites and stalactites in
+this area due to the distance between the floor and ceiling. The sounds of
+winged creatures echo greatly in the wide expanse, creating a never ending
+disturbance to the otherwise quiet cave. @n
+~
+32 av 0 0 0 0
+D2
+~
+~
+0 0 3264 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3268 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 3265 0 0 0 0 0 0 0 0
+S
+#3270
+@RR@rub@Ry @DC@Wa@wve@D: @cMid Level@n~
+   @DThis area is bathed in darkness and very little fresh air from the surface
+has reached this far into the cave. The jagged stalactites and stalagmites are
+larger here as well making travel difficult. The smell of this part of the cave
+is rather damp and tinged with mold. Lastly the sounds of various winged
+creatures can be heard echoing throughout the cave occasionally. @n
+~
+32 acv 0 0 0 0
+D0
+~
+~
+0 0 3271 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3268 0 0 0 0 0 0 0 0
+S
+#3271
+@RR@rub@Ry @DC@Wa@wve@D: @cMid Level@n~
+   @DThis area is bathed in darkness and very little fresh air from the surface
+has reached this far into the cave. The jagged stalactites and stalagmites are
+larger here as well making travel difficult. The smell of this part of the cave
+is rather damp and tinged with mold. Lastly the sounds of various winged
+creatures can be heard echoing throughout the cave occasionally. @n
+~
+32 av 0 0 0 0
+D2
+~
+~
+0 0 3270 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 3272 0 0 0 0 0 0 0 0
+S
+#3272
+@RR@rub@Ry @DC@Wa@wve@D: @cMid Level@n~
+   @DThis area is bathed in darkness and very little fresh air from the surface
+has reached this far into the cave. The jagged stalactites and stalagmites are
+larger here as well making travel difficult. The smell of this part of the cave
+is rather damp and tinged with mold. Lastly the sounds of various winged
+creatures can be heard echoing throughout the cave occasionally. @n
+~
+32 av 0 0 0 0
+D1
+~
+~
+0 0 3273 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 3271 0 0 0 0 0 0 0 0
+S
+#3273
+@RR@rub@Ry @DC@Wa@wve@D: @cMid Level@n~
+   @DThis area is bathed in darkness and very little fresh air from the surface
+has reached this far into the cave. The jagged stalactites and stalagmites are
+larger here as well making travel difficult. The smell of this part of the cave
+is rather damp and tinged with mold. Lastly the sounds of various winged
+creatures can be heard echoing throughout the cave occasionally. @n
+~
+32 av 0 0 0 0
+D1
+~
+~
+0 0 3274 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3272 0 0 0 0 0 0 0 0
+S
+#3274
+@RR@rub@Ry @DC@Wa@wve@D: @cMid Level@n~
+   @DThis area is bathed in darkness and very little fresh air from the surface
+has reached this far into the cave. The jagged stalactites and stalagmites are
+larger here as well making travel difficult. The smell of this part of the cave
+is rather damp and tinged with mold. Lastly the sounds of various winged
+creatures can be heard echoing throughout the cave occasionally. @n
+~
+32 av 0 0 0 0
+D1
+~
+~
+0 0 3214 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3273 0 0 0 0 0 0 0 0
+S
+#3275
+@RR@rub@Ry @DC@Wa@wve@D: @cMid Level@n~
+   @DThis part of the cave is almost a complete cliff leading down to the darkest
+depths of the cave. Stagnant air is wafting up from the depths below. The
+darkness below is as absolute as possible with no natural means of illumination.
+The cliff face itself is potmarked from moisture damaging the walls sometime in
+the past. @n
+~
+32 acv 0 0 0 0
+D0
+~
+~
+0 0 3243 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 3276 0 0 0 0 0 0 0 0
+S
+#3276
+@RR@rub@Ry @DC@Wa@wve@D: @cDepths@n~
+   @DThis part of the cave is incredibly dark with no natural light to be found at
+all. The air is stagnant being that it is so far from the surface. There is
+also a subtle yet strong odor of guano floating through the air. There is a
+cliff face at the north side of this area leading up to the higher levels of the
+cave as well. @n
+~
+32 av 0 0 0 0
+D2
+~
+~
+0 0 3277 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 3275 0 0 0 0 0 0 0 0
+S
+#3277
+@RR@rub@Ry @DC@Wa@wve@D: @cDepths@n~
+   @DThis part of the cave is incredibly dark with no natural light to be found at
+all. The air is stagnant being that it is so far from the surface. There is
+also a subtle yet strong odor of guano floating through the air. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3276 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3278 0 0 0 0 0 0 0 0
+S
+#3278
+@RR@rub@Ry @DC@Wa@wve@D: @cDepths@n~
+   @DThis part of the cave is incredibly dark with no natural light to be found at
+all. The air is stagnant being that it is so far from the surface. There is
+also a subtle yet strong odor of guano floating through the air. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3277 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3280 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3279 0 0 0 0 0 0 0 0
+S
+#3279
+@RR@rub@Ry @DC@Wa@wve@D: @cDead End@n~
+   @DThis part of the cave is incredibly dark with no natural light to be found at
+all. The air is stagnant being that it is so far from the surface. There is
+also a subtle yet strong odor of guano floating through the air. @n
+~
+32 av 0 0 0 0
+D1
+~
+~
+0 0 3278 0 0 0 0 0 0 0 0
+S
+#3280
+@RR@rub@Ry @DC@Wa@wve@D: @cDepths@n~
+   @DThis part of the cave is incredibly dark with no natural light to be found at
+all. The air is stagnant being that it is so far from the surface. There is
+also a subtle yet strong odor of guano floating through the air. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3278 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 3281 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3299 0 0 0 0 0 0 0 0
+S
+#3281
+@RR@rub@Ry @DC@Wa@wve@D: @cDepths@n~
+   @DThis part of the cave is incredibly dark with no natural light to be found at
+all. The air is stagnant being that it is so far from the surface. There is
+also a subtle yet strong odor of guano floating through the air. @n
+~
+32 av 0 0 0 0
+D3
+~
+~
+0 0 3280 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 3282 0 0 0 0 0 0 0 0
+S
+#3282
+@RR@rub@Ry @DC@Wa@wve@D: @cDepths@n~
+   @DThis part of the cave is incredibly dark with no natural light to be found at
+all. The air is stagnant being that it is so far from the surface. There is
+also a subtle yet strong odor of guano floating through the air. @n
+~
+32 av 0 0 0 0
+D1
+~
+~
+0 0 3283 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 3281 0 0 0 0 0 0 0 0
+S
+#3283
+@RR@rub@Ry @DC@Wa@wve@D: @cDepths@n~
+   @DThis part of the cave is incredibly dark with no natural light to be found at
+all. The air is stagnant being that it is so far from the surface. There is
+also a subtle yet strong odor of guano floating through the air. @n
+~
+32 av 0 0 0 0
+D1
+~
+~
+0 0 3284 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3282 0 0 0 0 0 0 0 0
+S
+#3284
+@RR@rub@Ry @DC@Wa@wve@D: @cDepths@n~
+   @DThis part of the cave is incredibly dark with no natural light to be found at
+all. The air is stagnant being that it is so far from the surface. There is
+also a subtle yet strong odor of guano floating through the air. @n
+~
+32 av 0 0 0 0
+D1
+~
+~
+0 0 3285 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3292 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3283 0 0 0 0 0 0 0 0
+S
+#3285
+@RR@rub@Ry @DC@Wa@wve@D: @cDepths@n~
+   @DThis part of the cave is incredibly dark with no natural light to be found at
+all. The air is stagnant being that it is so far from the surface. There is
+also a subtle yet strong odor of guano floating through the air. @n
+~
+32 av 0 0 0 0
+D1
+~
+~
+0 0 3286 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3284 0 0 0 0 0 0 0 0
+S
+#3286
+@RR@rub@Ry @DC@Wa@wve@D: @cDepths@n~
+   @DThis part of the cave is incredibly dark with no natural light to be found at
+all. The air is stagnant being that it is so far from the surface. There is
+also a subtle yet strong odor of guano floating through the air. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3287 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3288 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3285 0 0 0 0 0 0 0 0
+S
+#3287
+@RR@rub@Ry @DC@Wa@wve@D: @cDead End@n~
+   @DThis part of the cave is incredibly dark with no natural light to be found at
+all. The air is stagnant being that it is so far from the surface. There is
+also a subtle yet strong odor of guano floating through the air. @n
+~
+32 av 0 0 0 0
+D2
+~
+~
+0 0 3286 0 0 0 0 0 0 0 0
+S
+#3288
+@RR@rub@Ry @DC@Wa@wve@D: @cDepths@n~
+   @DThis part of the cave is incredibly dark with no natural light to be found at
+all. The air is stagnant being that it is so far from the surface. There is
+also a subtle yet strong odor of guano floating through the air. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3286 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3289 0 0 0 0 0 0 0 0
+S
+#3289
+@RR@rub@Ry @DC@Wa@wve@D: @cDepths@n~
+   @DThis part of the cave is incredibly dark with no natural light to be found at
+all. The air is stagnant being that it is so far from the surface. There is
+also a subtle yet strong odor of guano floating through the air. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3288 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3290 0 0 0 0 0 0 0 0
+S
+#3290
+@RR@rub@Ry @DC@Wa@wve@D: @cDepths@n~
+   @DThis part of the cave is incredibly dark with no natural light to be found at
+all. The air is stagnant being that it is so far from the surface. There is
+also a subtle yet strong odor of guano floating through the air. @n
+~
+32 av 0 0 0 0
+D1
+~
+~
+0 0 3289 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3291 0 0 0 0 0 0 0 0
+S
+#3291
+@RR@rub@Ry @DC@Wa@wve@D: @cDepths@n~
+   @DThis part of the cave is incredibly dark with no natural light to be found at
+all. The air is stagnant being that it is so far from the surface. There is
+also a subtle yet strong odor of guano floating through the air. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3292 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 3290 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 3293 0 0 0 0 0 0 0 0
+S
+#3292
+@RR@rub@Ry @DC@Wa@wve@D: @cDepths@n~
+   @DThis part of the cave is incredibly dark with no natural light to be found at
+all. The air is stagnant being that it is so far from the surface. There is
+also a subtle yet strong odor of guano floating through the air. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3284 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3291 0 0 0 0 0 0 0 0
+S
+#3293
+@RR@rub@Ry @DC@Wa@wve@D: @cDepths@n~
+   @DThis part of the cave is incredibly dark with no natural light to be found at
+all. The air is stagnant being that it is so far from the surface. There is
+also a subtle yet strong odor of guano floating through the air. @n
+~
+32 av 0 0 0 0
+D3
+~
+~
+0 0 3294 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 3291 0 0 0 0 0 0 0 0
+S
+#3294
+@RR@rub@Ry @DC@Wa@wve@D: @cDepths@n~
+   @DThis part of the cave is incredibly dark with no natural light to be found at
+all. The air is stagnant being that it is so far from the surface. There is
+also a subtle yet strong odor of guano floating through the air. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3295 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 3293 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3296 0 0 0 0 0 0 0 0
+S
+#3295
+@RR@rub@Ry @DC@Wa@wve@D: @cSvvurm Nest@n~
+   @DThe ground of this part of the cave is covered in pieces of dead wood that
+have been woven into some sort of matting or nest. Large broken egg shells
+litter the top of the nest where it appears living beings emerged from them
+recently. @n
+~
+32 acv 0 0 0 0
+D2
+~
+~
+0 0 3294 0 0 0 0 0 0 0 0
+S
+#3296
+@RR@rub@Ry @DC@Wa@wve@D: @cDepths@n~
+   @DThis part of the cave is incredibly dark with no natural light to be found at
+all. The air is stagnant being that it is so far from the surface. There is
+also a subtle yet strong odor of guano floating through the air. @n
+~
+32 av 0 0 0 0
+D1
+~
+~
+0 0 3294 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 3297 0 0 0 0 0 0 0 0
+S
+#3297
+@RR@rub@Ry @DC@Wa@wve@D: @cDepths@n~
+   @DThis part of the cave is incredibly dark with no natural light to be found at
+all. The air is stagnant being that it is so far from the surface. There is
+also a subtle yet strong odor of guano floating through the air. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3298 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 3296 0 0 0 0 0 0 0 0
+S
+#3298
+@RR@rub@Ry @DC@Wa@wve@D: @cDepths@n~
+   @DThis part of the cave is incredibly dark with no natural light to be found at
+all. The air is stagnant being that it is so far from the surface. There is
+also a subtle yet strong odor of guano floating through the air. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3299 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3297 0 0 0 0 0 0 0 0
+S
+#3299
+@RR@rub@Ry @DC@Wa@wve@D: @cDepths@n~
+   @DThis part of the cave is incredibly dark with no natural light to be found at
+all. The air is stagnant being that it is so far from the surface. There is
+also a subtle yet strong odor of guano floating through the air. @n
+~
+32 av 0 0 0 0
+D0
+~
+~
+0 0 3280 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3298 0 0 0 0 0 0 0 0
+S
+$~

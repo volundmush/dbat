@@ -1,0 +1,1258 @@
+#7600
+Cavern Tunnels~
+   This deep cavern is flooded with water. Little to no light in available,
+and as you make your way further in it only gets worse. The walls of the
+tunnel are unworked or raw, closing tightly in some areas then expanding
+allowing maybe two people to stand shoulder to shoulder.
+~
+76 i g 0 0 9
+D0
+~
+~
+0 0 7601 0 0 0 0 0 0 0 0
+S
+#7601
+Cavern Tunnels~
+   This deep cavern is flooded with water. Little to no light in available,
+and as you make your way further in it only gets worse. The walls of the
+tunnel are unworked or raw, closing tightly in some areas then expanding
+allowing maybe two people to stand shoulder to shoulder.
+~
+76 i g 0 0 9
+D0
+~
+~
+0 0 7602 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7600 0 0 0 0 0 0 0 0
+S
+#7602
+Cavern Tunnels~
+   This deep cavern is flooded with water. Little to no light in available,
+and as you make your way further in it only gets worse. The walls of the
+tunnel are unworked or raw, closing tightly in some areas then expanding
+allowing maybe two people to stand shoulder to shoulder.
+~
+76 i g 0 0 9
+D2
+~
+~
+0 0 7601 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 7615 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 7603 0 0 0 0 0 0 0 0
+S
+#7603
+Cavern Tunnels~
+   This deep cavern is flooded with water. Little to no light in available,
+and as you make your way further in it only gets worse. The walls of the
+tunnel are unworked or raw, closing tightly in some areas then expanding
+allowing maybe two people to stand shoulder to shoulder.
+~
+76 i g 0 0 9
+D7
+~
+~
+0 0 7604 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7602 0 0 0 0 0 0 0 0
+S
+#7604
+Cavern Tunnels~
+   This deep cavern is flooded with water. Little to no light in available,
+and as you make your way further in it only gets worse. The walls of the
+tunnel are unworked or raw, closing tightly in some areas then expanding
+allowing maybe two people to stand shoulder to shoulder.
+~
+76 i g 0 0 9
+D7
+~
+~
+0 0 7605 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7603 0 0 0 0 0 0 0 0
+S
+#7605
+Cavern Tunnels~
+   This deep cavern is flooded with water. Little to no light in available,
+and as you make your way further in it only gets worse. The walls of the
+tunnel are unworked or raw, closing tightly in some areas then expanding
+allowing maybe two people to stand shoulder to shoulder.
+~
+76 ai g 0 0 9
+D0
+~
+~
+0 0 7606 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7604 0 0 0 0 0 0 0 0
+S
+#7606
+Cavern Tunnels~
+   This deep cavern is flooded with water. Little to no light in available,
+and as you make your way further in it only gets worse. The walls of the
+tunnel are unworked or raw, closing tightly in some areas then expanding
+allowing maybe two people to stand shoulder to shoulder.
+~
+76 ai g 0 0 9
+D2
+~
+~
+0 0 7605 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 7607 0 0 0 0 0 0 0 0
+S
+#7607
+Cavern Tunnels~
+   This deep cavern is flooded with water. Little to no light in available,
+and as you make your way further in it only gets worse. The walls of the
+tunnel are unworked or raw, closing tightly in some areas then expanding
+allowing maybe two people to stand shoulder to shoulder.
+~
+76 ai g 0 0 9
+D6
+~
+~
+0 0 7608 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7606 0 0 0 0 0 0 0 0
+S
+#7608
+Cavern Tunnels~
+   This deep cavern is flooded with water. Little to no light in available,
+and as you make your way further in it only gets worse. The walls of the
+tunnel are unworked or raw, closing tightly in some areas then expanding
+allowing maybe two people to stand shoulder to shoulder.
+~
+76 ai g 0 0 9
+D3
+~
+~
+0 0 7609 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7607 0 0 0 0 0 0 0 0
+S
+#7609
+Cavern Tunnels~
+   This deep cavern is flooded with water. Little to no light in available,
+and as you make your way further in it only gets worse. The walls of the
+tunnel are unworked or raw, closing tightly in some areas then expanding
+allowing maybe two people to stand shoulder to shoulder. To the south a single
+piece of the wall glows with bioluminescence produced by some odd looking
+algae. This lights up the room allowing you to see.
+~
+76 di g 0 0 9
+D1
+~
+~
+0 0 7608 0 0 0 0 0 0 0 0
+D2
+~
+wall~
+3 0 7616 20 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7610 0 0 0 0 0 0 0 0
+S
+#7610
+Cavern Tunnels~
+   This deep cavern is flooded with water. Little to no light in available,
+and as you make your way further in it only gets worse. The walls of the
+tunnel are unworked or raw, closing tightly in some areas then expanding
+allowing maybe two people to stand shoulder to shoulder.
+~
+76 ai g 0 0 9
+D1
+~
+~
+0 0 7609 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7611 0 0 0 0 0 0 0 0
+S
+#7611
+Cavern Tunnles~
+   This deep cavern is flooded with water. Little to no light in available,
+and as you make your way further in it only gets worse. The walls of the
+tunnel are unworked or raw, closing tightly in some areas then expanding
+allowing maybe two people to stand shoulder to shoulder.
+~
+76 ai g 0 0 9
+D7
+~
+~
+0 0 7610 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7612 0 0 0 0 0 0 0 0
+S
+#7612
+Cavern Tunnels~
+   This deep cavern is flooded with water. Little to no light in available,
+and as you make your way further in it only gets worse. The walls of the
+tunnel are unworked or raw, closing tightly in some areas then expanding
+allowing maybe two people to stand shoulder to shoulder.
+~
+76 ai g 0 0 9
+D2
+~
+~
+0 0 7613 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 7611 0 0 0 0 0 0 0 0
+S
+#7613
+Cavern Tunnels~
+   This deep cavern is flooded with water. Little to no light in available,
+and as you make your way further in it only gets worse. The walls of the
+tunnel are unworked or raw, closing tightly in some areas then expanding
+allowing maybe two people to stand shoulder to shoulder.
+~
+76 ai g 0 0 9
+D0
+~
+~
+0 0 7612 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7614 0 0 0 0 0 0 0 0
+S
+#7614
+Cavern Tunnels~
+   This deep cavern is flooded with water. Little to no light in available,
+and as you make your way further in it only gets worse. The walls of the
+tunnel are unworked or raw, closing tightly in some areas then expanding
+allowing maybe two people to stand shoulder to shoulder.
+~
+76 i g 0 0 9
+D6
+~
+~
+0 0 7613 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7615 0 0 0 0 0 0 0 0
+S
+#7615
+Cavern Tunnels~
+   This deep cavern is flooded with water. Little to no light in available,
+and as you make your way further in it only gets worse. The walls of the
+tunnel are unworked or raw, closing tightly in some areas then expanding
+allowing maybe two people to stand shoulder to shoulder.
+~
+76 i g 0 0 9
+D6
+~
+~
+0 0 7614 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7602 0 0 0 0 0 0 0 0
+S
+#7616
+Air Pocket~
+   The tunnel begins to work its way upwards creating a large air pocket near
+the ceiling. The bioluminescent algae covering the walls throws an eerie green
+glow through the water.
+~
+76 di g 0 0 7
+D0
+~
+wall~
+3 0 7609 20 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7617 0 0 0 0 0 0 0 0
+S
+#7617
+Air Pocket~
+   The tunnel begins to work its way upwards creating a large air pocket near
+the ceiling. The bioluminescent algae covering the walls throws an eerie green
+glow through the water.
+~
+76 di g 0 0 7
+D0
+~
+~
+0 0 7616 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7618 0 0 0 0 0 0 0 0
+S
+#7618
+Tunnel Exit~
+   The water in the slowly declines as the tunnel goes upward, eventually
+leveling off to about ankle deep water. As you slosh your way through, it
+suddenly becomes apparent that there are steps leading to above, and a brighter
+light trickles through the hole in the ceiling. The smell of dampness and life
+hangs heavy in the air.
+~
+76 d g 0 0 6
+D0
+~
+~
+0 0 7617 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 7619 0 0 0 0 0 0 0 0
+S
+#7619
+Lost City: Outer Ring~
+This unfinished room was created by Virtus.
+~
+76 0 g 0 0 1
+D0
+~
+~
+0 0 7647 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7620 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7646 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 7618 0 0 0 0 0 0 0 0
+S
+#7620
+Lost City: Outer Ring~
+This unfinished room was created by Virtus.
+~
+76 0 g 0 0 1
+D1
+~
+~
+0 0 7621 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7619 0 0 0 0 0 0 0 0
+S
+#7621
+Lost City: Outer Ring~
+This unfinished room was created by Virtus.
+~
+76 0 g 0 0 1
+D3
+~
+~
+0 0 7620 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 7622 0 0 0 0 0 0 0 0
+S
+#7622
+Lost City: Outer Ring~
+This unfinished room was created by Virtus.
+~
+76 0 g 0 0 1
+D7
+~
+~
+0 0 7623 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7621 0 0 0 0 0 0 0 0
+S
+#7623
+Lost City: Outer Ring~
+This unfinished room was created by Virtus.
+~
+76 0 g 0 0 1
+D7
+~
+~
+0 0 7624 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7622 0 0 0 0 0 0 0 0
+S
+#7624
+Lost City: Outer Ring~
+   @GA field with blue grass and minor shrubberies has been cultivated here. 
+The walls are spanned to either side giving more than enough room for food to
+be grown here. Though the fields look untilled and have long since overgrown
+since this city was abandoned. The walls are covered in bioluminescent algae
+that give off a green-ish light. One would have to assume that this is why
+grass grows within this mountain@n.
+~
+76 0 g 0 0 2
+D0
+~
+~
+0 0 7625 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7623 0 0 0 0 0 0 0 0
+S
+#7625
+Lost City: Outer Ring~
+   @GA field with blue grass and minor shrubberies has been cultivated here. 
+The walls are spanned to either side giving more than enough room for food to
+be grown here. Though the fields look untilled and have long since overgrown
+since this city was abandoned. The walls are covered in bioluminescent algae
+that give off a green-ish light. One would have to assume that this is why
+grass grows within this mountain@n.
+~
+76 0 g 0 0 2
+D0
+~
+~
+0 0 7626 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7624 0 0 0 0 0 0 0 0
+S
+#7626
+Lost City: Outer Ring~
+   @GA field with blue grass and minor shrubberies has been cultivated here. 
+The walls are spanned to either side giving more than enough room for food to
+be grown here. Though the fields look untilled and have long since overgrown
+since this city was abandoned. The walls are covered in bioluminescent algae
+that give off a green-ish light. One would have to assume that this is why
+grass grows within this mountain@n.
+~
+76 0 g 0 0 2
+D0
+~
+~
+0 0 7627 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7625 0 0 0 0 0 0 0 0
+S
+#7627
+Lost City: Outer Ring~
+   @yThe plains slowly give way to rocky hills. Large chunks of the ceiling of
+the cave have fallen, forcing new paths to be taken to move further around the
+ring. From some of the holes, water from the outside of the mountain slowly
+leaks in through waterfalls. The ground is covered by dead and decaying
+plant-life, which is perfect for the dusting of knee-deep foliage. In the
+distance, you can see the beginnings of a large forest of strange looking
+trees. @n
+~
+76 0 g 0 0 4
+D0
+~
+~
+0 0 7628 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7626 0 0 0 0 0 0 0 0
+S
+#7628
+Lost City: Outer Ring~
+   @yThe plains slowly give way to rocky hills. Large chunks of the ceiling of
+the cave have fallen, forcing new paths to be taken to move further around the
+ring. From some of the holes, water from the outside of the mountain slowly
+leaks in through waterfalls. The ground is covered by dead and decaying
+plant-life, which is perfect for the dusting of knee-deep foliage. In the
+distance, you can see the beginnings of a large forest of strange looking
+trees. @n
+~
+76 0 g 0 0 4
+D2
+~
+~
+0 0 7627 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 7629 0 0 0 0 0 0 0 0
+S
+#7629
+Lost City: Outer Ring~
+   @yThe plains slowly give way to rocky hills. Large chunks of the ceiling of
+the cave have fallen, forcing new paths to be taken to move further around the
+ring. From some of the holes, water from the outside of the mountain slowly
+leaks in through waterfalls. The ground is covered by dead and decaying
+plant-life, which is perfect for the dusting of knee-deep foliage. In the
+distance, you can see the beginnings of a large forest of strange looking
+trees. @n
+~
+76 0 g 0 0 4
+D6
+~
+~
+0 0 7630 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7628 0 0 0 0 0 0 0 0
+S
+#7630
+Lost City: Outer Ring~
+   @gRows of trees have been planted here, while most of trees have @mviolet@g
+leaves. A few large trees stand out and above the rest. These @Ytr@Re@Yes@g are wider
+and have @Wwhite@g bark decorating them. Artificial light streams down from above
+from large beautiful @Yop@Ra@Yls@g embedded into large runic symbols. @n
+~
+76 0 g 0 0 3
+D6
+~
+~
+0 0 7631 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7629 0 0 0 0 0 0 0 0
+S
+#7631
+Lost City: Outer Ring~
+   @gRows of trees have been planted here, while most of trees have @mviolet@g
+leaves. A few large trees stand out and above the rest. These @Ytr@Re@Yes@g are wider
+and have @Wwhite@g bark decorating them. Artificial light streams down from above
+from large beautiful @Yop@Ra@Yls@g embedded into large runic symbols. @n
+~
+76 0 g 0 0 3
+D3
+~
+~
+0 0 7632 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7630 0 0 0 0 0 0 0 0
+S
+#7632
+Lost City: Outer Ring~
+   @CThe trees end abruptly, giving way to a sandy ring around a large pool of
+water. The water goes as deep as three feet, but no further. It's always
+disturbed, with life teeming at not only the shore- but also deeper into the
+water. To the west, the a waterfall can be seen, pouring a seemingly endless
+amount of water into the pool. @n
+~
+76 0 gF 0 0 6
+D1
+~
+~
+0 0 7631 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7633 0 0 0 0 0 0 0 0
+S
+#7633
+Lost City: Outer Ring~
+   @CA large hole in the ceiling of the mountain spews out a constant stream of
+@cwater@C, which bounces off of various @yrocks and ledges@C to form a massive and
+beautiful @Cw@ca@Wt@ce@Cr@cf@Wa@cl@Cl@C. The roar of the @cwater@C smashing into the @yrocks@C, and
+further into the @Blake@C, drowns out almost every other noise with this proximity
+to it. The @cwater@C of the naturally formed @Blake@C is constantly disturbed, with
+@cwater@C coming in- and out. Towards the center, a mini-@Cw@ca@Wt@ce@Cr@cf@Wa@cl@Cl@C has been made
+as the @cwater@C from the @Blake@C overflows into the dark space between the outer and
+middle of the city.@n
+~
+76 0 g 0 0 6
+D1
+~
+~
+0 0 7632 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7634 0 0 0 0 0 0 0 0
+D10
+~
+~
+0 0 7686 0 0 0 0 0 0 0 0
+S
+#7634
+Lost City: Outer Ring~
+   @CThe trees end abruptly, giving way to a sandy ring around a large pool of
+water. The water goes as deep as three feet, but no further. It's always
+disturbed, with life teeming at not only the shore- but also deeper into the
+water. To the east, the a waterfall can be seen, pouring a seemingly endless
+amount of water into the pool. @n
+~
+76 0 gF 0 0 6
+D1
+~
+~
+0 0 7633 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7635 0 0 0 0 0 0 0 0
+S
+#7635
+Lost City: Outer Ring~
+   @gRows of trees have been planted here, while most of trees have @mviolet@g
+leaves. A few large trees stand out and above the rest. These @Ytr@Re@Yes@g are wider
+and have @Wwhite@g bark decorating them. Artificial light streams down from above
+from large beautiful @Yop@Ra@Yls@g embedded into large runic symbols. @n
+~
+76 0 g 0 0 3
+D1
+~
+~
+0 0 7634 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7636 0 0 0 0 0 0 0 0
+S
+#7636
+Lost City: Outer Ring~
+   @gRows of trees have been planted here, while most of trees have @mviolet@g
+leaves. A few large trees stand out and above the rest. These @Ytr@Re@Yes@g are wider
+and have @Wwhite@g bark decorating them. Artificial light streams down from above
+from large beautiful @Yop@Ra@Yls@g embedded into large runic symbols. @n
+~
+76 0 g 0 0 3
+D7
+~
+~
+0 0 7635 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7637 0 0 0 0 0 0 0 0
+S
+#7637
+Lost City: Outer Ring~
+   @yThe plains slowly give way to rocky hills. Large chunks of the ceiling of
+the cave have fallen, forcing new paths to be taken to move further around the
+ring. From some of the holes, water from the outside of the mountain slowly
+leaks in through waterfalls. The ground is covered by dead and decaying
+plant-life, which is perfect for the dusting of knee-deep foliage. In the
+distance, you can see the beginnings of a large forest of strange looking
+trees. @n
+~
+76 0 g 0 0 4
+D7
+~
+~
+0 0 7636 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7638 0 0 0 0 0 0 0 0
+S
+#7638
+Lost City: Outer Ring~
+   @yThe plains slowly give way to rocky hills. Large chunks of the ceiling of
+the cave have fallen, forcing new paths to be taken to move further around the
+ring. From some of the holes, water from the outside of the mountain slowly
+leaks in through waterfalls. The ground is covered by dead and decaying
+plant-life, which is perfect for the dusting of knee-deep foliage. In the
+distance, you can see the beginnings of a large forest of strange looking
+trees. @n
+~
+76 0 g 0 0 4
+D2
+~
+~
+0 0 7639 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 7637 0 0 0 0 0 0 0 0
+S
+#7639
+Lost City: Outer Ring~
+   @yThe plains slowly give way to rocky hills. Large chunks of the ceiling of
+the cave have fallen, forcing new paths to be taken to move further around the
+ring. From some of the holes, water from the outside of the mountain slowly
+leaks in through waterfalls. The ground is covered by dead and decaying
+plant-life, which is perfect for the dusting of knee-deep foliage. In the
+distance, you can see the beginnings of a large forest of strange looking
+trees. @n
+~
+76 0 g 0 0 4
+D0
+~
+~
+0 0 7638 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7640 0 0 0 0 0 0 0 0
+S
+#7640
+Lost City: Outer Ring~
+   @GA field with blue grass and minor shrubberies has been cultivated here. 
+The walls are spanned to either side giving more than enough room for food to
+be grown here. Though the fields look untilled and have long since overgrown
+since this city was abandoned. The walls are covered in bioluminescent algae
+that give off a green-ish light. One would have to assume that this is why
+grass grows within this mountain@n.
+~
+76 0 g 0 0 2
+D0
+~
+~
+0 0 7639 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7641 0 0 0 0 0 0 0 0
+S
+#7641
+Lost City: Outer Ring~
+   @GA field with blue grass and minor shrubberies has been cultivated here. 
+The walls are spanned to either side giving more than enough room for food to
+be grown here. Though the fields look untilled and have long since overgrown
+since this city was abandoned. The walls are covered in bioluminescent algae
+that give off a green-ish light. One would have to assume that this is why
+grass grows within this mountain@n.
+~
+76 0 g 0 0 2
+D0
+~
+~
+0 0 7640 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7642 0 0 0 0 0 0 0 0
+S
+#7642
+Lost City: Outer Ring~
+   @GA field with blue grass and minor shrubberies has been cultivated here. 
+The walls are spanned to either side giving more than enough room for food to
+be grown here. Though the fields look untilled and have long since overgrown
+since this city was abandoned. The walls are covered in bioluminescent algae
+that give off a green-ish light. One would have to assume that this is why
+grass grows within this mountain@n.
+~
+76 0 g 0 0 2
+D0
+~
+~
+0 0 7641 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7643 0 0 0 0 0 0 0 0
+S
+#7643
+Lost City: Outer Ring~
+This unfinished room was created by Virtus.
+~
+76 0 g 0 0 1
+D6
+~
+~
+0 0 7642 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7644 0 0 0 0 0 0 0 0
+S
+#7644
+Lost City: Outer Ring~
+This unfinished room was created by Virtus.
+~
+76 0 g 0 0 1
+D6
+~
+~
+0 0 7643 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7645 0 0 0 0 0 0 0 0
+S
+#7645
+Lost City: Outer Ring~
+This unfinished room was created by Virtus.
+~
+76 0 g 0 0 1
+D1
+~
+~
+0 0 7646 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 7644 0 0 0 0 0 0 0 0
+S
+#7646
+Lost City: Outer Ring~
+This unfinished room was created by Virtus.
+~
+76 0 g 0 0 1
+D1
+~
+~
+0 0 7619 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7645 0 0 0 0 0 0 0 0
+S
+#7647
+Lost City: Shallow Bridge~
+   This old stone path is covered with about a foot of water. Algae is growing
+on the walls right around the holes where the water seeps out before it pools
+onto the floor. Some stones are somewhat uprooted and slightly out of pass. 
+If one wasnt careful they might fall face first.
+~
+76 0 g 0 0 6
+D0
+~
+~
+0 0 7648 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7619 0 0 0 0 0 0 0 0
+S
+#7648
+Lost City: Middle Ring~
+This unfinished room was created by Virtus.
+~
+76 0 g 0 0 0
+D0
+~
+~
+0 0 7664 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7647 0 0 0 0 0 0 0 0
+S
+#7664
+Lost City: Shallow Bridge~
+   This old stone path is covered with about a foot of water. There are no
+walls here, instead water expands to both the left and the right. Water is
+pooling in off in the distance causing a waterfall sound to fill the area. 
+Its almost surreal if everything wasnt in ruins. 
+~
+76 0 g 0 0 6
+D0
+~
+~
+0 0 7665 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7684 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7648 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7670 0 0 0 0 0 0 0 0
+S
+#7665
+Lost City: Inner Circle~
+   The area feels desolate leaving little to no thought about there being life
+here. What looks like a once great civilization has been reduced to rubble. 
+The ruins stand tall however, some of the old buildings in better conditions
+than others. The stone that was used to erect these building seems like it
+could have come from the mountain walls that the ruins were residing in. The
+only true enemy of these once greatly crafted buildings is time.
+~
+76 0 g 0 0 0
+D0
+~
+~
+0 0 7666 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7664 0 0 0 0 0 0 0 0
+S
+#7666
+Lost City: Inner Circle~
+   The area feels desolate leaving little to no thought about there being life
+here. What looks like a once great civilization has been reduced to rubble. 
+The ruins stand tall however, some of the old buildings in better conditions
+than others. The stone that was used to erect these building seems like it
+could have come from the mountain walls that the ruins were residing in. The
+only true enemy of these once greatly crafted buildings is time.
+~
+76 0 g 0 0 0
+D0
+~
+~
+0 0 7669 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7668 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7665 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7667 0 0 0 0 0 0 0 0
+S
+#7667
+Lost City: Inner Circle~
+   The area feels desolate leaving little to no thought about there being life
+here. What looks like a once great civilization has been reduced to rubble. 
+The ruins stand tall however, some of the old buildings in better conditions
+than others. The stone that was used to erect these building seems like it
+could have come from the mountain walls that the ruins were residing in. The
+only true enemy of these once greatly crafted buildings is time.
+~
+76 0 g 0 0 0
+D1
+~
+~
+0 0 7666 0 0 0 0 0 0 0 0
+S
+#7668
+Lost City: Inner Circle~
+   The area feels desolate leaving little to no thought about there being life
+here. What looks like a once great civilization has been reduced to rubble. 
+The ruins stand tall however, some of the old buildings in better conditions
+than others. The stone that was used to erect these building seems like it
+could have come from the mountain walls that the ruins were residing in. The
+only true enemy of these once greatly crafted buildings is time.
+~
+76 0 g 0 0 0
+D3
+~
+~
+0 0 7666 0 0 0 0 0 0 0 0
+S
+#7669
+Lost City: Inner Circle~
+   The area feels desolate leaving little to no thought about there being life
+here. What looks like a once great civilization has been reduced to rubble. 
+The ruins stand tall however, some of the old buildings in better conditions
+than others. The stone that was used to erect these building seems like it
+could have come from the mountain walls that the ruins were residing in. The
+only true enemy of these once greatly crafted buildings is time.
+~
+76 0 g 0 0 0
+D2
+~
+~
+0 0 7666 0 0 0 0 0 0 0 0
+S
+#7670
+New BuildWalk Room~
+   @BThe ceiling expands upwards quite aways before turning into the dome. 
+Large holes in the walls spew water out at fairly alarming rate, though the
+water level doesnt seem to rise. The holes are evenly spaced and look as if
+they were deliberately carved and placed there. @n
+~
+76 0 g 0 0 7
+D0
+~
+~
+0 0 7671 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7664 0 0 0 0 0 0 0 0
+S
+#7671
+New BuildWalk Room~
+   @BThe ceiling expands upwards quite aways before turning into the dome. 
+Large holes in the walls spew water out at fairly alarming rate, though the
+water level doesnt seem to rise. The holes are evenly spaced and look as if
+they were deliberately carved and placed there. @n
+~
+76 0 g 0 0 7
+D2
+~
+~
+0 0 7670 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7672 0 0 0 0 0 0 0 0
+S
+#7672
+New BuildWalk Room~
+   @BThe ceiling expands upwards quite aways before turning into the dome. 
+Large holes in the walls spew water out at fairly alarming rate, though the
+water level doesnt seem to rise. The holes are evenly spaced and look as if
+they were deliberately carved and placed there. @n
+~
+76 0 g 0 0 7
+D0
+~
+~
+0 0 7673 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7671 0 0 0 0 0 0 0 0
+S
+#7673
+New BuildWalk Room~
+   @BThe ceiling expands upwards quite aways before turning into the dome. 
+Large holes in the walls spew water out at fairly alarming rate, though the
+water level doesnt seem to rise. The holes are evenly spaced and look as if
+they were deliberately carved and placed there. @n
+~
+76 0 g 0 0 7
+D0
+~
+~
+0 0 7674 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7672 0 0 0 0 0 0 0 0
+S
+#7674
+New BuildWalk Room~
+   @BThe ceiling expands upwards quite aways before turning into the dome. 
+Large holes in the walls spew water out at fairly alarming rate, though the
+water level doesnt seem to rise. The holes are evenly spaced and look as if
+they were deliberately carved and placed there. @n
+~
+76 0 g 0 0 7
+D1
+~
+~
+0 0 7675 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7673 0 0 0 0 0 0 0 0
+S
+#7675
+New BuildWalk Room~
+   @BThe ceiling expands upwards quite aways before turning into the dome. 
+Large holes in the walls spew water out at fairly alarming rate, though the
+water level doesnt seem to rise. The holes are evenly spaced and look as if
+they were deliberately carved and placed there. @n
+~
+76 0 g 0 0 7
+D0
+~
+~
+0 0 7676 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7674 0 0 0 0 0 0 0 0
+S
+#7676
+New BuildWalk Room~
+   @BThe ceiling expands upwards quite aways before turning into the dome. 
+Large holes in the walls spew water out at fairly alarming rate, though the
+water level doesnt seem to rise. The holes are evenly spaced and look as if
+they were deliberately carved and placed there. @n
+~
+76 0 g 0 0 7
+D1
+~
+~
+0 0 7677 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7675 0 0 0 0 0 0 0 0
+S
+#7677
+New BuildWalk Room~
+Note to Virtus: mention coral in the room description.  Hidden exit to down.
+~
+76 0 g 0 0 7
+D1
+~
+~
+0 0 7678 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7676 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 7685 0 0 0 0 0 0 0 0
+S
+T 7618
+#7678
+New BuildWalk Room~
+   @BThe ceiling expands upwards quite aways before turning into the dome. 
+Large holes in the walls spew water out at fairly alarming rate, though the
+water level doesnt seem to rise. The holes are evenly spaced and look as if
+they were deliberately carved and placed there. @n
+~
+76 0 g 0 0 7
+D2
+~
+~
+0 0 7679 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7677 0 0 0 0 0 0 0 0
+S
+#7679
+New BuildWalk Room~
+   @BThe ceiling expands upwards quite aways before turning into the dome. 
+Large holes in the walls spew water out at fairly alarming rate, though the
+water level doesnt seem to rise. The holes are evenly spaced and look as if
+they were deliberately carved and placed there. @n
+~
+76 0 g 0 0 7
+D0
+~
+~
+0 0 7678 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7680 0 0 0 0 0 0 0 0
+S
+#7680
+New BuildWalk Room~
+   @BThe ceiling expands upwards quite aways before turning into the dome. 
+Large holes in the walls spew water out at fairly alarming rate, though the
+water level doesnt seem to rise. The holes are evenly spaced and look as if
+they were deliberately carved and placed there. @n
+~
+76 0 g 0 0 7
+D2
+~
+~
+0 0 7681 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7679 0 0 0 0 0 0 0 0
+S
+#7681
+New BuildWalk Room~
+   @BThe ceiling expands upwards quite aways before turning into the dome. 
+Large holes in the walls spew water out at fairly alarming rate, though the
+water level doesnt seem to rise. The holes are evenly spaced and look as if
+they were deliberately carved and placed there. @n
+~
+76 0 g 0 0 7
+D0
+~
+~
+0 0 7680 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7682 0 0 0 0 0 0 0 0
+S
+#7682
+New BuildWalk Room~
+   @BThe ceiling expands upwards quite aways before turning into the dome. 
+Large holes in the walls spew water out at fairly alarming rate, though the
+water level doesnt seem to rise. The holes are evenly spaced and look as if
+they were deliberately carved and placed there. @n
+~
+76 0 g 0 0 7
+D0
+~
+~
+0 0 7681 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7683 0 0 0 0 0 0 0 0
+S
+#7683
+New BuildWalk Room~
+   @BThe ceiling expands upwards quite aways before turning into the dome. 
+Large holes in the walls spew water out at fairly alarming rate, though the
+water level doesnt seem to rise. The holes are evenly spaced and look as if
+they were deliberately carved and placed there. @n
+~
+76 0 g 0 0 7
+D1
+~
+~
+0 0 7682 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7684 0 0 0 0 0 0 0 0
+S
+#7684
+New BuildWalk Room~
+   @BThe ceiling expands upwards quite aways before turning into the dome. 
+Large holes in the walls spew water out at fairly alarming rate, though the
+water level doesnt seem to rise. The holes are evenly spaced and look as if
+they were deliberately carved and placed there. @n
+~
+76 0 g 0 0 7
+D0
+~
+~
+0 0 7683 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7664 0 0 0 0 0 0 0 0
+S
+#7685
+The Hydra's Lair~
+Note to Virtus: make a comment about there being a large rocky crevice here, with bubbles rising out of it.
+~
+76 ah g 0 0 9
+D4
+~
+~
+0 0 7677 0 0 0 0 0 0 0 0
+E
+crevice~
+Maybe you should @Rinspect@n it.
+~
+S
+T 7619
+#7686
+Behind the Waterfall~
+   Save A small cave can be found behind the roaring waterfall. The walls,
+floor, and ceiling have been smoothed away by the wetness that covers it. 
+There is evidence of animals having lived here, but in the center at the far
+back a single rock can be found, oddly placed.
+~
+76 acD g 0 0 0
+D11
+~
+~
+0 0 7633 0 0 0 0 0 0 0 0
+S
+$~

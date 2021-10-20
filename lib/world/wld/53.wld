@@ -1,0 +1,2271 @@
+#5300
+@WBefore the @WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n~
+ Up ahead is the Aromina Hunting preserve, inside the massive bio-dome that
+looms omniously.  A small building built into the bio-dome's surface appears to
+be an entry point for the reserve.
+~
+53 cpw 0 0 0 11
+D0
+~
+~
+0 0 5301 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 4952 0 0 0 0 0 0 0 0
+S
+T 310
+#5301
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WEntrance@n~
+@wVisitors to the Aromina Hunting preserve must pass through this building
+before entering.  The building resembles an old hunting cabin, with its oaken
+walls, ceilings and floors.  A fixed counter and turnstyle have been placed at
+the door leading into the preserve. A warning @Rsign@n has been posted on the counter.
+~
+53 ehpw 0 0 0 0
+D2
+~
+~
+0 0 5300 0 0 0 0 0 0 0 0
+E
+sign~
+   @RWarning@D:@W Creatures in the Aromina Hunting Preserve are highly aggressive and
+dangerous. Unprepared hunters may die. The Aromina Hunting Preserve is by no
+means liable for hunters who die in the preserve. @n
+
+   @WThe hunting lodge found in the plains section will offer hunters refuge. 
+Hunters also must speak to the guard stationed there to leave. @n
+~
+S
+#5302
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WHunting Lodge@n~
+ The front porch of the Hunting lodge is a place where hunters can relax.  
+The whole of the plains can be viewed from here, while the pictureqsue Mountains
+of the preserve, rise majestically on the horizon.
+~
+53 hw 0 0 0 0
+D0
+~
+~
+0 0 5303 0 0 0 0 0 0 0 0
+S
+#5303
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WHunting Lodge@n~
+   The front porch of the Hunting lodge is a place where hunters can relax. 
+The whole of the plains can be viewed from here, while the pictureqsue Mountains
+of the preserve, rise majestically on the horizon. There is a sign here.
+~
+53 chw 0 0 0 0
+D0
+~
+~
+0 0 5304 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5305 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5302 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5350 0 0 0 0 0 0 0 0
+E
+look sign~
+   To leave the hunting preserve, just say leave and the guard will teleport you
+out. 
+
+Aromina Hunting Preserve Management.
+~
+S
+#5304
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WHunting Lodge@n~
+ The front porch of the Hunting lodge is a place where hunters can relax.  
+The whole of the plains can be viewed from here, while the pictureqsue Mountains
+of the preserve, rise majestically on the horizon.
+~
+53 hw 0 0 0 0
+D2
+~
+~
+0 0 5303 0 0 0 0 0 0 0 0
+S
+#5305
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WHunting Lodge@n~
+ The lobby of the Hunting lodge is quite expansive, with many comfy couches
+for relaxtion.  In the middle of the back wall, is a large fire place, that
+roars day and night with bright flames.  Heads of various animals are mounted on
+the lodge walls, displaying the variety of creatures on offer for hunters in the
+Aromina Hunting preserve.
+~
+53 hw 0 0 0 0
+D0
+~
+~
+0 0 5306 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5307 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5303 0 0 0 0 0 0 0 0
+S
+#5306
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WHunting Lodge@n~
+ The lobby of the Hunting lodge is quite expansive, with many comfy couches
+for relaxtion.  In the middle of the back wall, is a large fire place, that
+roars day and night with bright flames.  Heads of various animals are mounted on
+the lodge walls, displaying the variety of creatures on offer for hunters in the
+Aromina Hunting preserve.
+~
+53 hw 0 0 0 0
+D1
+~
+~
+0 0 5308 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5305 0 0 0 0 0 0 0 0
+S
+#5307
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WHunting Lodge@n~
+ The lobby of the Hunting lodge is quite expansive, with many comfy couches
+for relaxtion.  In the middle of the back wall, is a large fire place, that
+roars day and night with bright flames.  Heads of various animals are mounted on
+the lodge walls, displaying the variety of creatures on offer for hunters in the
+Aromina Hunting preserve.  Stairs lead upward here.
+~
+53 hw 0 0 0 0
+D0
+~
+~
+0 0 5305 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5309 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 5310 0 0 0 0 0 0 0 0
+S
+#5308
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WHunting Lodge@n~
+ This area just off the main foyer is a small bar that caters to hunters.  
+They sell several alcoholic beverages imported from Earth, each having a large
+steel keg behind the bar with clear labels describing them.  A vending machine
+behind the bar emits a low hum and appears to sell cigars.
+~
+53 hw 0 0 0 0
+D3
+~
+~
+0 0 5306 0 0 0 0 0 0 0 0
+S
+#5309
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WHunting Lodge@n~
+ A wooden sign hangs loosely from the ceiling reading '@RHunting Supplies@n'.  
+The shelves lined up against the north and south walls are jammed full of
+different types of bait used to lure animals and other hunting equipment.  
+Various animal pelts hang from rusty nails on the eastern wall.
+~
+53 hw 0 0 0 0
+D3
+~
+~
+0 0 5307 0 0 0 0 0 0 0 0
+S
+#5310
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WHunting Lodge@n~
+ Heads of various animals are mounted on the lodge walls, displaying the
+variety of creatures on offer for hunters in the Aromina Hunting preserve.  
+This second floor hallway leads to rooms where guests may rest.  A stairway
+leads down to the hunting lodge lobby.
+~
+53 hw 0 0 0 0
+D0
+~
+~
+0 0 5311 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 5307 0 0 0 0 0 0 0 0
+S
+#5311
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WHunting Lodge@n~
+ Heads of various animals are mounted on the lodge walls, displaying the
+variety of creatures on offer for hunters in the Aromina Hunting preserve.  
+This second floor hallway leads to rooms where guests may rest.
+~
+53 hw 0 0 0 0
+D0
+~
+~
+0 0 5312 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5316 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5310 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5315 0 0 0 0 0 0 0 0
+S
+#5312
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WHunting Lodge@n~
+ Heads of various animals are mounted on the lodge walls, displaying the
+variety of creatures on offer for hunters in the Aromina Hunting preserve.  
+This second floor hallway leads to rooms where guests may rest.
+~
+53 hw 0 0 0 0
+D1
+~
+~
+0 0 5314 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5311 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5313 0 0 0 0 0 0 0 0
+S
+#5313
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WHunting Lodge@n~
+ A wooden bed with a thick animal fur blanket over it is pushed up against one
+wall.  Opposite the door is a window that allows guests at the lodge to look
+outside at the Preserve terrain.  Mounted heads of a bear and deer have been
+positioned on the walls.
+~
+53 hw 0 0 0 0
+D1
+~
+~
+0 0 5312 0 0 0 0 0 0 0 0
+S
+#5314
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WHunting Lodge@n~
+ A wooden bed with a thick animal fur blanket over it is pushed up against one
+wall.  Opposite the door is a window that allows guests at the lodge to look
+outside at the Preserve terrain.  Mounted heads of a bear and deer have been
+positioned on the walls.
+~
+53 hw 0 0 0 0
+D3
+~
+~
+0 0 5312 0 0 0 0 0 0 0 0
+S
+#5315
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WHunting Lodge@n~
+ A wooden bed with a thick animal fur blanket over it is pushed up against one
+wall.  Opposite the door is a window that allows guests at the lodge to look
+outside at the Preserve terrain.  Mounted heads of a bear and deer have been
+positioned on the walls.
+~
+53 hw 0 0 0 0
+D1
+~
+~
+0 0 5311 0 0 0 0 0 0 0 0
+S
+#5316
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WHunting Lodge@n~
+ A wooden bed with a thick animal fur blanket over it is pushed up against one
+wall.  Opposite the door is a window that allows guests at the lodge to look
+outside at the Preserve terrain.  Mounted heads of a bear and deer have been
+positioned on the walls.
+~
+53 hw 0 0 0 0
+D3
+~
+~
+0 0 5311 0 0 0 0 0 0 0 0
+S
+#5317
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5334 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5318 0 0 0 0 0 0 0 0
+S
+#5318
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5333 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5317 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5319 0 0 0 0 0 0 0 0
+S
+#5319
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5332 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5318 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5320 0 0 0 0 0 0 0 0
+S
+#5320
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5331 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5319 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5321 0 0 0 0 0 0 0 0
+S
+#5321
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5330 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5320 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5322 0 0 0 0 0 0 0 0
+S
+#5322
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5329 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5321 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5323 0 0 0 0 0 0 0 0
+S
+#5323
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5328 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5322 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5324 0 0 0 0 0 0 0 0
+S
+#5324
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5327 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5323 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5325 0 0 0 0 0 0 0 0
+S
+#5325
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5326 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5324 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5411 0 0 0 0 0 0 0 0
+S
+#5326
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5342 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5327 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5325 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5410 0 0 0 0 0 0 0 0
+S
+#5327
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5341 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5328 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5324 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5326 0 0 0 0 0 0 0 0
+S
+#5328
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5340 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5329 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5323 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5327 0 0 0 0 0 0 0 0
+S
+#5329
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5339 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5330 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5322 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5328 0 0 0 0 0 0 0 0
+S
+#5330
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5338 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5331 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5321 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5329 0 0 0 0 0 0 0 0
+S
+#5331
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5337 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5332 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5320 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5330 0 0 0 0 0 0 0 0
+S
+#5332
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5336 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5333 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5319 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5331 0 0 0 0 0 0 0 0
+S
+#5333
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5335 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5334 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5318 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5332 0 0 0 0 0 0 0 0
+S
+#5334
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D2
+~
+~
+0 0 5317 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5333 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 5335 0 0 0 0 0 0 0 0
+S
+#5335
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D2
+~
+~
+0 0 5333 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5336 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 5334 0 0 0 0 0 0 0 0
+S
+#5336
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5350 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5335 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5332 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5337 0 0 0 0 0 0 0 0
+S
+#5337
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5349 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5336 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5331 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5338 0 0 0 0 0 0 0 0
+S
+#5338
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5348 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5337 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5330 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5339 0 0 0 0 0 0 0 0
+S
+#5339
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5347 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5338 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5329 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5340 0 0 0 0 0 0 0 0
+S
+#5340
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5346 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5339 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5328 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5341 0 0 0 0 0 0 0 0
+S
+#5341
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5345 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5340 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5327 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5342 0 0 0 0 0 0 0 0
+S
+#5342
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5344 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5341 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5326 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5343 0 0 0 0 0 0 0 0
+S
+#5343
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5408 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5342 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5410 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5409 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 5344 0 0 0 0 0 0 0 0
+S
+#5344
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5407 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5345 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5342 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 5343 0 0 0 0 0 0 0 0
+S
+#5345
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5406 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5346 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5341 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5344 0 0 0 0 0 0 0 0
+S
+#5346
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5405 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5347 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5340 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5345 0 0 0 0 0 0 0 0
+S
+#5347
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 dhw 0 0 0 2
+D0
+~
+~
+0 0 5404 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5348 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5339 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5346 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 5351 0 0 0 0 0 0 0 0
+S
+#5348
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5351 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5349 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5338 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5347 0 0 0 0 0 0 0 0
+S
+#5349
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5352 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5350 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5337 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5348 0 0 0 0 0 0 0 0
+S
+#5350
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5353 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5303 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5336 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5349 0 0 0 0 0 0 0 0
+S
+#5351
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5403 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5352 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5348 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 5347 0 0 0 0 0 0 0 0
+S
+#5352
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5402 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5353 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5349 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5351 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 5354 0 0 0 0 0 0 0 0
+S
+#5353
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5354 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5350 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5352 0 0 0 0 0 0 0 0
+S
+#5354
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5401 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5355 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5353 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 5356 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 5352 0 0 0 0 0 0 0 0
+S
+#5355
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5356 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5354 0 0 0 0 0 0 0 0
+S
+#5356
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WPlains@n~
+ These long sweeping plains stretch on for miles and seem almost perfectly
+flat.  Grass up to a meter in height grows all across the plains, providing the
+perfect cover for smaller animals.  Besides the long grass, the only other
+vegetation is the occassional tree but are few and far between.
+~
+53 hw 0 0 0 2
+D0
+~
+~
+0 0 5400 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5355 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 5354 0 0 0 0 0 0 0 0
+S
+#5357
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5358 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5372 0 0 0 0 0 0 0 0
+S
+#5358
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5359 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5357 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5371 0 0 0 0 0 0 0 0
+S
+#5359
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5360 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5358 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5370 0 0 0 0 0 0 0 0
+S
+#5360
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D1
+~
+~
+0 0 5409 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5359 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5369 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 5361 0 0 0 0 0 0 0 0
+S
+#5361
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5413 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5412 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5369 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5368 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 5362 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 5360 0 0 0 0 0 0 0 0
+S
+#5362
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5363 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5413 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5368 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5367 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 5361 0 0 0 0 0 0 0 0
+S
+#5363
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5364 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5414 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5362 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5366 0 0 0 0 0 0 0 0
+S
+#5364
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5458 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5363 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5365 0 0 0 0 0 0 0 0
+S
+#5365
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5457 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5364 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5366 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 5378 0 0 0 0 0 0 0 0
+S
+#5366
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5365 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5363 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5367 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5378 0 0 0 0 0 0 0 0
+S
+#5367
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5366 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5362 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5376 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5377 0 0 0 0 0 0 0 0
+S
+#5368
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5362 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5361 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5375 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5376 0 0 0 0 0 0 0 0
+S
+#5369
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5361 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5360 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5370 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5375 0 0 0 0 0 0 0 0
+S
+#5370
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5369 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5359 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5371 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5374 0 0 0 0 0 0 0 0
+S
+#5371
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5370 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5358 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5372 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5373 0 0 0 0 0 0 0 0
+S
+#5372
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5371 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5357 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 5373 0 0 0 0 0 0 0 0
+S
+#5373
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5374 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5371 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5394 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 5372 0 0 0 0 0 0 0 0
+S
+#5374
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5375 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5370 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5373 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5383 0 0 0 0 0 0 0 0
+S
+#5375
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5368 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5369 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5374 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5382 0 0 0 0 0 0 0 0
+S
+#5376
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5367 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5368 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5382 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5381 0 0 0 0 0 0 0 0
+S
+#5377
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5378 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5367 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5381 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5380 0 0 0 0 0 0 0 0
+S
+#5378
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D1
+~
+~
+0 0 5366 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5377 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5379 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 5365 0 0 0 0 0 0 0 0
+S
+#5379
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D1
+~
+~
+0 0 5378 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5380 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5387 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 5388 0 0 0 0 0 0 0 0
+S
+#5380
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5379 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5377 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5385 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5386 0 0 0 0 0 0 0 0
+S
+#5381
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5377 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5376 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5384 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5385 0 0 0 0 0 0 0 0
+S
+#5382
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5376 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5375 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5383 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5384 0 0 0 0 0 0 0 0
+S
+#5383
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5382 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5374 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5394 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5393 0 0 0 0 0 0 0 0
+S
+#5384
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5381 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5382 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5393 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5392 0 0 0 0 0 0 0 0
+S
+#5385
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5380 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5381 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5392 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5391 0 0 0 0 0 0 0 0
+S
+#5386
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5387 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5380 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5391 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5390 0 0 0 0 0 0 0 0
+S
+#5387
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5388 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5379 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5386 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5389 0 0 0 0 0 0 0 0
+S
+#5388
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D2
+~
+~
+0 0 5387 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 5379 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 5389 0 0 0 0 0 0 0 0
+S
+#5389
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D1
+~
+~
+0 0 5387 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 5388 0 0 0 0 0 0 0 0
+S
+#5390
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D1
+~
+~
+0 0 5386 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 5391 0 0 0 0 0 0 0 0
+S
+#5391
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5386 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5385 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 5390 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 5392 0 0 0 0 0 0 0 0
+S
+#5392
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5385 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5384 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5399 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 5391 0 0 0 0 0 0 0 0
+S
+#5393
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5384 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5383 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5395 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5399 0 0 0 0 0 0 0 0
+S
+#5394
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5383 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5373 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5395 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 5396 0 0 0 0 0 0 0 0
+S
+#5395
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5393 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5394 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5396 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5398 0 0 0 0 0 0 0 0
+S
+#5396
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5395 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5397 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 5394 0 0 0 0 0 0 0 0
+S
+#5397
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5398 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5396 0 0 0 0 0 0 0 0
+S
+#5398
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5399 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5395 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5397 0 0 0 0 0 0 0 0
+S
+#5399
+@WA@wr@Do@cm@Ci@Dn@Wa @rH@Ru@Wn@wt@Wi@Rn@rg @gPreserve@n: @WWoods@n~
+ These woodlands stretch from the plains to the east and cover the entire
+southwestern quarter of the Aromina Hunting Preserve.  The ground gently begins
+sloping the further west hunters go into the woods.  Pine trees are prevalent
+here.
+~
+53 hw 0 0 0 3
+D0
+~
+~
+0 0 5392 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5393 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5398 0 0 0 0 0 0 0 0
+S
+$~

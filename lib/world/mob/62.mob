@@ -1,0 +1,356 @@
+#6200
+Colnel Silver~
+@DC@wo@Wl@Do@Wn@we@Dl @WS@wilve@Wr@n~
+Colonel Silver of the Red Ribbon Army, is flexing his muscles here
+~
+ 
+~
+dvwxy 0 0 0 l 0 0 0 0 E
+13 0 10 0d6+0 0d0+0
+0 0 0 2
+8 8 1
+Str: 7
+Dex: 14
+Int: 10
+Wis: 13
+Con: 7
+Cha: 14
+E
+#6201
+General Blue~
+@DG@We@wn@De@Wr@wal @BB@bl@cu@Ce@n~
+Red Ribbon Army General Blue is standing here
+~
+ 
+~
+dvwxy 0 0 0 l 0 0 0 0 E
+14 0 10 0d6+0 0d0+0
+0 0 0 2
+8 8 1
+Str: 8
+Dex: 13
+Int: 14
+Wis: 15
+Con: 18
+Cha: 18
+E
+#6202
+Captain Yellow~
+@WC@wa@Dp@wt@Wa@wi@Dn @YY@ye@Yl@yl@Yo@yw@n~
+@WC@wa@Dp@wt@Wa@wi@Dn @YY@ye@Yl@yl@Yo@yw@n is standing here
+~
+   A captain in the Red Ribbon Army, he appears to be a humanoid tiger,
+muscular, complete with orange and black stripped fur.
+~
+dvwxy 0 0 0 l 0 0 0 0 E
+11 0 10 0d6+0 0d0+0
+0 0 0 2
+8 8 1
+Str: 19
+Dex: 7
+Int: 5
+Wis: 7
+Con: 7
+Cha: 15
+E
+#6203
+Blue Saiba~
+@CB@cl@bu@Be @BS@ba@ci@Cba@n~
+A @CB@cl@bu@Be @BS@ba@ci@Cba@n is standing here
+~
+It looks unfinished.
+ 
+~
+dvwxyzA 0 0 0 l 0 0 0 0 E
+9 0 10 0d8+0 0d0+0
+0 0 16 30
+8 8 1
+Str: 9
+Dex: 13
+Int: 8
+Wis: 13
+Con: 16
+Cha: 6
+E
+#6204
+slim orange ogre eoz~
+Eoz~
+A @rs@yli@rm Or@yan@rge@w-@rsk@yin@rne@Yd @rO@ygr@re @nis standing here
+~
+   The skin of this tall ogre, slim in comparison to his brethren, is colored
+orange. Despite his thinner build, a stoic look is engraved on his flat face
+and the muscle he does have appears to have been well-trained. Set under his
+pair of short, close-set horns is a pair of pitch-black eyes. He is wearing a
+crisp white, fitted, button-down shirt with a black tie and a pair of black
+slacks. An off-white name tag hangs loosely from his breast pocket, the word
+"Eoz" written across its surface.
+~
+bdvwxyzA 0 0 0 l 0 0 0 0 E
+10 0 10 0d8+0 0d0+0
+0 0 18 9
+8 8 1
+Str: 7
+Dex: 11
+Int: 6
+Wis: 9
+Con: 13
+Cha: 19
+E
+#6205
+Captain Dark~
+@WC@wa@Dp@wt@Wa@wi@Dn @DD@War@Dk@n~
+The obese Captain Dark is standing here
+~
+ 
+~
+dvwxy 0 0 0 l 0 0 0 0 E
+11 0 10 0d6+0 0d0+0
+0 0 0 2
+8 8 1
+Str: 16
+Dex: 15
+Int: 20
+Wis: 20
+Con: 11
+Cha: 16
+E
+#6206
+Colonel Violet~
+@DC@wo@Wl@Do@Wn@we@Dl @MV@miole@Mt@n~
+Colonel Violet, the only female officer of the Red Ribbon Army is here
+~
+ 
+~
+dvwxy 0 0 0 l 0 0 0 0 E
+13 0 10 0d6+0 0d0+0
+0 0 0 2
+8 8 2
+Str: 10
+Dex: 18
+Int: 12
+Wis: 6
+Con: 6
+Cha: 17
+E
+#6207
+Commander Red~
+@DC@wo@Wm@Dm@wa@Dn@Wd@we@Dr @RR@re@Rd@n~
+Commander Red, the leader of the Red Ribbon Army is here, gloating
+~
+ 
+~
+dfvwxy 0 0 0 l 0 0 0 0 E
+15 0 10 0d6+0 0d0+0
+0 0 0 2
+8 8 1
+Str: 15
+Dex: 14
+Int: 12
+Wis: 18
+Con: 9
+Cha: 12
+E
+#6208
+General Copper~
+@DG@We@wn@De@Wr@wal @yCopper@n~
+General Copper scans the horizon here
+~
+ 
+~
+dvwxy 0 0 0 l 0 0 0 0 E
+14 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 20
+Dex: 9
+Int: 19
+Wis: 7
+Con: 17
+Cha: 18
+E
+#6209
+General White~
+@DG@We@wn@De@wr@wal @WWhite@n~
+General White is standing here, eyes closed
+~
+ 
+~
+dvwxy 0 0 0 l 0 0 0 0 E
+14 0 10 0d6+0 0d0+0
+0 0 0 2
+8 8 1
+Str: 9
+Dex: 10
+Int: 8
+Wis: 9
+Con: 14
+Cha: 11
+E
+#6210
+Major Metallitron~
+@WM@wa@Dj@wo@Wr @DM@weta@Dl@wl@Di@wtro@Dn@n~
+Metallitron is here, thumping his fists together in a menacing fashion
+~
+ 
+~
+dvwxy 0 0 0 l 0 0 0 0 E
+12 0 10 0d6+0 0d0+0
+0 0 0 2
+8 8 1
+Str: 10
+Dex: 11
+Int: 7
+Wis: 15
+Con: 9
+Cha: 15
+E
+#6211
+Staff Officer Black~
+@WStaff @wOfficer @DBlack@n~
+Staff Officer Black is standing here
+~
+ 
+~
+dvwxy 0 0 0 l 0 0 0 0 E
+16 0 10 0d6+0 0d0+0
+0 0 0 2
+8 8 1
+Str: 16
+Dex: 14
+Int: 18
+Wis: 18
+Con: 17
+Cha: 19
+E
+#6212
+Sergeant-Major Purple~
+@DS@wergean@Dt@w-@DM@wajo@Dr @mP@Murpl@me@n~
+Sergeant-Major Purple of the Red Ribbon Army is standing here
+~
+ 
+~
+dvwxy 0 0 0 0 0 0 0 0 E
+10 0 10 0d6+0 0d0+0
+0 0 0 2
+8 8 1
+Str: 8
+Dex: 15
+Int: 10
+Wis: 6
+Con: 14
+Cha: 9
+E
+#6213
+Red Ribbon Army Soldier~
+@RRed @rRibbon @RArmy @WSoldier@n~
+A Soldier with the Red Ribbon Army is looking for a fight here
+~
+ 
+~
+dvwxy 0 0 0 l 0 0 0 0 E
+8 0 10 0d6+0 0d0+0
+0 0 0 2
+8 8 1
+Str: 18
+Dex: 6
+Int: 17
+Wis: 8
+Con: 10
+Cha: 7
+E
+#6214
+Goz~
+Goz~
+Goz the Ogre is standing here
+~
+   @WThis large blue ogre appears to be in charge of this area of hell. He is
+wearing white shorts and a white tank top. On the shirt written in blue is the
+word "Hell". @n
+~
+bdsvwxyA 0 0 0 l 0 0 0 0 E
+5 0 10 0d0+0 0d0+0
+0 0 18 28
+8 8 1
+Str: 7
+Dex: 7
+Int: 7
+Wis: 8
+Con: 12
+Cha: 6
+E
+T 6201
+#6215
+Mez~
+Mez~
+Mez is standing here
+~
+   @WThis red skinned ogre is wearing white shorts, a white shirt with the word
+"Hell" on it, and glasses.@n
+~
+bdsvwxy 0 0 0 l 0 0 0 0 E
+10 0 10 0d0+0 0d0+0
+0 0 18 28
+8 8 1
+Str: 16
+Dex: 18
+Int: 5
+Wis: 14
+Con: 11
+Cha: 14
+E
+T 6204
+#6216
+Small Demon~
+Small Demon~
+A small demon is running around chasing souls here
+~
+ 
+~
+dvwxy 0 0 0 l 0 0 0 0 E
+14 0 10 0d8+0 0d0+0
+0 0 10 9
+8 8 1
+Str: 10
+Dex: 10
+Int: 17
+Wis: 12
+Con: 8
+Cha: 10
+E
+#6217
+Ogre~
+an Ogre~
+An Ogre idly walks around here, bored look on his face
+~
+ 
+~
+dvwxy 0 0 0 l 0 0 0 0 E
+5 0 10 0d0+0 0d0+0
+0 0 18 28
+8 8 1
+Str: 14
+Dex: 15
+Int: 20
+Wis: 7
+Con: 7
+Cha: 6
+E
+#6218
+female ogre~
+Female Ogre~
+A Female Ogre stands here
+~
+ 
+~
+dvwxy 0 0 0 l 0 0 0 0 E
+6 0 10 0d0+0 0d0+0
+0 0 18 28
+8 8 2
+Str: 11
+Dex: 6
+Int: 13
+Wis: 8
+Con: 15
+Cha: 13
+E
+$

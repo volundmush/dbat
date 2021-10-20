@@ -1,0 +1,33 @@
+@Version: 2
+#159
+Gmork~
+@GEarth@c: Orange Star Campus@n~
+15900 15999 10 2 0 0 0 0 1 100
+M 0 15915 1 15999 1 0 	(@WFollower@n of @YSet@n)
+M 0 15903 20 15933 3 40 	(@nRift student@n)
+M 0 15912 20 15994 1 40 	(@nBewitched student@n)
+M 0 15912 20 15990 1 40 	(@nBewitched student@n)
+M 0 15913 20 15991 1 40 	(@nRebel student@n)
+M 0 15914 1 15982 1 75 	(@WS@yu@Wp@ye@Wr@y S@Wa@yi@Wy@ya@Wm@ya@Wn@n)
+E 1 15900 100 6 -1 50 	(@GV@Wi@Ds@go@Wr@D H@Ge@Wl@Dm@ge@Wt@n)
+M 0 15912 20 15970 2 50 	(@nBewitched student@n)
+M 0 15912 20 15964 1 50 	(@nBewitched student@n)
+M 0 15912 20 15957 2 50 	(@nBewitched student@n)
+M 0 15913 20 15953 2 50 	(@nRebel student@n)
+M 0 15912 20 15949 1 50 	(@nBewitched student@n)
+M 0 15900 10 15942 1 50 	(@nPunk student@n)
+M 0 15912 20 15944 2 50 	(@nBewitched student@n)
+M 0 15913 20 15940 2 50 	(@nRebel student@n)
+M 0 15901 6 15927 2 60 	(@nOutlaw Gang Member@n)
+M 0 15900 6 15923 2 60 	(@nPunk student@n)
+M 0 15905 5 15918 1 50 	(@nSports Club student@n)
+M 0 15911 5 15918 1 50 	(@nGym student@n)
+M 0 15910 8 15905 2 60 	(@yOrange Star@n Cheerleader@n)
+M 0 15910 8 15906 2 60 	(@yOrange Star@n Cheerleader@n)
+M 0 15910 8 15908 2 60 	(@yOrange Star@n Cheerleader@n)
+M 0 15910 8 15910 2 60 	(@yOrange Star@n Cheerleader@n)
+M 0 15902 1 15928 1 0 	(@nOutlaw Jim@n)
+E 1 15936 500 6 -1 25 	(@WOutlaw@n @rJim's@n @WBandana@n)
+M 0 15936 1 15936 1 0 	(@nVi@Md@nel@n)
+S
+$

@@ -1,0 +1,143 @@
+#16900
+Gaxzixite Warrior~
+@BG@baxzixit@Be @DWarrior@n~
+@wA @BG@baxzixit@Be @DWarrior@w is standing here ready to fight!@n
+~
+   @WThis breed of arlian is entirely subterranean and has a more antlike
+appearance than its distant cousins that live on or near the surface. They
+also happen to have a poison gland inside their mouths. @n
+~
+bdf 0 0 0 l 0 0 0 0 E
+100 0 -1490 0d4+0 0d0+0
+0 0 20 13
+8 8 1
+Str: 77
+Dex: 52
+Int: 66
+Wis: 72
+Con: 90
+Cha: 66
+E
+T 16901
+#16901
+Gaxzixite Worker Drone~
+@BG@baxzixit@Be @wWorker @MDrone@n~
+@wA @BG@baxzixit@Be @wWorker @MDrone@w is working here.@n
+~
+   @WThis antlike arlian spends its entire life underground tending to the
+tunnels of the hive. Carrying rocks, honey, corpses, or whatever else needs
+moved or gathered. This Gaxzixite is about half the size of a warrior. @n
+~
+bd 0 0 0 l 0 0 0 0 E
+70 0 10 0d0+0 0d0+0
+0 0 20 28
+8 8 1
+Str: 69
+Dex: 37
+Int: 64
+Wis: 55
+Con: 62
+Cha: 44
+E
+#16902
+Gaxzixite Hatchling~
+@BG@baxzixit@Be @wHatchling@n~
+@wA @BG@baxzixit@Be @wHatchling is crawling here.@n
+~
+   @WThis Gaxzixite has just recently hatched. It spends most of its time eating
+and keeping the tunnels clean of debris. Unable to stand upright they tend to
+cling to walls whenever anything bigger than them is walking about. @n
+~
+bd 0 0 0 l 0 0 0 0 E
+20 0 10 0d0+0 0d0+0
+400 0 20 28
+8 8 0
+Str: 11
+Dex: 16
+Int: 15
+Wis: 15
+Con: 14
+Cha: 12
+E
+#16903
+Wild Toorg'ak~
+@RWild @gT@Go@Do@gr@Gg@w'@Ga@gk@n~
+@wA @Rwild @gT@Go@Do@gr@Gg@w'@Ga@gk@w is eating something crunchy here.@n
+~
+   @WThis large beatle like creature isn't as dangerous as the healthy Toorg'ak
+raised by the Kilnak. Having to survive in the battlefield of the Dark hasn't
+given this poor thing much food to grow by. @n
+~
+d 0 0 0 l 0 0 0 0 E
+85 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Str: 51
+Dex: 83
+Int: 31
+Wis: 40
+Con: 76
+Cha: 84
+E
+#16904
+Jekkix~
+@wJekkix@n~
+@wJekkix is standing guard here.@n
+~
+   @WThis large Kilnak warrior is dressed just like all the rest, save for a high
+quality blue colored silk sash tied about his waist. @n
+~
+bd 0 0 0 l 0 0 0 0 E
+95 0 10 0d0+0 0d0+0
+0 0 20 28
+8 8 1
+Str: 60
+Dex: 49
+Int: 75
+Wis: 58
+Con: 53
+Cha: 94
+E
+T 16903
+#16905
+Kirala~
+@wKirala@n~
+@wKirala the Kilnak worker overseer is resting here.@n
+~
+   @WThis beautiful (by arlian standards) Kilnak member is resting on a silk
+cushion here while observing the workers and accounting for the sorting of
+scavenged materials. @n
+~
+bd 0 0 0 l 0 0 0 0 E
+68 0 10 0d0+0 0d0+0
+0 0 20 28
+8 8 2
+Str: 62
+Dex: 35
+Int: 57
+Wis: 40
+Con: 65
+Cha: 48
+E
+T 16904
+#16906
+Skesksok~
+@RSkeskok@n~
+@wA @Rskeskok@w is clinging to the ceiling here.@n
+~
+   @WThis massive hairy spider makes the Dark its home, and catches wild Toorg'ak
+for meals. @n
+~
+bdf a 0 0 lu 0 0 0 0 E
+92 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 7
+Str: 12
+Dex: 8
+Int: 12
+Wis: 12
+Con: 8
+Cha: 8
+E
+$

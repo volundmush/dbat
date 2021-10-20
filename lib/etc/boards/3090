@@ -1,0 +1,201 @@
+Board File
+1 1 1 9 2
+#1
+Gmork
+1516610274
+Zone changes for Era 9
+@yOrange Star @WHighschool@n
+@G___________________________@n
+
+   @W-@R Level balancing. Zone should now be viable for levels 10-30 at base, expanded area is 50-60.
+   @W-@RZone Cleanup. Adjusted grammar, coloring and descriptions etc. for mobs and items.@n
+   @W-@RTalisman Trigger re-written. This was very simple, so now players will be flagged the moment they kill the Follower. Any further attempts will load the replica, and the items themselves no longer load, they're dropped through the trigger to avoid stealing.@n
+
+@WThe Moon@n
+@G_________________________________@n
+
+   @W-@RLevel balancing. Zone has been adjusted and now viable for 50-80ish on the level ranges, @WEXCLUDING@R the 100+ Mlvl mobs that stand out.@n
+   @W-@RFinished the zone. Remaining Vnums were used to add in the FIB moon base, as well as the Lost temple of Samael (only denoted by the statue and the ambience).
+   @W-@RZone cleanup. Adjusted grammar, coloring and descriptions etc. for mobs and items.@n
+   @W-@ROnyx Ore item. This has been given to a new Onyx Golem, Mlvl set to be similar to the Sapphire golem. This for now is a cash item that can be sold, but is intended to be attached to a quest setup similar to the Fangol Blitz Bracer mid-era.@n
+~
+#2
+Iovan
+1411338888
+Dragons plus more
+   I've changed the lizardfolk race into dragon race. If you have anything
+built as a lizardfolk before you should probably change it to something else.
+Dragons will have the fire breath attack open to them. I'll add other elements
+eventually for them to breath out. Shadow Dragons, the wyverns on Yardrat, all
+currently built dragons, and Bahamut are all now dragon type.
+
+   I've also added in two other attacks for non-humanoid npcs to use. The
+first is fang strike, which only serpents can use. The second is ram, which
+any non-humanoid can use (rarely). Fang strike has a good chance to hit with a
+bonus to bite's damage. Ram does a lot of damage with less of a chance to hit
+and a good chance to bust up limbs.
+~
+#3
+Iovan
+1410858761
+NPC Skillsets
+   Setting an NPC to the following classes will give them access to ki attacks
+(such as kiblast) if they roll the chance to use a ki attack, as well as
+special ki attacks if they roll high enough to do one.
+ 
+Class             Skills  ( Least Likely to Fire -> Most Likely to Fire)
+--------------------------------------------------------------------------
+Roshi - Kakusanha, Kienzan, Kamehameha, Barrier, Tier 1 and 2 ki attacks
+Krane - Tribeam, Hasshuken, Dodonpa, Barrier, Tier 1 and 2
+Bardock - Final Flash, Big Bang, Galik Gun, Barrier, Tier 1 and 2
+Frieza - Deathball, Kienzan, Deathbeam, Barrier, Tier 1 and 2
+Piccolo - Scatter Shot, Special Beam Cannon, Masenko, Barrier, Tier 1 and 2
+Nail - Regenerate, Heal, Masenko, Zanzoken*, Tier 1 and 2
+Sixteen - Hell Flash, Kousengan, Dual Beam, Barrier, Tier 1 and 2
+Ginyu - Spiral, Crusher Ball, Eraser Cannon, Zanzoken*, Tier 1 and 2
+Kurzak - Ensnare, Seishou Enko, Renzo, Barrier, Tier 1 and 2
+Tsuna - Koteiru, Water Razor, Water Spikes, Barrier, Tier 1 and 2
+Jinto - Star Nova, Star Breaker, Trip, Zanzoken*, Tier 1 and 2
+Tapion - Phoenix Slash, Darkness Dragon Slash, Twin Slash, Zanzoken*, Tier 1 and 2
+Kibito - Psychic Barrage, Psychic Blast, Heal, Zanzoken*, Tier 1 and 2
+Dabura (Do not give to every demon!)- Hellspear, Honoo, Fireshield, Zanzoken*, Tier 1 and 2
+
+   *: Tier 1 and 2 has a chance everytime to roll a zanzoken. This separate
+zanzoken listing is an extra chance for a zanzoken (since normally a barrier
+would be rolled if they have barrier where Zanzoken* is listed. )
+
+   If an NPC is generally weak (level 10 or below) or a "normal" type of person
+do not give them a class. Normal citizens should not have a class other than
+commoner.
+~
+#4
+Iovan
+1410220083
+No Poison
+   Added no poison mob flag to medit. This will make the mob immune to the
+poison skill.
+~
+#5
+Iovan
+1376038311
+Scripts
+A reference can be found here. It sure would be nice if someone could go through the site and copy most of this information down for us and place it on the staff's building section on the forum.
+
+http://www.tbamud.com/Oasis_DG_pages/contents/script_commands.htm
+~
+#6
+Sedalis
+1358467595
+Newbie Quests
+These senseis now have newbie quests:
+Bardock
+Roshi
+Frieza
+Ginyu
+Krane
+Sixteen
+Piccolo
+
+The other senseis already had quests, or didn't warrant them. The quest reward
+is twofold. The item you get from the quest is edible, and can be gotten over
+and over again. It only fills you up by 1, so it's a terrible food... But
+it's something to prevent starving at the beginning and easy to obtain. Also,
+when completing the quest... You get two Public Transport Tickets that you can
+use to go to Namek to grav train and come back. The quest can only be
+completed once, so you can't spam tickets from it.
+
+Some minor changes to areas have been done in some spots. Notably, this means
+signs have been put up directing noobs to the area the noob quest involves...
+In the form of a street sign type thing. This was only done for some (some,
+like frieza and the frozen fist dojo... You have no choice but to pass on your
+way out, so you don't need signs... )
+~
+#7
+Sedalis
+1356185279
+Pendelum Room Errors
+Should be fixed. The trigger was being offset by an interestingly written
+while statement so that when it detected the player, it set the variable to not
+the player, but the previous run through of the script var.
+~
+#8
+Sedalis
+1356151247
+Arlia Food Shop
+Added a food shop to Arlia in zone 160 (room and shop vnum 16096). There was
+already a food place there (known after the fact), but Sam didn't mind if it
+stayed.
+~
+#9
+Sedalis
+1354900884
+Gabriela's Resize Script
+Gabriela's resize script had several errors in syntax, as well as an
+inconsistency with what was written on the board. I copied the trigger to vnum
+14791 and rewrote parts of the original (14790) to make it both accurate and
+correct in syntax.
+
+@R-@nPrice now accurately reflects 5% of the cost plus level of the item times 50
+@R-@nThe say script had a percent sign in it, which aborted the rest of the say
+after it, probably because it was looking for a variable.
+@R-@nThe say information has been updated to let the player know the cost both on
+failure and success.
+
+@R-@YSedalis@n
+~
+S101 Set 1516610274
+S101 Virtus 1516610274
+S124 Gmork 1410858761
+S124 Residue 1410858761
+S124 Tsokolate 1410858761
+S124 Psychopomp 1410858761
+S124 Seraph 1410858761
+S124 Fenrir 1410858761
+S124 Andros 1410858761
+S124 Iovan 1410858761
+S124 Virtus 1410858761
+S124 Faye 1410858761
+S124 Set 1410858761
+S124 Rillao 1410858761
+S124 Seddy 1410858761
+S156 Gmork 1411338888
+S156 Residue 1411338888
+S156 Tsokolate 1411338888
+S156 Psychopomp 1411338888
+S156 Fenrir 1411338888
+S156 Cypher 1411338888
+S156 Virtus 1411338888
+S156 Iovan 1411338888
+S156 Samael 1411338888
+S156 Andros 1411338888
+S156 Faye 1411338888
+S156 Set 1411338888
+S156 Rillao 1411338888
+S156 Seddy 1411338888
+S168 Gmork 1410220083
+S168 Residue 1410220083
+S168 Tsokolate 1410220083
+S168 Psychopomp 1410220083
+S168 Fenrir 1410220083
+S168 Samael 1410220083
+S168 Set 1410220083
+S168 Faye 1410220083
+S168 Iovan 1410220083
+S168 Virtus 1410220083
+S168 Andros 1410220083
+S168 Rillao 1410220083
+S168 Seddy 1410220083
+S257 Gmork 1376038311
+S257 Residue 1376038311
+S257 Tsokolate 1376038311
+S257 Psychopomp 1376038311
+S257 Faye 1376038311
+S257 Iovan 1376038311
+S257 Samael 1376038311
+S257 Andros 1376038311
+S257 Buddha 1376038311
+S257 Aresael 1376038311
+S257 Virtus 1376038311
+S257 Set 1376038311
+S257 Rillao 1376038311
+S257 Seddy 1376038311

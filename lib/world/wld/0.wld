@@ -1,0 +1,911 @@
+#0
+The Void~
+    You are awe stricken by your presense here. You stand in a part of the
+universe not made for mortals. You are surrounded by the great Nothing.
+~
+0 dn 0 0 0 0
+S
+T 1
+#1
+Limbo~
+   The dwelling place of a soul, you stand on the plane of Limbo. Everything
+around you is grey and swirling. You do not feel the pull of time upon your
+bones here, you wonder how long you will stay... @n
+~
+0 dh 0 0 0 1
+S
+#2
+@DThe Hall of Truth@n~
+   @WStone pillars line this place, stretched bewtween marble ceiling and the
+floor. A ring of enormous stone chairs sit in the center of this hall,
+gathered together in a circle; tall backs rising high. These throne-like
+chairs are where each of the Greater Immortals of the @DUn@mi@Dve@mr@Dse@W sit and discuss
+matters of importance. @n
+~
+0 hD 0 0 0 0
+D0
+~
+door~
+1 0 8 20 0 0 0 0 0 0 0
+D1
+~
+door~
+1 0 7 20 0 0 0 0 0 0 0
+D2
+~
+undefined~
+0 0 6 20 0 0 0 0 0 0 0
+D3
+~
+door~
+1 0 11 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 12 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 300 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 9 0 0 0 0 0 0 0 0
+E
+chair chairs throne thrones~
+   @WThese throne like chairs are massive and constructed of a black stone of the
+rarest quality.  Symbols are carved into the backs of each chair, with a wolf
+symbol carved into the back of the head throne chair.  @n
+~
+E
+floor marble below ground~
+   @WThe floor of the area is made of a nice marble unlike any found in the known
+universe.  It throbs with an otherworldly light.  @n
+~
+S
+#3
+0~
+This is where stuff on the test ship is stored.
+~
+0 lmn e 0 0 0
+D0
+~
+~
+0 0 4 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2 0 0 0 0 0 0 0 0
+S
+#4
+Inside the ragnarok~
+You are inside the ragnarok, it is the second test ship.
+~
+0 jlmn 0 0 0 0
+D2
+~
+~
+0 0 3 0 0 0 0 0 0 0 0
+S
+#5
+@rDump Room@n~
+   @RThis is the dump for all mortal stuff. It shouldn't see much if any use. 
+If there is anything in here do not worry as it will be purged regularly by the
+mud. @n
+~
+0 h 0 0 0 0
+D1
+~
+~
+0 0 6 0 0 0 0 0 0 0 0
+S
+#6
+@DI@Wo@wv@Wa@Dn@W'@ws @bO@Bf@wf@Bi@bc@we@n~
+   @WThis room is constructed of a strange type of stone.  A table takes up the
+center of the room, with thousands of papers resting on its surface.  A large
+celestial flame hovers above, lighting the entire room and especially the table.
+A large comfy chair sits at one edge of the table, where someone of immense size
+can sit and work on whatever projects the table can hold.  @n
+~
+0 h 0 0 0 0
+D0
+~
+~
+0 0 2 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5 0 0 0 0 0 0 0 0
+S
+T 98
+#7
+@RPunishment Room@n~
+   This is the @RPunishment Room@n, where records of all mortals' wrongdoings are
+recorded.
+~
+0 h 0 0 0 11
+D1
+~
+~
+0 0 16694 0 0 0 0 0 0 0 0
+D3
+~
+door~
+1 0 2 20 0 0 0 0 0 0 0
+S
+#8
+@DGmork's Office@n~
+   @WThis room is constructed of pure white marble, and clouds can be seen
+floating outside the many windows that are built into the room's walls.  A large
+table fills the room and on it tiny mountains and buildings sit.  Seemingly left
+over work of the immortals who built the planets...  @n
+~
+0 h F 0 0 0
+D2
+~
+door~
+1 0 2 20 0 0 0 0 0 0 0
+S
+#9
+@DH@re@Rl@Yl@n~
+   @RThis is a room of intense heat built just for hooligans who can't respect the
+rules properly.  @n
+~
+0 efhC 0 0 0 0
+S
+#10
+Project Team Room~
+ This room is for the project team
+~
+0 0 0 0 0 0
+D3
+~
+~
+0 0 8 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 2 0 0 0 0 0 0 0 0
+S
+#11
+@CVirtus' Roleplay Office@n~
+   @WThis organized chaos of a room belongs to the immortal @CVi@crt@Cus@W. Everything
+seems to be floating on puffy white clouds, or flying around in a sense of
+weightlessness. A large @ywooden@W desk sits in the direct middle of the room,
+facing the door. A high backed, @Dblack@W leather chair is half pushed into the
+desk. Documents are strewn across the room, in the drawers, on the surface of
+the desk, or in some other place, haphazardly placed down. Each document
+represents @nevery@W mortal in the universe, and their story- everything that they
+have done, and are constantly updated through some magical means. Behind the
+desk floats the roleplay board, sitting on its own cloud. It seems to be the
+only "organized" thing in the room, with scheduled roleplay events written out
+over most of the surface in bright @Ggreen@W marker.
+~
+0 h 0 0 0 0
+D0
+~
+seraph~
+1 0 14 20 0 0 0 0 0 0 0
+D1
+~
+door~
+1 0 2 20 0 0 0 0 0 0 0
+S
+#12
+@GS@Ce@cr@gen@ci@Ct@Gy @cG@Cl@Wa@Cd@ce@n~
+ @gYou find yourelf by a small babbling brook, in a lush green field surrounded
+by a thick wall of pine tress.  The sounds of the brook are soothing and
+relaxing to your ears.  Occassionaly a rabbit will bound playfully across the
+field.  Looking around, something is not right, everything is not clear and
+concise as it should be, the images are rough edged and the colors have a watery
+tone to them.  It is almost like you have stepped into a painting.  @n
+~
+0 h 0 0 0 0
+S
+T 18700
+T 4128
+#13
+@YRillao's @xD@xe@xs@xc@xe@xn@xt @xi@xn@xt@xo @xM@xa@xd@xn@xe@xs@xs@n~
+@7 @n         @3 @n               @4 @n                          @2 @n
+@0        @6 @n                                     @3 @n
+@0                @1 @n                 @4 @n             @7 @n
+@0    @5 @n                    @1 @n     @6 @n                      @3 @n
+@0  @2 @n    @5 @n             @5 @n              @7 @n       @1 @n
+~
+0 h 0 0 0 0
+S
+#14
+@YSeraph's @RCorner@n~
+   @nThree floating pillars form a triangle, revolving around a large table. On
+the table are @Cthree-@Yd@Wi@Ym@We@Yn@Ws@Yi@Wo@Yn@Wa@Yl@n models of random locations throughout the
+universe. The center models look to be designed for the @Ra@Yf@Rt@Ye@Rr@Yl@Ri@Yf@Re@n in
+particular. An obscenely large D-20 sits on the edge of the table in front of
+a large leather chair. Runes cover the chair as if a child with a crayon got a
+hold of it.
+~
+0 B 0 0 0 0
+S
+#15
+Test Ship 2~
+This is the second test ship.
+~
+0 jl 0 0 0 0
+D2
+~
+~
+0 0 16 0 0 0 0 0 0 0 0
+S
+#16
+@RLa@Ywbind@R's @yOffice@n~
+You are in an unfinished room.
+~
+0 n 0 0 0 0
+D0
+~
+~
+0 0 15 0 0 0 0 0 0 0 0
+S
+#19
+@cC@Ca@Wp@wsu@cl@Ce @cC@Co@Wr@wp @WSa@wles@n~
+   @WThis store is a branch of the Capsule Corporation, responsible for
+distributing their products to the public. Several aisles are present, much
+like a convenience store, that are filled with primarily capsule (or dynocap)
+products, as well as items in other ranges produced by Capsule Corporation. @n
+
+@WA @Rsign@W hangs over the counter here.@n
+~
+0 u 0 0 0 10
+D2
+~
+~
+0 0 370 0 0 0 0 0 0 0 0
+E
+look sign~
+This sign is OOC
+   The capsules are banded into three categories: @YGold@n, @DSilver@n and @yBronze@n
+(going from best to worst). To use a capsule, you must type click <capsule's
+full name> (Minus the a).
+
+For example: The radar capsule is activated by typing @Yclick radar capsule@n.
+~
+S
+#20
+@yC@Dh@Wo@wc@yo@Dl@Wa@wt@ye @CShop@n~
+   @WThis small shop has been built to resemble classical sweet shops, only this
+one obviously specializes in chocalate. A kitchen can be seen in the back of
+the shop, complete with old style stoves and marble counters. Near the front of
+the shop there is a cash register on a small table off to the side. In the
+center of the front however is a large display showing off the various
+chocolates that are on sale. @n
+~
+0 u 0 0 0 10
+D3
+~
+~
+0 0 341 0 0 0 0 0 0 0 0
+S
+#21
+Storage Room~
+@WThis is just a plain storage room. Leave it be.@n
+~
+0 hjl 0 0 0 0
+D0
+~
+~
+0 0 22 0 0 0 0 0 0 0 0
+S
+#22
+Storage Room Atrium~
+@WThis is just a plain storage room atrium. Leave it be.@n
+~
+0 hln 0 0 0 0
+D2
+~
+~
+0 0 21 0 0 0 0 0 0 0 0
+S
+#23
+@yS@Yt@Wo@wrage @gPlus@n~
+   @WThis small cramped area appears to be the lobby of a storage company. There
+is a smooth black counter made of unknown material built around the floor space
+of the lobby on all sides except where the glass door entrance is located. 
+Behind the counter endless rows of storage boxes can be seen stacked. @n
+
+@wA @Rsign@w is handing here.@n
+~
+0 ceh 0 0 0 0
+D2
+~
+~
+0 0 399 0 0 0 0 0 0 0 0
+E
+sign~
+   @wIt costs 1500 zenni to store an object here. Objects stored can not exceed
+9000 weight. You can only store one object at a time(though it can be a
+container that has other objects in it). Stored objects will be held for 160
+MUD DAYS before they are removed. So make sure to renew their rental(for
+another 1500 zenni) or pick them up. @n
+
+@GCOMMANDS@n
+@w------------
+store (object)
+check
+renew
+pickup
+~
+S
+#25
+@YJ@yim@Y's @DW@We@wi@Dg@Wh@wt@De@wd @GG@ge@wa@Gr@n~
+   @WThis room has rows of display shelves with various types of weighted gear
+stacked on them. The shelves are made out of heavy duty steel in order to hold
+all the weight the gear puts on them. A counter with a register can be seen
+far to the back of the store. @n
+
+@wA @Rsign@w has been posted here@n.
+~
+0 u 0 0 0 10
+D2
+~
+~
+0 0 401 0 0 0 0 0 0 0 0
+E
+sign~
+   @cOOC: Do not buy any weighted equipment if you do not feel confident you will
+be able to store it. It's heavy and will take up a lot of your carry weight
+when not worn and will not fit in most containers. Those with houses, ships,
+or clan vaults can safely store them though. @n
+~
+S
+#26
+@cShop @wof @rR@Ra@Wr@we @WThings@n~
+   @DThis dark and mysterious shop is small. Almost the size of a normal house
+bedroom. It has shelves stacked with odd and curious looking objects. The
+shelves line either wall leading to a small counter in the back. @n
+~
+0 c f 0 0 10
+D2
+~
+~
+0 0 14032 0 0 0 0 0 0 0 0
+S
+#29
+An unfinished room~
+You are in an unfinished room.
+~
+0 0 0 0 0 0
+S
+#39
+An unfinished room~
+You are in an unfinished room.
+~
+0 0 0 0 0 0
+D0
+~
+~
+0 0 523 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 58 0 0 0 0 0 0 0 0
+S
+#46
+@DPocket Dimension@n~
+   @xThis strange place shimmers with different colors that change to the pattern
+of a pulsing sound. Everytime the walls of this dimension change color to the
+sound a vibration of energy can be felt rippling through the air. @n
+~
+0 0 b 0 0 11
+S
+#47
+An unfinished room~
+You are in an unfinished room.
+~
+0 0 0 0 0 0
+D8
+~
+~
+0 0 1543 0 0 0 0 0 0 0 0
+S
+#48
+@DSpace@n~
+   @DYou can see stars and blackness through the viewport of the public transport
+ship. The stars rush past so fast they almost have blurred completely into
+solid lines. @n
+~
+0 eh 0 0 0 0
+S
+T 59
+#49
+Mob Goto Room~
+@WThis is only for mobs!@n
+~
+0 h 0 0 0 0
+S
+#50
+@cL@Co@Ww @gE@Ga@Wr@wth @yO@Yr@Wb@wit@n~
+   @CThis level of orbit around the planet earth is far above the clouds. It is
+still incredibly cold here, with no chance for air-breathing life to survive
+here for long. What atmosphere there is here happens to be catching and
+reflecting light, making it a lot brighter here. @n
+~
+0 B 0 0 0 13
+D4
+~
+~
+0 0 40979 0 0 0 0 0 0 0 0
+S
+#51
+@cL@Co@Ww @cF@Cr@Wi@wgid @yO@Yr@Wb@wit@n~
+   @wThis level of orbit around the planet frigid is far above the snow blasted
+landscape. Very few clouds can be seen floating above the planet, but those
+that can be seen have piled up into raging snowstorms that never seem to stop.
+There is very little atmosphere here, and the temperature is blisteringly cold. @n
+~
+0 B 0 0 0 13
+D4
+~
+~
+0 0 30889 0 0 0 0 0 0 0 0
+S
+#52
+@cL@Co@Ww @yK@Yo@Wn@wack @yO@Yr@Wb@wit@n~
+   @gAt this altitude in the planet Konack's orbit the air is incredibly thin. 
+The temperature is is cold as the atmosphere is too thin to retain heat. The
+clouds sweeping across the planet's surface are far below here, moving slowly
+from this vantage point. @n
+~
+0 B 0 0 0 13
+D4
+~
+~
+0 0 27065 0 0 0 0 0 0 0 0
+S
+#53
+@cL@Co@Ww @rV@Re@Wg@weta @yO@Yr@Wb@wit@n~
+   @RThis area is just within the atmosphere of Vegeta. Dark red and orange
+clouds drift even this far up in the atmosphere of this huge planet. It is
+impossible to make out the landmass or oceans below because of the thickness of
+the clouds surrounding the planet. Occasional breaks in the clouds do occur,
+but not enough can be seen through them to make a difference. @n
+~
+0 B 0 0 0 13
+D4
+~
+~
+0 0 32365 0 0 0 0 0 0 0 0
+S
+#54
+@cL@Co@Ww @gN@Ga@Wm@wek @yO@Yr@Wb@wit@n~
+   @GThis is just inside the atmosphere of Namek. The atmosphere is still thin
+enough here to be dark, reflecting less light than the thicker atmosphere below.
+Fluffy clouds can be seen far below sweeping through the light green air of the
+planet. @n
+~
+0 B 0 0 0 13
+D4
+~
+~
+0 0 42880 0 0 0 0 0 0 0 0
+S
+#55
+@cL@Co@Ww @bA@Be@Wt@wher @yO@Yr@Wb@wit@n~
+   @BThis area is just inside the atmosphere of the planet. The blue reflective
+gas of the atmosphere is the main aspect of the atmosphere at this depth. As a
+result nearly blinding blue light is all that can be seen from this location. @n
+~
+0 B 0 0 0 13
+D4
+~
+~
+0 0 41959 0 0 0 0 0 0 0 0
+S
+#56
+@cL@Co@Ww @mY@Ma@Wr@wd@Wr@Ma@mt @yO@Yr@Wb@wit@n~
+   @mThe details of this planet are more visible from this altitude, with the
+surface mostly covered in dry craggy mountains. Very little water can be seen
+on the surface of the planet. As a result of little moisture there are few
+clouds and even less plant life to be seen.
+~
+0 B 0 0 0 13
+D4
+~
+~
+0 0 34899 0 0 0 0 0 0 0 0
+S
+#57
+@CL@co@Ww @CZ@ce@Wn@Di@ct@Ch @yO@Yr@Wb@wi@Dt@n~
+   @cThe details of the moon are more visible from this altitude, with the
+surface covered with thick, green jungles and dotted with mountain ranges. 
+Low hanging clouds of mist can be seen, slowly moving across the landscape. @n
+~
+0 B 0 0 0 13
+D4
+~
+~
+0 0 50772 0 0 0 0 0 0 0 0
+S
+#58
+@cL@Co@Ww @cK@Ca@Wn@wa@cs@Cs@Wa @yO@Yr@Wb@wit@n~
+   @CThis level of orbit around the planet kanassa is far above the clouds. It is
+still incredibly cold here, with no chance for air-breathing life to survive
+here for long. What atmosphere there is here happens to be catching and
+reflecting light, making it a lot brighter here. @n
+~
+0 B 0 0 0 13
+D4
+~
+~
+0 0 53859 0 0 0 0 0 0 0 0
+S
+#59
+@cL@Co@Ww @yA@Yrl@yi@wa @yO@Yr@Wb@wit@n~
+   @rDull brown and orange clouds can be seen floating far below even at this low
+orbit. An orange glow caused by the nearby starlight being caught in the dirty
+atmosphere of the planet can be seen in all directions. Occasionaly gaps in
+the thick clouds reveal a brownish wasteland on the surface of the planet. @n
+~
+0 B 0 0 0 13
+D4
+~
+~
+0 0 52434 0 0 0 0 0 0 0 0
+S
+#60
+@WThrough a @BBlue @WWormhole@n~
+   @BThis bright blue tunnel seems to exist on its own plane. Not much can be
+seen through it except a way forward and the way back. @n
+~
+0 gB 0 0 0 13
+D7
+~
+~
+0 0 61 0 0 0 0 0 0 0 0
+D11
+~
+~
+0 0 40167 0 0 0 0 0 0 0 0
+S
+#61
+@WThrough a @BBlue @WWormhole@n~
+   @BThis bright blue tunnel seems to exist on its own plane. Not much can be
+seen through it except a way forward and the way back. @n
+~
+0 B 0 0 0 13
+D7
+~
+~
+0 0 62 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 60 0 0 0 0 0 0 0 0
+S
+#62
+@WThrough a @BBlue @WWormhole@n~
+   @BThis bright blue tunnel seems to exist on its own plane. Not much can be
+seen through it except a way forward and the way back. @n
+~
+0 B 0 0 0 13
+D0
+~
+~
+0 0 63 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 61 0 0 0 0 0 0 0 0
+S
+#63
+@WThrough a @BBlue @WWormhole@n~
+   @BThis bright blue tunnel seems to exist on its own plane. Not much can be
+seen through it except a way forward and the way back. @n
+~
+0 B 0 0 0 13
+D0
+~
+~
+0 0 64 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 65199 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 62 0 0 0 0 0 0 0 0
+S
+#64
+@WThrough a @BBlue @WWormhole@n~
+   @BThis bright blue tunnel seems to exist on its own plane. Not much can be
+seen through it except a way forward and the way back. @n
+~
+0 B 0 0 0 13
+D2
+~
+~
+0 0 63 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 65 0 0 0 0 0 0 0 0
+S
+#65
+@WThrough a @BBlue @WWormhole@n~
+   @BThis bright blue tunnel seems to exist on its own plane. Not much can be
+seen through it except a way forward and the way back. @n
+~
+0 gB 0 0 0 13
+D9
+~
+~
+0 0 64 0 0 0 0 0 0 0 0
+D11
+~
+~
+0 0 34713 0 0 0 0 0 0 0 0
+S
+#66
+@WThrough a @RR@re@Rd@W Wormhole@n~
+   @RThis bright red tunnel seems to exist on its own plane. Not much can be seen
+through it except a way forward and the way back.
+~
+0 gB 0 0 0 13
+D8
+~
+~
+0 0 67 0 0 0 0 0 0 0 0
+D11
+~
+~
+0 0 28889 0 0 0 0 0 0 0 0
+S
+#67
+@WThrough a @RR@re@Rd@W Wormhole@n~
+   @RThis bright red tunnel seems to exist on its own plane. Not much can be seen
+through it except a way forward and the way back.
+~
+0 gB 0 0 0 13
+D6
+~
+~
+0 0 66 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 68 0 0 0 0 0 0 0 0
+S
+#68
+@WThrough a @RR@re@Rd@W Wormhole@n~
+   @RThis bright red tunnel seems to exist on its own plane. Not much can be seen
+through it except a way forward and the way back.
+~
+0 gB 0 0 0 13
+D6
+~
+~
+0 0 67 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 69 0 0 0 0 0 0 0 0
+S
+#69
+@WThrough a @RR@re@Rd@W Wormhole@n~
+   @RThis bright red tunnel seems to exist on its own plane. Not much can be seen
+through it except a way forward and the way back.
+~
+0 gB 0 0 0 13
+D2
+~
+~
+0 0 70 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 68 0 0 0 0 0 0 0 0
+S
+#70
+@WThrough a @RR@re@Rd@W Wormhole@n~
+   @RThis bright red tunnel seems to exist on its own plane. Not much can be seen
+through it except a way forward and the way back.
+~
+0 gB 0 0 0 13
+D0
+~
+~
+0 0 69 0 0 0 0 0 0 0 0
+D11
+~
+~
+0 0 40364 0 0 0 0 0 0 0 0
+S
+#79
+Auction Connection Room~
+@RDO NOT TOUCH!@n
+~
+0 ln 0 0 0 0
+D2
+~
+~
+0 0 80 0 0 0 0 0 0 0 0
+S
+#80
+Auction Save Room~
+@RDO NOT TOUCH!@n
+~
+0 jl 0 0 0 0
+D0
+~
+~
+0 0 79 0 0 0 0 0 0 0 0
+S
+#81
+@rA@Ru@Wc@wt@Wi@Ro@rn @yH@Yo@Wu@wse@n~
+   @yThis large wooden room has a large display stage showing off the various
+items currently being auctioned. A podium has been placed at the front of the
+stage where an Auctioneer handles the auctioning of the items. A technician
+just in front of the stage appears to be working some complicated equipment
+that is used to broadcast auction news over scouter frequencies. @n
+
+@wA @Rsign@w is hanging right here.@n
+~
+0 u 0 0 0 0
+D2
+~
+~
+0 0 304 0 0 0 0 0 0 0 0
+E
+sign~
+@cOOC@D: @CSee help auction for details.@n
+~
+S
+#82
+@rA@Ru@Wc@wt@Wi@Ro@rn @yH@Yo@Wu@wse@n~
+   @yThis large wooden room has a large display stage showing off the various
+items currently being auctioned. A podium has been placed at the front of the
+stage where an Auctioneer handles the auctioning of the items. A technician
+just in front of the stage appears to be working some complicated equipment
+that is used to broadcast auction news over scouter frequencies. @n
+
+@wA @Rsign@w is hanging right here.@n
+~
+0 v 0 0 0 0
+D1
+~
+~
+0 0 2256 0 0 0 0 0 0 0 0
+E
+sign~
+@cOOC@D: @CSee help auction for details.@n
+~
+S
+#83
+@rA@Ru@Wc@wt@Wi@Ro@rn @yH@Yo@Wu@wse@n~
+   @yThis large wooden room has a large display stage showing off the various
+items currently being auctioned. A podium has been placed at the front of the
+stage where an Auctioneer handles the auctioning of the items. A technician
+just in front of the stage appears to be working some complicated equipment
+that is used to broadcast auction news over scouter frequencies. @n
+
+@wA @Rsign@w is hanging right here.@n
+~
+0 w 0 0 0 0
+D3
+~
+~
+0 0 4004 0 0 0 0 0 0 0 0
+E
+sign~
+@cOOC@D: @CSee help auction for details.@n
+~
+S
+#84
+@rA@Ru@Wc@wt@Wi@Ro@rn @yH@Yo@Wu@wse@n~
+   @yThis large wooden room has a large display stage showing off the various
+items currently being auctioned. A podium has been placed at the front of the
+stage where an Auctioneer handles the auctioning of the items. A technician
+just in front of the stage appears to be working some complicated equipment
+that is used to broadcast auction news over scouter frequencies. @n
+
+@wA @Rsign@w is hanging right here.@n
+~
+0 y 0 0 0 0
+D3
+~
+~
+0 0 11602 0 0 0 0 0 0 0 0
+E
+sign~
+@cOOC@D: @CSee help auction for details.@n
+~
+S
+#85
+@rA@Ru@Wc@wt@Wi@Ro@rn @yH@Yo@Wu@wse@n~
+   @yThis large wooden room has a large display stage showing off the various
+items currently being auctioned. A podium has been placed at the front of the
+stage where an Auctioneer handles the auctioning of the items. A technician
+just in front of the stage appears to be working some complicated equipment
+that is used to broadcast auction news over scouter frequencies. @n
+
+@wA @Rsign@w is hanging right here.@n
+~
+0 0 a 0 0 0
+D1
+~
+~
+0 0 12015 0 0 0 0 0 0 0 0
+E
+sign~
+@cOOC@D: @CSee help auction for details.@n
+~
+S
+#86
+@rA@Ru@Wc@wt@Wi@Ro@rn @yH@Yo@Wu@wse@n~
+   @yThis large wooden room has a large display stage showing off the various
+items currently being auctioned. A podium has been placed at the front of the
+stage where an Auctioneer handles the auctioning of the items. A technician
+just in front of the stage appears to be working some complicated equipment
+that is used to broadcast auction news over scouter frequencies. @n
+
+@wA @Rsign@w is hanging right here.@n
+~
+0 x 0 0 0 0
+D1
+~
+~
+0 0 8024 0 0 0 0 0 0 0 0
+E
+sign~
+@cOOC@D: @CSee help auction for details.@n
+~
+S
+#97
+@wThe @gPungent@n @yPipe@n~
+   @WA small shop in the Akibura Shopping District. The room smells faintly of
+scented cigarette smoke, and every wall is lined with various smoke-ables of
+varying rarity. There's a counter on the far wall of the store, looking out
+into the street. Underneath the counter in a glass case are several different
+styled lighters- matches, zippos, torches, you name it. @n
+~
+0 u 0 0 0 10
+D0
+~
+~
+0 0 365 0 0 0 0 0 0 0 0
+S
+#98
+@DF@Wi@wx it @WY@wo@Du@Wr@ws@De@Wl@wf@n~
+   @WSeveral steel worktables have been placed around the room here. Concrete
+floor, walls, and ceiling make up the structure of the room. Boxes of spare
+parts have been stacked at various locations in the room as well. A large
+chalkboard has been set up at the back of the room and appears to have some
+schematics written on it. @n
+
+@wA @rsign@w has been posted near the entrance.@n
+~
+0 u 0 0 0 11
+D2
+~
+~
+0 0 358 0 0 0 0 0 0 0 0
+E
+sign~
+   @GFor those who wish to grasp the fine art of fixing there own things instead
+of being wasteful. Jared here is qualified to train you in this very pursuit.
+Welcome to Fixing Class 101. @n
+~
+S
+#99
+@cC@Co@Wl@wd @bD@Bi@Ws@wcuss@Wi@Bo@bn@n~
+   @WClothing of varying designs and styles cover every hook, rack, and shelf in
+this small store. Apparently this is where unimaginative people go to find
+unique clothes everyone else is already wearing. A counter with a cash register
+can be seen near the back across from some dressing booths. @n
+~
+0 u 0 0 0 10
+D0
+~
+~
+0 0 367 0 0 0 0 0 0 0 0
+S
+$~

@@ -1,0 +1,172 @@
+#15300
+Cave Fish~
+@gC@Gav@ge @cF@Ci@Ws@Dh@n~
+@wA @gc@Gav@ge @cf@Ci@Ws@Dh@w is swimming around here.@n
+~
+   @WThis fish is covered in tough glowing scales and stretches about four feet
+in length. Razor sharp teeth protrude from its bottom jaw. @n
+~
+dz 0 0 0 ly 0 0 0 0 E
+22 20 10 0d0+0 0d0+0
+0 0 15 28
+8 8 0
+Size: 3
+Str: 9
+Dex: 13
+Int: 9
+Wis: 9
+Con: 13
+Cha: 13
+E
+#15301
+Water Elemental~
+@BW@bate@Br @cE@Cl@De@cm@Ce@Dn@ct@Ca@Dl@n~
+@WA @Bw@bate@Br @ce@Cl@De@cm@Ce@Dn@ct@Ca@Dl@w is standing guard here.@n
+~
+   @WThis creature appears to be made out of water that has come to life. It is
+very difficult to see when surrounded with other water that it can freely
+manipulate. @n
+~
+bdvwxyzA 0 0 0 ly 0 0 0 0 E
+40 20 10 0d0+0 0d0+0
+0 0 23 28
+8 8 1
+Size: 4
+Str: 11
+Dex: 9
+Int: 11
+Wis: 11
+Con: 9
+Cha: 9
+E
+T 15300
+T 15301
+#15302
+Ice Elemental~
+@cI@Cc@ce @cE@Cl@De@cm@Ce@Dn@ct@Ca@Dl@n~
+@wAn @cI@Cc@ce @cE@Cl@De@cm@Ce@Dn@ct@Ca@Dl@w is standing guard here.@n
+~
+   @WThis creature appears to be made out of ice. How ice can live is not easily
+understood. Neither is why it would choose to live here.
+@n
+~
+bdvwxyzA 0 0 0 ly 0 0 0 0 E
+40 20 10 0d0+0 0d0+0
+0 0 23 28
+8 8 1
+Size: 4
+Str: 11
+Dex: 9
+Int: 11
+Wis: 11
+Con: 9
+Cha: 9
+E
+T 15302
+T 15303
+#15303
+Ice Spirit~
+@cI@Cc@ce @YSpirit@n~
+@wAn @ci@Cc@ce @Yspirit@w is floating here with a horrified look on its face.@n
+~
+   @WThis appears to be the ghost of a kanassan that is forever trapped in this
+cave. Why it is trapped in not easy to figure out. @n
+~
+dvwxyz 0 0 0 ly 0 0 0 0 E
+25 20 10 0d0+0 0d0+0
+0 0 23 28
+8 8 1
+Size: 4
+Str: 14
+Dex: 16
+Int: 14
+Wis: 14
+Con: 16
+Cha: 16
+E
+#15310
+Kanassan Ghost~
+@cK@Canassa@cn @wGhost@n~
+@wA @cK@Canassa@cn @wGhost is floating nearby.@n
+~
+   @WThis dead kanassan seems to be confused... About the part concerning being
+dead. @n
+~
+d 0 0 0 ly 0 0 0 0 E
+45 20 10 0d0+0 0d0+0
+0 0 6 28
+8 8 1
+Str: 10
+Dex: 13
+Int: 10
+Wis: 10
+Con: 13
+Cha: 13
+E
+#15311
+Guntar Pirate~
+@rG@Runta@rr @yP@Yi@Dra@Yt@ye@n~
+@wA @rG@Runta@rr @yP@Yi@Dra@Yt@ye@w is looking for loot here.@n
+~
+   @WThis kanassan is wearing the uniform of the dreaded Guntar Pirates. A group
+that has plagued various areas of the kanassan ocean for decades. Their
+leadership has changed several times during this period but their goals have
+not. They steal and plunder whatever they can. @n
+~
+bd 0 0 0 ly 0 0 0 0 E
+75 20 10 0d0+0 0d0+0
+0 0 6 28
+8 8 1
+Str: 12
+Dex: 13
+Int: 12
+Wis: 12
+Con: 13
+Cha: 13
+E
+T 15316
+#15312
+Guntar Elite~
+@rG@Runta@rr @cE@Cl@Di@Ct@ce@n~
+@wA @rG@Runta@rr @cE@Cl@Di@Ct@ce@w is searching for loot here.@n
+~
+   @WThis kanassan is wearing the uniform of the dreaded Guntar Pirates. A group
+that has plagued various areas of the kanassan ocean for decades. Their
+leadership has changed several times during this period but their goals have
+not. They steal and plunder whatever they can. @n
+~
+bd 0 0 0 ly 0 0 0 0 E
+80 20 10 0d0+0 0d0+0
+0 0 6 28
+8 8 1
+Str: 14
+Dex: 12
+Int: 14
+Wis: 14
+Con: 12
+Cha: 12
+E
+T 15316
+#15313
+Rozo Guntar Sub-Commander~
+@GRozo @rG@Runta@rr @cS@Cu@Wb@w-@cC@Co@Wm@wm@ca@Cn@Wd@we@cr@n~
+@GRozo @rG@Runta@rr @cS@Cu@Wb@w-@cC@Co@Wm@wm@ca@Cn@Wd@we@cr@w is looking at a waterproof map here.@n
+~
+   @WThis tough looking kanassan is a member of the dreaded pirate group Guntar.
+He is a sub-commander which puts him in charge of one of the groups many Marauder
+Class submarines. Rozo happens to be in charge the most elite members of the
+group outside of the main leader. @n
+~
+bdA 0 0 0 ly 0 0 0 0 E
+90 20 10 0d0+0 0d0+0
+0 0 6 28
+8 8 1
+Str: 8
+Dex: 9
+Int: 8
+Wis: 8
+Con: 9
+Cha: 9
+E
+T 15312
+$

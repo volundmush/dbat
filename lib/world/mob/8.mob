@@ -1,0 +1,123 @@
+#800
+Shrouded Assassin~
+@bShrouded @rAssassin@n~
+@wA @bshrouded @rassassin@W is standing here!@n
+~
+   @WThis humanoid figure had their face covered with a black shroud. Their body
+is covered in a black synthetic steal suit. A multiude of knife loops and
+sheaths adorn the suit. @n
+~
+d 0 0 0 0 0 0 0 0 E
+18 0 10 0d8+0 0d0+0
+10 0 0 24
+8 8 1
+Str: 12
+Dex: 14
+Int: 16
+Wis: 12
+Con: 15
+Cha: 15
+E
+#801
+Shrouded Assassin~
+@bShrouded @rAssassin@n~
+@wA @bshrouded @rassassin@W is standing here!@n
+~
+   @WThis humanoid figure had their face covered with a black shroud. Their body
+is covered in a black synthetic steal suit. A multiude of knife loops and
+sheaths adorn the suit. @n
+~
+d 0 0 0 0 0 0 0 0 E
+35 0 10 0d8+0 0d0+0
+10 0 0 24
+8 8 1
+Str: 20
+Dex: 23
+Int: 21
+Wis: 17
+Con: 23
+Cha: 24
+E
+#802
+Shrouded Assassin~
+@bShrouded @rAssassin@n~
+@wA @bshrouded @rassassin@W is standing here!@n
+~
+   @WThis humanoid figure had their face covered with a black shroud. Their body
+is covered in a black synthetic steal suit. A multiude of knife loops and
+sheaths adorn the suit. @n
+~
+d 0 0 0 0 0 0 0 0 E
+50 0 10 0d8+0 0d0+0
+10 0 0 24
+8 8 1
+Str: 36
+Dex: 48
+Int: 25
+Wis: 44
+Con: 33
+Cha: 45
+E
+T 49
+#803
+Shrouded Assassin~
+@bShrouded @rAssassin@n~
+@wA @bshrouded @rassassin@W is standing here!@n
+~
+   @WThis humanoid figure had their face covered with a black shroud. Their body
+is covered in a black synthetic steal suit. A multiude of knife loops and
+sheaths adorn the suit. @n
+~
+d 0 0 0 0 0 0 0 0 E
+72 0 10 0d8+0 0d0+0
+10 0 0 24
+8 8 1
+Str: 52
+Dex: 51
+Int: 54
+Wis: 57
+Con: 52
+Cha: 66
+E
+#804
+Shrouded Assassin~
+@bShrouded @rAssassin@n~
+@wA @bshrouded @rassassin@W is standing here!@n
+~
+   @WThis humanoid figure had their face covered with a black shroud. Their body
+is covered in a black synthetic steal suit. A multiude of knife loops and
+sheaths adorn the suit. @n
+~
+d 0 0 0 0 0 0 0 0 E
+90 0 10 0d8+0 0d0+0
+10 0 0 24
+8 8 1
+Str: 71
+Dex: 78
+Int: 76
+Wis: 74
+Con: 61
+Cha: 45
+E
+#805
+Shrouded Assassin~
+@bShrouded @rAssassin@n~
+@wA @bshrouded @rassassin@W is standing here!@n
+~
+   @WThis humanoid figure had their face covered with a black shroud. Their body
+is covered in a black synthetic steal suit. A multiude of knife loops and
+sheaths adorn the suit. @n
+~
+d 0 0 0 0 0 0 0 0 E
+102 0 10 0d4+0 0d0+0
+10 0 0 0
+8 8 1
+Str: 52
+Dex: 100
+Int: 52
+Wis: 54
+Con: 62
+Cha: 59
+E
+T 49
+$

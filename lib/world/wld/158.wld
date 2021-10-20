@@ -1,0 +1,192 @@
+#15800
+Shattered Soul-Hall of @WLight@y and @DDarkness@n~
+   @y<The main hall serves as both the central area of the ships and the guest
+receiving area. The floor and walls are made of dark @Dblack@y obsidian that have
+been polished to a @Cmirror finish@y. In the corners of the room, some legless
+@Rchairs@y are bolted to the walls with small tables rising from the floor between
+each pair. The chairs and tables are a stark @wwhite@y color to contrast the
+walls. A food and drink dispenser is in the center of the room, ensuring that
+both the pilot and his guest are always provided for. Stairs leading down can
+be seen in the floor in the South East corner of the room. The @Rairlock@y can be
+seen in the wall here.>@n
+~
+158 jl e 0 0 0
+D0
+~
+~
+0 0 15801 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 15802 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 15803 0 0 0 0 0 0 0 0
+E
+Mirror~
+@nYou can see your face!
+~
+E
+Chairs~
+@n They look so comfortable they make you want to sit down.  
+~
+E
+airlock~
+@n The @CHatch@n that leads out of the ship.
+~
+S
+#15801
+Shattered Soul-@GGrand @RHelm@n ~
+   @y<This is the Helm of the ship. Complicated instruments and controls can be
+seen on the console that dominates the space of this room. The console curves
+around the North edge of room leaving only a small space for the pilot. Above
+the console a view screen can be seen that displays the area immediately in
+front of the ship. A pivoting chair is here, it seems to be used by the pilot
+while in flight. The chair has a @Rhole in the back@y that would accommodate a
+tail.>@n
+~
+158 dln e 0 0 0
+D2
+~
+~
+0 0 15800 0 0 0 0 0 0 0 0
+E
+Hole~
+@nIcerian design at it's finest!
+~
+S
+#15802
+Shattered Soul-@CMaster @wBedroom@n~
+   @y<These are the private quarters of the Captain, contained within are his
+sleeping quarters and personal effects. The walls are made of the same
+@Dobsidian material@y as the main hall, but the floors are covered in carpet the
+color of @wfreshly fallen snow. @y There is a @RGrand bed@y here, and a healing tank
+in the corner.>@n
+~
+158 dD e 0 0 0
+D0
+~
+~
+0 0 15800 0 0 0 0 0 0 0 0
+E
+Obsidian~
+@nIt seems to suck all the light out of the room.
+~
+E
+Bed~
+@nIt looks fit for a king with @CBlue silk sheets@n and a @Wwhite furry blanket.@n 
+~
+S
+#15803
+@nShattered-Soul-@eGravity Well@n~
+   @y<This is a room used for training. A gravity chamber sits in the center of
+this room. The floors and walls are made of some kind of @Cblue linoleum@y tiles
+the color of ice on a frozen river that has been polished to a perfectly
+@wmirrored surface. @y The whole room looks like it would be easy to clean up when
+@ycovered in sweat and @Rblood.@y>@n
+~
+158 d e 0 0 0
+D4
+~
+~
+0 0 15800 0 0 0 0 0 0 0 0
+E
+lineoleum~
+@nStaring into it is like looking into another world. 
+~
+E
+Mirror~
+@nIt's dim and faded, but you can see your face.
+~
+E
+Blood~
+@nNot a drop to be found!
+~
+S
+#15804
+@RBlank Room@n~
+You're in a room.
+~
+158 djl e 0 0 0
+S
+#15805
+@GT@Whe @GT@Wat@Ysum@Wak@Gi@R - @YCargo Room@n~
+   @WThis cargo room is well kept, cleaned and organized by robots that can
+occassionally be seen scurrying around performing various tasks. A large,
+metal hatch leads to the outside of the ship, and a separate ramp leads down
+into the training room. A bridge can be seen to the north. @n
+~
+158 djln e 0 0 0
+D0
+~
+~
+0 0 15808 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 15807 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 15806 0 0 0 0 0 0 0 0
+S
+#15806
+@GT@Whe @GT@Wat@Ysum@Wak@Gi@R - @YTraining Room@n~
+   @WThis training room is equipped with state of the art electronics. A large
+console dominates the center of the room, along the top of which are buttons
+emitting their own light so that they can be seen even in the dark. A ring of
+small spheres is embedded into the walls of the room, which spring to life upon
+command of those that are authorized and prepare to assist in the training of
+anyone brave enough to invoke them. @n
+~
+158 dlmn e 0 0 0
+D4
+~
+~
+0 0 15805 0 0 0 0 0 0 0 0
+S
+#15807
+@GT@Whe @GT@Wat@Ysum@Wak@Gi@R - @YCaptain's Cabin@n~
+   The captain's cabin is a secluded room from the rest of the ship. A large
+bed lines the far wall, overshadowed by a canopy which can be opened or closed
+to reveal or conceal the bed itself. On top of the stand to the left of the
+bed are several tablets with information on them. Lights are built into the
+walls and ceiling, providing adjustable light at the beckoning of the captain.
+Large screens have been installed onto the walls adjacent to the bed.
+~
+158 djlmD e 0 0 0
+D0
+~
+~
+0 0 15805 0 0 0 0 0 0 0 0
+S
+#15808
+@GT@Whe @GT@Wat@Ysum@Wak@Gi@R - @YBridge@n~
+   @WThe bridge of the @GT@Wat@Ysum@Wak@Gi@W houses three chairs. The center chair has arms
+that are adorned with extendable screens and a plethora of buttons. The chairs
+on the left and right are plain, clearly meant for passengers or observers. 
+The far wall is dominated by a viewscreen which can switch between displays if
+prompted by the Command Chair. @n A bulbous dome extending down from the ceiling
+contains what looks like a camera eye, which swivels to observe those in the
+room - perhaps the observation device of an artificial intelligence construct?
+~
+158 djl e 0 0 0
+D2
+~
+~
+0 0 15805 0 0 0 0 0 0 0 0
+S
+#15809
+@RBlank Room@n~
+You are in an unfinished room.
+~
+158 0 0 0 0 0
+S
+#15882
+An unfinished room~
+You are in an unfinished room.
+~
+158 0 0 0 0 0
+S
+$~

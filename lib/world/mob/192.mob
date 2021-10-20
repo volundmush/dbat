@@ -1,0 +1,93 @@
+#19200
+Giant Ferion~
+Giant Ferion~
+A Giant Ferion roams around here
+~
+
+~
+dxyz 0 0 0 l 0 0 0 0 E
+103 0 10 0d0+0 0d0+0
+0 0 15 15
+8 8 1
+Str: 64
+Dex: 75
+Int: 76
+Wis: 64
+Con: 64
+Cha: 68
+E
+#19201
+Crazed Konatsu~
+Crazed Konatsu~
+A Konatsu roams through the forest, a dazed look on their face
+~
+ 
+~
+df 0 0 0 l 0 0 0 0 E
+104 0 10 0d0+0 0d0+0
+0 0 3 3
+8 8 1
+Str: 100
+Dex: 92
+Int: 98
+Wis: 95
+Con: 95
+Cha: 97
+E
+#19202
+Fungraru~
+Fungraru~
+A Fungraru is here, slowly creeping by
+~
+ 
+~
+dxyz 0 0 0 l 0 0 0 0 E
+102 0 10 0d0+0 0d0+0
+0 0 15 15
+8 8 1
+Str: 53
+Dex: 77
+Int: 59
+Wis: 98
+Con: 100
+Cha: 90
+E
+#19203
+Cougral~
+Cougral~
+A Cougral stalks through the forest here
+~
+ 
+~
+dxyz 0 0 0 l 0 0 0 0 E
+103 0 10 0d0+0 0d0+0
+0 0 15 15
+8 8 1
+BareHandAttack: 4
+Str: 85
+Dex: 54
+Int: 85
+Wis: 53
+Con: 81
+Cha: 51
+E
+#19233
+test mob~
+the unfinished mob~
+An unfinished mob stands here.
+~
+It looks unfinished.
+~
+bd 0 0 0 0 0 0 0 0 E
+30 0 10 0d0+0 0d0+0
+0 0 0 0
+8 8 1
+Str: 23
+Dex: 27
+Int: 16
+Wis: 23
+Con: 19
+Cha: 24
+E
+T 19233
+$

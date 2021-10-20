@@ -1,0 +1,15 @@
+@Version: 2
+#181
+Iovan Virtus~
+Clans: Dark Thorne Syndicate~
+18100 18199 10 2 0 0 0 0 0 100
+D 0 18168 6 1 -1 -1 	(@RD@ra@yr@rk@DT@rh@yo@rr@Dn@re @wC@Wo@wm@Wp@wo@Wu@wn@Wd@n: @YCouncil Chambers Door@n)
+D 0 18169 8 1 -1 -1 	(@RD@ra@yr@rk@DT@rh@yo@rr@Dn@re @wC@Wo@wm@Wp@wo@Wu@wn@Wd@n: @YSanctum of Council@n)
+O 0 65 10000 18165 1 0 	(@wA Healing Tank@n)
+O 0 11 10000 18164 1 0 	(@wA Gravity Generator@n)
+D 0 18151 2 1 1 0 	(@RD@ra@yr@rk@DT@rh@yo@rr@Dn@re @wC@Wo@wm@Wp@wo@Wu@wn@Wd@n: @YOuter Courtyard@n)
+D 1 18151 2 2 1 0 	(@RD@ra@yr@rk@DT@rh@yo@rr@Dn@re @wC@Wo@wm@Wp@wo@Wu@wn@Wd@n: @YOuter Courtyard@n)
+D 0 18150 0 1 1 0 	(@RD@ra@yr@rk@DT@rh@yo@rr@Dn@re @wC@Wo@wm@Wp@wo@Wu@wn@Wd@n: @YOuter Entrance@n)
+D 1 18150 0 2 1 0 	(@RD@ra@yr@rk@DT@rh@yo@rr@Dn@re @wC@Wo@wm@Wp@wo@Wu@wn@Wd@n: @YOuter Entrance@n)
+S
+$

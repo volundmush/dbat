@@ -1,0 +1,198 @@
+#200
+Karl~
+@wKarl@n~
+@wKarl is counting some money here.@n
+~
+ @WThis dude appears to be taking it easy all the time, wearing a t-shirt,
+shorts, and sandals.  @n
+~
+bd 0 0 0 0 0 0 0 0 E
+100 0 10 0d0+0 0d0+0
+10000 0 0 28
+8 8 1
+Str: 72
+Dex: 58
+Int: 80
+Wis: 71
+Con: 68
+Cha: 73
+E
+T 201
+T 202
+T 483
+#201
+Goku~
+@wGoku@n~
+@wGoku is standing here smiling.@n
+~
+ @WThis man is wearing an orange gi, with orange pants, and blue boots.  The
+Kame School symbol is on the front of his gi, and King Kai's Symbol is on the
+back.  He has spikey black hair and black eyes.  @n
+~
+bdmA b 0 0 l 0 0 0 0 E
+70 0 10 0d4+0 0d0+0
+0 0 1 0
+8 8 1
+Str: 68
+Dex: 45
+Int: 50
+Wis: 46
+Con: 50
+Cha: 40
+E
+T 209
+T 210
+T 211
+#202
+Chi Chi~
+@wChi Chi@n~
+@wChi Chi is standing here with a fussy look.@n
+~
+ @WThis woman has black hair tied up in a bun on top of her head.  She is
+wearing a pink and purple outfit.  She appears to be upset about something.  @n
+~
+bdA 0 0 0 0 0 0 0 0 E
+15 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 2
+Str: 12
+Dex: 9
+Int: 12
+Wis: 7
+Con: 13
+Cha: 8
+E
+#203
+Cow~
+@wA Cow@n~
+@wA @Wc@Do@Ww @wis standing here munching on grass.@n
+~
+ @WA simple wild cow.  @n
+~
+dxyz 0 0 0 l 0 0 0 0 E
+5 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 2
+Size: 4
+Str: 8
+Dex: 9
+Int: 6
+Wis: 8
+Con: 9
+Cha: 7
+E
+#204
+Fox~
+@wA Fox@n~
+@wA fox is wandering here.
+~
+ @WThis red fox appears to be looking for some food while at the same time
+keeping an eye out for bigger predetors.  @n
+~
+dxyz 0 0 0 l 0 0 0 0 E
+4 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 3
+Str: 7
+Dex: 8
+Int: 7
+Wis: 8
+Con: 8
+Cha: 5
+E
+#205
+Sabre-tooth~
+@wA Sabre-tooth@n~
+@wA sabre-tooth tiger is prowling here.@n
+~
+ @WThis tan furred tiger has long tusk-like fangs protruding from its mouth.  @n
+~
+dxyz 0 0 0 l 0 0 0 0 E
+12 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 5
+Str: 6
+Dex: 12
+Int: 8
+Wis: 7
+Con: 11
+Cha: 12
+E
+#206
+Boar~
+@wA Boar@n~
+@wA boar is trotting here.@n
+~
+@WThis ugly brown pig has shaggy fur and an ill temper.@n
+~
+dxyz 0 0 0 l 0 0 0 0 E
+7 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 4
+Str: 8
+Dex: 10
+Int: 6
+Wis: 7
+Con: 8
+Cha: 7
+E
+#207
+Testi the Dragon~
+Testi The Dragon~
+Testi The Dragon flaps his stubby wings here.
+~
+@WThis is one ugly cartoon dragon.@n
+~
+d 0 0 0 0 0 0 0 0 E
+101 0 10 0d0+0 0d0+0
+0 0 0 0
+8 8 0
+Str: 100
+Dex: 91
+Int: 71
+Wis: 76
+Con: 67
+Cha: 79
+E
+#210
+Jim~
+@wJim@n~
+@wJim is standing here.@n
+~
+   @WThis normal looking guy is sitting behind the counter ready to take any
+orders the customer may have. @n
+~
+bds 0 0 0 0 0 0 0 0 E
+3 0 10 0d0+0 0d0+0
+200000 0 0 28
+8 8 1
+Str: 9
+Dex: 6
+Int: 7
+Wis: 7
+Con: 8
+Cha: 5
+E
+#211
+Garrick~
+@wGarrick@n~
+@wGarrick the biker is idly twirling a length of chain@n
+~
+@WThis large, muscular-looking Mutant is wearing a white wife-beater, dark leather pants, with boots and jacket to match. He has a large, ugly scar running across his throat. You might try to @Rtalk@W to him.@n
+~
+d 0 0 0 0 0 0 0 0 E
+24 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 13
+Dex: 18
+Int: 15
+Wis: 22
+Con: 20
+Cha: 17
+E
+T 485
+$

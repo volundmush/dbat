@@ -1,0 +1,19 @@
+#15700
+Makon shopkeeper~
+@wMakon@n~
+@wMakon is standing here.@n
+~
+@wThis normal looking guy is sitting behind the counter ready to take any orders the customer may have.@n
+~
+bds 0 0 0 0 0 0 0 0 E
+3 0 10 0d0+0 0d0+0
+200000 0 1 28
+8 8 1
+Str: 14
+Dex: 14
+Int: 14
+Wis: 14
+Con: 14
+Cha: 14
+E
+$

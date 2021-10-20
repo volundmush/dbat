@@ -1,0 +1,168 @@
+#18000
+Novice Shopkeeper~
+@wNovice Shopkeeper@n~
+@wThe Novice Shopkeeper is standing here.@n
+~
+   @WThis member of the UDF has taken on the duty of managing the clan's
+equipment. @n
+~
+bdsA 0 0 0 0 0 0 0 0 E
+50 20 10 0d0+0 0d0+0
+200000 0 0 28
+8 8 1
+Str: 8
+Dex: 15
+Int: 8
+Wis: 8
+Con: 15
+Cha: 15
+E
+#18001
+Advanced Shopkeeper~
+@wAdvanced Shopkeeper@n~
+@wThe Advanced Shopkeeper is standing here.@n
+~
+   @WThis member of the UDF has taken on the duty of managing the clan's
+equipment. @n
+~
+bdsA 0 0 0 0 0 0 0 0 E
+50 20 10 0d0+0 0d0+0
+200000 0 0 28
+8 8 1
+Str: 8
+Dex: 15
+Int: 8
+Wis: 8
+Con: 15
+Cha: 15
+E
+#18002
+Expert Shopkeeper~
+@wExpert Shopkeeper@n~
+@wThe Expert Shopkeeper is standing here@n
+~
+   @WThis member of the UDF has taken on the duty of managing the clan's
+equipment. @n
+~
+bdsA 0 0 0 0 0 0 0 0 E
+50 20 10 0d0+0 0d0+0
+200000 0 0 28
+8 8 1
+Str: 8
+Dex: 15
+Int: 8
+Wis: 8
+Con: 15
+Cha: 15
+E
+#18003
+Station Security Officer~
+@wS@Wt@Da@wt@Wi@Do@wn @RS@recurit@Ry @wOfficer@n~
+@wA S@Wt@Da@wt@Wi@Do@wn @RS@recurit@Ry @wOfficer@w is on patrol here.@n
+~
+
+~
+d 0 0 0 0 0 0 0 0 E
+100 20 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 12
+Dex: 13
+Int: 12
+Wis: 12
+Con: 13
+Cha: 13
+E
+T 18001
+#18004
+Station Security Hologram~
+@wS@Wt@Da@wt@Wi@Do@wn @RS@recurit@Ry @wHologram@n~
+@wA S@Wt@Da@wt@Wi@Do@wn @RS@recurit@Ry @wHologram is being projected here.@n
+~
+
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+100 20 10 0d0+0 0d0+0
+0 0 22 28
+8 8 1
+Str: 13
+Dex: 8
+Int: 13
+Wis: 13
+Con: 8
+Cha: 8
+E
+T 18001
+#18005
+Holographic Soldier Alpha~
+@yH@Yo@Wl@wo@yg@Yr@Wa@wp@yh@Yi@Wc @wS@Wo@Dldi@We@wr @CAlpha@n~
+@wA @yH@Yo@Wl@wo@yg@Yr@Wa@wp@yh@Yi@Wc @wS@Wo@Dldi@We@wr @CAlpha@w is projected here.@n
+~
+
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+50 20 10 0d0+0 0d0+0
+0 0 22 28
+8 8 1
+Str: 14
+Dex: 9
+Int: 14
+Wis: 14
+Con: 9
+Cha: 9
+E
+#18006
+Holographic Soldier Beta~
+@yH@Yo@Wl@wo@yg@Yr@Wa@wp@yh@Yi@Wc @wS@Wo@Dldi@We@wr @CBeta@n~
+@wA @yH@Yo@Wl@wo@yg@Yr@Wa@wp@yh@Yi@Wc @wS@Wo@Dldi@We@wr @CBeta@w is projected here.@n
+~
+
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+60 20 10 0d0+0 0d0+0
+0 0 22 28
+8 8 1
+Str: 14
+Dex: 9
+Int: 14
+Wis: 14
+Con: 9
+Cha: 9
+E
+#18007
+Holographic Soldier Gamma~
+@yH@Yo@Wl@wo@yg@Yr@Wa@wp@yh@Yi@Wc @wS@Wo@Dldi@We@wr @CGamma@n~
+@wA @yH@Yo@Wl@wo@yg@Yr@Wa@wp@yh@Yi@Wc @wS@Wo@Dldi@We@wr @CGamma@w is projected here.@n
+~
+
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+80 20 10 0d0+0 0d0+0
+0 0 22 28
+8 8 1
+Str: 13
+Dex: 9
+Int: 13
+Wis: 13
+Con: 9
+Cha: 9
+E
+#18008
+Holographic Soldier Delta~
+@yH@Yo@Wl@wo@yg@Yr@Wa@wp@yh@Yi@Wc @wS@Wo@Dldi@We@wr @CDelta@n~
+@wA @yH@Yo@Wl@wo@yg@Yr@Wa@wp@yh@Yi@Wc @wS@Wo@Dldi@We@wr @CDelta@w is projected here.@n
+~
+
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+90 20 10 0d0+0 0d0+0
+0 0 22 28
+8 8 1
+Str: 11
+Dex: 14
+Int: 11
+Wis: 11
+Con: 14
+Cha: 14
+E
+$

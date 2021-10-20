@@ -1,0 +1,1723 @@
+#17000
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cAirlock Chamber@n~
+   @WThis metallic room appears to be used solely for entering and leaving the
+ship. Dual doors have been built into the room to prevent atmospheric leak from
+the ship if the outer doors are opened while in the vacuum of space. @n
+~
+170 c 0 0 0 0
+D0
+~
+~
+0 0 17001 0 0 0 0 0 0 0 0
+S
+#17001
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cHallway@n~
+   @WThis dull white metallic hallway has almost a tube like shape to it. The
+only exception to this shape is the flat floor which is covered in purple metal
+plating. White lights have been built into the ceiling as well, providing ample
+light for the otherwise dull hallway. @n
+
+@wA @Rpanel@w can be seen to the right of a set of elevator doors here.@n
+~
+170 0 0 0 0 0
+D0
+~
+doors~
+1 0 17021 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17002 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17000 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17020 0 0 0 0 0 0 0 0
+E
+panel~
+@GPush@w to open.@n
+~
+S
+T 17002
+#17002
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cHallway@n~
+   @WThis dull white metallic hallway has almost a tube like shape to it. The
+only exception to this shape is the flat floor which is covered in purple metal
+plating. White lights have been built into the ceiling as well, providing ample
+light for the otherwise dull hallway. @n
+~
+170 0 0 0 0 0
+D1
+~
+~
+0 0 17003 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17001 0 0 0 0 0 0 0 0
+S
+#17003
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cHallway@n~
+   @WThis dull white metallic hallway has almost a tube like shape to it. The
+only exception to this shape is the flat floor which is covered in purple metal
+plating. White lights have been built into the ceiling as well, providing ample
+light for the otherwise dull hallway. @n
+~
+170 0 0 0 0 0
+D3
+~
+~
+0 0 17002 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 17004 0 0 0 0 0 0 0 0
+S
+#17004
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cHallway@n~
+   @WThis dull white metallic hallway has almost a tube like shape to it. The
+only exception to this shape is the flat floor which is covered in purple metal
+plating. White lights have been built into the ceiling as well, providing ample
+light for the otherwise dull hallway. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17005 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17003 0 0 0 0 0 0 0 0
+S
+#17005
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cHallway@n~
+   @WThis dull white metallic hallway has almost a tube like shape to it. The
+only exception to this shape is the flat floor which is covered in purple metal
+plating. White lights have been built into the ceiling as well, providing ample
+light for the otherwise dull hallway. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17006 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17022 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17004 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17023 0 0 0 0 0 0 0 0
+S
+#17006
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cHallway@n~
+   @WThis dull white metallic hallway has almost a tube like shape to it. The
+only exception to this shape is the flat floor which is covered in purple metal
+plating. White lights have been built into the ceiling as well, providing ample
+light for the otherwise dull hallway. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17007 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17005 0 0 0 0 0 0 0 0
+S
+#17007
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cHallway@n~
+   @WThis dull white metallic hallway has almost a tube like shape to it. The
+only exception to this shape is the flat floor which is covered in purple metal
+plating. White lights have been built into the ceiling as well, providing ample
+light for the otherwise dull hallway. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17008 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17024 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17006 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17025 0 0 0 0 0 0 0 0
+S
+#17008
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cHallway@n~
+   @WThis dull white metallic hallway has almost a tube like shape to it. The
+only exception to this shape is the flat floor which is covered in purple metal
+plating. White lights have been built into the ceiling as well, providing ample
+light for the otherwise dull hallway. @n
+~
+170 0 0 0 0 0
+D2
+~
+~
+0 0 17007 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 17009 0 0 0 0 0 0 0 0
+S
+#17009
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cHallway@n~
+   @WThis dull white metallic hallway has almost a tube like shape to it. The
+only exception to this shape is the flat floor which is covered in purple metal
+plating. White lights have been built into the ceiling as well, providing ample
+light for the otherwise dull hallway. @n
+~
+170 0 0 0 0 0
+D3
+~
+~
+0 0 17010 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 17008 0 0 0 0 0 0 0 0
+S
+#17010
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cHallway@n~
+   @WThis dull white metallic hallway has almost a tube like shape to it. The
+only exception to this shape is the flat floor which is covered in purple metal
+plating. White lights have been built into the ceiling as well, providing ample
+light for the otherwise dull hallway. @n
+~
+170 0 0 0 0 0
+D1
+~
+~
+0 0 17009 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17026 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17011 0 0 0 0 0 0 0 0
+S
+#17011
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cHallway@n~
+   @WThis dull white metallic hallway has almost a tube like shape to it. The
+only exception to this shape is the flat floor which is covered in purple metal
+plating. White lights have been built into the ceiling as well, providing ample
+light for the otherwise dull hallway. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17027 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17010 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17012 0 0 0 0 0 0 0 0
+S
+#17012
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cHallway@n~
+   @WThis dull white metallic hallway has almost a tube like shape to it. The
+only exception to this shape is the flat floor which is covered in purple metal
+plating. White lights have been built into the ceiling as well, providing ample
+light for the otherwise dull hallway. @n
+~
+170 0 0 0 0 0
+D1
+~
+~
+0 0 17011 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17028 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17013 0 0 0 0 0 0 0 0
+S
+#17013
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cHallway@n~
+   @WThis dull white metallic hallway has almost a tube like shape to it. The
+only exception to this shape is the flat floor which is covered in purple metal
+plating. White lights have been built into the ceiling as well, providing ample
+light for the otherwise dull hallway. @n
+~
+170 0 0 0 0 0
+D1
+~
+~
+0 0 17012 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17014 0 0 0 0 0 0 0 0
+S
+#17014
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cHallway@n~
+   @WThis dull white metallic hallway has almost a tube like shape to it. The
+only exception to this shape is the flat floor which is covered in purple metal
+plating. White lights have been built into the ceiling as well, providing ample
+light for the otherwise dull hallway. @n
+~
+170 0 0 0 0 0
+D2
+~
+~
+0 0 17015 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 17013 0 0 0 0 0 0 0 0
+S
+#17015
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cHallway@n~
+   @WThis dull white metallic hallway has almost a tube like shape to it. The
+only exception to this shape is the flat floor which is covered in purple metal
+plating. White lights have been built into the ceiling as well, providing ample
+light for the otherwise dull hallway. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17014 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17029 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17016 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17030 0 0 0 0 0 0 0 0
+S
+#17016
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cHallway@n~
+   @WThis dull white metallic hallway has almost a tube like shape to it. The
+only exception to this shape is the flat floor which is covered in purple metal
+plating. White lights have been built into the ceiling as well, providing ample
+light for the otherwise dull hallway. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17015 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17017 0 0 0 0 0 0 0 0
+S
+#17017
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cHallway@n~
+   @WThis dull white metallic hallway has almost a tube like shape to it. The
+only exception to this shape is the flat floor which is covered in purple metal
+plating. White lights have been built into the ceiling as well, providing ample
+light for the otherwise dull hallway. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17016 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17031 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17018 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17032 0 0 0 0 0 0 0 0
+S
+#17018
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cHallway@n~
+   @WThis dull white metallic hallway has almost a tube like shape to it. The
+only exception to this shape is the flat floor which is covered in purple metal
+plating. White lights have been built into the ceiling as well, providing ample
+light for the otherwise dull hallway. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17017 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 17019 0 0 0 0 0 0 0 0
+S
+#17019
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cHallway@n~
+   @WThis dull white metallic hallway has almost a tube like shape to it. The
+only exception to this shape is the flat floor which is covered in purple metal
+plating. White lights have been built into the ceiling as well, providing ample
+light for the otherwise dull hallway. @n
+~
+170 0 0 0 0 0
+D1
+~
+~
+0 0 17020 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 17018 0 0 0 0 0 0 0 0
+S
+#17020
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cHallway@n~
+   @WThis dull white metallic hallway has almost a tube like shape to it. The
+only exception to this shape is the flat floor which is covered in purple metal
+plating. White lights have been built into the ceiling as well, providing ample
+light for the otherwise dull hallway. @n
+~
+170 0 0 0 0 0
+D1
+~
+~
+0 0 17001 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17019 0 0 0 0 0 0 0 0
+S
+#17021
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cElevator@n~
+   @WThis cylindrical room appears to be an elevator used to travel between decks
+of the ship. There are purple tiles covering the floor, red stripes of paint
+across the otherwise dull grey walls, and bright white lights taking up the
+entire ceiling. @n
+
+@wA @Rpanel@w can be seen to the right of the doors.@n
+~
+170 c 0 0 0 0
+D2
+~
+doors~
+1 0 17001 0 0 0 0 0 0 0 0
+E
+panel~
+@cHolds    @D: @Gpush one@n
+@cMid Deck @D: @Gpush two @C(current floor)@n
+@cMain Deck@D: @Gpush three@n
+~
+S
+T 17004
+T 17005
+#17022
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cCrew Quarters@n~
+   @WThis small round room appears to be regularly cleaned and maintained by those
+who routinely occupy it. The walls are painted a dull white and the floor is
+covered in shiny purple metal plating. Closets and dressers have been built
+into the walls to provide places for crew to store their belongings while
+aboard. @n
+~
+170 c 0 0 0 0
+D3
+~
+~
+0 0 17005 0 0 0 0 0 0 0 0
+S
+#17023
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cCrew Quarters@n~
+   @WThis small round room appears to be regularly cleaned and maintained by those
+who routinely occupy it. The walls are painted a dull white and the floor is
+covered in shiny purple metal plating. Closets and dressers have been built
+into the walls to provide places for crew to store their belongings while
+aboard. @n
+~
+170 c 0 0 0 0
+D1
+~
+~
+0 0 17005 0 0 0 0 0 0 0 0
+S
+#17024
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cCrew Quarters@n~
+   @WThis small round room appears to be regularly cleaned and maintained by those
+who routinely occupy it. The walls are painted a dull white and the floor is
+covered in shiny purple metal plating. Closets and dressers have been built
+into the walls to provide places for crew to store their belongings while
+aboard. @n
+~
+170 c 0 0 0 0
+D3
+~
+~
+0 0 17007 0 0 0 0 0 0 0 0
+S
+#17025
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cCrew Quarters@n~
+   @WThis small round room appears to be regularly cleaned and maintained by those
+who routinely occupy it. The walls are painted a dull white and the floor is
+covered in shiny purple metal plating. Closets and dressers have been built
+into the walls to provide places for crew to store their belongings while
+aboard. @n
+~
+170 c 0 0 0 0
+D1
+~
+~
+0 0 17007 0 0 0 0 0 0 0 0
+S
+#17026
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cCrew Quarters@n~
+   @WThis small round room appears to be regularly cleaned and maintained by those
+who routinely occupy it. The walls are painted a dull white and the floor is
+covered in shiny purple metal plating. Closets and dressers have been built
+into the walls to provide places for crew to store their belongings while
+aboard. @n
+~
+170 c 0 0 0 0
+D0
+~
+~
+0 0 17010 0 0 0 0 0 0 0 0
+S
+#17027
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cHealing Chamber@n~
+   @WThis dull white room has several healing tanks built into its structure
+though it appears most of them are out of order or in the process of receiving
+maintenance. A large window showing the blackness of space can be seen built
+into the north wall behind the healing tanks. @n
+~
+170 c 0 0 0 0
+D2
+~
+~
+0 0 17011 0 0 0 0 0 0 0 0
+S
+#17028
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cCrew Quarters@n~
+   @WThis small round room appears to be regularly cleaned and maintained by those
+who routinely occupy it. The walls are painted a dull white and the floor is
+covered in shiny purple metal plating. Closets and dressers have been built
+into the walls to provide places for crew to store their belongings while
+aboard. @n
+~
+170 c 0 0 0 0
+D0
+~
+~
+0 0 17012 0 0 0 0 0 0 0 0
+S
+#17029
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cCrew Quarters@n~
+   @WThis small round room appears to be regularly cleaned and maintained by those
+who routinely occupy it. The walls are painted a dull white and the floor is
+covered in shiny purple metal plating. Closets and dressers have been built
+into the walls to provide places for crew to store their belongings while
+aboard. @n
+~
+170 c 0 0 0 0
+D3
+~
+~
+0 0 17015 0 0 0 0 0 0 0 0
+S
+#17030
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cCrew Quarters@n~
+   @WThis small round room appears to be regularly cleaned and maintained by those
+who routinely occupy it. The walls are painted a dull white and the floor is
+covered in shiny purple metal plating. Closets and dressers have been built
+into the walls to provide places for crew to store their belongings while
+aboard. @n
+~
+170 c 0 0 0 0
+D1
+~
+~
+0 0 17015 0 0 0 0 0 0 0 0
+S
+#17031
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cCrew Quarters@n~
+   @WThis small round room appears to be regularly cleaned and maintained by those
+who routinely occupy it. The walls are painted a dull white and the floor is
+covered in shiny purple metal plating. Closets and dressers have been built
+into the walls to provide places for crew to store their belongings while
+aboard. @n
+~
+170 c 0 0 0 0
+D3
+~
+~
+0 0 17017 0 0 0 0 0 0 0 0
+S
+#17032
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cCrew Quarters@n~
+   @WThis small round room appears to be regularly cleaned and maintained by those
+who routinely occupy it. The walls are painted a dull white and the floor is
+covered in shiny purple metal plating. Closets and dressers have been built
+into the walls to provide places for crew to store their belongings while
+aboard. @n
+~
+170 c 0 0 0 0
+D1
+~
+~
+0 0 17017 0 0 0 0 0 0 0 0
+S
+#17033
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cElevator@n~
+   @WThis cylindrical room appears to be an elevator used to travel between decks
+of the ship. There are purple tiles covering the floor, red stripes of paint
+across the otherwise dull grey walls, and bright white lights taking up the
+entire ceiling. @n
+
+@wA @Rpanel@w can be seen to the right of the doors.@n
+~
+170 c 0 0 0 0
+D0
+~
+doors~
+1 0 17034 20 0 0 0 0 0 0 0
+E
+panel~
+@cHolds    @D: @Gpush one@n
+@cMid Deck @D: @Gpush two@n
+@cMain Deck@D: @Gpush three @C(current floor)@n
+~
+S
+T 17004
+T 17005
+#17034
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cBridge Hallway@n~
+   @WThis dull white metallic hallway has almost a tube like shape to it. The
+only exception to this shape is the flat floor which is covered in purple metal
+plating. White lights have been built into the ceiling as well, providing ample
+light for the otherwise dull hallway. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17037 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17035 0 0 0 0 0 0 0 0
+D2
+~
+doors~
+1 0 17033 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17036 0 0 0 0 0 0 0 0
+S
+T 17003
+#17035
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cKitchen@n~
+   @WThis large room has dozens of cooking appliances and counters built into its
+walls. The smells of all sorts of exotic foods float through the air. A large
+wrap around window has been built into the east and south walls. Outside the
+window the vastness of space can easily be seen stretching on forever. @n
+~
+170 c 0 0 0 0
+D3
+~
+~
+0 0 17034 0 0 0 0 0 0 0 0
+S
+#17036
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cDining Room@n~
+   @WThis large room has a fresh coat of white paint on all its surfaces except
+for the floor which is covered in the ship's standard purple metal plating. 
+Lots of well crafted dining furniture can be seen placed around the room. A
+wrap around window has been built into the west and south walls providng a nice
+view of space for those dining. @n
+~
+170 c 0 0 0 0
+D1
+~
+~
+0 0 17034 0 0 0 0 0 0 0 0
+S
+#17037
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cBridge Hallway@n~
+   @WThis dull white metallic hallway has almost a tube like shape to it. The
+only exception to this shape is the flat floor which is covered in purple metal
+plating. White lights have been built into the ceiling as well, providing ample
+light for the otherwise dull hallway. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17038 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17034 0 0 0 0 0 0 0 0
+S
+#17038
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cBridge Hallway@n~
+   @WThis dull white metallic hallway has almost a tube like shape to it. The
+only exception to this shape is the flat floor which is covered in purple metal
+plating. White lights have been built into the ceiling as well, providing ample
+light for the otherwise dull hallway. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17041 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17039 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17037 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17040 0 0 0 0 0 0 0 0
+S
+#17039
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cSalza's Quarters@n~
+   @WThis spacious room appears to the sleeping quarters of a high ranking member
+of the ship's crew. It is well decorated with various artifacts from conquered
+worlds that have been put on display. @n
+~
+170 c 0 0 0 0
+D3
+~
+~
+0 0 17038 0 0 0 0 0 0 0 0
+S
+#17040
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cCooler's Quarters@n~
+   This finely decorated room has a large gold emblem built into the metal
+plating of its floor. Fine exotic wood with a rich dark color has been built
+into the walls. Finally a large window has been built into the wall of the ship
+showing a great view of the vastness of space.
+~
+170 c 0 0 0 0
+D1
+~
+~
+0 0 17038 0 0 0 0 0 0 0 0
+S
+#17041
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cBridge Hallway@n~
+   @WThis dull white metallic hallway has almost a tube like shape to it. The
+only exception to this shape is the flat floor which is covered in purple metal
+plating. White lights have been built into the ceiling as well, providing ample
+light for the otherwise dull hallway. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17042 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17038 0 0 0 0 0 0 0 0
+S
+#17042
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cBridge@n~
+   @WThis massive room has several control panels built into the walls running
+east and west. A massive window shaped like a bubble juts out from the north
+end of the room. This provides a great view of space through the glass of the
+window. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17045 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17043 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17041 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17047 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 17046 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 17044 0 0 0 0 0 0 0 0
+S
+#17043
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cBridge@n~
+   @WThis massive room has several control panels built into the walls running
+east and west. A massive window shaped like a bubble juts out from the north
+end of the room. This provides a great view of space through the glass of the
+window. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17044 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17042 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 17045 0 0 0 0 0 0 0 0
+S
+#17044
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cBridge@n~
+   @WThis massive room has several control panels built into the walls running
+east and west. A massive window shaped like a bubble juts out from the north
+end of the room. This provides a great view of space through the glass of the
+window. @n
+~
+170 0 0 0 0 0
+D2
+~
+~
+0 0 17043 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17045 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17042 0 0 0 0 0 0 0 0
+S
+#17045
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cBridge@n~
+   @WThis massive room has several control panels built into the walls running
+east and west. A massive window shaped like a bubble juts out from the north
+end of the room. This provides a great view of space through the glass of the
+window. @n
+~
+170 c 0 0 0 0
+D1
+~
+~
+0 0 17044 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17042 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17046 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 17043 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17047 0 0 0 0 0 0 0 0
+S
+#17046
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cBridge@n~
+   @WThis massive room has several control panels built into the walls running
+east and west. A massive window shaped like a bubble juts out from the north
+end of the room. This provides a great view of space through the glass of the
+window. @n
+~
+170 0 0 0 0 0
+D1
+~
+~
+0 0 17045 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17047 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 17042 0 0 0 0 0 0 0 0
+S
+#17047
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cBridge@n~
+   @WThis massive room has several control panels built into the walls running
+east and west. A massive window shaped like a bubble juts out from the north
+end of the room. This provides a great view of space through the glass of the
+window. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17046 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17042 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 17045 0 0 0 0 0 0 0 0
+S
+#17048
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cElevator@n~
+   @WThis cylindrical room appears to be an elevator used to travel between decks
+of the ship. There are purple tiles covering the floor, red stripes of paint
+across the otherwise dull grey walls, and bright white lights taking up the
+entire ceiling. @n
+
+@wA @Rpanel@w can be seen to the right of the doors.@n
+~
+170 c 0 0 0 0
+D0
+~
+doors~
+1 0 17051 0 0 0 0 0 0 0 0
+E
+panel~
+@cHolds    @D: @Gpush one @C(current floor)@n
+@cMid Deck @D: @Gpush two@n
+@cMain Deck@D: @Gpush three@n
+~
+S
+T 17004
+T 17005
+#17049
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cShip Holds@n~
+   @WThis large expansive area seems to be the cargo holds of the ship. Metal
+crates and other storage devices have been stacked all around. Even though
+there are hundreds of such storage devices stored there still happens to be a
+lot of space available in the holds. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17058 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17050 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 17057 0 0 0 0 0 0 0 0
+S
+#17050
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cShip Holds@n~
+   @WThis large expansive area seems to be the cargo holds of the ship. Metal
+crates and other storage devices have been stacked all around. Even though
+there are hundreds of such storage devices stored there still happens to be a
+lot of space available in the holds. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17057 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17051 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17049 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 17058 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 17056 0 0 0 0 0 0 0 0
+S
+#17051
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cShip Holds@n~
+   @WThis large expansive area seems to be the cargo holds of the ship. Metal
+crates and other storage devices have been stacked all around. Even though
+there are hundreds of such storage devices stored there still happens to be a
+lot of space available in the holds. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17056 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17052 0 0 0 0 0 0 0 0
+D2
+~
+doors~
+1 0 17048 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17050 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 17057 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 17055 0 0 0 0 0 0 0 0
+S
+T 17001
+#17052
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cShip Holds@n~
+   @WThis large expansive area seems to be the cargo holds of the ship. Metal
+crates and other storage devices have been stacked all around. Even though
+there are hundreds of such storage devices stored there still happens to be a
+lot of space available in the holds. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17055 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17053 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17051 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 17056 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 17054 0 0 0 0 0 0 0 0
+S
+#17053
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cShip Holds@n~
+   @WThis large expansive area seems to be the cargo holds of the ship. Metal
+crates and other storage devices have been stacked all around. Even though
+there are hundreds of such storage devices stored there still happens to be a
+lot of space available in the holds. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17054 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17052 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 17055 0 0 0 0 0 0 0 0
+S
+#17054
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cShip Holds@n~
+   @WThis large expansive area seems to be the cargo holds of the ship. Metal
+crates and other storage devices have been stacked all around. Even though
+there are hundreds of such storage devices stored there still happens to be a
+lot of space available in the holds. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17063 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17053 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17055 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 17062 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17052 0 0 0 0 0 0 0 0
+S
+#17055
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cShip Holds@n~
+   @WThis large expansive area seems to be the cargo holds of the ship. Metal
+crates and other storage devices have been stacked all around. Even though
+there are hundreds of such storage devices stored there still happens to be a
+lot of space available in the holds. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17062 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17054 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17052 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17056 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 17061 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 17063 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 17053 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17051 0 0 0 0 0 0 0 0
+S
+#17056
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cShip Holds@n~
+   @WThis large expansive area seems to be the cargo holds of the ship. Metal
+crates and other storage devices have been stacked all around. Even though
+there are hundreds of such storage devices stored there still happens to be a
+lot of space available in the holds. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17061 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17055 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17051 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17057 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 17060 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 17062 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 17052 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17050 0 0 0 0 0 0 0 0
+S
+#17057
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cShip Holds@n~
+   @WThis large expansive area seems to be the cargo holds of the ship. Metal
+crates and other storage devices have been stacked all around. Even though
+there are hundreds of such storage devices stored there still happens to be a
+lot of space available in the holds. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17060 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17056 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17050 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17058 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 17059 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 17061 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 17051 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17049 0 0 0 0 0 0 0 0
+S
+#17058
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cShip Holds@n~
+   @WThis large expansive area seems to be the cargo holds of the ship. Metal
+crates and other storage devices have been stacked all around. Even though
+there are hundreds of such storage devices stored there still happens to be a
+lot of space available in the holds. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17059 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17057 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17049 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 17060 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 17050 0 0 0 0 0 0 0 0
+S
+#17059
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cShip Holds@n~
+   @WThis large expansive area seems to be the cargo holds of the ship. Metal
+crates and other storage devices have been stacked all around. Even though
+there are hundreds of such storage devices stored there still happens to be a
+lot of space available in the holds. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17068 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17060 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17058 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 17067 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 17057 0 0 0 0 0 0 0 0
+S
+#17060
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cShip Holds@n~
+   @WThis large expansive area seems to be the cargo holds of the ship. Metal
+crates and other storage devices have been stacked all around. Even though
+there are hundreds of such storage devices stored there still happens to be a
+lot of space available in the holds. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17067 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17061 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17057 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17059 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 17068 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 17066 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 17056 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17058 0 0 0 0 0 0 0 0
+S
+#17061
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cShip Holds@n~
+   @WThis large expansive area seems to be the cargo holds of the ship. Metal
+crates and other storage devices have been stacked all around. Even though
+there are hundreds of such storage devices stored there still happens to be a
+lot of space available in the holds. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17066 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17062 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17056 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17060 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 17067 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 17065 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 17055 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17057 0 0 0 0 0 0 0 0
+S
+#17062
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cShip Holds@n~
+   @WThis large expansive area seems to be the cargo holds of the ship. Metal
+crates and other storage devices have been stacked all around. Even though
+there are hundreds of such storage devices stored there still happens to be a
+lot of space available in the holds. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17065 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17063 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17055 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17061 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 17066 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 17064 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 17054 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17056 0 0 0 0 0 0 0 0
+S
+#17063
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cShip Holds@n~
+   @WThis large expansive area seems to be the cargo holds of the ship. Metal
+crates and other storage devices have been stacked all around. Even though
+there are hundreds of such storage devices stored there still happens to be a
+lot of space available in the holds. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17064 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17054 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17062 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 17065 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17055 0 0 0 0 0 0 0 0
+S
+#17064
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cShip Holds@n~
+   @WThis large expansive area seems to be the cargo holds of the ship. Metal
+crates and other storage devices have been stacked all around. Even though
+there are hundreds of such storage devices stored there still happens to be a
+lot of space available in the holds. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17073 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17063 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17065 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 17072 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17062 0 0 0 0 0 0 0 0
+S
+#17065
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cShip Holds@n~
+   @WThis large expansive area seems to be the cargo holds of the ship. Metal
+crates and other storage devices have been stacked all around. Even though
+there are hundreds of such storage devices stored there still happens to be a
+lot of space available in the holds. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17072 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17064 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17062 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17066 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 17071 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 17073 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 17063 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17061 0 0 0 0 0 0 0 0
+S
+#17066
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cShip Holds@n~
+   @WThis large expansive area seems to be the cargo holds of the ship. Metal
+crates and other storage devices have been stacked all around. Even though
+there are hundreds of such storage devices stored there still happens to be a
+lot of space available in the holds. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17071 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17065 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17061 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17067 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 17070 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 17072 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 17062 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17060 0 0 0 0 0 0 0 0
+S
+#17067
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cShip Holds@n~
+   @WThis large expansive area seems to be the cargo holds of the ship. Metal
+crates and other storage devices have been stacked all around. Even though
+there are hundreds of such storage devices stored there still happens to be a
+lot of space available in the holds. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17070 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17066 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17060 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17068 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 17069 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 17071 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 17061 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17059 0 0 0 0 0 0 0 0
+S
+#17068
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cShip Holds@n~
+   @WThis large expansive area seems to be the cargo holds of the ship. Metal
+crates and other storage devices have been stacked all around. Even though
+there are hundreds of such storage devices stored there still happens to be a
+lot of space available in the holds. @n
+~
+170 0 0 0 0 0
+D0
+~
+~
+0 0 17069 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17067 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17059 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 17070 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 17060 0 0 0 0 0 0 0 0
+S
+#17069
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cShip Holds@n~
+   @WThis large expansive area seems to be the cargo holds of the ship. Metal
+crates and other storage devices have been stacked all around. Even though
+there are hundreds of such storage devices stored there still happens to be a
+lot of space available in the holds. @n
+~
+170 0 0 0 0 0
+D1
+~
+~
+0 0 17070 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17068 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 17067 0 0 0 0 0 0 0 0
+S
+#17070
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cShip Holds@n~
+   @WThis large expansive area seems to be the cargo holds of the ship. Metal
+crates and other storage devices have been stacked all around. Even though
+there are hundreds of such storage devices stored there still happens to be a
+lot of space available in the holds. @n
+~
+170 0 0 0 0 0
+D1
+~
+~
+0 0 17071 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17067 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17069 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 17066 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17068 0 0 0 0 0 0 0 0
+S
+#17071
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cShip Holds@n~
+   @WThis large expansive area seems to be the cargo holds of the ship. Metal
+crates and other storage devices have been stacked all around. Even though
+there are hundreds of such storage devices stored there still happens to be a
+lot of space available in the holds. @n
+~
+170 0 0 0 0 0
+D1
+~
+~
+0 0 17072 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17066 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17070 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 17065 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17067 0 0 0 0 0 0 0 0
+S
+#17072
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cShip Holds@n~
+   @WThis large expansive area seems to be the cargo holds of the ship. Metal
+crates and other storage devices have been stacked all around. Even though
+there are hundreds of such storage devices stored there still happens to be a
+lot of space available in the holds. @n
+~
+170 0 0 0 0 0
+D1
+~
+~
+0 0 17073 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17065 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17071 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 17064 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17066 0 0 0 0 0 0 0 0
+S
+#17073
+@cC@Co@wo@cl@Ce@wr@c'@Cs @DS@Wh@wip@D: @cShip Holds@n~
+   @WThis large expansive area seems to be the cargo holds of the ship. Metal
+crates and other storage devices have been stacked all around. Even though
+there are hundreds of such storage devices stored there still happens to be a
+lot of space available in the holds. @n
+~
+170 0 0 0 0 0
+D2
+~
+~
+0 0 17064 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17072 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17065 0 0 0 0 0 0 0 0
+S
+$~

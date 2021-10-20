@@ -1,0 +1,302 @@
+#4800
+Titanium Ice shopkeeper~
+@cT@Ci@Dt@wa@Wn@wi@Cu@cm @CI@cc@We @nShopkeeper~
+The shopkeeper here, watches over the store with a steely gaze.
+~
+@d @n
+~
+bds 0 0 0 l 0 0 0 0 E
+100 0 10 0d4+0 0d0+0
+0 0 2 6
+8 8 1
+Str: 69
+Dex: 60
+Int: 69
+Wis: 97
+Con: 80
+Cha: 95
+E
+#4801
+Human Slave~
+@CH@cu@Wm@ca@Cn@n Slave~
+A sullen looking Human slave is here.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 10 E
+10 0 10 0d0+0 0d0+0
+0 0 0 0
+8 8 1
+Str: 5
+Dex: 10
+Int: 16
+Wis: 20
+Con: 11
+Cha: 17
+E
+#4802
+Namek Slave~
+@gN@Ga@Wm@Ge@gk@n Slave~
+A Namekian slave is here, kicking the dirt on the ground.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 10 E
+10 0 10 1d10+0 0d0+0
+0 0 4 3
+8 8 1
+Str: 19
+Dex: 12
+Int: 11
+Wis: 14
+Con: 5
+Cha: 7
+E
+#4803
+Saiyan Slave~
+@YS@ya@Yiy@ya@Yn@n Slave~
+A Saiyan slave is here, acting deviously.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 -10 E
+10 0 10 0d8+0 0d0+0
+0 0 1 4
+8 8 1
+Str: 20
+Dex: 18
+Int: 10
+Wis: 7
+Con: 13
+Cha: 10
+E
+#4804
+Icer Slave~
+@CI@cc@We@wr@n Slave~
+An Icerian slave is walking around here with her head hung low.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 -10 E
+10 0 10 0d10+0 0d0+0
+0 0 2 5
+8 8 1
+Str: 11
+Dex: 6
+Int: 20
+Wis: 7
+Con: 9
+Cha: 19
+E
+#4805
+Mutant slave~
+@MM@mu@Rt@ra@mn@Mt@n Slave~
+A mutant slave is walking around aimlessly here.
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 -10 E
+10 0 10 0d10+0 0d0+0
+0 0 5 5
+8 8 1
+Str: 7
+Dex: 20
+Int: 18
+Wis: 8
+Con: 14
+Cha: 16
+E
+#4806
+Kanassan Slave~
+@bK@Ba@bn@Bas@bs@Ba@bn@n Slave~
+A dehydrated looking Kanassan slave is toiling here.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 10 E
+10 0 10 0d4+0 0d0+0
+0 0 6 12
+8 8 1
+Str: 7
+Dex: 5
+Int: 13
+Wis: 17
+Con: 14
+Cha: 6
+E
+#4807
+Halfbreed slave~
+@CH@ca@Dl@Wf@wb@Wr@De@ce@Cd@n Slave~
+A small halfbreed slave is here, sobbing.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 -10 E
+10 0 10 0d8+0 0d0+0
+0 0 7 1
+8 8 1
+Str: 13
+Dex: 20
+Int: 20
+Wis: 12
+Con: 20
+Cha: 18
+E
+#4808
+Truffle Slave~
+@bT@Br@Du@wf@Df@Bl@be@n Slave~
+A truffle slave is here, trying to break free of his bonds.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 10 E
+10 0 10 0d12+0 0d0+0
+0 0 13 10
+8 8 1
+Str: 10
+Dex: 7
+Int: 20
+Wis: 12
+Con: 10
+Cha: 9
+E
+#4809
+Konatsu slave~
+@DK@Wo@wn@Da@wt@Ws@Du@n slave~
+A Konatsu slave is sulking here.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 10 E
+10 0 10 0d8+0 0d0+0
+0 0 3 7
+8 8 1
+Str: 9
+Dex: 19
+Int: 13
+Wis: 18
+Con: 9
+Cha: 19
+E
+#4810
+Market Guard~
+@gM@Ga@wr@Wk@Ge@gt @MG@mu@Wa@mr@Md@n~
+A bulky Mutant is here, patrolling the area.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 -10 E
+10 0 10 0d4+0 0d0+0
+0 0 2 6
+8 8 1
+Str: 15
+Dex: 19
+Int: 12
+Wis: 13
+Con: 10
+Cha: 17
+E
+T 4806
+#4811
+Market Guard~
+@gM@Ga@wr@Wk@Ge@gt @MG@mu@Wa@mr@Md@n~
+An Icerian market guard patrols the area here.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 -10 E
+15 0 10 0d4+0 0d0+0
+0 0 2 6
+8 8 1
+Str: 12
+Dex: 13
+Int: 10
+Wis: 16
+Con: 9
+Cha: 19
+E
+T 4806
+#4812
+Market Guard~
+@gM@Ga@wr@Wk@Ge@gt @MG@mu@Wa@mr@Md@n~
+A guard is here, processing traffic in and out of the slave market.
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 -10 E
+20 0 10 0d4+0 0d0+0
+0 0 2 6
+8 8 1
+Str: 18
+Dex: 14
+Int: 11
+Wis: 13
+Con: 14
+Cha: 20
+E
+T 4800
+T 4802
+T 4892
+#4813
+Market Guard~
+@gM@Ga@wr@Wk@Ge@gt @MG@mu@Wa@mr@Md@n~
+A guard is here, processing traffic in and out of the slave market.
+~
+@D @n
+~
+bds 0 0 0 l 0 0 0 -10 E
+25 0 10 0d4+0 0d0+0
+0 0 2 6
+8 8 1
+Str: 25
+Dex: 24
+Int: 15
+Wis: 24
+Con: 21
+Cha: 23
+E
+T 4801
+T 4803
+T 4892
+#4814
+Garn~
+Garn~
+Garn the slave master stands here, selling slaves.
+~
+ooc - Type list to see his stock
+~
+bds 0 0 0 l 0 0 0 0 E
+1 0 10 0d4+0 0d0+0
+0 0 2 6
+8 8 1
+Str: 10
+Dex: 18
+Int: 8
+Wis: 12
+Con: 6
+Cha: 19
+E
+T 4804
+#4815
+Lord Icer Glacier~
+@WL@Co@Wr@Cd @CG@Wl@Ca@Wc@Ci@We@Cr@n~
+@nAn @CI@Wc@Ce@Wr@Ci@Wa@Cn @YL@Ro@Yr@Rd@n stands here lavished in gold and silver.
+~
+   The Icer stands here wearing brilliant silk clothing. Gold rings decorate
+his hands, and a crested neckless hangs from his neck.
+~
+bds 0 0 0 l 0 0 0 0 E
+50 0 10 0d4+0 0d0+0
+0 0 2 6
+8 8 1
+Str: 36
+Dex: 44
+Int: 44
+Wis: 47
+Con: 26
+Cha: 41
+E
+T 4807
+T 4808
+T 4809
+$

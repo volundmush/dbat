@@ -1,0 +1,2057 @@
+#16300
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp@n - @WHangar@n~
+   @WThis expansive hangar bay is but one of several in the Celestial Corp owned
+Space Station dubbed the 'Great Space Hub'. From here, the Celestial Corp's
+fleet of public transportation vessels dock and head out to their destinations.
+Passengers of all races can be seen scurrying around looking for their ship. At
+several locations in this area, are large electronic @Rsigns@W with ship routes and
+other information present on their displays. @n
+~
+163 cq 0 0 0 0
+D0
+~
+~
+0 0 16301 0 0 0 0 0 0 0 0
+D11
+~
+~
+0 0 33385 0 0 0 0 0 0 0 0
+S
+#16301
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp@n - @WCustoms Checkpoint@n~
+   @WEntry into and exit out of the Space Hub is dictated by checkpoints such as
+this. Armed security guards watch over the area, as travellers pass through
+advanced scanners. Next to each scanner frame is a conveyer belt where space
+travellers place their goods for security checks. To the west of here is a
+locked door clearly labeled 'Security Offices'. @n
+~
+163 0 0 0 0 0
+D0
+~
+~
+0 0 16302 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16300 0 0 0 0 0 0 0 0
+S
+#16302
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp@n - @WLobby@n~
+   @WThe main lobby of the Celestial Corp is bustling with activity, with a
+variety of different races from all over the galaxy moving to and fro. There
+are a number of seating areas, whilst a large decorative fountain can be seen
+in the middle of the lobby. To the south of the lobby is the customs
+checkpoint, while assorted shops can be seen elsewhere, including a food court.
+There is also a training facility to the west. @n
+~
+163 0 0 0 0 0
+D0
+~
+~
+0 0 16303 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16304 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16301 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16308 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16312 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16320 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16321 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16322 0 0 0 0 0 0 0 0
+S
+#16303
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WTicket Counter@n~
+   @WThis store just off the lobby sells the public transportation tickets people
+use to fly about the galaxy. A sleek white counter can be seen, with glass
+windows on the north side of the room. Several queues, sectioned off by purple
+velvet ropes, lead up to the counter. @n
+~
+163 0 0 0 0 10
+D2
+~
+~
+0 0 16302 0 0 0 0 0 0 0 0
+S
+#16304
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp@n - @WFood Court@n~
+   @WThe Food Court here in the Space Hub is, perhaps unsurprisingly, almost as
+large as the main lobby. Popular fast food franchises from all over the galaxy
+can be seen here, each with their own dedicated seating areas. A large play
+pen area is full of children running, screaming and laughing as they enjoy the
+facilities. @n
+~
+163 0 0 0 0 0
+D0
+~
+~
+0 0 16305 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16307 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16306 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16302 0 0 0 0 0 0 0 0
+S
+#16305
+@YM@yc@Rs@rt@Yu@yf@Rf @DRestaurant@n~
+   @WGrease covers sections of the walls closest to a counter that is equally
+stained with grease. A large menu of tasty 'food' is displayed above the
+counter. An easy to use cash register with food icons for buttons instead of
+numbers sits on top of the counter. Tabls can be seen in the back, a few of
+which should be safe to eat on. @n
+~
+163 0 0 0 0 10
+D2
+~
+~
+0 0 16304 0 0 0 0 0 0 0 0
+S
+#16306
+@CF@cr@wi@Wg@ci@Cd @RF@rr@Yi@ye@Rd @DR@wa@Wt@n~
+   @CThe smells of spices and oil are very heavy in this small resturant. The
+faint sound of crackling can be heard as employees dip the battered rat into
+hot oil. The floors of this place are dirty and littered with used napkins and
+food boxes. The trash cans are overflowing, spilling garbage on the floor. A
+long line forms infront of the counter as patient customers wait for their
+delicate fried rat. @n
+~
+163 0 0 0 0 10
+D0
+~
+~
+0 0 16304 0 0 0 0 0 0 0 0
+S
+#16307
+@YB@yu@Dr@wg@ye@Yr @CQ@cu@De@ce@Cn@n~
+   @YHome to the giant double flopper, a burger known for it's heart attack
+inducing fat content but addictively good tasting. Burger Queen is a small
+franchise take away chain whose origins are largely unknown. The tiles of the
+floor are checkered with a lighter and darker shade of burgundy. Several
+bolted down plastic white tables and chairs have been placed to one side of
+Burger Queen to serve as a dining in area. @n
+~
+163 0 0 0 0 10
+D3
+~
+~
+0 0 16304 0 0 0 0 0 0 0 0
+S
+#16308
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp@n - @WFitness Center@n~
+   @WAt great expense, Celestial Corp has built this state of the art fitness and
+training complex. In the main foyer area, there are a number of traditional
+exercise machines available to use, as well as LCD TVs hanging from the ceiling
+that play motivational videos. A @Rsign@W at the counter details the facilities
+available here. @n
+~
+163 h 0 0 0 0
+D0
+~
+~
+0 0 16309 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16302 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16310 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16311 0 0 0 0 0 0 0 0
+E
+sign~
+@CCelestial Corp Fitness Center - Facility Guide@n
+@WNorth - Healing Tanks@n
+@WWest - Holographic Training, Technique Practice Range@n
+@WSouth - Gravity Training@n
+~
+S
+#16309
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp@n - @WHealing Facility@n~
+   @WAlthough part of the Celestial Corp fitness center, this facility also
+doubles as a quick response hospital for incidents that are too far away from
+the core planets. In addition to a number of healing tanks, there is a
+surgical operation area and other medical stations, each staffed. @n
+~
+163 D 0 0 0 0
+D2
+~
+~
+0 0 16308 0 0 0 0 0 0 0 0
+S
+#16310
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp@n - @WGrav Training@n~
+   @WThis room is wide and circular in shape. Aside from the door leading out
+into the Fitness Center's foyer, there are no other exits or windows. The
+floors, walls and ceiling are all white. A gravity altering machine is present
+in the center of the room. @n
+~
+163 D 0 0 0 0
+D0
+~
+~
+0 0 16308 0 0 0 0 0 0 0 0
+D2
+~
+door~
+1 0 16369 20 0 0 0 0 0 0 0
+S
+#16311
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp@n - @WCombat Training@n~
+   @WThis room seems almost devoid of any decoration upon the shiny silver
+colored floors, walls and ceiling. Upon the ceiling however are a series of
+small black circles. On the far wall is a red optical eye just above a digital
+@Csign@W. The waiting room is well lit but where the light comes from is unknown.
+The foyer of the Fitness Center is to the east. A big @Rred@W button lies next to
+the scanner, with a label above it that says, "Press me for Practice Range." @n
+~
+163 0 0 0 0 0
+D1
+~
+~
+0 0 16308 0 0 0 0 0 0 0 0
+E
+sign~
+@CHolographic Combat Simulation@n
+@WTo use the simulation, please say @Cbegin@W.@n
+@RNote@W: Simulation software will select appropriate scenario.@n
+@RNote@W: Combat is lethal. You may die if you are not careful.@n
+
+
+@CTechnique Practice Range@n
+@WTo teleport to the practice range, please press the button.
+@n
+~
+S
+T 16302
+T 16304
+#16312
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp@n - @WHallway@n~
+   @WThis hallway leads off of the main lobby, with further access blocked by a
+locked door. A sign reading '@CEmployee Access Only@W' is visible on the left door
+panel and on the right side of the wall is a key card swiper. @n
+~
+163 0 0 0 0 0
+D0
+~
+door~
+2 0 16313 20 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16302 0 0 0 0 0 0 0 0
+S
+#16313
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp@n - @WHallway@n~
+   This unfinished room was created by Samael. This area is obviously
+unfinished. If you can see this, feel free to point and laugh at Kindle.
+~
+163 0 0 0 0 0
+D0
+~
+~
+0 0 16314 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16312 0 0 0 0 0 0 0 0
+S
+#16314
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp@n - @WHallway@n~
+This unfinished room was created by Samael.
+~
+163 0 0 0 0 0
+D1
+~
+~
+0 0 16315 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16313 0 0 0 0 0 0 0 0
+S
+#16315
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp@n - @WHallway@n~
+This unfinished room was created by Samael.
+~
+163 0 0 0 0 0
+D0
+~
+~
+0 0 16316 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16318 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16317 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16314 0 0 0 0 0 0 0 0
+S
+#16316
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp@n - @WCubicle@n~
+This unfinished room was created by Samael.
+~
+163 0 0 0 0 0
+D2
+~
+~
+0 0 16315 0 0 0 0 0 0 0 0
+S
+#16317
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp@n - @WCubicle@n~
+This unfinished room was created by Samael.
+~
+163 0 0 0 0 0
+D0
+~
+~
+0 0 16315 0 0 0 0 0 0 0 0
+S
+#16318
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp@n - @WHallway@n~
+This unfinished room was created by Samael.
+~
+163 0 0 0 0 0
+D3
+~
+~
+0 0 16315 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 16319 0 0 0 0 0 0 0 0
+S
+#16319
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp@n - @WHead Office@n~
+This unfinished room was created by Samael.
+~
+163 0 0 0 0 0
+D5
+~
+~
+0 0 16318 0 0 0 0 0 0 0 0
+S
+#16320
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp@n - @WInformation Kiosk@n~
+   @WThe most distinct thing about this kiosk is the cheesy music being played,
+the kind you would expect to hear only in an elevator. Landscape paintings
+from a variety of worlds hang on the walls. In the middle of the kiosk are
+some racks with information brochures placed in them. @n
+~
+163 0 0 0 0 0
+D9
+~
+~
+0 0 16302 0 0 0 0 0 0 0 0
+S
+#16321
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WSouvenir Shop@n~
+   @WThis store is perhaps the largest on the Celestial Corp space hub and one
+could be forgiven for thinking it was more of a department store. twenty
+aisles can be seen going from east to west, their shelves stacked full of
+assorted goods ranging from stuffed animals to postcards, keychains and
+anything in between. @n
+~
+163 0 0 0 0 10
+D6
+~
+~
+0 0 16302 0 0 0 0 0 0 0 0
+S
+#16322
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WHallway@n~
+   @WWhite walls, floors and ceilings would give this hallway a sterile look, if
+it wasn't for the LCD screens positioned along the walls that play
+advertisements from all of the galaxy. Signs hang from the ceiling indicating
+the hallway runs between the pool area and main lobby. @n
+~
+163 0 0 0 0 0
+D7
+~
+~
+0 0 16302 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16323 0 0 0 0 0 0 0 0
+S
+#16323
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WHallway@n~
+   @WWhite walls, floors and ceilings would give this hallway a sterile look, if
+it wasn't for the LCD screens positioned along the walls that play
+advertisements from all of the galaxy. Signs hang from the ceiling indicating
+the hallway runs between the pool area and main lobby. @n
+~
+163 0 0 0 0 0
+D3
+~
+~
+0 0 16324 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16322 0 0 0 0 0 0 0 0
+S
+#16324
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WPool Side@n~
+   @WWide marble pavement leads around the edge of the pool here, as well as to
+little bungalows that guests can rent. The theme here is reminiscent of the
+ideal tropical island as depicted on Earth. The ceiling is a glass variant,
+allowing guests to look out at the stars. @n
+~
+163 0 0 0 0 0
+D0
+~
+~
+0 0 16325 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16323 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16339 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16340 0 0 0 0 0 0 0 0
+S
+#16325
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WPool Side@n~
+   @WWide marble pavement leads around the edge of the pool here, as well as to
+little bungalows that guests can rent. The theme here is reminiscent of the
+ideal tropical island as depicted on Earth. The ceiling is a glass variant,
+allowing guests to look out at the stars. @n
+~
+163 0 0 0 0 0
+D0
+~
+~
+0 0 16326 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16324 0 0 0 0 0 0 0 0
+S
+#16326
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WPool Side@n~
+   @WWide marble pavement leads around the edge of the pool here, as well as to
+little bungalows that guests can rent. The theme here is reminiscent of the
+ideal tropical island as depicted on Earth. The ceiling is a glass variant,
+allowing guests to look out at the stars. @n
+~
+163 0 0 0 0 0
+D2
+~
+~
+0 0 16325 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16327 0 0 0 0 0 0 0 0
+S
+#16327
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WPool Side@n~
+   @WWide marble pavement leads around the edge of the pool here, as well as to
+little bungalows that guests can rent. The theme here is reminiscent of the
+ideal tropical island as depicted on Earth. The ceiling is a glass variant,
+allowing guests to look out at the stars. @n
+~
+163 0 0 0 0 0
+D1
+~
+~
+0 0 16326 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16344 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16328 0 0 0 0 0 0 0 0
+S
+#16328
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WPool Side@n~
+   @WWide marble pavement leads around the edge of the pool here, as well as to
+little bungalows that guests can rent. The theme here is reminiscent of the
+ideal tropical island as depicted on Earth. The ceiling is a glass variant,
+allowing guests to look out at the stars. @n
+~
+163 0 0 0 0 0
+D1
+~
+~
+0 0 16327 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16329 0 0 0 0 0 0 0 0
+S
+#16329
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WPool Side@n~
+   @WWide marble pavement leads around the edge of the pool here, as well as to
+little bungalows that guests can rent. The theme here is reminiscent of the
+ideal tropical island as depicted on Earth. The ceiling is a glass variant,
+allowing guests to look out at the stars. @n
+~
+163 0 0 0 0 0
+D1
+~
+~
+0 0 16328 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16330 0 0 0 0 0 0 0 0
+S
+#16330
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WPool Side@n~
+   @WWide marble pavement leads around the edge of the pool here, as well as to
+little bungalows that guests can rent. The theme here is reminiscent of the
+ideal tropical island as depicted on Earth. The ceiling is a glass variant,
+allowing guests to look out at the stars. @n
+~
+163 0 0 0 0 0
+D1
+~
+~
+0 0 16329 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16331 0 0 0 0 0 0 0 0
+S
+#16331
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WPool Side@n~
+   @WWide marble pavement leads around the edge of the pool here, as well as to
+little bungalows that guests can rent. The theme here is reminiscent of the
+ideal tropical island as depicted on Earth. The ceiling is a glass variant,
+allowing guests to look out at the stars. @n
+~
+163 0 0 0 0 0
+D0
+~
+~
+0 0 16330 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16332 0 0 0 0 0 0 0 0
+S
+#16332
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WPool Side@n~
+   @WWide marble pavement leads around the edge of the pool here, as well as to
+little bungalows that guests can rent. The theme here is reminiscent of the
+ideal tropical island as depicted on Earth. The ceiling is a glass variant,
+allowing guests to look out at the stars. A fully stocked bar has been set up
+here, for adult travellers as well as several speakers blaring the latest pop
+chart sensations. @n
+~
+163 0 0 0 0 10
+D0
+~
+~
+0 0 16331 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16346 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16333 0 0 0 0 0 0 0 0
+S
+#16333
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WPool Side@n~
+   @WWide marble pavement leads around the edge of the pool here, as well as to
+little bungalows that guests can rent. The theme here is reminiscent of the
+ideal tropical island as depicted on Earth. The ceiling is a glass variant,
+allowing guests to look out at the stars. @n
+~
+163 0 0 0 0 0
+D0
+~
+~
+0 0 16332 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16334 0 0 0 0 0 0 0 0
+S
+#16334
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WPool Side@n~
+   @WWide marble pavement leads around the edge of the pool here, as well as to
+little bungalows that guests can rent. The theme here is reminiscent of the
+ideal tropical island as depicted on Earth. The ceiling is a glass variant,
+allowing guests to look out at the stars. @n
+~
+163 0 0 0 0 0
+D0
+~
+~
+0 0 16333 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16335 0 0 0 0 0 0 0 0
+S
+#16335
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WPool Side@n~
+   @WWide marble pavement leads around the edge of the pool here, as well as to
+little bungalows that guests can rent. The theme here is reminiscent of the
+ideal tropical island as depicted on Earth. The ceiling is a glass variant,
+allowing guests to look out at the stars. @n
+~
+163 0 0 0 0 0
+D1
+~
+~
+0 0 16336 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16334 0 0 0 0 0 0 0 0
+S
+#16336
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WPool Side@n~
+   @WWide marble pavement leads around the edge of the pool here, as well as to
+little bungalows that guests can rent. The theme here is reminiscent of the
+ideal tropical island as depicted on Earth. The ceiling is a glass variant,
+allowing guests to look out at the stars. @n
+~
+163 0 0 0 0 0
+D0
+~
+~
+0 0 16345 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16337 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16335 0 0 0 0 0 0 0 0
+S
+#16337
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WPool Side@n~
+   @WWide marble pavement leads around the edge of the pool here, as well as to
+little bungalows that guests can rent. The theme here is reminiscent of the
+ideal tropical island as depicted on Earth. The ceiling is a glass variant,
+allowing guests to look out at the stars. @n
+~
+163 0 0 0 0 0
+D1
+~
+~
+0 0 16338 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16336 0 0 0 0 0 0 0 0
+S
+#16338
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WPool Side@n~
+   @WWide marble pavement leads around the edge of the pool here, as well as to
+little bungalows that guests can rent. The theme here is reminiscent of the
+ideal tropical island as depicted on Earth. The ceiling is a glass variant,
+allowing guests to look out at the stars. @n
+~
+163 0 0 0 0 0
+D0
+~
+~
+0 0 16339 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16337 0 0 0 0 0 0 0 0
+S
+#16339
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WPool Side@n~
+   @WWide marble pavement leads around the edge of the pool here, as well as to
+little bungalows that guests can rent. The theme here is reminiscent of the
+ideal tropical island as depicted on Earth. The ceiling is a glass variant,
+allowing guests to look out at the stars. @n
+~
+163 0 0 0 0 0
+D0
+~
+~
+0 0 16324 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16338 0 0 0 0 0 0 0 0
+S
+#16340
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WPool@n~
+   @WThe water in this pool is crystal clear, sparkling and cool to the touch. 
+The pool's floor is one giant protected screen, displaying a top down view of a
+variety of sea life swimming about in their 'natural' habitat. @n
+~
+163 d 0 0 0 7
+D0
+~
+~
+0 0 16341 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16324 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16342 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16343 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 16352 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16344 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16345 0 0 0 0 0 0 0 0
+S
+#16341
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WPool@n~
+   @WThe water in this pool is crystal clear, sparkling and cool to the touch. 
+The pool's floor is one giant protected screen, displaying a top down view of a
+variety of sea life swimming about in their 'natural' habitat. @n
+~
+163 d 0 0 0 7
+D2
+~
+~
+0 0 16340 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16344 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 16353 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16343 0 0 0 0 0 0 0 0
+S
+#16342
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WPool@n~
+   @WThe water in this pool is crystal clear, sparkling and cool to the touch. 
+The pool's floor is one giant protected screen, displaying a top down view of a
+variety of sea life swimming about in their 'natural' habitat. @n
+~
+163 d 0 0 0 7
+D0
+~
+~
+0 0 16340 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16345 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 16354 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16343 0 0 0 0 0 0 0 0
+S
+#16343
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WPool@n~
+   @WThe water in this pool is crystal clear, sparkling and cool to the touch. 
+The pool's floor is one giant protected screen, displaying a top down view of a
+variety of sea life swimming about in their 'natural' habitat. @n
+~
+163 d 0 0 0 7
+D0
+~
+~
+0 0 16344 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16340 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16345 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16346 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 16349 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16347 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16341 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16342 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16348 0 0 0 0 0 0 0 0
+S
+#16344
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WPool@n~
+   @WThe water in this pool is crystal clear, sparkling and cool to the touch. 
+The pool's floor is one giant protected screen, displaying a top down view of a
+variety of sea life swimming about in their 'natural' habitat. @n
+~
+163 d 0 0 0 7
+D0
+~
+~
+0 0 16327 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16341 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16343 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16347 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 16350 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16340 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16346 0 0 0 0 0 0 0 0
+S
+#16345
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WPool@n~
+   @WThe water in this pool is crystal clear, sparkling and cool to the touch. 
+The pool's floor is one giant protected screen, displaying a top down view of a
+variety of sea life swimming about in their 'natural' habitat. @n
+~
+163 d 0 0 0 7
+D0
+~
+~
+0 0 16343 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16342 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16336 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16348 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 16351 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16346 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16340 0 0 0 0 0 0 0 0
+S
+#16346
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WPool@n~
+   @WThe water in this pool is crystal clear, sparkling and cool to the touch. 
+The pool's floor is one giant protected screen, displaying a top down view of a
+variety of sea life swimming about in their 'natural' habitat. @n
+~
+163 d 0 0 0 7
+D0
+~
+~
+0 0 16347 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16343 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16348 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16332 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 16355 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16344 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16345 0 0 0 0 0 0 0 0
+S
+#16347
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WPool@n~
+   @WThe water in this pool is crystal clear, sparkling and cool to the touch. 
+The pool's floor is one giant protected screen, displaying a top down view of a
+variety of sea life swimming about in their 'natural' habitat. @n
+~
+163 d 0 0 0 7
+D1
+~
+~
+0 0 16344 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16346 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 16356 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16343 0 0 0 0 0 0 0 0
+S
+#16348
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WPool@n~
+   @WThe water in this pool is crystal clear, sparkling and cool to the touch. 
+The pool's floor is one giant protected screen, displaying a top down view of a
+variety of sea life swimming about in their 'natural' habitat. @n
+~
+163 d 0 0 0 7
+D0
+~
+~
+0 0 16346 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16345 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 16357 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16343 0 0 0 0 0 0 0 0
+S
+#16349
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WPool@n~
+   @WThe water in this pool is crystal clear, sparkling and cool to the touch. 
+The pool's floor is one giant protected screen, displaying a top down view of a
+variety of sea life swimming about in their 'natural' habitat. @n
+~
+163 d 0 0 0 9
+D0
+~
+~
+0 0 16350 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16352 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16351 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16355 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 16343 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16356 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16353 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16354 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16357 0 0 0 0 0 0 0 0
+S
+#16350
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WPool@n~
+   @WThe water in this pool is crystal clear, sparkling and cool to the touch. 
+The pool's floor is one giant protected screen, displaying a top down view of a
+variety of sea life swimming about in their 'natural' habitat. @n
+~
+163 d 0 0 0 9
+D1
+~
+~
+0 0 16353 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16349 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16356 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 16344 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16352 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16355 0 0 0 0 0 0 0 0
+S
+#16351
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WPool@n~
+   @WThe water in this pool is crystal clear, sparkling and cool to the touch. 
+The pool's floor is one giant protected screen, displaying a top down view of a
+variety of sea life swimming about in their 'natural' habitat. @n
+~
+163 d 0 0 0 9
+D0
+~
+~
+0 0 16349 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16354 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16357 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 16345 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16355 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16352 0 0 0 0 0 0 0 0
+S
+#16352
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WPool@n~
+   @WThe water in this pool is crystal clear, sparkling and cool to the touch. 
+The pool's floor is one giant protected screen, displaying a top down view of a
+variety of sea life swimming about in their 'natural' habitat. @n
+~
+163 d 0 0 0 9
+D0
+~
+~
+0 0 16353 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16354 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16349 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 16340 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16350 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16351 0 0 0 0 0 0 0 0
+S
+#16353
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WPool@n~
+   @WThe water in this pool is crystal clear, sparkling and cool to the touch. 
+The pool's floor is one giant protected screen, displaying a top down view of a
+variety of sea life swimming about in their 'natural' habitat. @n
+~
+163 d 0 0 0 9
+D2
+~
+~
+0 0 16352 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16350 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 16341 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16349 0 0 0 0 0 0 0 0
+S
+#16354
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WPool@n~
+   @WThe water in this pool is crystal clear, sparkling and cool to the touch. 
+The pool's floor is one giant protected screen, displaying a top down view of a
+variety of sea life swimming about in their 'natural' habitat. @n
+~
+163 d 0 0 0 9
+D0
+~
+~
+0 0 16352 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16351 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 16342 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16349 0 0 0 0 0 0 0 0
+S
+#16355
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WPool@n~
+   @WThe water in this pool is crystal clear, sparkling and cool to the touch. 
+The pool's floor is one giant protected screen, displaying a top down view of a
+variety of sea life swimming about in their 'natural' habitat. @n
+~
+163 d 0 0 0 9
+D0
+~
+~
+0 0 16356 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16349 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16357 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 16346 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16350 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16351 0 0 0 0 0 0 0 0
+S
+#16356
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WPool@n~
+   @WThe water in this pool is crystal clear, sparkling and cool to the touch. 
+The pool's floor is one giant protected screen, displaying a top down view of a
+variety of sea life swimming about in their 'natural' habitat. @n
+~
+163 d 0 0 0 9
+D1
+~
+~
+0 0 16350 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16355 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 16347 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16349 0 0 0 0 0 0 0 0
+S
+#16357
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WPool@n~
+   @WThe water in this pool is crystal clear, sparkling and cool to the touch. 
+The pool's floor is one giant protected screen, displaying a top down view of a
+variety of sea life swimming about in their 'natural' habitat. @n
+~
+163 d 0 0 0 9
+D0
+~
+~
+0 0 16355 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16351 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 16348 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16349 0 0 0 0 0 0 0 0
+S
+#16358
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WCombat Simulator@n~
+   @WThis strange area appears to go on forever, and yet at the same time it
+appears to be quite small. The ground is made up of a white foggy substance,
+as are the 'walls' of the expanse. @n
+
+@WThere is a @Rsign@W here.@n
+~
+163 h 0 0 0 0
+E
+sign~
+@WTo leave the combat simular, please say @Rleave@W.@n
+~
+S
+T 16301
+#16359
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WCombat Simulator@n~
+   @WThis strange area appears to go on forever, and yet at the same time it
+appears to be quite small. The ground is made up of a white foggy substance,
+as are the 'walls' of the expanse. @n
+
+@WThere is a @Rsign@W here.@n
+~
+163 h 0 0 0 0
+E
+sign~
+@WTo leave the combat simular, please say @Rleave@W.@n
+~
+S
+T 16301
+#16360
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WCombat Simulator@n~
+   @WThis strange area appears to go on forever, and yet at the same time it
+appears to be quite small. The ground is made up of a white foggy substance,
+as are the 'walls' of the expanse. @n
+
+@WThere is a @Rsign@W here.@n
+~
+163 h 0 0 0 0
+E
+sign~
+@WTo leave the combat simular, please say @Rleave@W.@n
+~
+S
+T 16301
+#16361
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WCombat Simulator@n~
+   @WThis strange area appears to go on forever, and yet at the same time it
+appears to be quite small. The ground is made up of a white foggy substance,
+as are the 'walls' of the expanse. @n
+
+@WThere is a @Rsign@W here.@n
+~
+163 h 0 0 0 0
+E
+sign~
+@WTo leave the combat simular, please say @Rleave@W.@n
+~
+S
+T 16301
+#16362
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WCombat Simulator@n~
+   @WThis strange area appears to go on forever, and yet at the same time it
+appears to be quite small. The ground is made up of a white foggy substance,
+as are the 'walls' of the expanse. @n
+
+@WThere is a @Rsign@W here.@n
+~
+163 h 0 0 0 0
+E
+sign~
+@WTo leave the combat simular, please say @Rleave@W.@n
+~
+S
+T 16301
+#16363
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WCombat Simulator@n~
+   @WThis strange area appears to go on forever, and yet at the same time it
+appears to be quite small. The ground is made up of a white foggy substance,
+as are the 'walls' of the expanse. @n
+
+@WThere is a @Rsign@W here.@n
+~
+163 h 0 0 0 0
+E
+sign~
+@WTo leave the combat simular, please say @Rleave@W.@n
+~
+S
+T 16301
+#16364
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WCombat Simulator@n~
+   @WThis strange area appears to go on forever, and yet at the same time it
+appears to be quite small. The ground is made up of a white foggy substance,
+as are the 'walls' of the expanse. @n
+
+@WThere is a @Rsign@W here.@n
+~
+163 h 0 0 0 0
+E
+sign~
+@WTo leave the combat simular, please say @Rleave@W.@n
+~
+S
+T 16301
+#16365
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WCombat Simulator@n~
+   @WThis strange area appears to go on forever, and yet at the same time it
+appears to be quite small. The ground is made up of a white foggy substance,
+as are the 'walls' of the expanse. @n
+
+@WThere is a @Rsign@W here.@n
+~
+163 h 0 0 0 0
+E
+sign~
+@WTo leave the combat simular, please say @Rleave@W.@n
+~
+S
+T 16301
+#16366
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WCombat Simulator@n~
+   @WThis strange area appears to go on forever, and yet at the same time it
+appears to be quite small. The ground is made up of a white foggy substance,
+as are the 'walls' of the expanse. @n
+
+@WThere is a @Rsign@W here.@n
+~
+163 h 0 0 0 0
+E
+sign~
+@WTo leave the combat simular, please say @Rleave@W.@n
+~
+S
+T 16301
+#16367
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WCombat Simulator@n~
+   @WThis strange area appears to go on forever, and yet at the same time it
+appears to be quite small. The ground is made up of a white foggy substance,
+as are the 'walls' of the expanse. @n
+
+@WThere is a @Rsign@W here.@n
+~
+163 h 0 0 0 0
+E
+sign~
+@WTo leave the combat simular, please say @Rleave@W.@n
+~
+S
+T 16301
+#16368
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp @n- @WCombat Simulator@n~
+   @WThis strange area appears to go on forever, and yet at the same time it
+appears to be quite small. The ground is made up of a white foggy substance,
+as are the 'walls' of the expanse. @n
+
+@WThere is a @Rsign@W here.@n
+~
+163 h 0 0 0 0
+E
+sign~
+@WTo leave the combat simular, please say @Rleave@W.@n
+~
+S
+T 16301
+#16369
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@no@Wr@np - Service Duct~
+@nThis is a basic service duck, for Station maintenance workers to come and go
+from the deck below. This room isn't very large, and would be cramped for even
+two people to stand in. It also serves as a utility closet, cluttered with
+cleaning supplies, brooms, mops and other tools for keeping up the appearance
+of the station. @n
+~
+163 d v 0 0 0
+D0
+~
+door~
+1 0 16310 20 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 16370 0 0 0 0 0 0 0 0
+S
+#16370
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl@D C@no@Wr@np@n - Jefferies Tube@n~
+@nThis is a standardized Jefferies tube that leads from the access hatch above
+and leads downward, toward the Maintenance Deck level below. The tube is
+cramped and tight, barely enough room for a person to climb down the ladder
+bolted to the side of the wall of the jefferies tube. @n
+~
+163 d v 0 0 0
+D4
+~
+~
+0 0 16369 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 16371 0 0 0 0 0 0 0 0
+S
+#16371
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@no@Wr@np - Maintenance Deck~
+@nThis is the maintenance deck of the Celestial Corp space station. These narrow
+walkways don't have the refined or finished look of the station walkways and
+corridors that exist above. The side walls are all exposed, thick cables and
+wiring running along the innards of the structure naked to the open eye. The
+air down here is hot, from all of the machinery running and every now and again
+a burst of hot @Wsteam@n hisses or leaks from a random pipe joint leaving a musty
+moisture to the smell of the air. @n
+~
+163 d v 0 0 0
+D2
+~
+~
+0 0 16372 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 16370 0 0 0 0 0 0 0 0
+E
+steam~
+@c-----------------------------------------------------------------@n
+@WOccasionally, one of the exposed pipes down here will spew out a plume of thick white steam that permeates the air and can be quite harmful if one doesn't duck out of the way. The steam has that metallic smell to it that speaks of old, worn pipes.@n
+@c-----------------------------------------------------------------@n
+~
+S
+#16372
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@no@Wr@np - Maintenance Deck~
+@nThis is the maintenance deck of the Celestial Corp space station. These narrow
+walkways don't have the refined or finished look of the station walkways and
+corridors that exist above. The side walls are all exposed, thick cables and
+wiring running along the innards of the structure naked to the open eye. The
+air down here is hot, from all of the machinery running and every now and again
+a burst of hot @Wsteam@n hisses or leaks from a random pipe joint leaving a musty
+moisture to the smell of the air. @n
+~
+163 d v 0 0 0
+D0
+~
+~
+0 0 16371 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16373 0 0 0 0 0 0 0 0
+E
+steam~
+@c-----------------------------------------------------------------@n
+@WOccasionally, one of the exposed pipes down here will spew out a plume of thick white steam that permeates the air and can be quite harmful if one doesn't duck out of the way. The steam has that metallic smell to it that speaks of old, worn pipes.@n
+@c-----------------------------------------------------------------@n
+~
+S
+#16373
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@no@Wr@np - Maintenance Deck~
+@nThis is the maintenance deck of the Celestial Corp space station. These narrow
+walkways don't have the refined or finished look of the station walkways and
+corridors that exist above. The side walls are all exposed, thick cables and
+wiring running along the innards of the structure naked to the open eye. The
+air down here is hot, from all of the machinery running and every now and again
+a burst of hot @Wsteam@n hisses or leaks from a random pipe joint leaving a musty
+moisture to the smell of the air. @n
+~
+163 d v 0 0 0
+D0
+~
+~
+0 0 16372 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16374 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16375 0 0 0 0 0 0 0 0
+E
+steam~
+@c-----------------------------------------------------------------@n
+@WOccasionally, one of the exposed pipes down here will spew out a plume of thick white steam that permeates the air and can be quite harmful if one doesn't duck out of the way. The steam has that metallic smell to it that speaks of old, worn pipes.@n
+@c-----------------------------------------------------------------@n
+~
+S
+#16374
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@no@Wr@np - Maintenance Crew Quarters~
+@nThis small, cramped area has been setup with some cots, and stacked bunks to
+account for rest time and sleeping quarters for the maintenance crews that work
+down here. The dingy and drab bedding, and complete lack of decoration suggest
+long hours of work, and substandard pay for these workers. @n
+~
+163 deD v 0 0 0
+D3
+~
+~
+0 0 16373 0 0 0 0 0 0 0 0
+S
+T 16310
+#16375
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@no@Wr@np - Maintenance Deck~
+@nThis is the maintenance deck of the Celestial Corp space station. These narrow
+walkways don't have the refined or finished look of the station walkways and
+corridors that exist above. The side walls are all exposed, thick cables and
+wiring running along the innards of the structure naked to the open eye. The
+air down here is hot, from all of the machinery running and every now and again
+a burst of hot @Wsteam@n hisses or leaks from a random pipe joint leaving a musty
+moisture to the smell of the air. @n
+~
+163 d v 0 0 0
+D0
+~
+~
+0 0 16373 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16377 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16376 0 0 0 0 0 0 0 0
+E
+steam~
+@c-----------------------------------------------------------------@n
+@WOccasionally, one of the exposed pipes down here will spew out a plume of thick white steam that permeates the air and can be quite harmful if one doesn't duck out of the way. The steam has that metallic smell to it that speaks of old, worn pipes.@n
+@c-----------------------------------------------------------------@n
+~
+S
+#16376
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@no@Wr@np - Maintenance Mess Hall~
+@nThis is a small mess hall that's been setup for maintenance workers to use for
+their break time and meal times. This mess hall is bare bones, offering
+nothing of any real value to eat whatsoever. It does suggest that the workers
+and crew here are often segregated down here on this deck. @n
+~
+163 d v 0 0 0
+D1
+~
+~
+0 0 16375 0 0 0 0 0 0 0 0
+S
+#16377
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@no@Wr@np - Maintenance Deck~
+@nThis is the maintenance deck of the Celestial Corp space station. These narrow
+walkways don't have the refined or finished look of the station walkways and
+corridors that exist above. The side walls are all exposed, thick cables and
+wiring running along the innards of the structure naked to the open eye. The
+air down here is hot, from all of the machinery running and every now and again
+a burst of hot @Wsteam@n hisses or leaks from a random pipe joint leaving a musty
+moisture to the smell of the air. @n
+~
+163 d v 0 0 0
+D0
+~
+~
+0 0 16375 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16378 0 0 0 0 0 0 0 0
+E
+steam~
+@c-----------------------------------------------------------------@n
+@WOccasionally, one of the exposed pipes down here will spew out a plume of thick white steam that permeates the air and can be quite harmful if one doesn't duck out of the way. The steam has that metallic smell to it that speaks of old, worn pipes.@n
+@c-----------------------------------------------------------------@n
+~
+S
+#16378
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@no@Wr@np - Maintenance Deck~
+@nThis is the maintenance deck of the Celestial Corp space station. These narrow
+walkways don't have the refined or finished look of the station walkways and
+corridors that exist above. The side walls are all exposed, thick cables and
+wiring running along the innards of the structure naked to the open eye. The
+air down here is hot, from all of the machinery running and every now and again
+a burst of hot @Wsteam@n hisses or leaks from a random pipe joint leaving a musty
+moisture to the smell of the air. @n
+~
+163 d v 0 0 0
+D1
+~
+~
+0 0 16379 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16377 0 0 0 0 0 0 0 0
+E
+steam~
+@c-----------------------------------------------------------------@n
+@WOccasionally, one of the exposed pipes down here will spew out a plume of thick white steam that permeates the air and can be quite harmful if one doesn't duck out of the way. The steam has that metallic smell to it that speaks of old, worn pipes.@n
+@c-----------------------------------------------------------------@n
+~
+S
+#16379
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@no@Wr@np - Maintenance Deck~
+@nThis is the maintenance deck of the Celestial Corp space station. These narrow
+walkways don't have the refined or finished look of the station walkways and
+corridors that exist above. The side walls are all exposed, thick cables and
+wiring running along the innards of the structure naked to the open eye. The
+air down here is hot, from all of the machinery running and every now and again
+a burst of hot @Wsteam@n hisses or leaks from a random pipe joint leaving a musty
+moisture to the smell of the air. @n
+~
+163 d v 0 0 0
+D0
+~
+door~
+1 0 16380 20 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16378 0 0 0 0 0 0 0 0
+E
+steam~
+@c-----------------------------------------------------------------@n
+@WOccasionally, one of the exposed pipes down here will spew out a plume of thick white steam that permeates the air and can be quite harmful if one doesn't duck out of the way. The steam has that metallic smell to it that speaks of old, worn pipes.@n
+@c-----------------------------------------------------------------@n
+~
+S
+#16380
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@no@Wr@np - Back Supply Room~
+@nThis is a large supply room, the walls of which are lined with mostly tall
+metal shelves stacked high with supply boxes and crates for any number of the
+businesses above. The air in here is a little bit smokey, due to the several
+crewman or engineers that can be seen lounging about. This appears to be where
+the real breaks and free time is spent amongst the workers here. @n
+~
+163 d v 0 0 0
+D2
+~
+door~
+1 0 16379 20 0 0 0 0 0 0 0
+S
+#16381
+@GG@gree@Gn@M N@mebul@Ma@W Mall@n - @RRed@W Light Basement Level@n~
+@nThis level of the mall seems a little less trafficked, as most of the store
+fronts are unoccupied or out of business. The lights overhead here are dimmer,
+and it looks like the bulbs haven't been changed in some time. Nor has the
+ceiling been cleaned, looking as though the custodial staff in the Mall skip
+this level whenever possible. What customers do wander down here seem a
+tougher sort, sometimes looking downright shady. @n
+~
+163 d v 0 0 0
+D2
+~
+~
+0 0 16382 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 17212 0 0 0 0 0 0 0 0
+S
+#16382
+@GG@gree@Gn@M N@mebul@Ma@W Mall@n - @RRed@W Light Basement Level@n~
+@nThis level of the mall seems a little less trafficked, as most of the store
+fronts are unoccupied or out of business. The lights overhead here are dimmer,
+and it looks like the bulbs haven't been changed in some time. Nor has the
+ceiling been cleaned, looking as though the custodial staff in the Mall skip
+this level whenever possible. What customers do wander down here seem a
+tougher sort, sometimes looking downright shady. @n
+~
+163 d v 0 0 0
+D0
+~
+~
+0 0 16381 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16383 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16385 0 0 0 0 0 0 0 0
+S
+#16383
+@GG@gree@Gn@M N@mebul@Ma@W Mall@n - @RRed@W Light Basement Level@n~
+@nThis level of the mall seems a little less trafficked, as most of the store
+fronts are unoccupied or out of business. The lights overhead here are dimmer,
+and it looks like the bulbs haven't been changed in some time. Nor has the
+ceiling been cleaned, looking as though the custodial staff in the Mall skip
+this level whenever possible. What customers do wander down here seem a
+tougher sort, sometimes looking downright shady. @n
+~
+163 d v 0 0 0
+D1
+~
+~
+0 0 16384 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16382 0 0 0 0 0 0 0 0
+S
+#16384
+@GG@gree@Gn@M N@mebul@Ma@W Mall@n - @RRed@W Light Basement Level@n~
+@nThis level of the mall seems a little less trafficked, as most of the store
+fronts are unoccupied or out of business. The lights overhead here are dimmer,
+and it looks like the bulbs haven't been changed in some time. Nor has the
+ceiling been cleaned, looking as though the custodial staff in the Mall skip
+this level whenever possible. What customers do wander down here seem a
+tougher sort, sometimes looking downright shady. @n
+~
+163 d v 0 0 0
+D0
+~
+~
+0 0 16398 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16387 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16383 0 0 0 0 0 0 0 0
+S
+#16385
+@GG@gree@Gn@M N@mebul@Ma@W Mall@n - @RRed@W Light Basement Level@n~
+@nThis level of the mall seems a little less trafficked, as most of the store
+fronts are unoccupied or out of business. The lights overhead here are dimmer,
+and it looks like the bulbs haven't been changed in some time. Nor has the
+ceiling been cleaned, looking as though the custodial staff in the Mall skip
+this level whenever possible. What customers do wander down here seem a
+tougher sort, sometimes looking downright shady. @n
+~
+163 d v 0 0 0
+D1
+~
+~
+0 0 16382 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16386 0 0 0 0 0 0 0 0
+S
+#16386
+@GG@gree@Gn@M N@mebul@Ma@W Mall@n - @RRed@W Light Basement Level@n~
+@nThis level of the mall seems a little less trafficked, as most of the store
+fronts are unoccupied or out of business. The lights overhead here are dimmer,
+and it looks like the bulbs haven't been changed in some time. Nor has the
+ceiling been cleaned, looking as though the custodial staff in the Mall skip
+this level whenever possible. What customers do wander down here seem a
+tougher sort, sometimes looking downright shady. @n
+~
+163 d v 0 0 0
+D1
+~
+~
+0 0 16385 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16395 0 0 0 0 0 0 0 0
+S
+#16387
+@GG@gree@Gn@M N@mebul@Ma@W Mall@n - @RRed@W Light Basement Level@n~
+@nThis level of the mall seems a little less trafficked, as most of the store
+fronts are unoccupied or out of business. The lights overhead here are dimmer,
+and it looks like the bulbs haven't been changed in some time. Nor has the
+ceiling been cleaned, looking as though the custodial staff in the Mall skip
+this level whenever possible. What customers do wander down here seem a
+tougher sort, sometimes looking downright shady. @n
+~
+163 d v 0 0 0
+D0
+~
+~
+0 0 16384 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16388 0 0 0 0 0 0 0 0
+S
+#16388
+@GG@gree@Gn@M N@mebul@Ma@W Mall@n - @RRed@W Light Basement Level@n~
+@nThis level of the mall seems a little less trafficked, as most of the store
+fronts are unoccupied or out of business. The lights overhead here are dimmer,
+and it looks like the bulbs haven't been changed in some time. Nor has the
+ceiling been cleaned, looking as though the custodial staff in the Mall skip
+this level whenever possible. What customers do wander down here seem a
+tougher sort, sometimes looking downright shady. @n
+~
+163 d v 0 0 0
+D0
+~
+~
+0 0 16387 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16389 0 0 0 0 0 0 0 0
+S
+#16389
+@GG@gree@Gn@M N@mebul@Ma@W Mall@n - @RRed@W Light Basement Level@n~
+@nThis level of the mall seems a little less trafficked, as most of the store
+fronts are unoccupied or out of business. The lights overhead here are dimmer,
+and it looks like the bulbs haven't been changed in some time. Nor has the
+ceiling been cleaned, looking as though the custodial staff in the Mall skip
+this level whenever possible. What customers do wander down here seem a
+tougher sort, sometimes looking downright shady. @n
+~
+163 d v 0 0 0
+D0
+~
+~
+0 0 16388 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16390 0 0 0 0 0 0 0 0
+S
+#16390
+@GG@gree@Gn@M N@mebul@Ma@W Mall@n - @RRed@W Light Basement Level@n~
+@nThis level of the mall seems a little less trafficked, as most of the store
+fronts are unoccupied or out of business. The lights overhead here are dimmer,
+and it looks like the bulbs haven't been changed in some time. Nor has the
+ceiling been cleaned, looking as though the custodial staff in the Mall skip
+this level whenever possible. What customers do wander down here seem a
+tougher sort, sometimes looking downright shady. @n
+~
+163 d v 0 0 0
+D1
+~
+~
+0 0 16389 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16391 0 0 0 0 0 0 0 0
+S
+#16391
+@GG@gree@Gn@M N@mebul@Ma@W Mall@n - @RRed@W Light Basement Level@n~
+@nThis level of the mall seems a little less trafficked, as most of the store
+fronts are unoccupied or out of business. The lights overhead here are dimmer,
+and it looks like the bulbs haven't been changed in some time. Nor has the
+ceiling been cleaned, looking as though the custodial staff in the Mall skip
+this level whenever possible. What customers do wander down here seem a
+tougher sort, sometimes looking downright shady. @n
+~
+163 d v 0 0 0
+D0
+~
+~
+0 0 16396 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16390 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16392 0 0 0 0 0 0 0 0
+S
+#16392
+@GG@gree@Gn@M N@mebul@Ma@W Mall@n - @RRed@W Light Basement Level@n~
+@nThis level of the mall seems a little less trafficked, as most of the store
+fronts are unoccupied or out of business. The lights overhead here are dimmer,
+and it looks like the bulbs haven't been changed in some time. Nor has the
+ceiling been cleaned, looking as though the custodial staff in the Mall skip
+this level whenever possible. What customers do wander down here seem a
+tougher sort, sometimes looking downright shady. @n
+~
+163 d v 0 0 0
+D1
+~
+~
+0 0 16391 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16393 0 0 0 0 0 0 0 0
+S
+#16393
+@GG@gree@Gn@M N@mebul@Ma@W Mall@n - @RRed@W Light Basement Level@n~
+@nThis level of the mall seems a little less trafficked, as most of the store
+fronts are unoccupied or out of business. The lights overhead here are dimmer,
+and it looks like the bulbs haven't been changed in some time. Nor has the
+ceiling been cleaned, looking as though the custodial staff in the Mall skip
+this level whenever possible. What customers do wander down here seem a
+tougher sort, sometimes looking downright shady. @n
+~
+163 d v 0 0 0
+D0
+~
+~
+0 0 16394 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16392 0 0 0 0 0 0 0 0
+S
+#16394
+@GG@gree@Gn@M N@mebul@Ma@W Mall@n - @RRed@W Light Basement Level@n~
+@nThis level of the mall seems a little less trafficked, as most of the store
+fronts are unoccupied or out of business. The lights overhead here are dimmer,
+and it looks like the bulbs haven't been changed in some time. Nor has the
+ceiling been cleaned, looking as though the custodial staff in the Mall skip
+this level whenever possible. What customers do wander down here seem a
+tougher sort, sometimes looking downright shady. @n
+~
+163 d v 0 0 0
+D0
+~
+~
+0 0 16395 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16393 0 0 0 0 0 0 0 0
+S
+#16395
+@GG@gree@Gn@M N@mebul@Ma@W Mall@n - @RRed@W Light Basement Level@n~
+@nThis level of the mall seems a little less trafficked, as most of the store
+fronts are unoccupied or out of business. The lights overhead here are dimmer,
+and it looks like the bulbs haven't been changed in some time. Nor has the
+ceiling been cleaned, looking as though the custodial staff in the Mall skip
+this level whenever possible. What customers do wander down here seem a
+tougher sort, sometimes looking downright shady. @n
+~
+163 d v 0 0 0
+D0
+~
+~
+0 0 16386 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16394 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16397 0 0 0 0 0 0 0 0
+S
+#16396
+@DS@Rt@Dy@Rg@Di@Ra@Dn@M Sp@Di@Mce@W & Everything@Y Nice@n~
+@nThis small store seems to be the only one in the area right now that's still
+open for business. The store itself seems rather bland, passing itself off as
+a pawn shop, however it seems clear to anyone with passing intelligence that
+this place probably deals in less savory products and wares to its clients. @n
+~
+163 d v 0 0 0
+D2
+~
+~
+0 0 16391 0 0 0 0 0 0 0 0
+S
+#16397
+@DClosed Store Front@n~
+@nThis store front is currently closed. It looks like it hasn't seen a business
+occupying it in quite some time, enough to build up a little bit of dust. The
+dark shadows of these abandoned store fronts seem a perfect location for back
+alley deals and illicit activities. @n
+~
+163 d v 0 0 0
+D1
+~
+~
+0 0 16395 0 0 0 0 0 0 0 0
+S
+#16398
+@DClosed Store Front@n~
+@nThis store front is currently closed. It looks like it hasn't seen a business
+occupying it in quite some time, enough to build up a little bit of dust. The
+dark shadows of these abandoned store fronts seem a perfect location for back
+alley deals and illicit activities. @n
+~
+163 d v 0 0 0
+D2
+~
+~
+0 0 16384 0 0 0 0 0 0 0 0
+S
+#16399
+@cC@Ce@Wl@Ye@ys@Yt@Wi@Ca@cl @DC@wo@Wrp@w - @WPractice Range@n~
+@WWith walls made of thick concrete, this sturdy room is built to withstand nuclear-level techniques. It is split into several sections, practice targets running parallel to each booth. Above each lane is an automated counter, keeping track of successful hits. Near the entrance, there is a button that can be pressed to leave. This is where you can come to @Renhance @Wyour own custom skills. A small sign hangs next to the entrance, listing the current skills available for practice.@n
+~
+163 0 0 0 0 0
+E
+sign~
+(enhance: blessed || balefire )
+~
+S
+T 16305
+T 16306
+$~

@@ -1,0 +1,179 @@
+#15100
+Giant Shrimp~
+@wGiant Shrimp@n~
+@wA giant shrimp is swimming around here.@n
+~
+   @WThis large shrimp has grown to about three feet long. It uses it's many
+legs and tail to swim around from rocky crag to rocky crag. @n
+~
+dxyz 0 0 0 ly 0 0 0 0 E
+4 20 10 0d0+0 0d0+0
+0 0 15 28
+8 8 2
+Size: 3
+Str: 13
+Dex: 11
+Int: 13
+Wis: 13
+Con: 11
+Cha: 11
+E
+#15101
+Amobite~
+@wAn Amobite@n~
+@wAn amobite is floating around here trying to go unseen.@n
+~
+   @WThis creature is only native to Kanassa. It is similar to the common
+jellyfish in substance but has an almost completely transparent body. Its body
+structure tends to morph to whatever is most useful at the time as it tries to
+blend into its surroundings. @n
+~
+dxy 0 0 0 ly 0 0 0 0 E
+7 20 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 1
+Str: 16
+Dex: 14
+Int: 16
+Wis: 16
+Con: 14
+Cha: 14
+E
+#15102
+Rock Trout~
+@wRock Trout@n~
+@wA rock trout is swimming cautiously here.@n
+~
+   @WThis fish measures about four feet long and its body is covered in hard
+scales that resemble the rocks of this area. @n
+~
+dz 0 0 0 ly 0 0 0 0 E
+5 20 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 3
+Str: 14
+Dex: 11
+Int: 14
+Wis: 14
+Con: 11
+Cha: 11
+E
+#15103
+Slyphorite~
+@wA Slyphorite@n~
+@wA slyphorite is walking across the ocean floor here.@n
+~
+   @WThis large crab-like creature can only be found on Kanassa. It has six long
+exoskeleton covered legs that it scurries around with and two stretchy tentecle
+arms that it uses to grab prey with. This particular one has grown to measure
+ten feet from legtip to legtip. @n
+~
+dvwxyz 0 0 0 ly 0 0 0 0 E
+10 20 10 0d0+0 0d0+0
+0 0 15 28
+8 8 2
+Size: 4
+Str: 14
+Dex: 14
+Int: 14
+Wis: 14
+Con: 14
+Cha: 14
+E
+#15104
+Pearl Shark~
+@wPearl Shark@n~
+@wA pearl shark is swimming here slowly while searching for prey.@n
+~
+   @WThis large shark, which measures about twenty feet long, has a peculiar
+appearance to its skin. It's mostly blue skin sparkles when light catches it
+thanks to millions of tiny crystilline fragments that grow in it. The sparkle
+from these fragments is very similar to the appearance of a pearl and that is
+where this shark gets its name. @n
+~
+dz 0 0 0 ly 0 0 0 0 E
+25 20 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 5
+Str: 10
+Dex: 8
+Int: 10
+Wis: 10
+Con: 8
+Cha: 8
+E
+#15105
+Flat Whale~
+@wFlat Whale@n~
+@wA flat whale is swimming leisurely through the water here.@n
+~
+   @WThis hundred foot long whale is very different from any other known type of
+whale. It's body is extremely thin from bottom to top. Compared to its length
+of about one hundred feet it only has a thickness of about five feet. It's
+entire body swims through the water in a ripling motion which helps it stir up
+the microscopic food that it consumes regularly. @n
+~
+dz 0 0 0 ly 0 0 0 0 E
+22 20 10 0d0+0 0d0+0
+0 0 15 28
+8 8 2
+Size: 7
+Str: 15
+Dex: 10
+Int: 15
+Wis: 15
+Con: 10
+Cha: 10
+E
+#15106
+Grand Amobite~
+@wA Grand Amobite@n~
+@wA grand amobite is floating here with a half digested fish visible in its clear body.@n
+~
+   @WThis is a gigantic version of the normal amobite. These amobites are rare
+and come about when a standard amobite managed to live for a long time and
+continue to grow. The usual cautious amobite becomes bolder as it outgrows its
+natural predators. @n
+~
+dxy 0 0 0 ly 0 0 0 0 E
+28 20 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 5
+Str: 16
+Dex: 14
+Int: 16
+Wis: 16
+Con: 14
+Cha: 14
+E
+#15107
+Dreaded Griknaug~
+@wThe @RD@rreade@Rd @mG@Mr@Wi@wk@mn@Ma@Wu@wg@n~
+@wThe @Rd@rreade@Rd @mG@Mr@Wi@wk@mn@Ma@Wu@wg is swimming slowly through the waters here.@n
+~
+   @WThis massive creature is shaped like the cross between a turtle and an
+octopus. It's shell is over a thousand feet across and it's tentcles are about
+that length themselves. It has a total of six tentecles that stretch out of
+holes in its shell to snatch up whatever it decides to eat at any point in
+time. Food is then handed to a mouth that it has on the bottom of its shell.
+This mouth is protected by the shell most of the time but opens up to eat. No
+eyes can be seen on the beast so it's not understood how it detects prey. All
+other animals of the ocean flee before its presence. @n
+~
+dxyzA 0 0 0 ly 0 0 0 0 E
+150 20 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 8
+Str: 9
+Dex: 12
+Int: 9
+Wis: 9
+Con: 12
+Cha: 12
+E
+$

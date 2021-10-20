@@ -1,0 +1,186 @@
+2 1633400862 0 320 0 0
+#17
+0 0 0 0 0 100 100 0 0 dfqAC 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Map~
+undefined~
+.~
+~
+12 0 0 0 0 0 0 0
+G
+1633400851
+U
+-1
+Z
+1
+#17998
+0 0 0 0 0 100 100 0 9 dqA 0 0 0 0 0 0 0 0 0 0 0
+XAP
+iMuffin~
+@Wi@wM@Du@Wf@Df@wi@Wn@n~
+An iMuffin is lying here~
+~
+12 0 0 0 0 0 0 0
+G
+1633400851
+U
+-1
+Z
+4
+E
+iMuffin~
+   @WThis is the latest tablet device from Pear Inc, bearing visual similarities
+to a muffin. @n
+
+@WTo use the iMuffin, type @yiMuffin@n
+~
+#108
+0 10 10 0 0 100 100 0 13 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Bottle water~
+a bottle of water~
+A bottle of water has been left here~
+~
+17 1 0 0 0 15 0 0
+G
+1633400854
+U
+6310736792255288774
+Z
+4
+#110
+0 0 0 0 0 100 100 0 17 A 0 v 0 0 0 0 0 0 0 0 0
+XAP
+Simple White Gi~
+@WSimple @wWhite @cG@Ci@n~
+@wA @Wsimple @wwhite @cg@Ci @wis lying here@n~
+~
+11 1025 0 0 0 1 25 0
+G
+1633400854
+U
+8262519532945432091
+Z
+4
+A
+17 10 0
+#111
+0 0 0 0 0 100 100 0 17 A 0 v 0 0 0 0 0 0 0 0 0
+XAP
+Simple White Pants~
+@WSimple @wWhite @cP@Ca@Wn@wts@n~
+@wA pair of @Wsimple @wwhite @cp@Ca@Wn@wts are lying here@n~
+~
+11 33 0 0 0 1 25 0
+G
+1633400854
+U
+5094211396617617900
+Z
+4
+A
+17 25 0
+#112
+0 0 0 0 0 100 100 0 9 A 0 v 0 0 0 0 0 0 0 0 0
+XAP
+Simple White Belt~
+@WSimple @wWhite @cB@Ce@Wl@wt@n~
+@wA @Wsimple @wwhite @cb@Ce@Wl@wt is lying here@n~
+~
+11 2049 0 0 0 1 15 0
+G
+1633400854
+U
+1842147389478649954
+Z
+4
+A
+17 10 0
+#113
+0 0 0 0 0 100 100 0 9 A 0 v 0 0 0 0 0 0 0 0 0
+XAP
+Simple Kevlar Vest~
+@WSimple @wKevlar @cV@Ce@Ws@wt@n~
+@wA @Wsimple @wkevlar @cv@Ce@Ws@wt is lying here@n~
+~
+11 9 0 0 0 2 25 0
+G
+1633400854
+U
+2338940658688189563
+Z
+4
+A
+17 50 0
+#114
+0 0 0 0 0 100 100 0 9 A 0 v 0 0 0 0 0 0 0 0 0
+XAP
+Simple Black Shoes~
+@WSimple @DBlack @cS@Ch@Wo@wes@n~
+@wA pair of @Wsimple @Dblack @cs@Ch@Wo@wes are lying here@n~
+~
+11 65 0 0 0 1 14 0
+G
+1633400854
+U
+7511242492043824183
+Z
+4
+A
+17 10 0
+#4901
+0 5 5 0 0 100 100 0 45 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Frozen Berry~
+@wF@Wr@Co@wz@Ce@Wn @RB@re@Rr@rr@Ry@n~
+A @wF@Wr@Co@wz@Ce@Wn @RB@re@Rr@rr@Ry@n has been dropped here~
+~
+19 1 0 0 0 1 5 0
+G
+1633400854
+U
+8788342707082188309
+Z
+4
+#4901
+0 5 5 0 0 100 100 0 45 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Frozen Berry~
+@wF@Wr@Co@wz@Ce@Wn @RB@re@Rr@rr@Ry@n~
+A @wF@Wr@Co@wz@Ce@Wn @RB@re@Rr@rr@Ry@n has been dropped here~
+~
+19 1 0 0 0 1 5 0
+G
+1633400854
+U
+6747675566733001570
+Z
+4
+#317
+0 0 0 24 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Simple Flashlight~
+@wSimple @YFlashlight@n~
+@wA simple @Yflashlight @wis lying here@n~
+~
+1 1 0 0 0 1 25 0
+G
+1633400854
+U
+8956049425950336063
+Z
+4
+#61
+0 0 0 0 0 100 100 0 17 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Sleeping bag~
+@wa @BSleeping Bag@n~
+@wA @Bsleeping bag@w has been unrolled on the ground here@n~
+~
+32 1 0 0 0 2 25 0
+G
+1633400854
+U
+3132708580766690089
+Z
+4

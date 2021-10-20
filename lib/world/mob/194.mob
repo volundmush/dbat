@@ -1,0 +1,76 @@
+#19400
+Shadow Spawn~
+@DSh@wad@Dow Sp@wa@Dwn@n~
+The Shadows shift around here, almost as if they are alive
+~
+ 
+~
+df 0 0 0 0 0 0 0 0 E
+107 20 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 9
+Dex: 8
+Int: 9
+Wis: 9
+Con: 8
+Cha: 8
+E
+#19401
+Shadow Lich~
+@DSh@wad@Dow L@wic@Dh@n~
+A being cloaked in Shadows stands here
+~
+ 
+~
+df 0 0 0 0 0 0 0 0 E
+108 20 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 10
+Dex: 14
+Int: 10
+Wis: 10
+Con: 14
+Cha: 14
+E
+#19402
+Shadow Warrior~
+@DSh@wad@Dow Wa@wrri@Dor@n~
+A large being wearing armor seemingly made from the Shadows stands here
+~
+ 
+~
+d 0 0 0 0 0 0 0 0 E
+109 20 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 13
+Dex: 10
+Int: 13
+Wis: 13
+Con: 10
+Cha: 10
+E
+#19499
+Shadow Overlord~
+@DSh@wad@Dow Ov@werlo@Drd@n~
+The Shadow Overlord stands here, shadows swirling around his form
+~
+ 
+~
+bd 0 0 0 0 0 0 0 0 E
+115 20 10 0d4+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 12
+Dex: 15
+Int: 12
+Wis: 12
+Con: 15
+Cha: 15
+E
+T 19492
+T 19489
+T 19494
+$

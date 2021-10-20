@@ -1,0 +1,232 @@
+1 1633553323 0 0 2301 0
+#113
+6 0 0 0 0 100 100 0 9 A 0 v 0 0 0 0 0 0 0 0 0
+XAP
+Simple Kevlar Vest~
+@WSimple @wKevlar @cV@Ce@Ws@wt@n~
+@wA @Wsimple @wkevlar @cv@Ce@Ws@wt is lying here@n~
+~
+11 9 0 0 0 2 25 0
+G
+1633428497
+U
+1331429013004828200
+Z
+4
+A
+17 50 0
+#111
+8 0 0 0 0 100 100 0 17 A 0 v 0 0 0 0 0 0 0 0 0
+XAP
+Simple White Pants~
+@WSimple @wWhite @cP@Ca@Wn@wts@n~
+@wA pair of @Wsimple @wwhite @cp@Ca@Wn@wts are lying here@n~
+~
+11 33 0 0 0 1 25 0
+G
+1633428497
+U
+4832647998616720550
+Z
+4
+A
+17 25 0
+#114
+9 0 0 0 0 100 100 0 9 A 0 v 0 0 0 0 0 0 0 0 0
+XAP
+Simple Black Shoes~
+@WSimple @DBlack @cS@Ch@Wo@wes@n~
+@wA pair of @Wsimple @Dblack @cs@Ch@Wo@wes are lying here@n~
+~
+11 65 0 0 0 1 14 0
+G
+1633428497
+U
+552744561845690287
+Z
+4
+A
+17 10 0
+#110
+13 0 0 0 0 100 100 0 17 A 0 v 0 0 0 0 0 0 0 0 0
+XAP
+Simple White Gi~
+@WSimple @wWhite @cG@Ci@n~
+@wA @Wsimple @wwhite @cg@Ci @wis lying here@n~
+~
+11 1025 0 0 0 1 25 0
+G
+1633428497
+U
+5423877043960601348
+Z
+4
+A
+17 10 0
+#112
+14 0 0 0 0 100 100 0 9 A 0 v 0 0 0 0 0 0 0 0 0
+XAP
+Simple White Belt~
+@WSimple @wWhite @cB@Ce@Wl@wt@n~
+@wA @Wsimple @wwhite @cb@Ce@Wl@wt is lying here@n~
+~
+11 2049 0 0 0 1 15 0
+G
+1633428497
+U
+2967986006115888500
+Z
+4
+A
+17 10 0
+#12000
+19 0 0 0 0 100 100 0 17 A o v 0 0 0 0 0 0 0 0 0
+XAP
+Symbol of Kibito~
+@DS@wy@Wmb@wo@Dl @nof @RK@Wi@Db@wi@Wt@Ro@n~
+A symbol signfying that one is a student of Kibito, lays here~
+~
+11 32769 0 0 0 1 100 0
+G
+1633428500
+U
+3056522436900358715
+Z
+4
+A
+3 1 0
+A
+17 20 0
+#17
+0 0 0 0 0 100 100 0 0 dfqAC 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Map~
+undefined~
+.~
+~
+12 0 0 0 0 0 0 0
+G
+1633427200
+U
+-1
+Z
+1
+#17998
+0 0 0 0 0 100 100 0 9 dqA 0 0 0 0 0 0 0 0 0 0 0
+XAP
+iMuffin~
+@Wi@wM@Du@Wf@Df@wi@Wn@n~
+An iMuffin is lying here~
+~
+12 0 0 0 0 0 0 0
+G
+1633427200
+U
+-1
+Z
+4
+E
+iMuffin~
+   @WThis is the latest tablet device from Pear Inc, bearing visual similarities
+to a muffin. @n
+
+@WTo use the iMuffin, type @yiMuffin@n
+~
+#1101
+0 15 15 0 0 100 100 0 45 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Rice Cake~
+@wA Rice Cake@n~
+@wA rice cake is lying here@n~
+~
+19 1 0 0 0 1 0 0
+G
+1633428513
+U
+1466725448969974106
+Z
+4
+#1101
+0 3 15 0 0 100 100 0 45 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Rice Cake~
+@wA Rice Cake@n~
+@wA rice cake is lying here@n~
+~
+19 1 0 0 0 1 0 0
+G
+1633428513
+U
+763153004807847385
+Z
+4
+#317
+0 0 0 24 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Simple Flashlight~
+@wSimple @YFlashlight@n~
+@wA simple @Yflashlight @wis lying here@n~
+~
+1 1 0 0 0 1 25 0
+G
+1633428497
+U
+3845261299815311407
+Z
+4
+#108
+0 10 0 0 0 100 100 0 13 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Bottle~
+a bottle of water~
+A bottle of water has been left here~
+~
+17 1 0 0 0 5 0 0
+G
+1633428497
+U
+5028125528494853595
+Z
+4
+#61
+0 0 0 0 0 100 100 0 17 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Sleeping bag~
+@wa @BSleeping Bag@n~
+@wA @Bsleeping bag@w has been unrolled on the ground here@n~
+~
+32 1 0 0 0 2 25 0
+G
+1633428497
+U
+6524626442240033139
+Z
+4
+#71
+0 10 8 0 0 100 100 0 16 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Paper Cup~
+@wA Paper Cup@n~
+@wA paper cup @wis lying here@n~
+~
+17 1 0 0 0 13 0 0
+G
+1633516328
+U
+7654090622463044429
+Z
+4
+#12030
+0 2 0 17 0 100 100 0 36 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Glowing Orb~
+@yG@Ylowin@yg @WO@cr@Cb@n~
+A glowing orb floats here~
+~
+1 16385 0 0 0 2 10 0
+G
+1633420604
+U
+2481640070987859331
+Z
+4

@@ -1,0 +1,1953 @@
+#9900
+@BS@bt@wa@Dvi@wn@bo@Bs @yR@Da@Wv@wi@Dn@ye@n - @WRickety Bridge@n~
+   This rickety wooden bridge connects Kerberos on one side of the Stavinos
+Ravine, to New Keberos on the other side. It is a long drop to the bottom
+should one fall off the bridge. At the bottom of the ravine is a small river
+surrounded by jagged rocks. @n
+~
+99 cx 0 0 0 5
+D1
+~
+~
+0 0 9866 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9901 0 0 0 0 0 0 0 0
+S
+T 310
+#9901
+@BS@bt@wa@Dvi@wn@bo@Bs @yR@Da@Wv@wi@Dn@ye@n - @WRickety Bridge@n~
+   This rickety wooden bridge connects Kerberos on one side of the Stavinos
+Ravine, to New Keberos on the other side. It is a long drop to the bottom
+should one fall off the bridge. At the bottom of the ravine is a small river
+surrounded by jagged rocks. @n
+~
+99 x 0 0 0 5
+D1
+~
+~
+0 0 9900 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9902 0 0 0 0 0 0 0 0
+S
+#9902
+@BS@bt@wa@Dvi@wn@bo@Bs @yR@Da@Wv@wi@Dn@ye@n - @WRickety Bridge@n~
+   This rickety wooden bridge connects Kerberos on one side of the Stavinos
+Ravine, to New Keberos on the other side. It is a long drop to the bottom
+should one fall off the bridge. At the bottom of the ravine is a small river
+surrounded by jagged rocks. @n
+~
+99 x 0 0 0 5
+D1
+~
+~
+0 0 9901 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9903 0 0 0 0 0 0 0 0
+S
+#9903
+@BS@bt@wa@Dvi@wn@bo@Bs @yR@Da@Wv@wi@Dn@ye@n - @WRickety Bridge@n~
+   This rickety wooden bridge connects Kerberos on one side of the Stavinos
+Ravine, to New Keberos on the other side. It is a long drop to the bottom
+should one fall off the bridge. At the bottom of the ravine is a small river
+surrounded by jagged rocks. @n
+~
+99 x 0 0 0 5
+D1
+~
+~
+0 0 9902 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9904 0 0 0 0 0 0 0 0
+S
+#9904
+@BS@bt@wa@Dvi@wn@bo@Bs @yR@Da@Wv@wi@Dn@ye@n - @WRickety Bridge@n~
+   This rickety wooden bridge connects Kerberos on one side of the Stavinos
+Ravine, to New Keberos on the other side. It is a long drop to the bottom
+should one fall off the bridge. At the bottom of the ravine is a small river
+surrounded by jagged rocks. @n
+~
+99 x 0 0 0 5
+D1
+~
+~
+0 0 9903 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9905 0 0 0 0 0 0 0 0
+S
+#9905
+@BS@bt@wa@Dvi@wn@bo@Bs @yR@Da@Wv@wi@Dn@ye@n - @WRickety Bridge@n~
+   This rickety wooden bridge connects Kerberos on one side of the Stavinos
+Ravine, to New Keberos on the other side. It is a long drop to the bottom
+should one fall off the bridge. At the bottom of the ravine is a small river
+surrounded by jagged rocks. @n
+~
+99 x 0 0 0 5
+D1
+~
+~
+0 0 9904 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9906 0 0 0 0 0 0 0 0
+S
+#9906
+@BS@bt@wa@Dvi@wn@bo@Bs @yR@Da@Wv@wi@Dn@ye@n - @WRickety Bridge@n~
+   This rickety wooden bridge connects Kerberos on one side of the Stavinos
+Ravine, to New Keberos on the other side. It is a long drop to the bottom
+should one fall off the bridge. At the bottom of the ravine is a small river
+surrounded by jagged rocks. @n
+~
+99 x 0 0 0 5
+D1
+~
+~
+0 0 9905 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9907 0 0 0 0 0 0 0 0
+S
+#9907
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws@n - @DOuter Wall@n~
+   @DThis was once the Outer Wall of the Old Kerberos fortress city. It stretches
+both north and south along the cliff edge and this demolished area may have even
+been a gate in times gone by. @n
+~
+99 x 0 0 0 1
+D1
+~
+~
+0 0 9906 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9908 0 0 0 0 0 0 0 0
+S
+#9908
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws@n - @DRuins@n~
+   @DThis area was once the residential area of Old Kerberos as well as the
+marketplace. Little remains intact from those times, with piles of rubble
+laying here and there. Blood stains the stone paths that were once well
+travelled and with the exception of the occassional small weed, nothing grows
+from the dirt here. @n
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9909 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9907 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9911 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9913 0 0 0 0 0 0 0 0
+S
+#9909
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws@n - @DRuins@n~
+   @DThis area was once the residential area of Old Kerberos as well as the
+marketplace. Little remains intact from those times, with piles of rubble
+laying here and there. Blood stains the stone paths that were once well
+travelled and with the exception of the occassional small weed, nothing grows
+from the dirt here. @n
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9910 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9908 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9914 0 0 0 0 0 0 0 0
+S
+#9910
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws@n - @DRuins@n~
+   @DThis area was once the residential area of Old Kerberos as well as the
+marketplace. Little remains intact from those times, with piles of rubble
+laying here and there. Blood stains the stone paths that were once well
+travelled and with the exception of the occassional small weed, nothing grows
+from the dirt here. @n
+~
+99 x 0 0 0 1
+D2
+~
+~
+0 0 9909 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9915 0 0 0 0 0 0 0 0
+S
+#9911
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws@n - @DRuins@n~
+   @DThis area was once the residential area of Old Kerberos as well as the
+marketplace. Little remains intact from those times, with piles of rubble
+laying here and there. Blood stains the stone paths that were once well
+travelled and with the exception of the occassional small weed, nothing grows
+from the dirt here. @n
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9908 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9912 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9916 0 0 0 0 0 0 0 0
+S
+#9912
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws@n - @DRuins@n~
+   @DThis area was once the residential area of Old Kerberos as well as the
+marketplace. Little remains intact from those times, with piles of rubble
+laying here and there. Blood stains the stone paths that were once well
+travelled and with the exception of the occassional small weed, nothing grows
+from the dirt here. @n
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9911 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9917 0 0 0 0 0 0 0 0
+S
+#9913
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws@n - @DRuins@n~
+   @DThis area was once the residential area of Old Kerberos as well as the
+marketplace. Little remains intact from those times, with piles of rubble
+laying here and there. Blood stains the stone paths that were once well
+travelled and with the exception of the occassional small weed, nothing grows
+from the dirt here. @n
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9914 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9908 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9916 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9918 0 0 0 0 0 0 0 0
+S
+#9914
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws@n - @DRuins@n~
+   @DThis area was once the residential area of Old Kerberos as well as the
+marketplace. Little remains intact from those times, with piles of rubble
+laying here and there. Blood stains the stone paths that were once well
+travelled and with the exception of the occassional small weed, nothing grows
+from the dirt here. @n
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9915 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9909 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9913 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9921 0 0 0 0 0 0 0 0
+S
+#9915
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws@n - @DRuins@n~
+   @DThis area was once the residential area of Old Kerberos as well as the
+marketplace. Little remains intact from those times, with piles of rubble
+laying here and there. Blood stains the stone paths that were once well
+travelled and with the exception of the occassional small weed, nothing grows
+from the dirt here. @n
+~
+99 x 0 0 0 1
+D1
+~
+~
+0 0 9910 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9914 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9922 0 0 0 0 0 0 0 0
+S
+#9916
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws@n - @DRuins@n~
+   @DThis area was once the residential area of Old Kerberos as well as the
+marketplace. Little remains intact from those times, with piles of rubble
+laying here and there. Blood stains the stone paths that were once well
+travelled and with the exception of the occassional small weed, nothing grows
+from the dirt here. @n
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9913 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9911 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9917 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9919 0 0 0 0 0 0 0 0
+S
+#9917
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws@n - @DRuins@n~
+   @DThis area was once the residential area of Old Kerberos as well as the
+marketplace. Little remains intact from those times, with piles of rubble
+laying here and there. Blood stains the stone paths that were once well
+travelled and with the exception of the occassional small weed, nothing grows
+from the dirt here. @n
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9916 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9912 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9920 0 0 0 0 0 0 0 0
+S
+#9918
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws@n - @DRuins@n~
+   @DThis area was once the residential area of Old Kerberos as well as the
+marketplace. Little remains intact from those times, with piles of rubble
+laying here and there. Blood stains the stone paths that were once well
+travelled and with the exception of the occassional small weed, nothing grows
+from the dirt here. @n
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9921 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9913 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9919 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9923 0 0 0 0 0 0 0 0
+S
+#9919
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws@n - @DRuins@n~
+   @DThis area was once the residential area of Old Kerberos as well as the
+marketplace. Little remains intact from those times, with piles of rubble
+laying here and there. Blood stains the stone paths that were once well
+travelled and with the exception of the occassional small weed, nothing grows
+from the dirt here. @n
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9918 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9916 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9920 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9926 0 0 0 0 0 0 0 0
+S
+#9920
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws@n - @DRuins@n~
+   @DThis area was once the residential area of Old Kerberos as well as the
+marketplace. Little remains intact from those times, with piles of rubble
+laying here and there. Blood stains the stone paths that were once well
+travelled and with the exception of the occassional small weed, nothing grows
+from the dirt here. @n
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9919 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9917 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9927 0 0 0 0 0 0 0 0
+S
+#9921
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws@n - @DRuins@n~
+   @DThis area was once the residential area of Old Kerberos as well as the
+marketplace. Little remains intact from those times, with piles of rubble
+laying here and there. Blood stains the stone paths that were once well
+travelled and with the exception of the occassional small weed, nothing grows
+from the dirt here. @n
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9922 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9914 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9918 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9924 0 0 0 0 0 0 0 0
+S
+#9922
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws@n - @DRuins@n~
+   @DThis area was once the residential area of Old Kerberos as well as the
+marketplace. Little remains intact from those times, with piles of rubble
+laying here and there. Blood stains the stone paths that were once well
+travelled and with the exception of the occassional small weed, nothing grows
+from the dirt here. @n
+~
+99 x 0 0 0 1
+D1
+~
+~
+0 0 9915 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9921 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9925 0 0 0 0 0 0 0 0
+S
+#9923
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws@n - @DRuins@n~
+   @DThis area was once the residential area of Old Kerberos as well as the
+marketplace. Little remains intact from those times, with piles of rubble
+laying here and there. Blood stains the stone paths that were once well
+travelled and with the exception of the occassional small weed, nothing grows
+from the dirt here. @n
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9924 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9918 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9926 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9928 0 0 0 0 0 0 0 0
+S
+#9924
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws@n - @DRuins@n~
+   @DThis area was once the residential area of Old Kerberos as well as the
+marketplace. Little remains intact from those times, with piles of rubble
+laying here and there. Blood stains the stone paths that were once well
+travelled and with the exception of the occassional small weed, nothing grows
+from the dirt here. @n
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9925 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9921 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9923 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9929 0 0 0 0 0 0 0 0
+S
+#9925
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws@n - @DRuins@n~
+   @DThis area was once the residential area of Old Kerberos as well as the
+marketplace. Little remains intact from those times, with piles of rubble
+laying here and there. Blood stains the stone paths that were once well
+travelled and with the exception of the occassional small weed, nothing grows
+from the dirt here. @n
+~
+99 x 0 0 0 1
+D1
+~
+~
+0 0 9922 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9924 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9930 0 0 0 0 0 0 0 0
+S
+#9926
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws@n - @DRuins@n~
+   @DThis area was once the residential area of Old Kerberos as well as the
+marketplace. Little remains intact from those times, with piles of rubble
+laying here and there. Blood stains the stone paths that were once well
+travelled and with the exception of the occassional small weed, nothing grows
+from the dirt here. @n
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9923 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9919 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9927 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9931 0 0 0 0 0 0 0 0
+S
+#9927
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws@n - @DRuins@n~
+   @DThis area was once the residential area of Old Kerberos as well as the
+marketplace. Little remains intact from those times, with piles of rubble
+laying here and there. Blood stains the stone paths that were once well
+travelled and with the exception of the occassional small weed, nothing grows
+from the dirt here. @n
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9926 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9920 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9932 0 0 0 0 0 0 0 0
+S
+#9928
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws@n - @DRuins@n~
+   @DThis area was once the residential area of Old Kerberos as well as the
+marketplace. Little remains intact from those times, with piles of rubble
+laying here and there. Blood stains the stone paths that were once well
+travelled and with the exception of the occassional small weed, nothing grows
+from the dirt here. @n
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9929 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9923 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9931 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9933 0 0 0 0 0 0 0 0
+S
+#9929
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws@n - @DRuins@n~
+   @DThis area was once the residential area of Old Kerberos as well as the
+marketplace. Little remains intact from those times, with piles of rubble
+laying here and there. Blood stains the stone paths that were once well
+travelled and with the exception of the occassional small weed, nothing grows
+from the dirt here. @n
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9930 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9924 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9928 0 0 0 0 0 0 0 0
+S
+#9930
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws@n - @DRuins@n~
+   @DThis area was once the residential area of Old Kerberos as well as the
+marketplace. Little remains intact from those times, with piles of rubble
+laying here and there. Blood stains the stone paths that were once well
+travelled and with the exception of the occassional small weed, nothing grows
+from the dirt here. @n
+~
+99 x 0 0 0 1
+D1
+~
+~
+0 0 9925 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9929 0 0 0 0 0 0 0 0
+S
+#9931
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws@n - @DRuins@n~
+   @DThis area was once the residential area of Old Kerberos as well as the
+marketplace. Little remains intact from those times, with piles of rubble
+laying here and there. Blood stains the stone paths that were once well
+travelled and with the exception of the occassional small weed, nothing grows
+from the dirt here. @n
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9928 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9926 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9932 0 0 0 0 0 0 0 0
+S
+#9932
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws@n - @DRuins@n~
+   @DThis area was once the residential area of Old Kerberos as well as the
+marketplace. Little remains intact from those times, with piles of rubble
+laying here and there. Blood stains the stone paths that were once well
+travelled and with the exception of the occassional small weed, nothing grows
+from the dirt here. @n
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9931 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9927 0 0 0 0 0 0 0 0
+S
+#9933
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws@n - @DCitadel Gate@n~
+   @DWhat remains of the inner wall and the citadel gate stands here. One half of
+the large wooden gate remains intact, the other lays on the ground broken in
+two. The walkway on the wall where the gate is missing has also collapsed and
+stone bricks are scattered around the area. @n
+~
+99 cx 0 0 0 1
+D1
+~
+~
+0 0 9928 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9934 0 0 0 0 0 0 0 0
+S
+#9934
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws@n - @DCitadel Road@n~
+   @DCitadel Road, named thus because it leads to Citadel Plaza and in turn, the
+Citadel to the west. The road has suffered a fair amount of damage and small
+craters can be found along it's length. Crimson blood stains the stone
+underfoot. @n
+~
+99 x 0 0 0 1
+D1
+~
+~
+0 0 9933 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9935 0 0 0 0 0 0 0 0
+S
+#9935
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws@n - @DCitadel Road@n~
+   @DCitadel Road, named thus because it leads to Citadel Plaza and in turn, the
+Citadel to the west. The road has suffered a fair amount of damage and small
+craters can be found along it's length. Crimson blood stains the stone
+underfoot. @n
+~
+99 x 0 0 0 1
+D1
+~
+~
+0 0 9934 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9936 0 0 0 0 0 0 0 0
+S
+#9936
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws @n- @DCitadel Plaza@n~
+   @DThis plaza was once the meeting ground of the nobles of House Sereg-Vanma and
+other important figures. In the middle stands a now broken statue of a konatsu,
+the top half of which lays on the ground at it's feet. Broken benches border
+the plaza. @n
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9937 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9935 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9938 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9939 0 0 0 0 0 0 0 0
+S
+#9937
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws @n- @DCitadel Plaza@n~
+   @DThis plaza was once the meeting ground of the nobles of House Sereg-Vanma and
+other important figures. In the middle stands a now broken statue of a konatsu,
+the top half of which lays on the ground at it's feet. Broken benches border
+the plaza. @n
+~
+99 x 0 0 0 1
+D2
+~
+~
+0 0 9936 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9940 0 0 0 0 0 0 0 0
+S
+#9938
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws @n- @DCitadel Plaza@n~
+   @DThis plaza was once the meeting ground of the nobles of House Sereg-Vanma and
+other important figures. In the middle stands a now broken statue of a konatsu,
+the top half of which lays on the ground at it's feet. Broken benches border
+the plaza. @n
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9936 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9941 0 0 0 0 0 0 0 0
+S
+#9939
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws @n- @DCitadel Plaza@n~
+   @DThis plaza was once the meeting ground of the nobles of House Sereg-Vanma and
+other important figures. In the middle stands a now broken statue of a konatsu,
+the top half of which lays on the ground at it's feet. Broken benches border
+the plaza. @n
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9940 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9936 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9941 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9942 0 0 0 0 0 0 0 0
+S
+#9940
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws @n- @DCitadel Plaza@n~
+   @DThis plaza was once the meeting ground of the nobles of House Sereg-Vanma and
+other important figures. In the middle stands a now broken statue of a konatsu,
+the top half of which lays on the ground at it's feet. Broken benches border
+the plaza. @n
+~
+99 x 0 0 0 1
+D1
+~
+~
+0 0 9937 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9939 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9943 0 0 0 0 0 0 0 0
+S
+#9941
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws @n- @DCitadel Plaza@n~
+   @DThis plaza was once the meeting ground of the nobles of House Sereg-Vanma and
+other important figures. In the middle stands a now broken statue of a konatsu,
+the top half of which lays on the ground at it's feet. Broken benches border
+the plaza. @n
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9939 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9938 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9944 0 0 0 0 0 0 0 0
+S
+#9942
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws @n- @DCitadel Plaza@n~
+   @DThis plaza was once the meeting ground of the nobles of House Sereg-Vanma and
+other important figures. In the middle stands a now broken statue of a konatsu,
+the top half of which lays on the ground at it's feet. Broken benches border
+the plaza. @n
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9943 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9939 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9944 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9945 0 0 0 0 0 0 0 0
+S
+#9943
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws @n- @DCitadel Plaza@n~
+   @DThis plaza was once the meeting ground of the nobles of House Sereg-Vanma and
+other important figures. In the middle stands a now broken statue of a konatsu,
+the top half of which lays on the ground at it's feet. Broken benches border
+the plaza. @n
+~
+99 x 0 0 0 1
+D1
+~
+~
+0 0 9940 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9942 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9950 0 0 0 0 0 0 0 0
+S
+#9944
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws @n- @DCitadel Plaza@n~
+   @DThis plaza was once the meeting ground of the nobles of House Sereg-Vanma and
+other important figures. In the middle stands a now broken statue of a konatsu,
+the top half of which lays on the ground at it's feet. Broken benches border
+the plaza. @n
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9942 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9941 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9955 0 0 0 0 0 0 0 0
+S
+#9945
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws @n- @DPlaza Steps@n~
+   @DThe steps leading from the Plaza to the Citadel are as wide as the plaza
+itself. The remains of fortifications litter the steps, indicating a battle
+probably took place here at some point in the past. @m
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9950 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9942 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9955 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 9946 0 0 0 0 0 0 0 0
+S
+#9946
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws @n- @DPlaza Steps@n~
+   @DThe steps leading from the Plaza to the Citadel are as wide as the plaza
+itself. The remains of fortifications litter the steps, indicating a battle
+probably took place here at some point in the past. @m
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9951 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9956 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9947 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 9945 0 0 0 0 0 0 0 0
+S
+#9947
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws @n- @DPlaza Steps@n~
+   @DThe steps leading from the Plaza to the Citadel are as wide as the plaza
+itself. The remains of fortifications litter the steps, indicating a battle
+probably took place here at some point in the past. @m
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9952 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9946 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9957 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 9948 0 0 0 0 0 0 0 0
+S
+#9948
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws @n- @DPlaza Steps@n~
+   @DThe steps leading from the Plaza to the Citadel are as wide as the plaza
+itself. The remains of fortifications litter the steps, indicating a battle
+probably took place here at some point in the past. @m
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9953 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9958 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9949 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 9947 0 0 0 0 0 0 0 0
+S
+#9949
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws @n- @DPlaza Steps@n~
+   @DThe steps leading from the Plaza to the Citadel are as wide as the plaza
+itself. The remains of fortifications litter the steps, indicating a battle
+probably took place here at some point in the past. @m
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9954 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9948 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9959 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9960 0 0 0 0 0 0 0 0
+S
+#9950
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws @n- @DPlaza Steps@n~
+   @DThe steps leading from the Plaza to the Citadel are as wide as the plaza
+itself. The remains of fortifications litter the steps, indicating a battle
+probably took place here at some point in the past. @m
+~
+99 x 0 0 0 1
+D1
+~
+~
+0 0 9943 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9945 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 9951 0 0 0 0 0 0 0 0
+S
+#9951
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws @n- @DPlaza Steps@n~
+   @DThe steps leading from the Plaza to the Citadel are as wide as the plaza
+itself. The remains of fortifications litter the steps, indicating a battle
+probably took place here at some point in the past. @m
+~
+99 x 0 0 0 1
+D2
+~
+~
+0 0 9946 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9952 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 9950 0 0 0 0 0 0 0 0
+S
+#9952
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws @n- @DPlaza Steps@n~
+   @DThe steps leading from the Plaza to the Citadel are as wide as the plaza
+itself. The remains of fortifications litter the steps, indicating a battle
+probably took place here at some point in the past. @m
+~
+99 x 0 0 0 1
+D1
+~
+~
+0 0 9951 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9947 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 9953 0 0 0 0 0 0 0 0
+S
+#9953
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws @n- @DPlaza Steps@n~
+   @DThe steps leading from the Plaza to the Citadel are as wide as the plaza
+itself. The remains of fortifications litter the steps, indicating a battle
+probably took place here at some point in the past. @m
+~
+99 x 0 0 0 1
+D2
+~
+~
+0 0 9948 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9954 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 9952 0 0 0 0 0 0 0 0
+S
+#9954
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws @n- @DPlaza Steps@n~
+   @DThe steps leading from the Plaza to the Citadel are as wide as the plaza
+itself. The remains of fortifications litter the steps, indicating a battle
+probably took place here at some point in the past. @m
+~
+99 x 0 0 0 1
+D1
+~
+~
+0 0 9953 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9949 0 0 0 0 0 0 0 0
+S
+#9955
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws @n- @DPlaza Steps@n~
+   @DThe steps leading from the Plaza to the Citadel are as wide as the plaza
+itself. The remains of fortifications litter the steps, indicating a battle
+probably took place here at some point in the past. @m
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9945 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9944 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 9956 0 0 0 0 0 0 0 0
+S
+#9956
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws @n- @DPlaza Steps@n~
+   @DThe steps leading from the Plaza to the Citadel are as wide as the plaza
+itself. The remains of fortifications litter the steps, indicating a battle
+probably took place here at some point in the past. @m
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9946 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9957 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 9955 0 0 0 0 0 0 0 0
+S
+#9957
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws @n- @DPlaza Steps@n~
+   @DThe steps leading from the Plaza to the Citadel are as wide as the plaza
+itself. The remains of fortifications litter the steps, indicating a battle
+probably took place here at some point in the past. @m
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9947 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9956 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 9958 0 0 0 0 0 0 0 0
+S
+#9958
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws @n- @DPlaza Steps@n~
+   @DThe steps leading from the Plaza to the Citadel are as wide as the plaza
+itself. The remains of fortifications litter the steps, indicating a battle
+probably took place here at some point in the past. @m
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9948 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9959 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 9957 0 0 0 0 0 0 0 0
+S
+#9959
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws @n- @DPlaza Steps@n~
+   @DThe steps leading from the Plaza to the Citadel are as wide as the plaza
+itself. The remains of fortifications litter the steps, indicating a battle
+probably took place here at some point in the past. @m
+~
+99 x 0 0 0 1
+D0
+~
+~
+0 0 9949 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9958 0 0 0 0 0 0 0 0
+S
+#9960
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WFirst Floor@n~
+   @DThis hallway winds around the entire first floor. On the outerwall is a view
+to the outside of the citadel, those windows allowing the view have been
+shattered and the glass that comprises them can be found on the floor here. @n
+~
+99 dx 0 0 0 0
+D0
+~
+~
+0 0 9961 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9949 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9973 0 0 0 0 0 0 0 0
+S
+#9961
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WFirst Floor@n~
+   @DThis hallway winds around the entire first floor. On the outerwall is a view
+to the outside of the citadel, those windows allowing the view have been
+shattered and the glass that comprises them can be found on the floor here. @n
+~
+99 dx 0 0 0 0
+D0
+~
+~
+0 0 9962 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9960 0 0 0 0 0 0 0 0
+S
+#9962
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WFirst Floor@n~
+   @DThis hallway winds around the entire first floor. On the outerwall is a view
+to the outside of the citadel, those windows allowing the view have been
+shattered and the glass that comprises them can be found on the floor here. @n
+~
+99 dx 0 0 0 0
+D2
+~
+~
+0 0 9961 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9963 0 0 0 0 0 0 0 0
+S
+#9963
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WFirst Floor@n~
+   @DThis hallway winds around the entire first floor. On the outerwall is a view
+to the outside of the citadel, those windows allowing the view have been
+shattered and the glass that comprises them can be found on the floor here. @n
+~
+99 dx 0 0 0 0
+D1
+~
+~
+0 0 9962 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9964 0 0 0 0 0 0 0 0
+S
+#9964
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WFirst Floor@n~
+   @DThis hallway winds around the entire first floor. On the outerwall is a view
+to the outside of the citadel, those windows allowing the view have been
+shattered and the glass that comprises them can be found on the floor here. @n
+~
+99 dx 0 0 0 0
+D1
+~
+~
+0 0 9963 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9965 0 0 0 0 0 0 0 0
+S
+#9965
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WFirst Floor@n~
+   @DThis hallway winds around the entire first floor. On the outerwall is a view
+to the outside of the citadel, those windows allowing the view have been
+shattered and the glass that comprises them can be found on the floor here. @n
+~
+99 dx 0 0 0 0
+D1
+~
+~
+0 0 9964 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9966 0 0 0 0 0 0 0 0
+S
+#9966
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WFirst Floor@n~
+   @DThis hallway winds around the entire first floor. On the outerwall is a view
+to the outside of the citadel, those windows allowing the view have been
+shattered and the glass that comprises them can be found on the floor here. @n
+~
+99 dx 0 0 0 0
+D0
+~
+~
+0 0 9965 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9967 0 0 0 0 0 0 0 0
+S
+#9967
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WFirst Floor@n~
+   @DThis hallway winds around the entire first floor. On the outerwall is a view
+to the outside of the citadel, those windows allowing the view have been
+shattered and the glass that comprises them can be found on the floor here. @n
+~
+99 dx 0 0 0 0
+D0
+~
+~
+0 0 9966 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9974 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9968 0 0 0 0 0 0 0 0
+S
+#9968
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WFirst Floor@n~
+   @DThis hallway winds around the entire first floor. On the outerwall is a view
+to the outside of the citadel, those windows allowing the view have been
+shattered and the glass that comprises them can be found on the floor here. @n
+~
+99 dx 0 0 0 0
+D0
+~
+~
+0 0 9967 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9969 0 0 0 0 0 0 0 0
+S
+#9969
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WFirst Floor@n~
+   @DThis hallway winds around the entire first floor. On the outerwall is a view
+to the outside of the citadel, those windows allowing the view have been
+shattered and the glass that comprises them can be found on the floor here. @n
+~
+99 dx 0 0 0 0
+D0
+~
+~
+0 0 9968 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9970 0 0 0 0 0 0 0 0
+S
+#9970
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WFirst Floor@n~
+   @DThis hallway winds around the entire first floor. On the outerwall is a view
+to the outside of the citadel, those windows allowing the view have been
+shattered and the glass that comprises them can be found on the floor here. @n
+~
+99 dx 0 0 0 0
+D1
+~
+~
+0 0 9971 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9969 0 0 0 0 0 0 0 0
+S
+#9971
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WFirst Floor@n~
+   @DThis hallway winds around the entire first floor. On the outerwall is a view
+to the outside of the citadel, those windows allowing the view have been
+shattered and the glass that comprises them can be found on the floor here. @n
+~
+99 dx 0 0 0 0
+D1
+~
+~
+0 0 9972 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9970 0 0 0 0 0 0 0 0
+S
+#9972
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WFirst Floor@n~
+   @DThis hallway winds around the entire first floor. On the outerwall is a view
+to the outside of the citadel, those windows allowing the view have been
+shattered and the glass that comprises them can be found on the floor here. @n
+~
+99 dx 0 0 0 0
+D0
+~
+~
+0 0 9973 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9971 0 0 0 0 0 0 0 0
+S
+#9973
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WFirst Floor@n~
+   @DThis hallway winds around the entire first floor. On the outerwall is a view
+to the outside of the citadel, those windows allowing the view have been
+shattered and the glass that comprises them can be found on the floor here. @n
+~
+99 dx 0 0 0 0
+D0
+~
+~
+0 0 9960 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9972 0 0 0 0 0 0 0 0
+S
+#9974
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WStairs of Ascension@n~
+   @DThis stairway, made of gold, connects the first and second floors of the
+Furion Citadel with one another. Several steps are marked with a blotchy
+crimson stain. @n
+~
+99 dx 0 0 0 0
+D3
+~
+~
+0 0 9967 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 9975 0 0 0 0 0 0 0 0
+S
+#9975
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WStairs of Ascension@n~
+   @DThis stairway, made of gold, connects the first and second floors of the
+Furion Citadel with one another. Several steps are marked with a blotchy
+crimson stain. @n
+~
+99 dx 0 0 0 0
+D1
+~
+~
+0 0 9976 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 9974 0 0 0 0 0 0 0 0
+S
+#9976
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WStairs of Ascension@n~
+   @DThis stairway, made of gold, connects the first and second floors of the
+Furion Citadel with one another. Several steps are marked with a blotchy
+crimson stain. @n
+~
+99 dx 0 0 0 0
+D3
+~
+~
+0 0 9975 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 9977 0 0 0 0 0 0 0 0
+S
+#9977
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WStairs of Ascension@n~
+   @DThis stairway, made of gold, connects the first and second floors of the
+Furion Citadel with one another. Several steps are marked with a blotchy
+crimson stain. @n
+~
+99 dx 0 0 0 0
+D1
+~
+~
+0 0 9978 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 9976 0 0 0 0 0 0 0 0
+S
+#9978
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WStairs of Ascension@n~
+   @DThis stairway, made of gold, connects the first and second floors of the
+Furion Citadel with one another. Several steps are marked with a blotchy
+crimson stain. @n
+~
+99 dx 0 0 0 0
+D3
+~
+~
+0 0 9977 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 9979 0 0 0 0 0 0 0 0
+S
+#9979
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WStairs of Ascension@n~
+   @DThis stairway, made of gold, connects the first and second floors of the
+Furion Citadel with one another. Several steps are marked with a blotchy
+crimson stain. @n
+~
+99 dx 0 0 0 0
+D1
+~
+~
+0 0 9980 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 9978 0 0 0 0 0 0 0 0
+S
+#9980
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WSecond Floor@n~
+   @DSections of the outer wall and ceiling are missing here, allowing the
+elements into the ruined Furion Citadel. This place looks as if it has seen a
+lot of battle, with numerous blood stains. The tiles and brick walls also carry
+wear in the form of scratch marks, dents and cracks. @n
+~
+99 dx 0 0 0 0
+D0
+~
+~
+0 0 9981 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9993 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9979 0 0 0 0 0 0 0 0
+S
+#9981
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WSecond Floor@n~
+   @DSections of the outer wall and ceiling are missing here, allowing the
+elements into the ruined Furion Citadel. This place looks as if it has seen a
+lot of battle, with numerous blood stains. The tiles and brick walls also carry
+wear in the form of scratch marks, dents and cracks. @n
+~
+99 dx 0 0 0 0
+D0
+~
+~
+0 0 9982 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9980 0 0 0 0 0 0 0 0
+S
+#9982
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WSecond Floor@n~
+   @DSections of the outer wall and ceiling are missing here, allowing the
+elements into the ruined Furion Citadel. This place looks as if it has seen a
+lot of battle, with numerous blood stains. The tiles and brick walls also carry
+wear in the form of scratch marks, dents and cracks. @n
+~
+99 dx 0 0 0 0
+D2
+~
+~
+0 0 9981 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9983 0 0 0 0 0 0 0 0
+S
+#9983
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WSecond Floor@n~
+   @DSections of the outer wall and ceiling are missing here, allowing the
+elements into the ruined Furion Citadel. This place looks as if it has seen a
+lot of battle, with numerous blood stains. The tiles and brick walls also carry
+wear in the form of scratch marks, dents and cracks. @n
+~
+99 dx 0 0 0 0
+D1
+~
+~
+0 0 9982 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9984 0 0 0 0 0 0 0 0
+S
+#9984
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WSecond Floor@n~
+   @DSections of the outer wall and ceiling are missing here, allowing the
+elements into the ruined Furion Citadel. This place looks as if it has seen a
+lot of battle, with numerous blood stains. The tiles and brick walls also carry
+wear in the form of scratch marks, dents and cracks. @n
+~
+99 dx 0 0 0 0
+D1
+~
+~
+0 0 9983 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9985 0 0 0 0 0 0 0 0
+S
+#9985
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WSecond Floor@n~
+   @DSections of the outer wall and ceiling are missing here, allowing the
+elements into the ruined Furion Citadel. This place looks as if it has seen a
+lot of battle, with numerous blood stains. The tiles and brick walls also carry
+wear in the form of scratch marks, dents and cracks. @n
+~
+99 dx 0 0 0 0
+D1
+~
+~
+0 0 9984 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9986 0 0 0 0 0 0 0 0
+S
+#9986
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WSecond Floor@n~
+   @DSections of the outer wall and ceiling are missing here, allowing the
+elements into the ruined Furion Citadel. This place looks as if it has seen a
+lot of battle, with numerous blood stains. The tiles and brick walls also carry
+wear in the form of scratch marks, dents and cracks. @n
+~
+99 dx 0 0 0 0
+D0
+~
+~
+0 0 9985 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9987 0 0 0 0 0 0 0 0
+S
+#9987
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WSecond Floor@n~
+   @DSections of the outer wall and ceiling are missing here, allowing the
+elements into the ruined Furion Citadel. This place looks as if it has seen a
+lot of battle, with numerous blood stains. The tiles and brick walls also carry
+wear in the form of scratch marks, dents and cracks. @n
+~
+99 dx 0 0 0 0
+D0
+~
+~
+0 0 9986 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9994 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9988 0 0 0 0 0 0 0 0
+S
+#9988
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WSecond Floor@n~
+   @DSections of the outer wall and ceiling are missing here, allowing the
+elements into the ruined Furion Citadel. This place looks as if it has seen a
+lot of battle, with numerous blood stains. The tiles and brick walls also carry
+wear in the form of scratch marks, dents and cracks. @n
+~
+99 dx 0 0 0 0
+D0
+~
+~
+0 0 9987 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9989 0 0 0 0 0 0 0 0
+S
+#9989
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WSecond Floor@n~
+   @DSections of the outer wall and ceiling are missing here, allowing the
+elements into the ruined Furion Citadel. This place looks as if it has seen a
+lot of battle, with numerous blood stains. The tiles and brick walls also carry
+wear in the form of scratch marks, dents and cracks. @n
+~
+99 dx 0 0 0 0
+D0
+~
+~
+0 0 9988 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9990 0 0 0 0 0 0 0 0
+S
+#9990
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WSecond Floor@n~
+   @DSections of the outer wall and ceiling are missing here, allowing the
+elements into the ruined Furion Citadel. This place looks as if it has seen a
+lot of battle, with numerous blood stains. The tiles and brick walls also carry
+wear in the form of scratch marks, dents and cracks. @n
+~
+99 dx 0 0 0 0
+D1
+~
+~
+0 0 9991 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9989 0 0 0 0 0 0 0 0
+S
+#9991
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WSecond Floor@n~
+   @DSections of the outer wall and ceiling are missing here, allowing the
+elements into the ruined Furion Citadel. This place looks as if it has seen a
+lot of battle, with numerous blood stains. The tiles and brick walls also carry
+wear in the form of scratch marks, dents and cracks. @n
+~
+99 dx 0 0 0 0
+D1
+~
+~
+0 0 9992 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9990 0 0 0 0 0 0 0 0
+S
+#9992
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WSecond Floor@n~
+   @DSections of the outer wall and ceiling are missing here, allowing the
+elements into the ruined Furion Citadel. This place looks as if it has seen a
+lot of battle, with numerous blood stains. The tiles and brick walls also carry
+wear in the form of scratch marks, dents and cracks. @n
+~
+99 dx 0 0 0 0
+D0
+~
+~
+0 0 9993 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9991 0 0 0 0 0 0 0 0
+S
+#9993
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WSecond Floor@n~
+   @DSections of the outer wall and ceiling are missing here, allowing the
+elements into the ruined Furion Citadel. This place looks as if it has seen a
+lot of battle, with numerous blood stains. The tiles and brick walls also carry
+wear in the form of scratch marks, dents and cracks. @n
+~
+99 dx 0 0 0 0
+D0
+~
+~
+0 0 9980 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9992 0 0 0 0 0 0 0 0
+S
+#9994
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WInner Sanctum@n~
+   @DOnce the meeting chamber of the nobles of Sereg-Vanma, the Inner Sanctum is a
+shadow of it's former self. The ceiling has been entirely destroyed, while the
+walls in parts are ruined, sloping up and down around the room. @n
+~
+99 dx 0 0 0 0
+D0
+~
+~
+0 0 9995 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9997 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9996 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9987 0 0 0 0 0 0 0 0
+S
+#9995
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WInner Sanctum@n~
+   @DOnce the meeting chamber of the nobles of Sereg-Vanma, the Inner Sanctum is a
+shadow of it's former self. The ceiling has been entirely destroyed, while the
+walls in parts are ruined, sloping up and down around the room. @n
+~
+99 dx 0 0 0 0
+D1
+~
+~
+0 0 9998 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9994 0 0 0 0 0 0 0 0
+S
+#9996
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WInner Sanctum@n~
+   @DOnce the meeting chamber of the nobles of Sereg-Vanma, the Inner Sanctum is a
+shadow of it's former self. The ceiling has been entirely destroyed, while the
+walls in parts are ruined, sloping up and down around the room. @n
+~
+99 dx 0 0 0 0
+D0
+~
+~
+0 0 9994 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9999 0 0 0 0 0 0 0 0
+S
+#9997
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WInner Sanctum@n~
+   @DOnce the meeting chamber of the nobles of Sereg-Vanma, the Inner Sanctum is a
+shadow of it's former self. The ceiling has been entirely destroyed, while the
+walls in parts are ruined, sloping up and down around the room. @n
+~
+99 dx 0 0 0 0
+D0
+~
+~
+0 0 9998 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9999 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9994 0 0 0 0 0 0 0 0
+S
+#9998
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WInner Sanctum@n~
+   @DOnce the meeting chamber of the nobles of Sereg-Vanma, the Inner Sanctum is a
+shadow of it's former self. The ceiling has been entirely destroyed, while the
+walls in parts are ruined, sloping up and down around the room. @n
+~
+99 dx 0 0 0 0
+D2
+~
+~
+0 0 9997 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9995 0 0 0 0 0 0 0 0
+S
+#9999
+@BF@bu@Dr@wi@bo@Bn @rC@Ri@Dt@wa@Wd@Re@rl@n - @WInner Sanctum@n~
+   @DOnce the meeting chamber of the nobles of Sereg-Vanma, the Inner Sanctum is a
+shadow of it's former self. The ceiling has been entirely destroyed, while the
+walls in parts are ruined, sloping up and down around the room. @n
+~
+99 dx 0 0 0 0
+D0
+~
+~
+0 0 9997 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9996 0 0 0 0 0 0 0 0
+S
+$~

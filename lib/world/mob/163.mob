@@ -1,0 +1,497 @@
+#16300
+Mcstuff Clerk~
+@YM@yc@Rs@rt@Yu@yf@Rf @cClerk@n~
+@wThe @YM@yc@Rs@rt@Yu@yf@Rf @cClerk @wis ready to take your order.@n
+~
+ @WThis humble employee just wants to make it through another day.  @n
+~
+bds 0 0 0 l 0 0 0 0 E
+100 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 95
+Dex: 53
+Int: 87
+Wis: 75
+Con: 75
+Cha: 53
+E
+T 303
+#16301
+Burger Queen Clerk~
+@YB@yu@Dr@wg@ye@Yr @CQ@cu@We@ce@Cn @DClerk@n~
+A greasy teen is standing behind the counter, ready to serve customers.
+~
+@D @n
+~
+bds 0 0 0 l 0 0 0 0 E
+100 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 60
+Dex: 90
+Int: 99
+Wis: 65
+Con: 53
+Cha: 93
+E
+#16302
+FRR trainee~
+@CF@RF@DR @wt@Wr@Dain@We@we@n~
+An @CF@RF@DR @wt@Wr@Dain@We@we@n is standing at a register.
+~
+@D @n
+~
+bds 0 0 0 l 0 0 0 0 E
+100 0 10 0d0+0 0d0+0
+0 0 5 28
+8 8 1
+Str: 77
+Dex: 84
+Int: 53
+Wis: 81
+Con: 50
+Cha: 64
+E
+#16303
+Ticket Saleswoman~
+Ticket Saleswoman~
+A female is standing here, selling public transport tickets.
+~
+@D @n
+~
+bds 0 0 0 l 0 0 0 0 E
+100 0 10 0d4+0 0d0+0
+0 0 0 0
+8 8 2
+Str: 69
+Dex: 70
+Int: 71
+Wis: 52
+Con: 85
+Cha: 99
+E
+#16304
+Bored Clerk~
+Bored Clerk~
+A clerk, clearly bored, is here leaning against the counter
+~
+@D @n
+~
+bdsD 0 0 0 0 0 0 0 0 E
+100 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 90
+Dex: 57
+Int: 90
+Wis: 55
+Con: 55
+Cha: 100
+E
+T 16300
+#16305
+Freidrich~
+Freidrich~
+The cashier Freidrich stares blankly at the shoppers.
+~
+@D @n
+~
+bds 0 0 0 l 0 0 0 0 E
+100 0 10 0d0+0 0d0+0
+0 0 5 28
+8 8 1
+Str: 64
+Dex: 77
+Int: 51
+Wis: 60
+Con: 92
+Cha: 62
+E
+#16306
+Bartender~
+@Wa Bartender@n~
+A bartender is here, serving drinks.
+~
+@D @n
+~
+bds 0 0 0 l 0 0 0 0 E
+100 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 71
+Dex: 62
+Int: 63
+Wis: 85
+Con: 58
+Cha: 82
+E
+#16307
+CyroSec Officer~
+@CC@cy@Dr@wo@WS@ce@Cc @RO@rf@Wf@wi@Dc@re@Rr@n~
+A CyroSec Customs Officer is here, checking passengers for security risks.
+~
+@D @n
+~
+bds 0 0 0 l 0 0 0 0 E
+100 0 10 0d0+0 0d0+0
+0 0 2 28
+8 8 1
+Str: 100
+Dex: 81
+Int: 59
+Wis: 84
+Con: 87
+Cha: 72
+E
+T 16303
+#16308
+Gym Instructor~
+@CG@cy@Cm @RI@rn@Ws@wt@Dru@wc@Wt@ro@Rr@n~
+@nA @CG@cy@Cm @RI@rn@Ws@wt@Dru@wc@Wt@ro@Rr@n is here, helping out clients.
+~
+@D @n
+@ROOC@D: @WThis guy is a trainer@n
+~
+bds 0 0 0 l 0 0 0 0 E
+100 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 64
+Dex: 52
+Int: 50
+Wis: 66
+Con: 78
+Cha: 98
+E
+T 16307
+#16310
+Level One Hologram~
+@WLevel One Hologram@n~
+A level one hologram is standing here, ready for combat.
+~
+@D @n
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+6 0 10 0d0+0 0d0+0
+0 0 22 28
+8 8 0
+Str: 5
+Dex: 7
+Int: 7
+Wis: 10
+Con: 8
+Cha: 8
+E
+#16311
+Level Two Hologram~
+@WLevel Two Hologram@n~
+A level two hologram is standing here, ready for combat.
+~
+@D @n
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+16 0 10 0d0+0 0d0+0
+0 0 22 28
+8 8 0
+Str: 16
+Dex: 10
+Int: 16
+Wis: 11
+Con: 10
+Cha: 15
+E
+#16312
+Level Three Hologram~
+@WLevel Three Hologram@n~
+A level three hologram is standing here, ready for combat.
+~
+@D @n
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+26 0 10 0d0+0 0d0+0
+0 0 22 28
+8 8 0
+Str: 17
+Dex: 25
+Int: 18
+Wis: 22
+Con: 24
+Cha: 13
+E
+#16313
+Level Four Hologram~
+@WLevel Four Hologram@n~
+A level four hologram is standing here, ready for combat.
+~
+@D @n
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+36 0 10 0d0+0 0d0+0
+0 0 22 28
+8 8 0
+Str: 28
+Dex: 20
+Int: 25
+Wis: 29
+Con: 19
+Cha: 18
+E
+#16314
+Level Five Hologram~
+@WLevel Five Hologram@n~
+A level five hologram is standing here, ready for combat.
+~
+@D @n
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+46 0 10 0d0+0 0d0+0
+0 0 22 28
+8 8 0
+Str: 44
+Dex: 23
+Int: 29
+Wis: 30
+Con: 23
+Cha: 39
+E
+#16315
+Level Six Hologram~
+@WLevel Six Hologram@n~
+A level six hologram is standing here, ready for combat.
+~
+@D @n
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+56 0 10 0d0+0 0d0+0
+0 0 22 28
+8 8 0
+Str: 34
+Dex: 31
+Int: 28
+Wis: 48
+Con: 54
+Cha: 50
+E
+#16316
+Level Seven Hologram~
+@WLevel Seven Hologram@n~
+A level seven hologram is standing here, ready for combat.
+~
+@D @n
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+66 0 10 0d0+0 0d0+0
+0 0 22 28
+8 8 0
+Str: 40
+Dex: 40
+Int: 65
+Wis: 54
+Con: 33
+Cha: 49
+E
+#16317
+Level Eight Hologram~
+@WLevel Eight Hologram@n~
+A level eight hologram is standing here, ready for combat.
+~
+@D @n
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+76 0 10 0d0+0 0d0+0
+0 0 22 28
+8 8 0
+Str: 71
+Dex: 50
+Int: 69
+Wis: 69
+Con: 69
+Cha: 49
+E
+#16318
+Level Nine Hologram~
+@WLevel Nine Hologram@n~
+A level nine hologram is standing here, ready for combat.
+~
+@D @n
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+86 0 10 0d0+0 0d0+0
+0 0 22 28
+8 8 0
+Str: 61
+Dex: 45
+Int: 48
+Wis: 44
+Con: 69
+Cha: 46
+E
+#16319
+Level Ten Hologram~
+@WLevel Ten Hologram@n~
+A level ten hologram is standing here, ready for combat.
+~
+@D @n
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+96 0 10 0d0+0 0d0+0
+0 0 22 28
+8 8 0
+Str: 75
+Dex: 59
+Int: 79
+Wis: 51
+Con: 61
+Cha: 62
+E
+#16320
+Level Eleven Hologram~
+@WLevel Eleven Hologram@n~
+A level eleven hologram is standing here, ready for combat.
+~
+@D @n
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+108 0 10 0d0+0 0d0+0
+0 0 22 28
+8 8 0
+Str: 94
+Dex: 87
+Int: 65
+Wis: 80
+Con: 55
+Cha: 58
+E
+#16321
+Balefire teacher~
+the Balefire Teacher~
+The Balefire Teacher stands here.
+~
+He should be invisible.
+~
+bcdsvwxyz 0 0 0 c 0 0 0 0 E
+100 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 76
+Dex: 97
+Int: 62
+Wis: 67
+Con: 58
+Cha: 93
+E
+#16322
+Practice Dummy~
+@DP@wr@Ya@yc@Yt@Wi@wc@De@Y D@yu@wm@ym@Yy@n~
+A @DP@wr@Ya@yc@Yt@Wi@wc@De@Y D@yu@wm@ym@Yy@n, marred from combat damage, stands here.
+~
+   This practice dummy looks well used, parts of it scorched and burned, the
+stuffing inside sticks out of a few places where it's been stabbed or slashed.
+There's been a few attempts at sewing it back together, or patching it up, but
+it's a hard job to keep up with.
+~
+bcdvwxyzD 0 0 0 0 0 0 0 0 E
+10 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 0
+Str: 6
+Dex: 7
+Int: 9
+Wis: 6
+Con: 9
+Cha: 9
+E
+#16323
+bham blessed hammer teacher~
+the Blessed Hammer teacher~
+The Blessed Hammer Teacher stands here.
+~
+If you can see this mob, please report to Virtus ASAP.
+~
+bcdsvwxyz 0 0 0 c 0 0 0 0 E
+100 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 67
+Dex: 87
+Int: 81
+Wis: 82
+Con: 54
+Cha: 85
+E
+#16330
+maintenance engineer~
+@WMain@Dt@Wen@Da@Wnce@n Engineer@n~
+@nA surly looking Engineer leans against some supply crates.@n
+~
+It looks unfinished.
+~
+bdlvwxyz 0 0 0 0 0 0 0 0 E
+100 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 69
+Dex: 65
+Int: 71
+Wis: 69
+Con: 100
+Cha: 59
+E
+#16331
+maintenance crew~
+@nMaintenance Crew@n~
+@nA member of the maintenance crew loiters here.@n
+~
+It looks unfinished.
+~
+cdlmvwxyz 0 0 0 l 0 0 0 0 E
+35 0 10 0d10+0 0d0+0
+0 0 13 5
+8 8 1
+Str: 18
+Dex: 36
+Int: 32
+Wis: 36
+Con: 29
+Cha: 40
+E
+#16332
+scruffy hippy frank~
+@nFrank the Hippy@n~
+@nFrank, a scruffy looking hippy stands behind the counter.@n
+~
+It looks unfinished.
+~
+bdlvwxyz 0 0 0 l 0 0 0 0 E
+100 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 50
+Dex: 90
+Int: 65
+Wis: 87
+Con: 100
+Cha: 92
+E
+#16333
+smuggler human grizzly~
+@nGrizzly Smuggler@n~
+@nA grizzly looking character passes by.@n
+~
+@nThis grizzly looking character seems to be the epitome of what someone might
+think a smuggler looks like. They pass by with a clear attempt to do anything
+but draw attention to themselves. @n
+~
+dlmvwxyz 0 0 0 0 0 0 0 0 E
+40 0 10 0d4+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 21
+Dex: 29
+Int: 28
+Wis: 32
+Con: 35
+Cha: 25
+E
+$

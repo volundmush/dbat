@@ -1,0 +1,2786 @@
+#1800
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Stairwell@n~
+ @WThis concrete stairwell has no decorations and very little light.  The steps
+have a single steel rail running down the center of the stairs.  The stairs
+themselves do not drop that far, seemingly only a single floor in distance.  A
+@Gsign@W can be seen posted above the stairwell entrance.  @n @WBlue stripes have been
+painted down the sides of the stairwell indicating what section this stairwell
+leads too.  @n
+~
+18 u 0 0 0 0
+D1
+~
+~
+0 0 1799 0 0 0 0 0 0 0 0
+D5
+~
+hatch~
+1 1801 1801 0 0 0 0 0 0 0 0
+E
+sign~
+@cLevel One@D:   @WTesting Labs@n
+@cLevel Two@D:   @WObsolete Model Storage@n
+@cLevel Three@D: @WAdvanced Model Labs@n
+@cLevel Four@D:  @WBio-Android Labs@n
+@cLevel Five@D:  @WGero's Quarters @D(@CCurrent Floor@D)@n
+@cLevel Six@D:   @WTesting Grounds@n
+~
+S
+#1801
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Stairwell@n~
+ @WThis concrete stairwell has no decorations and very little light.  The steps
+have a single steel rail running down the center of the stairs.  The stairs
+themselves do not drop that far, seemingly only a single floor in distance.  A
+@Gsign@W can be seen posted above the stairwell entrance.  @n @WBlue stripes have been
+painted down the sides of the stairwell indicating what section this stairwell
+leads too.  @n
+~
+18 cu 0 0 0 0
+D2
+~
+~
+0 0 1802 0 0 0 0 0 0 0 0
+D4
+~
+hatch~
+1 1801 1800 0 0 0 0 0 0 0 0
+E
+sign~
+@cLevel One@D:   @WTesting Labs@n
+@cLevel Two@D:   @WObsolete Model Storage@n
+@cLevel Three@D: @WAdvanced Model Labs@n
+@cLevel Four@D:  @WBio-Android Labs@n
+@cLevel Five@D:  @WGero's Quarters@n
+@cLevel Five@D:  @WTesting Grounds, Blue Section @D(@CCurrent Floor@D)@n
+~
+S
+#1802
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1801 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1806 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1803 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1807 0 0 0 0 0 0 0 0
+S
+#1803
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D1
+~
+~
+0 0 1802 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1807 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1804 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1806 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1808 0 0 0 0 0 0 0 0
+S
+#1804
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D1
+~
+~
+0 0 1803 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1808 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1805 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1807 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1809 0 0 0 0 0 0 0 0
+S
+#1805
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D1
+~
+~
+0 0 1804 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1809 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1808 0 0 0 0 0 0 0 0
+S
+#1806
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1802 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1810 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1807 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1803 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1811 0 0 0 0 0 0 0 0
+S
+#1807
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1803 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1806 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1811 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1808 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1804 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1802 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1810 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1812 0 0 0 0 0 0 0 0
+S
+#1808
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1804 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1807 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1812 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1809 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1805 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1803 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1811 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1813 0 0 0 0 0 0 0 0
+S
+#1809
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1805 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1808 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1813 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1814 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1804 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1812 0 0 0 0 0 0 0 0
+S
+#1810
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1806 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1811 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1807 0 0 0 0 0 0 0 0
+S
+#1811
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1807 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1810 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1812 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1808 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1806 0 0 0 0 0 0 0 0
+S
+#1812
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1808 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1811 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1813 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1809 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1807 0 0 0 0 0 0 0 0
+S
+#1813
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1809 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1812 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1808 0 0 0 0 0 0 0 0
+S
+#1814
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Area Hallway@n~
+ @WThis concrete hallway has been painted blue except for the titanium plating
+that makes up its floor tiles.  White lights illuminate the room showing off
+burned or scorched marks on the titanium below and holes in the concrete where
+chunks have been blown or ripped out.  It appears this hallway has seen combat
+lately.  @n
+~
+18 u 0 0 0 0
+D1
+~
+~
+0 0 1809 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1815 0 0 0 0 0 0 0 0
+S
+#1815
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Area Hallway@n~
+ @WThis concrete hallway has been painted blue except for the titanium plating
+that makes up its floor tiles.  White lights illuminate the room showing off
+burned or scorched marks on the titanium below and holes in the concrete where
+chunks have been blown or ripped out.  It appears this hallway has seen combat
+lately.  @n
+~
+18 u 0 0 0 0
+D1
+~
+~
+0 0 1814 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1816 0 0 0 0 0 0 0 0
+S
+#1816
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Area Hallway@n~
+ @WThis concrete hallway has been painted blue except for the titanium plating
+that makes up its floor tiles.  White lights illuminate the room showing off
+burned or scorched marks on the titanium below and holes in the concrete where
+chunks have been blown or ripped out.  It appears this hallway has seen combat
+lately.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1815 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1817 0 0 0 0 0 0 0 0
+S
+#1817
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Area Hallway@n~
+ @WThis concrete hallway has been painted blue except for the titanium plating
+that makes up its floor tiles.  White lights illuminate the room showing off
+burned or scorched marks on the titanium below and holes in the concrete where
+chunks have been blown or ripped out.  It appears this hallway has seen combat
+lately.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1816 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1819 0 0 0 0 0 0 0 0
+S
+#1818
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D1
+~
+~
+0 0 1819 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1821 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1822 0 0 0 0 0 0 0 0
+S
+#1819
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1817 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1820 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1822 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1818 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1823 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1821 0 0 0 0 0 0 0 0
+S
+#1820
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D2
+~
+~
+0 0 1823 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1819 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1822 0 0 0 0 0 0 0 0
+S
+#1821
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1818 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1822 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1824 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1819 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1825 0 0 0 0 0 0 0 0
+S
+#1822
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1819 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1823 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1825 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1821 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1818 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1820 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1826 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1824 0 0 0 0 0 0 0 0
+S
+#1823
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1820 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1827 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1826 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1822 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1819 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1825 0 0 0 0 0 0 0 0
+S
+#1824
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1821 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1825 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1822 0 0 0 0 0 0 0 0
+S
+#1825
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1822 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1826 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1824 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1821 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1823 0 0 0 0 0 0 0 0
+S
+#1826
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1823 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1825 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1822 0 0 0 0 0 0 0 0
+S
+#1827
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Area Hallway@n~
+ @WThis concrete hallway has been painted blue except for the titanium plating
+that makes up its floor tiles.  White lights illuminate the room showing off
+burned or scorched marks on the titanium below and holes in the concrete where
+chunks have been blown or ripped out.  It appears this hallway has seen combat
+lately.  @n
+~
+18 u 0 0 0 0
+D1
+~
+~
+0 0 1831 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1823 0 0 0 0 0 0 0 0
+S
+#1828
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D1
+~
+~
+0 0 1829 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1831 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1832 0 0 0 0 0 0 0 0
+S
+#1829
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D1
+~
+~
+0 0 1830 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1832 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1828 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1833 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1831 0 0 0 0 0 0 0 0
+S
+#1830
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D2
+~
+~
+0 0 1833 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1829 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1832 0 0 0 0 0 0 0 0
+S
+#1831
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1828 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1832 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1834 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1827 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1829 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1835 0 0 0 0 0 0 0 0
+S
+#1832
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1829 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1833 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1835 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1831 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1828 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1830 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1836 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1834 0 0 0 0 0 0 0 0
+S
+#1833
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1830 0 0 0 0 0 0 0 0
+D1
+~
+door~
+1 1800 1837 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1836 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1832 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1829 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1835 0 0 0 0 0 0 0 0
+S
+#1834
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1831 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1835 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1832 0 0 0 0 0 0 0 0
+S
+#1835
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1832 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1836 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1875 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1834 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1831 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1833 0 0 0 0 0 0 0 0
+S
+#1836
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1833 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1835 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1832 0 0 0 0 0 0 0 0
+S
+#1837
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DScarred Hallway@n~
+ @WThis hallway has a mixture of red and blue paint on different sides of it.  
+However what distinguishes it from other hallways is the sheer amount of damage
+that can be seen it.  It is as if two opposing sides have done most of their
+combat in here, with damage evident everywhere.  @n
+~
+18 cu 0 0 0 0
+D1
+~
+door~
+1 1801 1841 0 0 0 0 0 0 0 0
+D3
+~
+door~
+1 1800 1833 0 0 0 0 0 0 0 0
+S
+#1838
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D1
+~
+~
+0 0 1839 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1841 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1842 0 0 0 0 0 0 0 0
+S
+#1839
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D1
+~
+~
+0 0 1840 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1842 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1838 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1843 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1841 0 0 0 0 0 0 0 0
+S
+#1840
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D2
+~
+~
+0 0 1843 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1839 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1842 0 0 0 0 0 0 0 0
+S
+#1841
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1838 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1842 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1844 0 0 0 0 0 0 0 0
+D3
+~
+door~
+1 1801 1837 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1839 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1845 0 0 0 0 0 0 0 0
+S
+#1842
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1839 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1843 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1845 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1841 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1838 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1840 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1846 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1844 0 0 0 0 0 0 0 0
+S
+#1843
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1840 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1847 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1846 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1842 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1839 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1845 0 0 0 0 0 0 0 0
+S
+#1844
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1841 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1845 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1842 0 0 0 0 0 0 0 0
+S
+#1845
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1842 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1846 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1897 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1844 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1841 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1843 0 0 0 0 0 0 0 0
+S
+#1846
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1843 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1845 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1842 0 0 0 0 0 0 0 0
+S
+#1847
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Area Hallway@n~
+ @WThis concrete hallway has been painted red except for the titanium plating
+that makes up its floor tiles.  White lights illuminate the room showing off
+burned or scorched marks on the titanium below and holes in the concrete where
+chunks have been blown or ripped out.  It appears this hallway has seen combat
+lately.  @n
+~
+18 u 0 0 0 0
+D1
+~
+~
+0 0 1851 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1843 0 0 0 0 0 0 0 0
+S
+#1848
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D1
+~
+~
+0 0 1849 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1851 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1852 0 0 0 0 0 0 0 0
+S
+#1849
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1857 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1850 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1852 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1848 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1853 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1851 0 0 0 0 0 0 0 0
+S
+#1850
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D2
+~
+~
+0 0 1853 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1849 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1852 0 0 0 0 0 0 0 0
+S
+#1851
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1848 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1852 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1854 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1847 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1849 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1855 0 0 0 0 0 0 0 0
+S
+#1852
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1849 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1853 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1855 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1851 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1848 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1850 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1856 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1854 0 0 0 0 0 0 0 0
+S
+#1853
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1850 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1856 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1852 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1849 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1855 0 0 0 0 0 0 0 0
+S
+#1854
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1851 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1855 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1852 0 0 0 0 0 0 0 0
+S
+#1855
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1852 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1856 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1854 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1851 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1853 0 0 0 0 0 0 0 0
+S
+#1856
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1853 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1855 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1852 0 0 0 0 0 0 0 0
+S
+#1857
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Area Hallway@n~
+ @WThis concrete hallway has been painted red except for the titanium plating
+that makes up its floor tiles.  White lights illuminate the room showing off
+burned or scorched marks on the titanium below and holes in the concrete where
+chunks have been blown or ripped out.  It appears this hallway has seen combat
+lately.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1858 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1849 0 0 0 0 0 0 0 0
+S
+#1858
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Area Hallway@n~
+ @WThis concrete hallway has been painted red except for the titanium plating
+that makes up its floor tiles.  White lights illuminate the room showing off
+burned or scorched marks on the titanium below and holes in the concrete where
+chunks have been blown or ripped out.  It appears this hallway has seen combat
+lately.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1859 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1857 0 0 0 0 0 0 0 0
+S
+#1859
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Area Hallway@n~
+ @WThis concrete hallway has been painted red except for the titanium plating
+that makes up its floor tiles.  White lights illuminate the room showing off
+burned or scorched marks on the titanium below and holes in the concrete where
+chunks have been blown or ripped out.  It appears this hallway has seen combat
+lately.  @n
+~
+18 u 0 0 0 0
+D2
+~
+~
+0 0 1858 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1860 0 0 0 0 0 0 0 0
+S
+#1860
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Area Hallway@n~
+ @WThis concrete hallway has been painted red except for the titanium plating
+that makes up its floor tiles.  White lights illuminate the room showing off
+burned or scorched marks on the titanium below and holes in the concrete where
+chunks have been blown or ripped out.  It appears this hallway has seen combat
+lately.  @n
+~
+18 u 0 0 0 0
+D1
+~
+~
+0 0 1859 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1865 0 0 0 0 0 0 0 0
+S
+#1861
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D2
+~
+~
+0 0 1865 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1862 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1866 0 0 0 0 0 0 0 0
+S
+#1862
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D1
+~
+~
+0 0 1861 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1866 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1863 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1865 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1867 0 0 0 0 0 0 0 0
+S
+#1863
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D1
+~
+~
+0 0 1862 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1867 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1864 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1866 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1868 0 0 0 0 0 0 0 0
+S
+#1864
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1873 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1863 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1868 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1867 0 0 0 0 0 0 0 0
+S
+#1865
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1861 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1860 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1869 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1866 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1862 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1870 0 0 0 0 0 0 0 0
+S
+#1866
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1862 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1865 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1870 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1867 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1863 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1861 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1869 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1871 0 0 0 0 0 0 0 0
+S
+#1867
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1863 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1866 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1871 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1868 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1864 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1862 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1870 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1872 0 0 0 0 0 0 0 0
+S
+#1868
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1864 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1867 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1872 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1863 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1871 0 0 0 0 0 0 0 0
+S
+#1869
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1865 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1870 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1866 0 0 0 0 0 0 0 0
+S
+#1870
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1866 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1869 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1871 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1867 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1865 0 0 0 0 0 0 0 0
+S
+#1871
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1867 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1870 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1872 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1868 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1866 0 0 0 0 0 0 0 0
+S
+#1872
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1868 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1871 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1867 0 0 0 0 0 0 0 0
+S
+#1873
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Stairwell@n~
+ @WThis concrete stairwell has no decorations and very little light.  The steps
+have a single steel rail running down the center of the stairs.  The stairs
+themselves do not drop that far, seemingly only a single floor in distance.  A
+@Gsign@W can be seen posted above the stairwell entrance.  @n @WRed stripes have been
+painted down the sides of the stairwell indicating what section this stairwell
+leads too.  @n
+~
+18 cu 0 0 0 0
+D2
+~
+~
+0 0 1864 0 0 0 0 0 0 0 0
+D4
+~
+hatch~
+1 1800 1874 0 0 0 0 0 0 0 0
+E
+sign~
+@cLevel One@D:   @WTesting Labs@n
+@cLevel Two@D:   @WObsolete Model Storage@n
+@cLevel Three@D: @WAdvanced Model Labs@n
+@cLevel Four@D:  @WBio-Android Labs@n
+@cLevel Five@D:  @WGero's Quarters@n
+@cLevel Five@D:  @WTesting Grounds, Red Section @D(@CCurrent Floor@D)@n
+~
+S
+#1874
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Stairwell@n~
+ @WThis concrete stairwell has no decorations and very little light.  The steps
+have a single steel rail running down the center of the stairs.  The stairs
+themselves do not drop that far, seemingly only a single floor in distance.  A
+@Gsign@W can be seen posted above the stairwell entrance.  @n @WRed stripes have been
+painted down the sides of the stairwell indicating what section this stairwell
+leads too.  @n
+~
+18 u 0 0 0 0
+D3
+~
+~
+0 0 1799 0 0 0 0 0 0 0 0
+D5
+~
+hatch~
+1 1800 1873 0 0 0 0 0 0 0 0
+E
+sign~
+@cLevel One@D:   @WTesting Labs@n
+@cLevel Two@D:   @WObsolete Model Storage@n
+@cLevel Three@D: @WAdvanced Model Labs@n
+@cLevel Four@D:  @WBio-Android Labs@n
+@cLevel Five@D:  @WGero's Quarters @D(@CCurrent Floor@D)@n
+@cLevel Six@D:   @WTesting Grounds@n
+~
+S
+#1875
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Area Hallway@n~
+ @WThis concrete hallway has been painted blue except for the titanium plating
+that makes up its floor tiles.  White lights illuminate the room showing off
+burned or scorched marks on the titanium below and holes in the concrete where
+chunks have been blown or ripped out.  It appears this hallway has seen combat
+lately.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1835 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1876 0 0 0 0 0 0 0 0
+S
+#1876
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Area Hallway@n~
+ @WThis concrete hallway has been painted blue except for the titanium plating
+that makes up its floor tiles.  White lights illuminate the room showing off
+burned or scorched marks on the titanium below and holes in the concrete where
+chunks have been blown or ripped out.  It appears this hallway has seen combat
+lately.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1875 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1878 0 0 0 0 0 0 0 0
+S
+#1877
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D1
+~
+~
+0 0 1878 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1880 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1881 0 0 0 0 0 0 0 0
+S
+#1878
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1876 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1879 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1881 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1877 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1882 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1880 0 0 0 0 0 0 0 0
+S
+#1879
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D2
+~
+~
+0 0 1882 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1878 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1881 0 0 0 0 0 0 0 0
+S
+#1880
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1877 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1881 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1883 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1878 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1884 0 0 0 0 0 0 0 0
+S
+#1881
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1878 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1882 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1884 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1880 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1877 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1879 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1885 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1883 0 0 0 0 0 0 0 0
+S
+#1882
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1879 0 0 0 0 0 0 0 0
+D1
+~
+door~
+1 1800 1886 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1885 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1881 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1878 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1884 0 0 0 0 0 0 0 0
+S
+#1883
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1880 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1884 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1881 0 0 0 0 0 0 0 0
+S
+#1884
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1881 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1885 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1883 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1880 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1882 0 0 0 0 0 0 0 0
+S
+#1885
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DBlue Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted blue except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1882 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1884 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1881 0 0 0 0 0 0 0 0
+S
+#1886
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DScarred Hallway@n~
+ @WThis hallway has a mixture of red and blue paint on different sides of it.  
+However what distinguishes it from other hallways is the sheer amount of damage
+that can be seen it.  It is as if two opposing sides have done most of their
+combat in here, with damage evident everywhere.  @n
+~
+18 cu 0 0 0 0
+D1
+~
+door~
+1 1801 1890 0 0 0 0 0 0 0 0
+D2
+~
+hatch~
+1 1801 1898 0 0 0 0 0 0 0 0
+D3
+~
+door~
+1 1800 1882 0 0 0 0 0 0 0 0
+S
+#1887
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D1
+~
+~
+0 0 1888 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1890 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1891 0 0 0 0 0 0 0 0
+S
+#1888
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1896 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1889 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1891 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1887 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1892 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1890 0 0 0 0 0 0 0 0
+S
+#1889
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D2
+~
+~
+0 0 1892 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1888 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1891 0 0 0 0 0 0 0 0
+S
+#1890
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1887 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1891 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1893 0 0 0 0 0 0 0 0
+D3
+~
+door~
+1 1801 1886 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1888 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1894 0 0 0 0 0 0 0 0
+S
+#1891
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1888 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1892 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1894 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1890 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1887 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1889 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1895 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1893 0 0 0 0 0 0 0 0
+S
+#1892
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1889 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1895 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1891 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1888 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1894 0 0 0 0 0 0 0 0
+S
+#1893
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1890 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1894 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1891 0 0 0 0 0 0 0 0
+S
+#1894
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1891 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1895 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1893 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1890 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1892 0 0 0 0 0 0 0 0
+S
+#1895
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Battle-Area@n~
+ @WThis concrete battle-area has been painted red except for the titanium
+plating that makes up its floor tiles.  White lights illuminate the room showing
+off burned or scorched marks on the titanium below and holes in the concrete
+where chunks have been blown or ripped out.  It appears this hallway has seen
+combat lately, even showing signs of blood that wasn't completely cleaned up
+staining parts of the walls, floor, and ceiling.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1892 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1894 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1891 0 0 0 0 0 0 0 0
+S
+#1896
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Area Hallway@n~
+ @WThis concrete hallway has been painted red except for the titanium plating
+that makes up its floor tiles.  White lights illuminate the room showing off
+burned or scorched marks on the titanium below and holes in the concrete where
+chunks have been blown or ripped out.  It appears this hallway has seen combat
+lately.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1897 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1888 0 0 0 0 0 0 0 0
+S
+#1897
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DRed Testing Area Hallway@n~
+ @WThis concrete hallway has been painted red except for the titanium plating
+that makes up its floor tiles.  White lights illuminate the room showing off
+burned or scorched marks on the titanium below and holes in the concrete where
+chunks have been blown or ripped out.  It appears this hallway has seen combat
+lately.  @n
+~
+18 u 0 0 0 0
+D0
+~
+~
+0 0 1845 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1896 0 0 0 0 0 0 0 0
+S
+#1898
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DEnd of Hallway@n~
+ @WThis area of the hallway has seen no combat.  Its concrete walls are grey and
+unpainted, and no damage can be found anywhere.  To the south a massive steal
+door can be seen.  @n
+~
+18 u 0 0 0 0
+D0
+~
+hatch~
+1 1801 1886 0 0 0 0 0 0 0 0
+D2
+~
+door~
+1 1800 1899 0 0 0 0 0 0 0 0
+S
+#1899
+@rG@Re@Dr@Wo@w's @rL@Ra@Wb@w: @DCell's Chamber@n~
+ @WA giant cylinder of green liquid can be seen sitting at the center of this
+concrete area.  The cylinder has a single organism living inside it, growing
+slowly but surely.  Right now the organism is about the size of a fist.  
+Security devices have been built around the cylinder to protect it.  @n
+~
+18 u 0 0 0 0
+D0
+~
+door~
+1 1800 1898 0 0 0 0 0 0 0 0
+S
+$~

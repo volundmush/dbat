@@ -1,0 +1,25 @@
+4
+liqe
+18
+liquefy explode $*
+1
+2
+gw
+15
+grapple $* wrap
+1
+3
+tkg
+28
+throw knife $*;get all.knife
+1
+2
+tk
+14
+throw knife $*
+1
+3
+gak
+13
+get all.knife
+0

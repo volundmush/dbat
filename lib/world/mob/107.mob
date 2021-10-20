@@ -1,0 +1,43 @@
+#10700
+muskrat~
+@yA muskrat@n~
+A muskrat wanders the area searching for food.
+~
+   Rippling with a soft, brown fur, this creature waddles the area in search of
+food. It's claws are long and sharp, with incisors revealed from the mouth of
+equal length and sharpness. It's beady black eyes peer at anything that moves.
+~
+d 0 0 0 l 0 0 0 0 E
+5 20 9 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 3
+Str: 10
+Dex: 11
+Int: 10
+Wis: 10
+Con: 11
+Cha: 11
+E
+#10701
+worrt frog creature~
+@DA @cW@Dorrt@n~
+@DA frog-like creature sits here, looking for food@n
+~
+   Quite a hideous-looking creature, It has fleshy spines that protrude from
+it's back, and large eyes that sit atop it's head. The creature's hands have
+large, bony fingers with webbing at the base. It has a relatively large body,
+and a mouth that stretches across it's form.
+~
+d 0 0 0 0 0 0 0 0 E
+5 20 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Str: 12
+Dex: 14
+Int: 12
+Wis: 12
+Con: 14
+Cha: 14
+E
+$

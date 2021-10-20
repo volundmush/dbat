@@ -1,0 +1,723 @@
+#17900
+Alan~
+Alan~
+Alan the escaped elf is standing here.
+~
+   Alan is wearing a green and red costume and looks like the average small
+human boy, with the exception of pointy ears.
+~
+bcds 0 0 0 l 0 0 0 0 E
+5 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 5
+Dex: 8
+Int: 18
+Wis: 11
+Con: 9
+Cha: 17
+E
+T 17908
+T 17905
+T 17997
+#17901
+Susie~
+Susie~
+Susie the elf, stands here.
+~
+   Susie wears a red and green costume and appears much like the average female
+human child, with the exception of pointy ears.
+~
+bcds 0 0 0 l 0 0 0 0 E
+5 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 2
+Size: 3
+Str: 11
+Dex: 5
+Int: 20
+Wis: 9
+Con: 16
+Cha: 18
+E
+T 17906
+T 17907
+T 17913
+T 17997
+#17902
+Snow Wolf~
+a Snow Wolf~
+A Snow Wolf stands here, howling.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 0 E
+10 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 4
+Str: 11
+Dex: 16
+Int: 5
+Wis: 8
+Con: 14
+Cha: 9
+E
+#17903
+Polar Bear~
+a Polar Bear~
+A Polar Bear is hunting here.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 0 E
+11 0 10 0d4+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 5
+Str: 13
+Dex: 12
+Int: 7
+Wis: 8
+Con: 12
+Cha: 9
+E
+#17904
+Elf Miner~
+an Elf Miner~
+An Elf Miner is working hard here.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 0 E
+12 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Size: 3
+Str: 19
+Dex: 15
+Int: 17
+Wis: 9
+Con: 9
+Cha: 20
+E
+T 17901
+#17905
+Elf Miner~
+an Elf Miner~
+An Elf Miner is cartings coal around here.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 0 E
+16 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 2
+Size: 3
+Str: 11
+Dex: 11
+Int: 16
+Wis: 13
+Con: 18
+Cha: 19
+E
+T 17901
+#17906
+Rudolph~
+Rudolph~
+Rudolph the red nosed reindeer is standing here.
+~
+@D @n
+~
+dm 0 0 0 l 0 0 0 0 E
+19 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 4
+Str: 12
+Dex: 20
+Int: 8
+Wis: 6
+Con: 19
+Cha: 11
+E
+T 17903
+#17907
+Dancer~
+Dancer~
+Dancer stands here, keeping a watchful eye over the elves.
+~
+@D @n
+~
+dm 0 0 0 l 0 0 0 0 E
+18 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 2
+Size: 4
+Str: 9
+Dex: 20
+Int: 7
+Wis: 7
+Con: 15
+Cha: 16
+E
+T 17903
+#17908
+Vixen~
+Vixen~
+Vixen patrols the area here.
+~
+@D @n
+~
+dm 0 0 0 l 0 0 0 0 E
+19 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 2
+Size: 4
+Str: 16
+Dex: 14
+Int: 7
+Wis: 7
+Con: 19
+Cha: 19
+E
+T 17903
+#17909
+Cupid~
+Cupid~
+Cupid stands guard here.
+~
+@D @n
+~
+dm 0 0 0 l 0 0 0 0 E
+22 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 4
+Str: 16
+Dex: 21
+Int: 6
+Wis: 6
+Con: 20
+Cha: 17
+E
+T 17903
+#17910
+Dasher~
+Dasher~
+Dasher is stamping his hooves provocatively, here.
+~
+@D @n
+~
+dm 0 0 0 l 0 0 0 0 E
+25 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 4
+Str: 25
+Dex: 20
+Int: 5
+Wis: 5
+Con: 23
+Cha: 24
+E
+T 17903
+#17911
+Prancer~
+Prancer~
+Prancer is standing guard here.
+~
+@D @n
+~
+dm 0 0 0 l 0 0 0 0 E
+26 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 25
+Dex: 14
+Int: 21
+Wis: 22
+Con: 15
+Cha: 17
+E
+T 17903
+#17912
+Comet~
+Comet~
+Comet patrols the area, keeping an eye on the elves.
+~
+@D @n
+~
+dm 0 0 0 l 0 0 0 0 E
+27 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 4
+Str: 17
+Dex: 26
+Int: 6
+Wis: 6
+Con: 24
+Cha: 25
+E
+T 17903
+#17913
+Donner~
+Donner~
+Donner keeps a keen eye over the slaves here.
+~
+@D @n
+~
+dm 0 0 0 l 0 0 0 0 E
+24 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 2
+Size: 4
+Str: 21
+Dex: 23
+Int: 8
+Wis: 5
+Con: 20
+Cha: 21
+E
+T 17903
+#17914
+Blitzen~
+Blitzen~
+Blitzen stands guard here, snorting viciously on occasion.
+~
+@D @n
+~
+dm 0 0 0 l 0 0 0 0 E
+28 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 4
+Str: 15
+Dex: 22
+Int: 8
+Wis: 7
+Con: 22
+Cha: 28
+E
+T 17903
+#17915
+Elf Worker~
+an Elf Worker~
+An Elf Worker stands here, building a weapon.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 0 E
+14 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Size: 3
+Str: 15
+Dex: 9
+Int: 17
+Wis: 18
+Con: 20
+Cha: 18
+E
+T 17902
+#17916
+Elf Worker~
+an Elf Worker~
+An Elf Worker is cleaning up a mess here.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 0 E
+14 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 2
+Size: 3
+Str: 7
+Dex: 10
+Int: 19
+Wis: 11
+Con: 19
+Cha: 18
+E
+T 17902
+#17917
+Frost Dragon~
+@WF@wr@Do@cs@Ct @RD@rr@Wa@Dg@Ro@rn@n~
+A mighty Frost Dragon roars loudly here.
+~
+@D @n
+~
+bdpr 0 0 0 lx 0 0 0 0 E
+20 0 9 0d8+0 0d0+0
+0 0 21 4
+8 8 1
+Str: 11
+Dex: 12
+Int: 11
+Wis: 18
+Con: 11
+Cha: 12
+E
+#17918
+Santa Claws~
+@RS@ra@Wn@rt@Ra @DC@Wl@wa@Ww@Ds@n~
+Santa Claws stands here in a menacing pose.
+~
+   This human stands at just under 6 feet tall and has a large belly. A flowing
+white beard hangs from the lower half of his rosey cheeked face. Santa Claws is
+adorned in a red suit with white trim and a set of sharp looking metallic claws
+for each hand.
+~
+bdpr 0 0 0 l 0 0 0 1000 E
+105 0 10 0d8+0 0d0+0
+0 0 0 1
+8 8 1
+Str: 79
+Dex: 57
+Int: 87
+Wis: 100
+Con: 90
+Cha: 60
+E
+T 17900
+T 17910
+T 17911
+#17919
+Jack Frost~
+@CJ@wa@Wc@Ck @CF@cr@Do@cs@Ct@n~
+Jack Frost is here, cackling maniacly.
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 0 E
+40 0 10 0d0+0 0d0+0
+0 0 2 28
+8 8 1
+Str: 39
+Dex: 24
+Int: 23
+Wis: 34
+Con: 22
+Cha: 31
+E
+T 17914
+#17920
+Elf Shopkeeper~
+@WElf Shopkeeper@n~
+An Elf Shopkeeper is peddling some wares here.
+~
+@D @n
+~
+bds 0 0 0 l 0 0 0 0 E
+100 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Size: 3
+Str: 64
+Dex: 97
+Int: 90
+Wis: 62
+Con: 91
+Cha: 91
+E
+#17950
+Dragonbowl Merchandise Seller~
+@RD@rr@ga@Gg@ro@Rn@Db@wo@Ww@Dl @WMerchandise Seller@n~
+A man selling Dragonbowl merchandise stands here.
+~
+@D @n
+~
+bds 0 0 0 l 0 0 0 0 E
+100 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 90
+Dex: 69
+Int: 97
+Wis: 87
+Con: 73
+Cha: 51
+E
+#17960
+Cadbury Bunny~
+@MC@mad@Mb@mu@Mr@my @MB@mu@Mnn@my@w~
+The Cadbury Bunny stands here
+~
+@n@
+~
+bds 0 0 0 l 0 0 0 0 E
+100 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 5
+Str: 97
+Dex: 93
+Int: 65
+Wis: 39
+Con: 100
+Cha: 86
+E
+T 17950
+#17961
+Rocky~
+@RRocky@w~
+@RRocky @wstands here smacking his fists.
+~
+@n@
+~
+bdlp 0 0 0 il iku 0 0 0 E
+50 0 10 0d8+0 0d0+0
+0 0 1 4
+8 8 1
+Str: 40
+Dex: 43
+Int: 36
+Wis: 27
+Con: 37
+Cha: 38
+E
+T 17952
+#17962
+Chocolate~
+@BChocolate@w~
+@BChocolate @wis standing here with his arms crossed.
+~
+@n@
+~
+bdl 0 0 0 l 0 0 0 0 E
+28 0 10 0d8+0 0d0+0
+0 0 0 4
+8 8 1
+Str: 14
+Dex: 26
+Int: 16
+Wis: 27
+Con: 21
+Cha: 16
+E
+#17963
+Marshmellow~
+@GMarshmallow@w~
+@GMarshmallow @wis standing here.
+~
+@n@
+~
+bdl 0 0 0 l 0 0 0 0 E
+26 0 10 0d8+0 0d0+0
+0 0 0 4
+8 8 1
+Str: 18
+Dex: 20
+Int: 17
+Wis: 15
+Con: 18
+Cha: 18
+E
+#17964
+Nuts~
+@YNuts@w~
+@YNuts @wis standing here scratching himself crazily.
+~
+@n@
+~
+bdl 0 0 0 l 0 0 0 0 E
+24 0 10 0d8+0 0d0+0
+0 0 0 4
+8 8 1
+Str: 13
+Dex: 13
+Int: 16
+Wis: 19
+Con: 12
+Cha: 23
+E
+#17965
+Devil Turkey~
+Devil Turkey~
+A Large Hell Turkey is here, the flames of hell cooking it from the inside out.
+~
+A Large Turkey
+~
+df 0 0 0 l 0 0 0 0 E
+50 0 10 0d8+0 0d0+0
+0 0 10 9
+8 8 1
+Str: 43
+Dex: 46
+Int: 28
+Wis: 43
+Con: 38
+Cha: 37
+E
+#17966
+Gobbler~
+Gobbler~
+Gobbler the Giant Hell Turkey stands here.
+~
+It looks unfinished.
+~
+defnpr 0 0 0 l 0 0 0 0 E
+105 0 10 0d8+0 0d0+0
+0 0 10 9
+8 8 1
+Str: 95
+Dex: 71
+Int: 98
+Wis: 90
+Con: 79
+Cha: 68
+E
+#17967
+Weredracopire~
+@YW@ye@Wr@we@gd@Gr@Da@Gc@go@Rp@rir@Re@n~
+A legendary Weredracopire is standing here, looking for prey.
+~
+   The Weredracopire is a creature of legend, most think only to inhabit the
+story books read only on Halloween. It is a fiendish creature, part werewolf,
+part dragon and part vampire. How it came to be is unknown but it should be
+avoided at all costs.
+~
+d 0 0 0 l 0 0 0 0 E
+125 0 10 0d0+0 0d0+0
+0 0 17 28
+8 8 1
+Size: 6
+Str: 100
+Dex: 70
+Int: 79
+Wis: 76
+Con: 100
+Cha: 73
+E
+#17968
+Headless Horseman~
+Headless Horseman~
+The Headless Horseman is atop his horse, here.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 0 E
+29 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 16
+Dex: 27
+Int: 23
+Wis: 19
+Con: 24
+Cha: 15
+E
+#17969
+Golden Oozaru~
+@YG@yo@Dl@wd@ye@Yn @RO@ro@Wz@wa@Rr@ru@n~
+A golden Oozaru is rampaging here.
+~
+@D @n
+~
+df 0 0 0 l 0 0 0 0 E
+70 0 10 0d0+0 0d0+0
+0 0 1 28
+8 8 1
+Size: 7
+Str: 46
+Dex: 42
+Int: 52
+Wis: 62
+Con: 50
+Cha: 68
+E
+#17970
+Lord Slug~
+@RL@wo@Wr@rd @YS@gl@Gu@yg@n~
+Lord Slug is here, looking to expand his holdings.
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 0 E
+45 0 10 0d0+0 0d0+0
+0 0 4 28
+8 8 1
+Size: 6
+Str: 28
+Dex: 27
+Int: 26
+Wis: 42
+Con: 24
+Cha: 43
+E
+#17980
+Void Minion~
+@DVoid Minion@n~
+A void minion stands here, staring coldly.
+~
+@D @n
+~
+df 0 0 0 l 0 0 0 0 E
+30 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 0
+Str: 25
+Dex: 26
+Int: 17
+Wis: 30
+Con: 28
+Cha: 28
+E
+#17981
+Void Beast~
+@DVoid Beast@n~
+A void beast glowers here, drooling.
+~
+@D @n
+~
+df 0 0 0 l 0 0 0 0 E
+60 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 0
+Size: 6
+Str: 46
+Dex: 55
+Int: 7
+Wis: 13
+Con: 40
+Cha: 48
+E
+#17982
+Void Stalker~
+@DVoid Stalker@n~
+A void stalker is hunting prey here
+~
+@D @n
+~
+df 0 0 0 l 0 0 0 0 E
+100 0 10 0d0+0 0d0+0
+0 0 10 28
+8 8 0
+Str: 74
+Dex: 55
+Int: 88
+Wis: 66
+Con: 85
+Cha: 52
+E
+#17983
+Void Titan~
+@DVoid Titan@n~
+A void stalker is hunting prey here
+~
+@D @n
+~
+df 0 0 0 l 0 0 0 0 E
+119 0 10 0d0+0 0d0+0
+0 0 22 28
+8 8 0
+Size: 8
+Str: 75
+Dex: 77
+Int: 100
+Wis: 62
+Con: 60
+Cha: 100
+E
+$

@@ -1,0 +1,28 @@
+CircleMUD v3.0 Shop File~
+#13549~
+54
+4238
+73
+-1
+0.50
+0.20
+17
+-1
+%s Sorry, I don't stock that item.~
+%s You don't seem to have that.~
+%s I don't trade in such items.~
+%s I can't afford that!~
+%s You are too poor!~
+%s That'll be %d zenni, thanks.~
+%s I'll give you %d zenni for that.~
+0
+0
+13546
+0 0 16384 0
+13549
+-1
+0
+28
+0
+0
+$~

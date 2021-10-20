@@ -1,0 +1,27 @@
+@Version: 2
+#117
+Gmork~
+@wNamek@c: Crystalline Cave@n~
+11700 11799 10 2 d 0 0 0 0 0
+M 0 11707 5 11751 5 17 	(@BS@ba@Wp@Dp@wh@Wi@br@Be @wG@Do@Wl@De@wm@n)
+G 1 11700 100 -1 -1 80 	(@cS@Ca@wp@Wp@Dh@ci@Cr@we @cC@Cr@wy@Dst@ca@Cl@n)
+M 0 11706 5 11751 5 17 	(@WMini @BS@ba@Wp@Dp@wh@Wi@br@Be @wG@Do@Wl@De@wm@n)
+G 1 11700 100 -1 -1 80 	(@cS@Ca@wp@Wp@Dh@ci@Cr@we @cC@Cr@wy@Dst@ca@Cl@n)
+M 0 11704 5 11739 5 16 	(@WMini @WQ@wu@War@wt@Wz @wG@Do@Wl@De@wm@n)
+G 1 11700 100 -1 -1 80 	(@cS@Ca@wp@Wp@Dh@ci@Cr@we @cC@Cr@wy@Dst@ca@Cl@n)
+M 0 11705 5 11739 5 16 	(@WQ@wu@War@wt@Wz @wG@Do@Wl@De@wm@n)
+G 1 11700 100 -1 -1 80 	(@cS@Ca@wp@Wp@Dh@ci@Cr@we @cC@Cr@wy@Dst@ca@Cl@n)
+M 0 11702 5 11720 5 16 	(@WMini @wS@Dt@Wo@Dn@we @DG@wo@Wl@we@Dm@n)
+G 1 11700 100 -1 -1 80 	(@cS@Ca@wp@Wp@Dh@ci@Cr@we @cC@Cr@wy@Dst@ca@Cl@n)
+M 0 11703 5 11720 5 16 	(@wS@Dt@Wo@Dn@we @DG@wo@Wl@we@Dm@n)
+G 1 11700 100 -1 -1 80 	(@cS@Ca@wp@Wp@Dh@ci@Cr@we @cC@Cr@wy@Dst@ca@Cl@n)
+M 0 11700 5 11703 5 15 	(@WMini @wA@Ds@Wh@De@wn @DG@wo@Wl@we@Dm@n)
+G 1 11700 100 -1 -1 80 	(@cS@Ca@wp@Wp@Dh@ci@Cr@we @cC@Cr@wy@Dst@ca@Cl@n)
+M 0 11701 5 11703 5 15 	(@wA@Ds@Wh@De@wn @DG@wo@Wl@we@Dm@n)
+G 1 11700 100 -1 -1 80 	(@cS@Ca@wp@Wp@Dh@ci@Cr@we @cC@Cr@wy@Dst@ca@Cl@n)
+M 0 11708 5 11772 5 17 	(@WMini @GE@gm@we@Wr@wa@gl@Gd @wG@Do@Wl@De@wm@n)
+G 1 11700 100 -1 -1 80 	(@cS@Ca@wp@Wp@Dh@ci@Cr@we @cC@Cr@wy@Dst@ca@Cl@n)
+M 0 11709 5 11772 5 17 	(@GE@gm@we@Wr@wa@gl@Gd @wG@Do@Wl@De@wm@n)
+G 1 11700 100 -1 -1 80 	(@cS@Ca@wp@Wp@Dh@ci@Cr@we @cC@Cr@wy@Dst@ca@Cl@n)
+S
+$

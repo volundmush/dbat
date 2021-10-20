@@ -1,0 +1,372 @@
+#8800
+Well wisher~
+@cW@Cel@cl@n-@mw@Mi@Wsh@Me@mr@n~
+A well-wisher holding a reef of white flowers is here.
+~
+@D @n
+~
+cd 0 0 0 l 0 0 0 10 E
+6 0 10 0d8+0 0d0+0
+0 0 3 7
+8 8 1
+Str: 6
+Dex: 18
+Int: 15
+Wis: 14
+Con: 18
+Cha: 16
+E
+#8801
+Well wisher~
+@cW@Cel@cl@n-@mw@Mi@Wsh@Me@mr@n~
+A well-wisher holding a boquet of flowers is here
+~
+@D @n
+~
+cd 0 0 0 l 0 0 0 10 E
+6 0 10 0d8+0 0d0+0
+0 0 3 7
+8 8 2
+Str: 7
+Dex: 15
+Int: 9
+Wis: 12
+Con: 9
+Cha: 14
+E
+#8802
+Grieving male~
+@CG@cr@yi@Yev@yi@cn@Cg @Rm@Wa@rl@Re@n~
+A male Kontasu is here grieving.
+~
+@D @n
+~
+cd 0 0 0 l 0 0 0 10 E
+7 0 10 0d8+0 0d0+0
+0 0 3 7
+8 8 1
+Str: 8
+Dex: 14
+Int: 7
+Wis: 10
+Con: 5
+Cha: 7
+E
+#8803
+Grieving woman~
+@CG@cr@yi@Yev@yi@cn@Cg @mw@Mo@Wm@Ma@mn@n~
+A female konatsu is here grieving.
+~
+@D @n
+~
+cd 0 0 0 l 0 0 0 10 E
+7 0 10 0d8+0 0d0+0
+0 0 3 7
+8 8 2
+Str: 7
+Dex: 18
+Int: 19
+Wis: 19
+Con: 19
+Cha: 6
+E
+#8804
+Oroist Guard~
+@BO@br@wo@Wi@bs@Bt @gG@Gu@Wa@Gr@gd@n~
+An Oroist guard is here, patrolling.
+~
+@D @n
+~
+cd 0 0 0 l 0 0 0 20 E
+8 0 10 0d8+0 0d0+0
+0 0 3 7
+8 8 1
+Str: 9
+Dex: 20
+Int: 10
+Wis: 18
+Con: 12
+Cha: 7
+E
+#8805
+Oroist Guard~
+@BO@br@wo@Wi@bs@Bt @gG@Gu@Wa@Gr@gd@n~
+An Oroist guard is here, keeping an eye on proceedings.
+~
+@D @n
+~
+cd 0 0 0 l 0 0 0 20 E
+8 0 10 0d8+0 0d0+0
+0 0 3 7
+8 8 2
+Str: 10
+Dex: 14
+Int: 15
+Wis: 6
+Con: 8
+Cha: 17
+E
+#8806
+Grieving child~
+@CG@cr@yi@Yev@yi@cn@Cg @yc@Yh@yi@Yl@yd@n~
+A child wiping a tear from his eye with a hankerchief is here.
+~
+@D @n
+~
+cd 0 0 0 l 0 0 0 10 E
+5 0 10 0d8+0 0d0+0
+0 0 3 7
+8 8 1
+Size: 3
+Str: 7
+Dex: 20
+Int: 10
+Wis: 20
+Con: 15
+Cha: 17
+E
+#8807
+Grieving child~
+@CG@cr@yi@Yev@yi@cn@Cg @yc@Yh@yi@Yl@yd@n~
+A little child sobs softly as she walks abouts here.
+~
+@D @n
+~
+cd 0 0 0 l 0 0 0 10 E
+5 0 10 0d8+0 0d0+0
+0 0 3 7
+8 8 2
+Size: 3
+Str: 10
+Dex: 13
+Int: 19
+Wis: 14
+Con: 14
+Cha: 17
+E
+#8810
+Ordinator~
+an @YO@yr@Dd@Yi@yn@Ya@Dt@yo@Yr@n~
+An Ordinator is preparing for battle here.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 0 E
+70 0 10 0d0+0 0d0+0
+0 0 3 28
+8 8 1
+Str: 57
+Dex: 52
+Int: 68
+Wis: 50
+Con: 43
+Cha: 43
+E
+#8811
+Grand Ordinator~
+@CG@wr@ca@wn@Cd @YO@yr@Dd@Yi@yn@Ya@Dt@yo@Yr@n~
+A grand ordinator is surveying the battlefield here.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 0 E
+75 0 10 0d0+0 0d0+0
+0 0 3 28
+8 8 1
+Str: 56
+Dex: 55
+Int: 70
+Wis: 73
+Con: 40
+Cha: 67
+E
+#8812
+Dres Militia~
+@RD@yr@Ye@Rs @DM@Wi@wl@Di@wt@Wi@Da@n~
+An ill-equipped Dres Militiaman is here.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 0 E
+71 0 10 0d0+0 0d0+0
+0 0 3 28
+8 8 1
+Str: 39
+Dex: 53
+Int: 58
+Wis: 55
+Con: 63
+Cha: 70
+E
+#8813
+Mercenary~
+a @BM@be@Wr@cc@Ce@cn@Wa@br@By@n~
+A mercenary fighting for House Taesal is here.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 0 E
+72 0 10 0d0+0 0d0+0
+0 0 3 28
+8 8 1
+Str: 46
+Dex: 68
+Int: 48
+Wis: 57
+Con: 53
+Cha: 60
+E
+#8814
+Oroist Priestess~
+@BO@br@wo@Wi@bs@Bt @MP@mr@Wi@me@Ms@mt@We@ms@Ms@n~
+A priestess of House Oroist is here, looking for wounded soldiers to tend to.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 0 E
+73 0 10 0d0+0 0d0+0
+0 0 3 28
+8 8 2
+Str: 39
+Dex: 71
+Int: 60
+Wis: 61
+Con: 56
+Cha: 70
+E
+#8815
+Sereg-Vanma Soldier~
+@RS@re@Rr@re@Rg@D-@cV@Ca@wn@Wm@wa @DSoldier@n~
+A soldier of House Sereg-Vanma is here, searching for enemies.
+~
+@D @n
+~
+df 0 0 0 l 0 0 0 0 E
+74 0 10 0d0+0 0d0+0
+0 0 3 28
+8 8 1
+Str: 37
+Dex: 73
+Int: 42
+Wis: 47
+Con: 46
+Cha: 67
+E
+#8816
+Truffle Warrior~
+@GT@gr@Wu@wf@Df@gl@Ge @RW@ra@Dr@wr@Wi@ro@Rr@n~
+A truffle warrior is here, preparing to fire at the enemy.
+~
+@D @n
+~
+df 0 0 0 l 0 0 0 0 E
+79 0 10 0d0+0 0d0+0
+0 0 13 28
+8 8 1
+Str: 63
+Dex: 70
+Int: 67
+Wis: 53
+Con: 79
+Cha: 52
+E
+#8817
+Eltharion~
+@GE@wl@gt@Wh@Da@Wr@gi@wo@Gn@n~
+Eltharion stands here, in a calm demeanour.
+~
+@WEltharion is a hero of House Indoril, the famed blind swordsman.@n
+~
+d 0 0 0 l 0 0 0 0 E
+82 0 10 0d0+0 0d0+0
+0 0 3 28
+8 8 1
+Str: 45
+Dex: 69
+Int: 53
+Wis: 47
+Con: 45
+Cha: 49
+E
+#8818
+Taloc~
+@rT@Da@Rl@Do@rc@n~
+Taloc is here, looking for enemies to kill.
+~
+   @WTaloc is a giant of a man, standing head and shoulders above most Konatsus.
+Once a farm hand he has risen to fame as a hero of House Dres. @n
+~
+d 0 0 0 l 0 0 0 0 E
+83 0 10 0d0+0 0d0+0
+0 0 3 28
+8 8 1
+Size: 5
+Str: 41
+Dex: 77
+Int: 76
+Wis: 63
+Con: 46
+Cha: 59
+E
+#8819
+Meridius~
+@MM@me@wr@Wid@wi@mu@Ms@n~
+Meridius is sneaking about here.
+~
+   @WMeridius is a famed female assassin, who although not actually a member of
+House Taesal, has been considered a hero of their house. @n
+~
+d 0 0 0 l 0 0 0 0 E
+81 0 10 0d0+0 0d0+0
+0 0 3 28
+8 8 2
+Str: 70
+Dex: 80
+Int: 77
+Wis: 80
+Con: 64
+Cha: 57
+E
+#8820
+Pontius~
+@BP@bo@wn@Wt@wi@bu@Bs@n~
+Pontius the Wise stands here, preaching.
+~
+   @WPontius the Wise is the current High Priest of House Oroist and has become a
+respected hero in this war. Both for his skill with his specially crafted mace
+and ability to make even the most cowardly man into a fearless warrior with
+words alone. 
+~
+d 0 0 0 l 0 0 0 0 E
+80 0 10 0d0+0 0d0+0
+0 0 3 28
+8 8 1
+Str: 59
+Dex: 53
+Int: 75
+Wis: 74
+Con: 70
+Cha: 80
+E
+#8821
+Hirudegarn~
+@gH@Gi@yr@Yu@Dd@We@yg@Ya@Gr@gn@n~
+The towering beast Hirudegarn rampages here.
+~
+   @WHirudegarn, a massive almost insectoid like creature, is a creation of the
+dark magics of Sereg-Vanma and Truffle Technology. Since it's 'birth'
+Hirudegarn has slaughted all those who have opposed it with relative ease. @n
+~
+dfvwxyzA 0 0 0 l 0 0 0 0 E
+90 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 0
+Size: 8
+Str: 64
+Dex: 61
+Int: 27
+Wis: 55
+Con: 65
+Cha: 49
+E
+$

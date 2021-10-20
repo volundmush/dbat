@@ -1,0 +1,356 @@
+#19500
+Bulma~
+Bulma~
+Bulma is tinkering with something here
+~
+   @WThis blue haired girl is wearing a lab coat over a very stylish outfit. 
+She has a magnifying lense built into a headpiece she is wearing as she works
+on some piece of equipment. @n
+~
+bdvwxyA 0 0 0 0 0 0 0 0 E
+4 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 2
+Str: 6
+Dex: 16
+Int: 14
+Wis: 8
+Con: 14
+Cha: 7
+E
+T 19506
+T 19507
+#19501
+Briefs~
+Dr. Briefs~
+Dr. Briefs is working on something here
+~
+@WThis old gentleman with a moustache and a bent cigarette in his mouth is
+studying some sort of invention.  On his shoulder a miniature black cat can be
+seen hanging on.@n
+~
+bdvwxyA 0 0 0 0 0 0 0 0 E
+4 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 11
+Dex: 7
+Int: 6
+Wis: 15
+Con: 6
+Cha: 12
+E
+T 19504
+T 19505
+#19502
+Mrs. Briefs~
+Mrs. Briefs~
+Mrs. Briefs is drinking tea here
+~
+   @WThis blond haired woman is wearing a striped tube-top and blue pants with
+black shoes. She has pearl earrings in her ears and is perpetually smiling. @n
+~
+bdvwxy 0 0 0 0 0 0 0 0 E
+3 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 2
+Str: 18
+Dex: 7
+Int: 10
+Wis: 13
+Con: 15
+Cha: 16
+E
+T 19508
+T 19509
+T 19510
+#19503
+Receptionist~
+a Receptionist~
+A receptionist is sitting at a desk here
+~
+It looks unfinished.
+~
+bdvwxy 0 0 0 0 0 0 0 0 E
+4 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 11
+Dex: 7
+Int: 9
+Wis: 16
+Con: 7
+Cha: 6
+E
+T 19501
+T 19502
+T 19503
+#19504
+Lion~
+a lion~
+A lion is sitting here
+~
+@W The king of the jungle is sitting here. This lion has been partially tamed so that it may live in the preserve.
+~
+bd 0 0 0 l 0 0 0 0 E
+20 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Str: 18
+Dex: 18
+Int: 8
+Wis: 5
+Con: 20
+Cha: 11
+E
+#19505
+Ticket Seller~
+the Ticket Seller~
+The ticket seller is standing inside a booth here
+~
+@WThis ticket seller works officially for the martial arts stadium.@n
+~
+bds 0 0 0 0 0 0 0 0 E
+4 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 11
+Dex: 5
+Int: 8
+Wis: 9
+Con: 12
+Cha: 8
+E
+T 19511
+T 19512
+T 19513
+T 19517
+T 19527
+#19506
+Tournament Announcer~
+Tournament Announcer~
+A tournament announcer is standing here with a microphone
+~
+@WThis loud outspoken man is the announce for the tournament.
+~
+bdsvwxy 0 0 0 0 0 0 0 0 E
+1 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 5
+Dex: 13
+Int: 6
+Wis: 10
+Con: 13
+Cha: 5
+E
+T 19518
+T 19519
+#19507
+Boomer~
+Boomer~
+Boomer the wrestler is confidently standing here
+~
+@WThis big burly man is a professional wrestler who has qualified for the
+tournament.@n
+~
+df 0 0 0 0 0 0 0 0 E
+15 0 10 0d4+0 0d0+0
+0 0 0 0
+8 8 1
+Str: 16
+Dex: 10
+Int: 10
+Wis: 11
+Con: 11
+Cha: 14
+E
+T 19516
+T 19520
+#19508
+Valeria~
+Valeria~
+Valeria is standing here looking determined
+~
+@WThis beautiful woman looks pretty strong. She isn't all about her looks.@n
+~
+df 0 0 0 0 0 0 0 0 E
+18 0 10 0d6+0 0d0+0
+0 0 0 2
+8 8 2
+Str: 12
+Dex: 9
+Int: 18
+Wis: 10
+Con: 14
+Cha: 10
+E
+T 19521
+T 19524
+#19509
+Rohxa~
+Rohxa~
+Rohxa is standing here looking mysterious
+~
+@WThis old man has a long grey beared and completely black garb on. He looks to be quite serious all the time.@n
+~
+d 0 0 0 0 0 0 0 0 E
+30 0 10 0d4+0 0d0+0
+0 0 0 0
+8 8 1
+Str: 18
+Dex: 26
+Int: 27
+Wis: 16
+Con: 27
+Cha: 27
+E
+T 19522
+#19510
+Vox~
+Vox~
+Vox is standing here flexing his muscles
+~
+@WThis brawny man appears to be quite an acomplished martial artist.@n
+~
+d 0 0 0 0 0 0 0 0 E
+40 0 10 0d6+0 0d0+0
+0 0 0 2
+8 8 1
+Str: 29
+Dex: 27
+Int: 33
+Wis: 37
+Con: 35
+Cha: 40
+E
+T 19523
+#19511
+Infernion Clerk~
+the Infernion Clerk~
+The Infernion clerk is standing here
+~
+   @WThis man is well built physically and is even wearing some of the store's
+gear. @n
+~
+bdsvwxy 0 0 0 0 0 0 0 0 E
+100 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 79
+Dex: 75
+Int: 52
+Wis: 54
+Con: 98
+Cha: 85
+E
+#19512
+Police Officer~
+Police Officer~
+A police officer is walking here
+~
+@WThis officer works for the WPD, and seems to take his job seriously.
+~
+d 0 0 0 0 0 0 0 0 E
+8 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 19
+Dex: 7
+Int: 17
+Wis: 14
+Con: 17
+Cha: 8
+E
+#19513
+Old Lady~
+Little Old Lady~
+A little old lady is standing here
+~
+It looks unfinished.
+@WThis old lady seems to be out shopping.
+~
+d 0 0 0 0 0 0 0 0 E
+2 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 6
+Dex: 11
+Int: 18
+Wis: 15
+Con: 17
+Cha: 5
+E
+#19514
+Street Cleaner~
+a Street Cleaner~
+A street cleaner is cleaning the street here
+~
+@WThis man appears to be paid to keep the streets clean.@n
+~
+d 0 0 0 0 0 0 0 0 E
+8 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 5
+Dex: 19
+Int: 9
+Wis: 13
+Con: 11
+Cha: 8
+E
+#19515
+Street Performer~
+a Street Performer~
+A street performer is dancing here
+~
+@WThis young man appears to make a living by money given for watching him perform.@n
+~
+d 0 0 0 0 0 0 0 0 E
+5 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 18
+Dex: 12
+Int: 15
+Wis: 10
+Con: 7
+Cha: 20
+E
+#19516
+Male Pedestrian~
+a Male Pedestrian~
+A male pedestrian is standing here
+~
+@WThis pedestrian seems to be traveling somewhere.@n
+~
+d 0 0 0 0 0 0 0 0 E
+4 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 14
+Dex: 11
+Int: 12
+Wis: 12
+Con: 10
+Cha: 15
+E
+#19517
+Female Pedestrian~
+a Female Pedestrian~
+A female pedestrian is standing here
+~
+@WThis pedestrian seems to be traveling somewhere.@n
+~
+d 0 0 0 0 0 0 0 0 E
+4 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 2
+Str: 6
+Dex: 5
+Int: 5
+Wis: 12
+Con: 16
+Cha: 6
+E
+$

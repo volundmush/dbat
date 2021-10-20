@@ -1,0 +1,2140 @@
+#7300
+@yOutside A Cave@n~
+   @yThis small ledge extends out from the entrance of the Twilight Caverns. A
+large hole in the cliff wall leads into a dimly lit but sparkling cave. Below
+the ledge yellow clouds can be seen floating slowly by in massive quantities.
+Far below those clouds you can see parts of what appears to be a long winding
+road suspended in the sky. Maybe one could @Ghop@y down to that road if they were
+crazy. @n
+
+@WA @Rsign@W is posted to a rock here.@n
+~
+73 cA 0 0 0 5
+D0
+~
+~
+0 0 7301 0 0 0 0 0 0 0 0
+E
+sign~
+@y ---------------------------
+@y|         @RWarning!          @y|
+@y|                           @y|
+@y|   @RDue to the deaths of    @y|
+@y|   @Rthe 3rd Ogre Mining     @y|
+@y|   @RAuxilary this mine is   @y|
+@y|   @Rofficially closed!      @y|
+@y|                           @y|
+@y|   @RAn investigation is     @y|
+@y|   @Rcurrently PENDING!!!    @y|
+@y ---------------------------
+@y             | |
+@y             | |
+~
+S
+T 7300
+#7301
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DExpansive Chamber@n~
+   @mThis dimly lit chamber appears to be made out of a unique type of rock that
+is only found in these floating cliffs. This dark purple rock has a unique way
+of catching any stray rays of light that hit its edges and reflecting them back
+as soft sparkles. The sounds of dripping water can be heard throughout the
+chamber presumably from the moisture on the cave ceiling falling to the cave
+floor. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7306 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7300 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7302 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 7305 0 0 0 0 0 0 0 0
+S
+T 7301
+#7302
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DExpansive Chamber@n~
+   @mThis dimly lit chamber appears to be made out of a unique type of rock that
+is only found in these floating cliffs. This dark purple rock has a unique way
+of catching any stray rays of light that hit its edges and reflecting them back
+as soft sparkles. The sounds of dripping water can be heard throughout the
+chamber presumably from the moisture on the cave ceiling falling to the cave
+floor. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7305 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7301 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7303 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 7304 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 7306 0 0 0 0 0 0 0 0
+S
+T 7301
+#7303
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DExpansive Chamber@n~
+   @mThis dimly lit chamber appears to be made out of a unique type of rock that
+is only found in these floating cliffs. This dark purple rock has a unique way
+of catching any stray rays of light that hit its edges and reflecting them back
+as soft sparkles. The sounds of dripping water can be heard throughout the
+chamber presumably from the moisture on the cave ceiling falling to the cave
+floor. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7304 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7302 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 7305 0 0 0 0 0 0 0 0
+S
+T 7301
+#7304
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DExpansive Chamber@n~
+   @mThis dimly lit chamber appears to be made out of a unique type of rock that
+is only found in these floating cliffs. This dark purple rock has a unique way
+of catching any stray rays of light that hit its edges and reflecting them back
+as soft sparkles. The sounds of dripping water can be heard throughout the
+chamber presumably from the moisture on the cave ceiling falling to the cave
+floor. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7309 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7305 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7303 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7310 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 7308 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7302 0 0 0 0 0 0 0 0
+S
+T 7301
+#7305
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DExpansive Chamber@n~
+   @mThis dimly lit chamber appears to be made out of a unique type of rock that
+is only found in these floating cliffs. This dark purple rock has a unique way
+of catching any stray rays of light that hit its edges and reflecting them back
+as soft sparkles. The sounds of dripping water can be heard throughout the
+chamber presumably from the moisture on the cave ceiling falling to the cave
+floor. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7308 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7306 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7302 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7304 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 7309 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 7307 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7301 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7303 0 0 0 0 0 0 0 0
+S
+T 7301
+#7306
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DExpansive Chamber@n~
+   @mThis dimly lit chamber appears to be made out of a unique type of rock that
+is only found in these floating cliffs. This dark purple rock has a unique way
+of catching any stray rays of light that hit its edges and reflecting them back
+as soft sparkles. The sounds of dripping water can be heard throughout the
+chamber presumably from the moisture on the cave ceiling falling to the cave
+floor. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7307 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7301 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7305 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 7308 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7302 0 0 0 0 0 0 0 0
+S
+T 7301
+#7307
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DExpansive Chamber@n~
+   @mThis dimly lit chamber appears to be made out of a unique type of rock that
+is only found in these floating cliffs. This dark purple rock has a unique way
+of catching any stray rays of light that hit its edges and reflecting them back
+as soft sparkles. The sounds of dripping water can be heard throughout the
+chamber presumably from the moisture on the cave ceiling falling to the cave
+floor. @n
+~
+73 A 0 0 0 0
+D2
+~
+~
+0 0 7306 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7308 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7305 0 0 0 0 0 0 0 0
+S
+T 7301
+#7308
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DExpansive Chamber@n~
+   @mThis dimly lit chamber appears to be made out of a unique type of rock that
+is only found in these floating cliffs. This dark purple rock has a unique way
+of catching any stray rays of light that hit its edges and reflecting them back
+as soft sparkles. The sounds of dripping water can be heard throughout the
+chamber presumably from the moisture on the cave ceiling falling to the cave
+floor. @n
+~
+73 A 0 0 0 0
+D1
+~
+~
+0 0 7307 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7305 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7309 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7306 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7304 0 0 0 0 0 0 0 0
+S
+T 7301
+#7309
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DExpansive Chamber@n~
+   @mThis dimly lit chamber appears to be made out of a unique type of rock that
+is only found in these floating cliffs. This dark purple rock has a unique way
+of catching any stray rays of light that hit its edges and reflecting them back
+as soft sparkles. The sounds of dripping water can be heard throughout the
+chamber presumably from the moisture on the cave ceiling falling to the cave
+floor. @n
+~
+73 A 0 0 0 0
+D1
+~
+~
+0 0 7308 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7304 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7305 0 0 0 0 0 0 0 0
+S
+T 7301
+#7310
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DNear Surface@n~
+   @mThese winding cavern tunnels are made out of the same rock as the rest of
+the Twilight Caverns. There is quite a bit more light and fresh air in these
+tunnels though as they are close to the surface entrance of the caverns. It
+appears that sometime in the past people dug out the natural cavern walls to
+expand these tunnels. The reason for this is not obvious by staring at the
+walls though. @n
+~
+73 A 0 0 0 0
+D1
+~
+~
+0 0 7304 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7311 0 0 0 0 0 0 0 0
+S
+T 7301
+#7311
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DNear Surface@n~
+   @mThese winding cavern tunnels are made out of the same rock as the rest of
+the Twilight Caverns. There is quite a bit more light and fresh air in these
+tunnels though as they are close to the surface entrance of the caverns. It
+appears that sometime in the past people dug out the natural cavern walls to
+expand these tunnels. The reason for this is not obvious by staring at the
+walls though. @n
+~
+73 A 0 0 0 0
+D1
+~
+~
+0 0 7310 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7312 0 0 0 0 0 0 0 0
+S
+T 7301
+#7312
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DNear Surface@n~
+   @mThese winding cavern tunnels are made out of the same rock as the rest of
+the Twilight Caverns. There is quite a bit more light and fresh air in these
+tunnels though as they are close to the surface entrance of the caverns. It
+appears that sometime in the past people dug out the natural cavern walls to
+expand these tunnels. The reason for this is not obvious by staring at the
+walls though. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7313 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7311 0 0 0 0 0 0 0 0
+S
+T 7301
+#7313
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DNear Surface@n~
+   @mThese winding cavern tunnels are made out of the same rock as the rest of
+the Twilight Caverns. There is quite a bit more light and fresh air in these
+tunnels though as they are close to the surface entrance of the caverns. It
+appears that sometime in the past people dug out the natural cavern walls to
+expand these tunnels. The reason for this is not obvious by staring at the
+walls though. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7314 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7312 0 0 0 0 0 0 0 0
+S
+T 7301
+#7314
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DNear Surface@n~
+   @mThese winding cavern tunnels are made out of the same rock as the rest of
+the Twilight Caverns. There is quite a bit more light and fresh air in these
+tunnels though as they are close to the surface entrance of the caverns. It
+appears that sometime in the past people dug out the natural cavern walls to
+expand these tunnels. The reason for this is not obvious by staring at the
+walls though. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7315 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7313 0 0 0 0 0 0 0 0
+S
+T 7301
+#7315
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DNear Surface@n~
+   @mThese winding cavern tunnels are made out of the same rock as the rest of
+the Twilight Caverns. There is quite a bit more light and fresh air in these
+tunnels though as they are close to the surface entrance of the caverns. It
+appears that sometime in the past people dug out the natural cavern walls to
+expand these tunnels. The reason for this is not obvious by staring at the
+walls though. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7316 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7314 0 0 0 0 0 0 0 0
+S
+T 7301
+#7316
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DNear Surface@n~
+   @mThese winding cavern tunnels are made out of the same rock as the rest of
+the Twilight Caverns. There is quite a bit more light and fresh air in these
+tunnels though as they are close to the surface entrance of the caverns. It
+appears that sometime in the past people dug out the natural cavern walls to
+expand these tunnels. The reason for this is not obvious by staring at the
+walls though. @n
+~
+73 A 0 0 0 0
+D1
+~
+~
+0 0 7317 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7315 0 0 0 0 0 0 0 0
+S
+T 7301
+#7317
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DNear Surface@n~
+   @mThese winding cavern tunnels are made out of the same rock as the rest of
+the Twilight Caverns. There is quite a bit more light and fresh air in these
+tunnels though as they are close to the surface entrance of the caverns. It
+appears that sometime in the past people dug out the natural cavern walls to
+expand these tunnels. The reason for this is not obvious by staring at the
+walls though. @n
+~
+73 A 0 0 0 0
+D1
+~
+~
+0 0 7318 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7316 0 0 0 0 0 0 0 0
+S
+T 7301
+#7318
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DNear Surface@n~
+   @mThese winding cavern tunnels are made out of the same rock as the rest of
+the Twilight Caverns. There is quite a bit more light and fresh air in these
+tunnels though as they are close to the surface entrance of the caverns. It
+appears that sometime in the past people dug out the natural cavern walls to
+expand these tunnels. The reason for this is not obvious by staring at the
+walls though. @n
+~
+73 A 0 0 0 0
+D1
+~
+~
+0 0 7319 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7317 0 0 0 0 0 0 0 0
+S
+T 7301
+#7319
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DTunnel Intersection@n~
+   @mThese winding cavern tunnels are made out of the same rock as the rest of
+the Twilight Caverns. There is quite a bit more light and fresh air in these
+tunnels though as they are close to the surface entrance of the caverns. It
+appears that sometime in the past people dug out the natural cavern walls to
+expand these tunnels. The reason for this is not obvious by staring at the
+walls though. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7323 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7320 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7318 0 0 0 0 0 0 0 0
+S
+T 7301
+#7320
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DNear Surface@n~
+   @mThese winding cavern tunnels are made out of the same rock as the rest of
+the Twilight Caverns. There is quite a bit more light and fresh air in these
+tunnels though as they are close to the surface entrance of the caverns. It
+appears that sometime in the past people dug out the natural cavern walls to
+expand these tunnels. The reason for this is not obvious by staring at the
+walls though. @n
+~
+73 A 0 0 0 0
+D1
+~
+~
+0 0 7321 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7319 0 0 0 0 0 0 0 0
+S
+T 7301
+#7321
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DNear Surface@n~
+   @mThese winding cavern tunnels are made out of the same rock as the rest of
+the Twilight Caverns. There is quite a bit more light and fresh air in these
+tunnels though as they are close to the surface entrance of the caverns. It
+appears that sometime in the past people dug out the natural cavern walls to
+expand these tunnels. The reason for this is not obvious by staring at the
+walls though. @n
+~
+73 A 0 0 0 0
+D1
+~
+~
+0 0 7322 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7320 0 0 0 0 0 0 0 0
+S
+T 7301
+#7322
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DDescending Tunnel@n~
+   @mThis tunnel cuts down vertically toward a lower shaft of the caverns. 
+Notches have been cut into part of the wall to form a crude natural ladder. 
+By the look of the notches they haven't been used in many years and some of
+them have been worn away by the caverns moisture. @n
+~
+73 A 0 0 0 0
+D3
+~
+~
+0 0 7321 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 7343 0 0 0 0 0 0 0 0
+S
+T 7301
+#7323
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DNear Surface@n~
+   @mThese winding cavern tunnels are made out of the same rock as the rest of
+the Twilight Caverns. There is quite a bit more light and fresh air in these
+tunnels though as they are close to the surface entrance of the caverns. It
+appears that sometime in the past people dug out the natural cavern walls to
+expand these tunnels. The reason for this is not obvious by staring at the
+walls though. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7324 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7319 0 0 0 0 0 0 0 0
+S
+T 7301
+#7324
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DNear Surface@n~
+   @mThese winding cavern tunnels are made out of the same rock as the rest of
+the Twilight Caverns. There is quite a bit more light and fresh air in these
+tunnels though as they are close to the surface entrance of the caverns. It
+appears that sometime in the past people dug out the natural cavern walls to
+expand these tunnels. The reason for this is not obvious by staring at the
+walls though. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7325 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7323 0 0 0 0 0 0 0 0
+S
+T 7301
+#7325
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DNear Surface@n~
+   @mThese winding cavern tunnels are made out of the same rock as the rest of
+the Twilight Caverns. There is quite a bit more light and fresh air in these
+tunnels though as they are close to the surface entrance of the caverns. It
+appears that sometime in the past people dug out the natural cavern walls to
+expand these tunnels. The reason for this is not obvious by staring at the
+walls though. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7326 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7324 0 0 0 0 0 0 0 0
+S
+T 7301
+#7326
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DDescending Tunnel@n~
+   @mThis tunnel cuts down vertically toward a lower shaft of the caverns. 
+Notches have been cut into part of the wall to form a crude natural ladder. 
+By the look of the notches they haven't been used in many years and some of
+them have been worn away by the caverns moisture. @n
+~
+73 A 0 0 0 0
+D2
+~
+~
+0 0 7325 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 7327 0 0 0 0 0 0 0 0
+S
+T 7301
+#7327
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DDescending Tunnel@n~
+   @mThis tunnel cuts up vertically toward a upper shaft of the caverns. 
+Notches have been cut into part of the wall to form a crude natural ladder. 
+By the look of the notches they haven't been used in many years and some of
+them have been worn away by the caverns moisture. @n
+~
+73 cA 0 0 0 0
+D0
+~
+~
+0 0 7328 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 7326 0 0 0 0 0 0 0 0
+S
+T 7301
+#7328
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7329 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7327 0 0 0 0 0 0 0 0
+S
+T 7301
+#7329
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D1
+~
+~
+0 0 7330 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7328 0 0 0 0 0 0 0 0
+S
+T 7301
+#7330
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D1
+~
+~
+0 0 7331 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7329 0 0 0 0 0 0 0 0
+S
+T 7301
+#7331
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D2
+~
+~
+0 0 7332 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7330 0 0 0 0 0 0 0 0
+S
+T 7301
+#7332
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7331 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7333 0 0 0 0 0 0 0 0
+S
+T 7301
+#7333
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7332 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7334 0 0 0 0 0 0 0 0
+S
+T 7301
+#7334
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D3
+~
+~
+0 0 7333 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 7335 0 0 0 0 0 0 0 0
+S
+T 7301
+#7335
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7336 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7334 0 0 0 0 0 0 0 0
+S
+T 7301
+#7336
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7337 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7335 0 0 0 0 0 0 0 0
+S
+T 7301
+#7337
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D2
+~
+~
+0 0 7336 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 7338 0 0 0 0 0 0 0 0
+S
+T 7301
+#7338
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D6
+~
+~
+0 0 7339 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7337 0 0 0 0 0 0 0 0
+S
+T 7301
+#7339
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D7
+~
+~
+0 0 7340 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7338 0 0 0 0 0 0 0 0
+S
+T 7301
+#7340
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D1
+~
+~
+0 0 7341 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7339 0 0 0 0 0 0 0 0
+S
+T 7301
+#7341
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D1
+~
+~
+0 0 7342 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7340 0 0 0 0 0 0 0 0
+S
+T 7301
+#7342
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DDescending Tunnel@n~
+   @mThis tunnel cuts down vertically toward a lower shaft of the caverns. 
+Notches have been cut into part of the wall to form a crude natural ladder. 
+By the look of the notches they haven't been used in many years and some of
+them have been worn away by the caverns moisture. @n
+~
+73 A 0 0 0 0
+D3
+~
+~
+0 0 7341 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 7389 0 0 0 0 0 0 0 0
+S
+T 7301
+#7343
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DDescending Tunnel@n~
+   @mThis tunnel cuts up vertically toward a upper shaft of the caverns. 
+Notches have been cut into part of the wall to form a crude natural ladder. 
+By the look of the notches they haven't been used in many years and some of
+them have been worn away by the caverns moisture. @n
+~
+73 cA 0 0 0 0
+D2
+~
+~
+0 0 7344 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 7322 0 0 0 0 0 0 0 0
+S
+T 7301
+#7344
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7343 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7345 0 0 0 0 0 0 0 0
+S
+T 7301
+#7345
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7344 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7346 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7354 0 0 0 0 0 0 0 0
+S
+T 7301
+#7346
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D1
+~
+~
+0 0 7347 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7345 0 0 0 0 0 0 0 0
+S
+T 7301
+#7347
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D1
+~
+~
+0 0 7348 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7346 0 0 0 0 0 0 0 0
+S
+T 7301
+#7348
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D2
+~
+~
+0 0 7349 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7347 0 0 0 0 0 0 0 0
+S
+T 7301
+#7349
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7348 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7370 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7350 0 0 0 0 0 0 0 0
+S
+T 7301
+#7350
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7349 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7351 0 0 0 0 0 0 0 0
+S
+T 7301
+#7351
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D1
+~
+~
+0 0 7350 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7355 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7352 0 0 0 0 0 0 0 0
+S
+T 7301
+#7352
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D1
+~
+~
+0 0 7351 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7353 0 0 0 0 0 0 0 0
+S
+T 7301
+#7353
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7354 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7352 0 0 0 0 0 0 0 0
+S
+T 7301
+T 7301
+#7354
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7345 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7353 0 0 0 0 0 0 0 0
+S
+T 7301
+#7355
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7351 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7356 0 0 0 0 0 0 0 0
+S
+T 7301
+#7356
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7355 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7357 0 0 0 0 0 0 0 0
+S
+T 7301
+#7357
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7356 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7361 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7359 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7358 0 0 0 0 0 0 0 0
+S
+T 7301
+#7358
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D1
+~
+~
+0 0 7357 0 0 0 0 0 0 0 0
+S
+T 7301
+#7359
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7357 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7360 0 0 0 0 0 0 0 0
+S
+T 7301
+#7360
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7359 0 0 0 0 0 0 0 0
+S
+T 7301
+#7361
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D1
+~
+~
+0 0 7362 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7357 0 0 0 0 0 0 0 0
+S
+T 7301
+#7362
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D1
+~
+~
+0 0 7363 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7361 0 0 0 0 0 0 0 0
+S
+T 7301
+#7363
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D1
+~
+~
+0 0 7364 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7362 0 0 0 0 0 0 0 0
+S
+T 7301
+#7364
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7365 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7363 0 0 0 0 0 0 0 0
+S
+T 7301
+#7365
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7366 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7364 0 0 0 0 0 0 0 0
+S
+T 7301
+#7366
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7367 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7371 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7365 0 0 0 0 0 0 0 0
+S
+T 7301
+#7367
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7368 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7366 0 0 0 0 0 0 0 0
+S
+T 7301
+#7368
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D2
+~
+~
+0 0 7367 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7369 0 0 0 0 0 0 0 0
+S
+T 7301
+#7369
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D1
+~
+~
+0 0 7368 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7370 0 0 0 0 0 0 0 0
+S
+T 7301
+#7370
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D1
+~
+~
+0 0 7369 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7349 0 0 0 0 0 0 0 0
+S
+T 7301
+#7371
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D1
+~
+~
+0 0 7372 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7366 0 0 0 0 0 0 0 0
+S
+T 7301
+#7372
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7373 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7371 0 0 0 0 0 0 0 0
+S
+T 7301
+#7373
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7374 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7372 0 0 0 0 0 0 0 0
+S
+T 7301
+#7374
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7375 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7373 0 0 0 0 0 0 0 0
+S
+T 7301
+#7375
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7376 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7374 0 0 0 0 0 0 0 0
+S
+T 7301
+#7376
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7377 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7375 0 0 0 0 0 0 0 0
+S
+T 7301
+#7377
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D2
+~
+~
+0 0 7376 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7378 0 0 0 0 0 0 0 0
+S
+T 7301
+#7378
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D1
+~
+~
+0 0 7377 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 7379 0 0 0 0 0 0 0 0
+S
+T 7301
+#7379
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D6
+~
+~
+0 0 7380 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7378 0 0 0 0 0 0 0 0
+S
+T 7301
+#7380
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D6
+~
+~
+0 0 7381 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7379 0 0 0 0 0 0 0 0
+S
+T 7301
+#7381
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D6
+~
+~
+0 0 7382 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7380 0 0 0 0 0 0 0 0
+S
+T 7301
+#7382
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7383 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7381 0 0 0 0 0 0 0 0
+S
+T 7301
+#7383
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7384 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7382 0 0 0 0 0 0 0 0
+S
+T 7301
+#7384
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DMidlevel Tunnel@n~
+   @mThese tunnels appear to fall between the surface level of the cavern and the
+lower depths. The air here isn't quite as fresh as the surface level but it
+has a taste of freshness to it and still gets ample light reflected throughout
+the caverns. The expansion of the natural tunnels by unknown tools is more
+obvious here as well. Finally certain chunks of the walls have been tunneled
+out in what appears to be past mining attempts. @n
+~
+73 A 0 0 0 0
+D2
+~
+~
+0 0 7383 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 7385 0 0 0 0 0 0 0 0
+S
+T 7301
+#7385
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DDescending Tunnel@n~
+   @mThis tunnel cuts down vertically toward a lower shaft of the caverns. 
+Notches have been cut into part of the wall to form a crude natural ladder. 
+By the look of the notches they haven't been used in many years and some of
+them have been worn away by the caverns moisture. @n
+~
+73 A 0 0 0 0
+D5
+~
+~
+0 0 7386 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7384 0 0 0 0 0 0 0 0
+S
+T 7301
+#7386
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DDescending Tunnel@n~
+   @mThis tunnel cuts up vertically toward a upper shaft of the caverns. 
+Notches have been cut into part of the wall to form a crude natural ladder. 
+By the look of the notches they haven't been used in many years and some of
+them have been worn away by the caverns moisture. @n
+~
+73 cA 0 0 0 0
+D0
+~
+~
+0 0 7387 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 7385 0 0 0 0 0 0 0 0
+S
+T 7301
+#7387
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DDeep Tunnel@n~
+   @mThis part of the caverns has stale air and very little light. The walls
+have been marred excessively by mining equipment, though what was dug out of
+the walls is unknown. Large beams of old wood have been presed into weak parts
+of the cavern to prop them up. The entire cavern here seems to creak and grown
+with the movement of the floating cliffs. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7388 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7390 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7386 0 0 0 0 0 0 0 0
+S
+T 7301
+#7388
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DDeep Tunnel@n~
+   @mThis part of the caverns has stale air and very little light. The walls
+have been marred excessively by mining equipment, though what was dug out of
+the walls is unknown. Large beams of old wood have been presed into weak parts
+of the cavern to prop them up. The entire cavern here seems to creak and grown
+with the movement of the floating cliffs. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7389 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7387 0 0 0 0 0 0 0 0
+S
+T 7301
+#7389
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DDescending Tunnel@n~
+   @mThis tunnel cuts up vertically toward a upper shaft of the caverns. 
+Notches have been cut into part of the wall to form a crude natural ladder. 
+By the look of the notches they haven't been used in many years and some of
+them have been worn away by the caverns moisture. @n
+~
+73 cA 0 0 0 0
+D2
+~
+~
+0 0 7388 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 7342 0 0 0 0 0 0 0 0
+S
+T 7301
+#7390
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DDeep Tunnel@n~
+   @mThis part of the caverns has stale air and very little light. The walls
+have been marred excessively by mining equipment, though what was dug out of
+the walls is unknown. Large beams of old wood have been presed into weak parts
+of the cavern to prop them up. The entire cavern here seems to creak and grown
+with the movement of the floating cliffs. @n
+~
+73 A 0 0 0 0
+D1
+~
+~
+0 0 7391 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7387 0 0 0 0 0 0 0 0
+S
+T 7301
+#7391
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DDeep Tunnel@n~
+   @mThis part of the caverns has stale air and very little light. The walls
+have been marred excessively by mining equipment, though what was dug out of
+the walls is unknown. Large beams of old wood have been presed into weak parts
+of the cavern to prop them up. The entire cavern here seems to creak and grown
+with the movement of the floating cliffs. @n
+~
+73 A 0 0 0 0
+D1
+~
+~
+0 0 7392 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7390 0 0 0 0 0 0 0 0
+S
+T 7301
+#7392
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DDeep Tunnel@n~
+   @mThis part of the caverns has stale air and very little light. The walls
+have been marred excessively by mining equipment, though what was dug out of
+the walls is unknown. Large beams of old wood have been presed into weak parts
+of the cavern to prop them up. The entire cavern here seems to creak and grown
+with the movement of the floating cliffs. @n
+~
+73 A 0 0 0 0
+D1
+~
+~
+0 0 7393 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7391 0 0 0 0 0 0 0 0
+S
+T 7301
+#7393
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DDark Expanse@n~
+   @mThis part of the caverns appears to be a natural formed expanse. Very
+little work was done on it and it's probably a good thing too. It does not
+look like the cavern would be able to hold together at this expanse if it had
+been mined like the rest of the tunnels. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7394 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7398 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7392 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 7397 0 0 0 0 0 0 0 0
+S
+T 7301
+#7394
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DDark Expanse@n~
+   @mThis part of the caverns appears to be a natural formed expanse. Very
+little work was done on it and it's probably a good thing too. It does not
+look like the cavern would be able to hold together at this expanse if it had
+been mined like the rest of the tunnels. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7395 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7397 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7393 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 7396 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7398 0 0 0 0 0 0 0 0
+S
+T 7301
+#7395
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DDark Expanse@n~
+   @mThis part of the caverns appears to be a natural formed expanse. Very
+little work was done on it and it's probably a good thing too. It does not
+look like the cavern would be able to hold together at this expanse if it had
+been mined like the rest of the tunnels. @n
+~
+73 A 0 0 0 0
+D1
+~
+~
+0 0 7396 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7394 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7397 0 0 0 0 0 0 0 0
+S
+T 7301
+#7396
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DDark Expanse@n~
+   @mThis part of the caverns appears to be a natural formed expanse. Very
+little work was done on it and it's probably a good thing too. It does not
+look like the cavern would be able to hold together at this expanse if it had
+been mined like the rest of the tunnels. @n
+~
+73 A 0 0 0 0
+D2
+~
+~
+0 0 7397 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7395 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7394 0 0 0 0 0 0 0 0
+S
+T 7301
+#7397
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DDark Expanse@n~
+   @mThis part of the caverns appears to be a natural formed expanse. Very
+little work was done on it and it's probably a good thing too. It does not
+look like the cavern would be able to hold together at this expanse if it had
+been mined like the rest of the tunnels. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7396 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7400 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7398 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7394 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 7395 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7393 0 0 0 0 0 0 0 0
+S
+T 7301
+#7398
+@mT@Mw@Wi@wli@Wg@Mh@mt @mC@Ma@Wv@we@Wr@Mn@ms@W: @DDark Expanse@n~
+   @mThis part of the caverns appears to be a natural formed expanse. Very
+little work was done on it and it's probably a good thing too. It does not
+look like the cavern would be able to hold together at this expanse if it had
+been mined like the rest of the tunnels. @n
+~
+73 A 0 0 0 0
+D0
+~
+~
+0 0 7397 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7393 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 7394 0 0 0 0 0 0 0 0
+S
+T 7301
+#7399
+@YFalling Through The Clouds@n~
+   @YYellow clouds rush past you as you fall steadily through them. Something
+about the clouds and this general area of the Afterlife appears to have an
+negative affect on flying abilities. You can do nothing but helplessly plummet
+from here until you find something solid beneath you! @n
+~
+73 A 0 0 0 8
+S
+$~

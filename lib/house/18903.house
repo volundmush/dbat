@@ -1,0 +1,666 @@
+#16407
+-2 0 0 0 0 100 100 0 45 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Apple~
+@GG@gr@Ge@ge@Gn @gA@Gp@yp@Gl@ge@n~
+@nA granny smith apple lies here@n~
+~
+19 1 0 0 0 1 5 0
+G
+1556294483
+U
+7012225722449080165
+Z
+3
+#16409
+-1 250 5 -1 0 100 100 0 6 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Orange Star Backpack~
+@n@yOrange Star @WBackpack@n~
+@nA backpack stitched with the @yOrange Star@n logo rests here.~
+~
+15 163841 0 0 0 24 50 0
+G
+1576841640
+U
+-1
+Z
+4
+A
+3 1 0
+#2406
+-1 0 0 0 0 92 100 0 44 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+royal guardsman armor~
+@RR@roya@Rl @CGuardsman @DA@Wr@wm@Wo@Dr@n~
+@wA set of @RR@roya@Rl @CGuardman @DA@Wr@wm@Wo@Dr@w is lying here@n~
+~
+11 9 0 0 0 25 250 0
+G
+1552113118
+U
+858725442042596583
+Z
+4
+A
+17 400 0
+A
+5 1 0
+#2207
+-1 0 0 0 0 79 100 0 44 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Bardock Saiyan Armor~
+@yS@Ya@yi@Yy@ya@Yn@n armor with @rB@Ra@Wr@wd@Wo@Rc@rk@n's symbol on the front~
+Some Saiyan armor with Bardock's symbol on it has been dropped here~
+~
+11 9 0 0 0 10 0 0
+G
+1552872271
+U
+702428700632932865
+Z
+4
+A
+17 750 0
+#211
+-1 0 0 0 0 93 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Weighted Blue Wristband~
+@wWeighted @bBlue @wWristband@n~
+@wA weighted @bblue @wwristband is lying here@n~
+~
+11 4097 0 0 0 50 250 0
+G
+1553204906
+U
+8731207121971927352
+Z
+4
+#211
+-1 0 0 0 0 96 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Weighted Blue Wristband~
+@wWeighted @bBlue @wWristband@n~
+@wA weighted @bblue @wwristband is lying here@n~
+~
+11 4097 0 0 0 50 250 0
+G
+1553204906
+U
+744828779403420313
+Z
+4
+#212
+-1 0 0 0 0 91 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Weighted Blue Boots~
+@wWeighted @bBlue @wBoots@n~
+@wA pair of weighted @bblue @wboots are lying here@n~
+~
+11 65 0 0 0 100 250 0
+G
+1553207073
+U
+5723347546451738816
+Z
+4
+#13525
+-2 0 0 0 0 100 100 0 16 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Prototype Custom Scouter Recipe~
+a Prototype Custom Scouter Recipe~
+A prototype custom scouter recipe is lying here~
+~
+16 1 0 0 0 1 10 0
+G
+1553722467
+U
+7168117169831347935
+Z
+4
+E
+look prototype custom scouter recipe~
+To build a Prototype Custom Scouter, you must have the following components:
+Plastic Casing
+Display Screen
+Prototype CPU
+
+If you possess all these components: type build prototype custom scouter
+~
+#13412
+-2 0 0 0 0 100 100 0 16 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Scrap Armor Schematics~
+Scrap Armor Schematics~
+Some schematics for scrap armor have been left here~
+To build scrap armor you need the following components:
+Large Metal Scrap, x2 Small Metal Scrap
+
+OOC - type build scrap armor to build item
+~
+16 1 0 0 0 1 10 0
+G
+1553722853
+U
+3340521560540386566
+Z
+4
+#13592
+-2 0 0 0 0 100 100 0 16 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Saber Staff Recipe~
+Lightsaber and Saberstaff Recipe~
+A recipe for both lightsabers and saberstaffs can be found here~
+~
+16 1 0 0 0 1 500 0
+G
+1555022858
+U
+2050691570968462122
+Z
+4
+E
+lightsaber and saberstaff recipe~
+   To make either a lightsaber or saberstaff you need the following three
+components:
+Hilt (Depending on model), a focusing crystal and a diatum power cell.
+
+To build a lightsaber use the following syntax:
+build blue lightsaber
+build green lightsaber
+build red lightsaber
+
+For Saberstaffs:
+build blue saberstaff
+build green saberstaff
+build red saberstaff
+~
+#17616
+-2 0 0 0 0 100 100 0 16 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Dura-Tech Plasma Sabre Instructions~
+@wDura-Tech Plasma Sabre Instructions@n~
+@wA piece of paper titled 'Dura-Tech Plasma Sabre Instructions' is lying here@n~
+Parts Required for constructions
+---------------------
+Plasma Core
+Dura-Tech Circuits
+Dura-Tech Sabre Casing and Lens
+Massive Ruby
+
+Assemble with care.
+~
+16 1 0 0 0 1 10 0
+G
+1556164437
+U
+1142087256613984426
+Z
+4
+#13410
+-1 50 1 -1 0 100 100 0 6 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Schematics Folder~
+Schematics Folder~
+A folder for placing schematics of things to build, has been dropped here~
+~
+15 1 0 0 0 1 50 0
+G
+1553722631
+U
+8195113290072238055
+Z
+4
+#13507
+-1 0 0 0 0 100 100 0 13 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Miniature Display Screen~
+a Miniature Display Screen~
+A green miniature display screen is lying here~
+~
+12 1 0 0 0 1 100 0
+G
+1553722509
+U
+2280991981547404661
+Z
+4
+#13506
+-1 0 0 0 0 100 100 0 43 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Plastic Casing~
+a plastic casing~
+A plastic casing that might house electronics is lying here~
+~
+12 1 0 0 0 1 100 0
+G
+1553722514
+U
+8255273134551367197
+Z
+4
+#13406
+-1 0 0 0 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Metal Scrap~
+Large Metal Scrap~
+A large piece of metal is lying here~
+~
+12 1 0 0 0 1 120 0
+G
+1553722908
+U
+6759401809640910923
+Z
+4
+#8100
+-1 0 0 0 0 100 100 0 16 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+The Betrayal book~
+@WT@whe @WB@wetrayal@n~
+A book is laying here~
+@RThe Betrayal @rby Alextra Cavore@n
+
+   @WMany centuries ago, the first alien visitors arrived on Konack. These beings
+whom would later come to be known as Truffles, who were technologically superior
+to the Konatsu people in every way. @n
+
+   @WThe people feared these small devils and amongst the Great Houses, only
+Sereg-Vanma did not outlaw them. Instead, against the advice of the grand
+council, Grand master Llaro Benim welcomed them with open arms. @n
+
+   @WBenim had watched as his house slowly began to lose its superior power to the
+other four under his rule. And in the Truffles, he had a way to not only
+correct this but to establish a new world order, with him its unconditional
+ruler. @n
+
+   @WHouse Sereg-Vanma's warriors were mobilised for war, armed with Truffle
+technology. The war raged for several years with Benim having more victorious
+at the start of this war. The four other houses with Indoril leading the way,
+united and pushed back the traitor forces. @n
+
+   @WEventually, House Sereg-Vanma and their Truffle allies were pushed back to
+their last bastion. Defeat for the traitors looked almost certain but as the
+combined forces of House Indoril, Oroist, Dres and Taesal breached the
+stronghold, the greatest act of treachery in Konack's history was commited. @n
+
+   @WA massive beast created by perverse magic and blasphemous Truffle technology
+was summoned to the battlefield. In mere minutes, the creature that had been
+summoned, Hirudegan, managed to scatter the pious forces. @n
+
+   @WThe Hirudegan beast then over the course of two weeks caused untold
+destruction and killed countless Konatsu warriors and innocent villagers before
+it was finally stopped by a warrior whose name was omitted from the history
+books. @n
+
+   @Y(Historical note - It is estimated that almost more than 50 times more lives
+were lost to Hirudegan's rampage than in the previous six years of the war. )@n
+
+   @WWith the death of Hirudegan, the remaining traitorous forces were easily
+crushed. After this final defeat, Lord Llaro Benim was executed along with any
+surviving Truffles. The House was renamed to Sereg-Vanam and placed under
+constant watch from the priests and monks of House Oroist. @n
+~
+16 1 0 0 0 4 10 0
+G
+1555021086
+U
+2219016037400161175
+Z
+4
+#8101
+-1 0 0 0 0 100 100 0 16 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Yellow Book of Indoril~
+@YYellow @nbook of @YI@yn@Yd@Do@yr@yi@Yl@n~
+A copy of the Yellow Book of Indoril has been dropped here~
+This book is an information guide on House Indoril.
+
+@WNotable Figures@n
+@w-----------------@n
+   @WHighborne Sappherion - Current Leader of House Indoril and ruler of Konack.
+Longest reigning Highborne in over 200 years. He can be located at the Emerald
+Tower. @n
+
+   @WCouncillor Marias - A member of the Council of Kal Tyor and also the highest
+ranking Indoril member behind Sappherion. She is in charge of the day-to-day
+running of the House and can be found in the Indoril Compound in Tiranoc. @n
+
+@WCapital@n
+@w-----------------@n
+   @WThe capital of the House Indoril region is Tiranoc, the largest city on
+Konack. The primary holdings here is the Indoril compound in the pontius
+sector. @n
+
+@WGuards@n
+@w-----------------@n
+   @WAlmost every House maintains their own guards but those of House Indoril are
+amongst the finest Konatsu Warriors available. The ordinators (of which there
+are several ranks) are the soldiers of House Indoril and the guards of Tiranoc.
+The ordinators are also personally responsible with defending the Emerald Tower,
+the home of the Highborne and the Kal Tyor. @n
+
+@WHistoric Figures@n
+@w-----------------@n
+   @WThe chief historical figure of House Indoril is a hero known as Eltharion. 
+He was one of the finest swordsmen of the War of Betrayal era. However, he was
+completely blind and the only house that would take him into service was House
+Indoril. It was said that using his honed hearing, he could see more clearly
+than he ever could when his eyesight was still intact. Eltharion is one of the
+only men to ever thwart an assassination attempt by Meridius. @n
+~
+16 1 0 0 0 1 10 0
+G
+1555021084
+U
+6903051914524296094
+Z
+4
+#8102
+-1 0 0 0 0 100 100 0 16 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Blue book of Oroist~
+@BBlue@n book of @BO@br@wo@Wi@bs@Bt@n~
+A copy of the Blue book of Oroist has been dropped here~
+This book is an information guide on House Oroist
+
+@WHouse Oroist@n
+@w------------------@n
+   @WOroist is the least traditional house in the sense that is the representation
+of the monks and clergymen of the primary religion on Konack, the worship of a
+god known as Temujin. Fable tells that Temujin appears one day and slew the
+ancester god Shigeru for being deceiptful and cruel to those he was charged
+with. Oroist is the youngest house and they claim their origins lay in those
+few who witnessed Temujin slay Shigeru first hand. @n
+
+@WNotable Figures@n
+@w------------------@n
+   @WHigh Priest Semaj - The high priest is the leader of House Oroist and is a
+highly respected individual who commands the respect of the people. Some
+speculate his influence is cause for concern to Highborne Sappherion. He can be
+located at the Great Oroist Temple in the Taloc Sector. @n
+
+   @WCouncillor Orlu - Orlu no longer serves as a priest or monk for House Oroist
+as he hold's House Oroist's seat on the council of Kal Tyor, as it is strictly
+forbidden to be a practicing priest or monk while holding such a position. He
+spends most of his time in the Kal Tyor chamber. @n
+
+@WCapital@n
+@w------------------@n
+   @WHouse Oroist unlike the other houses, does not hold a region or have a
+capital city. Instead, they are based out of the Great Oroist Temple in
+Tiranoc. Smaller temples can be found in other cities. @n
+
+@WGuards@n
+@w------------------@n
+   @WThe Great Oroist Temple's defense comes under the jurisdiction of the
+Ordinators, however the House has a sect of warrior monks who devote their lives
+to training and defending the temples of Oroist. The honor of watching over
+House Sereg-Vanma was given to the pious warrior monks of Oroist. @n
+
+@WHistorical Figures@n
+@w------------------@n
+   @WThe chief historical figure of House Oroist is Pontius the Wise, a hero of
+the War of Betrayal era. Pontius was the High Priest of House Oroist at the
+time. He was an accomplished warrior who wielded the mace of benevolence, but
+his true strength lay in his power of speech. Always accompanied by the
+religious texts of Konack, Pontius was able to inspire any individual whom he
+spoke to. When Pontius gave a sermon, even the most cowardly man became
+fearless. Pontius perished at the hands of Hirudegarn, giving his life in an
+attempt to delay the beast's advance. @n
+~
+16 1 0 0 0 1 10 0
+G
+1555021083
+U
+719368828755294451
+Z
+4
+#8103
+-1 0 0 0 0 100 100 0 16 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Teal Book of Taesal~
+@CTeal@n book of @BT@ba@ce@Cs@ba@Bl@n~
+A copy of the teal book of Taesal has been left here~
+This is an information guide about House Taesal.
+
+@WHouse Taesal@n
+@w-----------------@n
+   @WHouse Taesal is a house formed primarily of merchants, shopkeepers and rich
+nobles with too much time on their hands. The house's primary goal is expanding
+it's power and influence through enmassing wealth. They are perhaps the most
+politically organised of any of the houses. It was a member of House Taesal who
+invented the concept of a contract on Konack. The House has almost always been
+run by a member of the Taesal family itself. @n
+
+@WNotable Figures@n
+@w-----------------@n
+   @WShela Taesal - Currently the matriach of the Taesal family, she is also the
+leader of House Taesal. Already quite wealthy, her most notable action of
+recent times was to pass a law that 10% of taxes collected by House Taesal are
+given to the Taesal family. She can be located at the Taesal Manor in Tiranoc.
+
+   @WLord Aranni - He is House Taesal's representive on the council of Kal Tyor.
+He owns a large building company that is caters to every area of construction
+available, from small houses right up to government contracts for things such as
+roads and so forth. He can be found in his construction company's main office
+in Tiranoc. @n
+
+@WCapital@n
+@w-----------------@n
+   @WThe capital of House Taesal territory is Machiavila, known as the Merchant
+City. Another area of importantance is the Turlon Fair. @n
+
+@WGuards@n
+@w-----------------@n
+   @WHouse Taesal's guard force primarily consists of mercenaries and as such are
+not very loyal to the house. In general, they care very little about the people
+they are protecting beyond fulfilling basic requirements of getting the next
+pouch of gold. @n
+
+@WHistorical Figures@n
+@w-----------------@n
+   @WThe chief historical figure of House Taesal, is a female assassin known as
+Meridius and is one of the famous heroes of the War of Betrayal. Although she
+was never actually a member of House Taesal, her parents were. Outside of the
+war she had an almost 100% kill ratio, the only target she ever failed to
+assassinate was Eltharion, who she eventually fell in love with. The honorable
+guild of assassins was founded by her. @n
+~
+16 1 0 0 0 1 10 0
+G
+1555021083
+U
+5328142617105423402
+Z
+4
+#8104
+-1 0 0 0 0 100 100 0 16 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Red book of Sereg-Vanma~
+@RRed@n book of @RS@re@Rr@re@Rg@D-@cV@Ca@wn@Wm@wa@n~
+A copy of Red book of Sereg-Vanma lays here~
+This book is an information guide on House Sereg-Vanma
+
+@WHouse Sereg-Vanma@n
+@w-----------------@n
+   @WKnown as the traitor House, Sereg-Vanma is the reformed house of that which
+instigated the War of Betrayal. All records of the previous name of the House
+have been expunged from records. They are the only House who has no affiliation
+with the religious aspects of Konack, though the warrior monks of House Oroist
+have been appointed to keep an eye on them. @n
+
+@WNotable Figures@n
+@w-----------------@n
+   @WLord Nikolish - He is the man who is currently both the leader of House
+Sereg-Vanma and occupies a seat on the council of Kal Tyor. His best
+achievement to date was successfully winning Sereg-Vanma a seat on the Kal Tyor
+council. Lord Nikolish is often controversial and has on numerous occassions
+stated that he felt the religious House Oroist needed to be made defunct for
+Konack to make real progress. Nikolish can be found in the Sereg-Vanma manor in
+Tiranoc. @n
+
+   @WLeonardo Da Minci - The foremost inventor and scientist amongst the Konatsu
+people, although the majority of his experiments and inventions are outlawed. 
+A high ranking member of House Sereg-Vanma, Da Minci hides away in the city of
+Cerberus. @n
+
+@WCapital@n
+@w-----------------@n
+@WThe Capital of the Sereg-Vanma region is the underground city of Cerberus.@n
+
+@WGuards@n
+@w-----------------@n
+   @WHouse Sereg-Vanma possesses no guard force to speak of, with the exception of
+the warrior monks of House Oroist assigned to keep an eye on them. Though
+rumours suggest that the high ranking members of the house have outlawed
+constructs as their personal guards. @n
+
+@WHistorical Figures@n
+@w-----------------@n
+@WNone@n
+~
+16 1 0 0 0 1 10 0
+G
+1555021081
+U
+3484981566281107153
+Z
+4
+#8105
+-1 0 0 0 0 100 100 0 16 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Brown book of Dres~
+@yBrown@n book of @RD@yr@Ye@Rs@n~
+A copy of Brown book of Dres is lying here~
+This book is an information guide to House Dres.
+
+@WHouse Dres@n
+@w-----------------@n
+   @WDres is the House primarily made up of farmers, miners and various other
+trade labourers. It is known as the 'Peoples House' because of this. House
+Dres also occupies the largest territory of any of it's fellow Houses. Most of
+Dres' political actions serve the best interests of the common workers and trade
+guilds. @n
+
+@WNotable Figures@n
+@w-----------------@n
+   @WLord Llaro Stern - The current head of House Dres, Llaro Stern comes from a
+long line of farmers. He rose to power with the support of Matsu Colvian who is
+the head of the most powerful farming family on Konack. Stern likes to get his
+hands dirty from time to time as to not forget where he comes from. He can be
+found in his mansion in City Dres. @n
+
+   @WMishie Shuro - Renowned for her cooking, Mishie is also a high ranking member
+of House Dres and their representitive on the Council of Kal Tyor. She has a
+good working relationship with all the trade guilds and is tipped to succeed
+Llaro Stern one day as the head of House Dres. Mishie Shuro can be found at the
+Dres Manor in Tiranoc. @n
+
+@WCapital@n
+@w-----------------@n
+@WThe capital of House Dres region is the aptly named rural town, Dres.@n
+
+@WGuards@n
+@w-----------------@n
+   @WHouse Dres employs guards in the form of militia. Often young men who desire
+anything but to work on their father's farm will pick up a sword and join the
+militia. While not as organised or as well equipped as the Ordinators of House
+Indoril, the Dres Guard make up for it with enthusiasm to do a good job. @n
+
+@WHistorical Figures@n
+@w-----------------@n
+   @WThe chief historical figure of House Dres, is Taloc, a giant of a Konatsu
+with as kind a heart as one could fight. Before the War of Betrayal he was but
+a farm hand. One day, Sereg-Vanma forces attacked the farm he worked at and
+Taloc, wielding an axe used for wood chopping, single handidly defeated them. 
+It was Pontius the Wise, convinced Taloc to join the war. Along with Pontius,
+he died at the hands of Hirudegarn, in an attempt to delay the beast. @n
+~
+16 1 0 0 0 1 10 0
+G
+1555021079
+U
+1249637043002224872
+Z
+4
+#13511
+-1 0 0 0 0 100 100 0 23 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Prototype CPU~
+a Prototype CPU~
+A prototype CPU has been left here~
+~
+12 1 0 0 0 1 1500 0
+G
+1553722519
+U
+8862699681643779910
+Z
+4
+#63217
+-1 0 0 0 0 91 100 0 22 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Valkyrie Greaves~
+@mV@Wa@ml@Wk@my@Wri@me@n Greaves~
+A pair of well crafted greaves lay here~
+~
+11 33 0 0 0 80 3580 0
+G
+1553710336
+U
+2521206521111389793
+Z
+4
+A
+17 875 0
+#16400
+0 500 1 -1 0 100 100 0 9 A 0 D D 20 0 0 0 0 0 0 0
+XAP
+Steel Locker~
+@n@WSteel @nLocker~
+@nA@W steel@n locker is mounted to the wall here@n~
+~
+15 1 0 0 0 81 0 0
+G
+1556294483
+U
+1891253523283155263
+Z
+4
+#16301
+0 0 0 0 0 100 100 0 6 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Stylish Couch~
+@Wa Stylish Couch@n~
+A stylish looking couch has been placed here for weary space travellers~
+~
+31 1 0 0 0 1000 0 0
+G
+1556587512
+U
+5854867130163567450
+Z
+4
+#11
+0 0 0 0 0 100 100 0 9 C 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Gravity Generator~
+@wA Gravity Generator@n~
+@wA Gravity Generator, set to 0x gravity, is built here@n~
+~
+12 0 0 0 0 0 0 0
+G
+1557429063
+U
+-1
+Z
+4
+A
+13 1000000 0
+A
+17 2000000 0
+E
+gravity generator~
+Enter "gravity" for a more complete list of commands associated with this device.
+~

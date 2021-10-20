@@ -1,0 +1,127 @@
+#6100
+king kai~
+@YK@yi@Yn@yg@n@n @BK@Ca@ci~
+@YK@yi@Yn@yg@n@n @BK@Ca@ci @Wis standing here, watching the fighters train@n
+~
+@D @n
+~
+bdgs 0 0 0 l 0 0 0 0 E
+100 0 10 0d12+0 0d0+0
+0 0 12 10
+8 8 1
+Size: 3
+Str: 81
+Dex: 95
+Int: 67
+Wis: 77
+Con: 66
+Cha: 95
+E
+T 6100
+T 6101
+T 6104
+#6101
+bubbles~
+@yBubbles@n~
+@yBubbles@w is playing here.@n
+~
+   @WThis monkey appears to be quite playful. He has pointy ears and thick brown
+fur. @n
+~
+dehvwxyz 0 0 0 lA bh 0 0 0 E
+10 0 10 0d8+0 0d0+0
+0 0 15 30
+8 8 1
+Size: 4
+BareHandAttack: 4
+Str: 17
+Dex: 19
+Int: 7
+Wis: 6
+Con: 15
+Cha: 18
+E
+T 6102
+#6102
+Gregory~
+@gGregory@n~
+@gGregory@w is flying here.@n
+~
+   @WThis giant humanoid cricket looks quite strange. @n
+~
+deghvwxyzA 0 0 0 lxA bh 0 0 0 E
+20 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 3
+BareHandAttack: 1
+Str: 14
+Dex: 18
+Int: 8
+Wis: 6
+Con: 18
+Cha: 16
+E
+#6127
+olibu~
+@YO@yl@ci@Cb@cu@n~
+@YO@yl@ci@Cb@cu@n @Wis training here@n
+~
+It looks unfinished.
+~
+d 0 0 0 0 0 0 0 10 E
+20 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 10
+Dex: 14
+Int: 16
+Wis: 18
+Con: 11
+Cha: 12
+E
+#6164
+snake servant~
+@GS@gn@ca@Ck@ge@n@n @GS@ge@cr@Cv@ga@Gn@gt@n@n~
+@GS@gn@ca@Ck@ge@n@n @GS@ge@cr@Cv@ga@Gn@gt@n@n @Cis walking around here@n
+~
+   @WThis beautiful girl has green skin and apparently works for Princess Snake.
+She is wearing a blue colored chinese style dress. @n
+~
+dvwxyzA 0 0 0 lA b 0 0 0 E
+10 0 10 0d0+0 0d0+0
+0 0 17 28
+8 8 2
+Str: 8
+Dex: 20
+Int: 6
+Wis: 8
+Con: 16
+Cha: 12
+E
+T 6140
+T 6141
+#6165
+princess snake~
+@RP@rr@yi@Yn@Wc@wess@n@n @GS@gn@ca@Ck@ge@n@n~
+@RP@rr@yi@Yn@Wc@wess@n@n @GS@gn@ca@Ck@ge@n@n @CIs standing around looking rather bored..@n
+~
+   @WThis green skinned woman has pointy ears and appears to be quite beautiful
+despite having an errie quality to her. @n
+~
+bdelwxyzA 0 0 0 lA b 0 0 0 E
+30 0 10 0d6+0 0d0+0
+0 0 17 26
+8 8 2
+BareHandAttack: 4
+Str: 19
+Dex: 28
+Int: 6
+Wis: 5
+Con: 22
+Cha: 29
+E
+T 6142
+T 6143
+T 6144
+$

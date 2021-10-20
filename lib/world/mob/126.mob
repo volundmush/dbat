@@ -1,0 +1,582 @@
+#12600
+Female Happy Secretary Human~
+@wA happy @Ds@Wecretary@n~
+@wA happy @Ds@Wecretary@w, standing behind the desk, is here.@n
+~
+@WA young, happy woman stands before you. She is wearing a genuine smile that
+warmly invites guests to approach her. She is wearing square glasses, a
+business suit and business pants. @n
+~
+bdsA 0 0 0 a 0 0 0 0 E
+2 0 10 0d0+0 0d0+0
+0 0 0 0
+8 8 2
+Str: 5
+Dex: 8
+Int: 20
+Wis: 17
+Con: 10
+Cha: 19
+E
+T 12600
+#12601
+King Guard Male Human~
+@WA @YK@win@Yg@W's @DG@Wu@wa@Wr@wd@n~
+@WA @YK@win@Yg@W's @DG@Wu@wa@Wr@wd@W is walking around here, keeping an eye on things.@n
+~
+@DThe man standing before you is wearing black sunglasses, a black suit and
+pants. He has an earpiece that he often speaks into. He is very mindful of
+his surroundings and tries very hard to not be seen. @n
+~
+cdm 0 0 0 0 0 0 0 0 E
+71 0 10 0d0+0 0d0+0
+0 0 0 0
+8 8 1
+Str: 60
+Dex: 59
+Int: 36
+Wis: 56
+Con: 60
+Cha: 50
+E
+#12602
+King Furry~
+@YK@win@Yg @cF@Curr@cy@n~
+@YK@win@Yg @cF@Curr@cy@W is here, signing some papers.@n
+~
+@WThe being standing before you is a half-breed; he is a bi-pedal dog. His fur
+is @cb@Clu@ce@W, he has a long white white moustache and he wears glasses. @n
+~
+bd 0 0 0 0 0 0 0 0 E
+4 0 10 0d0+0 0d0+0
+0 0 0 0
+8 8 1
+Str: 15
+Dex: 9
+Int: 19
+Wis: 11
+Con: 6
+Cha: 11
+E
+T 12602
+#12603
+Strong King's Guard Human Male~
+@WThe @cS@Ctron@cg @YK@win@Yg@W's @DG@Wu@wa@Wr@wd@n~
+@WThe @cS@Ctron@cg @YK@win@Yg@W's @DG@Wu@wa@Wr@wd@W is standing guard here.@n
+~
+@WA large man stands before you. He is standing in the corner of the room
+quietly, with a hand behind his back. He eyes you cautiously. @n
+~
+bcdm 0 0 0 0 0 0 0 0 E
+81 0 10 0d0+0 0d0+0
+0 0 0 0
+8 8 1
+Str: 66
+Dex: 80
+Int: 67
+Wis: 61
+Con: 52
+Cha: 71
+E
+#12604
+Female Woman Mistress~
+@WA @MM@ci@Cs@ct@Cr@ce@Cs@Ms@n~
+@WA woman, in her underwear, is here.@n
+~
+@WThe woman standing before you is absolutely beautiful, by Earth standards at
+least, her hair is blown. Her lips are @Rred@W, her skin is flawless, her nails
+are polished @Mpink@W and she appears to be in her late teens. @n
+~
+cdh 0 0 0 0 0 0 0 0 E
+2 0 10 0d0+0 0d0+0
+0 0 0 0
+8 8 2
+Str: 10
+Dex: 11
+Int: 15
+Wis: 10
+Con: 10
+Cha: 10
+E
+#12605
+Emissary Saiyan Male~
+@wA @yS@Ya@yi@Yy@ya@Yn @gEmissary@n~
+@wA @yS@Ya@yi@Yy@ya@Yn @gEmissary@w is just waiting here.@n
+~
+@WThe Saiyan standing before you has been sent from Planet Vegeta to Earth to
+negotiate any agreements between the two planets. @n
+~
+bcd 0 0 0 l 0 0 0 0 E
+40 0 10 0d8+0 0d0+0
+0 0 1 4
+8 8 1
+Str: 37
+Dex: 23
+Int: 24
+Wis: 28
+Con: 32
+Cha: 35
+E
+#12606
+Table Guy~
+Table Guy~
+Table Guy is here. You should never see this mob
+~
+It looks unfinished.
+~
+d 0 0 0 0 0 0 0 0 E
+10 0 10 0d0+0 1d0+0
+0 0 0 28
+8 8 1
+Str: 14
+Dex: 16
+Int: 7
+Wis: 20
+Con: 17
+Cha: 10
+E
+T 12606
+#12628
+Kanassan Katja thirteenth councillor~
+@CKatja@n the @DT@Whi@br@Bte@be@Wnt@Dh@n~
+@CKatja@n, the @DT@Whi@br@Bte@be@Wnt@Dh @cCo@nu@Wn@Dc@ci@Cl@cm@ne@Wm@Db@ce@Cr@n, is here@n
+~
+@CKatja@n is the second strongest and fifth most influential member of the Council.
+He, like many other of the Council members, appears to be very old. @n
+~
+bdlmvwxyz a 0 0 l 0 0 0 0 E
+80 0 10 0d4+0 0d0+0
+0 0 6 12
+8 8 1
+Str: 77
+Dex: 79
+Int: 60
+Wis: 70
+Con: 45
+Cha: 73
+E
+#12629
+Kanassan Wasser Tenth Councillor~
+@CWasser@n the @DT@Wen@bt@Bh@n~
+@CWasser@w, the @DT@we@Wn@bt@Bh @cCo@wu@Wn@Dc@ci@Cl@w@cm@we@Wm@Db@ce@Cr@w, is here.@n
+~
+@CWasser@n is the tenth member of the Supreme Council. He is largely responsible
+for interactions with the Temple in Aquis City and seldom gets involved in
+matters beyond religion. @n
+~
+bdlvwxyz 0 0 0 l 0 0 0 0 E
+60 0 10 0d4+0 0d0+0
+0 0 6 12
+8 8 1
+Str: 40
+Dex: 41
+Int: 31
+Wis: 60
+Con: 50
+Cha: 60
+E
+#12630
+Kanassan Voda Sixth Councillor~
+@CVoda@n the @DS@Wix@bt@Bh@n~
+@CVoda@w, the @DS@wi@Wx@bt@Bh @cCo@wu@Wn@Dc@ci@Cl@w@cm@we@Wm@Db@ce@Cr@w, is here.@n
+~
+@nThis Kanassan is short by Kanassan standards and @CVoda@n looks very old. Her
+facial expressions are dull and resigned, full of boredom. @n
+~
+bdlmvwxyz 0 0 0 l 0 0 0 0 E
+40 0 10 0d4+0 0d0+0
+0 0 6 12
+8 8 2
+Str: 31
+Dex: 25
+Int: 37
+Wis: 36
+Con: 24
+Cha: 21
+E
+#12631
+Kanassan Vatten Twelfth Councillor~
+@CVatten@n the @DT@Wwe@bl@Bft@bh@n~
+@CVatten@w, the @DT@ww@We@bl@Bft@bh @cCo@wu@Wn@Dc@ci@Cl@w@cm@we@Wm@Db@ce@Cr@w, is training here.@n
+~
+@CVatten@n is the third strongest but merely tenth most influential as a member of
+the Supreme Council. He is one the better Hydromancers amongst the Council
+members. @n
+~
+dlvwxyz 0 0 0 l 0 0 0 0 E
+75 0 10 0d4+0 0d0+0
+0 0 6 12
+8 8 1
+Str: 39
+Dex: 67
+Int: 41
+Wis: 37
+Con: 50
+Cha: 68
+E
+T 12629
+#12632
+Kanassan Toolo ninth Councillor~
+@CToolo@n the @DN@Wi@Bnt@bh@n~
+@CToolo@n, the @DN@Wi@Bnt@bh@n @cCo@nu@Wn@Dc@ci@Cl@cm@ne@Wm@Db@ce@Cr@n, deliberates here@n
+~
+@n@CToolo@n is an old, and esteemed member of the Supreme Council. His face whiskers
+are long and droopy and he the perhaps the most influential member of the
+Supreme Council, for his master of Future Sight. @n
+~
+bdlmvwxyz 0 0 0 l 0 0 0 0 E
+30 0 10 0d4+0 0d0+0
+0 0 6 12
+8 8 1
+Str: 23
+Dex: 30
+Int: 17
+Wis: 25
+Con: 15
+Cha: 16
+E
+#12633
+Kanassan Metsi Eleventh Councillor~
+@CMetsi@n the @DE@Wle@bv@Ben@bth@n~
+@CMetsi@w, the @DE@wl@We@bv@Ben@bth @cCo@wu@Wn@Dc@ci@Cl@w@cm@we@Wm@Db@ce@Cr@w, is meditating here.@n
+~
+@CMetsi@n sits here, silently meditating in the ebb and flow of the water. Her
+level head and widom has earned her the second most influence on the Supreme
+Council. @n
+~
+bdlmvwxyz 0 0 0 l 0 0 0 0 E
+50 0 10 0d4+0 0d0+0
+0 0 6 12
+8 8 2
+Str: 42
+Dex: 35
+Int: 25
+Wis: 48
+Con: 26
+Cha: 47
+E
+#12634
+Kanassan Aqura eighth councillor~
+@CAqura@n the @DE@Wig@Bh@bth@n~
+@CAqura@n, the @DE@Wig@Bh@bth@n @cCo@nu@Wn@Dc@ci@Cl@cm@ne@Wm@Db@ce@Cr@n, deliberates here@n
+~
+@CAquara@n is one of the only members of the Supreme Council to also have trained
+as a martial arts fighter and not just a hydromancer. His body still carries
+the bulk of his fighting days, and he is the second least influential member of
+the Council. @n
+~
+bdlmvwxyz 0 0 0 l 0 0 0 0 E
+100 0 10 0d4+0 0d0+0
+0 0 6 12
+8 8 1
+Str: 62
+Dex: 58
+Int: 93
+Wis: 80
+Con: 50
+Cha: 91
+E
+#12635
+Demetrious Kanassan seventh councillor~
+@CDemetrious@n the @DS@Wev@Ben@bth@n~
+@CDemetrious@n, the @DS@Wev@Ben@bth@n @cCo@nu@Wn@Dc@ci@Cl@cm@ne@Wm@Db@ce@Cr@n, stands here@n
+~
+@CDemetrious@n doesn't appear to be built like a fighter, but he carries the scars.
+The thing that stands out most about this stately dressed Kanassan is that he is
+missing one eye, the socket clenched and scarred shut. His memories of the
+past make him the third most influential member of the Supreme Council. @n
+~
+bdlmvwxyz 0 0 0 l 0 0 0 0 E
+50 0 10 0d4+0 0d0+0
+0 0 6 12
+8 8 1
+Str: 33
+Dex: 44
+Int: 27
+Wis: 42
+Con: 31
+Cha: 32
+E
+#12636
+Wasabe Kanassan fifth Councillor~
+@CWasabe@n the @DF@Wif@Bt@bh@n~
+@CWasabe@n, the @DF@Wif@Bt@bh @cCo@nu@Wn@Dc@ci@Cl@cm@ne@Wm@Db@ce@Cr@n, contemplates matters here@n
+~
+@CWasabe@n seems fairly average in nearly every way a Kanassan can be. Nothing
+about their appearance really stands them apart from another and there isn't
+anything remarkable about their personality. This man holds his position on
+the Council by virtue of being the best of what's left and thus holds the very
+least amount of influence on the Supreme Council. @n
+~
+bdlmvwxyz 0 0 0 l 0 0 0 0 E
+25 0 10 0d4+0 0d0+0
+0 0 6 12
+8 8 1
+Str: 19
+Dex: 16
+Int: 22
+Wis: 22
+Con: 20
+Cha: 20
+E
+#12637
+Kanassan Wadja fourth councillor~
+@CWadja@n the @DF@Wou@Br@bth@n~
+@CWadja@n, the @DF@Wou@Br@bth @cCo@nu@Wn@Dc@ci@Cl@cm@ne@Wm@Db@ce@Cr@n, floats here in meditation@n
+~
+@CWadja@n is a tentative looking Kanassan, and her demeanor and her voice is as
+timid as her behavior. Behind this docile nature lie sharp eyes and even
+sharper mind however, as she is keen to remind her other Council members. 
+This sharp wit leaves her with the third least influence on the Supreme
+Council. @n
+~
+bdlmvwxyz 0 0 0 l 0 0 0 0 E
+44 0 10 0d4+0 0d0+0
+0 0 6 12
+8 8 2
+Str: 41
+Dex: 29
+Int: 31
+Wis: 30
+Con: 34
+Cha: 28
+E
+#12638
+Kanassan Wunjo third councillor~
+@CWunjo@n the @DT@Whi@br@Bd@n~
+@CWunjo@n, the @DT@Whi@br@Bd @cCo@nu@Wn@Dc@ci@Cl@cm@ne@Wm@Db@ce@Cr@n, is here@n
+~
+@CWunjo@n is one of the more mysterious members of the Supreme Council. Ninth
+among influence, his stranger past leaves him as a black sheep amongst his
+fellow members of the Council for having left Kanassa and returned. @n
+~
+bdlmvwxyz 0 0 0 l 0 0 0 0 E
+58 0 10 0d4+0 0d0+0
+0 0 6 12
+8 8 1
+Str: 36
+Dex: 42
+Int: 41
+Wis: 44
+Con: 32
+Cha: 45
+E
+#12639
+Kanassan Kandajar second councillor~
+@CKandajar@n the @DS@Wec@bo@Bnd@n~
+@CKandajar@n, the @DS@Wec@bo@Bnd @cCo@nu@Wn@Dc@ci@Cl@cm@ne@Wm@Db@ce@Cr@n, is here@n
+~
+@CKandajar@n is the youngest member of the Supreme Council, which makes it strange
+that he is the fourth most influential member. However he's come by his status
+he seems earnest and passionate when discussing matters of the Council or Aquis
+City. @n
+~
+bdlmvwxyz 0 0 0 l 0 0 0 0 E
+58 0 10 0d4+0 0d0+0
+0 0 6 12
+8 8 1
+Str: 36
+Dex: 42
+Int: 52
+Wis: 50
+Con: 44
+Cha: 39
+E
+#12640
+Kanassan Paza first councillor~
+@CPaza@n the @DF@Wir@bs@Bt@n~
+@CPaza@n, the @DF@Wir@bs@Bt @cCo@nu@Wn@Dc@ci@Cl@cm@ne@Wm@Db@ce@Cr@n, deliberates here@n
+~
+@CPaza@n is a statuesque Kanassan who carries herself with confidence. This
+confidence is to cover the fact that she carries only the eighth most influence
+of the Supreme Council. Her personality is as dominant as her demeanor. @n
+~
+bdlmvwxyz 0 0 0 l 0 0 0 0 E
+70 0 10 0d4+0 0d0+0
+0 0 6 12
+8 8 2
+Str: 46
+Dex: 48
+Int: 35
+Wis: 35
+Con: 37
+Cha: 66
+E
+#12641
+Kanassan Shimi~
+@CShimi@n~
+@CShimi@n sits atop a counter covered in wares@n
+~
+@CShimi@n is an average Kanassan in stature with maybe that glimmer in the eye that
+suggests a shrewd business person. @n
+~
+bdlsvwxy 0 0 0 l 0 0 0 0 E
+100 0 10 0d4+0 0d0+0
+0 0 6 12
+8 8 2
+Str: 82
+Dex: 86
+Int: 82
+Wis: 92
+Con: 88
+Cha: 100
+E
+#12642
+burly aquis tower guard kanassan~
+@cA@Cq@Wu@bi@Bs@D T@Wo@Dw@We@Dr@n Guard@n~
+@nA burly Kanassan stands here, blocking the stairs.@n
+~
+@nThis @CKanassan@n is strong and burly looking for their kind. He stands guard and
+looks as though he means business. @n
+~
+bdlmvwxyz 0 0 0 l 0 0 0 0 E
+100 0 10 0d4+0 0d0+0
+0 0 6 12
+8 8 1
+Str: 89
+Dex: 92
+Int: 64
+Wis: 73
+Con: 51
+Cha: 61
+E
+T 12642
+#12643
+arlian powerful imposing hive soldier insectoid~
+@GA@gr@Yl@Gi@ga@Yn@n Hive @DSoldier@n~
+@nA powerful and imposing looking insectoid soldier stands guard here@n
+~
+@nThis arlian is very insectiod in nature. He looks like an enormous cricket, if
+crickets were carnivorous and mutated to be monstrous. Several legs and nasty
+serrated claws on humanoid-like hands. @n
+~
+bcdlvwxyz 0 0 0 l 0 0 0 0 E
+25 0 10 0d4+0 0d0+0
+0 0 20 13
+8 8 1
+Str: 23
+Dex: 19
+Int: 16
+Wis: 19
+Con: 18
+Cha: 19
+E
+T 12643
+#12644
+arlian palace slave~
+@GA@gr@Yl@Gi@ga@Yn@n Palace Slave@n~
+@nA malnourished Arlian slave is here, trying to look busy@n
+~
+@nThis Arlian is clearly malnourished and stands around doing the minimal amount
+needed to try and look busy as they wander about palace grounds. @n
+~
+cdlvwxyz 0 0 0 l 0 0 0 0 E
+10 0 10 0d4+0 0d0+0
+0 0 20 13
+8 8 1
+Str: 9
+Dex: 18
+Int: 6
+Wis: 6
+Con: 18
+Cha: 8
+E
+#12645
+arlian powerful imposing hive guard~
+@GA@gr@Yl@Gi@ga@Yn@n Hive @DGuard@n~
+@nA powerful and imposing looking insectoid soldier stands guard here@n
+~
+@nThis arlian is very insectiod in nature. He looks like an enormous cricket, if
+crickets were carnivorous and mutated to be monstrous. Several legs and nasty
+serrated claws on humanoid-like hands. @n
+~
+cdlvwxyz 0 0 0 l 0 0 0 0 E
+25 0 10 0d4+0 0d0+0
+0 0 20 13
+8 8 1
+Str: 21
+Dex: 15
+Int: 25
+Wis: 20
+Con: 25
+Cha: 25
+E
+T 12643
+#12646
+king moai arlian~
+@YK@yin@Yg@n @GM@go@Ya@Gi@n~
+@nThe greedy and powerful @YK@yin@Yg@G M@go@Ya@Gi@n stands here.@n
+~
+It looks unfinished.
+~
+bdlvwxyz 0 0 0 l 0 0 0 0 E
+100 0 10 0d4+0 0d0+0
+0 0 20 13
+8 8 1
+Str: 52
+Dex: 89
+Int: 89
+Wis: 70
+Con: 88
+Cha: 96
+E
+T 12644
+T 12645
+T 12646
+#12647
+arlian harem slave~
+@GA@gr@Yl@Gi@ga@Yn@n Harem @MSlave@n~
+@nA malnourished female Arlian rests here.@n
+~
+It looks unfinished.
+~
+bcdlvwxyz 0 0 0 l 0 0 0 0 E
+0 0 10 0d4+0 0d0+0
+0 0 20 13
+8 8 2
+Str: 11
+Dex: 15
+Int: 16
+Wis: 7
+Con: 5
+Cha: 8
+E
+#12694
+Suzy Marie~
+Suzy Marie~
+An unfinished mob stands here.
+~
+It looks unfinished.
+~
+dlmvwxyz 0 0 0 0 0 0 0 0 E
+110 0 10 0d8+0 0d0+0
+0 0 1 4
+8 8 1
+Str: 13
+Dex: 10
+Int: 13
+Wis: 13
+Con: 10
+Cha: 10
+E
+#12699
+Demon Havari Imp~
+@DH@cavari@w, the @yI@rm@Rp@n~
+@DH@cavari@w, the @yI@rm@Rp@w, is here.@n
+~
+@WA thin, child-like @yI@rm@Rp@W stands before you. He has blood red skin, diminutive
+wings and red eyes. @n
+~
+bd 0 0 0 l 0 0 0 -1000 E
+80 0 10 0d0+0 0d0+0
+0 0 10 28
+8 8 1
+Size: 2
+Str: 56
+Dex: 61
+Int: 72
+Wis: 53
+Con: 74
+Cha: 63
+E
+$

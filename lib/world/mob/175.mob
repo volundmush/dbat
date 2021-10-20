@@ -1,0 +1,345 @@
+#17500
+Adult Male Colonist~
+@wAdult Male Colonist@n~
+@wAn adult male colonist is walking here.@n
+~
+   @WThis colonist is wearing a standard two piece blue uniform common to the
+colony. @n
+~
+d 0 0 0 0 0 0 0 0 E
+8 20 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 16
+Dex: 16
+Int: 16
+Wis: 16
+Con: 16
+Cha: 16
+E
+#17501
+Adult Female Colonist~
+@wAdult Female Colonist@n~
+@wAn adult female colonist is walking casually here.@n
+~
+   @WThis colonist is wearing the standard two piece uniform common to the
+colony. @n
+~
+d 0 0 0 0 0 0 0 0 E
+7 20 10 0d0+0 0d0+0
+0 0 0 28
+8 8 2
+Str: 8
+Dex: 11
+Int: 8
+Wis: 8
+Con: 11
+Cha: 11
+E
+#17502
+Young Boy~
+@wYoung Boy@n~
+@wA young boy is running around playing here.@n
+~
+   @WThis young boy is wearing a red shirt and black pants. @n
+~
+d 0 0 0 0 0 0 0 0 E
+3 20 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 16
+Dex: 14
+Int: 16
+Wis: 16
+Con: 14
+Cha: 14
+E
+#17503
+Young Girl~
+@wYoung Girl@n~
+@wA young girl is standing here looking around.@n
+~
+   @WThis girl is wearing a yellow dress. @n
+~
+d 0 0 0 0 0 0 0 0 E
+2 20 10 0d0+0 0d0+0
+0 0 0 28
+8 8 2
+Str: 16
+Dex: 9
+Int: 16
+Wis: 16
+Con: 9
+Cha: 9
+E
+#17504
+Old Male Colonist~
+@wOld Male Colonist@n~
+@wAn old male colonist is standing here reading a newspaper.@n
+~
+   @WThis old man is wearing the standard blue two piece uniform of colony
+adults. @n
+~
+d 0 0 0 0 0 0 0 0 E
+5 20 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 10
+Dex: 16
+Int: 10
+Wis: 10
+Con: 16
+Cha: 16
+E
+#17505
+Old Female Colonist~
+@wOld Female Colonist@n~
+@wAn old female colonist is standing here looking tiredly at the world.@n
+~
+   @WThis old woman is dressed in the standard blue two piece uniform of the
+colony. @n
+~
+d 0 0 0 0 0 0 0 0 E
+4 20 10 0d0+0 0d0+0
+0 0 0 28
+8 8 2
+Str: 9
+Dex: 15
+Int: 9
+Wis: 9
+Con: 15
+Cha: 15
+E
+#17506
+Tired Farmer~
+@wA Tired Farmer@n~
+@wA tired farmer is working in the field here.@n
+~
+   @WThis colonist is wearing a two piece green uniform that signifies his
+occupation as a colony farmer. @n
+~
+d 0 0 0 0 0 0 0 0 E
+8 20 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 15
+Dex: 13
+Int: 15
+Wis: 15
+Con: 13
+Cha: 13
+E
+T 17501
+#17507
+Tired Farmer~
+@wA Tired Farmer@n~
+@wA tired farmer is working in the field here.@n
+~
+   @WThis colonist is wearing a two piece green uniform that signifies his
+occupation as a colony farmer. @n
+~
+d 0 0 0 0 0 0 0 0 E
+6 20 10 0d0+0 0d0+0
+0 0 0 28
+8 8 2
+Str: 15
+Dex: 13
+Int: 15
+Wis: 15
+Con: 13
+Cha: 13
+E
+T 17501
+#17508
+Gerrad~
+@wGerrad@n~
+@wGerrad the colony marshal is standing here looking out the window at the streets below.@n
+~
+   @WThis tall man with a thick mustache is wearing a black two piece uniform
+with a silver star pinned to the left side of his chest. @n
+~
+bd 0 0 0 0 0 0 0 0 E
+45 20 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 16
+Dex: 13
+Int: 16
+Wis: 16
+Con: 13
+Cha: 13
+E
+T 17519
+T 17520
+#17509
+Gustaf~
+@wGustaf@n~
+@wGustaf the current mayor is standing next to his desk reading a piece of paper.@n
+~
+   @WThis lanky man is dressed in a fine expensive suit and appears to be
+engrossed in reading the piece of paper in his hands. @n
+~
+bd 0 0 0 0 0 0 0 0 E
+30 20 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 10
+Dex: 15
+Int: 10
+Wis: 10
+Con: 15
+Cha: 15
+E
+T 17502
+T 17503
+T 17504
+T 17505
+#17510
+Poor Colonist~
+@wPoor Colonist@n~
+@wA poor colonist is staring at the floorboards of his home.@n
+~
+   @WThis colonist has had hard luck on the new planet and is strugling to make
+ends meet. @n
+~
+bd 0 0 0 0 0 0 0 0 E
+5 20 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 10
+Dex: 14
+Int: 10
+Wis: 10
+Con: 14
+Cha: 14
+E
+#17511
+Yuu~
+@wYuu@n~
+@wYuu, The Exile, is standing here with his arms folded within his robes.@n
+~
+   @WThis old kai appears to have a sinister quality lurking beneath what he
+presents to most people. @n
+~
+bd 0 0 0 l 0 0 0 0 E
+80 20 10 0d0+0 0d0+0
+0 0 12 28
+8 8 1
+Str: 14
+Dex: 15
+Int: 14
+Wis: 14
+Con: 15
+Cha: 15
+E
+T 17507
+T 17508
+T 17509
+T 17510
+T 17511
+T 17512
+T 17518
+#17512
+Dura-Tech Clerk~
+@DD@Wu@wr@Da@W-@wT@De@Wc@wh @CClerk@n~
+@wThe @DD@Wu@wr@Da@W-@wT@De@Wc@wh @CClerk@w is standing behind the counter here.@n
+~
+   @WThis young woman appears to enjoy her work here at Dura-Tech. @n
+~
+bds 0 0 0 0 0 0 0 0 E
+5 20 10 0d0+0 0d0+0
+1000000 0 0 28
+8 8 2
+Str: 15
+Dex: 13
+Int: 15
+Wis: 15
+Con: 13
+Cha: 13
+E
+#17513
+Carbonium Shopkeeper~
+@yC@Ya@wr@yb@Yo@wn@yi@Yu@wm @BShopkeeper@n~
+@wThe @yC@Ya@wr@yb@Yo@wn@yi@Yu@wm @BShopkeeper@w is standing here.@n
+~
+   @WThis fat man is waiting impatiently for customers to hurry up and buy
+things. @n
+~
+bds 0 0 0 0 0 0 0 0 E
+5 20 10 0d0+0 0d0+0
+1000000 0 0 28
+8 8 1
+Str: 14
+Dex: 15
+Int: 14
+Wis: 14
+Con: 15
+Cha: 15
+E
+#17514
+Greg~
+@wGreg@n~
+@wGreg the store clerk is standing here with a smile on his face.@n
+~
+   @WThis large burly man is the colony's main source of supplies. @n
+~
+bds 0 0 0 0 0 0 0 0 E
+5 20 10 0d0+0 0d0+0
+1000000 0 0 28
+8 8 1
+Str: 14
+Dex: 15
+Int: 14
+Wis: 14
+Con: 15
+Cha: 15
+E
+T 17506
+#17515
+Gytalis~
+@wGytalis@n~
+@wGytalis, The Hermit, is sitting here reading a book with one hand while holding a sword fragment with the other.@n
+~
+   @WThis old kontasu appears to have been living here for quite some time. 
+He's dressed in a fancy black and white silk kimono and has a cane propped up
+against his chair. @n
+~
+bd 0 0 0 l 0 0 0 0 E
+70 20 10 0d0+0 0d0+0
+0 0 3 28
+8 8 1
+Str: 9
+Dex: 16
+Int: 9
+Wis: 9
+Con: 16
+Cha: 16
+E
+T 17514
+T 17513
+T 17515
+T 17516
+T 17517
+T 17518
+#17516
+Damanos~
+@WDamanos@n~
+A snobby looking human named Damanos is here.
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 0 E
+50 20 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 14
+Dex: 9
+Int: 14
+Wis: 14
+Con: 9
+Cha: 9
+E
+T 17540
+T 17541
+T 17542
+$

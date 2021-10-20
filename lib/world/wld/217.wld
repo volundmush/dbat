@@ -1,0 +1,2361 @@
+#63200
+@rThe@n @YO@yu@Yt@yp@Yo@ys@yt@n : City Gate~
+@nA colossal gate fit for the titans of legend stands to the north. No creases
+can be seen, as if the gate entire was carved from the mountain itself. A
+towering landscape of pillars and ramparts lie above the stone face of the
+door. An unrecognizable set of runes in a lost language have been meticulously
+etched into every side of the structure. If examined, the architecture begins
+to to dwarf the mind with its sheer sense of size and solitude. @n
+~
+217 cdfghAF 0 0 0 1
+D0
+~
+Gate~
+1 63200 63201 113 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6003 0 0 0 0 0 0 0 0
+E
+sign~
+look at my sign
+~
+S
+#63201
+@rThe @YOutpost@n: Exposed Columns~
+@nThere is no ceiling for these halls, leaving the walkway open to the elements.
+Though the elements seem to have little to no effect on this ancient place. 
+Pillars stretch to the skies casting shadows which loom over the path toward
+their counterparts. Adjacent to the pillars, twelve foot tall statues in
+various poses stand tall, gazing down upon those who pass through these
+corridors. The sames runes that adorn the gate decorate the base of each
+statue. @n
+~
+217 dhAF 0 0 0 1
+D0
+~
+~
+0 0 63204 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 63202 0 0 0 0 0 0 0 0
+D2
+~
+Gate~
+1 63200 63200 100 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63203 0 0 0 0 0 0 0 0
+S
+#63202
+@rThe @YOutpost@n: Exposed Columns~
+@nThere is no ceiling for these halls, leaving the walkway open to the elements.
+Though the elements seem to have little to no effect on this ancient place. 
+Pillars stretch to the skies casting shadows which loom over the path toward
+their counterparts. Adjacent to the pillars, twelve foot tall statues in
+various poses stand tall, gazing down upon those who pass through these
+corridors. The sames runes that adorn the gate decorate the base of each
+statue. @n
+~
+217 dhAF 0 0 0 1
+D0
+~
+~
+0 0 63206 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63201 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 63204 0 0 0 0 0 0 0 0
+S
+#63203
+@rThe @YOutpost@n: Exposed Columns~
+@nThere is no ceiling for these halls, leaving the walkway open to the elements.
+Though the elements seem to have little to no effect on this ancient place. 
+Pillars stretch to the skies casting shadows which loom over the path toward
+their counterparts. Adjacent to the pillars, twelve foot tall statues in
+various poses stand tall, gazing down upon those who pass through these
+corridors. The sames runes that adorn the gate decorate the base of each
+statue. @n
+~
+217 dhAF 0 0 0 1
+D0
+~
+~
+0 0 63205 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 63201 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 63204 0 0 0 0 0 0 0 0
+S
+#63204
+@rThe@Y Outpost@n: The Golden Dome@n~
+@nA dome of amazing size covers a gargantuan platform. Three slim bridges
+connect to the platform, a black void of space beneath them. Above, is a mural
+that looks brand new and covers the ceiling of the domr. Painting of glorious
+battles between all species are on display and they seem to radiate within this
+room illuminating it with a strange light. Further examination of the art, the
+painting scenes seem to move, replaying the battles like living memories in an
+endless loop. In the center of the platform a single @YS@Wt@Ya@Wt@Yu@We@n can be seen. @n
+~
+217 cdhAF 0 0 0 0
+D2
+~
+~
+0 0 63201 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 63202 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 63203 0 0 0 0 0 0 0 0
+E
+Look Statue~
+   @R< @nThe warrior of warriors, decorated for their triumph on the battlefield
+they have earned their rightful place within the Outpost of Warriors. May
+those who follow this path take note, only the strongest earn their place
+amongst the gods of glory and battle. @R>@n
+~
+S
+#63205
+@rThe @YOutpost@n: Exposed Columns~
+@nThere is no ceiling for these halls, leaving the walkway open to the elements.
+Though the elements seem to have little to no effect on this ancient place. 
+Pillars stretch to the skies casting shadows which loom over the path toward
+their counterparts. Adjacent to the pillars, twelve foot tall statues in
+various poses stand tall, gazing down upon those who pass through these
+corridors. The sames runes that adorn the gate decorate the base of each
+statue. @n
+~
+217 dhAF 0 0 0 1
+D2
+~
+~
+0 0 63203 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 63207 0 0 0 0 0 0 0 0
+S
+#63206
+@rThe @YOutpost@n: Exposed Columns~
+@nThere is no ceiling for these halls, leaving the walkway open to the elements.
+Though the elements seem to have little to no effect on this ancient place. 
+Pillars stretch to the skies casting shadows which loom over the path toward
+their counterparts. Adjacent to the pillars, twelve foot tall statues in
+various poses stand tall, gazing down upon those who pass through these
+corridors. The sames runes that adorn the gate decorate the base of each
+statue. @n
+~
+217 dhAF 0 0 0 1
+D2
+~
+~
+0 0 63202 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 63207 0 0 0 0 0 0 0 0
+S
+#63207
+@rThe@Y Outpost@n: Olympic Staircase~
+@nStepping through a last pair of columns, the path leads to an opening. 
+Through this opening lies a passage which is at first narrow but soon broadens
+out as it reveals a grand staircase. The steps are far too tall and wide for
+any normally-sized creature to traverse with any sort of ease. Torches of
+white fire are staggered along the stairs, simply hovering in place as they
+shed pale light eerily along the stairs and columns. The flames do not flicker
+or waver, but remain always constant. @n
+~
+217 dhAF 0 0 0 0
+D4
+~
+~
+0 0 63208 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 63206 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 63205 0 0 0 0 0 0 0 0
+S
+#63208
+@rThe@Y Outpost@n: Olympic Staircase~
+@nStepping through a last pair of columns, the path leads to an opening. 
+Through this opening lies a passage which is at first narrow but soon broadens
+out as it reveals a grand staircase. The steps are far too tall and wide for
+any normally-sized creature to traverse with any sort of ease. Torches of
+white fire are staggered along the stairs, simply hovering in place as they
+shed pale light eerily along the stairs and columns. The flames do not flicker
+or waver, but remain always constant. @n
+~
+217 dhAF 0 0 0 1
+D2
+~
+~
+0 0 63209 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 63207 0 0 0 0 0 0 0 0
+S
+#63209
+@rThe@Y Outpost@n: Olympic Staircase~
+@nStepping through a last pair of columns, the path leads to an opening. 
+Through this opening lies a passage which is at first narrow but soon broadens
+out as it reveals a grand staircase. The steps are far too tall and wide for
+any normally-sized creature to traverse with any sort of ease. Torches of
+white fire are staggered along the stairs, simply hovering in place as they
+shed pale light eerily along the stairs and columns. The flames do not flicker
+or waver, but remain always constant. @n
+~
+217 dhAF 0 0 0 0
+D0
+~
+~
+0 0 63208 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 63210 0 0 0 0 0 0 0 0
+S
+#63210
+@rThe@Y Outpost@n: Olympic Staircase~
+@nStepping through a last pair of columns, the path leads to an opening. 
+Through this opening lies a passage which is at first narrow but soon broadens
+out as it reveals a grand staircase. The steps are far too tall and wide for
+any normally-sized creature to traverse with any sort of ease. Torches of
+white fire are staggered along the stairs, simply hovering in place as they
+shed pale light eerily along the stairs and columns. The flames do not flicker
+or waver, but remain always constant. @n
+~
+217 dhAF 0 0 0 1
+D0
+~
+~
+0 0 63211 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 63209 0 0 0 0 0 0 0 0
+S
+#63211
+@rThe@Y Outpost@n: Olympic Staircase~
+@nStepping through a last pair of columns, the path leads to an opening. 
+Through this opening lies a passage which is at first narrow but soon broadens
+out as it reveals a grand staircase. The steps are far too tall and wide for
+any normally-sized creature to traverse with any sort of ease. Torches of
+white fire are staggered along the stairs, simply hovering in place as they
+shed pale light eerily along the stairs and columns. The flames do not flicker
+or waver, but remain always constant. @n
+~
+217 dhAF 0 0 0 1
+D0
+~
+~
+0 0 63212 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63210 0 0 0 0 0 0 0 0
+S
+#63212
+@rThe @YOutpost@n: The Longhouse@n~
+@nThis long building is made of stone and wooden logs, stretching hundreds of
+feet in either direction. The bricks used to constuct the building are
+enormous, almost of impossible size. The walls are covered in shields with a
+variety of different weapons places sporadically between them. In the center
+of the building, stretching almost as long as the longhouse itself is a
+thundering fire pit. Tables are placed around the pit with fruits, drink, and
+large hunks of meat placed on them. In the center look a giant roasting spit
+with the head of a dragon spinning over the largest part of the fire. @n
+~
+217 dhAF 0 0 0 0
+D1
+~
+~
+0 0 63213 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63211 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63216 0 0 0 0 0 0 0 0
+S
+#63213
+@rThe @YOutpost@n: The Longhouse@n~
+@nThis long building is made of stone and wooden logs, stretching hundreds of
+feet in either direction. The bricks used to constuct the building are
+enormous, almost of impossible size. The walls are covered in shields with a
+variety of different weapons places sporadically between them. In the center
+of the building, stretching almost as long as the longhouse itself is a
+thundering fire pit. Tables are placed around the pit with fruits, drink, and
+large hunks of meat placed on them. In the center look a giant roasting spit
+with the head of a dragon spinning over the largest part of the fire. @n
+~
+217 dhAF 0 0 0 0
+D1
+~
+~
+0 0 63214 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63212 0 0 0 0 0 0 0 0
+S
+#63214
+@rThe @YOutpost@n: The Longhouse@n~
+@nThis long building is made of stone and wooden logs, stretching hundreds of
+feet in either direction. The bricks used to constuct the building are
+enormous, almost of impossible size. The walls are covered in shields with a
+variety of different weapons places sporadically between them. In the center
+of the building, stretching almost as long as the longhouse itself is a
+thundering fire pit. Tables are placed around the pit with fruits, drink, and
+large hunks of meat placed on them. In the center look a giant roasting spit
+with the head of a dragon spinning over the largest part of the fire. @n
+~
+217 dhAF 0 0 0 0
+D3
+~
+~
+0 0 63213 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 63215 0 0 0 0 0 0 0 0
+S
+#63215
+@rThe @YOutpost@n: The Longhouse@n~
+@nThis long building is made of stone and wooden logs, stretching hundreds of
+feet in either direction. The bricks used to constuct the building are
+enormous, almost of impossible size. The walls are covered in shields with a
+variety of different weapons places sporadically between them. In the center
+of the building, stretching almost as long as the longhouse itself is a
+thundering fire pit. Tables are placed around the pit with fruits, drink, and
+large hunks of meat placed on them. In the center look a giant roasting spit
+with the head of a dragon spinning over the largest part of the fire. @n
+~
+217 dhAF 0 0 0 0
+D6
+~
+~
+0 0 63223 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 63214 0 0 0 0 0 0 0 0
+S
+#63216
+@rThe @YOutpost@n: The Longhouse@n~
+@nThis long building is made of stone and wooden logs, stretching hundreds of
+feet in either direction. The bricks used to constuct the building are
+enormous, almost of impossible size. The walls are covered in shields with a
+variety of different weapons places sporadically between them. In the center
+of the building, stretching almost as long as the longhouse itself is a
+thundering fire pit. Tables are placed around the pit with fruits, drink, and
+large hunks of meat placed on them. In the center look a giant roasting spit
+with the head of a dragon spinning over the largest part of the fire. @n
+~
+217 dhAF 0 0 0 0
+D1
+~
+~
+0 0 63212 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63217 0 0 0 0 0 0 0 0
+S
+#63217
+@rThe @YOutpost@n: The Longhouse@n~
+@nThis long building is made of stone and wooden logs, stretching hundreds of
+feet in either direction. The bricks used to constuct the building are
+enormous, almost of impossible size. The walls are covered in shields with a
+variety of different weapons places sporadically between them. In the center
+of the building, stretching almost as long as the longhouse itself is a
+thundering fire pit. Tables are placed around the pit with fruits, drink, and
+large hunks of meat placed on them. In the center look a giant roasting spit
+with the head of a dragon spinning over the largest part of the fire. @n
+~
+217 dhAF 0 0 0 0
+D1
+~
+~
+0 0 63216 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 63218 0 0 0 0 0 0 0 0
+S
+#63218
+@rThe @YOutpost@n: The Longhouse@n~
+@nThis long building is made of stone and wooden logs, stretching hundreds of
+feet in either direction. The bricks used to constuct the building are
+enormous, almost of impossible size. The walls are covered in shields with a
+variety of different weapons places sporadically between them. In the center
+of the building, stretching almost as long as the longhouse itself is a
+thundering fire pit. Tables are placed around the pit with fruits, drink, and
+large hunks of meat placed on them. In the center look a giant roasting spit
+with the head of a dragon spinning over the largest part of the fire. @n
+~
+217 dhAF 0 0 0 0
+D7
+~
+~
+0 0 63219 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 63217 0 0 0 0 0 0 0 0
+S
+#63219
+@rThe @YOutpost@n: The Longhouse@n~
+@nThis long building is made of stone and wooden logs, stretching hundreds of
+feet in either direction. The bricks used to constuct the building are
+enormous, almost of impossible size. The walls are covered in shields with a
+variety of different weapons places sporadically between them. In the center
+of the building, stretching almost as long as the longhouse itself is a
+thundering fire pit. Tables are placed around the pit with fruits, drink, and
+large hunks of meat placed on them. In the center look a giant roasting spit
+with the head of a dragon spinning over the largest part of the fire. @n
+~
+217 dhAF 0 0 0 0
+D1
+~
+~
+0 0 63220 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 63218 0 0 0 0 0 0 0 0
+S
+#63220
+@rThe @YOutpost@n: The Longhouse@n~
+@nThis long building is made of stone and wooden logs, stretching hundreds of
+feet in either direction. The bricks used to constuct the building are
+enormous, almost of impossible size. The walls are covered in shields with a
+variety of different weapons places sporadically between them. In the center
+of the building, stretching almost as long as the longhouse itself is a
+thundering fire pit. Tables are placed around the pit with fruits, drink, and
+large hunks of meat placed on them. In the center look a giant roasting spit
+with the head of a dragon spinning over the largest part of the fire. @n
+~
+217 dhAF 0 0 0 0
+D1
+~
+~
+0 0 63221 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63219 0 0 0 0 0 0 0 0
+S
+#63221
+@rThe @YOutpost@n: The Longhouse@n~
+@nThis long building is made of stone and wooden logs, stretching hundreds of
+feet in either direction. The bricks used to constuct the building are
+enormous, almost of impossible size. The walls are covered in shields with a
+variety of different weapons places sporadically between them. In the center
+of the building, stretching almost as long as the longhouse itself is a
+thundering fire pit. Tables are placed around the pit with fruits, drink, and
+large hunks of meat placed on them. In the center look a giant roasting spit
+with the head of a dragon spinning over the largest part of the fire. @n
+~
+217 dhAF 0 0 0 0
+D0
+~
+~
+0 0 63224 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 63222 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63220 0 0 0 0 0 0 0 0
+S
+#63222
+@rThe @YOutpost@n: The Longhouse@n~
+@nThis long building is made of stone and wooden logs, stretching hundreds of
+feet in either direction. The bricks used to constuct the building are
+enormous, almost of impossible size. The walls are covered in shields with a
+variety of different weapons places sporadically between them. In the center
+of the building, stretching almost as long as the longhouse itself is a
+thundering fire pit. Tables are placed around the pit with fruits, drink, and
+large hunks of meat placed on them. In the center look a giant roasting spit
+with the head of a dragon spinning over the largest part of the fire. @n
+~
+217 dhAF 0 0 0 0
+D1
+~
+~
+0 0 63223 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63221 0 0 0 0 0 0 0 0
+S
+#63223
+@rThe @YOutpost@n: The Longhouse@n~
+@nThis long building is made of stone and wooden logs, stretching hundreds of
+feet in either direction. The bricks used to constuct the building are
+enormous, almost of impossible size. The walls are covered in shields with a
+variety of different weapons places sporadically between them. In the center
+of the building, stretching almost as long as the longhouse itself is a
+thundering fire pit. Tables are placed around the pit with fruits, drink, and
+large hunks of meat placed on them. In the center look a giant roasting spit
+with the head of a dragon spinning over the largest part of the fire. @n
+~
+217 dhAF 0 0 0 0
+D3
+~
+~
+0 0 63222 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 63215 0 0 0 0 0 0 0 0
+S
+#63224
+@rThe@Y Outpost@n: Connecting Hallway@n~
+@nThis closed hallways is simple in design. In case of battle, it resembles a
+perfect choke point to be used against invading forces. The torches are
+scarce, two in the beginning at the entrance, and two that can be seen further
+into the outpost. @n
+~
+217 cdhAF 0 0 0 0
+D0
+~
+~
+0 0 63225 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63221 0 0 0 0 0 0 0 0
+S
+#63225
+@rThe@Y Outpost@n: Barracks@n~
+@nThis building resembles the last but these walls are made of reinforced steel
+and there is no feast here. Racks of weapons are placed along the walls, each
+holding an array of weapons. Swords, Spears, Crossbows, and then the
+occasional polearm. Torches of white fire sit above each rack so they're well
+lit and easily accessible. @n
+~
+217 dhAF 0 0 0 0
+D1
+~
+~
+0 0 63226 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63224 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63228 0 0 0 0 0 0 0 0
+S
+#63226
+@rThe@Y Outpost@n: Barracks@n~
+@nThis building resembles the last but these walls are made of reinforced steel
+and there is no feast here. Racks of weapons are placed along the walls, each
+holding an array of weapons. Swords, Spears, Crossbows, and then the
+occasional polearm. Torches of white fire sit above each rack so they're well
+lit and easily accessible. @n
+~
+217 dhAF 0 0 0 0
+D1
+~
+~
+0 0 63227 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63225 0 0 0 0 0 0 0 0
+S
+#63227
+@rThe@Y Outpost@n: Barracks@n~
+@nThis building resembles the last but these walls are made of reinforced steel
+and there is no feast here. Racks of weapons are placed along the walls, each
+holding an array of weapons. Swords, Spears, Crossbows, and then the
+occasional polearm. Torches of white fire sit above each rack so they're well
+lit and easily accessible. @n
+~
+217 dhAF 0 0 0 0
+D3
+~
+~
+0 0 63226 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 63231 0 0 0 0 0 0 0 0
+S
+#63228
+@rThe@Y Outpost@n: Barracks@n~
+@nThis building resembles the last but these walls are made of reinforced steel
+and there is no feast here. Racks of weapons are placed along the walls, each
+holding an array of weapons. Swords, Spears, Crossbows, and then the
+occasional polearm. Torches of white fire sit above each rack so they're well
+lit and easily accessible. @n
+~
+217 dhAF 0 0 0 0
+D1
+~
+~
+0 0 63225 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63229 0 0 0 0 0 0 0 0
+S
+#63229
+@rThe@Y Outpost@n: Barracks@n~
+@nThis building resembles the last but these walls are made of reinforced steel
+and there is no feast here. Racks of weapons are placed along the walls, each
+holding an array of weapons. Swords, Spears, Crossbows, and then the
+occasional polearm. Torches of white fire sit above each rack so they're well
+lit and easily accessible. @n
+~
+217 dhAF 0 0 0 0
+D1
+~
+~
+0 0 63228 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 63230 0 0 0 0 0 0 0 0
+S
+#63230
+@rThe@Y Outpost@n: Barracks@n~
+@nThis building resembles the last but these walls are made of reinforced steel
+and there is no feast here. Racks of weapons are placed along the walls, each
+holding an array of weapons. Swords, Spears, Crossbows, and then the
+occasional polearm. Torches of white fire sit above each rack so they're well
+lit and easily accessible. @n
+~
+217 dhAF 0 0 0 0
+D7
+~
+~
+0 0 63236 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 63229 0 0 0 0 0 0 0 0
+S
+#63231
+@rThe@Y Outpost@n: Barracks@n~
+@nThis building resembles the last but these walls are made of reinforced steel
+and there is no feast here. Racks of weapons are placed along the walls, each
+holding an array of weapons. Swords, Spears, Crossbows, and then the
+occasional polearm. Torches of white fire sit above each rack so they're well
+lit and easily accessible. @n
+~
+217 dhAF 0 0 0 0
+D6
+~
+~
+0 0 63232 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 63227 0 0 0 0 0 0 0 0
+S
+#63232
+@rThe@Y Outpost@n: Barracks@n~
+@nThis building resembles the last but these walls are made of reinforced steel
+and there is no feast here. Racks of weapons are placed along the walls, each
+holding an array of weapons. Swords, Spears, Crossbows, and then the
+occasional polearm. Torches of white fire sit above each rack so they're well
+lit and easily accessible. @n
+~
+217 dhAF 0 0 0 0
+D3
+~
+~
+0 0 63233 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 63231 0 0 0 0 0 0 0 0
+S
+#63233
+@rThe@Y Outpost@n: Barracks@n~
+@nThis building resembles the last but these walls are made of reinforced steel
+and there is no feast here. Racks of weapons are placed along the walls, each
+holding an array of weapons. Swords, Spears, Crossbows, and then the
+occasional polearm. Torches of white fire sit above each rack so they're well
+lit and easily accessible. @n
+~
+217 dhAF 0 0 0 0
+D1
+~
+~
+0 0 63232 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63234 0 0 0 0 0 0 0 0
+S
+#63234
+@rThe@Y Outpost@n: Barracks@n~
+@nThis building resembles the last but these walls are made of reinforced steel
+and there is no feast here. Racks of weapons are placed along the walls, each
+holding an array of weapons. Swords, Spears, Crossbows, and then the
+occasional polearm. Torches of white fire sit above each rack so they're well
+lit and easily accessible. @n
+~
+217 dhAF 0 0 0 0
+D0
+~
+~
+0 0 63237 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 63233 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63238 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63235 0 0 0 0 0 0 0 0
+S
+#63235
+@rThe@Y Outpost@n: Barracks@n~
+@nThis building resembles the last but these walls are made of reinforced steel
+and there is no feast here. Racks of weapons are placed along the walls, each
+holding an array of weapons. Swords, Spears, Crossbows, and then the
+occasional polearm. Torches of white fire sit above each rack so they're well
+lit and easily accessible. @n
+~
+217 dhAF 0 0 0 0
+D1
+~
+~
+0 0 63234 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63236 0 0 0 0 0 0 0 0
+S
+#63236
+@rThe@Y Outpost@n: Barracks@n~
+@nThis building resembles the last but these walls are made of reinforced steel
+and there is no feast here. Racks of weapons are placed along the walls, each
+holding an array of weapons. Swords, Spears, Crossbows, and then the
+occasional polearm. Torches of white fire sit above each rack so they're well
+lit and easily accessible. @n
+~
+217 dhAF 0 0 0 0
+D1
+~
+~
+0 0 63235 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 63230 0 0 0 0 0 0 0 0
+S
+#63237
+@rThe@Y Outpost@n: Connecting Hallway@n~
+@nThis closed hallways is simple in design. In case of battle, it resembles a
+perfect choke point to be used against invading forces. The torches are
+scarce, two in the beginning at the entrance, and two that can be seen further
+into the outpost. @n
+~
+217 cdhAF 0 0 0 0
+D0
+~
+~
+0 0 63239 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63234 0 0 0 0 0 0 0 0
+S
+#63238
+@rThe@Y Outpost@n: @GR@Yo@Gn@Yn@Go@Yc@W's @DA@Wr@Dm@Wo@Dr@Wy@n~
+@nWeapons and shields decorate the walls, leaving no visible space for anything
+else. A chandelier made of elk or deer antlers hangs from the center of the
+ceiling, and the torches around the edges of it are lit with @Ww@Ch@Wi@Ct@We@n and @Cb@Wl@Cu@We@n
+flames that burn always. @n
+~
+217 cdhAF 0 0 0 10
+D0
+~
+~
+0 0 63234 0 0 0 0 0 0 0 0
+S
+#63239
+@rThe@Y Outpost@n: Tight Hallway@n~
+@nThis closed hallways is simple in design. In case of battle, it resembles a
+perfect choke point to be used against invading forces. The torches are
+scarce, lighting up only the corners of the room before it goes dark in any
+direction. Torches can be seen at the end of all four halls. @n
+~
+217 dhiAF 0 0 0 0
+D0
+~
+~
+0 0 63248 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 63240 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63237 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63244 0 0 0 0 0 0 0 0
+S
+#63240
+@rThe@Y Outpost@n: Tight Hallway@n~
+@nThis closed hallways is simple in design. In case of battle, it resembles a
+perfect choke point to be used against invading forces. The torches are
+scarce, lighting up only the corners of the room before it goes dark in any
+direction. Torches can be seen at the end of all four halls. @n
+~
+217 dhiAF 0 0 0 0
+D1
+~
+~
+0 0 63241 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63239 0 0 0 0 0 0 0 0
+S
+#63241
+@rThe@Y Outpost@n: Tight Hallway@n~
+@nThis closed hallways is simple in design. In case of battle, it resembles a
+perfect choke point to be used against invading forces. The torches are
+scarce, lighting up only the corners of the room before it goes dark in any
+direction. Torches can be seen at the end of all four halls. @n
+~
+217 dhiAF 0 0 0 0
+D1
+~
+~
+0 0 63242 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63240 0 0 0 0 0 0 0 0
+S
+#63242
+@rThe@Y Outpost@n: Tight Hallway@n~
+@nThis closed hallways is simple in design. In case of battle, it resembles a
+perfect choke point to be used against invading forces. The torches are
+scarce, lighting up only the corners of the room before it goes dark in any
+direction. Torches can be seen at the end of all four halls. @n
+~
+217 dhiAF 0 0 0 0
+D1
+~
+~
+0 0 63243 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63241 0 0 0 0 0 0 0 0
+S
+#63243
+@rThe@Y Outpost@n: Tight Hallway@n~
+@nThis closed hallways is simple in design. In case of battle, it resembles a
+perfect choke point to be used against invading forces. The torches are
+scarce, lighting up only the corners of the room before it goes dark in any
+direction. Torches can be seen at the end of all four halls. @n
+~
+217 cdhiAF 0 0 0 0
+D3
+~
+~
+0 0 63242 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 63299 0 0 0 0 0 0 0 0
+S
+#63244
+@rThe@Y Outpost@n: Tight Hallway@n~
+@nThis closed hallways is simple in design. In case of battle, it resembles a
+perfect choke point to be used against invading forces. The torches are
+scarce, lighting up only the corners of the room before it goes dark in any
+direction. Torches can be seen at the end of all four halls. @n
+~
+217 dhiAF 0 0 0 0
+D1
+~
+~
+0 0 63239 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63245 0 0 0 0 0 0 0 0
+S
+#63245
+@rThe@Y Outpost@n: Tight Hallway@n~
+@nThis closed hallways is simple in design. In case of battle, it resembles a
+perfect choke point to be used against invading forces. The torches are
+scarce, lighting up only the corners of the room before it goes dark in any
+direction. Torches can be seen at the end of all four halls. @n
+~
+217 dhiAF 0 0 0 0
+D1
+~
+~
+0 0 63244 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63246 0 0 0 0 0 0 0 0
+S
+#63246
+@rThe@Y Outpost@n: Tight Hallway@n~
+@nThis closed hallways is simple in design. In case of battle, it resembles a
+perfect choke point to be used against invading forces. The torches are
+scarce, lighting up only the corners of the room before it goes dark in any
+direction. Torches can be seen at the end of all four halls. @n
+~
+217 dhiAF 0 0 0 0
+D1
+~
+~
+0 0 63245 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63247 0 0 0 0 0 0 0 0
+S
+#63247
+@rThe@Y Outpost@n: Tight Hallway@n~
+@nThis closed hallways is simple in design. In case of battle, it resembles a
+perfect choke point to be used against invading forces. The torches are
+scarce, lighting up only the corners of the room before it goes dark in any
+direction. Torches can be seen at the end of all four halls. @n
+~
+217 cdhiAF 0 0 0 0
+D1
+~
+~
+0 0 63246 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 63278 0 0 0 0 0 0 0 0
+S
+#63248
+@rThe@Y Outpost@n: Connecting Hallway@n~
+@nThis closed hallways is simple in design. In case of battle, it resembles a
+perfect choke point to be used against invading forces. The torches are
+scarce, lighting up only the corners of the room before it goes dark in any
+direction. Torches can be seen at the end of all four halls. @n
+~
+217 dhiAF 0 0 0 0
+D0
+~
+~
+0 0 63249 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63239 0 0 0 0 0 0 0 0
+S
+#63249
+@rThe@Y Outpost@n: Inner Sanctum@n~
+@nThis part of the Outpost is by far the largest. The walls are covered with
+murals of past battles, from this galaxy and many many others. Along the
+bottom edges where the wall meets the floor, there are runes etched into the
+stone. @n
+~
+217 dhAF 0 0 0 0
+D0
+~
+~
+0 0 63250 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 63259 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63248 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63269 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 63268 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 63258 0 0 0 0 0 0 0 0
+S
+#63250
+@rThe@Y Outpost@n: Inner Sanctum@n~
+@nThis part of the Outpost is by far the largest. The walls are covered with
+murals of past battles, from this galaxy and many many others. Along the
+bottom edges where the wall meets the floor, there are runes etched into the
+stone. @n
+~
+217 dhAF 0 0 0 0
+D0
+~
+~
+0 0 63251 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 63258 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63249 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63268 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 63267 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 63257 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 63259 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 63269 0 0 0 0 0 0 0 0
+S
+#63251
+@rThe@Y Outpost@n: Inner Sanctum@n~
+@nThis part of the Outpost is by far the largest. The walls are covered with
+murals of past battles, from this galaxy and many many others. Along the
+bottom edges where the wall meets the floor, there are runes etched into the
+stone. @n
+~
+217 dhAF 0 0 0 0
+D0
+~
+~
+0 0 63252 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 63257 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63250 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63267 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 63266 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 63256 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 63258 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 63268 0 0 0 0 0 0 0 0
+S
+#63252
+@rThe@Y Outpost@n: Inner Sanctum@n~
+@nThis part of the Outpost is by far the largest. The walls are covered with
+murals of past battles, from this galaxy and many many others. Along the
+bottom edges where the wall meets the floor, there are runes etched into the
+stone. @n
+~
+217 dhAF 0 0 0 0
+D0
+~
+~
+0 0 63253 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 63256 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63251 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63266 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 63254 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 63255 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 63257 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 63267 0 0 0 0 0 0 0 0
+S
+#63253
+@rThe@Y Outpost@n: The Jarl's Throne@n~
+@nThis part of the Outpost is by far the largest. The walls are covered with
+murals of past battles, from this galaxy and many many others. Along the
+bottom edges where the wall meets the floor, there are runes etched into the
+stone. @n
+~
+217 cdhADF 0 0 0 0
+D0
+~
+~
+0 0 63276 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 63255 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63252 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63254 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 63256 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 63266 0 0 0 0 0 0 0 0
+S
+#63254
+@rThe@Y Outpost@n: Inner Sanctum@n~
+@nThis part of the Outpost is by far the largest. The walls are covered with
+murals of past battles, from this galaxy and many many others. Along the
+bottom edges where the wall meets the floor, there are runes etched into the
+stone. @n
+~
+217 dhAF 0 0 0 0
+D1
+~
+~
+0 0 63253 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63266 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 63252 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 63273 0 0 0 0 0 0 0 0
+S
+#63255
+@rThe@Y Outpost@n: Inner Sanctum@n~
+@nThis part of the Outpost is by far the largest. The walls are covered with
+murals of past battles, from this galaxy and many many others. Along the
+bottom edges where the wall meets the floor, there are runes etched into the
+stone. @n
+~
+217 dhAF 0 0 0 0
+D2
+~
+~
+0 0 63256 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63253 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 63263 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 63252 0 0 0 0 0 0 0 0
+S
+#63256
+@rThe@Y Outpost@n: Inner Sanctum@n~
+@nThis part of the Outpost is by far the largest. The walls are covered with
+murals of past battles, from this galaxy and many many others. Along the
+bottom edges where the wall meets the floor, there are runes etched into the
+stone. @n
+~
+217 dhAF 0 0 0 0
+D0
+~
+~
+0 0 63255 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 63263 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63257 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63252 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 63253 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 63262 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 63251 0 0 0 0 0 0 0 0
+S
+#63257
+@rThe@Y Outpost@n: Inner Sanctum@n~
+@nThis part of the Outpost is by far the largest. The walls are covered with
+murals of past battles, from this galaxy and many many others. Along the
+bottom edges where the wall meets the floor, there are runes etched into the
+stone. @n
+~
+217 dhAF 0 0 0 0
+D0
+~
+~
+0 0 63256 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 63262 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63258 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63251 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 63252 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 63263 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 63261 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 63250 0 0 0 0 0 0 0 0
+S
+#63258
+@rThe@Y Outpost@n: Inner Sanctum@n~
+@nThis part of the Outpost is by far the largest. The walls are covered with
+murals of past battles, from this galaxy and many many others. Along the
+bottom edges where the wall meets the floor, there are runes etched into the
+stone. @n
+~
+217 dhAF 0 0 0 0
+D0
+~
+~
+0 0 63257 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 63261 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63259 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63250 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 63251 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 63262 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 63260 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 63249 0 0 0 0 0 0 0 0
+S
+#63259
+@rThe@Y Outpost@n: Inner Sanctum@n~
+@nThis part of the Outpost is by far the largest. The walls are covered with
+murals of past battles, from this galaxy and many many others. Along the
+bottom edges where the wall meets the floor, there are runes etched into the
+stone. @n
+~
+217 dhAF 0 0 0 0
+D0
+~
+~
+0 0 63258 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 63260 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63249 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 63250 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 63261 0 0 0 0 0 0 0 0
+S
+#63260
+@rThe@Y Outpost@n: Inner Sanctum@n~
+@nThis part of the Outpost is by far the largest. The walls are covered with
+murals of past battles, from this galaxy and many many others. Along the
+bottom edges where the wall meets the floor, there are runes etched into the
+stone. @n
+~
+217 dhAF 0 0 0 0
+D0
+~
+~
+0 0 63261 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63259 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 63258 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 63264 0 0 0 0 0 0 0 0
+S
+#63261
+@rThe@Y Outpost@n: Inner Sanctum@n~
+@nThis part of the Outpost is by far the largest. The walls are covered with
+murals of past battles, from this galaxy and many many others. Along the
+bottom edges where the wall meets the floor, there are runes etched into the
+stone. @n
+~
+217 dhAF 0 0 0 0
+D0
+~
+~
+0 0 63262 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 63264 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63260 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63258 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 63257 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 63265 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 63259 0 0 0 0 0 0 0 0
+S
+#63262
+@rThe@Y Outpost@n: Inner Sanctum@n~
+@nThis part of the Outpost is by far the largest. The walls are covered with
+murals of past battles, from this galaxy and many many others. Along the
+bottom edges where the wall meets the floor, there are runes etched into the
+stone. @n
+~
+217 dhAF 0 0 0 0
+D0
+~
+~
+0 0 63263 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 63265 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63261 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63257 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 63256 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 63264 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 63258 0 0 0 0 0 0 0 0
+S
+#63263
+@rThe@Y Outpost@n: Inner Sanctum@n~
+@nThis part of the Outpost is by far the largest. The walls are covered with
+murals of past battles, from this galaxy and many many others. Along the
+bottom edges where the wall meets the floor, there are runes etched into the
+stone. @n
+~
+217 dhAF 0 0 0 0
+D2
+~
+~
+0 0 63262 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63256 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 63255 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 63265 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 63257 0 0 0 0 0 0 0 0
+S
+#63264
+@rThe@Y Outpost@n: Inner Sanctum@n~
+@nThis part of the Outpost is by far the largest. The walls are covered with
+murals of past battles, from this galaxy and many many others. Along the
+bottom edges where the wall meets the floor, there are runes etched into the
+stone. @n
+~
+217 dhAF 0 0 0 0
+D0
+~
+~
+0 0 63265 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63261 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 63262 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 63260 0 0 0 0 0 0 0 0
+S
+#63265
+@rThe@Y Outpost@n: Inner Sanctum@n~
+@nThis part of the Outpost is by far the largest. The walls are covered with
+murals of past battles, from this galaxy and many many others. Along the
+bottom edges where the wall meets the floor, there are runes etched into the
+stone. @n
+~
+217 dhAF 0 0 0 0
+D2
+~
+~
+0 0 63264 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63262 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 63263 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 63261 0 0 0 0 0 0 0 0
+S
+#63266
+@rThe@Y Outpost@n: Inner Sanctum@n~
+@nThis part of the Outpost is by far the largest. The walls are covered with
+murals of past battles, from this galaxy and many many others. Along the
+bottom edges where the wall meets the floor, there are runes etched into the
+stone. @n
+~
+217 dhAF 0 0 0 0
+D0
+~
+~
+0 0 63254 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 63252 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63267 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63273 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 63253 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 63251 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 63272 0 0 0 0 0 0 0 0
+S
+#63267
+@rThe@Y Outpost@n: Inner Sanctum@n~
+@nThis part of the Outpost is by far the largest. The walls are covered with
+murals of past battles, from this galaxy and many many others. Along the
+bottom edges where the wall meets the floor, there are runes etched into the
+stone. @n
+~
+217 dhAF 0 0 0 0
+D0
+~
+~
+0 0 63266 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 63251 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63268 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63272 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 63273 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 63252 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 63250 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 63271 0 0 0 0 0 0 0 0
+S
+#63268
+@rThe@Y Outpost@n: Inner Sanctum@n~
+@nThis part of the Outpost is by far the largest. The walls are covered with
+murals of past battles, from this galaxy and many many others. Along the
+bottom edges where the wall meets the floor, there are runes etched into the
+stone. @n
+~
+217 dhAF 0 0 0 0
+D0
+~
+~
+0 0 63267 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 63250 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63269 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63271 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 63272 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 63251 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 63249 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 63270 0 0 0 0 0 0 0 0
+S
+#63269
+@rThe@Y Outpost@n: Inner Sanctum@n~
+@nThis part of the Outpost is by far the largest. The walls are covered with
+murals of past battles, from this galaxy and many many others. Along the
+bottom edges where the wall meets the floor, there are runes etched into the
+stone. @n
+~
+217 dhAF 0 0 0 0
+D0
+~
+~
+0 0 63268 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 63249 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63270 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 63250 0 0 0 0 0 0 0 0
+S
+#63270
+@rThe@Y Outpost@n: Inner Sanctum@n~
+@nThis part of the Outpost is by far the largest. The walls are covered with
+murals of past battles, from this galaxy and many many others. Along the
+bottom edges where the wall meets the floor, there are runes etched into the
+stone. @n
+~
+217 dhAF 0 0 0 0
+D0
+~
+~
+0 0 63271 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 63269 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 -1 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 63275 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 63268 0 0 0 0 0 0 0 0
+S
+#63271
+@rThe@Y Outpost@n: Inner Sanctum@n~
+@nThis part of the Outpost is by far the largest. The walls are covered with
+murals of past battles, from this galaxy and many many others. Along the
+bottom edges where the wall meets the floor, there are runes etched into the
+stone. @n
+~
+217 dhAF 0 0 0 0
+D0
+~
+~
+0 0 63272 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 63268 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63270 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63275 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 63274 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 63267 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 63269 0 0 0 0 0 0 0 0
+S
+#63272
+@rThe@Y Outpost@n: Inner Sanctum@n~
+@nThis part of the Outpost is by far the largest. The walls are covered with
+murals of past battles, from this galaxy and many many others. Along the
+bottom edges where the wall meets the floor, there are runes etched into the
+stone. @n
+~
+217 dhAF 0 0 0 0
+D0
+~
+~
+0 0 63273 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 63267 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63271 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63274 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 63266 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 63268 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 63275 0 0 0 0 0 0 0 0
+S
+#63273
+@rThe@Y Outpost@n: Inner Sanctum@n~
+@nThis part of the Outpost is by far the largest. The walls are covered with
+murals of past battles, from this galaxy and many many others. Along the
+bottom edges where the wall meets the floor, there are runes etched into the
+stone. @n
+~
+217 dhAF 0 0 0 0
+D1
+~
+~
+0 0 63266 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63272 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 63254 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 63267 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 63274 0 0 0 0 0 0 0 0
+S
+#63274
+@rThe@Y Outpost@n: Inner Sanctum@n~
+@nThis part of the Outpost is by far the largest. The walls are covered with
+murals of past battles, from this galaxy and many many others. Along the
+bottom edges where the wall meets the floor, there are runes etched into the
+stone. @n
+~
+217 dhAF 0 0 0 0
+D1
+~
+~
+0 0 63272 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63275 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 63273 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 63271 0 0 0 0 0 0 0 0
+S
+#63275
+@rThe@Y Outpost@n: Inner Sanctum@n~
+@nThis part of the Outpost is by far the largest. The walls are covered with
+murals of past battles, from this galaxy and many many others. Along the
+bottom edges where the wall meets the floor, there are runes etched into the
+stone. @n
+~
+217 dhAF 0 0 0 0
+D0
+~
+~
+0 0 63274 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 63271 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 63272 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 63270 0 0 0 0 0 0 0 0
+S
+#63276
+@rThe@Y Outpost@n: The Forge@n~
+@nThis room feels kind of small compared to the rest of the Outpost. A forge,
+its circular base hot with fiery embers. Its chimney stack is built into the
+wall allowing the smoke to pour out. The mouth of this forge is very large,
+allowing the crafting of large-sized weapons. A large tank made of clay or
+stone has been filled with water so one can cool the metal from the anvil. A
+small amount of light leaks from the wall to the north, behind the forge. @n
+~
+217 cdhAF 0 0 0 0
+D0
+~
+wall~
+3 0 63277 20 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63253 0 0 0 0 0 0 0 0
+S
+#63277
+@rThe@Y Outpost@n: Sanctum of the Gods@n~
+@nThis room is barren of any design. It's an open roof room unlike most of the
+Outpost. The floors are polished marble, a mix of colors white and black and a
+large circular pillar sits in the middle of the room. It only reaches the
+knees at its height, and it is decorated with @Yr@Wu@Yn@We@Ys@n that encirle it. The
+entire room and pillar included, look as though they were carved from one piece
+of marble; a single masterwork. No torches touch these walls, for all the
+light needed comes from the opening of the roof. @n
+~
+217 cdhAF 0 0 0 1
+D2
+~
+wall~
+1 0 63276 20 0 0 0 0 0 0 0
+E
+runes~
+@D=======================================================@n
+@RSeek out the child of the @DRaven@R, only then will you be tested, and found.@n
+@D=======================================================@n
+~
+S
+#63278
+@rThe@Y Outpost@n: Battlements~
+@nAtop these monumental walls, you can see the entirety of the Outpost from up
+here. One can see the Outer Sanctum and the enormous dome. From the
+exccessively large long house, to white smoke rising from vents in the center
+of the house. Large pillars topped with @Gg@Yr@Ge@Ye@Gn@n flames are staggered across the
+top of the great wall. Runic carvings stretch across each pillar, and the sky
+is decorated with wispy yellow clouds being torn to and fro by strong winds. 
+The air is cold giving an almost frost-bitten feeling to those who linger in
+one place for too long. @n
+~
+217 dhAF 0 0 0 1
+D2
+~
+~
+0 0 63279 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 63247 0 0 0 0 0 0 0 0
+S
+#63279
+@rThe@Y Outpost@n: Battlements~
+@nAtop these monumental walls, you can see the entirety of the Outpost from up
+here. One can see the Outer Sanctum and the enormous dome. From the
+exccessively large long house, to white smoke rising from vents in the center
+of the house. Large pillars topped with @Gg@Yr@Ge@Ye@Gn@n flames are staggered across the
+top of the great wall. Runic carvings stretch across each pillar, and the sky
+is decorated with wispy yellow clouds being torn to and fro by strong winds. 
+The air is cold giving an almost frost-bitten feeling to those who linger in
+one place for too long. @n
+~
+217 dhAF 0 0 0 1
+D0
+~
+~
+0 0 63278 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63280 0 0 0 0 0 0 0 0
+S
+#63280
+@rThe@Y Outpost@n: Battlements~
+@nAtop these monumental walls, you can see the entirety of the Outpost from up
+here. One can see the Outer Sanctum and the enormous dome. From the
+exccessively large long house, to white smoke rising from vents in the center
+of the house. Large pillars topped with @Gg@Yr@Ge@Ye@Gn@n flames are staggered across the
+top of the great wall. Runic carvings stretch across each pillar, and the sky
+is decorated with wispy yellow clouds being torn to and fro by strong winds. 
+The air is cold giving an almost frost-bitten feeling to those who linger in
+one place for too long. @n
+~
+217 dhAF 0 0 0 1
+D0
+~
+~
+0 0 63279 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63281 0 0 0 0 0 0 0 0
+S
+#63281
+@rThe@Y Outpost@n: Battlements~
+@nAtop these monumental walls, you can see the entirety of the Outpost from up
+here. One can see the Outer Sanctum and the enormous dome. From the
+exccessively large long house, to white smoke rising from vents in the center
+of the house. Large pillars topped with @Gg@Yr@Ge@Ye@Gn@n flames are staggered across the
+top of the great wall. Runic carvings stretch across each pillar, and the sky
+is decorated with wispy yellow clouds being torn to and fro by strong winds. 
+The air is cold giving an almost frost-bitten feeling to those who linger in
+one place for too long. @n
+~
+217 dhAF 0 0 0 1
+D0
+~
+~
+0 0 63280 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63282 0 0 0 0 0 0 0 0
+S
+#63282
+@rThe@Y Outpost@n: Battlements~
+@nAtop these monumental walls, you can see the entirety of the Outpost from up
+here. One can see the Outer Sanctum and the enormous dome. From the
+exccessively large long house, to white smoke rising from vents in the center
+of the house. Large pillars topped with @Gg@Yr@Ge@Ye@Gn@n flames are staggered across the
+top of the great wall. Runic carvings stretch across each pillar, and the sky
+is decorated with wispy yellow clouds being torn to and fro by strong winds. 
+The air is cold giving an almost frost-bitten feeling to those who linger in
+one place for too long. @n
+~
+217 dhAF 0 0 0 1
+D0
+~
+~
+0 0 63281 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63283 0 0 0 0 0 0 0 0
+S
+#63283
+@rThe@Y Outpost@n: Battlements~
+@nAtop these monumental walls, you can see the entirety of the Outpost from up
+here. One can see the Outer Sanctum and the enormous dome. From the
+exccessively large long house, to white smoke rising from vents in the center
+of the house. Large pillars topped with @Gg@Yr@Ge@Ye@Gn@n flames are staggered across the
+top of the great wall. Runic carvings stretch across each pillar, and the sky
+is decorated with wispy yellow clouds being torn to and fro by strong winds. 
+The air is cold giving an almost frost-bitten feeling to those who linger in
+one place for too long. @n
+~
+217 dhAF 0 0 0 1
+D0
+~
+~
+0 0 63282 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63284 0 0 0 0 0 0 0 0
+S
+#63284
+@rThe@Y Outpost@n: Battlements~
+@nAtop these monumental walls, you can see the entirety of the Outpost from up
+here. One can see the Outer Sanctum and the enormous dome. From the
+exccessively large long house, to white smoke rising from vents in the center
+of the house. Large pillars topped with @Gg@Yr@Ge@Ye@Gn@n flames are staggered across the
+top of the great wall. Runic carvings stretch across each pillar, and the sky
+is decorated with wispy yellow clouds being torn to and fro by strong winds. 
+The air is cold giving an almost frost-bitten feeling to those who linger in
+one place for too long. @n
+~
+217 dhAF 0 0 0 1
+D0
+~
+~
+0 0 63283 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 63285 0 0 0 0 0 0 0 0
+S
+#63285
+@rThe@Y Outpost@n: Battlements~
+@nAtop these monumental walls, you can see the entirety of the Outpost from up
+here. One can see the Outer Sanctum and the enormous dome. From the
+exccessively large long house, to white smoke rising from vents in the center
+of the house. Large pillars topped with @Gg@Yr@Ge@Ye@Gn@n flames are staggered across the
+top of the great wall. Runic carvings stretch across each pillar, and the sky
+is decorated with wispy yellow clouds being torn to and fro by strong winds. 
+The air is cold giving an almost frost-bitten feeling to those who linger in
+one place for too long. @n
+~
+217 dhAF 0 0 0 1
+D1
+~
+~
+0 0 63286 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63284 0 0 0 0 0 0 0 0
+S
+#63286
+@rThe@Y Outpost@n: Battlements~
+@nAtop these monumental walls, you can see the entirety of the Outpost from up
+here. One can see the Outer Sanctum and the enormous dome. From the
+exccessively large long house, to white smoke rising from vents in the center
+of the house. Large pillars topped with @Gg@Yr@Ge@Ye@Gn@n flames are staggered across the
+top of the great wall. Runic carvings stretch across each pillar, and the sky
+is decorated with wispy yellow clouds being torn to and fro by strong winds. 
+The air is cold giving an almost frost-bitten feeling to those who linger in
+one place for too long. @n
+~
+217 dhAF 0 0 0 1
+D1
+~
+~
+0 0 63287 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63285 0 0 0 0 0 0 0 0
+S
+#63287
+@rThe@Y Outpost@n: Battlements~
+@nAtop these monumental walls, you can see the entirety of the Outpost from up
+here. One can see the Outer Sanctum and the enormous dome. From the
+exccessively large long house, to white smoke rising from vents in the center
+of the house. Large pillars topped with @Gg@Yr@Ge@Ye@Gn@n flames are staggered across the
+top of the great wall. Runic carvings stretch across each pillar, and the sky
+is decorated with wispy yellow clouds being torn to and fro by strong winds. 
+The air is cold giving an almost frost-bitten feeling to those who linger in
+one place for too long. @n
+~
+217 dhAF 0 0 0 1
+D1
+~
+~
+0 0 63288 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63286 0 0 0 0 0 0 0 0
+S
+#63288
+@rThe@Y Outpost@n: Battlements~
+@nAtop these monumental walls, you can see the entirety of the Outpost from up
+here. One can see the Outer Sanctum and the enormous dome. From the
+exccessively large long house, to white smoke rising from vents in the center
+of the house. Large pillars topped with @Gg@Yr@Ge@Ye@Gn@n flames are staggered across the
+top of the great wall. Runic carvings stretch across each pillar, and the sky
+is decorated with wispy yellow clouds being torn to and fro by strong winds. 
+The air is cold giving an almost frost-bitten feeling to those who linger in
+one place for too long. @n
+~
+217 dhAF 0 0 0 1
+D1
+~
+~
+0 0 63289 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63287 0 0 0 0 0 0 0 0
+S
+#63289
+@rThe@Y Outpost@n: Battlements~
+@nAtop these monumental walls, you can see the entirety of the Outpost from up
+here. One can see the Outer Sanctum and the enormous dome. From the
+exccessively large long house, to white smoke rising from vents in the center
+of the house. Large pillars topped with @Gg@Yr@Ge@Ye@Gn@n flames are staggered across the
+top of the great wall. Runic carvings stretch across each pillar, and the sky
+is decorated with wispy yellow clouds being torn to and fro by strong winds. 
+The air is cold giving an almost frost-bitten feeling to those who linger in
+one place for too long. @n
+~
+217 dhAF 0 0 0 1
+D1
+~
+~
+0 0 63290 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63288 0 0 0 0 0 0 0 0
+S
+#63290
+@rThe@Y Outpost@n: Battlements~
+@nAtop these monumental walls, you can see the entirety of the Outpost from up
+here. One can see the Outer Sanctum and the enormous dome. From the
+exccessively large long house, to white smoke rising from vents in the center
+of the house. Large pillars topped with @Gg@Yr@Ge@Ye@Gn@n flames are staggered across the
+top of the great wall. Runic carvings stretch across each pillar, and the sky
+is decorated with wispy yellow clouds being torn to and fro by strong winds. 
+The air is cold giving an almost frost-bitten feeling to those who linger in
+one place for too long. @n
+~
+217 dhAF 0 0 0 1
+D1
+~
+~
+0 0 63291 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63289 0 0 0 0 0 0 0 0
+S
+#63291
+@rThe@Y Outpost@n: Battlements~
+@nAtop these monumental walls, you can see the entirety of the Outpost from up
+here. One can see the Outer Sanctum and the enormous dome. From the
+exccessively large long house, to white smoke rising from vents in the center
+of the house. Large pillars topped with @Gg@Yr@Ge@Ye@Gn@n flames are staggered across the
+top of the great wall. Runic carvings stretch across each pillar, and the sky
+is decorated with wispy yellow clouds being torn to and fro by strong winds. 
+The air is cold giving an almost frost-bitten feeling to those who linger in
+one place for too long. @n
+~
+217 dhAF 0 0 0 1
+D1
+~
+~
+0 0 63292 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63290 0 0 0 0 0 0 0 0
+S
+#63292
+@rThe@Y Outpost@n: Battlements~
+@nAtop these monumental walls, you can see the entirety of the Outpost from up
+here. One can see the Outer Sanctum and the enormous dome. From the
+exccessively large long house, to white smoke rising from vents in the center
+of the house. Large pillars topped with @Gg@Yr@Ge@Ye@Gn@n flames are staggered across the
+top of the great wall. Runic carvings stretch across each pillar, and the sky
+is decorated with wispy yellow clouds being torn to and fro by strong winds. 
+The air is cold giving an almost frost-bitten feeling to those who linger in
+one place for too long. @n
+~
+217 dhAF 0 0 0 1
+D0
+~
+~
+0 0 63293 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 63291 0 0 0 0 0 0 0 0
+S
+#63293
+@rThe@Y Outpost@n: Battlements~
+@nAtop these monumental walls, you can see the entirety of the Outpost from up
+here. One can see the Outer Sanctum and the enormous dome. From the
+exccessively large long house, to white smoke rising from vents in the center
+of the house. Large pillars topped with @Gg@Yr@Ge@Ye@Gn@n flames are staggered across the
+top of the great wall. Runic carvings stretch across each pillar, and the sky
+is decorated with wispy yellow clouds being torn to and fro by strong winds. 
+The air is cold giving an almost frost-bitten feeling to those who linger in
+one place for too long. @n
+~
+217 dhAF 0 0 0 1
+D0
+~
+~
+0 0 63294 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63292 0 0 0 0 0 0 0 0
+S
+#63294
+@rThe@Y Outpost@n: Battlements~
+@nAtop these monumental walls, you can see the entirety of the Outpost from up
+here. One can see the Outer Sanctum and the enormous dome. From the
+exccessively large long house, to white smoke rising from vents in the center
+of the house. Large pillars topped with @Gg@Yr@Ge@Ye@Gn@n flames are staggered across the
+top of the great wall. Runic carvings stretch across each pillar, and the sky
+is decorated with wispy yellow clouds being torn to and fro by strong winds. 
+The air is cold giving an almost frost-bitten feeling to those who linger in
+one place for too long. @n
+~
+217 dhAF 0 0 0 1
+D0
+~
+~
+0 0 63295 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63293 0 0 0 0 0 0 0 0
+S
+#63295
+@rThe@Y Outpost@n: Battlements~
+@nAtop these monumental walls, you can see the entirety of the Outpost from up
+here. One can see the Outer Sanctum and the enormous dome. From the
+exccessively large long house, to white smoke rising from vents in the center
+of the house. Large pillars topped with @Gg@Yr@Ge@Ye@Gn@n flames are staggered across the
+top of the great wall. Runic carvings stretch across each pillar, and the sky
+is decorated with wispy yellow clouds being torn to and fro by strong winds. 
+The air is cold giving an almost frost-bitten feeling to those who linger in
+one place for too long. @n
+~
+217 dhAF 0 0 0 1
+D0
+~
+~
+0 0 63297 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63294 0 0 0 0 0 0 0 0
+S
+#63297
+@rThe@Y Outpost@n: Battlements~
+@nAtop these monumental walls, you can see the entirety of the Outpost from up
+here. One can see the Outer Sanctum and the enormous dome. From the
+exccessively large long house, to white smoke rising from vents in the center
+of the house. Large pillars topped with @Gg@Yr@Ge@Ye@Gn@n flames are staggered across the
+top of the great wall. Runic carvings stretch across each pillar, and the sky
+is decorated with wispy yellow clouds being torn to and fro by strong winds. 
+The air is cold giving an almost frost-bitten feeling to those who linger in
+one place for too long. @n
+~
+217 dhAF 0 0 0 1
+D0
+~
+~
+0 0 63298 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63295 0 0 0 0 0 0 0 0
+S
+#63298
+@rThe@Y Outpost@n: Battlements~
+@nAtop these monumental walls, you can see the entirety of the Outpost from up
+here. One can see the Outer Sanctum and the enormous dome. From the
+exccessively large long house, to white smoke rising from vents in the center
+of the house. Large pillars topped with @Gg@Yr@Ge@Ye@Gn@n flames are staggered across the
+top of the great wall. Runic carvings stretch across each pillar, and the sky
+is decorated with wispy yellow clouds being torn to and fro by strong winds. 
+The air is cold giving an almost frost-bitten feeling to those who linger in
+one place for too long. @n
+~
+217 dhAF 0 0 0 1
+D0
+~
+~
+0 0 63299 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 63297 0 0 0 0 0 0 0 0
+S
+#63299
+@rThe@Y Outpost@n: Battlements~
+@nAtop these monumental walls, you can see the entirety of the Outpost from up
+here. One can see the Outer Sanctum and the enormous dome. From the
+exccessively large long house, to white smoke rising from vents in the center
+of the house. Large pillars topped with @Gg@Yr@Ge@Ye@Gn@n flames are staggered across the
+top of the great wall. Runic carvings stretch across each pillar, and the sky
+is decorated with wispy yellow clouds being torn to and fro by strong winds. 
+The air is cold giving an almost frost-bitten feeling to those who linger in
+one place for too long. @n
+~
+217 dhAF 0 0 0 1
+D2
+~
+~
+0 0 63298 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 63243 0 0 0 0 0 0 0 0
+S
+$~

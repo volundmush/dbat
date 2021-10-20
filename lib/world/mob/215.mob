@@ -1,0 +1,538 @@
+#62900
+Female Wood Rat~
+@wA @Mf@me@Mm@ma@Ml@me @yW@wo@Do@wd@yr@Da@wt@n~
+@wA @yW@wo@Do@wd@yr@Da@wt@n@w is here, feeding on the corpse.
+~
+Small and brown, this rodent bears no noticeable features.
+~
+bd 0 0 0 l 0 0 0 0 E
+30 20 10 0d0+30000 0d0+0
+0 1500000 15 28
+8 8 2
+Str: 12
+Dex: 14
+Int: 12
+Wis: 12
+Con: 14
+Cha: 14
+E
+T 62901
+#62901
+Kai Holy Order Scared Alert Guard~
+@wA Scared @RH@Woly @RO@Wrder @wGuard@n~
+An alert guard is here, watching for the smallest of movements.@n
+~
+@WStationed here all alone and fearing for his life, this guard jumps to inspect
+any movement he sees or hears. @n
+~
+bd 0 0 0 l 0 0 0 1000 E
+40 20 10 0d1000+0 0d0+0
+0 1500000 12 28
+8 8 1
+Str: 11
+Dex: 8
+Int: 11
+Wis: 11
+Con: 8
+Cha: 8
+E
+T 62906
+#62902
+large mutated spider~
+@wA @Gm@gon@Gste@gro@Gus@w @DSp@Wid@Der@w@n~
+@wA large, mutated spider is here, looking for its next meal.@n
+~
+@WThis large spider has undergone a horrid transformation because of the
+contamination present in the area. It's eyes are bloody and the spider may
+very well be blind. Its hairs are a sickly green color and its fangs are
+brittle and grey. @w@n
+~
+bd 0 0 0 l 0 0 0 0 E
+55 20 10 0d0+0 0d0+0
+0 0 15 28
+8 8 0
+Size: 4
+Str: 14
+Dex: 14
+Int: 14
+Wis: 14
+Con: 14
+Cha: 14
+E
+#62903
+male wood rat disease~
+@wA @CM@ca@Cl@ce @yW@wo@Do@wd@yr@Da@wt@n~
+@wA @CM@ca@Cl@ce @yW@wo@Do@wd@yr@Da@wt is here, dying of disease.@n
+~
+@wThis woodrat looks ill. Its eyes are bloody are and it has no teeth to eat
+with. The rat's fur is a pale and sickly white color. @n
+~
+bcd 0 0 0 l 0 0 0 0 E
+65 20 10 0d0+0 0d0+0
+1 0 15 28
+8 8 1
+Str: 16
+Dex: 15
+Int: 16
+Wis: 16
+Con: 15
+Cha: 15
+E
+#62905
+Fungi Rat Rodent Infected Green~
+@wA @GM@yo@Gl@yd@Gy @WR@Da@Wt@w@n~
+@wA @Gg@yr@Ge@ye@Gn @WR@Da@Wt@w is here, eating mushrooms.@n
+~
+@wThis rat's fur has become green and its teeth are as yellow as cheese. The
+rat's one eye is blood-red and it appears that it is blind in that eye. This
+rodent continues devouring its food; unaware of its sick state. @n
+~
+bcdg 0 0 0 l 0 0 0 0 E
+60 20 10 0d0+0 0d0+0
+0 0 15 28
+8 8 0
+Size: 3
+Str: 15
+Dex: 16
+Int: 15
+Wis: 15
+Con: 16
+Cha: 16
+E
+#62906
+Squire Holy Order Saint Patros Kai~
+@wA @CS@cquire @wof the @RH@Woly @RO@Wrder@w~
+@wA @CS@cquire@w of the @RH@Woly @RO@Wrder@w is here, looking forward to battle.
+~
+@WYoung and clearly inexperienced, this squire gleams with excitement as he waits
+for orders to go into battle. @w
+~
+bd 0 0 0 l 0 0 0 1000 E
+40 20 10 0d0+0 0d0+0
+0 0 12 28
+8 8 1
+Str: 9
+Dex: 8
+Int: 9
+Wis: 9
+Con: 8
+Cha: 8
+E
+#62907
+Commander Kai Holy Order Saint Patros~
+@wA @CC@commander @wof the @RH@Woly @RO@Wrder@w~
+@wA @CC@commander @wof the @RH@Woly @RO@Wrder@w is here, analyzing the situation.
+~
+@WThis Kai commands the squires of the Holy Order. He appears to be quite old
+and his face bears many wrinkles that come from his stressful occupation. 
+Despite this, the Commander seems to partially enjoy his position of power. @w
+~
+bds 0 0 0 l 0 0 0 1000 E
+70 20 9 50d1000+30 0d0+0
+0 0 12 28
+8 8 1
+Str: 8
+Dex: 9
+Int: 8
+Wis: 8
+Con: 9
+Cha: 9
+E
+T 62907
+T 62921
+#62908
+Kopernukis Nikolaus High Astromancer Hoshijin~
+@GKopernukis@w, a @YH@yigh @BA@Yst@Wr@wo@Bm@Yan@Wc@we@Yr@w~
+@GKopernukis@w, a @YH@yigh @BA@Yst@Wr@wo@Bm@Yan@Wc@we@Yr@w, is here looking upset.@n
+~
+@WSeemingly wise and old, Kopernukis stands here looking very upset at the Holy
+Order's Commander. Looking at his face its hard to say that he has ever been
+happy at anything though. @n
+~
+bds 0 0 0 l 0 0 0 75 E
+40 20 10 0d0+0 0d0+0
+0 0 14 28
+8 8 1
+Str: 13
+Dex: 14
+Int: 13
+Wis: 13
+Con: 14
+Cha: 14
+E
+#62909
+Levay Demon Greater~
+@RL@Ce@Dv@Ca@Dy@w, a Greater @RD@De@Wm@Do@Rn@n~
+@RL@Ce@Dv@Ca@Dy@w, a Greater @RD@De@Wm@Do@Rn@w, is here@n.
+~
+@WExtremely large in size compared to other Demons, this particular Demon stands
+tall and seems to command respect. His large horn twist outward into the sky,
+his skin is a pale grey color that hints that he hasn't seen sunlight in years.
+His blood-red eyes glance around and respond to those that meet them directly
+by returning fear into the poor soul that dares stare at them.
+~
+bdps 0 0 0 l r a 0 -1000 E
+110 20 10 0d8+0 0d0+0
+0 0 10 9
+8 8 1
+Str: 10
+Dex: 8
+Int: 10
+Wis: 10
+Con: 8
+Cha: 8
+E
+T 62909
+T 62910
+T 62913
+T 62915
+T 62917
+#62910
+Opportunistic Demon Hidden~
+@wAn Opportunistic @RD@Demo@Rn@w@n~
+@wAn Opportunistic @RD@Demo@Rn@w is here, hiding in the shadows.@n
+~
+Barely visible outside of his glowing eyes, this Demon is awaiting the right chance to attack any members of the Holy Order of Saint Patros that may come into his range.
+~
+bcdm 0 0 0 l 0 0 0 -500 E
+40 20 10 0d8+0 0d0+0
+0 0 10 9
+8 8 1
+Str: 11
+Dex: 10
+Int: 11
+Wis: 11
+Con: 10
+Cha: 10
+E
+#62911
+Jayne Demon Lust~
+@RJ@Ca@Dy@Cn@De@w, a @RD@De@Wm@Do@Rn @wof @ML@Wu@Ms@Wt@n~
+@RJ@Ca@Dy@Cn@De@w, a @RD@De@Wm@Do@Rn @wof @ML@Wu@Ms@Wt@w is standing here@n
+~
+@WStanding seductively, this Demon's eyes are almost hypnotic in their pink color
+and her lips are a dark red. Her horns are very small compared to her size. 
+Small fangs are barely visible on the edges of her mouth. Whoever this Demon
+is, it is obvious that she comes from Hell's Lust section. @n
+~
+bdprs 0 0 0 l 0 a 0 -1000 E
+80 20 10 0d8+0 0d0+0
+0 0 10 9
+8 8 2
+Str: 8
+Dex: 11
+Int: 8
+Wis: 8
+Con: 11
+Cha: 11
+E
+T 62911
+T 62912
+T 62925
+#62912
+Alistar bored Demon~
+@RA@Cl@Di@Cs@Dt@Ca@Dr@w, a bored @RD@De@Wm@Do@Rn@n~
+@RA@Cl@Di@Cs@Dt@Ca@Dr@w, a bored @RD@De@Wm@Do@Rn@w, is here leaning against the gate.@n
+~
+@WLarge and extremely musclar, this Demon leans against the larger gate behind
+him clearly bored. Occassionally he hums to himself and taps the gate in an
+attempt to entertain himself by creating a tune. @n
+
+~
+bdgprs 0 0 0 l 0 0 0 -500 E
+80 20 10 0d8+0 0d0+0
+0 0 10 9
+8 8 1
+Str: 13
+Dex: 11
+Int: 13
+Wis: 13
+Con: 11
+Cha: 11
+E
+T 62914
+T 62924
+#62913
+Pestilience First Horseman Void Mutant~
+@GP@We@gs@Wt@Gi@Wl@gi@We@Gn@Wc@ge@w, a @CH@cor@wse@cm@wa@cn@w of @RT@rhe @CV@wo@Wi@cd@n~
+@GP@We@gs@Wt@Gi@Wl@gi@We@Gn@Wc@ge@w, the First @CH@cor@wse@cm@wa@cn@w of @RT@rhe @CV@Do@Wi@cd@w, is here spreading disease and illness.@n
+~
+@wAppearing to be an old and sickly man, the being before you is unlike any other
+creature you've seen before. Most of his teeth have fallen out except for a
+single gold canine that will soon leave this being's mouth. His skin is
+rampant with pimples and boils and has a stone-stone like texture to it. He
+breathes slowly and heavily as though he were on the verge of dying. @n
+~
+d 0 0 0 l 0 0 0 0 E
+130 20 9 0d0+0 0d0+0
+2500 0 5 28
+8 8 1
+Str: 8
+Dex: 14
+Int: 8
+Wis: 8
+Con: 14
+Cha: 14
+E
+#62914
+Steed Pestilience Horseman Void Sickly Frail~
+@CT@ch@Ce @WS@wt@De@We@wd@w @cof @GP@We@gs@Wt@Gi@Wl@gi@We@Gn@Wc@ge@n~
+@wA @Gs@Wi@gc@Wk@Gl@gy@w, @Gf@Wr@ga@Wi@Gl@n horse is here, sickening those around it.
+~
+@WA deformed white horse stands before you. The hair that once ran along the
+back of its head long ago, is now an ancient grey colour. The horse shakes
+uncontrollably and spreads a toxic poison every time it breathes. The steed's
+eyes are a pale white colour; suggesting that the animal may be blind. @n
+~
+bdpr 0 0 0 l 0 0 0 0 E
+103 20 -20 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Str: 9
+Dex: 11
+Int: 9
+Wis: 9
+Con: 11
+Cha: 11
+E
+T 62943
+T 62938
+#62915
+Keru Holy Order Saint Patros General BaseKeru~
+@CK@Ye@wr@Yu@w, @CG@ceneral@w of the @RH@Woly @RO@Wrder@n~
+@CK@Ye@wr@Yu@w, @CG@ceneral@w of the @RH@Woly @RO@Wrder@w, is here fighting Demons.@n
+~
+@WThe Kai standing before you is very vigiliant of his surroundings, he appears
+to be a capable and experienced warrior. Occassionally the Kai shouts "Demon!
+" at moving shadows. @n
+~
+bdpr 0 0 0 l 0 0 0 1000 E
+70 20 10 0d12+0 0d0+0
+0 0 12 10
+8 8 1
+Str: 15
+Dex: 14
+Int: 15
+Wis: 15
+Con: 14
+Cha: 14
+E
+T 62916
+T 62918
+T 62928
+T 62930
+#62916
+Keru Trans1Keru Mystic First Kai~
+@CMystic @GFirst @CK@Ye@wr@Yu@n~
+@CK@Ye@wr@Yu@w, is here looking more determined than ever to fight Demons.@n
+~
+@CK@Ye@wr@Yu@w has undergone some significant changes in his persona; now the Kai is
+extremely devoted to what brought upon this change and it looks like he will
+retain this determined expression until he is done with his objective. @n
+~
+bd 0 0 0 l 0 0 0 1000 E
+85 0 9 0d12+0 0d0+5
+0 0 12 10
+8 8 1
+Size: 0
+Str: 11
+Dex: 11
+Int: 11
+Wis: 11
+Con: 11
+Cha: 11
+E
+#62917
+Ambriella Kaio Feminine Female~
+@CA@Ymb@wrie@Ylla@n~
+A feminine Kaio is standing here on the lookout for something.
+~
+@WOf average looking appearance, this Kaio is is adorned in the classical armor
+of the Holy Order of Saint Patros from head to toe. It is hard to make out any
+distinguishing features on her because of the armor and the only way of knowing
+her gender is through her hips and waist. Her eyes - which can barely be seen
+under her helmet - are very serious as though she were troubled by something.
+@n
+~
+bdps 0 0 0 l 0 0 0 1000 E
+60 20 10 0d12+0 0d0+0
+0 0 12 10
+8 8 2
+Str: 10
+Dex: 12
+Int: 10
+Wis: 10
+Con: 12
+Cha: 12
+E
+T 62922
+T 62931
+#62918
+Insane Demon Rabies Infected~
+@WA @GR@wa@Wb@wi@We@ws@M-@GI@wn@Wf@we@Wc@wt@We@wd @RD@Demo@Rn@n~
+@WA@wn @GI@wn@Ws@wa@Wn@we @RD@Demo@Rn@n is prowling here.
+~
+@WThis Demon seems to have lost any sense of who it is or was. The Demon is
+sweating profusely, he is mumbling to himself which makes it clear that he is
+suffering from hallucinations. The corners of his mouth are drowning in the
+excessive saliva that the Demon produces. @n
+~
+cdp 0 0 0 l 0 0 0 -350 E
+65 20 9 0d8+0 0d0+0
+0 0 10 9
+8 8 1
+Str: 10
+Dex: 9
+Int: 10
+Wis: 10
+Con: 9
+Cha: 9
+E
+T 62929
+#62919
+Choleraic Demon Unhealthy~
+@WA @GC@wh@Wo@wl@We@wr@Wa@wi@Wc @RD@Demo@Rn@n~
+@WAn @GU@wn@Wh@we@Wa@wl@Wt@wh@Wy @RD@Demo@Rn@n is here, constantly licking his lips.
+~
+@WThis Demon is barely managing to move around in his sick state. Dried snot is
+clearly visible on his face. His skin has sagged so much that he has lost most
+of his demonic characteristics - making him looking more like a Mutant. The
+Demon's horn is flakey and causes its owner great pain whenever it even
+slightly touches something.
+
+~
+cd 0 0 0 l 0 0 0 -350 E
+70 20 10 0d0+0 0d0+0
+0 0 10 28
+8 8 1
+Str: 10
+Dex: 10
+Int: 10
+Wis: 10
+Con: 10
+Cha: 10
+E
+T 62929
+#62920
+Limax Golem Nudity Hoshijin Large Creature~
+@GLimax@w, The @YG@yolem@w of @MN@Ru@Md@Wi@Mt@Ry@n~
+A large creature is here, standing proudly over everything.
+~
+@WThis @YG@yolem@W has the appearance of a Hoshijin and also sports the race's unique
+runes and markings. Its skin - despite its contradictory ghostly-look -
+appears to have been made of stone. The Golem simply stands still, awaiting
+the challenger whom summoned it. @n
+~
+bdpr 0 0 0 l n 0 0 0 E
+20 20 10 0d8+0 0d0+0
+0 0 14 11
+8 8 1
+Str: 8
+Dex: 11
+Int: 8
+Wis: 8
+Con: 11
+Cha: 11
+E
+T 62934
+#62921
+Aquila Golem Servitude Hoshijin Large Creature~
+@GAquila@w, The @YG@yolem@w of @RS@Merv@Wi@Mtud@Re@n~
+A large creature is here, standing proudly over everything.
+~
+@WThis @YG@yolem@W has the appearance of a Hoshijin and also sports the race's unique
+runes and markings. Its skin - despite its contradictory ghostly-look -
+appears to have been made of stone. The Golem simply stands still, awaiting
+the challenger whom summoned it. @n
+~
+bdpr 0 0 0 l 0 0 0 0 E
+20 20 10 0d8+0 0d0+0
+0 0 14 11
+8 8 1
+Str: 16
+Dex: 14
+Int: 16
+Wis: 16
+Con: 14
+Cha: 14
+E
+T 62936
+#62922
+Noctua Golem Enlightenment Large~
+@GNoctua@w, The @YG@yolem @wof @RE@Mnlig@Whte@Mnmen@Rt@n~
+@wA large @YG@yolem@w is here, awaiting his challenger.@n
+~
+It looks unfinished.
+~
+bd 0 0 0 l 0 0 0 0 E
+15 20 10 0d0+0 0d0+0
+0 0 14 28
+8 8 1
+Str: 16
+Dex: 16
+Int: 16
+Wis: 16
+Con: 16
+Cha: 16
+E
+T 62937
+#62923
+Kepler Astromancer High Hoshijin~
+@GKepler@w, a @YH@yigh @BA@Yst@Wr@wo@Bm@Yan@Wc@we@Yr@n~
+@GKepler@w, a @YH@yigh @BA@Yst@Wr@wo@Bm@Yan@Wc@we@Yr@w, is here observing his surroundings sadly.@n
+~
+@WBearing a slight squint, Kepler appears to be very mad at the conflict that has
+been happening around him. The Hoshijin is very old and wise, eyebags are
+visible beneath his eyes which seems to suggest that the Hoshijin hasn't had a
+good night's rest in a while. @n
+~
+bdprs 0 0 0 l 0 0 0 320 E
+40 20 10 0d8+0 0d0+0
+0 0 14 11
+8 8 1
+Str: 13
+Dex: 12
+Int: 13
+Wis: 13
+Con: 12
+Cha: 12
+E
+T 62933
+#62924
+Inviz Man~
+Inviz Man~
+Inviz Man is here.
+~
+It looks unfinished.
+~
+bd 0 0 0 c 0 0 0 0 E
+0 20 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 11
+Dex: 16
+Int: 11
+Wis: 11
+Con: 16
+Cha: 16
+E
+T 62942
+#62930
+mob unfinished~
+the unfinished mob~
+An unfinished mob stands here.
+~
+It looks unfinished.
+~
+d 0 0 0 0 0 0 0 0 E
+0 20 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 11
+Dex: 8
+Int: 11
+Wis: 11
+Con: 8
+Cha: 8
+E
+$

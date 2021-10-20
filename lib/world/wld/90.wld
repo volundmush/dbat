@@ -1,0 +1,1878 @@
+#9000
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wEntrance@n~
+   @DThis room has a massive steel door attached to its entrance which bright
+light streams through the small holes in it from the outside. Jet black rock
+walls, floor and ceiling greet the eye, while the Temple seems to have an
+@Dunnatural rejection of light sources. There is a sign posted here next to the
+door to the way out.
+~
+90 dx 0 0 0 0
+D1
+~
+~
+0 0 9001 0 0 0 0 0 0 0 0
+D3
+~
+Temple door~
+1 9000 8998 0 0 0 0 0 0 0 0
+E
+sign~
+@ROOC@D: @WIf you happen to have lost your key, do not worry. The locks on this
+side of the door do not require the key!@n
+~
+S
+T 310
+#9001
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wShade Hallway@n~
+ @DShadows dance and flow eerily across the walls, floor and ceiling of this
+hallway, giving it a surreal look.  The exact material of the walls and floor
+are unknown.  The ceiling has been painted to resemble the night sky.  @n
+~
+90 dx 0 0 0 0
+D1
+~
+~
+0 0 9002 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9000 0 0 0 0 0 0 0 0
+S
+#9002
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wShade Hallway@n~
+ @DShadows dance and flow eerily across the walls, floor and ceiling of this
+hallway, giving it a surreal look.  The exact material of the walls and floor
+are unknown.  The ceiling has been painted to resemble the night sky.  @n
+~
+90 dx 0 0 0 0
+D1
+~
+~
+0 0 9003 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9001 0 0 0 0 0 0 0 0
+S
+#9003
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wShade Hallway@n~
+ @DShadows dance and flow eerily across the walls, floor and ceiling of this
+hallway, giving it a surreal look.  The exact material of the walls and floor
+are unknown.  The ceiling has been painted to resemble the night sky.  @n
+~
+90 dx 0 0 0 0
+D1
+~
+~
+0 0 9004 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9002 0 0 0 0 0 0 0 0
+S
+#9004
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wShade Hallway@n~
+ @DShadows dance and flow eerily across the walls, floor and ceiling of this
+hallway, giving it a surreal look.  The exact material of the walls and floor
+are unknown.  The ceiling has been painted to resemble the night sky.  @n
+~
+90 dx 0 0 0 0
+D1
+~
+~
+0 0 9005 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9003 0 0 0 0 0 0 0 0
+S
+#9005
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wShade Hallway@n~
+ @DShadows dance and flow eerily across the walls, floor and ceiling of this
+hallway, giving it a surreal look.  The exact material of the walls and floor
+are unknown.  The ceiling has been painted to resemble the night sky.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9006 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9018 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9011 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9004 0 0 0 0 0 0 0 0
+S
+#9006
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wShade Hallway@n~
+ @DShadows dance and flow eerily across the walls, floor and ceiling of this
+hallway, giving it a surreal look.  The exact material of the walls and floor
+are unknown.  The ceiling has been painted to resemble the night sky.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9007 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9005 0 0 0 0 0 0 0 0
+S
+#9007
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wShade Hallway@n~
+ @DShadows dance and flow eerily across the walls, floor and ceiling of this
+hallway, giving it a surreal look.  The exact material of the walls and floor
+are unknown.  The ceiling has been painted to resemble the night sky.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9008 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9006 0 0 0 0 0 0 0 0
+S
+#9008
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wShade Hallway@n~
+ @DShadows dance and flow eerily across the walls, floor and ceiling of this
+hallway, giving it a surreal look.  The exact material of the walls and floor
+are unknown.  The ceiling has been painted to resemble the night sky.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9009 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9007 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9017 0 0 0 0 0 0 0 0
+S
+#9009
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wShade Hallway@n~
+ @DShadows dance and flow eerily across the walls, floor and ceiling of this
+hallway, giving it a surreal look.  The exact material of the walls and floor
+are unknown.  The ceiling has been painted to resemble the night sky.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9010 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9008 0 0 0 0 0 0 0 0
+S
+#9010
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wShade Hallway@n~
+ @DShadows dance and flow eerily across the walls, floor and ceiling of this
+hallway, giving it a surreal look.  The exact material of the walls and floor
+are unknown.  The ceiling has been painted to resemble the night sky.  @n
+~
+90 dx 0 0 0 0
+D2
+~
+~
+0 0 9009 0 0 0 0 0 0 0 0
+S
+#9011
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wShade Hallway@n~
+ @DShadows dance and flow eerily across the walls, floor and ceiling of this
+hallway, giving it a surreal look.  The exact material of the walls and floor
+are unknown.  The ceiling has been painted to resemble the night sky.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9005 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9012 0 0 0 0 0 0 0 0
+S
+#9012
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wShade Hallway@n~
+ @DShadows dance and flow eerily across the walls, floor and ceiling of this
+hallway, giving it a surreal look.  The exact material of the walls and floor
+are unknown.  The ceiling has been painted to resemble the night sky.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9011 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9013 0 0 0 0 0 0 0 0
+S
+#9013
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wShade Hallway@n~
+ @DShadows dance and flow eerily across the walls, floor and ceiling of this
+hallway, giving it a surreal look.  The exact material of the walls and floor
+are unknown.  The ceiling has been painted to resemble the night sky.  @n
+~
+90 0 0 0 0 0
+D0
+~
+~
+0 0 9012 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9014 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9016 0 0 0 0 0 0 0 0
+S
+#9014
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wShade Hallway@n~
+ @DShadows dance and flow eerily across the walls, floor and ceiling of this
+hallway, giving it a surreal look.  The exact material of the walls and floor
+are unknown.  The ceiling has been painted to resemble the night sky.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9013 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9015 0 0 0 0 0 0 0 0
+S
+#9015
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wShade Hallway@n~
+ @DShadows dance and flow eerily across the walls, floor and ceiling of this
+hallway, giving it a surreal look.  The exact material of the walls and floor
+are unknown.  The ceiling has been painted to resemble the night sky.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9014 0 0 0 0 0 0 0 0
+S
+#9016
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wShadow Stairway@n~
+ @DStairs shaped like crescent moons lead up to the second floor of the temple
+from here.  Silver lined hand rails are built into the sides of the stairs,
+allowing a hand hold while climbing up the steep steps.  @n
+~
+90 dx 0 0 0 0
+D1
+~
+~
+0 0 9013 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 9065 0 0 0 0 0 0 0 0
+S
+#9017
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wShadow Stairway@n~
+ @DStairs shaped like crescent moons lead up to the second floor of the temple
+from here.  Silver lined hand rails are built into the sides of the stairs,
+allowing a hand hold while climbing up the steep steps.  @n
+~
+90 dx 0 0 0 0
+D1
+~
+~
+0 0 9008 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 9064 0 0 0 0 0 0 0 0
+S
+#9018
+@DSh@wad@Wow@Dl@Wa@ws @CT@ce@Dmp@cl@Ce@D - @wChamber of Shadows@n~
+ @DThis area opens up into a massive chamber.  Shadows fill this chamber, with
+its many columns and statues one can never know where something is hiding.  A
+massive crystal is set in the center of the chamber's ceiling, giving pale,
+sickly light to the whole chamber.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9019 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9023 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9021 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9005 0 0 0 0 0 0 0 0
+S
+#9019
+@DSh@wad@Wow@Dl@Wa@ws @CT@ce@Dmp@cl@Ce@D - @wChamber of Shadows@n~
+ @DThis area opens up into a massive chamber.  Shadows fill this chamber, with
+its many columns and statues one can never know where something is hiding.  A
+massive crystal is set in the center of the chamber's ceiling, giving pale,
+sickly light to the whole chamber.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9020 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9024 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9018 0 0 0 0 0 0 0 0
+S
+#9020
+@DSh@wad@Wow@Dl@Wa@ws @CT@ce@Dmp@cl@Ce@D - @wChamber of Shadows@n~
+ @DThis area opens up into a massive chamber.  Shadows fill this chamber, with
+its many columns and statues one can never know where something is hiding.  A
+massive crystal is set in the center of the chamber's ceiling, giving pale,
+sickly light to the whole chamber.  @n
+~
+90 dx 0 0 0 0
+D1
+~
+~
+0 0 9025 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9019 0 0 0 0 0 0 0 0
+S
+#9021
+@DSh@wad@Wow@Dl@Wa@ws @CT@ce@Dmp@cl@Ce@D - @wChamber of Shadows@n~
+ @DThis area opens up into a massive chamber.  Shadows fill this chamber, with
+its many columns and statues one can never know where something is hiding.  A
+massive crystal is set in the center of the chamber's ceiling, giving pale,
+sickly light to the whole chamber.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9018 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9026 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9022 0 0 0 0 0 0 0 0
+S
+#9022
+@DSh@wad@Wow@Dl@Wa@ws @CT@ce@Dmp@cl@Ce@D - @wChamber of Shadows@n~
+ @DThis area opens up into a massive chamber.  Shadows fill this chamber, with
+its many columns and statues one can never know where something is hiding.  A
+massive crystal is set in the center of the chamber's ceiling, giving pale,
+sickly light to the whole chamber.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9021 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9027 0 0 0 0 0 0 0 0
+S
+#9023
+@DSh@wad@Wow@Dl@Wa@ws @CT@ce@Dmp@cl@Ce@D - @wChamber of Shadows@n~
+ @DThis area opens up into a massive chamber.  Shadows fill this chamber, with
+its many columns and statues one can never know where something is hiding.  A
+massive crystal is set in the center of the chamber's ceiling, giving pale,
+sickly light to the whole chamber.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9024 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9028 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9026 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9018 0 0 0 0 0 0 0 0
+S
+#9024
+@DSh@wad@Wow@Dl@Wa@ws @CT@ce@Dmp@cl@Ce@D - @wChamber of Shadows@n~
+ @DThis area opens up into a massive chamber.  Shadows fill this chamber, with
+its many columns and statues one can never know where something is hiding.  A
+massive crystal is set in the center of the chamber's ceiling, giving pale,
+sickly light to the whole chamber.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9025 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9029 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9023 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9019 0 0 0 0 0 0 0 0
+S
+#9025
+@DSh@wad@Wow@Dl@Wa@ws @CT@ce@Dmp@cl@Ce@D - @wChamber of Shadows@n~
+ @DThis area opens up into a massive chamber.  Shadows fill this chamber, with
+its many columns and statues one can never know where something is hiding.  A
+massive crystal is set in the center of the chamber's ceiling, giving pale,
+sickly light to the whole chamber.  @n
+~
+90 dx 0 0 0 0
+D1
+~
+~
+0 0 9030 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9024 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9020 0 0 0 0 0 0 0 0
+S
+#9026
+@DSh@wad@Wow@Dl@Wa@ws @CT@ce@Dmp@cl@Ce@D - @wChamber of Shadows@n~
+ @DThis area opens up into a massive chamber.  Shadows fill this chamber, with
+its many columns and statues one can never know where something is hiding.  A
+massive crystal is set in the center of the chamber's ceiling, giving pale,
+sickly light to the whole chamber.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9023 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9031 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9027 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9021 0 0 0 0 0 0 0 0
+S
+#9027
+@DSh@wad@Wow@Dl@Wa@ws @CT@ce@Dmp@cl@Ce@D - @wChamber of Shadows@n~
+ @DThis area opens up into a massive chamber.  Shadows fill this chamber, with
+its many columns and statues one can never know where something is hiding.  A
+massive crystal is set in the center of the chamber's ceiling, giving pale,
+sickly light to the whole chamber.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9026 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9032 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9022 0 0 0 0 0 0 0 0
+S
+#9028
+@DSh@wad@Wow@Dl@Wa@ws @CT@ce@Dmp@cl@Ce@D - @wChamber of Shadows@n~
+ @DThis area opens up into a massive chamber.  Shadows fill this chamber, with
+its many columns and statues one can never know where something might be
+hiding.  A massive crystal is set in the center of the chamber's ceiling, giving
+pale sickly light to the whole chamber.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9029 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9033 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9031 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9023 0 0 0 0 0 0 0 0
+S
+#9029
+@DSh@wad@Wow@Dl@Wa@ws @CT@ce@Dmp@cl@Ce@D - @wChamber of Shadows@n~
+ @DThis area opens up into a massive chamber.  Shadows fill this chamber, with
+its many columns and statues one can never know where something might be
+hiding.  A massive crystal is set in the center of the chamber's ceiling, giving
+pale sickly light to the whole chamber.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9030 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9034 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9028 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9024 0 0 0 0 0 0 0 0
+S
+#9030
+@DSh@wad@Wow@Dl@Wa@ws @CT@ce@Dmp@cl@Ce@D - @wChamber of Shadows@n~
+ @DThis area opens up into a massive chamber.  Shadows fill this chamber, with
+its many columns and statues one can never know where something might be
+hiding.  A massive crystal is set in the center of the chamber's ceiling, giving
+pale sickly light to the whole chamber.  @n
+~
+90 dx 0 0 0 0
+D1
+~
+~
+0 0 9035 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9029 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9025 0 0 0 0 0 0 0 0
+S
+#9031
+@DSh@wad@Wow@Dl@Wa@ws @CT@ce@Dmp@cl@Ce@D - @wChamber of Shadows@n~
+ @DThis area opens up into a massive chamber.  Shadows fill this chamber, with
+its many columns and statues one can never know where something might be
+hiding.  A massive crystal is set in the center of the chamber's ceiling, giving
+pale sickly light to the whole chamber.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9028 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9036 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9032 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9026 0 0 0 0 0 0 0 0
+S
+#9032
+@DSh@wad@Wow@Dl@Wa@ws @CT@ce@Dmp@cl@Ce@D - @wChamber of Shadows@n~
+ @DThis area opens up into a massive chamber.  Shadows fill this chamber, with
+its many columns and statues one can never know where something might be
+hiding.  A massive crystal is set in the center of the chamber's ceiling, giving
+pale sickly light to the whole chamber.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9031 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9037 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9027 0 0 0 0 0 0 0 0
+S
+#9033
+@DSh@wad@Wow@Dl@Wa@ws @CT@ce@Dmp@cl@Ce@D - @wChamber of Shadows@n~
+ @DThis area opens up into a massive chamber.  Shadows fill this chamber, with
+its many columns and statues one can never know where something might be
+hiding.  A massive crystal is set in the center of the chamber's ceiling, giving
+pale sickly light to the whole chamber.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9034 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9038 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9036 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9028 0 0 0 0 0 0 0 0
+S
+#9034
+@DSh@wad@Wow@Dl@Wa@ws @CT@ce@Dmp@cl@Ce@D - @wChamber of Shadows@n~
+ @DThis area opens up into a massive chamber.  Shadows fill this chamber, with
+its many columns and statues one can never know where something might be
+hiding.  A massive crystal is set in the center of the chamber's ceiling, giving
+pale sickly light to the whole chamber.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9035 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9033 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9029 0 0 0 0 0 0 0 0
+S
+#9035
+@DSh@wad@Wow@Dl@Wa@ws @CT@ce@Dmp@cl@Ce@D - @wChamber of Shadows@n~
+ @DThis area opens up into a massive chamber.  Shadows fill this chamber, with
+its many columns and statues one can never know where something might be
+hiding.  A massive crystal is set in the center of the chamber's ceiling, giving
+pale sickly light to the whole chamber.  @n
+~
+90 dx 0 0 0 0
+D2
+~
+~
+0 0 9034 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9030 0 0 0 0 0 0 0 0
+S
+#9036
+@DSh@wad@Wow@Dl@Wa@ws @CT@ce@Dmp@cl@Ce@D - @wChamber of Shadows@n~
+ @DThis area opens up into a massive chamber.  Shadows fill this chamber, with
+its many columns and statues one can never know where something might be
+hiding.  A massive crystal is set in the center of the chamber's ceiling, giving
+pale sickly light to the whole chamber.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9033 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9037 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9031 0 0 0 0 0 0 0 0
+S
+#9037
+@DSh@wad@Wow@Dl@Wa@ws @CT@ce@Dmp@cl@Ce@D - @wChamber of Shadows@n~
+ @DThis area opens up into a massive chamber.  Shadows fill this chamber, with
+its many columns and statues one can never know where something might be
+hiding.  A massive crystal is set in the center of the chamber's ceiling, giving
+pale sickly light to the whole chamber.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9036 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9032 0 0 0 0 0 0 0 0
+S
+#9038
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Hallway@n~
+ @DThis hallway is nearly pitch black, with any light sources present being hazy
+and out of focus.  This is where advanced practioners of Konatjitsu, known as
+Shadow Konatsu, train their other senses to further increase their skills.  @n
+~
+90 cdx 0 0 0 0
+D1
+~
+Temple door~
+1 9001 9039 20 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9033 0 0 0 0 0 0 0 0
+S
+#9039
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Hallway@n~
+   @DThis hallway is nearly pitch black, with any light sources present being
+hazy and out of focus. This is where advanced practioners of Konatjitsu, known
+as Shadow Konatsu, train their other senses to further increase their skills.
+A sign is posted here, on the way out. @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9040 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9063 0 0 0 0 0 0 0 0
+D3
+~
+Temple door~
+1 9001 9038 20 0 0 0 0 0 0 0
+E
+sign~
+   @ROOC@D: @WIf you happen to have lost your key, do not worry. The locks on this
+side of the door do not require the key! @n
+~
+S
+#9040
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Hallway@n~
+ @DThis hallway is nearly pitch black, with any light sources present being hazy
+and out of focus.  This is where advanced practioners of Konatjitsu, known as
+Shadow Konatsu, train their other senses to further increase their skills.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9041 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9039 0 0 0 0 0 0 0 0
+S
+#9041
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Hallway@n~
+ @DThis hallway is nearly pitch black, with any light sources present being hazy
+and out of focus.  This is where advanced practioners of Konatjitsu, known as
+Shadow Konatsu, train their other senses to further increase their skills.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9042 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9040 0 0 0 0 0 0 0 0
+S
+#9042
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Hallway@n~
+ @DThis hallway is nearly pitch black, with any light sources present being hazy
+and out of focus.  This is where advanced practioners of Konatjitsu, known as
+Shadow Konatsu, train their other senses to further increase their skills.  @n
+~
+90 dx 0 0 0 0
+D1
+~
+~
+0 0 9043 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9041 0 0 0 0 0 0 0 0
+S
+#9043
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Hallway@n~
+ @DThis hallway is nearly pitch black, with any light sources present being hazy
+and out of focus.  This is where advanced practioners of Konatjitsu, known as
+Shadow Konatsu, train their other senses to further increase their skills.  @n
+~
+90 dx 0 0 0 0
+D1
+~
+~
+0 0 9044 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9042 0 0 0 0 0 0 0 0
+S
+#9044
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Hallway@n~
+ @DThis hallway is nearly pitch black, with any light sources present being hazy
+and out of focus.  This is where advanced practioners of Konatjitsu, known as
+Shadow Konatsu, train their other senses to further increase their skills.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9045 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9043 0 0 0 0 0 0 0 0
+S
+#9045
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Hallway@n~
+ @DThis hallway is nearly pitch black, with any light sources present being hazy
+and out of focus.  This is where advanced practioners of Konatjitsu, known as
+Shadow Konatsu, train their other senses to further increase their skills.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9046 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9044 0 0 0 0 0 0 0 0
+S
+#9046
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Hallway@n~
+ @DThis hallway is nearly pitch black, with any light sources present being hazy
+and out of focus.  This is where advanced practioners of Konatjitsu, known as
+Shadow Konatsu, train their other senses to further increase their skills.  @n
+~
+90 dx 0 0 0 0
+D1
+~
+~
+0 0 9047 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9045 0 0 0 0 0 0 0 0
+S
+#9047
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Hallway@n~
+ @DThis hallway is nearly pitch black, with any light sources present being hazy
+and out of focus.  This is where advanced practioners of Konatjitsu, known as
+Shadow Konatsu, train their other senses to further increase their skills.  @n
+~
+90 dx 0 0 0 0
+D1
+~
+~
+0 0 9048 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9046 0 0 0 0 0 0 0 0
+S
+#9048
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Hallway@n~
+ @DThis hallway is nearly pitch black, with any light sources present being hazy
+and out of focus.  This is where advanced practioners of Konatjitsu, known as
+Shadow Konatsu, train their other senses to further increase their skills.  @n
+~
+90 dx 0 0 0 0
+D1
+~
+~
+0 0 9049 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9047 0 0 0 0 0 0 0 0
+S
+#9049
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Hallway@n~
+ @DThis hallway is nearly pitch black, with any light sources present being hazy
+and out of focus.  This is where advanced practioners of Konatjitsu, known as
+Shadow Konatsu, train their other senses to further increase their skills.  @n
+~
+90 dx 0 0 0 0
+D1
+~
+~
+0 0 9050 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9048 0 0 0 0 0 0 0 0
+S
+#9050
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Hallway@n~
+ @DThis hallway is nearly pitch black, with any light sources present being hazy
+and out of focus.  This is where advanced practioners of Konatjitsu, known as
+Shadow Konatsu, train their other senses to further increase their skills.  @n
+~
+90 dx 0 0 0 0
+D2
+~
+~
+0 0 9051 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9049 0 0 0 0 0 0 0 0
+S
+#9051
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Hallway@n~
+ @DThis hallway is nearly pitch black, with any light sources present being hazy
+and out of focus.  This is where advanced practioners of Konatjitsu, known as
+Shadow Konatsu, train their other senses to further increase their skills.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9050 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9052 0 0 0 0 0 0 0 0
+S
+#9052
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Hallway@n~
+ @DThis hallway is nearly pitch black, with any light sources present being hazy
+and out of focus.  This is where advanced practioners of Konatjitsu, known as
+Shadow Konatsu, train their other senses to further increase their skills.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9051 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9053 0 0 0 0 0 0 0 0
+S
+#9053
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Hallway@n~
+ @DThis hallway is nearly pitch black, with any light sources present being hazy
+and out of focus.  This is where advanced practioners of Konatjitsu, known as
+Shadow Konatsu, train their other senses to further increase their skills.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9052 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9055 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9054 0 0 0 0 0 0 0 0
+S
+#9054
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wShadow Guru's Room@n~
+ @DA large soft seat sits in the middle of this room and is where the Guru of
+the Temple must sit while his disciples train.  The room has a small source of
+light, in the form of two flickering blue flamed torches hanging on the walls.
+@n
+~
+90 dx 0 0 0 0
+D1
+~
+~
+0 0 9053 0 0 0 0 0 0 0 0
+S
+#9055
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Hallway@n~
+ @DThis hallway is nearly pitch black, with any light sources present being hazy
+and out of focus.  This is where advanced practioners of Konatjitsu, known as
+Shadow Konatsu, train their other senses to further increase their skills.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9053 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9056 0 0 0 0 0 0 0 0
+S
+#9056
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Hallway@n~
+ @DThis hallway is nearly pitch black, with any light sources present being hazy
+and out of focus.  This is where advanced practioners of Konatjitsu, known as
+Shadow Konatsu, train their other senses to further increase their skills.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9055 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9057 0 0 0 0 0 0 0 0
+S
+#9057
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Hallway@n~
+ @DThis hallway is nearly pitch black, with any light sources present being hazy
+and out of focus.  This is where advanced practioners of Konatjitsu, known as
+Shadow Konatsu, train their other senses to further increase their skills.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9056 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9058 0 0 0 0 0 0 0 0
+S
+#9058
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Hallway@n~
+ @DThis hallway is nearly pitch black, with any light sources present being hazy
+and out of focus.  This is where advanced practioners of Konatjitsu, known as
+Shadow Konatsu, train their other senses to further increase their skills.  @n
+~
+90 dx 0 0 0 0
+D1
+~
+~
+0 0 9057 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9059 0 0 0 0 0 0 0 0
+S
+#9059
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Hallway@n~
+ @DThis hallway is nearly pitch black, with any light sources present being hazy
+and out of focus.  This is where advanced practioners of Konatjitsu, known as
+Shadow Konatsu, train their other senses to further increase their skills.  @n
+~
+90 dx 0 0 0 0
+D1
+~
+~
+0 0 9058 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9060 0 0 0 0 0 0 0 0
+S
+#9060
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Hallway@n~
+ @DThis hallway is nearly pitch black, with any light sources present being hazy
+and out of focus.  This is where advanced practioners of Konatjitsu, known as
+Shadow Konatsu, train their other senses to further increase their skills.  @n
+~
+90 dx 0 0 0 0
+D1
+~
+~
+0 0 9059 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9061 0 0 0 0 0 0 0 0
+S
+#9061
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Hallway@n~
+ @DThis hallway is nearly pitch black, with any light sources present being hazy
+and out of focus.  This is where advanced practioners of Konatjitsu, known as
+Shadow Konatsu, train their other senses to further increase their skills.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9062 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9060 0 0 0 0 0 0 0 0
+S
+#9062
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Hallway@n~
+ @DThis hallway is nearly pitch black, with any light sources present being hazy
+and out of focus.  This is where advanced practioners of Konatjitsu, known as
+Shadow Konatsu, train their other senses to further increase their skills.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9063 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9061 0 0 0 0 0 0 0 0
+S
+#9063
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Hallway@n~
+ @DThis hallway is nearly pitch black, with any light sources present being hazy
+and out of focus.  This is where advanced practioners of Konatjitsu, known as
+Shadow Konatsu, train their other senses to further increase their skills.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9039 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9062 0 0 0 0 0 0 0 0
+S
+#9064
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wShadow Stairway@n~
+ @DStairs shaped like crescent moons lead down to the first floor of the temple
+from here.  Silver lined hand rails are into the sides of the stairs, allowing a
+hand hold while climbing down the steep steps.  @n
+~
+90 dx 0 0 0 0
+D1
+~
+~
+0 0 9066 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 9017 0 0 0 0 0 0 0 0
+S
+#9065
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wShadow Stairway@n~
+ @DStairs shaped like crescent moons lead down to the first floor of the temple
+from here.  Silver lined hand rails are into the sides of the stairs, allowing a
+hand hold while climbing down the steep steps.  @n
+~
+90 dx 0 0 0 0
+D1
+~
+~
+0 0 9070 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 9016 0 0 0 0 0 0 0 0
+S
+#9066
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wInfinity Hallway@n~
+ @DThis hallway is made up of a dark, hard stone material that looks incredibly
+course and very difficult to break.  Streams of shadowy light flow down the
+sides of the walls, emitted from white crystals embedded in the walls.  @n
+~
+90 dx 0 0 0 0
+D2
+~
+~
+0 0 9067 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9064 0 0 0 0 0 0 0 0
+S
+#9067
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wInfinity Hallway@n~
+ @DThis hallway is made up of a dark, hard stone material that looks incredibly
+course and very difficult to break.  Streams of shadowy light flow down the
+sides of the walls, emitted from white crystals embedded in the walls.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9066 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9068 0 0 0 0 0 0 0 0
+S
+#9068
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wInfinity Hallway@n~
+ @DThis hallway is made up of a dark, hard stone material that looks incredibly
+course and very difficult to break.  Streams of shadowy light flow down the
+sides of the walls, emitted from white crystals embedded in the walls.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9067 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9071 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9069 0 0 0 0 0 0 0 0
+S
+#9069
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wInfinity Hallway@n~
+ @DThis hallway is made up of a dark, hard stone material that looks incredibly
+course and very difficult to break.  Streams of shadowy light flow down the
+sides of the walls, emitted from white crystals embedded in the walls.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9068 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9070 0 0 0 0 0 0 0 0
+S
+#9070
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wInfinity Hallway@n~
+ @DThis hallway is made up of a dark, hard stone material that looks incredibly
+course and very difficult to break.  Streams of shadowy light flow down the
+sides of the walls, emitted from white crystals embedded in the walls.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9069 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9065 0 0 0 0 0 0 0 0
+S
+#9071
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wInfinity Hallway@n~
+ @DThis hallway is made up of a dark, hard stone material that looks incredibly
+course and very difficult to break.  Streams of shadowy light flow down the
+sides of the walls, emitted from white crystals embedded in the walls.  @n
+~
+90 dx 0 0 0 0
+D1
+~
+~
+0 0 9072 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9068 0 0 0 0 0 0 0 0
+S
+#9072
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wInfinity Hallway@n~
+ @DThis hallway is made up of a dark, hard stone material that looks incredibly
+course and very difficult to break.  Streams of shadowy light flow down the
+sides of the walls, emitted from white crystals embedded in the walls.  @n
+~
+90 dx 0 0 0 0
+D1
+~
+~
+0 0 9073 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9071 0 0 0 0 0 0 0 0
+S
+#9073
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wInfinity Hallway@n~
+ @DThis hallway is made up of a dark, hard stone material that looks incredibly
+course and very difficult to break.  Streams of shadowy light flow down the
+sides of the walls, emitted from white crystals embedded in the walls.  @n
+~
+90 dx 0 0 0 0
+D1
+~
+~
+0 0 9074 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9072 0 0 0 0 0 0 0 0
+S
+#9074
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wInfinity Hallway@n~
+ @DThis hallway is made up of a dark, hard stone material that looks
+incredibly coarse and very difficult to break. Streams of shadowy light flow
+down the sides of the walls, emitted from white crystals embedded in them. 
+There is a slit in the wall here that almost looks as if a @Wblade@D could be
+inserted into it. @n
+~
+90 cdx 0 0 0 0
+D0
+~
+~
+0 0 9075 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9087 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9073 0 0 0 0 0 0 0 0
+E
+examine blade~
+To summon the beast most foul, a blade of shadows is required
+~
+S
+#9075
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Chamber@n~
+ @DA series of dark colors wash over this huge chamber in a rippling motion.  
+The floor, walls and ceiling all appear to move with the colors, adding the
+appearance of uncerntainty.  Every now and then, beams of bright white light
+pierce the darkness, projecting from a massive crystal in the center of the
+ceiling.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9078 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9076 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9074 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9077 0 0 0 0 0 0 0 0
+S
+#9076
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Chamber@n~
+ @DA series of dark colors wash over this huge chamber in a rippling motion.  
+The floor, walls and ceiling all appear to move with the colors, adding the
+appearance of uncerntainty.  Every now and then, beams of bright white light
+pierce the darkness, projecting from a massive crystal in the center of the
+ceiling.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9080 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9075 0 0 0 0 0 0 0 0
+S
+#9077
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Chamber@n~
+ @DA series of dark colors wash over this huge chamber in a rippling motion.  
+The floor, walls and ceiling all appear to move with the colors, adding the
+appearance of uncerntainty.  Every now and then, beams of bright white light
+pierce the darkness, projecting from a massive crystal in the center of the
+ceiling.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9079 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9075 0 0 0 0 0 0 0 0
+S
+#9078
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Chamber@n~
+ @DA series of dark colors wash over this huge chamber in a rippling motion.  
+The floor, walls and ceiling all appear to move with the colors, adding the
+appearance of uncerntainty.  Every now and then, beams of bright white light
+pierce the darkness, projecting from a massive crystal in the center of the
+ceiling.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9081 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9080 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9075 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9079 0 0 0 0 0 0 0 0
+S
+#9079
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Chamber@n~
+ @DA series of dark colors wash over this huge chamber in a rippling motion.  
+The floor, walls and ceiling all appear to move with the colors, adding the
+appearance of uncerntainty.  Every now and then, beams of bright white light
+pierce the darkness, projecting from a massive crystal in the center of the
+ceiling.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9082 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9078 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9077 0 0 0 0 0 0 0 0
+S
+#9080
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Chamber@n~
+ @DA series of dark colors wash over this huge chamber in a rippling motion.  
+The floor, walls and ceiling all appear to move with the colors, adding the
+appearance of uncerntainty.  Every now and then, beams of bright white light
+pierce the darkness, projecting from a massive crystal in the center of the
+ceiling.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9083 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9076 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9078 0 0 0 0 0 0 0 0
+S
+#9081
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Chamber@n~
+   @DA series of dark colors wash over this huge chamber in a rippling motion. 
+The floor, walls and ceiling all appear to move with the colors, adding the
+appearance of uncerntainty. Every now and then, beams of bright white light
+pierce the darkness, projecting from a massive crystal in the center of the
+ceiling. @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9084 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9083 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9078 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9082 0 0 0 0 0 0 0 0
+S
+#9082
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Chamber@n~
+   @DA series of dark colors wash over this huge chamber in a rippling motion. 
+The floor, walls and ceiling all appear to move with the colors, adding the
+appearance of uncerntainty. Every now and then, beams of bright white light
+pierce the darkness, projecting from a massive crystal in the center of the
+ceiling. @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9085 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9081 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9079 0 0 0 0 0 0 0 0
+S
+#9083
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Chamber@n~
+ @DA series of dark colors wash over this huge chamber in a rippling motion.  
+The floor, walls and ceiling all appear to move with the colors, adding the
+appearance of uncerntainty.  Every now and then, beams of bright white light
+pierce the darkness, projecting from a massive crystal in the center of the
+ceiling.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9086 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9080 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9081 0 0 0 0 0 0 0 0
+S
+#9084
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Chamber@n~
+ @DA series of dark colors wash over this huge chamber in a rippling motion.  
+The floor, walls and ceiling all appear to move with the colors, adding the
+appearance of uncerntainty.  Every now and then, beams of bright white light
+pierce the darkness, projecting from a massive crystal in the center of the
+ceiling.  @n
+~
+90 dx 0 0 0 0
+D1
+~
+~
+0 0 9086 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9081 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9085 0 0 0 0 0 0 0 0
+S
+#9085
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Chamber@n~
+ @DA series of dark colors wash over this huge chamber in a rippling motion.  
+The floor, walls and ceiling all appear to move with the colors, adding the
+appearance of uncerntainty.  Every now and then, beams of bright white light
+pierce the darkness, projecting from a massive crystal in the center of the
+ceiling.  @n
+~
+90 dx 0 0 0 0
+D1
+~
+~
+0 0 9084 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9082 0 0 0 0 0 0 0 0
+S
+#9086
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wDarkness Chamber@n~
+ @DA series of dark colors wash over this huge chamber in a rippling motion.  
+The floor, walls and ceiling all appear to move with the colors, adding the
+appearance of uncerntainty.  Every now and then, beams of bright white light
+pierce the darkness, projecting from a massive crystal in the center of the
+ceiling.  @n
+~
+90 dx 0 0 0 0
+D2
+~
+~
+0 0 9083 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9084 0 0 0 0 0 0 0 0
+S
+#9087
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wSpectrum Chamber@n~
+ @DThis chamber has more colors in it than the rest of the temple combined.  
+All the colors of this chamber flow and meld together, creating an experience
+like being inside a kaleidoscope.  The walls, floor and ceiling are fuzzy with
+all the different colors, making it hard to see objects or people walking around
+in here.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9074 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9088 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9090 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9089 0 0 0 0 0 0 0 0
+S
+#9088
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wSpectrum Chamber@n~
+ @DThis chamber has more colors in it than the rest of the temple combined.  
+All the colors of this chamber flow and meld together, creating an experience
+like being inside a kaleidoscope.  The walls, floor and ceiling are fuzzy with
+all the different colors, making it hard to see objects or people walking around
+in here.  @n
+~
+90 dx 0 0 0 0
+D2
+~
+~
+0 0 9092 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9087 0 0 0 0 0 0 0 0
+S
+#9089
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wSpectrum Chamber@n~
+ @DThis chamber has more colors in it than the rest of the temple combined.  
+All the colors of this chamber flow and meld together, creating an experience
+like being inside a kaleidoscope.  The walls, floor and ceiling are fuzzy with
+all the different colors, making it hard to see objects or people walking around
+in here.  @n
+~
+90 dx 0 0 0 0
+D1
+~
+~
+0 0 9087 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9091 0 0 0 0 0 0 0 0
+S
+#9090
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wSpectrum Chamber@n~
+ @DThis chamber has more colors in it than the rest of the temple combined.  
+All the colors of this chamber flow and meld together, creating an experience
+like being inside a kaleidoscope.  The walls, floor and ceiling are fuzzy with
+all the different colors, making it hard to see objects or people walking around
+in here.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9087 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9092 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9093 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9091 0 0 0 0 0 0 0 0
+S
+#9091
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wSpectrum Chamber@n~
+ @DThis chamber has more colors in it than the rest of the temple combined.  
+All the colors of this chamber flow and meld together, creating an experience
+like being inside a kaleidoscope.  The walls, floor and ceiling are fuzzy with
+all the different colors, making it hard to see objects or people walking around
+in here.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9089 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9090 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9094 0 0 0 0 0 0 0 0
+S
+#9092
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wSpectrum Chamber@n~
+ @DThis chamber has more colors in it than the rest of the temple combined.  
+All the colors of this chamber flow and meld together, creating an experience
+like being inside a kaleidoscope.  The walls, floor and ceiling are fuzzy with
+all the different colors, making it hard to see objects or people walking around
+in here.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9088 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9095 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9090 0 0 0 0 0 0 0 0
+S
+#9093
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wSpectrum Chamber@n~
+ @DThis chamber has more colors in it than the rest of the temple combined.  
+All the colors of this chamber flow and meld together, creating an experience
+like being inside a kaleidoscope.  The walls, floor and ceiling are fuzzy with
+all the different colors, making it hard to see objects or people walking around
+in here.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9090 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9095 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9096 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9094 0 0 0 0 0 0 0 0
+S
+#9094
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wSpectrum Chamber@n~
+ @DThis chamber has more colors in it than the rest of the temple combined.  
+All the colors of this chamber flow and meld together, creating an experience
+like being inside a kaleidoscope.  The walls, floor and ceiling are fuzzy with
+all the different colors, making it hard to see objects or people walking around
+in here.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9091 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9093 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9097 0 0 0 0 0 0 0 0
+S
+#9095
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wSpectrum Chamber@n~
+ @DThis chamber has more colors in it than the rest of the temple combined.  
+All the colors of this chamber flow and meld together, creating an experience
+like being inside a kaleidoscope.  The walls, floor and ceiling are fuzzy with
+all the different colors, making it hard to see objects or people walking around
+in here.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9092 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9098 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9093 0 0 0 0 0 0 0 0
+S
+#9096
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wSpectrum Chamber@n~
+ @DThis chamber has more colors in it than the rest of the temple combined.  
+All the colors of this chamber flow and meld together, creating an experience
+like being inside a kaleidoscope.  The walls, floor and ceiling are fuzzy with
+all the different colors, making it hard to see objects or people walking around
+in here.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9093 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9098 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9097 0 0 0 0 0 0 0 0
+S
+#9097
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wSpectrum Chamber@n~
+ @DThis chamber has more colors in it than the rest of the temple combined.  
+All the colors of this chamber flow and meld together, creating an experience
+like being inside a kaleidoscope.  The walls, floor and ceiling are fuzzy with
+all the different colors, making it hard to see objects or people walking around
+in here.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9094 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9096 0 0 0 0 0 0 0 0
+S
+#9098
+@DSh@wad@Wow@Dl@wa@Ws @CT@ce@Dmp@cl@Ce@D - @wSpectrum Chamber@n~
+ @DThis chamber has more colors in it than the rest of the temple combined.  
+All the colors of this chamber flow and meld together, creating an experience
+like being inside a kaleidoscope.  The walls, floor and ceiling are fuzzy with
+all the different colors, making it hard to see objects or people walking around
+in here.  @n
+~
+90 dx 0 0 0 0
+D0
+~
+~
+0 0 9095 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9096 0 0 0 0 0 0 0 0
+S
+$~

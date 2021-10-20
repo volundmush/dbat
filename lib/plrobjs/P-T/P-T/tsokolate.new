@@ -1,0 +1,200 @@
+1 1633533404 0 2456 956 0
+#17
+0 0 0 0 0 100 100 0 0 dfqAC 0 y 0 0 0 0 0 0 0 0 0
+XAP
+Map~
+undefined~
+.~
+~
+12 0 0 0 0 0 0 0
+G
+1632172509
+U
+8059896103006260249
+Z
+1
+#17998
+0 0 0 0 0 100 100 0 9 dqA 0 y 0 0 0 0 0 0 0 0 0
+XAP
+iMuffin~
+@Wi@wM@Du@Wf@Df@wi@Wn@n~
+An iMuffin is lying here~
+~
+12 0 0 0 0 0 0 0
+G
+1632172509
+U
+6338314992555674574
+Z
+4
+E
+iMuffin~
+   @WThis is the latest tablet device from Pear Inc, bearing visual similarities
+to a muffin. @n
+
+@WTo use the iMuffin, type @yiMuffin@n
+~
+#65535
+0 0 0 0 0 100 100 0 16 A 0 y 0 0 0 0 0 0 0 0 0
+XAP
+mail paper letter~
+@WA piece of mail@n~
+@WSomeone has left a piece of mail here@n~
+ @D* * * * @CGalactic Mail System @D* * * *
+@cDate@D:@w Wed Sep 22 05:16:11 2021
+  @cTo@D:@G Tsokolate
+@cFrom@D:@R Virtus
+
+@weval num %actor.age%
+if %num% >= 30
+Kid calls them old
+else
+kid sees that theyre young
+end
+end
+
+
+ps the second end might not be necessary, Im a little dumb and unfocused rn
+@n~
+16 16385 0 0 0 1 30 10
+G
+1632302198
+U
+559577662509474888
+Z
+0
+#315
+0 0 0 0 0 100 100 0 16 A 0 y 0 0 0 0 0 0 0 0 0
+XAP
+Piece Notepaper Paper~
+@wA Piece of Notepaper@n~
+@wA piece of notepaper has been dropped here.@n~
+EMOTE
+----------
+   
+@MEmote@w is used to perform roleplaying actions that are not possible by any
+pre-built commands or socials. It is not to be abused. It is only to be used
+to add life to roleplay, not to force your own ideas on someone else's
+character. To do so will be considered bad roleplay and breaking said rule.@n 
+   
+@wYou can put in special colored speech in emotes with &1 and &2. For example
+you get the output in an emote of '@CBlah Blah@w' if you enter &1Blah Blah&2 in an
+emote. You can place in the emote where ever you want your name to appear(what
+appears depe ds on the viewer). Lastly you can place a * followed immediately
+by a name to have another character's name placed (view dependent also) into
+the emote. The name must be immediately after the asterisk and its first
+letter must be capitalized. (Example: *arl). You can only target one other
+character in an emote at a time.@n
+   
+Example:
+Typed (by Goku)    @Y:@w emote grabs a cookie and offers it to Joe.@n
+Shown (to the room)@Y:@w Goku grabs a cookie and offers it to Joe.@n
+   
+Typed (by Goku)       @Y:@w ooc *grabs a cookie and offers it to Joe.@n
+Shown (to the channel)@Y:@w @D[@bOOC@D: @gGoku grabs a cookie and offers it to Joe.@D]@n
+   
+@D---------@n
+@YSee also@w:@n
+@Whelp socials@w, @Whelp smote@w, @Whelp channels@n
+@Whelp roleplay@w, @Whelp colorcodes@n
+~
+16 1 0 0 0 1 5 0
+G
+1632836269
+U
+127484508424270796
+Z
+4
+#316
+0 0 0 0 0 100 100 0 9 A 0 y 0 0 0 0 0 0 0 0 0
+XAP
+Simple Pen~
+@wSimple @BPen@n~
+@wA simple @Bpen @wis lying here@n~
+~
+21 1 0 0 0 1 5 0
+G
+1632836274
+U
+3347896986699373330
+Z
+4
+#64799
+0 0 0 0 0 100 100 0 9 A e 0 0 0 0 0 0 0 0 0 0
+XAP
+Healing Gloves~
+Healing Gloves (IMM only)~
+Healing Gloves~
+~
+11 129 0 0 0 0 0 0
+G
+1632925765
+U
+6735708766060467290
+Z
+4
+A
+41 10 414
+#64702
+0 0 0 0 0 100 100 0 17 A o o 0 0 0 0 0 0 0 0 0
+XAP
+Dragon Clan Trainee Gloves Heal Pair Kibito~
+@C(@gD@Gr@Ra@rg@Go@gn @RC@rl@Ya@yn@C) @YT@wrainee @DG@Wl@Dov@We@Ds@n~
+@wA pair of @Dg@Wl@Dov@We@Ds@w have been left here@n~
+~
+11 129 0 0 0 1 10000 0
+G
+1633101302
+U
+1007817762085334482
+Z
+4
+A
+3 4 0
+A
+4 4 0
+A
+41 4 414
+A
+17 2000 0
+E
+Dragon Clan Trainee Gloves Heal Pair Kibito~
+@wThese two @Dg@Dl@Wo@Dv@We@Ds@w are made of cotton and are extremely light in weight. 
+Located on their palm areas is the @C(@gD@Gr@Ra@rg@Go@gn @RC@rl@Ya@yn@C) @yinsignia@w to show what kind of
+@gN@ga@Gm@gek@Gi@ga@Gn@w would be expected to be wearing them. @n
+~
+#13560
+0 5 5 7 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Black Label Vodka firebreather~
+Black Label Vodka~
+A bottle of black label vodka has been left here~
+~
+17 1 0 0 0 10 10 0
+G
+1633081373
+U
+1707164955506290275
+Z
+4
+#62632
+0 1 1 1 0 100 100 0 16 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Today's newspaper~
+@nToday's Newspaper~
+A copy of today's newspaper lies here~
+~
+5 8193 0 0 0 2 2 0
+G
+1632095951
+U
+4478645738685331743
+Z
+4
+E
+Today's Newspaper~
+   It's the newspaper of the day. Details on it describe local events,
+restaraunt reviews, and more. 
+
+It seems the right amount of heft to @Rthwap@n someone over the head with it.
+~

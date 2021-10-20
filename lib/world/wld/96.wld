@@ -1,0 +1,1161 @@
+#9600
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RPath to the Tower@n~
+   @DHalfway up the mountain, one can see a tower thrusting up into the sky from
+its peak. Below, the base of the mountain and relative lifelessness of the
+little island it stands on. Out over the ocean, a few tendrils of smoke rise
+into the air. @n
+~
+96 c 0 0 0 5
+D0
+~
+~
+0 0 9601 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 11302 0 0 0 0 0 0 0 0
+S
+#9601
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RBefore the Tower@n~
+   @D A path along the mountain has lead to a weathered tower. Lights from the
+many tower windows windows give evidence that this place is occupied by someone
+or something. From here, one can see out over the oceans of Namek, and if not
+for the battles taking place between Frieza's forces and those of planet Namek,
+it would be quite serene. @n
+~
+96 0 0 0 0 5
+D0
+The doors to the Wisdom Tower look formidible. Built of some kind of hardened
+wood from the trees that only grow here on Namek.
+~
+tower doors~
+2 0 9604 20 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9600 0 0 0 0 0 0 0 0
+S
+#9602
+New BuildWalk Room~
+This unfinished room was created by Katar.
+~
+96 0 0 0 0 0
+S
+#9603
+An unfinished room~
+You are in an unfinished room.
+~
+96 0 0 0 0 0
+S
+#9604
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of Awakening@n~
+   @DThe first floor of the Wisdom Tower is barren of decoration. Barren of
+distraction. This simple hallway ends in corners of ninety degrees on either
+end. A steady, low hum can be heard from those meditating on this floor. 
+There is a peaceful aura about the area that eases the nerves and makes one
+feel like perhaps they should only whisper if they speak. @n
+
+
+@DYou may @Rleave@D from here.@n
+~
+96 0 0 0 0 0
+D0
+~
+~
+0 0 9620 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9607 0 0 0 0 0 0 0 0
+D2
+~
+tower doors~
+1 0 9601 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9605 0 0 0 0 0 0 0 0
+S
+T 9692
+#9605
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of Awakening@n~
+   @DThe first floor of the Wisdom Tower is barren of decoration. Barren of
+distraction. This simple hallway ends in corners of ninety degrees on either
+end. A steady, low hum can be heard from those meditating on this floor. 
+There is a peaceful aura about the area that eases the nerves and makes one
+feel like perhaps they should only whisper if they speak. @n
+~
+96 0 0 0 0 0
+D1
+~
+~
+0 0 9604 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9606 0 0 0 0 0 0 0 0
+S
+#9606
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of Awakening@n~
+   @DThe first floor of the Wisdom Tower is barren of decoration. Barren of
+distraction. This simple hallway ends in corners of ninety degrees on either
+end. A steady, low hum can be heard from those meditating on this floor. 
+There is a peaceful aura about the area that eases the nerves and makes one
+feel like perhaps they should only whisper if they speak. @n
+~
+96 0 0 0 0 0
+D0
+~
+~
+0 0 9613 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9605 0 0 0 0 0 0 0 0
+S
+#9607
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of Awakening@n~
+   @DThe first floor of the Wisdom Tower is barren of decoration. Barren of
+distraction. This simple hallway ends in corners of ninety degrees on either
+end. A steady, low hum can be heard from those meditating on this floor. 
+There is a peaceful aura about the area that eases the nerves and makes one
+feel like perhaps they should only whisper if they speak. @n
+~
+96 0 0 0 0 0
+D1
+~
+~
+0 0 9608 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9604 0 0 0 0 0 0 0 0
+S
+#9608
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of Awakening@n~
+   @DThe first floor of the Wisdom Tower is barren of decoration. Barren of
+distraction. This simple hallway ends in corners of ninety degrees on either
+end. A steady, low hum can be heard from those meditating on this floor. 
+There is a peaceful aura about the area that eases the nerves and makes one
+feel like perhaps they should only whisper if they speak. @n
+~
+96 0 0 0 0 0
+D0
+~
+~
+0 0 9609 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9607 0 0 0 0 0 0 0 0
+S
+#9609
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of Awakening@n~
+   @DThe first floor of the Wisdom Tower is barren of decoration. Barren of
+distraction. This simple hallway ends in corners of ninety degrees on either
+end. A steady, low hum can be heard from those meditating on this floor. 
+There is a peaceful aura about the area that eases the nerves and makes one
+feel like perhaps they should only whisper if they speak. @n
+~
+96 0 0 0 0 0
+D0
+~
+~
+0 0 9610 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9608 0 0 0 0 0 0 0 0
+S
+#9610
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of Awakening@n~
+   @DThe first floor of the Wisdom Tower is barren of decoration. Barren of
+distraction. This simple hallway ends in corners of ninety degrees on either
+end. A steady, low hum can be heard from those meditating on this floor. 
+There is a peaceful aura about the area that eases the nerves and makes one
+feel like perhaps they should only whisper if they speak. @n
+~
+96 0 0 0 0 0
+D0
+~
+~
+0 0 9611 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9624 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9609 0 0 0 0 0 0 0 0
+S
+#9611
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of Awakening@n~
+   @DThe first floor of the Wisdom Tower is barren of decoration. Barren of
+distraction. This simple hallway ends in corners of ninety degrees on either
+end. A steady, low hum can be heard from those meditating on this floor. 
+There is a peaceful aura about the area that eases the nerves and makes one
+feel like perhaps they should only whisper if they speak. @n
+~
+96 0 0 0 0 0
+D0
+~
+~
+0 0 9612 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9610 0 0 0 0 0 0 0 0
+S
+#9612
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of Awakening@n~
+   @DThe first floor of the Wisdom Tower is barren of decoration. Barren of
+distraction. This simple hallway ends in corners of ninety degrees on either
+end. A steady, low hum can be heard from those meditating on this floor. 
+There is a peaceful aura about the area that eases the nerves and makes one
+feel like perhaps they should only whisper if they speak. @n
+~
+96 0 0 0 0 0
+D2
+~
+~
+0 0 9611 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9619 0 0 0 0 0 0 0 0
+S
+#9613
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of Awakening@n~
+   @DThe first floor of the Wisdom Tower is barren of decoration. Barren of
+distraction. This simple hallway ends in corners of ninety degrees on either
+end. A steady, low hum can be heard from those meditating on this floor. 
+There is a peaceful aura about the area that eases the nerves and makes one
+feel like perhaps they should only whisper if they speak. @n
+~
+96 0 0 0 0 0
+D0
+~
+~
+0 0 9614 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9606 0 0 0 0 0 0 0 0
+S
+#9614
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of Awakening@n~
+   @DThe first floor of the Wisdom Tower is barren of decoration. Barren of
+distraction. This simple hallway ends in corners of ninety degrees on either
+end. A steady, low hum can be heard from those meditating on this floor. 
+There is a peaceful aura about the area that eases the nerves and makes one
+feel like perhaps they should only whisper if they speak. @n
+~
+96 0 0 0 0 0
+D0
+~
+~
+0 0 9615 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9613 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9623 0 0 0 0 0 0 0 0
+S
+#9615
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of Awakening@n~
+   @DThe first floor of the Wisdom Tower is barren of decoration. Barren of
+distraction. This simple hallway ends in corners of ninety degrees on either
+end. A steady, low hum can be heard from those meditating on this floor. 
+There is a peaceful aura about the area that eases the nerves and makes one
+feel like perhaps they should only whisper if they speak. @n
+~
+96 0 0 0 0 0
+D0
+~
+~
+0 0 9616 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9614 0 0 0 0 0 0 0 0
+S
+#9616
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of Awakening@n~
+   @DThe first floor of the Wisdom Tower is barren of decoration. Barren of
+distraction. This simple hallway ends in corners of ninety degrees on either
+end. A steady, low hum can be heard from those meditating on this floor. 
+There is a peaceful aura about the area that eases the nerves and makes one
+feel like perhaps they should only whisper if they speak. @n
+~
+96 0 0 0 0 0
+D1
+~
+~
+0 0 9617 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9615 0 0 0 0 0 0 0 0
+S
+#9617
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of Awakening@n~
+   @DThe first floor of the Wisdom Tower is barren of decoration. Barren of
+distraction. This simple hallway ends in corners of ninety degrees on either
+end. A steady, low hum can be heard from those meditating on this floor. 
+There is a peaceful aura about the area that eases the nerves and makes one
+feel like perhaps they should only whisper if they speak. @n
+~
+96 0 0 0 0 0
+D1
+~
+~
+0 0 9618 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9616 0 0 0 0 0 0 0 0
+S
+#9618
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of Awakening@n~
+   @DThe first floor of the Wisdom Tower is barren of decoration. Barren of
+distraction. This simple hallway ends in corners of ninety degrees on either
+end. A steady, low hum can be heard from those meditating on this floor. 
+There is a peaceful aura about the area that eases the nerves and makes one
+feel like perhaps they should only whisper if they speak. @n
+~
+96 0 0 0 0 0
+D0
+~
+~
+0 0 9622 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9619 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9621 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9617 0 0 0 0 0 0 0 0
+S
+#9619
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of Awakening@n~
+   @DThe first floor of the Wisdom Tower is barren of decoration. Barren of
+distraction. This simple hallway ends in corners of ninety degrees on either
+end. A steady, low hum can be heard from those meditating on this floor. 
+There is a peaceful aura about the area that eases the nerves and makes one
+feel like perhaps they should only whisper if they speak. @n
+~
+96 0 0 0 0 0
+D1
+~
+~
+0 0 9612 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9618 0 0 0 0 0 0 0 0
+S
+#9620
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RAscension Room@n~
+   @RThe red walls of this room stand out in stark contrast to everything else on
+this floor. The red is a deep crimson, the color of the blood of certain
+races. From the corner of the observer's eye, the red seems to almost be
+running along the walls, coming up from the floor and then down from above. @n
+~
+96 0 0 0 0 0
+D2
+~
+~
+0 0 9604 0 0 0 0 0 0 0 0
+S
+T 9693
+#9621
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFirst Meditation Room@n~
+   @DThis Meditation room is built into the center of the tower, rather than on
+the perimeter of it. The only light in the room comes from a singular orb
+embedded into the ceiling which casts a soft, yellow glow. The air smells
+subtly of lavender, perhaps because of some kind of incense burning in a bowl
+in the center of the room. @n
+~
+96 0 0 0 0 0
+D0
+~
+~
+0 0 9618 0 0 0 0 0 0 0 0
+S
+T 9605
+#9622
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RRoom of Mortality@n~
+   @DAn archway separates this room from the hallways outside. On the far end is
+a window, allowing light to beam into the center of the room where one might
+meditate on profound things. Orbs of light are ensconced on the wall on the
+three sides apart from the archway, giving the room a comfortable ambience of
+light without being too bright. @n
+~
+96 0 0 0 0 0
+D2
+~
+~
+0 0 9618 0 0 0 0 0 0 0 0
+S
+#9623
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RRoom of Mortality@n~
+   @DAn archway separates this room from the hallways outside. On the far end is
+a window, allowing light to beam into the center of the room where one might
+meditate on profound things. Orbs of light are ensconced on the wall on the
+three sides apart from the archway, giving the room a comfortable ambience of
+light without being too bright. @n
+~
+96 0 0 0 0 0
+D1
+~
+~
+0 0 9614 0 0 0 0 0 0 0 0
+S
+#9624
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RRoom of Mortality@n~
+   @DAn archway separates this room from the hallways outside. On the far end is
+a window, allowing light to beam into the center of the room where one might
+meditate on profound things. Orbs of light are ensconced on the wall on the
+three sides apart from the archway, giving the room a comfortable ambience of
+light without being too bright. @n
+~
+96 0 0 0 0 0
+D3
+~
+~
+0 0 9610 0 0 0 0 0 0 0 0
+S
+#9625
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RAscension Room@n~
+   @RThe red walls of this room stand out in stark contrast to everything else on
+this floor. The red is a deep crimson, the color of the blood of certain
+races. From the corner of the observer's eye, the red seems to almost be
+running along the walls, coming up from the floor and then down from above. @n
+~
+96 0 0 0 0 0
+D2
+~
+~
+0 0 9626 0 0 0 0 0 0 0 0
+S
+#9626
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of True Seeing@n~
+   @WThe hallway here is shined to a polish, and seems to be made of granite with
+an inch thick layer of something transparent reinforced over top of it. While
+not mirrorlike, one gets the sense that looking at the walls, the walls seem to
+be looking back. Though no lights are present in the hallways, it is
+nevertheless not difficult to see in this hallway at all. @n
+~
+96 0 0 0 0 0
+D0
+~
+~
+0 0 9625 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9629 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9627 0 0 0 0 0 0 0 0
+S
+#9627
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of True Seeing@n~
+   @WThe hallway here is shined to a polish, and seems to be made of granite with
+an inch thick layer of something transparent reinforced over top of it. While
+not mirrorlike, one gets the sense that looking at the walls, the walls seem to
+be looking back. Though no lights are present in the hallways, it is
+nevertheless not difficult to see in this hallway at all. @n
+~
+96 0 0 0 0 0
+D1
+~
+~
+0 0 9626 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9628 0 0 0 0 0 0 0 0
+S
+#9628
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of True Seeing@n~
+   @WThe hallway here is shined to a polish, and seems to be made of granite with
+an inch thick layer of something transparent reinforced over top of it. While
+not mirrorlike, one gets the sense that looking at the walls, the walls seem to
+be looking back. Though no lights are present in the hallways, it is
+nevertheless not difficult to see in this hallway at all. @n
+~
+96 0 0 0 0 0
+D0
+~
+~
+0 0 9638 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9627 0 0 0 0 0 0 0 0
+S
+#9629
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of True Seeing@n~
+   @WThe hallway here is shined to a polish, and seems to be made of granite with
+an inch thick layer of something transparent reinforced over top of it. While
+not mirrorlike, one gets the sense that looking at the walls, the walls seem to
+be looking back. Though no lights are present in the hallways, it is
+nevertheless not difficult to see in this hallway at all. @n
+~
+96 0 0 0 0 0
+D1
+~
+~
+0 0 9630 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9626 0 0 0 0 0 0 0 0
+S
+#9630
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of True Seeing@n~
+   @WThe hallway here is shined to a polish, and seems to be made of granite with
+an inch thick layer of something transparent reinforced over top of it. While
+not mirrorlike, one gets the sense that looking at the walls, the walls seem to
+be looking back. Though no lights are present in the hallways, it is
+nevertheless not difficult to see in this hallway at all. @n
+~
+96 0 0 0 0 0
+D0
+~
+~
+0 0 9631 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9629 0 0 0 0 0 0 0 0
+S
+#9631
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of True Seeing@n~
+   @WThe hallway here is shined to a polish, and seems to be made of granite with
+an inch thick layer of something transparent reinforced over top of it. While
+not mirrorlike, one gets the sense that looking at the walls, the walls seem to
+be looking back. Though no lights are present in the hallways, it is
+nevertheless not difficult to see in this hallway at all. @n
+~
+96 0 0 0 0 0
+D0
+~
+~
+0 0 9632 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9630 0 0 0 0 0 0 0 0
+S
+#9632
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of True Seeing@n~
+   @WThe hallway here is shined to a polish, and seems to be made of granite with
+an inch thick layer of something transparent reinforced over top of it. While
+not mirrorlike, one gets the sense that looking at the walls, the walls seem to
+be looking back. Though no lights are present in the hallways, it is
+nevertheless not difficult to see in this hallway at all. @n
+~
+96 0 0 0 0 0
+D0
+~
+~
+0 0 9633 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9645 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9631 0 0 0 0 0 0 0 0
+S
+#9633
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of True Seeing@n~
+   @WThe hallway here is shined to a polish, and seems to be made of granite with
+an inch thick layer of something transparent reinforced over top of it. While
+not mirrorlike, one gets the sense that looking at the walls, the walls seem to
+be looking back. Though no lights are present in the hallways, it is
+nevertheless not difficult to see in this hallway at all. @n
+~
+96 0 0 0 0 0
+D0
+~
+~
+0 0 9634 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9632 0 0 0 0 0 0 0 0
+S
+#9634
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of True Seeing@n~
+   @WThe hallway here is shined to a polish, and seems to be made of granite with
+an inch thick layer of something transparent reinforced over top of it. While
+not mirrorlike, one gets the sense that looking at the walls, the walls seem to
+be looking back. Though no lights are present in the hallways, it is
+nevertheless not difficult to see in this hallway at all. @n
+~
+96 0 0 0 0 0
+D2
+~
+~
+0 0 9633 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9635 0 0 0 0 0 0 0 0
+S
+#9635
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of True Seeing@n~
+   @WThe hallway here is shined to a polish, and seems to be made of granite with
+an inch thick layer of something transparent reinforced over top of it. While
+not mirrorlike, one gets the sense that looking at the walls, the walls seem to
+be looking back. Though no lights are present in the hallways, it is
+nevertheless not difficult to see in this hallway at all. @n
+~
+96 0 0 0 0 0
+D1
+~
+~
+0 0 9634 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9636 0 0 0 0 0 0 0 0
+S
+#9636
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of True Seeing@n~
+   @WThe hallway here is shined to a polish, and seems to be made of granite with
+an inch thick layer of something transparent reinforced over top of it. While
+not mirrorlike, one gets the sense that looking at the walls, the walls seem to
+be looking back. Though no lights are present in the hallways, it is
+nevertheless not difficult to see in this hallway at all. @n
+~
+96 0 0 0 0 0
+D0
+~
+~
+0 0 9644 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9635 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9642 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9637 0 0 0 0 0 0 0 0
+S
+#9637
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of True Seeing@n~
+   @WThe hallway here is shined to a polish, and seems to be made of granite with
+an inch thick layer of something transparent reinforced over top of it. While
+not mirrorlike, one gets the sense that looking at the walls, the walls seem to
+be looking back. Though no lights are present in the hallways, it is
+nevertheless not difficult to see in this hallway at all. @n
+~
+96 0 0 0 0 0
+D1
+~
+~
+0 0 9636 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9641 0 0 0 0 0 0 0 0
+S
+#9638
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of True Seeing@n~
+   @WThe hallway here is shined to a polish, and seems to be made of granite with
+an inch thick layer of something transparent reinforced over top of it. While
+not mirrorlike, one gets the sense that looking at the walls, the walls seem to
+be looking back. Though no lights are present in the hallways, it is
+nevertheless not difficult to see in this hallway at all. @n
+~
+96 0 0 0 0 0
+D0
+~
+~
+0 0 9639 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9628 0 0 0 0 0 0 0 0
+S
+#9639
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of True Seeing@n~
+   @WThe hallway here is shined to a polish, and seems to be made of granite with
+an inch thick layer of something transparent reinforced over top of it. While
+not mirrorlike, one gets the sense that looking at the walls, the walls seem to
+be looking back. Though no lights are present in the hallways, it is
+nevertheless not difficult to see in this hallway at all. @n
+~
+96 0 0 0 0 0
+D0
+~
+~
+0 0 9640 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9638 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9643 0 0 0 0 0 0 0 0
+S
+#9640
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of True Seeing@n~
+   @WThe hallway here is shined to a polish, and seems to be made of granite with
+an inch thick layer of something transparent reinforced over top of it. While
+not mirrorlike, one gets the sense that looking at the walls, the walls seem to
+be looking back. Though no lights are present in the hallways, it is
+nevertheless not difficult to see in this hallway at all. @n
+~
+96 0 0 0 0 0
+D0
+~
+~
+0 0 9641 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9639 0 0 0 0 0 0 0 0
+S
+#9641
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of True Seeing@n~
+   @WThe hallway here is shined to a polish, and seems to be made of granite with
+an inch thick layer of something transparent reinforced over top of it. While
+not mirrorlike, one gets the sense that looking at the walls, the walls seem to
+be looking back. Though no lights are present in the hallways, it is
+nevertheless not difficult to see in this hallway at all. @n
+~
+96 0 0 0 0 0
+D1
+~
+~
+0 0 9637 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9640 0 0 0 0 0 0 0 0
+S
+#9642
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RSecond Meditation Room@n~
+This unfinished room was created by Seddy.
+~
+96 0 0 0 0 0
+D0
+~
+~
+0 0 9636 0 0 0 0 0 0 0 0
+S
+#9643
+@GW@Wisdo@Gm @GT@Wow@We@Gr@W - @RRoom of the Warrior Clan@n~
+   @DThis room is filled with smoke. There's so much that one has difficult
+seeing more than a few feet. The walls are a dark gray, which adds a sense of
+vertigo since even the walls themselves look like smoke.
+~
+96 0 0 0 0 0
+D1
+~
+~
+0 0 9639 0 0 0 0 0 0 0 0
+S
+#9644
+@GW@Wisdo@Gm @GT@Wow@We@Gr@W - @RRoom of the Dragon Clan@n~
+   @DThis room is filled with smoke. There's so much that one has difficult
+seeing more than a few feet. The walls are a dark gray, which adds a sense of
+vertigo since even the walls themselves look like smoke.
+~
+96 0 0 0 0 0
+D2
+~
+~
+0 0 9636 0 0 0 0 0 0 0 0
+S
+#9645
+@GW@Wisdo@Gm @GT@Wow@We@Gr@W - @RRoom of Clan Difference@n~
+   @DThis room is filled with smoke. There's so much that one has difficult
+seeing more than a few feet. The walls are a dark gray, which adds a sense of
+vertigo since even the walls themselves look like smoke.
+~
+96 0 0 0 0 0
+D3
+~
+~
+0 0 9632 0 0 0 0 0 0 0 0
+S
+#9646
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RAscension Room@n~
+   @RThe red walls of this room stand out in stark contrast to everything else on
+this floor. The red is a deep crimson, the color of the blood of certain
+races. From the corner of the observer's eye, the red seems to almost be
+running along the walls, coming up from the floor and then down from above. @n
+~
+96 0 0 0 0 0
+D2
+~
+~
+0 0 9647 0 0 0 0 0 0 0 0
+S
+#9647
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of Peace@n~
+   @YPeace radiates from the floor, walls, and ceiling here. A soft, yellow rock
+comprises the walls, white carpet covers the floor, and the ceiling matches the
+floor in color, but seems to be made out of transluscent crystal of some kind.
+Even the air here is still. @n
+~
+96 0 0 0 0 0
+D0
+~
+~
+0 0 9646 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9648 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9650 0 0 0 0 0 0 0 0
+S
+#9648
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of Peace@n~
+   @YPeace radiates from the floor, walls, and ceiling here. A soft, yellow rock
+comprises the walls, white carpet covers the floor, and the ceiling matches the
+floor in color, but seems to be made out of transluscent crystal of some kind.
+Even the air here is still. @n
+~
+96 0 0 0 0 0
+D1
+~
+~
+0 0 9649 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9647 0 0 0 0 0 0 0 0
+S
+#9649
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of Peace@n~
+   @YPeace radiates from the floor, walls, and ceiling here. A soft, yellow rock
+comprises the walls, white carpet covers the floor, and the ceiling matches the
+floor in color, but seems to be made out of transluscent crystal of some kind.
+Even the air here is still. @n
+~
+96 0 0 0 0 0
+D0
+~
+~
+0 0 9662 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9648 0 0 0 0 0 0 0 0
+S
+#9650
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of Peace@n~
+   @YPeace radiates from the floor, walls, and ceiling here. A soft, yellow rock
+comprises the walls, white carpet covers the floor, and the ceiling matches the
+floor in color, but seems to be made out of transluscent crystal of some kind.
+Even the air here is still. @n
+~
+96 0 0 0 0 0
+D1
+~
+~
+0 0 9647 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9651 0 0 0 0 0 0 0 0
+S
+#9651
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of Peace@n~
+   @YPeace radiates from the floor, walls, and ceiling here. A soft, yellow rock
+comprises the walls, white carpet covers the floor, and the ceiling matches the
+floor in color, but seems to be made out of transluscent crystal of some kind.
+Even the air here is still. @n
+~
+96 0 0 0 0 0
+D0
+~
+~
+0 0 9652 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9650 0 0 0 0 0 0 0 0
+S
+#9652
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of Peace@n~
+   @YPeace radiates from the floor, walls, and ceiling here. A soft, yellow rock
+comprises the walls, white carpet covers the floor, and the ceiling matches the
+floor in color, but seems to be made out of transluscent crystal of some kind.
+Even the air here is still. @n
+~
+96 0 0 0 0 0
+D0
+~
+~
+0 0 9653 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9651 0 0 0 0 0 0 0 0
+S
+#9653
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of Peace@n~
+   @YPeace radiates from the floor, walls, and ceiling here. A soft, yellow rock
+comprises the walls, white carpet covers the floor, and the ceiling matches the
+floor in color, but seems to be made out of transluscent crystal of some kind.
+Even the air here is still. @n
+~
+96 0 0 0 0 0
+D0
+~
+~
+0 0 9654 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9652 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9665 0 0 0 0 0 0 0 0
+S
+#9654
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of Peace@n~
+   @YPeace radiates from the floor, walls, and ceiling here. A soft, yellow rock
+comprises the walls, white carpet covers the floor, and the ceiling matches the
+floor in color, but seems to be made out of transluscent crystal of some kind.
+Even the air here is still. @n
+~
+96 0 0 0 0 0
+D0
+~
+~
+0 0 9655 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9653 0 0 0 0 0 0 0 0
+S
+#9655
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of Peace@n~
+   @YPeace radiates from the floor, walls, and ceiling here. A soft, yellow rock
+comprises the walls, white carpet covers the floor, and the ceiling matches the
+floor in color, but seems to be made out of transluscent crystal of some kind.
+Even the air here is still. @n
+~
+96 0 0 0 0 0
+D1
+~
+~
+0 0 9656 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9654 0 0 0 0 0 0 0 0
+S
+#9656
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of Peace@n~
+   @YPeace radiates from the floor, walls, and ceiling here. A soft, yellow rock
+comprises the walls, white carpet covers the floor, and the ceiling matches the
+floor in color, but seems to be made out of transluscent crystal of some kind.
+Even the air here is still. @n
+~
+96 0 0 0 0 0
+D1
+~
+~
+0 0 9657 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9655 0 0 0 0 0 0 0 0
+S
+#9657
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of Peace@n~
+   @YPeace radiates from the floor, walls, and ceiling here. A soft, yellow rock
+comprises the walls, white carpet covers the floor, and the ceiling matches the
+floor in color, but seems to be made out of transluscent crystal of some kind.
+Even the air here is still. @n
+~
+96 0 0 0 0 0
+D0
+~
+~
+0 0 9664 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9658 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9663 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9656 0 0 0 0 0 0 0 0
+S
+#9658
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of Peace@n~
+   @YPeace radiates from the floor, walls, and ceiling here. A soft, yellow rock
+comprises the walls, white carpet covers the floor, and the ceiling matches the
+floor in color, but seems to be made out of transluscent crystal of some kind.
+Even the air here is still. @n
+~
+96 0 0 0 0 0
+D1
+~
+~
+0 0 9659 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9657 0 0 0 0 0 0 0 0
+S
+#9659
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of Peace@n~
+   @YPeace radiates from the floor, walls, and ceiling here. A soft, yellow rock
+comprises the walls, white carpet covers the floor, and the ceiling matches the
+floor in color, but seems to be made out of transluscent crystal of some kind.
+Even the air here is still. @n
+~
+96 0 0 0 0 0
+D2
+~
+~
+0 0 9660 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9658 0 0 0 0 0 0 0 0
+S
+#9660
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of Peace@n~
+   @YPeace radiates from the floor, walls, and ceiling here. A soft, yellow rock
+comprises the walls, white carpet covers the floor, and the ceiling matches the
+floor in color, but seems to be made out of transluscent crystal of some kind.
+Even the air here is still. @n
+~
+96 0 0 0 0 0
+D0
+~
+~
+0 0 9659 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9661 0 0 0 0 0 0 0 0
+S
+#9661
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of Peace@n~
+   @YPeace radiates from the floor, walls, and ceiling here. A soft, yellow rock
+comprises the walls, white carpet covers the floor, and the ceiling matches the
+floor in color, but seems to be made out of transluscent crystal of some kind.
+Even the air here is still. @n
+~
+96 0 0 0 0 0
+D0
+~
+~
+0 0 9660 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9666 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9662 0 0 0 0 0 0 0 0
+S
+#9662
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RFloor of Peace@n~
+   @YPeace radiates from the floor, walls, and ceiling here. A soft, yellow rock
+comprises the walls, white carpet covers the floor, and the ceiling matches the
+floor in color, but seems to be made out of transluscent crystal of some kind.
+Even the air here is still. @n
+~
+96 0 0 0 0 0
+D0
+~
+~
+0 0 9661 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9649 0 0 0 0 0 0 0 0
+S
+#9663
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RThird Meditation Room@n~
+This unfinished room was created by Seddy.
+~
+96 0 0 0 0 0
+D0
+~
+~
+0 0 9657 0 0 0 0 0 0 0 0
+S
+#9664
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RRoom of Zen@n~
+   @WThis room is pure white, broken only by the archway leading out to the
+hallway and the window allowing the light of one or more of Namek's suns into
+the room. There is no dirt, no smudge, nothing to ruin the prestinity of the
+room. It is almost as if the purity of the room wants to seep itself into the
+heart, mind, and soul of those who visit it. @n
+~
+96 0 0 0 0 0
+D2
+~
+~
+0 0 9657 0 0 0 0 0 0 0 0
+S
+#9665
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RRoom of Zen@n~
+   @WThis room is pure white, broken only by the archway leading out to the
+hallway and the window allowing the light of one or more of Namek's suns into
+the room. There is no dirt, no smudge, nothing to ruin the prestinity of the
+room. It is almost as if the purity of the room wants to seep itself into the
+heart, mind, and soul of those who visit it. @n
+~
+96 0 0 0 0 0
+D1
+~
+~
+0 0 9653 0 0 0 0 0 0 0 0
+S
+#9666
+@GW@Wisdo@Gm @GT@Wow@We@Gr @W- @RRoom of Zen@n~
+   @WThis room is pure white, broken only by the archway leading out to the
+hallway and the window allowing the light of one or more of Namek's suns into
+the room. There is no dirt, no smudge, nothing to ruin the prestinity of the
+room. It is almost as if the purity of the room wants to seep itself into the
+heart, mind, and soul of those who visit it. @n
+~
+96 0 0 0 0 0
+D3
+~
+~
+0 0 9661 0 0 0 0 0 0 0 0
+S
+$~

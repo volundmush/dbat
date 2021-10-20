@@ -1,0 +1,1985 @@
+#14400
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Entrance@n~
+   @yUpon entrance, the room emits a gentle muddy smell. The walls are a dark
+golden hue, much the same as the floor. Near the ceiling of the tunnel, and
+along the walls at varying intervals, squirming bugs emitting their own light
+from bioluminescence light up the surroundings. @n
+~
+144 cy 0 0 0 11
+D0
+~
+~
+0 0 14401 0 0 0 0 0 0 0 0
+D11
+~
+~
+0 0 10922 0 0 0 0 0 0 0 0
+E
+sign~
+This is a sign for a player's benefit. Beware of angry frogs.
+~
+S
+#14401
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Tunnel@n~
+   @yContinuing through the tunnel, the small bugs light the area for all
+passersby to see. Hedges line the exits to the gardens on either side, their
+leaves shining among the provided light. The tunnel continues to the north,
+where the light shines brighter. @n
+~
+144 y 0 0 0 0
+D0
+~
+~
+0 0 14404 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14403 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14400 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14402 0 0 0 0 0 0 0 0
+E
+sign~
+This is a sign for a player's benefit. Beware of angry frogs.
+~
+S
+#14402
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Garden@n~
+   @yFilled with varying types of flora, this garden gives off a serene feeling.
+Insects buzz about, continuing the cycle of life, while water trickles among the
+roots to keep the plants alive. Lining the walls in strange patterns are bugs
+giving off a glow that provide the life for the plants, and the ability to see.
+~
+144 y 0 0 0 0
+D1
+~
+~
+0 0 14401 0 0 0 0 0 0 0 0
+S
+#14403
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Garden@n~
+   @yFilled with varying types of flora, this garden gives off a serene feeling.
+Insects buzz about, continuing the cycle of life, while water trickles among the
+roots to keep the plants alive. Lining the walls in strange patterns are bugs
+giving off a glow that provide the life for the plants, and the ability to see.
+~
+144 y 0 0 0 0
+D3
+~
+~
+0 0 14401 0 0 0 0 0 0 0 0
+S
+#14404
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Tunnel@n~
+   @yContinuing through the tunnel, the small bugs light the area for all
+passersby to see. The walls flare outwards near the end, opening up into a
+bright light, and the village commons. @n
+~
+144 y 0 0 0 0
+D0
+~
+~
+0 0 14405 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14401 0 0 0 0 0 0 0 0
+S
+#14405
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Village Commons@n~
+   @yThis room is the epicenter of the village. Wares are sold by varying
+vendors, mostly food. A small, open hut sits in the middle, full of fliers and
+information about the village. The bioluminescent creatures are display in an
+exaggerated fashion on the ceiling, providing a brilliant light for the area.
+
+@yA @Rsign@y is here.@n
+~
+144 y 0 0 0 10
+D0
+~
+~
+0 0 14421 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14407 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14404 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14411 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14418 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14415 0 0 0 0 0 0 0 0
+D10
+~
+~
+0 0 14406 0 0 0 0 0 0 0 0
+E
+sign~
+@R---------------------------------@n
+@yTo the northwest: Bank
+To the northeast: Postmaster
+To the east: General Store
+@R---------------------------------@n
+~
+S
+#14406
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Information Hut@n~
+   @yThis tiny hut boasts a board filled with bulletins and notices for the
+village. The light throughout the room is dim, but plentiful enough to read
+the board with ease. One @Rnotice@y sticks out quite visibly, before the others.
+~
+144 y 0 0 0 1
+D11
+~
+~
+0 0 14405 0 0 0 0 0 0 0 0
+E
+notice~
+@Y------------------------------------------------------@n
+@RPlease see Gosho concerning the village's lost grub!
+@Y------------------------------------------------------@n
+~
+S
+#14407
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Tunnel@n~
+   @yA simple tunnel pushes its way through the soil in both directions. The
+ground is littered with gravel to provide traction, while the walls are lined
+with the bioluminescent creatures to provide light in the tunnel, with an even
+greater light emitted from the west. @n
+~
+144 y 0 0 0 1
+D1
+~
+~
+0 0 14408 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14405 0 0 0 0 0 0 0 0
+S
+#14408
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Tunnel@n~
+   @yA barren path strewn with gravel, carved out buildings line the sides of
+this tunnel, with signs depicting what their wares are. Bioluminescent
+creatures line the buildings and ceiling to provide the necessary light. @n
+~
+144 y 0 0 0 1
+D0
+~
+~
+0 0 14437 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14409 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14439 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14407 0 0 0 0 0 0 0 0
+S
+#14409
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Tunnel@n~
+   @yA barren path strewn with gravel, simple gardens can be seen with their
+hedges protruding just slightly onto the path. The ceiling is lined with
+bioluminescent creatures to light the passageway. @n
+~
+144 y 0 0 0 1
+D0
+~
+~
+0 0 14472 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14410 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14473 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14408 0 0 0 0 0 0 0 0
+S
+#14410
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Downward Spiral@n~
+   @yThe tunnel ends abruptly, with the bioluminescent creatures lighting a
+downward spiraling ramp, allowing access to another level of the village. 
+Gravel and other larger pieces of rock line the floow to provide some traction
+to the passersby on their decline. @n
+~
+144 y 0 0 0 1
+D3
+~
+~
+0 0 14409 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 14452 0 0 0 0 0 0 0 0
+S
+#14411
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Tunnel@n~
+   @yA simple tunnel pushes its way through the soil in both directions. The
+ground is littered with gravel to provide traction, while the walls are lined
+with the bioluminescent creatures to provide light in the tunnel, with an even
+greater light emitted from the east. @n
+~
+144 y 0 0 0 1
+D1
+~
+~
+0 0 14405 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14412 0 0 0 0 0 0 0 0
+S
+#14412
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Tunnel@n~
+   @yA barren path strewn with gravel, carved out buildings line the sides of
+this tunnel, with signs depicting what their wares are. Bioluminescent
+creatures line the buildings and ceiling to provide the necessary light. @n
+~
+144 y 0 0 0 1
+D0
+~
+~
+0 0 14433 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14411 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14435 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14413 0 0 0 0 0 0 0 0
+S
+#14413
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Tunnel@n~
+   @yA barren path strewn with gravel, carved out buildings line the sides of
+this tunnel, with signs depicting what their wares are. Bioluminescent
+creatures line the buildings and ceiling to provide the necessary light. @n
+~
+144 y 0 0 0 1
+D0
+~
+~
+0 0 14470 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14412 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14471 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14414 0 0 0 0 0 0 0 0
+S
+#14414
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Downward Spiral@n~
+   @yThe tunnel ends abruptly, with the bioluminescent creatures lighting a
+downward spiraling ramp, allowing access to another level of the village. 
+Gravel and other larger pieces of rock line the floow to provide some traction
+to the passersby on their decline. @n
+~
+144 y 0 0 0 1
+D1
+~
+~
+0 0 14413 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 14444 0 0 0 0 0 0 0 0
+S
+#14415
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Tunnel@n~
+   @yA simple tunnel pushes its way through the soil in both directions. The
+ground is littered with gravel to provide traction, while the walls are lined
+with the bioluminescent creatures to provide light in the tunnel, with a
+building carved out to the north. @n
+~
+144 y 0 0 0 1
+D0
+~
+~
+0 0 14442 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14416 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14405 0 0 0 0 0 0 0 0
+S
+#14416
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Tunnel@n~
+   @yA simple tunnel pushes its way through the soil in both directions. The
+ground is littered with gravel to provide traction, while the walls are lined
+with the bioluminescent creatures to provide light in the tunnel, with a
+building carved out to the south. @n
+~
+144 y 0 0 0 1
+D2
+~
+door~
+1 0 14443 20 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14417 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14415 0 0 0 0 0 0 0 0
+S
+#14417
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Garden@n~
+   @yFilled with varying types of flora, this garden gives off a serene feeling.
+Insects buzz about, continuing the cycle of life, while water trickles among the
+roots to keep the plants alive. Lining the walls in strange patterns are bugs
+giving off a glow that provide the life for the plants, and the ability to see.
+~
+144 y 0 0 0 0
+D9
+~
+~
+0 0 14416 0 0 0 0 0 0 0 0
+S
+#14418
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Tunnel@n~
+   @yA simple tunnel pushes its way through the soil in both directions. The
+ground is littered with gravel to provide traction, while the walls are lined
+with the bioluminescent creatures to provide light in the tunnel, with a
+building carved out to the north. @n
+~
+144 y 0 0 0 1
+D0
+~
+~
+0 0 14441 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14419 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14405 0 0 0 0 0 0 0 0
+S
+#14419
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Tunnel@n~
+   @yA simple tunnel pushes its way through the soil in both directions. The
+ground is littered with gravel to provide traction, while the walls are lined
+with the bioluminescent creatures to provide light in the tunnel, with a
+building carved out to the south. @n
+~
+144 y 0 0 0 1
+D2
+~
+door~
+1 0 14478 20 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14420 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14418 0 0 0 0 0 0 0 0
+S
+#14420
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Garden@n~
+   @yFilled with varying types of flora, this garden gives off a serene feeling.
+Insects buzz about, continuing the cycle of life, while water trickles among the
+roots to keep the plants alive. Lining the walls in strange patterns are bugs
+giving off a glow that provide the life for the plants, and the ability to see.
+~
+144 y 0 0 0 0
+D8
+~
+~
+0 0 14419 0 0 0 0 0 0 0 0
+S
+#14421
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Tunnel@n~
+   @yA simple tunnel pushes its way through the soil in both directions. The
+ground is littered with gravel to provide traction, while the walls are lined
+with the bioluminescent creatures to provide light in the tunnel, with an even
+greater light emitted from the south. @n
+~
+144 y 0 0 0 1
+D0
+~
+~
+0 0 14422 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14405 0 0 0 0 0 0 0 0
+S
+#14422
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Tunnel@n~
+   @yA simple tunnel pushes its way through the soil in both directions. The
+ground is littered with gravel to provide traction, while the walls are lined
+with the bioluminescent creatures to provide light in the tunnel, with an even
+greater light emitted from the north. @n
+~
+144 y 0 0 0 1
+D0
+~
+~
+0 0 14423 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14421 0 0 0 0 0 0 0 0
+S
+#14423
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Junction@n~
+   @yThe path ends abruptly in a brightly-lit room, hedges from gardens spilling
+onto the path. The smell of vegetation is strong in the area, rivalling the
+smell of the dirt and soil. A brilliant pattern of bioluminescent creatures
+lines the ceiling, illuminating the room to the fullest extent. @n
+~
+144 y 0 0 0 1
+D0
+~
+~
+0 0 14424 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14428 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14422 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14426 0 0 0 0 0 0 0 0
+S
+#14424
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Garden@n~
+   @yFilled with varying types of flora, this garden gives off a serene feeling.
+Insects buzz about, continuing the cycle of life, while water trickles among the
+roots to keep the plants alive. Lining the walls in strange patterns are bugs
+giving off a glow that provide the life for the plants, and the ability to see.
+~
+144 y 0 0 0 0
+D0
+~
+~
+0 0 14425 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14423 0 0 0 0 0 0 0 0
+S
+#14425
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Elder's Dwelling@n~
+   @yThis drab house is lavish compared to the others in the village, boasting
+multiple carpets and even a window. A few chairs dot the room, offering
+visitors and seekers of wisdom a place to rest. In the back of the room lies a
+path upstairs. @n
+~
+144 y 0 0 0 0
+D2
+~
+~
+0 0 14424 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 14432 0 0 0 0 0 0 0 0
+S
+#14426
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Garden@n~
+   @yFilled with varying types of flora, this garden gives off a serene feeling.
+Insects buzz about, continuing the cycle of life, while water trickles among the
+roots to keep the plants alive. Lining the walls in strange patterns are bugs
+giving off a glow that provide the life for the plants, and the ability to see.
+~
+144 y 0 0 0 0
+D1
+~
+~
+0 0 14423 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14427 0 0 0 0 0 0 0 0
+S
+#14427
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Elder's Dwelling@n~
+   @yThis drab house is lavish compared to the others in the village, boasting
+multiple carpets and even a window. A few chairs dot the room, offering
+visitors and seekers of wisdom a place to rest. In the back of the room lies a
+path upstairs. @n
+~
+144 y 0 0 0 0
+D1
+~
+~
+0 0 14426 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 14431 0 0 0 0 0 0 0 0
+S
+#14428
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Garden@n~
+   @yFilled with varying types of flora, this garden gives off a serene feeling.
+Insects buzz about, continuing the cycle of life, while water trickles among the
+roots to keep the plants alive. Lining the walls in strange patterns are bugs
+giving off a glow that provide the life for the plants, and the ability to see.
+~
+144 y 0 0 0 0
+D1
+~
+~
+0 0 14429 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14423 0 0 0 0 0 0 0 0
+S
+#14429
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Elder's Dwelling@n~
+   @yThis drab house is lavish compared to the others in the village, boasting
+multiple carpets and even a window. A few chairs dot the room, offering
+visitors and seekers of wisdom a place to rest. In the back of the room lies a
+path upstairs. @n
+~
+144 y 0 0 0 0
+D3
+~
+~
+0 0 14428 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 14430 0 0 0 0 0 0 0 0
+S
+#14430
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Simple Room@n~
+   @yA simple room, sporting only a bed and a chair, with a carpet on the ground.
+It is softly lit by bioluminescent insects, providing just enough light to lead
+the way between the bed and the access to downstairs. @n
+~
+144 y 0 0 0 0
+D5
+~
+~
+0 0 14429 0 0 0 0 0 0 0 0
+S
+#14431
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Simple Room@n~
+   @yA simple room, sporting only a bed and a chair, with a carpet on the ground.
+It is softly lit by bioluminescent insects, providing just enough light to lead
+the way between the bed and the access to downstairs. @n
+~
+144 y 0 0 0 0
+D5
+~
+~
+0 0 14427 0 0 0 0 0 0 0 0
+S
+#14432
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Simple Room@n~
+   @yA simple room, sporting only a bed and a chair, with a carpet on the ground.
+It is softly lit by bioluminescent insects, providing just enough light to lead
+the way between the bed and the access to downstairs. @n
+~
+144 y 0 0 0 0
+D5
+~
+~
+0 0 14425 0 0 0 0 0 0 0 0
+S
+#14433
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Weapons Galore@n~
+   @yThis small alcove is adorned with wrapped weaponry, to protect from the
+dampness, hanging on the walls and sitting atop counters. It is brightly lit,
+offering clear view of all of the wares available. @n
+~
+144 y 0 0 0 10
+D2
+~
+~
+0 0 14412 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 14434 0 0 0 0 0 0 0 0
+S
+#14434
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Simple Room@n~
+   @yMostly barren, this room holds only a bed and a small table. It is dark,
+but just barely bright enough to see. The bed is tidy, made with dull gray
+sheets. @n
+~
+144 y 0 0 0 0
+D5
+~
+~
+0 0 14433 0 0 0 0 0 0 0 0
+S
+#14435
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Armory@n~
+   @yThis small alcove is adorned with wrapped and covered armor, to protect from
+the dampness, hanging on the walls and sitting atop counters, or mounted as
+displays. It is brightly lit, offering clear view of all of the wares
+available. @n
+~
+144 y 0 0 0 10
+D0
+~
+~
+0 0 14412 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 14436 0 0 0 0 0 0 0 0
+S
+#14436
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Simple Room@n~
+   @yMostly barren, this room holds only a bed and a small table. It is dark,
+but just barely bright enough to see. The bed is tidy, made with dull gray
+sheets. @n
+~
+144 y 0 0 0 0
+D5
+~
+~
+0 0 14435 0 0 0 0 0 0 0 0
+S
+#14437
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: General Store@n~
+   @yDimly illuminated, various wares can be seen littered around the room. 
+Shelves protrude from the walls, with tables lining the room, with a counter in
+the back. @n
+~
+144 y 0 0 0 10
+D2
+~
+~
+0 0 14408 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 14438 0 0 0 0 0 0 0 0
+S
+#14438
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Simple Room@n~
+   @yMostly barren, this room holds only a bed and a small table. It is dark,
+but just barely bright enough to see. The bed is tidy, made with dull gray
+sheets. @n
+~
+144 y 0 0 0 0
+D5
+~
+~
+0 0 14437 0 0 0 0 0 0 0 0
+S
+#14439
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Distribution Center@n~
+   @yThis room glows with a fierce intensity, the bioluminescent creatures
+covering every nook and cranny. They line the shelves, walls, and ceilings,
+while others sit in baskets. The floor has a small path cleared and barricaded
+off for a safe way to reach to the counter in the back. @n
+~
+144 y 0 0 0 0
+D0
+~
+~
+0 0 14408 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 14440 0 0 0 0 0 0 0 0
+S
+#14440
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Simple Room@n~
+   @yMostly barren, this room holds only a bed and a small table. It is dark,
+but just barely bright enough to see. The bed is tidy, made with dull gray
+sheets. @n
+~
+144 y 0 0 0 0
+D5
+~
+~
+0 0 14439 0 0 0 0 0 0 0 0
+S
+#14441
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Bank@n~
+   @yA rather small alcove, this room is unadorned except for a single machine
+used for monetary transactions. Light illuminates the room with small posts
+and rope to cordone patrons into an orderly line. @n
+~
+144 y 0 0 0 0
+D2
+~
+~
+0 0 14418 0 0 0 0 0 0 0 0
+S
+#14442
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Post Office@n~
+   @yA decently sized alcove, the back of the room is covered with shelves, each
+littered with mail and stacks of paper, behind a counter. The alcove is
+well-lit, the bioluminescent creatures patterened across the walls. @n
+~
+144 y 0 0 0 0
+D2
+~
+~
+0 0 14415 0 0 0 0 0 0 0 0
+S
+#14443
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Common Dwelling@n~
+   @gThis room is nothing more than small and simple living quarters, carved out
+of the island. Standard furniture and a make-shift door for added privacy. 
+The walls are bare, with a large rug on the ground to offer some protection to
+the ground. @n
+~
+144 y 0 0 0 0
+D0
+~
+door~
+1 0 14416 0 0 0 0 0 0 0 0
+S
+#14444
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Upward Spiral@n~
+   @yLined by hedges from the surrounding gardens, the tunnel comes to an end
+with an upward spiral providing access to the upper level of the village. 
+Gravel and other larger pieces of rock and stone line the floor to provide the
+passerby with traction. @n
+~
+144 y 0 0 0 0
+D0
+~
+~
+0 0 14453 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14445 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14455 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 14414 0 0 0 0 0 0 0 0
+S
+#14445
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Tunnel@n~
+   @yA simple path through the lower level of the village, this area is
+surrounded by hedges and flowers from the adjacent gardens. The ceiling is
+lined with the bioluminescent creatures to provide light to all passersby. @n
+~
+144 y 0 0 0 0
+D0
+~
+~
+0 0 14454 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14446 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14456 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14444 0 0 0 0 0 0 0 0
+S
+#14446
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Tunnel@n~
+   @yA simple tunnel pushes its way through the soil in both directions. The
+ground is littered with gravel to provide traction, while the walls are lined
+with the bioluminescent creatures to provide light in the tunnel. @n
+~
+144 y 0 0 0 0
+D1
+~
+~
+0 0 14447 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14445 0 0 0 0 0 0 0 0
+S
+#14447
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Tunnel@n~
+   @yA simple tunnel pushes its way through the soil in both directions. The
+ground is littered with gravel to provide traction, while the walls are lined
+with the bioluminescent creatures to provide light in the tunnel. @n
+~
+144 y 0 0 0 0
+D1
+~
+~
+0 0 14448 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14446 0 0 0 0 0 0 0 0
+S
+#14448
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Trials of Strength@n~
+   @yThis room is large compared to the rest of the village, almost cavernous. 
+Bioluminescent creatures line the ceiling in spiral patterns, illuminating the
+large area. A small path leads north, shrouded in darkness. @n
+
+@yA @Rsign @yis here.@n
+~
+144 y 0 0 0 0
+D0
+~
+~
+0 0 14467 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14449 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14469 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14447 0 0 0 0 0 0 0 0
+E
+sign~
+@R---------------------------------
+@yTo the south: Glowworm Nursery
+To the north: Trial of the Mind
+@R---------------------------------@n
+~
+S
+#14449
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Tunnel@n~
+   @yA simple tunnel pushes its way through the soil in both directions. The
+ground is littered with gravel to provide traction, while the walls are lined
+with the bioluminescent creatures to provide light in the tunnel. @n
+~
+144 y 0 0 0 0
+D1
+~
+~
+0 0 14450 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14448 0 0 0 0 0 0 0 0
+S
+#14450
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Tunnel@n~
+   @yA simple tunnel pushes its way through the soil in both directions. The
+ground is littered with gravel to provide traction, while the walls are lined
+with the bioluminescent creatures to provide light in the tunnel. @n
+~
+144 y 0 0 0 0
+D1
+~
+~
+0 0 14451 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14449 0 0 0 0 0 0 0 0
+S
+#14451
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Tunnel@n~
+   @yA simple path through the lower level of the village, this area is
+surrounded by hedges and flowers from the adjacent gardens. The ceiling is
+lined with the bioluminescent creatures to provide light to all passersby. @n
+~
+144 y 0 0 0 0
+D0
+~
+~
+0 0 14460 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14452 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14458 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14450 0 0 0 0 0 0 0 0
+S
+#14452
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Upward Spiral@n~
+   @yLined by hedges from the surrounding gardens, the tunnel comes to an end
+with an upward spiral providing access to the upper level of the village. 
+Gravel and other larger pieces of rock and stone line the floor to provide the
+passerby with traction. @n
+~
+144 y 0 0 0 0
+D0
+~
+~
+0 0 14459 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14457 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14451 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 14410 0 0 0 0 0 0 0 0
+S
+#14453
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Garden@n~
+   @yFilled with varying types of flora, this garden gives off a serene feeling.
+Insects buzz about, continuing the cycle of life, while water trickles among the
+roots to keep the plants alive. Lining the walls in strange patterns are bugs
+giving off a glow that provide the life for the plants, and the ability to see.
+~
+144 y 0 0 0 0
+D1
+~
+~
+0 0 14454 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14444 0 0 0 0 0 0 0 0
+S
+#14454
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Garden@n~
+   @yFilled with varying types of flora, this garden gives off a serene feeling.
+Insects buzz about, continuing the cycle of life, while water trickles among the
+roots to keep the plants alive. Lining the walls in strange patterns are bugs
+giving off a glow that provide the life for the plants, and the ability to see.
+~
+144 y 0 0 0 0
+D2
+~
+~
+0 0 14445 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14453 0 0 0 0 0 0 0 0
+S
+#14455
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Garden@n~
+   @yFilled with varying types of flora, this garden gives off a serene feeling.
+Insects buzz about, continuing the cycle of life, while water trickles among the
+roots to keep the plants alive. Lining the walls in strange patterns are bugs
+giving off a glow that provide the life for the plants, and the ability to see.
+~
+144 y 0 0 0 0
+D0
+~
+~
+0 0 14444 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14456 0 0 0 0 0 0 0 0
+S
+#14456
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Garden@n~
+   @yFilled with varying types of flora, this garden gives off a serene feeling.
+Insects buzz about, continuing the cycle of life, while water trickles among the
+roots to keep the plants alive. Lining the walls in strange patterns are bugs
+giving off a glow that provide the life for the plants, and the ability to see.
+~
+144 y 0 0 0 0
+D0
+~
+~
+0 0 14445 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14455 0 0 0 0 0 0 0 0
+S
+#14457
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Garden@n~
+   @yFilled with varying types of flora, this garden gives off a serene feeling.
+Insects buzz about, continuing the cycle of life, while water trickles among the
+roots to keep the plants alive. Lining the walls in strange patterns are bugs
+giving off a glow that provide the life for the plants, and the ability to see.
+~
+144 y 0 0 0 0
+D0
+~
+~
+0 0 14452 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14458 0 0 0 0 0 0 0 0
+S
+#14458
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Garden@n~
+   @yFilled with varying types of flora, this garden gives off a serene feeling.
+Insects buzz about, continuing the cycle of life, while water trickles among the
+roots to keep the plants alive. Lining the walls in strange patterns are bugs
+giving off a glow that provide the life for the plants, and the ability to see.
+~
+144 y 0 0 0 0
+D0
+~
+~
+0 0 14451 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14457 0 0 0 0 0 0 0 0
+S
+#14459
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Garden@n~
+   @yFilled with varying types of flora, this garden gives off a serene feeling.
+Insects buzz about, continuing the cycle of life, while water trickles among the
+roots to keep the plants alive. Lining the walls in strange patterns are bugs
+giving off a glow that provide the life for the plants, and the ability to see.
+~
+144 y 0 0 0 0
+D2
+~
+~
+0 0 14452 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14460 0 0 0 0 0 0 0 0
+S
+#14460
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Garden@n~
+   @yFilled with varying types of flora, this garden gives off a serene feeling.
+Insects buzz about, continuing the cycle of life, while water trickles among the
+roots to keep the plants alive. Lining the walls in strange patterns are bugs
+giving off a glow that provide the life for the plants, and the ability to see.
+~
+144 y 0 0 0 0
+D1
+~
+~
+0 0 14459 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14451 0 0 0 0 0 0 0 0
+S
+#14461
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: @CG@clowwor@Cm @CF@car@Cm@n~
+   @ySmall paths line the area, dictating places that may be used for getting
+around. Between the paths lie large areas covered with cocoons, filling up
+branches of short bushes and the ground itself. The cocoons give off a small
+@ctinge@y of light, while the bioluminescent creatures themselves crawl along the
+walls here. @n
+~
+144 y 0 0 0 0
+D0
+A small gate
+~
+gate~
+1 0 14469 20 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14462 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14464 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14466 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14463 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14465 0 0 0 0 0 0 0 0
+S
+#14462
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: @CG@clowwor@Cm @CF@car@Cm@n~
+   @ySmall paths line the area, dictating places that may be used for getting
+around. Between the paths lie large areas covered with cocoons, filling up
+branches of short bushes and the ground itself. The cocoons give off a small
+@ctinge@y of light, while the bioluminescent creatures themselves crawl along the
+walls here. @n
+~
+144 y 0 0 0 0
+D2
+~
+~
+0 0 14463 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14461 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14464 0 0 0 0 0 0 0 0
+S
+#14463
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: @CG@clowwor@Cm @CF@car@Cm@n~
+   @ySmall paths line the area, dictating places that may be used for getting
+around. Between the paths lie large areas covered with cocoons, filling up
+branches of short bushes and the ground itself. The cocoons give off a small
+@ctinge@y of light, while the bioluminescent creatures themselves crawl along the
+walls here. @n
+~
+144 y 0 0 0 0
+D0
+~
+~
+0 0 14462 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14464 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14461 0 0 0 0 0 0 0 0
+S
+#14464
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: @CG@clowwor@Cm @CF@car@Cm@n~
+   @ySmall paths line the area, dictating places that may be used for getting
+around. Between the paths lie large areas covered with cocoons, filling up
+branches of short bushes and the ground itself. The cocoons give off a small
+@ctinge@y of light, while the bioluminescent creatures themselves crawl along the
+walls here. A large collection of cocoons are gathered about a small tunnel
+here. @n
+~
+144 y 0 0 0 0
+D0
+~
+~
+0 0 14461 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14463 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14465 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 65009 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14466 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14462 0 0 0 0 0 0 0 0
+S
+#14465
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: @CG@clowwor@Cm @CF@car@Cm@n~
+   @ySmall paths line the area, dictating places that may be used for getting
+around. Between the paths lie large areas covered with cocoons, filling up
+branches of short bushes and the ground itself. The cocoons give off a small
+@ctinge@y of light, while the bioluminescent creatures themselves crawl along the
+walls here. @n
+~
+144 y 0 0 0 0
+D0
+~
+~
+0 0 14466 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14464 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14461 0 0 0 0 0 0 0 0
+S
+#14466
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: @CG@clowwor@Cm @CF@car@Cm@n~
+   @ySmall paths line the area, dictating places that may be used for getting
+around. Between the paths lie large areas covered with cocoons, filling up
+branches of short bushes and the ground itself. The cocoons give off a small
+@ctinge@y of light, while the bioluminescent creatures themselves crawl along the
+walls here. @n
+~
+144 y 0 0 0 0
+D1
+~
+~
+0 0 14461 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14465 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14464 0 0 0 0 0 0 0 0
+S
+#14467
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Trial of the Mind@n~
+   @yThe ground is covered with a gentle, rolling mist, the bioluminescent
+creatures dotting the walls, lighting the room in an eerie fashion. Moisture
+glistens off of the walls, some dripping onto the ground from the ceiling. @n
+
+@yA @Rsign @yis here.@n
+~
+144 cy 0 0 0 0
+D2
+~
+~
+0 0 14448 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14479 0 0 0 0 0 0 0 0
+E
+sign~
+@RBe wary, those of weak strength and wills. Only the capable should pass beyond this point.@n
+~
+S
+#14468
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Trial of the Body@n~
+   @yThe walls close in together, narrowing the passage. Few creatures
+illuminate the area, though a bright light from the northeast spills onto the
+ground. The end of the tunnel flares out in both directions. @n
+~
+144 cy 0 0 0 0
+D7
+~
+~
+0 0 15408 0 0 0 0 0 0 0 0
+S
+T 14407
+#14469
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Entrance to the Farm@n~
+   @yThis room, like most, is rather unremarkable. It is surrounded by the soil
+of the island that everything is dug out of, and it is lit up by the
+bioluminescent creatures. To the south lies a small, courtesy gate to signify
+the importance of the area. @n
+~
+144 cy 0 0 0 0
+D0
+~
+~
+0 0 14448 0 0 0 0 0 0 0 0
+D2
+A small gate
+~
+gate~
+1 0 14461 20 0 0 0 0 0 0 0
+S
+#14470
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Garden@n~
+   @yFilled with varying types of flora, this garden gives off a serene feeling.
+Insects buzz about, continuing the cycle of life, while water trickles among the
+roots to keep the plants alive. Lining the walls in strange patterns are bugs
+giving off a glow that provide the life for the plants, and the ability to see.
+~
+144 y 0 0 0 0
+D0
+~
+door~
+1 0 14476 20 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14413 0 0 0 0 0 0 0 0
+S
+#14471
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Garden@n~
+   @yFilled with varying types of flora, this garden gives off a serene feeling.
+Insects buzz about, continuing the cycle of life, while water trickles among the
+roots to keep the plants alive. Lining the walls in strange patterns are bugs
+giving off a glow that provide the life for the plants, and the ability to see.
+~
+144 y 0 0 0 0
+D0
+~
+~
+0 0 14413 0 0 0 0 0 0 0 0
+D2
+~
+door~
+1 0 14477 20 0 0 0 0 0 0 0
+S
+#14472
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Garden@n~
+   @yFilled with varying types of flora, this garden gives off a serene feeling.
+Insects buzz about, continuing the cycle of life, while water trickles among the
+roots to keep the plants alive. Lining the walls in strange patterns are bugs
+giving off a glow that provide the life for the plants, and the ability to see.
+~
+144 y 0 0 0 0
+D0
+door
+~
+door~
+1 0 14475 20 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14409 0 0 0 0 0 0 0 0
+S
+#14473
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Garden@n~
+   @yFilled with varying types of flora, this garden gives off a serene feeling.
+Insects buzz about, continuing the cycle of life, while water trickles among the
+roots to keep the plants alive. Lining the walls in strange patterns are bugs
+giving off a glow that provide the life for the plants, and the ability to see.
+~
+144 y 0 0 0 0
+D0
+~
+~
+0 0 14409 0 0 0 0 0 0 0 0
+D2
+~
+door~
+1 0 14474 20 0 0 0 0 0 0 0
+S
+#14474
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Common Dwelling@n~
+   @gThis room is nothing more than small and simple living quarters, carved out
+of the island. Standard furniture and a make-shift door for added privacy. 
+The walls are bare, with a large rug on the ground to offer some protection to
+the ground. @n
+~
+144 y 0 0 0 0
+D0
+~
+door~
+1 0 14473 0 0 0 0 0 0 0 0
+S
+#14475
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Common Dwelling@n~
+   @gThis room is nothing more than small and simple living quarters, carved out
+of the island. Standard furniture and a make-shift door for added privacy. 
+The walls are bare, with a large rug on the ground to offer some protection to
+the ground. @n
+~
+144 y 0 0 0 0
+D2
+~
+door~
+1 0 14472 20 0 0 0 0 0 0 0
+S
+#14476
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Common Dwelling@n~
+   @gThis room is nothing more than small and simple living quarters, carved out
+of the island. Standard furniture and a make-shift door for added privacy. 
+The walls are bare, with a large rug on the ground to offer some protection to
+the ground. @n
+~
+144 y 0 0 0 0
+D2
+~
+door~
+1 0 14470 0 0 0 0 0 0 0 0
+S
+#14477
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Common Dwelling@n~
+   @gThis room is nothing more than small and simple living quarters, carved out
+of the island. Standard furniture and a make-shift door for added privacy. 
+The walls are bare, with a large rug on the ground to offer some protection to
+the ground. @n
+~
+144 y 0 0 0 0
+D0
+~
+door~
+1 0 14471 0 0 0 0 0 0 0 0
+S
+#14478
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: Common Dwelling@n~
+   @gThis room is nothing more than small and simple living quarters, carved out
+of the island. Standard furniture and a make-shift door for added privacy. 
+The walls are bare, with a large rug on the ground to offer some protection to
+the ground. @n
+~
+144 y 0 0 0 0
+D0
+~
+door~
+1 0 14419 0 0 0 0 0 0 0 0
+S
+#14479
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: @yM@Yaz@ye @Dof the @yM@Yin@yd@n~
+   @yA gentle, rolling mist covers the ground while a few bioluminescent
+creatures dot the walls providing an eerie glow. The ground is damp, the
+softness giving way slightly under weight. @n
+~
+144 y 0 0 0 0
+D3
+~
+~
+0 0 14480 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14467 0 0 0 0 0 0 0 0
+S
+T 14408
+T 14409
+T 14410
+T 14411
+T 14412
+T 14413
+T 14414
+T 14415
+T 14416
+#14480
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: @yM@Yaz@ye @Dof the @yM@Yin@yd@n~
+   @yA gentle, rolling mist covers the ground while a few bioluminescent
+creatures dot the walls providing an eerie glow. The ground is damp, the
+softness giving way slightly under weight. @n
+~
+144 y 0 0 0 0
+D1
+~
+~
+0 0 14479 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14487 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14481 0 0 0 0 0 0 0 0
+S
+T 14408
+T 14409
+T 14410
+T 14411
+T 14412
+T 14413
+T 14414
+T 14415
+T 14416
+#14481
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: @yM@Yaz@ye @Dof the @yM@Yin@yd@n~
+   @yA gentle, rolling mist covers the ground while a few bioluminescent
+creatures dot the walls providing an eerie glow. The ground is damp, the
+softness giving way slightly under weight. @n
+~
+144 y 0 0 0 0
+D0
+~
+~
+0 0 14482 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14480 0 0 0 0 0 0 0 0
+S
+T 14408
+T 14409
+T 14410
+T 14411
+T 14412
+T 14413
+T 14414
+T 14415
+T 14416
+#14482
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: @yM@Yaz@ye @Dof the @yM@Yin@yd@n~
+   @yA gentle, rolling mist covers the ground while a few bioluminescent
+creatures dot the walls providing an eerie glow. The ground is damp, the
+softness giving way slightly under weight. @n
+~
+144 y 0 0 0 0
+D0
+~
+~
+0 0 14483 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14481 0 0 0 0 0 0 0 0
+S
+T 14408
+T 14409
+T 14410
+T 14411
+T 14412
+T 14413
+T 14414
+T 14415
+T 14416
+#14483
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: @yM@Yaz@ye @Dof the @yM@Yin@yd@n~
+   @yA gentle, rolling mist covers the ground while a few bioluminescent
+creatures dot the walls providing an eerie glow. The ground is damp, the
+softness giving way slightly under weight. @n
+~
+144 y 0 0 0 0
+D2
+~
+~
+0 0 14482 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14484 0 0 0 0 0 0 0 0
+S
+T 14408
+T 14409
+T 14410
+T 14411
+T 14412
+T 14413
+T 14414
+T 14415
+T 14416
+#14484
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: @yM@Yaz@ye @Dof the @yM@Yin@yd@n~
+   @yA gentle, rolling mist covers the ground while a few bioluminescent
+creatures dot the walls providing an eerie glow. The ground is damp, the
+softness giving way slightly under weight. @n
+~
+144 y 0 0 0 0
+D1
+~
+~
+0 0 14483 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14485 0 0 0 0 0 0 0 0
+S
+T 14408
+T 14409
+T 14410
+T 14411
+T 14412
+T 14413
+T 14414
+T 14415
+T 14416
+#14485
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: @yM@Yaz@ye @Dof the @yM@Yin@yd@n~
+   @yA gentle, rolling mist covers the ground while a few bioluminescent
+creatures dot the walls providing an eerie glow. The ground is damp, the
+softness giving way slightly under weight. @n
+~
+144 y 0 0 0 0
+D0
+~
+~
+0 0 14484 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14486 0 0 0 0 0 0 0 0
+S
+T 14408
+T 14409
+T 14410
+T 14411
+T 14412
+T 14413
+T 14414
+T 14415
+T 14416
+#14486
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: @yM@Yaz@ye @Dof the @yM@Yin@yd@n~
+   @yA gentle, rolling mist covers the ground while a few bioluminescent
+creatures dot the walls providing an eerie glow. The ground is damp, the
+softness giving way slightly under weight. @n
+~
+144 y 0 0 0 0
+D1
+~
+~
+0 0 14485 0 0 0 0 0 0 0 0
+S
+T 14408
+T 14409
+T 14410
+T 14411
+T 14412
+T 14413
+T 14414
+T 14415
+T 14416
+#14487
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: @yM@Yaz@ye @Dof the @yM@Yin@yd@n~
+   @yA gentle, rolling mist covers the ground while a few bioluminescent
+creatures dot the walls providing an eerie glow. The ground is damp, the
+softness giving way slightly under weight. @n
+~
+144 y 0 0 0 0
+D0
+~
+~
+0 0 14480 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14491 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14488 0 0 0 0 0 0 0 0
+S
+T 14408
+T 14409
+T 14410
+T 14411
+T 14412
+T 14413
+T 14414
+T 14415
+T 14416
+#14488
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: @yM@Yaz@ye @Dof the @yM@Yin@yd@n~
+@yA gentle, rolling mist covers the ground while a few bioluminescent creatures
+dot the walls providing an eerie glow. The ground is damp, the softness giving
+way slightly under weight. 
+~
+144 y 0 0 0 0
+D1
+~
+~
+0 0 14487 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14489 0 0 0 0 0 0 0 0
+S
+T 14408
+T 14409
+T 14410
+T 14411
+T 14412
+T 14413
+T 14414
+T 14415
+T 14416
+#14489
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: @yM@Yaz@ye @Dof the @yM@Yin@yd@n~
+@yA gentle, rolling mist covers the ground while a few bioluminescent creatures
+dot the walls providing an eerie glow. The ground is damp, the softness giving
+way slightly under weight. 
+~
+144 y 0 0 0 0
+D0
+~
+~
+0 0 14490 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14488 0 0 0 0 0 0 0 0
+S
+T 14408
+T 14409
+T 14410
+T 14411
+T 14412
+T 14413
+T 14414
+T 14415
+T 14416
+#14490
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: @yM@Yaz@ye @Dof the @yM@Yin@yd@n~
+@yA gentle, rolling mist covers the ground while a few bioluminescent creatures
+dot the walls providing an eerie glow. The ground is damp, the softness giving
+way slightly under weight. 
+~
+144 y 0 0 0 0
+D2
+~
+~
+0 0 14489 0 0 0 0 0 0 0 0
+S
+T 14408
+T 14409
+T 14410
+T 14411
+T 14412
+T 14413
+T 14414
+T 14415
+T 14416
+#14491
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: @yM@Yaz@ye @Dof the @yM@Yin@yd@n~
+   @yA gentle, rolling mist covers the ground while a few bioluminescent
+creatures dot the walls providing an eerie glow. The ground is damp, the
+softness giving way slightly under weight. @n
+~
+144 y 0 0 0 0
+D0
+~
+~
+0 0 14487 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14492 0 0 0 0 0 0 0 0
+S
+T 14408
+T 14409
+T 14410
+T 14411
+T 14412
+T 14413
+T 14414
+T 14415
+T 14416
+#14492
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: @yM@Yaz@ye @Dof the @yM@Yin@yd@n~
+   @yA gentle, rolling mist covers the ground while a few bioluminescent
+creatures dot the walls providing an eerie glow. The ground is damp, the
+softness giving way slightly under weight. @n
+~
+144 y 0 0 0 0
+D1
+~
+~
+0 0 14491 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14493 0 0 0 0 0 0 0 0
+S
+T 14408
+T 14409
+T 14410
+T 14411
+T 14412
+T 14413
+T 14414
+T 14415
+T 14416
+#14493
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: @yM@Yaz@ye @Dof the @yM@Yin@yd@n~
+   @yA gentle, rolling mist covers the ground while a few bioluminescent
+creatures dot the walls providing an eerie glow. The ground is damp, the
+softness giving way slightly under weight. @n
+~
+144 y 0 0 0 0
+D1
+~
+~
+0 0 14492 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14494 0 0 0 0 0 0 0 0
+S
+T 14408
+T 14409
+T 14410
+T 14411
+T 14412
+T 14413
+T 14414
+T 14415
+T 14416
+#14494
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: @yM@Yaz@ye @Dof the @yM@Yin@yd@n~
+   @yA gentle, rolling mist covers the ground while a few bioluminescent
+creatures dot the walls providing an eerie glow. The ground is damp, the
+softness giving way slightly under weight. @n
+~
+144 y 0 0 0 0
+D0
+~
+~
+0 0 14493 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14495 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14496 0 0 0 0 0 0 0 0
+S
+T 14408
+T 14409
+T 14410
+T 14411
+T 14412
+T 14413
+T 14414
+T 14415
+T 14416
+#14495
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: @yM@Yaz@ye @Dof the @yM@Yin@yd@n~
+   @yA gentle, rolling mist covers the ground while a few bioluminescent
+creatures dot the walls providing an eerie glow. The ground is damp, the
+softness giving way slightly under weight. @n
+~
+144 y 0 0 0 0
+D2
+~
+~
+0 0 14497 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14494 0 0 0 0 0 0 0 0
+S
+T 14408
+T 14409
+T 14410
+T 14411
+T 14412
+T 14413
+T 14414
+T 14415
+T 14416
+#14496
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: @yM@Yaz@ye @Dof the @yM@Yin@yd@n~
+   @yA gentle, rolling mist covers the ground while a few bioluminescent
+creatures dot the walls providing an eerie glow. The ground is damp, the
+softness giving way slightly under weight. @n
+~
+144 y 0 0 0 0
+D1
+~
+~
+0 0 14494 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 15403 0 0 0 0 0 0 0 0
+S
+T 14408
+T 14409
+T 14410
+T 14411
+T 14412
+T 14413
+T 14414
+T 14415
+T 14416
+#14497
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: @yM@Yaz@ye @Dof the @yM@Yin@yd@n~
+   @yA gentle, rolling mist covers the ground while a few bioluminescent
+creatures dot the walls providing an eerie glow. The ground is damp, the
+softness giving way slightly under weight. @n
+~
+144 y 0 0 0 0
+D0
+~
+~
+0 0 14495 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14498 0 0 0 0 0 0 0 0
+S
+T 14408
+T 14409
+T 14410
+T 14411
+T 14412
+T 14413
+T 14414
+T 14415
+T 14416
+#14498
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: @yM@Yaz@ye @Dof the @yM@Yin@yd@n~
+   @yA gentle, rolling mist covers the ground while a few bioluminescent
+creatures dot the walls providing an eerie glow. The ground is damp, the
+softness giving way slightly under weight. @n
+~
+144 y 0 0 0 0
+D1
+~
+~
+0 0 14497 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14499 0 0 0 0 0 0 0 0
+S
+T 14408
+T 14409
+T 14410
+T 14411
+T 14412
+T 14413
+T 14414
+T 14415
+T 14416
+#14499
+@RK@ra@Dk@yu@Dr@ye@rt@Ra @RV@ri@Dl@yl@Da@rg@Re@c: @yM@Yaz@ye @Dof the @yM@Yin@yd@n~
+   @yA gentle, rolling mist covers the ground while a few bioluminescent
+creatures dot the walls providing an eerie glow. The ground is damp, the
+softness giving way slightly under weight. @n
+~
+144 y 0 0 0 0
+D0
+~
+~
+0 0 14498 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 15400 0 0 0 0 0 0 0 0
+S
+T 14408
+T 14409
+T 14410
+T 14411
+T 14412
+T 14413
+T 14414
+T 14415
+T 14416
+$~

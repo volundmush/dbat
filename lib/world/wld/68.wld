@@ -1,0 +1,2866 @@
+#6800
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WAirport@n~
+   @cThis small section of concrete is where the comically shaped Higher Plane
+airplanes land and take off from. There is very little to the concrete slab
+itself except for having large electric lights posted at each of the slab's four
+corners. A green field can be seen to the south from here. @n
+~
+68 cA 0 0 0 11
+D2
+~
+~
+0 0 6803 0 0 0 0 0 0 0 0
+S
+#6801
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Heroes@n~
+   @GThis green field has very few trees and is made up of short grass that
+appears to have been cut recently. The field has a cheery atmosphere to it and
+an otherworldly quality about its air. Occasional bushes of flowers can be seen
+growing in prepared patterns, adding a certain beauty to the field. @n
+~
+68 dA 0 0 0 2
+D1
+~
+~
+0 0 6802 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6810 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6809 0 0 0 0 0 0 0 0
+S
+#6802
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Heroes@n~
+   @GThis green field has very few trees and is made up of short grass that
+appears to have been cut recently. The field has a cheery atmosphere to it and
+an otherworldly quality about its air. Occasional bushes of flowers can be seen
+growing in prepared patterns, adding a certain beauty to the field. @n
+~
+68 dA 0 0 0 2
+D1
+~
+~
+0 0 6803 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6809 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6801 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6808 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6810 0 0 0 0 0 0 0 0
+S
+#6803
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Heroes@n~
+   @GThis green field has very few trees and is made up of short grass that
+appears to have been cut recently. The field has a cheery atmosphere to it and
+an otherworldly quality about its air. Occasional bushes of flowers can be seen
+growing in prepared patterns, adding a certain beauty to the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6800 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6804 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6808 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6802 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6807 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6809 0 0 0 0 0 0 0 0
+S
+#6804
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Heroes@n~
+   @GThis green field has very few trees and is made up of short grass that
+appears to have been cut recently. The field has a cheery atmosphere to it and
+an otherworldly quality about its air. Occasional bushes of flowers can be seen
+growing in prepared patterns, adding a certain beauty to the field. @n
+~
+68 dA 0 0 0 2
+D1
+~
+~
+0 0 6805 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6807 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6803 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6806 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6808 0 0 0 0 0 0 0 0
+S
+#6805
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Heroes@n~
+   @GThis green field has very few trees and is made up of short grass that
+appears to have been cut recently. The field has a cheery atmosphere to it and
+an otherworldly quality about its air. Occasional bushes of flowers can be seen
+growing in prepared patterns, adding a certain beauty to the field. @n
+~
+68 dA 0 0 0 2
+D2
+~
+~
+0 0 6806 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6804 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6807 0 0 0 0 0 0 0 0
+S
+#6806
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Heroes@n~
+   @GThis green field has very few trees and is made up of short grass that
+appears to have been cut recently. The field has a cheery atmosphere to it and
+an otherworldly quality about its air. Occasional bushes of flowers can be seen
+growing in prepared patterns, adding a certain beauty to the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6805 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6815 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6807 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6804 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6814 0 0 0 0 0 0 0 0
+S
+#6807
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Heroes@n~
+   @GThis green field has very few trees and is made up of short grass that
+appears to have been cut recently. The field has a cheery atmosphere to it and
+an otherworldly quality about its air. Occasional bushes of flowers can be seen
+growing in prepared patterns, adding a certain beauty to the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6804 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6806 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6814 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6808 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6803 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6805 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6815 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6813 0 0 0 0 0 0 0 0
+S
+#6808
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Heroes@n~
+   @GThis green field has very few trees and is made up of short grass that
+appears to have been cut recently. The field has a cheery atmosphere to it and
+an otherworldly quality about its air. Occasional bushes of flowers can be seen
+growing in prepared patterns, adding a certain beauty to the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6803 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6807 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6813 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6809 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6802 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6804 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6814 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6812 0 0 0 0 0 0 0 0
+S
+#6809
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Heroes@n~
+   @GThis green field has very few trees and is made up of short grass that
+appears to have been cut recently. The field has a cheery atmosphere to it and
+an otherworldly quality about its air. Occasional bushes of flowers can be seen
+growing in prepared patterns, adding a certain beauty to the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6802 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6808 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6812 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6810 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6801 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6803 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6813 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6811 0 0 0 0 0 0 0 0
+S
+#6810
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Heroes@n~
+   @GThis green field has very few trees and is made up of short grass that
+appears to have been cut recently. The field has a cheery atmosphere to it and
+an otherworldly quality about its air. Occasional bushes of flowers can be seen
+growing in prepared patterns, adding a certain beauty to the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6801 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6809 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6811 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6802 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6812 0 0 0 0 0 0 0 0
+S
+#6811
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Heroes@n~
+   @GThis green field has very few trees and is made up of short grass that
+appears to have been cut recently. The field has a cheery atmosphere to it and
+an otherworldly quality about its air. Occasional bushes of flowers can be seen
+growing in prepared patterns, adding a certain beauty to the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6810 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6812 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6820 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6826 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6809 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6819 0 0 0 0 0 0 0 0
+S
+#6812
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Heroes@n~
+   @GThis green field has very few trees and is made up of short grass that
+appears to have been cut recently. The field has a cheery atmosphere to it and
+an otherworldly quality about its air. Occasional bushes of flowers can be seen
+growing in prepared patterns, adding a certain beauty to the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6809 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6813 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6819 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6811 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6810 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6808 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6818 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6820 0 0 0 0 0 0 0 0
+S
+#6813
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Heroes@n~
+   @GThis green field has very few trees and is made up of short grass that
+appears to have been cut recently. The field has a cheery atmosphere to it and
+an otherworldly quality about its air. Occasional bushes of flowers can be
+seen growing in prepared patterns, adding a certain beauty to the field. @n @GA
+smooth gray @Wrock@G sits in the center of the training field, big enough to sit
+upon and focus. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6808 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6814 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6818 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6812 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6809 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6807 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6817 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6819 0 0 0 0 0 0 0 0
+E
+rock~
+   @WA large, round stone seemingly put in place intentionally. An inscription
+at the base reads, "@CA communal place of focus and reflection. Fellow kai can
+come here and @Yphase@C from this reality into the next. @W"@n
+~
+S
+T 12407
+#6814
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Heroes@n~
+   @GThis green field has very few trees and is made up of short grass that
+appears to have been cut recently. The field has a cheery atmosphere to it and
+an otherworldly quality about its air. Occasional bushes of flowers can be seen
+growing in prepared patterns, adding a certain beauty to the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6807 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6815 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6817 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6813 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6808 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6806 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6816 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6818 0 0 0 0 0 0 0 0
+S
+#6815
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Heroes@n~
+   @GThis green field has very few trees and is made up of short grass that
+appears to have been cut recently. The field has a cheery atmosphere to it and
+an otherworldly quality about its air. Occasional bushes of flowers can be seen
+growing in prepared patterns, adding a certain beauty to the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6806 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6880 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6816 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6814 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6807 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6817 0 0 0 0 0 0 0 0
+S
+#6816
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Heroes@n~
+   @GThis green field has very few trees and is made up of short grass that
+appears to have been cut recently. The field has a cheery atmosphere to it and
+an otherworldly quality about its air. Occasional bushes of flowers can be seen
+growing in prepared patterns, adding a certain beauty to the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6815 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6825 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6817 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6814 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6824 0 0 0 0 0 0 0 0
+S
+#6817
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Heroes@n~
+   @GThis green field has very few trees and is made up of short grass that
+appears to have been cut recently. The field has a cheery atmosphere to it and
+an otherworldly quality about its air. Occasional bushes of flowers can be seen
+growing in prepared patterns, adding a certain beauty to the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6814 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6816 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6824 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6818 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6813 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6815 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6825 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6823 0 0 0 0 0 0 0 0
+S
+#6818
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Heroes@n~
+   @GThis green field has very few trees and is made up of short grass that
+appears to have been cut recently. The field has a cheery atmosphere to it and
+an otherworldly quality about its air. Occasional bushes of flowers can be seen
+growing in prepared patterns, adding a certain beauty to the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6813 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6817 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6823 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6819 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6812 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6814 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6824 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6822 0 0 0 0 0 0 0 0
+S
+#6819
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Heroes@n~
+   @GThis green field has very few trees and is made up of short grass that
+appears to have been cut recently. The field has a cheery atmosphere to it and
+an otherworldly quality about its air. Occasional bushes of flowers can be seen
+growing in prepared patterns, adding a certain beauty to the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6812 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6818 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6822 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6820 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6811 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6813 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6823 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6821 0 0 0 0 0 0 0 0
+S
+#6820
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Heroes@n~
+   @GThis green field has very few trees and is made up of short grass that
+appears to have been cut recently. The field has a cheery atmosphere to it and
+an otherworldly quality about its air. Occasional bushes of flowers can be seen
+growing in prepared patterns, adding a certain beauty to the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6811 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6819 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6821 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6812 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6822 0 0 0 0 0 0 0 0
+S
+#6821
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Heroes@n~
+   @GThis green field has very few trees and is made up of short grass that
+appears to have been cut recently. The field has a cheery atmosphere to it and
+an otherworldly quality about its air. Occasional bushes of flowers can be seen
+growing in prepared patterns, adding a certain beauty to the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6820 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6822 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6819 0 0 0 0 0 0 0 0
+S
+#6822
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Heroes@n~
+   @GThis green field has very few trees and is made up of short grass that
+appears to have been cut recently. The field has a cheery atmosphere to it and
+an otherworldly quality about its air. Occasional bushes of flowers can be seen
+growing in prepared patterns, adding a certain beauty to the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6819 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6823 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6821 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6820 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6818 0 0 0 0 0 0 0 0
+S
+#6823
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Heroes@n~
+   @GThis green field has very few trees and is made up of short grass that
+appears to have been cut recently. The field has a cheery atmosphere to it and
+an otherworldly quality about its air. Occasional bushes of flowers can be seen
+growing in prepared patterns, adding a certain beauty to the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6818 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6824 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6934 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6822 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6819 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6817 0 0 0 0 0 0 0 0
+S
+#6824
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Heroes@n~
+   @GThis green field has very few trees and is made up of short grass that
+appears to have been cut recently. The field has a cheery atmosphere to it and
+an otherworldly quality about its air. Occasional bushes of flowers can be seen
+growing in prepared patterns, adding a certain beauty to the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6817 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6825 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6823 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6818 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6816 0 0 0 0 0 0 0 0
+S
+#6825
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Heroes@n~
+   @GThis green field has very few trees and is made up of short grass that
+appears to have been cut recently. The field has a cheery atmosphere to it and
+an otherworldly quality about its air. Occasional bushes of flowers can be seen
+growing in prepared patterns, adding a certain beauty to the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6816 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6824 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6817 0 0 0 0 0 0 0 0
+S
+#6826
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WDirt Path@n~
+   @yThis well worn dirt path has many foot prints left in its soft surface. 
+Bushes of various sizes and shapes form natural walls for the sides of the path.
+Every ten feet stone arches can be seen over the path with vines growing up their
+columns in random patterns. @n
+~
+68 cdA 0 0 0 2
+D1
+~
+~
+0 0 6811 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6827 0 0 0 0 0 0 0 0
+S
+#6827
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WDirt Path@n~
+   @yThis well worn dirt path has many foot prints left in its soft surface. 
+Bushes of various sizes and shapes form natural walls for the sides of the path.
+Every ten feet stone arches can be seen over the path with vines growing up their
+columns in random patterns. @n
+~
+68 dA 0 0 0 2
+D1
+~
+~
+0 0 6826 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6828 0 0 0 0 0 0 0 0
+S
+#6828
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WDirt Path@n~
+   @yThis well worn dirt path has many foot prints left in its soft surface. 
+Bushes of various sizes and shapes form natural walls for the sides of the path.
+Every ten feet stone arches can be seen over the path with vines growing up their
+columns in random patterns. @n
+~
+68 cdA 0 0 0 2
+D3
+~
+~
+0 0 6831 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6827 0 0 0 0 0 0 0 0
+S
+#6829
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Might@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D2
+~
+~
+0 0 6830 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6838 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6837 0 0 0 0 0 0 0 0
+S
+#6830
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Might@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6829 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6831 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6837 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6838 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6836 0 0 0 0 0 0 0 0
+S
+#6831
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Might@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6830 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6828 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6832 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6836 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6837 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6835 0 0 0 0 0 0 0 0
+S
+#6832
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Might@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6831 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6833 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6835 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6836 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6834 0 0 0 0 0 0 0 0
+S
+#6833
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Might@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6832 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6834 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6835 0 0 0 0 0 0 0 0
+S
+#6834
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Might@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6835 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6833 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6844 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6843 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6842 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6832 0 0 0 0 0 0 0 0
+S
+#6835
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Might@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6836 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6832 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6834 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6842 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6841 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6831 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6833 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6843 0 0 0 0 0 0 0 0
+S
+#6836
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Might@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6837 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6831 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6835 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6841 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6840 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6830 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6832 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6842 0 0 0 0 0 0 0 0
+S
+#6837
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Might@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6838 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6830 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6836 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6840 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6839 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6829 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6831 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6841 0 0 0 0 0 0 0 0
+S
+#6838
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Might@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D1
+~
+~
+0 0 6829 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6837 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6839 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6830 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6840 0 0 0 0 0 0 0 0
+S
+#6839
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Might@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D1
+~
+~
+0 0 6838 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6840 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6837 0 0 0 0 0 0 0 0
+S
+#6840
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Might@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6839 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6837 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6841 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6838 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6836 0 0 0 0 0 0 0 0
+S
+#6841
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Might@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6840 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6836 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6842 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6837 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6835 0 0 0 0 0 0 0 0
+S
+#6842
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Might@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6841 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6835 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6843 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6836 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6834 0 0 0 0 0 0 0 0
+S
+#6843
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Might@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6842 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6834 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6835 0 0 0 0 0 0 0 0
+S
+#6844
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WDirt Path@n~
+   @yThis well worn dirt path has many foot prints left in its soft surface. 
+Bushes of various sizes and shapes form natural walls for the sides of the path.
+Every ten feet stone arches can be seen over the path with vines growing up their
+columns in random patterns. @n
+~
+68 cdA 0 0 0 2
+D0
+~
+~
+0 0 6834 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6845 0 0 0 0 0 0 0 0
+S
+#6845
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WDirt Path@n~
+   @yThis well worn dirt path has many foot prints left in its soft surface. 
+Bushes of various sizes and shapes form natural walls for the sides of the path.
+Every ten feet stone arches can be seen over the path with vines growing up their
+columns in random patterns. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6844 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6846 0 0 0 0 0 0 0 0
+S
+#6846
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WDirt Path@n~
+   @yThis well worn dirt path has many foot prints left in its soft surface. 
+Bushes of various sizes and shapes form natural walls for the sides of the path.
+Every ten feet stone arches can be seen over the path with vines growing up their
+columns in random patterns. @n
+~
+68 cdA 0 0 0 2
+D0
+~
+~
+0 0 6845 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6856 0 0 0 0 0 0 0 0
+S
+#6847
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Battles@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D1
+~
+~
+0 0 6856 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6848 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6855 0 0 0 0 0 0 0 0
+S
+#6848
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Battles@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6847 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6855 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6849 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6856 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6854 0 0 0 0 0 0 0 0
+S
+#6849
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Battles@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6848 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6854 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6850 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6855 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6853 0 0 0 0 0 0 0 0
+S
+#6850
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Battles@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6849 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6853 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6851 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6854 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6852 0 0 0 0 0 0 0 0
+S
+#6851
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Battles@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6850 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6852 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6853 0 0 0 0 0 0 0 0
+S
+#6852
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Battles@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6853 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6861 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6862 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6851 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6850 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6860 0 0 0 0 0 0 0 0
+S
+#6853
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Battles@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6854 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6860 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6852 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6850 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6849 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6859 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6861 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6851 0 0 0 0 0 0 0 0
+S
+#6854
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Battles@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6855 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6859 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6853 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6849 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6848 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6858 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6860 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6850 0 0 0 0 0 0 0 0
+S
+#6855
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Battles@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6856 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6858 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6854 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6848 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6847 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6857 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6859 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6849 0 0 0 0 0 0 0 0
+S
+#6856
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Battles@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6846 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6857 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6855 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6847 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6858 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6848 0 0 0 0 0 0 0 0
+S
+#6857
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Battles@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D2
+~
+~
+0 0 6858 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6856 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6855 0 0 0 0 0 0 0 0
+S
+#6858
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Battles@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6857 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6859 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6855 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6856 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6854 0 0 0 0 0 0 0 0
+S
+#6859
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Battles@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6858 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6860 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6854 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6855 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6853 0 0 0 0 0 0 0 0
+S
+#6860
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Battles@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6859 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6861 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6853 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6854 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6852 0 0 0 0 0 0 0 0
+S
+#6861
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Battles@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6860 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6852 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6853 0 0 0 0 0 0 0 0
+S
+#6862
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WDirt Path@n~
+   @yThis well worn dirt path has many foot prints left in its soft surface. 
+Bushes of various sizes and shapes form natural walls for the sides of the path.
+Every ten feet stone arches can be seen over the path with vines growing up their
+columns in random patterns. @n
+~
+68 cdA 0 0 0 2
+D0
+~
+~
+0 0 6852 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6863 0 0 0 0 0 0 0 0
+S
+#6863
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WDirt Path@n~
+   @yThis well worn dirt path has many foot prints left in its soft surface. 
+Bushes of various sizes and shapes form natural walls for the sides of the path.
+Every ten feet stone arches can be seen over the path with vines growing up their
+columns in random patterns. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6862 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6864 0 0 0 0 0 0 0 0
+S
+#6864
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WDirt Path@n~
+   @yThis well worn dirt path has many foot prints left in its soft surface. 
+Bushes of various sizes and shapes form natural walls for the sides of the path.
+Every ten feet stone arches can be seen over the path with vines growing up their
+columns in random patterns. @n
+~
+68 cdA 0 0 0 2
+D0
+~
+~
+0 0 6863 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6874 0 0 0 0 0 0 0 0
+S
+#6865
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Virtue@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D1
+~
+~
+0 0 6874 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6866 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6873 0 0 0 0 0 0 0 0
+S
+#6866
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Virtue@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6865 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6873 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6867 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6874 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6872 0 0 0 0 0 0 0 0
+S
+#6867
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Virtue@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6866 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6872 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6868 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6873 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6871 0 0 0 0 0 0 0 0
+S
+#6868
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Virtue@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6867 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6871 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6869 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6872 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6870 0 0 0 0 0 0 0 0
+S
+#6869
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Virtue@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6868 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6870 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6871 0 0 0 0 0 0 0 0
+S
+#6870
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Virtue@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6871 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6879 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6869 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6868 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6878 0 0 0 0 0 0 0 0
+S
+#6871
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Virtue@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6872 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6878 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6870 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6868 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6867 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6877 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6879 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6869 0 0 0 0 0 0 0 0
+S
+#6872
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Virtue@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6873 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6877 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6871 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6867 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6866 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6876 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6878 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6868 0 0 0 0 0 0 0 0
+S
+#6873
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Virtue@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6874 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6876 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6872 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6866 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6865 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6875 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6877 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6867 0 0 0 0 0 0 0 0
+S
+#6874
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Virtue@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6864 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6875 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6873 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6865 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6876 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6866 0 0 0 0 0 0 0 0
+S
+#6875
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Virtue@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D2
+~
+~
+0 0 6876 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6874 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6873 0 0 0 0 0 0 0 0
+S
+#6876
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Virtue@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6875 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6877 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6873 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6874 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6872 0 0 0 0 0 0 0 0
+S
+#6877
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Virtue@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6876 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6953 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6878 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6872 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6873 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6871 0 0 0 0 0 0 0 0
+S
+#6878
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Virtue@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6877 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6879 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6871 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6872 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6870 0 0 0 0 0 0 0 0
+S
+#6879
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Virtue@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6878 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6870 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6871 0 0 0 0 0 0 0 0
+S
+#6880
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WDirt Path@n~
+   @yThis well worn dirt path has many foot prints left in its soft surface. 
+Bushes of various sizes and shapes form natural walls for the sides of the path.
+Every ten feet stone arches can be seen over the path with vines growing up their
+columns in random patterns. @n
+~
+68 cdA 0 0 0 2
+D1
+~
+~
+0 0 6881 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6815 0 0 0 0 0 0 0 0
+S
+#6881
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WDirt Path@n~
+   @yThis well worn dirt path has many foot prints left in its soft surface. 
+Bushes of various sizes and shapes form natural walls for the sides of the path.
+Every ten feet stone arches can be seen over the path with vines growing up their
+columns in random patterns. @n
+~
+68 dA 0 0 0 2
+D3
+~
+~
+0 0 6880 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6882 0 0 0 0 0 0 0 0
+S
+#6882
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WDirt Path@n~
+   @yThis well worn dirt path has many foot prints left in its soft surface. 
+Bushes of various sizes and shapes form natural walls for the sides of the path.
+Every ten feet stone arches can be seen over the path with vines growing up their
+columns in random patterns. @n
+~
+68 cdA 0 0 0 2
+D1
+~
+~
+0 0 6885 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6881 0 0 0 0 0 0 0 0
+S
+#6883
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Saints@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D1
+~
+~
+0 0 6892 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6884 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6891 0 0 0 0 0 0 0 0
+S
+#6884
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Saints@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6883 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6891 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6885 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6892 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6890 0 0 0 0 0 0 0 0
+S
+#6885
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Saints@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6884 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6890 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6886 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6882 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6891 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6889 0 0 0 0 0 0 0 0
+S
+#6886
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Saints@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6885 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6889 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6887 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6890 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6888 0 0 0 0 0 0 0 0
+S
+#6887
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Saints@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6886 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6888 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6889 0 0 0 0 0 0 0 0
+S
+#6888
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Saints@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6889 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6897 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6898 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6887 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6886 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6896 0 0 0 0 0 0 0 0
+S
+#6889
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Saints@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6890 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6896 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6888 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6886 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6885 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6895 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6897 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6887 0 0 0 0 0 0 0 0
+S
+#6890
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Saints@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6891 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6895 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6889 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6885 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6884 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6894 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6896 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6886 0 0 0 0 0 0 0 0
+S
+#6891
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Saints@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6892 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6894 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6890 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6884 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6883 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6893 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6895 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6885 0 0 0 0 0 0 0 0
+S
+#6892
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Saints@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D1
+~
+~
+0 0 6893 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6891 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6883 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6894 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6884 0 0 0 0 0 0 0 0
+S
+#6893
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Saints@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D2
+~
+~
+0 0 6894 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6892 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6891 0 0 0 0 0 0 0 0
+S
+#6894
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Saints@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6893 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6895 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6891 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6892 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6890 0 0 0 0 0 0 0 0
+S
+#6895
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Saints@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6894 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6896 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6890 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6891 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6889 0 0 0 0 0 0 0 0
+S
+#6896
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Saints@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6895 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6897 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6889 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6890 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6888 0 0 0 0 0 0 0 0
+S
+#6897
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WField of Saints@n~
+   @GThis field has grass that has grown to about a foot in height and is waving
+about in the breeze whenever one happens to blow through. Various statues of
+warriors have been placed in random locations around the field providing
+decoration and inspiration for those who train in the field. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6896 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6888 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6889 0 0 0 0 0 0 0 0
+S
+#6898
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WDirt Path@n~
+   @yThis well worn dirt path has many foot prints left in its soft surface. 
+Bushes of various sizes and shapes form natural walls for the sides of the path.
+Every ten feet stone arches can be seen over the path with vines growing up their
+columns in random patterns. @n
+~
+68 cdA 0 0 0 2
+D0
+~
+~
+0 0 6888 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6899 0 0 0 0 0 0 0 0
+S
+#6899
+@yO@Yt@Wh@we@Dr@yw@Yo@Wr@wl@Dd@c: @WDirt Path@n~
+   @yThis well worn dirt path has many foot prints left in its soft surface. 
+Bushes of various sizes and shapes form natural walls for the sides of the path.
+Every ten feet stone arches can be seen over the path with vines growing up their
+columns in random patterns. @n
+~
+68 dA 0 0 0 2
+D0
+~
+~
+0 0 6898 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6900 0 0 0 0 0 0 0 0
+S
+$~

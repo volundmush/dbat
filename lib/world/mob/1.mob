@@ -1,0 +1,266 @@
+#100
+@WNewbie Guard@n~
+@WNewbie Guard@n~
+noob guard is standing here
+~
+noob guard is standing here
+~
+bdegs 0 0 0 cl 0 0 0 0 E
+0 0 10 0d0+0 0d0+0
+0 0 0 0
+8 8 0
+BareHandAttack: 1
+Str: 13
+Dex: 8
+Int: 13
+Wis: 7
+Con: 10
+Cha: 9
+E
+T 100
+T 101
+#101
+rookie level 1~
+@CR@Wo@wo@Dk@ci@De@n@n @CL@We@wv@De@cl@n @r1@n~
+@CR@Wo@wo@Dk@ci@De@n@n @CL@We@wv@De@cl@n @r1@n @Wis standing here@n
+~
+@d @n
+~
+bd 0 0 0 0 0 0 0 0 E
+1 0 10 0d0+0 0d0+0
+0 0 0 0
+8 8 0
+Str: 20
+Dex: 14
+Int: 19
+Wis: 5
+Con: 9
+Cha: 6
+E
+T 119
+#102
+shadow demon~
+@DS@wh@Wa@Dd@wo@Ww@n @RD@re@wm@Ro@rn@n@n@n~
+@DS@wh@Wa@Dd@wo@Ww@n @RD@re@wm@Ro@rn@n@n@n @yis looking around for something to kill@n
+~
+It looks unfinished.
+~
+def 0 0 0 0 0 0 0 0 E
+0 0 10 0d0+0 0d0+0
+0 0 0 0
+8 8 0
+Str: 20
+Dex: 13
+Int: 11
+Wis: 10
+Con: 11
+Cha: 5
+E
+#103
+Testi Two~
+Testi Two~
+Testi Two
+~
+It looks unfinished.
+~
+d 0 0 0 0 0 0 0 0 E
+102 0 10 0d0+0 0d0+0
+0 0 0 0
+8 8 0
+Str: 66
+Dex: 59
+Int: 69
+Wis: 55
+Con: 72
+Cha: 66
+E
+#116
+MUD school Equipment Clerk~
+Equipment Clerk~
+The MUD school equipment Clerk is standing here.
+~
+@d @n
+~
+bdgs 0 0 0 0 h 0 0 0 E
+100 0 10 0d0+0 0d0+0
+0 0 0 0
+8 8 0
+Str: 64
+Dex: 79
+Int: 62
+Wis: 77
+Con: 85
+Cha: 93
+E
+T 106
+#120
+bum~
+a Bum~
+a bum is sleeping here
+~
+It looks unfinished.
+~
+ds 0 0 0 0 0 0 0 0 E
+100 0 10 0d0+0 0d0+0
+0 0 0 0
+8 8 0
+Size: 5
+BareHandAttack: 14
+Str: 85
+Dex: 86
+Int: 72
+Wis: 66
+Con: 99
+Cha: 89
+E
+#145
+the second tutor~
+@YThe second tutor@n~
+@wThe @n@Ysecond tutor@n@w is standing here, looking around.@n
+~
+It looks unfinished.
+~
+bdem 0 0 0 l h 0 0 0 E
+0 0 10 0d0+0 0d0+0
+0 0 0 0
+8 8 0
+Str: 17
+Dex: 6
+Int: 11
+Wis: 10
+Con: 10
+Cha: 5
+E
+T 145
+T 146
+T 147
+#155
+construction saiyan worker~
+@YS@ya@Yi@Wy@Ya@yn @WC@wo@Rn@Ws@wt@Rr@Wu@wc@Rt@Wi@wo@Rn @nWorker@n~
+A construction worker sits on a beam, hammering away at a nail.
+~
+   A low class Saiyan who turned his abilities towards construction, rather
+than destruction.
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+11 0 10 0d8+0 0d0+0
+0 0 1 4
+6 8 1
+Str: 23
+Dex: 13
+Int: 8
+Wis: 6
+Con: 15
+Cha: 21
+E
+T 155
+#156
+Gine Saiyan~
+@MGi@mn@Me@n~
+@MGi@mn@Me@n is standing here, slicing a cut of meat.
+~
+   Gine is a woman of average height and slender build. She has a pale
+complexion, onyx eyes, and shaggy black hair reaching her shoulders. She wears
+a sleeveless black bodysuit and a dark green combat armor highlighted with
+bronze and outlined by white. Additionally, she wears purple armbands and
+white boots. Like all Saiyans, she naturally possesses a tail, which unlike
+most adult Saiyans, she lets sway freely rather than securing it around her
+waist.
+~
+bcdvwxyz 0 0 0 l 0 0 0 500 E
+31 0 10 0d8+0 0d0+0
+0 0 1 4
+8 8 2
+Str: 37
+Dex: 23
+Int: 18
+Wis: 19
+Con: 26
+Cha: 35
+E
+T 156
+T 157
+#160
+Jenny~
+@wJenny@n~
+@wJenny, the card clerk, is standing here.@n
+~
+   @wThis young woman is enthusistic about the game. At least that's the act she
+puts on for the customers. @n
+~
+bds 0 0 0 0 0 0 0 0 E
+2 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 2
+Str: 7
+Dex: 8
+Int: 8
+Wis: 10
+Con: 10
+Cha: 7
+E
+T 696
+#161
+Mike~
+@wMike@n~
+@wMike, the supply clerk, is standing here.@n
+~
+   It looks unfinished. @wThis young man is enthusistic about the game. At
+least that's the act he puts on for the customers. @n
+~
+bds 0 0 0 0 0 0 0 0 E
+2 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 10
+Dex: 7
+Int: 10
+Wis: 8
+Con: 7
+Cha: 7
+E
+#183
+tutor #3~
+Third Tutor~
+The third Tutor is standing here
+~
+It looks unfinished.
+~
+bdegl 0 0 0 0 0 0 0 0 E
+0 0 10 0d0+0 0d0+0
+0 0 0 0
+8 8 0
+Str: 16
+Dex: 8
+Int: 18
+Wis: 6
+Con: 5
+Cha: 8
+E
+T 183
+#184
+Final Tutor~
+@yFinal @cTutor@n~
+@WThe @yFinal @cTutor@W stands here.@n
+~
+   @WThis old man seems to be reading through a large book, of which the title
+appears to be "Dragonball AT Help Files". @n
+~
+bds 0 0 0 l 0 0 0 0 E
+100 0 10 0d0+0 0d0+0
+0 0 0 0
+8 8 0
+Str: 67
+Dex: 92
+Int: 77
+Wis: 63
+Con: 71
+Cha: 97
+E
+T 188
+T 189
+T 190
+T 191
+T 192
+T 193
+$

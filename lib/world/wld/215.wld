@@ -1,0 +1,2052 @@
+#62900
+@WBefore @DA @BW@Ca@bt@ce@Br@Cf@ba@cl@Cl@n~
+@c A serene and harmonious feeling settles here as water gently sprays itself
+into the air after it has fallen from the waterfall. The river extends briefly
+far off into the south before it finally runs dry and ends. There are a few
+large, flat rocks that could turn this region into the ideal picnic place. @n
+~
+215 0 0 0 0 6
+D0
+~
+~
+0 0 62901 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3541 0 0 0 0 0 0 0 0
+E
+Pyramid~
+The large pyramid has been abandoned for years and is close to collapsing. 
+Holes scar the building and a few @Gcrack@ws could be turned into a openings to
+gain access to the pyramid@n
+~
+S
+#62901
+@WBehind @DA @BW@Ca@bt@ce@Br@Cf@ba@cl@Cl@n~
+@D An eery musical tone seems to have been created between the water falling from
+south of here and the occassional sounds of drops that echo all throughout this
+damp cavern. The most distinguishing features of the cavern is an odd marking
+to the far west and a subtle but foul stench coming from the east.
+~
+215 0 0 0 0 0
+D1
+~
+~
+0 0 62902 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 62900 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62903 0 0 0 0 0 0 0 0
+S
+#62902
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w@n~
+@DA powerful stench rudely invades your nostrils; the cause of the smell is the
+decaying @Wcorpse@D, which based on the bloodtrail, has been dragged here. 
+Besides the corpse is a hole that leads downwards; it's hard to make out what
+is at the bottom of the hole from here but the smell down there seems to be way
+better than the smell up here. @w@n
+~
+215 0 0 0 0 0
+D3
+~
+~
+0 0 62901 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 62904 0 0 0 0 0 0 0 0
+E
+Corpse~
+@WThe disfigured corpse that you see is wearing a magnficient set of golden equipment. Most of it is bloodied and has several bite marks but the beauty of the what the corpse is wearing still remains intact even after its owner's death. Most notable of what's worn by the corpse are its golden gauntlets.@w@n
+~
+S
+#62903
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @RT@wh@De @RA@wlt@Dar@w@n~
+@DA few dim candles have been placed on the ground here to provide a consistent
+line of sight. These candles reveal an untouched @Waltar@D that sits in the
+northern wall and just above it are large @Rmarkings@D that have been painted onto
+the wall. @n
+~
+215 0 0 0 0 0
+D1
+~
+~
+0 0 62901 0 0 0 0 0 0 0 0
+E
+altar~
+@WSeemingly abandoned as seen by the cobwebs forming around it; the altar hosts a
+small vial containing a red liquid, a Hoshijin skull and a large goblet that
+also contains a red liquid. The goblet's liquid appears to also contain
+leaves, nails and hair-strands. @w@n
+~
+E
+Markings~
+@WYou should try to @Gexamine@W the markings@w@n
+~
+S
+T 62900
+T 62999
+#62904
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w@n~
+@DRemnants of a ladder that had been constructed out of various animal bones can
+be seen here running up a wall. From here it's difficult to see when it ends.
+A number of crushed bones also scatter the floor and far to the east you can
+barely see three silhouettes.
+~
+215 0 0 0 0 0
+D1
+~
+~
+0 0 62905 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 62902 0 0 0 0 0 0 0 0
+S
+#62905
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w@n~
+@DA white line that runs up a wall can be made out from the west, it appears to
+abruptly stop and then continue making its run up the wall again. A white
+powder-like substance also accumulated beneath, on the ground, the line. 
+Located to the east, appears to be two columns that have a figure standing
+between them. @w@n
+~
+215 0 0 0 0 0
+D1
+~
+~
+0 0 62906 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62904 0 0 0 0 0 0 0 0
+S
+T 62940
+#62906
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @RT@wh@De @RD@wiv@Der@wgen@Dce@w@n~
+@DTwo marble columns have been erected here, each one rspectively located in the
+northern and southern exits from here. @mRune@Ds have been carved into each of the
+columns and the columns bear a strange characteristic when a light source is
+brought close to them: The one on the north glows in an electric blue color and
+the one on the south glows in a fiery red color. @w@n
+~
+215 0 0 0 0 0
+D0
+~
+~
+0 0 62907 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 62960 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62905 0 0 0 0 0 0 0 0
+E
+Rune~
+@WYou should try to @Rdecipher@W the runes.
+~
+S
+T 62903
+T 62940
+#62907
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w~
+@DThe sound of water running can be faintly heard over head. The cavern here
+twists and turns sharply. The walls here are extremely smooth, indicating that
+they have recently undergone maintaince. On some ocassions the walls will
+randomly start to glow in an electric-blue color. @n
+~
+215 0 0 0 0 0
+D1
+~
+~
+0 0 62909 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 62906 0 0 0 0 0 0 0 0
+S
+T 62940
+#62908
+@MUnderground Cavern's Variable ADJUST room @R(TP-ONLY)@n~
+References for the triggers that are used in this area's quests.
+@YControl @C<Variable name>@n
+
+@GGood Cavern Triggers@n
+@CStarted@w = For the start of the quest - should not exist on Demons.
+@CGoing@n
+@CAlistar@n
+@CKeru@w
+@CTask@n
+@CSeal
+@CFinished@w = The end of the quest.
+~
+215 0 0 0 0 0
+D1
+~
+~
+0 0 -1 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 -1 0 0 0 0 0 0 0 0
+S
+T 62994
+#62909
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w~
+@DThe sound of water running can be faintly heard over head. The cavern here
+twists and turns sharply. The walls here are extremely smooth, indicating that
+they have recently undergone maintaince. On some ocassions the walls will
+randomly start to glow in an electric-blue color. @n
+~
+215 0 0 0 0 0
+D0
+~
+~
+0 0 62910 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62907 0 0 0 0 0 0 0 0
+S
+T 62940
+#62910
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @YL@yimax@w~
+@DThe sound of water can be heard over head. This passageway begins here and
+seems to endlessly march on eastwards without any indication that it will end.
+Loud growls come from east and echo throughout the entire cavern. The ceiling
+is covered with numerous dots that are connected randomly. @w
+~
+215 c 0 0 0 0
+D1
+~
+~
+0 0 62916 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 62909 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 62911 0 0 0 0 0 0 0 0
+E
+ceiling dots~
+@WMine is the story of the naked snail. The story of he beast whose story never
+caught on. When the Eldritich Star burns hot in the spring, I am nude. In the
+winter when all others are clothed, I am still nude. Only Orion can command me
+to be clothed.
+
+I am the constellation for Nudity.@n
+~
+S
+T 62940
+#62911
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w~
+@DThe walls here are irregular and contract into small spaces and then expand
+into large spaces. Some debris trickles down onto the sandy floor and a large
+object can be seen in the far distance. @w@n
+~
+215 0 0 0 0 0
+D0
+~
+~
+0 0 62912 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 62910 0 0 0 0 0 0 0 0
+S
+#62912
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @YT@yhe @YS@ylug@w~
+@DFinally becoming a large expanse, this portion of the cavern hosts a large
+statue in its center and then veers itself into multiple, smaller exits. @w@n
+~
+215 0 0 0 0 0
+D0
+~
+~
+0 0 62913 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 62915 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 62911 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62914 0 0 0 0 0 0 0 0
+S
+#62913
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w~
+@DThe walls here are irregular and contract into small spaces and then expand
+into large spaces. Some debris trickles down onto the sandy floor and a large
+object can be seen in the far distance. @w@n
+~
+215 0 0 0 0 0
+D2
+~
+~
+0 0 62912 0 0 0 0 0 0 0 0
+S
+#62914
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w~
+@DThe walls here are irregular and contract into small spaces and then expand
+into large spaces. Some debris trickles down onto the sandy floor and a large
+object can be seen in the far distance. @w@n
+~
+215 0 0 0 0 0
+D1
+~
+~
+0 0 62912 0 0 0 0 0 0 0 0
+S
+#62915
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w~
+@DThe walls here are irregular and contract into small spaces and then expand
+into large spaces. Some debris trickles down onto the sandy floor and a large
+object can be seen in the far distance. @w@n
+~
+215 0 0 0 0 0
+D3
+~
+~
+0 0 62912 0 0 0 0 0 0 0 0
+S
+#62916
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @YA@yndromeda@w@n~
+@DThe sound of running water can be heard over head. This long passageway seems
+to be endless as it continues going east but to the west there is a turn that
+gives the impression that it will eventually end. Low growls also echo briefly
+throughout this cavern. The ceiling is covered with numerous dots that are
+connected randomly. @w@n
+~
+215 0 0 0 0 0
+D1
+~
+~
+0 0 62917 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62910 0 0 0 0 0 0 0 0
+E
+ceiling dots~
+@WMine is the story of the princess. The story of the damsel who was saved from her sacrifice. Chained to a cliff to sate the hunger of a beast, my rescuer came at the very last moment. My beauty caused others to be jealous of me.
+
+I am the constellation of the Princess.@n
+~
+S
+T 62940
+#62917
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @YP@yegasus@w@n~
+@DThe sound of running water can be heard over head. This long passageway seems
+to be endless as it continues going east but to the west there is a turn that
+gives the impression that it will eventually end. Low growls also echo briefly
+throughout this cavern. The ceiling is covered with numerous dots that are
+connected randomly. @w@n
+~
+215 0 0 0 0 0
+D1
+~
+~
+0 0 62918 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62916 0 0 0 0 0 0 0 0
+E
+ceiling dots~
+@WMine is the story of the winged horse. The story of the beast who flew to the
+heavens. Born of battle between Gods, it was blood and water that gave me my
+beauty. For the things that traverse from one region to another, I am the
+greatest of all.
+
+I am the constellation for Transportation.@n
+~
+S
+T 62940
+#62918
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @YA@yquila@w~
+@DLooking west or east, this passageway never seems to end. Water running above
+your head can be heard. Bright lights can be seen coming from the north and
+the smell of burning incense also comes from the same direction. The ceiling
+is covered with numerous dots that are connected randomly.@w
+~
+215 0 0 0 0 0
+D0
+~
+~
+0 0 62919 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 62924 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62917 0 0 0 0 0 0 0 0
+E
+ceiling dots~
+@WMine is the story of the servant. The story of the man who serves his master.
+When the Eldritich Star shines brightly in spring, I fan my master. In the
+winter, I gather wood for his fires. I run errands and carry his possessions.
+
+I am the constellation of Servants and Slaves. @n
+~
+S
+T 62940
+#62919
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w~
+@DLovely marbled walls are prominent in this section of the cavern. The
+increasly brighter lights reveal the contents of depictions on the walls: two
+stars, blue and red, moving across the wall in a pattern with a man following
+each star. The smell of burning incense in the air grows stronger. Far to the
+north, you can see a statue of a large bird. @w
+~
+215 c 0 0 0 0
+D0
+~
+~
+0 0 62920 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 62918 0 0 0 0 0 0 0 0
+S
+T 62940
+#62920
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @YT@yhe @YE@yagle@w~
+@DA large statue of an eagle stands tall in the center of this room. Candles
+hang on the sides of the walls and subtle winds cause shadows to dance and hop
+on the walls. These marble walls contain depictions of two stars and a man
+pursuing each star. The smell of burning incense in the air seems to be coming
+from the east. @w@n
+~
+215 0 0 0 0 0
+D0
+~
+~
+0 0 62921 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 62923 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 62919 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62922 0 0 0 0 0 0 0 0
+S
+T 62940
+#62921
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w~
+@DSome cracks can feature on the walls in this room but they are overshadowed by
+the magnificence that exists here. Marble walls persist with their depictions
+of a large star and a man bowing to this star. The faint smell of burning
+incense can be smelt from the south; the same direction where a statue of a
+large bird can be seen. @w@n
+~
+215 0 0 0 0 0
+D2
+~
+~
+0 0 62920 0 0 0 0 0 0 0 0
+S
+T 62940
+#62922
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w~
+@DSome cracks can feature on the walls in this room but they are overshadowed by
+the magnificence that exists here. Marble walls persist with their depictions
+of a large star and a man bowing to this star. The faint smell of burning
+incense can be smelt from the east; the same direction where a statue of a
+large bird can be seen. @w@n
+~
+215 0 0 0 0 0
+D1
+~
+~
+0 0 62920 0 0 0 0 0 0 0 0
+S
+T 62940
+#62923
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w~
+@DThe smell of incense is overwhelming here. Short sticks here run across most
+of the floor, forming a pathway to a wall on the east. This wall bears the
+depiction of a large star and a man bowing before this star. The few lights
+that are here give this area a scary yet divine atmosphere. Looking to the
+west, a large statue of a bird can be seen. @w@n
+~
+215 hD 0 0 0 0
+D3
+~
+~
+0 0 62920 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 -1 0 0 0 0 0 0 0 0
+S
+#62924
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @YB@yootes@w@n~
+@DThe sound of running water can be heard over head. This long passageway seems
+to be endless as it continues going west but to the east there is a turn that
+gives the impression that it will eventually end. Low growls also echo briefly
+throughout this cavern. The ceiling is covered with numerous dots that are
+connected randomly. @w@n
+~
+215 0 0 0 0 0
+D1
+~
+~
+0 0 62925 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62918 0 0 0 0 0 0 0 0
+E
+ceiling dots~
+@WMine is the story of the shepard. The story of the man who drives the cart. 
+When the Eldritich Star shines brightly in spring, I plow the land. In the
+winter, I feast on my seven oxen and surivive on them until spring comes again.
+
+@n
+
+@WI am the constellation for Farmers.@n
+~
+S
+T 62940
+#62925
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @YA@yrcturus@w@n~
+@DThe sound of running water can be heard over head. This long passageway seems
+to be endless as it continues going west but to the east there is a turn that
+gives the impression that it will eventually end. Low growls also echo briefly
+throughout this cavern. The ceiling is covered with numerous dots that are
+connected randomly. @w@n
+~
+215 0 0 0 0 0
+D1
+~
+~
+0 0 62926 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62924 0 0 0 0 0 0 0 0
+E
+Dots Ceiling~
+@WMine is the story of the guardian. The story of the loyalist who strives to
+guard his master's treasures. When the Eldritich Star shines brightly at day,
+I shine as the second brightest. In the night, my redness can be seen for my
+brightness persists even then.
+
+I am the constellation for Guardians.@n
+~
+S
+T 62940
+#62926
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @YN@yoctua@w~
+@DThe sound of water can be heard over head. This passageway begins here and
+seems to endlessly march on westwards without any indication that it will end.
+Loud growls come from south and echo throughout the entire cavern. A glimmer
+of light can be seen here eminating from the south. The ceiling is covered
+with numerous dots that are connected randomly. @w
+~
+215 0 0 0 0 0
+D2
+~
+~
+0 0 62932 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62925 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 62927 0 0 0 0 0 0 0 0
+E
+ceiling dots~
+@WMine is the story of the owl. The story of the beast who brings wisdom. When
+the Eldritich Star dims itself at night, I prowl the night. Throughout my
+existence, I am the creature that all other creatures seek advice from. 
+
+I am the constellation for the Enlightened.@n
+~
+S
+T 62940
+#62927
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w~
+@DDark and damp, this region of the cavern has been completely abandoned and is
+crumbling as a result. Moss grows in the cracks of the rocky walls and some
+lights sneak through inbetween these cracks. The sound of dripping water can
+be heard. The statue of a large bird can be seen to the north. @w@n
+~
+215 ac 0 0 0 0
+D0
+~
+~
+0 0 62928 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 62926 0 0 0 0 0 0 0 0
+S
+T 62940
+#62928
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @YT@yhe @YO@ywl@w~
+@DA large statue looms in the center of this room. The most notable features in
+this part of the cavern are this statue. The dampness and darkness continues
+to dominate this region. Sounds of dripping water can be heard in the
+distance. @w@n
+~
+215 a 0 0 0 0
+D0
+~
+~
+0 0 62929 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 62931 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 62927 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62930 0 0 0 0 0 0 0 0
+S
+T 62908
+T 62940
+#62929
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w~
+@DA large statue of a bird can be seen to the far east. The dampness and
+darkness continues to dominate this region. Sounds of dripping water can be
+heard in the distance. @w@n
+~
+215 a 0 0 0 0
+D2
+~
+~
+0 0 62928 0 0 0 0 0 0 0 0
+S
+T 62940
+#62930
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w~
+@DA large statue of a bird can be seen to the far east. The dampness and
+darkness continues to dominate this region. Sounds of dripping water can be
+heard in the distance. @w@n
+~
+215 a 0 0 0 0
+D1
+~
+~
+0 0 62928 0 0 0 0 0 0 0 0
+S
+T 62940
+#62931
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w~
+@DA large statue of a bird can be seen to the far west. The dampness and
+darkness continues to dominate this region. Sounds of dripping water can be
+heard in the distance. @w@n
+~
+215 a 0 0 0 0
+D3
+~
+~
+0 0 62928 0 0 0 0 0 0 0 0
+S
+T 62940
+#62932
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w~
+   @DThe sound of water can be heard over head. Loud growls come from south and
+echo throughout the entire cavern. Light can be seen here eminating from the
+south. The ceiling is covered with numerous dots that are connected randomly.
+
+@w@n
+~
+215 c 0 0 0 0
+D0
+~
+~
+0 0 62926 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 62933 0 0 0 0 0 0 0 0
+S
+T 62940
+#62933
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w~
+@DLit brightly by the candles that perch themselves on the rocky walls, this room
+diverges itself into three directions: north, south and west. Running water
+can faintly be heard above your head and an even fainter sound of a growl comes
+from the south. @n
+~
+215 0 0 0 0 0
+D0
+~
+~
+0 0 62932 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 62934 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62936 0 0 0 0 0 0 0 0
+S
+T 62940
+#62934
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w~
+@DThe sound of water can be heard over head. Loud growls come from south and
+echo throughout the entire cavern. Light can be seen here eminating from the
+north. The ceiling is covered with numerous dots that are connected randomly.
+~
+215 c 0 0 0 0
+D0
+~
+~
+0 0 62933 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 62935 0 0 0 0 0 0 0 0
+S
+T 62940
+#62935
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @YD@yelphinus@w@n~
+@DThe sound of water can be heard over head. This passageway begins here and
+seems to endlessly march on westwards without any indication that it will end.
+Loud growls come from west and echo throughout the entire cavern. A glimmer of
+light can be seen here eminating from the north. The ceiling is covered with
+numerous dots that are connected randomly. @w
+~
+215 0 0 0 0 0
+D0
+~
+~
+0 0 62934 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62942 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 62937 0 0 0 0 0 0 0 0
+E
+ceiling dots~
+@WMine is the story of the dolphin. The story of the sea beast who saved the
+life of a poet. When the Eldritich Star's rays strike the ocean, I bask in its
+light. I am the one who rescues others in their time of need.
+
+I am the constellation of the Saviour.@n
+~
+S
+T 62940
+#62936
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w~
+@DA large gate can been to the west from here. This section of the cavern is
+similar to the other portions of the cavern. The walls here are old and worn,
+the paint on the on them slowly decaying away and revealing its true rocky
+nature. A bright light can be seen to the east from here. @n
+~
+215 0 0 0 0 0
+D1
+~
+~
+0 0 62933 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62961 0 0 0 0 0 0 0 0
+S
+T 62940
+#62937
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w@n~
+@DWater drips from the ceiling and falls onto the ground, the drops of water fall
+in rythm to create a brief musical number that plays in this abandoned cavern.
+Fungi grows from the cracks in the rock. Looking to the south, a large statue
+can be seen. @w@n
+~
+215 c 0 0 0 0
+D2
+~
+~
+0 0 62938 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 -1 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 62935 0 0 0 0 0 0 0 0
+S
+T 62940
+#62938
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @YT@yhe @YD@yolphin@w@n~
+@DThe droplets of water have accumulated to the point where they have formed a
+small puddle around the statue that hulks in this room and some music can be
+loudly heard coming from the north. Fungi continues to grow on the rocky walls
+here and seems to have begun moving in all directions. @w@n
+~
+215 0 0 0 0 0
+D0
+~
+~
+0 0 62937 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 62940 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 62939 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62941 0 0 0 0 0 0 0 0
+S
+T 62940
+#62939
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w@n~
+@DCracks in the walls allow some light to enter but fungi grows in the darker
+corners in this room. The ceiling here is covered with fungi and some of it
+occassionally falls onto the ground. Music can be heard from the north and a
+big statue can also be seen in the same direction. @w@n
+~
+215 0 0 0 0 0
+D0
+~
+~
+0 0 62938 0 0 0 0 0 0 0 0
+S
+T 62940
+#62940
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w@n~
+@DCracks in the walls allow some light to enter but fungi grows in the darker
+corners in this room. The ceiling here is covered with fungi and some of it
+occassionally falls onto the ground. Music can be heard from the west and a
+big statue can also be seen in the same direction. @w@n
+~
+215 0 0 0 0 0
+D3
+~
+~
+0 0 62938 0 0 0 0 0 0 0 0
+S
+T 62940
+#62941
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w@n~
+@DCracks in the walls allow some light to enter but fungi grows in the darker
+corners in this room. The ceiling here is covered with fungi and some of it
+occassionally falls onto the ground. Music can be heard from the east and a
+big statue can also be seen in the same direction. @w@n
+~
+215 0 0 0 0 0
+D1
+~
+~
+0 0 62938 0 0 0 0 0 0 0 0
+S
+T 62940
+#62942
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @YP@yollux@w@n~
+@DThe sound of running water can be heard over head. This long passageway seems
+to be endless as it continues going west but to the east there is a turn that
+gives the impression that it will eventually end. Low growls also echo briefly
+throughout this cavern. The ceiling is covered with numerous dots that are
+connected randomly. @w@n
+~
+215 0 0 0 0 0
+D1
+~
+~
+0 0 62935 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62943 0 0 0 0 0 0 0 0
+E
+ceiling dots~
+@WMine is the story of the brother. The story of the dem-god who united himself
+with his twin. When the Eldritich Star rises eternally, I enjoy its view with
+my brother. I am the who one signifies loyalty.
+
+I am the constellation of Unity.@n
+~
+S
+T 62940
+#62943
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @YC@yastor@w@n~
+@DThe sound of running water can be heard over head. This long passageway seems
+to be endless as it continues going west but to the east there is a turn that
+gives the impression that it will eventually end. Low growls also echo briefly
+throughout this cavern. The ceiling is covered with numerous dots that are
+connected randomly. @w@n
+~
+215 0 0 0 0 0
+D1
+~
+~
+0 0 62942 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62944 0 0 0 0 0 0 0 0
+E
+ceiling dots~
+@WMine is the story of the brother. The story of the dem-god who united himself
+with his twin. When the Eldritich Star rises eternally, I enjoy its view with
+my brother. I am the who one signifies loyalty.
+
+I am the constellation of Unity.@n
+~
+S
+T 62940
+#62944
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @YC@yygnus@w@n~
+@DLooking west or east, this passageway never seems to end. Water running above
+your head can be heard and a loud growl comes from the south and disperses
+itself to echo throughout the cavern. The ceiling is covered with numerous
+dots that are connected randomly. @w@n
+~
+215 0 0 0 0 0
+D1
+~
+~
+0 0 62943 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 62945 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62950 0 0 0 0 0 0 0 0
+E
+dots ceiling~
+@WThis constellations is unidentifiable... @n
+~
+S
+T 62940
+#62945
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w@n~
+@DThe rocky walls here have been excellently maintained. The ceiling has some
+fungi growing on it that seems to be growing from the east. Looking to the
+south, a huge bird can be seen. From the north, you can faintly hear the sound
+of running water. @w@n
+~
+215 c 0 0 0 0
+D0
+~
+~
+0 0 62944 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 62946 0 0 0 0 0 0 0 0
+S
+T 62940
+#62946
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @YT@yhe @YS@ywan@w@n~
+@DThe rocky walls here have been excellently maintained. The ceiling has some
+fungi growing on it that seems to be growing from the east. A large statue of
+a swan has been erected here in the center of the room.
+~
+215 0 0 0 0 0
+D0
+~
+~
+0 0 62945 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 62948 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 62947 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62949 0 0 0 0 0 0 0 0
+S
+T 62940
+#62947
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w~
+@DThe rocky walls here have been excellently maintained. The ceiling has no
+fungi growing on it but you can hear some sounds that come from the north. To
+the north, you can see a huge bird. @w
+~
+215 0 0 0 0 0
+D0
+~
+~
+0 0 62946 0 0 0 0 0 0 0 0
+S
+T 62940
+#62948
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w@n~
+@DThe rocky walls here have been excellently maintained. A lot of fungi is
+growing from the eastern wall and seems to be moving to the other walls. A
+large bird can be seen from the west here. @w@n
+~
+215 0 0 0 0 0
+D3
+~
+~
+0 0 62946 0 0 0 0 0 0 0 0
+S
+T 62940
+#62949
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w@n~
+@DThe rocky walls here have been excellently maintained. The ceiling has no
+fungi growing on it but you can hear some sounds that come from the west. To
+the east, you can see a huge bird.
+~
+215 0 0 0 0 0
+D1
+~
+~
+0 0 62946 0 0 0 0 0 0 0 0
+S
+T 62940
+#62950
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @YC@yepheus@w@n~
+@DThe sound of running water can be heard over head. This long passageway seems
+to be endless as it continues going east but to the west there is a turn that
+gives the impression that it will eventually end. Low growls also echo briefly
+throughout this cavern. The ceiling is covered with numerous dots that are
+connected randomly. @w@n
+~
+215 0 0 0 0 0
+D1
+~
+~
+0 0 62944 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62951 0 0 0 0 0 0 0 0
+E
+dots ceiling~
+@WThis constellations is unidentifiable...@n
+~
+S
+T 62940
+#62951
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @YC@yassiopeia@w@n~
+@DThe sound of running water can be heard over head. This long passageway seems
+to be endless as it continues going east but to the west there is a turn that
+gives the impression that it will eventually end. Low growls also echo briefly
+throughout this cavern. The ceiling is covered with numerous dots that are
+connected randomly. @w@n
+~
+215 0 0 0 0 0
+D1
+~
+~
+0 0 62950 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62952 0 0 0 0 0 0 0 0
+E
+dots ceiling~
+@WThis constellations is unidentifiable...@n
+~
+S
+T 62940
+#62952
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @YD@yraco@w@n~
+@DThe sound of water can be heard over head. This passageway begins here and
+seems to endlessly march on eastwards without any indication that it will end.
+Loud growls come from east and echo throughout the entire cavern. The ceiling
+is covered with numerous dots that are connected randomly. @w@n
+~
+215 c 0 0 0 0
+D0
+~
+~
+0 0 62958 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 62951 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 62953 0 0 0 0 0 0 0 0
+E
+dots ceiling~
+@WThis constellations is unidentifiable... @n
+~
+S
+T 62940
+#62953
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w@n~
+@DThis part of the cavern appears to have been well-maintained at some stage in
+its existence but now it has begun to fall victim to neglience. Small segments
+of this place are marked my fungi growing and cobwebs. Looking south, you can
+make out a monolithic statue. @w@n
+~
+215 0 0 0 0 0
+D2
+~
+~
+0 0 62954 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 62952 0 0 0 0 0 0 0 0
+S
+T 62940
+#62954
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @YT@yhe @YD@yragon@w@n~
+@DThis part of the cavern appears to have been well-maintained at some stage in
+its existence but now it has begun to fall victim to neglience. Small segments
+of this place are marked my fungi growing and cobwebs. A large statue,
+surrounded by utter darkness stand alone in this room. @w@n
+~
+215 0 0 0 0 0
+D0
+~
+~
+0 0 62953 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 62956 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 62955 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62957 0 0 0 0 0 0 0 0
+S
+T 62940
+#62955
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w@n~
+@DDespite the light that you possess, this room is still so dark that you can
+barely see anything past your nose. Growls invade your ears and you feel that
+you are being watched by something. To the far north, you can make out a
+gigantic structure. @w@n
+~
+215 a 0 0 0 0
+D0
+~
+~
+0 0 62954 0 0 0 0 0 0 0 0
+S
+T 62940
+#62956
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w@n~
+@DDespite the light that you possess, this room is still so dark that you can
+barely see anything past your nose. Growls invade your ears and you feel that
+you are being watched by something. To the far west, you can make out a
+gigantic structure. @w@n
+~
+215 a 0 0 0 0
+D3
+~
+~
+0 0 62954 0 0 0 0 0 0 0 0
+S
+T 62940
+#62957
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w@n~
+@DDespite the light that you possess, this room is still so dark that you can
+barely see anything past your nose. Growls invade your ears and you feel that
+you are being watched by something. To the far east, you can make out a
+gigantic structure. @w@n
+~
+215 a 0 0 0 0
+D1
+~
+~
+0 0 62954 0 0 0 0 0 0 0 0
+S
+T 62940
+#62958
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w~
+@DThe sound of water running can be faintly heard over head. The cavern here
+twists and turns sharply. The walls here are extremely smooth, indicating that
+they have recently undergone maintaince. On some ocassions the walls will
+randomly start to glow in a fiery-red color. @n
+~
+215 0 0 0 0 0
+D2
+~
+~
+0 0 62952 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62960 0 0 0 0 0 0 0 0
+S
+T 62940
+#62959
+@RNot In Use@n~
+This unfinished room was created by Kay.
+~
+215 0 0 0 0 0
+D1
+~
+~
+0 0 -1 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 -1 0 0 0 0 0 0 0 0
+S
+#62960
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w~
+@DThe sound of water running can be faintly heard over head. The cavern here
+twists and turns sharply. The walls here are extremely smooth, indicating that
+they have recently undergone maintaince. On some ocassions the walls will
+randomly start to glow in a fiery-red color. @n
+~
+215 0 0 0 0 0
+D0
+~
+~
+0 0 62906 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 62958 0 0 0 0 0 0 0 0
+S
+T 62940
+#62961
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @RT@wh@De @RG@wa@Dt@we@n~
+@DA large gate blocks any access to the west. This section of the cavern is
+similar to the other portions of the cavern. The walls here are old and worn,
+the paint on the on them slowly decaying away and revealing its true rocky
+nature. A bright light can be seen to the east from here. 
+~
+215 0 0 0 0 0
+D1
+~
+~
+0 0 62936 0 0 0 0 0 0 0 0
+D3
+~
+Gate~
+2 62913 62962 20 0 0 0 0 0 0 0
+E
+Gate~
+@WThis large gate is made out of bone. The massive gate has been constructed in
+such a way so that it appears to have the face of a screaming woman. The eyes
+glow yellow - whether this is from a possible light source on the other side of
+the door or whether the light is from this bizzare gate is unclear. The door's
+keyhole also acts as the woman's mouth. @n
+~
+S
+T 62940
+#62962
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w~
+@DLit will by the candles that cling to the walls, this portion of the cavern is
+in ruin. Its walls have become brittle and could collapse if the slightest
+touch was applied to them. The walls are also marred in dried blood. Some
+light can be seen coming from below and a transparent gate of sort exists to
+the west. @n
+~
+215 0 0 0 0 0
+D1
+~
+Gate~
+0 62913 62961 20 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 62963 0 0 0 0 0 0 0 0
+S
+T 62940
+#62963
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @RS@wecond @RF@wloor~
+@DLit well by the candles, this portion of the cavern is in ruin. Its walls have
+become brittle and could collapse if the slightest touch was applied to them.
+The walls are also marred in dried blood. A seemingly-never ending hallway
+marches to the west and continues far further than your eye can see; eventually
+being covered by darkness. The rocky stairs that have been carved from the
+walls and lead up are the only thing that isn't in ruin. @w@n
+~
+215 c 0 0 0 0
+D2
+~
+~
+0 0 -1 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62968 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 62962 0 0 0 0 0 0 0 0
+S
+T 62940
+#62964
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @CBeneath @YT@yhe @YO@ywl@w~
+@DOver run with the smell of smoke, this small passageway is considerably smaller
+than the other rooms that you've encountered in the cavern. The walls are
+uncomfortably close to one another and you can barely manage to move here. 
+Demonic markings cover the entirety of these walls; a loud and sinister voice
+coming from these markings which speaks in tandem as the markings glow brighter
+and dimmer. @n
+~
+215 h 0 0 0 0
+D0
+~
+~
+0 0 -1 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 62999 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 -1 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 -1 0 0 0 0 0 0 0 0
+S
+T 62996
+#62965
+Not In Use~
+This unfinished room was created by Kay.
+~
+215 0 0 0 0 0
+D2
+~
+~
+0 0 -1 0 0 0 0 0 0 0 0
+S
+#62966
+@RNot In Use@n~
+This unfinished room was created by Kay.
+~
+215 0 0 0 0 0
+D0
+~
+~
+0 0 -1 0 0 0 0 0 0 0 0
+S
+#62967
+@RNot In Use@n~
+This unfinished room was created by Kay.
+~
+215 0 0 0 0 0
+D1
+~
+~
+0 0 62963 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 -1 0 0 0 0 0 0 0 0
+S
+#62968
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w~
+@DLit well by the candles, this portion of the cavern is in ruin. Its walls have
+become brittle and could collapse if the slightest touch was applied to them.
+The walls are also marred in dried blood. A seemingly-never ending hallway
+marches to the west and continues far further than your eye can see; eventually
+being covered by darkness. @n
+~
+215 0 0 0 0 0
+D0
+~
+~
+0 0 62969 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 62963 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 62970 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62971 0 0 0 0 0 0 0 0
+S
+T 62940
+#62969
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @YA@yries@w~
+@DSmall candles encircle the large statue that looms over everything in this
+room. The light created by the candles gives the statue a fearsome look. 
+Some slight blood stains can be seen on the wall, the walls themselves are
+still brittle bear their fragile appearance that could cause them to collapse
+under any touch. To the far south another statue can be made out. @n
+~
+215 0 0 0 0 0
+D2
+~
+~
+0 0 62968 0 0 0 0 0 0 0 0
+S
+T 62940
+#62970
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @YT@yaurus@w~
+@DSmall candles encircle the large statue that looms over everything in this
+room. The light created by the candles gives the statue a fearsome look. 
+Some slight blood stains can be seen on the wall, the walls themselves are
+still brittle bear their fragile appearance that could cause them to collapse
+under any touch. To the far north another statue can be made out. @n
+~
+215 0 0 0 0 0
+D0
+~
+~
+0 0 62968 0 0 0 0 0 0 0 0
+S
+T 62940
+#62971
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w~
+@DLit well by the candles, this portion of the cavern is in ruin. Its walls have
+become brittle and could collapse if the slightest touch was applied to them.
+The walls are also marred in dried blood. A seemingly-never ending hallway
+marches to the west and continues far further than your eye can see; eventually
+being covered by darkness. @n
+~
+215 0 0 0 0 0
+D1
+~
+~
+0 0 62968 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62972 0 0 0 0 0 0 0 0
+S
+T 62940
+#62972
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w~
+@DLit well by the candles, this portion of the cavern is in ruin. Its walls have
+become brittle and could collapse if the slightest touch was applied to them.
+The walls are also marred in dried blood. A seemingly-never ending hallway
+marches to the west and continues far further than your eye can see; eventually
+being covered by darkness. @n
+~
+215 0 0 0 0 0
+D0
+~
+~
+0 0 62973 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 62971 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 62974 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62975 0 0 0 0 0 0 0 0
+S
+T 62940
+#62973
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @YG@yemini@w~
+@DSmall candles encircle the large statue that looms over everything in this
+room. The light created by the candles gives the statue a fearsome look. 
+Some slight blood stains can be seen on the wall, the walls themselves are
+still brittle bear their fragile appearance that could cause them to collapse
+under any touch. To the far south another statue can be made out. @n
+~
+215 0 0 0 0 0
+D2
+~
+~
+0 0 62972 0 0 0 0 0 0 0 0
+S
+T 62940
+#62974
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @YC@yancer@w~
+@DSmall candles encircle the large statue that looms over everything in this
+room. The light created by the candles gives the statue a fearsome look. 
+Some slight blood stains can be seen on the wall, the walls themselves are
+still brittle bear their fragile appearance that could cause them to collapse
+under any touch. To the far north another statue can be made out. @n
+~
+215 0 0 0 0 0
+D0
+~
+~
+0 0 62972 0 0 0 0 0 0 0 0
+S
+T 62940
+#62975
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w~
+@DLit well by the candles, this portion of the cavern is in ruin. Its walls have
+become brittle and could collapse if the slightest touch was applied to them.
+The walls are also marred in dried blood. A seemingly-never ending hallway
+marches to the west and continues far further than your eye can see; eventually
+being covered by darkness. @n
+~
+215 0 0 0 0 0
+D1
+~
+~
+0 0 62972 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62976 0 0 0 0 0 0 0 0
+S
+T 62940
+#62976
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w~
+@DLit well by the candles, this portion of the cavern is in ruin. Its walls have
+become brittle and could collapse if the slighest touch was applied to them. 
+The walls are also marred in dried blood. This long hallway which stretches
+east and west seems to have an end to the west. @n
+~
+215 c 0 0 0 0
+D0
+~
+~
+0 0 62977 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 62975 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 62978 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62979 0 0 0 0 0 0 0 0
+S
+T 62940
+#62977
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @YL@yeo@w~
+@DSmall candles encircle the large statue that looms over everything in this
+room. The light created by the candles gives the statue a fearsome look. 
+Some slight blood stains can be seen on the wall, the walls themselves are
+still brittle bear their fragile appearance that could cause them to collapse
+under any touch. @n
+~
+215 0 0 0 0 0
+D2
+~
+~
+0 0 62976 0 0 0 0 0 0 0 0
+S
+T 62940
+#62978
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @YV@yirgo@w~
+@DUtterly run down and in bad condition, this portion of the cavern is perhaps
+the worst. The fragile walls are on the brink of collapse. A few candles can
+be seen in the center of the room surrounding a pile of rubble. @n
+~
+215 0 0 0 0 0
+D0
+~
+~
+0 0 62976 0 0 0 0 0 0 0 0
+S
+T 62940
+#62979
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w~
+@DLit well by the candles, this portion of the cavern is in ruin. Its walls have
+become brittle and could collapse if the slighest touch was applied to them. 
+The walls are also marred in dried blood. This long hallway which stretches
+east and west seems to have an end to the west. @n
+~
+215 0 0 0 0 0
+D1
+~
+~
+0 0 62976 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62980 0 0 0 0 0 0 0 0
+S
+T 62940
+#62980
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w~
+@DLit well by the candles, this portion of the cavern is in ruin. Its walls have
+become brittle and could collapse if the slighest touch was applied to them. 
+The walls are also marred in dried blood. This long hallway which stretches
+east and west seems to have an end to the west. @n
+~
+215 0 0 0 0 0
+D0
+~
+~
+0 0 62981 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 62979 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 62982 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62983 0 0 0 0 0 0 0 0
+S
+T 62940
+#62981
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @YL@yibra@w~
+@DSmall candles encircle the large statue that looms over everything in this
+room. The light created by the candles gives the statue a fearsome look. 
+Some slight blood stains can be seen on the wall, the walls themselves are
+still brittle bear their fragile appearance that could cause them to collapse
+under any touch. To the far south another statue can be made out. @n
+~
+215 0 0 0 0 0
+D2
+~
+~
+0 0 62980 0 0 0 0 0 0 0 0
+S
+T 62940
+#62982
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @YS@ycorpio@w~
+@DSmall candles encircle the large statue that looms over everything in this
+room. The light created by the candles gives the statue a fearsome look. 
+Some slight blood stains can be seen on the wall, the walls themselves are
+still brittle bear their fragile appearance that could cause them to collapse
+under any touch. To the far north another statue can be made out. @n
+~
+215 0 0 0 0 0
+D0
+~
+~
+0 0 62980 0 0 0 0 0 0 0 0
+S
+T 62940
+#62983
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w~
+@DLit well by the candles, this portion of the cavern is in ruin. Its walls have
+become brittle and could collapse if the slighest touch was applied to them. 
+The walls are also marred in dried blood. This long hallway which stretches
+east and west seems to have an end to the west. @n
+~
+215 0 0 0 0 0
+D1
+~
+~
+0 0 62980 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62984 0 0 0 0 0 0 0 0
+S
+T 62940
+#62984
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w~
+@DLit well by the candles, this portion of the cavern is in ruin. Its walls have
+become brittle and could collapse if the slighest touch was applied to them. 
+The walls are also marred in dried blood. This long hallway which stretches
+east and west seems to have an end to the west. @n
+~
+215 0 0 0 0 0
+D0
+~
+~
+0 0 62985 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 62983 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 62986 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62987 0 0 0 0 0 0 0 0
+S
+T 62940
+#62985
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @YS@yagittarius@w~
+@DSmall candles encircle the large statue that looms over everything in this
+room. The light created by the candles gives the statue a fearsome look. 
+Some slight blood stains can be seen on the wall, the walls themselves are
+still brittle bear their fragile appearance that could cause them to collapse
+under any touch. To the far south another statue can be made out. @n
+~
+215 0 0 0 0 0
+D2
+~
+~
+0 0 62984 0 0 0 0 0 0 0 0
+S
+T 62940
+#62986
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @YC@yapricorn@w~
+@DSmall candles encircle the large statue that looms over everything in this
+room. The light created by the candles gives the statue a fearsome look. 
+Some slight blood stains can be seen on the wall, the walls themselves are
+still brittle bear their fragile appearance that could cause them to collapse
+under any touch. To the far north another statue can be made out. @n
+~
+215 0 0 0 0 0
+D0
+~
+~
+0 0 62984 0 0 0 0 0 0 0 0
+S
+T 62940
+#62987
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w~
+@DLit well by the candles, this portion of the cavern is in ruin. Its walls have
+become brittle and could collapse if the slighest touch was applied to them. 
+The walls are also marred in dried blood. This long hallway which stretches
+east and west seems to have an end to the west. @n
+~
+215 0 0 0 0 0
+D1
+~
+~
+0 0 62984 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62988 0 0 0 0 0 0 0 0
+S
+T 62940
+#62988
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@w~
+@DLit well by the candles, this portion of the cavern is in ruin. Its walls have
+become brittle and could collapse if the slighest touch was applied to them. 
+The walls are also marred in dried blood. @n
+~
+215 0 0 0 0 0
+D0
+~
+~
+0 0 62989 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 62987 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 62990 0 0 0 0 0 0 0 0
+D3
+~
+Seal~
+4 0 -1 0 0 0 0 0 0 0 0
+S
+T 62920
+#62989
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @YA@yquarius@w~
+@DSmall candles encircle the large statue that looms over everything in this
+room. The light created by the candles gives the statue a fearsome look. 
+Some slight blood stains can be seen on the wall, the walls themselves are
+still brittle bear their fragile appearance that could cause them to collapse
+under any touch. To the far south another statue can be made out. @n
+~
+215 0 0 0 0 0
+D2
+~
+~
+0 0 62988 0 0 0 0 0 0 0 0
+S
+T 62940
+#62990
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @YP@yisces@w~
+@DSmall candles encircle the large statue that looms over everything in this
+room. The light created by the candles gives the statue a fearsome look. 
+Some slight blood stains can be seen on the wall, the walls themselves are
+still brittle bear their fragile appearance that could cause them to collapse
+under any touch. To the far north another statue can be made out. @n
+~
+215 0 0 0 0 0
+D0
+~
+~
+0 0 62988 0 0 0 0 0 0 0 0
+S
+T 62940
+#62991
+@GS@Yu@ym@Ym@ye@Gr @CG@Wl@co@Wb@Ce@n~
+@GAn open field of wheat surrounds this entire area. The sand here is very
+loose, this occasionally creates sink holes which swallow massive portions of
+the wheat; one of the stranger phenomena about this place is that the wheat is
+almost immediately and magically replaced by the exact same amount of wheat
+that was engulfed in the sink hole. Observing this place in its entirety, the
+sky is a dark-wooden brown and the the field never seems to end. Looking
+carefully to the sky you can barely make out your reflection.
+
+@RA large wormhole is here@G!@n
+
+~
+215 dh 0 0 0 2
+D1
+~
+~
+0 0 -1 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62992 0 0 0 0 0 0 0 0
+E
+Wormhole~
+@WLooking through the @Rwormhole@W you see...@n
+
+@Y===================@n
+@DLit well by the candles, this portion of the cavern is in ruin. Its walls have
+become brittle and could collapse if the slighest touch was applied to them. 
+The walls are also marred in dried blood.@n
+@Y===================@n
+~
+S
+T 62941
+#62992
+@GS@Yu@ym@Ym@ye@Gr @CG@Wl@co@Wb@Ce@n~
+@GAn open field of wheat surrounds this entire area. The sand here is very
+loose, this occasionally creates sink holes which swallow massive portions of
+the wheat; one of the stranger phenomena about this place is that the wheat is
+almost immediately and magically replaced by the exact same amount of wheat
+that was engulfed in the sink hole. A breeze, whose direction can not be truly
+determined, carries the hint of harvest as it rustles through the wheat. 
+Observing this place in its entirety, the sky is a dark-wooden brown and the
+the field never seems to end. Looking carefully to the sky you can barely make
+out your reflection. @n
+~
+215 dh 0 0 0 2
+D0
+~
+~
+0 0 62993 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 62991 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 62995 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62994 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 62996 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 62997 0 0 0 0 0 0 0 0
+S
+#62993
+@GS@Yu@ym@Ym@ye@Gr @CG@Wl@co@Wb@Ce@n~
+@GAn open field of wheat surrounds this entire area. The sand here is very
+loose, this occasionally creates sink holes which swallow massive portions of
+the wheat; one of the stranger phenomena about this place is that the wheat is
+almost immediately and magically replaced by the exact same amount of wheat
+that was engulfed in the sink hole. A breeze, whose direction can not be truly
+determined, carries the hint of harvest as it rustles through the wheat. 
+Observing this place in its entirety, the sky is a dark-wooden brown and the
+the field never seems to end. Looking carefully to the sky you can barely make
+out your reflection. @n
+~
+215 dh 0 0 0 2
+D2
+~
+~
+0 0 62992 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62996 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 62994 0 0 0 0 0 0 0 0
+S
+#62994
+@GS@Yu@ym@Ym@ye@Gr @CG@Wl@co@Wb@Ce@n~
+@GAn open field of wheat surrounds this entire area. The sand here is very
+loose, this occasionally creates sink holes which swallow massive portions of
+the wheat; one of the stranger phenomena about this place is that the wheat is
+almost immediately and magically replaced by the exact same amount of wheat
+that was engulfed in the sink hole. A breeze, whose direction can not be truly
+determined, carries the hint of harvest as it rustles through the wheat. 
+Observing this place in its entirety, the sky is a dark-wooden brown and the
+the field never seems to end. Looking carefully to the sky you can barely make
+out your reflection. @n
+~
+215 dh 0 0 0 2
+D0
+~
+~
+0 0 62996 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 62992 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 62997 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62998 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 62993 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 62995 0 0 0 0 0 0 0 0
+S
+#62995
+@GS@Yu@ym@Ym@ye@Gr @CG@Wl@co@Wb@Ce@n~
+@GAn open field of wheat surrounds this entire area. The sand here is very
+loose, this occasionally creates sink holes which swallow massive portions of
+the wheat; one of the stranger phenomena about this place is that the wheat is
+almost immediately and magically replaced by the exact same amount of wheat
+that was engulfed in the sink hole. A breeze, whose direction can not be truly
+determined, carries the hint of harvest as it rustles through the wheat. 
+Observing this place in its entirety, the sky is a dark-wooden brown and the
+the field never seems to end. Looking carefully to the sky you can barely make
+out your reflection. @n
+~
+215 dh 0 0 0 2
+D0
+~
+~
+0 0 62992 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 62997 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 62994 0 0 0 0 0 0 0 0
+S
+#62996
+@GS@Yu@ym@Ym@ye@Gr @CG@Wl@co@Wb@Ce@n~
+@GAn open field of wheat surrounds this entire area. The sand here is very
+loose, this occasionally creates sink holes which swallow massive portions of
+the wheat; one of the stranger phenomena about this place is that the wheat is
+almost immediately and magically replaced by the exact same amount of wheat
+that was engulfed in the sink hole. A breeze, whose direction can not be truly
+determined, carries the hint of harvest as it rustles through the wheat. 
+Observing this place in its entirety, the sky is a dark-wooden brown and the
+the field never seems to end. Looking carefully to the sky you can barely make
+out your reflection. @n
+~
+215 dh 0 0 0 2
+D1
+~
+~
+0 0 62993 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 62994 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 62992 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 -1 0 0 0 0 0 0 0 0
+S
+#62997
+@GS@Yu@ym@Ym@ye@Gr @CG@Wl@co@Wb@Ce@n~
+@GAn open field of wheat surrounds this entire area. The sand here is very
+loose, this occasionally creates sink holes which swallow massive portions of
+the wheat; one of the stranger phenomena about this place is that the wheat is
+almost immediately and magically replaced by the exact same amount of wheat
+that was engulfed in the sink hole. A breeze, whose direction can not be truly
+determined, carries the hint of harvest as it rustles through the wheat. 
+Observing this place in its entirety, the sky is a dark-wooden brown and the
+the field never seems to end. Looking carefully to the sky you can barely make
+out your reflection. @n
+~
+215 dh 0 0 0 2
+D0
+~
+~
+0 0 62994 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 62995 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 62992 0 0 0 0 0 0 0 0
+S
+#62998
+@GS@Yu@ym@Ym@ye@Gr @CG@Wl@co@Wb@Ce @R- @GPestilience@n~
+@GWhatever this place is, the open field of wheat that covers the whole place
+ends here. The wheat here has been pressed into the ground and runs in
+swirling and random patterns; from the air it becomes clear that the wheat's
+unique shaping actually forms several crop circles which make up a very small
+portion of this overall region. The sand here is also different. It is stiff
+and barren, any impressions that are made into it are magically removed and
+replaced with the same dry land that encompassess most of this specific area.
+In the center of the largest crop circle is a bizzare being who seems to be the
+one responsible for the abrupt change in this place's environment. @n
+~
+215 dh 0 0 0 11
+D1
+~
+~
+0 0 62994 0 0 0 0 0 0 0 0
+S
+#62999
+@cU@Dnd@We@wrg@Dro@Wu@wn@cd @cC@wav@Der@cn@G: @CBeneath @YT@yhe @YO@ywl@w~
+@DOver run with the smell of smoke, this small passageway is considerably smaller
+than the other rooms that you've encountered in the cavern. The walls are
+uncomfortably close to one another and you can barely manage to move here. 
+The ceiling here is transparent and it appears that you may exit this hidden
+section by simply going upwards. @n
+~
+215 h 0 0 0 0
+D3
+~
+~
+0 0 62964 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 62928 0 0 0 0 0 0 0 0
+S
+$~

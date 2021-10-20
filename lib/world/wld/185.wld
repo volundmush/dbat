@@ -1,0 +1,1466 @@
+#18500
+@wAsteroid~
+   @wThe surface of this asteroid is barren and desolate. Small craters
+occasionally pock the surface, but most have been filled in by dust. Overhead
+one can see the planet earth and occasionally it's moon. It is unknown what
+keeps this rock in it's location. @n@
+~
+185 0 t 0 0 0
+D0
+~
+~
+0 0 18504 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18505 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18504 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 18504 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 18501 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 18502 0 0 0 0 0 0 0 0
+S
+#18501
+@wAsteroid~
+   @wThe surface of this asteroid is barren and desolate. Small craters
+occasionally pock the surface, but most have been filled in by dust. Overhead
+one can see the planet earth and occasionally it's moon. It is unknown what
+keeps this rock in it's location. @n@
+~
+185 0 t 0 0 0
+D1
+~
+~
+0 0 18502 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18505 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18500 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 18502 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 18502 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 18504 0 0 0 0 0 0 0 0
+S
+#18502
+@wAsteroid~
+   @wThe surface of this asteroid is barren and desolate. Small craters
+occasionally pock the surface, but most have been filled in by dust. Overhead
+one can see the planet earth and occasionally it's moon. It is unknown what
+keeps this rock in it's location. @n@
+~
+185 0 t 0 0 0
+D1
+~
+~
+0 0 18505 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18501 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18501 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 18500 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 18504 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 18501 0 0 0 0 0 0 0 0
+S
+#18503
+@nAbove the Moon@n~
+@nThe space that surrounds the @DM@Wo@Do@Wn@n feels as though some form of pressure is always pressing down upon it somehow. Fractured, it's unclear exactly what holds these pieces of the lunar body together as it continues to orbit around the @GEarth@n.
+~
+185 cdF t 0 0 0
+D5
+~
+~
+0 0 63300 0 0 0 0 0 0 0 0
+D11
+~
+~
+0 0 41826 0 0 0 0 0 0 0 0
+S
+#18504
+@wAsteroid~
+   @wThe surface of this asteroid is barren and desolate. Small craters
+occasionally pock the surface, but most have been filled in by dust. Overhead
+one can see the planet earth and occasionally it's moon. It is unknown what
+keeps this rock in it's location. @n@
+~
+185 0 t 0 0 0
+D0
+~
+~
+0 0 18505 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18500 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18502 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 18501 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 18500 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 18500 0 0 0 0 0 0 0 0
+S
+#18505
+@wA Large Crater~
+   @wThis crater is huge, easily spanning several miles in diameter. Far, far
+below, you can see something gleaming, and occasionaly glowing. @n@
+~
+185 0 t 0 0 0
+D0
+~
+~
+0 0 18500 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 18501 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18504 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18502 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 18503 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 18506 0 0 0 0 0 0 0 0
+S
+#18506
+@wBottom Of A Large Crater@n@~
+   @wThis room is illuminated by an enormous crystalline being that glows and
+pulses with brilliant multicolored light. The walls of the crater rise
+ominously into the sky. @n@
+~
+185 0 t 0 0 0
+D4
+~
+~
+0 0 18505 20 0 0 0 0 0 0 0
+S
+#18507
+@YS@yh@Do@wo@Wt@Di@yn@Yg S@yta@Yr @RC@ra@Ds@wi@Wno@n - @WHallway@n~
+   @YBright flashing lights projecting from a variety of slot machines to the
+north can be seen, while the sounds from those very slot machines mixed with
+punters both winning and losing, can be heard. Soft red carpet adorns the
+floor while a massive sign indicating the name of the casino hangs from the
+roof. @n
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 18510 18508 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18550 0 0 0 0 0 0 0 0
+D9
+A simple wooden door
+~
+wooden door~
+1 0 18575 20 0 0 0 0 0 0 0
+S
+#18508
+@YS@yh@Do@wo@Wt@Di@yn@Yg S@yta@Yr @RC@ra@Ds@wi@Wno@n - @WHallway@n~
+   @YBright flashing lights projecting from a variety of slot machines to the
+north can be seen, while the sounds from those very slot machines mixed with
+punters both winning and losing, can be heard. Soft red carpet adorns the
+floor while a massive sign indicating the name of the casino hangs from the
+roof. @n
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18515 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 18512 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18507 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18509 0 0 0 0 0 0 0 0
+S
+#18509
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino - Slot Machine Hallway A@n~
+   @YSlot machines are present here in several rows, with punters of all varities
+sat down and trying their luck. A cacophony of different slot machines going
+off can be heard. @n
+~
+185 0 0 0 0 0
+D1
+~
+~
+0 0 18508 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18510 0 0 0 0 0 0 0 0
+S
+#18510
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino - Slot Machine Hallway A@n~
+   @YSlot machines are present here in several rows, with punters of all varities
+sat down and trying their luck. A cacophony of different slot machines going
+off can be heard. @n
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18565 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 18509 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18511 0 0 0 0 0 0 0 0
+S
+#18511
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino - Slot Machine Hallway A@n~
+   @YSlot machines are present here in several rows, with punters of all varities
+sat down and trying their luck. A cacophony of different slot machines going
+off can be heard. @n
+~
+185 0 0 0 0 0
+D1
+~
+~
+0 0 18510 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18566 0 0 0 0 0 0 0 0
+S
+#18512
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino - Slot Machine Hallway B@n~
+   @YSlot machines are present here in several rows, with punters of all varities
+sat down and trying their luck. A cacophony of different slot machines going
+off can be heard. @n
+~
+185 0 0 0 0 0
+D1
+~
+~
+0 0 18513 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18508 0 0 0 0 0 0 0 0
+S
+#18513
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino - Slot Machine Hallway B@n~
+   @YSlot machines are present here in several rows, with punters of all varities
+sat down and trying their luck. A cacophony of different slot machines going
+off can be heard. @n
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18568 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 18514 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18512 0 0 0 0 0 0 0 0
+S
+#18514
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino - Slot Machine Hallway B@n~
+   @YSlot machines are present here in several rows, with punters of all varities
+sat down and trying their luck. A cacophony of different slot machines going
+off can be heard. @n
+~
+185 0 0 0 0 0
+D1
+~
+~
+0 0 18569 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18513 0 0 0 0 0 0 0 0
+S
+#18515
+@YS@yh@Do@wo@Wt@Di@yn@Yg S@yta@Yr @RC@ra@Ds@wi@Wno@n - @WHallway@n~
+   @YBright flashing lights projecting from a variety of slot machines to the
+north can be seen, while the sounds from those very slot machines mixed with
+punters both winning and losing, can be heard. Soft red carpet adorns the
+floor while a massive sign indicating the name of the casino hangs from the
+roof. @n
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18516 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18508 0 0 0 0 0 0 0 0
+S
+#18516
+@YS@yh@Do@wo@Wt@Di@yn@Yg S@yta@Yr @RC@ra@Ds@wi@Wno@n - @WHallway@n~
+   @YBright flashing lights projecting from a variety of slot machines to the
+north can be seen, while the sounds from those very slot machines mixed with
+punters both winning and losing, can be heard. Soft red carpet adorns the
+floor while a massive sign indicating the name of the casino hangs from the
+roof. @n
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18519 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 18518 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18515 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18517 0 0 0 0 0 0 0 0
+S
+#18517
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - ATM Room~
+This unfinished room was created by Samael.
+~
+185 0 0 0 0 0
+D1
+~
+~
+0 0 18516 0 0 0 0 0 0 0 0
+S
+#18518
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - Cashout Room~
+This unfinished room was created by Samael.
+~
+185 0 0 0 0 0
+D3
+~
+~
+0 0 18516 0 0 0 0 0 0 0 0
+S
+#18519
+@YS@yh@Do@wo@Wt@Di@yn@Yg S@yta@Yr @RC@ra@Ds@wi@Wno@n - @WHallway@n~
+   @YBright flashing lights projecting from a variety of slot machines to the
+north can be seen, while the sounds from those very slot machines mixed with
+punters both winning and losing, can be heard. Soft red carpet adorns the
+floor while a massive sign indicating the name of the casino hangs from the
+roof. @n
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18520 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18516 0 0 0 0 0 0 0 0
+S
+#18520
+@YS@yh@Do@wo@Wt@Di@yn@Yg S@yta@Yr @RC@ra@Ds@wi@Wno@n - @WHallway@n~
+   @YBright flashing lights projecting from a variety of slot machines to the
+north can be seen, while the sounds from those very slot machines mixed with
+punters both winning and losing, can be heard. Soft red carpet adorns the
+floor while a massive sign indicating the name of the casino hangs from the
+roof. A stairway leading up to the second floor is here. @n
+~
+185 0 0 0 0 0
+D2
+~
+~
+0 0 18519 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 18521 0 0 0 0 0 0 0 0
+S
+#18521
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - High Roller Floor~
+This unfinished room was created by Samael.
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18522 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 18526 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18523 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 18542 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 18520 0 0 0 0 0 0 0 0
+S
+#18522
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - High Roller Floor~
+This unfinished room was created by Samael.
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18529 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18521 0 0 0 0 0 0 0 0
+S
+#18523
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - High Roller Floor~
+This unfinished room was created by Samael.
+~
+185 0 0 0 0 0
+D1
+~
+~
+0 0 18521 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18524 0 0 0 0 0 0 0 0
+S
+#18524
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - High Roller Floor~
+This unfinished room was created by Samael.
+~
+185 0 0 0 0 0
+D1
+~
+~
+0 0 18523 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18525 0 0 0 0 0 0 0 0
+S
+#18525
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - High Roller Floor~
+This unfinished room was created by Samael.
+~
+185 0 0 0 0 0
+D1
+~
+~
+0 0 18524 0 0 0 0 0 0 0 0
+S
+#18526
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - High Roller Floor~
+This unfinished room was created by Samael.
+~
+185 0 0 0 0 0
+D1
+~
+~
+0 0 18527 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18521 0 0 0 0 0 0 0 0
+S
+#18527
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - High Roller Floor~
+This unfinished room was created by Samael.
+~
+185 0 0 0 0 0
+D1
+~
+~
+0 0 18528 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18526 0 0 0 0 0 0 0 0
+S
+#18528
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - High Roller Floor~
+This unfinished room was created by Samael.
+~
+185 0 0 0 0 0
+D3
+~
+~
+0 0 18527 0 0 0 0 0 0 0 0
+S
+#18529
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - High Roller Floor~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18530 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18522 0 0 0 0 0 0 0 0
+S
+#18530
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - High Roller Floor~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18531 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18529 0 0 0 0 0 0 0 0
+S
+#18531
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - High Roller Floor~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18532 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18530 0 0 0 0 0 0 0 0
+S
+#18532
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - Theater Seats~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18539 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 18535 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18531 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18533 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18540 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 18538 0 0 0 0 0 0 0 0
+S
+#18533
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - Theater Seats~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18540 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 18532 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18534 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18541 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 18539 0 0 0 0 0 0 0 0
+S
+#18534
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - Theater Seats~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18541 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 18533 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 18540 0 0 0 0 0 0 0 0
+S
+#18535
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - Theater Seats~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18538 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 18536 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18532 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18539 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 18537 0 0 0 0 0 0 0 0
+S
+#18536
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - Theater Seats~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18537 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18535 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18538 0 0 0 0 0 0 0 0
+S
+#18537
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - Theater Seats~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D2
+~
+~
+0 0 18536 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18538 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 18535 0 0 0 0 0 0 0 0
+S
+#18538
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - Theater Seats~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D1
+~
+~
+0 0 18537 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18535 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18539 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 18536 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 18532 0 0 0 0 0 0 0 0
+S
+#18539
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - Theater Seats~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D1
+~
+~
+0 0 18538 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18532 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18540 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 18535 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 18533 0 0 0 0 0 0 0 0
+S
+#18540
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - Theater Seats~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D1
+~
+~
+0 0 18539 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18533 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18541 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 18532 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 18534 0 0 0 0 0 0 0 0
+S
+#18541
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - Theater Seats~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D1
+~
+~
+0 0 18540 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18534 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 18533 0 0 0 0 0 0 0 0
+S
+#18542
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - Office Hallway~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D2
+~
+~
+0 0 18544 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 18521 0 0 0 0 0 0 0 0
+S
+#18543
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - God Spy Room~
+You are in an unfinished room.
+~
+185 0 0 0 0 0
+S
+#18544
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - Office Hallway~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18542 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18545 0 0 0 0 0 0 0 0
+S
+#18545
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - Office Hallway~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18544 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18546 0 0 0 0 0 0 0 0
+S
+#18546
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - Office Hallway~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18545 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 18562 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18547 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18561 0 0 0 0 0 0 0 0
+S
+#18547
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - Office Hallway~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18546 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18548 0 0 0 0 0 0 0 0
+S
+#18548
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - Office Hallway~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18547 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 18564 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18549 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18563 0 0 0 0 0 0 0 0
+S
+#18549
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - Office Hallway~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18548 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18551 0 0 0 0 0 0 0 0
+S
+#18550
+@YS@yh@Do@wo@Wt@Di@yn@Yg S@yta@Yr @RC@ra@Ds@wi@Wno@n - @WEntrance@n~
+   @YThis landing pad serves as the entrance to the galaxy-wide famous Shooting
+Star Casino. A variety of space ships can be found parked throughout the area.
+Soft music plays over the speakers. @n
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18507 0 0 0 0 0 0 0 0
+S
+#18551
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - Office Hallway~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18549 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18552 0 0 0 0 0 0 0 0
+S
+#18552
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - Gelik's Office~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18551 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 18555 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18553 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18558 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 18556 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 18559 0 0 0 0 0 0 0 0
+S
+#18553
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - Gelik's Office~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18552 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 18556 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18554 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18559 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18558 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 18555 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 18557 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 18560 0 0 0 0 0 0 0 0
+S
+#18554
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - Gelik's Office~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18553 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 18557 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18560 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18559 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 18556 0 0 0 0 0 0 0 0
+S
+#18555
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - Gelik's Office~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D2
+~
+~
+0 0 18556 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18552 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 18553 0 0 0 0 0 0 0 0
+S
+#18556
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - Gelik's Office~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18555 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18557 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18553 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18552 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 18554 0 0 0 0 0 0 0 0
+S
+#18557
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - Gelik's Office~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18556 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18554 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18553 0 0 0 0 0 0 0 0
+S
+#18558
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - Gelik's Office~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D1
+~
+~
+0 0 18552 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18559 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 18553 0 0 0 0 0 0 0 0
+S
+#18559
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - Gelik's Office~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18558 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 18553 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18560 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 18552 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 18554 0 0 0 0 0 0 0 0
+S
+#18560
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - Gelik's Office~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18559 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 18554 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 18553 0 0 0 0 0 0 0 0
+S
+#18561
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - Accounting Office~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D1
+~
+~
+0 0 18546 0 0 0 0 0 0 0 0
+S
+#18562
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - Security Office~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D3
+~
+~
+0 0 18546 0 0 0 0 0 0 0 0
+S
+#18563
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - VIP Partner Room~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D1
+~
+~
+0 0 18548 0 0 0 0 0 0 0 0
+S
+#18564
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino@W - Detention Room~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D3
+~
+~
+0 0 18548 0 0 0 0 0 0 0 0
+S
+#18565
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino - Slot Machines B@n~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D2
+~
+~
+0 0 18510 0 0 0 0 0 0 0 0
+S
+#18566
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino - Slot Machine Hallway A@n~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18567 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 18511 0 0 0 0 0 0 0 0
+S
+#18567
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino - Slot Machines A@n~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D2
+~
+~
+0 0 18566 0 0 0 0 0 0 0 0
+S
+#18568
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino - Slot Machines C@n~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D2
+~
+~
+0 0 18513 0 0 0 0 0 0 0 0
+S
+#18569
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino - Slot Machine Hallway B@n~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18570 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18514 0 0 0 0 0 0 0 0
+S
+#18570
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino - Slot Machines D@n~
+This unfinished room was created by Seddy.
+~
+185 0 0 0 0 0
+D2
+~
+~
+0 0 18569 0 0 0 0 0 0 0 0
+S
+#18571
+New BuildWalk Room~
+This unfinished room was created by Mannagoth.
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18575 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 18573 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18574 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18572 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 18579 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 18577 0 0 0 0 0 0 0 0
+S
+#18572
+New BuildWalk Room~
+This unfinished room was created by Mannagoth.
+~
+185 0 0 0 0 0
+D1
+~
+~
+0 0 18571 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18578 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 18574 0 0 0 0 0 0 0 0
+S
+#18573
+New BuildWalk Room~
+This unfinished room was created by Mannagoth.
+~
+185 0 0 0 0 0
+D2
+~
+~
+0 0 18579 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18571 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 18574 0 0 0 0 0 0 0 0
+S
+#18574
+New BuildWalk Room~
+This unfinished room was created by Mannagoth.
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18571 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 18576 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18577 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18572 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 18573 0 0 0 0 0 0 0 0
+S
+#18575
+The start~
+A big white room
+~
+185 d 0 0 0 0
+D0
+A simple wooden door
+~
+Wooden door~
+1 18510 18507 20 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 18571 0 0 0 0 0 0 0 0
+S
+#18576
+New BuildWalk Room~
+This unfinished room was created by Mannagoth.
+~
+185 0 0 0 0 0
+D3
+~
+~
+0 0 18574 0 0 0 0 0 0 0 0
+S
+#18577
+New BuildWalk Room~
+This unfinished room was created by Mannagoth.
+~
+185 0 0 0 0 0
+D1
+~
+~
+0 0 18574 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 18571 0 0 0 0 0 0 0 0
+S
+#18578
+New BuildWalk Room~
+This unfinished room was created by Mannagoth.
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18572 0 0 0 0 0 0 0 0
+S
+#18579
+New BuildWalk Room~
+This unfinished room was created by Mannagoth.
+~
+185 0 0 0 0 0
+D0
+~
+~
+0 0 18573 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 18571 0 0 0 0 0 0 0 0
+S
+#18599
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino - Casino God Room@n~
+This room is designed to allow for a god to check up on the area, etc.
+~
+185 0 0 0 0 0
+S
+$~

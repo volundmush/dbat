@@ -1,0 +1,282 @@
+#15600
+Unlocker Minion Kraken~
+Unlocker Minion Kraken~
+Unlocker Minion Kraken
+~
+It looks unfinished.
+~
+bd 0 0 0 0 0 0 0 0 E
+100 20 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 15
+Dex: 14
+Int: 15
+Wis: 15
+Con: 14
+Cha: 14
+E
+T 15601
+#15601
+Human Slave~
+@CH@cu@Wm@ca@Cn@n Slave~
+A sullen looking Human slave is here.
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 10 E
+100 20 10 0d6+0 0d0+0
+0 0 0 2
+8 8 2
+Str: 13
+Dex: 10
+Int: 13
+Wis: 13
+Con: 10
+Cha: 10
+E
+#15602
+Saiyan Slave~
+@YS@ya@Yiy@ya@Yn@n Slave~
+A Saiyan slave is here, acting deviously.
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 -10 E
+100 20 10 0d8+0 0d0+0
+0 0 1 4
+8 8 1
+Size: 5
+Str: 10
+Dex: 13
+Int: 10
+Wis: 10
+Con: 13
+Cha: 13
+E
+#15603
+Mutant slave~
+@MM@mu@Rt@ra@mn@Mt@n Slave~
+A mutant slave is walking around aimlessly here.
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 -10 E
+100 20 10 0d10+0 0d0+0
+0 0 5 5
+8 8 0
+Size: 5
+Str: 11
+Dex: 9
+Int: 11
+Wis: 11
+Con: 9
+Cha: 9
+E
+#15604
+Konatsu slave~
+@DK@Wo@wn@Da@wt@Ws@Du@n slave~
+A Konatsu slave is sulking here.
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 10 E
+100 20 10 0d8+0 0d0+0
+0 0 3 7
+8 8 1
+Str: 9
+Dex: 9
+Int: 9
+Wis: 9
+Con: 9
+Cha: 9
+E
+#15605
+Euron~
+Euron~
+Euron stands here, casually observing his surroundings.
+~
+   @WEuron is a muscular Kanassan, but not overtly so. He stands at 6'1" and has
+grey coloured scales. The Kanassan wears a black eye patch over his right eye
+and a black trenchcoat. @n
+~
+bdsA 0 0 0 l 0 0 0 0 E
+100 20 10 0d0+0 0d0+0
+0 0 6 28
+8 8 1
+Str: 11
+Dex: 15
+Int: 11
+Wis: 11
+Con: 15
+Cha: 15
+E
+T 15604
+T 15605
+T 15608
+#15606
+Captain Dread~
+@RC@ra@Dp@wt@Wa@ri@Rn @RD@rr@De@ra@Rd@n~
+Captain Dread stands here, cutting an imposing figure.
+~
+@D @n
+~
+bdf 0 0 0 l 0 0 0 0 E
+120 20 10 0d4+0 0d0+0
+0 0 6 12
+8 8 1
+Str: 14
+Dex: 11
+Int: 14
+Wis: 14
+Con: 11
+Cha: 11
+E
+T 15606
+T 15607
+#15607
+Limmy~
+@BL@bi@Cm@cm@Cy@n~
+Limmy One-hand stands here, looking over the galaxy map.
+~
+@D @n
+~
+bdf 0 0 0 l 0 0 0 0 E
+100 20 10 0d0+0 0d0+0
+0 0 6 28
+8 8 1
+Str: 8
+Dex: 14
+Int: 8
+Wis: 8
+Con: 14
+Cha: 14
+E
+#15608
+Yunkai Lookout~
+@MY@mu@Dn@wk@ma@Mi @YL@yo@Wo@wk@Wo@yu@Yt@n~
+A Yunkai Pirate is standing here, keeping a lookout.
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 0 E
+90 20 10 0d0+0 0d0+0
+0 0 6 28
+8 8 1
+Str: 14
+Dex: 16
+Int: 14
+Wis: 14
+Con: 16
+Cha: 16
+E
+T 15609
+#15609
+Yunkai Pillager~
+@MY@mu@Dn@wk@ma@Mi @YP@yi@Dl@wl@Wa@Dg@ye@Yr@n~
+A Yunkai pillager is roaming here
+~
+@D @n
+~
+df 0 0 0 l 0 0 0 0 E
+94 20 10 0d0+0 0d0+0
+0 0 6 28
+8 8 1
+Str: 13
+Dex: 12
+Int: 13
+Wis: 13
+Con: 12
+Cha: 12
+E
+#15610
+Yunkai Pirate~
+@MY@mu@Dn@wk@ma@Mi @RP@ri@Wr@wa@rt@Re@n~
+A Yunkai pirate is here, looking for someone to rob.
+~
+@D @n
+~
+df 0 0 0 l 0 0 0 0 E
+98 20 10 0d0+0 0d0+0
+0 0 6 28
+8 8 1
+Str: 16
+Dex: 8
+Int: 16
+Wis: 16
+Con: 8
+Cha: 8
+E
+#15611
+Cortuth~
+Cortuth~
+Cortuth stands here, watching over the armory.
+~
+@D @n
+~
+bds 0 0 0 l 0 0 0 0 E
+100 20 10 0d0+0 0d0+0
+0 0 5 28
+8 8 1
+Str: 9
+Dex: 11
+Int: 9
+Wis: 9
+Con: 11
+Cha: 11
+E
+#15612
+First Mate Cutter~
+@WFirst @wMate @RC@ru@Dt@wt@re@Rr@n~
+First Mate Cutter is standing here, surveying the bridge.
+~
+@D @n
+~
+bdf 0 0 0 l 0 0 0 0 E
+115 20 10 0d0+0 0d0+0
+0 0 6 28
+8 8 1
+Str: 14
+Dex: 11
+Int: 14
+Wis: 14
+Con: 11
+Cha: 11
+E
+#15613
+Yunkai Raider~
+@MY@mu@Dn@wk@ma@Mi @RR@ra@Di@wd@re@Rr@n~
+A Yunkai raider prowls about here
+~
+@D @n
+~
+df 0 0 0 l 0 0 0 0 E
+105 20 10 0d0+0 0d0+0
+0 0 6 28
+8 8 1
+Str: 10
+Dex: 9
+Int: 10
+Wis: 10
+Con: 9
+Cha: 9
+E
+#15614
+Yunkai Elite~
+@MY@mu@Dn@wk@ma@Mi @GE@gl@Wi@gt@Ge@n~
+A Yunkai elite patrols here.
+~
+@D @n
+~
+df 0 0 0 l 0 0 0 0 E
+110 20 10 0d0+0 0d0+0
+0 0 6 28
+8 8 1
+Str: 15
+Dex: 10
+Int: 15
+Wis: 15
+Con: 10
+Cha: 10
+E
+$

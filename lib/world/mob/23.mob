@@ -1,0 +1,307 @@
+#2300
+Leblanc female~
+@WL@De@mb@Bl@ma@Dn@Wc@n~
+@WL@De@mb@Bl@ma@Dn@Wc@n stands here, a hand on her hip while the other holds her staff.
+~
+Something something magey girl.
+~
+bcdvwxyz 0 0 0 l 0 0 0 0 E
+1 0 10 0d8+0 0d0+0
+0 0 0 1
+8 8 2
+Str: 15
+Dex: 11
+Int: 7
+Wis: 12
+Con: 12
+Cha: 5
+E
+#2301
+Raven~
+@DR@ma@Bv@me@Dn~
+@nA @DR@ma@Bv@me@Dn@n sits here, occasionally preening its wings.
+~
+@nA @DR@ma@Bv@me@Dn@n sits here, occasionally preening its wings.  The creature's eyes are a mystic purple, and feathers are a midnight blue, if not entirely black.  It's large- definitely bigger than any Raven you've seen before.
+~
+bds 0 0 0 l i 0 0 0 E
+100 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 0
+Str: 52
+Dex: 85
+Int: 38
+Wis: 52
+Con: 56
+Cha: 68
+E
+#2302
+npc Virtus2~
+Virtus2~
+Virtus is standing here.
+~
+A simple man, seemingly ordinary. Yet... There's something about him...
+~
+bds 0 0 0 l 0 0 0 0 E
+60 0 10 0d4+0 0d0+0
+0 0 0 0
+8 8 1
+Str: 64
+Dex: 52
+Int: 65
+Wis: 59
+Con: 40
+Cha: 50
+E
+#2303
+Hecarim Shadow War~
+@DH@ne@cc@Ca@cr@ni@Dm@n, @DThe @DS@nh@Dad@no@Dw of @rW@Ra@rr@n~
+@DH@ne@cc@Ca@cr@ni@Dm@n, @Dthe @DS@nh@Dad@no@Dw @nrevenant of @rW@Ra@rr@n stands here.
+~
+   The behemoth that stands before you resembles the fairytail of a centaur. 
+However, the oozing etheral and shadows that bleed off of him suggest a
+malevolent aura. In his hand is a terrifying mix of a halbred and a spear.
+~
+bd 0 0 0 l 0 0 0 -100 E
+80 0 10 0d6+0 0d0+0
+0 0 23 14
+8 8 1
+Size: 5
+Str: 48
+Dex: 78
+Int: 47
+Wis: 58
+Con: 54
+Cha: 59
+E
+#2304
+Elise~
+@REl@Wis@Re@n~
+the daughter of Darius, Elise stands her smiling.
+~
+   This girl has crimson red hair, which truly compliment her deep Blue eyes.
+A small tail swishes behind her. She is dressed in a pure white summer dress.
+The six year old offeres you a genuine wide smile when you make eye contact
+with her.
+~
+bdsvwxyz 0 0 0 l 0 0 0 0 E
+2 0 10 0d0+0 0d0+0
+0 0 7 28
+8 8 2
+Str: 5
+Dex: 9
+Int: 6
+Wis: 6
+Con: 8
+Cha: 7
+E
+#2305
+Swat Unit~
+@nA @BU@Rn@Bi@Rt@n of the @WS@Dw@Wa@Dt@n~
+A swat unit memeber stands here pointing an M-16 at you
+~
+   This person stands here in a bullet proof vest, armed with an M-16
+~
+bdvwxyz 0 0 0 0 0 0 0 0 E
+40 0 10 0d6+0 0d0+0
+0 0 0 2
+8 8 1
+Str: 34
+Dex: 34
+Int: 50
+Wis: 21
+Con: 39
+Cha: 37
+E
+#2306
+Mech assualt swat unit~
+@WM@re@Wc@rh@n assualt @WS@Dw@Wa@Dt@n unit~
+A large Mech-Assualt unit with the words Swat painted on the side stands ready here.
+~
+   This large machine stands about ten feet tall. Two heavily built reverse
+jointed legs holds this machine upright. Two huge barreled rifles are
+positioned on either side of its body. A small head looking piee sits on the
+forward part of its torso, a small red light bouncing between from side to side
+of its visor piece.
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+55 0 10 0d6+0 0d0+0
+0 0 9 8
+8 8 0
+Str: 33
+Dex: 53
+Int: 42
+Wis: 42
+Con: 47
+Cha: 28
+E
+#2307
+dazza shazza~
+Dazza and Shazza~
+Dazza and Shazza are standing here flogging 'strayan food and goods.
+~
+   Dazza is perched over the barbie, his hands striking with the swiftness of a
+red belly as he snaps his tongs, expertly shifting his snags before they can
+burn. A stubbie of VB is clutched tightly in his meaty fist, half of the
+bitter brew splashing onto the surface of the barbie and the rest down his
+gullet. 
+
+   Shazza is by her husbands side, screeching like a galah about her one
+hundred percent genuine strayan goods, strutting like an emu towards anyone
+foolish enough to look in the couple's general direction. She cackles like a
+kookaburra at potential customers terrible jokes, and pinches their children's
+cheeks. 
+~
+bds 0 0 0 0 0 0 0 0 E
+10 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 0
+Str: 5
+Dex: 5
+Int: 10
+Wis: 8
+Con: 7
+Cha: 10
+E
+#2308
+Solis Kanassan~
+Solis, the Kanassan Leader~
+Solis the Kanassan Leader stands here.
+~
+   A grizzled Kanassan veteran, having served his planet several times. His
+skin is a royal blue color, with variants of green mixxed in. Battleworn armor
+adorns his body, and a purple glowing M sits smack in the middle of his
+forehead.
+~
+bcdvwxyz 0 0 0 l 0 0 0 0 E
+104 0 10 0d4+0 0d0+0
+0 0 6 12
+8 8 1
+Str: 63
+Dex: 52
+Int: 79
+Wis: 53
+Con: 79
+Cha: 63
+E
+#2309
+Natu Kanassan Bodyguard~
+Natu, Solis' bodyguard~
+Natu, Solis' bodyguard stands here, arms crossed.
+~
+   Natu, a young Kanassan warrior who has pledged himself to Solis. His skin
+is a myriad of colors, swirling and changing in the light like oil. He wears
+silimar armor to his sister and his leader, and a glowing M sits on the center
+of his forehead.
+~
+bcdvwxyz 0 0 0 l 0 0 0 0 E
+103 0 10 0d4+0 0d0+0
+0 0 6 12
+8 8 1
+Str: 63
+Dex: 85
+Int: 55
+Wis: 81
+Con: 96
+Cha: 90
+E
+#2310
+Lisa~
+Lisa, Solis' bodyguard~
+Lisa, Solis' bodyguard stands here.
+~
+   Lisa, sister to Natu and fellow bodyguard of their leader, Solis. Her
+features are angular and prominant, and a long blue spine runs down the center
+of her back. The color of this Kanassan's skin is a bright blue, with blacks
+mingled in. She wears similar battleworn armor to Natu and Solis, and has a
+glowing purple M in the center of her forehead.
+~
+bcdvwxyz 0 0 0 l 0 0 0 0 E
+103 0 10 0d4+0 0d0+0
+0 0 6 12
+8 8 2
+Str: 69
+Dex: 100
+Int: 90
+Wis: 80
+Con: 99
+Cha: 60
+E
+#2311
+testyanimal~
+testyanimal~
+yes
+~
+It looks unfinished.
+~
+d 0 0 0 l 0 0 0 0 E
+135 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Str: 88
+Dex: 72
+Int: 60
+Wis: 41
+Con: 85
+Cha: 78
+E
+#2312
+Turles Saiyan~
+Turles~
+Turles stands here, arms crossed over his torso with a smirk on his face.
+~
+An undefined string.~
+bcdvwxyz 0 0 0 l 0 0 0 0 E
+65 0 10 0d8+0 0d0+0
+0 0 1 4
+8 8 1
+Str: 59
+Dex: 37
+Int: 52
+Wis: 41
+Con: 47
+Cha: 63
+E
+#2313
+Tayzin mutant~
+@RT@Wayzi@Rn@n~
+@RT@Wayzi@Rn@n, the @C[@WWTO@C]@n ambassador, stands here.
+~
+@RT@Wayzi@Rn@n, the @C[@WWTO@C]@n ambassador, looks tough.  A scar runs down over
+his right eye, and his muscular frame seems ready for combat at any
+moment.  There is no look of fear about him, mirroring the general lack
+of fear from the Saiyans of planet Vegeta.  His face is etched with
+pride as well, as if he fit right in on the planet he was posted at.
+~
+bdnprs 0 0 0 l 0 0 0 0 E
+5 0 10 0d10+0 0d0+0
+0 0 5 5
+8 8 1
+Str: 8
+Dex: 9
+Int: 7
+Wis: 14
+Con: 16
+Cha: 14
+E
+T 1133
+T 1132
+T 1136
+#2314
+Deletemelater~
+Deletemelater~
+An unfinished mob stands here.
+~
+It looks unfinished.
+~
+d 0 0 0 0 0 0 0 0 E
+130 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 11
+Dex: 12
+Int: 11
+Wis: 11
+Con: 12
+Cha: 12
+E
+$

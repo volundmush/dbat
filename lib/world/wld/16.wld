@@ -1,0 +1,2277 @@
+#1600
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yEast Path@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D0
+~
+~
+0 0 1599 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1601 0 0 0 0 0 0 0 0
+S
+#1601
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yEast Path@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D0
+~
+~
+0 0 1600 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1602 0 0 0 0 0 0 0 0
+S
+#1602
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yIntersection of East and South Paths@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D0
+~
+~
+0 0 1601 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1603 0 0 0 0 0 0 0 0
+S
+#1603
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @ySouth Path@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D1
+~
+~
+0 0 1602 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1604 0 0 0 0 0 0 0 0
+S
+#1604
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @ySouth Path@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D1
+~
+~
+0 0 1603 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1605 0 0 0 0 0 0 0 0
+S
+#1605
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @ySouth Path@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D1
+~
+~
+0 0 1604 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1606 0 0 0 0 0 0 0 0
+S
+#1606
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @ySouth Path@n~
+   @gThis narrow path winds through the thick Shadow Forest. Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and
+even more darkness off the path. Sounds of wild animals can be heard
+throughout the forest, adding an eerie quality to the whole experience of being
+on this narrow path. @n
+~
+16 u 0 0 0 3
+D1
+~
+~
+0 0 1605 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1607 0 0 0 0 0 0 0 0
+S
+#1607
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @ySouth Path@n~
+   @gThis narrow path winds through the thick Shadow Forest. Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and
+even more darkness off the path. Sounds of wild animals can be heard
+throughout the forest, adding an eerie quality to the whole experience of being
+on this narrow path. @n
+~
+16 cu 0 0 0 3
+D1
+~
+~
+0 0 1606 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1670 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1608 0 0 0 0 0 0 0 0
+S
+#1608
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @ySouth Path@n~
+   @gThis narrow path winds through the thick Shadow Forest. Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and
+even more darkness off the path. Sounds of wild animals can be heard
+throughout the forest, adding an eerie quality to the whole experience of being
+on this narrow path. @n
+~
+16 u 0 0 0 3
+D1
+~
+~
+0 0 1607 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1609 0 0 0 0 0 0 0 0
+S
+#1609
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @ySouth Path@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D1
+~
+~
+0 0 1608 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1610 0 0 0 0 0 0 0 0
+S
+#1610
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yIntersection of South and West Paths@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D0
+~
+~
+0 0 1611 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1609 0 0 0 0 0 0 0 0
+S
+#1611
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yWest Path@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D0
+~
+~
+0 0 1612 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1610 0 0 0 0 0 0 0 0
+S
+#1612
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yWest Path@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D0
+~
+~
+0 0 1613 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1611 0 0 0 0 0 0 0 0
+S
+#1613
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yWest Path@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D0
+~
+~
+0 0 1614 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1612 0 0 0 0 0 0 0 0
+S
+#1614
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yWest Path@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D0
+~
+~
+0 0 1615 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1613 0 0 0 0 0 0 0 0
+S
+#1615
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yWest Path@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D0
+~
+~
+0 0 1616 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1614 0 0 0 0 0 0 0 0
+S
+#1616
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yWest Path@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D0
+~
+~
+0 0 1649 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1615 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1617 0 0 0 0 0 0 0 0
+S
+#1617
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yWest Path@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D1
+~
+~
+0 0 1616 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1618 0 0 0 0 0 0 0 0
+S
+#1618
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yWest Path@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D1
+~
+~
+0 0 1617 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1619 0 0 0 0 0 0 0 0
+S
+#1619
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yWest Path@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D0
+~
+~
+0 0 1620 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1618 0 0 0 0 0 0 0 0
+S
+#1620
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yWest Path@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D0
+~
+~
+0 0 1621 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1619 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2140 0 0 0 0 0 0 0 0
+S
+#1621
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yWest Path@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D0
+~
+~
+0 0 1622 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1669 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1620 0 0 0 0 0 0 0 0
+S
+#1622
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yWest Path@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D0
+~
+~
+0 0 1623 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1621 0 0 0 0 0 0 0 0
+S
+#1623
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yIntersection of West and North Paths@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D1
+~
+~
+0 0 1624 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1622 0 0 0 0 0 0 0 0
+S
+#1624
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yNorth Path@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D1
+~
+~
+0 0 1625 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1623 0 0 0 0 0 0 0 0
+S
+#1625
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yNorth Path@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D1
+~
+~
+0 0 1626 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1624 0 0 0 0 0 0 0 0
+S
+#1626
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yNorth Path@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D1
+~
+~
+0 0 1627 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1625 0 0 0 0 0 0 0 0
+S
+#1627
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yNorth Path@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D0
+~
+~
+0 0 1628 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1651 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1626 0 0 0 0 0 0 0 0
+S
+#1628
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yNorth Path@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D1
+~
+~
+0 0 1629 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1627 0 0 0 0 0 0 0 0
+S
+#1629
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yNorth Path@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D1
+~
+~
+0 0 1630 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1628 0 0 0 0 0 0 0 0
+S
+#1630
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yNorth Path@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D1
+~
+~
+0 0 1631 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1629 0 0 0 0 0 0 0 0
+S
+#1631
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yNorth Path@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D1
+~
+~
+0 0 1632 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1630 0 0 0 0 0 0 0 0
+S
+#1632
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yNorth Path@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D0
+~
+~
+0 0 1700 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1633 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1631 0 0 0 0 0 0 0 0
+S
+#1633
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yNorth Path@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D1
+~
+~
+0 0 1634 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1632 0 0 0 0 0 0 0 0
+S
+#1634
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yNorth Path@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D1
+~
+~
+0 0 1635 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1633 0 0 0 0 0 0 0 0
+S
+#1635
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yIntersection of East and North Paths@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D2
+~
+~
+0 0 1636 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1634 0 0 0 0 0 0 0 0
+S
+#1636
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yEast Path@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D0
+~
+~
+0 0 1635 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1637 0 0 0 0 0 0 0 0
+S
+#1637
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yEast Path@n~
+ @gThis narrow path winds through the thick Shadow Forest.  Very little light
+can penetrate the trees of the forest, casting dark shadows on the path and even
+more darkness off the path.  Sounds of wild animals can be heard throughout the
+forest, adding an eerie quality to the whole experience of being on this narrow
+path.  @n
+~
+16 u 0 0 0 3
+D0
+~
+~
+0 0 1636 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1592 0 0 0 0 0 0 0 0
+S
+#1638
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yDark Path@n~
+ @DThere is so little light in this area that it almost looks like night.  The
+trees are thickest in this part of the forest and the animal sounds are louder.
+The smell of the forest has become a little more pungent in this area as well as
+the foliage of plants encroaches upon the narrow path.  @n
+~
+16 u 0 0 0 3
+D1
+~
+~
+0 0 1592 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1639 0 0 0 0 0 0 0 0
+S
+#1639
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yDark Path@n~
+ @DThere is so little light in this area that it almost looks like night.  The
+trees are thickest in this part of the forest and the animal sounds are louder.
+The smell of the forest has become a little more pungent in this area as well as
+the foliage of plants encroaches upon the narrow path.  @n
+~
+16 u 0 0 0 3
+D0
+~
+~
+0 0 1640 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1638 0 0 0 0 0 0 0 0
+S
+#1640
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yDark Path@n~
+ @DThere is so little light in this area that it almost looks like night.  The
+trees are thickest in this part of the forest and the animal sounds are louder.
+The smell of the forest has become a little more pungent in this area as well as
+the foliage of plants encroaches upon the narrow path.  @n
+~
+16 u 0 0 0 3
+D2
+~
+~
+0 0 1639 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1641 0 0 0 0 0 0 0 0
+S
+#1641
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yDark Path@n~
+ @DThere is so little light in this area that it almost looks like night.  The
+trees are thickest in this part of the forest and the animal sounds are louder.
+The smell of the forest has become a little more pungent in this area as well as
+the foliage of plants encroaches upon the narrow path.  @n
+~
+16 u 0 0 0 3
+D1
+~
+~
+0 0 1640 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1642 0 0 0 0 0 0 0 0
+S
+#1642
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yDark Path@n~
+ @DThere is so little light in this area that it almost looks like night.  The
+trees are thickest in this part of the forest and the animal sounds are louder.
+The smell of the forest has become a little more pungent in this area as well as
+the foliage of plants encroaches upon the narrow path.  @n
+~
+16 u 0 0 0 3
+D1
+~
+~
+0 0 1641 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1643 0 0 0 0 0 0 0 0
+S
+#1643
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yDark Path@n~
+ @DThere is so little light in this area that it almost looks like night.  The
+trees are thickest in this part of the forest and the animal sounds are louder.
+The smell of the forest has become a little more pungent in this area as well as
+the foliage of plants encroaches upon the narrow path.  @n
+~
+16 u 0 0 0 3
+D1
+~
+~
+0 0 1642 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1644 0 0 0 0 0 0 0 0
+S
+#1644
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yDark Path@n~
+ @DThere is so little light in this area that it almost looks like night.  The
+trees are thickest in this part of the forest and the animal sounds are louder.
+The smell of the forest has become a little more pungent in this area as well as
+the foliage of plants encroaches upon the narrow path.  @n
+~
+16 u 0 0 0 3
+D1
+~
+~
+0 0 1643 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1645 0 0 0 0 0 0 0 0
+S
+#1645
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yDark Dank Path@n~
+ @DThere is so little light in this area that it almost looks like night.  The
+trees are thickest in this part of the forest and the animal sounds are louder.
+The smell of the forest has become a little more pungent in this area as well as
+the foliage of plants encroaches upon the narrow path.  The moisture in this
+area has seeped onto the path making it difficult to travel as the dirt becomes
+mud.  @n
+~
+16 u 0 0 0 3
+D0
+~
+~
+0 0 1644 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1646 0 0 0 0 0 0 0 0
+S
+#1646
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yDark Dank Path@n~
+ @DThere is so little light in this area that it almost looks like night.  The
+trees are thickest in this part of the forest and the animal sounds are louder.
+The smell of the forest has become a little more pungent in this area as well as
+the foliage of plants encroaches upon the narrow path.  The moisture in this
+area has seeped onto the path making it difficult to travel as the dirt becomes
+mud.  @n
+~
+16 u 0 0 0 3
+D0
+~
+~
+0 0 1645 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1652 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1647 0 0 0 0 0 0 0 0
+S
+#1647
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yDark Dank Path@n~
+ @DThere is so little light in this area that it almost looks like night.  The
+trees are thickest in this part of the forest and the animal sounds are louder.
+The smell of the forest has become a little more pungent in this area as well as
+the foliage of plants encroaches upon the narrow path.  The moisture in this
+area has seeped onto the path making it difficult to travel as the dirt becomes
+mud.  @n
+~
+16 u 0 0 0 3
+D1
+~
+~
+0 0 1646 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1648 0 0 0 0 0 0 0 0
+S
+#1648
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yDark Dank Path@n~
+ @DThere is so little light in this area that it almost looks like night.  The
+trees are thickest in this part of the forest and the animal sounds are louder.
+The smell of the forest has become a little more pungent in this area as well as
+the foliage of plants encroaches upon the narrow path.  The moisture in this
+area has seeped onto the path making it difficult to travel as the dirt becomes
+mud.  @n
+~
+16 u 0 0 0 3
+D0
+~
+~
+0 0 1650 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1647 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1649 0 0 0 0 0 0 0 0
+S
+#1649
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yDark Dank Path@n~
+ @DThere is so little light in this area that it almost looks like night.  The
+trees are thickest in this part of the forest and the animal sounds are louder.
+The smell of the forest has become a little more pungent in this area as well as
+the foliage of plants encroaches upon the narrow path.  The moisture in this
+area has seeped onto the path making it difficult to travel as the dirt becomes
+mud.  @n
+~
+16 u 0 0 0 3
+D1
+~
+~
+0 0 1648 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1616 0 0 0 0 0 0 0 0
+S
+#1650
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yDark Dank Path@n~
+ @DThere is so little light in this area that it almost looks like night.  The
+trees are thickest in this part of the forest and the animal sounds are louder.
+The smell of the forest has become a little more pungent in this area as well as
+the foliage of plants encroaches upon the narrow path.  The moisture in this
+area has seeped onto the path making it difficult to travel as the dirt becomes
+mud.  @n
+~
+16 u 0 0 0 3
+D0
+~
+~
+0 0 1651 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1648 0 0 0 0 0 0 0 0
+S
+#1651
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yDark Dank Path@n~
+ @DThere is so little light in this area that it almost looks like night.  The
+trees are thickest in this part of the forest and the animal sounds are louder.
+The smell of the forest has become a little more pungent in this area as well as
+the foliage of plants encroaches upon the narrow path.  The moisture in this
+area has seeped onto the path making it difficult to travel as the dirt becomes
+mud.  @n
+~
+16 u 0 0 0 3
+D0
+~
+~
+0 0 1627 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1650 0 0 0 0 0 0 0 0
+S
+#1652
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yWell Cut Path@n~
+ @gThis area of the path is brighter as many of the trees along either side have
+been cut down recently.  Their cut trunks littering the ground all over the
+place.  The smell of fresh cut wood is overpowering in this area, and the
+lessening of animal sounds have made it extremely peaceful here.  @n
+~
+16 u 0 0 0 3
+D0
+~
+~
+0 0 1646 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1653 0 0 0 0 0 0 0 0
+S
+#1653
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yWell Cut Path@n~
+ @gThis area of the path is brighter as many of the trees along either side have
+been cut down recently.  Their cut trunks littering the ground all over the
+place.  The smell of fresh cut wood is overpowering in this area, and the
+lessening of animal sounds have made it extremely peaceful here.  @n
+~
+16 u 0 0 0 3
+D1
+~
+~
+0 0 1654 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1652 0 0 0 0 0 0 0 0
+S
+#1654
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yWell Cut Path@n~
+ @gThis area of the path is brighter as many of the trees along either side have
+been cut down recently.  Their cut trunks littering the ground all over the
+place.  The smell of fresh cut wood is overpowering in this area, and the
+lessening of animal sounds have made it extremely peaceful here.  @n
+~
+16 u 0 0 0 3
+D0
+~
+~
+0 0 1668 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1655 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1653 0 0 0 0 0 0 0 0
+S
+#1655
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yWell Cut Path@n~
+ @gThis area of the path is brighter as many of the trees along either side have
+been cut down recently.  Their cut trunks littering the ground all over the
+place.  The smell of fresh cut wood is overpowering in this area, and the
+lessening of animal sounds have made it extremely peaceful here.  @n
+~
+16 u 0 0 0 3
+D1
+~
+~
+0 0 1595 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1654 0 0 0 0 0 0 0 0
+S
+#1656
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yWell Cut Path@n~
+ @gThis area of the path is brighter as many of the trees along either side have
+been cut down recently.  Their cut trunks littering the ground all over the
+place.  The smell of fresh cut wood is overpowering in this area, and the
+lessening of animal sounds have made it extremely peaceful here.  @n
+~
+16 u 0 0 0 3
+D1
+~
+~
+0 0 1598 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1667 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1657 0 0 0 0 0 0 0 0
+S
+#1657
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yWell Cut Path@n~
+ @gThis area of the path is brighter as many of the trees along either side have
+been cut down recently.  Their cut trunks littering the ground all over the
+place.  The smell of fresh cut wood is overpowering in this area, and the
+lessening of animal sounds have made it extremely peaceful here.  @n
+~
+16 cdeu 0 0 0 3
+D1
+~
+~
+0 0 1656 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1659 0 0 0 0 0 0 0 0
+S
+#1658
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yPeaceful Clearing Southeast@n~
+ @GThis clearing in the forest is made of of mostly grass.  The occasional bush
+can be found, but nothing larger than three feet.  The sky can be clearly seen
+with plenty of light warming the entire clearing.  The sounds of the forest echo
+clearly through here as well, nolonger distorted by the trees like on the paths
+of the forest.  @n
+~
+16 ehu 0 0 0 2
+D0
+~
+~
+0 0 1659 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1661 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1662 0 0 0 0 0 0 0 0
+S
+#1659
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yPeaceful Clearing East@n~
+ @GThis clearing in the forest is made of of mostly grass.  The occasional bush
+can be found, but nothing larger than three feet.  The sky can be clearly seen
+with plenty of light warming the entire clearing.  The sounds of the forest echo
+clearly through here as well, nolonger distorted by the trees like on the paths
+of the forest.  @n
+~
+16 ehu 0 0 0 2
+D0
+~
+~
+0 0 1660 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1657 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1658 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1662 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1663 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1661 0 0 0 0 0 0 0 0
+S
+#1660
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yPeaceful Clearing Northeast@n~
+ @GThis clearing in the forest is made of of mostly grass.  The occasional bush
+can be found, but nothing larger than three feet.  The sky can be clearly seen
+with plenty of light warming the entire clearing.  The sounds of the forest echo
+clearly through here as well, nolonger distorted by the trees like on the paths
+of the forest.  @n
+~
+16 ehu 0 0 0 2
+D2
+~
+~
+0 0 1659 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1663 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1662 0 0 0 0 0 0 0 0
+S
+#1661
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yPeaceful Clearing South@n~
+ @GThis clearing in the forest is made of of mostly grass.  The occasional bush
+can be found, but nothing larger than three feet.  The sky can be clearly seen
+with plenty of light warming the entire clearing.  The sounds of the forest echo
+clearly through here as well, nolonger distorted by the trees like on the paths
+of the forest.  @n
+~
+16 ehu 0 0 0 2
+D0
+~
+~
+0 0 1662 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1658 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1664 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1665 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1659 0 0 0 0 0 0 0 0
+S
+#1662
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yPeaceful Clearing Center@n~
+ @GThis clearing in the forest is made of of mostly grass.  The occasional bush
+can be found, but nothing larger than three feet.  The sky can be clearly seen
+with plenty of light warming the entire clearing.  The sounds of the forest echo
+clearly through here as well, nolonger distorted by the trees like on the paths
+of the forest.  @n
+~
+16 cehuD 0 0 0 2
+D0
+~
+~
+0 0 1663 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1659 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1661 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1665 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1666 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1660 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1658 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1664 0 0 0 0 0 0 0 0
+S
+#1663
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yPeaceful Clearing North@n~
+ @GThis clearing in the forest is made of of mostly grass.  The occasional bush
+can be found, but nothing larger than three feet.  The sky can be clearly seen
+with plenty of light warming the entire clearing.  The sounds of the forest echo
+clearly through here as well, nolonger distorted by the trees like on the paths
+of the forest.  @n
+~
+16 ehu 0 0 0 2
+D1
+~
+~
+0 0 1660 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1662 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1666 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1659 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1665 0 0 0 0 0 0 0 0
+S
+#1664
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yPeaceful Clearing Southwest@n~
+ @GThis clearing in the forest is made of of mostly grass.  The occasional bush
+can be found, but nothing larger than three feet.  The sky can be clearly seen
+with plenty of light warming the entire clearing.  The sounds of the forest echo
+clearly through here as well, nolonger distorted by the trees like on the paths
+of the forest.  @n
+~
+16 ehu 0 0 0 2
+D0
+~
+~
+0 0 1665 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1661 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1662 0 0 0 0 0 0 0 0
+S
+#1665
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yPeaceful Clearing West@n~
+ @GThis clearing in the forest is made of of mostly grass.  The occasional bush
+can be found, but nothing larger than three feet.  The sky can be clearly seen
+with plenty of light warming the entire clearing.  The sounds of the forest echo
+clearly through here as well, nolonger distorted by the trees like on the paths
+of the forest.  @n
+~
+16 ehu 0 0 0 2
+D0
+~
+~
+0 0 1666 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1662 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1664 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1663 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1661 0 0 0 0 0 0 0 0
+S
+#1666
+@DS@Wh@wa@Dd@Wo@Dw @GF@gores@Gt@D: @yPeaceful Clearing Northwest@n~
+ @GThis clearing in the forest is made of of mostly grass.  The occasional bush
+can be found, but nothing larger than three feet.  The sky can be clearly seen
+with plenty of light warming the entire clearing.  The sounds of the forest echo
+clearly through here as well, nolonger distorted by the trees like on the paths
+of the forest.  @n
+~
+16 ehu 0 0 0 2
+D1
+~
+~
+0 0 1663 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1665 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1662 0 0 0 0 0 0 0 0
+S
+#1667
+@gLumberjack's @yCabin@n~
+ @yThis cozy cabin is made entirely of wood logs, cut and fit together
+perfectly.  Electric lights have been built into the ceiling, providing modern
+illumination to an otherwise archaic structure.  A large fireplace built out of
+stone masonry sits at the south end of the room, with a fire burning brightly in
+it.  @n
+~
+16 cu 0 0 0 0
+D0
+~
+~
+0 0 1656 0 0 0 0 0 0 0 0
+S
+#1668
+@rHunter's @ycabin@n~
+ @yThis small wooden cabin has animal pelts of all kinds decorating its
+surfaces.  A strong brick fireplace is built at the north wall with several
+large game heads hanging above it.  A small window with wooden shutters makes up
+the only ventilation of the room.  However besides the fireplace electric
+lights have been built into the ceiling providing more than natural
+illumination.  @n
+~
+16 cu 0 0 0 0
+D2
+~
+~
+0 0 1654 0 0 0 0 0 0 0 0
+S
+#1669
+@DD@re@Rc@Dr@re@Rp@Di@rt @yCabin@n~
+ @DThis dark cabin looks as if it has been abandoned for years.  @GShelves@D cover
+the south wall, filled with broken pottery and jars that seem to have once
+contained herbs and flora found only in the forest.  A broken brick fireplace is
+built into the east wall, with signs of firewood decades old still inside.  @n
+~
+16 cu 0 0 0 0
+D3
+~
+~
+0 0 1621 0 0 0 0 0 0 0 0
+E
+shelves~
+@WThe shelves are mostly covered in old tools, jars, and plant pots all of which are ruined by time. There does however seem to be new looking herb knife sitting on the bottom most shelf. Maybe someone could @Ggrab@W it.@n
+~
+S
+T 1605
+#1670
+@yD@Di@Wr@wt @WDriveway@n~
+   @WA thin lane of dirt makes up what is apparently a driveway of some sort. 
+Ruts where tires have driven continually go down boths sides of the narrow
+lane. To the southeast a small farmhouse can be seen, and a good ways to the
+south a large field can be seen fenced in. @n
+
+A broken, twisted, and dirty @Gsign@n has been built up over the driveway.
+~
+16 cu 0 0 0 3
+D0
+~
+~
+0 0 1607 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1671 0 0 0 0 0 0 0 0
+E
+sign~
+                   @RVaus Farm@n
+~
+S
+#1671
+@yD@Di@Wr@wt @WDriveway@n~
+ @WA thin lane of dirt makes up what is apparently a driveway of some sort.  
+Ruts where tires have driven continually go down both sides of the narrow lane.
+To the east a small farmhouse can be seen, and a good ways to the south a
+large field can be seen fenced in.  @n
+~
+16 u 0 0 0 3
+D0
+~
+~
+0 0 1670 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1673 0 0 0 0 0 0 0 0
+D10
+~
+~
+0 0 1672 0 0 0 0 0 0 0 0
+S
+#1672
+@wSmall @yFarmhouse@n~
+ @WThis is inside of the small farmhouse of Vaus Farm.  It appears the farmer
+both sleeps and eats in this one room.  A partial kitchen has been built not far
+from a small living area.  A bathroom the size of a medium closet can be seen in
+the northeast area of the house.  @n
+~
+16 u 0 0 0 0
+D11
+~
+~
+0 0 1671 0 0 0 0 0 0 0 0
+S
+#1673
+@yD@Di@Wr@wt @WDriveway@n~
+ @WA thin lane of dirt makes up what is apparently a driveway of some sort.  
+Ruts where tires have driven continually go down boths sides of the narrow lane.
+To the northeast a small farmhouse can be seen, and near to the south a large
+field can be seen fenced in.  @n
+~
+16 u 0 0 0 2
+D0
+~
+~
+0 0 1671 0 0 0 0 0 0 0 0
+D2
+~
+gate~
+1 0 1676 20 0 0 0 0 0 0 0
+S
+#1674
+@WRow of @gT@Gu@Wr@wnips@n~
+ @GThe green leaves of turnips planted in a straight north to south row can be
+seen poking up above the soft field dirt here.  The turnips look well cared for
+and relativly pest free.  @n
+~
+16 u 0 0 0 2
+D1
+~
+~
+0 0 1675 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1679 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1680 0 0 0 0 0 0 0 0
+S
+T 1612
+#1675
+@WInbetween the Rows@n~
+ @yThis dark dirt is found between the rows of turnips allowing a path for
+anyone working the field to move without disturbing the plants.  Many foot
+prints can be found through this area, mostly footprints appearing to belong to
+thick boots.  @n @yTo the north of here a tall turnip silo can be seen with its
+shiny metal sides glinting with whatever light is available.  @n
+~
+16 u 0 0 0 2
+D1
+~
+~
+0 0 1676 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1680 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1674 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1681 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1679 0 0 0 0 0 0 0 0
+D10
+~
+hatch~
+1 0 1699 20 0 0 0 0 0 0 0
+S
+#1676
+@WRow of @gT@Gu@Wr@wnips@n~
+ @GThe green leaves of turnips planted in a straight north to south row can be
+seen poking up above the soft field dirt here.  The turnips look well cared for
+and relativly pest free.  @n
+~
+16 u 0 0 0 2
+D0
+~
+gate~
+1 0 1673 20 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1677 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1681 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1675 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1682 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1680 0 0 0 0 0 0 0 0
+S
+T 1612
+#1677
+@WInbetween the Rows@n~
+ @yThis dark dirt is found between the rows of turnips allowing a path for
+anyone working the field to move without disturbing the plants.  Many foot
+prints can be found through this area, mostly footprints appearing to belong to
+thick boots.  @n
+~
+16 u 0 0 0 2
+D1
+~
+~
+0 0 1678 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1682 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1676 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1683 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1681 0 0 0 0 0 0 0 0
+S
+#1678
+@WRow of @gT@Gu@Wr@wnips@n~
+ @GThe green leaves of turnips planted in a straight north to south row can be
+seen poking up above the soft field dirt here.  The turnips look well cared for
+and relativly pest free.  @n
+~
+16 u 0 0 0 2
+D2
+~
+~
+0 0 1683 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1677 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1682 0 0 0 0 0 0 0 0
+S
+T 1612
+#1679
+@WRow of @gT@Gu@Wr@wnips@n~
+ @GThe green leaves of turnips planted in a straight north to south row can be
+seen poking up above the soft field dirt here.  The turnips look well cared for
+and relativly pest free.  @n
+~
+16 u 0 0 0 2
+D0
+~
+~
+0 0 1674 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1680 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1684 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1675 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1685 0 0 0 0 0 0 0 0
+S
+T 1612
+#1680
+@WInbetween the Rows@n~
+ @yThis dark dirt is found between the rows of turnips allowing a path for
+anyone working the field to move without disturbing the plants.  Many foot
+prints can be found through this area, mostly footprints appearing to belong to
+thick boots.  @n
+~
+16 u 0 0 0 2
+D0
+~
+~
+0 0 1675 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1681 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1685 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1679 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1674 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1676 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1686 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1684 0 0 0 0 0 0 0 0
+S
+#1681
+@WRow of @gT@Gu@Wr@wnips@n~
+ @GThe green leaves of turnips planted in a straight north to south row can be
+seen poking up above the soft field dirt here.  The turnips look well cared for
+and relativly pest free.  @n
+~
+16 u 0 0 0 2
+D0
+~
+~
+0 0 1676 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1682 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1686 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1680 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1675 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1677 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1687 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1685 0 0 0 0 0 0 0 0
+S
+T 1612
+#1682
+@WInbetween the Rows@n~
+ @yThis dark dirt is found between the rows of turnips allowing a path for
+anyone working the field to move without disturbing the plants.  Many foot
+prints can be found through this area, mostly footprints appearing to belong to
+thick boots.  @n
+~
+16 u 0 0 0 2
+D0
+~
+~
+0 0 1677 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1683 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1687 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1681 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1676 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1678 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1688 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1686 0 0 0 0 0 0 0 0
+S
+#1683
+@WRow of @gT@Gu@Wr@wnips@n~
+ @GThe green leaves of turnips planted in a straight north to south row can be
+seen poking up above the soft field dirt here.  The turnips look well cared for
+and relativly pest free.  @n
+~
+16 u 0 0 0 2
+D0
+~
+~
+0 0 1678 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1688 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1682 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1677 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1687 0 0 0 0 0 0 0 0
+S
+T 1612
+#1684
+@WRow of @gT@Gu@Wr@wnips@n~
+ @GThe green leaves of turnips planted in a straight north to south row can be
+seen poking up above the soft field dirt here.  The turnips look well cared for
+and relativly pest free.  @n
+~
+16 u 0 0 0 2
+D0
+~
+~
+0 0 1679 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1685 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1689 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1680 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1690 0 0 0 0 0 0 0 0
+S
+T 1612
+#1685
+@WInbetween the Rows@n~
+ @yThis dark dirt is found between the rows of turnips allowing a path for
+anyone working the field to move without disturbing the plants.  Many foot
+prints can be found through this area, mostly footprints appearing to belong to
+thick boots.  @n
+~
+16 u 0 0 0 2
+D0
+~
+~
+0 0 1680 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1686 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1690 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1684 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1679 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1681 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1691 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1689 0 0 0 0 0 0 0 0
+S
+#1686
+@WRow of @gT@Gu@Wr@wnips@n~
+ @GThe green leaves of turnips planted in a straight north to south row can be
+seen poking up above the soft field dirt here.  The turnips look well cared for
+and relativly pest free.  @n
+~
+16 u 0 0 0 2
+D0
+~
+~
+0 0 1681 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1687 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1691 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1685 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1680 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1682 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1692 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1690 0 0 0 0 0 0 0 0
+S
+T 1612
+#1687
+@WInbetween the Rows@n~
+ @yThis dark dirt is found between the rows of turnips allowing a path for
+anyone working the field to move without disturbing the plants.  Many foot
+prints can be found through this area, mostly footprints appearing to belong to
+thick boots.  @n
+~
+16 u 0 0 0 2
+D0
+~
+~
+0 0 1682 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1688 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1692 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1686 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1681 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1683 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1693 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1691 0 0 0 0 0 0 0 0
+S
+#1688
+@WRow of @gT@Gu@Wr@wnips@n~
+ @GThe green leaves of turnips planted in a straight north to south row can be
+seen poking up above the soft field dirt here.  The turnips look well cared for
+and relativly pest free.  @n
+~
+16 u 0 0 0 2
+D0
+~
+~
+0 0 1683 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1693 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1687 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1682 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1692 0 0 0 0 0 0 0 0
+S
+T 1612
+#1689
+@WRow of @gT@Gu@Wr@wnips@n~
+ @GThe green leaves of turnips planted in a straight north to south row can be
+seen poking up above the soft field dirt here.  The turnips look well cared for
+and relativly pest free.  @n
+~
+16 u 0 0 0 2
+D0
+~
+~
+0 0 1684 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1690 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1694 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1685 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1695 0 0 0 0 0 0 0 0
+S
+T 1612
+#1690
+@WInbetween the Rows@n~
+ @yThis dark dirt is found between the rows of turnips allowing a path for
+anyone working the field to move without disturbing the plants.  Many foot
+prints can be found through this area, mostly footprints appearing to belong to
+thick boots.  @n
+~
+16 u 0 0 0 2
+D0
+~
+~
+0 0 1685 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1691 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1695 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1689 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1684 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1686 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1696 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1694 0 0 0 0 0 0 0 0
+S
+#1691
+@WRow of @gT@Gu@Wr@wnips@n~
+ @GThe green leaves of turnips planted in a straight north to south row can be
+seen poking up above the soft field dirt here.  The turnips look well cared for
+and relativly pest free.  @n
+~
+16 u 0 0 0 2
+D0
+~
+~
+0 0 1686 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1692 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1696 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1690 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1685 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1687 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1697 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1695 0 0 0 0 0 0 0 0
+S
+T 1612
+#1692
+@WInbetween the Rows@n~
+ @yThis dark dirt is found between the rows of turnips allowing a path for
+anyone working the field to move without disturbing the plants.  Many foot
+prints can be found through this area, mostly footprints appearing to belong to
+thick boots.  @n
+~
+16 u 0 0 0 2
+D0
+~
+~
+0 0 1687 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1693 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1697 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1691 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1686 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1688 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1698 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1696 0 0 0 0 0 0 0 0
+S
+#1693
+@WRow of @gT@Gu@Wr@wnips@n~
+ @GThe green leaves of turnips planted in a straight north to south row can be
+seen poking up above the soft field dirt here.  The turnips look well cared for
+and relativly pest free.  @n
+~
+16 u 0 0 0 2
+D0
+~
+~
+0 0 1688 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1698 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1692 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1687 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1697 0 0 0 0 0 0 0 0
+S
+T 1612
+#1694
+@WRow of @gT@Gu@Wr@wnips@n~
+ @GThe green leaves of turnips planted in a straight north to south row can be
+seen poking up above the soft field dirt here.  The turnips look well cared for
+and relativly pest free.  @n
+~
+16 u 0 0 0 2
+D0
+~
+~
+0 0 1689 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1695 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1690 0 0 0 0 0 0 0 0
+S
+T 1612
+#1695
+@WInbetween the Rows@n~
+ @yThis dark dirt is found between the rows of turnips allowing a path for
+anyone working the field to move without disturbing the plants.  Many foot
+prints can be found through this area, mostly footprints appearing to belong to
+thick boots.  @n
+~
+16 u 0 0 0 2
+D0
+~
+~
+0 0 1690 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1696 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1694 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1689 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1691 0 0 0 0 0 0 0 0
+S
+#1696
+@WRow of @gT@Gu@Wr@wnips@n~
+ @GThe green leaves of turnips planted in a straight north to south row can be
+seen poking up above the soft field dirt here.  The turnips look well cared for
+and relativly pest free.  @n
+~
+16 u 0 0 0 2
+D0
+~
+~
+0 0 1691 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1697 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1695 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1690 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1692 0 0 0 0 0 0 0 0
+S
+T 1612
+#1697
+@WInbetween the Rows@n~
+ @yThis dark dirt is found between the rows of turnips allowing a path for
+anyone working the field to move without disturbing the plants.  Many foot
+prints can be found through this area, mostly footprints appearing to belong to
+thick boots.  @n
+~
+16 u 0 0 0 2
+D0
+~
+~
+0 0 1692 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1698 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1696 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1691 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1693 0 0 0 0 0 0 0 0
+S
+#1698
+@WRow of @gT@Gu@Wr@wnips@n~
+ @GThe green leaves of turnips planted in a straight north to south row can be
+seen poking up above the soft field dirt here.  The turnips look well cared for
+and relativly pest free.  @n
+~
+16 du 0 0 0 2
+D0
+~
+~
+0 0 1693 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1697 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1692 0 0 0 0 0 0 0 0
+S
+T 1612
+#1699
+@gT@Gu@Wr@wnip @WS@Di@Wl@wo@n~
+ @WThis is a silo dedicated to containing the turnips that have been harvested.
+There is a very small space to stand in when the silo is nearly empty or empty.  When
+it is full anyone standing in here would be on the turnips themselves.  @n
+~
+16 u 0 0 0 0
+D11
+~
+hatch~
+1 0 1675 20 0 0 0 0 0 0 0
+S
+T 1613
+$~

@@ -1,0 +1,505 @@
+#8000
+Ordinator~
+@YO@yr@Dd@Yi@yn@Ya@Dt@yo@Yr@n~
+An Ordinator is patrolling here.
+~
+@D   @n
+~
+d 0 0 0 l 0 0 0 5 E
+20 20 10 0d6+0 0d0+0
+0 0 3 2
+8 8 1
+Str: 15
+Dex: 12
+Int: 15
+Wis: 15
+Con: 12
+Cha: 12
+E
+#8001
+Ordinator~
+@YO@yr@Dd@Yi@yn@Ya@Dt@yo@Yr@n~
+An Ordinator stands guard here.
+~
+@D   @n
+~
+d 0 0 0 l 0 0 0 5 E
+20 20 10 0d6+0 0d0+0
+0 0 3 2
+8 8 2
+Str: 15
+Dex: 12
+Int: 15
+Wis: 15
+Con: 12
+Cha: 12
+E
+#8002
+Grand Ordinator~
+@CG@wr@ca@wn@Cd @YO@yr@Dd@Yi@yn@Ya@Dt@yo@Yr@n~
+A grand ordinator is keeping an eye out for trouble here.
+~
+@D   @n
+~
+d 0 0 0 l 0 0 0 0 E
+30 20 10 0d8+0 0d0+0
+0 0 3 7
+8 8 1
+Str: 13
+Dex: 14
+Int: 13
+Wis: 13
+Con: 14
+Cha: 14
+E
+#8003
+Grand Ordinator~
+@CG@wr@ca@wn@Cd @YO@yr@Dd@Yi@yn@Ya@Dt@yo@Yr@n~
+Patrolling the area here, is a Grand Ordinator.
+~
+@D   @n
+~
+d 0 0 0 l 0 0 0 0 E
+30 20 10 0d8+0 0d0+0
+0 0 3 7
+8 8 2
+Str: 13
+Dex: 14
+Int: 13
+Wis: 13
+Con: 14
+Cha: 14
+E
+#8004
+Commoner~
+@WCommoner@n~
+A commoner is here sweeping the ground.
+~
+@D   @n
+~
+d 0 0 0 l 0 0 0 5 E
+1 20 10 0d8+0 0d0+0
+0 0 3 7
+8 8 1
+Str: 10
+Dex: 14
+Int: 10
+Wis: 10
+Con: 14
+Cha: 14
+E
+#8005
+Commoner~
+@WCommoner@n~
+A commoner skips along here.
+~
+@D   @n
+~
+d 0 0 0 l 0 0 0 5 E
+1 20 10 0d8+0 0d0+0
+0 0 3 7
+8 8 2
+Str: 10
+Dex: 14
+Int: 10
+Wis: 10
+Con: 14
+Cha: 14
+E
+#8006
+Child~
+@cC@Yh@Ci@Yl@cd@n~
+A child is running around here, playing tag.
+~
+@D   @n
+~
+d 0 0 0 l 0 0 0 5 E
+1 20 10 0d4+0 0d0+0
+0 0 3 6
+8 8 1
+Str: 16
+Dex: 8
+Int: 16
+Wis: 16
+Con: 8
+Cha: 8
+E
+#8007
+Child~
+@cC@Yh@Ci@Yl@cd@n~
+A little konatsu child is playing hopscotch here.
+~
+@D    @n
+~
+d 0 0 0 l 0 0 0 5 E
+1 20 10 0d4+0 0d0+0
+0 0 3 6
+8 8 2
+Str: 16
+Dex: 8
+Int: 16
+Wis: 16
+Con: 8
+Cha: 8
+E
+#8008
+Preacher~
+@RP@rr@De@wac@Dh@re@Rr@n~
+A preacher is here, preaching to people in the streets.
+~
+@D   @n
+~
+d 0 0 0 l 0 0 0 0 E
+2 20 10 0d10+0 0d0+0
+0 0 3 3
+8 8 1
+Str: 13
+Dex: 11
+Int: 13
+Wis: 13
+Con: 11
+Cha: 11
+E
+#8009
+Monk~
+@WM@won@Wk@n~
+A monk is walking around in a state of bliss.
+~
+@D   @n
+~
+d 0 0 0 l 0 0 0 5 E
+2 20 10 0d10+0 0d0+0
+0 0 3 3
+8 8 1
+Str: 14
+Dex: 11
+Int: 14
+Wis: 14
+Con: 11
+Cha: 11
+E
+#8010
+Visitor~
+@DV@wis@Wi@wto@Dr@n~
+A visitor to Tiranoc is remarking about the architecture of the Great Oroist Temple.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 5 E
+2 20 10 0d8+0 0d0+0
+0 0 3 7
+8 8 1
+Str: 10
+Dex: 8
+Int: 10
+Wis: 10
+Con: 8
+Cha: 8
+E
+#8011
+Visitor~
+@DV@wis@Wi@wto@Dr@n~
+A visitor is taking in the sights and sounds of Tiranoc.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 5 E
+2 20 10 0d8+0 0d0+0
+0 0 3 7
+8 8 2
+Str: 10
+Dex: 8
+Int: 10
+Wis: 10
+Con: 8
+Cha: 8
+E
+#8012
+Indoril Retainer~
+@YI@Dn@Yd@yo@Yr@Di@Yl @DRetainer@n~
+A retainer of House Indoril is walking hurridly.
+~
+@D  @n
+~
+d 0 0 0 l 0 0 0 5 E
+3 20 10 0d8+0 0d0+0
+0 0 3 7
+8 8 1
+Str: 16
+Dex: 11
+Int: 16
+Wis: 16
+Con: 11
+Cha: 11
+E
+#8013
+Indoril Retainer~
+@YI@Dn@Yd@yo@Yr@Di@Yl @DRetainer@n~
+A retainer of House Indoril is here writing down some notes.
+~
+@D  @n
+~
+d 0 0 0 l 0 0 0 5 E
+3 20 10 0d8+0 0d0+0
+0 0 3 7
+8 8 2
+Str: 16
+Dex: 11
+Int: 16
+Wis: 16
+Con: 11
+Cha: 11
+E
+#8014
+Retainer~
+@RS@re@Rr@re@Rg@D-@cV@Ca@wn@Wm@wa @DRetainer@n~
+A retainer of House Sereg-Vanma is moving about in a hurry.
+~
+@D   @n
+~
+d 0 0 0 l 0 0 0 -5 E
+3 20 10 0d10+0 0d0+0
+0 0 0 3
+8 8 1
+Str: 9
+Dex: 14
+Int: 9
+Wis: 9
+Con: 14
+Cha: 14
+E
+#8015
+Retainer~
+@RS@re@Rr@re@Rg@D-@cV@Ca@wn@Wm@wa @DRetainer@n~
+A retainer of House Sereg-Vanma is looking absent minded.
+~
+@D   @n
+~
+d 0 0 0 l 0 0 0 -5 E
+3 20 10 0d10+0 0d0+0
+0 0 0 3
+8 8 2
+Str: 9
+Dex: 14
+Int: 9
+Wis: 9
+Con: 14
+Cha: 14
+E
+#8016
+Taesal Retainer~
+@bT@Ba@ce@Cs@Ba@Bl @DRetainer@n~
+A retainer of House Taesal is shoving his way past people to get somewhere.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 0 E
+3 20 10 0d8+0 0d0+0
+0 0 3 7
+8 8 1
+Str: 10
+Dex: 13
+Int: 10
+Wis: 10
+Con: 13
+Cha: 13
+E
+#8017
+Taesal Retainer~
+@bT@Ba@ce@Cs@Ba@Bl @DRetainer@n~
+A retainer of House Taesal is showing off her latest purchase.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 0 E
+3 20 10 0d8+0 0d0+0
+0 0 3 7
+8 8 2
+Str: 10
+Dex: 13
+Int: 10
+Wis: 10
+Con: 13
+Cha: 13
+E
+#8018
+Dres Retainer~
+@RD@yr@Ye@Rs @DRetainer@n~
+A retainer of House Dres is lugging some garden equipment here.
+~
+@D   @n
+~
+d 0 0 0 l 0 0 0 5 E
+3 20 10 0d8+0 0d0+0
+0 0 3 7
+8 8 1
+Str: 8
+Dex: 10
+Int: 8
+Wis: 8
+Con: 10
+Cha: 10
+E
+#8019
+Dres Retainer~
+@RD@yr@Ye@Rs @DRetainer@n~
+Showing off some fresh produce is a retainer from House Dres.
+~
+@D   @n
+~
+d 0 0 0 l 0 0 0 5 E
+3 20 10 0d8+0 0d0+0
+0 0 3 7
+8 8 2
+Str: 8
+Dex: 10
+Int: 8
+Wis: 8
+Con: 10
+Cha: 10
+E
+#8020
+Indoril Noble~
+@YI@Dn@Yd@yo@Yr@Di@Yl @DNoble@n~
+An noble of House Indoril is here, showing off an expensive looking blade.
+~
+@D  @n
+~
+d 0 0 0 l 0 0 0 5 E
+4 20 10 0d8+0 0d0+0
+0 0 3 7
+8 8 1
+Str: 8
+Dex: 14
+Int: 8
+Wis: 8
+Con: 14
+Cha: 14
+E
+#8021
+Indoril Noble~
+@YI@Dn@Yd@yo@Yr@Di@Yl @DNoble@n~
+An exquizitely dressed Indoril Noble is here.
+~
+@D  @n
+~
+d 0 0 0 l 0 0 0 5 E
+4 20 10 0d8+0 0d0+0
+0 0 3 7
+8 8 2
+Str: 8
+Dex: 14
+Int: 8
+Wis: 8
+Con: 14
+Cha: 14
+E
+#8022
+Noble~
+@RS@re@Rr@re@Rg@D-@cV@Ca@wn@Wm@wa @DNoble@n~
+A noble of Sereg-Vanma is tinkering with a fancy looking object.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 -5 E
+3 20 10 0d8+0 0d0+0
+0 0 3 7
+8 8 1
+Str: 12
+Dex: 16
+Int: 12
+Wis: 12
+Con: 16
+Cha: 16
+E
+#8023
+Noble~
+@RS@re@Rr@re@Rg@D-@cV@Ca@wn@Wm@wa @DNoble@n~
+A noble of Sereg-Vanma is tinkering with a fancy looking object.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 -5 E
+3 20 10 0d8+0 0d0+0
+0 0 3 7
+8 8 2
+Str: 12
+Dex: 16
+Int: 12
+Wis: 12
+Con: 16
+Cha: 16
+E
+#8024
+Taesal Noble~
+@BT@ba@ce@Cs@ba@Bl @DNoble@n~
+A noble of House Taesal is holding their nose up in snobby fashion.
+~
+@D  @n
+~
+d 0 0 0 l 0 0 0 5 E
+3 20 10 0d10+0 0d0+0
+0 0 3 3
+8 8 1
+Str: 9
+Dex: 15
+Int: 9
+Wis: 9
+Con: 15
+Cha: 15
+E
+#8025
+Taesal Noble~
+@BT@ba@ce@Cs@ba@Bl @DNoble@n~
+A noble of House Taesal is holding their nose up in snobby fashion.
+~
+@D  @n
+~
+d 0 0 0 l 0 0 0 5 E
+3 20 10 0d10+0 0d0+0
+0 0 3 3
+8 8 2
+Str: 9
+Dex: 15
+Int: 9
+Wis: 9
+Con: 15
+Cha: 15
+E
+#8026
+Dres Noble~
+@RD@yr@Ye@Rs @DNoble@n~
+A Dres noble is here, discussing his estate.
+~
+@D  @n
+~
+d 0 0 0 l 0 0 0 0 E
+3 20 10 0d8+0 0d0+0
+0 0 3 1
+8 8 1
+Str: 12
+Dex: 16
+Int: 12
+Wis: 12
+Con: 16
+Cha: 16
+E
+#8027
+Dres Noble~
+@RD@yr@Ye@Rs @DNoble@n~
+A noble of House Dres is discussing gardening techniques.
+~
+@D  @n
+~
+d 0 0 0 l 0 0 0 5 E
+3 20 10 0d8+0 0d0+0
+0 0 3 1
+8 8 2
+Str: 12
+Dex: 16
+Int: 12
+Wis: 12
+Con: 16
+Cha: 16
+E
+$

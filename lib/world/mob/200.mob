@@ -1,0 +1,59 @@
+#20000
+Grousnak~
+@wGrousnak@N~
+@wA @wgrousnak@w is floating here@N
+~
+   @WThis large serpentine creature is currently feasting on some free floating
+gases found in the nearby nebula. This creature is covered in silvery scales
+and a silvery aura surrounds the beast. Occasionally the grousnak opens its
+large maw and displays its gas collection valves. @n
+~
+dz 0 0 0 ily 0 0 0 0 E
+120 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Str: 71
+Dex: 86
+Int: 68
+Wis: 65
+Con: 80
+Cha: 81
+E
+#20001
+Space Amoeba~
+@cS@Cp@wa@Cc@ce @wA@Cm@coe@Cb@wa@n~
+@wThe @cS@Cp@wa@Cc@ce @wA@Cm@coe@Cb@wa@w is floating here@n
+~
+   @WIts a massive single celled organism that lives in space. @n
+~
+d 0 0 0 ly 0 0 0 0 E
+130 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Str: 85
+Dex: 72
+Int: 50
+Wis: 48
+Con: 99
+Cha: 72
+E
+#20099
+small wasp~
+Small @YW@ya@Ds@yp@n~
+A Small @YW@ya@Ds@yp@n flies here.
+~
+A Small @YW@ya@Ds@yp@n
+~
+dfikl 0 0 0 0 0 0 0 0 E
+1 0 10 0d6+0 0d0+0
+1 0 15 26
+7 8 2
+Size: 2
+Str: 12
+Dex: 12
+Int: 12
+Wis: 12
+Con: 12
+Cha: 12
+E
+$

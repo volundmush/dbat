@@ -1,0 +1,148 @@
+#1300
+Vulture~
+@wA @DV@Wu@wl@Dt@Wu@wre@n~
+@wA @Dv@Wu@wl@Dt@Wu@wre is standing here watching.@n
+~
+ @WThis large black bird symbolizes death to many as it is a carrion bird.  It
+eats the dead or dying because they are easy prey.  @n
+~
+dxyz 0 0 0 l 0 0 0 0 E
+8 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 4
+Str: 20
+Dex: 12
+Int: 6
+Wis: 5
+Con: 13
+Cha: 8
+E
+#1301
+Red Scorpion~
+@wA @RR@re@Rd @yS@Yc@Wo@wr@Wpi@Yo@yn@n~
+@wA @Rr@re@Rd @ys@Yc@Wo@wr@Wpi@Yo@yn @wis wandering here.@n
+~
+ @WThis large red scorpion appears to be quite aggressive.  It is about one foot
+in length with a tail twice that length.  The stinger on its tail measure two
+inches and curves upwards wickedly.  @n
+~
+dfvwxyz 0 0 0 l 0 0 0 0 E
+12 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 0
+Str: 8
+Dex: 15
+Int: 6
+Wis: 7
+Con: 20
+Cha: 20
+E
+#1302
+Sand Shrew~
+@wA @YS@yan@Yd @yShrew@n~
+@wA @Ys@yan@Yd @yshrew @wis scurrying here.@n
+~
+ @WThis small rodent appears to have a tough time surviving the harshness of the
+desert.  It has light brown fur that allows it to blend in with most of the
+sand, and a stubby tail preventing it from leaving trails.  @n
+~
+dxyz 0 0 0 l 0 0 0 0 E
+4 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 0
+Str: 13
+Dex: 15
+Int: 7
+Wis: 5
+Con: 18
+Cha: 11
+E
+#1303
+Sand Worm~
+@wA @YS@yan@Yd @GW@go@Yr@Gm@n~
+@wA @Ys@yan@Yd @Gw@go@Yr@Gm@w is burrowing here.@n
+~
+ @WThis large five foot worm has a large black beak at what appears to be its
+head.  Red ruby like stones seem to jut out from sections of its body, causing
+it to shimmer and sparkle as its sand colored body moves in the sand.  This
+gives the impression of fire sparks shimmering across the sand.  @n
+~
+dz 0 0 0 l 0 0 0 0 E
+18 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 0
+Size: 5
+Str: 17
+Dex: 18
+Int: 6
+Wis: 6
+Con: 17
+Cha: 17
+E
+#1304
+Giant Camel~
+@wA @DG@Wi@wa@Wn@Dt @yCamel@n~
+@wA @Dg@Wi@wa@Wn@Dt @ycamel@w is standing here.@n
+~
+ @WThis camel is as large as an elephant.  It is apparently a rare breed that
+only exists in this desert.  Because of its size it lacks hair, having rough
+brown skin that resists the heat of the day.  @n
+~
+dxyz 0 0 0 l 0 0 0 0 E
+20 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 0
+Size: 6
+Str: 19
+Dex: 18
+Int: 7
+Wis: 6
+Con: 16
+Cha: 12
+E
+#1305
+Yamcha~
+@YY@yamch@Ya@n~
+@YY@yamch@Ya@w is exercising here.@n
+~
+ @WThis young man has long black hair, black eyes, and a scar over his right eye
+and two scars on his left cheek forming an x.  He is wearing an orange gi with
+the Kame School symbol on its back.  @n
+~
+bdsA 0 0 0 0 0 0 0 0 E
+31 0 10 0d4+0 0d0+0
+0 0 0 0
+8 8 1
+Str: 26
+Dex: 23
+Int: 25
+Wis: 29
+Con: 26
+Cha: 30
+E
+T 1300
+T 1302
+T 1303
+#1306
+Puar~
+@BP@bua@Br@n~
+@BP@bua@Br @wis floating here, smiling.@n
+~
+ @WThis flying cat appears to be completely devoted to Yamcha and is rarely seen
+without him nearby.  @n
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+2 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 0
+Size: 3
+Str: 11
+Dex: 14
+Int: 5
+Wis: 7
+Con: 16
+Cha: 5
+E
+T 1301
+$

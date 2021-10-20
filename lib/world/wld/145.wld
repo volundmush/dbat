@@ -1,0 +1,1698 @@
+#14500
+@rG@Re@Dr@Wo@D'@ns @rL@Ra@Wb@w: @DBio Android Labs@n~
+ @WThis wide open concrete area has steel tables bolted to the floor in
+different areas.  Surgical and medical diagnosis equipment can be seen built
+next to each table, allowing for work on many different bio-android specimens at
+a time.  @n
+~
+145 z 0 0 0 0
+D3
+~
+~
+0 0 13999 0 0 0 0 0 0 0 0
+S
+#14501
+@rG@Re@Dr@Wo@D'@ns @rL@Ra@Wb@w: @DBio Android Labs@n~
+ @WThis wide open concrete area has steel tables bolted to the floor in
+different areas.  Surgical and medical diagnosis equipment can be seen built
+next to each table, allowing for work on many different bio-android specimens at
+a time.  @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 13998 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14502 0 0 0 0 0 0 0 0
+S
+#14502
+@rG@Re@Dr@Wo@D'@ns @rL@Ra@Wb@w: @DBio Android Labs@n~
+ @WThis wide open concrete area has steel tables bolted to the floor in
+different areas.  Surgical and medical diagnosis equipment can be seen built
+next to each table, allowing for work on many different bio-android specimens at
+a time.  @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14501 0 0 0 0 0 0 0 0
+S
+#14503
+@rG@Re@Dr@Wo@D'@ns @rL@Ra@Wb@w: @DBio Android Labs@n~
+ @WThis wide open concrete area has steel tables bolted to the floor in
+different areas.  Surgical and medical diagnosis equipment can be seen built
+next to each table, allowing for work on many different bio-android specimens at
+a time.  @n
+
+@WThere is a sign here.@n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14504 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14508 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14506 0 0 0 0 0 0 0 0
+E
+look sign~
+To leave the training simulation, say leave in this room.
+~
+S
+T 13519
+#14504
+@rG@Re@Dr@Wo@D'@ns @rL@Ra@Wb@w: @DBio Android Labs@n~
+ @WThis wide open concrete area has steel tables bolted to the floor in
+different areas.  Surgical and medical diagnosis equipment can be seen built
+next to each table, allowing for work on many different bio-android specimens at
+a time.  @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14505 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14503 0 0 0 0 0 0 0 0
+S
+#14505
+@rG@Re@Dr@Wo@D'@ns @rL@Ra@Wb@w: @DBio Android Labs@n~
+ @WThis wide open concrete area has steel tables bolted to the floor in
+different areas.  Surgical and medical diagnosis equipment can be seen built
+next to each table, allowing for work on many different bio-android specimens at
+a time.  @n
+~
+145 z 0 0 0 0
+D3
+~
+~
+0 0 14504 0 0 0 0 0 0 0 0
+S
+#14506
+@rG@Re@Dr@Wo@D'@ns @rL@Ra@Wb@w: @DBio Android Labs@n~
+ @WThis wide open concrete area has steel tables bolted to the floor in
+different areas.  Surgical and medical diagnosis equipment can be seen built
+next to each table, allowing for work on many different bio-android specimens at
+a time.  @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14503 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14507 0 0 0 0 0 0 0 0
+S
+#14507
+@rG@Re@Dr@Wo@D'@ns @rL@Ra@Wb@w: @DBio Android Labs@n~
+ @WThis wide open concrete area has steel tables bolted to the floor in
+different areas.  Surgical and medical diagnosis equipment can be seen built
+next to each table, allowing for work on many different bio-android specimens at
+a time.  @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14506 0 0 0 0 0 0 0 0
+S
+#14508
+@rG@Re@Dr@Wo@D'@ns @rL@Ra@Wb@w: @DBio Android Labs@n~
+ @WThis wide open concrete area has steel tables bolted to the floor in
+different areas.  Surgical and medical diagnosis equipment can be seen built
+next to each table, allowing for work on many different bio-android specimens at
+a time.  @n
+~
+145 z 0 0 0 0
+D0
+~
+~
+0 0 14503 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14509 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14513 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14511 0 0 0 0 0 0 0 0
+S
+#14509
+@rG@Re@Dr@Wo@D'@ns @rL@Ra@Wb@w: @DBio Android Labs@n~
+ @WThis wide open concrete area has steel tables bolted to the floor in
+different areas.  Surgical and medical diagnosis equipment can be seen built
+next to each table, allowing for work on many different bio-android specimens at
+a time.  @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14510 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14508 0 0 0 0 0 0 0 0
+S
+#14510
+@rG@Re@Dr@Wo@D'@ns @rL@Ra@Wb@w: @DBio Android Labs@n~
+ @WThis wide open concrete area has steel tables bolted to the floor in
+different areas.  Surgical and medical diagnosis equipment can be seen built
+next to each table, allowing for work on many different bio-android specimens at
+a time.  @n
+~
+145 z 0 0 0 0
+D3
+~
+~
+0 0 14509 0 0 0 0 0 0 0 0
+S
+#14511
+@rG@Re@Dr@Wo@D'@ns @rL@Ra@Wb@w: @DBio Android Labs@n~
+ @WThis wide open concrete area has steel tables bolted to the floor in
+different areas.  Surgical and medical diagnosis equipment can be seen built
+next to each table, allowing for work on many different bio-android specimens at
+a time.  @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14508 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14512 0 0 0 0 0 0 0 0
+S
+#14512
+@rG@Re@Dr@Wo@D'@ns @rL@Ra@Wb@w: @DBio Android Labs@n~
+ @WThis wide open concrete area has steel tables bolted to the floor in
+different areas.  Surgical and medical diagnosis equipment can be seen built
+next to each table, allowing for work on many different bio-android specimens at
+a time.  @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14511 0 0 0 0 0 0 0 0
+S
+#14513
+@rG@Re@Dr@Wo@D'@ns @rL@Ra@Wb@w: @DBio Android Labs@n~
+ @WThis wide open concrete area has steel tables bolted to the floor in
+different areas.  Surgical and medical diagnosis equipment can be seen built
+next to each table, allowing for work on many different bio-android specimens at
+a time.  @n
+~
+145 z 0 0 0 0
+D0
+~
+~
+0 0 14508 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14514 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14516 0 0 0 0 0 0 0 0
+S
+#14514
+@rG@Re@Dr@Wo@D'@ns @rL@Ra@Wb@w: @DBio Android Labs@n~
+ @WThis wide open concrete area has steel tables bolted to the floor in
+different areas.  Surgical and medical diagnosis equipment can be seen built
+next to each table, allowing for work on many different bio-android specimens at
+a time.  @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14515 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14513 0 0 0 0 0 0 0 0
+S
+#14515
+@rG@Re@Dr@Wo@D'@ns @rL@Ra@Wb@w: @DBio Android Labs@n~
+ @WThis wide open concrete area has steel tables bolted to the floor in
+different areas.  Surgical and medical diagnosis equipment can be seen built
+next to each table, allowing for work on many different bio-android specimens at
+a time.  @n
+~
+145 z 0 0 0 0
+D3
+~
+~
+0 0 14514 0 0 0 0 0 0 0 0
+S
+#14516
+@rG@Re@Dr@Wo@D'@ns @rL@Ra@Wb@w: @DBio Android Labs@n~
+ @WThis wide open concrete area has steel tables bolted to the floor in
+different areas.  Surgical and medical diagnosis equipment can be seen built
+next to each table, allowing for work on many different bio-android specimens at
+a time.  @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14513 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14517 0 0 0 0 0 0 0 0
+S
+#14517
+@rG@Re@Dr@Wo@D'@ns @rL@Ra@Wb@w: @DBio Android Labs@n~
+ @WThis wide open concrete area has steel tables bolted to the floor in
+different areas.  Surgical and medical diagnosis equipment can be seen built
+next to each table, allowing for work on many different bio-android specimens at
+a time.  @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14516 0 0 0 0 0 0 0 0
+S
+#14518
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+
+@MThere is a sign here.@n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14519 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14523 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14521 0 0 0 0 0 0 0 0
+E
+look sign~
+To leave the training simulation, say leave in this room.
+~
+S
+T 13521
+#14519
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14520 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14518 0 0 0 0 0 0 0 0
+S
+#14520
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D3
+~
+~
+0 0 14519 0 0 0 0 0 0 0 0
+S
+#14521
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14518 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14522 0 0 0 0 0 0 0 0
+S
+#14522
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14521 0 0 0 0 0 0 0 0
+S
+#14523
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D0
+~
+~
+0 0 14518 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14524 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14528 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14526 0 0 0 0 0 0 0 0
+S
+#14524
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14525 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14523 0 0 0 0 0 0 0 0
+S
+#14525
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D3
+~
+~
+0 0 14524 0 0 0 0 0 0 0 0
+S
+#14526
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14523 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14527 0 0 0 0 0 0 0 0
+S
+#14527
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14526 0 0 0 0 0 0 0 0
+S
+#14528
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D0
+~
+~
+0 0 14523 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14529 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14531 0 0 0 0 0 0 0 0
+S
+#14529
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14530 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14528 0 0 0 0 0 0 0 0
+S
+#14530
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D3
+~
+~
+0 0 14529 0 0 0 0 0 0 0 0
+S
+#14531
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14528 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14532 0 0 0 0 0 0 0 0
+S
+#14532
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14531 0 0 0 0 0 0 0 0
+S
+#14533
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+
+@MThere is a sign here.@n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14534 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14538 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14536 0 0 0 0 0 0 0 0
+E
+look sign~
+To leave the training simulation, say leave in this room.
+~
+S
+T 13521
+#14534
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14535 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14533 0 0 0 0 0 0 0 0
+S
+#14535
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D3
+~
+~
+0 0 14534 0 0 0 0 0 0 0 0
+S
+#14536
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14533 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14537 0 0 0 0 0 0 0 0
+S
+#14537
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14536 0 0 0 0 0 0 0 0
+S
+#14538
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D0
+~
+~
+0 0 14533 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14539 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14543 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14541 0 0 0 0 0 0 0 0
+S
+#14539
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14540 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14538 0 0 0 0 0 0 0 0
+S
+#14540
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D3
+~
+~
+0 0 14539 0 0 0 0 0 0 0 0
+S
+#14541
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14538 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14542 0 0 0 0 0 0 0 0
+S
+#14542
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14541 0 0 0 0 0 0 0 0
+S
+#14543
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D0
+~
+~
+0 0 14538 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14544 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14546 0 0 0 0 0 0 0 0
+S
+#14544
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14545 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14543 0 0 0 0 0 0 0 0
+S
+#14545
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D3
+~
+~
+0 0 14544 0 0 0 0 0 0 0 0
+S
+#14546
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14543 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14547 0 0 0 0 0 0 0 0
+S
+#14547
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14546 0 0 0 0 0 0 0 0
+S
+#14548
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+
+@MThere is a sign here.@n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14549 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14553 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14551 0 0 0 0 0 0 0 0
+E
+look sign~
+To leave the training simulation, say leave in this room.
+~
+S
+T 13521
+#14549
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14550 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14548 0 0 0 0 0 0 0 0
+S
+#14550
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D3
+~
+~
+0 0 14549 0 0 0 0 0 0 0 0
+S
+#14551
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14548 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14552 0 0 0 0 0 0 0 0
+S
+#14552
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14551 0 0 0 0 0 0 0 0
+S
+#14553
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D0
+~
+~
+0 0 14548 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14554 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14558 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14556 0 0 0 0 0 0 0 0
+S
+#14554
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14555 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14553 0 0 0 0 0 0 0 0
+S
+#14555
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D3
+~
+~
+0 0 14554 0 0 0 0 0 0 0 0
+S
+#14556
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14553 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14557 0 0 0 0 0 0 0 0
+S
+#14557
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14556 0 0 0 0 0 0 0 0
+S
+#14558
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D0
+~
+~
+0 0 14553 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14559 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14561 0 0 0 0 0 0 0 0
+S
+#14559
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14560 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14558 0 0 0 0 0 0 0 0
+S
+#14560
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D3
+~
+~
+0 0 14559 0 0 0 0 0 0 0 0
+S
+#14561
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14558 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14562 0 0 0 0 0 0 0 0
+S
+#14562
+@RC@ra@Mn@rd@Ry @GL@ga@Wn@Gd@n~
+   @MThe ground here appears to be mixture of peppermint grass and chocolate. 
+Small craters dot the area, seemingly filled with blue jello while large
+lollipops of various shapes rise ten feet into the air. The smell of fresh
+caramel is carried on a gentle breeze here. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14561 0 0 0 0 0 0 0 0
+S
+#14563
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+
+@DThere is a sign here.@n
+~
+145 z 0 0 0 0
+D0
+~
+~
+0 0 14568 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14564 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14566 0 0 0 0 0 0 0 0
+E
+look sign~
+To leave the training simulation, say leave room in this room.
+~
+S
+T 13523
+#14564
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14565 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14563 0 0 0 0 0 0 0 0
+S
+#14565
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+145 z 0 0 0 0
+D3
+~
+~
+0 0 14564 0 0 0 0 0 0 0 0
+S
+#14566
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14563 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14567 0 0 0 0 0 0 0 0
+S
+#14567
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14566 0 0 0 0 0 0 0 0
+S
+#14568
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+145 z 0 0 0 0
+D0
+~
+~
+0 0 14573 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14569 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14563 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14571 0 0 0 0 0 0 0 0
+S
+#14569
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14570 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14568 0 0 0 0 0 0 0 0
+S
+#14570
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+145 z 0 0 0 0
+D3
+~
+~
+0 0 14569 0 0 0 0 0 0 0 0
+S
+#14571
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14568 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14572 0 0 0 0 0 0 0 0
+S
+#14572
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14571 0 0 0 0 0 0 0 0
+S
+#14573
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14574 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14568 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14576 0 0 0 0 0 0 0 0
+S
+#14574
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14575 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14573 0 0 0 0 0 0 0 0
+S
+#14575
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+145 z 0 0 0 0
+D3
+~
+~
+0 0 14574 0 0 0 0 0 0 0 0
+S
+#14576
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14573 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14577 0 0 0 0 0 0 0 0
+S
+#14577
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14576 0 0 0 0 0 0 0 0
+S
+#14578
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+
+@DThere is a sign here.@n
+~
+145 z 0 0 0 0
+D0
+~
+~
+0 0 14583 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14579 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14581 0 0 0 0 0 0 0 0
+E
+look sign~
+To leave the training simulation, say leave room in this room.
+~
+S
+T 13523
+#14579
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14580 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14578 0 0 0 0 0 0 0 0
+S
+#14580
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+145 z 0 0 0 0
+D3
+~
+~
+0 0 14579 0 0 0 0 0 0 0 0
+S
+#14581
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14578 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14582 0 0 0 0 0 0 0 0
+S
+#14582
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14581 0 0 0 0 0 0 0 0
+S
+#14583
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+145 z 0 0 0 0
+D0
+~
+~
+0 0 14588 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14584 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14578 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14586 0 0 0 0 0 0 0 0
+S
+#14584
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14585 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14583 0 0 0 0 0 0 0 0
+S
+#14585
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+145 z 0 0 0 0
+D3
+~
+~
+0 0 14584 0 0 0 0 0 0 0 0
+S
+#14586
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14583 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14587 0 0 0 0 0 0 0 0
+S
+#14587
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14586 0 0 0 0 0 0 0 0
+S
+#14588
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14589 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14583 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14591 0 0 0 0 0 0 0 0
+S
+#14589
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14590 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14588 0 0 0 0 0 0 0 0
+S
+#14590
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+145 z 0 0 0 0
+D3
+~
+~
+0 0 14589 0 0 0 0 0 0 0 0
+S
+#14591
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14588 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14592 0 0 0 0 0 0 0 0
+S
+#14592
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14591 0 0 0 0 0 0 0 0
+S
+#14593
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+
+@DThere is a sign here.@n
+~
+145 z 0 0 0 0
+D0
+~
+~
+0 0 14598 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14594 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14596 0 0 0 0 0 0 0 0
+E
+look sign~
+To leave the training simulation, say leave room in this room.
+~
+S
+T 13523
+#14594
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14595 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14593 0 0 0 0 0 0 0 0
+S
+#14595
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+145 z 0 0 0 0
+D3
+~
+~
+0 0 14594 0 0 0 0 0 0 0 0
+S
+#14596
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14593 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14597 0 0 0 0 0 0 0 0
+S
+#14597
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14596 0 0 0 0 0 0 0 0
+S
+#14598
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+145 z 0 0 0 0
+D0
+~
+~
+0 0 14603 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14599 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14593 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14601 0 0 0 0 0 0 0 0
+S
+#14599
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+145 z 0 0 0 0
+D1
+~
+~
+0 0 14600 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14598 0 0 0 0 0 0 0 0
+S
+$~

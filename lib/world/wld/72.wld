@@ -1,0 +1,1102 @@
+#7200
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cNexus@n~
+   @DThis dark room appears to be the central point of the catacombs. The walls
+are made of some sort of sandstone. Skeletons can be seen set in slots along
+the walls. Branching out from this point in four directions the rest of the
+catacombs can be seen dimly lit by distant torches. @n
+~
+72 fhA 0 0 0 0
+D0
+~
+~
+0 0 7234 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7223 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7212 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7201 0 0 0 0 0 0 0 0
+D4
+~
+slab~
+1 7200 7105 0 0 0 0 0 0 0 0
+S
+#7201
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorridor@n~
+   @DThis dark corridor has walls made out of sandstone. Barely lit torches hang
+from the walls at intervals illuminating the dead remains of bodies that have
+been left in slots built into the walls. @n
+~
+72 fhA 0 0 0 0
+D1
+~
+~
+0 0 7200 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7202 0 0 0 0 0 0 0 0
+S
+#7202
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorridor@n~
+   @DThis dark corridor has walls made out of sandstone. Barely lit torches hang
+from the walls at intervals illuminating the dead remains of bodies that have
+been left in slots built into the walls. @n
+~
+72 cfhA 0 0 0 0
+D1
+~
+~
+0 0 7201 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7204 0 0 0 0 0 0 0 0
+S
+#7203
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D2
+~
+~
+0 0 7204 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7208 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7207 0 0 0 0 0 0 0 0
+S
+#7204
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D0
+~
+~
+0 0 7203 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7202 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7205 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7207 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 7208 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7206 0 0 0 0 0 0 0 0
+S
+#7205
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D0
+~
+~
+0 0 7204 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7206 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 7207 0 0 0 0 0 0 0 0
+S
+#7206
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D0
+~
+~
+0 0 7207 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7205 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7211 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 7210 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 7204 0 0 0 0 0 0 0 0
+S
+#7207
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D0
+~
+~
+0 0 7208 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7204 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7206 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7210 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 7209 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 7203 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7205 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7211 0 0 0 0 0 0 0 0
+S
+#7208
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D1
+~
+~
+0 0 7203 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7207 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7209 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7204 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7210 0 0 0 0 0 0 0 0
+S
+#7209
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D1
+~
+~
+0 0 7208 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7210 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7207 0 0 0 0 0 0 0 0
+S
+#7210
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D0
+~
+~
+0 0 7209 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7207 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7211 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 7208 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7206 0 0 0 0 0 0 0 0
+S
+#7211
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D0
+~
+~
+0 0 7210 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7206 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 7207 0 0 0 0 0 0 0 0
+S
+#7212
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorridor@n~
+   @DThis dark corridor has walls made out of sandstone. Barely lit torches hang
+from the walls at intervals illuminating the dead remains of bodies that have
+been left in slots built into the walls. @n
+~
+72 fhA 0 0 0 0
+D0
+~
+~
+0 0 7200 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7213 0 0 0 0 0 0 0 0
+S
+#7213
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorridor@n~
+   @DThis dark corridor has walls made out of sandstone. Barely lit torches hang
+from the walls at intervals illuminating the dead remains of bodies that have
+been left in slots built into the walls. @n
+~
+72 cfhA 0 0 0 0
+D0
+~
+~
+0 0 7212 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7215 0 0 0 0 0 0 0 0
+S
+#7214
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D1
+~
+~
+0 0 7215 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7219 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7218 0 0 0 0 0 0 0 0
+S
+#7215
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D0
+~
+~
+0 0 7213 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7216 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7218 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7214 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7217 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7219 0 0 0 0 0 0 0 0
+S
+#7216
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D2
+~
+~
+0 0 7217 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7215 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7218 0 0 0 0 0 0 0 0
+S
+#7217
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D0
+~
+~
+0 0 7216 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7222 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7218 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 7215 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7221 0 0 0 0 0 0 0 0
+S
+#7218
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D0
+~
+~
+0 0 7215 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7217 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7221 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7219 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 7214 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 7216 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7222 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7220 0 0 0 0 0 0 0 0
+S
+#7219
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D0
+~
+~
+0 0 7214 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7218 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7220 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 7215 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7221 0 0 0 0 0 0 0 0
+S
+#7220
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D0
+~
+~
+0 0 7219 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7221 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 7218 0 0 0 0 0 0 0 0
+S
+#7221
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D0
+~
+~
+0 0 7218 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7222 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7220 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 7219 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 7217 0 0 0 0 0 0 0 0
+S
+#7222
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D0
+~
+~
+0 0 7217 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7221 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 7218 0 0 0 0 0 0 0 0
+S
+#7223
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorridor@n~
+   @DThis dark corridor has walls made out of sandstone. Barely lit torches hang
+from the walls at intervals illuminating the dead remains of bodies that have
+been left in slots built into the walls. @n
+~
+72 fhA 0 0 0 0
+D1
+~
+~
+0 0 7224 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7200 0 0 0 0 0 0 0 0
+S
+#7224
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorridor@n~
+   @DThis dark corridor has walls made out of sandstone. Barely lit torches hang
+from the walls at intervals illuminating the dead remains of bodies that have
+been left in slots built into the walls. @n
+~
+72 cfhA 0 0 0 0
+D1
+~
+~
+0 0 7226 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7223 0 0 0 0 0 0 0 0
+S
+#7225
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D0
+~
+~
+0 0 7226 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7230 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 7229 0 0 0 0 0 0 0 0
+S
+#7226
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D0
+~
+~
+0 0 7227 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7229 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7225 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7224 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 7228 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7230 0 0 0 0 0 0 0 0
+S
+#7227
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D1
+~
+~
+0 0 7228 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7226 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7229 0 0 0 0 0 0 0 0
+S
+#7228
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D1
+~
+~
+0 0 7233 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7229 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7227 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7232 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7226 0 0 0 0 0 0 0 0
+S
+#7229
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D0
+~
+~
+0 0 7228 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7232 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7230 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7226 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 7227 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 7233 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7231 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7225 0 0 0 0 0 0 0 0
+S
+#7230
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D0
+~
+~
+0 0 7229 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7231 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7225 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 7226 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 7232 0 0 0 0 0 0 0 0
+S
+#7231
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D0
+~
+~
+0 0 7232 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7230 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 7229 0 0 0 0 0 0 0 0
+S
+#7232
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D0
+~
+~
+0 0 7233 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7231 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7229 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 7228 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7230 0 0 0 0 0 0 0 0
+S
+#7233
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D2
+~
+~
+0 0 7232 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7228 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7229 0 0 0 0 0 0 0 0
+S
+#7234
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorridor@n~
+   @DThis dark corridor has walls made out of sandstone. Barely lit torches hang
+from the walls at intervals illuminating the dead remains of bodies that have
+been left in slots built into the walls. @n
+~
+72 fhA 0 0 0 0
+D0
+~
+~
+0 0 7235 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7200 0 0 0 0 0 0 0 0
+S
+#7235
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorridor@n~
+   @DThis dark corridor has walls made out of sandstone. Barely lit torches hang
+from the walls at intervals illuminating the dead remains of bodies that have
+been left in slots built into the walls. @n
+~
+72 cfhA 0 0 0 0
+D0
+~
+~
+0 0 7237 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7234 0 0 0 0 0 0 0 0
+S
+#7236
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D0
+~
+~
+0 0 7241 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7237 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 7240 0 0 0 0 0 0 0 0
+S
+#7237
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D0
+~
+~
+0 0 7240 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7236 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7235 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7238 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 7239 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 7241 0 0 0 0 0 0 0 0
+S
+#7238
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D0
+~
+~
+0 0 7239 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7237 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 7240 0 0 0 0 0 0 0 0
+S
+#7239
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D0
+~
+~
+0 0 7244 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7240 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7238 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 7243 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7237 0 0 0 0 0 0 0 0
+S
+#7240
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D0
+~
+~
+0 0 7243 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7241 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7237 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7239 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 7244 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 7242 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7236 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7238 0 0 0 0 0 0 0 0
+S
+#7241
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D0
+~
+~
+0 0 7242 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7236 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7240 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 7243 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7237 0 0 0 0 0 0 0 0
+S
+#7242
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D2
+~
+~
+0 0 7241 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7243 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7240 0 0 0 0 0 0 0 0
+S
+#7243
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D1
+~
+~
+0 0 7242 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7240 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7244 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7241 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 7239 0 0 0 0 0 0 0 0
+S
+#7244
+@mD@Ma@Wr@wk @DC@Wa@wt@Da@Wc@wo@Dm@Wb@D: @cCorpse Pit@n~
+   @DThis large room appears to be a massive burial site within the catacombs. 
+The floor is covered in holes with skeletons placed inside them. The holes are
+only deep enough for each skeleton to sit in them safely. @n
+~
+72 fhA 0 0 0 0
+D1
+~
+~
+0 0 7243 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7239 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 7240 0 0 0 0 0 0 0 0
+S
+$~

@@ -1,0 +1,65 @@
+#300
+Public Transport Trigger~
+0 j 100
+~
+if (%object.vnum% == 304)
+if (%self.room.vnum% == 408)
+  wait 1 sec
+  say You are already on earth.
+  give ticket %actor.name%
+else
+  wait 1 sec
+  say All aboard!
+  wait 1
+  mteleport %actor.name% 50
+  mload mob 301
+  mgoto 51
+  wait 1 sec
+  %send% %actor% The ship roars as you take your seat and begins its journey.
+  wait 2 sec
+  %send% %actor% Stars begin to fly by as the ship reaches full speed.
+  wait 3 sec
+  %send% %actor% Stars are flying by too fast to be seen as the ship continues on.
+  wait 2 sec
+  %send% %actor% The ship begins to shake as it settles down.
+  wait 1 sec
+  mteleport %actor% 408
+  %force% %actor% look
+  %send% %actor% You have arrived, and disembark.
+  %echoaround% %actor% %actor.name% disembarks from a ship.
+  mpurge self
+end
+elseif (%object.vnum% == 305)
+if (%self.room.vnum% == 4250)
+  wait 1 sec
+  say You are already on frigid.
+  give ticket %actor.name%
+else
+  wait 1 sec
+  say All aboard!
+  wait 1
+  mteleport %actor.name% 50
+  mload mob 301
+  mgoto 51
+  wait 1 sec
+  %send% %actor% The ship roars as you take your seat and begins its journey.
+  wait 2 sec
+  %send% %actor% Stars begin to fly by as the ship reaches full speed.
+  wait 3 sec
+  %send% %actor% Stars are flying by too fast to be seen as the ship continues on.
+  wait 2 sec
+  %send% %actor% The ship begins to shake as it settles down.
+  wait 1 sec
+  mteleport %actor% 4250
+  %force% %actor% look
+  %send% %actor% You have arrived, and disembark.
+  %echoaround% %actor% %actor.name% disembarks from a ship.
+  mpurge self
+end
+else
+wait 1 sec
+say What is this?
+give %object.name% %actor.name%
+end
+~
+$~

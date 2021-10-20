@@ -1,0 +1,1797 @@
+#6400
+@WThe Gates to @RH@re@yl@Ylf@yi@rr@Re@W City@n~
+   @rLarge black iron gates block the path that leads into and out of Hellfire
+City, the demonic city built inside the feared Hell Pit. The smell of sulfur
+hangs heavy in the air. @n
+~
+64 cdE 0 0 0 1
+D0
+~
+gate~
+1 0 6401 20 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6244 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6300 0 0 0 0 0 0 0 0
+S
+T 6406
+#6401
+@WThe Gates to @RH@re@yl@Ylf@yi@rr@Re@W City@n~
+   @rLarge black iron gates block the path that leads into and out of Hellfire
+city, the demonic city built inside the feared Hell Pit. The smell of sulfur
+hangs heavy in the air. A stairway leads downward to the first level of
+Hellfire City. @n
+~
+64 cdE 0 0 0 1
+D2
+~
+gate~
+1 0 6400 20 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 6402 0 0 0 0 0 0 0 0
+S
+T 6406
+#6402
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WLust@n~
+   @rThe first level of Hellfire City is Lust and it is here where mortals who
+have improperly lusted for the flesh of another often come to find themselves
+in this chaotic city. The ground is made up of packed red dirt, which is
+cracked in many places, allowing hot steam to flow through the cracks. The
+smell of sulfur hangs heavy in the air. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6403 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6600 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 6401 0 0 0 0 0 0 0 0
+S
+#6403
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WLust@n~
+   @rThe first level of Hellfire City is Lust and it is here where mortals who
+have improperly lusted for the flesh of another often come to find themselves
+in this chaotic city. The ground is made up of packed red dirt, which is
+cracked in many places, allowing hot steam to flow through the cracks. The
+smell of sulfur hangs heavy in the air. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6404 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6402 0 0 0 0 0 0 0 0
+S
+#6404
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WLust@n~
+   @rThe first level of Hellfire City is Lust and it is here where mortals who
+have improperly lusted for the flesh of another often come to find themselves
+in this chaotic city. The ground is made up of packed red dirt, which is
+cracked in many places, allowing hot steam to flow through the cracks. The
+smell of sulfur hangs heavy in the air. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6405 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6403 0 0 0 0 0 0 0 0
+S
+#6405
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WLust@n~
+   @rThe first level of Hellfire City is Lust and it is here where mortals who
+have improperly lusted for the flesh of another often come to find themselves
+in this chaotic city. The ground is made up of packed red dirt, which is
+cracked in many places, allowing hot steam to flow through the cracks. The
+smell of sulfur hangs heavy in the air. @n
+~
+64 E 0 0 0 1
+D0
+~
+~
+0 0 6601 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6406 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6404 0 0 0 0 0 0 0 0
+S
+#6406
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WLust@n~
+   @rThe first level of Hellfire City is Lust and it is here where mortals who
+have improperly lusted for the flesh of another often come to find themselves
+in this chaotic city. The ground is made up of packed red dirt, which is
+cracked in many places, allowing hot steam to flow through the cracks. The
+smell of sulfur hangs heavy in the air. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6407 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6405 0 0 0 0 0 0 0 0
+S
+#6407
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WLust@n~
+   @rThe first level of Hellfire City is Lust and it is here where mortals who
+have improperly lusted for the flesh of another often come to find themselves
+in this chaotic city. The ground is made up of packed red dirt, which is
+cracked in many places, allowing hot steam to flow through the cracks. The
+smell of sulfur hangs heavy in the air. @n
+~
+64 E 0 0 0 1
+D0
+~
+~
+0 0 6488 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6408 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6406 0 0 0 0 0 0 0 0
+S
+#6408
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WLust@n~
+   @rThe first level of Hellfire City is Lust and it is here where mortals who
+have improperly lusted for the flesh of another often come to find themselves
+in this chaotic city. The ground is made up of packed red dirt, which is
+cracked in many places, allowing hot steam to flow through the cracks. The
+smell of sulfur hangs heavy in the air. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6409 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6407 0 0 0 0 0 0 0 0
+S
+#6409
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WLust@n~
+   @rThe first level of Hellfire City is Lust and it is here where mortals who
+have improperly lusted for the flesh of another often come to find themselves
+in this chaotic city. The ground is made up of packed red dirt, which is
+cracked in many places, allowing hot steam to flow through the cracks. The
+smell of sulfur hangs heavy in the air. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6410 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6408 0 0 0 0 0 0 0 0
+S
+#6410
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WLust@n~
+   @rThe first level of Hellfire City is Lust and it is here where mortals who
+have improperly lusted for the flesh of another often come to find themselves
+in this chaotic city. The ground is made up of packed red dirt, which is
+cracked in many places, allowing hot steam to flow through the cracks. The
+smell of sulfur hangs heavy in the air. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6411 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6409 0 0 0 0 0 0 0 0
+S
+#6411
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WLust@n~
+   @rThe first level of Hellfire City is Lust and it is here where mortals who
+have improperly lusted for the flesh of another often come to find themselves
+in this chaotic city. The ground is made up of packed red dirt, which is
+cracked in many places, allowing hot steam to flow through the cracks. The
+smell of sulfur hangs heavy in the air. @n
+~
+64 E 0 0 0 1
+D3
+~
+~
+0 0 6410 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6412 0 0 0 0 0 0 0 0
+S
+#6412
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WStaircase@n~
+   @rThis staircase has been built out of hundreds and hundreds of various races'
+skulls and leads between the Lust and Gluttony levels of Hellfire City. The
+skulls seem to be held together via a magical means, as a glow emanates in
+between the spaces. The smell of sulfur is heavy in the air. @n
+~
+64 E 0 0 0 1
+D5
+~
+~
+0 0 6413 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6411 0 0 0 0 0 0 0 0
+S
+#6413
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WStaircase@n~
+   @rThis staircase has been built out of hundreds and hundreds of various races'
+skulls and leads between the Lust and Gluttony levels of Hellfire City. The
+skulls seem to be held together via a magical means, as a glow emanates in
+between the spaces. The smell of sulfur is heavy in the air. @n
+~
+64 E 0 0 0 1
+D4
+~
+~
+0 0 6412 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6414 0 0 0 0 0 0 0 0
+S
+#6414
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WGluttony@n~
+   @rThe second level of Hellfire City is Gluttony and it is here where mortals
+who have been overly gluttonous during their lives find themselves. The ground
+here appears to be made of up of various sorts of hard boiled lollies and is
+quite sticky. The smell of freshly baked doughnuts wafts through the air. @n
+~
+64 E 0 0 0 1
+D3
+~
+~
+0 0 6415 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6413 0 0 0 0 0 0 0 0
+S
+#6415
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WGluttony@n~
+   @rThe second level of Hellfire City is Gluttony and it is here where mortals
+who have been overly gluttonous during their lives find themselves. The ground
+here appears to be made of up of various sorts of hard boiled lollies and is
+quite sticky. The smell of freshly baked doughnuts wafts through the air. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6414 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6569 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6416 0 0 0 0 0 0 0 0
+S
+#6416
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WGluttony@n~
+   @rThe second level of Hellfire City is Gluttony and it is here where mortals
+who have been overly gluttonous during their lives find themselves. The ground
+here appears to be made of up of various sorts of hard boiled lollies and is
+quite sticky. The smell of freshly baked doughnuts wafts through the air. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6415 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6530 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6417 0 0 0 0 0 0 0 0
+S
+#6417
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WGluttony@n~
+   @rThe second level of Hellfire City is Gluttony and it is here where mortals
+who have been overly gluttonous during their lives find themselves. The ground
+here appears to be made of up of various sorts of hard boiled lollies and is
+quite sticky. The smell of freshly baked doughnuts wafts through the air. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6416 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6418 0 0 0 0 0 0 0 0
+S
+#6418
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WGluttony@n~
+   @rThe second level of Hellfire City is Gluttony and it is here where mortals
+who have been overly gluttonous during their lives find themselves. The ground
+here appears to be made of up of various sorts of hard boiled lollies and is
+quite sticky. The smell of freshly baked doughnuts wafts through the air. @n
+~
+64 E 0 0 0 1
+D0
+~
+~
+0 0 6495 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6417 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6419 0 0 0 0 0 0 0 0
+S
+#6419
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WGluttony@n~
+   @rThe second level of Hellfire City is Gluttony and it is here where mortals
+who have been overly gluttonous during their lives find themselves. The ground
+here appears to be made of up of various sorts of hard boiled lollies and is
+quite sticky. The smell of freshly baked doughnuts wafts through the air. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6418 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6420 0 0 0 0 0 0 0 0
+S
+#6420
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WGluttony@n~
+   @rThe second level of Hellfire City is Gluttony and it is here where mortals
+who have been overly gluttonous during their lives find themselves. The ground
+here appears to be made of up of various sorts of hard boiled lollies and is
+quite sticky. The smell of freshly baked doughnuts wafts through the air. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6419 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6421 0 0 0 0 0 0 0 0
+S
+#6421
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WGluttony@n~
+   @rThe second level of Hellfire City is Gluttony and it is here where mortals
+who have been overly gluttonous during their lives find themselves. The ground
+here appears to be made of up of various sorts of hard boiled lollies and is
+quite sticky. The smell of freshly baked doughnuts wafts through the air. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6420 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6553 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6422 0 0 0 0 0 0 0 0
+S
+#6422
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WGluttony@n~
+   @rThe second level of Hellfire City is Gluttony and it is here where mortals
+who have been overly gluttonous during their lives find themselves. The ground
+here appears to be made of up of various sorts of hard boiled lollies and is
+quite sticky. The smell of freshly baked doughnuts wafts through the air. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6421 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6423 0 0 0 0 0 0 0 0
+S
+#6423
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WGluttony@n~
+   @rThe second level of Hellfire City is Gluttony and it is here where mortals
+who have been overly gluttonous during their lives find themselves. The ground
+here appears to be made of up of various sorts of hard boiled lollies and is
+quite sticky. The smell of freshly baked doughnuts wafts through the air. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6422 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6424 0 0 0 0 0 0 0 0
+S
+#6424
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WStaircase@n~
+   @rThis staircase has been built out of hundreds and hundreds of various races'
+skulls and leads between the Greed and Sloth levels of Hellfire City. The
+skulls seem to be held together via a magical means, as a glow emanates in
+between the spaces. The smell of sulfur is heavy in the air. @n
+~
+64 E 0 0 0 1
+D5
+~
+~
+0 0 6425 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6423 0 0 0 0 0 0 0 0
+S
+#6425
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WStaircase@n~
+   @rThis staircase has been built out of hundreds and hundreds of various races'
+skulls and leads between the Greed and Sloth levels of Hellfire City. The
+skulls seem to be held together via a magical means, as a glow emanates in
+between the spaces. The smell of sulfur is heavy in the air. @n
+~
+64 E 0 0 0 1
+D4
+~
+~
+0 0 6424 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6426 0 0 0 0 0 0 0 0
+S
+#6426
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WGreed@n~
+   @rThis is the Third Level of Hellfire City, Greed. The souls of mortals who
+hoarded treasure and showed no empathy to those who were worse off during their
+lifetime often end up here. The ground is made of packed red dirt that is
+cracked in places, allowing to steam to rise up. Occassionally in places there
+are valuable gems found in the dirt and there is zenni flying around in the
+air. The smell of sulfur is quite strong here. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6427 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6425 0 0 0 0 0 0 0 0
+S
+#6427
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WGreed@n~
+   @rThis is the Third Level of Hellfire City, Greed. The souls of mortals who
+hoarded treasure and showed no empathy to those who were worse off during their
+lifetime often end up here. The ground is made of packed red dirt that is
+cracked in places, allowing to steam to rise up. Occassionally in places there
+are valuable gems found in the dirt and there is zenni flying around in the
+air. The smell of sulfur is quite strong here. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6428 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6426 0 0 0 0 0 0 0 0
+S
+#6428
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WGreed@n~
+   @rThis is the Third Level of Hellfire City, Greed. The souls of mortals who
+hoarded treasure and showed no empathy to those who were worse off during their
+lifetime often end up here. The ground is made of packed red dirt that is
+cracked in places, allowing to steam to rise up. Occassionally in places there
+are valuable gems found in the dirt and there is zenni flying around in the
+air. The smell of sulfur is quite strong here. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6429 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6427 0 0 0 0 0 0 0 0
+S
+#6429
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WGreed@n~
+   @rThis is the Third Level of Hellfire City, Greed. The souls of mortals who
+hoarded treasure and showed no empathy to those who were worse off during their
+lifetime often end up here. The ground is made of packed red dirt that is
+cracked in places, allowing to steam to rise up. Occassionally in places there
+are valuable gems found in the dirt and there is zenni flying around in the
+air. The smell of sulfur is quite strong here. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6430 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6428 0 0 0 0 0 0 0 0
+S
+#6430
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WGreed@n~
+   @rThis is the Third Level of Hellfire City, Greed. The souls of mortals who
+hoarded treasure and showed no empathy to those who were worse off during their
+lifetime often end up here. The ground is made of packed red dirt that is
+cracked in places, allowing to steam to rise up. Occassionally in places there
+are valuable gems found in the dirt and there is zenni flying around in the
+air. The smell of sulfur is quite strong here. @n
+~
+64 E 0 0 0 1
+D0
+~
+~
+0 0 6502 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6431 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6563 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6429 0 0 0 0 0 0 0 0
+S
+#6431
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WGreed@n~
+   @rThis is the Third Level of Hellfire City, Greed. The souls of mortals who
+hoarded treasure and showed no empathy to those who were worse off during their
+lifetime often end up here. The ground is made of packed red dirt that is
+cracked in places, allowing to steam to rise up. Occassionally in places there
+are valuable gems found in the dirt and there is zenni flying around in the
+air. The smell of sulfur is quite strong here. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6432 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6430 0 0 0 0 0 0 0 0
+S
+#6432
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WGreed@n~
+   @rThis is the Third Level of Hellfire City, Greed. The souls of mortals who
+hoarded treasure and showed no empathy to those who were worse off during their
+lifetime often end up here. The ground is made of packed red dirt that is
+cracked in places, allowing to steam to rise up. Occassionally in places there
+are valuable gems found in the dirt and there is zenni flying around in the
+air. The smell of sulfur is quite strong here. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6433 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6699 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6431 0 0 0 0 0 0 0 0
+S
+#6433
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WGreed@n~
+   @rThis is the Third Level of Hellfire City, Greed. The souls of mortals who
+hoarded treasure and showed no empathy to those who were worse off during their
+lifetime often end up here. The ground is made of packed red dirt that is
+cracked in places, allowing to steam to rise up. Occassionally in places there
+are valuable gems found in the dirt and there is zenni flying around in the
+air. The smell of sulfur is quite strong here. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6434 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6432 0 0 0 0 0 0 0 0
+S
+#6434
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WGreed@n~
+   @rThis is the Third Level of Hellfire City, Greed. The souls of mortals who
+hoarded treasure and showed no empathy to those who were worse off during their
+lifetime often end up here. The ground is made of packed red dirt that is
+cracked in places, allowing to steam to rise up. Occassionally in places there
+are valuable gems found in the dirt and there is zenni flying around in the
+air. The smell of sulfur is quite strong here. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6435 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6433 0 0 0 0 0 0 0 0
+S
+#6435
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WGreed@n~
+   @rThis is the Third Level of Hellfire City, Greed. The souls of mortals who
+hoarded treasure and showed no empathy to those who were worse off during their
+lifetime often end up here. The ground is made of packed red dirt that is
+cracked in places, allowing to steam to rise up. Occassionally in places there
+are valuable gems found in the dirt and there is zenni flying around in the
+air. The smell of sulfur is quite strong here. @n
+~
+64 E 0 0 0 1
+D3
+~
+~
+0 0 6434 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6436 0 0 0 0 0 0 0 0
+S
+#6436
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WStaircase@n~
+   @rThis staircase has been built out of hundreds and hundreds of various races'
+skulls and leads between the Greed and Sloth levels of Hellfire City. The
+skulls seem to be held together via a magical means, as a glow emanates in
+between the spaces. The smell of sulfur is heavy in the air. @n
+~
+64 E 0 0 0 1
+D5
+~
+~
+0 0 6437 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6435 0 0 0 0 0 0 0 0
+S
+#6437
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WStaircase@n~
+   @rThis staircase has been built out of hundreds and hundreds of various races'
+skulls and leads between the Greed and Sloth levels of Hellfire City. The
+skulls seem to be held together via a magical means, as a glow emanates in
+between the spaces. The smell of sulfur is heavy in the air. @n
+~
+64 E 0 0 0 1
+D4
+~
+~
+0 0 6436 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6438 0 0 0 0 0 0 0 0
+S
+#6438
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WSloth@n~
+   @rThe fourth level of Hellfire City, Sloth, is where the souls of those who
+have been excessively lazy and indifferent in their life often end up. The
+ground here is made up of red dirt and contains many cracks allowing hot steam
+to rise up through the ground. Growing from the cliff face to the south are
+tentacle-like whips, cracking at those who might be slacking from their chores
+here. @n
+~
+64 E 0 0 0 1
+D3
+~
+~
+0 0 6439 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6437 0 0 0 0 0 0 0 0
+S
+#6439
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WSloth@n~
+   @rThe fourth level of Hellfire City, Sloth, is where the souls of those who
+have been excessively lazy and indifferent in their life often end up. The
+ground here is made up of red dirt and contains many cracks allowing hot steam
+to rise up through the ground. Growing from the cliff face to the south are
+tentacle-like whips, cracking at those who might be slacking from their chores
+here. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6438 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6440 0 0 0 0 0 0 0 0
+S
+#6440
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WSloth@n~
+   @rThe fourth level of Hellfire City, Sloth, is where the souls of those who
+have been excessively lazy and indifferent in their life often end up. The
+ground here is made up of red dirt and contains many cracks allowing hot steam
+to rise up through the ground. Growing from the cliff face to the south are
+tentacle-like whips, cracking at those who might be slacking from their chores
+here. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6439 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6441 0 0 0 0 0 0 0 0
+S
+#6441
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WSloth@n~
+   @rThe fourth level of Hellfire City, Sloth, is where the souls of those who
+have been excessively lazy and indifferent in their life often end up. The
+ground here is made up of red dirt and contains many cracks allowing hot steam
+to rise up through the ground. Growing from the cliff face to the south are
+tentacle-like whips, cracking at those who might be slacking from their chores
+here. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6440 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6442 0 0 0 0 0 0 0 0
+S
+#6442
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WSloth@n~
+   @rThe fourth level of Hellfire City, Sloth, is where the souls of those who
+have been excessively lazy and indifferent in their life often end up. The
+ground here is made up of red dirt and contains many cracks allowing hot steam
+to rise up through the ground. Growing from the cliff face to the south are
+tentacle-like whips, cracking at those who might be slacking from their chores
+here. @n
+~
+64 E 0 0 0 1
+D0
+~
+~
+0 0 6509 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6441 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6443 0 0 0 0 0 0 0 0
+S
+#6443
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WSloth@n~
+   @rThe fourth level of Hellfire City, Sloth, is where the souls of those who
+have been excessively lazy and indifferent in their life often end up. The
+ground here is made up of red dirt and contains many cracks allowing hot steam
+to rise up through the ground. Growing from the cliff face to the south are
+tentacle-like whips, cracking at those who might be slacking from their chores
+here. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6442 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6444 0 0 0 0 0 0 0 0
+S
+#6444
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WSloth@n~
+   @rThe fourth level of Hellfire City, Sloth, is where the souls of those who
+have been excessively lazy and indifferent in their life often end up. The
+ground here is made up of red dirt and contains many cracks allowing hot steam
+to rise up through the ground. Growing from the cliff face to the south are
+tentacle-like whips, cracking at those who might be slacking from their chores
+here. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6443 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6445 0 0 0 0 0 0 0 0
+S
+#6445
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WSloth@n~
+   @rThe fourth level of Hellfire City, Sloth, is where the souls of those who
+have been excessively lazy and indifferent in their life often end up. The
+ground here is made up of red dirt and contains many cracks allowing hot steam
+to rise up through the ground. Growing from the cliff face to the south are
+tentacle-like whips, cracking at those who might be slacking from their chores
+here. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6444 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6446 0 0 0 0 0 0 0 0
+S
+#6446
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WSloth@n~
+   @rThe fourth level of Hellfire City, Sloth, is where the souls of those who
+have been excessively lazy and indifferent in their life often end up. The
+ground here is made up of red dirt and contains many cracks allowing hot steam
+to rise up through the ground. Growing from the cliff face to the south are
+tentacle-like whips, cracking at those who might be slacking from their chores
+here. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6445 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6447 0 0 0 0 0 0 0 0
+S
+#6447
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WSloth@n~
+   @rThe fourth level of Hellfire City, Sloth, is where the souls of those who
+have been excessively lazy and indifferent in their life often end up. The
+ground here is made up of red dirt and contains many cracks allowing hot steam
+to rise up through the ground. Growing from the cliff face to the south are
+tentacle-like whips, cracking at those who might be slacking from their chores
+here. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6446 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6448 0 0 0 0 0 0 0 0
+S
+#6448
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WStaircase@n~
+   @rThis staircase has been built out of hundreds and hundreds of various races'
+skulls and leads between the Sloth and Wrath levels of Hellfire City. The
+skulls seem to be held together via a magical means, as a glow emanates in
+between the spaces. The smell of sulfur is heavy in the air. @n
+~
+64 E 0 0 0 1
+D5
+~
+~
+0 0 6449 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6447 0 0 0 0 0 0 0 0
+S
+#6449
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WStaircase@n~
+   @rThis staircase has been built out of hundreds and hundreds of various races'
+skulls and leads between the Sloth and Wrath levels of Hellfire City. The
+skulls seem to be held together via a magical means, as a glow emanates in
+between the spaces. The smell of sulfur is heavy in the air. @n
+~
+64 E 0 0 0 1
+D4
+~
+~
+0 0 6448 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6450 0 0 0 0 0 0 0 0
+S
+#6450
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WWrath@n~
+   @rVigilantes and those who have murdered or genocided for revenge end up here,
+the 5th level of Hellfire City, Wrath. Through the cracks in the packed, red
+dirt ground, flames belch upwards, scorching anyone who walks close enough. 
+The smell of sulfur in the air is very strong here. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6451 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6449 0 0 0 0 0 0 0 0
+S
+#6451
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WWrath@n~
+   @rVigilantes and those who have murdered or genocided for revenge end up here,
+the 5th level of Hellfire City, Wrath. Through the cracks in the packed, red
+dirt ground, flames belch upwards, scorching anyone who walks close enough. 
+The smell of sulfur in the air is very strong here. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6452 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6450 0 0 0 0 0 0 0 0
+S
+#6452
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WWrath@n~
+   @rVigilantes and those who have murdered or genocided for revenge end up here,
+the 5th level of Hellfire City, Wrath. Through the cracks in the packed, red
+dirt ground, flames belch upwards, scorching anyone who walks close enough. 
+The smell of sulfur in the air is very strong here. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6453 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6451 0 0 0 0 0 0 0 0
+S
+#6453
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WWrath@n~
+   @rVigilantes and those who have murdered or genocided for revenge end up here,
+the 5th level of Hellfire City, Wrath. Through the cracks in the packed, red
+dirt ground, flames belch upwards, scorching anyone who walks close enough. 
+The smell of sulfur in the air is very strong here. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6454 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6452 0 0 0 0 0 0 0 0
+S
+#6454
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WWrath@n~
+   @rVigilantes and those who have murdered or genocided for revenge end up here,
+the 5th level of Hellfire City, Wrath. Through the cracks in the packed, red
+dirt ground, flames belch upwards, scorching anyone who walks close enough. 
+The smell of sulfur in the air is very strong here. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6455 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6453 0 0 0 0 0 0 0 0
+S
+#6455
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WWrath@n~
+   @rVigilantes and those who have murdered or genocided for revenge end up here,
+the 5th level of Hellfire City, Wrath. Through the cracks in the packed, red
+dirt ground, flames belch upwards, scorching anyone who walks close enough. 
+The smell of sulfur in the air is very strong here. @n
+~
+64 E 0 0 0 1
+D0
+~
+~
+0 0 6516 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6456 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6454 0 0 0 0 0 0 0 0
+S
+#6456
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WWrath@n~
+   @rVigilantes and those who have murdered or genocided for revenge end up here,
+the 5th level of Hellfire City, Wrath. Through the cracks in the packed, red
+dirt ground, flames belch upwards, scorching anyone who walks close enough. 
+The smell of sulfur in the air is very strong here. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6457 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6455 0 0 0 0 0 0 0 0
+S
+#6457
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WWrath@n~
+   @rVigilantes and those who have murdered or genocided for revenge end up here,
+the 5th level of Hellfire City, Wrath. Through the cracks in the packed, red
+dirt ground, flames belch upwards, scorching anyone who walks close enough. 
+The smell of sulfur in the air is very strong here. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6458 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6456 0 0 0 0 0 0 0 0
+S
+#6458
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WWrath@n~
+   @rVigilantes and those who have murdered or genocided for revenge end up here,
+the 5th level of Hellfire City, Wrath. Through the the cracked in the packed,
+red dirt ground, flames belch upwards, scorching anyone who walks close enough.
+The smell of sulfur in the air is very strong here. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6459 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6568 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6457 0 0 0 0 0 0 0 0
+S
+#6459
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WWrath@n~
+   @rVigilantes and those who have murdered or genocided for revenge end up here,
+the 5th level of Hellfire City, Wrath. Through the cracks in the packed, red
+dirt ground, flames belch upwards, scorching anyone who walks close enough. 
+The smell of sulfur in the air is very strong here. @n
+~
+64 E 0 0 0 1
+D3
+~
+~
+0 0 6458 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6460 0 0 0 0 0 0 0 0
+S
+#6460
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WStaircase@n~
+   @rThis staircase has been built out of hundreds and hundreds of various races'
+skulls and leads between the Wrath and Envy levels of Hellfire city. The skulls
+seem to be held together via a magical means, as a glow emanates in between the
+spaces. The smell of sulfur is heavy in the air. @n
+~
+64 E 0 0 0 1
+D5
+~
+~
+0 0 6461 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6459 0 0 0 0 0 0 0 0
+S
+#6461
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WStaircase@n~
+   @rThis staircase has been built out of hundreds and hundreds of various races'
+skulls and leads between the Wrath and Envy levels of Hellfire city. The skulls
+seem to be held together via a magical means, as a glow emanates in between the
+spaces. The smell of sulfur is heavy in the air. @n
+~
+64 E 0 0 0 1
+D4
+~
+~
+0 0 6460 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6462 0 0 0 0 0 0 0 0
+S
+#6462
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WEnvy@n~
+   @rGreen colored steam flows out of the many cracks in the packed, red, dirt
+ground here. This is the sixth level of Hell, Envy, where those who have
+commited grievous acts, as a result of jealousy, reside. @n
+~
+64 E 0 0 0 1
+D3
+~
+~
+0 0 6463 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6461 0 0 0 0 0 0 0 0
+S
+#6463
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WEnvy@n~
+   @rGreen colored steam flows out of the many cracks in the packed, red, dirt
+ground here. This is the sixth level of Hell, Envy, where those who have
+commited grievous acts, as a result of jealousy, reside. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6462 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6464 0 0 0 0 0 0 0 0
+S
+#6464
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WEnvy@n~
+   @rGreen colored steam flows out of the many cracks in the packed, red, dirt
+ground here. This is the sixth level of Hell, Envy, where those who have
+commited grievous acts, as a result of jealousy, reside. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6463 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6465 0 0 0 0 0 0 0 0
+S
+#6465
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WEnvy@n~
+   @rGreen colored steam flows out of the many cracks in the packed, red, dirt
+ground here. This is the sixth level of Hell, Envy, where those who have
+commited grievous acts, as a result of jealousy, reside. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6464 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6466 0 0 0 0 0 0 0 0
+S
+#6466
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WEnvy@n~
+   @rGreen colored steam flows out of the many cracks in the packed, red, dirt
+ground here. This is the sixth level of Hell, Envy, where those who have
+commited grievous acts, as a result of jealousy, reside. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6465 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6467 0 0 0 0 0 0 0 0
+S
+#6467
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WEnvy@n~
+   @rGreen colored steam flows out of the many cracks in the packed, red, dirt
+ground here. This is the sixth level of Hell, Envy, where those who have
+commited grievous acts, as a result of jealousy, reside. @n
+~
+64 E 0 0 0 1
+D0
+~
+~
+0 0 6523 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6466 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6468 0 0 0 0 0 0 0 0
+S
+#6468
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WEnvy@n~
+   @rGreen colored steam flows out of the many cracks in the packed, red, dirt
+ground here. This is the sixth level of Hell, Envy, where those who have
+commited grievous acts, as a result of jealousy, reside. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6467 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6469 0 0 0 0 0 0 0 0
+S
+#6469
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WEnvy@n~
+   @rGreen colored steam flows out of the many cracks in the packed, red, dirt
+ground here. This is the sixth level of Hell, Envy, where those who have
+commited grievous acts, as a result of jealousy, reside. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6468 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6470 0 0 0 0 0 0 0 0
+S
+#6470
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WEnvy@n~
+   @rGreen colored steam flows out of the many cracks in the packed, red, dirt
+ground here. This is the sixth level of Hell, Envy, where those who have
+commited grievous acts, as a result of jealousy, reside. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6469 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6471 0 0 0 0 0 0 0 0
+S
+#6471
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WEnvy@n~
+   @rGreen colored steam flows out of the many cracks in the packed, red, dirt
+ground here. This is the sixth level of Hell, Envy, where those who have
+commited grievous acts, as a result of jealousy, reside. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6470 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 6472 0 0 0 0 0 0 0 0
+S
+#6472
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WStaircase@n~
+   @rThis staircase has been built out of hundreds and hundreds of various races'
+skulls and leads between the Envy and Pride levels of Hellfire City. The
+skulls seem to be held together via a magical means, as a glow emanates in
+between the spaces. The smell of sulfur is heavy in the air. @n
+~
+64 E 0 0 0 1
+D5
+~
+~
+0 0 6473 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 6471 0 0 0 0 0 0 0 0
+S
+#6473
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WStaircase@n~
+   @rThis staircase has been built out of hundreds and hundreds of various races'
+skulls and leads between the Envy and Pride levels of Hellfire City. The
+skulls seem to be held together via a magical means, as a glow emanates in
+between the spaces. The smell of sulfur is heavy in the air. @n
+~
+64 E 0 0 0 1
+D4
+~
+~
+0 0 6472 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 6474 0 0 0 0 0 0 0 0
+S
+#6474
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WPride@n~
+   @rThe Seventh level of Hellfire City is Pride, where those who have committed
+the most grievous of sins imaginable can be found. Pride cuts right through
+the middle of the Hell Pit. To either side of the red dirt path ferocious
+flames rise into the air. In the middle of Hell Pit, a black adamantium tower
+rises high into the sky. The smell of sulfur here is very strong. @n
+~
+64 E 0 0 0 1
+D7
+~
+~
+0 0 6475 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6473 0 0 0 0 0 0 0 0
+S
+#6475
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WPride@n~
+   @rThe Seventh level of Hellfire City is Pride, where those who have committed
+the most grievous of sins imaginable can be found. Pride cuts right through
+the middle of the Hell Pit. To either side of the red dirt path ferocious
+flames rise into the air. In the middle of Hell Pit, a black adamantium tower
+rises high into the sky. The smell of sulfur here is very strong. @n
+~
+64 E 0 0 0 1
+D7
+~
+~
+0 0 6476 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6474 0 0 0 0 0 0 0 0
+S
+#6476
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WPride@n~
+   @rThe Seventh level of Hellfire City is Pride, where those who have committed
+the most grievous of sins imaginable can be found. Pride cuts right through
+the middle of the Hell Pit. To either side of the red dirt path ferocious
+flames rise into the air. In the middle of Hell Pit, a black adamantium tower
+rises high into the sky. The smell of sulfur here is very strong. @n
+~
+64 E 0 0 0 1
+D7
+~
+~
+0 0 6477 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6475 0 0 0 0 0 0 0 0
+S
+#6477
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WPride@n~
+   @rThe Seventh level of Hellfire City is Pride, where those who have committed
+the most grievous of sins imaginable can be found. Pride cuts right through
+the middle of the Hell Pit. To either side of the red dirt path ferocious
+flames rise into the air. In the middle of Hell Pit, a black adamantium tower
+rises high into the sky. The smell of sulfur here is very strong. @n
+~
+64 E 0 0 0 1
+D7
+~
+~
+0 0 6478 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6476 0 0 0 0 0 0 0 0
+S
+#6478
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WPride@n~
+   @rThe Seventh level of Hellfire City is Pride, where those who have committed
+the most grievous of sins imaginable can be found. Pride cuts right through
+the middle of the Hell Pit. To either side of the red dirt path ferocious
+flames rise into the air. In the middle of Hell Pit, a black adamantium tower
+rises high into the sky. The smell of sulfur here is very strong. @n
+~
+64 E 0 0 0 1
+D7
+~
+~
+0 0 6479 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6477 0 0 0 0 0 0 0 0
+S
+#6479
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WPride@n~
+   @rThe Seventh level of Hellfire City is Pride, where those who have committed
+the most grievous of sins imaginable can be found. Pride cuts right through
+the middle of the Hell Pit. To either side of the red dirt path ferocious
+flames rise into the air. In the middle of Hell Pit, a black adamantium tower
+rises high into the sky. The smell of sulfur here is very strong. @n
+~
+64 E 0 0 0 1
+D7
+~
+~
+0 0 6480 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6478 0 0 0 0 0 0 0 0
+S
+#6480
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WPride@n~
+   @rThe Seventh level of Hellfire City is Pride, where those who have committed
+the most grievous of sins imaginable can be found. Pride cuts right through
+the middle of the Hell Pit. To either side of the red dirt path ferocious
+flames rise into the air. In the middle of Hell Pit, a black adamantium tower
+rises high into the sky. The smell of sulfur here is very strong. @n
+~
+64 E 0 0 0 1
+D7
+~
+~
+0 0 6481 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6479 0 0 0 0 0 0 0 0
+S
+#6481
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WPride@n~
+   @rThe Seventh level of Hellfire City is Pride, where those who have committed
+the most grievous of sins imaginable can be found. Pride cuts right through
+the middle of the Hell Pit. To either side of the red dirt path ferocious
+flames rise into the air. In the middle of Hell Pit, a black adamantium tower
+rises high into the sky. The smell of sulfur here is very strong. @n
+~
+64 E 0 0 0 1
+D7
+~
+~
+0 0 6482 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6480 0 0 0 0 0 0 0 0
+S
+#6482
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WPride@n~
+   @rThe Seventh level of Hellfire City is Pride, where those who have committed
+the most grievous of sins imaginable can be found. Pride cuts right through
+the middle of the Hell Pit. To either side of the red dirt path ferocious
+flames rise into the air. In the middle of Hell Pit, a black adamantium tower
+rises high into the sky. The smell of sulfur here is very strong. @n
+~
+64 E 0 0 0 1
+D7
+~
+~
+0 0 6483 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6481 0 0 0 0 0 0 0 0
+S
+#6483
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WPride@n~
+   @rThe Seventh level of Hellfire City is Pride, where those who have committed
+the most grievous of sins imaginable can be found. Pride cuts right through
+the middle of the Hell Pit. To either side of the red dirt path ferocious
+flames rise into the air. In the middle of Hell Pit, a black adamantium tower
+rises high into the sky. The smell of sulfur here is very strong. @n
+~
+64 E 0 0 0 1
+D7
+~
+~
+0 0 6484 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6482 0 0 0 0 0 0 0 0
+S
+#6484
+@RH@re@yl@Ylf@yi@rr@Re@W City@D: @WPride@n~
+   @rThe Seventh level of Hellfire City is Pride, where those who have committed
+the most grievous of sins imaginable can be found. Pride cuts right through
+the middle of the Hell Pit. To either side of the red dirt path ferocious
+flames rise into the air. In the middle of Hell Pit, a black adamantium tower
+rises high into the sky. The smell of sulfur here is very strong. @n
+
+@rA large flaming portal is here. Type @Yportal@r to use it.@n
+~
+64 E 0 0 0 1
+D7
+~
+undefined~
+0 0 6485 20 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6483 0 0 0 0 0 0 0 0
+S
+T 6404
+#6485
+@RD@ra@Wb@wu@rr@Ra@n's @cP@Ca@wl@Wa@Cc@ce@n~
+   @rThis palace is inhabited by the Demon King, Dabura. The dark, obsidian,
+walls and floors are blotched in places by the blood of those who were less
+than welcome guests here.
+~
+64 chE 0 0 0 0
+D7
+~
+~
+0 0 6486 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6484 0 0 0 0 0 0 0 0
+S
+#6486
+@RD@ra@Wb@wu@rr@Ra@n's @cP@Ca@wl@Wa@Cc@ce@n~
+   @rThis palace is inhabited by the Demon King, Dabura. The dark, obsidian,
+walls and floors are blotched in places by the blood of those who were less
+than welcome guests here. @n
+~
+64 hE 0 0 0 0
+D7
+~
+~
+0 0 6487 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 6485 0 0 0 0 0 0 0 0
+S
+#6487
+@RD@ra@Wb@wu@rr@Ra@n's @cP@Ca@wl@Wa@Cc@ce@n~
+   @rThis palace is inhabited by the Demon King, Dabura. The dark, obsidian,
+walls and floors are blotched in places by the blood of those who were less
+than welcome guests here. A large throne, made up of skulls, is here. @n
+~
+64 hDE 0 0 0 0
+D9
+~
+~
+0 0 6486 0 0 0 0 0 0 0 0
+S
+#6488
+@rT@Ro@Wr@wt@Wu@Rr@re @DR@wa@Wc@Dk@w: @WLust@n~
+   @DThe Torture rack stretches out from Lust and either side is a drop. Chains
+and shackles are built into the surface and it is here where those who have
+commited the sin of Lust are tortured. @n
+~
+64 cE 0 0 0 1
+D0
+~
+~
+0 0 6489 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6407 0 0 0 0 0 0 0 0
+S
+#6489
+@rT@Ro@Wr@wt@Wu@Rr@re @DR@wa@Wc@Dk@w: @WLust@n~
+   @DThe Torture rack stretches out from Lust and either side is a drop. Chains
+and shackles are built into the surface and it is here where those who have
+commited the sin of Lust are tortured. @n
+~
+64 E 0 0 0 1
+D0
+~
+~
+0 0 6490 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6488 0 0 0 0 0 0 0 0
+S
+#6490
+@rT@Ro@Wr@wt@Wu@Rr@re @DR@wa@Wc@Dk@w: @WLust@n~
+   @DThe Torture rack stretches out from Lust and either side is a drop. Chains
+and shackles are built into the surface and it is here where those who have
+commited the sin of Lust are tortured. @n
+~
+64 E 0 0 0 1
+D0
+~
+~
+0 0 6491 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6489 0 0 0 0 0 0 0 0
+S
+#6491
+@rT@Ro@Wr@wt@Wu@Rr@re @DR@wa@Wc@Dk@w: @WLust@n~
+   @DThe Torture rack stretches out from Lust and either side is a drop. Chains
+and shackles are built into the surface and it is here where those who have
+commited the sin of Lust are tortured. @n
+~
+64 E 0 0 0 1
+D0
+~
+~
+0 0 6492 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6494 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6490 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6493 0 0 0 0 0 0 0 0
+S
+#6492
+@rT@Ro@Wr@wt@Wu@Rr@re @DR@wa@Wc@Dk@w: @WLust@n~
+   @DThe Torture rack stretches out from Lust and either side is a drop. Chains
+and shackles are built into the surface and it is here where those who have
+commited the sin of Lust are tortured. @n
+~
+64 E 0 0 0 10
+D2
+~
+~
+0 0 6491 0 0 0 0 0 0 0 0
+S
+#6493
+@rT@Ro@Wr@wt@Wu@Rr@re @DR@wa@Wc@Dk@w: @WLust@n~
+   @DThe Torture rack stretches out from Lust and either side is a drop. Chains
+and shackles are built into the surface and it is here where those who have
+commited the sin of Lust are tortured. @n
+~
+64 E 0 0 0 1
+D1
+~
+~
+0 0 6491 0 0 0 0 0 0 0 0
+S
+#6494
+@rT@Ro@Wr@wt@Wu@Rr@re @DR@wa@Wc@Dk@w: @WLust@n~
+   @DThe Torture rack stretches out from Lust and either side is a drop. Chains
+and shackles are built into the surface and it is here where those who have
+commited the sin of Lust are tortured. @n
+~
+64 E 0 0 0 1
+D3
+~
+~
+0 0 6491 0 0 0 0 0 0 0 0
+S
+#6495
+@rT@Ro@Wr@wt@Wu@Rr@re @DR@wa@Wc@Dk@w: @WGluttony@n~
+   @DThe Torture rack stretches out from Gluttony and either side is a drop. 
+Chains and shackles are built into the surface and it is here where those who
+have commited the sin of Gluttony are tortured. @n
+~
+64 cE 0 0 0 1
+D0
+~
+~
+0 0 6496 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6418 0 0 0 0 0 0 0 0
+S
+#6496
+@rT@Ro@Wr@wt@Wu@Rr@re @DR@wa@Wc@Dk@w: @WGluttony@n~
+   @DThe Torture rack stretches out from Gluttony and either side is a drop. 
+Chains and shackles are built into the surface and it is here where those who
+have commited the sin of Gluttony are tortured. @n
+~
+64 E 0 0 0 1
+D0
+~
+~
+0 0 6497 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6495 0 0 0 0 0 0 0 0
+S
+#6497
+@rT@Ro@Wr@wt@Wu@Rr@re @DR@wa@Wc@Dk@w: @WGluttony@n~
+   @DThe Torture rack stretches out from Gluttony and either side is a drop. 
+Chains and shackles are built into the surface and it is here where those who
+have commited the sin of Gluttony are tortured. @n
+~
+64 E 0 0 0 1
+D0
+~
+~
+0 0 6498 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6496 0 0 0 0 0 0 0 0
+S
+#6498
+@rT@Ro@Wr@wt@Wu@Rr@re @DR@wa@Wc@Dk@w: @WGluttony@n~
+   @DThe Torture rack stretches out from Gluttony and either side is a drop. 
+Chains and shackles are built into the surface and it is here where those who
+have commited the sin of Gluttony are tortured. @n
+~
+64 E 0 0 0 1
+D0
+~
+~
+0 0 6499 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 6501 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 6497 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 6500 0 0 0 0 0 0 0 0
+S
+#6499
+@rT@Ro@Wr@wt@Wu@Rr@re @DR@wa@Wc@Dk@w: @WGluttony@n~
+   @DThe Torture rack stretches out from Gluttony and either side is a drop. 
+Chains and shackles are built into the surface and it is here where those who
+have commited the sin of Gluttony are tortured. @n
+~
+64 E 0 0 0 1
+D2
+~
+~
+0 0 6498 0 0 0 0 0 0 0 0
+S
+$~

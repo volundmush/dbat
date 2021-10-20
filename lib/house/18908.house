@@ -1,0 +1,980 @@
+#415
+0 150 0 -1 0 100 100 0 12 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Kitchen Table~
+@wa kitchen table@n~
+@wA kitchen table sits here@n~
+~
+15 1 0 0 0 100 0 0
+G
+1557963852
+U
+3874443590778519265
+Z
+4
+E
+table~
+@D(@cTry 'look on table' to see its contents@D)@n
+~
+#421
+-1 10 0 0 0 100 100 0 13 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Small Glass~
+@wa small glass@n~
+@wA small glass sits here@n~
+~
+17 1 0 0 0 1 0 0
+G
+1557963852
+U
+4689136791371725943
+Z
+1
+#420
+-1 0 0 0 0 100 100 0 1 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Ceramic Plate~
+@wa ceramic plate@n~
+@wA ceramic plate sits here@n~
+~
+12 1 0 0 0 1 0 0
+G
+1557963852
+U
+8441992528268313261
+Z
+2
+#420
+-1 0 0 0 0 100 100 0 1 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Ceramic Plate~
+@wa ceramic plate@n~
+@wA ceramic plate sits here@n~
+~
+12 1 0 0 0 1 0 0
+G
+1557963852
+U
+618748400067071395
+Z
+2
+#420
+-1 0 0 0 0 100 100 0 1 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Ceramic Plate~
+@wa ceramic plate@n~
+@wA ceramic plate sits here@n~
+~
+12 1 0 0 0 1 0 0
+G
+1557963852
+U
+7630611183474495751
+Z
+2
+#419
+0 100 5 -1 0 100 100 0 12 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Wooden Cabinet~
+@wA Wooden Cabinet@n~
+@wA wooden cabinet has been built into the wall here@n~
+~
+15 1 0 0 0 10 0 0
+G
+1557963852
+U
+7694431649347146779
+Z
+3
+#13324
+0 0 0 0 0 100 100 0 14 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Rose~
+@wA @RR@ro@Rs@re@n~
+@yA Large @RR@ro@Rs@re @YFlower@y has risen from the soil~
+~
+8 1 0 0 0 1 4 0
+G
+1556585341
+U
+6153241874835410234
+Z
+4
+#405
+0 550 5 -1 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Stove Oven~
+@wa stove@n~
+@wA Stove has been placed here@n~
+~
+15 1 0 0 0 400 0 0
+G
+1556585341
+U
+6482859560090915481
+Z
+4
+E
+stove oven~
+   @WThis is for cooking raw things.  Try putting different things in it and
+typing 'cook'.  Be careful though, you don't want to cook anything important now
+do you?  @n
+~
+#17290
+0 0 0 0 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Fuel Canister~
+@wLarge Fuel Canister @D(@G100@D)@n~
+@wA large fuel canister is lying here@n~
+~
+12 1 0 0 0 25 500 0
+G
+1554192870
+U
+2033074963522441168
+Z
+4
+#17290
+0 0 0 0 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Fuel Canister~
+@wLarge Fuel Canister @D(@G100@D)@n~
+@wA large fuel canister is lying here@n~
+~
+12 1 0 0 0 25 500 0
+G
+1558018199
+U
+2409667003730250527
+Z
+4
+#17290
+0 0 0 0 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Fuel Canister~
+@wLarge Fuel Canister @D(@G100@D)@n~
+@wA large fuel canister is lying here@n~
+~
+12 1 0 0 0 25 500 0
+G
+1558063446
+U
+4848022907829892684
+Z
+4
+#405
+0 550 5 -1 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Stove Oven~
+@wa stove@n~
+@wA Stove has been placed here@n~
+~
+15 1 0 0 0 400 0 0
+G
+1556585341
+U
+1115012918078657968
+Z
+4
+E
+stove oven~
+   @WThis is for cooking raw things.  Try putting different things in it and
+typing 'cook'.  Be careful though, you don't want to cook anything important now
+do you?  @n
+~
+#1303
+0 0 0 0 0 100 100 0 10 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Boulder~
+@wA Large @yBoulder@n~
+@wA large @yboulder@w is lying here@n~
+~
+12 1 0 0 0 4000 0 0
+G
+1556043130
+U
+7558587746790827419
+Z
+4
+#1613
+0 0 0 0 0 0 100 0 44 AB 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Dead Campfire~
+@DDead Campfire@n~
+@wA @Ddead campfire@w, full of ash, can be seen here@n~
+~
+12 0 0 0 0 10 0 0
+G
+1558195636
+U
+2560603703763920569
+Z
+4
+#2254
+0 3 0 1 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Small Flashlight~
+@wSmall Flashlight@n~
+@wA small flashlight is lying here@n~
+~
+1 16385 0 0 0 1 25 0
+G
+1554125771
+U
+2466433357647144780
+Z
+4
+#3200
+0 0 0 0 0 100 100 0 31 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Small Ruby~
+@wSmall @RR@rub@Ry@n~
+@wA small @Rr@rub@Ry@w is lying here@n~
+~
+8 1 0 0 0 1 80 0
+G
+1554127698
+U
+6852023292147961484
+Z
+4
+#2254
+0 1 0 15 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Small Flashlight~
+@wSmall Flashlight@n~
+@wA small flashlight is lying here@n~
+~
+1 16385 0 0 0 1 25 0
+G
+1554194455
+U
+734925718592411151
+Z
+4
+#314
+0 48 48 0 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Canteen water~
+@wLarge @gCanteen@n~
+@wA large @gcanteen @wis lying here@n~
+~
+17 1 0 0 0 0 50 0
+G
+1552977619
+U
+1759995989436402968
+Z
+4
+#2013
+0 0 0 0 0 100 100 0 3 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Diamond~
+a Diamond~
+A diamond has been dropped here~
+~
+8 1 0 0 0 0 0 0
+G
+1558027851
+U
+5719376644669147548
+Z
+4
+#408
+-1 2 2 0 0 100 100 0 45 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Pizza Slice~
+@wa pizza slice@n~
+@wA pizza slice is sitting here@n~
+~
+19 1 0 0 0 1 0 0
+G
+1556585341
+U
+5718146157493525857
+Z
+2
+#407
+-1 6 6 1 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Beer Can~
+@wa beer can@n~
+@wA beer can is sitting here@n~
+~
+17 1 0 0 0 11 0 0
+G
+1558028624
+U
+886741857423527826
+Z
+1
+#407
+-1 6 6 1 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Beer Can~
+@wa beer can@n~
+@wA beer can is sitting here@n~
+~
+17 1 0 0 0 11 0 0
+G
+1558028624
+U
+5347350715878391859
+Z
+1
+#404
+0 550 1 -1 0 100 100 0 9 A 0 0 0 20 0 0 0 0 0 0 0
+XAP
+Refrigerator frige fridge~
+@wa refrigerator@n~
+@wA Refrigerator has been placed here@n~
+~
+15 1 0 0 0 500 0 0
+G
+1556585341
+U
+2523399471274669563
+Z
+5
+#404
+0 550 5 -1 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Refrigerator frige fridge~
+@wa refrigerator@n~
+@wA Refrigerator has been placed here@n~
+~
+15 1 0 0 0 500 0 0
+G
+1558110124
+U
+3700839519433107520
+Z
+5
+#407
+-1 6 6 1 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Beer Can~
+@wa beer can@n~
+@wA beer can is sitting here@n~
+~
+17 1 0 0 0 11 0 0
+G
+1558110124
+U
+8996173659216855385
+Z
+1
+#407
+-1 6 6 1 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Beer Can~
+@wa beer can@n~
+@wA beer can is sitting here@n~
+~
+17 1 0 0 0 11 0 0
+G
+1558110124
+U
+4576336698303839824
+Z
+1
+#409
+-1 1 1 0 1 100 100 0 14 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Raw Beef Steak~
+@RRaw Beef Steak@n~
+@wA @Rraw beef steak@w is lying here@n~
+~
+19 1 0 0 0 5 0 0
+G
+1558110124
+U
+516343263749542822
+Z
+2
+#404
+0 550 5 -1 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Refrigerator frige fridge~
+@wa refrigerator@n~
+@wA Refrigerator has been placed here@n~
+~
+15 1 0 0 0 500 0 0
+G
+1558110124
+U
+3279070551497712196
+Z
+5
+#407
+-1 6 6 1 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Beer Can~
+@wa beer can@n~
+@wA beer can is sitting here@n~
+~
+17 1 0 0 0 11 0 0
+G
+1556585341
+U
+8615999713936680277
+Z
+1
+#407
+-1 6 6 1 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Beer Can~
+@wa beer can@n~
+@wA beer can is sitting here@n~
+~
+17 1 0 0 0 11 0 0
+G
+1556585341
+U
+9127314876304130234
+Z
+1
+#409
+-1 1 1 0 1 100 100 0 14 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Raw Beef Steak~
+@RRaw Beef Steak@n~
+@wA @Rraw beef steak@w is lying here@n~
+~
+19 1 0 0 0 5 0 0
+G
+1556585341
+U
+1741759766108745910
+Z
+2
+#404
+0 550 5 -1 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Refrigerator frige fridge~
+@wa refrigerator@n~
+@wA Refrigerator has been placed here@n~
+~
+15 1 0 0 0 500 0 0
+G
+1556585341
+U
+1735127533261490413
+Z
+5
+#408
+-1 2 2 0 0 100 100 0 45 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Pizza Slice~
+@wa pizza slice@n~
+@wA pizza slice is sitting here@n~
+~
+19 1 0 0 0 1 0 0
+G
+1558110124
+U
+2299082053008504379
+Z
+2
+#407
+-1 6 6 1 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Beer Can~
+@wa beer can@n~
+@wA beer can is sitting here@n~
+~
+17 1 0 0 0 11 0 0
+G
+1558117414
+U
+5870714906389028031
+Z
+1
+#407
+-1 6 6 1 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Beer Can~
+@wa beer can@n~
+@wA beer can is sitting here@n~
+~
+17 1 0 0 0 11 0 0
+G
+1558117414
+U
+4332404946635791678
+Z
+1
+#404
+0 550 1 -1 0 100 100 0 9 A 0 0 0 20 0 0 0 0 0 0 0
+XAP
+Refrigerator frige fridge~
+@wa refrigerator@n~
+@wA Refrigerator has been placed here@n~
+~
+15 1 0 0 0 500 0 0
+G
+1558110124
+U
+7257206498214398252
+Z
+5
+#409
+-1 1 1 0 1 100 100 0 14 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Raw Beef Steak~
+@RRaw Beef Steak@n~
+@wA @Rraw beef steak@w is lying here@n~
+~
+19 1 0 0 0 5 0 0
+G
+1558035332
+U
+6448330960963391694
+Z
+2
+#408
+-1 2 2 0 0 100 100 0 45 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Pizza Slice~
+@wa pizza slice@n~
+@wA pizza slice is sitting here@n~
+~
+19 1 0 0 0 1 0 0
+G
+1558035332
+U
+2284539848870754135
+Z
+2
+#408
+-1 2 2 0 0 100 100 0 45 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Pizza Slice~
+@wa pizza slice@n~
+@wA pizza slice is sitting here@n~
+~
+19 1 0 0 0 1 0 0
+G
+1558035332
+U
+1182986212670535138
+Z
+2
+#404
+0 550 5 -1 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Refrigerator frige fridge~
+@wa refrigerator@n~
+@wA Refrigerator has been placed here@n~
+~
+15 1 0 0 0 500 0 0
+G
+1558035332
+U
+2862360821431656031
+Z
+5
+#407
+-1 6 6 1 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Beer Can~
+@wa beer can@n~
+@wA beer can is sitting here@n~
+~
+17 1 0 0 0 11 0 0
+G
+1557963852
+U
+5051014074307963386
+Z
+1
+#407
+-1 6 6 1 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Beer Can~
+@wa beer can@n~
+@wA beer can is sitting here@n~
+~
+17 1 0 0 0 11 0 0
+G
+1557963852
+U
+3416257398945922552
+Z
+1
+#409
+-1 1 1 0 1 100 100 0 14 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Raw Beef Steak~
+@RRaw Beef Steak@n~
+@wA @Rraw beef steak@w is lying here@n~
+~
+19 1 0 0 0 5 0 0
+G
+1557963852
+U
+7050400571953317200
+Z
+2
+#404
+0 550 5 -1 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Refrigerator frige fridge~
+@wa refrigerator@n~
+@wA Refrigerator has been placed here@n~
+~
+15 1 0 0 0 500 0 0
+G
+1557963852
+U
+4225685604013851297
+Z
+5
+#404
+0 550 5 -1 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Refrigerator frige fridge~
+@wa refrigerator@n~
+@wA Refrigerator has been placed here@n~
+~
+15 1 0 0 0 500 0 0
+G
+1556585341
+U
+4911173160760690621
+Z
+5
+#408
+-1 2 2 0 0 100 100 0 45 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Pizza Slice~
+@wa pizza slice@n~
+@wA pizza slice is sitting here@n~
+~
+19 1 0 0 0 1 0 0
+G
+1558035332
+U
+2155778969955689299
+Z
+2
+#407
+-1 6 6 1 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Beer Can~
+@wa beer can@n~
+@wA beer can is sitting here@n~
+~
+17 1 0 0 0 11 0 0
+G
+1558035332
+U
+9175693764072878715
+Z
+1
+#407
+-1 6 6 1 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Beer Can~
+@wa beer can@n~
+@wA beer can is sitting here@n~
+~
+17 1 0 0 0 11 0 0
+G
+1558035332
+U
+288831551988855786
+Z
+1
+#404
+0 550 5 -1 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Refrigerator frige fridge~
+@wa refrigerator@n~
+@wA Refrigerator has been placed here@n~
+~
+15 1 0 0 0 500 0 0
+G
+1558035332
+U
+3818251061770238577
+Z
+5
+#409
+-1 1 1 0 1 100 100 0 14 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Raw Beef Steak~
+@RRaw Beef Steak@n~
+@wA @Rraw beef steak@w is lying here@n~
+~
+19 1 0 0 0 5 0 0
+G
+1558110124
+U
+7409766515407219027
+Z
+2
+#408
+-1 2 2 0 0 100 100 0 45 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Pizza Slice~
+@wa pizza slice@n~
+@wA pizza slice is sitting here@n~
+~
+19 1 0 0 0 1 0 0
+G
+1558110124
+U
+1570537493230139198
+Z
+2
+#408
+-1 2 2 0 0 100 100 0 45 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Pizza Slice~
+@wa pizza slice@n~
+@wA pizza slice is sitting here@n~
+~
+19 1 0 0 0 1 0 0
+G
+1558110124
+U
+2223688264989447666
+Z
+2
+#404
+0 550 5 -1 0 97 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Refrigerator frige fridge~
+@wa refrigerator@n~
+@wA Refrigerator has been placed here@n~
+~
+15 1 0 0 0 500 0 0
+G
+1558110124
+U
+8967430873976924326
+Z
+5
+#212
+0 0 0 0 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Weighted Blue Boots~
+@wWeighted @bBlue @wBoots@n~
+@wA pair of weighted @bblue @wboots are lying here@n~
+~
+11 65 0 0 0 100 250 0
+G
+1554130329
+U
+7626087555892705310
+Z
+4
+#320
+0 0 0 0 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Red Car Lightning T-800X~
+@RRed @YLightning @CT-800X@n~
+@wA @Rred @YLightning @CT-800X @wis parked here@n~
+~
+12 1 0 0 0 4500 2500 0
+G
+1559585471
+U
+2526623810330492356
+Z
+4
+#320
+0 0 0 0 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Red Car Lightning T-800X~
+@RRed @YLightning @CT-800X@n~
+@wA @Rred @YLightning @CT-800X @wis parked here@n~
+~
+12 1 0 0 0 4500 2500 0
+G
+1558110124
+U
+1009224393001504762
+Z
+4
+#320
+0 0 0 0 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Red Car Lightning T-800X~
+@RRed @YLightning @CT-800X@n~
+@wA @Rred @YLightning @CT-800X @wis parked here@n~
+~
+12 1 0 0 0 4500 2500 0
+G
+1558110124
+U
+8169049960729885885
+Z
+4
+#320
+0 0 0 0 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Red Car Lightning T-800X~
+@RRed @YLightning @CT-800X@n~
+@wA @Rred @YLightning @CT-800X @wis parked here@n~
+~
+12 1 0 0 0 4500 2500 0
+G
+1558110124
+U
+5121337803245225027
+Z
+4
+#215
+0 0 0 0 0 0 100 0 9 AB 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Weighted Red Boots~
+@wWeighted @rRed @wBoots@n~
+@wA pair of weighted @rred @wboots are lying here@n~
+~
+11 65 0 0 0 750 750 0
+G
+1554426363
+U
+323837678186419775
+Z
+3
+#213
+0 0 0 0 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Weighted Red Shirt~
+@wWeighted @rRed @wShirt@n~
+@wA weighted @rred @wshirt is lying here@n~
+~
+11 9 0 0 0 1000 1000 0
+G
+1554426388
+U
+7550577474736575313
+Z
+3
+#2013
+0 0 0 0 0 100 100 0 3 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Diamond~
+a Diamond~
+A diamond has been dropped here~
+~
+8 1 0 0 0 0 0 0
+G
+1558027851
+U
+4887898120065603713
+Z
+4
+#224
+0 0 0 0 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Weighted Shoulder Set~
+@wWeighted @WShoulder @wSet@n~
+@wA weighted @Wshoulder @wset is lying here@n~
+~
+11 131073 0 0 0 2000 2000 0
+G
+1558020560
+U
+5512098570805623706
+Z
+4
+#2275
+0 0 0 0 0 100 100 0 10 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Busted Saiyan Statue~
+@WBusted Saiyan Statue@n~
+@wA @Wbusted statue of a saiyan@w is sitting here@n~
+~
+12 1 0 0 0 5800 0 0
+G
+1557124482
+U
+8904220048885321780
+Z
+4
+#14800
+0 0 0 0 0 100 100 0 44 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+C Class Keycard~
+@wa @YC @WClass @RKeycard@n~
+An Akatsuki Labs keycard has been dropped here~
+~
+18 1 0 0 0 1 50 0
+G
+1558218321
+U
+8335024933417719024
+Z
+3
+E
+look c class keycard~
+Keycard grants basic security access within Akatsuki Laboratories.
+
+Areas able to get into: Main building & Tech Division
+~
+#14800
+0 0 0 0 0 100 100 0 44 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+C Class Keycard~
+@wa @YC @WClass @RKeycard@n~
+An Akatsuki Labs keycard has been dropped here~
+~
+18 1 0 0 0 1 50 0
+G
+1552207834
+U
+502891455143443071
+Z
+3
+E
+look c class keycard~
+Keycard grants basic security access within Akatsuki Laboratories.
+
+Areas able to get into: Main building & Tech Division
+~
+#15520
+0 0 0 0 0 100 100 0 29 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Serenity Key~
+Serenity City key~
+The gate key for Serenity City lays here~
+~
+18 1 0 0 0 0 0 0
+G
+1558952851
+U
+696861108445145817
+Z
+4
+#2802
+0 0 0 0 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Pride Key~
+@rP@Rr@Wi@wde @rK@we@Wy@n~
+@wThe @rP@Rr@Wi@wde @rk@we@Wy@w is laying here@n~
+~
+18 1 0 0 0 1 0 0
+G
+1558492841
+U
+7391190631851744420
+Z
+4
+#321
+0 0 0 0 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Car White Frostfire Delta AX~
+@wA white @CF@wr@Co@ws@Ct@rf@Ri@Yr@Re @cDelta @YAX@n~
+@wA white @CF@wr@Co@ws@Ct@rf@Ri@Yr@Re @cDelta @YAX@w is parked here@n~
+~
+12 1 0 0 0 4500 2000 0
+G
+1559398301
+U
+8220846182665125464
+Z
+4

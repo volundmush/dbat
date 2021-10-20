@@ -1,0 +1,909 @@
+#17700
+@RW@ra@Rr @RS@rt@Da@rr@Rt@n~
+   @WThis is a plain white room, with a couple of benches pushed up against
+opposing walls. It would almost appear as if it were a waiting room. A @Rsign@W
+has been hung up on the north wall. @n
+~
+177 eh 0 0 0 0
+S
+#17701
+Good Score~
+   @WThis room is responsible for keeping tally of the good score. No player
+should be here. @n
+~
+177 eh 0 0 0 0
+S
+#17702
+Evil Score~
+@WThis room keeps check of the score for evil sides. No player should be in here.@n
+~
+177 eh 0 0 0 0
+S
+#17703
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @YL@yi@Yg@yh@Yt@n~
+   @WIn this corridors of pure white floors, walls and ceilings, do the good
+aligned make their stand. One would expect that blood stains would be a
+nightmare here, but mere moments after splatter makes contact with a surface,
+it is gone. @n
+~
+177 eh 0 0 0 0
+D0
+~
+~
+0 0 17718 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17704 0 0 0 0 0 0 0 0
+S
+#17704
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @YL@yi@Yg@yh@Yt@n~
+   @WIn this corridors of pure white floors, walls and ceilings, do the good
+aligned make their stand. One would expect that blood stains would be a
+nightmare here, but mere moments after splatter makes contact with a surface,
+it is gone. @n
+~
+177 eh 0 0 0 0
+D1
+~
+~
+0 0 17705 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17703 0 0 0 0 0 0 0 0
+S
+#17705
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @YL@yi@Yg@yh@Yt@n~
+   @WIn this corridors of pure white floors, walls and ceilings, do the good
+aligned make their stand. One would expect that blood stains would be a
+nightmare here, but mere moments after splatter makes contact with a surface,
+it is gone. @n
+~
+177 eh 0 0 0 0
+D1
+~
+~
+0 0 17706 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17704 0 0 0 0 0 0 0 0
+S
+#17706
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @YL@yi@Yg@yh@Yt@n~
+   @WIn this corridors of pure white floors, walls and ceilings, do the good
+aligned make their stand. One would expect that blood stains would be a
+nightmare here, but mere moments after splatter makes contact with a surface,
+it is gone. @n
+~
+177 eh 0 0 0 0
+D1
+~
+~
+0 0 17707 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17705 0 0 0 0 0 0 0 0
+S
+#17707
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @YL@yi@Yg@yh@Yt@n~
+   @WIn this corridors of pure white floors, walls and ceilings, do the good
+aligned make their stand. One would expect that blood stains would be a
+nightmare here, but mere moments after splatter makes contact with a surface,
+it is gone. @n
+~
+177 eh 0 0 0 0
+D0
+~
+~
+0 0 17708 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17706 0 0 0 0 0 0 0 0
+S
+#17708
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @YL@yi@Yg@yh@Yt@n~
+   @WIn this corridors of pure white floors, walls and ceilings, do the good
+aligned make their stand. One would expect that blood stains would be a
+nightmare here, but mere moments after splatter makes contact with a surface,
+it is gone. @n
+~
+177 eh 0 0 0 0
+D0
+~
+~
+0 0 17709 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17707 0 0 0 0 0 0 0 0
+S
+#17709
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @YL@yi@Yg@yh@Yt@n~
+   @WIn this corridors of pure white floors, walls and ceilings, do the good
+aligned make their stand. One would expect that blood stains would be a
+nightmare here, but mere moments after splatter makes contact with a surface,
+it is gone. @n
+~
+177 eh 0 0 0 0
+D0
+~
+~
+0 0 17710 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17708 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17721 0 0 0 0 0 0 0 0
+S
+#17710
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @YL@yi@Yg@yh@Yt@n~
+   @WIn this corridors of pure white floors, walls and ceilings, do the good
+aligned make their stand. One would expect that blood stains would be a
+nightmare here, but mere moments after splatter makes contact with a surface,
+it is gone. @n
+~
+177 eh 0 0 0 0
+D0
+~
+~
+0 0 17711 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17709 0 0 0 0 0 0 0 0
+S
+#17711
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @YL@yi@Yg@yh@Yt@n~
+   @WIn this corridors of pure white floors, walls and ceilings, do the good
+aligned make their stand. One would expect that blood stains would be a
+nightmare here, but mere moments after splatter makes contact with a surface,
+it is gone. @n
+~
+177 eh 0 0 0 0
+D2
+~
+~
+0 0 17710 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17712 0 0 0 0 0 0 0 0
+S
+#17712
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @YL@yi@Yg@yh@Yt@n~
+   @WIn this corridors of pure white floors, walls and ceilings, do the good
+aligned make their stand. One would expect that blood stains would be a
+nightmare here, but mere moments after splatter makes contact with a surface,
+it is gone. @n
+~
+177 eh 0 0 0 0
+D1
+~
+~
+0 0 17711 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17713 0 0 0 0 0 0 0 0
+S
+#17713
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @YL@yi@Yg@yh@Yt@n~
+   @WIn this corridors of pure white floors, walls and ceilings, do the good
+aligned make their stand. One would expect that blood stains would be a
+nightmare here, but mere moments after splatter makes contact with a surface,
+it is gone. @n
+~
+177 eh 0 0 0 0
+D0
+~
+~
+0 0 17722 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17712 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17714 0 0 0 0 0 0 0 0
+S
+#17714
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @YL@yi@Yg@yh@Yt@n~
+   @WIn this corridors of pure white floors, walls and ceilings, do the good
+aligned make their stand. One would expect that blood stains would be a
+nightmare here, but mere moments after splatter makes contact with a surface,
+it is gone. @n
+~
+177 eh 0 0 0 0
+D1
+~
+~
+0 0 17713 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17715 0 0 0 0 0 0 0 0
+S
+#17715
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @YL@yi@Yg@yh@Yt@n~
+   @WIn this corridors of pure white floors, walls and ceilings, do the good
+aligned make their stand. One would expect that blood stains would be a
+nightmare here, but mere moments after splatter makes contact with a surface,
+it is gone. @n
+~
+177 eh 0 0 0 0
+D1
+~
+~
+0 0 17714 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17716 0 0 0 0 0 0 0 0
+S
+#17716
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @YL@yi@Yg@yh@Yt@n~
+   @WIn this corridors of pure white floors, walls and ceilings, do the good
+aligned make their stand. One would expect that blood stains would be a
+nightmare here, but mere moments after splatter makes contact with a surface,
+it is gone. @n
+~
+177 eh 0 0 0 0
+D0
+~
+~
+0 0 17715 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17717 0 0 0 0 0 0 0 0
+S
+#17717
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @YL@yi@Yg@yh@Yt@n~
+   @WIn this corridors of pure white floors, walls and ceilings, do the good
+aligned make their stand. One would expect that blood stains would be a
+nightmare here, but mere moments after splatter makes contact with a surface,
+it is gone. @n
+~
+177 eh 0 0 0 0
+D0
+~
+~
+0 0 17716 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17719 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17718 0 0 0 0 0 0 0 0
+S
+#17718
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @YL@yi@Yg@yh@Yt@n~
+   @WIn this corridors of pure white floors, walls and ceilings, do the good
+aligned make their stand. One would expect that blood stains would be a
+nightmare here, but mere moments after splatter makes contact with a surface,
+it is gone. @n
+~
+177 eh 0 0 0 0
+D0
+~
+~
+0 0 17717 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17703 0 0 0 0 0 0 0 0
+S
+#17719
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @YL@yi@Yg@yh@Yt@n~
+   @WIn this corridors of pure white floors, walls and ceilings, do the good
+aligned make their stand. One would expect that blood stains would be a
+nightmare here, but mere moments after splatter makes contact with a surface,
+it is gone. @n
+~
+177 eh 0 0 0 0
+D1
+~
+~
+0 0 17720 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17717 0 0 0 0 0 0 0 0
+S
+#17720
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @YL@yi@Yg@yh@Yt@n~
+   @WIn this corridors of pure white floors, walls and ceilings, do the good
+aligned make their stand. One would expect that blood stains would be a
+nightmare here, but mere moments after splatter makes contact with a surface,
+it is gone. @n
+~
+177 eh 0 0 0 0
+D1
+~
+~
+0 0 17721 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17719 0 0 0 0 0 0 0 0
+S
+#17721
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @YL@yi@Yg@yh@Yt@n~
+   @WIn this corridors of pure white floors, walls and ceilings, do the good
+aligned make their stand. One would expect that blood stains would be a
+nightmare here, but mere moments after splatter makes contact with a surface,
+it is gone. @n
+~
+177 eh 0 0 0 0
+D1
+~
+~
+0 0 17709 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17720 0 0 0 0 0 0 0 0
+S
+#17722
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @YL@yi@Yg@yh@Yt@n~
+   @WIn this corridors of pure white floors, walls and ceilings, do the good
+aligned make their stand. One would expect that blood stains would be a
+nightmare here, but mere moments after splatter makes contact with a surface,
+it is gone. @n
+~
+177 eh 0 0 0 0
+D2
+~
+~
+0 0 17713 0 0 0 0 0 0 0 0
+S
+#17723
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @RD@ra@Dr@wkn@De@rs@Rs@n~
+   @DThe area here seems quite dark but still bright enough to see with a degree
+of clarity, thanks in part to the flames that crawl up the black walls either
+side of the corridor. The smell of rotting flesh is potent here and the
+screams of persumably innocent people can be heard. @n
+~
+177 eh 0 0 0 0
+D0
+~
+~
+0 0 17738 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17724 0 0 0 0 0 0 0 0
+S
+#17724
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @RD@ra@Dr@wkn@De@rs@Rs@n~
+   @DThe area here seems quite dark but still bright enough to see with a degree
+of clarity, thanks in part to the flames that crawl up the black walls either
+side of the corridor. The smell of rotting flesh is potent here and the
+screams of persumably innocent people can be heard. @n
+~
+177 eh 0 0 0 0
+D1
+~
+~
+0 0 17725 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17723 0 0 0 0 0 0 0 0
+S
+#17725
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @RD@ra@Dr@wkn@De@rs@Rs@n~
+   @DThe area here seems quite dark but still bright enough to see with a degree
+of clarity, thanks in part to the flames that crawl up the black walls either
+side of the corridor. The smell of rotting flesh is potent here and the
+screams of persumably innocent people can be heard. @n
+~
+177 eh 0 0 0 0
+D1
+~
+~
+0 0 17726 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17724 0 0 0 0 0 0 0 0
+S
+#17726
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @RD@ra@Dr@wkn@De@rs@Rs@n~
+   @DThe area here seems quite dark but still bright enough to see with a degree
+of clarity, thanks in part to the flames that crawl up the black walls either
+side of the corridor. The smell of rotting flesh is potent here and the
+screams of persumably innocent people can be heard. @n
+~
+177 eh 0 0 0 0
+D1
+~
+~
+0 0 17727 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17725 0 0 0 0 0 0 0 0
+S
+#17727
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @RD@ra@Dr@wkn@De@rs@Rs@n~
+   @DThe area here seems quite dark but still bright enough to see with a degree
+of clarity, thanks in part to the flames that crawl up the black walls either
+side of the corridor. The smell of rotting flesh is potent here and the
+screams of persumably innocent people can be heard. @n
+~
+177 eh 0 0 0 0
+D0
+~
+~
+0 0 17728 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17726 0 0 0 0 0 0 0 0
+S
+#17728
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @RD@ra@Dr@wkn@De@rs@Rs@n~
+   @DThe area here seems quite dark but still bright enough to see with a degree
+of clarity, thanks in part to the flames that crawl up the black walls either
+side of the corridor. The smell of rotting flesh is potent here and the
+screams of persumably innocent people can be heard. @n
+~
+177 eh 0 0 0 0
+D0
+~
+~
+0 0 17729 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17727 0 0 0 0 0 0 0 0
+S
+#17729
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @RD@ra@Dr@wkn@De@rs@Rs@n~
+   @DThe area here seems quite dark but still bright enough to see with a degree
+of clarity, thanks in part to the flames that crawl up the black walls either
+side of the corridor. The smell of rotting flesh is potent here and the
+screams of persumably innocent people can be heard. @n
+~
+177 eh 0 0 0 0
+D0
+~
+~
+0 0 17730 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17728 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17741 0 0 0 0 0 0 0 0
+S
+#17730
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @RD@ra@Dr@wkn@De@rs@Rs@n~
+   @DThe area here seems quite dark but still bright enough to see with a degree
+of clarity, thanks in part to the flames that crawl up the black walls either
+side of the corridor. The smell of rotting flesh is potent here and the
+screams of persumably innocent people can be heard. @n
+~
+177 eh 0 0 0 0
+D0
+~
+~
+0 0 17731 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17729 0 0 0 0 0 0 0 0
+S
+#17731
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @RD@ra@Dr@wkn@De@rs@Rs@n~
+   @DThe area here seems quite dark but still bright enough to see with a degree
+of clarity, thanks in part to the flames that crawl up the black walls either
+side of the corridor. The smell of rotting flesh is potent here and the
+screams of persumably innocent people can be heard. @n
+~
+177 eh 0 0 0 0
+D2
+~
+~
+0 0 17730 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17732 0 0 0 0 0 0 0 0
+S
+#17732
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @RD@ra@Dr@wkn@De@rs@Rs@n~
+   @DThe area here seems quite dark but still bright enough to see with a degree
+of clarity, thanks in part to the flames that crawl up the black walls either
+side of the corridor. The smell of rotting flesh is potent here and the
+screams of persumably innocent people can be heard. @n
+~
+177 eh 0 0 0 0
+D1
+~
+~
+0 0 17731 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17733 0 0 0 0 0 0 0 0
+S
+#17733
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @RD@ra@Dr@wkn@De@rs@Rs@n~
+   @DThe area here seems quite dark but still bright enough to see with a degree
+of clarity, thanks in part to the flames that crawl up the black walls either
+side of the corridor. The smell of rotting flesh is potent here and the
+screams of persumably innocent people can be heard. @n
+~
+177 eh 0 0 0 0
+D0
+~
+~
+0 0 17742 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17732 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17734 0 0 0 0 0 0 0 0
+S
+#17734
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @RD@ra@Dr@wkn@De@rs@Rs@n~
+   @DThe area here seems quite dark but still bright enough to see with a degree
+of clarity, thanks in part to the flames that crawl up the black walls either
+side of the corridor. The smell of rotting flesh is potent here and the
+screams of persumably innocent people can be heard. @n
+~
+177 eh 0 0 0 0
+D1
+~
+~
+0 0 17733 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17735 0 0 0 0 0 0 0 0
+S
+#17735
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @RD@ra@Dr@wkn@De@rs@Rs@n~
+   @DThe area here seems quite dark but still bright enough to see with a degree
+of clarity, thanks in part to the flames that crawl up the black walls either
+side of the corridor. The smell of rotting flesh is potent here and the
+screams of persumably innocent people can be heard. @n
+~
+177 eh 0 0 0 0
+D1
+~
+~
+0 0 17734 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17736 0 0 0 0 0 0 0 0
+S
+#17736
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @RD@ra@Dr@wkn@De@rs@Rs@n~
+   @DThe area here seems quite dark but still bright enough to see with a degree
+of clarity, thanks in part to the flames that crawl up the black walls either
+side of the corridor. The smell of rotting flesh is potent here and the
+screams of persumably innocent people can be heard. @n
+~
+177 eh 0 0 0 0
+D0
+~
+~
+0 0 17735 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17737 0 0 0 0 0 0 0 0
+S
+#17737
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @RD@ra@Dr@wkn@De@rs@Rs@n~
+   @DThe area here seems quite dark but still bright enough to see with a degree
+of clarity, thanks in part to the flames that crawl up the black walls either
+side of the corridor. The smell of rotting flesh is potent here and the
+screams of persumably innocent people can be heard. @n
+~
+177 eh 0 0 0 0
+D0
+~
+~
+0 0 17736 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17739 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17738 0 0 0 0 0 0 0 0
+S
+#17738
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @RD@ra@Dr@wkn@De@rs@Rs@n~
+   @DThe area here seems quite dark but still bright enough to see with a degree
+of clarity, thanks in part to the flames that crawl up the black walls either
+side of the corridor. The smell of rotting flesh is potent here and the
+screams of persumably innocent people can be heard. @n
+~
+177 eh 0 0 0 0
+D0
+~
+~
+0 0 17737 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17723 0 0 0 0 0 0 0 0
+S
+#17739
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @RD@ra@Dr@wkn@De@rs@Rs@n~
+   @DThe area here seems quite dark but still bright enough to see with a degree
+of clarity, thanks in part to the flames that crawl up the black walls either
+side of the corridor. The smell of rotting flesh is potent here and the
+screams of persumably innocent people can be heard. @n
+~
+177 eh 0 0 0 0
+D1
+~
+~
+0 0 17740 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17737 0 0 0 0 0 0 0 0
+S
+#17740
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @RD@ra@Dr@wkn@De@rs@Rs@n~
+   @DThe area here seems quite dark but still bright enough to see with a degree
+of clarity, thanks in part to the flames that crawl up the black walls either
+side of the corridor. The smell of rotting flesh is potent here and the
+screams of persumably innocent people can be heard. @n
+~
+177 eh 0 0 0 0
+D1
+~
+~
+0 0 17741 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17739 0 0 0 0 0 0 0 0
+S
+#17741
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @RD@ra@Dr@wkn@De@rs@Rs@n~
+   @DThe area here seems quite dark but still bright enough to see with a degree
+of clarity, thanks in part to the flames that crawl up the black walls either
+side of the corridor. The smell of rotting flesh is potent here and the
+screams of persumably innocent people can be heard. @n
+~
+177 eh 0 0 0 0
+D1
+~
+~
+0 0 17729 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17740 0 0 0 0 0 0 0 0
+S
+#17742
+@CC@co@Wr@wr@Di@Wd@co@Cr @nof @RD@ra@Dr@wkn@De@rs@Rs@n~
+   @DThe area here seems quite dark but still bright enough to see with a degree
+of clarity, thanks in part to the flames that crawl up the black walls either
+side of the corridor. The smell of rotting flesh is potent here and the
+screams of persumably innocent people can be heard. @n
+~
+177 eh 0 0 0 0
+D2
+~
+~
+0 0 17733 0 0 0 0 0 0 0 0
+S
+#17743
+@CA@cd@Bv@ban@Bc@ce@Cd @gK@Gi@gn@We@gt@Gi@gc @DD@wo@Wj@Do@n~
+   @gCentered in the northern wall of the dojo is a large wooden door that lacks
+a handle of any sort. Thick blades of grass have been meticulously woven
+together into the large mat that spans the entirety of the floor here. The mat
+feels soft enough to prevent serious injury from colliding with the ground, and
+appears to be capable of withstanding a good deal of punishment. The walls of
+the dojo are an earthy brown, a few sections are padded with grass panels. @n
+~
+177 c a 0 0 0
+D0
+~
+~
+0 0 12084 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17744 0 0 0 0 0 0 0 0
+S
+#17744
+@CA@cd@Bv@ban@Bc@ce@Cd @gK@Gi@gn@We@gt@Gi@gc @DD@wo@Wj@Do@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be
+capable of withstanding a good deal of punishment. The walls of the dojo are
+an earthy brown, a few sections are padded with grass panels. Large pillars
+formed from the core of some massive tree are spread about the dojo, holding up
+the ceiling overhead and removing the need for additional walls, so the
+majority of the dojo is left wide open. @n
+~
+177 0 a 0 0 0
+D0
+~
+~
+0 0 17743 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17751 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17745 0 0 0 0 0 0 0 0
+S
+#17745
+@CA@cd@Bv@ban@Bc@ce@Cd @gK@Gi@gn@We@gt@Gi@gc @DD@wo@Wj@Do@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be
+capable of withstanding a good deal of punishment. The walls of the dojo are
+an earthy brown, a few sections are padded with grass panels. Large pillars
+formed from the core of some massive tree are spread about the dojo, holding up
+the ceiling overhead and removing the need for additional walls, so the
+majority of the dojo is left wide open. @n
+~
+177 0 a 0 0 0
+D1
+~
+~
+0 0 17744 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17746 0 0 0 0 0 0 0 0
+S
+#17746
+@CA@cd@Bv@ban@Bc@ce@Cd @gK@Gi@gn@We@gt@Gi@gc @DD@wo@Wj@Do@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be
+capable of withstanding a good deal of punishment. The walls of the dojo are
+an earthy brown, a few sections are padded with grass panels. Large pillars
+formed from the core of some massive tree are spread about the dojo, holding up
+the ceiling overhead and removing the need for additional walls, so the
+majority of the dojo is left wide open. @n
+~
+177 0 0 0 0 0
+D0
+~
+~
+0 0 17745 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17747 0 0 0 0 0 0 0 0
+S
+#17747
+@CA@cd@Bv@ban@Bc@ce@Cd @gK@Gi@gn@We@gt@Gi@gc @DD@wo@Wj@Do@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be
+capable of withstanding a good deal of punishment. The walls of the dojo are
+an earthy brown, a few sections are padded with grass panels. Large pillars
+formed from the core of some massive tree are spread about the dojo, holding up
+the ceiling overhead and removing the need for additional walls, so the
+majority of the dojo is left wide open. @n
+~
+177 0 a 0 0 0
+D0
+~
+~
+0 0 17746 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17748 0 0 0 0 0 0 0 0
+S
+#17748
+@CA@cd@Bv@ban@Bc@ce@Cd @gK@Gi@gn@We@gt@Gi@gc @DD@wo@Wj@Do@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be
+capable of withstanding a good deal of punishment. The walls of the dojo are
+an earthy brown, a few sections are padded with grass panels. Large pillars
+formed from the core of some massive tree are spread about the dojo, holding up
+the ceiling overhead and removing the need for additional walls, so the
+majority of the dojo is left wide open. @n
+~
+177 0 a 0 0 0
+D1
+~
+~
+0 0 17749 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17747 0 0 0 0 0 0 0 0
+S
+#17749
+@CA@cd@Bv@ban@Bc@ce@Cd @gK@Gi@gn@We@gt@Gi@gc @DD@wo@Wj@Do@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be
+capable of withstanding a good deal of punishment. The walls of the dojo are
+an earthy brown, a few sections are padded with grass panels. Large pillars
+formed from the core of some massive tree are spread about the dojo, holding up
+the ceiling overhead and removing the need for additional walls, so the
+majority of the dojo is left wide open. @n
+~
+177 0 a 0 0 0
+D0
+~
+~
+0 0 17750 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17748 0 0 0 0 0 0 0 0
+S
+#17750
+@CA@cd@Bv@ban@Bc@ce@Cd @gK@Gi@gn@We@gt@Gi@gc @DD@wo@Wj@Do@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be
+capable of withstanding a good deal of punishment. The walls of the dojo are
+an earthy brown, a few sections are padded with grass panels. Large pillars
+formed from the core of some massive tree are spread about the dojo, holding up
+the ceiling overhead and removing the need for additional walls, so the
+majority of the dojo is left wide open. @n
+~
+177 0 a 0 0 0
+D0
+~
+~
+0 0 17751 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17749 0 0 0 0 0 0 0 0
+S
+#17751
+@CA@cd@Bv@ban@Bc@ce@Cd @gK@Gi@gn@We@gt@Gi@gc @DD@wo@Wj@Do@n~
+   @gThick blades of grass have been meticulously woven together into the large
+mat that spans the entirety of the floor here. The mat feels soft enough to
+prevent serious injury from colliding with the ground, and appears to be
+capable of withstanding a good deal of punishment. The walls of the dojo are
+an earthy brown, a few sections are padded with grass panels. Large pillars
+formed from the core of some massive tree are spread about the dojo, holding up
+the ceiling overhead and removing the need for additional walls, so the
+majority of the dojo is left wide open. @n
+~
+177 0 a 0 0 0
+D2
+~
+~
+0 0 17750 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17744 0 0 0 0 0 0 0 0
+S
+$~

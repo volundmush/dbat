@@ -1,0 +1,3882 @@
+#18803
+0 -1 1000000 0 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Steel Sink~
+@cLarge Steel Sink@n~
+@wA @clarge steel sink@w is built into the countertop here@n~
+~
+23 0 0 0 0 1000005 0 0
+G
+1549341118
+U
+6722885839764197461
+Z
+4
+#18803
+0 -1 1000000 0 0 100 100 0 9 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Steel Sink~
+@cLarge Steel Sink@n~
+@wA @clarge steel sink@w is built into the countertop here@n~
+~
+23 0 0 0 0 1000005 0 0
+G
+1556071909
+U
+-1
+Z
+4
+#19093
+0 0 0 0 0 100 100 0 9 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Flambus Stove~
+@rF@Rl@Ya@Rm@rb@Ru@Ys @DStove@n~
+@wA @rF@Rl@Ya@Rm@rb@Ru@Ys @DStove@w has been set up here@n~
+~
+12 0 0 0 0 5000 0 0
+G
+1556071983
+U
+-1
+Z
+4
+#415
+0 150 0 -1 0 100 100 0 12 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Kitchen Table~
+@wa kitchen table@n~
+@wA kitchen table sits here@n~
+~
+15 1 0 0 0 100 0 0
+G
+1556121383
+U
+835981630751290142
+Z
+4
+E
+table~
+@D(@cTry 'look on table' to see its contents@D)@n
+~
+#421
+-1 10 0 0 0 100 100 0 13 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Small Glass~
+@wa small glass@n~
+@wA small glass sits here@n~
+~
+17 1 0 0 0 1 0 0
+G
+1556121383
+U
+2806273122247877720
+Z
+1
+#421
+-1 10 0 0 0 100 100 0 13 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Small Glass~
+@wa small glass@n~
+@wA small glass sits here@n~
+~
+17 1 0 0 0 1 0 0
+G
+1556121383
+U
+8401850414982973150
+Z
+1
+#421
+-1 10 0 0 0 100 100 0 13 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Small Glass~
+@wa small glass@n~
+@wA small glass sits here@n~
+~
+17 1 0 0 0 1 0 0
+G
+1556121383
+U
+4296051952078367007
+Z
+1
+#420
+-1 0 0 0 0 100 100 0 1 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Ceramic Plate~
+@wa ceramic plate@n~
+@wA ceramic plate sits here@n~
+~
+12 1 0 0 0 1 0 0
+G
+1556121383
+U
+4784215492266430217
+Z
+2
+#420
+-1 0 0 0 0 100 100 0 1 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Ceramic Plate~
+@wa ceramic plate@n~
+@wA ceramic plate sits here@n~
+~
+12 1 0 0 0 1 0 0
+G
+1556121383
+U
+4611361638679258600
+Z
+2
+#419
+0 100 5 -1 0 100 100 0 12 A 0 0 0 20 0 0 0 0 0 0 0
+XAP
+Wooden Cabinet~
+@wA Wooden Cabinet@n~
+@wA wooden cabinet has been built into the wall here@n~
+~
+15 1 0 0 0 10 0 0
+G
+1556121383
+U
+1502903165226155347
+Z
+3
+#408
+-1 2 2 0 0 100 100 0 45 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Pizza Slice~
+@wa pizza slice@n~
+@wA pizza slice is sitting here@n~
+~
+19 1 0 0 0 1 0 0
+G
+1556121383
+U
+9204676054806329466
+Z
+2
+#407
+-1 6 6 1 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Beer Can~
+@wa beer can@n~
+@wA beer can is sitting here@n~
+~
+17 1 0 0 0 11 0 0
+G
+1556122303
+U
+7352774421420855197
+Z
+1
+#1232
+-1 17 20 2000 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Plate Sushi~
+@wPlate of Sushi@n~
+@wA plate of sushi is lying here@n~
+~
+19 1 0 0 0 1 600 0
+G
+1556173572
+U
+-1
+Z
+4
+#1232
+-1 17 20 2000 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Plate Sushi~
+@wPlate of Sushi@n~
+@wA plate of sushi is lying here@n~
+~
+19 1 0 0 0 1 600 0
+G
+1556173570
+U
+-1
+Z
+4
+#1232
+-1 17 20 2000 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Plate Sushi~
+@wPlate of Sushi@n~
+@wA plate of sushi is lying here@n~
+~
+19 1 0 0 0 1 600 0
+G
+1556173568
+U
+-1
+Z
+4
+#1232
+-1 17 20 2000 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Plate Sushi~
+@wPlate of Sushi@n~
+@wA plate of sushi is lying here@n~
+~
+19 1 0 0 0 1 600 0
+G
+1556173566
+U
+-1
+Z
+4
+#1232
+-1 17 20 2000 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Plate Sushi~
+@wPlate of Sushi@n~
+@wA plate of sushi is lying here@n~
+~
+19 1 0 0 0 1 600 0
+G
+1556173564
+U
+-1
+Z
+4
+#1232
+-1 17 20 2000 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Plate Sushi~
+@wPlate of Sushi@n~
+@wA plate of sushi is lying here@n~
+~
+19 1 0 0 0 1 600 0
+G
+1556173562
+U
+-1
+Z
+4
+#1232
+-1 17 20 2000 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Plate Sushi~
+@wPlate of Sushi@n~
+@wA plate of sushi is lying here@n~
+~
+19 1 0 0 0 1 600 0
+G
+1556173560
+U
+-1
+Z
+4
+#1232
+-1 17 20 2000 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Plate Sushi~
+@wPlate of Sushi@n~
+@wA plate of sushi is lying here@n~
+~
+19 1 0 0 0 1 600 0
+G
+1556173558
+U
+-1
+Z
+4
+#1232
+-1 17 20 2000 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Plate Sushi~
+@wPlate of Sushi@n~
+@wA plate of sushi is lying here@n~
+~
+19 1 0 0 0 1 600 0
+G
+1556173556
+U
+-1
+Z
+4
+#1232
+-1 17 20 2000 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Plate Sushi~
+@wPlate of Sushi@n~
+@wA plate of sushi is lying here@n~
+~
+19 1 0 0 0 1 600 0
+G
+1556173554
+U
+-1
+Z
+4
+#1232
+-1 17 20 2000 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Plate Sushi~
+@wPlate of Sushi@n~
+@wA plate of sushi is lying here@n~
+~
+19 1 0 0 0 1 600 0
+G
+1556173552
+U
+-1
+Z
+4
+#1232
+-1 17 20 2000 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Plate Sushi~
+@wPlate of Sushi@n~
+@wA plate of sushi is lying here@n~
+~
+19 1 0 0 0 1 600 0
+G
+1556173550
+U
+-1
+Z
+4
+#1232
+-1 17 20 2000 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Plate Sushi~
+@wPlate of Sushi@n~
+@wA plate of sushi is lying here@n~
+~
+19 1 0 0 0 1 600 0
+G
+1556173548
+U
+-1
+Z
+4
+#1232
+-1 17 20 2000 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Plate Sushi~
+@wPlate of Sushi@n~
+@wA plate of sushi is lying here@n~
+~
+19 1 0 0 0 1 600 0
+G
+1556173546
+U
+-1
+Z
+4
+#1232
+-1 17 20 2000 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Plate Sushi~
+@wPlate of Sushi@n~
+@wA plate of sushi is lying here@n~
+~
+19 1 0 0 0 1 600 0
+G
+1556173527
+U
+-1
+Z
+4
+#1232
+-1 17 20 2000 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Plate Sushi~
+@wPlate of Sushi@n~
+@wA plate of sushi is lying here@n~
+~
+19 1 0 0 0 1 600 0
+G
+1556173525
+U
+-1
+Z
+4
+#1232
+-1 17 20 2000 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Plate Sushi~
+@wPlate of Sushi@n~
+@wA plate of sushi is lying here@n~
+~
+19 1 0 0 0 1 600 0
+G
+1556173522
+U
+-1
+Z
+4
+#1232
+-1 17 20 2000 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Plate Sushi~
+@wPlate of Sushi@n~
+@wA plate of sushi is lying here@n~
+~
+19 1 0 0 0 1 600 0
+G
+1556173520
+U
+-1
+Z
+4
+#1232
+-1 17 20 2000 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Plate Sushi~
+@wPlate of Sushi@n~
+@wA plate of sushi is lying here@n~
+~
+19 1 0 0 0 1 600 0
+G
+1556173518
+U
+-1
+Z
+4
+#1232
+-1 17 20 2000 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Plate Sushi~
+@wPlate of Sushi@n~
+@wA plate of sushi is lying here@n~
+~
+19 1 0 0 0 1 600 0
+G
+1556173516
+U
+-1
+Z
+4
+#1232
+-1 17 20 2000 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Plate Sushi~
+@wPlate of Sushi@n~
+@wA plate of sushi is lying here@n~
+~
+19 1 0 0 0 1 600 0
+G
+1556173514
+U
+-1
+Z
+4
+#1232
+-1 17 20 2000 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Plate Sushi~
+@wPlate of Sushi@n~
+@wA plate of sushi is lying here@n~
+~
+19 1 0 0 0 1 600 0
+G
+1556173512
+U
+-1
+Z
+4
+#1232
+-1 17 20 2000 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Plate Sushi~
+@wPlate of Sushi@n~
+@wA plate of sushi is lying here@n~
+~
+19 1 0 0 0 1 600 0
+G
+1556173510
+U
+-1
+Z
+4
+#1232
+-1 17 20 2000 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Plate Sushi~
+@wPlate of Sushi@n~
+@wA plate of sushi is lying here@n~
+~
+19 1 0 0 0 1 600 0
+G
+1556173508
+U
+-1
+Z
+4
+#1232
+-1 17 20 2000 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Plate Sushi~
+@wPlate of Sushi@n~
+@wA plate of sushi is lying here@n~
+~
+19 1 0 0 0 1 600 0
+G
+1556173506
+U
+-1
+Z
+4
+#1232
+-1 17 20 2000 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Plate Sushi~
+@wPlate of Sushi@n~
+@wA plate of sushi is lying here@n~
+~
+19 1 0 0 0 1 600 0
+G
+1556173504
+U
+-1
+Z
+4
+#1232
+-1 17 20 2000 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Plate Sushi~
+@wPlate of Sushi@n~
+@wA plate of sushi is lying here@n~
+~
+19 1 0 0 0 1 600 0
+G
+1556173502
+U
+-1
+Z
+4
+#1232
+-1 17 20 2000 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Plate Sushi~
+@wPlate of Sushi@n~
+@wA plate of sushi is lying here@n~
+~
+19 1 0 0 0 1 600 0
+G
+1556173500
+U
+-1
+Z
+4
+#1232
+-1 17 20 2000 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Plate Sushi~
+@wPlate of Sushi@n~
+@wA plate of sushi is lying here@n~
+~
+19 1 0 0 0 1 600 0
+G
+1556173498
+U
+-1
+Z
+4
+#1232
+-1 17 20 2000 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Plate Sushi~
+@wPlate of Sushi@n~
+@wA plate of sushi is lying here@n~
+~
+19 1 0 0 0 1 600 0
+G
+1556173496
+U
+-1
+Z
+4
+#1232
+-1 17 20 2000 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Plate Sushi~
+@wPlate of Sushi@n~
+@wA plate of sushi is lying here@n~
+~
+19 1 0 0 0 1 600 0
+G
+1556173494
+U
+-1
+Z
+4
+#404
+0 550 5 -1 0 100 100 0 9 A 0 0 0 20 0 0 0 0 0 0 0
+XAP
+Refrigerator frige fridge~
+@wa refrigerator@n~
+@wA Refrigerator has been placed here@n~
+~
+15 1 0 0 0 500 0 0
+G
+1556121383
+U
+278901480022822857
+Z
+5
+#416
+0 0 0 0 0 100 100 0 12 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Wooden Chair~
+@wa wooden chair@n~
+@wA wooden chair sits here@n~
+~
+31 1 0 0 0 12 0 0
+G
+1556121383
+U
+6115428501930750341
+Z
+4
+#416
+0 0 0 0 0 100 100 0 12 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Wooden Chair~
+@wa wooden chair@n~
+@wA wooden chair sits here@n~
+~
+31 1 0 0 0 12 0 0
+G
+1556121383
+U
+7549490809398626680
+Z
+4
+#17223
+-1 6 6 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Carrot~
+@wLarge @RCarrot@n~
+@wA @wlarge @Rcarrot@w is lying here@n~
+~
+19 1 0 0 0 1 112 0
+G
+1556409488
+U
+-1
+Z
+4
+#17223
+-1 6 6 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Carrot~
+@wLarge @RCarrot@n~
+@wA @wlarge @Rcarrot@w is lying here@n~
+~
+19 1 0 0 0 1 112 0
+G
+1556409488
+U
+-1
+Z
+4
+#17223
+-1 6 6 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Carrot~
+@wLarge @RCarrot@n~
+@wA @wlarge @Rcarrot@w is lying here@n~
+~
+19 1 0 0 0 1 112 0
+G
+1556409488
+U
+-1
+Z
+4
+#17223
+-1 6 6 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Carrot~
+@wLarge @RCarrot@n~
+@wA @wlarge @Rcarrot@w is lying here@n~
+~
+19 1 0 0 0 1 112 0
+G
+1556409488
+U
+-1
+Z
+4
+#17223
+-1 6 6 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Carrot~
+@wLarge @RCarrot@n~
+@wA @wlarge @Rcarrot@w is lying here@n~
+~
+19 1 0 0 0 1 112 0
+G
+1556409488
+U
+-1
+Z
+4
+#17223
+-1 6 6 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Carrot~
+@wLarge @RCarrot@n~
+@wA @wlarge @Rcarrot@w is lying here@n~
+~
+19 1 0 0 0 1 112 0
+G
+1556409488
+U
+-1
+Z
+4
+#17223
+-1 6 6 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Carrot~
+@wLarge @RCarrot@n~
+@wA @wlarge @Rcarrot@w is lying here@n~
+~
+19 1 0 0 0 1 112 0
+G
+1556409488
+U
+-1
+Z
+4
+#17223
+-1 6 6 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Carrot~
+@wLarge @RCarrot@n~
+@wA @wlarge @Rcarrot@w is lying here@n~
+~
+19 1 0 0 0 1 112 0
+G
+1556409488
+U
+-1
+Z
+4
+#17223
+-1 6 6 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Carrot~
+@wLarge @RCarrot@n~
+@wA @wlarge @Rcarrot@w is lying here@n~
+~
+19 1 0 0 0 1 112 0
+G
+1556409488
+U
+-1
+Z
+4
+#17223
+-1 6 6 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Carrot~
+@wLarge @RCarrot@n~
+@wA @wlarge @Rcarrot@w is lying here@n~
+~
+19 1 0 0 0 1 112 0
+G
+1556409488
+U
+-1
+Z
+4
+#17223
+-1 6 6 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Carrot~
+@wLarge @RCarrot@n~
+@wA @wlarge @Rcarrot@w is lying here@n~
+~
+19 1 0 0 0 1 112 0
+G
+1556409488
+U
+-1
+Z
+4
+#17223
+-1 6 6 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Carrot~
+@wLarge @RCarrot@n~
+@wA @wlarge @Rcarrot@w is lying here@n~
+~
+19 1 0 0 0 1 112 0
+G
+1556409488
+U
+-1
+Z
+4
+#17223
+-1 6 6 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Carrot~
+@wLarge @RCarrot@n~
+@wA @wlarge @Rcarrot@w is lying here@n~
+~
+19 1 0 0 0 1 112 0
+G
+1556409488
+U
+-1
+Z
+4
+#17223
+-1 6 6 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Carrot~
+@wLarge @RCarrot@n~
+@wA @wlarge @Rcarrot@w is lying here@n~
+~
+19 1 0 0 0 1 112 0
+G
+1556409488
+U
+-1
+Z
+4
+#17223
+-1 6 6 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Carrot~
+@wLarge @RCarrot@n~
+@wA @wlarge @Rcarrot@w is lying here@n~
+~
+19 1 0 0 0 1 112 0
+G
+1556409488
+U
+-1
+Z
+4
+#17223
+-1 6 6 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Carrot~
+@wLarge @RCarrot@n~
+@wA @wlarge @Rcarrot@w is lying here@n~
+~
+19 1 0 0 0 1 112 0
+G
+1556409488
+U
+-1
+Z
+4
+#17223
+-1 6 6 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Carrot~
+@wLarge @RCarrot@n~
+@wA @wlarge @Rcarrot@w is lying here@n~
+~
+19 1 0 0 0 1 112 0
+G
+1556409488
+U
+-1
+Z
+4
+#17223
+-1 6 6 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Carrot~
+@wLarge @RCarrot@n~
+@wA @wlarge @Rcarrot@w is lying here@n~
+~
+19 1 0 0 0 1 112 0
+G
+1556409488
+U
+-1
+Z
+4
+#17223
+-1 6 6 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Carrot~
+@wLarge @RCarrot@n~
+@wA @wlarge @Rcarrot@w is lying here@n~
+~
+19 1 0 0 0 1 112 0
+G
+1556409488
+U
+-1
+Z
+4
+#17223
+-1 6 6 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Carrot~
+@wLarge @RCarrot@n~
+@wA @wlarge @Rcarrot@w is lying here@n~
+~
+19 1 0 0 0 1 112 0
+G
+1556409488
+U
+-1
+Z
+4
+#17223
+-1 6 6 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Carrot~
+@wLarge @RCarrot@n~
+@wA @wlarge @Rcarrot@w is lying here@n~
+~
+19 1 0 0 0 1 112 0
+G
+1556409488
+U
+-1
+Z
+4
+#17217
+-1 0 0 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Cucumber~
+@wLarge @gC@Gu@wc@Gu@gm@wb@Ge@wr@n~
+@wA @wlarge @gc@Gu@wc@Gu@gm@wb@Ge@wr@w is lying here@n~
+~
+19 1 0 0 0 2 150 0
+G
+1556409521
+U
+-1
+Z
+4
+#17217
+-1 0 0 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Cucumber~
+@wLarge @gC@Gu@wc@Gu@gm@wb@Ge@wr@n~
+@wA @wlarge @gc@Gu@wc@Gu@gm@wb@Ge@wr@w is lying here@n~
+~
+19 1 0 0 0 2 150 0
+G
+1556409521
+U
+-1
+Z
+4
+#17217
+-1 0 0 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Cucumber~
+@wLarge @gC@Gu@wc@Gu@gm@wb@Ge@wr@n~
+@wA @wlarge @gc@Gu@wc@Gu@gm@wb@Ge@wr@w is lying here@n~
+~
+19 1 0 0 0 2 150 0
+G
+1556409521
+U
+-1
+Z
+4
+#17217
+-1 0 0 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Cucumber~
+@wLarge @gC@Gu@wc@Gu@gm@wb@Ge@wr@n~
+@wA @wlarge @gc@Gu@wc@Gu@gm@wb@Ge@wr@w is lying here@n~
+~
+19 1 0 0 0 2 150 0
+G
+1556409521
+U
+-1
+Z
+4
+#17217
+-1 0 0 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Cucumber~
+@wLarge @gC@Gu@wc@Gu@gm@wb@Ge@wr@n~
+@wA @wlarge @gc@Gu@wc@Gu@gm@wb@Ge@wr@w is lying here@n~
+~
+19 1 0 0 0 2 150 0
+G
+1556409521
+U
+-1
+Z
+4
+#17217
+-1 0 0 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Cucumber~
+@wLarge @gC@Gu@wc@Gu@gm@wb@Ge@wr@n~
+@wA @wlarge @gc@Gu@wc@Gu@gm@wb@Ge@wr@w is lying here@n~
+~
+19 1 0 0 0 2 150 0
+G
+1556409521
+U
+-1
+Z
+4
+#17217
+-1 0 0 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Cucumber~
+@wLarge @gC@Gu@wc@Gu@gm@wb@Ge@wr@n~
+@wA @wlarge @gc@Gu@wc@Gu@gm@wb@Ge@wr@w is lying here@n~
+~
+19 1 0 0 0 2 150 0
+G
+1556409521
+U
+-1
+Z
+4
+#17217
+-1 0 0 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Cucumber~
+@wLarge @gC@Gu@wc@Gu@gm@wb@Ge@wr@n~
+@wA @wlarge @gc@Gu@wc@Gu@gm@wb@Ge@wr@w is lying here@n~
+~
+19 1 0 0 0 2 150 0
+G
+1556409521
+U
+-1
+Z
+4
+#17217
+-1 0 0 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Cucumber~
+@wLarge @gC@Gu@wc@Gu@gm@wb@Ge@wr@n~
+@wA @wlarge @gc@Gu@wc@Gu@gm@wb@Ge@wr@w is lying here@n~
+~
+19 1 0 0 0 2 150 0
+G
+1556409521
+U
+-1
+Z
+4
+#17217
+-1 0 0 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Cucumber~
+@wLarge @gC@Gu@wc@Gu@gm@wb@Ge@wr@n~
+@wA @wlarge @gc@Gu@wc@Gu@gm@wb@Ge@wr@w is lying here@n~
+~
+19 1 0 0 0 2 150 0
+G
+1556409521
+U
+-1
+Z
+4
+#17217
+-1 0 0 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Cucumber~
+@wLarge @gC@Gu@wc@Gu@gm@wb@Ge@wr@n~
+@wA @wlarge @gc@Gu@wc@Gu@gm@wb@Ge@wr@w is lying here@n~
+~
+19 1 0 0 0 2 150 0
+G
+1556409521
+U
+-1
+Z
+4
+#17217
+-1 0 0 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Cucumber~
+@wLarge @gC@Gu@wc@Gu@gm@wb@Ge@wr@n~
+@wA @wlarge @gc@Gu@wc@Gu@gm@wb@Ge@wr@w is lying here@n~
+~
+19 1 0 0 0 2 150 0
+G
+1556409521
+U
+-1
+Z
+4
+#17217
+-1 0 0 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Cucumber~
+@wLarge @gC@Gu@wc@Gu@gm@wb@Ge@wr@n~
+@wA @wlarge @gc@Gu@wc@Gu@gm@wb@Ge@wr@w is lying here@n~
+~
+19 1 0 0 0 2 150 0
+G
+1556409521
+U
+-1
+Z
+4
+#17217
+-1 0 0 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Cucumber~
+@wLarge @gC@Gu@wc@Gu@gm@wb@Ge@wr@n~
+@wA @wlarge @gc@Gu@wc@Gu@gm@wb@Ge@wr@w is lying here@n~
+~
+19 1 0 0 0 2 150 0
+G
+1556409521
+U
+-1
+Z
+4
+#17217
+-1 0 0 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Cucumber~
+@wLarge @gC@Gu@wc@Gu@gm@wb@Ge@wr@n~
+@wA @wlarge @gc@Gu@wc@Gu@gm@wb@Ge@wr@w is lying here@n~
+~
+19 1 0 0 0 2 150 0
+G
+1556409521
+U
+-1
+Z
+4
+#17217
+-1 0 0 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Cucumber~
+@wLarge @gC@Gu@wc@Gu@gm@wb@Ge@wr@n~
+@wA @wlarge @gc@Gu@wc@Gu@gm@wb@Ge@wr@w is lying here@n~
+~
+19 1 0 0 0 2 150 0
+G
+1556409521
+U
+-1
+Z
+4
+#17217
+-1 0 0 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Cucumber~
+@wLarge @gC@Gu@wc@Gu@gm@wb@Ge@wr@n~
+@wA @wlarge @gc@Gu@wc@Gu@gm@wb@Ge@wr@w is lying here@n~
+~
+19 1 0 0 0 2 150 0
+G
+1556409521
+U
+-1
+Z
+4
+#17217
+-1 0 0 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Cucumber~
+@wLarge @gC@Gu@wc@Gu@gm@wb@Ge@wr@n~
+@wA @wlarge @gc@Gu@wc@Gu@gm@wb@Ge@wr@w is lying here@n~
+~
+19 1 0 0 0 2 150 0
+G
+1556409521
+U
+-1
+Z
+4
+#17217
+-1 0 0 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Cucumber~
+@wLarge @gC@Gu@wc@Gu@gm@wb@Ge@wr@n~
+@wA @wlarge @gc@Gu@wc@Gu@gm@wb@Ge@wr@w is lying here@n~
+~
+19 1 0 0 0 2 150 0
+G
+1556409521
+U
+-1
+Z
+4
+#17217
+-1 0 0 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Cucumber~
+@wLarge @gC@Gu@wc@Gu@gm@wb@Ge@wr@n~
+@wA @wlarge @gc@Gu@wc@Gu@gm@wb@Ge@wr@w is lying here@n~
+~
+19 1 0 0 0 2 150 0
+G
+1556409521
+U
+-1
+Z
+4
+#17217
+-1 0 0 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Cucumber~
+@wLarge @gC@Gu@wc@Gu@gm@wb@Ge@wr@n~
+@wA @wlarge @gc@Gu@wc@Gu@gm@wb@Ge@wr@w is lying here@n~
+~
+19 1 0 0 0 2 150 0
+G
+1556409521
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556409473
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556409504
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556409504
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556409504
+U
+-1
+Z
+4
+#1131
+-1 1 1 0 0 100 100 0 14 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Garlic Cloves~
+@yG@Ya@wr@Yl@wic @YC@wlo@Yve@ws@n~
+@wSome @yg@Ya@wr@Yl@wic @Yc@wlo@Yve@ws @ware lying here@n~
+~
+19 1 0 0 0 1 120 0
+G
+1556409554
+U
+-1
+Z
+4
+#1131
+-1 1 1 0 0 100 100 0 14 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Garlic Cloves~
+@yG@Ya@wr@Yl@wic @YC@wlo@Yve@ws@n~
+@wSome @yg@Ya@wr@Yl@wic @Yc@wlo@Yve@ws @ware lying here@n~
+~
+19 1 0 0 0 1 120 0
+G
+1556409554
+U
+-1
+Z
+4
+#1131
+-1 1 1 0 0 100 100 0 14 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Garlic Cloves~
+@yG@Ya@wr@Yl@wic @YC@wlo@Yve@ws@n~
+@wSome @yg@Ya@wr@Yl@wic @Yc@wlo@Yve@ws @ware lying here@n~
+~
+19 1 0 0 0 1 120 0
+G
+1556409554
+U
+-1
+Z
+4
+#1131
+-1 1 1 0 0 100 100 0 14 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Garlic Cloves~
+@yG@Ya@wr@Yl@wic @YC@wlo@Yve@ws@n~
+@wSome @yg@Ya@wr@Yl@wic @Yc@wlo@Yve@ws @ware lying here@n~
+~
+19 1 0 0 0 1 120 0
+G
+1556409554
+U
+-1
+Z
+4
+#1131
+-1 1 1 0 0 100 100 0 14 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Garlic Cloves~
+@yG@Ya@wr@Yl@wic @YC@wlo@Yve@ws@n~
+@wSome @yg@Ya@wr@Yl@wic @Yc@wlo@Yve@ws @ware lying here@n~
+~
+19 1 0 0 0 1 120 0
+G
+1556409554
+U
+-1
+Z
+4
+#1131
+-1 1 1 0 0 100 100 0 14 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Garlic Cloves~
+@yG@Ya@wr@Yl@wic @YC@wlo@Yve@ws@n~
+@wSome @yg@Ya@wr@Yl@wic @Yc@wlo@Yve@ws @ware lying here@n~
+~
+19 1 0 0 0 1 120 0
+G
+1556409554
+U
+-1
+Z
+4
+#1131
+-1 1 1 0 0 100 100 0 14 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Garlic Cloves~
+@yG@Ya@wr@Yl@wic @YC@wlo@Yve@ws@n~
+@wSome @yg@Ya@wr@Yl@wic @Yc@wlo@Yve@ws @ware lying here@n~
+~
+19 1 0 0 0 1 120 0
+G
+1556409554
+U
+-1
+Z
+4
+#1131
+-1 1 1 0 0 100 100 0 14 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Garlic Cloves~
+@yG@Ya@wr@Yl@wic @YC@wlo@Yve@ws@n~
+@wSome @yg@Ya@wr@Yl@wic @Yc@wlo@Yve@ws @ware lying here@n~
+~
+19 1 0 0 0 1 120 0
+G
+1556409554
+U
+-1
+Z
+4
+#1131
+-1 1 1 0 0 100 100 0 14 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Garlic Cloves~
+@yG@Ya@wr@Yl@wic @YC@wlo@Yve@ws@n~
+@wSome @yg@Ya@wr@Yl@wic @Yc@wlo@Yve@ws @ware lying here@n~
+~
+19 1 0 0 0 1 120 0
+G
+1556409554
+U
+-1
+Z
+4
+#1131
+-1 1 1 0 0 100 100 0 14 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Garlic Cloves~
+@yG@Ya@wr@Yl@wic @YC@wlo@Yve@ws@n~
+@wSome @yg@Ya@wr@Yl@wic @Yc@wlo@Yve@ws @ware lying here@n~
+~
+19 1 0 0 0 1 120 0
+G
+1556409554
+U
+-1
+Z
+4
+#1131
+-1 1 1 0 0 100 100 0 14 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Garlic Cloves~
+@yG@Ya@wr@Yl@wic @YC@wlo@Yve@ws@n~
+@wSome @yg@Ya@wr@Yl@wic @Yc@wlo@Yve@ws @ware lying here@n~
+~
+19 1 0 0 0 1 120 0
+G
+1556409554
+U
+-1
+Z
+4
+#1131
+-1 1 1 0 0 100 100 0 14 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Garlic Cloves~
+@yG@Ya@wr@Yl@wic @YC@wlo@Yve@ws@n~
+@wSome @yg@Ya@wr@Yl@wic @Yc@wlo@Yve@ws @ware lying here@n~
+~
+19 1 0 0 0 1 120 0
+G
+1556409554
+U
+-1
+Z
+4
+#1131
+-1 1 1 0 0 100 100 0 14 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Garlic Cloves~
+@yG@Ya@wr@Yl@wic @YC@wlo@Yve@ws@n~
+@wSome @yg@Ya@wr@Yl@wic @Yc@wlo@Yve@ws @ware lying here@n~
+~
+19 1 0 0 0 1 120 0
+G
+1556409554
+U
+-1
+Z
+4
+#1131
+-1 1 1 0 0 100 100 0 14 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Garlic Cloves~
+@yG@Ya@wr@Yl@wic @YC@wlo@Yve@ws@n~
+@wSome @yg@Ya@wr@Yl@wic @Yc@wlo@Yve@ws @ware lying here@n~
+~
+19 1 0 0 0 1 120 0
+G
+1556409554
+U
+-1
+Z
+4
+#1131
+-1 1 1 0 0 100 100 0 14 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Garlic Cloves~
+@yG@Ya@wr@Yl@wic @YC@wlo@Yve@ws@n~
+@wSome @yg@Ya@wr@Yl@wic @Yc@wlo@Yve@ws @ware lying here@n~
+~
+19 1 0 0 0 1 120 0
+G
+1556409554
+U
+-1
+Z
+4
+#1131
+-1 1 1 0 0 100 100 0 14 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Garlic Cloves~
+@yG@Ya@wr@Yl@wic @YC@wlo@Yve@ws@n~
+@wSome @yg@Ya@wr@Yl@wic @Yc@wlo@Yve@ws @ware lying here@n~
+~
+19 1 0 0 0 1 120 0
+G
+1556409554
+U
+-1
+Z
+4
+#1131
+-1 1 1 0 0 100 100 0 14 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Garlic Cloves~
+@yG@Ya@wr@Yl@wic @YC@wlo@Yve@ws@n~
+@wSome @yg@Ya@wr@Yl@wic @Yc@wlo@Yve@ws @ware lying here@n~
+~
+19 1 0 0 0 1 120 0
+G
+1556409554
+U
+-1
+Z
+4
+#1131
+-1 1 1 0 0 100 100 0 14 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Garlic Cloves~
+@yG@Ya@wr@Yl@wic @YC@wlo@Yve@ws@n~
+@wSome @yg@Ya@wr@Yl@wic @Yc@wlo@Yve@ws @ware lying here@n~
+~
+19 1 0 0 0 1 120 0
+G
+1556409554
+U
+-1
+Z
+4
+#1131
+-1 1 1 0 0 100 100 0 14 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Garlic Cloves~
+@yG@Ya@wr@Yl@wic @YC@wlo@Yve@ws@n~
+@wSome @yg@Ya@wr@Yl@wic @Yc@wlo@Yve@ws @ware lying here@n~
+~
+19 1 0 0 0 1 120 0
+G
+1556409554
+U
+-1
+Z
+4
+#1131
+-1 1 1 0 0 100 100 0 14 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Garlic Cloves~
+@yG@Ya@wr@Yl@wic @YC@wlo@Yve@ws@n~
+@wSome @yg@Ya@wr@Yl@wic @Yc@wlo@Yve@ws @ware lying here@n~
+~
+19 1 0 0 0 1 120 0
+G
+1556409554
+U
+-1
+Z
+4
+#1131
+-1 1 1 0 0 100 100 0 14 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Garlic Cloves~
+@yG@Ya@wr@Yl@wic @YC@wlo@Yve@ws@n~
+@wSome @yg@Ya@wr@Yl@wic @Yc@wlo@Yve@ws @ware lying here@n~
+~
+19 1 0 0 0 1 120 0
+G
+1556409554
+U
+-1
+Z
+4
+#1131
+-1 1 1 0 0 100 100 0 14 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Garlic Cloves~
+@yG@Ya@wr@Yl@wic @YC@wlo@Yve@ws@n~
+@wSome @yg@Ya@wr@Yl@wic @Yc@wlo@Yve@ws @ware lying here@n~
+~
+19 1 0 0 0 1 120 0
+G
+1556409554
+U
+-1
+Z
+4
+#1131
+-1 1 1 0 0 100 100 0 14 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Garlic Cloves~
+@yG@Ya@wr@Yl@wic @YC@wlo@Yve@ws@n~
+@wSome @yg@Ya@wr@Yl@wic @Yc@wlo@Yve@ws @ware lying here@n~
+~
+19 1 0 0 0 1 120 0
+G
+1556409554
+U
+-1
+Z
+4
+#1131
+-1 1 1 0 0 100 100 0 14 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Garlic Cloves~
+@yG@Ya@wr@Yl@wic @YC@wlo@Yve@ws@n~
+@wSome @yg@Ya@wr@Yl@wic @Yc@wlo@Yve@ws @ware lying here@n~
+~
+19 1 0 0 0 1 120 0
+G
+1556409554
+U
+-1
+Z
+4
+#1131
+-1 1 1 0 0 100 100 0 14 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Garlic Cloves~
+@yG@Ya@wr@Yl@wic @YC@wlo@Yve@ws@n~
+@wSome @yg@Ya@wr@Yl@wic @Yc@wlo@Yve@ws @ware lying here@n~
+~
+19 1 0 0 0 1 120 0
+G
+1556409554
+U
+-1
+Z
+4
+#1131
+-1 1 1 0 0 100 100 0 14 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Garlic Cloves~
+@yG@Ya@wr@Yl@wic @YC@wlo@Yve@ws@n~
+@wSome @yg@Ya@wr@Yl@wic @Yc@wlo@Yve@ws @ware lying here@n~
+~
+19 1 0 0 0 1 120 0
+G
+1556409554
+U
+-1
+Z
+4
+#1131
+-1 1 1 0 0 100 100 0 14 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Garlic Cloves~
+@yG@Ya@wr@Yl@wic @YC@wlo@Yve@ws@n~
+@wSome @yg@Ya@wr@Yl@wic @Yc@wlo@Yve@ws @ware lying here@n~
+~
+19 1 0 0 0 1 120 0
+G
+1556409554
+U
+-1
+Z
+4
+#1131
+-1 1 1 0 0 100 100 0 14 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Garlic Cloves~
+@yG@Ya@wr@Yl@wic @YC@wlo@Yve@ws@n~
+@wSome @yg@Ya@wr@Yl@wic @Yc@wlo@Yve@ws @ware lying here@n~
+~
+19 1 0 0 0 1 120 0
+G
+1556409554
+U
+-1
+Z
+4
+#17213
+-1 10 10 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Potato~
+@YLarge @yPotato@n~
+@wA @Ylarge @ypotato@w is lying here@n~
+~
+19 1 0 0 0 1 170 0
+G
+1556733943
+U
+-1
+Z
+4
+#17215
+-1 4 4 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Onion~
+@WLarge @wO@Wn@Yi@wo@yn@n~
+@wA @Wlarge @wo@Wn@Yi@wo@yn @wis lying here@n~
+~
+19 1 0 0 0 1 115 0
+G
+1556733950
+U
+-1
+Z
+4
+#17215
+-1 4 4 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Onion~
+@WLarge @wO@Wn@Yi@wo@yn@n~
+@wA @Wlarge @wo@Wn@Yi@wo@yn @wis lying here@n~
+~
+19 1 0 0 0 1 115 0
+G
+1556733950
+U
+-1
+Z
+4
+#17215
+-1 4 4 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Onion~
+@WLarge @wO@Wn@Yi@wo@yn@n~
+@wA @Wlarge @wo@Wn@Yi@wo@yn @wis lying here@n~
+~
+19 1 0 0 0 1 115 0
+G
+1556733950
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17219
+-1 2 2 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Chili Pepper~
+@rC@Yh@Ri@Gl@Yi @rP@Reppe@rr@n~
+@wA @rc@Yh@Ri@Gl@Yi @rp@Reppe@rr@w is lying here@n~
+~
+19 1 0 0 0 1 80 0
+G
+1556733958
+U
+-1
+Z
+4
+#17215
+-1 4 4 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Onion~
+@WLarge @wO@Wn@Yi@wo@yn@n~
+@wA @Wlarge @wo@Wn@Yi@wo@yn @wis lying here@n~
+~
+19 1 0 0 0 1 115 0
+G
+1556733950
+U
+-1
+Z
+4
+#17215
+-1 4 4 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Onion~
+@WLarge @wO@Wn@Yi@wo@yn@n~
+@wA @Wlarge @wo@Wn@Yi@wo@yn @wis lying here@n~
+~
+19 1 0 0 0 1 115 0
+G
+1556733950
+U
+-1
+Z
+4
+#17215
+-1 4 4 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Onion~
+@WLarge @wO@Wn@Yi@wo@yn@n~
+@wA @Wlarge @wo@Wn@Yi@wo@yn @wis lying here@n~
+~
+19 1 0 0 0 1 115 0
+G
+1556733950
+U
+-1
+Z
+4
+#17215
+-1 4 4 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Onion~
+@WLarge @wO@Wn@Yi@wo@yn@n~
+@wA @Wlarge @wo@Wn@Yi@wo@yn @wis lying here@n~
+~
+19 1 0 0 0 1 115 0
+G
+1556733950
+U
+-1
+Z
+4
+#17215
+-1 4 4 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Onion~
+@WLarge @wO@Wn@Yi@wo@yn@n~
+@wA @Wlarge @wo@Wn@Yi@wo@yn @wis lying here@n~
+~
+19 1 0 0 0 1 115 0
+G
+1556733950
+U
+-1
+Z
+4
+#17215
+-1 4 4 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Onion~
+@WLarge @wO@Wn@Yi@wo@yn@n~
+@wA @Wlarge @wo@Wn@Yi@wo@yn @wis lying here@n~
+~
+19 1 0 0 0 1 115 0
+G
+1556733950
+U
+-1
+Z
+4
+#17215
+-1 4 4 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Onion~
+@WLarge @wO@Wn@Yi@wo@yn@n~
+@wA @Wlarge @wo@Wn@Yi@wo@yn @wis lying here@n~
+~
+19 1 0 0 0 1 115 0
+G
+1556733950
+U
+-1
+Z
+4
+#17215
+-1 4 4 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Onion~
+@WLarge @wO@Wn@Yi@wo@yn@n~
+@wA @Wlarge @wo@Wn@Yi@wo@yn @wis lying here@n~
+~
+19 1 0 0 0 1 115 0
+G
+1556733950
+U
+-1
+Z
+4
+#17215
+-1 4 4 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Onion~
+@WLarge @wO@Wn@Yi@wo@yn@n~
+@wA @Wlarge @wo@Wn@Yi@wo@yn @wis lying here@n~
+~
+19 1 0 0 0 1 115 0
+G
+1556733950
+U
+-1
+Z
+4
+#17215
+-1 4 4 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Onion~
+@WLarge @wO@Wn@Yi@wo@yn@n~
+@wA @Wlarge @wo@Wn@Yi@wo@yn @wis lying here@n~
+~
+19 1 0 0 0 1 115 0
+G
+1556733950
+U
+-1
+Z
+4
+#17215
+-1 4 4 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Onion~
+@WLarge @wO@Wn@Yi@wo@yn@n~
+@wA @Wlarge @wo@Wn@Yi@wo@yn @wis lying here@n~
+~
+19 1 0 0 0 1 115 0
+G
+1556733950
+U
+-1
+Z
+4
+#17215
+-1 4 4 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Onion~
+@WLarge @wO@Wn@Yi@wo@yn@n~
+@wA @Wlarge @wo@Wn@Yi@wo@yn @wis lying here@n~
+~
+19 1 0 0 0 1 115 0
+G
+1556733950
+U
+-1
+Z
+4
+#17215
+-1 4 4 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Onion~
+@WLarge @wO@Wn@Yi@wo@yn@n~
+@wA @Wlarge @wo@Wn@Yi@wo@yn @wis lying here@n~
+~
+19 1 0 0 0 1 115 0
+G
+1556733950
+U
+-1
+Z
+4
+#17215
+-1 4 4 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Onion~
+@WLarge @wO@Wn@Yi@wo@yn@n~
+@wA @Wlarge @wo@Wn@Yi@wo@yn @wis lying here@n~
+~
+19 1 0 0 0 1 115 0
+G
+1556733950
+U
+-1
+Z
+4
+#17215
+-1 4 4 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Onion~
+@WLarge @wO@Wn@Yi@wo@yn@n~
+@wA @Wlarge @wo@Wn@Yi@wo@yn @wis lying here@n~
+~
+19 1 0 0 0 1 115 0
+G
+1556733950
+U
+-1
+Z
+4
+#17215
+-1 4 4 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Onion~
+@WLarge @wO@Wn@Yi@wo@yn@n~
+@wA @Wlarge @wo@Wn@Yi@wo@yn @wis lying here@n~
+~
+19 1 0 0 0 1 115 0
+G
+1556733950
+U
+-1
+Z
+4
+#17215
+-1 4 4 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Onion~
+@WLarge @wO@Wn@Yi@wo@yn@n~
+@wA @Wlarge @wo@Wn@Yi@wo@yn @wis lying here@n~
+~
+19 1 0 0 0 1 115 0
+G
+1556733950
+U
+-1
+Z
+4
+#1407
+0 200 1 -1 0 100 100 0 6 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+large leather sack Veggies~
+@wA Large Leather Sack@n @wnicknamed @D(@CVeggies@D)@n~
+@wA large leather sack is lying here@n~
+~
+15 1 0 0 0 2 50 0
+G
+1556294482
+U
+1753281260681980694
+Z
+4
+#17217
+-1 0 0 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Cucumber~
+@wLarge @gC@Gu@wc@Gu@gm@wb@Ge@wr@n~
+@wA @wlarge @gc@Gu@wc@Gu@gm@wb@Ge@wr@w is lying here@n~
+~
+19 1 0 0 0 2 150 0
+G
+1556733897
+U
+-1
+Z
+4
+#17217
+-1 0 0 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Cucumber~
+@wLarge @gC@Gu@wc@Gu@gm@wb@Ge@wr@n~
+@wA @wlarge @gc@Gu@wc@Gu@gm@wb@Ge@wr@w is lying here@n~
+~
+19 1 0 0 0 2 150 0
+G
+1556733897
+U
+-1
+Z
+4
+#17217
+-1 0 0 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Cucumber~
+@wLarge @gC@Gu@wc@Gu@gm@wb@Ge@wr@n~
+@wA @wlarge @gc@Gu@wc@Gu@gm@wb@Ge@wr@w is lying here@n~
+~
+19 1 0 0 0 2 150 0
+G
+1556733897
+U
+-1
+Z
+4
+#17217
+-1 0 0 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Cucumber~
+@wLarge @gC@Gu@wc@Gu@gm@wb@Ge@wr@n~
+@wA @wlarge @gc@Gu@wc@Gu@gm@wb@Ge@wr@w is lying here@n~
+~
+19 1 0 0 0 2 150 0
+G
+1556733897
+U
+-1
+Z
+4
+#17217
+-1 0 0 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Cucumber~
+@wLarge @gC@Gu@wc@Gu@gm@wb@Ge@wr@n~
+@wA @wlarge @gc@Gu@wc@Gu@gm@wb@Ge@wr@w is lying here@n~
+~
+19 1 0 0 0 2 150 0
+G
+1556733897
+U
+-1
+Z
+4
+#17217
+-1 0 0 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Cucumber~
+@wLarge @gC@Gu@wc@Gu@gm@wb@Ge@wr@n~
+@wA @wlarge @gc@Gu@wc@Gu@gm@wb@Ge@wr@w is lying here@n~
+~
+19 1 0 0 0 2 150 0
+G
+1556733897
+U
+-1
+Z
+4
+#17217
+-1 0 0 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Cucumber~
+@wLarge @gC@Gu@wc@Gu@gm@wb@Ge@wr@n~
+@wA @wlarge @gc@Gu@wc@Gu@gm@wb@Ge@wr@w is lying here@n~
+~
+19 1 0 0 0 2 150 0
+G
+1556733897
+U
+-1
+Z
+4
+#17217
+-1 0 0 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Cucumber~
+@wLarge @gC@Gu@wc@Gu@gm@wb@Ge@wr@n~
+@wA @wlarge @gc@Gu@wc@Gu@gm@wb@Ge@wr@w is lying here@n~
+~
+19 1 0 0 0 2 150 0
+G
+1556733897
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17225
+-1 1 1 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Bean~
+@gG@Gree@gn @gB@Gea@gn@n~
+@wA @gg@Gree@gn @gb@Gea@gn@w is lying here@n~
+~
+19 1 0 0 0 1 44 0
+G
+1556733910
+U
+-1
+Z
+4
+#17215
+-1 4 4 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Onion~
+@WLarge @wO@Wn@Yi@wo@yn@n~
+@wA @Wlarge @wo@Wn@Yi@wo@yn @wis lying here@n~
+~
+19 1 0 0 0 1 115 0
+G
+1556733950
+U
+-1
+Z
+4
+#17215
+-1 4 4 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Onion~
+@WLarge @wO@Wn@Yi@wo@yn@n~
+@wA @Wlarge @wo@Wn@Yi@wo@yn @wis lying here@n~
+~
+19 1 0 0 0 1 115 0
+G
+1556733950
+U
+-1
+Z
+4
+#17215
+-1 4 4 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Onion~
+@WLarge @wO@Wn@Yi@wo@yn@n~
+@wA @Wlarge @wo@Wn@Yi@wo@yn @wis lying here@n~
+~
+19 1 0 0 0 1 115 0
+G
+1556733950
+U
+-1
+Z
+4
+#17215
+-1 4 4 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Onion~
+@WLarge @wO@Wn@Yi@wo@yn@n~
+@wA @Wlarge @wo@Wn@Yi@wo@yn @wis lying here@n~
+~
+19 1 0 0 0 1 115 0
+G
+1556733950
+U
+-1
+Z
+4
+#17215
+-1 4 4 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Onion~
+@WLarge @wO@Wn@Yi@wo@yn@n~
+@wA @Wlarge @wo@Wn@Yi@wo@yn @wis lying here@n~
+~
+19 1 0 0 0 1 115 0
+G
+1556733950
+U
+-1
+Z
+4
+#17215
+-1 4 4 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Onion~
+@WLarge @wO@Wn@Yi@wo@yn@n~
+@wA @Wlarge @wo@Wn@Yi@wo@yn @wis lying here@n~
+~
+19 1 0 0 0 1 115 0
+G
+1556733950
+U
+-1
+Z
+4
+#17215
+-1 4 4 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Onion~
+@WLarge @wO@Wn@Yi@wo@yn@n~
+@wA @Wlarge @wo@Wn@Yi@wo@yn @wis lying here@n~
+~
+19 1 0 0 0 1 115 0
+G
+1556733950
+U
+-1
+Z
+4
+#17215
+-1 4 4 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Onion~
+@WLarge @wO@Wn@Yi@wo@yn@n~
+@wA @Wlarge @wo@Wn@Yi@wo@yn @wis lying here@n~
+~
+19 1 0 0 0 1 115 0
+G
+1556733950
+U
+-1
+Z
+4
+#17215
+-1 4 4 0 0 100 100 0 45 0 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Onion~
+@WLarge @wO@Wn@Yi@wo@yn@n~
+@wA @Wlarge @wo@Wn@Yi@wo@yn @wis lying here@n~
+~
+19 1 0 0 0 1 115 0
+G
+1556733950
+U
+-1
+Z
+4
+#1407
+0 200 1 -1 0 100 100 0 6 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+large leather sack Veg2~
+@wA Large Leather Sack@n @wnicknamed @D(@CVeg2@D)@n~
+@wA large leather sack is lying here@n~
+~
+15 1 0 0 0 2 50 0
+G
+1556585341
+U
+2145531878770529381
+Z
+4

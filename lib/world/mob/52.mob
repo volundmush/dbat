@@ -1,0 +1,112 @@
+#5200
+Mountain Goat~
+a mountain goat~
+A mountain goat is wandering around here, looking for shrubs to munch on.
+~
+@D @n
+~
+dxyz 0 0 0 l 0 0 0 0 E
+50 0 10 0d4+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 4
+Str: 47
+Dex: 45
+Int: 18
+Wis: 8
+Con: 40
+Cha: 31
+E
+#5201
+Mountain Goat~
+a mountain goat~
+A mountain goat is wandering around here, looking for shrubs to munch on.
+~
+@D @n
+~
+dxyz 0 0 0 l 0 0 0 0 E
+51 0 10 0d4+0 0d0+0
+0 0 15 28
+8 8 2
+Size: 4
+Str: 51
+Dex: 32
+Int: 5
+Wis: 18
+Con: 33
+Cha: 51
+E
+#5202
+Spiney Thorned Lizard~
+a spiney thorned lizard~
+A small lizard with a row of thorns along its back is laying here in the sun.
+~
+@D @n
+~
+dxyz 0 0 0 l 0 0 0 0 E
+52 0 10 0d4+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 3
+Str: 44
+Dex: 50
+Int: 5
+Wis: 8
+Con: 43
+Cha: 27
+E
+#5203
+Baby Wyrm~
+a baby wyrm~
+A baby wyrm is here hunting for food.
+~
+@D @n
+~
+dxyz 0 0 0 l 0 0 0 0 E
+54 0 10 0d4+0 0d0+0
+0 0 21 28
+8 8 1
+Str: 49
+Dex: 52
+Int: 8
+Wis: 7
+Con: 51
+Cha: 30
+E
+#5204
+Baby Wyrm~
+a baby wyrm~
+A baby wyrm is here hunting for food.
+~
+@D @n
+~
+dxyz 0 0 0 l 0 0 0 0 E
+55 0 10 0d4+0 0d0+0
+0 0 21 28
+8 8 1
+Str: 44
+Dex: 36
+Int: 9
+Wis: 14
+Con: 48
+Cha: 54
+E
+#5205
+Wyrm~
+a wyrm~
+An angry looking gigantic Wyrm is here.
+~
+@D @n
+~
+dfxyz 0 0 0 lx 0 0 0 -100 E
+60 0 10 0d4+0 0d0+0
+0 0 21 28
+8 8 1
+Str: 57
+Dex: 40
+Int: 8
+Wis: 19
+Con: 39
+Cha: 57
+E
+$

@@ -1,0 +1,278 @@
+#19001
+Cowgirl~
+a Cowgirl~
+A bored looking girl wearing clothing from the store stands here
+~
+
+~
+bds 0 0 0 0 0 0 0 0 E
+20 20 10 0d0+0 0d0+0
+0 0 0 28
+8 8 2
+Str: 11
+Dex: 9
+Int: 11
+Wis: 11
+Con: 9
+Cha: 9
+E
+T 19001
+#19002
+Hyoua~
+Hyouga~
+Hyouga stands behind a counter here
+~
+ 
+~
+bds 0 0 0 l 0 0 0 0 E
+50 20 10 0d0+0 0d0+0
+0 0 2 28
+8 8 1
+Str: 13
+Dex: 12
+Int: 13
+Wis: 13
+Con: 12
+Cha: 12
+E
+T 19002
+#19003
+Mufzin~
+Mufzin~
+An old Saiyan stands boredly behind a counter here
+~
+ 
+~
+bds 0 0 0 l 0 0 0 0 E
+55 20 10 0d0+0 0d0+0
+0 0 1 28
+8 8 1
+Str: 11
+Dex: 13
+Int: 11
+Wis: 11
+Con: 13
+Cha: 13
+E
+T 19003
+#19004
+Nedren~
+Nedren~
+A Konatsu sits behind the counter here
+~
+ 
+~
+bds 0 0 0 l 0 0 0 0 E
+70 20 10 0d0+0 0d0+0
+0 0 3 28
+8 8 1
+Str: 8
+Dex: 8
+Int: 8
+Wis: 8
+Con: 8
+Cha: 8
+E
+T 19004
+#19005
+Kaidran~
+Kaidran~
+A bored looking Kai sits behind the counter here
+~
+
+~
+bds 0 0 0 l 0 0 0 0 E
+70 20 10 0d0+0 0d0+0
+0 0 12 28
+8 8 1
+Str: 8
+Dex: 12
+Int: 8
+Wis: 8
+Con: 12
+Cha: 12
+E
+T 19005
+#19006
+Nomad~
+a Nomad~
+A Namekian Nomad sits in the corner
+~
+
+~
+bds 0 0 0 l 0 0 0 0 E
+50 20 10 0d0+0 0d0+0
+0 0 4 28
+8 8 1
+Str: 13
+Dex: 15
+Int: 13
+Wis: 13
+Con: 15
+Cha: 15
+E
+T 19006
+#19007
+Clarice~
+Clarice~
+A Teenager stands behind the counter here
+~
+ 
+~
+bds 0 0 0 0 0 0 0 0 E
+10 20 10 0d0+0 0d0+0
+0 0 0 28
+8 8 2
+Str: 13
+Dex: 11
+Int: 13
+Wis: 13
+Con: 11
+Cha: 11
+E
+T 19007
+#19008
+Seth~
+Seth~
+A young Kai sits behind a counter here
+~
+
+~
+bds 0 0 0 l 0 0 0 0 E
+18 20 10 0d0+0 0d0+0
+0 0 12 28
+8 8 1
+Str: 8
+Dex: 11
+Int: 8
+Wis: 8
+Con: 11
+Cha: 11
+E
+T 19008
+#19009
+Shivita~
+@CS@Wh@Yivi@Wt@Ca@n~
+@CS@Wh@Yivi@Wt@Ca@n is wearing a bikini and cleaning a car here
+~
+@CS@Wh@Yivi@Wt@Ca@n is a voluptuous woman with an almost blank look on her face at all
+times. It is quite obvious she was not hired for her intelligence.
+~
+bd 0 0 0 0 0 0 0 0 E
+100 20 10 0d0+0 0d0+0
+0 0 0 28
+8 8 2
+Str: 9
+Dex: 10
+Int: 9
+Wis: 9
+Con: 10
+Cha: 10
+E
+T 19014
+#19010
+jiro jiro1~
+@CJ@Wir@Co@n~
+@CJ@Wir@Co@n, a three michelin star sushi chef, stands here
+~
+@CJ@Wir@Co@n, has the rigid face of one who is an expert in his profession. His eyes
+show that he is a man that does not tolerate imperfections.
+~
+bd 0 0 0 0 0 0 0 0 E
+100 20 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 12
+Dex: 15
+Int: 12
+Wis: 12
+Con: 15
+Cha: 15
+E
+T 19012
+#19011
+elite sparring dummy~
+@DE@rl@yi@rt@De @DS@rp@yarri@rn@Dg @DD@ru@ym@rm@Dy@n~
+@nAn @DE@rl@yi@rt@De @DS@rp@yarri@rn@Dg @DD@ru@ym@rm@Dy@n stands here, looking lethal
+~
+This robotic training dummy looks impressively built. While it emits no power
+readings, the stands and sleek features speak of a fighting level beyond that
+which most are capable of achieving.
+~
+bd 0 0 0 l 0 0 0 0 E
+100 20 10 0d0+0 0d0+0
+0 0 9 28
+8 8 1
+Str: 15
+Dex: 15
+Int: 15
+Wis: 15
+Con: 15
+Cha: 15
+E
+#19043
+Black Omen Guardian~
+@cB@n@Cl@n@Wa@n@Dck@n @cO@n@Cm@n@We@n@Dn@n @gG@n@Gu@n@Wardi@n@Dan@n~
+A large, humanoid construct is standing guard here.
+~
+   It is made up of a black, organic material and is fused with numerous red
+crystals. It has a high-tech electro-stunner grafted into its right arm and
+wields a large assault rifle with it's left arm.
+~
+d 0 0 0 l 0 0 0 0 E
+100 20 10 0d0+0 0d0+0
+0 0 8 28
+8 8 1
+Size: 5
+BareHandAttack: 12
+Str: 14
+Dex: 14
+Int: 14
+Wis: 14
+Con: 14
+Cha: 14
+E
+#19044
+Service Droid~
+@cB@n@Cl@n@Wa@n@Dck@n @cO@n@Cm@n@We@n@Dn@n @gS@n@Ge@n@Wrvi@n@Dce@n @gD@n@Gr@n@Woi@n@Dd@n~
+A little, humanoid Droid is wandering here, wiping down tables and waiting to greet guests.
+~
+   It is made up of a black, metal material and is covered with numerous red
+crystals.
+~
+bdA 0 0 0 0 0 0 0 0 E
+1 20 10 0d0+0 0d0+0
+0 0 9 28
+8 8 1
+Size: 3
+Str: 9
+Dex: 8
+Int: 9
+Wis: 9
+Con: 8
+Cha: 8
+E
+T 19044
+#19045
+Lavos~
+@RL@n@Ya@n@rv@n@Yo@n@Rs@n~
+The large, shelled @RL@n@Ya@n@rv@n@Yo@n@Rs@n lies dormant here.
+~
+   This massive red beast fills a large portion of the room, it is connected to
+the equally large Mammon Machine through wires and hoses bored into its
+carapace.
+~
+bd 0 0 0 0 0 0 0 0 E
+100 20 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 5
+Str: 15
+Dex: 10
+Int: 15
+Wis: 15
+Con: 10
+Cha: 10
+E
+T 19045
+$

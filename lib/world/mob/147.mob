@@ -1,0 +1,297 @@
+#14700
+Praskovya~
+Praskovya~
+Praskovya hums a little tune as she watches over the store.
+~
+@D @n
+~
+bds 0 0 0 l 0 0 0 0 E
+100 20 10 0d0+0 0d0+0
+0 0 13 28
+8 8 2
+Str: 15
+Dex: 12
+Int: 15
+Wis: 15
+Con: 12
+Cha: 12
+E
+#14701
+Stasya~
+Stasya~
+Stasya the Shift Perceptions sales rep, is here.
+~
+@D @n
+~
+bds 0 0 0 l 0 0 0 0 E
+100 20 10 0d0+0 0d0+0
+0 0 13 28
+8 8 2
+Str: 12
+Dex: 9
+Int: 12
+Wis: 12
+Con: 9
+Cha: 9
+E
+#14702
+Jozef~
+Jozef~
+Jozef stands behind the counter here, watching the customers.
+~
+@D @n
+~
+bds 0 0 0 l 0 0 0 0 E
+100 20 10 0d0+0 0d0+0
+0 0 13 28
+8 8 1
+Str: 8
+Dex: 15
+Int: 8
+Wis: 8
+Con: 15
+Cha: 15
+E
+#14703
+Sergei~
+Sergei~
+Sergei the store owner, stands here.
+~
+@D @n
+~
+bds 0 0 0 l 0 0 0 0 E
+100 20 10 0d0+0 0d0+0
+0 0 13 28
+8 8 1
+Str: 8
+Dex: 13
+Int: 8
+Wis: 8
+Con: 13
+Cha: 13
+E
+#14704
+Lyubov~
+Lyubov~
+Lyubov stands here, wiping down a used part.
+~
+@D @n
+~
+bds 0 0 0 l 0 0 0 0 E
+100 20 10 0d0+0 0d0+0
+0 0 13 28
+8 8 2
+Str: 12
+Dex: 9
+Int: 12
+Wis: 12
+Con: 9
+Cha: 9
+E
+#14705
+Havel~
+Havel~
+Havel is serving customers here.
+~
+@D @n
+~
+bds 0 0 0 l 0 0 0 0 E
+100 20 10 0d0+0 0d0+0
+0 0 13 28
+8 8 1
+Str: 9
+Dex: 13
+Int: 9
+Wis: 9
+Con: 13
+Cha: 13
+E
+#14706
+Techno Tek~
+Techno Tek~
+Techno Tek stands behind the bar here.
+~
+@D @n
+~
+bds 0 0 0 l 0 0 0 0 E
+100 20 10 0d0+0 0d0+0
+0 0 13 28
+8 8 2
+Str: 15
+Dex: 10
+Int: 15
+Wis: 15
+Con: 10
+Cha: 10
+E
+#14707
+Natayla~
+Natayla~
+Natayla stands here, cleaning the kitchen.
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 0 E
+2 20 10 0d0+0 0d0+0
+0 0 13 28
+8 8 2
+Str: 9
+Dex: 12
+Int: 9
+Wis: 9
+Con: 12
+Cha: 12
+E
+#14708
+Moisey~
+Moisey~
+Moisey the Landlord, is here.
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 0 E
+2 20 10 0d0+0 0d0+0
+0 0 13 28
+8 8 1
+Str: 9
+Dex: 15
+Int: 9
+Wis: 9
+Con: 15
+Cha: 15
+E
+T 14700
+#14709
+Nevena~
+Nevena~
+Nevena rests here.
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 0 E
+2 20 10 0d0+0 0d0+0
+0 0 13 28
+8 8 2
+Str: 13
+Dex: 8
+Int: 13
+Wis: 13
+Con: 8
+Cha: 8
+E
+T 14701
+#14710
+Boris~
+Boris~
+Boris is standing here, playing a video game.
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 0 E
+2 20 10 0d0+0 0d0+0
+0 0 13 28
+8 8 1
+Str: 10
+Dex: 8
+Int: 10
+Wis: 10
+Con: 8
+Cha: 8
+E
+#14711
+Symon~
+Symon~
+Symon is standing here.
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 0 E
+2 20 10 0d0+0 0d0+0
+0 0 13 28
+8 8 1
+Str: 9
+Dex: 10
+Int: 9
+Wis: 9
+Con: 10
+Cha: 10
+E
+T 14702
+T 14703
+T 14704
+#14712
+Miroslava~
+Miroslava~
+Miroslava stands here.
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 0 E
+2 20 10 0d0+0 0d0+0
+0 0 13 28
+8 8 2
+Str: 10
+Dex: 9
+Int: 10
+Wis: 10
+Con: 9
+Cha: 9
+E
+T 14700
+#14713
+Larysa~
+Larysa~
+Larysa stands here, dusting the apartment.
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 0 E
+2 20 10 0d0+0 0d0+0
+0 0 13 28
+8 8 2
+Str: 11
+Dex: 12
+Int: 11
+Wis: 11
+Con: 12
+Cha: 12
+E
+#14714
+Rostislav~
+Rostislav~
+Rostislav stands here.
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 0 E
+1 20 10 0d0+0 0d0+0
+0 0 13 28
+8 8 1
+Str: 15
+Dex: 15
+Int: 15
+Wis: 15
+Con: 15
+Cha: 15
+E
+T 14701
+#14715
+Gabriela~
+Gabriela~
+Gabriela stands here, re-sizing a customer's equipment.
+~
+@D @n
+~
+bds 0 0 0 l 0 0 0 0 E
+100 20 10 0d0+0 0d0+0
+0 0 13 28
+8 8 2
+Str: 14
+Dex: 11
+Int: 14
+Wis: 14
+Con: 11
+Cha: 11
+E
+T 14790
+$

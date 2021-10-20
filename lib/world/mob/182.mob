@@ -1,0 +1,262 @@
+#18200
+Sentinel Drone~
+@CS@ce@Wn@wt@Di@Wn@ce@Cl @WD@wr@Do@wn@We@n~
+A Sentinel Drone hovers here.
+~
+   @DThis small titanium ball with a red eye hovers around the Black Spider
+Mercenaries Mansion, patrolling for any intruders. If an intruder is detected,
+it is capable of deploying small arms and legs from it's spherical shape, making
+it more than just a simple sentry. @n
+~
+cdmA 0 0 0 el 0 0 0 0 E
+105 0 10 0d6+0 0d0+0
+0 0 9 8
+8 8 0
+Size: 2
+Str: 99
+Dex: 56
+Int: 100
+Wis: 95
+Con: 85
+Cha: 59
+E
+#18201
+Shadow Warrior~
+@DShadow @wWarrior@n~
+A shadow warrior melds into the surroundings, here.
+~
+   @WShadow warriors are elite warriors in the League of Shadows. Each wears a
+black uniform that includes a blindfold because each Shadow Warrior upon
+becoming one, has their eyes removed. As such, these fearsome opponents have
+heightened senses in other departments to make up for their lack of vision. @n
+~
+cdmrvwxyz 0 0 0 el 0 0 0 0 E
+100 0 10 0d6+0 0d0+0
+0 0 3 2
+8 8 1
+Str: 67
+Dex: 62
+Int: 68
+Wis: 72
+Con: 75
+Cha: 76
+E
+#18202
+Shadow Initiate~
+a Shadow Initiate~
+A shadow initiate is here training.
+~
+@D @n
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+85 0 10 0d0+0 0d0+0
+0 0 3 28
+8 8 1
+Str: 46
+Dex: 61
+Int: 68
+Wis: 52
+Con: 48
+Cha: 59
+E
+#18203
+Jonin Warrior~
+a Jonin Warrior~
+A Jonin warrior is perfecting his style here
+~
+@D @n
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+90 0 10 0d0+0 0d0+0
+0 0 3 28
+8 8 1
+Str: 57
+Dex: 70
+Int: 80
+Wis: 53
+Con: 67
+Cha: 46
+E
+#18204
+Shadow Elite~
+@Da Shadow Elite@n~
+An elite shadow warrior patrols the area here.
+~
+@D @n
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+112 0 10 0d0+0 0d0+0
+0 0 3 28
+8 8 1
+Str: 98
+Dex: 100
+Int: 69
+Wis: 84
+Con: 100
+Cha: 100
+E
+#18205
+Kitaren Assassin~
+@MK@mi@Dt@wa@Wr@me@Mn @RA@rs@Ds@wa@Ws@Ds@ri@Rn@n~
+A @MK@mi@Dt@wa@Wr@me@Mn @RA@rs@Ds@wa@Ws@Ds@ri@Rn@n lurks here.
+~
+@D @n
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+115 0 10 0d0+0 0d0+0
+0 0 3 28
+8 8 2
+Str: 93
+Dex: 100
+Int: 74
+Wis: 84
+Con: 82
+Cha: 64
+E
+#18206
+Master Calor Icerian~
+@GM@ga@Ws@wt@ge@Gr @RC@ra@Dl@ro@Rr@n~
+An imposing Icerian clad in armor stands here, casting watchful gaze.
+~
+@D @n
+~
+bdlvwxyz 0 0 0 l 0 0 0 0 E
+120 0 10 0d4+0 0d0+0
+0 0 2 6
+8 8 1
+Size: 5
+Str: 100
+Dex: 100
+Int: 81
+Wis: 100
+Con: 76
+Cha: 81
+E
+#18207
+Ferocious Black Spider Merc~
+a Ferocious Black Spider Merc~
+A ferocious member of the Black Spider Mercs trains here.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 0 E
+91 0 10 0d0+0 0d0+0
+0 0 1 28
+8 8 1
+Str: 70
+Dex: 89
+Int: 74
+Wis: 86
+Con: 64
+Cha: 55
+E
+#18208
+Suave Black Spider Merc~
+a Suave Black Spider Merc~
+A suave member of the Black Spider Mercs trains here.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 0 E
+93 0 10 0d0+0 0d0+0
+0 0 12 28
+8 8 1
+Str: 90
+Dex: 53
+Int: 49
+Wis: 77
+Con: 90
+Cha: 92
+E
+#18209
+Ruthless Black Spider Merc~
+a Ruthless Black Spider Merc~
+A ruthless member of the Black Spider Mercs trains here.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 0 E
+94 0 10 0d0+0 0d0+0
+0 0 1 28
+8 8 1
+Str: 80
+Dex: 76
+Int: 67
+Wis: 48
+Con: 72
+Cha: 81
+E
+#18210
+Shadow Smith~
+a Shadow Smith~
+A shadow smith is here, selling components.
+~
+@D @n
+~
+bds 0 0 0 l 0 0 0 0 E
+100 0 10 0d6+0 0d0+0
+10000 0 0 2
+8 8 1
+Str: 100
+Dex: 81
+Int: 75
+Wis: 59
+Con: 81
+Cha: 59
+E
+#18211
+Jonin Shopkeeper~
+a Jonin Shopkeeper~
+A shopkeeper stands here, tending to the Jonin Armory
+~
+@D @n
+~
+bds 0 0 0 l 0 0 0 0 E
+100 0 10 0d6+0 0d0+0
+10000 0 0 2
+8 8 1
+Str: 88
+Dex: 53
+Int: 66
+Wis: 70
+Con: 91
+Cha: 56
+E
+#18212
+Black Spider Prison Guard~
+Black Spider Prison Guard~
+A prison guard stands here, keeping a keen eye on the cells.
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 0 E
+100 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 93
+Dex: 68
+Int: 73
+Wis: 80
+Con: 55
+Cha: 88
+E
+T 18202
+#18213
+Lamenting Shopkeeper~
+Lamenting Shopkeeper~
+The lamenting Shopkeeper is here.
+~
+@D @n
+~
+bds 0 0 0 l 0 0 0 0 E
+100 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 98
+Dex: 92
+Int: 62
+Wis: 54
+Con: 65
+Cha: 61
+E
+$

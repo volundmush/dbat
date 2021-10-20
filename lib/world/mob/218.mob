@@ -1,0 +1,413 @@
+#63300
+moonanite moon bug insect alien~
+@mM@Doo@mn@Dan@mit@De@n~
+@nA @mM@Doo@mn@Dan@mit@De@n skitters past.@n
+~
+ 
+~
+cdvwxyz 0 0 0 l 0 0 0 0 E
+50 0 10 0d4+0 0d0+0
+0 0 15 13
+8 8 0
+Size: 3
+Str: 36
+Dex: 43
+Int: 7
+Wis: 5
+Con: 43
+Cha: 39
+E
+#63301
+lunar worm~
+@WL@nu@Wn@na@Wr @mW@Do@mr@Dm@n~
+@nA @WL@nu@Wn@na@Wr @mW@Do@mr@Dm@n is burrowing through the rock here.@n
+~
+It looks unfinished.
+~
+dz 0 0 0 l 0 0 0 0 E
+55 0 10 0d4+0 0d0+0
+0 0 17 13
+8 8 0
+Size: 5
+Str: 27
+Dex: 54
+Int: 14
+Wis: 10
+Con: 36
+Cha: 43
+E
+#63302
+lunar hollow~
+@WL@Du@Wn@Da@Wr @WH@Do@Wl@Dlo@Ww@n~
+@nA @WL@Du@Wn@Da@Wr H@Do@Wl@Dlo@Ww@n screeches in rage here.@n
+~
+It looks unfinished.
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+65 0 10 0d12+0 0d0+0
+0 0 23 10
+8 8 0
+Size: 5
+Str: 53
+Dex: 62
+Int: 65
+Wis: 49
+Con: 64
+Cha: 52
+E
+#63303
+prowl cat~
+@DProwl @rCat@n~
+@nA @Dprowl @rcat@n is scanning for aliens here.
+~
+It looks unfinished.
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+60 0 10 0d0+0 0d0+0
+0 0 22 28
+8 8 0
+Size: 5
+Str: 37
+Dex: 48
+Int: 35
+Wis: 38
+Con: 46
+Cha: 35
+E
+#63304
+prowl cat~
+@DProwl @rCat @YM@yk@RII@n~
+@nAn assault class @Dprowl@r cat@n stomps around.@n
+~
+It looks unfinished.
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+67 0 10 0d0+0 0d0+0
+0 0 22 28
+8 8 0
+Size: 5
+Str: 57
+Dex: 64
+Int: 65
+Wis: 43
+Con: 67
+Cha: 59
+E
+#63305
+quarry drone~
+@DQ@Wu@Da@Wr@Dr@Wy @yDrone@n~
+@nA @DQ@Wu@Da@Wr@Dr@Wy @yDrone@n is mining the rock here.@n
+~
+It looks unfinished.
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+103 0 10 0d0+0 0d0+0
+0 0 22 28
+8 8 0
+Size: 8
+Str: 53
+Dex: 94
+Int: 55
+Wis: 88
+Con: 61
+Cha: 63
+E
+#63306
+odd moonraker drone~
+@DM@Wo@Do@Wn@Dr@Wa@Dk@We@Dr @yDrone@n~
+@nAn odd looking drone stands guard here.
+~
+It looks unfinished.
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+50 0 10 0d0+0 0d0+0
+0 0 22 28
+8 8 0
+Size: 5
+Str: 27
+Dex: 32
+Int: 27
+Wis: 47
+Con: 40
+Cha: 35
+E
+#63307
+rudimentary protectron robot service~
+@n@WP@Dro@Wt@Dec@Wt@Dro@Wn@n~
+@nA rudimentary service robot patrols the halls.@n
+~
+It looks unfinished.
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+52 0 10 0d0+0 0d0+0
+0 0 22 28
+8 8 0
+Str: 49
+Dex: 27
+Int: 52
+Wis: 38
+Con: 35
+Cha: 39
+E
+#63308
+cyber cyberwulf wulf max~
+@WC@Ry@Wb@Re@Wr@RW@Wu@Rl@WF@n~
+@nMax the @WC@Ry@Wb@Re@Wr@RW@Wu@Rl@WF@n sits here, ready to ride the lightning.@n
+~
+It looks unfinished.
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+101 0 10 0d0+0 0d0+0
+0 0 22 28
+8 8 1
+Str: 67
+Dex: 51
+Int: 83
+Wis: 53
+Con: 62
+Cha: 52
+E
+#63309
+mechanoid~
+@nThe @DMechanoid@n~
+@nThe @DMechanoid@n crawls its way from the depths of the quarry.@n
+~
+It looks unfinished.
+~
+bcdvwxyz 0 0 0 l 0 0 0 0 E
+105 0 10 0d0+0 0d0+0
+0 0 22 28
+8 8 2
+Size: 8
+Str: 88
+Dex: 70
+Int: 94
+Wis: 57
+Con: 83
+Cha: 68
+E
+#63310
+fib agent staunch~
+@DF@W.@DI@W.@DB@W.@n Agent@n~
+@nA staunch looking @Dag@ne@Dnt@n in @Dsu@nn@Dgl@na@Dss@ne@Ds@n oversees the area.@n
+~
+@nThis agent is muscular and stone-faced. A short moustache if any across a
+granite looking jaw and chin. Dressed in a government issue black suit and
+large dark sunglasses, the earpiece behind one ear is all too noticeable. The
+bulge of a holster can be seen under the poorly tailored suit jacket. @n
+~
+cdlvwxyz 0 0 0 l 0 0 0 0 E
+60 0 10 0d8+0 0d0+0
+0 0 0 4
+8 8 1
+Str: 67
+Dex: 41
+Int: 44
+Wis: 42
+Con: 45
+Cha: 57
+E
+#63311
+fib agent veteran woman~
+@DF@W.@DI@W.@DB@W.@n Agent@n~
+@nA veteran @Dag@ne@Dnt@n patrols with her head on a swivel.@n
+~
+@nThis athletic looking woman has a severe look on her face. Her instincts and
+level attention speak of a command level of experience and her government
+issued black suit is more expertly tailored to hide her weapon. @n
+~
+cdlvwxyz 0 0 0 l 0 0 0 0 E
+67 0 10 0d8+0 0d0+0
+0 0 0 4
+8 8 2
+Str: 72
+Dex: 54
+Int: 67
+Wis: 45
+Con: 60
+Cha: 70
+E
+#63312
+agent fib specialist~
+@DF@W.@DI@W.@DB@W.@n Specialist@n~
+@nA trained specialist in @Dsu@nn@Dgl@na@Dss@ne@Ds@n stalks through here.@n
+~
+@nThis agent is dressed in tactical commando gear, and those classic black
+@Dsu@nn@Dgl@na@Dss@ne@Ds@n. His moves and demeanor give him away as a dead ringer for a
+trained commando or specialist. @n
+~
+cdlvwxyz 0 0 0 l 0 0 0 0 E
+70 0 10 0d8+0 0d0+0
+0 0 0 4
+8 8 1
+Str: 53
+Dex: 49
+Int: 69
+Wis: 41
+Con: 62
+Cha: 72
+E
+#63313
+agent fib femme fatale~
+@DF@W.@DI@W.@DB@W.@n Specialist@n~
+@nA trained @Dfe@nm@Dme@n @Dfa@nt@Dal@ne prowls through here.@n
+~
+@nThis agent is of the femme fatale sort. They appear voluptuous and sultry but
+move with a deadly grace. Dressed in sharp pencil skirts they pose as office
+girls so you'll never see the pencil to the neck coming. @n
+~
+cdlvwxyz 0 0 0 l 0 0 0 0 E
+73 0 10 0d8+0 0d0+0
+0 0 0 4
+8 8 2
+Str: 53
+Dex: 47
+Int: 44
+Wis: 69
+Con: 61
+Cha: 61
+E
+#63314
+fib general campbell~
+@DGe@nn@Der@na@Dl @WC@nam@Wp@nbe@Wl@nl@n~
+@DGe@nn@Der@na@Dl @WC@nam@Wp@nbe@Wl@nl@n stands here, monitoring agent's remote activities.@n
+~
+@nStanding tall and always at attention, this man looks to be older. His face
+has begun to sag a bit and wrinkle from age, and unlike the other agents of
+this facility he wears his traditional military field uniform, along with a @Rred
+beret@n.
+~
+cdlvwxyz 0 0 0 l 0 0 0 0 E
+81 0 10 0d8+0 0d0+0
+0 0 0 4
+8 8 1
+Str: 63
+Dex: 82
+Int: 64
+Wis: 79
+Con: 52
+Cha: 69
+E
+#63315
+fib technical operator~
+@WT@Dec@Wh@Dni@Wc@Dal@n Operator@n~
+@nA @Wt@Dec@Wh@Dni@Wc@Dal@n operator@n performs complex tasks here.@n
+~
+@nThis agent doesn't wear the usual black suit of the @DF@W. @DI@W. @DB@W. @n but rather has
+a more cubical farm worker kind of look instead. Dress shirt and tie, but
+perhaps with glasses or other signs of clerical work rather than work in the
+field. @n
+~
+cdvwxyz 0 0 0 l 0 0 0 0 E
+55 0 10 0d12+0 0d0+0
+0 0 0 10
+8 8 1
+Str: 37
+Dex: 50
+Int: 37
+Wis: 45
+Con: 37
+Cha: 37
+E
+#63316
+zetan alien prisoner~
+@GZe@Wt@Gan@n Prisoner@n~
+@nA small @ggreen@n man in a space suit is held prisoner here.@n
+~
+@nThis alien captive is a small, green man in a space suit complete with glass
+dome helmet. These creatures look nothing like Namekians, but rather more like
+a Saibaman. They are often seen wielding ray guns. @n
+~
+dlvwxyz a 0 0 l 0 0 0 0 E
+80 0 10 0d12+0 0d0+0
+0 0 11 10
+8 8 0
+Str: 55
+Dex: 53
+Int: 60
+Wis: 46
+Con: 64
+Cha: 46
+E
+#63317
+zetan alien prisoner~
+@GZe@Wt@Gan@n Prisoner@n~
+@nA small, muscular @ggreen@n man in a space suit is captive here.@n
+~
+@nThis alien captive is a small, green man in a space suit complete with glass
+dome helmet. These creatures look nothing like Namekians, but rather more like
+a Saibaman. They are often seen wielding ray guns. @n
+~
+dlvwxyz a 0 0 l 0 0 0 0 E
+84 0 10 0d12+0 0d0+0
+0 0 11 10
+8 8 0
+Str: 51
+Dex: 43
+Int: 66
+Wis: 75
+Con: 78
+Cha: 80
+E
+#63318
+kazoo zetan general~
+@GK@ga@Wz@go@Go@n~
+@GK@ga@Wz@go@Go@n, @GZe@Wt@Gan@n general, taunts all who pass by.
+~
+@nThis alien captive is a small, green man in a space suit complete with glass
+dome helmet. These creatures look nothing like Namekians, but rather more like
+a Saibaman. They are often seen wielding ray guns. @n This alien's suit is
+marked with bars of @Ycommand@n.
+~
+dlvwxyz a 0 0 l 0 0 0 0 E
+86 0 10 0d12+0 0d0+0
+100 0 11 10
+8 8 0
+Str: 57
+Dex: 73
+Int: 64
+Wis: 47
+Con: 58
+Cha: 66
+E
+#63319
+onyx golem shambling hulk~
+@DO@rn@Dy@Rx @DG@ro@Dl@Re@Dm@n~
+@nA shambling hulk of glossy @Do@rn@Dy@Rx@n passes by@n
+~
+@nThis large, unnatural creature is imposing by nature of made entirely of glossy
+black onyx. It shambles along wherever it travels, mindlessly pacing back and
+forth through these lost halls. @n
+~
+dlprvwxyz 0 0 0 l 0 0 0 0 E
+108 0 10 0d4+0 0d0+0
+0 0 15 6
+8 8 0
+Size: 6
+Str: 72
+Dex: 96
+Int: 31
+Wis: 66
+Con: 100
+Cha: 91
+E
+#63320
+doorman door man security retired guard~
+@nThe Doorman@n~
+@nA retired security guard loiters here@n
+~
+@nThis somewhat old man looks like your average retired security guard. His only
+purpose in being here seems to be to loiter about. @n
+~
+dlvwxyz 0 0 0 0 0 0 0 0 E
+55 0 10 0d8+0 0d0+0
+0 0 0 4
+8 8 1
+Str: 44
+Dex: 36
+Int: 34
+Wis: 44
+Con: 54
+Cha: 56
+E
+$

@@ -1,0 +1,1787 @@
+#2900
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cEntrance@n~
+   @wThis white marble room is brightly lit by a light source that can't be
+identified, it seems to come from all directions at once. A large stone gate
+can be seen to the west that has a slit near the top. Through the slit in the
+gate a forest can be seen outside. Statues of saiyan warriors in various poses
+serve as columns in this room that hold the pristine ceiling above up. @n
+
+@WSome @Rwords@W have been etched into the floor here.
+~
+29 v 0 0 0 11
+D1
+~
+~
+0 0 2901 0 0 0 0 0 0 0 0
+D3
+~
+gate~
+1 2802 2899 0 0 0 0 0 0 0 0
+E
+words~
+@RPoem of Prideful Warriors@n
+@D--------------@cOrdeals@D------------------@n
+@WSix floors you must ascend
+Before the Tower Keeper you shall meet
+Six Tower Guardians you must rend
+Before the Tower Keeper you shall greet
+Six strange riddles you must solve
+Before the Tower Keeper you shall fight
+Six difficult tests you must resolve
+Before the Tower Keeper you prove your might
+@D--------------@cVirtues@D------------------@W
+Through this ordeal your pride will be shown
+Having defeated its challenges one by one
+From strength of mind, muscle, and bone
+You will stand the victor who hath won.
+@W
+~
+S
+#2901
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cFirst Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2928 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2931 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2902 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2900 0 0 0 0 0 0 0 0
+S
+#2902
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cFirst Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2901 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2903 0 0 0 0 0 0 0 0
+S
+#2903
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cFirst Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2902 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2932 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2904 0 0 0 0 0 0 0 0
+S
+#2904
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cFirst Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2903 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2905 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2933 0 0 0 0 0 0 0 0
+S
+#2905
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cFirst Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2904 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2906 0 0 0 0 0 0 0 0
+S
+#2906
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cFirst Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D1
+~
+~
+0 0 2907 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2905 0 0 0 0 0 0 0 0
+S
+#2907
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cFirst Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2934 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2908 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2935 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2906 0 0 0 0 0 0 0 0
+S
+#2908
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cFirst Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D1
+~
+~
+0 0 2909 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2907 0 0 0 0 0 0 0 0
+S
+#2909
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cFirst Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2936 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2910 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2937 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2908 0 0 0 0 0 0 0 0
+S
+#2910
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cFirst Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D1
+~
+~
+0 0 2911 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2909 0 0 0 0 0 0 0 0
+S
+#2911
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cFirst Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2912 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2910 0 0 0 0 0 0 0 0
+S
+#2912
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cFirst Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2913 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2938 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2911 0 0 0 0 0 0 0 0
+S
+#2913
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cFirst Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2914 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2912 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2939 0 0 0 0 0 0 0 0
+S
+#2914
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cFirst Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2915 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2913 0 0 0 0 0 0 0 0
+S
+#2915
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cFirst Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2916 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2941 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2914 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2940 0 0 0 0 0 0 0 0
+S
+#2916
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cFirst Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2917 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2915 0 0 0 0 0 0 0 0
+S
+#2917
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cFirst Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2918 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2916 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2942 0 0 0 0 0 0 0 0
+S
+#2918
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cFirst Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2919 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2943 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2917 0 0 0 0 0 0 0 0
+S
+#2919
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cFirst Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D2
+~
+~
+0 0 2918 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2920 0 0 0 0 0 0 0 0
+S
+#2920
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cFirst Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D1
+~
+~
+0 0 2919 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2921 0 0 0 0 0 0 0 0
+S
+#2921
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cFirst Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2945 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2920 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2944 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2922 0 0 0 0 0 0 0 0
+S
+#2922
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cFirst Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D1
+~
+~
+0 0 2921 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2923 0 0 0 0 0 0 0 0
+S
+#2923
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cFirst Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2946 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2922 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2947 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2924 0 0 0 0 0 0 0 0
+S
+#2924
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cFirst Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D1
+~
+~
+0 0 2923 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2925 0 0 0 0 0 0 0 0
+S
+#2925
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cFirst Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D1
+~
+~
+0 0 2924 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2926 0 0 0 0 0 0 0 0
+S
+#2926
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cFirst Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2925 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2927 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2929 0 0 0 0 0 0 0 0
+S
+#2927
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cFirst Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2926 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2930 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2928 0 0 0 0 0 0 0 0
+S
+#2928
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cFirst Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2927 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2901 0 0 0 0 0 0 0 0
+S
+#2929
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSanctum of Trials@n~
+   @wThis room is completely made out of white marble that is illuminated by pure
+light that seems to come from all directions at once. A ring of white marble
+that stands slightly above the rest of the floor can be seen towards the center
+of the room. Around the ring several statues of saiyan warriors locked in
+battle can be seen. @n
+~
+29 v 0 0 0 0
+D1
+~
+~
+0 0 2926 0 0 0 0 0 0 0 0
+S
+#2930
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSanctum of Trials@n~
+   @wThis room is completely made out of white marble that is illuminated by pure
+light that seems to come from all directions at once. A ring of white marble
+that stands slightly above the rest of the floor can be seen towards the center
+of the room. Around the ring several statues of saiyan warriors locked in
+battle can be seen. @n
+~
+29 v 0 0 0 0
+D3
+~
+~
+0 0 2927 0 0 0 0 0 0 0 0
+S
+#2931
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSanctum of Bravery@n~
+   @wThis room is mostly made out of a curious white marble. White light that
+seems to come from all directions at once illuminates the room. In the center
+of the room a circle of white marble stands a bit higher than the rest of the
+floor. Surrounding the circle several emerald statues of some kind of creatures
+can be seen. Each one of these statues is different from the rest and has their
+right arms raised above the circle. These raised arms are pointed towards the
+center of the circle from all sides. @n
+~
+29 v 0 0 0 0
+D3
+~
+~
+0 0 2901 0 0 0 0 0 0 0 0
+S
+#2932
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSanctum of Trials@n~
+   @wThis room is completely made out of white marble that is illuminated by pure
+light that seems to come from all directions at once. A ring of white marble
+that stands slightly above the rest of the floor can be seen towards the center
+of the room. Around the ring several statues of saiyan warriors locked in
+battle can be seen. @n
+~
+29 v 0 0 0 0
+D3
+~
+~
+0 0 2903 0 0 0 0 0 0 0 0
+S
+#2933
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSanctum of Trials@n~
+   @wThis room is completely made out of white marble that is illuminated by pure
+light that seems to come from all directions at once. A ring of white marble
+that stands slightly above the rest of the floor can be seen towards the center
+of the room. Around the ring several statues of saiyan warriors locked in
+battle can be seen. @n
+~
+29 v 0 0 0 0
+D1
+~
+~
+0 0 2904 0 0 0 0 0 0 0 0
+S
+#2934
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSanctum of Trials@n~
+   @wThis room is completely made out of white marble that is illuminated by pure
+light that seems to come from all directions at once. A ring of white marble
+that stands slightly above the rest of the floor can be seen towards the center
+of the room. Around the ring several statues of saiyan warriors locked in
+battle can be seen. @n
+~
+29 v 0 0 0 0
+D2
+~
+~
+0 0 2907 0 0 0 0 0 0 0 0
+S
+#2935
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSanctum of Trials@n~
+   @wThis room is completely made out of white marble that is illuminated by pure
+light that seems to come from all directions at once. A ring of white marble
+that stands slightly above the rest of the floor can be seen towards the center
+of the room. Around the ring several statues of saiyan warriors locked in
+battle can be seen. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2907 0 0 0 0 0 0 0 0
+S
+#2936
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSanctum of Trials@n~
+   @wThis room is completely made out of white marble that is illuminated by pure
+light that seems to come from all directions at once. A ring of white marble
+that stands slightly above the rest of the floor can be seen towards the center
+of the room. Around the ring several statues of saiyan warriors locked in
+battle can be seen. @n
+~
+29 v 0 0 0 0
+D2
+~
+~
+0 0 2909 0 0 0 0 0 0 0 0
+S
+#2937
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSanctum of Trials@n~
+   @wThis room is completely made out of white marble that is illuminated by pure
+light that seems to come from all directions at once. A ring of white marble
+that stands slightly above the rest of the floor can be seen towards the center
+of the room. Around the ring several statues of saiyan warriors locked in
+battle can be seen. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2909 0 0 0 0 0 0 0 0
+S
+#2938
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSanctum of Trials@n~
+   @wThis room is completely made out of white marble that is illuminated by pure
+light that seems to come from all directions at once. A ring of white marble
+that stands slightly above the rest of the floor can be seen towards the center
+of the room. Around the ring several statues of saiyan warriors locked in
+battle can be seen. @n
+~
+29 v 0 0 0 0
+D3
+~
+~
+0 0 2912 0 0 0 0 0 0 0 0
+S
+#2939
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSanctum of Trials@n~
+   @wThis room is completely made out of white marble that is illuminated by pure
+light that seems to come from all directions at once. A ring of white marble
+that stands slightly above the rest of the floor can be seen towards the center
+of the room. Around the ring several statues of saiyan warriors locked in
+battle can be seen. @n
+~
+29 v 0 0 0 0
+D1
+~
+~
+0 0 2913 0 0 0 0 0 0 0 0
+S
+#2940
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cChamber of Bravery@n~
+   @wThis small room is made out of pristine white marble that is illuminated by
+white light that appears to come from all directions at once. In the center of
+the room a pedestal that stands about three feet off the floor and is about four
+feet in circumferance can be seen. Atop the pedestal @Rwords@w have been written. @n
+~
+29 v 0 0 0 0
+D1
+~
+~
+0 0 2915 0 0 0 0 0 0 0 0
+E
+words~
+   @wTo those following the path of pride. Guardians you must face and bring what
+you win to the chamber of their name. Here you must @ginvoke@w that which was won
+and then speak the answer to the riddle. Then you shall gain further access to
+this tower. @n
+~
+S
+#2941
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cPortal to Strength@n~
+   @wThis white marble room appears to have no floor. This is an illusion of
+course as the blackness where the floor should be is quite solid. This room is
+not nearly as brightly lit as the rest of the tower and seems to have something
+special working in it. @n
+~
+29 v 0 0 0 0
+D3
+~
+~
+0 0 2915 0 0 0 0 0 0 0 0
+S
+#2942
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSanctum of Trials@n~
+   @wThis room is completely made out of white marble that is illuminated by pure
+light that seems to come from all directions at once. A ring of white marble
+that stands slightly above the rest of the floor can be seen towards the center
+of the room. Around the ring several statues of saiyan warriors locked in
+battle can be seen. @n
+~
+29 v 0 0 0 0
+D1
+~
+~
+0 0 2917 0 0 0 0 0 0 0 0
+S
+#2943
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSanctum of Trials@n~
+   @wThis room is completely made out of white marble that is illuminated by pure
+light that seems to come from all directions at once. A ring of white marble
+that stands slightly above the rest of the floor can be seen towards the center
+of the room. Around the ring several statues of saiyan warriors locked in
+battle can be seen. @n
+~
+29 v 0 0 0 0
+D3
+~
+~
+0 0 2918 0 0 0 0 0 0 0 0
+S
+#2944
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSanctum of Trials@n~
+   @wThis room is completely made out of white marble that is illuminated by pure
+light that seems to come from all directions at once. A ring of white marble
+that stands slightly above the rest of the floor can be seen towards the center
+of the room. Around the ring several statues of saiyan warriors locked in
+battle can be seen. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2921 0 0 0 0 0 0 0 0
+S
+#2945
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSanctum of Trials@n~
+   @wThis room is completely made out of white marble that is illuminated by pure
+light that seems to come from all directions at once. A ring of white marble
+that stands slightly above the rest of the floor can be seen towards the center
+of the room. Around the ring several statues of saiyan warriors locked in
+battle can be seen. @n
+~
+29 v 0 0 0 0
+D2
+~
+~
+0 0 2921 0 0 0 0 0 0 0 0
+S
+#2946
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSanctum of Trials@n~
+   @wThis room is completely made out of white marble that is illuminated by pure
+light that seems to come from all directions at once. A ring of white marble
+that stands slightly above the rest of the floor can be seen towards the center
+of the room. Around the ring several statues of saiyan warriors locked in
+battle can be seen. @n
+~
+29 v 0 0 0 0
+D2
+~
+~
+0 0 2923 0 0 0 0 0 0 0 0
+S
+#2947
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSanctum of Trials@n~
+   @wThis room is completely made out of white marble that is illuminated by pure
+light that seems to come from all directions at once. A ring of white marble
+that stands slightly above the rest of the floor can be seen towards the center
+of the room. Around the ring several statues of saiyan warriors locked in
+battle can be seen. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2923 0 0 0 0 0 0 0 0
+S
+#2948
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cPortal to Wisdom@n~
+   @wThis white marble room appears to have no floor. This is an illusion of
+course as the blackness where the floor should be is quite solid. This room is
+not nearly as brightly lit as the rest of the tower and seems to have something
+special working in it. @n
+~
+29 v 0 0 0 0
+D1
+~
+~
+0 0 2949 0 0 0 0 0 0 0 0
+S
+#2949
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSecond Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2976 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2979 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2950 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2948 0 0 0 0 0 0 0 0
+S
+#2950
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSecond Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2949 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2951 0 0 0 0 0 0 0 0
+S
+#2951
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSecond Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2950 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2980 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2952 0 0 0 0 0 0 0 0
+S
+#2952
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSecond Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2951 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2953 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2981 0 0 0 0 0 0 0 0
+S
+#2953
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSecond Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2952 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2954 0 0 0 0 0 0 0 0
+S
+#2954
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSecond Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D1
+~
+~
+0 0 2955 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2953 0 0 0 0 0 0 0 0
+S
+#2955
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSecond Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2982 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2956 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2983 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2954 0 0 0 0 0 0 0 0
+S
+#2956
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSecond Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D1
+~
+~
+0 0 2957 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2955 0 0 0 0 0 0 0 0
+S
+#2957
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSecond Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2984 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2958 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2985 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2956 0 0 0 0 0 0 0 0
+S
+#2958
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSecond Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D1
+~
+~
+0 0 2959 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2957 0 0 0 0 0 0 0 0
+S
+#2959
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSecond Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2960 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2958 0 0 0 0 0 0 0 0
+S
+#2960
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSecond Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2961 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2986 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2959 0 0 0 0 0 0 0 0
+S
+#2961
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSecond Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2962 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2960 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2987 0 0 0 0 0 0 0 0
+S
+#2962
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSecond Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2963 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2961 0 0 0 0 0 0 0 0
+S
+#2963
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSecond Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2964 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2989 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2962 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2988 0 0 0 0 0 0 0 0
+S
+#2964
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSecond Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2965 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2963 0 0 0 0 0 0 0 0
+S
+#2965
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSecond Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2966 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2964 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2990 0 0 0 0 0 0 0 0
+S
+#2966
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSecond Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2967 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2991 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2965 0 0 0 0 0 0 0 0
+S
+#2967
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSecond Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D2
+~
+~
+0 0 2966 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2968 0 0 0 0 0 0 0 0
+S
+#2968
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSecond Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D1
+~
+~
+0 0 2967 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2969 0 0 0 0 0 0 0 0
+S
+#2969
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSecond Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2993 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2968 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2992 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2970 0 0 0 0 0 0 0 0
+S
+#2970
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSecond Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D1
+~
+~
+0 0 2969 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2971 0 0 0 0 0 0 0 0
+S
+#2971
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSecond Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2994 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2970 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2995 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2972 0 0 0 0 0 0 0 0
+S
+#2972
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSecond Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D1
+~
+~
+0 0 2971 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2973 0 0 0 0 0 0 0 0
+S
+#2973
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSecond Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D1
+~
+~
+0 0 2972 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2974 0 0 0 0 0 0 0 0
+S
+#2974
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSecond Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2973 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2975 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2977 0 0 0 0 0 0 0 0
+S
+#2975
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSecond Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2974 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2978 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2976 0 0 0 0 0 0 0 0
+S
+#2976
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSecond Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2975 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2949 0 0 0 0 0 0 0 0
+S
+#2977
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSanctum of Trials@n~
+   @wThis room is completely made out of white marble that is illuminated by pure
+light that seems to come from all directions at once. A ring of white marble
+that stands slightly above the rest of the floor can be seen towards the center
+of the room. Around the ring several statues of saiyan warriors locked in
+battle can be seen. @n
+~
+29 v 0 0 0 0
+D1
+~
+~
+0 0 2974 0 0 0 0 0 0 0 0
+S
+#2978
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSanctum of Trials@n~
+   @wThis room is completely made out of white marble that is illuminated by pure
+light that seems to come from all directions at once. A ring of white marble
+that stands slightly above the rest of the floor can be seen towards the center
+of the room. Around the ring several statues of saiyan warriors locked in
+battle can be seen. @n
+~
+29 v 0 0 0 0
+D3
+~
+~
+0 0 2975 0 0 0 0 0 0 0 0
+S
+#2979
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cChamber of Strength@n~
+   @wThis small room is made out of pristine white marble that is illuminated by
+white light that appears to come from all directions at once. In the center of
+the room a pedestal that stands about three feet off the floor and is about four
+feet in circumferance can be seen. Atop the pedestal @Rwords@w have been written. @n
+~
+29 v 0 0 0 0
+D3
+~
+~
+0 0 2949 0 0 0 0 0 0 0 0
+E
+words~
+   @wTo those following the path of pride. Guardians you must face and bring what
+you win to the chamber of their name. Here you must @ginvoke@w that which was won
+and then speak the answer to the riddle. Then you shall gain further access to
+this tower. @n
+~
+S
+#2980
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSanctum of Trials@n~
+   @wThis room is completely made out of white marble that is illuminated by pure
+light that seems to come from all directions at once. A ring of white marble
+that stands slightly above the rest of the floor can be seen towards the center
+of the room. Around the ring several statues of saiyan warriors locked in
+battle can be seen. @n
+~
+29 v 0 0 0 0
+D3
+~
+~
+0 0 2951 0 0 0 0 0 0 0 0
+S
+#2981
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSanctum of Trials@n~
+   @wThis room is completely made out of white marble that is illuminated by pure
+light that seems to come from all directions at once. A ring of white marble
+that stands slightly above the rest of the floor can be seen towards the center
+of the room. Around the ring several statues of saiyan warriors locked in
+battle can be seen. @n
+~
+29 v 0 0 0 0
+D1
+~
+~
+0 0 2952 0 0 0 0 0 0 0 0
+S
+#2982
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSanctum of Trials@n~
+   @wThis room is completely made out of white marble that is illuminated by pure
+light that seems to come from all directions at once. A ring of white marble
+that stands slightly above the rest of the floor can be seen towards the center
+of the room. Around the ring several statues of saiyan warriors locked in
+battle can be seen. @n
+~
+29 v 0 0 0 0
+D2
+~
+~
+0 0 2955 0 0 0 0 0 0 0 0
+S
+#2983
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSanctum of Trials@n~
+   @wThis room is completely made out of white marble that is illuminated by pure
+light that seems to come from all directions at once. A ring of white marble
+that stands slightly above the rest of the floor can be seen towards the center
+of the room. Around the ring several statues of saiyan warriors locked in
+battle can be seen. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2955 0 0 0 0 0 0 0 0
+S
+#2984
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSanctum of Trials@n~
+   @wThis room is completely made out of white marble that is illuminated by pure
+light that seems to come from all directions at once. A ring of white marble
+that stands slightly above the rest of the floor can be seen towards the center
+of the room. Around the ring several statues of saiyan warriors locked in
+battle can be seen. @n
+~
+29 v 0 0 0 0
+D2
+~
+~
+0 0 2957 0 0 0 0 0 0 0 0
+S
+#2985
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSanctum of Trials@n~
+   @wThis room is completely made out of white marble that is illuminated by pure
+light that seems to come from all directions at once. A ring of white marble
+that stands slightly above the rest of the floor can be seen towards the center
+of the room. Around the ring several statues of saiyan warriors locked in
+battle can be seen. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2957 0 0 0 0 0 0 0 0
+S
+#2986
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSanctum of Trials@n~
+   @wThis room is completely made out of white marble that is illuminated by pure
+light that seems to come from all directions at once. A ring of white marble
+that stands slightly above the rest of the floor can be seen towards the center
+of the room. Around the ring several statues of saiyan warriors locked in
+battle can be seen. @n
+~
+29 v 0 0 0 0
+D3
+~
+~
+0 0 2960 0 0 0 0 0 0 0 0
+S
+#2987
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSanctum of Trials@n~
+   @wThis room is completely made out of white marble that is illuminated by pure
+light that seems to come from all directions at once. A ring of white marble
+that stands slightly above the rest of the floor can be seen towards the center
+of the room. Around the ring several statues of saiyan warriors locked in
+battle can be seen. @n
+~
+29 v 0 0 0 0
+D1
+~
+~
+0 0 2961 0 0 0 0 0 0 0 0
+S
+#2988
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSanctum of Strength@n~
+   @wThis room is mostly made out of a curious white marble. White light that
+seems to come from all directions at once illuminates the room. In the center
+of the room a circle of white marble stands a bit higher than the rest of the
+floor. Surrounding the circle several emerald statues of some kind of creatures
+can be seen. Each one of these statues is different from the rest and has their
+right arms raised above the circle. These raised arms are pointed towards the
+center of the circle from all sides. @n
+~
+29 v 0 0 0 0
+D1
+~
+~
+0 0 2963 0 0 0 0 0 0 0 0
+S
+#2989
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cPortal to Bravery@n~
+   @wThis white marble room appears to have no floor. This is an illusion of
+course as the blackness where the floor should be is quite solid. This room is
+not nearly as brightly lit as the rest of the tower and seems to have something
+special working in it. @n
+~
+29 v 0 0 0 0
+D3
+~
+~
+0 0 2963 0 0 0 0 0 0 0 0
+S
+#2990
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSanctum of Trials@n~
+   @wThis room is completely made out of white marble that is illuminated by pure
+light that seems to come from all directions at once. A ring of white marble
+that stands slightly above the rest of the floor can be seen towards the center
+of the room. Around the ring several statues of saiyan warriors locked in
+battle can be seen. @n
+~
+29 v 0 0 0 0
+D1
+~
+~
+0 0 2965 0 0 0 0 0 0 0 0
+S
+#2991
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSanctum of Trials@n~
+   @wThis room is completely made out of white marble that is illuminated by pure
+light that seems to come from all directions at once. A ring of white marble
+that stands slightly above the rest of the floor can be seen towards the center
+of the room. Around the ring several statues of saiyan warriors locked in
+battle can be seen. @n
+~
+29 v 0 0 0 0
+D3
+~
+~
+0 0 2966 0 0 0 0 0 0 0 0
+S
+#2992
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSanctum of Trials@n~
+   @wThis room is completely made out of white marble that is illuminated by pure
+light that seems to come from all directions at once. A ring of white marble
+that stands slightly above the rest of the floor can be seen towards the center
+of the room. Around the ring several statues of saiyan warriors locked in
+battle can be seen. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2969 0 0 0 0 0 0 0 0
+S
+#2993
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSanctum of Trials@n~
+   @wThis room is completely made out of white marble that is illuminated by pure
+light that seems to come from all directions at once. A ring of white marble
+that stands slightly above the rest of the floor can be seen towards the center
+of the room. Around the ring several statues of saiyan warriors locked in
+battle can be seen. @n
+~
+29 v 0 0 0 0
+D2
+~
+~
+0 0 2969 0 0 0 0 0 0 0 0
+S
+#2994
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSanctum of Trials@n~
+   @wThis room is completely made out of white marble that is illuminated by pure
+light that seems to come from all directions at once. A ring of white marble
+that stands slightly above the rest of the floor can be seen towards the center
+of the room. Around the ring several statues of saiyan warriors locked in
+battle can be seen. @n
+~
+29 v 0 0 0 0
+D2
+~
+~
+0 0 2971 0 0 0 0 0 0 0 0
+S
+#2995
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cSanctum of Trials@n~
+   @wThis room is completely made out of white marble that is illuminated by pure
+light that seems to come from all directions at once. A ring of white marble
+that stands slightly above the rest of the floor can be seen towards the center
+of the room. Around the ring several statues of saiyan warriors locked in
+battle can be seen. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2971 0 0 0 0 0 0 0 0
+S
+#2996
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cPortal to Strength@n~
+   @wThis white marble room appears to have no floor. This is an illusion of
+course as the blackness where the floor should be is quite solid. This room is
+not nearly as brightly lit as the rest of the tower and seems to have something
+special working in it. @n
+~
+29 v 0 0 0 0
+D1
+~
+~
+0 0 2997 0 0 0 0 0 0 0 0
+S
+#2997
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cThird Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 3024 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 3027 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2998 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2996 0 0 0 0 0 0 0 0
+S
+#2998
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cThird Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2997 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2999 0 0 0 0 0 0 0 0
+S
+#2999
+@rP@Rr@Wi@wde @rT@wo@rw@Re@Wr@D: @cThird Floor Hallway@n~
+   @wThis hallway is made out of white marble and illuminated by bright light that
+seems to come from all directions at once. This light creates a surreal glow on
+the hallway's surfaces. Along the walls white columns extend from the floor to
+the ceiling and arches reach across the ceiling from one side to the other. @n
+~
+29 v 0 0 0 0
+D0
+~
+~
+0 0 2998 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 3028 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 3000 0 0 0 0 0 0 0 0
+S
+$~

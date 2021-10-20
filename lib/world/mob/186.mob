@@ -1,0 +1,185 @@
+#18600
+half dead saiyan~
+@DHal@Rf De@Da@Rd@D Sa@Ri@Dy@Ra@Dn@n~
+@DA Hal@Rf De@Da@Rd@D Sa@Ri@Dy@Ra@Dn@n reaches up from the ground
+~
+@DA Hal@Rf De@Da@Rd@D Sa@Ri@Dy@Ra@Dn@n is semi digested. He looks extremely pathetic and
+disgusting, large parts of his skin all over his body and face having been
+eaten away by acid. To gain an extra point, type @Rsquash saiyan@D. @n
+~
+bd 0 0 0 l 0 0 0 0 E
+0 20 10 0d0+0 0d0+0
+0 0 1 28
+8 8 1
+Str: 14
+Dex: 13
+Int: 14
+Wis: 14
+Con: 13
+Cha: 13
+E
+T 18600
+#18601
+half dead mutant~
+@DHal@Rf De@Da@Rd@D Mu@Rt@Da@Rn@Dt@n~
+@DA @DHal@Rf De@Da@Rd@D Mu@Rt@Da@Rn@Dt@n reaches up from the ground
+~
+@DA @DHal@Rf De@Da@Rd@D Mu@Rt@Da@Rn@Dt@n is semi digested. He looks extremely pathetic and
+disgusting, large parts of his skin all over his body and face having been
+eaten away by acid. To gain an extra point, type @Rsquash mutant@D. @n
+~
+bd 0 0 0 0 0 0 0 0 E
+0 20 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 13
+Dex: 9
+Int: 13
+Wis: 13
+Con: 9
+Cha: 9
+E
+T 18600
+#18602
+half dead human~
+@DHal@Rf De@Da@Rd@D Hu@Rm@Da@Rn@D@n~
+@DA @DHal@Rf De@Da@Rd@D Hu@Rm@Da@Rn@D@n reaches up from the ground
+~
+@DA @DHal@Rf De@Da@Rd@D Hu@Rm@Da@Rn@D@n is semi digested. He looks extremely pathetic and
+disgusting, large parts of his skin all over his body and face having been
+eaten away by acid. To gain an extra point, type @Rsquash lolbaby@D. @n
+~
+bd 0 0 0 0 0 0 0 0 E
+0 20 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 10
+Dex: 10
+Int: 10
+Wis: 10
+Con: 10
+Cha: 10
+E
+T 18600
+#18603
+lost participant~
+@YLost Participant@n~
+@nA @YLost Participant@n is looking for the way out here
+~
+@nA @YLost Participant@n looks extremely nervous. Several burn marks from acid adorn
+her skin, and her eyes are filled with tears.
+~
+d 0 0 0 0 0 0 0 0 E
+0 20 10 0d0+0 0d0+0
+0 0 0 28
+8 8 2
+Str: 12
+Dex: 15
+Int: 12
+Wis: 12
+Con: 15
+Cha: 15
+E
+#18604
+lister~
+@WL@Gi@Ws@Gt@We@Gr@n~
+@WL@Gi@Ws@Gt@We@Gr@w stands here behind a podium, a smile on his face@n
+~
+@WL@Gi@Ws@Gt@We@Gr@w stands here behind a podium, a smile on his face. His wears fancy silk
+clothing from neck to ankle. Shiny, black dress shoes look comfortable and
+well worn on his feet. When he smiles, his entire face lights up. @n
+~
+bdC 0 0 0 l 0 0 0 0 E
+110 20 10 0d10+0 0d0+0
+0 0 5 5
+8 8 1
+Str: 8
+Dex: 16
+Int: 8
+Wis: 8
+Con: 16
+Cha: 16
+E
+T 18602
+T 18603
+#18605
+ariana waitress1~
+@WA@Gr@Wi@Ga@Wn@Ga@n~
+@WA@Gr@Wi@Ga@Wn@Ga@n stands here, a small notepad in her hand
+~
+@WA@Gr@Wi@Ga@Wn@Ga@n stands here, a small notepad in her hand. Her face has a beauty that
+quite transcends the barrier of most racial perception. Her silky white skin
+is mostly covered by her uniform, but that does little to detract from her
+natural beauty. In her eyes in an innocence rarely found in the galaxy.
+~
+bcds 0 0 0 0 0 0 0 0 E
+5 20 10 0d0+0 0d0+0
+0 0 0 28
+8 8 2
+Str: 16
+Dex: 15
+Int: 16
+Wis: 16
+Con: 15
+Cha: 15
+E
+T 18604
+#18606
+angela waitress2~
+@CA@Yn@Cg@Ye@Cl@Ya@n~
+@CA@Yn@Cg@Ye@Cl@Ya@n is standing here with a notepad
+~
+@CA@Yn@Cg@Ye@Cl@Ya@n is standing here with a notepad in one hand and a pen in the other. 
+She has a nervous tick that causes her to twitch from time to time. Her face
+holds an expression of being extremely bored, as if she can't wait to get off
+work. @n
+~
+bcds 0 0 0 eg 0 0 0 0 E
+10 20 10 0d0+0 0d0+0
+0 0 0 28
+8 8 2
+Str: 15
+Dex: 12
+Int: 15
+Wis: 15
+Con: 12
+Cha: 12
+E
+#18698
+test shop mob~
+@CT@ce@mst @cS@Cho@c@mp M@co@Cb@n~
+@CT@ce@mst @cS@Cho@c@mp M@co@Cb@n is standing here, ready to be tested.
+~
+Stop looking at me, pervert.
+~
+bcds 0 0 0 0 0 0 0 0 E
+20 20 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 9
+Dex: 8
+Int: 9
+Wis: 9
+Con: 8
+Cha: 8
+E
+T 18699
+#18699
+spirit~
+@CS@cp@Ci@cr@Ci@ct@n@n~
+@WA@n @CS@cp@Ci@cr@Ci@ct@n@n @WIs floating around here@n
+~
+It looks unfinished.
+~
+dg 0 0 0 l b 0 0 0 E
+1 20 10 0d0+0 0d0+0
+20 0 23 28
+8 8 1
+Str: 16
+Dex: 9
+Int: 16
+Wis: 16
+Con: 9
+Cha: 9
+E
+$

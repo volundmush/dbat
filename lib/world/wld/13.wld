@@ -1,0 +1,2473 @@
+#1300
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSandpit Southeast@n~
+ @YThis area is a loose pit of sand that crumbles with every step towards the
+center of the pit.  It isn't dangerous, but it makes travel inconvenient.  
+Loose rocks have shifted with the sand and created rough obstructions throughout
+the sandpit, making bad terrain even worse.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1303 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1299 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1301 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1304 0 0 0 0 0 0 0 0
+S
+#1301
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSandpit South@n~
+ @YThis area is a loose pit of sand that crumbles with every step towards the
+center of the pit.  It isn't dangerous, but it makes travel inconvenient.  
+Loose rocks have shifted with the sand and created rough obstructions throughout
+the sandpit, making bad terrain even worse.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1304 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1300 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1302 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1305 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1303 0 0 0 0 0 0 0 0
+S
+#1302
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSandpit Southwest@n~
+ @YThis area is a loose pit of sand that crumbles with every step towards the
+center of the pit.  It isn't dangerous, but it makes travel inconvenient.  
+Loose rocks have shifted with the sand and created rough obstructions throughout
+the sandpit, making bad terrain even worse.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1305 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1301 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1304 0 0 0 0 0 0 0 0
+S
+#1303
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSandpit East@n~
+ @YThis area is a loose pit of sand that crumbles with every step towards the
+center of the pit.  It isn't dangerous, but it makes travel inconvenient.  
+Loose rocks have shifted with the sand and created rough obstructions throughout
+the sandpit, making bad terrain even worse.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1306 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1300 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1304 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1307 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1301 0 0 0 0 0 0 0 0
+S
+#1304
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSandpit Center@n~
+ @YThis area is a loose pit of sand that crumbles with every step towards the
+center of the pit.  It isn't dangerous, but it makes travel inconvenient.  
+Loose rocks have shifted with the sand and created rough obstructions throughout
+the sandpit, making bad terrain even worse.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1307 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1303 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1301 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1305 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1308 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1306 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1300 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1302 0 0 0 0 0 0 0 0
+S
+#1305
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSandpit West@n~
+ @YThis area is a loose pit of sand that crumbles with every step towards the
+center of the pit.  It isn't dangerous, but it makes travel inconvenient.  
+Loose rocks have shifted with the sand and created rough obstructions throughout
+the sandpit, making bad terrain even worse.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1308 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1304 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1302 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1301 0 0 0 0 0 0 0 0
+S
+#1306
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSandpit Northeast@n~
+ @YThis area is a loose pit of sand that crumbles with every step towards the
+center of the pit.  It isn't dangerous, but it makes travel inconvenient.  
+Loose rocks have shifted with the sand and created rough obstructions throughout
+the sandpit, making bad terrain even worse.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1404 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1309 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1303 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1307 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1304 0 0 0 0 0 0 0 0
+S
+#1307
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSandpit North@n~
+ @YThis area is a loose pit of sand that crumbles with every step towards the
+center of the pit.  It isn't dangerous, but it makes travel inconvenient.  
+Loose rocks have shifted with the sand and created rough obstructions throughout
+the sandpit, making bad terrain even worse.  @n
+~
+13 pu 0 0 0 12
+D1
+~
+~
+0 0 1306 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1304 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1308 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1303 0 0 0 0 0 0 0 0
+S
+#1308
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSandpit Northwest@n~
+ @YThis area is a loose pit of sand that crumbles with every step towards the
+center of the pit.  It isn't dangerous, but it makes travel inconvenient.  
+Loose rocks have shifted with the sand and created rough obstructions throughout
+the sandpit, making bad terrain even worse.  @n
+~
+13 pu 0 0 0 12
+D1
+~
+~
+0 0 1307 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1305 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1411 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1304 0 0 0 0 0 0 0 0
+S
+#1309
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WMid-dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D1
+~
+~
+0 0 1310 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1306 0 0 0 0 0 0 0 0
+S
+#1310
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WMid-dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D1
+~
+~
+0 0 1314 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1309 0 0 0 0 0 0 0 0
+S
+#1311
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSandpit Southwest@n~
+ @YThis area is a loose pit of sand that crumbles with every step towards the
+center of the pit.  It isn't dangerous, but it makes travel inconvenient.  
+Loose rocks have shifted with the sand and created rough obstructions throughout
+the sandpit, making bad terrain even worse.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1314 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1312 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1315 0 0 0 0 0 0 0 0
+S
+#1312
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSandpit South@n~
+ @YThis area is a loose pit of sand that crumbles with every step towards the
+center of the pit.  It isn't dangerous, but it makes travel inconvenient.  
+Loose rocks have shifted with the sand and created rough obstructions throughout
+the sandpit, making bad terrain even worse.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1315 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1313 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1320 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1311 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1314 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1316 0 0 0 0 0 0 0 0
+S
+#1313
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSandpit Southeast@n~
+ @YThis area is a loose pit of sand that crumbles with every step towards the
+center of the pit.  It isn't dangerous, but it makes travel inconvenient.  
+Loose rocks have shifted with the sand and created rough obstructions throughout
+the sandpit, making bad terrain even worse.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1316 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1312 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1315 0 0 0 0 0 0 0 0
+S
+#1314
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSandpit West@n~
+ @YThis area is a loose pit of sand that crumbles with every step towards the
+center of the pit.  It isn't dangerous, but it makes travel inconvenient.  
+Loose rocks have shifted with the sand and created rough obstructions throughout
+the sandpit, making bad terrain even worse.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1317 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1315 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1311 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1310 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1318 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1312 0 0 0 0 0 0 0 0
+S
+#1315
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSandpit Center@n~
+ @YThis area is a loose pit of sand that crumbles with every step towards the
+center of the pit.  It isn't dangerous, but it makes travel inconvenient.  
+Loose rocks have shifted with the sand and created rough obstructions throughout
+the sandpit, making bad terrain even worse.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1318 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1316 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1312 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1314 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1317 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1319 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1313 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1311 0 0 0 0 0 0 0 0
+S
+#1316
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSandpit East@n~
+ @YThis area is a loose pit of sand that crumbles with every step towards the
+center of the pit.  It isn't dangerous, but it makes travel inconvenient.  
+Loose rocks have shifted with the sand and created rough obstructions throughout
+the sandpit, making bad terrain even worse.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1319 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1322 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1313 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1315 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1318 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1312 0 0 0 0 0 0 0 0
+S
+#1317
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSandpit Northwest@n~
+ @YThis area is a loose pit of sand that crumbles with every step towards the
+center of the pit.  It isn't dangerous, but it makes travel inconvenient.  
+Loose rocks have shifted with the sand and created rough obstructions throughout
+the sandpit, making bad terrain even worse.  @n
+~
+13 pu 0 0 0 12
+D1
+~
+~
+0 0 1318 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1314 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1315 0 0 0 0 0 0 0 0
+S
+#1318
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSandpit North@n~
+ @YThis area is a loose pit of sand that crumbles with every step towards the
+center of the pit.  It isn't dangerous, but it makes travel inconvenient.  
+Loose rocks have shifted with the sand and created rough obstructions throughout
+the sandpit, making bad terrain even worse.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1398 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1319 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1315 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1317 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1316 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1314 0 0 0 0 0 0 0 0
+S
+#1319
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSandpit Northeast@n~
+ @YThis area is a loose pit of sand that crumbles with every step towards the
+center of the pit.  It isn't dangerous, but it makes travel inconvenient.  
+Loose rocks have shifted with the sand and created rough obstructions throughout
+the sandpit, making bad terrain even worse.  @n
+~
+13 pu 0 0 0 12
+D2
+~
+~
+0 0 1316 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1318 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1315 0 0 0 0 0 0 0 0
+S
+#1320
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSouthern Dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1312 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1321 0 0 0 0 0 0 0 0
+S
+#1321
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSouthern Dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1320 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1294 0 0 0 0 0 0 0 0
+S
+#1322
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WMid-dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D1
+~
+~
+0 0 1323 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1316 0 0 0 0 0 0 0 0
+S
+#1323
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WMid-dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D1
+~
+~
+0 0 1350 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1324 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1322 0 0 0 0 0 0 0 0
+S
+#1324
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WMid-dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1323 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1325 0 0 0 0 0 0 0 0
+S
+#1325
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSouthern Dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1324 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1326 0 0 0 0 0 0 0 0
+S
+#1326
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WLarge Boulder Northwest@n~
+ @yThis large boulder covers about three hundred feet of area.  It is flat and
+only about ten feet thick at its thickest point.  Very little sand shows on its
+top as the wind constantly keeps it clean.  @n
+~
+13 pu 0 0 0 12
+D1
+~
+~
+0 0 1327 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1329 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1325 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1330 0 0 0 0 0 0 0 0
+S
+#1327
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WLarge Boulder North@n~
+ @yThis large boulder covers about three hundred feet of area.  It is flat and
+only about ten feet thick at its thickest point.  Very little sand shows on its
+top as the wind constantly keeps it clean.  @n
+~
+13 pu 0 0 0 12
+D1
+~
+~
+0 0 1328 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1330 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1326 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1331 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1329 0 0 0 0 0 0 0 0
+S
+#1328
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WLarge Boulder Northeast@n~
+ @yThis large boulder covers about three hundred feet of area.  It is flat and
+only about ten feet thick at its thickest point.  Very little sand shows on its
+top as the wind constantly keeps it clean.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1348 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1331 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1327 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1330 0 0 0 0 0 0 0 0
+S
+#1329
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WLarge Boulder West@n~
+ @yThis large boulder covers about three hundred feet of area.  It is flat and
+only about ten feet thick at its thickest point.  Very little sand shows on its
+top as the wind constantly keeps it clean.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1326 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1330 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1290 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1327 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1291 0 0 0 0 0 0 0 0
+S
+#1330
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WLarge Boulder Center@n~
+ @yThis large boulder covers about three hundred feet of area.  It is flat and
+only about ten feet thick at its thickest point.  Very little sand shows on its
+top as the wind constantly keeps it clean.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1327 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1331 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1291 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1329 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1326 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1328 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1292 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1290 0 0 0 0 0 0 0 0
+S
+#1331
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WLarge Boulder East@n~
+ @yThis large boulder covers about three hundred feet of area.  It is flat and
+only about ten feet thick at its thickest point.  Very little sand shows on its
+top as the wind constantly keeps it clean.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1328 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1332 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1292 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1330 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1327 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1291 0 0 0 0 0 0 0 0
+S
+#1332
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSouthern Dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D1
+~
+~
+0 0 1333 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1331 0 0 0 0 0 0 0 0
+S
+#1333
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSouthern Dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D1
+~
+~
+0 0 1334 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1332 0 0 0 0 0 0 0 0
+S
+#1334
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSouthern Dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1335 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1333 0 0 0 0 0 0 0 0
+S
+#1335
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSouthern Dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1336 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1334 0 0 0 0 0 0 0 0
+S
+#1336
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WMid-dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1338 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1335 0 0 0 0 0 0 0 0
+S
+#1337
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSmall Oasis Southwest@n~
+ @GGreen plants and palm trees grow up around small ponds of clear water all
+around here.  This oasis appears to be above a large underground river which
+springs up in various spots creating the small ponds of the oasis.  @n
+~
+13 puD 0 0 0 12
+D0
+~
+~
+0 0 1340 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1338 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1346 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1341 0 0 0 0 0 0 0 0
+S
+#1338
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSmall Oasis South@n~
+ @GGreen plants and palm trees grow up around small ponds of clear water all
+around here.  This oasis appears to be above a large underground river which
+springs up in various spots creating the small ponds of the oasis.  @n
+~
+13 puD 0 0 0 12
+D0
+~
+~
+0 0 1341 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1339 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1336 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1337 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1340 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1342 0 0 0 0 0 0 0 0
+S
+#1339
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSmall Oasis Southeast@n~
+ @GGreen plants and palm trees grow up around small ponds of clear water all
+around here.  This oasis appears to be above a large underground river which
+springs up in various spots creating the small ponds of the oasis.  @n
+~
+13 puD 0 0 0 12
+D0
+~
+~
+0 0 1342 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1338 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1341 0 0 0 0 0 0 0 0
+S
+#1340
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSmall Oasis West@n~
+ @GGreen plants and palm trees grow up around small ponds of clear water all
+around here.  This oasis appears to be above a large underground river which
+springs up in various spots creating the small ponds of the oasis.  @n
+~
+13 puD 0 0 0 12
+D0
+~
+~
+0 0 1343 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1341 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1337 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1344 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1338 0 0 0 0 0 0 0 0
+S
+#1341
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSmall Oasis Center@n~
+ @GGreen plants and palm trees grow up around small ponds of clear water all
+around here.  This oasis appears to be above a large underground river which
+springs up in various spots creating the small ponds of the oasis.  @n
+~
+13 cpuD 0 0 0 12
+D0
+~
+~
+0 0 1344 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1342 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1338 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1340 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1343 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1345 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1339 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1337 0 0 0 0 0 0 0 0
+S
+#1342
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSmall Oasis East@n~
+ @GGreen plants and palm trees grow up around small ponds of clear water all
+around here.  This oasis appears to be above a large underground river which
+springs up in various spots creating the small ponds of the oasis.  @n
+~
+13 puD 0 0 0 12
+D0
+~
+~
+0 0 1345 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1339 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1341 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1344 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1338 0 0 0 0 0 0 0 0
+S
+#1343
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSmall Oasis Northwest@n~
+ @GGreen plants and palm trees grow up around small ponds of clear water all
+around here.  This oasis appears to be above a large underground river which
+springs up in various spots creating the small ponds of the oasis.  @n
+~
+13 puD 0 0 0 12
+D1
+~
+~
+0 0 1344 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1340 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1361 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1341 0 0 0 0 0 0 0 0
+S
+#1344
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSmall Oasis North@n~
+ @GGreen plants and palm trees grow up around small ponds of clear water all
+around here.  This oasis appears to be above a large underground river which
+springs up in various spots creating the small ponds of the oasis.  @n
+~
+13 puD 0 0 0 12
+D0
+~
+~
+0 0 1372 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1345 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1341 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1343 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1342 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1340 0 0 0 0 0 0 0 0
+S
+#1345
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSmall Oasis Northeast@n~
+ @GGreen plants and palm trees grow up around small ponds of clear water all
+around here.  This oasis appears to be above a large underground river which
+springs up in various spots creating the small ponds of the oasis.  @n
+~
+13 puD 0 0 0 12
+D2
+~
+~
+0 0 1342 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1344 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1341 0 0 0 0 0 0 0 0
+S
+#1346
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WMid-dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D1
+~
+~
+0 0 1337 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1347 0 0 0 0 0 0 0 0
+S
+#1347
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WMid-dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D1
+~
+~
+0 0 1346 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1348 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1349 0 0 0 0 0 0 0 0
+S
+#1348
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WMid-dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1347 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1328 0 0 0 0 0 0 0 0
+S
+#1349
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WMid-dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1351 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1347 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1350 0 0 0 0 0 0 0 0
+S
+#1350
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WMid-dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D1
+~
+~
+0 0 1349 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1323 0 0 0 0 0 0 0 0
+S
+#1351
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WMid-dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1353 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1349 0 0 0 0 0 0 0 0
+S
+#1352
+@DS@Wm@wa@Dl@Wl @cC@Ca@Wv@we@D: @WInside the Cave@n~
+ @WThis area of the cave appears to have been kept clean with signs of frequent
+and recent sweeping.  The smooth walls of the cave seem to have been ground down
+by some sort of tool to their soft finish.  Some lights have been secured from
+the ceiling, softly illuminating the insides of this cave.  @n
+~
+13 pu 0 0 0 0
+D0
+~
+~
+0 0 1355 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1353 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1356 0 0 0 0 0 0 0 0
+S
+#1353
+@DS@Wm@wa@Dl@Wl @cC@Ca@Wv@we@D: @WSouth Entrance@n~
+ @WThis well lit cave appears to have been made habitable by someone.  The
+entrance has been fitted with a door and a small rug has been placed at the base
+of the door.  The rest of the cave can barely be seen because of the glare of
+light coming through the entrance.  @n
+~
+13 cpu 0 0 0 0
+D0
+~
+~
+0 0 1356 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1354 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1351 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1352 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1355 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1357 0 0 0 0 0 0 0 0
+S
+#1354
+@DS@Wm@wa@Dl@Wl @cC@Ca@Wv@we@D: @WSoutheast Entrance@n~
+ @WThis well lit cave appears to have been made habitable by someone.  The
+entrance has been fitted with a door and a small rug has been placed at the base
+of the door.  The rest of the cave can barely be seen because of the glare of
+light coming through the entrance.  @n
+~
+13 cpu 0 0 0 0
+D0
+~
+~
+0 0 1357 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1361 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1353 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1356 0 0 0 0 0 0 0 0
+S
+#1355
+@DS@Wm@wa@Dl@Wl @cC@Ca@Wv@we@D: @WWest Entrance@n~
+ @WThis well lit cave appears to have been made habitable by someone.  The
+entrance has been fitted with a door and a small rug has been placed at the base
+of the door.  The rest of the cave can barely be seen because of the glare of
+light coming through the entrance.  @n
+~
+13 cpu 0 0 0 0
+D0
+~
+~
+0 0 1358 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1356 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1352 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1385 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1359 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1353 0 0 0 0 0 0 0 0
+S
+#1356
+@DS@Wm@wa@Dl@Wl @cC@Ca@Wv@we@D: @WLiving area@n~
+ @WThis area of the cave appears to be where someone has been living.  There are
+signs of life and movement.  Clothes have been strewn about on the floor
+haphazardly, and several pots in the room seem to contain or have contained
+different types of food.  @n
+~
+13 pu 0 0 0 0
+D0
+~
+~
+0 0 1359 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1357 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1353 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1355 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1358 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1360 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1354 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1352 0 0 0 0 0 0 0 0
+S
+#1357
+@DS@Wm@wa@Dl@Wl @cC@Ca@Wv@we@D: @WInside the Cave@n~
+ @WThis area of the cave appears to have been kept clean with signs of frequent
+and recent sweeping.  The smooth walls of the cave seem to have been ground down
+by some sort of tool to their soft finish.  Some lights have been secured from
+the ceiling, softly illuminating the insides of this cave.  @n
+~
+13 pu 0 0 0 0
+D0
+~
+~
+0 0 1360 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1354 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1356 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1359 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1353 0 0 0 0 0 0 0 0
+S
+#1358
+@DS@Wm@wa@Dl@Wl @cC@Ca@Wv@we@D: @WInside the Cave@n~
+ @WThis area of the cave appears to have been kept clean with signs of frequent
+and recent sweeping.  The smooth walls of the cave seem to have been ground down
+by some sort of tool to their soft finish.  Some lights have been secured from
+the ceiling, softly illuminating the insides of this cave.  @n
+~
+13 pu 0 0 0 0
+D1
+~
+~
+0 0 1359 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1355 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1356 0 0 0 0 0 0 0 0
+S
+#1359
+@DS@Wm@wa@Dl@Wl @cC@Ca@Wv@we@D: @WNorth Entrance@n~
+ @WThis well lit cave appears to have been made habitable by someone.  The
+entrance has been fitted with a door and a small rug has been placed at the base
+of the door.  The rest of the cave can barely be seen because of the glare of
+light coming through the entrance.  @n
+~
+13 cpu 0 0 0 0
+D0
+~
+~
+0 0 1376 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1360 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1356 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1358 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1357 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1355 0 0 0 0 0 0 0 0
+S
+#1360
+@DS@Wm@wa@Dl@Wl @cC@Ca@Wv@we@D: @WNortheast Entrance@n~
+ @WThis well lit cave appears to have been made habitable by someone.  The
+entrance has been fitted with a door and a small rug has been placed at the base
+of the door.  The rest of the cave can barely be seen because of the glare of
+light coming through the entrance.  @n
+~
+13 cpu 0 0 0 0
+D1
+~
+~
+0 0 1362 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1357 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1359 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1356 0 0 0 0 0 0 0 0
+S
+#1361
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WMid-dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D1
+~
+~
+0 0 1343 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1354 0 0 0 0 0 0 0 0
+S
+#1362
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WNorth Dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D1
+~
+~
+0 0 1363 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1360 0 0 0 0 0 0 0 0
+S
+#1363
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSandpit Southwest@n~
+ @YThis area is a loose pit of sand that crumbles with every step towards the
+center of the pit.  It isn't dangerous, but it makes travel inconvenient.  
+Loose rocks have shifted with the sand and created rough obstructions throughout
+the sandpit, making bad terrain even worse.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1366 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1364 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1362 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1367 0 0 0 0 0 0 0 0
+S
+#1364
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSandpit South@n~
+ @YThis area is a loose pit of sand that crumbles with every step towards the
+center of the pit.  It isn't dangerous, but it makes travel inconvenient.  
+Loose rocks have shifted with the sand and created rough obstructions throughout
+the sandpit, making bad terrain even worse.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1367 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1365 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1372 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1363 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1366 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1368 0 0 0 0 0 0 0 0
+S
+#1365
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSandpit Southeast@n~
+ @YThis area is a loose pit of sand that crumbles with every step towards the
+center of the pit.  It isn't dangerous, but it makes travel inconvenient.  
+Loose rocks have shifted with the sand and created rough obstructions throughout
+the sandpit, making bad terrain even worse.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1368 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1364 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1367 0 0 0 0 0 0 0 0
+S
+#1366
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSandpit West@n~
+ @YThis area is a loose pit of sand that crumbles with every step towards the
+center of the pit.  It isn't dangerous, but it makes travel inconvenient.  
+Loose rocks have shifted with the sand and created rough obstructions throughout
+the sandpit, making bad terrain even worse.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1369 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1367 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1363 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1370 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1364 0 0 0 0 0 0 0 0
+S
+#1367
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSandpit Center@n~
+ @YThis area is a loose pit of sand that crumbles with every step towards the
+center of the pit.  It isn't dangerous, but it makes travel inconvenient.  
+Loose rocks have shifted with the sand and created rough obstructions throughout
+the sandpit, making bad terrain even worse.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1370 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1368 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1364 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1366 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1369 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1371 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1365 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1363 0 0 0 0 0 0 0 0
+S
+#1368
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSandpit East@n~
+ @YThis area is a loose pit of sand that crumbles with every step towards the
+center of the pit.  It isn't dangerous, but it makes travel inconvenient.  
+Loose rocks have shifted with the sand and created rough obstructions throughout
+the sandpit, making bad terrain even worse.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1371 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1365 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1367 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1370 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1364 0 0 0 0 0 0 0 0
+S
+#1369
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSandpit Northwest@n~
+ @YThis area is a loose pit of sand that crumbles with every step towards the
+center of the pit.  It isn't dangerous, but it makes travel inconvenient.  
+Loose rocks have shifted with the sand and created rough obstructions throughout
+the sandpit, making bad terrain even worse.  @n
+~
+13 pu 0 0 0 12
+D1
+~
+~
+0 0 1370 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1366 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1373 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1367 0 0 0 0 0 0 0 0
+S
+#1370
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSandpit North@n~
+ @YThis area is a loose pit of sand that crumbles with every step towards the
+center of the pit.  It isn't dangerous, but it makes travel inconvenient.  
+Loose rocks have shifted with the sand and created rough obstructions throughout
+the sandpit, making bad terrain even worse.  @n
+~
+13 pu 0 0 0 12
+D1
+~
+~
+0 0 1371 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1367 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1369 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 1368 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1366 0 0 0 0 0 0 0 0
+S
+#1371
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WSandpit Northeast@n~
+ @YThis area is a loose pit of sand that crumbles with every step towards the
+center of the pit.  It isn't dangerous, but it makes travel inconvenient.  
+Loose rocks have shifted with the sand and created rough obstructions throughout
+the sandpit, making bad terrain even worse.  @n
+~
+13 pu 0 0 0 12
+D2
+~
+~
+0 0 1368 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1370 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 1367 0 0 0 0 0 0 0 0
+S
+#1372
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WMid-dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1364 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1344 0 0 0 0 0 0 0 0
+S
+#1373
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WNorth Dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D1
+~
+~
+0 0 1369 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1374 0 0 0 0 0 0 0 0
+S
+#1374
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WNorth Dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D1
+~
+~
+0 0 1373 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1375 0 0 0 0 0 0 0 0
+S
+#1375
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WNorth Dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1377 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1374 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1376 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1379 0 0 0 0 0 0 0 0
+S
+#1376
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WNorth Dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1375 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1359 0 0 0 0 0 0 0 0
+S
+#1377
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WNorth Dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1378 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1375 0 0 0 0 0 0 0 0
+S
+#1378
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WNear Oasis Cave@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 cpu 0 0 0 12
+D2
+~
+~
+0 0 1377 0 0 0 0 0 0 0 0
+S
+#1379
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WNorth Dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D1
+~
+~
+0 0 1375 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1380 0 0 0 0 0 0 0 0
+S
+#1380
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WNorth Dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D1
+~
+~
+0 0 1379 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1381 0 0 0 0 0 0 0 0
+S
+#1381
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WNorth Dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1386 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1380 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1382 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1393 0 0 0 0 0 0 0 0
+S
+#1382
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WNorth Dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1381 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1383 0 0 0 0 0 0 0 0
+S
+#1383
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WNorth Dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1382 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1384 0 0 0 0 0 0 0 0
+S
+#1384
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WMid-dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1383 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1385 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1397 0 0 0 0 0 0 0 0
+S
+#1385
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WMid-dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D1
+~
+~
+0 0 1355 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1384 0 0 0 0 0 0 0 0
+S
+#1386
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WNorth Dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1387 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1381 0 0 0 0 0 0 0 0
+S
+#1387
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WNorth Dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D2
+~
+~
+0 0 1386 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1388 0 0 0 0 0 0 0 0
+S
+#1388
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WNorth Dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D1
+~
+~
+0 0 1387 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1389 0 0 0 0 0 0 0 0
+S
+#1389
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WNorth Dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1390 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1388 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1391 0 0 0 0 0 0 0 0
+S
+#1390
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WNear Northern Plains@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 cpu 0 0 0 12
+D0
+~
+~
+0 0 1428 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1389 0 0 0 0 0 0 0 0
+S
+#1391
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WNorth Dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1389 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1392 0 0 0 0 0 0 0 0
+S
+#1392
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WNorth Dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1391 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1393 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1394 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1427 0 0 0 0 0 0 0 0
+S
+#1393
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WNorth Dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D1
+~
+~
+0 0 1381 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1392 0 0 0 0 0 0 0 0
+S
+#1394
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WNorth Dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1392 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1395 0 0 0 0 0 0 0 0
+S
+#1395
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WNorth Dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1394 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1396 0 0 0 0 0 0 0 0
+S
+#1396
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WMid-dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1395 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 1397 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1398 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1399 0 0 0 0 0 0 0 0
+S
+#1397
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WMid-dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D1
+~
+~
+0 0 1384 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1396 0 0 0 0 0 0 0 0
+S
+#1398
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WMid-dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D0
+~
+~
+0 0 1396 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 1318 0 0 0 0 0 0 0 0
+S
+#1399
+@YS@ya@Dn@Yd@yy @yD@Ye@ws@ye@Yr@wt@D: @WMid-dunes@n~
+ @YSand, rocks, and more sand fills this area.  There is so little moisture in
+this area it would be impossible to live comfortably.  The yellow and white sand
+blow wherever the wind blows, sometimes forming large clouds of moving sand that
+is blasted into every nook of the few rocks that poke up beyond the dunes.  
+Every couple hundred of feet large building sized boulders stick up from the
+sand, towering over the desert and providing the only shade available in the
+area.  @n
+~
+13 pu 0 0 0 12
+D1
+~
+~
+0 0 1396 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1400 0 0 0 0 0 0 0 0
+S
+$~

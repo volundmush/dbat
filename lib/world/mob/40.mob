@@ -1,0 +1,571 @@
+#4000
+Icerian Noble~
+an @WI@Cc@ce@Wr@Ci@ca@Wn @YN@yo@cb@yl@Ye@n~
+@wAn @wI@Cc@ce@wr@Ci@ca@wn @YN@yo@cb@yl@Ye@n struts here proudly.
+~
+This Icerian male carries himself in high regard, looking down on those of a lesser ilk.
+~
+d 0 0 0 l 0 0 0 0 E
+3 0 10 1d8+0 1d1+0
+0 0 2 29
+8 8 1
+Size: 5
+Str: 9
+Dex: 7
+Int: 20
+Wis: 5
+Con: 6
+Cha: 12
+E
+T 4010
+#4001
+Well Dressed Female~
+a @ww@De@Wl@wl @md@Mr@ye@Ys@ys@me@Md @cf@Ce@Wma@Cl@ce@n~
+A @wW@De@Wl@wl @md@Mr@ye@Ys@ys@me@Md @cf@Ce@Wma@Cl@ce@n stands here, snobbing commoners.
+~
+This female icer is of slender build and wears copius amounts of jewelry to reflect her status.
+~
+d 0 0 0 l 0 0 0 0 E
+3 0 10 1d8+0 1d1+0
+0 0 2 29
+8 8 2
+Str: 20
+Dex: 16
+Int: 6
+Wis: 8
+Con: 8
+Cha: 15
+E
+T 4010
+#4002
+Mutant servant~
+mutant servant~
+An @MM@mu@wta@mn@Mt @WS@we@Drv@wan@Wt@n scurries after its master.
+~
+@D   @n
+~
+d 0 0 0 l 0 0 0 0 E
+3 0 10 1d10+0 1d1+0
+0 0 5 5
+8 8 0
+Size: 3
+Str: 16
+Dex: 12
+Int: 8
+Wis: 7
+Con: 9
+Cha: 9
+E
+#4003
+Well dressed mutant~
+well dressed mutant~
+An @WW@De@wl@Wl @md@Mr@ye@Ys@ys@Me@md @MM@mu@wta@mn@Mt@n stands here, demanding attention.
+~
+@D   @n
+~
+d 0 0 0 l 0 0 0 0 E
+4 0 10 1d10+0 1d1+0
+0 0 5 5
+8 8 0
+Str: 19
+Dex: 11
+Int: 15
+Wis: 16
+Con: 7
+Cha: 14
+E
+#4004
+Icerian Male~
+an @WI@Cc@ce@Wr@Ci@ca@Wn @Ym@ya@Dl@Ye@n~
+@wAn @wI@Cc@ce@wr@Ci@ca@wn @YM@ya@Dl@Ye@n wanders here, looking disinterested.
+~
+@D   @n
+~
+d 0 0 0 l 0 0 0 0 E
+1 0 10 1d4+0 1d1+0
+0 0 2 6
+8 8 1
+Size: 5
+Str: 7
+Dex: 20
+Int: 10
+Wis: 6
+Con: 5
+Cha: 12
+E
+T 4006
+#4005
+Icerian Female~
+an @WI@Cc@ce@Wr@Ci@ca@Wn @Yf@ye@Dma@yl@Ye@n~
+@wAn @wI@Cc@ce@wr@Ci@ca@wn @YF@ye@Dma@yl@Ye@n is peering in shop windows here.
+~
+@D   @n
+~
+d 0 0 0 l 0 0 0 0 E
+1 0 10 1d4+0 1d1+0
+0 0 2 6
+8 8 2
+Size: 5
+Str: 12
+Dex: 17
+Int: 7
+Wis: 13
+Con: 8
+Cha: 20
+E
+T 4007
+#4006
+Mutant shopper~
+a mutant~
+A @gM@Gu@wt@Da@Gn@gt@n is running around hurriedly here.
+~
+@D   @n
+~
+d 0 0 0 l 0 0 0 0 E
+1 0 10 1d10+0 1d1+0
+0 0 5 5
+8 8 0
+Str: 11
+Dex: 19
+Int: 11
+Wis: 16
+Con: 18
+Cha: 8
+E
+#4007
+Cicle Hotel Clerk~
+a @wH@Wo@Dte@Wl C@wl@De@Cr@ck@n~
+@wThe @WH@wo@Dte@wl @wC@Wl@De@Cr@ck@n is here, sorting out room bookings.
+~
+@D   @n
+~
+bds 0 0 0 l 0 0 0 0 E
+1 0 10 1d10+0 1d1+0
+0 0 2 5
+8 8 1
+Str: 11
+Dex: 10
+Int: 17
+Wis: 19
+Con: 14
+Cha: 12
+E
+T 4000
+T 4001
+#4008
+Icer guard~
+an Icer guard~
+@wAn I@Dc@Ce@cr @WG@wu@Da@gr@Gd@n patrols here.
+~
+@D   @n
+~
+dm 0 0 0 l 0 0 0 0 E
+40 0 10 1d4+0 1d1+0
+0 0 2 6
+8 8 1
+Size: 5
+Str: 36
+Dex: 40
+Int: 39
+Wis: 39
+Con: 31
+Cha: 33
+E
+#4009
+Mutant Guard~
+a mutant guard~
+@nA @gM@Gu@Wt@Da@Gn@gt @wG@Wu@Da@gr@Gd@n is scanning the crowd.
+~
+@D   @n
+~
+dm 0 0 0 l 0 0 0 0 E
+25 0 10 1d10+0 1d1+0
+0 0 5 5
+8 8 0
+Str: 24
+Dex: 16
+Int: 16
+Wis: 12
+Con: 18
+Cha: 16
+E
+#4010
+Beggar Icer~
+a beggar~
+@wA scruffy looking icer is begging here.@n
+~
+@D   @n
+~
+d 0 0 0 l 0 0 0 0 E
+1 0 10 1d4+0 1d1+0
+0 0 2 6
+8 8 1
+Str: 18
+Dex: 9
+Int: 9
+Wis: 8
+Con: 5
+Cha: 10
+E
+T 4008
+T 4009
+#4011
+Female Beggar Icer~
+a beggar~
+A scruffy female icer is begging here.
+~
+@D   @n
+~
+d 0 0 0 l 0 0 0 0 E
+1 0 10 1d1+0 1d1+0
+0 0 2 28
+8 8 2
+Size: 3
+Str: 10
+Dex: 16
+Int: 6
+Wis: 11
+Con: 5
+Cha: 20
+E
+T 4009
+T 4008
+#4012
+Mutant beggar~
+a beggar~
+A mutant beggar is searching for zenni here.
+~
+@D   @n
+~
+d 0 0 0 l 0 0 0 0 E
+1 0 10 1d10+0 1d1+0
+0 0 5 5
+8 8 0
+Str: 5
+Dex: 7
+Int: 12
+Wis: 7
+Con: 12
+Cha: 8
+E
+T 4008
+T 4009
+#4013
+Poor Icer~
+a @Dp@Wo@wo@Dr @WI@cc@Ce@Wr@n~
+A scruffy looking icer is walking around here.
+~
+@D   @n
+~
+d 0 0 0 l 0 0 0 0 E
+1 0 10 0d4+0 0d0+0
+0 0 2 6
+8 8 1
+Str: 14
+Dex: 18
+Int: 13
+Wis: 8
+Con: 18
+Cha: 18
+E
+#4014
+Poor Icer~
+a @Dp@Wo@wo@Dr @WI@cc@Ce@Wr@n~
+A scruffy looking female icer is walking around here.
+~
+@D   @n
+~
+d 0 0 0 l 0 0 0 0 E
+1 0 10 0d4+0 0d0+0
+0 0 2 6
+8 8 2
+Str: 11
+Dex: 8
+Int: 7
+Wis: 8
+Con: 7
+Cha: 18
+E
+#4015
+Poor Mutant~
+a @Dp@Wo@wo@Dr @mm@Mu@Wt@wa@Mn@mt@n~
+A poor mutant is here searching for zenni that have fallen to the ground.
+~
+@D   @n
+~
+d 0 0 0 l 0 0 0 0 E
+1 0 10 0d10+0 0d0+0
+0 0 5 5
+8 8 1
+Str: 8
+Dex: 18
+Int: 5
+Wis: 16
+Con: 9
+Cha: 15
+E
+#4016
+Poor Mutant~
+a @Dp@Wo@wo@Dr @mm@Mu@Wt@wa@Mn@mt@n~
+A poor mutant is searching through trash cans here.
+~
+@D   @n
+~
+d 0 0 0 l 0 0 0 0 E
+1 0 10 0d10+0 0d0+0
+0 0 5 5
+8 8 2
+Str: 14
+Dex: 12
+Int: 7
+Wis: 11
+Con: 18
+Cha: 16
+E
+#4017
+Poor Mutant~
+a @Dp@Wo@wo@Dr @mm@Mu@Wt@wa@Mn@mt@n~
+A poor mutant goes about its business here.
+~
+@D   @n
+~
+d 0 0 0 l 0 0 0 0 E
+1 0 10 0d10+0 0d0+0
+0 0 5 5
+8 8 0
+Str: 10
+Dex: 6
+Int: 15
+Wis: 7
+Con: 11
+Cha: 11
+E
+#4018
+Icer Thief~
+an Icer thief~
+An @wI@Wc@Ce@cr @YT@Dh@yi@De@Yf@n is slinking around here.
+~
+@D   @n
+~
+d 0 0 0 l 0 0 0 0 E
+5 0 10 0d4+0 0d0+0
+0 0 2 6
+8 8 1
+Str: 9
+Dex: 5
+Int: 9
+Wis: 7
+Con: 6
+Cha: 18
+E
+#4019
+Mutant Thieft~
+a Mutant thief~
+An @MM@mu@wta@mn@Mt @YT@Dh@yi@De@Yf@n is slinking around here.
+~
+@D   @n
+~
+d 0 0 0 l 0 0 0 0 E
+5 0 10 0d10+0 0d0+0
+0 0 5 5
+8 8 1
+Size: 1
+Str: 16
+Dex: 12
+Int: 16
+Wis: 20
+Con: 19
+Cha: 7
+E
+#4020
+Mutant Criminal~
+a mutant criminal~
+An mutant is kicking dirt on the ground here.
+~
+@D   @n
+~
+d 0 0 0 l 0 0 0 0 E
+20 0 10 0d10+0 0d0+0
+0 0 5 5
+8 8 0
+Str: 20
+Dex: 10
+Int: 14
+Wis: 12
+Con: 15
+Cha: 11
+E
+#4021
+Icer Criminal~
+an Icer criminal~
+An Icer Criminal surveys the area, looking to bully someone.
+~
+@D   @n
+~
+d 0 0 0 l 0 0 0 0 E
+21 0 10 0d4+0 0d0+0
+0 0 2 6
+8 8 1
+BareHandAttack: 1
+Str: 20
+Dex: 11
+Int: 10
+Wis: 11
+Con: 19
+Cha: 21
+E
+#4022
+Icer Criminal~
+an Icer criminal~
+An Icer Criminal surveys the area, looking to bully someone.
+~
+@D   @n
+~
+d 0 0 0 l 0 0 0 0 E
+22 0 10 0d4+0 0d0+0
+0 0 2 6
+8 8 2
+BareHandAttack: 13
+Str: 18
+Dex: 11
+Int: 21
+Wis: 17
+Con: 21
+Cha: 21
+E
+#4023
+Volcanic Beast~
+a volcanic beast~
+A charred scaley beast is hunting here.
+~
+@D   @n
+~
+dfxyz 0 0 0 l 0 0 0 0 E
+24 0 10 0d8+0 0d0+0
+0 0 15 1
+8 8 1
+Size: 5
+BareHandAttack: 8
+Str: 19
+Dex: 22
+Int: 6
+Wis: 7
+Con: 24
+Cha: 12
+E
+#4024
+Volcanic Stalker~
+a volcanic stalker~
+A charred scaley beast is stalking its prey here.
+~
+@D   @n
+~
+dxyz 0 0 0 l 0 0 0 0 E
+30 0 10 0d10+0 0d0+0
+0 0 15 5
+8 8 2
+Size: 5
+BareHandAttack: 8
+Str: 19
+Dex: 27
+Int: 6
+Wis: 7
+Con: 23
+Cha: 15
+E
+#4025
+Derek the Dodo~
+@YD@ye@Dr@ye@Yk@n the @MD@mo@Md@mo@n~
+@YD@ye@Dr@ye@Yk@n the @MD@mo@Md@mo@n is prancing around here, preaching about gun safety.
+~
+@D   @n
+~
+d 0 0 0 l 0 0 0 0 E
+5 0 10 0d6+0 0d0+0
+0 0 0 2
+8 8 1
+Str: 7
+Dex: 8
+Int: 12
+Wis: 8
+Con: 5
+Cha: 13
+E
+T 4011
+#4026
+Cicle Hotel Clerk~
+a @wH@Wo@Dte@Wl C@wl@De@Cr@ck@n~
+@wThe @WH@wo@Dte@wl @wC@Wl@De@Cr@ck@n is here, sorting out room bookings.
+~
+It looks unfinished.
+~
+bds 0 0 0 l 0 0 0 0 E
+1 0 10 1d10+0 1d1+0
+0 0 2 5
+8 8 1
+Str: 9
+Dex: 13
+Int: 20
+Wis: 11
+Con: 19
+Cha: 16
+E
+T 4012
+T 4013
+T 4018
+#4030
+Estate Agent~
+Estate Agent~
+An estate agent is here, going over house listings.
+~
+@D @n
+~
+bds 0 0 0 l 0 0 0 0 E
+100 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 2
+Str: 53
+Dex: 85
+Int: 87
+Wis: 90
+Con: 66
+Cha: 85
+E
+T 4015
+#4031
+Wendy~
+Wendy~
+Wendy is standing here, scanning her surroundings.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 0 E
+5 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 2
+Str: 15
+Dex: 9
+Int: 16
+Wis: 16
+Con: 13
+Cha: 5
+E
+#4032
+Jeeves~
+Jeeves~
+An old, robed man stands here.
+~
+@D @n
+~
+bds 0 0 0 l 0 0 0 0 E
+5 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 15
+Dex: 16
+Int: 20
+Wis: 5
+Con: 10
+Cha: 7
+E
+$

@@ -1,0 +1,1017 @@
+#8700
+@DSt @CA@wl@Wu@Cc@Wi@Ca@n - Main Road~
+ @cThis street leads straight through the town of St Alucia, which looks as if
+its seen better times.  The windows of houses have been boarded up.  Doors are
+bolted closed or in some cases, creak open and shut slowly on their hinges, as
+the wind rolls through the street.  It looks like a Ghost Town though there does
+appear to be signs of life.  There is a sinister feeling to this place.  @n
+~
+87 x 0 0 0 1
+D3
+~
+~
+0 0 8701 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 8726 0 0 0 0 0 0 0 0
+S
+T 310
+#8701
+@DSt @CA@wl@Wu@Cc@Wi@Ca@n - Main Road~
+ @cThis street leads straight through the town of St Alucia, which looks as if
+its seen better times.  The windows of houses have been boarded up.  Doors are
+bolted closed or in some cases, creak open and shut slowly on their hinges, as
+the wind rolls through the street.  It looks like a Ghost Town though there does
+appear to be signs of life.  There is a sinister feeling to this place.  @n
+~
+87 x 0 0 0 1
+D0
+~
+~
+0 0 8702 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 8700 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8707 0 0 0 0 0 0 0 0
+S
+#8702
+@DSt @CA@wl@Wu@Cc@wi@Ca@n - Inn~
+ @cThis inn is run down and doesn't appear to have seen many visitors in recent
+times, much like the rest of St Alucia.  The inn is probably the only building
+in town, whose windows remain unboarded.  The smell of fresh flowers waft in the
+air, over-riding the general smell of death and staleness that is present
+elsewhere.  @n
+~
+87 cdx 0 0 0 0
+D0
+~
+~
+0 0 8704 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8701 0 0 0 0 0 0 0 0
+S
+#8703
+@DSt @CA@wl@Wu@Cc@wi@Ca@n - Inn~
+ @cThis inn is run down and doesn't appear to have seen many visitors in recent
+times, much like the rest of St Alucia.  The inn is probably the only building
+in town, whose windows remain unboarded.  The smell of fresh flowers waft in the
+air, over-riding the general smell of death and staleness that is present
+elsewhere.  @n
+~
+87 dx 0 0 0 0
+D1
+~
+~
+0 0 8704 0 0 0 0 0 0 0 0
+S
+#8704
+@DSt @CA@wl@Wu@Cc@wi@Ca@n - Inn~
+ @cThis inn is run down and doesn't appear to have seen many visitors in recent
+times, much like the rest of St Alucia.  The inn is probably the only building
+in town, whose windows remain unboarded.  The smell of fresh flowers waft in the
+air, over-riding the general smell of death and staleness that is present
+elsewhere.  @n
+~
+87 dx 0 0 0 0
+D1
+~
+~
+0 0 8705 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8702 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8703 0 0 0 0 0 0 0 0
+S
+#8705
+@DSt @CA@wl@Wu@Cc@wi@Ca@n - Inn~
+ @cThis inn is run down and doesn't appear to have seen many visitors in recent
+times, much like the rest of St Alucia.  The inn is probably the only building
+in town, whose windows remain unboarded.  The smell of fresh flowers waft in the
+air, over-riding the general smell of death and staleness that is present
+elsewhere.  @n
+~
+87 dx 0 0 0 0
+D0
+~
+~
+0 0 8706 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8704 0 0 0 0 0 0 0 0
+S
+#8706
+@DSt @CA@wl@Wu@Cc@wi@Ca@n - Inn~
+ @cThis inn is run down and doesn't appear to have seen many visitors in recent
+times, much like the rest of St Alucia.  The inn is probably the only building
+in town, whose windows remain unboarded.  The smell of fresh flowers waft in the
+air, over-riding the general smell of death and staleness that is present
+elsewhere.  @n
+~
+87 dx 0 0 0 0
+D2
+~
+~
+0 0 8705 0 0 0 0 0 0 0 0
+S
+#8707
+@DSt @CA@wl@Wu@Cc@Wi@Ca@n - Main Road~
+ @cThis street leads straight through the town of St Alucia, which looks as if
+its seen better times.  The windows of houses have been boarded up.  Doors are
+bolted closed or in some cases, creak open and shut slowly on their hinges, as
+the wind rolls through the street.  It looks like a Ghost Town though there does
+appear to be signs of life.  There is a sinister feeling to this place.  @n
+~
+87 x 0 0 0 1
+D1
+~
+~
+0 0 8701 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8708 0 0 0 0 0 0 0 0
+S
+#8708
+@DSt @CA@wl@Wu@Cc@Wi@Ca@n - Main Road~
+ @cThis street leads straight through the town of St Alucia, which looks as if
+its seen better times.  The windows of houses have been boarded up.  Doors are
+bolted closed or in some cases, creak open and shut slowly on their hinges, as
+the wind rolls through the street.  It looks like a Ghost Town though there does
+appear to be signs of life.  There is a sinister feeling to this place.  @n
+~
+87 x 0 0 0 1
+D0
+~
+~
+0 0 8709 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 8707 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8716 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8723 0 0 0 0 0 0 0 0
+S
+#8709
+@DSt @CA@wl@Wu@Cc@Wi@Ca@n - Carnal Alley~
+ @cThis compact alleyway leads north and south through St Alucia.  Old stone,
+two story houses line both sides of the road, the windows on all of them have
+been boarded up.  Blood stains the dirt that makes up the alleyway floor, in
+places.  @n
+~
+87 x 0 0 0 1
+D0
+~
+~
+0 0 8710 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8708 0 0 0 0 0 0 0 0
+S
+#8710
+@DSt @CA@wl@Wu@Cc@Wi@Ca@n - Carnal Alley~
+ @cThis compact alleyway leads north and south through St Alucia.  Old stone,
+two story houses line both sides of the road, the windows on all of them have
+been boarded up.  Blood stains the dirt that makes up the alleyway floor, in
+places.  @n
+~
+87 x 0 0 0 1
+D0
+~
+~
+0 0 8711 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8709 0 0 0 0 0 0 0 0
+S
+#8711
+@DSt @CA@wl@Wu@Cc@Wi@Ca@n - Carnal Alley~
+ @cThis compact alleyway leads north and south through St Alucia.  Old stone,
+two story houses line both sides of the road, the windows on all of them have
+been boarded up.  Blood stains the dirt that makes up the alleyway floor, in
+places.  @n
+~
+87 x 0 0 0 1
+D0
+~
+~
+0 0 8713 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8710 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8712 0 0 0 0 0 0 0 0
+S
+#8712
+@DSt @CA@wl@Wu@Cc@Wi@Ca@n - House~
+ @cHardly any light filters through the boarded windows of this house from the
+outside.  Dust hangs heavy in the air and covers the furniture here in a thick
+layer.  @n
+~
+87 dx 0 0 0 0
+D1
+~
+~
+0 0 8711 0 0 0 0 0 0 0 0
+S
+#8713
+@DSt @CA@wl@Wu@Cc@Wi@Ca@n - Carnal Alley~
+ @cThis compact alleyway leads north and south through St Alucia.  Old stone,
+two story houses line both sides of the road, the windows on all of them have
+been boarded up.  Blood stains the dirt that makes up the alleyway floor, in
+places.  @n
+~
+87 x 0 0 0 1
+D0
+~
+~
+0 0 8714 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8711 0 0 0 0 0 0 0 0
+S
+#8714
+@DSt @CA@wl@Wu@Cc@Wi@Ca@n - Carnal Alley~
+ @cThis compact alleyway leads north and south through St Alucia.  Old stone,
+two story houses line both sides of the road, the windows on all of them have
+been boarded up.  Blood stains the dirt that makes up the alleyway floor, in
+places.  @n
+~
+87 x 0 0 0 1
+D0
+~
+~
+0 0 8715 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8713 0 0 0 0 0 0 0 0
+S
+#8715
+@DSt @CA@wl@Wu@Cc@Wi@Ca@n - House~
+ @cHardly any light filters through the boarded windows of this house from the
+outside.  Dust hangs heavy in the air and covers the furniture here in a thick
+layer.  @n
+~
+87 dx 0 0 0 0
+D2
+~
+~
+0 0 8714 0 0 0 0 0 0 0 0
+D5
+~
+hatch~
+1 0 8735 20 0 0 0 0 0 0 0
+S
+#8716
+@DSt @CA@wl@Wu@Cc@Wi@Ca@n - Carnal Alley~
+ @cThis compact alleyway leads north and south through St Alucia.  Old stone,
+two story houses line both sides of the road, the windows on all of them have
+been boarded up.  Blood stains the dirt that makes up the alleyway floor, in
+places.  @n
+~
+87 x 0 0 0 1
+D0
+~
+~
+0 0 8708 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8717 0 0 0 0 0 0 0 0
+S
+#8717
+@DSt @CA@wl@Wu@Cc@Wi@Ca@n - Carnal Alley~
+ @cThis compact alleyway leads north and south through St Alucia.  Old stone,
+two story houses line both sides of the road, the windows on all of them have
+been boarded up.  Blood stains the dirt that makes up the alleyway floor, in
+places.  @n
+~
+87 x 0 0 0 1
+D0
+~
+~
+0 0 8716 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 8718 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8719 0 0 0 0 0 0 0 0
+S
+#8718
+@DSt @CA@wl@Wu@Cc@Wi@Ca@n - House~
+ @cHardly any light filters through the boarded windows of this house from the
+outside.  Dust hangs heavy in the air and covers the furniture here in a thick
+layer.  @n
+~
+87 dx 0 0 0 0
+D3
+~
+~
+0 0 8717 0 0 0 0 0 0 0 0
+S
+#8719
+@DSt @CA@wl@Wu@Cc@Wi@Ca@n - Carnal Alley~
+ @cThis compact alleyway leads north and south through St Alucia.  Old stone,
+two story houses line both sides of the road, the windows on all of them have
+been boarded up.  Blood stains the dirt that makes up the alleyway floor, in
+places.  @n
+~
+87 x 0 0 0 1
+D0
+~
+~
+0 0 8717 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8720 0 0 0 0 0 0 0 0
+S
+#8720
+@DSt @CA@wl@Wu@Cc@Wi@Ca@n - Carnal Alley~
+ @cThis compact alleyway leads north and south through St Alucia.  Old stone,
+two story houses line both sides of the road, the windows on all of them have
+been boarded up.  Blood stains the dirt that makes up the alleyway floor, in
+places.  @n
+~
+87 x 0 0 0 1
+D0
+~
+~
+0 0 8719 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8722 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8721 0 0 0 0 0 0 0 0
+S
+#8721
+@DSt @CA@wl@Wu@Cc@Wi@Ca@n - House~
+ @cHardly any light filters through the boarded windows of this house from the
+outside.  Dust hangs heavy in the air and covers the furniture here in a thick
+layer.  @n
+~
+87 0 0 0 0 0
+D1
+~
+~
+0 0 8720 0 0 0 0 0 0 0 0
+S
+#8722
+@DSt @CA@wl@Wu@Cc@Wi@Ca@n - Carnal Alley~
+ @cThis compact alleyway leads north and south through St Alucia.  Old stone,
+two story houses line both sides of the road, the windows on all of them have
+been boarded up.  Blood stains the dirt that makes up the alleyway floor, in
+places.  @n
+~
+87 x 0 0 0 1
+D0
+~
+~
+0 0 8720 0 0 0 0 0 0 0 0
+S
+#8723
+@DSt @CA@wl@Wu@Cc@Wi@Ca@n - Main Road~
+ @cThis street leads straight through the town of St Alucia, which looks as if
+its seen better times.  The windows of houses have been boarded up.  Doors are
+bolted closed or in some cases, creak open and shut slowly on their hinges, as
+the wind rolls through the street.  It looks like a Ghost Town though there does
+appear to be signs of life.  There is a sinister feeling to this place.  @n
+~
+87 x 0 0 0 1
+D1
+~
+~
+0 0 8708 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8724 0 0 0 0 0 0 0 0
+S
+#8724
+@DSt @CA@wl@Wu@Cc@Wi@Ca@n - Main Road~
+ @cThis street leads straight through the town of St Alucia, which looks as if
+its seen better times.  The windows of houses have been boarded up.  Doors are
+bolted closed or in some cases, creak open and shut slowly on their hinges, as
+the wind rolls through the street.  It looks like a Ghost Town though there does
+appear to be signs of life.  There is a sinister feeling to this place.  @n
+~
+87 x 0 0 0 1
+D1
+~
+~
+0 0 8723 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8725 0 0 0 0 0 0 0 0
+S
+#8725
+@DSt @CA@wl@Wu@Cc@Wi@Ca@n - Townhall~
+ @cThis large building is or was the townhall of St Alucia.  The windows are
+heavily boarded up but light from outside is still able to seep through holes in
+between the planks of wood.  There are rows of benches here, many of which are
+in a state of disrepair.  @n
+~
+87 dx 0 0 0 0
+D1
+~
+~
+0 0 8724 0 0 0 0 0 0 0 0
+S
+#8726
+@yD@Dir@yt @DR@wo@Wa@Dd@n~
+ @wThis dirt road doesn't appear to be well travelled at all.  Infact, the only
+visible prints appear to be caused by animals.  It is also in poor condition,
+with plenty of water filled potholes along its length.  The grass either side of
+the path is a sickly dark green color, while the only trees nearby appear
+lifeless, without a single leaf on their branches.  @n
+~
+87 cx 0 0 0 2
+D6
+~
+~
+0 0 8700 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 8727 0 0 0 0 0 0 0 0
+S
+#8727
+@yD@Dir@yt @DR@wo@Wa@Dd@n~
+ @wThis dirt road doesn't appear to be well travelled at all.  Infact, the only
+visible prints appear to be caused by animals.  It is also in poor condition,
+with plenty of water filled potholes along its length.  The grass either side of
+the path is a sickly dark green color, while the only trees nearby appear
+lifeless, without a single leaf on their branches.  @n
+~
+87 x 0 0 0 2
+D6
+~
+~
+0 0 8726 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 8728 0 0 0 0 0 0 0 0
+S
+#8728
+@yD@Dir@yt @DR@wo@Wa@Dd@n~
+ @wThis dirt road doesn't appear to be well travelled at all.  Infact, the only
+visible prints appear to be caused by animals.  It is also in poor condition,
+with plenty of water filled potholes along its length.  The grass either side of
+the path is a sickly dark green color, while the only trees nearby appear
+lifeless, without a single leaf on their branches.  @n
+~
+87 x 0 0 0 2
+D6
+~
+~
+0 0 8727 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 8729 0 0 0 0 0 0 0 0
+S
+#8729
+@yD@Dir@yt @DR@wo@Wa@Dd@n~
+ @wThis dirt road doesn't appear to be well travelled at all.  Infact, the only
+visible prints appear to be caused by animals.  It is also in poor condition,
+with plenty of water filled potholes along its length.  The grass either side of
+the path is a sickly dark green color, while the only trees nearby appear
+lifeless, without a single leaf on their branches.  @n
+~
+87 x 0 0 0 2
+D1
+~
+~
+0 0 8730 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 8728 0 0 0 0 0 0 0 0
+S
+#8730
+@yD@Dir@yt @DR@wo@Wa@Dd@n~
+ @wThis dirt road doesn't appear to be well travelled at all.  Infact, the only
+visible prints appear to be caused by animals.  It is also in poor condition,
+with plenty of water filled potholes along its length.  The grass either side of
+the path is a sickly dark green color, while the only trees nearby appear
+lifeless, without a single leaf on their branches.  @n
+~
+87 x 0 0 0 2
+D1
+~
+~
+0 0 8731 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8729 0 0 0 0 0 0 0 0
+S
+#8731
+@yD@Dir@yt @DR@wo@Wa@Dd@n~
+ @wThis dirt road doesn't appear to be well travelled at all.  Infact, the only
+visible prints appear to be caused by animals.  It is also in poor condition,
+with plenty of water filled potholes along its length.  The grass either side of
+the path is a sickly dark green color, while the only trees nearby appear
+lifeless, without a single leaf on their branches.  @n
+~
+87 x 0 0 0 2
+D3
+~
+~
+0 0 8730 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 8732 0 0 0 0 0 0 0 0
+S
+#8732
+@yD@Dir@yt @DR@wo@Wa@Dd@n~
+ @wThis dirt road doesn't appear to be well travelled at all.  Infact, the only
+visible prints appear to be caused by animals.  It is also in poor condition,
+with plenty of water filled potholes along its length.  The grass either side of
+the path is a sickly dark green color, while the only trees nearby appear
+lifeless, without a single leaf on their branches.  @n
+~
+87 x 0 0 0 2
+D6
+~
+~
+0 0 8731 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 8733 0 0 0 0 0 0 0 0
+S
+#8733
+@yD@Dir@yt @DR@wo@Wa@Dd@n~
+   @wThis dirt road doesn't appear to be well travelled at all. Infact, the only
+visible prints appear to be caused by animals. It is also in poor condition,
+with plenty of water filled potholes along its length. The grass either side
+of the path is a sickly dark green color, while the only trees nearby appear
+lifeless, without a single leaf on their branches. @n
+~
+87 x 0 0 0 2
+D1
+~
+~
+0 0 8734 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 8732 0 0 0 0 0 0 0 0
+S
+#8734
+@yD@Dir@yt @DR@wo@Wa@Dd@n~
+ @wThis dirt road doesn't appear to be well travelled at all.  Infact, the only
+visible prints appear to be caused by animals.  It is also in poor condition,
+with plenty of water filled potholes along its length.  The grass either side of
+the path is a sickly dark green color, while the only trees nearby appear
+lifeless, without a single leaf on their branches.  @n
+~
+87 x 0 0 0 2
+D1
+~
+gate~
+1 0 8609 20 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8733 0 0 0 0 0 0 0 0
+S
+#8735
+@DSt @CA@wl@Wu@Cc@wi@Ca@n - Underground~
+ @cThese tunnels appear to be shoddily constructed, with few support beams on
+the walls and ceilings.  They weave underneath all of St Alucia.  Low growling
+sounds can be heard.  @n
+~
+87 irx 0 0 0 0
+D4
+~
+~
+0 0 8715 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 8736 0 0 0 0 0 0 0 0
+S
+#8736
+@DSt @CA@wl@Wu@Cc@wi@Ca@n - Underground~
+ @cThese tunnels appear to be shoddily constructed, with few support beams on
+the walls and ceilings.  They weave underneath all of St Alucia.  Low growling
+sounds can be heard.  @n
+~
+87 irx 0 0 0 0
+D2
+~
+~
+0 0 8737 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 8735 0 0 0 0 0 0 0 0
+S
+#8737
+@DSt @CA@wl@Wu@Cc@wi@Ca@n - Underground~
+ @cThese tunnels appear to be shoddily constructed, with few support beams on
+the walls and ceilings.  They weave underneath all of St Alucia.  Low growling
+sounds can be heard.  @n
+~
+87 irx 0 0 0 0
+D0
+~
+~
+0 0 8736 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8738 0 0 0 0 0 0 0 0
+S
+#8738
+@DSt @CA@wl@Wu@Cc@wi@Ca@n - Underground~
+ @cThese tunnels appear to be shoddily constructed, with few support beams on
+the walls and ceilings.  They weave underneath all of St Alucia.  Low growling
+sounds can be heard.  @n
+~
+87 irx 0 0 0 0
+D0
+~
+~
+0 0 8737 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8739 0 0 0 0 0 0 0 0
+S
+#8739
+@DSt @CA@wl@Wu@Cc@wi@Ca@n - Underground~
+ @cThese tunnels appear to be shoddily constructed, with few support beams on
+the walls and ceilings.  They weave underneath all of St Alucia.  Low growling
+sounds can be heard.  @n
+~
+87 irx 0 0 0 0
+D1
+~
+~
+0 0 8738 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8740 0 0 0 0 0 0 0 0
+S
+#8740
+@DSt @CA@wl@Wu@Cc@wi@Ca@n - Underground~
+ @cThese tunnels appear to be shoddily constructed, with few support beams on
+the walls and ceilings.  They weave underneath all of St Alucia.  Low growling
+sounds can be heard.  @n
+~
+87 irx 0 0 0 0
+D0
+~
+~
+0 0 8739 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8741 0 0 0 0 0 0 0 0
+S
+#8741
+@DSt @CA@wl@Wu@Cc@wi@Ca@n - Underground~
+ @cThese tunnels appear to be shoddily constructed, with few support beams on
+the walls and ceilings.  They weave underneath all of St Alucia.  Low growling
+sounds can be heard.  @n
+~
+87 irx 0 0 0 0
+D0
+~
+~
+0 0 8740 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8742 0 0 0 0 0 0 0 0
+S
+#8742
+@DSt @CA@wl@Wu@Cc@wi@Ca@n - Underground~
+ @cThese tunnels appear to be shoddily constructed, with few support beams on
+the walls and ceilings.  They weave underneath all of St Alucia.  Low growling
+sounds can be heard.  @n
+~
+87 irx 0 0 0 0
+D0
+~
+~
+0 0 8741 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8743 0 0 0 0 0 0 0 0
+S
+#8743
+@DSt @CA@wl@Wu@Cc@wi@Ca@n - Underground~
+ @cThese tunnels appear to be shoddily constructed, with few support beams on
+the walls and ceilings.  They weave underneath all of St Alucia.  Low growling
+sounds can be heard.  @n
+~
+87 irx 0 0 0 0
+D0
+~
+~
+0 0 8742 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8744 0 0 0 0 0 0 0 0
+S
+#8744
+@DSt @CA@wl@Wu@Cc@wi@Ca@n - Underground~
+ @cThese tunnels appear to be shoddily constructed, with few support beams on
+the walls and ceilings.  They weave underneath all of St Alucia.  Low growling
+sounds can be heard.  @n
+~
+87 irx 0 0 0 0
+D0
+~
+~
+0 0 8743 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8745 0 0 0 0 0 0 0 0
+S
+#8745
+@DSt @CA@wl@Wu@Cc@wi@Ca@n - Underground~
+ @cThese tunnels appear to be shoddily constructed, with few support beams on
+the walls and ceilings.  They weave underneath all of St Alucia.  Low growling
+sounds can be heard.  @n
+~
+87 irx 0 0 0 0
+D0
+~
+~
+0 0 8744 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 8746 0 0 0 0 0 0 0 0
+S
+#8746
+@DSt @CA@wl@Wu@Cc@wi@Ca@n - Underground~
+   @cThese tunnels appear to be shoddily constructed, with few support beams on
+the walls and ceilings. They weave underneath all of St Alucia. Low grumbling
+sounds can be heard. @n
+~
+87 irx 0 0 0 0
+D1
+~
+~
+0 0 8747 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8745 0 0 0 0 0 0 0 0
+S
+#8747
+@DSt @CA@wl@Wu@Cc@wi@Ca@n - Underground~
+ @cThese tunnels appear to be shoddily constructed, with few support beams on
+the walls and ceilings.  They weave underneath all of St Alucia.  Low growling
+sounds can be heard.  @n
+~
+87 irx 0 0 0 0
+D2
+~
+~
+0 0 8748 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8746 0 0 0 0 0 0 0 0
+S
+#8748
+@DSt @CA@wl@Wu@Cc@wi@Ca@n - Underground~
+ @cThese tunnels appear to be shoddily constructed, with few support beams on
+the walls and ceilings.  They weave underneath all of St Alucia.  Low growling
+sounds can be heard.  @n
+~
+87 irx 0 0 0 0
+D0
+~
+~
+0 0 8747 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8749 0 0 0 0 0 0 0 0
+S
+#8749
+@DSt @CA@wl@Wu@Cc@wi@Ca@n - Underground~
+ @cThese tunnels appear to be shoddily constructed, with few support beams on
+the walls and ceilings.  They weave underneath all of St Alucia.  Low growling
+sounds can be heard.  @n
+~
+87 irx 0 0 0 0
+D0
+~
+~
+0 0 8748 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8750 0 0 0 0 0 0 0 0
+S
+#8750
+@DSt @CA@wl@Wu@Cc@wi@Ca@n - Underground~
+ @cThese tunnels appear to be shoddily constructed, with few support beams on
+the walls and ceilings.  They weave underneath all of St Alucia.  Low growling
+sounds can be heard.  @n
+~
+87 irx 0 0 0 0
+D0
+~
+~
+0 0 8749 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8751 0 0 0 0 0 0 0 0
+S
+#8751
+@DSt @CA@wl@Wu@Cc@wi@Ca@n - Underground~
+ @cThese tunnels appear to be shoddily constructed, with few support beams on
+the walls and ceilings.  They weave underneath all of St Alucia.  Low growling
+sounds can be heard.  @n
+~
+87 irx 0 0 0 0
+D0
+~
+~
+0 0 8750 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 8752 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8758 0 0 0 0 0 0 0 0
+S
+#8752
+@DSt @CA@wl@Wu@Cc@wi@Ca@n - Underground~
+ @cThese tunnels appear to be shoddily constructed, with few support beams on
+the walls and ceilings.  They weave underneath all of St Alucia.  Low growling
+sounds can be heard.  @n
+~
+87 irx 0 0 0 0
+D1
+~
+~
+0 0 8753 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8757 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8751 0 0 0 0 0 0 0 0
+S
+#8753
+@DSt @CA@wl@Wu@Cc@wi@Ca@n - Underground~
+ @cThese tunnels appear to be shoddily constructed, with few support beams on
+the walls and ceilings.  They weave underneath all of St Alucia.  Low growling
+sounds can be heard.  @n
+~
+87 irx 0 0 0 0
+D1
+~
+~
+0 0 8754 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8756 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8752 0 0 0 0 0 0 0 0
+S
+#8754
+@DSt @CA@wl@Wu@Cc@wi@Ca@n - Underground~
+ @cThese tunnels appear to be shoddily constructed, with few support beams on
+the walls and ceilings.  They weave underneath all of St Alucia.  Low growling
+sounds can be heard.  @n
+~
+87 irx 0 0 0 0
+D2
+~
+~
+0 0 8755 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8753 0 0 0 0 0 0 0 0
+S
+#8755
+@DSt @CA@wl@Wu@Cc@wi@Ca@n - Underground~
+ @cThese tunnels appear to be shoddily constructed, with few support beams on
+the walls and ceilings.  They weave underneath all of St Alucia.  Low growling
+sounds can be heard.  @n
+~
+87 irx 0 0 0 0
+D0
+~
+~
+0 0 8754 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8756 0 0 0 0 0 0 0 0
+S
+#8756
+@DSt @CA@wl@Wu@Cc@wi@Ca@n - Underground~
+ @cThese tunnels appear to be shoddily constructed, with few support beams on
+the walls and ceilings.  They weave underneath all of St Alucia.  Low growling
+sounds can be heard.  @n
+~
+87 irx 0 0 0 0
+D0
+~
+~
+0 0 8753 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 8755 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8757 0 0 0 0 0 0 0 0
+S
+#8757
+@DSt @CA@wl@Wu@Cc@wi@Ca@n - Underground~
+ @cThese tunnels appear to be shoddily constructed, with few support beams on
+the walls and ceilings.  They weave underneath all of St Alucia.  Low growling
+sounds can be heard.  @n
+~
+87 irx 0 0 0 0
+D0
+~
+~
+0 0 8752 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 8756 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8758 0 0 0 0 0 0 0 0
+S
+#8758
+@DSt @CA@wl@Wu@Cc@wi@Ca@n - Underground~
+ @cThese tunnels appear to be shoddily constructed, with few support beams on
+the walls and ceilings.  They weave underneath all of St Alucia.  Low growling
+sounds can be heard.  @n
+~
+87 irx 0 0 0 0
+D0
+~
+~
+0 0 8751 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 8757 0 0 0 0 0 0 0 0
+S
+$~

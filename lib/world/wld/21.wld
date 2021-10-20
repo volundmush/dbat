@@ -1,0 +1,2839 @@
+#2100
+@cGame Zone Corridor@n~
+   @CThis bright cyan colored corridor has various platforms and obstacles for
+players to maneuver around on. The floor, walls, and ceiling are all
+semi-translucent light. The light of the room seems to come from all sides at
+once. @n
+~
+21 ehu 0 0 0 0
+D0
+~
+~
+0 0 2099 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2101 0 0 0 0 0 0 0 0
+S
+#2101
+@cGame Zone Corridor@n~
+   @CThis bright cyan colored corridor has various platforms and obstacles for
+players to maneuver around on. The floor, walls, and ceiling are all
+semi-translucent light. The light of the room seems to come from all sides at
+once. @n
+~
+21 ehu 0 0 0 0
+D0
+~
+~
+0 0 2100 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2102 0 0 0 0 0 0 0 0
+S
+#2102
+@cGame Zone Corridor@n~
+   @CThis bright cyan colored corridor has various platforms and obstacles for
+players to maneuver around on. The floor, walls, and ceiling are all
+semi-translucent light. The light of the room seems to come from all sides at
+once. @n
+~
+21 ehu 0 0 0 0
+D1
+~
+~
+0 0 2103 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2101 0 0 0 0 0 0 0 0
+S
+#2103
+@cGame Zone Corridor@n~
+   @CThis bright cyan colored corridor has various platforms and obstacles for
+players to maneuver around on. The floor, walls, and ceiling are all
+semi-translucent light. The light of the room seems to come from all sides at
+once. @n
+~
+21 ehu 0 0 0 0
+D0
+~
+~
+0 0 2123 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2122 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2104 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2102 0 0 0 0 0 0 0 0
+S
+#2104
+@cGame Zone Corridor@n~
+   @CThis bright cyan colored corridor has various platforms and obstacles for
+players to maneuver around on. The floor, walls, and ceiling are all
+semi-translucent light. The light of the room seems to come from all sides at
+once. @n
+~
+21 ehu 0 0 0 0
+D0
+~
+~
+0 0 2103 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2105 0 0 0 0 0 0 0 0
+S
+#2105
+@cGame Zone Corridor@n~
+   @CThis bright cyan colored corridor has various platforms and obstacles for
+players to maneuver around on. The floor, walls, and ceiling are all
+semi-translucent light. The light of the room seems to come from all sides at
+once. @n
+~
+21 ehu 0 0 0 0
+D0
+~
+~
+0 0 2104 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2110 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2106 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2109 0 0 0 0 0 0 0 0
+S
+#2106
+@cGame Zone Corridor@n~
+   @CThis bright cyan colored corridor has various platforms and obstacles for
+players to maneuver around on. The floor, walls, and ceiling are all
+semi-translucent light. The light of the room seems to come from all sides at
+once. @n
+~
+21 ehu 0 0 0 0
+D0
+~
+~
+0 0 2105 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2107 0 0 0 0 0 0 0 0
+S
+#2107
+@cGame Zone Corridor@n~
+   @CThis bright cyan colored corridor has various platforms and obstacles for
+players to maneuver around on. The floor, walls, and ceiling are all
+semi-translucent light. The light of the room seems to come from all sides at
+once. @n
+~
+21 ehu 0 0 0 0
+D0
+~
+~
+0 0 2106 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2108 0 0 0 0 0 0 0 0
+S
+#2108
+@cGame Zone Corridor@n~
+   @CThis bright cyan colored corridor has various platforms and obstacles for
+players to maneuver around on. The floor, walls, and ceiling are all
+semi-translucent light. The light of the room seems to come from all sides at
+once. @n
+~
+21 ehu 0 0 0 0
+D0
+~
+~
+0 0 2107 0 0 0 0 0 0 0 0
+S
+#2109
+@cSpawn @WPoint@n~
+   @GThis area appears to be made out of light. Its floor, walls, and ceiling all
+appear to be semi-translucent green light. A large red colored pad covers part
+of the floor. This pad is obviously where players are loaded into the game. @n
+~
+21 ehu 0 0 0 0
+D1
+~
+~
+0 0 2105 0 0 0 0 0 0 0 0
+S
+#2110
+@cGame Zone Corridor@n~
+   @CThis bright cyan colored corridor has various platforms and obstacles for
+players to maneuver around on. The floor, walls, and ceiling are all
+semi-translucent light. The light of the room seems to come from all sides at
+once. @n
+~
+21 ehu 0 0 0 0
+D1
+~
+~
+0 0 2111 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2105 0 0 0 0 0 0 0 0
+S
+#2111
+@cGame Zone Corridor@n~
+   @CThis bright cyan colored corridor has various platforms and obstacles for
+players to maneuver around on. The floor, walls, and ceiling are all
+semi-translucent light. The light of the room seems to come from all sides at
+once. @n
+~
+21 ehu 0 0 0 0
+D0
+~
+~
+0 0 2118 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2112 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2110 0 0 0 0 0 0 0 0
+S
+#2112
+@cGame Zone Corridor@n~
+   @CThis bright cyan colored corridor has various platforms and obstacles for
+players to maneuver around on. The floor, walls, and ceiling are all
+semi-translucent light. The light of the room seems to come from all sides at
+once. @n
+~
+21 ehu 0 0 0 0
+D1
+~
+~
+0 0 2117 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2113 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2111 0 0 0 0 0 0 0 0
+S
+#2113
+@cGame Zone Corridor@n~
+   @CThis bright cyan colored corridor has various platforms and obstacles for
+players to maneuver around on. The floor, walls, and ceiling are all
+semi-translucent light. The light of the room seems to come from all sides at
+once. @n
+~
+21 ehu 0 0 0 0
+D0
+~
+~
+0 0 2112 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2114 0 0 0 0 0 0 0 0
+S
+#2114
+@cGame Zone Corridor@n~
+   @CThis bright cyan colored corridor has various platforms and obstacles for
+players to maneuver around on. The floor, walls, and ceiling are all
+semi-translucent light. The light of the room seems to come from all sides at
+once. @n
+~
+21 ehu 0 0 0 0
+D0
+~
+~
+0 0 2113 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2115 0 0 0 0 0 0 0 0
+S
+#2115
+@cGame Zone Corridor@n~
+   @CThis bright cyan colored corridor has various platforms and obstacles for
+players to maneuver around on. The floor, walls, and ceiling are all
+semi-translucent light. The light of the room seems to come from all sides at
+once. @n
+~
+21 ehu 0 0 0 0
+D1
+~
+~
+0 0 2116 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2114 0 0 0 0 0 0 0 0
+S
+#2116
+@cGame Zone Corridor@n~
+   @CThis bright cyan colored corridor has various platforms and obstacles for
+players to maneuver around on. The floor, walls, and ceiling are all
+semi-translucent light. The light of the room seems to come from all sides at
+once. @n
+~
+21 ehu 0 0 0 0
+D1
+~
+~
+0 0 2076 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2115 0 0 0 0 0 0 0 0
+S
+#2117
+@cGame Zone Corridor@n~
+   @CThis bright cyan colored corridor has various platforms and obstacles for
+players to maneuver around on. The floor, walls, and ceiling are all
+semi-translucent light. The light of the room seems to come from all sides at
+once. @n
+~
+21 ehu 0 0 0 0
+D0
+~
+~
+0 0 2081 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2112 0 0 0 0 0 0 0 0
+S
+#2118
+@cGame Zone Corridor@n~
+   @CThis bright cyan colored corridor has various platforms and obstacles for
+players to maneuver around on. The floor, walls, and ceiling are all
+semi-translucent light. The light of the room seems to come from all sides at
+once. @n
+~
+21 ehu 0 0 0 0
+D0
+~
+~
+0 0 2119 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2111 0 0 0 0 0 0 0 0
+S
+#2119
+@cGame Zone Center@n~
+   @BThis is the center of the entire game zone. It has platforms and stairs
+wrapping around part of the room, and up and over the four corridors leading
+into this room.
+~
+21 ehu 0 0 0 0
+D0
+~
+~
+0 0 2120 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2121 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2118 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2122 0 0 0 0 0 0 0 0
+S
+#2120
+@cGame Zone Corridor@n~
+   @CThis bright cyan colored corridor has various platforms and obstacles for
+players to maneuver around on. The floor, walls, and ceiling are all
+semi-translucent light. The light of the room seems to come from all sides at
+once. @n
+~
+21 ehu 0 0 0 0
+D0
+~
+~
+0 0 2090 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2119 0 0 0 0 0 0 0 0
+S
+#2121
+@cGame Zone Corridor@n~
+   @CThis bright cyan colored corridor has various platforms and obstacles for
+players to maneuver around on. The floor, walls, and ceiling are all
+semi-translucent light. The light of the room seems to come from all sides at
+once. @n
+~
+21 ehu 0 0 0 0
+D1
+~
+~
+0 0 2082 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2119 0 0 0 0 0 0 0 0
+S
+#2122
+@cGame Zone Corridor@n~
+   @CThis bright cyan colored corridor has various platforms and obstacles for
+players to maneuver around on. The floor, walls, and ceiling are all
+semi-translucent light. The light of the room seems to come from all sides at
+once. @n
+~
+21 ehu 0 0 0 0
+D1
+~
+~
+0 0 2119 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2103 0 0 0 0 0 0 0 0
+S
+#2123
+@cGame Zone Corridor@n~
+   @CThis bright cyan colored corridor has various platforms and obstacles for
+players to maneuver around on. The floor, walls, and ceiling are all
+semi-translucent light. The light of the room seems to come from all sides at
+once. @n
+~
+21 ehu 0 0 0 0
+D0
+~
+~
+0 0 2124 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2103 0 0 0 0 0 0 0 0
+S
+#2124
+@cGame Zone Corridor@n~
+   @CThis bright cyan colored corridor has various platforms and obstacles for
+players to maneuver around on. The floor, walls, and ceiling are all
+semi-translucent light. The light of the room seems to come from all sides at
+once. @n
+~
+21 ehu 0 0 0 0
+D1
+~
+~
+0 0 2091 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2123 0 0 0 0 0 0 0 0
+S
+#2125
+@cGAME HUB@n~
+   @WThis is the end of the game, if you manage to see this, sit patiently or
+contact an immortal. @n
+~
+21 ehu 0 0 0 0
+S
+#2126
+@RV@rR @YW@yorl@Yd @GG@gam@Ge @CC@cente@Cr@n~
+   @WThis large room is lit up by lasers from each corner. The lasers shoot
+across the ceiling, spinning and creating patterns on the floor. A large screen
+can be seen showing the current game in progress and several booths are lined
+up next to it for the players to enter the game world through. @n
+
+@WA @Gsign@W is hanging below the screen here.@n
+~
+21 cepu 0 0 0 0
+D1
+~
+~
+0 0 19522 0 0 0 0 0 0 0 0
+E
+megaman~
+   @WVR Megaman is a game of TAG. The point if to be not "it" the longest. The
+longer you remained untagged, the more points you get. However if you are it
+you lose points the longer you are it. So the goal is to avoid being it
+whenever possible.
+
+@YCommands@n
+@w-----------@n
+@Gtag (target)@n
+@Ghud@n
+~
+E
+mario~
+   @WVR Mario is a game of points! You collect points in certain ways. 
+Depending on how you do something you may get more points. For example you get
+points for stomping an enemy, but you get more points by sending a Koopa Troopa
+sliding into a bunch of enemies in a row. You also get points for bashing coin
+boxes or grabbing the ultra rare flag. The point is to be the one with the most
+points by the end of the game which is done by setting up the best point
+gathering combos.
+
+@YStomp Points@n
+@w--------------
+@CGoomba@D: @G25
+@CKoopa Troopa@D: @G50
+@CBuzzy Bettle@D: @G100
+
+@YSliding Shell Combo Points@n
+@w--------------
+50 x number of enemies hit
++500 if 5 are hit
++1000 more if 10 are hit
+
+@YCommands@n
+@w--------------
+@Gstomp (target)
+@Gkick (target) @D: @wFor kicking stunned koopa troopas@n
+@Gbash box@n
+@Ggrab flag@n
+@Ghud@n
+~
+E
+Zelda~
+   @WVR Zelda is a game of combat and collection. The goal is to be the one with
+the highest amount of rupees by the time the game ends. You gain rupees by
+killing enemies with your magical sword, throwing a boomerang wich will stun a
+player in the game other than the thrower and cause them to drop rupees, or a
+bomb which will hit everyone in a room except the thrower. Players can fight
+other players with their swords as well. With each player getting 3 hearts per
+spawn. If a player is killed the one who killed them will get 25% of the rupees
+the loser had.
+
+@CMagical Sword@D: @Gslash (target)@n
+@CBoomarang    @D: @Gthrow (target)@n
+@CBomb         @D: @Gtoss (target)@n
+@CHeads up Dis@D : @Ghud@n
+~
+E
+sign~
+   @WWelcome to VR World! How this works is there are three VR games available to
+load. They are multiplayer games, so invite all your friends to play! To read
+the rules of a particular game type 'look' and the name of the game. The basic
+game start/entry commands are listed below here.
+
+
+   There needs to be at least three players by the time the game ends for there
+to be any winners(first and second places). It costs 50 zenni to enter a game,
+so make sure you have the money. 
+
+
+   To view the games available just type load. It is strongly suggested you
+read the game's rules before attempting to play. 
+
+@Gload
+load (game name)
+enter game
+gtime@n
+
+   @ROnce a game is started, it will continue until finished. It is intended for
+several people to play, so do not enter solo. @n
+~
+S
+T 2017
+T 2019
+T 2018
+T 2020
+#2127
+@cWest @WCity @CEntrance@n~
+   @WThis hard concrete highway seems to be the only way for ground traffic to
+travel to and from West City. Every fifty feet street lights light up the
+highway, giving visibility at night for any traffic found on the highway. @n
+~
+21 cpu 0 0 0 1
+D1
+~
+~
+0 0 2128 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 19506 0 0 0 0 0 0 0 0
+S
+#2128
+@wWest @DH@Wi@wg@Dh@Ww@wa@Dy@n~
+   @WThis hard concrete highway seems to be the only way for ground traffic to
+travel to and from West City. Every fifty feet street lights light up the
+highway, giving visibility at night for any traffic found on the highway. @n
+~
+21 pu 0 0 0 1
+D1
+~
+~
+0 0 2129 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2127 0 0 0 0 0 0 0 0
+S
+#2129
+@wWest @DH@Wi@wg@Dh@Ww@wa@Dy@n~
+   @WThis hard concrete highway seems to be the only way for ground traffic to
+travel to and from West City. Every fifty feet street lights light up the
+highway, giving visibility at night for any traffic found on the highway. @n
+~
+21 pu 0 0 0 1
+D1
+~
+~
+0 0 2130 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2128 0 0 0 0 0 0 0 0
+S
+#2130
+@wWest @DH@Wi@wg@Dh@Ww@wa@Dy@n~
+   @WThis hard concrete highway seems to be the only way for ground traffic to
+travel to and from West City. Every fifty feet street lights light up the
+highway, giving visibility at night for any traffic found on the highway. @n
+~
+21 pu 0 0 0 1
+D3
+~
+~
+0 0 2129 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2131 0 0 0 0 0 0 0 0
+S
+#2131
+@wWest @DH@Wi@wg@Dh@Ww@wa@Dy@n~
+   @WThis hard concrete highway seems to be the only way for ground traffic to
+travel to and from West City. Every fifty feet street lights light up the
+highway, giving visibility at night for any traffic found on the highway. @n
+~
+21 pu 0 0 0 1
+D6
+~
+~
+0 0 2130 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2132 0 0 0 0 0 0 0 0
+S
+#2132
+@wWest @DH@Wi@wg@Dh@Ww@wa@Dy@n~
+   @WThis hard concrete highway seems to be the only way for ground traffic to
+travel to and from West City. Every fifty feet street lights light up the
+highway, giving visibility at night for any traffic found on the highway. @n
+~
+21 pu 0 0 0 1
+D6
+~
+~
+0 0 2131 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2133 0 0 0 0 0 0 0 0
+S
+#2133
+@wWest @DH@Wi@wg@Dh@Ww@wa@Dy@n~
+   @WThis hard concrete highway seems to be the only way for ground traffic to
+travel to and from West City. Every fifty feet street lights light up the
+highway, giving visibility at night for any traffic found on the highway. @n
+~
+21 pu 0 0 0 1
+D1
+~
+~
+0 0 2134 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2132 0 0 0 0 0 0 0 0
+S
+#2134
+@wWest @DH@Wi@wg@Dh@Ww@wa@Dy@n~
+   @WThis hard concrete highway seems to be the only way for ground traffic to
+travel to and from West City. Every fifty feet street lights light up the
+highway, giving visibility at night for any traffic found on the highway. @n
+~
+21 pu 0 0 0 1
+D1
+~
+~
+0 0 2135 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2133 0 0 0 0 0 0 0 0
+S
+#2135
+@wWest @DH@Wi@wg@Dh@Ww@wa@Dy@n~
+   @WThis hard concrete highway seems to be the only way for ground traffic to
+travel to and from West City. Every fifty feet street lights light up the
+highway, giving visibility at night for any traffic found on the highway. @n
+~
+21 pu 0 0 0 1
+D3
+~
+~
+0 0 2134 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2136 0 0 0 0 0 0 0 0
+S
+#2136
+@wWest @DH@Wi@wg@Dh@Ww@wa@Dy@n~
+   @WThis hard concrete highway seems to be the only way for ground traffic to
+travel to and from West City. Every fifty feet street lights light up the
+highway, giving visibility at night for any traffic found on the highway. @n
+~
+21 pu 0 0 0 1
+D1
+~
+~
+0 0 2137 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2135 0 0 0 0 0 0 0 0
+S
+#2137
+@wWest @DH@Wi@wg@Dh@Ww@wa@Dy@n~
+   @WThis hard concrete highway seems to be the only way for ground traffic to
+travel to and from West City. Every fifty feet street lights light up the
+highway, giving visibility at night for any traffic found on the highway. @n
+~
+21 pu 0 0 0 1
+D1
+~
+~
+0 0 2138 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2136 0 0 0 0 0 0 0 0
+S
+#2138
+@wWest @DH@Wi@wg@Dh@Ww@wa@Dy@n~
+   @WThis hard concrete highway seems to be the only way for ground traffic to
+travel to and from West City. Every fifty feet street lights light up the
+highway, giving visibility at night for any traffic found on the highway. @n
+~
+21 pu 0 0 0 1
+D1
+~
+~
+0 0 2139 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2137 0 0 0 0 0 0 0 0
+S
+#2139
+@wWest @DH@Wi@wg@Dh@Ww@wa@Dy@n~
+   @WThis hard concrete highway seems to be the only way for ground traffic to
+travel to and from West City. Every fifty feet street lights light up the
+highway, giving visibility at night for any traffic found on the highway. @n
+~
+21 pu 0 0 0 1
+D1
+~
+~
+0 0 2140 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2138 0 0 0 0 0 0 0 0
+S
+#2140
+@wWest @DH@Wi@wg@Dh@Ww@wa@Dy @GEntrance@n~
+   @WThis hard concrete highway seems to be the only way for ground traffic to
+travel to and from West City. Every fifty feet street lights light up the
+highway, giving visibility at night for any traffic found on the highway. @n
+~
+21 cpu 0 0 0 1
+D1
+~
+~
+0 0 1620 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2139 0 0 0 0 0 0 0 0
+S
+#2141
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WShoreline@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu F 0 0 12
+D0
+~
+~
+0 0 1104 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2142 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1103 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1105 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2178 0 0 0 0 0 0 0 0
+S
+#2142
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WShoreline@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu F 0 0 12
+D0
+~
+~
+0 0 1105 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2143 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2178 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2141 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1104 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1106 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2177 0 0 0 0 0 0 0 0
+S
+#2143
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WShoreline@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu F 0 0 12
+D0
+~
+~
+0 0 1106 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2144 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2177 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2142 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1105 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1107 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2176 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2178 0 0 0 0 0 0 0 0
+S
+#2144
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WShoreline@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu F 0 0 12
+D0
+~
+~
+0 0 1107 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2145 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2176 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2143 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1106 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1108 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2175 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2177 0 0 0 0 0 0 0 0
+S
+#2145
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WShoreline@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu F 0 0 12
+D0
+~
+~
+0 0 1108 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2146 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2175 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2144 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1107 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1109 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2174 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2176 0 0 0 0 0 0 0 0
+S
+#2146
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WShoreline@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu F 0 0 12
+D0
+~
+~
+0 0 1109 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2147 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2174 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2145 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1108 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1110 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2173 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2175 0 0 0 0 0 0 0 0
+S
+#2147
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WShoreline@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu F 0 0 12
+D0
+~
+~
+0 0 1110 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2148 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2173 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2146 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1109 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1111 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2172 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2174 0 0 0 0 0 0 0 0
+S
+#2148
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WShoreline@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu F 0 0 12
+D0
+~
+~
+0 0 1111 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2149 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2172 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2147 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1110 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1112 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2171 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2173 0 0 0 0 0 0 0 0
+S
+#2149
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WShoreline@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu F 0 0 12
+D0
+~
+~
+0 0 1112 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2150 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2171 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2148 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1111 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1113 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2170 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2172 0 0 0 0 0 0 0 0
+S
+#2150
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WShoreline@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu F 0 0 12
+D0
+~
+~
+0 0 1113 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2151 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2170 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2149 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1112 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1114 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2169 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2171 0 0 0 0 0 0 0 0
+S
+#2151
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WShoreline@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu F 0 0 12
+D0
+~
+~
+0 0 1114 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2152 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2169 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2150 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1113 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1115 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2168 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2170 0 0 0 0 0 0 0 0
+S
+#2152
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WShoreline@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu F 0 0 12
+D0
+~
+~
+0 0 1115 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2153 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2168 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2151 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1114 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1116 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2167 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2169 0 0 0 0 0 0 0 0
+S
+#2153
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WShoreline@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu F 0 0 12
+D0
+~
+~
+0 0 1116 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2154 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2167 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2152 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1115 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1117 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2166 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2168 0 0 0 0 0 0 0 0
+S
+#2154
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WShoreline@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu F 0 0 12
+D0
+~
+~
+0 0 1117 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2155 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2166 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2153 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1116 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1118 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2165 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2167 0 0 0 0 0 0 0 0
+S
+#2155
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WShoreline@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu F 0 0 12
+D0
+~
+~
+0 0 1118 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2156 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2165 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2154 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1117 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1119 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2164 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2166 0 0 0 0 0 0 0 0
+S
+#2156
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WShoreline@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu F 0 0 12
+D0
+~
+~
+0 0 1119 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2157 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2164 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2155 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1118 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1120 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2163 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2165 0 0 0 0 0 0 0 0
+S
+#2157
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WShoreline@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu F 0 0 12
+D0
+~
+~
+0 0 1120 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2158 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2163 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2156 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1119 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1121 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2162 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2164 0 0 0 0 0 0 0 0
+S
+#2158
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WShoreline@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu F 0 0 12
+D0
+~
+~
+0 0 1121 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2159 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2162 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2157 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1120 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1122 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2161 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2163 0 0 0 0 0 0 0 0
+S
+#2159
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WShoreline@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu F 0 0 12
+D0
+~
+~
+0 0 1122 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2160 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2161 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2158 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1121 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1123 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2162 0 0 0 0 0 0 0 0
+S
+#2160
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WShoreline@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu F 0 0 12
+D0
+~
+~
+0 0 1123 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2159 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 1122 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 1124 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2161 0 0 0 0 0 0 0 0
+S
+#2161
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WMiddle of the beach@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu 0 0 0 12
+D0
+~
+~
+0 0 2159 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2162 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2158 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2160 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2194 0 0 0 0 0 0 0 0
+S
+#2162
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WMiddle of the beach@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu 0 0 0 12
+D0
+~
+~
+0 0 2158 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2161 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2194 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2163 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2157 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2159 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2193 0 0 0 0 0 0 0 0
+S
+#2163
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WMiddle of the beach@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu 0 0 0 12
+D0
+~
+~
+0 0 2157 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2162 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2193 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2164 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2156 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2158 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2194 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2192 0 0 0 0 0 0 0 0
+S
+#2164
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WMiddle of the beach@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu 0 0 0 12
+D0
+~
+~
+0 0 2156 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2163 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2192 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2165 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2155 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2157 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2193 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2191 0 0 0 0 0 0 0 0
+S
+#2165
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WMiddle of the beach@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu 0 0 0 12
+D0
+~
+~
+0 0 2155 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2164 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2191 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2166 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2154 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2156 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2192 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2190 0 0 0 0 0 0 0 0
+S
+#2166
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WMiddle of the beach@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu 0 0 0 12
+D0
+~
+~
+0 0 2154 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2165 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2190 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2167 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2153 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2155 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2191 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2189 0 0 0 0 0 0 0 0
+S
+#2167
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WMiddle of the beach@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu 0 0 0 12
+D0
+~
+~
+0 0 2153 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2166 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2189 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2168 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2152 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2154 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2190 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2188 0 0 0 0 0 0 0 0
+S
+#2168
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WMiddle of the beach@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu 0 0 0 12
+D0
+~
+~
+0 0 2152 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2167 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2188 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2169 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2151 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2153 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2189 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2187 0 0 0 0 0 0 0 0
+S
+#2169
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WMiddle of the beach@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu 0 0 0 12
+D0
+~
+~
+0 0 2151 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2168 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2187 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2170 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2150 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2152 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2188 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2186 0 0 0 0 0 0 0 0
+S
+#2170
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WMiddle of the beach@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu 0 0 0 12
+D0
+~
+~
+0 0 2150 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2169 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2186 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2171 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2149 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2151 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2187 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2185 0 0 0 0 0 0 0 0
+S
+#2171
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WMiddle of the beach@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu 0 0 0 12
+D0
+~
+~
+0 0 2149 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2170 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2185 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2172 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2148 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2150 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2186 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2184 0 0 0 0 0 0 0 0
+S
+#2172
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@ya@Yc@Wh:  Karaoke Platform@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+@Y
+
+   In the middle of this section of beach, a makeshift stage platform has been
+set up with a shaded canopy cover.@n
+~
+21 cpu 0 0 0 12
+D0
+~
+~
+0 0 2148 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2171 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2184 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2173 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2147 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2149 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2185 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2183 0 0 0 0 0 0 0 0
+S
+#2173
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WMiddle of the beach@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu 0 0 0 12
+D0
+~
+~
+0 0 2147 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2172 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2183 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2174 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2146 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2148 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2184 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2182 0 0 0 0 0 0 0 0
+S
+#2174
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WMiddle of the beach@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu 0 0 0 12
+D0
+~
+~
+0 0 2146 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2173 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2182 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2175 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2145 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2147 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2183 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2181 0 0 0 0 0 0 0 0
+S
+#2175
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WMiddle of the beach@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu 0 0 0 12
+D0
+~
+~
+0 0 2145 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2174 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2181 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2176 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2144 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2146 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2182 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2180 0 0 0 0 0 0 0 0
+S
+#2176
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WMiddle of the beach@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu 0 0 0 12
+D0
+~
+~
+0 0 2144 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2175 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2180 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2177 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2143 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2145 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2181 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2179 0 0 0 0 0 0 0 0
+S
+#2177
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WMiddle of the beach@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu 0 0 0 12
+D0
+~
+~
+0 0 2143 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2176 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2179 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2178 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2142 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2144 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2180 0 0 0 0 0 0 0 0
+S
+#2178
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WMiddle of the beach@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu 0 0 0 12
+D0
+~
+~
+0 0 2142 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2177 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2141 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2143 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2179 0 0 0 0 0 0 0 0
+S
+#2179
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WUp the beach@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu 0 0 0 12
+D0
+~
+~
+0 0 2177 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2180 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2178 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2176 0 0 0 0 0 0 0 0
+S
+#2180
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WUp the beach@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu 0 0 0 12
+D0
+~
+~
+0 0 2176 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2181 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2179 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2177 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2175 0 0 0 0 0 0 0 0
+S
+#2181
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WUp the beach@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu 0 0 0 12
+D0
+~
+~
+0 0 2175 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2182 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2180 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2176 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2174 0 0 0 0 0 0 0 0
+S
+#2182
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WUp the beach@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu 0 0 0 12
+D0
+~
+~
+0 0 2174 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2183 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2181 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2175 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2173 0 0 0 0 0 0 0 0
+S
+#2183
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WUp the beach@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu 0 0 0 12
+D0
+~
+~
+0 0 2173 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2184 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2182 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2174 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2172 0 0 0 0 0 0 0 0
+S
+#2184
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WUp the beach@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu 0 0 0 12
+D0
+~
+~
+0 0 2172 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2185 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2183 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2173 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2171 0 0 0 0 0 0 0 0
+S
+#2185
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WUp the beach@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu 0 0 0 12
+D0
+~
+~
+0 0 2171 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2186 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2184 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2172 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2170 0 0 0 0 0 0 0 0
+S
+#2186
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WUp the beach@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu 0 0 0 12
+D0
+~
+~
+0 0 2170 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2187 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2185 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2171 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2169 0 0 0 0 0 0 0 0
+S
+#2187
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WUp the beach@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu 0 0 0 12
+D0
+~
+~
+0 0 2169 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2188 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2186 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2170 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2168 0 0 0 0 0 0 0 0
+S
+#2188
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WUp the beach@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu 0 0 0 12
+D0
+~
+~
+0 0 2168 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2189 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2187 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2169 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2167 0 0 0 0 0 0 0 0
+S
+#2189
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WUp the beach@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu 0 0 0 12
+D0
+~
+~
+0 0 2167 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2190 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2188 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2168 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2166 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2195 0 0 0 0 0 0 0 0
+S
+#2190
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WUp the beach@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu 0 0 0 12
+D0
+~
+~
+0 0 2166 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2191 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2195 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2189 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2167 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2165 0 0 0 0 0 0 0 0
+S
+#2191
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WUp the beach@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu 0 0 0 12
+D0
+~
+~
+0 0 2165 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2192 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2190 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2166 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2164 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2195 0 0 0 0 0 0 0 0
+S
+#2192
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WUp the beach@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu 0 0 0 12
+D0
+~
+~
+0 0 2164 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2193 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2191 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2165 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2163 0 0 0 0 0 0 0 0
+S
+#2193
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WUp the beach@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu 0 0 0 12
+D0
+~
+~
+0 0 2163 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2194 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2192 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2164 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2162 0 0 0 0 0 0 0 0
+S
+#2194
+@RH@re@Dr@Rc@ru@Dl@re @yB@Ye@Da@Yc@wh@D: @WUp the beach@n~
+   @YThis entire area is full of white fine sand. Trash cans and small booths are
+set up every fifty paces, for patrons to use at their leisure. Empty clam
+shells and other ocean debris can be found partially buried in the sand in some
+parts of the beach as well. @n
+~
+21 pu 0 0 0 12
+D0
+~
+~
+0 0 2162 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2193 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2163 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2161 0 0 0 0 0 0 0 0
+S
+#2195
+@WSmall @DR@Wo@wa@Dd@n~
+   @WThis small road is made up of concrete and runs straight to and from Hercule
+Beach to the north. Street-lamps light the road up every fifty feet at night,
+and green information signs can be seen posted every so often along the
+roadside. @n
+~
+21 cpu 0 0 0 1
+D0
+~
+~
+0 0 2190 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2196 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2189 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2191 0 0 0 0 0 0 0 0
+S
+#2196
+@WSmall @DR@Wo@wa@Dd@n~
+   @WThis small road is made up of concrete and runs straight to and from Hercule
+Beach to the north. Street-lamps light the road up every fifty feet at night,
+and green information signs can be seen posted every so often along the
+roadside. @n
+~
+21 pu 0 0 0 1
+D0
+~
+~
+0 0 2195 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2197 0 0 0 0 0 0 0 0
+S
+#2197
+@WSmall @DR@Wo@wa@Dd@n~
+   @WThis small road is made up of concrete and runs straight to and from Hercule
+Beach to the north. Street-lamps light the road up every fifty feet at night,
+and green information signs can be seen posted every so often along the
+roadside. @n
+~
+21 pu 0 0 0 1
+D0
+~
+~
+0 0 2196 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2198 0 0 0 0 0 0 0 0
+S
+#2198
+@WSmall @DR@Wo@wa@Dd@n~
+   @WThis small road is made up of concrete and runs straight to and from Hercule
+Beach to the north. Street-lamps light the road up every fifty feet at night,
+and green information signs can be seen posted every so often along the
+roadside. @n
+~
+21 pu 0 0 0 1
+D0
+~
+~
+0 0 2197 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2199 0 0 0 0 0 0 0 0
+S
+#2199
+@WSmall @DR@Wo@wa@Dd@n~
+   @WThis small road is made up of concrete and runs straight to and from Hercule
+Beach to the north. Street-lamps light the road up every fifty feet at night,
+and green information signs can be seen posted every so often along the
+roadside. @n
+~
+21 pu 0 0 0 1
+D0
+~
+~
+0 0 2198 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 13000 0 0 0 0 0 0 0 0
+S
+$~

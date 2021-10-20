@@ -1,0 +1,991 @@
+#9100
+uc~
+You are in an unfinished room.
+~
+91 0 0 0 0 0
+S
+#9101
+@RE@WD@CF@W Headquarters@n~
+   @RE@WD@CF@n headquarters is a technologically advanced room, where fighters of
+varying strengths come to apply and work for the @RE@narth @WD@nefense @CF@norce. Two
+guards stand by the front door, and two more by the front desk, all of which
+look quite powerful. Light filters into the room from unindentifiable sources,
+but despite not being able to tell from where the light comes, the room is well
+lit. There are no windows to the outside, as the entire building seems built
+to withstand explosions of terrible force. @n
+~
+91 cdehu 0 0 0 0
+D1
+~
+~
+0 0 9102 0 0 0 0 0 0 0 0
+S
+#9102
+@RE@WD@CF @WHallway@n~
+This unfinished room was created by Seddy.
+~
+91 0 0 0 0 0
+D0
+~
+~
+0 0 9103 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9105 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9104 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9101 0 0 0 0 0 0 0 0
+S
+#9103
+@RE@WD@CF@W Novice Shop@n~
+   @nThe @RE@WD@CF@W Novice Shop@n is a room with an assortment of neat but not terribly
+fancy objects for sale. Most are displayed on the walls around the room, but a
+few items are kept in a glass case that also serves as a counter where the
+clerk stands ready to help customers. 
+~
+91 dehu 0 0 0 0
+D2
+~
+~
+0 0 9102 0 0 0 0 0 0 0 0
+S
+#9104
+@RE@WD@CF@W Novice Recreation Room@n~
+   Pool tables, arcade games, a large assortment of seating areas, and a small
+set of tables at which one might sit and have a meal, play card games with
+friends, or just discuss life adorn this room. Guards pass into and out of
+this room frequently, making certain that order is kept should anyone grow a
+little rowdy at the loss of a game or antagonization of a conversation.
+~
+91 dehu 0 0 0 0
+D0
+~
+~
+0 0 9102 0 0 0 0 0 0 0 0
+S
+#9105
+@RE@WD@CF @WHallway@n~
+This unfinished room was created by Seddy.
+~
+91 0 0 0 0 0
+D1
+~
+~
+0 0 9106 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9102 0 0 0 0 0 0 0 0
+S
+#9106
+@RE@WD@CF @WHallway@n~
+This unfinished room was created by Seddy.
+~
+91 0 0 0 0 0
+D0
+~
+~
+0 0 9107 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9109 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9108 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9105 0 0 0 0 0 0 0 0
+S
+#9107
+@RE@WD@CF @WMaster Shop@n~
+This unfinished room was created by Seddy.
+~
+91 0 0 0 0 0
+D2
+~
+~
+0 0 9106 0 0 0 0 0 0 0 0
+S
+#9108
+@RE@WD@CF @WMaster Recreation Room@n~
+This unfinished room was created by Seddy.
+~
+91 0 0 0 0 0
+D0
+~
+~
+0 0 9106 0 0 0 0 0 0 0 0
+S
+#9109
+@RE@WD@CF @WHallway@n~
+This unfinished room was created by Seddy.
+~
+91 0 0 0 0 0
+D1
+~
+~
+0 0 9110 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9106 0 0 0 0 0 0 0 0
+S
+#9110
+@RE@WD@CF @WElite Shop@n~
+This unfinished room was created by Seddy.
+~
+91 0 0 0 0 0
+D3
+~
+~
+0 0 9109 0 0 0 0 0 0 0 0
+S
+#9111
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RCity Square@n~
+   @WThe central square of @DS@yh@wadow@Dr@wai@Dn@W is paved with @wgrey@W and @Dblack@W brick,
+probably stemming from the @Rv@Yo@Rl@rcan@Yi@Rc@W materials used in its construction. Like
+the rest of the city, there are no patches of @Ggrass@W anywhere to be seen. 
+Every inch bears the mark of human construction of the sturdiest kind. @n
+~
+91 dpu 0 0 0 1
+D0
+~
+~
+0 0 9114 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9127 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9198 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9112 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 9115 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 9197 0 0 0 0 0 0 0 0
+S
+#9112
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RCity Square@n~
+   @WThe central square of @DS@yh@wadow@Dr@wai@Dn@W is paved with @wgrey@W and @Dblack@W brick,
+probably stemming from the @Rv@Yo@Rl@rcan@Yi@Rc@W materials used in its construction. Like
+the rest of the city, there are no patches of @Ggrass@W anywhere to be seen. 
+Every inch bears the mark of human construction of the sturdiest kind. @n
+~
+91 dpu 0 0 0 1
+D0
+~
+~
+0 0 9115 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9111 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9197 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9113 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 9116 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 9114 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 9198 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 9196 0 0 0 0 0 0 0 0
+S
+#9113
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RCity Square@n~
+   @WThe central square of @DS@yh@wadow@Dr@wai@Dn@W is paved with @wgrey@W and @Dblack@W brick,
+probably stemming from the @Rv@Yo@Rl@rcan@Yi@Rc@W materials used in its construction. Like
+the rest of the city, there are no patches of @Ggrass@W anywhere to be seen. 
+Every inch bears the mark of human construction of the sturdiest kind. @n
+~
+91 dpu 0 0 0 1
+D0
+~
+~
+0 0 9116 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9112 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9196 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9119 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 9115 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 9197 0 0 0 0 0 0 0 0
+S
+#9114
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RCity Square@n~
+   @WThe central square of @DS@yh@wadow@Dr@wai@Dn@W is paved with @wgrey@W and @Dblack@W brick,
+probably stemming from the @Rv@Yo@Rl@rcan@Yi@Rc@W materials used in its construction. Like
+the rest of the city, there are no patches of @Ggrass@W anywhere to be seen. 
+Every inch bears the mark of human construction of the sturdiest kind. @n
+~
+91 dpu 0 0 0 1
+D2
+~
+~
+0 0 9111 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9115 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 9112 0 0 0 0 0 0 0 0
+S
+#9115
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RCity Square@n~
+   @WThe central square of @DS@yh@wadow@Dr@wai@Dn@W is paved with @wgrey@W and @Dblack@W brick,
+probably stemming from the @Rv@Yo@Rl@rcan@Yi@Rc@W materials used in its construction. Like
+the rest of the city, there are no patches of @Ggrass@W anywhere to be seen. 
+Every inch bears the mark of human construction of the sturdiest kind. @n
+~
+91 dpu 0 0 0 1
+D0
+~
+~
+0 0 9117 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9114 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9112 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9116 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 9111 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 9113 0 0 0 0 0 0 0 0
+S
+#9116
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RCity Square@n~
+   @WThe central square of @DS@yh@wadow@Dr@wai@Dn@W is paved with @wgrey@W and @Dblack@W brick,
+probably stemming from the @Rv@Yo@Rl@rcan@Yi@Rc@W materials used in its construction. Like
+the rest of the city, there are no patches of @Ggrass@W anywhere to be seen. 
+Every inch bears the mark of human construction of the sturdiest kind. @n
+~
+91 dpu 0 0 0 1
+D1
+~
+~
+0 0 9115 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9113 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 9112 0 0 0 0 0 0 0 0
+S
+#9117
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RPolice Station@n~
+This unfinished room was created by Seddy.
+~
+91 pu 0 0 0 0
+D2
+~
+~
+0 0 9115 0 0 0 0 0 0 0 0
+S
+#9118
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RCrime Den@n~
+This unfinished room was created by Seddy.
+~
+91 pu 0 0 0 0
+D0
+~
+~
+0 0 9197 0 0 0 0 0 0 0 0
+S
+#9119
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RMain Street@n~
+   Main street bisects Shadowrain City along the north and south axis and leads
+to the City Square at the center of the city. Several cars are parked on the
+side of the street and signs of new construction are prevalent as far down the
+street as one can see.
+~
+91 dpu 0 0 0 1
+D1
+~
+~
+0 0 9113 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9120 0 0 0 0 0 0 0 0
+S
+#9120
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RMain Street@n~
+   Main street bisects Shadowrain City along the north and south axis and leads
+to the City Square at the center of the city. Several cars are parked on the
+side of the street and signs of new construction are prevalent as far down the
+street as one can see.
+~
+91 dpu 0 0 0 1
+D1
+~
+~
+0 0 9119 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9121 0 0 0 0 0 0 0 0
+S
+#9121
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RMain Street@n~
+   Main street bisects Shadowrain City along the north and south axis and leads
+to the City Square at the center of the city. Several cars are parked on the
+side of the street and signs of new construction are prevalent as far down the
+street as one can see.
+~
+91 dpu 0 0 0 1
+D1
+~
+~
+0 0 9120 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9122 0 0 0 0 0 0 0 0
+S
+#9122
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RMain Street@n~
+   Main street bisects Shadowrain City along the north and south axis and leads
+to the City Square at the center of the city. Several cars are parked on the
+side of the street and signs of new construction are prevalent as far down the
+street as one can see.
+~
+91 dpu 0 0 0 1
+D1
+~
+~
+0 0 9121 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9123 0 0 0 0 0 0 0 0
+S
+#9123
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RMain Street@n~
+   Main street bisects Shadowrain City along the north and south axis and leads
+to the City Square at the center of the city. Several cars are parked on the
+side of the street and signs of new construction are prevalent as far down the
+street as one can see.
+~
+91 dpu 0 0 0 1
+D1
+~
+~
+0 0 9122 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9124 0 0 0 0 0 0 0 0
+S
+#9124
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RMain Street@n~
+   Main street bisects Shadowrain City along the north and south axis and leads
+to the City Square at the center of the city. Several cars are parked on the
+side of the street and signs of new construction are prevalent as far down the
+street as one can see.
+~
+91 dpu 0 0 0 1
+D1
+~
+~
+0 0 9123 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9125 0 0 0 0 0 0 0 0
+S
+#9125
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RMain Street@n~
+   Main street bisects Shadowrain City along the north and south axis and leads
+to the City Square at the center of the city. Several cars are parked on the
+side of the street and signs of new construction are prevalent as far down the
+street as one can see.
+~
+91 dpu 0 0 0 1
+D1
+~
+~
+0 0 9124 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9126 0 0 0 0 0 0 0 0
+S
+#9126
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RMain Street@n~
+   Main street bisects Shadowrain City along the north and south axis and leads
+to the City Square at the center of the city. Several cars are parked on the
+side of the street and signs of new construction are prevalent as far down the
+street as one can see.
+~
+91 dpu 0 0 0 11
+D1
+~
+~
+0 0 9125 0 0 0 0 0 0 0 0
+D11
+~
+~
+0 0 9134 0 0 0 0 0 0 0 0
+S
+#9127
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RMain Street@n~
+   Main street bisects Shadowrain City along the north and south axis and leads
+to the City Square at the center of the city. Several cars are parked on the
+side of the street and signs of new construction are prevalent as far down the
+street as one can see.
+~
+91 dpu 0 0 0 1
+D1
+~
+~
+0 0 9128 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9111 0 0 0 0 0 0 0 0
+S
+#9128
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RMain Street@n~
+   Main street bisects Shadowrain City along the north and south axis and leads
+to the City Square at the center of the city. Several cars are parked on the
+side of the street and signs of new construction are prevalent as far down the
+street as one can see.
+~
+91 dpu 0 0 0 1
+D1
+~
+~
+0 0 9129 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9127 0 0 0 0 0 0 0 0
+S
+#9129
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RMain Street@n~
+   Main street bisects Shadowrain City along the north and south axis and leads
+to the City Square at the center of the city. Several cars are parked on the
+side of the street and signs of new construction are prevalent as far down the
+street as one can see.
+~
+91 dpu 0 0 0 1
+D1
+~
+~
+0 0 9130 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9128 0 0 0 0 0 0 0 0
+S
+#9130
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RMain Street@n~
+   Main street bisects Shadowrain City along the north and south axis and leads
+to the City Square at the center of the city. Several cars are parked on the
+side of the street and signs of new construction are prevalent as far down the
+street as one can see.
+~
+91 dpu 0 0 0 1
+D1
+~
+~
+0 0 9131 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9129 0 0 0 0 0 0 0 0
+S
+#9131
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RMain Street@n~
+   Main street bisects Shadowrain City along the north and south axis and leads
+to the City Square at the center of the city. Several cars are parked on the
+side of the street and signs of new construction are prevalent as far down the
+street as one can see.
+~
+91 dpu 0 0 0 1
+D1
+~
+~
+0 0 9132 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9130 0 0 0 0 0 0 0 0
+S
+#9132
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RMain Street@n~
+   Main street bisects Shadowrain City along the north and south axis and leads
+to the City Square at the center of the city. Several cars are parked on the
+side of the street and signs of new construction are prevalent as far down the
+street as one can see.
+~
+91 dpu 0 0 0 1
+D1
+~
+~
+0 0 9133 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9131 0 0 0 0 0 0 0 0
+S
+#9133
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RMain Street@n~
+   Main street bisects Shadowrain City along the north and south axis and leads
+to the City Square at the center of the city. Several cars are parked on the
+side of the street and signs of new construction are prevalent as far down the
+street as one can see.
+~
+91 dpu 0 0 0 11
+D3
+~
+~
+0 0 9132 0 0 0 0 0 0 0 0
+S
+#9134
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RShadowrain Highway@n~
+   Shadowrain Highway leads to and from Shadowrain. A huge spire to the west
+can be seen, and far above it some kind of structure. To the east, hints of
+the city of Shadowrain can be seen. This road is well kept, and the grass
+within ten feet of the highway is newly mowed and clearly recently maintained.
+~
+91 cpu 0 0 0 11
+D3
+~
+~
+0 0 9135 0 0 0 0 0 0 0 0
+D10
+~
+~
+0 0 9126 0 0 0 0 0 0 0 0
+S
+#9135
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RShadowrain Highway@n~
+   Shadowrain Highway leads to and from Shadowrain. A huge spire to the west
+can be seen, and far above it some kind of structure. To the east, hints of
+the city of Shadowrain can be seen. This road is well kept, and the grass
+within ten feet of the highway is newly mowed and clearly recently maintained.
+~
+91 dpu 0 0 0 2
+D1
+~
+~
+0 0 9134 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9136 0 0 0 0 0 0 0 0
+S
+#9136
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RShadowrain Highway@n~
+   Shadowrain Highway leads to and from Shadowrain. A huge spire to the west
+can be seen, and far above it some kind of structure. To the east, hints of
+the city of Shadowrain can be seen. This road is well kept, and the grass
+within ten feet of the highway is newly mowed and clearly recently maintained.
+~
+91 dpu 0 0 0 2
+D0
+~
+~
+0 0 9135 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9137 0 0 0 0 0 0 0 0
+S
+#9137
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RShadowrain Highway@n~
+   Shadowrain Highway leads to and from Shadowrain. A huge spire to the west
+can be seen, and far above it some kind of structure. To the east, hints of
+the city of Shadowrain can be seen. This road is well kept, and the grass
+within ten feet of the highway is newly mowed and clearly recently maintained.
+~
+91 dpu 0 0 0 2
+D1
+~
+~
+0 0 9136 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9138 0 0 0 0 0 0 0 0
+S
+#9138
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RShadowrain Highway@n~
+   Shadowrain Highway leads to and from Shadowrain. A huge spire to the west
+can be seen, and far above it some kind of structure. To the east, hints of
+the city of Shadowrain can be seen. This road is well kept, and the grass
+within ten feet of the highway is newly mowed and clearly recently maintained.
+~
+91 dpu 0 0 0 2
+D1
+~
+~
+0 0 9137 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9139 0 0 0 0 0 0 0 0
+S
+#9139
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RShadowrain Highway@n~
+   Shadowrain Highway leads to and from Shadowrain. A huge spire to the west
+can be seen, and far above it some kind of structure. To the east, hints of
+the city of Shadowrain can be seen. This road is well kept, and the grass
+within ten feet of the highway is newly mowed and clearly recently maintained.
+~
+91 dpu 0 0 0 2
+D1
+~
+~
+0 0 9138 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 9140 0 0 0 0 0 0 0 0
+S
+#9140
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RShadowrain Highway@n~
+   Shadowrain Highway leads to and from Shadowrain. A huge spire to the west
+can be seen, and far above it some kind of structure. To the east, hints of
+the city of Shadowrain can be seen. This road is well kept, and the grass
+within ten feet of the highway is newly mowed and clearly recently maintained.
+~
+91 dpu 0 0 0 2
+D7
+~
+~
+0 0 9139 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 9141 0 0 0 0 0 0 0 0
+S
+#9141
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RShadowrain Highway@n~
+   Shadowrain Highway leads to and from Shadowrain. A huge spire to the west
+can be seen, and far above it some kind of structure. To the east, hints of
+the city of Shadowrain can be seen. This road is well kept, and the grass
+within ten feet of the highway is newly mowed and clearly recently maintained.
+~
+91 dpu 0 0 0 2
+D3
+~
+~
+0 0 9142 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 9140 0 0 0 0 0 0 0 0
+S
+#9142
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RShadowrain Highway@n~
+   Shadowrain Highway leads to and from Shadowrain. A huge spire to the west
+can be seen, and far above it some kind of structure. To the east, hints of
+the city of Shadowrain can be seen. This road is well kept, and the grass
+within ten feet of the highway is newly mowed and clearly recently maintained.
+~
+91 dpu 0 0 0 2
+D1
+~
+~
+0 0 9141 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9143 0 0 0 0 0 0 0 0
+S
+#9143
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RShadowrain Highway@n~
+   Shadowrain Highway leads to and from Shadowrain. A huge spire to the west
+can be seen, and far above it some kind of structure. To the east, hints of
+the city of Shadowrain can be seen. This road is well kept, and the grass
+within ten feet of the highway is newly mowed and clearly recently maintained.
+~
+91 dpu 0 0 0 2
+D1
+~
+~
+0 0 9142 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9144 0 0 0 0 0 0 0 0
+S
+#9144
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RShadowrain Highway@n~
+   Shadowrain Highway leads to and from Shadowrain. A huge spire to the west
+can be seen, and far above it some kind of structure. To the east, hints of
+the city of Shadowrain can be seen. This road is well kept, and the grass
+within ten feet of the highway is newly mowed and clearly recently maintained.
+~
+91 dpu 0 0 0 2
+D0
+~
+~
+0 0 9143 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9145 0 0 0 0 0 0 0 0
+S
+#9145
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RShadowrain Highway@n~
+   Shadowrain Highway leads to and from Shadowrain. A huge spire to the west
+can be seen, and far above it some kind of structure. To the east, hints of
+the city of Shadowrain can be seen. This road is well kept, and the grass
+within ten feet of the highway is newly mowed and clearly recently maintained.
+~
+91 dpu 0 0 0 2
+D1
+~
+~
+0 0 9144 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9146 0 0 0 0 0 0 0 0
+S
+#9146
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RShadowrain Highway@n~
+   Shadowrain Highway leads to and from Shadowrain. A huge spire to the west
+can be seen, and far above it some kind of structure. To the east, hints of
+the city of Shadowrain can be seen. This road is well kept, and the grass
+within ten feet of the highway is newly mowed and clearly recently maintained.
+~
+91 dpu 0 0 0 2
+D1
+~
+~
+0 0 9145 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9147 0 0 0 0 0 0 0 0
+S
+#9147
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RShadowrain Highway@n~
+   Shadowrain Highway leads to and from Shadowrain. A huge spire to the west
+can be seen, and far above it some kind of structure. To the east, hints of
+the city of Shadowrain can be seen. This road is well kept, and the grass
+within ten feet of the highway is newly mowed and clearly recently maintained.
+~
+91 dpu 0 0 0 2
+D1
+~
+~
+0 0 9146 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 9148 0 0 0 0 0 0 0 0
+S
+#9148
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RShadowrain Highway@n~
+   Shadowrain Highway leads to and from Shadowrain. A huge spire to the west
+can be seen, and far above it some kind of structure. To the east, hints of
+the city of Shadowrain can be seen. This road is well kept, and the grass
+within ten feet of the highway is newly mowed and clearly recently maintained.
+~
+91 dpu 0 0 0 2
+D3
+~
+~
+0 0 9149 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 9147 0 0 0 0 0 0 0 0
+S
+#9149
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RShadowrain Highway@n~
+   Shadowrain Highway leads to and from Shadowrain. A huge spire to the west
+can be seen, and far above it some kind of structure. To the east, hints of
+the city of Shadowrain can be seen. This road is well kept, and the grass
+within ten feet of the highway is newly mowed and clearly recently maintained.
+~
+91 cdpu 0 0 0 2
+D1
+~
+~
+0 0 9148 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 1460 0 0 0 0 0 0 0 0
+S
+#9180
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino - blah@n~
+You are in an unfinished room.
+~
+91 0 0 0 0 0
+S
+#9190
+@YS@yh@Do@Wot@Di@yn@Yg S@yta@Yr@R C@ra@Ds@Wino - Test Save Room@n~
+You are in an unfinished room.
+~
+91 hln 0 0 0 0
+S
+#9195
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RJail Room@n~
+   This room is to hold people under suspicion of rule breaking, or whose
+evidence is being presented to a higher imm to get a decision on what
+punishment should be. If you're here, there's probably significant evidence
+against you, so please don't make things worse for yourself.
+~
+91 0 0 0 0 0
+S
+#9196
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RCity Square@n~
+   @WThe central square of @DS@yh@wadow@Dr@wai@Dn@W is paved with @wgrey@W and @Dblack@W brick,
+probably stemming from the @Rv@Yo@Rl@rcan@Yi@Rc@W materials used in its construction. Like
+the rest of the city, there are no patches of @Ggrass@W anywhere to be seen. 
+Every inch bears the mark of human construction of the sturdiest kind. @n
+~
+91 dpu 0 0 0 1
+D0
+~
+~
+0 0 9113 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9197 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 9112 0 0 0 0 0 0 0 0
+S
+#9197
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RCity Square@n~
+   @WThe central square of @DS@yh@wadow@Dr@wai@Dn@W is paved with @wgrey@W and @Dblack@W brick,
+probably stemming from the @Rv@Yo@Rl@rcan@Yi@Rc@W materials used in its construction. Like
+the rest of the city, there are no patches of @Ggrass@W anywhere to be seen. 
+Every inch bears the mark of human construction of the sturdiest kind. @n
+~
+91 dpu 0 0 0 1
+D0
+~
+~
+0 0 9112 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 9198 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 9118 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9196 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 9113 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 9111 0 0 0 0 0 0 0 0
+S
+#9198
+@DS@w@yh@wadow@Dr@wai@Dn C@wit@Dy@w - @RCity Square@n~
+   @WThe central square of @DS@yh@wadow@Dr@wai@Dn@W is paved with @wgrey@W and @Dblack@W brick,
+probably stemming from the @Rv@Yo@Rl@rcan@Yi@Rc@W materials used in its construction. Like
+the rest of the city, there are no patches of @Ggrass@W anywhere to be seen. 
+Every inch bears the mark of human construction of the sturdiest kind. @n
+~
+91 dpu 0 0 0 1
+D0
+~
+~
+0 0 9111 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 9197 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 9112 0 0 0 0 0 0 0 0
+S
+#9199
+@RS@Wedd@Ry's O@Wffic@Re@n~
+Seddy's office is full of test tubes, bunson burners, toothpicks, dental floss,
+and an extreme amount of duct tape. Apparently, these are the things he builds
+with. This seems somewhat odd, but then again... It's Seddy.
+
+@RZone 196@Y- @W Zenith Castle@n
+@RZone 166@Y-@W  Arlia Mine
+@RZone 185@W-  Shooting Star Casino@n
+@RZone 96 @W-  @GT@Wo@Yw@We@Gr of W@Wi@Ys@yd@Wo@Gm@n
+@RZone 91@W -  Mob Control Interaction Zone@n
+~
+91 0 0 0 0 0
+D3
+~
+office door~
+1 0 9198 20 0 0 0 0 0 0 0
+S
+$~

@@ -1,0 +1,41 @@
+@Version: 2
+#56
+Samael~
+@BFrigid@c: Koltoan Mine@n~
+5600 5699 10 2 0 0 0 0 0 0
+O 0 5600 10 5623 1 0 	(@YT@yr@De@wa@Ws@Du@yr@Ye @DC@wh@We@ws@Dt@n)
+P 1 5601 1000 5600 -1 30 	(@DC@Woa@Dl@n)
+P 1 5601 1000 5600 -1 30 	(@DC@Woa@Dl@n)
+P 1 5601 1000 5600 -1 30 	(@DC@Woa@Dl@n)
+P 1 5602 1000 5600 -1 50 	(@CD@wi@Wa@cmo@wn@Cd@n)
+P 1 5603 1000 5600 -1 60 	(@GE@wm@ge@Dr@ga@wl@Gd@n)
+O 0 5600 10 5612 1 0 	(@YT@yr@De@wa@Ws@Du@yr@Ye @DC@wh@We@ws@Dt@n)
+P 1 5601 1000 5600 -1 30 	(@DC@Woa@Dl@n)
+P 1 5601 1000 5600 -1 30 	(@DC@Woa@Dl@n)
+P 1 5601 1000 5600 -1 30 	(@DC@Woa@Dl@n)
+P 1 5602 5600 5600 -1 50 	(@CD@wi@Wa@cmo@wn@Cd@n)
+P 1 5603 1000 5600 -1 60 	(@GE@wm@ge@Dr@ga@wl@Gd@n)
+O 0 5600 10 5659 1 0 	(@YT@yr@De@wa@Ws@Du@yr@Ye @DC@wh@We@ws@Dt@n)
+P 1 5601 1000 5600 -1 30 	(@DC@Woa@Dl@n)
+P 1 5601 1000 5600 -1 30 	(@DC@Woa@Dl@n)
+P 1 5601 1000 5600 -1 30 	(@DC@Woa@Dl@n)
+P 1 5602 1000 5600 -1 50 	(@CD@wi@Wa@cmo@wn@Cd@n)
+P 1 5603 1000 5600 -1 60 	(@GE@wm@ge@Dr@ga@wl@Gd@n)
+M 0 5600 15 5665 15 24 	(a swamp troll)
+G 1 5604 1000 -1 -1 10 	(@DT@wr@Wo@wl@Dl @Df@Wa@wt@n)
+G 1 5604 1000 -1 -1 50 	(@DT@wr@Wo@wl@Dl @Df@Wa@wt@n)
+G 1 5604 1000 -1 -1 80 	(@DT@wr@Wo@wl@Dl @Df@Wa@wt@n)
+O 0 5600 10 5665 1 0 	(@YT@yr@De@wa@Ws@Du@yr@Ye @DC@wh@We@ws@Dt@n)
+P 1 5601 1000 5600 -1 30 	(@DC@Woa@Dl@n)
+P 1 5601 1000 5600 -1 30 	(@DC@Woa@Dl@n)
+P 1 5601 1000 5600 -1 30 	(@DC@Woa@Dl@n)
+P 1 5602 1000 5600 -1 50 	(@CD@wi@Wa@cmo@wn@Cd@n)
+P 1 5603 1000 5600 -1 60 	(@GE@wm@ge@Dr@ga@wl@Gd@n)
+O 0 5600 1000 5696 1 0 	(@YT@yr@De@wa@Ws@Du@yr@Ye @DC@wh@We@ws@Dt@n)
+P 1 5601 1000 5600 -1 30 	(@DC@Woa@Dl@n)
+P 1 5601 1000 5600 -1 30 	(@DC@Woa@Dl@n)
+P 1 5601 1000 5600 -1 30 	(@DC@Woa@Dl@n)
+P 1 5602 1000 5600 -1 50 	(@CD@wi@Wa@cmo@wn@Cd@n)
+P 1 5603 1000 5600 -1 60 	(@GE@wm@ge@Dr@ga@wl@Gd@n)
+S
+$

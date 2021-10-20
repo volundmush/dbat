@@ -1,0 +1,14 @@
+@Version: 2
+#50
+Samael~
+@BFrigid@c: Mirror Shard Maze@n~
+5000 5099 10 2 d 0 0 0 0 0
+O 0 5001 500 5050 1 0 	(a small @rC@Ra@Ym@Rpf@Yi@rr@Re@n)
+O 0 61 10000 5050 2 0 	(@wa @BSleeping Bag@n)
+O 0 5002 5000 5050 1 0 	(a Small Fountain)
+O 0 68 10000 5050 3 0 	(@wA Ration@n)
+M 0 5001 1 5099 1 50 	(@CS@ch@Di@wv@We@cr@Ci@wu@Ws@n)
+G 1 5000 10000 -1 -1 94 	(@RR@roya@Rl @CI@cc@We@cr@Ci@Wa@Wn @DCrown@n)
+M 0 5000 3 5001 3 2 	(Maze Cleaner)
+S
+$

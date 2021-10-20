@@ -1,0 +1,146 @@
+#1200
+Rattlesnake~
+@wA @DR@Wa@wtt@Dl@We@wsn@Da@Wk@we@n~
+@wA @Dr@Wa@wtt@Dl@We@wsn@Da@Wk@we is slithering here.@n
+~
+ @WThis snake is rather venomous to normal people and could be dangerous.  It
+has a distinctive diamond pattern on its back and a rattle on its tail.
+~
+dfz 0 0 0 l 0 0 0 0 E
+8 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Str: 19
+Dex: 10
+Int: 8
+Wis: 5
+Con: 12
+Cha: 9
+E
+#1201
+Large Wolverine~
+@wA Large @cWolverine@n~
+@wA large @cwolverine@w is rummaging here.@n
+~
+ @WThis vicious little animal has silver and black fur.  A stout body with a
+small head and four feet tipped with dangerous claws.  @n
+~
+dxyz 0 0 0 l 0 0 0 0 E
+6 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 5
+Str: 9
+Dex: 14
+Int: 6
+Wis: 6
+Con: 15
+Cha: 10
+E
+#1202
+Mountain Goat~
+@wA @yMountain @DGoat@n~
+@wA @ymountain @Dgoat@w is standing here.@n
+~
+ @WThis brawny goat has a huge rack of horns that are curled to protect their
+tips from the impact of combat.  @n
+~
+dxyz 0 0 0 l 0 0 0 0 E
+7 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 0
+Size: 4
+Str: 17
+Dex: 12
+Int: 6
+Wis: 8
+Con: 20
+Cha: 11
+E
+#1203
+Grizzly Bear~
+@wA G@Wr@Di@Wz@wz@Dl@Wy @yBear@n~
+@wA g@Wr@Di@Wz@wz@Dl@Wy @ybear @wis sniffing the air here.@n
+~
+ @WThis large bear has dark brown fur and towers at twelve feet when standing
+upright.  It has long sharp fangs and claws and enough strength to crush a
+normal person's head with one swing of its paw.  You do not want to be seen by
+it.  @n
+~
+dfxyz 0 0 0 l 0 0 0 0 E
+10 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 6
+Str: 20
+Dex: 12
+Int: 7
+Wis: 5
+Con: 12
+Cha: 7
+E
+#1204
+Large Roc~
+@wA Large @YR@yo@Yc@n~
+@wA large @Yr@yo@Yc@w is perched here.@n
+~
+ @WThis magnificant bird has a wing span of twenty feet and a body size around
+five feet.  It has a beak the size of a coconut, if a coconut were shaped like a
+hawk's beak.  Its feathers average at three feet in length and are colored
+golden brown.  @n
+~
+dfxyz 0 0 0 l 0 0 0 0 E
+15 0 10 0d0+0 0d0+0
+100 0 15 28
+8 8 0
+Size: 5
+Str: 16
+Dex: 15
+Int: 8
+Wis: 8
+Con: 15
+Cha: 15
+E
+#1205
+Rock Worm~
+@wA @WR@Do@wc@Wk @gW@Yo@Gr@gm@n~
+@wA @Wr@Do@wc@Wk @gw@Yo@Gr@gm @wis crawling here.@n
+~
+ @WThis worm is about two feet in length and has a large black beack at what
+appears to be its head.  It is mostly grey and rocklike with little bits of soft
+green showing through.  @n
+~
+dz 0 0 0 l 0 0 0 0 E
+8 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 0
+Size: 3
+Str: 13
+Dex: 10
+Int: 6
+Wis: 6
+Con: 16
+Cha: 6
+E
+#1206
+Tyrannosaurus Rex~
+@wA @gTyrannosaurus@w Rex@n~
+@wA @gtyrannosaurus@w rex is stomping around here.@n
+~
+ @WThis massive dinosaur has huge teeth and dark green scales.  It looks to be
+quite aggressive, chasing and roaring at nearly everything it sees.  @n
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+18 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 0
+Size: 7
+Str: 20
+Dex: 14
+Int: 5
+Wis: 5
+Con: 17
+Cha: 12
+E
+T 1200
+$

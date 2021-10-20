@@ -1,0 +1,27 @@
+@Version: 2
+#35
+Iovan~
+@CZenith@c: Miscellaneous@n~
+3500 3599 10 2 d 0 0 0 0 0
+O 0 3425 10000 3538 2 85 	(@MS@me@Wr@ma@Mf @GP@gl@Wa@gn@Gt@n)
+O 0 3425 10000 3526 2 85 	(@MS@me@Wr@ma@Mf @GP@gl@Wa@gn@Gt@n)
+O 0 3425 10000 3570 2 85 	(@MS@me@Wr@ma@Mf @GP@gl@Wa@gn@Gt@n)
+M 0 3500 8 3534 2 0 	(a Jaguar)
+M 0 3501 8 3534 2 0 	(a Python)
+M 0 3502 8 3534 2 0 	(a Monkey)
+M 0 3503 8 3534 2 0 	(a Hedgehog)
+O 0 3425 10000 3534 2 85 	(@MS@me@Wr@ma@Mf @GP@gl@Wa@gn@Gt@n)
+M 0 3500 8 3546 4 0 	(a Jaguar)
+M 0 3501 8 3546 4 0 	(a Python)
+M 0 3502 8 3546 4 0 	(a Monkey)
+M 0 3503 8 3546 4 0 	(a Hedgehog)
+O 0 3425 10000 3546 2 85 	(@MS@me@Wr@ma@Mf @GP@gl@Wa@gn@Gt@n)
+M 0 3505 10 3586 5 0 	(a Quetzalorn)
+M 0 3505 10 3599 5 0 	(a Quetzalorn)
+M 0 3504 1 3550 1 20 	(a Chupacabra)
+M 0 3500 8 3513 2 0 	(a Jaguar)
+M 0 3501 8 3513 2 0 	(a Python)
+M 0 3502 8 3513 2 0 	(a Monkey)
+M 0 3503 8 3513 2 0 	(a Hedgehog)
+S
+$

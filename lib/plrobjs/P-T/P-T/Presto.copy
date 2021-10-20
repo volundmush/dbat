@@ -1,0 +1,592 @@
+2 1633553456 0 403 104 0
+#113
+6 0 0 0 0 100 100 0 9 A 0 v 0 0 0 0 0 0 0 0 0
+XAP
+Simple Kevlar Vest~
+@WSimple @wKevlar @cV@Ce@Ws@wt@n~
+@wA @Wsimple @wkevlar @cv@Ce@Ws@wt is lying here@n~
+~
+11 9 0 0 0 2 25 0
+G
+1633518193
+U
+8862974442514317482
+Z
+4
+A
+17 50 0
+#111
+8 0 0 0 0 100 100 0 17 A 0 v 0 0 0 0 0 0 0 0 0
+XAP
+Simple White Pants~
+@WSimple @wWhite @cP@Ca@Wn@wts@n~
+@wA pair of @Wsimple @wwhite @cp@Ca@Wn@wts are lying here@n~
+~
+11 33 0 0 0 1 25 0
+G
+1633518193
+U
+4624374937998410257
+Z
+4
+A
+17 25 0
+#114
+9 0 0 0 0 90 100 0 9 A 0 v 0 0 0 0 0 0 0 0 0
+XAP
+Simple Black Shoes~
+@WSimple @DBlack @cS@Ch@Wo@wes@n~
+@wA pair of @Wsimple @Dblack @cs@Ch@Wo@wes are lying here@n~
+~
+11 65 0 0 0 1 14 0
+G
+1633518193
+U
+3152848570830471471
+Z
+4
+A
+17 10 0
+#110
+13 0 0 0 0 87 100 0 17 A 0 v 0 0 0 0 0 0 0 0 0
+XAP
+Simple White Gi~
+@WSimple @wWhite @cG@Ci@n~
+@wA @Wsimple @wwhite @cg@Ci @wis lying here@n~
+~
+11 1025 0 0 0 1 25 0
+G
+1633518193
+U
+6835200122885209147
+Z
+4
+A
+17 10 0
+#112
+14 0 0 0 0 93 100 0 9 A 0 v 0 0 0 0 0 0 0 0 0
+XAP
+Simple White Belt~
+@WSimple @wWhite @cB@Ce@Wl@wt@n~
+@wA @Wsimple @wwhite @cb@Ce@Wl@wt is lying here@n~
+~
+11 2049 0 0 0 1 15 0
+G
+1633518193
+U
+6727413487451108310
+Z
+4
+A
+17 10 0
+#1202
+-1 13 48 0 0 100 100 0 45 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Roc Egg~
+@wA @YR@yo@Yc @wEgg@n~
+A @YR@yo@Yc@n egg is lying here~
+~
+19 1 0 0 0 1 10 0
+G
+1633529794
+U
+4930092651634373434
+Z
+4
+#1202
+-1 48 48 0 0 100 100 0 45 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Roc Egg~
+@wA @YR@yo@Yc @wEgg@n~
+A @YR@yo@Yc@n egg is lying here~
+~
+19 1 0 0 0 1 10 0
+G
+1633529796
+U
+865033562504487391
+Z
+4
+#313
+19 270 1 -1 0 100 100 0 17 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Large Canvas Backpack~
+@wLarge @gCanvas @wBackpack@n~
+@wA large @gcanvas @wbackpack is lying here@n~
+~
+15 32769 0 0 0 2 100 0
+G
+1633534875
+U
+6742142643656893938
+Z
+4
+#2242
+23 0 0 0 0 100 100 0 9 A 0 a 0 0 0 0 0 0 0 0 0
+XAP
+Upgraded Saiyan Scouter~
+@bUpgraded @yS@Ya@yi@Yy@ya@Yn @gS@Gc@Wo@wu@Wt@Ge@gr@n~
+@wAn @bUpgraded @yS@Ya@yi@Yy@ya@Yn @gS@Gc@Wo@wu@Wt@Ge@gr@w is lying here@n~
+~
+11 262145 0 0 0 1 1800 0
+G
+1633539325
+U
+4126074417132635740
+Z
+4
+A
+3 1 0
+#17
+0 0 0 0 0 100 100 0 0 dfqAC 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Map~
+undefined~
+.~
+~
+12 0 0 0 0 0 0 0
+G
+1633518071
+U
+1628735077584645259
+Z
+1
+#17998
+0 0 0 0 0 100 100 0 9 dqA 0 0 0 0 0 0 0 0 0 0 0
+XAP
+iMuffin~
+@Wi@wM@Du@Wf@Df@wi@Wn@n~
+An iMuffin is lying here~
+~
+12 0 0 0 0 0 0 0
+G
+1633518071
+U
+7676972158862098124
+Z
+4
+E
+iMuffin~
+   @WThis is the latest tablet device from Pear Inc, bearing visual similarities
+to a muffin. @n
+
+@WTo use the iMuffin, type @yiMuffin@n
+~
+#8171
+0 16 1 1 3 100 100 0 12 A 0 d 0 0 0 0 0 0 0 0 0
+XAP
+Wooden Sword~
+@na @yWooden@n @WSword@n~
+A wooden sword has been discarded here~
+~
+5 8193 0 0 0 10 150 0
+G
+1633519284
+U
+1203610490109334844
+Z
+4
+#556
+0 0 0 0 0 100 100 0 37 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Green Belt~
+@GGreen @yBelt@n~
+@wA @Ggreen @ybelt@w is lying here@n~
+~
+11 2049 0 0 0 1 50 0
+G
+1633488614
+U
+949931645682993878
+Z
+4
+A
+6 1 0
+#65535
+0 0 0 0 0 1 1 0 0 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+bloody head @wFemale @YYellow @wBelt@n~
+@wThe bloody head of @wFemale @YYellow @wBelt@n@w@n~
+@wThe bloody head of @wFemale @YYellow @wBelt@n@w is lying here@n~
+~
+12 1 0 0 0 5 0 0
+G
+1633535509
+U
+5722994299041703022
+Z
+0
+#19050
+0 2 1 1 11 100 100 0 9 A 0 d 0 0 0 0 0 0 0 0 0
+XAP
+Throwing Knife~
+@CThrowing Knife@n~
+@WA @Cthrowing knife@w is lying here@N~
+~
+5 1 0 0 0 1 500 0
+G
+1633518071
+U
+3222056205198710723
+Z
+4
+#19050
+0 2 1 1 11 100 100 0 9 A 0 d 0 0 0 0 0 0 0 0 0
+XAP
+Throwing Knife~
+@CThrowing Knife@n~
+@WA @Cthrowing knife@w is lying here@N~
+~
+5 1 0 0 0 1 500 0
+G
+1633518071
+U
+1349908132715945864
+Z
+4
+#19050
+0 2 1 1 11 100 100 0 9 A 0 d 0 0 0 0 0 0 0 0 0
+XAP
+Throwing Knife~
+@CThrowing Knife@n~
+@WA @Cthrowing knife@w is lying here@N~
+~
+5 1 0 0 0 1 500 0
+G
+1633518071
+U
+471347507041389603
+Z
+4
+#19050
+0 2 1 1 11 100 100 0 9 A 0 d 0 0 0 0 0 0 0 0 0
+XAP
+Throwing Knife~
+@CThrowing Knife@n~
+@WA @Cthrowing knife@w is lying here@N~
+~
+5 1 0 0 0 1 500 0
+G
+1633518071
+U
+7672806432305610673
+Z
+4
+#19050
+0 2 1 1 11 100 100 0 9 A 0 d 0 0 0 0 0 0 0 0 0
+XAP
+Throwing Knife~
+@CThrowing Knife@n~
+@WA @Cthrowing knife@w is lying here@N~
+~
+5 1 0 0 0 1 500 0
+G
+1633422904
+U
+7600458266906350467
+Z
+4
+#19050
+0 2 1 1 11 100 100 0 9 A 0 d 0 0 0 0 0 0 0 0 0
+XAP
+Throwing Knife~
+@CThrowing Knife@n~
+@WA @Cthrowing knife@w is lying here@N~
+~
+5 1 0 0 0 1 500 0
+G
+1633422904
+U
+7365245494029439060
+Z
+4
+#19050
+0 2 1 1 11 98 100 0 9 A 0 d 0 0 0 0 0 0 0 0 0
+XAP
+Throwing Knife~
+@CThrowing Knife@n~
+@WA @Cthrowing knife@w is lying here@N~
+~
+5 1 0 0 0 1 500 0
+G
+1633422904
+U
+6672341423158183218
+Z
+4
+#12030
+0 0 0 18 0 100 100 0 36 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Glowing Orb~
+@yG@Ylowin@yg @WO@cr@Cb@n~
+A glowing orb floats here~
+~
+1 16385 0 0 0 2 10 0
+G
+1633549074
+U
+3633183875423020480
+Z
+4
+#47004
+0 0 0 0 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Celestial Pod Ship Key 47004~
+@CC@D.@CC@D. @YKey@n to @WP@Do@Wd @D<@g5@D>@n marked @GSerial @g47004@n~
+The @cC@Ce@Yle@ys@Yti@Ca@cl @DC@wo@Wrp@n @YKey@n with the serial @g47004@D@n is lying here~
+~
+18 1 0 0 0 1 0 0
+G
+1633549983
+U
+5412200796815151371
+Z
+4
+#108
+0 10 10 0 0 100 100 0 13 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Bottle water~
+a bottle of water~
+A bottle of water has been left here~
+~
+17 1 0 0 0 7 0 0
+G
+1633518193
+U
+8633854211962198195
+Z
+4
+#555
+0 0 0 0 0 100 100 0 37 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Red Belt~
+@RRed @yBelt@n~
+@wA @Rred @ybelt@w is lying here@n~
+~
+11 2049 0 0 0 1 100 0
+G
+1633535624
+U
+5578723796589575001
+Z
+4
+A
+6 1 0
+A
+17 50 0
+#401
+0 0 0 0 0 100 100 0 6 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Small Recliner~
+@wa small recliner@n~
+@wA small recliner has been placed here@n~
+~
+31 1 0 0 0 150 0 0
+G
+1633510195
+U
+1319818902172079864
+Z
+4
+#401
+0 0 0 0 0 100 100 0 6 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Small Recliner~
+@wa small recliner@n~
+@wA small recliner has been placed here@n~
+~
+31 1 0 0 0 150 0 0
+G
+1633420604
+U
+5260669479854825141
+Z
+4
+#421
+-1 10 0 0 0 100 100 0 13 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Small Glass~
+@wa small glass@n~
+@wA small glass sits here@n~
+~
+17 1 0 0 0 1 0 0
+G
+1633539164
+U
+4421494964363782122
+Z
+1
+#421
+-1 10 0 0 0 100 100 0 13 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Small Glass~
+@wa small glass@n~
+@wA small glass sits here@n~
+~
+17 1 0 0 0 1 0 0
+G
+1633539164
+U
+7241579363912276987
+Z
+1
+#421
+-1 10 0 0 0 100 100 0 13 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Small Glass~
+@wa small glass@n~
+@wA small glass sits here@n~
+~
+17 1 0 0 0 1 0 0
+G
+1633539164
+U
+3864482940673156623
+Z
+1
+#420
+-1 0 0 0 0 100 100 0 1 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Ceramic Plate~
+@wa ceramic plate@n~
+@wA ceramic plate sits here@n~
+~
+12 1 0 0 0 1 0 0
+G
+1633539164
+U
+4903985343802307000
+Z
+2
+#420
+-1 0 0 0 0 100 100 0 1 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Ceramic Plate~
+@wa ceramic plate@n~
+@wA ceramic plate sits here@n~
+~
+12 1 0 0 0 1 0 0
+G
+1633539164
+U
+280253721407796392
+Z
+2
+#419
+0 100 5 -1 0 100 100 0 12 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Wooden Cabinet~
+@wA Wooden Cabinet@n~
+@wA wooden cabinet has been built into the wall here@n~
+~
+15 1 0 0 0 10 0 0
+G
+1633539164
+U
+7538143646082649019
+Z
+3
+#401
+0 0 0 0 0 100 100 0 6 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Small Recliner~
+@wa small recliner@n~
+@wA small recliner has been placed here@n~
+~
+31 1 0 0 0 150 0 0
+G
+1633526454
+U
+8371537078611080360
+Z
+4
+#403
+0 0 0 0 0 100 100 0 44 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Small Tv Television~
+@wa small tv@n~
+@wA small television has been placed on a table here@n~
+~
+12 1 0 0 0 25 0 0
+G
+1633526454
+U
+2082992275942044131
+Z
+4
+E
+news~
+@WThis channel seems to be twenty four hour news.
+
+@CTed Perfect Hair@D: @cAnd so 30 school children died today, and ha-ha, I just bought my fifth home!@n
+
+@CTed Perfect Hair@D: @cMore at eleven, ha-ha!@n
+
+@D[@GChannels available: Action, Drama, Comedy, News@D]@n
+~
+E
+comedy~
+@WThis channel appears to be all about comedy.
+
+@CJoe Shmoe@D: @cWho here loves tacos?@n
+
+@c*Apparently one of the less funny comedians is on right now*@n
+
+@D[@GChannels available: Action, Drama, Comedy, News@D]@n
+~
+E
+drama~
+@wA sad drama can be seen playing on the tv...
+
+@CCarla@D: @cI will never be able to walk again! *sob* *sob*@n
+
+@c*You feel a little teary eyed but try to hide it.*@n
+
+@D[@GChannels available: Action, Drama, Comedy, News@D]@n
+~
+E
+television tv action~
+@WAn action anime can be seen playing on the tv....@n
+
+@CIchigo@D: @cBan...kai!!!!!!
+
+@c*The whole screen begins to flash with bright blue lights.*@n
+
+@c*The channel suddenly goes to a commercial...awwww.*@n
+
+@D[@GChannels available: Action, Drama, Comedy, News@D]@n
+~
+#61
+0 0 0 0 0 100 100 0 17 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Sleeping bag~
+@wa @BSleeping Bag@n~
+@wA @Bsleeping bag@w has been unrolled on the ground here@n~
+~
+32 1 0 0 0 2 25 0
+G
+1633518193
+U
+7276253275236957573
+Z
+4
+#405
+0 550 5 -1 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Stove Oven~
+@wa stove@n~
+@wA Stove has been placed here@n~
+~
+15 1 0 0 0 400 0 0
+G
+1633539164
+U
+612451105112620603
+Z
+4
+E
+stove oven~
+   @WThis is for cooking raw things.  Try putting different things in it and
+typing 'cook'.  Be careful though, you don't want to cook anything important now
+do you?  @n
+~

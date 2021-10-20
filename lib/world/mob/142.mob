@@ -1,0 +1,100 @@
+#14200
+Tornel~
+@wA Tornel@n~
+@wA tornel is clinging to a rock here.@n
+~
+   @WThis large lizard has brown scales that help it hide among the rocks of the
+cliff. @n
+~
+dxyz 0 0 0 l 0 0 0 0 E
+75 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 5
+Str: 42
+Dex: 54
+Int: 38
+Wis: 41
+Con: 54
+Cha: 40
+E
+#14201
+Jade Worm~
+@gJ@Ga@Wd@we @gW@Go@Yr@gm@n~
+@wA @gJ@Ga@Wd@we @gW@Go@Yr@gm@w is squirming here.@n
+~
+   @WThis massive worm has a distinct four jaw mouth that is filled with hard
+round teeth used for breaking up the green crystals found throughout the cliffs
+and digesting them. @n
+~
+dz 0 0 0 l 0 0 0 0 E
+90 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 6
+Str: 86
+Dex: 74
+Int: 15
+Wis: 35
+Con: 86
+Cha: 75
+E
+#14202
+Jade Wyvern~
+@wA @gJ@Ga@Wd@we @yW@Yy@yv@Ye@Wr@wn@n~
+@wA @gJ@Ga@Wd@we @yW@Yy@yv@Ye@Wr@wn is perched here.@n
+~
+   @WThis large winged creature is like a small dragon that is built around flight
+specifically. It has hard green scales that resemble the crystals found in this
+region. @n
+~
+dxyz 0 0 0 l 0 0 0 0 E
+101 0 10 0d0+0 0d0+0
+0 0 21 28
+8 8 1
+Str: 66
+Dex: 84
+Int: 71
+Wis: 48
+Con: 86
+Cha: 88
+E
+#14203
+Bahamut~
+@wB@Wa@Dh@Wa@wm@Wu@Dt@n~
+@wB@Wa@Dh@Wa@wm@Wu@Dt@w, King of Dragons, is perched here.@n
+~
+   @WThis massive dragon has black crystalline scales all over his body. Massive
+wings stretch out from his back in an impressive spectacle along with his
+powerful limbs and tail. @n
+~
+bdfvwxyz 0 0 0 l 0 0 0 0 E
+105 0 10 0d0+0 0d0+0
+0 0 21 28
+8 8 1
+Str: 95
+Dex: 100
+Int: 45
+Wis: 67
+Con: 84
+Cha: 100
+E
+#14204
+Alpha Wyvern~
+@cA@Cl@Wp@wha @yW@Yy@yv@Ye@Wr@wn@n~
+@wAn @cA@Cl@Wp@wha @yW@Yy@yv@Ye@Wr@wn@w is perched here.@n
+~
+   @WThis wyvern is at least three times the size of all the other wyverns. @n
+~
+dxyz 0 0 0 l 0 0 0 0 E
+102 0 10 0d0+0 0d0+0
+0 0 21 28
+8 8 1
+Str: 64
+Dex: 62
+Int: 32
+Wis: 63
+Con: 62
+Cha: 77
+E
+$

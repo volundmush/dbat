@@ -1,0 +1,268 @@
+#300
+Ticket Salesman~
+@wTicket Salesman@n~
+@wA Ticket Salesman stands here.@n
+~
+   @WThis young fellow is sitting behind a counter with his hands on a keyboard.
+A display of destinations and tickets prices can be seen behind him.  @n
+~
+bds 0 0 0 0 0 0 0 0 E
+100 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 86
+Dex: 58
+Int: 81
+Wis: 50
+Con: 83
+Cha: 79
+E
+T 4016
+#301
+Public Transport Pilot~
+@WPublic @DT@Wr@wa@Dn@Ws@wp@Do@Wr@wt @bP@Bi@wl@bo@Bt@n~
+@wA @WPublic @DT@Wr@wa@Dn@Ws@wp@Do@Wr@wt @bP@Bi@wl@bo@Bt @wstands here.@n
+~
+   @WThis experienced pilot is holding a captains hat underneath his right arm,
+and is dressed in a blue uniform.  @n
+~
+bds 0 0 0 0 0 0 0 0 E
+100 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 81
+Dex: 76
+Int: 79
+Wis: 77
+Con: 78
+Cha: 68
+E
+T 300
+T 306
+T 307
+#302
+Mcstuff Clerk~
+@YM@yc@Rs@rt@Yu@yf@Rf @cClerk@n~
+@wThe @YM@yc@Rs@rt@Yu@yf@Rf @cClerk @wis ready to take your order.@n
+~
+ @WThis humble employee just wants to make it through another day.  @n
+~
+bds 0 0 0 l 0 0 0 0 E
+100 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 82
+Dex: 68
+Int: 59
+Wis: 74
+Con: 99
+Cha: 65
+E
+T 303
+T 304
+#303
+Public Transport Pilot~
+@WPublic @DT@Wr@wa@Dn@Ws@wp@Do@Wr@wt @bP@Bi@wl@bo@Bt@n~
+@wA @WPublic @DT@Wr@wa@Dn@Ws@wp@Do@Wr@wt @bP@Bi@wl@bo@Bt @wstands here.@n
+~
+   @WThis experienced pilot is holding a captains hat underneath his right arm,
+and is dressed in a blue uniform.  @n
+~
+bds 0 0 0 0 0 0 0 0 E
+100 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 64
+Dex: 79
+Int: 92
+Wis: 71
+Con: 54
+Cha: 83
+E
+T 300
+#304
+Jimmy~
+@wJimmy@n~
+@wJimmy the lawyer is standing here.@n
+~
+ @WHe is wearing a cheap suit and even cheaper shoes.  @n
+~
+bd 0 0 0 0 0 0 0 0 E
+3 0 10 0d0+0 0d0+0
+50 0 0 28
+8 8 1
+Str: 7
+Dex: 8
+Int: 10
+Wis: 5
+Con: 8
+Cha: 8
+E
+T 305
+T 4015
+#305
+Walker~
+@wWalker@n~
+@wWalker is standing here.@n
+~
+@WThis middle-aged man is wearing a plain black t-shirt and khaki slack. You can try to @Rtalk@n to him.
+~
+bds 0 0 0 0 0 0 0 0 E
+3 0 10 0d0+0 0d0+0
+10000 0 0 28
+8 8 1
+Str: 6
+Dex: 9
+Int: 7
+Wis: 6
+Con: 7
+Cha: 6
+E
+T 499
+#310
+Training Dummy LVL One~
+@mTraining Dummy @rLVL @ROne@n~
+@wA @mtraining dummy @rLVL @ROne @whas been set up here.@n
+~
+   @WThis training dummy has been set up so one can practice their skills upon
+it. It has not been programmed to fight back in any way. @n
+~
+bdAD 0 0 0 l 0 0 0 0 E
+15 0 10 0d0+1 0d0+0
+0 0 9 28
+8 8 0
+Str: 12
+Dex: 12
+Int: 9
+Wis: 5
+Con: 11
+Cha: 13
+E
+T 365
+T 364
+#311
+Training Dummy LVL Two~
+@mTraining Dummy @rLVL @RTwo@n~
+@wA @mtraining dummy @rLVL @RTwo @whas been set up here.@n
+~
+   @WThis training dummy has been set up so one can practice their skills upon
+it. It has not been programmed to fight back in any way. @n
+~
+bdAD 0 0 0 l 0 0 0 0 E
+30 0 10 0d0+1 0d0+0
+0 0 9 28
+8 8 0
+Str: 19
+Dex: 25
+Int: 19
+Wis: 18
+Con: 26
+Cha: 19
+E
+T 365
+T 364
+#312
+Training Dummy LVL Three~
+@mTraining Dummy @rLVL @RThree@n~
+@wA @mtraining dummy @rLVL @RThree @whas been set up here.@n
+~
+   @WThis training dummy has been set up so one can practice their skills upon
+it. It has not been programmed to fight back in any way. @n
+~
+bdAD 0 0 0 l 0 0 0 0 E
+50 0 10 0d0+1 0d0+0
+0 0 9 28
+8 8 0
+Str: 38
+Dex: 48
+Int: 43
+Wis: 31
+Con: 34
+Cha: 27
+E
+T 365
+T 364
+#313
+Training Dummy LVL Four~
+@mTraining Dummy @rLVL @RFour@n~
+@wA @mtraining dummy @rLVL @RFour @whas been set up here.@n
+~
+   @WThis training dummy has been set up so one can practice their skills upon
+it. It has not been programmed to fight back in any way. @n
+~
+bdAD 0 0 0 l 0 0 0 0 E
+70 0 10 0d0+1 0d0+0
+0 0 9 28
+8 8 0
+Str: 40
+Dex: 63
+Int: 65
+Wis: 45
+Con: 36
+Cha: 60
+E
+T 365
+T 364
+#314
+Gus~
+@cGus@n~
+@wGus, the hotdog vendor, is standing here.@n
+~
+   @WThis slightly overweight man is dressed in a hotdog themed uniform with a
+white apron draped over his gut. @n
+~
+bds 0 0 0 0 0 0 0 0 E
+4 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 5
+Dex: 6
+Int: 6
+Wis: 7
+Con: 8
+Cha: 6
+E
+T 313
+#315
+training dummy five~
+@mTraining Dummy@r LVL @RFive@n~
+A @mtraining dummy @rLVL@R Five@n has been set up here.
+~
+   @WThis training dummy has been set up so one can practice their skills upon
+it. It has not been programmed to fight back in any way. @n
+~
+bdvwxyzAD 0 0 0 0 0 0 0 0 E
+90 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 0
+Str: 55
+Dex: 71
+Int: 47
+Wis: 51
+Con: 84
+Cha: 80
+E
+T 364
+T 365
+#316
+training dummy lvl six~
+@mTraining Dummy @rLVL@R Six@n~
+A @mTraining Dummy @rLVL@R Six@n has been set up here.
+~
+   @WThis training dummy has been set up so one can practice their skills upon
+it. It has not been programmed to fight back in any way. @n
+~
+bdvwxyzAD 0 0 0 0 0 0 0 0 E
+100 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 0
+Str: 70
+Dex: 54
+Int: 99
+Wis: 70
+Con: 82
+Cha: 56
+E
+T 364
+T 365
+$

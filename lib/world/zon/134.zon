@@ -1,0 +1,22 @@
+@Version: 2
+#134
+Samael~
+@GEarth@c: Junkyard, Miscellaneous@n~
+13400 13499 10 2 d 0 0 0 0 0
+M 0 13403 1 13407 1 0 	(Tink)
+G 1 13410 1000 -1 -1 0 	(Schematics Folder)
+G 1 13411 1000 -1 -1 0 	(Hydraulic Trident schematics)
+G 1 13412 1000 -1 -1 0 	(Scrap Armor Schematics)
+G 1 13413 1000 -1 -1 0 	(Scrap Light Schematics)
+M 0 13402 1 13408 1 0 	(Dean)
+G 1 13403 1000 -1 -1 0 	(Hydraulics component)
+G 1 13408 1000 -1 -1 0 	(Cracked Globe)
+G 1 13409 1000 -1 -1 0 	(Odd Power Source)
+M 0 13400 1 13413 1 0 	(Gobsmack)
+G 1 13404 1000 -1 -1 0 	(Metal Shaft)
+G 1 13405 1000 -1 -1 0 	(Sharp Scrap)
+G 1 13406 1000 -1 -1 0 	(Large Metal Scrap)
+G 1 13407 1000 -1 -1 0 	(Small Metal Scrap)
+M 0 13401 1 13403 1 0 	(Scraps)
+S
+$

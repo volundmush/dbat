@@ -1,0 +1,1628 @@
+#4200
+@CF@cr@Wo@wz@Ce@cn@n @cF@Ci@Ws@wt @YD@yoj@Yo@n- Entrance~
+ @CThere are several speakers in the corners of this large entrance hall to the
+Dojo, which say over the PA system, "Welcome to the Frozen Fist Dojo" every now
+and again.  There are some armored figures checking people who go further into
+the dojo while against one wall there are several booths where people can enroll
+to join the dojo.  @n
+~
+42 cdw 0 0 0 0
+D0
+~
+~
+0 0 4201 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 4018 0 0 0 0 0 0 0 0
+S
+#4201
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- Hallway~
+   @CThis hallway leads throughout the dojo and connects all the rooms used for
+training.  The sounds of the dojo students training in their respective rooms
+can be heard from this hallway.  @n
+~
+42 dw 0 0 0 0
+D0
+~
+~
+0 0 4202 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 4210 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 4200 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 4209 0 0 0 0 0 0 0 0
+S
+#4202
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- Hallway~
+   @CThis hallway leads throughout the dojo and connects all the rooms used for
+training.  The sounds of the dojo students training in their respective rooms
+can be heard from this hallway.  @n
+~
+42 dw 0 0 0 0
+D0
+~
+~
+0 0 4203 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 4208 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 4201 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 4207 0 0 0 0 0 0 0 0
+S
+#4203
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- Hallway~
+   @CThis hallway leads throughout the dojo and connects all the rooms used for
+training.  The sounds of the dojo students training in their respective rooms
+can be heard from this hallway.  @n
+~
+42 dw 0 0 0 0
+D0
+~
+~
+0 0 4204 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 4206 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 4202 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 4205 0 0 0 0 0 0 0 0
+S
+#4204
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- Stairwell~
+   @CThe marble stairs weave in a spiral pattern, connecting the different floors
+of the Dojo.  Ice like glass railings border the stairwell, providing some form
+of barrier.  @n
+~
+42 dw 0 0 0 0
+D2
+~
+~
+0 0 4203 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 4214 0 0 0 0 0 0 0 0
+S
+#4205
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- 1st Year training~
+   @CThese reasonably sized rooms are where the students of the dojo come to learn
+the lessons from their masters.  Each room is a different class, full of eager
+students with the hunger to succeed in this prestigious dojo.  Mirrors line the
+north wall, while the floor have been covered with blue soft and cushy mats.  
+First year students train in this room.  @n
+~
+42 cdw 0 0 0 0
+D1
+~
+~
+0 0 4203 0 0 0 0 0 0 0 0
+S
+#4206
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- 1st Year training~
+   @CThese reasonably sized rooms are where the students of the dojo come to learn
+the lessons from their masters.  Each room is a different class, full of eager
+students with the hunger to succeed in this prestigious dojo.  Mirrors line the
+north wall, while the floor have been covered with blue soft and cushy mats.  
+First year students train in this room.  @n
+~
+42 cdw 0 0 0 0
+D3
+~
+~
+0 0 4203 0 0 0 0 0 0 0 0
+S
+#4207
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- 1st Year training~
+   @CThese reasonably sized rooms are where the students of the dojo come to learn
+the lessons from their masters.  Each room is a different class, full of eager
+students with the hunger to succeed in this prestigious dojo.  Mirrors line the
+north wall, while the floor have been covered with blue soft and cushy mats.  
+First year students train in this room.  @n
+~
+42 cdw 0 0 0 0
+D1
+~
+~
+0 0 4202 0 0 0 0 0 0 0 0
+S
+#4208
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- 1st Year training~
+   @CThese reasonably sized rooms are where the students of the dojo come to learn
+the lessons from their masters.  Each room is a different class, full of eager
+students with the hunger to succeed in this prestigious dojo.  Mirrors line the
+north wall, while the floor have been covered with blue soft and cushy mats.  
+First year students train in this room.  @n
+~
+42 cdw 0 0 0 0
+D3
+~
+~
+0 0 4202 0 0 0 0 0 0 0 0
+S
+#4209
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- 1st Year training~
+   @CThese reasonably sized rooms are where the students of the dojo come to learn
+the lessons from their masters.  Each room is a different class, full of eager
+students with the hunger to succeed in this prestigious dojo.  Mirrors line the
+north wall, while the floor have been covered with blue soft and cushy mats.  
+First year students train in this room.  @n
+~
+42 cdw 0 0 0 0
+D1
+~
+~
+0 0 4201 0 0 0 0 0 0 0 0
+S
+#4210
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- Combat Training~
+   @CPotential applicants into the Frozen Fist Dojo must first pass through these
+hallways.  The instructors drill the recruits and teach them the absolute basics
+of combat.  Occassionaly, the son or daughter of a powerful Icer is rejected for
+acceptance to the dojo and they run through these halls, tears of disappointment
+running down their faces.  @n
+~
+42 cdw 0 0 0 0
+D1
+~
+~
+0 0 4211 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 4201 0 0 0 0 0 0 0 0
+S
+#4211
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- Combat Training~
+   @CPotential applicants into the Frozen Fist Dojo must first pass through these
+hallways.  The instructors drill the recruits and teach them the absolute basics
+of combat.  Occassionaly, the son or daughter of a powerful Icer is rejected for
+acceptance to the dojo and they run through these halls, tears of disappointment
+running down their faces.  @n
+~
+42 dw 0 0 0 0
+D1
+~
+~
+0 0 4212 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 4210 0 0 0 0 0 0 0 0
+S
+#4212
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- Combat Training~
+   @CPotential applicants into the Frozen Fist Dojo must first pass through these
+hallways.  The instructors drill the recruits and teach them the absolute basics
+of combat.  Occassionaly, the son or daughter of a powerful Icer is rejected for
+acceptance to the dojo and they run through these halls, tears of disappointment
+running down their faces.  @n
+~
+42 dw 0 0 0 0
+D2
+~
+~
+0 0 4213 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 4211 0 0 0 0 0 0 0 0
+S
+#4213
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- Combat Training~
+   @CPotential applicants into the Frozen Fist Dojo must first pass through these
+hallways.  The instructors drill the recruits and teach them the absolute basics
+of combat.  Occassionaly, the son or daughter of a powerful Icer is rejected for
+acceptance to the dojo and they run through these halls, tears of disappointment
+running down their faces.  @n
+~
+42 dew 0 0 0 0
+D0
+~
+~
+0 0 4212 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 4281 0 0 0 0 0 0 0 0
+S
+#4214
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- Stairwell~
+   @CThe marble stairs weave in a spiral pattern, connecting the different floors
+of the Dojo.  Ice like glass railings border the stairwell, providing some form
+of barrier.  @n
+~
+42 dw 0 0 0 0
+D2
+~
+~
+0 0 4215 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 4204 0 0 0 0 0 0 0 0
+S
+#4215
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- Hallway~
+   @CThis hallway leads throughout the dojo and connects all the rooms used for
+training.  The sounds of the dojo students training in their respective rooms
+can be heard from this hallway.  @n
+~
+42 dw 0 0 0 0
+D0
+~
+~
+0 0 4214 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 4216 0 0 0 0 0 0 0 0
+S
+#4216
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- Hallway~
+   @CThis hallway leads throughout the dojo and connects all the rooms used for
+training.  The sounds of the dojo students training in their respective rooms
+can be heard from this hallway.  @n
+~
+42 dw 0 0 0 0
+D0
+~
+~
+0 0 4215 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 4222 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 4217 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 4221 0 0 0 0 0 0 0 0
+S
+#4217
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- Hallway~
+   @CThis hallway leads throughout the dojo and connects all the rooms used for
+training.  The sounds of the dojo students training in their respective rooms
+can be heard from this hallway.  @n
+~
+42 dw 0 0 0 0
+D0
+~
+~
+0 0 4216 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 4224 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 4218 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 4223 0 0 0 0 0 0 0 0
+S
+#4218
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- Hallway~
+   @CThis hallway leads throughout the dojo and connects all the rooms used for
+training.  The sounds of the dojo students training in their respective rooms
+can be heard from this hallway.  @n
+~
+42 dw 0 0 0 0
+D0
+~
+~
+0 0 4217 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 4220 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 4225 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 4219 0 0 0 0 0 0 0 0
+S
+#4219
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- 2nd year training~
+   @CThese reasonably sized rooms are where the students of the dojo come to learn
+the lessons from their masters.  Each room is a different class, full of eager
+students with the hunger to succeed in this prestigious dojo.  Mirrors line the
+north wall, while the floor have been covered with blue soft and cushy mats.  
+The second year students train in this room.  @n
+~
+42 cdw 0 0 0 0
+D1
+~
+~
+0 0 4218 0 0 0 0 0 0 0 0
+S
+#4220
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- 2nd year training~
+   @CThese reasonably sized rooms are where the students of the dojo come to learn
+the lessons from their masters.  Each room is a different class, full of eager
+students with the hunger to succeed in this prestigious dojo.  Mirrors line the
+north wall, while the floor have been covered with blue soft and cushy mats.  
+The second year students train in this room.  @n
+~
+42 cdw 0 0 0 0
+D3
+~
+~
+0 0 4218 0 0 0 0 0 0 0 0
+S
+#4221
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- 2nd year training~
+   @CThese reasonably sized rooms are where the students of the dojo come to learn
+the lessons from their masters.  Each room is a different class, full of eager
+students with the hunger to succeed in this prestigious dojo.  Mirrors line the
+north wall, while the floor have been covered with blue soft and cushy mats.  
+The second year students train in this room.  @n
+~
+42 cdw 0 0 0 0
+D1
+~
+~
+0 0 4216 0 0 0 0 0 0 0 0
+S
+#4222
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- 2nd year training~
+   @CThese reasonably sized rooms are where the students of the dojo come to learn
+the lessons from their masters.  Each room is a different class, full of eager
+students with the hunger to succeed in this prestigious dojo.  Mirrors line the
+north wall, while the floor have been covered with blue soft and cushy mats.  
+The second year students train in this room.  @n
+~
+42 cdw 0 0 0 0
+D3
+~
+~
+0 0 4216 0 0 0 0 0 0 0 0
+S
+#4223
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- 2nd year training~
+   @CThese reasonably sized rooms are where the students of the dojo come to learn
+the lessons from their masters.  Each room is a different class, full of eager
+students with the hunger to succeed in this prestigious dojo.  Mirrors line the
+north wall, while the floor have been covered with blue soft and cushy mats.  
+The second year students train in this room.  @n
+~
+42 cdw 0 0 0 0
+D1
+~
+~
+0 0 4217 0 0 0 0 0 0 0 0
+S
+#4224
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- 2nd year training~
+   @CThese reasonably sized rooms are where the students of the dojo come to learn
+the lessons from their masters.  Each room is a different class, full of eager
+students with the hunger to succeed in this prestigious dojo.  Mirrors line the
+north wall, while the floor have been covered with blue soft and cushy mats.  
+The second year students train in this room.  @n
+~
+42 cdw 0 0 0 0
+D3
+~
+~
+0 0 4217 0 0 0 0 0 0 0 0
+S
+#4225
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- Stairwell~
+   @CThe marble stairs weave in a spiral pattern, connecting the different floors
+of the Dojo.  Ice like glass railings border the stairwell, providing some form
+of barrier.  @n
+~
+42 dw 0 0 0 0
+D0
+~
+~
+0 0 4218 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 4226 0 0 0 0 0 0 0 0
+S
+#4226
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- Stairwell~
+   @CThe marble stairs weave in a spiral pattern, connecting the different floors
+of the Dojo.  Ice like glass railings border the stairwell, providing some form
+of barrier.  @n
+~
+42 dw 0 0 0 0
+D0
+~
+~
+0 0 4227 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 4225 0 0 0 0 0 0 0 0
+S
+#4227
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- Hallway~
+   @CThis hallway leads throughout the dojo and connects all the rooms used for
+training.  The sounds of the dojo students training in their respective rooms
+can be heard from this hallway.  @n
+~
+42 dw 0 0 0 0
+D0
+~
+~
+0 0 4228 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 4226 0 0 0 0 0 0 0 0
+S
+#4228
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- Hallway~
+   @CThis hallway leads throughout the dojo and connects all the rooms used for
+training.  The sounds of the dojo students training in their respective rooms
+can be heard from this hallway.  @n
+~
+42 dw 0 0 0 0
+D0
+~
+~
+0 0 4229 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 4235 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 4227 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 4234 0 0 0 0 0 0 0 0
+S
+#4229
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- Hallway~
+   @CThis hallway leads throughout the dojo and connects all the rooms used for
+training.  The sounds of the dojo students training in their respective rooms
+can be heard from this hallway.  @n
+~
+42 dw 0 0 0 0
+D0
+~
+~
+0 0 4230 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 4228 0 0 0 0 0 0 0 0
+S
+#4230
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- Hallway~
+   @CThis hallway leads throughout the dojo and connects all the rooms used for
+training.  The sounds of the dojo students training in their respective rooms
+can be heard from this hallway.  @n
+~
+42 dw 0 0 0 0
+D0
+~
+~
+0 0 4231 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 4233 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 4229 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 4232 0 0 0 0 0 0 0 0
+S
+#4231
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- Stairwell~
+   @CThe marble stairs weave in a spiral pattern, connecting the different floors
+of the Dojo.  Ice like glass railings border the stairwell, providing some form
+of barrier.  @n
+~
+42 dw 0 0 0 0
+D2
+~
+~
+0 0 4230 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 4236 0 0 0 0 0 0 0 0
+S
+#4232
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- 3rd year training~
+   @CThese reasonably sized rooms are where the students of the dojo come to learn
+the lessons from their masters.  Each room is a different class, full of eager
+students with the hunger to succeed in this prestigious dojo.  Mirrors line the
+north wall, while the floor have been covered with blue soft and cushy mats.  
+Cocky third year students can be found training here.  @n
+~
+42 cdw 0 0 0 0
+D1
+~
+~
+0 0 4230 0 0 0 0 0 0 0 0
+S
+#4233
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- 3rd year training~
+   @CThese reasonably sized rooms are where the students of the dojo come to learn
+the lessons from their masters.  Each room is a different class, full of eager
+students with the hunger to succeed in this prestigious dojo.  Mirrors line the
+north wall, while the floor have been covered with blue soft and cushy mats.  
+Cocky third year students can be found training here.  @n
+~
+42 cdw 0 0 0 0
+D3
+~
+~
+0 0 4230 0 0 0 0 0 0 0 0
+S
+#4234
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- 3rd year training~
+   @CThese reasonably sized rooms are where the students of the dojo come to learn
+the lessons from their masters.  Each room is a different class, full of eager
+students with the hunger to succeed in this prestigious dojo.  Mirrors line the
+north wall, while the floor have been covered with blue soft and cushy mats.  
+Cocky third year students can be found training here.  @n
+~
+42 cdw 0 0 0 0
+D1
+~
+~
+0 0 4228 0 0 0 0 0 0 0 0
+S
+#4235
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- 3rd year training~
+   @CThese reasonably sized rooms are where the students of the dojo come to learn
+the lessons from their masters.  Each room is a different class, full of eager
+students with the hunger to succeed in this prestigious dojo.  Mirrors line the
+north wall, while the floor have been covered with blue soft and cushy mats.  
+Cocky third year students can be found training here.  @n
+~
+42 cdw 0 0 0 0
+D3
+~
+~
+0 0 4228 0 0 0 0 0 0 0 0
+S
+#4236
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- Stairwell~
+   @CThe marble stairs weave in a spiral pattern, connecting the different floors
+of the Dojo.  Ice like glass railings border the stairwell, providing some form
+of barrier.  @n
+~
+42 dw 0 0 0 0
+D2
+~
+~
+0 0 4237 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 4231 0 0 0 0 0 0 0 0
+S
+#4237
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- Hallway~
+   @CThis hallway leads throughout the dojo and connects all the rooms used for
+training.  The sounds of the dojo students training in their respective rooms
+can be heard from this hallway.  @n
+~
+42 dw 0 0 0 0
+D0
+~
+~
+0 0 4236 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 4239 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 4238 0 0 0 0 0 0 0 0
+S
+#4238
+@CF@cr@wo@Wz@Ce@cn F@Ci@ws@Wt @YD@yoj@Yo@n- Elite Training~
+   @CThese reasonably sized rooms are where the students of the dojo come to learn
+the lessons from their masters.  Each room is a different class, full of eager
+students with the hunger to succeed in this prestigious dojo.  Mirrors line the
+north wall, while the floor have been covered with blue soft and cushy mats.  
+Only the most talented students of the dojo are allowed to be here as they
+receive personal classes from the Dojo master herself.  @n
+~
+42 cdw 0 0 0 0
+D1
+~
+~
+0 0 4237 0 0 0 0 0 0 0 0
+S
+#4239
+@CF@cr@Do@Wz@Ce@cn @cF@Ci@Ds@Wt @YD@yoj@Yo@n - @WMaster's Abode@n~
+   @CThe Dojo masters abode is low lit, with only a handful of candles giving off
+a faint glow, assembled around a small mat of which the master of the Dojo
+meditates on.  @n
+~
+42 cdw 0 0 0 0
+D3
+~
+~
+0 0 4237 0 0 0 0 0 0 0 0
+S
+#4240
+@CJ@ce@Yr@yo@Yd@ce@Cl@n's @RS@ru@Dr@wg@We@Rr@ry@n- Reception~
+   @CThe reception of Jerodel's Surgery has been painted a drab white, that
+reflects the rooms low halogen lights.  Soft contemporary music plays over the
+PA system, occassionally drowned out by the calling of a patients name.  On the
+far wall is an assortment of pamphlets and other documents most of which relate
+to things associated with the extreme cold temperatures of Frigid.  @n
+~
+42 cdw 0 0 0 0
+D9
+~
+~
+0 0 4241 0 0 0 0 0 0 0 0
+D11
+~
+~
+0 0 4075 0 0 0 0 0 0 0 0
+S
+#4241
+@CJ@ce@Yr@yo@Yd@ce@Cl@n's @RS@ru@Dr@wg@We@Rr@ry@n- Hallway~
+   @CThe hallway like the rest of the surgery has been painted with the same drab
+white color.  Halogen lights hanging on the ceiling perodically flicker on and
+off, giving an earie sense to the hallway.  The floor is tiled in a checkered
+fashion, swamp green and beige with the occassional spatter of blood.  The
+humming of healing tanks can be heard to the north.  An occassional scream wafts
+in from the recovery ward to the south.  @n
+~
+42 dw 0 0 0 0
+D0
+~
+~
+0 0 4242 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 4243 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 4244 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 4240 0 0 0 0 0 0 0 0
+S
+#4242
+@CJ@ce@Yr@yo@Yd@ce@Cl@n's @RS@ru@Dr@wg@We@Rr@ry@n- Healing Tank~
+   @CSeveral healing tanks hum loudly clustered together in the confined space of
+this room.  The room is not well lit, combined with the glowing green colored
+light of the healing tanks gives off an eerie glow.  @n
+~
+42 dwD 0 0 0 0
+D2
+~
+~
+0 0 4241 0 0 0 0 0 0 0 0
+S
+#4243
+@CJ@ce@Yr@yo@Yd@ce@Cl@n's @RS@ru@Dr@wg@We@Rr@ry@n- Recovery Ward~
+   @CThere are two rows of hospital beds here, one pushed up against the far wall
+and the other in the middle of the rooom.  Most of the patients here appear to
+have been or are being treated for frostbite and various other inflictions from
+the cold weather of Frigid.  @n
+~
+42 dw 0 0 0 0
+D0
+~
+~
+0 0 4241 0 0 0 0 0 0 0 0
+S
+#4244
+@CJ@ce@Yr@yo@Yd@ce@Cl@n's @RS@ru@Dr@wg@We@Rr@ry@n- Hallway~
+   @CThe hallway like the rest of the surgery has been painted with the same drab
+white color.  Halogen lights hanging on the ceiling perodically flicker on and
+off, giving an earie sense to the hallway.  The floor is tiled in a checkered
+fashion, swamp green and beige with the occassional spatter of blood.  The
+medical supplies store room can be found to the north, while Jerodel's office is
+to the south west.  @n
+~
+42 dw 0 0 0 0
+D0
+~
+~
+0 0 4245 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 4241 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 4246 0 0 0 0 0 0 0 0
+S
+#4245
+@CJ@ce@Yr@yo@Yd@ce@Cl@n's @RS@ru@Dr@wg@We@Rr@ry@n- Physical Therapy~
+   @CThis room appears to be coated in white, gravity resistant plating. Lights
+have been built into the ceiling above, providing ample lighting for the rest
+of the room. Aside from a mild scent of sweat lingering in the air the
+ventilation keeps the room pleasantly fresh and stocked with oxygen. @n
+~
+42 dw 0 0 0 0
+D2
+~
+~
+0 0 4244 0 0 0 0 0 0 0 0
+S
+#4246
+@CJ@ce@Yr@yo@Yd@ce@Cl@n's @RS@ru@Dr@wg@We@Rr@ry@n- Jerodel's Office~
+   @CThis is the office of Jerodel, the head doctor at this surgery.  There are
+several bookshelves along the walls, full of medical books of all types.  
+Jerodel's desk is extremely messy.  The spaces not taken up by an old computer
+are covered in piles of notes and other paper.  @n
+~
+42 w 0 0 0 0
+D7
+~
+~
+0 0 4244 0 0 0 0 0 0 0 0
+S
+#4247
+@WI@Cc@ce @bC@Br@co@Cw@wn @DS@wta@Drp@wor@Dt@n- Lobby~
+   @cThe lobby of the Starport is quite expansive and almost all of the features
+of the starport located here.  There are several ticket booths to the south of
+the lobby, of which beyond them, the public and private landing pads can be
+found.  Off to the east of the lobby is a small tourist information office,
+while to the west there is a souvenir shop for those looking to buy a memento of
+Frigid.  The lobby is quite busy at all times, however there has been provided
+plenty of benches for guests to rest upon.  A row of phone booths are behind a
+row of benches near the middle.
+~
+42 cw 0 0 0 1
+D1
+~
+~
+0 0 4249 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 4250 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 4248 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 4005 0 0 0 0 0 0 0 0
+S
+#4248
+@WS@Cleet@We's@N Little Shop of @rH@Do@rr@Dr@ro@Dr@Ws@n~
+ @cThis small shop is filled with new shelving units and various glass display
+cases.  The fresh smell of paint can be smelled, the walls now painted in a
+vibrant blue color.  Tons of souvenirs ranging from small toys to elaborate
+puzzles line the shelves.  Through the display cases different types of jewelry
+are laid out waiting for purchase.  @n
+~
+42 dehw 0 0 0 10
+D1
+~
+~
+0 0 4247 0 0 0 0 0 0 0 0
+S
+#4249
+@WI@Cc@ce @bC@Br@co@Cw@wn @DS@wta@Drp@wor@Dt@n- Tourist Information~
+   @cThis small information office has several racks filled with pamphlets about
+Frigid, the activities that can be found here as well as various other planets.
+A small TV is housed in a locked cabinet to prevent thievery.  On it, are
+landscape pictures of various locations around Frigid.  @n
+~
+42 dw 0 0 0 1
+D3
+~
+~
+0 0 4247 0 0 0 0 0 0 0 0
+S
+#4250
+@WI@Cc@ce @bC@Br@co@Cw@wn @DS@wta@Drp@wor@Dt@n- Landing pad~
+   @cThis is the main landing pad for the Frigid starport and its where the public
+transport vessels arrive and depart.  Mutants scamper here and there, tending to
+docked vessels, performing repairs and refueling them.  Flight announcements
+occur quite often serving as a warning to any slacking pilots.  @n
+
+@RA sign about the public transports has been posted here.@n
+~
+42 w 0 0 0 1
+D0
+~
+~
+0 0 4247 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 4263 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 4261 0 0 0 0 0 0 0 0
+E
+sign~
+@C(OOC)@W To view information about the Galactic Travels transports and how to
+board them, follow the help files contained in @Yhelp galactic@W. @n
+~
+S
+#4251
+@wI@Cc@ce @bC@Br@co@Cw@wn @WFirst National@n~
+ The First National is the major bank on Frigid.  The roof is raised higher
+than a normal building elevated about 30 feet from the floor.  Large greco style
+pillars race up to meet the roof, lending support in two lines from the entrance
+right up to the numerous tellers booths on the far side.  Round tables with
+comfy chairs have been placed at scattered locations across the bank floor for
+patrons to sit down while they wait for their number to called.
+~
+42 cdehw 0 0 0 0
+D1
+~
+~
+0 0 4009 0 0 0 0 0 0 0 0
+S
+#4252
+@wI@Cc@ce @bC@Br@co@Cw@wn @WProfessionals@n~
+ This quaint little office has two desks and 2 filing cabinets, one on the
+edge of each desk.  Photographs of properties big and small, for sale or rent,
+cover the front windows of the Real Estate office, allowing both onlooker and
+those who are in the office itself to peruse them.
+~
+42 cdehw 0 0 0 0
+D3
+~
+~
+0 0 4022 0 0 0 0 0 0 0 0
+S
+#4253
+@wI@Cc@cy @DB@wr@Wo@Dke@wra@Wg@De@n~
+ @CAn overwhelming smell of musky, old items make the air in this small shop
+very heavy.  Old antiques and verious other items lay scattered in no particular
+order or placement.  The wooden floor cracks underneath each step, sending small
+particles of dust into the air.
+~
+42 cw 0 0 0 10
+D6
+~
+~
+0 0 4027 0 0 0 0 0 0 0 0
+S
+#4254
+@CB@co@gk@Gu@wz@Wa @DA@wc@Wc@Des@Ws@wor@Wie@Ds@n~
+ @CA small voice recording plays as the door opens, @W"Welcome to Bokuza
+Accessories!  Serving the Throne for over twenty years!"  @CThis small shop is
+painted in all sorts of vibrant colors.  Items of all types are on display here
+each with a descriptive and unique layout.  A circular metal counter rests in
+the middle of the shop waiting to take eager customers.  @n
+~
+42 w 0 0 0 10
+D2
+~
+~
+0 0 4039 0 0 0 0 0 0 0 0
+S
+#4255
+@mD@yu@Mru@mn@yk@Muu@n's @CP@wr@Wo@Dt@cec@Dt@Wi@won@Cs@n~
+ @CArmor of diffrent types hang off the walls.  The armors range from small
+protective vests to heavy blast shields used for seiges.  Several works can be
+seen behind the counter applying polish to the armors to give them a shiny
+finish.  Sounds of heavy clanking and hammering can also be heard from behind
+the counter as the armor is being fabricated.  @n
+~
+42 w 0 0 0 10
+D1
+~
+~
+0 0 4032 0 0 0 0 0 0 0 0
+S
+#4256
+@rA@Rm@Wn@wu@D-@rN@Ra@Wt@wi@Ro@rn@n~
+ @CThe noise in this shop is ear shattering as various test weapons are being
+used.  The smell of barrel smoke and gun powder make the air in here hard to
+breath.  On the left wall lay an assortment of blasters and other types of
+firearms.  The right wall adorns various hand to hand weapons, all of which are
+polished brightly.  @n
+~
+42 cw 0 0 0 10
+D1
+~
+~
+0 0 4034 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 4266 0 0 0 0 0 0 0 0
+S
+#4257
+@CF@cr@wi@Wg@ci@Cd @RF@rr@Yi@ye@Rd @DR@wa@Wt@n~
+ @CThe smells of spices and oil are very heavy in this small resturant.  The
+faint sound of crackling can be heard as employees dip the battered rat into hot
+oil.  The floors of this place are dirty and littered with used napkins and food
+boxes.  The trash cans are overflowing, spilling garbage on the floor.  A long
+line forms infront of the counter as patient customers wait for their delicate
+fried rat.  @n
+~
+42 cw 0 0 0 10
+D9
+~
+~
+0 0 4023 0 0 0 0 0 0 0 0
+S
+#4258
+@yC@Do@Wff@De@ye @wH@Wu@wt@n~
+ @CThe small cafe gives a comforting feel as the sound of soft jazz music plays
+in the background.  The walls and floor are brown in color with several small
+tables set up for customers.  The air is warm with the fresh smell of coffee and
+other drinks being made.  @n
+~
+42 cw 0 0 0 10
+D1
+~
+~
+0 0 4045 0 0 0 0 0 0 0 0
+S
+#4259
+@rW@Da@Rr@Wl@ro@Dr@Rd@Ws @w& @mW@Me@wn@Dc@Wh@Me@Ms @gP@Du@gb@n~
+ This rather large pub sits off the busy roads of the residential sector.  The
+floor and walls are a brown color and looks as if they have just been varnished
+to a nice shine.  A black stone firepit rests in the middle of the pub as a
+large crackling fire burns brightly.  On the walls are several royal blue
+banners adorn with the crest of Chelsea FC.  Underneath one of the banners, a
+ripped and torn red banner hangs on a rusty nail.  On further inspection, it
+looks to be a ruined banner of Arsenal FC.
+~
+42 cw 0 0 0 0
+D3
+~
+~
+0 0 4047 0 0 0 0 0 0 0 0
+S
+#4260
+@rC@Rr@Da@Wz@wy I@Wv@Ca@cn@n's @MV@ma@Dr@wi@De@mt@My @gS@Gt@Do@Wr@we@n~
+   This is quite possibly the wierdest store in the galaxy. Items of..." 
+Unknown" Origin lay about in tables and shelves. The floor is made of a plush
+green carpet that is soft to the touch. The walls are adorn with several wacky
+posters, each of which have their own unique feel. The back counter is shaped
+like a triangle and is made from solid steel. A newspaper clipping of an @Yad@n is
+pinned to a bulliten board.
+~
+42 cw 0 0 0 10
+D2
+~
+~
+0 0 4030 0 0 0 0 0 0 0 0
+E
+newspaper clipping ad~
+@YSurvival Tips with Bartholomew Blackstone, 
+Adventurer Extraordinaire!@n
+@g-----------------------------------------------@n
+
+@WSurviving in the wilderness can be tough! Nights 
+can be cold, and without any light, you're at the
+mercy of the creatures that can see in the dark! 
+Not to fear, though, for good ol' Bart Blackstone 
+is here to help!
+
+@WMake sure to get plenty of wood! Without the 
+proper kiln dried logs, you may have trouble 
+keeping a fire that will last.
+
+@WYou'll need at least @w3 quartered logs@W built in 
+a pyramid to make a fire. With a little bitta elbow 
+grease and some patience, soon your fire will be 
+roaring like a lion!
+
+@WYoull also find that laying next to a fire is quite 
+relaxing, and it often gets me feeling energetic
+and ready for the next adventure!@n
+
+@g-----------------------------------------------@n
+@YThis has been survival tips with Bartholomew 
+Blackstone! Be safe, and good luck out there!@n
+~
+S
+#4261
+@WI@Cc@ce @bC@Br@co@Cw@wn @DS@wta@Drp@wor@Dt-@n Private Landing Pad 3~
+ @cThis private landing pad comes fully equipped with everything that a pilot
+could possibly need for their ship.  Only those who are lucky enough to own a
+private vessel can land here.  Ships are flying over head, leaving or entering
+through the volcanic hangar bay that allows access to this starport and its
+landing pads.  @n
+~
+42 dw 0 0 0 1
+D1
+~
+~
+0 0 4250 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 4262 0 0 0 0 0 0 0 0
+S
+#4262
+@WI@Cc@ce @bC@Br@co@Cw@wn @DS@wta@Drp@wor@Dt-@n Private Landing Pad 4~
+ @cThis private landing pad comes fully equipped with everything that a pilot
+could possibly need for their ship.  Only those who are lucky enough to own a
+private vessel can land here.  Ships are flying over head, leaving or entering
+through the volcanic hangar bay that allows access to this starport and its
+landing pads.  @n
+~
+42 dw 0 0 0 1
+D1
+~
+~
+0 0 4261 0 0 0 0 0 0 0 0
+S
+#4263
+@WI@Cc@ce @bC@Br@co@Cw@wn @DS@wta@Drp@wor@Dt-@n Private Landing Pad 2~
+ @cThis private landing pad comes fully equipped with everything that a pilot
+could possibly need for their ship.  Only those who are lucky enough to own a
+private vessel can land here.  Ships are flying over head, leaving or entering
+through the volcanic hangar bay that allows access to this starport and its
+landing pads.  @n
+~
+42 dw 0 0 0 1
+D1
+~
+~
+0 0 4264 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 4250 0 0 0 0 0 0 0 0
+S
+#4264
+@WI@Cc@ce @bC@Br@co@Cw@wn @DS@wta@Drp@wor@Dt-@n Private Landing Pad 1~
+ @cThis private landing pad comes fully equipped with everything that a pilot
+could possibly need for their ship.  Only those who are lucky enough to own a
+private vessel can land here.  Ships are flying over head, leaving or entering
+through the volcanic hangar bay that allows access to this starport and its
+landing pads.  @n
+~
+42 w 0 0 0 1
+D3
+~
+~
+0 0 4263 0 0 0 0 0 0 0 0
+S
+#4265
+@RB@ro@wu@Wn@rt@Ry @GH@gu@wn@Wt@we@gr@Gs @mG@Mu@Di@Ml@md@n~
+ Many trophies of dangerous predators have been mounted on the walls of this
+foyer, which serves as the Guild house for Bounty Hunters on Frigid.  Up against
+the back wall are two boards that display current bounties.  Inbetween them is
+the Guild Master's desk.
+~
+42 cdw 0 0 0 0
+D0
+~
+~
+0 0 4071 0 0 0 0 0 0 0 0
+S
+#4266
+@RA@rm@Wn@wu@D-@rN@Ra@Wt@wi@Ro@Rn@n: Shooting Range~
+ @CThe smell of gun powder is strong in the air here outback of Amnu-nation in
+this shooting range.  This is a long hallway that is lined with booths for
+punters to step up to and fire their weapon of choice and the plentiful training
+dummies.  @n
+~
+42 dw 0 0 0 0
+D0
+~
+~
+0 0 4256 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 4267 0 0 0 0 0 0 0 0
+S
+#4267
+@RA@rm@Wn@wu@D-@rN@Ra@Wt@wi@Ro@Rn@n: Shooting Range~
+ @CThe smell of gun powder is strong in the air here outback of Amnu-nation in
+this shooting range.  This is a long hallway that is lined with booths for
+punters to step up to and fire their weapon of choice and the plentiful training
+dummies.  @n
+~
+42 dw 0 0 0 0
+D1
+~
+~
+0 0 4266 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 4268 0 0 0 0 0 0 0 0
+S
+#4268
+@RA@rm@Wn@wu@D-@rN@Ra@Wt@wi@Ro@Rn@n: Shooting Range~
+ @CThe smell of gun powder is strong in the air here outback of Amnu-nation in
+this shooting range.  This is a long hallway that is lined with booths for
+punters to step up to and fire their weapon of choice and the plentiful training
+dummies.  @n
+~
+42 dw 0 0 0 0
+D1
+~
+~
+0 0 4267 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 4269 0 0 0 0 0 0 0 0
+S
+#4269
+@RA@rm@Wn@wu@D-@rN@Ra@Wt@wi@Ro@Rn@n: Shooting Range~
+ @CThe smell of gun powder is strong in the air here outback of Amnu-nation in
+this shooting range.  This is a long hallway that is lined with booths for
+punters to step up to and fire their weapon of choice and the plentiful training
+dummies.  @n
+~
+42 dw 0 0 0 0
+D1
+~
+~
+0 0 4268 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 4270 0 0 0 0 0 0 0 0
+S
+#4270
+@RA@rm@Wn@wu@D-@rN@Ra@Wt@wi@Ro@Rn@n: Shooting Range~
+ @CThe smell of gun powder is strong in the air here outback of Amnu-nation in
+this shooting range.  This is a long hallway that is lined with booths for
+punters to step up to and fire their weapon of choice and the plentiful training
+dummies.  @n
+~
+42 dw 0 0 0 0
+D1
+~
+~
+0 0 4269 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 4271 0 0 0 0 0 0 0 0
+S
+#4271
+@RA@rm@Wn@wu@D-@rN@Ra@Wt@wi@Ro@Rn@n: Shooting Range~
+ @CThe smell of gun powder is strong in the air here outback of Amnu-nation in
+this shooting range.  This is a long hallway that is lined with booths for
+punters to step up to and fire their weapon of choice and the plentiful training
+dummies.  @n
+~
+42 dw 0 0 0 0
+D1
+~
+~
+0 0 4270 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 4272 0 0 0 0 0 0 0 0
+S
+#4272
+@RA@rm@Wn@wu@D-@rN@Ra@Wt@wi@Ro@Rn@n: Shooting Range~
+ @CThe smell of gun powder is strong in the air here outback of Amnu-nation in
+this shooting range.  This is a long hallway that is lined with booths for
+punters to step up to and fire their weapon of choice and the plentiful training
+dummies.  @n
+~
+42 dw 0 0 0 0
+D1
+~
+~
+0 0 4271 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 4273 0 0 0 0 0 0 0 0
+S
+#4273
+@RA@rm@Wn@wu@D-@rN@Ra@Wt@wi@Ro@Rn@n: Shooting Range~
+ @CThe smell of gun powder is strong in the air here outback of Amnu-nation in
+this shooting range.  This is a long hallway that is lined with booths for
+punters to step up to and fire their weapon of choice and the plentiful training
+dummies.  @n
+~
+42 dw 0 0 0 0
+D1
+~
+~
+0 0 4272 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 4274 0 0 0 0 0 0 0 0
+S
+#4274
+@RA@rm@Wn@wu@D-@rN@Ra@Wt@wi@Ro@Rn@n: Shooting Range~
+ @CThe smell of gun powder is strong in the air here outback of Amnu-nation in
+this shooting range.  This is a long hallway that is lined with booths for
+punters to step up to and fire their weapon of choice and the plentiful training
+dummies.  @n
+~
+42 dw 0 0 0 0
+D1
+~
+~
+0 0 4273 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 4275 0 0 0 0 0 0 0 0
+S
+#4275
+@RA@rm@Wn@wu@D-@rN@Ra@Wt@wi@Ro@Rn@n: Shooting Range~
+ @CThe smell of gun powder is strong in the air here outback of Amnu-nation in
+this shooting range.  This is a long hallway that is lined with booths for
+punters to step up to and fire their weapon of choice and the plentiful training
+dummies.  @n
+~
+42 dw 0 0 0 0
+D1
+~
+~
+0 0 4274 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 4276 0 0 0 0 0 0 0 0
+S
+#4276
+@RA@rm@Wn@wu@D-@rN@Ra@Wt@wi@Ro@Rn@n: Shooting Range~
+ @CThe smell of gun powder is strong in the air here outback of Amnu-nation in
+this shooting range.  This is a long hallway that is lined with booths for
+punters to step up to and fire their weapon of choice and the plentiful training
+dummies.  @n
+~
+42 dw 0 0 0 0
+D1
+~
+~
+0 0 4275 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 4277 0 0 0 0 0 0 0 0
+S
+#4277
+@RA@rm@Wn@wu@D-@rN@Ra@Wt@wi@Ro@Rn@n: Shooting Range~
+ @CThe smell of gun powder is strong in the air here outback of Amnu-nation in
+this shooting range.  This is a long hallway that is lined with booths for
+punters to step up to and fire their weapon of choice and the plentiful training
+dummies.  @n
+~
+42 dw 0 0 0 0
+D1
+~
+~
+0 0 4276 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 4278 0 0 0 0 0 0 0 0
+S
+#4278
+@RA@rm@Wn@wu@D-@rN@Ra@Wt@wi@Ro@Rn@n: Shooting Range~
+ @CThe smell of gun powder is strong in the air here outback of Amnu-nation in
+this shooting range.  This is a long hallway that is lined with booths for
+punters to step up to and fire their weapon of choice and the plentiful training
+dummies.  @n
+~
+42 dw 0 0 0 0
+D1
+~
+~
+0 0 4277 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 4279 0 0 0 0 0 0 0 0
+S
+#4279
+@RA@rm@Wn@wu@D-@rN@Ra@Wt@wi@Ro@Rn@n: Shooting Range~
+ @CThe smell of gun powder is strong in the air here outback of Amnu-nation in
+this shooting range.  This is a long hallway that is lined with booths for
+punters to step up to and fire their weapon of choice and the plentiful training
+dummies.  @n
+~
+42 dw 0 0 0 0
+D1
+~
+~
+0 0 4278 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 4280 0 0 0 0 0 0 0 0
+S
+#4280
+@RA@rm@Wn@wu@D-@rN@Ra@Wt@wi@Ro@Rn@n: Shooting Range~
+ @CThe smell of gun powder is strong in the air here outback of Amnu-nation in
+this shooting range.  This is a long hallway that is lined with booths for
+punters to step up to and fire their weapon of choice and the plentiful training
+dummies.  @n
+~
+42 dw 0 0 0 0
+D1
+~
+~
+0 0 4279 0 0 0 0 0 0 0 0
+S
+#4281
+@CF@cr@Wi@we@cz@Ca@n's @WChamber@n - @WHallway@n~
+ @WThis spherical hallway connects Frieza's Chamber to the Frozen Fist Dojo.  
+The walls, floors and ceiling are all smooth to the touch and a bright white
+color.  @n
+~
+42 dehw 0 0 0 0
+D0
+~
+~
+0 0 4213 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 4282 0 0 0 0 0 0 0 0
+S
+#4282
+@CF@cr@Wi@we@cz@Ca@n's @WChamber@n - @WHallway@n~
+ @WThis spherical hallway connects Frieza's Chamber to the Frozen Fist Dojo.  
+The walls, floors and ceiling are all smooth to the touch and a bright white
+color.  @n
+~
+42 dehw 0 0 0 0
+D0
+~
+~
+0 0 4281 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 4283 0 0 0 0 0 0 0 0
+S
+#4283
+@CF@cr@Wi@we@cz@Ca@n's @WChamber@n~
+ @WThis central chamber has been constructed just off the Frozen Fist Dojo to
+allow Frieza easy access to hand pick the strongest students to serve him.  A
+large computer screen hangs from the roof, showing a picture of Frigid.  The
+chamber is round in shape and all the surfaces are white in color.  @n
+~
+42 ehwD 0 0 0 0
+D3
+~
+~
+0 0 4282 0 0 0 0 0 0 0 0
+S
+#4284
+@MG@Di@mn@Dy@Mu @DC@wo@Wr@wp@Ds @gA@Gc@Da@Wd@De@Gm@gy@n - @WEntrance@n~
+   @mThis is the Ginyu Corps Academy, where warriors who aspire to join the famous
+Ginyu Force come. The door is heavily guarded and only initiates in the Ginyu
+Corps are allowed in. A large version of the Ginyu Force symbol has been
+painted above the door. @n
+~
+42 chw 0 0 0 0
+D0
+~
+~
+0 0 4285 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 4072 0 0 0 0 0 0 0 0
+S
+#4285
+@MG@Di@mn@Dy@Mu @DC@wo@Wr@wp@Ds @gA@Gc@Da@Wd@De@Gm@gy@n - @WHallway@n~
+   @mThis hallway leads through the Ginyu Corps Academy. The walls, floors and
+ceilings are all white and the lights overhead are dull, dotted out every few
+yards on the ceiling. The ginyu force symbol has been painted above every door,
+providing some color to an otherwise bland hallway. @n
+~
+42 hw 0 0 0 0
+D0
+~
+~
+0 0 4286 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 4284 0 0 0 0 0 0 0 0
+S
+#4286
+@MG@Di@mn@Dy@Mu @DC@wo@Wr@wp@Ds @gA@Gc@Da@Wd@De@Gm@gy@n - @WHallway@n~
+   @mThis hallway leads through the Ginyu Corps Academy. The walls, floors and
+ceilings are all white and the lights overhead are dull, dotted out every few
+yards on the ceiling. The ginyu force symbol has been painted above every
+door, providing some color to an otherwise bland hallway. There is a strange
+@Rnotice@m posted on the wall. @n
+~
+42 hw 0 0 0 0
+D0
+~
+~
+0 0 4287 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 4285 0 0 0 0 0 0 0 0
+E
+notice~
+@ROOC - If you find yourself running out of opponents, head to the fourth level of the city to the Frozen Fist Dojo.@n
+~
+S
+#4287
+@MG@Di@mn@Dy@Mu @DC@wo@Wr@wp@Ds @gA@Gc@Da@Wd@De@Gm@gy@n - @WHallway@n~
+   @mThis hallway leads through the Ginyu Corps Academy. The walls, floors and
+ceilings are all white and the lights overhead are dull, dotted out every few
+yards on the ceiling. The ginyu force symbol has been painted above every door,
+providing some color to an otherwise bland hallway. @n
+~
+42 hw 0 0 0 0
+D0
+~
+~
+0 0 4288 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 4294 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 4286 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 4293 0 0 0 0 0 0 0 0
+S
+#4288
+@MG@Di@mn@Dy@Mu @DC@wo@Wr@wp@Ds @gA@Gc@Da@Wd@De@Gm@gy@n - @WHallway@n~
+   @mThis hallway leads through the Ginyu Corps Academy. The walls, floors and
+ceilings are all white and the lights overhead are dull, dotted out every few
+yards on the ceiling. The ginyu force symbol has been painted above every door,
+providing some color to an otherwise bland hallway. @n
+~
+42 hw 0 0 0 0
+D0
+~
+~
+0 0 4289 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 4287 0 0 0 0 0 0 0 0
+S
+#4289
+@MG@Di@mn@Dy@Mu @DC@wo@Wr@wp@Ds @gA@Gc@Da@Wd@De@Gm@gy@n - @WHallway@n~
+   @mThis hallway leads through the Ginyu Corps Academy. The walls, floors and
+ceilings are all white and the lights overhead are dull, dotted out every few
+yards on the ceiling. The ginyu force symbol has been painted above every door,
+providing some color to an otherwise bland hallway. @n
+~
+42 hw 0 0 0 0
+D0
+~
+~
+0 0 4290 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 4292 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 4288 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 4291 0 0 0 0 0 0 0 0
+S
+#4290
+@MG@Di@mn@Dy@Mu @DC@wo@Wr@wp@Ds @gA@Gc@Da@Wd@De@Gm@gy@n - @WOffice@n~
+   @mThe office of Captain Ginyu, it is quite large and also serves as a place
+where initiates can receive private tutoring from Ginyu himself. A large
+life-like potrait of Captain Ginyu in a pose, hangs on the backwall, just behind
+his desk. @n
+~
+42 hwD 0 0 0 0
+D2
+~
+~
+0 0 4289 0 0 0 0 0 0 0 0
+S
+#4291
+@MG@Di@mn@Dy@Mu @DC@wo@Wr@wp@Ds @gA@Gc@Da@Wd@De@Gm@gy@n - @WDojo@n~
+   @mThis one of several small dojos in the Ginyu Corps academy. On the far wall
+is a potrait of Ginyu posing, while potraits of Jeice, Burter, Guldo and Recoome
+can be found on the other walls. Techno dance music can be heard coming from a
+speaker in the corner. @n
+~
+42 hw 0 0 0 0
+D1
+~
+~
+0 0 4289 0 0 0 0 0 0 0 0
+S
+#4292
+@MG@Di@mn@Dy@Mu @DC@wo@Wr@wp@Ds @gA@Gc@Da@Wd@De@Gm@gy@n - @WSupplies@n~
+   @mThis closet houses the essential supplies needed for the day to day running
+of the academy. Several boxes of food can be found on one shelf, while the rest
+of the space is taken up by armor and other necessary equipment. @n
+~
+42 hw 0 0 0 0
+D3
+~
+~
+0 0 4289 0 0 0 0 0 0 0 0
+S
+#4293
+@MG@Di@mn@Dy@Mu @DC@wo@Wr@wp@Ds @gA@Gc@Da@Wd@De@Gm@gy@n - @WDojo@n~
+   @mThis one of several small dojos in the Ginyu Corps academy. On the far wall
+is a potrait of Ginyu posing, while potraits of Jeice, Burter, Guldo and Recoome
+can be found on the other walls. Techno dance music can be heard coming from a
+speaker in the corner. @n
+~
+42 hw 0 0 0 0
+D1
+~
+~
+0 0 4287 0 0 0 0 0 0 0 0
+S
+#4294
+@MG@Di@mn@Dy@Mu @DC@wo@Wr@wp@Ds @gA@Gc@Da@Wd@De@Gm@gy@n - @WDojo@n~
+   @mThis one of several small dojos in the Ginyu Corps academy. On the far wall
+is a potrait of Ginyu posing, while potraits of Jeice, Burter, Guldo and Recoome
+can be found on the other walls. Techno dance music can be heard coming from a
+speaker in the corner. @n
+~
+42 hw 0 0 0 0
+D3
+~
+~
+0 0 4287 0 0 0 0 0 0 0 0
+S
+#4299
+An unfinished room~
+You are in an unfinished room.
+~
+42 0 0 0 0 0
+S
+$~

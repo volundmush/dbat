@@ -1,0 +1,1871 @@
+#17200
+@GG@gree@Gn@n @MN@mebul@Ma @WMall@n - @WHangar Bay@n~
+   @WThis hangar bay is laid out in what one could only expect a space version of
+a multilevel carpark might look like. Dozens of platforms run from one side of
+the bay to the other, with smaller platforms either side serving as parking
+spaces. There are several levels, allowing for hundreds of spaces. On the
+northern side of each platform is an elevator that takes customers to the ground
+floor. @n
+
+@RA sign about public transports has been posted here.@n
+~
+172 cq 0 0 0 0
+D0
+~
+~
+0 0 17201 0 0 0 0 0 0 0 0
+D11
+~
+~
+0 0 41490 0 0 0 0 0 0 0 0
+E
+sign~
+@C(OOC)@W To view information about the Galactic Travels transports and how to
+board them, follow the help files contained in @Yhelp galactic@W. @n
+~
+S
+#17201
+@GG@gree@Gn @MN@mebul@Ma @WMall@n - @WEntrance@n~
+   @WThis serves as the entrance to the Green Nebula Mall, of which just to the
+south is a large and expansive hangar bay. A sign on the roof suggests
+continuing to the north if one wishes to enter the Mall proper. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17202 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17200 0 0 0 0 0 0 0 0
+S
+#17202
+@GG@gree@Gn @MN@mebul@Ma @WMall @n- @WFirst Floor@n~
+   @WThis large hallway is an entrance to the Mall itself, leading from the
+Hangar Bay parking to the escalators which take customers to the higher levels,
+where the shops are. The walls, floor and ceiling are bland light grey
+concrete, however numerous TV screens are positioned on the walls, playing
+advertisements. @n
+~
+172 0 0 0 0 0
+D1
+~
+~
+0 0 17203 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17201 0 0 0 0 0 0 0 0
+S
+#17203
+@GG@gree@Gn @MN@mebul@Ma @WMall @n- @WFirst Floor@n~
+   @WThis large hallway is an entrance to the Mall itself, leading from the
+Hangar Bay parking to the escalators which take customers to the higher
+levels, where the shops are. The walls, floor and ceiling are bland light grey
+concrete, however numerous TV screens are positioned on the walls, playing
+advertisements. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17204 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17202 0 0 0 0 0 0 0 0
+S
+#17204
+@GG@gree@Gn @MN@mebul@Ma @WMall @n- @WFirst Floor@n~
+   @WThis large hallway is an entrance to the Mall itself, leading from the
+Hangar Bay parking to the escalators which take customers to the higher
+levels, where the shops are. The walls, floor and ceiling are bland light grey
+concrete, however numerous TV screens are positioned on the walls, playing
+advertisements. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17205 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17203 0 0 0 0 0 0 0 0
+S
+#17205
+@GG@gree@Gn @MN@mebul@Ma @WMall @n- @WFirst Floor@n~
+   @WThis large hallway is an entrance to the Mall itself, leading from the
+Hangar Bay parking to the escalators which take customers to the higher
+levels, where the shops are. The walls, floor and ceiling are bland light grey
+concrete, however numerous TV screens are positioned on the walls, playing
+advertisements. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17206 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17204 0 0 0 0 0 0 0 0
+S
+#17206
+@GG@gree@Gn @MN@mebul@Ma @WMall @n- @WFirst Floor@n~
+   @WThis large hallway is an entrance to the Mall itself, leading from the
+Hangar Bay parking to the escalators which take customers to the higher
+levels, where the shops are. The walls, floor and ceiling are bland light grey
+concrete, however numerous TV screens are positioned on the walls, playing
+advertisements. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17207 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17205 0 0 0 0 0 0 0 0
+S
+#17207
+@GG@gree@Gn @MN@mebul@Ma @WMall @n- @WFirst Floor@n~
+   @WThis large hallway is an entrance to the Mall itself, leading from the
+Hangar Bay parking to the escalators which take customers to the higher
+levels, where the shops are. The walls, floor and ceiling are bland light grey
+concrete, however numerous TV screens are positioned on the walls, playing
+advertisements. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17208 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17206 0 0 0 0 0 0 0 0
+S
+#17208
+@GG@gree@Gn @MN@mebul@Ma @WMall @n- @WFirst Floor@n~
+   @WThis large hallway is an entrance to the Mall itself, leading from the
+Hangar Bay parking to the escalators which take customers to the higher
+levels, where the shops are. The walls, floor and ceiling are bland light grey
+concrete, however numerous TV screens are positioned on the walls, playing
+advertisements. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17209 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17207 0 0 0 0 0 0 0 0
+S
+#17209
+@GG@gree@Gn @MN@mebul@Ma @WMall @n- @WFirst Floor@n~
+   @WThis large hallway is an entrance to the Mall itself, leading from the
+Hangar Bay parking to the escalators which take customers to the higher
+levels, where the shops are. The walls, floor and ceiling are bland light grey
+concrete, however numerous TV screens are positioned on the walls, playing
+advertisements. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17210 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17208 0 0 0 0 0 0 0 0
+S
+#17210
+@GG@gree@Gn @MN@mebul@Ma @WMall @n- @WFirst Floor@n~
+   @WThis large hallway is an entrance to the Mall itself, leading from the
+Hangar Bay parking to the escalators which take customers to the higher levels,
+where the shops are. The walls, floor and ceiling are bland light grey
+concrete, however numerous TV screens are positioned on the walls, playing
+advertisements. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17215 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17209 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 17214 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 17211 0 0 0 0 0 0 0 0
+S
+#17211
+@GG@gree@Gn @MN@mebul@Ma @WMall @n- @WFirst Floor@n~
+   @WThis large hallway is an entrance to the Mall itself, leading from the
+Hangar Bay parking to the escalators which take customers to the higher
+levels, where the shops are. The walls, floor and ceiling are bland light grey
+concrete, however numerous TV screens are positioned on the walls, playing
+advertisements. @n
+~
+172 0 0 0 0 0
+D6
+~
+~
+0 0 17212 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17210 0 0 0 0 0 0 0 0
+S
+#17212
+@GG@gree@Gn @MN@mebul@Ma @WMall @n- @WFirst Floor@n~
+   @WThis large hallway is an entrance to the Mall itself, leading from the
+Hangar Bay parking to the escalators which take customers to the higher levels,
+where the shops are. The walls, floor and ceiling are bland light grey
+concrete, however numerous TV screens are positioned on the walls, playing
+advertisements. @n
+~
+172 0 0 0 0 0
+D5
+~
+~
+0 0 16381 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 17211 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17213 0 0 0 0 0 0 0 0
+S
+#17213
+@GG@gree@Gn @MN@mebul@Ma @WMall @n- @WFirst Floor@n~
+   @WThis large hallway is an entrance to the Mall itself, leading from the
+Hangar Bay parking to the escalators which take customers to the higher
+levels, where the shops are. The walls, floor and ceiling are bland light grey
+concrete, however numerous TV screens are positioned on the walls, playing
+advertisements. @n
+~
+172 0 0 0 0 0
+D7
+~
+~
+0 0 17212 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 17214 0 0 0 0 0 0 0 0
+S
+#17214
+@GG@gree@Gn @MN@mebul@Ma @WMall @n- @WFirst Floor@n~
+   @WThis large hallway is an entrance to the Mall itself, leading from the
+Hangar Bay parking to the escalators which take customers to the higher levels,
+where the shops are. The walls, floor and ceiling are bland light grey
+concrete, however numerous TV screens are positioned on the walls, playing
+advertisements. @n
+~
+172 0 0 0 0 0
+D6
+~
+~
+0 0 17213 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 17210 0 0 0 0 0 0 0 0
+S
+#17215
+@GG@gree@Gn @MN@mebul@Ma @WMall@n - @WEscalator@n~
+   @WOne of a series of escalators that allow guests to move about the different
+floors of the Mall. Escalators can be seen going up while the first floor of
+the Mall is to the south. @n
+~
+172 0 0 0 0 0
+D2
+~
+~
+0 0 17210 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 17216 0 0 0 0 0 0 0 0
+S
+#17216
+@GG@gree@Gn @MN@mebul@Ma @WMall@n - @WEscalator@n~
+   @WOne of a series of escalators that allow guests to move about the different
+floors of the Mall. Escalators can be seen going up and down, while the second
+floor of the Mall is to the south. @n
+~
+172 0 0 0 0 0
+D2
+~
+~
+0 0 17217 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 17237 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 17215 0 0 0 0 0 0 0 0
+S
+#17217
+@GG@gree@Gn @MN@mebul@Ma @WMall@n - @WSecond Floor@n~
+   @WThe second floor of the Green Nebula Mall is the first floor where shops can
+be found, all of which are located on the outside of the footpath. In the
+middle of this floor is a large artificial lake, with different types of trees
+and plants growing, as well as various species of fish swimming in the water.
+The typical sound of Mall music can be heard here. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17216 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17226 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17218 0 0 0 0 0 0 0 0
+S
+#17218
+@GG@gree@Gn @MN@mebul@Ma @WMall@n - @WSecond Floor@n~
+   @WThe second floor of the Green Nebula Mall is the first floor where shops can
+be found, all of which are located on the outside of the footpath. In the
+middle of this floor is a large artificial lake, with different types of trees
+and plants growing, as well as various species of fish swimming in the water.
+The typical sound of Mall music can be heard here. @n
+~
+172 0 0 0 0 0
+D1
+~
+~
+0 0 17217 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17219 0 0 0 0 0 0 0 0
+S
+#17219
+@GG@gree@Gn @MN@mebul@Ma @WMall@n - @WSecond Floor@n~
+   @WThe second floor of the Green Nebula Mall is the first floor where shops can
+be found, all of which are located on the outside of the footpath. In the
+middle of this floor is a large artificial lake, with different types of trees
+and plants growing, as well as various species of fish swimming in the water.
+The typical sound of Mall music can be heard here. @n
+~
+172 0 0 0 0 0
+D1
+~
+~
+0 0 17218 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17220 0 0 0 0 0 0 0 0
+S
+#17220
+@GG@gree@Gn @MN@mebul@Ma @WMall@n - @WSecond Floor@n~
+   @WThe second floor of the Green Nebula Mall is the first floor where shops can
+be found, all of which are located on the outside of the footpath. In the
+middle of this floor is a large artificial lake, with different types of trees
+and plants growing, as well as various species of fish swimming in the water.
+The typical sound of Mall music can be heard here. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17219 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17221 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17276 0 0 0 0 0 0 0 0
+S
+#17221
+@GG@gree@Gn @MN@mebul@Ma @WMall@n - @WSecond Floor@n~
+   @WThe second floor of the Green Nebula Mall is the first floor where shops can
+be found, all of which are located on the outside of the footpath. In the
+middle of this floor is a large artificial lake, with different types of trees
+and plants growing, as well as various species of fish swimming in the water.
+The typical sound of Mall music can be heard here. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17220 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17222 0 0 0 0 0 0 0 0
+S
+#17222
+@GG@gree@Gn @MN@mebul@Ma @WMall@n - @WSecond Floor@n~
+   @WThe second floor of the Green Nebula Mall is the first floor where shops can
+be found, all of which are located on the outside of the footpath. In the
+middle of this floor is a large artificial lake, with different types of trees
+and plants growing, as well as various species of fish swimming in the water.
+The typical sound of Mall music can be heard here. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17221 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17223 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17275 0 0 0 0 0 0 0 0
+S
+#17223
+@GG@gree@Gn @MN@mebul@Ma @WMall@n - @WSecond Floor@n~
+   @WThe second floor of the Green Nebula Mall is the first floor where shops can
+be found, all of which are located on the outside of the footpath. In the
+middle of this floor is a large artificial lake, with different types of trees
+and plants growing, as well as various species of fish swimming in the water.
+The typical sound of Mall music can be heard here. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17222 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17224 0 0 0 0 0 0 0 0
+S
+#17224
+@GG@gree@Gn @MN@mebul@Ma @WMall@n - @WSecond Floor@n~
+   @WThe second floor of the Green Nebula Mall is the first floor where shops can
+be found, all of which are located on the outside of the footpath. In the
+middle of this floor is a large artificial lake, with different types of trees
+and plants growing, as well as various species of fish swimming in the water.
+The typical sound of Mall music can be heard here. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17223 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17225 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17271 0 0 0 0 0 0 0 0
+S
+#17225
+@GG@gree@Gn @MN@mebul@Ma @WMall@n - @WSecond Floor@n~
+   @WThe second floor of the Green Nebula Mall is the first floor where shops can
+be found, all of which are located on the outside of the footpath. In the
+middle of this floor is a large artificial lake, with different types of trees
+and plants growing, as well as various species of fish swimming in the water.
+The typical sound of Mall music can be heard here. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17224 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17236 0 0 0 0 0 0 0 0
+S
+#17226
+@GG@gree@Gn @MN@mebul@Ma @WMall@n - @WSecond Floor@n~
+   @WThe second floor of the Green Nebula Mall is the first floor where shops can
+be found, all of which are located on the outside of the footpath. In the
+middle of this floor is a large artificial lake, with different types of trees
+and plants growing, as well as various species of fish swimming in the water.
+The typical sound of Mall music can be heard here. @n
+~
+172 0 0 0 0 0
+D1
+~
+~
+0 0 17227 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17217 0 0 0 0 0 0 0 0
+S
+#17227
+@GG@gree@Gn @MN@mebul@Ma @WMall@n - @WSecond Floor@n~
+   @WThe second floor of the Green Nebula Mall is the first floor where shops can
+be found, all of which are located on the outside of the footpath. In the
+middle of this floor is a large artificial lake, with different types of trees
+and plants growing, as well as various species of fish swimming in the water.
+The typical sound of Mall music can be heard here. @n
+~
+172 0 0 0 0 0
+D1
+~
+~
+0 0 17277 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17228 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17226 0 0 0 0 0 0 0 0
+S
+#17228
+@GG@gree@Gn @MN@mebul@Ma @WMall@n - @WSecond Floor@n~
+   @WThe second floor of the Green Nebula Mall is the first floor where shops can
+be found, all of which are located on the outside of the footpath. In the
+middle of this floor is a large artificial lake, with different types of trees
+and plants growing, as well as various species of fish swimming in the water.
+The typical sound of Mall music can be heard here. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17227 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17267 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17229 0 0 0 0 0 0 0 0
+S
+#17229
+@GG@gree@Gn @MN@mebul@Ma @WMall@n - @WSecond Floor@n~
+   @WThe second floor of the Green Nebula Mall is the first floor where shops can
+be found, all of which are located on the outside of the footpath. In the
+middle of this floor is a large artificial lake, with different types of trees
+and plants growing, as well as various species of fish swimming in the water.
+The typical sound of Mall music can be heard here. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17228 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17230 0 0 0 0 0 0 0 0
+S
+#17230
+@GG@gree@Gn @MN@mebul@Ma @WMall@n - @WSecond Floor@n~
+   @WThe second floor of the Green Nebula Mall is the first floor where shops can
+be found, all of which are located on the outside of the footpath. In the
+middle of this floor is a large artificial lake, with different types of trees
+and plants growing, as well as various species of fish swimming in the water.
+The typical sound of Mall music can be heard here. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17229 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17268 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17231 0 0 0 0 0 0 0 0
+S
+#17231
+@GG@gree@Gn @MN@mebul@Ma @WMall@n - @WSecond Floor@n~
+   @WThe second floor of the Green Nebula Mall is the first floor where shops can
+be found, all of which are located on the outside of the footpath. In the
+middle of this floor is a large artificial lake, with different types of trees
+and plants growing, as well as various species of fish swimming in the water.
+The typical sound of Mall music can be heard here. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17230 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17232 0 0 0 0 0 0 0 0
+S
+#17232
+@GG@gree@Gn @MN@mebul@Ma @WMall@n - @WSecond Floor@n~
+   @WThe second floor of the Green Nebula Mall is the first floor where shops can
+be found, all of which are located on the outside of the footpath. In the
+middle of this floor is a large artificial lake, with different types of trees
+and plants growing, as well as various species of fish swimming in the water.
+The typical sound of Mall music can be heard here. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17231 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17269 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17233 0 0 0 0 0 0 0 0
+S
+#17233
+@GG@gree@Gn @MN@mebul@Ma @WMall@n - @WSecond Floor@n~
+   @WThe second floor of the Green Nebula Mall is the first floor where shops can
+be found, all of which are located on the outside of the footpath. In the
+middle of this floor is a large artificial lake, with different types of trees
+and plants growing, as well as various species of fish swimming in the water.
+The typical sound of Mall music can be heard here. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17232 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17234 0 0 0 0 0 0 0 0
+S
+#17234
+@GG@gree@Gn @MN@mebul@Ma @WMall@n - @WSecond Floor@n~
+   @WThe second floor of the Green Nebula Mall is the first floor where shops can
+be found, all of which are located on the outside of the footpath. In the
+middle of this floor is a large artificial lake, with different types of trees
+and plants growing, as well as various species of fish swimming in the water.
+The typical sound of Mall music can be heard here. @n
+~
+172 0 0 0 0 0
+D1
+~
+~
+0 0 17233 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17235 0 0 0 0 0 0 0 0
+S
+#17235
+@GG@gree@Gn @MN@mebul@Ma @WMall@n - @WSecond Floor@n~
+   @WThe second floor of the Green Nebula Mall is the first floor where shops can
+be found, all of which are located on the outside of the footpath. In the
+middle of this floor is a large artificial lake, with different types of trees
+and plants growing, as well as various species of fish swimming in the water.
+The typical sound of Mall music can be heard here. @n
+~
+172 0 0 0 0 0
+D1
+~
+~
+0 0 17234 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17270 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17236 0 0 0 0 0 0 0 0
+S
+#17236
+@GG@gree@Gn @MN@mebul@Ma @WMall@n - @WSecond Floor@n~
+   @WThe second floor of the Green Nebula Mall is the first floor where shops can
+be found, all of which are located on the outside of the footpath. In the
+middle of this floor is a large artificial lake, with different types of trees
+and plants growing, as well as various species of fish swimming in the water.
+The typical sound of Mall music can be heard here. @n
+~
+172 0 0 0 0 0
+D1
+~
+~
+0 0 17235 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17225 0 0 0 0 0 0 0 0
+S
+#17237
+@GG@gree@Gn @MN@mebul@Ma @WMall@n - @WEscalator@n~
+   @WOne of a series of escalators that allow guests to move about the different
+floors of the Mall. Escalators can be seen going up and down, while the third
+floor of the Mall is to the south. @n
+~
+172 0 0 0 0 0
+D2
+~
+~
+0 0 17238 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 17258 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 17216 0 0 0 0 0 0 0 0
+S
+#17238
+@GG@gree@Gn @MN@mebul@Ma @WMall@w - @WThird Floor@n~
+   @WThe walkway here serves as both an access route to the shops, which are
+positioned on the outside and as a balcony, looking out over the second floor
+and the picturesque artificial lake down below. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17237 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17247 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17239 0 0 0 0 0 0 0 0
+S
+#17239
+@GG@gree@Gn @MN@mebul@Ma @WMall@w - @WThird Floor@n~
+   @WThe walkway here serves as both an access route to the shops, which are
+positioned on the outside and as a balcony, looking out over the second floor
+and the picturesque artificial lake down below. @n
+~
+172 0 0 0 0 0
+D1
+~
+~
+0 0 17238 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17240 0 0 0 0 0 0 0 0
+S
+#17240
+@GG@gree@Gn @MN@mebul@Ma @WMall@w - @WThird Floor@n~
+   @WThe walkway here serves as both an access route to the shops, which are
+positioned on the outside and as a balcony, looking out over the second floor
+and the picturesque artificial lake down below. @n
+~
+172 0 0 0 0 0
+D1
+~
+~
+0 0 17239 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17241 0 0 0 0 0 0 0 0
+S
+#17241
+@GG@gree@Gn @MN@mebul@Ma @WMall@w - @WThird Floor@n~
+   @WThe walkway here serves as both an access route to the shops, which are
+positioned on the outside and as a balcony, looking out over the second floor
+and the picturesque artificial lake down below. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17240 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17242 0 0 0 0 0 0 0 0
+S
+#17242
+@GG@gree@Gn @MN@mebul@Ma @WMall@w - @WThird Floor@n~
+   @WThe walkway here serves as both an access route to the shops, which are
+positioned on the outside and as a balcony, looking out over the second floor
+and the picturesque artificial lake down below. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17241 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17243 0 0 0 0 0 0 0 0
+S
+#17243
+@GG@gree@Gn @MN@mebul@Ma @WMall@w - @WThird Floor@n~
+   @WThe walkway here serves as both an access route to the shops, which are
+positioned on the outside and as a balcony, looking out over the second floor
+and the picturesque artificial lake down below. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17242 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17244 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17274 0 0 0 0 0 0 0 0
+S
+#17244
+@GG@gree@Gn @MN@mebul@Ma @WMall@w - @WThird Floor@n~
+   @WThe walkway here serves as both an access route to the shops, which are
+positioned on the outside and as a balcony, looking out over the second floor
+and the picturesque artificial lake down below. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17243 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17245 0 0 0 0 0 0 0 0
+S
+#17245
+@GG@gree@Gn @MN@mebul@Ma @WMall@w - @WThird Floor@n~
+   @WThe walkway here serves as both an access route to the shops, which are
+positioned on the outside and as a balcony, looking out over the second floor
+and the picturesque artificial lake down below. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17244 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17246 0 0 0 0 0 0 0 0
+S
+#17246
+@GG@gree@Gn @MN@mebul@Ma @WMall@w - @WThird Floor@n~
+   @WThe walkway here serves as both an access route to the shops, which are
+positioned on the outside and as a balcony, looking out over the second floor
+and the picturesque artificial lake down below. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17245 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17257 0 0 0 0 0 0 0 0
+S
+#17247
+@GG@gree@Gn @MN@mebul@Ma @WMall@w - @WThird Floor@n~
+   @WThe walkway here serves as both an access route to the shops, which are
+positioned on the outside and as a balcony, looking out over the second floor
+and the picturesque artificial lake down below. @n
+~
+172 0 0 0 0 0
+D1
+~
+~
+0 0 17248 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17238 0 0 0 0 0 0 0 0
+S
+#17248
+@GG@gree@Gn @MN@mebul@Ma @WMall@w - @WThird Floor@n~
+   @WThe walkway here serves as both an access route to the shops, which are
+positioned on the outside and as a balcony, looking out over the second floor
+and the picturesque artificial lake down below. @n
+~
+172 0 0 0 0 0
+D1
+~
+~
+0 0 184 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17249 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17247 0 0 0 0 0 0 0 0
+S
+#17249
+@GG@gree@Gn @MN@mebul@Ma @WMall@w - @WThird Floor@n~
+   @WThe walkway here serves as both an access route to the shops, which are
+positioned on the outside and as a balcony, looking out over the second floor
+and the picturesque artificial lake down below. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17248 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17250 0 0 0 0 0 0 0 0
+S
+#17250
+@GG@gree@Gn @MN@mebul@Ma @WMall@w - @WThird Floor@n~
+   @WThe walkway here serves as both an access route to the shops, which are
+positioned on the outside and as a balcony, looking out over the second floor
+and the picturesque artificial lake down below. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17249 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17251 0 0 0 0 0 0 0 0
+S
+#17251
+@GG@gree@Gn @MN@mebul@Ma @WMall@w - @WThird Floor@n~
+   @WThe walkway here serves as both an access route to the shops, which are
+positioned on the outside and as a balcony, looking out over the second floor
+and the picturesque artificial lake down below. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17250 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17252 0 0 0 0 0 0 0 0
+S
+#17252
+@GG@gree@Gn @MN@mebul@Ma @WMall@w - @WThird Floor@n~
+   @WThe walkway here serves as both an access route to the shops, which are
+positioned on the outside and as a balcony, looking out over the second floor
+and the picturesque artificial lake down below. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17251 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17272 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17253 0 0 0 0 0 0 0 0
+S
+#17253
+@GG@gree@Gn @MN@mebul@Ma @WMall@w - @WThird Floor@n~
+   @WThe walkway here serves as both an access route to the shops, which are
+positioned on the outside and as a balcony, looking out over the second floor
+and the picturesque artificial lake down below. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17252 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17254 0 0 0 0 0 0 0 0
+S
+#17254
+@GG@gree@Gn @MN@mebul@Ma @WMall@w - @WThird Floor@n~
+   @WThe walkway here serves as both an access route to the shops, which are
+positioned on the outside and as a balcony, looking out over the second floor
+and the picturesque artificial lake down below. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17253 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17255 0 0 0 0 0 0 0 0
+S
+#17255
+@GG@gree@Gn @MN@mebul@Ma @WMall@w - @WThird Floor@n~
+   @WThe walkway here serves as both an access route to the shops, which are
+positioned on the outside and as a balcony, looking out over the second floor
+and the picturesque artificial lake down below. @n
+~
+172 0 0 0 0 0
+D1
+~
+~
+0 0 17254 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17256 0 0 0 0 0 0 0 0
+S
+#17256
+@GG@gree@Gn @MN@mebul@Ma @WMall@w - @WThird Floor@n~
+   @WThe walkway here serves as both an access route to the shops, which are
+positioned on the outside and as a balcony, looking out over the second floor
+and the picturesque artificial lake down below. @n
+~
+172 0 0 0 0 0
+D1
+~
+~
+0 0 17255 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17273 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17257 0 0 0 0 0 0 0 0
+S
+#17257
+@GG@gree@Gn @MN@mebul@Ma @WMall@w - @WThird Floor@n~
+   @WThe walkway here serves as both an access route to the shops, which are
+positioned on the outside and as a balcony, looking out over the second floor
+and the picturesque artificial lake down below. @n
+~
+172 0 0 0 0 0
+D1
+~
+~
+0 0 17256 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17246 0 0 0 0 0 0 0 0
+S
+#17258
+@GG@gree@Gn @MN@mebul@Ma @WMall@n - @WEscalator@n~
+   @WOne of a series of escalators that allow guests to move about the different
+floors of the Mall. Just the one is here, leading down to a lower floor, while
+the fourth floor of the Mall can be seen to the south. @n
+~
+172 0 0 0 0 0
+D2
+~
+~
+0 0 17259 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 17237 0 0 0 0 0 0 0 0
+S
+#17259
+@GG@gree@Gn @MN@mebul@Ma @WMall@n - @WFourth Floor@n~
+   @WA dome stretches over this floor, that makes up a food court. Lush gardens
+have been grown here around the dining tables, where one can get a good view of
+space and the Green Nebula itself from any of the seats here. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17258 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17260 0 0 0 0 0 0 0 0
+S
+#17260
+@GG@gree@Gn @MN@mebul@Ma @WMall - Center Stage Coffee Shop@n~
+   A dome stretches over the entire floor that makes up a food court. Lush
+@Gg@ga@Gr@gd@Ge@gn@Gs@n have been grown here around the dining tables, where one can get a good
+view of space and the @GG@gree@Gn @MN@mebul@Ma@n itself from any of the seats here. 
+Situated in the center of it all is the @GC@gente@Gr @CS@ctag@Ce @YC@yoffe@Ye @MS@mho@Mp@n, so named for
+the large elevated stage that takes up a portion of the floor area. This @Yo@gp@Ye@gn
+@Ya@gi@Yr@ge@Yd c@ga@Yf@ge@n boasts a selection of nearly a @Chu@cnd@Cre@cd d@Cif@cfe@Cre@cnt @Cfl@cav@Cor@cs@n of @Yc@yoffe@Ye
+a@yn@Yd t@ye@Ya@n. A dozen or so small, quaint table and chair sets around the central
+stage. On one corner of the stage a large, portable @Dc@nh@Da@nl@Dk@nb@Do@na@Dr@nd s@Di@ng@Dn@n is propped
+up against a small planter, its surface currently bare of writing. Two
+baristas stand behind the nearby covered counter area, waiting to handle the
+customers orders.
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17259 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17262 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17263 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17261 0 0 0 0 0 0 0 0
+S
+#17261
+@GG@gree@Gn @MN@mebul@Ma @WMall@n - @WFourth Floor@n~
+   @WA dome stretches over this floor, that makes up a food court. Lush gardens
+have been grown here around the dining tables, where one can get a good view of
+space and the Green Nebula itself from any of the seats here. @n
+~
+172 0 0 0 0 0
+D1
+~
+~
+0 0 17260 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17265 0 0 0 0 0 0 0 0
+S
+#17262
+@GG@gree@Gn @MN@mebul@Ma @WMall@n - @WFourth Floor@n~
+   @WA dome stretches over this floor, that makes up a food court. Lush gardens
+have been grown here around the dining tables, where one can get a good view of
+space and the Green Nebula itself from any of the seats here. @n
+~
+172 0 0 0 0 0
+D1
+~
+~
+0 0 17264 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17260 0 0 0 0 0 0 0 0
+S
+#17263
+@GG@gree@Gn @MN@mebul@Ma @WMall@n - @WFourth Floor@n~
+   @WA dome stretches over this floor, that makes up a food court. Lush gardens
+have been grown here around the dining tables, where one can get a good view of
+space and the Green Nebula itself from any of the seats here. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17260 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17266 0 0 0 0 0 0 0 0
+S
+#17264
+@YM@yc@Rs@rt@Yu@yf@Rf @DRestaurant@n~
+   @WGrease covers sections of the walls closest to a counter that is equally
+stained with grease. A large menu of tasty 'food' is displayed above the
+counter. An easy to use cash register with food icons for buttons instead of
+numbers sits on top of the counter. Tabls can be seen in the back, a few of
+which should be safe to eat on. @n
+~
+172 0 0 0 0 10
+D3
+~
+~
+0 0 17262 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 -1 0 0 0 0 0 0 0 0
+S
+#17265
+@YB@yu@Dr@wg@ye@Yr @CQ@cu@We@ce@Cn@n~
+   @YHome to the giant double flopper, a burger known for it's heart attack
+inducing fat content but addictively good tasting, Burger Queen is a small
+franchise take away chain whose origins are largely unknown. The tiles of
+the floor are checkered with a lighter and darker shade of burgundy. Several
+bolted down plastic white tables and chairs have been placed to one side of
+Burger Queen to serve as a dining in area. @n
+~
+172 0 0 0 0 10
+D1
+~
+~
+0 0 17261 0 0 0 0 0 0 0 0
+S
+#17266
+@CF@cr@wi@Wg@ci@Cd @RF@rr@Yi@ye@Rd @DR@wa@Wt@n~
+   @CThe smells of spices and oil are very heavy in this small resturant. The
+faint sound of crackling can be heard as employees dip the battered rat into
+hot oil. The floors of this place are dirty and littered with used napkins and
+food boxes. The trash cans are overflowing, spilling garbage on the floor. A
+long line forms infront of the counter as patient customers wait for their
+delicate fried rat. @n
+~
+172 0 0 0 0 10
+D0
+~
+~
+0 0 17263 0 0 0 0 0 0 0 0
+S
+#17267
+@cC@Ca@Wp@wsu@cl@Ce @cC@Co@Wr@wp @WSa@wles@n~
+   @WThis store is a branch of the Capsule Corporation, responsible for
+distributing their products to the public. Several aisles are present, much
+like a convience store, that are filled with primarily capsule (or dynocap)
+products, as well as items in other ranges produced by Capsule Corporation. @n
+
+@WA @Rsign@W hangs over the counter here.@n
+~
+172 0 0 0 0 10
+D3
+~
+~
+0 0 17228 0 0 0 0 0 0 0 0
+E
+look sign~
+This sign is OOC
+   The capsules are banded into three categories: @YGold@n, @DSilver@n and @yBronze@n
+(going from best to worst). To use a capsule, you must type click <capsule's
+full name> (Minus the a).
+
+For example: The radar capsule is activated by typing @Yclick radar capsule@n.
+~
+S
+#17268
+@BG@balacti@Bc @DP@waw@Dn@n~
+   @WThis store seems to have items from all over the galaxy on it's shelves,
+though many of the goods appear second hand. A counter to the back of the
+store has security mesh reaching from the top of the counter to the roof,
+protecting the clerk, with a single area where business can be conducted
+through an open slot with ease. @n
+~
+172 0 0 0 0 10
+D3
+~
+~
+0 0 17230 0 0 0 0 0 0 0 0
+S
+#17269
+@YH@yalogeni@Yc @YLi@ygh@Yts@n~
+   @WLights, ranging from hand held flashlights to house lights of differing
+sizes and shapes can be found in this store. Most of the lights on display are
+on and the temperature feels slightly warmer in here than anywhere else in the
+Mall. A sign reading, 'Longest Lasting Lights in the Galaxy' can be seen
+drapped along the face of the counter. @n
+~
+172 0 0 0 0 10
+D3
+~
+~
+0 0 17232 0 0 0 0 0 0 0 0
+S
+#17270
+@YI@yn@Wf@wo@Dr@ym@Da@wt@Wi@yo@Yn @wK@Wi@Do@ws@Wk@n~
+   @WThis small kiosk seems to be the shopping mall's help and information desk.
+Stands containing a variety of information can be found here. Upon the desk is a
+notice saying that the clerk has ship and house construction pamphlets to give
+out. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17235 0 0 0 0 0 0 0 0
+S
+#17271
+@BG@br@Da@wv@Di@bt@By@n's a @wD@Wr@wa@Dg@n~
+   @BA droopy banner hangs from the ceiling in the middle of the room and reads
+'@wWhen gravity's a drag.. You need weighted clothing! @B'. Racks from which
+clothing hang can be seen in rows. They appear to look normal, despite being
+advertised as weighted. @n
+~
+172 0 0 0 0 10
+D1
+~
+~
+0 0 17224 0 0 0 0 0 0 0 0
+S
+#17272
+@GG@ga@Wd@wg@De@gt@Gs @D'R' @WU@ws@n~
+   @WThis large department store carries a wide range of electronic goods and
+gadgets, ranging from TVs to tracking bugs. It also appears to be quite busy,
+perhaps due to it selling a number of items that can't legally be acquired
+elsewhere in the galaxy. @n
+~
+172 0 0 0 0 10
+D3
+~
+~
+0 0 17252 0 0 0 0 0 0 0 0
+S
+#17273
+@RN@ri@Wn@wc@Wa@ri@Rd @GE@gn@Dh@wa@Wn@Dc@We@wm@De@gn@Gt@n~
+   @WThis rather large store almost appears as if it were a laboratory in a
+fashion, with its walls, floor and ceiling all a pearly white color and
+immaculately clean. There are several booths, varying in size with monitors
+hanging from the ceiling above, seemingly displaying the booth's function. A
+@Rmonitor@W near the front of the store alternates between an advertisement and an
+instructional video. @n
+~
+172 h 0 0 0 10
+D0
+~
+~
+0 0 17256 0 0 0 0 0 0 0 0
+S
+#17274
+@GG@gi@Dovan@gn@Gi@n's @CO@Wd@Dditi@We@Cs@n~
+   This shop has a unique smell given off by some of the rare and unique
+objects on the shelves. Tapistries of sorts hang from the walls, while below
+those in some spots appears to be anchient and new tech, giving an odd contrast
+to different areas of the shop. In one corner of the shop seems dedicated to
+some odd objects that can't be described.
+~
+172 h 0 0 0 10
+D1
+~
+~
+0 0 17243 0 0 0 0 0 0 0 0
+S
+#17275
+@WP@wo@Dr@wt@Wa@Db@wl@We @CL@ci@Wv@wi@cn@Cg@n~
+   @WA double-sided shelf funs through the middle of the store, whilst other
+displays can be found along the walls. Tiny capsules in class casing sit on
+the shelves, and behind them monitors display the contents of the capsules to
+the customer. @n
+~
+172 h 0 0 0 10
+D1
+~
+~
+0 0 17222 0 0 0 0 0 0 0 0
+E
+sign~
+@WA large sign reads:@n
+  @RTemporarily closed for rennovations@n.
+~
+S
+#17276
+@GG@ya@gr@Gd@ye@gn @MF@wl@Mo@mw@we@Mr@n~
+   @GThis room has been decked out completely in wood. The wood has been painted
+a bright natural green. Racks and tables with all kinds of plants fill the
+floor areas of the large room. Toward the back end of the room a table with a
+cash register can be seen. @n
+~
+172 h 0 0 0 10
+D1
+~
+~
+0 0 17220 0 0 0 0 0 0 0 0
+S
+#17277
+@cC@Ce@Yle@ys@Yti@Ca@cl @DC@wo@Wrp@D: @GStore@n~
+   @WThis small room is made almost entirely out of polished titanium fitted
+together so smoothly that no cracks are visible. Toward the back of the room
+there is a large wooden counter seemingly out of place in the otherwise sterile
+room. On top of the counter a register can be seen and behind the counter a
+pair of double doors can be seen. @n
+
+@WA @Rsign@W has been hung here.@n
+~
+172 c 0 0 0 0
+D1
+~
+~
+0 0 17278 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17227 0 0 0 0 0 0 0 0
+E
+sign~
+@Y============================== @CSaiyan Pod @Y==============================@n
+@WThese pods are capable of carrying one individual safely through
+the expanses of space. Recovered from various battlegrounds and refurbished
+these reliable pods are the economical choice for any aspiring traveler of the
+@Wstars.
+@Y========================================================================@n
+@R[@YPrice: @G15,000 @R]@R[@YCapacity:   @G1@R] [@YGideon's Sexy Rating: @G4/10@R]@n
+
+
+@Y=========================== @YE@yD@YI @CX@ce@Wn@Do-@cF@Ci@Wg@Dh@Wt@ce@Cr @Y===========================@n
+@WThese small fighters were developed for the EDI.  So many
+of them were made that the EDI did not purchase them all, so stripped down
+surplus models have been made available for the public. This streamlined
+fighter sports a single laser cannon (upgradeable) and a sleek agile body. @n
+@Y========================================================================@n
+@R[@YPrice: @G50,000 @R]@R[@YCapacity:   @G2@R] [@YGideon's Sexy Rating: @G6/10@R]@n
+
+@G-> @ROther models coming very soon (@YTM@R)!@n
+@G-> @RFuel not included!@n
+@G-> @RPay Serra when you're ready to purchase!@n
+~
+S
+#17278
+@cC@Ce@Yle@ys@Yti@Ca@cl @DC@wo@Wrp@D: @GShipyard F1@n~
+   @WThis large steel floor has spaces drawn out on it just large enough to fit
+the ships parked in them. Near each space complicated ship building and
+maintenance equipment can be seen. Above space can be seen through a blue
+glowing forcefield and catwalks can be seen leading down at various points on
+the main floor to the secondary floor. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17279 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17281 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17283 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17277 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 41490 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 17294 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 17280 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 17282 0 0 0 0 0 0 0 0
+S
+#17279
+@cC@Ce@Yle@ys@Yti@Ca@cl @DC@wo@Wrp@D: @GShipyard F1@n~
+   @WThis large steel floor has spaces drawn out on it just large enough to fit
+the ships parked in them. Near each space complicated ship building and
+maintenance equipment can be seen. Above space can be seen through a blue
+glowing forcefield and catwalks can be seen leading down at various points on
+the main floor to the secondary floor. @n
+~
+172 0 0 0 0 0
+D1
+~
+~
+0 0 17280 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17278 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 41490 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 17295 0 0 0 0 0 0 0 0
+S
+#17280
+@cC@Ce@Yle@ys@Yti@Ca@cl @DC@wo@Wrp@D: @GShipyard F1@n~
+   @WThis large steel floor has spaces drawn out on it just large enough to fit
+the ships parked in them. Near each space complicated ship building and
+maintenance equipment can be seen. Above space can be seen through a blue
+glowing forcefield and catwalks can be seen leading down at various points on
+the main floor to the secondary floor. @n
+~
+172 0 0 0 0 0
+D1
+~
+~
+0 0 17286 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17281 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17279 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 41490 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 17290 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 17285 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17278 0 0 0 0 0 0 0 0
+S
+#17281
+@cC@Ce@Yle@ys@Yti@Ca@cl @DC@wo@Wrp@D: @GShipyard F1@n~
+   @WThis large steel floor has spaces drawn out on it just large enough to fit
+the ships parked in them. Near each space complicated ship building and
+maintenance equipment can be seen. Above space can be seen through a blue
+glowing forcefield and catwalks can be seen leading down at various points on
+the main floor to the secondary floor. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17280 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17285 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17282 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17278 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 41490 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 17291 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 17286 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 17284 0 0 0 0 0 0 0 0
+S
+#17282
+@cC@Ce@Yle@ys@Yti@Ca@cl @DC@wo@Wrp@D: @GShipyard F1@n~
+   @WThis large steel floor has spaces drawn out on it just large enough to fit
+the ships parked in them. Near each space complicated ship building and
+maintenance equipment can be seen. Above space can be seen through a blue
+glowing forcefield and catwalks can be seen leading down at various points on
+the main floor to the secondary floor. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17281 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17284 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17283 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 41490 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 17292 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 17278 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 17285 0 0 0 0 0 0 0 0
+S
+#17283
+@cC@Ce@Yle@ys@Yti@Ca@cl @DC@wo@Wrp@D: @GShipyard F1@n~
+   @WThis large steel floor has spaces drawn out on it just large enough to fit
+the ships parked in them. Near each space complicated ship building and
+maintenance equipment can be seen. Above space can be seen through a blue
+glowing forcefield and catwalks can be seen leading down at various points on
+the main floor to the secondary floor. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17278 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17282 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 41490 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 17293 0 0 0 0 0 0 0 0
+S
+#17284
+@cC@Ce@Yle@ys@Yti@Ca@cl @DC@wo@Wrp@D: @GShipyard F1@n~
+   @WThis large steel floor has spaces drawn out on it just large enough to fit
+the ships parked in them. Near each space complicated ship building and
+maintenance equipment can be seen. Above space can be seen through a blue
+glowing forcefield and catwalks can be seen leading down at various points on
+the main floor to the secondary floor. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17285 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17282 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 41490 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 17287 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 17281 0 0 0 0 0 0 0 0
+S
+#17285
+@cC@Ce@Yle@ys@Yti@Ca@cl @DC@wo@Wrp@D: @GShipyard F1@n~
+   @WThis large steel floor has spaces drawn out on it just large enough to fit
+the ships parked in them. Near each space complicated ship building and
+maintenance equipment can be seen. Above space can be seen through a blue
+glowing forcefield and catwalks can be seen leading down at various points on
+the main floor to the secondary floor. @n
+~
+172 0 0 0 0 0
+D0
+~
+~
+0 0 17286 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17284 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17281 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 41490 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 17288 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 17280 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17282 0 0 0 0 0 0 0 0
+S
+#17286
+@cC@Ce@Yle@ys@Yti@Ca@cl @DC@wo@Wrp@D: @GShipyard F1@n~
+   @WThis large steel floor has spaces drawn out on it just large enough to fit
+the ships parked in them. Near each space complicated ship building and
+maintenance equipment can be seen. Above space can be seen through a blue
+glowing forcefield and catwalks can be seen leading down at various points on
+the main floor to the secondary floor. @n
+~
+172 0 0 0 0 0
+D2
+~
+~
+0 0 17285 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17280 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 41490 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 17289 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17281 0 0 0 0 0 0 0 0
+S
+#17287
+@cC@Ce@Yle@ys@Yti@Ca@cl @DC@wo@Wrp@D: @GShipyard F2@n~
+   @WThis large metal floor has been built similarly to the one above with many
+ships parked in various ship spaces. At various points on the floor spiral
+staircases can be seen leading to the floor above. It seems like each ship
+parking space is capable of opening below to the depths of space. Each has
+been fitted with forcefield generators to maintain atmospheric pressure. @n
+~
+172 0 0 0 0 0
+D4
+~
+~
+0 0 17284 0 0 0 0 0 0 0 0
+S
+#17288
+@cC@Ce@Yle@ys@Yti@Ca@cl @DC@wo@Wrp@D: @GShipyard F2@n~
+   @WThis large metal floor has been built similarly to the one above with many
+ships parked in various ship spaces. At various points on the floor spiral
+staircases can be seen leading to the floor above. It seems like each ship
+parking space is capable of opening below to the depths of space. Each has
+been fitted with forcefield generators to maintain atmospheric pressure. @n
+~
+172 0 0 0 0 0
+D4
+~
+~
+0 0 17285 0 0 0 0 0 0 0 0
+S
+#17289
+@cC@Ce@Yle@ys@Yti@Ca@cl @DC@wo@Wrp@D: @GShipyard F2@n~
+   @WThis large metal floor has been built similarly to the one above with many
+ships parked in various ship spaces. At various points on the floor spiral
+staircases can be seen leading to the floor above. It seems like each ship
+parking space is capable of opening below to the depths of space. Each has
+been fitted with forcefield generators to maintain atmospheric pressure. @n
+~
+172 0 0 0 0 0
+D4
+~
+~
+0 0 17286 0 0 0 0 0 0 0 0
+S
+#17290
+@cC@Ce@Yle@ys@Yti@Ca@cl @DC@wo@Wrp@D: @GShipyard F2@n~
+   @WThis large metal floor has been built similarly to the one above with many
+ships parked in various ship spaces. At various points on the floor spiral
+staircases can be seen leading to the floor above. It seems like each ship
+parking space is capable of opening below to the depths of space. Each has
+been fitted with forcefield generators to maintain atmospheric pressure. @n
+~
+172 0 0 0 0 0
+D4
+~
+~
+0 0 17280 0 0 0 0 0 0 0 0
+S
+#17291
+@cC@Ce@Yle@ys@Yti@Ca@cl @DC@wo@Wrp@D: @GShipyard F2@n~
+   @WThis large metal floor has been built similarly to the one above with many
+ships parked in various ship spaces. At various points on the floor spiral
+staircases can be seen leading to the floor above. It seems like each ship
+parking space is capable of opening below to the depths of space. Each has
+been fitted with forcefield generators to maintain atmospheric pressure. @n
+~
+172 0 0 0 0 0
+D4
+~
+~
+0 0 17281 0 0 0 0 0 0 0 0
+S
+#17292
+@cC@Ce@Yle@ys@Yti@Ca@cl @DC@wo@Wrp@D: @GShipyard F2@n~
+   @WThis large metal floor has been built similarly to the one above with many
+ships parked in various ship spaces. At various points on the floor spiral
+staircases can be seen leading to the floor above. It seems like each ship
+parking space is capable of opening below to the depths of space. Each has
+been fitted with forcefield generators to maintain atmospheric pressure. @n
+~
+172 0 0 0 0 0
+D4
+~
+~
+0 0 17282 0 0 0 0 0 0 0 0
+S
+#17293
+@cC@Ce@Yle@ys@Yti@Ca@cl @DC@wo@Wrp@D: @GShipyard F2@n~
+   @WThis large metal floor has been built similarly to the one above with many
+ships parked in various ship spaces. At various points on the floor spiral
+staircases can be seen leading to the floor above. It seems like each ship
+parking space is capable of opening below to the depths of space. Each has
+been fitted with forcefield generators to maintain atmospheric pressure. @n
+~
+172 0 0 0 0 0
+D4
+~
+~
+0 0 17283 0 0 0 0 0 0 0 0
+S
+#17294
+@cC@Ce@Yle@ys@Yti@Ca@cl @DC@wo@Wrp@D: @GShipyard F2@n~
+   @WThis large metal floor has been built similarly to the one above with many
+ships parked in various ship spaces. At various points on the floor spiral
+staircases can be seen leading to the floor above. It seems like each ship
+parking space is capable of opening below to the depths of space. Each has
+been fitted with forcefield generators to maintain atmospheric pressure. @n
+~
+172 0 0 0 0 0
+D4
+~
+~
+0 0 17278 0 0 0 0 0 0 0 0
+S
+#17295
+@cC@Ce@Yle@ys@Yti@Ca@cl @DC@wo@Wrp@D: @GShipyard F2@n~
+   @WThis large metal floor has been built similarly to the one above with many
+ships parked in various ship spaces. At various points on the floor spiral
+staircases can be seen leading to the floor above. It seems like each ship
+parking space is capable of opening below to the depths of space. Each has
+been fitted with forcefield generators to maintain atmospheric pressure. @n
+~
+172 0 0 0 0 0
+D4
+~
+~
+0 0 17279 0 0 0 0 0 0 0 0
+S
+$~

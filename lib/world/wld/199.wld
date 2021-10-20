@@ -1,0 +1,1314 @@
+#19900
+@wYun-Yammka: Cockpit@n~
+   @WThis cockpit appears to be fairly standard, though the color scheme is
+rather flashy. A bright yellow and leather chair, bolted to the floor, sits at
+the front, sitting amidst an array of controls and panels. The walls are a
+dark gray and drab. The viewport is large, enabling a good view of the
+surroundings from the front, enabling anyone present a great view. @n
+~
+199 dn e 0 0 0
+D2
+~
+~
+0 0 19901 0 0 0 0 0 0 0 0
+E
+look panels~
+   @WThe read-outs shown are pretty normal, regarding distance to the programmed
+location, or the mechanical stability of any of the instruments and workings of
+the ship, as well as a full diagnostic read-out. @n
+~
+S
+#19901
+@wYun-Yammka: Storage@n~
+   @WThis room is kept fairly tidy. It has a bolted down table with stuff strewn
+about it, a small radio console is popped up on it as well. The large metallic
+hatch is the only exit out of the ship, but also the only entrance. A paper
+with a small, rough drawing can be seen attached to the hatch, some writing
+upon it as well. The floor is a cold, metal gray, patterned by the panels, as
+if unfinished. The walls are also a dark gray, with no markings or special
+features. Some neatly stacked crates lay neatly arranged in a corner, labled
+"Supplies". @n
+~
+199 jln e 0 0 0
+D0
+~
+~
+0 0 19900 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 19902 0 0 0 0 0 0 0 0
+E
+Drawing~
+   @WThe drawing is simple, as if drawn by a child. It is an attempted likeness
+of Vorp's old self, yet poorly drawn and colored. @n
+~
+E
+radio~
+   @WA simple console; upon pushing the power button, lyrics can be heard
+emanating from the speaker system at a soft level. @n
+~
+E
+Table~
+   @WUpon this sullen, gray table lies a few papers, filled with seemingly random
+numbers and sentences, among a few oddities that may serve as tools of
+self-amusement. @n
+~
+S
+#19902
+@wYun-Yammka: Rest Area@n~
+   @WUpon entering, the first thing noticeable about this room is its bright
+colors. The walls are an obnoxiously bright yellow, with some pictures
+displayed. A lavish bed with dark covers sits in a corner of the room, leaving
+a large open space, revealing the gray, metallic panelled floor. A console can
+be seen on the wall, for monitoring progress on long journies. @n
+~
+199 D e 0 0 0
+D1
+~
+~
+0 0 19901 0 0 0 0 0 0 0 0
+E
+console~
+   @WRead-outs of the distance remaining to the coordinates provided to the
+navigation system, as well as diagnostics of the ship itself can be read. @n
+~
+E
+Pictures~
+   @WVarious art pieces of unknown origin are displayed on the wall, showing off
+their elegance in full view. @n
+~
+S
+#19903
+@DThe Dark Archon: Training Room@n~
+   @WThis room appears to be coated in white gravity resistant plating. Lights
+have been built into the ceiling above, providing ample lighting for the rest of
+the room. Aside from a mild scent of sweat lingering in the air the
+ventilation keeps the room pleasantly fresh and stocked with oxygen. @n
+~
+199 0 e 0 0 0
+D3
+~
+~
+0 0 19912 0 0 0 0 0 0 0 0
+S
+#19904
+The Zafir Krakken - Cockpit~
+   @WThe cockpit appears to be of a standard issue Celestial Corp setup. On the
+northern side is a viewing window. A single brown leather chair has sits bolted
+to the floor in the middle of the room, with a few control panels and screens in
+front of it. @n
+~
+199 n e 0 0 0
+D2
+~
+~
+0 0 19905 0 0 0 0 0 0 0 0
+S
+#19905
+The Zafir Krakken - Cargo~
+   @WA large metallic hatch in the middle of the room serves as an entry and exit
+point to and from the ship. Some cargo crates with the Celestial Corp logo on
+them have been placed against the eastern wall. @n
+~
+199 jl e 0 0 0
+D0
+~
+~
+0 0 19904 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 19907 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 19906 0 0 0 0 0 0 0 0
+S
+#19906
+The Zafir Krakken - Rest Area~
+   @WThe rest area is one of the larger sections of a standard Celestial Corp ship
+layout. Up against the western wall is a pine bed, with a soft mattress covered
+in white sheets that have the Celestial Corp logo on them. On the northern wall
+is a black box labeled backup generator, that presumably supplies the healing
+tank with power separate to the ship. @n
+~
+199 D e 0 0 0
+D1
+~
+~
+0 0 19905 0 0 0 0 0 0 0 0
+S
+#19907
+The Zafir Krakken - Training Room~
+   @WThis room appears to be coated in white gravity resistant plating. Lights
+have been built into the ceiling above, providing ample lighting for the rest of
+the room. Aside from a mild scent of sweat lingering in the air the
+ventilation keeps the room pleasantly fresh and stocked with oxygen. @n
+~
+199 0 e 0 0 0
+D3
+~
+~
+0 0 19905 0 0 0 0 0 0 0 0
+S
+#19908
+@wCrimson Talon Storage@n~
+   @WA large metallic hatch in the middle of the room serves as an entry and exit
+point to and from the ship. Some cargo crates with the Celestial Corp logo on
+them have been placed against the eastern wall. @n
+~
+199 jl e 0 0 0
+D0
+~
+~
+0 0 19909 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 19911 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 19910 0 0 0 0 0 0 0 0
+S
+#19909
+@wCrimson Talon Cockpit@n~
+   @WThe cockpit appears to be of a standard issue Celestial Corp setup. On the
+northern side is a viewing window. A single brown leather chair has sits bolted
+to the floor in the middle of the room, with a few control panels and screens in
+front of it. @n
+~
+199 dn e 0 0 0
+D2
+~
+~
+0 0 19908 0 0 0 0 0 0 0 0
+S
+#19910
+@wCrimson Talon Rest-area@n~
+   @WThe rest area is one of the larger sections of a standard Celestial Corp ship
+layout. Up against the western wall is a pine bed, with a soft mattress covered
+in white sheets that have the Celestial Corp logo on them. On the northern wall
+is a black box labeled backup generator, that presumably supplies the healing
+tank with power separate to the ship. @n
+~
+199 D e 0 0 0
+D1
+~
+~
+0 0 19908 0 0 0 0 0 0 0 0
+S
+#19911
+@wCrimson Talon Training Room@n~
+   @WThis room appears to be coated in white gravity resistant plating. Lights
+have been built into the ceiling above, providing ample lighting for the rest of
+the room. Aside from a mild scent of sweat lingering in the air the
+ventilation keeps the room pleasantly fresh and stocked with oxygen. @n
+~
+199 0 e 0 0 0
+D3
+~
+~
+0 0 19908 0 0 0 0 0 0 0 0
+S
+#19912
+@DThe Dark Archon: Storage bay@n~
+   @WA large metallic hatch in the middle of the room serves as an entry and exit
+point to and from the ship. Some cargo crates with the Celestial Corp logo on
+them have been placed against the eastern wall. @n
+~
+199 jl e 0 0 0
+D0
+~
+~
+0 0 19913 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 19903 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 19914 0 0 0 0 0 0 0 0
+S
+#19913
+@DThe Dark Archon: Cockpit@n~
+   @WThe cockpit appears to be of a standard issue Celestial Corp setup. On the
+northern side is a viewing window. A single brown leather chair has sits bolted
+to the floor in the middle of the room, with a few control panels and screens in
+front of it. @n
+~
+199 n e 0 0 0
+D2
+~
+~
+0 0 19912 0 0 0 0 0 0 0 0
+S
+#19914
+@DThe Dark Archon: Rest-area@n~
+   @WThe rest area is one of the larger sections of a standard Celestial Corp ship
+layout. Up against the western wall is a pine bed, with a soft mattress covered
+in white sheets that have the Celestial Corp logo on them. On the northern wall
+is a black box labeled backup generator, that presumably supplies the healing
+tank with power separate to the ship. @n
+~
+199 D e 0 0 0
+D1
+~
+~
+0 0 19912 0 0 0 0 0 0 0 0
+S
+#19915
+@wRust Bucket: Storage@n~
+   @WA large metallic hatch in the middle of the room serves as an entry and exit
+point to and from the ship. Some cargo crates with the Celestial Corp logo on
+them have been placed against the eastern wall. @n
+~
+199 jl e 0 0 0
+D0
+~
+~
+0 0 19916 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 19918 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 19930 0 0 0 0 0 0 0 0
+S
+#19916
+@wRust Bucket: Cockpit@n~
+   @WThe cockpit appears to be of a standard issue Celestial Corp setup. On the
+northern side is a viewing window. A single brown leather chair has sits bolted
+to the floor in the middle of the room, with a few control panels and screens in
+front of it. @n
+~
+199 n e 0 0 0
+D2
+~
+~
+0 0 19915 0 0 0 0 0 0 0 0
+S
+#19917
+@wThe Adamant: Cockpit@n~
+   @WThe cockpit appears to be of a standard issue Celestial Corp setup. On the
+northern side is a viewing window. A single brown leather chair has sits bolted
+to the floor in the middle of the room, with a few control panels and screens in
+front of it. @n
+~
+199 n e 0 0 0
+D2
+~
+~
+0 0 19949 0 0 0 0 0 0 0 0
+S
+#19918
+@wRust Bucket: Training Room@n~
+   @WThis room appears to be coated in white gravity resistant plating. Lights
+have been built into the ceiling above, providing ample lighting for the rest of
+the room. Aside from a mild scent of sweat lingering in the air the
+ventilation keeps the room pleasantly fresh and stocked with oxygen. @n
+~
+199 0 e 0 0 0
+D3
+~
+~
+0 0 19915 0 0 0 0 0 0 0 0
+S
+#19919
+@rV@Ra@Wn@wg@Du@Wa@Rr@rd@n Storage~
+   @WA large metallic hatch in the middle of the room serves as an entry and exit
+point to and from the ship. Some cargo crates with the Celestial Corp logo on
+them have been placed against the eastern wall. @n
+~
+199 jl e 0 0 0
+D0
+~
+~
+0 0 19920 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 19922 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 19921 0 0 0 0 0 0 0 0
+S
+#19920
+@rV@Ra@Wn@wg@Du@Wa@Rr@rd@n Cockpit~
+   @WThe cockpit appears to be of a standard issue Celestial Corp setup. On the
+northern side is a viewing window. A single brown leather chair has sits bolted
+to the floor in the middle of the room, with a few control panels and screens in
+front of it. @n
+~
+199 hn e 0 0 0
+D2
+~
+~
+0 0 19919 0 0 0 0 0 0 0 0
+S
+#19921
+@rV@Ra@Wn@wg@Du@Wa@Rr@rd@n Rest-area~
+   @WThe rest area is one of the larger sections of a standard Celestial Corp ship
+layout. Up against the western wall is a pine bed, with a soft mattress covered
+in white sheets that have the Celestial Corp logo on them. On the northern wall
+is a black box labeled backup generator, that presumably supplies the healing
+tank with power separate to the ship. @n
+~
+199 hD e 0 0 0
+D1
+~
+~
+0 0 19919 0 0 0 0 0 0 0 0
+S
+#19922
+@rV@Ra@Wn@wg@Du@Wa@Rr@rd@n Training Room~
+   @WThis room appears to be coated in white gravity resistant plating. Lights
+have been built into the ceiling above, providing ample lighting for the rest of
+the room. Aside from a mild scent of sweat lingering in the air the
+ventilation keeps the room pleasantly fresh and stocked with oxygen. @n
+~
+199 h e 0 0 0
+D3
+~
+~
+0 0 19919 0 0 0 0 0 0 0 0
+S
+#19923
+@CC@ca@Cr@Dg@co @DH@co@Dl@wd@n~
+   @CA frigid mist fills the air here, obscuring everything more then a few feet
+away. @cT@Ch@ci@Cc@ck @ci@Cc@ce @Cencapsulates the walls, and water occasionally drips from
+icicles that have formed on the ceiling. @DD@wa@Dr@wk @Df@wi@Dg@wu@Dr@we@Ds @Cseem to move just
+beneath the surface of the ice. @n
+~
+199 jl e 0 0 0
+D0
+~
+~
+0 0 19924 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 19926 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 19925 0 0 0 0 0 0 0 0
+S
+#19924
+@CS@ch@Ci@cp@C'@cs @DB@wr@Di@wd@Dg@we@n~
+   @CAlthough this area is frigid, it lacks the mist filling the rest of the
+ship. However, much of the bridge is submerged, including the pilot's seat. 
+The @cc@Co@cn@Ct@cr@Do@cl@Ds@C all appear to be made of ice, and a transparent sheet of ice hangs
+from the ceiling, forward of the chair. @n
+~
+199 n e 0 0 0
+D2
+~
+~
+0 0 19923 0 0 0 0 0 0 0 0
+S
+#19925
+@CC@cr@Cy@co@Ds@ct@Ca@cs@Ci@cs @DC@ch@Ca@cm@Cb@ce@Cr@n~
+   @CA frigid mist fills the air here, obscuring everything more then a few feet
+away. @cT@Ch@ci@Cc@ck @ci@Cc@ce @Ccoats the walls, and water occasionally drips from icicles
+that have formed on the ceiling. @DD@wa@Dr@wk @Df@wi@Dg@wu@Dr@we@Ds @Cseem to move just beneath the
+surface of the ice. An array of electronics and monitors are embedded in one
+wall, along with a bank of stasis pods. @n
+~
+199 D e 0 0 0
+D1
+~
+~
+0 0 19923 0 0 0 0 0 0 0 0
+S
+#19926
+@DN@wu@Dll @DS@wp@Da@wc@De@n~
+   @DStepping into this room is like stepping into infinity. No light sources
+exist, yet somehow one can still see what little features exist. @DS@wh@Ya@Dd@wo@Dw@wy
+@Dt@we@Dn@wd@Dr@wi@Dl@ws @Dseem to writhe in this darkness, somehow darker then the room around
+them- yet only visible from the corner of one's eye. @n
+~
+199 0 e 0 0 0
+D3
+~
+~
+0 0 19923 0 0 0 0 0 0 0 0
+S
+#19927
+@BC@ba@Dr@Wg@wo@D B@Wa@wy@n~
+   @wThis is a massive, well lit area. Large crates and other supply's can be
+seen here. At either end of the large room exits leading to the Control room as
+well as to the Medical Bay can be seen. It has wide walls and many straps,
+metal hooks, and lockers used for storing various item types for safe transport.
+~
+199 jl e 0 0 0
+D0
+~
+~
+0 0 19928 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 19929 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 19954 0 0 0 0 0 0 0 0
+S
+#19928
+@yC@Yo@Dn@Wt@wr@Yo@yl@D D@We@wc@Wk@n~
+   @wThis room is filled with different types of navigational equipment, as well
+as two large chairs, for the Pilot and Co-Pilot. The only exit is back into the
+Cargo Bay. The fore wall of this room is a massive window, and the sides are
+lined with crew members at various stations making sure the ship runs smoothly.
+~
+199 n e 0 0 0
+D2
+~
+~
+0 0 19927 0 0 0 0 0 0 0 0
+S
+#19929
+@cM@Ce@Dd@Wi@Wc@Ca@cl @DB@Wa@wy@n~
+   @wThis large white room is filled with medical equipment, as well as a top of
+the line healing tank. The room is well lit from the overhead lights. There is
+a bed here for those needing to heal from training too hard, or any other reason
+they may need. @n
+~
+199 0 e 0 0 0
+D1
+~
+~
+0 0 19927 0 0 0 0 0 0 0 0
+S
+#19930
+@wRust Bucket: Rest Area@n~
+   @WThe rest area is one of the larger sections of a standard Celestial Corp
+ship layout. Up against the western wall is a pine bed, with a soft mattress
+covered in white sheets that have the Celestial Corp logo on them. On the
+northern wall is a black box labeled backup generator, that presumably supplies
+the healing tank with power separate to the ship. @n
+~
+199 D e 0 0 0
+D1
+~
+~
+0 0 19915 0 0 0 0 0 0 0 0
+S
+#19931
+Poseidon - Cargo Hold~
+   A large metallic hatch in the middle of the room serves as an entry and exit
+point to and from the ship. Some cargo crates with the Celestial Corp logo on
+them have been placed against the eastern wall. 
+~
+199 hjlm 0 0 0 0
+D0
+~
+~
+0 0 19933 0 0 0 0 0 0 0 0
+E
+look drones~
+   There appears to be dozens of these steel grey spherical drones hanging from
+the ceilings of the hangar bay. They don't look particularly menacing but their
+small size means they can also adequately fight inside the Blackstone Fortress
+as well.
+~
+S
+#19932
+@RRESERVED FOR FUTURE EXPANSION OF DIZ'S SHIP@n~
+   @DThis long hallway leads from the hangar bay all the way to the bridge of the
+Blackstone Fortress. The walls, floors and ceiling are made up of a black
+obsidian like material. The sounds of chittering behind the walls can be heard.
+Almost as if something is behind them. A stairwell leads downward to the Gravity
+Well. @n
+~
+199 h 0 0 0 0
+D5
+~
+~
+0 0 19934 0 0 0 0 0 0 0 0
+S
+#19933
+Poseidon - Cockpit~
+   The cockpit appears to be of a standard issue Celestial Corp setup. On the
+northern side is a viewing window. A single brown leather chair has sits
+bolted to the floor in the middle of the room, with a few control panels and
+screens in front of it.
+~
+199 hn 0 0 0 0
+D2
+~
+~
+0 0 19931 0 0 0 0 0 0 0 0
+S
+#19934
+@RRESERVED FOR FUTURE EXPANSION OF DIZ'S SHIP@n~
+   @DThe gravity well is a specially designed area aboard the Blackstone Fortress
+where the gravity can be altered without affecting any other part of the vessel.
+Small red orbs are implanted into the black obisidian like metal surfaces. @n
+~
+199 hD 0 0 0 0
+D4
+~
+~
+0 0 19932 0 0 0 0 0 0 0 0
+S
+#19935
+@WSakana Mirai - Cargo Hold@n~
+   @WThe entrance ramp leads into the maw of the ship - which opens via a
+beak-like set of doors that snap open and shut with alarming speeds. Inside
+the odd Kanassan vessel hangs the heavy scents of seaweed and fish. The walls
+are sleek and pearlescent white, with subtle displays and readouts that offer
+up information in strange sigils and alien glyphs. From here there is a long
+hallway that runs the body of the craft. The hallway has doors on either side
+and at its end - with signs illuminated in subtle blues and greens, describing
+their destinations. @n
+~
+199 jl e 0 0 0
+D0
+~
+~
+0 0 19936 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 19938 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 19937 0 0 0 0 0 0 0 0
+S
+#19936
+@WSakana Mirai - The Ship's Wheel@n~
+   @WA single seat, molded to the comfort of its fishy occupant, sits in the
+middle of a small array of displays, controls, and windows. From this seat,
+all the vital operations of the Sakana Mirai are undertaken with a minimal of
+effort. Nearly all the functions are automated - with the majority of bells
+and whistles in this cockpit being informational. Displays of the current
+time, weather, galactic coordinates, and nearest Taco Hell are all taking up
+screens that surround the pilot's main and peripheral views. @n
+~
+199 n e 0 0 0
+D2
+~
+~
+0 0 19935 0 0 0 0 0 0 0 0
+S
+#19937
+@WSakana Mirai - The Captain's Cab@n~
+   @WThis room smells heavily of kelp, seawater, and incense. One of the great
+portholes seen from the outside of the ship takes up an entire wall here,
+allowing the room's guests to peer outside. Aside from the view, the room is
+not very remarkable. A small, simple hammock is strung up between what looks
+like a healing tank and a vending machine. The hammock, long since abandoned
+as a sleeping device is covered in old magazines, newspapers, and junk food
+rappers. @n
+~
+199 0 e 0 0 0
+D1
+~
+~
+0 0 19935 0 0 0 0 0 0 0 0
+S
+#19938
+@WSakana Mirai - The Fish Tank@n~
+   @WA gooey, unusual membrane keeps this part of the ship separate from the rest
+- the material is soft to the touch, but incredibly resilient. Pushing through
+the stuff allows entrance to the Fish Tank. Inside the Tank is flooded to the
+ceiling with crystal blue waters, the walls are spherical and smooth, with only
+a panel to adjust the pressures and gravity within the room. Swimming
+throughout the waters are a smattering of brilliantly colored tropical fishes
+collected from different oceans for a selection of exotic planets. @n
+~
+199 0 e 0 0 0
+D3
+~
+~
+0 0 19935 0 0 0 0 0 0 0 0
+S
+#19939
+Storage~
+   @WA large metallic hatch in the middle of the room serves as an entry and exit
+point to and from the ship. Some cargo crates with the Celestial Corp logo on
+them have been placed against the eastern wall. @n
+~
+199 jl e 0 0 0
+D0
+~
+~
+0 0 19940 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 19942 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 19941 0 0 0 0 0 0 0 0
+S
+#19940
+Cockpit~
+   @WThe cockpit appears to be of a standard issue Celestial Corp setup. On the
+northern side is a viewing window. A single brown leather chair has sits bolted
+to the floor in the middle of the room, with a few control panels and screens in
+front of it. @n
+~
+199 n e 0 0 0
+D2
+~
+~
+0 0 19939 0 0 0 0 0 0 0 0
+S
+#19941
+Rest Area~
+   @WThe rest area is one of the larger sections of a standard Celestial Corp ship
+layout. Up against the western wall is a pine bed, with a soft mattress covered
+in white sheets that have the Celestial Corp logo on them. On the northern wall
+is a black box labeled backup generator, that presumably supplies the healing
+tank with power separate to the ship. @n
+~
+199 D e 0 0 0
+D1
+~
+~
+0 0 19939 0 0 0 0 0 0 0 0
+S
+#19942
+Training room~
+   @WThis room appears to be coated in white gravity resistant plating. Lights
+have been built into the ceiling above, providing ample lighting for the rest of
+the room. Aside from a mild scent of sweat lingering in the air the
+ventilation keeps the room pleasantly fresh and stocked with oxygen. @n
+~
+199 0 e 0 0 0
+D3
+~
+~
+0 0 19939 0 0 0 0 0 0 0 0
+S
+#19943
+@wSoaring Angel: Storage@n~
+   @WA large metallic hatch in the middle of the room serves as an entry and exit
+point to and from the ship. Some cargo crates with the Celestial Corp logo on
+them have been placed against the eastern wall. @n
+~
+199 jl e 0 0 0
+D0
+~
+~
+0 0 19944 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 19946 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 19945 0 0 0 0 0 0 0 0
+S
+#19944
+@wSoaring Angel: Cockpit@n~
+   @WThe cockpit appears to be of a standard issue Celestial Corp setup. On the
+northern side is a viewing window. A single brown leather chair has sits bolted
+to the floor in the middle of the room, with a few control panels and screens in
+front of it. @n
+~
+199 n e 0 0 0
+D2
+~
+~
+0 0 19943 0 0 0 0 0 0 0 0
+S
+#19945
+@wSoaring Angel: Rest Area@n~
+   @WThe rest area is one of the larger sections of a standard Celestial Corp ship
+layout. Up against the western wall is a pine bed, with a soft mattress covered
+in white sheets that have the Celestial Corp logo on them. On the northern wall
+is a black box labeled backup generator, that presumably supplies the healing
+tank with power separate to the ship. @n
+~
+199 D e 0 0 0
+D1
+~
+~
+0 0 19943 0 0 0 0 0 0 0 0
+S
+#19946
+@wSoaring Angel: Training Room@n~
+   @WThis room appears to be coated in white gravity resistant plating. Lights
+have been built into the ceiling above, providing ample lighting for the rest of
+the room. Aside from a mild scent of sweat lingering in the air the
+ventilation keeps the room pleasantly fresh and stocked with oxygen. @n
+~
+199 0 e 0 0 0
+D3
+~
+~
+0 0 19943 0 0 0 0 0 0 0 0
+S
+#19947
+@wThe Grey Wolf: Storage@n~
+   @WA large metallic hatch in the middle of the room serves as an entry and exit
+point to and from the ship. Some cargo crates with the Celestial Corp logo on
+them have been placed against the eastern wall. @n
+~
+199 jl e 0 0 0
+D0
+~
+~
+0 0 19948 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 19979 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 19978 0 0 0 0 0 0 0 0
+S
+#19948
+@wThe Grey Wolf: Cockpit@n~
+   @WThe cockpit appears to be of a standard issue Celestial Corp setup. On the
+northern side is a viewing window. A single brown leather chair has sits bolted
+to the floor in the middle of the room, with a few control panels and screens in
+front of it. @n
+~
+199 n e 0 0 0
+D2
+~
+~
+0 0 19947 0 0 0 0 0 0 0 0
+S
+#19949
+@wThe Adamant: Storage@n~
+   @WA large metallic hatch in the middle of the room serves as an entry and exit
+point to and from the ship. Some cargo crates with the Celestial Corp logo on
+them have been placed against the eastern wall. @n
+~
+199 jl e 0 0 0
+D0
+~
+~
+0 0 19917 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 19955 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 19956 0 0 0 0 0 0 0 0
+S
+#19950
+@WThe Event Horizon - Storage@n~
+   @WA large metallic hatch in the middle of the room serves as an entry and exit
+point to and from the ship. Some cargo crates with the Celestial Corp logo on
+them have been placed against the eastern wall. @n
+~
+199 jl e 0 0 0
+D0
+~
+~
+0 0 19951 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 19981 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 19980 0 0 0 0 0 0 0 0
+S
+#19951
+@WThe Event Horizon - Cockpit@n~
+   @WThe cockpit appears to be of a standard issue Celestial Corp setup. On the
+northern side is a viewing window. A single brown leather chair has sits bolted
+to the floor in the middle of the room, with a few control panels and screens in
+front of it. @n
+~
+199 n e 0 0 0
+D2
+~
+~
+0 0 19950 0 0 0 0 0 0 0 0
+S
+#19952
+@WFleeting Star - Storage@n~
+   @WA large metallic hatch in the middle of the room serves as an entry and exit
+point to and from the ship. Some cargo crates with the Celestial Corp logo on
+them have been placed against the eastern wall. @n
+~
+199 jl e 0 0 0
+D0
+~
+~
+0 0 19953 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 19958 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 19957 0 0 0 0 0 0 0 0
+S
+#19953
+@WFleeting Star - Cockpit@n~
+   @WThe cockpit appears to be of a standard issue Celestial Corp setup. On the
+northern side is a viewing window. A single brown leather chair has sits bolted
+to the floor in the middle of the room, with a few control panels and screens in
+front of it. @n
+~
+199 n e 0 0 0
+D2
+~
+~
+0 0 19952 0 0 0 0 0 0 0 0
+S
+#19954
+@bF@Bi@Dt@wn@We@Bs@bs@n Room@n~
+   @WThis room appears to be coated in white gravity resistant plating. Lights
+have been built into the ceiling above, providing ample lighting for the rest
+of the room. Aside from a mild scent of sweat lingering in the air the
+ventilation keeps the room pleasantly fresh and stocked with oxygen. @n
+~
+199 0 0 0 0 0
+D4
+~
+~
+0 0 19927 0 0 0 0 0 0 0 0
+S
+#19955
+@wThe Adamant: Training Room@n~
+   @WThis room appears to be coated in white gravity resistant plating. Lights
+have been built into the ceiling above, providing ample lighting for the rest
+of the room. Aside from a mild scent of sweat lingering in the air the
+ventilation keeps the room pleasantly fresh and stocked with oxygen. @n
+~
+199 0 e 0 0 0
+D3
+~
+~
+0 0 19949 0 0 0 0 0 0 0 0
+S
+#19956
+@wThe Adamant: Rest-Area@n~
+   @WThe rest area is one of the larger sections of a standard Celestial Corp
+ship layout. Up against the western wall is a pine bed, with a soft mattress
+covered in white sheets that have the Celestial Corp logo on them. On the
+northern wall is a black box labeled backup generator, that presumably supplies
+the healing tank with power separate to the ship. @n
+~
+199 D e 0 0 0
+D1
+~
+~
+0 0 19949 0 0 0 0 0 0 0 0
+S
+#19957
+@WFleeting Star - Rest Area@n~
+   @WThe rest area is one of the larger sections of a standard Celestial Corp
+ship layout. Up against the western wall is a pine bed, with a soft mattress
+covered in white sheets that have the Celestial Corp logo on them. On the
+northern wall is a black box labeled backup generator, that presumably supplies
+the healing tank with power separate to the ship. @n
+~
+199 D e 0 0 0
+D1
+~
+~
+0 0 19952 0 0 0 0 0 0 0 0
+S
+#19958
+@WFleeting Star - Training Room@n~
+   @WThis room appears to be coated in white gravity resistant plating. Lights
+have been built into the ceiling above, providing ample lighting for the rest
+of the room. Aside from a mild scent of sweat lingering in the air the
+ventilation keeps the room pleasantly fresh and stocked with oxygen. @n
+~
+199 0 e 0 0 0
+D3
+~
+~
+0 0 19952 0 0 0 0 0 0 0 0
+S
+#19959
+@mM@Da@mk@De@mnk@Do@ms@Da@mpp@Do@n: @YC@yargo @YH@yold@n~
+   @YT@yhe cargo holding area also serves as the entrance and exit from the
+@mM@Da@mk@De@mnk@Do@ms@Da@mpp@Do@y, as well as guest quarters. A few crates are stacked neatly
+@Yt@yowards the back of the area, held down by sturdy straps. The seats that line
+@Yt@yhe sides of the room look comfortable for long trips. To the north is a door
+@Yt@yhat is labeled @RB@Yridge@y, while a gap in the crates to the south reveals a door
+@Yt@yhat is labeled @RG@Yravity and @RE@Yngines@y. @n
+~
+199 jlm e 0 0 0
+D0
+~
+~
+0 0 19960 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 19961 0 0 0 0 0 0 0 0
+S
+#19960
+@mM@Da@mk@De@mnk@Do@ms@Da@mpp@Do@n: @YB@yridge@n~
+   @YT@yhe bridge of the @mM@Da@mk@De@mnk@Do@ms@Da@mpp@Do @yis round in shape except for the flat back
+@Yw@yall that leads back into the rest of the ship. The room has an open center
+@Yf@yielding only a command chair. Various panels and displays line the walls, and
+@Ya@y large viewscreen fills the rounded forward wall, which is also the front of
+@Yt@yhe ship. @n
+~
+199 dln e 0 0 0
+D2
+~
+~
+0 0 19959 0 0 0 0 0 0 0 0
+E
+look panels~
+   @WThe read-outs shown are pretty normal, regarding distance to the programmed
+location, or the mechanical stability of any of the instruments and workings of
+the ship, as well as a full diagnostic read-out. @n
+~
+S
+#19961
+@mM@Da@mk@De@mnk@Do@ms@Da@mpp@Do@W: @YG@yravity @YC@yhamber@n~
+   @YW@yindows on the sides of the room allow you to see the engines on either side
+@Yo@yf the ship. A large power cable runs from both sides of this room where the
+@Ye@yngines are attached to a machine along the back wall of the ship. The machine
+@Ya@yppears to be a device for manipulating gravity, and draws power directly from
+@Yt@yhe engines. 
+~
+199 0 e 0 0 0
+D0
+~
+~
+0 0 19959 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 19962 0 0 0 0 0 0 0 0
+S
+#19962
+@mM@Da@mk@De@mnk@Do@ms@Da@mpp@Do@W: @YC@yaptain@R'@ys @YR@yoom@n~
+   @YA@y @Rh@Yealing @Rt@Yank@y rests beside the opening, and is built into the wall. A
+@Yl@yarge bed protrudes from the opposite wall, and looks like an excellent place
+@Yt@yo rest during long journeys. A desk is positioned against one side of the
+@Yr@yoom, and paperwork is organized on it in vertical files.
+~
+199 D e 0 0 0
+D5
+~
+~
+0 0 19961 0 0 0 0 0 0 0 0
+S
+#19963
+@WThe Nightingale - Storage@n~
+   @WA large metallic hatch in the middle of the room serves as an entry and exit
+point to and from the ship. Some cargo crates with the Celestial Corp logo on
+them have been placed against the eastern wall. @n
+~
+199 jl e 0 0 0
+D0
+~
+~
+0 0 19964 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 19982 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 19965 0 0 0 0 0 0 0 0
+S
+#19964
+@WThe Nightingale - Cockpit@n~
+   @WThe cockpit appears to be of a standard issue Celestial Corp setup. On the
+northern side is a viewing window. A single brown leather chair has sits
+bolted to the floor in the middle of the room, with a few control panels and
+screens in front of it. @n
+~
+199 n e 0 0 0
+D2
+~
+~
+0 0 19963 0 0 0 0 0 0 0 0
+S
+#19965
+@WThe Nightingale - Rest Area@n~
+   @WThe rest area is one of the larger sections of a standard Celestial Corp
+ship layout. Up against the western wall is a pine bed, with a soft mattress
+covered in white sheets that have the Celestial Corp logo on them. On the
+northern wall is a black box labeled backup generator, that presumably supplies
+the healing tank with power separate to the ship. @n
+~
+199 D e 0 0 0
+D1
+~
+~
+0 0 19963 0 0 0 0 0 0 0 0
+S
+#19966
+@wThe Honey Bee: Cargo Bay@n~
+   @WA large metallic hatch in the middle of the room serves as an entry and exit
+point to and from the ship. Some cargo crates with the Celestial Corp logo on
+them have been placed against the eastern wall. @n
+~
+199 jl e 0 0 0
+D0
+~
+~
+0 0 19967 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 19969 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 19968 0 0 0 0 0 0 0 0
+S
+#19967
+@wThe Honey Bee: Cockpit@n~
+   @WThe cockpit appears to be of a standard issue Celestial Corp setup. On the
+northern side is a viewing window. A single brown leather chair has sits
+bolted to the floor in the middle of the room, with a few control panels and
+screens in front of it. @n
+~
+199 n e 0 0 0
+D2
+~
+~
+0 0 19966 0 0 0 0 0 0 0 0
+S
+#19968
+@wThe Honey Bee: Rest Area@n~
+   @WThe rest area is one of the larger sections of a standard Celestial Corp
+ship layout. Up against the western wall is a pine bed, with a soft mattress
+covered in white sheets that have the Celestial Corp logo on them. On the
+northern wall is a black box labeled backup generator, that presumably supplies
+the healing tank with power separate to the ship. @n
+~
+199 D e 0 0 0
+D1
+~
+~
+0 0 19966 0 0 0 0 0 0 0 0
+S
+#19969
+@wThe Honey Bee: Training Room@n~
+   @WThis room appears to be coated in white gravity resistant plating. Lights
+have been built into the ceiling above, providing ample lighting for the rest
+of the room. Aside from a mild scent of sweat lingering in the air the
+ventilation keeps the room pleasantly fresh and stocked with oxygen. @n
+~
+199 0 e 0 0 0
+D3
+~
+~
+0 0 19966 0 0 0 0 0 0 0 0
+S
+#19970
+@wThe Bloodrose: Storage@n~
+   @WA large metallic hatch in the middle of the room serves as an entry and exit
+point to and from the ship. Some cargo crates with the Celestial Corp logo on
+them have been placed against the eastern wall. @n
+~
+199 jl e 0 0 0
+D0
+~
+~
+0 0 19973 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 19972 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 19971 0 0 0 0 0 0 0 0
+S
+#19971
+@wThe Bloodrose: Rest Area@n~
+   @WThe rest area is one of the larger sections of a standard Celestial Corp
+ship layout. Up against the western wall is a pine bed, with a soft mattress
+covered in white sheets that have the Celestial Corp logo on them. On the
+northern wall is a black box labeled backup generator, that presumably supplies
+the healing tank with power separate to the ship. @n
+~
+199 D e 0 0 0
+D1
+~
+~
+0 0 19970 0 0 0 0 0 0 0 0
+S
+#19972
+@wThe Bloodrose: Training Room@n~
+   @WThis room appears to be coated in white gravity resistant plating. Lights
+have been built into the ceiling above, providing ample lighting for the rest
+of the room. Aside from a mild scent of sweat lingering in the air the
+ventilation keeps the room pleasantly fresh and stocked with oxygen. @n
+~
+199 0 e 0 0 0
+D3
+~
+~
+0 0 19970 0 0 0 0 0 0 0 0
+S
+#19973
+@wThe Bloodrose: Cockpit@n~
+   @WThe cockpit appears to be of a standard issue Celestial Corp setup. On the
+northern side is a viewing window. A single brown leather chair has sits
+bolted to the floor in the middle of the room, with a few control panels and
+screens in front of it. @n
+~
+199 n e 0 0 0
+D2
+~
+~
+0 0 19970 0 0 0 0 0 0 0 0
+S
+#19974
+@wThe Stimato: Living Room~
+   From the joint of the hatch and the floor, a strip of simple green carpet
+runs towards the navigational room across from the hatch. And another ran from
+the two rooms to the left and right, making it seem to split the room into
+four. In the closest right corner, sat a food dispenser. In the far left
+corner of the room sat a military style white table, bench seats running up
+both sides. The legs of the table and benches bolted to the black metal floor
+of the ship. In the opposite squared quadrant was a green couch, sitting
+against the wall and facing the table's direction.
+~
+199 jl e 0 0 0
+D0
+~
+~
+0 0 19975 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 19976 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 19977 0 0 0 0 0 0 0 0
+S
+#19975
+@wThe Stimato: Navigational Room~
+   A single large chair with a squared back sat in the center of the room,
+thick foam cushions lining the front of the back and top of the seat. The
+front of the seat was curved with two dips for the pilot's legs. It ran in a
+solid shape down to the floor from it's squared seat. Atop the right arm was a
+T shaped lever. It sits before a square foot long screen angled forward, that
+connects to a square unit going to the floor. And a yoke that stretches from
+the floor infront of the seat.
+~
+199 n e 0 0 0
+D2
+~
+~
+0 0 19974 0 0 0 0 0 0 0 0
+S
+#19976
+@wThe Stimato: Training Room~
+   No carpet sits on the black steel of the floor in this room. It's surface
+is merely marred with scratches and dents. Against the far wall facing the
+room's exit sits a gravity machine. A small rectangular blue screen sits on
+it's front, with blinking white numbers. Beneath the screen sets a simple ten
+digit numeric pad. A bar comes from the cieling to the floor in the center of
+the room, with a thick pad encircling it's entire height.
+~
+199 0 0 0 0 0
+D3
+~
+~
+0 0 19974 0 0 0 0 0 0 0 0
+S
+#19977
+@wThe Stimato: Bedroom~
+   The green carpet covered this entire floor from wall to wall. Thought he
+room itself seemed slightly plain. As only a large bed sat against the far
+wall, with it's footboard pointing back at the exit. A wardrobe sits in the
+corner of the wall past the bed's footboard. And against the right wall sat a
+single person healing tank.
+~
+199 D e 0 0 0
+D1
+~
+~
+0 0 19974 0 0 0 0 0 0 0 0
+S
+#19978
+@wThe Grey Wolf: Rest Area@n~
+   @WThe rest area is one of the larger sections of a standard Celestial Corp
+ship layout. Up against the western wall is a pine bed, with a soft mattress
+covered in white sheets that have the Celestial Corp logo on them. On the
+northern wall is a black box labeled backup generator, that presumably supplies
+the healing tank with power separate to the ship.
+~
+199 D e 0 0 0
+D1
+~
+~
+0 0 19947 0 0 0 0 0 0 0 0
+S
+#19979
+@wThe Grey Wolf: Training Room@n~
+   @WThis room appears to be coated in white gravity resistant plating. Lights
+have been built into the ceiling above, providing ample lighting for the rest
+of the room. Aside from a mild scent of sweat lingering in the air the
+ventilation keeps the room pleasantly fresh and stocked with oxygen.
+~
+199 0 e 0 0 0
+D3
+~
+~
+0 0 19947 0 0 0 0 0 0 0 0
+S
+#19980
+@WThe Event Horizon - Rest Area@n~
+   @WThe rest area is one of the larger sections of a standard Celestial Corp
+ship layout. Up against the western wall is a pine bed, with a soft mattress
+covered in white sheets that have the Celestial Corp logo on them. On the
+northern wall is a black box labeled backup generator, that presumably supplies
+the healing tank with power separate to the ship. @n
+~
+199 D 0 0 0 0
+D1
+~
+~
+0 0 19950 0 0 0 0 0 0 0 0
+S
+#19981
+@WThe Event Horizon - Training Area@n~
+   @WThis room appears to be coated in white gravity resistant plating. Lights
+have been built into the ceiling above, providing ample lighting for the rest
+of the room. Aside from a mild scent of sweat lingering in the air the
+ventilation keeps the room pleasantly fresh and stocked with oxygen. @n
+~
+199 0 0 0 0 0
+D3
+~
+~
+0 0 19950 0 0 0 0 0 0 0 0
+S
+#19982
+@WThe Nightingale - Training Room@n~
+   @WThis room appears to be coated in white gravity resistant plating. Lights
+have been built into the ceiling above, providing ample lighting for the rest
+of the room. Aside from a mild scent of sweat lingering in the air the
+ventilation keeps the room pleasantly fresh and stocked with oxygen. @n
+~
+199 0 0 0 0 0
+D3
+~
+~
+0 0 19963 0 0 0 0 0 0 0 0
+S
+$~

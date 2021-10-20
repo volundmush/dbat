@@ -1,0 +1,2101 @@
+#2600
+@RB@rl@Roo@rd @yD@Yu@wn@ye@Ys@D: @WPath Through the Sands, West@n~
+   @YThis area is completely made up of rough piles of loose sand that have been
+deposited by the winds that seem to swirl around from every direction. Dunes of
+sand can be seen stretching away in every direction, only obscured occasionally
+by terrible gusts of wind kicking sand into the air. @n
+~
+26 cv 0 0 0 12
+D0
+~
+~
+0 0 2598 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2601 0 0 0 0 0 0 0 0
+S
+#2601
+@RB@rl@Roo@rd @yD@Yu@wn@ye@Ys@D: @WPath Through the Sands, West@n~
+   @YThis area is completely made up of rough piles of loose sand that have been
+deposited by the winds that seem to swirl around from every direction. Dunes of
+sand can be seen stretching away in every direction, only obscured occasionally
+by terrible gusts of wind kicking sand into the air. @n
+~
+26 v 0 0 0 12
+D0
+~
+~
+0 0 2600 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2602 0 0 0 0 0 0 0 0
+S
+#2602
+@RB@rl@Roo@rd @yD@Yu@wn@ye@Ys@D: @WPath Through the Sands, West@n~
+   @YThis area is completely made up of rough piles of loose sand that have been
+deposited by the winds that seem to swirl around from every direction. Dunes of
+sand can be seen stretching away in every direction, only obscured occasionally
+by terrible gusts of wind kicking sand into the air. @n
+~
+26 v 0 0 0 12
+D0
+~
+~
+0 0 2601 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2603 0 0 0 0 0 0 0 0
+S
+#2603
+@RB@rl@Roo@rd @yD@Yu@wn@ye@Ys@D: @WPath Through the Sands, West@n~
+   @YThis area is completely made up of rough piles of loose sand that have been
+deposited by the winds that seem to swirl around from every direction. Dunes of
+sand can be seen stretching away in every direction, only obscured occasionally
+by terrible gusts of wind kicking sand into the air. @n
+~
+26 v 0 0 0 12
+D0
+~
+~
+0 0 2602 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2604 0 0 0 0 0 0 0 0
+S
+#2604
+@RB@rl@Roo@rd @yD@Yu@wn@ye@Ys@D: @WPath Through the Sands, West@n~
+   @YThis area is completely made up of rough piles of loose sand that have been
+deposited by the winds that seem to swirl around from every direction. Dunes of
+sand can be seen stretching away in every direction, only obscured occasionally
+by terrible gusts of wind kicking sand into the air. @n
+~
+26 cv 0 0 0 12
+D1
+~
+~
+0 0 2606 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2603 0 0 0 0 0 0 0 0
+S
+#2605
+@RB@rl@Roo@rd @yD@Yu@wn@ye@Ys@D: @WCool Oasis Northwest@n~
+   @CThis area is about three feet deep in crystal blue water. Various plants are
+growing around the shallowest edges of the water partially shading it from the
+red Vegeta sun. Rocks of varying sizes and colors occasionally jut up from the
+oasis floor creating perches for small animals to use when drinking from the
+waters. @n
+~
+26 v 0 0 0 12
+D1
+~
+~
+0 0 2610 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2606 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2609 0 0 0 0 0 0 0 0
+S
+#2606
+@RB@rl@Roo@rd @yD@Yu@wn@ye@Ys@D: @WCool Oasis West@n~
+   @CThis area is about three feet deep in crystal blue water. Various plants are
+growing around the shallowest edges of the water partially shading it from the
+red Vegeta sun. Rocks of varying sizes and colors occasionally jut up from the
+oasis floor creating perches for small animals to use when drinking from the
+waters. @n
+~
+26 v 0 0 0 12
+D0
+~
+~
+0 0 2605 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2609 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2607 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2604 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2610 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2608 0 0 0 0 0 0 0 0
+S
+#2607
+@RB@rl@Roo@rd @yD@Yu@wn@ye@Ys@D: @WCool Oasis Southwest@n~
+   @CThis area is about three feet deep in crystal blue water. Various plants are
+growing around the shallowest edges of the water partially shading it from the
+red Vegeta sun. Rocks of varying sizes and colors occasionally jut up from the
+oasis floor creating perches for small animals to use when drinking from the
+waters. @n
+~
+26 v 0 0 0 12
+D0
+~
+~
+0 0 2606 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2608 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2609 0 0 0 0 0 0 0 0
+S
+#2608
+@RB@rl@Roo@rd @yD@Yu@wn@ye@Ys@D: @WCool Oasis South@n~
+   @CThis area is about three feet deep in crystal blue water. Various plants are
+growing around the shallowest edges of the water partially shading it from the
+red Vegeta sun. Rocks of varying sizes and colors occasionally jut up from the
+oasis floor creating perches for small animals to use when drinking from the
+waters. @n
+~
+26 v 0 0 0 12
+D0
+~
+~
+0 0 2609 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2613 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2607 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2606 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2612 0 0 0 0 0 0 0 0
+S
+#2609
+@RB@rl@Roo@rd @yD@Yu@wn@ye@Ys@D: @WCool Oasis Center@n~
+   @CThis area is about three feet deep in crystal blue water. Various plants are
+growing around the shallowest edges of the water partially shading it from the
+red Vegeta sun. Rocks of varying sizes and colors occasionally jut up from the
+oasis floor creating perches for small animals to use when drinking from the
+waters. @n
+~
+26 v 0 0 0 12
+D0
+~
+~
+0 0 2610 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2612 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2608 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2606 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2605 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2611 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2613 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2607 0 0 0 0 0 0 0 0
+S
+#2610
+@RB@rl@Roo@rd @yD@Yu@wn@ye@Ys@D: @WCool Oasis North@n~
+   @CThis area is about three feet deep in crystal blue water. Various plants are
+growing around the shallowest edges of the water partially shading it from the
+red Vegeta sun. Rocks of varying sizes and colors occasionally jut up from the
+oasis floor creating perches for small animals to use when drinking from the
+waters. @n
+~
+26 v 0 0 0 12
+D1
+~
+~
+0 0 2611 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2609 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2605 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2612 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2606 0 0 0 0 0 0 0 0
+S
+#2611
+@RB@rl@Roo@rd @yD@Yu@wn@ye@Ys@D: @WCool Oasis Northeast@n~
+   @CThis area is about three feet deep in crystal blue water. Various plants are
+growing around the shallowest edges of the water partially shading it from the
+red Vegeta sun. Rocks of varying sizes and colors occasionally jut up from the
+oasis floor creating perches for small animals to use when drinking from the
+waters. @n
+~
+26 v 0 0 0 12
+D2
+~
+~
+0 0 2612 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2610 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2609 0 0 0 0 0 0 0 0
+S
+#2612
+@RB@rl@Roo@rd @yD@Yu@wn@ye@Ys@D: @WCool Oasis East@n~
+   @CThis area is about three feet deep in crystal blue water. Various plants are
+growing around the shallowest edges of the water partially shading it from the
+red Vegeta sun. Rocks of varying sizes and colors occasionally jut up from the
+oasis floor creating perches for small animals to use when drinking from the
+waters. @n
+~
+26 v 0 0 0 12
+D0
+~
+~
+0 0 2611 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2613 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2609 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2610 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2608 0 0 0 0 0 0 0 0
+S
+#2613
+@RB@rl@Roo@rd @yD@Yu@wn@ye@Ys@D: @WCool Oasis Southeast@n~
+   @CThis area is about three feet deep in crystal blue water. Various plants are
+growing around the shallowest edges of the water partially shading it from the
+red Vegeta sun. Rocks of varying sizes and colors occasionally jut up from the
+oasis floor creating perches for small animals to use when drinking from the
+waters. @n
+~
+26 v 0 0 0 12
+D0
+~
+~
+0 0 2612 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2614 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2608 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2609 0 0 0 0 0 0 0 0
+S
+#2614
+@RB@rl@Roo@rd @yD@Yu@wn@ye@Ys@D: @WPath Through the Dunes, Center@n~
+   @YThis area is completely made up of rough piles of loose sand that have been
+deposited by the winds that seem to swirl around from every direction. This
+area seems to be near the center of the desert. The dry air and heat are
+suffocating here making it difficult for most life forms to survive for long. @n
+~
+26 cv 0 0 0 12
+D1
+~
+~
+0 0 2532 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2613 0 0 0 0 0 0 0 0
+S
+#2615
+@RB@rl@Roo@rd @yD@Yu@wn@ye@Ys@D: @WOutside a Dark Cave@n~
+   @YThis area is covered completely in sand dunes that have been blown up against
+a large rock formation. A massive opening in the rocks can be seen to the west
+leading to some sort of dark cave. The insides of the cave are hidden from view
+but occasional high pitched bird sounds can be heard from within. @n
+~
+26 cv 0 0 0 12
+D1
+~
+~
+0 0 2596 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 3200 0 0 0 0 0 0 0 0
+S
+#2616
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cNear Vegetos@n ~
+   @yThis wide dirt road runs between the rocky cliffs of the Ancestral Mountains.
+Further south the cliffs continue to rise up higher and closer to the path,
+shrouding it in murky darkness. To the north large round buildings of the city
+Vegetos can be seen, though they are not nearly as impressive as these rock
+formations. @n
+~
+26 v 0 0 0 5
+D0
+~
+~
+0 0 2331 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2617 0 0 0 0 0 0 0 0
+S
+T 310
+#2617
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cMain Pass@n~
+   @yThis dirt path is completely surrounded by rocks and cliffs on both sides. 
+The cliffs and rocks being a part of the mountain range this pass is cutting
+through. The high mountains in this surrounding area are craggy, jagged, and
+give the area a foreboding image. @n
+~
+26 v 0 0 0 5
+D0
+~
+~
+0 0 2616 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2618 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2675 0 0 0 0 0 0 0 0
+S
+#2618
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cMain Pass@n~
+   @yThis dirt path is completely surrounded by rocks and cliffs on both sides. 
+The cliffs and rocks being a part of the mountain range this pass is cutting
+through. The high mountains in this surrounding area are craggy, jagged, and
+give the area a foreboding image. @n
+~
+26 v 0 0 0 5
+D0
+~
+~
+0 0 2617 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2619 0 0 0 0 0 0 0 0
+S
+#2619
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cMain Pass@n~
+   @yThis dirt path is completely surrounded by rocks and cliffs on both sides. 
+The cliffs and rocks being a part of the mountain range this pass is cutting
+through. The high mountains in this surrounding area are craggy, jagged, and
+give the area a foreboding image. @n
+~
+26 v 0 0 0 5
+D0
+~
+~
+0 0 2618 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2620 0 0 0 0 0 0 0 0
+S
+#2620
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cMain Pass@n~
+   @yThis dirt path is completely surrounded by rocks and cliffs on both sides. 
+The cliffs and rocks being a part of the mountain range this pass is cutting
+through. The high mountains in this surrounding area are craggy, jagged, and
+give the area a foreboding image. @n
+~
+26 v 0 0 0 5
+D0
+~
+~
+0 0 2619 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2621 0 0 0 0 0 0 0 0
+S
+#2621
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cMain Pass@n~
+   @yThis dirt path is completely surrounded by rocks and cliffs on both sides. 
+The cliffs and rocks being a part of the mountain range this pass is cutting
+through. The high mountains in this surrounding area are craggy, jagged, and
+give the area a foreboding image. @n
+~
+26 v 0 0 0 5
+D1
+~
+~
+0 0 2622 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2620 0 0 0 0 0 0 0 0
+S
+#2622
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cMain Pass@n~
+   @yThis dirt path is completely surrounded by rocks and cliffs on both sides. 
+The cliffs and rocks being a part of the mountain range this pass is cutting
+through. The high mountains in this surrounding area are craggy, jagged, and
+give the area a foreboding image. @n
+~
+26 v 0 0 0 5
+D2
+~
+~
+0 0 2623 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2621 0 0 0 0 0 0 0 0
+S
+#2623
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cMain Pass@n~
+   @yThis dirt path is completely surrounded by rocks and cliffs on both sides. 
+The cliffs and rocks being a part of the mountain range this pass is cutting
+through. The high mountains in this surrounding area are craggy, jagged, and
+give the area a foreboding image. @n
+~
+26 v 0 0 0 5
+D0
+~
+~
+0 0 2622 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2624 0 0 0 0 0 0 0 0
+S
+#2624
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cMain Pass@n~
+   @yThis dirt path is completely surrounded by rocks and cliffs on both sides. 
+The cliffs and rocks being a part of the mountain range this pass is cutting
+through. The high mountains in this surrounding area are craggy, jagged, and
+give the area a foreboding image. @n
+~
+26 v 0 0 0 5
+D0
+~
+~
+0 0 2623 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2625 0 0 0 0 0 0 0 0
+S
+#2625
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cMain Pass@n~
+   @yThis dirt path is completely surrounded by rocks and cliffs on both sides. 
+The cliffs and rocks being a part of the mountain range this pass is cutting
+through. The high mountains in this surrounding area are craggy, jagged, and
+give the area a foreboding image. @n
+~
+26 v 0 0 0 5
+D0
+~
+~
+0 0 2624 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2674 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2626 0 0 0 0 0 0 0 0
+S
+#2626
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cMain Pass@n~
+   @yThis dirt path is completely surrounded by rocks and cliffs on both sides. 
+The cliffs and rocks being a part of the mountain range this pass is cutting
+through. The high mountains in this surrounding area are craggy, jagged, and
+give the area a foreboding image. @n
+~
+26 v 0 0 0 5
+D1
+~
+~
+0 0 2625 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2627 0 0 0 0 0 0 0 0
+S
+#2627
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cMain Pass@n~
+   @yThis dirt path is completely surrounded by rocks and cliffs on both sides. 
+The cliffs and rocks being a part of the mountain range this pass is cutting
+through. The high mountains in this surrounding area are craggy, jagged, and
+give the area a foreboding image. @n
+~
+26 v 0 0 0 5
+D0
+~
+~
+0 0 2626 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2628 0 0 0 0 0 0 0 0
+S
+#2628
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cMain Pass@n~
+   @yThis dirt path is completely surrounded by rocks and cliffs on both sides. 
+The cliffs and rocks being a part of the mountain range this pass is cutting
+through. The high mountains in this surrounding area are craggy, jagged, and
+give the area a foreboding image. @n
+~
+26 v 0 0 0 5
+D0
+~
+~
+0 0 2627 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2629 0 0 0 0 0 0 0 0
+S
+#2629
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cMain Pass@n~
+   @yThis dirt path is completely surrounded by rocks and cliffs on both sides. 
+The cliffs and rocks being a part of the mountain range this pass is cutting
+through. The high mountains in this surrounding area are craggy, jagged, and
+give the area a foreboding image. @n
+~
+26 v 0 0 0 5
+D0
+~
+~
+0 0 2628 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2630 0 0 0 0 0 0 0 0
+S
+#2630
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cMain Pass@n~
+   @yThis dirt path is completely surrounded by rocks and cliffs on both sides. 
+The cliffs and rocks being a part of the mountain range this pass is cutting
+through. The high mountains in this surrounding area are craggy, jagged, and
+give the area a foreboding image. @n
+~
+26 v 0 0 0 5
+D0
+~
+~
+0 0 2629 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2631 0 0 0 0 0 0 0 0
+S
+#2631
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cMain Pass@n~
+   @yThis dirt path is completely surrounded by rocks and cliffs on both sides. 
+The cliffs and rocks being a part of the mountain range this pass is cutting
+through. The high mountains in this surrounding area are craggy, jagged, and
+give the area a foreboding image. @n
+~
+26 v 0 0 0 5
+D0
+~
+~
+0 0 2630 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2632 0 0 0 0 0 0 0 0
+S
+#2632
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cMain Pass@n~
+   @yThis dirt path is completely surrounded by rocks and cliffs on both sides. 
+The cliffs and rocks being a part of the mountain range this pass is cutting
+through. The high mountains in this surrounding area are craggy, jagged, and
+give the area a foreboding image. @n
+~
+26 v 0 0 0 5
+D0
+~
+~
+0 0 2631 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2633 0 0 0 0 0 0 0 0
+S
+#2633
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cMain Pass@n~
+   @yThis dirt path is completely surrounded by rocks and cliffs on both sides. 
+The cliffs and rocks being a part of the mountain range this pass is cutting
+through. The high mountains in this surrounding area are craggy, jagged, and
+give the area a foreboding image. @n
+~
+26 v 0 0 0 5
+D0
+~
+~
+0 0 2632 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2670 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2634 0 0 0 0 0 0 0 0
+S
+#2634
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cMain Pass@n~
+   @yThis dirt path is completely surrounded by rocks and cliffs on both sides. 
+The cliffs and rocks being a part of the mountain range this pass is cutting
+through. The high mountains in this surrounding area are craggy, jagged, and
+give the area a foreboding image. @n
+~
+26 v 0 0 0 5
+D1
+~
+~
+0 0 2633 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2635 0 0 0 0 0 0 0 0
+S
+#2635
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cMain Pass@n~
+   @yThis dirt path is completely surrounded by rocks and cliffs on both sides. 
+The cliffs and rocks being a part of the mountain range this pass is cutting
+through. The high mountains in this surrounding area are craggy, jagged, and
+give the area a foreboding image. @n
+~
+26 v 0 0 0 5
+D2
+~
+~
+0 0 2636 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2689 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2634 0 0 0 0 0 0 0 0
+S
+#2636
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cMain Pass@n~
+   @yThis dirt path is completely surrounded by rocks and cliffs on both sides. 
+The cliffs and rocks being a part of the mountain range this pass is cutting
+through. The high mountains in this surrounding area are craggy, jagged, and
+give the area a foreboding image. @n
+~
+26 v 0 0 0 5
+D0
+~
+~
+0 0 2635 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2637 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2708 0 0 0 0 0 0 0 0
+S
+#2637
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cMain Pass@n~
+   @yThis dirt path is completely surrounded by rocks and cliffs on both sides. 
+The cliffs and rocks being a part of the mountain range this pass is cutting
+through. The high mountains in this surrounding area are craggy, jagged, and
+give the area a foreboding image. @n
+~
+26 v 0 0 0 5
+D0
+~
+~
+0 0 2636 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2640 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2638 0 0 0 0 0 0 0 0
+S
+#2638
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cMain Pass@n~
+   @yThis dirt path is completely surrounded by rocks and cliffs on both sides. 
+The cliffs and rocks being a part of the mountain range this pass is cutting
+through. The high mountains in this surrounding area are craggy, jagged, and
+give the area a foreboding image. @n
+~
+26 v 0 0 0 5
+D0
+~
+~
+0 0 2637 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2639 0 0 0 0 0 0 0 0
+S
+#2639
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cEdge of a Swamp@n~
+   @yThis is the end of the mountain pass. The cliffs and mountains are shorter
+here, blending together into more of a hilly environment on either side of the
+pass. To the south of here a large putrid swamp of black water and foul
+plantlife can be seen stretching into the distance. @n
+~
+26 cv 0 0 0 5
+D0
+~
+~
+0 0 2638 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2709 0 0 0 0 0 0 0 0
+S
+#2640
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cDark Tunnel@n~
+   @DThis tunnel is made out of natural rock formations inside one of the
+Ancestral mountains. Stalactites hang down from the ceiling in random jagged
+formations with water dripping from their tips onto stalagmites located in
+similar patterns below. Further on the tunnel stretches darkly as a errie
+silence permeates the air. @n
+~
+26 acv 0 0 0 0
+D1
+~
+~
+0 0 2642 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2637 0 0 0 0 0 0 0 0
+S
+#2641
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cWide Cave Northwest@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+26 av 0 0 0 0
+D1
+~
+~
+0 0 2646 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2642 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2645 0 0 0 0 0 0 0 0
+S
+#2642
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cWide Cave West@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+26 av 0 0 0 0
+D0
+~
+~
+0 0 2641 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2645 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2643 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2640 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2646 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2644 0 0 0 0 0 0 0 0
+S
+#2643
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cWide Cave Southwest@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+26 av 0 0 0 0
+D0
+~
+~
+0 0 2642 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2644 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2645 0 0 0 0 0 0 0 0
+S
+#2644
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cWide Cave South@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+26 av 0 0 0 0
+D0
+~
+~
+0 0 2645 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2649 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2643 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2642 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2648 0 0 0 0 0 0 0 0
+S
+#2645
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cWide Cave Center@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+26 av 0 0 0 0
+D0
+~
+~
+0 0 2646 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2648 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2644 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2642 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2641 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2647 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2649 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2643 0 0 0 0 0 0 0 0
+S
+#2646
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cWide Cave North@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+26 av 0 0 0 0
+D1
+~
+~
+0 0 2647 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2645 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2641 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2648 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2642 0 0 0 0 0 0 0 0
+S
+#2647
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cWide Cave Northeast@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+26 av 0 0 0 0
+D2
+~
+~
+0 0 2648 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2646 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2645 0 0 0 0 0 0 0 0
+S
+#2648
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cWide Cave East@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+26 av 0 0 0 0
+D0
+~
+~
+0 0 2647 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2650 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2649 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2645 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2646 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2644 0 0 0 0 0 0 0 0
+S
+#2649
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cWide Cave Southeast@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+26 av 0 0 0 0
+D0
+~
+~
+0 0 2648 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2644 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2645 0 0 0 0 0 0 0 0
+S
+#2650
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cDark Tunnel@n~
+   @DThis tunnel is made out of natural rock formations inside one of the
+Ancestral mountains. Stalactites hang down from the ceiling in random jagged
+formations with water dripping from their tips onto stalagmites located in
+similar patterns below. Further on the tunnel stretches darkly as a errie
+silence permeates the air. @n
+~
+26 av 0 0 0 0
+D3
+~
+~
+0 0 2648 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2651 0 0 0 0 0 0 0 0
+S
+#2651
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cDark Tunnel@n~
+   @DThis tunnel is made out of natural rock formations inside one of the
+Ancestral mountains. Stalactites hang down from the ceiling in random jagged
+formations with water dripping from their tips onto stalagmites located in
+similar patterns below. Further on the tunnel stretches darkly as a errie
+silence permeates the air. @n
+~
+26 av 0 0 0 0
+D7
+~
+~
+0 0 2652 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2650 0 0 0 0 0 0 0 0
+S
+#2652
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cDark Tunnel@n~
+   @DThis tunnel is made out of natural rock formations inside one of the
+Ancestral mountains. Stalactites hang down from the ceiling in random jagged
+formations with water dripping from their tips onto stalagmites located in
+similar patterns below. Further on the tunnel stretches darkly as a errie
+silence permeates the air. @n
+~
+26 av 0 0 0 0
+D7
+~
+~
+0 0 2653 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2651 0 0 0 0 0 0 0 0
+S
+#2653
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cDark Tunnel@n~
+   @DThis tunnel is made out of natural rock formations inside one of the
+Ancestral mountains. Stalactites hang down from the ceiling in random jagged
+formations with water dripping from their tips onto stalagmites located in
+similar patterns below. Further on the tunnel stretches darkly as a errie
+silence permeates the air. @n
+~
+26 av 0 0 0 0
+D0
+~
+~
+0 0 2654 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2652 0 0 0 0 0 0 0 0
+S
+#2654
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cDark Tunnel@n~
+   @DThis tunnel is made out of natural rock formations inside one of the
+Ancestral mountains. Stalactites hang down from the ceiling in random jagged
+formations with water dripping from their tips onto stalagmites located in
+similar patterns below. Further on the tunnel stretches darkly as a errie
+silence permeates the air. @n
+~
+26 av 0 0 0 0
+D0
+~
+~
+0 0 2655 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2653 0 0 0 0 0 0 0 0
+S
+#2655
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cDark Tunnel@n~
+   @DThis tunnel is made out of natural rock formations inside one of the
+Ancestral mountains. Stalactites hang down from the ceiling in random jagged
+formations with water dripping from their tips onto stalagmites located in
+similar patterns below. Further on the tunnel stretches darkly as a errie
+silence permeates the air. @n
+~
+26 av 0 0 0 0
+D0
+~
+~
+0 0 2656 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2654 0 0 0 0 0 0 0 0
+S
+#2656
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cDark Tunnel@n~
+   @DThis tunnel is made out of natural rock formations inside one of the
+Ancestral mountains. Stalactites hang down from the ceiling in random jagged
+formations with water dripping from their tips onto stalagmites located in
+similar patterns below. Further on the tunnel stretches darkly as a errie
+silence permeates the air. @n
+~
+26 av 0 0 0 0
+D2
+~
+~
+0 0 2655 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2657 0 0 0 0 0 0 0 0
+S
+#2657
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cDark Tunnel@n~
+   @DThis tunnel is made out of natural rock formations inside one of the
+Ancestral mountains. Stalactites hang down from the ceiling in random jagged
+formations with water dripping from their tips onto stalagmites located in
+similar patterns below. Further on the tunnel stretches darkly as a errie
+silence permeates the air. @n
+~
+26 av 0 0 0 0
+D1
+~
+~
+0 0 2656 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2659 0 0 0 0 0 0 0 0
+S
+#2658
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cWide Cave Northeast@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+26 av 0 0 0 0
+D2
+~
+~
+0 0 2659 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2663 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2662 0 0 0 0 0 0 0 0
+S
+#2659
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cWide Cave East@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+26 av 0 0 0 0
+D0
+~
+~
+0 0 2658 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2657 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2660 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2662 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2663 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2661 0 0 0 0 0 0 0 0
+S
+#2660
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cWide Cave Southeast@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+26 av 0 0 0 0
+D0
+~
+~
+0 0 2659 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2661 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2662 0 0 0 0 0 0 0 0
+S
+#2661
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cWide Cave South@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+26 av 0 0 0 0
+D0
+~
+~
+0 0 2662 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2660 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2667 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2666 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2665 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2659 0 0 0 0 0 0 0 0
+S
+#2662
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cWide Cave Center@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+26 av 0 0 0 0
+D0
+~
+~
+0 0 2663 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2659 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2661 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2665 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2664 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2658 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2660 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2666 0 0 0 0 0 0 0 0
+S
+#2663
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cWide Cave North@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+26 av 0 0 0 0
+D0
+~
+~
+0 0 2671 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2658 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2662 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2664 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2659 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2665 0 0 0 0 0 0 0 0
+S
+#2664
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cWide Cave Northwest@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+26 av 0 0 0 0
+D1
+~
+~
+0 0 2663 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2665 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2662 0 0 0 0 0 0 0 0
+S
+#2665
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cWide Cave West@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+26 av 0 0 0 0
+D0
+~
+~
+0 0 2664 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2662 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2666 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2663 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2661 0 0 0 0 0 0 0 0
+S
+#2666
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cWide Cave Southwest@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+26 av 0 0 0 0
+D0
+~
+~
+0 0 2665 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2661 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2662 0 0 0 0 0 0 0 0
+S
+#2667
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cCraggy Pass@n~
+   @yThis dim narrow pass leads through a section of the mountains that is almost
+completely obscured from the sky above. The rocky walls of the mountains rise
+up on either side of the pass so close together traveling through the pass is
+quite a bit difficult. @n
+~
+26 cv 0 0 0 5
+D0
+~
+~
+0 0 2661 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2668 0 0 0 0 0 0 0 0
+S
+#2668
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cCraggy Pass@n~
+   @yThis dim narrow pass leads through a section of the mountains that is almost
+completely obscured from the sky above. The rocky walls of the mountains rise
+up on either side of the pass so close together traveling through the pass is
+quite a bit difficult. @n
+~
+26 v 0 0 0 5
+D0
+~
+~
+0 0 2667 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2669 0 0 0 0 0 0 0 0
+S
+#2669
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cCraggy Pass@n~
+   @yThis dim narrow pass leads through a section of the mountains that is almost
+completely obscured from the sky above. The rocky walls of the mountains rise
+up on either side of the pass so close together traveling through the pass is
+quite a bit difficult. @n
+~
+26 v 0 0 0 5
+D1
+~
+~
+0 0 2668 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2670 0 0 0 0 0 0 0 0
+S
+#2670
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cCraggy Pass@n~
+   @yThis dim narrow pass leads through a section of the mountains that is almost
+completely obscured from the sky above. The rocky walls of the mountains rise
+up on either side of the pass so close together traveling through the pass is
+quite a bit difficult. @n
+~
+26 v 0 0 0 5
+D1
+~
+~
+0 0 2669 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2633 0 0 0 0 0 0 0 0
+S
+#2671
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cRocky Pass@n~
+   @yThis dim narrow pass leads through a section of the mountains that is almost
+completely obscured from the sky above. The rocky walls of the mountains rise
+up on either side of the pass so close together traveling through the pass is
+quite a bit difficult. @n
+~
+26 cv 0 0 0 5
+D0
+~
+~
+0 0 2672 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2663 0 0 0 0 0 0 0 0
+S
+#2672
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cRocky Pass@n~
+   @yThis dim narrow pass leads through a section of the mountains that is almost
+completely obscured from the sky above. The rocky walls of the mountains rise
+up on either side of the pass so close together traveling through the pass is
+quite a bit difficult. @n
+~
+26 v 0 0 0 5
+D0
+~
+~
+0 0 2673 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2671 0 0 0 0 0 0 0 0
+S
+#2673
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cRocky Pass@n~
+   @yThis dim narrow pass leads through a section of the mountains that is almost
+completely obscured from the sky above. The rocky walls of the mountains rise
+up on either side of the pass so close together traveling through the pass is
+quite a bit difficult. @n
+~
+26 v 0 0 0 5
+D2
+~
+~
+0 0 2672 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2674 0 0 0 0 0 0 0 0
+S
+#2674
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cRocky Pass@n~
+   @yThis dim narrow pass leads through a section of the mountains that is almost
+completely obscured from the sky above. The rocky walls of the mountains rise
+up on either side of the pass so close together traveling through the pass is
+quite a bit difficult. @n
+~
+26 v 0 0 0 5
+D1
+~
+~
+0 0 2673 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2625 0 0 0 0 0 0 0 0
+S
+#2675
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cShadowy Pass@n~
+   @yThis pass runs through that tallest rock formations of the mountain range. 
+As a result of this the soft dirt path that makes up the pass is almost
+constantly shrouded in deep shade. The temperature is remarkably cooler than
+the climate average as a result. @n
+~
+26 v 0 0 0 5
+D1
+~
+~
+0 0 2617 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2676 0 0 0 0 0 0 0 0
+S
+#2676
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cShadowy Pass@n~
+   @yThis pass runs through that tallest rock formations of the mountain range. 
+As a result of this the soft dirt path that makes up the pass is almost
+constantly shrouded in deep shade. The temperature is remarkably cooler than
+the climate average as a result. @n
+~
+26 v 0 0 0 5
+D2
+~
+~
+0 0 2677 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2675 0 0 0 0 0 0 0 0
+S
+#2677
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cShadowy Pass@n~
+   @yThis pass runs through that tallest rock formations of the mountain range. 
+As a result of this the soft dirt path that makes up the pass is almost
+constantly shrouded in deep shade. The temperature is remarkably cooler than
+the climate average as a result. @n
+~
+26 v 0 0 0 5
+D0
+~
+~
+0 0 2676 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2678 0 0 0 0 0 0 0 0
+S
+#2678
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cShadowy Pass@n~
+   @yThis pass runs through that tallest rock formations of the mountain range. 
+As a result of this the soft dirt path that makes up the pass is almost
+constantly shrouded in deep shade. The temperature is remarkably cooler than
+the climate average as a result. @n
+~
+26 v 0 0 0 5
+D0
+~
+~
+0 0 2677 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2679 0 0 0 0 0 0 0 0
+S
+#2679
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cShadowy Pass@n~
+   @yThis pass runs through that tallest rock formations of the mountain range. 
+As a result of this the soft dirt path that makes up the pass is almost
+constantly shrouded in deep shade. The temperature is remarkably cooler than
+the climate average as a result. @n
+~
+26 v 0 0 0 5
+D7
+~
+~
+0 0 2678 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2680 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2690 0 0 0 0 0 0 0 0
+S
+#2680
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cShadowy Pass@n~
+   @yThis pass runs through that tallest rock formations of the mountain range. 
+As a result of this the soft dirt path that makes up the pass is almost
+constantly shrouded in deep shade. The temperature is remarkably cooler than
+the climate average as a result. @n
+~
+26 v 0 0 0 5
+D2
+~
+~
+0 0 2681 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2679 0 0 0 0 0 0 0 0
+S
+#2681
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cShadowy Pass@n~
+   @yThis pass runs through that tallest rock formations of the mountain range. 
+As a result of this the soft dirt path that makes up the pass is almost
+constantly shrouded in deep shade. The temperature is remarkably cooler than
+the climate average as a result. @n
+~
+26 v 0 0 0 5
+D0
+~
+~
+0 0 2680 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2682 0 0 0 0 0 0 0 0
+S
+#2682
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cShadowy Pass@n~
+   @yThis pass runs through that tallest rock formations of the mountain range. 
+As a result of this the soft dirt path that makes up the pass is almost
+constantly shrouded in deep shade. The temperature is remarkably cooler than
+the climate average as a result. @n
+~
+26 v 0 0 0 5
+D0
+~
+~
+0 0 2681 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2683 0 0 0 0 0 0 0 0
+S
+#2683
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cShadowy Pass@n~
+   @yThis pass runs through that tallest rock formations of the mountain range. 
+As a result of this the soft dirt path that makes up the pass is almost
+constantly shrouded in deep shade. The temperature is remarkably cooler than
+the climate average as a result. @n
+~
+26 v 0 0 0 5
+D2
+~
+~
+0 0 2684 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2682 0 0 0 0 0 0 0 0
+S
+#2684
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cShadowy Pass@n~
+   @yThis pass runs through that tallest rock formations of the mountain range. 
+As a result of this the soft dirt path that makes up the pass is almost
+constantly shrouded in deep shade. The temperature is remarkably cooler than
+the climate average as a result. @n
+~
+26 v 0 0 0 5
+D0
+~
+~
+0 0 2683 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2685 0 0 0 0 0 0 0 0
+S
+#2685
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cShadowy Pass@n~
+   @yThis pass runs through that tallest rock formations of the mountain range. 
+As a result of this the soft dirt path that makes up the pass is almost
+constantly shrouded in deep shade. The temperature is remarkably cooler than
+the climate average as a result. @n
+~
+26 v 0 0 0 5
+D0
+~
+~
+0 0 2684 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2686 0 0 0 0 0 0 0 0
+S
+#2686
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cShadowy Pass@n~
+   @yThis pass runs through that tallest rock formations of the mountain range. 
+As a result of this the soft dirt path that makes up the pass is almost
+constantly shrouded in deep shade. The temperature is remarkably cooler than
+the climate average as a result. @n
+~
+26 v 0 0 0 5
+D0
+~
+~
+0 0 2685 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2687 0 0 0 0 0 0 0 0
+S
+#2687
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cShadowy Pass@n~
+   @yThis pass runs through that tallest rock formations of the mountain range. 
+As a result of this the soft dirt path that makes up the pass is almost
+constantly shrouded in deep shade. The temperature is remarkably cooler than
+the climate average as a result. @n
+~
+26 v 0 0 0 5
+D1
+~
+~
+0 0 2686 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2688 0 0 0 0 0 0 0 0
+S
+#2688
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cShadowy Pass@n~
+   @yThis pass runs through that tallest rock formations of the mountain range. 
+As a result of this the soft dirt path that makes up the pass is almost
+constantly shrouded in deep shade. The temperature is remarkably cooler than
+the climate average as a result. @n
+~
+26 v 0 0 0 5
+D7
+~
+~
+0 0 2687 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2689 0 0 0 0 0 0 0 0
+S
+#2689
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cShadowy Pass@n~
+   @yThis pass runs through that tallest rock formations of the mountain range. 
+As a result of this the soft dirt path that makes up the pass is almost
+constantly shrouded in deep shade. The temperature is remarkably cooler than
+the climate average as a result. @n
+~
+26 v 0 0 0 5
+D6
+~
+~
+0 0 2688 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2635 0 0 0 0 0 0 0 0
+S
+#2690
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cDark Tunnel@n~
+   @DThis dark tunnel appears to have been naturally formed over time. The walls
+are made out of smooth stone that is slick with moisture and smells of
+stagnation. The temperature in this cave like tunnel is a good deal lower than
+the temperature found in this region. @n
+~
+26 acv 0 0 0 0
+D2
+~
+~
+0 0 2691 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2679 0 0 0 0 0 0 0 0
+S
+#2691
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cDark Tunnel@n~
+   @DThis dark tunnel appears to have been naturally formed over time. The walls
+are made out of smooth stone that is slick with moisture and smells of
+stagnation. The temperature in this cave like tunnel is a good deal lower than
+the temperature found in this region. @n
+~
+26 av 0 0 0 0
+D0
+~
+~
+0 0 2690 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2692 0 0 0 0 0 0 0 0
+S
+#2692
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cDark Tunnel@n~
+   @DThis dark tunnel appears to have been naturally formed over time. The walls
+are made out of smooth stone that is slick with moisture and smells of
+stagnation. The temperature in this cave like tunnel is a good deal lower than
+the temperature found in this region. @n
+~
+26 av 0 0 0 0
+D0
+~
+~
+0 0 2691 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2693 0 0 0 0 0 0 0 0
+S
+#2693
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cDark Tunnel@n~
+   @DThis dark tunnel appears to have been naturally formed over time. The walls
+are made out of smooth stone that is slick with moisture and smells of
+stagnation. The temperature in this cave like tunnel is a good deal lower than
+the temperature found in this region. @n
+~
+26 av 0 0 0 0
+D7
+~
+~
+0 0 2692 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2694 0 0 0 0 0 0 0 0
+S
+#2694
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cDark Tunnel@n~
+   @DThis dark tunnel appears to have been naturally formed over time. The walls
+are made out of smooth stone that is slick with moisture and smells of
+stagnation. The temperature in this cave like tunnel is a good deal lower than
+the temperature found in this region. @n
+~
+26 av 0 0 0 0
+D2
+~
+~
+0 0 2696 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2693 0 0 0 0 0 0 0 0
+S
+#2695
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cWide Cave Northwest@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+26 av 0 0 0 0
+D1
+~
+~
+0 0 2696 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2700 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2699 0 0 0 0 0 0 0 0
+S
+#2696
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cWide Cave North@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+26 av 0 0 0 0
+D0
+~
+~
+0 0 2694 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2697 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2699 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2695 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2698 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2700 0 0 0 0 0 0 0 0
+S
+#2697
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cWide Cave Northeast@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+26 av 0 0 0 0
+D2
+~
+~
+0 0 2698 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2696 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2699 0 0 0 0 0 0 0 0
+S
+#2698
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cWide Cave East@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+26 av 0 0 0 0
+D0
+~
+~
+0 0 2697 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2703 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2699 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2696 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2702 0 0 0 0 0 0 0 0
+S
+#2699
+@yA@Yn@Wc@we@Ds@Wt@wral @yM@Yo@Wu@wn@Dt@Wa@wins@D: @cWide Cave Center@n~
+   @DThis dark cave seems to have once held lots of water that smoothed out its
+sides and created its wide expanse. The ceiling isn't very high especially with
+its stalactites hanging down, but its width gives it a spacious feeling for a
+cave. @n
+~
+26 av 0 0 0 0
+D0
+~
+~
+0 0 2696 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 2698 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 2702 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 2700 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 2695 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 2697 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 2703 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 2701 0 0 0 0 0 0 0 0
+S
+$~

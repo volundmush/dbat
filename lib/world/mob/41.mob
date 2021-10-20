@@ -1,0 +1,195 @@
+#4100
+Palace Guard~
+a @CP@ca@Dl@ca@Cc@De @WG@wu@Da@Gr@gd@n~
+@wThe @CP@ca@Dl@ca@Cc@De @WG@wu@Da@Gr@Gd@n stands here, guarding the entrance to the palace.
+~
+@D @n
+~
+bde 0 0 0 l 0 0 0 0 E
+30 20 10 0d4+0 0d0+0
+0 0 2 6
+8 8 1
+Str: 11
+Dex: 11
+Int: 11
+Wis: 11
+Con: 11
+Cha: 11
+E
+T 4100
+#4101
+Palace Guard~
+a palace guard~
+This guard patrols the palace.
+~
+@D @n
+~
+de 0 0 0 l 0 0 0 0 E
+50 20 10 0d4+0 0d0+0
+0 0 2 6
+8 8 1
+Size: 6
+Str: 11
+Dex: 11
+Int: 11
+Wis: 11
+Con: 11
+Cha: 11
+E
+#4102
+Palace Guard~
+a palace guard~
+This guard patrols the palace.
+~
+@D @n
+~
+de 0 0 0 l 0 0 0 0 E
+50 20 10 0d4+0 0d0+0
+0 0 2 6
+8 8 2
+Size: 3
+Str: 11
+Dex: 11
+Int: 11
+Wis: 11
+Con: 11
+Cha: 11
+E
+#4103
+Palace Guard~
+a palace guard~
+A palace guard is resting here.
+~
+@D @n
+~
+bde 0 0 0 l 0 0 0 0 E
+52 20 10 0d4+0 0d0+0
+0 0 2 6
+8 8 1
+Size: 5
+Str: 11
+Dex: 11
+Int: 11
+Wis: 11
+Con: 11
+Cha: 11
+E
+#4104
+Royal Guard~
+a @RR@Wo@ry@Wa@Rl @GG@gu@Wa@gr@Gd@n~
+An @RR@wo@ry@wa@Rl @GG@gu@wa@gr@Gd@n stands here proudly.
+~
+@D @n
+~
+bdem 0 0 0 el h 0 0 0 E
+57 20 10 0d4+0 0d0+0
+0 0 2 6
+8 8 1
+Size: 5
+BareHandAttack: 5
+Str: 14
+Dex: 8
+Int: 14
+Wis: 14
+Con: 8
+Cha: 8
+E
+#4105
+King cold~
+@YK@win@Yg @CC@wo@cl@Cd@n~
+@YK@win@Yg @CC@wo@cl@Cd@n is sitting here upon his throne.
+~
+@D @n
+~
+bdepr 0 0 0 el h 0 0 0 E
+68 20 10 0d0+0 0d0+0
+0 0 2 6
+8 8 1
+Size: 5
+BareHandAttack: 6
+Str: 12
+Dex: 15
+Int: 12
+Wis: 12
+Con: 15
+Cha: 15
+E
+T 4130
+T 4131
+#4106
+Mutant Servant~
+a mutant servant~
+A mutant servant is here on a break.
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 0 E
+40 20 10 0d10+0 0d0+0
+0 0 5 5
+8 8 1
+BareHandAttack: 10
+Str: 15
+Dex: 11
+Int: 15
+Wis: 15
+Con: 11
+Cha: 11
+E
+#4107
+Security Chief~
+@RS@re@Dc@wu@Wr@Di@rt@Ry @YC@yh@Wi@ye@Yf@n~
+The chief of security in Ice Crown City, is here looking at paper work.
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 0 E
+40 20 10 0d4+0 0d0+0
+0 0 2 6
+8 8 1
+Size: 5
+Str: 10
+Dex: 15
+Int: 10
+Wis: 10
+Con: 15
+Cha: 15
+E
+#4108
+Quarantine Guard~
+@DQuarantine @GG@gu@Wa@gr@Gd@n~
+A security guard assigned to the quarantine area, stands guard here.
+~
+@D @n
+~
+bcds 0 0 0 l 0 0 0 0 E
+10 20 10 0d4+0 0d0+0
+0 0 5 6
+8 8 1
+Str: 10
+Dex: 8
+Int: 10
+Wis: 10
+Con: 8
+Cha: 8
+E
+T 4103
+T 4104
+#4109
+Royal Cook~
+@RR@Wo@ry@Wa@Rl@n Cook~
+The Royal cook is here, slaving in the kitchen.
+~
+@D @n
+~
+bcds 0 0 0 l 0 0 0 0 E
+1 20 10 0d4+0 0d0+0
+0 0 5 6
+8 8 1
+Str: 9
+Dex: 16
+Int: 9
+Wis: 9
+Con: 16
+Cha: 16
+E
+$

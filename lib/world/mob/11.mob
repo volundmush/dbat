@@ -1,0 +1,217 @@
+#1124
+Android Eighteen~
+@CAndroid Eighteen@n~
+@CAndroid Eighteen@w is standing here with a cold expression on her face.@n
+~
+   @WThis beautiful blonde woman has a continual cold expression on her face and
+seems to be irritated by waiting for something or someone. She is wearing a
+black vest with a ribbon emblem on it, black jeans, and a white shirt. @n
+~
+bdsA 0 0 0 l 0 0 0 0 E
+70 0 10 0d0+0 0d0+0
+0 0 9 28
+8 8 2
+Str: 43
+Dex: 43
+Int: 49
+Wis: 56
+Con: 43
+Cha: 70
+E
+T 1122
+#1125
+Master Roshi~
+@wMaster @rR@Ro@Ws@whi@n~
+@wMaster @rR@Ro@Ws@whi is sitting here.@n
+~
+ @WThis bald man is wearing an orange chinese style shirt with purple pants and
+simple laceless black shoes.  A white beard hangs down from his chin and
+sunglasses cover his eyes.  He has a knobby wooden staff cradled between his
+knees.  @n
+~
+bdsA 0 0 0 0 0 0 0 0 E
+10 0 10 0d4+0 0d0+0
+0 0 0 0
+8 8 1
+Str: 17
+Dex: 11
+Int: 15
+Wis: 5
+Con: 15
+Cha: 8
+E
+T 1124
+T 1127
+#1126
+Krillin~
+@CKrillin@n~
+@CKrillin@w is standing guard here.@n
+~
+ @WThis short bald man with no nose is wearing a reddish orange gi with the kame
+kanji on the back.  @n
+~
+bcdsA 0 0 0 0 0 0 0 0 E
+30 0 10 0d4+0 0d0+0
+0 0 0 0
+8 8 1
+Size: 3
+Str: 33
+Dex: 28
+Int: 30
+Wis: 20
+Con: 33
+Cha: 20
+E
+T 1126
+T 1123
+T 1705
+T 1128
+T 1130
+#1127
+Launch~
+@RL@ra@Ru@rn@Rc@rh@n~
+@RL@ra@Ru@rn@Rc@rh @wis standing here preparing a meal.@n
+~
+ @WThis pretty young woman is quite spoken right now, however when she sneezes
+that may change.  She has dark blue hair and black eyes and is wearing a red
+ribbon tied in her hair.  A tank top and shorts complete her outfit.  @n
+~
+bdsA 0 0 0 0 0 0 0 0 E
+5 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 2
+Str: 6
+Dex: 7
+Int: 8
+Wis: 7
+Con: 9
+Cha: 7
+E
+T 1125
+T 1129
+T 1131
+#1130
+Trellisa mutant~
+@CT@Wrellis@Ca@n~
+@CT@Wrellis@Ca@n the @C[@WWTO@C]@n ambassador is here.
+~
+@CT@Wrellis@Ca@w is clearly a female mutant, or at least appears to be.
+Her face is prstinely smooth, breathtakingly beautiful.  If this was
+done intentionally to cater to the weakness of humankind, it
+was a masterful stroke of genius.  Her long, golden hair flows
+down her back like a royal cape, long, luxurious, and incredible
+to behold.  If such a thing as a perfect woman existed, this might
+be it.@n
+~
+bcds 0 0 0 l 0 0 0 0 E
+5 0 10 0d10+0 0d0+0
+0 0 5 5
+8 8 2
+Str: 5
+Dex: 10
+Int: 7
+Wis: 8
+Con: 12
+Cha: 13
+E
+T 1132
+T 1133
+T 1136
+#1190
+Rabbit~
+@wA @WRabbit@n~
+@wA @Wrabbit@w is hopping here.@n
+~
+ @WIt appears to only be a harmless rabbit.  It has grey fur and a white fluffy
+tail.  @n
+~
+dxyz 0 0 0 l 0 0 0 0 E
+4 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 0
+Size: 1
+Str: 5
+Dex: 8
+Int: 5
+Wis: 5
+Con: 7
+Cha: 10
+E
+#1191
+Green Snake~
+@wA @gGreen @wSnake@n~
+@wA @ggreen @wsnake slithers here.@n
+~
+ @WA non-poisonous snake that never the less has a long strong muscular body
+made for crushing its prey.  It can also bite and has sharp strong fangs.  @n
+~
+dz 0 0 0 l 0 0 0 0 E
+5 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 0
+Str: 5
+Dex: 10
+Int: 6
+Wis: 5
+Con: 8
+Cha: 6
+E
+#1192
+Coyote~
+@WC@Do@wy@Wo@Dt@we@n~
+@wA @Wc@Do@wy@Wo@Dt@we is tracking something here.@n
+~
+ @WThis scrawny canine is about the size of a medium sized dog, only thinner and
+meaner.  It has sharp teeth and grey fur.  @n
+~
+dxyz 0 0 0 l 0 0 0 0 E
+5 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 0
+Size: 4
+Str: 8
+Dex: 7
+Int: 5
+Wis: 7
+Con: 10
+Cha: 9
+E
+#1193
+Male Hiker~
+@wA Male Hiker@n~
+@wA male hiker is surveying the land here.@n
+~
+ @WThis man is wearing plain hiking clothes with heavy boots and carrying a
+small hiking cane.  @n
+~
+d 0 0 0 0 0 0 0 0 E
+4 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 8
+Dex: 5
+Int: 5
+Wis: 8
+Con: 5
+Cha: 7
+E
+#1194
+Female Hiker~
+@wA Female Hiker@n~
+@wA female hiker is taking a breather here.@n
+~
+ @WThis woman is wearing plain hiking clothes with heavy boots and carrying a
+small hiking cane.  @n
+~
+d 0 0 0 0 0 0 0 0 E
+4 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 2
+Str: 6
+Dex: 8
+Int: 10
+Wis: 5
+Con: 6
+Cha: 6
+E
+$

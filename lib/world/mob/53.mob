@@ -1,0 +1,215 @@
+#5300
+Vicious Troll~
+@RV@ri@Wc@wi@Do@ru@Rs @yT@Drol@yl@n~
+A vicious troll roams here.
+~
+@D @n
+~
+dfvwxyz 0 0 0 l 0 0 0 0 E
+62 0 10 0d4+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 4
+Str: 43
+Dex: 39
+Int: 21
+Wis: 18
+Con: 56
+Cha: 46
+E
+#5301
+Gene-Spliced Rex~
+@MG@me@Wn@we@D-@mS@Mp@Dl@wi@Wc@me@Md @RR@De@rx@n~
+A gene-spliced Rex is roaring here.
+~
+   @WThis creature is a Tyrannosaurus Rex, but genetically altered to be larger
+and stronger than its Earth counterpart. @n
+~
+dfvwxyz 0 0 0 l 0 0 0 0 E
+72 0 10 0d4+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 7
+Str: 51
+Dex: 58
+Int: 20
+Wis: 22
+Con: 66
+Cha: 66
+E
+#5302
+Emerald Wyvern~
+@wan @GE@gm@Ge@gr@Ga@gl@Gd @yW@Yy@yv@Ye@Wr@wn@n ~
+An Emerald Wyvern soars through the sky here.
+~
+@D @n
+~
+dfxyz 0 0 0 lx 0 0 0 0 E
+70 0 10 0d0+0 0d0+0
+0 0 21 28
+8 8 2
+Str: 54
+Dex: 44
+Int: 36
+Wis: 59
+Con: 35
+Cha: 66
+E
+#5303
+Frost Wyrm~
+@Wa @cF@Cr@Wo@Cs@ct @RW@ry@Dr@Rm@n~
+A frost wyrm is hovering here.
+~
+@D @n
+~
+dfvwxyz 0 0 0 lx 0 0 0 0 E
+75 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 6
+BareHandAttack: 12
+Str: 37
+Dex: 44
+Int: 42
+Wis: 32
+Con: 58
+Cha: 57
+E
+#5304
+Aromina Entrance Guard~
+@WA@wr@Do@cm@Ci@Dn@wa @gPreserve@n Guard~
+An Aromina Preserve Guard is standing here.
+~
+@D @n
+~
+bcds 0 0 0 l 0 0 0 0 E
+100 0 10 0d4+0 0d0+0
+0 0 2 6
+8 8 1
+Size: 5
+Str: 72
+Dex: 71
+Int: 64
+Wis: 56
+Con: 84
+Cha: 79
+E
+T 5300
+T 5301
+#5305
+Aromina Preserve Barkeep~
+@WA@wr@Do@cm@Ci@Dn@wa @gPreserve@n Barkeep~
+The barkeep is here, wiping a mug with a wet cloth.
+~
+@D @n
+~
+bcds 0 0 0 l 0 0 0 0 E
+100 0 10 0d4+0 0d0+0
+0 0 2 0
+8 8 1
+Str: 92
+Dex: 89
+Int: 66
+Wis: 94
+Con: 96
+Cha: 66
+E
+#5306
+Aromina Preserve Hunter~
+@WA@wr@Do@cm@Ci@Dn@wa @gPreserve@n Hunter~
+A hunter, tasked with working in the supply shop, is here.
+~
+@D @n
+~
+bds 0 0 0 l 0 0 0 0 E
+100 0 10 0d4+0 0d0+0
+0 0 2 6
+8 8 1
+Str: 77
+Dex: 50
+Int: 57
+Wis: 96
+Con: 100
+Cha: 79
+E
+#5307
+Aromina Entrance Guard~
+@WA@wr@Do@cm@Ci@Dn@wa @gPreserve@n Guard~
+An Aromina Preserve Guard is standing here.
+~
+@D @n
+~
+bcds 0 0 0 l 0 0 0 0 E
+100 0 10 0d4+0 0d0+0
+0 0 2 6
+8 8 1
+Str: 89
+Dex: 89
+Int: 82
+Wis: 55
+Con: 89
+Cha: 85
+E
+T 5302
+T 5306
+T 5392
+#5308
+Gene-Spliced Lion~
+@Wa @MG@me@Wn@we@D-@mS@Mp@Dl@wi@Wc@me@Md @YL@yi@Wo@Yn@n~
+A gene-spliced Lion is napping here.
+~
+@WThis creature is a genetically altered version of the Lion, an animal from Earth.@n
+~
+dfxyz 0 0 0 l 0 0 0 0 E
+64 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 5
+Str: 48
+Dex: 41
+Int: 24
+Wis: 26
+Con: 45
+Cha: 35
+E
+#5309
+Mutated Karinak~
+@Wa @mM@Mu@Wt@wa@Wt@Me@md @GK@ga@yr@Yi@yn@ga@Gk@n~
+A mutated Karinak is rampaging here.
+~
+@WImported from Konack, this Karinak seems to have been genetically altered.@n
+~
+dfvwxyz 0 0 0 l 0 0 0 0 E
+66 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 2
+BareHandAttack: 3
+Str: 54
+Dex: 63
+Int: 44
+Wis: 55
+Con: 57
+Cha: 45
+E
+#5310
+Cloned Midgardsorm~
+@CC@cl@Do@Wn@ce@Cd @gM@Gi@Wd@wg@Da@gr@Gd@Ws@worm@n~
+A cloned Midgardsorm slithers here.
+~
+   @WThis massive snake-like creature is believed to be a cloned version of a
+legendary creature from the planet Vegeta called the Midgardsorm. @n
+~
+dfz 0 0 0 l 0 0 0 0 E
+68 0 10 0d0+0 0d0+0
+0 0 17 28
+8 8 1
+Size: 7
+BareHandAttack: 1
+Str: 59
+Dex: 44
+Int: 32
+Wis: 8
+Con: 50
+Cha: 62
+E
+$

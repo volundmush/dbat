@@ -1,0 +1,214 @@
+#6800
+Recently Deceased Warrior~
+@wRecently Deceased @rW@Ra@Wr@wr@Di@ro@Rr@n~
+@wA recently deceased @rw@Ra@Wr@wr@Di@ro@Rr@w is standing here.@n
+~
+   @WThis warrior has only recently traveled to Otherworld and begun his afterlife
+training. @n
+~
+d 0 0 0 0 0 0 0 5 E
+8 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 5
+Dex: 8
+Int: 5
+Wis: 10
+Con: 7
+Cha: 5
+E
+#6801
+Recently Deceased Warrior~
+@wRecently Deceased @rW@Ra@Wr@wr@Di@ro@Rr@n~
+@wA recently deceased @rw@Ra@Wr@wr@Di@ro@Rr@w is standing here.@n
+~
+   @WThis warrior has only recently traveled to Otherworld and begun his afterlife
+training. @n
+~
+d 0 0 0 l 0 0 0 5 E
+8 0 10 0d0+0 0d0+0
+0 0 1 28
+8 8 1
+Str: 11
+Dex: 5
+Int: 6
+Wis: 5
+Con: 9
+Cha: 10
+E
+#6802
+Recently Deceased Warrior~
+@wRecently Deceased @rW@Ra@Wr@wr@Di@ro@Rr@n~
+@wA recently deceased @rw@Ra@Wr@wr@Di@ro@Rr@w is standing here.@n
+~
+   @WThis warrior has only recently traveled to Otherworld and begun his afterlife
+training. @n
+~
+d 0 0 0 l 0 0 0 5 E
+9 0 10 0d0+0 0d0+0
+0 0 3 28
+8 8 1
+Str: 5
+Dex: 14
+Int: 5
+Wis: 8
+Con: 9
+Cha: 5
+E
+#6803
+Veteran Warrior~
+@wVeteran @rW@Ra@Wr@wr@Di@ro@Rr@n~
+@wA veteran @rw@Ra@Wr@wr@Di@ro@Rr@w is punching the air here.@n
+~
+   @WThis warrior has been dead a little while and has been training on
+Otherworld. @n
+~
+d 0 0 0 l 0 0 0 5 E
+10 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 9
+Dex: 7
+Int: 8
+Wis: 6
+Con: 10
+Cha: 10
+E
+#6804
+Experienced Warrior~
+@wExperienced @rW@Ra@Wr@wr@Di@ro@Rr@n~
+@wAn experienced @rw@Ra@Wr@wr@Di@ro@Rr@w is kicking the air here.@n
+~
+   @WThis warrior has been dead long enough to be experienced in many of the
+universe's fighting styles. @n
+~
+d 0 0 0 l 0 0 0 5 E
+12 0 10 0d0+0 0d0+0
+0 0 6 28
+8 8 1
+Str: 7
+Dex: 8
+Int: 9
+Wis: 6
+Con: 12
+Cha: 6
+E
+#6805
+Ancient Warrior~
+@wAncient @rW@Ra@Wr@wr@Di@ro@Rr@n~
+@wAn ancient @rw@Ra@Wr@wr@Di@ro@Rr @wis meditating here.@n
+~
+   @WThis warrior has moved on from physical training to mental training in his
+years of living in the afterlife. @n
+~
+d 0 0 0 l 0 0 0 5 E
+15 0 10 0d10+0 0d0+0
+0 0 5 5
+8 8 1
+Str: 13
+Dex: 16
+Int: 9
+Wis: 13
+Con: 23
+Cha: 17
+E
+#6806
+Transcendent Warrior~
+@wTranscendent @rW@Ra@Wr@wr@Wi@ro@Rr@n~
+@wA @wtranscendent @rw@Ra@Wr@wr@Wi@ro@Rr@w is standing here with confidence.@n
+~
+   @WThis warrior has mastered nearly everything to learn on Otherworld, all he
+lacks is physical training to reach ever higher. @n
+~
+d 0 0 0 l 0 0 0 5 E
+18 0 10 0d8+0 0d0+0
+0 0 13 7
+8 8 1
+Str: 10
+Dex: 29
+Int: 30
+Wis: 21
+Con: 12
+Cha: 27
+E
+#6807
+Grand Warrior~
+@wGrand @rW@Ra@Wr@wr@Di@ro@Rr@n~
+@wA grand @rw@Ra@Wr@wr@Di@ro@Rr@w is training here.@n
+~
+   @WThis warrior continues to strengthen his fighting prowess with each passing
+day in the afterlife. @n
+~
+d 0 0 0 0 0 0 0 5 E
+22 0 10 0d6+0 0d0+0
+0 0 0 2
+8 8 1
+Str: 19
+Dex: 16
+Int: 26
+Wis: 23
+Con: 17
+Cha: 24
+E
+#6808
+Legendary Warrior~
+@wLegendary @rW@Ra@Wr@wr@Di@ro@Rr@n~
+@wA legendary @rw@Ra@Wr@wr@Di@ro@Rr@w is sparring here.@n
+~
+   @WThis warrior has attained legendary status among those on Otherworld for his
+dedication if not his strength. @n
+~
+d 0 0 0 l 0 0 0 5 E
+30 0 10 0d12+0 0d0+0
+0 0 12 10
+8 8 1
+Str: 22
+Dex: 16
+Int: 19
+Wis: 19
+Con: 17
+Cha: 17
+E
+#6809
+Higher Plane Pilot~
+@wHigher Plane Pilot@n~
+@wThe Higher Plane pilot is standing here.@n
+~
+   @WThis female appears to work as the pilot of the plane to and from Otherworld.
+She is wearing an airplane pilot's uniform. @n
+~
+bdegs 0 0 0 efglA b 0 0 5 E
+20 0 10 0d0+0 0d0+0
+0 0 12 28
+8 8 2
+Str: 17
+Dex: 11
+Int: 12
+Wis: 16
+Con: 14
+Cha: 17
+E
+T 6800
+T 6801
+#6810
+Sage of Iovan~
+@cSage @wof @CIovan@n~
+@wThe @cSage @wof @CIovan@w is standing here leaning on a staff.@n
+~
+   @WThis old looking kai is wearing a long white robe with a hood pulled up over
+his head. In his hands is a large ornately carved wooden staff. @n
+~
+bd 0 0 0 l 0 0 0 0 E
+40 0 10 0d0+0 0d0+0
+0 0 12 28
+8 8 1
+Str: 29
+Dex: 28
+Int: 35
+Wis: 31
+Con: 32
+Cha: 30
+E
+T 6802
+T 6803
+$

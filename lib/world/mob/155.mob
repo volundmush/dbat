@@ -1,0 +1,478 @@
+#15500
+mob unfinished~
+the unfinished mob~
+An unfinished mob stands here.
+~
+It looks unfinished.
+~
+d 0 0 0 l 0 0 0 0 E
+0 0 10 0d0+0 0d0+0
+0 0 20 28
+8 8 1
+Str: 15
+Dex: 9
+Int: 5
+Wis: 7
+Con: 6
+Cha: 14
+E
+#15501
+Doctor~
+a Doctor~
+A Doctor is here, mumbling to himself
+~
+He is wearing a standard white labcoat worn by all doctors.
+~
+bds 0 0 0 0 0 0 0 0 E
+50 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 33
+Dex: 47
+Int: 35
+Wis: 26
+Con: 26
+Cha: 36
+E
+T 15503
+T 15505
+T 15504
+#15502
+Logic Tester~
+Logic Tester~
+The Logic Tester
+~
+It looks unfinished.
+~
+d 0 0 0 0 0 0 0 0 E
+1 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 20
+Dex: 15
+Int: 17
+Wis: 11
+Con: 14
+Cha: 8
+E
+T 15597
+#15503
+Ticket Seller~
+Ticket Seller~
+A ticket seller roams around the area, selling tickets for an event
+~
+ 
+~
+bds 0 0 0 0 0 0 0 0 E
+100 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 8
+Dex: 15
+Int: 8
+Wis: 8
+Con: 15
+Cha: 15
+E
+T 15515
+T 15521
+#15505
+Rebel Guard~
+a Rebel Guard~
+A Rebel Guard stands at the entrance to the camp
+~
+It looks unfinished.
+~
+bd 0 0 0 l 0 0 0 0 E
+55 0 10 0d0+0 0d0+0
+0 0 12 28
+8 8 1
+Str: 30
+Dex: 27
+Int: 44
+Wis: 28
+Con: 42
+Cha: 44
+E
+#15508
+Elite Guard~
+an Elite Guard~
+An elite guard watches over the command tent
+~
+It looks unfinished.
+~
+bd 0 0 0 l 0 0 0 0 E
+63 0 10 0d0+0 0d0+0
+0 0 12 28
+8 8 1
+BareHandAttack: 3
+Str: 38
+Dex: 32
+Int: 59
+Wis: 47
+Con: 35
+Cha: 35
+E
+#15509
+Commander Kerin~
+Commander Kerin~
+Commander Kerin stands here, looking over a map of the city
+~
+   The commander of the Rebels fighting to retake the city, Kerin, stands at
+about 5'6, and appears to weigh around 163lbs. He wears armor with a charred
+cape behind him. Two swords hang from his belt on opposite sides.
+~
+bd 0 0 0 l 0 0 0 10 E
+55 0 10 0d4+0 0d0+0
+0 0 12 28
+8 8 1
+Str: 38
+Dex: 52
+Int: 54
+Wis: 29
+Con: 55
+Cha: 51
+E
+T 15508
+T 15509
+T 15507
+#15510
+Rebel Guard~
+a Rebel Guard~
+A Rebel Guard patrols the area
+~
+It looks unfinished.
+~
+d 0 0 0 l 0 0 0 0 E
+52 0 10 0d0+0 0d0+0
+0 0 12 28
+8 8 1
+BareHandAttack: 13
+Str: 29
+Dex: 40
+Int: 29
+Wis: 33
+Con: 47
+Cha: 39
+E
+#15511
+Medic~
+a Medic~
+A Medic rushes around, tending to the wounded
+~
+It looks unfinished.
+~
+bd 0 0 0 l 0 0 0 0 E
+50 0 10 0d0+0 0d0+0
+0 0 12 28
+8 8 1
+Str: 30
+Dex: 34
+Int: 37
+Wis: 48
+Con: 32
+Cha: 29
+E
+T 15511
+T 15513
+#15512
+Armory Keeper~
+the Armory Keeper~
+The keeper of the armory sits behind a desk next to the enterence
+~
+   This Kai looks rare for his species. He is build for combat with large
+muscles and just a mean look about him.
+~
+bds 0 0 0 l 0 0 0 0 E
+45 0 10 0d0+0 0d0+0
+0 0 12 28
+8 8 1
+Str: 26
+Dex: 32
+Int: 38
+Wis: 26
+Con: 22
+Cha: 23
+E
+T 15514
+T 15512
+#15513
+Rebel Guard~
+a Rebel Guard~
+A Rebel Guard patrols the camp here
+~
+It looks unfinished.
+~
+d 0 0 0 l 0 0 0 0 E
+54 0 10 0d0+0 0d0+0
+0 0 12 28
+8 8 2
+BareHandAttack: 13
+Str: 42
+Dex: 43
+Int: 50
+Wis: 29
+Con: 50
+Cha: 53
+E
+#15514
+Rebel Guard~
+a Rebel Guard~
+A Guard stands here, watching over the armory
+~
+It looks unfinished.
+~
+bd 0 0 0 l 0 0 0 0 E
+49 0 10 0d0+0 0d0+0
+0 0 12 28
+8 8 1
+Str: 45
+Dex: 36
+Int: 41
+Wis: 41
+Con: 34
+Cha: 33
+E
+#15515
+Hysteric Woman~
+a hysteric woman~
+A hysteric woman sits on the edge of a small cot, sobbing
+~
+   Her clothes are all torn up, burn marks every where. One of her arms is
+covered in bandages.
+~
+bds 0 0 0 l 0 0 0 0 E
+13 0 10 0d0+0 0d0+0
+0 0 12 28
+8 8 2
+Str: 20
+Dex: 9
+Int: 19
+Wis: 10
+Con: 20
+Cha: 13
+E
+T 15516
+#15516
+Rebel Guard~
+a Rebel Guard~
+A Rebel Guard walks around, looking for Makai
+~
+It looks unfinished.
+~
+d 0 0 0 l 0 0 0 0 E
+55 0 10 0d0+0 0d0+0
+0 0 12 28
+8 8 1
+BareHandAttack: 13
+Str: 38
+Dex: 35
+Int: 37
+Wis: 38
+Con: 30
+Cha: 28
+E
+#15517
+Refugee~
+a Refugee~
+A Refugee wanders around here
+~
+It looks unfinished.
+~
+d 0 0 0 l 0 0 0 0 E
+45 0 10 0d0+0 0d0+0
+0 0 12 28
+8 8 1
+Str: 29
+Dex: 41
+Int: 43
+Wis: 35
+Con: 28
+Cha: 25
+E
+#15520
+Makai Guard~
+a Makai Guard~
+A Makai stands guard here
+~
+It looks unfinished.
+~
+bdf 0 0 0 l 0 0 0 0 E
+56 0 10 0d0+0 0d0+0
+0 0 12 28
+8 8 1
+Str: 34
+Dex: 39
+Int: 55
+Wis: 30
+Con: 33
+Cha: 47
+E
+T 15520
+#15521
+Makai Warrior~
+a Makai Warrior~
+A Makai Warrior is standing here
+~
+It looks unfinished.
+~
+df 0 0 0 l 0 0 0 0 E
+56 0 10 0d4+0 0d0+0
+0 0 12 28
+8 8 1
+Str: 45
+Dex: 52
+Int: 51
+Wis: 41
+Con: 47
+Cha: 32
+E
+#15531
+Scared Kai~
+a Scared Kai~
+A scared Kai is here, hiding behind some rubble
+~
+   This kai's clothes are torn in places, blood runs down his cheek and drips
+onto the ground and his shirt.
+~
+d 0 0 0 l 0 0 0 0 E
+47 0 10 0d0+0 0d0+0
+0 0 12 28
+8 8 1
+Str: 45
+Dex: 39
+Int: 27
+Wis: 30
+Con: 37
+Cha: 44
+E
+T 15531
+T 15532
+T 15530
+#15544
+Insane Makai~
+an Insane Makai~
+An Insane Makai wanders the streets, looking for survivors
+~
+   This Makai looks around with an evil grin on his face, and bursts out
+laughing before sending an energy blast off at a building. Scars cover his
+face, and show through his torn clothing.
+~
+df 0 0 0 l 0 0 0 0 E
+58 0 10 0d0+0 0d0+0
+0 0 12 28
+8 8 1
+BareHandAttack: 13
+Str: 47
+Dex: 53
+Int: 48
+Wis: 40
+Con: 36
+Cha: 51
+E
+T 15544
+#15545
+Makai Succubus~
+a Makai Succubus~
+A Makai Succubus stands at one of the intersection corners
+~
+It looks unfinished.
+~
+bdf 0 0 0 l 0 0 0 0 E
+65 0 10 0d0+0 0d0+0
+0 0 12 28
+8 8 2
+BareHandAttack: 2
+Str: 61
+Dex: 33
+Int: 46
+Wis: 33
+Con: 54
+Cha: 59
+E
+#15579
+Makai Shaman~
+a Makai shaman~
+A Makai shaman sits here, chanting.
+~
+It looks unfinished.
+~
+bd 0 0 0 l 0 0 0 0 E
+61 0 10 0d0+0 0d0+0
+0 0 12 28
+6 6 1
+Str: 61
+Dex: 49
+Int: 47
+Wis: 53
+Con: 33
+Cha: 46
+E
+#15593
+Lost Child~
+a lost child~
+A lost child stands here, crying for her mom
+~
+   A small child stands here, crying out for her mom. She holds a small teddy
+bear in her arms, that is missing an eye and it's left arm. Her clothes are
+torn in places, and she has some dried up blood on her cheek.
+~
+bds 0 0 0 l 0 0 0 0 E
+3 0 10 0d0+0 0d0+0
+0 0 12 28
+8 8 2
+Str: 6
+Dex: 13
+Int: 16
+Wis: 6
+Con: 7
+Cha: 5
+E
+T 15593
+T 15592
+#15595
+Makai Warlord~
+a Makai Warlord~
+A Makai Warlord stands here, resting a large sword on his shoulder
+~
+   It looks unfinished. The Makai Warlord is adorned with all types of
+diferent stuff. He wears battle armor that has scratches, dents, and even
+peices missing from it. Around his waist is a belt that holds many diferent
+things, skulls, small daggers, and other assorted items from previous battles.
+Around a neck hangs a small chain with the mark of a Makai Warlord hanging from
+it.
+~
+bd 0 0 0 l 0 0 0 0 E
+64 0 10 0d4+0 0d0+0
+0 0 12 28
+8 8 1
+BareHandAttack: 3
+Str: 45
+Dex: 32
+Int: 47
+Wis: 41
+Con: 44
+Cha: 57
+E
+T 15599
+T 15595
+T 15598
+#15599
+Kiel Mayor~
+Kiel the Mayor~
+Kiel, the Mayor, is here cowering in fear
+~
+
+~
+bd 0 0 0 l 0 0 0 0 E
+43 0 10 0d0+0 0d0+0
+0 0 12 28
+8 8 1
+Str: 37
+Dex: 22
+Int: 38
+Wis: 30
+Con: 29
+Cha: 27
+E
+$

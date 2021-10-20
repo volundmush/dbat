@@ -1,0 +1,267 @@
+#2900
+Golem Bravery~
+@wA G@Wo@Dl@We@wm of @rB@Rr@Wa@wv@re@Rr@Wy@n~
+@wA @wG@Wo@Dl@We@wm of @rB@Rr@Wa@wv@re@Rr@Wy@n is standing here.@n
+~
+   @WThis is a large statue of a saiyan warrior. It seems to be enchanted and
+moving as if it were alive. @n
+~
+bdA 0 0 0 l 0 0 0 0 E
+50 0 10 0d0+0 0d0+0
+0 0 1 28
+8 8 0
+Size: 5
+Str: 38
+Dex: 37
+Int: 26
+Wis: 40
+Con: 46
+Cha: 30
+E
+#2901
+Golem Strength~
+@wA G@Wo@Dl@We@wm of @bS@Bt@Wr@we@bn@Bg@Wt@wh@n~
+@wA G@Wo@Dl@We@wm of @bS@Bt@Wr@we@bn@Bg@Wt@wh is standing here.@n
+~
+   @WThis is a large statue of a saiyan warrior. It seems to be enchanted and
+moving as if it were alive. @n
+~
+bdA 0 0 0 l 0 0 0 0 E
+55 0 10 0d0+0 0d0+0
+0 0 1 28
+8 8 0
+Size: 5
+Str: 49
+Dex: 32
+Int: 28
+Wis: 37
+Con: 37
+Cha: 43
+E
+#2902
+Golem Wisdom~
+@wA G@Wo@Dl@We@wm of @mW@Mi@Ws@wd@mo@Mm@n~
+@wA G@Wo@Dl@We@wm of @mW@Mi@Ws@wd@mo@Mm@w is standing here.@n
+~
+   @WThis is a large statue of a saiyan warrior. It seems to be enchanted and
+moving as if it were alive. @n
+~
+bdA 0 0 0 l 0 0 0 0 E
+60 0 10 0d0+0 0d0+0
+0 0 1 28
+8 8 0
+Size: 5
+Str: 47
+Dex: 34
+Int: 42
+Wis: 45
+Con: 40
+Cha: 46
+E
+#2903
+Golem Cunning~
+@wA G@Wo@Dl@We@wm of @gC@Gu@Wn@wn@gi@Gn@Wg@n~
+@wA G@Wo@Dl@We@wm of @gC@Gu@Wn@wn@gi@Gn@Wg@w is standing here.@n
+~
+   @WThis is a large statue of a saiyan warrior. It seems to be enchanted and
+moving as if it were alive. @n
+~
+bdA 0 0 0 l 0 0 0 0 E
+65 0 10 0d0+0 0d0+0
+0 0 1 28
+8 8 0
+Size: 5
+Str: 47
+Dex: 64
+Int: 44
+Wis: 57
+Con: 51
+Cha: 50
+E
+#2904
+Golem Honor~
+@wA G@Wo@Dl@We@wm of @cH@Co@Wn@wo@cr@n~
+@wA G@Wo@Dl@We@wm of @cH@Co@Wn@wo@cr@w is standing here.@n
+~
+   @WThis is a large statue of a saiyan warrior. It seems to be enchanted and
+moving as if it were alive. @n
+~
+bdA 0 0 0 l 0 0 0 0 E
+70 0 10 0d0+0 0d0+0
+0 0 1 28
+8 8 0
+Size: 5
+Str: 57
+Dex: 39
+Int: 40
+Wis: 46
+Con: 44
+Cha: 59
+E
+#2905
+Golem Victory~
+@wA G@Wo@Dl@We@wm of @yV@Yi@Wc@wt@yo@Yr@Wy@n~
+@wA G@Wo@Dl@We@wm of @yV@Yi@Wc@wt@yo@Yr@Wy@w is standing here.@n
+~
+   @WThis is a large statue of a saiyan warrior. It seems to be enchanted and
+moving as if it were alive. @n
+~
+bdA 0 0 0 l 0 0 0 0 E
+75 0 10 0d0+0 0d0+0
+0 0 1 28
+8 8 0
+Size: 5
+Str: 57
+Dex: 37
+Int: 50
+Wis: 68
+Con: 58
+Cha: 49
+E
+#2906
+Guardian Bravery~
+@DG@Wu@wa@Wr@Dd@Wi@wa@Wn @wof @rB@Rr@Wa@wv@re@Rr@Wy@n~
+@wThe @DG@Wu@wa@Wr@Dd@Wi@wa@Wn @wof @rB@Rr@Wa@wv@re@Rr@Wy@w is standing here.@n
+~
+   @WThis statue of a saiyan warrior appears to be made out of jade stone. 
+Standing at about sixteen feet tall it looks down on the room with eyes of blue
+fire. @n
+~
+bdA 0 0 0 l 0 0 0 0 E
+80 0 10 0d4+0 0d0+0
+0 0 1 0
+8 8 0
+Str: 65
+Dex: 65
+Int: 59
+Wis: 66
+Con: 62
+Cha: 57
+E
+T 2903
+#2907
+Guardian Strength~
+@DG@Wu@wa@Wr@Dd@Wi@wa@Wn @wof @bS@Bt@Wr@we@bn@Bg@Wt@wh@n~
+@wThe @DG@Wu@wa@Wr@Dd@Wi@wa@Wn @wof @bS@Bt@Wr@we@bn@Bg@Wt@wh is standing here.@n
+~
+   @WThis statue of a saiyan warrior appears to be made out of jade stone. 
+Standing at about sixteen feet tall it looks down on the room with eyes of blue
+fire. @n
+~
+bdA 0 0 0 l 0 0 0 0 E
+82 0 10 0d8+0 0d0+0
+0 0 1 1
+8 8 0
+Str: 79
+Dex: 55
+Int: 59
+Wis: 55
+Con: 53
+Cha: 79
+E
+T 2903
+#2908
+Guardian Wisdom~
+@DG@Wu@wa@Wr@Dd@Wi@wa@Wn @wof @mW@Mi@Ws@wd@mo@Mm@n~
+@wThe @DG@Wu@wa@Wr@Dd@Wi@wa@Wn @wof @mW@Mi@Ws@wd@mo@Mm@w is standing here.@n
+~
+   @WThis statue of a saiyan warrior appears to be made out of jade stone. 
+Standing at about sixteen feet tall it looks down on the room with eyes of blue
+fire. @n
+~
+bdA 0 0 0 l 0 0 0 0 E
+84 0 10 0d6+0 0d0+0
+0 0 1 2
+8 8 0
+Str: 52
+Dex: 48
+Int: 68
+Wis: 64
+Con: 65
+Cha: 61
+E
+T 2903
+#2909
+Guardian Cunning~
+@DG@Wu@wa@Wr@Dd@Wi@wa@Wn @wof @gC@Gu@Wn@wn@gi@Gn@Wg@n~
+@wThe @DG@Wu@wa@Wr@Dd@Wi@wa@Wn @wof @gC@Gu@Wn@wn@gi@Gn@Wg@w is standing here.@n
+~
+   @WThis statue of a saiyan warrior appears to be made out of jade stone. 
+Standing at about sixteen feet tall it looks down on the room with eyes of blue
+fire. @n
+~
+bdA 0 0 0 l 0 0 0 0 E
+86 0 10 0d10+0 0d0+0
+0 0 1 3
+8 8 0
+Str: 81
+Dex: 68
+Int: 48
+Wis: 75
+Con: 52
+Cha: 67
+E
+T 2903
+#2910
+Guardian Honor~
+@DG@Wu@wa@Wr@Dd@Wi@wa@Wn @wof @cH@Co@Wn@wo@cr@n~
+@wThe @DG@Wu@wa@Wr@Dd@Wi@wa@Wn @wof @cH@Co@Wn@wo@cr@w is standing here.@n
+~
+   @WThis statue of a saiyan warrior appears to be made out of jade stone. 
+Standing at about sixteen feet tall it looks down on the room with eyes of blue
+fire. @n
+~
+bdA 0 0 0 l 0 0 0 0 E
+88 0 10 0d8+0 0d0+0
+0 0 1 4
+8 8 0
+Str: 84
+Dex: 72
+Int: 57
+Wis: 71
+Con: 83
+Cha: 49
+E
+T 2903
+#2911
+Guardian Victory~
+@DG@Wu@wa@Wr@Dd@Wi@wa@Wn @wof @yV@Yi@Wc@wt@yo@Yr@Wy@n~
+@wThe @DG@Wu@wa@Wr@Dd@Wi@wa@Wn @wof @yV@Yi@Wc@wt@yo@Yr@Wy@w is standing here.@n
+~
+   @WThis statue of a saiyan warrior appears to be made out of jade stone. 
+Standing at about sixteen feet tall it looks down on the room with eyes of blue
+fire. @n
+~
+bdA 0 0 0 l 0 0 0 0 E
+90 0 10 0d10+0 0d0+0
+0 0 1 5
+8 8 0
+Str: 74
+Dex: 89
+Int: 78
+Wis: 78
+Con: 77
+Cha: 68
+E
+T 2903
+#2912
+Keeper Pride~
+@yK@Ye@We@wper of @rP@Rr@Wi@wde@n~
+@wThe @yK@Ye@We@wper of @rP@Rr@Wi@wde@w is standing here menacingly.@n
+~
+   @WThis saiyan appears to be quite old. Dressed in a crimson robe while
+holding a gnarled wooden staff in his right hand and a worn leather book in his
+left. @n
+~
+bdA 0 0 0 l 0 0 0 0 E
+90 0 10 0d4+0 0d0+0
+0 0 1 6
+8 8 1
+Str: 58
+Dex: 83
+Int: 79
+Wis: 48
+Con: 71
+Cha: 64
+E
+$

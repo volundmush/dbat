@@ -1,0 +1,2151 @@
+#14100
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WNear Yardra City@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 0 fD 0 0 3
+D1
+~
+~
+0 0 14042 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14102 0 0 0 0 0 0 0 0
+S
+#14101
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WSunlit Clearing@n~
+   @GThis clearing has few trees and an ample amount of sunlight penetrating the
+forest canopy. Hair-like grass fills the clearing along with a few crystaline
+bushes. In a few spots animal burrows can be seen dug into the clearing ground.
+A general feeling of peace permeates the area. @n
+~
+141 0 fD 0 0 3
+D2
+~
+~
+0 0 14102 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14106 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14105 0 0 0 0 0 0 0 0
+S
+#14102
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WSunlit Clearing@n~
+   @GThis clearing has few trees and an ample amount of sunlight penetrating the
+forest canopy. Hair-like grass fills the clearing along with a few crystaline
+bushes. In a few spots animal burrows can be seen dug into the clearing ground.
+A general feeling of peace permeates the area. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14101 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14100 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14103 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14105 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14106 0 0 0 0 0 0 0 0
+S
+#14103
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WSunlit Clearing@n~
+   @GThis clearing has few trees and an ample amount of sunlight penetrating the
+forest canopy. Hair-like grass fills the clearing along with a few crystaline
+bushes. In a few spots animal burrows can be seen dug into the clearing ground.
+A general feeling of peace permeates the area. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14102 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14104 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14105 0 0 0 0 0 0 0 0
+S
+#14104
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WSunlit Clearing@n~
+   @GThis clearing has few trees and an ample amount of sunlight penetrating the
+forest canopy. Hair-like grass fills the clearing along with a few crystaline
+bushes. In a few spots animal burrows can be seen dug into the clearing ground.
+A general feeling of peace permeates the area. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14105 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14103 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14180 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14109 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14108 0 0 0 0 0 0 0 0
+S
+#14105
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WSunlit Clearing@n~
+   @GThis clearing has few trees and an ample amount of sunlight penetrating the
+forest canopy. Hair-like grass fills the clearing along with a few crystaline
+bushes. In a few spots animal burrows can be seen dug into the clearing ground.
+A general feeling of peace permeates the area. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14106 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14102 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14104 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14108 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14107 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14101 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14103 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14109 0 0 0 0 0 0 0 0
+S
+#14106
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WSunlit Clearing@n~
+   @GThis clearing has few trees and an ample amount of sunlight penetrating the
+forest canopy. Hair-like grass fills the clearing along with a few crystaline
+bushes. In a few spots animal burrows can be seen dug into the clearing ground.
+A general feeling of peace permeates the area. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14110 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14101 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14105 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14107 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14102 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14108 0 0 0 0 0 0 0 0
+S
+#14107
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WSunlit Clearing@n~
+   @GThis clearing has few trees and an ample amount of sunlight penetrating the
+forest canopy. Hair-like grass fills the clearing along with a few crystaline
+bushes. In a few spots animal burrows can be seen dug into the clearing ground.
+A general feeling of peace permeates the area. @n
+~
+141 0 fD 0 0 3
+D1
+~
+~
+0 0 14106 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14108 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14105 0 0 0 0 0 0 0 0
+S
+#14108
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WSunlit Clearing@n~
+   @GThis clearing has few trees and an ample amount of sunlight penetrating the
+forest canopy. Hair-like grass fills the clearing along with a few crystaline
+bushes. In a few spots animal burrows can be seen dug into the clearing ground.
+A general feeling of peace permeates the area. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14107 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14105 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14109 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14106 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14104 0 0 0 0 0 0 0 0
+S
+#14109
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WSunlit Clearing@n~
+   @GThis clearing has few trees and an ample amount of sunlight penetrating the
+forest canopy. Hair-like grass fills the clearing along with a few crystaline
+bushes. In a few spots animal burrows can be seen dug into the clearing ground.
+A general feeling of peace permeates the area. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14108 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14104 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14105 0 0 0 0 0 0 0 0
+S
+#14110
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 c fD 0 0 3
+D0
+~
+~
+0 0 14111 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14106 0 0 0 0 0 0 0 0
+S
+#14111
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14112 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14110 0 0 0 0 0 0 0 0
+S
+#14112
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 0 fD 0 0 3
+D2
+~
+~
+0 0 14111 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14113 0 0 0 0 0 0 0 0
+S
+#14113
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 0 fD 0 0 3
+D1
+~
+~
+0 0 14112 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14114 0 0 0 0 0 0 0 0
+S
+#14114
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 c fD 0 0 3
+D1
+~
+~
+0 0 14113 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14117 0 0 0 0 0 0 0 0
+S
+#14115
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WThick Clearing@n~
+   @GThis clearing has a decent amount of sunlight penetrating the canopy lighting
+up hundreds of fat and tall crystaline bushes that fill the nearly treeless
+clearing. These bushes appear to have crystaline thorns that grow from their
+branches and make traveling difficult.
+~
+141 0 fD 0 0 3
+D2
+~
+~
+0 0 14116 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14124 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14123 0 0 0 0 0 0 0 0
+S
+#14116
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WThick Clearing@n~
+   @GThis clearing has a decent amount of sunlight penetrating the canopy lighting
+up hundreds of fat and tall crystaline bushes that fill the nearly treeless
+clearing. These bushes appear to have crystaline thorns that grow from their
+branches and make traveling difficult.
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14115 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14117 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14123 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14124 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14122 0 0 0 0 0 0 0 0
+S
+#14117
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WThick Clearing@n~
+   @GThis clearing has a decent amount of sunlight penetrating the canopy lighting
+up hundreds of fat and tall crystaline bushes that fill the nearly treeless
+clearing. These bushes appear to have crystaline thorns that grow from their
+branches and make traveling difficult.
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14116 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14114 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14118 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14122 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14123 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14121 0 0 0 0 0 0 0 0
+S
+#14118
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WThick Clearing@n~
+   @GThis clearing has a decent amount of sunlight penetrating the canopy lighting
+up hundreds of fat and tall crystaline bushes that fill the nearly treeless
+clearing. These bushes appear to have crystaline thorns that grow from their
+branches and make traveling difficult.
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14117 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14119 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14121 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14122 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14120 0 0 0 0 0 0 0 0
+S
+#14119
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WThick Clearing@n~
+   @GThis clearing has a decent amount of sunlight penetrating the canopy lighting
+up hundreds of fat and tall crystaline bushes that fill the nearly treeless
+clearing. These bushes appear to have crystaline thorns that grow from their
+branches and make traveling difficult.
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14118 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14120 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14121 0 0 0 0 0 0 0 0
+S
+#14120
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WThick Clearing@n~
+   @GThis clearing has a decent amount of sunlight penetrating the canopy lighting
+up hundreds of fat and tall crystaline bushes that fill the nearly treeless
+clearing. These bushes appear to have crystaline thorns that grow from their
+branches and make traveling difficult.
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14121 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14119 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14189 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14129 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14128 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14118 0 0 0 0 0 0 0 0
+S
+#14121
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WThick Clearing@n~
+   @GThis clearing has a decent amount of sunlight penetrating the canopy lighting
+up hundreds of fat and tall crystaline bushes that fill the nearly treeless
+clearing. These bushes appear to have crystaline thorns that grow from their
+branches and make traveling difficult.
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14122 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14118 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14120 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14128 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14127 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14117 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14119 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14129 0 0 0 0 0 0 0 0
+S
+#14122
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WThick Clearing@n~
+   @GThis clearing has a decent amount of sunlight penetrating the canopy lighting
+up hundreds of fat and tall crystaline bushes that fill the nearly treeless
+clearing. These bushes appear to have crystaline thorns that grow from their
+branches and make traveling difficult.
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14123 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14117 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14121 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14127 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14126 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14116 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14118 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14128 0 0 0 0 0 0 0 0
+S
+#14123
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WThick Clearing@n~
+   @GThis clearing has a decent amount of sunlight penetrating the canopy lighting
+up hundreds of fat and tall crystaline bushes that fill the nearly treeless
+clearing. These bushes appear to have crystaline thorns that grow from their
+branches and make traveling difficult.
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14124 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14116 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14122 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14126 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14125 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14115 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14117 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14127 0 0 0 0 0 0 0 0
+S
+#14124
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WThick Clearing@n~
+   @GThis clearing has a decent amount of sunlight penetrating the canopy lighting
+up hundreds of fat and tall crystaline bushes that fill the nearly treeless
+clearing. These bushes appear to have crystaline thorns that grow from their
+branches and make traveling difficult.
+~
+141 0 fD 0 0 3
+D1
+~
+~
+0 0 14115 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14123 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14125 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14116 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14126 0 0 0 0 0 0 0 0
+S
+#14125
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WThick Clearing@n~
+   @GThis clearing has a decent amount of sunlight penetrating the canopy lighting
+up hundreds of fat and tall crystaline bushes that fill the nearly treeless
+clearing. These bushes appear to have crystaline thorns that grow from their
+branches and make traveling difficult.
+~
+141 0 fD 0 0 3
+D1
+~
+~
+0 0 14124 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14126 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14123 0 0 0 0 0 0 0 0
+S
+#14126
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WThick Clearing@n~
+   @GThis clearing has a decent amount of sunlight penetrating the canopy lighting
+up hundreds of fat and tall crystaline bushes that fill the nearly treeless
+clearing. These bushes appear to have crystaline thorns that grow from their
+branches and make traveling difficult.
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14125 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14123 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14127 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14124 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14122 0 0 0 0 0 0 0 0
+S
+#14127
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WThick Clearing@n~
+   @GThis clearing has a decent amount of sunlight penetrating the canopy lighting
+up hundreds of fat and tall crystaline bushes that fill the nearly treeless
+clearing. These bushes appear to have crystaline thorns that grow from their
+branches and make traveling difficult.
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14126 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14122 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14128 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14130 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14123 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14121 0 0 0 0 0 0 0 0
+S
+#14128
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WThick Clearing@n~
+   @GThis clearing has a decent amount of sunlight penetrating the canopy lighting
+up hundreds of fat and tall crystaline bushes that fill the nearly treeless
+clearing. These bushes appear to have crystaline thorns that grow from their
+branches and make traveling difficult.
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14127 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14121 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14129 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14122 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14120 0 0 0 0 0 0 0 0
+S
+#14129
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WThick Clearing@n~
+   @GThis clearing has a decent amount of sunlight penetrating the canopy lighting
+up hundreds of fat and tall crystaline bushes that fill the nearly treeless
+clearing. These bushes appear to have crystaline thorns that grow from their
+branches and make traveling difficult.
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14128 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14120 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14121 0 0 0 0 0 0 0 0
+S
+#14130
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 c fD 0 0 3
+D1
+~
+~
+0 0 14127 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14131 0 0 0 0 0 0 0 0
+S
+#14131
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 0 fD 0 0 3
+D1
+~
+~
+0 0 14130 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14132 0 0 0 0 0 0 0 0
+S
+#14132
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 0 fD 0 0 3
+D2
+~
+~
+0 0 14133 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14131 0 0 0 0 0 0 0 0
+S
+#14133
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14132 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14134 0 0 0 0 0 0 0 0
+S
+#14134
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14133 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14135 0 0 0 0 0 0 0 0
+S
+#14135
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14134 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14136 0 0 0 0 0 0 0 0
+S
+#14136
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 0 fD 0 0 3
+D2
+~
+~
+0 0 14137 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14135 0 0 0 0 0 0 0 0
+S
+#14137
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14136 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14138 0 0 0 0 0 0 0 0
+S
+#14138
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14137 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14139 0 0 0 0 0 0 0 0
+S
+#14139
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14138 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14140 0 0 0 0 0 0 0 0
+S
+#14140
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14139 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14184 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14141 0 0 0 0 0 0 0 0
+S
+#14141
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 c fD 0 0 3
+D7
+~
+~
+0 0 14140 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14142 0 0 0 0 0 0 0 0
+S
+#14142
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WSunlit Clearing@n~
+   @GThis clearing has few trees and an ample amount of sunlight penetrating the
+forest canopy. Hair-like grass fills the clearing along with a few crystaline
+bushes. In a few spots animal burrows can be seen dug into the clearing ground.
+A general feeling of peace permeates the area. @n
+~
+141 0 fD 0 0 3
+D2
+~
+~
+0 0 14147 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14143 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14141 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14146 0 0 0 0 0 0 0 0
+S
+#14143
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WSunlit Clearing@n~
+   @GThis clearing has few trees and an ample amount of sunlight penetrating the
+forest canopy. Hair-like grass fills the clearing along with a few crystaline
+bushes. In a few spots animal burrows can be seen dug into the clearing ground.
+A general feeling of peace permeates the area. @n
+~
+141 0 fD 0 0 3
+D1
+~
+~
+0 0 14142 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14146 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14144 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14147 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14145 0 0 0 0 0 0 0 0
+S
+#14144
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WSunlit Clearing@n~
+   @GThis clearing has few trees and an ample amount of sunlight penetrating the
+forest canopy. Hair-like grass fills the clearing along with a few crystaline
+bushes. In a few spots animal burrows can be seen dug into the clearing ground.
+A general feeling of peace permeates the area. @n
+~
+141 0 fD 0 0 3
+D1
+~
+~
+0 0 14143 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14145 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14146 0 0 0 0 0 0 0 0
+S
+#14145
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WSunlit Clearing@n~
+   @GThis clearing has few trees and an ample amount of sunlight penetrating the
+forest canopy. Hair-like grass fills the clearing along with a few crystaline
+bushes. In a few spots animal burrows can be seen dug into the clearing ground.
+A general feeling of peace permeates the area. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14144 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14146 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14150 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14143 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14149 0 0 0 0 0 0 0 0
+S
+#14146
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WSunlit Clearing@n~
+   @GThis clearing has few trees and an ample amount of sunlight penetrating the
+forest canopy. Hair-like grass fills the clearing along with a few crystaline
+bushes. In a few spots animal burrows can be seen dug into the clearing ground.
+A general feeling of peace permeates the area. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14143 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14147 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14149 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14145 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14144 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14142 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14148 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14150 0 0 0 0 0 0 0 0
+S
+#14147
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WSunlit Clearing@n~
+   @GThis clearing has few trees and an ample amount of sunlight penetrating the
+forest canopy. Hair-like grass fills the clearing along with a few crystaline
+bushes. In a few spots animal burrows can be seen dug into the clearing ground.
+A general feeling of peace permeates the area. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14142 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14148 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14146 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14143 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14149 0 0 0 0 0 0 0 0
+S
+#14148
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WSunlit Clearing@n~
+   @GThis clearing has few trees and an ample amount of sunlight penetrating the
+forest canopy. Hair-like grass fills the clearing along with a few crystaline
+bushes. In a few spots animal burrows can be seen dug into the clearing ground.
+A general feeling of peace permeates the area. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14147 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14149 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14146 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14151 0 0 0 0 0 0 0 0
+S
+#14149
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WSunlit Clearing@n~
+   @GThis clearing has few trees and an ample amount of sunlight penetrating the
+forest canopy. Hair-like grass fills the clearing along with a few crystaline
+bushes. In a few spots animal burrows can be seen dug into the clearing ground.
+A general feeling of peace permeates the area. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14146 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14148 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14150 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14145 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14147 0 0 0 0 0 0 0 0
+S
+#14150
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WSunlit Clearing@n~
+   @GThis clearing has few trees and an ample amount of sunlight penetrating the
+forest canopy. Hair-like grass fills the clearing along with a few crystaline
+bushes. In a few spots animal burrows can be seen dug into the clearing ground.
+A general feeling of peace permeates the area. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14145 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14149 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14146 0 0 0 0 0 0 0 0
+S
+#14151
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 c fD 0 0 3
+D6
+~
+~
+0 0 14148 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14152 0 0 0 0 0 0 0 0
+S
+#14152
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WThick Clearing@n~
+   @GThis clearing has a decent amount of sunlight penetrating the canopy lighting
+up hundreds of fat and tall crystaline bushes that fill the nearly treeless
+clearing. These bushes appear to have crystaline thorns that grow from their
+branches and make traveling difficult.
+~
+141 0 fD 0 0 3
+D1
+~
+~
+0 0 14157 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14153 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14151 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14156 0 0 0 0 0 0 0 0
+S
+#14153
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WThick Clearing@n~
+   @GThis clearing has a decent amount of sunlight penetrating the canopy lighting
+up hundreds of fat and tall crystaline bushes that fill the nearly treeless
+clearing. These bushes appear to have crystaline thorns that grow from their
+branches and make traveling difficult.
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14152 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14156 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14154 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14157 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14155 0 0 0 0 0 0 0 0
+S
+#14154
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WThick Clearing@n~
+   @GThis clearing has a decent amount of sunlight penetrating the canopy lighting
+up hundreds of fat and tall crystaline bushes that fill the nearly treeless
+clearing. These bushes appear to have crystaline thorns that grow from their
+branches and make traveling difficult.
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14153 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14155 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14156 0 0 0 0 0 0 0 0
+S
+#14155
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WThick Clearing@n~
+   @GThis clearing has a decent amount of sunlight penetrating the canopy lighting
+up hundreds of fat and tall crystaline bushes that fill the nearly treeless
+clearing. These bushes appear to have crystaline thorns that grow from their
+branches and make traveling difficult.
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14156 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14160 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14154 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14153 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14159 0 0 0 0 0 0 0 0
+S
+#14156
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WThick Clearing@n~
+   @GThis clearing has a decent amount of sunlight penetrating the canopy lighting
+up hundreds of fat and tall crystaline bushes that fill the nearly treeless
+clearing. These bushes appear to have crystaline thorns that grow from their
+branches and make traveling difficult.
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14157 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14159 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14155 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14153 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14152 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14158 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14160 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14154 0 0 0 0 0 0 0 0
+S
+#14157
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WThick Clearing@n~
+   @GThis clearing has a decent amount of sunlight penetrating the canopy lighting
+up hundreds of fat and tall crystaline bushes that fill the nearly treeless
+clearing. These bushes appear to have crystaline thorns that grow from their
+branches and make traveling difficult.
+~
+141 0 fD 0 0 3
+D1
+~
+~
+0 0 14158 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14156 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14152 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14159 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14153 0 0 0 0 0 0 0 0
+S
+#14158
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WThick Clearing@n~
+   @GThis clearing has a decent amount of sunlight penetrating the canopy lighting
+up hundreds of fat and tall crystaline bushes that fill the nearly treeless
+clearing. These bushes appear to have crystaline thorns that grow from their
+branches and make traveling difficult.
+~
+141 0 fD 0 0 3
+D2
+~
+~
+0 0 14159 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14157 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14156 0 0 0 0 0 0 0 0
+S
+#14159
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WThick Clearing@n~
+   @GThis clearing has a decent amount of sunlight penetrating the canopy lighting
+up hundreds of fat and tall crystaline bushes that fill the nearly treeless
+clearing. These bushes appear to have crystaline thorns that grow from their
+branches and make traveling difficult.
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14158 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14161 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14160 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14156 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14157 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14155 0 0 0 0 0 0 0 0
+S
+#14160
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WThick Clearing@n~
+   @GThis clearing has a decent amount of sunlight penetrating the canopy lighting
+up hundreds of fat and tall crystaline bushes that fill the nearly treeless
+clearing. These bushes appear to have crystaline thorns that grow from their
+branches and make traveling difficult.
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14159 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14155 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14156 0 0 0 0 0 0 0 0
+S
+#14161
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 c fD 0 0 3
+D1
+~
+~
+0 0 14162 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14159 0 0 0 0 0 0 0 0
+S
+#14162
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 0 fD 0 0 3
+D1
+~
+~
+0 0 14163 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14161 0 0 0 0 0 0 0 0
+S
+#14163
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14164 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14162 0 0 0 0 0 0 0 0
+S
+#14164
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 c fD 0 0 3
+D2
+~
+~
+0 0 14163 0 0 0 0 0 0 0 0
+S
+#14165
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WGiant Tree Stump@n~
+   @yThis entire area is on top of a massive tree trunk that has been cut flat and
+level. It looks to be about two hundred yards across and baby trees have
+started to grow up in the rotting cracks and crevices of its surface. What
+happened to the rest of the tree can't be seen in this clearing with just this
+stump left. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14170 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14166 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14169 0 0 0 0 0 0 0 0
+S
+#14166
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WGiant Tree Stump@n~
+   @yThis entire area is on top of a massive tree trunk that has been cut flat and
+level. It looks to be about two hundred yards across and baby trees have
+started to grow up in the rotting cracks and crevices of its surface. What
+happened to the rest of the tree can't be seen in this clearing with just this
+stump left. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14169 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14165 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14167 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14168 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14170 0 0 0 0 0 0 0 0
+S
+#14167
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WGiant Tree Stump@n~
+   @yThis entire area is on top of a massive tree trunk that has been cut flat and
+level. It looks to be about two hundred yards across and baby trees have
+started to grow up in the rotting cracks and crevices of its surface. What
+happened to the rest of the tree can't be seen in this clearing with just this
+stump left. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14168 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14166 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14169 0 0 0 0 0 0 0 0
+S
+#14168
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WGiant Tree Stump@n~
+   @yThis entire area is on top of a massive tree trunk that has been cut flat and
+level. It looks to be about two hundred yards across and baby trees have
+started to grow up in the rotting cracks and crevices of its surface. What
+happened to the rest of the tree can't be seen in this clearing with just this
+stump left. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14173 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14169 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14167 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14172 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14166 0 0 0 0 0 0 0 0
+S
+#14169
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WGiant Tree Stump@n~
+   @yThis entire area is on top of a massive tree trunk that has been cut flat and
+level. It looks to be about two hundred yards across and baby trees have
+started to grow up in the rotting cracks and crevices of its surface. What
+happened to the rest of the tree can't be seen in this clearing with just this
+stump left. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14172 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14170 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14166 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14168 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14171 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14165 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14167 0 0 0 0 0 0 0 0
+S
+#14170
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WGiant Tree Stump@n~
+   @yThis entire area is on top of a massive tree trunk that has been cut flat and
+level. It looks to be about two hundred yards across and baby trees have
+started to grow up in the rotting cracks and crevices of its surface. What
+happened to the rest of the tree can't be seen in this clearing with just this
+stump left. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14171 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14165 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14169 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14172 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14166 0 0 0 0 0 0 0 0
+S
+#14171
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WGiant Tree Stump@n~
+   @yThis entire area is on top of a massive tree trunk that has been cut flat and
+level. It looks to be about two hundred yards across and baby trees have
+started to grow up in the rotting cracks and crevices of its surface. What
+happened to the rest of the tree can't be seen in this clearing with just this
+stump left. @n
+~
+141 0 fD 0 0 3
+D2
+~
+~
+0 0 14170 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14172 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14169 0 0 0 0 0 0 0 0
+S
+#14172
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WGiant Tree Stump@n~
+   @yThis entire area is on top of a massive tree trunk that has been cut flat and
+level. It looks to be about two hundred yards across and baby trees have
+started to grow up in the rotting cracks and crevices of its surface. What
+happened to the rest of the tree can't be seen in this clearing with just this
+stump left. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14174 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14171 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14169 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14173 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14170 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14168 0 0 0 0 0 0 0 0
+S
+#14173
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WGiant Tree Stump@n~
+   @yThis entire area is on top of a massive tree trunk that has been cut flat and
+level. It looks to be about two hundred yards across and baby trees have
+started to grow up in the rotting cracks and crevices of its surface. What
+happened to the rest of the tree can't be seen in this clearing with just this
+stump left. @n
+~
+141 0 fD 0 0 3
+D1
+~
+~
+0 0 14172 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14168 0 0 0 0 0 0 0 0
+S
+#14174
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 c fD 0 0 3
+D0
+~
+~
+0 0 14175 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14172 0 0 0 0 0 0 0 0
+S
+#14175
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14176 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14174 0 0 0 0 0 0 0 0
+S
+#14176
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 0 fD 0 0 3
+D1
+~
+~
+0 0 14177 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14175 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14181 0 0 0 0 0 0 0 0
+S
+#14177
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 0 fD 0 0 3
+D1
+~
+~
+0 0 14178 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14176 0 0 0 0 0 0 0 0
+S
+#14178
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14179 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14177 0 0 0 0 0 0 0 0
+S
+#14179
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14180 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14178 0 0 0 0 0 0 0 0
+S
+#14180
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 c fD 0 0 3
+D0
+~
+~
+0 0 14104 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14179 0 0 0 0 0 0 0 0
+S
+#14181
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 0 fD 0 0 3
+D1
+~
+~
+0 0 14176 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14182 0 0 0 0 0 0 0 0
+S
+#14182
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14185 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14181 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14183 0 0 0 0 0 0 0 0
+S
+#14183
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 0 fD 0 0 3
+D1
+~
+~
+0 0 14182 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14184 0 0 0 0 0 0 0 0
+S
+#14184
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 c fD 0 0 3
+D1
+~
+~
+0 0 14183 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14140 0 0 0 0 0 0 0 0
+S
+#14185
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14186 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14182 0 0 0 0 0 0 0 0
+S
+#14186
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14187 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14185 0 0 0 0 0 0 0 0
+S
+#14187
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14188 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14186 0 0 0 0 0 0 0 0
+S
+#14188
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 0 fD 0 0 3
+D0
+~
+~
+0 0 14189 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14187 0 0 0 0 0 0 0 0
+S
+#14189
+@gJ@Ga@Wd@we @gF@Go@wr@ye@Gs@gt@D: @WCrystaline Path@n~
+   @gThis dark forest is populated by relatively column shaped trees. Crystaline
+branches stretch out from the tree trunks creating a beautiful spectacle of
+green light winking from the sunlight hitting said branches. What leaves the
+trees have grow close to the trunk of the tree instead of the branches. A worn
+dirt path leads inbetween the trees here. @n
+~
+141 c fD 0 0 3
+D0
+~
+~
+0 0 14120 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14188 0 0 0 0 0 0 0 0
+S
+$~

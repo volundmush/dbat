@@ -1,0 +1,482 @@
+#5800
+@YT@yhre@Ye @YS@yta@Yr @nElementary - Parking Lot~
+   The front of the school has a small garden planted by the walls, parted only
+where the path that leads from the parking lot to the front door is. The grass
+is neatly trimmed with a few small trees growing beside the walkway.
+~
+58 cu 0 0 0 1
+D0
+~
+~
+0 0 13031 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5801 0 0 0 0 0 0 0 0
+S
+#5801
+@YT@yhre@Ye @YS@yta@Yr @nElementary - Hallway~
+   The hallway is lined with lockers, with the occasional break for a water
+fountain, a door to another room, or some other sort of decoration. Students
+and teachers can sometimes be seen traveling the hallway.
+~
+58 u 0 0 0 0
+D0
+~
+~
+0 0 5800 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5804 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5818 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5802 0 0 0 0 0 0 0 0
+S
+#5802
+@YT@yhre@Ye @YS@yta@Yr @nElementary - Hallway~
+   The hallway is lined with lockers, with the occasional break for a water
+fountain, a door to another room, or some other sort of decoration. Students
+and teachers can sometimes be seen traveling the hallway.
+~
+58 u 0 0 0 0
+D1
+~
+~
+0 0 5801 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5815 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5803 0 0 0 0 0 0 0 0
+S
+#5803
+@YT@yhre@Ye @YS@yta@Yr @nElementary - Hallway~
+   The hallway is lined with lockers, with the occasional break for a water
+fountain, a door to another room, or some other sort of decoration. Students
+and teachers can sometimes be seen traveling the hallway.
+~
+58 u 0 0 0 0
+D1
+~
+~
+0 0 5802 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5806 0 0 0 0 0 0 0 0
+S
+#5804
+@YT@yhre@Ye @YS@yta@Yr @nElementary - Hallway~
+   The hallway is lined with lockers, with the occasional break for a water
+fountain, a door to another room, or some other sort of decoration. Students
+and teachers can sometimes be seen traveling the hallway.
+~
+58 u 0 0 0 0
+D1
+~
+~
+0 0 5805 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5816 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5801 0 0 0 0 0 0 0 0
+S
+#5805
+@YT@yhre@Ye @YS@yta@Yr @nElementary - Hallway~
+   The hallway is lined with lockers, with the occasional break for a water
+fountain, a door to another room, or some other sort of decoration. Students
+and teachers can sometimes be seen traveling the hallway.
+~
+58 u 0 0 0 0
+D2
+~
+~
+0 0 5814 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5804 0 0 0 0 0 0 0 0
+S
+#5806
+@YT@yhre@Ye @YS@yta@Yr @nElementary - Hallway~
+   The hallway is lined with lockers, with the occasional break for a water
+fountain, a door to another room, or some other sort of decoration. Students
+and teachers can sometimes be seen traveling the hallway.
+~
+58 u 0 0 0 0
+D0
+~
+~
+0 0 5803 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5807 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5822 0 0 0 0 0 0 0 0
+S
+#5807
+@YT@yhre@Ye @YS@yta@Yr @nElementary - Hallway~
+   The hallway is lined with lockers, with the occasional break for a water
+fountain, a door to another room, or some other sort of decoration. Students
+and teachers can sometimes be seen traveling the hallway.
+~
+58 u 0 0 0 0
+D0
+~
+~
+0 0 5806 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5808 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5821 0 0 0 0 0 0 0 0
+S
+#5808
+@YT@yhre@Ye @YS@yta@Yr @nElementary - Hallway~
+   The hallway is lined with lockers, with the occasional break for a water
+fountain, a door to another room, or some other sort of decoration. Students
+and teachers can sometimes be seen traveling the hallway.
+~
+58 u 0 0 0 0
+D0
+~
+~
+0 0 5807 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5809 0 0 0 0 0 0 0 0
+S
+#5809
+@YT@yhre@Ye @YS@yta@Yr @nElementary - Hallway~
+   The hallway is lined with lockers, with the occasional break for a water
+fountain, a door to another room, or some other sort of decoration. Students
+and teachers can sometimes be seen traveling the hallway.
+~
+58 u 0 0 0 0
+D1
+~
+~
+0 0 5810 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5808 0 0 0 0 0 0 0 0
+S
+#5810
+@YT@yhre@Ye @YS@yta@Yr @nElementary - Hallway~
+   The hallway is lined with lockers, with the occasional break for a water
+fountain, a door to another room, or some other sort of decoration. Students
+and teachers can sometimes be seen traveling the hallway.
+~
+58 u 0 0 0 0
+D0
+~
+~
+0 0 5823 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5811 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5817 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5809 0 0 0 0 0 0 0 0
+S
+#5811
+@YT@yhre@Ye @YS@yta@Yr @nElementary - Hallway~
+   The hallway is lined with lockers, with the occasional break for a water
+fountain, a door to another room, or some other sort of decoration. Students
+and teachers can sometimes be seen traveling the hallway.
+~
+58 u 0 0 0 0
+D1
+~
+~
+0 0 5812 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5810 0 0 0 0 0 0 0 0
+S
+#5812
+@YT@yhre@Ye @YS@yta@Yr @nElementary - Hallway~
+   The hallway is lined with lockers, with the occasional break for a water
+fountain, a door to another room, or some other sort of decoration. Students
+and teachers can sometimes be seen traveling the hallway.
+~
+58 u 0 0 0 0
+D0
+~
+~
+0 0 5813 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5811 0 0 0 0 0 0 0 0
+S
+#5813
+@YT@yhre@Ye @YS@yta@Yr @nElementary - Hallway~
+   The hallway is lined with lockers, with the occasional break for a water
+fountain, a door to another room, or some other sort of decoration. Students
+and teachers can sometimes be seen traveling the hallway.
+~
+58 u 0 0 0 0
+D0
+~
+~
+0 0 5814 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5820 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5812 0 0 0 0 0 0 0 0
+S
+#5814
+@YT@yhre@Ye @YS@yta@Yr @nElementary - Hallway~
+   The hallway is lined with lockers, with the occasional break for a water
+fountain, a door to another room, or some other sort of decoration. Students
+and teachers can sometimes be seen traveling the hallway.
+~
+58 u 0 0 0 0
+D0
+~
+~
+0 0 5805 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5819 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 5813 0 0 0 0 0 0 0 0
+S
+#5815
+@YT@yhre@Ye @YS@yta@Yr @nElementary - Class 1-A~
+   The classroom holds enough desks to seat about twenty five students. The
+blackboard contains writings of the last class held.
+~
+58 u 0 0 0 0
+D0
+~
+~
+0 0 5802 0 0 0 0 0 0 0 0
+E
+blackboard~
+1+1=4 is written on the blackboard.
+~
+S
+#5816
+@YT@yhre@Ye @YS@yta@Yr @nElementary - 1-B~
+   The classroom holds enough desks to seat about twenty five students. The
+blackboard contains writings of the last class held.
+~
+58 u 0 0 0 0
+D0
+~
+~
+0 0 5804 0 0 0 0 0 0 0 0
+S
+#5817
+@YT@yhre@Ye @YS@yta@Yr @nElementary - Principle's Office~
+   The princapals office is large. A rug lays in the middle of the room with
+the desk resting on the edge. The desk itself is large and made of Mahogany
+with a large, black lether chair behind it. Bookcases with different
+assortment of books line both sides of the wall.
+~
+58 u 0 0 0 0
+D0
+~
+~
+0 0 5810 0 0 0 0 0 0 0 0
+S
+#5818
+@YT@yhre@Ye @YS@yta@Yr @nElementary - Janitor's Closet~
+   The janitor's closet is really cramped room. Shelving units lay on two
+sides, cleaning solutions of different types resting on them. In the middle of
+the back wall is a desk a small light and some papers on it.
+~
+58 u 0 0 0 0
+D0
+~
+~
+0 0 5801 0 0 0 0 0 0 0 0
+S
+#5819
+@YT@yhre@Ye @YS@yta@Yr @nElementary - Class 2-A~
+   The classroom holds enough desks to seat about twenty five students. The
+blackboard contains writings of the last class held.
+~
+58 u 0 0 0 0
+D3
+~
+~
+0 0 5814 0 0 0 0 0 0 0 0
+S
+#5820
+@YT@yhre@Ye @YS@yta@Yr @nElementary - Class 2-B~
+   The classroom holds enough desks to seat about twenty five students. The
+blackboard contains writings of the last class held.
+~
+58 u 0 0 0 0
+D3
+~
+~
+0 0 5813 0 0 0 0 0 0 0 0
+E
+blackboard~
+A history about how the Kingdom of Wei almost took over the world, and how they should have done it, is written on the board.
+~
+S
+#5821
+@YT@yhre@Ye @YS@yta@Yr @nElementary - Class 2-C~
+   The classroom holds enough desks to seat about twenty five students. The
+blackboard contains writings of the last class held.
+~
+58 u 0 0 0 0
+D1
+~
+~
+0 0 5807 0 0 0 0 0 0 0 0
+S
+#5822
+@YT@yhre@Ye @YS@yta@Yr @nElementary - Class 1-C~
+The classroom holds enough desks to seat about twenty five students. The blackboard contains writings of the last class held.
+~
+58 u 0 0 0 0
+D1
+~
+~
+0 0 5806 0 0 0 0 0 0 0 0
+S
+#5823
+@YT@yhre@Ye @YS@yta@Yr @nElementary - Cafeteria~
+   The large cafateria has many long rows of tables where the students come to
+eat their lunch. In the back lies the kitchen, where a foul smell thats
+similar to burning hair and wet dog comes from.
+~
+58 u 0 0 0 0
+D2
+~
+~
+0 0 5810 0 0 0 0 0 0 0 0
+S
+#5824
+Public Ship Zel~
+   This small ship has been modified to remove most comfort to favor more
+speed. A total of 6 chairs is all that can be seen.
+~
+58 0 0 0 0 0
+S
+T 5802
+#5825
+Public Ship Zel~
+   This small ship has been modified to remove most comfort to favor more
+speed. A total of 6 chairs is all that can be seen.
+~
+58 0 0 0 0 0
+S
+T 5802
+#5826
+Inside the Van~
+   The inside of the van is almost totally empty. The front of the van has a
+makeshift wall built to seperate the front from the back, and in the back there
+is just some rope, a blindfold, and what appears to be a gag of some sort.
+~
+58 0 0 0 0 0
+S
+#5827
+@CM@cr@C. @cF@Cr@co@Cs@ct@C'@cs @CI@cc@Ce @cC@Cr@ce@Ca@cm @CP@ca@Cr@cl@Co@cu@Cr@n~
+   The entire establishment seems to sparkle with cleaniness. Literally
+sparkle. There is the faint smell of cleaning products in the air, but it is
+overpowered by the scent of fudge, chocolate and caramel. Several large
+coolers frame the left-most wall of the room, filled with take home containers
+of your favourite icy treats. Several booths, and tables are scattered around
+the room- an upbeat synthesized jingle plays on an endless loop from speakers
+tucked into the corners of the roof. The counter is a see-through plexiglass
+display cabinet filled with a literal rainbow of colours and flavours. Some of
+the flavours are unusual, and several of the ice creams have a strange glean to
+them.
+~
+58 u 0 0 0 10
+D0
+~
+~
+0 0 370 0 0 0 0 0 0 0 0
+S
+#5896
+@CZ@ce@Yl@ya@Yk@ci@Cn@c'@Cs @nFarm~
+You are in an unfinished room.
+~
+58 0 0 0 0 0
+D2
+~
+~
+0 0 5897 0 0 0 0 0 0 0 0
+S
+#5897
+@CZ@ce@Yl@ya@Yk@ci@Cn@c'@Cs @nFarm - Farm Plot~
+You are in an unfinished room.
+~
+58 0 0 0 0 0
+D0
+~
+~
+0 0 5896 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 5898 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 5899 0 0 0 0 0 0 0 0
+S
+#5898
+@CZ@ce@Yl@ya@Yk@ci@Cn@c'@Cs @nFarm - Farm Plot~
+You are in an unfinished room.
+~
+58 0 0 0 0 0
+D3
+~
+~
+0 0 5897 0 0 0 0 0 0 0 0
+S
+#5899
+@CZ@ce@Yl@ya@Yk@ci@Cn@c'@Cs @nFarm - Farm Plot~
+You are in an unfinished room.
+~
+58 0 0 0 0 0
+D1
+~
+~
+0 0 5897 0 0 0 0 0 0 0 0
+S
+$~

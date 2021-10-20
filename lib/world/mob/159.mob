@@ -1,0 +1,223 @@
+#15900
+punk student~
+@nPunk student@n~
+@nA student is cutting class here, dressed in punk clothing.@n
+~
+@nA grungy looking teenager in ragged clothing stands here.  Their hair is mess of spikes or a mohawk and their face sports several pericings.
+~
+dvwxyz 0 0 0 0 0 0 0 0 E
+40 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 39
+Dex: 37
+Int: 30
+Wis: 22
+Con: 34
+Cha: 24
+E
+#15901
+outlaw gang member student teenager~
+@nOutlaw gang member~
+@nA member of the Outlaw gang is prowling for trouble here.
+~
+@nThis student is a member of Outlaw Jim's gang, and is wearing the signiture bandana. the outlaw is clean cut but looks ready to fight.
+~
+dfvwxyz 0 0 0 0 0 0 0 0 E
+40 0 10 0d0+0 0d0+0
+100 0 0 28
+8 8 1
+Str: 20
+Dex: 22
+Int: 35
+Wis: 24
+Con: 40
+Cha: 31
+E
+#15902
+jim outlaw~
+@nOutlaw Jim@n~
+@nOutlaw Jim stands here, chewing a toothpick.@n
+~
+Standing before you is Outlaw Jim. He wears a school jacket with the sleeves ripped off, and his gang's signiture bandana around his forehead. He is well muscled and looks like he can handle himself well in a fight.
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+60 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 44
+Dex: 41
+Int: 32
+Wis: 35
+Con: 48
+Cha: 46
+E
+T 15902
+T 15903
+#15903
+time rift student~
+@nRift student@n~
+@nA student from the time rift is wandering here, confused.@n
+~
+This teenager is in ragged battle gear and is covered in ash. He seemed confused about his surroundings and is clearly freaking out.
+~
+dvwxyz 0 0 0 0 0 0 0 0 E
+50 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 41
+Dex: 35
+Int: 27
+Wis: 26
+Con: 33
+Cha: 44
+E
+#15905
+sports club student~
+@nSports Club student@n~
+@nA Sports Club student is running by, kicking a football.@n
+~
+A sports club student is playing soccer here. They look in good shape and play mercilessly.
+~
+dvwxyz 0 0 0 0 0 0 0 0 E
+20 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 19
+Dex: 17
+Int: 16
+Wis: 14
+Con: 12
+Cha: 20
+E
+#15910
+orange star cheerleader~
+@yOrange Star@n cheerleader~
+@nAn attractive cheerleader wearing an @yOrange Star@n @WHighschool@n uniform is cheering here.
+~
+@nAn @yOrange @n@WStar Highschool@n cheerleader is jumping away here, cheering their team's player on to victory.
+~
+bdvwxyz 0 0 0 0 0 0 0 0 E
+15 0 10 0d0+0 0d0+0
+10 0 0 28
+8 8 2
+Str: 13
+Dex: 7
+Int: 13
+Wis: 8
+Con: 8
+Cha: 12
+E
+#15911
+gym student~
+@nGym student@n~
+@nA gym student is performing exercises here.@n
+~
+@nA student exercises here, in their gym uniform. Nothing truly special stands them out from the rest of the crowd, apart from the uncomfortably short shorts, and too-thin tank tops that often make up budgeted school gym uniforms.
+~
+dvwxyz 0 0 0 0 0 0 0 0 E
+20 0 10 0d0+0 0d0+0
+50 0 0 28
+8 8 1
+Str: 20
+Dex: 12
+Int: 20
+Wis: 12
+Con: 12
+Cha: 10
+E
+#15912
+bewitched student~
+@nBewitched student@n~
+@nA bewitched student fights other students here.@n
+~
+@nA deranged and bewitched student is brawling here, fighting the other students.
+~
+dvwxyz 0 0 0 0 0 0 0 0 E
+50 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 35
+Dex: 42
+Int: 27
+Wis: 28
+Con: 50
+Cha: 36
+E
+#15913
+rebel student~
+@nRebel student@n~
+@nA rebel student is fighting the others under mind control here.@n
+~
+@nA ragged rebel student in worse for the wear battle gear is here, battling against those who seem betwitched out of their minds.
+~
+dvwxyz 0 0 0 0 0 0 0 0 E
+55 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 51
+Dex: 48
+Int: 52
+Wis: 51
+Con: 46
+Cha: 40
+E
+#15914
+Super Saiyaman~
+@WS@yu@Wp@ye@Wr@y S@Wa@yi@Wy@ya@Wm@ya@Wn@n~
+@nA @WS@yu@Wp@ye@Wr@y S@Wa@yi@Wy@ya@Wn@n is floating here, face covered by a strange and vizored helmet.@n
+~
+@nA super Saiyan flies about, surrounded by energy that crackles and spits lightning. His identity is protected by a dark, vizored helmet. Garbed in ragged battle gear, this includes heavy looking shoulder guards and a cape.
+~
+dfvwxyz 0 0 0 l 0 0 0 0 E
+65 0 10 0d4+0 0d0+0
+200 0 7 0
+8 8 1
+Str: 73
+Dex: 44
+Int: 45
+Wis: 60
+Con: 51
+Cha: 50
+E
+#15915
+follower madman set~
+@WFollower@n of @YSet@n~
+@nA deranged @Wmadman@n stands here, making strange arcane gestures as he casts strange magic into the air.
+~
+The Follower of Set looks like a man deranged, as he mumbles and mutters and chants strange magic in the air. He gestures wildy speaking in ancient tongues.
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+65 0 10 0d8+0 0d0+0
+0 0 10 9
+8 8 1
+Str: 65
+Dex: 68
+Int: 72
+Wis: 40
+Con: 43
+Cha: 61
+E
+T 15998
+#15936
+videl~
+@nVi@Md@nel@n~
+@nVi@Md@nel@n stands here, looking worried.@n
+~
+Videl stands here, in ragged battle gear and a bandana over her forehead.
+~
+bdsvwxyz 0 0 0 l 0 0 0 0 E
+65 0 10 0d4+0 0d0+0
+0 0 0 28
+8 8 2
+Str: 38
+Dex: 64
+Int: 40
+Wis: 63
+Con: 58
+Cha: 44
+E
+T 15939
+T 15940
+T 15941
+$

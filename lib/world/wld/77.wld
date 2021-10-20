@@ -1,0 +1,943 @@
+#7700
+uc~
+You are in an unfinished room.
+~
+77 0 0 0 0 0
+S
+#7701
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Entrance@n~
+   @WThis area appears to be the entrance to Gero's Laboratory. A shiny titanium
+plated floor gleams, reflecting the white lights burning on the ceiling. The
+walls and ceiling appear to be some type of reinforced concrete with dark green
+paint on them. A steel door with a @Gpanel@W next to it can be seen towards the
+south. Next to the door a @Gsign@W has been hung. A ladder leads down through
+awide hole. @n
+~
+77 pu 0 0 0 0
+D5
+~
+~
+0 0 7702 0 0 0 0 0 0 0 0
+D11
+~
+~
+1 0 1715 0 0 0 0 0 0 0 0
+E
+panel~
+@WThis panel seems to be a keypad with buttons labeled 0 through 9.@n
+~
+E
+sign~
+@RWarning, do not release this passcode to unauthorized personel.@n
+
+@cPasscode: @C57624@n
+~
+S
+T 310
+T 7704
+#7702
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Testing Labs Hallway@n~
+   @WThis well lit hallway has titanium tiles bolted to the floor. The walls and
+ceiling appear to be made of some form of reinforced concrete. White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall. @n
+~
+77 pu 0 0 0 0
+D0
+~
+~
+0 0 7703 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 7701 0 0 0 0 0 0 0 0
+S
+T 1800
+#7703
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Testing Labs Hallway@n~
+   @WThis well lit hallway has titanium tiles bolted to the floor. The walls and
+ceiling appear to be made of some form of reinforced concrete. White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall. @n
+~
+77 pu 0 0 0 0
+D0
+~
+~
+0 0 7706 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7705 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7702 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7704 0 0 0 0 0 0 0 0
+S
+#7704
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Testing Labs Storage Room@n~
+   @WThis mostly concrete room has row after row of body sized metal capsules
+bolted to the floor. The capsules look like metal caskets with glass windows
+about five inches by five inches built into their lids. Panels controlling
+each capsule have been built into their respective sides, allowing any operator
+to open or close the capsules. @n
+~
+77 pu 0 0 0 0
+D1
+~
+~
+0 0 7703 0 0 0 0 0 0 0 0
+S
+#7705
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Testing Labs Storage Room@n~
+   @WThis mostly concrete room has row after row of body sized metal capsules
+bolted to the floor. The capsules look like metal caskets with glass windows
+about five inches by five inches built into their lids. Panels controlling
+each capsule have been built into their respective sides, allowing any operator
+to open or close the capsules. @n
+~
+77 pu 0 0 0 0
+D3
+~
+~
+0 0 7703 0 0 0 0 0 0 0 0
+S
+#7706
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Testing Labs Hallway@n~
+   @WThis well lit hallway has titanium tiles bolted to the floor. The walls and
+ceiling appear to be made of some form of reinforced concrete. White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall. @n
+~
+77 pu 0 0 0 0
+D0
+~
+~
+0 0 7707 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7703 0 0 0 0 0 0 0 0
+S
+#7707
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Testing Labs Hallway@n~
+   @WThis well lit hallway has titanium tiles bolted to the floor. The walls and
+ceiling appear to be made of some form of reinforced concrete. White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall. @n
+~
+77 pu 0 0 0 0
+D0
+~
+~
+0 0 7710 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7709 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7706 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7708 0 0 0 0 0 0 0 0
+S
+#7708
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Testing Labs Storage Room@n~
+   @WThis mostly concrete room has row after row of body sized metal capsules
+bolted to the floor. The capsules look like metal caskets with glass windows
+about five inches by five inches built into their lids. Panels controlling
+each capsule have been built into their respective sides, allowing any operator
+to open or close the capsules. @n
+~
+77 pu 0 0 0 0
+D1
+~
+~
+0 0 7707 0 0 0 0 0 0 0 0
+S
+#7709
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Testing Labs Storage Room@n~
+   @WThis mostly concrete room has row after row of body sized metal capsules
+bolted to the floor. The capsules look like metal caskets with glass windows
+about five inches by five inches built into their lids. Panels controlling
+each capsule have been built into their respective sides, allowing any operator
+to open or close the capsules. @n
+~
+77 pu 0 0 0 0
+D3
+~
+~
+0 0 7707 0 0 0 0 0 0 0 0
+S
+#7710
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Testing Labs Hallway@n~
+   @WThis well lit hallway has titanium tiles bolted to the floor. The walls and
+ceiling appear to be made of some form of reinforced concrete. White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall. @n
+~
+77 cpu 0 0 0 0
+D0
+~
+~
+0 0 7711 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7707 0 0 0 0 0 0 0 0
+S
+#7711
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Testing Labs Lab-floor@n~
+   @WThis mostly concrete area appears to be where the actual testing of the
+testing labs is performed. Steel tables with heavy duty equipment have been
+placed all around the wide expansive room. Adjustable lights, computer
+monitors, and scanning equipment have been placed above or by each table. On
+some of the tables half constructed androids can be seen, some as little
+complete as having only half a body. @w
+~
+77 pu 0 0 0 0
+D0
+~
+~
+0 0 7712 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7716 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7710 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7715 0 0 0 0 0 0 0 0
+S
+#7712
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Testing Labs Lab-floor@n~
+   @WThis mostly concrete area appears to be where the actual testing of the
+testing labs is performed. Steel tables with heavy duty equipment have been
+placed all around the wide expansive room. Adjustable lights, computer
+monitors, and scanning equipment have been placed above or by each table. On
+some of the tables half constructed androids can be seen, some as little
+complete as having only half a body. @w
+~
+77 pu 0 0 0 0
+D0
+~
+~
+0 0 7713 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7717 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7711 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7714 0 0 0 0 0 0 0 0
+S
+#7713
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Level 1 Stairwell@n~
+   @WThis concrete stairwell has no decorations and very little light. The steps
+have a single steel rail running down the center of the stairs. The stairs
+themselves do not drop that far, seemingly only a single floor in distance. A
+sign can be seen posted above the stairwell entrance. @n
+~
+77 cpu 0 0 0 0
+D2
+~
+~
+0 0 7712 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 7718 0 0 0 0 0 0 0 0
+S
+#7714
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Testing Labs Lab-floor@n~
+   @WThis mostly concrete area appears to be where the actual testing of the
+testing labs is performed. Steel tables with heavy duty equipment have been
+placed all around the wide expansive room. Adjustable lights, computer
+monitors, and scanning equipment have been placed above or by each table. On
+some of the tables half constructed androids can be seen, some as little
+complete as having only half a body. @w
+~
+77 pu 0 0 0 0
+D1
+~
+~
+0 0 7712 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7715 0 0 0 0 0 0 0 0
+S
+#7715
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Testing Labs Lab-floor@n~
+   @WThis mostly concrete area appears to be where the actual testing of the
+testing labs is performed. Steel tables with heavy duty equipment have been
+placed all around the wide expansive room. Adjustable lights, computer
+monitors, and scanning equipment have been placed above or by each table. On
+some of the tables half constructed androids can be seen, some as little
+complete as having only half a body. @w
+~
+77 pu 0 0 0 0
+D0
+~
+~
+0 0 7714 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7711 0 0 0 0 0 0 0 0
+S
+#7716
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Testing Labs Lab-floor@n~
+   @WThis mostly concrete area appears to be where the actual testing of the
+testing labs is performed. Steel tables with heavy duty equipment have been
+placed all around the wide expansive room. Adjustable lights, computer
+monitors, and scanning equipment have been placed above or by each table. On
+some of the tables half constructed androids can be seen, some as little
+complete as having only half a body. @w
+~
+77 pu 0 0 0 0
+D0
+~
+~
+0 0 7717 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7711 0 0 0 0 0 0 0 0
+S
+#7717
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Testing Labs Lab-floor@n~
+   @WThis mostly concrete area appears to be where the actual testing of the
+testing labs is performed. Steel tables with heavy duty equipment have been
+placed all around the wide expansive room. Adjustable lights, computer
+monitors, and scanning equipment have been placed above or by each table. On
+some of the tables half constructed androids can be seen, some as little
+complete as having only half a body. @w
+~
+77 pu 0 0 0 0
+D2
+~
+~
+0 0 7716 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7712 0 0 0 0 0 0 0 0
+S
+#7718
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Level 2 Stairwell@n~
+   @WThis concrete stairwell has no decorations and very little light. The steps
+have a single steel rail running down the center of the stairs. The stairs
+themselves do not drop that far, seemingly only a single floor in distance. A
+sign can be seen posted above the stairwell entrance. @n
+~
+77 pu 0 0 0 0
+D0
+~
+~
+0 0 7719 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 7713 0 0 0 0 0 0 0 0
+S
+#7719
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Obsolete Model Storage Hallway@n ~
+   @WThis well lit hallway has titanium tiles bolted to the floor. The walls and
+ceiling appear to be made of some form of reinforced concrete. White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall. @n
+~
+77 pu 0 0 0 0
+D0
+~
+~
+0 0 7722 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7721 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7718 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7720 0 0 0 0 0 0 0 0
+S
+#7720
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Obsolete Model Storage Room@n~
+   @WThis mostly concrete room has row after row of body sized metal capsules
+bolted to the floor. The lights on all the capsules are dim, and the lights in
+the room are dimmer still. It appears that this room hasn't been inspected for
+quite a while. @n
+~
+77 pu 0 0 0 0
+D1
+~
+~
+0 0 7719 0 0 0 0 0 0 0 0
+S
+#7721
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Obsolete Model Storage Room@n~
+   @WThis mostly concrete room has row after row of body sized metal capsules
+bolted to the floor. The lights on all the capsules are dim, and the lights in
+the room are dimmer still. It appears that this room hasn't been inspected for
+quite a while. @n
+~
+77 pu 0 0 0 0
+D3
+~
+~
+0 0 7719 0 0 0 0 0 0 0 0
+S
+#7722
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Obsolete Model Storage Hallway@n ~
+   @WThis well lit hallway has titanium tiles bolted to the floor. The walls and
+ceiling appear to be made of some form of reinforced concrete. White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall. @n
+~
+77 pu 0 0 0 0
+D0
+~
+~
+0 0 7723 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7719 0 0 0 0 0 0 0 0
+S
+#7723
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Obsolete Model Storage Hallway@n ~
+   @WThis well lit hallway has titanium tiles bolted to the floor. The walls and
+ceiling appear to be made of some form of reinforced concrete. White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall. @n
+~
+77 pu 0 0 0 0
+D0
+~
+~
+0 0 7726 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7725 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7722 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7724 0 0 0 0 0 0 0 0
+S
+#7724
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Obsolete Model Storage Room@n~
+   @WThis mostly concrete room has row after row of body sized metal capsules
+bolted to the floor. The lights on all the capsules are dim, and the lights in
+the room are dimmer still. It appears that this room hasn't been inspected for
+quite a while. @n
+~
+77 pu 0 0 0 0
+D1
+~
+~
+0 0 7723 0 0 0 0 0 0 0 0
+S
+#7725
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Obsolete Model Storage Room@n~
+   @WThis mostly concrete room has row after row of body sized metal capsules
+bolted to the floor. The lights on all the capsules are dim, and the lights in
+the room are dimmer still. It appears that this room hasn't been inspected for
+quite a while. @n
+~
+77 pu 0 0 0 0
+D3
+~
+~
+0 0 7723 0 0 0 0 0 0 0 0
+S
+#7726
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Obsolete Model Storage Hallway@n ~
+   @WThis well lit hallway has titanium tiles bolted to the floor. The walls and
+ceiling appear to be made of some form of reinforced concrete. White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall. @n
+~
+77 cpu 0 0 0 0
+D0
+~
+~
+0 0 7727 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7723 0 0 0 0 0 0 0 0
+S
+#7727
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Obsolete Labs@n~
+   @WThe equipment in this lab appears to be outdated compared to what the rest
+of the facility has to offer. Obsolete android models sit on metal
+construction tables with their bodies half built. Some of the more finished
+models show signs of having their parts removed after installation, presumably
+since the parts were still good enough to use elsewhere. @n
+~
+77 pu 0 0 0 0
+D0
+~
+~
+0 0 7728 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7732 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7726 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7731 0 0 0 0 0 0 0 0
+S
+#7728
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Obsolete Labs@n~
+   @WThe equipment in this lab appears to be outdated compared to what the rest
+of the facility has to offer. Obsolete android models sit on metal
+construction tables with their bodies half built. Some of the more finished
+models show signs of having their parts removed after installation, presumably
+since the parts were still good enough to use elsewhere. @n
+~
+77 pu 0 0 0 0
+D1
+~
+~
+0 0 7733 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7727 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7730 0 0 0 0 0 0 0 0
+S
+#7729
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Level 2 Stairwell@n~
+   @WThis concrete stairwell has no decorations and very little light. The steps
+have a single steel rail running down the center of the stairs. The stairs
+themselves do not drop that far, seemingly only a single floor in distance. A
+sign can be seen posted above the stairwell entrance. @n
+~
+77 cpu 0 0 0 0
+D3
+~
+~
+0 0 7733 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 7734 0 0 0 0 0 0 0 0
+S
+#7730
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Obsolete Labs@n~
+   @WThe equipment in this lab appears to be outdated compared to what the rest
+of the facility has to offer. Obsolete android models sit on metal
+construction tables with their bodies half built. Some of the more finished
+models show signs of having their parts removed after installation, presumably
+since the parts were still good enough to use elsewhere. @n
+~
+77 pu 0 0 0 0
+D1
+~
+~
+0 0 7728 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7731 0 0 0 0 0 0 0 0
+S
+#7731
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Obsolete Labs@n~
+   @WThe equipment in this lab appears to be outdated compared to what the rest
+of the facility has to offer. Obsolete android models sit on metal
+construction tables with their bodies half built. Some of the more finished
+models show signs of having their parts removed after installation, presumably
+since the parts were still good enough to use elsewhere. @n
+~
+77 pu 0 0 0 0
+D0
+~
+~
+0 0 7730 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7727 0 0 0 0 0 0 0 0
+S
+#7732
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Obsolete Labs@n~
+   @WThe equipment in this lab appears to be outdated compared to what the rest
+of the facility has to offer. Obsolete android models sit on metal
+construction tables with their bodies half built. Some of the more finished
+models show signs of having their parts removed after installation, presumably
+since the parts were still good enough to use elsewhere. @n
+~
+77 pu 0 0 0 0
+D0
+~
+~
+0 0 7733 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7727 0 0 0 0 0 0 0 0
+S
+#7733
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Obsolete Labs@n~
+   @WThe equipment in this lab appears to be outdated compared to what the rest
+of the facility has to offer. Obsolete android models sit on metal
+construction tables with their bodies half built. Some of the more finished
+models show signs of having their parts removed after installation, presumably
+since the parts were still good enough to use elsewhere. @n
+~
+77 pu 0 0 0 0
+D1
+~
+~
+0 0 7729 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7732 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7728 0 0 0 0 0 0 0 0
+S
+#7734
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Level 3 Stairwell@n~
+   @WThis concrete stairwell has no decorations and very little light. The steps
+have a single steel rail running down the center of the stairs. The stairs
+themselves do not drop that far, seemingly only a single floor in distance. A
+sign can be seen posted above the stairwell entrance. @n
+~
+77 pu 0 0 0 0
+D1
+~
+~
+0 0 7735 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 7729 0 0 0 0 0 0 0 0
+S
+#7735
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Advanced Model Labs Hallway@n~
+   @WThis well lit hallway has titanium tiles bolted to the floor. The walls and
+ceiling appear to be made of some form of reinforced concrete. White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall. @n
+~
+77 pu 0 0 0 0
+D0
+~
+~
+0 0 7736 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7738 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7737 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7734 0 0 0 0 0 0 0 0
+S
+#7736
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Advanced Model Labs Storage Room@n~
+   @WThis mostly concrete room has row after row of body sized metal capsules
+bolted to the floor. The capsules look like metal caskets with glass windows
+about five inches by five inches built into their lids. Panels controlling
+each capsule have been built into their respective sides, allowing any operator
+to open or close the capsules. @n
+~
+77 pu 0 0 0 0
+D2
+~
+~
+0 0 7735 0 0 0 0 0 0 0 0
+S
+#7737
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Advanced Model Labs Storage Room@n~
+   @WThis mostly concrete room has row after row of body sized metal capsules
+bolted to the floor. The capsules look like metal caskets with glass windows
+about five inches by five inches built into their lids. Panels controlling
+each capsule have been built into their respective sides, allowing any operator
+to open or close the capsules. @n
+~
+77 pu 0 0 0 0
+D0
+~
+~
+0 0 7735 0 0 0 0 0 0 0 0
+S
+#7738
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Advanced Model Labs Hallway@n~
+   @WThis well lit hallway has titanium tiles bolted to the floor. The walls and
+ceiling appear to be made of some form of reinforced concrete. White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall. @n
+~
+77 pu 0 0 0 0
+D1
+~
+~
+0 0 7739 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7735 0 0 0 0 0 0 0 0
+S
+#7739
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Advanced Model Labs Hallway@n~
+   @WThis well lit hallway has titanium tiles bolted to the floor. The walls and
+ceiling appear to be made of some form of reinforced concrete. White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall. @n
+~
+77 pu 0 0 0 0
+D0
+~
+~
+0 0 7740 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7742 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7741 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7738 0 0 0 0 0 0 0 0
+S
+#7740
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Advanced Model Labs Storage Room@n~
+   @WThis mostly concrete room has row after row of body sized metal capsules
+bolted to the floor. The capsules look like metal caskets with glass windows
+about five inches by five inches built into their lids. Panels controlling
+each capsule have been built into their respective sides, allowing any operator
+to open or close the capsules. @n
+~
+77 pu 0 0 0 0
+D2
+~
+~
+0 0 7739 0 0 0 0 0 0 0 0
+S
+#7741
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Advanced Model Labs Storage Room@n~
+   @WThis mostly concrete room has row after row of body sized metal capsules
+bolted to the floor. The capsules look like metal caskets with glass windows
+about five inches by five inches built into their lids. Panels controlling
+each capsule have been built into their respective sides, allowing any operator
+to open or close the capsules. @n
+~
+77 pu 0 0 0 0
+D0
+~
+~
+0 0 7739 0 0 0 0 0 0 0 0
+S
+#7742
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Advanced Model Labs Hallway@n~
+   @WThis well lit hallway has titanium tiles bolted to the floor. The walls and
+ceiling appear to be made of some form of reinforced concrete. White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall. @n
+~
+77 pu 0 0 0 0
+D1
+~
+~
+0 0 7743 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7739 0 0 0 0 0 0 0 0
+S
+#7743
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Advanced Model Labs Hallway@n~
+   @WThis well lit hallway has titanium tiles bolted to the floor. The walls and
+ceiling appear to be made of some form of reinforced concrete. White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall. @n
+~
+77 pu 0 0 0 0
+D2
+~
+~
+0 0 7744 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7742 0 0 0 0 0 0 0 0
+S
+#7744
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Advanced Model Labs Hallway@n~
+   @WThis well lit hallway has titanium tiles bolted to the floor. The walls and
+ceiling appear to be made of some form of reinforced concrete. White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall. @n
+~
+77 pu 0 0 0 0
+D0
+~
+~
+0 0 7743 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7745 0 0 0 0 0 0 0 0
+S
+#7745
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Level 4 Stairwell@n~
+   @WThis concrete stairwell has no decorations and very little light. The steps
+have a single steel rail running down the center of the stairs. The stairs
+themselves do not drop that far, seemingly only a single floor in distance. A
+sign can be seen posted above the stairwell entrance. @n
+~
+77 pu 0 0 0 0
+D0
+~
+~
+0 0 7744 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 7746 0 0 0 0 0 0 0 0
+S
+#7746
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Level 5 Stairwell@n~
+   @WThis concrete stairwell has no decorations and very little light. The steps
+have a single steel rail running down the center of the stairs. The stairs
+themselves do not drop that far, seemingly only a single floor in distance. A
+sign can be seen posted above the stairwell entrance. @n
+~
+77 pu 0 0 0 0
+D2
+~
+~
+0 0 7747 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 7745 0 0 0 0 0 0 0 0
+S
+#7747
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Gero's Quarters Hallway@n~
+   @WThis well lit hallway has titanium tiles bolted to the floor. The walls and
+ceiling appear to be made of some form of reinforced concrete. White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall. @n
+~
+77 pu 0 0 0 0
+D0
+~
+~
+0 0 7746 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7748 0 0 0 0 0 0 0 0
+S
+#7748
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Gero's Quarters Hallway@n~
+   @WThis well lit hallway has titanium tiles bolted to the floor. The walls and
+ceiling appear to be made of some form of reinforced concrete. White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall. @n
+~
+77 pu 0 0 0 0
+D0
+~
+~
+0 0 7747 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 7751 0 0 0 0 0 0 0 0
+S
+#7751
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Gero's Quarters Hallway@n~
+   @WThis well lit hallway has titanium tiles bolted to the floor. The walls and
+ceiling appear to be made of some form of reinforced concrete. White lights
+illuminate the entire hallway from above, and occasionally red alert lights can
+be seen bolted to sections of the wall. @n
+~
+77 pu 0 0 0 0
+D0
+~
+~
+0 0 7748 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 7753 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 7752 0 0 0 0 0 0 0 0
+S
+#7752
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Gero's Room@n~
+   @wThis plain concrete room doesn't look as if its owner cares much for
+decorations. Dull white lights illuminate several bookcases lined up near the
+entrance to the room. Beyond those bookcases a study area and sleeping area
+can be seen with plain brown carpeting covering the floor in those two areas.
+~
+77 pu 0 0 0 0
+D1
+~
+~
+0 0 7751 0 0 0 0 0 0 0 0
+S
+#7753
+@rG@Re@Dr@Wo@w'@Ws @rL@Ra@Wb@D: Gero's Planning Room@n~
+   @WHalf of this large room is filled with rows of bookshelves that reach nearly
+to the nine foot tall ceiling. The other side of this concrete room a steel
+desk with many different computer monitors located on it can be seen. On a
+clear spot of the desk blueprints and diagrams of android models can be seen.
+~
+77 pu 0 0 0 0
+D3
+~
+~
+0 0 7751 0 0 0 0 0 0 0 0
+S
+$~

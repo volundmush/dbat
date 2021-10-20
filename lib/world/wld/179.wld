@@ -1,0 +1,1781 @@
+#17900
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WHill Top@n~
+   @CA black summoning symbol dominates the top of this snow covered hill. It
+doesn't appear possible to continue to the south, as there is a large cliff face
+drop and beyond that a fiercely raging blizzard. @n
+~
+179 dgh 0 0 0 4
+D0
+~
+~
+0 0 17901 0 0 0 0 0 0 0 0
+S
+#17901
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WDown the hill@n~
+   @CA path going down this hill looks to have been recently shoveled, exposing
+dirt while either side of the path, powdery white snow remains. Candy stripped
+poles with light globes atop them line the length of the path. @n
+~
+179 dh 0 0 0 4
+D2
+~
+~
+0 0 17900 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 17902 0 0 0 0 0 0 0 0
+S
+#17902
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WDown the hill@n~
+   @CA path going down this hill looks to have been recently shoveled, exposing
+dirt while either side of the path, powdery white snow remains. Candy stripped
+poles with light globes atop them line the length of the path. @n
+~
+179 dh 0 0 0 4
+D0
+~
+~
+0 0 17903 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 17901 0 0 0 0 0 0 0 0
+S
+#17903
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WDown the hill@n~
+   @CA path going down this hill looks to have been recently shoveled, exposing
+dirt while either side of the path, powdery white snow remains. Candy stripped
+poles with light globes atop them line the length of the path. @n
+~
+179 dh 0 0 0 4
+D2
+~
+~
+0 0 17902 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17904 0 0 0 0 0 0 0 0
+S
+#17904
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WDown the hill@n~
+   @CA path going down this hill looks to have been recently shoveled, exposing
+dirt while either side of the path, powdery white snow remains. Candy stripped
+poles with light globes atop them line the length of the path. @n
+~
+179 dh 0 0 0 4
+D0
+~
+~
+0 0 17905 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17903 0 0 0 0 0 0 0 0
+S
+#17905
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WDown the hill@n~
+   @CA path going down this hill looks to have been recently shoveled, exposing
+dirt while either side of the path, powdery white snow remains. Candy stripped
+poles with light globes atop them line the length of the path. @n
+~
+179 dh 0 0 0 4
+D2
+~
+~
+0 0 17904 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 17906 0 0 0 0 0 0 0 0
+S
+#17906
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WDown the hill@n~
+   @CA path going down this hill looks to have been recently shoveled, exposing
+dirt while either side of the path, powdery white snow remains. Candy stripped
+poles with light globes atop them line the length of the path. @n
+~
+179 dh 0 0 0 4
+D0
+~
+~
+0 0 17907 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 17905 0 0 0 0 0 0 0 0
+S
+#17907
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WWindswept plains@n~
+   @CWinds sweep across these snow covered plains, howling loudly, picking up the
+softer snow on the surface adding to the chilly wind. There doesn't appear to
+be any discernible path through the plains that look like they could stretch on
+for miles. @n
+~
+179 dh 0 0 0 2
+D0
+~
+~
+0 0 17910 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17909 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17906 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17908 0 0 0 0 0 0 0 0
+S
+#17908
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WWindswept plains@n~
+   @CWinds sweep across these snow covered plains, howling loudly, picking up the
+softer snow on the surface adding to the chilly wind. There doesn't appear to
+be any discernible path through the plains that look like they could stretch on
+for miles. @n
+~
+179 dh 0 0 0 2
+D0
+~
+~
+0 0 17911 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17907 0 0 0 0 0 0 0 0
+S
+#17909
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WWindswept plains@n~
+   @CWinds sweep across these snow covered plains, howling loudly, picking up the
+softer snow on the surface adding to the chilly wind. There doesn't appear to
+be any discernible path through the plains that look like they could stretch on
+for miles. @n
+~
+179 dh 0 0 0 2
+D0
+~
+~
+0 0 17912 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17907 0 0 0 0 0 0 0 0
+S
+#17910
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WWindswept plains@n~
+   @CWinds sweep across these snow covered plains, howling loudly, picking up the
+softer snow on the surface adding to the chilly wind. There doesn't appear to
+be any discernible path through the plains that look like they could stretch on
+for miles. @n
+~
+179 dh 0 0 0 2
+D0
+~
+~
+0 0 17913 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17912 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17907 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17911 0 0 0 0 0 0 0 0
+S
+#17911
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WWindswept plains@n~
+   @CWinds sweep across these snow covered plains, howling loudly, picking up the
+softer snow on the surface adding to the chilly wind. There doesn't appear to
+be any discernible path through the plains that look like they could stretch on
+for miles. @n
+~
+179 dh 0 0 0 2
+D0
+~
+~
+0 0 17914 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17910 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17908 0 0 0 0 0 0 0 0
+S
+#17912
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WWindswept plains@n~
+   @CWinds sweep across these snow covered plains, howling loudly, picking up the
+softer snow on the surface adding to the chilly wind. There doesn't appear to
+be any discernible path through the plains that look like they could stretch on
+for miles. @n
+~
+179 dh 0 0 0 2
+D0
+~
+~
+0 0 17915 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17909 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17910 0 0 0 0 0 0 0 0
+S
+#17913
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WWindswept plains@n~
+   @CWinds sweep across these snow covered plains, howling loudly, picking up the
+softer snow on the surface adding to the chilly wind. There doesn't appear to
+be any discernible path through the plains that look like they could stretch on
+for miles. @n
+~
+179 dh 0 0 0 2
+D0
+~
+~
+0 0 17916 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17915 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17910 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17914 0 0 0 0 0 0 0 0
+S
+#17914
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WWindswept plains@n~
+   @CWinds sweep across these snow covered plains, howling loudly, picking up the
+softer snow on the surface adding to the chilly wind. There doesn't appear to
+be any discernible path through the plains that look like they could stretch on
+for miles. @n
+~
+179 dh 0 0 0 2
+D0
+~
+~
+0 0 17917 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17913 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17911 0 0 0 0 0 0 0 0
+S
+#17915
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WWindswept plains@n~
+   @CWinds sweep across these snow covered plains, howling loudly, picking up the
+softer snow on the surface adding to the chilly wind. There doesn't appear to
+be any discernible path through the plains that look like they could stretch on
+for miles. @n
+~
+179 dh 0 0 0 2
+D0
+~
+~
+0 0 17918 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17912 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17913 0 0 0 0 0 0 0 0
+S
+#17916
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WWindswept plains@n~
+   @CWinds sweep across these snow covered plains, howling loudly, picking up the
+softer snow on the surface adding to the chilly wind. There doesn't appear to
+be any discernible path through the plains that look like they could stretch on
+for miles. @n
+~
+179 dh 0 0 0 2
+D0
+~
+~
+0 0 17919 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17918 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17913 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17917 0 0 0 0 0 0 0 0
+S
+#17917
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WWindswept plains@n~
+   @CWinds sweep across these snow covered plains, howling loudly, picking up the
+softer snow on the surface adding to the chilly wind. There doesn't appear to
+be any discernible path through the plains that look like they could stretch on
+for miles. @n
+~
+179 dh 0 0 0 2
+D0
+~
+~
+0 0 17920 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17916 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17914 0 0 0 0 0 0 0 0
+S
+#17918
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WWindswept plains@n~
+   @CWinds sweep across these snow covered plains, howling loudly, picking up the
+softer snow on the surface adding to the chilly wind. There doesn't appear to
+be any discernible path through the plains that look like they could stretch on
+for miles. @n
+~
+179 dh 0 0 0 2
+D0
+~
+~
+0 0 17921 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17915 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17916 0 0 0 0 0 0 0 0
+S
+#17919
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WWindswept plains@n~
+   @CWinds sweep across these snow covered plains, howling loudly, picking up the
+softer snow on the surface adding to the chilly wind. There doesn't appear to
+be any discernible path through the plains that look like they could stretch on
+for miles. @n
+~
+179 dh 0 0 0 2
+D1
+~
+~
+0 0 17921 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17916 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17920 0 0 0 0 0 0 0 0
+D5
+~
+Mine hatch~
+1 17921 17922 20 0 0 0 0 0 0 0
+S
+#17920
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WWindswept plains@n~
+   @CWinds sweep across these snow covered plains, howling loudly, picking up the
+softer snow on the surface adding to the chilly wind. There doesn't appear to
+be any discernible path through the plains that look like they could stretch on
+for miles. @n
+~
+179 dh 0 0 0 2
+D1
+~
+~
+0 0 17919 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17917 0 0 0 0 0 0 0 0
+S
+#17921
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WWindswept plains@n~
+   @CWinds sweep across these snow covered plains, howling loudly, picking up the
+softer snow on the surface adding to the chilly wind. There doesn't appear to
+be any discernible path through the plains that look like they could stretch on
+for miles. @n
+~
+179 dh 0 0 0 2
+D2
+~
+~
+0 0 17918 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17919 0 0 0 0 0 0 0 0
+S
+#17922
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Shaft@n~
+   @CThe mineshaft doesn't seem very wide and is poorly constructed. Support
+beams are missing in places, while some are rotting or cracked. Small lights,
+of several different colors, hang from a wire along the roof. @n
+~
+179 cdhr 0 0 0 5
+D0
+~
+~
+0 0 17923 0 0 0 0 0 0 0 0
+D4
+~
+Mine hatch~
+1 17921 17919 20 0 0 0 0 0 0 0
+S
+#17923
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Shaft@n~
+   @CThe mineshaft doesn't seem very wide and is poorly constructed. Support
+beams are missing in places, while some are rotting or cracked. Small lights,
+of several different colors, hang from a wire along the roof. @n
+~
+179 dhr 0 0 0 5
+D0
+~
+~
+0 0 17924 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17922 0 0 0 0 0 0 0 0
+S
+#17924
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Shaft@n~
+   @CThe mineshaft doesn't seem very wide and is poorly constructed. Support
+beams are missing in places, while some are rotting or cracked. Small lights,
+of several different colors, hang from a wire along the roof. @n
+~
+179 dhr 0 0 0 5
+D2
+~
+~
+0 0 17923 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 17925 0 0 0 0 0 0 0 0
+S
+#17925
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Shaft@n~
+   @CThe mineshaft doesn't seem very wide and is poorly constructed. Support
+beams are missing in places, while some are rotting or cracked. Small lights,
+of several different colors, hang from a wire along the roof. @n
+~
+179 dhr 0 0 0 5
+D1
+~
+~
+0 0 17926 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 17924 0 0 0 0 0 0 0 0
+S
+#17926
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Shaft@n~
+   @CThe mineshaft doesn't seem very wide and is poorly constructed. Support
+beams are missing in places, while some are rotting or cracked. Small lights,
+of several different colors, hang from a wire along the roof. @n
+~
+179 dhr 0 0 0 5
+D1
+~
+~
+0 0 17927 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17925 0 0 0 0 0 0 0 0
+S
+#17927
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Shaft@n~
+   @CThe mineshaft doesn't seem very wide and is poorly constructed. Support
+beams are missing in places, while some are rotting or cracked. Small lights,
+of several different colors, hang from a wire along the roof. @n
+~
+179 dhr 0 0 0 5
+D0
+~
+~
+0 0 17928 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17926 0 0 0 0 0 0 0 0
+S
+#17928
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Shaft@n~
+   @CThe mineshaft doesn't seem very wide and is poorly constructed. Support
+beams are missing in places, while some are rotting or cracked. Small lights,
+of several different colors, hang from a wire along the roof. @n
+~
+179 dhr 0 0 0 5
+D0
+~
+~
+0 0 17929 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17927 0 0 0 0 0 0 0 0
+S
+#17929
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Shaft@n~
+   @CThe mineshaft doesn't seem very wide and is poorly constructed. Support
+beams are missing in places, while some are rotting or cracked. Small lights,
+of several different colors, hang from a wire along the roof. @n
+~
+179 dhr 0 0 0 5
+D2
+~
+~
+0 0 17928 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 17935 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 17930 0 0 0 0 0 0 0 0
+S
+#17930
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Shaft@n~
+   @CThe mineshaft doesn't seem very wide and is poorly constructed. Support
+beams are missing in places, while some are rotting or cracked. Small lights,
+of several different colors, hang from a wire along the roof. @n
+~
+179 dhr 0 0 0 5
+D7
+~
+~
+0 0 17931 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17929 0 0 0 0 0 0 0 0
+S
+#17931
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Shaft@n~
+   @CThe mineshaft doesn't seem very wide and is poorly constructed. Support
+beams are missing in places, while some are rotting or cracked. Small lights,
+of several different colors, hang from a wire along the roof. @n
+~
+179 dhr 0 0 0 5
+D1
+~
+~
+0 0 17932 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17930 0 0 0 0 0 0 0 0
+S
+#17932
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Shaft@n~
+   @CThe mineshaft doesn't seem very wide and is poorly constructed. Support
+beams are missing in places, while some are rotting or cracked. Small lights,
+of several different colors, hang from a wire along the roof. @n
+~
+179 dhr 0 0 0 5
+D1
+~
+~
+0 0 17933 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17931 0 0 0 0 0 0 0 0
+S
+#17933
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Shaft@n~
+   @CThe mineshaft doesn't seem very wide and is poorly constructed. Support
+beams are missing in places, while some are rotting or cracked. Small lights,
+of several different colors, hang from a wire along the roof. @n
+~
+179 dhr 0 0 0 5
+D0
+~
+~
+0 0 17934 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17932 0 0 0 0 0 0 0 0
+S
+#17934
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Shaft@n~
+   @CThe mineshaft doesn't seem very wide and is poorly constructed. Support
+beams are missing in places, while some are rotting or cracked. Small lights,
+of several different colors, hang from a wire along the roof. @n
+~
+179 hnr 0 0 0 5
+D2
+~
+~
+0 0 17933 0 0 0 0 0 0 0 0
+S
+#17935
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Shaft@n~
+   @CThe mineshaft doesn't seem very wide and is poorly constructed. Support
+beams are missing in places, while some are rotting or cracked. Small lights,
+of several different colors, hang from a wire along the roof. @n
+~
+179 dhr 0 0 0 5
+D3
+~
+~
+0 0 17936 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 17929 0 0 0 0 0 0 0 0
+S
+#17936
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Shaft@n~
+   @CThe mineshaft doesn't seem very wide and is poorly constructed. Support
+beams are missing in places, while some are rotting or cracked. Small lights,
+of several different colors, hang from a wire along the roof. @n
+~
+179 dhr 0 0 0 5
+D1
+~
+~
+0 0 17935 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17937 0 0 0 0 0 0 0 0
+S
+#17937
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Shaft@n~
+   @CThe mineshaft doesn't seem very wide and is poorly constructed. Support
+beams are missing in places, while some are rotting or cracked. Small lights,
+of several different colors, hang from a wire along the roof. @n
+~
+179 dhr 0 0 0 5
+D0
+~
+~
+0 0 17938 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17936 0 0 0 0 0 0 0 0
+S
+#17938
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Shaft@n~
+   @CThe mineshaft doesn't seem very wide and is poorly constructed. Support
+beams are missing in places, while some are rotting or cracked. Small lights,
+of several different colors, hang from a wire along the roof. @n
+~
+179 dhr 0 0 0 5
+D0
+~
+~
+0 0 17939 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17937 0 0 0 0 0 0 0 0
+S
+#17939
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Shaft@n~
+   @CThe mineshaft doesn't seem very wide and is poorly constructed. Support
+beams are missing in places, while some are rotting or cracked. Small lights,
+of several different colors, hang from a wire along the roof. @n
+~
+179 dhr 0 0 0 5
+D2
+~
+~
+0 0 17938 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17940 0 0 0 0 0 0 0 0
+S
+#17940
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Shaft@n~
+   @CThe mineshaft doesn't seem very wide and is poorly constructed. Support
+beams are missing in places, while some are rotting or cracked. Small lights,
+of several different colors, hang from a wire along the roof. @n
+~
+179 dhr 0 0 0 5
+D1
+~
+~
+0 0 17939 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17941 0 0 0 0 0 0 0 0
+S
+#17941
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Shaft@n~
+   @CThe mineshaft doesn't seem very wide and is poorly constructed. Support
+beams are missing in places, while some are rotting or cracked. Small lights,
+of several different colors, hang from a wire along the roof. @n
+~
+179 dhr 0 0 0 5
+D0
+~
+~
+0 0 17945 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17940 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17942 0 0 0 0 0 0 0 0
+S
+#17942
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Shaft@n~
+   @CThe mineshaft doesn't seem very wide and is poorly constructed. Support
+beams are missing in places, while some are rotting or cracked. Small lights,
+of several different colors, hang from a wire along the roof. @n
+~
+179 dhr 0 0 0 5
+D7
+~
+~
+0 0 17941 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17943 0 0 0 0 0 0 0 0
+S
+#17943
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Shaft@n~
+   @CThe mineshaft doesn't seem very wide and is poorly constructed. Support
+beams are missing in places, while some are rotting or cracked. Small lights,
+of several different colors, hang from a wire along the roof. @n
+~
+179 dhr 0 0 0 5
+D7
+~
+~
+0 0 17942 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17944 0 0 0 0 0 0 0 0
+S
+#17944
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Shaft@n~
+   @CThe mineshaft doesn't seem very wide and is poorly constructed. Support
+beams are missing in places, while some are rotting or cracked. Small lights,
+of several different colors, hang from a wire along the roof. @n
+~
+179 dhr 0 0 0 5
+D7
+~
+~
+0 0 17943 0 0 0 0 0 0 0 0
+S
+#17945
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Shaft@n~
+   @CThe mineshaft doesn't seem very wide and is poorly constructed. Support
+beams are missing in places, while some are rotting or cracked. Small lights,
+of several different colors, hang from a wire along the roof. @n
+~
+179 dhr 0 0 0 5
+D0
+~
+~
+0 0 17946 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17941 0 0 0 0 0 0 0 0
+S
+#17946
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Shaft@n~
+   @CThe mineshaft doesn't seem very wide and is poorly constructed. Support
+beams are missing in places, while some are rotting or cracked. Small lights,
+of several different colors, hang from a wire along the roof. @n
+~
+179 dhr 0 0 0 5
+D2
+~
+~
+0 0 17945 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 17947 0 0 0 0 0 0 0 0
+S
+#17947
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Shaft@n~
+   @CThe mineshaft doesn't seem very wide and is poorly constructed. Support
+beams are missing in places, while some are rotting or cracked. Small lights,
+of several different colors, hang from a wire along the roof. @n
+~
+179 dhr 0 0 0 5
+D7
+~
+~
+0 0 17948 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17946 0 0 0 0 0 0 0 0
+S
+#17948
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Shaft@n~
+   @CThe mineshaft doesn't seem very wide and is poorly constructed. Support
+beams are missing in places, while some are rotting or cracked. Small lights,
+of several different colors, hang from a wire along the roof. @n
+~
+179 dhr 0 0 0 5
+D7
+~
+~
+0 0 17949 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17947 0 0 0 0 0 0 0 0
+S
+#17949
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Camp@n~
+   @CThis wide open chamber seems to serve as a base camp deep in the mines on
+Northran. Dozens of iron cages can be found in rows on the south side, each
+with a small bed and a bowl inside. On the northern side of the chamber are
+mine carts, mostly full of black, sooty coal. @n
+~
+179 dhr 0 0 0 5
+D0
+~
+~
+0 0 17950 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17954 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17948 0 0 0 0 0 0 0 0
+S
+#17950
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Camp@n~
+   @CThis wide open chamber seems to serve as a base camp deep in the mines on
+Northran. Dozens of iron cages can be found in rows on the south side, each
+with a small bed and a bowl inside. On the northern side of the chamber are
+mine carts, mostly full of black, sooty coal. @n
+~
+179 dhr 0 0 0 5
+D0
+~
+~
+0 0 17951 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17953 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17949 0 0 0 0 0 0 0 0
+S
+#17951
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Camp@n~
+   @CThis wide open chamber seems to serve as a base camp deep in the mines on
+Northran. Dozens of iron cages can be found in rows on the south side, each
+with a small bed and a bowl inside. On the northern side of the chamber are
+mine carts, mostly full of black, sooty coal. @n
+~
+179 dhr 0 0 0 5
+D1
+~
+~
+0 0 17952 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17950 0 0 0 0 0 0 0 0
+S
+#17952
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Camp@n~
+   @CThis wide open chamber seems to serve as a base camp deep in the mines on
+Northran. Dozens of iron cages can be found in rows on the south side, each
+with a small bed and a bowl inside. On the northern side of the chamber are
+mine carts, mostly full of black, sooty coal. @n
+~
+179 dhr 0 0 0 5
+D1
+~
+~
+0 0 17957 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17953 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17951 0 0 0 0 0 0 0 0
+S
+#17953
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Camp@n~
+   @CThis wide open chamber seems to serve as a base camp deep in the mines on
+Northran. Dozens of iron cages can be found in rows on the south side, each
+with a small bed and a bowl inside. On the northern side of the chamber are
+mine carts, mostly full of black, sooty coal. @n
+~
+179 dhr 0 0 0 5
+D0
+~
+~
+0 0 17952 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17956 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17954 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17950 0 0 0 0 0 0 0 0
+S
+#17954
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Camp@n~
+   @CThis wide open chamber seems to serve as a base camp deep in the mines on
+Northran. Dozens of iron cages can be found in rows on the south side, each
+with a small bed and a bowl inside. On the northern side of the chamber are
+mine carts, mostly full of black, sooty coal. @n
+~
+179 dhr 0 0 0 5
+D0
+~
+~
+0 0 17953 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17955 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17949 0 0 0 0 0 0 0 0
+S
+#17955
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Camp@n~
+   @CThis wide open chamber seems to serve as a base camp deep in the mines on
+Northran. Dozens of iron cages can be found in rows on the south side, each
+with a small bed and a bowl inside. On the northern side of the chamber are
+mine carts, mostly full of black, sooty coal. @n
+~
+179 dhr 0 0 0 5
+D0
+~
+~
+0 0 17956 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17954 0 0 0 0 0 0 0 0
+S
+#17956
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Camp@n~
+   @CThis wide open chamber seems to serve as a base camp deep in the mines on
+Northran. Dozens of iron cages can be found in rows on the south side, each
+with a small bed and a bowl inside. On the northern side of the chamber are
+mine carts, mostly full of black, sooty coal. @n
+~
+179 dhr 0 0 0 5
+D0
+~
+~
+0 0 17957 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17955 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17953 0 0 0 0 0 0 0 0
+S
+#17957
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Camp@n~
+   @CThis wide open chamber seems to serve as a base camp deep in the mines on
+Northran. Dozens of iron cages can be found in rows on the south side, each
+with a small bed and a bowl inside. On the northern side of the chamber are
+mine carts, mostly full of black, sooty coal. @n
+~
+179 dhr 0 0 0 5
+D2
+~
+~
+0 0 17956 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17952 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 17958 0 0 0 0 0 0 0 0
+S
+#17958
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Shaft@n~
+   @CThe mineshaft doesn't seem very wide and is poorly constructed. Support
+beams are missing in places, while some are rotting or cracked. Small lights,
+of several different colors, hang from a wire along the roof. @n
+~
+179 dhr 0 0 0 5
+D7
+~
+~
+0 0 17959 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17957 0 0 0 0 0 0 0 0
+S
+#17959
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Shaft@n~
+   @CThe mineshaft doesn't seem very wide and is poorly constructed. Support
+beams are missing in places, while some are rotting or cracked. Small lights,
+of several different colors, hang from a wire along the roof. @n
+~
+179 dhr 0 0 0 5
+D0
+~
+~
+0 0 17960 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 17958 0 0 0 0 0 0 0 0
+S
+#17960
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Shaft@n~
+   @CThe mineshaft doesn't seem very wide and is poorly constructed. Support
+beams are missing in places, while some are rotting or cracked. Small lights,
+of several different colors, hang from a wire along the roof. @n
+~
+179 dhr 0 0 0 5
+D0
+~
+~
+0 0 17961 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17959 0 0 0 0 0 0 0 0
+S
+#17961
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WMine Shaft@n~
+   @CThe mineshaft doesn't seem very wide and is poorly constructed. Support
+beams are missing in places, while some are rotting or cracked. Small lights,
+of several different colors, hang from a wire along the roof. @n
+~
+179 dhr 0 0 0 5
+D2
+~
+~
+0 0 17960 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 17962 0 0 0 0 0 0 0 0
+S
+#17962
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WSnow-drift Path@n~
+   @CEither side of this dirt path, is powdery white snow, with the occasional
+light post glowing brightly. Further to the north is a large brick building
+with a large chimney puffing white smoke out the top of it. @n
+~
+179 dh 0 0 0 2
+D0
+~
+~
+0 0 17963 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 17961 0 0 0 0 0 0 0 0
+S
+#17963
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WSnow-drift Path@n~
+   @CEither side of this dirt path, is powdery white snow, with the occasional
+light post glowing brightly. Further to the north is a large brick building
+with a large chimney puffing white smoke out the top of it. @n
+~
+179 dh 0 0 0 2
+D0
+~
+~
+0 0 17964 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17962 0 0 0 0 0 0 0 0
+S
+#17964
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WSnow-drift Path@n~
+   @CEither side of this dirt path, is powdery white snow, with the occasional
+light post glowing brightly. Further to the north is a large brick building
+with a large chimney puffing white smoke out the top of it. @n
+~
+179 dh 0 0 0 2
+D0
+~
+~
+0 0 17965 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17963 0 0 0 0 0 0 0 0
+S
+#17965
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WSnow-drift Path@n~
+   @CEither side of this dirt path, is powdery white snow, with the occasional
+light post glowing brightly. Further to the north is a large brick building
+with a large chimney puffing white smoke out the top of it. @n
+~
+179 dh 0 0 0 2
+D0
+~
+~
+0 0 17966 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17964 0 0 0 0 0 0 0 0
+S
+#17966
+@WN@wo@Dr@ct@Ch@Dr@wa@Wn@n - @WSnow-drift Path@n~
+   @CEither side of this dirt path, is powdery white snow, with the occasional
+light post glowing brightly. Further to the north is a large brick building
+with a large chimney puffing white smoke out the top of it. @n
+~
+179 dh 0 0 0 2
+D0
+~
+~
+0 0 17967 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17965 0 0 0 0 0 0 0 0
+S
+#17967
+@RS@ra@Wn@rt@Ra@n's @DW@yo@Yr@Wk@ws@Yh@yo@Dp@n~
+   @CA large black conveyor belt in the middle of the Workshop runs non-stop,
+weapon components streamed down it's length as they are slowly built. At the
+nothern end is a cart, which is filled up with the constructed weapons and
+hauled off elsewhere. A thin mist floats over the concrete floor. @n
+~
+179 dh 0 0 0 0
+D0
+~
+~
+0 0 17970 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17968 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17966 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17969 0 0 0 0 0 0 0 0
+S
+#17968
+@RS@ra@Wn@rt@Ra@n's @DW@yo@Yr@Wk@ws@Yh@yo@Dp@n~
+   @CA large black conveyor belt in the middle of the Workshop runs non-stop,
+weapon components streamed down it's length as they are slowly built. At the
+nothern end is a cart, which is filled up with the constructed weapons and
+hauled off elsewhere. A thin mist floats over the concrete floor. @n
+~
+179 dh 0 0 0 0
+D0
+~
+~
+0 0 17972 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17967 0 0 0 0 0 0 0 0
+S
+#17969
+@RS@ra@Wn@rt@Ra@n's @DW@yo@Yr@Wk@ws@Yh@yo@Dp@n~
+   @CA large black conveyor belt in the middle of the Workshop runs non-stop,
+weapon components streamed down it's length as they are slowly built. At the
+nothern end is a cart, which is filled up with the constructed weapons and
+hauled off elsewhere. A thin mist floats over the concrete floor. @n
+~
+179 dh 0 0 0 0
+D0
+~
+~
+0 0 17971 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17967 0 0 0 0 0 0 0 0
+S
+#17970
+@RS@ra@Wn@rt@Ra@n's @DW@yo@Yr@Wk@ws@Yh@yo@Dp@n~
+   @CA large black conveyor belt in the middle of the Workshop runs non-stop,
+weapon components streamed down it's length as they are slowly built. At the
+nothern end is a cart, which is filled up with the constructed weapons and
+hauled off elsewhere. A thin mist floats over the concrete floor. @n
+~
+179 dh 0 0 0 0
+D0
+~
+~
+0 0 17973 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17972 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17967 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17971 0 0 0 0 0 0 0 0
+S
+#17971
+@RS@ra@Wn@rt@Ra@n's @DW@yo@Yr@Wk@ws@Yh@yo@Dp@n~
+   @CA large black conveyor belt in the middle of the Workshop runs non-stop,
+weapon components streamed down it's length as they are slowly built. At the
+nothern end is a cart, which is filled up with the constructed weapons and
+hauled off elsewhere. A thin mist floats over the concrete floor. @n
+~
+179 dh 0 0 0 0
+D0
+~
+~
+0 0 17974 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17970 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17969 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17976 0 0 0 0 0 0 0 0
+S
+#17972
+@RS@ra@Wn@rt@Ra@n's @DW@yo@Yr@Wk@ws@Yh@yo@Dp@n~
+   @CA large black conveyor belt in the middle of the Workshop runs non-stop,
+weapon components streamed down it's length as they are slowly built. At the
+nothern end is a cart, which is filled up with the constructed weapons and
+hauled off elsewhere. A thin mist floats over the concrete floor. @n
+~
+179 dh 0 0 0 0
+D0
+~
+~
+0 0 17975 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17968 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17970 0 0 0 0 0 0 0 0
+S
+#17973
+@RS@ra@Wn@rt@Ra@n's @DW@yo@Yr@Wk@ws@Yh@yo@Dp@n~
+   @CA large black conveyor belt in the middle of the Workshop runs non-stop,
+weapon components streamed down it's length as they are slowly built. At the
+nothern end is a cart, which is filled up with the constructed weapons and
+hauled off elsewhere. A thin mist floats over the concrete floor. @n
+~
+179 dh 0 0 0 0
+D0
+~
+~
+0 0 17983 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17975 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17970 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17974 0 0 0 0 0 0 0 0
+S
+#17974
+@RS@ra@Wn@rt@Ra@n's @DW@yo@Yr@Wk@ws@Yh@yo@Dp@n~
+   @CA large black conveyor belt in the middle of the Workshop runs non-stop,
+weapon components streamed down it's length as they are slowly built. At the
+nothern end is a cart, which is filled up with the constructed weapons and
+hauled off elsewhere. A thin mist floats over the concrete floor. @n
+~
+179 dh 0 0 0 0
+D1
+~
+~
+0 0 17973 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17971 0 0 0 0 0 0 0 0
+S
+#17975
+@RS@ra@Wn@rt@Ra@n's @DW@yo@Yr@Wk@ws@Yh@yo@Dp@n~
+   @CA large black conveyor belt in the middle of the Workshop runs non-stop,
+weapon components streamed down it's length as they are slowly built. At the
+nothern end is a cart, which is filled up with the constructed weapons and
+hauled off elsewhere. A thin mist floats over the concrete floor. @n
+~
+179 dh 0 0 0 0
+D2
+~
+~
+0 0 17972 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17973 0 0 0 0 0 0 0 0
+S
+#17976
+@RS@ra@Wn@rt@Ra@n's @DW@yo@Yr@Wk@ws@Yh@yo@Dp@n - @WHallway@n~
+   @CThis small hallway leads between the Workshop area and a rest area. Posters
+of a large fat human in a red suit, glaring have been placed on the walls,
+perhaps in attempt to demoralize workers. @n
+~
+179 dh 0 0 0 0
+D1
+~
+~
+0 0 17971 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17977 0 0 0 0 0 0 0 0
+S
+#17977
+@RS@ra@Wn@rt@Ra@n's @DW@yo@Yr@Wk@ws@Yh@yo@Dp@n - @WRest Area@n~
+   @CA large wooden table sits firmly in the middle of the rest area, upon it are
+dozens of bowls, filled with some sort of foul looking broth. On the western
+wall is a large potrait of a man in a read suit, pointing his right arm forward
+with a steely, menacing gaze upon his face. @n
+~
+179 dh 0 0 0 0
+D0
+~
+~
+0 0 17978 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17976 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17982 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17980 0 0 0 0 0 0 0 0
+S
+#17978
+@RS@ra@Wn@rt@Ra@n's @DW@yo@Yr@Wk@ws@Yh@yo@Dp@n - @WRest Area@n~
+   @CA large wooden table sits firmly in the middle of the rest area, upon it are
+dozens of bowls, filled with some sort of foul looking broth. On the western
+wall is a large potrait of a man in a read suit, pointing his right arm forward
+with a steely, menacing gaze upon his face. @n
+~
+179 dh 0 0 0 0
+D2
+~
+~
+0 0 17977 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17979 0 0 0 0 0 0 0 0
+S
+#17979
+@RS@ra@Wn@rt@Ra@n's @DW@yo@Yr@Wk@ws@Yh@yo@Dp@n - @WRest Area@n~
+   @CA large wooden table sits firmly in the middle of the rest area, upon it are
+dozens of bowls, filled with some sort of foul looking broth. On the western
+wall is a large potrait of a man in a read suit, pointing his right arm forward
+with a steely, menacing gaze upon his face. @n
+~
+179 dh 0 0 0 0
+D1
+~
+~
+0 0 17978 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17980 0 0 0 0 0 0 0 0
+S
+#17980
+@RS@ra@Wn@rt@Ra@n's @DW@yo@Yr@Wk@ws@Yh@yo@Dp@n - @WRest Area@n~
+   @CA large wooden table sits firmly in the middle of the rest area, upon it are
+dozens of bowls, filled with some sort of foul looking broth. On the western
+wall is a large potrait of a man in a read suit, pointing his right arm forward
+with a steely, menacing gaze upon his face. @n
+~
+179 dh 0 0 0 0
+D0
+~
+~
+0 0 17979 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17977 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17981 0 0 0 0 0 0 0 0
+S
+#17981
+@RS@ra@Wn@rt@Ra@n's @DW@yo@Yr@Wk@ws@Yh@yo@Dp@n - @WRest Area@n~
+   @CA large wooden table sits firmly in the middle of the rest area, upon it are
+dozens of bowls, filled with some sort of foul looking broth. On the western
+wall is a large potrait of a man in a read suit, pointing his right arm forward
+with a steely, menacing gaze upon his face. @n
+~
+179 dh 0 0 0 0
+D0
+~
+~
+0 0 17980 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17982 0 0 0 0 0 0 0 0
+S
+#17982
+@RS@ra@Wn@rt@Ra@n's @DW@yo@Yr@Wk@ws@Yh@yo@Dp@n - @WRest Area@n~
+   @CA large wooden table sits firmly in the middle of the rest area, upon it are
+dozens of bowls, filled with some sort of foul looking broth. On the western
+wall is a large potrait of a man in a read suit, pointing his right arm forward
+with a steely, menacing gaze upon his face. @n
+~
+179 dh 0 0 0 0
+D0
+~
+~
+0 0 17977 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17981 0 0 0 0 0 0 0 0
+S
+#17983
+@RS@ra@Wn@rt@Ra@n's @DW@yo@Yr@Wk@ws@Yh@yo@Dp@n - @WStaircase@n~
+   @CA wooden staircase weaves around in a spiral upward to the balcony above. A
+smooth railing is present on the outer side of the stairs so users don't fall
+off. @n
+~
+179 dh 0 0 0 0
+D2
+~
+~
+0 0 17973 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 17984 0 0 0 0 0 0 0 0
+S
+#17984
+@RS@ra@Wn@rt@Ra@n's @DW@yo@Yr@Wk@ws@Yh@yo@Dp@n - @WBalcony@n~
+   @CThe Balcony overlooks the main workshop floor, where the elf slaves toil
+endlessly to produce weaponry for the evil master of this place. A wooden
+railing has been built on the edge of the Balcony to prevent people from falling
+off to the workshop below. @n
+~
+179 dh 0 0 0 0
+D1
+~
+~
+0 0 17985 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17987 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 17983 0 0 0 0 0 0 0 0
+S
+#17985
+@RS@ra@Wn@rt@Ra@n's @DW@yo@Yr@Wk@ws@Yh@yo@Dp@n - @WBalcony@n~
+   @CThe Balcony overlooks the main workshop floor, where the elf slaves toil
+endlessly to produce weaponry for the evil master of this place. A wooden
+railing has been built on the edge of the Balcony to prevent people from falling
+off to the workshop below. @n
+~
+179 dh 0 0 0 0
+D1
+~
+~
+0 0 17986 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17984 0 0 0 0 0 0 0 0
+S
+#17986
+@RS@ra@Wn@rt@Ra@n's @DW@yo@Yr@Wk@ws@Yh@yo@Dp@n - @WBalcony@n~
+   @CThe Balcony overlooks the main workshop floor, where the elf slaves toil
+endlessly to produce weaponry for the evil master of this place. A wooden
+railing has been built on the edge of the Balcony to prevent people from falling
+off to the workshop below. @n
+~
+179 dh 0 0 0 0
+D0
+~
+~
+0 0 17991 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17985 0 0 0 0 0 0 0 0
+S
+#17987
+@RS@ra@Wn@rt@Ra@n's @DW@yo@Yr@Wk@ws@Yh@yo@Dp@n - @WBalcony@n~
+   @CThe Balcony overlooks the main workshop floor, where the elf slaves toil
+endlessly to produce weaponry for the evil master of this place. A wooden
+railing has been built on the edge of the Balcony to prevent people from falling
+off to the workshop below. @n
+~
+179 dh 0 0 0 0
+D1
+~
+~
+0 0 17984 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17988 0 0 0 0 0 0 0 0
+S
+#17988
+@RS@ra@Wn@rt@Ra@n's @DW@yo@Yr@Wk@ws@Yh@yo@Dp@n - @WBalcony@n~
+   @CThe Balcony overlooks the main workshop floor, where the elf slaves toil
+endlessly to produce weaponry for the evil master of this place. A wooden
+railing has been built on the edge of the Balcony to prevent people from falling
+off to the workshop below. @n
+~
+179 dh 0 0 0 0
+D0
+~
+~
+0 0 17989 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17987 0 0 0 0 0 0 0 0
+S
+#17989
+@RS@ra@Wn@rt@Ra@n's @DW@yo@Yr@Wk@ws@Yh@yo@Dp@n - @WHallway@n~
+   @CThe walls of this hallway are stone bricks of varying earth tones, while the
+floor is wooden and creaks under weight. More demoralizing posters of a fat man
+in a red suit can be found slapped on the walls here. @n
+~
+179 dh 0 0 0 0
+D0
+~
+~
+0 0 17990 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17988 0 0 0 0 0 0 0 0
+S
+#17990
+@RS@ra@Wn@rt@Ra@n's @DW@yo@Yr@Wk@ws@Yh@yo@Dp@n - @WHallway@n~
+   @CThe walls of this hallway are stone bricks of varying earth tones, while the
+floor is wooden and creaks under weight. More demoralizing posters of a fat man
+in a red suit can be found slapped on the walls here. @n
+~
+179 dh 0 0 0 0
+D0
+~
+~
+0 0 17997 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17989 0 0 0 0 0 0 0 0
+S
+#17991
+@RS@ra@Wn@rt@Ra@n's @DW@yo@Yr@Wk@ws@Yh@yo@Dp@n - @WHallway@n~
+   @CThe walls of this hallway are stone bricks of varying earth tones, while the
+floor is wooden and creaks under weight. More demoralizing posters of a fat man
+in a red suit can be found slapped on the walls here. @n
+~
+179 dh 0 0 0 0
+D0
+~
+~
+0 0 17992 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17986 0 0 0 0 0 0 0 0
+S
+#17992
+@RS@ra@Wn@rt@Ra@n's @DW@yo@Yr@Wk@ws@Yh@yo@Dp@n - @WHallway@n~
+   @CThe walls of this hallway are stone bricks of varying earth tones, while the
+floor is wooden and creaks under weight. More demoralizing posters of a fat man
+in a red suit can be found slapped on the walls here. @n
+~
+179 dh 0 0 0 0
+D2
+~
+~
+0 0 17991 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17993 0 0 0 0 0 0 0 0
+S
+#17993
+@RS@ra@Wn@rt@Ra@n's @DW@yo@Yr@Wk@ws@Yh@yo@Dp@n - @WHallway@n~
+   @CThe walls of this hallway are stone bricks of varying earth tones, while the
+floor is wooden and creaks under weight. More demoralizing posters of a fat man
+in a red suit can be found slapped on the walls here. @n
+~
+179 dh 0 0 0 0
+D1
+~
+~
+0 0 17992 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17994 0 0 0 0 0 0 0 0
+S
+#17994
+@RS@ra@Wn@rt@Ra@n's @DW@yo@Yr@Wk@ws@Yh@yo@Dp@n - @WHallway@n~
+   @CThe walls of this hallway are stone bricks of varying earth tones, while the
+floor is wooden and creaks under weight. More demoralizing posters of a fat man
+in a red suit can be found slapped on the walls here. @n
+~
+179 dh 0 0 0 0
+D0
+~
+~
+0 0 17998 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 17993 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17995 0 0 0 0 0 0 0 0
+S
+#17995
+@RS@ra@Wn@rt@Ra@n's @DW@yo@Yr@Wk@ws@Yh@yo@Dp@n - @WHallway@n~
+   @CThe walls of this hallway are stone bricks of varying earth tones, while the
+floor is wooden and creaks under weight. More demoralizing posters of a fat man
+in a red suit can be found slapped on the walls here. @n
+~
+179 dh 0 0 0 0
+D1
+~
+~
+0 0 17994 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17996 0 0 0 0 0 0 0 0
+S
+#17996
+@RS@ra@Wn@rt@Ra@n's @DW@yo@Yr@Wk@ws@Yh@yo@Dp@n - @WHallway@n~
+   @CThe walls of this hallway are stone bricks of varying earth tones, while the
+floor is wooden and creaks under weight. More demoralizing posters of a fat man
+in a red suit can be found slapped on the walls here. @n
+~
+179 dh 0 0 0 0
+D1
+~
+~
+0 0 17995 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 17997 0 0 0 0 0 0 0 0
+S
+#17997
+@RS@ra@Wn@rt@Ra@n's @DW@yo@Yr@Wk@ws@Yh@yo@Dp@n - @WHallway@n~
+   @CThe walls of this hallway are stone bricks of varying earth tones, while the
+floor is wooden and creaks under weight. More demoralizing posters of a fat man
+in a red suit can be found slapped on the walls here. @n
+~
+179 dh 0 0 0 0
+D1
+~
+~
+0 0 17996 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 17990 0 0 0 0 0 0 0 0
+S
+#17998
+@RS@ra@Wn@rt@Ra@n's @DW@yo@Yr@Wk@ws@Yh@yo@Dp@n - @WOffice@n~
+   @CAn oak desk with a soft padded chair have been positioned on the northern
+side of the office. Upon the desk is a pile of white documents. A potrait
+hangs on the wall behind the desk, while in the southern corners of the room are
+two potted plants. @n
+~
+179 dh 0 0 0 0
+D2
+~
+~
+0 0 17994 0 0 0 0 0 0 0 0
+S
+#17999
+Santa load room~
+You are in an unfinished room.
+Imms only
+~
+179 h 0 0 0 0
+S
+$~

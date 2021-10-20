@@ -1,0 +1,225 @@
+CircleMUD v3.0 Shop File~
+#14782~
+13526
+13527
+13528
+13529
+-1
+0.50
+0.20
+-1
+%s Sorry, I don't stock that item.~
+%s You don't seem to have that.~
+%s I don't trade in such items.~
+%s I can't afford that!~
+%s You are too poor!~
+%s That'll be %d zenni, thanks.~
+%s I'll give you %d zenni for that.~
+0
+0
+14700
+0 0 16384 0
+14782
+-1
+0
+28
+0
+0
+#14783~
+13530
+13531
+13532
+13533
+13534
+13535
+13536
+13537
+13538
+13539
+13540
+13541
+13542
+13593
+-1
+1.00
+0.20
+11
+-1
+%s Sorry, I don't stock that item.~
+%s You don't seem to have that.~
+%s I don't trade in such items.~
+%s I can't afford that!~
+%s You are too poor!~
+%s That'll be %d zenni, thanks.~
+%s I'll give you %d zenni for that.~
+0
+0
+14701
+0 0 16384 0
+14783
+-1
+0
+28
+0
+0
+#14784~
+13543
+13544
+13545
+13546
+13547
+13548
+13549
+13550
+13551
+13552
+13553
+13554
+13555
+13556
+-1
+0.50
+0.20
+11
+-1
+%s Sorry, I don't stock that item.~
+%s You don't seem to have that.~
+%s I don't trade in such items.~
+%s I can't afford that!~
+%s You are too poor!~
+%s That'll be %d zenni, thanks.~
+%s I'll give you %d zenni for that.~
+0
+0
+14702
+0 0 16384 0
+14784
+-1
+0
+28
+0
+0
+#14785~
+45
+46
+47
+48
+43
+14701
+14702
+76
+-1
+0.50
+0.20
+19
+17
+12
+-1
+%s Sorry, I don't stock that item.~
+%s You don't seem to have that.~
+%s I don't trade in such items.~
+%s I can't afford that!~
+%s You are too poor!~
+%s That'll be %d zenni, thanks.~
+%s I'll give you %d zenni for that.~
+0
+0
+14703
+0 0 16384 0
+14785
+-1
+0
+28
+0
+0
+#14786~
+13580
+13581
+13582
+13583
+13584
+13585
+13592
+-1
+0.50
+0.20
+11
+8
+5
+31
+32
+17
+19
+12
+1
+16
+-1
+%s Sorry, I don't stock that item.~
+%s You don't seem to have that.~
+%s I don't trade in such items.~
+%s I can't afford that!~
+%s You are too poor!~
+%s That'll be %d zenni, thanks.~
+%s I'll give you %d zenni for that.~
+0
+0
+14704
+0 0 16384 0
+14786
+-1
+0
+28
+0
+0
+#14787~
+13560
+-1
+0.50
+0.20
+17
+-1
+%s Sorry, I don't stock that item.~
+%s You don't seem to have that.~
+%s I don't trade in such items.~
+%s I can't afford that!~
+%s You are too poor!~
+%s That'll be %d zenni, thanks.~
+%s I'll give you %d zenni for that.~
+0
+0
+14706
+0 0 16384 0
+14787
+-1
+0
+28
+0
+0
+#14788~
+13557
+13558
+13559
+-1
+0.50
+0.20
+19
+17
+-1
+%s Sorry, I don't stock that item.~
+%s You don't seem to have that.~
+%s I don't trade in such items.~
+%s I can't afford that!~
+%s You are too poor!~
+%s That'll be %d zenni, thanks.~
+%s I'll give you %d zenni for that.~
+0
+0
+14705
+0 0 16384 0
+14788
+-1
+0
+28
+0
+0
+$~

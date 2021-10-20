@@ -1,0 +1,77 @@
+#15400
+trokk mutant dubious large~
+Trokk~
+A large mutant, with a dubious look on his face is standing here
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 0 E
+21 0 10 0d0+0 0d0+0
+0 0 5 28
+8 8 1
+Str: 14
+Dex: 21
+Int: 10
+Wis: 16
+Con: 12
+Cha: 12
+E
+#15401
+kresh lanky mutant~
+Kresh~
+A lanky looking mutant with a wicked sneer is standing here
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 0 E
+24 0 10 0d0+0 0d0+0
+0 0 5 28
+8 8 1
+Str: 20
+Dex: 13
+Int: 24
+Wis: 21
+Con: 18
+Cha: 12
+E
+#15402
+mayor carson portly~
+Mayor Carson~
+A portly man with a frightened look on his face
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 0 E
+1 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 17
+Dex: 5
+Int: 13
+Wis: 11
+Con: 16
+Cha: 10
+E
+#15499
+zjond mutant~
+Zjond~
+A tall, lean, middle-aged mutant with an intense glint in his eye.
+~
+   This mutant is a little too tall, a little too lanky. He moves with a lazy
+gait that gives the impression of laziness. When he looks at something, it is
+with a sharp, discerning eye, a studious examination of what has his attention.
+He is dressed in a simple all-black suit though the boots on his feet are a
+bright, gleaming black leather.
+~
+bd 0 0 0 0 0 0 0 0 E
+103 0 10 2d4+0 0d0+0
+0 0 5 6
+8 8 1
+Str: 14
+Dex: 8
+Int: 14
+Wis: 14
+Con: 8
+Cha: 8
+E
+$

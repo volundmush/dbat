@@ -1,0 +1,249 @@
+#14000
+Shattered Star Clerk~
+@wShattered Star Clerk@n~
+@wThe Shattered Star Clerk is standing here.@n
+~
+   @WThis old Yardratian is dressed in traditional Yardratian garb and has a
+pleasant smile on his odd face. @n
+~
+bds 0 0 0 l 0 0 0 0 E
+20 20 10 0d0+0 0d0+0
+250000 0 19 28
+8 8 1
+Str: 10
+Dex: 11
+Int: 10
+Wis: 10
+Con: 11
+Cha: 11
+E
+#14001
+Jeema~
+@wJeema@n~
+@wJeema the baker is standing here.@n
+~
+   @WThis female Yardratian has flour and a smile on her face. @n
+~
+bds 0 0 0 l 0 0 0 0 E
+20 20 10 0d0+0 0d0+0
+20000 0 19 28
+8 8 2
+Str: 15
+Dex: 9
+Int: 15
+Wis: 15
+Con: 9
+Cha: 9
+E
+#14002
+Gleb~
+@wGleb@n~
+@wGleb, the shopkeeper, is standing here.@n
+~
+   @WThis short Yardratian looks to be quite old. @n
+~
+bds 0 0 0 0 0 0 0 0 E
+15 20 10 0d0+0 0d0+0
+100000 0 0 28
+8 8 1
+Str: 11
+Dex: 9
+Int: 11
+Wis: 11
+Con: 9
+Cha: 9
+E
+#14004
+Desmon~
+@wDesmon@n~
+@wDesmon the smith is working on something here.@n
+~
+   @WThis burly Yardratian appears to be quite skilled with smithing. He is
+wearing a leather apron over his traditional Yardratian garb. @n
+~
+bds 0 0 0 l 0 0 0 0 E
+100 20 10 0d0+0 0d0+0
+100000 0 19 28
+8 8 1
+Str: 10
+Dex: 13
+Int: 10
+Wis: 10
+Con: 13
+Cha: 13
+E
+T 14001
+T 14002
+T 14003
+T 14004
+#14005
+Grumms~
+@wGrumms@n~
+@wGrumms the shopkeeper is standing here.@n
+~
+   @WThis short yardratian man is hobbled over a worn wooden cane. @n
+~
+bds 0 0 0 l 0 0 0 0 E
+20 20 10 0d0+0 0d0+0
+100000 0 19 28
+8 8 1
+Str: 16
+Dex: 14
+Int: 16
+Wis: 16
+Con: 14
+Cha: 14
+E
+#14006
+Jemdust Clerk~
+@wJemdust Clerk@n~
+@wThe Jemdust clerk is standing here.@n
+~
+   @WThis female yardratian is continuously polishing the merchandise of the
+Jemdust shop. @n
+~
+bds 0 0 0 l 0 0 0 0 E
+10 20 10 0d0+0 0d0+0
+100000 0 19 28
+8 8 1
+Str: 13
+Dex: 9
+Int: 13
+Wis: 13
+Con: 9
+Cha: 9
+E
+#14007
+Yardratian Child~
+@wYardratian Child@n~
+@wA yardratian child is eating candy here@n
+~
+   @WThis young yardratian is outside enjoying the day while eating some popular
+yardratian candy. @n
+~
+d 0 0 0 l 0 0 0 0 E
+1 20 10 0d0+0 0d0+0
+0 0 19 28
+8 8 1
+Str: 13
+Dex: 9
+Int: 13
+Wis: 13
+Con: 9
+Cha: 9
+E
+#14008
+Yardratian Male~
+@wYardratian Male@n~
+@wA yardratian male is standing here.@n
+~
+   @WThis young adult yardratian appears to be waiting for something. Dressed in
+traditional Yardratian clothing and with a bored expression on his face. @n
+~
+d 0 0 0 l 0 0 0 0 E
+3 20 10 0d0+0 0d0+0
+0 0 19 28
+8 8 1
+Str: 8
+Dex: 11
+Int: 8
+Wis: 8
+Con: 11
+Cha: 11
+E
+#14009
+Yardratian Female~
+@wYardratian Female@n~
+@wA yardratian female is standing here.@n
+~
+   @WThis young adult yardratian is dressed in traditional yardratian garb and
+appears to be on her way somewhere. @n
+~
+d 0 0 0 l 0 0 0 0 E
+2 20 10 0d0+0 0d0+0
+0 0 19 28
+8 8 2
+Str: 8
+Dex: 15
+Int: 8
+Wis: 8
+Con: 15
+Cha: 15
+E
+#14010
+Minto Initiate~
+@bM@Bi@wn@bt@Bo @cI@Cn@Wi@wti@ca@Ct@We@n~
+@wA @bM@Bi@wn@bt@Bo @cI@Cn@Wi@wti@ca@Ct@We@w is standing here.@n
+~
+   @WThis yardratian has enlisted in the Minto academy and is being trained as a
+Minto Warrior. @n
+~
+d 0 0 0 l 0 0 0 0 E
+80 20 10 0d0+0 0d0+0
+0 0 19 28
+8 8 1
+Str: 9
+Dex: 8
+Int: 9
+Wis: 9
+Con: 8
+Cha: 8
+E
+#14011
+Minto Adept~
+@bM@Bi@wn@bt@Bo @cA@Cd@We@wpt@n~
+@wA @bM@Bi@wn@bt@Bo @cA@Cd@We@wpt@w is standing here.@n
+~
+   @WThis yardratian has enlisted in the Minto academy and is being trained as a
+Minto Warrior. @n
+~
+d 0 0 0 l 0 0 0 0 E
+85 20 10 0d0+0 0d0+0
+0 0 19 28
+8 8 1
+Str: 10
+Dex: 12
+Int: 10
+Wis: 10
+Con: 12
+Cha: 12
+E
+#14012
+Minto Expert~
+@bM@Bi@wn@bt@Bo @cE@Cx@Wp@wert@n~
+@wA @bM@Bi@wn@bt@Bo @cE@Cx@Wp@wert@w is standing here.@n
+~
+   @WThis yardratian has enlisted in the Minto academy and is being trained as a
+Minto Warrior. @n
+~
+d 0 0 0 l 0 0 0 0 E
+90 20 10 0d0+0 0d0+0
+0 0 19 28
+8 8 1
+Str: 10
+Dex: 15
+Int: 10
+Wis: 10
+Con: 15
+Cha: 15
+E
+#14013
+Hooded Man~
+@wA @DHooded@w Man@n~
+@wA @DHooded@w Man, is sitting behind a counter here@n
+~
+   @WThis strange cloaked man has a hood drawn up around his face. None of his
+bodily features are apparent except for a vague humanoid shape. @n
+~
+bds 0 0 0 0 0 0 0 0 E
+30 20 10 0d0+0 0d0+0
+500000 0 19 28
+8 8 1
+Str: 14
+Dex: 8
+Int: 14
+Wis: 14
+Con: 8
+Cha: 8
+E
+$

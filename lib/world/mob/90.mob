@@ -1,0 +1,189 @@
+#9000
+Shadowlas Guardian~
+@DSh@wad@Wow@Dl@wa@Ws@w Guardian@n~
+A Konatsu is here, guarding the entrance to the Shadowlas Temple.
+~
+@d @n
+~
+bd 0 0 0 l 0 0 0 0 E
+40 20 10 0d8+0 0d0+0
+0 0 3 7
+8 8 1
+Str: 13
+Dex: 9
+Int: 13
+Wis: 13
+Con: 9
+Cha: 9
+E
+#9001
+Shadowlas Guardian~
+@DSh@wad@Wow@Dl@wa@Ws@w Guardian@n~
+A Shadowlas Guardian is here, protecting the entrance to the inner section of the Temple.
+~
+@d @n
+~
+bd 0 0 0 l 0 0 0 0 E
+50 20 10 0d8+0 0d0+0
+0 0 3 7
+8 8 1
+Str: 13
+Dex: 9
+Int: 13
+Wis: 13
+Con: 9
+Cha: 9
+E
+#9002
+Silhouette Konatsu~
+a Silhouette Konatsu~
+A Konatsu in Silhouette form looks from side to side.
+~
+@d @n
+~
+d 0 0 0 l 0 0 0 -20 E
+50 20 10 0d8+0 0d0+0
+0 0 3 7
+8 8 2
+Str: 12
+Dex: 13
+Int: 12
+Wis: 12
+Con: 13
+Cha: 13
+E
+#9003
+Silhouette Konatsu~
+a Silhouette Konatsu~
+A Konatsu in Silhouette form, stands here, eyes closed listening intently.
+~
+@d @n
+~
+d 0 0 0 l 0 0 0 -20 E
+52 20 10 0d8+0 0d0+0
+0 0 3 7
+8 8 2
+Str: 12
+Dex: 13
+Int: 12
+Wis: 12
+Con: 13
+Cha: 13
+E
+#9004
+Shade Konatsu~
+a Shade Konatsu~
+A Konatsu in shade form slinks through the darkness here.
+~
+@d @n
+~
+d 0 0 0 l 0 0 0 -20 E
+54 20 10 0d8+0 0d0+0
+0 0 3 7
+8 8 1
+Str: 16
+Dex: 13
+Int: 16
+Wis: 16
+Con: 13
+Cha: 13
+E
+#9005
+Shade Konatsu~
+a Shade Konatsu~
+A konatsu in shade form grips her blade tightly, preparing to strike.
+~
+@d @n
+~
+d 0 0 0 l 0 0 0 -20 E
+56 20 10 0d8+0 0d0+0
+0 0 3 7
+8 8 2
+Str: 16
+Dex: 13
+Int: 16
+Wis: 16
+Con: 13
+Cha: 13
+E
+#9006
+Shadow Guru~
+@DS@wh@Wad@wo@Dw @WG@wu@Dru@n~
+The Shadow Guru, master of the Shadowlas Temple stands here.
+~
+@d @n
+~
+bd 0 0 0 l 0 0 0 0 E
+60 20 10 0d8+0 0d0+0
+0 0 3 7
+8 8 1
+Str: 13
+Dex: 10
+Int: 13
+Wis: 13
+Con: 10
+Cha: 10
+E
+#9007
+Shadow Elemental~
+a @DS@wh@Wad@wo@Ww @CE@cl@We@ym@Ye@yn@Wt@ca@Cl@n~
+A Shadow Elemental stands here, flowing to and fro.
+~
+@d @n
+~
+dvwxyz 0 0 0 l 0 0 0 -30 E
+58 20 10 0d8+0 0d0+0
+0 0 23 7
+8 8 0
+Size: 5
+Str: 16
+Dex: 9
+Int: 16
+Wis: 16
+Con: 9
+Cha: 9
+E
+#9008
+Rainbow Elemental~
+a rainbow @CE@cl@We@ym@Ye@yn@Wt@ca@Cl@n~
+A rainbow elemental moves around here, shifting color with every step.
+~
+@d @n
+~
+dvwxyz 0 0 0 l 0 0 0 -30 E
+58 20 10 0d8+0 0d0+0
+0 0 23 7
+8 8 0
+Size: 5
+Str: 9
+Dex: 14
+Int: 9
+Wis: 9
+Con: 14
+Cha: 14
+E
+#9010
+Reaper Elemental~
+@rR@Re@wa@Wp@re@Rr @CE@cl@We@ym@Ye@yn@Wt@ca@Cl@n~
+A massive Reaper Elemental lurks here, hunting for souls to claim.
+~
+   The Reaper Elemental is the largest of any of it's kind and equally rare. 
+Blue lines criss cross over it's black body like tribal tattoos. The Reaper
+glares with two glowing red eyes and where you would expect to find hands, large
+claws can be found. @n
+~
+bdvwxyzA 0 0 0 l 0 0 0 -30 E
+60 20 10 0d8+0 0d0+0
+0 0 23 9
+8 8 0
+Size: 7
+Str: 14
+Dex: 15
+Int: 14
+Wis: 14
+Con: 15
+Cha: 15
+E
+T 9001
+T 9002
+$

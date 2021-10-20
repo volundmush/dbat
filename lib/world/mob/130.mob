@@ -1,0 +1,686 @@
+#13000
+Master Krane~
+@CMaster Krane@n~
+@CMaster Krane @wis sitting here.@n
+~
+   @WThis elderly man has a shrewd look on his face and Fu Man Chu style moustache
+and beard. @n
+~
+bdsA 0 0 0 0 0 0 0 0 E
+20 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 13
+Dex: 13
+Int: 15
+Wis: 14
+Con: 19
+Cha: 11
+E
+T 13000
+T 1127
+#13001
+Chaotzu~
+@CChaotzu@n~
+@CChaotzu @wis standing here.@n
+~
+   @WThis small guy has pale white skin, doll like eyes, and red marks on his
+cheeks. He is wearing a white shirt and green pants. @n
+~
+bdsA 0 0 0 0 0 0 0 0 E
+22 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 15
+Dex: 16
+Int: 18
+Wis: 13
+Con: 15
+Cha: 22
+E
+T 13003
+T 13006
+T 13008
+#13002
+Tienshinhan~
+@CTienshinhan@n~
+@CTienshinhan @wis standing guard here.@n
+~
+   @WThis bald man has... Three eyes! Not only that but he has a tough look on
+his face. He is not wearing a shirt, but he is wearing green pants, yellow
+leg-warmers, green bracers and black shoes. @n
+~
+bdsA 0 0 0 l 0 0 0 0 E
+31 0 10 0d6+0 0d0+0
+0 0 0 2
+8 8 1
+Str: 20
+Dex: 25
+Int: 31
+Wis: 31
+Con: 22
+Cha: 16
+E
+T 13001
+T 13002
+T 1705
+T 13005
+T 13007
+#13003
+Small Penguin~
+@wA Small Penguin@n~
+@wA small penguin is waddling here.@n
+~
+   @WThis small bird can't fly, in fact it swims, but only when it isn't waddling
+on land. @n
+~
+dxyz 0 0 0 l 0 0 0 0 E
+1 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Str: 8
+Dex: 10
+Int: 5
+Wis: 7
+Con: 6
+Cha: 7
+E
+#13004
+Monkey~
+@wA Monkey@n~
+@wA monkey is playing here.@n
+~
+   @WThis monkey is a little troublemaker, better watch it. @n
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+1 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 3
+Str: 6
+Dex: 5
+Int: 8
+Wis: 7
+Con: 6
+Cha: 10
+E
+#13005
+Ostrich~
+@wAn Ostrich@n~
+@wAn ostrich is standing here.@n
+~
+   @WThis bird can not fly. It is a very fast runner though, with powerful legs
+that it uses quite well. @n
+~
+dxyz 0 0 0 l 0 0 0 0 E
+1 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 2
+Size: 4
+Str: 5
+Dex: 5
+Int: 6
+Wis: 8
+Con: 5
+Cha: 9
+E
+#13006
+Leopard~
+@wA Leopard@n~
+@wA leopard is stalking around here.@n
+~
+   @WThis leopard has a beautiful yellow and black coat. @n
+~
+dxyz 0 0 0 l 0 0 0 0 E
+2 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 2
+Size: 5
+Str: 8
+Dex: 8
+Int: 8
+Wis: 7
+Con: 6
+Cha: 6
+E
+#13007
+Hippo~
+@wA Hippo@n~
+@wA hippo is swimming here.@n
+~
+   @WThis is a hippo, a very large creature that lives mostly in shallow waters.
+They do come up onto land sometimes though. @n
+~
+dxyz 0 0 0 l 0 0 0 0 E
+2 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 6
+Str: 7
+Dex: 9
+Int: 7
+Wis: 8
+Con: 9
+Cha: 8
+E
+#13008
+Zebra~
+@wA Zebra@n~
+@wA zebra is standing here.@n
+~
+   @WThis equine beast has black and white stripes covering its body which is a
+natural defense against predators on the grassy plains. @n
+~
+dxyz 0 0 0 l 0 0 0 0 E
+2 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 4
+Str: 8
+Dex: 10
+Int: 8
+Wis: 7
+Con: 9
+Cha: 6
+E
+#13009
+George~
+@wGeorge@n~
+@wGeorge, the Taco Hell employee, is standing here.@n
+~
+   @WThis strange smelly man seems barely focused on his job of basic math and
+terrible customer service. His beard seems like a health code violation, but
+fortunatly his thinning mane is firmly beneath a hair net. Bitching and moaning
+seem to be the attitude this person goes about doing anything required of him.
+It is best to order quickly and let him enjoy what little there is to his
+existence alone. @n
+~
+bdsA 0 0 0 0 0 0 0 0 E
+1 0 10 0d0+0 0d0+0
+25000 0 0 28
+8 8 1
+Str: 8
+Dex: 9
+Int: 6
+Wis: 10
+Con: 5
+Cha: 6
+E
+T 13004
+#13010
+Trina~
+@wTrina@n~
+@wTrina the Stargem shopkeeper is standing here.@n
+~
+   @wThis beautiful woman is busy shining a piece of Stargem jewelry. @n
+~
+bds 0 0 0 0 0 0 0 0 E
+3 0 10 0d0+0 0d0+0
+100000 0 0 28
+8 8 2
+Str: 6
+Dex: 5
+Int: 6
+Wis: 8
+Con: 7
+Cha: 7
+E
+#13011
+Weight Lifter Man Lifting~
+@wA Weight Lifter@n~
+@wA man is lifting weights here.@n
+~
+   @WThis burly man looks like he has been hitting the weights recently and
+frequently. @n
+~
+d 0 0 0 0 0 0 0 0 E
+6 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 9
+Dex: 6
+Int: 5
+Wis: 10
+Con: 7
+Cha: 7
+E
+#13012
+Wrestler~
+@wA Wrestler@n~
+@wA wrestler is practicing some grapples here.
+~
+   @WThis man is dressed in spandex and is attempting to pin an invisible foe. @n
+~
+d 0 0 0 0 0 0 0 0 E
+7 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 6
+Dex: 6
+Int: 7
+Wis: 7
+Con: 5
+Cha: 9
+E
+#13013
+Kickboxer~
+@wA Kickboxer@n~
+@wA kickboxer is practicing a shin-strike here.
+~
+   @WThis lean muscular man looks to b e pretty serious about his kickboxing
+skills. @n
+~
+d 0 0 0 0 0 0 0 0 E
+8 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 5
+Dex: 9
+Int: 7
+Wis: 10
+Con: 6
+Cha: 10
+E
+#13014
+Nurse~
+@wA nurse@n~
+@wA nurse is looking at a clipboard here@n
+~
+   @WThis woman is dressed in a white uniform and has a name tag displayed on her
+chest. @n
+~
+d 0 0 0 0 0 0 0 0 E
+4 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 2
+Str: 8
+Dex: 7
+Int: 5
+Wis: 6
+Con: 5
+Cha: 5
+E
+#13015
+Doctor~
+@wA doctor@n~
+@wA doctor is talking on a cellphone here.@n
+~
+   @WThis doctor appears to be quite busy at the moment. @n
+~
+d 0 0 0 0 0 0 0 0 E
+4 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 5
+Dex: 5
+Int: 6
+Wis: 7
+Con: 8
+Cha: 5
+E
+#13016
+Patient~
+@wA patient@n~
+@wA patient is wandering around here.@n
+~
+   @WThis young man is dressed in a hospital gown and appears to have his hand
+wrapped up in bandages. @n
+~
+d 0 0 0 0 0 0 0 0 E
+3 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 7
+Dex: 6
+Int: 6
+Wis: 7
+Con: 6
+Cha: 8
+E
+#13017
+Patient~
+@wA patient@n~
+@wA patient is standing here.@n
+~
+   @WThis young woman is getting around on crutches. @n
+~
+d 0 0 0 0 0 0 0 0 E
+2 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 2
+Str: 5
+Dex: 6
+Int: 10
+Wis: 7
+Con: 5
+Cha: 8
+E
+#13018
+Mortician~
+@wMortician@n~
+@wThe Mortician is looking at a chart here.@n
+~
+   @WThis doctor specializes in dealing with the dead. @n
+~
+bd 0 0 0 0 0 0 0 0 E
+5 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 2
+Str: 6
+Dex: 8
+Int: 6
+Wis: 5
+Con: 10
+Cha: 7
+E
+#13019
+Visitor~
+@wA hospital visitor@n~
+@wA hospital visitor is checking out a magazine here.@n
+~
+   @WThis man is visiting someone at the hospital. @n
+~
+bd 0 0 0 0 0 0 0 0 E
+4 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 7
+Dex: 5
+Int: 9
+Wis: 8
+Con: 8
+Cha: 10
+E
+#13020
+Ken~
+@wKen@n~
+@wKen the restaurant owner is standing here.@n
+~
+   @WThis man has an eyepatch over his right eye and a scar down the same side of
+his face. Other than these traits he appears to be a friendly and non-threating
+guy. @n
+~
+bds 0 0 0 0 0 0 0 0 E
+15 0 10 0d0+0 0d0+0
+50000 0 0 28
+8 8 1
+Str: 12
+Dex: 13
+Int: 11
+Wis: 14
+Con: 8
+Cha: 15
+E
+#13021
+Logan~
+@wLogan@n~
+@wLogan, Walker's cousin, is standing here.@n
+~
+   @WWalker's younger cousin here appears to enjoy running this small supply shop
+for Walker who is busy in Nexus City with the original store. @n
+~
+bds 0 0 0 0 0 0 0 0 E
+5 0 10 0d0+0 0d0+0
+50000 0 0 28
+8 8 1
+Str: 7
+Dex: 6
+Int: 9
+Wis: 5
+Con: 7
+Cha: 8
+E
+#13022
+Old Lady~
+@wOld Lady@n~
+@wAn old lady is walking here.@n
+~
+   @WThis old lady appears to be out shopping. @n
+~
+d 0 0 0 0 0 0 0 0 E
+1 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 2
+Str: 6
+Dex: 8
+Int: 8
+Wis: 6
+Con: 5
+Cha: 9
+E
+#13023
+Young Man~
+@wYoung Man@n~
+@wA young man is standing here.@n
+~
+   @WThis young man appears to have nothing better to do right now except to hang
+out. @n
+~
+d 0 0 0 0 0 0 0 0 E
+2 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 6
+Dex: 6
+Int: 8
+Wis: 5
+Con: 7
+Cha: 8
+E
+#13024
+Police Officer~
+@wPolice Officer@n~
+@wA police officer is standing here.@n
+~
+   @WThis is one of Satan City's finest doing his job. @n
+~
+dm 0 0 0 0 0 0 0 0 E
+5 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 7
+Dex: 5
+Int: 9
+Wis: 7
+Con: 10
+Cha: 5
+E
+#13025
+Young Woman~
+@wYoung Woman@n~
+@wA young woman is standing here.@n
+~
+   @WThis young woman appears to be on her way somewhere. @n
+~
+d 0 0 0 0 0 0 0 0 E
+2 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 2
+Str: 7
+Dex: 8
+Int: 8
+Wis: 8
+Con: 5
+Cha: 8
+E
+#13026
+Worker~
+@wWorker@n~
+@wA worker is standing here sipping coffee.@n
+~
+   @WThis man appears to be on a break right now. @n
+~
+d 0 0 0 0 0 0 0 0 E
+3 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 5
+Dex: 6
+Int: 8
+Wis: 6
+Con: 5
+Cha: 7
+E
+#13027
+Furion Shopkeeper~
+@wThe Furion Shopkeeper@n~
+@wThe Furion shopkeeper is standing here.@n
+~
+   @WThis man appears to be quite calm and relaxed. It is as if every detail in
+life bores him on some level. @n
+~
+bds 0 0 0 0 0 0 0 0 E
+20 0 10 0d0+0 0d0+0
+100000 0 0 28
+8 8 1
+Str: 11
+Dex: 12
+Int: 18
+Wis: 16
+Con: 15
+Cha: 17
+E
+#13028
+Old Sage~
+@wOld sage@n~
+@wAn old sage is sitting here, smoking herb from a long pipe.@n
+~
+   @WThis old man has large white puffy eyebrows, a bald head, and a long white
+beards. He is wearing a pearly white robe with gold trim and has his feet
+hidden under the hem of the very same robe. @n
+~
+bds 0 0 0 0 0 0 0 0 E
+50 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 33
+Dex: 42
+Int: 43
+Wis: 30
+Con: 30
+Cha: 48
+E
+#13029
+Gus~
+@wGus@n~
+@wGus the shopkeeper is standing here.@n
+~
+   @WThis large man appears to work quite hard in both running the store as well
+as making the equipment that is sold in it. @n
+~
+bds 0 0 0 0 0 0 0 0 E
+20 0 10 0d0+0 0d0+0
+100000 0 0 28
+8 8 1
+Str: 13
+Dex: 12
+Int: 19
+Wis: 20
+Con: 11
+Cha: 12
+E
+#13030
+Eel~
+@wAn Eel@n~
+@wAn eel is swimming here.@n
+~
+   @WThis long slimy snake like fish has large powerful jaws and measures about
+nine feet in length. @n
+~
+dz 0 0 0 ly 0 0 0 0 E
+15 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 0
+Size: 3
+Str: 13
+Dex: 15
+Int: 7
+Wis: 6
+Con: 15
+Cha: 9
+E
+#13031
+Giant Angler Fish~
+@wA Giant Angler Fish@n~
+@wA giant angler fish is swimming here.@n
+~
+   @WThis fish is at least six feet long and has a mouth big enough to a gorilla
+whole. Its teeth are wickedly long in the lower jaw as well. A glowing
+appendage hangs out from its head like a fishing line. @n
+~
+dz 0 0 0 ly 0 0 0 0 E
+18 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 0
+Size: 4
+Str: 10
+Dex: 14
+Int: 7
+Wis: 7
+Con: 15
+Cha: 18
+E
+#13032
+Water Wurm~
+@wA Water Wurm@n~
+@wA water wurm is swimming here.@n
+~
+   @WThis creature is massive. It has a large head with no eyes and a mouth like
+a garbage disposal. It measures about twenty feet in length and has skin as
+tough as iron. @n
+~
+dz 0 0 0 ly 0 0 0 0 E
+22 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 0
+Size: 6
+Str: 20
+Dex: 18
+Int: 8
+Wis: 8
+Con: 21
+Cha: 14
+E
+#13033
+Giant Crab~
+@wA Giant Crab@n~
+@wA giant crab is perched here.@n
+~
+   @WThis crab is about the size of an elephant. It has two massive claws that
+could sheer steel like paper. @n
+~
+bdvwxyz 0 0 0 ly 0 0 0 0 E
+30 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 0
+Size: 6
+Str: 15
+Dex: 30
+Int: 6
+Wis: 7
+Con: 22
+Cha: 30
+E
+#13034
+Kraken~
+@wThe Kraken@n~
+@wThe Kraken is floating here.@n
+~
+   @WThis massive octopus like monster seems to be all limbs. It must be over a
+hundred feet long when stretched out and capable of crushing an ocean liner
+without much effort. Inbetwen all its legs there is a gaping maw with beaklike
+teeth. @n
+~
+bdxyz 0 0 0 ly 0 0 0 0 E
+40 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 0
+Size: 6
+Str: 35
+Dex: 36
+Int: 7
+Wis: 7
+Con: 26
+Cha: 34
+E
+$

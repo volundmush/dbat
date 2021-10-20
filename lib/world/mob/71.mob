@@ -1,0 +1,63 @@
+#7100
+Dark Spectre~
+@mD@Ma@Wr@wk @RS@rpectr@Re@n~
+@wA @mD@Ma@Wr@wk @RS@rpectr@Re@w is floating here.@n
+~
+   @WThis dark being has a vague humanoid shape to it. It's very presence
+appears to be sucking the heat from this room. @n
+~
+dvwxyzA 0 0 0 l 0 0 0 0 E
+101 20 10 0d0+0 0d0+0
+0 0 23 28
+8 8 0
+Size: 3
+Str: 14
+Dex: 8
+Int: 14
+Wis: 14
+Con: 8
+Cha: 8
+E
+T 7107
+#7101
+Vitash Spawn~
+@GV@gitas@Gh @rS@Rp@Wa@wwn@n~
+@wA @GV@gitas@Gh @rS@Rp@Wa@wwn@w is prowling here!@n
+~
+   @WThis appears to be some kind of young dragon with dark obsidian scales. It
+has burning red eyes and appears to be quite unpleasant. @n
+~
+bdf 0 0 0 l 0 0 0 0 E
+102 20 10 0d0+0 0d0+0
+0 0 10 28
+8 8 0
+Str: 16
+Dex: 14
+Int: 16
+Wis: 16
+Con: 14
+Cha: 14
+E
+#7102
+Vitash Devourer Death~
+@GV@gitas@Gh@n~
+@GV@gitas@Gh@w the @mD@Me@Wv@wo@mu@Mr@We@wr of @DDeath@w is hovering here.@n
+~
+   @WThis massive dragon has obsidian scales and eyes that burn red and bright as
+suns. It has blood dripping from its fang filled maw and appears mad with hate
+for anything that exists. @n
+~
+bdf 0 0 0 l 0 0 0 0 E
+104 20 10 0d0+0 0d0+0
+0 0 10 28
+8 8 1
+Str: 16
+Dex: 15
+Int: 16
+Wis: 16
+Con: 15
+Cha: 15
+E
+T 7102
+T 7103
+$

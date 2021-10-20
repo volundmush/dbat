@@ -1,0 +1,2185 @@
+#14900
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cCentral Square@n~
+   @cThis large part of the city appears to be its center. The ground is
+comprised of rock the same as most of the walls of the city. Having been
+carved out of an underwater cave by the Kanassans of the city. Various metal
+structures have been built into the ground and walls as well. Including a
+raised platform leading to the landing pad of the city in the center of the
+square. @n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14901 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14905 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14904 0 0 0 0 0 0 0 0
+S
+#14901
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cCentral Square@n~
+   @cThis large part of the city appears to be its center. The ground is
+comprised of rock the same as most of the walls of the city. Having been
+carved out of an underwater cave by the Kanassans of the city. Various metal
+structures have been built into the ground and walls as well. Including a
+raised platform leading to the landing pad of the city in the center of the
+square. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14969 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14902 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14904 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14900 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14903 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14905 0 0 0 0 0 0 0 0
+S
+#14902
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cCentral Square@n~
+   @cThis large part of the city appears to be its center. The ground is
+comprised of rock the same as most of the walls of the city. Having been
+carved out of an underwater cave by the Kanassans of the city. Various metal
+structures have been built into the ground and walls as well. Including a
+raised platform leading to the landing pad of the city in the center of the
+square. @n
+~
+149 0 g 0 0 1
+D2
+~
+~
+0 0 14903 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14901 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14904 0 0 0 0 0 0 0 0
+S
+#14903
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cCentral Square@n~
+   @cThis large part of the city appears to be its center. The ground is
+comprised of rock the same as most of the walls of the city. Having been
+carved out of an underwater cave by the Kanassans of the city. Various metal
+structures have been built into the ground and walls as well. Including a
+raised platform leading to the landing pad of the city in the center of the
+square. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14902 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14909 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14908 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14904 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14901 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14907 0 0 0 0 0 0 0 0
+S
+#14904
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cLanding Pad@n~
+   @WThis large metal platform has been fitted with several docking structures
+for ships to land by. These structures appear to be used to work on any ships
+landed here. A large opening in the cave above makes the sky of Kanassa
+visible far above past a large chasm of smooth rock. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14901 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14903 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14907 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14905 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14900 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14902 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14908 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14906 0 0 0 0 0 0 0 0
+S
+#14905
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cCentral Square@n~
+   @cThis large part of the city appears to be its center. The ground is
+comprised of rock the same as most of the walls of the city. Having been
+carved out of an underwater cave by the Kanassans of the city. Various metal
+structures have been built into the ground and walls as well. Including a
+raised platform leading to the landing pad of the city in the center of the
+square. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14900 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14904 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14906 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14961 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14901 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14907 0 0 0 0 0 0 0 0
+S
+#14906
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cCentral Square@n~
+   @cThis large part of the city appears to be its center. The ground is
+comprised of rock the same as most of the walls of the city. Having been
+carved out of an underwater cave by the Kanassans of the city. Various metal
+structures have been built into the ground and walls as well. Including a
+raised platform leading to the landing pad of the city in the center of the
+square. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14905 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14907 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14904 0 0 0 0 0 0 0 0
+S
+#14907
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cCentral Square@n~
+   @cThis large part of the city appears to be its center. The ground is
+comprised of rock the same as most of the walls of the city. Having been
+carved out of an underwater cave by the Kanassans of the city. Various metal
+structures have been built into the ground and walls as well. Including a
+raised platform leading to the landing pad of the city in the center of the
+square. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14904 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14908 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14965 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14906 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14905 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14903 0 0 0 0 0 0 0 0
+S
+#14908
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cCentral Square@n~
+   @cThis large part of the city appears to be its center. The ground is
+comprised of rock the same as most of the walls of the city. Having been
+carved out of an underwater cave by the Kanassans of the city. Various metal
+structures have been built into the ground and walls as well. Including a
+raised platform leading to the landing pad of the city in the center of the
+square. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14903 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14907 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14904 0 0 0 0 0 0 0 0
+S
+#14909
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cBubblos Street@n~
+   @cThis street is larger than most of the rest due to being a central street.
+It has the same metal panels built into the blue rock ceiling as any other
+street, with the same white lights. However closer along to the center of the
+city natural light from Kanassa can be seen filtering in through the great
+chasm. @n
+
+@cA @Rposter@c is hung up on the side of the street.@n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14910 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14903 0 0 0 0 0 0 0 0
+E
+poster~
+@y/---------------------------------\@n
+@y|                                 @y|@n
+@y|      @WAttention Citizens@n         @y|@n
+@y|                                 @y|@n
+@y|   @WDo your part in keeping the@n   @y|@n
+@y|   @WCity of Aquis safe. Report@n    @y|@n
+@y|   @Wall unauthorized offworlder@n   @y|@n
+@y|   @Wactivity to the city guards@n   @y|@n
+@y|       @Was soon as possible.@n      @y|@n
+@y|                                 @y|@n
+@y|                                 @y|@n
+@y|       @WTogether in Unity@n         @y|@n
+@y|       @WWe remain strong,@n         @y|@n
+@y|       @WLong Live Kanassa@n         @y|@n
+@y|                                 @y|@n
+@y|   @WAn Aquis City Announcement@n    @y|@n
+@y\---------------------------------/@n
+~
+S
+#14910
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cBubblos Street@n~
+   @cThis street is larger than most of the rest due to being a central street.
+It has the same metal panels built into the blue rock ceiling as any other
+street, with the same white lights. However closer along to the center of the
+city natural light from Kanassa can be seen filtering in through the great
+chasm. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 15000 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14911 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14909 0 0 0 0 0 0 0 0
+S
+#14911
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cBubblos Street@n~
+   @cThis street is larger than most of the rest due to being a central street.
+It has the same metal panels built into the blue rock ceiling as any other
+street, with the same white lights. However closer along to the center of the
+city natural light from Kanassa can be seen filtering in through the great
+chasm. @n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14912 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14910 0 0 0 0 0 0 0 0
+S
+#14912
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cBubblos Street@n~
+   @cThis street is larger than most of the rest due to being a central street.
+It has the same metal panels built into the blue rock ceiling as any other
+street, with the same white lights. However closer along to the center of the
+city natural light from Kanassa can be seen filtering in through the great
+chasm. @n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14913 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14911 0 0 0 0 0 0 0 0
+S
+#14913
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cIntersection of Undine and Bubblos Streets@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be the most traveled
+of the entire city. Its rock flooring is well worn with the movement of many
+feet through out the centuries. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14914 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 15099 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14960 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14912 0 0 0 0 0 0 0 0
+S
+#14914
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cUndine Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be the most traveled
+of the entire city. Its rock flooring is well worn with the movement of many
+feet through out the centuries. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14915 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14913 0 0 0 0 0 0 0 0
+S
+#14915
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cUndine Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be the most traveled
+of the entire city. Its rock flooring is well worn with the movement of many
+feet through out the centuries. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14916 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14914 0 0 0 0 0 0 0 0
+S
+#14916
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cUndine Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be the most traveled
+of the entire city. Its rock flooring is well worn with the movement of many
+feet through out the centuries. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14917 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14915 0 0 0 0 0 0 0 0
+S
+#14917
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cUndine Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be the most traveled
+of the entire city. Its rock flooring is well worn with the movement of many
+feet through out the centuries. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14918 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14916 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 15012 0 0 0 0 0 0 0 0
+S
+#14918
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cUndine Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be the most traveled
+of the entire city. Its rock flooring is well worn with the movement of many
+feet through out the centuries. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14919 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14917 0 0 0 0 0 0 0 0
+S
+#14919
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cIntersection of Hydro Way and Undine Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be a lower class
+district of the city. There are many shoddy buildings carved out of the cave
+rock to the north and south. @n
+~
+149 0 g 0 0 1
+D2
+~
+~
+0 0 14918 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14920 0 0 0 0 0 0 0 0
+S
+#14920
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cHydro Way@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be a lower class
+district of the city. There are many shoddy buildings carved out of the cave
+rock to the north and south. @n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14919 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14921 0 0 0 0 0 0 0 0
+S
+#14921
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cHydro Way@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be a lower class
+district of the city. There are many shoddy buildings carved out of the cave
+rock to the north and south. @n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14920 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14922 0 0 0 0 0 0 0 0
+S
+#14922
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cIntersection of Hydro Way and Reef Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be a lower class
+district of the city. There are many shoddy buildings carved out of the cave
+rock to the north and south. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14985 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14921 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14923 0 0 0 0 0 0 0 0
+S
+#14923
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cHydro Way@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be a lower class
+district of the city. There are many shoddy buildings carved out of the cave
+rock to the north and south. @n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14922 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14924 0 0 0 0 0 0 0 0
+S
+#14924
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cHydro Way@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be a lower class
+district of the city. There are many shoddy buildings carved out of the cave
+rock to the north and south. @n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14923 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14925 0 0 0 0 0 0 0 0
+S
+#14925
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cIntersection of Hydro and Shell Ways@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be a lower class
+district of the city. There are many shoddy buildings carved out of the cave
+rock to the north and south. @n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14924 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14972 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14926 0 0 0 0 0 0 0 0
+S
+#14926
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cHydro Way@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be a lower class
+district of the city. There are many shoddy buildings carved out of the cave
+rock to the north and south. @n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14925 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14927 0 0 0 0 0 0 0 0
+S
+#14927
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cHydro Way@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be a lower class
+district of the city. There are many shoddy buildings carved out of the cave
+rock to the north and south. @n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14926 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14928 0 0 0 0 0 0 0 0
+S
+#14928
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cIntersection of Hydro Way and Reef Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be a lower class
+district of the city. There are many shoddy buildings carved out of the cave
+rock to the north and south. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14973 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14927 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14929 0 0 0 0 0 0 0 0
+S
+#14929
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cHydro Way@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be a lower class
+district of the city. There are many shoddy buildings carved out of the cave
+rock to the north and south. @n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14928 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 15014 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14930 0 0 0 0 0 0 0 0
+S
+#14930
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cHydro Way@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be a lower class
+district of the city. There are many shoddy buildings carved out of the cave
+rock to the north and south. @n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14929 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14931 0 0 0 0 0 0 0 0
+S
+#14931
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cIntersection of Sylph Street and Hydro Way@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street like all streets of the city
+appears to be limited to foot traffic only. There are however many signs
+placed indicating directions for those in the city to find their way around. @n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14930 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14932 0 0 0 0 0 0 0 0
+S
+#14932
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cSylph Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street like all streets of the city
+appears to be limited to foot traffic only. There are however many signs
+placed indicating directions for those in the city to find their way around. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14931 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14933 0 0 0 0 0 0 0 0
+S
+#14933
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cSylph Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street like all streets of the city
+appears to be limited to foot traffic only. There are however many signs
+placed indicating directions for those in the city to find their way around. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14932 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14934 0 0 0 0 0 0 0 0
+S
+#14934
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cSylph Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street like all streets of the city
+appears to be limited to foot traffic only. There are however many signs
+placed indicating directions for those in the city to find their way around. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14933 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 15055 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14935 0 0 0 0 0 0 0 0
+S
+#14935
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cSylph Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street like all streets of the city
+appears to be limited to foot traffic only. There are however many signs
+placed indicating directions for those in the city to find their way around. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14934 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14936 0 0 0 0 0 0 0 0
+S
+#14936
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cSylph Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street like all streets of the city
+appears to be limited to foot traffic only. There are however many signs
+placed indicating directions for those in the city to find their way around. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14935 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14937 0 0 0 0 0 0 0 0
+S
+#14937
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cIntersection of Sylph and Bubblos Streets@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street like all streets of the city
+appears to be limited to foot traffic only. There are however many signs
+placed indicating directions for those in the city to find their way around. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14936 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14964 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14938 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14999 0 0 0 0 0 0 0 0
+S
+#14938
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cSylph Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street like all streets of the city
+appears to be limited to foot traffic only. There are however many signs
+placed indicating directions for those in the city to find their way around. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14937 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14939 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 12629 0 0 0 0 0 0 0 0
+S
+#14939
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cSylph Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street like all streets of the city
+appears to be limited to foot traffic only. There are however many signs
+placed indicating directions for those in the city to find their way around. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14938 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14940 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 12629 0 0 0 0 0 0 0 0
+S
+#14940
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cSylph Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street like all streets of the city
+appears to be limited to foot traffic only. There are however many signs
+placed indicating directions for those in the city to find their way around. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14939 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14941 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 12629 0 0 0 0 0 0 0 0
+S
+#14941
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cSylph Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street like all streets of the city
+appears to be limited to foot traffic only. There are however many signs
+placed indicating directions for those in the city to find their way around. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14940 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14942 0 0 0 0 0 0 0 0
+S
+#14942
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cSylph Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street like all streets of the city
+appears to be limited to foot traffic only. There are however many signs
+placed indicating directions for those in the city to find their way around. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14941 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14943 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 15017 0 0 0 0 0 0 0 0
+S
+#14943
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cIntersection of Sylph and Ruto Streets@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street like all streets of the city
+appears to be limited to foot traffic only. There are however many signs
+placed indicating directions for those in the city to find their way around. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14942 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14944 0 0 0 0 0 0 0 0
+S
+#14944
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cRuto Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be part of the more
+well to do section of the city. The houses carved into the walls of the cave
+appear to be of a higher quality design and size. @n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14945 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14943 0 0 0 0 0 0 0 0
+S
+#14945
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cRuto Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be part of the more
+well to do section of the city. The houses carved into the walls of the cave
+appear to be of a higher quality design and size. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 15015 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14946 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14944 0 0 0 0 0 0 0 0
+S
+#14946
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cIntersection of Ruto and Coral Streets@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be part of the more
+well to do section of the city. The houses carved into the walls of the cave
+appear to be of a higher quality design and size. @n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14947 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14998 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14945 0 0 0 0 0 0 0 0
+S
+#14947
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cRuto Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be part of the more
+well to do section of the city. The houses carved into the walls of the cave
+appear to be of a higher quality design and size. @n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14948 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14946 0 0 0 0 0 0 0 0
+S
+#14948
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cRuto Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be part of the more
+well to do section of the city. The houses carved into the walls of the cave
+appear to be of a higher quality design and size. @n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14949 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14947 0 0 0 0 0 0 0 0
+S
+#14949
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cIntersection of Shell Way and Ruto Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be part of the more
+well to do section of the city. The houses carved into the walls of the cave
+appear to be of a higher quality design and size. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14968 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14950 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14948 0 0 0 0 0 0 0 0
+S
+#14950
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cRuto Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be part of the more
+well to do section of the city. The houses carved into the walls of the cave
+appear to be of a higher quality design and size. @n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14951 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14949 0 0 0 0 0 0 0 0
+S
+#14951
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cRuto Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be part of the more
+well to do section of the city. The houses carved into the walls of the cave
+appear to be of a higher quality design and size. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 15010 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14952 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14950 0 0 0 0 0 0 0 0
+S
+#14952
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cIntersection of Ruto and Coral Streets@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be part of the more
+well to do section of the city. The houses carved into the walls of the cave
+appear to be of a higher quality design and size. @n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14953 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14986 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14951 0 0 0 0 0 0 0 0
+S
+#14953
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cRuto Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be part of the more
+well to do section of the city. The houses carved into the walls of the cave
+appear to be of a higher quality design and size. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 15011 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14954 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14952 0 0 0 0 0 0 0 0
+S
+#14954
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cRuto Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be part of the more
+well to do section of the city. The houses carved into the walls of the cave
+appear to be of a higher quality design and size. @n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14955 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14953 0 0 0 0 0 0 0 0
+S
+#14955
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cIntersection of Ruto and Undine Streets@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be part of the more
+well to do section of the city. The houses carved into the walls of the cave
+appear to be of a higher quality design and size. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14956 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14954 0 0 0 0 0 0 0 0
+S
+#14956
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cUndine Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be the most traveled
+of the entire city. Its rock flooring is well worn with the movement of many
+feet through out the centuries. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14957 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14955 0 0 0 0 0 0 0 0
+S
+#14957
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cUndine Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be the most traveled
+of the entire city. Its rock flooring is well worn with the movement of many
+feet through out the centuries. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14958 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14956 0 0 0 0 0 0 0 0
+S
+#14958
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cUndine Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be the most traveled
+of the entire city. Its rock flooring is well worn with the movement of many
+feet through out the centuries. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14959 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14957 0 0 0 0 0 0 0 0
+S
+#14959
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cUndine Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be the most traveled
+of the entire city. Its rock flooring is well worn with the movement of many
+feet through out the centuries. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14960 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14958 0 0 0 0 0 0 0 0
+D3
+~
+door~
+2 0 177 20 0 0 0 0 0 0 0
+S
+#14960
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cUndine Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be the most traveled
+of the entire city. Its rock flooring is well worn with the movement of many
+feet through out the centuries. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14913 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14959 0 0 0 0 0 0 0 0
+S
+#14961
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cBubblos Street@n~
+   @cThis street is larger than most of the rest due to being a central street.
+It has the same metal panels built into the blue rock ceiling as any other
+street, with the same white lights. However closer along to the center of the
+city natural light from Kanassa can be seen filtering in through the great
+chasm. @n
+
+@cA @Rposter@c is hung up on the side of the street.@n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14905 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14962 0 0 0 0 0 0 0 0
+E
+poster~
+@y/---------------------------------\@n
+@y|                                 @y|@n
+@y|      @WAttention Citizens@n         @y|@n
+@y|                                 @y|@n
+@y|   @WDo your part in keeping the@n   @y|@n
+@y|   @WCity of Aquis safe. Report@n    @y|@n
+@y|   @Wall unauthorized offworlder@n   @y|@n
+@y|   @Wactivity to the city guards@n   @y|@n
+@y|       @Was soon as possible.@n      @y|@n
+@y|                                 @y|@n
+@y|                                 @y|@n
+@y|       @WTogether in Unity@n         @y|@n
+@y|       @WWe remain strong,@n         @y|@n
+@y|       @WLong Live Kanassa@n         @y|@n
+@y|                                 @y|@n
+@y|   @WAn Aquis City Announcement@n    @y|@n
+@y\---------------------------------/@n
+~
+S
+#14962
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cBubblos Street@n~
+   @cThis street is larger than most of the rest due to being a central street.
+It has the same metal panels built into the blue rock ceiling as any other
+street, with the same white lights. However closer along to the center of the
+city natural light from Kanassa can be seen filtering in through the great
+chasm. @n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14961 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14963 0 0 0 0 0 0 0 0
+S
+#14963
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cBubblos Street@n~
+   @cThis street is larger than most of the rest due to being a central street.
+It has the same metal panels built into the blue rock ceiling as any other
+street, with the same white lights. However closer along to the center of the
+city natural light from Kanassa can be seen filtering in through the great
+chasm. @n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14962 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14964 0 0 0 0 0 0 0 0
+S
+#14964
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cBubblos Street@n~
+   @cThis street is larger than most of the rest due to being a central street.
+It has the same metal panels built into the blue rock ceiling as any other
+street, with the same white lights. However closer along to the center of the
+city natural light from Kanassa can be seen filtering in through the great
+chasm. @n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14963 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14937 0 0 0 0 0 0 0 0
+S
+#14965
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cShell Way@n~
+   @cThis street is larger than most of the rest due to being a central street.
+It has the same metal panels built into the blue rock ceiling as any other
+street, with the same white lights. However closer along to the center of the
+city natural light from Kanassa can be seen filtering in through the great
+chasm. @n
+
+@cA @Rposter@c is hung up on the side of the street.@n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14907 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14966 0 0 0 0 0 0 0 0
+E
+poster~
+@y/---------------------------------\@n
+@y|                                 @y|@n
+@y|      @WAttention Citizens@n         @y|@n
+@y|                                 @y|@n
+@y|   @WDo your part in keeping the@n   @y|@n
+@y|   @WCity of Aquis safe. Report@n    @y|@n
+@y|   @Wall unauthorized offworlder@n   @y|@n
+@y|   @Wactivity to the city guards@n   @y|@n
+@y|       @Was soon as possible.@n      @y|@n
+@y|                                 @y|@n
+@y|                                 @y|@n
+@y|       @WTogether in Unity@n         @y|@n
+@y|       @WWe remain strong,@n         @y|@n
+@y|       @WLong Live Kanassa@n         @y|@n
+@y|                                 @y|@n
+@y|   @WAn Aquis City Announcement@n    @y|@n
+@y\---------------------------------/@n
+~
+S
+#14966
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cShell Way@n~
+   @cThis street is larger than most of the rest due to being a central street.
+It has the same metal panels built into the blue rock ceiling as any other
+street, with the same white lights. However closer along to the center of the
+city natural light from Kanassa can be seen filtering in through the great
+chasm. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14965 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14967 0 0 0 0 0 0 0 0
+S
+#14967
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cShell Way@n~
+   @cThis street is larger than most of the rest due to being a central street.
+It has the same metal panels built into the blue rock ceiling as any other
+street, with the same white lights. However closer along to the center of the
+city natural light from Kanassa can be seen filtering in through the great
+chasm. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14966 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14968 0 0 0 0 0 0 0 0
+S
+#14968
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cShell Way@n~
+   @cThis street is larger than most of the rest due to being a central street.
+It has the same metal panels built into the blue rock ceiling as any other
+street, with the same white lights. However closer along to the center of the
+city natural light from Kanassa can be seen filtering in through the great
+chasm. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14967 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14949 0 0 0 0 0 0 0 0
+S
+#14969
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cShell Way@n~
+   @cThis street is larger than most of the rest due to being a central street.
+It has the same metal panels built into the blue rock ceiling as any other
+street, with the same white lights. However closer along to the center of the
+city natural light from Kanassa can be seen filtering in through the great
+chasm. @n
+
+@cA @Rposter@c is hung up on the side of the street.@n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14970 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14901 0 0 0 0 0 0 0 0
+E
+poster~
+@y/---------------------------------\@n
+@y|                                 @y|@n
+@y|      @WAttention Citizens@n         @y|@n
+@y|                                 @y|@n
+@y|   @WDo your part in keeping the@n   @y|@n
+@y|   @WCity of Aquis safe. Report@n    @y|@n
+@y|   @Wall unauthorized offworlder@n   @y|@n
+@y|   @Wactivity to the city guards@n   @y|@n
+@y|       @Was soon as possible.@n      @y|@n
+@y|                                 @y|@n
+@y|                                 @y|@n
+@y|       @WTogether in Unity@n         @y|@n
+@y|       @WWe remain strong,@n         @y|@n
+@y|       @WLong Live Kanassa@n         @y|@n
+@y|                                 @y|@n
+@y|   @WAn Aquis City Announcement@n    @y|@n
+@y\---------------------------------/@n
+~
+S
+#14970
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cShell Way@n~
+   @cThis street is larger than most of the rest due to being a central street.
+It has the same metal panels built into the blue rock ceiling as any other
+street, with the same white lights. However closer along to the center of the
+city natural light from Kanassa can be seen filtering in through the great
+chasm. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14971 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14969 0 0 0 0 0 0 0 0
+S
+#14971
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cShell Way@n~
+   @cThis street is larger than most of the rest due to being a central street.
+It has the same metal panels built into the blue rock ceiling as any other
+street, with the same white lights. However closer along to the center of the
+city natural light from Kanassa can be seen filtering in through the great
+chasm. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14972 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14970 0 0 0 0 0 0 0 0
+S
+#14972
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cShell Way@n~
+   @cThis street is larger than most of the rest due to being a central street.
+It has the same metal panels built into the blue rock ceiling as any other
+street, with the same white lights. However closer along to the center of the
+city natural light from Kanassa can be seen filtering in through the great
+chasm. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14925 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14971 0 0 0 0 0 0 0 0
+S
+#14973
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cReef Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with whitel ightsi mbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be a lower class
+district of the city. There are many shoddy buildings carved out of the cave
+rock surrounding the street. This part of the cave appears to be closest to
+the ocean and many metal leak patches can be seen on some of the walls. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14974 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14928 0 0 0 0 0 0 0 0
+S
+#14974
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cReef Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with whitel ightsi mbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be a lower class
+district of the city. There are many shoddy buildings carved out of the cave
+rock surrounding the street. This part of the cave appears to be closest to
+the ocean and many metal leak patches can be seen on some of the walls. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14975 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14973 0 0 0 0 0 0 0 0
+S
+#14975
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cReef Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with whitel ightsi mbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be a lower class
+district of the city. There are many shoddy buildings carved out of the cave
+rock surrounding the street. This part of the cave appears to be closest to
+the ocean and many metal leak patches can be seen on some of the walls. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14976 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14974 0 0 0 0 0 0 0 0
+S
+#14976
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cReef Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with whitel ightsi mbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be a lower class
+district of the city. There are many shoddy buildings carved out of the cave
+rock surrounding the street. This part of the cave appears to be closest to
+the ocean and many metal leak patches can be seen on some of the walls. @n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14977 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14975 0 0 0 0 0 0 0 0
+S
+#14977
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cReef Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with whitel ightsi mbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be a lower class
+district of the city. There are many shoddy buildings carved out of the cave
+rock surrounding the street. This part of the cave appears to be closest to
+the ocean and many metal leak patches can be seen on some of the walls. @n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14978 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14976 0 0 0 0 0 0 0 0
+S
+#14978
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cReef Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with whitel ightsi mbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be a lower class
+district of the city. There are many shoddy buildings carved out of the cave
+rock surrounding the street. This part of the cave appears to be closest to
+the ocean and many metal leak patches can be seen on some of the walls. @n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14979 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14977 0 0 0 0 0 0 0 0
+S
+#14979
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cReef Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with whitel ightsi mbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be a lower class
+district of the city. There are many shoddy buildings carved out of the cave
+rock surrounding the street. This part of the cave appears to be closest to
+the ocean and many metal leak patches can be seen on some of the walls. @n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14980 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14978 0 0 0 0 0 0 0 0
+S
+#14980
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cReef Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with whitel ightsi mbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be a lower class
+district of the city. There are many shoddy buildings carved out of the cave
+rock surrounding the street. This part of the cave appears to be closest to
+the ocean and many metal leak patches can be seen on some of the walls. @n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14981 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 15013 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14979 0 0 0 0 0 0 0 0
+S
+#14981
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cReef Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with whitel ightsi mbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be a lower class
+district of the city. There are many shoddy buildings carved out of the cave
+rock surrounding the street. This part of the cave appears to be closest to
+the ocean and many metal leak patches can be seen on some of the walls. @n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14982 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14980 0 0 0 0 0 0 0 0
+S
+#14982
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cReef Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with whitel ightsi mbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be a lower class
+district of the city. There are many shoddy buildings carved out of the cave
+rock surrounding the street. This part of the cave appears to be closest to
+the ocean and many metal leak patches can be seen on some of the walls. @n
+~
+149 0 g 0 0 1
+D2
+~
+~
+0 0 14983 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14981 0 0 0 0 0 0 0 0
+S
+#14983
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cReef Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with whitel ightsi mbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be a lower class
+district of the city. There are many shoddy buildings carved out of the cave
+rock surrounding the street. This part of the cave appears to be closest to
+the ocean and many metal leak patches can be seen on some of the walls. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14982 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14984 0 0 0 0 0 0 0 0
+S
+#14984
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cReef Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with whitel ightsi mbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be a lower class
+district of the city. There are many shoddy buildings carved out of the cave
+rock surrounding the street. This part of the cave appears to be closest to
+the ocean and many metal leak patches can be seen on some of the walls. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14983 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14985 0 0 0 0 0 0 0 0
+S
+#14985
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cReef Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with whitel ightsi mbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be a lower class
+district of the city. There are many shoddy buildings carved out of the cave
+rock surrounding the street. This part of the cave appears to be closest to
+the ocean and many metal leak patches can be seen on some of the walls. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14984 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14922 0 0 0 0 0 0 0 0
+S
+#14986
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cIntersection of Ruto and Coral Streets@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be part of the more
+well to do section of the city. The houses carved into the walls of the cave
+appear to be of a higher quality design and size. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14952 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14987 0 0 0 0 0 0 0 0
+S
+#14987
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cIntersection of Ruto and Coral Streets@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be part of the more
+well to do section of the city. The houses carved into the walls of the cave
+appear to be of a higher quality design and size. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14986 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14988 0 0 0 0 0 0 0 0
+S
+#14988
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cIntersection of Ruto and Coral Streets@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be part of the more
+well to do section of the city. The houses carved into the walls of the cave
+appear to be of a higher quality design and size. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14987 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14989 0 0 0 0 0 0 0 0
+S
+#14989
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cIntersection of Ruto and Coral Streets@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be part of the more
+well to do section of the city. The houses carved into the walls of the cave
+appear to be of a higher quality design and size. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14988 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14990 0 0 0 0 0 0 0 0
+S
+#14990
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cIntersection of Ruto and Coral Streets@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be part of the more
+well to do section of the city. The houses carved into the walls of the cave
+appear to be of a higher quality design and size. @n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14989 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14991 0 0 0 0 0 0 0 0
+S
+#14991
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cIntersection of Ruto and Coral Streets@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be part of the more
+well to do section of the city. The houses carved into the walls of the cave
+appear to be of a higher quality design and size. @n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14990 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14992 0 0 0 0 0 0 0 0
+S
+#14992
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cIntersection of Ruto and Coral Streets@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be part of the more
+well to do section of the city. The houses carved into the walls of the cave
+appear to be of a higher quality design and size. @n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14991 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14993 0 0 0 0 0 0 0 0
+S
+#14993
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cIntersection of Ruto and Coral Streets@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be part of the more
+well to do section of the city. The houses carved into the walls of the cave
+appear to be of a higher quality design and size. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 15016 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14992 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14994 0 0 0 0 0 0 0 0
+S
+#14994
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cIntersection of Ruto and Coral Streets@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be part of the more
+well to do section of the city. The houses carved into the walls of the cave
+appear to be of a higher quality design and size. @n
+~
+149 0 g 0 0 1
+D1
+~
+~
+0 0 14993 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14995 0 0 0 0 0 0 0 0
+S
+#14995
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cIntersection of Ruto and Coral Streets@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be part of the more
+well to do section of the city. The houses carved into the walls of the cave
+appear to be of a higher quality design and size. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14996 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14994 0 0 0 0 0 0 0 0
+S
+#14996
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cIntersection of Ruto and Coral Streets@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be part of the more
+well to do section of the city. The houses carved into the walls of the cave
+appear to be of a higher quality design and size. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14997 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14995 0 0 0 0 0 0 0 0
+S
+#14997
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cIntersection of Ruto and Coral Streets@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be part of the more
+well to do section of the city. The houses carved into the walls of the cave
+appear to be of a higher quality design and size. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14998 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14996 0 0 0 0 0 0 0 0
+S
+#14998
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cCoral Street@n~
+   @cThis street appears to be made almost entirely out of the rock of the cave
+that Aquis is housed in. There are however metal sections built into the
+ceiling with white lights imbedded in their surfaces. These lights give a cool
+glow on the blue rock of the cave. This street appears to be part of the more
+well to do section of the city. The houses carved into the walls of the cave
+appear to be of a higher quality design and size. @n
+~
+149 0 g 0 0 1
+D0
+~
+~
+0 0 14946 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14997 0 0 0 0 0 0 0 0
+S
+#14999
+@cA@Cq@Wu@bi@Bs @DC@Wi@wt@Wy@D: @cWest Entrance@n~
+   @cThis large area is almost entirely made of metal. The metal walls, ceiling,
+and floor all converge toward a large opening. The opening however is not
+covered with metal. It's covered with some kind of gooey substance in the form
+of a wall. This wall works as a perfect barrier for the water outside. 
+People however can freely enter and leave the barrier because of its built in
+adaption to not hinder humanoid movement. @n
+~
+149 c g 0 0 11
+D1
+~
+~
+0 0 14937 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 15100 0 0 0 0 0 0 0 0
+S
+T 14900
+$~

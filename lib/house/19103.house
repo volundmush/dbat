@@ -1,0 +1,64 @@
+#11
+0 0 0 0 0 100 100 0 9 C 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Gravity Generator~
+@wA Gravity Generator@n~
+@wA Gravity Generator, set to 0x gravity, is built here@n~
+~
+12 0 0 0 0 0 0 0
+G
+1557031586
+U
+-1
+Z
+4
+A
+13 1000000 0
+A
+17 2000000 0
+E
+gravity generator~
+Enter "gravity" for a more complete list of commands associated with this device.
+~
+#325
+0 0 0 0 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+VX9 Rockwalker Truck~
+@CVX9 @DRockwalker @wTruck@n~
+@wA @CVX9 @DRockwalker @wtruck@w is parked here@n~
+~
+12 1 0 0 0 10000 3000 0
+G
+1557032932
+U
+1355266022304903937
+Z
+4
+#325
+0 0 0 0 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+VX9 Rockwalker Truck~
+@CVX9 @DRockwalker @wTruck@n~
+@wA @CVX9 @DRockwalker @wtruck@w is parked here@n~
+~
+12 1 0 0 0 10000 3000 0
+G
+1555358893
+U
+1748873099452815305
+Z
+4
+#320
+0 0 0 0 0 100 100 0 9 A 0 0 0 0 0 0 0 0 0 0 0
+XAP
+Red Car Lightning T-800X~
+@RRed @YLightning @CT-800X@n~
+@wA @Rred @YLightning @CT-800X @wis parked here@n~
+~
+12 1 0 0 0 4500 2500 0
+G
+1557068622
+U
+4179500276296125212
+Z
+4

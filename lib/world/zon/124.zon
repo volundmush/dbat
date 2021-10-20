@@ -1,0 +1,20 @@
+@Version: 2
+#124
+Rillao~
+@gAether@c: Ortusian Temple, Silent Glade@n~
+12400 12499 10 2 d 0 0 0 0 0
+M 0 14104 1 12498 1 0 	(@wGigantic @yB@Ye@yar@n)
+G 1 14101 1000 -1 -1 80 	(@wGigantic @yB@Ye@yar @RH@re@ma@rr@Rt@n)
+M 0 12408 1 12498 1 95 	(Shin)
+G 1 86 10000 -1 -1 50 	(Vial of @cS@Ca@Wc@wr@ce@Cd @gE@Gl@Wi@wx@gi@Gr@n)
+G 1 3602 10 -1 -1 90 	(@yBroken@Y key@W third piece@n)
+G 1 7504 9001 -1 -1 99 	(a @cG@Ce@wm @Wof @CA@cr@Wb@wi@rt@Rr@ra@wt@Wi@co@Cn@n)
+M 0 12401 4 12427 4 12 	(a Giant Spider)
+M 0 17854 10 12427 10 0 	(a Genderless Demon)
+M 0 12400 5 12402 5 12 	(a Spiderling)
+M 0 12402 4 12442 4 12 	(a Corrupted Spider)
+M 0 12404 3 12478 3 12 	(a Makai Torturer)
+M 0 12403 1 12465 1 12 	(a Spider Queen)
+M 0 12405 3 12465 3 12 	(a Makai Witch)
+S
+$

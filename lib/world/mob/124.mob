@@ -1,0 +1,178 @@
+#12400
+Spiderling~
+a Spiderling~
+A spiderling scuttles along here.
+~
+@D @n
+~
+dhxyz 0 0 0 l 0 0 0 0 E
+20 0 10 0d6+0 0d0+0
+0 0 15 14
+8 8 1
+Size: 2
+Str: 19
+Dex: 19
+Int: 5
+Wis: 7
+Con: 19
+Cha: 19
+E
+#12401
+Giant Spider~
+a Giant Spider~
+A Giant Spider clicks it's fangs together here.
+~
+@D @n
+~
+dfhxyz 0 0 0 l 0 0 0 0 E
+21 0 10 0d4+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 3
+Str: 11
+Dex: 21
+Int: 7
+Wis: 6
+Con: 17
+Cha: 21
+E
+#12402
+Corrupted Spider~
+a Corrupted Spider~
+A corrupted spider is here, hissing loudly.
+~
+@D @n
+~
+dfxyz 0 0 0 l 0 0 0 -10 E
+22 0 10 0d4+0 0d0+0
+0 0 15 28
+8 8 0
+Size: 4
+Str: 18
+Dex: 20
+Int: 7
+Wis: 8
+Con: 21
+Cha: 17
+E
+#12403
+Spider Queen~
+a Spider Queen~
+A spider queen, covered in baby spiders is here.
+~
+@D @n
+~
+dfxyz 0 0 0 l 0 0 0 0 E
+23 0 10 0d8+0 0d0+0
+0 0 15 9
+8 8 2
+Size: 5
+Str: 13
+Dex: 16
+Int: 7
+Wis: 8
+Con: 17
+Cha: 20
+E
+#12404
+Makai Torturer~
+a Makai Torturer~
+A sinister looking Makai stands here, looking for someone to torture.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 -10 E
+24 0 10 0d8+0 0d0+0
+0 0 12 9
+8 8 1
+Str: 22
+Dex: 20
+Int: 21
+Wis: 23
+Con: 18
+Cha: 18
+E
+#12405
+Makai Witch~
+a Makai Witch~
+A Makai Witch is chanting something softly here.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 -10 E
+23 0 10 0d8+0 0d0+0
+0 0 12 9
+8 8 2
+Str: 13
+Dex: 11
+Int: 12
+Wis: 13
+Con: 23
+Cha: 23
+E
+#12406
+Mistress Ortusia~
+@CM@ci@Ws@wt@Dr@We@cs@Cs @RO@rr@Ct@cu@Cs@ri@Ra@n~
+Mistress Ortusia stands here with her arms crossed.
+~
+   @WLong considered dead, Mistress Ortusia stands here in all her glory. Pale
+skinned but youthful looking, as well as slim, one word would sum up Ortusia;
+Attractive. The legends say the long, blond haired Kai is the mother of all
+Makai and all those who listen to her call, will succumb to the darker nature of
+their being. @n
+~
+bd 0 0 0 l 0 0 0 0 E
+60 0 10 0d12+0 0d0+0
+0 0 12 10
+8 8 2
+Str: 52
+Dex: 30
+Int: 35
+Wis: 59
+Con: 34
+Cha: 35
+E
+T 12403
+#12407
+Psychic Satyr~
+@WP@ws@Dy@cch@Cic @WS@wa@Dt@ry@Rr@n~
+A three-eyed psychic satyr roams here
+~
+@D @n
+~
+dgvwxyz 0 0 0 l 0 0 0 0 E
+50 0 10 0d12+0 0d0+0
+0 0 23 10
+8 8 1
+Size: 5
+Str: 48
+Dex: 33
+Int: 48
+Wis: 40
+Con: 28
+Cha: 42
+E
+#12408
+Shin~
+Shin~
+The supreme Kaio, Shin, is standing here.
+~
+   This kai is short and purple skinned, his head adorned with a striking white
+mohawk. Shin wears a posh looking, predominately blue and teal outfit. A busy
+but friendly look characterizes his face, as a being such as himself has an
+entire galaxy to watch over.
+~
+dprA b 0 0 l 0 0 0 0 E
+105 0 10 0d12+0 0d0+0
+0 0 12 10
+8 8 1
+Str: 65
+Dex: 76
+Int: 66
+Wis: 83
+Con: 100
+Cha: 67
+E
+T 12404
+T 12405
+$

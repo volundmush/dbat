@@ -1,0 +1,2127 @@
+#16700
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WEntrance@n~
+   @cThis wide shaft appears to be partly naturaly formed obsidian rock and
+partly artificially shaped construction. The ceiling has been left mostly
+natural, but the walls have been carved flat. Depictions of various Kilnak
+Arlian warriors in battle have been painted on the walls of this entrance area.
+The floor has also been similarly smoothed out and painted. This painting
+stretches from the floor to a large wall directly in front of the entrance way.
+The painting being of a humongous worm rising up out of the ground with a
+mouthfull of arlians. @n
+~
+167 0 h 0 0 11
+D0
+~
+~
+0 0 16701 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16893 0 0 0 0 0 0 0 0
+S
+T 310
+#16701
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WEntrance Corridor@n~
+   @cThis wide corridor is made out of the same rock as the rest of the cavern,
+with its walls similarly being carved and smoothed flat save for complicated
+etchings of ancient Arlians. Every ten feet a hollowed out tusk with burning
+oil hang on either wall providing illumination for the corridor. @n
+~
+167 0 h 0 0 0
+D2
+~
+~
+0 0 16700 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16702 0 0 0 0 0 0 0 0
+S
+#16702
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WEntrance Corridor@n~
+   @cThis wide corridor is made out of the same rock as the rest of the cavern,
+with its walls similarly being carved and smoothed flat save for complicated
+etchings of ancient Arlians. Every ten feet a hollowed out tusk with burning
+oil hang on either wall providing illumination for the corridor. @n
+~
+167 0 h 0 0 0
+D1
+~
+~
+0 0 16701 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16703 0 0 0 0 0 0 0 0
+S
+#16703
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WEntrance Corridor@n~
+   @cThis wide corridor is made out of the same rock as the rest of the cavern,
+with its walls similarly being carved and smoothed flat save for complicated
+etchings of ancient Arlians. Every ten feet a hollowed out tusk with burning
+oil hang on either wall providing illumination for the corridor. @n
+~
+167 0 h 0 0 0
+D0
+~
+~
+0 0 16704 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16702 0 0 0 0 0 0 0 0
+S
+#16704
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WCircular Corridor@n~
+   @cThis wide corridor has been carved out of the same rock as the rest of the
+cavern, with its walls similarly being smoothed flat save for complicated
+etchings of ancient Arlians. This particular corridor appears to have been
+cared out in one continuous curve forming a circle. @n
+~
+167 0 h 0 0 0
+D2
+~
+~
+0 0 16703 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16706 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16705 0 0 0 0 0 0 0 0
+S
+#16705
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WCircular Corridor@n~
+   @cThis wide corridor has been carved out of the same rock as the rest of the
+cavern, with its walls similarly being smoothed flat save for complicated
+etchings of ancient Arlians. This particular corridor appears to have been
+cared out in one continuous curve forming a circle. @n
+~
+167 0 h 0 0 0
+D1
+~
+~
+0 0 16738 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 16783 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16720 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16704 0 0 0 0 0 0 0 0
+S
+#16706
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WCircular Corridor@n~
+   @cThis wide corridor has been carved out of the same rock as the rest of the
+cavern, with its walls similarly being smoothed flat save for complicated
+etchings of ancient Arlians. This particular corridor appears to have been
+cared out in one continuous curve forming a circle. @n
+~
+167 0 h 0 0 0
+D3
+~
+~
+0 0 16707 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16720 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16704 0 0 0 0 0 0 0 0
+S
+#16707
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WTradepit Entrance@n~
+   @cThis large entranceway is connected to a large opening in the cavern. 
+Stairs lead down from the entrance way into the depths of the expansive cavern
+with various tents and boothes dotting the cavern floor below. In the center
+of the pit a pool of clear water can be seen, a rarity on this part of the
+planet. @n
+~
+167 c h 0 0 0
+D1
+~
+~
+0 0 16706 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16708 0 0 0 0 0 0 0 0
+S
+#16708
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WTradepit Floor@n~
+   @cThis expansive pit has trading tents and boothes set up everywhere the eye
+can see for hundreds of feet in every direction. The walls of the pit climb to
+the ceiling of the cavern with one fifty foot wide opening in the ceiling off
+above the north end of the pit. In the center of the pit a pool the size of a
+small pond with its clear waters can be seen. So much water gathered into one
+place is a highly prized rarity on this planet. @n
+~
+167 0 h 0 0 0
+D0
+~
+~
+0 0 16709 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16707 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16713 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16712 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16717 0 0 0 0 0 0 0 0
+S
+#16709
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WTradepit Floor@n~
+   @cThis expansive pit has trading tents and boothes set up everywhere the eye
+can see for hundreds of feet in every direction. The walls of the pit climb to
+the ceiling of the cavern with one fifty foot wide opening in the ceiling off
+above the north end of the pit. In the center of the pit a pool the size of a
+small pond with its clear waters can be seen. So much water gathered into one
+place is a highly prized rarity on this planet. @n
+~
+167 0 h 0 0 10
+D0
+~
+~
+0 0 16710 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16708 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16712 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16711 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16713 0 0 0 0 0 0 0 0
+S
+#16710
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WTradepit Floor@n~
+   @cThis expansive pit has trading tents and boothes set up everywhere the eye
+can see for hundreds of feet in every direction. The walls of the pit climb to
+the ceiling of the cavern with one fifty foot wide opening in the ceiling off
+above the north end of the pit. In the center of the pit a pool the size of a
+small pond with its clear waters can be seen. So much water gathered into one
+place is a highly prized rarity on this planet. @n
+~
+167 0 h 0 0 0
+D2
+~
+~
+0 0 16709 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16711 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16719 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16712 0 0 0 0 0 0 0 0
+S
+#16711
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WTradepit Floor@n~
+   @cThis expansive pit has trading tents and boothes set up everywhere the eye
+can see for hundreds of feet in every direction. The walls of the pit climb to
+the ceiling of the cavern with one fifty foot wide opening in the ceiling off
+above the north end of the pit. In the center of the pit a pool the size of a
+small pond with its clear waters can be seen. So much water gathered into one
+place is a highly prized rarity on this planet. @n
+~
+167 0 h 0 0 10
+D0
+~
+~
+0 0 16719 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16710 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16712 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16716 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16709 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16715 0 0 0 0 0 0 0 0
+S
+#16712
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WTradepit Pool@n~
+   @CThis large pool of cool clear water takes up the entire center of the
+Tradepit. Its still waters appear to go down to quite a surprising depth and
+it is most likely the only source of fresh water like this for hundreds of
+miles. @n
+~
+167 c h 0 0 6
+D0
+~
+~
+0 0 16711 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16709 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16713 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16715 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16716 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16710 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16708 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16714 0 0 0 0 0 0 0 0
+S
+#16713
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WTradepit Floor@n~
+   @cThis expansive pit has trading tents and boothes set up everywhere the eye
+can see for hundreds of feet in every direction. The walls of the pit climb to
+the ceiling of the cavern with one fifty foot wide opening in the ceiling off
+above the north end of the pit. In the center of the pit a pool the size of a
+small pond with its clear waters can be seen. So much water gathered into one
+place is a highly prized rarity on this planet. @n
+~
+167 0 h 0 0 0
+D0
+~
+~
+0 0 16712 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16708 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16717 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16714 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16715 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16709 0 0 0 0 0 0 0 0
+S
+#16714
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WTradepit Floor@n~
+   @cThis expansive pit has trading tents and boothes set up everywhere the eye
+can see for hundreds of feet in every direction. The walls of the pit climb to
+the ceiling of the cavern with one fifty foot wide opening in the ceiling off
+above the north end of the pit. In the center of the pit a pool the size of a
+small pond with its clear waters can be seen. So much water gathered into one
+place is a highly prized rarity on this planet. @n
+~
+167 0 h 0 0 10
+D0
+~
+~
+0 0 16715 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16713 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16718 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16712 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16717 0 0 0 0 0 0 0 0
+S
+#16715
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WTradepit Floor@n~
+   @cThis expansive pit has trading tents and boothes set up everywhere the eye
+can see for hundreds of feet in every direction. The walls of the pit climb to
+the ceiling of the cavern with one fifty foot wide opening in the ceiling off
+above the north end of the pit. In the center of the pit a pool the size of a
+small pond with its clear waters can be seen. So much water gathered into one
+place is a highly prized rarity on this planet. @n
+~
+167 0 h 0 0 0
+D0
+~
+~
+0 0 16716 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16712 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16714 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16718 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16711 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16713 0 0 0 0 0 0 0 0
+S
+#16716
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WTradepit Floor@n~
+   @cThis expansive pit has trading tents and boothes set up everywhere the eye
+can see for hundreds of feet in every direction. The walls of the pit climb to
+the ceiling of the cavern with one fifty foot wide opening in the ceiling off
+above the north end of the pit. In the center of the pit a pool the size of a
+small pond with its clear waters can be seen. So much water gathered into one
+place is a highly prized rarity on this planet. @n
+~
+167 0 h 0 0 0
+D1
+~
+~
+0 0 16711 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16715 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16719 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16712 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16718 0 0 0 0 0 0 0 0
+S
+#16717
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WTradepit Floor@n~
+   @cThis expansive pit has trading tents and boothes set up everywhere the eye
+can see for hundreds of feet in every direction. The walls of the pit climb to
+the ceiling of the cavern with one fifty foot wide opening in the ceiling off
+above the north end of the pit. In the center of the pit a pool the size of a
+small pond with its clear waters can be seen. So much water gathered into one
+place is a highly prized rarity on this planet. @n
+~
+167 0 h 0 0 0
+D0
+~
+~
+0 0 16713 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16714 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16708 0 0 0 0 0 0 0 0
+S
+#16718
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WTradepit Floor@n~
+   @cThis expansive pit has trading tents and boothes set up everywhere the eye
+can see for hundreds of feet in every direction. The walls of the pit climb to
+the ceiling of the cavern with one fifty foot wide opening in the ceiling off
+above the north end of the pit. In the center of the pit a pool the size of a
+small pond with its clear waters can be seen. So much water gathered into one
+place is a highly prized rarity on this planet. @n
+~
+167 0 h 0 0 0
+D1
+~
+~
+0 0 16715 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16716 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16714 0 0 0 0 0 0 0 0
+S
+#16719
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WTradepit Floor@n~
+   @cThis expansive pit has trading tents and boothes set up everywhere the eye
+can see for hundreds of feet in every direction. The walls of the pit climb to
+the ceiling of the cavern with one fifty foot wide opening in the ceiling off
+above the north end of the pit. In the center of the pit a pool the size of a
+small pond with its clear waters can be seen. So much water gathered into one
+place is a highly prized rarity on this planet. @n
+~
+167 0 h 0 0 0
+D2
+~
+~
+0 0 16711 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16710 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16716 0 0 0 0 0 0 0 0
+S
+#16720
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WCircular Corridor@n~
+   @cThis wide corridor has been carved out of the same rock as the rest of the
+cavern, with its walls similarly being smoothed flat save for complicated
+etchings of ancient Arlians. This particular corridor appears to have been
+cared out in one continuous curve forming a circle. @n
+~
+167 0 h 0 0 0
+D0
+~
+~
+0 0 16721 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16705 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16706 0 0 0 0 0 0 0 0
+S
+#16721
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WDark Corridor@n~
+   @DThis corridor is dimly lit with very few oil lamps mounted on the walls. 
+The walls are completely smooth as well and lack the carvings found on most of
+the cavern walls. The otherwise smooth floor is covered in strange claw
+markings though. @n
+~
+167 0 h 0 0 0
+D0
+~
+~
+0 0 16722 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16720 0 0 0 0 0 0 0 0
+S
+#16722
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WDark Corridor@n~
+   @DThis corridor is dimly lit with very few oil lamps mounted on the walls. 
+The walls are completely smooth as well and lack the carvings found on most of
+the cavern walls. The otherwise smooth floor is covered in strange claw
+markings though. @n
+~
+167 c h 0 0 0
+D0
+~
+cage~
+1 16709 16725 20 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16721 0 0 0 0 0 0 0 0
+S
+T 16709
+#16723
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WDark Den@n~
+   @DThis pitch black room mostly remains natural cavern untouched by tunneling
+tools of any kind. Old bits and pieces of bone and exoskeleton litter the
+cavern floor and a foul stench permiates the air. @n
+~
+167 a h 0 0 0
+D0
+~
+~
+0 0 16732 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16724 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16731 0 0 0 0 0 0 0 0
+S
+#16724
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WDark Den@n~
+   @DThis pitch black room mostly remains natural cavern untouched by tunneling
+tools of any kind. Old bits and pieces of bone and exoskeleton litter the
+cavern floor and a foul stench permiates the air. @n
+~
+167 a h 0 0 0
+D0
+~
+~
+0 0 16731 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16725 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16723 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16732 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16730 0 0 0 0 0 0 0 0
+S
+#16725
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WDark Den@n~
+   @DThis pitch black room mostly remains natural cavern untouched by tunneling
+tools of any kind. Old bits and pieces of bone and exoskeleton litter the
+cavern floor and a foul stench permiates the air. @n
+
+@WA @Gsign@W has been posted here.@n
+~
+167 a h 0 0 0
+D0
+~
+~
+0 0 16730 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16726 0 0 0 0 0 0 0 0
+D2
+~
+cage~
+1 1 16722 20 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16724 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16730 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16729 0 0 0 0 0 0 0 0
+E
+sign~
+@RA picture of Toorg'ak fangs have been painted on the sign in red.@n
+ 
+   @ROOC@D: @WIf you happen to have lost your key, do not worry. The locks on this
+side of the door do not require the key! @n
+~
+S
+#16726
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WDark Den@n~
+   @DThis pitch black room mostly remains natural cavern untouched by tunneling
+tools of any kind. Old bits and pieces of bone and exoskeleton litter the
+cavern floor and a foul stench permiates the air. @n
+~
+167 a h 0 0 0
+D0
+~
+~
+0 0 16729 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16727 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16725 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16730 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16728 0 0 0 0 0 0 0 0
+S
+#16727
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WDark Den@n~
+   @DThis pitch black room mostly remains natural cavern untouched by tunneling
+tools of any kind. Old bits and pieces of bone and exoskeleton litter the
+cavern floor and a foul stench permiates the air. @n
+~
+167 a h 0 0 0
+D0
+~
+~
+0 0 16728 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16726 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16729 0 0 0 0 0 0 0 0
+S
+#16728
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WDark Den@n~
+   @DThis pitch black room mostly remains natural cavern untouched by tunneling
+tools of any kind. Old bits and pieces of bone and exoskeleton litter the
+cavern floor and a foul stench permiates the air. @n
+~
+167 a h 0 0 0
+D0
+~
+~
+0 0 16737 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16727 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16729 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16736 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16726 0 0 0 0 0 0 0 0
+S
+#16729
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WDark Den@n~
+   @DThis pitch black room mostly remains natural cavern untouched by tunneling
+tools of any kind. Old bits and pieces of bone and exoskeleton litter the
+cavern floor and a foul stench permiates the air. @n
+~
+167 a h 0 0 0
+D0
+~
+~
+0 0 16736 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16728 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16726 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16730 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16735 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16727 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16725 0 0 0 0 0 0 0 0
+S
+#16730
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WDark Den@n~
+   @DThis pitch black room mostly remains natural cavern untouched by tunneling
+tools of any kind. Old bits and pieces of bone and exoskeleton litter the
+cavern floor and a foul stench permiates the air. @n
+~
+167 a h 0 0 0
+D0
+~
+~
+0 0 16735 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16729 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16725 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16731 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16734 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16736 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16726 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16724 0 0 0 0 0 0 0 0
+S
+#16731
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WDark Den@n~
+   @DThis pitch black room mostly remains natural cavern untouched by tunneling
+tools of any kind. Old bits and pieces of bone and exoskeleton litter the
+cavern floor and a foul stench permiates the air. @n
+~
+167 a h 0 0 0
+D0
+~
+~
+0 0 16734 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16730 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16724 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16732 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16733 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16735 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16725 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16723 0 0 0 0 0 0 0 0
+S
+#16732
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WDark Den@n~
+   @DThis pitch black room mostly remains natural cavern untouched by tunneling
+tools of any kind. Old bits and pieces of bone and exoskeleton litter the
+cavern floor and a foul stench permiates the air. @n
+~
+167 a h 0 0 0
+D0
+~
+~
+0 0 16733 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16731 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16723 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16734 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16724 0 0 0 0 0 0 0 0
+S
+#16733
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WDark Den@n~
+   @DThis pitch black room mostly remains natural cavern untouched by tunneling
+tools of any kind. Old bits and pieces of bone and exoskeleton litter the
+cavern floor and a foul stench permiates the air. @n
+~
+167 a h 0 0 0
+D1
+~
+~
+0 0 16734 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16732 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16731 0 0 0 0 0 0 0 0
+S
+#16734
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WDark Den@n~
+   @DThis pitch black room mostly remains natural cavern untouched by tunneling
+tools of any kind. Old bits and pieces of bone and exoskeleton litter the
+cavern floor and a foul stench permiates the air. @n
+~
+167 a h 0 0 0
+D1
+~
+~
+0 0 16735 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16731 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16733 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16730 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16732 0 0 0 0 0 0 0 0
+S
+#16735
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WDark Den@n~
+   @DThis pitch black room mostly remains natural cavern untouched by tunneling
+tools of any kind. Old bits and pieces of bone and exoskeleton litter the
+cavern floor and a foul stench permiates the air. @n
+~
+167 a h 0 0 0
+D1
+~
+~
+0 0 16736 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16730 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16734 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16729 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16731 0 0 0 0 0 0 0 0
+S
+#16736
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WDark Den@n~
+   @DThis pitch black room mostly remains natural cavern untouched by tunneling
+tools of any kind. Old bits and pieces of bone and exoskeleton litter the
+cavern floor and a foul stench permiates the air. @n
+~
+167 a h 0 0 0
+D1
+~
+~
+0 0 16737 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16729 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16735 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16728 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16730 0 0 0 0 0 0 0 0
+S
+#16737
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WDark Den@n~
+   @DThis pitch black room mostly remains natural cavern untouched by tunneling
+tools of any kind. Old bits and pieces of bone and exoskeleton litter the
+cavern floor and a foul stench permiates the air. @n
+~
+167 a h 0 0 0
+D2
+~
+~
+0 0 16728 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16736 0 0 0 0 0 0 0 0
+S
+#16738
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WSloped Tunnel@n~
+   @cThis tunnel appears to have been carved out entirely by the Kilnak Tribe and
+descends with a gentle slope deeper into the mountain. The walls lack the
+ornate carvings closer to the entrance of the caverns and instead are
+completely smoothed to an astounding percision. It is a wonder that such a
+primative tribe could exhibit such craftsmanship. @n
+~
+167 0 h 0 0 0
+D1
+~
+~
+0 0 16739 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16705 0 0 0 0 0 0 0 0
+S
+#16739
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WSloped Tunnel@n~
+   @cThis tunnel appears to have been carved out entirely by the Kilnak Tribe and
+descends with a gentle slope deeper into the mountain. The walls lack the
+ornate carvings closer to the entrance of the caverns and instead are
+completely smoothed to an astounding percision. It is a wonder that such a
+primative tribe could exhibit such craftsmanship. @n
+~
+167 0 h 0 0 0
+D1
+~
+~
+0 0 16740 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16738 0 0 0 0 0 0 0 0
+S
+#16740
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WSloped Tunnel@n~
+   @cThis tunnel appears to have been carved out entirely by the Kilnak Tribe and
+descends with a gentle slope deeper into the mountain. The walls lack the
+ornate carvings closer to the entrance of the caverns and instead are
+completely smoothed to an astounding percision. It is a wonder that such a
+primative tribe could exhibit such craftsmanship. @n
+~
+167 0 h 0 0 0
+D0
+~
+~
+0 0 16741 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16739 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16743 0 0 0 0 0 0 0 0
+S
+#16741
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WSloped Tunnel@n~
+   @cThis tunnel appears to have been carved out entirely by the Kilnak Tribe and
+descends with a gentle slope deeper into the mountain. The walls lack the
+ornate carvings closer to the entrance of the caverns and instead are
+completely smoothed to an astounding percision. It is a wonder that such a
+primative tribe could exhibit such craftsmanship. @n
+~
+167 0 h 0 0 0
+D0
+~
+~
+0 0 16742 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16740 0 0 0 0 0 0 0 0
+S
+#16742
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WSloped Tunnel@n~
+   @cThis tunnel appears to have been carved out entirely by the Kilnak Tribe and
+descends with a gentle slope deeper into the mountain. The walls lack the
+ornate carvings closer to the entrance of the caverns and instead are
+completely smoothed to an astounding percision. It is a wonder that such a
+primative tribe could exhibit such craftsmanship. @n
+~
+167 0 h 0 0 0
+D0
+~
+~
+0 0 16749 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16741 0 0 0 0 0 0 0 0
+S
+#16743
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WSloped Tunnel@n~
+   @cThis tunnel appears to have been carved out entirely by the Kilnak Tribe and
+descends with a gentle slope deeper into the mountain. The walls lack the
+ornate carvings closer to the entrance of the caverns and instead are
+completely smoothed to an astounding percision. It is a wonder that such a
+primative tribe could exhibit such craftsmanship. @n
+~
+167 0 h 0 0 0
+D7
+~
+~
+0 0 16744 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16740 0 0 0 0 0 0 0 0
+S
+#16744
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WSloped Tunnel@n~
+   @cThis tunnel appears to have been carved out entirely by the Kilnak Tribe and
+descends with a gentle slope deeper into the mountain. The walls lack the
+ornate carvings closer to the entrance of the caverns and instead are
+completely smoothed to an astounding percision. It is a wonder that such a
+primative tribe could exhibit such craftsmanship. @n
+~
+167 0 h 0 0 0
+D7
+~
+~
+0 0 16745 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16743 0 0 0 0 0 0 0 0
+S
+#16745
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WSloped Tunnel@n~
+   @cThis tunnel appears to have been carved out entirely by the Kilnak Tribe and
+descends with a gentle slope deeper into the mountain. The walls lack the
+ornate carvings closer to the entrance of the caverns and instead are
+completely smoothed to an astounding percision. It is a wonder that such a
+primative tribe could exhibit such craftsmanship. @n
+~
+167 0 h 0 0 0
+D1
+~
+~
+0 0 16746 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16744 0 0 0 0 0 0 0 0
+S
+#16746
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WSloped Tunnel@n~
+   @cThis tunnel appears to have been carved out entirely by the Kilnak Tribe and
+descends with a gentle slope deeper into the mountain. The walls lack the
+ornate carvings closer to the entrance of the caverns and instead are
+completely smoothed to an astounding percision. It is a wonder that such a
+primative tribe could exhibit such craftsmanship. @n
+~
+167 0 h 0 0 0
+D0
+~
+~
+0 0 16748 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16747 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16745 0 0 0 0 0 0 0 0
+S
+#16747
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WGuard Post@n~
+   @cThis small alcove in the caverns and tunnels sits next to the small tunnel
+to the west. Rough bone tables and chairs have been arranged in the far corner
+of the alcove. Anyone sitting there would have a good view of the tunnel while
+being hard to spot tucked away in the back of the alcove. @n
+~
+167 0 h 0 0 0
+D3
+~
+~
+0 0 16746 0 0 0 0 0 0 0 0
+S
+#16748
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WSmall Tunnel@n~
+   @cThis tunnel is only about twice as large as the average arlian and appears
+to have been carved out of the mountain's rock. The walls and ceiling form a
+roughly hewn rectangle straight through the rock. @n
+~
+167 0 h 0 0 0
+D0
+~
+~
+0 0 16766 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16746 0 0 0 0 0 0 0 0
+S
+#16749
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WSmall Tunnel@n~
+   @cThis tunnel is only about twice as large as the average arlian and appears
+to have been carved out of the mountain's rock. The walls and ceiling form a
+roughly hewn rectangle straight through the rock. @n
+~
+167 0 h 0 0 0
+D1
+~
+~
+0 0 16751 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16742 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16750 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16779 0 0 0 0 0 0 0 0
+S
+#16750
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WGuard Post@n~
+   @cThis small alcove in the caverns and tunnels sits next to the small tunnel
+to the east. Rough bone tables and chairs have been arranged in the far corner
+of the alcove. Anyone sitting there would have a good view of the tunnel while
+being hard to spot tucked away in the back of the alcove. @n
+~
+167 0 h 0 0 0
+D1
+~
+~
+0 0 16749 0 0 0 0 0 0 0 0
+S
+#16751
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WSmall Tunnel@n~
+   @cThis tunnel is only about twice as large as the average arlian and appears
+to have been carved out of the mountain's rock. The walls and ceiling form a
+roughly hewn rectangle straight through the rock. @n
+~
+167 0 h 0 0 0
+D0
+~
+~
+0 0 16752 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16749 0 0 0 0 0 0 0 0
+S
+#16752
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WSmall Tunnel@n~
+   @cThis tunnel is only about twice as large as the average arlian and appears
+to have been carved out of the mountain's rock. The walls and ceiling form a
+roughly hewn rectangle straight through the rock. @n
+~
+167 0 h 0 0 0
+D0
+~
+~
+0 0 16753 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16751 0 0 0 0 0 0 0 0
+S
+#16753
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WSmall Tunnel@n~
+   @cThis tunnel is only about twice as large as the average arlian and appears
+to have been carved out of the mountain's rock. The walls and ceiling form a
+roughly hewn rectangle straight through the rock. @n
+~
+167 0 h 0 0 0
+D1
+~
+~
+0 0 16754 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16752 0 0 0 0 0 0 0 0
+S
+#16754
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WSmall Tunnel@n~
+   @cThis tunnel is only about twice as large as the average arlian and appears
+to have been carved out of the mountain's rock. The walls and ceiling form a
+roughly hewn rectangle straight through the rock. @n
+~
+167 0 h 0 0 0
+D1
+~
+~
+0 0 16755 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16753 0 0 0 0 0 0 0 0
+S
+#16755
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WSmall Tunnel@n~
+   @cThis tunnel is only about twice as large as the average arlian and appears
+to have been carved out of the mountain's rock. The walls and ceiling form a
+roughly hewn rectangle straight through the rock. @n
+~
+167 0 h 0 0 0
+D0
+~
+~
+0 0 16756 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16754 0 0 0 0 0 0 0 0
+S
+#16756
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WTribal Living Quarters@n~
+   @cThis part of the cavern opens up into a wider space that appears to have
+been wholly tunneled out of the rock. Doorways have been cut into the walls
+with hide and cloth coverings over each one. A large central fire burns
+beneath a small hole tunneled through the side of the mountain. @n
+~
+167 0 h 0 0 0
+D0
+~
+~
+0 0 16761 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16762 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16755 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16757 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16760 0 0 0 0 0 0 0 0
+S
+#16757
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WTribal Living Quarters@n~
+   @cThis part of the cavern opens up into a wider space that appears to have
+been wholly tunneled out of the rock. Doorways have been cut into the walls
+with hide and cloth coverings over each one. A large central fire burns
+beneath a small hole tunneled through the side of the mountain. @n
+~
+167 0 h 0 0 0
+D0
+~
+~
+0 0 16760 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16756 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16758 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16759 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16761 0 0 0 0 0 0 0 0
+S
+#16758
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WTribal Living Quarters@n~
+   @cThis part of the cavern opens up into a wider space that appears to have
+been wholly tunneled out of the rock. Doorways have been cut into the walls
+with hide and cloth coverings over each one. A large central fire burns
+beneath a small hole tunneled through the side of the mountain. @n
+~
+167 0 h 0 0 0
+D0
+~
+~
+0 0 16759 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16757 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16763 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16760 0 0 0 0 0 0 0 0
+S
+#16759
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WTribal Living Quarters@n~
+   @cThis part of the cavern opens up into a wider space that appears to have
+been wholly tunneled out of the rock. Doorways have been cut into the walls
+with hide and cloth coverings over each one. A large central fire burns
+beneath a small hole tunneled through the side of the mountain. @n
+~
+167 0 h 0 0 0
+D0
+~
+~
+0 0 16764 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16760 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16758 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16757 0 0 0 0 0 0 0 0
+S
+#16760
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WTribal Living Quarters@n~
+   @cThis part of the cavern opens up into a wider space that appears to have
+been wholly tunneled out of the rock. Doorways have been cut into the walls
+with hide and cloth coverings over each one. A large central fire burns
+beneath a small hole tunneled through the side of the mountain. @n
+~
+167 0 h 0 0 0
+D1
+~
+~
+0 0 16761 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16757 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16759 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16756 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16758 0 0 0 0 0 0 0 0
+S
+#16761
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WTribal Living Quarters@n~
+   @cThis part of the cavern opens up into a wider space that appears to have
+been wholly tunneled out of the rock. Doorways have been cut into the walls
+with hide and cloth coverings over each one. A large central fire burns
+beneath a small hole tunneled through the side of the mountain. @n
+~
+167 0 h 0 0 0
+D0
+~
+~
+0 0 16765 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16756 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16760 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16757 0 0 0 0 0 0 0 0
+S
+#16762
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WStone Cottage@n~
+   @cThis small cottage consists of a single room with a doorway covered by a
+silk and leather sheet. Tribal ornaments and carvings cover the walls, but the
+floorspace is mostly barren save for several silk sleeping mats. @n
+~
+167 0 h 0 0 0
+D3
+~
+~
+0 0 16756 0 0 0 0 0 0 0 0
+S
+#16763
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WStone Cottage@n~
+   @cThis small cottage consists of a single room with a doorway covered by a
+silk and leather sheet. Tribal ornaments and carvings cover the walls, but the
+floorspace is mostly barren save for several silk sleeping mats. @n
+~
+167 0 h 0 0 0
+D1
+~
+~
+0 0 16758 0 0 0 0 0 0 0 0
+S
+#16764
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WStone Cottage@n~
+   @cThis small cottage consists of a single room with a doorway covered by a
+silk and leather sheet. Tribal ornaments and carvings cover the walls, but the
+floorspace is mostly barren save for several silk sleeping mats. @n
+~
+167 0 h 0 0 0
+D2
+~
+~
+0 0 16759 0 0 0 0 0 0 0 0
+S
+#16765
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WStone Cottage@n~
+   @cThis small cottage consists of a single room with a doorway covered by a
+silk and leather sheet. Tribal ornaments and carvings cover the walls, but the
+floorspace is mostly barren save for several silk sleeping mats. @n
+~
+167 0 h 0 0 0
+D2
+~
+~
+0 0 16761 0 0 0 0 0 0 0 0
+S
+#16766
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WSmall Tunnel@n~
+   @cThis tunnel is only about twice as large as the average arlian and appears
+to have been carved out of the mountain's rock. The walls and ceiling form a
+roughly hewn rectangle straight through the rock. @n
+~
+167 0 h 0 0 0
+D1
+~
+~
+0 0 16767 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16748 0 0 0 0 0 0 0 0
+S
+#16767
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WSmall Tunnel@n~
+   @cThis tunnel is only about twice as large as the average arlian and appears
+to have been carved out of the mountain's rock. The walls and ceiling form a
+roughly hewn rectangle straight through the rock. @n
+~
+167 0 h 0 0 0
+D1
+~
+~
+0 0 16768 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16766 0 0 0 0 0 0 0 0
+S
+#16768
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WSmall Tunnel@n~
+   @cThis tunnel is only about twice as large as the average arlian and appears
+to have been carved out of the mountain's rock. The walls and ceiling form a
+roughly hewn rectangle straight through the rock. @n
+~
+167 0 h 0 0 0
+D0
+~
+~
+0 0 16769 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16767 0 0 0 0 0 0 0 0
+S
+#16769
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WTribal Living Quarters@n~
+   @cThis part of the cavern opens up into a wider space that appears to have
+been wholly tunneled out of the rock. Doorways have been cut into the walls
+with hide and cloth coverings over each one. A large central fire burns
+beneath a small hole tunneled through the side of the mountain. @n
+~
+167 0 h 0 0 0
+D0
+~
+~
+0 0 16774 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16775 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16768 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16770 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16773 0 0 0 0 0 0 0 0
+S
+#16770
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WTribal Living Quarters@n~
+   @cThis part of the cavern opens up into a wider space that appears to have
+been wholly tunneled out of the rock. Doorways have been cut into the walls
+with hide and cloth coverings over each one. A large central fire burns
+beneath a small hole tunneled through the side of the mountain. @n
+~
+167 0 h 0 0 0
+D0
+~
+~
+0 0 16773 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16769 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16771 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16772 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16774 0 0 0 0 0 0 0 0
+S
+#16771
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WTribal Living Quarters@n~
+   @cThis part of the cavern opens up into a wider space that appears to have
+been wholly tunneled out of the rock. Doorways have been cut into the walls
+with hide and cloth coverings over each one. A large central fire burns
+beneath a small hole tunneled through the side of the mountain. @n
+~
+167 0 h 0 0 0
+D0
+~
+~
+0 0 16772 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16770 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16778 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16773 0 0 0 0 0 0 0 0
+S
+#16772
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WTribal Living Quarters@n~
+   @cThis part of the cavern opens up into a wider space that appears to have
+been wholly tunneled out of the rock. Doorways have been cut into the walls
+with hide and cloth coverings over each one. A large central fire burns
+beneath a small hole tunneled through the side of the mountain. @n
+~
+167 0 h 0 0 0
+D0
+~
+~
+0 0 16777 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 16773 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16771 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16770 0 0 0 0 0 0 0 0
+S
+#16773
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WTribal Living Quarters@n~
+   @cThis part of the cavern opens up into a wider space that appears to have
+been wholly tunneled out of the rock. Doorways have been cut into the walls
+with hide and cloth coverings over each one. A large central fire burns
+beneath a small hole tunneled through the side of the mountain. @n
+~
+167 0 h 0 0 0
+D1
+~
+~
+0 0 16774 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16770 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16772 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16769 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16771 0 0 0 0 0 0 0 0
+S
+#16774
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WTribal Living Quarters@n~
+   @cThis part of the cavern opens up into a wider space that appears to have
+been wholly tunneled out of the rock. Doorways have been cut into the walls
+with hide and cloth coverings over each one. A large central fire burns
+beneath a small hole tunneled through the side of the mountain. @n
+~
+167 0 h 0 0 0
+D0
+~
+~
+0 0 16776 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16769 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16773 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16770 0 0 0 0 0 0 0 0
+S
+#16775
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WStone Cottage@n~
+   @cThis small cottage consists of a single room with a doorway covered by a
+silk and leather sheet. Tribal ornaments and carvings cover the walls, but the
+floorspace is mostly barren save for several silk sleeping mats. @n
+~
+167 0 h 0 0 0
+D3
+~
+~
+0 0 16769 0 0 0 0 0 0 0 0
+S
+#16776
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WStone Cottage@n~
+   @cThis small cottage consists of a single room with a doorway covered by a
+silk and leather sheet. Tribal ornaments and carvings cover the walls, but the
+floorspace is mostly barren save for several silk sleeping mats. @n
+~
+167 0 h 0 0 0
+D2
+~
+~
+0 0 16774 0 0 0 0 0 0 0 0
+S
+#16777
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WStone Cottage@n~
+   @cThis small cottage consists of a single room with a doorway covered by a
+silk and leather sheet. Tribal ornaments and carvings cover the walls, but the
+floorspace is mostly barren save for several silk sleeping mats. @n
+~
+167 0 h 0 0 0
+D2
+~
+~
+0 0 16772 0 0 0 0 0 0 0 0
+S
+#16778
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WStone Cottage@n~
+   @cThis small cottage consists of a single room with a doorway covered by a
+silk and leather sheet. Tribal ornaments and carvings cover the walls, but the
+floorspace is mostly barren save for several silk sleeping mats. @n
+~
+167 0 h 0 0 0
+D1
+~
+~
+0 0 16771 0 0 0 0 0 0 0 0
+S
+#16779
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WSmall Tunnel@n~
+   @cThis tunnel is only about twice as large as the average arlian and appears
+to have been carved out of the mountain's rock. The walls and ceiling form a
+roughly hewn rectangle straight through the rock. @n
+~
+167 0 h 0 0 0
+D6
+~
+~
+0 0 16780 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16749 0 0 0 0 0 0 0 0
+S
+#16780
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WSmall Tunnel@n~
+   @cThis tunnel is only about twice as large as the average arlian and appears
+to have been carved out of the mountain's rock. The walls and ceiling form a
+roughly hewn rectangle straight through the rock. @n
+~
+167 0 h 0 0 0
+D6
+~
+~
+0 0 16781 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16779 0 0 0 0 0 0 0 0
+S
+#16781
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WSmall Tunnel@n~
+   @cThis tunnel is only about twice as large as the average arlian and appears
+to have been carved out of the mountain's rock. The walls and ceiling form a
+roughly hewn rectangle straight through the rock. @n
+~
+167 0 h 0 0 0
+D0
+~
+~
+0 0 16782 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16780 0 0 0 0 0 0 0 0
+S
+#16782
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WChief's Cottage@n~
+   @WThis small one room cottage has been entirely carved out of the mountain's
+rock and smoothed over. The chief's seat is located against the north wall and
+consists of several layers of folded phiron silk. Above the seat hangs the
+pieces of a broken bone spear with a flawless topaz blade. The rest of the
+room is completely empty.
+~
+167 c h 0 0 0
+D2
+~
+~
+0 0 16781 0 0 0 0 0 0 0 0
+S
+#16783
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WExcavation Tunnel@n~
+   @cThis tunnel is much smaller than most of the tunnels and caverns above and
+appears to have been roughly cut out through much tougher rock. The floor of
+the tunnel appears to have been well trafficked and a fine powder of crushed
+rock and minerals has collected from spillage of worker baskets. @n
+~
+167 c h 0 0 0
+D4
+~
+~
+0 0 16705 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 16784 0 0 0 0 0 0 0 0
+S
+#16784
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WExcavation Tunnel@n~
+   @cThis tunnel is much smaller than most of the tunnels and caverns above and
+appears to have been roughly cut out through much tougher rock. The floor of
+the tunnel appears to have been well trafficked and a fine powder of crushed
+rock and minerals has collected from spillage of worker baskets. @n
+~
+167 0 h 0 0 0
+D0
+~
+~
+0 0 16788 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 16783 0 0 0 0 0 0 0 0
+S
+#16785
+@DD@Wa@wyoi @DM@Wo@wunt@Da@Wi@wn@D: @CThrough The Air@n~
+   @CThis area is the air right next to the mountain. The Kemabra Wastes can be
+seen below and to the south west from here. Directly below obsidian rocks and
+chunks of the mountain can be seen ready to assert gravity's judgement on those
+bound to its force. @n
+~
+167 c h 0 0 8
+D5
+~
+~
+0 0 16896 0 0 0 0 0 0 0 0
+S
+#16786
+@rValbi @wS@Wh@wel@Wl @yHut@D: @cInside@n~
+   @rThis area appears to be the spacious inside of a large dead insect. The
+inside has been chiseled and cleaned in an attempt to make a living space out
+of the shell. Near where the head of the dead insect would have been a small
+opening with a cloth covering can be seen and apparently leads outside. @n
+~
+167 0 h 0 0 0
+D2
+~
+~
+0 0 16787 0 0 0 0 0 0 0 0
+S
+#16787
+@rValbi @wS@Wh@wel@Wl @yHut@D: @cEntrance@n~
+   @rThis tight area appears to be the neck of the exoskeleton. The opening to
+the shell can be seen here. A small cloth sheet covers the opening. 
+Occasionally the outside breeze causes the sheet to flutter and snap. @n
+~
+167 0 h 0 0 0
+D0
+~
+~
+0 0 16786 0 0 0 0 0 0 0 0
+S
+#16788
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WExcavation Tunnel@n~
+   @cThis tunnel is much smaller than most of the tunnels and caverns above and
+appears to have been roughly cut out through much tougher rock. The floor of
+the tunnel appears to have been well trafficked and a fine powder of crushed
+rock and minerals has collected from spillage of worker baskets. @n
+~
+167 0 h 0 0 0
+D2
+~
+~
+0 0 16784 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16789 0 0 0 0 0 0 0 0
+S
+#16789
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WExcavation Tunnel@n~
+   @cThis tunnel is much smaller than most of the tunnels and caverns above and
+appears to have been roughly cut out through much tougher rock. The floor of
+the tunnel appears to have been well trafficked and a fine powder of crushed
+rock and minerals has collected from spillage of worker baskets. @n
+~
+167 0 h 0 0 0
+D0
+~
+~
+0 0 16790 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16788 0 0 0 0 0 0 0 0
+S
+#16790
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WExcavation Tunnel@n~
+   @cThis tunnel is much smaller than most of the tunnels and caverns above and
+appears to have been roughly cut out through much tougher rock. The floor of
+the tunnel appears to have been well trafficked and a fine powder of crushed
+rock and minerals has collected from spillage of worker baskets. @n
+~
+167 0 h 0 0 0
+D0
+~
+~
+0 0 16792 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16789 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 16791 0 0 0 0 0 0 0 0
+S
+#16791
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WMineral Sorting@n~
+   @cThis expansive room was made appears to have been made out of a former
+cavern carved into a large vault of sorts about half the size of the trading
+pit above. Large amounts of rocks and minerals have been sorted into large
+heaps through the room based on their usefulness to the tribe. @n
+~
+167 0 h 0 0 0
+D1
+~
+~
+0 0 16790 0 0 0 0 0 0 0 0
+S
+#16792
+@rKilnak @cC@Ca@cve@Cr@cn@Cs@D: @WExcavation Tunnel@n~
+   @cThis tunnel is much smaller than most of the tunnels and caverns above and
+appears to have been roughly cut out through much tougher rock. The floor of
+the tunnel appears to have been well trafficked and a fine powder of crushed
+rock and minerals has collected from spillage of worker baskets. @n
+~
+167 0 h 0 0 0
+D2
+~
+~
+0 0 16790 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 16793 0 0 0 0 0 0 0 0
+S
+#16793
+@mDark @Wof @mA@Mr@mli@Ma@D: @BNear Kilnak Caverns@n~
+   @bThis dirty small tunnel appears to have been excavated long ago and runs
+through a layer of the planet that is almost completely alien to the surface
+world. A foul stench permeates the air and adds to the oppressive atmosphere
+of this dark place. Occasional screeches and growls can be heard coming from
+deeper within the caverns. @n
+~
+167 a h 0 0 0
+D3
+~
+~
+0 0 16794 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 16792 0 0 0 0 0 0 0 0
+S
+#16794
+@MDark @Wof @mA@Mr@mli@Ma@D: @BExcavated Tunnel@n~
+   @bThis tunnel is wide enough for several average size arlians to fit through
+shoulder to shoulder, though the walls and ceiling have been cut away the floor
+appears to have mostly just been smoothed down. @n
+~
+167 a h 0 0 0
+D1
+~
+~
+0 0 16793 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 16795 0 0 0 0 0 0 0 0
+S
+#16795
+@MDark @Wof @mA@Mr@mli@Ma@D: @BExcavated Tunnel@n~
+   @bThis tunnel is wide enough for several average size arlians to fit through
+shoulder to shoulder, though the walls and ceiling have been cut away the floor
+appears to have mostly just been smoothed down. @n
+~
+167 a h 0 0 0
+D0
+~
+~
+0 0 16796 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 16794 0 0 0 0 0 0 0 0
+S
+#16796
+@MDark @Wof @mA@Mr@mli@Ma@D: @BExcavated Tunnel@n~
+   @bThis tunnel is wide enough for several average size arlians to fit through
+shoulder to shoulder, though the walls and ceiling have been cut away the floor
+appears to have mostly just been smoothed down. @n
+~
+167 a h 0 0 0
+D0
+~
+~
+0 0 16797 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 16795 0 0 0 0 0 0 0 0
+S
+#16797
+@MDark @Wof @mA@Mr@mli@Ma@D: @BExcavated Tunnel@n~
+   @bThis tunnel is wide enough for several average size arlians to fit through
+shoulder to shoulder, though the walls and ceiling have been cut away the floor
+appears to have mostly just been smoothed down. @n
+~
+167 a h 0 0 0
+D2
+~
+~
+0 0 16796 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 16798 0 0 0 0 0 0 0 0
+S
+#16798
+@MDark @Wof @mA@Mr@mli@Ma@D: @BExcavated Tunnel@n~
+   @bThis tunnel is wide enough for several average size arlians to fit through
+shoulder to shoulder, though the walls and ceiling have been cut away the floor
+appears to have mostly just been smoothed down. @n
+~
+167 a h 0 0 0
+D1
+~
+~
+0 0 16799 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 16797 0 0 0 0 0 0 0 0
+S
+#16799
+@MDark @Wof @mA@Mr@mli@Ma@D: @BExcavated Tunnel@n~
+   @bThis tunnel is wide enough for several average size arlians to fit through
+shoulder to shoulder, though the walls and ceiling have been cut away the floor
+appears to have mostly just been smoothed down. @n
+~
+167 a h 0 0 0
+D3
+~
+~
+0 0 16798 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 16900 0 0 0 0 0 0 0 0
+S
+$~

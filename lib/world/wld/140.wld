@@ -1,0 +1,1668 @@
+#14000
+@mY@Ma@Wr@wdra @DS@Wp@wa@Dc@We@wp@Do@Wr@wt@D: @cRelaxation Booth@n~
+   @WThis small area appears to have been built to cater to the tourist who might
+visit the city Yardra and the planet Yardrat at large. State of the art climate
+control technology has been built into the stone fabricated room. @n
+~
+140 D f 0 0 0
+D0
+~
+~
+0 0 14001 0 0 0 0 0 0 0 0
+S
+#14001
+@mY@Ma@Wr@wdra @DS@Wp@wa@Dc@We@wp@Do@Wr@wt@D: @cHallway@n~
+   @WThis concrete hallway has a dome shaped ceiling and large unglassed window
+portals running along its east and west walls. A fresh Yadratian breeze
+occasionally blows through the otherwise drab concrete hallway. @n
+~
+140 0 f 0 0 0
+D0
+~
+~
+0 0 14002 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14000 0 0 0 0 0 0 0 0
+S
+#14002
+@mY@Ma@Wr@wdra @DS@Wp@wa@Dc@We@wp@Do@Wr@wt@D: @cLobby@n~
+   @WThis large room has row after row of benches sitting on its drab concrete
+floor. A massive domed roof made out of the same concrete stands fifty feet
+overhead. Sky lights have been built into the ceiling allowing natural
+Yardratian light to filter in. @n
+~
+140 c f 0 0 0
+D0
+~
+~
+0 0 14007 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14005 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14001 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14003 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14006 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14004 0 0 0 0 0 0 0 0
+S
+#14003
+@mY@Ma@Wr@wdra @DS@Wp@wa@Dc@We@wp@Do@Wr@wt@D: @cPrivate Launchpad (1)@n~
+   @WThis launchpad was built for private licensed ships to use.  The launchpad is
+well taken care of, with processing fees for landing ships to pay.  Seperate
+spaces have been provided for ships to land on.  @n
+~
+140 0 f 0 0 0
+D1
+~
+~
+0 0 14002 0 0 0 0 0 0 0 0
+S
+#14004
+@mY@Ma@Wr@wdra @DS@Wp@wa@Dc@We@wp@Do@Wr@wt@D: @cPrivate Launchpad (2)@n~
+   @WThis launchpad was built for private licensed ships to use.  The launchpad is
+well taken care of, with processing fees for landing ships to pay.  Seperate
+spaces have been provided for ships to land on.  @n
+~
+140 0 f 0 0 0
+D7
+~
+~
+0 0 14002 0 0 0 0 0 0 0 0
+S
+#14005
+@mY@Ma@Wr@wdra @DS@Wp@wa@Dc@We@wp@Do@Wr@wt@D: @cPrivate Launchpad (3)@n~
+   @WThis launchpad was built for private licensed ships to use.  The launchpad is
+well taken care of, with processing fees for landing ships to pay.  Seperate
+spaces have been provided for ships to land on.  @n
+~
+140 0 f 0 0 0
+D3
+~
+~
+0 0 14002 0 0 0 0 0 0 0 0
+S
+#14006
+@mY@Ma@Wr@wdra @DS@Wp@wa@Dc@We@wp@Do@Wr@wt@D: @cPrivate Launchpad (4)@n~
+   @WThis launchpad was built for private licensed ships to use.  The launchpad is
+well taken care of, with processing fees for landing ships to pay.  Seperate
+spaces have been provided for ships to land on.  @n
+~
+140 0 f 0 0 0
+D6
+~
+~
+0 0 14002 0 0 0 0 0 0 0 0
+S
+#14007
+@mY@Ma@Wr@wdra @DS@Wp@wa@Dc@We@wp@Do@Wr@wt@D: @cEntrance@n~
+   @WThis drab concrete room has two glass doors leading outside to what appears
+to be a cobble stone street. To the south from here a large spacious room full
+of benches can be seen. @n
+~
+140 0 f 0 0 0
+D0
+~
+~
+0 0 14008 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14002 0 0 0 0 0 0 0 0
+S
+#14008
+@cS@Cy@wl@Cp@ch @gStreet@n~
+   @WThis cobble stone street appears to receive little traffic as its stones are
+in perfect condition. Purple bushes dot the side of the street adding some
+color and decoration. @n
+~
+140 0 f 0 0 1
+D0
+~
+~
+0 0 14034 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14009 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14007 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14033 0 0 0 0 0 0 0 0
+S
+#14009
+@cS@Cy@wl@Cp@ch @gStreet@n~
+   @WThis cobble stone street appears to receive little traffic as its stones are
+in perfect condition. Purple bushes dot the side of the street adding some
+color and decoration. @n
+~
+140 0 f 0 0 1
+D1
+~
+~
+0 0 14010 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14008 0 0 0 0 0 0 0 0
+S
+#14010
+@cS@Cy@wl@Cp@ch @gStreet@n~
+   @WThis cobble stone street appears to receive little traffic as its stones are
+in perfect condition. Purple bushes dot the side of the street adding some
+color and decoration. @n
+~
+140 0 f 0 0 1
+D3
+~
+~
+0 0 14009 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14011 0 0 0 0 0 0 0 0
+S
+#14011
+@cS@Cy@wl@Cp@ch @gStreet@n~
+   @WThis cobble stone street appears to receive little traffic as its stones are
+in perfect condition. Purple bushes dot the side of the street adding some
+color and decoration. @n
+~
+140 0 f 0 0 1
+D6
+~
+~
+0 0 14010 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14012 0 0 0 0 0 0 0 0
+S
+#14012
+@rF@Rr@we@Re@rt @gAvenue@n~
+   @WThis cobble stone street appears to have been repaired recently. New stones
+can be spotted amongst the older stones. To the east of this street a few
+buildings can be seen. @n
+~
+140 0 f 0 0 1
+D2
+~
+~
+0 0 14013 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14011 0 0 0 0 0 0 0 0
+S
+#14013
+@rF@Rr@we@Re@rt @gAvenue@n~
+   @WThis cobble stone street appears to have been repaired recently. New stones
+can be spotted amongst the older stones. To the east of this street a few
+buildings can be seen. @n
+~
+140 0 f 0 0 1
+D0
+~
+~
+0 0 14012 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14054 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14014 0 0 0 0 0 0 0 0
+S
+#14014
+@rF@Rr@we@Re@rt @gAvenue@n~
+   @WThis cobble stone street appears to have been repaired recently. New stones
+can be spotted amongst the older stones. To the east of this street a few
+buildings can be seen. @n
+~
+140 0 f 0 0 1
+D0
+~
+~
+0 0 14013 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14015 0 0 0 0 0 0 0 0
+S
+#14015
+@rF@Rr@we@Re@rt @gAvenue@n~
+   @WThis cobble stone street appears to have been repaired recently. New stones
+can be spotted amongst the older stones. To the east of this street a few
+buildings can be seen. @n
+~
+140 0 f 0 0 1
+D0
+~
+~
+0 0 14014 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14016 0 0 0 0 0 0 0 0
+S
+#14016
+@rF@Rr@we@Re@rt @gAvenue@n~
+   @WThis cobble stone street appears to have been repaired recently. New stones
+can be spotted amongst the older stones. To the east of this street a few
+buildings can be seen. @n
+~
+140 0 f 0 0 1
+D0
+~
+~
+0 0 14015 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14053 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14017 0 0 0 0 0 0 0 0
+S
+#14017
+@rF@Rr@we@Re@rt @gAvenue@n~
+   @WThis cobble stone street appears to have been repaired recently. New stones
+can be spotted amongst the older stones. To the east of this street a few
+buildings can be seen. @n
+~
+140 0 f 0 0 1
+D0
+~
+~
+0 0 14016 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14018 0 0 0 0 0 0 0 0
+S
+#14018
+@bJ@Bi@Wm@wv @gStreet@n~
+   @WThis cobble stone street appears to receive little traffic as its stones are
+in perfect condition. Purple bushes dot the side of the street adding some
+color and decoration. @n
+~
+140 0 f 0 0 1
+D7
+~
+~
+0 0 14017 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14019 0 0 0 0 0 0 0 0
+S
+#14019
+@bJ@Bi@Wm@wv @gStreet@n~
+   @WThis cobble stone street appears to receive little traffic as its stones are
+in perfect condition. Purple bushes dot the side of the street adding some
+color and decoration. @n
+~
+140 0 f 0 0 1
+D3
+~
+~
+0 0 14020 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14018 0 0 0 0 0 0 0 0
+S
+#14020
+@bJ@Bi@Wm@wv @gStreet@n~
+   @WThis cobble stone street appears to receive little traffic as its stones are
+in perfect condition. Purple bushes dot the side of the street adding some
+color and decoration. @n
+~
+140 0 f 0 0 1
+D1
+~
+~
+0 0 14019 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14052 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14021 0 0 0 0 0 0 0 0
+S
+#14021
+@bJ@Bi@Wm@wv @gStreet@n~
+   @WThis cobble stone street appears to receive little traffic as its stones are
+in perfect condition. Purple bushes dot the side of the street adding some
+color and decoration. @n
+~
+140 0 f 0 0 1
+D1
+~
+~
+0 0 14020 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14022 0 0 0 0 0 0 0 0
+S
+#14022
+@bJ@Bi@Wm@wv @gStreet@n~
+   @WThis cobble stone street appears to receive little traffic as its stones are
+in perfect condition. Purple bushes dot the side of the street adding some
+color and decoration. @n
+~
+140 0 f 0 0 1
+D0
+~
+~
+0 0 14051 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14021 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14023 0 0 0 0 0 0 0 0
+S
+#14023
+@bJ@Bi@Wm@wv @gStreet@n~
+   @WThis cobble stone street appears to receive little traffic as its stones are
+in perfect condition. Purple bushes dot the side of the street adding some
+color and decoration. @n
+~
+140 0 f 0 0 1
+D1
+~
+~
+0 0 14022 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 14024 0 0 0 0 0 0 0 0
+S
+#14024
+@bJ@Bi@Wm@wv @gStreet@n~
+   @WThis cobble stone street appears to receive little traffic as its stones are
+in perfect condition. Purple bushes dot the side of the street adding some
+color and decoration. @n
+~
+140 0 f 0 0 1
+D6
+~
+~
+0 0 14025 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14023 0 0 0 0 0 0 0 0
+S
+#14025
+@mG@Mr@meip@Mp@mle @gWay@n~
+   @WThis cobble stone street appears to have been repaired recently. New stones
+can be spotted amongst the older stones. To the west of this street a few
+buildings can be seen. @n
+~
+140 0 f 0 0 1
+D0
+~
+~
+0 0 14026 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 14024 0 0 0 0 0 0 0 0
+S
+#14026
+@mG@Mr@meip@Mp@mle @gWay@n~
+   @WThis cobble stone street appears to have been repaired recently. New stones
+can be spotted amongst the older stones. To the west of this street a few
+buildings can be seen. @n
+~
+140 0 f 0 0 1
+D0
+~
+~
+0 0 14027 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14025 0 0 0 0 0 0 0 0
+S
+#14027
+@mG@Mr@meip@Mp@mle @gWay@n~
+   @WThis cobble stone street appears to have been repaired recently. New stones
+can be spotted amongst the older stones. To the west of this street a few
+buildings can be seen. @n
+~
+140 0 f 0 0 1
+D0
+~
+~
+0 0 14028 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14026 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14050 0 0 0 0 0 0 0 0
+S
+#14028
+@mG@Mr@meip@Mp@mle @gWay@n~
+   @WThis cobble stone street appears to have been repaired recently. New stones
+can be spotted amongst the older stones. To the west of this street a few
+buildings can be seen. @n
+~
+140 0 f 0 0 1
+D0
+~
+~
+0 0 14029 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14027 0 0 0 0 0 0 0 0
+S
+#14029
+@mG@Mr@meip@Mp@mle @gWay@n~
+   @WThis cobble stone street appears to have been repaired recently. New stones
+can be spotted amongst the older stones. To the west of this street a few
+buildings can be seen. @n
+~
+140 0 f 0 0 1
+D0
+~
+~
+0 0 14030 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14028 0 0 0 0 0 0 0 0
+S
+#14030
+@mG@Mr@meip@Mp@mle @gWay@n~
+   @WThis cobble stone street appears to have been repaired recently. New stones
+can be spotted amongst the older stones. To the west of this street a few
+buildings can be seen. @n
+~
+140 0 f 0 0 1
+D2
+~
+~
+0 0 14029 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 14031 0 0 0 0 0 0 0 0
+S
+#14031
+@cS@Cy@wl@Cp@ch @gStreet@n~
+   @WThis cobble stone street appears to receive little traffic as its stones are
+in perfect condition. Purple bushes dot the side of the street adding some
+color and decoration. @n
+~
+140 0 f 0 0 1
+D7
+~
+~
+0 0 14032 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14030 0 0 0 0 0 0 0 0
+S
+#14032
+@cS@Cy@wl@Cp@ch @gStreet@n~
+   @WThis cobble stone street appears to receive little traffic as its stones are
+in perfect condition. Purple bushes dot the side of the street adding some
+color and decoration. @n
+~
+140 0 f 0 0 1
+D0
+~
+~
+0 0 26 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14033 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 14031 0 0 0 0 0 0 0 0
+S
+#14033
+@cS@Cy@wl@Cp@ch @gStreet@n~
+   @WThis cobble stone street appears to receive little traffic as its stones are
+in perfect condition. Purple bushes dot the side of the street adding some
+color and decoration. @n
+~
+140 0 f 0 0 1
+D1
+~
+~
+0 0 14008 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14032 0 0 0 0 0 0 0 0
+S
+#14034
+@yJ@Yo@wo@ym@Ya@wn @gStreet@n~
+   @WThis wide cobble stone street appears to receive a bit more use than the rest
+of the city's streets. Benches, signs, and pedestrians can be seen to the side
+of the street. A few dark green trees have been planted here or there alongside
+the street as well. @n
+~
+140 0 f 0 0 1
+D0
+~
+~
+0 0 14035 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14008 0 0 0 0 0 0 0 0
+S
+#14035
+@yJ@Yo@wo@ym@Ya@wn @gStreet@n~
+   @WThis wide cobble stone street appears to receive a bit more use than the rest
+of the city's streets. Benches, signs, and pedestrians can be seen to the side
+of the street. A few dark green trees have been planted here or there alongside
+the street as well. @n
+~
+140 0 f 0 0 1
+D0
+~
+~
+0 0 14036 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14034 0 0 0 0 0 0 0 0
+S
+#14036
+@yJ@Yo@wo@ym@Ya@wn @gStreet@n~
+   @WThis wide cobble stone street appears to receive a bit more use than the rest
+of the city's streets. Benches, signs, and pedestrians can be seen to the side
+of the street. A few dark green trees have been planted here or there alongside
+the street as well. @n
+~
+140 0 f 0 0 1
+D0
+~
+~
+0 0 14037 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14035 0 0 0 0 0 0 0 0
+S
+#14037
+@yJ@Yo@wo@ym@Ya@wn @gStreet@n~
+   @WThis wide cobble stone street appears to receive a bit more use than the rest
+of the city's streets. Benches, signs, and pedestrians can be seen to the side
+of the street. A few dark green trees have been planted here or there alongside
+the street as well. @n
+~
+140 0 f 0 0 1
+D0
+~
+~
+0 0 14038 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14036 0 0 0 0 0 0 0 0
+S
+#14038
+@yW@Ya@Wr@wes @gAvenue@n~
+   @WThis wide cobble stone street appears to receive a bit more use than the rest
+of the city's streets. Benches, signs, and pedestrians can be seen to the side
+of the street. A few dark green trees have been planted here or there alongside
+the street as well. @n
+~
+140 0 f 0 0 1
+D1
+~
+~
+0 0 14043 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14037 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14039 0 0 0 0 0 0 0 0
+S
+#14039
+@yW@Ya@Wr@wes @gAvenue@n~
+   @WThis wide cobble stone street appears to receive a bit more use than the rest
+of the city's streets. Benches, signs, and pedestrians can be seen to the side
+of the street. A few dark green trees have been planted here or there alongside
+the street as well. @n
+~
+140 0 f 0 0 1
+D1
+~
+~
+0 0 14038 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14040 0 0 0 0 0 0 0 0
+S
+#14040
+@yW@Ya@Wr@wes @gAvenue@n~
+   @WThis wide cobble stone street appears to receive a bit more use than the rest
+of the city's streets. Benches, signs, and pedestrians can be seen to the side
+of the street. A few dark green trees have been planted here or there alongside
+the street as well. @n
+~
+140 0 f 0 0 1
+D1
+~
+~
+0 0 14039 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14041 0 0 0 0 0 0 0 0
+S
+#14041
+@yW@Ya@Wr@wes @gAvenue@n~
+   @WThis wide cobble stone street appears to receive a bit more use than the rest
+of the city's streets. Benches, signs, and pedestrians can be seen to the side
+of the street. A few dark green trees have been planted here or there alongside
+the street as well. @n
+~
+140 0 f 0 0 1
+D1
+~
+~
+0 0 14040 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14049 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14042 0 0 0 0 0 0 0 0
+S
+#14042
+@mY@Ma@Wr@wdra @WCity@D: @cWest Entrance@n~
+   @WTwo large stone pillars rise up on either side of the street here and large
+wooden gates hang on each pillar. South and north from each pillar a large
+concrete wall stretches around the city. To the west a dark forest that
+occasional errie sounds coming from it can be seen. @n
+~
+140 c f 0 0 1
+D1
+~
+~
+0 0 14041 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14100 0 0 0 0 0 0 0 0
+S
+#14043
+@yW@Ya@Wr@wes @gAvenue@n~
+   @WThis wide cobble stone street appears to receive a bit more use than the rest
+of the city's streets. Benches, signs, and pedestrians can be seen to the side
+of the street. A few dark green trees have been planted here or there alongside
+the street as well. @n
+~
+140 0 f 0 0 1
+D1
+~
+~
+0 0 14044 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14038 0 0 0 0 0 0 0 0
+S
+#14044
+@yW@Ya@Wr@wes @gAvenue@n~
+   @WThis wide cobble stone street appears to receive a bit more use than the rest
+of the city's streets. Benches, signs, and pedestrians can be seen to the side
+of the street. A few dark green trees have been planted here or there alongside
+the street as well. @n
+~
+140 0 f 0 0 1
+D0
+~
+~
+0 0 14048 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14045 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14043 0 0 0 0 0 0 0 0
+S
+#14045
+@yW@Ya@Wr@wes @gAvenue@n~
+   @WThis wide cobble stone street appears to receive a bit more use than the rest
+of the city's streets. Benches, signs, and pedestrians can be seen to the side
+of the street. A few dark green trees have been planted here or there alongside
+the street as well. @n
+~
+140 0 f 0 0 1
+D1
+~
+~
+0 0 14046 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14047 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14044 0 0 0 0 0 0 0 0
+S
+#14046
+@mY@Ma@Wr@wdra @WCity@D: @cEast Entrance@n~
+   @WTwo large stone pillars rise up on either side of the street here and large
+wooden gates hang on each pillar. South and north from each pillar a large
+concrete wall stretches around the city. To the east a small mountain can be
+seen with a temple resting on its uppermost peak. @n
+~
+140 c f 0 0 1
+D1
+~
+~
+0 0 14300 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14045 0 0 0 0 0 0 0 0
+S
+#14047
+@DS@Wh@wa@ct@Ct@We@wr@De@Wd @cS@Ct@Wa@wr @cShop@n~
+   @WThis small shop seems to be made out of a type of Yardratian wood. Racks and
+shelves cover the floor space of the shop, displaying all kinds of merchandise
+to customers. To the rear of the shop a wooden counter can be seen with a cash
+register sitting atop its surface. @n
+~
+140 ch f 0 0 0
+D0
+~
+~
+0 0 14045 0 0 0 0 0 0 0 0
+S
+#14048
+@mY@Ma@Wr@wdius @yBakery@n~
+   @WThis small shop appears to be made out of some type of Yardratian wood. A
+large glass display case full of baked goods can be seen standing before a tall
+wooden counter. Behind the counter towards the back of the bakery a kitchen can
+be seen and the smells of freshly baked goods are wafting through the air from
+that direction. @n
+~
+140 ch f 0 0 0
+D2
+~
+~
+0 0 14044 0 0 0 0 0 0 0 0
+S
+#14049
+@WP@wa@Dc@Wk@w'@De@Wm @CS@cu@Dp@wp@Cl@ci@De@ws@n~
+   @WThis concrete building appears to be some sort of supply shop. Racks and
+shelves full of various supplies can be seen built into the walls and into the
+floor. Towards the back a metal counter with an archaic cash register sitting
+atop its surface can be seen. @n
+~
+140 ch f 0 0 10
+D0
+~
+~
+0 0 14041 0 0 0 0 0 0 0 0
+S
+#14050
+@CD@cesmo@Cn @rForge@n~
+   @DThis dark room is covered in soot and is thick with smoke. A large forge can
+be seen towards the back behind a dark metal counter. A trough of water can be
+seen sitting next to an anvil not far from the forge. A large selection of
+smithing tools can be seen hanging on the wall near the anvil as well. @n
+~
+140 ceh f 0 0 0
+D1
+~
+~
+0 0 14027 0 0 0 0 0 0 0 0
+S
+#14051
+@mD@Ma@Wr@wk @mL@Mi@Wg@wh@mt@Mn@Wi@wng @cShop@n~
+   @cThis dark shop has no descernable lights built into any of its structure. 
+The only light to be found is from the strange equipment that is displayed all
+around the room. The very metal of the equipment glows with a magical energy
+that is hard to describe. To the back of the shop a worn wooden counter with a
+cash register can be seen. @n
+~
+140 c f 0 0 10
+D2
+~
+~
+0 0 14022 0 0 0 0 0 0 0 0
+S
+#14052
+@mY@Ma@Wr@wdra @WCity@D: @cSouth Entrance@n~
+   @WTwo large stone pillars rise up on either side of the street here and large
+wooden gates hang on each pillar. East and west from each pillar a large
+concrete wall stretches around the city. To the south towering cliffs made of
+brown and green stones can be seen in the distance. @n
+~
+140 c f 0 0 1
+D0
+~
+~
+0 0 14020 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14200 0 0 0 0 0 0 0 0
+S
+#14053
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cEntrance@n ~
+   @WTwo glass doors have been built into the west opening of this concrete room.
+A dark street can be seen outside the glass doors. To the east a nearly bare
+concrete room can be seen. @n
+~
+140 c f 0 0 0
+D1
+~
+~
+0 0 14055 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14016 0 0 0 0 0 0 0 0
+S
+#14054
+@bJ@Be@Cm@bd@Bu@Cs@bt @yO@Yr@yn@Ya@ym@Ye@yn@Yt@ya@Yt@yi@Yo@yn@n~
+   @yThis small shop appears to be made out of wood that is local to the planet
+Yardrat. A strong smell of cleaning solvents drifts through the air. The
+source of the smell seems to be the shiny and well maintained jewlry that is
+hanging on hooks behind a small wooden counter towards the west end of the shop.
+A silver cashier is sitting on the counter. @n
+~
+140 ch f 0 0 0
+D3
+~
+~
+0 0 14013 0 0 0 0 0 0 0 0
+S
+#14055
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, First Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D0
+~
+~
+0 0 14066 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14067 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14056 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14053 0 0 0 0 0 0 0 0
+S
+#14056
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, First Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D0
+~
+~
+0 0 14055 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14057 0 0 0 0 0 0 0 0
+S
+#14057
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, First Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D0
+~
+~
+0 0 14056 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14058 0 0 0 0 0 0 0 0
+S
+#14058
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, First Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D1
+~
+~
+0 0 14059 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14057 0 0 0 0 0 0 0 0
+S
+#14059
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, First Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D0
+~
+~
+0 0 14060 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14058 0 0 0 0 0 0 0 0
+S
+#14060
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, First Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D0
+~
+~
+0 0 14061 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14059 0 0 0 0 0 0 0 0
+S
+#14061
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, First Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D0
+~
+~
+0 0 14062 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14060 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14067 0 0 0 0 0 0 0 0
+S
+#14062
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, First Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D0
+~
+~
+0 0 14063 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14061 0 0 0 0 0 0 0 0
+S
+#14063
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, First Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D2
+~
+~
+0 0 14062 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14064 0 0 0 0 0 0 0 0
+S
+#14064
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, First Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D1
+~
+~
+0 0 14063 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14065 0 0 0 0 0 0 0 0
+S
+#14065
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, First Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D1
+~
+~
+0 0 14064 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14066 0 0 0 0 0 0 0 0
+S
+#14066
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, First Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D0
+~
+~
+0 0 14065 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14055 0 0 0 0 0 0 0 0
+S
+#14067
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cStairwell, First Floor@n~
+   @WThis bare concrete room has a circular staircase leading to the next floor.
+The staircase appears to be made out of an almost completely black metallic
+staircase. With a thick handrail leading up it sides for stability when
+climbing the otherwise narrow and unsafe staircase. @n
+~
+140 c f 0 0 0
+D1
+~
+~
+0 0 14061 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14055 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 14068 0 0 0 0 0 0 0 0
+S
+#14068
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cStairwell, Second Floor@n~
+   @WThis bare concrete room has a circular staircase leading to the next floor.
+The staircase appears to be made out of an almost completely black metallic
+staircase. With a thick handrail leading up it sides for stability when
+climbing the otherwise narrow and unsafe staircase. @n
+~
+140 c f 0 0 0
+D1
+~
+~
+0 0 14069 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14075 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 14081 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 14067 0 0 0 0 0 0 0 0
+S
+#14069
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, Second Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D0
+~
+~
+0 0 14080 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14070 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14068 0 0 0 0 0 0 0 0
+S
+#14070
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, Second Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D0
+~
+~
+0 0 14069 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14071 0 0 0 0 0 0 0 0
+S
+#14071
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, Second Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D0
+~
+~
+0 0 14070 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14072 0 0 0 0 0 0 0 0
+S
+#14072
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, Second Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D1
+~
+~
+0 0 14071 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14073 0 0 0 0 0 0 0 0
+S
+#14073
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, Second Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D0
+~
+~
+0 0 14074 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14072 0 0 0 0 0 0 0 0
+S
+#14074
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, Second Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D0
+~
+~
+0 0 14075 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14073 0 0 0 0 0 0 0 0
+S
+#14075
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, Second Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D0
+~
+~
+0 0 14076 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14068 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14074 0 0 0 0 0 0 0 0
+S
+#14076
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, Second Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D0
+~
+~
+0 0 14077 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14075 0 0 0 0 0 0 0 0
+S
+#14077
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, Second Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D1
+~
+~
+0 0 14078 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14076 0 0 0 0 0 0 0 0
+S
+#14078
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, Second Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D1
+~
+~
+0 0 14079 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14077 0 0 0 0 0 0 0 0
+S
+#14079
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, Second Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D2
+~
+~
+0 0 14080 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14078 0 0 0 0 0 0 0 0
+S
+#14080
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, Second Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D0
+~
+~
+0 0 14079 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14069 0 0 0 0 0 0 0 0
+S
+#14081
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cStairwell, Third Floor@n~
+   @WThis bare concrete room has a circular staircase leading to the next floor.
+The staircase appears to be made out of an almost completely black metallic
+staircase. With a thick handrail leading up it sides for stability when
+climbing the otherwise narrow and unsafe staircase. @n
+~
+140 c f 0 0 0
+D1
+~
+~
+0 0 14082 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14088 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 14068 0 0 0 0 0 0 0 0
+S
+#14082
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, Third Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D0
+~
+~
+0 0 14093 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14083 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14081 0 0 0 0 0 0 0 0
+S
+#14083
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, Third Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D0
+~
+~
+0 0 14082 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14084 0 0 0 0 0 0 0 0
+S
+#14084
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, Third Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D0
+~
+~
+0 0 14083 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14085 0 0 0 0 0 0 0 0
+S
+#14085
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, Third Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D1
+~
+~
+0 0 14084 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14086 0 0 0 0 0 0 0 0
+S
+#14086
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, Third Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D0
+~
+~
+0 0 14087 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14085 0 0 0 0 0 0 0 0
+S
+#14087
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, Third Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D0
+~
+~
+0 0 14088 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14086 0 0 0 0 0 0 0 0
+S
+#14088
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, Third Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D0
+~
+~
+0 0 14089 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 14081 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14087 0 0 0 0 0 0 0 0
+S
+#14089
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, Third Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D0
+~
+~
+0 0 14090 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14088 0 0 0 0 0 0 0 0
+S
+#14090
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, Third Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D1
+~
+~
+0 0 14091 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14089 0 0 0 0 0 0 0 0
+S
+#14091
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, Third Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D1
+~
+~
+0 0 14092 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14090 0 0 0 0 0 0 0 0
+S
+#14092
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, Third Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D2
+~
+~
+0 0 14093 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 14091 0 0 0 0 0 0 0 0
+S
+#14093
+@bM@Bi@wn@bt@Bo @bW@Ba@wr@br@Bi@wo@br @bA@Bc@wa@bd@Be@wm@by@D: @cTraining Area, Third Floor@n~
+   @WThis is a mostly bare concrete room with dark red lights illuminating from
+above. Some of the few things that can be seen in the otherwise bare room are
+apparent training implements such as wooden fighting dummies and obstacles. 
+Occasional shouts can be heard echoing through the doorways that lead to similar
+rooms. @n
+~
+140 0 f 0 0 0
+D0
+~
+~
+0 0 14092 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 14082 0 0 0 0 0 0 0 0
+S
+$~

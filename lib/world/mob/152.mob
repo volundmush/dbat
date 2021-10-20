@@ -1,0 +1,71 @@
+#15200
+Cape Octopus~
+@wA Cape Octopus@n~
+@wA cape octopus is swimming through the water here.@n
+~
+   @WThis octopus is only about six feet in length, which doesn't give it a very
+intimidating size. It does however have razor sharp retractable spikes on the
+ends of its tentecles that enable it to take down prey in a deadly manner. It
+gets its name from the way it hangs its rear tentecles when stalking a prey. 
+Leaving them trailing out gently like a cape. @n
+~
+dxyz 0 0 0 ly 0 0 0 0 E
+30 20 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 4
+Str: 11
+Dex: 12
+Int: 11
+Wis: 11
+Con: 12
+Cha: 12
+E
+#15201
+Vespown~
+@wA Vespown@n~
+@wA vespown is clinging to some rocks here.@n
+~
+   @WThis strange creature is only found in any form on Kanassa. It has six
+limbs on a round body. On each limb is a clawed hand that allows it to kill
+prey and hang onto the rocks found in this part of the ocean. It's skin is
+much like shark skin and its round bulbous head with one eye is capable of
+sinking into its body for protection. @n
+~
+dvwz 0 0 0 ly 0 0 0 0 E
+35 20 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 4
+Str: 8
+Dex: 9
+Int: 8
+Wis: 8
+Con: 9
+Cha: 9
+E
+#15202
+Cragmot~
+@wA Cragmot@n~
+@wA cragmot is sitting here trying to look like a rock.@n
+~
+   @WThis large creature has thousands of tiny legs underneath it that it moves
+around with. When it isn't moving it tries to mimic the nearby rocks and does
+a passable job due to its rough shell. The only visible part of its body
+outside the shell other than its legs is its head which comes out when it feels
+safe enough. When the head is out it quickly gathers up mouthfuls of whatever
+nearby plant it has targeted for consumption. @n
+~
+dxyz 0 0 0 ly 0 0 0 0 E
+30 20 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 4
+Str: 16
+Dex: 13
+Int: 16
+Wis: 16
+Con: 13
+Cha: 13
+E
+$

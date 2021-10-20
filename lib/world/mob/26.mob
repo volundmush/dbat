@@ -1,0 +1,81 @@
+#2600
+Vush'pa~
+@wA Vush'pa@n~
+@wA vush'pa is prowling here.@n
+~
+   @WThis large hairy beast has a somewhat humanoid shape to it even though it
+runs around on its four legs. It has a large wolf like mouth with sharp teeth
+on its head and long sharp claws on its hand like paws. @n
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+30 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 0
+Size: 5
+Str: 20
+Dex: 21
+Int: 5
+Wis: 8
+Con: 27
+Cha: 16
+E
+#2601
+Veshal~
+@wA Veshal@n~
+@wA veshal is hanging from the ceiling here.@n
+~
+   @WThis large bat-like creature has a long tail with a stinger as its most
+defining feature. @n
+~
+dxyz 0 0 0 l 0 0 0 0 E
+25 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 0
+Size: 4
+Str: 19
+Dex: 24
+Int: 8
+Wis: 7
+Con: 22
+Cha: 25
+E
+#2602
+Cave Worm~
+@cCave @gW@Go@Yr@gm@n~
+@wA @ccave @gw@Go@Yr@gm@w is slithering here.@n
+~
+   @WThis massive worm lives off of the minerals found in this cave. @n
+~
+dz 0 0 0 l 0 0 0 0 E
+32 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 6
+Str: 30
+Dex: 30
+Int: 5
+Wis: 5
+Con: 22
+Cha: 28
+E
+#2603
+Red Dragon~
+@rRed @gD@Gr@Wa@wg@Wo@gn@n~
+@wA @rred @gd@Gr@Wa@wg@Wo@gn@w is perched here.@n
+~
+   @WThis beast is absolutly massive. With the head that is covered with horns
+and a mouth that is full of teeth. Large leathery wings stretch out from its
+large body and a long tail stretches out twice its torso length. @n
+~
+bdfxyz 0 0 0 l 0 0 0 0 E
+45 0 10 0d0+0 0d0+0
+0 0 21 28
+8 8 0
+Str: 28
+Dex: 44
+Int: 15
+Wis: 6
+Con: 42
+Cha: 38
+E
+$

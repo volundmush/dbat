@@ -1,0 +1,770 @@
+#62500
+scrap metal droid~
+Scrap metal droid~
+A Scrap Metal droid is patroling here.
+~
+This cybernetic creation seems composed of rejected bits and pieces of scrap.
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+60 0 10 0d4+0 0d0+0
+500 0 9 28
+8 8 1
+Str: 57
+Dex: 34
+Int: 49
+Wis: 47
+Con: 32
+Cha: 57
+E
+#62501
+model thirteen android~
+@CModel@n @WThirteen@n Android~
+@nA @CModel@n @WT@nhi@Wr@ntee@Wn@n Android is prowling here.
+~
+@nThis android appears to be made for combat and is of advanced design.
+~
+cdlvwxyzF 0 0 0 l 0 0 0 0 E
+88 0 10 0d6+0 0d0+0
+0 0 9 8
+8 8 0
+Str: 66
+Dex: 100
+Int: 88
+Wis: 51
+Con: 93
+Cha: 87
+E
+#62502
+truffle spectre~
+@nTuffle @CSpectre@n~
+A spectre of the ancient Tuffle crew wanders here.
+~
+@nA spiritual manefestation of one of the members of the ancient crew of this
+ship.
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+62 0 10 0d4+0 0d0+0
+0 0 23 28
+8 8 1
+Size: 3
+Str: 34
+Dex: 35
+Int: 47
+Wis: 44
+Con: 61
+Cha: 40
+E
+T 62575
+#62503
+security borg cyborg~
+@WSecurity@n Cyborg~
+@nA @WSecurity@n Cyborg patrols here, it's @rlazer@n eye scanning the halls.
+~
+@nThis cyborg must have been human once. Now its body is riddled with implants
+and enhancements. One of its eyes has been replaced with an infrared lazer.
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+70 0 10 0d4+0 0d0+0
+750 0 9 28
+8 8 1
+Str: 54
+Dex: 35
+Int: 68
+Wis: 48
+Con: 57
+Cha: 35
+E
+#62504
+geno scorpion~
+@YG@ye@Yn@yo @RS@ncorpion~
+@nA @YG@ye@Yn@yo @RS@ncorpion is crawling along the wall here, venom dripping from its stinger.
+~
+@nA giant, mutated scorpion creature with venom dripping from its stinger.
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+73 0 10 0d0+0 0d0+0
+600 0 15 28
+8 8 0
+Size: 5
+Str: 76
+Dex: 93
+Int: 60
+Wis: 40
+Con: 67
+Cha: 60
+E
+T 62580
+T 62578
+#62505
+malmsteen~
+@GM@ga@Gl@gm@Gs@gt@Ge@ge@Gn@n~
+@GM@ga@Gl@gm@Gs@gt@Ge@ge@Gn@n stands here, hands clasped behind his back.
+~
+@nMalmsteen is an eccentric though well dressed truffle.
+~
+bdsvwxyz 0 0 0 l 0 0 0 0 E
+103 0 10 0d4+0 0d0+0
+10000 0 13 28
+8 8 1
+Str: 53
+Dex: 80
+Int: 67
+Wis: 74
+Con: 62
+Cha: 66
+E
+T 62507
+T 62508
+T 62505
+#62506
+necrotic zombie~
+@DNecrotic @nZombie~
+@nA @DNecrotic@n Zombie lurks here.
+~
+@nA foul looking, and foul smelling zombie.
+~
+bdfvwxyz 0 0 0 lr 0 0 0 0 E
+84 0 10 0d0+0 0d0+0
+1000 0 10 28
+8 8 1
+Str: 98
+Dex: 89
+Int: 85
+Wis: 77
+Con: 91
+Cha: 73
+E
+T 62576
+T 62577
+#62508
+risen zombie~
+@DRisen@n Zombie~
+@nA @DRisen@n Zombie lurks here.
+~
+This horrid creature looks as though it crawled its way straight out of hell.
+
+@n
+~
+cdvwxyz 0 0 0 lr 0 0 0 0 E
+85 0 10 0d0+0 0d0+0
+0 0 14 28
+8 8 1
+Str: 50
+Dex: 53
+Int: 69
+Wis: 42
+Con: 45
+Cha: 75
+E
+T 62576
+T 62577
+#62509
+composite droid~
+@WC@Do@Wm@Dp@Wo@Ds@Wi@Dt@We @nDroid~
+@nA @WC@Do@Wm@Dp@Wo@Ds@Wi@Dt@We @nDroid patrols here.
+~
+@nThis mechanical soldier is made of a large number of composite pieces and
+alloys to create a versatile sentry unit.
+~
+cdvwxyz 0 0 0 l 0 0 0 0 E
+71 0 10 0d0+0 0d0+0
+1000 0 9 28
+8 8 1
+Str: 68
+Dex: 52
+Int: 41
+Wis: 57
+Con: 38
+Cha: 50
+E
+#62510
+chrome sphynx~
+@DC@Wh@Dr@Wo@Dm@We @YS@yph@Yy@ynx@n~
+@nA large @DC@Wh@Dr@Wo@Dm@We @YS@yph@Yy@ynx@n patrols here.
+~
+@nThis robotic Sphynx is made entirely of an unknown chrome alloy and seems
+sentient.
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+86 0 10 0d0+0 0d0+0
+1000 0 22 28
+8 8 0
+Size: 5
+Str: 63
+Dex: 89
+Int: 75
+Wis: 98
+Con: 82
+Cha: 82
+E
+T 62578
+T 62575
+#62520
+radioactive spider~
+@GR@ga@Gd@gi@Go@ga@Gc@gt@Gi@gv@Ge @WS@Dp@Wi@Dd@We@Dr@n~
+@nA @GR@ga@Gd@gi@Go@ga@Gc@gt@Gi@gv@Ge @WS@Dp@Wi@Dd@We@Dr@n skitters along here.
+~
+@nThis @GR@ga@Gd@gi@Go@ga@Gc@gt@Gi@gv@Ge @WS@Dp@Wi@Dd@We@Dr@n is gigantic in size, and acid drips from its monstrous
+mandibles.
+~
+cdvwxyz 0 0 0 l 0 0 0 0 E
+70 0 10 0d0+0 0d0+0
+666 0 15 28
+8 8 0
+Size: 6
+Str: 62
+Dex: 62
+Int: 18
+Wis: 23
+Con: 58
+Cha: 41
+E
+#62521
+fire elemental~
+@RF@Yi@Rr@Ye @YE@Rl@Ye@Rm@Ye@Rn@Yt@Ra@Yl@n~
+@nA @RF@Yi@Rr@Ye @YE@Rl@Ye@Rm@Ye@Rn@Yt@Ra@Yl@n stands here.
+~
+@nThis is an elemental creature made of living fire. It's shape changes often as
+its body is malleable.
+~
+cdvwxyz 0 0 0 l 0 0 0 0 E
+84 0 10 0d0+0 0d0+0
+0 0 23 28
+8 8 1
+Size: 5
+Str: 82
+Dex: 55
+Int: 54
+Wis: 59
+Con: 75
+Cha: 80
+E
+T 62576
+#62522
+horror lord~
+@DHorror@n @rLord@n~
+@nA @DHorror @rLord@n lurks here.
+~
+This creature is just as unspeakable as some of the others that lurk in this
+place. This one is taller and meaner looking than most. @n
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+94 0 10 0d0+0 0d0+0
+2803 0 18 28
+8 8 1
+Str: 54
+Dex: 50
+Int: 54
+Wis: 72
+Con: 75
+Cha: 90
+E
+T 62573
+T 62581
+#62550
+beacon~
+beacon~
+beacon
+~
+beacon
+~
+d 0 0 0 cl 0 0 0 0 E
+0 0 10 0d0+0 0d0+0
+0 0 9 28
+8 8 1
+Size: 2
+Str: 9
+Dex: 9
+Int: 7
+Wis: 7
+Con: 10
+Cha: 8
+E
+#62551
+gengen wer golden goose~
+@YG@We@yn@YG@We@yn @YW@We@yr@n~
+A large goose nests here on a pile of eggs.
+~
+@nA large goose is nesting here, its down the color of spun gold.
+~
+bcdvwxyz 0 0 0 l 0 0 0 0 E
+80 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 2
+Size: 5
+Str: 60
+Dex: 59
+Int: 23
+Wis: 45
+Con: 74
+Cha: 73
+E
+T 62579
+#62555
+Jackal~
+@nA @DJ@ra@Dc@rk@Da@rl@n~
+@nA @DJ@ra@Dc@rk@Da@rl@n is perched here like a statue, ears perked straight up.
+~
+It looks unfinished.
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+87 0 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Str: 69
+Dex: 85
+Int: 55
+Wis: 56
+Con: 85
+Cha: 92
+E
+#62560
+inviso~
+inviso~
+inviso
+~
+It looks unfinished.
+~
+bd 0 0 0 c 0 0 0 0 E
+0 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 6
+Dex: 8
+Int: 7
+Wis: 9
+Con: 9
+Cha: 5
+E
+#62565
+sekhmet warrior~
+@YS@ye@Yk@yh@Ym@ye@Yt @WWarrior@n~
+@nA @YS@ye@Yk@yh@Ym@ye@Yt@n warrior prowls here, sniffing the air.
+~
+@nThis warrior is female, and bears the head of a lioness atop a human's body. @n
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+102 0 10 0d0+0 0d0+0
+3329 0 5 28
+8 8 2
+Str: 69
+Dex: 63
+Int: 98
+Wis: 63
+Con: 66
+Cha: 59
+E
+T 62574
+T 62581
+#62570
+gremlin~
+@GG@gr@Ge@gm@Gl@gi@Gn@n~
+@nA small @GG@gr@Ge@gm@Gl@gi@Gn@n skitters across the floor.@n
+~
+@nA tiny little gremlin, complete with minature tool boot and evil smile.
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+67 0 10 0d0+0 0d0+0
+275 0 16 28
+8 8 1
+Size: 2
+Str: 53
+Dex: 53
+Int: 67
+Wis: 57
+Con: 36
+Cha: 34
+E
+T 62645
+#62571
+repair droid~
+@nRepair Droid~
+@nA Repair Droid works here
+~
+@nThis model of android seems designed for maitenence and repair work rather than
+combat. @n
+~
+cdvwxyzF 0 0 0 l 0 0 0 0 E
+112 0 10 0d0+0 0d0+0
+0 0 9 28
+8 8 0
+Str: 87
+Dex: 84
+Int: 76
+Wis: 89
+Con: 65
+Cha: 92
+E
+#62594
+ooshy~
+@nOoshy~
+@nThe spirit of Ooshy the sculptor is floating here, aimlessly.
+~
+@n A small man wearing a cotton short robe and headress. He seems to be holding
+a hammer and chisel. @n
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+108 0 10 0d0+0 0d0+0
+0 0 0 28
+8 8 1
+Str: 54
+Dex: 63
+Int: 57
+Wis: 84
+Con: 100
+Cha: 97
+E
+#62595
+ra mutant~
+@YR@Wa@n~
+@nA hawk-headed mutant stands here, radiating power.
+~
+@nThis is Ra, the Ancient Spirit.
+~
+bdsvwxyz 0 0 0 l 0 0 0 0 E
+105 0 10 0d4+0 0d0+0
+1000 0 5 13
+8 8 1
+Size: 5
+Str: 97
+Dex: 76
+Int: 64
+Wis: 70
+Con: 83
+Cha: 99
+E
+T 62595
+T 62597
+T 62596
+#62596
+Horus Saiyan kingly~
+@RH@ro@Rr@ru@Rs@n~
+@nA Kingly Saiyan stands here proudly.
+~
+@nThis is Horus, the Ancient Spirit.
+~
+bdsvwxyz 0 0 0 l 0 0 0 0 E
+106 0 10 0d4+0 0d0+0
+10000 0 1 28
+8 8 1
+Str: 84
+Dex: 70
+Int: 76
+Wis: 75
+Con: 94
+Cha: 63
+E
+T 62506
+T 62699
+T 62697
+#62597
+isis kai~
+@WI@ws@Wi@ws@n~
+@nA motherly looking Kai is sitting here.
+~
+@nThis is Isis, the Ancient Spirit.
+~
+bdsvwxyz 0 0 0 l 0 0 0 0 E
+95 0 10 0d0+0 0d0+0
+10000 0 12 28
+8 8 2
+Str: 59
+Dex: 92
+Int: 73
+Wis: 67
+Con: 55
+Cha: 57
+E
+T 62696
+T 62695
+T 62694
+#62598
+osiris~
+@gOsiris@n~
+@nA tall, slender Namekian stands here.
+~
+@nThis is Osiris, the Ancient Spirit.
+~
+bdsvwxyz 0 0 0 l 0 0 0 0 E
+103 0 10 0d0+0 0d0+0
+10000 0 4 28
+8 8 1
+Str: 84
+Dex: 77
+Int: 98
+Wis: 99
+Con: 56
+Cha: 52
+E
+T 62598
+T 62599
+T 62698
+#62599
+lavos fire elemental~
+@RL@Ya@rv@Yo@Rs@n~
+@nThe large, spike-shelled @RL@Ya@rv@Yo@Rs@n lies dormant here.
+~
+@RL@Ya@rv@Yo@Rs@n is almost spherical in shape, and takes up almost all of the space in
+even this large and forboding room. Floating in the air, his shell is covered
+with thick, wicked looking spikes that protrude from it's back and his demonic
+face is nothing more than two glowing eyes over a vicsiously hooked bird beak.
+Large diodes and wires protrude from brutal-looking conductors that have been
+burrowed through the carapace shell of the creature to leech its very energy
+into a gigantic @Dmachine@n that seems to incorporate the entire room into it's
+function or design.
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+120 0 10 0d0+0 0d0+0
+10000 0 15 28
+8 8 1
+Size: 6
+Str: 62
+Dex: 95
+Int: 63
+Wis: 57
+Con: 83
+Cha: 65
+E
+T 62690
+T 62677
+T 62688
+T 62692
+#62600
+mob unfinished~
+@WC@wommand @DDroid@n~
+@nA command model android is standing here.
+~
+A command model android unit.
+~
+dfvwxyz 0 0 0 l m 0 0 0 E
+78 0 10 0d0+0 0d0+0
+0 0 9 28
+8 8 0
+Str: 85
+Dex: 90
+Int: 70
+Wis: 80
+Con: 66
+Cha: 66
+E
+T 62647
+#62601
+unspeakable horror lost~
+@DL@wo@Ds@wt @rH@Do@rrr@Do@rr@n~
+@nAn unspeakable @rH@Do@rrr@Do@rr@n lurks here.
+~
+This horrific creature is beyond description.
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+78 0 10 0d0+0 0d0+0
+1264 0 15 28
+8 8 0
+Size: 5
+Str: 64
+Dex: 61
+Int: 31
+Wis: 40
+Con: 85
+Cha: 80
+E
+T 62574
+T 62578
+#62603
+sleete~
+@WS@Cleet@We@n~
+A bored looking Icer stands here behind the counter.
+~
+It looks unfinished.
+~
+bdnprs 0 0 0 l 0 0 0 0 E
+100 0 10 0d0+0 0d0+0
+0 0 2 28
+8 8 2
+Str: 69
+Dex: 56
+Int: 87
+Wis: 76
+Con: 81
+Cha: 93
+E
+#62605
+malmsteen~
+@GM@ga@Gl@gm@Gs@gt@Ge@ge@Gn@n~
+@GM@ga@Gl@gm@Gs@gt@Ge@ge@Gn@n stands here, hands clasped behind his back.
+~
+@nMalmsteen is an eccentric though well dressed truffle.
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+10 0 10 0d4+0 0d0+0
+10000 0 13 28
+8 8 1
+Str: 8
+Dex: 8
+Int: 15
+Wis: 5
+Con: 6
+Cha: 5
+E
+T 62507
+T 62508
+T 62505
+#62610
+locutus~
+@DL@Wo@Dc@Wu@Dt@Wu@Ds@n~
+@DL@Wo@Dc@Wu@Dt@Wu@Ds@n stands here, his lazer eye scanning the area.@n
+~
+@nBefore you stands Loctutus, the speaker for those who remain aboard this
+vessel. @N
+~
+dsvwxyz 0 0 0 l 0 0 0 0 E
+95 0 10 0d0+0 0d0+0
+10000 0 9 28
+8 8 1
+Str: 80
+Dex: 60
+Int: 83
+Wis: 75
+Con: 65
+Cha: 97
+E
+T 62607
+T 62608
+T 62609
+#62611
+locutus~
+@DL@Wo@Dc@Wu@Dt@Wu@Ds@n~
+@DL@Wo@Dc@Wu@Dt@Wu@Ds@n stands here, his lazer eye scanning the area.@n
+~
+@nBefore you stands Loctutus, the speaker for those who remain aboard this
+vessel. @N
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+95 0 10 0d0+0 0d0+0
+10000 0 9 28
+8 8 1
+Str: 5
+Dex: 9
+Int: 8
+Wis: 7
+Con: 9
+Cha: 8
+E
+T 62608
+T 62607
+T 62609
+#62695
+ra mutant~
+@YR@Wa@n~
+@nA hawk-headed mutant stands here, radiating power.
+~
+@nThis is Ra, the Ancient Spirit.
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+10 0 10 0d4+0 0d0+0
+10000 0 5 13
+8 8 1
+Size: 5
+Str: 8
+Dex: 6
+Int: 10
+Wis: 5
+Con: 8
+Cha: 5
+E
+T 62595
+T 62597
+T 62596
+#62696
+horus saiyan kingly~
+@RH@ro@Rr@ru@Rs@n~
+@nA Kingly Saiyan stands here proudly.
+~
+@nThis is Horus, the Ancient Spirit.
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+106 0 10 0d4+0 0d0+0
+10000 0 1 28
+8 8 1
+Str: 90
+Dex: 54
+Int: 65
+Wis: 78
+Con: 82
+Cha: 67
+E
+T 62506
+T 62699
+T 62697
+#62697
+isis kai~
+@WI@ws@Wi@ws@n~
+@nA motherly looking Kai is sitting here.
+~
+@nThis is Isis, the Ancient Spirit.
+~
+bdfvwxyz 0 0 0 l 0 0 0 0 E
+95 0 10 0d0+0 0d0+0
+10000 0 12 28
+8 8 2
+Str: 6
+Dex: 10
+Int: 8
+Wis: 9
+Con: 9
+Cha: 5
+E
+T 62696
+T 62695
+T 62694
+#62698
+osiris~
+@gOsiris@n~
+@nA tall, slender Namekian stands here.
+~
+@nThis is Osiris, the Ancient Spirit.
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+103 0 10 0d0+0 0d0+0
+10000 0 4 28
+8 8 1
+Str: 92
+Dex: 78
+Int: 58
+Wis: 81
+Con: 98
+Cha: 53
+E
+T 62598
+T 62599
+T 62698
+#62699
+lavos fire elemental~
+@RL@Ya@rv@Yo@Rs@n~
+@nThe large, spike-shelled @RL@Ya@rv@Yo@Rs@n lies dormant here.
+~
+@RL@Ya@rv@Yo@Rs@n is almost spherical in shape, and takes up almost all of the space in
+even this large and forboding room. Floating in the air, his shell is covered
+with thick, wicked looking spikes that protrude from it's back and his demonic
+face is nothing more than two glowing eyes over a vicsiously hooked bird beak.
+Large diodes and wires protrude from brutal-looking conductors that have been
+burrowed through the carapace shell of the creature to leech its very energy
+into a gigantic @Dmachine@n that seems to incorporate the entire room into it's
+function or design.
+~
+bdvwxyz 0 0 0 l 0 0 0 0 E
+120 0 10 0d0+0 0d0+0
+10000 0 15 28
+8 8 1
+Size: 6
+Str: 92
+Dex: 85
+Int: 70
+Wis: 38
+Con: 89
+Cha: 68
+E
+T 62690
+T 62677
+T 62688
+T 62692
+$

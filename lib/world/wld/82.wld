@@ -1,0 +1,1519 @@
+#8200
+@GE@gm@we@Dr@wa@gl@Gd @MD@mr@wea@mm@Ms @DT@Wo@ww@We@Dr@n- Hallway~
+ @gThis hallway weaves through the Emerald Dream Tower, the palace of the ruler
+of Konack.  The walls and ceiling are made up entirely of emerald, the surfaces
+appearing completely smooth.  Lanterns hanging off the walls mix with the
+emerald, causing the room to have an eerily low green light to it.  @n
+~
+82 cdx 0 0 0 0
+D0
+~
+~
+0 0 8201 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8202 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 8089 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 8090 0 0 0 0 0 0 0 0
+S
+#8201
+@GE@gm@we@Dr@wa@gl@Gd @MD@mr@wea@mm@Ms @DT@Wo@ww@We@Dr@n- Kal Tyor Chamber~
+ @gThis large chamber is circular in shape, with a small wall enclosing a small
+area in the center.  A palantir is in the middle of this and is where a speaker
+stands when adressing the grand council.  Beyond that wall are seats where the
+grand council sits.  @n
+~
+82 dx 0 0 0 0
+D2
+~
+~
+0 0 8200 0 0 0 0 0 0 0 0
+S
+#8202
+@GE@gm@we@Dr@wa@gl@Gd @MD@mr@wea@mm@Ms @DT@Wo@ww@We@Dr@n- Hallway~
+ @gThis hallway weaves through the Emerald Dream Tower, the palace of the ruler
+of Konack.  The walls and ceiling are made up entirely of emerald, the surfaces
+appearing completely smooth.  Lanterns hanging off the walls mix with the
+emerald, causing the room to have an eerily low green light to it.  @n
+~
+82 dx 0 0 0 0
+D1
+~
+~
+0 0 8200 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 8203 0 0 0 0 0 0 0 0
+S
+#8203
+@GE@gm@we@Dr@wa@gl@Gd @MD@mr@wea@mm@Ms @DT@Wo@ww@We@Dr@n- Hallway~
+ @gThis hallway weaves through the Emerald Dream Tower, the palace of the ruler
+of Konack.  The walls and ceiling are made up entirely of emerald, the surfaces
+appearing completely smooth.  Lanterns hanging off the walls mix with the
+emerald, causing the room to have an eerily low green light to it.  @n
+~
+82 dx 0 0 0 0
+D6
+~
+~
+0 0 8204 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 8202 0 0 0 0 0 0 0 0
+S
+#8204
+@GE@gm@we@Dr@wa@gl@Gd @MD@mr@wea@mm@Ms @DT@Wo@ww@We@Dr@n- Hallway~
+ @gThis hallway weaves through the Emerald Dream Tower, the palace of the ruler
+of Konack.  The walls and ceiling are made up entirely of emerald, the surfaces
+appearing completely smooth.  Lanterns hanging off the walls mix with the
+emerald, causing the room to have an eerily low green light to it.  @n
+~
+82 dx 0 0 0 0
+D0
+~
+~
+0 0 8205 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 8203 0 0 0 0 0 0 0 0
+S
+#8205
+@GE@gm@we@Dr@wa@gl@Gd @MD@mr@wea@mm@Ms @DT@Wo@ww@We@Dr@n- Hallway~
+ @gThis hallway weaves through the Emerald Dream Tower, the palace of the ruler
+of Konack.  The walls and ceiling are made up entirely of emerald, the surfaces
+appearing completely smooth.  Lanterns hanging off the walls mix with the
+emerald, causing the room to have an eerily low green light to it.  @n
+~
+82 dx 0 0 0 0
+D2
+~
+~
+0 0 8204 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 8206 0 0 0 0 0 0 0 0
+S
+#8206
+@GE@gm@we@Dr@wa@gl@Gd @MD@mr@wea@mm@Ms @DT@Wo@ww@We@Dr@n- Hallway~
+ @gThis hallway weaves through the Emerald Dream Tower, the palace of the ruler
+of Konack.  The walls and ceiling are made up entirely of emerald, the surfaces
+appearing completely smooth.  Lanterns hanging off the walls mix with the
+emerald, causing the room to have an eerily low green light to it.  @n
+~
+82 dx 0 0 0 0
+D4
+~
+~
+0 0 8207 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 8205 0 0 0 0 0 0 0 0
+S
+#8207
+@GE@gm@we@Dr@wa@gl@Gd @MD@mr@wea@mm@Ms @DT@Wo@ww@We@Dr@n- Stairway~
+ @gThis stairway weaves and climbs up through the Emerald Dream Tower, the
+palace of the ruler of Konack.  The walls and ceiling are made up entirely of
+emerald, the surfaces appearing completely smooth.  Lanterns hanging off the
+walls mix with the emerald, causing the room to have an eerily low green light
+to it.  @n
+~
+82 dx 0 0 0 0
+D5
+~
+~
+0 0 8206 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 8208 0 0 0 0 0 0 0 0
+S
+#8208
+@GE@gm@we@Dr@wa@gl@Gd @MD@mr@wea@mm@Ms @DT@Wo@ww@We@Dr@n- Stairway~
+ @gThis stairway weaves and climbs up through the Emerald Dream Tower, the
+palace of the ruler of Konack.  The walls and ceiling are made up entirely of
+emerald, the surfaces appearing completely smooth.  Lanterns hanging off the
+walls mix with the emerald, causing the room to have an eerily low green light
+to it.  @n
+~
+82 dx 0 0 0 0
+D4
+~
+~
+0 0 8209 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 8207 0 0 0 0 0 0 0 0
+S
+#8209
+@GE@gm@we@Dr@wa@gl@Gd @MD@mr@wea@mm@Ms @DT@Wo@ww@We@Dr@n- Stairway~
+ @gThis stairway weaves and climbs up through the Emerald Dream Tower, the
+palace of the ruler of Konack.  The walls and ceiling are made up entirely of
+emerald, the surfaces appearing completely smooth.  Lanterns hanging off the
+walls mix with the emerald, causing the room to have an eerily low green light
+to it.  @n
+~
+82 dx 0 0 0 0
+D5
+~
+~
+0 0 8208 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 8210 0 0 0 0 0 0 0 0
+S
+#8210
+@GE@gm@we@Dr@wa@gl@Gd @MD@mr@wea@mm@Ms @DT@Wo@ww@We@Dr@n- Stairway~
+ @gThis stairway weaves and climbs up through the Emerald Dream Tower, the
+palace of the ruler of Konack.  The walls and ceiling are made up entirely of
+emerald, the surfaces appearing completely smooth.  Lanterns hanging off the
+walls mix with the emerald, causing the room to have an eerily low green light
+to it.  @n
+~
+82 dx 0 0 0 0
+D4
+~
+~
+0 0 8211 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 8209 0 0 0 0 0 0 0 0
+S
+#8211
+@GE@gm@we@Dr@wa@gl@Gd @MD@mr@wea@mm@Ms @DT@Wo@ww@We@Dr@n- Stairway~
+ @gThis stairway weaves and climbs up through the Emerald Dream Tower, the
+palace of the ruler of Konack.  The walls and ceiling are made up entirely of
+emerald, the surfaces appearing completely smooth.  Lanterns hanging off the
+walls mix with the emerald, causing the room to have an eerily low green light
+to it.  @n
+~
+82 dx 0 0 0 0
+D1
+~
+~
+0 0 8212 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 8210 0 0 0 0 0 0 0 0
+S
+#8212
+@GE@gm@we@Dr@wa@gl@Gd @MD@mr@wea@mm@Ms @DT@Wo@ww@We@Dr@n- Stairway~
+ @gThis stairway weaves and climbs up through the Emerald Dream Tower, the
+palace of the ruler of Konack.  The walls and ceiling are made up entirely of
+emerald, the surfaces appearing completely smooth.  Lanterns hanging off the
+walls mix with the emerald, causing the room to have an eerily low green light
+to it.  @n
+~
+82 dx 0 0 0 0
+D3
+~
+~
+0 0 8211 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 8213 0 0 0 0 0 0 0 0
+S
+#8213
+@GE@gm@we@Dr@wa@gl@Gd @MD@mr@wea@mm@Ms @DT@Wo@ww@We@Dr@n- Stairway~
+ @gThis stairway weaves and climbs up through the Emerald Dream Tower, the
+palace of the ruler of Konack.  The walls and ceiling are made up entirely of
+emerald, the surfaces appearing completely smooth.  Lanterns hanging off the
+walls mix with the emerald, causing the room to have an eerily low green light
+to it.  @n
+~
+82 dx 0 0 0 0
+D1
+~
+~
+0 0 8214 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 8212 0 0 0 0 0 0 0 0
+S
+#8214
+@GE@gm@we@Dr@wa@gl@Gd @MD@mr@wea@mm@Ms @DT@Wo@ww@We@Dr@n- Stairway~
+ @gThis stairway weaves and climbs up through the Emerald Dream Tower, the
+palace of the ruler of Konack.  The walls and ceiling are made up entirely of
+emerald, the surfaces appearing completely smooth.  Lanterns hanging off the
+walls mix with the emerald, causing the room to have an eerily low green light
+to it.  @n
+~
+82 dx 0 0 0 0
+D3
+~
+~
+0 0 8213 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 8215 0 0 0 0 0 0 0 0
+S
+#8215
+@GE@gm@we@Dr@wa@gl@Gd @MD@mr@wea@mm@Ms @DT@Wo@ww@We@Dr@n- Stairway~
+ @gThis stairway weaves and climbs up through the Emerald Dream Tower, the
+palace of the ruler of Konack.  The walls and ceiling are made up entirely of
+emerald, the surfaces appearing completely smooth.  Lanterns hanging off the
+walls mix with the emerald, causing the room to have an eerily low green light
+to it.  @n
+~
+82 dx 0 0 0 0
+D5
+~
+~
+0 0 8214 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 8216 0 0 0 0 0 0 0 0
+S
+#8216
+@GE@gm@we@Dr@wa@gl@Gd @MD@mr@wea@mm@Ms @DT@Wo@ww@We@Dr@n- Stairway~
+ @gThis stairway weaves and climbs up through the Emerald Dream Tower, the
+palace of the ruler of Konack.  The walls and ceiling are made up entirely of
+emerald, the surfaces appearing completely smooth.  Lanterns hanging off the
+walls mix with the emerald, causing the room to have an eerily low green light
+to it.  @n
+~
+82 dx 0 0 0 0
+D4
+~
+~
+0 0 8217 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 8215 0 0 0 0 0 0 0 0
+S
+#8217
+@GE@gm@we@Dr@wa@gl@Gd @MD@mr@wea@mm@Ms @DT@Wo@ww@We@Dr@n- Stairway~
+ @gThis stairway weaves and climbs up through the Emerald Dream Tower, the
+palace of the ruler of Konack.  The walls and ceiling are made up entirely of
+emerald, the surfaces appearing completely smooth.  Lanterns hanging off the
+walls mix with the emerald, causing the room to have an eerily low green light
+to it.  @n
+~
+82 dx 0 0 0 0
+D5
+~
+~
+0 0 8216 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 8218 0 0 0 0 0 0 0 0
+S
+#8218
+@GE@gm@we@Dr@wa@gl@Gd @MD@mr@wea@mm@Ms @DT@Wo@ww@We@Dr@n- Stairway~
+ @gThis stairway weaves and climbs up through the Emerald Dream Tower, the
+palace of the ruler of Konack.  The walls and ceiling are made up entirely of
+emerald, the surfaces appearing completely smooth.  Lanterns hanging off the
+walls mix with the emerald, causing the room to have an eerily low green light
+to it.  @n
+~
+82 dx 0 0 0 0
+D4
+~
+~
+0 0 8219 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 8217 0 0 0 0 0 0 0 0
+S
+#8219
+@GE@gm@we@Dr@wa@gl@Gd @MD@mr@wea@mm@Ms @DT@Wo@ww@We@Dr@n- Stairway~
+ @gThis stairway weaves and climbs up through the Emerald Dream Tower, the
+palace of the ruler of Konack.  The walls and ceiling are made up entirely of
+emerald, the surfaces appearing completely smooth.  Lanterns hanging off the
+walls mix with the emerald, causing the room to have an eerily low green light
+to it.  @n
+~
+82 dx 0 0 0 0
+D2
+~
+~
+0 0 8220 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 8218 0 0 0 0 0 0 0 0
+S
+#8220
+@GE@gm@we@Dr@wa@gl@Gd @MD@mr@wea@mm@Ms @DT@Wo@ww@We@Dr@n- Stairway~
+ @gThis stairway weaves and climbs up through the Emerald Dream Tower, the
+palace of the ruler of Konack.  The walls and ceiling are made up entirely of
+emerald, the surfaces appearing completely smooth.  Lanterns hanging off the
+walls mix with the emerald, causing the room to have an eerily low green light
+to it.  @n
+~
+82 dx 0 0 0 0
+D0
+~
+~
+0 0 8219 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 8221 0 0 0 0 0 0 0 0
+S
+#8221
+@GE@gm@we@Dr@wa@gl@Gd @MD@mr@wea@mm@Ms @DT@Wo@ww@We@Dr@n- Stairway~
+ @gThis stairway weaves and climbs up through the Emerald Dream Tower, the
+palace of the ruler of Konack.  The walls and ceiling are made up entirely of
+emerald, the surfaces appearing completely smooth.  Lanterns hanging off the
+walls mix with the emerald, causing the room to have an eerily low green light
+to it.  @n
+~
+82 dx 0 0 0 0
+D2
+~
+~
+0 0 8222 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 8220 0 0 0 0 0 0 0 0
+S
+#8222
+@GE@gm@we@Dr@wa@gl@Gd @MD@mr@wea@mm@Ms @DT@Wo@ww@We@Dr@n- Stairway~
+ @gThis stairway weaves and climbs up through the Emerald Dream Tower, the
+palace of the ruler of Konack.  The walls and ceiling are made up entirely of
+emerald, the surfaces appearing completely smooth.  Lanterns hanging off the
+walls mix with the emerald, causing the room to have an eerily low green light
+to it.  @n
+~
+82 dx 0 0 0 0
+D0
+~
+~
+0 0 8221 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 8223 0 0 0 0 0 0 0 0
+S
+#8223
+@GE@gm@we@Dr@wa@gl@Gd @MD@mr@wea@mm@Ms @DT@Wo@ww@We@Dr@n- Stairway~
+ @gThis stairway weaves and climbs up through the Emerald Dream Tower, the
+palace of the ruler of Konack.  The walls and ceiling are made up entirely of
+emerald, the surfaces appearing completely smooth.  Lanterns hanging off the
+walls mix with the emerald, causing the room to have an eerily low green light
+to it.  @n
+~
+82 dx 0 0 0 0
+D5
+~
+~
+0 0 8222 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 8224 0 0 0 0 0 0 0 0
+S
+#8224
+@GE@gm@we@Dr@wa@gl@Gd @MD@mr@wea@mm@Ms @DT@Wo@ww@We@Dr@n- Stairway~
+ @gThis stairway weaves and climbs up through the Emerald Dream Tower, the
+palace of the ruler of Konack.  The walls and ceiling are made up entirely of
+emerald, the surfaces appearing completely smooth.  Lanterns hanging off the
+walls mix with the emerald, causing the room to have an eerily low green light
+to it.  @n
+~
+82 dx 0 0 0 0
+D4
+~
+~
+0 0 8225 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 8223 0 0 0 0 0 0 0 0
+S
+#8225
+@GE@gm@we@Dr@wa@gl@Gd @MD@mr@wea@mm@Ms @DT@Wo@ww@We@Dr@n- Stairway~
+ @gThis stairway weaves and climbs up through the Emerald Dream Tower, the
+palace of the ruler of Konack.  The walls and ceiling are made up entirely of
+emerald, the surfaces appearing completely smooth.  Lanterns hanging off the
+walls mix with the emerald, causing the room to have an eerily low green light
+to it.  @n
+~
+82 dx 0 0 0 0
+D5
+~
+~
+0 0 8224 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 8226 0 0 0 0 0 0 0 0
+S
+#8226
+@GE@gm@we@Dr@wa@gl@Gd @MD@mr@wea@mm@Ms @DT@Wo@ww@We@Dr@n- Stairway~
+ @gThis stairway weaves and climbs up through the Emerald Dream Tower, the
+palace of the ruler of Konack.  The walls and ceiling are made up entirely of
+emerald, the surfaces appearing completely smooth.  Lanterns hanging off the
+walls mix with the emerald, causing the room to have an eerily low green light
+to it.  @n
+~
+82 dx 0 0 0 0
+D4
+~
+~
+0 0 8227 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 8225 0 0 0 0 0 0 0 0
+S
+#8227
+@GE@gm@we@Dr@wa@gl@Gd @MD@mr@wea@mm@Ms @DT@Wo@ww@We@Dr@n- Hallway~
+ @gThis hallway weaves through the Emerald Dream Tower, the palace of the ruler
+of Konack.  The walls and ceiling are made up entirely of emerald, the surfaces
+appearing completely smooth.  Lanterns hanging off the walls mix with the
+emerald, causing the room to have an eerily low green light to it.  @n
+~
+82 dx 0 0 0 0
+D3
+~
+~
+0 0 8228 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 8226 0 0 0 0 0 0 0 0
+S
+#8228
+@GE@gm@we@Dr@wa@gl@Gd @MD@mr@wea@mm@Ms @DT@Wo@ww@We@Dr@n- Hallway~
+ @gThis hallway weaves through the Emerald Dream Tower, the palace of the ruler
+of Konack.  The walls and ceiling are made up entirely of emerald, the surfaces
+appearing completely smooth.  Lanterns hanging off the walls mix with the
+emerald, causing the room to have an eerily low green light to it.  @n
+~
+82 dx 0 0 0 0
+D1
+~
+~
+0 0 8227 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8229 0 0 0 0 0 0 0 0
+S
+#8229
+@GE@gm@we@Dr@wa@gl@Gd @MD@mr@wea@mm@Ms @DT@Wo@ww@We@Dr@n- Highborne Chamber~
+ @gThe highborne chamber is where the current ruler of Konack resides.  Like the
+rest of the Tower, the walls are comprised of Emerald, however here the roof is
+different.  It is made up of black marble and there is small pearls inset into
+it, forming a highly accurate map of the constellations.  @n
+~
+82 dx 0 0 0 0
+D1
+~
+~
+0 0 8228 0 0 0 0 0 0 0 0
+S
+#8230
+@nBefore the @mM@Mu@Ws@Mi@mc @DB@wo@Wx@n~
+ @mThis clearing is between two, two storey buildings and is immaculately clean.
+An odd box is here and soft, calming music appears to be coming from it.  It
+appears possible to go inside.  @n
+~
+82 cdehx 0 0 0 0
+D3
+~
+~
+0 0 8003 0 0 0 0 0 0 0 0
+D10
+~
+~
+0 0 8231 0 0 0 0 0 0 0 0
+S
+#8231
+@mM@Mu@Ws@Mi@mc @DB@wo@Wx@n~
+ @mThe central chamber of this mystical music box is quite dim, with the only
+light coming from two smaller chambers and the keyhole entrance.  Soft, calming
+music can be heard here.  @n
+~
+82 dehx 0 0 0 0
+D0
+~
+~
+0 0 8233 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8232 0 0 0 0 0 0 0 0
+D11
+~
+~
+0 0 8230 0 0 0 0 0 0 0 0
+S
+#8232
+@mM@Mu@Ws@Mi@mc @DB@wo@Wx@n- @DK@wi@Wt@wc@Dh@we@Wn@n~
+ @mA magical orb floats near the roof of this chamber, providing a light source
+for what appears to be a small kitchen.  @n
+~
+82 dehx 0 0 0 0
+D1
+~
+~
+0 0 8231 0 0 0 0 0 0 0 0
+S
+#8233
+@mM@Mu@Ws@Mi@mc @DB@wo@Wx@n - @RT@ra@Wp@wi@Ro@rn@W'@ns @mC@Mh@Wa@wm@Wb@Me@mr@n~
+ @mInscense candles, placed around the edges of this chamber, burn brightly and
+sweet scents permeate throughout the chamber.  The soft, gentle music of this
+music box is slightly loudly here and seems to eminate from this chamber.  @n
+~
+82 ehxD 0 0 0 0
+D2
+~
+~
+0 0 8231 0 0 0 0 0 0 0 0
+S
+#8234
+@YT@yi@Dr@Wa@Dn@yo@Yc@n - @WInto the Sewer@n~
+   @WA partially rusted, iron ladder leads from the streets of Tiranoc above, to
+the sewer system beneath the city. Spaced out and inset into the stone
+surface, are small white crystals that radiate with a soft light. @n
+~
+82 cx 0 0 0 0
+D4
+~
+~
+0 0 8048 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 8235 0 0 0 0 0 0 0 0
+S
+#8235
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WOuter Causeway@n~
+   @gThe outer causeway of Tiranoc's sewer system runs along a similar path to
+that of the Golden Circlet Road in the city above. Water slowly trickles down
+the walls into channels either side of the causeway that are full of flowing
+water. White crystals can be seen on the walls, providing a soft radiating
+light to the area. @n
+~
+82 x 0 0 0 0
+D0
+~
+~
+0 0 8268 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 8234 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 8258 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 8236 0 0 0 0 0 0 0 0
+S
+#8236
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WOuter Causeway@n~
+   @gThe outer causeway of Tiranoc's sewer system runs along a similar path to
+that of the Golden Circlet Road in the city above. Water slowly trickles down
+the walls into channels either side of the causeway that are full of flowing
+water. White crystals can be seen on the walls, providing a soft radiating
+light to the area. @n
+~
+82 x 0 0 0 0
+D7
+~
+~
+0 0 8237 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 8235 0 0 0 0 0 0 0 0
+S
+#8237
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WOuter Causeway@n~
+   @gThe outer causeway of Tiranoc's sewer system runs along a similar path to
+that of the Golden Circlet Road in the city above. Water slowly trickles down
+the walls into channels either side of the causeway that are full of flowing
+water. White crystals can be seen on the walls, providing a soft radiating
+light to the area. @n
+~
+82 x 0 0 0 0
+D7
+~
+~
+0 0 8238 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 8236 0 0 0 0 0 0 0 0
+S
+#8238
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WOuter Causeway@n~
+   @gThe outer causeway of Tiranoc's sewer system runs along a similar path to
+that of the Golden Circlet Road in the city above. Water slowly trickles down
+the walls into channels either side of the causeway that are full of flowing
+water. White crystals can be seen on the walls, providing a soft radiating
+light to the area. @n
+~
+82 x 0 0 0 0
+D7
+~
+~
+0 0 8239 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 8237 0 0 0 0 0 0 0 0
+S
+#8239
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WOuter Causeway@n~
+   @gThe outer causeway of Tiranoc's sewer system runs along a similar path to
+that of the Golden Circlet Road in the city above. Water slowly trickles down
+the walls into channels either side of the causeway that are full of flowing
+water. White crystals can be seen on the walls, providing a soft radiating
+light to the area. @n
+~
+82 x 0 0 0 0
+D7
+~
+~
+0 0 8240 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 8238 0 0 0 0 0 0 0 0
+S
+#8240
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WOuter Causeway@n~
+   @gThe outer causeway of Tiranoc's sewer system runs along a similar path to
+that of the Golden Circlet Road in the city above. Water slowly trickles down
+the walls into channels either side of the causeway that are full of flowing
+water. White crystals can be seen on the walls, providing a soft radiating
+light to the area. @n
+~
+82 x 0 0 0 0
+D7
+~
+~
+0 0 8241 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 8239 0 0 0 0 0 0 0 0
+S
+#8241
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WOuter Causeway@n~
+   @gThe outer causeway of Tiranoc's sewer system runs along a similar path to
+that of the Golden Circlet Road in the city above. Water slowly trickles down
+the walls into channels either side of the causeway that are full of flowing
+water. White crystals can be seen on the walls, providing a soft radiating
+light to the area. @n
+~
+82 x 0 0 0 0
+D3
+~
+~
+0 0 8271 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 8261 0 0 0 0 0 0 0 0
+D6
+~
+~
+0 0 8242 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 8240 0 0 0 0 0 0 0 0
+S
+#8242
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WOuter Causeway@n~
+   @gThe outer causeway of Tiranoc's sewer system runs along a similar path to
+that of the Golden Circlet Road in the city above. Water slowly trickles down
+the walls into channels either side of the causeway that are full of flowing
+water. White crystals can be seen on the walls, providing a soft radiating
+light to the area. @n
+~
+82 x 0 0 0 0
+D6
+~
+~
+0 0 8243 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 8241 0 0 0 0 0 0 0 0
+S
+#8243
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WOuter Causeway@n~
+   @gThe outer causeway of Tiranoc's sewer system runs along a similar path to
+that of the Golden Circlet Road in the city above. Water slowly trickles down
+the walls into channels either side of the causeway that are full of flowing
+water. White crystals can be seen on the walls, providing a soft radiating
+light to the area. @n
+~
+82 x 0 0 0 0
+D6
+~
+~
+0 0 8244 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 8242 0 0 0 0 0 0 0 0
+S
+#8244
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WOuter Causeway@n~
+   @gThe outer causeway of Tiranoc's sewer system runs along a similar path to
+that of the Golden Circlet Road in the city above. Water slowly trickles down
+the walls into channels either side of the causeway that are full of flowing
+water. White crystals can be seen on the walls, providing a soft radiating
+light to the area. @n
+~
+82 x 0 0 0 0
+D6
+~
+~
+0 0 8245 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 8243 0 0 0 0 0 0 0 0
+S
+#8245
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WOuter Causeway@n~
+   @gThe outer causeway of Tiranoc's sewer system runs along a similar path to
+that of the Golden Circlet Road in the city above. Water slowly trickles down
+the walls into channels either side of the causeway that are full of flowing
+water. White crystals can be seen on the walls, providing a soft radiating
+light to the area. @n
+~
+82 x 0 0 0 0
+D6
+~
+~
+0 0 8246 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 8244 0 0 0 0 0 0 0 0
+S
+#8246
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WOuter Causeway@n~
+   @gThe outer causeway of Tiranoc's sewer system runs along a similar path to
+that of the Golden Circlet Road in the city above. Water slowly trickles down
+the walls into channels either side of the causeway that are full of flowing
+water. White crystals can be seen on the walls, providing a soft radiating
+light to the area. @n
+~
+82 x 0 0 0 0
+D6
+~
+~
+0 0 8247 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 8245 0 0 0 0 0 0 0 0
+S
+#8247
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WOuter Causeway@n~
+   @gThe outer causeway of Tiranoc's sewer system runs along a similar path to
+that of the Golden Circlet Road in the city above. Water slowly trickles down
+the walls into channels either side of the causeway that are full of flowing
+water. White crystals can be seen on the walls, providing a soft radiating
+light to the area. @n
+~
+82 x 0 0 0 0
+D2
+~
+~
+0 0 8262 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 8260 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 8246 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 8248 0 0 0 0 0 0 0 0
+S
+#8248
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WOuter Causeway@n~
+   @gThe outer causeway of Tiranoc's sewer system runs along a similar path to
+that of the Golden Circlet Road in the city above. Water slowly trickles down
+the walls into channels either side of the causeway that are full of flowing
+water. White crystals can be seen on the walls, providing a soft radiating
+light to the area. @n
+~
+82 x 0 0 0 0
+D7
+~
+~
+0 0 8247 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 8249 0 0 0 0 0 0 0 0
+S
+#8249
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WOuter Causeway@n~
+   @gThe outer causeway of Tiranoc's sewer system runs along a similar path to
+that of the Golden Circlet Road in the city above. Water slowly trickles down
+the walls into channels either side of the causeway that are full of flowing
+water. White crystals can be seen on the walls, providing a soft radiating
+light to the area. @n
+~
+82 x 0 0 0 0
+D7
+~
+~
+0 0 8248 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 8250 0 0 0 0 0 0 0 0
+S
+#8250
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WOuter Causeway@n~
+   @gThe outer causeway of Tiranoc's sewer system runs along a similar path to
+that of the Golden Circlet Road in the city above. Water slowly trickles down
+the walls into channels either side of the causeway that are full of flowing
+water. White crystals can be seen on the walls, providing a soft radiating
+light to the area. @n
+~
+82 x 0 0 0 0
+D7
+~
+~
+0 0 8249 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 8251 0 0 0 0 0 0 0 0
+S
+#8251
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WOuter Causeway@n~
+   @gThe outer causeway of Tiranoc's sewer system runs along a similar path to
+that of the Golden Circlet Road in the city above. Water slowly trickles down
+the walls into channels either side of the causeway that are full of flowing
+water. White crystals can be seen on the walls, providing a soft radiating
+light to the area. @n
+~
+82 x 0 0 0 0
+D7
+~
+~
+0 0 8250 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 8252 0 0 0 0 0 0 0 0
+S
+#8252
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WOuter Causeway@n~
+   @gThe outer causeway of Tiranoc's sewer system runs along a similar path to
+that of the Golden Circlet Road in the city above. Water slowly trickles down
+the walls into channels either side of the causeway that are full of flowing
+water. White crystals can be seen on the walls, providing a soft radiating
+light to the area. @n
+~
+82 x 0 0 0 0
+D7
+~
+~
+0 0 8251 0 0 0 0 0 0 0 0
+D9
+~
+~
+0 0 8253 0 0 0 0 0 0 0 0
+S
+#8253
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WOuter Causeway@n~
+   @gThe outer causeway of Tiranoc's sewer system runs along a similar path to
+that of the Golden Circlet Road in the city above. Water slowly trickles down
+the walls into channels either side of the causeway that are full of flowing
+water. White crystals can be seen on the walls, providing a soft radiating
+light to the area. @n
+~
+82 x 0 0 0 0
+D1
+~
+~
+0 0 8265 0 0 0 0 0 0 0 0
+D4
+~
+~
+0 0 8259 0 0 0 0 0 0 0 0
+D7
+~
+~
+0 0 8252 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 8254 0 0 0 0 0 0 0 0
+S
+#8254
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WOuter Causeway@n~
+   @gThe outer causeway of Tiranoc's sewer system runs along a similar path to
+that of the Golden Circlet Road in the city above. Water slowly trickles down
+the walls into channels either side of the causeway that are full of flowing
+water. White crystals can be seen on the walls, providing a soft radiating
+light to the area. @n
+~
+82 x 0 0 0 0
+D6
+~
+~
+0 0 8253 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 8255 0 0 0 0 0 0 0 0
+S
+#8255
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WOuter Causeway@n~
+   @gThe outer causeway of Tiranoc's sewer system runs along a similar path to
+that of the Golden Circlet Road in the city above. Water slowly trickles down
+the walls into channels either side of the causeway that are full of flowing
+water. White crystals can be seen on the walls, providing a soft radiating
+light to the area. @n
+~
+82 x 0 0 0 0
+D6
+~
+~
+0 0 8254 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 8256 0 0 0 0 0 0 0 0
+S
+#8256
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WOuter Causeway@n~
+   @gThe outer causeway of Tiranoc's sewer system runs along a similar path to
+that of the Golden Circlet Road in the city above. Water slowly trickles down
+the walls into channels either side of the causeway that are full of flowing
+water. White crystals can be seen on the walls, providing a soft radiating
+light to the area. @n
+~
+82 x 0 0 0 0
+D6
+~
+~
+0 0 8255 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 8257 0 0 0 0 0 0 0 0
+S
+#8257
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WOuter Causeway@n~
+   @gThe outer causeway of Tiranoc's sewer system runs along a similar path to
+that of the Golden Circlet Road in the city above. Water slowly trickles down
+the walls into channels either side of the causeway that are full of flowing
+water. White crystals can be seen on the walls, providing a soft radiating
+light to the area. @n
+~
+82 x 0 0 0 0
+D6
+~
+~
+0 0 8256 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 8258 0 0 0 0 0 0 0 0
+S
+#8258
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WOuter Causeway@n~
+   @gThe outer causeway of Tiranoc's sewer system runs along a similar path to
+that of the Golden Circlet Road in the city above. Water slowly trickles down
+the walls into channels either side of the causeway that are full of flowing
+water. White crystals can be seen on the walls, providing a soft radiating
+light to the area. @n
+~
+82 x 0 0 0 0
+D6
+~
+~
+0 0 8257 0 0 0 0 0 0 0 0
+D8
+~
+~
+0 0 8235 0 0 0 0 0 0 0 0
+S
+#8259
+@YT@yi@Dr@Wa@Dn@yo@Yc@n - @WInto the Sewer@n~
+   @WA partially rusted, iron ladder leads from the streets of Tiranoc above, to
+the sewer system beneath the city. Spaced out and inset into the stone
+surface, are small white crystals that radiate with a soft light. @n
+~
+82 cx 0 0 0 0
+D4
+~
+~
+0 0 8058 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 8253 0 0 0 0 0 0 0 0
+S
+#8260
+@YT@yi@Dr@Wa@Dn@yo@Yc@n - @WInto the Sewer@n~
+   @WA partially rusted, iron ladder leads from the streets of Tiranoc above, to
+the sewer system beneath the city. Spaced out and inset into the stone
+surface, are small white crystals that radiate with a soft light. @n
+~
+82 cx 0 0 0 0
+D4
+~
+~
+0 0 8068 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 8247 0 0 0 0 0 0 0 0
+S
+#8261
+@YT@yi@Dr@Wa@Dn@yo@Yc@n - @WInto the Sewer@n~
+   @WA partially rusted, iron ladder leads from the streets of Tiranoc above, to
+the sewer system beneath the city. Spaced out and inset into the stone
+surface, are small white crystals that radiate with a soft light. @n
+~
+82 cx 0 0 0 0
+D4
+~
+~
+0 0 8083 0 0 0 0 0 0 0 0
+D5
+~
+~
+0 0 8241 0 0 0 0 0 0 0 0
+S
+#8262
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WCentral Causeway@n~
+   @gThis causeway leads from the outer ring to the very center of the sewer
+system known as the Pit. Channels of water either side of the causeway run
+towards the center, as if being drawn there. White crystals producing soft,
+radiant light on the walls can be seen. @n
+~
+82 x 0 0 0 0
+D0
+~
+~
+0 0 8247 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8263 0 0 0 0 0 0 0 0
+S
+#8263
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WCentral Causeway@n~
+   @gThis causeway leads from the outer ring to the very center of the sewer
+system known as the Pit. Channels of water either side of the causeway run
+towards the center, as if being drawn there. White crystals producing soft,
+radiant light on the walls can be seen. @n
+~
+82 x 0 0 0 0
+D0
+~
+~
+0 0 8262 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8264 0 0 0 0 0 0 0 0
+S
+#8264
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WCentral Causeway@n~
+   @gThis causeway leads from the outer ring to the very center of the sewer
+system known as the Pit. Channels of water either side of the causeway run
+towards the center, as if being drawn there. White crystals producing soft,
+radiant light on the walls can be seen. @n
+~
+82 x 0 0 0 0
+D0
+~
+~
+0 0 8263 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8278 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 18200 0 0 0 0 0 0 0 0
+S
+#8265
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WCentral Causeway@n~
+   @gThis causeway leads from the outer ring to the very center of the sewer
+system known as the Pit. Channels of water either side of the causeway run
+towards the center, as if being drawn there. White crystals producing soft,
+radiant light on the walls can be seen. @n
+~
+82 x 0 0 0 0
+D1
+~
+~
+0 0 8266 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8253 0 0 0 0 0 0 0 0
+S
+#8266
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WCentral Causeway@n~
+   @gThis causeway leads from the outer ring to the very center of the sewer
+system known as the Pit. Channels of water either side of the causeway run
+towards the center, as if being drawn there. White crystals producing soft,
+radiant light on the walls can be seen. @n
+~
+82 x 0 0 0 0
+D1
+~
+~
+0 0 8267 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8265 0 0 0 0 0 0 0 0
+S
+#8267
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WCentral Causeway@n~
+   @gThis causeway leads from the outer ring to the very center of the sewer
+system known as the Pit. Channels of water either side of the causeway run
+towards the center, as if being drawn there. White crystals producing soft,
+radiant light on the walls can be seen. @n
+~
+82 x 0 0 0 0
+D1
+~
+~
+0 0 8276 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8266 0 0 0 0 0 0 0 0
+S
+#8268
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WCentral Causeway@n~
+   @gThis causeway leads from the outer ring to the very center of the sewer
+system known as the Pit. Channels of water either side of the causeway run
+towards the center, as if being drawn there. White crystals producing soft,
+radiant light on the walls can be seen. @n
+~
+82 x 0 0 0 0
+D0
+~
+~
+0 0 8269 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8235 0 0 0 0 0 0 0 0
+S
+#8269
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WCentral Causeway@n~
+   @gThis causeway leads from the outer ring to the very center of the sewer
+system known as the Pit. Channels of water either side of the causeway run
+towards the center, as if being drawn there. White crystals producing soft,
+radiant light on the walls can be seen. @n
+~
+82 x 0 0 0 0
+D0
+~
+~
+0 0 8270 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8268 0 0 0 0 0 0 0 0
+S
+#8270
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WCentral Causeway@n~
+   @gThis causeway leads from the outer ring to the very center of the sewer
+system known as the Pit. Channels of water either side of the causeway run
+towards the center, as if being drawn there. White crystals producing soft,
+radiant light on the walls can be seen. @n
+~
+82 x 0 0 0 0
+D0
+~
+~
+0 0 8281 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8269 0 0 0 0 0 0 0 0
+S
+#8271
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WCentral Causeway@n~
+   @gThis causeway leads from the outer ring to the very center of the sewer
+system known as the Pit. Channels of water either side of the causeway run
+towards the center, as if being drawn there. White crystals producing soft,
+radiant light on the walls can be seen. @n
+~
+82 x 0 0 0 0
+D1
+~
+~
+0 0 8241 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8272 0 0 0 0 0 0 0 0
+S
+#8272
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WCentral Causeway@n~
+   @gThis causeway leads from the outer ring to the very center of the sewer
+system known as the Pit. Channels of water either side of the causeway run
+towards the center, as if being drawn there. White crystals producing soft,
+radiant light on the walls can be seen. @n
+~
+82 x 0 0 0 0
+D1
+~
+~
+0 0 8271 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8273 0 0 0 0 0 0 0 0
+S
+#8273
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WCentral Causeway@n~
+   @gThis causeway leads from the outer ring to the very center of the sewer
+system known as the Pit. Channels of water either side of the causeway run
+towards the center, as if being drawn there. White crystals producing soft,
+radiant light on the walls can be seen. @n
+~
+82 x 0 0 0 0
+D1
+~
+~
+0 0 8272 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8274 0 0 0 0 0 0 0 0
+S
+#8274
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WThe Pit@n~
+   @gAt the very heart of the sewer system beneath Tiranoc, is the pit. The
+sound of water cascading down from the central causeways echoes throughout the
+area, as it impacts into the murky water that has collected here. A strong,
+foul odor is present in the air here. @n
+~
+82 x 0 0 0 6
+D0
+~
+~
+0 0 8279 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 8273 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8282 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8275 0 0 0 0 0 0 0 0
+S
+#8275
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WThe Pit@n~
+   @gAt the very heart of the sewer system beneath Tiranoc, is the pit. The
+sound of water cascading down from the central causeways echoes throughout the
+area, as it impacts into the murky water that has collected here. A strong,
+foul odor is present in the air here. @n
+~
+82 x 0 0 0 6
+D0
+~
+~
+0 0 8278 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 8274 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8281 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8276 0 0 0 0 0 0 0 0
+S
+#8276
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WThe Pit@n~
+   @gAt the very heart of the sewer system beneath Tiranoc, is the pit. The
+sound of water cascading down from the central causeways echoes throughout the
+area, as it impacts into the murky water that has collected here. A strong,
+foul odor is present in the air here. @n
+~
+82 x 0 0 0 6
+D0
+~
+~
+0 0 8277 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 8275 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8280 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8267 0 0 0 0 0 0 0 0
+S
+#8277
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WThe Pit@n~
+   @gAt the very heart of the sewer system beneath Tiranoc, is the pit. The
+sound of water cascading down from the central causeways echoes throughout the
+area, as it impacts into the murky water that has collected here. A strong,
+foul odor is present in the air here. @n
+~
+82 x 0 0 0 6
+D1
+~
+~
+0 0 8278 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8276 0 0 0 0 0 0 0 0
+S
+#8278
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WThe Pit@n~
+   @gAt the very heart of the sewer system beneath Tiranoc, is the pit. The
+sound of water cascading down from the central causeways echoes throughout the
+area, as it impacts into the murky water that has collected here. A strong,
+foul odor is present in the air here. @n
+~
+82 x 0 0 0 6
+D0
+~
+~
+0 0 8264 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 8279 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8275 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8277 0 0 0 0 0 0 0 0
+S
+#8279
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WThe Pit@n~
+   @gAt the very heart of the sewer system beneath Tiranoc, is the pit. The
+sound of water cascading down from the central causeways echoes throughout the
+area, as it impacts into the murky water that has collected here. A strong,
+foul odor is present in the air here. @n
+~
+82 x 0 0 0 6
+D2
+~
+~
+0 0 8274 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8278 0 0 0 0 0 0 0 0
+S
+#8280
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WThe Pit@n~
+   @gAt the very heart of the sewer system beneath Tiranoc, is the pit. The
+sound of water cascading down from the central causeways echoes throughout the
+area, as it impacts into the murky water that has collected here. A strong,
+foul odor is present in the air here. @n
+~
+82 x 0 0 0 6
+D0
+~
+~
+0 0 8276 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 8281 0 0 0 0 0 0 0 0
+S
+#8281
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WThe Pit@n~
+   @gAt the very heart of the sewer system beneath Tiranoc, is the pit. The
+sound of water cascading down from the central causeways echoes throughout the
+area, as it impacts into the murky water that has collected here. A strong,
+foul odor is present in the air here. @n
+~
+82 x 0 0 0 6
+D0
+~
+~
+0 0 8275 0 0 0 0 0 0 0 0
+D1
+~
+~
+0 0 8282 0 0 0 0 0 0 0 0
+D2
+~
+~
+0 0 8270 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8280 0 0 0 0 0 0 0 0
+S
+#8282
+@YT@yi@Dr@Wa@Dn@yo@Yc @GS@gewe@Gr@n - @WThe Pit@n~
+   @gAt the very heart of the sewer system beneath Tiranoc, is the pit. The
+sound of water cascading down from the central causeways echoes throughout the
+area, as it impacts into the murky water that has collected here. A strong,
+foul odor is present in the air here. @n
+~
+82 x 0 0 0 6
+D0
+~
+~
+0 0 8274 0 0 0 0 0 0 0 0
+D3
+~
+~
+0 0 8281 0 0 0 0 0 0 0 0
+S
+$~

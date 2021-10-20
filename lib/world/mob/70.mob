@@ -1,0 +1,171 @@
+#7000
+South Galaxy Warrior~
+@wSouth Galaxy @cW@Ca@Wr@wr@Di@co@Cr@n~
+@wA south galaxy @cw@Ca@Wr@wr@Di@co@Cr@w is training here.@n
+~
+   @WThis warrior hails from the south galaxy and he is one of its most prized
+fighters. @n
+~
+d b 0 0 l 0 0 0 5 E
+40 0 10 0d8+0 0d0+0
+0 0 0 23
+8 8 1
+Str: 30
+Dex: 32
+Int: 39
+Wis: 24
+Con: 28
+Cha: 21
+E
+#7001
+West Galaxy Warrior~
+@wWest Galaxy @cW@Ca@Wr@wr@Di@co@Cr@n~
+@wA west galaxy @cw@Ca@Wr@wr@Di@co@Cr@w is training here.@n
+~
+   @WThis is one of west galaxy's finest warriors. @n
+~
+d b 0 0 l 0 0 0 5 E
+50 0 10 0d8+0 0d0+0
+0 0 0 23
+8 8 1
+Str: 29
+Dex: 30
+Int: 35
+Wis: 45
+Con: 43
+Cha: 34
+E
+#7002
+East Galaxy Warrior~
+@wEast Galaxy @cW@Ca@Wr@wr@Di@co@Cr@n~
+@wAn east galaxy @cw@Ca@Wr@wr@Di@co@Cr@w is training here.@n
+~
+   @WThis is one of east galaxy's finest warriors. @n
+~
+d b 0 0 l 0 0 0 5 E
+60 0 10 0d8+0 0d0+0
+0 0 0 23
+8 8 1
+Str: 43
+Dex: 45
+Int: 31
+Wis: 56
+Con: 34
+Cha: 34
+E
+#7003
+North Galaxy Warrior~
+@wNorth Galaxy @cW@Ca@Wr@wr@Di@co@Cr@n~
+@wA north galaxy @cw@Ca@Wr@wr@Di@co@Cr@w is training here.@n
+~
+   @WThis is one of north galaxy's finest warriors, and one of the finest in the
+entire universe. @n
+~
+d b 0 0 l 0 0 0 5 E
+70 0 10 0d8+0 0d0+0
+0 0 0 23
+8 8 1
+Str: 57
+Dex: 44
+Int: 51
+Wis: 45
+Con: 45
+Cha: 54
+E
+#7004
+Grand Kai~
+@cG@Cran@cd @wKai@n~
+@wThe @cG@Cran@cd @wKai@w is standing here.@n
+~
+   @WThis old kai has a long beard and bushy eyebrows. He is wearing a fez like
+hat, a vest, and puffy pants. He seems to have a silly manner about the things
+he does. @n
+~
+bdsA 0 0 0 l 0 0 0 0 E
+90 0 10 0d0+0 0d0+0
+0 0 0 12
+8 8 1
+Str: 56
+Dex: 46
+Int: 45
+Wis: 71
+Con: 47
+Cha: 84
+E
+T 7000
+T 7001
+T 7002
+#7005
+Grand Trainer~
+@cG@Cran@cd @wTrainer@n~
+@cG@Cran@cd @wTrainer is standing here.@n
+~
+   @WThis kai appears to be someone of great importance, dressed in fine silk
+clothing and wearing a unique hat atop his head. @n
+~
+bds 0 0 0 l 0 0 0 0 E
+40 0 10 0d0+0 0d0+0
+0 0 0 12
+8 8 1
+Str: 40
+Dex: 20
+Int: 20
+Wis: 34
+Con: 26
+Cha: 31
+E
+#7006
+Grand Shopkeep~
+@cG@Cran@cd @wShopkeep@n~
+@wThe @cG@Cran@cd @wShopkeep@w is standing here.@n
+~
+   @WThis wily old kai is dressed in splendid clothing. @n
+~
+bds 0 0 0 l 0 0 0 0 E
+20 0 10 0d0+0 0d0+0
+0 0 0 12
+8 8 1
+Str: 14
+Dex: 16
+Int: 10
+Wis: 18
+Con: 10
+Cha: 14
+E
+#7007
+Central Galaxy Warrior~
+@nCentral Galaxy @cW@Ca@Wr@wr@Di@co@Cr@n~
+@nAn central galaxy @cw@Ca@Wr@wr@Di@co@Cr@n is training here.
+~
+   @WThis is one of central galaxy's finest warriors. @n
+~
+dvwxyz b 0 0 0 0 0 0 0 E
+90 0 10 0d12+0 0d0+0
+0 0 0 23
+8 8 1
+Str: 73
+Dex: 64
+Int: 74
+Wis: 54
+Con: 71
+Cha: 51
+E
+#7008
+Dimensional Trade Shopkeep~
+@cD@Cim@We@cn@Csi@Wo@cn@Cal@W Trade Shopkeep@n~
+The @cD@Cim@We@cn@Csi@Wo@cn@Cal@W Trade Shopkeep@n stands here.
+~
+An undefined string.~
+bdsvwxyz 0 0 0 0 0 0 0 0 E
+90 0 10 0d0+0 0d0+0
+1000000 0 18 28
+8 8 1
+Size: 4
+Str: 8
+Dex: 11
+Int: 8
+Wis: 8
+Con: 11
+Cha: 11
+E
+$

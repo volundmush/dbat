@@ -1,0 +1,57 @@
+#12200
+Yakavita Guard~
+Yakavita Guard~
+A muscular kai stands guard here.
+~
+@D @n
+~
+bds 0 0 0 l 0 0 0 -20 E
+14 0 10 0d4+0 0d0+0
+0 0 12 6
+8 8 1
+Str: 16
+Dex: 14
+Int: 16
+Wis: 9
+Con: 16
+Cha: 13
+E
+T 12200
+T 12201
+#12201
+Yakavita Guard~
+Yakavita Guard~
+A muscular kai is patrolling the yacht here.
+~
+@D @n
+~
+d 0 0 0 l 0 0 0 -20 E
+14 0 10 0d4+0 0d0+0
+0 0 12 6
+8 8 1
+Str: 19
+Dex: 10
+Int: 20
+Wis: 16
+Con: 9
+Cha: 8
+E
+#12202
+Mister Yakavita~
+@DM@wi@Wst@we@Dr @RY@ra@Wk@Da@rv@Wi@Rt@ra@n~
+Mister Yakavita is leaning against the bar, sipping a whisky.
+~
+@D @N
+~
+bds 0 0 0 l 0 0 0 -30 E
+100 0 10 0d8+0 0d0+0
+1000000 0 12 9
+8 8 1
+Str: 62
+Dex: 64
+Int: 51
+Wis: 72
+Con: 100
+Cha: 89
+E
+$

@@ -1,0 +1,316 @@
+#17300
+Mechanic~
+@wMechanic@n~
+@wA mechanic is here working on a ship.@n
+~
+   @WThis man looks like he is quite busy working on repairing a ship. He is
+wearing a gray jumpsuit and carrying a box of strange tools. He has a massive
+build with large muscles bulging underneath his jumpsuit. @n
+~
+bd 0 0 0 l 0 0 0 0 E
+70 20 10 0d0+0 0d0+0
+0 0 5 28
+8 8 1
+Str: 11
+Dex: 16
+Int: 11
+Wis: 11
+Con: 16
+Cha: 16
+E
+T 17302
+#17301
+Basic Crewman~
+@wBasic Crewman@n~
+@wA basic crewman is standing here.@n
+~
+   @WThis is crew member has the lowest rank and seems to be the most populous on
+the station. @n
+~
+d 0 0 0 l 0 0 0 0 E
+50 20 10 0d0+0 0d0+0
+0 0 5 28
+8 8 1
+Str: 14
+Dex: 16
+Int: 14
+Wis: 14
+Con: 16
+Cha: 16
+E
+#17302
+Basic Crewman~
+@wBasic Crewman@n~
+@wA basic crewman is standing here.@n
+~
+   @WThis is crew member has the lowest rank and seems to be the most populous on
+the station. @n
+~
+d 0 0 0 l 0 0 0 0 E
+50 20 10 0d0+0 0d0+0
+0 0 5 28
+8 8 2
+Str: 14
+Dex: 16
+Int: 14
+Wis: 14
+Con: 16
+Cha: 16
+E
+#17303
+Ensign Crewman~
+@wEnsign Crewman@n~
+@wAn ensign ranked crewman is standing here.@n
+~
+   @WThis crew member has the rank of ensign and is wearing a red dress uniform
+and basic armor. @n
+~
+d 0 0 0 l 0 0 0 0 E
+53 20 10 0d0+0 0d0+0
+0 0 5 28
+8 8 1
+Str: 12
+Dex: 11
+Int: 12
+Wis: 12
+Con: 11
+Cha: 11
+E
+#17304
+Ensign Crewman~
+@wEnsign Crewman@n~
+@wAn ensign ranked crewman is standing here.@n
+~
+   @WThis crew member has the rank of ensign and is wearing a red dress uniform
+and basic armor. @n
+~
+d 0 0 0 l 0 0 0 0 E
+53 20 10 0d0+0 0d0+0
+0 0 5 28
+8 8 2
+Str: 12
+Dex: 11
+Int: 12
+Wis: 12
+Con: 11
+Cha: 11
+E
+#17305
+Lieutenant Crewman~
+@wLieutenant Crewman@n~
+@wA lieutenant crewman is standing here looking at some documents.@n
+~
+   @WThis crew member is wearing a red dress uniform and some basic armor. @n
+~
+d 0 0 0 l 0 0 0 0 E
+60 20 10 0d0+0 0d0+0
+0 0 5 28
+8 8 1
+Str: 10
+Dex: 8
+Int: 10
+Wis: 10
+Con: 8
+Cha: 8
+E
+#17306
+Captain Grustol~
+@wCaptain Grustol@n~
+@wCaptain Grustol is standing here looking out a view-port.@n
+~
+   @WThis male mutant is wearing a red dress uniform with some basic armor. He
+has a scared face with a perpetual frown pasted on it. @n
+~
+bd 0 0 0 l r 0 0 0 E
+80 20 10 0d0+0 0d0+0
+0 0 5 28
+8 8 1
+Str: 13
+Dex: 12
+Int: 13
+Wis: 13
+Con: 12
+Cha: 12
+E
+T 17306
+#17307
+Warehouse Clerk~
+@wWarehouse Clerk@n~
+@wA warehouse clerk is standing here.@n
+~
+   @WIt seems this crew member is in charge of the storage warehouse. He is
+wearing a red dress uniform with basic armor. @n
+~
+bds 0 0 0 l 0 0 0 0 E
+55 20 10 0d0+0 0d0+0
+0 0 5 28
+8 8 1
+Str: 10
+Dex: 8
+Int: 10
+Wis: 10
+Con: 8
+Cha: 8
+E
+#17308
+Mess Hall Worker~
+@wMess Hall Worker@n~
+@wA mess hall worker is tending the display counter here.@n
+~
+   @WThis crew member is wearing a white uniform with an ensign rank insignia on
+her shoulders. @n
+~
+bd 0 0 0 l 0 0 0 0 E
+55 20 10 0d0+0 0d0+0
+0 0 5 28
+8 8 2
+Str: 15
+Dex: 11
+Int: 15
+Wis: 15
+Con: 11
+Cha: 11
+E
+#17309
+Hungry Crewman~
+@wHungry Crewman@n~
+@wA hungry crewman is loitering here.@n
+~
+   @WThis crew member has come to the mess hall with the intent to eat. He is
+wearing a red dress uniform with basic armor. @n
+~
+d 0 0 0 l 0 0 0 0 E
+50 20 10 0d0+0 0d0+0
+0 0 5 28
+8 8 1
+Str: 14
+Dex: 10
+Int: 14
+Wis: 14
+Con: 10
+Cha: 10
+E
+#17310
+Yazto~
+@wYazto@n~
+@wYazto, the head scientist, is standing here.@n
+~
+   @WThis short truffle appears to have been hired by whom ever runs the
+space-station. He is wearing a prestine white uniform. @n
+~
+bd 0 0 0 l 0 0 0 0 E
+85 20 10 0d0+0 0d0+0
+0 0 13 28
+8 8 1
+Str: 13
+Dex: 13
+Int: 13
+Wis: 13
+Con: 13
+Cha: 13
+E
+T 17307
+#17311
+Gein~
+@wGein@n~
+@wGein is standing here with a bored expression.@n
+~
+   @WThis mutant is wearing a red dress uniform with elite armor. He is
+apprently has the rank of captain. What he is responsible for though is not
+immeadiatly apparent. @n
+~
+bd 0 0 0 l 0 0 0 0 E
+85 20 10 0d0+0 0d0+0
+0 0 5 28
+8 8 1
+Str: 14
+Dex: 10
+Int: 14
+Wis: 14
+Con: 10
+Cha: 10
+E
+T 17308
+#17312
+Freelance Truffle Scientist~
+@wFreelance Truffle Scientist@n~
+@wA freelance truffle scientist is standing here.@n
+~
+   @WThis truffle scientist is wearing a pristine white uniform and appears to be
+experimenting on something. @n
+~
+d 0 0 0 l 0 0 0 0 E
+60 20 10 0d0+0 0d0+0
+0 0 13 28
+8 8 1
+Str: 8
+Dex: 13
+Int: 8
+Wis: 8
+Con: 13
+Cha: 13
+E
+#17313
+Red Chimera~
+@rRed @gC@Wh@wi@Gm@We@wr@ga@n~
+@wA @rred @gc@Wh@wi@Gm@We@wr@ga@w is prowling here.@n
+~
+   @WThis massive and dangerous creature appears to have been part of several
+horrible genetic experiments. @n
+~
+dxyz 0 0 0 l 0 0 0 0 E
+70 20 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 7
+Str: 16
+Dex: 10
+Int: 16
+Wis: 16
+Con: 10
+Cha: 10
+E
+#17314
+Black Chimera~
+@DBlack @gC@Wh@wi@Gm@We@wr@ga@n~
+@wA @Dblack @gc@Wh@wi@Gm@We@wr@ga@w is gnawing on a bone here.@n
+~
+   @WThis massive and dangerous creature appears to have been part of several
+horrible genetic experiments. @n
+~
+dxyz 0 0 0 l 0 0 0 0 E
+75 20 10 0d0+0 0d0+0
+0 0 15 28
+8 8 1
+Size: 7
+Str: 16
+Dex: 10
+Int: 16
+Wis: 16
+Con: 10
+Cha: 10
+E
+#17315
+Washio~
+@gW@Gashi@go@n~
+@gW@Gashi@go@w, the station director, is standing here.@n
+~
+   @WThis fat mutant is wearing a red dress uniform with basic armor. He has a
+sloppy grin plastered on his face as he stares out his large view-port at the
+depths of space. @n
+~
+bds 0 0 0 l 0 0 0 0 E
+60 20 10 0d0+0 0d0+0
+0 0 5 28
+8 8 1
+Str: 10
+Dex: 12
+Int: 10
+Wis: 10
+Con: 12
+Cha: 12
+E
+T 17310
+T 17311
+T 17312
+$

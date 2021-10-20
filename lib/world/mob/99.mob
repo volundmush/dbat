@@ -1,0 +1,198 @@
+#9900
+Oroist Spy~
+@BO@br@Do@Wi@bs@Bt @DS@wp@Wy@n~
+A suspicious looking monk is standing here waiting for someone.
+~
+@D @n
+~
+bd 0 0 0 l 0 0 0 0 E
+35 0 10 0d8+0 0d0+0
+0 0 3 7
+8 8 1
+Str: 19
+Dex: 32
+Int: 28
+Wis: 32
+Con: 35
+Cha: 18
+E
+T 8124
+#9901
+Grandmaster Llaro Benim~
+@CG@cr@wa@Wn@Cd@cm@Ca@Ws@wt@ce@Cr @DL@wl@Wa@wr@Do @RB@re@Dn@ri@Rm@n~
+The ghost of Grandmaster Llaro Benim stands here defiantly.
+~
+@D @n
+~
+bdvwxyz 0 0 0 l 0 0 0 -30 E
+50 0 10 0d8+0 0d0+0
+0 0 23 7
+8 8 1
+Size: 5
+Str: 25
+Dex: 31
+Int: 40
+Wis: 43
+Con: 43
+Cha: 49
+E
+#9902
+Kerberos Citizen~
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws @nCitizen~
+A ghost of an old Kerberos citizen floats here.
+~
+@D @n
+~
+dvwxyz 0 0 0 l 0 0 0 -10 E
+40 0 10 0d8+0 0d0+0
+0 0 23 7
+8 8 0
+Size: 4
+Str: 24
+Dex: 20
+Int: 37
+Wis: 38
+Con: 21
+Cha: 22
+E
+#9903
+Truffle Scientist~
+@CT@cr@Du@wf@Df@cl@Ce @DSc@wi@We@Dn@Wt@wi@Dst@n~
+The ghost of a Truffle Scientist haunts here.
+~
+@D @n
+~
+dvwxyz 0 0 0 l 0 0 0 -20 E
+41 0 10 0d8+0 0d0+0
+0 0 23 7
+8 8 0
+Size: 3
+Str: 36
+Dex: 32
+Int: 26
+Wis: 23
+Con: 26
+Cha: 21
+E
+#9904
+Kerberos Guard~
+@DO@wl@Dd @RK@re@Dr@Wb@Re@rr@Do@Ws @nGuard~
+The ghost of an Old Kerberos guard is patrolling here.
+~
+@D @n
+~
+dvwxyz 0 0 0 l 0 0 0 -10 E
+42 0 10 0d8+0 0d0+0
+0 0 23 7
+8 8 0
+Size: 4
+Str: 25
+Dex: 23
+Int: 28
+Wis: 23
+Con: 35
+Cha: 30
+E
+#9905
+Sereg-Vanma Warlock~
+@RS@re@Rr@re@Rg@D-@cV@Ca@wn@Wm@wa@n Warlock~
+A ghost of a Sereg-Vanma Warlock is chanting here.
+~
+@D @n
+~
+dvwxyz 0 0 0 l 0 0 0 -20 E
+43 0 10 0d8+0 0d0+0
+0 0 23 7
+8 8 0
+Size: 4
+Str: 31
+Dex: 29
+Int: 43
+Wis: 30
+Con: 30
+Cha: 37
+E
+#9906
+Truffle Soldier~
+@CT@cr@Du@wf@Df@cl@Ce@n Soldier~
+A ghost of a Truffle Soldier patrols here.
+~
+@D @n
+~
+dvwxyz 0 0 0 l 0 0 0 -20 E
+44 0 10 0d8+0 0d0+0
+0 0 23 7
+8 8 0
+Size: 3
+Str: 25
+Dex: 40
+Int: 30
+Wis: 27
+Con: 34
+Cha: 36
+E
+#9907
+Citadel Guard~
+@rC@Ri@Dt@wa@Wd@Re@rl @gG@Gu@Wa@Gr@gd@n~
+A ghost of a Citadel Guard stands here, ready for battle.
+~
+@D @n
+~
+dvwxyz 0 0 0 l 0 0 0 -20 E
+45 0 10 0d8+0 0d0+0
+0 0 23 7
+8 8 0
+Size: 4
+Str: 28
+Dex: 36
+Int: 45
+Wis: 33
+Con: 26
+Cha: 43
+E
+#9908
+Elwin ghost~
+the Ghost of Elwin~
+The Ghost of Elwin, an old Sereg-Vanma warlock floats here.
+~
+   A corporeal spirit that hasn't passed into the next realm, Elwin the Ghost
+still has unfinished business in this realm before he passes. He was old in
+his time of passing, and wears battle armor from the war between Truffle and
+Konatsu. He is clearly unhappy.
+~
+cdgsvwxyz 0 0 0 l 0 0 0 0 E
+55 0 10 0d8+0 0d0+0
+0 0 23 7
+8 8 1
+Size: 4
+Str: 35
+Dex: 51
+Int: 37
+Wis: 29
+Con: 42
+Cha: 37
+E
+T 9900
+T 9901
+T 9902
+T 9903
+#9909
+Alloralla~
+Alloralla~
+Alloralla stands here.
+~
+   A young Konatsu woman about 20 years old. She wears a sparkly necklace.
+~
+dvwxyz 0 0 0 l 0 0 0 0 E
+30 0 10 0d8+0 0d0+0
+0 0 3 7
+8 8 2
+Str: 17
+Dex: 26
+Int: 23
+Wis: 27
+Con: 24
+Cha: 25
+E
+T 9904
+$
