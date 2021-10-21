@@ -11,91 +11,16 @@
 *  original credits maintained where relevant for act.other.c as this is  *
 *  practically an act.other.c part two - Iovan 3/20/2011                  *
 ************************************************************************ */
-
-#define __ACT_MISC_C__
-
-#include "structs.h"
-#include "utils.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "db.h"
-#include "spells.h"
-#include "screen.h"
-#include "house.h"
-#include "constants.h"
-#include "dg_scripts.h"
-#include "feats.h"
-#include "clan.h"
-#include "combat.h"
-
-/* extern variables */
-
-/* local variables  */
-
-/* extern functions */
-void send_to_imm(char *messg, ...);
-extern void handle_teleport(struct char_data *ch, struct char_data *tar, int location);
-extern void search_replace(char *string, const char *find, const char *replace);
-extern void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, char *name);
-extern int arena_watch(struct char_data *ch);
-extern int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj, int num);
-extern int check_skill(struct char_data *ch, int skill);
-extern int init_skill(struct char_data *ch, int snum);
-ACMD(do_get);
-ACMD(do_transform);
-ACMD(do_follow);
+#include "act.h"
 
 /* local functions  */
-void generate_multiform(struct char_data *ch, struct char_data *multi1, struct char_data *multi2, struct char_data *multi3);
-void handle_multi_merge(struct char_data *form);
-void resolve_song(struct char_data *ch);
-void handle_songs(void);
-int campfire_cook(int recipe);
-int valid_recipe(struct char_data *ch, int recipe, int type);
-int has_pole(struct char_data *ch);
-void catch_fish(struct char_data *ch, int quality);
-void fish_update(void);
-void ash_burn(struct char_data *ch);
-void disp_rpp_store(struct char_data *ch);
-void handle_rpp_store(struct char_data *ch, int choice);
-void rpp_feature(struct char_data *ch, const char *arg);
-int valid_silk(struct obj_data *obj);
-ACMD(do_spoil);
-ACMD(do_feed);
-ACMD(do_beacon);
-ACMD(do_dimizu);
-ACMD(do_obstruct);
-ACMD(do_warppool);
-ACMD(do_fireshield);
-ACMD(do_cook);
-ACMD(do_adrenaline);
-ACMD(do_ensnare);
-ACMD(do_arena);
-ACMD(do_bury);
-ACMD(do_hayasa);
-ACMD(do_instill);
-ACMD(do_kanso);
-ACMD(do_hydromancy);
-ACMD(do_channel);
-ACMD(do_shimmer);
-ACMD(do_metamorph);
-ACMD(do_amnisiac);
-ACMD(do_healglow);
-ACMD(do_resize);
-ACMD(do_scry);
-ACMD(do_runic);
-ACMD(do_extract);
-ACMD(do_fish);
-ACMD(do_defend);
-ACMD(do_lifeforce);
-ACMD(do_liquefy);
-ACMD(do_shell);
-ACMD(do_moondust);
-ACMD(do_preference);
-ACMD(do_song);
-ACMD(do_multiform);
-ACMD(do_spiritcontrol);
+static void generate_multiform(struct char_data *ch, struct char_data *multi1, struct char_data *multi2, struct char_data *multi3);
+static void resolve_song(struct char_data *ch);
+static int campfire_cook(int recipe);
+static int valid_recipe(struct char_data *ch, int recipe, int type);
+static int has_pole(struct char_data *ch);
+static void catch_fish(struct char_data *ch, int quality);
+static int valid_silk(struct obj_data *obj);
 
 
 ACMD(do_spiritcontrol)
@@ -231,7 +156,7 @@ ACMD(do_multiform)
 
 }
 
-void generate_multiform(struct char_data *ch, struct char_data *multi1, struct char_data *multi2, struct char_data *multi3)
+static void generate_multiform(struct char_data *ch, struct char_data *multi1, struct char_data *multi2, struct char_data *multi3)
 {
 
 
@@ -457,7 +382,7 @@ void handle_songs()
 
 }
 
-void resolve_song(struct char_data *ch)
+static void resolve_song(struct char_data *ch)
 {
 
    struct char_data *vict = NULL, *next_v = NULL;
@@ -1472,7 +1397,7 @@ ACMD(do_fish)
  }
 } /* End fish */
 
-int has_pole(struct char_data *ch)
+static int has_pole(struct char_data *ch)
 {
 
  if (GET_EQ(ch, WEAR_WIELD2)) {
@@ -1560,7 +1485,7 @@ void fish_update(void)
 
 }
 
-void catch_fish(struct char_data *ch, int quality)
+static void catch_fish(struct char_data *ch, int quality)
 {
   struct obj_data *fish = NULL;
   int num = 1000;
@@ -3639,7 +3564,7 @@ ACMD(do_ensnare)
 }
 
 /* This determines of an object is a suitable bundle of silk or not */
-int valid_silk(struct obj_data *obj)
+static int valid_silk(struct obj_data *obj)
 {
   int value = 0;
 
@@ -4258,7 +4183,7 @@ void handle_rpp_store(struct char_data *ch, int choice)
  }
 }
 
-int valid_recipe(struct char_data *ch, int recipe, int type)
+static int valid_recipe(struct char_data *ch, int recipe, int type)
 {
  /* Plant Variables */
  int tomato = -1, cucumber = -1, onion = -1, greenbean = -1, garlic = -1, redpep = -1;
@@ -4740,7 +4665,7 @@ int valid_recipe(struct char_data *ch, int recipe, int type)
  }
 }
 
-int campfire_cook(int recipe)
+static int campfire_cook(int recipe)
 {
 
  switch (recipe) {
