@@ -230,7 +230,7 @@ cl_sint64 mana_gain(struct char_data *ch)
      gain = GET_MAX_MANA(ch) / 12;
     }
     if (IS_MUTANT(ch)) {
-     gain = GET_MAX_MANA(ch) / 12;
+     gain = GET_MAX_MANA(ch) / 11;
     }
     if (IS_ARLIAN(ch)) {
      gain = GET_MAX_MANA(ch) / 30;
@@ -243,7 +243,7 @@ cl_sint64 mana_gain(struct char_data *ch)
      gain = GET_MAX_MANA(ch) / 15;
     }
     if (IS_MUTANT(ch)) {
-     gain = GET_MAX_MANA(ch) / 15;
+     gain = GET_MAX_MANA(ch) / 13;
     }
     if (!IS_KONATSU(ch) && !IS_MUTANT(ch)) {
      gain = GET_MAX_MANA(ch) / 12;
@@ -406,7 +406,7 @@ cl_sint64 hit_gain(struct char_data *ch)
      gain = GET_MAX_HIT(ch) / 2;
     }
     if (IS_MUTANT(ch)) {
-     gain = GET_MAX_HIT(ch) / 12;
+     gain = GET_MAX_HIT(ch) / 11;
     }
     if (!IS_HUMAN(ch) && !IS_NAMEK(ch) && !IS_MUTANT(ch)) {
      gain = GET_MAX_HIT(ch) / 10;
@@ -419,7 +419,7 @@ cl_sint64 hit_gain(struct char_data *ch)
      gain = GET_MAX_HIT(ch) / 4;
     }
     if (IS_MUTANT(ch)) {
-     gain = GET_MAX_HIT(ch) / 18;
+     gain = GET_MAX_HIT(ch) / 16;
     }
     if (IS_ARLIAN(ch)) {
      gain = GET_MAX_HIT(ch) / 40;
@@ -548,7 +548,7 @@ cl_sint64 move_gain(struct char_data *ch)
   } else {
    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_REGEN) || (GET_BONUS(ch, BONUS_DESTROYER) > 0 && ROOM_DAMAGE(IN_ROOM(ch)) >= 75)) {
     if (IS_MUTANT(ch)) {
-     gain = GET_MAX_MOVE(ch) / 8;
+     gain = GET_MAX_MOVE(ch) / 7;
     }
     if (IS_ARLIAN(ch)) {
      gain = GET_MAX_MOVE(ch) / 4;
@@ -558,7 +558,7 @@ cl_sint64 move_gain(struct char_data *ch)
     }
    } else if (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_REGEN)) {
     if (IS_MUTANT(ch)) {
-     gain = GET_MAX_MOVE(ch) / 10;
+     gain = GET_MAX_MOVE(ch) / 9;
     }
     if (!IS_MUTANT(ch)) {
      gain = GET_MAX_MOVE(ch) / 8;
@@ -915,7 +915,7 @@ void gain_exp(struct char_data *ch, cl_sint64 gain)
    gain += gain * 0.15;
   }
   if (PLR_FLAGGED(ch, PLR_IMMORTAL)) {
-   gain = gain * 0.85;
+   gain = gain * 0.95;
   }
 
   cl_sint64 diff = gain * 0.15;
@@ -1092,229 +1092,236 @@ void gain_condition(struct char_data *ch, int condition, int value)
        ocond = HUNGER;
 
       if (pukeroll > GET_CON(ch) + 19) {
-       act("@r@6You retch violently until your stomach is empty! Your constitution couldn't handle being that stuffed!@n", TRUE, ch, 0, 0, TO_CHAR);
-       act("@m@6$n@r@6 retches violently! It seems $e stuffed $mself too much!@n", TRUE, ch, 0, 0, TO_ROOM);
-       SET_BIT_AR(AFF_FLAGS(ch), AFF_PUKED);
-       if (!IS_NAMEK(ch)) {
-        GET_COND(ch, HUNGER) -= 40; 
-        if (GET_COND(ch, HUNGER) < 0)
-         GET_COND(ch, HUNGER) = 0;
-		if (IS_BIO(ch) && (GET_GENOME(ch, 0) == 3 || GET_GENOME(ch, 1) == 3))
-			GET_COND(ch, HUNGER) = -1;
-       } if (!IS_KANASSAN(ch)) {
-        GET_COND(ch, THIRST) -= 30;
-        if (GET_COND(ch, THIRST) < 0)
-         GET_COND(ch, THIRST) = 0;
-       } else {
-        send_to_char(ch, "Through your mastery of your bodily fluids you manage to retain your hydration.\r\n");
-        return;
-       }
-      } else if (pukeroll > GET_CON(ch) + 9) {
-       act("@r@6You puke violently! Your constitution couldn't handle being that stuffed!@n", TRUE, ch, 0, 0, TO_CHAR);
-       act("@m@6$n@r@6 pukes violently! It seems $e stuffed $mself too much!@n", TRUE, ch, 0, 0, TO_ROOM);
-       SET_BIT_AR(AFF_FLAGS(ch), AFF_PUKED);
-       if (!IS_NAMEK(ch)) {
-        GET_COND(ch, HUNGER) -= 20;
-        if (GET_COND(ch, HUNGER) < 0)
-         GET_COND(ch, HUNGER) = 0;
-       } if (!IS_KANASSAN(ch)) {
-        GET_COND(ch, THIRST) -= 15;
-        if (GET_COND(ch, THIRST) < 0)
-         GET_COND(ch, THIRST) = 0;
-       } else {
-        send_to_char(ch, "Through your mastery of your bodily fluids you manage to retain your hydration.\r\n");
-        return;
-       }
-      } else if (pukeroll > GET_CON(ch)) {
-       act("@r@6You puke a little! Your constitution couldn't handle being that stuffed!@n", TRUE, ch, 0, 0, TO_CHAR);
-       act("@m@6$n@r@6 pukes a little! It seems $e stuffed $mself too much!@n", TRUE, ch, 0, 0, TO_ROOM);
-       SET_BIT_AR(AFF_FLAGS(ch), AFF_PUKED);
-       if (!IS_NAMEK(ch)) {
-        GET_COND(ch, HUNGER) -= 8;
-        if (GET_COND(ch, HUNGER) < 0)
-         GET_COND(ch, HUNGER) = 0;
-       } if (!IS_KANASSAN(ch)) {
-        GET_COND(ch, THIRST) -= 8;
-        if (GET_COND(ch, THIRST) < 0)
-         GET_COND(ch, THIRST) = 0;
-       } else {
-        send_to_char(ch, "Through your mastery of your bodily fluids you manage to retain your hydration.\r\n");
-        return;
-       }
-      }
-     }
-    } else {
-     GET_COND(ch, condition) += value;
-    }
-   }
-  }
+							act("@r@6You retch violently until your stomach is empty! Your constitution couldn't handle being that stuffed!@n", TRUE, ch, 0, 0, TO_CHAR);
+							act("@m@6$n@r@6 retches violently! It seems $e stuffed $mself too much!@n", TRUE, ch, 0, 0, TO_ROOM);
+							SET_BIT_AR(AFF_FLAGS(ch), AFF_PUKED);
+							if (!IS_NAMEK(ch)) {
+								GET_COND(ch, HUNGER) -= 40;
+								if (GET_COND(ch, HUNGER) < 0)
+									GET_COND(ch, HUNGER) = 0;
+								if (IS_BIO(ch) && (GET_GENOME(ch, 0) == 3 || GET_GENOME(ch, 1) == 3))
+									GET_COND(ch, HUNGER) = -1;
+							} if (!IS_KANASSAN(ch)) {
+								GET_COND(ch, THIRST) -= 30;
+								if (GET_COND(ch, THIRST) < 0)
+									GET_COND(ch, THIRST) = 0;
+							}
+							else {
+								send_to_char(ch, "Through your mastery of your bodily fluids you manage to retain your hydration.\r\n");
+								return;
+							}
+						}
+						else if (pukeroll > GET_CON(ch) + 9) {
+							act("@r@6You puke violently! Your constitution couldn't handle being that stuffed!@n", TRUE, ch, 0, 0, TO_CHAR);
+							act("@m@6$n@r@6 pukes violently! It seems $e stuffed $mself too much!@n", TRUE, ch, 0, 0, TO_ROOM);
+							SET_BIT_AR(AFF_FLAGS(ch), AFF_PUKED);
+							if (!IS_NAMEK(ch)) {
+								GET_COND(ch, HUNGER) -= 20;
+								if (GET_COND(ch, HUNGER) < 0)
+									GET_COND(ch, HUNGER) = 0;
+							} if (!IS_KANASSAN(ch)) {
+								GET_COND(ch, THIRST) -= 15;
+								if (GET_COND(ch, THIRST) < 0)
+									GET_COND(ch, THIRST) = 0;
+							}
+							else {
+								send_to_char(ch, "Through your mastery of your bodily fluids you manage to retain your hydration.\r\n");
+								return;
+							}
+						}
+						else if (pukeroll > GET_CON(ch)) {
+							act("@r@6You puke a little! Your constitution couldn't handle being that stuffed!@n", TRUE, ch, 0, 0, TO_CHAR);
+							act("@m@6$n@r@6 pukes a little! It seems $e stuffed $mself too much!@n", TRUE, ch, 0, 0, TO_ROOM);
+							SET_BIT_AR(AFF_FLAGS(ch), AFF_PUKED);
+							if (!IS_NAMEK(ch)) {
+								GET_COND(ch, HUNGER) -= 8;
+								if (GET_COND(ch, HUNGER) < 0)
+									GET_COND(ch, HUNGER) = 0;
+							} if (!IS_KANASSAN(ch)) {
+								GET_COND(ch, THIRST) -= 8;
+								if (GET_COND(ch, THIRST) < 0)
+									GET_COND(ch, THIRST) = 0;
+							}
+							else {
+								send_to_char(ch, "Through your mastery of your bodily fluids you manage to retain your hydration.\r\n");
+								return;
+							}
+						}
+					}
+				}
+				else {
+					GET_COND(ch, condition) += value;
+				}
+			}
+		}
 
-  if (!AFF_FLAGGED(ch, AFF_SPIRIT) && (!GET_SKILL(ch, SKILL_SURVIVAL) || (GET_SKILL(ch, SKILL_SURVIVAL) < rand_number(1, 140)))) {
-   if (value <= 0) {
-    if (GET_COND(ch, condition) >= 0) {
-     if (AFF_FLAGGED(ch, AFF_PUKED)) {
-       REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_PUKED);
-     }
-     if (GET_COND(ch, condition) + value < 0) {
-      GET_COND(ch, condition) = 0;
-     } else {
-      GET_COND(ch, condition) += value;
-     }   
-    }
-   }
-  switch (condition) {
-   case HUNGER:
-    switch (GET_COND(ch, condition)) {
-     case 0:
-      if (GET_MOVE(ch) >= GET_MAX_MOVE(ch) / 3) {
-       send_to_char(ch, "@RYou are starving to death!@n\r\n");
-       GET_MOVE(ch) -= GET_MOVE(ch) / 3;
-      }
-      else if (GET_MOVE(ch) < GET_MAX_MOVE(ch) / 3) {
-       send_to_char(ch, "@RYou are starving to death!@n\r\n");
-       GET_MOVE(ch) = 0;
-       if (GET_SUPPRESS(ch) > 0) {
-        send_to_char(ch, "@RYou stop suppressing!@n\r\n");
-        GET_SUPP(ch) = 0;
-        GET_HIT(ch) += GET_SUPPRESS(ch);
-        GET_SUPPRESS(ch) = 0;
-       }
-       GET_HIT(ch) -= GET_MAX_HIT(ch) / 3;
-       }
-      break;
-     case 1:
-      send_to_char(ch, "You are extremely hungry!\r\n");
-      break;
-     case 2:
-      send_to_char(ch, "You are very hungry!\r\n");
-      break;
-     case 3:
-      send_to_char(ch, "You are pretty hungry!\r\n");
-      break;
-     case 4:
-      send_to_char(ch, "You are hungry!\r\n");
-      break;
-     case 5:
-     case 6:
-     case 7:
-     case 8:
-      send_to_char(ch, "Your stomach is growling!\r\n");
-      break;
-     case 9:
-     case 10:
-     case 11:
-      send_to_char(ch, "You could use something to eat.\r\n");
-      break;
-     case 12:
-     case 13:
-     case 14:
-     case 15:
-     case 16:
-     case 17:
-      send_to_char(ch, "You could use a bite to eat.\r\n");
-      break;
-     case 18:
-     case 19:
-     case 20:
-      send_to_char(ch, "You could use a snack.\r\n");
-      break;
-     default:
-      break;
-    }
-    break;
-   case THIRST:
-    switch (GET_COND(ch, condition)) {
-     case 0:
-      if (GET_MOVE(ch) >= GET_MAX_MOVE(ch) / 3) {
-       send_to_char(ch, "@RYou are dehydrated!@n\r\n");
-       GET_MOVE(ch) -= GET_MOVE(ch) / 3;
-      }
-      else if (GET_MOVE(ch) < GET_MAX_MOVE(ch) / 3) {
-       send_to_char(ch, "@RYou are dehydrated!@n\r\n");
-       GET_MOVE(ch) = 0;
-       if (GET_SUPPRESS(ch) > 0) {
-        send_to_char(ch, "@RYou stop suppressing!@n\r\n");
-        GET_SUPP(ch) = 0;
-        GET_HIT(ch) += GET_SUPPRESS(ch);
-        GET_SUPPRESS(ch) = 0;
-       }
-        GET_HIT(ch) -= GET_MAX_HIT(ch) / 3;
-       }
-      break;
-     case 1:
-      send_to_char(ch, "You are extremely thirsty!\r\n");
-      break;
-     case 2:
-      send_to_char(ch, "You are very thirsty!\r\n");
-      break;
-     case 3:
-      send_to_char(ch, "You are pretty thirsty!\r\n");
-      break;
-     case 4:
-      send_to_char(ch, "You are thirsty!\r\n");
-      break;
-     case 5:
-     case 6:
-     case 7:
-     case 8:
-      send_to_char(ch, "Your throat is pretty dry!\r\n");
-      break;
-     case 9:
-     case 10:
-     case 11:
-      send_to_char(ch, "You could use something to drink.\r\n");
-      break;
-     case 12:
-     case 13:
-     case 14:
-     case 15:
-     case 16:
-     case 17:
-      send_to_char(ch, "Your mouth feels pretty dry.\r\n");
-      break;
-     case 18:
-     case 19:
-     case 20:
-      send_to_char(ch, "You could use a sip of water.\r\n");
-      break;
-     default:
-      break;
-    }
-    break;
-   case DRUNK:
-     if (intoxicated) {
-      if (GET_COND(ch, DRUNK) <= 0) {
-       send_to_char(ch, "You are now sober.\r\n");
-      }
-     }
-    break;
-  default:
-    break;
-  }
- if (GET_HIT(ch) <= 0 && GET_COND(ch, HUNGER) == 0) {
-    send_to_char(ch, "You have starved to death!\r\n");
-    GET_MOVE(ch) = 0;
-    act("@W$n@W falls down dead before you...@n", FALSE, ch, 0, 0, TO_ROOM);
-    die(ch, NULL);
-    if (GET_COND(ch, HUNGER) != -1) {
-     GET_COND(ch, HUNGER) = 48;
-    }
-    if (GET_COND(ch, THIRST) != -1) {
-     GET_COND(ch, THIRST) = 48;
-    }
-   }
- if (GET_HIT(ch) <= 0 && GET_COND(ch, THIRST) == 0) {
-  send_to_char(ch, "You have died of dehydration!\r\n");
-  GET_MOVE(ch) = 0;
-  act("@W$n@W falls down dead before you...@n", FALSE, ch, 0, 0, TO_ROOM);
-  die(ch, NULL);
-    if (GET_COND(ch, HUNGER) != -1) {
-     GET_COND(ch, HUNGER) = 48;
-    }
-    GET_COND(ch, THIRST) = 48;
-   }
-  }
- }
+		if (!AFF_FLAGGED(ch, AFF_SPIRIT) && (!GET_SKILL(ch, SKILL_SURVIVAL) || (GET_SKILL(ch, SKILL_SURVIVAL) < rand_number(1, 140)))) {
+			if (value <= 0) {
+				if (GET_COND(ch, condition) >= 0) {
+					if (AFF_FLAGGED(ch, AFF_PUKED)) {
+						REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_PUKED);
+					}
+					if (GET_COND(ch, condition) + value < 0) {
+						GET_COND(ch, condition) = 0;
+					}
+					else {
+						GET_COND(ch, condition) += value;
+					}
+				}
+			}
+			switch (condition) {
+			case HUNGER:
+				switch (GET_COND(ch, condition)) {
+				case 0:
+					if (GET_MOVE(ch) >= GET_MAX_MOVE(ch) / 3) {
+						send_to_char(ch, "@RYou are starving to death!@n\r\n");
+						GET_MOVE(ch) -= GET_MOVE(ch) / 3;
+					}
+					else if (GET_MOVE(ch) < GET_MAX_MOVE(ch) / 3) {
+						send_to_char(ch, "@RYou are starving to death!@n\r\n");
+						GET_MOVE(ch) = 0;
+						if (GET_SUPPRESS(ch) > 0) {
+							send_to_char(ch, "@RYou stop suppressing!@n\r\n");
+							GET_SUPP(ch) = 0;
+							GET_HIT(ch) += GET_SUPPRESS(ch);
+							GET_SUPPRESS(ch) = 0;
+						}
+						GET_HIT(ch) -= GET_MAX_HIT(ch) / 3;
+					}
+					break;
+				case 1:
+					send_to_char(ch, "You are extremely hungry!\r\n");
+					break;
+				case 2:
+					send_to_char(ch, "You are very hungry!\r\n");
+					break;
+				case 3:
+					send_to_char(ch, "You are pretty hungry!\r\n");
+					break;
+				case 4:
+					send_to_char(ch, "You are hungry!\r\n");
+					break;
+				case 5:
+				case 6:
+				case 7:
+				case 8:
+					send_to_char(ch, "Your stomach is growling!\r\n");
+					break;
+				case 9:
+				case 10:
+				case 11:
+					send_to_char(ch, "You could use something to eat.\r\n");
+					break;
+				case 12:
+				case 13:
+				case 14:
+				case 15:
+				case 16:
+				case 17:
+					send_to_char(ch, "You could use a bite to eat.\r\n");
+					break;
+				case 18:
+				case 19:
+				case 20:
+					send_to_char(ch, "You could use a snack.\r\n");
+					break;
+				default:
+					break;
+				}
+				break;
+			case THIRST:
+				switch (GET_COND(ch, condition)) {
+				case 0:
+					if (GET_MOVE(ch) >= GET_MAX_MOVE(ch) / 3) {
+						send_to_char(ch, "@RYou are dehydrated!@n\r\n");
+						GET_MOVE(ch) -= GET_MOVE(ch) / 3;
+					}
+					else if (GET_MOVE(ch) < GET_MAX_MOVE(ch) / 3) {
+						send_to_char(ch, "@RYou are dehydrated!@n\r\n");
+						GET_MOVE(ch) = 0;
+						if (GET_SUPPRESS(ch) > 0) {
+							send_to_char(ch, "@RYou stop suppressing!@n\r\n");
+							GET_SUPP(ch) = 0;
+							GET_HIT(ch) += GET_SUPPRESS(ch);
+							GET_SUPPRESS(ch) = 0;
+						}
+						GET_HIT(ch) -= GET_MAX_HIT(ch) / 3;
+					}
+					break;
+				case 1:
+					send_to_char(ch, "You are extremely thirsty!\r\n");
+					break;
+				case 2:
+					send_to_char(ch, "You are very thirsty!\r\n");
+					break;
+				case 3:
+					send_to_char(ch, "You are pretty thirsty!\r\n");
+					break;
+				case 4:
+					send_to_char(ch, "You are thirsty!\r\n");
+					break;
+				case 5:
+				case 6:
+				case 7:
+				case 8:
+					send_to_char(ch, "Your throat is pretty dry!\r\n");
+					break;
+				case 9:
+				case 10:
+				case 11:
+					send_to_char(ch, "You could use something to drink.\r\n");
+					break;
+				case 12:
+				case 13:
+				case 14:
+				case 15:
+				case 16:
+				case 17:
+					send_to_char(ch, "Your mouth feels pretty dry.\r\n");
+					break;
+				case 18:
+				case 19:
+				case 20:
+					send_to_char(ch, "You could use a sip of water.\r\n");
+					break;
+				default:
+					break;
+				}
+				break;
+			case DRUNK:
+				if (intoxicated) {
+					if (GET_COND(ch, DRUNK) <= 0) {
+						send_to_char(ch, "You are now sober.\r\n");
+					}
+				}
+				break;
+			default:
+				break;
+			}
+			if (GET_HIT(ch) <= 0 && GET_COND(ch, HUNGER) == 0) {
+				send_to_char(ch, "You have starved to death!\r\n");
+				GET_MOVE(ch) = 0;
+				act("@W$n@W falls down dead before you...@n", FALSE, ch, 0, 0, TO_ROOM);
+				die(ch, NULL);
+				if (GET_COND(ch, HUNGER) != -1) {
+					GET_COND(ch, HUNGER) = 48;
+				}
+				if (GET_COND(ch, THIRST) != -1) {
+					GET_COND(ch, THIRST) = 48;
+				}
+			}
+			if (GET_HIT(ch) <= 0 && GET_COND(ch, THIRST) == 0) {
+				send_to_char(ch, "You have died of dehydration!\r\n");
+				GET_MOVE(ch) = 0;
+				act("@W$n@W falls down dead before you...@n", FALSE, ch, 0, 0, TO_ROOM);
+				die(ch, NULL);
+				if (GET_COND(ch, HUNGER) != -1) {
+					GET_COND(ch, HUNGER) = 48;
+				}
+				GET_COND(ch, THIRST) = 48;
+			}
+		}
+	}
 }
 
 
