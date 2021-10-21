@@ -44,6 +44,7 @@ ACMD(do_move);
 #define IS_MOVE(cmdnum) (complete_cmd_info[cmdnum].command_pointer == do_move)
 
 
+int special(struct char_data *ch, int cmd, char *arg);
 void fingerUser(struct char_data *ch, char *name);
 int readUserIndex(char *name);
 void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, char *name);

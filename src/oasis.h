@@ -605,6 +605,8 @@ void free_guild(struct guild_data *guild);
 void gedit_modify_string(char **str, char *new);
 ACMD(do_oasis_gedit);
 
+int buildwalk(struct char_data *ch, int dir);
+
 void zedit_setup(struct descriptor_data *d, int room_num);
 void zedit_new_zone(struct char_data *ch, zone_vnum vzone_num, room_vnum bottom, room_vnum top);
 void zedit_create_index(int znum, char *type);
