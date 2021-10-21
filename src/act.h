@@ -151,7 +151,7 @@ ACMD(do_whois);
 
 /* act.item.c */
 // global variables
-extern struct *obj_selling;
+extern struct obj_data *obj_selling;
 extern struct char_data *ch_selling, *ch_buying;
 
 // functions
