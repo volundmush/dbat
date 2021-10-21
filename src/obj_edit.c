@@ -478,7 +478,6 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
         SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_SH);
         break;
       }
-      REMOVE_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_UNBREAKABLE);
       *buf = '\0';
       sprintf(buf, d->obj_name);
       obj->name = strdup(buf);
@@ -500,7 +499,6 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
       *buf3 = '\0';
       sprintf(buf3, "%s", d->obj_long);
       obj->description = strdup(buf3);
-      REMOVE_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_UNBREAKABLE);
       switch(d->obj_weapon) {
        case 1:
         GET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE) = TYPE_SLASH - TYPE_HIT;

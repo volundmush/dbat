@@ -586,7 +586,7 @@ int wield_type(int chsize, const struct obj_data *weap);
 #define GET_MOLT_EXP(ch)  ((ch)->moltexp)
 #define GET_MOLT_LEVEL(ch) ((ch)->moltlevel)
 #define GET_SDCOOLDOWN(ch) ((ch)->con_sdcooldown)
-
+#define GET_INGESTLEARNED(ch) ((ch)->ingestLearned)
 #define GET_POS(ch)		((ch)->position)
 #define GET_IDNUM(ch)		((ch)->idnum)
 #define GET_ID(x)		((x)->id)

@@ -3835,24 +3835,42 @@ ACMD(do_eat)
     affect_join(ch, &af, FALSE, FALSE, FALSE, FALSE);
   }
  if (subcmd == SCMD_EAT) {
-  if (foob >= GET_OBJ_VAL(food, VAL_FOOD_FOODVAL)) {
+  if (foob >= GET_OBJ_VAL(food, VAL_FOOD_FOODVAL)) 
+  {
    send_to_char(ch, "You finish the last bite.\r\n");
+   if (GET_OBJ_VNUM(food) == 53) {
+	   GET_MOVE(ch) += GET_MAX_MOVE(ch) / 30;
+	   GET_LIFEFORCE(ch) += GET_LIFEMAX(ch) * 0.01;
+	   if (GET_MOVE(ch) > GET_MAX_MOVE(ch)) {
+		   GET_MOVE(ch) = GET_MAX_MOVE(ch);
+	   }
+	   if (GET_LIFEFORCE(ch) > GET_LIFEMAX(ch)) {
+		   GET_LIFEFORCE(ch) = GET_LIFEMAX(ch);
+	   }
+	   if (OBJ_FLAGGED(food, ITEM_FORGED)) {
+		   send_to_char(ch, "This is a forgery. You gain nothing!\r\n");
+	   }
+	   else {
+		   send_to_char(ch, "You feel more energetic!\r\n");
+		   majin_gain(ch, -1);
+	   }
+   }
    if (GET_OBJ_VNUM(food) == 93) {
-    GET_MOVE(ch) += GET_MAX_MOVE(ch) / 20;
-    GET_LIFEFORCE(ch) += GET_LIFEMAX(ch) * 0.01;
-    if (GET_MOVE(ch) > GET_MAX_MOVE(ch)) {
-     GET_MOVE(ch) = GET_MAX_MOVE(ch);
-    }
-    if (GET_LIFEFORCE(ch) > GET_LIFEMAX(ch)) {
-     GET_LIFEFORCE(ch) = GET_LIFEMAX(ch);
-    }
-	if (OBJ_FLAGGED(food, ITEM_FORGED)) {
-	send_to_char(ch, "This is a forgery. You gain nothing!\r\n");
-	}
-	else {
-    send_to_char(ch, "You feel more energetic!\r\n");
-    majin_gain(ch, 0);
-	}
+	   GET_MOVE(ch) += GET_MAX_MOVE(ch) / 20;
+	   GET_LIFEFORCE(ch) += GET_LIFEMAX(ch) * 0.01;
+	   if (GET_MOVE(ch) > GET_MAX_MOVE(ch)) {
+		   GET_MOVE(ch) = GET_MAX_MOVE(ch);
+	   }
+	   if (GET_LIFEFORCE(ch) > GET_LIFEMAX(ch)) {
+		   GET_LIFEFORCE(ch) = GET_LIFEMAX(ch);
+	   }
+	   if (OBJ_FLAGGED(food, ITEM_FORGED)) {
+		   send_to_char(ch, "This is a forgery. You gain nothing!\r\n");
+	   }
+	   else {
+		   send_to_char(ch, "You feel more energetic!\r\n");
+		   majin_gain(ch, 0);
+	   }
    }
    if (GET_OBJ_VNUM(food) == 94) {
     GET_MOVE(ch) += GET_MAX_MOVE(ch) / 10;
@@ -3892,23 +3910,41 @@ ACMD(do_eat)
   }
   else {
    GET_OBJ_VAL(food, VAL_FOOD_FOODVAL) -= foob;
+   if (GET_OBJ_VNUM(food) == 53) {
+	   GET_MOVE(ch) += GET_MAX_MOVE(ch) / 30;
+	   GET_LIFEFORCE(ch) += GET_LIFEMAX(ch) * 0.01;
+	   if (GET_MOVE(ch) > GET_MAX_MOVE(ch)) {
+		   GET_MOVE(ch) = GET_MAX_MOVE(ch);
+	   }
+	   if (GET_LIFEFORCE(ch) > GET_LIFEMAX(ch)) {
+		   GET_LIFEFORCE(ch) = GET_LIFEMAX(ch);
+	   }
+	   if (OBJ_FLAGGED(food, ITEM_FORGED)) {
+		   send_to_char(ch, "This is a forgery. You gain nothing!\r\n");
+	   }
+	   else {
+		   send_to_char(ch, "You feel more energetic!\r\n");
+		   majin_gain(ch, -1);
+		   extract_obj(food);
+	   }
+   }
    if (GET_OBJ_VNUM(food) == 93) {
-    GET_MOVE(ch) += GET_MAX_MOVE(ch) / 20;
-    GET_LIFEFORCE(ch) += GET_LIFEMAX(ch) * 0.01;
-    if (GET_MOVE(ch) > GET_MAX_MOVE(ch)) {
-     GET_MOVE(ch) = GET_MAX_MOVE(ch);
-    }
-    if (GET_LIFEFORCE(ch) > GET_LIFEMAX(ch)) {
-     GET_LIFEFORCE(ch) = GET_LIFEMAX(ch);
-    }
-        if (OBJ_FLAGGED(food, ITEM_FORGED)) {
-        send_to_char(ch, "This is a forgery. You gain nothing!\r\n");
-        }
-        else {
-    send_to_char(ch, "You feel more energetic!\r\n");
-    majin_gain(ch, 0);
-    extract_obj(food);
-        }
+	   GET_MOVE(ch) += GET_MAX_MOVE(ch) / 20;
+	   GET_LIFEFORCE(ch) += GET_LIFEMAX(ch) * 0.01;
+	   if (GET_MOVE(ch) > GET_MAX_MOVE(ch)) {
+		   GET_MOVE(ch) = GET_MAX_MOVE(ch);
+	   }
+	   if (GET_LIFEFORCE(ch) > GET_LIFEMAX(ch)) {
+		   GET_LIFEFORCE(ch) = GET_LIFEMAX(ch);
+	   }
+	   if (OBJ_FLAGGED(food, ITEM_FORGED)) {
+		   send_to_char(ch, "This is a forgery. You gain nothing!\r\n");
+	   }
+	   else {
+		   send_to_char(ch, "You feel more energetic!\r\n");
+		   majin_gain(ch, 0);
+		   extract_obj(food);
+	   }
    }
    if (GET_OBJ_VNUM(food) == 94) {
     GET_MOVE(ch) += GET_MAX_MOVE(ch) / 10;
@@ -3956,6 +3992,7 @@ ACMD(do_eat)
   }
 }
 
+
 void majin_gain(struct char_data *ch, int type)
 {
   if (!IS_MAJIN(ch) || IS_NPC(ch)) {
@@ -3966,10 +4003,49 @@ void majin_gain(struct char_data *ch, int type)
     send_to_char(ch, "You can not gain anymore from candy consumption at your current level.\r\n");
     return;
   }
+  else if (type == -1) {
+	  int st = (GET_BASE_ST(ch) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
+	  int pl = (GET_BASE_PL(ch) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
+	  int ki = (GET_BASE_KI(ch) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
+	  if (st > 300000) {
+		  st = 300000;
+	  }
+	  if (ki > 300000) {
+		  ki = 300000;
+	  }
+	  if (pl > 300000) {
+		  pl = 300000;
+	  }
+	  if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+		  GET_MAX_HIT(ch) += pl * 2;
+		  GET_MAX_MANA(ch) += ki * 2;
+		  GET_MAX_MOVE(ch) += st * 2;
+	  }
+	  else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+		  GET_MAX_HIT(ch) += pl * 3;
+		  GET_MAX_MANA(ch) += ki * 3;
+		  GET_MAX_MOVE(ch) += st * 3;
+	  }
+	  else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+		  GET_MAX_HIT(ch) += pl * 4.5;
+		  GET_MAX_MANA(ch) += ki * 4.5;
+		  GET_MAX_MOVE(ch) += st * 4.5;
+	  }
+	  else {
+		  GET_MAX_HIT(ch) += pl;
+		  GET_MAX_MANA(ch) += ki;
+		  GET_MAX_MOVE(ch) += st;
+	  }
+	  GET_BASE_PL(ch) += pl;
+	  GET_BASE_KI(ch) += ki;
+	  GET_BASE_ST(ch) += st;
+	  send_to_char(ch, "@mYou feel stronger after consuming the candy @D[@RPL@W: @r%s @CKi@D: @c%s @GSt@D: @g%s@D]@m!@n\r\n", add_commas(pl), add_commas(ki), add_commas(st));
+	  return;
+  }
   else if (type == 0) {
-    int st = (GET_BASE_ST(ch) / 1500) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
-    int pl = (GET_BASE_PL(ch) / 1500) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
-    int ki = (GET_BASE_KI(ch) / 1500) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
+    int st = (GET_BASE_ST(ch) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
+    int pl = (GET_BASE_PL(ch) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
+    int ki = (GET_BASE_KI(ch) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
     if (st > 500000) {
       st = 500000;
     }
@@ -4006,17 +4082,17 @@ void majin_gain(struct char_data *ch, int type)
     return;
   }
   else if (type == 1) {
-    int st = (GET_BASE_ST(ch) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
-    int pl = (GET_BASE_PL(ch) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
-    int ki = (GET_BASE_KI(ch) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
-    if (st > 1000000) {
-      st = 1000000;
+    int st = (GET_BASE_ST(ch) / 1000) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
+    int pl = (GET_BASE_PL(ch) / 1000) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
+    int ki = (GET_BASE_KI(ch) / 1000) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
+    if (st > 1200000) {
+      st = 1200000;
     }
-    if (ki > 1000000) {
-      ki = 1000000;
+    if (ki > 1200000) {
+      ki = 1200000;
     }
-    if (pl > 1000000) {
-      pl = 1000000;
+    if (pl > 1200000) {
+      pl = 1200000;
     }
      if (PLR_FLAGGED(ch, PLR_TRANS1)) {
       GET_MAX_HIT(ch) += pl * 2;
@@ -4045,9 +4121,9 @@ void majin_gain(struct char_data *ch, int type)
     return;
   }
   else if (type == 2) {
-    int st = (GET_BASE_ST(ch) / 1000) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
-    int pl = (GET_BASE_PL(ch) / 1000) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
-    int ki = (GET_BASE_KI(ch) / 1000) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
+    int st = (GET_BASE_ST(ch) / 900) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
+    int pl = (GET_BASE_PL(ch) / 900) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
+    int ki = (GET_BASE_KI(ch) / 900) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
     if (st > 1500000) {
       st = 1500000;
     }

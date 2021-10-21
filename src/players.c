@@ -447,6 +447,7 @@ int load_char(const char *name, struct char_data *ch)
 	GET_SDCOOLDOWN(ch) = 0;
     GET_BANK_GOLD(ch) = PFDEF_BANK;
     GET_ABSORBS(ch) = PFDEF_BANK;
+    GET_INGESTLEARNED(ch) = PFDEF_BANK;
     RACIAL_PREF(ch) = PFDEF_BANK;
     GET_UP(ch) = PFDEF_BANK;
     GET_FORGETING(ch) = PFDEF_BANK;
@@ -603,6 +604,7 @@ int load_char(const char *name, struct char_data *ch)
 
       case 'I':
              if (!strcmp(tag, "Id  "))  GET_IDNUM(ch)           = atol(line);
+        else if (!strcmp(tag, "INGl"))  GET_INGESTLEARNED(ch) = atoi(line);
         else if (!strcmp(tag, "Int "))  ch->real_abils.intel    = atoi(line);
         else if (!strcmp(tag, "Invs"))  GET_INVIS_LEV(ch)       = atoi(line);
       break;
@@ -1114,6 +1116,7 @@ void save_char(struct char_data * ch)
   if (GET_COOLDOWN(ch)     != PFDEF_BANK)       fprintf(fl, "Scoo: %d\n", GET_SDCOOLDOWN(ch));
   if (GET_ARMOR(ch)	       != PFDEF_AC)		    fprintf(fl, "Ac  : %d\n", GET_ARMOR(ch));
   if (GET_ABSORBS(ch)      != PFDEF_GOLD)       fprintf(fl, "Abso: %d\n", GET_ABSORBS(ch));
+  if (GET_INGESTLEARNED(ch)      != PFDEF_GOLD)       fprintf(fl, "INGl: %d\n", GET_INGESTLEARNED(ch));
   if (GET_UP(ch)           != PFDEF_GOLD)       fprintf(fl, "Upgr: %d\n", GET_UP(ch));
   if (GET_FORGETING(ch)    != PFDEF_BANK)       fprintf(fl, "Forg: %d\n", GET_FORGETING(ch));
   if (GET_FORGET_COUNT(ch) != PFDEF_BANK)       fprintf(fl, "Forc: %d\n", GET_FORGET_COUNT(ch));
