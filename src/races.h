@@ -5,8 +5,6 @@
 #ifndef CIRCLE_RACES_H
 #define CIRCLE_RACES_H
 
-#include "conf.h"
-#include "sysdep.h"
 #include "structs.h"
 #include "utils.h"
 

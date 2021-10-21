@@ -6,9 +6,6 @@
 *  Copyright (C) 1993 The Trustees of The Johns Hopkins University        *
 ************************************************************************* */
 
-#include "conf.h"
-#include "sysdep.h"
-
 #include "structs.h"
 
 void Crash_listrent(char *fname);

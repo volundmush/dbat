@@ -10,8 +10,6 @@
 
 #define __GENOLC_C__
 
-#include "conf.h"
-#include "sysdep.h"
 #include "structs.h"
 #include "utils.h"
 #include "db.h"

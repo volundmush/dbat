@@ -15,7 +15,6 @@
 ************************************************************************ */
 #include "act.h"
 
-
 ACMD(do_lightgrenade)
 {
  int perc, dge = 2, count = 0, skill;
@@ -3393,6 +3392,7 @@ ACMD(do_throw)
   return;
  }
 }
+
 ACMD(do_selfd)
 {
 

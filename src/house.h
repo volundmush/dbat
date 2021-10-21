@@ -1,8 +1,6 @@
 #ifndef __HOUSE_H__
 #define __HOUSE_H__
 
-#include "conf.h"
-#include "sysdep.h"
 #include "structs.h"
 #include "comm.h"
 #include "handler.h"

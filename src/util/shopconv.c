@@ -1,8 +1,5 @@
 /* code to convert 2.20 shop files to 3.0 shop files - written by Jeff Fink */
 
-#include "conf.h"
-#include "sysdep.h"
-
 #include "structs.h"
 #include "db.h"
 #include "utils.h"

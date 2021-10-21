@@ -5,8 +5,6 @@
 #ifndef CIRCLE_HEDIT_H
 #define CIRCLE_HEDIT_H
 
-#include "conf.h"
-#include "sysdep.h"
 #include "structs.h"
 #include "comm.h"
 #include "interpreter.h"

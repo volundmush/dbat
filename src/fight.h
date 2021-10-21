@@ -5,8 +5,6 @@
 #ifndef CIRCLE_FIGHT_H
 #define CIRCLE_FIGHT_H
 
-#include "conf.h"
-#include "sysdep.h"
 #include "structs.h"
 #include "utils.h"
 #include "comm.h"

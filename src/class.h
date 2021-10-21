@@ -5,8 +5,6 @@
 #ifndef CIRCLE_CLASS_H
 #define CIRCLE_CLASS_H
 
-#include "conf.h"
-#include "sysdep.h"
 #include "structs.h"
 #include "db.h"
 #include "utils.h"

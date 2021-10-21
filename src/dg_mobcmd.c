@@ -35,8 +35,6 @@
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
 
-#include "conf.h"
-#include "sysdep.h"
 #include "structs.h"
 #include "screen.h"
 #include "dg_scripts.h"

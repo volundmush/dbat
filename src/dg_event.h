@@ -15,8 +15,6 @@
 #ifndef __DG_EVENT_H__
 #define __DG_EVENT_H__
 
-#include "conf.h"
-#include "sysdep.h"
 #include "structs.h"
 #include "db.h"
 #include "utils.h"

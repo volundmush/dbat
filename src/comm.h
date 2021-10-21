@@ -11,8 +11,6 @@
 #ifndef __COMM_H__
 #define __COMM_H__
 
-
-#include "conf.h"
 #include "sysdep.h"
 
 #if CIRCLE_GNU_LIBC_MEMORY_TRACK
@@ -87,6 +85,7 @@
 #define COPYOVER_FILE "copyover.dat"
 
 /* comm.c */
+void send_to_eaves(const char *messg, struct char_data *tch, ...);
 size_t	send_to_char(struct char_data *ch, const char *messg, ...) __attribute__ ((format (printf, 2, 3)));
 void	send_to_all(const char *messg, ...) __attribute__ ((format (printf, 1, 2)));
 void	send_to_room(room_rnum room, const char *messg, ...) __attribute__ ((format (printf, 2, 3)));

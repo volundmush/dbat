@@ -5,8 +5,6 @@
 #ifndef CIRCLE_MEDIT_H
 #define CIRCLE_MEDIT_H
 
-#include "conf.h"
-#include "sysdep.h"
 #include "structs.h"
 #include "interpreter.h"
 #include "comm.h"

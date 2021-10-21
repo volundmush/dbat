@@ -8,31 +8,11 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-
-#include "conf.h"
-#include "sysdep.h"
-#include "structs.h"
-#include "utils.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "db.h"
-#include "spells.h"
-
-
-/* globals */
-extern int top_of_socialt;
-extern struct social_messg *soc_mess_list;
+#include "act.h"
 
 /* local functions */
-char *fread_action(FILE *fl, int nr);
-int find_action(int cmd);
-ACMD(do_action);
-ACMD(do_insult);
-void boot_social_messages(void);
-void free_social_messages(void);
-void free_action(struct social_messg *mess);
-void free_command_list(void);
+static char *fread_action(FILE *fl, int nr);
+static int find_action(int cmd);
 
 ACMD(do_action)
 {
@@ -112,8 +92,6 @@ ACMD(do_action)
   }
 }
 
-
-
 ACMD(do_insult)
 {
   char arg[MAX_INPUT_LENGTH];
@@ -160,8 +138,6 @@ ACMD(do_insult)
   } else
     send_to_char(ch, "I'm sure you don't want to insult *everybody*...\r\n");
 }
-
-
 
 void boot_social_messages(void)
 {
@@ -353,7 +329,7 @@ void free_command_list(void)
   complete_cmd_info = NULL;
 }
 
-char *fread_action(FILE *fl, int nr)
+static char *fread_action(FILE *fl, int nr)
 {
   char buf[MAX_STRING_LENGTH];
 
@@ -406,7 +382,7 @@ void free_action(struct social_messg *mess)  {
   memset(mess, 0, sizeof(struct social_messg));
 }
 
-int find_action(int cmd)
+static int find_action(int cmd)
 {
   int bot, top, mid;
 
@@ -499,4 +475,3 @@ action = &soc_mess_list[act_nr];
   }
   act(buf, FALSE, ch, 0, vict, TO_GMOTE);
 }
-
