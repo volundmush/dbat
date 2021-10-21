@@ -1,3 +1,6 @@
+#ifndef __CONF_H__
+#define __CONF_H__
+
 /* src/conf.h.in.  Generated automatically from configure.in by autoheader.  */
 
 /* Define to empty if the keyword does not work.  */
@@ -342,3 +345,5 @@
 #undef SIZEOF_SIZE_T
 #undef SIZEOF_TIME_T
 #undef SIZEOF_CHAR_P
+
+#endif

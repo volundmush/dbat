@@ -1,3 +1,8 @@
+#ifndef __SYSDEP_H__
+#define __SYSDEP_H__
+
+#include "conf.h"
+
 /* ************************************************************************
 *   File: sysdep.h                                      Part of CircleMUD *
 *  Usage: machine-specific defs based on values in conf.h (from configure)*
@@ -898,3 +903,5 @@ struct in_addr {
 
 
 #endif /* NO_LIBRARY_PROTOTYPES */
+
+#endif

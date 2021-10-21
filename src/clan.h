@@ -29,9 +29,6 @@
 #ifndef __CLAN_H__
 #define __CLAN_H__
 
-#include "conf.h"
-#include "sysdep.h"
-
 #include "structs.h"        // for char_data
 #include "db.h"             // for LIB_ETC
 #include "comm.h"           // for send_to_char

@@ -10,8 +10,6 @@
 
 #define __ACT_OTHER_C__
 
-#include "conf.h"
-#include "sysdep.h"
 #include "structs.h"
 #include "utils.h"
 #include "comm.h"

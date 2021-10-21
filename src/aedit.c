@@ -6,8 +6,6 @@
  * ftpable from ftp.circlemud.org:/pub/CircleMUD/contrib/code
  */
 
-#include "conf.h"
-#include "sysdep.h"
 #include "structs.h"
 #include "interpreter.h"
 #include "handler.h"

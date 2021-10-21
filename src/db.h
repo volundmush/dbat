@@ -10,10 +10,8 @@
 
 #ifndef __DB_H__
 #define __DB_H__
-#define __DB_C__
 
-#include "conf.h"
-#include "sysdep.h"
+
 #include "structs.h"
 #include "utils.h"
 #include "config.h"
@@ -172,6 +170,11 @@ extern struct reset_q_type reset_q;	/* queue of zones to be reset	 */
 extern struct char_data *EDRAGON;
 extern int WISH[2];
 extern int DRAGONR, DRAGONZ, DRAGONC, SHENRON;
+extern int circle_restrict;
+extern struct help_index_element *help_table;
+extern char *help, *ihelp, *credits, *news, *info, *wizlist, *immlist;
+extern char *policies, *handbook, *motd, *imotd;
+extern int top_of_helpt, dballtime;
 
 /* public procedures in db.c */
 void	boot_db(void);
@@ -190,6 +193,7 @@ void save_disabled(void);
 void free_disabled(void);
 void    free_help_table(void);
 void    load_help(FILE *fl, char *name);
+void auc_save(void);
 
 zone_rnum real_zone(zone_vnum vnum);
 room_rnum real_room(room_vnum vnum);

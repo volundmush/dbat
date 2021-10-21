@@ -8,8 +8,6 @@
 #ifndef __GUILD_H__
 #define __GUILD_H__
 
-#include "conf.h"
-#include "sysdep.h"
 #include "structs.h"
 #include "utils.h"
 #include "comm.h"
@@ -139,5 +137,7 @@ struct guild_data {
 /* Functions defined in guild.c */
 int print_skills_by_type(struct char_data *ch, char *buf, int maxsz, int sktype, char *argument);
 void levelup_parse(struct descriptor_data *d, char *arg);
+int rpp_to_level(struct char_data *ch);
+int slot_count(struct char_data *ch);
 
 #endif

@@ -9,8 +9,6 @@
 
 /* --relistan 2/22/99 - 2/24/99 */
 
-#include "conf.h"
-#include "sysdep.h"
 #include "structs.h"
 #include "interpreter.h"
 #include "comm.h"

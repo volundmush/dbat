@@ -8,25 +8,17 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.              *
 *  Vehicle.c written by Chris Jacobson <fear@athenet.net>		 *
 *************************************************************************/
-
 #include "vehicles.h"
-
-
-
-struct obj_data *get_obj_in_list_type(int type, struct obj_data *list);
-ACMD(do_look);
 
 #ifndef EXITN
 #  define EXITN(room, door)		(world[room].dir_option[door])
 #endif
 
-void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir);
-struct obj_data *find_control(struct char_data *ch);
-int ship_land_location(struct char_data *ch, struct obj_data *vehicle, char *arg);
-void disp_ship_locations(struct char_data *ch, struct obj_data *vehicle);
+static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, char *arg);
+static void disp_ship_locations(struct char_data *ch, struct obj_data *vehicle);
 
 /* This shows the player what locations the planet has to land at. */
-void disp_ship_locations(struct char_data *ch, struct obj_data *vehicle)
+static void disp_ship_locations(struct char_data *ch, struct obj_data *vehicle)
 {
  if (GET_ROOM_VNUM(IN_ROOM(vehicle)) == 50) { // Above Earth
   send_to_char(ch, "@D------------------[ @GEarth@D ]------------------@c\n");
@@ -91,7 +83,7 @@ void disp_ship_locations(struct char_data *ch, struct obj_data *vehicle)
  }
 }
 
-int ship_land_location(struct char_data *ch, struct obj_data *vehicle, char *arg)
+static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, char *arg)
 {
  int landspot = 50;
  if (GET_ROOM_VNUM(IN_ROOM(vehicle)) == 50) { // Above Earth
@@ -353,7 +345,7 @@ struct obj_data *find_hatch_by_vnum(int vnum)
 }
 
 /* Search the given list for an object type, and return a ptr to that obj*/
-struct obj_data *get_obj_in_list_type(int type, struct obj_data *list) 
+struct obj_data *get_obj_in_list_type(int type, struct obj_data *list)
 {
   struct obj_data * i;
 
@@ -363,7 +355,6 @@ struct obj_data *get_obj_in_list_type(int type, struct obj_data *list)
 
   return NULL;
 }
-
 
 /* Search the player's room, inventory and equipment for a control */
 struct obj_data *find_control(struct char_data *ch)
@@ -385,7 +376,7 @@ struct obj_data *find_control(struct char_data *ch)
 }
 
 /* Drive our vehicle into another vehicle */
- void drive_into_vehicle(struct char_data *ch, struct obj_data *vehicle, char *arg)
+static void drive_into_vehicle(struct char_data *ch, struct obj_data *vehicle, char *arg)
 {
   struct obj_data *vehicle_in_out;
   int was_in, is_in, is_going_to;
@@ -423,7 +414,7 @@ struct obj_data *find_control(struct char_data *ch)
 }
 
 /* Drive our vehicle out of another vehicle */
-void drive_outof_vehicle(struct char_data *ch, struct obj_data *vehicle)
+static void drive_outof_vehicle(struct char_data *ch, struct obj_data *vehicle)
 {
   struct obj_data *hatch, *vehicle_in_out;
   char   buf[MAX_INPUT_LENGTH];

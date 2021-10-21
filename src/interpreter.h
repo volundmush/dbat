@@ -13,8 +13,6 @@
 
 #define __INTERPRETER_C__
 
-#include "conf.h"
-#include "sysdep.h"
 #include "structs.h"
 #include "comm.h"
 #include "db.h"
@@ -45,6 +43,10 @@ ACMD(do_move);
 #define CMD_IS(cmd_name) (!strcmp(cmd_name, complete_cmd_info[cmd].command))
 #define IS_MOVE(cmdnum) (complete_cmd_info[cmdnum].command_pointer == do_move)
 
+
+void fingerUser(struct char_data *ch, char *name);
+int readUserIndex(char *name);
+void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, char *name);
 void	command_interpreter(struct char_data *ch, char *argument);
 int	search_block(char *arg, const char **list, int exact);
 char	lower( char c );

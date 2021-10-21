@@ -11,8 +11,10 @@
 #ifndef __STRUCTS_H__
 #define __STRUCTS_H__
 
-#include "conf.h"
 #include "sysdep.h"
+
+/* quick struct declarations */
+struct reset_com;
 
 /*
  * Intended use of this macro is to allow external packages to work with

@@ -5,8 +5,6 @@
 #ifndef CIRCLE_HSEDIT_H
 #define CIRCLE_HSEDIT_H
 
-#include "conf.h"
-#include "sysdep.h"
 #include "structs.h"
 #include "comm.h"
 #include "utils.h"

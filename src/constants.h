@@ -9,9 +9,6 @@
 
 #ifndef __CONSTANTS_H__
 #define __CONSTANTS_H__
-
-#include "conf.h"
-#include "sysdep.h"
 #include "structs.h"
 #include "interpreter.h"	/* alias_data */
 

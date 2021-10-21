@@ -5,8 +5,6 @@
 #ifndef CIRCLE_DG_COMM_H
 #define CIRCLE_DG_COMM_H
 
-#include "conf.h"
-#include "sysdep.h"
 #include "structs.h"
 #include "dg_scripts.h"
 #include "utils.h"

@@ -5,9 +5,6 @@
 *  All Rights Reserved                                                    *
 ************************************************************************* */
 
-#include "conf.h"
-#include "sysdep.h"
-
 #include "structs.h"
 #include "db.h"
 
