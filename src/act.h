@@ -1,9 +1,9 @@
+#ifndef CIRCLE_ACT_H
+#define CIRCLE_ACT_H
 //
 // Created by volund on 10/20/21.
 //
 
-#ifndef CIRCLE_ACT_H
-#define CIRCLE_ACT_H
 
 #include "conf.h"
 #include "sysdep.h"

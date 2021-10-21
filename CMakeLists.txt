@@ -44,7 +44,7 @@ target_include_directories(circle PUBLIC libs/sqlitepp/include)
 target_include_directories(circle PUBLIC libs/asio/asio/include)
 
 #set_property(TARGET circle PROPERTY CXX_STANDARD 17)
-set_property(TARGET circle PROPERTY C_STANDARD 17)
+set_property(TARGET circle PROPERTY C_STANDARD 11)
 
 
 SET(circle_link ${CMAKE_INSTALL_PREFIX}/bin/)
