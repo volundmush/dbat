@@ -56,7 +56,7 @@ dkms.conf
 cmake-build-*
 
 # DBAT
-lib/
+lib
 src/Makefile
 config.log
 config.status
