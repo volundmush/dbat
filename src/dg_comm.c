@@ -22,10 +22,7 @@ extern int find_first_step(room_rnum src, room_rnum target);
 
 /* local functions */
 void sub_write_to_char(char_data *ch, char *tokens[], void *otokens[], char type[]);
-void send_to_imm(char *messg, ...);
-void fly_zone(zone_rnum zone, char *messg, struct char_data *ch);
-void send_to_scouter(char *messg, struct char_data *ch, int num, int type);
-void send_to_sense(int type, char *messg, struct char_data *ch);
+
 
 /* same as any_one_arg except that it stops at punctuation */
 char *any_one_name(char *argument, char *first_arg)

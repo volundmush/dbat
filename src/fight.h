@@ -18,4 +18,8 @@
 #include "feats.h"
 #include "combat.h"
 
+// functions
+void death_cry(struct char_data *ch);
+int group_bonus(struct char_data *ch, int type);
+
 #endif //CIRCLE_FIGHT_H

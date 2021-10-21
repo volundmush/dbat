@@ -15,4 +15,7 @@
 #include "dg_scripts.h"
 #include "constants.h"
 
+// functions
+void timed_dt(struct char_data *ch);
+
 #endif //CIRCLE_LIMITS_H

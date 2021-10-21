@@ -7,68 +7,22 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-
-#include "structs.h"
-#include "utils.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "db.h"
-#include "spells.h"
-#include "house.h"
-#include "constants.h"
-#include "dg_scripts.h"
-
-/* external functions */
-extern int slot_count(struct char_data *ch);
-extern void fly_zone(zone_rnum zone, char *messg, struct char_data *ch);
-extern void improve_skill(struct char_data *ch, int skill, int num);
-void die(struct char_data * ch, struct char_data * killer);
-void send_to_imm(char *messg, ...);
-extern struct time_info_data time_info;
-extern zone_rnum real_zone_by_thing(room_vnum vznum);
-extern void send_to_scouter(char *messg, struct char_data *ch, int num, int type);
-extern void send_to_sense(int type, char *messg, struct char_data *ch);
-extern void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir);
-struct obj_data *find_vehicle_by_vnum(int vnum);
-struct obj_data *find_control(struct char_data *ch);
-int special(struct char_data *ch, int cmd, char *arg);
-void death_cry(struct char_data *ch);
-int find_eq_pos(struct char_data *ch, struct obj_data *obj, char *arg);
-int buildwalk(struct char_data *ch, int dir);
-struct obj_data *find_vehicle_by_vnum(int vnum);
-struct obj_data *find_hatch_by_vnum(int vnum);
-void timed_dt(struct char_data *ch);
-int can_edit_zone(struct char_data *ch, zone_rnum rnum);
-void dismount_char(struct char_data *ch);
-void mount_char(struct char_data *ch, char_data *mount);
-void handle_fall(struct char_data *ch);
-void carry_drop(struct char_data *ch, int type);
-int group_bonus(struct char_data *ch, int type);
+#include "act.h"
 
 /* local functions */
-int check_swim(struct char_data *ch);
-int land_location(struct char_data *ch, char *arg);
-void disp_locations(struct char_data *ch);
-int has_boat(struct char_data *ch);
-int find_door(struct char_data *ch, const char *type, char *dir, const char *cmdname);
-int has_key(struct char_data *ch, obj_vnum key);
-void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int scmd);
-int ok_pick(struct char_data *ch, obj_vnum keynum, int pickproof, int dclock, int scmd, struct obj_data *obj);
-int has_flight(struct char_data *ch);
-void handle_teleport(struct char_data *ch, struct char_data *tar, int location);
-ACMD(do_gen_door);
-ACMD(do_enter);
-ACMD(do_leave);
-ACMD(do_stand);
-ACMD(do_fly);
-ACMD(do_sit);
-ACMD(do_rest);
-ACMD(do_sleep);
-ACMD(do_wake);
-ACMD(do_follow);
-ACMD(do_flee);
-ACMD(do_carry);
+static void handle_fall(struct char_data *ch);
+static int check_swim(struct char_data *ch);
+static void disp_locations(struct char_data *ch);
+static int has_boat(struct char_data *ch);
+static int find_door(struct char_data *ch, const char *type, char *dir, const char *cmdname);
+static int has_key(struct char_data *ch, obj_vnum key);
+static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int scmd);
+static int ok_pick(struct char_data *ch, obj_vnum keynum, int pickproof, int dclock, int scmd, struct obj_data *obj);
+static int has_flight(struct char_data *ch);
+static int do_simple_enter(struct char_data *ch, struct obj_data *obj, int need_specials_check);
+static int perform_enter_obj(struct char_data *ch, struct obj_data *obj, int need_specials_check);
+static int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_specials_check);
+static int perform_leave_obj(struct char_data *ch, struct obj_data *obj, int need_specials_check);
 
 /* This handles teleporting players with instant transmission or skills like it. */
 void handle_teleport(struct char_data *ch, struct char_data *tar, int location)
@@ -451,7 +405,7 @@ int land_location(struct char_data *ch, char *arg)
 }
 
 /* This shows the player what locations the planet has to land at. */
-void disp_locations(struct char_data *ch)
+static void disp_locations(struct char_data *ch)
 {
  if (GET_ROOM_VNUM(IN_ROOM(ch)) == 50) { // Above Earth
   send_to_char(ch, "@D------------------[ @GEarth@D ]------------------@c\n");
@@ -561,7 +515,7 @@ ACMD(do_land)
 
 
 /* simple function to determine if char can walk on water */
-int has_boat(struct char_data *ch)
+static int has_boat(struct char_data *ch)
 {
   struct obj_data *obj;
   int i;
@@ -591,7 +545,7 @@ int has_boat(struct char_data *ch)
 }
 
 /* simple function to determine if char can fly */
-int has_flight(struct char_data *ch)
+static int has_flight(struct char_data *ch)
 {
   struct obj_data *obj;
 
@@ -1022,7 +976,6 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
   return (1);
 }
 
-
 int perform_move(struct char_data *ch, int dir, int need_specials_check)
 {
   room_rnum was_in;
@@ -1105,7 +1058,6 @@ int perform_move(struct char_data *ch, int dir, int need_specials_check)
   }
   return (0);
 }
-
 
 ACMD(do_move)
 {
@@ -1391,8 +1343,7 @@ ACMD(do_move)
   }
 }
 
-
-int find_door(struct char_data *ch, const char *type, char *dir, const char *cmdname)
+static int find_door(struct char_data *ch, const char *type, char *dir, const char *cmdname)
 {
   int door;
 
@@ -1432,8 +1383,7 @@ int find_door(struct char_data *ch, const char *type, char *dir, const char *cmd
   }
 }
 
-
-int has_key(struct char_data *ch, obj_vnum key)
+static int has_key(struct char_data *ch, obj_vnum key)
 {
   struct obj_data *o;
   int i;
@@ -1454,8 +1404,6 @@ int has_key(struct char_data *ch, obj_vnum key)
   return (0);
 }
 
-
-
 #define NEED_OPEN	(1 << 0)
 #define NEED_CLOSED	(1 << 1)
 #define NEED_UNLOCKED	(1 << 2)
@@ -1470,7 +1418,7 @@ const char *cmd_door[NUM_DOOR_CMD] =
   "pick"
 };
 
-const int flags_door[] =
+static const int flags_door[] =
 {
   NEED_CLOSED | NEED_UNLOCKED,
   NEED_OPEN,
@@ -1497,7 +1445,7 @@ const int flags_door[] =
 		(TOGGLE_BIT(GET_OBJ_VAL(obj, VAL_CONTAINER_FLAGS), CONT_LOCKED)) :\
 		(TOGGLE_BIT(EXITN(room, door)->exit_info, EX_LOCKED)))
 
-void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int scmd)
+static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int scmd)
 {
   char buf[MAX_STRING_LENGTH];
   size_t len;
@@ -1714,7 +1662,7 @@ void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int scmd)
   *dbuf = '\0';
 }
 
-int ok_pick(struct char_data *ch, obj_vnum keynum, int pickproof, int dclock, int scmd, struct obj_data *hatch)
+static int ok_pick(struct char_data *ch, obj_vnum keynum, int pickproof, int dclock, int scmd, struct obj_data *hatch)
 {
   int skill_lvl, found = FALSE;
   struct obj_data *obj, *next_obj;
@@ -1875,7 +1823,7 @@ ACMD(do_gen_door)
   return;
 }
 
-int do_simple_enter(struct char_data *ch, struct obj_data *obj, int need_specials_check)
+static int do_simple_enter(struct char_data *ch, struct obj_data *obj, int need_specials_check)
 {
   room_rnum dest_room = real_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST));
   room_rnum was_in = IN_ROOM(ch);
@@ -2001,7 +1949,7 @@ int do_simple_enter(struct char_data *ch, struct obj_data *obj, int need_special
   return 1;
 }
 
-int perform_enter_obj(struct char_data *ch, struct obj_data *obj, int need_specials_check)
+static int perform_enter_obj(struct char_data *ch, struct obj_data *obj, int need_specials_check)
 {
   room_rnum was_in = IN_ROOM(ch);
   int could_move = FALSE;
@@ -2099,7 +2047,7 @@ ACMD(do_enter)
   }
 }
 
-int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_specials_check)
+static int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_specials_check)
 
 {
   room_rnum was_in = IN_ROOM(ch), dest_room = NOWHERE;
@@ -2255,7 +2203,7 @@ int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_special
   return 1;
 }
 
-int perform_leave_obj(struct char_data *ch, struct obj_data *obj, int need_specials_check)
+static int perform_leave_obj(struct char_data *ch, struct obj_data *obj, int need_specials_check)
 {
   room_rnum was_in = IN_ROOM(ch);
   int could_move = FALSE;
@@ -2314,7 +2262,7 @@ ACMD(do_leave)
   }
 }
 
-void handle_fall(struct char_data *ch)
+static void handle_fall(struct char_data *ch)
 {
  int room = -1;
  while (EXIT(ch, 5) && SECT(IN_ROOM(ch)) == SECT_FLYING) {
@@ -2363,7 +2311,7 @@ void handle_fall(struct char_data *ch)
 
 }
 
-int check_swim(struct char_data *ch)
+static int check_swim(struct char_data *ch)
 {
 
  if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE)) {
@@ -2794,6 +2742,7 @@ ACMD(do_fly)
   }
  }
 }
+
 ACMD(do_stand)
 {
   struct obj_data *chair;
@@ -3381,7 +3330,6 @@ ACMD(do_wake)
   }
 }
 
-
 ACMD(do_follow)
 {
   char buf[MAX_INPUT_LENGTH];
@@ -3430,4 +3378,3 @@ ACMD(do_follow)
     }
   }
 }
-
