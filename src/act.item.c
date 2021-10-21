@@ -7,59 +7,19 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include "act.h"
 
-#include "conf.h"
-#include "sysdep.h"
-#include "structs.h"
-#include "utils.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "db.h"
-#include "spells.h"
-#include "constants.h"
-#include "dg_scripts.h"
-#include "oasis.h"
-#include "assemblies.h"
-#include "boards.h"
-#include "screen.h"
-#include "feats.h"
 
-/* extern functions */
-extern struct obj_data *find_control(struct char_data *ch);
-extern int slot_count(struct char_data *ch);
-void search_replace(char *string, const char *find, const char *replace);
-extern int level_exp(struct char_data *ch, int level);
-extern void send_to_imm(char *messg, ...);
-extern void log_imm_action(char *messg, ...);
-extern time_t BOARDNEWMORT;
-extern time_t BOARDNEWIMM;
-extern time_t BOARDNEWDUO;
-extern time_t BOARDNEWBUI;
-extern time_t BOARDNEWCOD;
-extern int WISHTIME;
-extern int dballtime;
-extern int SELFISHMETER;
-extern int DBALL_HUNTER1;
-extern int DBALL_HUNTER2;
-extern int DBALL_HUNTER1_VNUM;
-extern int DBALL_HUNTER2_VNUM;
-extern struct descriptor_data *descriptor_list;
-extern void auc_save(void);
-extern zone_rnum real_zone_by_thing(room_vnum vznum);
-char *find_exdesc(char *word, struct extra_descr_data *list);
-void item_check(struct obj_data *object, struct char_data *ch);
-void dball_load(void);
-ACMD(do_say);
-
-/* local functions */
-int curbid = 0;				/* current bid on item being auctioned */
-int aucstat = AUC_NULL_STATE;		/* state of auction.. first_bid etc.. */
+/* global variables */
 struct obj_data *obj_selling = NULL;	/* current object for sale */
 struct char_data *ch_selling = NULL;	/* current character selling obj */
 struct char_data *ch_buying  = NULL;	/* current character buying the object */
 
-char *auctioneer[AUC_BID + 1] = {
+/* local vvariables  */
+static  int curbid = 0;				/* current bid on item being auctioned */
+static int aucstat = AUC_NULL_STATE;		/* state of auction.. first_bid etc.. */
+
+static const char *auctioneer[AUC_BID + 1] = {
 	
 	"@D[@CAUCTION@c: @C$n@W puts $p@W up for sale at @Y%d@W zenni.@D]@n",
 	"@D[@CAUCTION@c: @W$p@W at @Y%d@W zenni going once!@D]@n",
@@ -74,59 +34,35 @@ char *auctioneer[AUC_BID + 1] = {
 	"@D[@CAUCTION@c: @C$n@W bids @Y%d@W zenni on $p@W.@D]@n"
 };
 
-void majin_gain(struct char_data *ch, int type);
-int check_insidebag(struct obj_data *cont, double mult);
-int can_take_obj(struct char_data *ch, struct obj_data *obj);
-void get_check_money(struct char_data *ch, struct obj_data *obj);
-int perform_get_from_room(struct char_data *ch, struct obj_data *obj);
-void get_from_room(struct char_data *ch, char *arg, int amount);
-void perform_give_gold(struct char_data *ch, struct char_data *vict, int amount);
-void perform_give(struct char_data *ch, struct char_data *vict, struct obj_data *obj);
-int perform_drop(struct char_data *ch, struct obj_data *obj, byte mode, const char *sname, room_rnum RDR);
-void perform_drop_gold(struct char_data *ch, int amount, byte mode, room_rnum RDR);
-struct char_data *give_find_vict(struct char_data *ch, char *arg);
-void weight_change_object(struct obj_data *obj, int weight);
-void perform_put(struct char_data *ch, struct obj_data *obj, struct obj_data *cont);
-void name_from_drinkcon(struct obj_data *obj);
-void get_from_container(struct char_data *ch, struct obj_data *cont, char *arg, int mode, int amount);
-void name_to_drinkcon(struct obj_data *obj, int type);
-void wear_message(struct char_data *ch, struct obj_data *obj, int where);
-void perform_wear(struct char_data *ch, struct obj_data *obj, int where);
-int find_eq_pos(struct char_data *ch, struct obj_data *obj, char *arg);
-void perform_get_from_container(struct char_data *ch, struct obj_data *obj, struct obj_data *cont, int mode);
-void perform_remove(struct char_data *ch, int pos);
-int hands(struct char_data * ch);
-cl_sint64 max_carry_weight(struct char_data *ch);
-void start_auction(struct char_data * ch, struct obj_data * obj, int 
+/* local functions */
+static void majin_gain(struct char_data *ch, int type);
+
+static int can_take_obj(struct char_data *ch, struct obj_data *obj);
+static void get_check_money(struct char_data *ch, struct obj_data *obj);
+static void get_from_room(struct char_data *ch, char *arg, int howmany);
+static void perform_give_gold(struct char_data *ch, struct char_data *vict, int amount);
+static void perform_give(struct char_data *ch, struct char_data *vict, struct obj_data *obj);
+static int perform_drop(struct char_data *ch, struct obj_data *obj, byte mode, const char *sname, room_rnum RDR);
+static void perform_drop_gold(struct char_data *ch, int amount, byte mode, room_rnum RDR);
+static struct char_data *give_find_vict(struct char_data *ch, char *arg);
+static void perform_put(struct char_data *ch, struct obj_data *obj, struct obj_data *cont);
+static void get_from_container(struct char_data *ch, struct obj_data *cont, char *arg, int mode, int howmany);
+static void wear_message(struct char_data *ch, struct obj_data *obj, int where);
+static void perform_get_from_container(struct char_data *ch, struct obj_data *obj, struct obj_data *cont, int mode);
+static int hands(struct char_data * ch);
+static void start_auction(struct char_data * ch, struct obj_data * obj, int
 bid);
-void auc_stat(struct char_data * ch, struct obj_data *obj);
-void stop_auction(int type, struct char_data * ch);
-void check_auction(void);
-void auc_send_to_all(char *messg, bool buyer);
-int check_saveroom_count(struct char_data *ch, struct obj_data *cont);
-int has_housekey(struct char_data *ch, struct obj_data *obj);
-void harvest_plant(struct char_data *ch, struct obj_data *plant);
-char buf[MAX_STRING_LENGTH];
-ACMD(do_split);
-ACMD(do_auction);
-ACMD(do_bid);
-ACMD(do_assemble);
-ACMD(do_remove);
-ACMD(do_put);
-ACMD(do_get);
-ACMD(do_drop);
-ACMD(do_give);
-ACMD(do_drink);
-ACMD(do_eat);
-ACMD(do_pour);
-ACMD(do_wear);
-ACMD(do_wield);
-ACMD(do_grab);
-ACMD(do_twohand);
-ACMD(do_deploy);
-ACMD(do_pack);
-ACMD(do_garden);
-ACMD(do_refuel);
+static void auc_stat(struct char_data * ch, struct obj_data *obj);
+static void auc_send_to_all(char *messg, bool buyer);
+static int has_housekey(struct char_data *ch, struct obj_data *obj);
+static void harvest_plant(struct char_data *ch, struct obj_data *plant);
+static int can_harvest(struct obj_data *plant);
+static char *find_exdesc_keywords(char *word, struct extra_descr_data *list);
+
+/* local variables */
+static char buf[MAX_STRING_LENGTH];
+
+// definitions
 
 ACMD(do_refuel)
 {
@@ -180,54 +116,30 @@ ACMD(do_refuel)
 }
 }
 
-int can_harvest(struct obj_data *plant)
+static int can_harvest(struct obj_data *plant)
 {
- int result = FALSE;
 
  switch (GET_OBJ_VNUM(plant)) {
   case 250:
-   result = TRUE;
-   break;
   case 1129:
-   result = TRUE;
-   break;
   case 17210:
-   result = TRUE;
-   break;
   case 17211:
-   result = TRUE;
-   break;
   case 17214:
-   result = TRUE;
-   break;
   case 17216:
-   result = TRUE;
-   break;
   case 17218:
-   result = TRUE;
-   break;
   case 17220:
-   result = TRUE;
-   break;
   case 17222:
-   result = TRUE;
-   break;
   case 17224:
-   result = TRUE;
-   break;
   case 17226:
-   result = TRUE;
-   break;
   case 3702:
-   result = TRUE;
-   break;
+   return TRUE;
  }
 
- return (result);
+ return FALSE;
 
 }
 
-void harvest_plant(struct char_data *ch, struct obj_data *plant)
+static void harvest_plant(struct char_data *ch, struct obj_data *plant)
 {
  int extract = FALSE, reward = rand_number(5, 15), count = reward;
  struct obj_data *fruit = NULL;
@@ -746,7 +658,7 @@ ACMD(do_garden)
  }
 }
 
-int has_housekey(struct char_data *ch, struct obj_data *obj)
+static int has_housekey(struct char_data *ch, struct obj_data *obj)
 {
 
     struct obj_data *obj2 = NULL, *next_obj;
@@ -1102,7 +1014,7 @@ ACMD(do_twohand)
  }
 }
 
-void start_auction(struct char_data * ch, struct obj_data * obj, int bid)
+static void start_auction(struct char_data * ch, struct obj_data * obj, int bid)
 {
 	/* Take object from character and set variables */
 	
@@ -2056,7 +1968,7 @@ void stop_auction(int type, struct char_data * ch)
 
 }
 
-void auc_stat(struct char_data *ch, struct obj_data *obj)
+static void auc_stat(struct char_data *ch, struct obj_data *obj)
 {
 			
 	if (aucstat == AUC_NULL_STATE)
@@ -2085,7 +1997,7 @@ void auc_stat(struct char_data *ch, struct obj_data *obj)
 	}
 }
 
-void auc_send_to_all(char *messg, bool buyer)
+static void auc_send_to_all(char *messg, bool buyer)
 {
   struct descriptor_data *i;
 
@@ -2325,7 +2237,7 @@ ACMD(do_assemble)
   }
 }
 
-void perform_put(struct char_data *ch, struct obj_data *obj,
+static void perform_put(struct char_data *ch, struct obj_data *obj,
 		      struct obj_data *cont)
 {
 
@@ -2500,9 +2412,7 @@ ACMD(do_put)
   }
 }
 
-
-
-int can_take_obj(struct char_data *ch, struct obj_data *obj)
+static int can_take_obj(struct char_data *ch, struct obj_data *obj)
 {
   if (!(CAN_WEAR(obj, ITEM_WEAR_TAKE))) {
     act("$p: you can't take that!", FALSE, ch, obj, 0, TO_CHAR);
@@ -2520,8 +2430,7 @@ int can_take_obj(struct char_data *ch, struct obj_data *obj)
   return (1);
 }
 
-
-void get_check_money(struct char_data *ch, struct obj_data *obj)
+static void get_check_money(struct char_data *ch, struct obj_data *obj)
 {
   int value = GET_OBJ_VAL(obj, VAL_MONEY_SIZE);
 
@@ -2556,8 +2465,7 @@ void get_check_money(struct char_data *ch, struct obj_data *obj)
   }
 }
 
-
-void perform_get_from_container(struct char_data *ch, struct obj_data *obj,
+static void perform_get_from_container(struct char_data *ch, struct obj_data *obj,
 				     struct obj_data *cont, int mode)
 {
   if (mode == FIND_OBJ_INV || mode == FIND_OBJ_EQUIP || can_take_obj(ch, obj)) {
@@ -2599,7 +2507,7 @@ void perform_get_from_container(struct char_data *ch, struct obj_data *obj,
 }
 
 
-void get_from_container(struct char_data *ch, struct obj_data *cont,
+static void get_from_container(struct char_data *ch, struct obj_data *cont,
 			     char *arg, int mode, int howmany)
 {
   struct obj_data *obj, *next_obj;
@@ -2693,7 +2601,7 @@ int perform_get_from_room(struct char_data *ch, struct obj_data *obj)
   return (0);
 }
 
-char *find_exdesc_keywords(char *word, struct extra_descr_data *list)
+static char *find_exdesc_keywords(char *word, struct extra_descr_data *list)
 {
   struct extra_descr_data *i;
 
@@ -2704,7 +2612,7 @@ char *find_exdesc_keywords(char *word, struct extra_descr_data *list)
   return (NULL);
 }
 
-void get_from_room(struct char_data *ch, char *arg, int howmany)
+static void get_from_room(struct char_data *ch, char *arg, int howmany)
 {
   struct obj_data *obj, *next_obj;
   int dotmode, found = 0;
@@ -2752,8 +2660,6 @@ void get_from_room(struct char_data *ch, char *arg, int howmany)
     }
   }
 }
-
-
 
 ACMD(do_get)
 {
@@ -2834,8 +2740,7 @@ ACMD(do_get)
   }
 }
 
-
-void perform_drop_gold(struct char_data *ch, int amount,
+static void perform_drop_gold(struct char_data *ch, int amount,
 		            byte mode, room_rnum RDR)
 {
   struct obj_data *obj;
@@ -2893,11 +2798,10 @@ void perform_drop_gold(struct char_data *ch, int amount,
   }
 }
 
-
 #define VANISH(mode) ((mode == SCMD_DONATE || mode == SCMD_JUNK) ? \
 		      "  It vanishes in a puff of smoke!" : "")
 
-int perform_drop(struct char_data *ch, struct obj_data *obj,
+static int perform_drop(struct char_data *ch, struct obj_data *obj,
 		     byte mode, const char *sname, room_rnum RDR)
 {
   char buf[MAX_STRING_LENGTH];
@@ -3010,8 +2914,6 @@ int perform_drop(struct char_data *ch, struct obj_data *obj,
 
   return (0);
 }
-
-
 
 ACMD(do_drop)
 {
@@ -3154,8 +3056,7 @@ ACMD(do_drop)
   }
 }
 
-
-void perform_give(struct char_data *ch, struct char_data *vict,
+static void perform_give(struct char_data *ch, struct char_data *vict,
 		       struct obj_data *obj)
 {
   if (!give_otrigger(obj, ch, vict)) 
@@ -3232,7 +3133,7 @@ void perform_give(struct char_data *ch, struct char_data *vict,
 }
 
 /* utility function for give */
-struct char_data *give_find_vict(struct char_data *ch, char *arg)
+static struct char_data *give_find_vict(struct char_data *ch, char *arg)
 {
   struct char_data *vict;
 
@@ -3251,8 +3152,7 @@ struct char_data *give_find_vict(struct char_data *ch, char *arg)
   return (NULL);
 }
 
-
-void perform_give_gold(struct char_data *ch, struct char_data *vict,
+static void perform_give_gold(struct char_data *ch, struct char_data *vict,
 		            int amount)
 {
   char buf[MAX_STRING_LENGTH];
@@ -3373,8 +3273,6 @@ ACMD(do_give)
   }
 }
 
-
-
 void weight_change_object(struct obj_data *obj, int weight)
 {
   struct obj_data *tmp_obj;
@@ -3398,8 +3296,6 @@ void weight_change_object(struct obj_data *obj, int weight)
      */
   }
 }
-
-
 
 void name_from_drinkcon(struct obj_data *obj)
 {
@@ -3446,8 +3342,6 @@ void name_from_drinkcon(struct obj_data *obj)
   obj->name = new_name;
 }
 
-
-
 void name_to_drinkcon(struct obj_data *obj, int type)
 {
   char *new_name;
@@ -3463,8 +3357,6 @@ void name_to_drinkcon(struct obj_data *obj, int type)
 
   obj->name = new_name;
 }
-
-
 
 ACMD(do_drink)
 {
@@ -3687,8 +3579,6 @@ ACMD(do_drink)
   }
   return;
 }
-
-
 
 ACMD(do_eat)
 {
@@ -3992,8 +3882,7 @@ ACMD(do_eat)
   }
 }
 
-
-void majin_gain(struct char_data *ch, int type)
+static void majin_gain(struct char_data *ch, int type)
 {
   if (!IS_MAJIN(ch) || IS_NPC(ch)) {
    return;
@@ -4313,9 +4202,7 @@ ACMD(do_pour)
   weight_change_object(to_obj, amount);	/* Add weight */
 }
 
-
-
-void wear_message(struct char_data *ch, struct obj_data *obj, int where)
+static void wear_message(struct char_data *ch, struct obj_data *obj, int where)
 {
   const char *wear_messages[][2] = {
     {"$n lights $p and holds it.",
@@ -4393,7 +4280,7 @@ void wear_message(struct char_data *ch, struct obj_data *obj, int where)
   act(wear_messages[where][1], FALSE, ch, obj, 0, TO_CHAR);
 }
 
-int hands(struct char_data * ch)
+static int hands(struct char_data * ch)
 {
   int x;
 
@@ -4519,8 +4406,6 @@ void perform_wear(struct char_data *ch, struct obj_data *obj, int where)
   equip_char(ch, obj, where);
 }
 
-
-
 int find_eq_pos(struct char_data *ch, struct obj_data *obj, char *arg)
 {
   int where = -1;
@@ -4576,8 +4461,6 @@ int find_eq_pos(struct char_data *ch, struct obj_data *obj, char *arg)
   }
   return (where);
 }
-
-
 
 ACMD(do_wear)
 {
@@ -4663,8 +4546,6 @@ ACMD(do_wear)
   }
 }
 
-
-
 ACMD(do_wield)
 {
   char arg[MAX_INPUT_LENGTH];
@@ -4697,8 +4578,6 @@ ACMD(do_wield)
     }
   }
 }
-
-
 
 ACMD(do_grab)
 {
@@ -4738,8 +4617,6 @@ ACMD(do_grab)
   }
 }
 
-
-
 void perform_remove(struct char_data *ch, int pos)
 {
   struct obj_data *obj;
@@ -4773,8 +4650,6 @@ void perform_remove(struct char_data *ch, int pos)
      }
   }
 }
-
-
 
 ACMD(do_remove)
 {
@@ -4968,4 +4843,3 @@ cl_sint64 max_carry_weight(struct char_data *ch)
   total = 1;
   return (total * abil);
 }
-

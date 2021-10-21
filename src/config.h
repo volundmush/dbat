@@ -5,10 +5,6 @@
 #ifndef CIRCLE_CONFIG_H
 #define CIRCLE_CONFIG_H
 
-#define __CONFIG_C__
-
-#include "conf.h"
-#include "sysdep.h"
 #include "structs.h"
 #include "interpreter.h"	/* alias_data definition for structs.h */
 

@@ -11,8 +11,6 @@
 #ifndef __HANDLER_H__
 #define __HANDLER_H__
 
-#include "conf.h"
-#include "sysdep.h"
 #include "structs.h"
 #include "utils.h"
 #include "comm.h"
@@ -25,6 +23,7 @@
 #include "races.h"
 
 /* handling the affected-structures */
+void item_check(struct obj_data *object, struct char_data *ch);
 void	affect_total(struct char_data *ch);
 void	affect_modify(struct char_data * ch, int loc, int mod, int spec, long bitv, bool add);
 void	affect_to_char(struct char_data *ch, struct affected_type *af);

@@ -16,7 +16,6 @@
 #define MAX_FILESIZE	8192
 #define LINEBUF_SIZE	128
 
-#include "conf.h"
 #include "sysdep.h"
 
 

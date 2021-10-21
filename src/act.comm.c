@@ -7,21 +7,15 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-
 #include "act.h"
 
-/* extern functions */
-extern struct time_info_data *real_time_passed(time_t t2, time_t t1);
-extern void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, char *name);
-extern void search_replace(char *string, const char *find, const char *replace);
-extern void send_to_eaves(const char *messg, struct char_data *tch, ...);
-extern void send_to_imm(char *messg, ...);
-
 /* local functions */
-void perform_tell(struct char_data *ch, struct char_data *vict, char *arg);
-int is_tell_ok(struct char_data *ch, struct char_data *vict);
-void handle_whisper(char *buf, struct char_data *ch, struct char_data *vict);
-char *overhear(char *buf, int type);
+static void perform_tell(struct char_data *ch, struct char_data *vict, char *arg);
+static int is_tell_ok(struct char_data *ch, struct char_data *vict);
+static void handle_whisper(char *buf, struct char_data *ch, struct char_data *vict);
+static char *overhear(char *buf, int type);
+static void list_languages(struct char_data *ch);
+static void garble_text(char *string, int known, int lang);
 
 
 
@@ -38,7 +32,7 @@ static const char *languages[] =
   "\n"
 };
 
-void list_languages(struct char_data *ch)
+static void list_languages(struct char_data *ch)
 {
   int a = 0, i;
 
@@ -134,7 +128,7 @@ ACMD(do_languages)
 
 }
 
-void garble_text(char *string, int known, int lang)
+static void garble_text(char *string, int known, int lang)
 {
   char letters[50] = "";
   int i;
@@ -793,8 +787,7 @@ ACMD(do_gsay)
   }
 }
 
-
-void perform_tell(struct char_data *ch, struct char_data *vict, char *arg)
+static void perform_tell(struct char_data *ch, struct char_data *vict, char *arg)
 {
   char buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
 
@@ -837,7 +830,7 @@ void perform_tell(struct char_data *ch, struct char_data *vict, char *arg)
     GET_LAST_TELL(vict) = GET_IDNUM(ch);
 }
 
-int is_tell_ok(struct char_data *ch, struct char_data *vict)
+static int is_tell_ok(struct char_data *ch, struct char_data *vict)
 {
 
   if (ch == vict)
@@ -915,7 +908,6 @@ ACMD(do_tell)
 
 }
 
-
 ACMD(do_reply)
 {
   struct char_data *tch = character_list;
@@ -960,7 +952,6 @@ ACMD(do_reply)
       perform_tell(ch, tch, argument);
   }
 }
-
 
 ACMD(do_spec_comm)
 {
@@ -1032,8 +1023,7 @@ ACMD(do_spec_comm)
   }
 }
 
-
-void handle_whisper(char *buf, struct char_data *ch, struct char_data *vict)
+static void handle_whisper(char *buf, struct char_data *ch, struct char_data *vict)
 {
  struct char_data *tch;
 
@@ -1071,7 +1061,7 @@ void handle_whisper(char *buf, struct char_data *ch, struct char_data *vict)
 
 }
 
-char *overhear(char *buf, int type)
+static char *overhear(char *buf, int type)
 {
 
  switch (type) {
@@ -1266,8 +1256,6 @@ ACMD(do_write)
   }
 }
 
-
-
 ACMD(do_page)
 {
   struct descriptor_data *d;
@@ -1303,7 +1291,6 @@ ACMD(do_page)
       send_to_char(ch, "There is no such person in the game!\r\n");
   }
 }
-
 
 /**********************************************************************
  * generalized communication func, originally by Fred C. Merkel (Torg) *
@@ -1483,7 +1470,6 @@ ACMD(do_gen_comm)
        GET_SPAM(ch) += 1;
       }
 }
-
 
 ACMD(do_qcomm)
 {

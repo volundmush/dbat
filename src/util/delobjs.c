@@ -13,9 +13,6 @@
    usage: switch into an obj directory; type: delobjs <plrfile> <obj wildcard>
  */
 
-#include "conf.h"
-#include "sysdep.h"
-
 #include "structs.h"
 #include "utils.h"
 #include "db.h"

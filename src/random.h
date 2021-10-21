@@ -5,7 +5,6 @@
 #ifndef CIRCLE_RANDOM_H
 #define CIRCLE_RANDOM_H
 
-#include "conf.h"
 #include "sysdep.h"
 
 void circle_srandom(unsigned long initial_seed);

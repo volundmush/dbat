@@ -5,8 +5,6 @@
 #ifndef CIRCLE_LIMITS_H
 #define CIRCLE_LIMITS_H
 
-#include "conf.h"
-#include "sysdep.h"
 #include "structs.h"
 #include "utils.h"
 #include "spells.h"

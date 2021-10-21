@@ -42,6 +42,9 @@
 #define READ_SIZE	256
 
 /* public functions in utils.c */
+struct time_info_data *real_time_passed(time_t t2, time_t t1);
+struct time_info_data *mud_time_passed(time_t t2, time_t t1);
+
 int masadv(char *tmp, struct char_data *ch);
 void demon_refill_lf(struct char_data *ch, cl_sint64 num);
 void dispel_ash(struct char_data *ch);

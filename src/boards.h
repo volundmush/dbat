@@ -11,8 +11,7 @@
 #ifndef __BOARDS_H__
 #define __BOARDS_H__
 
-#include "conf.h"
-#include "sysdep.h"
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "structs.h"
