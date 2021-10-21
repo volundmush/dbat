@@ -3595,6 +3595,9 @@ cl_sint64 damtype(struct char_data *ch, int type, int skill, double percent)
     if (focus > 0) {
      dam += focus * (dam / 200);
     }
+    if (IS_SAIYAN(ch)) {
+     dam += (dam / 100) * 20;
+    }
      if (IS_HUMAN(ch) && skill == 101) {
       dam = dam * 1.1;
      } else if (IS_HUMAN(ch) && skill == 102) {
@@ -3633,6 +3636,9 @@ cl_sint64 damtype(struct char_data *ch, int type, int skill, double percent)
       dam += focus * (dam / 200);
      }
    }
+   if (IS_SAIYAN(ch)) {
+     dam += (dam / 100) * 20;
+    }
      if (IS_HUMAN(ch) && skill == 101) {
       dam = dam * 1.1;
      } else if (IS_HUMAN(ch) && skill == 102) {
@@ -3649,6 +3655,9 @@ cl_sint64 damtype(struct char_data *ch, int type, int skill, double percent)
     if (focus > 0) {
      dam += focus * (dam / 200);
     }
+    if (IS_SAIYAN(ch)) {
+     dam += (dam / 100) * 20;
+    }
      if (IS_HUMAN(ch) && skill == 101) {
       dam = dam * 1.1;
      } else if (IS_HUMAN(ch) && skill == 102) {
@@ -3663,6 +3672,9 @@ cl_sint64 damtype(struct char_data *ch, int type, int skill, double percent)
     dam *= 1.25;
     if (focus > 0) {
      dam += focus * (dam / 200);
+    }
+    if (IS_SAIYAN(ch)) {
+     dam += (dam / 100) * 20;
     }
      if (IS_HUMAN(ch) && skill == 101) {
       dam = dam * 1.1;
@@ -3694,6 +3706,9 @@ cl_sint64 damtype(struct char_data *ch, int type, int skill, double percent)
     if (focus > 0) {
      dam += focus * (dam / 200);
     }
+    if (IS_SAIYAN(ch)) {
+     dam += (dam / 100) * 20;
+    }
      if (IS_HUMAN(ch) && skill == 101) {
       dam = dam * 1.1;
      } else if (IS_HUMAN(ch) && skill == 102) {
@@ -3708,6 +3723,9 @@ cl_sint64 damtype(struct char_data *ch, int type, int skill, double percent)
     dam *= 1.25;
     if (focus > 0) {
      dam += focus * (dam / 200);
+    }
+    if (IS_SAIYAN(ch)) {
+     dam += (dam / 100) * 20;
     }
      if (IS_HUMAN(ch) && skill == 101) {
       dam = dam * 1.1;
@@ -3738,6 +3756,9 @@ cl_sint64 damtype(struct char_data *ch, int type, int skill, double percent)
     dam *= 1.25;
     if (focus > 0) {
      dam += focus * (dam / 200);
+    }
+    if (IS_SAIYAN(ch)) {
+     dam += (dam / 100) * 20;
     }
    break;
    case 34: /* Kakusanha */
@@ -3856,7 +3877,7 @@ cl_sint64 damtype(struct char_data *ch, int type, int skill, double percent)
      dam += focus * (dam / 200);
     }
     if (IS_KAI(ch)) {
-     dam += (dam / 100) * 15;
+     dam += (dam / 100) * 20;
     }
      if (IS_HUMAN(ch) && skill == 101) {
       dam = dam * 1.1;
@@ -3874,7 +3895,7 @@ cl_sint64 damtype(struct char_data *ch, int type, int skill, double percent)
      dam += focus * (dam / 200);
     }
     if (IS_KAI(ch)) {
-     dam += (dam / 100) * 15;
+     dam += (dam / 100) * 20;
     }
      if (IS_HUMAN(ch) && skill == 101) {
       dam = dam * 1.1;
@@ -4084,6 +4105,9 @@ cl_sint64 damtype(struct char_data *ch, int type, int skill, double percent)
     dam *= 1.25;
     if (focus > 0) {
      dam += focus * (dam / 200);
+    }
+    if (IS_SAIYAN(ch)) {
+     dam += (dam / 100) * 20;
     }
      if (IS_HUMAN(ch) && skill == 101) {
       dam = dam * 1.1;

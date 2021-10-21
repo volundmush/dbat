@@ -1401,20 +1401,46 @@ void fight_stack()
         perc = 1;
        }
        if (IS_TRUFFLE(ch) && perc == 10) {
-        perc += 10;
-       }
-       if (IS_TRUFFLE(ch) && perc == 5) {
-        perc += 5;
-       }
-       if (IS_TRUFFLE(ch) && perc == 2) {
-        perc += 3;
-       }
-       if (IS_TRUFFLE(ch) && perc == 1) {
-        perc += 1;
-       }
-       if (perc > 1 && GET_PREFERENCE(ch) == PREFERENCE_H2H) {
-        perc = perc * 0.5;
-       }
+				perc += 10;
+			}
+			if (IS_TRUFFLE(ch) && perc == 5) {
+				perc += 5;
+			}
+			if (IS_TRUFFLE(ch) && perc == 2) {
+				perc += 3;
+			}
+			if (IS_TRUFFLE(ch) && perc == 1) {
+				perc += 1;
+			}
+			if (perc > 1 && GET_PREFERENCE(ch) == PREFERENCE_H2H) {
+				perc = perc * 0.5;
+			}
+    }
+		if (PLR_FLAGGED(ch, PLR_CHARGE)) {
+			if ((GET_SKILL(ch, SKILL_CONCENTRATION) > 74)) {
+				perc = 10;
+			}
+			else if ((GET_SKILL(ch, SKILL_CONCENTRATION) > 49)) {
+				perc = 5;
+			}
+			else if ((GET_SKILL(ch, SKILL_CONCENTRATION) > 24)) {
+				perc = 2;
+			}
+			else {
+				perc = 1;
+			}
+			if (IS_MUTANT(ch) && perc == 10) {
+				perc -= 1;
+			}
+			if (IS_MUTANT(ch) && perc == 5) {
+				perc -= 1;
+			}
+			if (IS_MUTANT(ch) && perc == 2) {
+				perc -= 1;
+      }
+			if (perc > 1 && GET_PREFERENCE(ch) == PREFERENCE_H2H) {
+				perc = perc * 0.5;
+			}
        if (GET_MANA(ch) <= 0) {
         send_to_char(ch, "You can not charge anymore, you have charged all your energy!\r\n");
         act("$n@w's aura grows calm.@n", TRUE, ch, 0, 0, TO_ROOM);

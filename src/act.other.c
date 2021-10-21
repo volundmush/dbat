@@ -666,8 +666,8 @@ ACMD(do_rpp)
   return;
  }
  
- revcost = revcost * (GET_LEVEL(ch) / 10);
- tnlcost = 1 + (tnlcost * (GET_LEVEL(ch) / 20));
+ revcost = revcost * (GET_LEVEL(ch) / 15);
+ tnlcost = 1 + (tnlcost * (GET_LEVEL(ch) / 40));
  
  if (revcost < 1) {
   revcost = 1;
@@ -676,20 +676,20 @@ ACMD(do_rpp)
  }
 
  if (PLR_FLAGGED(ch, PLR_PDEATH)) {
-  revcost *= 2;
+  revcost *= 6;
  }
  
  if (!*arg) { /* Display menu */
   send_to_char(ch, "@C                             Rewards Menu\n");
   send_to_char(ch, "@b  ------------------------------------------------------------------\n");
-  send_to_char(ch, "  @C1@D)@c Excel House         @D[@G 65 RPP @D]  @C2@D) Removed Temporarily         @D]@n\n");
-  send_to_char(ch, "  @C3@D)@c Custom Equipment    @D[@G 30 RPP @D]  @C4@D)@c Alignment Change      @D[@G  5 RPP @D]\n");
-  send_to_char(ch, "  @C5@D)@c 5,000 zenni         @D[@G  1 RPP @D]  @C6@D)@c +2 To A Stat          @D[@G  5 RPP @D]\n");
-  send_to_char(ch, "  @C7@D)@c +500 PS             @D[@G  4 RPP @D]  @C8@D)@c Revival               @D[@G%3d RPP @D]\n", revcost);
-  send_to_char(ch, "  @C9@D)@c 25%s TNL Exp         @D[@G%3d RPP @D] @C10@D)@c Aura Change           @D[@G  2 RPP @D]\n", "%", tnlcost);
-  send_to_char(ch, " @C11@D)@c Reach Softcap       @D[@G  8 RPP @D] @C12@D)@c RPP Store             @D[@G ?? RPP @D]\n");
-  send_to_char(ch, " @C13@D)@c Extra Feature       @D[@G  2 RPP @D] @C14@D)@c Restring Equipment    @D[@G  1 RPP @D]\n");
-  send_to_char(ch, " @C15@D)@c Extra Skillslot     @D[@G  5 RPP @D] @C16@D)@c Speed DB Spawn 1 day  @D[@G  5 RPP @D]@n\n");
+  send_to_char(ch, "  @C1@D)@R Disabled            @D[@G -- RPP @D]  @C2@D)@R Disabled              @D[@G -- RPP @D]@n\n");
+  send_to_char(ch, "  @C3@D)@c Custom Equipment    @D[@G 30 RPP @D]  @C4@D)@c Alignment Change      @D[@G 20 RPP @D]\n");
+  send_to_char(ch, "  @C5@D)@c 7,500 zenni         @D[@G  1 RPP @D]  @C6@D)@c +2 To A Stat          @D[@G  2 RPP @D]\n");
+  send_to_char(ch, "  @C7@D)@c +750 PS             @D[@G  4 RPP @D]  @C8@D)@c Revival               @D[@G%3d RPP @D]\n", revcost);
+  send_to_char(ch, "  @C9@D)@c 50%s TNL Exp         @D[@G%3d RPP @D] @C10@D)@c Aura Change           @D[@G  2 RPP @D]\n", "%", tnlcost);
+  send_to_char(ch, " @C11@D)@c Reach Softcap       @D[@G  6 RPP @D] @C12@D)@c RPP Store             @D[@G ?? RPP @D]\n");
+  send_to_char(ch, " @C13@D)@c Extra Feature       @D[@G  1 RPP @D] @C14@D)@c Restring Equipment    @D[@G  1 RPP @D]\n");
+  send_to_char(ch, " @C15@D)@c Extra Skillslot     @D[@G  5 RPP @D] @C16@D)@R Disabled              @D[@G -- RPP @D]@n\n");
   send_to_char(ch, "@b  ------------------------------------------------------------------@n\n");
   send_to_char(ch, "@D                           [@YYour RPP@D:@G %3d@D]@n\n", GET_RP(ch));
  // send_to_char(ch, "@D                           [@YRPP Bank@D:@G %3d@D]@n\n", GET_RBANK(ch));
@@ -727,7 +727,7 @@ ACMD(do_rpp)
     }
    }
    if (selection == 4) {     /* Simple Align Change*/
-    pay = 5;
+    pay = 20;
     if (GET_RP(ch) < pay) {
 	 send_to_char(ch, "You do not have enough RPP for that selection.\r\n");
 	 return;
@@ -765,13 +765,13 @@ ACMD(do_rpp)
 	 send_to_char(ch, "You do not have enough RPP for that selection.\r\n");
 	 return;
 	} else {
-     GET_BANK_GOLD(ch) += 5000;
-     send_to_char(ch, "Your bank zenni has been increased by 5,000\r\n");
+     GET_BANK_GOLD(ch) += 7500;
+     send_to_char(ch, "Your bank zenni has been increased by 7,500\r\n");
     } /* Can pay for it */
    } /* End Simple Zenni Reward */
    
    if (selection == 6) {     /* Simple Stat Change*/
-    pay = 5;
+    pay = 2;
     if (GET_RP(ch) < pay) {
 	 send_to_char(ch, "You do not have enough RPP for that selection.\r\n");
 	 return;
@@ -854,8 +854,8 @@ ACMD(do_rpp)
 	 send_to_char(ch, "You do not have enough RPP for that selection.\r\n");
 	 return;
 	} else {
-     GET_PRACTICES(ch, GET_CLASS(ch)) += 500;
-     send_to_char(ch, "Your practices have been increased by 500\r\n");
+     GET_PRACTICES(ch, GET_CLASS(ch)) += 750;
+     send_to_char(ch, "Your practices have been increased by 750\r\n");
     } /* Can pay for it */
    } /* End Simple Zenni Reward */
 
@@ -967,8 +967,8 @@ ACMD(do_rpp)
      send_to_char(ch, "You can not buy experience anymore UNTIL you level.\r\n");
      return;
 	} else {
-     GET_EXP(ch) += level_exp(ch, GET_LEVEL(ch) + 1) * .25;
-     send_to_char(ch, "You gained 25%s of the entire experience needed for your next level.\r\n", "%");
+     GET_EXP(ch) += level_exp(ch, GET_LEVEL(ch) + 1) * .52;
+     send_to_char(ch, "You gained 50%s of the entire experience needed for your next level.\r\n", "%");
     } /* Can pay for it */
    } /* End Simple Exp Reward */
 
@@ -1018,7 +1018,7 @@ ACMD(do_rpp)
    } /* End Simple Aura Change */
 
    if (selection == 11) {     /* Simple Soft-cap Reward*/
-    pay = 8;
+    pay = 6;
     if (GET_RP(ch) < pay) {
 	 send_to_char(ch, "You do not have enough RPP for that selection.\r\n");
 	 return;
@@ -1111,7 +1111,7 @@ ACMD(do_rpp)
   } /*End Skillslot Reward */
 
   if (selection == 16) { /* DB Spawn Reward */
-    pay = 5;
+    pay = 5000;
     if (GET_RP(ch) < pay) {
          send_to_char(ch, "You do not have enough RPP in your bank for that selection.\r\n");
          return;
@@ -1166,7 +1166,7 @@ ACMD(do_rpp)
    filename = REQUEST_FILE;
    
    if (selection == 1) {
-    pay = 65;
+    pay = 6500;
     if (GET_RP(ch) < pay) {
         send_to_char(ch, "Nice try but you don't have enough RPP for that.\r\n");
         return;
@@ -3051,85 +3051,90 @@ ACMD(do_kura)
 ACMD(do_candy)
 {
 
-  struct char_data *vict;
-  struct obj_data *obj;
-  char arg[MAX_INPUT_LENGTH];
+	struct char_data *vict;
+	struct obj_data *obj;
+	char arg[MAX_INPUT_LENGTH];
 
-  one_argument(argument, arg);
+	one_argument(argument, arg);
 
-  if (!IS_MAJIN(ch)) {
-   send_to_char(ch, "You are not a majin, how can you do that?\r\n");
-   return;
-  }
-  if (FIGHTING(ch)) {
-   send_to_char(ch, "You are too busy fighting!\r\n");
-   return;
-  }
+	if (!IS_MAJIN(ch)) {
+		send_to_char(ch, "You are not a majin, how can you do that?\r\n");
+		return;
+	}
+	//if (FIGHTING(ch)) {
+		//send_to_char(ch, "You are too busy fighting!\r\n");
+		//return;
+	//}
 
-  if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-   send_to_char(ch, "Turn who into candy?\r\n");
-   return;
-  }
-  if (!can_kill(ch, vict, NULL, 0)) {
-   return;
-  }
-  if (!IS_NPC(vict)) {
-   send_to_char(ch, "You can't turn them into candy.\r\n");
-   return;
-  }
-  if (GET_MAX_HIT(vict) > GET_MAX_HIT(ch) * 2) {
-   send_to_char(ch, "They are too powerful.\r\n");
-   return;
-  }
-  if (GET_MAX_HIT(vict) < GET_MAX_HIT(ch) * .5 && GET_LEVEL(ch) < 100) {
-   send_to_char(ch, "They are too weak.\r\n");
-   return;
-  }
-  if (GET_MAX_HIT(vict) < GET_MAX_HIT(ch) * .1 && GET_LEVEL(ch) == 100) {
-   send_to_char(ch, "They are too weak.\r\n");
-   return;
-  }
-  if (GET_MANA(ch) < GET_MAX_MANA(ch) / 15) {
-   send_to_char(ch, "You do not have enough ki.\r\n");
-   return;
-  }
-  if (rand_number(1, 6) == 6) {
-   GET_MANA(ch) -= GET_MAX_MANA(ch) / 15;
-         reveal_hiding(ch, 0);
-   act("@cYou aim your forelock at @R$N@c and fire a beam of pink energy but it is dodged!@n", TRUE, ch, 0, vict, TO_CHAR);
-   act("@C$n@c aims $s forelock at @R$N@c and fires a beam of pink energy but the beam is dodged!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-   if (!FIGHTING(ch)) {
-    set_fighting(ch, vict);
-   }
-   if (!FIGHTING(vict)) {
-    set_fighting(vict, ch);
-   }
-   WAIT_STATE(ch, PULSE_3SEC);
-   return;
-  }
-  else {
-   GET_MANA(ch) -= GET_MAX_MANA(ch) / 15;
-         reveal_hiding(ch, 0);
-   act("@cYou aim your forelock at @R$N@c and fire a beam of pink energy that envelopes $S entire body and changes $M into candy!@n", TRUE, ch, 0, vict, TO_CHAR);
-   act("@C$n@c aims $s forelock at @R$N@c and fires a beam of pink energy that envelopes $S entire body and changes $M into candy!@n ", TRUE, ch, 0, vict, TO_NOTVICT);
-   if (GET_MAX_HIT(vict) >= GET_MAX_HIT(ch) * 1.5) {
-    send_to_char(ch, "You grab the candy as it falls.\r\n");
-    obj = read_object(95, VIRTUAL);
-    obj_to_char(obj, ch);    
-   }
-   else if (GET_MAX_HIT(vict) >= GET_MAX_HIT(ch)) {
-    send_to_char(ch, "You grab the candy as it falls.\r\n");
-    obj = read_object(94, VIRTUAL);
-    obj_to_char(obj, ch);
-   }
-   else if (GET_MAX_HIT(vict) < GET_MAX_HIT(ch)) {
-    send_to_char(ch, "You grab the candy as it falls.\r\n");
-    obj = read_object(93, VIRTUAL);
-    obj_to_char(obj, ch);
-   }
-   SET_BIT_AR(MOB_FLAGS(vict), MOB_HUSK);
-   die(vict, ch);
-  }
+	if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
+		send_to_char(ch, "Turn who into candy?\r\n");
+		return;
+	}
+	if (!can_kill(ch, vict, NULL, 0)) {
+		return;
+	}
+	if (!IS_NPC(vict)) {
+		send_to_char(ch, "You can't turn them into candy.\r\n");
+		return;
+	}
+	if (GET_MAX_HIT(vict) > GET_MAX_HIT(ch) * 2) {
+		send_to_char(ch, "They are too powerful.\r\n");
+		return;
+	}
+	if (GET_MAX_HIT(vict) < GET_MAX_HIT(ch) * .25 && GET_LEVEL(ch) < 100) {
+		send_to_char(ch, "They are too weak.\r\n");
+		return;
+	}
+	if (GET_MAX_HIT(vict) < GET_MAX_HIT(ch) * .09 && GET_LEVEL(ch) == 100) {
+		send_to_char(ch, "They are too weak.\r\n");
+		return;
+	}
+	if (GET_MANA(ch) < GET_MAX_MANA(ch) / 15) {
+		send_to_char(ch, "You do not have enough ki.\r\n");
+		return;
+	}
+	if (rand_number(1, 6) == 6) {
+		GET_MANA(ch) -= GET_MAX_MANA(ch) / 15;
+		reveal_hiding(ch, 0);
+		act("@cYou aim your forelock at @R$N@c and fire a beam of energy but it is dodged!@n", TRUE, ch, 0, vict, TO_CHAR);
+		act("@C$n@c aims $s forelock at @R$N@c and fires a beam of energy but the beam is dodged!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+		if (!FIGHTING(ch)) {
+			set_fighting(ch, vict);
+		}
+		if (!FIGHTING(vict)) {
+			set_fighting(vict, ch);
+		}
+		WAIT_STATE(ch, PULSE_3SEC);
+		return;
+	}
+	else {
+		GET_MANA(ch) -= GET_MAX_MANA(ch) / 15;
+		reveal_hiding(ch, 0);
+		act("@cYou aim your forelock at @R$N@c and fire a beam of energy that envelopes $S entire body and changes $M into candy!@n", TRUE, ch, 0, vict, TO_CHAR);
+		act("@C$n@c aims $s forelock at @R$N@c and fires a beam of energy that envelopes $S entire body and changes $M into candy!@n ", TRUE, ch, 0, vict, TO_NOTVICT);
+		if (GET_MAX_HIT(vict) >= GET_MAX_HIT(ch) * 1.5) {
+			send_to_char(ch, "You grab the candy as it falls.\r\n");
+			obj = read_object(95, VIRTUAL);
+			obj_to_char(obj, ch);
+		}
+		else if (GET_MAX_HIT(vict) >= GET_MAX_HIT(ch)) {
+			send_to_char(ch, "You grab the candy as it falls.\r\n");
+			obj = read_object(94, VIRTUAL);
+			obj_to_char(obj, ch);
+		}
+		else if (GET_MAX_HIT(vict) < GET_MAX_HIT(ch) && (((GET_MAX_HIT(vict) >= GET_MAX_HIT(ch) * .5) && GET_LEVEL(ch) < 100) || ((GET_MAX_HIT(vict) >= GET_MAX_HIT(ch) * .1) && GET_LEVEL(ch) >= 100))) {
+			send_to_char(ch, "You grab the candy as it falls.\r\n");
+			obj = read_object(93, VIRTUAL);
+			obj_to_char(obj, ch);
+		}
+		else if (GET_MAX_HIT(vict) < GET_MAX_HIT(ch) && (((GET_MAX_HIT(vict) < GET_MAX_HIT(ch) * .5) && GET_LEVEL(ch) < 100) || ((GET_MAX_HIT(vict) < GET_MAX_HIT(ch) * .1) && GET_LEVEL(ch) >= 100))) {
+			send_to_char(ch, "You grab the candy as it falls.\r\n");
+			obj = read_object(53, VIRTUAL);
+			obj_to_char(obj, ch);
+		}
+		SET_BIT_AR(MOB_FLAGS(vict), MOB_HUSK);
+		die(vict, ch);
+	}
 
 
 }
@@ -4188,175 +4193,219 @@ ACMD(do_potential)
 ACMD(do_majinize)
 {
 
- struct char_data *vict;
- char arg[MAX_INPUT_LENGTH];
+	struct char_data *vict;
+	char arg[MAX_INPUT_LENGTH];
 
- one_argument(argument, arg);
+	one_argument(argument, arg);
 
- if (!IS_MAJIN(ch)) {
-  send_to_char(ch, "You are not a majin and can not majinize anyone.\r\n");
-  return;
- }
+	if (!IS_MAJIN(ch))
+	{
+		send_to_char(ch, "You are not a majin and can not majinize anyone.\r\n");
+		return;
+	}
 
- if (!*arg) {
-  send_to_char(ch, "Who do you want to majinize?\r\n");
-  return;
- }
+	if (!*arg)
+	{
+		send_to_char(ch, "Who do you want to majinize?\r\n");
+		return;
+	}
 
- if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  send_to_char(ch, "That target isn't here.\r\n");
-  return;
- }
+	if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM)))
+	{
+		send_to_char(ch, "That target isn't here.\r\n");
+		return;
+	}
 
- if (IS_NPC(vict)) {
-  send_to_char(ch, "Why would you waste your time majinizing them?\r\n");
-  return;
- }
- if (vict == ch) {
-  send_to_char(ch, "You can't majinize yourself.\r\n");
-  return;
- }
- if (PLR_FLAGGED(vict, PLR_PR)) {
-  send_to_char(ch, "You can't majinize them their potential has been released!\r\n");
-  return;
- }
+	if (IS_NPC(vict))
+	{
+		send_to_char(ch, "Why would you waste your time majinizing them?\r\n");
+		return;
+	}
+	if (vict == ch)
+	{
+		send_to_char(ch, "You can't majinize yourself.\r\n");
+		return;
+	}
+	if (PLR_FLAGGED(vict, PLR_PR))
+	{
+		send_to_char(ch, "You can't majinize them their potential has been released!\r\n");
+		return;
+	}
+	int alignmentTotal = GET_ALIGNMENT(ch) - GET_ALIGNMENT(vict);
+	if (MAJINIZED(vict) > 0 && MAJINIZED(vict) != GET_ID(ch))
+	{
+		send_to_char(ch, "They are already majinized before by someone else.\r\n");
+		return;
+	}
+	else if ((vict->master != ch))
+	{
+		send_to_char(ch, "They must be following you in order for you to majinize them.\r\n");
+		return;
+	}
 
- if (MAJINIZED(vict) > 0 && MAJINIZED(vict) != GET_ID(ch)) {
-  send_to_char(ch, "They are already majinized before by someone else.\r\n");
-  return;
- }
- else if ((vict->master != ch)) {
-  send_to_char(ch, "They must be following you in order for you to majinize them.\r\n");
-  return;
- }
- else if ((GET_ALIGNMENT(vict) > 500 && GET_ALIGNMENT(ch) < -500) || (GET_ALIGNMENT(vict) < 500 && GET_ALIGNMENT(ch) > -500)) {
-  send_to_char(ch, "Their alignment is so opposed to your's that they resist your attempts to enslave them!\r\n");
-  return;
- }
- else if (GET_MAX_HIT(vict) > GET_MAX_HIT(ch) * 4) {
-  send_to_char(ch, "Their powerlevel is so much higher than yours they resist your attempts to enslave them!\r\n");
-  return;
- }
- /* Rillao: transloc, add new transes here */
- else if (MAJINIZED(vict) > 0 && MAJINIZED(vict) == GET_ID(ch)) {
-        reveal_hiding(ch, 0);
-  act("You remove $N's majinization, freeing them from your influence, but also weakening them.", TRUE, ch, 0, vict, TO_CHAR);
-  act("$n removes your majinization, freeing you from their influence, and weakening you!", TRUE, ch, 0, vict, TO_VICT);
-  act("$n waves a hand at $N, and instantly the glowing M on $S forehead disappears!", TRUE, ch, 0, vict, TO_NOTVICT);
-  MAJINIZED(vict) = 0;
-  GET_BOOSTS(ch) += 1;
-           double mult = 1;
-           if (IS_TRUFFLE(vict) && PLR_FLAGGED(vict, PLR_TRANS1)) {
-            mult = 3;
-           }
-           else if (IS_TRUFFLE(vict) && PLR_FLAGGED(vict, PLR_TRANS2)) {
-            mult = 4;
-           }
-           else if (IS_TRUFFLE(vict) && PLR_FLAGGED(vict, PLR_TRANS3)) {
-            mult = 5;
-           }
-           else if (IS_BIO(vict) && PLR_FLAGGED(vict, PLR_TRANS1)) {
-            mult = 2;
-           }
-           else if (IS_BIO(vict) && PLR_FLAGGED(vict, PLR_TRANS2)) {
-            mult = 3;
-           }
-           else if (IS_BIO(vict) && PLR_FLAGGED(vict, PLR_TRANS3)) {
-            mult = 3.5;
-           }
-           else if (IS_BIO(vict) && PLR_FLAGGED(vict, PLR_TRANS4)) {
-            mult = 4;
-           }
-           else if (IS_MAJIN(vict) && PLR_FLAGGED(vict, PLR_TRANS1)) {
-            mult = 2;
-           }
-           else if (IS_MAJIN(vict) && PLR_FLAGGED(vict, PLR_TRANS2)) {
-            mult = 3;
-           }
-           else if (IS_MAJIN(vict) && PLR_FLAGGED(vict, PLR_TRANS3)) {
-            mult = 4.5;
-           }
-           else if (IS_HOSHIJIN(vict) && GET_PHASE(vict) == 1) {
-            mult = 2;
-           }
-           else if (IS_HOSHIJIN(vict) && GET_PHASE(vict) == 2) {
-            mult = 3;
-           }
-  if (GET_MAJINIZED(vict) == 0) {
-   GET_MAJINIZED(vict) = (GET_BASE_PL(vict) * .4) * mult;
-  }
-  GET_MAX_HIT(vict) -= GET_MAJINIZED(vict) * mult;
-  if (GET_MAJINIZED(vict) == 0) {
-   GET_MAJINIZED(vict) = (GET_BASE_PL(vict) * .4);
-  }
-  GET_BASE_PL(vict) -= GET_MAJINIZED(vict);
-  return;
- }
- else if (GET_BOOSTS(ch) == 0) {
-  send_to_char(ch, "You are incapable of majinizing%s.\r\n", GET_LEVEL(ch) < 100 ? " right now" : " anymore");
-  if (GET_LEVEL(ch) < 25) {
-   send_to_char(ch, "Your next available majinize will be at level 25\r\n");
-  }
-  else if (GET_LEVEL(ch) < 50) {
-   send_to_char(ch, "Your next available majinize will be at level 50\r\n");
-  }
-  else if (GET_LEVEL(ch) < 75) {
-   send_to_char(ch, "Your next available majinize will be at level 75\r\n");
-  }
-  else if (GET_LEVEL(ch) < 100) {
-   send_to_char(ch, "Your next available majinize will be at level 100\r\n");
-  }
-  return;
- }
- else {
-        reveal_hiding(ch, 0);
-  act("You focus your power into $N, influencing their mind and increasing their strength! After the struggle ends in $S mind a glowing purple M forms on $S forehead.", TRUE, ch, 0, vict, TO_CHAR);
-  act("$n focuses power into you, influencing your mind and increasing your strength! After the struggle in your mind ends a glowing purple M forms on your forehead.", TRUE, ch, 0, vict, TO_VICT);
-  act("$n focuses power into $N, influencing their mind and increasing their strength! After the struggle ends in $S mind a glowing purple M forms on $S forehead.", TRUE, ch, 0, vict, TO_NOTVICT);
-  MAJINIZED(vict) = GET_ID(ch);
-  GET_BOOSTS(ch) -= 1;
-           double mult = 1;
-           if (IS_TRUFFLE(vict) && PLR_FLAGGED(vict, PLR_TRANS1)) {
-            mult = 3;
-           }
-           else if (IS_TRUFFLE(vict) && PLR_FLAGGED(vict, PLR_TRANS2)) {
-            mult = 4;
-           }
-           else if (IS_TRUFFLE(vict) && PLR_FLAGGED(vict, PLR_TRANS3)) {
-            mult = 5;
-           }
-           else if (IS_BIO(vict) && PLR_FLAGGED(vict, PLR_TRANS1)) {
-            mult = 2;
-           }
-           else if (IS_BIO(vict) && PLR_FLAGGED(vict, PLR_TRANS2)) {
-            mult = 3;
-           }
-           else if (IS_BIO(vict) && PLR_FLAGGED(vict, PLR_TRANS3)) {
-            mult = 3.5;
-           }
-           else if (IS_BIO(vict) && PLR_FLAGGED(vict, PLR_TRANS4)) {
-            mult = 4;
-           }
-           else if (IS_MAJIN(vict) && PLR_FLAGGED(vict, PLR_TRANS1)) {
-            mult = 2;
-           }
-           else if (IS_MAJIN(vict) && PLR_FLAGGED(vict, PLR_TRANS2)) {
-            mult = 3;
-           }
-           else if (IS_MAJIN(vict) && PLR_FLAGGED(vict, PLR_TRANS3)) {
-            mult = 4.5;
-           }
-           else if (IS_HOSHIJIN(vict) && GET_PHASE(vict) == 1) {
-            mult = 2;
-           }
-           else if (IS_HOSHIJIN(vict) && GET_PHASE(vict) == 2) {
-            mult = 3;
-           }
-  GET_MAJINIZED(vict) = GET_BASE_PL(vict) * .4;
-  GET_MAX_HIT(vict) += (GET_BASE_PL(vict) * .4) * mult;
-  GET_BASE_PL(vict) += GET_BASE_PL(vict) * .4;
-  return;
- }
+	else if (!((alignmentTotal >= -1500) && (alignmentTotal <= 1500)))
+	{
+		send_to_char(ch, "Their alignment is so opposed to your's that they resist your attempts to enslave them!\r\n");
+		return;
+	}
+	else if (GET_MAX_HIT(vict) > GET_MAX_HIT(ch) * 4)
+	{
+		send_to_char(ch, "Their powerlevel is so much higher than yours they resist your attempts to enslave them!\r\n");
+		return;
+	}
+	/* Rillao: transloc, add new transes here */
+	else if (MAJINIZED(vict) > 0 && MAJINIZED(vict) == GET_ID(ch))
+	{
+		reveal_hiding(ch, 0);
+		act("You remove $N's majinization, freeing them from your influence, but also weakening them.", TRUE, ch, 0, vict, TO_CHAR);
+		act("$n removes your majinization, freeing you from their influence, and weakening you!", TRUE, ch, 0, vict, TO_VICT);
+		act("$n waves a hand at $N, and instantly the glowing M on $S forehead disappears!", TRUE, ch, 0, vict, TO_NOTVICT);
+		MAJINIZED(vict) = 0;
+		GET_BOOSTS(ch) += 1;
+		double mult = 1;
+		if (IS_TRUFFLE(vict) && PLR_FLAGGED(vict, PLR_TRANS1))
+		{
+			mult = 3;
+		}
+		else if (IS_TRUFFLE(vict) && PLR_FLAGGED(vict, PLR_TRANS2))
+		{
+			mult = 4;
+		}
+		else if (IS_TRUFFLE(vict) && PLR_FLAGGED(vict, PLR_TRANS3))
+		{
+			mult = 5;
+		}
+		else if (IS_BIO(vict) && PLR_FLAGGED(vict, PLR_TRANS1))
+		{
+			mult = 2;
+		}
+		else if (IS_BIO(vict) && PLR_FLAGGED(vict, PLR_TRANS2))
+		{
+			mult = 3;
+		}
+		else if (IS_BIO(vict) && PLR_FLAGGED(vict, PLR_TRANS3))
+		{
+			mult = 3.5;
+		}
+		else if (IS_BIO(vict) && PLR_FLAGGED(vict, PLR_TRANS4))
+		{
+			mult = 4;
+		}
+		else if (IS_MAJIN(vict) && PLR_FLAGGED(vict, PLR_TRANS1))
+		{
+			mult = 2;
+		}
+		else if (IS_MAJIN(vict) && PLR_FLAGGED(vict, PLR_TRANS2))
+		{
+			mult = 3;
+		}
+		else if (IS_MAJIN(vict) && PLR_FLAGGED(vict, PLR_TRANS3))
+		{
+			mult = 4.5;
+		}
+		else if (IS_HOSHIJIN(vict) && GET_PHASE(vict) == 1)
+		{
+			mult = 2;
+		}
+		else if (IS_HOSHIJIN(vict) && GET_PHASE(vict) == 2)
+		{
+			mult = 3;
+		}
+		if (GET_MAJINIZED(vict) == 0)
+		{
+			GET_MAJINIZED(vict) = (GET_BASE_PL(vict) * .4) * mult;
+		}
+		GET_MAX_HIT(vict) -= GET_MAJINIZED(vict) * mult;
+		if (GET_MAJINIZED(vict) == 0)
+		{
+			GET_MAJINIZED(vict) = (GET_BASE_PL(vict) * .4);
+		}
+		GET_BASE_PL(vict) -= GET_MAJINIZED(vict);
+		return;
+	}
+	else if (GET_BOOSTS(ch) == 0)
+	{
+		send_to_char(ch, "You are incapable of majinizing%s.\r\n", GET_LEVEL(ch) < 100 ? " right now" : " anymore");
+		if (GET_LEVEL(ch) < 25)
+		{
+			send_to_char(ch, "Your next available majinize will be at level 25\r\n");
+		}
+		else if (GET_LEVEL(ch) < 50)
+		{
+			send_to_char(ch, "Your next available majinize will be at level 50\r\n");
+		}
+		else if (GET_LEVEL(ch) < 75)
+		{
+			send_to_char(ch, "Your next available majinize will be at level 75\r\n");
+		}
+		else if (GET_LEVEL(ch) < 100)
+		{
+			send_to_char(ch, "Your next available majinize will be at level 100\r\n");
+		}
+		return;
+	}
+	else
+	{
+		reveal_hiding(ch, 0);
+		act("You focus your power into $N, influencing their mind and increasing their strength! After the struggle ends in $S mind a glowing purple M forms on $S forehead.", TRUE, ch, 0, vict, TO_CHAR);
+		act("$n focuses power into you, influencing your mind and increasing your strength! After the struggle in your mind ends a glowing purple M forms on your forehead.", TRUE, ch, 0, vict, TO_VICT);
+		act("$n focuses power into $N, influencing their mind and increasing their strength! After the struggle ends in $S mind a glowing purple M forms on $S forehead.", TRUE, ch, 0, vict, TO_NOTVICT);
+		MAJINIZED(vict) = GET_ID(ch);
+		GET_BOOSTS(ch) -= 1;
+		double mult = 1;
+		if (IS_TRUFFLE(vict) && PLR_FLAGGED(vict, PLR_TRANS1))
+		{
+			mult = 3;
+		}
+		else if (IS_TRUFFLE(vict) && PLR_FLAGGED(vict, PLR_TRANS2))
+		{
+			mult = 4;
+		}
+		else if (IS_TRUFFLE(vict) && PLR_FLAGGED(vict, PLR_TRANS3))
+		{
+			mult = 5;
+		}
+		else if (IS_BIO(vict) && PLR_FLAGGED(vict, PLR_TRANS1))
+		{
+			mult = 2;
+		}
+		else if (IS_BIO(vict) && PLR_FLAGGED(vict, PLR_TRANS2))
+		{
+			mult = 3;
+		}
+		else if (IS_BIO(vict) && PLR_FLAGGED(vict, PLR_TRANS3))
+		{
+			mult = 3.5;
+		}
+		else if (IS_BIO(vict) && PLR_FLAGGED(vict, PLR_TRANS4))
+		{
+			mult = 4;
+		}
+		else if (IS_MAJIN(vict) && PLR_FLAGGED(vict, PLR_TRANS1))
+		{
+			mult = 2;
+		}
+		else if (IS_MAJIN(vict) && PLR_FLAGGED(vict, PLR_TRANS2))
+		{
+			mult = 3;
+		}
+		else if (IS_MAJIN(vict) && PLR_FLAGGED(vict, PLR_TRANS3))
+		{
+			mult = 4.5;
+		}
+		else if (IS_HOSHIJIN(vict) && GET_PHASE(vict) == 1)
+		{
+			mult = 2;
+		}
+		else if (IS_HOSHIJIN(vict) && GET_PHASE(vict) == 2)
+		{
+			mult = 3;
+		}
+		GET_MAJINIZED(vict) = GET_BASE_PL(vict) * .4;
+		GET_MAX_HIT(vict) += (GET_BASE_PL(vict) * .4) * mult;
+		GET_BASE_PL(vict) += GET_BASE_PL(vict) * .4;
+		return;
+	}
 
 }
 
@@ -9239,3243 +9288,3292 @@ void handle_revert(struct char_data *ch, int add, double mult)
 ACMD(do_transform)
 {
 
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-  char buf3[MAX_INPUT_LENGTH];
-
-  if (IS_NPC(ch)) {
-    return;
-  }
-  two_arguments(argument, arg, arg2);
-
-  if (PLR_FLAGGED(ch, PLR_OOZARU)) {
-   send_to_char(ch, "You are the great Oozaru right now and can't transform!\r\n");
-   return;
-  }
-  if (GET_KAIOKEN(ch) > 0) {
-   send_to_char(ch, "You are in kaioken right now and can't transform!\r\n");
-   return;
-  }
-  if (GET_SUPPRESS(ch) > 0) {
-   send_to_char(ch, "You are suppressing right now and can't transform!\r\n");
-   return;
-  }
-  if (GET_CLONES(ch) > 0) {
-   send_to_char(ch, "You can't concentrate on transforming while your body is split into multiple forms!\r\n");
-   return;
-  }
-   reveal_hiding(ch, 0);
-  /*R: Hidden transformation stuff following this*/
-  if (GET_BASE_PL(ch) < 50000) { 
-    send_to_char(ch, "@RYou are too weak to comprehend transforming!@n\r\n");
-   return;
-  }
-
-  if (!*arg) {
-   if (IS_HUMAN(ch)) {
-    send_to_char(ch, "              @YSuper @CHuman@n\r\n");
-    send_to_char(ch, "@b------------------------------------------------@n\r\n");
-    send_to_char(ch, "@YSuper @CHuman @WFirst  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
-    send_to_char(ch, "@YSuper @CHuman @WSecond @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
-    send_to_char(ch, "@YSuper @CHuman @WThird  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
-    send_to_char(ch, "@YSuper @CHuman @WFourth @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4)) : "??????????");
-    send_to_char(ch, "@b------------------------------------------------@n\r\n");
-   }
-   else if (IS_SAIYAN(ch) && !PLR_FLAGGED(ch, PLR_LSSJ)) {
-    send_to_char(ch, "              @YSuper @CSaiyan@n\r\n");
-    send_to_char(ch, "@b------------------------------------------------@n\r\n");
-    send_to_char(ch, "@YSuper @CSaiyan @WFirst  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
-    send_to_char(ch, "@YSuper @CSaiyan @WSecond @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
-    send_to_char(ch, "@YSuper @CSaiyan @WThird  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
-    send_to_char(ch, "@YSuper @CSaiyan @WFourth @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4)) : "??????????");
-    send_to_char(ch, "@b------------------------------------------------@n\r\n");
-   }
-   else if (IS_SAIYAN(ch) && PLR_FLAGGED(ch, PLR_LSSJ)) {
-    send_to_char(ch, "                @YSuper @CSaiyan@n\r\n");
-    send_to_char(ch, "@b-------------------------------------------------@n\r\n");
-    send_to_char(ch, "@YSuper @CSaiyan @WFirst   @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
-    send_to_char(ch, "@YLegendary @CSuper Saiyan @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
-    send_to_char(ch, "@b-------------------------------------------------@n\r\n");
-   }
-   else if (IS_HALFBREED(ch)) {
-    send_to_char(ch, "              @YSuper @CSaiyan@n\r\n");
-    send_to_char(ch, "@b------------------------------------------------@n\r\n");
-    send_to_char(ch, "@YSuper @CSaiyan @WFirst  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
-    send_to_char(ch, "@YSuper @CSaiyan @WSecond @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
-    send_to_char(ch, "@YSuper @CSaiyan @WThird  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
-    send_to_char(ch, "@b------------------------------------------------@n\r\n");
-   }
-   else if (IS_NAMEK(ch)) {
-    send_to_char(ch, "              @YSuper @CNamek@n\r\n");
-    send_to_char(ch, "@b------------------------------------------------@n\r\n");
-    send_to_char(ch, "@YSuper @CNamek @WFirst  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
-    send_to_char(ch, "@YSuper @CNamek @WSecond @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
-    send_to_char(ch, "@YSuper @CNamek @WThird  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
-    send_to_char(ch, "@YSuper @CNamek @WFourth @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4)) : "??????????");
-    send_to_char(ch, "@b------------------------------------------------@n\r\n");
-   }
-   else if (IS_ICER(ch)) {
-    send_to_char(ch, "              @YTransform@n\r\n");
-    send_to_char(ch, "@b------------------------------------------------@n\r\n");
-    send_to_char(ch, "@YTransform @WFirst  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
-    send_to_char(ch, "@YTransform @WSecond @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
-    send_to_char(ch, "@YTransform @WThird  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
-    send_to_char(ch, "@YTransform @WFourth @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4)) : "??????????");
-    send_to_char(ch, "@b------------------------------------------------@n\r\n");
-   }
-   else if (IS_MUTANT(ch)) {
-    send_to_char(ch, "              @YMutate@n\r\n");
-    send_to_char(ch, "@b------------------------------------------------@n\r\n");
-    send_to_char(ch, "@YMutate @WFirst  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
-    send_to_char(ch, "@YMutate @WSecond @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
-    send_to_char(ch, "@YMutate @WThird  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
-    send_to_char(ch, "@b------------------------------------------------@n\r\n");
-   }
-   else if (IS_KONATSU(ch)) {
-    send_to_char(ch, "              @YShadow@n\r\n");
-    send_to_char(ch, "@b------------------------------------------------@n\r\n");
-    send_to_char(ch, "@YShadow @WFirst  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
-    send_to_char(ch, "@YShadow @WSecond @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
-    send_to_char(ch, "@YShadow @WThird  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
-    send_to_char(ch, "@b------------------------------------------------@n\r\n");
-   }
-   else if (IS_ANDROID(ch)) {
-    send_to_char(ch, "              @YUpgrade@n\r\n");
-    send_to_char(ch, "@b------------------------------------------------@n\r\n");
-    send_to_char(ch, "@Y1.0 @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
-    send_to_char(ch, "@Y2.0 @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
-    send_to_char(ch, "@Y3.0 @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
-    send_to_char(ch, "@Y4.0 @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4)) : "??????????");
-    send_to_char(ch, "@Y5.0 @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 5) * 0.75) ? add_commas(trans_req(ch, 5)) : "??????????");
-    send_to_char(ch, "@Y6.0 @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 6) * 0.75) ? add_commas(trans_req(ch, 6)) : "??????????");
-    send_to_char(ch, "@b------------------------------------------------@n\r\n");
-   }
-   else if (IS_BIO(ch)) {
-    send_to_char(ch, "              @YPerfection@n\r\n");
-    send_to_char(ch, "@b------------------------------------------------@n\r\n");
-    send_to_char(ch, "@YMature        @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
-    send_to_char(ch, "@YSemi-Perfect  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
-    send_to_char(ch, "@YPerfect       @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
-    send_to_char(ch, "@YSuper Perfect @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4)) : "??????????");
-    send_to_char(ch, "@b------------------------------------------------@n\r\n");
-   }
-   else if (IS_TRUFFLE(ch)) {
-    send_to_char(ch, "              @YAscend@n\r\n");
-    send_to_char(ch, "@b------------------------------------------------@n\r\n");
-    send_to_char(ch, "@YAscend @WFirst  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
-    send_to_char(ch, "@YAscend @WSecond @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
-    send_to_char(ch, "@YAscend @WThird @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
-    send_to_char(ch, "@b------------------------------------------------@n\r\n");
-   }
-   else if (IS_MAJIN(ch)) {
-    send_to_char(ch, "              @YMorph@n\r\n");
-    send_to_char(ch, "@b------------------------------------------------@n\r\n");
-    send_to_char(ch, "@YMorph @WAffinity @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
-    send_to_char(ch, "@YMorph @WSuper    @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
-    send_to_char(ch, "@YMorph @WTrue     @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
-    send_to_char(ch, "@b------------------------------------------------@n\r\n");
-   }
-   else if (IS_KAI(ch)) {
-    send_to_char(ch, "              @YMystic@n\r\n");
-    send_to_char(ch, "@b------------------------------------------------@n\r\n");
-    send_to_char(ch, "@YMystic @WFirst     @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
-    send_to_char(ch, "@YMystic @WSecond    @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
-    send_to_char(ch, "@YMystic @WThird     @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
-    send_to_char(ch, "@b------------------------------------------------@n\r\n");
-   }
-   else {
-    send_to_char(ch, "You do not have a transformation.\r\n");
-    return;
-   }
-   if (trans_req(ch, 1) > 0) {
-    if (GET_TRANSCLASS(ch) == 1) {
-     send_to_char(ch, "\r\n@RYou have @rterrible@R transformation BPL Requirements.@n\r\n");
-    } else if (GET_TRANSCLASS(ch) == 2) {
-     send_to_char(ch, "\r\n@CYou have @caverage@C transformation BPL Requirements.@n\r\n");
-    } else if (GET_TRANSCLASS(ch) == 3) {
-     send_to_char(ch, "\r\n@GYou have @gGREAT@G transformation BPL Requirements.@n\r\n");
-    }
-   }
-   return;
-  }/* End of No Argument */
-
-  /* ----------------------------------Transformation Section--------------------------------------*/
-/* Rillao: transloc, add new transes here */
-  else if (!str_cmp("first", arg)) {
-   if (IS_HUMAN(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS2) || PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that form!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-       send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 1)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_MOVE(ch) <= GET_MAX_MOVE(ch) * 0.1) {
-        send_to_char(ch, "You do not have enough stamina!");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 1)) {
-        if (GET_TRANSCOST(ch, 1) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 1) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@WYou spread your feet out and crouch slightly as a bright white aura bursts around your body. Torrents of white and blue energy burn upwards around your body while your muscles grow and become more defined at the same time. In a sudden rush of power you achieve @CSuper @cHuman @GFirst@W sending surrounding debris high into the sky!", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n@W crouches slightly while spreading $s feet as a bright white aura bursts up around $s body. Torrents of white and blue energy burn upwards around $s body while $s muscles grow and become more defined at the same time. In a sudden rush of power debris is sent flying high into the air with $m achieving @CSuper @cHuman @GFirst@W!", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-
-        int add = 1000000;
-        double mult = 2;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, .1);
-                
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of Human First Trans */
-
-
-
-   if (IS_TRUFFLE(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS2) || PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that form!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-       send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 1)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_MOVE(ch) <= GET_MAX_MOVE(ch) * 0.1) {
-        send_to_char(ch, "You do not have enough stamina!");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 1)) {
-        if (GET_TRANSCOST(ch, 1) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 1) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@WYour mind accelerates working through the mysteries of the universe while at the same time your body begins to change! Innate nano-technology within your body begins to activate, forming flexible metal plating across parts of your skin!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n@W begins to write complicated calculations in the air as though $e were possessed while at the same time $s body begins to change! Innate nano-technology within $s body begins to activate, forming flexible metal plating across parts of $s skin!@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-        
-
-        int add = 1300000;
-        double mult = 3;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, .1);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of TRUFFLE First Trans */
-
-   if (IS_KAI(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS2) || PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that form!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-       send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 1)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_MOVE(ch) <= GET_MAX_MOVE(ch) * 0.1) {
-        send_to_char(ch, "You do not have enough stamina!");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 1)) {
-        if (GET_TRANSCOST(ch, 1) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 1) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@WThoughts begin to flow through your mind of events throughout your life. The progression leads up to more recent events and finally to this very moment. All of it's significance overwhelms you momentarily and your motivation and drive increase. As your attention is drawn back to your surroundings, you feel as though your thinking, senses, and reflexes have sharpened dramatically.  At the core of your being, a greater depth of power can be felt.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@W$n@W's face tenses, it becoming clear momentarily that they are deep in thought. After a brief lapse in focus, their attention seems to return to their surroundings. Though it's not apparent why they were so distracted, something definitely seems different about $m.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-        
-
-        int add = 1100000;
-        double mult = 3;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, .1);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of KAI First Trans */
-
-   if (IS_KONATSU(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS2) || PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that form!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-       send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 1)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_MOVE(ch) <= GET_MAX_MOVE(ch) * 0.1) {
-        send_to_char(ch, "You do not have enough stamina!");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 1)) {
-        if (GET_TRANSCOST(ch, 1) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 1) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@WA dark shadowy aura with flecks of white energy begins to burn around your body! Strength and agility can be felt rising up within as your form becomes blurred and ethereal looking. You smile as you realize your @GFirst @DShadow @BForm@W!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@WA dark shadowy aura with flecks of white energy begins to burn around @C$n@W's body! $s form becomes blurred and ethereal-looking as $s muscles become strong and lithe. $e smiles as $e achieves $s @GFirst @DShadow @BForm@W!@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-        
-
-        int add = 1000000;
-        double mult = 2;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, .1);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of Konatsu First Trans */
-
-   if (IS_ICER(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS2) || PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that form!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-       send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 1)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_MOVE(ch) <= GET_MAX_MOVE(ch) * 0.1) {
-        send_to_char(ch, "You do not have enough stamina!");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 1)) {
-        if (GET_TRANSCOST(ch, 1) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 1) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@WYou yell with pain as your body begins to grow and power surges within! Your legs expand outward to triple their previous length. Soon after your arms, chest, and head follow. Your horns grow longer and curve upwards while lastly your tail expands. You are left confidently standing, having completed your @GFirst @cTransformation@W.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n@W yells with pain as $s body begins to grow and power surges outward! $s legs expand outward to triple their previous length. Soon after $s arms, chest, and head follow. $s horns grow longer and curve upwards while lastly $s tail expands. $e is left confidently standing, having completed $s @GFirst @cTransformation@W.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-        
-
-        int add = 400000;
-        double mult = 2;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, .1);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of ICER First Trans */
-
-   if (IS_MUTANT(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS2) || PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that form!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-       send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 1)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_MOVE(ch) <= GET_MAX_MOVE(ch) * 0.1) {
-        send_to_char(ch, "You do not have enough stamina!");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 1)) {
-        if (GET_TRANSCOST(ch, 1) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 1) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@WYour flesh grows tougher as power surges up from within. Your fingernails grow longer, sharper, and more claw-like. Lastly your muscles double in size as you achieve your @GFirst @mMutation@W!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n@W flesh grows tougher as power surges up around $m. $s fingernails grow longer, sharper, and more claw-like. Lastly $s muscles double in size as $e achieves $s @GFirst @mMutation@W!@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-        
-
-        int add = 100000;
-        double mult = 2;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, .1);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of MUTANT First Trans */
-
-   if (IS_HALFBREED(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS2) || PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that form!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-       send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 1)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_MOVE(ch) <= GET_MAX_MOVE(ch) * 0.1) {
-        send_to_char(ch, "You do not have enough stamina!");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 1)) {
-        if (GET_TRANSCOST(ch, 1) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 1) = TRUE;
-         }
-        }
-        if (!PLR_FLAGGED(ch, PLR_LSSJ) && !PLR_FLAGGED(ch, PLR_FPSSJ) && rand_number(1, 500) >= 491 && GET_MAX_HIT(ch) > 19200000) {
-           send_to_char(ch, "You have mastered the super saiyan first transformation and have achieved Full Power Super Saiyan! You will now no longer use stamina while in this form.\r\n");
-           SET_BIT_AR(PLR_FLAGS(ch), PLR_FPSSJ);
-          }
-        int zone = 0;
-        act("@WSomething inside your mind snaps as your rage spills over! Lightning begins to strike the ground all around you as you feel torrents of power rushing through every fiber of your being. Your hair suddenly turns golden as your eyes change to the color of emeralds. In a final rush of power a golden aura rushes up around your body! You have become a @CSuper @YSaiyan@W!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n@W screams in rage as lightning begins to crash all around! $s hair turns golden and $s eyes change to an emerald color as a bright golden aura bursts up around $s body! As $s energy stabilizes $e wears a fierce look upon $s face, having transformed into a @CSuper @YSaiyan@W!@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-        
-
-        int add = 900000;
-        double mult = 2;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, .1);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of HALFBREED First Trans */
-
-   if (IS_NAMEK(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS2) || PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that form!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-       send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 1)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_MOVE(ch) <= GET_MAX_MOVE(ch) * 0.1) {
-        send_to_char(ch, "You do not have enough stamina!");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 1)) {
-        if (GET_TRANSCOST(ch, 1) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 1) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@WYou crouch down and clench your fists as your muscles begin to bulge! Sweat pours down your body as the ground beneath your feet cracks and warps under the pressure of your rising ki! With a sudden burst that sends debris flying you realize a new plateau in your power, having achieved @CSuper @gNamek @GFirst@W!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n @Wcrouches down and clenches $s fists as $s muscles begin to bulge! Sweat pours down $s body as the ground beneath $s feet cracks and warps under the pressure of  $s rising ki! With a sudden burst that sends debris flying $e seems to realize a new plateau in $s power, having achieved @CSuper @gNamek @GFirst@W!@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-        
-
-        int add = 200000;
-        double mult = 2;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, .1);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of NAMEK First Trans */
-
-   if (IS_SAIYAN(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS2) || PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that form!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-       send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 1)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_MOVE(ch) <= GET_MAX_MOVE(ch) * 0.1) {
-        send_to_char(ch, "You do not have enough stamina!");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 1)) {
-        if (GET_TRANSCOST(ch, 1) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 1) = TRUE;
-         }
-        }
-        if (!PLR_FLAGGED(ch, PLR_LSSJ) && !PLR_FLAGGED(ch, PLR_FPSSJ) && rand_number(1, 500) >= 491 && GET_MAX_HIT(ch) > 19200000) {
-           send_to_char(ch, "You have mastered the super saiyan first transformation and have achieved Full Power Super Saiyan! You will now no longer use stamina while in this form.\r\n");
-           SET_BIT_AR(PLR_FLAGS(ch), PLR_FPSSJ);
-          }
-        int zone = 0;
-        act("@WSomething inside your mind snaps as your rage spills over! Lightning begins to strike the ground all around you as you feel torrents of power rushing through every fiber of your being. Your hair suddenly turns golden as your eyes change to the color of emeralds. In a final rush of power a golden aura rushes up around your body! You have become a @CSuper @YSaiyan@W!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n@W screams in rage as lightning begins to crash all around! $s hair turns golden and $s eyes change to an emerald color as a bright golden aura bursts up around $s body! As $s energy stabilizes $e wears a fierce look upon $s face, having transformed into a @CSuper @YSaiyan@W!@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-        
-
-        int add = 800000;
-        double mult = 2;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, .1);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of Saiyan First Trans */
-
-    return;
-  }/* End of First Trans */
-
-  else if (!str_cmp("second", arg)) {
-   if (IS_HUMAN(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that form!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-       send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 2)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
-        send_to_char(ch, "You do not have enough stamina!");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 2)) {
-        if (GET_TRANSCOST(ch, 2) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 2) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@WSuddenly a bright white aura bursts into existance around your body, you feel the intensity of your hidden potential boil until it can't be contained any longer! Waves of ki shoot out from your aura streaking outwards in many directions. A roar that shakes everything in the surrounding area sounds right as your energy reaches its potential and you achieve @CSuper @cHuman @GSecond@W!", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n@W is suddenly covered with a bright white aura as $e grits $s teeth, apparently struggling with the power boiling to the surface! Waves of ki shoot out from $s aura, streaking in several directions as a mighty roar shakes everything in the surrounding area. As $s aura calms $e smiles, having achieved @CSuper @cHuman @GSecond@W!", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-        
-        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 1000000, 2);
-        }
-
-
-        int add = 12000000;
-        double mult = 3;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, .2);
-        
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of Human Second Trans */
-
-   if (IS_KAI(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that form!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-       send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 2)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
-        send_to_char(ch, "You do not have enough stamina!");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 2)) {
-        if (GET_TRANSCOST(ch, 2) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 2) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@WYou feel a sudden rush of emotion, escalating almost to a loss of control as your thoughts race. Your heart begins to beat fast as memories mix with the raw emotion. A faint blue glow begins to surround you. As your emotions level off, you feel a deeper understanding of the universe as you know it. You visibly calm back down to an almost steely eyed resolve as you assess your surroundings. The blue aura wicks around you for a few moments and then dissipates. Thought it's full impact is not yet clear to you, you are left feeling as though both your power and inner strength have turned into nearly bottomless wells.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@W$n@W's appears to be hit by some sudden pangs of agony, their face contorted in pain.  After a moment a faint blue aura appears around them, glowing brighter as time passes. You can feel something in the pit of your stomach, letting you know that something very significant is changing around you. Before long $n@W's aura fades, leaving a very determined looking person in your presence.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-        
-        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 1100000, 3);
-        }
-
-
-        int add = 115000000;
-        double mult = 4;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, .2);
-        
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of KAI Second Trans */
-
-   if (IS_TRUFFLE(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that form!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-       send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 2)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
-        send_to_char(ch, "You do not have enough stamina!");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 2)) {
-        if (GET_TRANSCOST(ch, 2) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 2) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@WComplete understanding of every physical thing floods your mind as the nano-technology within you continues to change your body! Your eyes change; becoming glassy, hard, and glowing. Your muscles merge with a nano-fiber strengthening them at the molecular level! Finally your very bones become plated in nano-metals that have yet to be invented naturally!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n@.s nano-technology continues to change $s body! $s eyes change; becoming glassy, hard, and glowing. $s muscles merge with a nano-fiber strengthening them at the molecular level! Finally $s very bones become plated in nano-metals that have yet to be invented naturally!@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-        
-        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 1300000, 3);
-        }
-
-
-        int add = 80000000;
-        double mult = 4;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, .2);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of TRUFFLE Second Trans */
-
-   if (IS_KONATSU(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that form!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-       send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 2)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
-        send_to_char(ch, "You do not have enough stamina!");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 2)) {
-        if (GET_TRANSCOST(ch, 2) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 2) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@WThe shadowy aura surrounding your body burns larger than ever as dark bolts of purple electricity crackles across your skin. Your eyes begin to glow white as shockwaves of power explode outward! All the shadows in the immediate area are absorbed into your aura in an instant as you achieve your @GSecond @DShadow @BForm@W!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@WThe shadowy aura surrounding @C$n@W's body burns larger than ever as dark bolts of purple electricity crackles across $s skin. $s eyes begin to glow white as shockwaves of power explode outward! All the shadows in the immediate area are absorbed into $s aura in an instant as $e achieves $s @GSecond @DShadow @BForm@W!@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-        
-        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 1000000, 2);
-        }
-
-
-        int add = 56000000;
-        double mult = 4;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, .2);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of Konatsu Second Trans */
-
-   if (IS_MUTANT(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that form!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-       send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 2)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
-        send_to_char(ch, "You do not have enough stamina!");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 2)) {
-        if (GET_TRANSCOST(ch, 2) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 2) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@WSpikes grow out from your elbows as your power begins to climb to new heights. The muscles along your forearms grow to double their former size as the spikes growing from your elbows flatten and sharpen into blades. You have achieved your @GSecond @mMutation@W!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@WSpikes grow out from @C$n@W's elbows as $s power begins to climb to new heights. The muscles along $s forearms grow to double their former size as the spikes growing from $s elbows flatten and sharpen into blades. $e has achieved your @GSecond @mMutation@W!@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-        
-        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 100000, 2);
-        }
-
-
-        int add = 8500000;
-        double mult = 3;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, .2);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of MUTANT Second Trans */
-
-   if (IS_ICER(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that form!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-       send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 2)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
-        send_to_char(ch, "You do not have enough stamina!");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 2)) {
-        if (GET_TRANSCOST(ch, 2) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 2) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@WYou yell as pain envelopes your body and a dark aura bursts up! The back of your head stretches out growing multiple spikes along its edges as it grows. In addition to this your shoulders stretch out forming pointed ridges. You cackle as lastly your nose disappears and your face becomes more lizard like. Energy swirls around your body as you realize your @GSecond @cTransformation@W.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n@W yells as pain envelopes $s body and a dark aura bursts up around $m! The back of $s head stretches out growing multiple spikes along its edges as it grows. In addition to this $s shoulders stretch out forming pointed ridges. $e cackles as lastly $s nose disappears and $s face becomes more lizard like. Energy swirls around $s body as $e realizes $s @GSecond @cTransformation@W.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-        
-        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 400000, 2);
-        }
-
-
-        int add = 7000000;
-        double mult = 3;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, .2);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of ICER Second Trans */
-
-   if (IS_HALFBREED(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that form!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-       send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 2)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
-        send_to_char(ch, "You do not have enough stamina!");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 2)) {
-        if (GET_TRANSCOST(ch, 2) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 2) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@WBlinding rage burns through your mind as a sudden eruption of energy surges forth! A golden aura bursts up around your body, glowing as bright as the sun. Rushing winds rocket out from your body in every direction as bolts of electricity begin to crackle in your aura. As your aura dims you are left standing confidently, having achieved @CSuper @YSaiyan @GSecond@W!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n@W stands up straight with $s head back as $e releases an ear piercing scream! A blindingly bright golden aura bursts up around $s body, glowing as bright as the sun. As rushing winds begin to rocket out from $m in every direction, bolts of electricity flash and crackle in $s aura. As $s aura begins to dim $e is left standing confidently, having achieved @CSuper @YSaiyan @GSecond@W!@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-        
-        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 900000, 2);
-        }
-
-
-        int add = 16500000;
-        double mult = 4;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, .2);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of HALFBREED Second Trans */
-
-   if (IS_NAMEK(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that form!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-       send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 2)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
-        send_to_char(ch, "You do not have enough stamina!");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 2)) {
-        if (GET_TRANSCOST(ch, 2) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 2) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@WYou gasp in shock as a power within your body that you had not been aware of begins to surge to the surface! Your muscles grow larger as energy crackles between your antennae intensely! A shockwave of energy explodes outward as you achieve a new plateau in power, @CSuper @gNamek @GSecond@W!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n @Wgasps in shock as a power within $s body begins to surge out! $s muscles grow larger as energy crackles between $s antennae intensely! A shockwave of energy explodes outward as $e achieves a new plateau in power, @CSuper @gNamek @GSecond@W!@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-        
-        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 200000, 2);
-        }
-
-
-        int add = 4000000;
-        double mult = 3;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, .2);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of NAMEK Second Trans */
-
-   if (IS_SAIYAN(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that form!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-       send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 2)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_MOVE(ch) <= GET_MAX_MOVE(ch) * 0.2) {
-        send_to_char(ch, "You do not have enough stamina!");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 2)) {
-        if (GET_TRANSCOST(ch, 2) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 2) = TRUE;
-         }
-        }
-        int zone = 0;
-       if (!PLR_FLAGGED(ch, PLR_LSSJ)) {
-        act("@WBlinding rage burns through your mind as a sudden eruption of energy surges forth! A golden aura bursts up around your body, glowing as bright as the sun. Rushing winds rocket out from your body in every direction as bolts of electricity begin to crackle in your aura. As your aura dims you are left standing confidently, having achieved @CSuper @YSaiyan @GSecond@W!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n@W stands up straight with $s head back as $e releases an ear piercing scream! A blindingly bright golden aura bursts up around $s body, glowing as bright as the sun. As rushing winds begin to rocket out from $m in every direction, bolts of electricity flash and crackle in $s aura. As $s aura begins to dim $e is left standing confidently, having achieved @CSuper @YSaiyan @GSecond@W!@n", TRUE, ch, 0, 0, TO_ROOM);
-       } else {
-         act("@WYou roar and then stand at your full height. You flex every muscle in your body as you feel your strength grow! Your eyes begin to glow @wwhite@W with energy, your hair turns @Ygold@W, and at the same time a @wbright @Yg@yo@Yl@yd@Ye@yn@W aura flashes up around your body! You release your @YL@ye@Dg@We@wn@Yd@ya@Dr@Yy@W power upon the universe!@n", TRUE, ch, 0, 0, TO_CHAR);
-         act("@C$n @Wroars and then stands at $s full height. Then $s muscles start to buldge and grow as $e flexes them! Suddenly $s eyes begin to glow @wwhite@W with energy, $s hair turns @Ygold@W, and at the same time a @wbright @Yg@yo@Yl@yd@Ye@yn@W aura flashes up around $s body! @C$n@W releases $s @YL@ye@Dg@We@wn@Yd@ya@Dr@Yy@W power upon the universe!@n", TRUE, ch, 0, 0, TO_ROOM);        
-       }
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-
-        int add = 0;
-        double mult = 0;
- 
-       if (!PLR_FLAGGED(ch, PLR_LSSJ)) {
-        add = 20000000;
-        mult = 3;
-       } else {
-        add = 185000000;
-        mult = 6;
-       }
-
-        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 800000, 2);
-        }
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, .2);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of Saiyan Second Trans */
-
-
-    return;
-  }/* End of Second Trans */
-
-  else if (!str_cmp("third", arg)) {
-   if (IS_HUMAN(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that form!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-       send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 3)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
-        send_to_char(ch, "You do not have enough stamina!");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 3)) {
-        if (GET_TRANSCOST(ch, 3) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 3) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@WYou clench both of your fists as the bright white aura around your body is absorbed back into your flesh. As it is absorbed, your muscles triple in size and electricity crackles across your flesh. You grin as you feel the power of @CSuper @cHuman @GThird@W!", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n@W clenches both of $s fists as the bright white aura around $s body is absorbed back into $s flesh. As it is absorbed, $s muscles triple in size and bright electricity crackles across $s flesh. $e smiles as $e achieves the power of @CSuper @cHuman @GThird@W!", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-
-
-        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 1000000, 2);
-        }
-        if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 12000000, 3);
-        }
-        
-
-        int add = 50000000;
-        double mult = 4;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, .2);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of Human Third Trans */
-     
-     if (IS_TRUFFLE(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that form!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-       send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 3)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
-        send_to_char(ch, "You do not have enough stamina!");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 3)) {
-        if (GET_TRANSCOST(ch, 3) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 3) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@WYou have reached the final stage of enlightenment and the nano-technology thriving inside you begin to initiate the changes! Your neural pathways become refined, your reflexes honed, your auditory and ocular senses sharpening far beyond normal levels! Your gravitational awareness improves, increasing sensitivity and accuracy in your equilibrum!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n begins to mumble quietly, slowly at first and gradually picking up speed. A glint is seen from $s eyes and $s arms reach outwards briefly as $e appears to catch his balance. $s arms drop back to $s sides as balance is regained, a vicious smile on $s face.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-        
-        if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 80000000, 4);
-        }
-
-
-        int add = 300000000;
-        double mult = 5;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, .2);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of TRUFFLE Third Trans */
-     
-     if (IS_KAI(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that form!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-       send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 3)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
-        send_to_char(ch, "You do not have enough stamina!");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 3)) {
-        if (GET_TRANSCOST(ch, 3) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 3) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@WYour minds' eye becomes overwhelmed by secrets unimaginable. The threads of the very universe become visible in your heightened state of awareness. Reaching out, a single thread vibrates, producing a @Rred @Wcolor -- yours. Your fingertips brush against it and your senses become clouded by a vast expanse of white color and noise. As your vision and hearing return, you understand the threads tying every living being together. Your awareness has expanded beyond comprehension!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n@W's eyes grow wide, mouth agape. $s body begins to shiver uncontrollably! $s arms reaches out cautiously before falling back down to $s side. $s face relaxes visibly, features returning to a normal state. $s irises remain larger than before, a slight smile softening $s gaze.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-        
-        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 1100000, 3);
-         }
-         if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 115000000, 4);
-        }
-
-
-        int add = 270000000;
-        double mult = 5;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, .2);
-        
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of KAI Second Trans */
-
-   if (IS_MUTANT(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that form!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-       send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 3)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
-        send_to_char(ch, "You do not have enough stamina!");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 3)) {
-        if (GET_TRANSCOST(ch, 3) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 3) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@WA dark cyan aura bursts up around your body as the ground begins to crack beneath you! You scream out in pain as your power begins to explode! Two large spikes grow out from your shoulder blades as you reach your @GThird @mMutation!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@WA dark cyan aura bursts up around @C$n@W's body as the ground begins to crack beneath $m and $e screams out in pain as $s power begins to explode! Two large spikes grow out from $s shoulder blades as $e reaches $s @GThird @mMutation!@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-
-        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 100000, 2);
-        }
-        if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 8500000, 3);
-        }
-        
-
-        int add = 80000000;
-        double mult = 4;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, .2);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of MUTANT Third Trans */
-     
-    if (IS_KONATSU(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that form!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-       send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 3)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
-        send_to_char(ch, "You do not have enough stamina!");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 3)) {
-        if (GET_TRANSCOST(ch, 3) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 3) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@WThe shadowy aura around you explodes outward as your power begins to rise!  You're overcome with a sudden realization, that the shadows are an extension of yourself, that light isn't needed for your shadows to bloom.  With this newfound wisdom comes ability and power!  The color in your aura drains as the shadows slide inward and cling to your body like a second, solid black skin!  Shockwaves roll off of you in quick succession, pelting the surrounding area harshly!  Accompanying the waves, a pool of darkness blossoms underneath you, slowly spreading the shadows to the whole area, projecting onto any surface nearby!  Purple and black electricity crackle in your solid white aura, and you grin as you realize your @GThird @DShadow @BForm@W!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@WThe shadowy aura around $n explodes outward as $s power begins to rise!  Realization dawns on $s face, followed shortly by confidence! The color in $s aura drains as the shadows slide inward to cling to $s body like a second, solid black skin! Shockwaves roll off of $n in quick succession, pelting the surrounding area harshly!  Accompanying the waves, a pool of darkness blossoms underneath them, slowly spreading the shadows to the whole area, projecting onto any surface nearby! Purple and black electricity crackle in $s solid white aura, and he grins as $e realizes $s @GThird @DShadow @BForm@W!@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-        
-        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 1000000, 2);
-        }
-        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 56000000, 4);
-        }
-
-
-        int add = 290000000;
-        double mult = 5;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, .2);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of Konatsu Third Trans */
-
-   if (IS_ICER(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that form!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-       send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 3)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
-        send_to_char(ch, "You do not have enough stamina!");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 3)) {
-        if (GET_TRANSCOST(ch, 3) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 3) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@WA blinding light surrounds your body while your rising power begins to rip up the ground beneath you! Your skin and torso shell begin to crack as your new body struggles to free its self. Huge chunks of debris lift free of the ground as your power begins to rise to unbelievable heights. Suddenly your old skin and torso shell burst off from your body, leaving a sleek form glowing where they had been. Everything comes crashing down as your power evens out, leaving you with your @GThird @cTransformation @Wcompleted!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@WA blinding light surrounds @C$n@W's body while $s rising power begins to rip up the ground beneath $m! $s skin and torso shell begin to crack as $s new body struggles to free its self. Huge chunks of debris lift free of the ground as $s power begins to rise to unbelievable heights. Suddenly $s old skin and torso shell burst off from $s body, leaving a sleek form glowing where they had been. Everything comes crashing down as @C$n@W's power evens out, leaving $m with $s @GThird @cTransformation @Wcompleted!@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-
-
-        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 400000, 2);
-        }
-        if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 7000000, 3);
-        }
-        
-
-        int add = 45000000;
-        double mult = 4;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, .2);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of ICER Third Trans */
-
-   if (IS_HALFBREED(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that form!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-       send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 3)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
-        send_to_char(ch, "You do not have enough stamina!");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 3)) {
-        if (GET_TRANSCOST(ch, 3) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 3) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@WElectricity begins to crackle around your body as your aura grows explosively! You yell as your powerlevel begins to skyrocket while your hair grows to multiple times the length it was previously. Your muscles become incredibly dense instead of growing in size, preserving your speed. Finally your irises appear just as your transformation becomes complete, having achieved @CSuper @YSaiyan @GThird@W!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@WElectricity begins to crackle around @C$n@W, as $s aura grows explosively! $e yells as the energy around $m skyrockets and $s hair grows to multiple times its previous length. $e smiles as $s irises appear and $s muscles tighten up. $s transformation complete, $e now stands confidently, having achieved @CSuper @YSaiyan @GThird@W!@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-
-        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 900000, 2);
-        }
-        if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 16500000, 4);
-        }
-        
-
-        int add = 240000000;
-        double mult = 5;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, .2);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of HALFBREED Third Trans */
-
-   if (IS_NAMEK(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that form!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-       send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 3)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
-        send_to_char(ch, "You do not have enough stamina!");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 3)) {
-        if (GET_TRANSCOST(ch, 3) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 3) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@WA fierce clear aura bursts up around your body as you struggle to control a growing power within! Energy leaks off of your aura at an astounding rate filling the air around you with small orbs of ki. As your power begins to level off the ambient ki hovering around you is absorbed inward in a sudden shock that leaves your skin glowing! You have achieved a rare power, @CSuper @gNamek @GThird@W!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@WA fierce clear aura bursts up around @C$n@W's body as $e struggles to control $s own power! Energy leaks off of $s aura at an astounding rate filling the air around $m with small orbs of ki. As $s power begins to level off the ambient ki hovering around $m is absorbed inward in a sudden shock that leaves $s skin glowing! $e has achieved a rare power, @CSuper @gNamek @GThird@W!@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-
-        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 200000, 2);
-        }
-        if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 4000000, 3);
-        }
-        
-
-        int add = 65000000;
-        double mult = 4;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, .2);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of NAMEK Third Trans */
-
-   if (IS_SAIYAN(ch) && !PLR_FLAGGED(ch, PLR_LSSJ)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that form!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-       send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 3)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_MOVE(ch) <= GET_MAX_MOVE(ch) * 0.1) {
-        send_to_char(ch, "You do not have enough stamina!");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 3)) {
-        if (GET_TRANSCOST(ch, 3) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 3) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@WElectricity begins to crackle around your body as your aura grows explosively! You yell as your powerlevel begins to skyrocket while your hair grows to multiple times the length it was previously. Your muscles become incredibly dense instead of growing in size, preserving your speed. Finally your irises appear just as your transformation becomes complete, having achieved @CSuper @YSaiyan @GThird@W!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@WElectricity begins to crackle around @C$n@W, as $s aura grows explosively! $e yells as the energy around $m skyrockets and $s hair grows to multiple times its previous length. $e smiles as $s irises appear and $s muscles tighten up. $s transformation complete, $e now stands confidently, having achieved @CSuper @YSaiyan @GThird@W!@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-
-        int add = 80000000;
-        double mult = 4;
-
-        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 800000, 2);
-        }
-        if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 20000000, 3);
-        }
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, .2);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of Saiyan Third Trans */
-
-    return;
-  }/* End of Third Trans */
-
-  else if (!str_cmp("fourth", arg)) {
-   if (IS_HUMAN(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 4)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
-        send_to_char(ch, "You do not have enough stamina!");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 4)) {
-        if (GET_TRANSCOST(ch, 4) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 4) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@WYou grit your teeth and clench your fists as a sudden surge of power begins to tear through your body! Your muscles lose volume and gain mass, condensing into sleek hyper efficiency as a spectacular shimmering white aura flows over you, flashes of multicolored light flaring up in rising stars around your new form, a corona of glory! You feel your ultimate potential realized as you ascend to @CSuper @cHuman @GFourth@W!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n@W grits $s teeth and clenches $s fists as a sudden surge of power begins to tear through $s body! $n@W's muscles lose volume and gain mass, condensing into sleek hyper efficiency as a spectacular shimmering white aura flows over $m, flashes of multicolored light flare up in rising stars around $s new form, a corona of glory! $n@W smiles as his ultimate potential is realized as $e ascends to @CSuper @cHuman @GFourth@W!@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-
-        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 1000000, 2);
-        }
-        if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 12000000, 3);
-        }
-        if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 50000000, 4);
-        }
-        
-
-        int add = 270000000;
-        double mult = 4.5;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, .2);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS4);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of Human Fourth Trans */
-
-   if (IS_ICER(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 4)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
-        send_to_char(ch, "You do not have enough stamina!");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 4)) {
-        if (GET_TRANSCOST(ch, 4) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 4) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@WA feeling of complete power courses through your viens as your body begins to change radically! You triple in height while a hard shell forms over your entire torso. Hard bones grow out from your head forming four ridges that jut outward. A hard covering grows up over your mouth and nose completing the transformation! A dark crimson aura flames around your body as you realize your @GFourth @cTransformation@W!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n@W's body begins to change radically! $e triples in height while a hard shell forms over $s entire torso. Hard bones grow out from $s head forming four ridges that jut outward. A hard covering grows up over $s mouth and nose completing the transformation! A dark crimson aura flames around @C$n@W's body as $e realizes $s @GFourth @cTransformation@W!@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-
-        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 400000, 2);
-        }
-        if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 7000000, 3);
-        }
-        if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 45000000, 4);
-        }
-        
-
-        int add = 200000000;
-        double mult = 5;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, .2);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS4);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of ICER Fourth Trans */
-
-   if (IS_NAMEK(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 4)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
-        send_to_char(ch, "You do not have enough stamina!");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 4)) {
-        if (GET_TRANSCOST(ch, 4) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 4) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@WAn inner calm fills your mind as your power surges higher than ever before. Complete clarity puts everything once questioned into perspective. While this inner calm is filling your mind, an outer storm of energy erupts around your body! The storm of energy boils and crackles while growing larger. You have achieved @CSuper @gNamek @GFourth@W, a mystery of the ages.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n@W smiles calmly as a look of complete understand fills $s eyes. While $e remains perfectly calm and detached a massivly powerful storm of energy erupts from his body. This storm of energy shimmers with the colors of the rainbow and boils and crackles with awesome power! $s smile disappears as he realizes a mysterious power of the ages, @CSuper @gNamek @GFourth@W!@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-
-        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 200000, 2);
-        }
-        if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 4000000, 3);
-        }
-        if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 65000000, 4);
-        }
-        
-
-        int add = 230000000;
-        double mult = 4.5;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, .2);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS4);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of NAMEK Fourth Trans */
-
-   if (IS_SAIYAN(ch) && !PLR_FLAGGED(ch, PLR_LSSJ)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 4)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
-        send_to_char(ch, "You do not have enough stamina!");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 4)) {
-        if (GET_TRANSCOST(ch, 4) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 4) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@WHaving absorbed enough blutz waves, your body begins to transform! Red fur grows over certain parts of your skin as your hair grows longer and unkempt. A red outline forms around your eyes while the irises of those very same eyes change to an amber color. Energy crackles about your body violently as you achieve the peak of saiyan perfection, @CSuper @YSaiyan @GFourth@W!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@WHaving absorbed enough blutz waves, @C$n@W's body begins to transform! Red fur grows over certain parts of $s skin as $s hair grows longer and unkempt. A red outline forms around $s eyes while the irises of those very same eyes change to an amber color. Energy crackles about $s body violently as $e achieves the peak of saiyan perfection, @CSuper @YSaiyan @GFourth@W!@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-
-        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 800000, 2);
-        }
-        if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 20000000, 3);
-        }
-        if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 80000000, 4);
-        }
-        
-        int add = 182000000;
-        double mult = 5.5;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, .2);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS4);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of Saiyan Fourth Trans */
-    return;
-  }/* End of Fourth Trans */
-  else if (!str_cmp("mature", arg)) {
-   if (IS_BIO(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-       send_to_char(ch, "You are already beyond that form!\r\n");
-       return;
-      }
-      if (GET_ABSORBS(ch) > 2) {
-        send_to_char(ch, "You need to absorb something to transform!\r\n");
-        return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-       send_to_char(ch, "You are already in that form!\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 1)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 1)) {
-        if (GET_TRANSCOST(ch, 1) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 1) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@gYou bend over as @rpain@g wracks your body! Your limbs begin to grow out, becoming more defined and muscular. As your limbs finish growing outward you feel a painful sensation coming from your back as a long tail with a spike grows out of your back! As the pain subsides you stand up straight and a current of power shatters part of the ground beneath you. You have @rmatured@g beyond your @Gl@ga@Dr@gv@Ga@ge stage!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@W$n @gbends over as a @rpainful@g look covers $s face! $s limbs begin to grow out, becoming more defined and muscular. As $s limbs finish growing outward $e screams as a long tail with a spike grows rips out of $s back! As $e calms $e stands up straight and a current of power shatters part of the ground beneath $m. $e has @rmatured@g beyond $s @Gl@ga@Dr@gv@Ga@ge stage!@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-        
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-
-
-        int add = 1000000;
-        double mult = 2;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, 0.0);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-        return;
-      }
-     } /* End of Bio First Trans */
-    return;
-  }/* End of Bio First Trans */
-
-  else if (!str_cmp("semi-perfect", arg) || !str_cmp("Semi-Perfect", arg)) {
-   if (IS_BIO(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that form!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-       send_to_char(ch, "You are already in that form!\r\n");
-       return;
-      }
-      if (GET_ABSORBS(ch) > 1) {
-        send_to_char(ch, "You need to absorb something to transform!\r\n");
-        return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 2)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
-        send_to_char(ch, "You do not have enough stamina!");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 2)) {
-        if (GET_TRANSCOST(ch, 2) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 2) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@WYour exoskeleton begins to glow spectacularly while the shape of your body begins to change. Your tail shrinks slightly. Your hands, feet, and facial features become more refined. While your body colors change slightly. The crests on your head change, standing up straighter on either side of your head as well. As you finish transforming a wave of power floods your being. You have achieved your @gSemi@D-@GPerfect @BForm@W!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n@W's exoskeleton begins to glow spectacularly while the shape of $s body begins to change. $s tail shrinks slightly. $s hands, feet, and facial features become more refined. While $s body colors change slightly. The crests on $s head change, standing up straighter on either side of $s head as well. As $e finishes transforming a wave of power rushes out from $m. $e has achieved $s @gSemi@D-@GPerfect @BForm@W!@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-        
-        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 1000000, 2);
-        }
-
-
-        int add = 8000000;
-        double mult = 3;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, 0.0);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of BIO Second Trans */
-  } /* End of Bio Second Trans */
-
-  else if (!str_cmp("perfect", arg)) {
-   if (IS_BIO(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that form!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-       send_to_char(ch, "You are already in that form!\r\n");
-       return;
-      }
-      if (GET_ABSORBS(ch) > 0) {
-        send_to_char(ch, "You need to absorb something to transform!\r\n");
-        return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 3)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
-        send_to_char(ch, "You do not have enough stamina!");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 3)) {
-        if (GET_TRANSCOST(ch, 3) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 3) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@WYour whole body is engulfed in blinding light as your exoskeleton begins to change shape! Your hands, feet, and facial features become more refined and humanoid. While your colors change, becoming more subdued and neutral. A bright golden aura bursts up around your body as you achieve your @GPerfect @BForm@W!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n@W whole body is engulfed in blinding light as $s exoskeleton begins to change shape! $s hands, feet, and facial features become more refined and humanoid. While $s colors change, becoming more subdued and neutral. A bright golden aura bursts up around $s body as $e achieves $s @GPerfect @BForm@W!@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-
-        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 1000000, 2);
-        }
-        if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 8000000, 3);
-        }
-        
-
-        int add = 70000000;
-        double mult = 3.5;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, 0.0);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of BIO Third Trans */
-  } /* End of Bio Third Trans */
-
-  else if ((!str_cmp("super", arg) || !str_cmp("super perfect", arg)) && IS_BIO(ch)) {
-   if (IS_BIO(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already in that form!\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 4)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 4)) {
-        if (GET_TRANSCOST(ch, 4) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 4) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@WA rush of power explodes from your perfect body, crushing nearby debris and sending dust billowing in all directions. Electricity crackles throughout your aura intensely while your muscles grow slightly larger but incredibly dense. You smile as you realize that you have taken your perfect form beyond imagination. You are now @CSuper @GPerfect@W!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@WA rush of power explodes from @C$n@W's perfect body, crushing nearby debris and sending dust billowing in all directions. Electricity crackles throughout $s aura intensely while $s muscles grow slightly larger but incredibly dense. $e smiles as $e has taken $s perfect form beyond imagination. $e is now @CSuper @GPerfect@W!@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-
-        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 1000000, 2);
-        }
-        if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 8000000, 3);
-        }
-        if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 70000000, 3.5);
-        }
-        
-
-        int add = 400000000;
-        double mult = 4;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, 0.0);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS4);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of BIO Fourth Trans */
-  } /* End of Bio Fourth Trans */
-
-  else if (!str_cmp("affinity", arg)) {
-   if (IS_MAJIN(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS2) || PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that form!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-       send_to_char(ch, "You are already in that form!\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 1)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 1)) {
-        if (GET_TRANSCOST(ch, 1) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 1) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@WA dark pink aura bursts up around your body as images of good and evil fill your mind! You feel the power within your body growing intensely, reflecting your personal alignment as your body changes!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@WA dark pink aura bursts up around @C$n@W's body as images of good and evil fill $s mind! $e feels the power within $s body growing intensely, reflecting $s personal alignment as $s body changes!@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-        
-
-        int add = 1250000;
-        double mult = 2;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, 0.0);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of MAJIN First Trans */
-
-  } /* Majin First trans block */
-  else if (!str_cmp("super", arg)) {
-    if (IS_MAJIN(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that form!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-       send_to_char(ch, "You are already in that form!\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 2)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      if (GET_ABSORBS(ch) > 0 && GET_LEVEL(ch) < 50) {
-       send_to_char(ch, "You need to ingest someone before you can use that form.\r\n");
-       return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 2)) {
-        if (GET_TRANSCOST(ch, 2) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 2) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@WAn intense pink aura surrounds your body as it begins to change, taking on the characteristics of those you have ingested! Explosions of pink energy burst into existence all around you as your power soars to sights unseen!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@WAn intense pink aura surrounds @C$n@W's body as it begins to change, taking on the characteristics of those $e has ingested! Explosions of pink energy burst into existence all around $m as $s power soars to sights unseen!@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-        
-        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 1250000, 2);
-        }
-
-
-        int add = 15000000;
-        double mult = 3;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, 0.0);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of MAJIN Second Trans */
-
-  } /* Majin Second trans block */
-
-  else if (!str_cmp("true", arg)) {
-
-   if (IS_MAJIN(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that form!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-       send_to_char(ch, "You are already in that form!\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 3)) {
-        send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 3)) {
-        if (GET_TRANSCOST(ch, 3) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 3) = TRUE;
-         }
-        }
-        int zone = 0;
-        act("@WRipples of intense pink energy rush upwards around your body as it begins to morph into its truest form! The ground beneath your feet forms into a crater from the very pressure of your rising ki! Earthquakes shudder throughout the area as your finish morphing!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@WRipples of intense pink energy rush upwards around @C$n@W's body as it begins to morph into its truest form! The ground beneath $s feet forms into a crater from the very pressure of $s rising ki! Earthquakes shudder throughout the area as $e finishes morphing!@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
-         send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
-        }
-
-        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 1250000, 2);
-        }
-        if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-         /* handle revert, Ch, add, mult */
-         handle_revert(ch, 15000000, 3);
-        }
-        
-
-        int add = 340000000;
-        double mult = 4.5;
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, 0.0);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
-        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-        send_to_scouter(buf3, ch, 1, 0);
-        return;
-      }
-     } /* End of MAJIN Third Trans */
-
-  } /* Majin Second trans block */
-
-  else if (!str_cmp("1.0", arg)) {
-   if (IS_ANDROID(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS2) || PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that upgrade!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-       send_to_char(ch, "You are already in that upgrade!\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 1)) {
-        send_to_char(ch, "You are not strong enough to handle that upgrade!\r\n");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 1)) {
-        if (GET_TRANSCOST(ch, 1) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 1) = TRUE;
-         }
-        }
-        act("@WYou stop for a moment as the nano-machines within your body reprogram and restructure you. You are now more powerful and efficient!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n @Wstops for a moment as the nano-machines within $s body reprogram and restructure $m. $e is now more powerful and efficient!@n", TRUE, ch, 0, 0, TO_ROOM);        
-
-        int add = 5000000;
-        double mult = 1;
-
-        if (PLR_FLAGGED(ch, PLR_SENSEM)) {
-         add += 7500000;
-        }
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, 0.0);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-        return;
-      }
-     } /* End of ANDROID First Trans */
-
-  }
-  else if (!str_cmp("2.0", arg)) {
-   if (IS_ANDROID(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that upgrade!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-       send_to_char(ch, "You are already in that upgrade!\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 2)) {
-        send_to_char(ch, "You are not strong enough to handle that upgrade!\r\n");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 2)) {
-        if (GET_TRANSCOST(ch, 2) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 2) = TRUE;
-         }
-        }
-        act("@WYou stop for a moment as the nano-machines within your body reprogram and restructure you. You are now more powerful and efficient!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n @Wstops for a moment as the nano-machines within $s body reprogram and restructure $m. $e is now more powerful and efficient!@n", TRUE, ch, 0, 0, TO_ROOM);
-        
-        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-        }
-
-        int add = 20000000;
-        double mult = 1;
-
-        if (PLR_FLAGGED(ch, PLR_SENSEM)) {
-         add += 30000000;
-        }
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, 0.0);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        return;
-      }
-     } /* End of ANDROID Second Trans */
-
-  }
-  else if (!str_cmp("3.0", arg)) {
-   if (IS_ANDROID(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already beyond that upgrade!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-       send_to_char(ch, "You are already in that upgrade!\r\n");
-       return;
-      }
-      if (!PLR_FLAGGED(ch, PLR_TRANS2)) {
-       send_to_char(ch, "You havn't upgraded to 2.0 yet!\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 3)) {
-        send_to_char(ch, "You are not strong enough to handle that upgrade!\r\n");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 3)) {
-        if (GET_TRANSCOST(ch, 3) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 3) = TRUE;
-         }
-        }
-        act("@WYou stop for a moment as the nano-machines within your body reprogram and restructure you. You are now more powerful and efficient!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n @Wstops for a moment as the nano-machines within $s body reprogram and restructure $m. $e is now more powerful and efficient!@n", TRUE, ch, 0, 0, TO_ROOM);
-
-        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-        }
-        if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        }
-
-        int add = 125000000;
-        double mult = 1;
-
-        if (PLR_FLAGGED(ch, PLR_SENSEM)) {
-         add += 187500000;
-        }
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, 0.0);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
-        return;
-      }
-     } /* End of ANDROID Third Trans */
-
-  }
-  else if (!str_cmp("4.0", arg)) {
-   if (IS_ANDROID(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS5) || PLR_FLAGGED(ch, PLR_TRANS6)) {
-       send_to_char(ch, "You are already beyond that upgrade!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You are already in that upgrade!\r\n");
-       return;
-      }
-      if (!PLR_FLAGGED(ch, PLR_TRANS3)) {
-       send_to_char(ch, "You havn't upgraded to 3.0 yet!\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 4)) {
-        send_to_char(ch, "You are not strong enough to handle that upgrade!\r\n");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 4)) {
-        if (GET_TRANSCOST(ch, 4) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 4) = TRUE;
-         }
-        }
-        act("@WYou stop for a moment as the nano-machines within your body reprogram and restructure you. You are now more powerful and efficient!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n @Wstops for a moment as the nano-machines within $s body reprogram and restructure $m. $e is now more powerful and efficient!@n", TRUE, ch, 0, 0, TO_ROOM);
-
-        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-        }
-        if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        }
-        if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
-        }
-
-        cl_sint64 add = 1000000000;
-        double mult = 1;
-
-        if (PLR_FLAGGED(ch, PLR_SENSEM)) {
-         add += 1500000000;
-        }
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, 0.0);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS4);
-        return;
-      }
-     } /* End of ANDROID Fourth Trans */
-
-  }
-  else if (!str_cmp("5.0", arg)) {
-   if (IS_ANDROID(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS6)) {
-       send_to_char(ch, "You are already beyond that upgrade!\r\n");
-       return;
-      }
-      if (PLR_FLAGGED(ch, PLR_TRANS5)) {
-       send_to_char(ch, "You are already in that upgrade!\r\n");
-       return;
-      }
-      if (!PLR_FLAGGED(ch, PLR_TRANS4)) {
-       send_to_char(ch, "You havn't upgraded to 4.0 yet!\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 5)) {
-        send_to_char(ch, "You are not strong enough to handle that upgrade!\r\n");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 5)) {
-        if (GET_TRANSCOST(ch, 5) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 5) = TRUE;
-         }
-        }
-        act("@WYou stop for a moment as the nano-machines within your body reprogram and restructure you. You are now more powerful and efficient!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n @Wstops for a moment as the nano-machines within $s body reprogram and restructure $m. $e is now more powerful and efficient!@n", TRUE, ch, 0, 0, TO_ROOM);
-
-        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-        }
-        if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        }
-        if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
-        }
-        if (PLR_FLAGGED(ch, PLR_TRANS4)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS4);
-        }
-
-        cl_sint64 add = 25000000000;
-          add *= 100;
-        double mult = 1;
-
-        if (PLR_FLAGGED(ch, PLR_SENSEM)) {
-         add += 3750000000;
-        }
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, 0.0);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS5);
-        return;
-      }
-     } /* End of ANDROID Fifth Trans */
-
-  }
-  else if (!str_cmp("6.0", arg)) {
-   if (IS_ANDROID(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS6)) {
-       send_to_char(ch, "You are already in that upgrade!\r\n");
-       return;
-      }
-      if (!PLR_FLAGGED(ch, PLR_TRANS5)) {
-       send_to_char(ch, "You havn't upgraded to 5.0 yet!\r\n");
-       return;
-      }
-      if (GET_BASE_PL(ch) < trans_req(ch, 6)) {
-        send_to_char(ch, "You are not strong enough to handle that upgrade!\r\n");
-        return;
-      }
-      else if (GET_BASE_PL(ch) >= trans_req(ch, 6)) {
-        if (GET_TRANSCOST(ch, 6) == FALSE) {
-         if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
-          send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
-          return;
-         } else {
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-          GET_TRANSCOST(ch, 6) = TRUE;
-         }
-        }
-        act("@WYou stop for a moment as the nano-machines within your body reprogram and restructure you. You are now more powerful and efficient!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n @Wstops for a moment as the nano-machines within $s body reprogram and restructure $m. $e is now more powerful and efficient!@n", TRUE, ch, 0, 0, TO_ROOM); 
-
-        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-        }
-        if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        }
-        if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
-        }
-        if (PLR_FLAGGED(ch, PLR_TRANS4)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS4);
-        }
-        if (PLR_FLAGGED(ch, PLR_TRANS5)) {
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS5);
-        }
-
-        cl_sint64 add = 1000000000;
-         add += 1000000000;
-         add += 1000000000;
-         add += 1000000000;
-         add += 1000000000;
-        double mult = 1;
-
-        if (PLR_FLAGGED(ch, PLR_SENSEM)) {
-         add += 750000000;
-         add *= 100;
-        }
-
-        /* handle_transform: ch, add, mult, drain*/
-        handle_transform(ch, add, mult, 0.0);
-
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS6);
-        return;
-      }
-     } /* End of ANDROID Sixth Trans */
-  }
-
-  /* ----------------------------------Revert Section--------------------------------------*/
-/* Rillao: transloc, add new transes here */
-  else if (!str_cmp("revert", arg)) {
-   if (IS_HUMAN(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS4)) {
-        
-        act("@wYou revert from @CSuper @cHuman @GFourth@w.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@w$n@w reverts from @CSuper @cHuman @GFourth@w.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((GET_CHARGE(ch) > 0)) {
-         do_charge(ch, "release", 0, 0);
-        }
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS4);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-
-        /* handle revert, Ch, add, mult */
-        handle_revert(ch, 270000000, 4.5);
-
-        if (*arg2) {
-         do_transform(ch, arg2, 0, 0);
-        }
-        return;
-      }
-      else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-        
-        act("@wYou revert from @CSuper @cHuman @GThird@w.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@w$n@w reverts from @CSuper @cHuman @GThird@w.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((GET_CHARGE(ch) > 0)) {
-         do_charge(ch, "release", 0, 0);
-        }
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-
-        /* handle revert, Ch, add, mult */
-        handle_revert(ch, 50000000, 4);
-
-        if (*arg2) {
-         do_transform(ch, arg2, 0, 0);
-        }
-        return;
-      }
-      else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-        
-        act("@wYou revert from @CSuper @cHuman @GSecond@w.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@w$n@w reverts from @CSuper @cHuman @GSecond@w.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((GET_CHARGE(ch) > 0)) {
-         do_charge(ch, "release", 0, 0);
-        }
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-
-        /* handle revert, Ch, add, mult */
-        handle_revert(ch, 12000000, 3);
-
-        if (*arg2) {
-         do_transform(ch, arg2, 0, 0);
-        }
-        return;
-      }
-      else if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-        
-        act("@wYou revert from @CSuper @cHuman @GFirst@w.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@w$n@w reverts from @CSuper @cHuman @GFirst.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((GET_CHARGE(ch) > 0)) {
-         do_charge(ch, "release", 0, 0);
-        }
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-
-        /* handle revert, Ch, add, mult */
-        handle_revert(ch, 1000000, 2);
-
-        if (*arg2) {
-         do_transform(ch, arg2, 0, 0);
-        }
-        return;
-      }
-     else {
-      send_to_char(ch, "You do not need to revert from any form!\r\n");
-      return;
-     }
-   }
-   else if (IS_SAIYAN(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS4)) {
-        
-        act("@wYou revert from @CSuper @cSaiyan @GFourth@w.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@w$n@w reverts from @CSuper @cSaiyan @GFourth@w.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((GET_CHARGE(ch) > 0)) {
-         do_charge(ch, "release", 0, 0);
-        }
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS4);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-
-        /* handle revert, Ch, add, mult */
-        handle_revert(ch, 182000000, 5.5);
-
-        if (*arg2) {
-         do_transform(ch, arg2, 0, 0);
-        }
-        return;
-      }
-      else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-        
-        act("@wYou revert from @CSuper @cSaiyan @GThird@w.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@w$n@w reverts from @CSuper @cSaiyan @GThird@w.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((GET_CHARGE(ch) > 0)) {
-         do_charge(ch, "release", 0, 0);
-        }
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-
-        /* handle revert, Ch, add, mult */
-        handle_revert(ch, 80000000, 4);
-
-        if (*arg2) {
-         do_transform(ch, arg2, 0, 0);
-        }
-        return;
-      }
-      else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-        
-       if (!PLR_FLAGGED(ch, PLR_LSSJ)) {
-        act("@wYou revert from @CSuper @cSaiyan @GSecond@w.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@w$n@w reverts from @CSuper @cSaiyan @GSecond@w.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((GET_CHARGE(ch) > 0)) {
-         do_charge(ch, "release", 0, 0);
-        }
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-
-        /* handle revert, Ch, add, mult */
-        handle_revert(ch, 20000000, 3);
-       } else {
-        act("@wYou revert from your @YLegendary @CSuper Saiyan@w form.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@w$n@w reverts from $s @YLegendary @CSuper Saiyan@w form@w.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((GET_CHARGE(ch) > 0)) {
-         do_charge(ch, "release", 0, 0);
-        }
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-
-        /* handle revert, Ch, add, mult */
-        handle_revert(ch, 185000000, 6);
-       }
-
-        if (*arg2) {
-         do_transform(ch, arg2, 0, 0);
-        }
-        return;
-      }
-      else if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-        
-        act("@wYou revert from @CSuper @cSaiyan @GFirst@w.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@w$n@w reverts from @CSuper @cSaiyan @GFirst.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((GET_CHARGE(ch) > 0)) {
-         do_charge(ch, "release", 0, 0);
-        }
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-
-        /* handle revert, Ch, add, mult */
-        handle_revert(ch, 800000, 2);
-
-        if (*arg2) {
-         do_transform(ch, arg2, 0, 0);
-        }
-        return;
-      }
-     else {
-      send_to_char(ch, "You do not need to revert from any form!\r\n");
-      return;
-     }
-   }
-   else if (IS_HALFBREED(ch)) {
-      if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-        
-        act("@wYou revert from @CSuper @cSaiyan @GThird@w.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@w$n@w reverts from @CSuper @cSaiyan @GThird@w.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((GET_CHARGE(ch) > 0)) {
-         do_charge(ch, "release", 0, 0);
-        }
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-
-        /* handle revert, Ch, add, mult */
-        handle_revert(ch, 240000000, 5);
-
-        if (*arg2) {
-         do_transform(ch, arg2, 0, 0);
-        }
-        return;
-      }
-      else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-        
-        act("@wYou revert from @CSuper @cSaiyan @GSecond@w.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@w$n@w reverts from @CSuper @cSaiyan @GSecond@w.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((GET_CHARGE(ch) > 0)) {
-         do_charge(ch, "release", 0, 0);
-        }
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-
-        /* handle revert, Ch, add, mult */
-        handle_revert(ch, 16500000, 4);
-
-        if (*arg2) {
-         do_transform(ch, arg2, 0, 0);
-        }
-        return;
-      }
-      else if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-        
-        act("@wYou revert from @CSuper @cSaiyan @GFirst@w.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@w$n@w reverts from @CSuper @cSaiyan @GFirst.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((GET_CHARGE(ch) > 0)) {
-         do_charge(ch, "release", 0, 0);
-        }
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-
-        /* handle revert, Ch, add, mult */
-        handle_revert(ch, 900000, 2);
-
-        if (*arg2) {
-         do_transform(ch, arg2, 0, 0);
-        }
-        return;
-      }
-     else {
-      send_to_char(ch, "You do not need to revert from any form!\r\n");
-      return;
-     }
-   }
-
-   else if (IS_NAMEK(ch)) {
-    if (PLR_FLAGGED(ch, PLR_TRANS4)) {
-        
-        act("@wYou revert from @CSuper @cNamek @GFourth@w.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@w$n@w reverts from @CSuper @cNamek @GFourth@w.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((GET_CHARGE(ch) > 0)) {
-         do_charge(ch, "release", 0, 0);
-        }
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS4);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-
-        /* handle revert, Ch, add, mult */
-        handle_revert(ch, 230000000, 4.5);
-
-        if (*arg2) {
-         do_transform(ch, arg2, 0, 0);
-        }
-        return;
-      }
-      else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-        
-        act("@wYou revert from @CSuper @cNamek @GThird@w.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@w$n@w reverts from @CSuper @cNamek @GThird@w.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((GET_CHARGE(ch) > 0)) {
-         do_charge(ch, "release", 0, 0);
-        }
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-
-        /* handle revert, Ch, add, mult */
-        handle_revert(ch, 65000000, 4);
-
-        if (*arg2) {
-         do_transform(ch, arg2, 0, 0);
-        }
-        return;
-      }
-      else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-        
-        act("@wYou revert from @CSuper @cNamek @GSecond@w.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@w$n@w reverts from @CSuper @cNamek @GSecond@w.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((GET_CHARGE(ch) > 0)) {
-         do_charge(ch, "release", 0, 0);
-        }
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-
-        /* handle revert, Ch, add, mult */
-        handle_revert(ch, 4000000, 3);
-
-        if (*arg2) {
-         do_transform(ch, arg2, 0, 0);
-        }
-        return;
-      }
-      else if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-        
-        act("@wYou revert from @CSuper @cNamek @GFirst@w.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@w$n@w reverts from @CSuper @cNamek @GFirst.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((GET_CHARGE(ch) > 0)) {
-         do_charge(ch, "release", 0, 0);
-        }
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-
-        /* handle revert, Ch, add, mult */
-        handle_revert(ch, 200000, 2);
-
-        if (*arg2) {
-         do_transform(ch, arg2, 0, 0);
-        }
-        return;
-      }
-     else {
-      send_to_char(ch, "You do not need to revert from any form!\r\n");
-      return;
-     }
-   }
-
-   else if (IS_ICER(ch)) {
-    if (PLR_FLAGGED(ch, PLR_TRANS4)) {
-        
-        act("@wYou revert from @CTransform @GFourth@w.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@w$n@w reverts from @CTransform @GFourth@w.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((GET_CHARGE(ch) > 0)) {
-         do_charge(ch, "release", 0, 0);
-        }
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS4);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-
-        /* handle revert, Ch, add, mult */
-        handle_revert(ch, 200000000, 5);
-
-        if (*arg2) {
-         do_transform(ch, arg2, 0, 0);
-        }
-        return;
-      }
-      else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-        
-        act("@wYou revert from @CTransform @GThird@w.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@w$n@w reverts from @CTransform @GThird@w.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((GET_CHARGE(ch) > 0)) {
-         do_charge(ch, "release", 0, 0);
-        }
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-
-        /* handle revert, Ch, add, mult */
-        handle_revert(ch, 45000000, 4);
-
-        if (*arg2) {
-         do_transform(ch, arg2, 0, 0);
-        }
-        return;
-      }
-      else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-        
-        act("@wYou revert from @CTransform @GSecond@w.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@w$n@w reverts from @CTransform @GSecond@w.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((GET_CHARGE(ch) > 0)) {
-         do_charge(ch, "release", 0, 0);
-        }
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-
-        /* handle revert, Ch, add, mult */
-        handle_revert(ch, 7000000, 3);
-
-        if (*arg2) {
-         do_transform(ch, arg2, 0, 0);
-        }
-        return;
-      }
-      else if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-        
-        act("@wYou revert from @CTransform @GFirst@w.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@w$n@w reverts from @CTransform @GFirst.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((GET_CHARGE(ch) > 0)) {
-         do_charge(ch, "release", 0, 0);
-        }
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-
-        /* handle revert, Ch, add, mult */
-        handle_revert(ch, 400000, 2);
-
-        if (*arg2) {
-         do_transform(ch, arg2, 0, 0);
-        }
-        return;
-      }
-     else {
-      send_to_char(ch, "You do not need to revert from any form!\r\n");
-      return;
-     }
-   }
-
-   else if (IS_MUTANT(ch)) {
-     if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-        
-        act("@wYou revert from @CMutate @GThird@w.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@w$n@w reverts from @CMutate @GThird@w.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((GET_CHARGE(ch) > 0)) {
-         do_charge(ch, "release", 0, 0);
-        }
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-
-        /* handle revert, Ch, add, mult */
-        handle_revert(ch, 80000000, 4);
-
-        if (*arg2) {
-         do_transform(ch, arg2, 0, 0);
-        }
-        return;
-      }
-      else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-        
-        act("@wYou revert from @CMutate @GSecond@w.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@w$n@w reverts from @CMutate @GSecond@w.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((GET_CHARGE(ch) > 0)) {
-         do_charge(ch, "release", 0, 0);
-        }
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-
-        /* handle revert, Ch, add, mult */
-        handle_revert(ch, 8500000, 3);
-
-        if (*arg2) {
-         do_transform(ch, arg2, 0, 0);
-        }
-        return;
-      }
-      else if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-        
-        act("@wYou revert from @CMutate @GFirst@w.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@w$n@w reverts from @CMutate @GFirst.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((GET_CHARGE(ch) > 0)) {
-         do_charge(ch, "release", 0, 0);
-        }
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-
-        /* handle revert, Ch, add, mult */
-        handle_revert(ch, 100000, 2);
-
-        if (*arg2) {
-         do_transform(ch, arg2, 0, 0);
-        }
-        return;
-      }
-     else {
-      send_to_char(ch, "You do not need to revert from any form!\r\n");
-      return;
-     }
-   }
-
-   else if (IS_KONATSU(ch)) {
-     if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-        
-        act("@wYou revert from @CShadow @GThird@w.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@w$n@w reverts from @CShadow @GThird@w.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((GET_CHARGE(ch) > 0)) {
-         do_charge(ch, "release", 0, 0);
-        }
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-
-        /* handle revert, Ch, add, mult */
-        handle_revert(ch, 290000000, 5);
-
-        if (*arg2) {
-         do_transform(ch, arg2, 0, 0);
-        }
-        return;
-      }
-     if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-        
-        act("@wYou revert from @CShadow @GSecond@w.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@w$n@w reverts from @CShadow @GSecond@w.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((GET_CHARGE(ch) > 0)) {
-         do_charge(ch, "release", 0, 0);
-        }
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-
-        /* handle revert, Ch, add, mult */
-        handle_revert(ch, 56000000, 4);
-
-        if (*arg2) {
-         do_transform(ch, arg2, 0, 0);
-        }
-        return;
-      }
-      else if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-        
-        act("@wYou revert from @CShadow @GFirst@w.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@w$n@w reverts from @CShadow @GFirst.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((GET_CHARGE(ch) > 0)) {
-         do_charge(ch, "release", 0, 0);
-        }
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-
-        /* handle revert, Ch, add, mult */
-        handle_revert(ch, 1000000, 2);
-
-        if (*arg2) {
-         do_transform(ch, arg2, 0, 0);
-        }
-        return;
-      }
-     else {
-      send_to_char(ch, "You do not need to revert from any form!\r\n");
-      return;
-     }
-   }
-
-   else if (IS_KAI(ch)) {
-   if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-        
-        act("@wYou revert from @CMystic @GThird@w.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@w$n@w reverts from @CMystic @GThird@w.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((GET_CHARGE(ch) > 0)) {
-         do_charge(ch, "release", 0, 0);
-        }
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-
-        /* handle revert, Ch, add, mult */
-        handle_revert(ch, 270000000, 5);
-
-        if (*arg2) {
-         do_transform(ch, arg2, 0, 0);
-        }
-        return;
-      }
-     if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-        
-        act("@wYou revert from @CMystic @GSecond@w.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@w$n@w reverts from @CMystic @GSecond@w.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((GET_CHARGE(ch) > 0)) {
-         do_charge(ch, "release", 0, 0);
-        }
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-
-        /* handle revert, Ch, add, mult */
-        handle_revert(ch, 115000000, 4);
-
-        if (*arg2) {
-         do_transform(ch, arg2, 0, 0);
-        }
-        return;
-      }
-      else if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-        
-        act("@wYou revert from @CMystic @GFirst@w.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@w$n@w reverts from @CMystic @GFirst.@n", TRUE, ch, 0, 0, TO_ROOM);
-        if ((GET_CHARGE(ch) > 0)) {
-         do_charge(ch, "release", 0, 0);
-        }
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
-
-        /* handle revert, Ch, add, mult */
-        handle_revert(ch, 1100000, 3);
-
-        if (*arg2) {
-         do_transform(ch, arg2, 0, 0);
-        }
-        return;
-      }
-     else {
-      send_to_char(ch, "You do not need to revert from any form!\r\n");
-      return;
-     }
-   }
-
-   else {
-     send_to_char(ch, "You do not need to revert from any form!\r\n");
-   }
-   return;
-  }/* End revert segment */
-  else if (IS_KANASSAN(ch) || IS_DEMON(ch)) {
-   send_to_char(ch, "You do not have a transformation.\r\n");
-   return;
-  }
-  else {
-    send_to_char(ch, "What form?\r\n");
-    return;
-  } /* Fail message */ 
+	char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+	char buf3[MAX_INPUT_LENGTH];
+
+	if (IS_NPC(ch)) {
+		return;
+	}
+	two_arguments(argument, arg, arg2);
+
+	if (PLR_FLAGGED(ch, PLR_OOZARU)) {
+		send_to_char(ch, "You are the great Oozaru right now and can't transform!\r\n");
+		return;
+	}
+	if (GET_KAIOKEN(ch) > 0) {
+		send_to_char(ch, "You are in kaioken right now and can't transform!\r\n");
+		return;
+	}
+	if (GET_SUPPRESS(ch) > 0) {
+		send_to_char(ch, "You are suppressing right now and can't transform!\r\n");
+		return;
+	}
+	if (GET_CLONES(ch) > 0) {
+		send_to_char(ch, "You can't concentrate on transforming while your body is split into multiple forms!\r\n");
+		return;
+	}
+	reveal_hiding(ch, 0);
+	/*R: Hidden transformation stuff following this*/
+	if (GET_BASE_PL(ch) < 50000) {
+		send_to_char(ch, "@RYou are too weak to comprehend transforming!@n\r\n");
+		return;
+	}
+
+	if (!*arg) {
+		if (IS_HUMAN(ch)) {
+			send_to_char(ch, "              @YSuper @CHuman@n\r\n");
+			send_to_char(ch, "@b------------------------------------------------@n\r\n");
+			send_to_char(ch, "@YSuper @CHuman @WFirst  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
+			send_to_char(ch, "@YSuper @CHuman @WSecond @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
+			send_to_char(ch, "@YSuper @CHuman @WThird  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
+			send_to_char(ch, "@YSuper @CHuman @WFourth @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4)) : "??????????");
+			send_to_char(ch, "@b------------------------------------------------@n\r\n");
+		}
+		else if (IS_SAIYAN(ch) && !PLR_FLAGGED(ch, PLR_LSSJ)) {
+			send_to_char(ch, "              @YSuper @CSaiyan@n\r\n");
+			send_to_char(ch, "@b------------------------------------------------@n\r\n");
+			send_to_char(ch, "@YSuper @CSaiyan @WFirst  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
+			send_to_char(ch, "@YSuper @CSaiyan @WSecond @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
+			send_to_char(ch, "@YSuper @CSaiyan @WThird  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
+			send_to_char(ch, "@YSuper @CSaiyan @WFourth @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4)) : "??????????");
+			send_to_char(ch, "@b------------------------------------------------@n\r\n");
+		}
+		else if (IS_SAIYAN(ch) && PLR_FLAGGED(ch, PLR_LSSJ)) {
+			send_to_char(ch, "                @YSuper @CSaiyan@n\r\n");
+			send_to_char(ch, "@b-------------------------------------------------@n\r\n");
+			send_to_char(ch, "@YSuper @CSaiyan @WFirst   @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
+			send_to_char(ch, "@YLegendary @CSuper Saiyan @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
+			send_to_char(ch, "@b-------------------------------------------------@n\r\n");
+		}
+		else if (IS_HALFBREED(ch)) {
+			send_to_char(ch, "              @YSuper @CSaiyan@n\r\n");
+			send_to_char(ch, "@b------------------------------------------------@n\r\n");
+			send_to_char(ch, "@YSuper @CSaiyan @WFirst  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
+			send_to_char(ch, "@YSuper @CSaiyan @WSecond @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
+			send_to_char(ch, "@YSuper @CSaiyan @WThird  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
+			send_to_char(ch, "@b------------------------------------------------@n\r\n");
+		}
+		else if (IS_NAMEK(ch)) {
+			send_to_char(ch, "              @YSuper @CNamek@n\r\n");
+			send_to_char(ch, "@b------------------------------------------------@n\r\n");
+			send_to_char(ch, "@YSuper @CNamek @WFirst  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
+			send_to_char(ch, "@YSuper @CNamek @WSecond @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
+			send_to_char(ch, "@YSuper @CNamek @WThird  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
+			send_to_char(ch, "@YSuper @CNamek @WFourth @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4)) : "??????????");
+			send_to_char(ch, "@b------------------------------------------------@n\r\n");
+		}
+		else if (IS_ICER(ch)) {
+			send_to_char(ch, "              @YTransform@n\r\n");
+			send_to_char(ch, "@b------------------------------------------------@n\r\n");
+			send_to_char(ch, "@YTransform @WFirst  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
+			send_to_char(ch, "@YTransform @WSecond @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
+			send_to_char(ch, "@YTransform @WThird  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
+			send_to_char(ch, "@YTransform @WFourth @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4)) : "??????????");
+			send_to_char(ch, "@b------------------------------------------------@n\r\n");
+		}
+		else if (IS_MUTANT(ch)) {
+			send_to_char(ch, "              @YMutate@n\r\n");
+			send_to_char(ch, "@b------------------------------------------------@n\r\n");
+			send_to_char(ch, "@YMutate @WFirst  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
+			send_to_char(ch, "@YMutate @WSecond @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
+			send_to_char(ch, "@YMutate @WThird  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
+			send_to_char(ch, "@b------------------------------------------------@n\r\n");
+		}
+		else if (IS_KONATSU(ch)) {
+			send_to_char(ch, "              @YShadow@n\r\n");
+			send_to_char(ch, "@b------------------------------------------------@n\r\n");
+			send_to_char(ch, "@YShadow @WFirst  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
+			send_to_char(ch, "@YShadow @WSecond @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
+			send_to_char(ch, "@YShadow @WThird  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
+			send_to_char(ch, "@b------------------------------------------------@n\r\n");
+		}
+		else if (IS_ANDROID(ch)) {
+			send_to_char(ch, "              @YUpgrade@n\r\n");
+			send_to_char(ch, "@b------------------------------------------------@n\r\n");
+			send_to_char(ch, "@Y1.0 @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
+			send_to_char(ch, "@Y2.0 @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
+			send_to_char(ch, "@Y3.0 @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
+			send_to_char(ch, "@Y4.0 @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4)) : "??????????");
+			send_to_char(ch, "@Y5.0 @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 5) * 0.75) ? add_commas(trans_req(ch, 5)) : "??????????");
+			send_to_char(ch, "@Y6.0 @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 6) * 0.75) ? add_commas(trans_req(ch, 6)) : "??????????");
+			send_to_char(ch, "@b------------------------------------------------@n\r\n");
+		}
+		else if (IS_BIO(ch)) {
+			send_to_char(ch, "              @YPerfection@n\r\n");
+			send_to_char(ch, "@b------------------------------------------------@n\r\n");
+			send_to_char(ch, "@YMature        @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
+			send_to_char(ch, "@YSemi-Perfect  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
+			send_to_char(ch, "@YPerfect       @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
+			send_to_char(ch, "@YSuper Perfect @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4)) : "??????????");
+			send_to_char(ch, "@b------------------------------------------------@n\r\n");
+		}
+		else if (IS_TRUFFLE(ch)) {
+			send_to_char(ch, "              @YAscend@n\r\n");
+			send_to_char(ch, "@b------------------------------------------------@n\r\n");
+			send_to_char(ch, "@YAscend @WFirst  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
+			send_to_char(ch, "@YAscend @WSecond @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
+			send_to_char(ch, "@YAscend @WThird @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
+			send_to_char(ch, "@b------------------------------------------------@n\r\n");
+		}
+		else if (IS_MAJIN(ch)) {
+			send_to_char(ch, "              @YMorph@n\r\n");
+			send_to_char(ch, "@b------------------------------------------------@n\r\n");
+			send_to_char(ch, "@YMorph @WAffinity @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
+			send_to_char(ch, "@YMorph @WSuper    @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
+			send_to_char(ch, "@YMorph @WTrue     @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
+			send_to_char(ch, "@b------------------------------------------------@n\r\n");
+		}
+		else if (IS_KAI(ch)) {
+			send_to_char(ch, "              @YMystic@n\r\n");
+			send_to_char(ch, "@b------------------------------------------------@n\r\n");
+			send_to_char(ch, "@YMystic @WFirst     @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
+			send_to_char(ch, "@YMystic @WSecond    @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
+			send_to_char(ch, "@YMystic @WThird     @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
+			send_to_char(ch, "@b------------------------------------------------@n\r\n");
+		}
+		else {
+			send_to_char(ch, "You do not have a transformation.\r\n");
+			return;
+		}
+		if (trans_req(ch, 1) > 0) {
+			if (GET_TRANSCLASS(ch) == 1) {
+				send_to_char(ch, "\r\n@RYou have @rterrible@R transformation BPL Requirements.@n\r\n");
+			}
+			else if (GET_TRANSCLASS(ch) == 2) {
+				send_to_char(ch, "\r\n@CYou have @caverage@C transformation BPL Requirements.@n\r\n");
+			}
+			else if (GET_TRANSCLASS(ch) == 3) {
+				send_to_char(ch, "\r\n@GYou have @gGREAT@G transformation BPL Requirements.@n\r\n");
+			}
+		}
+		return;
+	}/* End of No Argument */
+
+	 /* ----------------------------------Transformation Section--------------------------------------*/
+	 /* Rillao: transloc, add new transes here */
+	else if (!str_cmp("first", arg)) {
+		if (IS_HUMAN(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS2) || PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that form!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+				send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 1)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_MOVE(ch) <= GET_MAX_MOVE(ch) * 0.1) {
+				send_to_char(ch, "You do not have enough stamina!");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 1)) {
+				if (GET_TRANSCOST(ch, 1) == FALSE) {
+					if (GET_RP(ch) < 1) {
+						send_to_char(ch, "You need 1 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 1;
+						GET_TRANSCOST(ch, 1) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@WYou spread your feet out and crouch slightly as a bright white aura bursts around your body. Torrents of white and blue energy burn upwards around your body while your muscles grow and become more defined at the same time. In a sudden rush of power you achieve @CSuper @cHuman @GFirst@W sending surrounding debris high into the sky!", TRUE, ch, 0, 0, TO_CHAR);
+				act("@C$n@W crouches slightly while spreading $s feet as a bright white aura bursts up around $s body. Torrents of white and blue energy burn upwards around $s body while $s muscles grow and become more defined at the same time. In a sudden rush of power debris is sent flying high into the air with $m achieving @CSuper @cHuman @GFirst@W!", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+				int add = 1000000;
+				double mult = 2;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, .1);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of Human First Trans */
+
+
+		if (IS_TRUFFLE(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS2) || PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that form!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+				send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 1)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_MOVE(ch) <= GET_MAX_MOVE(ch) * 0.1) {
+				send_to_char(ch, "You do not have enough stamina!");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 1)) {
+				if (GET_TRANSCOST(ch, 1) == FALSE) {
+					if (GET_RP(ch) < 1) {
+						send_to_char(ch, "You need 1 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 1;
+						GET_TRANSCOST(ch, 1) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@WYour mind accelerates working through the mysteries of the universe while at the same time your body begins to change! Innate nano-technology within your body begins to activate, forming flexible metal plating across parts of your skin!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@C$n@W begins to write complicated calculations in the air as though $e were possessed while at the same time $s body begins to change! Innate nano-technology within $s body begins to activate, forming flexible metal plating across parts of $s skin!@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+
+				int add = 1300000;
+				double mult = 3;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, .1);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of TRUFFLE First Trans */
+
+		if (IS_KAI(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS2) || PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that form!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+				send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 1)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_MOVE(ch) <= GET_MAX_MOVE(ch) * 0.1) {
+				send_to_char(ch, "You do not have enough stamina!");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 1)) {
+				if (GET_TRANSCOST(ch, 1) == FALSE) {
+					if (GET_RP(ch) < 1) {
+						send_to_char(ch, "You need 1 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 1;
+						GET_TRANSCOST(ch, 1) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@WThoughts begin to flow through your mind of events throughout your life. The progression leads up to more recent events and finally to this very moment. All of it's significance overwhelms you momentarily and your motivation and drive increase. As your attention is drawn back to your surroundings, you feel as though your thinking, senses, and reflexes have sharpened dramatically.  At the core of your being, a greater depth of power can be felt.@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@W$n@W's face tenses, it becoming clear momentarily that they are deep in thought. After a brief lapse in focus, their attention seems to return to their surroundings. Though it's not apparent why they were so distracted, something definitely seems different about $m.@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+
+				int add = 1100000;
+				double mult = 3;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, .1);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of KAI First Trans */
+
+		if (IS_KONATSU(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS2) || PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that form!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+				send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 1)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_MOVE(ch) <= GET_MAX_MOVE(ch) * 0.1) {
+				send_to_char(ch, "You do not have enough stamina!");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 1)) {
+				if (GET_TRANSCOST(ch, 1) == FALSE) {
+					if (GET_RP(ch) < 1) {
+						send_to_char(ch, "You need 1 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 1;
+						GET_TRANSCOST(ch, 1) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@WA dark shadowy aura with flecks of white energy begins to burn around your body! Strength and agility can be felt rising up within as your form becomes blurred and ethereal looking. You smile as you realize your @GFirst @DShadow @BForm@W!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@WA dark shadowy aura with flecks of white energy begins to burn around @C$n@W's body! $s form becomes blurred and ethereal-looking as $s muscles become strong and lithe. $e smiles as $e achieves $s @GFirst @DShadow @BForm@W!@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+
+				int add = 1000000;
+				double mult = 2;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, .1);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of Konatsu First Trans */
+
+		if (IS_ICER(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS2) || PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that form!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+				send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 1)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_MOVE(ch) <= GET_MAX_MOVE(ch) * 0.1) {
+				send_to_char(ch, "You do not have enough stamina!");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 1)) {
+				if (GET_TRANSCOST(ch, 1) == FALSE) {
+					if (GET_RP(ch) < 1) {
+						send_to_char(ch, "You need 1 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 1;
+						GET_TRANSCOST(ch, 1) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@WYou yell with pain as your body begins to grow and power surges within! Your legs expand outward to triple their previous length. Soon after your arms, chest, and head follow. Your horns grow longer and curve upwards while lastly your tail expands. You are left confidently standing, having completed your @GFirst @cTransformation@W.@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@C$n@W yells with pain as $s body begins to grow and power surges outward! $s legs expand outward to triple their previous length. Soon after $s arms, chest, and head follow. $s horns grow longer and curve upwards while lastly $s tail expands. $e is left confidently standing, having completed $s @GFirst @cTransformation@W.@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+
+				int add = 400000;
+				double mult = 2;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, .1);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of ICER First Trans */
+
+		if (IS_MUTANT(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS2) || PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that form!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+				send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 1)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_MOVE(ch) <= GET_MAX_MOVE(ch) * 0.1) {
+				send_to_char(ch, "You do not have enough stamina!");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 1)) {
+				if (GET_TRANSCOST(ch, 1) == FALSE) {
+					if (GET_RP(ch) < 1) {
+						send_to_char(ch, "You need 1 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 1;
+						GET_TRANSCOST(ch, 1) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@WYour flesh grows tougher as power surges up from within. Your fingernails grow longer, sharper, and more claw-like. Lastly your muscles double in size as you achieve your @GFirst @mMutation@W!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@C$n@W flesh grows tougher as power surges up around $m. $s fingernails grow longer, sharper, and more claw-like. Lastly $s muscles double in size as $e achieves $s @GFirst @mMutation@W!@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+
+				int add = 100000;
+				double mult = 2;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, .1);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of MUTANT First Trans */
+
+		if (IS_HALFBREED(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS2) || PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that form!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+				send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 1)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_MOVE(ch) <= GET_MAX_MOVE(ch) * 0.1) {
+				send_to_char(ch, "You do not have enough stamina!");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 1)) {
+				if (GET_TRANSCOST(ch, 1) == FALSE) {
+					if (GET_RP(ch) < 1) {
+						send_to_char(ch, "You need 1 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 1;
+						GET_TRANSCOST(ch, 1) = TRUE;
+					}
+				}
+				if (!PLR_FLAGGED(ch, PLR_LSSJ) && !PLR_FLAGGED(ch, PLR_FPSSJ) && rand_number(1, 500) >= 491 && GET_MAX_HIT(ch) > 19200000) {
+					send_to_char(ch, "You have mastered the super saiyan first transformation and have achieved Full Power Super Saiyan! You will now no longer use stamina while in this form.\r\n");
+					SET_BIT_AR(PLR_FLAGS(ch), PLR_FPSSJ);
+				}
+				int zone = 0;
+				act("@WSomething inside your mind snaps as your rage spills over! Lightning begins to strike the ground all around you as you feel torrents of power rushing through every fiber of your being. Your hair suddenly turns golden as your eyes change to the color of emeralds. In a final rush of power a golden aura rushes up around your body! You have become a @CSuper @YSaiyan@W!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@C$n@W screams in rage as lightning begins to crash all around! $s hair turns golden and $s eyes change to an emerald color as a bright golden aura bursts up around $s body! As $s energy stabilizes $e wears a fierce look upon $s face, having transformed into a @CSuper @YSaiyan@W!@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+
+				int add = 900000;
+				double mult = 2;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, .1);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of HALFBREED First Trans */
+
+		if (IS_NAMEK(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS2) || PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that form!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+				send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 1)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_MOVE(ch) <= GET_MAX_MOVE(ch) * 0.1) {
+				send_to_char(ch, "You do not have enough stamina!");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 1)) {
+				if (GET_TRANSCOST(ch, 1) == FALSE) {
+					if (GET_RP(ch) < 1) {
+						send_to_char(ch, "You need 1 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 1;
+						GET_TRANSCOST(ch, 1) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@WYou crouch down and clench your fists as your muscles begin to bulge! Sweat pours down your body as the ground beneath your feet cracks and warps under the pressure of your rising ki! With a sudden burst that sends debris flying you realize a new plateau in your power, having achieved @CSuper @gNamek @GFirst@W!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@C$n @Wcrouches down and clenches $s fists as $s muscles begin to bulge! Sweat pours down $s body as the ground beneath $s feet cracks and warps under the pressure of  $s rising ki! With a sudden burst that sends debris flying $e seems to realize a new plateau in $s power, having achieved @CSuper @gNamek @GFirst@W!@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+
+				int add = 200000;
+				double mult = 2;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, .1);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of NAMEK First Trans */
+
+		if (IS_SAIYAN(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS2) || PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that form!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+				send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 1)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_MOVE(ch) <= GET_MAX_MOVE(ch) * 0.1) {
+				send_to_char(ch, "You do not have enough stamina!");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 1)) {
+				if (GET_TRANSCOST(ch, 1) == FALSE) {
+					if (GET_RP(ch) < 1) {
+						send_to_char(ch, "You need 1 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 1;
+						GET_TRANSCOST(ch, 1) = TRUE;
+					}
+				}
+				if (!PLR_FLAGGED(ch, PLR_LSSJ) && !PLR_FLAGGED(ch, PLR_FPSSJ) && rand_number(1, 500) >= 491 && GET_MAX_HIT(ch) > 19200000) {
+					send_to_char(ch, "You have mastered the super saiyan first transformation and have achieved Full Power Super Saiyan! You will now no longer use stamina while in this form.\r\n");
+					SET_BIT_AR(PLR_FLAGS(ch), PLR_FPSSJ);
+				}
+				int zone = 0;
+				act("@WSomething inside your mind snaps as your rage spills over! Lightning begins to strike the ground all around you as you feel torrents of power rushing through every fiber of your being. Your hair suddenly turns golden as your eyes change to the color of emeralds. In a final rush of power a golden aura rushes up around your body! You have become a @CSuper @YSaiyan@W!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@C$n@W screams in rage as lightning begins to crash all around! $s hair turns golden and $s eyes change to an emerald color as a bright golden aura bursts up around $s body! As $s energy stabilizes $e wears a fierce look upon $s face, having transformed into a @CSuper @YSaiyan@W!@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+
+				int add = 800000;
+				double mult = 2;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, .1);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of Saiyan First Trans */
+
+		return;
+	}/* End of First Trans */
+
+	else if (!str_cmp("second", arg)) {
+		if (IS_HUMAN(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that form!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+				send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 2)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
+				send_to_char(ch, "You do not have enough stamina!");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 2)) {
+				if (GET_TRANSCOST(ch, 2) == FALSE) {
+					if (GET_RP(ch) < 1) {
+						send_to_char(ch, "You need 1 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 1;
+						GET_TRANSCOST(ch, 2) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@WSuddenly a bright white aura bursts into existance around your body, you feel the intensity of your hidden potential boil until it can't be contained any longer! Waves of ki shoot out from your aura streaking outwards in many directions. A roar that shakes everything in the surrounding area sounds right as your energy reaches its potential and you achieve @CSuper @cHuman @GSecond@W!", TRUE, ch, 0, 0, TO_CHAR);
+				act("@C$n@W is suddenly covered with a bright white aura as $e grits $s teeth, apparently struggling with the power boiling to the surface! Waves of ki shoot out from $s aura, streaking in several directions as a mighty roar shakes everything in the surrounding area. As $s aura calms $e smiles, having achieved @CSuper @cHuman @GSecond@W!", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+				if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 1000000, 2);
+				}
+
+
+				int add = 12000000;
+				double mult = 3;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, .2);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of Human Second Trans */
+
+		if (IS_KAI(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that form!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+				send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 2)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
+				send_to_char(ch, "You do not have enough stamina!");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 2)) {
+				if (GET_TRANSCOST(ch, 2) == FALSE) {
+					if (GET_RP(ch) < 2) {
+						send_to_char(ch, "You need 2 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 2;
+						GET_TRANSCOST(ch, 2) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@WYou feel a sudden rush of emotion, escalating almost to a loss of control as your thoughts race. Your heart begins to beat fast as memories mix with the raw emotion. A faint blue glow begins to surround you. As your emotions level off, you feel a deeper understanding of the universe as you know it. You visibly calm back down to an almost steely eyed resolve as you assess your surroundings. The blue aura wicks around you for a few moments and then dissipates. Thought it's full impact is not yet clear to you, you are left feeling as though both your power and inner strength have turned into nearly bottomless wells.@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@W$n@W's appears to be hit by some sudden pangs of agony, their face contorted in pain.  After a moment a faint blue aura appears around them, glowing brighter as time passes. You can feel something in the pit of your stomach, letting you know that something very significant is changing around you. Before long $n@W's aura fades, leaving a very determined looking person in your presence.@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+				if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 1100000, 3);
+				}
+
+
+				int add = 115000000;
+				double mult = 4;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, .2);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of KAI Second Trans */
+
+		if (IS_TRUFFLE(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that form!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+				send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 2)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
+				send_to_char(ch, "You do not have enough stamina!");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 2)) {
+				if (GET_TRANSCOST(ch, 2) == FALSE) {
+					if (GET_RP(ch) < 2) {
+						send_to_char(ch, "You need 2 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 2;
+						GET_TRANSCOST(ch, 2) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@WComplete understanding of every physical thing floods your mind as the nano-technology within you continues to change your body! Your eyes change; becoming glassy, hard, and glowing. Your muscles merge with a nano-fiber strengthening them at the molecular level! Finally your very bones become plated in nano-metals that have yet to be invented naturally!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@C$n@.s nano-technology continues to change $s body! $s eyes change; becoming glassy, hard, and glowing. $s muscles merge with a nano-fiber strengthening them at the molecular level! Finally $s very bones become plated in nano-metals that have yet to be invented naturally!@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+				if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 1300000, 3);
+				}
+
+
+				int add = 80000000;
+				double mult = 4;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, .2);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of TRUFFLE Second Trans */
+
+		if (IS_KONATSU(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that form!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+				send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 2)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
+				send_to_char(ch, "You do not have enough stamina!");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 2)) {
+				if (GET_TRANSCOST(ch, 2) == FALSE) {
+					if (GET_RP(ch) < 2) {
+						send_to_char(ch, "You need 2 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 2;
+						GET_TRANSCOST(ch, 2) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@WThe shadowy aura surrounding your body burns larger than ever as dark bolts of purple electricity crackles across your skin. Your eyes begin to glow white as shockwaves of power explode outward! All the shadows in the immediate area are absorbed into your aura in an instant as you achieve your @GSecond @DShadow @BForm@W!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@WThe shadowy aura surrounding @C$n@W's body burns larger than ever as dark bolts of purple electricity crackles across $s skin. $s eyes begin to glow white as shockwaves of power explode outward! All the shadows in the immediate area are absorbed into $s aura in an instant as $e achieves $s @GSecond @DShadow @BForm@W!@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+				if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 1000000, 2);
+				}
+
+
+				int add = 56000000;
+				double mult = 4;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, .2);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of Konatsu Second Trans */
+
+		if (IS_MUTANT(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that form!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+				send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 2)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
+				send_to_char(ch, "You do not have enough stamina!");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 2)) {
+				if (GET_TRANSCOST(ch, 2) == FALSE) {
+					if (GET_RP(ch) < 2) {
+						send_to_char(ch, "You need 2 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 2;
+						GET_TRANSCOST(ch, 2) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@WSpikes grow out from your elbows as your power begins to climb to new heights. The muscles along your forearms grow to double their former size as the spikes growing from your elbows flatten and sharpen into blades. You have achieved your @GSecond @mMutation@W!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@WSpikes grow out from @C$n@W's elbows as $s power begins to climb to new heights. The muscles along $s forearms grow to double their former size as the spikes growing from $s elbows flatten and sharpen into blades. $e has achieved your @GSecond @mMutation@W!@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+				if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 100000, 2);
+				}
+
+
+				int add = 8500000;
+				double mult = 3;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, .2);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of MUTANT Second Trans */
+
+		if (IS_ICER(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that form!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+				send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 2)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
+				send_to_char(ch, "You do not have enough stamina!");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 2)) {
+				if (GET_TRANSCOST(ch, 2) == FALSE) {
+					if (GET_RP(ch) < 1) {
+						send_to_char(ch, "You need 1 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 1;
+						GET_TRANSCOST(ch, 2) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@WYou yell as pain envelopes your body and a dark aura bursts up! The back of your head stretches out growing multiple spikes along its edges as it grows. In addition to this your shoulders stretch out forming pointed ridges. You cackle as lastly your nose disappears and your face becomes more lizard like. Energy swirls around your body as you realize your @GSecond @cTransformation@W.@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@C$n@W yells as pain envelopes $s body and a dark aura bursts up around $m! The back of $s head stretches out growing multiple spikes along its edges as it grows. In addition to this $s shoulders stretch out forming pointed ridges. $e cackles as lastly $s nose disappears and $s face becomes more lizard like. Energy swirls around $s body as $e realizes $s @GSecond @cTransformation@W.@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+				if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 400000, 2);
+				}
+
+
+				int add = 7000000;
+				double mult = 3;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, .2);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of ICER Second Trans */
+
+		if (IS_HALFBREED(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that form!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+				send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 2)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
+				send_to_char(ch, "You do not have enough stamina!");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 2)) {
+				if (GET_TRANSCOST(ch, 2) == FALSE) {
+					if (GET_RP(ch) < 2) {
+						send_to_char(ch, "You need 2 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 2;
+						GET_TRANSCOST(ch, 2) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@WBlinding rage burns through your mind as a sudden eruption of energy surges forth! A golden aura bursts up around your body, glowing as bright as the sun. Rushing winds rocket out from your body in every direction as bolts of electricity begin to crackle in your aura. As your aura dims you are left standing confidently, having achieved @CSuper @YSaiyan @GSecond@W!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@C$n@W stands up straight with $s head back as $e releases an ear piercing scream! A blindingly bright golden aura bursts up around $s body, glowing as bright as the sun. As rushing winds begin to rocket out from $m in every direction, bolts of electricity flash and crackle in $s aura. As $s aura begins to dim $e is left standing confidently, having achieved @CSuper @YSaiyan @GSecond@W!@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+				if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 900000, 2);
+				}
+
+
+				int add = 16500000;
+				double mult = 4;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, .2);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of HALFBREED Second Trans */
+
+		if (IS_NAMEK(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that form!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+				send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 2)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
+				send_to_char(ch, "You do not have enough stamina!");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 2)) {
+				if (GET_TRANSCOST(ch, 2) == FALSE) {
+					if (GET_RP(ch) < 1) {
+						send_to_char(ch, "You need 1 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 1;
+						GET_TRANSCOST(ch, 2) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@WYou gasp in shock as a power within your body that you had not been aware of begins to surge to the surface! Your muscles grow larger as energy crackles between your antennae intensely! A shockwave of energy explodes outward as you achieve a new plateau in power, @CSuper @gNamek @GSecond@W!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@C$n @Wgasps in shock as a power within $s body begins to surge out! $s muscles grow larger as energy crackles between $s antennae intensely! A shockwave of energy explodes outward as $e achieves a new plateau in power, @CSuper @gNamek @GSecond@W!@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+				if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 200000, 2);
+				}
+
+
+				int add = 4000000;
+				double mult = 3;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, .2);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of NAMEK Second Trans */
+
+		if (IS_SAIYAN(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that form!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+				send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 2)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_MOVE(ch) <= GET_MAX_MOVE(ch) * 0.2) {
+				send_to_char(ch, "You do not have enough stamina!");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 2)) {
+				if (GET_TRANSCOST(ch, 2) == FALSE) {
+					if (GET_RP(ch) < 1) {
+						send_to_char(ch, "You need 1 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 1;
+						GET_TRANSCOST(ch, 2) = TRUE;
+					}
+				}
+				int zone = 0;
+				if (!PLR_FLAGGED(ch, PLR_LSSJ)) {
+					act("@WBlinding rage burns through your mind as a sudden eruption of energy surges forth! A golden aura bursts up around your body, glowing as bright as the sun. Rushing winds rocket out from your body in every direction as bolts of electricity begin to crackle in your aura. As your aura dims you are left standing confidently, having achieved @CSuper @YSaiyan @GSecond@W!@n", TRUE, ch, 0, 0, TO_CHAR);
+					act("@C$n@W stands up straight with $s head back as $e releases an ear piercing scream! A blindingly bright golden aura bursts up around $s body, glowing as bright as the sun. As rushing winds begin to rocket out from $m in every direction, bolts of electricity flash and crackle in $s aura. As $s aura begins to dim $e is left standing confidently, having achieved @CSuper @YSaiyan @GSecond@W!@n", TRUE, ch, 0, 0, TO_ROOM);
+				}
+				else {
+					act("@WYou roar and then stand at your full height. You flex every muscle in your body as you feel your strength grow! Your eyes begin to glow @wwhite@W with energy, your hair turns @Ygold@W, and at the same time a @wbright @Yg@yo@Yl@yd@Ye@yn@W aura flashes up around your body! You release your @YL@ye@Dg@We@wn@Yd@ya@Dr@Yy@W power upon the universe!@n", TRUE, ch, 0, 0, TO_CHAR);
+					act("@C$n @Wroars and then stands at $s full height. Then $s muscles start to buldge and grow as $e flexes them! Suddenly $s eyes begin to glow @wwhite@W with energy, $s hair turns @Ygold@W, and at the same time a @wbright @Yg@yo@Yl@yd@Ye@yn@W aura flashes up around $s body! @C$n@W releases $s @YL@ye@Dg@We@wn@Yd@ya@Dr@Yy@W power upon the universe!@n", TRUE, ch, 0, 0, TO_ROOM);
+				}
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+				int add = 0;
+				double mult = 0;
+
+				if (!PLR_FLAGGED(ch, PLR_LSSJ)) {
+					add = 20000000;
+					mult = 3;
+				}
+				else {
+					add = 185000000;
+					mult = 6;
+				}
+
+				if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 800000, 2);
+				}
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, .2);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of Saiyan Second Trans */
+
+
+		return;
+	}/* End of Second Trans */
+
+	else if (!str_cmp("third", arg)) {
+		if (IS_HUMAN(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that form!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+				send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 3)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
+				send_to_char(ch, "You do not have enough stamina!");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 3)) {
+				if (GET_TRANSCOST(ch, 3) == FALSE) {
+					if (GET_RP(ch) < 1) {
+						send_to_char(ch, "You need 1 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 1;
+						GET_TRANSCOST(ch, 3) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@WYou clench both of your fists as the bright white aura around your body is absorbed back into your flesh. As it is absorbed, your muscles triple in size and electricity crackles across your flesh. You grin as you feel the power of @CSuper @cHuman @GThird@W!", TRUE, ch, 0, 0, TO_CHAR);
+				act("@C$n@W clenches both of $s fists as the bright white aura around $s body is absorbed back into $s flesh. As it is absorbed, $s muscles triple in size and bright electricity crackles across $s flesh. $e smiles as $e achieves the power of @CSuper @cHuman @GThird@W!", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+
+				if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 1000000, 2);
+				}
+				if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 12000000, 3);
+				}
+
+
+				int add = 50000000;
+				double mult = 4;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, .2);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of Human Third Trans */
+
+		if (IS_TRUFFLE(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that form!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+				send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 3)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
+				send_to_char(ch, "You do not have enough stamina!");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 3)) {
+				if (GET_TRANSCOST(ch, 3) == FALSE) {
+					if (GET_RP(ch) < 2) {
+						send_to_char(ch, "You need 2 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 2;
+						GET_TRANSCOST(ch, 3) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@WYou have reached the final stage of enlightenment and the nano-technology thriving inside you begin to initiate the changes! Your neural pathways become refined, your reflexes honed, your auditory and ocular senses sharpening far beyond normal levels! Your gravitational awareness improves, increasing sensitivity and accuracy in your equilibrum!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@C$n begins to mumble quietly, slowly at first and gradually picking up speed. A glint is seen from $s eyes and $s arms reach outwards briefly as $e appears to catch his balance. $s arms drop back to $s sides as balance is regained, a vicious smile on $s face.@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+				if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 80000000, 4);
+				}
+
+
+				int add = 300000000;
+				double mult = 5;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, .2);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of TRUFFLE Third Trans */
+
+		if (IS_KAI(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that form!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+				send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 3)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
+				send_to_char(ch, "You do not have enough stamina!");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 3)) {
+				if (GET_TRANSCOST(ch, 3) == FALSE) {
+					if (GET_RP(ch) < 2) {
+						send_to_char(ch, "You need 2 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 2;
+						GET_TRANSCOST(ch, 3) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@WYour minds' eye becomes overwhelmed by secrets unimaginable. The threads of the very universe become visible in your heightened state of awareness. Reaching out, a single thread vibrates, producing a @Rred @Wcolor -- yours. Your fingertips brush against it and your senses become clouded by a vast expanse of white color and noise. As your vision and hearing return, you understand the threads tying every living being together. Your awareness has expanded beyond comprehension!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@C$n@W's eyes grow wide, mouth agape. $s body begins to shiver uncontrollably! $s arms reaches out cautiously before falling back down to $s side. $s face relaxes visibly, features returning to a normal state. $s irises remain larger than before, a slight smile softening $s gaze.@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+				if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 1100000, 3);
+				}
+				if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 115000000, 4);
+				}
+
+
+				int add = 270000000;
+				double mult = 5;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, .2);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of KAI Third Trans */
+
+		if (IS_MUTANT(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that form!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+				send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 3)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
+				send_to_char(ch, "You do not have enough stamina!");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 3)) {
+				if (GET_TRANSCOST(ch, 3) == FALSE) {
+					if (GET_RP(ch) < 2) {
+						send_to_char(ch, "You need 2 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 2;
+						GET_TRANSCOST(ch, 3) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@WA dark cyan aura bursts up around your body as the ground begins to crack beneath you! You scream out in pain as your power begins to explode! Two large spikes grow out from your shoulder blades as you reach your @GThird @mMutation!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@WA dark cyan aura bursts up around @C$n@W's body as the ground begins to crack beneath $m and $e screams out in pain as $s power begins to explode! Two large spikes grow out from $s shoulder blades as $e reaches $s @GThird @mMutation!@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+				if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 100000, 2);
+				}
+				if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 8500000, 3);
+				}
+
+
+				int add = 80000000;
+				double mult = 4;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, .2);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of MUTANT Third Trans */
+
+		if (IS_KONATSU(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that form!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+				send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 3)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
+				send_to_char(ch, "You do not have enough stamina!");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 3)) {
+				if (GET_TRANSCOST(ch, 3) == FALSE) {
+					if (GET_RP(ch) < 2) {
+						send_to_char(ch, "You need 2 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 2;
+						GET_TRANSCOST(ch, 3) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@WThe shadowy aura around you explodes outward as your power begins to rise!  You're overcome with a sudden realization, that the shadows are an extension of yourself, that light isn't needed for your shadows to bloom.  With this newfound wisdom comes ability and power!  The color in your aura drains as the shadows slide inward and cling to your body like a second, solid black skin!  Shockwaves roll off of you in quick succession, pelting the surrounding area harshly!  Accompanying the waves, a pool of darkness blossoms underneath you, slowly spreading the shadows to the whole area, projecting onto any surface nearby!  Purple and black electricity crackle in your solid white aura, and you grin as you realize your @GThird @DShadow @BForm@W!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@WThe shadowy aura around $n explodes outward as $s power begins to rise!  Realization dawns on $s face, followed shortly by confidence! The color in $s aura drains as the shadows slide inward to cling to $s body like a second, solid black skin! Shockwaves roll off of $n in quick succession, pelting the surrounding area harshly!  Accompanying the waves, a pool of darkness blossoms underneath them, slowly spreading the shadows to the whole area, projecting onto any surface nearby! Purple and black electricity crackle in $s solid white aura, and he grins as $e realizes $s @GThird @DShadow @BForm@W!@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+				if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 1000000, 2);
+				}
+				if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 56000000, 4);
+				}
+
+
+				int add = 290000000;
+				double mult = 5;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, .2);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of Konatsu Third Trans */
+
+		if (IS_ICER(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that form!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+				send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 3)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
+				send_to_char(ch, "You do not have enough stamina!");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 3)) {
+				if (GET_TRANSCOST(ch, 3) == FALSE) {
+					if (GET_RP(ch) < 1) {
+						send_to_char(ch, "You need 1 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 1;
+						GET_TRANSCOST(ch, 3) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@WA blinding light surrounds your body while your rising power begins to rip up the ground beneath you! Your skin and torso shell begin to crack as your new body struggles to free its self. Huge chunks of debris lift free of the ground as your power begins to rise to unbelievable heights. Suddenly your old skin and torso shell burst off from your body, leaving a sleek form glowing where they had been. Everything comes crashing down as your power evens out, leaving you with your @GThird @cTransformation @Wcompleted!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@WA blinding light surrounds @C$n@W's body while $s rising power begins to rip up the ground beneath $m! $s skin and torso shell begin to crack as $s new body struggles to free its self. Huge chunks of debris lift free of the ground as $s power begins to rise to unbelievable heights. Suddenly $s old skin and torso shell burst off from $s body, leaving a sleek form glowing where they had been. Everything comes crashing down as @C$n@W's power evens out, leaving $m with $s @GThird @cTransformation @Wcompleted!@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+
+				if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 400000, 2);
+				}
+				if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 7000000, 3);
+				}
+
+
+				int add = 45000000;
+				double mult = 4;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, .2);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of ICER Third Trans */
+
+		if (IS_HALFBREED(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that form!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+				send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 3)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
+				send_to_char(ch, "You do not have enough stamina!");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 3)) {
+				if (GET_TRANSCOST(ch, 3) == FALSE) {
+					if (GET_RP(ch) < 2) {
+						send_to_char(ch, "You need 2 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 2;
+						GET_TRANSCOST(ch, 3) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@WElectricity begins to crackle around your body as your aura grows explosively! You yell as your powerlevel begins to skyrocket while your hair grows to multiple times the length it was previously. Your muscles become incredibly dense instead of growing in size, preserving your speed. Finally your irises appear just as your transformation becomes complete, having achieved @CSuper @YSaiyan @GThird@W!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@WElectricity begins to crackle around @C$n@W, as $s aura grows explosively! $e yells as the energy around $m skyrockets and $s hair grows to multiple times its previous length. $e smiles as $s irises appear and $s muscles tighten up. $s transformation complete, $e now stands confidently, having achieved @CSuper @YSaiyan @GThird@W!@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+				if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 900000, 2);
+				}
+				if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 16500000, 4);
+				}
+
+
+				int add = 240000000;
+				double mult = 5;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, .2);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of HALFBREED Third Trans */
+
+		if (IS_NAMEK(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that form!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+				send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 3)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
+				send_to_char(ch, "You do not have enough stamina!");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 3)) {
+				if (GET_TRANSCOST(ch, 3) == FALSE) {
+					if (GET_RP(ch) < 1) {
+						send_to_char(ch, "You need 1 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 1;
+						GET_TRANSCOST(ch, 3) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@WA fierce clear aura bursts up around your body as you struggle to control a growing power within! Energy leaks off of your aura at an astounding rate filling the air around you with small orbs of ki. As your power begins to level off the ambient ki hovering around you is absorbed inward in a sudden shock that leaves your skin glowing! You have achieved a rare power, @CSuper @gNamek @GThird@W!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@WA fierce clear aura bursts up around @C$n@W's body as $e struggles to control $s own power! Energy leaks off of $s aura at an astounding rate filling the air around $m with small orbs of ki. As $s power begins to level off the ambient ki hovering around $m is absorbed inward in a sudden shock that leaves $s skin glowing! $e has achieved a rare power, @CSuper @gNamek @GThird@W!@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+				if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 200000, 2);
+				}
+				if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 4000000, 3);
+				}
+
+
+				int add = 65000000;
+				double mult = 4;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, .2);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of NAMEK Third Trans */
+
+		if (IS_SAIYAN(ch) && !PLR_FLAGGED(ch, PLR_LSSJ)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that form!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+				send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 3)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_MOVE(ch) <= GET_MAX_MOVE(ch) * 0.1) {
+				send_to_char(ch, "You do not have enough stamina!");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 3)) {
+				if (GET_TRANSCOST(ch, 3) == FALSE) {
+					if (GET_RP(ch) < 1) {
+						send_to_char(ch, "You need 1 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 1;
+						GET_TRANSCOST(ch, 3) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@WElectricity begins to crackle around your body as your aura grows explosively! You yell as your powerlevel begins to skyrocket while your hair grows to multiple times the length it was previously. Your muscles become incredibly dense instead of growing in size, preserving your speed. Finally your irises appear just as your transformation becomes complete, having achieved @CSuper @YSaiyan @GThird@W!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@WElectricity begins to crackle around @C$n@W, as $s aura grows explosively! $e yells as the energy around $m skyrockets and $s hair grows to multiple times its previous length. $e smiles as $s irises appear and $s muscles tighten up. $s transformation complete, $e now stands confidently, having achieved @CSuper @YSaiyan @GThird@W!@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+				int add = 80000000;
+				double mult = 4;
+
+				if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 800000, 2);
+				}
+				if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 20000000, 3);
+				}
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, .2);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of Saiyan Third Trans */
+
+		return;
+	}/* End of Third Trans */
+
+	else if (!str_cmp("fourth", arg)) {
+		if (IS_HUMAN(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 4)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
+				send_to_char(ch, "You do not have enough stamina!");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 4)) {
+				if (GET_TRANSCOST(ch, 4) == FALSE) {
+					if (GET_RP(ch) < 2) {
+						send_to_char(ch, "You need 2 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 2;
+						GET_TRANSCOST(ch, 4) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@WYou grit your teeth and clench your fists as a sudden surge of power begins to tear through your body! Your muscles lose volume and gain mass, condensing into sleek hyper efficiency as a spectacular shimmering white aura flows over you, flashes of multicolored light flaring up in rising stars around your new form, a corona of glory! You feel your ultimate potential realized as you ascend to @CSuper @cHuman @GFourth@W!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@C$n@W grits $s teeth and clenches $s fists as a sudden surge of power begins to tear through $s body! $n@W's muscles lose volume and gain mass, condensing into sleek hyper efficiency as a spectacular shimmering white aura flows over $m, flashes of multicolored light flare up in rising stars around $s new form, a corona of glory! $n@W smiles as his ultimate potential is realized as $e ascends to @CSuper @cHuman @GFourth@W!@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+				if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 1000000, 2);
+				}
+				if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 12000000, 3);
+				}
+				if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 50000000, 4);
+				}
+
+
+				int add = 270000000;
+				double mult = 4.5;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, .2);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS4);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of Human Fourth Trans */
+
+		if (IS_ICER(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 4)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
+				send_to_char(ch, "You do not have enough stamina!");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 4)) {
+				if (GET_TRANSCOST(ch, 4) == FALSE) {
+					if (GET_RP(ch) < 2) {
+						send_to_char(ch, "You need 2 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 2;
+						GET_TRANSCOST(ch, 4) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@WA feeling of complete power courses through your viens as your body begins to change radically! You triple in height while a hard shell forms over your entire torso. Hard bones grow out from your head forming four ridges that jut outward. A hard covering grows up over your mouth and nose completing the transformation! A dark crimson aura flames around your body as you realize your @GFourth @cTransformation@W!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@C$n@W's body begins to change radically! $e triples in height while a hard shell forms over $s entire torso. Hard bones grow out from $s head forming four ridges that jut outward. A hard covering grows up over $s mouth and nose completing the transformation! A dark crimson aura flames around @C$n@W's body as $e realizes $s @GFourth @cTransformation@W!@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+				if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 400000, 2);
+				}
+				if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 7000000, 3);
+				}
+				if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 45000000, 4);
+				}
+
+
+				int add = 200000000;
+				double mult = 5;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, .2);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS4);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of ICER Fourth Trans */
+
+		if (IS_NAMEK(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 4)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
+				send_to_char(ch, "You do not have enough stamina!");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 4)) {
+				if (GET_TRANSCOST(ch, 4) == FALSE) {
+					if (GET_RP(ch) < 2) {
+						send_to_char(ch, "You need 2 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 2;
+						GET_TRANSCOST(ch, 4) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@WAn inner calm fills your mind as your power surges higher than ever before. Complete clarity puts everything once questioned into perspective. While this inner calm is filling your mind, an outer storm of energy erupts around your body! The storm of energy boils and crackles while growing larger. You have achieved @CSuper @gNamek @GFourth@W, a mystery of the ages.@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@C$n@W smiles calmly as a look of complete understand fills $s eyes. While $e remains perfectly calm and detached a massivly powerful storm of energy erupts from his body. This storm of energy shimmers with the colors of the rainbow and boils and crackles with awesome power! $s smile disappears as he realizes a mysterious power of the ages, @CSuper @gNamek @GFourth@W!@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+				if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 200000, 2);
+				}
+				if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 4000000, 3);
+				}
+				if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 65000000, 4);
+				}
+
+
+				int add = 230000000;
+				double mult = 4.5;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, .2);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS4);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of NAMEK Fourth Trans */
+
+		if (IS_SAIYAN(ch) && !PLR_FLAGGED(ch, PLR_LSSJ)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 4)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
+				send_to_char(ch, "You do not have enough stamina!");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 4)) {
+				if (GET_TRANSCOST(ch, 4) == FALSE) {
+					if (GET_RP(ch) < 2) {
+						send_to_char(ch, "You need 2 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 2;
+						GET_TRANSCOST(ch, 4) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@WHaving absorbed enough blutz waves, your body begins to transform! Red fur grows over certain parts of your skin as your hair grows longer and unkempt. A red outline forms around your eyes while the irises of those very same eyes change to an amber color. Energy crackles about your body violently as you achieve the peak of saiyan perfection, @CSuper @YSaiyan @GFourth@W!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@WHaving absorbed enough blutz waves, @C$n@W's body begins to transform! Red fur grows over certain parts of $s skin as $s hair grows longer and unkempt. A red outline forms around $s eyes while the irises of those very same eyes change to an amber color. Energy crackles about $s body violently as $e achieves the peak of saiyan perfection, @CSuper @YSaiyan @GFourth@W!@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+				if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 800000, 2);
+				}
+				if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 20000000, 3);
+				}
+				if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 80000000, 4);
+				}
+
+				int add = 182000000;
+				double mult = 5.5;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, .2);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS4);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of Saiyan Fourth Trans */
+		return;
+	}/* End of Fourth Trans */
+	else if (!str_cmp("mature", arg)) {
+		if (IS_BIO(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+				send_to_char(ch, "You are already beyond that form!\r\n");
+				return;
+			}
+			if (GET_ABSORBS(ch) > 2) {
+				send_to_char(ch, "You need to absorb something to transform!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+				send_to_char(ch, "You are already in that form!\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 1)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 1)) {
+				if (GET_TRANSCOST(ch, 1) == FALSE) {
+					if (GET_RP(ch) < 1) {
+						send_to_char(ch, "You need 1 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 1;
+						GET_TRANSCOST(ch, 1) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@gYou bend over as @rpain@g wracks your body! Your limbs begin to grow out, becoming more defined and muscular. As your limbs finish growing outward you feel a painful sensation coming from your back as a long tail with a spike grows out of your back! As the pain subsides you stand up straight and a current of power shatters part of the ground beneath you. You have @rmatured@g beyond your @Gl@ga@Dr@gv@Ga@ge stage!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@W$n @gbends over as a @rpainful@g look covers $s face! $s limbs begin to grow out, becoming more defined and muscular. As $s limbs finish growing outward $e screams as a long tail with a spike grows rips out of $s back! As $e calms $e stands up straight and a current of power shatters part of the ground beneath $m. $e has @rmatured@g beyond $s @Gl@ga@Dr@gv@Ga@ge stage!@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+
+
+				int add = 1000000;
+				double mult = 2;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, 0.0);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+				return;
+			}
+		} /* End of Bio First Trans */
+		return;
+	}/* End of Bio First Trans */
+
+	else if (!str_cmp("semi-perfect", arg) || !str_cmp("Semi-Perfect", arg)) {
+		if (IS_BIO(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that form!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+				send_to_char(ch, "You are already in that form!\r\n");
+				return;
+			}
+			if (GET_ABSORBS(ch) > 1) {
+				send_to_char(ch, "You need to absorb something to transform!\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 2)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
+				send_to_char(ch, "You do not have enough stamina!");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 2)) {
+				if (GET_TRANSCOST(ch, 2) == FALSE) {
+					if (GET_RP(ch) < 1) {
+						send_to_char(ch, "You need 1 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 1;
+						GET_TRANSCOST(ch, 2) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@WYour exoskeleton begins to glow spectacularly while the shape of your body begins to change. Your tail shrinks slightly. Your hands, feet, and facial features become more refined. While your body colors change slightly. The crests on your head change, standing up straighter on either side of your head as well. As you finish transforming a wave of power floods your being. You have achieved your @gSemi@D-@GPerfect @BForm@W!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@C$n@W's exoskeleton begins to glow spectacularly while the shape of $s body begins to change. $s tail shrinks slightly. $s hands, feet, and facial features become more refined. While $s body colors change slightly. The crests on $s head change, standing up straighter on either side of $s head as well. As $e finishes transforming a wave of power rushes out from $m. $e has achieved $s @gSemi@D-@GPerfect @BForm@W!@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+				if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 1000000, 2);
+				}
+
+
+				int add = 8000000;
+				double mult = 3;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, 0.0);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of BIO Second Trans */
+	} /* End of Bio Second Trans */
+
+	else if (!str_cmp("perfect", arg)) {
+		if (IS_BIO(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that form!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+				send_to_char(ch, "You are already in that form!\r\n");
+				return;
+			}
+			if (GET_ABSORBS(ch) > 0) {
+				send_to_char(ch, "You need to absorb something to transform!\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 3)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_MOVE(ch) <= (GET_MAX_MOVE(ch) * 0.2)) {
+				send_to_char(ch, "You do not have enough stamina!");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 3)) {
+				if (GET_TRANSCOST(ch, 3) == FALSE) {
+					if (GET_RP(ch) < 1) {
+						send_to_char(ch, "You need 1 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 1;
+						GET_TRANSCOST(ch, 3) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@WYour whole body is engulfed in blinding light as your exoskeleton begins to change shape! Your hands, feet, and facial features become more refined and humanoid. While your colors change, becoming more subdued and neutral. A bright golden aura bursts up around your body as you achieve your @GPerfect @BForm@W!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@C$n@W whole body is engulfed in blinding light as $s exoskeleton begins to change shape! $s hands, feet, and facial features become more refined and humanoid. While $s colors change, becoming more subdued and neutral. A bright golden aura bursts up around $s body as $e achieves $s @GPerfect @BForm@W!@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+				if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 1000000, 2);
+				}
+				if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 8000000, 3);
+				}
+
+
+				int add = 70000000;
+				double mult = 3.5;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, 0.0);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of BIO Third Trans */
+	} /* End of Bio Third Trans */
+
+	else if ((!str_cmp("super", arg) || !str_cmp("super perfect", arg)) && IS_BIO(ch)) {
+		if (IS_BIO(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already in that form!\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 4)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 4)) {
+				if (GET_TRANSCOST(ch, 4) == FALSE) {
+					if (GET_RP(ch) < 2) {
+						send_to_char(ch, "You need 2 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 2;
+						GET_TRANSCOST(ch, 4) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@WA rush of power explodes from your perfect body, crushing nearby debris and sending dust billowing in all directions. Electricity crackles throughout your aura intensely while your muscles grow slightly larger but incredibly dense. You smile as you realize that you have taken your perfect form beyond imagination. You are now @CSuper @GPerfect@W!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@WA rush of power explodes from @C$n@W's perfect body, crushing nearby debris and sending dust billowing in all directions. Electricity crackles throughout $s aura intensely while $s muscles grow slightly larger but incredibly dense. $e smiles as $e has taken $s perfect form beyond imagination. $e is now @CSuper @GPerfect@W!@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+				if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 1000000, 2);
+				}
+				if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 8000000, 3);
+				}
+				if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 70000000, 3.5);
+				}
+
+
+				int add = 400000000;
+				double mult = 4;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, 0.0);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS4);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of BIO Fourth Trans */
+	} /* End of Bio Fourth Trans */
+
+	else if (!str_cmp("affinity", arg)) {
+		if (IS_MAJIN(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS2) || PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that form!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+				send_to_char(ch, "You are already in that form!\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 1)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 1)) {
+				if (GET_TRANSCOST(ch, 1) == FALSE) {
+					if (GET_RP(ch) < 1) {
+						send_to_char(ch, "You need 1 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 1;
+						GET_TRANSCOST(ch, 1) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@WA dark pink aura bursts up around your body as images of good and evil fill your mind! You feel the power within your body growing intensely, reflecting your personal alignment as your body changes!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@WA dark pink aura bursts up around @C$n@W's body as images of good and evil fill $s mind! $e feels the power within $s body growing intensely, reflecting $s personal alignment as $s body changes!@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+
+				int add = 1250000;
+				double mult = 2;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, 0.0);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of MAJIN First Trans */
+
+	} /* Majin First trans block */
+	else if (!str_cmp("super", arg)) {
+		if (IS_MAJIN(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that form!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+				send_to_char(ch, "You are already in that form!\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 2)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			if (GET_ABSORBS(ch) > 0 && GET_LEVEL(ch) < 50) {
+				send_to_char(ch, "You need to ingest someone before you can use that form.\r\n");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 2)) {
+				if (GET_TRANSCOST(ch, 2) == FALSE) {
+					if (GET_RP(ch) < 2) {
+						send_to_char(ch, "You need 2 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 2;
+						GET_TRANSCOST(ch, 2) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@WAn intense pink aura surrounds your body as it begins to change, taking on the characteristics of those you have ingested! Explosions of pink energy burst into existence all around you as your power soars to sights unseen!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@WAn intense pink aura surrounds @C$n@W's body as it begins to change, taking on the characteristics of those $e has ingested! Explosions of pink energy burst into existence all around $m as $s power soars to sights unseen!@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+				if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 1250000, 2);
+				}
+
+
+				int add = 15000000;
+				double mult = 3;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, 0.0);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of MAJIN Second Trans */
+
+	} /* Majin Second trans block */
+
+	else if (!str_cmp("true", arg)) {
+
+		if (IS_MAJIN(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that form!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+				send_to_char(ch, "You are already in that form!\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 3)) {
+				send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 3)) {
+				if (GET_TRANSCOST(ch, 3) == FALSE) {
+					if (GET_RP(ch) < 2) {
+						send_to_char(ch, "You need 2 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 2;
+						GET_TRANSCOST(ch, 3) = TRUE;
+					}
+				}
+				int zone = 0;
+				act("@WRipples of intense pink energy rush upwards around your body as it begins to morph into its truest form! The ground beneath your feet forms into a crater from the very pressure of your rising ki! Earthquakes shudder throughout the area as your finish morphing!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@WRipples of intense pink energy rush upwards around @C$n@W's body as it begins to morph into its truest form! The ground beneath $s feet forms into a crater from the very pressure of $s rising ki! Earthquakes shudder throughout the area as $e finishes morphing!@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+					send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+				}
+
+				if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 1250000, 2);
+				}
+				if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 15000000, 3);
+				}
+
+
+				int add = 340000000;
+				double mult = 4.5;
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, 0.0);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
+				send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+				sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+				send_to_scouter(buf3, ch, 1, 0);
+				return;
+			}
+		} /* End of MAJIN Third Trans */
+
+	} /* Majin Second trans block */
+
+	else if (!str_cmp("1.0", arg)) {
+		if (IS_ANDROID(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS2) || PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that upgrade!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+				send_to_char(ch, "You are already in that upgrade!\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 1)) {
+				send_to_char(ch, "You are not strong enough to handle that upgrade!\r\n");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 1)) {
+				if (GET_TRANSCOST(ch, 1) == FALSE) {
+					if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
+						send_to_char(ch, "You need 50 practice points in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
+						GET_TRANSCOST(ch, 1) = TRUE;
+					}
+				}
+				act("@WYou stop for a moment as the nano-machines within your body reprogram and restructure you. You are now more powerful and efficient!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@C$n @Wstops for a moment as the nano-machines within $s body reprogram and restructure $m. $e is now more powerful and efficient!@n", TRUE, ch, 0, 0, TO_ROOM);
+
+				int add = 5000000;
+				double mult = 1;
+
+				if (PLR_FLAGGED(ch, PLR_SENSEM)) {
+					add += 7500000;
+				}
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, 0.0);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+				return;
+			}
+		} /* End of ANDROID First Trans */
+
+	}
+	else if (!str_cmp("2.0", arg)) {
+		if (IS_ANDROID(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that upgrade!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+				send_to_char(ch, "You are already in that upgrade!\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 2)) {
+				send_to_char(ch, "You are not strong enough to handle that upgrade!\r\n");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 2)) {
+				if (GET_TRANSCOST(ch, 2) == FALSE) {
+					if (GET_RP(ch) < 1) {
+						send_to_char(ch, "You need 1 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 1;
+						GET_TRANSCOST(ch, 2) = TRUE;
+					}
+				}
+				act("@WYou stop for a moment as the nano-machines within your body reprogram and restructure you. You are now more powerful and efficient!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@C$n @Wstops for a moment as the nano-machines within $s body reprogram and restructure $m. $e is now more powerful and efficient!@n", TRUE, ch, 0, 0, TO_ROOM);
+
+				if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+				}
+
+				int add = 20000000;
+				double mult = 1;
+
+				if (PLR_FLAGGED(ch, PLR_SENSEM)) {
+					add += 30000000;
+				}
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, 0.0);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				return;
+			}
+		} /* End of ANDROID Second Trans */
+
+	}
+	else if (!str_cmp("3.0", arg)) {
+		if (IS_ANDROID(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already beyond that upgrade!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+				send_to_char(ch, "You are already in that upgrade!\r\n");
+				return;
+			}
+			if (!PLR_FLAGGED(ch, PLR_TRANS2)) {
+				send_to_char(ch, "You havn't upgraded to 2.0 yet!\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 3)) {
+				send_to_char(ch, "You are not strong enough to handle that upgrade!\r\n");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 3)) {
+				if (GET_TRANSCOST(ch, 3) == FALSE) {
+					if (GET_RP(ch) < 1) {
+						send_to_char(ch, "You need 1 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 1;
+						GET_TRANSCOST(ch, 3) = TRUE;
+					}
+				}
+				act("@WYou stop for a moment as the nano-machines within your body reprogram and restructure you. You are now more powerful and efficient!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@C$n @Wstops for a moment as the nano-machines within $s body reprogram and restructure $m. $e is now more powerful and efficient!@n", TRUE, ch, 0, 0, TO_ROOM);
+
+				if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+				}
+				if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				}
+
+				int add = 125000000u;
+				double mult = 1;
+
+				if (PLR_FLAGGED(ch, PLR_SENSEM)) {
+					add += 187500000u;
+				}
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, 0.0);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
+				return;
+			}
+		} /* End of ANDROID Third Trans */
+
+	}
+	else if (!str_cmp("4.0", arg)) {
+		if (IS_ANDROID(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS5) || PLR_FLAGGED(ch, PLR_TRANS6)) {
+				send_to_char(ch, "You are already beyond that upgrade!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You are already in that upgrade!\r\n");
+				return;
+			}
+			if (!PLR_FLAGGED(ch, PLR_TRANS3)) {
+				send_to_char(ch, "You havn't upgraded to 3.0 yet!\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 4)) {
+				send_to_char(ch, "You are not strong enough to handle that upgrade!\r\n");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 4)) {
+				if (GET_TRANSCOST(ch, 4) == FALSE) {
+					if (GET_RP(ch) < 1) {
+						send_to_char(ch, "You need 1 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 1;
+						GET_TRANSCOST(ch, 4) = TRUE;
+					}
+				}
+				act("@WYou stop for a moment as the nano-machines within your body reprogram and restructure you. You are now more powerful and efficient!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@C$n @Wstops for a moment as the nano-machines within $s body reprogram and restructure $m. $e is now more powerful and efficient!@n", TRUE, ch, 0, 0, TO_ROOM);
+
+				if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+				}
+				if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				}
+				if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
+				}
+
+				cl_uint64 add = 1000000000u;
+				double mult = 1;
+
+				if (PLR_FLAGGED(ch, PLR_SENSEM)) {
+					add += 1500000000u;
+				}
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, 0.0);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS4);
+				return;
+			}
+		} /* End of ANDROID Fourth Trans */
+
+	}
+	else if (!str_cmp("5.0", arg)) {
+		if (IS_ANDROID(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS6)) {
+				send_to_char(ch, "You are already beyond that upgrade!\r\n");
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS5)) {
+				send_to_char(ch, "You are already in that upgrade!\r\n");
+				return;
+			}
+			if (!PLR_FLAGGED(ch, PLR_TRANS4)) {
+				send_to_char(ch, "You havn't upgraded to 4.0 yet!\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 5)) {
+				send_to_char(ch, "You are not strong enough to handle that upgrade!\r\n");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 5)) {
+				if (GET_TRANSCOST(ch, 5) == FALSE) {
+					if (GET_RP(ch) < 1) {
+						send_to_char(ch, "You need 1 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 1;
+						GET_TRANSCOST(ch, 5) = TRUE;
+					}
+				}
+				act("@WYou stop for a moment as the nano-machines within your body reprogram and restructure you. You are now more powerful and efficient!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@C$n @Wstops for a moment as the nano-machines within $s body reprogram and restructure $m. $e is now more powerful and efficient!@n", TRUE, ch, 0, 0, TO_ROOM);
+
+				if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+				}
+				if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				}
+				if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
+				}
+				if (PLR_FLAGGED(ch, PLR_TRANS4)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS4);
+				}
+
+				//cl_uint64 add = 25000000000u;
+				unsigned long long int add = 2500000000000;
+				//add *= 100;
+				double mult = 1;
+
+				if (PLR_FLAGGED(ch, PLR_SENSEM)) {
+					add += 3750000000u;
+				}
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, 0.0);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS5);
+				return;
+			}
+		} /* End of ANDROID Fifth Trans */
+
+	}
+	else if (!str_cmp("6.0", arg)) {
+		if (IS_ANDROID(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS6)) {
+				send_to_char(ch, "You are already in that upgrade!\r\n");
+				return;
+			}
+			if (!PLR_FLAGGED(ch, PLR_TRANS5)) {
+				send_to_char(ch, "You havn't upgraded to 5.0 yet!\r\n");
+				return;
+			}
+			if (GET_BASE_PL(ch) < trans_req(ch, 6)) {
+				send_to_char(ch, "You are not strong enough to handle that upgrade!\r\n");
+				return;
+			}
+			else if (GET_BASE_PL(ch) >= trans_req(ch, 6)) {
+				if (GET_TRANSCOST(ch, 6) == FALSE) {
+					if (GET_RP(ch) < 2) {
+						send_to_char(ch, "You need 2 RPP in order to obtain a transformation for the first time.\r\n");
+						return;
+					}
+					else {
+						GET_RP(ch) -= 2;
+						GET_TRANSCOST(ch, 6) = TRUE;
+					}
+				}
+				act("@WYou stop for a moment as the nano-machines within your body reprogram and restructure you. You are now more powerful and efficient!@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@C$n @Wstops for a moment as the nano-machines within $s body reprogram and restructure $m. $e is now more powerful and efficient!@n", TRUE, ch, 0, 0, TO_ROOM);
+
+				if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+				}
+				if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				}
+				if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
+				}
+				if (PLR_FLAGGED(ch, PLR_TRANS4)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS4);
+				}
+				if (PLR_FLAGGED(ch, PLR_TRANS5)) {
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS5);
+				}
+
+				cl_uint64 add = 1000000000u;
+				add += 1000000000u;
+				add += 1000000000u;
+				add += 1000000000u;
+				add += 1000000000u;
+				double mult = 1;
+
+				if (PLR_FLAGGED(ch, PLR_SENSEM)) {
+					add += 750000000u;
+					add *= 100u;
+				}
+
+				/* handle_transform: ch, add, mult, drain*/
+				handle_transform(ch, add, mult, 0.0);
+
+				SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANS6);
+				return;
+			}
+		} /* End of ANDROID Sixth Trans */
+	}
+
+	/* ----------------------------------Revert Section--------------------------------------*/
+	/* Rillao: transloc, add new transes here */
+	else if (!str_cmp("revert", arg)) {
+		if (IS_HUMAN(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS4)) {
+
+				act("@wYou revert from @CSuper @cHuman @GFourth@w.@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@w$n@w reverts from @CSuper @cHuman @GFourth@w.@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((GET_CHARGE(ch) > 0)) {
+					do_charge(ch, "release", 0, 0);
+				}
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS4);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+
+				/* handle revert, Ch, add, mult */
+				handle_revert(ch, 270000000, 4.5);
+
+				if (*arg2) {
+					do_transform(ch, arg2, 0, 0);
+				}
+				return;
+			}
+			else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+
+				act("@wYou revert from @CSuper @cHuman @GThird@w.@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@w$n@w reverts from @CSuper @cHuman @GThird@w.@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((GET_CHARGE(ch) > 0)) {
+					do_charge(ch, "release", 0, 0);
+				}
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+
+				/* handle revert, Ch, add, mult */
+				handle_revert(ch, 50000000, 4);
+
+				if (*arg2) {
+					do_transform(ch, arg2, 0, 0);
+				}
+				return;
+			}
+			else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+
+				act("@wYou revert from @CSuper @cHuman @GSecond@w.@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@w$n@w reverts from @CSuper @cHuman @GSecond@w.@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((GET_CHARGE(ch) > 0)) {
+					do_charge(ch, "release", 0, 0);
+				}
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+
+				/* handle revert, Ch, add, mult */
+				handle_revert(ch, 12000000, 3);
+
+				if (*arg2) {
+					do_transform(ch, arg2, 0, 0);
+				}
+				return;
+			}
+			else if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+
+				act("@wYou revert from @CSuper @cHuman @GFirst@w.@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@w$n@w reverts from @CSuper @cHuman @GFirst.@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((GET_CHARGE(ch) > 0)) {
+					do_charge(ch, "release", 0, 0);
+				}
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+
+				/* handle revert, Ch, add, mult */
+				handle_revert(ch, 1000000, 2);
+
+				if (*arg2) {
+					do_transform(ch, arg2, 0, 0);
+				}
+				return;
+			}
+			else {
+				send_to_char(ch, "You do not need to revert from any form!\r\n");
+				return;
+			}
+		}
+		else if (IS_SAIYAN(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS4)) {
+
+				act("@wYou revert from @CSuper @cSaiyan @GFourth@w.@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@w$n@w reverts from @CSuper @cSaiyan @GFourth@w.@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((GET_CHARGE(ch) > 0)) {
+					do_charge(ch, "release", 0, 0);
+				}
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS4);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+
+				/* handle revert, Ch, add, mult */
+				handle_revert(ch, 182000000, 5.5);
+
+				if (*arg2) {
+					do_transform(ch, arg2, 0, 0);
+				}
+				return;
+			}
+			else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+
+				act("@wYou revert from @CSuper @cSaiyan @GThird@w.@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@w$n@w reverts from @CSuper @cSaiyan @GThird@w.@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((GET_CHARGE(ch) > 0)) {
+					do_charge(ch, "release", 0, 0);
+				}
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+
+				/* handle revert, Ch, add, mult */
+				handle_revert(ch, 80000000, 4);
+
+				if (*arg2) {
+					do_transform(ch, arg2, 0, 0);
+				}
+				return;
+			}
+			else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+
+				if (!PLR_FLAGGED(ch, PLR_LSSJ)) {
+					act("@wYou revert from @CSuper @cSaiyan @GSecond@w.@n", TRUE, ch, 0, 0, TO_CHAR);
+					act("@w$n@w reverts from @CSuper @cSaiyan @GSecond@w.@n", TRUE, ch, 0, 0, TO_ROOM);
+					if ((GET_CHARGE(ch) > 0)) {
+						do_charge(ch, "release", 0, 0);
+					}
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 20000000, 3);
+				}
+				else {
+					act("@wYou revert from your @YLegendary @CSuper Saiyan@w form.@n", TRUE, ch, 0, 0, TO_CHAR);
+					act("@w$n@w reverts from $s @YLegendary @CSuper Saiyan@w form@w.@n", TRUE, ch, 0, 0, TO_ROOM);
+					if ((GET_CHARGE(ch) > 0)) {
+						do_charge(ch, "release", 0, 0);
+					}
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+
+					/* handle revert, Ch, add, mult */
+					handle_revert(ch, 185000000, 6);
+				}
+
+				if (*arg2) {
+					do_transform(ch, arg2, 0, 0);
+				}
+				return;
+			}
+			else if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+
+				act("@wYou revert from @CSuper @cSaiyan @GFirst@w.@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@w$n@w reverts from @CSuper @cSaiyan @GFirst.@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((GET_CHARGE(ch) > 0)) {
+					do_charge(ch, "release", 0, 0);
+				}
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+
+				/* handle revert, Ch, add, mult */
+				handle_revert(ch, 800000, 2);
+
+				if (*arg2) {
+					do_transform(ch, arg2, 0, 0);
+				}
+				return;
+			}
+			else {
+				send_to_char(ch, "You do not need to revert from any form!\r\n");
+				return;
+			}
+		}
+		else if (IS_HALFBREED(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+
+				act("@wYou revert from @CSuper @cSaiyan @GThird@w.@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@w$n@w reverts from @CSuper @cSaiyan @GThird@w.@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((GET_CHARGE(ch) > 0)) {
+					do_charge(ch, "release", 0, 0);
+				}
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+
+				/* handle revert, Ch, add, mult */
+				handle_revert(ch, 240000000, 5);
+
+				if (*arg2) {
+					do_transform(ch, arg2, 0, 0);
+				}
+				return;
+			}
+			else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+
+				act("@wYou revert from @CSuper @cSaiyan @GSecond@w.@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@w$n@w reverts from @CSuper @cSaiyan @GSecond@w.@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((GET_CHARGE(ch) > 0)) {
+					do_charge(ch, "release", 0, 0);
+				}
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+
+				/* handle revert, Ch, add, mult */
+				handle_revert(ch, 16500000, 4);
+
+				if (*arg2) {
+					do_transform(ch, arg2, 0, 0);
+				}
+				return;
+			}
+			else if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+
+				act("@wYou revert from @CSuper @cSaiyan @GFirst@w.@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@w$n@w reverts from @CSuper @cSaiyan @GFirst.@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((GET_CHARGE(ch) > 0)) {
+					do_charge(ch, "release", 0, 0);
+				}
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+
+				/* handle revert, Ch, add, mult */
+				handle_revert(ch, 900000, 2);
+
+				if (*arg2) {
+					do_transform(ch, arg2, 0, 0);
+				}
+				return;
+			}
+			else {
+				send_to_char(ch, "You do not need to revert from any form!\r\n");
+				return;
+			}
+		}
+
+		else if (IS_NAMEK(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS4)) {
+
+				act("@wYou revert from @CSuper @cNamek @GFourth@w.@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@w$n@w reverts from @CSuper @cNamek @GFourth@w.@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((GET_CHARGE(ch) > 0)) {
+					do_charge(ch, "release", 0, 0);
+				}
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS4);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+
+				/* handle revert, Ch, add, mult */
+				handle_revert(ch, 230000000, 4.5);
+
+				if (*arg2) {
+					do_transform(ch, arg2, 0, 0);
+				}
+				return;
+			}
+			else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+
+				act("@wYou revert from @CSuper @cNamek @GThird@w.@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@w$n@w reverts from @CSuper @cNamek @GThird@w.@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((GET_CHARGE(ch) > 0)) {
+					do_charge(ch, "release", 0, 0);
+				}
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+
+				/* handle revert, Ch, add, mult */
+				handle_revert(ch, 65000000, 4);
+
+				if (*arg2) {
+					do_transform(ch, arg2, 0, 0);
+				}
+				return;
+			}
+			else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+
+				act("@wYou revert from @CSuper @cNamek @GSecond@w.@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@w$n@w reverts from @CSuper @cNamek @GSecond@w.@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((GET_CHARGE(ch) > 0)) {
+					do_charge(ch, "release", 0, 0);
+				}
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+
+				/* handle revert, Ch, add, mult */
+				handle_revert(ch, 4000000, 3);
+
+				if (*arg2) {
+					do_transform(ch, arg2, 0, 0);
+				}
+				return;
+			}
+			else if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+
+				act("@wYou revert from @CSuper @cNamek @GFirst@w.@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@w$n@w reverts from @CSuper @cNamek @GFirst.@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((GET_CHARGE(ch) > 0)) {
+					do_charge(ch, "release", 0, 0);
+				}
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+
+				/* handle revert, Ch, add, mult */
+				handle_revert(ch, 200000, 2);
+
+				if (*arg2) {
+					do_transform(ch, arg2, 0, 0);
+				}
+				return;
+			}
+			else {
+				send_to_char(ch, "You do not need to revert from any form!\r\n");
+				return;
+			}
+		}
+
+		else if (IS_ICER(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS4)) {
+
+				act("@wYou revert from @CTransform @GFourth@w.@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@w$n@w reverts from @CTransform @GFourth@w.@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((GET_CHARGE(ch) > 0)) {
+					do_charge(ch, "release", 0, 0);
+				}
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS4);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+
+				/* handle revert, Ch, add, mult */
+				handle_revert(ch, 200000000, 5);
+
+				if (*arg2) {
+					do_transform(ch, arg2, 0, 0);
+				}
+				return;
+			}
+			else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+
+				act("@wYou revert from @CTransform @GThird@w.@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@w$n@w reverts from @CTransform @GThird@w.@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((GET_CHARGE(ch) > 0)) {
+					do_charge(ch, "release", 0, 0);
+				}
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+
+				/* handle revert, Ch, add, mult */
+				handle_revert(ch, 45000000, 4);
+
+				if (*arg2) {
+					do_transform(ch, arg2, 0, 0);
+				}
+				return;
+			}
+			else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+
+				act("@wYou revert from @CTransform @GSecond@w.@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@w$n@w reverts from @CTransform @GSecond@w.@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((GET_CHARGE(ch) > 0)) {
+					do_charge(ch, "release", 0, 0);
+				}
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+
+				/* handle revert, Ch, add, mult */
+				handle_revert(ch, 7000000, 3);
+
+				if (*arg2) {
+					do_transform(ch, arg2, 0, 0);
+				}
+				return;
+			}
+			else if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+
+				act("@wYou revert from @CTransform @GFirst@w.@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@w$n@w reverts from @CTransform @GFirst.@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((GET_CHARGE(ch) > 0)) {
+					do_charge(ch, "release", 0, 0);
+				}
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+
+				/* handle revert, Ch, add, mult */
+				handle_revert(ch, 400000, 2);
+
+				if (*arg2) {
+					do_transform(ch, arg2, 0, 0);
+				}
+				return;
+			}
+			else {
+				send_to_char(ch, "You do not need to revert from any form!\r\n");
+				return;
+			}
+		}
+
+		else if (IS_MUTANT(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+
+				act("@wYou revert from @CMutate @GThird@w.@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@w$n@w reverts from @CMutate @GThird@w.@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((GET_CHARGE(ch) > 0)) {
+					do_charge(ch, "release", 0, 0);
+				}
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+
+				/* handle revert, Ch, add, mult */
+				handle_revert(ch, 80000000, 4);
+
+				if (*arg2) {
+					do_transform(ch, arg2, 0, 0);
+				}
+				return;
+			}
+			else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+
+				act("@wYou revert from @CMutate @GSecond@w.@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@w$n@w reverts from @CMutate @GSecond@w.@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((GET_CHARGE(ch) > 0)) {
+					do_charge(ch, "release", 0, 0);
+				}
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+
+				/* handle revert, Ch, add, mult */
+				handle_revert(ch, 8500000, 3);
+
+				if (*arg2) {
+					do_transform(ch, arg2, 0, 0);
+				}
+				return;
+			}
+			else if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+
+				act("@wYou revert from @CMutate @GFirst@w.@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@w$n@w reverts from @CMutate @GFirst.@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((GET_CHARGE(ch) > 0)) {
+					do_charge(ch, "release", 0, 0);
+				}
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+
+				/* handle revert, Ch, add, mult */
+				handle_revert(ch, 100000, 2);
+
+				if (*arg2) {
+					do_transform(ch, arg2, 0, 0);
+				}
+				return;
+			}
+			else {
+				send_to_char(ch, "You do not need to revert from any form!\r\n");
+				return;
+			}
+		}
+
+		else if (IS_KONATSU(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+
+				act("@wYou revert from @CShadow @GThird@w.@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@w$n@w reverts from @CShadow @GThird@w.@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((GET_CHARGE(ch) > 0)) {
+					do_charge(ch, "release", 0, 0);
+				}
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+
+				/* handle revert, Ch, add, mult */
+				handle_revert(ch, 290000000, 5);
+
+				if (*arg2) {
+					do_transform(ch, arg2, 0, 0);
+				}
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+
+				act("@wYou revert from @CShadow @GSecond@w.@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@w$n@w reverts from @CShadow @GSecond@w.@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((GET_CHARGE(ch) > 0)) {
+					do_charge(ch, "release", 0, 0);
+				}
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+
+				/* handle revert, Ch, add, mult */
+				handle_revert(ch, 56000000, 4);
+
+				if (*arg2) {
+					do_transform(ch, arg2, 0, 0);
+				}
+				return;
+			}
+			else if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+
+				act("@wYou revert from @CShadow @GFirst@w.@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@w$n@w reverts from @CShadow @GFirst.@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((GET_CHARGE(ch) > 0)) {
+					do_charge(ch, "release", 0, 0);
+				}
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+
+				/* handle revert, Ch, add, mult */
+				handle_revert(ch, 1000000, 2);
+
+				if (*arg2) {
+					do_transform(ch, arg2, 0, 0);
+				}
+				return;
+			}
+			else {
+				send_to_char(ch, "You do not need to revert from any form!\r\n");
+				return;
+			}
+		}
+
+		else if (IS_KAI(ch)) {
+			if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+
+				act("@wYou revert from @CMystic @GThird@w.@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@w$n@w reverts from @CMystic @GThird@w.@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((GET_CHARGE(ch) > 0)) {
+					do_charge(ch, "release", 0, 0);
+				}
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+
+				/* handle revert, Ch, add, mult */
+				handle_revert(ch, 270000000, 5);
+
+				if (*arg2) {
+					do_transform(ch, arg2, 0, 0);
+				}
+				return;
+			}
+			if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+
+				act("@wYou revert from @CMystic @GSecond@w.@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@w$n@w reverts from @CMystic @GSecond@w.@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((GET_CHARGE(ch) > 0)) {
+					do_charge(ch, "release", 0, 0);
+				}
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS2);
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+
+				/* handle revert, Ch, add, mult */
+				handle_revert(ch, 115000000, 4);
+
+				if (*arg2) {
+					do_transform(ch, arg2, 0, 0);
+				}
+				return;
+			}
+			else if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+
+				act("@wYou revert from @CMystic @GFirst@w.@n", TRUE, ch, 0, 0, TO_CHAR);
+				act("@w$n@w reverts from @CMystic @GFirst.@n", TRUE, ch, 0, 0, TO_ROOM);
+				if ((GET_CHARGE(ch) > 0)) {
+					do_charge(ch, "release", 0, 0);
+				}
+				REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
+
+				/* handle revert, Ch, add, mult */
+				handle_revert(ch, 1100000, 3);
+
+				if (*arg2) {
+					do_transform(ch, arg2, 0, 0);
+				}
+				return;
+			}
+			else {
+				send_to_char(ch, "You do not need to revert from any form!\r\n");
+				return;
+			}
+		}
+
+		else {
+			send_to_char(ch, "You do not need to revert from any form!\r\n");
+		}
+		return;
+	}/* End revert segment */
+	else if (IS_KANASSAN(ch) || IS_DEMON(ch)) {
+		send_to_char(ch, "You do not have a transformation.\r\n");
+		return;
+	}
+	else {
+		send_to_char(ch, "What form?\r\n");
+		return;
+	} /* Fail message */
 }/*End of Function */
 
 ACMD(do_situp)
@@ -13451,448 +13549,484 @@ void check_eq(struct char_data *ch)
 /* This handles many player specific routines. It may be a bit too bloated though. */
 void base_update()
 {
-  struct descriptor_data *d;
-  int cash = FALSE, inc = 0;
-  int countch = FALSE, pcoun = 0;
+	struct descriptor_data *d;
+	int cash = FALSE, inc = 0;
+	int countch = FALSE, pcoun = 0;
 
- if (INTERESTTIME != 0 && INTERESTTIME <= time(0) && time(0) != 0) {
-  INTERESTTIME = time(0) + 86400;
-  LASTINTEREST = time(0);
-  save_mud_time(&time_info);
-  cash = TRUE;
-  countch = TRUE;
- }
+	if (INTERESTTIME != 0 && INTERESTTIME <= time(0) && time(0) != 0) {
+		INTERESTTIME = time(0) + 86400;
+		LASTINTEREST = time(0);
+		save_mud_time(&time_info);
+		cash = TRUE;
+		countch = TRUE;
+	}
 
- if (TOPCOUNTDOWN > 0) {
-  TOPCOUNTDOWN -= 4;
- }
+	if (TOPCOUNTDOWN > 0) {
+		TOPCOUNTDOWN -= 4;
+	}
 
- for (d = descriptor_list; d; d = d->next) {
-   if (!IS_PLAYING(d))
-    continue;
-   if (IS_NPC(d->character)) {
-    if (ABSORBING(d->character) && IN_ROOM(d->character) != IN_ROOM(ABSORBING(d->character))) {
-     send_to_char(d->character, "You stop absorbing %s!\r\n", GET_NAME(ABSORBING(d->character)));
-     ABSORBBY(ABSORBING(d->character)) = NULL;
-     ABSORBING(d->character) = NULL;
-    }
-    if (IS_ANDROID(d->character) && ABSORBING(d->character) && rand_number(1, 10) >= 7) {
-     cl_sint64 drain1 = GET_MAX_MANA(d->character) * 0.01, drain2 = GET_MAX_MOVE(d->character) * 0.01;
-     struct char_data *drained = ABSORBING(d->character);
-     if (GET_MOVE(drained) - drain2 < 0) {
-      drain2 = GET_MOVE(drained);
-     }
-     if (GET_MANA(drained) - drain1 < 0) {
-      drain1 = GET_MANA(drained);
-     }
-     GET_MOVE(d->character) += drain2;
-     GET_MANA(d->character) += drain1;
-     GET_HIT(d->character) += drain1 * 0.5;
-     if (GET_MANA(d->character) >= GET_MAX_MANA(d->character)) {
-      GET_MANA(d->character) = GET_MAX_MANA(d->character);
-     }
-     if (GET_MOVE(d->character) >= GET_MAX_MOVE(d->character)) {
-      GET_MOVE(d->character) = GET_MAX_MOVE(d->character);
-     }
-     if (GET_HIT(d->character) >= GET_MAX_HIT(d->character)) {
-      GET_HIT(d->character) = GET_MAX_HIT(d->character);
-     }
-     if (GET_MANA(d->character) == GET_MAX_MANA(d->character) && GET_MOVE(d->character) == GET_MAX_MOVE(d->character)) {
-      do_absorb(d->character, NULL, 0, 0);
-     }
-    }
-    continue;
-   }
-   if (countch == TRUE) {
-    pcoun += 1;
-   }
-   if (!IS_NPC(d->character) && rand_number(1, 15) >= 14) {
-    ash_burn(d->character);
-   }
-   if (AFF_FLAGGED(d->character, AFF_CURSE) && GET_LIFEFORCE(d->character) > GET_LIFEMAX(d->character) * 0.4) {
-    GET_LIFEFORCE(d->character) -= GET_LIFEMAX(d->character) * 0.01;
-    demon_refill_lf(d->character, GET_LIFEMAX(d->character) * 0.01);
-    if (GET_LIFEFORCE(d->character) < GET_LIFEMAX(d->character) * 0.4) {
-     GET_LIFEFORCE(d->character) = GET_LIFEMAX(d->character) * 0.4;
-    }
-   }
-   if (GET_BACKSTAB_COOL(d->character) > 0) {
-    GET_BACKSTAB_COOL(d->character) -= 1;
-   }
-   if (PLR_FLAGGED(d->character, PLR_GOOP) && d->character->gooptime == 60) {
-    if (IS_BIO(d->character)) {
-     act("@GConciousness slowly returns to you. You realize quickly that some of your cells have survived. You take control of your regenerative processes and focus on growing a new body!@n", TRUE, d->character, 0, 0, TO_CHAR);
-    } else {
-     act("@MSlowly you regain conciousness. The various split off chunks of your body begin to likewise stir.@n", TRUE, d->character, 0, 0, TO_CHAR);
-     act("@MYou think you notice the chunks of @m$n@M's moving slightly.@n", TRUE, d->character, 0, 0, TO_ROOM);
-    }
-    d->character->gooptime -= 1;
-   } else if (PLR_FLAGGED(d->character, PLR_GOOP) && d->character->gooptime == 30) {
-    if (IS_BIO(d->character)) {
-     act("@GFrom the collection of cells growing a crude form of your body starts to take shape!@n", TRUE, d->character, 0, 0, TO_CHAR);
-     act("@GYou start to notice a large mass of pulsing flesh growing before you!@n", TRUE, d->character, 0, 0, TO_ROOM);
-    } else {
-     act("@MYou will the various chunks of your body to return and slowly more and more of them begin to fly into you. Your body begins to grow larger and larger as this process unfolds!@n ", TRUE, d->character, 0, 0, TO_CHAR);
-     act("@MThe various chunks of @m$n@M's body start to fly into the largest chunk! As the chunks collide they begin to form a larger and still growing blob of goo!@n", TRUE, d->character, 0, 0, TO_ROOM);
-    }
-    d->character->gooptime -= 1;
-   } else if (PLR_FLAGGED(d->character, PLR_GOOP) && d->character->gooptime == 15) {
-    if (IS_BIO(d->character)) {
-     act("@GYour body has almost reached its previous form! Only a little more regenerating is needed!@n", TRUE, d->character, 0, 0, TO_CHAR);
-     act("@GThe lump of flesh has now grown to the size where the likeness of @g$n@G can be seen of it! It appears that $e is regenerating $s body from what was only a few cells!@n", TRUE, d->character, 0, 0, TO_ROOM);
-    } else {
-     act("@MYour body has reached half its previous size as your limbs ooze slowly out into their proper shape!@n", TRUE, d->character, 0, 0, TO_CHAR);
-     act("@m$n@M's body has regenerated to half its previous size! Slowly $s limbs ooze out into their proper shape! It won't be long now till $e has fully regenerated!@n", TRUE, d->character, 0, 0, TO_ROOM);
-    }
-    d->character->gooptime -= 1;
-   } else if (PLR_FLAGGED(d->character, PLR_GOOP) && d->character->gooptime == 0) {
-    if (IS_BIO(d->character)) {
-     GET_HIT(d->character) = gear_pl(d->character);
-     act("@GYour body has fully regenerated! You flex your arms and legs outward with a rush of renewed strength!@n", TRUE, d->character, 0, 0, TO_CHAR);
-     act("@g$n@G's body has fully regenerated! Suddenly $e flexes $s arms and legs and a rush of power erupts from off of $s body!@n", TRUE, d->character, 0, 0, TO_ROOM);
-    } else {
-     GET_HIT(d->character) = gear_pl(d->character);
-     act("@MYour body has fully regenerated! You scream out in triumph and a short gust of steam erupts from your pores!@n", TRUE, d->character, 0, 0, TO_CHAR);
-     act("@m$n@M's body has fully regenerated! Suddenly $e screams out in gleeful triumph and short gust of steam erupts from $s skin pores!", TRUE, d->character, 0, 0, TO_ROOM);
-    }
-    REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_GOOP);
-   } else {
-    d->character->gooptime -= 1;
-   }
-   if (GET_COOLDOWN(d->character) > 0) {
-    GET_COOLDOWN(d->character) -= 2;
-    if (GET_COOLDOWN(d->character) <= 0) {
-     GET_COOLDOWN(d->character) = 0;
-     send_to_char(d->character, "You can concentrate again.\r\n");
-    }
-   }
-      /* Andros Start */
-   if (GET_SDCOOLDOWN(d->character) > 0) {
-     GET_SDCOOLDOWN(d->character) -= 2;
-	if (GET_SDCOOLDOWN(d->character) <= 0) {
-	 GET_SDCOOLDOWN(d->character) = 0;
-	 send_to_char(d->character, "Your body has recovered from your last selfdestruct.\r\n");
-	 }
-	} /* Andros End */
-   if (CARRYING(d->character)) {
-    if (IN_ROOM(CARRYING(d->character)) != IN_ROOM(d->character)) {
-     carry_drop(d->character, 3); 
-    }
-   }
-   if (GET_DEFENDER(d->character)) {
-    if (IN_ROOM(d->character) != IN_ROOM(GET_DEFENDER(d->character))) {
-     GET_DEFENDING(GET_DEFENDER(d->character)) = NULL;
-     GET_DEFENDER(d->character) = NULL;
-    }
-   }
-   if (GET_DEFENDING(d->character)) {
-    if (IN_ROOM(d->character) != IN_ROOM(GET_DEFENDING(d->character))) {
-     GET_DEFENDER(GET_DEFENDING(d->character)) = NULL;
-     GET_DEFENDING(d->character) = NULL;
-    }
-   }
-   if (PLR_FLAGGED(d->character, PLR_TRANSMISSION)) {
-    REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_TRANSMISSION);
-   }
-   if (!FIGHTING(d->character) && AFF_FLAGGED(d->character, AFF_POSITION)) {
-    REMOVE_BIT_AR(AFF_FLAGS(d->character), AFF_POSITION);
-   }
-   if (SITS(d->character)) {
-    if (IN_ROOM(d->character) != IN_ROOM(SITS(d->character))) {
-     struct obj_data *chair = SITS(d->character);
-     SITTING(chair) = NULL;
-     SITS(d->character) = NULL;
-    }
-   }
-   if (GET_PING(d->character) >= 1) {
-    GET_PING(d->character) -= 1;
-    if (PLR_FLAGGED(d->character, PLR_PILOTING) && GET_PING(d->character) == 0) {
-     send_to_char(d->character, "Your radar is ready to calculate the direction of another destination.\r\n");
-    }
-   }
-   if (GET_ADMLEVEL(d->character) < 1 && TOPCOUNTDOWN <= 0 && GET_LEVEL(d->character) > 0) {
-    topWrite(d->character);
-   }
-   if (PLR_FLAGGED(d->character, PLR_SELFD) && !PLR_FLAGGED(d->character, PLR_SELFD2)) {
-    if (rand_number(4, 100) < GET_SKILL(d->character, SKILL_SELFD)) {
-     send_to_char(d->character, "You feel you are ready to self destruct!\r\n");
-     SET_BIT_AR(PLR_FLAGS(d->character), PLR_SELFD2);
-    }
-   }
-   if (!FIGHTING(d->character) && COMBO(d->character) > -1) {
-    COMBO(d->character) = -1;
-    COMBHITS(d->character) = 0;
-   }
-   if (MOON_UP && (IS_SAIYAN(d->character) || IS_HALFBREED(d->character)) && !PLR_FLAGGED(d->character, PLR_OOZARU)) {
-    oozaru_add(d->character);
-   }
-   if (cash == TRUE && GET_BANK_GOLD(d->character) > 0) {
-    inc = (GET_BANK_GOLD(d->character) / 100) * 2;
-    GET_LINTEREST(d->character) = LASTINTEREST;
-    if (inc >= 7500) {
-     inc = 7500;
-    }
-     GET_BANK_GOLD(d->character) += inc;
-    send_to_char(d->character, "@cBank Interest@D: @Y%s@n\r\n", add_commas(inc));
-   }
-   if (!IS_NPC(d->character)) {
-    check_eq(d->character);
-   }
-   if (!IS_NPC(d->character) && ROOM_EFFECT(IN_ROOM(d->character)) >= 1 && rand_number(1, 100) >= 96) {
-    if (ROOM_EFFECT(IN_ROOM(d->character)) <= 4) {
-    switch (rand_number(1, 4)) {
-     case 1:
-      act("@RLava spews up violently from the cracks in the ground!@n", FALSE, d->character, 0, 0, TO_ROOM);
-      act("@RLava spews up violently from the cracks in the ground!@n", FALSE, d->character, 0, 0, TO_CHAR);
-      break;
-     case 2:
-      act("@RThe lava bubbles and gives off tremendous heat!@n", FALSE, d->character, 0, 0, TO_ROOM);
-      act("@RThe lava bubbles and gives off tremendous heat!@n", FALSE, d->character, 0, 0, TO_CHAR);
-      break;
-     case 3:
-      act("@RNoxious fumes rise from the bubbling lava!@n", FALSE, d->character, 0, 0, TO_ROOM);
-      act("@RNoxious fumes rise from the bubbling lava!@n", FALSE, d->character, 0, 0, TO_CHAR);
-      break;
-     case 4:
-      act("@RSome of the lava cools as it spreads further from the source!@n", FALSE, d->character, 0, 0, TO_ROOM);
-      act("@RSome of the lava cools as it spreads further from the source!@n", FALSE, d->character, 0, 0, TO_CHAR);
-      break;
-    }
-    ROOM_EFFECT(IN_ROOM(d->character)) += 1;
-    }
-    else if (ROOM_EFFECT(IN_ROOM(d->character)) == 5) {
-      act("@RLava covers the entire area now!@n", FALSE, d->character, 0, 0, TO_ROOM);
-      act("@RLava covers the entire area now!@n", FALSE, d->character, 0, 0, TO_CHAR);
-      ROOM_EFFECT(IN_ROOM(d->character)) += 1;
-    }
-   }
-   if (ABSORBING(d->character) && IN_ROOM(d->character) != IN_ROOM(ABSORBING(d->character))) {
-    send_to_char(d->character, "You stop absorbing %s!\r\n", GET_NAME(ABSORBING(d->character)));
-    ABSORBBY(ABSORBING(d->character)) = NULL;
-    ABSORBING(d->character) = NULL;
-   }
-   if (IS_ANDROID(d->character) && ABSORBING(d->character)) {
-    if (GET_MOVE(ABSORBING(d->character)) < (GET_MAX_MOVE(d->character) / 15) && GET_MANA(ABSORBING(d->character)) < (GET_MAX_MANA(d->character) / 15)) {
-      act("@WYou stop absorbing stamina and ki from @c$N as they don't have enough for you to take@W!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_CHAR);
-      act("@C$n@W stops absorbing stamina and ki from you!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_VICT);
-      act("@C$n@W stops absorbing stamina and ki from @c$N@w!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_NOTVICT);
-      if (!FIGHTING(d->character) || FIGHTING(d->character) != ABSORBING(d->character)) {
-       set_fighting(d->character, ABSORBBY(ABSORBING(d->character)));
-      }
-      if (!FIGHTING(ABSORBBY(ABSORBING(d->character))) || FIGHTING(ABSORBBY(ABSORBING(d->character))) != d->character) {
-       set_fighting(ABSORBBY(ABSORBING(d->character)), d->character);
-      }
-      ABSORBBY(ABSORBING(d->character)) = NULL;
-      ABSORBING(d->character) = NULL;
-    }
-   }
-   if (IS_ANDROID(d->character) && ABSORBING(d->character) && rand_number(1, 9) >= 6) {
-    if (GET_MOVE(ABSORBING(d->character)) > (GET_MAX_MOVE(d->character) / 15) || GET_MANA(ABSORBING(d->character)) > (GET_MAX_MANA(d->character) / 15)) {
-     GET_MOVE(d->character) += GET_MAX_MOVE(d->character) * 0.08;
-     GET_MANA(d->character) += GET_MAX_MANA(d->character) * 0.08;
-     GET_MOVE(ABSORBING(d->character)) -= GET_MAX_MOVE(d->character) / 20;
-     GET_MANA(ABSORBING(d->character)) -= GET_MAX_MANA(d->character) / 20;
-     act("@WYou absorb stamina and ki from @c$N@W!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_CHAR);
-     act("@C$n@W absorbs stamina and ki from you!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_VICT);
-     send_to_char(ABSORBING(d->character), "@wTry 'escape'!@n\r\n");
-     act("@C$n@W absorbs stamina and ki from @c$N@w!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_NOTVICT);
-     if (GET_HIT(d->character) < gear_pl(d->character)) {
-      GET_HIT(d->character) += GET_MAX_MANA(d->character) * 0.04;
-      if (GET_HIT(d->character) > gear_pl(d->character)) {
-       GET_HIT(d->character) = gear_pl(d->character);
-      }
-      send_to_char(d->character, "@CYou convert a portion of the absorbed energy into refilling your powerlevel.@n\r\n");
-     }
-     if (GET_MOVE(ABSORBING(d->character)) <= 0) {
-      GET_MOVE(ABSORBING(d->character)) = 1;
-     }
-     if (GET_MANA(ABSORBING(d->character)) <= 0) {
-      GET_MANA(ABSORBING(d->character)) = 1;
-     }
-     if (GET_MOVE(d->character) > GET_MAX_MOVE(d->character) && GET_MANA(d->character) < GET_MAX_MANA(d->character)) {
-      GET_MOVE(d->character) = GET_MAX_MOVE(d->character);
-     }
-     else if (GET_MOVE(d->character) < GET_MAX_MOVE(d->character) && GET_MANA(d->character) > GET_MAX_MANA(d->character)) {
-      GET_MANA(d->character) = GET_MAX_MANA(d->character);
-     }
-     else if (GET_MOVE(d->character) >= GET_MAX_MOVE(d->character) && GET_MANA(d->character) >= GET_MAX_MANA(d->character)) {
-      GET_MANA(d->character) = GET_MAX_MANA(d->character);
-      GET_MOVE(d->character) = GET_MAX_MOVE(d->character);
-      act("@WYou stop absorbing stamina and ki from @c$N as you are full@W!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_CHAR);
-      act("@C$n@W stops absorbing stamina and ki from you!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_VICT);
-      act("@C$n@W stops absorbing stamina and ki from @c$N@w!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_NOTVICT);
-      if (!FIGHTING(d->character) || FIGHTING(d->character) != ABSORBING(d->character)) {
-       set_fighting(d->character, ABSORBBY(ABSORBING(d->character)));
-      }
-      if (!FIGHTING(ABSORBBY(ABSORBING(d->character))) || FIGHTING(ABSORBBY(ABSORBING(d->character))) != d->character) {
-       set_fighting(ABSORBBY(ABSORBING(d->character)), d->character);
-      }
-      ABSORBBY(ABSORBING(d->character)) = NULL;
-      ABSORBING(d->character) = NULL;
-     }
-     int sum = 1;
-     int mum = 1;
-     int ium = 1;
-     if (!soft_cap(d->character, 0)) {
-      sum = 0;
-     }
-     if (!soft_cap(d->character, 2)) {
-      mum = 0;
-     }
-     if (!soft_cap(d->character, 1)) {
-      ium = 0;
-     }
+	for (d = descriptor_list; d; d = d->next) {
+		if (!IS_PLAYING(d))
+			continue;
+		if (IS_NPC(d->character)) {
+			if (ABSORBING(d->character) && IN_ROOM(d->character) != IN_ROOM(ABSORBING(d->character))) {
+				send_to_char(d->character, "You stop absorbing %s!\r\n", GET_NAME(ABSORBING(d->character)));
+				ABSORBBY(ABSORBING(d->character)) = NULL;
+				ABSORBING(d->character) = NULL;
+			}
+			if (IS_ANDROID(d->character) && ABSORBING(d->character) && rand_number(1, 10) >= 7) {
+				cl_sint64 drain1 = GET_MAX_MANA(d->character) * 0.01, drain2 = GET_MAX_MOVE(d->character) * 0.01;
+				struct char_data *drained = ABSORBING(d->character);
+				if (GET_MOVE(drained) - drain2 < 0) {
+					drain2 = GET_MOVE(drained);
+				}
+				if (GET_MANA(drained) - drain1 < 0) {
+					drain1 = GET_MANA(drained);
+				}
+				GET_MOVE(d->character) += drain2;
+				GET_MANA(d->character) += drain1;
+				GET_HIT(d->character) += drain1 * 0.5;
+				if (GET_MANA(d->character) >= GET_MAX_MANA(d->character)) {
+					GET_MANA(d->character) = GET_MAX_MANA(d->character);
+				}
+				if (GET_MOVE(d->character) >= GET_MAX_MOVE(d->character)) {
+					GET_MOVE(d->character) = GET_MAX_MOVE(d->character);
+				}
+				if (GET_HIT(d->character) >= GET_MAX_HIT(d->character)) {
+					GET_HIT(d->character) = GET_MAX_HIT(d->character);
+				}
+				if (GET_MANA(d->character) == GET_MAX_MANA(d->character) && GET_MOVE(d->character) == GET_MAX_MOVE(d->character)) {
+					do_absorb(d->character, NULL, 0, 0);
+				}
+			}
+			continue;
+		}
+		if (countch == TRUE) {
+			pcoun += 1;
+		}
+		if (!IS_NPC(d->character) && rand_number(1, 15) >= 14) {
+			ash_burn(d->character);
+		}
+		if (AFF_FLAGGED(d->character, AFF_CURSE) && GET_LIFEFORCE(d->character) > GET_LIFEMAX(d->character) * 0.4) {
+			GET_LIFEFORCE(d->character) -= GET_LIFEMAX(d->character) * 0.01;
+			demon_refill_lf(d->character, GET_LIFEMAX(d->character) * 0.01);
+			if (GET_LIFEFORCE(d->character) < GET_LIFEMAX(d->character) * 0.4) {
+				GET_LIFEFORCE(d->character) = GET_LIFEMAX(d->character) * 0.4;
+			}
+		}
+		if (GET_BACKSTAB_COOL(d->character) > 0) {
+			GET_BACKSTAB_COOL(d->character) -= 1;
+		}
+		if (PLR_FLAGGED(d->character, PLR_GOOP) && d->character->gooptime == 60) {
+			if (IS_BIO(d->character)) {
+				act("@GConciousness slowly returns to you. You realize quickly that some of your cells have survived. You take control of your regenerative processes and focus on growing a new body!@n", TRUE, d->character, 0, 0, TO_CHAR);
+			}
+			else {
+				act("@MSlowly you regain conciousness. The various split off chunks of your body begin to likewise stir.@n", TRUE, d->character, 0, 0, TO_CHAR);
+				act("@MYou think you notice the chunks of @m$n@M's moving slightly.@n", TRUE, d->character, 0, 0, TO_ROOM);
+			}
+			d->character->gooptime -= 1;
+		}
+		else if (PLR_FLAGGED(d->character, PLR_GOOP) && d->character->gooptime == 30) {
+			if (IS_BIO(d->character)) {
+				act("@GFrom the collection of cells growing a crude form of your body starts to take shape!@n", TRUE, d->character, 0, 0, TO_CHAR);
+				act("@GYou start to notice a large mass of pulsing flesh growing before you!@n", TRUE, d->character, 0, 0, TO_ROOM);
+			}
+			else {
+				act("@MYou will the various chunks of your body to return and slowly more and more of them begin to fly into you. Your body begins to grow larger and larger as this process unfolds!@n ", TRUE, d->character, 0, 0, TO_CHAR);
+				act("@MThe various chunks of @m$n@M's body start to fly into the largest chunk! As the chunks collide they begin to form a larger and still growing blob of goo!@n", TRUE, d->character, 0, 0, TO_ROOM);
+			}
+			d->character->gooptime -= 1;
+		}
+		else if (PLR_FLAGGED(d->character, PLR_GOOP) && d->character->gooptime == 15) {
+			if (IS_BIO(d->character)) {
+				act("@GYour body has almost reached its previous form! Only a little more regenerating is needed!@n", TRUE, d->character, 0, 0, TO_CHAR);
+				act("@GThe lump of flesh has now grown to the size where the likeness of @g$n@G can be seen of it! It appears that $e is regenerating $s body from what was only a few cells!@n", TRUE, d->character, 0, 0, TO_ROOM);
+			}
+			else {
+				act("@MYour body has reached half its previous size as your limbs ooze slowly out into their proper shape!@n", TRUE, d->character, 0, 0, TO_CHAR);
+				act("@m$n@M's body has regenerated to half its previous size! Slowly $s limbs ooze out into their proper shape! It won't be long now till $e has fully regenerated!@n", TRUE, d->character, 0, 0, TO_ROOM);
+			}
+			d->character->gooptime -= 1;
+		}
+		else if (PLR_FLAGGED(d->character, PLR_GOOP) && d->character->gooptime == 0)
+		{
+			if (IS_BIO(d->character))
+			{
+				GET_HIT(d->character) = gear_pl(d->character);
+				act("@GYour body has fully regenerated! You flex your arms and legs outward with a rush of renewed strength!@n", TRUE, d->character, 0, 0, TO_CHAR);
+				act("@g$n@G's body has fully regenerated! Suddenly $e flexes $s arms and legs and a rush of power erupts from off of $s body!@n", TRUE, d->character, 0, 0, TO_ROOM);
+			}
+			//Zenkai Boost
+			else if (IS_SAIYAN(d->character))
+			{
 
-     if (sum == 1) {
-      if (rand_number(1, 8) >= 6) {
-       int gain = rand_number(GET_LEVEL(d->character) / 2, GET_LEVEL(d->character) *3) + (GET_LEVEL(d->character) * 18);
-       if (GET_LEVEL(d->character) > 30) {
-        gain += rand_number(GET_LEVEL(d->character) *2, GET_LEVEL(d->character) *4) + (GET_LEVEL(d->character) * 50);
-       }
-       if (GET_LEVEL(d->character) > 60) {
-        gain *= 2;
-       }
-       if (GET_LEVEL(d->character) > 80) {
-        gain *= 3;
-       }
-       if (GET_LEVEL(d->character) > 90) {
-        gain *= 4;
-       }
-       send_to_char(d->character, "@gYou gain +@G%d@g permanent powerlevel!@n\r\n", gain);
-       if (group_bonus(d->character, 2) == 7) {
-        if (PLR_FLAGGED(d->character->master, PLR_SENSEM)) {
-         int gbonus = gain * 0.15;
-         gain += gbonus;
-         send_to_char(d->character, "The leader of your group conveys an extra bonus! @D[@G+%s@D]@n \r\n", add_commas(gbonus));
-        }
-       }
-       GET_MAX_HIT(d->character) += gain;
-       GET_BASE_PL(d->character) += gain;
-      }
-     }
-     if (mum == 1) {
-      if (rand_number(1, 8) >= 6) {
-       int gain = rand_number(GET_LEVEL(d->character) / 2, GET_LEVEL(d->character) * 3) + (GET_LEVEL(d->character) * 18);
-       if (GET_LEVEL(d->character) > 30) {
-        gain += rand_number(GET_LEVEL(d->character) *2, GET_LEVEL(d->character) *4) + (GET_LEVEL(d->character) * 50);
-       }
-       if (GET_LEVEL(d->character) > 60) {
-        gain *= 2;
-       }
-       if (GET_LEVEL(d->character) > 80) {
-        gain *= 3;
-       }
-       if (GET_LEVEL(d->character) > 90) {
-        gain *= 4;
-       }
-       send_to_char(d->character, "@gYou gain +@G%d@g permanent stamina!@n\r\n", gain);
-       if (group_bonus(d->character, 2) == 7) {
-        if (PLR_FLAGGED(d->character->master, PLR_SENSEM)) {
-         int gbonus = gain * 0.15;
-         gain += gbonus;
-         send_to_char(d->character, "The leader of your group conveys an extra bonus! @D[@G+%s@D]@n \r\n", add_commas(gbonus));
-        }
-       }
-       GET_MAX_MOVE(d->character) += gain;
-       GET_BASE_ST(d->character) += gain;
-      }
-     }
-     if (ium == 1) {
-      if (rand_number(1, 8) >= 6) {
-       int gain = rand_number(GET_LEVEL(d->character) / 2, GET_LEVEL(d->character) * 3) + (GET_LEVEL(d->character) * 18);
-       if (GET_LEVEL(d->character) > 30) {
-        gain += rand_number(GET_LEVEL(d->character) *2, GET_LEVEL(d->character) *4) + (GET_LEVEL(d->character) * 50);
-       }
-       if (GET_LEVEL(d->character) > 60) {
-        gain *= 2;
-       }
-       if (GET_LEVEL(d->character) > 80) {
-        gain *= 3;
-       }
-       if (GET_LEVEL(d->character) > 90) {
-        gain *= 4;
-       }
-       send_to_char(d->character, "@gYou gain +@G%d@g permanent ki!@n\r\n", gain);
-       if (group_bonus(d->character, 2) == 7) {
-        if (PLR_FLAGGED(d->character->master, PLR_SENSEM)) {
-         int gbonus = gain * 0.15;
-         gain += gbonus;
-         send_to_char(d->character, "The leader of your group conveys an extra bonus! @D[@G+%s@D]@n \r\n", add_commas(gbonus));
-        }
-       }
-       GET_MAX_MANA(d->character) += gain;
-       GET_BASE_KI(d->character) += gain;
-      }
-     }
-     if (sum == 0) {
-      if (rand_number(1, 8) >= 6) {
-       int gain = 1;
-       send_to_char(d->character, "@gYou gain +@G%d@g permanent powerlevel. You may need to level.@n\r\n", gain);
-       GET_MAX_HIT(d->character) += gain;
-       GET_BASE_PL(d->character) += gain;
-      }
-     }
-     if (mum == 0) {
-      if (rand_number(1, 8) >= 6) {
-       int gain = 1;
-       send_to_char(d->character, "@gYou gain +@G%d@g permanent stamina. You may need to level.@n\r\n", gain);
-       GET_MAX_MOVE(d->character) += gain;
-       GET_BASE_ST(d->character) += gain;
-      }
-     }
-     if (ium == 0) {
-      if (rand_number(1, 8) >= 6) {
-       int gain = 1;
-       send_to_char(d->character, "@gYou gain +@G%d@g permanent ki. You may need to level.@n\r\n", gain);
-       GET_MAX_MANA(d->character) += gain;
-       GET_BASE_KI(d->character) += gain;
-      }
-     }
-    }
-   }
-   if (BLOCKS(d->character)) {
-    struct char_data *vict = BLOCKS(d->character);
-    if (IN_ROOM(vict) != IN_ROOM(d->character)) {
-     BLOCKED(vict) = NULL;
-     BLOCKS(d->character) = NULL;
-    }
-   }
-   if (GET_OVERFLOW(d->character) == TRUE) {
-    mudlog(NRM, ADMLVL_GOD, TRUE, "OVERFLOW: %s has caused an overflow, check for illegal activity.", GET_NAME(d->character));
-    GET_OVERFLOW(d->character) = FALSE;
-   }
-   if (GET_SPAM(d->character) > 0) {
-    GET_SPAM(d->character) = 0;
-   }
-   else
-    continue;
-  }
+				int zenkaiPL, zenkaiKi, zenkaiSt;
+				zenkaiPL = GET_BASE_PL(d->character) * 1.03;
+				zenkaiKi = GET_BASE_KI(d->character) * 1.015;
+				zenkaiSt = GET_BASE_ST(d->character) * 1.015;
 
-  if (countch == TRUE) {
-   PCOUNT = pcoun;
-   PCOUNTDAY = time(0);
-  }
+				GET_HIT(d->character) = gear_pl(d->character) * .5;
+				GET_MANA(d->character) = GET_MAX_MANA(d->character) *.2;
+				GET_MOVE(d->character) = GET_MAX_MOVE(d->character) *.2;
+				if (!IN_ARENA(d->character))
+				{
+					GET_BASE_PL(d->character) = zenkaiPL;
+					GET_BASE_KI(d->character) = zenkaiKi;
+					GET_BASE_ST(d->character) = zenkaiSt;
+					GET_MAX_HIT(d->character) = zenkaiPL;
+					GET_MAX_MANA(d->character) = zenkaiKi;
+					GET_MAX_MOVE(d->character) = zenkaiSt;
+					send_to_char(d->character, "@D[@YZ@ye@wn@Wk@Ya@yi @YB@yo@wo@Ws@Yt@D] @WYou feel much stronger!\r\n");
+					send_to_char(d->character, "@D[@RPL@Y:@n+%s@D] @D[@CKI@Y:@n+%s@D] @D[@GSTA@Y:@n+%s@D]@n\r\n", add_commas(zenkaiPL), add_commas(zenkaiKi), add_commas(zenkaiSt));
+				}
+				act("@RYou collapse to the ground, body pushed beyond the typical limits of exhaustion. The passage of time distorts and an indescribable amount of time passes as raw emotions pass through your very being. Your eyes open and focus with a newfound clarity as your unadulterated emotions and feelings revive you for a second wind!@n", TRUE, d->character, 0, 0, TO_CHAR);
+				act("@r$n@R collapses to the ground, seemingly dead. After a brief moment, their eyes flash open with a determined look on their face!", TRUE, d->character, 0, 0, TO_ROOM);
+			}
+			else {
+				GET_HIT(d->character) = gear_pl(d->character);
+				act("@MYour body has fully regenerated! You scream out in triumph and a short gust of steam erupts from your pores!@n", TRUE, d->character, 0, 0, TO_CHAR);
+				act("@m$n@M's body has fully regenerated! Suddenly $e screams out in gleeful triumph and short gust of steam erupts from $s skin pores!", TRUE, d->character, 0, 0, TO_ROOM);
+			}
+			REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_GOOP);
+		}
+		else {
+			d->character->gooptime -= 1;
+		}
+		if (GET_COOLDOWN(d->character) > 0) {
+			GET_COOLDOWN(d->character) -= 2;
+			if (GET_COOLDOWN(d->character) <= 0) {
+				GET_COOLDOWN(d->character) = 0;
+				send_to_char(d->character, "You can concentrate again.\r\n");
+			}
+		}
+		/* Andros Start */
+		if (GET_SDCOOLDOWN(d->character) > 0) {
+			GET_SDCOOLDOWN(d->character) -= 10;
+			if (GET_SDCOOLDOWN(d->character) <= 0) {
+				GET_SDCOOLDOWN(d->character) = 0;
+				send_to_char(d->character, "Your body has recovered from your last selfdestruct.\r\n");
+			}
+		} /* Andros End */
+		if (CARRYING(d->character)) {
+			if (IN_ROOM(CARRYING(d->character)) != IN_ROOM(d->character)) {
+				carry_drop(d->character, 3);
+			}
+		}
+		if (GET_DEFENDER(d->character)) {
+			if (IN_ROOM(d->character) != IN_ROOM(GET_DEFENDER(d->character))) {
+				GET_DEFENDING(GET_DEFENDER(d->character)) = NULL;
+				GET_DEFENDER(d->character) = NULL;
+			}
+		}
+		if (GET_DEFENDING(d->character)) {
+			if (IN_ROOM(d->character) != IN_ROOM(GET_DEFENDING(d->character))) {
+				GET_DEFENDER(GET_DEFENDING(d->character)) = NULL;
+				GET_DEFENDING(d->character) = NULL;
+			}
+		}
+		if (PLR_FLAGGED(d->character, PLR_TRANSMISSION)) {
+			REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_TRANSMISSION);
+		}
+		if (!FIGHTING(d->character) && AFF_FLAGGED(d->character, AFF_POSITION)) {
+			REMOVE_BIT_AR(AFF_FLAGS(d->character), AFF_POSITION);
+		}
+		if (SITS(d->character)) {
+			if (IN_ROOM(d->character) != IN_ROOM(SITS(d->character))) {
+				struct obj_data *chair = SITS(d->character);
+				SITTING(chair) = NULL;
+				SITS(d->character) = NULL;
+			}
+		}
+		if (GET_PING(d->character) >= 1) {
+			GET_PING(d->character) -= 1;
+			if (PLR_FLAGGED(d->character, PLR_PILOTING) && GET_PING(d->character) == 0) {
+				send_to_char(d->character, "Your radar is ready to calculate the direction of another destination.\r\n");
+			}
+		}
+		if (GET_ADMLEVEL(d->character) < 1 && TOPCOUNTDOWN <= 0 && GET_LEVEL(d->character) > 0) {
+			topWrite(d->character);
+		}
+		if (PLR_FLAGGED(d->character, PLR_SELFD) && !PLR_FLAGGED(d->character, PLR_SELFD2)) {
+			if (rand_number(4, 100) < GET_SKILL(d->character, SKILL_SELFD)) {
+				send_to_char(d->character, "You feel you are ready to self destruct!\r\n");
+				SET_BIT_AR(PLR_FLAGS(d->character), PLR_SELFD2);
+			}
+		}
+		if (!FIGHTING(d->character) && COMBO(d->character) > -1) {
+			COMBO(d->character) = -1;
+			COMBHITS(d->character) = 0;
+		}
+		if (MOON_UP && (IS_SAIYAN(d->character) || IS_HALFBREED(d->character)) && !PLR_FLAGGED(d->character, PLR_OOZARU)) {
+			oozaru_add(d->character);
+		}
+		if (cash == TRUE && GET_BANK_GOLD(d->character) > 0) {
+			inc = (GET_BANK_GOLD(d->character) / 50) * 2;
+			GET_LINTEREST(d->character) = LASTINTEREST;
+			if (inc >= 25000) {
+				inc = 25000;
+			}
+			GET_BANK_GOLD(d->character) += inc;
+			send_to_char(d->character, "@cBank Interest@D: @Y%s@n\r\n", add_commas(inc));
+		}
+		if (!IS_NPC(d->character)) {
+			check_eq(d->character);
+		}
+		if (!IS_NPC(d->character) && ROOM_EFFECT(IN_ROOM(d->character)) >= 1 && rand_number(1, 100) >= 96) {
+			if (ROOM_EFFECT(IN_ROOM(d->character)) <= 4) {
+				switch (rand_number(1, 4)) {
+				case 1:
+					act("@RLava spews up violently from the cracks in the ground!@n", FALSE, d->character, 0, 0, TO_ROOM);
+					act("@RLava spews up violently from the cracks in the ground!@n", FALSE, d->character, 0, 0, TO_CHAR);
+					break;
+				case 2:
+					act("@RThe lava bubbles and gives off tremendous heat!@n", FALSE, d->character, 0, 0, TO_ROOM);
+					act("@RThe lava bubbles and gives off tremendous heat!@n", FALSE, d->character, 0, 0, TO_CHAR);
+					break;
+				case 3:
+					act("@RNoxious fumes rise from the bubbling lava!@n", FALSE, d->character, 0, 0, TO_ROOM);
+					act("@RNoxious fumes rise from the bubbling lava!@n", FALSE, d->character, 0, 0, TO_CHAR);
+					break;
+				case 4:
+					act("@RSome of the lava cools as it spreads further from the source!@n", FALSE, d->character, 0, 0, TO_ROOM);
+					act("@RSome of the lava cools as it spreads further from the source!@n", FALSE, d->character, 0, 0, TO_CHAR);
+					break;
+				}
+				ROOM_EFFECT(IN_ROOM(d->character)) += 1;
+			}
+			else if (ROOM_EFFECT(IN_ROOM(d->character)) == 5) {
+				act("@RLava covers the entire area now!@n", FALSE, d->character, 0, 0, TO_ROOM);
+				act("@RLava covers the entire area now!@n", FALSE, d->character, 0, 0, TO_CHAR);
+				ROOM_EFFECT(IN_ROOM(d->character)) += 1;
+			}
+		}
+		if (ABSORBING(d->character) && IN_ROOM(d->character) != IN_ROOM(ABSORBING(d->character))) {
+			send_to_char(d->character, "You stop absorbing %s!\r\n", GET_NAME(ABSORBING(d->character)));
+			ABSORBBY(ABSORBING(d->character)) = NULL;
+			ABSORBING(d->character) = NULL;
+		}
+		if (IS_ANDROID(d->character) && ABSORBING(d->character)) {
+			if (GET_MOVE(ABSORBING(d->character)) < (GET_MAX_MOVE(d->character) / 15) && GET_MANA(ABSORBING(d->character)) < (GET_MAX_MANA(d->character) / 15)) {
+				act("@WYou stop absorbing stamina and ki from @c$N as they don't have enough for you to take@W!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_CHAR);
+				act("@C$n@W stops absorbing stamina and ki from you!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_VICT);
+				act("@C$n@W stops absorbing stamina and ki from @c$N@w!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_NOTVICT);
+				if (!FIGHTING(d->character) || FIGHTING(d->character) != ABSORBING(d->character)) {
+					set_fighting(d->character, ABSORBBY(ABSORBING(d->character)));
+				}
+				if (!FIGHTING(ABSORBBY(ABSORBING(d->character))) || FIGHTING(ABSORBBY(ABSORBING(d->character))) != d->character) {
+					set_fighting(ABSORBBY(ABSORBING(d->character)), d->character);
+				}
+				ABSORBBY(ABSORBING(d->character)) = NULL;
+				ABSORBING(d->character) = NULL;
+			}
+		}
+		if (IS_ANDROID(d->character) && ABSORBING(d->character) && rand_number(1, 9) >= 6) {
+			if (GET_MOVE(ABSORBING(d->character)) > (GET_MAX_MOVE(d->character) / 15) || GET_MANA(ABSORBING(d->character)) > (GET_MAX_MANA(d->character) / 15)) {
+				GET_MOVE(d->character) += GET_MAX_MOVE(d->character) * 0.08;
+				GET_MANA(d->character) += GET_MAX_MANA(d->character) * 0.08;
+				GET_MOVE(ABSORBING(d->character)) -= GET_MAX_MOVE(d->character) / 20;
+				GET_MANA(ABSORBING(d->character)) -= GET_MAX_MANA(d->character) / 20;
+				act("@WYou absorb stamina and ki from @c$N@W!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_CHAR);
+				act("@C$n@W absorbs stamina and ki from you!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_VICT);
+				send_to_char(ABSORBING(d->character), "@wTry 'escape'!@n\r\n");
+				act("@C$n@W absorbs stamina and ki from @c$N@w!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_NOTVICT);
+				if (GET_HIT(d->character) < gear_pl(d->character)) {
+					GET_HIT(d->character) += GET_MAX_MANA(d->character) * 0.04;
+					if (GET_HIT(d->character) > gear_pl(d->character)) {
+						GET_HIT(d->character) = gear_pl(d->character);
+					}
+					send_to_char(d->character, "@CYou convert a portion of the absorbed energy into refilling your powerlevel.@n\r\n");
+				}
+				if (GET_MOVE(ABSORBING(d->character)) <= 0) {
+					GET_MOVE(ABSORBING(d->character)) = 1;
+				}
+				if (GET_MANA(ABSORBING(d->character)) <= 0) {
+					GET_MANA(ABSORBING(d->character)) = 1;
+				}
+				if (GET_MOVE(d->character) > GET_MAX_MOVE(d->character) && GET_MANA(d->character) < GET_MAX_MANA(d->character)) {
+					GET_MOVE(d->character) = GET_MAX_MOVE(d->character);
+				}
+				else if (GET_MOVE(d->character) < GET_MAX_MOVE(d->character) && GET_MANA(d->character) > GET_MAX_MANA(d->character)) {
+					GET_MANA(d->character) = GET_MAX_MANA(d->character);
+				}
+				else if (GET_MOVE(d->character) >= GET_MAX_MOVE(d->character) && GET_MANA(d->character) >= GET_MAX_MANA(d->character)) {
+					GET_MANA(d->character) = GET_MAX_MANA(d->character);
+					GET_MOVE(d->character) = GET_MAX_MOVE(d->character);
+					act("@WYou stop absorbing stamina and ki from @c$N as you are full@W!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_CHAR);
+					act("@C$n@W stops absorbing stamina and ki from you!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_VICT);
+					act("@C$n@W stops absorbing stamina and ki from @c$N@w!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_NOTVICT);
+					if (!FIGHTING(d->character) || FIGHTING(d->character) != ABSORBING(d->character)) {
+						set_fighting(d->character, ABSORBBY(ABSORBING(d->character)));
+					}
+					if (!FIGHTING(ABSORBBY(ABSORBING(d->character))) || FIGHTING(ABSORBBY(ABSORBING(d->character))) != d->character) {
+						set_fighting(ABSORBBY(ABSORBING(d->character)), d->character);
+					}
+					ABSORBBY(ABSORBING(d->character)) = NULL;
+					ABSORBING(d->character) = NULL;
+				}
+				int sum = 1;
+				int mum = 1;
+				int ium = 1;
+				if (!soft_cap(d->character, 0)) {
+					sum = 0;
+				}
+				if (!soft_cap(d->character, 2)) {
+					mum = 0;
+				}
+				if (!soft_cap(d->character, 1)) {
+					ium = 0;
+				}
 
-  if (TOPCOUNTDOWN <= 0) {
-   TOPCOUNTDOWN = 60;
-  }
+				if (sum == 1) {
+					if (rand_number(1, 8) >= 6) {
+						int gain = rand_number(GET_LEVEL(d->character) / 2, GET_LEVEL(d->character) * 3) + (GET_LEVEL(d->character) * 18);
+						if (GET_LEVEL(d->character) > 30) {
+							gain += rand_number(GET_LEVEL(d->character) * 2, GET_LEVEL(d->character) * 4) + (GET_LEVEL(d->character) * 50);
+						}
+						if (GET_LEVEL(d->character) > 60) {
+							gain *= 2;
+						}
+						if (GET_LEVEL(d->character) > 80) {
+							gain *= 3;
+						}
+						if (GET_LEVEL(d->character) > 90) {
+							gain *= 4;
+						}
+						send_to_char(d->character, "@gYou gain +@G%d@g permanent powerlevel!@n\r\n", gain);
+						if (group_bonus(d->character, 2) == 7) {
+							if (PLR_FLAGGED(d->character->master, PLR_SENSEM)) {
+								int gbonus = gain * 0.15;
+								gain += gbonus;
+								send_to_char(d->character, "The leader of your group conveys an extra bonus! @D[@G+%s@D]@n \r\n", add_commas(gbonus));
+							}
+						}
+						GET_MAX_HIT(d->character) += gain;
+						GET_BASE_PL(d->character) += gain;
+					}
+				}
+				if (mum == 1) {
+					if (rand_number(1, 8) >= 6) {
+						int gain = rand_number(GET_LEVEL(d->character) / 2, GET_LEVEL(d->character) * 3) + (GET_LEVEL(d->character) * 18);
+						if (GET_LEVEL(d->character) > 30) {
+							gain += rand_number(GET_LEVEL(d->character) * 2, GET_LEVEL(d->character) * 4) + (GET_LEVEL(d->character) * 50);
+						}
+						if (GET_LEVEL(d->character) > 60) {
+							gain *= 2;
+						}
+						if (GET_LEVEL(d->character) > 80) {
+							gain *= 3;
+						}
+						if (GET_LEVEL(d->character) > 90) {
+							gain *= 4;
+						}
+						send_to_char(d->character, "@gYou gain +@G%d@g permanent stamina!@n\r\n", gain);
+						if (group_bonus(d->character, 2) == 7) {
+							if (PLR_FLAGGED(d->character->master, PLR_SENSEM)) {
+								int gbonus = gain * 0.15;
+								gain += gbonus;
+								send_to_char(d->character, "The leader of your group conveys an extra bonus! @D[@G+%s@D]@n \r\n", add_commas(gbonus));
+							}
+						}
+						GET_MAX_MOVE(d->character) += gain;
+						GET_BASE_ST(d->character) += gain;
+					}
+				}
+				if (ium == 1) {
+					if (rand_number(1, 8) >= 6) {
+						int gain = rand_number(GET_LEVEL(d->character) / 2, GET_LEVEL(d->character) * 3) + (GET_LEVEL(d->character) * 18);
+						if (GET_LEVEL(d->character) > 30) {
+							gain += rand_number(GET_LEVEL(d->character) * 2, GET_LEVEL(d->character) * 4) + (GET_LEVEL(d->character) * 50);
+						}
+						if (GET_LEVEL(d->character) > 60) {
+							gain *= 2;
+						}
+						if (GET_LEVEL(d->character) > 80) {
+							gain *= 3;
+						}
+						if (GET_LEVEL(d->character) > 90) {
+							gain *= 4;
+						}
+						send_to_char(d->character, "@gYou gain +@G%d@g permanent ki!@n\r\n", gain);
+						if (group_bonus(d->character, 2) == 7) {
+							if (PLR_FLAGGED(d->character->master, PLR_SENSEM)) {
+								int gbonus = gain * 0.15;
+								gain += gbonus;
+								send_to_char(d->character, "The leader of your group conveys an extra bonus! @D[@G+%s@D]@n \r\n", add_commas(gbonus));
+							}
+						}
+						GET_MAX_MANA(d->character) += gain;
+						GET_BASE_KI(d->character) += gain;
+					}
+				}
+				if (sum == 0) {
+					if (rand_number(1, 8) >= 6) {
+						int gain = 1;
+						send_to_char(d->character, "@gYou gain +@G%d@g permanent powerlevel. You may need to level.@n\r\n", gain);
+						GET_MAX_HIT(d->character) += gain;
+						GET_BASE_PL(d->character) += gain;
+					}
+				}
+				if (mum == 0) {
+					if (rand_number(1, 8) >= 6) {
+						int gain = 1;
+						send_to_char(d->character, "@gYou gain +@G%d@g permanent stamina. You may need to level.@n\r\n", gain);
+						GET_MAX_MOVE(d->character) += gain;
+						GET_BASE_ST(d->character) += gain;
+					}
+				}
+				if (ium == 0) {
+					if (rand_number(1, 8) >= 6) {
+						int gain = 1;
+						send_to_char(d->character, "@gYou gain +@G%d@g permanent ki. You may need to level.@n\r\n", gain);
+						GET_MAX_MANA(d->character) += gain;
+						GET_BASE_KI(d->character) += gain;
+					}
+				}
+			}
+		}
+		if (BLOCKS(d->character)) {
+			struct char_data *vict = BLOCKS(d->character);
+			if (IN_ROOM(vict) != IN_ROOM(d->character)) {
+				BLOCKED(vict) = NULL;
+				BLOCKS(d->character) = NULL;
+			}
+		}
+		if (GET_OVERFLOW(d->character) == TRUE) {
+			mudlog(NRM, ADMLVL_GOD, TRUE, "OVERFLOW: %s has caused an overflow, check for illegal activity.", GET_NAME(d->character));
+			GET_OVERFLOW(d->character) = FALSE;
+		}
+		if (GET_SPAM(d->character) > 0) {
+			GET_SPAM(d->character) = 0;
+		}
+		else
+			continue;
+	}
+
+	if (countch == TRUE) {
+		PCOUNT = pcoun;
+		PCOUNTDAY = time(0);
+	}
+
+	if (TOPCOUNTDOWN <= 0) {
+		TOPCOUNTDOWN = 60;
+	}
 }
 
 int has_scanner(struct char_data *ch)
 {
-  struct obj_data *obj, *next_obj;
-  int success = 0;
+	struct obj_data *obj, *next_obj;
+	int success = 0;
 
 
 
-   for (obj = ch->carrying; obj; obj = next_obj) {
-       next_obj = obj->next_content;
-     if (obj && GET_OBJ_VNUM(obj) == 13600) {
-      success = 1;
-     }
-   }
- 
- return (success);
+	for (obj = ch->carrying; obj; obj = next_obj) {
+		next_obj = obj->next_content;
+		if (obj && GET_OBJ_VNUM(obj) == 13600) {
+			success = 1;
+		}
+	}
+
+	return (success);
 }
 
 ACMD(do_snet)
