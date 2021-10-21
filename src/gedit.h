@@ -5,8 +5,6 @@
 #ifndef CIRCLE_GEDIT_H
 #define CIRCLE_GEDIT_H
 
-#include "conf.h"
-#include "sysdep.h"
 #include "structs.h"
 #include "utils.h"
 

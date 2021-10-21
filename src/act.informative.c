@@ -7,152 +7,43 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-
-#include "conf.h"
-#include "sysdep.h"
-#include "structs.h"
-#include "utils.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "db.h"
-#include "spells.h"
-#include "screen.h"
-#include "constants.h"
-#include "dg_scripts.h"
-#include "boards.h"
-#include "feats.h"
-#include "clan.h"
-#include "maputils.h"
-
-/* extern variables */
-extern int SELFISHMETER;
-extern int circle_restrict;
-extern int has_mail(long recipient);
-extern int DRAGONC;
-extern int DRAGONR;
-extern int HIGHPCOUNT;
-extern int PCOUNT;
-extern time_t PCOUNTDAY;
-extern time_t PCOUNTDATE;
-extern time_t NEWSUPDATE;
-extern struct help_index_element *help_table;
-extern char *help;
-extern struct time_info_data time_info;
-extern char *ihelp;
-extern int top_of_helpt;
-extern int dballtime;
-extern int CURRENT_ERA;
-
-extern char *credits;
-extern char *news;
-extern char *info;
-extern char *motd;
-extern char *imotd;
-extern char *wizlist;
-extern char *immlist;
-extern char *policies;
-extern char *handbook;
-extern int show_mob_stacking;
-extern int show_obj_stacking;
-
-/* user related*/
-extern void introCreate(struct char_data *ch);
-extern struct obj_data *find_vehicle_by_vnum(int vnum);
-extern struct obj_data *find_control(struct char_data *ch);
-extern void fingerUser(struct char_data *ch, char *name);
-extern void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, char *name);
-extern int readUserIndex(char *name);
-extern int rpp_to_level(struct char_data *ch);
-
-/* extern functions */
-extern int check_saveroom_count(struct char_data *ch, struct obj_data *cont);
-
-void gen_map(struct char_data *ch, int num);
-void search_replace(char *string, const char *find, const char *replace);
-ACMD(do_action);
-ACMD(do_insult);
-int level_exp(struct char_data *ch, int level);
-struct time_info_data *real_time_passed(time_t t2, time_t t1);
-struct obj_data *find_vehicle_by_vnum(int vnum);
-extern struct obj_data *get_obj_in_list_type(int type, struct obj_data *list);
-void view_room_by_rnum(struct char_data * ch, int is_in);
-void bringdesc(struct char_data *ch, struct char_data *tch);
-int check_disabled(const struct command_info *command);
+#include "act.h"
 
 /* local functions */
-void see_plant(struct obj_data *obj, struct char_data *ch);
-double terrain_bonus(struct char_data *ch);
-void search_room(struct char_data *ch);
-void bonus_status(struct char_data *ch);
-int sort_commands_helper(const void *a, const void *b);
-void print_object_location(int num, struct obj_data *obj, struct char_data *ch, int recur);
-void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mode);
-void list_obj_to_char(struct obj_data *list, struct char_data *ch, int mode, int show);
-void trans_check(struct char_data *ch, struct char_data *vict);
-int show_obj_modifiers(struct obj_data *obj, struct char_data *ch);
-ACMD(do_look);
-ACMD(do_examine);
-ACMD(do_gold);
-ACMD(do_score);
-ACMD(do_status);
-ACMD(do_inventory);
-ACMD(do_equipment);
-ACMD(do_time);
-ACMD(do_weather);
-ACMD(do_help);
-ACMD(do_who);
-ACMD(do_users);
-ACMD(do_gen_ps);
-void perform_mortal_where(struct char_data *ch, char *arg);
-void perform_immort_where(struct char_data *ch, char *arg);
-ACMD(do_where);
-ACMD(do_levels);
-ACMD(do_consider);
-ACMD(do_diagnose);
-ACMD(do_color);
-ACMD(do_toggle);
-void sort_commands(void);
-ACMD(do_commands);
-void diag_char_to_char(struct char_data *i, struct char_data *ch);
-void diag_obj_to_char(struct obj_data *obj, struct char_data *ch);
-void look_at_char(struct char_data *i, struct char_data *ch);
-void list_one_char(struct char_data *i, struct char_data *ch);
-void list_char_to_char(struct char_data *list, struct char_data *ch);
-ACMD(do_exits);
-void look_in_direction(struct char_data *ch, int dir);
-void look_in_obj(struct char_data *ch, char *arg);
-void look_out_window(struct char_data *ch, char *arg);
-char *find_exdesc(char *word, struct extra_descr_data *list);
-void look_at_target(struct char_data *ch, char *arg, int read);
-void search_in_direction(struct char_data * ch, int dir);
-ACMD(do_autoexit);
-void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_mode);
-void do_auto_exits2(room_rnum target_room, struct char_data *ch);
-void display_spells(struct char_data *ch, struct obj_data *obj);
-void display_scroll(struct char_data *ch, struct obj_data *obj);
-void space_to_minus(char *str);
-void free_history(struct char_data *ch, int type);
-ACMD(do_history); 
-ACMD(do_map);
-ACMD(do_rptrans);
-ACMD(do_finger);
-ACMD(do_perf);
-ACMD(do_nickname);
-ACMD(do_table);
-ACMD(do_play);
-ACMD(do_post);
-ACMD(do_hand);
-ACMD(do_shuffle);
-ACMD(do_draw);
-ACMD(do_kyodaika);
-ACMD(do_mimic);
-ACMD(do_rpbank);
-ACMD(do_rdisplay);
-ACMD(do_evolve);
-ACMD(do_rpbanktrans);
-
-
+static void gen_map(struct char_data *ch, int num);
+static void bringdesc(struct char_data *ch, struct char_data *tch);
+static void see_plant(struct obj_data *obj, struct char_data *ch);
+static double terrain_bonus(struct char_data *ch);
+static void search_room(struct char_data *ch);
+static void bonus_status(struct char_data *ch);
+static int sort_commands_helper(const void *a, const void *b);
+static void print_object_location(int num, struct obj_data *obj, struct char_data *ch, int recur);
+static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mode);
+static void list_obj_to_char(struct obj_data *list, struct char_data *ch, int mode, int show);
+static void trans_check(struct char_data *ch, struct char_data *vict);
+static int show_obj_modifiers(struct obj_data *obj, struct char_data *ch);
+static void perform_mortal_where(struct char_data *ch, char *arg);
+static void perform_immort_where(struct char_data *ch, char *arg);
+static void diag_char_to_char(struct char_data *i, struct char_data *ch);
+static void diag_obj_to_char(struct obj_data *obj, struct char_data *ch);
+static void look_at_char(struct char_data *i, struct char_data *ch);
+static void list_one_char(struct char_data *i, struct char_data *ch);
+static void list_char_to_char(struct char_data *list, struct char_data *ch);
+static void look_in_direction(struct char_data *ch, int dir);
+static void look_in_obj(struct char_data *ch, char *arg);
+static void look_out_window(struct char_data *ch, char *arg);
+static void look_at_target(struct char_data *ch, char *arg, int read);
+static void search_in_direction(struct char_data * ch, int dir);
+static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_mode);
+static void do_auto_exits2(room_rnum target_room, struct char_data *ch);
+static void display_spells(struct char_data *ch, struct obj_data *obj);
+static void display_scroll(struct char_data *ch, struct obj_data *obj);
+static void space_to_minus(char *str);
+static void free_history(struct char_data *ch, int type);
+static int yesrace(int num);
+static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum,
+                          struct char_data *ch);
+// definitions
 ACMD(do_evolve)
 {
 
@@ -244,7 +135,7 @@ ACMD(do_evolve)
  }
 }
 
-void see_plant(struct obj_data *obj, struct char_data *ch)
+static void see_plant(struct obj_data *obj, struct char_data *ch)
 {
 
  int water = GET_OBJ_VAL(obj, VAL_WATERLEVEL);
@@ -288,7 +179,7 @@ void see_plant(struct obj_data *obj, struct char_data *ch)
 }
 
 /* This is used to determine the terrain bonus for search_room - Iovan 12/16/2012*/
-double terrain_bonus(struct char_data *ch)
+static double terrain_bonus(struct char_data *ch)
 {
 
  double bonus = 0.0;
@@ -321,7 +212,7 @@ double terrain_bonus(struct char_data *ch)
 
 
 /* This is used to find hidden people in a room with search - Iovan 12/16/2012 */
-void search_room(struct char_data *ch)
+static void search_room(struct char_data *ch)
 {
 
  struct char_data *vict, *next_v;
@@ -390,7 +281,7 @@ void search_room(struct char_data *ch)
 
 }
 
-const char *weapon_disp[6] = {
+static const char *weapon_disp[6] = {
  "Sword",
  "Dagger",
  "Spear",
@@ -400,7 +291,7 @@ const char *weapon_disp[6] = {
 };
 
 /* Used for mimic - Iovan */
-int yesrace (int num)
+int yesrace(int num)
 {
  int okay = TRUE;
 
@@ -507,7 +398,6 @@ ACMD(do_mimic)
  }
  
 }
-
 
 ACMD(do_kyodaika)
 {
@@ -935,13 +825,11 @@ ACMD(do_nickname)
 }
 
 
-void add_history(struct char_data *ch, char *str, int type);
-
 /* local globals */
 int *cmd_sort_info;
 
 /* Portal appearance types */
-const char *portal_appearance[] = {
+static const char *portal_appearance[] = {
     "All you can see is the glow of the portal.",
     "You see an image of yourself in the room - my, you are looking attractive today.",
     "All you can see is a swirling grey mist.",
@@ -950,12 +838,7 @@ const char *portal_appearance[] = {
     "Suddenly, out of the blackness a flaming red eye appears and fixes its gaze upon you.",
     "\n"
 };
-#define MAX_PORTAL_TYPES        6
 
-/* For show_obj_to_char 'mode'.	/-- arbitrary */
-#define SHOW_OBJ_LONG		0
-#define SHOW_OBJ_SHORT		1
-#define SHOW_OBJ_ACTION		2
 
 ACMD(do_showoff)
 {
@@ -1177,7 +1060,7 @@ ACMD(do_intro)
 }
 
 /* Used when checking status or looking at a character */
-void bringdesc(struct char_data *ch, struct char_data *tch)
+static void bringdesc(struct char_data *ch, struct char_data *tch)
 {
 
   if (ch != NULL &&  tch != NULL && IS_HUMANOID(tch)) {
@@ -1552,7 +1435,7 @@ void bringdesc(struct char_data *ch, struct char_data *tch)
   }
 }
 
-void map_draw_room(char map[9][10], int x, int y, room_rnum rnum,
+static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum,
 struct char_data *ch)
 {
   int door;
@@ -2172,7 +2055,8 @@ ACMD(do_map)
 {
  gen_map(ch, 1);
 }
-void gen_map(struct char_data *ch, int num)
+
+static void gen_map(struct char_data *ch, int num)
 {
   int door, i;
   char map[9][10] = {{'-'}, {'-'}};
@@ -2317,7 +2201,7 @@ void gen_map(struct char_data *ch, int num)
 }
 
 
-void display_spells(struct char_data *ch, struct obj_data *obj)
+static void display_spells(struct char_data *ch, struct obj_data *obj)
 {
   int i;
 
@@ -2338,7 +2222,7 @@ void display_spells(struct char_data *ch, struct obj_data *obj)
   return;
 }
 
-void display_scroll(struct char_data *ch, struct obj_data *obj)
+static void display_scroll(struct char_data *ch, struct obj_data *obj)
 {
   send_to_char(ch, "The scroll contains the following spell:\r\n");
   send_to_char(ch, "@c---@wSpell Name@c---------------------------------------------------@n\r\n");
@@ -2346,7 +2230,7 @@ void display_scroll(struct char_data *ch, struct obj_data *obj)
   return;
 }
 
-void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mode)
+static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mode)
 {
   if (!obj || !ch) {
     log("SYSERR: NULL pointer in show_obj_to_char(): obj=%p ch=%p", obj, ch);
@@ -2765,8 +2649,7 @@ void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mode)
   send_to_char(ch, "\r\n");
 }
 
-
-int show_obj_modifiers(struct obj_data *obj, struct char_data *ch)
+static int show_obj_modifiers(struct obj_data *obj, struct char_data *ch)
 {
   int found = FALSE;
 
@@ -2857,7 +2740,7 @@ int show_obj_modifiers(struct obj_data *obj, struct char_data *ch)
   return(found);
 }
 
-void list_obj_to_char(struct obj_data *list, struct char_data *ch, int mode, int show)
+static void list_obj_to_char(struct obj_data *list, struct char_data *ch, int mode, int show)
 {
   struct obj_data *i, *j, *d;
   bool found = FALSE;
@@ -2912,7 +2795,7 @@ void list_obj_to_char(struct obj_data *list, struct char_data *ch, int mode, int
   send_to_char(ch, " Nothing.\r\n");
 }
 
-void diag_obj_to_char(struct obj_data *obj, struct char_data *ch)
+static void diag_obj_to_char(struct obj_data *obj, struct char_data *ch)
 {
   struct {
     int percent;
@@ -2942,7 +2825,7 @@ void diag_obj_to_char(struct obj_data *obj, struct char_data *ch)
   send_to_char(ch, "\r\n%c%s %s\r\n", UPPER(*objs), objs + 1, diagnosis[ar_index].text);
 }
 
-void diag_char_to_char(struct char_data *i, struct char_data *ch)
+static void diag_char_to_char(struct char_data *i, struct char_data *ch)
 {
   struct {
     int percent;
@@ -3017,8 +2900,7 @@ void diag_char_to_char(struct char_data *i, struct char_data *ch)
   send_to_char(ch, "%s\r\n", diagnosis[ar_index].text);
 }
 
-
-void look_at_char(struct char_data *i, struct char_data *ch)
+static void look_at_char(struct char_data *i, struct char_data *ch)
 {
   int j, found, clan = FALSE;
   char buf[100];
@@ -3289,8 +3171,7 @@ void look_at_char(struct char_data *i, struct char_data *ch)
   }
 }
 
-
-void list_one_char(struct char_data *i, struct char_data *ch)
+static void list_one_char(struct char_data *i, struct char_data *ch)
 {
   struct obj_data *chair = NULL;
   int count = FALSE;
@@ -3761,7 +3642,7 @@ void list_one_char(struct char_data *i, struct char_data *ch)
 
 }
 
-void list_char_to_char(struct char_data *list, struct char_data *ch)
+static void list_char_to_char(struct char_data *list, struct char_data *ch)
 {
   struct char_data *i, *j;
   struct hide_node {
@@ -3859,7 +3740,7 @@ void list_char_to_char(struct char_data *list, struct char_data *ch)
   } /* loop through all characters in room */
 }
 
-void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_mode)
+static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_mode)
 {
   int door, door_found = 0, has_light = FALSE, i;
   char dlist1[500];
@@ -4446,7 +4327,7 @@ void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_mode)
   }
 }
 
-void do_auto_exits2(room_rnum target_room, struct char_data *ch)
+static void do_auto_exits2(room_rnum target_room, struct char_data *ch)
 {
   int door, slen = 0;
 
@@ -4465,7 +4346,6 @@ void do_auto_exits2(room_rnum target_room, struct char_data *ch)
   send_to_char(ch, "%s\r\n", slen ? "" : "None!");
 }
 
-
 ACMD(do_exits)
 {
   /* Why duplicate code? */
@@ -4476,7 +4356,7 @@ ACMD(do_exits)
   }
 }
 
-const char *exitlevels[] = {
+static const char *exitlevels[] = {
   "off", "normal", "n/a", "complete", "\n"};
 
 ACMD(do_autoexit)
@@ -4840,7 +4720,7 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
   list_char_to_char(world[target_room].people, ch);
 }
 
-void look_in_direction(struct char_data *ch, int dir)
+static void look_in_direction(struct char_data *ch, int dir)
 {
   if (EXIT(ch, dir)) {
     if (EXIT(ch, dir)->general_description)
@@ -4873,7 +4753,7 @@ void look_in_direction(struct char_data *ch, int dir)
     send_to_char(ch, "Nothing special there...\r\n");
 }
 
-void look_in_obj(struct char_data *ch, char *arg)
+static void look_in_obj(struct char_data *ch, char *arg)
 {
   struct obj_data *obj = NULL;
   struct char_data *dummy = NULL;
@@ -4988,8 +4868,6 @@ void look_in_obj(struct char_data *ch, char *arg)
     }
 }
 
-
-
 char *find_exdesc(char *word, struct extra_descr_data *list)
 {
   struct extra_descr_data *i;
@@ -5011,7 +4889,7 @@ char *find_exdesc(char *word, struct extra_descr_data *list)
  * Thanks to Angus Mezick <angus@EDGIL.CCMAIL.COMPUSERVE.COM> for the
  * suggested fix to this problem.
  */
-void look_at_target(struct char_data *ch, char *arg, int cmread)
+static void look_at_target(struct char_data *ch, char *arg, int cmread)
 {
   int bits, found = FALSE, j, fnum, i = 0, msg = 1;
   struct char_data *found_char = NULL;
@@ -5192,7 +5070,7 @@ void look_at_target(struct char_data *ch, char *arg, int cmread)
   }
 }
 
-void look_out_window(struct char_data *ch, char *arg)
+static void look_out_window(struct char_data *ch, char *arg)
 {
   struct obj_data *i, *viewport = NULL, *vehicle = NULL;
   struct char_data *dummy = NULL;
@@ -5687,8 +5565,6 @@ ACMD(do_look)
   }
 }
 
-
-
 ACMD(do_examine)
 {
   struct char_data *tmp_char;
@@ -5717,8 +5593,6 @@ ACMD(do_examine)
     }
   }
 }
-
-
 
 ACMD(do_gold)
 {
@@ -5853,7 +5727,7 @@ ACMD(do_score)
 
 }
 
-void trans_check(struct char_data *ch, struct char_data *vict)
+static void trans_check(struct char_data *ch, struct char_data *vict)
 {
 /* Rillao: transloc, add new transes here */
  if (IS_HUMAN(vict)) {
@@ -6801,7 +6675,7 @@ const char *list_bonuses[] = {
 };
 
 /* Display What Bonuses/Negatives Player Has */
-void bonus_status(struct char_data *ch)
+static void bonus_status(struct char_data *ch)
 {
  int i, max = 52, count = 0;
 
@@ -6847,7 +6721,6 @@ ACMD(do_inventory)
   list_obj_to_char(ch->carrying, ch, SHOW_OBJ_SHORT, TRUE);
   send_to_char(ch, "\n");
 }
-
 
 ACMD(do_equipment)
 {
@@ -6905,7 +6778,6 @@ ACMD(do_equipment)
   }
 }
 
-
 ACMD(do_time)
 {
   const char *suf;
@@ -6949,7 +6821,6 @@ ACMD(do_time)
 	  day, suf, month_name[time_info.month], time_info.year);
 }
 
-
 ACMD(do_weather)
 {
   const char *sky_look[] = {
@@ -6976,12 +6847,11 @@ ACMD(do_weather)
 }
 
 /* puts -'s instead of spaces */
-void space_to_minus(char *str)
+static void space_to_minus(char *str)
 {
   while ((str = strchr(str, ' ')) != NULL)
     *str = '-';
 }
-
 
 int search_help(const char *argument, int level)
 {
@@ -7438,7 +7308,6 @@ ACMD(do_users)
   send_to_char(ch, "\r\n%d visible sockets connected.\r\n", num_can_see);
 }
 
-
 /* Generic page_string function for displaying text */
 ACMD(do_gen_ps)
 {
@@ -7503,8 +7372,7 @@ ACMD(do_gen_ps)
   }
 }
 
-
-void perform_mortal_where(struct char_data *ch, char *arg)
+static void perform_mortal_where(struct char_data *ch, char *arg)
 {
   struct char_data *i;
   struct descriptor_data *d;
@@ -7537,8 +7405,7 @@ void perform_mortal_where(struct char_data *ch, char *arg)
   }
 }
 
-
-void print_object_location(int num, struct obj_data *obj, struct char_data *ch,
+static void print_object_location(int num, struct obj_data *obj, struct char_data *ch,
 			        int recur)
 {
   if (num > 0)
@@ -7563,9 +7430,7 @@ void print_object_location(int num, struct obj_data *obj, struct char_data *ch,
     send_to_char(ch, "in an unknown location\r\n");
 }
 
-
-
-void perform_immort_where(struct char_data *ch, char *arg)
+static void perform_immort_where(struct char_data *ch, char *arg)
 {
   struct char_data *i;
   struct obj_data *k;
@@ -7657,8 +7522,6 @@ void perform_immort_where(struct char_data *ch, char *arg)
   }
 }
 
-
-
 ACMD(do_where)
 {
   char arg[MAX_INPUT_LENGTH];
@@ -7670,8 +7533,6 @@ ACMD(do_where)
   else
     perform_mortal_where(ch, arg);
 }
-
-
 
 ACMD(do_levels)
 {
@@ -7696,8 +7557,6 @@ ACMD(do_levels)
 
   page_string(ch->desc, buf, TRUE);
 }
-
-
 
 ACMD(do_consider)
 {
@@ -7743,8 +7602,6 @@ ACMD(do_consider)
     send_to_char(ch, "No chance.\r\n");
 }
 
-
-
 ACMD(do_diagnose)
 {
   char buf[MAX_INPUT_LENGTH];
@@ -7770,8 +7627,7 @@ ACMD(do_diagnose)
   }
 }
 
-
-const char *ctypes[] = {
+static const char *ctypes[] = {
   "off", "on", "\n"
 };
 
@@ -8068,7 +7924,6 @@ ACMD(do_color)
   send_to_char(ch, "Your color is now @o%s@n.\r\n", ctypes[tp]);
 }
 
-
 ACMD(do_toggle)
 {
   char buf2[4];
@@ -8172,13 +8027,11 @@ ACMD(do_toggle)
           }
 }
 
-
-int sort_commands_helper(const void *a, const void *b)
+static int sort_commands_helper(const void *a, const void *b)
 {
   return strcmp(complete_cmd_info[*(const int *)a].sort_as,
                 complete_cmd_info[*(const int *)b].sort_as);
 }
-
 
 void sort_commands(void)
 {
@@ -8196,7 +8049,6 @@ void sort_commands(void)
   /* Don't sort the RESERVED or \n entries. */
   qsort(cmd_sort_info + 1, num_of_cmds - 2, sizeof(int), sort_commands_helper);
 }
-
 
 ACMD(do_commands)
 {
@@ -8261,7 +8113,7 @@ ACMD(do_commands)
     send_to_char(ch, "\r\n");
 }
 
-void free_history(struct char_data *ch, int type) 
+static void free_history(struct char_data *ch, int type)
 { 
   struct txt_block *tmp = GET_HISTORY(ch, type), *ftmp;      
  
@@ -8273,8 +8125,7 @@ void free_history(struct char_data *ch, int type)
   } 
   GET_HISTORY(ch, type) = NULL;        
 } 
- 
- 
+
 ACMD(do_history) 
 { 
   char arg[MAX_INPUT_LENGTH]; 
@@ -8314,11 +8165,7 @@ ACMD(do_history)
   } else 
     send_to_char(ch, "You have no history in that channel.\r\n"); 
 } 
- 
- 
-#define HIST_LENGTH 100 
- 
- 
+
 void add_history(struct char_data *ch, char *str, int type) 
 { 
   int i = 0; 
@@ -8646,7 +8493,7 @@ ACMD(do_whois)
 
 #define DOOR_DCHIDE(ch, door)           (EXIT(ch, door)->dchide)
 
-void search_in_direction(struct char_data * ch, int dir)
+static void search_in_direction(struct char_data * ch, int dir)
 {
   int check=FALSE, skill_lvl, dchide=20;
 
@@ -8683,4 +8530,3 @@ void search_in_direction(struct char_data * ch, int dir)
   } else
     send_to_char(ch, "There is no exit there.\r\n");
 }
-

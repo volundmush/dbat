@@ -9,8 +9,6 @@
 #ifndef __FEATS_H__
 #define __FEATS_H__
 
-#include "conf.h"
-#include "sysdep.h"
 #include "structs.h"
 #include "utils.h"
 #include "comm.h"

@@ -5,8 +5,6 @@
 #ifndef CIRCLE_PLAYERS_H
 #define CIRCLE_PLAYERS_H
 
-#include "conf.h"
-#include "sysdep.h"
 #include "structs.h"
 #include "utils.h"
 #include "db.h"

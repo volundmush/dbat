@@ -1,3 +1,7 @@
+#ifndef __CONF_H__
+#define __CONF_H__
+
+
 /* src/conf.h.  Generated from conf.h.in by configure.  */
 /* src/conf.h.in.  Generated automatically from configure.in by autoheader.  */
 
@@ -343,3 +347,6 @@
 #define SIZEOF_SIZE_T 8
 #define SIZEOF_TIME_T 8
 #define SIZEOF_CHAR_P 8
+
+
+#endif

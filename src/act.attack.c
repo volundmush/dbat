@@ -13,10 +13,7 @@
 *   credits found in act.offensive.c except for the commands added in-    *
 *                                                   ~~Iovan               *
 ************************************************************************ */
-
 #include "act.h"
-
-
 
 ACMD(do_lightgrenade)
 {
@@ -3395,6 +3392,7 @@ ACMD(do_throw)
   return;
  }
 }
+
 ACMD(do_selfd)
 {
 

@@ -19,7 +19,6 @@
 #define BSZ 256
 #define MAGIC_CHAR '='
 
-#include "conf.h"
 #include "sysdep.h"
 
 int main(void)

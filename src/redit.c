@@ -5,8 +5,6 @@
  *  Copyright 1997-2001 George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
-#include "conf.h"
-#include "sysdep.h"
 #include "structs.h"
 #include "utils.h"
 #include "comm.h"

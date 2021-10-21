@@ -9,7 +9,6 @@
 
 #define log(msg) fprintf(stderr, "%s\n", msg)
 
-#include "conf.h"
 #include "sysdep.h"
 
 
