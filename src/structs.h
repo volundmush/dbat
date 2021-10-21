@@ -2567,6 +2567,7 @@ struct char_data {
   struct char_data *original;
   short clones;
   int relax_count;
+ 	int ingestLearned;
 };
 
 /* ====================================================================== */

@@ -624,8 +624,10 @@ void do_start(struct char_data *ch)
      SET_BIT_AR(PLR_FLAGS(ch), PLR_TAIL);
   }
   if (GET_RACE(ch) == RACE_MAJIN) {
-   GET_ABSORBS(ch) = 0;
-  }
+		GET_ABSORBS(ch) = 0;
+		GET_INGESTLEARNED(ch) = 0;
+		
+	}
   if (GET_RACE(ch) == RACE_BIO) {
    GET_ABSORBS(ch) = 3;
   }

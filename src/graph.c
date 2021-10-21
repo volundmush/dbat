@@ -405,377 +405,459 @@ ACMD(do_radar)
 
 ACMD(do_track)
 {
-  char arg[MAX_INPUT_LENGTH];
-  struct char_data *vict;
-  struct descriptor_data *i;
-  int count = 0, dir;
+	char arg[MAX_INPUT_LENGTH];
+	struct char_data *vict;
+	struct descriptor_data *i;
+	int count = 0, dir;
 
-  /* The character must have the track skill. */
-  if (IS_NPC(ch) || !GET_SKILL(ch, SKILL_SENSE)) {
-    send_to_char(ch, "You have no idea how.\r\n");
-    return;
-  }
-  if (GET_SUPPRESS(ch) <= 20 && GET_SUPPRESS(ch) > 0) {
-   send_to_char(ch, "You are concentrating too hard on suppressing your powerlevel at this level of suppression.\r\n");
-   return;
-  }
+	/* The character must have the track skill. */
+	if (IS_NPC(ch) || !GET_SKILL(ch, SKILL_SENSE)) {
+		send_to_char(ch, "You have no idea how.\r\n");
+		return;
+	}
+	if (GET_SUPPRESS(ch) <= 20 && GET_SUPPRESS(ch) > 0) {
+		send_to_char(ch, "You are concentrating too hard on suppressing your powerlevel at this level of suppression.\r\n");
+		return;
+	}
 
-  one_argument(argument, arg);
-  if (!*arg && !FIGHTING(ch)) {
-    send_to_char(ch, "Whom are you trying to sense?\r\n");
-    return;
-  }
-  else if (!*arg && FIGHTING(ch)) {
-   vict = FIGHTING(ch);
-   send_to_char(ch, "You focus on the one your are fighting.\r\n");
-   if (AFF_FLAGGED(vict, AFF_NOTRACK) || IS_ANDROID(vict)) {
-    send_to_char(ch, "You can't sense them.\r\n");
-    return;
-   }
-   if (!read_sense_memory(ch, vict)) {
-    send_to_char(ch, "You will remember their ki signal from now on.\r\n");
-    sense_memory_write(ch, vict);
-   }
-   act("You look at $N@n intently for a moment.", TRUE, ch, 0, vict, TO_CHAR);
-   act("$n looks at you intently for a moment.", TRUE, ch, 0, vict, TO_VICT);
-   act("$n looks at $N@n intently for a moment.", TRUE, ch, 0, vict, TO_NOTVICT);
-   if (!IS_ANDROID(vict)) {
-    if (GET_ALIGNMENT(vict) > 50 && GET_ALIGNMENT(vict) < 200) {
-     send_to_char(ch, "You sense slightly pure and good ki from them.\r\n");
-    }
-    else if (GET_ALIGNMENT(vict) > 200 && GET_ALIGNMENT(vict) < 500) {
-     send_to_char(ch, "You sense a pure and good ki from them.\r\n");
-    }
-    else if (GET_ALIGNMENT(vict) >= 500) {
-     send_to_char(ch, "You sense an extremely pure and good ki from them.\r\n");
-    }
-    else if (GET_ALIGNMENT(vict) < -50 && GET_ALIGNMENT(vict) > -200) {
-     send_to_char(ch, "You sense slightly sour and evil ki from them.\r\n");
-    }
-    else if (GET_ALIGNMENT(vict) < -200 && GET_ALIGNMENT(vict) > -500) {
-     send_to_char(ch, "You sense a sour and evil ki from them.\r\n");
-    }
-    else if (GET_ALIGNMENT(vict) <= -500) {
-     send_to_char(ch, "You sense an extremely evil ki from them.\r\n");
-    }
-    else if (GET_ALIGNMENT(vict) > -50 && GET_ALIGNMENT(vict) < 50) {
-     send_to_char(ch, "You sense slightly mild indefinable ki from them.\r\n");
-    }
-        if (GET_HIT(vict) > GET_HIT(ch) * 50) {
-         send_to_char(ch, "Their power is so huge it boggles your mind and crushes your spirit to fight!\n");
-        } else if (GET_HIT(vict) > GET_HIT(ch) * 25) {
-         send_to_char(ch, "Their power is so much larger than you that you would die like an insect.\n");
-        } else if (GET_HIT(vict) > GET_HIT(ch) * 10) {
-         send_to_char(ch, "Their power is many times larger than your own.\n");
-        } else if (GET_HIT(vict) > GET_HIT(ch) * 5) {
-         send_to_char(ch, "Their power is a great deal larger than your own.\n");
-        } else if (GET_HIT(vict) > GET_HIT(ch) * 2) {
-         send_to_char(ch, "Their power is more than twice as large as your own.\n");
-        } else if (GET_HIT(vict) > GET_HIT(ch)) {
-         send_to_char(ch, "Their power is about twice as large as your own.\n");
-        } else if (GET_HIT(vict) == GET_HIT(ch)) {
-         send_to_char(ch, "Their power is exactly as strong as you.\n");
-        } else if (GET_HIT(vict) >= GET_HIT(ch) * 0.75) {
-         send_to_char(ch, "Their power is about a quarter of your own or larger.\n");
-        } else if (GET_HIT(vict) >= GET_HIT(ch) * 0.5) {
-         send_to_char(ch, "Their power is about half of your own or larger.\n");
-        } else if (GET_HIT(vict) >= GET_HIT(ch) * 0.25) {
-         send_to_char(ch, "Their power is about a quarter of your own or larger.\n");
-        } else if (GET_HIT(vict) >= GET_HIT(ch) * 0.1) {
-         send_to_char(ch, "Their power is about a tenth of your own or larger.\n");
-        } else if (GET_HIT(vict) >= GET_HIT(ch) * 0.01) {
-         send_to_char(ch, "Their power is less than a tenth of your own.\n");
-        } else if (GET_HIT(vict) < GET_HIT(ch) * 0.01) {
-         send_to_char(ch, "Their power is less than 1 percent of your own. What a weakling...\n");
-        }
-   }
-   else {
-    send_to_char(ch, "You can't sense their powerlevel as they are a machine.\r\n");
-   }
-   return;
-  }
+	one_argument(argument, arg);
+	if (!*arg && !FIGHTING(ch)) {
+		send_to_char(ch, "Whom are you trying to sense?\r\n");
+		return;
+	}
+	else if (!*arg && FIGHTING(ch)) {
+		vict = FIGHTING(ch);
+		send_to_char(ch, "You focus on the one your are fighting.\r\n");
+		if (AFF_FLAGGED(vict, AFF_NOTRACK) || IS_ANDROID(vict)) {
+			send_to_char(ch, "You can't sense them.\r\n");
+			return;
+		}
+		if (!read_sense_memory(ch, vict)) {
+			send_to_char(ch, "You will remember their ki signal from now on.\r\n");
+			sense_memory_write(ch, vict);
+		}
+		act("You look at $N@n intently for a moment.", TRUE, ch, 0, vict, TO_CHAR);
+		act("$n looks at you intently for a moment.", TRUE, ch, 0, vict, TO_VICT);
+		act("$n looks at $N@n intently for a moment.", TRUE, ch, 0, vict, TO_NOTVICT);
+		if (!IS_ANDROID(vict)) {
+			if (GET_ALIGNMENT(vict) > 50 && GET_ALIGNMENT(vict) < 200) {
+				send_to_char(ch, "You sense slightly pure and good ki from them.\r\n");
+			}
+			else if (GET_ALIGNMENT(vict) > 200 && GET_ALIGNMENT(vict) < 500) {
+				send_to_char(ch, "You sense a pure and good ki from them.\r\n");
+			}
+			else if (GET_ALIGNMENT(vict) >= 500) {
+				send_to_char(ch, "You sense an extremely pure and good ki from them.\r\n");
+			}
+			else if (GET_ALIGNMENT(vict) < -50 && GET_ALIGNMENT(vict) > -200) {
+				send_to_char(ch, "You sense slightly sour and evil ki from them.\r\n");
+			}
+			else if (GET_ALIGNMENT(vict) < -200 && GET_ALIGNMENT(vict) > -500) {
+				send_to_char(ch, "You sense a sour and evil ki from them.\r\n");
+			}
+			else if (GET_ALIGNMENT(vict) <= -500) {
+				send_to_char(ch, "You sense an extremely evil ki from them.\r\n");
+			}
+			else if (GET_ALIGNMENT(vict) > -50 && GET_ALIGNMENT(vict) < 50) {
+				send_to_char(ch, "You sense slightly mild indefinable ki from them.\r\n");
+			}
+			if (GET_HIT(vict) > GET_HIT(ch) * 50) {
+				send_to_char(ch, "Their power is so huge it boggles your mind and crushes your spirit to fight!\n");
+			}
+			else if (GET_HIT(vict) > GET_HIT(ch) * 25) {
+				send_to_char(ch, "Their power is so much larger than you that you would die like an insect.\n");
+			}
+			else if (GET_HIT(vict) > GET_HIT(ch) * 10) {
+				send_to_char(ch, "Their power is many times larger than your own.\n");
+			}
+			else if (GET_HIT(vict) > GET_HIT(ch) * 5) {
+				send_to_char(ch, "Their power is a great deal larger than your own.\n");
+			}
+			else if (GET_HIT(vict) > GET_HIT(ch) * 2) {
+				send_to_char(ch, "Their power is more than twice as large as your own.\n");
+			}
+			else if (GET_HIT(vict) > GET_HIT(ch)) {
+				send_to_char(ch, "Their power is about twice as large as your own.\n");
+			}
+			else if (GET_HIT(vict) == GET_HIT(ch)) {
+				send_to_char(ch, "Their power is exactly as strong as you.\n");
+			}
+			else if (GET_HIT(vict) >= GET_HIT(ch) * 0.75) {
+				send_to_char(ch, "Their power is about a quarter of your own or larger.\n");
+			}
+			else if (GET_HIT(vict) >= GET_HIT(ch) * 0.5) {
+				send_to_char(ch, "Their power is about half of your own or larger.\n");
+			}
+			else if (GET_HIT(vict) >= GET_HIT(ch) * 0.25) {
+				send_to_char(ch, "Their power is about a quarter of your own or larger.\n");
+			}
+			else if (GET_HIT(vict) >= GET_HIT(ch) * 0.1) {
+				send_to_char(ch, "Their power is about a tenth of your own or larger.\n");
+			}
+			else if (GET_HIT(vict) >= GET_HIT(ch) * 0.01) {
+				send_to_char(ch, "Their power is less than a tenth of your own.\n");
+			}
+			else if (GET_HIT(vict) < GET_HIT(ch) * 0.01) {
+				send_to_char(ch, "Their power is less than 1 percent of your own. What a weakling...\n");
+			}
+		}
+		else {
+			send_to_char(ch, "You can't sense their powerlevel as they are a machine.\r\n");
+		}
+		return;
+	}
 
-   /* Scanning the entire planet. */
-   if (!str_cmp(arg, "scan")) {
-     for (i = descriptor_list; i; i = i->next) {
-      if (STATE(i) != CON_PLAYING) {
-       continue;
-      } else if (IS_ANDROID(i->character)) {
-       continue;
-      } else if (i->character == ch) {
-       continue;
-      } else if (GET_HIT(i->character) < (GET_HIT(ch) * 0.001) + 1) {
-       continue;
-      } else if (planet_check(ch, i->character)) {
-       if (readIntro(ch, i->character) == 1) {
-        send_to_char(ch, "@D[@Y%d@D] @CYou sense @c%s@C with ", (count + 1), get_i_name(ch, i->character));
-       } else {
-        send_to_char(ch, "@D[@Y%d@D] @CYou sense ", (count + 1));
-       }
-        /* How strong is the one we sense? */
-        if (GET_HIT(i->character) > GET_HIT(ch) * 50) {
-         send_to_char(ch, "a power so huge it boggles your mind and crushes your spirit to fight!\n");
-        } else if (GET_HIT(i->character) > GET_HIT(ch) * 25) {
-         send_to_char(ch, "a power so much larger than you that you would die like an insect.\n");
-        } else if (GET_HIT(i->character) > GET_HIT(ch) * 10) {
-         send_to_char(ch, "a power that is many times larger than your own.\n");
-        } else if (GET_HIT(i->character) > GET_HIT(ch) * 5) {
-         send_to_char(ch, "a power that is a great deal larger than your own.\n");
-        } else if (GET_HIT(i->character) > GET_HIT(ch) * 2) {
-         send_to_char(ch, "a power that is more than twice as large as your own.\n");
-        } else if (GET_HIT(i->character) > GET_HIT(ch)) {
-         send_to_char(ch, "a power that is about twice as large as your own.\n");
-        } else if (GET_HIT(i->character) == GET_HIT(ch)) {
-         send_to_char(ch, "a power that is exactly as strong as you.\n");
-        } else if (GET_HIT(i->character) >= GET_HIT(ch) * 0.75) {
-         send_to_char(ch, "a power that is about a quarter of your own or larger.\n");
-        } else if (GET_HIT(i->character) >= GET_HIT(ch) * 0.5) {
-         send_to_char(ch, "a power that is about half of your own or larger.\n");
-        } else if (GET_HIT(i->character) >= GET_HIT(ch) * 0.25) {
-         send_to_char(ch, "a power that is about a quarter of your own or larger.\n");
-        } else if (GET_HIT(i->character) >= GET_HIT(ch) * 0.1) {
-         send_to_char(ch, "a power that is about a tenth of your own or larger.\n");
-        } else if (GET_HIT(i->character) >= GET_HIT(ch) * 0.01) {
-         send_to_char(ch, "a power that is less than a tenth of your own.\n");
-        } else if (GET_HIT(i->character) < GET_HIT(ch) * 0.01) {
-         send_to_char(ch, "a power that is less than 1 percent of your own. What a weakling...\n");
-        }
+	/* Scanning the entire planet. */
+	if (!str_cmp(arg, "scan")) {
+		for (i = descriptor_list; i; i = i->next) {
+			if (STATE(i) != CON_PLAYING) {
+				continue;
+			}
+			else if (IS_ANDROID(i->character)) {
+				continue;
+			}
+			else if (i->character == ch) {
+				continue;
+			}
+			else if (GET_HIT(i->character) < (GET_HIT(ch) * 0.001) + 1) {
+				continue;
+			}
+			else if (planet_check(ch, i->character)) {
+				if (readIntro(ch, i->character) == 1) {
+					send_to_char(ch, "@D[@Y%d@D] @CYou sense @c%s@C with ", (count + 1), get_i_name(ch, i->character));
+				}
+				else {
+					send_to_char(ch, "@D[@Y%d@D] @CYou sense ", (count + 1));
+				}
+				/* How strong is the one we sense? */
+				if (GET_HIT(i->character) > GET_HIT(ch) * 50) {
+					send_to_char(ch, "a power so huge it boggles your mind and crushes your spirit to fight!\n");
+				}
+				else if (GET_HIT(i->character) > GET_HIT(ch) * 25) {
+					send_to_char(ch, "a power so much larger than you that you would die like an insect.\n");
+				}
+				else if (GET_HIT(i->character) > GET_HIT(ch) * 10) {
+					send_to_char(ch, "a power that is many times larger than your own.\n");
+				}
+				else if (GET_HIT(i->character) > GET_HIT(ch) * 5) {
+					send_to_char(ch, "a power that is a great deal larger than your own.\n");
+				}
+				else if (GET_HIT(i->character) > GET_HIT(ch) * 2) {
+					send_to_char(ch, "a power that is more than twice as large as your own.\n");
+				}
+				else if (GET_HIT(i->character) > GET_HIT(ch)) {
+					send_to_char(ch, "a power that is about twice as large as your own.\n");
+				}
+				else if (GET_HIT(i->character) == GET_HIT(ch)) {
+					send_to_char(ch, "a power that is exactly as strong as you.\n");
+				}
+				else if (GET_HIT(i->character) >= GET_HIT(ch) * 0.75) {
+					send_to_char(ch, "a power that is about a quarter of your own or larger.\n");
+				}
+				else if (GET_HIT(i->character) >= GET_HIT(ch) * 0.5) {
+					send_to_char(ch, "a power that is about half of your own or larger.\n");
+				}
+				else if (GET_HIT(i->character) >= GET_HIT(ch) * 0.25) {
+					send_to_char(ch, "a power that is about a quarter of your own or larger.\n");
+				}
+				else if (GET_HIT(i->character) >= GET_HIT(ch) * 0.1) {
+					send_to_char(ch, "a power that is about a tenth of your own or larger.\n");
+				}
+				else if (GET_HIT(i->character) >= GET_HIT(ch) * 0.01) {
+					send_to_char(ch, "a power that is less than a tenth of your own.\n");
+				}
+				else if (GET_HIT(i->character) < GET_HIT(ch) * 0.01) {
+					send_to_char(ch, "a power that is less than 1 percent of your own. What a weakling...\n");
+				}
 
-        /* What's their alignment? */
- 
-        if (GET_ALIGNMENT(i->character) >= 500) {
-         send_to_char(ch, "@wYou sense an extremely pure and good ki from them.@n\n");
-        } else if (GET_ALIGNMENT(i->character) > 200) {
-         send_to_char(ch, "@wYou sense a pure and good ki from them.@n\n");
-        } else if (GET_ALIGNMENT(i->character) > 50) {
-         send_to_char(ch, "@wYou sense slightly pure and good ki from them.@n\n");
-        } else if (GET_ALIGNMENT(i->character) > -50) {
-         send_to_char(ch, "@wYou sense a slightly mild indefinable ki from them.@n\n");
-        } else if (GET_ALIGNMENT(i->character) > -200) {
-         send_to_char(ch, "@wYou sense a slightly sour and evil ki from them.@n\n");
-        } else if (GET_ALIGNMENT(i->character) > -500) {
-         send_to_char(ch, "@wYou sense a sour and evil ki from them.@n\n");
-        } else if (GET_ALIGNMENT(i->character) <= -500) {
-         send_to_char(ch, "@wYou sense an extremely evil ki from them.@n\n");
-        }
+				/* What's their alignment? */
 
-        char *blah = sense_location(i->character);
-        send_to_char(ch, "@wLastly you sense that they are at... @C%s@n\n", blah);
-        ++count;
-        free(blah);
-      }
-     }
-     if (count == 0) {
-      send_to_char(ch, "You sense that there is no one important around.@n\n");
-     }
-     return;
-    }
-  
-  /* The person can't see the victim. */ 
-  
-   if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))) {
-     send_to_char(ch, "No one is around by that name.\r\n");
-     return;
-   }
-  
-  /* We can't track the victim. */
-  if (AFF_FLAGGED(vict, AFF_NOTRACK) || IS_ANDROID(vict)) {
-    send_to_char(ch, "You can't sense them.\r\n");
-    return;
-  }
+				if (GET_ALIGNMENT(i->character) >= 500) {
+					send_to_char(ch, "@wYou sense an extremely pure and good ki from them.@n\n");
+				}
+				else if (GET_ALIGNMENT(i->character) > 200) {
+					send_to_char(ch, "@wYou sense a pure and good ki from them.@n\n");
+				}
+				else if (GET_ALIGNMENT(i->character) > 50) {
+					send_to_char(ch, "@wYou sense slightly pure and good ki from them.@n\n");
+				}
+				else if (GET_ALIGNMENT(i->character) > -50) {
+					send_to_char(ch, "@wYou sense a slightly mild indefinable ki from them.@n\n");
+				}
+				else if (GET_ALIGNMENT(i->character) > -200) {
+					send_to_char(ch, "@wYou sense a slightly sour and evil ki from them.@n\n");
+				}
+				else if (GET_ALIGNMENT(i->character) > -500) {
+					send_to_char(ch, "@wYou sense a sour and evil ki from them.@n\n");
+				}
+				else if (GET_ALIGNMENT(i->character) <= -500) {
+					send_to_char(ch, "@wYou sense an extremely evil ki from them.@n\n");
+				}
 
-  if (GET_HIT(vict) < (GET_HIT(ch) * 0.001) + 1) {
-   if (IN_ROOM(ch) == IN_ROOM(vict)) {
-    if (!read_sense_memory(ch, vict)) {
-     send_to_char(ch, "Their powerlevel is too weak for you to sense properly, but you will recognise their ki signal from now on.\r\n");
-     sense_memory_write(ch, vict);
-    } else {
-     send_to_char(ch, "Their powerlevel is too weak for you to sense properly.\r\n");
-    }
-   } else {
-    send_to_char(ch, "Their powerlevel is too weak for you to sense properly.\r\n");
-   }
-   return;
-  }
-/*
- if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_YARDRAT) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_YARDRAT)))) {
-    send_to_char(ch, "@WSense@D: @YYardrat@n\r\n");
-    if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD)) {
-     char *blah = sense_location(vict);
-     send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
-     free(blah);
-    }
-   } else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_EARTH))) {
-    send_to_char(ch, "@WSense@D: @GEarth@n\r\n");
-    if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD)) {
-     char *blah = sense_location(vict);
-     send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
-     free(blah);
-    }
-   } else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_VEGETA)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_VEGETA))) {
-    send_to_char(ch, "@WSense@D: @YVegeta@n\r\n");
-    if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD)) {
-     char *blah = sense_location(vict);
-     send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
-     free(blah);
-    }
-     else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_NAMEK)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_NAMEK))) {
-    send_to_char(ch, "@WSense@D: @gNamek@n\r\n");
-    if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD)) {
-     char *blah = sense_location(vict);
-     send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
-     free(blah);
-    }
-   } else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_FRIGID)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_FRIGID))) {
-    send_to_char(ch, "@WSense@D: @CFrigid@n\r\n");
-    if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD)) {
-     char *blah = sense_location(vict);
-     send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
-     free(blah);
-    }
-   } else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_AETHER)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_AETHER))) {
-    send_to_char(ch, "@WSense@D: @mAetherh@n\r\n");
-    if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD)) {
-     char *blah = sense_location(vict);
-     send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
-     free(blah);
-    }
-   } else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_KONACK)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_KONACK))) {
-    send_to_char(ch, "@WSense@D: @MKonack@n\r\n");
-    if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD)) {
-     char *blah = sense_location(vict);
-     send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
-     free(blah);
-    }
-   } else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_KANASSA)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_KANASSA))) {
-    send_to_char(ch, "@WSense@D: @cKanassa@n\r\n");
-    if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD)) {
-     char *blah = sense_location(vict);
-     send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
-     free(blah);
-    }
-   } else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_ARLIA)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_ARLIA))) {
-    send_to_char(ch, "@WSense@D: @yArlia@n\r\n");
-    if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD)) {
-     char *blah = sense_location(vict);
-     send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
-     free(blah);
-    }
-/* } else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100 && (!PLANET_ZENITH(IN_ROOM(ch), PLANET_ZENITH)) && (PLANET_ZENITH(IN_ROOM(vict), PLANET_ZENITH))) {   
-    send_to_char(ch, "@WSense@D: @CZenith@n\r\n");
-    if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD)) {
-     char *blah = sense_location(vict);
-     send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
-     free(blah);
-    } 
-   } else {
-   
+				char *blah = sense_location(i->character);
+				send_to_char(ch, "@wLastly you sense that they are at... @C%s@n\n", blah);
+				++count;
+				free(blah);
+			}
+		}
+		if (count == 0) {
+			send_to_char(ch, "You sense that there is no one important around.@n\n");
+		}
+		return;
+	}
 
-*/
-  if (GET_SKILL(ch, SKILL_SENSE) < rand_number(1, 101)) {
-    int tries = 10;
-    /* Find a random direction. :) */
-    do {
-      dir = rand_number(0, NUM_OF_DIRS - 1);
-    } while (!CAN_GO(ch, dir) && --tries);
-    send_to_char(ch, "You sense them %s faintly from here, but are unsure....\r\n", dirs[dir]);
-    improve_skill(ch, SKILL_SENSE, 1);
-    improve_skill(ch, SKILL_SENSE, 1);
-    improve_skill(ch, SKILL_SENSE, 1);
-    return;
-  }
+	/* The person can't see the victim. */
 
-  /* They passed the skill check. */
-  dir = find_first_step(IN_ROOM(ch), IN_ROOM(vict));
+	if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))) {
+		send_to_char(ch, "No one is around by that name.\r\n");
+		return;
+	}
 
-  switch (dir) {
-  case BFS_ERROR:
-    send_to_char(ch, "Hmm.. something seems to be wrong.\r\n");
-    break;
-  case BFS_ALREADY_THERE:
-    act("You look at $N@n intently for a moment.", TRUE, ch, 0, vict, TO_CHAR);
-    act("$n looks at you intently for a moment.", TRUE, ch, 0, vict, TO_VICT);
-    act("$n looks at $N intently for a moment.", TRUE, ch, 0, vict, TO_NOTVICT);
-   if (!IS_ANDROID(vict)) {
-    if (GET_ALIGNMENT(vict) > 50 && GET_ALIGNMENT(vict) < 200) {
-     send_to_char(ch, "You sense slightly pure and good ki from them.\r\n");
-    }
-    else if (GET_ALIGNMENT(vict) > 200 && GET_ALIGNMENT(vict) < 500) {
-     send_to_char(ch, "You sense a pure and good ki from them.\r\n");
-    }
-    else if (GET_ALIGNMENT(vict) >= 500) {
-     send_to_char(ch, "You sense an extremely pure and good ki from them.\r\n");
-    }
-    else if (GET_ALIGNMENT(vict) < -50 && GET_ALIGNMENT(vict) > -200) {
-     send_to_char(ch, "You sense slightly sour and evil ki from them.\r\n");
-    }
-    else if (GET_ALIGNMENT(vict) < -200 && GET_ALIGNMENT(vict) > -500) {
-     send_to_char(ch, "You sense a sour and evil ki from them.\r\n");
-    }
-    else if (GET_ALIGNMENT(vict) <= -500) {
-     send_to_char(ch, "You sense an extremely evil ki from them.\r\n");
-    }
-    else if (GET_ALIGNMENT(vict) > -50 && GET_ALIGNMENT(vict) < 50) {
-     send_to_char(ch, "You sense slightly mild indefinable ki from them.\r\n");
-    }
-   }
-    if (!IS_ANDROID(vict)) {
-        if (GET_HIT(vict) > GET_HIT(ch) * 50) {
-         send_to_char(ch, "Their power is so huge it boggles your mind and crushes your spirit to fight!\n");
-        } else if (GET_HIT(vict) > GET_HIT(ch) * 25) {
-         send_to_char(ch, "Their power is so much larger than you that you would die like an insect.\n");
-        } else if (GET_HIT(vict) > GET_HIT(ch) * 10) {
-         send_to_char(ch, "Their power is many times larger than your own.\n");
-        } else if (GET_HIT(vict) > GET_HIT(ch) * 5) {
-         send_to_char(ch, "Their power is a great deal larger than your own.\n");
-        } else if (GET_HIT(vict) > GET_HIT(ch) * 2) {
-         send_to_char(ch, "Their power is more than twice as large as your own.\n");
-        } else if (GET_HIT(vict) > GET_HIT(ch)) {
-         send_to_char(ch, "Their power is about twice as large as your own.\n");
-        } else if (GET_HIT(vict) == GET_HIT(ch)) {
-         send_to_char(ch, "Their power is exactly as strong as you.\n");
-        } else if (GET_HIT(vict) >= GET_HIT(ch) * 0.75) {
-         send_to_char(ch, "Their power is about a quarter of your own or larger.\n");
-        } else if (GET_HIT(vict) >= GET_HIT(ch) * 0.5) {
-         send_to_char(ch, "Their power is about half of your own or larger.\n");
-        } else if (GET_HIT(vict) >= GET_HIT(ch) * 0.25) {
-         send_to_char(ch, "Their power is about a quarter of your own or larger.\n");
-        } else if (GET_HIT(vict) >= GET_HIT(ch) * 0.1) {
-         send_to_char(ch, "Their power is about a tenth of your own or larger.\n");
-        } else if (GET_HIT(vict) >= GET_HIT(ch) * 0.01) {
-         send_to_char(ch, "Their power is less than a tenth of your own.\n");
-        } else if (GET_HIT(vict) < GET_HIT(ch) * 0.01) {
-         send_to_char(ch, "Their power is less than 1 percent of your own. What a weakling...\n");
-        }
-     if (!read_sense_memory(ch, vict)) {
-      send_to_char(ch, "You will remember their ki signal from now on.\r\n");
-      sense_memory_write(ch, vict);
-     }
-    }
-    else {
-     send_to_char(ch, "You can't sense their powerlevel as they are a machine.\r\n");
-    }
-    break;
-  case BFS_TO_FAR:
-    send_to_char(ch, "You are too far to sense %s accurately from here.\r\n", HMHR(vict));
-    break;
-  case BFS_NO_PATH:
-    send_to_char(ch, "You can't sense %s from here.\r\n", HMHR(vict));
-    break;
-  default:	/* Success! */
-    if ((GET_SKILL_BASE(ch, SKILL_SENSE) >= 75)) {
-     char *blah = sense_location(vict);
-     send_to_char(ch, "You sense them %s from here!\r\n", dirs[dir]);
-     send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
-     free(blah);
-    } else { 
-    send_to_char(ch, "You sense them %s from here!\r\n", dirs[dir]);
-    break;
-  }
-    WAIT_STATE(ch, PULSE_2SEC);
-    improve_skill(ch, SKILL_SENSE, 1);
-    improve_skill(ch, SKILL_SENSE, 1);
-    improve_skill(ch, SKILL_SENSE, 1);
-    }
+	/* We can't track the victim. */
+	if (AFF_FLAGGED(vict, AFF_NOTRACK) || IS_ANDROID(vict)) {
+		send_to_char(ch, "You can't sense them.\r\n");
+		return;
+	}
+
+	if (GET_HIT(vict) < (GET_HIT(ch) * 0.001) + 1) {
+		if (IN_ROOM(ch) == IN_ROOM(vict)) {
+			if (!read_sense_memory(ch, vict)) {
+				send_to_char(ch, "Their powerlevel is too weak for you to sense properly, but you will recognise their ki signal from now on.\r\n");
+				sense_memory_write(ch, vict);
+			}
+			else {
+				send_to_char(ch, "Their powerlevel is too weak for you to sense properly.\r\n");
+			}
+		}
+		else {
+			send_to_char(ch, "Their powerlevel is too weak for you to sense properly.\r\n");
+		}
+		return;
+	}
+
+	if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_YARDRAT)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_YARDRAT))))
+	{
+		send_to_char(ch, "@WSense@D: @YYardrat@n\r\n");
+		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
+		{
+			char *blah = sense_location(vict);
+			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
+			free(blah);
+		}
+	}
+	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_EARTH))))
+	{
+		send_to_char(ch, "@WSense@D: @GEarth@n\r\n");
+		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
+		{
+			char *blah = sense_location(vict);
+			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
+			free(blah);
+		}
+	}
+	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_VEGETA)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_VEGETA))))
+	{
+		send_to_char(ch, "@WSense@D: @YVegeta@n\r\n");
+		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
+		{
+			char *blah = sense_location(vict);
+			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
+			free(blah);
+		}
+	}
+	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_NAMEK)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_NAMEK))))
+	{
+		send_to_char(ch, "@WSense@D: @gNamek@n\r\n");
+		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
+		{
+			char *blah = sense_location(vict);
+			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
+			free(blah);
+		}
+	}
+	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_FRIGID)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_FRIGID))))
+	{
+		send_to_char(ch, "@WSense@D: @CFrigid@n\r\n");
+		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
+		{
+			char *blah = sense_location(vict);
+			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
+			free(blah);
+		}
+	}
+	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_AETHER)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_AETHER))))
+	{
+		send_to_char(ch, "@WSense@D: @mAetherh@n\r\n");
+		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
+		{
+			char *blah = sense_location(vict);
+			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
+			free(blah);
+		}
+	}
+	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_KONACK)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_KONACK))))
+	{
+		send_to_char(ch, "@WSense@D: @MKonack@n\r\n");
+		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
+		{
+			char *blah = sense_location(vict);
+			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
+			free(blah);
+		}
+	}
+	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_KANASSA)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_KANASSA))))
+	{
+		send_to_char(ch, "@WSense@D: @cKanassa@n\r\n");
+		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
+		{
+			char *blah = sense_location(vict);
+			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
+			free(blah);
+		}
+	}
+	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_ARLIA)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_ARLIA))))
+	{
+		send_to_char(ch, "@WSense@D: @yArlia@n\r\n");
+		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
+		{
+			char *blah = sense_location(vict);
+			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
+			free(blah);
+		}
+	}
+	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(PLANET_ZENITH(IN_ROOM(ch))) && (PLANET_ZENITH(IN_ROOM(vict)))))
+   {
+	send_to_char(ch, "@WSense@D: @CZenith@n\r\n");
+	if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
+	{
+	 char *blah = sense_location(vict);
+	 send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
+	 free(blah);
+	}
+   } 
+	else 
+	{
+
+
+
+		if (GET_SKILL(ch, SKILL_SENSE) < rand_number(1, 101)) {
+			int tries = 10;
+			/* Find a random direction. :) */
+			do {
+				dir = rand_number(0, NUM_OF_DIRS - 1);
+			} while (!CAN_GO(ch, dir) && --tries);
+			send_to_char(ch, "You sense them %s faintly from here, but are unsure....\r\n", dirs[dir]);
+			improve_skill(ch, SKILL_SENSE, 1);
+			improve_skill(ch, SKILL_SENSE, 1);
+			improve_skill(ch, SKILL_SENSE, 1);
+			return;
+		}
+
+		/* They passed the skill check. */
+		dir = find_first_step(IN_ROOM(ch), IN_ROOM(vict));
+
+		switch (dir) {
+		case BFS_ERROR:
+			send_to_char(ch, "Hmm.. something seems to be wrong.\r\n");
+			break;
+		case BFS_ALREADY_THERE:
+			act("You look at $N@n intently for a moment.", TRUE, ch, 0, vict, TO_CHAR);
+			act("$n looks at you intently for a moment.", TRUE, ch, 0, vict, TO_VICT);
+			act("$n looks at $N intently for a moment.", TRUE, ch, 0, vict, TO_NOTVICT);
+			if (!IS_ANDROID(vict)) {
+				if (GET_ALIGNMENT(vict) > 50 && GET_ALIGNMENT(vict) < 200) {
+					send_to_char(ch, "You sense slightly pure and good ki from them.\r\n");
+				}
+				else if (GET_ALIGNMENT(vict) > 200 && GET_ALIGNMENT(vict) < 500) {
+					send_to_char(ch, "You sense a pure and good ki from them.\r\n");
+				}
+				else if (GET_ALIGNMENT(vict) >= 500) {
+					send_to_char(ch, "You sense an extremely pure and good ki from them.\r\n");
+				}
+				else if (GET_ALIGNMENT(vict) < -50 && GET_ALIGNMENT(vict) > -200) {
+					send_to_char(ch, "You sense slightly sour and evil ki from them.\r\n");
+				}
+				else if (GET_ALIGNMENT(vict) < -200 && GET_ALIGNMENT(vict) > -500) {
+					send_to_char(ch, "You sense a sour and evil ki from them.\r\n");
+				}
+				else if (GET_ALIGNMENT(vict) <= -500) {
+					send_to_char(ch, "You sense an extremely evil ki from them.\r\n");
+				}
+				else if (GET_ALIGNMENT(vict) > -50 && GET_ALIGNMENT(vict) < 50) {
+					send_to_char(ch, "You sense slightly mild indefinable ki from them.\r\n");
+				}
+			}
+			if (!IS_ANDROID(vict)) {
+				if (GET_HIT(vict) > GET_HIT(ch) * 50) {
+					send_to_char(ch, "Their power is so huge it boggles your mind and crushes your spirit to fight!\n");
+				}
+				else if (GET_HIT(vict) > GET_HIT(ch) * 25) {
+					send_to_char(ch, "Their power is so much larger than you that you would die like an insect.\n");
+				}
+				else if (GET_HIT(vict) > GET_HIT(ch) * 10) {
+					send_to_char(ch, "Their power is many times larger than your own.\n");
+				}
+				else if (GET_HIT(vict) > GET_HIT(ch) * 5) {
+					send_to_char(ch, "Their power is a great deal larger than your own.\n");
+				}
+				else if (GET_HIT(vict) > GET_HIT(ch) * 2) {
+					send_to_char(ch, "Their power is more than twice as large as your own.\n");
+				}
+				else if (GET_HIT(vict) > GET_HIT(ch)) {
+					send_to_char(ch, "Their power is about twice as large as your own.\n");
+				}
+				else if (GET_HIT(vict) == GET_HIT(ch)) {
+					send_to_char(ch, "Their power is exactly as strong as you.\n");
+				}
+				else if (GET_HIT(vict) >= GET_HIT(ch) * 0.75) {
+					send_to_char(ch, "Their power is about a quarter of your own or larger.\n");
+				}
+				else if (GET_HIT(vict) >= GET_HIT(ch) * 0.5) {
+					send_to_char(ch, "Their power is about half of your own or larger.\n");
+				}
+				else if (GET_HIT(vict) >= GET_HIT(ch) * 0.25) {
+					send_to_char(ch, "Their power is about a quarter of your own or larger.\n");
+				}
+				else if (GET_HIT(vict) >= GET_HIT(ch) * 0.1) {
+					send_to_char(ch, "Their power is about a tenth of your own or larger.\n");
+				}
+				else if (GET_HIT(vict) >= GET_HIT(ch) * 0.01) {
+					send_to_char(ch, "Their power is less than a tenth of your own.\n");
+				}
+				else if (GET_HIT(vict) < GET_HIT(ch) * 0.01) {
+					send_to_char(ch, "Their power is less than 1 percent of your own. What a weakling...\n");
+				}
+				if (!read_sense_memory(ch, vict)) {
+					send_to_char(ch, "You will remember their ki signal from now on.\r\n");
+					sense_memory_write(ch, vict);
+				}
+			}
+			else {
+				send_to_char(ch, "You can't sense their powerlevel as they are a machine.\r\n");
+			}
+			break;
+		case BFS_TO_FAR:
+			send_to_char(ch, "You are too far to sense %s accurately from here.\r\n", HMHR(vict));
+			break;
+		case BFS_NO_PATH:
+			send_to_char(ch, "You can't sense %s from here.\r\n", HMHR(vict));
+			break;
+		default:	/* Success! */
+			if ((GET_SKILL_BASE(ch, SKILL_SENSE) >= 75)) {
+				char *blah = sense_location(vict);
+				send_to_char(ch, "You sense them %s from here!\r\n", dirs[dir]);
+				send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
+				free(blah);
+			}
+			else {
+				send_to_char(ch, "You sense them %s from here!\r\n", dirs[dir]);
+				break;
+			}
+			WAIT_STATE(ch, PULSE_2SEC);
+			improve_skill(ch, SKILL_SENSE, 1);
+			improve_skill(ch, SKILL_SENSE, 1);
+			improve_skill(ch, SKILL_SENSE, 1);
+		}
+	}
 }
 

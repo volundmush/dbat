@@ -100,21 +100,42 @@ int calculate_skill_cost(struct char_data *ch, int skill)
 
 void handle_ingest_learn(struct char_data *ch, struct char_data *vict)
 {
-  int i;
+	
+	int i = 1;
+	send_to_char(ch, "@YAll your current skills improve somewhat!@n\r\n");
 
-  send_to_char(ch, "@YAll your current skills improve somewhat!@n\r\n");
-  
-  for (i = 1; i <= SKILL_TABLE_SIZE; i++) {
-   if (GET_SKILL_BASE(ch, i) > 0 && GET_SKILL_BASE(vict, i) > 0) {
-    send_to_char(ch, "@YYou gained a lot of new knowledge about @y%s@Y!@n\r\n", spell_info[i].name);
-    if (GET_SKILL_BASE(ch, i) + 10 < 100)
-     GET_SKILL_BASE(ch, i) += 10;
-    else
-     GET_SKILL_BASE(ch, i) = 100;
-   } else if (GET_SKILL_BASE(ch, i) > 0 && GET_SKILL_BASE(ch, i) < 100) {
-    GET_SKILL_BASE(ch, i) += 1;
-   }
-  }
+	for (i = 1; i <= SKILL_TABLE_SIZE; i++) 
+	{
+		
+		if (GET_SKILL_BASE(ch, i) > 0 && GET_SKILL_BASE(vict, i) > 0 && i != 141)
+		{
+			send_to_char(ch, "@YYou gained a lot of new knowledge about @y%s@Y!@n\r\n", spell_info[i].name);
+
+			if (GET_SKILL_BASE(ch, i) + 10 < 100)
+			{
+				GET_SKILL_BASE(ch, i) += 10;
+			}
+			else if (GET_SKILL_BASE(ch, i) > 0 && GET_SKILL_BASE(ch, i) < 100)
+			{
+				GET_SKILL_BASE(ch, i) += 1;
+			}
+			else
+			{
+				GET_SKILL_BASE(ch, i) = 100;
+			}
+			
+		}
+		if (((i >= 481 && i <= 489) || i == 517 || i == 535) && ((GET_SKILL_BASE(ch, i) <= 0) && GET_SKILL_BASE(vict, i) > 0))
+		{
+			SET_SKILL(ch, i, GET_SKILL_BASE(ch, i) + rand_number(10, 25));
+			send_to_char(ch, "@YYou learned @y%s@Y from ingesting your target!@n\r\n", spell_info[i].name);
+			GET_SLOTS(ch) += 1;
+			GET_INGESTLEARNED(ch) = 1;
+
+		}
+		
+
+	}
 }
 
 ACMD(do_teach)

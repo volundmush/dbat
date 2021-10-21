@@ -12209,254 +12209,254 @@ ACMD(do_attack2)
 
 ACMD(do_bite)
 {
- int prob, perc, avo, index = 0, pry = 2, dge = 2, blk = 2, skill = 0;
- cl_sint64 dmg, stcost = 20 + (GET_MAX_HIT(ch) / 500);
- struct char_data *vict;
- struct obj_data *obj;
- char arg[MAX_INPUT_LENGTH];
- double attperc = 0;
+	int prob, perc, avo, index = 0, pry = 2, dge = 2, blk = 2, skill = 0;
+	cl_sint64 dmg, stcost = 20 + (GET_MAX_HIT(ch) / 500);
+	struct char_data *vict;
+	struct obj_data *obj;
+	char arg[MAX_INPUT_LENGTH];
+	double attperc = 0;
 
-  one_argument(argument, arg);
+	one_argument(argument, arg);
 
 
- if (!IS_NPC(ch) && (!IS_MUTANT(ch) || (GET_GENOME(ch, 0) != 7 && GET_GENOME(ch, 1) != 7))) {
-  send_to_char(ch, "You don't want to put that in your mouth, you don't know where it has been!\r\n");
-  return;
- }
- if (!can_grav(ch)) {
-  return;
- }
+	if (!IS_NPC(ch) && (!IS_MUTANT(ch) || (GET_GENOME(ch, 0) != 7 && GET_GENOME(ch, 1) != 7))) {
+		send_to_char(ch, "You don't want to put that in your mouth, you don't know where it has been!\r\n");
+		return;
+	}
+	if (!can_grav(ch)) {
+		return;
+	}
 
-  if (!*arg && !FIGHTING(ch)) {
-   return;
-  }
+	if (!*arg && !FIGHTING(ch)) {
+		return;
+	}
 
- if (!check_points(ch, 0, GET_MAX_HIT(ch) / 200)) {
-  return;
- }
+	if (!check_points(ch, 0, GET_MAX_HIT(ch) / 200)) {
+		return;
+	}
 
- skill = init_skill(ch, SKILL_PUNCH);
+	skill = init_skill(ch, SKILL_PUNCH);
 
- if (skill <= 0) {
-  skill = 60;
- }
+	if (skill <= 0) {
+		skill = 60;
+	}
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   return;
-  }
- }
- handle_cooldown(ch, 4);
- if (vict) {
-  if (!can_kill(ch, vict, NULL, 0)) {
-   return;
-  }
-  if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
-   vict = def;
-  }
-  index = check_def(vict);
-  prob = roll_accuracy(ch, skill, TRUE);
-  perc = chance_to_hit(ch);
+	vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
+		if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
+			vict = FIGHTING(ch);
+		}
+		else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
+			return;
+		}
+	}
+	handle_cooldown(ch, 4);
+	if (vict) {
+		if (!can_kill(ch, vict, NULL, 0)) {
+			return;
+		}
+		if (handle_defender(vict, ch)) {
+			struct char_data *def = GET_DEFENDER(vict);
+			vict = def;
+		}
+		index = check_def(vict);
+		prob = roll_accuracy(ch, skill, TRUE);
+		perc = chance_to_hit(ch);
 
-  index -= handle_speed(ch, vict);
+		index -= handle_speed(ch, vict);
 
-  avo = index / 4;
+		avo = index / 4;
 
-  handle_defense(vict, &pry, &blk, &dge);
+		handle_defense(vict, &pry, &blk, &dge);
 
-  prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
-  }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your bite before reappearing!@n", TRUE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c bite before reappearing!@n", TRUE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c bite before reappearing!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     pcost(ch, 0, stcost / 2);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your bite, but your zanzoken is faster!@n", TRUE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
-  if (prob < perc - 20) {
-   if (GET_MOVE(vict) > 0) {
-    if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
-	 act("@C$N@W parries your bite with a punch of their own!@n", TRUE, ch, 0, vict, TO_CHAR);
-     act("@WYou parry @C$n's@W bite with a punch of your own!@n", TRUE, ch, 0, vict, TO_VICT);
-     act("@C$N@W parries @c$n's@W bite with a punch of $S own!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     improve_skill(vict, SKILL_PARRY, 0);
-     pcost(ch, 0, stcost / 2);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 500);
-     dmg = damtype(vict, -1, skill, attperc);
-     dmg *= calc_critical(ch, 1);
-     hurt(0, 0, vict, ch, NULL, dmg, -1);
-     
-     return;
-    }
-    else if (blk > axion_dice(10)) {
-	 act("@C$N@W moves quickly and blocks your bite!@n", TRUE, ch, 0, vict, TO_CHAR);
-     act("@WYou move quickly and block @C$n's@W bite!@n", TRUE, ch, 0, vict, TO_VICT);
-     act("@C$N@W moves quickly and blocks @c$n's@W bite!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     improve_skill(vict, SKILL_BLOCK, 0);
-     pcost(ch, 0, stcost / 2);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 500);
-     dmg = damtype(ch, 6, skill, attperc);
-     dmg /= 4;
-     hurt(0, 0, ch, vict, NULL, dmg, 0);
-     
-     return;
-    }
-    else if (dge > axion_dice(10)) {
-     act("@C$N@W manages to dodge your bite!@n", TRUE, ch, 0, vict, TO_CHAR);
-     act("@WYou dodge @C$n's@W bite!@n", TRUE, ch, 0, vict, TO_VICT);
-     act("@C$N@W manages to dodge @c$n's@W bite!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     improve_skill(vict, SKILL_DODGE, 0);
-     pcost(ch, 0, stcost / 2);
-     hurt(0, 0, ch, vict, NULL, 0, 0);
-     
-     return;
-    }
-    else {
-	 act("@WYou move to bite @C$N@W, but miss!@n", TRUE, ch, 0, vict, TO_CHAR);
-     act("@C$n@W moves to bite you, but misses!@n", TRUE, ch, 0, vict, TO_VICT);
-     act("@c$n@W moves to bite @C$N@W, but somehow misses!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     pcost(ch, 0, stcost / 2);
-     hurt(0, 0, ch, vict, NULL, 0, 0);
-     
-     return;
-    }
-   }
-   else {
-     act("@C$n@W moves to bite you, but misses!@n", TRUE, ch, 0, vict, TO_VICT);
-     act("@c$n@W moves to bite @C$N@W, but somehow misses!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-    pcost(ch, 0, stcost / 2);
-     
-   }
-     hurt(0, 0, ch, vict, NULL, 0, 0);
-   return;
-  }
-  else {
-   dmg = damtype(ch, 8, skill, attperc);
-   if (!IS_NPC(ch)) {
-    dmg = damtype(ch, 0, skill, attperc);
-   }
-   dmg += dmg * 0.25;
-   int hitspot = 1;
-   hitspot = roll_hitloc(ch, vict, skill);
-   switch(hitspot) {
-    case 1:
-      act("@WYou bite @C$N's@W face!@n", TRUE, ch, 0, vict, TO_CHAR);
-      act("@C$n@W bites your face!@n", TRUE, ch, 0, vict, TO_VICT);
-      act("@c$n@W bites into $N's face!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-         if (GET_BONUS(ch, BONUS_SOFT)) {
-          dmg *= calc_critical(ch, 2);
-         }
-      hurt(0, 0, ch, vict, NULL, dmg, 0);
-      dam_eq_loc(vict, 3);
-      /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
-     break;
-    case 2: /* Critical */
-      act("@WYou bite @C$N@W!@n", TRUE, ch, 0, vict, TO_CHAR);
-      act("@C$n@W bites you!@n", TRUE, ch, 0, vict, TO_VICT);
-      act("@C$n@W bites @c$N@W!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      dmg *= calc_critical(ch, 0);
-      hurt(0, 0, ch, vict, NULL, dmg, 0);
-      dam_eq_loc(vict, 4);
-      /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
-     break;
-    case 3:
-      act("@WYou bite @C$N's@W body!@n", TRUE, ch, 0, vict, TO_CHAR);
-      act("@C$n@W bites you on the body, sending blood flying!@n", TRUE, ch, 0, vict, TO_VICT);
-      act("@C$n@W bites @c$N@W on the body, sending blood flying!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-         if (GET_BONUS(ch, BONUS_SOFT)) {
-          dmg *= calc_critical(ch, 2);
-         }
-      hurt(0, 0, ch, vict, NULL, dmg, 0);
-      dam_eq_loc(vict, 4);
-      /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
-     break;
-    case 4: /* Weak */
-      act("@WYou bite @C$N's@W arm!@n", TRUE, ch, 0, vict, TO_CHAR);
-      act("@C$n@W bites you on the arm!@n", TRUE, ch, 0, vict, TO_VICT);
-      act("@C$n@W bites @c$N@W on the arm!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      dmg *= calc_critical(ch, 1);
-      hurt(0, 0, ch, vict, NULL, dmg, 0);
-      dam_eq_loc(vict, 1);
-      /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
-     break;
-    case 5: /* Weak 2 */
-      act("@WYou bite @C$N's@W leg!@n", TRUE, ch, 0, vict, TO_CHAR);
-      act("@C$n@W bites into your leg!@n", TRUE, ch, 0, vict, TO_VICT);
-      act("@c$n@W bites into @c$N's@W leg!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      dmg *= calc_critical(ch, 1);
-      hurt(0, 0, ch, vict, NULL, dmg, 0);
-      dam_eq_loc(vict, 2);
-      /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
-     break;
-   }
-   if (!IS_NPC(ch)) {
-    if (axion_dice(0) > GET_CON(vict) && rand_number(1, 5) == 5) {
-     act("@R$N@r was poisoned by your bite!@n", TRUE, ch, 0, vict, TO_CHAR);
-     act("@rYou were poisoned by the bite!@n", TRUE, ch, 0, vict, TO_VICT);
-     vict->poisonby = ch;
-     int duration = (GET_INT(ch) / 50) + 1;
-     assign_affect(vict, AFF_POISON, SKILL_POISON, duration, 0, 0, 0, 0, 0, 0);
-    }
-   }
+		prob -= avo;
+		if (GET_POS(vict) == POS_SLEEPING) {
+			pry = 0;
+			blk = 0;
+			dge = 0;
+			prob += 50;
+		}
+		if (GET_POS(vict) == POS_RESTING) {
+			pry /= 4;
+			blk /= 4;
+			dge /= 4;
+			prob += 25;
+		}
+		if (GET_POS(vict) == POS_SITTING) {
+			pry /= 2;
+			blk /= 2;
+			dge /= 2;
+			prob += 10;
+		}
+		if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
+			if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
+				act("@C$N@c disappears, avoiding your bite before reappearing!@n", TRUE, ch, 0, vict, TO_CHAR);
+				act("@cYou disappear, avoiding @C$n's@c bite before reappearing!@n", TRUE, ch, 0, vict, TO_VICT);
+				act("@C$N@c disappears, avoiding @C$n's@c bite before reappearing!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+				if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
+					REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
+				}
+				REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
+				pcost(ch, 0, stcost / 2);
+				pcost(vict, 0, GET_MAX_HIT(vict) / 200);
 
-   pcost(ch, 0, stcost);
-     
-   return;
-  }
- }
- else if (obj) {
-  if (!can_kill(ch, NULL, obj, 0)) {
-   return;
-  }
-   if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
-    return;
-   }
-   dmg = ((GET_HIT(ch) / 10000) + (GET_STR(ch)));
-   act("@C$n@W bites $p@W extremely hard!@n", TRUE, ch, obj, 0, TO_ROOM);
-   hurt(0, 0, ch, NULL, obj, dmg, 0);
-   pcost(ch, 0, stcost);
-   
- }
- else {
-  send_to_char(ch, "Error! Please report.\r\n");
-  return;
- }
+				return;
+			}
+			else {
+				act("@C$N@c disappears, trying to avoid your bite, but your zanzoken is faster!@n", TRUE, ch, 0, vict, TO_CHAR);
+				act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
+				act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+				REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
+				REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
+			}
+		}
+		if (prob < perc - 20) {
+			if (GET_MOVE(vict) > 0) {
+				if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
+					act("@C$N@W parries your bite with a punch of their own!@n", TRUE, ch, 0, vict, TO_CHAR);
+					act("@WYou parry @C$n's@W bite with a punch of your own!@n", TRUE, ch, 0, vict, TO_VICT);
+					act("@C$N@W parries @c$n's@W bite with a punch of $S own!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+					improve_skill(vict, SKILL_PARRY, 0);
+					pcost(ch, 0, stcost / 2);
+					pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+					dmg = damtype(vict, -1, skill, attperc);
+					dmg *= calc_critical(ch, 1);
+					hurt(0, 0, vict, ch, NULL, dmg, -1);
+
+					return;
+				}
+				else if (blk > axion_dice(10)) {
+					act("@C$N@W moves quickly and blocks your bite!@n", TRUE, ch, 0, vict, TO_CHAR);
+					act("@WYou move quickly and block @C$n's@W bite!@n", TRUE, ch, 0, vict, TO_VICT);
+					act("@C$N@W moves quickly and blocks @c$n's@W bite!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+					improve_skill(vict, SKILL_BLOCK, 0);
+					pcost(ch, 0, stcost / 2);
+					pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+					dmg = damtype(ch, 6, skill, attperc);
+					dmg /= 4;
+					hurt(0, 0, ch, vict, NULL, dmg, 0);
+
+					return;
+				}
+				else if (dge > axion_dice(10)) {
+					act("@C$N@W manages to dodge your bite!@n", TRUE, ch, 0, vict, TO_CHAR);
+					act("@WYou dodge @C$n's@W bite!@n", TRUE, ch, 0, vict, TO_VICT);
+					act("@C$N@W manages to dodge @c$n's@W bite!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+					improve_skill(vict, SKILL_DODGE, 0);
+					pcost(ch, 0, stcost / 2);
+					hurt(0, 0, ch, vict, NULL, 0, 0);
+
+					return;
+				}
+				else {
+					act("@WYou move to bite @C$N@W, but miss!@n", TRUE, ch, 0, vict, TO_CHAR);
+					act("@C$n@W moves to bite you, but misses!@n", TRUE, ch, 0, vict, TO_VICT);
+					act("@c$n@W moves to bite @C$N@W, but somehow misses!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+					pcost(ch, 0, stcost / 2);
+					hurt(0, 0, ch, vict, NULL, 0, 0);
+
+					return;
+				}
+			}
+			else {
+				act("@C$n@W moves to bite you, but misses!@n", TRUE, ch, 0, vict, TO_VICT);
+				act("@c$n@W moves to bite @C$N@W, but somehow misses!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+				pcost(ch, 0, stcost / 2);
+
+			}
+			hurt(0, 0, ch, vict, NULL, 0, 0);
+			return;
+		}
+		else {
+			dmg = damtype(ch, 8, skill, attperc);
+			if (!IS_NPC(ch)) {
+				dmg = damtype(ch, 0, skill, attperc);
+			}
+			dmg += dmg * 0.25;
+			int hitspot = 1;
+			hitspot = roll_hitloc(ch, vict, skill);
+			switch (hitspot) {
+			case 1:
+				act("@WYou bite @C$N's@W face!@n", TRUE, ch, 0, vict, TO_CHAR);
+				act("@C$n@W bites your face!@n", TRUE, ch, 0, vict, TO_VICT);
+				act("@c$n@W bites into $N's face!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+				if (GET_BONUS(ch, BONUS_SOFT)) {
+					dmg *= calc_critical(ch, 2);
+				}
+				hurt(0, 0, ch, vict, NULL, dmg, 0);
+				dam_eq_loc(vict, 3);
+				/* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
+				break;
+			case 2: /* Critical */
+				act("@WYou bite @C$N@W!@n", TRUE, ch, 0, vict, TO_CHAR);
+				act("@C$n@W bites you!@n", TRUE, ch, 0, vict, TO_VICT);
+				act("@C$n@W bites @c$N@W!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+				dmg *= calc_critical(ch, 0);
+				hurt(0, 0, ch, vict, NULL, dmg, 0);
+				dam_eq_loc(vict, 4);
+				/* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
+				break;
+			case 3:
+				act("@WYou bite @C$N's@W body!@n", TRUE, ch, 0, vict, TO_CHAR);
+				act("@C$n@W bites you on the body, sending blood flying!@n", TRUE, ch, 0, vict, TO_VICT);
+				act("@C$n@W bites @c$N@W on the body, sending blood flying!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+				if (GET_BONUS(ch, BONUS_SOFT)) {
+					dmg *= calc_critical(ch, 2);
+				}
+				hurt(0, 0, ch, vict, NULL, dmg, 0);
+				dam_eq_loc(vict, 4);
+				/* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
+				break;
+			case 4: /* Weak */
+				act("@WYou bite @C$N's@W arm!@n", TRUE, ch, 0, vict, TO_CHAR);
+				act("@C$n@W bites you on the arm!@n", TRUE, ch, 0, vict, TO_VICT);
+				act("@C$n@W bites @c$N@W on the arm!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+				dmg *= calc_critical(ch, 1);
+				hurt(0, 0, ch, vict, NULL, dmg, 0);
+				dam_eq_loc(vict, 1);
+				/* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
+				break;
+			case 5: /* Weak 2 */
+				act("@WYou bite @C$N's@W leg!@n", TRUE, ch, 0, vict, TO_CHAR);
+				act("@C$n@W bites into your leg!@n", TRUE, ch, 0, vict, TO_VICT);
+				act("@c$n@W bites into @c$N's@W leg!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+				dmg *= calc_critical(ch, 1);
+				hurt(0, 0, ch, vict, NULL, dmg, 0);
+				dam_eq_loc(vict, 2);
+				/* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
+				break;
+			}
+			if (!IS_NPC(ch)) {
+				if (axion_dice(0) > GET_CON(vict) && rand_number(1, 5) == 5) {
+					act("@R$N@r was poisoned by your bite!@n", TRUE, ch, 0, vict, TO_CHAR);
+					act("@rYou were poisoned by the bite!@n", TRUE, ch, 0, vict, TO_VICT);
+					vict->poisonby = ch;
+					int duration = (GET_INT(ch) / 50) + 1;
+					assign_affect(vict, AFF_POISON, SKILL_POISON, duration, 0, 0, 0, 0, 0, 0);
+				}
+			}
+
+			pcost(ch, 0, stcost);
+
+			return;
+		}
+	}
+	else if (obj) {
+		if (!can_kill(ch, NULL, obj, 0)) {
+			return;
+		}
+		if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
+			return;
+		}
+		dmg = ((GET_HIT(ch) / 10000) + (GET_STR(ch)));
+		act("@C$n@W bites $p@W extremely hard!@n", TRUE, ch, obj, 0, TO_ROOM);
+		hurt(0, 0, ch, NULL, obj, dmg, 0);
+		pcost(ch, 0, stcost);
+
+	}
+	else {
+		send_to_char(ch, "Error! Please report.\r\n");
+		return;
+	}
 }
 
 ACMD(do_kiball)
