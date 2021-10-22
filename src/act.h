@@ -84,7 +84,6 @@ ACMD(do_voice);
 ACMD(do_languages);
 ACMD(do_osay);
 
-
 /* act.informative.c */
 // defines
 #define MAX_PORTAL_TYPES        6
@@ -250,6 +249,9 @@ ACMD(do_multiform);
 ACMD(do_spiritcontrol);
 ACMD(do_ashcloud);
 ACMD(do_silk);
+ACMD(do_tailhide);
+ACMD(do_nogrow);
+ACMD(do_restring);
 
 /* act.movement.c */
 
