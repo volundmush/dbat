@@ -126,5 +126,8 @@ void   show_help(struct descriptor_data *t, const char *entry);
 /* variables */
 extern unsigned long pulse;
 extern FILE *logfile;
-
+extern int circle_shutdown, circle_reboot;
+extern socket_t mother_desc;
+extern ush_int port;
+extern int buf_switches, buf_largecount, buf_overflows;
 #endif

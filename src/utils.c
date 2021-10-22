@@ -4686,7 +4686,7 @@ int num_pc_in_room(struct room_data *room)
  * non-recoverable errors, of course...
  *
  * XXX: Wonder if flushing streams includes sockets?  */
-extern FILE *player_fl;
+FILE *player_fl;
 void core_dump_real(const char *who, int line)
 {
   /* log("SYSERR: Assertion failed at %s:%d!", who, line); */

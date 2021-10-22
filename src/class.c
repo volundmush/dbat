@@ -17,24 +17,6 @@
 
 #include "class.h"
 
-
-
-extern void racial_ability_modifiers(struct char_data *ch);
-extern void set_height_and_weight_by_race(struct char_data *ch);
-extern void racial_body_parts(struct char_data *ch);
-extern void bring_to_cap(struct char_data *ch);
-void send_to_imm(char *messg, ...);
-extern int ERAPLAYERS;
-
-/* local functions */
-void snoop_check(struct char_data *ch);
-int parse_class(struct char_data *ch, int arg);
-void do_start(struct char_data *ch);
-int invalid_class(struct char_data *ch, struct obj_data *obj);
-int level_exp(struct char_data *ch, int level);
-int load_levels();
-void cedit_creation(struct char_data *ch);
-
 /* Names first */
 
 const char *class_abbrevs[NUM_CLASSES+1] = {
@@ -151,14 +133,14 @@ const char *class_display[NUM_CLASSES] = {
   "@B1@W) @MRoshi\r\n",
   "@B2@W) @WPiccolo\r\n",
   "@B3@W) @YKrane\r\n",
-  "@B4@W) @BNail\r\n"
-  "@B5@W) @BBardock\r\n"
-  "@B6@W) @BGinyu\r\n"
+  "@B4@W) @BNail\r\n",
+  "@B5@W) @BBardock\r\n",
+  "@B6@W) @BGinyu\r\n",
   "@B7@W) @WFrieza\r\n",
   "@B8@W) @YTapion\r\n",
-  "@B9@W) @BAndroid 16\r\n"
-  "@B10@W) @BDabura\r\n"
-  "@B11@W) @BKibito\r\n"
+  "@B9@W) @BAndroid 16\r\n",
+  "@B10@W) @BDabura\r\n",
+  "@B11@W) @BKibito\r\n",
   "@B12@W) @BJinto\r\n",
   "@B13@W) @BTsuna\r\n",
   "@B14@W) @BKurzak\r\n",
@@ -373,7 +355,7 @@ int parse_class(struct char_data *ch, int arg)
  * "recycle" the existing mobs that are used in other guilds for your new
  * guild, then you don't have to change that file, only here.
  */
-struct guild_info_type guild_info[6] = {
+const struct guild_info_type guild_info[6] = {
 
 /* Kortaal */
   { CLASS_ROSHI,	3017,	SCMD_EAST	},
@@ -414,16 +396,16 @@ const char *config_sect[NUM_CONFIG_SECTIONS+1] = {
 #define CONFIG_LEVEL_WILL	5
 #define CONFIG_LEVEL_BASEHIT	6
 
-char level_version[READ_SIZE];
-int level_vernum = 0;
-int save_classes[SAVING_WILL+1][NUM_CLASSES];
-int basehit_classes[NUM_CLASSES];
+static char level_version[READ_SIZE];
+static int level_vernum = 0;
+static int save_classes[SAVING_WILL+1][NUM_CLASSES];
+static int basehit_classes[NUM_CLASSES];
 
 #define SAVE_MANUAL 0
 #define SAVE_LOW 1
 #define SAVE_HIGH 2
 
-char *save_type_names[] = {
+static const char *save_type_names[] = {
   "manual",
   "low",
   "high"
@@ -434,7 +416,7 @@ char *save_type_names[] = {
 #define BASEHIT_MEDIUM  2
 #define BASEHIT_HIGH    3
 
-char *basehit_type_names[] = {
+static const char *basehit_type_names[] = {
   "manual",
   "low",
   "medium",
@@ -443,7 +425,7 @@ char *basehit_type_names[] = {
 
 /* Class Template Attribute values were created so all default PC classes would
    total 80 before racial modifiers. Non defaults add up to 60. */
-int class_template[NUM_BASIC_CLASSES][6] = {
+static const int class_template[NUM_BASIC_CLASSES][6] = {
 /* 		      S,  D,  C,  I,  W,  C */
 /* Wizard 	*/ { 10, 13, 13, 18, 16, 10 },
 /* Cleric 	*/ { 13, 10, 13, 10, 18, 16 },
@@ -460,7 +442,7 @@ int class_template[NUM_BASIC_CLASSES][6] = {
 
 /* Race Template Attribute values were created so all default PC races would
    total 80 before racial modifiers. Non defaults add up to 60. */
-int race_template[NUM_RACES][6] = {
+static const int race_template[NUM_RACES][6] = {
 /* 		      S,  D,  C,  I,  W,  C */
 /* Human 	*/ { 13, 13, 13, 13, 13, 13 },
 /* Saiyan  	*/ { 16, 12, 14, 10, 12, 12 },
@@ -515,7 +497,7 @@ void cedit_creation(struct char_data *ch)
 /* This character creation method is original */
 
 /* Taken from the SRD under OGL, see ../doc/srd.txt for information */
-int class_hit_die_size[NUM_CLASSES] = {
+const int class_hit_die_size[NUM_CLASSES] = {
 /* Wi */ 4,
 /* Cl */ 8,
 /* Ro */ 6,
@@ -899,20 +881,20 @@ void do_start(struct char_data *ch)
 }
 
 
-int free_start_feats_wizard[] = {
+static const int free_start_feats_wizard[] = {
   FEAT_SIMPLE_WEAPON_PROFICIENCY,
   FEAT_SCRIBE_SCROLL,
   0
 };
 
-int free_start_feats_sorcerer[] = {
+static const int free_start_feats_sorcerer[] = {
   FEAT_SIMPLE_WEAPON_PROFICIENCY,
   0
 };
 
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-int free_start_feats_cleric[] = {
+static const int free_start_feats_cleric[] = {
   FEAT_SIMPLE_WEAPON_PROFICIENCY,
   FEAT_ARMOR_PROFICIENCY_HEAVY,
   FEAT_ARMOR_PROFICIENCY_LIGHT,
@@ -922,14 +904,14 @@ int free_start_feats_cleric[] = {
 };
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-int free_start_feats_rogue[] = {
+static const int free_start_feats_rogue[] = {
   FEAT_SIMPLE_WEAPON_PROFICIENCY,
   FEAT_ARMOR_PROFICIENCY_LIGHT,
   0
 };
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-int free_start_feats_fighter[] = {
+static const int free_start_feats_fighter[] = {
   FEAT_SIMPLE_WEAPON_PROFICIENCY,
   FEAT_MARTIAL_WEAPON_PROFICIENCY,
   FEAT_ARMOR_PROFICIENCY_HEAVY,
@@ -939,7 +921,7 @@ int free_start_feats_fighter[] = {
   0
 };
 
-int free_start_feats_paladin[] = {
+static const int free_start_feats_paladin[] = {
   FEAT_SIMPLE_WEAPON_PROFICIENCY,
   FEAT_MARTIAL_WEAPON_PROFICIENCY,
   FEAT_ARMOR_PROFICIENCY_HEAVY,
@@ -951,7 +933,7 @@ int free_start_feats_paladin[] = {
 
 
 
-int free_start_feats_barbarian[] = {
+static const int free_start_feats_barbarian[] = {
   FEAT_SIMPLE_WEAPON_PROFICIENCY,
   FEAT_MARTIAL_WEAPON_PROFICIENCY,
   FEAT_ARMOR_PROFICIENCY_LIGHT,
@@ -960,14 +942,14 @@ int free_start_feats_barbarian[] = {
   0
 };
 
-int free_start_feats_bard[] = {
+static const int free_start_feats_bard[] = {
   FEAT_SIMPLE_WEAPON_PROFICIENCY,
   FEAT_ARMOR_PROFICIENCY_LIGHT,
   FEAT_ARMOR_PROFICIENCY_SHIELD,
   0
 };
 
-int free_start_feats_ranger[] = {
+static const int free_start_feats_ranger[] = {
   FEAT_SIMPLE_WEAPON_PROFICIENCY,
   FEAT_MARTIAL_WEAPON_PROFICIENCY,
   FEAT_ARMOR_PROFICIENCY_LIGHT,
@@ -977,14 +959,14 @@ int free_start_feats_ranger[] = {
 
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-int free_start_feats_monk[] = {
+static const int free_start_feats_monk[] = {
   FEAT_SIMPLE_WEAPON_PROFICIENCY,
   FEAT_MARTIAL_WEAPON_PROFICIENCY,
   FEAT_IMPROVED_GRAPPLE,
   0
 };
 
-int free_start_feats_druid[] = {
+static const int free_start_feats_druid[] = {
   FEAT_SIMPLE_WEAPON_PROFICIENCY,
   FEAT_ARMOR_PROFICIENCY_LIGHT,
   FEAT_ARMOR_PROFICIENCY_MEDIUM,
@@ -992,13 +974,13 @@ int free_start_feats_druid[] = {
   0
 };
 
-int no_free_start_feats[] = {
+static const int no_free_start_feats[] = {
  0
 };
 
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-int *free_start_feats[] = {
+static const int *free_start_feats[] = {
  /* CLASS_ROSHI	*/ free_start_feats_wizard,
  /* CLASS_PICCOLO	*/ free_start_feats_cleric,
  /* CLASS_KRANE		*/ free_start_feats_rogue,
@@ -2178,9 +2160,9 @@ sbyte dex_mod_capped(const struct char_data *ch)
   return mod;
 }
 
-int cabbr_ranktable[NUM_CLASSES];
+static int cabbr_ranktable[NUM_CLASSES];
 
-int comp_rank(const void *a, const void *b)
+static int comp_rank(const void *a, const void *b)
 {
   int first, second;
   first = *(const int *)a;
@@ -2246,7 +2228,6 @@ char *class_desc_str(struct char_data *ch, int howlong, int wantthe)
   }
 }
 
-
 int total_skill_levels(struct char_data *ch, int skill)
 {
   int i = 0, j, total = 0;
@@ -2257,7 +2238,6 @@ int total_skill_levels(struct char_data *ch, int skill)
   }
   return total;
 }
-
 
 int load_levels()
 {
@@ -2386,8 +2366,7 @@ int calc_penalty_exp(struct char_data *ch, int gain)
   return gain;
 }
 
-
-int size_scaling_table[NUM_SIZES][4] = {
+static const int size_scaling_table[NUM_SIZES][4] = {
 /*                   str       dex     con  nat arm */
 /* Fine		*/ { -10,	-2,	-2,	0 },
 /* Diminutive	*/ { -10,	-2,	-2,	0 },
@@ -2425,7 +2404,7 @@ time_t max_age(struct char_data *ch)
   return tmp;
 }
 
-const int class_feats_wizard[] = {
+static const int class_feats_wizard[] = {
   FEAT_UNDEFINED
 };
 
@@ -2435,19 +2414,19 @@ const int class_feats_wizard[] = {
  * feats. Most classes can ONLY take from these lists for their class
  * feats.
  */
-const int class_feats_rogue[] = {
+static const int class_feats_rogue[] = {
   FEAT_UNDEFINED
 };
 
-const int class_feats_fighter[] = {
+static const int class_feats_fighter[] = {
   FEAT_UNDEFINED
 };
 
-const int no_class_feats[] = {
+static const int no_class_feats[] = {
   FEAT_UNDEFINED
 };
 
-const int *class_bonus_feats[NUM_CLASSES] = {
+static const int *class_bonus_feats[NUM_CLASSES] = {
 /* WIZARD		*/ class_feats_wizard,
 /* CLERIC		*/ no_class_feats,
 /* ROGUE		*/ class_feats_rogue,

@@ -7,48 +7,9 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-
-#include "structs.h"
-#include "utils.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "db.h"
-#include "spells.h"
-#include "constants.h"
-#include "mail.h"
-
-/*   external vars  */
-extern struct time_info_data time_info;
-extern struct guild_info_type guild_info[6];
-extern void auc_save(void);
-extern char *rIntro(struct char_data *ch, char *arg);
-
-/* extern functions */
-ACMD(do_drop);
-ACMD(do_gen_door);
-ACMD(do_say);
-ACMD(do_action);
-void gain_level(struct char_data *ch, int whichclass);
+#include "spec_procs.h"
 
 /* local functions */
-SPECIAL(guild);
-SPECIAL(dump);
-SPECIAL(mayor);
-void npc_steal(struct char_data *ch, struct char_data *victim);
-SPECIAL(snake);
-SPECIAL(thief);
-SPECIAL(magic_user);
-SPECIAL(guild_guard);
-SPECIAL(puff);
-SPECIAL(fido);
-SPECIAL(janitor);
-SPECIAL(cityguard);
-SPECIAL(pet_shops);
-SPECIAL(auction);
-SPECIAL(bank);
-SPECIAL(gravity);
-SPECIAL(augmenter);
 
 
 /* ********************************************************************
@@ -239,7 +200,7 @@ bool check_obj_in_room(obj_vnum obj, room_vnum room)
   return found; 
 } 
 
-int gauntlet_info[][3] = {  /* --mystic 26 Oct 2005 */ 
+static const int gauntlet_info[][3] = {  /* --mystic 26 Oct 2005 */
 
 /* Gauntlet Room Scoring*/ 
 /* Num  Rm Num   Direction   */ 
@@ -556,7 +517,6 @@ SPECIAL(gauntlet_rest)  /* Jamdog - 20th Feb 2007 */
   return FALSE; 
 } 
 
-
 void npc_steal(struct char_data *ch, struct char_data *victim)
 {
   int gold;
@@ -729,7 +689,6 @@ SPECIAL(guild_guard)
 }
 
 
-
 SPECIAL(puff)
 {
   char actbuf[MAX_INPUT_LENGTH];
@@ -755,8 +714,6 @@ SPECIAL(puff)
   }
 }
 
-
-
 SPECIAL(fido)
 {
   struct obj_data *i, *temp, *next_obj;
@@ -781,8 +738,6 @@ SPECIAL(fido)
   return (FALSE);
 }
 
-
-
 SPECIAL(janitor)
 {
   struct obj_data *i;
@@ -803,7 +758,6 @@ SPECIAL(janitor)
 
   return (FALSE);
 }
-
 
 SPECIAL(cityguard)
 {
@@ -867,7 +821,6 @@ SPECIAL(cityguard)
 
   return (FALSE);
 }
-
 
 #define PET_PRICE(pet) (GET_LEVEL(pet) * 300)
 
@@ -934,7 +887,6 @@ SPECIAL(pet_shops)
   /* All commands except list and buy */
   return (FALSE);
 }
-
 
 SPECIAL(auction)
 {
@@ -1134,7 +1086,6 @@ SPECIAL(auction)
   /* All commands except list and buy */
   return (FALSE);
 }
-
 
 /* ********************************************************************
 *  Special procedures for objects                                     *
@@ -1789,7 +1740,6 @@ SPECIAL(bank)
     return (FALSE);
 }
 
-
 SPECIAL(cleric_marduk)
 {
   int tmp, num_used = 0;
@@ -1865,7 +1815,6 @@ SPECIAL(cleric_marduk)
   return FALSE;
 }
 
-
 SPECIAL(cleric_ao)
 {
   int tmp, num_used = 0;
@@ -1932,7 +1881,6 @@ SPECIAL(cleric_ao)
   return FALSE;
 }
 
-
 SPECIAL(dziak)
 {
   int tmp, num_used = 0;
@@ -1992,7 +1940,6 @@ SPECIAL(dziak)
   return FALSE;
 }
 
-
 SPECIAL(azimer)
 {
   int tmp, num_used = 0;
@@ -2049,7 +1996,6 @@ SPECIAL(azimer)
   return FALSE;
 }
 
-
 SPECIAL(lyrzaxyn)
 {
   int tmp, num_used = 0;
@@ -2105,7 +2051,6 @@ SPECIAL(lyrzaxyn)
   }
   return FALSE;
 }
-
 
 SPECIAL(magic_user)
 {
@@ -2165,4 +2110,3 @@ SPECIAL(magic_user)
   }
   return FALSE;
 }
-

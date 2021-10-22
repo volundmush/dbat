@@ -15,4 +15,7 @@
 #include "constants.h"
 #include "maputils.h"
 
+// functions
+int find_first_step(room_rnum src, room_rnum target);
+
 #endif //CIRCLE_GRAPH_H

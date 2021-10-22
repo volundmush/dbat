@@ -8,157 +8,27 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include "structs.h"
-#include "utils.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "db.h"
-#include "spells.h"
-#include "house.h"
-#include "screen.h"
-#include "constants.h"
-#include "oasis.h"
-#include "genzon.h"
-#include "dg_scripts.h"
-#include "assemblies.h"
-#include "feats.h"
-#include "genolc.h"
-#include "improved-edit.h"
-#include "maputils.h"
+#include "act.h"
 
-/*   external vars  */
-extern int number_of_assassins;
-extern int mob_specials_used;
-extern int mapnums[MAP_ROWS+1][MAP_COLS+1];
-extern int SELFISHMETER;
-extern int LASTNEWS;
-extern time_t INTERESTTIME;
-extern time_t LASTINTEREST;
-extern int SAIYAN_ALLOWED;
-extern int MAJIN_ALLOWED;
-extern FILE *player_fl;
-extern struct time_info_data time_info;
-extern time_t boot_time;
-extern int circle_shutdown, circle_reboot;
-extern int circle_restrict;
-extern int buf_switches, buf_largecount, buf_overflows;
-extern int top_of_p_table;
-extern socket_t mother_desc;
-extern ush_int port;
-extern struct player_index_element *player_table;
-struct time_info_data *real_time_passed(time_t t2, time_t t1);
-extern const char *unused_spellname;
-extern const char *list_bonus[];
-extern time_t NEWSUPDATE;
-extern char *NEWS_TITLE;
-
-/* for chars */
-extern number_of_assassins;
-extern int TOP_OF_NEWS;
-extern char *immlist;
-extern char level_version[READ_SIZE];
-extern int level_vernum;
-extern room_vnum freeres[NUM_ALIGNS];
-extern int SAIYAN_ALLOWED;
-extern int MAJIN_ALLOWED;
-/*user accounts*/
-extern void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, char *name);
-extern int readUserIndex(char *name);
-
-/* extern functions */
-extern void log_imm_action(char *messg, ...);
-int check_insidebag(struct obj_data *cont, double mult);
-void star_phase(struct char_data *ch, int type);
-void send_to_imm(char *messg, ...);
-int level_exp(struct char_data *ch, int level);
-int copyover_timer = 0; /* for timed copyovers */
-void show_shops(struct char_data *ch, char *value);
-void hcontrol_list_houses(struct char_data *ch);
-void do_start(struct char_data *ch);
-void appear(struct char_data *ch);
-void reset_zone(zone_rnum zone);
-void run_autowiz(void);
-int save_all(void);
-void print_zone(struct char_data *ch, zone_vnum vnum);
-struct char_data *find_char(long n);
-SPECIAL(shop_keeper);
-void Crash_rentsave(struct char_data * ch, int cost);
-void show_guild(struct char_data * ch, char *arg);
-void list_skills_perct(struct char_data *ch, struct char_data *vict);
-void racial_body_parts(struct char_data *ch);
-void print_lockout(struct char_data *ch);
-extern void delete_inv_backup(struct char_data *ch);
-ACMD(do_reboot);
+/* local variables */
+static int copyover_timer = 0; /* for timed copyovers */
 
 /* local functions */
-void update_space(void);
-void search_replace(char *string, const char *find, const char *replace);
-void execute_copyover(void);
-int perform_set(struct char_data *ch, struct char_data *vict, int mode, char *val_arg);
-void perform_immort_invis(struct char_data *ch, int level);
-ACMD(do_echo);
-ACMD(do_send);
-room_rnum find_target_room(struct char_data *ch, char *rawroomstr);
-ACMD(do_at);
-ACMD(do_goto);
-ACMD(do_trans);
-ACMD(do_teleport);
-ACMD(do_vnum);
-void do_stat_room(struct char_data *ch);
-void do_stat_object(struct char_data *ch, struct obj_data *j);
-void do_stat_character(struct char_data *ch, struct char_data *k);
-ACMD(do_stat);
-ACMD(do_shutdown);
-ACMD(do_recall);
-void stop_snooping(struct char_data *ch);
-ACMD(do_snoop);
-ACMD(do_switch);
-ACMD(do_return);
-ACMD(do_load);
-ACMD(do_vstat);
-ACMD(do_purge);
-ACMD(do_syslog);
-ACMD(do_advance);
-ACMD(do_restore);
-void perform_immort_vis(struct char_data *ch);
-ACMD(do_invis);
-ACMD(do_gecho);
-ACMD(do_poofset);
-ACMD(do_dc);
-ACMD(do_wizlock);
-ACMD(do_date);
-ACMD(do_last);
-ACMD(do_force);
-ACMD(do_wiznet);
-ACMD(do_zreset);
-ACMD(do_wizutil);
-size_t print_zone_to_buf(char *bufptr, size_t left, zone_rnum zone, int listall);
-ACMD(do_show);
-ACMD(do_set);
-void snoop_check(struct char_data *ch);
-ACMD(do_saveall);
-ACMD(do_wizupdate);
-ACMD(do_chown);
-ACMD(do_zpurge);
-void mob_checkload(struct char_data *ch, mob_vnum mvnum);
-void obj_checkload(struct char_data *ch, obj_vnum ovnum);
-void trg_checkload(struct char_data *ch, trig_vnum tvnum);
-void lockWrite(struct char_data *ch, char *name);
-ACMD(do_zcheck);
-ACMD(do_checkloadstatus);
-ACMD(do_spells);
-ACMD(do_finddoor);
-ACMD(do_interest);
-ACMD(do_transobj);
-ACMD(do_permission);
-ACMD(do_reward);
-ACMD(do_approve);
-ACMD(do_newsedit);
-ACMD(do_news);
-ACMD(do_lag);
-ACMD(do_rbank);
+static void print_lockout(struct char_data *ch);
+static void execute_copyover(void);
+static int perform_set(struct char_data *ch, struct char_data *vict, int mode, char *val_arg);
+static void perform_immort_invis(struct char_data *ch, int level);
+static void do_stat_room(struct char_data *ch);
+static void do_stat_object(struct char_data *ch, struct obj_data *j);
+static void do_stat_character(struct char_data *ch, struct char_data *k);
+static void stop_snooping(struct char_data *ch);
+static size_t print_zone_to_buf(char *bufptr, size_t left, zone_rnum zone, int listall);
+static void mob_checkload(struct char_data *ch, mob_vnum mvnum);
+static void obj_checkload(struct char_data *ch, obj_vnum ovnum);
+static void trg_checkload(struct char_data *ch, trig_vnum tvnum);
+static void lockWrite(struct char_data *ch, char *name);
 
+// definitions
 ACMD(do_lag)
 {
 
@@ -448,7 +318,7 @@ ACMD(do_newsedit)
   STATE(ch->desc) = CON_NEWSEDIT;
 }
 
-void print_lockout(struct char_data *ch)
+static void print_lockout(struct char_data *ch)
 {
   if (IS_NPC(ch))
    return;
@@ -523,7 +393,7 @@ ACMD(do_approve)
  }
 }
 
-void lockWrite(struct char_data *ch, char *name)
+static void lockWrite(struct char_data *ch, char *name)
 {
   FILE *file;
   char fname[40], filler[50], line[256];
@@ -743,7 +613,6 @@ ACMD(do_rbank)
 
 }
 
-
 ACMD(do_permission)
 {
  char arg[MAX_INPUT_LENGTH];
@@ -844,9 +713,6 @@ ACMD(do_transobj)
   return;
  }
 }
-
-
-
 
 void search_replace(char *string, const char *find, const char *replace)
 {
@@ -1120,8 +986,6 @@ ACMD(do_send)
     send_to_char(ch, "You send '%s' to %s.\r\n", buf, GET_NAME(vict));
 }
 
-
-
 /* take a string, and return an rnum.. used for goto, at, etc.  -je 4/6/93 */
 room_rnum find_target_room(struct char_data *ch, char *rawroomstr)
 {
@@ -1198,8 +1062,6 @@ room_rnum find_target_room(struct char_data *ch, char *rawroomstr)
   return (NOWHERE);
 }
 
-
-
 ACMD(do_at)
 {
   char command[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH];
@@ -1232,7 +1094,6 @@ ACMD(do_at)
   }
 }
 
-
 ACMD(do_goto)
 {
   char buf[MAX_STRING_LENGTH];
@@ -1257,8 +1118,6 @@ ACMD(do_goto)
   look_at_room(IN_ROOM(ch), ch, 0);
   enter_wtrigger(&world[IN_ROOM(ch)], ch, -1);
 }
-
-
 
 ACMD(do_trans)
 {
@@ -1314,8 +1173,6 @@ ACMD(do_trans)
   }
 }
 
-
-
 ACMD(do_teleport)
 {
   char buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
@@ -1350,8 +1207,6 @@ ACMD(do_teleport)
   }
 }
 
-
-
 ACMD(do_vnum)
 {
   char buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
@@ -1383,7 +1238,6 @@ ACMD(do_vnum)
       send_to_char(ch, "No armor types by that name.\r\n");
 
 }
-
 
 #define ZOCMD zone_table[zrnum].cmd[subcmd]
  
@@ -1508,7 +1362,7 @@ void list_zone_commands_room(struct char_data *ch, room_vnum rvnum)
 }
 #undef ZOCMD
 
-void do_stat_room(struct char_data *ch)
+static void do_stat_room(struct char_data *ch)
 {
   char buf2[MAX_STRING_LENGTH];
   struct extra_descr_data *desc;
@@ -1598,9 +1452,7 @@ void do_stat_room(struct char_data *ch)
   list_zone_commands_room(ch, rm->number);
 }
 
-
-
-void do_stat_object(struct char_data *ch, struct obj_data *j)
+static void do_stat_object(struct char_data *ch, struct obj_data *j)
 {
   int i, found;
   obj_vnum vnum;
@@ -1796,8 +1648,7 @@ void do_stat_object(struct char_data *ch, struct obj_data *j)
   do_sstat_object(ch, j);
 }
 
-
-void do_stat_character(struct char_data *ch, struct char_data *k)
+static void do_stat_character(struct char_data *ch, struct char_data *k)
 {
   char buf[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];
@@ -2093,7 +1944,6 @@ ACMD(do_varstat)
 
 }
 
-
 ACMD(do_stat)
 {
   char buf1[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
@@ -2184,7 +2034,6 @@ ACMD(do_stat)
   }
 }
 
-
 ACMD(do_shutdown)
 {
   char arg[MAX_INPUT_LENGTH];
@@ -2223,7 +2072,6 @@ ACMD(do_shutdown)
     send_to_char(ch, "Unknown shutdown option.\r\n");
 }
 
-
 void snoop_check(struct char_data *ch)
 {
   /*  This short routine is to ensure that characters that happen
@@ -2246,7 +2094,7 @@ void snoop_check(struct char_data *ch)
   }
 }
 
-void stop_snooping(struct char_data *ch)
+static void stop_snooping(struct char_data *ch)
 {
   if (!ch->desc->snooping)
     send_to_char(ch, "You aren't snooping anyone.\r\n");
@@ -2256,7 +2104,6 @@ void stop_snooping(struct char_data *ch)
     ch->desc->snooping = NULL;
   }
 }
-
 
 ACMD(do_snoop)
 {
@@ -2300,8 +2147,6 @@ ACMD(do_snoop)
   }
 }
 
-
-
 ACMD(do_switch)
 {
   char arg[MAX_INPUT_LENGTH];
@@ -2334,7 +2179,6 @@ ACMD(do_switch)
   }
 }
 
-
 ACMD(do_return)
 {
   if (ch->desc && ch->desc->original) {
@@ -2363,8 +2207,6 @@ ACMD(do_return)
     ch->desc = NULL;
   }
 }
-
-
 
 ACMD(do_load)
 {
@@ -2438,8 +2280,6 @@ ACMD(do_load)
     send_to_char(ch, "That'll have to be either 'obj' or 'mob'.\r\n");
 }
 
-
-
 ACMD(do_vstat)
 {
   char buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
@@ -2481,9 +2321,6 @@ ACMD(do_vstat)
   } else
     send_to_char(ch, "That'll have to be either 'obj' or 'mob'.\r\n");
 }
-
-
-
 
 /* clean a room of all mobiles and objects */
 ACMD(do_purge)
@@ -2558,9 +2395,7 @@ ACMD(do_purge)
   }
 }
 
-
-
-const char *logtypes[] = {
+static const char *logtypes[] = {
   "off", "brief", "normal", "complete", "\n"
 };
 
@@ -2636,7 +2471,7 @@ ACMD(do_copyover)
 #endif 
 } 
 
-void execute_copyover(void)
+static void execute_copyover(void)
 {
   FILE *fp;
   struct descriptor_data *d, *d_next;
@@ -2734,6 +2569,7 @@ void copyover_check(void)
     } 
   } 
 }
+
 ACMD(do_advance)
 {
   struct char_data *victim;
@@ -2913,14 +2749,12 @@ ACMD(do_restore)
   }
 }
 
-
 void perform_immort_vis(struct char_data *ch)
 {
   GET_INVIS_LEV(ch) = 0;
 }
 
-
-void perform_immort_invis(struct char_data *ch, int level)
+static void perform_immort_invis(struct char_data *ch, int level)
 {
   struct char_data *tch;
 
@@ -2938,7 +2772,6 @@ void perform_immort_invis(struct char_data *ch, int level)
   GET_INVIS_LEV(ch) = level;
   send_to_char(ch, "Your invisibility level is %d.\r\n", level);
 }
-  
 
 ACMD(do_invis)
 {
@@ -2966,7 +2799,6 @@ ACMD(do_invis)
       perform_immort_invis(ch, level);
   }
 }
-
 
 ACMD(do_gecho)
 {
@@ -3033,8 +2865,6 @@ ACMD(do_poofset)
   send_to_char(ch, "%s", CONFIG_OK);
 }
 
-
-
 ACMD(do_dc)
 {
   char arg[MAX_INPUT_LENGTH];
@@ -3093,8 +2923,6 @@ ACMD(do_dc)
   }
 }
 
-
-
 ACMD(do_wizlock)
 {
   char arg[MAX_INPUT_LENGTH];
@@ -3152,7 +2980,6 @@ ACMD(do_wizlock)
  }
 }
 
-
 ACMD(do_date)
 {
   char *tmstr;
@@ -3178,8 +3005,6 @@ ACMD(do_date)
     send_to_char(ch, "Up since %s: %d day%s, %d:%02d\r\n", tmstr, d, d == 1 ? "" : "s", h, m);
   }
 }
-
-
 
 ACMD(do_last)
 {
@@ -3212,7 +3037,6 @@ ACMD(do_last)
     ctime(&vict->time.logon));
   free_char(vict);
 }
-
 
 ACMD(do_force)
 {
@@ -3263,8 +3087,6 @@ ACMD(do_force)
     }
   }
 }
-
-
 
 ACMD(do_wiznet)
 {
@@ -3356,8 +3178,6 @@ ACMD(do_wiznet)
   if (PRF_FLAGGED(ch, PRF_NOREPEAT))
     send_to_char(ch, "%s", CONFIG_OK);
 }
-
-
 
 ACMD(do_zreset)
 {
@@ -3522,7 +3342,7 @@ ACMD(do_wizutil)
    code 3 times ... -je, 4/6/93 */
 
 /* FIXME: overflow possible */
-size_t print_zone_to_buf(char *bufptr, size_t left, zone_rnum zone, int listall)
+static size_t print_zone_to_buf(char *bufptr, size_t left, zone_rnum zone, int listall)
 {
   size_t tmp;
   
@@ -3580,7 +3400,6 @@ size_t print_zone_to_buf(char *bufptr, size_t left, zone_rnum zone, int listall)
         count_color_chars(zone_table[zone].name)+30, zone_table[zone].name, 
         zone_table[zone].builders, zone_table[zone].bot, zone_table[zone].top);
 }
-
 
 ACMD(do_show)
 {
@@ -3929,7 +3748,6 @@ ACMD(do_show)
   }
 }
 
-
 /***************** The do_set function ***********************************/
 
 #define PC   1
@@ -3948,7 +3766,7 @@ ACMD(do_show)
 
 
 /* The set options available */
-  struct set_struct {
+static const struct set_struct {
     const char *cmd;
     const char level;
     const char pcnpc;
@@ -4039,8 +3857,7 @@ ACMD(do_show)
    { "\n", 0, BOTH, MISC }
   };
 
-
-int perform_set(struct char_data *ch, struct char_data *vict, int mode,
+static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
 		char *val_arg)
 {
   int i, on = 0, off = 0;
@@ -5064,7 +4881,7 @@ ACMD(do_zpurge)
 
 /* Armor class limits*/
 #define TOTAL_WEAR_CHECKS  (NUM_ITEM_WEARS-2)  /*minus Wield and Take*/
-struct zcheck_armor {
+static const struct zcheck_armor {
   bitvector_t bitvector;          /* from Structs.h                       */
   int ac_allowed;                 /* Max. AC allowed for this body part  */
   char *message;                  /* phrase for error message            */
@@ -5099,7 +4916,7 @@ struct zcheck_armor {
   To ignore an apply, set max_aff to -99.
   These will be ignored if MAX_APPLIES_LIMIT = 0
 */
-struct zcheck_affs {
+static const struct zcheck_affs {
   int aff_type;    /*from Structs.h*/
   int min_aff;     /*min. allowed value*/
   int max_aff;     /*max. allowed value*/
@@ -5158,7 +4975,7 @@ struct zcheck_affs {
 
 /*room limits*/
 /* Off limit zones are any zones a player should NOT be able to walk to (ex. Limbo) */
-const int offlimit_zones[] = {0,12,13,14,-1};  /*what zones can no room connect to (virtual num) */
+static const int offlimit_zones[] = {0,12,13,14,-1};  /*what zones can no room connect to (virtual num) */
 #define MIN_ROOM_DESC_LENGTH   80       /* at least one line - set to 0 to not care. */
 #define MAX_COLOUMN_WIDTH      80       /* at most 80 chars per line */
 
@@ -5499,7 +5316,7 @@ ACMD (do_zcheck)
 }
 /**********************************************************************************/
 
-void mob_checkload(struct char_data *ch, mob_vnum mvnum)
+static void mob_checkload(struct char_data *ch, mob_vnum mvnum)
 {
   int cmd_no, count = 0;
   zone_rnum zone;
@@ -5532,7 +5349,7 @@ void mob_checkload(struct char_data *ch, mob_vnum mvnum)
    send_to_char(ch, "@D[@nTotal counted: %s.@D]@n\r\n", add_commas(count));
 }
 
-void obj_checkload(struct char_data *ch, obj_vnum ovnum)
+static void obj_checkload(struct char_data *ch, obj_vnum ovnum)
 {
   int cmd_no, count = 0;
   zone_rnum zone;
@@ -5617,7 +5434,7 @@ void obj_checkload(struct char_data *ch, obj_vnum ovnum)
    send_to_char(ch, "@D[@nTotal counted: %s.@D]@n\r\n", add_commas(count));
 }
 
-void trg_checkload(struct char_data *ch, trig_vnum tvnum)
+static void trg_checkload(struct char_data *ch, trig_vnum tvnum)
 {
   int cmd_no, found = 0;
   zone_rnum zone;
@@ -5822,4 +5639,3 @@ ACMD(do_boom)
 
   send_to_outdoor("%s shakes the world with a mighty boom!\r\n", GET_NAME(ch));
 }
-

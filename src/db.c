@@ -46,9 +46,6 @@ long max_mob_id = MOB_ID_BASE;  /* for unique mob id's       */
 long max_obj_id = OBJ_ID_BASE;  /* for unique obj id's       */
 int dg_owner_purged;            /* For control of scripts */
 
-extern int LASTPAYTYPE;
-extern int LASTNEWS;
-
 int no_mail = 0;		/* mail disabled?		 */
 int mini_mud = 0;		/* mini-mud mode?		 */
 int no_rent_check = 0;		/* skip rent check on boot?	 */
@@ -95,115 +92,70 @@ struct reset_q_type reset_q;	/* queue of zones to be reset	 */
 
 extern struct board_info *boards; /* our boards */
 extern int imc_is_enabled;
+
 /* local functions */
-void mob_stats(struct char_data *mob);
-void dragon_level(struct char_data *ch);
-int check_bitvector_names(bitvector_t bits, size_t namecount, const char *whatami, const char *whatbits);
-int check_object_spell_number(struct obj_data *obj, int val);
-int check_object_level(struct obj_data *obj, int val);
-void setup_dir(FILE *fl, int room, int dir);
-void index_boot(int mode);
-void discrete_load(FILE *fl, int mode, char *filename);
-int check_object(struct obj_data *);
-void parse_room(FILE *fl, int virtual_nr);
-void parse_mobile(FILE *mob_f, int nr);
-char *parse_object(FILE *obj_f, int nr);
-void parse_trigger(FILE *fl, int virtual_nr);
-void load_zones(FILE *fl, char *zonename);
-void assign_mobiles(void);
-void assign_objects(void);
-void assign_rooms(void);
-void assign_the_shopkeepers(void);
-int is_empty(zone_rnum zone_nr);
-void reset_zone(zone_rnum zone);
-int file_to_string(const char *name, char *buf);
-int file_to_string_alloc(const char *name, char **buf);
-void reboot_wizlists(void);
-ACMD(do_reboot);
-void boot_world(void);
-int count_alias_records(FILE *fl);
-int count_hash_records(FILE *fl);
-bitvector_t asciiflag_conv(char *flag);
-bitvector_t asciiflag_conv_aff(char *flag);
-int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr);
-void interpret_espec(const char *keyword, const char *value, struct char_data *ch, int nr);
-void parse_espec(char *buf, struct char_data *ch, int nr);
-int parse_enhanced_mob(FILE *mob_f, struct char_data *ch, int nr);
-void get_one_line(FILE *fl, char *buf);
-void save_char_vars(struct char_data *ch);
-void check_start_rooms(void);
-void renum_world(void);
-void renum_zone_table(void);
-void log_zone_error(zone_rnum zone, int cmd_no, const char *message);
-void reset_time(void);
-int suntzu_armor_convert(struct obj_data *obj);
-int suntzu_weapon_convert(int wp_type);
-void free_obj_unique_hash();
-void mob_autobalance(struct char_data *ch);
+static void mob_stats(struct char_data *mob);
+static void dragon_level(struct char_data *ch);
+static int check_bitvector_names(bitvector_t bits, size_t namecount, const char *whatami, const char *whatbits);
+static int check_object_spell_number(struct obj_data *obj, int val);
+static int check_object_level(struct obj_data *obj, int val);
+static void setup_dir(FILE *fl, int room, int dir);
+static void discrete_load(FILE *fl, int mode, char *filename);
+static int check_object(struct obj_data *);
+static void parse_room(FILE *fl, int virtual_nr);
+static void parse_mobile(FILE *mob_f, int nr);
+static char *parse_object(FILE *obj_f, int nr);
+static void load_zones(FILE *fl, char *zonename);
+static int file_to_string(const char *name, char *buf);
+static int file_to_string_alloc(const char *name, char **buf);
+static int count_alias_records(FILE *fl);
+static int count_hash_records(FILE *fl);
+static bitvector_t asciiflag_conv_aff(char *flag);
+static int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr);
+static void interpret_espec(const char *keyword, const char *value, struct char_data *ch, int nr);
+static void parse_espec(char *buf, struct char_data *ch, int nr);
+static int parse_enhanced_mob(FILE *mob_f, struct char_data *ch, int nr);
+static void get_one_line(FILE *fl, char *buf);
+static void check_start_rooms(void);
+static void renum_world(void);
+static void renum_zone_table(void);
+static void log_zone_error(zone_rnum zone, int cmd_no, const char *message);
+static void reset_time(void);
+static int suntzu_armor_convert(struct obj_data *obj);
+static int suntzu_weapon_convert(int wp_type);
+static void free_obj_unique_hash();
+static void mob_autobalance(struct char_data *ch);
 
 /* external functions */
-extern void load_shadow_dragons(void);
+
 void paginate_string(char *str, struct descriptor_data *d);
-struct time_info_data *mud_time_passed(time_t t2, time_t t1);
+
 void free_alias(struct alias_data *a);
-void weather_and_time(int mode);
 void mag_assign_spells(void);
-void boot_social_messages(void);
-void update_obj_file(void);	/* In objsave.c */
 void create_command_list(void);
-void sort_commands(void);
 void sort_spells(void);
 void load_banned(void);
 void Read_Invalid_List(void);
-void boot_the_shops(FILE *shop_f, char *filename, int rec_count);
 int hsort(const void *a, const void *b);
 void prune_crlf(char *txt);
-void destroy_shops(void);
 void build_player_index(void);
 void clean_pfiles(void);
-void free_object_strings(struct obj_data *obj);
-void free_object_strings_proto(struct obj_data *obj);
-void boot_context_help(void);
-void free_context_help(void);
-struct time_info_data *real_time_passed(time_t t2, time_t t1);
-int add_to_save_list(zone_vnum, int type);
-int save_all(void);
-extern zone_rnum real_zone_by_thing(room_vnum vznum);
 void boot_the_guilds(FILE *gm_f, char *filename, int rec_count);
 void destroy_guilds(void);
 void assign_the_guilds(void);
-int load_levels();    /* class.c */
-void innate_add(struct char_data * ch, int innate, int timer);
 void memorize_add(struct char_data * ch, int spellnum, int timer);
 void assign_feats(void);
 void free_feats(void);
 void sort_feats(void);
-void set_height_and_weight_by_race(struct char_data *ch);
-time_t birth_age(struct char_data *ch);
-time_t max_age(struct char_data *ch);
-void htree_shutdown();
 void free_assemblies(void);
-void racial_body_parts(struct char_data *ch);
-extern int level_exp(struct char_data *ch, int level);
-extern int class_hit_die_size[NUM_CLASSES];
-SPECIAL(shop_keeper);
 
 /* external vars */
-extern struct descriptor_data *descriptor_list;
-extern const char *unused_spellname;	/* spell_parser.c */
 extern int no_specials;
 extern int scheck;
-extern int bitwarning;
-extern int bitsavetodisk;
 
-extern struct player_index_element *player_table;
-extern int top_of_p_table;
 extern long top_idnum;
 
-/* external ASCII Player Files vars */
-extern int auto_pwipe;
-
-void dragon_level(struct char_data *ch)
+static void dragon_level(struct char_data *ch)
 {
  struct descriptor_data *d;
  int level = 0, count = 0;
@@ -229,7 +181,7 @@ void dragon_level(struct char_data *ch)
  ch->race_level = level + rand_number(5, 20);
 }
 
-void mob_stats(struct char_data *mob)
+static void mob_stats(struct char_data *mob)
 {
   int start = GET_LEVEL(mob) * 0.5, finish = GET_LEVEL(mob);
   
@@ -329,7 +281,7 @@ void mob_stats(struct char_data *mob)
 
 /* Convert CWG-SunTzu armor objects to new armor types */
 
-int suntzu_armor_convert(struct obj_data *obj)
+static int suntzu_armor_convert(struct obj_data *obj)
 {
   int i;
   int conv = 0;
@@ -396,7 +348,7 @@ int suntzu_armor_convert(struct obj_data *obj)
 
 /* Convert CWG-SunTzu weapon objects to new weapon types */
 
-int suntzu_weapon_convert(int wp_type)
+static int suntzu_weapon_convert(int wp_type)
 {
   int new_type;
 
@@ -1036,7 +988,7 @@ void auc_load(struct obj_data *obj)
 }
 
 /* reset the time in the game from file */
-void reset_time(void)
+static void reset_time(void)
 {
   time_t beginning_of_time = 0;
   FILE *bgtime;
@@ -1158,7 +1110,7 @@ void save_mud_time(struct time_info_data *when)
  * did add the 'goto' and changed some "while()" into "do { } while()".
  *	-gg 6/24/98 (technically 6/25/98, but I care not.)
  */
-int count_alias_records(FILE *fl)
+static int count_alias_records(FILE *fl)
 {
   char key[READ_SIZE], next_key[READ_SIZE];
   char line[READ_SIZE], *scan;
@@ -1199,7 +1151,7 @@ ackeof:
 }
 
 /* function to count how many hash-mark delimited records exist in a file */
-int count_hash_records(FILE *fl)
+static int count_hash_records(FILE *fl)
 {
   char buf[128];
   int count = 0;
@@ -1372,7 +1324,7 @@ void index_boot(int mode)
 }
 
 
-void discrete_load(FILE *fl, int mode, char *filename)
+static void discrete_load(FILE *fl, int mode, char *filename)
 {
   int nr = -1, last;
   char line[READ_SIZE];
@@ -1463,7 +1415,7 @@ bitvector_t asciiflag_conv(char *flag)
   return (flags);
 }
 
-bitvector_t asciiflag_conv_aff(char *flag)
+static bitvector_t asciiflag_conv_aff(char *flag)
 {
   bitvector_t flags = 0;
   int is_num = TRUE;
@@ -1485,7 +1437,7 @@ bitvector_t asciiflag_conv_aff(char *flag)
   return (flags);
 }
 /* load the rooms */
-void parse_room(FILE *fl, int virtual_nr)
+static void parse_room(FILE *fl, int virtual_nr)
 {
   static int room_nr = 0, zone = 0;
   int t[10], i, retval;
@@ -1655,7 +1607,7 @@ void parse_room(FILE *fl, int virtual_nr)
 }
 
 /* read direction data */
-void setup_dir(FILE *fl, int room, int dir)
+static void setup_dir(FILE *fl, int room, int dir)
 {
   int t[11], retval;
   char line[READ_SIZE], buf2[128];
@@ -1744,7 +1696,7 @@ void setup_dir(FILE *fl, int room, int dir)
 
 
 /* make sure the start rooms exist & resolve their vnums to rnums */
-void check_start_rooms(void)
+static void check_start_rooms(void)
 {
   if ((r_mortal_start_room = real_room(CONFIG_MORTAL_START)) == NOWHERE) {
     log("SYSERR:  Mortal start room does not exist.  Change mortal_start_room in lib/etc/config.");
@@ -1764,7 +1716,7 @@ void check_start_rooms(void)
 
 
 /* resolve all vnums into rnums in the world */
-void renum_world(void)
+static void renum_world(void)
 {
   int room, door;
 
@@ -1790,7 +1742,7 @@ void renum_world(void)
  * NOTE 1: Assumes NOWHERE == NOBODY == NOTHING.
  * NOTE 2: Assumes sizeof(room_rnum) >= (sizeof(mob_rnum) and sizeof(obj_rnum))
  */
-void renum_zone_table(void)
+static void renum_zone_table(void)
 {
   int cmd_no;
   room_rnum a, b, c, olda, oldb, oldc;
@@ -1849,8 +1801,7 @@ void renum_zone_table(void)
     }
 }
 
-
-void mob_autobalance(struct char_data *ch)
+static void mob_autobalance(struct char_data *ch)
 {
     /* Try to add some baseline defaults based on level choice. */
     GET_HIT(ch) = 0;
@@ -1863,7 +1814,7 @@ void mob_autobalance(struct char_data *ch)
     GET_DAMAGE_MOD(ch) = 0;
 }
 
-int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
+static int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
 {
   int j, t[10];
   char line[READ_SIZE];
@@ -1980,7 +1931,7 @@ int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
 #define RANGE(low, high)	\
 	(num_arg = MAX((low), MIN((high), (num_arg))))
 
-void interpret_espec(const char *keyword, const char *value, struct char_data *ch, int nr)
+static void interpret_espec(const char *keyword, const char *value, struct char_data *ch, int nr)
 {
   int num_arg = 0, matched = FALSE;
   int num, num2, num3, num4, num5, num6;
@@ -2133,7 +2084,7 @@ void interpret_espec(const char *keyword, const char *value, struct char_data *c
 #undef BOOL_CASE
 #undef RANGE
 
-void parse_espec(char *buf, struct char_data *ch, int nr)
+static void parse_espec(char *buf, struct char_data *ch, int nr)
 {
   char *ptr;
 
@@ -2145,7 +2096,7 @@ void parse_espec(char *buf, struct char_data *ch, int nr)
   interpret_espec(buf, ptr, ch, nr);
 }
 
-int parse_enhanced_mob(FILE *mob_f, struct char_data *ch, int nr)
+static int parse_enhanced_mob(FILE *mob_f, struct char_data *ch, int nr)
 {
   char line[READ_SIZE];
 
@@ -2325,7 +2276,7 @@ int parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
 }
 
 
-void parse_mobile(FILE *mob_f, int nr)
+static void parse_mobile(FILE *mob_f, int nr)
 {
   static int i = 0;
 
@@ -2352,7 +2303,7 @@ void parse_mobile(FILE *mob_f, int nr)
 
 
 /* read all objects from obj file; generate index and prototypes */
-char *parse_object(FILE *obj_f, int nr)
+static char *parse_object(FILE *obj_f, int nr)
 {
   static int i = 0;
   static char line[READ_SIZE];
@@ -2648,7 +2599,7 @@ char *parse_object(FILE *obj_f, int nr)
 #define Z	zone_table[zone]
 
 /* load the zone table and command tables */
-void load_zones(FILE *fl, char *zonename)
+static void load_zones(FILE *fl, char *zonename)
 {
   static zone_rnum zone = 0;
   int cmd_no, num_of_cmds = 0, line_num = 0, tmp, error, arg_num, version = 1;
@@ -2814,7 +2765,7 @@ void load_zones(FILE *fl, char *zonename)
 #undef Z
 
 
-void get_one_line(FILE *fl, char *buf)
+static void get_one_line(FILE *fl, char *buf)
 {
   if (fgets(buf, READ_SIZE, fl) == NULL) {
     log("SYSERR: error reading help file: not terminated with $?");
@@ -3647,7 +3598,7 @@ struct obj_unique_hash_elem {
   struct obj_unique_hash_elem *next_e;
 };
 
-void free_obj_unique_hash()
+static void free_obj_unique_hash()
 {
   int i;
   struct obj_unique_hash_elem *elem;
@@ -3953,7 +3904,7 @@ void zone_update(void)
     }
 }
 
-void log_zone_error(zone_rnum zone, int cmd_no, const char *message)
+static void log_zone_error(zone_rnum zone, int cmd_no, const char *message)
 {
   mudlog(NRM, ADMLVL_GOD, TRUE, "SYSERR: zone file: %s", message);
   mudlog(NRM, ADMLVL_GOD, TRUE, "SYSERR: ...offending cmd: '%c' cmd in zone #%d, line %d",
@@ -4585,7 +4536,7 @@ void free_obj(struct obj_data *obj)
  * replace, give everybody using it a different copy so
  * as to avoid special cases.
  */
-int file_to_string_alloc(const char *name, char **buf)
+static int file_to_string_alloc(const char *name, char **buf)
 {
   int temppage;
   char temp[MAX_STRING_LENGTH];
@@ -4618,7 +4569,7 @@ int file_to_string_alloc(const char *name, char **buf)
 
 
 /* read contents of a text file, and place in buf */
-int file_to_string(const char *name, char *buf)
+static int file_to_string(const char *name, char *buf)
 {
   FILE *fl;
   char tmp[READ_SIZE + 3];
@@ -4948,7 +4899,7 @@ zone_rnum real_zone(zone_vnum vnum)
  *
  * TODO: Add checks for unknown bitvectors.
  */
-int check_object(struct obj_data *obj)
+static int check_object(struct obj_data *obj)
 {
   char objname[MAX_INPUT_LENGTH + 32];
   int error = FALSE, y;
@@ -5007,7 +4958,7 @@ int check_object(struct obj_data *obj)
 }
 
 
-int check_object_spell_number(struct obj_data *obj, int val)
+static int check_object_spell_number(struct obj_data *obj, int val)
 {
   int error = FALSE;
   const char *spellname;
@@ -5056,7 +5007,7 @@ int check_object_spell_number(struct obj_data *obj, int val)
   return (error);
 }
 
-int check_object_level(struct obj_data *obj, int val)
+static int check_object_level(struct obj_data *obj, int val)
 {
   int error = FALSE;
 
@@ -5067,7 +5018,7 @@ int check_object_level(struct obj_data *obj, int val)
   return (error);
 }
 
-int check_bitvector_names(bitvector_t bits, size_t namecount, const char *whatami, const char *whatbits)
+static int check_bitvector_names(bitvector_t bits, size_t namecount, const char *whatami, const char *whatbits)
 {
   unsigned int flagnum;
   bool error = FALSE;

@@ -43,7 +43,10 @@ ACMD(do_move);
 #define CMD_IS(cmd_name) (!strcmp(cmd_name, complete_cmd_info[cmd].command))
 #define IS_MOVE(cmdnum) (complete_cmd_info[cmdnum].command_pointer == do_move)
 
+extern const char *list_bonus[];
 
+void topWrite(struct char_data *ch);
+char *rIntro(struct char_data *ch, char *arg);
 int special(struct char_data *ch, int cmd, char *arg);
 void fingerUser(struct char_data *ch, char *name);
 int readUserIndex(char *name);

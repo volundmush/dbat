@@ -10,23 +10,14 @@
 
 #include "weather.h"
 
-extern struct time_info_data time_info;
-extern int MOON_UP;
-extern int DEATHPHASE;
-extern void send_to_imm(char *messg, ...);
 
-void weather_and_time(int mode);
-void another_hour(int mode);
-void weather_change(void);
-void oozaru_add(struct char_data *tch);
-void oozaru_drop(struct char_data *tch);
-void phase_powerup(struct char_data *ch, int type, int phase);
-void star_phase(struct char_data *ch, int type);
-void grow_plants(void);
+static void another_hour(int mode);
+static void weather_change(void);
+static void phase_powerup(struct char_data *ch, int type, int phase);
+static void grow_plants(void);
 
-ACMD(do_kaioken);
 
-void grow_plants(void)
+static void grow_plants(void)
 {
   struct obj_data *k;
 
@@ -70,7 +61,7 @@ void weather_and_time(int mode)
 }
 
 
-void another_hour(int mode)
+static void another_hour(int mode)
 {
   time_info.hours++;
 
@@ -139,7 +130,7 @@ void another_hour(int mode)
 }
 
 
-void weather_change(void)
+static void weather_change(void)
 {
   int diff, change;
   if ((time_info.month >= 9) && (time_info.month <= 16))
@@ -476,7 +467,7 @@ void star_phase(struct char_data *ch, int type)
 }
 
 /* This handles powering up a Hoshijin or powering them down */
-void phase_powerup(struct char_data *ch, int type, int phase)
+static void phase_powerup(struct char_data *ch, int type, int phase)
 {
  if (ch == NULL) {
   return;

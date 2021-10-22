@@ -8,76 +8,7 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include "structs.h"
-#include "utils.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "db.h"
-#include "spells.h"
-#include "constants.h"
-#include "dg_scripts.h"
-#include "clan.h"
-#include "combat.h"
-
-/* External functions */
-extern int slot_count(struct char_data *ch);
-
-/* local functions */
-ACMD(do_stand);
-ACMD(do_assist);
-ACMD(do_kill);
-ACMD(do_flee);
-ACMD(do_charge);
-ACMD(do_punch);
-ACMD(do_kick);
-ACMD(do_elbow);
-ACMD(do_knee);
-ACMD(do_powerup);
-ACMD(do_get);
-ACMD(do_roundhouse);
-ACMD(do_tailwhip);
-ACMD(do_uppercut);
-ACMD(do_kiball);
-ACMD(do_kiblast);
-ACMD(do_beam);
-ACMD(do_bite);
-ACMD(do_heeldrop);
-ACMD(do_attack);
-ACMD(do_attack2);
-ACMD(do_renzo);
-ACMD(do_kamehameha);
-ACMD(do_masenko);
-ACMD(do_dodonpa);
-ACMD(do_galikgun);
-ACMD(do_deathbeam);
-ACMD(do_eraser);
-ACMD(do_tslash);
-ACMD(do_psyblast);
-ACMD(do_honoo);
-ACMD(do_dualbeam);
-ACMD(do_rogafufuken);
-ACMD(do_baku);
-ACMD(do_kienzan);
-ACMD(do_tribeam);
-ACMD(do_sbc);
-ACMD(do_final);
-ACMD(do_crusher);
-ACMD(do_ddslash);
-ACMD(do_pbarrage);
-ACMD(do_hellflash);
-ACMD(do_hellspear);
-ACMD(do_kakusanha);
-ACMD(do_scatter);
-ACMD(do_bigbang);
-ACMD(do_pslash);
-ACMD(do_deathball);
-ACMD(do_spiritball);
-ACMD(do_genki);
-ACMD(do_geno);
-ACMD(do_kousengan);
-ACMD(do_balefire);
-ACMD(do_blessedhammer);
+#include "act.h"
 
 /* Combat commands below this line */
 
@@ -4049,6 +3980,7 @@ ACMD(do_balefire)
  }
 }
 /* Rillao: End Balefire */
+
 ACMD(do_kakusanha)
 {
  int perc, dge = 2, count = 0, skill;
@@ -15265,7 +15197,6 @@ ACMD(do_kick)
  }
 }
 
-
 ACMD(do_knee)
 {
  int prob, perc, avo, index = 0, pry = 2, dge = 2, blk = 2, skill = 0;
@@ -15984,7 +15915,6 @@ ACMD(do_charge)
    send_to_char(ch, "That is an invalid argument.\r\n");
   }
 }
-
 
 ACMD(do_powerup)
 {

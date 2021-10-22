@@ -7,189 +7,22 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 **************************************************************************/
-
-#define __ACT_OTHER_C__
-
-#include "structs.h"
-#include "utils.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "db.h"
-#include "spells.h"
-#include "screen.h"
-#include "house.h"
-#include "constants.h"
-#include "dg_scripts.h"
-#include "feats.h"
-#include "clan.h"
-#include "obj_edit.h"
-
-/* extern variables */
-extern int SHADOW_DRAGON1;
-extern int SHADOW_DRAGON2;
-extern int SHADOW_DRAGON3;
-extern int SHADOW_DRAGON4;
-extern int SHADOW_DRAGON5;
-extern int SHADOW_DRAGON6;
-extern int SHADOW_DRAGON7;
-extern int dballtime;
-extern int SELFISHMETER;
-extern int MOON_UP;
-extern time_t INTERESTTIME;
-extern time_t LASTINTEREST;
-extern time_t BOARDNEWCOD;
-extern int TOPCOUNTDOWN;
-extern int PCOUNT;
-extern time_t PCOUNTDAY;
-extern int top_of_p_table;
-extern struct time_info_data *real_time_passed(time_t t2, time_t t1);
-extern struct player_index_element *player_table;
-extern struct char_data *ch_selling;
-extern struct char_data *ch_buying;
-extern struct char_data *EDRAGON;
-extern int WISH[2];
-extern int DRAGONR;
-extern int DRAGONZ;
-extern int DRAGONC;
-extern int SHENRON;
-
-/* extern procedures */
-extern int group_bonus(struct char_data *ch, int type);
-extern void ash_burn(struct char_data *ch);
-extern void handle_ingest_learn(struct char_data *ch, struct char_data *vict);
-extern int init_skill(struct char_data *ch, int snum);
-extern int check_skill(struct char_data *ch, int skill);
-extern int slot_count(struct char_data *ch);
-extern void handle_teleport(struct char_data *ch, struct char_data *tar, int location);
-extern void rpp_feature(struct char_data *ch, const char *arg);
-extern int cp(struct char_data *ch);
-extern void disp_rpp_store(struct char_data *ch);
-extern void handle_rpp_store(struct char_data *ch, int choice);
-extern char *rIntro(struct char_data *ch, char *arg);
-extern void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, struct obj_data *obj, cl_sint64 dmg, int type);
-extern void carry_drop(struct char_data *ch, int type);
-extern void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, char *name);
-extern void oozaru_drop(struct char_data *tch);
-extern void topWrite(struct char_data *ch);
-extern int limb_ok(struct char_data *ch, int type);
-extern void search_replace(char *string, const char *find, const char *replace);
-extern void oozaru_add(struct char_data *tch);
-extern struct time_info_data time_info;
-extern void save_mud_time(struct time_info_data *when);
-extern int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj, int num);
-extern zone_rnum real_zone_by_thing(room_vnum vznum);
-void log_custom(struct descriptor_data *d, struct obj_data *obj);
-void send_to_imm(char *messg, ...);
-void send_to_scouter(char *messg, struct char_data *ch, int num, int type);
-void send_to_sense(int type, char *messg, struct char_data *ch);
-void wishSYS(void);
-void perform_remove(struct char_data *ch, int pos);
-void stop_auction(int type, struct char_data * ch);
-void list_skills(struct char_data *ch, char *arg);
-void appear(struct char_data *ch);
-void write_aliases(struct char_data *ch);
-void perform_immort_vis(struct char_data *ch);
-SPECIAL(shop_keeper);
-ACMD(do_gen_comm);
-ACMD(do_charge);
-void die(struct char_data *ch, struct char_data * killer);
-void Crash_rentsave(struct char_data *ch, int cost);
-int level_exp(struct char_data *ch, int level);
-int has_mail(long id);
-extern int find_first_step(room_rnum src, room_rnum target);
-ACMD(do_wear);
+#include "act.h"
 
 /* local functions */
-void log_imm_action(char *messg, ...);
-int has_scanner(struct char_data *ch);
-void boost_obj(struct obj_data *obj, struct char_data *ch, int type);
-void handle_revert(struct char_data *ch, int add, double mult);
-void handle_transform(struct char_data *ch, int add, double mult, double drain);
-void bring_to_cap(struct char_data *ch);
-ACMD(do_quit);
-ACMD(do_save);
-ACMD(do_not_here);
-ACMD(do_hide);
-ACMD(do_steal);
-ACMD(do_practice);
-ACMD(do_visible);
-ACMD(do_title);
-int dball_count(struct char_data *ch);
-int perform_group(struct char_data *ch, struct char_data *vict, int highlvl, int lowlvl, cl_sint64 highpl, cl_sint64 lowpl);
-void print_group(struct char_data *ch);
-void base_update(void);
-void check_eq(struct char_data *ch);
-ACMD(do_group);
-ACMD(do_ungroup);
-ACMD(do_report);
-ACMD(do_split);
-ACMD(do_use);
-ACMD(do_value);
-ACMD(do_display);
-ACMD(do_gen_write);
-ACMD(do_gen_tog);
-ACMD(do_file);
-int spell_in_book(struct obj_data *obj, int spellnum);
-int spell_in_scroll(struct obj_data *obj, int spellnum);
-int spell_in_domain(struct char_data *ch, int spellnum);
-ACMD(do_scribe);
-ACMD(do_pagelength);
-ACMD(do_scouter);
-ACMD(do_snet);
-ACMD(do_spar);
-ACMD(do_pushup);
-ACMD(do_situp);
-ACMD(do_transform);
-ACMD(do_summon);
-ACMD(do_instant);
-ACMD(do_barrier);
-ACMD(do_heal);
-ACMD(do_solar);
-ACMD(do_eyec);
-ACMD(do_zanzoken);
-ACMD(do_eavesdrop);
-ACMD(do_disguise);
-ACMD(do_appraise);
-ACMD(do_forgery);
-ACMD(do_plant);
-ACMD(do_kaioken);
-ACMD(do_focus);
-ACMD(do_regenerate);
-ACMD(do_escape);
-ACMD(do_absorb);
-ACMD(do_ingest);
-ACMD(do_upgrade);
-ACMD(do_srepair);
-ACMD(do_recharge);
-ACMD(do_form);
-ACMD(do_spit);
-ACMD(do_majinize);
-ACMD(do_potential);
-ACMD(do_telepathy);
-ACMD(do_fury);
-ACMD(do_pose);
-ACMD(do_implant);
-ACMD(do_hass);
-ACMD(do_suppress);
-ACMD(do_drag);
-ACMD(do_stop);
-ACMD(do_future);
-ACMD(do_candy);
-ACMD(do_kura);
-ACMD(do_taisha);
-ACMD(do_paralyze);
-ACMD(do_infuse);
-ACMD(do_rip);
-ACMD(do_train);
-ACMD(do_trip);
-ACMD(do_grapple);
-ACMD(do_willpower);
-ACMD(do_commune);
-ACMD(do_rpp);
-ACMD(do_meditate);
-ACMD(do_aura);
+static int has_scanner(struct char_data *ch);
+static void boost_obj(struct obj_data *obj, struct char_data *ch, int type);
+static void handle_revert(struct char_data *ch, int add, double mult);
+static void handle_transform(struct char_data *ch, int add, double mult, double drain);
+static int perform_group(struct char_data *ch, struct char_data *vict, int highlvl, int lowlvl, cl_sint64 highpl, cl_sint64 lowpl);
+static void print_group(struct char_data *ch);
+static void check_eq(struct char_data *ch);
+static int spell_in_book(struct obj_data *obj, int spellnum);
+static int spell_in_scroll(struct obj_data *obj, int spellnum);
+static int spell_in_domain(struct char_data *ch, int spellnum);
+static void show_clan_info(struct char_data *ch);
 
+// definitions
 void log_imm_action(char *messg, ...)
 {
 
@@ -2934,7 +2767,6 @@ ACMD(do_paralyze)
  }
 }
 
-
 ACMD(do_taisha)
 {
 
@@ -3637,7 +3469,6 @@ ACMD(do_implant)
   return;
  }
 }
-
 
 ACMD(do_pose)
 {
@@ -4495,7 +4326,7 @@ ACMD(do_spit)
 
 /* This handles increasing the stats of a created object based on the skill *
  * and/or stats of the user.                                                */
-void boost_obj(struct obj_data *obj, struct char_data *ch, int type)
+static void boost_obj(struct obj_data *obj, struct char_data *ch, int type)
 {
 
  if (!obj || !ch)
@@ -8798,7 +8629,7 @@ void load_shadow_dragons()
  save_mud_time(&time_info);
 }
 
-void wishSYS ()
+void wishSYS(void)
 {
   if (SHENRON == TRUE) {
    if (SELFISHMETER < 10) {
@@ -9162,7 +8993,7 @@ ACMD(do_summon)
 }
 
 /* This handles transforming Current and Max PL/KI/ST them */
-void handle_transform(struct char_data *ch, int add, double mult, double drain)
+static void handle_transform(struct char_data *ch, int add, double mult, double drain)
 {
 
  if (!ch)
@@ -9244,7 +9075,7 @@ void handle_transform(struct char_data *ch, int add, double mult, double drain)
 }
 
 /* This handles reverting Current and Max PL/KI/ST */
-void handle_revert(struct char_data *ch, int add, double mult)
+static void handle_revert(struct char_data *ch, int add, double mult)
 {
    if (!ch)
     return;
@@ -13515,7 +13346,7 @@ ACMD(do_spar)
  }
 }
 
-void check_eq(struct char_data *ch)
+static void check_eq(struct char_data *ch)
 {
   struct obj_data *obj;
   int i;
@@ -13545,7 +13376,7 @@ void check_eq(struct char_data *ch)
 }
 
 /* This handles many player specific routines. It may be a bit too bloated though. */
-void base_update()
+void base_update(void)
 {
 	struct descriptor_data *d;
 	int cash = FALSE, inc = 0;
@@ -14010,7 +13841,7 @@ void base_update()
 	}
 }
 
-int has_scanner(struct char_data *ch)
+static int has_scanner(struct char_data *ch)
 {
 	struct obj_data *obj, *next_obj;
 	int success = 0;
@@ -14588,8 +14419,6 @@ ACMD(do_quit)
   }
 }
 
-
-
 ACMD(do_save)
 {
   if (IS_NPC(ch) || !ch->desc)
@@ -14632,14 +14461,12 @@ ACMD(do_save)
 
 }
 
-
 /* generic function for commands which are normally overridden by
    special procedures - i.e., shop commands, mail commands, etc. */
 ACMD(do_not_here)
 {
   send_to_char(ch, "Sorry, but you cannot do that here!\r\n");
 }
-
 
 ACMD(do_steal)
 {
@@ -14899,7 +14726,6 @@ ACMD(do_steal)
  }
 }
 
-
 ACMD(do_practice) {
   char arg[200];
 
@@ -14924,7 +14750,6 @@ ACMD(do_skills)
     }
     list_skills(ch, arg);
 }
-
 
 ACMD(do_visible)
 {
@@ -14957,7 +14782,6 @@ ACMD(do_visible)
     send_to_char(ch, "You are already visible.\r\n");
 }
 
-
 ACMD(do_title)
 {
   skip_spaces(&argument);
@@ -14977,8 +14801,7 @@ ACMD(do_title)
   }
 }
 
-
-int perform_group(struct char_data *ch, struct char_data *vict, int highlvl, int lowlvl, cl_sint64 highpl, cl_sint64 lowpl)
+static int perform_group(struct char_data *ch, struct char_data *vict, int highlvl, int lowlvl, cl_sint64 highpl, cl_sint64 lowpl)
 {
   if (AFF_FLAGGED(vict, AFF_GROUP) || !CAN_SEE(ch, vict))
     return (0);
@@ -15018,8 +14841,7 @@ int perform_group(struct char_data *ch, struct char_data *vict, int highlvl, int
   return (1);
 }
 
-
-void print_group(struct char_data *ch)
+static void print_group(struct char_data *ch)
 {
   struct char_data *k;
   struct follow_type *f;
@@ -15067,8 +14889,6 @@ void print_group(struct char_data *ch)
       send_to_char(ch, "@D----------------@n\r\n");
   }
 }
-
-
 
 ACMD(do_group)
 {
@@ -15154,8 +14974,6 @@ ACMD(do_group)
   }
 }
 
-
-
 ACMD(do_ungroup)
 {
   char buf[MAX_INPUT_LENGTH];
@@ -15211,9 +15029,6 @@ ACMD(do_ungroup)
     stop_follower(tch);
 }
 
-
-
-
 ACMD(do_report)
 {
   char buf[MAX_STRING_LENGTH];
@@ -15241,8 +15056,6 @@ ACMD(do_report)
 
   send_to_char(ch, "You report to the group.\r\n");
 }
-
-
 
 ACMD(do_split)
 {
@@ -15327,8 +15140,6 @@ ACMD(do_split)
     return;
   }
 }
-
-
 
 ACMD(do_use)
 {
@@ -15477,8 +15288,6 @@ ACMD(do_use)
   mag_objectmagic(ch, mag_item, buf);
 }
 
-
-
 ACMD(do_value)
 {
   char arg[MAX_INPUT_LENGTH];
@@ -15529,7 +15338,6 @@ ACMD(do_value)
   } else
     send_to_char(ch, "Specify a value.  (0 to disable)\r\n");
 }
-
 
 ACMD(do_display)
 {
@@ -15619,8 +15427,6 @@ ACMD(do_display)
   send_to_char(ch, "%s", CONFIG_OK);
 }
 
-
-
 ACMD(do_gen_write)
 {
   FILE *fl;
@@ -15689,8 +15495,6 @@ ACMD(do_gen_write)
   fclose(fl);
   send_to_char(ch, "Okay.  Thanks!\r\n");
 }
-
-
 
 #define TOG_OFF 0
 #define TOG_ON  1
@@ -16455,7 +16259,7 @@ void update_innate(struct char_data *ch)
   } 
 }
 
-int spell_in_book(struct obj_data *obj, int spellnum)
+static int spell_in_book(struct obj_data *obj, int spellnum)
 {
   int i;
   bool found = FALSE;
@@ -16475,7 +16279,7 @@ int spell_in_book(struct obj_data *obj, int spellnum)
   return 0;
 }
 
-int spell_in_scroll(struct obj_data *obj, int spellnum)
+static int spell_in_scroll(struct obj_data *obj, int spellnum)
 {
   if (GET_OBJ_VAL(obj, VAL_SCROLL_SPELL1) == spellnum)
     return TRUE;
@@ -16483,7 +16287,7 @@ int spell_in_scroll(struct obj_data *obj, int spellnum)
   return FALSE;
 }
 
-int spell_in_domain(struct char_data *ch, int spellnum)
+static int spell_in_domain(struct char_data *ch, int spellnum)
 {
   if (spell_info[spellnum].domain == DOMAIN_UNDEFINED) {
     return FALSE;
@@ -16493,7 +16297,7 @@ int spell_in_domain(struct char_data *ch, int spellnum)
 }
 
 
-room_vnum freeres[NUM_ALIGNS] = {
+const room_vnum freeres[NUM_ALIGNS] = {
 /* LAWFUL_GOOD */	1000,
 /* NEUTRAL_GOOD */	1000,
 /* CHAOTIC_GOOD */	1000,
@@ -16546,7 +16350,7 @@ ACMD(do_resurrect)
   act("$n's body forms in a pool of @Bblue light@n.", TRUE, ch, 0, 0, TO_ROOM);
 }
 
-void show_clan_info(struct char_data *ch) {
+static void show_clan_info(struct char_data *ch) {
 
   send_to_char(ch,   "@c----------------------------------------\r\n"
                      "@c|@WProvided by@D: @YAlister of Aeonian Dreams@c|\r\n"
@@ -16584,7 +16388,6 @@ void show_clan_info(struct char_data *ch) {
                      "  clan bset     <clan>\n");
 
 }
-
 
 ACMD(do_clan) {
 
@@ -17177,7 +16980,6 @@ ACMD(do_clan) {
   }
 }
 
-
 ACMD(do_pagelength)
 {
   char arg[MAX_INPUT_LENGTH];
@@ -17441,4 +17243,3 @@ ACMD(do_aura) {
   }
  }
 }
-

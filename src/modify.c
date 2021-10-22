@@ -8,37 +8,17 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include "structs.h"
-#include "utils.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "db.h"
-#include "comm.h"
-#include "spells.h"
-#include "mail.h"
-#include "boards.h"
-#include "improved-edit.h"
-#include "oasis.h"
-#include "tedit.h"
-#include "shop.h"
-#include "guild.h"
-
-void show_string(struct descriptor_data *d, char *input);
-
-extern const char *unused_spellname;	/* spell_parser.c */
+#include "modify.h"
 
 /* local functions */
-void smash_tilde(char *str);
-void smash_numb(char *str);
-ACMD(do_skillset);
-char *next_page(char *str, struct char_data *ch);
-int count_pages(char *str, struct char_data *ch);
-void paginate_string(char *str, struct descriptor_data *d);
-void playing_string_cleanup(struct descriptor_data *d, int action);
-void exdesc_string_cleanup(struct descriptor_data *d, int action);
-void trigedit_string_cleanup(struct descriptor_data *d, int terminator);
 
-const char *string_fields[] =
+static void smash_numb(char *str);
+static char *next_page(char *str, struct char_data *ch);
+static int count_pages(char *str, struct char_data *ch);
+static void playing_string_cleanup(struct descriptor_data *d, int action);
+static void exdesc_string_cleanup(struct descriptor_data *d, int action);
+
+static const char *string_fields[] =
 {
   "name",
   "short",
@@ -51,7 +31,7 @@ const char *string_fields[] =
 
 
 /* maximum length for text field x+1 */
-int length[] =
+static const int length[] =
 {
   15,
   60,
@@ -96,7 +76,7 @@ void smash_tilde(char *str)
 #endif
 }
 
-void smash_numb(char *str)
+static void smash_numb(char *str)
 {
   /*
    * Erase any _line ending_ tildes inserted in the editor.
@@ -271,7 +251,7 @@ void string_add(struct descriptor_data *d, char *str)
      strcat(*d->str, "\r\n");
 }
 
-void playing_string_cleanup(struct descriptor_data *d, int action)
+static void playing_string_cleanup(struct descriptor_data *d, int action)
 {
   struct board_info *board;
   struct board_msg *fore,*cur,*aft;
@@ -330,7 +310,7 @@ void playing_string_cleanup(struct descriptor_data *d, int action)
     }
 }
 
-void exdesc_string_cleanup(struct descriptor_data *d, int action)
+static void exdesc_string_cleanup(struct descriptor_data *d, int action)
 {
   if (action == STRINGADD_ABORT)
     write_to_output(d, "Description aborted.\r\n");
@@ -443,7 +423,7 @@ ACMD(do_skillset)
 /* Traverse down the string until the begining of the next page has been
  * reached.  Return NULL if this is the last page of the string.
  */
-char *next_page(char *str, struct char_data *ch) 
+static char *next_page(char *str, struct char_data *ch)
 { 
   int col = 1, line = 1; 
 
@@ -487,7 +467,7 @@ char *next_page(char *str, struct char_data *ch)
 
 
 /* Function that returns the number of pages in the string. */
-int count_pages(char *str, struct char_data *ch)
+static int count_pages(char *str, struct char_data *ch)
 {
   int pages;
 

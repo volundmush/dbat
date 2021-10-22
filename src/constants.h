@@ -12,7 +12,6 @@
 #include "structs.h"
 #include "interpreter.h"	/* alias_data */
 
-
 extern const char *circlemud_version;
 extern const char *oasisolc_version;
 extern const char *ascii_pfiles_version;
@@ -61,27 +60,18 @@ extern size_t wear_bits_count;
 extern const char *AssemblyTypes[MAX_ASSM+1];
 extern const char *alignments[NUM_ALIGNS+1];
 extern const char *admin_level_names[ADMLVL_IMPL+2];
-extern struct aging_data racial_aging_data[NUM_RACES];
+extern const struct aging_data racial_aging_data[NUM_RACES];
 extern const char *spell_schools[NUM_SCHOOLS+1];
 extern const char *cchoice_names[NUM_COLOR+1];
 extern const char *creation_methods[NUM_CREATION_METHODS+1];
 extern const char *zone_bits[NUM_ZONE_FLAGS+1];
 extern const char *history_types[NUM_HIST+1];
-extern const char *pc_race_types[NUM_RACES+1];
-extern const char *pc_class_types[NUM_CLASSES+1];
 extern const char *weapon_type[MAX_WEAPON_TYPES+2];
 extern const char *armor_type[MAX_ARMOR_TYPES+1];
 extern const char *wield_names[NUM_WIELD_NAMES+1];
 extern const char *material_names[NUM_MATERIALS+1];
-extern const char *class_abbrevs[NUM_CLASSES+1];
-extern const char *race_abbrevs[NUM_RACES+1];
 extern const char *admin_flags[NUM_ADMFLAGS+1];
 extern const char *crit_type[NUM_CRIT_TYPES+1];
-extern const char *config_sect[NUM_CONFIG_SECTIONS+1];
-extern const char *class_names[NUM_CLASSES+1];
-extern const char *race_names[NUM_RACES+1];
-extern const char *trade_letters[NUM_TRADERS+1];
-extern const char *shop_bits[NUM_SHOP_FLAGS+1];
 extern const char *hairl_types[];
 extern const char *eye_types[];
 extern const char *FHA_types[];

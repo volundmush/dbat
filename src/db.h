@@ -11,7 +11,6 @@
 #ifndef __DB_H__
 #define __DB_H__
 
-
 #include "structs.h"
 #include "utils.h"
 #include "config.h"
@@ -34,6 +33,8 @@
 #include "clan.h"
 #include "reset.h"
 #include "imc.h"
+#include "act.h"
+#include "spec_assign.h"
 
 /* arbitrary constants used by index_boot() (must be unique) */
 #define DB_BOOT_WLD	0
@@ -177,6 +178,9 @@ extern char *policies, *handbook, *motd, *imotd;
 extern int top_of_helpt, dballtime;
 
 /* public procedures in db.c */
+void boot_world(void);
+int is_empty(zone_rnum zone_nr);
+void index_boot(int mode);
 void	boot_db(void);
 void	destroy_db(void);
 int	create_entry(char *name);
@@ -194,6 +198,7 @@ void free_disabled(void);
 void    free_help_table(void);
 void    load_help(FILE *fl, char *name);
 void auc_save(void);
+
 
 zone_rnum real_zone(zone_vnum vnum);
 room_rnum real_room(room_vnum vnum);
@@ -354,7 +359,7 @@ struct ban_list_element {
 
 
 /* global buffering system */
-
+extern time_t boot_time;
 
 extern struct config_data config_info;
 
@@ -393,9 +398,12 @@ extern int top_of_trigt;
 extern long max_mob_id;
 extern long max_obj_id;
 extern int dg_owner_purged;
+extern int xap_objs;
 
 void strip_string(char *buffer);
 int read_xap_objects(FILE *fl,struct char_data *ch);
+bitvector_t asciiflag_conv(char *flag);
+void reset_zone(zone_rnum zone);
 
 /* For disabled commands code by Erwin S. Andreasen, */
 /* ported to CircleMUD by Myrdred (Alexei Svitkine)  */
@@ -415,5 +423,8 @@ struct disabled_data {
        sh_int level;                       /* level of disabler             */
        int subcmd;                         /* the subcmd, if any            */
 };
+
+// commands
+ACMD(do_reboot);
 
 #endif
