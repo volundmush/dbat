@@ -8,6 +8,20 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 #include "spec_procs.h"
+#include "utils.h"
+#include "comm.h"
+#include "interpreter.h"
+#include "handler.h"
+#include "db.h"
+#include "spells.h"
+#include "constants.h"
+#include "mail.h"
+#include "act.movement.h"
+#include "act.item.h"
+#include "act.social.h"
+#include "guild.h"
+#include "races.h"
+#include "act.comm.h"
 
 /* local functions */
 
@@ -1117,7 +1131,7 @@ SPECIAL(healtank)
     return (TRUE);
    }
 
-   if (!str_cmp("enter", arg)) {
+   if (!strcasecmp("enter", arg)) {
     if (PLR_FLAGGED(ch, PLR_HEALT)) {
      send_to_char(ch, "You are already inside a healing tank!\r\n");
      return (TRUE);
@@ -1155,7 +1169,7 @@ SPECIAL(healtank)
 
    } // End of Enter argument
   
-  else if (!str_cmp("exit", arg)) {
+  else if (!strcasecmp("exit", arg)) {
    if (!PLR_FLAGGED(ch, PLR_HEALT)) {
     send_to_char(ch, "You are not inside a healing tank.\r\n");
     return (TRUE);
@@ -1170,7 +1184,7 @@ SPECIAL(healtank)
    }
   } // End of Exit argument
 
-  else if (!str_cmp("check", arg)) {
+  else if (!strcasecmp("check", arg)) {
    if (HCHARGE(htank) < 20 && HCHARGE(htank) > 0) { 
    send_to_char(ch, "The healing tank has %d bars of energy displayed on its meter.\r\n", HCHARGE(htank));
    }
@@ -1227,7 +1241,7 @@ SPECIAL(augmenter)
      send_to_char(ch, "@YSpeed       @y: @WCurrently measured at @w%d@W, cost to augment @Y%s@W.@n\r\n", speed, add_commas(specost));
      send_to_char(ch, "\r\n");
      return (TRUE);
-    } else if (!str_cmp("strength", arg) || !str_cmp("str", arg)) {
+    } else if (!strcasecmp("strength", arg) || !strcasecmp("str", arg)) {
      if (strength >= 100)
       send_to_char(ch, "Your strength is already as high as it can possibly go.\r\n");
      else if (GET_GOLD(ch) < strcost)
@@ -1239,7 +1253,7 @@ SPECIAL(augmenter)
       GET_GOLD(ch) -= strcost;
       save_char(ch);
      }
-    } else if (!str_cmp("intelligence", arg) || !str_cmp("int", arg)) {
+    } else if (!strcasecmp("intelligence", arg) || !strcasecmp("int", arg)) {
      if (intel >= 100)
       send_to_char(ch, "Your intelligence is already as high as it can possibly go.\r\n");
      else if (GET_GOLD(ch) < intcost)
@@ -1251,7 +1265,7 @@ SPECIAL(augmenter)
       GET_GOLD(ch) -= intcost;
       save_char(ch);
      }
-    } else if (!str_cmp("constitution", arg) || !str_cmp("con", arg)) {
+    } else if (!strcasecmp("constitution", arg) || !strcasecmp("con", arg)) {
      if (consti >= 100)
       send_to_char(ch, "Your constitution is already as high as it can possibly go.\r\n");
      else if (GET_GOLD(ch) < concost)
@@ -1263,7 +1277,7 @@ SPECIAL(augmenter)
       GET_GOLD(ch) -= concost;
       save_char(ch);
      }
-    } else if (!str_cmp("speed", arg) || !str_cmp("spe", arg)) {
+    } else if (!strcasecmp("speed", arg) || !strcasecmp("spe", arg)) {
      if (speed >= 100)
       send_to_char(ch, "Your speed is already as high as it can possibly go.\r\n");
      else if (GET_GOLD(ch) < specost)
@@ -1275,7 +1289,7 @@ SPECIAL(augmenter)
       GET_GOLD(ch) -= specost;
       save_char(ch);
      }
-    } else if (!str_cmp("agility", arg) || !str_cmp("agi", arg)) {
+    } else if (!strcasecmp("agility", arg) || !strcasecmp("agi", arg)) {
      if (agility >= 100)
       send_to_char(ch, "Your agility is already as high as it can possibly go.\r\n");
      else if (GET_GOLD(ch) < agicost)
@@ -1287,7 +1301,7 @@ SPECIAL(augmenter)
       GET_GOLD(ch) -= agicost;
       save_char(ch);
      }
-    } else if (!str_cmp("wisdom", arg) || !str_cmp("wis", arg)) {
+    } else if (!strcasecmp("wisdom", arg) || !strcasecmp("wis", arg)) {
      if (wisdom >= 100)
       send_to_char(ch, "Your wisdom how somehow been measured is already as high as it can possibly go.\r\n");
      else if (GET_GOLD(ch) < wiscost)
@@ -1336,11 +1350,11 @@ SPECIAL(gravity)
     send_to_char(ch, "It's broken!\r\n");
     return (TRUE);
    }
-   if ((!str_cmp("N", arg) || !str_cmp("n", arg) || !str_cmp("0", arg)) && GET_OBJ_WEIGHT(obj) == 0) {
+   if ((!strcasecmp("N", arg) || !strcasecmp("n", arg) || !strcasecmp("0", arg)) && GET_OBJ_WEIGHT(obj) == 0) {
     send_to_char(ch, "The gravity generator is already set to that.\r\n");
     return (TRUE);
    }
-   else if (!str_cmp("N", arg) || !str_cmp("n", arg) || !str_cmp("0", arg)) {
+   else if (!strcasecmp("N", arg) || !strcasecmp("n", arg) || !strcasecmp("0", arg)) {
     send_to_char(ch, "You punch in normal gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_VEGETA) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_GRAVITYX10)) {
@@ -1353,15 +1367,15 @@ SPECIAL(gravity)
     }
     match = TRUE;
    }
-   if (!str_cmp("10", arg) && GET_OBJ_WEIGHT(obj) == 10) {
+   if (!strcasecmp("10", arg) && GET_OBJ_WEIGHT(obj) == 10) {
     send_to_char(ch, "The gravity generator is already set to that.\r\n");
     return (TRUE);
    }
-   else if (!str_cmp("10", arg) && ROOM_GRAVITY(IN_ROOM(ch)) == 10 && (ROOM_FLAGGED(IN_ROOM(ch), ROOM_VEGETA) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_GRAVITYX10))) {
+   else if (!strcasecmp("10", arg) && ROOM_GRAVITY(IN_ROOM(ch)) == 10 && (ROOM_FLAGGED(IN_ROOM(ch), ROOM_VEGETA) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_GRAVITYX10))) {
     send_to_char(ch, "The gravity around you is already at that.\r\n");
     return (TRUE);
    }
-   else if (!str_cmp("10", arg) && ROOM_GRAVITY(IN_ROOM(ch)) != 10 && (ROOM_FLAGGED(IN_ROOM(ch), ROOM_VEGETA) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_GRAVITYX10))) {
+   else if (!strcasecmp("10", arg) && ROOM_GRAVITY(IN_ROOM(ch)) != 10 && (ROOM_FLAGGED(IN_ROOM(ch), ROOM_VEGETA) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_GRAVITYX10))) {
     send_to_char(ch, "You punch in normal gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
@@ -1372,18 +1386,18 @@ SPECIAL(gravity)
      GET_OBJ_WEIGHT(obj) = 0;
     match = TRUE;
    }
-   else if (!str_cmp("10", arg)) {
+   else if (!strcasecmp("10", arg)) {
     send_to_char(ch, "You punch in ten times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     ROOM_GRAVITY(IN_ROOM(ch)) = 10;
      GET_OBJ_WEIGHT(obj) = 10;
     match = TRUE;
    }
-   if (!str_cmp("20", arg) && GET_OBJ_WEIGHT(obj) == 20) {
+   if (!strcasecmp("20", arg) && GET_OBJ_WEIGHT(obj) == 20) {
     send_to_char(ch, "The gravity generator is already set to that.\r\n");
     return (TRUE);
    }
-   else if (!str_cmp("20", arg)) {
+   else if (!strcasecmp("20", arg)) {
     send_to_char(ch, "You punch in twenty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
@@ -1394,11 +1408,11 @@ SPECIAL(gravity)
      GET_OBJ_WEIGHT(obj) = 20;
     match = TRUE;
    }
-   if (!str_cmp("30", arg) && GET_OBJ_WEIGHT(obj) == 30) {
+   if (!strcasecmp("30", arg) && GET_OBJ_WEIGHT(obj) == 30) {
     send_to_char(ch, "The gravity generator is already set to that.\r\n");
     return (TRUE);
    }
-   else if (!str_cmp("30", arg)) {
+   else if (!strcasecmp("30", arg)) {
     send_to_char(ch, "You punch in thirty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
@@ -1409,11 +1423,11 @@ SPECIAL(gravity)
      GET_OBJ_WEIGHT(obj) = 30;
     match = TRUE;
    }
-   if (!str_cmp("40", arg) && GET_OBJ_WEIGHT(obj) == 40) {
+   if (!strcasecmp("40", arg) && GET_OBJ_WEIGHT(obj) == 40) {
     send_to_char(ch, "The gravity generator is already set to that.\r\n");
     return (TRUE);
    }
-   else if (!str_cmp("40", arg)) {
+   else if (!strcasecmp("40", arg)) {
     send_to_char(ch, "You punch in fourty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
@@ -1424,11 +1438,11 @@ SPECIAL(gravity)
      GET_OBJ_WEIGHT(obj) = 40;
     match = TRUE;
    }
-   if (!str_cmp("50", arg) && GET_OBJ_WEIGHT(obj) == 50) {
+   if (!strcasecmp("50", arg) && GET_OBJ_WEIGHT(obj) == 50) {
     send_to_char(ch, "The gravity generator is already set to that.\r\n");
     return (TRUE);
    }
-   else if (!str_cmp("50", arg)) {
+   else if (!strcasecmp("50", arg)) {
     send_to_char(ch, "You punch in fifty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
@@ -1439,11 +1453,11 @@ SPECIAL(gravity)
      GET_OBJ_WEIGHT(obj) = 50;
     match = TRUE;
    }
-   if (!str_cmp("100", arg) && GET_OBJ_WEIGHT(obj) == 100) {
+   if (!strcasecmp("100", arg) && GET_OBJ_WEIGHT(obj) == 100) {
     send_to_char(ch, "The gravity generator is already set to that.\r\n");
     return (TRUE);
    }
-   else if (!str_cmp("100", arg)) {
+   else if (!strcasecmp("100", arg)) {
     send_to_char(ch, "You punch in one hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
@@ -1454,11 +1468,11 @@ SPECIAL(gravity)
      GET_OBJ_WEIGHT(obj) = 100;
     match = TRUE;
    }
-   if (!str_cmp("200", arg) && GET_OBJ_WEIGHT(obj) == 200) {
+   if (!strcasecmp("200", arg) && GET_OBJ_WEIGHT(obj) == 200) {
     send_to_char(ch, "The gravity generator is already set to that.\r\n");
     return (TRUE);
    }
-   else if (!str_cmp("200", arg)) {
+   else if (!strcasecmp("200", arg)) {
     send_to_char(ch, "You punch in two hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
@@ -1469,11 +1483,11 @@ SPECIAL(gravity)
      GET_OBJ_WEIGHT(obj) = 200;
     match = TRUE;
    }
-   if (!str_cmp("300", arg) && GET_OBJ_WEIGHT(obj) == 300) {
+   if (!strcasecmp("300", arg) && GET_OBJ_WEIGHT(obj) == 300) {
     send_to_char(ch, "The gravity generator is already set to that.\r\n");
     return (TRUE);
    }
-   else if (!str_cmp("300", arg)) {
+   else if (!strcasecmp("300", arg)) {
     send_to_char(ch, "You punch in three hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
@@ -1484,11 +1498,11 @@ SPECIAL(gravity)
      GET_OBJ_WEIGHT(obj) = 300;
     match = TRUE;
    }
-   if (!str_cmp("400", arg) && GET_OBJ_WEIGHT(obj) == 400) {
+   if (!strcasecmp("400", arg) && GET_OBJ_WEIGHT(obj) == 400) {
     send_to_char(ch, "The gravity generator is already set to that.\r\n");
     return (TRUE);
    }
-   else if (!str_cmp("400", arg)) {
+   else if (!strcasecmp("400", arg)) {
     send_to_char(ch, "You punch in four hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
@@ -1499,11 +1513,11 @@ SPECIAL(gravity)
      GET_OBJ_WEIGHT(obj) = 400;
     match = TRUE;
    }
-   if (!str_cmp("500", arg) && GET_OBJ_WEIGHT(obj) == 500) {
+   if (!strcasecmp("500", arg) && GET_OBJ_WEIGHT(obj) == 500) {
     send_to_char(ch, "The gravity generator is already set to that.\r\n");
     return (TRUE);
    }
-   else if (!str_cmp("500", arg)) {
+   else if (!strcasecmp("500", arg)) {
     send_to_char(ch, "You punch in five hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
@@ -1514,11 +1528,11 @@ SPECIAL(gravity)
      GET_OBJ_WEIGHT(obj) = 500;
     match = TRUE;
    }
-   if (!str_cmp("1000", arg) && GET_OBJ_WEIGHT(obj) == 1000) {
+   if (!strcasecmp("1000", arg) && GET_OBJ_WEIGHT(obj) == 1000) {
     send_to_char(ch, "The gravity generator is already set to that.\r\n");
     return (TRUE);
    }
-   else if (!str_cmp("1000", arg)) {
+   else if (!strcasecmp("1000", arg)) {
     send_to_char(ch, "You punch in one thousand times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
@@ -1529,11 +1543,11 @@ SPECIAL(gravity)
      GET_OBJ_WEIGHT(obj) = 1000;
     match = TRUE;
    }
-   if (!str_cmp("5000", arg) && GET_OBJ_WEIGHT(obj) == 5000) {
+   if (!strcasecmp("5000", arg) && GET_OBJ_WEIGHT(obj) == 5000) {
     send_to_char(ch, "The gravity generator is already set to that.\r\n");
     return (TRUE);
    }
-   else if (!str_cmp("5000", arg)) {
+   else if (!strcasecmp("5000", arg)) {
     send_to_char(ch, "You punch in five thousand times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
@@ -1544,11 +1558,11 @@ SPECIAL(gravity)
      GET_OBJ_WEIGHT(obj) = 5000;
     match = TRUE;
    }
-   if (!str_cmp("10000", arg) && GET_OBJ_WEIGHT(obj) == 10000) {
+   if (!strcasecmp("10000", arg) && GET_OBJ_WEIGHT(obj) == 10000) {
     send_to_char(ch, "The gravity generator is already set to that.\r\n");
     return (TRUE);
    }
-   else if (!str_cmp("10000", arg)) {
+   else if (!strcasecmp("10000", arg)) {
     send_to_char(ch, "You punch in ten thousand times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
@@ -1643,7 +1657,7 @@ SPECIAL(bank)
         send_to_char(ch, "There is an error. Report to Iovan.");
         return (TRUE);
        }
-       if (!str_cmp(GET_NAME(vict), ch->desc->tmp1) || !str_cmp(GET_NAME(vict), ch->desc->tmp2) || !str_cmp(GET_NAME(vict), ch->desc->tmp3) || !str_cmp(GET_NAME(vict), ch->desc->tmp4) || !str_cmp(GET_NAME(vict), ch->desc->tmp5)) {
+       if (!strcasecmp(GET_NAME(vict), ch->desc->tmp1) || !strcasecmp(GET_NAME(vict), ch->desc->tmp2) || !strcasecmp(GET_NAME(vict), ch->desc->tmp3) || !strcasecmp(GET_NAME(vict), ch->desc->tmp4) || !strcasecmp(GET_NAME(vict), ch->desc->tmp5)) {
         send_to_char(ch, "You can not transfer money to your own offline characters...");
         if (is_file == TRUE)
          free_char(vict);

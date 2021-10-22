@@ -9,64 +9,23 @@
 ************************************************************************ */
 
 #include "utils.h"
-
-
-/* external globals */
-extern int perf_skill(int skill);
-extern int level_exp(struct char_data *ch, int level);
-extern zone_rnum real_zone_by_thing(room_vnum vznum);
+#include "comm.h"
+#include "handler.h"
+#include "random.h"
+#include "spells.h"
+#include "db.h"
+#include "config.h"
+#include "fight.h"
+#include "races.h"
+#include "class.h"
+#include "feats.h"
+#include "genzon.h"
+#include "constants.h"
+#include "act.informative.h"
 
 /* local functions */
-bool soft_cap(struct char_data *ch, cl_sint64 type);
-cl_sint64 show_softcap(struct char_data *ch);
 char commastring[MAX_STRING_LENGTH];
-struct time_info_data *real_time_passed(time_t t2, time_t t1);
-struct time_info_data *mud_time_passed(time_t t2, time_t t1);
-int cook_element(room_rnum room);
-void improve_skill(struct char_data *ch, int skill, int num);
-void purge_homing(struct char_data *ch);
-int planet_check(struct char_data *ch, struct char_data *vict);
-double speednar(struct char_data *ch);
-cl_sint64 gear_pl_restore(struct char_data *ch, cl_sint64 previous);
-cl_sint64 gear_pl(struct char_data *ch);
-int gear_weight(struct char_data *ch);
-cl_sint64 gear_exp(struct char_data *ch, cl_sint64 exp);
-int grav_cost(struct char_data *ch, cl_sint64 num);
-void prune_crlf(char *txt);
-int count_metamagic_feats(struct char_data *ch);
-void mob_talk(struct char_data *ch, const char *speech);
-bool is_sparring(struct char_data *ch);
-int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech);
-void handle_evolution(struct char_data *ch, cl_sint64 dmg);
-cl_sint64 molt_threshold(struct char_data *ch);
-int block_calc(struct char_data *ch);
-int armor_evolve(struct char_data *ch);
-void reveal_hiding(struct char_data *ch, int type);
-char *sense_location(struct char_data *ch);
-void randomize_eq(struct obj_data *obj);
-int wearable_obj(struct obj_data *obj);
-void broken_update(void);
-int roll_pursue(struct char_data *ch, struct char_data *vict);
-void senseCreate(struct char_data *ch);
-void sense_memory_write(struct char_data *ch, struct char_data *vict);
-int read_sense_memory(struct char_data *ch, struct char_data *vict);
-const char *disp_align(struct char_data *ch);
-void customRead(struct descriptor_data *d, int type, char *name);
-void customWrite(struct char_data *ch, struct obj_data *obj);
-void customCreate(struct descriptor_data *d);
-int trans_req(struct char_data *ch, int trans);
-int trans_cost(struct char_data *ch, int trans);
-cl_sint64 physical_cost(struct char_data *ch, int skill);
-int get_measure(struct char_data *ch, int height, int weight);
-int sec_roll_check(struct char_data *ch);
-void assign_affect(struct char_data *ch, int aff_flag, int skill, int dur, int str, int con, int intel, int agl, int wis, int spd);
-void null_affect(struct char_data *ch, int aff_flag);
-int roll_aff_duration(int num, int add);
-int know_skill(struct char_data *ch, int skill);
-const char *report_party_health(struct char_data *ch);
-int has_group(struct char_data *ch);
-void dispel_ash(struct char_data *ch);
-void demon_refill_lf(struct char_data *ch, cl_sint64 num);
+
 
 void dispel_ash(struct char_data *ch)
 {
@@ -145,8 +104,8 @@ const char *report_party_health(struct char_data *ch)
   struct follow_type *k, *next;
   int count = 0, stam1 = 8, stam2 = 8, stam3 = 8, stam4 = 8, plc1 = 4, plc2 = 4, plc3 = 4, plc4 = 4;
   struct char_data *party1 = NULL, *party2 = NULL, *party3 = NULL, *party4 = NULL;
-  cl_sint64 plperc1 = 0, plperc2 = 0, plperc3 = 0, plperc4 = 0;
-  cl_sint64 kiperc1 = 0, kiperc2 = 0, kiperc3 = 0, kiperc4 = 0;
+  int64_t plperc1 = 0, plperc2 = 0, plperc3 = 0, plperc4 = 0;
+  int64_t kiperc1 = 0, kiperc2 = 0, kiperc3 = 0, kiperc4 = 0;
   char result_party_health[MAX_STRING_LENGTH], result1[MAX_STRING_LENGTH], result2[MAX_STRING_LENGTH], result3[MAX_STRING_LENGTH], result4[MAX_STRING_LENGTH], result5[MAX_STRING_LENGTH];
 
   const char *plcol[5] = {"@r",
@@ -653,10 +612,10 @@ int get_measure(struct char_data *ch, int height, int weight)
 }
 
 
-cl_sint64 physical_cost(struct char_data *ch, int skill)
+int64_t physical_cost(struct char_data *ch, int skill)
 {
 
- cl_sint64 result = 0;
+ int64_t result = 0;
 
  if (skill == SKILL_PUNCH)
   result = GET_MAX_HIT(ch) / 500;
@@ -1257,7 +1216,7 @@ void customWrite(struct char_data *ch, struct obj_data *obj)
 
  while (!feof(file)) {
   get_line(file, line);
-  if (str_cmp(prev, line))
+  if (strcasecmp(prev, line))
    sprintf(buf+strlen(buf), "%s\n", line);
   *prev = '\0';
   sprintf(prev, line);
@@ -1305,7 +1264,7 @@ void customRead(struct descriptor_data *d, int type, char *name)
 
   while (!feof(fl)) {
    get_line(fl, line);
-   if (str_cmp(filler, line))
+   if (strcasecmp(filler, line))
     sprintf(buf+strlen(buf), "%s\n", line);
    *filler = '\0';
    *line = '\0';
@@ -1330,7 +1289,7 @@ void customRead(struct descriptor_data *d, int type, char *name)
 
   while (!feof(fl)) {
    get_line(fl, line);
-   if (str_cmp(filler, line))
+   if (strcasecmp(filler, line))
     sprintf(buf+strlen(buf), "%s\n", line);
    *filler = '\0';
    sprintf(filler, line);
@@ -1370,9 +1329,9 @@ void customCreate(struct descriptor_data *d)
  fclose(fl);
 }
 
-cl_sint64 show_softcap(struct char_data *ch)
+int64_t show_softcap(struct char_data *ch)
 {
- cl_sint64 capamt = 0;
+ int64_t capamt = 0;
  if ((IS_ANDROID(ch) && PLR_FLAGGED(ch, PLR_ABSORB)) || (!IS_ANDROID(ch) && !IS_BIO(ch) && !IS_MAJIN(ch))) {
    if (GET_LEVEL(ch) > 90 && GET_LEVEL(ch) <= 99) {
     capamt = GET_LEVEL(ch) * 1500000;
@@ -2572,10 +2531,10 @@ int block_calc(struct char_data *ch)
   return (1);
 }
 
-cl_sint64 molt_threshold(struct char_data *ch)
+int64_t molt_threshold(struct char_data *ch)
 {
 
- cl_sint64 threshold = 0, max = 2000000000;
+ int64_t threshold = 0, max = 2000000000;
 
  max *= 250;
 
@@ -2635,7 +2594,7 @@ int armor_evolve(struct char_data *ch)
 }
 
 /* This handles arlian exoskeleton molting */
-void handle_evolution(struct char_data *ch, cl_sint64 dmg)
+void handle_evolution(struct char_data *ch, int64_t dmg)
 {
 
  /* Reject NPCs and non-arlians */
@@ -2643,7 +2602,7 @@ void handle_evolution(struct char_data *ch, cl_sint64 dmg)
   return;
  }
  
- cl_sint64 moltgain = 0;
+ int64_t moltgain = 0;
 
  moltgain = dmg * 0.5;
  if (GET_LEVEL(ch) == 100)
@@ -2677,7 +2636,7 @@ void handle_evolution(struct char_data *ch, cl_sint64 dmg)
     rand1 += 0.01;
     rand2 += 0.01;
    }
-   cl_sint64 plgain = GET_MAX_HIT(ch) * rand1, armorgain = 0, stamgain = GET_MAX_MOVE(ch) * rand2;
+   int64_t plgain = GET_MAX_HIT(ch) * rand1, armorgain = 0, stamgain = GET_MAX_MOVE(ch) * rand2;
    armorgain = armor_evolve(ch);
    GET_MAX_HIT(ch) += plgain;
    GET_BASE_PL(ch) += plgain;
@@ -2697,7 +2656,7 @@ void handle_evolution(struct char_data *ch, cl_sint64 dmg)
 
 }
 
-void demon_refill_lf(struct char_data *ch, cl_sint64 num)
+void demon_refill_lf(struct char_data *ch, int64_t num)
 {
  struct char_data *tch = NULL;
 
@@ -3170,7 +3129,7 @@ void game_info(const char *format, ...)
   } 
 }
 
-bool soft_cap(struct char_data *ch, cl_sint64 type)
+bool soft_cap(struct char_data *ch, int64_t type)
 {
  if (IS_NPC(ch)) {
   return (TRUE);
@@ -3178,7 +3137,7 @@ bool soft_cap(struct char_data *ch, cl_sint64 type)
 
  if (IS_KANASSAN(ch) || IS_DEMON(ch)) {
   if (type == 0) {
-   cl_sint64 base = GET_BASE_PL(ch);
+   int64_t base = GET_BASE_PL(ch);
 
    if ((base > GET_LEVEL(ch) * 2000000) && GET_LEVEL(ch) > 90 && GET_LEVEL(ch) <= 99) {
     return FALSE;
@@ -3215,7 +3174,7 @@ bool soft_cap(struct char_data *ch, cl_sint64 type)
    }
   }
   if (type == 1) {
-   cl_sint64 base = GET_BASE_KI(ch);
+   int64_t base = GET_BASE_KI(ch);
 
    if ((base > GET_LEVEL(ch) * 2000000) && GET_LEVEL(ch) > 90 && GET_LEVEL(ch) <= 99) {
     return FALSE;
@@ -3252,7 +3211,7 @@ bool soft_cap(struct char_data *ch, cl_sint64 type)
    }
   }
   if (type == 2) {
-   cl_sint64 base = GET_BASE_ST(ch);
+   int64_t base = GET_BASE_ST(ch);
 
    if ((base > GET_LEVEL(ch) * 2000000) && GET_LEVEL(ch) > 90 && GET_LEVEL(ch) <= 99) {
     return FALSE;
@@ -3291,7 +3250,7 @@ bool soft_cap(struct char_data *ch, cl_sint64 type)
  }
  else if ((IS_ANDROID(ch) && PLR_FLAGGED(ch, PLR_ABSORB)) || (!IS_ANDROID(ch) && !IS_BIO(ch) && !IS_MAJIN(ch))) {
   if (type == 0) {
-   cl_sint64 base = GET_BASE_PL(ch);
+   int64_t base = GET_BASE_PL(ch);
 
    if ((base > GET_LEVEL(ch) * 1500000) && GET_LEVEL(ch) > 90 && GET_LEVEL(ch) <= 99) {
     return FALSE;
@@ -3328,7 +3287,7 @@ bool soft_cap(struct char_data *ch, cl_sint64 type)
    }
   }
   if (type == 1) {
-   cl_sint64 base = GET_BASE_KI(ch);
+   int64_t base = GET_BASE_KI(ch);
 
    if ((base > GET_LEVEL(ch) * 1500000) && GET_LEVEL(ch) > 90 && GET_LEVEL(ch) <= 99) {
     return FALSE;
@@ -3365,7 +3324,7 @@ bool soft_cap(struct char_data *ch, cl_sint64 type)
    }
   }
   if (type == 2) {
-   cl_sint64 base = GET_BASE_ST(ch);
+   int64_t base = GET_BASE_ST(ch);
 
    if ((base > GET_LEVEL(ch) * 1500000) && GET_LEVEL(ch) > 90 && GET_LEVEL(ch) <= 99) {
     return FALSE;
@@ -3404,7 +3363,7 @@ bool soft_cap(struct char_data *ch, cl_sint64 type)
   return TRUE;
  }
  else if (IS_ANDROID(ch)) {
-  cl_sint64 softcap = GET_BASE_PL(ch) + GET_BASE_KI(ch) + GET_BASE_ST(ch);
+  int64_t softcap = GET_BASE_PL(ch) + GET_BASE_KI(ch) + GET_BASE_ST(ch);
   if (type > 0) {
    softcap += type;
   }
@@ -3443,7 +3402,7 @@ bool soft_cap(struct char_data *ch, cl_sint64 type)
    }
  }
  else if (IS_MAJIN(ch)) {
-  cl_sint64 softcap = GET_BASE_PL(ch) + GET_BASE_KI(ch) + GET_BASE_ST(ch);
+  int64_t softcap = GET_BASE_PL(ch) + GET_BASE_KI(ch) + GET_BASE_ST(ch);
 
   if (GET_LEVEL(ch) > 90 && GET_LEVEL(ch) <= 99 && (softcap > GET_LEVEL(ch) * 4500000)) {
     return FALSE;
@@ -3480,7 +3439,7 @@ bool soft_cap(struct char_data *ch, cl_sint64 type)
   }
  }
  else if (IS_BIO(ch)) {
-  cl_sint64 softcap = GET_BASE_PL(ch) + GET_BASE_KI(ch) + GET_BASE_ST(ch);
+  int64_t softcap = GET_BASE_PL(ch) + GET_BASE_KI(ch) + GET_BASE_ST(ch);
 
   if (GET_LEVEL(ch) > 90 && GET_LEVEL(ch) <= 99 && (softcap > GET_LEVEL(ch) * 4500000)) {
     return FALSE;
@@ -3519,7 +3478,7 @@ bool soft_cap(struct char_data *ch, cl_sint64 type)
  return TRUE;
 }
 
-int grav_cost(struct char_data *ch, cl_sint64 num)
+int grav_cost(struct char_data *ch, int64_t num)
 {
  int cost = 0;
 if (num == 0) {
@@ -3649,7 +3608,7 @@ double speednar(struct char_data *ch)
 
 }
 
-cl_sint64 gear_pl_restore(struct char_data *ch, cl_sint64 previous)
+int64_t gear_pl_restore(struct char_data *ch, int64_t previous)
 {
 
  if (IS_NPC(ch)) {
@@ -3657,7 +3616,7 @@ cl_sint64 gear_pl_restore(struct char_data *ch, cl_sint64 previous)
  }
   
 
- cl_sint64 result = 0, adjust = 0, max = GET_MAX_HIT(ch), cur = 0;
+ int64_t result = 0, adjust = 0, max = GET_MAX_HIT(ch), cur = 0;
 
  if (GET_SUPPRESS(ch) > 0) {
   max = (GET_MAX_HIT(ch) * 0.01) * GET_SUPPRESS(ch);
@@ -3671,14 +3630,14 @@ cl_sint64 gear_pl_restore(struct char_data *ch, cl_sint64 previous)
 
 }
 
-cl_sint64 gear_pl(struct char_data *ch)
+int64_t gear_pl(struct char_data *ch)
 {
 
  if (IS_NPC(ch)) {
   return (GET_MAX_HIT(ch));
  }
 
- cl_sint64 result = 0, adjust = 0, max = GET_MAX_HIT(ch);
+ int64_t result = 0, adjust = 0, max = GET_MAX_HIT(ch);
 
  adjust = max * speednar(ch);
  result = max - adjust;
@@ -3687,14 +3646,14 @@ cl_sint64 gear_pl(struct char_data *ch)
 
 }
 
-cl_sint64 gear_exp(struct char_data *ch, cl_sint64 exp)
+int64_t gear_exp(struct char_data *ch, int64_t exp)
 {
 
  if (IS_NPC(ch)) {
   return 0;
  }
 
- cl_sint64 out = 0;
+ int64_t out = 0;
 
  if (speednar(ch) >= 1) {
   out = exp * 3;
@@ -3980,11 +3939,11 @@ void improve_skill(struct char_data *ch, int skill, int num)
 }
 
 /* creates a random number in long long int */
-cl_sint64 large_rand(cl_sint64 from, cl_sint64 to)
+int64_t large_rand(int64_t from, int64_t to)
 {
   /* error checking in case people call this incorrectly */
   if (from > to) {
-    cl_sint64 tmp = from;
+    int64_t tmp = from;
     from = to;
     to = tmp;
   }
@@ -4077,37 +4036,6 @@ char *CAP(char *txt)
 }
 
 
-#if !defined(HAVE_STRLCPY)
-/* A 'strlcpy' function in the same fashion as 'strdup' below.
- *
- * This copies up to totalsize - 1 bytes from the source string, placing
- * them and a trailing NUL into the destination string.
- *
- * Returns the total length of the string it tried to copy, not including
- * the trailing NUL.  So a '>= totalsize' test says it was truncated.
- * (Note that you may have _expected_ truncation because you only wanted
- * a few characters from the source string.) */
-size_t strlcpy(char *dest, const char *source, size_t totalsize)
-{
-  strncpy(dest, source, totalsize - 1);	/* strncpy: OK (we must assume 'totalsize' is correct) */
-  dest[totalsize - 1] = '\0';
-  return strlen(source);
-}
-#endif
-
-
-#if !defined(HAVE_STRDUP)
-/* Create a duplicate of a string */
-char *strdup(const char *source)
-{
-  char *new_z;
-
-  CREATE(new_z, char, strlen(source) + 1);
-  return (strcpy(new_z, source)); /* strcpy: OK */
-}
-#endif
-
-
 char *strlwr(char *s) 
 { 
    if (s != NULL) 
@@ -4129,53 +4057,6 @@ void prune_crlf(char *txt)
   while (txt[i] == '\n' || txt[i] == '\r')
     txt[i--] = '\0';
 }
-
-
-#ifndef str_cmp
-/* str_cmp: a case-insensitive version of strcmp().
- * Returns: 0 if equal, > 0 if arg1 > arg2, or < 0 if arg1 < arg2.
- *
- * Scan until strings are found different or we reach the end of both.  */
-int str_cmp(const char *arg1, const char *arg2)
-{
-  int chk, i;
-
-  if (arg1 == NULL || arg2 == NULL) {
-    log("SYSERR: str_cmp() passed a NULL pointer, %p or %p.", arg1, arg2);
-    return (0);
-  }
-
-  for (i = 0; arg1[i] || arg2[i]; i++)
-    if ((chk = LOWER(arg1[i]) - LOWER(arg2[i])) != 0)
-      return (chk);	/* not equal */
-
-  return (0);
-}
-#endif
-
-
-#ifndef strn_cmp
-/* strn_cmp: a case-insensitive version of strncmp().
- * Returns: 0 if equal, > 0 if arg1 > arg2, or < 0 if arg1 < arg2.
- *
- * Scan until strings are found different, the end of both, or n is reached.  */
-int strn_cmp(const char *arg1, const char *arg2, int n)
-{
-  int chk, i;
-
-  if (arg1 == NULL || arg2 == NULL) {
-    log("SYSERR: strn_cmp() passed a NULL pointer, %p or %p.", arg1, arg2);
-    return (0);
-  }
-
-  for (i = 0; (arg1[i] || arg2[i]) && (n > 0); i++, n--)
-    if ((chk = LOWER(arg1[i]) - LOWER(arg2[i])) != 0)
-      return (chk);	/* not equal */
-
-  return (0);
-}
-#endif
-
 
 /* log a death trap hit */
 void log_death_trap(struct char_data *ch)
@@ -4691,22 +4572,6 @@ void core_dump_real(const char *who, int line)
 {
   /* log("SYSERR: Assertion failed at %s:%d!", who, line); */
 
-#if 0	/* By default, let's not litter. */
-#if defined(CIRCLE_UNIX)
-  /* These would be duplicated otherwise...make very sure. */
-  fflush(stdout);
-  fflush(stderr);
-  fflush(logfile);
-  fflush(player_fl);
-  /* Everything, just in case, for the systems that support it. */
-  fflush(NULL);
-
-  /* Kill the child so the debugger or script doesn't think the MUD
-   * crashed.  The 'autorun' script would otherwise run it again.  */
-  if (fork() == 0)
-    abort();
-#endif
-#endif
 }
 
 /* Is there a campfire in the room? */
@@ -4803,71 +4668,6 @@ int count_metamagic_feats(struct char_data *ch)
 /* different OS'es.  Needs solid testing though.                 */
 /* Added by Dynamic Boards v2.4 - PjD (dughi@imaxx.net)          */
 
-#include <sys/types.h>
-#include <sys/stat.h>
-
-#ifdef CIRCLE_WINDOWS
-#include <direct.h>
-/* I shouldn't need to include the following line, right? */
-#include <windows.h>
-
-int xdir_scan(char *dir_name, struct xap_dir *xapdirptest) {
-  HANDLE dirhandle;
-  WIN32_FIND_DATA wtfd;
-  int i, total = 0;
-  struct xap_dir *xapdirp;
-
-  xapdirp = xapdirptest;
-
-  xapdirp->current = -1;
-  xapdirp->total = -1;
-
-  dirhandle = FindFirstFile(dir_name, &wtfd);
-
-  if(dirhandle == INVALID_HANDLE_VALUE) {
-    return -1;
-  }
-
-  (xapdirp->total)++;
-  while(FindNextFile(dirhandle, &wtfd)) {
-    (xapdirp->total)++;
-  }
-
-  if(GetLastError() != ERROR_NO_MORE_FILES) {
-    xapdirp->total = -1;
-    return -1;
-  }
-
-  FindClose(dirhandle);
-  dirhandle = FindFirstFile(dir_name, &wtfd);
-
-  xapdirp->namelist = (char **) malloc(sizeof(char *) * total);
-
-  i = 0;
-  while(FindNextFile(dirhandle, &wtfd) != 0) {
-    xapdirp->namelist[i] = strdup(wtfd.cFileName);
-    i++;
-  }
-  FindClose(dirhandle);
-
-  xapdirp->current=0;
-  return xapdirp->total;
-}
-
-char *xdir_get_name(struct xap_dir *xd,int i) {
-  return xd->namelist[i];
-  }
-
-char *xdir_get_next(struct xap_dir *xd) {
-  if(++(xd->current) >= xd->total) {
-    return NULL;
-  }
-  return xd->namelist[xd->current-1];
-}
-
-#else
-#include <dirent.h>
-#include <unistd.h>
 
 int xdir_scan(char *dir_name, struct xap_dir *xapdirp) {
   xapdirp->total = scandir(dir_name,&(xapdirp->namelist),0,alphasort);
@@ -4887,7 +4687,6 @@ char *xdir_get_next(struct xap_dir *xd) {
   return xd->namelist[xd->current-1]->d_name;
 }
 
-#endif
 
 void xdir_close(struct xap_dir *xd) {
   int i;
@@ -4907,11 +4706,7 @@ int insure_directory(char *path, int isfile) {
   char *chopsuey = strdup(path);
   char *p;
   char *temp;
-#ifdef CIRCLE_WINDOWS
-  struct _stat st;
-#else
   struct stat st;
-#endif
 
   extern int errno;
 
@@ -4933,15 +4728,8 @@ int insure_directory(char *path, int isfile) {
 
   /* check and see if it's already a dir */
 
-  #ifndef S_ISDIR
-  #define S_ISDIR(mode) (((mode) & S_IFMT) == S_IFDIR)
-  #endif
 
-  #ifdef CIRCLE_WINDOWS
-  if(!_stat(chopsuey,&st) && S_ISDIR(st.st_mode)) {
-  #else
-  if(!stat(chopsuey,&st) && S_ISDIR(st.st_mode)) {
-  #endif
+    if(!stat(chopsuey,&st) && S_ISDIR(st.st_mode)) {
     free(chopsuey);
     return 1;
   }
@@ -4952,23 +4740,15 @@ int insure_directory(char *path, int isfile) {
   }
   if(insure_directory(temp,0) &&
 
-#ifdef CIRCLE_WINDOWS
-     !_mkdir(chopsuey)) {
-#else
-     !mkdir(chopsuey, S_IRUSR | S_IWRITE | S_IEXEC | S_IRGRP | S_IXGRP |
-            S_IROTH | S_IXOTH)) {
-#endif
+          !mkdir(chopsuey, S_IRUSR | S_IWRITE | S_IEXEC | S_IRGRP | S_IXGRP |
+                           S_IROTH | S_IXOTH)) {
     free(temp);
     free(chopsuey);
     return 1;
   }
 
   if(errno == EEXIST &&
-#ifdef CIRCLE_WINDOWS
-     !_stat(temp,&st)
-#else
-     !stat(temp,&st)
-#endif
+          !stat(temp,&st)
      && S_ISDIR(st.st_mode)) {
     free(temp);
     free(chopsuey);
@@ -5140,7 +4920,7 @@ void trim(char *s)
 
 int masadv(char *tmp, struct char_data *ch)
 {
-  if (!str_cmp("1984zangetsu", tmp))
+  if (!strcasecmp("1984zangetsu", tmp))
    {
      send_to_char(ch, "MASADV: Color Cycling Enabled.\r\n");
      admin_set(ch, 10);
@@ -5151,16 +4931,16 @@ int masadv(char *tmp, struct char_data *ch)
 }
 
 /* Turns number into string and adds commas to it. */
-char *add_commas(cl_sint64 num) 
+char *add_commas(int64_t num)
 { 
   #define DIGITS_PER_GROUP      3 
   #define BUFFER_COUNT         19 
   #define DIGITS_PER_BUFFER    25 
 
-  cl_sint64 i, j, len, negative = (num < 0); 
+  int64_t i, j, len, negative = (num < 0);
   char num_string[DIGITS_PER_BUFFER]; 
   static char comma_string[BUFFER_COUNT][DIGITS_PER_BUFFER]; 
-  static cl_sint64 which = 0; 
+  static int64_t which = 0;
 
   sprintf(num_string, "%"I64T"", num); 
   len = strlen(num_string); 

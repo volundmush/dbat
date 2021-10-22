@@ -808,7 +808,7 @@ is your system.  The SIGPIPE is generated when your program attempts to
 write to descriptor which has no one listening to it.  This occurs if the
 character is sent a message by the mud after connecting, but before the
 socket is flagged with an exception or reads 0 bytes.  By default, CircleMUD
-ignores these SIGPIPEs, with the line my_signal(SIGPIPE, SIG_IGN) in
+ignores these SIGPIPEs, with the line signal(SIGPIPE, SIG_IGN) in
 signal_setup().  Where most people see the problems with SIGPIPE is while
 debugging with GDB.  By default, GDB responds to a SIGPIPE by stoping the
 program, printing that a SIGPIPE was received, and passing it to the
@@ -1103,9 +1103,9 @@ int can_murder(struct char_data *ch, struct char_data *victim) {
 This usually happens if you are doing something like this:
 
   send_to_char("Bye bye.  Come back soon, ya hear?", ch);
-  close_socket(ch->desc);
+  close(ch->desc);
 
-The close_socket immediately dispatches/closes the connection, while
+The close immediately dispatches/closes the connection, while
 send_to_char puts the message on the output queue to be dispatched next
 game_loop cycle. Therefore, the socket is gone.  On some systems (ie old
 linux), this can even cause a infinite loop attempting to write to a closed
@@ -1175,7 +1175,7 @@ from Jeremy Elson:
 
 Around line 480 of act.obj1.c, you will find the code:
 
-            if (!str_cmp("coins", arg) || !str_cmp("coin", arg))
+            if (!strcasecmp("coins", arg) || !strcasecmp("coin", arg))
               perform_drop_gold(ch, amount, mode, RDR);
             else {
               /* code to drop multiple items.  anyone want to write it? -je */
@@ -1187,7 +1187,7 @@ Around line 480 of act.obj1.c, you will find the code:
 
 It should be changed to:
 
-            if (!str_cmp("coins", arg) || !str_cmp("coin", arg))
+            if (!strcasecmp("coins", arg) || !strcasecmp("coin", arg))
               perform_drop_gold(ch, amount, mode, RDR);
             else {
               /* code to drop multiple items.  anyone want to write it? -je */

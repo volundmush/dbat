@@ -4,6 +4,18 @@
  * Copyright 1997-2001 George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 #include "sedit.h"
+#include "utils.h"
+#include "comm.h"
+#include "interpreter.h"
+#include "db.h"
+#include "shop.h"
+#include "genolc.h"
+#include "genshp.h"
+#include "genzon.h"
+#include "oasis.h"
+#include "constants.h"
+#include "races.h"
+#include "act.informative.h"
 
 /*
  * Should check more things.
@@ -41,7 +53,7 @@ ACMD(do_oasis_sedit)
     send_to_char(ch, "Specify a shop VNUM to edit.\r\n");
     return;
   } else if (!isdigit(*buf1)) {
-    if (str_cmp("save", buf1) != 0) {
+    if (strcasecmp("save", buf1) != 0) {
       send_to_char(ch, "Yikes!  Stop that, someone will get hurt!\r\n");
       return;
     }

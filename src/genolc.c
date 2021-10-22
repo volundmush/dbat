@@ -4,25 +4,19 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-
+#define __GENOLC_C__
 #include "genolc.h"
-
-
-
-extern struct zone_data *zone_table;
-extern zone_rnum top_of_zone_table;
-extern struct room_data *world;
-extern struct char_data *mob_proto;
-extern struct index_data *mob_index;
-extern struct index_data *obj_index;
-extern struct shop_data *shop_index;
-extern struct index_data **trig_index;
-extern int top_shop;
-extern int top_of_trigt;
-extern struct guild_data *guild_index;
-extern int top_guild;
-int save_guilds(zone_rnum zone_num);
-int save_config( IDXTYPE nowhere );        /* Exported from cedit.c */
+#include "gengld.h"
+#include "cedit.h"
+#include "genmob.h"
+#include "genobj.h"
+#include "genshp.h"
+#include "genwld.h"
+#include "modify.h"
+#include "genzon.h"
+#include "oasis.h"
+#include "utils.h"
+#include "comm.h"
 
 /* List of zones to be saved.  */
 struct save_list_data *save_list;

@@ -6,19 +6,17 @@
  ************************************************************************/
 
 #include "genwld.h"
+#include "utils.h"
+#include "db.h"
+#include "handler.h"
+#include "comm.h"
+#include "genolc.h"
+#include "genwld.h"
+#include "genzon.h"
+#include "shop.h"
+#include "dg_olc.h"
+#include "htree.h"
 
-
-
-extern struct room_data *world;
-extern struct zone_data *zone_table;
-extern struct index_data *mob_index;
-extern struct shop_data *shop_index;
-extern zone_rnum top_of_zone_table;
-extern room_rnum r_mortal_start_room;
-extern room_rnum r_immort_start_room;
-extern room_rnum r_frozen_start_room;
-
-void update_wait_events(struct room_data *to, struct room_data *from);
 
 /*
  * This function will copy the strings so be sure you free your own

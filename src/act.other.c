@@ -7,14 +7,38 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 **************************************************************************/
-#include "act.h"
+#include "act.other.h"
+#include "utils.h"
+#include "comm.h"
+#include "handler.h"
+#include "dg_comm.h"
+#include "combat.h"
+#include "config.h"
+#include "act.misc.h"
+#include "weather.h"
+#include "act.item.h"
+#include "act.wizard.h"
+#include "act.informative.h"
+#include "act.movement.h"
+#include "obj_edit.h"
+#include "graph.h"
+#include "alias.h"
+#include "spells.h"
+#include "interpreter.h"
+#include "fight.h"
+#include "races.h"
+#include "class.h"
+#include "constants.h"
+#include "shop.h"
+#include "feats.h"
+#include "guild.h"
 
 /* local functions */
 static int has_scanner(struct char_data *ch);
 static void boost_obj(struct obj_data *obj, struct char_data *ch, int type);
 static void handle_revert(struct char_data *ch, int add, double mult);
 static void handle_transform(struct char_data *ch, int add, double mult, double drain);
-static int perform_group(struct char_data *ch, struct char_data *vict, int highlvl, int lowlvl, cl_sint64 highpl, cl_sint64 lowpl);
+static int perform_group(struct char_data *ch, struct char_data *vict, int highlvl, int lowlvl, int64_t highpl, int64_t lowpl);
 static void print_group(struct char_data *ch);
 static void check_eq(struct char_data *ch);
 static int spell_in_book(struct obj_data *obj, int spellnum);
@@ -155,7 +179,7 @@ void bring_to_cap(struct char_data *ch)
   }
 if (IS_KANASSAN(ch) || IS_DEMON(ch)) {
  if (skippl == FALSE) {
-   cl_sint64 base = GET_BASE_PL(ch), diff;
+   int64_t base = GET_BASE_PL(ch), diff;
    if ((base < GET_LEVEL(ch) * 2000000) && GET_LEVEL(ch) > 90 && GET_LEVEL(ch) <= 99) {
     diff = (GET_LEVEL(ch) * 2000000) - GET_BASE_PL(ch);
     GET_MAX_HIT(ch) += diff * mult;
@@ -209,7 +233,7 @@ if (IS_KANASSAN(ch) || IS_DEMON(ch)) {
  } /* End powerlevel section */
 
  if (skipki == FALSE) {
-   cl_sint64 base = GET_BASE_KI(ch), diff;
+   int64_t base = GET_BASE_KI(ch), diff;
    if ((base < GET_LEVEL(ch) * 2000000) && GET_LEVEL(ch) > 90 && GET_LEVEL(ch) <= 99) {
     diff = (GET_LEVEL(ch) * 2000000) - GET_BASE_KI(ch);
     GET_MAX_MANA(ch) += diff * mult;
@@ -263,7 +287,7 @@ if (IS_KANASSAN(ch) || IS_DEMON(ch)) {
  } /* End ki section */
 
  if (skipst == FALSE) {
-   cl_sint64 base = GET_BASE_ST(ch), diff;
+   int64_t base = GET_BASE_ST(ch), diff;
    if ((base < GET_LEVEL(ch) * 2000000) && GET_LEVEL(ch) > 90 && GET_LEVEL(ch) <= 99) {
     diff = (GET_LEVEL(ch) * 2000000) - GET_BASE_ST(ch);
     GET_MAX_MOVE(ch) += diff * mult;
@@ -318,7 +342,7 @@ if (IS_KANASSAN(ch) || IS_DEMON(ch)) {
 }
  else {
   if (skippl == FALSE) {
-   cl_sint64 base = GET_BASE_PL(ch), diff;
+   int64_t base = GET_BASE_PL(ch), diff;
    if ((base < GET_LEVEL(ch) * 1500000) && GET_LEVEL(ch) > 90 && GET_LEVEL(ch) <= 99) {
     diff = (GET_LEVEL(ch) * 1500000) - GET_BASE_PL(ch);
     GET_MAX_HIT(ch) += diff * mult;
@@ -372,7 +396,7 @@ if (IS_KANASSAN(ch) || IS_DEMON(ch)) {
  } /* End Powerlevel Section */
 
  if (skipki == FALSE) {
-   cl_sint64 base = GET_BASE_KI(ch), diff;
+   int64_t base = GET_BASE_KI(ch), diff;
    if ((base < GET_LEVEL(ch) * 1500000) && GET_LEVEL(ch) > 90 && GET_LEVEL(ch) <= 99) {
     diff = (GET_LEVEL(ch) * 1500000) - GET_BASE_KI(ch);
     GET_MAX_MANA(ch) += diff * mult;
@@ -426,7 +450,7 @@ if (IS_KANASSAN(ch) || IS_DEMON(ch)) {
  } /* End Ki Section */
 
  if (skipst == FALSE) {
-   cl_sint64 base = GET_BASE_ST(ch), diff;
+   int64_t base = GET_BASE_ST(ch), diff;
    if ((base < GET_LEVEL(ch) * 1500000) && GET_LEVEL(ch) > 90 && GET_LEVEL(ch) <= 99) {
     diff = (GET_LEVEL(ch) * 1500000) - GET_BASE_ST(ch);
     GET_MAX_MOVE(ch) += diff * mult;
@@ -567,19 +591,19 @@ ACMD(do_rpp)
 	  send_to_char(ch, "What do you want to change your alignment to? (evil, sorta-evil, neutral, sorta-good, good)");
 	  return;
 	 }
-	 if (!str_cmp(arg2, "evil")) {
+	 if (!strcasecmp(arg2, "evil")) {
           send_to_char(ch, "You change your alignment to Evil.\r\n");
           GET_ALIGNMENT(ch) = -750;
-	 } else if (!str_cmp(arg2, "sorta-evil")) {
+	 } else if (!strcasecmp(arg2, "sorta-evil")) {
           send_to_char(ch, "You change your alignment to Sorta Evil.\r\n");
           GET_ALIGNMENT(ch) = -50;
-	 } else if (!str_cmp(arg2, "neutral")) {
+	 } else if (!strcasecmp(arg2, "neutral")) {
           send_to_char(ch, "You change your alignment to Neutral.\r\n");
           GET_ALIGNMENT(ch) = 0;
- 	 } else if (!str_cmp(arg2, "sorta-good")) {
+ 	 } else if (!strcasecmp(arg2, "sorta-good")) {
           send_to_char(ch, "You change your alignment to Sorta Good.\r\n");
           GET_ALIGNMENT(ch) = 51;
-	 } else if (!str_cmp(arg2, "good")) {
+	 } else if (!strcasecmp(arg2, "good")) {
           send_to_char(ch, "You change your alignment to Good.\r\n");
           GET_ALIGNMENT(ch) = 300;
 	 } else {
@@ -611,7 +635,7 @@ ACMD(do_rpp)
 	  send_to_char(ch, "What stat? (str, con, int, wis, spd, agl)");
 	  return;
 	 }
-	 if (!str_cmp(arg2, "str")) {
+	 if (!strcasecmp(arg2, "str")) {
        if (GET_BONUS(ch, BONUS_WIMP) > 0 && ch->real_abils.str >= 45) {
         send_to_char(ch, "You can't because that stat maxes at 45 due to a trait negative.\r\n");
         return;
@@ -621,7 +645,7 @@ ACMD(do_rpp)
        }
        send_to_char(ch, "You increase your strength by 2.\r\n");
        ch->real_abils.str += 2;
-     } else if (!str_cmp(arg2, "con")) {
+     } else if (!strcasecmp(arg2, "con")) {
        if (GET_BONUS(ch, BONUS_FRAIL) > 0 && ch->real_abils.con >= 45) {
         send_to_char(ch, "You can't because that stat maxes at 45 due to a trait negative.\r\n");
         return;
@@ -631,7 +655,7 @@ ACMD(do_rpp)
        }
        send_to_char(ch, "You increase your constitution by 2.\r\n");
        ch->real_abils.con += 2;
-     } else if (!str_cmp(arg2, "int")) {
+     } else if (!strcasecmp(arg2, "int")) {
        if (GET_BONUS(ch, BONUS_DULL) > 0 && ch->real_abils.intel >= 45) {
         send_to_char(ch, "You can't because that stat maxes at 45 due to a trait negative.\r\n");
         return;
@@ -641,7 +665,7 @@ ACMD(do_rpp)
        }
        send_to_char(ch, "You increase your intelligence by 2.\r\n");
        ch->real_abils.intel += 2;
-     } else if (!str_cmp(arg2, "wis")) {
+     } else if (!strcasecmp(arg2, "wis")) {
        if (GET_BONUS(ch, BONUS_FOOLISH) > 0 && ch->real_abils.wis >= 45) {
         send_to_char(ch, "You can't because that stat maxes at 45 due to a trait negative.\r\n");
         return;
@@ -651,7 +675,7 @@ ACMD(do_rpp)
        }
        send_to_char(ch, "You increase your wisdom by 2.\r\n");
        ch->real_abils.wis += 2;
-     } else if (!str_cmp(arg2, "spd")) {
+     } else if (!strcasecmp(arg2, "spd")) {
        if (GET_BONUS(ch, BONUS_SLOW) > 0 && ch->real_abils.cha >= 45) {
         send_to_char(ch, "You can't because that stat maxes at 45 due to a trait negative.\r\n");
         return;
@@ -661,7 +685,7 @@ ACMD(do_rpp)
        }
        send_to_char(ch, "You increase your speed by 2.\r\n");
        ch->real_abils.cha += 2;
-     } else if (!str_cmp(arg2, "agl")) {
+     } else if (!strcasecmp(arg2, "agl")) {
        if (GET_BONUS(ch, BONUS_CLUMSY) > 0 && ch->real_abils.dex >= 45) {
         send_to_char(ch, "You can't because that stat maxes at 45 due to a trait negative.\r\n");
         return;
@@ -813,31 +837,31 @@ ACMD(do_rpp)
 	  send_to_char(ch, "Change your aura to what? (white, blue, red, green, pink, purple, yellow, black, orange)");
 	  return;
 	 }
-	 if (!str_cmp(arg2, "white")) {
+	 if (!strcasecmp(arg2, "white")) {
       GET_AURA(ch) = 0;
       send_to_char(ch, "You change your aura to white.\r\n");
-	 } else if (!str_cmp(arg2, "blue")) {
+	 } else if (!strcasecmp(arg2, "blue")) {
       GET_AURA(ch) = 1;
       send_to_char(ch, "You change your aura to blue.\r\n");
-	 } else if (!str_cmp(arg2, "red")) {
+	 } else if (!strcasecmp(arg2, "red")) {
       GET_AURA(ch) = 2;
       send_to_char(ch, "You change your aura to red.\r\n");
-	 } else if (!str_cmp(arg2, "green")) {
+	 } else if (!strcasecmp(arg2, "green")) {
       GET_AURA(ch) = 3;
       send_to_char(ch, "You change your aura to green.\r\n");
-	 } else if (!str_cmp(arg2, "pink")) {
+	 } else if (!strcasecmp(arg2, "pink")) {
       GET_AURA(ch) = 4;
       send_to_char(ch, "You change your aura to pink.\r\n");
-	 } else if (!str_cmp(arg2, "purple")) {
+	 } else if (!strcasecmp(arg2, "purple")) {
       GET_AURA(ch) = 5;
       send_to_char(ch, "You change your aura to purple.\r\n");
-	 } else if (!str_cmp(arg2, "yellow")) {
+	 } else if (!strcasecmp(arg2, "yellow")) {
       GET_AURA(ch) = 6;
       send_to_char(ch, "You change your aura to yellow.\r\n");
-	 } else if (!str_cmp(arg2, "black")) {
+	 } else if (!strcasecmp(arg2, "black")) {
       GET_AURA(ch) = 7;
       send_to_char(ch, "You change your aura to black.\r\n");
-	 } else if (!str_cmp(arg2, "orange")) {
+	 } else if (!strcasecmp(arg2, "orange")) {
       GET_AURA(ch) = 8;
       send_to_char(ch, "You change your aura to orange.\r\n");
 	 } else {
@@ -1104,7 +1128,7 @@ ACMD(do_commune)
  }
  
  int prob = GET_SKILL(ch, SKILL_COMMUNE), perc = axion_dice(0);
- cl_sint64 cost = GET_MAX_MOVE(ch) * .05;
+ int64_t cost = GET_MAX_MOVE(ch) * .05;
  
  if (GET_MANA(ch) < cost) {
   send_to_char(ch, "You do not have enough ki to commune with the Eldritch Star.\r\n");
@@ -1279,7 +1303,7 @@ ACMD(do_grapple)
 
  int pass = FALSE;
 
- if (!str_cmp("hold", arg2) || !str_cmp("choke", arg2) || !str_cmp("grab", arg2) || !str_cmp("wrap", arg2)) {
+ if (!strcasecmp("hold", arg2) || !strcasecmp("choke", arg2) || !strcasecmp("grab", arg2) || !strcasecmp("wrap", arg2)) {
   pass = TRUE;
   int perc = GET_SKILL(ch, SKILL_GRAPPLE), prob = axion_dice(0), cost = GET_MAX_MOVE(ch) / 100;
 
@@ -1349,10 +1373,10 @@ ACMD(do_grapple)
    improve_skill(ch, SKILL_GRAPPLE, 1);
    WAIT_STATE(ch, PULSE_4SEC);
    return;
-  } else if (!HAS_ARMS(vict) && !str_cmp("grab", arg2)) {
+  } else if (!HAS_ARMS(vict) && !strcasecmp("grab", arg2)) {
     send_to_char(ch, "They don't even have an arm to grab onto!\r\n");
     return;
-  } else if (!str_cmp("hold", arg2)) {
+  } else if (!strcasecmp("hold", arg2)) {
          reveal_hiding(ch, 0);
    act("@RYou rush at @r$N@R and manage to get $M in a hold from behind!@n", TRUE, ch, 0, vict, TO_CHAR);
    act("@r$n@R rushes at YOU and manages to get you in a hold from behind!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -1369,7 +1393,7 @@ ACMD(do_grapple)
    improve_skill(ch, SKILL_GRAPPLE, 1);
    WAIT_STATE(ch, PULSE_4SEC);
    return;
-  } else if (!str_cmp("choke", arg2)) {
+  } else if (!strcasecmp("choke", arg2)) {
          reveal_hiding(ch, 0);
    act("@RYou rush at @r$N@R and manage to grab $S throat with both hands!@n", TRUE, ch, 0, vict, TO_CHAR);
    act("@r$n@R rushes at YOU and manages to grab your throat with both hands!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -1386,7 +1410,7 @@ ACMD(do_grapple)
    improve_skill(ch, SKILL_GRAPPLE, 1);
    WAIT_STATE(ch, PULSE_4SEC);
    return;
-  } else if (!str_cmp("wrap", arg2)) {
+  } else if (!strcasecmp("wrap", arg2)) {
    if (!IS_MAJIN(ch)) {
     send_to_char(ch, "Your body is not flexible enough to wrap around a target!\r\n");
     return;
@@ -1407,7 +1431,7 @@ ACMD(do_grapple)
    improve_skill(ch, SKILL_GRAPPLE, 1);
    WAIT_STATE(ch, PULSE_4SEC);
    return;
-  } else if (!str_cmp("grab", arg2)) {
+  } else if (!strcasecmp("grab", arg2)) {
          reveal_hiding(ch, 0);
    act("@RYou rush at @r$N@R and manage to lock your arm onto $S!@n", TRUE, ch, 0, vict, TO_CHAR);
    act("@r$n@R rushes at YOU and manages to lock $s arm onto your's!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -1579,7 +1603,7 @@ ACMD(do_train)
  }
 
  int plus = 0;
- cl_sint64 total = 0, weight = 0, bonus = 0, cost = 0;
+ int64_t total = 0, weight = 0, bonus = 0, cost = 0;
  char arg[200];
 
  one_argument(argument, arg);
@@ -1958,7 +1982,7 @@ ACMD(do_train)
    cost *= 2;
   }
 
- if (!str_cmp("str", arg)) {
+ if (!strcasecmp("str", arg)) {
   if (ch->real_abils.str == 80) {
    send_to_char(ch, "Your base strength is maxed!\r\n");
    return;
@@ -2060,7 +2084,7 @@ ACMD(do_train)
    }
    save_char(ch);
   }
- } else if (!str_cmp("spd", arg)) {
+ } else if (!strcasecmp("spd", arg)) {
   if (ch->real_abils.cha == 80) {
    send_to_char(ch, "Your base speed is maxed!\r\n");
    return;
@@ -2158,7 +2182,7 @@ ACMD(do_train)
    }
    save_char(ch);
   }
- } else if (!str_cmp("con", arg)) {
+ } else if (!strcasecmp("con", arg)) {
   if (ch->real_abils.con == 80) {
    send_to_char(ch, "Your base constitution is maxed!\r\n");
    return;
@@ -2256,7 +2280,7 @@ ACMD(do_train)
    }
    save_char(ch);
   }
- } else if (!str_cmp("agl", arg)) {
+ } else if (!strcasecmp("agl", arg)) {
   if (ch->real_abils.dex == 80) {
    send_to_char(ch, "Your base agility is maxed!\r\n");
    return;
@@ -2354,7 +2378,7 @@ ACMD(do_train)
    }
    save_char(ch);
   }
- } else if (!str_cmp("int", arg)) {
+ } else if (!strcasecmp("int", arg)) {
   if (ch->real_abils.intel == 80) {
    send_to_char(ch, "Your base intelligence is maxed!\r\n");
    return;
@@ -2470,7 +2494,7 @@ ACMD(do_train)
    }
    save_char(ch);
   }
- } else if (!str_cmp("wis", arg)) {
+ } else if (!strcasecmp("wis", arg)) {
   if (ch->real_abils.wis == 80) {
    send_to_char(ch, "Your base wisdom is maxed!\r\n");
    return;
@@ -2834,7 +2858,7 @@ ACMD(do_kura)
 
  int num = atoi(arg);
  int skill = GET_SKILL(ch, SKILL_KURA);
- cl_sint64 cost = 0, bonus = 0;
+ int64_t cost = 0, bonus = 0;
 
  if (num > skill) {
   send_to_char(ch, "The number can not be greater than your skill.\r\n");
@@ -3206,7 +3230,7 @@ ACMD(do_suppress)
   return;
  }
 
- if (!str_cmp(arg, "release")) {
+ if (!strcasecmp(arg, "release")) {
   if (GET_SUPPRESS(ch)) {
         reveal_hiding(ch, 0);
    act("@GYou stop suppressing your current powerlevel!@n", TRUE, ch, 0, 0, TO_CHAR);
@@ -3231,8 +3255,8 @@ ACMD(do_suppress)
   return;
  }
 
- cl_sint64 max = gear_pl(ch);
- cl_sint64 amt = ((max * 0.01) * num);
+ int64_t max = gear_pl(ch);
+ int64_t amt = ((max * 0.01) * num);
  
  if (GET_HIT(ch) < amt && GET_SUPPRESS(ch) == 0) {
   send_to_char(ch, "You are already below %d percent of your max!\r\n", num);
@@ -3245,7 +3269,7 @@ ACMD(do_suppress)
          reveal_hiding(ch, 0);
    act("@GYou alter your suppression level!@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@G$n seems to concentrate for a moment.@n", TRUE, ch, 0, 0, TO_ROOM);
-   cl_sint64 diff = amt - GET_HIT(ch);
+   int64_t diff = amt - GET_HIT(ch);
    GET_SUPP(ch) -= diff;
    GET_HIT(ch) += diff;
    GET_SUPPRESS(ch) = num;
@@ -3255,7 +3279,7 @@ ACMD(do_suppress)
         reveal_hiding(ch, 0);
   act("@GYou alter your suppression level!@n", TRUE, ch, 0, 0, TO_CHAR);
   act("@G$n seems to concentrate for a moment.@n", TRUE, ch, 0, 0, TO_ROOM);
-  cl_sint64 diff = GET_HIT(ch) - amt;
+  int64_t diff = GET_HIT(ch) - amt;
   GET_SUPP(ch) += diff;
   GET_HIT(ch) -= diff;
   GET_SUPPRESS(ch) = num;
@@ -3269,7 +3293,7 @@ ACMD(do_suppress)
        reveal_hiding(ch, 0);
  act("@GYou suppress your current powerlevel!@n", TRUE, ch, 0, 0, TO_CHAR);
  act("@G$n seems to concentrate for a moment.@n", TRUE, ch, 0, 0, TO_ROOM);
- cl_sint64 diff = GET_HIT(ch) - amt;
+ int64_t diff = GET_HIT(ch) - amt;
  GET_SUPP(ch) = diff;
  GET_HIT(ch) = amt;
  GET_SUPPRESS(ch) = num;
@@ -3536,7 +3560,7 @@ ACMD(do_pose)
   ch->real_abils.str += 8;
   ch->real_abils.dex += 8;
   save_char(ch);
-  cl_sint64 before = GET_LIFEMAX(ch);
+  int64_t before = GET_LIFEMAX(ch);
   SET_BIT_AR(PLR_FLAGS(ch), PLR_POSE);
   GET_LIFEFORCE(ch) += GET_LIFEMAX(ch) - before;
   if (GET_LIFEFORCE(ch) > GET_LIFEMAX(ch)) {
@@ -3586,7 +3610,7 @@ ACMD(do_fury) {
     }
    }
    GET_FURY(ch) = 0;
-  } else if (!str_cmp(arg, "attack")) {
+  } else if (!strcasecmp(arg, "attack")) {
    GET_FURY(ch) = 50;
   } else {
    send_to_char(ch, "Syntax: fury (attack) <--- this will not use up your LF to restore PL.\n        fury <--- fury by itself will do both LF to PL restore and attack boost.\r\n");
@@ -4404,7 +4428,7 @@ ACMD(do_form)
  int skill = 0, senzu = FALSE, bag = FALSE, light = FALSE, sword = FALSE, mattress = FALSE, gi = FALSE, pants = FALSE, kachin = FALSE, boost = FALSE, shuriken = FALSE;
  int clothes = FALSE, wrist = FALSE, boots = FALSE, level = 0;
  double discount = 1.0;
- cl_sint64 cost = 0;
+ int64_t cost = 0;
  struct obj_data *obj;
  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], arg3[MAX_INPUT_LENGTH], clam[MAX_INPUT_LENGTH];
 
@@ -4503,11 +4527,11 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
     send_to_char(ch, "Making lowest quality version of object. To make a higher quality use, Syntax: create (type) (mid | high | highest)\r\n");
     send_to_char(ch, "If you are capable you will make it. If not you will make a low quality version.\r\n");
    } else if (*arg2) {
-    if (!str_cmp(arg2, "highest") && skill >= 100) {
+    if (!strcasecmp(arg2, "highest") && skill >= 100) {
      level = 4;
-    } else if (!str_cmp(arg2, "high") && skill >= 75) {
+    } else if (!strcasecmp(arg2, "high") && skill >= 75) {
      level = 3;
-    } else if (!str_cmp(arg2, "mid") && skill >= 50) {
+    } else if (!strcasecmp(arg2, "mid") && skill >= 50) {
      level = 2;
     } else {
      level = 1;
@@ -4547,11 +4571,11 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
     send_to_char(ch, "Making lowest quality version of object. To make a higher quality use, Syntax: create (type) (mid | high | highest)\r\n");
     send_to_char(ch, "If you are capable you will make it. If not you will make a low quality version.\r\n");
    } else if (*arg2) {
-    if (!str_cmp(arg2, "highest") && skill >= 100) {
+    if (!strcasecmp(arg2, "highest") && skill >= 100) {
      level = 4;
-    } else if (!str_cmp(arg2, "high") && skill >= 75) {
+    } else if (!strcasecmp(arg2, "high") && skill >= 75) {
      level = 3;
-    } else if (!str_cmp(arg2, "mid") && skill >= 50) {
+    } else if (!strcasecmp(arg2, "mid") && skill >= 50) {
      level = 2;
     } else {
      level = 1;
@@ -4645,19 +4669,19 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
     send_to_char(ch, "Making lowest quality version of object. To make a higher quality use, Syntax: create (type) (mid | high | higher | highest)\r\n");
     send_to_char(ch, "If you are capable you will make it. If not you will make a low quality version.\r\n");
    } else if (*arg3) {
-    if (!str_cmp(arg3, "highest") && skill >= 100) {
+    if (!strcasecmp(arg3, "highest") && skill >= 100) {
      level = 5;
-    } else if (!str_cmp(arg3, "higher") && skill >= 75) {
+    } else if (!strcasecmp(arg3, "higher") && skill >= 75) {
      level = 4;
-    } else if (!str_cmp(arg3, "high") && skill >= 50) {
+    } else if (!strcasecmp(arg3, "high") && skill >= 50) {
      level = 3;
-    } else if (!str_cmp(arg3, "mid") && skill >= 30) {
+    } else if (!strcasecmp(arg3, "mid") && skill >= 30) {
      level = 2;
     } else {
      level = 1;
     }
    }
-   if (!str_cmp(arg2, "sword")) {
+   if (!strcasecmp(arg2, "sword")) {
     if (level == 5) {
      obj = read_object(1519, VIRTUAL);
      add_unique_id(obj);
@@ -4674,7 +4698,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
      obj = read_object(90, VIRTUAL);
      add_unique_id(obj);
     }
-   } else if (!str_cmp(arg2, "dagger")) {
+   } else if (!strcasecmp(arg2, "dagger")) {
     if (level == 5) {
      obj = read_object(1540, VIRTUAL);
      add_unique_id(obj);
@@ -4691,7 +4715,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
      obj = read_object(1536, VIRTUAL);
      add_unique_id(obj);
     }
-   } else if (!str_cmp(arg2, "club")) {
+   } else if (!strcasecmp(arg2, "club")) {
     if (level == 5) {
      obj = read_object(1545, VIRTUAL);
      add_unique_id(obj);
@@ -4708,7 +4732,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
      obj = read_object(1541, VIRTUAL);
      add_unique_id(obj);
     }
-   } else if (!str_cmp(arg2, "spear")) {
+   } else if (!strcasecmp(arg2, "spear")) {
     if (level == 5) {
      obj = read_object(1550, VIRTUAL);
      add_unique_id(obj);
@@ -4725,7 +4749,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
      obj = read_object(1546, VIRTUAL);
      add_unique_id(obj);
     }
-   } else if (!str_cmp(arg2, "gun")) {
+   } else if (!strcasecmp(arg2, "gun")) {
     if (level == 5) {
      obj = read_object(1555, VIRTUAL);
      add_unique_id(obj);
@@ -5024,7 +5048,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
  }
  else if (!(strcmp(arg, "senzu"))) {
   cost = GET_MAX_MANA(ch);
-  cl_sint64 cost2 = gear_pl(ch) - 1;
+  int64_t cost2 = gear_pl(ch) - 1;
    
   if (senzu == FALSE) {
    send_to_char(ch, "What do you want to create?\r\n");
@@ -5085,7 +5109,7 @@ ACMD(do_recharge)
   return;
  }
  else {
-  cl_sint64 cost = 0;
+  int64_t cost = 0;
 
   cost = GET_MAX_MOVE(ch) / 20;
 
@@ -5133,7 +5157,7 @@ ACMD(do_srepair)
   return;
  }
  else {
-  cl_sint64 cost = 0, heal = 0;
+  int64_t cost = 0, heal = 0;
   
   cost = GET_MAX_HIT(ch) / 40;
 
@@ -5223,9 +5247,9 @@ ACMD(do_upgrade)
   return;
  }
 
- if (!str_cmp("augment", arg)) {
+ if (!strcasecmp("augment", arg)) {
    struct obj_data *obj = NULL;
-   cl_sint64 gain = 0;
+   int64_t gain = 0;
   if (GET_LEVEL(ch) < 80) {
    send_to_char(ch, "You need to be at least level 80 to use these kits.\r\n");
    return;
@@ -5268,7 +5292,7 @@ ACMD(do_upgrade)
        }
      break;
    }
-   if (!str_cmp("powerlevel", arg2)) {
+   if (!strcasecmp("powerlevel", arg2)) {
     obj_from_char(obj);
     extract_obj(obj);
     act("@WYou install the circuits and upgrade your maximum powerlevel.@n", TRUE, ch, 0, 0, TO_CHAR);
@@ -5277,7 +5301,7 @@ ACMD(do_upgrade)
     GET_BASE_PL(ch) += gain;
     send_to_char(ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain));
     return;
-   } else if (!str_cmp("ki", arg2)) {
+   } else if (!strcasecmp("ki", arg2)) {
     obj_from_char(obj);
     extract_obj(obj);
     act("@WYou install the circuits and upgrade your maximum ki.@n", TRUE, ch, 0, 0, TO_CHAR);
@@ -5286,7 +5310,7 @@ ACMD(do_upgrade)
     GET_BASE_KI(ch) += gain;
     send_to_char(ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain));
     return;
-   } else if (!str_cmp("stamina", arg2)) {
+   } else if (!strcasecmp("stamina", arg2)) {
     obj_from_char(obj);
     extract_obj(obj);
     act("@WYou install the circuits and upgrade your maximum stamina.@n", TRUE, ch, 0, 0, TO_CHAR);
@@ -5312,22 +5336,22 @@ ACMD(do_upgrade)
   return;
  }
 
- if (!*arg2 && (!str_cmp("powerlevel", arg) || !str_cmp("ki", arg) || !str_cmp("stamina", arg))) {
+ if (!*arg2 && (!strcasecmp("powerlevel", arg) || !strcasecmp("ki", arg) || !strcasecmp("stamina", arg))) {
   send_to_char(ch, "How many times do you want to increase %s?", arg);
   return;
  }
 
- if (atoi(arg2) <= 0 && (!str_cmp("powerlevel", arg) || !str_cmp("ki", arg) || !str_cmp("stamina", arg))) {
+ if (atoi(arg2) <= 0 && (!strcasecmp("powerlevel", arg) || !strcasecmp("ki", arg) || !strcasecmp("stamina", arg))) {
   send_to_char(ch, "It needs to be between 1-1000\r\n");
   return;
  } 
 
- if (atoi(arg2) > 1000 && (!str_cmp("powerlevel", arg) || !str_cmp("ki", arg) || !str_cmp("stamina", arg))) {
+ if (atoi(arg2) > 1000 && (!strcasecmp("powerlevel", arg) || !strcasecmp("ki", arg) || !strcasecmp("stamina", arg))) {
   send_to_char(ch, "It needs to be between 1-1000\r\n");
   return;
  }
 
- if (!str_cmp("powerlevel", arg)) {
+ if (!strcasecmp("powerlevel", arg)) {
   count = atoi(arg2);
   while (count > 0) {
    if (GET_LEVEL(ch) >= 90) {
@@ -5372,7 +5396,7 @@ ACMD(do_upgrade)
    GET_BASE_PL(ch) += bonus;
   }
  }
- else if (!str_cmp("ki", arg)) {
+ else if (!strcasecmp("ki", arg)) {
   count = atoi(arg2);
   while (count > 0) {
    if (GET_LEVEL(ch) >= 90) {
@@ -5417,7 +5441,7 @@ ACMD(do_upgrade)
    GET_BASE_KI(ch) += bonus;
   }
  }
- else if (!str_cmp("stamina", arg)) {
+ else if (!strcasecmp("stamina", arg)) {
   count = atoi(arg2);
   while (count > 0) {
    if (GET_LEVEL(ch) >= 90) {
@@ -5544,9 +5568,9 @@ ACMD(do_ingest)
     act("@C$n@W flings a piece of goo at you! The goo engulfs your body and then returns to @C$n@W!@n", TRUE, ch, 0, vict, TO_VICT);
     act("@C$n@w flings a piece of goo at @c$N@W! The goo engulfs $M and then return to @C$n@W!@n", TRUE, ch, 0, vict, TO_NOTVICT);
     GET_ABSORBS(ch) += 1;
-    cl_sint64 pl = GET_BASE_PL(vict) / 6;
-    cl_sint64 stam = GET_BASE_ST(vict) / 6;
-    cl_sint64 ki = GET_BASE_KI(vict) / 6;
+    int64_t pl = GET_BASE_PL(vict) / 6;
+    int64_t stam = GET_BASE_ST(vict) / 6;
+    int64_t ki = GET_BASE_KI(vict) / 6;
     GET_MAX_HIT(ch) += pl;
     GET_BASE_PL(ch) += pl;
     GET_MAX_MANA(ch) += ki;
@@ -5783,9 +5807,9 @@ ACMD(do_absorb)
      send_to_imm("[PK] %s killed %s at room [%d]\r\n", GET_NAME(ch), GET_NAME(vict), GET_ROOM_VNUM(IN_ROOM(vict)));
      SET_BIT_AR(PLR_FLAGS(vict), PLR_ABSORBED);
     }
-    cl_sint64 stam = GET_BASE_ST(vict) / 5;
-    cl_sint64 ki = GET_BASE_KI(vict) / 5;
-    cl_sint64 pl = GET_BASE_PL(vict) / 5;
+    int64_t stam = GET_BASE_ST(vict) / 5;
+    int64_t ki = GET_BASE_KI(vict) / 5;
+    int64_t pl = GET_BASE_PL(vict) / 5;
     send_to_char(ch, "@D[@gABSORB@D] @rPL@W: @D(@y%s@D) @cKi@W: @D(@y%s@D) @gSt@W: @D(@y%s@D)@n\r\n", add_commas(pl), add_commas(ki), add_commas(stam));
     improve_skill(ch, SKILL_ABSORB, 1);
     die(vict, NULL);
@@ -5836,9 +5860,9 @@ ACMD(do_absorb)
   else {
    act("@WYou rush at @c$N@W and stab them with your tail! You quickly suck out all the bio extract you need and leave the empty husk behind!", TRUE, ch, 0, vict, TO_CHAR);
    act("@C$n@w rushes at @c$N@W and stabs $M with $s tail! $e quickly sucks out all the bio extract and leaves the empty husk of @c$N@W behind!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-   cl_sint64 stam = GET_BASE_ST(vict) / 5000;
-   cl_sint64 ki = GET_BASE_KI(vict) / 5000;
-   cl_sint64 pl = GET_BASE_PL(vict) / 5000;
+   int64_t stam = GET_BASE_ST(vict) / 5000;
+   int64_t ki = GET_BASE_KI(vict) / 5000;
+   int64_t pl = GET_BASE_PL(vict) / 5000;
    stam += rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
    pl += rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
    ki += rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
@@ -5949,7 +5973,7 @@ ACMD(do_escape)
   act("@WYou struggle to break loose of @C$n's@W hold!@n", TRUE, ABSORBBY(ch), 0, ch, TO_VICT);
   act("@c$N@W struggles to break loose of your hold!@n", TRUE, ABSORBBY(ch), 0, ch, TO_CHAR);
   if (rand_number(1, 3) == 3) {
-   cl_sint64 dmg = GET_MAX_HIT(ch) * 0.025;
+   int64_t dmg = GET_MAX_HIT(ch) * 0.025;
    hurt(0, 0, ch, ABSORBBY(ch), NULL, dmg, 0);
    if (GET_POS(ABSORBBY(ch)) == POS_SLEEPING) {
     act("@c$N@W manages to break loose of @C$n's@W hold!@n", TRUE, ABSORBBY(ch), 0, ch, TO_NOTVICT);
@@ -6010,7 +6034,7 @@ ACMD(do_escape)
   act("@WYou struggle to break loose of @C$n's@W hold!@n", TRUE, GRAPPLED(ch), 0, ch, TO_VICT);
   act("@c$N@W struggles to break loose of your hold!@n", TRUE, GRAPPLED(ch), 0, ch, TO_CHAR);
   if (rand_number(1, 3) == 3) {
-   cl_sint64 dmg = GET_MAX_HIT(ch) * 0.025;
+   int64_t dmg = GET_MAX_HIT(ch) * 0.025;
    hurt(0, 0, ch, GRAPPLED(ch), NULL, dmg, 0);
    if (GET_POS(GRAPPLED(ch)) == POS_SLEEPING) {
     act("@c$N@W manages to break loose of @C$n's@W hold!@n", TRUE, GRAPPLED(ch), 0, ch, TO_NOTVICT);
@@ -6029,7 +6053,7 @@ ACMD(do_escape)
 
 ACMD(do_regenerate) {
 
- cl_sint64 amt = 0;
+ int64_t amt = 0;
  int skill = 0;
  char arg[MAX_INPUT_LENGTH];
 
@@ -6090,7 +6114,7 @@ ACMD(do_regenerate) {
   amt = amt * 0.9;
  }
 
- cl_sint64 life = (GET_LIFEFORCE(ch) - amt * 0.8), energy = (GET_MANA(ch) - amt * 0.2);
+ int64_t life = (GET_LIFEFORCE(ch) - amt * 0.8), energy = (GET_MANA(ch) - amt * 0.2);
 
  if ((life <= 0 || energy <= 0) && !IS_NPC(ch)) {
   send_to_char(ch, "Your life force or ki are too low to regenerate that much.\r\n");
@@ -6449,7 +6473,7 @@ ACMD(do_focus)
     act("You focus ki into your mind, awakening it to cosmic wisdom!", TRUE, ch, 0, 0, TO_CHAR);
     act("$n focuses ki into $s mind, awakening it to cosmic wisdom!", TRUE, ch, 0, 0, TO_ROOM);
     if (IS_JINTO(ch) && level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0 && GET_PRACTICES(ch, GET_CLASS(ch)) >= 15 && rand_number(1, 4) >= 3) {
-     cl_sint64 gain = 0;
+     int64_t gain = 0;
      GET_PRACTICES(ch, GET_CLASS(ch)) -= 15;
      if (GET_SKILL(ch, SKILL_ENLIGHTEN) >= 100) {
       gain = level_exp(ch, GET_LEVEL(ch) + 1) * 0.15;
@@ -6516,7 +6540,7 @@ ACMD(do_focus)
      act("$n focuses ki into your mind, awakening it to cosmic wisdom!", TRUE, ch, 0, vict, TO_VICT);
      act("$n focuses ki into $N's mind, awakening it to cosmic wisdom!", TRUE, ch, 0, vict, TO_NOTVICT);
     if (IS_JINTO(ch) && level_exp(vict, GET_LEVEL(vict) + 1) - GET_EXP(vict) > 0 && GET_PRACTICES(ch, GET_CLASS(ch)) >= 15 && rand_number(1, 4) >= 3) {
-     cl_sint64 gain = 0;
+     int64_t gain = 0;
      GET_PRACTICES(ch, GET_CLASS(ch)) -= 15;
      if (GET_SKILL(ch, SKILL_ENLIGHTEN) >= 100) {
       gain = level_exp(vict, GET_LEVEL(vict) + 1) * 0.15;
@@ -7227,7 +7251,7 @@ ACMD(do_kaioken)
 {
  char arg[MAX_INPUT_LENGTH];
  int roll = axion_dice(0), x = 0, pass = FALSE;
- cl_sint64 boost = 0;
+ int64_t boost = 0;
  one_argument(argument, arg);
 
  if (!check_skill(ch, SKILL_KAIOKEN)) {
@@ -7890,7 +7914,7 @@ ACMD(do_zanzoken)
 {
 
  int prob = 0, perc = 0;
- cl_sint64 cost = 0;
+ int64_t cost = 0;
  
 
  if (!know_skill(ch, SKILL_ZANZOKEN) && !IS_NPC(ch)) {
@@ -8115,7 +8139,7 @@ ACMD(do_solar)
 
 ACMD(do_heal)
 {
-  cl_sint64 cost = 0, prob = 0, perc = 0, heal = 0, bonus = 0;
+  int64_t cost = 0, prob = 0, perc = 0, heal = 0, bonus = 0;
   struct char_data *vict;
   char arg[MAX_INPUT_LENGTH];
 
@@ -8344,13 +8368,13 @@ ACMD(do_barrier)
    return;
   }
 
-  if (AFF_FLAGGED(ch, AFF_SANCTUARY) && !str_cmp("release", arg)) {
+  if (AFF_FLAGGED(ch, AFF_SANCTUARY) && !strcasecmp("release", arg)) {
    act("@BYou dispel your barrier, releasing its energy.@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@B$n@B dispels $s barrier, releasing its energy.@n", TRUE, ch, 0, 0, TO_ROOM);
    GET_BARRIER(ch) = 0;
    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_SANCTUARY);
    return;
-  } else if (!str_cmp("release", arg)) {
+  } else if (!strcasecmp("release", arg)) {
    send_to_char(ch, "You don't have a barrier.\r\n");
    return;
   }
@@ -8367,7 +8391,7 @@ ACMD(do_barrier)
   }
 
   size = atoi(arg);
-  cl_sint64 cost = 0;
+  int64_t cost = 0;
   prob = 0;
   if (GET_SKILL(ch, SKILL_BARRIER)) {
    prob = init_skill(ch, SKILL_BARRIER);
@@ -8431,7 +8455,7 @@ ACMD(do_instant)
 {
 
   int skill = 0, perc = 0, skill_num = 0, location = 0;
-  cl_sint64 cost = 0;
+  int64_t cost = 0;
   struct char_data *tar = NULL;
 
   char arg[MAX_INPUT_LENGTH] = "";
@@ -8487,17 +8511,17 @@ ACMD(do_instant)
   skill = GET_SKILL(ch, SKILL_INSTANTT);
   skill_num = SKILL_INSTANTT;
 
-  if (!str_cmp(arg, "planet-earth")) {
+  if (!strcasecmp(arg, "planet-earth")) {
    location = 300;
-  } else if (!str_cmp(arg, "planet-namek")) {
+  } else if (!strcasecmp(arg, "planet-namek")) {
    location = 10222;
-  } else if (!str_cmp(arg, "planet-frigid")) {
+  } else if (!strcasecmp(arg, "planet-frigid")) {
    location = 4017;
-  } else if (!str_cmp(arg, "planet-vegeta")) {
+  } else if (!strcasecmp(arg, "planet-vegeta")) {
    location = 2200;
-  } else if (!str_cmp(arg, "planet-konack")) {
+  } else if (!strcasecmp(arg, "planet-konack")) {
    location = 8006;
-  } else if (!str_cmp(arg, "planet-aether")) {
+  } else if (!strcasecmp(arg, "planet-aether")) {
    location = 12024;
   } else if (!(tar = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))) {
    send_to_char(ch, "@RThat target was not found.@n\r\n");
@@ -9280,7 +9304,7 @@ ACMD(do_transform)
 
 	 /* ----------------------------------Transformation Section--------------------------------------*/
 	 /* Rillao: transloc, add new transes here */
-	else if (!str_cmp("first", arg)) {
+	else if (!strcasecmp("first", arg)) {
 		if (IS_HUMAN(ch)) {
 			if (PLR_FLAGGED(ch, PLR_TRANS2) || PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
 				send_to_char(ch, "You are already beyond that form!\r\n");
@@ -9742,7 +9766,7 @@ ACMD(do_transform)
 		return;
 	}/* End of First Trans */
 
-	else if (!str_cmp("second", arg)) {
+	else if (!strcasecmp("second", arg)) {
 		if (IS_HUMAN(ch)) {
 			if (PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
 				send_to_char(ch, "You are already beyond that form!\r\n");
@@ -10265,7 +10289,7 @@ ACMD(do_transform)
 		return;
 	}/* End of Second Trans */
 
-	else if (!str_cmp("third", arg)) {
+	else if (!strcasecmp("third", arg)) {
 		if (IS_HUMAN(ch)) {
 			if (PLR_FLAGGED(ch, PLR_TRANS4)) {
 				send_to_char(ch, "You are already beyond that form!\r\n");
@@ -10814,7 +10838,7 @@ ACMD(do_transform)
 		return;
 	}/* End of Third Trans */
 
-	else if (!str_cmp("fourth", arg)) {
+	else if (!strcasecmp("fourth", arg)) {
 		if (IS_HUMAN(ch)) {
 			if (PLR_FLAGGED(ch, PLR_TRANS4)) {
 				send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
@@ -11063,7 +11087,7 @@ ACMD(do_transform)
 		} /* End of Saiyan Fourth Trans */
 		return;
 	}/* End of Fourth Trans */
-	else if (!str_cmp("mature", arg)) {
+	else if (!strcasecmp("mature", arg)) {
 		if (IS_BIO(ch)) {
 			if (PLR_FLAGGED(ch, PLR_TRANS2)) {
 				send_to_char(ch, "You are already beyond that form!\r\n");
@@ -11117,7 +11141,7 @@ ACMD(do_transform)
 		return;
 	}/* End of Bio First Trans */
 
-	else if (!str_cmp("semi-perfect", arg) || !str_cmp("Semi-Perfect", arg)) {
+	else if (!strcasecmp("semi-perfect", arg) || !strcasecmp("Semi-Perfect", arg)) {
 		if (IS_BIO(ch)) {
 			if (PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
 				send_to_char(ch, "You are already beyond that form!\r\n");
@@ -11179,7 +11203,7 @@ ACMD(do_transform)
 		} /* End of BIO Second Trans */
 	} /* End of Bio Second Trans */
 
-	else if (!str_cmp("perfect", arg)) {
+	else if (!strcasecmp("perfect", arg)) {
 		if (IS_BIO(ch)) {
 			if (PLR_FLAGGED(ch, PLR_TRANS4)) {
 				send_to_char(ch, "You are already beyond that form!\r\n");
@@ -11246,7 +11270,7 @@ ACMD(do_transform)
 		} /* End of BIO Third Trans */
 	} /* End of Bio Third Trans */
 
-	else if ((!str_cmp("super", arg) || !str_cmp("super perfect", arg)) && IS_BIO(ch)) {
+	else if ((!strcasecmp("super", arg) || !strcasecmp("super perfect", arg)) && IS_BIO(ch)) {
 		if (IS_BIO(ch)) {
 			if (PLR_FLAGGED(ch, PLR_TRANS4)) {
 				send_to_char(ch, "You are already in that form!\r\n");
@@ -11306,7 +11330,7 @@ ACMD(do_transform)
 		} /* End of BIO Fourth Trans */
 	} /* End of Bio Fourth Trans */
 
-	else if (!str_cmp("affinity", arg)) {
+	else if (!strcasecmp("affinity", arg)) {
 		if (IS_MAJIN(ch)) {
 			if (PLR_FLAGGED(ch, PLR_TRANS2) || PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
 				send_to_char(ch, "You are already beyond that form!\r\n");
@@ -11354,7 +11378,7 @@ ACMD(do_transform)
 		} /* End of MAJIN First Trans */
 
 	} /* Majin First trans block */
-	else if (!str_cmp("super", arg)) {
+	else if (!strcasecmp("super", arg)) {
 		if (IS_MAJIN(ch)) {
 			if (PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
 				send_to_char(ch, "You are already beyond that form!\r\n");
@@ -11413,7 +11437,7 @@ ACMD(do_transform)
 
 	} /* Majin Second trans block */
 
-	else if (!str_cmp("true", arg)) {
+	else if (!strcasecmp("true", arg)) {
 
 		if (IS_MAJIN(ch)) {
 			if (PLR_FLAGGED(ch, PLR_TRANS4)) {
@@ -11474,7 +11498,7 @@ ACMD(do_transform)
 
 	} /* Majin Second trans block */
 
-	else if (!str_cmp("1.0", arg)) {
+	else if (!strcasecmp("1.0", arg)) {
 		if (IS_ANDROID(ch)) {
 			if (PLR_FLAGGED(ch, PLR_TRANS2) || PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
 				send_to_char(ch, "You are already beyond that upgrade!\r\n");
@@ -11518,7 +11542,7 @@ ACMD(do_transform)
 		} /* End of ANDROID First Trans */
 
 	}
-	else if (!str_cmp("2.0", arg)) {
+	else if (!strcasecmp("2.0", arg)) {
 		if (IS_ANDROID(ch)) {
 			if (PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
 				send_to_char(ch, "You are already beyond that upgrade!\r\n");
@@ -11566,7 +11590,7 @@ ACMD(do_transform)
 		} /* End of ANDROID Second Trans */
 
 	}
-	else if (!str_cmp("3.0", arg)) {
+	else if (!strcasecmp("3.0", arg)) {
 		if (IS_ANDROID(ch)) {
 			if (PLR_FLAGGED(ch, PLR_TRANS4)) {
 				send_to_char(ch, "You are already beyond that upgrade!\r\n");
@@ -11621,7 +11645,7 @@ ACMD(do_transform)
 		} /* End of ANDROID Third Trans */
 
 	}
-	else if (!str_cmp("4.0", arg)) {
+	else if (!strcasecmp("4.0", arg)) {
 		if (IS_ANDROID(ch)) {
 			if (PLR_FLAGGED(ch, PLR_TRANS5) || PLR_FLAGGED(ch, PLR_TRANS6)) {
 				send_to_char(ch, "You are already beyond that upgrade!\r\n");
@@ -11663,7 +11687,7 @@ ACMD(do_transform)
 					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS3);
 				}
 
-				cl_uint64 add = 1000000000u;
+				uint64_t add = 1000000000u;
 				double mult = 1;
 
 				if (PLR_FLAGGED(ch, PLR_SENSEM)) {
@@ -11679,7 +11703,7 @@ ACMD(do_transform)
 		} /* End of ANDROID Fourth Trans */
 
 	}
-	else if (!str_cmp("5.0", arg)) {
+	else if (!strcasecmp("5.0", arg)) {
 		if (IS_ANDROID(ch)) {
 			if (PLR_FLAGGED(ch, PLR_TRANS6)) {
 				send_to_char(ch, "You are already beyond that upgrade!\r\n");
@@ -11724,7 +11748,7 @@ ACMD(do_transform)
 					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS4);
 				}
 
-				//cl_uint64 add = 25000000000u;
+				//uint64_t add = 25000000000u;
 				unsigned long long int add = 2500000000000;
 				//add *= 100;
 				double mult = 1;
@@ -11742,7 +11766,7 @@ ACMD(do_transform)
 		} /* End of ANDROID Fifth Trans */
 
 	}
-	else if (!str_cmp("6.0", arg)) {
+	else if (!strcasecmp("6.0", arg)) {
 		if (IS_ANDROID(ch)) {
 			if (PLR_FLAGGED(ch, PLR_TRANS6)) {
 				send_to_char(ch, "You are already in that upgrade!\r\n");
@@ -11786,7 +11810,7 @@ ACMD(do_transform)
 					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS5);
 				}
 
-				cl_uint64 add = 1000000000u;
+				uint64_t add = 1000000000u;
 				add += 1000000000u;
 				add += 1000000000u;
 				add += 1000000000u;
@@ -11809,7 +11833,7 @@ ACMD(do_transform)
 
 	/* ----------------------------------Revert Section--------------------------------------*/
 	/* Rillao: transloc, add new transes here */
-	else if (!str_cmp("revert", arg)) {
+	else if (!strcasecmp("revert", arg)) {
 		if (IS_HUMAN(ch)) {
 			if (PLR_FLAGGED(ch, PLR_TRANS4)) {
 
@@ -12693,7 +12717,7 @@ ACMD(do_situp)
 ACMD(do_meditate)
 {
   
-  cl_sint64 bonus = 0, cost = 1, weight = 0;
+  int64_t bonus = 0, cost = 1, weight = 0;
   struct obj_data *obj;
   char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
@@ -12749,7 +12773,7 @@ ACMD(do_meditate)
    return;
  }
 
- if (!str_cmp(arg, "expand")) {
+ if (!strcasecmp(arg, "expand")) {
   int cost = 3500;
   if (IS_SAIYAN(ch)) {
    cost = 7000;
@@ -12768,7 +12792,7 @@ ACMD(do_meditate)
    return;
   }
   return;
- } else if (!str_cmp(arg, "break")) {
+ } else if (!strcasecmp(arg, "break")) {
   if (MINDLINK(ch) == NULL) {
    send_to_char(ch, "You are not mind linked with anyone.\r\n");
    return;
@@ -13404,7 +13428,7 @@ void base_update(void)
 				ABSORBING(d->character) = NULL;
 			}
 			if (IS_ANDROID(d->character) && ABSORBING(d->character) && rand_number(1, 10) >= 7) {
-				cl_sint64 drain1 = GET_MAX_MANA(d->character) * 0.01, drain2 = GET_MAX_MOVE(d->character) * 0.01;
+				int64_t drain1 = GET_MAX_MANA(d->character) * 0.01, drain2 = GET_MAX_MOVE(d->character) * 0.01;
 				struct char_data *drained = ABSORBING(d->character);
 				if (GET_MOVE(drained) - drain2 < 0) {
 					drain2 = GET_MOVE(drained);
@@ -13914,7 +13938,7 @@ ACMD(do_snet)
   }
  }
 
- if (!str_cmp(arg, "check")) {
+ if (!strcasecmp(arg, "check")) {
   send_to_char(ch, "Your personal scouter number is: %d\r\n", GET_ID(ch));
   return;
  }
@@ -13940,7 +13964,7 @@ ACMD(do_snet)
   if (SFREQ(obj) == 0) {
    SFREQ(obj) = 1;
   }
-  if (!str_cmp(arg, "*") && call <= -1) {
+  if (!strcasecmp(arg, "*") && call <= -1) {
    global = TRUE;
   }
   if (GET_VOICE(ch) != NULL) {
@@ -14096,7 +14120,7 @@ ACMD(do_scouter)
       return;
      }
      reveal_hiding(ch, 3);
-     if (!str_cmp("scan", arg)) {
+     if (!strcasecmp("scan", arg)) {
         for (i = descriptor_list; i; i = i->next) {
          if (STATE(i) != CON_PLAYING) {
          continue;
@@ -14209,7 +14233,7 @@ ACMD(do_scouter)
       }
       else {
        long double percent = 0.0, cur = 0.0, max = 0.0;
-       cl_sint64 stam = GET_MOVE(vict), mstam = GET_MAX_MOVE(vict);
+       int64_t stam = GET_MOVE(vict), mstam = GET_MAX_MOVE(vict);
        if (stam <= 0)
         stam = 1;
        if (mstam <= 0)
@@ -14553,7 +14577,7 @@ ACMD(do_steal)
   }
   improve_skill(vict, SKILL_SPOT, 1);
  } else { /* Ok it wasn't a critical failure... */
-  if (!str_cmp(arg, "zenni")) { /* MOOLA! */
+  if (!strcasecmp(arg, "zenni")) { /* MOOLA! */
    if (prob > perc) {
     if (GET_GOLD(vict) > 0) {
      if (GET_GOLD(vict) > 100) {
@@ -14801,7 +14825,7 @@ ACMD(do_title)
   }
 }
 
-static int perform_group(struct char_data *ch, struct char_data *vict, int highlvl, int lowlvl, cl_sint64 highpl, cl_sint64 lowpl)
+static int perform_group(struct char_data *ch, struct char_data *vict, int highlvl, int lowlvl, int64_t highpl, int64_t lowpl)
 {
   if (AFF_FLAGGED(vict, AFF_GROUP) || !CAN_SEE(ch, vict))
     return (0);
@@ -14896,7 +14920,7 @@ ACMD(do_group)
   struct char_data *vict;
   struct follow_type *f;
   int found, highlvl = 0, lowlvl = 0;
-  cl_sint64 highpl = 0, lowpl = 0;
+  int64_t highpl = 0, lowpl = 0;
 
   one_argument(argument, buf);
 
@@ -14935,7 +14959,7 @@ ACMD(do_group)
 
   int foundwas = 0;  
 
-  if (!str_cmp(buf, "all")) {
+  if (!strcasecmp(buf, "all")) {
     perform_group(ch, ch, GET_LEVEL(ch), GET_LEVEL(ch), highpl, lowpl);
     for (found = 0, f = ch->followers; f; f = f->next) {
       foundwas = found;
@@ -15354,7 +15378,7 @@ ACMD(do_display)
     return;
   }
 
-  if (!str_cmp(argument, "on") || !str_cmp(argument, "all")) {
+  if (!strcasecmp(argument, "on") || !strcasecmp(argument, "all")) {
     SET_BIT_AR(PRF_FLAGS(ch), PRF_DISPHP);
     SET_BIT_AR(PRF_FLAGS(ch), PRF_DISPMOVE);
     SET_BIT_AR(PRF_FLAGS(ch), PRF_DISPKI);
@@ -15365,7 +15389,7 @@ ACMD(do_display)
     SET_BIT_AR(PRF_FLAGS(ch), PRF_DISPRAC);
     SET_BIT_AR(PRF_FLAGS(ch), PRF_DISHUTH);
     SET_BIT_AR(PRF_FLAGS(ch), PRF_DISPERC);
-  } else if (!str_cmp(argument, "off") || !str_cmp(argument, "none")) {
+  } else if (!strcasecmp(argument, "off") || !strcasecmp(argument, "none")) {
     REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_DISPHP);
     REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_DISPKI);
     REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_DISPMOVE);
@@ -15857,7 +15881,7 @@ ACMD(do_file)
      return;
    }
 
-   if (!str_cmp(field, "request")) {
+   if (!strcasecmp(field, "request")) {
     GET_BOARD(ch, 2) = time(0);
    }
 
@@ -16006,7 +16030,7 @@ ACMD(do_fix)
     return;
   }
 
-  if (!str_cmp("self", arg)) {
+  if (!strcasecmp("self", arg)) {
    if (!IS_ANDROID(ch)) {
     send_to_char(ch, "Only androids can fix their bodies with repair kits.\r\n");
     return;
@@ -16094,7 +16118,7 @@ ACMD(do_fix)
     REMOVE_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_BROKEN);
    }
    if (obj->carried_by == NULL && !PLR_FLAGGED(ch, PLR_REPLEARN) && (level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0 || GET_LEVEL(ch) >= 100)) {
-    cl_sint64 gain = (level_exp(ch, GET_LEVEL(ch) + 1) * 0.0003) * GET_SKILL(ch, SKILL_REPAIR);
+    int64_t gain = (level_exp(ch, GET_LEVEL(ch) + 1) * 0.0003) * GET_SKILL(ch, SKILL_REPAIR);
     send_to_char(ch, "@mYou've learned a bit from repairing it. @D[@gEXP@W: @G+%s@D]@n\r\n", add_commas(gain));
     SET_BIT_AR(PLR_FLAGS(ch), PLR_REPLEARN);
     gain_exp(ch, gain);
@@ -16121,8 +16145,8 @@ ACMD(do_fix)
    } else {
     act("You use the repair kit to fix part of your body...", TRUE, ch, 0, 0, TO_CHAR);
     act("$n works on their body with a repair kit.", TRUE, ch, 0, 0, TO_ROOM);
-    cl_sint64 mult = GET_SKILL(ch, SKILL_REPAIR);
-    cl_sint64 add = ((gear_pl(ch) * 0.005) + 10) * mult;
+    int64_t mult = GET_SKILL(ch, SKILL_REPAIR);
+    int64_t add = ((gear_pl(ch) * 0.005) + 10) * mult;
     GET_HIT(ch) += add;
     extract_obj(obj4);
     if (GET_HIT(ch) > gear_pl(ch)) {
@@ -17026,16 +17050,16 @@ ACMD(do_aid)
     return;
   }
 
- if (!str_cmp(arg, "adrenex")) {
+ if (!strcasecmp(arg, "adrenex")) {
   num = 380;
   num2 = 381;
- } else if (!str_cmp(arg, "antitoxin")) {
+ } else if (!strcasecmp(arg, "antitoxin")) {
   num = 380;
   num2 = 383;
- } else if (!str_cmp(arg, "salve")) {
+ } else if (!strcasecmp(arg, "salve")) {
   num = 380;
   num2 = 382;
- } else if (!str_cmp(arg, "formula-82")) {
+ } else if (!strcasecmp(arg, "formula-82")) {
   num = 380;
   num2 = 385;
  }
@@ -17076,7 +17100,7 @@ ACMD(do_aid)
     dc = axion_dice(0);
     if ((GET_SKILL(ch, SKILL_FIRST_AID) + 1) > dc) {
       send_to_char(ch, "You bandage %s's wounds.\r\n", GET_NAME(vict));
-      cl_sint64 roll = ((gear_pl(vict) / 100) * (GET_WIS(ch) / 4)) + gear_pl(vict) * 0.25;
+      int64_t roll = ((gear_pl(vict) / 100) * (GET_WIS(ch) / 4)) + gear_pl(vict) * 0.25;
       if (GET_BONUS(ch, BONUS_HEALER) > 0) {
        roll += roll * .1;
       }
@@ -17213,7 +17237,7 @@ ACMD(do_aura) {
    return;
   }
    
- if (!str_cmp(arg, "light")) {
+ if (!strcasecmp(arg, "light")) {
   if (GET_SKILL(ch, SKILL_FOCUS) && GET_SKILL(ch, SKILL_CONCENTRATION) < 75) {
     send_to_char(ch, "You need at least a skill level of 75 in Focus and Concentration to use this.\r\n");
 	return;

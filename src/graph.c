@@ -9,23 +9,22 @@
 ************************************************************************ */
 
 #include "graph.h"
-
-
-
-/* external functions */
-extern void search_replace(char *string, const char *find, const char *replace);
-void send_to_imm(char *messg, ...);
-struct obj_data *find_vehicle_by_vnum(int vnum);
-struct obj_data *find_control(struct char_data *ch);
-ACMD(do_say);
+#include "utils.h"
+#include "comm.h"
+#include "interpreter.h"
+#include "handler.h"
+#include "db.h"
+#include "spells.h"
+#include "constants.h"
+#include "maputils.h"
+#include "vehicles.h"
+#include "act.informative.h"
 
 /* local functions */
 int VALID_EDGE(room_rnum x, int y);
 void bfs_enqueue(room_rnum room, int dir);
 void bfs_dequeue(void);
 void bfs_clear_queue(void);
-int find_first_step(room_rnum src, room_rnum target);
-ACMD(do_track);
 
 struct bfs_queue_struct {
   room_rnum room;
@@ -203,42 +202,42 @@ ACMD(do_sradar)
   }
 
   if (noship == FALSE) {
-  if (!str_cmp(arg, "earth") || !str_cmp(arg, "Earth")) {
+  if (!strcasecmp(arg, "earth") || !strcasecmp(arg, "Earth")) {
    dir = find_first_step(IN_ROOM(vehicle), real_room(40979));
    sprintf(planet, "Earth");
-  } else if (!str_cmp(arg, "frigid") || !str_cmp(arg, "Frigid")) {
+  } else if (!strcasecmp(arg, "frigid") || !strcasecmp(arg, "Frigid")) {
    dir = find_first_step(IN_ROOM(vehicle), real_room(30889));
    sprintf(planet, "Frigid");
-  } else if (!str_cmp(arg, "konack") || !str_cmp(arg, "Konack")) {
+  } else if (!strcasecmp(arg, "konack") || !strcasecmp(arg, "Konack")) {
    dir = find_first_step(IN_ROOM(vehicle), real_room(27065));
    sprintf(planet, "Konack");
-  } else if (!str_cmp(arg, "vegeta") || !str_cmp(arg, "Vegeta")) {
+  } else if (!strcasecmp(arg, "vegeta") || !strcasecmp(arg, "Vegeta")) {
    dir = find_first_step(IN_ROOM(vehicle), real_room(32365));
    sprintf(planet, "Vegeta");
-  } else if (!str_cmp(arg, "aether") || !str_cmp(arg, "Aether")) {
+  } else if (!strcasecmp(arg, "aether") || !strcasecmp(arg, "Aether")) {
    dir = find_first_step(IN_ROOM(vehicle), real_room(41959));
    sprintf(planet, "Aether");
-  } else if (!str_cmp(arg, "namek") || !str_cmp(arg, "Namek")) {
+  } else if (!strcasecmp(arg, "namek") || !strcasecmp(arg, "Namek")) {
    dir = find_first_step(IN_ROOM(vehicle), real_room(42880));
    sprintf(planet, "Namek");
-  } else if (!str_cmp(arg, "buoy1") && GET_RADAR1(ch) <= 0) {
+  } else if (!strcasecmp(arg, "buoy1") && GET_RADAR1(ch) <= 0) {
     send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
     return;
-  } else if (!str_cmp(arg, "buoy2") && GET_RADAR2(ch) <= 0) {
+  } else if (!strcasecmp(arg, "buoy2") && GET_RADAR2(ch) <= 0) {
     send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
     return;
-  } else if (!str_cmp(arg, "buoy3") && GET_RADAR3(ch) <= 0) {
+  } else if (!strcasecmp(arg, "buoy3") && GET_RADAR3(ch) <= 0) {
     send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
     return;
-  } else if (!str_cmp(arg, "buoy1") && GET_RADAR1(ch) > 0) {
+  } else if (!strcasecmp(arg, "buoy1") && GET_RADAR1(ch) > 0) {
    int rad = GET_RADAR1(ch);
    dir = find_first_step(IN_ROOM(vehicle), real_room(rad));
    sprintf(planet, "Buoy One");
-  } else if (!str_cmp(arg, "buoy2") && GET_RADAR2(ch) > 0) {
+  } else if (!strcasecmp(arg, "buoy2") && GET_RADAR2(ch) > 0) {
    int rad = GET_RADAR2(ch);
    dir = find_first_step(IN_ROOM(vehicle), real_room(rad));
    sprintf(planet, "Buoy Two");
-  } else if (!str_cmp(arg, "buoy3") && GET_RADAR3(ch) > 0) {
+  } else if (!strcasecmp(arg, "buoy3") && GET_RADAR3(ch) > 0) {
    int rad = GET_RADAR3(ch);
    dir = find_first_step(IN_ROOM(vehicle), real_room(rad));
    sprintf(planet, "Buoy Three");
@@ -249,42 +248,42 @@ ACMD(do_sradar)
   }
 
   if (noship == TRUE) {
-  if (!str_cmp(arg, "earth") || !str_cmp(arg, "Earth")) {
+  if (!strcasecmp(arg, "earth") || !strcasecmp(arg, "Earth")) {
    dir = find_first_step(IN_ROOM(ch), real_room(40979));
    sprintf(planet, "Earth");
-  } else if (!str_cmp(arg, "frigid") || !str_cmp(arg, "Frigid")) {
+  } else if (!strcasecmp(arg, "frigid") || !strcasecmp(arg, "Frigid")) {
    dir = find_first_step(IN_ROOM(ch), real_room(30889));
    sprintf(planet, "Frigid");
-  } else if (!str_cmp(arg, "konack") || !str_cmp(arg, "Konack")) {
+  } else if (!strcasecmp(arg, "konack") || !strcasecmp(arg, "Konack")) {
    dir = find_first_step(IN_ROOM(ch), real_room(27065));
    sprintf(planet, "Konack");
-  } else if (!str_cmp(arg, "vegeta") || !str_cmp(arg, "Vegeta")) {
+  } else if (!strcasecmp(arg, "vegeta") || !strcasecmp(arg, "Vegeta")) {
    dir = find_first_step(IN_ROOM(ch), real_room(32365));
    sprintf(planet, "Vegeta");
-  } else if (!str_cmp(arg, "aether") || !str_cmp(arg, "Aether")) {
+  } else if (!strcasecmp(arg, "aether") || !strcasecmp(arg, "Aether")) {
    dir = find_first_step(IN_ROOM(ch), real_room(41959));
    sprintf(planet, "Aether");
-  } else if (!str_cmp(arg, "namek") || !str_cmp(arg, "Namek")) {
+  } else if (!strcasecmp(arg, "namek") || !strcasecmp(arg, "Namek")) {
    dir = find_first_step(IN_ROOM(ch), real_room(42880));
    sprintf(planet, "Namek");
-  } else if (!str_cmp(arg, "buoy1") && GET_RADAR1(ch) <= 0) {
+  } else if (!strcasecmp(arg, "buoy1") && GET_RADAR1(ch) <= 0) {
     send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
     return;
-  } else if (!str_cmp(arg, "buoy2") && GET_RADAR2(ch) <= 0) {
+  } else if (!strcasecmp(arg, "buoy2") && GET_RADAR2(ch) <= 0) {
     send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
     return;
-  } else if (!str_cmp(arg, "buoy3") && GET_RADAR3(ch) <= 0) {
+  } else if (!strcasecmp(arg, "buoy3") && GET_RADAR3(ch) <= 0) {
     send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
     return;
-  } else if (!str_cmp(arg, "buoy1") && GET_RADAR1(ch) > 0) {
+  } else if (!strcasecmp(arg, "buoy1") && GET_RADAR1(ch) > 0) {
    int rad = GET_RADAR1(ch);
    dir = find_first_step(IN_ROOM(ch), real_room(rad));
    sprintf(planet, "Buoy One");
-  } else if (!str_cmp(arg, "buoy2") && GET_RADAR2(ch) > 0) {
+  } else if (!strcasecmp(arg, "buoy2") && GET_RADAR2(ch) > 0) {
    int rad = GET_RADAR2(ch);
    dir = find_first_step(IN_ROOM(ch), real_room(rad));
    sprintf(planet, "Buoy Two");
-  } else if (!str_cmp(arg, "buoy3") && GET_RADAR3(ch) > 0) {
+  } else if (!strcasecmp(arg, "buoy3") && GET_RADAR3(ch) > 0) {
    int rad = GET_RADAR3(ch);
    dir = find_first_step(IN_ROOM(ch), real_room(rad));
    sprintf(planet, "Buoy Three");
@@ -508,7 +507,7 @@ ACMD(do_track)
 	}
 
 	/* Scanning the entire planet. */
-	if (!str_cmp(arg, "scan")) {
+	if (!strcasecmp(arg, "scan")) {
 		for (i = descriptor_list; i; i = i->next) {
 			if (STATE(i) != CON_PLAYING) {
 				continue;

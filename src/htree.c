@@ -8,6 +8,8 @@
  ***************************************************************************/
 
 #include "htree.h"
+#include "utils.h"
+#include "db.h"
 
 #undef HTREE_TEST_CYCLES
 

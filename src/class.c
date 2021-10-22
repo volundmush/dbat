@@ -16,6 +16,19 @@
  */
 
 #include "class.h"
+#include "db.h"
+#include "utils.h"
+#include "comm.h"
+#include "spells.h"
+#include "interpreter.h"
+#include "constants.h"
+#include "handler.h"
+#include "feats.h"
+#include "oasis.h"
+#include "act.wizard.h"
+#include "dg_comm.h"
+#include "config.h"
+#include "act.other.h"
 
 /* Names first */
 
@@ -1017,7 +1030,7 @@ static const int *free_start_feats[] = {
 void advance_level(struct char_data *ch, int whichclass)
 {
   struct levelup_data *llog;
-  cl_sint64 add_hp = 0, add_move = 0, add_mana = 0, add_ki = 0;
+  int64_t add_hp = 0, add_move = 0, add_mana = 0, add_ki = 0;
   int add_prac = 1, add_train, i, j = 0, ranks;
   int add_gen_feats = 0, add_class_feats = 0;
   char buf[MAX_STRING_LENGTH];
@@ -2142,15 +2155,15 @@ int level_exp(struct char_data *ch, int level)
 
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-sbyte ability_mod_value(int abil)
+int8_t ability_mod_value(int abil)
 {
   return ((int)(abil / 2)) - 5;
 }
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-sbyte dex_mod_capped(const struct char_data *ch)
+int8_t dex_mod_capped(const struct char_data *ch)
 {
-  sbyte mod;
+  int8_t mod;
   struct obj_data *armor;
   mod = ability_mod_value(GET_DEX(ch));
   armor = GET_EQ(ch, WEAR_BODY);

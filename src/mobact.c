@@ -9,39 +9,23 @@
 ************************************************************************ */
 
 #include "mobact.h"
-
-
-/* external globals */
-extern int no_specials;
-extern int top_shop;
-extern struct shop_data *shop_index;
-
-/* external functions */
-ACMD(do_heal);
-ACMD(do_rescue);
-ACMD(do_escape);
-ACMD(do_wake);
-ACMD(do_fly);
-ACMD(do_action);
-ACMD(do_punch);
-ACMD(do_kick);
-ACMD(do_kiblast);
-ACMD(do_elbow);
-ACMD(do_knee);
-ACMD(do_slam);
-ACMD(do_bite);
-int shop_producing(struct obj_data *item, int shop_nr);
-int perform_get_from_room(struct char_data *ch, struct obj_data *obj);
-int ok_damage_shopkeeper(struct char_data *ch, struct char_data *victim);
-int ok_shop_room(int shop_nr, room_vnum room);
-SPECIAL(shop_keeper);
-void npc_steal(struct char_data *ch, struct char_data *victim);
-void dismount_char(struct char_data *ch);
-void mob_taunt(struct char_data *ch);
+#include "utils.h"
+#include "db.h"
+#include "comm.h"
+#include "interpreter.h"
+#include "handler.h"
+#include "spells.h"
+#include "shop.h"
+#include "combat.h"
+#include "act.offensive.h"
+#include "act.movement.h"
+#include "act.other.h"
+#include "act.item.h"
+#include "act.social.h"
+#include "spec_procs.h"
 
 /* local functions */
 int player_present(struct char_data *ch);
-void mobile_activity(void);
 void clearMemory(struct char_data *ch);
 bool aggressive_mob_on_a_leash(struct char_data *slave, struct char_data *master, struct char_data *attack);
 void mob_absorb(struct char_data *ch, struct char_data *vict);

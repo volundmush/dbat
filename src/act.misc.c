@@ -11,7 +11,17 @@
 *  original credits maintained where relevant for act.other.c as this is  *
 *  practically an act.other.c part two - Iovan 3/20/2011                  *
 ************************************************************************ */
-#include "act.h"
+#include "act.misc.h"
+#include "dg_comm.h"
+#include "act.item.h"
+#include "act.wizard.h"
+#include "act.movement.h"
+#include "utils.h"
+#include "spells.h"
+#include "comm.h"
+#include "handler.h"
+#include "combat.h"
+#include "constants.h"
 
 /* local functions  */
 static void generate_multiform(struct char_data *ch, struct char_data *multi1, struct char_data *multi2, struct char_data *multi3);
@@ -34,7 +44,7 @@ ACMD(do_spiritcontrol)
    send_to_char(ch, "You have already concentrated and have full control of your spirit.\r\n");
    return;
   } else {
-   cl_sint64 cost = GET_MAX_MANA(ch) * 0.2;
+   int64_t cost = GET_MAX_MANA(ch) * 0.2;
    if (GET_MOVE(ch) < cost) {
     send_to_char(ch, "You need at least 20%s of your max ki in stamina to prepare this skill.\r\n", "%");
     return;
@@ -90,7 +100,7 @@ ACMD(do_multiform)
  one_argument(argument, arg);
 
  if (num >= 3) {
-  if (!str_cmp(arg, "merge")) {
+  if (!strcasecmp(arg, "merge")) {
    extract_char(multi1);
    extract_char(multi2);
    extract_char(multi3);
@@ -100,7 +110,7 @@ ACMD(do_multiform)
    return;
   }
  } else {
-  if (!str_cmp(arg, "merge")) {
+  if (!strcasecmp(arg, "merge")) {
    if (multi1) {
     extract_char(multi1);
    } if (multi2) {
@@ -109,8 +119,8 @@ ACMD(do_multiform)
     extract_char(multi3);
    }
    return;
-  } else if (!str_cmp(arg, "split")) {
-   cl_sint64 cost = (GET_MAX_MANA(ch) * 0.005) + (GET_MAX_MOVE(ch) * 0.005) + 2;
+  } else if (!strcasecmp(arg, "split")) {
+   int64_t cost = (GET_MAX_MANA(ch) * 0.005) + (GET_MAX_MOVE(ch) * 0.005) + 2;
    int penalty = 0;
  
    if (FIGHTING(ch)) {
@@ -209,7 +219,7 @@ static void generate_multiform(struct char_data *ch, struct char_data *multi1, s
 
   GET_CLONES(ch) += 1;
 
-  cl_sint64 mult = 1;
+  int64_t mult = 1;
 /* Rillao: transloc, add new transes here */
   if (IS_BIO(ch)) {
    if (PLR_FLAGGED(ch, PLR_TRANS1)) {
@@ -430,7 +440,7 @@ static void resolve_song(struct char_data *ch)
       if ((AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(vict, AFF_GROUP)) || vict == ch) {
        if (ch == vict->master || ch->master == vict || ch->master == vict->master || vict == ch) {
         if (skill > diceroll) {
-         cl_sint64 restore = (10 * skill) + ((GET_MAX_MANA(ch) * 0.0004) * skill);
+         int64_t restore = (10 * skill) + ((GET_MAX_MANA(ch) * 0.0004) * skill);
          if (vict != ch) {
           act("@CYour skillfully playing of the Song of Safety has an effect on @c$N@C.@n", TRUE, ch, 0, vict, TO_CHAR);
          } else {
@@ -793,18 +803,18 @@ ACMD(do_song)
    send_to_char(ch, "@wSyntax: song (shielding | safety | teleport | shadow )\r\n");
    return;
   } else {
-   cl_sint64 cost = GET_MAX_MANA(ch) * 0.01;
+   int64_t cost = GET_MAX_MANA(ch) * 0.01;
    int modifier = 1;
-   if (!str_cmp(arg, "shielding")) {
+   if (!strcasecmp(arg, "shielding")) {
     modifier = 20;
     cost *= modifier;
-   } else if (!str_cmp(arg, "teleport")) {
+   } else if (!strcasecmp(arg, "teleport")) {
     modifier = 50;
     cost *= modifier;
-   } else if (!str_cmp(arg, "shadow")) {
+   } else if (!strcasecmp(arg, "shadow")) {
     modifier = 8;
     cost *= modifier;
-   } else if (!str_cmp(arg, "safety")) {
+   } else if (!strcasecmp(arg, "safety")) {
     modifier = 3;
     cost *= modifier;
    }
@@ -850,21 +860,21 @@ ACMD(do_song)
     } else if (AFF_FLAGGED(ch, AFF_SPIRIT)) {
      send_to_char(ch, "Not while you're dead!\r\n");
      return;
-    } else if (!str_cmp(arg2, "earth")) {
+    } else if (!strcasecmp(arg2, "earth")) {
      GET_SONG(ch) = SONG_TELEPORT_EARTH;
-    } else if (!str_cmp(arg2, "frigid")) {
+    } else if (!strcasecmp(arg2, "frigid")) {
      GET_SONG(ch) = SONG_TELEPORT_FRIGID;
-    } else if (!str_cmp(arg2, "vegeta")) {
+    } else if (!strcasecmp(arg2, "vegeta")) {
      GET_SONG(ch) = SONG_TELEPORT_VEGETA;
-    } else if (!str_cmp(arg2, "namek")) {
+    } else if (!strcasecmp(arg2, "namek")) {
      GET_SONG(ch) = SONG_TELEPORT_NAMEK;
-    } else if (!str_cmp(arg2, "arlia")) {
+    } else if (!strcasecmp(arg2, "arlia")) {
      GET_SONG(ch) = SONG_TELEPORT_ARLIA;
-    } else if (!str_cmp(arg2, "kanassa")) {
+    } else if (!strcasecmp(arg2, "kanassa")) {
      GET_SONG(ch) = SONG_TELEPORT_KANASSA;
-    } else if (!str_cmp(arg2, "konack")) {
+    } else if (!strcasecmp(arg2, "konack")) {
      GET_SONG(ch) = SONG_TELEPORT_KONACK;
-    } else if (!str_cmp(arg2, "aether")) {
+    } else if (!strcasecmp(arg2, "aether")) {
      GET_SONG(ch) = SONG_TELEPORT_AETHER;
     } else {
      send_to_char(ch, "Syntax: song teleport (earth | vegeta | namek | aether | konack | kanassa | arlia | frigid)\r\n");
@@ -913,7 +923,7 @@ ACMD(do_preference)
   return;
  }
 
- if (!str_cmp(arg, "throw")) {
+ if (!strcasecmp(arg, "throw")) {
   send_to_char(ch, "You will now favor throwing weapons as fighting specialization. You're sure to nail it.\r\n");
   GET_PREFERENCE(ch) = PREFERENCE_THROWING;
   if (GET_SKILL_BASE(ch, SKILL_THROW) <= 90) {
@@ -922,15 +932,15 @@ ACMD(do_preference)
    GET_SKILL_BASE(ch, SKILL_THROW) = 100;
   }
   return;
- } else if (!str_cmp(arg, "hand")) {
+ } else if (!strcasecmp(arg, "hand")) {
   send_to_char(ch, "You will now favor your body as your fighting specialization. Your body is ready.\r\n");
   GET_PREFERENCE(ch) = PREFERENCE_H2H;
   return;
- } else if (!str_cmp(arg, "ki")) {
+ } else if (!strcasecmp(arg, "ki")) {
   send_to_char(ch, "You will now favor your ki energy as your fighting specialization. I expect more than a few smoldering craters.\r\n");
   GET_PREFERENCE(ch) = PREFERENCE_KI;
   return;
- } else if (!str_cmp(arg, "weapon")) {
+ } else if (!strcasecmp(arg, "weapon")) {
   send_to_char(ch, "You will now favor your weapons as your fighting specialization. Let the blood fly!\r\n");
   GET_PREFERENCE(ch) = PREFERENCE_WEAPON;
   return;
@@ -942,7 +952,7 @@ ACMD(do_preference)
 
 ACMD(do_moondust)
 {
-  cl_sint64 cost = GET_MAX_MOVE(ch) * 0.02, heal = 0;
+  int64_t cost = GET_MAX_MOVE(ch) * 0.02, heal = 0;
 
  /* Can they do the technique? */
 
@@ -1080,7 +1090,7 @@ ACMD(do_liquefy)
   return;
  }
  
- if (!str_cmp(arg, "hide")) {
+ if (!strcasecmp(arg, "hide")) {
   if (GRAPPLED(ch)) {
    GRAPPLING(GRAPPLED(ch)) = NULL;
    GRAPPLED(ch) = NULL;
@@ -1105,7 +1115,7 @@ ACMD(do_liquefy)
    SET_BIT_AR(AFF_FLAGS(ch), AFF_LIQUEFIED);
    return;
   }  
- } else if (!str_cmp(arg, "explode")) {
+ } else if (!strcasecmp(arg, "explode")) {
    struct char_data *vict;
   if (GRAPPLED(ch)) {
    GRAPPLING(GRAPPLED(ch)) = NULL;
@@ -1156,7 +1166,7 @@ ACMD(do_liquefy)
    act("@m$n@M's body rapidly turns to liquid and flies for @RYOUR@M open mouth! However you think quickly and force $m out before $e has a chance to get fully into your body!@n", TRUE, ch, 0, vict, TO_VICT);
    act("@m$n@M's body rapidly turns into liquid and flies for @R$N's@M open mouth! However as $e forces $mself in through @R$N's@M mouth $E manages to resist and force @m$n@M back out!@n", TRUE, ch, 0, vict, TO_NOTVICT);
    GET_MANA(ch) -= (GET_MAX_MANA(ch) * 0.002) + 150;
-   cl_sint64 dmg = GET_MAX_HIT(ch) * 0.08;
+   int64_t dmg = GET_MAX_HIT(ch) * 0.08;
    hurt(0, 0, ch, vict, NULL, dmg, 0);
    WAIT_STATE(ch, PULSE_3SEC);
    return;
@@ -1264,7 +1274,7 @@ ACMD(do_fish)
   return;
  }
 
- if (!str_cmp(arg, "cast")) {
+ if (!strcasecmp(arg, "cast")) {
    if (PLR_FLAGGED(ch, PLR_FISHING)) {
     send_to_char(ch, "You are already fishing! Syntax: fish stop\r\n");
     return;
@@ -1297,7 +1307,7 @@ ACMD(do_fish)
      send_to_char(ch, "@D[@wDistance@D: @Y%d@D]@n\r\n", GET_FISHD(ch));
      return;
    }
- } else if (!str_cmp(arg, "hook")) {
+ } else if (!strcasecmp(arg, "hook")) {
   if (!PLR_FLAGGED(ch, PLR_FISHING)) {
    send_to_char(ch, "You are not even fishing!\r\n");
    return;
@@ -1323,7 +1333,7 @@ ACMD(do_fish)
    GET_FISHSTATE(ch) = FISH_HOOKED;
    return;
   }
- } else if (!str_cmp(arg, "reel")) {
+ } else if (!strcasecmp(arg, "reel")) {
   if (!PLR_FLAGGED(ch, PLR_FISHING)) {
    send_to_char(ch, "You are not even fishing!\r\n");
    return;
@@ -1343,7 +1353,7 @@ ACMD(do_fish)
    GET_FISHSTATE(ch) = FISH_REELING;
    return;
   }
- } else if (!str_cmp(arg, "apply")) {
+ } else if (!strcasecmp(arg, "apply")) {
    if (!GET_EQ(ch, WEAR_WIELD2)) {
     send_to_char(ch, "You are not holding a fishing pole.\r\n");
     return;
@@ -1378,7 +1388,7 @@ ACMD(do_fish)
       } /* End we applied bait */
     } /* End Applying bait */
   } /* end has pole */
- } else if (!str_cmp(arg, "stop")) {
+ } else if (!strcasecmp(arg, "stop")) {
   if (!PLR_FLAGGED(ch, PLR_FISHING)) {
    send_to_char(ch, "You are not even fishing!\r\n");
    return;
@@ -1661,7 +1671,7 @@ ACMD(do_extract)
   return;
  }
 
- if (!str_cmp(arg, "combine")) {
+ if (!strcasecmp(arg, "combine")) {
   if (!(obj = get_obj_in_list_vis(ch, arg2, NULL, ch->carrying))) {
    send_to_char(ch, "You do not have the first bottle that you were wanting to combine.\r\n");
    return;
@@ -1724,14 +1734,14 @@ ACMD(do_extract)
     }
    }
 
-   cl_sint64 cost = ((GET_MAX_MANA(ch) * 0.35) + 500);
+   int64_t cost = ((GET_MAX_MANA(ch) * 0.35) + 500);
 
    if (found == FALSE) {
     send_to_char(ch, "You do not have an empty bottle to put the extracted ink in.\r\n");
     return;
    }
 
-   cl_sint64 extra = 0;
+   int64_t extra = 0;
   
    if (GET_OBJ_VAL(bottle, 6) + 4 >= 24)
     extra = GET_MAX_MANA(ch) * 0.5;   
@@ -1830,7 +1840,7 @@ ACMD(do_runic)
   return;
  }
 
- cl_sint64 cost = GET_MAX_MANA(ch) * 0.05;
+ int64_t cost = GET_MAX_MANA(ch) * 0.05;
  int inkcost = 0;
 
  if (IS_HOSHIJIN(ch))
@@ -1864,7 +1874,7 @@ ACMD(do_runic)
    GET_OBJ_VAL(bottle, 6) = 0;
   WAIT_STATE(ch, PULSE_3SEC);
   return;
- } else if (!str_cmp(arg2, "kenaz") || !str_cmp(arg2, "Kenaz")) {
+ } else if (!strcasecmp(arg2, "kenaz") || !strcasecmp(arg2, "Kenaz")) {
   inkcost += 1;
   if (vict == ch) {
    GET_MANA(ch) -= cost;
@@ -1903,7 +1913,7 @@ ACMD(do_runic)
   improve_skill(ch, SKILL_RUNIC, 1);
   WAIT_STATE(ch, PULSE_3SEC);
   return;
- } else if (!str_cmp(arg2, "algiz") || !str_cmp(arg2, "Algiz")) {
+ } else if (!strcasecmp(arg2, "algiz") || !strcasecmp(arg2, "Algiz")) {
   inkcost += 2;
   if (amount < inkcost) {
    send_to_char(ch, "You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
@@ -1945,7 +1955,7 @@ ACMD(do_runic)
   improve_skill(ch, SKILL_RUNIC, 1);
   WAIT_STATE(ch, PULSE_3SEC);
   return;
- } else if (!str_cmp(arg2, "oagaz") || !str_cmp(arg2, "Oagaz")) {
+ } else if (!strcasecmp(arg2, "oagaz") || !strcasecmp(arg2, "Oagaz")) {
   inkcost += 3;
   if (amount < inkcost) {
    send_to_char(ch, "You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
@@ -1967,7 +1977,7 @@ ACMD(do_runic)
     obj_to_char(empty, ch);
    }
   }
- } else if (!str_cmp(arg2, "laguz") || !str_cmp(arg2, "Laguz")) {
+ } else if (!strcasecmp(arg2, "laguz") || !strcasecmp(arg2, "Laguz")) {
   inkcost += 4;
   if (amount < inkcost) {
    send_to_char(ch, "You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
@@ -2009,7 +2019,7 @@ ACMD(do_runic)
   improve_skill(ch, SKILL_RUNIC, 1);
   WAIT_STATE(ch, PULSE_3SEC);
   return;
- } else if (!str_cmp(arg2, "wunjo") || !str_cmp(arg2, "Wunjo")) {
+ } else if (!strcasecmp(arg2, "wunjo") || !strcasecmp(arg2, "Wunjo")) {
   inkcost += 4;
   if (amount < inkcost) {
    send_to_char(ch, "You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
@@ -2051,7 +2061,7 @@ ACMD(do_runic)
   improve_skill(ch, SKILL_RUNIC, 1);
   WAIT_STATE(ch, PULSE_3SEC);
   return;
- } else if (!str_cmp(arg2, "purisaz") || !str_cmp(arg2, "Purisaz")) {
+ } else if (!strcasecmp(arg2, "purisaz") || !strcasecmp(arg2, "Purisaz")) {
   inkcost += 4;
   if (amount < inkcost) {
    send_to_char(ch, "You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
@@ -2093,7 +2103,7 @@ ACMD(do_runic)
   improve_skill(ch, SKILL_RUNIC, 1);
   WAIT_STATE(ch, PULSE_3SEC);
   return;
- } else if (!str_cmp(arg2, "gebo") || !str_cmp(arg2, "Gebo")) {
+ } else if (!strcasecmp(arg2, "gebo") || !strcasecmp(arg2, "Gebo")) {
   inkcost += 10;
   if (amount < inkcost) {
    send_to_char(ch, "You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
@@ -2141,7 +2151,7 @@ ACMD(do_runic)
 ACMD(do_scry)
 {
 
- if (str_cmp(CAP(GET_NAME(ch)), "Galeos")) {
+ if (strcasecmp(CAP(GET_NAME(ch)), "Galeos")) {
   send_to_char(ch, "You do not know how to perform that technique.\r\n");
   return;
  }
@@ -2182,7 +2192,7 @@ ACMD(do_scry)
   act("@GYou focus your mind and begin to allow the flood of images and energy to roar through your mind. You then allow those thoughts to make their way into the mind of @c$N@G. You can hardly comprehend the vastness of the information flooding in, yet still glimpse bits and pieces of your own destiny.@n", TRUE, ch, 0, vict, TO_CHAR);
   act("@GYou see @C$n@G begin to focus, and then without warning, your mind is flooded painfully with images, energy and information. The data streams in a mad torrent through your psyche, and just when you think snapping is possible, the voice of @C$n@G comes to you and eases and guides you. You see images of potential futures, information not yet known, knowledge yet undiscovered. Though you could not fully  grasp what is to come, you feel more prepared at facing the unknown.@n", TRUE, ch, 0, vict, TO_VICT);
   act("@C$n@W appears to be performing some sort of ritual or something with @c$N@W.@n", TRUE, ch, 0, vict, TO_NOTVICT);
-  cl_sint64 boost = GET_INT(ch) * 0.5;
+  int64_t boost = GET_INT(ch) * 0.5;
   double mult = 1;
 /* Rillao: transloc, add new transes here */
    if (IS_TRUFFLE(vict) && PLR_FLAGGED(vict, PLR_TRANS1)) {
@@ -2318,7 +2328,7 @@ ACMD(do_ashcloud)
 
  level = atoi(arg);
 
- cl_sint64 mult = 5;
+ int64_t mult = 5;
  double initial = 0.0;
 
  switch (level) {
@@ -2339,7 +2349,7 @@ ACMD(do_ashcloud)
    return;
  }
 
- cl_sint64 cost = (GET_MAX_MANA(ch) * initial) + (GET_INT(ch) * mult);
+ int64_t cost = (GET_MAX_MANA(ch) * initial) + (GET_INT(ch) * mult);
  
  if (GET_MANA(ch) < cost) {
   send_to_char(ch, "You do not have enough ki!\r\n");
@@ -2425,7 +2435,7 @@ ACMD(do_resize)
     if (GET_MOVE(ch) < GET_OBJ_WEIGHT(obj) + (GET_MAX_MOVE(ch) / 40)) {
      send_to_char(ch, "You do not have enough stamina to resize this object at this time.\r\n");
      return;
-    } else if (!str_cmp(arg2, "small")) {
+    } else if (!strcasecmp(arg2, "small")) {
      if (GET_OBJ_SIZE(obj) == SIZE_SMALL) {
       send_to_char(ch, "The equipment is already small sized.\r\n");
       return;
@@ -2435,7 +2445,7 @@ ACMD(do_resize)
       GET_OBJ_SIZE(obj) = SIZE_SMALL;
       GET_MOVE(ch) -= GET_OBJ_WEIGHT(obj) + (GET_MAX_MOVE(ch) / 40);
      }
-    } else if (!str_cmp(arg2, "medium")) {
+    } else if (!strcasecmp(arg2, "medium")) {
      if (GET_OBJ_SIZE(obj) == SIZE_MEDIUM) {
       send_to_char(ch, "The equipment is already medium sized.\r\n");
       return;
@@ -2491,7 +2501,7 @@ ACMD(do_healglow)
   return;
  }
 
- cl_sint64 cost = GET_MAX_MANA(ch) * 0.5;
+ int64_t cost = GET_MAX_MANA(ch) * 0.5;
 
  if (GET_MANA(ch) < cost) {
   send_to_char(ch, "You do not have enough ki. It requires at least 50%s of your ki in cost.\r\n", "%");
@@ -2524,7 +2534,7 @@ ACMD(do_healglow)
 ACMD(do_amnisiac)
 {
 
- if (str_cmp(GET_NAME(ch), "Kanashimi")) {
+ if (strcasecmp(GET_NAME(ch), "Kanashimi")) {
   send_to_char(ch, "You do not know how to perform that technique.\r\n");
   return;
  }
@@ -2590,7 +2600,7 @@ if (GET_ALIGNMENT(ch) >= 51) {
   return;
   } 
 
- cl_sint64 cost = (GET_MAX_MANA(ch) * 0.16);
+ int64_t cost = (GET_MAX_MANA(ch) * 0.16);
 
  if (AFF_FLAGGED(ch, AFF_METAMORPH)) {
   send_to_char(ch, "You are already surrounded by a dark aura!\r\n");
@@ -2630,7 +2640,7 @@ ACMD(do_shimmer)
 {
 
   int skill = 0, perc = 0, location = 0;
-  cl_sint64 cost = 0;
+  int64_t cost = 0;
   struct char_data *tar = NULL;
 
   char arg[MAX_INPUT_LENGTH] = "";
@@ -2644,7 +2654,7 @@ ACMD(do_shimmer)
     send_to_char(ch, "You stop watching the arena action.\r\n");
    }
   }
-  if (str_cmp(GET_NAME(ch), "Anubis")) {
+  if (strcasecmp(GET_NAME(ch), "Anubis")) {
     send_to_char(ch, "You do not even know how to perform that skill!\r\n");
     return;
   } else if (PLR_FLAGGED(ch, PLR_PILOTING)) {
@@ -2672,19 +2682,19 @@ ACMD(do_shimmer)
   perc = axion_dice(0);
   skill = 100;
 
-  if (!str_cmp(arg, "planet-earth")) {
+  if (!strcasecmp(arg, "planet-earth")) {
    location = 300;
-  } else if (!str_cmp(arg, "planet-namek")) {
+  } else if (!strcasecmp(arg, "planet-namek")) {
    location = 10222;
-  } else if (!str_cmp(arg, "planet-frigid")) {
+  } else if (!strcasecmp(arg, "planet-frigid")) {
    location = 4017;
-  } else if (!str_cmp(arg, "planet-vegeta")) {
+  } else if (!strcasecmp(arg, "planet-vegeta")) {
    location = 2200;
-  } else if (!str_cmp(arg, "planet-konack")) {
+  } else if (!strcasecmp(arg, "planet-konack")) {
    location = 8006;
-  } else if (!str_cmp(arg, "planet-aether")) {
+  } else if (!strcasecmp(arg, "planet-aether")) {
    location = 12024;
-  } else if (!str_cmp(arg, "afterlife")) {
+  } else if (!strcasecmp(arg, "afterlife")) {
    location = 6000;
   } else if (!(tar = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))) {
    send_to_char(ch, "@RThat target doesn't exist.@n\r\n");
@@ -2761,7 +2771,7 @@ ACMD(do_channel)
   return;
  }
 
- cl_sint64 cost = GET_MAX_MANA(ch) * 0.15;
+ int64_t cost = GET_MAX_MANA(ch) * 0.15;
 
  int chance = axion_dice(0), skill = GET_SKILL(ch, SKILL_STYLE);
 
@@ -2819,7 +2829,7 @@ ACMD(do_hydromancy)
  }
 
  int skill = GET_SKILL_BASE(ch, SKILL_STYLE), chance = axion_dice(0);
- cl_sint64 cost = 0;
+ int64_t cost = 0;
 
  cost = (GET_MAX_MANA(ch) / 12) - (GET_INT(ch) * GET_LEVEL(ch));
 
@@ -2862,7 +2872,7 @@ ACMD(do_hydromancy)
 
  int attempt = 0;
 
- if (!str_cmp(arg, "spike")) {
+ if (!strcasecmp(arg, "spike")) {
   struct obj_data *obj;
 
   cost = 100 + (GET_SKILL(ch, SKILL_STYLE) / (1 + (GET_MAX_MANA(ch) * 0.5)));
@@ -2900,7 +2910,7 @@ ACMD(do_hydromancy)
   }
   improve_skill(ch, SKILL_STYLE, 1);
   GET_COOLDOWN(ch) = 10;
- } else if (!str_cmp(arg, "flood")) {
+ } else if (!strcasecmp(arg, "flood")) {
   if (!*arg2) {
    send_to_char(ch, "Syntax 1: hydromancy flood (direction)\r\n");
    send_to_char(ch, "Example: hydromancy flood nw\r\n");
@@ -2976,7 +2986,7 @@ ACMD(do_kanso)
  if (IS_NPC(ch)) /* No mobs */
   return;
 
- if (str_cmp(GET_NAME(ch), "Levanthoth")) { /* NOT the right player */
+ if (strcasecmp(GET_NAME(ch), "Levanthoth")) { /* NOT the right player */
   send_to_char(ch, "You do not know how to perform that technique. \r\n");
   return;
  }
@@ -3000,7 +3010,7 @@ ACMD(do_kanso)
    return;
   }
 
-  cl_sint64 cost = GET_MAX_MANA(ch) / GET_INT(ch);
+  int64_t cost = GET_MAX_MANA(ch) / GET_INT(ch);
   int dice = axion_dice(-5), skill = GET_INT(ch), pdice = axion_dice(0); 
   int dam = rand_number(1, 4);
   struct affected_type af;
@@ -3239,7 +3249,7 @@ ACMD(do_hayasa)
  }
 
  int skill = GET_SKILL(ch, SKILL_HAYASA), prob = axion_dice(0);
- cl_sint64 cost = GET_MAX_MANA(ch) / (skill / 2);
+ int64_t cost = GET_MAX_MANA(ch) / (skill / 2);
  int duration = 1;
 
  if (skill >= 100) {
@@ -3324,7 +3334,7 @@ ACMD(do_bury)
   }
  }
 
- if (!str_cmp(arg, "bury")) {
+ if (!strcasecmp(arg, "bury")) {
   if (!*arg2) {
    send_to_char(ch, "Bury what?\r\n");
    return;
@@ -3346,7 +3356,7 @@ ACMD(do_bury)
    obj_to_room(obj, IN_ROOM(ch));
    SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_BURIED);
   }
- } else if (!str_cmp(arg, "uncover")) {
+ } else if (!strcasecmp(arg, "uncover")) {
   if (fobj == NULL) {
    send_to_char(ch, "There is nothing buried here.\r\n");
    return;
@@ -3382,7 +3392,7 @@ ACMD(do_arena)
  if (!*arg) {
   send_to_char(ch, "Syntax: arena (fighter number of participant)\r\n        arena look\r\n        arena scan\r\n        arena stop\r\n");
   return;
- } else if (!str_cmp(arg, "stop")) {
+ } else if (!strcasecmp(arg, "stop")) {
   send_to_char(ch, "You stop viewing what's going on in the arena.\r\n");
   REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_ARENAWATCH);
   ARENA_IDNUM(ch) = -1;
@@ -3390,14 +3400,14 @@ ACMD(do_arena)
  } else if (GET_ROOM_VNUM(IN_ROOM(ch)) != 17875) {
   send_to_char(ch, "You are not close enough to the arena floor to see it.\r\n");
   return;
- } else if (!str_cmp(arg, "look")) {
+ } else if (!strcasecmp(arg, "look")) {
   if (!PRF_FLAGGED(ch, PRF_ARENAWATCH)) {
    send_to_char(ch, "You are not even watching anyone in the arena.\r\n");
    return;
   } else if (arena_watch(ch) != NOWHERE) {
    look_at_room(real_room(arena_watch(ch)), ch, 0);
   }
- } else if (!str_cmp(arg, "scan")) {
+ } else if (!strcasecmp(arg, "scan")) {
   if (GET_ROOM_VNUM(IN_ROOM(ch)) == 17875) {
    int found = FALSE;
    struct descriptor_data *d;
@@ -3601,7 +3611,7 @@ ACMD(do_silk)
    return;
  }
 
- if (!str_cmp(arg, "weave")){
+ if (!strcasecmp(arg, "weave")){
 
   if (!*arg2) {
    send_to_char(ch, "Syntax: silk weave (head | wrist | belt)\r\n");
@@ -3623,7 +3633,7 @@ ACMD(do_silk)
    send_to_char(ch, "You do not have an acceptable bundle of silk in your inventory!\r\n");
    return;
   } else {
-   if (!str_cmp(arg2, "head")) {
+   if (!strcasecmp(arg2, "head")) {
     if (prob <= perc) {
      act("@WYou attempt to weave $p@W into the desired piece but end up ruining the entire bundle instead.@n", TRUE, ch, obj, 0, TO_CHAR);
      act("@C$n@W attempts to weave $p@W into some type of clothing but ends up ruining the entire bundle instead.@n", TRUE, ch, obj, 0, TO_ROOM);
@@ -3683,7 +3693,7 @@ ACMD(do_silk)
      extract_obj(obj);
      WAIT_STATE(ch, PULSE_4SEC);
     }
-   } else if (!str_cmp(arg2, "wrist")) {
+   } else if (!strcasecmp(arg2, "wrist")) {
     if (prob <= perc) {
      act("@WYou attempt to weave $p@W into the desired piece but end up ruining the entire bundle instead.@n", TRUE, ch, obj, 0, TO_CHAR);
      act("@C$n@W attempts to weave $p@W into some type of clothing but ends up ruining the entire bundle instead.@n", TRUE, ch, obj, 0, TO_ROOM);
@@ -3743,7 +3753,7 @@ ACMD(do_silk)
      extract_obj(obj);
      WAIT_STATE(ch, PULSE_4SEC);
     }
-   } else if (!str_cmp(arg2, "belt")) {
+   } else if (!strcasecmp(arg2, "belt")) {
     if (prob <= perc) {
      act("@WYou attempt to weave $p@W into the desired piece but end up ruining the entire bundle instead.@n", TRUE, ch, obj, 0, TO_CHAR);
      act("@C$n@W attempts to weave $p@W into some type of clothing but ends up ruining the entire bundle instead.@n", TRUE, ch, obj, 0, TO_ROOM);
@@ -3810,8 +3820,8 @@ ACMD(do_silk)
    return;
   } ////
 
- } else if (!str_cmp(arg, "bundle")) {
-  cl_sint64 cost = ((GET_MAX_MANA(ch) * 0.01) * (prob * 0.20)) + (GET_INT(ch) * GET_LEVEL(ch));
+ } else if (!strcasecmp(arg, "bundle")) {
+  int64_t cost = ((GET_MAX_MANA(ch) * 0.01) * (prob * 0.20)) + (GET_INT(ch) * GET_LEVEL(ch));
   
   if (GET_MANA(ch) < cost) {
    send_to_char(ch, "You do not have enough ki to weave any bundles of silk.\r\n");
@@ -3912,9 +3922,9 @@ ACMD(do_adrenaline)
     return;
    }
  
-   cl_sint64 trade =  gear_pl(ch) * percent;
+   int64_t trade =  gear_pl(ch) * percent;
 
-    if (!str_cmp(arg, "pl") || !str_cmp(arg, "PL")) {
+    if (!strcasecmp(arg, "pl") || !strcasecmp(arg, "PL")) {
      act("@GYou focus your mind and begin to overwork your powerful adrenal glands and your wounds begin to heal!@n", TRUE, ch, 0, 0, TO_CHAR);
      act("@g$n@G seems to concentrate and $s wounds begin to heal!@n", TRUE, ch, 0, 0, TO_ROOM);
      if (GET_HIT(ch) + trade > gear_pl(ch)) {
@@ -3925,7 +3935,7 @@ ACMD(do_adrenaline)
       GET_HIT(ch) += trade;
       GET_MOVE(ch) -= trade;
      }
-    } else if (!str_cmp(arg, "ki") || !str_cmp(arg, "KI")) {
+    } else if (!strcasecmp(arg, "ki") || !strcasecmp(arg, "KI")) {
      act("@GYou focus your mind and begin to overwork your powerful adrenal glands and you feel your ki replenish!@n", TRUE, ch, 0, 0, TO_CHAR);
      act("@g$n@G seems to concentrate and $e appears energized!@n", TRUE, ch, 0, 0, TO_ROOM);
      if (GET_MANA(ch) + trade > GET_MAX_MANA(ch)) {
@@ -4966,7 +4976,7 @@ ACMD(do_fireshield)
   return;
  }
 
- cl_sint64 cost = GET_MAX_MANA(ch) * 0.03;
+ int64_t cost = GET_MAX_MANA(ch) * 0.03;
 
  if (GET_MANA(ch) < cost) {
   send_to_char(ch, "You do not have enough ki!\r\n");
@@ -5053,22 +5063,22 @@ ACMD(do_warppool)
   return;
  }
 
- if (!str_cmp("earth", arg) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH)) {
+ if (!strcasecmp("earth", arg) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH)) {
   send_to_char(ch, "You are already on Earth!\r\n");
   return;
- } else if (!str_cmp("frigid", arg) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_FRIGID)) {
+ } else if (!strcasecmp("frigid", arg) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_FRIGID)) {
   send_to_char(ch, "You are already on Frigid!\r\n");
   return;
- } else if (!str_cmp("kanassa", arg) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_KANASSA)) {
+ } else if (!strcasecmp("kanassa", arg) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_KANASSA)) {
   send_to_char(ch, "You are already on Kanasssa!\r\n");
   return;
- } else if (!str_cmp("namek", arg) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_NAMEK)) {
+ } else if (!strcasecmp("namek", arg) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_NAMEK)) {
   send_to_char(ch, "You are already on Namek!\r\n");
   return;
- } else if (!str_cmp("aether", arg) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_AETHER)) {
+ } else if (!strcasecmp("aether", arg) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_AETHER)) {
   send_to_char(ch, "You are already on Aether!\r\n");
   return;
- } else if (!str_cmp("earth", arg)) {
+ } else if (!strcasecmp("earth", arg)) {
   if (prob > perc) {
    act("@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. You lose your concentration and the ritual fails!@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly a puzzled look comes across @c$n's @Cface and the water returns to normal.@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -5083,7 +5093,7 @@ ACMD(do_warppool)
    act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n", TRUE, ch, 0, 0, TO_ROOM);
    GET_MANA(ch) -= cost;
   }
- } else if (!str_cmp("frigid", arg)) {
+ } else if (!strcasecmp("frigid", arg)) {
   if (prob > perc) {
    act("@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. You lose your concentration and the ritual fails!@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly a puzzled look comes across @c$n's @Cface and the water returns to normal.@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -5098,7 +5108,7 @@ ACMD(do_warppool)
    act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n", TRUE, ch, 0, 0, TO_ROOM);
    GET_MANA(ch) -= cost;
   }
- } else if (!str_cmp("namek", arg)) {
+ } else if (!strcasecmp("namek", arg)) {
   if (prob > perc) {
    act("@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. You lose your concentration and the ritual fails!@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly a puzzled look comes across @c$n's @Cface and the water returns to normal.@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -5113,7 +5123,7 @@ ACMD(do_warppool)
    act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n", TRUE, ch, 0, 0, TO_ROOM);
    GET_MANA(ch) -= cost;
   } 
- } else if (!str_cmp("kanassa", arg)) {
+ } else if (!strcasecmp("kanassa", arg)) {
   if (prob > perc) {
    act("@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. You lose your concentration and the ritual fails!@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly a puzzled look comes across @c$n's @Cface and the water returns to normal.@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -5128,7 +5138,7 @@ ACMD(do_warppool)
    act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n", TRUE, ch, 0, 0, TO_ROOM);
    GET_MANA(ch) -= cost;
   }
- } else if (!str_cmp("aether", arg)) {
+ } else if (!strcasecmp("aether", arg)) {
   if (prob > perc) {
    act("@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. You lose your concentration and the ritual fails!@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly a puzzled look comes across @c$n's @Cface and the water returns to normal.@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -5193,40 +5203,40 @@ ACMD(do_obstruct)
 
  int dir = -1, dir2 = -1;
 
-  if (!str_cmp("n", arg) || !str_cmp("N", arg)) {
+  if (!strcasecmp("n", arg) || !strcasecmp("N", arg)) {
     dir = 0;
     dir2 = 2;
-  } else if (!str_cmp("e", arg) || !str_cmp("E", arg)) {
+  } else if (!strcasecmp("e", arg) || !strcasecmp("E", arg)) {
     dir = 1;
     dir2 = 3;
-  } else if (!str_cmp("s", arg) || !str_cmp("S", arg)) {
+  } else if (!strcasecmp("s", arg) || !strcasecmp("S", arg)) {
     dir = 2;
     dir2 = 0;
-  } else if (!str_cmp("w", arg) || !str_cmp("W", arg)) {
+  } else if (!strcasecmp("w", arg) || !strcasecmp("W", arg)) {
     dir = 3;
     dir2 = 1;
-  } else if (!str_cmp("u", arg) || !str_cmp("U", arg)) {
+  } else if (!strcasecmp("u", arg) || !strcasecmp("U", arg)) {
     dir = 4;
     dir2 = 5;
-  } else if (!str_cmp("d", arg) || !str_cmp("D", arg)) {
+  } else if (!strcasecmp("d", arg) || !strcasecmp("D", arg)) {
     dir = 5;
     dir2 = 4;
-  } else if (!str_cmp("i", arg) || !str_cmp("I", arg)) {
+  } else if (!strcasecmp("i", arg) || !strcasecmp("I", arg)) {
     dir = 10;
     dir2 = 11;
-  } else if (!str_cmp("o", arg) || !str_cmp("O", arg)) {
+  } else if (!strcasecmp("o", arg) || !strcasecmp("O", arg)) {
     dir = 11;
     dir2 = 10;
-  } else if (!str_cmp("nw", arg) || !str_cmp("NW", arg)) {
+  } else if (!strcasecmp("nw", arg) || !strcasecmp("NW", arg)) {
     dir = 6;
     dir2 = 8;
-  } else if (!str_cmp("ne", arg) || !str_cmp("NE", arg)) {
+  } else if (!strcasecmp("ne", arg) || !strcasecmp("NE", arg)) {
     dir = 7;
     dir2 = 9;
-  } else if (!str_cmp("se", arg) || !str_cmp("SE", arg)) {
+  } else if (!strcasecmp("se", arg) || !strcasecmp("SE", arg)) {
     dir = 8;
     dir2 = 6;
-  } else if (!str_cmp("sw", arg) || !str_cmp("SW", arg)) {
+  } else if (!strcasecmp("sw", arg) || !strcasecmp("SW", arg)) {
     dir = 9;
     dir2 = 7;
   } else {
@@ -5277,7 +5287,7 @@ ACMD(do_obstruct)
   obj3 = read_object(79, VIRTUAL);
   obj_to_room(obj3, IN_ROOM(ch));
 
-  cl_sint64 strength = (((GET_INT(ch) * skill) * GET_WIS(ch)) * 20) + (GET_MAX_MANA(ch) * 0.001);
+  int64_t strength = (((GET_INT(ch) * skill) * GET_WIS(ch)) * 20) + (GET_MAX_MANA(ch) * 0.001);
 
   if (strength > GET_MAX_HIT(ch) * 20) {
    strength = GET_MAX_HIT(ch) + (strength / 20);

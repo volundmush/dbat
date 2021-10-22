@@ -15,6 +15,7 @@
 ************************************************************************ */
 
 #include "config.h"
+#include "interpreter.h"	/* alias_data definition for structs.h */
 
 /*
  * Update:  The following constants and variables are now the default values
@@ -74,7 +75,7 @@ char last_user_freed[MAX_INPUT_LENGTH];
  /* Toplist Data */
  int TOPLOADED = FALSE;
  char *topname[25];
- cl_sint64 toppoint[25] = {0};
+ int64_t toppoint[25] = {0};
  /* End Top Data */
 
 int ERAPLAYERS = 0;
@@ -350,7 +351,7 @@ int bitsavetodisk = TRUE;
  * Change the PORT= line in autorun instead of (or in addition to)
  * changing this.
  */
-ush_int DFLT_PORT = 5001;
+uint16_t DFLT_PORT = 5001;
 
 /*
  * IP address to which the MUD should bind.  This is only useful if

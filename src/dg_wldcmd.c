@@ -10,21 +10,12 @@
 **************************************************************************/
 
 #include "structs.h"
-#include "screen.h"
 #include "dg_scripts.h"
 #include "utils.h"
 #include "comm.h"
 #include "interpreter.h"
 #include "handler.h"
 #include "db.h"
-#include "constants.h"
-
-/*
- * External functions
- */
-void die(struct char_data * ch, struct char_data * killer);
-zone_rnum real_zone_by_thing(room_vnum vznum);
-bitvector_t asciiflag_conv(char *flag);
 
 /*
  * Local functions
@@ -122,14 +113,14 @@ WCMD(do_weffect)
   nr = num;
   target = real_room(nr);
 
-  if (!str_cmp(arg, "gravity")) { /* Set gravity */
+  if (!strcasecmp(arg, "gravity")) { /* Set gravity */
    if (num < 0 || num > 10000) {
     wld_log(room, "weffect setting out of bounds, 0 - 10000 only.");
     return;
    } else {
     ROOM_GRAVITY(real_room(room->number)) = num;
    }
-  } else if (!str_cmp(arg, "light")) {
+  } else if (!strcasecmp(arg, "light")) {
    if (target == NOWHERE) {
     wld_log(room, "weffect target is NOWHERE.");
     return;
@@ -140,7 +131,7 @@ WCMD(do_weffect)
      REMOVE_BIT_AR(ROOM_FLAGS(target), ROOM_INDOORS);
     }
    }
-  } else if (!str_cmp(arg, "lava")) {
+  } else if (!strcasecmp(arg, "lava")) {
    if (target == NOWHERE) {
     wld_log(room, "weffect target is NOWHERE.");
     return;
@@ -337,7 +328,7 @@ WCMD(do_wdoor)
             strcat(newexit->general_description, "\r\n");
             break;
         case 2:  /* flags       */
-            newexit->exit_info = (sh_int)asciiflag_conv(value);
+            newexit->exit_info = (int16_t)asciiflag_conv(value);
             break;
         case 3:  /* key         */
             newexit->key = atoi(value);
@@ -378,7 +369,7 @@ WCMD(do_wteleport)
     if (target == NOWHERE)
         wld_log(room, "wteleport target is an invalid room");
 
-    else if (!str_cmp(arg1, "all")) {
+    else if (!strcasecmp(arg1, "all")) {
         if (nr == room->number) {
             wld_log(room, "wteleport all target is itself");
             return;
@@ -423,7 +414,7 @@ WCMD(do_wforce)
         return;
     }
 
-    if (!str_cmp(arg1, "all"))
+    if (!strcasecmp(arg1, "all"))
     {
         for (ch = room->people; ch; ch = next_ch)
         {

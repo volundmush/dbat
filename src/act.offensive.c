@@ -8,14 +8,23 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include "act.h"
+#include "act.offensive.h"
+#include "interpreter.h"
+#include "combat.h"
+#include "comm.h"
+#include "spells.h"
+#include "utils.h"
+#include "handler.h"
+#include "constants.h"
+#include "fight.h"
+
 
 /* Combat commands below this line */
 
 ACMD(do_galikgun)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .15, minimum = .1;
  struct char_data *vict;
  struct obj_data *obj;
@@ -322,7 +331,7 @@ ACMD(do_galikgun)
 ACMD(do_honoo)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill; 
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .125, minimum = .1;
  struct char_data *vict;
  struct obj_data *obj;
@@ -699,7 +708,7 @@ ACMD(do_honoo)
 ACMD(do_psyblast)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .125, minimum = .1;
  struct char_data *vict;
  struct obj_data *obj;
@@ -1031,7 +1040,7 @@ ACMD(do_psyblast)
 ACMD(do_tslash)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .125, minimum = .1;
  struct char_data *vict;
  struct obj_data *obj;
@@ -1496,7 +1505,7 @@ ACMD(do_tslash)
 ACMD(do_eraser)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .125, minimum = .1;
  struct char_data *vict;
  struct obj_data *obj;
@@ -1816,7 +1825,7 @@ ACMD(do_eraser)
 ACMD(do_pbarrage)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .2, minimum = .15;
  struct char_data *vict;
  struct obj_data *obj;
@@ -2317,7 +2326,7 @@ ACMD(do_genki)
 ACMD(do_spiritball)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .25, minimum = .20;
  struct char_data *vict;
  struct obj_data *obj;
@@ -2599,7 +2608,7 @@ ACMD(do_spiritball)
 ACMD(do_deathball)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .3, minimum = .15;
  struct char_data *vict;
  struct obj_data *obj;
@@ -2853,7 +2862,7 @@ ACMD(do_deathball)
 ACMD(do_pslash)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .3, minimum = .15;
  struct char_data *vict;
  struct obj_data *obj;
@@ -3153,7 +3162,7 @@ ACMD(do_pslash)
 ACMD(do_bigbang)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .3, minimum = .15;
  struct char_data *vict;
  struct obj_data *obj;
@@ -3417,7 +3426,7 @@ ACMD(do_bigbang)
 ACMD(do_scatter)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .3, minimum = .15;
  struct char_data *vict;
  struct obj_data *obj;
@@ -3700,7 +3709,7 @@ ACMD(do_scatter)
 ACMD(do_balefire)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .3, minimum = .15;
  struct char_data *vict;
  struct obj_data *obj;
@@ -3984,7 +3993,7 @@ ACMD(do_balefire)
 ACMD(do_kakusanha)
 {
  int perc, dge = 2, count = 0, skill;
-  cl_sint64 dmg;
+  int64_t dmg;
   double attperc = .3, minimum = .10;
   struct char_data *vict = NULL, *next_v = NULL;
   char arg2[MAX_INPUT_LENGTH];
@@ -4262,7 +4271,7 @@ ACMD(do_kakusanha)
 ACMD(do_hellspear)
 {
  int perc, dge = 2, count = 0, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .3, minimum = .10;
   struct char_data *vict = NULL, *next_v = NULL;
   char arg2[MAX_INPUT_LENGTH];
@@ -4406,7 +4415,7 @@ ACMD(do_hellspear)
 ACMD(do_hellflash)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .2, minimum = .10;
  struct char_data *vict;
  struct obj_data *obj;
@@ -4713,7 +4722,7 @@ ACMD(do_hellflash)
 ACMD(do_ddslash)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .2, minimum = .10;
  struct char_data *vict;
  struct obj_data *obj;
@@ -5005,7 +5014,7 @@ ACMD(do_ddslash)
 ACMD(do_crusher)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .2, minimum = .10;
  struct char_data *vict;
  struct obj_data *obj;
@@ -5313,7 +5322,7 @@ ACMD(do_crusher)
 ACMD(do_final)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .2, minimum = .10;
  struct char_data *vict;
  struct obj_data *obj;
@@ -5582,7 +5591,7 @@ ACMD(do_final)
 ACMD(do_sbc)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .15, minimum = .05;
  struct char_data *vict;
  struct obj_data *obj;
@@ -5835,7 +5844,7 @@ ACMD(do_sbc)
 ACMD(do_tribeam)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .2, minimum = .10;
  struct char_data *vict;
  struct obj_data *obj;
@@ -6111,7 +6120,7 @@ ACMD(do_tribeam)
 ACMD(do_kienzan)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .125, minimum = .05;
  struct char_data *vict;
  struct obj_data *obj;
@@ -6542,7 +6551,7 @@ ACMD(do_kienzan)
 ACMD(do_baku)
 {
  int perc, dge = 2, count = 0, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .15, minimum = .05;
   struct char_data *vict = NULL, *next_v = NULL;
   char arg2[MAX_INPUT_LENGTH];
@@ -6714,7 +6723,7 @@ ACMD(do_baku)
 ACMD(do_rogafufuken)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .05, minimum = .01;
  struct char_data *vict;
  struct obj_data *obj;
@@ -7000,7 +7009,7 @@ ACMD(do_rogafufuken)
 ACMD(do_dualbeam)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .1, minimum = .05;
  struct char_data *vict;
  struct obj_data *obj;
@@ -7307,7 +7316,7 @@ ACMD(do_dualbeam)
 ACMD(do_blessedhammer)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .05, minimum = .01;
  struct char_data *vict;
  struct obj_data *obj;
@@ -7583,7 +7592,7 @@ ACMD(do_blessedhammer)
 ACMD(do_kousengan)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .05, minimum = .01;
  struct char_data *vict;
  struct obj_data *obj;
@@ -7859,7 +7868,7 @@ ACMD(do_kousengan)
 ACMD(do_deathbeam)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .1, minimum = .05;
  struct char_data *vict;
  struct obj_data *obj;
@@ -8207,7 +8216,7 @@ ACMD(do_deathbeam)
 ACMD(do_dodonpa)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .1, minimum = .05;
  struct char_data *vict;
  struct obj_data *obj;
@@ -8515,7 +8524,7 @@ ACMD(do_dodonpa)
 ACMD(do_masenko)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .15, minimum = .05;
  struct char_data *vict;
  struct obj_data *obj;
@@ -8858,7 +8867,7 @@ ACMD(do_masenko)
 ACMD(do_kamehameha)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .15, minimum = .05;
  struct char_data *vict;
  struct obj_data *obj;
@@ -9261,7 +9270,7 @@ ACMD(do_kamehameha)
 ACMD(do_renzo)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .125, minimum = .05;
  struct char_data *vict;
  struct obj_data *obj;
@@ -9626,7 +9635,7 @@ ACMD(do_renzo)
 ACMD(do_heeldrop)
 {
  int prob, perc, avo, index = 0, pry = 0, dge = 0, blk = 0, skill = 0;
- cl_sint64 dmg, stcost = physical_cost(ch, SKILL_HEELDROP);
+ int64_t dmg, stcost = physical_cost(ch, SKILL_HEELDROP);
  struct char_data *vict;
  struct obj_data *obj;
  char arg[MAX_INPUT_LENGTH];
@@ -9994,8 +10003,8 @@ ACMD(do_attack)
 {
  int prob, perc, avo, index = 0, pry = 0, dge = 0, blk = 0, skill = 0, wtype = 0, gun = FALSE, gun2 = FALSE;
  int dualwield = 0, wielded = 0, guncost = 0;
- cl_sint64 stcost = (GET_MAX_HIT(ch) / 150);
- cl_sint64 dmg;
+ int64_t stcost = (GET_MAX_HIT(ch) / 150);
+ int64_t dmg;
  struct char_data *vict;
  struct obj_data *obj = NULL;
  char arg[MAX_INPUT_LENGTH];
@@ -10397,7 +10406,7 @@ ACMD(do_attack)
      if (gun == TRUE)
       dmg = gun_dam(ch, wlvl);
      hitspot = roll_hitloc(ch, vict, skill);
-     cl_sint64 beforepl = GET_HIT(vict);
+     int64_t beforepl = GET_HIT(vict);
      switch (hitspot) {
       case 1:
        if (GET_BONUS(ch, BONUS_SOFT)) {
@@ -10820,7 +10829,7 @@ ACMD(do_attack)
 ACMD(do_shogekiha)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .125, minimum = .05;
  struct char_data *vict;
  struct obj_data *obj;
@@ -11124,7 +11133,7 @@ ACMD(do_shogekiha)
 ACMD(do_tsuihidan)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .1, minimum = .05;
  struct char_data *vict;
  struct obj_data *obj;
@@ -11443,7 +11452,7 @@ ACMD(do_attack2)
 {
  int prob, perc, avo, index = 0, pry = 0, dge = 0, blk = 0, skill = 0, wtype = 0, gun2 = FALSE;
  int dualwield = 0;
- cl_sint64 dmg;
+ int64_t dmg;
  struct char_data *vict = NULL;
  struct obj_data *obj = NULL;
  char arg[MAX_INPUT_LENGTH];
@@ -11455,8 +11464,8 @@ ACMD(do_attack2)
    return;
  }
 
- cl_sint64 stcost = ((GET_MAX_HIT(ch) / 150) + GET_OBJ_WEIGHT(GET_EQ(ch, WEAR_WIELD2)));
- cl_sint64 kicost = ((GET_MAX_HIT(ch) / 150) + GET_OBJ_WEIGHT(GET_EQ(ch, WEAR_WIELD2)));
+ int64_t stcost = ((GET_MAX_HIT(ch) / 150) + GET_OBJ_WEIGHT(GET_EQ(ch, WEAR_WIELD2)));
+ int64_t kicost = ((GET_MAX_HIT(ch) / 150) + GET_OBJ_WEIGHT(GET_EQ(ch, WEAR_WIELD2)));
 
  if (IS_ANDROID(ch)) {
   stcost *= 0.25;
@@ -11774,7 +11783,7 @@ ACMD(do_attack2)
      if (gun2 == TRUE)
       dmg = gun_dam(ch, wlvl);
      hitspot = roll_hitloc(ch, vict, skill);
-     cl_sint64 beforepl = GET_HIT(vict);
+     int64_t beforepl = GET_HIT(vict);
      if (wtype == 3) {
       if (skill >= 100)
        dmg += dmg * 0.04;
@@ -12140,7 +12149,7 @@ ACMD(do_attack2)
 ACMD(do_bite)
 {
 	int prob, perc, avo, index = 0, pry = 2, dge = 2, blk = 2, skill = 0;
-	cl_sint64 dmg, stcost = 20 + (GET_MAX_HIT(ch) / 500);
+	int64_t dmg, stcost = 20 + (GET_MAX_HIT(ch) / 500);
 	struct char_data *vict;
 	struct obj_data *obj;
 	char arg[MAX_INPUT_LENGTH];
@@ -12392,7 +12401,7 @@ ACMD(do_bite)
 ACMD(do_kiball)
 {
  int prob, perc, avo, index = 0, pry = 2, dge = 2, blk = 2, skill = 0, frompool = FALSE;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .05, minimum = .01;
  struct char_data *vict;
  struct obj_data *obj;
@@ -12732,7 +12741,7 @@ ACMD(do_kiball)
 ACMD(do_beam)
 {
  int prob, perc, avo, index = 0, pry = 2, dge = 2, blk = 2, skill = 0;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .1, minimum = .01;
  struct char_data *vict;
  struct obj_data *obj;
@@ -13064,7 +13073,7 @@ ACMD(do_beam)
 ACMD(do_kiblast)
 {
  int prob, perc, avo, index = 0, pry = 2, dge = 2, blk = 2, skill = 0;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .075, minimum = .01;
  struct char_data *vict;
  struct obj_data *obj;
@@ -13304,7 +13313,7 @@ ACMD(do_kiblast)
      dmg += dmg * 0.05;
     }
    }
-   cl_sint64 record = GET_HIT(vict);
+   int64_t record = GET_HIT(vict);
    int hitspot = 1;
    hitspot = roll_hitloc(ch, vict, skill);
    switch(hitspot) {
@@ -13401,7 +13410,7 @@ ACMD(do_kiblast)
 ACMD(do_slam)
 {
  int prob, perc, avo, index = 0, pry = 2, dge = 2, blk = 2, skill = 0;
- cl_sint64 dmg, stcost = physical_cost(ch, SKILL_SLAM);
+ int64_t dmg, stcost = physical_cost(ch, SKILL_SLAM);
  struct char_data *vict;
  struct obj_data *obj;
  char arg[MAX_INPUT_LENGTH];
@@ -13801,7 +13810,7 @@ ACMD(do_slam)
 ACMD(do_uppercut)
 {
  int prob, perc, avo, index = 0, pry = 2, dge = 2, blk = 2, skill = 0;
- cl_sint64 dmg, stcost = physical_cost(ch, SKILL_UPPERCUT);
+ int64_t dmg, stcost = physical_cost(ch, SKILL_UPPERCUT);
  struct char_data *vict;
  struct obj_data *obj;
  char arg[MAX_INPUT_LENGTH];
@@ -14090,7 +14099,7 @@ ACMD(do_uppercut)
 ACMD(do_tailwhip)
 {
  int prob, perc, avo, index = 0, pry = 2, dge = 2, blk = 2, skill = 0;
- cl_sint64 dmg, stcost = physical_cost(ch, SKILL_TAILWHIP);
+ int64_t dmg, stcost = physical_cost(ch, SKILL_TAILWHIP);
  struct char_data *vict;
  struct obj_data *obj;
  char arg[MAX_INPUT_LENGTH];
@@ -14350,7 +14359,7 @@ ACMD(do_tailwhip)
 ACMD(do_roundhouse)
 {
  int prob, perc, avo, index = 0, pry = 2, dge = 2, blk = 2, skill = 0;
- cl_sint64 dmg, stcost = physical_cost(ch, SKILL_ROUNDHOUSE);
+ int64_t dmg, stcost = physical_cost(ch, SKILL_ROUNDHOUSE);
  struct char_data *vict;
  struct obj_data *obj;
  char arg[MAX_INPUT_LENGTH];
@@ -14645,7 +14654,7 @@ ACMD(do_roundhouse)
 ACMD(do_elbow)
 {
  int prob, perc, avo, index = 0, pry = 2, dge = 2, blk = 2, skill = 0;
- cl_sint64 dmg, stcost = physical_cost(ch, SKILL_ELBOW);
+ int64_t dmg, stcost = physical_cost(ch, SKILL_ELBOW);
  struct char_data *vict;
  struct obj_data *obj;
  char arg[MAX_INPUT_LENGTH];
@@ -14918,7 +14927,7 @@ ACMD(do_elbow)
 ACMD(do_kick)
 {
  int prob, perc, avo, index = 0, pry = 2, dge = 2, blk = 2, skill = 0;
- cl_sint64 dmg, stcost = physical_cost(ch, SKILL_KICK);
+ int64_t dmg, stcost = physical_cost(ch, SKILL_KICK);
  struct char_data *vict;
  struct obj_data *obj;
  char arg[MAX_INPUT_LENGTH];
@@ -15200,7 +15209,7 @@ ACMD(do_kick)
 ACMD(do_knee)
 {
  int prob, perc, avo, index = 0, pry = 2, dge = 2, blk = 2, skill = 0;
- cl_sint64 dmg, stcost = physical_cost(ch, SKILL_KNEE);
+ int64_t dmg, stcost = physical_cost(ch, SKILL_KNEE);
  struct char_data *vict;
  struct obj_data *obj;
  char arg[MAX_INPUT_LENGTH];
@@ -15481,7 +15490,7 @@ ACMD(do_knee)
 ACMD(do_punch)
 {
  int prob, perc, avo, index = 0, pry = 2, dge = 2, blk = 2, skill = 0;
- cl_sint64 dmg, stcost = physical_cost(ch, SKILL_PUNCH);
+ int64_t dmg, stcost = physical_cost(ch, SKILL_PUNCH);
  struct char_data *vict;
  struct obj_data *obj;
  char arg[MAX_INPUT_LENGTH];
@@ -15777,11 +15786,11 @@ ACMD(do_charge)
    send_to_char(ch, "[ 1 - 100 | cancel | release]\r\n");
    return;
   }
-  else if (!str_cmp("release", arg) && (PLR_FLAGGED(ch, PLR_CHARGE) && GET_CHARGE(ch) <= 0)) {
+  else if (!strcasecmp("release", arg) && (PLR_FLAGGED(ch, PLR_CHARGE) && GET_CHARGE(ch) <= 0)) {
   send_to_char(ch, "Try cancel instead, you have nothing charged up yet!\r\n");
    return;
   }
-  else if (!str_cmp("release", arg) && (PLR_FLAGGED(ch, PLR_CHARGE) && GET_CHARGE(ch) > 0)) {
+  else if (!strcasecmp("release", arg) && (PLR_FLAGGED(ch, PLR_CHARGE) && GET_CHARGE(ch) > 0)) {
   send_to_char(ch, "You stop charging and release your pent up energy.\r\n");
    switch (rand_number(1, 3)) {
     case 1:
@@ -15806,7 +15815,7 @@ ACMD(do_charge)
    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CHARGE);
    return;
   }
-  else if (!str_cmp("release", arg) && GET_CHARGE(ch) > 0) {
+  else if (!strcasecmp("release", arg) && GET_CHARGE(ch) > 0) {
   send_to_char(ch, "You release your pent up energy.\r\n");
    switch (rand_number(1, 3)) {
     case 1:
@@ -15830,7 +15839,7 @@ ACMD(do_charge)
    GET_CHARGETO(ch) = 0;
    return;
   }
-  else if (!str_cmp("cancel", arg) && PLR_FLAGGED(ch, PLR_CHARGE)) {
+  else if (!strcasecmp("cancel", arg) && PLR_FLAGGED(ch, PLR_CHARGE)) {
    send_to_char(ch, "You stop charging.\r\n");
    switch (rand_number(1, 3)) {
     case 1:
@@ -15850,7 +15859,7 @@ ACMD(do_charge)
    GET_CHARGETO(ch) = 0;
    return;
   }
-  else if (!str_cmp("cancel", arg) && !PLR_FLAGGED(ch, PLR_CHARGE)) {
+  else if (!strcasecmp("cancel", arg) && !PLR_FLAGGED(ch, PLR_CHARGE)) {
    send_to_char(ch, "You are not even charging!\r\n");
    return;
   }
@@ -15863,7 +15872,7 @@ ACMD(do_charge)
      send_to_char(ch, "You have set it too high!\r\n");
      return;
     } else if (AFF_FLAGGED(ch, AFF_SPIRITCONTROL)) {
-     cl_sint64 diff = 0;
+     int64_t diff = 0;
      if (GET_MANA(ch) < ((GET_MAX_MANA(ch) * 0.01) * amt) + 1) {
       diff = (((GET_MAX_MANA(ch) * 0.01) * amt) + 1) - GET_MANA(ch);
      }
@@ -15879,7 +15888,7 @@ ACMD(do_charge)
       null_affect(ch, AFF_SPIRITCONTROL);
       return;
      } else {
-      cl_sint64 spiritcost = GET_MAX_MANA(ch) * 0.05;
+      int64_t spiritcost = GET_MAX_MANA(ch) * 0.05;
       if (GET_SKILL(ch, SKILL_SPIRITCONTROL) >= 100) {
        spiritcost = GET_MAX_MANA(ch) * 0.01;
       }

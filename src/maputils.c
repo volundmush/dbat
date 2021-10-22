@@ -7,7 +7,10 @@
 * Paolo Libardi - pinkpallin@libero.it		     * 
 *****************************************************/
 #include "maputils.h"
-
+#include "utils.h"
+#include "comm.h"
+#include "interpreter.h"
+#include "db.h"
 
 
 extern struct room_data *world;  

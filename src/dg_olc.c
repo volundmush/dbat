@@ -12,31 +12,21 @@
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
 
-#include "structs.h"
+#include "dg_olc.h"
 #include "utils.h"
 #include "comm.h"
 #include "db.h"
 #include "genolc.h"
 #include "interpreter.h"
 #include "oasis.h"
-#include "dg_olc.h"
 #include "dg_event.h"
 #include "constants.h"
-
-/* external functions */
-zone_rnum real_zone_by_thing(room_vnum vznum);
-void create_world_index(int znum, const char *type);
-ACMD(do_wiznet);
+#include "act.wizard.h"
 
 /* local functions */
-void trigedit_disp_menu(struct descriptor_data *d);
-void trigedit_disp_types(struct descriptor_data *d);
-void trigedit_save(struct descriptor_data *d);
-void trigedit_string_cleanup(struct descriptor_data *d, int terminator);
-int format_script(struct descriptor_data *d);
-void trigedit_setup_existing(struct descriptor_data *d, int rtrg_num);
-void trigedit_setup_new(struct descriptor_data *d);
-void search_replace(char *string, const char *find, const char *replace);
+static void trigedit_disp_menu(struct descriptor_data *d);
+static void trigedit_disp_types(struct descriptor_data *d);
+
 
 /* ***********************************************************************
  * trigedit
@@ -208,7 +198,7 @@ void trigedit_setup_existing(struct descriptor_data *d, int rtrg_num)
 }
 
 
-void trigedit_disp_menu(struct descriptor_data *d)
+static void trigedit_disp_menu(struct descriptor_data *d)
 {
   struct trig_data *trig = OLC_TRIG(d);
   char *attach_type;
@@ -251,7 +241,7 @@ void trigedit_disp_menu(struct descriptor_data *d)
   OLC_MODE(d) = TRIGEDIT_MAIN_MENU;
 }
 
-void trigedit_disp_types(struct descriptor_data *d)
+static void trigedit_disp_types(struct descriptor_data *d)
 {
   int i, columns = 0;
   const char **types;

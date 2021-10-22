@@ -7,7 +7,26 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include "act.h"
+#include "act.informative.h"
+#include "act.wizard.h"
+#include "vehicles.h"
+#include "act.item.h"
+#include "act.social.h"
+#include "maputils.h"
+#include "config.h"
+#include "utils.h"
+#include "comm.h"
+#include "spells.h"
+#include "races.h"
+#include "handler.h"
+#include "constants.h"
+#include "dg_scripts.h"
+#include "class.h"
+#include "boards.h"
+#include "screen.h"
+#include "mail.h"
+#include "guild.h"
+#include "clan.h"
 
 /* local functions */
 static void gen_map(struct char_data *ch, int num);
@@ -55,7 +74,7 @@ ACMD(do_evolve)
  char arg[MAX_INPUT_LENGTH];
  one_argument(argument, arg);
 
- cl_sint64 plcost = GET_LEVEL(ch), stcost = GET_LEVEL(ch), kicost = GET_LEVEL(ch);
+ int64_t plcost = GET_LEVEL(ch), stcost = GET_LEVEL(ch), kicost = GET_LEVEL(ch);
 
  plcost += molt_threshold(ch) * 0.65 + (GET_MAX_HIT(ch) * 0.15);
  kicost += (molt_threshold(ch) * 0.50) + (GET_MAX_MANA(ch) * 0.22);
@@ -69,7 +88,7 @@ ACMD(do_evolve)
   send_to_char(ch, "@CStamina     @D: @Y%s @Wpts\r\n", add_commas(stcost));
   send_to_char(ch, "@D[@Y%s @Wpts currently@D]@n\r\n", add_commas(GET_MOLT_EXP(ch)));
   return;
- } else if (!str_cmp(arg, "powerlevel") || !str_cmp(arg, "pl")) {
+ } else if (!strcasecmp(arg, "powerlevel") || !strcasecmp(arg, "pl")) {
   if (plcost > molt_threshold(ch)) {
    send_to_char(ch, "You need a few more evolution levels before you can start upgrading powerlevel.\r\n");
    return;
@@ -77,7 +96,7 @@ ACMD(do_evolve)
    send_to_char(ch, "You do not have enough evolution experience.\r\n");
    return;
   } else {
-   cl_sint64 plgain = GET_BASE_PL(ch) * 0.01;
+   int64_t plgain = GET_BASE_PL(ch) * 0.01;
 
    if (plgain <= 0) {
     plgain = rand_number(1, 5);
@@ -90,7 +109,7 @@ ACMD(do_evolve)
    GET_MOLT_EXP(ch) -= plcost;
    send_to_char(ch, "Your body evolves to make better use of the way it is now, and you feel that your body has strengthened. @D[@RPL@D: @Y+%s@D]@n\r\n", add_commas(plgain));
   }
- } else if (!str_cmp(arg, "ki")) {
+ } else if (!strcasecmp(arg, "ki")) {
   if (kicost > molt_threshold(ch)) {
    send_to_char(ch, "You need a few more evolution levels before you can start upgrading ki.\r\n");
    return;
@@ -98,7 +117,7 @@ ACMD(do_evolve)
    send_to_char(ch, "You do not have enough evolution experience.\r\n");
    return;
   } else {
-   cl_sint64 kigain = GET_BASE_KI(ch) * 0.01;
+   int64_t kigain = GET_BASE_KI(ch) * 0.01;
 
    if (kigain <= 0) {
     kigain = rand_number(1, 5);
@@ -111,7 +130,7 @@ ACMD(do_evolve)
    GET_MOLT_EXP(ch) -= kicost;
    send_to_char(ch, "Your body evolves to make better use of the way it is now, and you feel that your spirit has strengthened. @D[@CKi@D: @Y+%s@D]@n\r\n", add_commas(kigain));
   }
- } else if (!str_cmp(arg, "stamina") || !str_cmp(arg, "st")) {
+ } else if (!strcasecmp(arg, "stamina") || !strcasecmp(arg, "st")) {
   if (stcost > molt_threshold(ch)) {
    send_to_char(ch, "You need a few more evolution levels before you can start upgrading stamina.\r\n");
    return;
@@ -119,7 +138,7 @@ ACMD(do_evolve)
    send_to_char(ch, "You do not have enough evolution experience.\r\n");
    return;
   } else {
-   cl_sint64 stgain = GET_BASE_ST(ch) * 0.01;
+   int64_t stgain = GET_BASE_ST(ch) * 0.01;
 
    if (stgain <= 0) {
     stgain = rand_number(1, 5);
@@ -348,7 +367,7 @@ ACMD(do_mimic)
 
   int prob = GET_SKILL(ch, SKILL_MIMIC), perc = axion_dice(0);
   double mult = 1 / prob;
-  cl_sint64 cost = GET_MAX_MANA(ch) * mult;
+  int64_t cost = GET_MAX_MANA(ch) * mult;
   int israce = FALSE, change = -1;
 
   x = 0;
@@ -356,7 +375,7 @@ ACMD(do_mimic)
    for (x = 0; x < NUM_RACES; x++) {
     if (race_ok_gender[(int)GET_SEX(ch)][x]) {
 	 if (yesrace(x)) {
-	  if (!str_cmp(arg, pc_race_types[x])) {
+	  if (!strcasecmp(arg, pc_race_types[x])) {
 	    if (GET_MIMIC(ch) == x + 1) {
 		  israce = TRUE;
 		  x = NUM_RACES + 1;
@@ -388,7 +407,7 @@ ACMD(do_mimic)
 	send_to_char(ch, "@mYou concentrate for a moment and your features start to blur as you use your ki to bend the light around your body. You now appear to be %s %s.@n\r\n", AN(RACE(ch)), LRACE(ch));
 	act(buf, TRUE, ch, 0, 0, TO_ROOM);
 	return;
- } else if (!str_cmp(arg, "stop")) {
+ } else if (!strcasecmp(arg, "stop")) {
 	act("@mYou concentrate for a moment and release the illusion that was mimicing another race.@n", TRUE, ch, 0, 0, TO_CHAR);
 	act("@M$n@m concentrates for a moment and SUDDENLY $s appearance changes some what!@n", TRUE, ch, 0, 0, TO_ROOM);
 	GET_MIMIC(ch) = 0;
@@ -580,7 +599,7 @@ ACMD(do_hand)
    return;
   }
 
- if (!str_cmp("look", arg)) {
+ if (!strcasecmp("look", arg)) {
    send_to_char(ch, "@CYour hand contains:\r\n@D---------------------------@n\r\n");
    for (obj = ch->carrying; obj; obj = next_obj) {
        next_obj = obj->next_content;
@@ -606,7 +625,7 @@ ACMD(do_hand)
     act(buf, TRUE, ch, 0, 0, TO_ROOM);
    }
  }
- else if (!str_cmp("show", arg)) {
+ else if (!strcasecmp("show", arg)) {
    send_to_char(ch, "You show off your hand to the room.\r\n");
    act("@C$n's hand contains:\r\n@D---------------------------@n", TRUE, ch, 0, 0, TO_ROOM);
    for (obj = ch->carrying; obj; obj = next_obj) {
@@ -764,7 +783,7 @@ ACMD(do_nickname)
    return;
   }
 
-  if (str_cmp(arg, "ship")) {
+  if (strcasecmp(arg, "ship")) {
    if (!(obj = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
     send_to_char(ch, "You don't have that item to nickname.\r\n");
     return;
@@ -775,7 +794,7 @@ ACMD(do_nickname)
    return;
   }
 
-  if (!str_cmp(arg, "ship")) {
+  if (!strcasecmp(arg, "ship")) {
    struct obj_data *ship = NULL, *next_obj = NULL, *ship2 = NULL; 
    int found = FALSE;
    for (ship = world[IN_ROOM(ch)].contents; ship; ship = next_obj) {
@@ -919,7 +938,7 @@ int readIntro(struct char_data *ch, struct char_data *vict) {
   while (!feof(fl)) {
     get_line(fl, line);
     sscanf(line, "%s %s\n", filler, scrap);
-    if (!str_cmp(GET_NAME(vict), filler)) {
+    if (!strcasecmp(GET_NAME(vict), filler)) {
      known = TRUE;
     }
   }
@@ -968,8 +987,8 @@ void introWrite(struct char_data *ch, struct char_data *vict, char *name)
   }
 
   while(x < count) {
-    if (x == 0 || str_cmp(names[x-1], names[x])) {
-     if (str_cmp(names[x], GET_NAME(vict))) {
+    if (x == 0 || strcasecmp(names[x-1], names[x])) {
+     if (strcasecmp(names[x], GET_NAME(vict))) {
       fprintf(fl, "%s %s\n", names[x], alias[x]);
      }
     }
@@ -2750,13 +2769,13 @@ static void list_obj_to_char(struct obj_data *list, struct char_data *ch, int mo
   for (i = list; i; i = i->next_content) {
     if (i->description == NULL)
       continue;
-    if (str_cmp(i->description, "undefined") == 0)
+    if (strcasecmp(i->description, "undefined") == 0)
       continue;
     num = 0;
     d = i;
     if (CONFIG_STACK_OBJS) {
       for (j = list; j != i; j = j->next_content)
-       if ((!str_cmp(j->short_description, i->short_description) && !str_cmp(j->description, i->description)) &&       
+       if ((!strcasecmp(j->short_description, i->short_description) && !strcasecmp(j->description, i->description)) &&
             (j->item_number == i->item_number) && ((OBJ_FLAGGED(j, ITEM_BROKEN) && OBJ_FLAGGED(i, ITEM_BROKEN)) || (!OBJ_FLAGGED(j, ITEM_BROKEN) && !OBJ_FLAGGED(i, ITEM_BROKEN))))
          if ((!SITTING(j) && !SITTING(i)))
           if (GET_OBJ_VAL(j, 6) == GET_OBJ_VAL(i, 6))
@@ -2769,7 +2788,7 @@ static void list_obj_to_char(struct obj_data *list, struct char_data *ch, int mo
       if (j!=i)
         continue;
       for (d = j = i; j; j = j->next_content)
-       if ((!str_cmp(j->short_description, i->short_description) && !str_cmp(j->description, i->description)) &&
+       if ((!strcasecmp(j->short_description, i->short_description) && !strcasecmp(j->description, i->description)) &&
             (j->item_number == i->item_number) && ((OBJ_FLAGGED(j, ITEM_BROKEN) && OBJ_FLAGGED(i, ITEM_BROKEN)) || (!OBJ_FLAGGED(j, ITEM_BROKEN) && !OBJ_FLAGGED(i, ITEM_BROKEN))))
          if ((!SITTING(j) && !SITTING(i)))
           if (GET_OBJ_POSTTYPE(j) == 0 && GET_OBJ_POSTTYPE(i) == 0)
@@ -2846,9 +2865,9 @@ static void diag_char_to_char(struct char_data *i, struct char_data *ch)
   };
   int percent, ar_index;
 
-  cl_sint64 hit = GET_HIT(i), max = gear_pl(i);
+  int64_t hit = GET_HIT(i), max = gear_pl(i);
  
-  cl_sint64 total = 0;
+  int64_t total = 0;
    if (GET_SUPPRESS(i) > 0) {
     total = max - GET_SUPP(i);
    }
@@ -3838,12 +3857,12 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
              log("ERROR: %s found error direction NORTHWEST at room %d", GET_NAME(ch), GET_ROOM_VNUM(IN_ROOM(ch)));
              return;
             }
-            sprintf(argh, "%s ", str_cmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
+            sprintf(argh, "%s ", strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
             sprintf(dlist1+strlen(dlist1), "                    The %s%s %s %s %s%s.\r\n",
                 IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET) ?
                     "@rsecret@w " : "",
                 (W_EXIT(target_room, door)->keyword &&
-                 str_cmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
+                 strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
                     fname(W_EXIT(target_room, door)->keyword) : "opening",
                  strstr(argh, "s ") != NULL ? "are" : "is",
                 IS_SET(W_EXIT(target_room, door)->exit_info, EX_CLOSED) ?
@@ -3865,12 +3884,12 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
              return;
             }
             char argh[200];
-            sprintf(argh, "%s ", str_cmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
+            sprintf(argh, "%s ", strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
             sprintf(dlist2+strlen(dlist2), "                    The %s%s %s %s %s%s.\r\n",
                 IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET) ?
                     "@rsecret@w " : "",
                 (W_EXIT(target_room, door)->keyword &&
-                 str_cmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
+                 strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
                     fname(W_EXIT(target_room, door)->keyword) : "opening",
                 strstr(argh, "s ") != NULL ? "are" : "is",
                 IS_SET(W_EXIT(target_room, door)->exit_info, EX_CLOSED) ?
@@ -3892,12 +3911,12 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
              return;
             }
             char argh[100];
-            sprintf(argh, "%s ", str_cmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
+            sprintf(argh, "%s ", strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
             sprintf(dlist3+strlen(dlist3), "                    The %s%s %s %s %s%s.\r\n",
                 IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET) ?
                     "@rsecret@w " : "",
                 (W_EXIT(target_room, door)->keyword &&
-                 str_cmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
+                 strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
                     fname(W_EXIT(target_room, door)->keyword) : "opening",
                  strstr(argh, "s ") != NULL ? "are" : "is",
                 IS_SET(W_EXIT(target_room, door)->exit_info, EX_CLOSED) ?
@@ -3919,12 +3938,12 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
              return;
             }
             char argh[100];
-            sprintf(argh, "%s ", str_cmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
+            sprintf(argh, "%s ", strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
             sprintf(dlist4+strlen(dlist4), "                    The %s%s %s %s %s%s.\r\n",
                 IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET) ?
                     "@rsecret@w " : "",
                 (W_EXIT(target_room, door)->keyword &&
-                 str_cmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
+                 strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
                     fname(W_EXIT(target_room, door)->keyword) : "opening",
                 strstr(argh, "s ") != NULL ? "are" : "is",
                 IS_SET(W_EXIT(target_room, door)->exit_info, EX_CLOSED) ?
@@ -3946,12 +3965,12 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
              return;
             }
             char argh[100];
-            sprintf(argh, "%s ", str_cmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
+            sprintf(argh, "%s ", strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
             sprintf(dlist5+strlen(dlist5), "                    The %s%s %s %s %s%s.\r\n",
                 IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET) ?
                     "@rsecret@w " : "",
                 (W_EXIT(target_room, door)->keyword &&
-                 str_cmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
+                 strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
                     fname(W_EXIT(target_room, door)->keyword) : "opening",
                   strstr(argh, "s ") != NULL ? "are" : "is",
                 IS_SET(W_EXIT(target_room, door)->exit_info, EX_CLOSED) ?
@@ -3973,12 +3992,12 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
              return;
             }
             char argh[100];
-            sprintf(argh, "%s ", str_cmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
+            sprintf(argh, "%s ", strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
             sprintf(dlist6+strlen(dlist6), "                    The %s%s %s %s %s%s.\r\n",
                 IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET) ?
                     "@rsecret@w " : "",
                 (W_EXIT(target_room, door)->keyword &&
-                 str_cmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
+                 strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
                     fname(W_EXIT(target_room, door)->keyword) : "opening",
                  strstr(argh, "s ") != NULL ? "are" : "is",
                 IS_SET(W_EXIT(target_room, door)->exit_info, EX_CLOSED) ?
@@ -4000,12 +4019,12 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
              return;
             }
             char argh[100];
-            sprintf(argh, "%s ", str_cmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
+            sprintf(argh, "%s ", strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
             sprintf(dlist7+strlen(dlist7), "                    The %s%s %s %s %s%s.\r\n",
                 IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET) ?
                     "@rsecret@w " : "",
                 (W_EXIT(target_room, door)->keyword &&
-                 str_cmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
+                 strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
                     fname(W_EXIT(target_room, door)->keyword) : "opening",
                 strstr(argh, "s ") != NULL ? "are" : "is",
                 IS_SET(W_EXIT(target_room, door)->exit_info, EX_CLOSED) ?
@@ -4027,12 +4046,12 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
              return;
             }
             char argh[100];
-            sprintf(argh, "%s ", str_cmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
+            sprintf(argh, "%s ", strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
             sprintf(dlist8+strlen(dlist8), "                    The %s%s %s %s %s%s.\r\n",
                 IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET) ?
                     "@rsecret@w " : "",
                 (W_EXIT(target_room, door)->keyword &&
-                 str_cmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
+                 strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
                     fname(W_EXIT(target_room, door)->keyword) : "opening",
                 strstr(argh, "s ") != NULL ? "are" : "is",
                 IS_SET(W_EXIT(target_room, door)->exit_info, EX_CLOSED) ?
@@ -4054,12 +4073,12 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
              return;
             }
             char argh[100];
-            sprintf(argh, "%s ", str_cmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
+            sprintf(argh, "%s ", strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
             sprintf(dlist9+strlen(dlist9), "                    The %s%s %s %s %s%s.\r\n",
                 IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET) ?
                     "@rsecret@w " : "",
                 (W_EXIT(target_room, door)->keyword &&
-                 str_cmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
+                 strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
                     fname(W_EXIT(target_room, door)->keyword) : "opening",
                  strstr(argh, "s ") != NULL ? "are" : "is",
                 IS_SET(W_EXIT(target_room, door)->exit_info, EX_CLOSED) ?
@@ -4081,12 +4100,12 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
              return;
             }
             char argh[100];
-            sprintf(argh, "%s ", str_cmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
+            sprintf(argh, "%s ", strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
             sprintf(dlist10+strlen(dlist10), "                    The %s%s %s %s %s%s.\r\n",
                 IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET) ?
                     "@rsecret@w " : "",
                 (W_EXIT(target_room, door)->keyword &&
-                 str_cmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
+                 strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
                     fname(W_EXIT(target_room, door)->keyword) : "opening",
                  strstr(argh, "s ") != NULL ? "are" : "is",
                 IS_SET(W_EXIT(target_room, door)->exit_info, EX_CLOSED) ?
@@ -4108,12 +4127,12 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
              return;
             }
             char argh[100];
-            sprintf(argh, "%s ", str_cmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
+            sprintf(argh, "%s ", strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
             sprintf(dlist11+strlen(dlist11), "                    The %s%s %s %s %s%s.\r\n",
                 IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET) ?
                     "@rsecret@w " : "",
                 (W_EXIT(target_room, door)->keyword &&
-                 str_cmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
+                 strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
                     fname(W_EXIT(target_room, door)->keyword) : "opening",
                  strstr(argh, "s ") != NULL ? "are" : "is",
                 IS_SET(W_EXIT(target_room, door)->exit_info, EX_CLOSED) ?
@@ -4135,12 +4154,12 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
              return;
             }
             char argh[100];
-            sprintf(argh, "%s ", str_cmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
+            sprintf(argh, "%s ", strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
             sprintf(dlist12+strlen(dlist12), "                    The %s%s %s %s %s%s.\r\n",
                 IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET) ?
                     "@rsecret@w " : "",
                 (W_EXIT(target_room, door)->keyword &&
-                 str_cmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
+                 strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
                     fname(W_EXIT(target_room, door)->keyword) : "opening",
                  strstr(argh, "s ") != NULL ? "are" : "is",
                 IS_SET(W_EXIT(target_room, door)->exit_info, EX_CLOSED) ?
@@ -5199,7 +5218,7 @@ ACMD(do_rptrans)
       continue;
      if (STATE(k) != CON_PLAYING)
       continue;
-     if (!str_cmp(k->user, arg))
+     if (!strcasecmp(k->user, arg))
       vict = k->character;
     }
     if (vict == NULL) {
@@ -5293,7 +5312,7 @@ ACMD(do_rbanktrans)
       continue;
      if (STATE(k) != CON_PLAYING)
       continue;
-     if (!str_cmp(k->user, arg))
+     if (!strcasecmp(k->user, arg))
       vict = k->character;
     }
     if (vict == NULL) {
@@ -6456,91 +6475,91 @@ ACMD(do_status)
   if (ch->affected) {
    int lasttype = 0;
    for (aff = ch->affected; aff; aff = aff->next) {
-    if (!str_cmp(skill_name(aff->type), "runic") && aff->type != lasttype) {
+    if (!strcasecmp(skill_name(aff->type), "runic") && aff->type != lasttype) {
      lasttype = aff->type;
      send_to_char(ch, "Your Kenaz rune is still in effect! (%2d Mud Hours)\r\n", aff->duration + 1);
     }
-    if (!str_cmp(skill_name(aff->type), "punch") && aff->type != lasttype) {
+    if (!strcasecmp(skill_name(aff->type), "punch") && aff->type != lasttype) {
      lasttype = aff->type;
      send_to_char(ch, "Your Algiz rune is still in effect! (%2d Mud Hours)\r\n", aff->duration + 1);
     }
-    if (!str_cmp(skill_name(aff->type), "knee") && aff->type != lasttype) {
+    if (!strcasecmp(skill_name(aff->type), "knee") && aff->type != lasttype) {
      lasttype = aff->type;
      send_to_char(ch, "Your Oagaz rune is still in effect! (%2d Mud Hours)\r\n", aff->duration + 1);
     }
-    if (!str_cmp(skill_name(aff->type), "slam") && aff->type != lasttype) {
+    if (!strcasecmp(skill_name(aff->type), "slam") && aff->type != lasttype) {
      lasttype = aff->type;
      send_to_char(ch, "Your Wunjo rune is still in effect! (%2d Mud Hours)\r\n", aff->duration + 1);
     }
-    if (!str_cmp(skill_name(aff->type), "heeldrop") && aff->type != lasttype) {
+    if (!strcasecmp(skill_name(aff->type), "heeldrop") && aff->type != lasttype) {
      lasttype = aff->type;
      send_to_char(ch, "Your Purisaz rune is still in effect! (%2d Mud Hours)\r\n", aff->duration + 1);
     }
-    if (!str_cmp(skill_name(aff->type), "special beam cannon") && aff->type != lasttype) {
+    if (!strcasecmp(skill_name(aff->type), "special beam cannon") && aff->type != lasttype) {
      lasttype = aff->type;
      send_to_char(ch, "Your Laguz rune is still in effect! (%2d Mud Hours)\r\n", aff->duration + 1);
     }
-    if (!str_cmp(skill_name(aff->type), "might") && aff->type != lasttype) {
+    if (!strcasecmp(skill_name(aff->type), "might") && aff->type != lasttype) {
      lasttype = aff->type;
      send_to_char(ch, "Your muscles are pumped! (%2d Mud Hours)\r\n", aff->duration + 1);
     }
-    if (!str_cmp(skill_name(aff->type), "flex") && aff->type != lasttype) {
+    if (!strcasecmp(skill_name(aff->type), "flex") && aff->type != lasttype) {
      lasttype = aff->type;
      send_to_char(ch, "You are more agile right now! (%2d Mud Hours)\r\n", aff->duration + 1);
     }
-    if (!str_cmp(skill_name(aff->type), "bless") && aff->type != lasttype) {
+    if (!strcasecmp(skill_name(aff->type), "bless") && aff->type != lasttype) {
      lasttype = aff->type;
      send_to_char(ch, "You have been blessed! (%2d Mud Hours)\r\n", aff->duration + 1);
     }
-    if (!str_cmp(skill_name(aff->type), "curse") && aff->type != lasttype) {
+    if (!strcasecmp(skill_name(aff->type), "curse") && aff->type != lasttype) {
      lasttype = aff->type;
      send_to_char(ch, "You have been cursed! (%2d Mud Hours)\r\n", aff->duration + 1);
     }
-    if (!str_cmp(skill_name(aff->type), "healing glow") && aff->type != lasttype) {
+    if (!strcasecmp(skill_name(aff->type), "healing glow") && aff->type != lasttype) {
      lasttype = aff->type;
      send_to_char(ch, "You have a healing glow enveloping your body! (%2d Mud Hours)\r\n", aff->duration + 1);
     }
-    if (!str_cmp(skill_name(aff->type), "genius") && aff->type != lasttype) {
+    if (!strcasecmp(skill_name(aff->type), "genius") && aff->type != lasttype) {
      lasttype = aff->type;
      send_to_char(ch, "You are smarter right now! (%2d Mud Hours)\r\n", aff->duration + 1);
     }
-    if (!str_cmp(skill_name(aff->type), "enlighten") && aff->type != lasttype) {
+    if (!strcasecmp(skill_name(aff->type), "enlighten") && aff->type != lasttype) {
      lasttype = aff->type;
      send_to_char(ch, "You are wiser right now! (%2d Mud Hours)\r\n", aff->duration + 1);
     }
-    if (!str_cmp(skill_name(aff->type), "yoikominminken") && aff->type != lasttype) {
+    if (!strcasecmp(skill_name(aff->type), "yoikominminken") && aff->type != lasttype) {
      lasttype = aff->type;
      send_to_char(ch, "You have been lulled to sleep! (%2d Mud Hours)\r\n", aff->duration + 1);
     }
-    if (!str_cmp(skill_name(aff->type), "solar flare") && aff->type != lasttype) {
+    if (!strcasecmp(skill_name(aff->type), "solar flare") && aff->type != lasttype) {
      lasttype = aff->type;
      send_to_char(ch, "You have been blinded! (%2d Mud Hours)\r\n", aff->duration + 1);
     }
-    if (!str_cmp(skill_name(aff->type), "spirit control") && aff->type != lasttype) {
+    if (!strcasecmp(skill_name(aff->type), "spirit control") && aff->type != lasttype) {
      lasttype = aff->type;
      send_to_char(ch, "You have full control of your spirit! (%2d Mud Hours)\r\n", aff->duration + 1);
     }
-    if (!str_cmp(skill_name(aff->type), "!UNUSED!") && aff->type != lasttype) {
+    if (!strcasecmp(skill_name(aff->type), "!UNUSED!") && aff->type != lasttype) {
      lasttype = aff->type;
      send_to_char(ch, "You feel poison burning through your blood! (%2d Mud Hours)\r\n", aff->duration + 1);
     }
-    if (!str_cmp(skill_name(aff->type), "tough skin") && aff->type != lasttype) {
+    if (!strcasecmp(skill_name(aff->type), "tough skin") && aff->type != lasttype) {
      lasttype = aff->type;
      send_to_char(ch, "You have toughened skin right now! (%2d Mud Hours)\r\n", aff->duration + 1);
     }
-    if (!str_cmp(skill_name(aff->type), "poison") && aff->type != lasttype) {
+    if (!strcasecmp(skill_name(aff->type), "poison") && aff->type != lasttype) {
      lasttype = aff->type;
      send_to_char(ch, "You have been poisoned! (%2d Mud Hours)\r\n", aff->duration + 1);
     }
-    if (!str_cmp(skill_name(aff->type), "warp pool") && aff->type != lasttype) {
+    if (!strcasecmp(skill_name(aff->type), "warp pool") && aff->type != lasttype) {
      lasttype = aff->type;
      send_to_char(ch, "Weakened State! (%2d Mud Hours)\r\n", aff->duration + 1);
     }
-    if (!str_cmp(skill_name(aff->type), "dark metamorphosis") && aff->type != lasttype) {
+    if (!strcasecmp(skill_name(aff->type), "dark metamorphosis") && aff->type != lasttype) {
      lasttype = aff->type;
      send_to_char(ch, "Your Dark Metamorphosis is still in effect. (%2d Mud Hours)\r\n", aff->duration + 1);
     }
-    if (!str_cmp(skill_name(aff->type), "hayasa") && aff->type != lasttype) {
+    if (!strcasecmp(skill_name(aff->type), "hayasa") && aff->type != lasttype) {
      lasttype = aff->type;
      send_to_char(ch, "Your body has been infused to move faster! (%2d Mud Hours)\r\n", aff->duration + 1);
     }
@@ -6611,7 +6630,7 @@ ACMD(do_status)
     send_to_char(ch, "Aura Light is active.\r\n");
   send_to_char(ch, "@D<@b--------------------------------------------------------------@D>@n\r\n");
   send_to_char(ch, "To view your bonus/negative traits enter: status traits\r\n");
- } else if (!str_cmp(arg, "traits")) {
+ } else if (!strcasecmp(arg, "traits")) {
   bonus_status(ch);
  } else {
   send_to_char(ch, "The only argument status takes is 'traits'. If you just want your status do not use an argument.\r\n");
@@ -6864,14 +6883,14 @@ int search_help(const char *argument, int level)
   while (bot <= top) {
     mid = (bot + top) / 2;
 
-    if (!(chk = strn_cmp(argument, help_table[mid].keywords, minlen)))  {
-      while ((mid > 0) && !strn_cmp(argument, help_table[mid - 1].keywords, minlen))
+    if (!(chk = strncasecmp(argument, help_table[mid].keywords, minlen)))  {
+      while ((mid > 0) && !strncasecmp(argument, help_table[mid - 1].keywords, minlen))
         mid--;
 
       while (level < help_table[mid].min_level && mid < (bot + top) / 2)
         mid++;
 
-      if (strn_cmp(argument, help_table[mid].keywords, minlen))
+      if (strncasecmp(argument, help_table[mid].keywords, minlen))
         break;
 
       return mid;
@@ -6996,7 +7015,7 @@ ACMD(do_who)
       line_color = "@w";
 
     if (CAN_SEE(ch, tch) && IS_PLAYING(d)) {
-    if (*name_search && str_cmp(GET_NAME(tch), name_search) &&
+    if (*name_search && strcasecmp(GET_NAME(tch), name_search) &&
 	!strstr(GET_TITLE(tch), name_search))
       continue;
     if (!CAN_SEE(ch, tch) || GET_LEVEL(tch) < low || GET_LEVEL(tch) > high)
@@ -7044,7 +7063,7 @@ ACMD(do_who)
         continue;
       if (!IS_PLAYING(d))
         continue;
-      if (*name_search && str_cmp(GET_NAME(tch), name_search) &&
+      if (*name_search && strcasecmp(GET_NAME(tch), name_search) &&
           !strstr(GET_TITLE(tch), name_search))
        continue;
       if (!CAN_SEE(ch, tch) || GET_LEVEL(tch) < low || GET_LEVEL(tch) > high)
@@ -7250,7 +7269,7 @@ ACMD(do_users)
 
       if (*host_search && !strstr(d->host, host_search))
 	continue;
-      if (*name_search && str_cmp(GET_NAME(tch), name_search))
+      if (*name_search && strcasecmp(GET_NAME(tch), name_search))
 	continue;
       if (!CAN_SEE(ch, tch) || GET_LEVEL(tch) < low || GET_LEVEL(tch) > high)
 	continue;
@@ -7548,7 +7567,7 @@ ACMD(do_levels)
     if (i == 100)
       nlen = snprintf(buf + len, sizeof(buf) - len, "[100] %8s          : \r\n", add_commas(level_exp(ch, 100)));
     else
-    nlen = snprintf(buf + len, sizeof(buf) - len, "[%2"SZT"] %8s-%-8s : \r\n", i,
+    nlen = snprintf(buf + len, sizeof(buf) - len, "[%2" SZT "] %8s-%-8s : \r\n", i,
 		add_commas(level_exp(ch, i)), add_commas(level_exp(ch, i + 1) - 1));
     if (len + nlen >= sizeof(buf) || nlen < 0)
       break;
@@ -8287,7 +8306,7 @@ ACMD(do_toplist)
 
   FILE *file;
   char fname[40], filler[50], line[256];
-  cl_sint64 points[25] = {0}, stats;
+  int64_t points[25] = {0}, stats;
   char *title[25] = {""};
   int count = 0, x = 0;
 

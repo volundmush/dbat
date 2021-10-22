@@ -9,7 +9,13 @@
 ************************************************************************ */
 
 #include "weather.h"
-
+#include "utils.h"
+#include "comm.h"
+#include "interpreter.h"
+#include "db.h"
+#include "dg_comm.h"
+#include "act.other.h"
+#include "config.h"
 
 static void another_hour(int mode);
 static void weather_change(void);

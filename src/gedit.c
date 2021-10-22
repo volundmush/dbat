@@ -7,33 +7,19 @@
  *  Copyright 1996 Harvey Gilpin.                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #include "gedit.h"
-
-
-
-/*-------------------------------------------------------------------*/
-/* external variables */
-extern struct guild_data *guild_index;
-extern int top_guild;
-
-extern zone_rnum real_zone_by_thing(room_vnum vznum);
-
-/*-------------------------------------------------------------------*/
-/*. Function prototypes . */
-
-void gedit_setup_new(struct descriptor_data *d);
-void gedit_setup_existing(struct descriptor_data *d, int rgm_num);
-void gedit_parse(struct descriptor_data *d, char *arg);
-void gedit_disp_menu(struct descriptor_data *d);
-void gedit_no_train_menu(struct descriptor_data *d);
-void gedit_save_internally(struct descriptor_data *d);
-void gedit_save_to_disk(int num);
-void copy_guild(struct guild_data *tgm, struct guild_data *fgm);
-void free_guild_strings(struct guild_data *guild);
-void free_guild(struct guild_data *guild);
-void gedit_modify_string(char **str, char *new);
-
-/*. External . */
-SPECIAL(guild);
+#include "genzon.h"
+#include "act.informative.h"
+#include "oasis.h"
+#include "gengld.h"
+#include "utils.h"
+#include "comm.h"
+#include "handler.h"
+#include "races.h"
+#include "interpreter.h"
+#include "spells.h"
+#include "feats.h"
+#include "genolc.h"
+#include "shop.h"
 
 /*
  * Should check more things.
@@ -72,7 +58,7 @@ ACMD(do_oasis_gedit)
     send_to_char(ch, "Specify a guild VNUM to edit.\r\n");
     return;
   } else if (!isdigit(*buf1)) {
-    if (str_cmp("save", buf1) != 0) {
+    if (strcasecmp("save", buf1) != 0) {
       send_to_char(ch, "Yikes!  Stop that, someone will get hurt!\r\n");
       return;
     }

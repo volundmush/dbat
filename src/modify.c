@@ -9,6 +9,21 @@
 ************************************************************************ */
 
 #include "modify.h"
+#include "utils.h"
+#include "interpreter.h"
+#include "handler.h"
+#include "db.h"
+#include "comm.h"
+#include "spells.h"
+#include "mail.h"
+#include "boards.h"
+#include "improved-edit.h"
+#include "oasis.h"
+#include "tedit.h"
+#include "shop.h"
+#include "guild.h"
+#include "spell_parser.h"
+#include "dg_olc.h"
 
 /* local functions */
 

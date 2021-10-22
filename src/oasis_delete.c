@@ -19,13 +19,7 @@
 
 #include "structs.h"
 #include "utils.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "db.h"
-#include "genolc.h"
 #include "oasis.h"
-#include "improved-edit.h"
 
 /* Internal Functions */
 int free_strings(void *data, int type);

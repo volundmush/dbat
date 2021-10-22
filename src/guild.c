@@ -8,32 +8,27 @@
  ************************************************************************ */
 
 #include "guild.h"
-
-
-
-
-/* extern variables */
-extern int cmd_say, cmd_tell;
-void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, char *name);
-
-/* extern function prototypes */
-ACMD(do_tell);
-ACMD(do_say);
-int level_exp(struct char_data *ch, int level);
-void gain_level(struct char_data *ch, int whichclass);
-int feat_is_available(struct char_data *ch, int featnum, int iarg, char *sarg);
-
-
+#include "utils.h"
+#include "spells.h"
+#include "comm.h"
+#include "db.h"
+#include "interpreter.h"
+#include "gengld.h"
+#include "local_limits.h"
+#include "feats.h"
+#include "act.comm.h"
+#include "handler.h"
+#include "shop.h"
+#include "class.h"
+#include "constants.h"
 
 /* Local variables */
-struct guild_data *guild_index;
 int spell_sort_info[SKILL_TABLE_SIZE + 1];
 int top_guild = -1;
+struct guild_data *guild_index;
+
 char *guild_customer_string(int guild_nr, int detailed);
-int rpp_to_level(struct char_data *ch);
-int slot_count(struct char_data *ch);
 int calculate_skill_cost(struct char_data *ch, int skill);
-void handle_ingest_learn(struct char_data *ch, struct char_data *vict);
 
 int calculate_skill_cost(struct char_data *ch, int skill)
 {
@@ -1237,7 +1232,7 @@ void handle_exp(struct char_data *keeper, int guild_nr, struct char_data *ch, ch
     return;
  }
  else {
-  cl_sint64 amt = level_exp(ch, GET_LEVEL(ch) + 1) / 100;
+  int64_t amt = level_exp(ch, GET_LEVEL(ch) + 1) / 100;
   if (GET_LEVEL(ch) == 100) {
    amt = 400000;
   }

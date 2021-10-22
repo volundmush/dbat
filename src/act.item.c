@@ -7,8 +7,27 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include "act.h"
-
+#include "act.item.h"
+#include "vehicles.h"
+#include "dg_comm.h"
+#include "act.wizard.h"
+#include "act.other.h"
+#include "act.comm.h"
+#include "act.informative.h"
+#include "config.h"
+#include "assemblies.h"
+#include "utils.h"
+#include "comm.h"
+#include "interpreter.h"
+#include "spells.h"
+#include "handler.h"
+#include "class.h"
+#include "feats.h"
+#include "guild.h"
+#include "constants.h"
+#include "genzon.h"
+#include "dg_scripts.h"
+#include "boards.h"
 
 /* global variables */
 struct obj_data *obj_selling = NULL;	/* current object for sale */
@@ -42,8 +61,8 @@ static void get_check_money(struct char_data *ch, struct obj_data *obj);
 static void get_from_room(struct char_data *ch, char *arg, int howmany);
 static void perform_give_gold(struct char_data *ch, struct char_data *vict, int amount);
 static void perform_give(struct char_data *ch, struct char_data *vict, struct obj_data *obj);
-static int perform_drop(struct char_data *ch, struct obj_data *obj, byte mode, const char *sname, room_rnum RDR);
-static void perform_drop_gold(struct char_data *ch, int amount, byte mode, room_rnum RDR);
+static int perform_drop(struct char_data *ch, struct obj_data *obj, int8_t mode, const char *sname, room_rnum RDR);
+static void perform_drop_gold(struct char_data *ch, int amount, int8_t mode, room_rnum RDR);
 static struct char_data *give_find_vict(struct char_data *ch, char *arg);
 static void perform_put(struct char_data *ch, struct obj_data *obj, struct obj_data *cont);
 static void get_from_container(struct char_data *ch, struct obj_data *cont, char *arg, int mode, int howmany);
@@ -350,7 +369,7 @@ ACMD(do_garden)
  }
 
  if (*arg) {
-  if (!str_cmp(arg, "collect")) {
+  if (!strcasecmp(arg, "collect")) {
    struct obj_data *obj2, *shovel = NULL, *next_obj;
    int found = FALSE;
 
@@ -408,7 +427,7 @@ ACMD(do_garden)
   return;
  }
 
- if (!str_cmp(arg2, "plant")) {
+ if (!strcasecmp(arg2, "plant")) {
   if (!(obj = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
    send_to_char(ch, "What are you trying to plant?\r\n");
    send_to_char(ch, "Syntax: garden (plant in inventory) plant\r\n");
@@ -426,14 +445,14 @@ ACMD(do_garden)
   return;
  }
 
- cl_sint64 cost = (GET_MAX_MOVE(ch) * 0.005) + rand_number(50, 150);
+ int64_t cost = (GET_MAX_MOVE(ch) * 0.005) + rand_number(50, 150);
  int skill = GET_SKILL(ch, SKILL_GARDENING);
  
  if (GET_MOVE(ch) < cost) {
   send_to_char(ch, "@WYou need at least @G%s@W stamina to garden.\r\n", add_commas(cost));
   return;
  } else {
-  if (!str_cmp(arg2, "water")) {
+  if (!strcasecmp(arg2, "water")) {
    struct obj_data *obj2, *water = NULL, *next_obj;
    int found = FALSE;
 
@@ -480,7 +499,7 @@ ACMD(do_garden)
     improve_skill(ch, SKILL_GARDENING, 0);
     return;
    }
-  } else if (!str_cmp(arg2, "harvest")) {
+  } else if (!strcasecmp(arg2, "harvest")) {
    struct obj_data *obj2, *clippers = NULL, *next_obj;
    int found = FALSE;
 
@@ -525,7 +544,7 @@ ACMD(do_garden)
     improve_skill(ch, SKILL_GARDENING, 0);
     return;
    }
-  } else if (!str_cmp(arg2, "dig")) {
+  } else if (!strcasecmp(arg2, "dig")) {
    struct obj_data *obj2, *shovel = NULL, *next_obj;
    int found = FALSE;
 
@@ -550,7 +569,7 @@ ACMD(do_garden)
     improve_skill(ch, SKILL_GARDENING, 0);
     return;
    }
-  } else if (!str_cmp(arg2, "plant")) {
+  } else if (!strcasecmp(arg2, "plant")) {
    struct obj_data *obj2, *shovel, *next_obj;
    int found = FALSE;
 
@@ -629,7 +648,7 @@ ACMD(do_garden)
     WAIT_STATE(ch, PULSE_3SEC);
     improve_skill(ch, SKILL_GARDENING, 0);
    }
-  } else if (!str_cmp(arg2, "pick")) {
+  } else if (!strcasecmp(arg2, "pick")) {
    if (!OBJ_FLAGGED(obj, ITEM_MATURE)) {
     send_to_char(ch, "You can't pick that type of plant. Syntax: garden (plant) harvest\r\n");
     return;
@@ -716,7 +735,7 @@ ACMD(do_pack)
    if (!*arg2) {
     send_to_char(ch, "This will sell off your house and delete everything inside. Are you sure? If you are then enter the command again with a yes at the end.\nSyntax: pack (house) yes\r\n");
     return;
-   } else if (str_cmp(arg2, "yes")) {
+   } else if (strcasecmp(arg2, "yes")) {
     send_to_char(ch, "This will sell off your house and delete everything inside. Are you sure? If you are then enter the command again with a yes at the end.\nSyntax: pack (house) yes\r\n");
     return;
    } else if (has_housekey(ch, obj) == 0) {
@@ -1696,7 +1715,7 @@ ACMD(do_bid)
   masterList = list;
   list = 0;
 
-  if (!str_cmp(arg, "list")) {
+  if (!strcasecmp(arg, "list")) {
     send_to_char(ch, "@Y                                   Auction@n\r\n");
     send_to_char(ch, "@c------------------------------------------------------------------------------@n\r\n");
    for (obj = world[auct_room].contents; obj; obj = next_obj) {
@@ -1722,7 +1741,7 @@ ACMD(do_bid)
     send_to_char(ch, "No items are currently being auctioned.\r\n");
    }
     send_to_char(ch, "@c------------------------------------------------------------------------------@n\r\n");
-  } else if (!str_cmp(arg, "appraise")) {
+  } else if (!strcasecmp(arg, "appraise")) {
    if (!*arg2) {
     send_to_char(ch, "Syntax: bid [ list | # ] (amt)\r\nOr...\r\nSyntax: bid appraise (list number)\r\n");
     send_to_char(ch, "What item number did you want to appraise?\r\n");
@@ -2057,7 +2076,7 @@ ACMD(do_assemble)
   } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE)) {
     send_to_char(ch, "You can't do that in space.");
     return;
-  } else if (!GET_SKILL(ch, SKILL_SURVIVAL) && !str_cmp(argument, "campfire")) {
+  } else if (!GET_SKILL(ch, SKILL_SURVIVAL) && !strcasecmp(argument, "campfire")) {
     send_to_char(ch, "You know nothing about building campfires.\r\n");
     return;
   }
@@ -2074,7 +2093,7 @@ ACMD(do_assemble)
    roll = 20;
   }
 
-  if (str_cmp(argument, "campfire")) {
+  if (strcasecmp(argument, "campfire")) {
    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE) || SECT(IN_ROOM(ch)) == SECT_WATER_NOSWIM || SUNKEN(IN_ROOM(ch))) {
     send_to_char(ch, "This area will not allow a fire to burn properly.\r\n");
     return;
@@ -2227,7 +2246,7 @@ ACMD(do_assemble)
 
   if (IS_TRUFFLE(ch) && rand_number(1, 5) >= 4 && GET_OBJ_COST(pObject) >= 500) {
    if (GET_LEVEL(ch) < 100 && level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0) {
-    cl_sint64 gain = level_exp(ch, GET_LEVEL(ch) + 1) * 0.011;
+    int64_t gain = level_exp(ch, GET_LEVEL(ch) + 1) * 0.011;
     send_to_char(ch, "@RExp Bonus@D: @G%s@n\r\n", add_commas(gain));
     gain_exp(ch, gain);
    } else {
@@ -2741,7 +2760,7 @@ ACMD(do_get)
 }
 
 static void perform_drop_gold(struct char_data *ch, int amount,
-		            byte mode, room_rnum RDR)
+		            int8_t mode, room_rnum RDR)
 {
   struct obj_data *obj;
 
@@ -2802,7 +2821,7 @@ static void perform_drop_gold(struct char_data *ch, int amount,
 		      "  It vanishes in a puff of smoke!" : "")
 
 static int perform_drop(struct char_data *ch, struct obj_data *obj,
-		     byte mode, const char *sname, room_rnum RDR)
+		     int8_t mode, const char *sname, room_rnum RDR)
 {
   char buf[MAX_STRING_LENGTH];
   int value;
@@ -2920,7 +2939,7 @@ ACMD(do_drop)
   char arg[MAX_INPUT_LENGTH];
   struct obj_data *obj, *next_obj;
   room_rnum RDR = 0;
-  byte mode = SCMD_DROP;
+  int8_t mode = SCMD_DROP;
   int dotmode, amount = 0, multi, num_don_rooms;
   const char *sname;
 
@@ -2976,7 +2995,7 @@ ACMD(do_drop)
   } else if (is_number(arg)) {
     multi = atoi(arg);
     one_argument(argument, arg);
-    if (!str_cmp("zenni", arg) || !str_cmp("gold", arg))
+    if (!strcasecmp("zenni", arg) || !strcasecmp("gold", arg))
       perform_drop_gold(ch, multi, mode, RDR);
     else if (multi <= 0)
       send_to_char(ch, "Yeah, that makes sense.\r\n");
@@ -3206,7 +3225,7 @@ ACMD(do_give)
   else if (is_number(arg)) {
     amount = atoi(arg);
     argument = one_argument(argument, arg);
-    if (!str_cmp("zenni", arg) || !str_cmp("gold", arg)) {
+    if (!strcasecmp("zenni", arg) || !strcasecmp("gold", arg)) {
       one_argument(argument, arg);
       if ((vict = give_find_vict(ch, arg)) != NULL) {
 	perform_give_gold(ch, vict, amount);
@@ -3329,7 +3348,7 @@ void name_from_drinkcon(struct obj_data *obj)
     else
       cpylen = strlen(cur_name);
 
-    if (!strn_cmp(cur_name, liqname, liqlen))
+    if (!strncasecmp(cur_name, liqname, liqlen))
       continue;
 
     if (*new_name)
@@ -3687,7 +3706,7 @@ ACMD(do_eat)
     }
    }
    if (!GET_OBJ_VAL(food, VAL_FOOD_POISON) && GET_HIT(ch) < gear_pl(ch) && subcmd != SCMD_TASTE) {
-    cl_sint64 suppress = (gear_pl(ch) * 0.01) * GET_SUPPRESS(ch);
+    int64_t suppress = (gear_pl(ch) * 0.01) * GET_SUPPRESS(ch);
     if (GET_WEIGHT(food) < 6) {
      GET_HIT(ch) += gear_pl(ch) * 0.05;
     } else {
@@ -4110,7 +4129,7 @@ ACMD(do_pour)
       send_to_char(ch, "Where do you want it?  Out or in what?\r\n");
       return;
     }
-    if (!str_cmp(arg2, "out")) {
+    if (!strcasecmp(arg2, "out")) {
       if (GET_OBJ_VAL(from_obj, VAL_DRINKCON_CAPACITY) > 0)
       {
       act("$n empties $p.", TRUE, ch, from_obj, 0, TO_ROOM);
@@ -4621,7 +4640,7 @@ void perform_remove(struct char_data *ch, int pos)
 {
   struct obj_data *obj;
 
-    cl_sint64 previous = GET_HIT(ch);
+    int64_t previous = GET_HIT(ch);
 
   if (!(obj = GET_EQ(ch, pos)))
     log("SYSERR: perform_remove: bad pos %d passed.", pos);
@@ -4828,9 +4847,9 @@ const int max_carry_load[] = {
 };
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-cl_sint64 max_carry_weight(struct char_data *ch)
+int64_t max_carry_weight(struct char_data *ch)
 {
-  cl_sint64 abil;
+  int64_t abil;
   int total;
 /*  abil = MAX(0, MIN(100, GET_STR(ch)));
   total = 1;

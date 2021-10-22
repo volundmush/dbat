@@ -9,14 +9,24 @@
 ************************************************************************ */
 
 #include "players.h"
-
+#include "utils.h"
+#include "db.h"
+#include "handler.h"
+#include "pfdefaults.h"
+#include "feats.h"
+#include "dg_scripts.h"
+#include "comm.h"
+#include "genmob.h"
+#include "constants.h"
+#include "imc.h"
+#include "class.h"
+#include "config.h"
 
 #define LOAD_HIT	0
 #define LOAD_MANA	1
 #define LOAD_MOVE	2
 #define LOAD_KI		3
 #define LOAD_LIFE       4
-
 
 /* local functions */
 void build_player_index(void);
@@ -32,14 +42,6 @@ void load_BASE(struct char_data *ch, const char *line, int mode);
 void load_molt(struct char_data *ch, const char *line);
 void load_majin(struct char_data *ch, const char *line);
 
-
-/* external fuctions */
-extern void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, char *name);
-char *read_delete(long recipient, char **from);
-bitvector_t asciiflag_conv(char *flag);
-void save_char_vars(struct char_data *ch);
-time_t birth_age(struct char_data *ch);
-time_t max_age(struct char_data *ch);
 
 /* 'global' vars */
 struct player_index_element *player_table = NULL;	/* index to plr file	 */
@@ -240,7 +242,7 @@ long get_ptable_by_name(const char *name)
   int i;
 
   for (i = 0; i <= top_of_p_table; i++)
-    if (!str_cmp(player_table[i].name, name))
+    if (!strcasecmp(player_table[i].name, name))
       return (i);
 
   return (-1);
@@ -252,7 +254,7 @@ long get_id_by_name(const char *name)
   int i;
 
   for (i = 0; i <= top_of_p_table; i++)
-    if (!str_cmp(player_table[i].name, name))
+    if (!strcasecmp(player_table[i].name, name))
       return (player_table[i].id);
 
   return (-1);
@@ -1458,7 +1460,7 @@ void load_feats(FILE *fl, struct char_data *ch)
 
 void load_HMVS(struct char_data *ch, const char *line, int mode)
 {
-  cl_sint64 num = 0, num2 = 0;
+  int64_t num = 0, num2 = 0;
 
   sscanf(line, "%"I64T"/%"I64T"", &num, &num2);
 
@@ -1487,7 +1489,7 @@ void load_HMVS(struct char_data *ch, const char *line, int mode)
 
 void load_BASE(struct char_data *ch, const char *line, int mode)
 {
-  cl_sint64 num = 0;
+  int64_t num = 0;
 
   sscanf(line, "%"I64T"", &num);
 
@@ -1512,7 +1514,7 @@ void load_BASE(struct char_data *ch, const char *line, int mode)
 
 void load_majin(struct char_data *ch, const char *line)
 {
-  cl_sint64 num = 0;
+  int64_t num = 0;
 
   sscanf(line, "%"I64T"", &num);
   GET_MAJINIZED(ch) = num;
@@ -1521,7 +1523,7 @@ void load_majin(struct char_data *ch, const char *line)
 
 void load_molt(struct char_data *ch, const char *line)
 {
-  cl_sint64 num = 0;
+  int64_t num = 0;
 
   sscanf(line, "%"I64T"", &num);
   GET_MOLT_EXP(ch) = num;

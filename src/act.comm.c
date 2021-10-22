@@ -7,7 +7,20 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include "act.h"
+#include "act.comm.h"
+#include "dg_comm.h"
+#include "utils.h"
+#include "comm.h"
+#include "spells.h"
+#include "interpreter.h"
+#include "db.h"
+#include "config.h"
+#include "act.wizard.h"
+#include "act.informative.h"
+#include "handler.h"
+#include "dg_scripts.h"
+#include "boards.h"
+#include "improved-edit.h"
 
 /* local functions */
 static void perform_tell(struct char_data *ch, struct char_data *vict, char *arg);
@@ -889,11 +902,11 @@ ACMD(do_tell)
     continue;
    if (k->user == NULL)
     continue;
-   if (found == FALSE && !IS_NPC(ch) && (!str_cmp(k->user, buf) || strstr(k->user, buf))) {
+   if (found == FALSE && !IS_NPC(ch) && (!strcasecmp(k->user, buf) || strstr(k->user, buf))) {
     vict = k->character;
     found = TRUE;
    }
-   else if (!IS_NPC(ch) && found == FALSE && (!str_cmp(GET_NAME(k->character), buf) || strstr(GET_NAME(k->character), buf)) && GET_ADMLEVEL(k->character) > 0) {
+   else if (!IS_NPC(ch) && found == FALSE && (!strcasecmp(GET_NAME(k->character), buf) || strstr(GET_NAME(k->character), buf)) && GET_ADMLEVEL(k->character) > 0) {
     vict = k->character;
     found = TRUE;
    }
@@ -1272,7 +1285,7 @@ ACMD(do_page)
     char buf[MAX_STRING_LENGTH];
 
     snprintf(buf, sizeof(buf), "\007\007*$n* %s", buf2);
-    if (!str_cmp(arg, "all")) {
+    if (!strcasecmp(arg, "all")) {
       if (ADM_FLAGGED(ch, ADM_TELLALL)) {
 	for (d = descriptor_list; d; d = d->next)
 	  if (STATE(d) == CON_PLAYING && d->character)

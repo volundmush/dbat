@@ -7,7 +7,22 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include "act.h"
+#include "act.movement.h"
+#include "dg_comm.h"
+#include "vehicles.h"
+#include "oasis_copy.h"
+#include "handler.h"
+#include "utils.h"
+#include "comm.h"
+#include "interpreter.h"
+#include "fight.h"
+#include "spells.h"
+#include "oasis.h"
+#include "guild.h"
+#include "dg_scripts.h"
+#include "local_limits.h"
+#include "house.h"
+#include "constants.h"
 
 /* local functions */
 static void handle_fall(struct char_data *ch);
@@ -196,203 +211,203 @@ int land_location(struct char_data *ch, char *arg)
 {
 
  if (GET_ROOM_VNUM(IN_ROOM(ch)) == 50) { // Above Earth
-  if (!str_cmp(arg, "Nexus City")) {
+  if (!strcasecmp(arg, "Nexus City")) {
    return (300);
-  } else if (!str_cmp(arg, "South Ocean")) {
+  } else if (!strcasecmp(arg, "South Ocean")) {
    return (800);
-  } else if (!str_cmp(arg, "Nexus Field")) {
+  } else if (!strcasecmp(arg, "Nexus Field")) {
    return (1150);
-  } else if (!str_cmp(arg, "Cherry Blossom Mountain")) {
+  } else if (!strcasecmp(arg, "Cherry Blossom Mountain")) {
    return (1180);
-  } else if (!str_cmp(arg, "Sandy Desert")) {
+  } else if (!strcasecmp(arg, "Sandy Desert")) {
    return (1287);
-  } else if (!str_cmp(arg, "Northern Plains")) {
+  } else if (!strcasecmp(arg, "Northern Plains")) {
    return (1428);
-  } else if (!str_cmp(arg, "Korin's Tower")) {
+  } else if (!strcasecmp(arg, "Korin's Tower")) {
    return (1456);
-  } else if (!str_cmp(arg, "Kami's Lookout")) {
+  } else if (!strcasecmp(arg, "Kami's Lookout")) {
    return (1506);
-  } else if (!str_cmp(arg, "Shadow Forest")) {
+  } else if (!strcasecmp(arg, "Shadow Forest")) {
    return (1636);
-  } else if (!str_cmp(arg, "Decrepit Area")) {
+  } else if (!strcasecmp(arg, "Decrepit Area")) {
    return (1710);
-  } else if (!str_cmp(arg, "West City")) {
+  } else if (!strcasecmp(arg, "West City")) {
    return (19510);
-  } else if (!str_cmp(arg, "Hercule Beach")) {
+  } else if (!strcasecmp(arg, "Hercule Beach")) {
    return (2141);
-  } else if (!str_cmp(arg, "Satan City")) {
+  } else if (!strcasecmp(arg, "Satan City")) {
    return (13020);
   } else {
    send_to_char(ch, "You don't know where that made up place is, but decided to land anyway.");
    return (300);
   }
  } else if (GET_ROOM_VNUM(IN_ROOM(ch)) == 51) { // Above Frigid
-  if (!str_cmp(arg, "Ice Crown City")) {
+  if (!strcasecmp(arg, "Ice Crown City")) {
    return (4264);
-  } else if (!str_cmp(arg, "Ice Highway")) {
+  } else if (!strcasecmp(arg, "Ice Highway")) {
    return (4300);
-  } else if (!str_cmp(arg, "Topica Snowfield")) {
+  } else if (!strcasecmp(arg, "Topica Snowfield")) {
    return (4351);
-  } else if (!str_cmp(arg, "Glug's Volcano")) {
+  } else if (!strcasecmp(arg, "Glug's Volcano")) {
    return (4400);
-  } else if (!str_cmp(arg, "Platonic Sea")) {
+  } else if (!strcasecmp(arg, "Platonic Sea")) {
    return (4600);
-  } else if (!str_cmp(arg, "Slave City")) {
+  } else if (!strcasecmp(arg, "Slave City")) {
    return (4800);
-  } else if (!str_cmp(arg, "Acturian Woods")) {
+  } else if (!strcasecmp(arg, "Acturian Woods")) {
    return (5100);
-  } else if (!str_cmp(arg, "Desolate Demesne")) {
+  } else if (!strcasecmp(arg, "Desolate Demesne")) {
    return (5150);
-  } else if (!str_cmp(arg, "Chateau Ishran")) {
+  } else if (!strcasecmp(arg, "Chateau Ishran")) {
    return (5165);
-  } else if (!str_cmp(arg, "Wyrm Spine Mountain")) {
+  } else if (!strcasecmp(arg, "Wyrm Spine Mountain")) {
    return (5200);
-  } else if (!str_cmp(arg, "Cloud Ruler Temple")) {
+  } else if (!strcasecmp(arg, "Cloud Ruler Temple")) {
    return (5500);
-  } else if (!str_cmp(arg, "Koltoan Mine")) {
+  } else if (!strcasecmp(arg, "Koltoan Mine")) {
    return (4944);
   } else {
    send_to_char(ch, "You don't know where that made up place is, but decided to land anyway.");
    return (4264);
   }
  } else if (GET_ROOM_VNUM(IN_ROOM(ch)) == 52) { // Above Konack
-  if (!str_cmp(arg, "Tiranoc City")) {
+  if (!strcasecmp(arg, "Tiranoc City")) {
    return (8006);
-  } else if (!str_cmp(arg, "Great Oroist Temple")) {
+  } else if (!strcasecmp(arg, "Great Oroist Temple")) {
    return (8300);
-  } else if (!str_cmp(arg, "Elzthuan Forest")) {
+  } else if (!strcasecmp(arg, "Elzthuan Forest")) {
    return (8400);
-  } else if (!str_cmp(arg, "Mazori Farm")) {
+  } else if (!strcasecmp(arg, "Mazori Farm")) {
    return (8447);
-  } else if (!str_cmp(arg, "Dres")) {
+  } else if (!strcasecmp(arg, "Dres")) {
    return (8500);
-  } else if (!str_cmp(arg, "Colvian Farm")) {
+  } else if (!strcasecmp(arg, "Colvian Farm")) {
    return (8600);
-  } else if (!str_cmp(arg, "St Alucia")) {
+  } else if (!strcasecmp(arg, "St Alucia")) {
    return (8700);
-  } else if (!str_cmp(arg, "Meridius Memorial")) {
+  } else if (!strcasecmp(arg, "Meridius Memorial")) {
    return (8800);
-  } else if (!str_cmp(arg, "Desert of Illusion")) {
+  } else if (!strcasecmp(arg, "Desert of Illusion")) {
    return (8900);
-  } else if (!str_cmp(arg, "Plains of Confusion")) {
+  } else if (!strcasecmp(arg, "Plains of Confusion")) {
    return (8954);
-  } else if (!str_cmp(arg, "Turlon Fair")) {
+  } else if (!strcasecmp(arg, "Turlon Fair")) {
    return (9200);
-  } else if (!str_cmp(arg, "Wetlands")) {
+  } else if (!strcasecmp(arg, "Wetlands")) {
    return (9700);
-  } else if (!str_cmp(arg, "Kerberos")) {
+  } else if (!strcasecmp(arg, "Kerberos")) {
    return (9855);
-  } else if (!str_cmp(arg, "Shaeras Mansion")) {
+  } else if (!strcasecmp(arg, "Shaeras Mansion")) {
    return (9864);
-  } else if (!str_cmp(arg, "Slavinus Ravine")) {
+  } else if (!strcasecmp(arg, "Slavinus Ravine")) {
    return (9900);
-  } else if (!str_cmp(arg, "Furian Citadel")) {
+  } else if (!strcasecmp(arg, "Furian Citadel")) {
    return (9949);
   } else {
    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
    return (8006);
   }
  } else if (GET_ROOM_VNUM(IN_ROOM(ch)) == 53) { // Above Vegeta
-  if (!str_cmp(arg, "Vegetos City")) {
+  if (!strcasecmp(arg, "Vegetos City")) {
    return (2226);
-  } else if (!str_cmp(arg, "Blood Dunes")) {
+  } else if (!strcasecmp(arg, "Blood Dunes")) {
    return (2600);
-  } else if (!str_cmp(arg, "Ancestral Mountains")) {
+  } else if (!strcasecmp(arg, "Ancestral Mountains")) {
    return (2616);
-  } else if (!str_cmp(arg, "Destopa Swamp")) {
+  } else if (!strcasecmp(arg, "Destopa Swamp")) {
    return (2709);
-  } else if (!str_cmp(arg, "Pride forest")) {
+  } else if (!strcasecmp(arg, "Pride forest")) {
    return (2800);
-  } else if (!str_cmp(arg, "Pride Tower")) {
+  } else if (!strcasecmp(arg, "Pride Tower")) {
    return (2899);
-  } else if (!str_cmp(arg, "Ruby Cave")) {
+  } else if (!strcasecmp(arg, "Ruby Cave")) {
    return (2615);
   } else {
    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
    return (2226);
   }
  } else if (GET_ROOM_VNUM(IN_ROOM(ch)) == 54) { // Above Namek
-  if (!str_cmp(arg, "Senzu Village")) {
+  if (!strcasecmp(arg, "Senzu Village")) {
    return (11600);
-  } else if (!str_cmp(arg, "Guru's House")) {
+  } else if (!strcasecmp(arg, "Guru's House")) {
    return (10182);
-  } else if (!str_cmp(arg, "Crystalline Cave")) {
+  } else if (!strcasecmp(arg, "Crystalline Cave")) {
    return (10474);
-  } else if (!str_cmp(arg, "Elder Village")) {
+  } else if (!strcasecmp(arg, "Elder Village")) {
    return (13300);
-  } else if (!str_cmp(arg, "Frieza's Ship")) {
+  } else if (!strcasecmp(arg, "Frieza's Ship")) {
    return (10203);
-  } else if (!str_cmp(arg, "Kakureta Village")) {
+  } else if (!strcasecmp(arg, "Kakureta Village")) {
    return (10922);
   } else {
    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
    return (11600);
   }
  } else if (GET_ROOM_VNUM(IN_ROOM(ch)) == 55) { // Above Aether
-  if (!str_cmp(arg, "Haven City")) {
+  if (!strcasecmp(arg, "Haven City")) {
    return (12010);
-  } else if (!str_cmp(arg, "Serenity Lake")) {
+  } else if (!strcasecmp(arg, "Serenity Lake")) {
    return (12103);
-  } else if (!str_cmp(arg, "Kaiju Forest")) {
+  } else if (!strcasecmp(arg, "Kaiju Forest")) {
    return (12300);
-  } else if (!str_cmp(arg, "Ortusian Temple")) {
+  } else if (!strcasecmp(arg, "Ortusian Temple")) {
    return (12400);
-  } else if (!str_cmp(arg, "Silent Glade")) {
+  } else if (!strcasecmp(arg, "Silent Glade")) {
    return (12480);
   } else {
    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
    return (12010);
   }
  } else if (GET_ROOM_VNUM(IN_ROOM(ch)) == 56) { // Above Yardrat
-  if (!str_cmp(arg, "Yardra City")) {
+  if (!strcasecmp(arg, "Yardra City")) {
    return (14008);
-  } else if (!str_cmp(arg, "Jade Forest")) {
+  } else if (!strcasecmp(arg, "Jade Forest")) {
    return (14100);
-  } else if (!str_cmp(arg, "Jade Cliffs")) {
+  } else if (!strcasecmp(arg, "Jade Cliffs")) {
    return (14200);
-  } else if (!str_cmp(arg, "Mount Valaria")) {
+  } else if (!strcasecmp(arg, "Mount Valaria")) {
    return (14300);
   } else {
    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
    return (14008);
   }
  } else if (GET_ROOM_VNUM(IN_ROOM(ch)) == 198) { // Above Cerria
-  if (!str_cmp(arg, "Cerria Colony")) {
+  if (!strcasecmp(arg, "Cerria Colony")) {
    return (17531);
-  } else if (!str_cmp(arg, "Crystalline Forest")) {
+  } else if (!strcasecmp(arg, "Crystalline Forest")) {
    return (7950);
-  } else if (!str_cmp(arg, "Fistarl Volcano")) {
+  } else if (!strcasecmp(arg, "Fistarl Volcano")) {
    return (17420);
   } else {
    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
    return (17531);
   }
  } else if (GET_ROOM_VNUM(IN_ROOM(ch)) == 57) { // Above Zennith
-  if (!str_cmp(arg, "Utatlan City")) {
+  if (!strcasecmp(arg, "Utatlan City")) {
    return (3412);
-  } else if (!str_cmp(arg, "Zenith Jungle")) {
+  } else if (!strcasecmp(arg, "Zenith Jungle")) {
    return (3520);
-  } else if (!str_cmp(arg, "Ancient Castle")) {
+  } else if (!strcasecmp(arg, "Ancient Castle")) {
    return (19600);
   } else {
    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
    return (3412);
   }
  } else if (GET_ROOM_VNUM(IN_ROOM(ch)) == 58) { // Above Kanassa
-  if (!str_cmp(arg, "Aquis City")) {
+  if (!strcasecmp(arg, "Aquis City")) {
    return (14904);
-  } else if (!str_cmp(arg, "Yunkai Pirate Base")) {
+  } else if (!strcasecmp(arg, "Yunkai Pirate Base")) {
    return (15655);
   } else {
    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
    return (14904);
   }
  } else if (GET_ROOM_VNUM(IN_ROOM(ch)) == 59) { // Above Arlia
-  if (!str_cmp(arg, "Janacre")) {
+  if (!strcasecmp(arg, "Janacre")) {
    return (16009);
-  } else if (!str_cmp(arg, "Arlian Wasteland")) {
+  } else if (!strcasecmp(arg, "Arlian Wasteland")) {
    return (16544);
-  } else if (!str_cmp(arg, "Arlia Mine")) {
+  } else if (!strcasecmp(arg, "Arlia Mine")) {
    return (16600);
   } else {
    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
@@ -2410,7 +2425,7 @@ ACMD(do_fly)
    GET_MANA(ch) -= GET_MAX_MANA(ch) / 100;
  }
  }
- if (!str_cmp("high", arg)) {
+ if (!strcasecmp("high", arg)) {
   if (GET_MANA(ch) < GET_MAX_MANA(ch) / 100 && !IS_ANDROID(ch)) {
    send_to_char(ch, "You do not have the ki to fly.");
    return;
@@ -2431,7 +2446,7 @@ ACMD(do_fly)
    GET_MANA(ch) -= GET_MAX_MANA(ch) / 100;
   }
  }
- if (!str_cmp("space", arg)) {
+ if (!strcasecmp("space", arg)) {
   if (!OUTSIDE(ch)) {
    send_to_char(ch, "You are not outside!");
    return;

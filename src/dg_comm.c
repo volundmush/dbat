@@ -12,16 +12,18 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 ************************************************************************ */
-
 #include "dg_comm.h"
-
-
-
-/* extern function */
-extern int find_first_step(room_rnum src, room_rnum target);
+#include "act.informative.h"
+#include "utils.h"
+#include "races.h"
+#include "comm.h"
+#include "dg_scripts.h"
+#include "graph.h"
+#include "spells.h"
+#include "handler.h"
 
 /* local functions */
-void sub_write_to_char(char_data *ch, char *tokens[], void *otokens[], char type[]);
+void sub_write_to_char(struct char_data *ch, char *tokens[], void *otokens[], char type[]);
 
 
 /* same as any_one_arg except that it stops at punctuation */
@@ -45,7 +47,7 @@ char *any_one_name(char *argument, char *first_arg)
 }
 
 
-void sub_write_to_char(char_data *ch, char *tokens[],
+void sub_write_to_char(struct char_data *ch, char *tokens[],
 		       void *otokens[], char type[])
 {
     char sb[MAX_STRING_LENGTH];
@@ -62,56 +64,56 @@ void sub_write_to_char(char_data *ch, char *tokens[],
 	case '~':
 	    if (!otokens[i])
 		strcat(sb,"someone");
-	    else if ((char_data *)otokens[i] == ch)
+	    else if ((struct char_data *)otokens[i] == ch)
 		strcat(sb,"you");
 	    else
-		strcat(sb,PERS((char_data *)otokens[i], ch));
+		strcat(sb,PERS((struct char_data *)otokens[i], ch));
 	    break;
 
 	case '|':
 	    if (!otokens[i])
 		strcat(sb,"someone's");
-	    else if ((char_data *)otokens[i] == ch)
+	    else if ((struct char_data *)otokens[i] == ch)
 		strcat(sb,"your");
 	    else
 	    {
-		strcat(sb,PERS((char_data *) otokens[i], ch));
+		strcat(sb,PERS((struct char_data *) otokens[i], ch));
 		strcat(sb,"'s");
 	    }
 	    break;
 
 	case '^':
-	    if (!otokens[i] || !CAN_SEE(ch, (char_data *) otokens[i]))
+	    if (!otokens[i] || !CAN_SEE(ch, (struct char_data *) otokens[i]))
 		strcat(sb,"its");
 	    else if (otokens[i] == ch)
 		strcat(sb,"your");
 	    else
-		strcat(sb,HSHR((char_data *) otokens[i]));
+		strcat(sb,HSHR((struct char_data *) otokens[i]));
 	    break;
 
 	case '&':
-	    if (!otokens[i] || !CAN_SEE(ch, (char_data *) otokens[i]))
+	    if (!otokens[i] || !CAN_SEE(ch, (struct char_data *) otokens[i]))
 		strcat(sb,"it");
 	    else if (otokens[i] == ch)
 		strcat(sb,"you");
 	    else
-		strcat(sb,HSSH((char_data *) otokens[i]));
+		strcat(sb,HSSH((struct char_data *) otokens[i]));
 	    break;
 
 	case '*':
-	    if (!otokens[i] || !CAN_SEE(ch, (char_data *) otokens[i]))
+	    if (!otokens[i] || !CAN_SEE(ch, (struct char_data *) otokens[i]))
 		strcat(sb,"it");
 	    else if (otokens[i] == ch)
 		strcat(sb,"you");
 	    else
-		strcat(sb,HMHR((char_data *) otokens[i]));
+		strcat(sb,HMHR((struct char_data *) otokens[i]));
 	    break;
 
 	case '¨':
 	    if (!otokens[i])
 		strcat(sb,"something");
 	    else
-		strcat(sb,OBJS(((obj_data *) otokens[i]), ch));
+		strcat(sb,OBJS(((struct obj_data *) otokens[i]), ch));
 	    break;
 	}
     }
@@ -123,14 +125,14 @@ void sub_write_to_char(char_data *ch, char *tokens[],
 }
 
 
-void sub_write(char *arg, char_data *ch, byte find_invis, int targets)
+void sub_write(char *arg, struct char_data *ch, int8_t find_invis, int targets)
 {
     char str[MAX_INPUT_LENGTH * 2];
     char type[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
     char *tokens[MAX_INPUT_LENGTH], *s, *p;
     void *otokens[MAX_INPUT_LENGTH];
-    char_data *to;
-    obj_data *obj;
+    struct char_data *to;
+    struct obj_data *obj;
     int i, tmp;
     int to_sleeping = 1; /* mainly for windows compiles */
 

@@ -6,19 +6,16 @@
  ************************************************************************/
 
 #include "genobj.h"
-
-
+#include "genolc.h"
+#include "genzon.h"
+#include "utils.h"
+#include "handler.h"
+#include "htree.h"
+#include "dg_olc.h"
+#include "shop.h"
 
 static int copy_object_main(struct obj_data *to, struct obj_data *from, int free_object);
 
-extern struct obj_data *obj_proto;
-extern struct obj_data *object_list;
-extern struct index_data *obj_index;
-extern struct zone_data *zone_table;
-extern struct shop_data *shop_index;
-extern zone_rnum top_of_zone_table;
-extern obj_rnum top_of_objt;
-extern int top_shop;
 
 obj_rnum add_object(struct obj_data *newobj, obj_vnum ovnum)
 {

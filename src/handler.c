@@ -7,20 +7,31 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-
 #include "handler.h"
+#include "utils.h"
+#include "comm.h"
+#include "db.h"
+#include "handler.h"
+#include "interpreter.h"
+#include "spells.h"
+#include "dg_scripts.h"
+#include "feats.h"
+#include "races.h"
+#include "class.h"
+#include "objsave.h"
+#include "fight.h"
+#include "races.h"
+#include "act.informative.h"
 
 /* local vars */
-int extractions_pending = 0;
+static int extractions_pending = 0;
 
 /* external vars */
 
-extern struct char_data *combat_list;
-
 /* local functions */
-int apply_ac(struct char_data *ch, int eq_pos);
-void update_object(struct obj_data *obj, int use);
-void update_char_objects(struct char_data *ch);
+static int apply_ac(struct char_data *ch, int eq_pos);
+static void update_object(struct obj_data *obj, int use);
+
 
 /* external functions */
 extern void handle_multi_merge(struct char_data *form);
@@ -65,7 +76,7 @@ const char *get_i_name(struct char_data *ch, struct char_data *vict) {
   while (!feof(fl)) {
     get_line(fl, line);
     sscanf(line, "%s %s\n", filler, scrap);
-    if (!str_cmp(GET_NAME(vict), filler)) {
+    if (!strcasecmp(GET_NAME(vict), filler)) {
      sprintf(name, "%s", scrap);
      known = TRUE;
     }
@@ -764,7 +775,7 @@ void obj_from_char(struct obj_data *object)
   if (!IS_NPC(object->carried_by))
     SET_BIT_AR(PLR_FLAGS(object->carried_by), PLR_CRASH);
  
-  cl_sint64 previous = gear_pl(object->carried_by);
+  int64_t previous = gear_pl(object->carried_by);
 
   IS_CARRYING_W(object->carried_by) -= GET_OBJ_WEIGHT(object);
   IS_CARRYING_N(object->carried_by)--;
@@ -790,7 +801,7 @@ void obj_from_char(struct obj_data *object)
 
 
 /* Return the effect of a piece of armor in position eq_pos */
-int apply_ac(struct char_data *ch, int eq_pos)
+static int apply_ac(struct char_data *ch, int eq_pos)
 {
   if (GET_EQ(ch, eq_pos) == NULL) {
     core_dump();
@@ -1285,7 +1296,7 @@ void extract_obj(struct obj_data *obj)
 
 
 
-void update_object(struct obj_data *obj, int use)
+static void update_object(struct obj_data *obj, int use)
 {
   if (!obj)
     return;
@@ -1659,9 +1670,9 @@ struct char_data *get_player_vis(struct char_data *ch, char *name, int *number, 
     if (inroom == FIND_CHAR_ROOM && IN_ROOM(i) != IN_ROOM(ch))
       continue;
     if (GET_ADMLEVEL(ch) < 1 && GET_ADMLEVEL(i) < 1 && !IS_NPC(ch) && !IS_NPC(i)) {
-     if (str_cmp(RACE(i), name) && !strstr(RACE(i), name)) {
+     if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name)) {
       if (readIntro(ch, i) == 1) {
-       if (str_cmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name)) {
+       if (strcasecmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name)) {
         continue;
        }
       }
@@ -1671,10 +1682,10 @@ struct char_data *get_player_vis(struct char_data *ch, char *name, int *number, 
      }
     }
     if ((GET_ADMLEVEL(ch) >= 1 || GET_ADMLEVEL(i) >= 1 || IS_NPC(ch) || IS_NPC(i))) {
-     if (str_cmp(i->name, name) && !strstr(i->name, name)) {
-      if (str_cmp(RACE(i), name) && !strstr(RACE(i), name)) {
+     if (strcasecmp(i->name, name) && !strstr(i->name, name)) {
+      if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name)) {
         if (!IS_NPC(ch) && !IS_NPC(i) && readIntro(ch, i) == 1) {
-         if (str_cmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name)) {
+         if (strcasecmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name)) {
           continue;
          }
         }
@@ -1706,7 +1717,7 @@ struct char_data *get_char_room_vis(struct char_data *ch, char *name, int *numbe
   }
 
   /* JE 7/18/94 :-) :-) */
-  if (!str_cmp(name, "self") || !str_cmp(name, "me"))
+  if (!strcasecmp(name, "self") || !strcasecmp(name, "me"))
     return (ch);
 
   /* 0.<name> means PC with name */
@@ -1714,7 +1725,7 @@ struct char_data *get_char_room_vis(struct char_data *ch, char *name, int *numbe
     return (get_player_vis(ch, name, NULL, FIND_CHAR_ROOM));
 
   for (i = world[IN_ROOM(ch)].people; i && *number; i = i->next_in_room) {
-    if (!str_cmp(name, "last") && LASTHIT(i) != 0 && LASTHIT(i) == GET_IDNUM(ch)) {
+    if (!strcasecmp(name, "last") && LASTHIT(i) != 0 && LASTHIT(i) == GET_IDNUM(ch)) {
       if (CAN_SEE(ch, i))
         if (--(*number) == 0)
           return (i);
@@ -1729,7 +1740,7 @@ struct char_data *get_char_room_vis(struct char_data *ch, char *name, int *numbe
         if (--(*number) == 0)
           return (i);
     }
-    else if (!IS_NPC(i) && !IS_NPC(ch) && !str_cmp(get_i_name(ch, i), CAP(name)) && i != ch) {
+    else if (!IS_NPC(i) && !IS_NPC(ch) && !strcasecmp(get_i_name(ch, i), CAP(name)) && i != ch) {
       if (CAN_SEE(ch, i))
         if (--(*number) == 0)
           return (i);
@@ -1784,9 +1795,9 @@ struct char_data *get_char_world_vis(struct char_data *ch, char *name, int *numb
     if (IN_ROOM(ch) == IN_ROOM(i))
       continue;
     if (GET_ADMLEVEL(ch) < 1 && GET_ADMLEVEL(i) < 1 && !IS_NPC(ch) && !IS_NPC(i)) {
-     if (str_cmp(RACE(i), name) && !strstr(RACE(i), name)) {
+     if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name)) {
       if (readIntro(ch, i) == 1) {
-       if (str_cmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name)) {
+       if (strcasecmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name)) {
         continue;
        }
       }
@@ -1796,10 +1807,10 @@ struct char_data *get_char_world_vis(struct char_data *ch, char *name, int *numb
      }
     }
     if ((GET_ADMLEVEL(ch) >= 1 || GET_ADMLEVEL(i) >= 1 || IS_NPC(ch) || IS_NPC(i))) {
-     if (str_cmp(i->name, name) && !strstr(i->name, name)) {
-      if (str_cmp(RACE(i), name) && !strstr(RACE(i), name)) {
+     if (strcasecmp(i->name, name) && !strstr(i->name, name)) {
+      if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name)) {
         if (!IS_NPC(ch) && !IS_NPC(i) && readIntro(ch, i) == 1) {
-         if (str_cmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name)) {
+         if (strcasecmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name)) {
           continue;
          }
         }

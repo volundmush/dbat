@@ -9,7 +9,7 @@
 
 /* --relistan 2/22/99 - 2/24/99 */
 
-#include "structs.h"
+#include "statedit.h"
 #include "interpreter.h"
 #include "comm.h"
 #include "utils.h"
@@ -17,7 +17,6 @@
 #include "oasis.h"
 
 int parse_stat_menu(struct descriptor_data *d, char *arg);
-int stats_disp_menu(struct descriptor_data *d);
 int stats_assign_stat(int abil, char *arg, struct descriptor_data *d);
 
 /* --relistan 2/22/99 for player configurable stats */

@@ -8,11 +8,13 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 #include "house.h"
-
-
-/* external functions */
-int Obj_to_store(struct obj_data *obj, FILE *fl, int location);
-bitvector_t asciiflag_conv(char *flag);
+#include "comm.h"
+#include "handler.h"
+#include "db.h"
+#include "interpreter.h"
+#include "utils.h"
+#include "constants.h"
+#include "objsave.h"
 
 /* local globals */
 struct house_control_rec house_control[MAX_HOUSES];
@@ -26,15 +28,13 @@ void House_restore_weight(struct obj_data *obj);
 void House_delete_file(room_vnum vnum);
 int find_house(room_vnum vnum);
 void House_save_control(void);
-void hcontrol_list_houses(struct char_data *ch);
+
 void hcontrol_build_house(struct char_data *ch, char *arg);
 void hcontrol_destroy_house(struct char_data *ch, char *arg);
 void hcontrol_pay_house(struct char_data *ch, char *arg);
-ACMD(do_hcontrol);
-ACMD(do_house);
+
 
 #define MAX_BAG_ROWS    5
-extern int xap_objs;
 
 /* First, the basics: finding the filename; loading/saving objects */
 
@@ -269,7 +269,7 @@ void hcontrol_build_house(struct char_data *ch, char *arg)
   struct house_control_rec temp_house;
   room_vnum virt_house;
   room_rnum real_house;
-  sh_int exit_num;
+  int16_t exit_num;
   long owner;
 
   if (num_of_houses >= MAX_HOUSES) {

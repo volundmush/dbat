@@ -1,7 +1,6 @@
 #include "races.h"
-
-/*user accounts*/
-extern void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, char *name);
+#include "utils.h"
+#include "interpreter.h"
 
 const char *race_names[NUM_RACES+1] = {
   "human",

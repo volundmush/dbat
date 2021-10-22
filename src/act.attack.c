@@ -13,12 +13,21 @@
 *   credits found in act.offensive.c except for the commands added in-    *
 *                                                   ~~Iovan               *
 ************************************************************************ */
-#include "act.h"
+#include "act.attack.h"
+#include "fight.h"
+#include "dg_comm.h"
+#include "act.item.h"
+#include "interpreter.h"
+#include "utils.h"
+#include "handler.h"
+#include "comm.h"
+#include "constants.h"
+#include "combat.h"
 
 ACMD(do_lightgrenade)
 {
  int perc, dge = 2, count = 0, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .35, minimum = .15;
   struct char_data *vict = NULL, *targ = NULL, *next_v = NULL;
   char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
@@ -213,7 +222,7 @@ ACMD(do_energize)
 ACMD(do_breath)
 {
  int prob, perc, avo, index = 0, pry = 2, dge = 2, blk = 2, skill = 0;
- cl_sint64 dmg, stcost = GET_MAX_HIT(ch) / 5000;
+ int64_t dmg, stcost = GET_MAX_HIT(ch) / 5000;
  struct char_data *vict;
  struct obj_data *obj;
  char arg[MAX_INPUT_LENGTH];
@@ -441,7 +450,7 @@ ACMD(do_breath)
 ACMD(do_ram)
 {
  int prob, perc, avo, index = 0, pry = 2, dge = 2, blk = 2, skill = 0;
- cl_sint64 dmg, stcost = GET_MAX_HIT(ch) / 200;
+ int64_t dmg, stcost = GET_MAX_HIT(ch) / 200;
  struct char_data *vict;
  struct obj_data *obj;
  char arg[MAX_INPUT_LENGTH];
@@ -647,7 +656,7 @@ ACMD(do_ram)
 ACMD(do_strike)
 {
  int prob, perc, avo, index = 0, pry = 2, dge = 2, blk = 2, skill = 0;
- cl_sint64 dmg, stcost = GET_MAX_HIT(ch) / 400;
+ int64_t dmg, stcost = GET_MAX_HIT(ch) / 400;
  struct char_data *vict;
  struct obj_data *obj;
  char arg[MAX_INPUT_LENGTH];
@@ -886,7 +895,7 @@ ACMD(do_combine)
    send_to_char(ch, "Leader Syntax: combine (attack) (target)\r\n");
    send_to_char(ch, "Cancel Syntax: combine stop\r\n");
   } else {
-   if (!str_cmp(arg, "stop") && ch->master) {
+   if (!strcasecmp(arg, "stop") && ch->master) {
     if (GET_COMBINE(ch) == -1) {
      send_to_char(ch, "You are not trying to combine any attacks...\r\n");
      return;
@@ -900,7 +909,7 @@ ACMD(do_combine)
      GET_COMBINE(ch) = -1;
      return;
     }
-   } else if (!str_cmp(arg, "stop") && !ch->master) {
+   } else if (!strcasecmp(arg, "stop") && !ch->master) {
     send_to_char(ch, "You do not need to stop as you haven't prepared anything.\r\n");
     return;
    }
@@ -982,7 +991,7 @@ ACMD(do_combine)
 ACMD(do_sunder)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .25, minimum = .05;
  struct char_data *vict;
  struct obj_data *obj;
@@ -1232,7 +1241,7 @@ ACMD(do_sunder)
 ACMD(do_zen)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .2, minimum = .1;
  struct char_data *vict;
  struct obj_data *obj;
@@ -1676,7 +1685,7 @@ ACMD(do_zen)
 ACMD(do_malice)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .3, minimum = .15;
  struct char_data *vict;
  struct obj_data *obj;
@@ -1951,7 +1960,7 @@ ACMD(do_malice)
 ACMD(do_nova)
 {
  int perc, dge = 2, count = 0, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .20, minimum = .1;
   struct char_data *vict = NULL, *next_v = NULL;
   char arg2[MAX_INPUT_LENGTH];
@@ -2131,7 +2140,7 @@ ACMD(do_nova)
 ACMD(do_head)
 {
  int prob, perc, avo, index = 0, pry = 2, dge = 2, blk = 2, skill = 0;
- cl_sint64 dmg, stcost = physical_cost(ch, SKILL_HEADBUTT);
+ int64_t dmg, stcost = physical_cost(ch, SKILL_HEADBUTT);
  struct char_data *vict;
  struct obj_data *obj;
  char arg[MAX_INPUT_LENGTH];
@@ -2419,7 +2428,7 @@ ACMD(do_head)
 ACMD(do_bash)
 {
  int prob, perc, avo, index = 0, pry = 2, dge = 2, blk = 2, skill = 0;
- cl_sint64 dmg, stcost = physical_cost(ch, SKILL_BASH);
+ int64_t dmg, stcost = physical_cost(ch, SKILL_BASH);
  struct char_data *vict;
  struct obj_data *obj;
  char arg[MAX_INPUT_LENGTH];
@@ -2703,7 +2712,7 @@ ACMD(do_bash)
 ACMD(do_seishou)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .15, minimum = .05;
  struct char_data *vict;
  struct obj_data *obj;
@@ -2944,7 +2953,7 @@ ACMD(do_throw)
   char arg[MAX_INPUT_LENGTH];
   char arg2[1000], chunk[2000], arg3[1000];
   int odam = 0, miss = TRUE, perc = 0, prob = 0, perc2 = 0, grab = FALSE;
-  cl_sint64 damage;
+  int64_t damage;
 
  half_chop(argument, arg, chunk);
 
@@ -3110,7 +3119,7 @@ ACMD(do_throw)
      perc2 = init_skill(vict, SKILL_DODGE);
      prob = axion_dice(penalty);
     if (*arg3) {
-     if (!str_cmp(arg3, "1") || !str_cmp(arg3, "single")) {
+     if (!strcasecmp(arg3, "1") || !strcasecmp(arg3, "single")) {
       multithrow = FALSE;
      } else {
       send_to_char(ch, "Syntax: throw (obj | character) (target) <-- This will multithrow if able\nSyntax: throw (obj) (target) (1 | single) <-- This will not multi throw)\r\n");
@@ -3397,7 +3406,7 @@ ACMD(do_selfd)
 {
 
  struct char_data *tch = NULL, *next_v = NULL;
- cl_sint64 dmg = 0;
+ int64_t dmg = 0;
 
  if (IS_NPC(ch))
   return;
@@ -3525,7 +3534,7 @@ ACMD(do_selfd)
 ACMD(do_razor)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .14, minimum = .05;
  struct char_data *vict;
  struct obj_data *obj;
@@ -3683,7 +3692,7 @@ ACMD(do_razor)
    return;
   }
   else {
-   cl_sint64 reduction = GET_HIT(vict);
+   int64_t reduction = GET_HIT(vict);
    dmg = damtype(ch, 47, skill, attperc);
    if (AFF_FLAGGED(ch, AFF_SANCTUARY)) {
     if (GET_SKILL(ch, SKILL_AQUA_BARRIER) >= 100) {
@@ -3786,7 +3795,7 @@ ACMD(do_spike)
  struct char_data *vict;
  struct obj_data *obj;
  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
- cl_sint64 dmg;
+ int64_t dmg;
  double attperc = .14, minimum = .05;
 
  two_arguments(argument, arg, arg2);
@@ -4169,7 +4178,7 @@ ACMD(do_spike)
 ACMD(do_koteiru)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  struct char_data *vict;
  struct obj_data *obj;
  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
@@ -4421,7 +4430,7 @@ ACMD(do_koteiru)
 ACMD(do_hspiral)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  struct char_data *vict;
  struct obj_data *obj;
  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
@@ -4715,7 +4724,7 @@ ACMD(do_spiral)
 ACMD(do_breaker)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
- cl_sint64 dmg;
+ int64_t dmg;
  struct char_data *vict;
  struct obj_data *obj;
  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
@@ -4890,7 +4899,7 @@ ACMD(do_breaker)
   }
   else {
    dmg = damtype(ch, 46, skill, attperc);
-   cl_sint64 theft = 0;
+   int64_t theft = 0;
    if (GET_LEVEL(ch) - 30 > GET_LEVEL(vict)) {
     theft = 1;
     GET_EXP(vict) -= theft;

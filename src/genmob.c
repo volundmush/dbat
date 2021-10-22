@@ -5,8 +5,16 @@
  ************************************************************************/
 
 #include "genmob.h"
-
-
+#include "utils.h"
+#include "db.h"
+#include "genolc.h"
+#include "shop.h"
+#include "genzon.h"
+#include "htree.h"
+#include "guild.h"
+#include "dg_scripts.h"
+#include "handler.h"
+#include "dg_olc.h"
 
 /* From db.c */
 void init_mobile_skills(void);
@@ -15,23 +23,12 @@ void init_mobile_skills(void);
 int update_mobile_strings(struct char_data *t, struct char_data *f);
 void check_mobile_strings(struct char_data *mob);
 void check_mobile_string(mob_vnum i, char **string, const char *dscr);
-int write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd);
 int write_mobile_espec(mob_vnum mvnum, struct char_data *mob, FILE *fd);
 int copy_mobile_strings(struct char_data *t, struct char_data *f);
+
 #if CONFIG_GENOLC_MOBPROG
 int write_mobile_mobprog(mob_vnum mvnum, struct char_data *mob, FILE *fd);
 #endif
-
-extern int top_shop;
-extern mob_rnum top_of_mobt;
-extern zone_rnum top_of_zone_table;
-extern struct zone_data *zone_table;
-extern struct shop_data *shop_index;
-extern struct char_data *character_list;
-extern struct char_data *mob_proto;
-extern struct index_data *mob_index;
-extern int top_guild;
-extern struct guild_data *guild_index;
 
 /* local functions */
 void extract_mobile_all(mob_vnum vnum);

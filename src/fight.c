@@ -9,39 +9,36 @@
 ************************************************************************ */
 
 #include "fight.h"
-
+#include "dg_comm.h"
+#include "act.attack.h"
+#include "act.other.h"
+#include "act.misc.h"
+#include "act.movement.h"
+#include "utils.h"
+#include "spells.h"
+#include "comm.h"
+#include "db.h"
+#include "config.h"
+#include "races.h"
+#include "handler.h"
+#include "combat.h"
 
 /* Structures */
 struct char_data *combat_list = NULL;	/* head of l-list of fighting chars */
 struct char_data *next_combat_list = NULL;
 
-
-
-
-
 /* local functions */
-
-
-void perform_group_gain(struct char_data *ch, int base, struct char_data *victim);
-void appear(struct char_data *ch);
-void free_messages(void);
-void free_messages_type(struct msg_type *msg);
-void check_killer(struct char_data *ch, struct char_data *vict);
-void make_corpse(struct char_data *ch, struct char_data *tch);
-void handle_corpse_condition(struct obj_data *corpse, struct char_data *ch);
-void make_pcorpse(struct char_data *ch);
-void change_alignment(struct char_data *ch, struct char_data *victim);
-void death_cry(struct char_data *ch);
-void raw_kill(struct char_data * ch, struct char_data * killer);
-
-void group_gain(struct char_data *ch, struct char_data *victim);
-void solo_gain(struct char_data *ch, struct char_data *victim);
-void final_combat_resolve(struct char_data *ch);
-void shadow_dragons_live(void);
-void cleanup_arena_watch(struct char_data *ch);
-void mob_attack(struct char_data *ch, char *buf);
-int pick_n_throw(struct char_data *ch, char *buf);
-void mutant_limb_regen(struct char_data *ch);
+static void perform_group_gain(struct char_data *ch, int base, struct char_data *victim);
+static void check_killer(struct char_data *ch, struct char_data *vict);
+static void make_corpse(struct char_data *ch, struct char_data *tch);
+static void handle_corpse_condition(struct obj_data *corpse, struct char_data *ch);
+static void make_pcorpse(struct char_data *ch);
+static void change_alignment(struct char_data *ch, struct char_data *victim);
+static void final_combat_resolve(struct char_data *ch);
+static void shadow_dragons_live(void);
+static void cleanup_arena_watch(struct char_data *ch);
+static void mob_attack(struct char_data *ch, char *buf);
+static int pick_n_throw(struct char_data *ch, char *buf);
 
 
 int group_bonus(struct char_data *ch, int type)
@@ -184,7 +181,7 @@ void mutant_limb_regen(struct char_data *ch)
  }
 }
 
-int pick_n_throw(struct char_data *ch, char *buf)
+static int pick_n_throw(struct char_data *ch, char *buf)
 {
  struct obj_data *cont;
  char buf2[MAX_INPUT_LENGTH], buf3[MAX_INPUT_LENGTH];;
@@ -207,7 +204,7 @@ int pick_n_throw(struct char_data *ch, char *buf)
  return (FALSE);
 }
 
-void mob_attack(struct char_data *ch, char *buf)
+static void mob_attack(struct char_data *ch, char *buf)
 {
 
  int power = rand_number(1, 5);
@@ -631,7 +628,7 @@ void mob_attack(struct char_data *ch, char *buf)
 
 } /* End mob_attack */
 
-void cleanup_arena_watch(struct char_data *ch)
+static void cleanup_arena_watch(struct char_data *ch)
 {
  struct descriptor_data *d;
  
@@ -649,7 +646,7 @@ void cleanup_arena_watch(struct char_data *ch)
  }
 }
 
-void shadow_dragons_live()
+static void shadow_dragons_live()
 {
   int value = 0;
   if (SHADOW_DRAGON1 != -1 || SHADOW_DRAGON2 != -1 || SHADOW_DRAGON3 != -1 || SHADOW_DRAGON4 != -1 || SHADOW_DRAGON5 != -1 || SHADOW_DRAGON6 != -1 || SHADOW_DRAGON7 != -1) {
@@ -840,7 +837,7 @@ void fight_stack()
       if (GET_HIT(ch) <= (gear_pl(ch) * 0.01) * GET_LIFEPERC(ch) && GET_LIFEFORCE(ch) > 0 && !IS_ANDROID(ch)) {
        if (rand_number(1, 15) >= 14) {
         if (GET_LIFEFORCE(ch) >= GET_LIFEMAX(ch) * 0.05 || AFF_FLAGGED(ch, AFF_HEALGLOW) || (IS_KANASSAN(ch) && GET_LIFEFORCE(ch) >= GET_LIFEMAX(ch) * 0.03)) {
-         cl_sint64 refill = 0, lfcost = GET_LIFEMAX(ch) * 0.05;
+         int64_t refill = 0, lfcost = GET_LIFEMAX(ch) * 0.05;
          if (GET_BONUS(ch, BONUS_DIEHARD) > 0 && (!IS_MUTANT(ch) || (GET_GENOME(ch, 0) != 2 && GET_GENOME(ch, 1) != 2))) {
           refill = GET_LIFEMAX(ch) * 0.1;
          } else if (GET_BONUS(ch, BONUS_DIEHARD) > 0 && IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 2 || GET_GENOME(ch, 1) == 2)) {
@@ -917,7 +914,7 @@ void fight_stack()
         act("@WYou crush @C$N@W some more!@n", TRUE, ch, 0, GRAPPLING(ch), TO_CHAR);
         act("@C$n@W crushes YOU@W some more!@n", TRUE, ch, 0, GRAPPLING(ch), TO_VICT);
         act("@C$n@W crushes @c$N@W some more!@n", TRUE, ch, 0, GRAPPLING(ch), TO_NOTVICT);
-        cl_sint64 damg = GET_STR(ch) * (10 + (GET_MAX_HIT(ch) * 0.005));
+        int64_t damg = GET_STR(ch) * (10 + (GET_MAX_HIT(ch) * 0.005));
         hurt(0, 0, ch, GRAPPLING(ch), NULL, damg, 0);
       }
       if (GRAPPLED(ch) && rand_number(1, 2) == 2) {
@@ -1114,7 +1111,7 @@ void fight_stack()
        char buf3[MAX_STRING_LENGTH];
        if (GET_HIT(ch) >= gear_pl(ch) && GET_MANA(ch) >= GET_MAX_MANA(ch) / 20 && GET_PREFERENCE(ch) != PREFERENCE_KI) {
         if (GET_MANA(ch) >= GET_MAX_MANA(ch) * 0.5) {
-         cl_sint64 raise = GET_MAX_MOVE(ch) * 0.02;
+         int64_t raise = GET_MAX_MOVE(ch) * 0.02;
          if (GET_MOVE(ch) + raise < GET_MAX_MOVE(ch))
           GET_MOVE(ch) += raise;
          else
@@ -1131,7 +1128,7 @@ void fight_stack()
         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_POWERUP);
        } else if (GET_HIT(ch) >= gear_pl(ch) && GET_MANA(ch) >= (GET_MAX_MANA(ch) * 0.0375) + 1 && GET_PREFERENCE(ch) == PREFERENCE_KI) {
         if (GET_MANA(ch) >= (GET_MAX_MANA(ch) * 0.0375) + 1) {
-         cl_sint64 raise = GET_MAX_MOVE(ch) * 0.02;
+         int64_t raise = GET_MAX_MOVE(ch) * 0.02;
          if (GET_MOVE(ch) + raise < GET_MAX_MOVE(ch))
           GET_MOVE(ch) += raise;
          else
@@ -1172,7 +1169,7 @@ void fight_stack()
          GET_MANA(ch) -= GET_MAX_MANA(ch) * 0.0375;
         }
         if (GET_MANA(ch) >= GET_MAX_MANA(ch) * 0.5) {
-         cl_sint64 raise = GET_MAX_MOVE(ch) * 0.02;
+         int64_t raise = GET_MAX_MOVE(ch) * 0.02;
          if (GET_MOVE(ch) + raise < GET_MAX_MOVE(ch))
           GET_MOVE(ch) += raise;
          else
@@ -1257,7 +1254,7 @@ void fight_stack()
       }
       if (!PLR_FLAGGED(ch, PLR_CHARGE) && rand_number(1, 40) >= 38 && !FIGHTING(ch) && (GET_PREFERENCE(ch) != PREFERENCE_KI || GET_CHARGE(ch) > GET_MAX_MANA(ch) * 0.1)) {
         if (GET_CHARGE(ch) >= GET_MAX_MANA(ch) / 100) {
-	cl_sint64 loss = 0;
+	int64_t loss = 0;
         send_to_char(ch, "You lose some of your energy slowly.\r\n");
         switch (rand_number(1, 3)) {
          case 1:
@@ -1436,7 +1433,7 @@ void update_pos(struct char_data *victim)
 }
 
 
-void check_killer(struct char_data *ch, struct char_data *vict)
+static void check_killer(struct char_data *ch, struct char_data *vict)
 {
   if (PLR_FLAGGED(vict, PLR_KILLER) || PLR_FLAGGED(vict, PLR_THIEF))
     return;
@@ -1496,7 +1493,7 @@ void stop_fighting(struct char_data *ch)
   update_pos(ch);
 }
 
-void make_pcorpse(struct char_data *ch)
+static void make_pcorpse(struct char_data *ch)
 {
 
   struct obj_data *corpse;
@@ -1592,7 +1589,7 @@ void make_pcorpse(struct char_data *ch)
 
 /* This handles how corpses are viewed. How many limbs they have. If they were *
  * disintergrated, blown in half, beat to a pulp, etc.        - Iovan 3/2/2011 */
-void handle_corpse_condition(struct obj_data *corpse, struct char_data *ch)
+static void handle_corpse_condition(struct obj_data *corpse, struct char_data *ch)
 {
 
   char buf2[MAX_NAME_LENGTH + 128];
@@ -1703,7 +1700,7 @@ void handle_corpse_condition(struct obj_data *corpse, struct char_data *ch)
  }
 }
 
-void make_corpse(struct char_data *ch, struct char_data *tch)
+static void make_corpse(struct char_data *ch, struct char_data *tch)
 {
   struct obj_data *corpse, *o;
   struct obj_data *money;
@@ -1843,7 +1840,7 @@ void loadmap(struct char_data *ch)
 
 
 /* When ch kills victim */
-void change_alignment(struct char_data *ch, struct char_data *victim)
+static void change_alignment(struct char_data *ch, struct char_data *victim)
 {
   /*
    * If you kill a monster with alignment A, you move 1/20th of the way to
@@ -1870,7 +1867,7 @@ void death_cry(struct char_data *ch)
 }
 
 /* Let's clean up necessary things after "death" */
-void final_combat_resolve(struct char_data *ch)
+static void final_combat_resolve(struct char_data *ch)
 {
     struct obj_data *chair;
 
@@ -2419,11 +2416,9 @@ void die(struct char_data * ch, struct char_data * killer)
   raw_kill(ch, killer);
 }
 
-
-
-void perform_group_gain(struct char_data *ch, int base, struct char_data *victim)
+static void perform_group_gain(struct char_data *ch, int base, struct char_data *victim)
 {
-  cl_sint64 share;
+  int64_t share;
 
   if (IN_ARENA(ch)) {
    return;
@@ -2582,7 +2577,7 @@ void perform_group_gain(struct char_data *ch, int base, struct char_data *victim
 void group_gain(struct char_data *ch, struct char_data *victim)
 {
   int tot_levels, tot_members; 
-  cl_sint64 tot_gain, base;
+  int64_t tot_gain, base;
   struct char_data *k;
   struct follow_type *f;
 
@@ -2666,7 +2661,7 @@ void solo_gain(struct char_data *ch, struct char_data *victim)
     ch = GET_ORIGINAL(ch);
    }
   }
-  cl_sint64 exp;
+  int64_t exp;
 
   exp = MIN(2000000, GET_EXP(victim));
 

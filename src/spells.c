@@ -19,17 +19,13 @@
 #include "dg_scripts.h"
 #include "feats.h"
 #include "oasis.h"
+#include "config.h"
+#include "act.item.h"
+#include "act.movement.h"
+#include "races.h"
+#include "act.informative.h"
 
 /* external variables */
-extern room_rnum r_mortal_start_room;
-extern int mini_mud;
-extern obj_vnum portal_object;
-
-/* external functions */
-void clearMemory(struct char_data *ch);
-void weight_change_object(struct obj_data *obj, int weight);
-void name_to_drinkcon(struct obj_data *obj, int type);
-void name_from_drinkcon(struct obj_data *obj);
 
 /*
  * Special spells appear below.

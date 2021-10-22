@@ -30,7 +30,10 @@
 
 
 #include "clan.h"        // the interface we need to impleme
-
+#include "db.h"             // for LIB_ETC
+#include "comm.h"           // for send_to_char
+#include "interpreter.h"    // for ACMD()
+#include "utils.h"          // for CREATE() and IDNUM()
 
 extern char *strlwr(char *s);
 extern void send_editor_help(struct descriptor_data *d);

@@ -9,7 +9,19 @@
 ************************************************************************ */
 
 #include "objsave.h"
-
+#include "unistd.h"
+#include "errno.h"
+#include "structs.h"
+#include "comm.h"
+#include "handler.h"
+#include "db.h"
+#include "interpreter.h"
+#include "utils.h"
+#include "spells.h"
+#include "players.h"
+#include "class.h"
+#include "act.social.h"
+#include "act.item.h"
 
 /* local functions */
 

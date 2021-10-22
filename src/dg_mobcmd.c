@@ -45,25 +45,14 @@
 #include "comm.h"
 #include "spells.h"
 #include "constants.h"
-
-/*
- * External functions
- */
-bitvector_t asciiflag_conv(char *flag);
-zone_rnum real_zone_by_thing(room_vnum vznum);
-void die(struct char_data *ch, struct char_data *killer);
-room_rnum find_target_room(struct char_data *ch, char *rawroomstr);
-void search_replace(char *string, const char *find, const char *replace);
+#include "act.wizard.h"
+#include "act.offensive.h"
 
 /*
  * Local functions.
  */
 void mob_log(char_data *mob, const char *format, ...);
-ACMD(do_bite);
-ACMD(do_punch);
-ACMD(do_kick);
-ACMD(do_elbow);
-ACMD(do_knee);
+
 ACMD(do_masound);
 ACMD(do_mkill);
 ACMD(do_mheal);
@@ -164,23 +153,23 @@ ACMD(do_mheal)
         return;
     }
 
-    cl_sint64 amount = 0;
+    int64_t amount = 0;
     double num = atoi(arg2);
     double perc = num * 0.01;
 
     amount = GET_MAX_HIT(ch) * perc;
 
-    if (!str_cmp(arg, "pl")) {
+    if (!strcasecmp(arg, "pl")) {
 		GET_HIT(ch) += GET_MAX_HIT(ch) * num;
         if (GET_HIT(ch) > GET_MAX_HIT(ch)) {
          GET_HIT(ch) = GET_MAX_HIT(ch);
         } 
-    } else if (!str_cmp(arg, "ki")) {
+    } else if (!strcasecmp(arg, "ki")) {
 		GET_MANA(ch) += GET_MAX_MANA(ch) * num;
         if (GET_MANA(ch) > GET_MAX_MANA(ch)) {
          GET_MANA(ch) = GET_MAX_MANA(ch);
         } 
-    } else if (!str_cmp(arg, "st")) {
+    } else if (!strcasecmp(arg, "st")) {
 		GET_MOVE(ch) += GET_MAX_MOVE(ch) * num;
         if (GET_MOVE(ch) > GET_MAX_MOVE(ch)) {
          GET_MOVE(ch) = GET_MAX_MOVE(ch);
@@ -290,7 +279,7 @@ ACMD(do_mjunk)
         return;
     }
 
-    if (!str_cmp(arg, "all")) junk_all = 1;
+    if (!strcasecmp(arg, "all")) junk_all = 1;
 
     if ((find_all_dots(arg) != FIND_INDIV) && !junk_all) {
       /* Thanks to Carlos Myers for fixing the line below */
@@ -732,7 +721,7 @@ ACMD(do_mteleport)
     return;
   }
 
-  if (!str_cmp(arg1, "all")) {
+  if (!strcasecmp(arg1, "all")) {
     if (target == IN_ROOM(ch)) {
       mob_log(ch, "mteleport all target is itself");
       return;
@@ -827,7 +816,7 @@ ACMD(do_mforce)
         return;
     }
 
-    if (!str_cmp(arg, "all")) {
+    if (!strcasecmp(arg, "all")) {
         struct descriptor_data *i;
         char_data *vch;
 
@@ -1152,7 +1141,7 @@ ACMD(do_mdoor)
             strcat(newexit->general_description, "\r\n");
             break;
         case 2:  /* flags       */
-            newexit->exit_info = (sh_int)asciiflag_conv(value);
+            newexit->exit_info = (int16_t)asciiflag_conv(value);
             break;
         case 3:  /* key         */
             newexit->key = atoi(value);
