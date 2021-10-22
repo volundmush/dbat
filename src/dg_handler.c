@@ -13,16 +13,13 @@
 *  $Revision: 1.0.14 $                                                    *
 ***************************************************************************/
 
-
 #include "structs.h"
 #include "dg_scripts.h"
 #include "utils.h"
-#include "comm.h"
 #include "db.h"
 #include "handler.h"
-#include "spells.h"
 #include "dg_event.h"
-#include "constants.h"
+
 
 /* frees memory associated with var */
 void free_var_el(struct trig_var_data *var)
@@ -54,7 +51,7 @@ int remove_var(struct trig_var_data **var_list, char *name)
 {
   struct trig_var_data *i, *j;
 
-  for (j = NULL, i = *var_list; i && str_cmp(name, i->name);
+  for (j = NULL, i = *var_list; i && strcasecmp(name, i->name);
        j = i, i = i->next);
 
   if (i) {

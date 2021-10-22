@@ -3,9 +3,11 @@
 improved-edit.c		Routines specific to the improved editor.
 
 */
-
-
 #include "improved-edit.h"
+#include "utils.h"
+#include "db.h"
+#include "comm.h"
+#include "interpreter.h"
 
 int format_script(struct descriptor_data *d);
 

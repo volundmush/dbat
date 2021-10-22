@@ -10,19 +10,21 @@
 
 
 #include "magic.h"
-
-/* external variables */
-extern int mini_mud;
-
-/* external functions */
-void clearMemory(struct char_data *ch);
-void weight_change_object(struct obj_data *obj, int weight);
+#include "utils.h"
+#include "comm.h"
+#include "spells.h"
+#include "handler.h"
+#include "db.h"
+#include "interpreter.h"
+#include "constants.h"
+#include "dg_scripts.h"
+#include "feats.h"
+#include "mobact.h"
+#include "fight.h"
 
 /* local functions */
 int mag_materials(struct char_data *ch, int item0, int item1, int item2, int extract, int verbose);
 void perform_mag_groups(int level, struct char_data *ch, struct char_data *tch, int spellnum);
-void affect_update(void);
-void affect_update_violence(void);
 
 /* affect_update: called from comm.c (causes spells to wear off) */
 void affect_update(void)

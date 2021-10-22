@@ -8,9 +8,16 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-
 #include "spell_parser.h"
-
+#include "utils.h"
+#include "interpreter.h"
+#include "spells.h"
+#include "handler.h"
+#include "comm.h"
+#include "db.h"
+#include "dg_scripts.h"
+#include "fight.h"
+#include "act.other.h"
 
 /* extern globals */
 

@@ -14,18 +14,10 @@
 #include "genzon.h"
 #include "oasis.h"
 #include "dg_scripts.h"
-
-/*-------------------------------------------------------------------*/
-
-extern struct zone_data *zone_table;
-extern zone_rnum top_of_zone_table;
-extern struct index_data *mob_index;
-extern struct char_data *mob_proto;
-extern struct index_data *obj_index;
-extern struct obj_data *obj_proto;
-extern struct descriptor_data *descriptor_list;
-extern struct index_data **trig_index;
-/*-------------------------------------------------------------------*/
+#include "act.informative.h"
+#include "races.h"
+#include "act.wizard.h"
+#include "handler.h"
 
 /*
  * Nasty internal macros to clean up the code.
@@ -35,8 +27,7 @@ extern struct index_data **trig_index;
 
 /* Prototypes. */
 int start_change_command(struct descriptor_data *d, int pos);
-void search_replace(char *string, const char *find, const char *replace);
-ACMD(do_wiznet);
+
 
 /*-------------------------------------------------------------------*/
 
@@ -59,7 +50,7 @@ ACMD(do_oasis_zedit)
   if (!*buf1)
     number = GET_ROOM_VNUM(IN_ROOM(ch));
   else if (!isdigit(*buf1)) {
-    if (str_cmp("save", buf1) == 0) {
+    if (strcasecmp("save", buf1) == 0) {
       save = TRUE;
       
       if (is_number(buf2))
@@ -78,7 +69,7 @@ ACMD(do_oasis_zedit)
         return;
       }
     } else if (GET_ADMLEVEL(ch) >= ADMLVL_IMPL) {
-      if (str_cmp("new", buf1) || !buf3 || !*buf3)
+      if (strcasecmp("new", buf1) || !buf3 || !*buf3)
         send_to_char(ch, "Format: zedit new <zone number> <bottom-room> "
            "<upper-room>\r\n");
       else {

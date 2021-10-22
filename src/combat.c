@@ -11,76 +11,20 @@
 ************************************************************************ */
 
 #include "combat.h"
-
-/* external functions */
-int group_bonus(struct char_data *ch, int type);
-void mob_absorb(struct char_data *ch, struct char_data *vict);
-void perform_remove(struct char_data * ch, int pos);
-ACMD(do_stand);
-ACMD(do_get);
-ACMD(do_regenerate);
-ACMD(do_srepair);
-ACMD(do_punch);
-ACMD(do_elbow);
-ACMD(do_kick);
-ACMD(do_knee);
-ACMD(do_roundhouse);
-ACMD(do_uppercut);
-ACMD(do_heeldrop);
-ACMD(do_slam);
-ACMD(do_bash);
-ACMD(do_head);
-ACMD(do_tailwhip);
-ACMD(do_attack);
+#include "act.movement.h"
+#include "act.item.h"
+#include "mobact.h"
+#include "fight.h"
+#include "act.attack.h"
+#include "dg_comm.h"
+#include "utils.h"
+#include "comm.h"
+#include "act.item.h"
+#include "handler.h"
+#include "constants.h"
+#include "genzon.h"
 
 /* local functions */
-void handle_death_msg(struct char_data *ch, struct char_data *vict, int type);
-void parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char sname[1000], int prob, int perc, int skill, int type);
-void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2, int skill, int skill2);
-void damage_eq(struct char_data *vict, int location);
-void remove_limb(struct char_data *vict, int num);
-int check_skill(struct char_data *ch, int skill);
-int check_points(struct char_data *ch, cl_sint64 ki, cl_sint64 st);
-void pcost(struct char_data *ch, double ki, cl_sint64 st);
-void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, struct obj_data *obj, cl_sint64 dmg, int type);
-cl_sint64 damtype(struct char_data *ch, int type, int skill, double percent);
-int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj, int num);
-void huge_update(void);
-int init_skill(struct char_data *ch, int snum);
-int can_grav(struct char_data *ch);
-int limb_ok(struct char_data *ch, int type);
-int check_def(struct char_data *vict);
-void dam_eq_loc(struct char_data *vict, int area);
-void hurt_limb(struct char_data *ch, struct char_data *vict, int chance, int area, cl_sint64 power);
-int handle_speed(struct char_data *ch, struct char_data *vict);
-void handle_defense(struct char_data *vict, int *pry, int *blk, int *dge);
-void spar_gain(struct char_data *ch, struct char_data *vict, int type, cl_sint64 dmg);
-int chance_to_hit(struct char_data *ch);
-cl_sint64 armor_calc(struct char_data *ch, cl_sint64 dmg, int type);
-int roll_hitloc(struct char_data *ch, struct char_data *vict, int skill);
-long double calc_critical(struct char_data *ch, int loc);
-int roll_accuracy(struct char_data *ch, int skill, bool kiatt);
-cl_sint64 advanced_energy(struct char_data *ch, cl_sint64 dmg);
-int physical_mastery(struct char_data *ch);
-int count_physical(struct char_data *ch);
-int handle_dodge(struct char_data *ch);
-int handle_block(struct char_data *ch);
-void update_mob_absorb(void);
-void cut_limb(struct char_data *ch, struct char_data *vict, int wlvl, int hitspot);
-int backstab(struct char_data *ch, struct char_data *vict, int wlvl, cl_sint64 dmg);
-void club_stamina(struct char_data *ch, struct char_data *vict, int wlvl, cl_sint64 dmg);
-cl_sint64 gun_dam(struct char_data *ch, int wlvl);
-int boom_headshot(struct char_data *ch);
-void handle_knockdown(struct char_data *ch);
-int roll_balance(struct char_data *ch);
-cl_sint64 combo_damage(struct char_data *ch, cl_sint64 damage, int type);
-int check_ruby(struct char_data *ch);
-void combine_attacks(struct char_data *ch, struct char_data *vict);
-void handle_disarm(struct char_data *ch, struct char_data *vict);
-int handle_defender(struct char_data *vict, struct char_data *ch);
-void handle_multihit(struct char_data *ch, struct char_data *vict);
-void damage_weapon(struct char_data *ch, struct obj_data *obj, struct char_data *vict);
-
 void damage_weapon(struct char_data *ch, struct obj_data *obj, struct char_data *vict)
 {
 
@@ -89,7 +33,7 @@ void damage_weapon(struct char_data *ch, struct obj_data *obj, struct char_data 
      return;
    }
    int ranking = 0, material = 1;
-   cl_sint64 PL10 = 2000000000, PL9 = 2000000000, PL8 = 2000000000;
+   int64_t PL10 = 2000000000, PL9 = 2000000000, PL8 = 2000000000;
 
    PL10 = PL10 * 5;
    PL9 = PL9 * 4;
@@ -337,8 +281,8 @@ int handle_defender(struct char_data *vict, struct char_data *ch)
 
  if (GET_DEFENDER(vict)) {
   struct char_data *def = GET_DEFENDER(vict);
-  cl_sint64 defnum = (GET_SPEEDI(def) * 0.01) * rand_number(-10, 10);
-  cl_sint64 chnum = (GET_SPEEDI(ch) * 0.01) * rand_number(-5, 10);
+  int64_t defnum = (GET_SPEEDI(def) * 0.01) * rand_number(-10, 10);
+  int64_t chnum = (GET_SPEEDI(ch) * 0.01) * rand_number(-5, 10);
   if (GET_SPEEDI(def) + defnum > GET_SPEEDI(ch) + chnum && IN_ROOM(def) == IN_ROOM(vict) && GET_POS(def) > POS_SITTING) {
    act("@YYou move to and manage to intercept the attack aimed at @y$N@Y!@n", TRUE, def, 0, vict, TO_CHAR);
    act("@y$n@Y moves to and manages to intercept the attack aimed at YOU!@n", TRUE, def, 0, vict, TO_VICT);
@@ -423,7 +367,7 @@ void combine_attacks(struct char_data *ch, struct char_data *vict)
 
  struct follow_type *f;
  char chbuf[MAX_INPUT_LENGTH], victbuf[MAX_INPUT_LENGTH], rmbuf[MAX_INPUT_LENGTH]; 
- cl_sint64 bonus = 0;
+ int64_t bonus = 0;
  double maxki = 0.0;
  int totalmem = 1;
  int attspd = 0, blockable = TRUE, same = TRUE, attsk = 0, attavg = GET_SKILL(ch,  attack_skills[GET_COMBINE(ch)]);
@@ -539,7 +483,7 @@ void combine_attacks(struct char_data *ch, struct char_data *vict)
    return;
  }
 
- cl_sint64 totki = 0;
+ int64_t totki = 0;
 
  act(chbuf, TRUE, ch, 0, vict, TO_CHAR);
  act(victbuf, TRUE, ch, 0, vict, TO_VICT);
@@ -650,9 +594,9 @@ int check_ruby(struct char_data *ch)
 
 }
 
-cl_sint64 combo_damage(struct char_data *ch, cl_sint64 damage, int type)
+int64_t combo_damage(struct char_data *ch, int64_t damage, int type)
 {
- cl_sint64 bonus = 0;
+ int64_t bonus = 0;
 
  if (type == 0) { /* Not a finish */
   int hits = COMBHITS(ch);
@@ -756,9 +700,9 @@ int boom_headshot(struct char_data *ch)
 
 }
 
- cl_sint64 gun_dam(struct char_data *ch, int wlvl)
+ int64_t gun_dam(struct char_data *ch, int wlvl)
 {
-  cl_sint64 dmg = 100;
+  int64_t dmg = 100;
 
  switch (wlvl) {
   case 1:
@@ -783,7 +727,7 @@ int boom_headshot(struct char_data *ch)
  else if (GET_SKILL(ch, SKILL_GUN) >= 50)
   dmg += dmg * 0.5;
 
- cl_sint64 dmg_prior = 0;
+ int64_t dmg_prior = 0;
 
  dmg_prior = (dmg * GET_DEX(ch)) * ((GET_LEVEL(ch) / 5) + 1);
 
@@ -795,11 +739,11 @@ int boom_headshot(struct char_data *ch)
  return (dmg);
 }
 
-void club_stamina(struct char_data *ch, struct char_data *vict, int wlvl, cl_sint64 dmg)
+void club_stamina(struct char_data *ch, struct char_data *vict, int wlvl, int64_t dmg)
 {
 
  double drain = 0.0;
- cl_sint64 drained = 0;
+ int64_t drained = 0;
 
  switch (wlvl) {
   case 1:
@@ -834,7 +778,7 @@ void club_stamina(struct char_data *ch, struct char_data *vict, int wlvl, cl_sin
 
 }
 
-int backstab(struct char_data *ch, struct char_data *vict, int wlvl, cl_sint64 dmg)
+int backstab(struct char_data *ch, struct char_data *vict, int wlvl, int64_t dmg)
 {
 
  int chance = 0, roll_to_beat = rand_number(1, 100);
@@ -1098,7 +1042,7 @@ int physical_mastery(struct char_data *ch)
 
 }
 
-cl_sint64 advanced_energy(struct char_data *ch, cl_sint64 dmg)
+int64_t advanced_energy(struct char_data *ch, int64_t dmg)
 {
 
  if (ch == NULL) {
@@ -1107,7 +1051,7 @@ cl_sint64 advanced_energy(struct char_data *ch, cl_sint64 dmg)
 
  double rate = 0.00;
  int count = GET_LEVEL(ch);
- cl_sint64 add = 0;
+ int64_t add = 0;
 
  if (GET_BONUS(ch, BONUS_LEECH)) {
   rate = (double)(count) * 0.2;
@@ -1271,12 +1215,12 @@ int roll_hitloc(struct char_data *ch, struct char_data *vict, int skill)
 
 }
 
-cl_sint64 armor_calc(struct char_data *ch, cl_sint64 dmg, int type)
+int64_t armor_calc(struct char_data *ch, int64_t dmg, int type)
 {
  if (IS_NPC(ch))
   return (0);
 
- cl_sint64 reduce = 0;
+ int64_t reduce = 0;
 
   if (GET_ARMOR(ch) < 1000) {
    reduce = GET_ARMOR(ch) * 0.5;
@@ -1423,7 +1367,7 @@ int handle_speed(struct char_data *ch, struct char_data *vict)
 }
 
 /* For Destroying or Breaking Limbs */
-void hurt_limb(struct char_data *ch, struct char_data *vict, int chance, int area, cl_sint64 power)
+void hurt_limb(struct char_data *ch, struct char_data *vict, int chance, int area, int64_t power)
 {
  if (!vict || IS_NPC(vict)) {
   return;
@@ -1778,7 +1722,7 @@ void update_mob_absorb()
 void huge_update()
 {
  int dge = 0, skill = 0, bonus = 1, count = 0;
- cl_sint64 dmg = 0;
+ int64_t dmg = 0;
  struct obj_data *k;
  struct char_data *ch, *vict, *next_v;
  
@@ -2188,7 +2132,7 @@ void homing_update()
      if (handle_parry(vict) < rand_number(1, 140)) {
       act("@rThe $p@r slams into your body, exploding in a flash of bright light!@n", TRUE, vict, k, 0, TO_CHAR);
       act("@rThe $p@r slams into @R$n's@r body, exploding in a flash of bright light!@n", TRUE, vict, k, 0, TO_ROOM);
-      cl_sint64 dmg = KICHARGE(k);
+      int64_t dmg = KICHARGE(k);
       extract_obj(k);
       hurt(0, 0, ch, vict, NULL, dmg, 1);
       continue;
@@ -2227,11 +2171,11 @@ void homing_update()
       if (GET_OBJ_VNUM(k) != 84) {
        act("@rThe $p@r slams into your body, exploding in a flash of bright light!@n", TRUE, vict, k, 0, TO_CHAR);
        act("@rThe $p@r slams into @R$n's@r body, exploding in a flash of bright light!@n", TRUE, vict, k, 0, TO_ROOM);
-       cl_sint64 dmg = KICHARGE(k);
+       int64_t dmg = KICHARGE(k);
        extract_obj(k);
        hurt(0, 0, ch, vict, NULL, dmg, 1);
       } else if (GET_OBJ_VNUM(k) == 84) {
-       cl_sint64 dmg = KICHARGE(k);
+       int64_t dmg = KICHARGE(k);
       if (dmg > GET_MAX_HIT(vict) / 5 && (!IS_MAJIN(vict) && !IS_BIO(vict))) {
        act("@R$N@r is cut in half by the attack!@n", TRUE, ch, 0, vict, TO_CHAR);
        act("@rYou are cut in half by the attack!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -2617,7 +2561,7 @@ void parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char
      char buf2[200];
      char buf3[200];
      int foundv = FALSE, foundo = FALSE;
-     cl_sint64 dmg = 0;
+     int64_t dmg = 0;
      struct obj_data *tob, *next_obj;
      struct char_data *tch, *next_v;
 
@@ -2972,9 +2916,9 @@ void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2,
 }
 
 /* Damage for player and NPC attacks  */
-cl_sint64 damtype(struct char_data *ch, int type, int skill, double percent)
+int64_t damtype(struct char_data *ch, int type, int skill, double percent)
 {
- cl_sint64 dam = 0, cou1 = 0, cou2 = 0, focus = 0;
+ int64_t dam = 0, cou1 = 0, cou2 = 0, focus = 0;
 
  /* Player damages based on attack */
  if (!IS_NPC(ch)) {
@@ -3609,8 +3553,8 @@ cl_sint64 damtype(struct char_data *ch, int type, int skill, double percent)
    case 26: /* Tribeam */
     if (!IS_NPC(ch) && percent > 0.15) {
      double hitperc = (percent - 0.15) * 5;
-     cl_sint64 amount = gear_pl(ch) * hitperc;
-     cl_sint64 difference = GET_HIT(ch) - amount;
+     int64_t amount = gear_pl(ch) * hitperc;
+     int64_t difference = GET_HIT(ch) - amount;
 
      if (difference < 1) {
       dam = GET_MAX_MANA(ch) * percent;
@@ -4186,7 +4130,7 @@ cl_sint64 damtype(struct char_data *ch, int type, int skill, double percent)
     dam += GET_INT(ch) * (dam * 0.005);
    }
   
-   cl_sint64 mobperc = (GET_HIT(ch) * 100) / GET_MAX_HIT(ch);
+   int64_t mobperc = (GET_HIT(ch) * 100) / GET_MAX_HIT(ch);
    if (mobperc < 98 && mobperc >= 90) {
     dam = dam * 0.95;
    } else if (mobperc < 90 && mobperc >= 80) {
@@ -4312,10 +4256,10 @@ void saiyan_gain(struct char_data *ch, struct char_data *vict)
 
 }
 
-void spar_gain(struct char_data *ch, struct char_data *vict, int type, cl_sint64 dmg)
+void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t dmg)
 {
  int chance = 0, gmult, gravity, bonus = 1, pscost = 2, difference = 0;
- cl_sint64 gain = 0, pl = 0, ki = 0, st = 0, gaincalc = 0;
+ int64_t gain = 0, pl = 0, ki = 0, st = 0, gaincalc = 0;
 
  if (ch != NULL && !IS_NPC(ch)) {
   if (dmg > GET_MAX_HIT(vict) / 10) {
@@ -4367,7 +4311,7 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, cl_sint64
   }
 
   if (chance >= rand_number(60, 75)) {
-   cl_sint64 num = 0,  maxnum = 500000;
+   int64_t num = 0,  maxnum = 500000;
    if (GET_LEVEL(ch) >= 70) {
     num += GET_LEVEL(ch) * 10000;
    } else if (GET_LEVEL(ch) >= 60) {
@@ -4510,7 +4454,7 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, cl_sint64
   }
 
   if (chance >= rand_number(60, 75)) {
-   cl_sint64 num = 0, maxnum = 500000;
+   int64_t num = 0, maxnum = 500000;
 
    if (GET_LEVEL(vict) >= 70) {
     num += GET_LEVEL(vict) * 10000;
@@ -4786,7 +4730,7 @@ int check_skill(struct char_data *ch, int skill)
 }
 
 /* Whether they have enough stamina or charged ki to preform the skill */
-int check_points(struct char_data *ch, cl_sint64 ki, cl_sint64 st)
+int check_points(struct char_data *ch, int64_t ki, int64_t st)
 {
 
  if (GET_PREFERENCE(ch) == PREFERENCE_H2H && GET_CHARGE(ch) >= GET_MAX_MANA(ch) * 0.1) {
@@ -4811,7 +4755,7 @@ int check_points(struct char_data *ch, cl_sint64 ki, cl_sint64 st)
   }
   if (GET_CHARGE(ch) < ki) {
    send_to_char(ch, "You do not have enough ki charged.\r\n");
-   cl_sint64 perc = GET_MAX_MANA(ch) * 0.01;
+   int64_t perc = GET_MAX_MANA(ch) * 0.01;
    if (ki >= perc * 49) {
     send_to_char(ch, "You need at least 50 percent charged.\r\n");
    }
@@ -4872,7 +4816,7 @@ int check_points(struct char_data *ch, cl_sint64 ki, cl_sint64 st)
 }
 
 /* Subtract the stamina or ki required */
-void pcost(struct char_data *ch, double ki, cl_sint64 st)
+void pcost(struct char_data *ch, double ki, int64_t st)
 {
  int before = 0;
  if (GET_LEVEL(ch) > 1 && !IS_NPC(ch)) {
@@ -4941,10 +4885,10 @@ void pcost(struct char_data *ch, double ki, cl_sint64 st)
 }
 
 /* Main damage function for RDBS 'Real Dragonball Battle System' */
-void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, struct obj_data *obj, cl_sint64 dmg, int type)
+void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, struct obj_data *obj, int64_t dmg, int type)
 {
- cl_sint64 index = 0;
- cl_sint64 maindmg = dmg, beforered = dmg;
+ int64_t index = 0;
+ int64_t maindmg = dmg, beforered = dmg;
  int dead = FALSE;
 
  /* If a character is trageted */
@@ -5006,7 +4950,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
   }
 
   if (IS_MUTANT(vict) && (GET_GENOME(vict, 0) == 8 || GET_GENOME(vict, 1) == 8) && type == 0) {
-   cl_sint64 drain = dmg * 0.1;
+   int64_t drain = dmg * 0.1;
    dmg -= drain;
    GET_MOVE(ch) -= drain;
    if (GET_MOVE(ch) < 0) {
@@ -5038,7 +4982,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
     } else if (COMBHITS(ch) < physical_mastery(ch)) {
      dmg += combo_damage(ch, dmg, 0);
      if ((COMBHITS(ch) == 10 || COMBHITS(ch) == 20 || COMBHITS(ch) == 30) && (level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0 || GET_LEVEL(ch) == 100)) {
-      cl_sint64 gain = GET_LEVEL(ch) * 1000;
+      int64_t gain = GET_LEVEL(ch) * 1000;
       if (GET_SKILL(ch, SKILL_STYLE) >= 100) {
        gain += gain * 2;
       } else if (GET_SKILL(ch, SKILL_STYLE) >= 80) {
@@ -5056,7 +5000,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
     } else {
      dmg += combo_damage(ch, dmg, 1);
      if ((COMBHITS(ch) == 10 || COMBHITS(ch) == 20 || COMBHITS(ch) == 30) && (level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0 || GET_LEVEL(ch) == 100)) {
-      cl_sint64 gain = GET_LEVEL(ch) * 1000;
+      int64_t gain = GET_LEVEL(ch) * 1000;
       if (GET_SKILL(ch, SKILL_STYLE) >= 100) {
        gain += gain * 2;
       } else if (GET_SKILL(ch, SKILL_STYLE) >= 80) {
@@ -5129,7 +5073,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
     dmg = 0;
   }
 
-  cl_sint64 conlimit = 2000000000;
+  int64_t conlimit = 2000000000;
   
   if (type == 0) {
    if (GET_MAX_HIT(vict) < conlimit) {
@@ -5249,7 +5193,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
   dmg += (dmg / 100) * 20;
  }
 
- if (GET_CLAN(vict) != NULL && !str_cmp(GET_CLAN(vict), "Heavenly Kaios")) {
+ if (GET_CLAN(vict) != NULL && !strcasecmp(GET_CLAN(vict), "Heavenly Kaios")) {
   if (GET_MANA(vict) >= GET_MAX_MANA(vict) / 2) {
    dmg -= (dmg / 100) * 20;
    act("@wYou are covered in a pristine @Cglow@w.@n", TRUE, vict, 0, 0, TO_CHAR);
@@ -5296,7 +5240,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
  }
 
  if (!AFF_FLAGGED(vict, AFF_KNOCKED) && (GET_POS(vict) == POS_SITTING || GET_POS(vict) == POS_RESTING) && GET_SKILL(vict, SKILL_ROLL) > axion_dice(0)) {
-  cl_sint64 rollcost = (GET_MAX_HIT(vict) / 300) * (GET_STR(ch) / 2);
+  int64_t rollcost = (GET_MAX_HIT(vict) / 300) * (GET_STR(ch) / 2);
   if (GET_MOVE(vict) >= rollcost) {
    act("@GYou roll to your feet in an agile fashion!@n", TRUE, vict, 0, 0, TO_CHAR);
    act("@G$n rolls to $s feet in an agile fashion!@n", TRUE, vict, 0, 0, TO_ROOM);
@@ -5572,7 +5516,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         act("@c$N@w barely clings to life!@n", TRUE, ch, 0, vict, TO_CHAR);
         act("@CYou barely cling to life!@n", TRUE, ch, 0, vict, TO_VICT);
         act("@c$N@w barely clings to life!@n.", TRUE, ch, 0, vict, TO_NOTVICT);
-        cl_sint64 lifeloss = dmg - GET_HIT(vict);
+        int64_t lifeloss = dmg - GET_HIT(vict);
         GET_LIFEFORCE(vict) -= lifeloss;
         send_to_char(vict, "@D[@CLifeforce@D: @R-%s@D]\n", add_commas(lifeloss));
       if (GET_LIFEFORCE(vict) >= GET_LIFEMAX(vict) * 0.05) {
@@ -5597,7 +5541,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
    }
    if (dmg > 1) {
     if (type <= 0 && GET_HIT(ch) >= (gear_pl(ch) * 0.5)) {
-     cl_sint64 raise = (GET_MAX_MANA(ch) * 0.005) + 1;
+     int64_t raise = (GET_MAX_MANA(ch) * 0.005) + 1;
      if (GET_MANA(ch) + raise < GET_MAX_MANA(ch))
       GET_MANA(ch) += raise;
      else
@@ -5605,7 +5549,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
     }
     send_to_char(ch, "@D[@GDamage@W: @R%s@D]@n\r\n", add_commas(dmg));
     send_to_char(vict, "@D[@rDamage@W: @R%s@D]@n\r\n", add_commas(dmg));
-    cl_sint64 healhp = (long double)(GET_MAX_HIT(vict)) * 0.12;
+    int64_t healhp = (long double)(GET_MAX_HIT(vict)) * 0.12;
     if (AFF_FLAGGED(ch, AFF_METAMORPH) && GET_HIT(ch) <= GET_MAX_HIT(ch)) {
      act("@RYour dark aura saps some of @r$N's@R life energy!@n", TRUE, ch, 0, vict, TO_CHAR);
      act("@r$n@R's dark aura saps some of your life energy!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -5620,11 +5564,11 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
     if (!is_sparring(ch) && IS_NPC(vict)) {
      if (type == 0 && rand_number(1, 100) >= 97) {
       send_to_char(ch, "@YY@yo@Yu @yg@Ya@yi@Yn@y s@Yo@ym@Ye @yb@Yo@yn@Yu@ys @Ye@yx@Yp@ye@Yr@yi@Ye@yn@Yc@ye@Y!@n\r\n");
-      cl_sint64 gain = GET_EXP(vict) * 0.05;
+      int64_t gain = GET_EXP(vict) * 0.05;
       gain += 1;
       gain_exp(ch, gain);
      } else if (type != 0 && rand_number(1, 100) >= 93) {
-      cl_sint64 gain = GET_EXP(vict) * 0.05;
+      int64_t gain = GET_EXP(vict) * 0.05;
       gain += 1;
       gain_exp(ch, gain);
      }
@@ -5678,7 +5622,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
    }
    if (dmg > 1 && suppresso == FALSE) {
     if (type == 0 && GET_HIT(ch) >= (gear_pl(ch) * 0.5)) {
-     cl_sint64 raise = (GET_MAX_MANA(ch) * 0.005) + 1;
+     int64_t raise = (GET_MAX_MANA(ch) * 0.005) + 1;
      if (GET_MANA(ch) + raise < GET_MAX_MANA(ch))
       GET_MANA(ch) += raise;
      else
@@ -5692,7 +5636,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
     }
     send_to_char(ch, "@D[@GDamage@W: @R%s@D]@n", add_commas(dmg));
     send_to_char(vict, "@D[@rDamage@W: @R%s@D]@n\r\n", add_commas(dmg));
-    //cl_sint64 healhp = GET_HIT(vict) * 0.12;
+    //int64_t healhp = GET_HIT(vict) * 0.12;
     if (GET_EQ(ch, WEAR_EYE) && vict && !PRF_FLAGGED(ch, PRF_NODEC)) {
      if (IS_ANDROID(vict)) {
       send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
@@ -5731,7 +5675,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
     send_to_char(ch, "@D[@GDamage@W: @R%s@D]@n", add_commas(dmg));
     send_to_char(vict, "@D[@rDamage@W: @R%s @c-Suppression-@D]@n\r\n", add_commas(dmg));
     send_to_char(vict, "@D[Suppression@W: @G%s@D]@n\r\n", add_commas(GET_SUPP(vict)));
-    //cl_sint64 healhp = GET_HIT(vict) * 0.12;
+    //int64_t healhp = GET_HIT(vict) * 0.12;
     if (GET_EQ(ch, WEAR_EYE) && vict && !PRF_FLAGGED(ch, PRF_NODEC)) {
      if (IS_ANDROID(vict)) {
       send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
@@ -5918,7 +5862,7 @@ void handle_cooldown(struct char_data *ch, int cooldown)
 
   reveal_hiding(ch, 0);
   int  waitCalc = 10, base = cooldown;
-  cl_sint64 cspd = 0;
+  int64_t cspd = 0;
 
   /* Ok calculating speed. */
   cspd = GET_SPEEDI(ch);
@@ -6669,7 +6613,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict)
 void handle_spiral(struct char_data *ch, struct char_data *vict, int skill, int first)
 {
  int prob, perc, avo, index, pry = 2, dge = 2, blk = 2;
- cl_sint64 dmg;
+ int64_t dmg;
  double amount = 0.0;
 
  if (first == FALSE) {

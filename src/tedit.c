@@ -14,23 +14,7 @@
 #include "oasis.h"
 #include "improved-edit.h"
 #include "tedit.h"
-
-extern char *credits;
-extern char *news;
-extern char *motd;
-extern char *imotd;
-extern char *help;
-extern char *info;
-extern char *background;
-extern char *handbook;
-extern char *policies;
-extern char *ihelp;
-extern time_t NEWSUPDATE;
-extern int TOP_OF_NEWS;
-extern char *NEWS_TITLE;
-extern struct time_info_data time_info;
-extern void save_mud_time(struct time_info_data *when);
-ACMD(do_reboot);
+#include "config.h"
 
 void news_string_cleanup(struct descriptor_data *d, int terminator)
 {

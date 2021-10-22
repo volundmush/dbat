@@ -9,45 +9,14 @@
 ************************************************************************ */
 
 #include "spec_assign.h"
-
-
-
-/* external globals */
-extern int mini_mud;
-
-/* external functions */
-SPECIAL(dump);
-SPECIAL(pet_shops);
-SPECIAL(auction);
-SPECIAL(postmaster);
-SPECIAL(cityguard);
-SPECIAL(receptionist);
-SPECIAL(cryogenicist);
-SPECIAL(guild_guard);
-SPECIAL(puff);
-SPECIAL(fido);
-SPECIAL(janitor);
-SPECIAL(mayor);
-SPECIAL(snake);
-SPECIAL(thief);
-SPECIAL(magic_user);
-SPECIAL(bank);
-SPECIAL(gravity);
-SPECIAL(healtank);
-SPECIAL(lyrzaxyn);
-SPECIAL(azimer);
-SPECIAL(dziak);
-SPECIAL(cleric_ao);
-SPECIAL(cleric_marduk);
-SPECIAL(gauntlet_room); 
-SPECIAL(gauntlet_end); 
-SPECIAL(gauntlet_rest);
-SPECIAL(augmenter);
+#include "db.h"
+#include "interpreter.h"
+#include "utils.h"
+#include "spec_procs.h"
+#include "objsave.h"
+#include "mail.h"
 
 /* local functions */
-void assign_mobiles(void);
-void assign_objects(void);
-void assign_rooms(void);
 void ASSIGNROOM(room_vnum room, SPECIAL(fname));
 void ASSIGNMOB(mob_vnum mob, SPECIAL(fname));
 void ASSIGNOBJ(obj_vnum obj, SPECIAL(fname));

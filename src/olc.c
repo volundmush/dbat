@@ -14,7 +14,7 @@
  *  NOT DONE!!
  */
 
-#include "structs.h"
+#include "olc.h"
 #include "utils.h"
 #include "comm.h"
 #include "interpreter.h"

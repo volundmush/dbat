@@ -20,20 +20,15 @@
 #include "constants.h"
 #include "spells.h"
 #include "handler.h"
+#include "races.h"
+#include "act.wizard.h"
+#include "act.informative.h"
 
 /*------------------------------------------------------------------------*/
 
 /*
  * External data structures.
  */
-extern struct room_data *world;
-extern struct obj_data *obj_proto;
-extern struct char_data *mob_proto;
-extern struct zone_data *zone_table;
-extern struct descriptor_data *descriptor_list;
-extern void update_space(void);
-void search_replace(char *string, const char *find, const char *replace);
-ACMD(do_wiznet);
 
 /*------------------------------------------------------------------------*/
 
@@ -85,7 +80,7 @@ ACMD(do_oasis_redit)
   if (!*buf1 || GET_ADMLEVEL(ch) < 1)
     number = GET_ROOM_VNUM(IN_ROOM(ch));
   else if (!isdigit(*buf1)) {
-    if (str_cmp("save", buf1) != 0) {
+    if (strcasecmp("save", buf1) != 0) {
       send_to_char(ch, "Yikes!  Stop that, someone will get hurt!\r\n");
       return;
     }

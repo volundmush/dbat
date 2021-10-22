@@ -6,34 +6,31 @@
 /** Copyright 2002 Kip Potter [Mythran] (kip_potter@hotmail.com)             **/
 /******************************************************************************/
 
-#include "structs.h"
+#include "oasis_copy.h"
+#include "dg_comm.h"
+#include "dg_olc.h"
+#include "act.wizard.h"
 #include "utils.h"
-#include "comm.h"
 #include "interpreter.h"
-#include "handler.h"
+#include "comm.h"
 #include "db.h"
+#include "config.h"
 #include "genolc.h"
-#include "genzon.h"
 #include "genwld.h"
-#include "oasis.h"
-#include "improved-edit.h"
-#include "constants.h"
-#include "shop.h"
 #include "genshp.h"
-#include "dg_scripts.h"
-
+#include "constants.h"
 
 /******************************************************************************/
 /** Internal Functions                                                       **/
 /******************************************************************************/
-ACMD(do_dig);
+
 room_vnum redit_find_new_vnum(zone_rnum zone);
-int buildwalk(struct char_data *ch, int dir);
+
 
 /* External Functions */
-extern void update_space(void);
-void send_to_imm(char *messg, ...);
-void trigedit_save(struct descriptor_data *d);
+
+
+
 void redit_save_internally(struct descriptor_data *d);
 void oedit_save_internally(struct descriptor_data *d);
 void medit_save_internally(struct descriptor_data *d);

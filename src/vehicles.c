@@ -9,6 +9,14 @@
 *  Vehicle.c written by Chris Jacobson <fear@athenet.net>		 *
 *************************************************************************/
 #include "vehicles.h"
+#include "utils.h"
+#include "comm.h"
+#include "interpreter.h"
+#include "handler.h"
+#include "db.h"
+#include "constants.h"
+#include "class.h"
+#include "races.h"
 
 #ifndef EXITN
 #  define EXITN(room, door)		(world[room].dir_option[door])
@@ -87,49 +95,49 @@ static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, ch
 {
  int landspot = 50;
  if (GET_ROOM_VNUM(IN_ROOM(vehicle)) == 50) { // Above Earth
-  if (!str_cmp(arg, "Nexus City")) {
+  if (!strcasecmp(arg, "Nexus City")) {
     landspot = 300;
     landspot += rand_number(0, 63);
     return (landspot);
-  } else if (!str_cmp(arg, "South Ocean")) {
+  } else if (!strcasecmp(arg, "South Ocean")) {
     landspot = 800;
     landspot += rand_number(0, 99);
     return (landspot);
-  } else if (!str_cmp(arg, "Nexus Field")) {
+  } else if (!strcasecmp(arg, "Nexus Field")) {
     landspot = 1150;
     landspot += rand_number(-16, 28);
     return (landspot);
-  } else if (!str_cmp(arg, "Cherry Blossom Mountain")) {
+  } else if (!strcasecmp(arg, "Cherry Blossom Mountain")) {
     landspot = 1180;
     landspot += rand_number(0, 19);
     return (landspot);
-  } else if (!str_cmp(arg, "Sandy Desert")) {
+  } else if (!strcasecmp(arg, "Sandy Desert")) {
     landspot = 1287;
     landspot += rand_number(0, 64);
     return (landspot);
-  } else if (!str_cmp(arg, "Northern Plains")) {
+  } else if (!strcasecmp(arg, "Northern Plains")) {
     landspot = 1428;
     landspot += rand_number(0, 55);
     return (landspot);
-  } else if (!str_cmp(arg, "Korin's Tower")) {
+  } else if (!strcasecmp(arg, "Korin's Tower")) {
     return (1456);
-  } else if (!str_cmp(arg, "Kami's Lookout")) {
+  } else if (!strcasecmp(arg, "Kami's Lookout")) {
     landspot = 1506;
     landspot += rand_number(0, 30);
     return (landspot);
-  } else if (!str_cmp(arg, "Shadow Forest")) {
+  } else if (!strcasecmp(arg, "Shadow Forest")) {
     landspot = 1600;
     landspot += rand_number(0, 66);
     return (landspot);
-  } else if (!str_cmp(arg, "Decrepit Area")) {
+  } else if (!strcasecmp(arg, "Decrepit Area")) {
    return (1710);
-  } else if (!str_cmp(arg, "West City")) {
+  } else if (!strcasecmp(arg, "West City")) {
    return (19510);
-  } else if (!str_cmp(arg, "Hercule Beach")) {
+  } else if (!strcasecmp(arg, "Hercule Beach")) {
     landspot = 2141;
     landspot += rand_number(0, 53);
     return (landspot);
-  } else if (!str_cmp(arg, "Satan City")) {
+  } else if (!strcasecmp(arg, "Satan City")) {
     landspot = 1150;
     landspot += rand_number(-16, 28);
     return (landspot);
@@ -139,174 +147,174 @@ static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, ch
    return (300);
   }
  } else if (GET_ROOM_VNUM(IN_ROOM(vehicle)) == 51) { // Above Frigid
-  if (!str_cmp(arg, "Ice Crown City")) {
+  if (!strcasecmp(arg, "Ice Crown City")) {
    return (4264);
-  } else if (!str_cmp(arg, "Ice Highway")) {
+  } else if (!strcasecmp(arg, "Ice Highway")) {
    return (4300);
-  } else if (!str_cmp(arg, "Topica Snowfield")) {
+  } else if (!strcasecmp(arg, "Topica Snowfield")) {
    return (4351);
-  } else if (!str_cmp(arg, "Glug's Volcano")) {
+  } else if (!strcasecmp(arg, "Glug's Volcano")) {
    return (4400);
-  } else if (!str_cmp(arg, "Platonic Sea")) {
+  } else if (!strcasecmp(arg, "Platonic Sea")) {
    return (4600);
-  } else if (!str_cmp(arg, "Slave City")) {
+  } else if (!strcasecmp(arg, "Slave City")) {
    return (4800);
-  } else if (!str_cmp(arg, "Acturian Woods")) {
+  } else if (!strcasecmp(arg, "Acturian Woods")) {
    return (5100);
-  } else if (!str_cmp(arg, "Desolate Demesne")) {
+  } else if (!strcasecmp(arg, "Desolate Demesne")) {
    return (5150);
-  } else if (!str_cmp(arg, "Chateau Ishran")) {
+  } else if (!strcasecmp(arg, "Chateau Ishran")) {
    return (5165);
-  } else if (!str_cmp(arg, "Wyrm Spine Mountain")) {
+  } else if (!strcasecmp(arg, "Wyrm Spine Mountain")) {
    return (5200);
-  } else if (!str_cmp(arg, "Cloud Ruler Temple")) {
+  } else if (!strcasecmp(arg, "Cloud Ruler Temple")) {
    return (5500);
-  } else if (!str_cmp(arg, "Koltoan Mine")) {
+  } else if (!strcasecmp(arg, "Koltoan Mine")) {
    return (4944);
   } else {
    send_to_char(ch, "You don't know where that made up place is, but decided to land anyway.");
    return (4264);
   }
  } else if (GET_ROOM_VNUM(IN_ROOM(vehicle)) == 52) { // Above Konack
-  if (!str_cmp(arg, "Tiranoc City")) {
+  if (!strcasecmp(arg, "Tiranoc City")) {
    return (8006);
-  } else if (!str_cmp(arg, "Great Oroist Temple")) {
+  } else if (!strcasecmp(arg, "Great Oroist Temple")) {
    return (8300);
-  } else if (!str_cmp(arg, "Elzthuan Forest")) {
+  } else if (!strcasecmp(arg, "Elzthuan Forest")) {
    return (8400);
-  } else if (!str_cmp(arg, "Mazori Farm")) {
+  } else if (!strcasecmp(arg, "Mazori Farm")) {
    return (8447);
-  } else if (!str_cmp(arg, "Dres")) {
+  } else if (!strcasecmp(arg, "Dres")) {
    return (8500);
-  } else if (!str_cmp(arg, "Colvian Farm")) {
+  } else if (!strcasecmp(arg, "Colvian Farm")) {
    return (8600);
-  } else if (!str_cmp(arg, "St Alucia")) {
+  } else if (!strcasecmp(arg, "St Alucia")) {
    return (8700);
-  } else if (!str_cmp(arg, "Meridius Memorial")) {
+  } else if (!strcasecmp(arg, "Meridius Memorial")) {
    return (8800);
-  } else if (!str_cmp(arg, "Desert of Illusion")) {
+  } else if (!strcasecmp(arg, "Desert of Illusion")) {
    return (8900);
-  } else if (!str_cmp(arg, "Plains of Confusion")) {
+  } else if (!strcasecmp(arg, "Plains of Confusion")) {
    return (8954);
-  } else if (!str_cmp(arg, "Turlon Fair")) {
+  } else if (!strcasecmp(arg, "Turlon Fair")) {
    return (9200);
-  } else if (!str_cmp(arg, "Wetlands")) {
+  } else if (!strcasecmp(arg, "Wetlands")) {
    return (9700);
-  } else if (!str_cmp(arg, "Kerberos")) {
+  } else if (!strcasecmp(arg, "Kerberos")) {
    return (9855);
-  } else if (!str_cmp(arg, "Shaeras Mansion")) {
+  } else if (!strcasecmp(arg, "Shaeras Mansion")) {
    return (9864);
-  } else if (!str_cmp(arg, "Slavinus Ravine")) {
+  } else if (!strcasecmp(arg, "Slavinus Ravine")) {
    return (9900);
-  } else if (!str_cmp(arg, "Furian Citadel")) {
+  } else if (!strcasecmp(arg, "Furian Citadel")) {
    return (9949);
   } else {
    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
    return (8006);
   }
  } else if (GET_ROOM_VNUM(IN_ROOM(vehicle)) == 53) { // Above Vegeta
-  if (!str_cmp(arg, "Vegetos City")) {
+  if (!strcasecmp(arg, "Vegetos City")) {
    return (2226);
-  } else if (!str_cmp(arg, "Blood Dunes")) {
+  } else if (!strcasecmp(arg, "Blood Dunes")) {
    return (2600);
-  } else if (!str_cmp(arg, "Ancestral Mountains")) {
+  } else if (!strcasecmp(arg, "Ancestral Mountains")) {
    return (2616);
-  } else if (!str_cmp(arg, "Destopa Swamp")) {
+  } else if (!strcasecmp(arg, "Destopa Swamp")) {
    return (2709);
-  } else if (!str_cmp(arg, "Pride forest")) {
+  } else if (!strcasecmp(arg, "Pride forest")) {
    return (2800);
-  } else if (!str_cmp(arg, "Pride Tower")) {
+  } else if (!strcasecmp(arg, "Pride Tower")) {
    return (2899);
-  } else if (!str_cmp(arg, "Ruby Cave")) {
+  } else if (!strcasecmp(arg, "Ruby Cave")) {
    return (2615);
   } else {
    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
    return (2226);
   }
  } else if (GET_ROOM_VNUM(IN_ROOM(vehicle)) == 54) { // Above Namek
-  if (!str_cmp(arg, "Senzu Village")) {
+  if (!strcasecmp(arg, "Senzu Village")) {
    return (11600);
-  } else if (!str_cmp(arg, "Guru's House")) {
+  } else if (!strcasecmp(arg, "Guru's House")) {
    return (10182);
-  } else if (!str_cmp(arg, "Crystalline Cave")) {
+  } else if (!strcasecmp(arg, "Crystalline Cave")) {
    return (10474);
-  } else if (!str_cmp(arg, "Elder Village")) {
+  } else if (!strcasecmp(arg, "Elder Village")) {
    return (13300);
-  } else if (!str_cmp(arg, "Frieza's Ship")) {
+  } else if (!strcasecmp(arg, "Frieza's Ship")) {
    return (10203);
-  } else if (!str_cmp(arg, "Kakureta Village")) {
+  } else if (!strcasecmp(arg, "Kakureta Village")) {
    return (10922);
   } else {
    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
    return (11600);
   }
  } else if (GET_ROOM_VNUM(IN_ROOM(vehicle)) == 55) { // Above Aether
-  if (!str_cmp(arg, "Haven City")) {
+  if (!strcasecmp(arg, "Haven City")) {
    return (12010);
-  } else if (!str_cmp(arg, "Serenity Lake")) {
+  } else if (!strcasecmp(arg, "Serenity Lake")) {
    return (12103);
-  } else if (!str_cmp(arg, "Kaiju Forest")) {
+  } else if (!strcasecmp(arg, "Kaiju Forest")) {
    return (12300);
-  } else if (!str_cmp(arg, "Ortusian Temple")) {
+  } else if (!strcasecmp(arg, "Ortusian Temple")) {
    return (12400);
-  } else if (!str_cmp(arg, "Silent Glade")) {
+  } else if (!strcasecmp(arg, "Silent Glade")) {
    return (12480);
   } else {
    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
    return (12010);
   }
  } else if (GET_ROOM_VNUM(IN_ROOM(vehicle)) == 56) { // Above Yardrat
-  if (!str_cmp(arg, "Yardra City")) {
+  if (!strcasecmp(arg, "Yardra City")) {
    return (14008);
-  } else if (!str_cmp(arg, "Jade Forest")) {
+  } else if (!strcasecmp(arg, "Jade Forest")) {
    return (14100);
-  } else if (!str_cmp(arg, "Jade Cliffs")) {
+  } else if (!strcasecmp(arg, "Jade Cliffs")) {
    return (14200);
-  } else if (!str_cmp(arg, "Mount Valaria")) {
+  } else if (!strcasecmp(arg, "Mount Valaria")) {
    return (14300);
   } else {
    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
    return (14008);
   }
  } else if (GET_ROOM_VNUM(IN_ROOM(vehicle)) == 198) { // Above Cerria
-  if (!str_cmp(arg, "Cerria Colony")) {
+  if (!strcasecmp(arg, "Cerria Colony")) {
    return (17531);
-  } else if (!str_cmp(arg, "Crystalline Forest")) {
+  } else if (!strcasecmp(arg, "Crystalline Forest")) {
    return (7950);
-  } else if (!str_cmp(arg, "Fistarl Volcano")) {
+  } else if (!strcasecmp(arg, "Fistarl Volcano")) {
    return (17420);
   } else {
    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
    return (17531);
   }
  } else if (GET_ROOM_VNUM(IN_ROOM(vehicle)) == 57) { // Above Zennith
-  if (!str_cmp(arg, "Utatlan City")) {
+  if (!strcasecmp(arg, "Utatlan City")) {
    return (3412);
-  } else if (!str_cmp(arg, "Zenith Jungle")) {
+  } else if (!strcasecmp(arg, "Zenith Jungle")) {
    return (3520);
-  } else if (!str_cmp(arg, "Ancient Castle")) {
+  } else if (!strcasecmp(arg, "Ancient Castle")) {
    return (19600);
   } else {
    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
    return (3412);
   }
  } else if (GET_ROOM_VNUM(IN_ROOM(vehicle)) == 58) { // Above Kanassa
-  if (!str_cmp(arg, "Aquis City")) {
+  if (!strcasecmp(arg, "Aquis City")) {
    return (14904);
-  } else if (!str_cmp(arg, "Yunkai Pirate Base")) {
+  } else if (!strcasecmp(arg, "Yunkai Pirate Base")) {
    return (15655);
   } else {
    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
    return (14904);
   }
  } else if (GET_ROOM_VNUM(IN_ROOM(vehicle)) == 59) { // Above Arlia
-  if (!str_cmp(arg, "Janacre")) {
+  if (!strcasecmp(arg, "Janacre")) {
    return (16009);
-  } else if (!str_cmp(arg, "Arlian Wasteland")) {
+  } else if (!strcasecmp(arg, "Arlian Wasteland")) {
    return (16544);
-  } else if (!str_cmp(arg, "Arlia Mine")) {
+  } else if (!strcasecmp(arg, "Arlia Mine")) {
    return (16600);
-  } else if (!str_cmp(arg, "Kemabra Wastes")) {
+  } else if (!strcasecmp(arg, "Kemabra Wastes")) {
    return (16816);
   } else {
    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
@@ -546,7 +554,7 @@ ACMD(do_warp)
  } else if (!*arg) {
   send_to_char(ch, "Syntax: shipwarp [ earth | vegeta | namek | konack | aether | frigid | buoy1 | buoy2 | buoy3 ]\r\n");
   return;
- } else if (str_cmp(arg, "earth") && str_cmp(arg, "vegeta") && str_cmp(arg, "namek") && str_cmp(arg, "konack") && str_cmp(arg, "frigid") && str_cmp(arg, "aether") && str_cmp(arg, "buoy1") && str_cmp(arg, "buoy2") && str_cmp(arg, "buoy3")) {
+ } else if (strcasecmp(arg, "earth") && strcasecmp(arg, "vegeta") && strcasecmp(arg, "namek") && strcasecmp(arg, "konack") && strcasecmp(arg, "frigid") && strcasecmp(arg, "aether") && strcasecmp(arg, "buoy1") && strcasecmp(arg, "buoy2") && strcasecmp(arg, "buoy3")) {
   send_to_char(ch, "Syntax: shipwarp [ earth | vegeta | namek | konack | aether | frigid | buoy1 | buoy2 | buoy3 ]\r\n");
   return;
  } else if (ROOM_FLAGGED(!IN_ROOM(vehicle), ROOM_SPACE)) {
@@ -556,7 +564,7 @@ ACMD(do_warp)
   send_to_char(ch, "Your ship is not outfitted with an Instant Travel Warp Accelerator.\r\n");
   return;
  } else {
-  if (!str_cmp(arg, "earth")) {
+  if (!strcasecmp(arg, "earth")) {
    if (GET_ROOM_VNUM(IN_ROOM(vehicle)) == 40979 || GET_ROOM_VNUM(IN_ROOM(vehicle)) == 50) {
     send_to_char(ch, "Your ship is already there!\r\n");
     return;
@@ -568,7 +576,7 @@ ACMD(do_warp)
     obj_to_room(vehicle, real_room(40979));
     send_to_room(IN_ROOM(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description); 
    }
-  } else if (!str_cmp(arg, "namek")) {
+  } else if (!strcasecmp(arg, "namek")) {
    if (GET_ROOM_VNUM(IN_ROOM(vehicle)) == 42880 || GET_ROOM_VNUM(IN_ROOM(vehicle)) == 54) {
     send_to_char(ch, "Your ship is already there!\r\n");
     return;
@@ -580,7 +588,7 @@ ACMD(do_warp)
     obj_to_room(vehicle, real_room(42880));
     send_to_room(IN_ROOM(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description); 
    }
-  } else if (!str_cmp(arg, "frigid")) {
+  } else if (!strcasecmp(arg, "frigid")) {
    if (GET_ROOM_VNUM(IN_ROOM(vehicle)) == 30889 || GET_ROOM_VNUM(IN_ROOM(vehicle)) == 51) {
     send_to_char(ch, "Your ship is already there!\r\n");
     return;
@@ -592,7 +600,7 @@ ACMD(do_warp)
     obj_to_room(vehicle, real_room(30889));
     send_to_room(IN_ROOM(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description); 
    }
-  } else if (!str_cmp(arg, "konack")) {
+  } else if (!strcasecmp(arg, "konack")) {
    if (GET_ROOM_VNUM(IN_ROOM(vehicle)) == 27065 || GET_ROOM_VNUM(IN_ROOM(vehicle)) == 52) {
     send_to_char(ch, "Your ship is already there!\r\n");
     return;
@@ -604,7 +612,7 @@ ACMD(do_warp)
     obj_to_room(vehicle, real_room(27065));
     send_to_room(IN_ROOM(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description); 
    }
-  } else if (!str_cmp(arg, "vegeta")) {
+  } else if (!strcasecmp(arg, "vegeta")) {
    if (GET_ROOM_VNUM(IN_ROOM(vehicle)) == 32365 || GET_ROOM_VNUM(IN_ROOM(vehicle)) == 53) {
     send_to_char(ch, "Your ship is already there!\r\n");
     return;
@@ -616,7 +624,7 @@ ACMD(do_warp)
     obj_to_room(vehicle, real_room(32365));
     send_to_room(IN_ROOM(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description); 
    }
-  } else if (!str_cmp(arg, "aether")) {
+  } else if (!strcasecmp(arg, "aether")) {
    if (GET_ROOM_VNUM(IN_ROOM(vehicle)) == 41959 || GET_ROOM_VNUM(IN_ROOM(vehicle)) == 55) {
     send_to_char(ch, "Your ship is already there!\r\n");
     return;
@@ -628,7 +636,7 @@ ACMD(do_warp)
     obj_to_room(vehicle, real_room(41959));
     send_to_room(IN_ROOM(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description); 
    }
-  } else if (!str_cmp(arg, "buoy1")) {
+  } else if (!strcasecmp(arg, "buoy1")) {
    if (GET_RADAR1(ch) <= 0) {
     send_to_char(ch, "You have not launched that buoy!\r\n");
     return;
@@ -643,7 +651,7 @@ ACMD(do_warp)
     obj_to_room(vehicle, real_room(GET_RADAR1(ch)));
     send_to_room(IN_ROOM(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description); 
    }
-  } else if (!str_cmp(arg, "buoy2")) {
+  } else if (!strcasecmp(arg, "buoy2")) {
    if (GET_RADAR2(ch) <= 0) {
     send_to_char(ch, "You have not launched that buoy!\r\n");
     return;
@@ -658,7 +666,7 @@ ACMD(do_warp)
     obj_to_room(vehicle, real_room(GET_RADAR2(ch)));
     send_to_room(IN_ROOM(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description); 
    }
-  } else if (!str_cmp(arg, "buoy3")) {
+  } else if (!strcasecmp(arg, "buoy3")) {
    if (GET_RADAR3(ch) <= 0) {
     send_to_char(ch, "You have not launched that buoy!\r\n");
     return;
@@ -694,7 +702,7 @@ ACMD(do_drive)
    return;
   }
 
-  if (!str_cmp(arg3, "unready") && !IS_NPC(ch)) {
+  if (!strcasecmp(arg3, "unready") && !IS_NPC(ch)) {
       if (!PLR_FLAGGED(ch, PLR_PILOTING)) {
        send_to_char(ch, "You are already not flying the ship!\r\n");
        return;
@@ -707,7 +715,7 @@ ACMD(do_drive)
        return;
      }
    }
-  if (!str_cmp(arg3, "ready") && !IS_NPC(ch)) {
+  if (!strcasecmp(arg3, "ready") && !IS_NPC(ch)) {
     if (!(controls = find_control(ch) )) {
     send_to_char(ch,"@wYou have nothing to control here!\r\n");
     return;
@@ -791,7 +799,7 @@ ACMD(do_drive)
              return;
             }
 
-      if (!str_cmp(arg, "north") || !str_cmp(arg, "n")) {
+      if (!strcasecmp(arg, "north") || !strcasecmp(arg, "n")) {
        dir = 0;
       drive_in_direction(ch, vehicle, dir);
        if (GET_OBJ_VAL(controls, 1) == 1) {
@@ -806,7 +814,7 @@ ACMD(do_drive)
         WAIT_STATE(ch, PULSE_1SEC * 0.5);
        }
       }
-      else if (!str_cmp(arg, "east") || !str_cmp(arg, "e")) {
+      else if (!strcasecmp(arg, "east") || !strcasecmp(arg, "e")) {
        dir = 1;
       drive_in_direction(ch, vehicle, dir);
        if (GET_OBJ_VAL(controls, 1) == 1) {
@@ -821,7 +829,7 @@ ACMD(do_drive)
         WAIT_STATE(ch, PULSE_1SEC * 0.5);
        }
       }
-      else if (!str_cmp(arg, "south") || !str_cmp(arg, "s")) {
+      else if (!strcasecmp(arg, "south") || !strcasecmp(arg, "s")) {
        dir = 2;
       drive_in_direction(ch, vehicle, dir);
        if (GET_OBJ_VAL(controls, 1) == 1) {
@@ -836,7 +844,7 @@ ACMD(do_drive)
         WAIT_STATE(ch, PULSE_1SEC * 0.5);
        }
       }
-      else if (!str_cmp(arg, "west") || !str_cmp(arg, "w")) {
+      else if (!strcasecmp(arg, "west") || !strcasecmp(arg, "w")) {
        dir = 3;
       drive_in_direction(ch, vehicle, dir);
        if (GET_OBJ_VAL(controls, 1) == 1) {
@@ -851,7 +859,7 @@ ACMD(do_drive)
         WAIT_STATE(ch, PULSE_1SEC * 0.5);
        }
       }
-      else if (!str_cmp(arg, "up") || !str_cmp(arg, "u")) {
+      else if (!strcasecmp(arg, "up") || !strcasecmp(arg, "u")) {
        dir = 4;
       drive_in_direction(ch, vehicle, dir);
        if (GET_OBJ_VAL(controls, 1) == 1) {
@@ -866,7 +874,7 @@ ACMD(do_drive)
         WAIT_STATE(ch, PULSE_1SEC * 0.5);
        }
       }
-      else if (!str_cmp(arg, "down") || !str_cmp(arg, "d")) {
+      else if (!strcasecmp(arg, "down") || !strcasecmp(arg, "d")) {
        dir = 5;
       drive_in_direction(ch, vehicle, dir);
        if (GET_OBJ_VAL(controls, 1) == 1) {
@@ -881,7 +889,7 @@ ACMD(do_drive)
         WAIT_STATE(ch, PULSE_1SEC * 0.5);
        }
       }
-      else if (!str_cmp(arg, "northwest") || !str_cmp(arg, "nw") || !str_cmp(arg, "northw")) {
+      else if (!strcasecmp(arg, "northwest") || !strcasecmp(arg, "nw") || !strcasecmp(arg, "northw")) {
        dir = 6;
       drive_in_direction(ch, vehicle, dir);
        if (GET_OBJ_VAL(controls, 1) == 1) {
@@ -896,7 +904,7 @@ ACMD(do_drive)
         WAIT_STATE(ch, PULSE_1SEC * 0.5);
        }
       }
-      else if (!str_cmp(arg, "northeast") || !str_cmp(arg, "ne") || !str_cmp(arg, "northe")) {
+      else if (!strcasecmp(arg, "northeast") || !strcasecmp(arg, "ne") || !strcasecmp(arg, "northe")) {
        dir = 7;
       drive_in_direction(ch, vehicle, dir);
        if (GET_OBJ_VAL(controls, 1) == 1) {
@@ -911,7 +919,7 @@ ACMD(do_drive)
         WAIT_STATE(ch, PULSE_1SEC * 0.5);
        }
       }
-      else if (!str_cmp(arg, "southeast") || !str_cmp(arg, "se") || !str_cmp(arg, "southe")) {
+      else if (!strcasecmp(arg, "southeast") || !strcasecmp(arg, "se") || !strcasecmp(arg, "southe")) {
        dir = 8;
       drive_in_direction(ch, vehicle, dir);
        if (GET_OBJ_VAL(controls, 1) == 1) {
@@ -926,7 +934,7 @@ ACMD(do_drive)
         WAIT_STATE(ch, PULSE_1SEC * 0.5);
        }
       }
-      else if (!str_cmp(arg, "southwest") || !str_cmp(arg, "sw") || !str_cmp(arg, "southw")) {
+      else if (!strcasecmp(arg, "southwest") || !strcasecmp(arg, "sw") || !strcasecmp(arg, "southw")) {
        dir = 9;
       drive_in_direction(ch, vehicle, dir);
        if (GET_OBJ_VAL(controls, 1) == 1) {
@@ -941,7 +949,7 @@ ACMD(do_drive)
         WAIT_STATE(ch, PULSE_1SEC * 0.5);
        }
       }
-      else if (!str_cmp(arg, "inside")) {
+      else if (!strcasecmp(arg, "inside")) {
        dir = 10;
       drive_in_direction(ch, vehicle, dir);
        if (GET_OBJ_VAL(controls, 1) == 1) {
@@ -956,7 +964,7 @@ ACMD(do_drive)
         WAIT_STATE(ch, PULSE_1SEC * 0.5);
        }
       }
-      else if (!str_cmp(arg, "outside")) {
+      else if (!strcasecmp(arg, "outside")) {
        dir = 11;
       drive_in_direction(ch, vehicle, dir);
        if (GET_OBJ_VAL(controls, 1) == 1) {
@@ -974,7 +982,7 @@ ACMD(do_drive)
      /*else if (dir = search_block(arg, dirs, FALSE) >= 0) {*/
       /* Drive in a direction... */
     /*}*/
-      else if (!str_cmp(arg, "land")) {
+      else if (!strcasecmp(arg, "land")) {
 
        if (!*arg2) {
          if (GET_OBJ_VNUM(vehicle) >= 46000 && GET_OBJ_VNUM(vehicle) <= 46099) {
@@ -989,11 +997,11 @@ ACMD(do_drive)
        char blah[MAX_INPUT_LENGTH];
        int land_location = 50;
        if (GET_OBJ_VNUM(vehicle) > 46099) {
-        if (str_cmp(arg2, "1") && str_cmp(arg2, "2") && str_cmp(arg2, "3") && str_cmp(arg2, "4")) {
+        if (strcasecmp(arg2, "1") && strcasecmp(arg2, "2") && strcasecmp(arg2, "3") && strcasecmp(arg2, "4")) {
          send_to_char(ch, "@wLand on which pad? 1, 2, 3 or 4?\r\n");
          return;
         }
-       } else if (str_cmp(arg2, "1") && str_cmp(arg2, "2") && str_cmp(arg2, "3") && str_cmp(arg2, "4")){
+       } else if (strcasecmp(arg2, "1") && strcasecmp(arg2, "2") && strcasecmp(arg2, "3") && strcasecmp(arg2, "4")){
         land_location = ship_land_location(ch, vehicle, arg2);
        }
         char buf3[MAX_INPUT_LENGTH];
@@ -1014,31 +1022,31 @@ ACMD(do_drive)
           obj_from_room(vehicle);
           obj_to_room(vehicle, real_room(land_location));
         } else if (IN_ROOM(vehicle) == real_room(50)) {
-         if (!str_cmp(arg2, "1")) {
+         if (!strcasecmp(arg2, "1")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(409));
          }
-         else if (!str_cmp(arg2, "2")) {
+         else if (!strcasecmp(arg2, "2")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(411));
          }
-         else if (!str_cmp(arg2, "3")) {
+         else if (!strcasecmp(arg2, "3")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(412));
          }
-         else if (!str_cmp(arg2, "4")) {
+         else if (!strcasecmp(arg2, "4")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(410));
          }
-         else if (!str_cmp(arg2, "4365")) {
+         else if (!strcasecmp(arg2, "4365")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(18904));
          }
-         else if (!str_cmp(arg2, "6329")) {
+         else if (!strcasecmp(arg2, "6329")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(18925));
          }
-         else if (!str_cmp(arg2, "1983")) {
+         else if (!strcasecmp(arg2, "1983")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(18995));
          } 
@@ -1064,23 +1072,23 @@ ACMD(do_drive)
         }
         /* For Vegeta */
         else if (IN_ROOM(vehicle) == real_room(53)) {
-         if (!str_cmp(arg2, "1")) {
+         if (!strcasecmp(arg2, "1")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(2319));
          }
-         else if (!str_cmp(arg2, "2")) {
+         else if (!strcasecmp(arg2, "2")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(2318));
          }
-         else if (!str_cmp(arg2, "3")) {
+         else if (!strcasecmp(arg2, "3")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(2320));
          }
-         else if (!str_cmp(arg2, "4")) {
+         else if (!strcasecmp(arg2, "4")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(2322));
          }
-         else if (!str_cmp(arg2, "4126")) {
+         else if (!strcasecmp(arg2, "4126")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(18212));
          }
@@ -1092,19 +1100,19 @@ ACMD(do_drive)
 
         /* For Yardrat */
         else if (IN_ROOM(vehicle) == real_room(56)) {
-         if (!str_cmp(arg2, "1")) {
+         if (!strcasecmp(arg2, "1")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(14003));
          }
-         else if (!str_cmp(arg2, "2")) {
+         else if (!strcasecmp(arg2, "2")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(14004));
          }
-         else if (!str_cmp(arg2, "3")) {
+         else if (!strcasecmp(arg2, "3")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(14005));
          }
-         else if (!str_cmp(arg2, "4")) {
+         else if (!strcasecmp(arg2, "4")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(14006));
          }
@@ -1116,19 +1124,19 @@ ACMD(do_drive)
 
         /* For Aether */
         else if (IN_ROOM(vehicle) == real_room(55)) {
-         if (!str_cmp(arg2, "1")) {
+         if (!strcasecmp(arg2, "1")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(12003));
          }
-         else if (!str_cmp(arg2, "2")) {
+         else if (!strcasecmp(arg2, "2")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(12004));
          }
-         else if (!str_cmp(arg2, "3")) {
+         else if (!strcasecmp(arg2, "3")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(12006));
          }
-         else if (!str_cmp(arg2, "4")) {
+         else if (!strcasecmp(arg2, "4")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(12005));
          }
@@ -1140,19 +1148,19 @@ ACMD(do_drive)
 
         /* For Arlia */
         else if (IN_ROOM(vehicle) == real_room(59)) {
-         if (!str_cmp(arg2, "1")) {
+         if (!strcasecmp(arg2, "1")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(16065));
          }
-         else if (!str_cmp(arg2, "2")) {
+         else if (!strcasecmp(arg2, "2")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(16066));
          }
-         else if (!str_cmp(arg2, "3")) {
+         else if (!strcasecmp(arg2, "3")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(16067));
          }
-         else if (!str_cmp(arg2, "4")) {
+         else if (!strcasecmp(arg2, "4")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(16068));
          }
@@ -1165,23 +1173,23 @@ ACMD(do_drive)
 
         /* For Frigid */
         else if (IN_ROOM(vehicle) == real_room(51)) {
-         if (!str_cmp(arg2, "1")) {
+         if (!strcasecmp(arg2, "1")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(4264));
          }
-         else if (!str_cmp(arg2, "2")) {
+         else if (!strcasecmp(arg2, "2")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(4263));
          }
-         else if (!str_cmp(arg2, "3")) {
+         else if (!strcasecmp(arg2, "3")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(4261));
          }
-         else if (!str_cmp(arg2, "4")) {
+         else if (!strcasecmp(arg2, "4")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(4262));
          }
-         else if (!str_cmp(arg2, "1337")) {
+         else if (!strcasecmp(arg2, "1337")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(18116));
          }
@@ -1192,19 +1200,19 @@ ACMD(do_drive)
         }
         /* For Namek */
         else if (IN_ROOM(vehicle) == real_room(54)) {
-         if (!str_cmp(arg2, "1")) {
+         if (!strcasecmp(arg2, "1")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(11628));
          }
-         else if (!str_cmp(arg2, "2")) {
+         else if (!strcasecmp(arg2, "2")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(11629));
          }
-         else if (!str_cmp(arg2, "3")) {
+         else if (!strcasecmp(arg2, "3")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(11630));
          }
-         else if (!str_cmp(arg2, "4")) {
+         else if (!strcasecmp(arg2, "4")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(11627));
          }
@@ -1215,19 +1223,19 @@ ACMD(do_drive)
         }
         /* For Konack */
         else if (IN_ROOM(vehicle) == real_room(52)) {
-         if (!str_cmp(arg2, "1")) {
+         if (!strcasecmp(arg2, "1")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(8195));
          }
-         else if (!str_cmp(arg2, "2")) {
+         else if (!strcasecmp(arg2, "2")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(8196));
          }
-         else if (!str_cmp(arg2, "3")) {
+         else if (!strcasecmp(arg2, "3")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(8197));
          }
-         else if (!str_cmp(arg2, "4")) {
+         else if (!strcasecmp(arg2, "4")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(8198));
          }
@@ -1253,7 +1261,7 @@ ACMD(do_drive)
            send_to_room(IN_ROOM(vehicle), buf3);
           }
       }
-     else if (!str_cmp(arg, "launch")) {
+     else if (!strcasecmp(arg, "launch")) {
        int lnum = 0;
        int rnum = 0;
        if (ROOM_FLAGGED(IN_ROOM(vehicle), ROOM_EARTH)) {
@@ -1347,13 +1355,13 @@ ACMD(do_drive)
       look_at_room(IN_ROOM(vehicle), ch, 0);
       send_to_char(ch, "@RFUEL@D: %s%s@n\r\n", GET_FUEL(controls) >= 200 ? "@G" : GET_FUEL(controls) >= 100 ? "@Y" : "@r", add_commas(GET_FUEL(controls)));
      }
-     else if (!str_cmp(arg, "mark")) {
+     else if (!strcasecmp(arg, "mark")) {
        int rnum = 0;
        if (!*arg2) {
         send_to_char(ch, "@wWhich marker are you wanting to launch? 1, 2, or 3?\r\n");
         return;
        }
-       if (!!str_cmp(arg2, "1") && !!str_cmp(arg2, "2") && !!str_cmp(arg2, "3")) {
+       if (!!strcasecmp(arg2, "1") && !!strcasecmp(arg2, "2") && !!strcasecmp(arg2, "3")) {
         send_to_char(ch, "@wWhich marker are you wanting to launch? 1, 2, or 3?\r\n");
         return;
        }
@@ -1365,67 +1373,67 @@ ACMD(do_drive)
 
        rnum = IN_ROOM(vehicle);
 
-       if (GET_RADAR1(ch) > 0 && !str_cmp(arg2, "1")) {
+       if (GET_RADAR1(ch) > 0 && !strcasecmp(arg2, "1")) {
         send_to_char(ch, "@wYou need to 'deactivate' that marker.\r\n");
         return;
        }
-       else if (GET_RADAR1(ch) <= 0 && !str_cmp(arg2, "1")) {
+       else if (GET_RADAR1(ch) <= 0 && !strcasecmp(arg2, "1")) {
         act("@wYou enter a unique code and launch a marker buoy.@n\r\n", FALSE, ch, 0, 0, TO_CHAR);
         act("@C$n@w manipulates the ship controls.@n\r\n", FALSE, ch, 0, 0, TO_ROOM);
         GET_RADAR1(ch) = GET_ROOM_VNUM(IN_ROOM(vehicle));
        }
-       if (GET_RADAR2(ch) > 0 && !str_cmp(arg2, "2")) {
+       if (GET_RADAR2(ch) > 0 && !strcasecmp(arg2, "2")) {
         send_to_char(ch, "@wYou need to 'deactivate' that marker.\r\n");
         return;
        }
-       else if (GET_RADAR2(ch) <= 0 && !str_cmp(arg2, "2")) {
+       else if (GET_RADAR2(ch) <= 0 && !strcasecmp(arg2, "2")) {
         act("@wYou enter a unique code and launch a marker buoy.@n\r\n", FALSE, ch, 0, 0, TO_CHAR);
         act("@C$n@w manipulates the ship controls.@n\r\n", FALSE, ch, 0, 0, TO_ROOM);
         GET_RADAR2(ch) = GET_ROOM_VNUM(IN_ROOM(vehicle));
        }
-       if (GET_RADAR3(ch) > 0 && !str_cmp(arg2, "3")) {
+       if (GET_RADAR3(ch) > 0 && !strcasecmp(arg2, "3")) {
         send_to_char(ch, "@wYou need to 'deactivate' that marker.\r\n");
         return;
        }
-       else if (GET_RADAR3(ch) <= 0 && !str_cmp(arg2, "3")) {
+       else if (GET_RADAR3(ch) <= 0 && !strcasecmp(arg2, "3")) {
         act("@wYou enter a unique code and launch a marker buoy.@n\r\n", FALSE, ch, 0, 0, TO_CHAR);
         act("@C$n@w manipulates the ship controls.@n\r\n", FALSE, ch, 0, 0, TO_ROOM);
         GET_RADAR3(ch) = GET_ROOM_VNUM(IN_ROOM(vehicle));
        }
      }
-     else if (!str_cmp(arg, "deactivate")) {
+     else if (!strcasecmp(arg, "deactivate")) {
        if (!*arg2) {
         send_to_char(ch, "@wWhich marker are you wanting to launch? 1, 2, or 3?\r\n");
         return;
        }
-       if (!!str_cmp(arg2, "1") && !!str_cmp(arg2, "2") && !!str_cmp(arg2, "3")) {
+       if (!!strcasecmp(arg2, "1") && !!strcasecmp(arg2, "2") && !!strcasecmp(arg2, "3")) {
         send_to_char(ch, "@wWhich marker are you wanting to deactivate? 1, 2, or 3?\r\n");
         return;
        }
 
-       if (GET_RADAR1(ch) <= 0 && !str_cmp(arg2, "1")) {
+       if (GET_RADAR1(ch) <= 0 && !strcasecmp(arg2, "1")) {
         send_to_char(ch, "@wYou haven't launched that buoy yet.\r\n");
         return;
        }
-       else if (GET_RADAR1(ch) > 0 && !str_cmp(arg2, "1")) {
+       else if (GET_RADAR1(ch) > 0 && !strcasecmp(arg2, "1")) {
         act("@wYou enter buoy one's code and command it to deactivate.@n\r\n", FALSE, ch, 0, 0, TO_CHAR);
         act("@C$n@w manipulates the ship controls.@n\r\n", FALSE, ch, 0, 0, TO_ROOM);
         GET_RADAR1(ch) = 0;
        }
-       if (GET_RADAR2(ch) <= 0 && !str_cmp(arg2, "2")) {
+       if (GET_RADAR2(ch) <= 0 && !strcasecmp(arg2, "2")) {
         send_to_char(ch, "@wYou haven't launched that buoy yet.\r\n");
         return;
        }
-       else if (GET_RADAR2(ch) > 0 && !str_cmp(arg2, "2")) {
+       else if (GET_RADAR2(ch) > 0 && !strcasecmp(arg2, "2")) {
         act("@wYou enter buoy two's code and command it to deactivate.@n\r\n", FALSE, ch, 0, 0, TO_CHAR);
         act("@C$n@w manipulates the ship controls.@n\r\n", FALSE, ch, 0, 0, TO_ROOM);
         GET_RADAR2(ch) = 0;
        }
-       if (GET_RADAR3(ch) <= 0 && !str_cmp(arg2, "3")) {
+       if (GET_RADAR3(ch) <= 0 && !strcasecmp(arg2, "3")) {
         send_to_char(ch, "@wYou haven't launched that buoy yet.\r\n");
         return;
        }
-       else if (GET_RADAR3(ch) > 0 && !str_cmp(arg2, "3")) {
+       else if (GET_RADAR3(ch) > 0 && !strcasecmp(arg2, "3")) {
         act("@wYou enter buoy three's code and command it to deactivate.@n\r\n", FALSE, ch, 0, 0, TO_CHAR);
         act("@C$n@w manipulates the ship controls.@n\r\n", FALSE, ch, 0, 0, TO_ROOM);
         GET_RADAR3(ch) = 0;
@@ -1468,7 +1476,7 @@ ACMD(do_ship_fire)
      next_obj = obj->next_content;
    if (shot == FALSE) {
     if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE && obj != vehicle) {
-     if (!str_cmp(arg1, obj->name)) {
+     if (!strcasecmp(arg1, obj->name)) {
       obj2 = obj;
       shot = TRUE;
      }

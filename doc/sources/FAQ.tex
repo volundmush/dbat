@@ -445,7 +445,7 @@ int can_murder(struct char_data *ch, struct char_data *victim) {
 This usually happens if you are doing something like this:
 \begin{verbatim}
   send_to_char("Bye bye.  Come back soon, ya hear?", ch);
-  close_socket(ch->desc);
+  close(ch->desc);
 \end{verbatim}
 The \texttt{close\_socket} immediately dispatches/closes the connection, while \texttt{send\_to\_char} puts the message on the output queue to be dispatched next
 \texttt{game\_loop} cycle. Therefore, the socket is gone.  On some systems (i.e., old linux), this can even cause a infinite loop attempting to write to a closed socket. The proper way of doing this and other ``Byebye'' messages is to set the CON state of the player to CLOSE, like this:
@@ -483,7 +483,7 @@ Instead of typing ``\texttt{autorun \&}'' to start the autorun script (which sta
 Apparently in Circle 2.2, you can drop any amount of coins, and then be rewarded with more coins than you had in the first place.  Here is the fix from Jeremy Elson:\newline
 Around line 480 of \texttt{act.obj1.c}, you will find the code:
 \begin{verbatim}
-        if (!str_cmp("coins", arg) || !str_cmp("coin", arg))
+        if (!strcasecmp("coins", arg) || !strcasecmp("coin", arg))
            perform_drop_gold(ch, amount, mode, RDR);
         else {
            /* code to drop multiple items.  anyone want to write it? -je */
@@ -494,7 +494,7 @@ Around line 480 of \texttt{act.obj1.c}, you will find the code:
 \end{verbatim}
 It should be changed to:
 \begin{verbatim}
-        if (!str_cmp("coins", arg) || !str_cmp("coin", arg))
+        if (!strcasecmp("coins", arg) || !strcasecmp("coin", arg))
            perform_drop_gold(ch, amount, mode, RDR);
         else {
            /* code to drop multiple items.  anyone want to write it? -je */

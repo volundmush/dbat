@@ -11,20 +11,11 @@
 
 #include "structs.h" 
 #include "utils.h" 
-#include "db.h" 
-#include "comm.h" 
-#include "handler.h" 
-#include "screen.h" 
+#include "db.h"
+#include "handler.h"
 #include "reset.h" 
+#include "spec_procs.h"
 
-/* External functions */ 
-int num_players_in_room(room_vnum room); 
-struct char_data *get_mob_by_vnum(int mob_vnum); 
-void CloseRoomExit(int room_vnum, int exit_dir); 
-void OpenRoomExit(int room_vnum, int exit_dir, int to_room_vnum); 
-bool isRoomExit(room_vnum room, int exit_dir); 
-bool check_mob_in_room(mob_vnum mob, room_vnum room); 
-bool check_obj_in_room(obj_vnum obj, room_vnum room); 
 
 /* pre_reset is called before a zone is reset - returns TRUE to prevent a normal reset of the zone */ 
 bool pre_reset(zone_vnum znum) 

@@ -8,55 +8,44 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 #include "comm.h"
-
+#include "utils.h"
+#include "config.h"
+#include "maputils.h"
+#include "ban.h"
+#include "weather.h"
+#include "act.wizard.h"
+#include "act.misc.h"
+#include "house.h"
+#include "act.other.h"
+#include "dg_comm.h"
+#include "handler.h"
+#include "dg_scripts.h"
+#include "act.item.h"
+#include "interpreter.h"
+#include "random.h"
+#include "act.informative.h"
+#include "dg_event.h"
+#include "mobact.h"
+#include "magic.h"
+#include "imc.h"
+#include "objsave.h"
+#include "genolc.h"
+#include "class.h"
+#include "combat.h"
+#include "modify.h"
+#include "fight.h"
+#include "local_limits.h"
+#include "clan.h"
+#include "mail.h"
+#include "races.h"
+#include "constants.h"
+#include "screen.h"
 
 /* externs */
-extern const char *song_types[];
-extern char last_user_freed[MAX_INPUT_LENGTH];
-extern int mapnums[MAP_ROWS+1][MAP_COLS+1];
-extern int top_of_p_table;
-extern void userLoad(struct descriptor_data *d, char *name);
-extern int CURRENT_ERA;
-extern int ERAPLAYERS;
-extern time_t PCOUNTDAY;
-extern int PCOUNT;
-extern int HIGHPCOUNT;
-extern time_t PCOUNTDATE;
-extern void send_to_imm(char *messg, ...);
-extern int has_mail(long recipient);
-extern void copyover_check(void);
-extern void check_auction(void);
-extern void fight_stack(void);
-extern struct ban_list_element *ban_list;
-extern int num_invalid;
-extern char *GREETINGS;
-extern char *GREETANSI;
-extern const char *circlemud_version;
-extern const char *oasisolc_version;
-extern const char *ascii_pfiles_version;
-extern int dballtime;
-extern int circle_restrict;
-extern int mini_mud;
-extern int no_rent_check;
-extern int xap_objs;		/* ascii objects. */
-extern int *cmd_sort_info;
-extern void base_update(void);
-extern void handle_songs(void);
-extern void fish_update(void);
-extern void homing_update(void);
-extern void update_mob_absorb(void);
-extern void huge_update(void);
-extern void broken_update(void);
-extern void clan_update(void);
-extern void dball_load(void);
-extern void wishSYS(void);
-extern void save_player_index(void);
+
+
 int passcomm(struct char_data *ch, char *comm);
 
-extern struct time_info_data time_info;		/* In db.c */
-extern char *help;
-extern struct help_index_element *help_table;
-extern int top_of_helpt;
 
 /* local globals */
 struct descriptor_data *descriptor_list = NULL;		/* master desc list */
@@ -71,340 +60,31 @@ int max_players = 0;		/* max descriptors available */
 int tics_passed = 0;		/* for extern checkpointing */
 int scheck = 0;			/* for syntax checking mode */
 struct timeval null_time;	/* zero-valued time structure */
-byte reread_wizlist;		/* signal: SIGUSR1 */
-byte emergency_unban;		/* signal: SIGUSR2 */
+int8_t reread_wizlist;		/* signal: SIGUSR1 */
+int8_t emergency_unban;		/* signal: SIGUSR2 */
 FILE *logfile = NULL;		/* Where to send the log messages. */
 const char *text_overflow = "**OVERFLOW**\r\n";
 int dg_act_check;               /* toggle for act_trigger */
 unsigned long pulse = 0;        /* number of pulses since game start */
-static bool fCopyOver;          /* Are we booting in copyover mode? */
-ush_int port;
-socket_t mother_desc;
+bool fCopyOver;          /* Are we booting in copyover mode? */
+uint16_t port;
+socklen_t mother_desc;
 char *last_act_message = NULL;
 
-/* functions in this file */
-void free_user(struct descriptor_data *d);
-RETSIGTYPE reread_wizlists(int sig);
-RETSIGTYPE unrestrict_game(int sig);
-RETSIGTYPE reap(int sig);
-RETSIGTYPE checkpointing(int sig);
-RETSIGTYPE hupsig(int sig);
-ssize_t perform_socket_read(socket_t desc, char *read_point, size_t space_left);
-ssize_t perform_socket_write(socket_t desc, const char *txt, size_t length, struct compr *comp);
-void echo_off(struct descriptor_data *d);
-void echo_on(struct descriptor_data *d);
-void circle_sleep(struct timeval *timeout);
-int get_from_q(struct txt_q *queue, char *dest, int *aliased);
-void init_game(ush_int port);
-void signal_setup(void);
-void game_loop(socket_t mother_desc);
-socket_t init_socket(ush_int port);
-int new_descriptor(socket_t s);
-int get_max_players(void);
-int process_output(struct descriptor_data *t);
-int process_input(struct descriptor_data *t);
-void timediff(struct timeval *diff, struct timeval *a, struct timeval *b);
-void timeadd(struct timeval *sum, struct timeval *a, struct timeval *b);
-void flush_queues(struct descriptor_data *d);
-void nonblock(socket_t s);
-int perform_subst(struct descriptor_data *t, char *orig, char *subst);
-void record_usage(void);
-char *make_prompt(struct descriptor_data *point);
-void check_idle_passwords(void);
-void send_to_eaves(const char *messg, struct char_data *tch, ...);
-int arena_watch(struct char_data *ch);
-void check_idle_menu(void);
-void heartbeat(int heart_pulse);
-struct in_addr *get_bind_addr(void);
-int parse_ip(const char *addr, struct in_addr *inaddr);
-int set_sendbuf(socket_t s);
-void free_bufpool(void);
-void setup_log(const char *filename, int fd);
-int open_logfile(const char *filename, FILE *stderr_fp);
-void init_descriptor (struct descriptor_data *newd, int desc);
-#if defined(POSIX)
-sigfunc *my_signal(int signo, sigfunc *func);
-#endif
 
-/* extern fcnts */
-extern void topLoad(void);
-void reboot_wizlists(void);
-void boot_world(void);
-void affect_update(void);	/* In magic.c */
-void mobile_activity(void);
-void show_string(struct descriptor_data *d, char *input);
-int isbanned(char *hostname);
-void weather_and_time(int mode);
-int perform_alias(struct descriptor_data *d, char *orig, size_t maxlen);
-void clear_free_list(void);
-void clear_boards(void);
-void free_social_messages(void);
-void free_mail_index(void);
-void Free_Invalid_List(void);
-void free_command_list(void);
-void load_config(void);
-void affect_update_violence(void);      /* In magic.c */
-void timed_dt(struct char_data *ch);
-int level_exp(struct char_data *ch, int level);
-void free_save_list(void);
-
-#ifdef HAVE_ZLIB_H
-/* zlib helper functions */
 void *z_alloc(void *opaque, uInt items, uInt size)
 {
-  return calloc(items, size);
+    return calloc(items, size);
 }
 
 void z_free(void *opaque, void *address)
 {
-  return free(address);
+    return free(address);
 }
-#endif /* HAVE_ZLIB_H */
-
-#ifdef __CXREF__
-#undef FD_ZERO
-#undef FD_SET
-#undef FD_ISSET
-#undef FD_CLR
-#define FD_ZERO(x)
-#define FD_SET(x, y) 0
-#define FD_ISSET(x, y) 0
-#define FD_CLR(x, y)
-#endif
-
 
 /***********************************************************************
 *  main game loop and related stuff                                    *
 ***********************************************************************/
-
-#if defined(CIRCLE_WINDOWS) || defined(CIRCLE_MACINTOSH)
-
-/*
- * Windows doesn't have gettimeofday, so we'll simulate it.
- * The Mac doesn't have gettimeofday either.
- * Borland C++ warns: "Undefined structure 'timezone'"
- */
-void gettimeofday(struct timeval *t, struct timezone *dummy)
-{
-#if defined(CIRCLE_WINDOWS)
-  DWORD millisec = GetTickCount();
-#elif defined(CIRCLE_MACINTOSH)
-  unsigned long int millisec;
-  millisec = (int)((float)TickCount() * 1000.0 / 60.0);
-#endif
-
-  t->tv_sec = (int) (millisec / 1000);
-  t->tv_usec = (millisec % 1000) * 1000;
-}
-
-#endif	/* CIRCLE_WINDOWS || CIRCLE_MACINTOSH */
-
-
-int main(int argc, char **argv)
-{
-  int pos = 1;
-  const char *dir;
-
-#ifdef MEMORY_DEBUG
-  zmalloc_init();
-#endif
-
-#if CIRCLE_GNU_LIBC_MEMORY_TRACK
-  mtrace();	/* This must come before any use of malloc(). */
-#endif
-
-#ifdef CIRCLE_MACINTOSH
-  /*
-   * ccommand() calls the command line/io redirection dialog box from
-   * Codewarriors's SIOUX library
-   */
-  argc = ccommand(&argv);
-  /* Initialize the GUSI library calls.  */
-  GUSIDefaultSetup();
-#endif
-
-  /****************************************************************************/
-  /** Load the game configuration.                                           **/
-  /** We must load BEFORE we use any of the constants stored in constants.c. **/
-  /** Otherwise, there will be no variables set to set the rest of the vars  **/
-  /** to, which will mean trouble --> Mythran                                **/
-  /****************************************************************************/
-  CONFIG_CONFFILE = NULL;
-  while ((pos < argc) && (*(argv[pos]) == '-')) {
-    if (*(argv[pos] + 1) == 'f') {
-      if (*(argv[pos] + 2))
-      CONFIG_CONFFILE = argv[pos] + 2;
-      else if (++pos < argc)
-      CONFIG_CONFFILE = argv[pos];
-      else {
-      puts("SYSERR: File name to read from expected after option -f.");
-      exit(1);
-      }
-    }
-    pos++;
-  }
-  pos = 1;
-
-  if (!CONFIG_CONFFILE)
-    CONFIG_CONFFILE = strdup(CONFIG_FILE);
-
-  load_config();
-  
-  port = CONFIG_DFLT_PORT;
-  dir = CONFIG_DFLT_DIR;
-
-  while ((pos < argc) && (*(argv[pos]) == '-')) {
-    switch (*(argv[pos] + 1)) {
-    case 'f':
-      if (! *(argv[pos] + 2))
-      ++pos;
-      break;
-    case 'o':
-      if (*(argv[pos] + 2))
-	CONFIG_LOGNAME = argv[pos] + 2;
-      else if (++pos < argc)
-	CONFIG_LOGNAME = argv[pos];
-      else {
-	puts("SYSERR: File name to log to expected after option -o.");
-	exit(1);
-      }
-      break;
-    case 'C': /* -C<socket number> - recover from copyover, this is the control socket */
-        fCopyOver = TRUE;
-        mother_desc = atoi(argv[pos]+2);
-      break;
-    case 'd':
-      if (*(argv[pos] + 2))
-	dir = argv[pos] + 2;
-      else if (++pos < argc)
-	dir = argv[pos];
-      else {
-	puts("SYSERR: Directory arg expected after option -d.");
-	exit(1);
-      }
-      break;
-    case 'm':
-      mini_mud = 1;
-      no_rent_check = 1;
-      puts("Running in minimized mode & with no rent check.");
-      break;
-    case 'c':
-      scheck = 1;
-      puts("Syntax check mode enabled.");
-      break;
-    case 'q':
-      no_rent_check = 1;
-      puts("Quick boot mode -- rent check supressed.");
-      break;
-    case 'r':
-      circle_restrict = 1;
-      puts("Restricting game -- no new players allowed.");
-      break;
-    case 's':
-      no_specials = 1;
-      puts("Suppressing assignment of special routines.");
-      break;
-    case 'x':
-      xap_objs = 1;
-      log("Loading player objects from secondary (ascii) files.");
-      break;
-    case 'h':
-      /* From: Anil Mahajan <amahajan@proxicom.com> */
-      printf("Usage: %s [-c] [-m] [-x] [-q] [-r] [-s] [-d pathname] [port #]\n"
-              "  -c             Enable syntax check mode.\n"
-              "  -d <directory> Specify library directory (defaults to 'lib').\n"
-              "  -f<file>       Use <file> for configuration.\n"
-              "  -h             Print this command line argument help.\n"
-              "  -m             Start in mini-MUD mode.\n"
-	      "  -o <file>      Write log to <file> instead of stderr.\n"
-              "  -q             Quick boot (doesn't scan rent for object limits)\n"
-              "  -r             Restrict MUD -- no new players allowed.\n"
-              "  -s             Suppress special procedure assignments.\n"
-              " Note:         These arguments are 'CaSe SeNsItIvE!!!'\n"
-	      "  -x             Load using secondary (ascii) files.\n",
-		 argv[0]
-      );
-      exit(0);
-    default:
-      printf("SYSERR: Unknown option -%c in argument string.\n", *(argv[pos] + 1));
-      break;
-    }
-    pos++;
-  }
-
-  if (pos < argc) {
-    if (!isdigit(*argv[pos])) {
-      printf("Usage: %s [-c] [-m] [-q] [-r] [-s] [-d pathname] [port #]\n", argv[0]);
-      exit(1);
-    } else if ((port = atoi(argv[pos])) <= 1024) {
-      printf("SYSERR: Illegal port number %d.\n", port);
-      exit(1);
-    }
-  }
-
-  /* All arguments have been parsed, try to open log file. */
-  setup_log(CONFIG_LOGNAME, STDERR_FILENO);
-
-  /*
-   * Moved here to distinguish command line options and to show up
-   * in the log if stderr is redirected to a file.
-   */
-  log("Using %s for configuration.", CONFIG_CONFFILE);
-  log("%s", circlemud_version);
-  log("%s", oasisolc_version);
-  log("%s", DG_SCRIPT_VERSION);
-  log("%s", ascii_pfiles_version);
-  log("%s", CWG_VERSION);
-  xap_objs = 1;
-  if (chdir(dir) < 0) {
-    perror("SYSERR: Fatal error changing to data directory");
-    exit(1);
-  }
-  log("Using %s as data directory.", dir);
-
-  if (scheck)
-    boot_world();
-  else {
-    log("Running game on port %d.", port);
-    init_game(port);
-  }
-
-  log("Clearing game world.");
-  destroy_db();
-
-  if (!scheck) {
-    log("Clearing other memory.");
-    free_bufpool();             /* comm.c */
-    free_player_index();	/* players.c */
-    clear_free_list();		/* mail.c */
-    free_mail_index();          /* mail.c */
-    free_text_files();		/* db.c */
-    clear_boards();             /* boards.c */
-    free(cmd_sort_info);	/* act.informative.c */
-    free_command_list();        /* act.informative.c */
-    free_social_messages();	/* act.social.c */
-    free_help_table();		/* db.c */
-    Free_Invalid_List();	/* ban.c */
-    free_strings(&config_info, OASIS_CFG); /* oasis_delete.c */
-    free_disabled();    /* interpreter.c */
-    free_save_list();		/* genolc.c */
-  }
-
-  if (last_act_message)
-    free(last_act_message);
-
-  /* probably should free the entire config here.. */
-  free(CONFIG_CONFFILE);
-
-  log("Done.");
-
-#ifdef MEMORY_DEBUG
-  zmalloc_check();
-#endif
-
-  return (0);
-}
-
 int enter_player_game(struct descriptor_data *d);
 
 /* first compression neg. string */
@@ -487,15 +167,13 @@ void copyover_recover()
 		
     if (!fOld) /* Player file not found?! */ {
        write_to_descriptor (desc, "\n\rSomehow, your character was lost during the folding. Sorry.\n\r", NULL);
-       close_socket (d);			
+       close_socket(d);
      } else {
        write_to_descriptor (desc, "\n\rFolding complete.\n\r", NULL);
-#ifdef HAVE_ZLIB_H
-       if (CONFIG_ENABLE_COMPRESSION && !PRF_FLAGGED(d->character, PRF_NOCOMPRESS)) {
-         d->comp->state = 1; /* indicates waiting for comp negotiation */
-         write_to_output(d, "%s", compress_offer);
-       }
-#endif /* HAVE_ZLIB_H */
+        if (CONFIG_ENABLE_COMPRESSION && !PRF_FLAGGED(d->character, PRF_NOCOMPRESS)) {
+            d->comp->state = 1; /* indicates waiting for comp negotiation */
+            write_to_output(d, "%s", compress_offer);
+        }
        set_loadroom = GET_LOADROOM(d->character);
          GET_LOADROOM(d->character) = saved_loadroom;
        enter_player_game(d);
@@ -511,7 +189,7 @@ void copyover_recover()
 }
 
 /* Init sockets, run game, and cleanup sockets */
-void init_game(ush_int cmport)
+void init_game(uint16_t cmport)
 {
 
   /* We don't want to restart if we crash before we get up. */
@@ -543,10 +221,8 @@ void init_game(ush_int cmport)
        int rowcounter, colcounter;
        int vnum_read;
 
-#if defined(CIRCLE_UNIX) || defined(CIRCLE_MACINTOSH)
-  log("Signal trapping.");
-  signal_setup();
-#endif
+    log("Signal trapping.");
+    signal_setup();
 
   log("Loading Space Map. ");
   
@@ -581,7 +257,7 @@ void init_game(ush_int cmport)
   while (descriptor_list)
     close_socket(descriptor_list);
 
-  CLOSE_SOCKET(mother_desc);
+  close(mother_desc);
 
   if (CONFIG_IMC_ENABLED) {
     imc_shutdown(FALSE);
@@ -607,83 +283,33 @@ void init_game(ush_int cmport)
  * init_socket sets up the mother descriptor - creates the socket, sets
  * its options up, binds it, and listens.
  */
-socket_t init_socket(ush_int cmport)
+socklen_t init_socket(uint16_t cmport)
 {
-  socket_t s;
+  socklen_t s;
   struct sockaddr_in sa;
   int opt;
 
-#ifdef CIRCLE_WINDOWS
-  {
-    WORD wVersionRequested;
-    WSADATA wsaData;
-
-    wVersionRequested = MAKEWORD(1, 1);
-
-    if (WSAStartup(wVersionRequested, &wsaData) != 0) {
-      log("SYSERR: WinSock not available!");
-      exit(1);
+    if ((s = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
+        perror("SYSERR: Error creating socket");
+        exit(1);
     }
 
-    /*
-     * 4 = stdin, stdout, stderr, mother_desc.  Windows might
-     * keep sockets and files separate, in which case this isn't
-     * necessary, but we will err on the side of caution.
-     */
-    if ((wsaData.iMaxSockets - 4) < max_players) {
-      max_players = wsaData.iMaxSockets - 4;
+    opt = 1;
+    if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *) &opt, sizeof(opt)) < 0){
+        perror("SYSERR: setsockopt REUSEADDR");
+        exit(1);
     }
-    log("Max players set to %d", max_players);
-
-    if ((s = socket(PF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET) {
-      log("SYSERR: Error opening network connection: Winsock error #%d",
-	  WSAGetLastError());
-      exit(1);
-    }
-  }
-#else
-  /*
-   * Should the first argument to socket() be AF_INET or PF_INET?  I don't
-   * know, take your pick.  PF_INET seems to be more widely adopted, and
-   * Comer (_Internetworking with TCP/IP_) even makes a point to say that
-   * people erroneously use AF_INET with socket() when they should be using
-   * PF_INET.  However, the man pages of some systems indicate that AF_INET
-   * is correct; some such as ConvexOS even say that you can use either one.
-   * All implementations I've seen define AF_INET and PF_INET to be the same
-   * number anyway, so the point is (hopefully) moot.
-   */
-
-  if ((s = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
-    perror("SYSERR: Error creating socket");
-    exit(1);
-  }
-#endif				/* CIRCLE_WINDOWS */
-
-#if defined(SO_REUSEADDR) && !defined(CIRCLE_MACINTOSH)
-  opt = 1;
-  if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *) &opt, sizeof(opt)) < 0){
-    perror("SYSERR: setsockopt REUSEADDR");
-    exit(1);
-  }
-#endif
 
   set_sendbuf(s);
 
-/*
- * The GUSI sockets library is derived from BSD, so it defines
- * SO_LINGER, even though setsockopt() is unimplimented.
- *	(from Dean Takemori <dean@UHHEPH.PHYS.HAWAII.EDU>)
- */
-#if defined(SO_LINGER) && !defined(CIRCLE_MACINTOSH)
-  {
-    struct linger ld;
+    {
+        struct linger ld;
 
-    ld.l_onoff = 0;
-    ld.l_linger = 0;
-    if (setsockopt(s, SOL_SOCKET, SO_LINGER, (char *) &ld, sizeof(ld)) < 0)
-      perror("SYSERR: setsockopt SO_LINGER");	/* Not fatal I suppose. */
-  }
-#endif
+        ld.l_onoff = 0;
+        ld.l_linger = 0;
+        if (setsockopt(s, SOL_SOCKET, SO_LINGER, (char *) &ld, sizeof(ld)) < 0)
+            perror("SYSERR: setsockopt SO_LINGER");	/* Not fatal I suppose. */
+    }
 
   /* Clear the structure */
   memset((char *)&sa, 0, sizeof(sa));
@@ -694,7 +320,7 @@ socket_t init_socket(ush_int cmport)
 
   if (bind(s, (struct sockaddr *) &sa, sizeof(sa)) < 0) {
     perror("SYSERR: bind");
-    CLOSE_SOCKET(s);
+    close(s);
     exit(1);
   }
   nonblock(s);
@@ -705,84 +331,46 @@ socket_t init_socket(ush_int cmport)
 
 int get_max_players(void)
 {
-#ifndef CIRCLE_UNIX
-  return (CONFIG_MAX_PLAYING);
-#else
 
-  int max_descs = 0;
-  const char *method;
+    int max_descs = 0;
+    const char *method;
 
 /*
  * First, we'll try using getrlimit/setrlimit.  This will probably work
  * on most systems.  HAS_RLIMIT is defined in sysdep.h.
  */
-#ifdef HAS_RLIMIT
-  {
-    struct rlimit limit;
+    {
+        struct rlimit limit;
 
-    /* find the limit of file descs */
-    method = "rlimit";
-    if (getrlimit(RLIMIT_NOFILE, &limit) < 0) {
-      perror("SYSERR: calling getrlimit");
-      exit(1);
+        /* find the limit of file descs */
+        method = "rlimit";
+        if (getrlimit(RLIMIT_NOFILE, &limit) < 0) {
+            perror("SYSERR: calling getrlimit");
+            exit(1);
+        }
+
+        /* set the current to the maximum */
+        limit.rlim_cur = limit.rlim_max;
+        if (setrlimit(RLIMIT_NOFILE, &limit) < 0) {
+            perror("SYSERR: calling setrlimit");
+            exit(1);
+        }
+        if (limit.rlim_max == RLIM_INFINITY)
+            max_descs = CONFIG_MAX_PLAYING + NUM_RESERVED_DESCS;
+        else
+            max_descs = MIN(CONFIG_MAX_PLAYING + NUM_RESERVED_DESCS, limit.rlim_max);
     }
 
-    /* set the current to the maximum */
-    limit.rlim_cur = limit.rlim_max;
-    if (setrlimit(RLIMIT_NOFILE, &limit) < 0) {
-      perror("SYSERR: calling setrlimit");
-      exit(1);
+    /* now calculate max _players_ based on max descs */
+    max_descs = MIN(CONFIG_MAX_PLAYING, max_descs - NUM_RESERVED_DESCS);
+
+    if (max_descs <= 0) {
+        log("SYSERR: Non-positive max player limit!  (Set at %d using %s).",
+            max_descs, method);
+        exit(1);
     }
-#ifdef RLIM_INFINITY
-    if (limit.rlim_max == RLIM_INFINITY)
-      max_descs = CONFIG_MAX_PLAYING + NUM_RESERVED_DESCS;
-    else
-      max_descs = MIN(CONFIG_MAX_PLAYING + NUM_RESERVED_DESCS, limit.rlim_max);
-#else
-    max_descs = MIN(CONFIG_MAX_PLAYING + NUM_RESERVED_DESCS, limit.rlim_max);
-#endif
-  }
-
-#elif defined (OPEN_MAX) || defined(FOPEN_MAX)
-#if !defined(OPEN_MAX)
-#define OPEN_MAX FOPEN_MAX
-#endif
-  method = "OPEN_MAX";
-  max_descs = OPEN_MAX;		/* Uh oh.. rlimit didn't work, but we have
-				 * OPEN_MAX */
-#elif defined (_SC_OPEN_MAX)
-  /*
-   * Okay, you don't have getrlimit() and you don't have OPEN_MAX.  Time to
-   * try the POSIX sysconf() function.  (See Stevens' _Advanced Programming
-   * in the UNIX Environment_).
-   */
-  method = "POSIX sysconf";
-  errno = 0;
-  if ((max_descs = sysconf(_SC_OPEN_MAX)) < 0) {
-    if (errno == 0)
-      max_descs = CONFIG_MAX_PLAYING + NUM_RESERVED_DESCS;
-    else {
-      perror("SYSERR: Error calling sysconf");
-      exit(1);
-    }
-  }
-#else
-  /* if everything has failed, we'll just take a guess */
-  method = "random guess";
-  max_descs = CONFIG_MAX_PLAYING + NUM_RESERVED_DESCS;
-#endif
-
-  /* now calculate max _players_ based on max descs */
-  max_descs = MIN(CONFIG_MAX_PLAYING, max_descs - NUM_RESERVED_DESCS);
-
-  if (max_descs <= 0) {
-    log("SYSERR: Non-positive max player limit!  (Set at %d using %s).",
-	    max_descs, method);
-    exit(1);
-  }
-  log("   Setting player limit to %d using %s.", max_descs, method);
-  return (max_descs);
-#endif /* CIRCLE_UNIX */
+    log("   Setting player limit to %d using %s.", max_descs, method);
+    return (max_descs);
 }
 
 
@@ -794,7 +382,7 @@ int get_max_players(void)
  * output and sending it out to players, and calling "heartbeat" functions
  * such as mobile_activity().
  */
-void game_loop(socket_t cmmother_desc)
+void game_loop(socklen_t cmmother_desc)
 {
   fd_set input_set, output_set, exc_set, null_set;
   struct timeval last_time, opt_time, process_time, temp_time;
@@ -851,10 +439,8 @@ void game_loop(socket_t cmmother_desc)
 
     maxdesc = cmmother_desc;
     for (d = descriptor_list; d; d = d->next) {
-#ifndef CIRCLE_WINDOWS
-      if (d->descriptor > maxdesc)
-	maxdesc = d->descriptor;
-#endif
+        if (d->descriptor > maxdesc)
+            maxdesc = d->descriptor;
       FD_SET(d->descriptor, &input_set);
       FD_SET(d->descriptor, &output_set);
       FD_SET(d->descriptor, &exc_set);
@@ -922,7 +508,7 @@ void game_loop(socket_t cmmother_desc)
       next_d = d->next;
       if (FD_ISSET(d->descriptor, &input_set))
 	if (process_input(d) < 0)
-	  close_socket(d);
+        close_socket(d);
     }
 
     /* Process commands we just read from process_input */
@@ -982,7 +568,7 @@ void game_loop(socket_t cmmother_desc)
       if (*(d->output) && FD_ISSET(d->descriptor, &output_set)) {
 	/* Output for this player is ready */
 	if (process_output(d) < 0) {
-          close_socket(d);
+        close_socket(d);
 	  log("ERROR: Tried to send output to dead socket!");
         }
 	else
@@ -1003,7 +589,7 @@ void game_loop(socket_t cmmother_desc)
     for (d = descriptor_list; d; d = next_d) {
       next_d = d->next;
       if (STATE(d) == CON_CLOSE || STATE(d) == CON_DISCONNECT)
-	close_socket(d);
+          close_socket(d);
     }
 
     /*
@@ -1046,10 +632,8 @@ void game_loop(socket_t cmmother_desc)
       num_invalid = 0;
     }
 
-#ifdef CIRCLE_UNIX
-    /* Update tics for deadlock protection (UNIX only) */
-    tics_passed++;
-#endif
+      /* Update tics for deadlock protection */
+      tics_passed++;
   }
 }
 
@@ -1211,17 +795,6 @@ void record_usage(void)
 
   log("nusage: %-3d sockets connected, %-3d sockets playing",
 	  sockets_connected, sockets_playing);
-
-#ifdef RUSAGE	/* Not RUSAGE_SELF because it doesn't guarantee prototype. */
-  {
-    struct rusage ru;
-
-    getrusage(RUSAGE_SELF, &ru);
-    log("rusage: user time: %ld sec, system time: %ld sec, max res size: %ld",
-	    ru.ru_utime.tv_sec, ru.ru_stime.tv_sec, ru.ru_maxrss);
-  }
-#endif
-
 }
 
 
@@ -1533,7 +1106,7 @@ char *make_prompt(struct descriptor_data *d)
        GET_CHARGE(d->character) = 0;
       }
     if (GET_CHARGE(d->character) > 0) {
-     cl_sint64 charge = GET_CHARGE(d->character);
+     int64_t charge = GET_CHARGE(d->character);
      if (!PRF_FLAGGED(d->character, PRF_NODEC) && !PRF_FLAGGED(d->character, PRF_DISPERC)) {
       if (charge >= GET_MAX_MANA(d->character)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G==@D<@RMAX@D>@G===@D]@n\n");
@@ -1648,7 +1221,7 @@ char *make_prompt(struct descriptor_data *d)
      }
      if (PRF_FLAGGED(d->character, PRF_DISPERC) && !PRF_FLAGGED(d->character, PRF_NODEC)) {
       if (GET_CHARGE(d->character) > 0) {
-        cl_sint64 perc = (GET_CHARGE(d->character) * 100) / GET_MAX_MANA(d->character);
+        int64_t perc = (GET_CHARGE(d->character) * 100) / GET_MAX_MANA(d->character);
         count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@BCharge@Y: @C%"I64T"%s@D]@n\n", perc, "%");
         if (count >= 0)
           len += count;
@@ -1656,7 +1229,7 @@ char *make_prompt(struct descriptor_data *d)
      }
       if (PRF_FLAGGED(d->character, PRF_NODEC)) {
       if (charge > 0) {
-        cl_sint64 perc = (charge * 100) / GET_MAX_MANA(d->character);
+        int64_t perc = (charge * 100) / GET_MAX_MANA(d->character);
         count = snprintf(prompt + len, sizeof(prompt) - len, "Ki is charged to %"I64T" percent.\n", perc);
         if (count >= 0)
           len += count;
@@ -1671,7 +1244,7 @@ char *make_prompt(struct descriptor_data *d)
       if (AFF_FLAGGED(d->character, AFF_SANCTUARY)) {
        if (PRF_FLAGGED(d->character, PRF_DISPERC) && !PRF_FLAGGED(d->character, PRF_NODEC)) {
         if (GET_BARRIER(d->character) > 0) {
-         cl_sint64 perc = (GET_BARRIER(d->character) * 100) / GET_MAX_MANA(d->character);
+         int64_t perc = (GET_BARRIER(d->character) * 100) / GET_MAX_MANA(d->character);
          count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GBarrier@Y: @B%"I64T"%s@D]@n\n", perc, "%");
          if (count >= 0)
           len += count;
@@ -1762,7 +1335,7 @@ char *make_prompt(struct descriptor_data *d)
        }
        if(PRF_FLAGGED(d->character, PRF_NODEC)) {
         if (GET_BARRIER(d->character) > 0) {
-         cl_sint64 perc = (GET_BARRIER(d->character) * 100) / GET_MAX_MANA(d->character);
+         int64_t perc = (GET_BARRIER(d->character) * 100) / GET_MAX_MANA(d->character);
          count = snprintf(prompt + len, sizeof(prompt) - len, "A barrier charged to %"I64T" percent surrounds you.@n\n", perc);
          if (count >= 0)
           len += count;
@@ -1796,7 +1369,7 @@ char *make_prompt(struct descriptor_data *d)
           len += count;
        }
       } else if (PRF_FLAGGED(d->character, PRF_DISPHP)) {
-       cl_sint64 power = GET_HIT(d->character), maxpower = (GET_MAX_HIT(d->character));
+       int64_t power = GET_HIT(d->character), maxpower = (GET_MAX_HIT(d->character));
        int perc = 0;
        if (power <= 0) {
         power = 1;
@@ -1849,7 +1422,7 @@ char *make_prompt(struct descriptor_data *d)
           len += count;
        }
       } else if (PRF_FLAGGED(d->character, PRF_DISPKI)) {
-       cl_sint64 power = GET_MANA(d->character), maxpower = GET_MAX_MANA(d->character);
+       int64_t power = GET_MANA(d->character), maxpower = GET_MAX_MANA(d->character);
        int perc = 0;
        if (power <= 0) {
         power = 1;
@@ -1896,7 +1469,7 @@ char *make_prompt(struct descriptor_data *d)
           len += count;
        }
       } else if (PRF_FLAGGED(d->character, PRF_DISPMOVE)) {
-       cl_sint64 power = GET_MOVE(d->character), maxpower = GET_MAX_MOVE(d->character);
+       int64_t power = GET_MOVE(d->character), maxpower = GET_MAX_MOVE(d->character);
        int perc = 0;
        if (power <= 0) {
         power = 1;
@@ -2363,7 +1936,7 @@ struct in_addr *get_bind_addr()
     bind_addr.s_addr = htonl(INADDR_ANY);
   } else {
     /* If the parsing fails, use INADDR_ANY */
-    if (!parse_ip(CONFIG_DFLT_IP, &bind_addr)) {
+    if (!inet_aton(CONFIG_DFLT_IP, &bind_addr)) {
       log("SYSERR: DFLT_IP of %s appears to be an invalid IP address",
           CONFIG_DFLT_IP);
       bind_addr.s_addr = htonl(INADDR_ANY);
@@ -2379,65 +1952,15 @@ struct in_addr *get_bind_addr()
   return (&bind_addr);
 }
 
-#ifdef HAVE_INET_ATON
-
-/*
- * inet_aton's interface is the same as parse_ip's: 0 on failure, non-0 if
- * successful
- */
-int parse_ip(const char *addr, struct in_addr *inaddr)
-{
-  return (inet_aton(addr, inaddr));
-}
-
-#elif HAVE_INET_ADDR
-
-/* inet_addr has a different interface, so we emulate inet_aton's */
-int parse_ip(const char *addr, struct in_addr *inaddr)
-{
-  long ip;
-
-  if ((ip = inet_addr(addr)) == -1) {
-    return (0);
-  } else {
-    inaddr->s_addr = (unsigned long) ip;
-    return (1);
-  }
-}
-
-#else
-
-/* If you have neither function - sorry, you can't do specific binding. */
-int parse_ip(const char *addr, struct in_addr *inaddr)
-{
-  log("SYSERR: warning: you're trying to set DFLT_IP but your system has no "
-      "functions to parse IP addresses (how bizarre!)");
-  return (0);
-}
-
-#endif /* INET_ATON and INET_ADDR */
-
-
-
 /* Sets the kernel's send buffer size for the descriptor */
-int set_sendbuf(socket_t s)
+int set_sendbuf(socklen_t s)
 {
-#if defined(SO_SNDBUF) && !defined(CIRCLE_MACINTOSH)
-  int opt = MAX_SOCK_BUF;
+    int opt = MAX_SOCK_BUF;
 
-  if (setsockopt(s, SOL_SOCKET, SO_SNDBUF, (char *) &opt, sizeof(opt)) < 0) {
-    perror("SYSERR: setsockopt SNDBUF");
-    return (-1);
-  }
-
-#if 0
-  if (setsockopt(s, SOL_SOCKET, SO_RCVBUF, (char *) &opt, sizeof(opt)) < 0) {
-    perror("SYSERR: setsockopt RCVBUF");
-    return (-1);
-  }
-#endif
-
-#endif
+    if (setsockopt(s, SOL_SOCKET, SO_SNDBUF, (char *) &opt, sizeof(opt)) < 0) {
+        perror("SYSERR: setsockopt SNDBUF");
+        return (-1);
+    }
 
   return (0);
 }
@@ -2463,9 +1986,7 @@ void init_descriptor (struct descriptor_data *newd, int desc)
 
   CREATE(newd->comp, struct compr, 1);
   newd->comp->state = 0; /* we start in normal mode */
-#ifdef HAVE_ZLIB_H
-  newd->comp->stream = NULL;
-#endif /* HAVE_ZLIB_H */
+    newd->comp->stream = NULL;
 }
 
 void set_color(struct descriptor_data *d)
@@ -2494,9 +2015,9 @@ void set_color(struct descriptor_data *d)
   return;
 }
 
-int new_descriptor(socket_t s)
+int new_descriptor(socklen_t s)
 {
-  socket_t desc;
+  socklen_t desc;
   int sockets_connected = 0;
   socklen_t i;
   struct descriptor_data *newd;
@@ -2514,7 +2035,7 @@ int new_descriptor(socket_t s)
 
   /* set the send buffer size */
   if (set_sendbuf(desc) < 0) {
-    CLOSE_SOCKET(desc);
+      close(desc);
     return (0);
   }
 
@@ -2524,7 +2045,7 @@ int new_descriptor(socket_t s)
 
   if (sockets_connected >= CONFIG_MAX_PLAYING) {
     write_to_descriptor(desc, "Sorry, CircleMUD is full right now... please try again later!\r\n", NULL);
-    CLOSE_SOCKET(desc);
+      close(desc);
     return (0);
   }
   /* create a new descriptor */
@@ -2547,19 +2068,11 @@ int new_descriptor(socket_t s)
 
   /* determine if the site is banned */
   if (isbanned(newd->host) == BAN_ALL) {
-    CLOSE_SOCKET(desc);
+      close(desc);
     mudlog(CMP, ADMLVL_GOD, TRUE, "Connection attempt denied from [%s]", newd->host);
     free(newd);
     return (0);
   }
-#if 0
-  /*
-   * Log new connections - probably unnecessary, but you may want it.
-   * Note that your immortals may wonder if they see a connection from
-   * your site, but you are wizinvis upon login.
-   */
-  mudlog(CMP, ADMLVL_GOD, FALSE, "New connection from [%s]", newd->host);
-#endif
 
   /* initialize descriptor data */
   init_descriptor(newd, desc);
@@ -2578,7 +2091,7 @@ int new_descriptor(socket_t s)
  * Send all of the output that we've accumulated for a player out to
  * the player's descriptor.
  *
- * 32 byte GARBAGE_SPACE in MAX_SOCK_BUF used for:
+ * 32 int8_tGARBAGE_SPACE in MAX_SOCK_BUF used for:
  *	 2 bytes: prepended \r\n
  *	14 bytes: overflow message
  *	 2 bytes: extra \r\n for non-comapct
@@ -2690,47 +2203,11 @@ int process_output(struct descriptor_data *t)
  * and one for all other platforms.
  */
 
-#if defined(CIRCLE_WINDOWS)
-
-ssize_t perform_socket_write(socket_t desc, const char *txt, size_t length, struct compr *comp)
-{
-  ssize_t result;
-
-  result = send(desc, txt, length, 0);
-
-  if (result > 0) {
-    /* Write was sucessful */
-    return (result);
-  }
-
-  if (result == 0) {
-    /* This should never happen! */
-    log("SYSERR: Huh??  write() returned 0???  Please report this!");
-    return (-1);
-  }
-
-  /* result < 0: An error was encountered. */
-
-  /* Transient error? */
-  if (WSAGetLastError() == WSAEWOULDBLOCK || WSAGetLastError() == WSAEINTR)
-    return (0);
-
-  /* Must be a fatal error. */
-  return (-1);
-}
-
-#else
-
-#if defined(CIRCLE_ACORN)
-#define write	socketwrite
-#endif
-
 /* perform_socket_write for all Non-Windows platforms */
-ssize_t perform_socket_write(socket_t desc, const char *txt, size_t length, struct compr *comp)
+ssize_t perform_socket_write(socklen_t desc, const char *txt, size_t length, struct compr *comp)
 {
   ssize_t result = 0;
 
-#ifdef HAVE_ZLIB_H
   int compr_result, tmp, cnt, bytes_copied;
   
   /* MCCP! this is where the zlib compression is handled */
@@ -2800,7 +2277,7 @@ exitzlibdo:
     if (result > 0)
 	result = bytes_copied;
   } else 
-#endif /* HAVE_ZLIB_H */
+
   result = write(desc, txt, length);
 
   if (result > 0) {
@@ -2820,26 +2297,12 @@ exitzlibdo:
    * indicate this.
    */
 
-#ifdef EAGAIN		/* POSIX */
-  if (errno == EAGAIN)
-    return (0);
-#endif
-
-#ifdef EWOULDBLOCK	/* BSD */
-  if (errno == EWOULDBLOCK)
-    return (0);
-#endif
-
-#ifdef EDEADLK		/* Macintosh */
-  if (errno == EDEADLK)
-    return (0);
-#endif
+    if (errno == EAGAIN)
+        return (0);
 
   /* Looks like the error was fatal.  Too bad. */
   return (-1);
 }
-
-#endif /* CIRCLE_WINDOWS */
 
     
 /*
@@ -2852,7 +2315,7 @@ exitzlibdo:
  * >=0  If all is well and good.
  *  -1  If an error was encountered, so that the player should be cut off.
  */
-int write_to_descriptor(socket_t desc, const char *txt, struct compr *comp)
+int write_to_descriptor(socklen_t desc, const char *txt, struct compr *comp)
 {
   ssize_t bytes_written;
   size_t total = strlen(txt), write_total = 0;
@@ -2882,17 +2345,11 @@ int write_to_descriptor(socket_t desc, const char *txt, struct compr *comp)
  * Same information about perform_socket_write applies here. I like
  * standards, there are so many of them. -gg 6/30/98
  */
-ssize_t perform_socket_read(socket_t desc, char *read_point, size_t space_left)
+ssize_t perform_socket_read(socklen_t desc, char *read_point, size_t space_left)
 {
   ssize_t ret;
 
-#if defined(CIRCLE_ACORN)
-  ret = recv(desc, read_point, space_left, MSG_DONTWAIT);
-#elif defined(CIRCLE_WINDOWS)
-  ret = recv(desc, read_point, space_left, 0);
-#else
-  ret = read(desc, read_point, space_left);
-#endif
+    ret = read(desc, read_point, space_left);
 
   /* Read was successful. */
   if (ret > 0)
@@ -2908,38 +2365,14 @@ ssize_t perform_socket_read(socket_t desc, char *read_point, size_t space_left)
    * read returned a value < 0: there was an error
    */
 
-#if defined(CIRCLE_WINDOWS)	/* Windows */
-  if (WSAGetLastError() == WSAEWOULDBLOCK || WSAGetLastError() == WSAEINTR)
-    return (0);
-#else
+    if (errno == EINTR)
+        return (0);
 
-#ifdef EINTR		/* Interrupted system call - various platforms */
-  if (errno == EINTR)
-    return (0);
-#endif
+    if (errno == EAGAIN)
+        return (0);
 
-#ifdef EAGAIN		/* POSIX */
-  if (errno == EAGAIN)
-    return (0);
-#endif
-
-#ifdef EWOULDBLOCK	/* BSD */
-  if (errno == EWOULDBLOCK)
-    return (0);
-#endif /* EWOULDBLOCK */
-
-#ifdef EDEADLK		/* Macintosh */
-  if (errno == EDEADLK)
-    return (0);
-#endif
-
-#ifdef ECONNRESET
-  if (errno == ECONNRESET)
-    return (-1);
-#endif
-
-#endif /* CIRCLE_WINDOWS */
-
+    if (errno == ECONNRESET)
+        return (-1);
   /*
    * We don't know what happened, cut them off. This qualifies for
    * a SYSERR because we have no idea what happened at this point.
@@ -2969,17 +2402,15 @@ int process_input(struct descriptor_data *t)
   char *ptr, *read_point, *write_point, *nl_pos = NULL;
   char tmp[MAX_INPUT_LENGTH];
 
-#ifdef HAVE_ZLIB_H
-  const char compress_start[] =
-  {
-    (char) IAC,
-    (char) SB,
-    (char) COMPRESS2,
-    (char) IAC,
-    (char) SE,
-    (char) 0
-  };
-#endif /* HAVE_ZLIB_H */
+const char compress_start[] =
+        {
+                (char) IAC,
+                (char) SB,
+                (char) COMPRESS2,
+                (char) IAC,
+                (char) SE,
+                (char) 0
+        };
 
   /* first, find the point where we left off reading data */
   buf_length = strlen(t->inbuf);
@@ -3004,7 +2435,7 @@ int process_input(struct descriptor_data *t)
     /* he shouldn't be doing this, and for the sake of efficiency, the read buffer isn't searched */
     /* (ie. it assumes that read_point[0] will be IAC, etc.) */
     if (t->comp->state == 1) {
-#ifdef HAVE_ZLIB_H
+
       if (*read_point == (char)IAC && *(read_point + 1) == (char)DO && *(read_point + 2) == (char)COMPRESS2) {
 	/* compression just turned on */
 	/* first send plaintext start of the compression stream */
@@ -3036,9 +2467,6 @@ int process_input(struct descriptor_data *t)
 	
 	bytes_read = 0; /* ignore the compression string - don't process it further */
       }
-#else /* HAVE_ZLIB_H */
-      t->comp->state = 0; /* We can't compress without zlib...turn it off */
-#endif /* HAVE_ZLIB_H */
     }
     /* at this point, we know we got some data from the read */
 
@@ -3062,14 +2490,7 @@ int process_input(struct descriptor_data *t)
  * that data is ready (process_input is only called if select indicates that
  * this descriptor is in the read set).  JE 2/23/95.
  */
-#if !defined(POSIX_NONBLOCK_BROKEN)
   } while (nl_pos == NULL);
-#else
-  } while (0);
-
-  if (nl_pos == NULL)
-    return (0);
-#endif /* POSIX_NONBLOCK_BROKEN */
 
   /*
    * okay, at this point we have at least one newline in the string; now we
@@ -3241,7 +2662,7 @@ void free_user(struct descriptor_data *d)
    }
    d->user_freed = 1;
 
-   if (!str_cmp(d->user, "Empty"))
+   if (!strcasecmp(d->user, "Empty"))
     return;
 
    log("Freeing User: %s", d->user);
@@ -3278,7 +2699,7 @@ void close_socket(struct descriptor_data *d)
   struct descriptor_data *temp;
 
   REMOVE_FROM_LIST(d, descriptor_list, next, temp);
-  CLOSE_SOCKET(d->descriptor);
+    close(d->descriptor);
   flush_queues(d);
 
   /* Forget snooping */
@@ -3361,14 +2782,12 @@ void close_socket(struct descriptor_data *d)
   }
 
   /* free compression structures */
-#ifdef HAVE_ZLIB_H
-  if (d->comp->stream) {
-    deflateEnd(d->comp->stream);
-    free(d->comp->stream);
-    free(d->comp->buff_out);
-    free(d->comp->buff_in);
-  }
-#endif /* HAVE_ZLIB_H */
+    if (d->comp->stream) {
+        deflateEnd(d->comp->stream);
+        free(d->comp->stream);
+        free(d->comp->buff_out);
+        free(d->comp->buff_in);
+    }
   /* d->comp was still created even if there is no zlib, for comp->state) */
   if (d->comp)
     free(d->comp);  
@@ -3394,6 +2813,7 @@ void check_idle_passwords(void)
     }
   }
 }
+
 void check_idle_menu(void)
 {
   struct descriptor_data *d, *next_d;
@@ -3422,92 +2842,44 @@ void check_idle_menu(void)
  * this and various other NeXT fixes.)
  */
 
-#if defined(CIRCLE_WINDOWS)
-
-void nonblock(socket_t s)
+void nonblock(socklen_t s)
 {
-  unsigned long val = 1;
-  ioctlsocket(s, FIONBIO, &val);
+    int flags;
+
+    flags = fcntl(s, F_GETFL, 0);
+    flags |= O_NONBLOCK;
+    if (fcntl(s, F_SETFL, flags) < 0) {
+        perror("SYSERR: Fatal error executing nonblock (comm.c)");
+        exit(1);
+    }
 }
-
-#elif defined(CIRCLE_AMIGA)
-
-void nonblock(socket_t s)
-{
-  long val = 1;
-  IoctlSocket(s, FIONBIO, &val);
-}
-
-#elif defined(CIRCLE_ACORN)
-
-void nonblock(socket_t s)
-{
-  int val = 1;
-  socket_ioctl(s, FIONBIO, &val);
-}
-
-#elif defined(CIRCLE_VMS)
-
-void nonblock(socket_t s)
-{
-  int val = 1;
-
-  if (ioctl(s, FIONBIO, &val) < 0) {
-    perror("SYSERR: Fatal error executing nonblock (comm.c)");
-    exit(1);
-  }
-}
-
-#elif defined(CIRCLE_UNIX) || defined(CIRCLE_OS2) || defined(CIRCLE_MACINTOSH)
-
-#ifndef O_NONBLOCK
-#define O_NONBLOCK O_NDELAY
-#endif
-
-void nonblock(socket_t s)
-{
-  int flags;
-
-  flags = fcntl(s, F_GETFL, 0);
-  flags |= O_NONBLOCK;
-  if (fcntl(s, F_SETFL, flags) < 0) {
-    perror("SYSERR: Fatal error executing nonblock (comm.c)");
-    exit(1);
-  }
-}
-
-#endif  /* CIRCLE_UNIX || CIRCLE_OS2 || CIRCLE_MACINTOSH */
 
 
 /* ******************************************************************
 *  signal-handling functions (formerly signals.c).  UNIX only.      *
 ****************************************************************** */
 
-#if defined(CIRCLE_UNIX) || defined(CIRCLE_MACINTOSH)
-
-RETSIGTYPE reread_wizlists(int sig)
+void reread_wizlists(int sig)
 {
-  reread_wizlist = TRUE;
+    reread_wizlist = TRUE;
 }
 
 
-RETSIGTYPE unrestrict_game(int sig)
+void unrestrict_game(int sig)
 {
-  emergency_unban = TRUE;
+    emergency_unban = TRUE;
 }
-
-#ifdef CIRCLE_UNIX
 
 /* clean up our zombie kids to avoid defunct processes */
-RETSIGTYPE reap(int sig)
+void reap(int sig)
 {
   while (waitpid(-1, NULL, WNOHANG) > 0);
 
-  my_signal(SIGCHLD, reap);
+  signal(SIGCHLD, reap);
 }
 
 /* Dying anyway... */
-RETSIGTYPE checkpointing(int sig)
+void checkpointing(int sig)
 {
 #ifndef MEMORY_DEBUG
   if (!tics_passed) {
@@ -3520,14 +2892,12 @@ RETSIGTYPE checkpointing(int sig)
 
 
 /* Dying anyway... */
-RETSIGTYPE hupsig(int sig)
+void hupsig(int sig)
 {
   log("SYSERR: Received SIGHUP, SIGINT, or SIGTERM.  Shutting down...");
   exit(1);			/* perhaps something more elegant should
 				 * substituted */
 }
-
-#endif	/* CIRCLE_UNIX */
 
 /*
  * This is an implementation of signal() using sigaction() for portability.
@@ -3543,42 +2913,19 @@ RETSIGTYPE hupsig(int sig)
  * SunOS Release 4.0.2 (sun386) needs this too, according to Tim Aldric.
  */
 
-#ifndef POSIX
-#define my_signal(signo, func) signal(signo, func)
-#else
-sigfunc *my_signal(int signo, sigfunc *func)
-{
-  struct sigaction sact, oact;
-
-  sact.sa_handler = func;
-  sigemptyset(&sact.sa_mask);
-  sact.sa_flags = 0;
-#ifdef SA_INTERRUPT
-  sact.sa_flags |= SA_INTERRUPT;	/* SunOS */
-#endif
-
-  if (sigaction(signo, &sact, &oact) < 0)
-    return (SIG_ERR);
-
-  return (oact.sa_handler);
-}
-#endif				/* POSIX */
-
-
 void signal_setup(void)
 {
-#ifndef CIRCLE_MACINTOSH
   struct itimerval itime;
   struct timeval interval;
 
   /* user signal 1: reread wizlists.  Used by autowiz system. */
-  my_signal(SIGUSR1, reread_wizlists);
+  signal(SIGUSR1, reread_wizlists);
 
   /*
    * user signal 2: unrestrict game.  Used for emergencies if you lock
    * yourself out of the MUD somehow.  (Duh...)
    */
-  my_signal(SIGUSR2, unrestrict_game);
+  signal(SIGUSR2, unrestrict_game);
 
   /*
    * set up the deadlock-protection so that the MUD aborts itself if it gets
@@ -3589,19 +2936,16 @@ void signal_setup(void)
   itime.it_interval = interval;
   itime.it_value = interval;
   setitimer(ITIMER_VIRTUAL, &itime, NULL);
-  my_signal(SIGVTALRM, checkpointing);
+  signal(SIGVTALRM, checkpointing);
 
   /* just to be on the safe side: */
-  my_signal(SIGHUP, hupsig);
-  my_signal(SIGCHLD, reap);
-#endif /* CIRCLE_MACINTOSH */
-  my_signal(SIGINT, hupsig);
-  my_signal(SIGTERM, hupsig);
-  my_signal(SIGPIPE, SIG_IGN);
-  my_signal(SIGALRM, SIG_IGN);
+  signal(SIGHUP, hupsig);
+  signal(SIGCHLD, reap);
+  signal(SIGINT, hupsig);
+  signal(SIGTERM, hupsig);
+  signal(SIGPIPE, SIG_IGN);
+  signal(SIGALRM, SIG_IGN);
 }
-
-#endif	/* CIRCLE_UNIX || CIRCLE_MACINTOSH */
 
 /* ****************************************************************
 *       Public routines for system-to-player-communication        *
@@ -4006,7 +3350,7 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
     }
     return NULL;
   }
-#include "screen.h" 
+
   if (type == TO_GMOTE) { 
     struct descriptor_data *i; 
     char buf[MAX_STRING_LENGTH];
@@ -4094,21 +3438,7 @@ void setup_log(const char *filename, int fd)
 {
   FILE *s_fp;
 
-#if defined(__MWERKS__) || defined(__GNUC__)
-  s_fp = stderr;
-#else
-  if ((s_fp = fdopen(STDERR_FILENO, "w")) == NULL) {
-    puts("SYSERR: Error opening stderr, trying stdout.");
-
-    if ((s_fp = fdopen(STDOUT_FILENO, "w")) == NULL) {
-      puts("SYSERR: Error opening stdout, trying a file.");
-
-      /* If we don't have a file, try a default. */
-      if (filename == NULL || *filename == '\0')
-        filename = "log/syslog";
-    }
-  }
-#endif
+    s_fp = stderr;
 
   if (filename == NULL || *filename == '\0') {
     /* No filename, set us up with the descriptor we just opened. */
@@ -4154,14 +3484,7 @@ int open_logfile(const char *filename, FILE *stderr_fp)
 /*
  * This may not be pretty but it keeps game_loop() neater than if it was inline.
  */
-#if defined(CIRCLE_WINDOWS)
 
-void circle_sleep(struct timeval *timeout)
-{
-  Sleep(timeout->tv_sec * 1000 + timeout->tv_usec / 1000);
-}
-
-#else
 
 void circle_sleep(struct timeval *timeout)
 {
@@ -4172,8 +3495,6 @@ void circle_sleep(struct timeval *timeout)
     }
   }
 }
-
-#endif /* CIRCLE_WINDOWS */
 
 void show_help(struct descriptor_data *t, const char *entry)
 {
@@ -4192,9 +3513,9 @@ void show_help(struct descriptor_data *t, const char *entry)
     if (bot > top) {
       return;
     }
-    else if (!(chk = strn_cmp(entry, help_table[mid].keywords, minlen))) {
+    else if (!(chk = strncasecmp(entry, help_table[mid].keywords, minlen))) {
       while ((mid > 0) &&
-       (!(chk = strn_cmp(entry, help_table[mid - 1].keywords, minlen))))
+       (!(chk = strncasecmp(entry, help_table[mid - 1].keywords, minlen))))
        mid--;
       write_to_output(t, "\r\n");
       snprintf(buf, sizeof(buf), "%s\r\n[ PRESS RETURN TO CONTINUE ]",
@@ -4239,49 +3560,49 @@ void send_to_range(room_vnum start, room_vnum finish, const char *messg, ...)
 int passcomm(struct char_data *ch, char *comm)
 {
 
- if (!str_cmp(comm, "score")) {
+ if (!strcasecmp(comm, "score")) {
   return TRUE;
  }
- else if (!str_cmp(comm, "sco")) {
+ else if (!strcasecmp(comm, "sco")) {
   return TRUE;
  }
- else if (!str_cmp(comm, "ooc")) {
+ else if (!strcasecmp(comm, "ooc")) {
   return TRUE;
  }
- else if (!str_cmp(comm, "newbie")) {
+ else if (!strcasecmp(comm, "newbie")) {
   return TRUE;
  }
- else if (!str_cmp(comm, "newb")) {
+ else if (!strcasecmp(comm, "newb")) {
   return TRUE;
  }
- else if (!str_cmp(comm, "look")) {
+ else if (!strcasecmp(comm, "look")) {
   return TRUE;
  }
- else if (!str_cmp(comm, "lo")) {
+ else if (!strcasecmp(comm, "lo")) {
   return TRUE;
  }
- else if (!str_cmp(comm, "l")) {
+ else if (!strcasecmp(comm, "l")) {
   return TRUE;
  }
- else if (!str_cmp(comm, "status")) {
+ else if (!strcasecmp(comm, "status")) {
   return TRUE;
  }
- else if (!str_cmp(comm, "stat")) {
+ else if (!strcasecmp(comm, "stat")) {
   return TRUE;
  }
- else if (!str_cmp(comm, "sta")) {
+ else if (!strcasecmp(comm, "sta")) {
   return TRUE;
  }
- else if (!str_cmp(comm, "tell")) {
+ else if (!strcasecmp(comm, "tell")) {
   return TRUE;
  }
- else if (!str_cmp(comm, "reply")) {
+ else if (!strcasecmp(comm, "reply")) {
   return TRUE;
  }
- else if (!str_cmp(comm, "say")) {
+ else if (!strcasecmp(comm, "say")) {
   return TRUE;
  }
- else if (!str_cmp(comm, "osay")) {
+ else if (!strcasecmp(comm, "osay")) {
   return TRUE;
  }
  else {

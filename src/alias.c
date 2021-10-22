@@ -10,7 +10,9 @@
 *********************************************************************** */
 
 #include "alias.h"
-
+#include "utils.h"
+#include "interpreter.h"
+#include "db.h"
 
 
 void write_aliases(struct char_data *ch)

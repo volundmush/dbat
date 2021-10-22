@@ -5,10 +5,8 @@
 *  This is an original file created by me for Dragonball Advent Truth     *
 *  to house all player level object editing functions -- Iovan 1/6/13     *
 ************************************************************************ */
-
 #define __OBJ_EDIT_C__
-
-#include "structs.h"
+#include "obj_edit.h"
 #include "utils.h"
 #include "comm.h"
 #include "interpreter.h"
@@ -18,15 +16,8 @@
 #include "screen.h"
 #include "constants.h"
 #include "obj_edit.h"
-
-/* extern variables */
-
-/* local variables  */
-
-/* extern functions */
-extern void send_to_imm(char *messg, ...);
-extern void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, char *name);
-extern void log_custom(struct descriptor_data *d, struct obj_data *obj);
+#include "dg_comm.h"
+#include "act.other.h"
 
 /* local functions  */
 void disp_custom_menu(struct descriptor_data *d);
@@ -209,7 +200,7 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
     if (!*arg) {
      write_to_output(d, "Save current changes and be charged?\r\nYes or No\r\n");
      return;      
-    } else if (!str_cmp(arg, "yes") || !str_cmp(arg, "Yes") || !str_cmp(arg, "y") || !str_cmp(arg, "Y")) {
+    } else if (!strcasecmp(arg, "yes") || !strcasecmp(arg, "Yes") || !strcasecmp(arg, "y") || !strcasecmp(arg, "Y")) {
      obj = d->obj_point;
 
      *buf = '\0';
@@ -234,7 +225,7 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
      write_to_output(d, "Purchase complete.");
      send_to_imm("Restring Eq: %s has bought: %s, which was %s.", GET_NAME(d->character), obj->short_description, d->obj_was);
      STATE(d) = CON_PLAYING;
-    } else if (!str_cmp(arg, "No") || !str_cmp(arg, "no") || !str_cmp(arg, "n") || !str_cmp(arg, "N")) {
+    } else if (!strcasecmp(arg, "No") || !strcasecmp(arg, "no") || !strcasecmp(arg, "n") || !strcasecmp(arg, "N")) {
      write_to_output(d, "Canceling purchase at no cost.\r\n");
      send_to_imm("Restring Eq: %s has canceled their equipment restring.", GET_NAME(d->character));
      d->obj_editval = EDIT_NONE;
@@ -423,7 +414,7 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
     if (!*arg) {
       write_to_output(d, "@wPurchase this custom piece? (Y or N)@n\r\n");
       return;
-    } else if (!str_cmp(arg, "y") || !str_cmp(arg, "Y")) {
+    } else if (!strcasecmp(arg, "y") || !strcasecmp(arg, "Y")) {
      write_to_output(d, "@wPurchase complete.@n\r\n");
      STATE(d) = CON_PLAYING;
      if (d->obj_weapon == 0) {
@@ -531,7 +522,7 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
      send_to_imm("Custom Eq: %s has bought: %s.", GET_NAME(d->character), obj->short_description);
      customWrite(d->character, obj);
      log_custom(d, obj);
-    } else if (!str_cmp(arg, "n") || !str_cmp(arg, "N")) {
+    } else if (!strcasecmp(arg, "n") || !strcasecmp(arg, "N")) {
      write_to_output(d, "Canceling purchase at no cost.\r\n");
      send_to_imm("Custom Eq: %s has canceled their custom eq construction.", GET_NAME(d->character));
      d->obj_editval = EDIT_NONE;

@@ -7,38 +7,17 @@
 *  Used at AderonMUD (aderonmud.genesismuds.com 3200)                    * 
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */ 
 #include "hsedit.h"
-
-
-
-/*------------------------------------------------------------------------*/ 
-/*. External data .*/ 
-
-extern struct   zone_data *zone_table; 
-extern struct house_control_rec house_control[MAX_HOUSES];     /* house.c */ 
-extern int num_of_houses;                                      /* house.c */ 
-extern const char *dirs[];                                 /* constants.c */ 
-/*------------------------------------------------------------------------*/ 
-/* external function protos */ 
-int find_house(room_vnum vnum);                                /* house.c */ 
-void House_save_control(void);                                 /* house.c */ 
-void House_delete_file(room_vnum vnum);                        /* house.c */ 
-extern void   strip_string(char *buffer); 
-
-/*------------------------------------------------------------------------*/ 
-/* local function protos */ 
-void hsedit_setup_new(struct descriptor_data *d); 
-void hsedit_setup_existing(struct descriptor_data *d, int real_num); 
-void hsedit_save_internally(struct descriptor_data *d); 
-void hsedit_save_to_disk(void); 
-void hsedit_disp_type_menu(struct descriptor_data *d); 
-void hsedit_disp_menu(struct descriptor_data * d); 
-void hsedit_parse(struct descriptor_data * d, char *arg); 
-void hsedit_disp_flags_menu(struct descriptor_data *d); 
-void hsedit_disp_val0_menu(struct descriptor_data *d); 
-void hsedit_disp_val1_menu(struct descriptor_data *d); 
-void hsedit_disp_val2_menu(struct descriptor_data *d); 
-void hsedit_disp_val3_menu(struct descriptor_data *d); 
-void free_house(struct house_control_rec *house); 
+#include "comm.h"
+#include "utils.h"
+#include "handler.h"
+#include "interpreter.h"
+#include "db.h"
+#include "oasis.h"
+#include "genolc.h"
+#include "genzon.h"
+#include "house.h"
+#include "act.informative.h"
+#include "constants.h"
 
 /*------------------------------------------------------------------------*/ 
 /* internal globals */ 
@@ -1038,7 +1017,7 @@ ACMD(do_oasis_hsedit)
   if (!*buf1) { 
     number = GET_ROOM_VNUM(IN_ROOM(ch)); 
   } else if (!isdigit(*buf1)) { 
-    if (str_cmp("save", buf1) != 0) { 
+    if (strcasecmp("save", buf1) != 0) {
       send_to_char(ch, "Yikes!  Stop that, someone will get hurt!\r\n"); 
       return; 
     } 

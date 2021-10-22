@@ -8,7 +8,36 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include "act.h"
+#include "act.wizard.h"
+#include "interpreter.h"
+#include "utils.h"
+#include "config.h"
+#include "act.other.h"
+#include "maputils.h"
+#include "dg_comm.h"
+#include "handler.h"
+#include "act.item.h"
+#include "act.informative.h"
+#include "players.h"
+#include "weather.h"
+#include "assemblies.h"
+#include "house.h"
+#include "comm.h"
+#include "constants.h"
+#include "dg_scripts.h"
+#include "races.h"
+#include "class.h"
+#include "spells.h"
+#include "improved-edit.h"
+#include "objsave.h"
+#include "feats.h"
+#include "fight.h"
+#include "genolc.h"
+#include "screen.h"
+#include "local_limits.h"
+#include "shop.h"
+#include "guild.h"
+#include "spell_parser.h"
 
 /* local variables */
 static int copyover_timer = 0; /* for timed copyovers */
@@ -50,7 +79,7 @@ ACMD(do_lag)
  }
 
  for (d = descriptor_list; d; d = d->next) {
-  if (!str_cmp(CAP(GET_NAME(d->character)), CAP(arg))) {
+  if (!strcasecmp(CAP(GET_NAME(d->character)), CAP(arg))) {
    if (GET_ADMLEVEL(d->character) > GET_ADMLEVEL(ch)) {
     send_to_char(ch, "Sorry, you've been outranked.\r\n");
     return;
@@ -157,7 +186,7 @@ ACMD(do_news)
           first = FALSE;
           sprintf(buf+strlen(buf), "%s\n@w--------------------------------------------------------------\n", line);
           sprintf(lastline, "%s", line);
-         } else if (!str_cmp(line, lastline)) {
+         } else if (!strcasecmp(line, lastline)) {
            continue;
          } else {
           sprintf(buf+strlen(buf), "%s\n", line);
@@ -171,7 +200,7 @@ ACMD(do_news)
     } /* End Check the entry */
   } /* End of main read while */
   fclose(fl);
- } else if (!str_cmp(arg, "list")) {
+ } else if (!strcasecmp(arg, "list")) {
   while (!feof(fl)) {
    get_line(fl, line);
     if(*line == '#') { /* Count the entries */
@@ -430,8 +459,8 @@ static void lockWrite(struct char_data *ch, char *name)
   }
 
   while(x < count) {
-    if (x == 0 || str_cmp(names[x-1], names[x])) {
-     if (str_cmp(names[x], CAP(name))) {
+    if (x == 0 || strcasecmp(names[x-1], names[x])) {
+     if (strcasecmp(names[x], CAP(name))) {
       fprintf(fl, "%s\n", CAP(names[x]));
      }
      else {
@@ -488,7 +517,7 @@ ACMD(do_reward)
     continue;
    if (STATE(k) != CON_PLAYING)
     continue;
-   if (!str_cmp(k->user, arg))
+   if (!strcasecmp(k->user, arg))
     vict = k->character;
   }
 
@@ -567,7 +596,7 @@ ACMD(do_rbank)
     continue;
    if (STATE(k) != CON_PLAYING)
     continue;
-   if (!str_cmp(k->user, arg))
+   if (!strcasecmp(k->user, arg))
     vict = k->character;
   }
 
@@ -625,17 +654,17 @@ ACMD(do_permission)
   return;
  }
 
- if (!*arg2 && !str_cmp("unrestrict", arg)) {
+ if (!*arg2 && !strcasecmp("unrestrict", arg)) {
   send_to_char(ch, "You want to unrestrict which race? @Gsaiyan @nor @Gmajin@n?\r\n");
   return;
  }
- if (!str_cmp("unrestrict", arg)) {
-  if (!str_cmp("saiyan", arg2)) {
+ if (!strcasecmp("unrestrict", arg)) {
+  if (!strcasecmp("saiyan", arg2)) {
    send_to_char(ch, "You have unrestricted saiyans for the very next character creation.\r\n");
    send_to_imm("PERMISSION: %s unrestricted saiyans.", GET_NAME(ch));
    SAIYAN_ALLOWED = TRUE;
   }
-  else if (!str_cmp("majin", arg2)) {
+  else if (!strcasecmp("majin", arg2)) {
    send_to_char(ch, "You have unrestricted majins for the very next character creation.\r\n");
    send_to_imm("PERMISSION: %s unrestricted majins.", GET_NAME(ch));
    MAJIN_ALLOWED = TRUE;
@@ -645,7 +674,7 @@ ACMD(do_permission)
    return;
   }
  }
- else if (!str_cmp("restrict", arg)) {
+ else if (!strcasecmp("restrict", arg)) {
   send_to_char(ch, "You have restricted character creation to standard race slection.\r\n");
   send_to_imm("PERMISSION: %s restricted races again.", GET_NAME(ch));
   MAJIN_ALLOWED = FALSE;
@@ -681,7 +710,7 @@ ACMD(do_transobj)
   send_to_char(ch, "You want to send what?\r\n");
   return;
  }
- else if (!str_cmp("all", arg2)) {
+ else if (!strcasecmp("all", arg2)) {
   int num = GET_OBJ_VNUM(obj);
   struct obj_data *obj2 = NULL;
 
@@ -846,12 +875,12 @@ ACMD(do_hell)
   return;
  }
 
- if (!str_cmp(arg, "Iovan") || !str_cmp(arg, "iovan") || !str_cmp(arg, "Fahl") || !str_cmp(arg, "fahl") || !str_cmp(arg, "Xyron") || !str_cmp(arg, "xyron") || !str_cmp(arg, "Samael") || !str_cmp(arg, "samael")) {
+ if (!strcasecmp(arg, "Iovan") || !strcasecmp(arg, "iovan") || !strcasecmp(arg, "Fahl") || !strcasecmp(arg, "fahl") || !strcasecmp(arg, "Xyron") || !strcasecmp(arg, "xyron") || !strcasecmp(arg, "Samael") || !strcasecmp(arg, "samael")) {
   send_to_char(ch, "What are you smoking? You can't lockout senior imms.\r\n");
   return;
  }
 
- if (!str_cmp(arg, "list")) {
+ if (!strcasecmp(arg, "list")) {
   print_lockout(ch);
   return;
  }
@@ -1128,7 +1157,7 @@ ACMD(do_trans)
   one_argument(argument, buf);
   if (!*buf)
     send_to_char(ch, "Whom do you wish to transfer?\r\n");
-  else if (str_cmp("all", buf)) {
+  else if (strcasecmp("all", buf)) {
     if (!(victim = get_char_vis(ch, buf, NULL, FIND_CHAR_WORLD)))
       send_to_char(ch, "%s", CONFIG_NOPERSON);
     else if (victim == ch)
@@ -2048,22 +2077,22 @@ ACMD(do_shutdown)
     log("(GC) Shutdown by %s.", GET_NAME(ch));
     send_to_all("Shutting down.\r\n");
     circle_shutdown = 1;
-  } else if (!str_cmp(arg, "reboot")) {
+  } else if (!strcasecmp(arg, "reboot")) {
     log("(GC) Reboot by %s.", GET_NAME(ch));
     send_to_all("Rebooting.. come back in a minute or two.\r\n");
     touch(FASTBOOT_FILE);
     circle_shutdown = circle_reboot = 1;
-  } else if (!str_cmp(arg, "die")) {
+  } else if (!strcasecmp(arg, "die")) {
     log("(GC) Shutdown by %s.", GET_NAME(ch));
     send_to_all("Shutting down for maintenance.\r\n");
     touch(KILLSCRIPT_FILE);
     circle_shutdown = 1;
-  } else if (!str_cmp(arg, "now")) {
+  } else if (!strcasecmp(arg, "now")) {
     log("(GC) Shutdown NOW by %s.", GET_NAME(ch));
     send_to_all("Rebooting.. come back in a minute or two.\r\n");
     circle_shutdown = 1;
     circle_reboot = 2; /* do not autosave olc */
-  } else if (!str_cmp(arg, "pause")) {
+  } else if (!strcasecmp(arg, "pause")) {
     log("(GC) Shutdown by %s.", GET_NAME(ch));
     send_to_all("Shutting down for maintenance.\r\n");
     touch(PAUSE_FILE);
@@ -2190,7 +2219,7 @@ ACMD(do_return)
      *
      * Zmey: here we put someone switched in our body to disconnect state
      * but we must also NULL his pointer to our character, otherwise
-     * close_socket() will damage our character's pointer to our descriptor
+     * close() will damage our character's pointer to our descriptor
      * (which is assigned below in this function). 12/17/99
      */
     if (ch->desc->original->desc) {
@@ -2494,7 +2523,7 @@ static void execute_copyover(void)
     d_next = d->next; /* We delete from the list , so need to save this */
     if (!d->character || d->connected > CON_PLAYING) {
       write_to_descriptor (d->descriptor, "\n\rSorry, we are rebooting. Come back in a few seconds.\n\r", d->comp);
-      close_socket (d); /* throw'em out */
+      close (d); /* throw'em out */
     } else {
       if (GET_ROOM_VNUM(IN_ROOM(och)) > 1) {
        fprintf (fp, "%d %s %s %d %s\n", d->descriptor, GET_NAME(och), d->host, GET_ROOM_VNUM(IN_ROOM(och)), d->user);
@@ -2507,21 +2536,17 @@ static void execute_copyover(void)
       /* save och */
       Crash_rentsave(och, 0);
       save_char(och);
-#ifdef HAVE_ZLIB_H
-      if (d->comp->state == 2) {
-        d->comp->state = 3; /* Code to use Z_FINISH for deflate */
-      }
-#endif /* HAVE_ZLIB_H */
+        if (d->comp->state == 2) {
+            d->comp->state = 3; /* Code to use Z_FINISH for deflate */
+        }
       write_to_descriptor (d->descriptor, buf, d->comp);
       d->comp->state = 0;
-#ifdef HAVE_ZLIB_H
-      if (d->comp->stream) {
-        deflateEnd(d->comp->stream);
-        free(d->comp->stream);
-        free(d->comp->buff_out);
-        free(d->comp->buff_in);
-      }
-#endif /* HAVE_ZLIB_H */
+        if (d->comp->stream) {
+            deflateEnd(d->comp->stream);
+            free(d->comp->stream);
+            free(d->comp->buff_out);
+            free(d->comp->buff_in);
+        }
     }
   }
 
@@ -2597,7 +2622,7 @@ ACMD(do_advance)
     return;
   }
   else if ((newlevel = atoi(level)) <= 0) {
-   if (!str_cmp("demote", level)) {
+   if (!strcasecmp("demote", level)) {
    victim->level = 1;
    GET_MAX_HIT(victim) = 150;
    GET_MAX_MANA(victim) = 150;
@@ -2890,7 +2915,7 @@ ACMD(do_dc)
     return;
   }
 
-  /* We used to just close the socket here using close_socket(), but
+  /* We used to just close the socket here using close(), but
    * various people pointed out this could cause a crash if you're
    * closing the person below you on the descriptor list.  Just setting
    * to CON_CLOSE leaves things in a massively inconsistent state so I
@@ -3050,7 +3075,7 @@ ACMD(do_force)
 
   if (!*arg || !*to_force)
     send_to_char(ch, "Whom do you wish to force do what?\r\n");
-  else if (!ADM_FLAGGED(ch, ADM_FORCEMASS) || (str_cmp("all", arg) && str_cmp("room", arg))) {
+  else if (!ADM_FLAGGED(ch, ADM_FORCEMASS) || (strcasecmp("all", arg) && strcasecmp("room", arg))) {
     if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD)))
       send_to_char(ch, "%s", CONFIG_NOPERSON);
     else if (!IS_NPC(vict) && GET_ADMLEVEL(ch) <= GET_ADMLEVEL(vict))
@@ -3061,7 +3086,7 @@ ACMD(do_force)
       mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s forced %s to %s", GET_NAME(ch), GET_NAME(vict), to_force);
       command_interpreter(vict, to_force);
     }
-  } else if (!str_cmp("room", arg)) {
+  } else if (!strcasecmp("room", arg)) {
     send_to_char(ch, "%s", CONFIG_OK);
     mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s forced room %d to %s",
 		GET_NAME(ch), GET_ROOM_VNUM(IN_ROOM(ch)), to_force);
@@ -3408,7 +3433,7 @@ ACMD(do_show)
   zone_rnum zrn;
   zone_vnum zvn;
   int low, high;
-  byte self = FALSE;
+  int8_t self = FALSE;
   struct char_data *vict = NULL;
   struct obj_data *obj;
   struct descriptor_data *d;
@@ -3861,7 +3886,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
 		char *val_arg)
 {
   int i, on = 0, off = 0;
-  cl_sint64 value = 0;
+  int64_t value = 0;
   room_rnum rnum;
   room_vnum rvnum;
 
@@ -4072,7 +4097,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
   case 29:
   case 30:
   case 31:
-    if (!str_cmp(val_arg, "off")) {
+    if (!strcasecmp(val_arg, "off")) {
       GET_COND(vict, (mode - 29)) = -1; /* warning: magic number here */
       send_to_char(ch, "%s's %s now off.\r\n", GET_NAME(vict), set_fields[mode].cmd);
     } else if (is_number(val_arg)) {
@@ -4132,7 +4157,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
     SET_OR_REMOVE(PRF_FLAGS(vict), PRF_QUEST);
     break;
   case 42:
-    if (!str_cmp(val_arg, "off")) {
+    if (!strcasecmp(val_arg, "off")) {
       REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_LOADROOM);
       GET_LOADROOM(vict) = NOWHERE;
     } else if (is_number(val_arg)) {
@@ -4415,10 +4440,10 @@ ACMD(do_set)
   if (!strcmp(name, "file")) {
     is_file = 1;
     half_chop(buf, name, buf);
-  } else if (!str_cmp(name, "player")) {
+  } else if (!strcasecmp(name, "player")) {
     is_player = 1;
     half_chop(buf, name, buf);
-  } else if (!str_cmp(name, "mob"))
+  } else if (!strcasecmp(name, "mob"))
     half_chop(buf, name, buf);
 
   half_chop(buf, field, buf);
@@ -4576,7 +4601,7 @@ ACMD(do_plist)
  
     time_away = *real_time_passed(time(0), player_table[i].last); 
  
-    if (*name_search && str_cmp(name_search, player_table[i].name)) 
+    if (*name_search && strcasecmp(name_search, player_table[i].name))
       continue; 
  
     if (time_away.day > high_day || time_away.day < low_day) 

@@ -7,24 +7,14 @@
  * ******************************************************************** */
 
 #include "assedit.h"
-
-
-
-/*-------------------------------------------------------------------*
- * External data structures.
- *-------------------------------------------------------------------*/
-extern struct descriptor_data *descriptor_list;
-extern struct obj_data *obj_proto;
-
-/*-------------------------------------------------------------------*
- * Function prototypes.
- *-------------------------------------------------------------------*/
-void assedit_setup(struct descriptor_data *d, int number);
-void assedit_disp_menu(struct descriptor_data *d);
-void assedit_delete(struct descriptor_data *d);
-void assedit_edit_extract(struct descriptor_data *d);
-void assedit_edit_inroom(struct descriptor_data *d);
-void nodigit(struct descriptor_data *d);
+#include "utils.h"
+#include "db.h"
+#include "comm.h"
+#include "handler.h"
+#include "interpreter.h"
+#include "oasis.h"
+#include "assemblies.h"
+#include "constants.h"
 
 
 /*-------------------------------------------------------------------*
@@ -65,7 +55,7 @@ ACMD (do_assedit)
     }
 
  if (!isdigit(*buf)) {
-    if (strn_cmp("new", buf, 3) == 0) {
+    if (strncasecmp("new", buf, 3) == 0) {
       if (!isdigit(*buf2)) {
             nodigit(d);
       } else if (real_object(atoi(buf2)) == NOTHING) {
@@ -79,7 +69,7 @@ ACMD (do_assedit)
             }
        }
     else
-    if (strn_cmp("delete", buf, 6) == 0) {
+    if (strncasecmp("delete", buf, 6) == 0) {
          if (!isdigit(*buf2))
             nodigit(d);
          else {

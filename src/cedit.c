@@ -5,8 +5,15 @@
  ************************************************************************/
 
 #include "cedit.h"
-
-
+#include "utils.h"
+#include "comm.h"
+#include "oasis.h"
+#include "db.h"
+#include "interpreter.h"
+#include "genolc.h"
+#include "imc.h"
+#include "improved-edit.h"
+#include "constants.h"
 
 /******************************************************************************/
 /** External Functions                                                       **/
@@ -63,7 +70,7 @@ ACMD(do_oasis_cedit)
     mudlog(BRF, ADMLVL_IMMORT, TRUE, 
       "OLC: %s starts editing the game configuration.", GET_NAME(ch));
     return;
-  } else if (str_cmp("save", buf1) != 0) {
+  } else if (strcasecmp("save", buf1) != 0) {
     send_to_char(ch, "Yikes!  Stop that, someone will get hurt!\r\n");
     return;
   }

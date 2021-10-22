@@ -11,36 +11,15 @@
 #include "comm.h"
 #include "db.h"
 #include "shop.h"
-#include "genolc.h"
 #include "genmob.h"
 #include "genshp.h"
 #include "genzon.h"
-#include "genwld.h"
 #include "genobj.h"
 #include "oasis.h"
-#include "screen.h"
 #include "dg_olc.h"
 #include "handler.h"
 #include "guild.h"
 
-/******************************************************************************/
-/** External Data Structures                                                 **/
-/******************************************************************************/
-extern struct obj_data *obj_proto;
-extern struct char_data *mob_proto;
-extern struct room_data *world;
-extern zone_rnum top_of_zone_table;
-extern struct zone_data *zone_table;
-extern struct descriptor_data *descriptor_list;
-
-/******************************************************************************/
-/** External Functions                                                       **/
-/******************************************************************************/
-int is_name(const char *str, const char *namelist);
-void gedit_save_to_disk(int num);
-void gedit_setup_existing(struct descriptor_data *d, int rgm_num);
-void gedit_setup_new(struct descriptor_data *d);
-void free_guild(struct guild_data *guild);
 
 /******************************************************************************/
 /** Internal Data Structures                                                 **/
@@ -194,7 +173,7 @@ ACMD(do_oasis)
  * attatched to a descriptor, sets all flags back to how they
  * should be.
  */
-void cleanup_olc(struct descriptor_data *d, byte cleanup_type)
+void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type)
 {
   /*
    * Clean up WHAT?

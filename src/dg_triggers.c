@@ -22,12 +22,8 @@
 #include "db.h"
 #include "oasis.h"
 #include "constants.h"
-
-extern const char *cmd_door[NUM_DOOR_CMD];
-extern struct time_info_data time_info;
-
-/* external functions */
-const char *skill_name(int num);
+#include "spell_parser.h"
+#include "act.movement.h"
 
 /*
  *  General functions used by several triggers
@@ -340,7 +336,7 @@ int command_mtrigger(char_data *actor, char *cmd, char *argument)
         }
 
         if (*GET_TRIG_ARG(t)=='*' ||
-            !strn_cmp(GET_TRIG_ARG(t), cmd, strlen(GET_TRIG_ARG(t)))) {
+            !strncasecmp(GET_TRIG_ARG(t), cmd, strlen(GET_TRIG_ARG(t)))) {
           ADD_UID_VAR(buf, t, actor, "actor", 0);
           skip_spaces(&argument);
           add_var(&GET_TRIG_VARS(t), "arg", argument, 0);
@@ -746,7 +742,7 @@ int cmd_otrig(obj_data *obj, char_data *actor, char *cmd,
 
       if (IS_SET(GET_TRIG_NARG(t), type) &&
           (*GET_TRIG_ARG(t)=='*' ||
-          !strn_cmp(GET_TRIG_ARG(t), cmd, strlen(GET_TRIG_ARG(t))))) {
+          !strncasecmp(GET_TRIG_ARG(t), cmd, strlen(GET_TRIG_ARG(t))))) {
 
         ADD_UID_VAR(buf, t, actor, "actor", 0);
         skip_spaces(&argument);
@@ -1125,7 +1121,7 @@ int command_wtrigger(char_data *actor, char *cmd, char *argument)
     }
 
     if (*GET_TRIG_ARG(t)=='*' ||
-        !strn_cmp(GET_TRIG_ARG(t), cmd, strlen(GET_TRIG_ARG(t)))) {
+        !strncasecmp(GET_TRIG_ARG(t), cmd, strlen(GET_TRIG_ARG(t)))) {
       ADD_UID_VAR(buf, t, actor, "actor", 0);
       skip_spaces(&argument);
       add_var(&GET_TRIG_VARS(t), "arg", argument, 0);

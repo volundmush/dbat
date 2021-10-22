@@ -19,27 +19,12 @@
 #include <errno.h>
 #include <sys/file.h>
 #include <time.h>
-#ifdef WIN32
-#include <io.h>
-#undef EINTR
-#undef EMFILE
-#define EINTR WSAEINTR
-#define EMFILE WSAEMFILE
-#define EWOULDBLOCK WSAEWOULDBLOCK
-#define EINPROGRESS WSAEINPROGRESS
-#define MAXHOSTNAMELEN 32
-#else
 #include <fnmatch.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-#endif
-#if defined(__OpenBSD__) || defined(__FreeBSD__)
-#include <sys/types.h>
-#endif
 #include "sha256.h"
-
 #include "structs.h"
 #include "utils.h"
 #include "comm.h"
@@ -433,13 +418,13 @@ bool imcstr_prefix( const char *astr, const char *bstr )
 {
    if( !astr )
    {
-      imcbug( "Strn_cmp: null astr." );
+      imcbug( "strncasecmp: null astr." );
       return TRUE;
    }
 
    if( !bstr )
    {
-      imcbug( "Strn_cmp: null bstr." );
+      imcbug( "strncasecmp: null bstr." );
       return TRUE;
    }
 
@@ -492,7 +477,7 @@ void imc_addname( char **list, const char *member )
       snprintf( newlist, LGST, "%s %s", *list, member );
 
    IMCSTRFREE( *list );
-   *list = IMCSTRALLOC( newlist );
+   *list = strdup( newlist );
 }
 
 /* Remove a member from a list, provided it's there. */
@@ -506,7 +491,7 @@ void imc_removename( char **list, const char *member )
    strlcpy( newlist, imcstrrep( *list, member, "" ), LGST );
 
    IMCSTRFREE( *list );
-   *list = IMCSTRALLOC( newlist );
+   *list = strdup( newlist );
 }
 
 char *imc_nameof( const char *src )
@@ -746,27 +731,27 @@ void imc_new_reminfo( const char *mud, const char *version, const char *netname,
 
    IMCCREATE( p, REMOTEINFO, 1 );
 
-   p->name = IMCSTRALLOC( mud );
+   p->name = strdup( mud );
 
    if( !url || url[0] == '\0' )
-      p->url = IMCSTRALLOC( "Unknown" );
+      p->url = strdup( "Unknown" );
    else
-      p->url = IMCSTRALLOC( url );
+      p->url = strdup( url );
 
    if( !version || version[0] == '\0' )
-      p->version = IMCSTRALLOC( "Unknown" );
+      p->version = strdup( "Unknown" );
    else
-      p->version = IMCSTRALLOC( version );
+      p->version = strdup( version );
 
    if( !netname || netname[0] == '\0' )
-      p->network = IMCSTRALLOC( this_imcmud->network );
+      p->network = strdup( this_imcmud->network );
    else
-      p->network = IMCSTRALLOC( netname );
+      p->network = strdup( netname );
 
    if( !path || path[0] == '\0' )
-      p->path = IMCSTRALLOC( "UNKNOWN" );
+      p->path = strdup( "UNKNOWN" );
    else
-      p->path = IMCSTRALLOC( path );
+      p->path = strdup( path );
 
    p->expired = FALSE;
 
@@ -869,7 +854,7 @@ void imc_addban( const char *what )
    IMC_BAN *ban;
 
    ban = imc_newban(  );
-   ban->name = IMCSTRALLOC( what );
+   ban->name = strdup( what );
 }
 
 void imc_freeban( IMC_BAN * ban )
@@ -946,19 +931,19 @@ void imcformat_channel( CHAR_DATA * ch, IMC_CHANNEL * d, int format, bool all )
          {
             snprintf( buf, LGST, "~R[~Y%s~R] ~C%%s: ~c%%s", c->local_name );
             IMCSTRFREE( c->regformat );
-            c->regformat = IMCSTRALLOC( buf );
+            c->regformat = strdup( buf );
          }
          if( format == 2 || format == 4 )
          {
             snprintf( buf, LGST, "~R[~Y%s~R] ~c%%s %%s", c->local_name );
             IMCSTRFREE( c->emoteformat );
-            c->emoteformat = IMCSTRALLOC( buf );
+            c->emoteformat = strdup( buf );
          }
          if( format == 3 || format == 4 )
          {
             snprintf( buf, LGST, "~R[~Y%s~R] ~c%%s", c->local_name );
             IMCSTRFREE( c->socformat );
-            c->socformat = IMCSTRALLOC( buf );
+            c->socformat = strdup( buf );
          }
       }
    }
@@ -974,19 +959,19 @@ void imcformat_channel( CHAR_DATA * ch, IMC_CHANNEL * d, int format, bool all )
       {
          snprintf( buf, LGST, "~R[~Y%s~R] ~C%%s: ~c%%s", d->local_name );
          IMCSTRFREE( d->regformat );
-         d->regformat = IMCSTRALLOC( buf );
+         d->regformat = strdup( buf );
       }
       if( format == 2 || format == 4 )
       {
          snprintf( buf, LGST, "~R[~Y%s~R] ~c%%s %%s", d->local_name );
          IMCSTRFREE( d->emoteformat );
-         d->emoteformat = IMCSTRALLOC( buf );
+         d->emoteformat = strdup( buf );
       }
       if( format == 3 || format == 4 )
       {
          snprintf( buf, LGST, "~R[~Y%s~R] ~c%%s", d->local_name );
          IMCSTRFREE( d->socformat );
-         d->socformat = IMCSTRALLOC( buf );
+         d->socformat = strdup( buf );
       }
    }
    imc_save_channels(  );
@@ -1010,14 +995,14 @@ void imc_new_channel( const char *chan, const char *owner, const char *ops, cons
    }
 
    IMCCREATE( c, IMC_CHANNEL, 1 );
-   c->name = IMCSTRALLOC( chan );
-   c->owner = IMCSTRALLOC( owner );
-   c->operators = IMCSTRALLOC( ops );
-   c->invited = IMCSTRALLOC( invite );
-   c->excluded = IMCSTRALLOC( exclude );
+   c->name = strdup( chan );
+   c->owner = strdup( owner );
+   c->operators = strdup( ops );
+   c->invited = strdup( invite );
+   c->excluded = strdup( exclude );
 
    if( lname && lname[0] != '\0' )
-      c->local_name = IMCSTRALLOC( lname );
+      c->local_name = strdup( lname );
 
    else
       c->local_name = imc_channel_nameof( c->name );
@@ -1112,7 +1097,7 @@ char *imcfread_line( FILE * fp )
       {
          imcbug( "%s", "imcfread_line: EOF encountered on read." );
          strlcpy( line, "", LGST );
-         return IMCSTRALLOC( line );
+         return strdup( line );
       }
       c = getc( fp );
    }
@@ -1126,7 +1111,7 @@ char *imcfread_line( FILE * fp )
       {
          imcbug( "%s", "imcfread_line: EOF encountered on read." );
          *pline = '\0';
-         return IMCSTRALLOC( line );
+         return strdup( line );
       }
       c = getc( fp );
       *pline++ = c;
@@ -1154,7 +1139,7 @@ char *imcfread_line( FILE * fp )
     */
    if( line[strlen( line ) - 1] == '~' )
       line[strlen( line ) - 1] = '\0';
-   return IMCSTRALLOC( line );
+   return strdup( line );
 }
 
 /*
@@ -1277,7 +1262,7 @@ void imc_register_packet_handler( const char *name, PACKET_FUN * func )
 
    IMCCREATE( ph, IMC_PHANDLER, 1 );
 
-   ph->name = IMCSTRALLOC( name );
+   ph->name = strdup( name );
    ph->func = func;
 
    IMCLINK( ph, first_phandler, last_phandler, next, prev );
@@ -1520,7 +1505,7 @@ void imc_update_tellhistory( CHAR_DATA * ch, const char *msg )
    {
       if( IMCTELLHISTORY( ch, x ) == '\0' )
       {
-         IMCTELLHISTORY( ch, x ) = IMCSTRALLOC( new_msg );
+         IMCTELLHISTORY( ch, x ) = strdup( new_msg );
          break;
       }
 
@@ -1531,10 +1516,10 @@ void imc_update_tellhistory( CHAR_DATA * ch, const char *msg )
          for( i = 1; i < MAX_IMCTELLHISTORY; i++ )
          {
             IMCSTRFREE( IMCTELLHISTORY( ch, i - 1 ) );
-            IMCTELLHISTORY( ch, i - 1 ) = IMCSTRALLOC( IMCTELLHISTORY( ch, i ) );
+            IMCTELLHISTORY( ch, i - 1 ) = strdup( IMCTELLHISTORY( ch, i ) );
          }
          IMCSTRFREE( IMCTELLHISTORY( ch, x ) );
-         IMCTELLHISTORY( ch, x ) = IMCSTRALLOC( new_msg );
+         IMCTELLHISTORY( ch, x ) = strdup( new_msg );
       }
    }
 }
@@ -1615,8 +1600,8 @@ PFUN( imc_recv_tell )
       {
          IMCSTRFREE( IMC_RREPLY( vic ) );
          IMCSTRFREE( IMC_RREPLY_NAME( vic ) );
-         IMC_RREPLY( vic ) = IMCSTRALLOC( q->from );
-         IMC_RREPLY_NAME( vic ) = IMCSTRALLOC( imcgetname( q->from ) );
+         IMC_RREPLY( vic ) = strdup( q->from );
+         IMC_RREPLY_NAME( vic ) = strdup( imcgetname( q->from ) );
       }
    }
 
@@ -1679,7 +1664,7 @@ void update_imchistory( IMC_CHANNEL * channel, char *message )
          local = localtime( &imc_time );
          snprintf( buf, LGST, "~R[%-2.2d/%-2.2d %-2.2d:%-2.2d] ~G%s",
                    local->tm_mon + 1, local->tm_mday, local->tm_hour, local->tm_min, msg );
-         channel->history[x] = IMCSTRALLOC( buf );
+         channel->history[x] = strdup( buf );
 
          if( IMCIS_SET( channel->flags, IMCCHAN_LOG ) )
          {
@@ -1710,7 +1695,7 @@ void update_imchistory( IMC_CHANNEL * channel, char *message )
             if( channel->history[z] != NULL )
             {
                IMCSTRFREE( channel->history[z] );
-               channel->history[z] = IMCSTRALLOC( channel->history[y] );
+               channel->history[z] = strdup( channel->history[y] );
             }
          }
 
@@ -1718,7 +1703,7 @@ void update_imchistory( IMC_CHANNEL * channel, char *message )
          snprintf( buf, LGST, "~R[%-2.2d/%-2.2d %-2.2d:%-2.2d] ~G%s",
                    local->tm_mon + 1, local->tm_mday, local->tm_hour, local->tm_min, msg );
          IMCSTRFREE( channel->history[x] );
-         channel->history[x] = IMCSTRALLOC( buf );
+         channel->history[x] = strdup( buf );
 
          if( IMCIS_SET( channel->flags, IMCCHAN_LOG ) )
          {
@@ -1986,7 +1971,7 @@ char *imcrankbuffer( CHAR_DATA * ch )
    {
       strlcpy( rbuf, "~YStaff", SMST );
 
-      if( CH_IMCRANK( ch ) && CH_IMCRANK( ch )[0] != '\0' && !str_cmp(CH_IMCRANK( ch ), "Male"))
+      if( CH_IMCRANK( ch ) && CH_IMCRANK( ch )[0] != '\0' && !strcasecmp(CH_IMCRANK( ch ), "Male"))
          snprintf( rbuf, SMST, "~B%-6s", color_mtoi( CH_IMCRANK( ch ) ) );
       else
          snprintf( rbuf, SMST, "~M%-6s", color_mtoi( CH_IMCRANK( ch ) ) );
@@ -1995,7 +1980,7 @@ char *imcrankbuffer( CHAR_DATA * ch )
    {
       strlcpy( rbuf, "~BPlayer", SMST );
 
-      if( CH_IMCRANK( ch ) && CH_IMCRANK( ch )[0] != '\0' && !str_cmp(CH_IMCRANK( ch ), "Male"))
+      if( CH_IMCRANK( ch ) && CH_IMCRANK( ch )[0] != '\0' && !strcasecmp(CH_IMCRANK( ch ), "Male"))
          snprintf( rbuf, SMST, "~B%-6s", color_mtoi( CH_IMCRANK( ch ) ) );
       else
          snprintf( rbuf, SMST, "~M%-6s", color_mtoi( CH_IMCRANK( ch ) ) );
@@ -2482,37 +2467,37 @@ PFUN( imc_recv_isalive )
    if( url[0] != '\0' )
    {
       IMCSTRFREE( r->url );
-      r->url = IMCSTRALLOC( url );
+      r->url = strdup( url );
    }
 
    if( version[0] != '\0' )
    {
       IMCSTRFREE( r->version );
-      r->version = IMCSTRALLOC( version );
+      r->version = strdup( version );
    }
 
    if( netname[0] != '\0' )
    {
       IMCSTRFREE( r->network );
-      r->network = IMCSTRALLOC( netname );
+      r->network = strdup( netname );
    }
 
    if( q->route && q->route[0] != '\0' )
    {
       IMCSTRFREE( r->path );
-      r->path = IMCSTRALLOC( q->route );
+      r->path = strdup( q->route );
    }
 
    if( host[0] != '\0' )
    {
       IMCSTRFREE( r->host );
-      r->host = IMCSTRALLOC( host );
+      r->host = strdup( host );
    }
 
    if( iport[0] != '\0' )
    {
       IMCSTRFREE( r->port );
-      r->port = IMCSTRALLOC( iport );
+      r->port = strdup( iport );
    }
 }
 
@@ -2592,11 +2577,11 @@ PFUN( imc_recv_iceupdate )
    IMCSTRFREE( c->invited );
    IMCSTRFREE( c->excluded );
 
-   c->name = IMCSTRALLOC( chan );
-   c->owner = IMCSTRALLOC( owner );
-   c->operators = IMCSTRALLOC( ops );
-   c->invited = IMCSTRALLOC( invite );
-   c->excluded = IMCSTRALLOC( exclude );
+   c->name = strdup( chan );
+   c->owner = strdup( owner );
+   c->operators = strdup( ops );
+   c->invited = strdup( invite );
+   c->excluded = strdup( exclude );
    c->open = copen;
    if( c->level == IMCPERM_NOTSET )
       c->level = perm;
@@ -2726,7 +2711,7 @@ void imc_ucache_update( const char *name, int gender )
       }
    }
    IMCCREATE( user, IMCUCACHE_DATA, 1 );
-   user->name = IMCSTRALLOC( name );
+   user->name = strdup( name );
    user->gender = gender;
    user->time = imc_time;
    IMCLINK( user, first_imcucache, last_imcucache, next, prev );
@@ -2921,11 +2906,11 @@ void imc_finalize_connection( char *name, char *netname )
    if( netname && netname[0] != '\0' )
    {
       IMCSTRFREE( this_imcmud->network );
-      this_imcmud->network = IMCSTRALLOC( netname );
+      this_imcmud->network = strdup( netname );
    }
 
    IMCSTRFREE( this_imcmud->servername );
-   this_imcmud->servername = IMCSTRALLOC( name );
+   this_imcmud->servername = strdup( name );
 
    imclog( "Connected to %s. Network ID: %s", name, ( netname && netname[0] != '\0' ) ? netname : "Unknown" );
 
@@ -4050,7 +4035,7 @@ void imc_readhelp( IMC_HELP_DATA * help, FILE * fp )
                while( ( hbuf[num] = fgetc( fp ) ) != EOF && hbuf[num] != '�' && num < ( LGST - 2 ) )
                   num++;
                hbuf[num] = '\0';
-               help->text = IMCSTRALLOC( hbuf );
+               help->text = strdup( hbuf );
                fMatch = TRUE;
                break;
             }
@@ -4528,7 +4513,7 @@ bool imc_read_config( int desc )
          this_imcmud->immlevel = 101;
          this_imcmud->adminlevel = 113;
          this_imcmud->implevel = 115;
-         this_imcmud->network = IMCSTRALLOC( "Unknown" );
+         this_imcmud->network = strdup( "Unknown" );
          this_imcmud->sha256 = TRUE;
          this_imcmud->sha256pass = FALSE;
          this_imcmud->desc = desc;
@@ -4589,18 +4574,18 @@ bool imc_read_config( int desc )
    }
 
    if( !this_imcmud->base || this_imcmud->base[0] == '\0' )
-      this_imcmud->base = IMCSTRALLOC( "Unknown Codebase" );
+      this_imcmud->base = strdup( "Unknown Codebase" );
 
    if( !this_imcmud->www || this_imcmud->www[0] == '\0' )
-      this_imcmud->www = IMCSTRALLOC( "Not specified" );
+      this_imcmud->www = strdup( "Not specified" );
 
    if( !this_imcmud->details || this_imcmud->details[0] == '\0' )
-      this_imcmud->details = IMCSTRALLOC( "No details provided." );
+      this_imcmud->details = strdup( "No details provided." );
 
    if( !this_imcmud->versionid )
    {
       snprintf( cbase, SMST, "%s%s", IMC_VERSION_STRING, this_imcmud->base );
-      this_imcmud->versionid = IMCSTRALLOC( cbase );
+      this_imcmud->versionid = strdup( cbase );
    }
    return TRUE;
 }
@@ -4678,49 +4663,49 @@ void imc_load_who_template( void )
          while( ( hbuf[num] = fgetc( fp ) ) != EOF && hbuf[num] != '�' && num < ( LGST - 2 ) )
             ++num;
          hbuf[num] = '\0';
-         whot->head = IMCSTRALLOC( parse_who_header( hbuf ) );
+         whot->head = strdup( parse_who_header( hbuf ) );
       }
       else if( !strcasecmp( word, "Tail:" ) )
       {
          while( ( hbuf[num] = fgetc( fp ) ) != EOF && hbuf[num] != '�' && num < ( LGST - 2 ) )
             ++num;
          hbuf[num] = '\0';
-         whot->tail = IMCSTRALLOC( parse_who_tail( hbuf ) );
+         whot->tail = strdup( parse_who_tail( hbuf ) );
       }
       else if( !strcasecmp( word, "Plrline:" ) )
       {
          while( ( hbuf[num] = fgetc( fp ) ) != EOF && hbuf[num] != '�' && num < ( LGST - 2 ) )
             ++num;
          hbuf[num] = '\0';
-         whot->plrline = IMCSTRALLOC( hbuf );
+         whot->plrline = strdup( hbuf );
       }
       else if( !strcasecmp( word, "Immline:" ) )
       {
          while( ( hbuf[num] = fgetc( fp ) ) != EOF && hbuf[num] != '�' && num < ( LGST - 2 ) )
             ++num;
          hbuf[num] = '\0';
-         whot->immline = IMCSTRALLOC( hbuf );
+         whot->immline = strdup( hbuf );
       }
       else if( !strcasecmp( word, "Immheader:" ) )
       {
          while( ( hbuf[num] = fgetc( fp ) ) != EOF && hbuf[num] != '�' && num < ( LGST - 2 ) )
             ++num;
          hbuf[num] = '\0';
-         whot->immheader = IMCSTRALLOC( hbuf );
+         whot->immheader = strdup( hbuf );
       }
       else if( !strcasecmp( word, "Plrheader:" ) )
       {
          while( ( hbuf[num] = fgetc( fp ) ) != EOF && hbuf[num] != '�' && num < ( LGST - 2 ) )
             ++num;
          hbuf[num] = '\0';
-         whot->plrheader = IMCSTRALLOC( hbuf );
+         whot->plrheader = strdup( hbuf );
       }
       else if( !strcasecmp( word, "Master:" ) )
       {
          while( ( hbuf[num] = fgetc( fp ) ) != EOF && hbuf[num] != '�' && num < ( LGST - 2 ) )
             ++num;
          hbuf[num] = '\0';
-         whot->master = IMCSTRALLOC( hbuf );
+         whot->master = strdup( hbuf );
       }
    }
    while( !feof( fp ) );
@@ -5092,9 +5077,9 @@ bool imc_startup_network( bool connected )
          fscanf( fp, "%s %s\n", netname, server );
 
          IMCSTRFREE( this_imcmud->network );
-         this_imcmud->network = IMCSTRALLOC( netname );
+         this_imcmud->network = strdup( netname );
          IMCSTRFREE( this_imcmud->servername );
-         this_imcmud->servername = IMCSTRALLOC( server );
+         this_imcmud->servername = strdup( server );
          IMCFCLOSE( fp );
       }
       this_imcmud->state = IMC_ONLINE;
@@ -5359,7 +5344,7 @@ IMC_CMD( imcsetup )
        */
       snprintf( buf, LGST, "Renamed channel '%s' to '%s'.\r\n", c->local_name, arg1 );
       IMCSTRFREE( c->local_name );
-      c->local_name = IMCSTRALLOC( arg1 );
+      c->local_name = strdup( arg1 );
       imc_to_char( buf, ch );
 
       /*
@@ -5404,14 +5389,14 @@ IMC_CMD( imcsetup )
          for( c = first_imc_channel; c; c = c->next )
          {
             IMCSTRFREE( c->regformat );
-            c->regformat = IMCSTRALLOC( arg1 );
+            c->regformat = strdup( arg1 );
          }
          imc_to_char( "All channel regular formats have been updated.\r\n", ch );
       }
       else
       {
          IMCSTRFREE( c->regformat );
-         c->regformat = IMCSTRALLOC( arg1 );
+         c->regformat = strdup( arg1 );
          imc_to_char( "The regular format for this channel has been changed successfully.\r\n", ch );
       }
       imc_save_channels(  );
@@ -5437,14 +5422,14 @@ IMC_CMD( imcsetup )
          for( c = first_imc_channel; c; c = c->next )
          {
             IMCSTRFREE( c->emoteformat );
-            c->emoteformat = IMCSTRALLOC( arg1 );
+            c->emoteformat = strdup( arg1 );
          }
          imc_to_char( "All channel emote formats have been updated.\r\n", ch );
       }
       else
       {
          IMCSTRFREE( c->emoteformat );
-         c->emoteformat = IMCSTRALLOC( arg1 );
+         c->emoteformat = strdup( arg1 );
          imc_to_char( "The emote format for this channel has been changed successfully.\r\n", ch );
       }
       imc_save_channels(  );
@@ -5470,14 +5455,14 @@ IMC_CMD( imcsetup )
          for( c = first_imc_channel; c; c = c->next )
          {
             IMCSTRFREE( c->socformat );
-            c->socformat = IMCSTRALLOC( arg1 );
+            c->socformat = strdup( arg1 );
          }
          imc_to_char( "All channel social formats have been updated.\r\n", ch );
       }
       else
       {
          IMCSTRFREE( c->socformat );
-         c->socformat = IMCSTRALLOC( arg1 );
+         c->socformat = strdup( arg1 );
          imc_to_char( "The social format for this channel has been changed successfully.\r\n", ch );
       }
       imc_save_channels(  );
@@ -5947,7 +5932,7 @@ IMC_CMD( imcfinger )
    if( !strcasecmp( arg, "email" ) )
    {
       IMCSTRFREE( IMC_EMAIL( ch ) );
-      IMC_EMAIL( ch ) = IMCSTRALLOC( argument );
+      IMC_EMAIL( ch ) = strdup( argument );
       imc_printf( ch, "Your email address has changed to: %s\r\n", IMC_EMAIL( ch ) );
       return;
    }
@@ -5955,7 +5940,7 @@ IMC_CMD( imcfinger )
    if( !strcasecmp( arg, "homepage" ) )
    {
       IMCSTRFREE( IMC_HOMEPAGE( ch ) );
-      IMC_HOMEPAGE( ch ) = IMCSTRALLOC( argument );
+      IMC_HOMEPAGE( ch ) = strdup( argument );
       imc_printf( ch, "Your homepage has changed to: %s\r\n", IMC_HOMEPAGE( ch ) );
       return;
    }
@@ -5970,7 +5955,7 @@ IMC_CMD( imcfinger )
    if( !strcasecmp( arg, "aim" ) )
    {
       IMCSTRFREE( IMC_AIM( ch ) );
-      IMC_AIM( ch ) = IMCSTRALLOC( argument );
+      IMC_AIM( ch ) = strdup( argument );
       imc_printf( ch, "Your AIM Screenname has changed to: %s\r\n", IMC_AIM( ch ) );
       return;
    }
@@ -5978,7 +5963,7 @@ IMC_CMD( imcfinger )
    if( !strcasecmp( arg, "yahoo" ) )
    {
       IMCSTRFREE( IMC_YAHOO( ch ) );
-      IMC_YAHOO( ch ) = IMCSTRALLOC( argument );
+      IMC_YAHOO( ch ) = strdup( argument );
       imc_printf( ch, "Your Yahoo Screenname has changed to: %s\r\n", IMC_YAHOO( ch ) );
       return;
    }
@@ -5986,7 +5971,7 @@ IMC_CMD( imcfinger )
    if( !strcasecmp( arg, "msn" ) )
    {
       IMCSTRFREE( IMC_MSN( ch ) );
-      IMC_MSN( ch ) = IMCSTRALLOC( argument );
+      IMC_MSN( ch ) = strdup( argument );
       imc_printf( ch, "Your MSN Screenname has changed to: %s\r\n", IMC_MSN( ch ) );
       return;
    }
@@ -5999,7 +5984,7 @@ IMC_CMD( imcfinger )
          return;
       }
       IMCSTRFREE( IMC_COMMENT( ch ) );
-      IMC_COMMENT( ch ) = IMCSTRALLOC( argument );
+      IMC_COMMENT( ch ) = strdup( argument );
       imc_printf( ch, "Your comment line has changed to: %s\r\n", IMC_COMMENT( ch ) );
       return;
    }
@@ -6296,7 +6281,7 @@ IMC_CMD( imcconfig )
    if( !strcasecmp( arg1, "infoname" ) )
    {
       IMCSTRFREE( this_imcmud->fullname );
-      this_imcmud->fullname = IMCSTRALLOC( argument );
+      this_imcmud->fullname = strdup( argument );
       imc_save_config(  );
       imc_printf( ch, "Infoname change to %s\r\n", argument );
       return;
@@ -6305,7 +6290,7 @@ IMC_CMD( imcconfig )
    if( !strcasecmp( arg1, "infohost" ) )
    {
       IMCSTRFREE( this_imcmud->ihost );
-      this_imcmud->ihost = IMCSTRALLOC( argument );
+      this_imcmud->ihost = strdup( argument );
       imc_save_config(  );
       imc_printf( ch, "Infohost changed to %s\r\n", argument );
       return;
@@ -6322,7 +6307,7 @@ IMC_CMD( imcconfig )
    if( !strcasecmp( arg1, "infoemail" ) )
    {
       IMCSTRFREE( this_imcmud->email );
-      this_imcmud->email = IMCSTRALLOC( argument );
+      this_imcmud->email = strdup( argument );
       imc_save_config(  );
       imc_printf( ch, "Infoemail changed to %s\r\n", argument );
       return;
@@ -6331,7 +6316,7 @@ IMC_CMD( imcconfig )
    if( !strcasecmp( arg1, "infowww" ) )
    {
       IMCSTRFREE( this_imcmud->www );
-      this_imcmud->www = IMCSTRALLOC( argument );
+      this_imcmud->www = strdup( argument );
       imc_save_config(  );
       imc_printf( ch, "InfoWWW changed to %s\r\n", argument );
       imc_send_keepalive( NULL, "*@*" );
@@ -6343,13 +6328,13 @@ IMC_CMD( imcconfig )
       char cbase[SMST];
 
       IMCSTRFREE( this_imcmud->base );
-      this_imcmud->base = IMCSTRALLOC( argument );
+      this_imcmud->base = strdup( argument );
       imc_save_config(  );
       imc_printf( ch, "Infobase changed to %s\r\n", argument );
 
       IMCSTRFREE( this_imcmud->versionid );
       snprintf( cbase, SMST, "%s%s", IMC_VERSION_STRING, this_imcmud->base );
-      this_imcmud->versionid = IMCSTRALLOC( cbase );
+      this_imcmud->versionid = strdup( cbase );
       imc_send_keepalive( NULL, "*@*" );
       return;
    }
@@ -6357,7 +6342,7 @@ IMC_CMD( imcconfig )
    if( !strcasecmp( arg1, "infodetails" ) )
    {
       IMCSTRFREE( this_imcmud->details );
-      this_imcmud->details = IMCSTRALLOC( argument );
+      this_imcmud->details = strdup( argument );
       imc_save_config(  );
       imc_to_char( "Infodetails updated.\r\n", ch );
       return;
@@ -6372,7 +6357,7 @@ IMC_CMD( imcconfig )
    if( !strcasecmp( arg1, "serveraddr" ) )
    {
       IMCSTRFREE( this_imcmud->rhost );
-      this_imcmud->rhost = IMCSTRALLOC( argument );
+      this_imcmud->rhost = strdup( argument );
       imc_printf( ch, "ServerAddr changed to %s\r\n", argument );
       imc_save_config(  );
       return;
@@ -6389,7 +6374,7 @@ IMC_CMD( imcconfig )
    if( !strcasecmp( arg1, "clientpwd" ) )
    {
       IMCSTRFREE( this_imcmud->clientpw );
-      this_imcmud->clientpw = IMCSTRALLOC( argument );
+      this_imcmud->clientpw = strdup( argument );
       imc_printf( ch, "Clientpwd changed to %s\r\n", argument );
       imc_save_config(  );
       return;
@@ -6398,7 +6383,7 @@ IMC_CMD( imcconfig )
    if( !strcasecmp( arg1, "serverpwd" ) )
    {
       IMCSTRFREE( this_imcmud->serverpw );
-      this_imcmud->serverpw = IMCSTRALLOC( argument );
+      this_imcmud->serverpw = strdup( argument );
       imc_printf( ch, "Serverpwd changed to %s\r\n", argument );
       imc_save_config(  );
       return;
@@ -6407,7 +6392,7 @@ IMC_CMD( imcconfig )
    if( !strcasecmp( arg1, "localname" ) )
    {
       IMCSTRFREE( this_imcmud->localname );
-      this_imcmud->localname = IMCSTRALLOC( argument );
+      this_imcmud->localname = strdup( argument );
       this_imcmud->sha256pass = FALSE;
       imc_save_config(  );
       imc_printf( ch, "Localname changed to %s\r\n", argument );
@@ -6478,7 +6463,7 @@ IMC_CMD( imcignore )
    if( !strcasecmp( arg, "add" ) )
    {
       IMCCREATE( ign, IMC_IGNORE, 1 );
-      ign->name = IMCSTRALLOC( argument );
+      ign->name = strdup( argument );
       IMCLINK( ign, FIRST_IMCIGNORE( ch ), LAST_IMCIGNORE( ch ), next, prev );
       imc_printf( ch, "%s will now be ignored.\r\n", argument );
       return;
@@ -7005,7 +6990,7 @@ IMC_CMD( imccedit )
       }
 
       IMCCREATE( cmd, IMC_CMD_DATA, 1 );
-      cmd->name = IMCSTRALLOC( name );
+      cmd->name = strdup( name );
       cmd->level = IMCPERM( ch );
       cmd->connected = FALSE;
       imc_printf( ch, "~gCommand ~W%s ~gcreated.\r\n", cmd->name );
@@ -7090,7 +7075,7 @@ IMC_CMD( imccedit )
       }
 
       IMCCREATE( alias, IMC_ALIAS, 1 );
-      alias->name = IMCSTRALLOC( argument );
+      alias->name = strdup( argument );
       IMCLINK( alias, cmd->first_alias, cmd->last_alias, next, prev );
       imc_printf( ch, "~W%s ~ghas been added as an alias for ~W%s\r\n", alias->name, cmd->name );
       imc_savecommands(  );
@@ -7145,7 +7130,7 @@ IMC_CMD( imccedit )
    {
       imc_printf( ch, "~gCommand ~W%s ~ghas been renamed to ~W%s.\r\n", cmd->name, argument );
       IMCSTRFREE( cmd->name );
-      cmd->name = IMCSTRALLOC( argument );
+      cmd->name = strdup( argument );
       imc_savecommands(  );
       return;
    }
@@ -7212,7 +7197,7 @@ IMC_CMD( imchedit )
    {
       imc_printf( ch, "~W%s ~ghas been renamed to ~W%s.\r\n", help->name, argument );
       IMCSTRFREE( help->name );
-      help->name = IMCSTRALLOC( argument );
+      help->name = strdup( argument );
       imc_savehelps(  );
       return;
    }
@@ -7491,8 +7476,8 @@ CHAR_DATA *imc_make_skeleton( const char *name )
 
    IMCCREATE( skeleton, CHAR_DATA, 1 );
 
-   skeleton->name = IMCSTRALLOC( name );
-   skeleton->short_descr = IMCSTRALLOC( name );
+   skeleton->name = strdup( name );
+   skeleton->short_descr = strdup( name );
    skeleton->in_room = real_room( 1 );
 
    return skeleton;

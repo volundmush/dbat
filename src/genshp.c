@@ -5,15 +5,12 @@
  ************************************************************************/
 
 #include "genshp.h"
+#include "utils.h"
+#include "db.h"
 
-
-
-extern struct index_data *mob_index;
-extern struct index_data *obj_index;
-extern struct shop_data *shop_index;
-extern struct zone_data *zone_table;
-extern int top_shop;
-extern zone_rnum top_of_zone_table;
+#include "genolc.h"
+#include "genshp.h"
+#include "genzon.h"
 
 /*
  * NOTE (gg): Didn't modify sedit much. Don't consider it as 'recent'

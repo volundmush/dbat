@@ -6,35 +6,15 @@
  * ftpable from ftp.circlemud.org:/pub/CircleMUD/contrib/code
  */
 
-#include "structs.h"
+#include "aedit.h"
+#include "act.informative.h"
+#include "act.social.h"
 #include "interpreter.h"
-#include "handler.h"
 #include "comm.h"
 #include "utils.h"
-#include "db.h"
 #include "oasis.h"
-#include "screen.h"
-#include "constants.h"
 #include "genolc.h"
-
-/* external functs */
-int sort_command_helper(const void *a, const void *b);
-void sort_commands(void); /* aedit patch -- M. Scott */
-void create_command_list(void);
-void free_action(struct social_messg *action);
-
-/* function protos */
-void aedit_disp_menu(struct descriptor_data * d);
-void aedit_parse(struct descriptor_data * d, char *arg);
-void aedit_setup_new(struct descriptor_data *d);
-void aedit_setup_existing(struct descriptor_data *d, int real_num);
-void aedit_save_to_disk(struct descriptor_data *d);
-void aedit_save_internally(struct descriptor_data *d);
-int aedit_find_command(const char *txt);
-
-/*
- * Utils and exported functions.
- */
+#include "constants.h"
 
 /*------------------------------------------------------------------------*\
   Utils and exported functions.
@@ -71,7 +51,7 @@ ACMD(do_oasis_aedit)
 
   d = ch->desc;
 
-  if (!str_cmp("save", arg)) {
+  if (!strcasecmp("save", arg)) {
     mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), TRUE, "OLC: %s saves socials.", GET_NAME(ch));
     send_to_char(ch, "Writing social file..\r\n");
     aedit_save_to_disk(d);

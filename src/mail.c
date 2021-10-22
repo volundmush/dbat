@@ -14,20 +14,18 @@ Written by Jeremy Elson (jelson@circlemud.org)
 
 *************************************************************************/
 #include "mail.h"
-
-
-
-/* external variables */
-extern int no_mail;
-extern struct player_index_element *player_table;
-
-/* external functions */
-SPECIAL(postmaster);
+#include "utils.h"
+#include "comm.h"
+#include "db.h"
+#include "interpreter.h"
+#include "handler.h"
+#include "improved-edit.h"
+#include "players.h"
 
 /* local globals */
-mail_index_type *mail_index = NULL;	/* list of recs in the mail file  */
-position_list_type *free_list = NULL;	/* list of free positions in file */
-long file_end_pos = 0;			/* length of file */
+static mail_index_type *mail_index = NULL;	/* list of recs in the mail file  */
+static position_list_type *free_list = NULL;	/* list of free positions in file */
+static long file_end_pos = 0;			/* length of file */
 
 /* local functions */
 void postmaster_send_mail(struct char_data *ch, struct char_data *mailman, int cmd, char *arg);
@@ -35,7 +33,6 @@ void postmaster_check_mail(struct char_data *ch, struct char_data *mailman, int 
 void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman, int cmd, char *arg);
 void push_free_list(long pos);
 long pop_free_list(void);
-void clear_free_list(void);
 mail_index_type *find_char_in_index(long searchee);
 void write_to_file(void *buf, int size, long filepos);
 void read_from_file(void *buf, int size, long filepos);
@@ -77,7 +74,7 @@ int mail_recip_ok(const char *name)
 
 /*
  * void push_free_list(long #1)
- * #1 - What byte offset into the file the block resides.
+ * #1 - What int8_toffset into the file the block resides.
  *
  * Net effect is to store a list of free blocks in the mail file in a linked
  * list.  This is called when people receive their messages and at startup

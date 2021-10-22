@@ -8,7 +8,11 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include "act.h"
+#include "act.social.h"
+#include "comm.h"
+#include "utils.h"
+#include "interpreter.h"
+#include "handler.h"
 
 /* local functions */
 char *fread_action(FILE *fl, int nr);
@@ -277,7 +281,7 @@ void create_command_list(void)
   for (j = 0; j < top_of_socialt; j++) { 
     k = j; 
     for (i = j + 1; i <= top_of_socialt; i++) 
-      if (str_cmp(soc_mess_list[i].sort_as, soc_mess_list[k].sort_as) < 0) 
+      if (strcasecmp(soc_mess_list[i].sort_as, soc_mess_list[k].sort_as) < 0)
         k = i; 
     if (j != k) { 
       temp = soc_mess_list[j]; 

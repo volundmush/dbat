@@ -5,18 +5,17 @@
  * -------------------------------------------------------------------- *
  * 1999 MAY 07 gdavis/azrael@laker.net Initial implementation.         *
  * ******************************************************************** */
+#define __ASSEMBLIES_C__
 
 #include "assemblies.h"
-
+#include "utils.h"
+#include "comm.h"
+#include "handler.h"
+#include "constants.h"
 
 /* Local global variables. */
-long           g_lNumAssemblies = 0;
-ASSEMBLY       *g_pAssemblyTable = NULL;
-
-
-/* External global variables. */
-extern struct obj_data *obj_proto;
-extern struct room_data *world;
+static long           g_lNumAssemblies = 0;
+static ASSEMBLY       *g_pAssemblyTable = NULL;
 
 
 void assemblyBootAssemblies( void )
@@ -47,7 +46,7 @@ void assemblyBootAssemblies( void )
     if( *szTag == '\0' )
       continue;
 
-    if( str_cmp( szTag, "Component" ) == 0 )
+    if( strcasecmp( szTag, "Component" ) == 0 )
     {
       if( sscanf( szLine, "#%ld %d %d", &lPartVnum, &iExtract, &iInRoom ) != 3
 )
@@ -61,7 +60,7 @@ void assemblyBootAssemblies( void )
          "assembly #%ld.", lPartVnum, lVnum );
       }
     }
-    else if( str_cmp( szTag, "Vnum" ) == 0 )
+    else if( strcasecmp( szTag, "Vnum" ) == 0 )
     {
       if( sscanf( szLine, "#%ld %s", &lVnum, szType ) != 2 )
       {

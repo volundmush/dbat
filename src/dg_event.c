@@ -28,10 +28,11 @@
  *
  */
 #include "dg_event.h"
+#include "utils.h"
+#include <limits.h>
+#include "comm.h"
 
-struct queue *event_q;          /* the event queue */
-
-extern unsigned long pulse;
+static struct queue *event_q;          /* the event queue */
 
 /* initializes the event queue */
 void event_init(void)

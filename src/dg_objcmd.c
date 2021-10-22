@@ -18,11 +18,7 @@
 #include "handler.h"
 #include "db.h"
 #include "constants.h"
-
-void die(struct char_data * ch, struct char_data *killer);
-bitvector_t asciiflag_conv(char *flag);
-zone_rnum real_zone_by_thing(room_vnum vznum);
-void search_replace(char *string, const char *find, const char *replace);
+#include "act.wizard.h"
 
 /*
  * Local functions
@@ -178,7 +174,7 @@ OCMD(do_oforce)
         return;
     }
 
-    if (!str_cmp(arg1, "all"))
+    if (!strcasecmp(arg1, "all"))
     {
         if ((room = obj_room(obj)) == NOWHERE)
             obj_log(obj, "oforce called by object in NOWHERE");
@@ -461,7 +457,7 @@ OCMD(do_oteleport)
     if (target == NOWHERE)
         obj_log(obj, "oteleport target is an invalid room");
 
-    else if (!str_cmp(arg1, "all"))
+    else if (!strcasecmp(arg1, "all"))
     {
         rm = obj_room(obj);
         if (target == rm)
@@ -723,7 +719,7 @@ OCMD(do_odoor)
             strcat(newexit->general_description, "\r\n"); /* strcat : OK */
             break;
         case 2:  /* flags       */
-            newexit->exit_info = (sh_int)asciiflag_conv(value);
+            newexit->exit_info = (int16_t)asciiflag_conv(value);
             break;
         case 3:  /* key         */
             newexit->key = atoi(value);

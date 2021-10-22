@@ -22,29 +22,12 @@
 #include "improved-edit.h"
 #include "dg_olc.h"
 #include "feats.h"
+#include "act.informative.h"
+#include "act.wizard.h"
+#include "races.h"
+#include "fight.h"
 
 /*------------------------------------------------------------------------*/
-
-/*
- * External variable declarations.
- */
-
-extern struct obj_data *obj_proto;
-extern struct index_data *obj_index;
-extern struct obj_data *object_list;
-extern obj_rnum top_of_objt;
-extern struct zone_data *zone_table;
-extern zone_rnum top_of_zone_table;
-extern struct shop_data *shop_index;
-extern struct attack_hit_type attack_hit_text[NUM_ATTACK_TYPES];
-extern struct board_info *bboards;
-extern struct descriptor_data *descriptor_list;
-extern long max_obj_id;
-void search_replace(char *string, const char *find, const char *replace);
-ACMD(do_wiznet);
-
-/*------------------------------------------------------------------------*/
-extern zone_rnum real_zone_by_thing(room_vnum vznum);
 
 /*
  * Handy macros.
@@ -76,7 +59,7 @@ ACMD(do_oasis_oedit)
     send_to_char(ch, "Specify an object VNUM to edit.\r\n");
     return;
   } else if (!isdigit(*buf1)) {
-    if (str_cmp("save", buf1) != 0) {
+    if (strcasecmp("save", buf1) != 0) {
       send_to_char(ch, "Yikes!  Stop that, someone will get hurt!\r\n");
       return;
     }

@@ -20,12 +20,8 @@
 #include "constants.h"
 #include "spells.h"
 #include "oasis.h"
-
-
-/* External variables and functions */
-extern int level_exp(struct char_data *ch, int level);
-extern struct time_info_data time_info;
-int check_flags_by_name_ar(int *array, int numflags, char *search, const char *namelist[]);
+#include "class.h"
+#include "races.h"
 
 /* Utility functions */
 
@@ -43,7 +39,7 @@ void add_var(struct trig_var_data **var_list, char *name, const char *value, lon
     return;
   }
 
-  for (vd = *var_list; vd && str_cmp(vd->name, name); vd = vd->next);
+  for (vd = *var_list; vd && strcasecmp(vd->name, name); vd = vd->next);
 
   if (vd && (!vd->context || vd->context==id)) {
     free(vd->value);
@@ -156,12 +152,12 @@ int text_processed(char *field, char *subfield, struct trig_var_data *vd,
   char *p, *p2;
   char tmpvar[MAX_STRING_LENGTH];
 
-  if (!str_cmp(field, "strlen")) {                     /* strlen    */
+  if (!strcasecmp(field, "strlen")) {                     /* strlen    */
     char limit[200];
     sprintf(limit, "%"SZT, strlen(vd->value));
     snprintf(str, slen, "%d", atoi(limit));
     return TRUE;
-  } else if (!str_cmp(field, "trim")) {                /* trim      */
+  } else if (!strcasecmp(field, "trim")) {                /* trim      */
     /* trim whitespace from ends */
     snprintf(tmpvar, sizeof(tmpvar)-1 , "%s", vd->value); /* -1 to use later*/
     p = tmpvar;
@@ -175,34 +171,34 @@ int text_processed(char *field, char *subfield, struct trig_var_data *vd,
     *(++p2) = '\0';                                         /* +1 ok (see above) */
     snprintf(str, slen, "%s", p);
     return TRUE;
-  } else if (!str_cmp(field, "contains")) {            /* contains  */
+  } else if (!strcasecmp(field, "contains")) {            /* contains  */
     if (str_str(vd->value, subfield))
       strcpy(str, "1");
     else
       strcpy(str, "0");
     return TRUE;
-  } else if (!str_cmp(field, "car")) {                 /* car       */
+  } else if (!strcasecmp(field, "car")) {                 /* car       */
     char *car = vd->value;
     while (*car && !isspace(*car))
       *str++ = *car++;
     *str = '\0';
     return TRUE;
 
-  } else if (!str_cmp(field, "cdr")) {                 /* cdr       */
+  } else if (!strcasecmp(field, "cdr")) {                 /* cdr       */
     char *cdr = vd->value;
     while (*cdr && !isspace(*cdr)) cdr++; /* skip 1st field */
     while (*cdr && isspace(*cdr)) cdr++;  /* skip to next */
 
     snprintf(str, slen, "%s", cdr);
     return TRUE;
-  } else if (!str_cmp(field, "charat")) {              /* CharAt    */
+  } else if (!strcasecmp(field, "charat")) {              /* CharAt    */
     size_t len = strlen(vd->value), dgindex = atoi(subfield);
     if (dgindex > len || dgindex < 1)
       strcpy(str, "");
     else
     	snprintf(str, slen, "%c", vd->value[dgindex - 1]);
     return TRUE;
-  } else if (!str_cmp(field, "mudcommand")) {
+  } else if (!strcasecmp(field, "mudcommand")) {
     /* find the mud command returned from this text */
 /* NOTE: you may need to replace "cmd_info" with "complete_cmd_info", */
 /* depending on what patches you've got applied.                      */
@@ -257,13 +253,13 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
   /* X.global() will have a NULL trig */
   if (trig)
     for (vd = GET_TRIG_VARS(trig); vd; vd = vd->next)
-      if (!str_cmp(vd->name, var))
+      if (!strcasecmp(vd->name, var))
         break;
 
   /* some evil waitstates could crash the mud if sent here with sc==NULL*/
   if (!vd && sc)
     for (vd = sc->global_vars; vd; vd = vd->next)
-      if (!str_cmp(vd->name, var) &&
+      if (!strcasecmp(vd->name, var) &&
           (vd->context==0 || vd->context==sc->context))
         break;
 
@@ -271,7 +267,7 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
     if (vd)
       snprintf(str, slen, "%s", vd->value);
     else {
-      if (!str_cmp(var, "self")) {
+      if (!strcasecmp(var, "self")) {
         switch (type) {
         case MOB_TRIGGER:
           snprintf(str, slen, "%c%d", UID_CHAR, GET_ID((char_data *) go));
@@ -284,40 +280,40 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
           break;
         }
       }
-      else if (!str_cmp(var, "global")) {
+      else if (!strcasecmp(var, "global")) {
         /* so "remote varname %global%" will work */
         snprintf(str, slen, "%d", ROOM_ID_BASE);
         return;
       }
-      else if (!str_cmp(var, "ctime"))
+      else if (!strcasecmp(var, "ctime"))
         snprintf(str, slen, "%ld", time(0));
-      else if (!str_cmp(var, "door"))
+      else if (!strcasecmp(var, "door"))
         snprintf(str, slen, "%s", door[type]);
-      else if (!str_cmp(var, "force"))
+      else if (!strcasecmp(var, "force"))
         snprintf(str, slen, "%s", force[type]);
-      else if (!str_cmp(var, "load"))
+      else if (!strcasecmp(var, "load"))
         snprintf(str, slen, "%s", load[type]);
-      else if (!str_cmp(var, "purge"))
+      else if (!strcasecmp(var, "purge"))
         snprintf(str, slen, "%s", purge[type]);
-      else if (!str_cmp(var, "teleport"))
+      else if (!strcasecmp(var, "teleport"))
         snprintf(str, slen, "%s", teleport[type]);
-      else if (!str_cmp(var, "damage"))
+      else if (!strcasecmp(var, "damage"))
         snprintf(str, slen, "%s", xdamage[type]);
-      else if (!str_cmp(var, "send"))
+      else if (!strcasecmp(var, "send"))
         snprintf(str, slen, "%s", send_cmd[type]);
-      else if (!str_cmp(var, "echo"))
+      else if (!strcasecmp(var, "echo"))
         snprintf(str, slen, "%s", echo_cmd[type]);
-      else if (!str_cmp(var, "echoaround"))
+      else if (!strcasecmp(var, "echoaround"))
         snprintf(str, slen, "%s", echoaround_cmd[type]);
-      else if (!str_cmp(var, "zoneecho"))
+      else if (!strcasecmp(var, "zoneecho"))
         snprintf(str, slen, "%s", zoneecho[type]);
-      else if (!str_cmp(var, "asound"))
+      else if (!strcasecmp(var, "asound"))
         snprintf(str, slen, "%s", asound[type]);
-      else if (!str_cmp(var, "at"))
+      else if (!strcasecmp(var, "at"))
         snprintf(str, slen, "%s", at[type]);
-      else if (!str_cmp(var, "transform"))
+      else if (!strcasecmp(var, "transform"))
         snprintf(str, slen, "%s", transform[type]);
-      else if (!str_cmp(var, "recho"))
+      else if (!strcasecmp(var, "recho"))
         snprintf(str, slen, "%s", recho[type]);
       else
         *str = '\0';
@@ -363,7 +359,7 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
     }
 
     else {
-      if (!str_cmp(var, "self")) {
+      if (!strcasecmp(var, "self")) {
         switch (type) {
         case MOB_TRIGGER:
           c = (char_data *) go;
@@ -383,7 +379,7 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
         }
       }
 
-      else if (!str_cmp(var, "global")) {
+      else if (!strcasecmp(var, "global")) {
         struct script_data *thescript = SCRIPT(&world[0]);
         *str = '\0';
         if (!thescript) {
@@ -391,7 +387,7 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
           return;
         }
         for (vd = thescript->global_vars; vd ; vd = vd->next)
-          if (!str_cmp(vd->name, field))
+          if (!strcasecmp(vd->name, field))
             break;
 
         if (vd)
@@ -399,18 +395,18 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 
         return;
       }
-      else if (!str_cmp(var, "people")) {
+      else if (!strcasecmp(var, "people")) {
         snprintf(str, slen, "%d",((num = atoi(field)) > 0) ? trgvar_in_room(num) : 0);
         return;
       }
-      else if (!str_cmp(var, "time")) {
-        if (!str_cmp(field, "hour"))
+      else if (!strcasecmp(var, "time")) {
+        if (!strcasecmp(field, "hour"))
           snprintf(str, slen, "%d", time_info.hours);
-        else if (!str_cmp(field, "day"))
+        else if (!strcasecmp(field, "day"))
           snprintf(str, slen, "%d", time_info.day + 1);
-        else if (!str_cmp(field, "month"))
+        else if (!strcasecmp(field, "month"))
           snprintf(str, slen, "%d", time_info.month + 1);
-        else if (!str_cmp(field, "year"))
+        else if (!strcasecmp(field, "year"))
           snprintf(str, slen, "%d", time_info.year);
         else *str = '\0';
         return;
@@ -437,7 +433,7 @@ in the vault (vnum: 453) now and then. you can just use
 **/
 
       /* addition inspired by Jamie Nelson - mordecai@xtra.co.nz */
-      else if (!str_cmp(var, "findmob")) {
+      else if (!strcasecmp(var, "findmob")) {
         if (!field || !*field || !subfield || !*subfield) {
           script_log("findmob.vnum(mvnum) - illegal syntax");
           strcpy(str, "0");
@@ -458,7 +454,7 @@ in the vault (vnum: 453) now and then. you can just use
         }
       }
       /* addition inspired by Jamie Nelson - mordecai@xtra.co.nz */
-      else if (!str_cmp(var, "findobj")) {
+      else if (!strcasecmp(var, "findobj")) {
         if (!field || !*field || !subfield || !*subfield) {
           script_log("findobj.vnum(ovnum) - illegal syntax");
           strcpy(str, "0");
@@ -474,8 +470,8 @@ in the vault (vnum: 453) now and then. you can just use
           }
         }
       }
-      else if (!str_cmp(var, "random")) {
-        if (!str_cmp(field, "char")) {
+      else if (!strcasecmp(var, "random")) {
+        if (!strcasecmp(field, "char")) {
           rndm = NULL;
           count = 0;
 
@@ -517,7 +513,7 @@ in the vault (vnum: 453) now and then. you can just use
             *str = '\0';
         }
 
-        else if (!str_cmp(field, "dir")) {
+        else if (!strcasecmp(field, "dir")) {
           room_rnum in_room = NOWHERE;
 
           switch (type) {
@@ -562,7 +558,7 @@ in the vault (vnum: 453) now and then. you can just use
     if (c) {
       if (text_processed(field, subfield, vd, str, slen)) return;
 
-      else if (!str_cmp(field, "global")) { /* get global of something else */
+      else if (!strcasecmp(field, "global")) { /* get global of something else */
         if (IS_NPC(c) && c->script) {
           find_replacement(go, c->script, NULL, MOB_TRIGGER,
             subfield, NULL, NULL, str, slen);
@@ -573,10 +569,10 @@ in the vault (vnum: 453) now and then. you can just use
 
       switch (LOWER(*field)) {
         case 'a':
-          if (!str_cmp(field, "aaaaa")) {
+          if (!strcasecmp(field, "aaaaa")) {
                strcpy(str, "0");
           }
-          else if (!str_cmp(field, "affect")) {
+          else if (!strcasecmp(field, "affect")) {
              if (subfield && *subfield) {
                int affect = get_flag_by_name(affected_bits, subfield);
                if (affect != NOFLAG && AFF_FLAGGED(c, affect))
@@ -586,10 +582,10 @@ in the vault (vnum: 453) now and then. you can just use
              } else
                strcpy(str, "0");
           }
-          else if (!str_cmp(field, "alias"))
+          else if (!strcasecmp(field, "alias"))
             snprintf(str, slen, "%s", GET_PC_NAME(c));
 
-          else if (!str_cmp(field, "align")) {
+          else if (!strcasecmp(field, "align")) {
             if (subfield && *subfield) {
               int addition = atoi(subfield);
              GET_ALIGNMENT(c) = MAX(-1000, MIN(addition, 1000));
@@ -598,7 +594,7 @@ in the vault (vnum: 453) now and then. you can just use
           }
           break;
         case 'b':
-          if (!str_cmp(field, "bank")) {
+          if (!strcasecmp(field, "bank")) {
             if (subfield && *subfield) {
               int addition = atoi(subfield);
               GET_BANK_GOLD(c) += addition;
@@ -607,32 +603,32 @@ in the vault (vnum: 453) now and then. you can just use
           }
           break;
         case 'c':
-          if (!str_cmp(field, "canbeseen")) {
+          if (!strcasecmp(field, "canbeseen")) {
             if ((type == MOB_TRIGGER) && !CAN_SEE(((char_data *)go), c))
               strcpy(str, "0");
             else
               strcpy(str, "1");
           }
-          else if (!str_cmp(field, "carry")) {
+          else if (!strcasecmp(field, "carry")) {
             if (!IS_NPC(c) && CARRYING(c))
              strcpy(str, "1");
             else
              strcpy(str, "0");
           }
-          else if (!str_cmp(field, "clan")) {
+          else if (!strcasecmp(field, "clan")) {
             if (GET_CLAN(c) != NULL && strstr(GET_CLAN(c), subfield))
              strcpy(str, "1");
             else
              strcpy(str, "0");
           }
-          else if (!str_cmp(field, "class")) {
+          else if (!strcasecmp(field, "class")) {
            if (!IS_NPC(c))
             snprintf(str, slen, "%s", pc_class_types[(int)GET_CLASS(c)]);
            else
             snprintf(str, slen, "blank");
           }
 
-          else if (!str_cmp(field, "con")) {
+          else if (!strcasecmp(field, "con")) {
             if (subfield && *subfield) {
               int addition = atoi(subfield);
               int max = 100;
@@ -642,7 +638,7 @@ in the vault (vnum: 453) now and then. you can just use
             }
             snprintf(str, slen, "%d", GET_CON(c));
           }
-          else if (!str_cmp(field, "cha")) {
+          else if (!strcasecmp(field, "cha")) {
             if (subfield && *subfield) {
               int addition = atoi(subfield);
               int max = 100;
@@ -654,16 +650,16 @@ in the vault (vnum: 453) now and then. you can just use
           }
           break;
         case 'd':
-          if (!str_cmp(field, "dead")) {
+          if (!strcasecmp(field, "dead")) {
            if (AFF_FLAGGED(c, AFF_SPIRIT))
             strcpy(str, "1");
            else
             strcpy(str, "0");
           }
-          else if (!str_cmp(field, "death")) {
+          else if (!strcasecmp(field, "death")) {
             snprintf(str, slen, "%ld", GET_DTIME(c));
           }
-          else if (!str_cmp(field, "dex")) {
+          else if (!strcasecmp(field, "dex")) {
             if (subfield && *subfield) {
               int addition = atoi(subfield);
               int max = 100;
@@ -673,13 +669,13 @@ in the vault (vnum: 453) now and then. you can just use
             }
             snprintf(str, slen, "%d", GET_DEX(c));
           }
-          else if (!str_cmp(field, "drag")) {
+          else if (!strcasecmp(field, "drag")) {
             if (!IS_NPC(c) && DRAGGING(c))
              strcpy(str, "1");
             else
              strcpy(str, "0");
           }
-          else if (!str_cmp(field, "drunk")) {
+          else if (!strcasecmp(field, "drunk")) {
             if (subfield && *subfield) {
               int addition = atoi(subfield);
             GET_COND(c, DRUNK) = MAX(-1, MIN(addition, 24));
@@ -688,7 +684,7 @@ in the vault (vnum: 453) now and then. you can just use
           }
           break;
         case 'e':
-          if (!str_cmp(field, "eq")) {
+          if (!strcasecmp(field, "eq")) {
             int pos;
             if (!subfield || !*subfield)
               *str = '\0';
@@ -707,9 +703,9 @@ in the vault (vnum: 453) now and then. you can just use
             else
               snprintf(str, slen, "%c%d",UID_CHAR, GET_ID(GET_EQ(c, pos)));
           }
-          if (!str_cmp(field, "exp")) {
+          if (!strcasecmp(field, "exp")) {
             if (subfield && *subfield) {
-              cl_sint64 addition = MIN(atoi(subfield), 2100000000);
+              int64_t addition = MIN(atoi(subfield), 2100000000);
 
               gain_exp(c, addition);
             }
@@ -717,19 +713,19 @@ in the vault (vnum: 453) now and then. you can just use
           }
           break;
         case 'f':
-          if (!str_cmp(field, "fighting")) {
+          if (!strcasecmp(field, "fighting")) {
             if (FIGHTING(c))
               snprintf(str, slen, "%c%d", UID_CHAR, GET_ID(FIGHTING(c)));
             else
               *str = '\0';
           }
-          else if (!str_cmp(field, "flying")) {
+          else if (!strcasecmp(field, "flying")) {
                if (AFF_FLAGGED(c, AFF_FLYING))
                  strcpy(str, "1");
                else
                  strcpy(str, "0");
           }
-          else if (!str_cmp(field, "follower")) {
+          else if (!strcasecmp(field, "follower")) {
             if (!c->followers || !c->followers->follower)
               *str = '\0';
             else
@@ -737,7 +733,7 @@ in the vault (vnum: 453) now and then. you can just use
           }
           break;
         case 'g':
-          if (!str_cmp(field, "gold")) {
+          if (!strcasecmp(field, "gold")) {
             if (subfield && *subfield) {
               int addition = atoi(subfield);
               GET_GOLD(c) += addition;
@@ -746,30 +742,30 @@ in the vault (vnum: 453) now and then. you can just use
           }
           break;
         case 'h':
-          if (!str_cmp(field, "has_item")) {
+          if (!strcasecmp(field, "has_item")) {
             if (!(subfield && *subfield))
               *str = '\0';
             else
               snprintf(str, slen, "%d", char_has_item(subfield, c));
           }
-          else if (!str_cmp(field, "hisher"))
+          else if (!strcasecmp(field, "hisher"))
             snprintf(str, slen, "%s", HSHR(c));
 
-          else if (!str_cmp(field, "heshe"))
+          else if (!strcasecmp(field, "heshe"))
             snprintf(str, slen, "%s", HSSH(c));
 
-          else if (!str_cmp(field, "himher"))
+          else if (!strcasecmp(field, "himher"))
             snprintf(str, slen, "%s", HMHR(c));
 
-          else if (!str_cmp(field, "hitp")) {
+          else if (!strcasecmp(field, "hitp")) {
             if (subfield && *subfield) {
-              cl_sint64 addition = atol(subfield);
+              int64_t addition = atol(subfield);
               GET_HIT(c) += addition;
               update_pos(c);
             }
             snprintf(str, slen, "%"I64T"", GET_HIT(c));
           }
-          else if (!str_cmp(field, "hunger")) {
+          else if (!strcasecmp(field, "hunger")) {
             if (subfield && *subfield) {
               int addition = atoi(subfield);
               GET_COND(c, HUNGER) = MAX(-1, MIN(addition, 24));
@@ -778,18 +774,18 @@ in the vault (vnum: 453) now and then. you can just use
           }
           break;
         case 'i':
-          if (!str_cmp(field, "id"))
+          if (!strcasecmp(field, "id"))
             snprintf(str, slen, "%d", GET_ID(c));
 
           /* new check for pc/npc status */
-          else if (!str_cmp(field, "is_pc")) {
+          else if (!strcasecmp(field, "is_pc")) {
             if (IS_NPC(c))
               strcpy(str, "0");
             else
               strcpy(str, "1");
           }
 
-          else if (!str_cmp(field, "inventory")) {
+          else if (!strcasecmp(field, "inventory")) {
             if(subfield && *subfield) {
               for (obj = c->carrying;obj;obj=obj->next_content) {
                 if(GET_OBJ_VNUM(obj)==atoi(subfield)) {
@@ -808,11 +804,11 @@ in the vault (vnum: 453) now and then. you can just use
             }
           }
 
-          else if (!str_cmp(field, "is_killer")) {
+          else if (!strcasecmp(field, "is_killer")) {
             if (subfield && *subfield) {
-              if (!str_cmp("on", subfield))
+              if (!strcasecmp("on", subfield))
                 SET_BIT_AR(PLR_FLAGS(c), PLR_KILLER);
-              else if (!str_cmp("off", subfield))
+              else if (!strcasecmp("off", subfield))
                 REMOVE_BIT_AR(PLR_FLAGS(c), PLR_KILLER);
             }
             if (PLR_FLAGGED(c, PLR_KILLER))
@@ -821,11 +817,11 @@ in the vault (vnum: 453) now and then. you can just use
               strcpy(str, "0");
           }
 
-          else if (!str_cmp(field, "is_thief")) {
+          else if (!strcasecmp(field, "is_thief")) {
             if (subfield && *subfield) {
-              if (!str_cmp("on", subfield))
+              if (!strcasecmp("on", subfield))
                 SET_BIT_AR(PLR_FLAGS(c), PLR_THIEF);
-              else if (!str_cmp("off", subfield))
+              else if (!strcasecmp("off", subfield))
                 REMOVE_BIT_AR(PLR_FLAGS(c), PLR_THIEF);
             }
             if (PLR_FLAGGED(c, PLR_THIEF))
@@ -834,7 +830,7 @@ in the vault (vnum: 453) now and then. you can just use
               strcpy(str, "0");
           }
 
-          else if (!str_cmp(field, "int")) {
+          else if (!strcasecmp(field, "int")) {
             if (subfield && *subfield) {
               int addition = atoi(subfield);
               int max = 100;
@@ -846,50 +842,50 @@ in the vault (vnum: 453) now and then. you can just use
           }
           break;
         case 'l':
-          if (!str_cmp(field, "level"))
+          if (!strcasecmp(field, "level"))
             snprintf(str, slen, "%d", GET_LEVEL(c));
           break;
         case 'm':
-          if (!str_cmp(field, "maxhitp")) {
+          if (!strcasecmp(field, "maxhitp")) {
             if (subfield && *subfield) {
-              cl_sint64 addition = atol(subfield);
+              int64_t addition = atol(subfield);
               GET_MAX_HIT(c) = MAX(GET_MAX_HIT(c) + addition, 1);
             }
             snprintf(str, slen, "%"I64T"", GET_MAX_HIT(c));
           }
 
-          else if (!str_cmp(field, "mana")) {
+          else if (!strcasecmp(field, "mana")) {
             if (subfield && *subfield) {
-              cl_sint64 addition = atol(subfield);
+              int64_t addition = atol(subfield);
               GET_MANA(c) += addition;
             }
             snprintf(str, slen, "%"I64T"", GET_MANA(c));
           }
-          else if (!str_cmp(field, "maxmana")) {
+          else if (!strcasecmp(field, "maxmana")) {
             if (subfield && *subfield) {
-              cl_sint64 addition = atol(subfield);
+              int64_t addition = atol(subfield);
               GET_MAX_MANA(c) = MAX(GET_MAX_MANA(c) + addition, 1);
             }
             snprintf(str, slen, "%"I64T"", GET_MAX_MANA(c));
           }
 
-          else if (!str_cmp(field, "move")) {
+          else if (!strcasecmp(field, "move")) {
             if (subfield && *subfield) {
-              cl_sint64 addition = atol(subfield);
+              int64_t addition = atol(subfield);
               GET_MOVE(c) += addition;
             }
             snprintf(str, slen, "%"I64T"", GET_MOVE(c));
           }
 
-          else if (!str_cmp(field, "maxmove")) {
+          else if (!strcasecmp(field, "maxmove")) {
             if (subfield && *subfield) {
-              cl_sint64 addition = atol(subfield);
+              int64_t addition = atol(subfield);
               GET_MAX_MOVE(c) = MAX(GET_MAX_MOVE(c) + addition, 1);
             }
             snprintf(str, slen, "%"I64T"", GET_MAX_MOVE(c));
           }
 
-          else if (!str_cmp(field, "master")) {
+          else if (!strcasecmp(field, "master")) {
             if (!c->master)
               *str = '\0';
             else
@@ -897,10 +893,10 @@ in the vault (vnum: 453) now and then. you can just use
           }
           break;
         case 'n':
-          if (!str_cmp(field, "name")) {
+          if (!strcasecmp(field, "name")) {
              snprintf(str, slen, "%s", GET_NAME(c));
           }
-          else if (!str_cmp(field, "next_in_room")) {
+          else if (!strcasecmp(field, "next_in_room")) {
             if (c->next_in_room)
               snprintf(str, slen,"%c%d",UID_CHAR, GET_ID(c->next_in_room));
             else
@@ -910,11 +906,11 @@ in the vault (vnum: 453) now and then. you can just use
         case 'p':
           /* Thanks to Christian Ejlertsen for this idea
              And to Ken Ray for speeding the implementation up :)*/
-          if (!str_cmp(field, "pos")) {
+          if (!strcasecmp(field, "pos")) {
             if (subfield && *subfield) {
               for (i = POS_SLEEPING; i <= POS_STANDING; i++) {
                 /* allows : Sleeping, Resting, Sitting, Fighting, Standing */
-                if (!strn_cmp(subfield, position_types[i], strlen(subfield))) {
+                if (!strncasecmp(subfield, position_types[i], strlen(subfield))) {
                   GET_POS(c) = i;
                   break;
                 }
@@ -922,7 +918,7 @@ in the vault (vnum: 453) now and then. you can just use
             }
             snprintf(str, slen, "%s", position_types[GET_POS(c)]);
           }
-          else if (!str_cmp(field, "prac")) {
+          else if (!strcasecmp(field, "prac")) {
             if (IS_NPC(c)) {
              if (IN_ROOM(c) != NOWHERE) {
               send_to_room(IN_ROOM(c), "Error!: Report this trigger error to the coding authorities!\r\n");
@@ -934,7 +930,7 @@ in the vault (vnum: 453) now and then. you can just use
             }
             snprintf(str, slen, "%d", GET_PRACTICES(c, GET_CLASS(c)));
           }
-          else if (!str_cmp(field, "plr")) { 
+          else if (!strcasecmp(field, "plr")) {
              if (subfield && *subfield) { 
                int plr = get_flag_by_name(player_bits, subfield); 
                if (plr != NOFLAG && PLR_FLAGGED(c, plr)) 
@@ -944,7 +940,7 @@ in the vault (vnum: 453) now and then. you can just use
              } else 
                strcpy(str, "0"); 
            }
-          else if (!str_cmp(field, "pref")) { 
+          else if (!strcasecmp(field, "pref")) {
              if (subfield && *subfield) { 
                int pref = get_flag_by_name(preference_bits, subfield); 
                if (pref != NOFLAG && PRF_FLAGGED(c, pref)) 
@@ -956,7 +952,7 @@ in the vault (vnum: 453) now and then. you can just use
            }
           break;
         case 'r':
-          if (!str_cmp(field, "room")) {  /* in NOWHERE, return the void */
+          if (!strcasecmp(field, "room")) {  /* in NOWHERE, return the void */
 /* see note in dg_scripts.h */
 #ifdef ACTOR_ROOM_IS_UID
             snprintf(str, slen, "%c%d",UID_CHAR,
@@ -966,7 +962,7 @@ in the vault (vnum: 453) now and then. you can just use
 #endif
           }
 #ifdef GET_RACE
-          else if (!str_cmp(field, "race")) {
+          else if (!strcasecmp(field, "race")) {
             if IS_NPC(c) {
               sprinttype(GET_RACE(c), race_names, str, slen);
              /* *str='\0';*/
@@ -975,7 +971,7 @@ in the vault (vnum: 453) now and then. you can just use
             }
           }
 #endif
-          else if (!str_cmp(field, "rpp")) {
+          else if (!strcasecmp(field, "rpp")) {
            if (subfield && *subfield) {
               int addition = atoi(subfield);
               GET_RP(c) += addition;
@@ -986,10 +982,10 @@ in the vault (vnum: 453) now and then. you can just use
 
           break;
         case 's':
-          if (!str_cmp(field, "sex"))
+          if (!strcasecmp(field, "sex"))
             snprintf(str, slen, "%s", genders[(int)GET_SEX(c)]);
 
-          else if (!str_cmp(field, "str")) {
+          else if (!strcasecmp(field, "str")) {
             if (subfield && *subfield) {
               int addition = atoi(subfield);
               int max = 100;
@@ -1000,7 +996,7 @@ in the vault (vnum: 453) now and then. you can just use
             snprintf(str, slen, "%d", GET_STR(c));
           }
 
-          else if (!str_cmp(field, "size")) {
+          else if (!strcasecmp(field, "size")) {
             if (subfield && *subfield) {
               int ns;
               if ((ns = search_block(subfield, size_names, FALSE)) > -1) {
@@ -1010,10 +1006,10 @@ in the vault (vnum: 453) now and then. you can just use
           sprinttype(get_size(c), size_names, str, slen);
           }
 
-          else if (!str_cmp(field, "skill"))
+          else if (!strcasecmp(field, "skill"))
             snprintf(str, slen, "%s", skill_percent(c, subfield));
 
-          else if (!str_cmp(field, "skillset")) {
+          else if (!strcasecmp(field, "skillset")) {
             if (!IS_NPC(c) && subfield && *subfield) {
               char skillname[MAX_INPUT_LENGTH], *amount;
               amount = one_word(subfield, skillname);
@@ -1028,21 +1024,21 @@ in the vault (vnum: 453) now and then. you can just use
             }
             *str = '\0'; /* so the parser know we recognize 'skillset' as a field */
           }
-          else if (!str_cmp(field, "saving_fortitude")) {
+          else if (!strcasecmp(field, "saving_fortitude")) {
             if (subfield && *subfield) {
               int addition = atoi(subfield);
               GET_SAVE_MOD(c, SAVING_FORTITUDE) += addition;
             }
             snprintf(str, slen, "%d", GET_SAVE_MOD(c, SAVING_FORTITUDE));
           }
-          else if (!str_cmp(field, "saving_reflex")) {
+          else if (!strcasecmp(field, "saving_reflex")) {
             if (subfield && *subfield) {
               int addition = atoi(subfield);
               GET_SAVE_MOD(c, SAVING_REFLEX) += addition;
             }
             snprintf(str, slen, "%d", GET_SAVE_MOD(c, SAVING_REFLEX));
           }
-          else if (!str_cmp(field, "saving_will")) {
+          else if (!strcasecmp(field, "saving_will")) {
             if (subfield && *subfield) {
               int addition = atoi(subfield);
               GET_SAVE_MOD(c, SAVING_WILL) += addition;
@@ -1052,19 +1048,19 @@ in the vault (vnum: 453) now and then. you can just use
 
           break;
         case 't':
-          if (!str_cmp(field, "thirst")) {
+          if (!strcasecmp(field, "thirst")) {
             if (subfield && *subfield) {
               int addition = atoi(subfield);
               GET_COND(c, THIRST) = MAX(-1, MIN(addition, 24));
             }
             snprintf(str, slen, "%d", GET_COND(c, THIRST));
           }
-          else if (!str_cmp(field, "tnl")) {
+          else if (!strcasecmp(field, "tnl")) {
             snprintf(str, slen, "%d", level_exp(c, GET_LEVEL(c) + 1));
           }
          break;
         case 'v':
-          if (!str_cmp(field, "vnum")) {
+          if (!strcasecmp(field, "vnum")) {
             if (subfield && *subfield) {
               snprintf(str, slen, "%d", IS_NPC(c) ? (int)(GET_MOB_VNUM(c) == atoi(subfield)) : -1 );
             } else {
@@ -1080,12 +1076,12 @@ in the vault (vnum: 453) now and then. you can just use
             }
           }
 
-          else if (!str_cmp(field, "varexists")) {
+          else if (!strcasecmp(field, "varexists")) {
             struct trig_var_data *remote_vd;
             strcpy(str, "0");
             if (SCRIPT(c)) {
               for (remote_vd = SCRIPT(c)->global_vars; remote_vd; remote_vd = remote_vd->next) {
-                if (!str_cmp(remote_vd->name, subfield)) break;
+                if (!strcasecmp(remote_vd->name, subfield)) break;
               }
               if (remote_vd) strcpy(str, "1");
             }
@@ -1093,9 +1089,9 @@ in the vault (vnum: 453) now and then. you can just use
 
           break;
         case 'w':
-          if (!str_cmp(field, "weight"))
+          if (!strcasecmp(field, "weight"))
             snprintf(str, slen, "%d", GET_WEIGHT(c));
-          else if (!str_cmp(field, "wis")) {
+          else if (!strcasecmp(field, "wis")) {
             if (subfield && *subfield) {
               int addition = atoi(subfield);
               int max = 100;
@@ -1107,7 +1103,7 @@ in the vault (vnum: 453) now and then. you can just use
           }
           break;
         case 'z':
-          if (!str_cmp(field, "zenni")) {
+          if (!strcasecmp(field, "zenni")) {
             if (subfield && *subfield) {
               int addition = atoi(subfield);
               GET_GOLD(c) += addition;
@@ -1120,7 +1116,7 @@ in the vault (vnum: 453) now and then. you can just use
       if (*str == '\x1') { /* no match found in switch */
         if (SCRIPT(c)) {
           for (vd = (SCRIPT(c))->global_vars; vd; vd = vd->next)
-            if (!str_cmp(vd->name, field))
+            if (!strcasecmp(vd->name, field))
               break;
           if (vd)
             snprintf(str, slen, "%s", vd->value);
@@ -1143,7 +1139,7 @@ in the vault (vnum: 453) now and then. you can just use
       *str = '\x1';
       switch (LOWER(*field)) {
         case 'a':
-          if (!str_cmp(field, "affects")) {
+          if (!strcasecmp(field, "affects")) {
             if (subfield && *subfield) {
               if (check_flags_by_name_ar(GET_OBJ_PERM(o), NUM_AFF_FLAGS, subfield, affected_bits) > 0)
                 snprintf(str, slen, "1");
@@ -1154,7 +1150,7 @@ in the vault (vnum: 453) now and then. you can just use
           }
           break;
         case 'c':
-          if (!str_cmp(field, "cost")) {
+          if (!strcasecmp(field, "cost")) {
             if (subfield && *subfield) {
               int addition = atoi(subfield);
               GET_OBJ_COST(o) = MAX(0, addition + GET_OBJ_COST(o));
@@ -1162,7 +1158,7 @@ in the vault (vnum: 453) now and then. you can just use
             snprintf(str, slen, "%d", GET_OBJ_COST(o));
           }
 
-          else if (!str_cmp(field, "cost_per_day")) {
+          else if (!strcasecmp(field, "cost_per_day")) {
             if (subfield && *subfield) {
               int addition = atoi(subfield);
               GET_OBJ_RENT(o) = MAX(0, addition + GET_OBJ_RENT(o));
@@ -1170,21 +1166,21 @@ in the vault (vnum: 453) now and then. you can just use
             snprintf(str, slen, "%d", GET_OBJ_RENT(o));
           }
 
-          else if (!str_cmp(field, "carried_by")) {
+          else if (!strcasecmp(field, "carried_by")) {
             if (o->carried_by)
               snprintf(str, slen,"%c%d",UID_CHAR, GET_ID(o->carried_by));
             else
               *str = '\0';
           }
 
-          else if (!str_cmp(field, "contents")) {
+          else if (!strcasecmp(field, "contents")) {
             if (o->contains)
               snprintf(str, slen, "%c%d", UID_CHAR, GET_ID(o->contains));
             else
               *str = '\0';
           }
           /* thanks to Jamie Nelson (Mordecai of 4 Dimensions MUD) */
-          else if (!str_cmp(field, "count")) {
+          else if (!strcasecmp(field, "count")) {
             if (GET_OBJ_TYPE(o) == ITEM_CONTAINER)
               snprintf(str, slen, "%d", item_in_list(subfield, o->contains));
             else
@@ -1192,7 +1188,7 @@ in the vault (vnum: 453) now and then. you can just use
           }
           break;
         case 'e':
-          if (!str_cmp(field, "extra")) {
+          if (!strcasecmp(field, "extra")) {
             if (subfield && *subfield) {
               if (check_flags_by_name_ar(GET_OBJ_EXTRA(o), NUM_ITEM_FLAGS, subfield, extra_bits) > 0)
                 snprintf(str, slen, "1");
@@ -1206,13 +1202,13 @@ in the vault (vnum: 453) now and then. you can just use
           break;
         case 'h':
           /* thanks to Jamie Nelson (Mordecai of 4 Dimensions MUD) */
-          if (!str_cmp(field, "has_in")) {
+          if (!strcasecmp(field, "has_in")) {
             if (GET_OBJ_TYPE(o) == ITEM_CONTAINER)
               snprintf(str, slen, "%s", (item_in_list(subfield, o->contains) ? "1" : "0"));
             else
             	strcpy(str, "0");
           }
-          if (!str_cmp(field, "health")) {
+          if (!strcasecmp(field, "health")) {
            if (subfield && *subfield) {
               int addition = atoi(subfield);
               GET_OBJ_VAL(o, VAL_ALL_HEALTH) = MAX(1, addition + GET_OBJ_VAL(o, VAL_ALL_HEALTH));
@@ -1223,19 +1219,19 @@ in the vault (vnum: 453) now and then. you can just use
           }
           break;
         case 'i':
-          if (!str_cmp(field, "id"))
+          if (!strcasecmp(field, "id"))
             snprintf(str, slen, "%d", GET_ID(o));
 
-          else if (!str_cmp(field, "is_inroom")) {
+          else if (!strcasecmp(field, "is_inroom")) {
             if (IN_ROOM(o) != NOWHERE)
               snprintf(str, slen,"%c%d",UID_CHAR, world[IN_ROOM(o)].number + ROOM_ID_BASE);
             else
               *str = '\0';
           }
-          else if (!str_cmp(field, "is_pc")) {
+          else if (!strcasecmp(field, "is_pc")) {
             strcpy(str, "-1");
           }
-          else if (!str_cmp(field, "itemflag")) {
+          else if (!strcasecmp(field, "itemflag")) {
              if (subfield && *subfield) {
                int item = get_flag_by_name(extra_bits, subfield);
                if (item != NOFLAG && OBJ_FLAGGED(o, item))
@@ -1247,12 +1243,12 @@ in the vault (vnum: 453) now and then. you can just use
            }
           break;
         case 'l':
-          if (!str_cmp(field, "level"))
+          if (!strcasecmp(field, "level"))
             snprintf(str, slen, "%d", GET_OBJ_LEVEL(o));
           break;
 
         case 'n':
-          if (!str_cmp(field, "name")) {
+          if (!strcasecmp(field, "name")) {
            if (!subfield || !*subfield)
             snprintf(str, slen, "%s",  o->name);
            else {
@@ -1261,7 +1257,7 @@ in the vault (vnum: 453) now and then. you can just use
             o->name = strdup(blah);
            }
           }
-          else if (!str_cmp(field, "next_in_list")) {
+          else if (!strcasecmp(field, "next_in_list")) {
             if (o->next_content)
               snprintf(str, slen,"%c%d",UID_CHAR, GET_ID(o->next_content));
             else
@@ -1269,7 +1265,7 @@ in the vault (vnum: 453) now and then. you can just use
           }
           break;
         case 'r':
-          if (!str_cmp(field, "room")) {
+          if (!strcasecmp(field, "room")) {
             if (obj_room(o) != NOWHERE)
               snprintf(str, slen,"%c%d",UID_CHAR, world[obj_room(o)].number + ROOM_ID_BASE);
             else
@@ -1277,7 +1273,7 @@ in the vault (vnum: 453) now and then. you can just use
           }
           break;
         case 's':
-          if (!str_cmp(field, "shortdesc")) {
+          if (!strcasecmp(field, "shortdesc")) {
            if (!subfield || !*subfield)
             snprintf(str, slen, "%s",  o->short_description);
            else {
@@ -1286,7 +1282,7 @@ in the vault (vnum: 453) now and then. you can just use
             o->short_description = strdup(blah);
            }
           }
-          else if (!str_cmp(field, "setaffects")) {
+          else if (!strcasecmp(field, "setaffects")) {
             if (subfield && *subfield) {
               int ns;
               if ((ns = check_flags_by_name_ar(GET_OBJ_PERM(o), NUM_AFF_FLAGS, subfield, affected_bits)) > 0) {
@@ -1295,7 +1291,7 @@ in the vault (vnum: 453) now and then. you can just use
               }
             }
           }
-          else if (!str_cmp(field, "setextra")) {
+          else if (!strcasecmp(field, "setextra")) {
             if (subfield && *subfield) {
               int ns;
               if ((ns = check_flags_by_name_ar(GET_OBJ_EXTRA(o), NUM_ITEM_FLAGS, subfield, extra_bits)) > 0) {
@@ -1305,7 +1301,7 @@ in the vault (vnum: 453) now and then. you can just use
             }
           }
 
-          else if (!str_cmp(field, "size")) {
+          else if (!strcasecmp(field, "size")) {
             if (subfield && *subfield) {
               int ns;
               if ((ns = search_block(subfield, size_names, FALSE)) > -1) {
@@ -1316,45 +1312,45 @@ in the vault (vnum: 453) now and then. you can just use
           }
           break;
         case 't':
-          if (!str_cmp(field, "type"))
+          if (!strcasecmp(field, "type"))
             sprinttype(GET_OBJ_TYPE(o), item_types, str, slen);
 
-          else if (!str_cmp(field, "timer"))
+          else if (!strcasecmp(field, "timer"))
             snprintf(str, slen, "%d", GET_OBJ_TIMER(o));
           break;
         case 'v':
-          if (!str_cmp(field, "vnum"))
+          if (!strcasecmp(field, "vnum"))
             if (subfield && *subfield) {
               snprintf(str, slen, "%d", (int)(GET_OBJ_VNUM(o) == atoi(subfield)));
             } else {
               snprintf(str, slen, "%d", GET_OBJ_VNUM(o));
             }
-          else if (!str_cmp(field, "val0"))
+          else if (!strcasecmp(field, "val0"))
             snprintf(str, slen, "%d", GET_OBJ_VAL(o, 0));
 
-          else if (!str_cmp(field, "val1"))
+          else if (!strcasecmp(field, "val1"))
             snprintf(str, slen, "%d", GET_OBJ_VAL(o, 1));
 
-          else if (!str_cmp(field, "val2"))
+          else if (!strcasecmp(field, "val2"))
             snprintf(str, slen, "%d", GET_OBJ_VAL(o, 2));
 
-          else if (!str_cmp(field, "val3"))
+          else if (!strcasecmp(field, "val3"))
             snprintf(str, slen, "%d", GET_OBJ_VAL(o, 3));
 
-          else if (!str_cmp(field, "val4"))
+          else if (!strcasecmp(field, "val4"))
             snprintf(str, slen, "%d", GET_OBJ_VAL(o, 4));
 
-          else if (!str_cmp(field, "val5"))
+          else if (!strcasecmp(field, "val5"))
             snprintf(str, slen, "%d", GET_OBJ_VAL(o, 5));
 
-          else if (!str_cmp(field, "val6"))
+          else if (!strcasecmp(field, "val6"))
             snprintf(str, slen, "%d", GET_OBJ_VAL(o, 6));
 
-          else if (!str_cmp(field, "val7"))
+          else if (!strcasecmp(field, "val7"))
             snprintf(str, slen, "%d", GET_OBJ_VAL(o, 7));
           break;
         case 'w':
-          if (!str_cmp(field, "weight")){
+          if (!strcasecmp(field, "weight")){
             if (subfield && *subfield) {
               int addition = atoi(subfield);
               if (addition < 0 || addition > 0) {
@@ -1366,7 +1362,7 @@ in the vault (vnum: 453) now and then. you can just use
             snprintf(str, slen, "%"I64T"", GET_OBJ_WEIGHT(o));
           }
 
-          else if (!str_cmp(field, "worn_by")) {
+          else if (!strcasecmp(field, "worn_by")) {
             if (o->worn_by)
               snprintf(str, slen,"%c%d",UID_CHAR, GET_ID(o->worn_by));
             else
@@ -1379,20 +1375,20 @@ in the vault (vnum: 453) now and then. you can just use
       if (*str == '\x1') { /* no match in switch */
         if (SCRIPT(o)) { /* check for global var */
           for (vd = (SCRIPT(o))->global_vars; vd; vd = vd->next)
-            if (!str_cmp(vd->name, field))
+            if (!strcasecmp(vd->name, field))
               break;
           if (vd)
             snprintf(str, slen, "%s", vd->value);
           else {
             *str = '\0';
-            if (str_cmp(GET_TRIG_NAME(trig), "Rename Object")) {
+            if (strcasecmp(GET_TRIG_NAME(trig), "Rename Object")) {
             script_log("Trigger: %s, VNum %d, type: %d. unknown object field: '%s'",
                        GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), type, field);
             }
           }
         } else {
           *str = '\0';
-          if (str_cmp(GET_TRIG_NAME(trig), "Rename Object")) {
+          if (strcasecmp(GET_TRIG_NAME(trig), "Rename Object")) {
           script_log("Trigger: %s, VNum %d, type: %d. unknown object field: '%s'",
                      GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), type, field);
           }
@@ -1411,7 +1407,7 @@ in the vault (vnum: 453) now and then. you can just use
                      GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), type);
         } else {
           for (vd = (SCRIPT(r))->global_vars; vd; vd = vd->next)
-            if (!str_cmp(vd->name, field))
+            if (!strcasecmp(vd->name, field))
               break;
           if (vd)
             snprintf(str, slen, "%s", vd->value);
@@ -1420,22 +1416,22 @@ in the vault (vnum: 453) now and then. you can just use
         }
       }
 
-      else if (!str_cmp(field, "name"))
+      else if (!strcasecmp(field, "name"))
         snprintf(str, slen, "%s",  r->name);
 
-      else if (!str_cmp(field, "sector"))
+      else if (!strcasecmp(field, "sector"))
         sprinttype(r->sector_type, sector_types, str, slen);
      
-      else if (!str_cmp(field, "gravity"))
+      else if (!strcasecmp(field, "gravity"))
         snprintf(str, slen,"%d",r->gravity);
 
-      else if (!str_cmp(field, "vnum")) {
+      else if (!strcasecmp(field, "vnum")) {
         if (subfield && *subfield) {
           snprintf(str, slen, "%d", (int)(r->number == atoi(subfield)));
         } else {
           snprintf(str, slen,"%d",r->number);
         }
-      } else if (!str_cmp(field, "contents")) {
+      } else if (!strcasecmp(field, "contents")) {
         if (subfield && *subfield) {
           for (obj = r->contents; obj; obj = obj->next_content) {
             if (GET_OBJ_VNUM(obj) == atoi(subfield)) {
@@ -1455,20 +1451,20 @@ in the vault (vnum: 453) now and then. you can just use
         }
       }
 
-      else if (!str_cmp(field, "people")) {
+      else if (!strcasecmp(field, "people")) {
         if (r->people)
           snprintf(str, slen, "%c%d", UID_CHAR, GET_ID(r->people));
         else
           *str = '\0';
       }
-      else if (!str_cmp(field, "id")) {
+      else if (!strcasecmp(field, "id")) {
         room_rnum rnum = real_room(r->number);
         if (rnum != NOWHERE)
           snprintf(str, slen, "%d", world[rnum].number + ROOM_ID_BASE);
         else
           *str = '\0';
       }
-      else if (!str_cmp(field, "weather")) {
+      else if (!strcasecmp(field, "weather")) {
         const char *sky_look[] = {
           "sunny",
           "cloudy",
@@ -1481,18 +1477,18 @@ in the vault (vnum: 453) now and then. you can just use
         else
           *str = '\0';
       }
-      else if (!str_cmp(field, "fishing")) {
+      else if (!strcasecmp(field, "fishing")) {
        room_rnum thisroom = real_room(r->number);
        if (ROOM_FLAGGED(thisroom, ROOM_FISHING))
          snprintf(str, slen, "1");
        else
          snprintf(str, slen, "0");  
       }
-      else if (!str_cmp(field, "zonenumber"))
+      else if (!strcasecmp(field, "zonenumber"))
         snprintf(str, slen, "%d",  zone_table[r->zone].number);
-      else if (!str_cmp(field, "zonename"))
+      else if (!strcasecmp(field, "zonename"))
         snprintf(str, slen, "%s",  zone_table[r->zone].name);
-      else if (!str_cmp(field, "roomflag")) {
+      else if (!strcasecmp(field, "roomflag")) {
         if (subfield && *subfield) {
           room_rnum thisroom = real_room(r->number);
           if (check_flags_by_name_ar(ROOM_FLAGS(thisroom), NUM_ROOM_FLAGS, subfield, room_bits) > 0)
@@ -1502,16 +1498,16 @@ in the vault (vnum: 453) now and then. you can just use
         } else
           snprintf(str, slen, "0");
       }
-      else if (!str_cmp(field, "north")) {
+      else if (!strcasecmp(field, "north")) {
         if (R_EXIT(r, NORTH)) {
           if (subfield && *subfield) {
-            if (!str_cmp(subfield, "vnum"))
+            if (!strcasecmp(subfield, "vnum"))
               snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, NORTH)->to_room));
-            else if (!str_cmp(subfield, "key"))
+            else if (!strcasecmp(subfield, "key"))
               snprintf(str, slen, "%d", R_EXIT(r, NORTH)->key);
-            else if (!str_cmp(subfield, "bits"))
+            else if (!strcasecmp(subfield, "bits"))
               sprintbit(R_EXIT(r, NORTH)->exit_info ,exit_bits, str, slen);
-            else if (!str_cmp(subfield, "room")) {
+            else if (!strcasecmp(subfield, "room")) {
               if (R_EXIT(r, NORTH)->to_room != NOWHERE)
                 snprintf(str, slen, "%c%d", UID_CHAR, world[R_EXIT(r, NORTH)->to_room].number + ROOM_ID_BASE);
               else
@@ -1522,16 +1518,16 @@ in the vault (vnum: 453) now and then. you can just use
         } else
           *str = '\0';
       }
-      else if (!str_cmp(field, "east")) {
+      else if (!strcasecmp(field, "east")) {
         if (R_EXIT(r, EAST)) {
           if (subfield && *subfield) {
-            if (!str_cmp(subfield, "vnum"))
+            if (!strcasecmp(subfield, "vnum"))
               snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, EAST)->to_room));
-            else if (!str_cmp(subfield, "key"))
+            else if (!strcasecmp(subfield, "key"))
               snprintf(str, slen, "%d", R_EXIT(r, EAST)->key);
-            else if (!str_cmp(subfield, "bits"))
+            else if (!strcasecmp(subfield, "bits"))
               sprintbit(R_EXIT(r, EAST)->exit_info ,exit_bits, str, slen);
-            else if (!str_cmp(subfield, "room")) {
+            else if (!strcasecmp(subfield, "room")) {
               if (R_EXIT(r, EAST)->to_room != NOWHERE)
                 snprintf(str, slen, "%c%d", UID_CHAR, world[R_EXIT(r, EAST)->to_room].number + ROOM_ID_BASE);
               else
@@ -1542,16 +1538,16 @@ in the vault (vnum: 453) now and then. you can just use
         } else
           *str = '\0';
       }
-      else if (!str_cmp(field, "south")) {
+      else if (!strcasecmp(field, "south")) {
         if (R_EXIT(r, SOUTH)) {
           if (subfield && *subfield) {
-            if (!str_cmp(subfield, "vnum"))
+            if (!strcasecmp(subfield, "vnum"))
               snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, SOUTH)->to_room));
-            else if (!str_cmp(subfield, "key"))
+            else if (!strcasecmp(subfield, "key"))
               snprintf(str, slen, "%d", R_EXIT(r, SOUTH)->key);
-            else if (!str_cmp(subfield, "bits"))
+            else if (!strcasecmp(subfield, "bits"))
               sprintbit(R_EXIT(r, SOUTH)->exit_info ,exit_bits, str, slen);
-            else if (!str_cmp(subfield, "room")) {
+            else if (!strcasecmp(subfield, "room")) {
               if (R_EXIT(r, SOUTH)->to_room != NOWHERE)
                 snprintf(str, slen, "%c%d", UID_CHAR, world[R_EXIT(r, SOUTH)->to_room].number + ROOM_ID_BASE);
               else
@@ -1562,16 +1558,16 @@ in the vault (vnum: 453) now and then. you can just use
         } else
           *str = '\0';
       }
-      else if (!str_cmp(field, "west")) {
+      else if (!strcasecmp(field, "west")) {
         if (R_EXIT(r, WEST)) {
           if (subfield && *subfield) {
-            if (!str_cmp(subfield, "vnum"))
+            if (!strcasecmp(subfield, "vnum"))
               snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, WEST)->to_room));
-            else if (!str_cmp(subfield, "key"))
+            else if (!strcasecmp(subfield, "key"))
               snprintf(str, slen, "%d", R_EXIT(r, WEST)->key);
-            else if (!str_cmp(subfield, "bits"))
+            else if (!strcasecmp(subfield, "bits"))
               sprintbit(R_EXIT(r, WEST)->exit_info ,exit_bits, str, slen);
-            else if (!str_cmp(subfield, "room")) {
+            else if (!strcasecmp(subfield, "room")) {
               if (R_EXIT(r, WEST)->to_room != NOWHERE)
                 snprintf(str, slen, "%c%d", UID_CHAR, world[R_EXIT(r, WEST)->to_room].number + ROOM_ID_BASE);
               else
@@ -1582,16 +1578,16 @@ in the vault (vnum: 453) now and then. you can just use
         } else
           *str = '\0';
       }
-      else if (!str_cmp(field, "up")) {
+      else if (!strcasecmp(field, "up")) {
         if (R_EXIT(r, UP)) {
           if (subfield && *subfield) {
-            if (!str_cmp(subfield, "vnum"))
+            if (!strcasecmp(subfield, "vnum"))
               snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, UP)->to_room));
-            else if (!str_cmp(subfield, "key"))
+            else if (!strcasecmp(subfield, "key"))
               snprintf(str, slen, "%d", R_EXIT(r, UP)->key);
-            else if (!str_cmp(subfield, "bits"))
+            else if (!strcasecmp(subfield, "bits"))
               sprintbit(R_EXIT(r, UP)->exit_info ,exit_bits, str, slen);
-            else if (!str_cmp(subfield, "room")) {
+            else if (!strcasecmp(subfield, "room")) {
               if (R_EXIT(r, UP)->to_room != NOWHERE)
                 snprintf(str, slen, "%c%d", UID_CHAR, world[R_EXIT(r, UP)->to_room].number + ROOM_ID_BASE);
               else
@@ -1602,16 +1598,16 @@ in the vault (vnum: 453) now and then. you can just use
         } else
           *str = '\0';
       }
-      else if (!str_cmp(field, "down")) {
+      else if (!strcasecmp(field, "down")) {
         if (R_EXIT(r, DOWN)) {
           if (subfield && *subfield) {
-            if (!str_cmp(subfield, "vnum"))
+            if (!strcasecmp(subfield, "vnum"))
               snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, DOWN)->to_room));
-            else if (!str_cmp(subfield, "key"))
+            else if (!strcasecmp(subfield, "key"))
               snprintf(str, slen, "%d", R_EXIT(r, DOWN)->key);
-            else if (!str_cmp(subfield, "bits"))
+            else if (!strcasecmp(subfield, "bits"))
               sprintbit(R_EXIT(r, DOWN)->exit_info ,exit_bits, str, slen);
-            else if (!str_cmp(subfield, "room")) {
+            else if (!strcasecmp(subfield, "room")) {
               if (R_EXIT(r, DOWN)->to_room != NOWHERE)
                 snprintf(str, slen, "%c%d", UID_CHAR, world[R_EXIT(r, DOWN)->to_room].number + ROOM_ID_BASE);
               else
@@ -1622,16 +1618,16 @@ in the vault (vnum: 453) now and then. you can just use
         } else
           *str = '\0';
       }
-      else if (!str_cmp(field, "northwest")) {
+      else if (!strcasecmp(field, "northwest")) {
         if (R_EXIT(r, NORTHWEST)) {
           if (subfield && *subfield) {
-            if (!str_cmp(subfield, "vnum"))
+            if (!strcasecmp(subfield, "vnum"))
               snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, NORTHWEST)->to_room));
-            else if (!str_cmp(subfield, "key"))
+            else if (!strcasecmp(subfield, "key"))
               snprintf(str, slen, "%d", R_EXIT(r, NORTHWEST)->key);
-            else if (!str_cmp(subfield, "bits"))
+            else if (!strcasecmp(subfield, "bits"))
               sprintbit(R_EXIT(r, NORTHWEST)->exit_info ,exit_bits, str, slen);
-            else if (!str_cmp(subfield, "room")) {
+            else if (!strcasecmp(subfield, "room")) {
               if (R_EXIT(r, NORTHWEST)->to_room != NOWHERE)
                 snprintf(str, slen, "%c%d", UID_CHAR, world[R_EXIT(r, NORTHWEST)->to_room].number + ROOM_ID_BASE);
               else
@@ -1642,16 +1638,16 @@ in the vault (vnum: 453) now and then. you can just use
         } else
           *str = '\0';
       }
-      else if (!str_cmp(field, "northeast")) {
+      else if (!strcasecmp(field, "northeast")) {
         if (R_EXIT(r, NORTHEAST)) {
           if (subfield && *subfield) {
-            if (!str_cmp(subfield, "vnum"))
+            if (!strcasecmp(subfield, "vnum"))
               snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, NORTHEAST)->to_room));
-            else if (!str_cmp(subfield, "key"))
+            else if (!strcasecmp(subfield, "key"))
               snprintf(str, slen, "%d", R_EXIT(r, NORTHEAST)->key);
-            else if (!str_cmp(subfield, "bits"))
+            else if (!strcasecmp(subfield, "bits"))
               sprintbit(R_EXIT(r, NORTHEAST)->exit_info ,exit_bits, str, slen);
-            else if (!str_cmp(subfield, "room")) {
+            else if (!strcasecmp(subfield, "room")) {
               if (R_EXIT(r, NORTHEAST)->to_room != NOWHERE)
                 snprintf(str, slen, "%c%d", UID_CHAR, world[R_EXIT(r, NORTHEAST)->to_room].number + ROOM_ID_BASE);
               else
@@ -1662,16 +1658,16 @@ in the vault (vnum: 453) now and then. you can just use
         } else
           *str = '\0';
       }
-      else if (!str_cmp(field, "southwest")) {
+      else if (!strcasecmp(field, "southwest")) {
         if (R_EXIT(r, SOUTHWEST)) {
           if (subfield && *subfield) {
-            if (!str_cmp(subfield, "vnum"))
+            if (!strcasecmp(subfield, "vnum"))
               snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, SOUTHWEST)->to_room));
-            else if (!str_cmp(subfield, "key"))
+            else if (!strcasecmp(subfield, "key"))
               snprintf(str, slen, "%d", R_EXIT(r, SOUTHWEST)->key);
-            else if (!str_cmp(subfield, "bits"))
+            else if (!strcasecmp(subfield, "bits"))
               sprintbit(R_EXIT(r, SOUTHWEST)->exit_info ,exit_bits, str, slen);
-            else if (!str_cmp(subfield, "room")) {
+            else if (!strcasecmp(subfield, "room")) {
               if (R_EXIT(r, SOUTHWEST)->to_room != NOWHERE)
                 snprintf(str, slen, "%c%d", UID_CHAR, world[R_EXIT(r, SOUTHWEST)->to_room].number + ROOM_ID_BASE);
               else
@@ -1682,16 +1678,16 @@ in the vault (vnum: 453) now and then. you can just use
         } else
           *str = '\0';
       }
-      else if (!str_cmp(field, "southeast")) {
+      else if (!strcasecmp(field, "southeast")) {
         if (R_EXIT(r, SOUTHEAST)) {
           if (subfield && *subfield) {
-            if (!str_cmp(subfield, "vnum"))
+            if (!strcasecmp(subfield, "vnum"))
               snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, SOUTHEAST)->to_room));
-            else if (!str_cmp(subfield, "key"))
+            else if (!strcasecmp(subfield, "key"))
               snprintf(str, slen, "%d", R_EXIT(r, SOUTHEAST)->key);
-            else if (!str_cmp(subfield, "bits"))
+            else if (!strcasecmp(subfield, "bits"))
               sprintbit(R_EXIT(r, SOUTHEAST)->exit_info ,exit_bits, str, slen);
-            else if (!str_cmp(subfield, "room")) {
+            else if (!strcasecmp(subfield, "room")) {
               if (R_EXIT(r, SOUTHEAST)->to_room != NOWHERE)
                 snprintf(str, slen, "%c%d", UID_CHAR, world[R_EXIT(r, SOUTHEAST)->to_room].number + ROOM_ID_BASE);
               else
@@ -1702,16 +1698,16 @@ in the vault (vnum: 453) now and then. you can just use
         } else
           *str = '\0';
       }
-      else if (!str_cmp(field, "inside")) {
+      else if (!strcasecmp(field, "inside")) {
         if (R_EXIT(r, INDIR)) {
           if (subfield && *subfield) {
-            if (!str_cmp(subfield, "vnum"))
+            if (!strcasecmp(subfield, "vnum"))
               snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, INDIR)->to_room));
-            else if (!str_cmp(subfield, "key"))
+            else if (!strcasecmp(subfield, "key"))
               snprintf(str, slen, "%d", R_EXIT(r, INDIR)->key);
-            else if (!str_cmp(subfield, "bits"))
+            else if (!strcasecmp(subfield, "bits"))
               sprintbit(R_EXIT(r, INDIR)->exit_info ,exit_bits, str, slen);
-            else if (!str_cmp(subfield, "room")) {
+            else if (!strcasecmp(subfield, "room")) {
               if (R_EXIT(r, INDIR)->to_room != NOWHERE)
                 snprintf(str, slen, "%c%d", UID_CHAR, world[R_EXIT(r, INDIR)->to_room].number + ROOM_ID_BASE);
               else
@@ -1722,16 +1718,16 @@ in the vault (vnum: 453) now and then. you can just use
         } else
           *str = '\0';
       }
-      else if (!str_cmp(field, "outside")) {
+      else if (!strcasecmp(field, "outside")) {
         if (R_EXIT(r, OUTDIR)) {
           if (subfield && *subfield) {
-            if (!str_cmp(subfield, "vnum"))
+            if (!strcasecmp(subfield, "vnum"))
               snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, OUTDIR)->to_room));
-            else if (!str_cmp(subfield, "key"))
+            else if (!strcasecmp(subfield, "key"))
               snprintf(str, slen, "%d", R_EXIT(r, OUTDIR)->key);
-            else if (!str_cmp(subfield, "bits"))
+            else if (!strcasecmp(subfield, "bits"))
               sprintbit(R_EXIT(r, OUTDIR)->exit_info ,exit_bits, str, slen);
-            else if (!str_cmp(subfield, "room")) {
+            else if (!strcasecmp(subfield, "room")) {
               if (R_EXIT(r, OUTDIR)->to_room != NOWHERE)
                 snprintf(str, slen, "%c%d", UID_CHAR, world[R_EXIT(r, OUTDIR)->to_room].number + ROOM_ID_BASE);
               else
@@ -1745,7 +1741,7 @@ in the vault (vnum: 453) now and then. you can just use
       else {
         if (SCRIPT(r)) { /* check for global var */
           for (vd = (SCRIPT(r))->global_vars; vd; vd = vd->next)
-            if (!str_cmp(vd->name, field))
+            if (!strcasecmp(vd->name, field))
               break;
           if (vd)
             snprintf(str, slen, "%s", vd->value);

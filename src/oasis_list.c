@@ -10,28 +10,15 @@
 #include "utils.h"
 #include "comm.h"
 #include "interpreter.h"
-#include "handler.h"
 #include "db.h"
-#include "genolc.h"
 #include "oasis.h"
-#include "improved-edit.h"
 #include "shop.h"
-#include "screen.h"
 #include "constants.h"
 #include "dg_scripts.h"
 #include "guild.h"
+#include "races.h"
+#include "class.h"
 
-/******************************************************************************/
-/** External Variables                                                       **/
-/******************************************************************************/
-extern struct shop_data *shop_index;
-extern int top_shop;
-extern struct index_data **trig_index;
-extern int top_of_trigt;
-extern struct guild_data *guild_index;
-extern int top_guild;
-extern int count_guilds(guild_vnum low, guild_vnum high);
-extern int count_shops(shop_vnum low, shop_vnum high);
 
 /******************************************************************************/
 /** Internal Functions                                                       **/

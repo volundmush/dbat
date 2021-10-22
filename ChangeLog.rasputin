@@ -547,7 +547,7 @@ changelog:
 	- (R) Update to roll_real_abils.
 	  Thanks to Welcor (welcor@builderacademy.net)!
 	6/09/05 
-	- (R) Changed byte to sbyte for ability_mod_value and dex_mod_capped.
+	- (R) Changed byte to int8_t for ability_mod_value and dex_mod_capped.
 	  Thanks to Fnord (fnord@cosanostra.net)!
 	6/08/05 
 	- (R) Removed various log() statements left over from DEBUG.

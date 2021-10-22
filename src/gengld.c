@@ -4,14 +4,10 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 #include "gengld.h"
-
-
-extern struct index_data *mob_index;
-extern struct index_data *obj_index;
-extern struct guild_data *guild_index;
-extern struct zone_data *zone_table;
-extern int top_guild;
-extern zone_rnum top_of_zone_table;
+#include "shop.h"
+#include "genolc.h"
+#include "genzon.h"
+#include "utils.h"
 
 /*
  * NOTE (gg): Didn't modify sedit much. Don't consider it as 'recent'

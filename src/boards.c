@@ -46,19 +46,18 @@ it.
 */
 
 #include "boards.h"
+#include "utils.h"
+#include "comm.h"
+#include "db.h"
+#include "boards.h"
+#include "interpreter.h"
+#include "handler.h"
+#include "improved-edit.h"
+#include "clan.h"
+#include "dg_comm.h"
+#include "config.h"
 
-struct board_info *bboards=NULL;  /* our global board structure */
-
-extern struct time_info_data time_info;
-extern void save_mud_time(struct time_info_data *when);
-extern void send_to_imm(char *messg, ...);
-extern struct descriptor_data *descriptor_list;
-extern struct index_data *obj_index;
-extern time_t BOARDNEWIMM;
-extern time_t BOARDNEWMORT;
-extern time_t BOARDNEWDUO;
-extern time_t BOARDNEWCOD;
-extern time_t BOARDNEWBUI;
+struct board_info *bboards = NULL;  /* our global board structure */
 
 void init_boards(void) 
 {

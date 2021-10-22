@@ -9,23 +9,21 @@
 ************************************************************************ */
 
 #include "ban.h"
+#include "utils.h"
+#include "comm.h"
+#include "interpreter.h"
+#include "handler.h"
+#include "db.h"
 
 /* local globals */
 struct ban_list_element *ban_list = NULL;
 
 /* local functions */
-void load_banned(void);
-int isbanned(char *hostname);
-void _write_one_node(FILE *fp, struct ban_list_element *node);
-void write_ban_list(void);
-ACMD(do_ban);
-ACMD(do_unban);
-int Valid_Name(char *newname);
-void Read_Invalid_List(void);
-void Free_Invalid_List(void);
+static void _write_one_node(FILE *fp, struct ban_list_element *node);
+static void write_ban_list(void);
 
 
-const char *ban_types[] = {
+static const char *ban_types[] = {
   "no",
   "new",
   "select",
@@ -92,7 +90,7 @@ int isbanned(char *hostname)
 }
 
 
-void _write_one_node(FILE *fp, struct ban_list_element *node)
+static void _write_one_node(FILE *fp, struct ban_list_element *node)
 {
   if (node) {
     _write_one_node(fp, node->next);
@@ -101,9 +99,7 @@ void _write_one_node(FILE *fp, struct ban_list_element *node)
   }
 }
 
-
-
-void write_ban_list(void)
+static void write_ban_list(void)
 {
   FILE *fl;
 
@@ -115,7 +111,6 @@ void write_ban_list(void)
   fclose(fl);
   return;
 }
-
 
 #define BAN_LIST_FORMAT "%-40.40s  %-8.8s  %-10.10s  %-16.16s\r\n"
 ACMD(do_ban)
@@ -158,12 +153,12 @@ ACMD(do_ban)
     send_to_char(ch, "Usage: ban {all | select | new} site_name\r\n");
     return;
   }
-  if (!(!str_cmp(flag, "select") || !str_cmp(flag, "all") || !str_cmp(flag, "new"))) {
+  if (!(!strcasecmp(flag, "select") || !strcasecmp(flag, "all") || !strcasecmp(flag, "new"))) {
     send_to_char(ch, "Flag must be ALL, SELECT, or NEW.\r\n");
     return;
   }
   for (ban_node = ban_list; ban_node; ban_node = ban_node->next) {
-    if (!str_cmp(ban_node->site, site)) {
+    if (!strcasecmp(ban_node->site, site)) {
       send_to_char(ch, "That site has already been banned -- unban it to change the ban type.\r\n");
       return;
     }
@@ -179,7 +174,7 @@ ACMD(do_ban)
   ban_node->date = time(0);
 
   for (i = BAN_NEW; i <= BAN_ALL; i++)
-    if (!str_cmp(flag, ban_types[i]))
+    if (!strcasecmp(flag, ban_types[i]))
       ban_node->type = i;
 
   ban_node->next = ban_list;
@@ -206,7 +201,7 @@ ACMD(do_unban)
   }
   ban_node = ban_list;
   while (ban_node && !found) {
-    if (!str_cmp(ban_node->site, site))
+    if (!strcasecmp(ban_node->site, site))
       found = 1;
     else
       ban_node = ban_node->next;
@@ -244,7 +239,7 @@ int Valid_Name(char *newname)
 
   /*
    * Make sure someone isn't trying to create this same name.  We want to
-   * do a 'str_cmp' so people can't do 'Bob' and 'BoB'.  The creating login
+   * do a 'strcasecmp' so people can't do 'Bob' and 'BoB'.  The creating login
    * will not have a character name yet and other people sitting at the
    * prompt won't have characters yet.
    *
@@ -255,7 +250,7 @@ int Valid_Name(char *newname)
    * THIS SHOULD FIX THE 'invalid name' if disconnected from OLC-bug - WELCOR 9/00
    */
   for (dt = descriptor_list; dt; dt = dt->next)
-    if (dt->character && GET_NAME(dt->character) && !str_cmp(GET_NAME(dt->character), newname))
+    if (dt->character && GET_NAME(dt->character) && !strcasecmp(GET_NAME(dt->character), newname))
       if (GET_IDNUM(dt->character) == -1)
         return (IS_PLAYING(dt));
 

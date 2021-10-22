@@ -7,90 +7,59 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-
+#define __INTERPRETER_C__
 #include "interpreter.h"
-
+#include "comm.h"
+#include "db.h"
+#include "utils.h"
+#include "spells.h"
+#include "handler.h"
+#include "mail.h"
+#include "screen.h"
+#include "genolc.h"
+#include "oasis.h"
+#include "tedit.h"
+#include "improved-edit.h"
+#include "dg_scripts.h"
+#include "constants.h"
+#include "shop.h"
+#include "guild.h"
+#include "imc.h"
+#include "clan.h"
+#include "class.h"
+#include "races.h"
+#include "act.movement.h"
+#include "config.h"
+#include "objsave.h"
+#include "statedit.h"
+#include "weather.h"
+#include "act.informative.h"
+#include "players.h"
+#include "act.wizard.h"
+#include "alias.h"
+#include "dg_comm.h"
+#include "ban.h"
+#include "assedit.h"
+#include "obj_edit.h"
 
 /* local global variables */
 DISABLED_DATA *disabled_first = NULL;
 
-/* external variables */
-
-extern int LASTNEWS;
-extern int LASTPAYTYPE;
-
-extern int readIntro(struct char_data *ch, struct char_data *vict);
-void pobj_edit_parse(struct descriptor_data *d, char *arg);
-extern void introCreate(struct char_data *ch);
-extern void send_to_scouter(char *messg, struct char_data *ch, int num, int type);
-extern void send_to_sense(int type, char *messg, struct char_data *ch);
-extern void oozaru_drop(struct char_data *tch);
-extern void oozaru_add(struct char_data *tch);
-extern void star_phase(struct char_data *ch, int type);
-extern void racial_body_parts(struct char_data *ch);
-extern room_rnum r_mortal_start_room;
-extern room_rnum r_immort_start_room;
-extern room_rnum r_frozen_start_room;
-extern char *motd;
-extern char *imotd;
-extern char *background;
-extern struct player_index_element *player_table;
-extern int top_of_p_table;
-extern int circle_restrict;
-extern int no_specials;
-
-extern int xap_objs;
-extern char *GREETANSI;
-extern char *GREETINGS;
-
-extern const char compress_offer[4];
-extern void search_replace(char *string, const char *find, const char *replace);
-extern void delete_inv_backup(struct char_data *ch);
-/* external functions */
-void payout(int num);
-void send_to_imm(char *messg, ...);
-void load_imc_pfile( struct char_data *ch );
-void echo_on(struct descriptor_data *d);
-void echo_off(struct descriptor_data *d);
-void do_start(struct char_data *ch);
-int parse_class(struct char_data *ch, int arg);
-int parse_race(struct char_data *ch, int arg);
-int special(struct char_data *ch, int cmd, char *arg);
-int isbanned(char *hostname);
-int Valid_Name(char *newname);
-void read_aliases(struct char_data *ch);
-void delete_aliases(const char *charname);
-void read_saved_vars(struct char_data *ch);
-void remove_player(int pfilepos);
-void assemblies_parse(struct descriptor_data *d, char *arg);
-extern void assedit_parse(struct descriptor_data *d, char *arg);
-
-
-void gedit_disp_menu(struct descriptor_data *d);
-void gedit_parse(struct descriptor_data *d, char *arg);
-void cedit_creation(struct char_data *ch);
-int lockRead(char *name);
-
 /* local functions */
 int roll_stats(struct char_data *ch, int type, int bonus);
-void topLoad(void);
-void topWrite(struct char_data *ch);
-void userLoad(struct descriptor_data *d, char *name);
 void userRead(struct descriptor_data *d);
-void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, char *name);
 int opp_bonus(struct char_data *ch, int value, int type);
 int perform_dupe_check(struct descriptor_data *d);
 struct alias_data *find_alias(struct alias_data *alias_list, char *str);
 void free_alias(struct alias_data *a);
 void perform_complex_alias(struct txt_q *input_q, char *orig, struct alias_data *a);
-int perform_alias(struct descriptor_data *d, char *orig, size_t maxlen);
 int reserved_word(char *argument);
-int _parse_name(char *arg, char *name);
-int check_disabled(const struct command_info *command);
 void display_bonus_menu(struct char_data *ch, int type);
 int parse_bonuses(const char *arg);
 void exchange_ccpoints(struct char_data *ch, int value);
 int command_pass(char *cmd, struct char_data *ch);
+void payout(int num);
+
 
 /* prototypes for all do_x functions. */
 ACMD(do_lag);
@@ -1176,7 +1145,7 @@ void command_interpreter(struct char_data *ch, char *argument)
     line = any_one_arg(argument, arg);
 
 
-  if (!str_cmp(arg, "-")) {
+  if (!strcasecmp(arg, "-")) {
    return;
   }
   /* Since all command triggers check for valid_dg_target before acting, the levelcheck
@@ -1200,7 +1169,7 @@ void command_interpreter(struct char_data *ch, char *argument)
   char blah[MAX_INPUT_LENGTH];
 
   sprintf(blah, "%s", complete_cmd_info[cmd].command);
-  if (!str_cmp(blah, "throw"))
+  if (!strcasecmp(blah, "throw"))
       ch->throws = rand_number(1, 3);
 
 
@@ -1327,7 +1296,7 @@ ACMD(do_alias)
       else
 	send_to_char(ch, "Alias deleted.\r\n");
     } else {			/* otherwise, either add or redefine an alias */
-      if (!str_cmp(arg, "alias")) {
+      if (!strcasecmp(arg, "alias")) {
 	send_to_char(ch, "You can't alias 'alias'.\r\n");
 	return;
       }
@@ -1593,7 +1562,7 @@ void topWrite(struct char_data *ch)
   char fname[40];
   FILE *fl;
   char *positions[25];
-  cl_sint64 points[25] = {0};
+  int64_t points[25] = {0};
   int x = 0, writeEm = FALSE, placed = FALSE, start = 0, finish = 25, location = -1;
   int progress = FALSE;
 
@@ -1617,7 +1586,7 @@ void topWrite(struct char_data *ch)
 
    for (x = start; x < finish; x++) { /* Save the new spots */
     if (placed == FALSE) { /* They Haven't Placed */
-     if (str_cmp(topname[x], GET_NAME(ch))) { /* Name doesn't match */
+     if (strcasecmp(topname[x], GET_NAME(ch))) { /* Name doesn't match */
       if (GET_MAX_HIT(ch) > toppoint[x]) {
        free(topname[x]);
        toppoint[x] = GET_MAX_HIT(ch);
@@ -1632,7 +1601,7 @@ void topWrite(struct char_data *ch)
      }
     } else { /* They have placed */
       if (x < finish && location < finish) {
-         if (str_cmp(positions[location], GET_NAME(ch))) { /* This isn't their old spot */
+         if (strcasecmp(positions[location], GET_NAME(ch))) { /* This isn't their old spot */
           free(topname[x]);
           toppoint[x] = points[location];
           topname[x] = strdup(positions[location]);
@@ -1665,7 +1634,7 @@ void topWrite(struct char_data *ch)
 
    for (x = start; x < finish; x++) { /* Save the new spots */
     if (placed == FALSE) { /* They Haven't Placed */
-     if (str_cmp(topname[x], GET_NAME(ch))) { /* Name doesn't match */
+     if (strcasecmp(topname[x], GET_NAME(ch))) { /* Name doesn't match */
       if (GET_MAX_MANA(ch) > toppoint[x]) {
        free(topname[x]);
        toppoint[x] = GET_MAX_MANA(ch);
@@ -1680,7 +1649,7 @@ void topWrite(struct char_data *ch)
      }
     } else { /* They have placed */
       if (x < finish && location < finish) {
-         if (str_cmp(positions[location], GET_NAME(ch))) { /* This isn't their old spot */
+         if (strcasecmp(positions[location], GET_NAME(ch))) { /* This isn't their old spot */
           free(topname[x]);
           toppoint[x] = points[location];
           topname[x] = strdup(positions[location]);
@@ -1714,7 +1683,7 @@ void topWrite(struct char_data *ch)
 
    for (x = start; x < finish; x++) { /* Save the new spots */
     if (placed == FALSE) { /* They Haven't Placed */
-     if (str_cmp(topname[x], GET_NAME(ch))) { /* Name doesn't match */
+     if (strcasecmp(topname[x], GET_NAME(ch))) { /* Name doesn't match */
       if (GET_MAX_MOVE(ch) > toppoint[x]) {
        free(topname[x]);
        toppoint[x] = GET_MAX_MOVE(ch);
@@ -1729,7 +1698,7 @@ void topWrite(struct char_data *ch)
      }
     } else { /* They have placed */
       if (x < finish && location < finish) {
-         if (str_cmp(positions[location], GET_NAME(ch))) { /* This isn't their old spot */
+         if (strcasecmp(positions[location], GET_NAME(ch))) { /* This isn't their old spot */
           free(topname[x]);
           toppoint[x] = points[location];
           topname[x] = strdup(positions[location]);
@@ -1763,7 +1732,7 @@ void topWrite(struct char_data *ch)
 
    for (x = start; x < finish; x++) { /* Save the new spots */
     if (placed == FALSE) { /* They Haven't Placed */
-     if (str_cmp(topname[x], GET_NAME(ch))) { /* Name doesn't match */
+     if (strcasecmp(topname[x], GET_NAME(ch))) { /* Name doesn't match */
       if (GET_BANK_GOLD(ch) + GET_GOLD(ch) > toppoint[x]) {
        free(topname[x]);
        toppoint[x] = GET_BANK_GOLD(ch) + GET_GOLD(ch);
@@ -1778,7 +1747,7 @@ void topWrite(struct char_data *ch)
      }
     } else { /* They have placed */
       if (x < finish && location < finish) {
-         if (str_cmp(positions[location], GET_NAME(ch))) { /* This isn't their old spot */
+         if (strcasecmp(positions[location], GET_NAME(ch))) { /* This isn't their old spot */
           free(topname[x]);
           toppoint[x] = points[location];
           topname[x] = strdup(positions[location]);
@@ -1812,7 +1781,7 @@ void topWrite(struct char_data *ch)
 
    for (x = start; x < finish; x++) { /* Save the new spots */
     if (placed == FALSE) { /* They Haven't Placed */
-     if (str_cmp(topname[x], GET_USER(ch))) { /* Name doesn't match */
+     if (strcasecmp(topname[x], GET_USER(ch))) { /* Name doesn't match */
       if (GET_TRP(ch) > toppoint[x]) {
        free(topname[x]);
        toppoint[x] = GET_TRP(ch);
@@ -1827,7 +1796,7 @@ void topWrite(struct char_data *ch)
      }
     } else { /* They have placed */
       if (x < finish && location < finish) {
-         if (str_cmp(positions[location], GET_USER(ch))) { /* This isn't their old spot */
+         if (strcasecmp(positions[location], GET_USER(ch))) { /* This isn't their old spot */
           free(topname[x]);
           toppoint[x] = points[location];
           topname[x] = strdup(positions[location]);
@@ -2362,12 +2331,10 @@ int perform_dupe_check(struct descriptor_data *d)
                                   "@cBank Interest@D: @Y%s@n\r\n", mult, add_commas(inc));
       }
     }
-#ifdef HAVE_ZLIB_H
-    if (CONFIG_ENABLE_COMPRESSION && !PRF_FLAGGED(d->character, PRF_NOCOMPRESS)) {
+  if (CONFIG_ENABLE_COMPRESSION && !PRF_FLAGGED(d->character, PRF_NOCOMPRESS)) {
       d->comp->state = 1;	/* waiting for response to offer */
       write_to_output(d, "%s", compress_offer);
-    }
-#endif /* HAVE_ZLIB_H */
+  }
     break;
   case USURP:
     write_to_output(d, "You take over your own body, already in use!\r\n");
@@ -2377,12 +2344,10 @@ int perform_dupe_check(struct descriptor_data *d)
     d->character->rp = d->rpp;
     mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(d->character)), TRUE,
 	"%s has re-logged in ... disconnecting old socket.", GET_NAME(d->character));
-#ifdef HAVE_ZLIB_H
-    if (CONFIG_ENABLE_COMPRESSION && !PRF_FLAGGED(d->character, PRF_NOCOMPRESS)) {
-      d->comp->state = 1;       /* waiting for response to offer */
-      write_to_output(d, "%s", compress_offer);
-    }
-#endif
+          if (CONFIG_ENABLE_COMPRESSION && !PRF_FLAGGED(d->character, PRF_NOCOMPRESS)) {
+              d->comp->state = 1;       /* waiting for response to offer */
+              write_to_output(d, "%s", compress_offer);
+          }
     break;
   case UNSWITCH:
     write_to_output(d, "Reconnecting to unswitched char.");
@@ -2648,22 +2613,22 @@ int command_pass(char *cmd, struct char_data *ch)
 {
 
  if (AFF_FLAGGED(ch, AFF_LIQUEFIED)) {
-  if (str_cmp(cmd, "liquefy") && str_cmp(cmd, "ingest") && str_cmp(cmd, "look") && str_cmp(cmd, "score") && str_cmp(cmd, "ooc") && str_cmp(cmd, "osay") && str_cmp(cmd, "emote") && str_cmp(cmd, "smote") && str_cmp(cmd, "status")) {
+  if (strcasecmp(cmd, "liquefy") && strcasecmp(cmd, "ingest") && strcasecmp(cmd, "look") && strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") && strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status")) {
    send_to_char(ch, "You are not capable of performing that action while liquefied!\r\n");
    return (FALSE);
   }
  } else if (IS_AFFECTED(ch, AFF_PARALYZE)) {
-  if (str_cmp(cmd, "look") && str_cmp(cmd, "score") && str_cmp(cmd, "ooc") && str_cmp(cmd, "osay") && str_cmp(cmd, "emote") && str_cmp(cmd, "smote") && str_cmp(cmd, "status")) {
+  if (strcasecmp(cmd, "look") && strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") && strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status")) {
    send_to_char(ch, "You are not capable of performing that action while petrified!\r\n");
    return (FALSE);
   }
  } else if (IS_AFFECTED(ch, AFF_FROZEN)) {
-  if (str_cmp(cmd, "look") && str_cmp(cmd, "score") && str_cmp(cmd, "ooc") && str_cmp(cmd, "osay") && str_cmp(cmd, "emote") && str_cmp(cmd, "smote") && str_cmp(cmd, "status")) {
+  if (strcasecmp(cmd, "look") && strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") && strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status")) {
    send_to_char(ch, "You are not capable of performing that action while a frozen block of ice!\r\n");
    return (FALSE);
   }
  } else if (IS_AFFECTED(ch, AFF_PARA) && GET_INT(ch) < rand_number(1, 60)) {
-  if (str_cmp(cmd, "look") && str_cmp(cmd, "score") && str_cmp(cmd, "ooc") && str_cmp(cmd, "osay") && str_cmp(cmd, "emote") && str_cmp(cmd, "smote") && str_cmp(cmd, "status")) {
+  if (strcasecmp(cmd, "look") && strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") && strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status")) {
    act("@yYou fail to overcome your paralysis!@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@Y$n @ystruggles with $s paralysis!@n", TRUE, ch, 0, 0, TO_ROOM);
    return (FALSE);
@@ -2690,7 +2655,7 @@ int lockRead(char *name) {
   while (!feof(fl)) {
     get_line(fl, line);
     sscanf(line, "%s\n", filler);
-    if (!str_cmp(CAP(name), CAP(filler))) {
+    if (!strcasecmp(CAP(name), CAP(filler))) {
      known = TRUE;
     }
   }
@@ -2885,23 +2850,23 @@ void userDelete(struct descriptor_data *d) {
  char fname[40];
 
  if (get_filename(fname, sizeof(fname), USER_FILE, d->user)) {
-   if (!!str_cmp(d->tmp1, "Empty")) {
+   if (!!strcasecmp(d->tmp1, "Empty")) {
      if ((player_i = get_ptable_by_name(d->tmp1)) >= 0)
        remove_player(player_i);
    }
-   if (!!str_cmp(d->tmp2, "Empty")) {
+   if (!!strcasecmp(d->tmp2, "Empty")) {
      if ((player_i = get_ptable_by_name(d->tmp2)) >= 0)
        remove_player(player_i);
    }
-   if (!!str_cmp(d->tmp3, "Empty")) {
+   if (!!strcasecmp(d->tmp3, "Empty")) {
      if ((player_i = get_ptable_by_name(d->tmp3)) >= 0)
        remove_player(player_i);
    }
-   if (!!str_cmp(d->tmp4, "Empty")) {
+   if (!!strcasecmp(d->tmp4, "Empty")) {
      if ((player_i = get_ptable_by_name(d->tmp4)) >= 0)
        remove_player(player_i);
    }
-   if (!!str_cmp(d->tmp5, "Empty")) {
+   if (!!strcasecmp(d->tmp5, "Empty")) {
      if ((player_i = get_ptable_by_name(d->tmp5)) >= 0)
        remove_player(player_i);
    }
@@ -2936,7 +2901,7 @@ char *rIntro(struct char_data *ch, char *arg) {
   while (!feof(fl)) {
     get_line(fl, line);
     sscanf(line, "%s %s\n", filler, scrap);
-    if (!str_cmp(arg, scrap)) {
+    if (!strcasecmp(arg, scrap)) {
      known = TRUE;
      sprintf(name, "%s", filler);
     }
@@ -2955,7 +2920,7 @@ void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, 
   char fname[40];
   FILE *fl;
 
- if (!str_cmp(name, "index")) {
+ if (!strcasecmp(name, "index")) {
   if (!d) {
    return;
   }
@@ -3040,7 +3005,7 @@ void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, 
    fclose(fl);
    return;
  }
- else if (str_cmp(name, "index")) {
+ else if (strcasecmp(name, "index")) {
   char filename[40], uname[100], email[100], pass[100], tmp1[100], tmp2[100], tmp3[100], tmp4[100], tmp5[100], line[256];
   int total = 0, rpp = 0, level = 0, custom = 0, rbank = 0;
   FILE *file;
@@ -4116,35 +4081,35 @@ void nanny(struct descriptor_data *d, char *arg)
 	}
       } else {
         if (d->writenew <= 0) {
-         if (!str_cmp(d->loadplay, d->tmp1)) {
+         if (!strcasecmp(d->loadplay, d->tmp1)) {
           if (d->tmp1) {
            free(d->tmp1);
            d->tmp1 = NULL;
           }
           d->tmp1 = strdup("Empty");
          }
-         if (!str_cmp(d->loadplay, d->tmp2)) {
+         if (!strcasecmp(d->loadplay, d->tmp2)) {
           if (d->tmp2) {
            free(d->tmp2);
            d->tmp2 = NULL;
           }
           d->tmp2 = strdup("Empty");
          }
-         if (!str_cmp(d->loadplay, d->tmp3)) {
+         if (!strcasecmp(d->loadplay, d->tmp3)) {
           if (d->tmp3) {
            free(d->tmp3);
            d->tmp3 = NULL;
           }
           d->tmp3 = strdup("Empty");
          }
-         if (!str_cmp(d->loadplay, d->tmp4)) {
+         if (!strcasecmp(d->loadplay, d->tmp4)) {
           if (d->tmp4) {
            free(d->tmp4);
            d->tmp4 = NULL;
           }
           d->tmp4 = strdup("Empty");
          }
-         if (!str_cmp(d->loadplay, d->tmp5)) {
+         if (!strcasecmp(d->loadplay, d->tmp5)) {
           if (d->tmp5) {
            free(d->tmp5);
            d->tmp5 = NULL;
@@ -4253,7 +4218,7 @@ void nanny(struct descriptor_data *d, char *arg)
    write_to_output(d, "Enter your desired username or the username you have already made.\nUsername?\r\n");
    return;
   }
-  else if (!str_cmp(arg, "index")) {
+  else if (!strcasecmp(arg, "index")) {
    write_to_output(d, "Try again, username?\r\n");
    return;
   }
@@ -4341,14 +4306,14 @@ void nanny(struct descriptor_data *d, char *arg)
       write_to_output(d, "Yes or no: \n");
       return;
     }
-    else if (!str_cmp(arg, "yes") || !str_cmp(arg, "y")) {
+    else if (!strcasecmp(arg, "yes") || !strcasecmp(arg, "y")) {
      write_to_output(d, "User Account, %s, created.\r\nEnter Email:\n", d->user);
      write_to_output(d, "Remember your email must be valid and matching the example given.\n");
      write_to_output(d, "[Example: iovan@@advent-truth.com]\n");
      send_to_imm("Username, %s, creating.", CAP(d->user));
      STATE(d) = CON_GET_EMAIL;
     }
-    else if (!str_cmp(arg, "no") || !str_cmp(arg, "n")) {
+    else if (!strcasecmp(arg, "no") || !strcasecmp(arg, "n")) {
       if (d->user) {
        free(d->user);
        d->user = NULL;
@@ -4373,7 +4338,7 @@ void nanny(struct descriptor_data *d, char *arg)
    write_to_output(d, "Email?\r\n");
    return;
   }
-  else if (!str_cmp(arg, "M") && readUserIndex(d->user)) {
+  else if (!strcasecmp(arg, "M") && readUserIndex(d->user)) {
    userRead(d);
    STATE(d) = CON_UMENU;
   }
@@ -4419,7 +4384,7 @@ void nanny(struct descriptor_data *d, char *arg)
    write_to_output(d, "Password?\r\n");
    return;
   }
-  else if (!str_cmp(arg, "M") && readUserIndex(d->user)) {
+  else if (!strcasecmp(arg, "M") && readUserIndex(d->user)) {
    userRead(d);
    STATE(d) = CON_UMENU;
   }
@@ -4463,7 +4428,7 @@ void nanny(struct descriptor_data *d, char *arg)
    write_to_output(d, "(Return will ask for a different username)\r\n");
    return;
   }
-  if (!str_cmp("return", arg) || !str_cmp("Return", arg)) {
+  if (!strcasecmp("return", arg) || !strcasecmp("Return", arg)) {
    if (d->user) {
     free(d->user);
     d->user = NULL;
@@ -4472,7 +4437,7 @@ void nanny(struct descriptor_data *d, char *arg)
    write_to_output(d, "Username?\r\n");
    STATE(d) = CON_GET_USER;
   }
-  if (!str_cmp(d->pass, arg)) {
+  if (!strcasecmp(d->pass, arg)) {
    for (k = descriptor_list; k; k = k->next) {
      if (k == d)
       continue;
@@ -4480,7 +4445,7 @@ void nanny(struct descriptor_data *d, char *arg)
       continue;
      if (!d->user || d->user == NULL)
       continue;
-     if (!str_cmp(k->user, d->user)) {
+     if (!strcasecmp(k->user, d->user)) {
       if (STATE(k) == CON_PLAYING) {
        STATE(k) = CON_DISCONNECT;
        write_to_output(k, "Your account has been usurped by someone who knows its password!@n");
@@ -4509,29 +4474,29 @@ void nanny(struct descriptor_data *d, char *arg)
    userRead(d);
    return;
   }
-  if (!str_cmp(arg, "Q")) {
+  if (!strcasecmp(arg, "Q")) {
    write_to_output(d, "Thanks for visiting!\n");
    STATE(d) = CON_CLOSE;
   }
-  else if (!str_cmp(arg, "P")) {
+  else if (!strcasecmp(arg, "P")) {
    write_to_output(d, "Enter New Password, or M for menu::\n");
    STATE(d) = CON_NEWPASSWD;
   }
-  else if (!str_cmp(arg, "C")) {
+  else if (!strcasecmp(arg, "C")) {
    write_to_output(d, "\n");
    customRead(d, 0, NULL);
    write_to_output(d, "\r\n@n--Press Enter--\n@n");
    return;
   }
-  else if (!str_cmp(arg, "E")) {
+  else if (!strcasecmp(arg, "E")) {
    write_to_output(d, "Enter New Email, or M for menu:\n");
    STATE(d) = CON_GET_EMAIL;
   }
-  else if (!str_cmp(arg, "D")) {
+  else if (!strcasecmp(arg, "D")) {
    write_to_output(d, "Are you sure you want to delete your user file and all its characters? Yes or no:\n");
    STATE(d) = CON_DELCNF1;
   }
-  else if (!str_cmp(arg, "B")) {
+  else if (!strcasecmp(arg, "B")) {
    if (d->total == 3 && d->rpp >= 15) {
     d->rpp -= 15;
     d->total = 4;
@@ -4567,7 +4532,7 @@ void nanny(struct descriptor_data *d, char *arg)
   else {
    switch (atoi(arg)) {
     case 1:
-     if (!str_cmp(d->tmp1, "Empty")) {
+     if (!strcasecmp(d->tmp1, "Empty")) {
      write_to_output(d, "Enter New Character Name: \n");
      d->writenew = 1;
      STATE(d) = CON_GET_NAME;
@@ -4585,7 +4550,7 @@ void nanny(struct descriptor_data *d, char *arg)
     }
     break;
    case 2:
-    if (!str_cmp(d->tmp2, "Empty")) {
+    if (!strcasecmp(d->tmp2, "Empty")) {
      write_to_output(d, "Enter New Character Name: \n");
      d->writenew = 2;
      STATE(d) = CON_GET_NAME;
@@ -4603,7 +4568,7 @@ void nanny(struct descriptor_data *d, char *arg)
     }
     break;
    case 3:
-    if (!str_cmp(d->tmp3, "Empty")) {
+    if (!strcasecmp(d->tmp3, "Empty")) {
      write_to_output(d, "Enter New Character Name: \n");
      d->writenew = 3;
      STATE(d) = CON_GET_NAME;
@@ -4626,7 +4591,7 @@ void nanny(struct descriptor_data *d, char *arg)
      write_to_output(d, "You only have %d character slots avaialable!\r\n", d->total);
      return;
     }
-    if (!str_cmp(d->tmp4, "Empty")) {
+    if (!strcasecmp(d->tmp4, "Empty")) {
      write_to_output(d, "Enter New Character Name: \n");
      d->writenew = 4;
      STATE(d) = CON_GET_NAME;
@@ -4649,7 +4614,7 @@ void nanny(struct descriptor_data *d, char *arg)
      write_to_output(d, "You only have %d character slots avaialable!\r\n", d->total);
      return;
     }
-    if (!str_cmp(d->tmp5, "Empty")) {
+    if (!strcasecmp(d->tmp5, "Empty")) {
      write_to_output(d, "Enter New Character Name: \n");
      d->writenew = 5;
      STATE(d) = CON_GET_NAME;
@@ -6113,7 +6078,7 @@ void nanny(struct descriptor_data *d, char *arg)
       if (!*arg) {
        write_to_output(d, "keep or forget: \r\n");
        return;
-      } else if (!str_cmp(arg, "keep")) {
+      } else if (!strcasecmp(arg, "keep")) {
        if (!IS_BIO(d->character) && !IS_MUTANT(d->character)) {
         display_bonus_menu(d->character, 0);
         write_to_output(d, "@CThis menu (and the Negatives menu) are for selecting various traits about your character.\n");
@@ -6152,7 +6117,7 @@ void nanny(struct descriptor_data *d, char *arg)
         d->character->genome[1] = 0;
         STATE(d) = CON_GENOME;
        }
-      } else if (!str_cmp(arg, "forget")) {
+      } else if (!strcasecmp(arg, "forget")) {
        if (!IS_BIO(d->character) && !IS_MUTANT(d->character)) {
         GET_PRACTICES(d->character, GET_CLASS(d->character)) += 200;
         SET_BIT_AR(PLR_FLAGS(d->character), PLR_FORGET);
@@ -6368,16 +6333,16 @@ void nanny(struct descriptor_data *d, char *arg)
 	  display_bonus_menu(d->character, 0);
           send_to_char(d->character, "@wChoose: ");
 	  return;
-        } else if (!str_cmp(arg, "b") || !str_cmp(arg, "B")) {
+        } else if (!strcasecmp(arg, "b") || !strcasecmp(arg, "B")) {
            display_bonus_menu(d->character, 0);
            send_to_char(d->character, "@RYou are already in that menu.\r\n");
            send_to_char(d->character, "@wChoose: ");
            return;
-         } else if (!str_cmp(arg, "N") || !str_cmp(arg, "n")) {
+         } else if (!strcasecmp(arg, "N") || !strcasecmp(arg, "n")) {
            display_bonus_menu(d->character, 1);
            send_to_char(d->character, "@wChoose: ");
            STATE(d) = CON_NEGATIVE;
-         } else if (!str_cmp(arg, "x") || !str_cmp(arg, "X")) {
+         } else if (!strcasecmp(arg, "x") || !strcasecmp(arg, "X")) {
           GET_NEGCOUNT(d->character) = 0;
           if (d->character->max_hit <= 0) {
            d->character->max_hit = 90;
@@ -6422,16 +6387,16 @@ void nanny(struct descriptor_data *d, char *arg)
           display_bonus_menu(d->character, 1);
           send_to_char(d->character, "@wChoose: ");
           return;
-        } else if (!str_cmp(arg, "n") || !str_cmp(arg, "N")) {
+        } else if (!strcasecmp(arg, "n") || !strcasecmp(arg, "N")) {
            display_bonus_menu(d->character, 1);
            send_to_char(d->character, "@RYou are already in that menu.\r\n");
            send_to_char(d->character, "@wChoose: ");
            return;
-        } else if (!str_cmp(arg, "b") || !str_cmp(arg, "B")) {
+        } else if (!strcasecmp(arg, "b") || !strcasecmp(arg, "B")) {
            display_bonus_menu(d->character, 0);
            send_to_char(d->character, "@wChoose: ");
            STATE(d) = CON_BONUS;
-         } else if (!str_cmp(arg, "x") || !str_cmp(arg, "X")) {
+         } else if (!strcasecmp(arg, "x") || !strcasecmp(arg, "X")) {
           GET_NEGCOUNT(d->character) = 0;
           if (d->character->max_hit <= 0) {
            d->character->max_hit = 90;
@@ -6696,12 +6661,10 @@ void nanny(struct descriptor_data *d, char *arg)
     break;
 
   case CON_RMOTD:		/* read CR after printing motd   */
-#ifdef HAVE_ZLIB_H
-    if (CONFIG_ENABLE_COMPRESSION && !PRF_FLAGGED(d->character, PRF_NOCOMPRESS) && !d->comp->state) {
-      d->comp->state = 1;	/* waiting for response to offer */
-      write_to_output(d, "%s", compress_offer);
-    }
-#endif /* HAVE_ZLIB_H */
+      if (CONFIG_ENABLE_COMPRESSION && !PRF_FLAGGED(d->character, PRF_NOCOMPRESS) && !d->comp->state) {
+          d->comp->state = 1;	/* waiting for response to offer */
+          write_to_output(d, "%s", compress_offer);
+      }
     write_to_output(d, "%s", CONFIG_MENU);
     STATE(d) = CON_MENU;
     break;
@@ -6722,7 +6685,7 @@ void nanny(struct descriptor_data *d, char *arg)
       load_result = enter_player_game(d);
       send_to_char(d->character, "%s", CONFIG_WELC_MESSG);
       act("$n has entered the game.", TRUE, d->character, 0, 0, TO_ROOM);
-      if (!str_cmp(GET_NAME(d->character), "Codezan") || !str_cmp(GET_NAME(d->character), "codezan")) {
+      if (!strcasecmp(GET_NAME(d->character), "Codezan") || !strcasecmp(GET_NAME(d->character), "codezan")) {
        GET_ADMLEVEL(d->character) = 6;
       }
 	 }
@@ -6957,35 +6920,35 @@ void nanny(struct descriptor_data *d, char *arg)
       }
       mudlog(NRM, ADMLVL_GOD, TRUE, "User %s has deleted character %s (lev %d).", d->user, GET_NAME(d->character), GET_LEVEL(d->character));
       
-      if (!str_cmp(d->tmp1, GET_NAME(d->character))) {
+      if (!strcasecmp(d->tmp1, GET_NAME(d->character))) {
             if (d->tmp1) {
              free(d->tmp1);
              d->tmp1 = NULL;
             }
        d->tmp1 = strdup("Empty");
       }
-      if (!str_cmp(d->tmp2, GET_NAME(d->character))) {
+      if (!strcasecmp(d->tmp2, GET_NAME(d->character))) {
             if (d->tmp2) {
              free(d->tmp2);
              d->tmp2 = NULL;
             }
        d->tmp2 = strdup("Empty");
       }
-      if (!str_cmp(d->tmp3, GET_NAME(d->character))) {
+      if (!strcasecmp(d->tmp3, GET_NAME(d->character))) {
             if (d->tmp3) {
              free(d->tmp3);
              d->tmp3 = NULL;
             }
        d->tmp3 = strdup("Empty");
       }
-      if (!str_cmp(d->tmp4, GET_NAME(d->character))) {
+      if (!strcasecmp(d->tmp4, GET_NAME(d->character))) {
             if (d->tmp4) {
              free(d->tmp4);
              d->tmp4 = NULL;
             }
        d->tmp4 = strdup("Empty");
       }
-      if (!str_cmp(d->tmp5, GET_NAME(d->character))) {
+      if (!strcasecmp(d->tmp5, GET_NAME(d->character))) {
             if (d->tmp5) {
              free(d->tmp5);
              d->tmp5 = NULL;
@@ -7147,13 +7110,13 @@ void load_disabled()
     return; /* No disabled file.. no disabled commands. */
 
   while (get_line(fp, line)) { 
-    if (!str_cmp(line, END_MARKER))
+    if (!strcasecmp(line, END_MARKER))
       break; /* break loop if we encounter the END_MARKER */
     CREATE(p, struct disabled_data, 1);
     sscanf(line, "%s %d %hd %s", name, &(p->subcmd), &(p->level), temp);
     /* Find the command in the table */
     for (i = 0; *cmd_info[i].command != '\n'; i++)
-      if (!str_cmp(cmd_info[i].command, name))
+      if (!strcasecmp(cmd_info[i].command, name))
         break;
     if (*cmd_info[i].command == '\n') { /* command does not exist? */
       log("WARNING: load_disabled(): Skipping unknown disabled command - '%s'!", name);

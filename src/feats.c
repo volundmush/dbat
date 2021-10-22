@@ -8,16 +8,20 @@
 
 
 #include "feats.h"
+#include "utils.h"
+#include "comm.h"
+#include "handler.h"
+#include "constants.h"
+#include "interpreter.h"
 
 /* Local Functions */
-void assign_feats(void);
+
 void feato(int featnum, char *name, int in_game, int can_learn, int can_stack);
 void list_feats_known(struct char_data *ch); 
 void list_feats_available(struct char_data *ch); 
 void list_feats_complete(struct char_data *ch); 
 int compare_feats(const void *x, const void *y);
-void sort_feats(void);	
-int find_feat_num(char *name);
+
 
 /* Global Variables and Structures */
 struct feat_info feat_list[NUM_FEATS_DEFINED + 1];

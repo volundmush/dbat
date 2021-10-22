@@ -11,30 +11,25 @@
 **************************************************************************/
 
 #include "hedit.h"
-
-
-
-/* external variables */
-extern int HEDITS;
-extern int top_of_helpt;
-extern struct help_index_element *help_table;
+#include "comm.h"
+#include "interpreter.h"
+#include "utils.h"
+#include "db.h"
+#include "boards.h"
+#include "oasis.h"
+#include "genolc.h"
+#include "genzon.h"
+#include "handler.h"
+#include "improved-edit.h"
+#include "config.h"
+#include "dg_comm.h"
+#include "act.informative.h"
 
 /* external functions */
-int search_help(const char *argument, int level);
-void index_boot(int mode);
-void send_to_imm(char *messg, ...);
 
 /* local functions */
-ACMD(do_oasis_hedit);
+
 static void hedit_disp_menu(struct descriptor_data *);
-void hedit_parse(struct descriptor_data *, char *);
-static void hedit_setup_new(struct descriptor_data *); 
-static void hedit_setup_existing(struct descriptor_data *, int); 
-static void hedit_save_to_disk(struct descriptor_data *); 
-static void hedit_save_internally(struct descriptor_data *);
-void hedit_string_cleanup(struct descriptor_data *, int);
-ACMD(do_helpcheck);
-ACMD(do_hindex);
 
 ACMD(do_oasis_hedit)
 {
@@ -50,7 +45,7 @@ ACMD(do_oasis_hedit)
    return;
   }
   
-  if (GET_ADMLEVEL(ch) < 4 && (!str_cmp("Tepsih", GET_NAME(ch)) && !str_cmp("Rogoshen", GET_NAME(ch)))) {
+  if (GET_ADMLEVEL(ch) < 4 && (!strcasecmp("Tepsih", GET_NAME(ch)) && !strcasecmp("Rogoshen", GET_NAME(ch)))) {
    send_to_char(ch, "Sorry you are incapable of editing help files at this time.\r\n");
    return;
   }
@@ -64,7 +59,7 @@ ACMD(do_oasis_hedit)
 
   d = ch->desc;
 
-  if (!str_cmp("save", arg)) {
+  if (!strcasecmp("save", arg)) {
     mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), TRUE, "OLC: %s saves help files.",
            GET_NAME(ch));
     hedit_save_to_disk(d);

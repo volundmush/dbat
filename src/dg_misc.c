@@ -19,8 +19,6 @@
 #include "spells.h"
 #include "constants.h"
 
-void die(struct char_data *ch, struct char_data * killer);
-
 /* copied from spell_parser.c: */
 #define SINFO spell_info[spellnum]
 
@@ -190,8 +188,8 @@ void do_dg_affect(void *go, struct script_data *sc, trig_data *trig, int script_
 
   /* find the property -- first search apply_types */
   i = 0;
-  while (str_cmp(apply_types[i], "\n")) {
-    if (!str_cmp(apply_types[i], property)) {
+  while (strcasecmp(apply_types[i], "\n")) {
+    if (!strcasecmp(apply_types[i], property)) {
       type=APPLY_TYPE;
       break;
     }
@@ -200,8 +198,8 @@ void do_dg_affect(void *go, struct script_data *sc, trig_data *trig, int script_
 
   if (!type) { /* search affect_types now */
     i = 0;
-    while (str_cmp(affected_bits[i], "\n")) {
-      if (!str_cmp(affected_bits[i], property)) {
+    while (strcasecmp(affected_bits[i], "\n")) {
+      if (!strcasecmp(affected_bits[i], property)) {
         type=AFFECT_TYPE;
         break;
       }
@@ -224,7 +222,7 @@ void do_dg_affect(void *go, struct script_data *sc, trig_data *trig, int script_
     return;
   }
 
-  if (!str_cmp(value_p, "off")) {
+  if (!strcasecmp(value_p, "off")) {
     affect_from_char(ch, SPELL_DG_AFFECT);
     return;
   }
