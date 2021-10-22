@@ -2,6 +2,7 @@
 #define __SYSDEP_H__
 
 #include "conf.h"
+#include "typestubs.h"
 
 /* ************************************************************************
 *   File: sysdep.h                                      Part of CircleMUD *
@@ -312,13 +313,10 @@ struct in_addr {
 
 
 /* Header files that are only used in act.other.c */
-#ifdef __ACT_OTHER_C__
 
 #ifdef HAVE_SYS_STAT_H
 # include <sys/stat.h>
 #endif
-
-#endif /* __ACT_OTHER_C__ */
 
 
 /* Basic system dependencies *******************************************/

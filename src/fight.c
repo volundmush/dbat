@@ -15,118 +15,13 @@
 struct char_data *combat_list = NULL;	/* head of l-list of fighting chars */
 struct char_data *next_combat_list = NULL;
 
-/* External structures */
-extern int mob_specials_used;
-extern int SHADOW_DRAGON1;
-extern int SHADOW_DRAGON2;
-extern int SHADOW_DRAGON3;
-extern int SHADOW_DRAGON4;
-extern int SHADOW_DRAGON5;
-extern int SHADOW_DRAGON6;
-extern int SHADOW_DRAGON7;
-extern int SELFISHMETER;
-extern void ash_burn(struct char_data *ch);
-void send_to_imm(char *messg, ...);
-extern struct message_list fight_messages[MAX_MESSAGES];
-extern void handle_spiral(struct char_data *ch, struct char_data *vict, int skill, int first);
-extern struct time_info_data *real_time_passed(time_t t2, time_t t1);
-extern struct time_info_data time_info;
 
-/* External procedures */
-extern void handle_multi_merge(struct char_data *form);
-extern void save_mud_time(struct time_info_data *when);
-extern void carry_drop(struct char_data *ch, int type);
-char *fread_action(FILE *fl, int nr);
-ACMD(do_throw);
-ACMD(do_fireshield);
-ACMD(do_kousengan);
-ACMD(do_regenerate);
-ACMD(do_heal);
-ACMD(do_trip);
-ACMD(do_koteiru);
-ACMD(do_razor);
-ACMD(do_spike);
-ACMD(do_ddslash);
-ACMD(do_kakusanha);
-ACMD(do_psyblast);
-ACMD(do_punch);
-ACMD(do_powerup);
-ACMD(do_srepair);
-ACMD(do_absorb);
-ACMD(do_kaioken);
-ACMD(do_strike);
-ACMD(do_kick);
-ACMD(do_elbow);
-ACMD(do_knee);
-ACMD(do_uppercut);
-ACMD(do_roundhouse);
-ACMD(do_heeldrop);
-ACMD(do_slam);
-ACMD(do_tailwhip);
-ACMD(do_head);
-ACMD(do_bite);
-ACMD(do_ram);
-ACMD(do_breath);
-ACMD(do_kiball);
-ACMD(do_kiblast);
-ACMD(do_beam);
-ACMD(do_renzo);
-ACMD(do_tsuihidan);
-ACMD(do_shogekiha);
-ACMD(do_kamehameha);
-ACMD(do_galikgun);
-ACMD(do_masenko);
-ACMD(do_hellspear);
-ACMD(do_hellflash);
-ACMD(do_dualbeam);
-ACMD(do_honoo);
-ACMD(do_pbarrage);
-ACMD(do_tslash);
-ACMD(do_pslash);
-ACMD(do_crusher);
-ACMD(do_eraser);
-ACMD(do_spiral);
-ACMD(do_tribeam);
-ACMD(do_dodonpa);
-ACMD(do_hass);
-ACMD(do_zanzoken);
-ACMD(do_deathball);
-ACMD(do_deathbeam);
-ACMD(do_kienzan);
-ACMD(do_bigbang);
-ACMD(do_final);
-ACMD(do_sbc);
-ACMD(do_scatter);
-ACMD(do_nova);
-ACMD(do_breaker);
-ACMD(do_seishou);
-ACMD(do_ensnare);
-ACMD(do_barrier);
-ACMD(do_attack);
-ACMD(do_stand);
-ACMD(do_fly);
-ACMD(do_wake);
-ACMD(do_flee);
-ACMD(do_get);
-ACMD(do_split);
-ACMD(do_sac);
-ACMD(do_transform);
-ACMD(do_kaioken);
-ACMD(do_escape);
-ACMD(do_balefire);
-ACMD(do_blessedhammer);
-int level_exp(struct char_data *ch, int level);
-int ok_damage_shopkeeper(struct char_data *ch, struct char_data *victim);
-void perform_remove(struct char_data *ch, int pos);
-void Crash_rentsave(struct char_data *ch, int cost);
-void fight_stack(void);
-void send_to_scouter(char *messg, struct char_data *ch, int num, int type);
-void send_to_sense(int type, char *messg, struct char_data *ch);
-void send_to_worlds(struct char_data *ch);
+
+
 
 /* local functions */
-void impact_sound(struct char_data *ch, char *mssg);
-void remove_limb(struct char_data *vict, int num);
+
+
 void perform_group_gain(struct char_data *ch, int base, struct char_data *victim);
 void appear(struct char_data *ch);
 void free_messages(void);
@@ -138,7 +33,7 @@ void make_pcorpse(struct char_data *ch);
 void change_alignment(struct char_data *ch, struct char_data *victim);
 void death_cry(struct char_data *ch);
 void raw_kill(struct char_data * ch, struct char_data * killer);
-void die(struct char_data * ch, struct char_data * killer);
+
 void group_gain(struct char_data *ch, struct char_data *victim);
 void solo_gain(struct char_data *ch, struct char_data *victim);
 void final_combat_resolve(struct char_data *ch);
@@ -147,7 +42,7 @@ void cleanup_arena_watch(struct char_data *ch);
 void mob_attack(struct char_data *ch, char *buf);
 int pick_n_throw(struct char_data *ch, char *buf);
 void mutant_limb_regen(struct char_data *ch);
-int group_bonus(struct char_data *ch, int type);
+
 
 int group_bonus(struct char_data *ch, int type)
 {
@@ -2380,8 +2275,6 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
     WAIT_STATE(ch, PULSE_VIOLENCE);
   }
 }
-
-
 
 void die(struct char_data * ch, struct char_data * killer)
 {

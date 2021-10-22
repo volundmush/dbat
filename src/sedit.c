@@ -3,38 +3,7 @@
  * Copyright 1996 Harvey Gilpin						*
  * Copyright 1997-2001 George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-
-#include "structs.h"
-#include "utils.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "db.h"
-#include "shop.h"
-#include "genolc.h"
-#include "genshp.h"
-#include "genzon.h"
-#include "oasis.h"
-#include "constants.h"
-
-/*-------------------------------------------------------------------*/
-
-/*
- * External variable declarations.
- */
-extern struct shop_data *shop_index;
-extern struct char_data *mob_proto;
-extern struct obj_data *obj_proto;
-extern struct room_data *world;
-extern struct zone_data *zone_table;
-extern struct index_data *mob_index;
-extern struct index_data *obj_index;
-
-/*-------------------------------------------------------------------*/
-
-/*
- * External functions.
- */
-SPECIAL(shop_keeper);
+#include "sedit.h"
 
 /*
  * Should check more things.

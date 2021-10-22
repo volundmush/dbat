@@ -11,6 +11,17 @@
 #ifndef __SHOP_H__
 #define __SHOP_H__
 
+#include "structs.h"
+#include "comm.h"
+#include "handler.h"
+#include "db.h"
+#include "interpreter.h"
+#include "utils.h"
+#include "constants.h"
+#include "spells.h"
+#include "feats.h"
+#include "act.h"
+
 struct shop_buy_data {
    int type;
    char *keywords;
@@ -250,5 +261,26 @@ struct stack_data {
 #define MSG_NO_USED_WANDSTAFF	"I don't buy used up wands or staves!"
 #define MSG_CANT_KILL_KEEPER	"Get out of here before I call the guards!"
 #define MSG_NO_BUY_BROKEN	"Sorry, but I don't deal in broken items."
+
+// global variables
+extern const char *trade_letters[NUM_TRADERS+1];
+extern const char *shop_bits[];
+extern struct shop_data *shop_index;
+extern int top_shop, cmd_say, cmd_tell, cmd_emote, cmd_slap, cmd_puke;
+
+// functions
+int shop_producing(struct obj_data *item, int shop_nr);
+int ok_damage_shopkeeper(struct char_data *ch, struct char_data *victim);
+void boot_the_shops(FILE *shop_f, char *filename, int rec_count);
+void assign_the_shopkeepers(void);
+int ok_shop_room(int shop_nr, room_vnum room);
+void destroy_shops(void);
+void show_shops(struct char_data *ch, char *arg);
+
+// special
+SPECIAL(shop_keeper);
+
+// commands
+
 
 #endif

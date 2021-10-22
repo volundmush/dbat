@@ -23,6 +23,7 @@
 #include "races.h"
 
 /* handling the affected-structures */
+void update_char_objects(struct char_data *ch);	/* handler.c */
 void item_check(struct obj_data *object, struct char_data *ch);
 void	affect_total(struct char_data *ch);
 void	affect_modify(struct char_data * ch, int loc, int mod, int spec, long bitv, bool add);

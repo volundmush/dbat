@@ -22,5 +22,11 @@
 #include "improved-edit.h"
 #include "dg_olc.h"
 #include "screen.h"
+#include "act.h"
+#include "races.h"
+
+// commands
+ACMD(do_oasis_medit);
+
 
 #endif //CIRCLE_MEDIT_H

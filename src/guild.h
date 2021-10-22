@@ -139,5 +139,8 @@ int print_skills_by_type(struct char_data *ch, char *buf, int maxsz, int sktype,
 void levelup_parse(struct descriptor_data *d, char *arg);
 int rpp_to_level(struct char_data *ch);
 int slot_count(struct char_data *ch);
+void show_guild(struct char_data * ch, char *arg);
+void handle_ingest_learn(struct char_data *ch, struct char_data *vict);
+void list_skills(struct char_data *ch, char *arg);
 
 #endif

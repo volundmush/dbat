@@ -10,46 +10,22 @@
 
 #include "limits.h"
 
-
-/* extern functions*/
-extern void group_gain(struct char_data *ch, struct char_data *victim);
-extern int cp(struct char_data *ch);
-extern int swim_check(struct char_data *ch);
-extern void solo_gain(struct char_data *ch, struct char_data *victim);
-extern int dball_count(struct char_data *ch);
-struct obj_data *find_vehicle_by_vnum(int vnum);
-extern int has_o2(struct char_data *ch);
-extern void hint_system(struct char_data *ch, int num);
-void die(struct char_data * ch, struct char_data * killer);
-extern int grav_cost(struct char_data *ch, cl_sint64 num);
-void write_aliases(struct char_data *ch);
-extern struct obj_data *obj_selling;
-void send_to_imm(char *messg, ...);
-ACMD(do_fly);
-
 /* local defines */
 #define sick_fail       2
 
 /* local functions */
-void heal_limb(struct char_data *ch);
-cl_sint64 move_gain(struct char_data *ch);
-cl_sint64 mana_gain(struct char_data *ch);
-cl_sint64 hit_gain(struct char_data *ch);
-void run_autowiz(void);
-void update_flags(struct char_data *ch);
-void Crash_rentsave(struct char_data *ch, int cost);
-int level_exp(struct char_data *ch, int level);
-void update_char_objects(struct char_data *ch);	/* handler.c */
-int calc_panalty_exp(struct char_data *ch, int gain);
-void update_innate(struct char_data *ch);
-void reboot_wizlists(void);
-void death_cry(struct char_data *ch);
-int wearing_stardust(struct char_data *ch);
-void healthy_check(struct char_data *ch);
-void barrier_shed(struct char_data *ch);
-void mutant_limb_regen(struct char_data *ch);
+static void heal_limb(struct char_data *ch);
+static cl_sint64 move_gain(struct char_data *ch);
+static cl_sint64 mana_gain(struct char_data *ch);
+static cl_sint64 hit_gain(struct char_data *ch);
+static void update_flags(struct char_data *ch);
 
-void barrier_shed(struct char_data *ch)
+static int wearing_stardust(struct char_data *ch);
+static void healthy_check(struct char_data *ch);
+static void barrier_shed(struct char_data *ch);
+static void check_idling(struct char_data *ch);
+
+static void barrier_shed(struct char_data *ch)
 {
 
  if (!AFF_FLAGGED(ch, AFF_SANCTUARY)) {
@@ -113,7 +89,7 @@ void barrier_shed(struct char_data *ch)
 }
 
 /* If they have the Healthy trait then they have a chance to lose each of these */
-void healthy_check(struct char_data *ch)
+static void healthy_check(struct char_data *ch)
 {
 
   if (!GET_BONUS(ch, BONUS_HEALTHY) || GET_POS(ch) != POS_SLEEPING) {
@@ -175,7 +151,7 @@ void healthy_check(struct char_data *ch)
   return;
 }
 
-int wearing_stardust(struct char_data *ch)
+static int wearing_stardust(struct char_data *ch)
 {
 
  int count = 0, i;
@@ -217,7 +193,7 @@ int wearing_stardust(struct char_data *ch)
  */
 
 /* manapoint gain pr. game hour */
-cl_sint64 mana_gain(struct char_data *ch)
+static cl_sint64 mana_gain(struct char_data *ch)
 {
   cl_sint64 gain = 0;
 
@@ -385,7 +361,6 @@ cl_sint64 mana_gain(struct char_data *ch)
   return (gain);
 }
 
-
 /* Hitpoint gain pr. game hour */
 cl_sint64 hit_gain(struct char_data *ch)
 {
@@ -535,10 +510,8 @@ cl_sint64 hit_gain(struct char_data *ch)
   return (gain);
 }
 
-
-
 /* move gain pr. game hour */
-cl_sint64 move_gain(struct char_data *ch)
+static cl_sint64 move_gain(struct char_data *ch)
 {
   cl_sint64 gain = 0;
 
@@ -674,7 +647,7 @@ cl_sint64 move_gain(struct char_data *ch)
   return (gain);
 }
 
-void update_flags(struct char_data *ch)
+static void update_flags(struct char_data *ch)
 {
   if (ch == NULL) {
     send_to_imm("ERROR: Empty ch variable sent to update_flags.");
@@ -793,7 +766,7 @@ void update_flags(struct char_data *ch)
 }
 
 /* ki gain pr. game hour */
-int ki_gain(struct char_data *ch)
+static int ki_gain(struct char_data *ch)
 {
   int gain = 0;
 
@@ -830,7 +803,6 @@ int ki_gain(struct char_data *ch)
 
   return (gain);
 }
-
 
 void set_title(struct char_data *ch, char *title)
 {
@@ -896,8 +868,6 @@ void run_autowiz(void)
   }
 #endif /* CIRCLE_UNIX || CIRCLE_WINDOWS */
 }
-
-
 
 void gain_exp(struct char_data *ch, cl_sint64 gain)
 {
@@ -1020,7 +990,6 @@ void gain_exp(struct char_data *ch, cl_sint64 gain)
   }
 }
 
-
 void gain_exp_regardless(struct char_data *ch, int gain)
 {
   int is_altered = FALSE;
@@ -1052,7 +1021,6 @@ void gain_exp_regardless(struct char_data *ch, int gain)
     }
   }
 }
-
 
 void gain_condition(struct char_data *ch, int condition, int value)
 {
@@ -1324,8 +1292,7 @@ void gain_condition(struct char_data *ch, int condition, int value)
 	}
 }
 
-
-void check_idling(struct char_data *ch)
+static void check_idling(struct char_data *ch)
 {
   if (dball_count(ch)) {
    return;
@@ -1424,7 +1391,7 @@ void check_idling(struct char_data *ch)
  }
 }
 
-void heal_limb(struct char_data *ch)
+static void heal_limb(struct char_data *ch)
 {
  int healrate = 0, recovered = FALSE;
 

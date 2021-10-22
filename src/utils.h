@@ -41,6 +41,9 @@
 
 #define READ_SIZE	256
 
+/* global variables */
+extern FILE *player_fl;
+
 /* public functions in utils.c */
 struct time_info_data *real_time_passed(time_t t2, time_t t1);
 struct time_info_data *mud_time_passed(time_t t2, time_t t1);
@@ -169,13 +172,11 @@ int	perform_move(struct char_data *ch, int dir, int following);
 cl_sint64	max_carry_weight(struct char_data *ch);
 
 /* in limits.c */
-int	ki_gain(struct char_data *ch);
 void	advance_level(struct char_data *ch, int whichclass);
 void	set_title(struct char_data *ch, char *title);
 void	gain_exp(struct char_data *ch, cl_sint64 gain);
 void	gain_exp_regardless(struct char_data *ch, int gain);
 void	gain_condition(struct char_data *ch, int condition, int value);
-void	check_idling(struct char_data *ch);
 void	point_update(void);
 void	update_pos(struct char_data *victim);
 

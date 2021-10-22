@@ -1535,7 +1535,7 @@ const char *admin_level_names[ADMLVL_IMPL+2] = {
 
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-struct aging_data racial_aging_data[NUM_RACES] = {
+const struct aging_data racial_aging_data[NUM_RACES] = {
 /*                   adult	start1	start2	start3	middle	old	vener.	maxdice	*/
 /* HUMAN        */ { 15,	{{1,4}, {1,6}, {2,6}},	35,	53,	70,	{2,20}	},
 /* ELF          */ { 110,	{{4,6}, {6,6}, {10,6}},	175,	263,	350,	{4,100}	},

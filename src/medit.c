@@ -11,21 +11,6 @@
 /*
  * External variable declarations.
  */
-extern struct index_data *mob_index;
-extern struct char_data *mob_proto;
-extern struct char_data *character_list;
-extern mob_rnum top_of_mobt;
-extern struct zone_data *zone_table;
-extern struct shop_data *shop_index;
-extern struct descriptor_data *descriptor_list;
-
-
-extern int class_hit_die_size[NUM_CLASSES];
-extern const int race_def_sizetable[NUM_RACES + 1];
-extern int level_exp(struct char_data *ch, int level);
-void search_replace(char *string, const char *find, const char *replace);
-void mob_autobalance(struct char_data *ch);
-ACMD(do_wiznet);
 
 /*-------------------------------------------------------------------*\
   utility functions 

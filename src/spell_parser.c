@@ -8,16 +8,9 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include "structs.h"
-#include "utils.h"
-#include "interpreter.h"
-#include "spells.h"
-#include "handler.h"
-#include "comm.h"
-#include "db.h"
-#include "dg_scripts.h"
 
-#define SINFO spell_info[spellnum]
+#include "spell_parser.h"
+
 
 /* extern globals */
 
@@ -28,13 +21,9 @@ struct spell_info_type spell_info[SKILL_TABLE_SIZE];
 void say_spell(struct char_data *ch, int spellnum, struct char_data *tch, struct obj_data *tobj);
 int mag_manacost(struct char_data *ch, int spellnum);
 void mag_nextstrike(int level, struct char_data *caster, int spellnum);
-ACMD(do_cast);
+
 void unused_spell(int spl);
 void mag_assign_spells(void);
-
-int is_innate(struct char_data *ch, int spellnum);
-int is_innate_ready(struct char_data *ch, int spellnum);
-void add_innate_timer(struct char_data *ch, int spellnum);
 
 /*
  * This arrangement is pretty stupid, but the number of skills is limited by
