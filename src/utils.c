@@ -3047,56 +3047,83 @@ bool is_sparring(struct char_data *ch)
 char *handle_racial(struct char_data *ch, int type)
 {
 
- static char intro[100];
+	static char intro[100];
 
- *intro = '\0';
+	*intro = '\0';
 
-if (type == 0) {
- if (IS_HALFBREED(ch)) {
-  if (RACIAL_PREF(ch) == 1) {
-   sprintf(intro, "human");
-   } else if (RACIAL_PREF(ch) == 2) {
-   sprintf(intro, "saiyan");
-   } else {
-   sprintf(intro, "%s", race_names[GET_RACE(ch)]);
-   }
- } else if (IS_ANDROID(ch)) {
-  if (RACIAL_PREF(ch) == 1) {
-   sprintf(intro, "android");
-   } else if (RACIAL_PREF(ch) == 2) {
-   sprintf(intro, "human");
-   } else if (RACIAL_PREF(ch) == 3) {
-   sprintf(intro, "robotic-humanoid");
-   } else {
-   sprintf(intro, "%s", race_names[GET_RACE(ch)]);
-   }
- } else {
-  sprintf(intro, "%s", race_names[GET_RACE(ch)]);
- }
-} else {
- if (IS_HALFBREED(ch)) {
-  if (RACIAL_PREF(ch) == 1) {
-   sprintf(intro, "Human");
-   } else if (RACIAL_PREF(ch) == 2) {
-   sprintf(intro, "Saiyan");
-   } else {
-   sprintf(intro, "%s", pc_race_types[GET_RACE(ch)]);
-   }
- } else if (IS_ANDROID(ch)) {
-  if (RACIAL_PREF(ch) == 1) {
-   sprintf(intro, "Android");
-   } else if (RACIAL_PREF(ch) == 2) {
-   sprintf(intro, "Human");
-   } else if (RACIAL_PREF(ch) == 3) {
-   sprintf(intro, "Robotic-Humanoid");
-   } else {
-   sprintf(intro, "%s", pc_race_types[GET_RACE(ch)]);
-   }
- } else {
-  sprintf(intro, "%s", pc_race_types[GET_RACE(ch)]);
- }
-}
- return (intro);
+	if (type == 0) {
+		if (IS_HALFBREED(ch)) {
+			if (RACIAL_PREF(ch) == 1) {
+				sprintf(intro, "human");
+			}
+			else if (RACIAL_PREF(ch) == 2) {
+				sprintf(intro, "saiyan");
+			}
+			else {
+				sprintf(intro, "%s", race_names[GET_RACE(ch)]);
+			}
+		}
+		else if (IS_ANDROID(ch)) {
+			if (RACIAL_PREF(ch) == 1) {
+				sprintf(intro, "android");
+			}
+			else if (RACIAL_PREF(ch) == 2) {
+				sprintf(intro, "human");
+			}
+			else if (RACIAL_PREF(ch) == 3) {
+				sprintf(intro, "robotic-humanoid");
+			}
+			else {
+				sprintf(intro, "%s", race_names[GET_RACE(ch)]);
+			}
+		}
+		else if (IS_SAIYAN(ch) && PLR_FLAGGED(ch, PLR_TAILHIDE))
+		{
+			sprintf(intro, "human");
+		}
+
+		else {
+			sprintf(intro, "%s", race_names[GET_RACE(ch)]);
+		}
+	}
+	else {
+		if (IS_HALFBREED(ch)) {
+			if (RACIAL_PREF(ch) == 1 || PLR_FLAGGED(ch, PLR_TAILHIDE)) {
+				sprintf(intro, "Human");
+			}
+			else if (RACIAL_PREF(ch) == 2 && !PLR_FLAGGED(ch, PLR_TAILHIDE)) {
+				sprintf(intro, "Saiyan");
+			}
+      else if (RACIAL_PREF(ch) == 2 && PLR_FLAGGED(ch, PLR_TAILHIDE)) {
+        sprintf(intro, "Human");
+      }
+			else {
+				sprintf(intro, "%s", pc_race_types[GET_RACE(ch)]);
+			}
+		}
+		else if (IS_ANDROID(ch)) {
+			if (RACIAL_PREF(ch) == 1) {
+				sprintf(intro, "Android");
+			}
+			else if (RACIAL_PREF(ch) == 2) {
+				sprintf(intro, "Human");
+			}
+			else if (RACIAL_PREF(ch) == 3) {
+				sprintf(intro, "Robotic-Humanoid");
+			}
+			else {
+				sprintf(intro, "%s", pc_race_types[GET_RACE(ch)]);
+			}
+		}
+		else if (IS_SAIYAN(ch) && PLR_FLAGGED(ch, PLR_TAILHIDE))
+		{
+			sprintf(intro, "human");
+		}
+		else {
+			sprintf(intro, "%s", pc_race_types[GET_RACE(ch)]);
+		}
+	}
+	return (intro);
 }
 
 char *introd_calc(struct char_data *ch)

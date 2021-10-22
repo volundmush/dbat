@@ -1526,11 +1526,11 @@ void advance_level(struct char_data *ch, int whichclass)
    GET_SLOTS(ch) += 1;
    send_to_char(ch, "@CYou feel like you could remember a new skill!@n\r\n");
   }
-  if (IS_NAMEK(ch) && rand_number(1, 100) <= 3) {
+  if (IS_NAMEK(ch) && rand_number(1, 100) <= 5) {
    GET_SLOTS(ch) += 1;
    send_to_char(ch, "@CYou feel as though you could learn another skill.@n\r\n");
   }
-  if (IS_ICER(ch) && rand_number(1, 100) <= 22) {
+  if (IS_ICER(ch) && rand_number(1, 100) <= 25) {
    bring_to_cap(ch);
    send_to_char(ch, "@GYou feel your body obtain its current optimal strength!@n\r\n");
   }
@@ -2129,7 +2129,7 @@ int level_exp(struct char_data *ch, int level)
     req = 600000000;
     break;
   case 100:
-    req = 1000000000;
+    req = 800000000;
     break;
  }
 
