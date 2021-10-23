@@ -3023,7 +3023,7 @@ ACMD(do_throw)
     int penalty = 0, chance = axion_dice(0) + axion_dice(0), wtype = 0, wlvl = 1, multithrow = TRUE;
     handle_cooldown(ch, 5);
     improve_skill(ch, SKILL_THROW, 0);
-    damage = ((GET_OBJ_WEIGHT(obj) * GET_STR(ch)) * (GET_CHA(ch) / 3)) + (GET_MAX_HIT(ch) * 0.01);
+    damage = ((GET_OBJ_WEIGHT(obj) / 3) * (GET_STR(ch)) * (GET_CHA(ch) / 3)) + (GET_MAX_HIT(ch) * 0.01);
     damage += (damage * 0.01) * (ROOM_GRAVITY(IN_ROOM(ch)) / 4);
 
     if (GET_PREFERENCE(ch) == PREFERENCE_THROWING) {
@@ -3068,13 +3068,13 @@ ACMD(do_throw)
     } else if (GET_OBJ_VAL(obj, VAL_ALL_MATERIAL) == MATERIAL_IRON) {
      odam = rand_number(18, 50);
     } else if (GET_OBJ_VAL(obj, VAL_ALL_MATERIAL) == MATERIAL_MITHRIL) {
-     odam = rand_number(5, 20);
+     odam = rand_number(5, 15);
     } else if (GET_OBJ_VAL(obj, VAL_ALL_MATERIAL) == MATERIAL_KACHIN) {
      odam = rand_number(5, 15);
     } else if (GET_OBJ_VAL(obj, VAL_ALL_MATERIAL) == MATERIAL_STONE) {
      odam = rand_number(20, 50);
     } else if (GET_OBJ_VAL(obj, VAL_ALL_MATERIAL) == MATERIAL_DIAMOND) {
-     odam = rand_number(5, 15);
+     odam = rand_number(5, 20);
     } else if (GET_OBJ_VAL(obj, VAL_ALL_MATERIAL) == MATERIAL_ENERGY) {
      if (rand_number(1, 2) == 2) {
       odam = 0;

@@ -36,7 +36,7 @@
 /* local functions */
 static int has_scanner(struct char_data *ch);
 static void boost_obj(struct obj_data *obj, struct char_data *ch, int type);
-static void handle_revert(struct char_data *ch, int add, double mult);
+static void handle_revert(struct char_data *ch, uint64_t add, double mult);
 static void handle_transform(struct char_data *ch, int add, double mult, double drain);
 static int perform_group(struct char_data *ch, struct char_data *vict, int highlvl, int lowlvl, int64_t highpl, int64_t lowpl);
 static void print_group(struct char_data *ch);
@@ -9020,122 +9020,125 @@ ACMD(do_summon)
 static void handle_transform(struct char_data *ch, int add, double mult, double drain)
 {
 
- if (!ch)
-  return;
- if (IS_NPC(ch))
-  return;
- else {
-       long double cur, max, dapercent = GET_LIFEPERC(ch);
-        /* Handle Pl */
-        cur = (long double)(GET_HIT(ch));
-        max = (long double)(GET_MAX_HIT(ch));
-        GET_MAX_HIT(ch) = (GET_BASE_PL(ch) + add) * mult;
-        if (android_can(ch) == 1)
-         GET_MAX_HIT(ch) += 50000000;
-        else if (android_can(ch) == 2)
-         GET_MAX_HIT(ch) += 20000000;
+	if (!ch)
+		return;
+	if (IS_NPC(ch))
+		return;
+	else {
+		long double cur, max, dapercent = GET_LIFEPERC(ch);
+		/* Handle Pl */
+		cur = (long double)(GET_HIT(ch));
+		max = (long double)(GET_MAX_HIT(ch));
+		GET_MAX_HIT(ch) = (GET_BASE_PL(ch) + add) * mult;
+		if (android_can(ch) == 1)
+			GET_MAX_HIT(ch) += 50000000;
+		else if (android_can(ch) == 2)
+			GET_MAX_HIT(ch) += 20000000;
 
-        if ((GET_HIT(ch) + (add * (cur / max))) * mult <= gear_pl(ch)) {
-         GET_HIT(ch) = (GET_HIT(ch) + (add * (cur / max))) * mult;
-        } else if ((GET_HIT(ch) + (add * (cur / max))) * mult > gear_pl(ch)) {
-         GET_HIT(ch) = gear_pl(ch);
-        }
+		if ((GET_HIT(ch) + (add * (cur / max))) * mult <= gear_pl(ch)) {
+			GET_HIT(ch) = (GET_HIT(ch) + (add * (cur / max))) * mult;
+		}
+		else if ((GET_HIT(ch) + (add * (cur / max))) * mult > gear_pl(ch)) {
+			GET_HIT(ch) = gear_pl(ch);
+		}
 
-        /* Handle Ki */
-        cur = (long double)(GET_MANA(ch));
-        max = (long double)(GET_MAX_MANA(ch));
-        GET_MAX_MANA(ch) = (GET_BASE_KI(ch) + add) * mult;
-        if (android_can(ch) == 1)
-         GET_MAX_MANA(ch) += 50000000;
-        else if (android_can(ch) == 2)
-         GET_MAX_MANA(ch) += 20000000;
+		/* Handle Ki */
+		cur = (long double)(GET_MANA(ch));
+		max = (long double)(GET_MAX_MANA(ch));
+		GET_MAX_MANA(ch) = (GET_BASE_KI(ch) + add) * mult;
+		if (android_can(ch) == 1)
+			GET_MAX_MANA(ch) += 50000000;
+		else if (android_can(ch) == 2)
+			GET_MAX_MANA(ch) += 20000000;
 
-        if ((GET_MANA(ch) + (add * (cur / max))) * mult <= GET_MAX_MANA(ch)) {
-         GET_MANA(ch) = (GET_MANA(ch) + (add * (cur / max))) * mult;
-        } else if ((GET_MANA(ch) + (add * (cur / max))) * mult > GET_MAX_MANA(ch)) {
-         GET_MANA(ch) = GET_MAX_MANA(ch);
-        }
+		if ((GET_MANA(ch) + (add * (cur / max))) * mult <= GET_MAX_MANA(ch)) {
+			GET_MANA(ch) = (GET_MANA(ch) + (add * (cur / max))) * mult;
+		}
+		else if ((GET_MANA(ch) + (add * (cur / max))) * mult > GET_MAX_MANA(ch)) {
+			GET_MANA(ch) = GET_MAX_MANA(ch);
+		}
 
-        /* Handle St */
-        GET_MOVE(ch) -= GET_MOVE(ch) * drain;
-        cur = (long double)(GET_MOVE(ch));
-        max = (long double)(GET_MAX_MOVE(ch));
-        GET_MAX_MOVE(ch) = (GET_BASE_ST(ch) + add) * mult;
-        if (android_can(ch) == 1)
-         GET_MAX_MOVE(ch) += 50000000;
-        else if (android_can(ch) == 2)
-         GET_MAX_MOVE(ch) += 20000000;
+		/* Handle St */
+		GET_MOVE(ch) -= GET_MOVE(ch) * drain;
+		cur = (long double)(GET_MOVE(ch));
+		max = (long double)(GET_MAX_MOVE(ch));
+		GET_MAX_MOVE(ch) = (GET_BASE_ST(ch) + add) * mult;
+		if (android_can(ch) == 1)
+			GET_MAX_MOVE(ch) += 50000000;
+		else if (android_can(ch) == 2)
+			GET_MAX_MOVE(ch) += 20000000;
 
-        if ((GET_MOVE(ch) + (add * (cur / max))) * mult <= GET_MAX_MOVE(ch)) {
-         GET_MOVE(ch) = (GET_MOVE(ch) + (add * (cur / max))) * mult;
-        } else if ((GET_MOVE(ch) + (add * (cur / max))) * mult > GET_MAX_MOVE(ch)) {
-         GET_MOVE(ch) = GET_MAX_MOVE(ch);
-        }
+		if ((GET_MOVE(ch) + (add * (cur / max))) * mult <= GET_MAX_MOVE(ch)) {
+			GET_MOVE(ch) = (GET_MOVE(ch) + (add * (cur / max))) * mult;
+		}
+		else if ((GET_MOVE(ch) + (add * (cur / max))) * mult > GET_MAX_MOVE(ch)) {
+			GET_MOVE(ch) = GET_MAX_MOVE(ch);
+		}
 
-        if (!IS_ANDROID(ch)) {
-         /* Handle Lifeforce */
-         /*R: Tried changing initial GET_LIFEFORCE to GET_LIFEMAX
-           I: You are setting lifemax, which is set dynamically by what KI and Stamina's maxes are.
-              This is updated all the time, so it isn't going to do anything for more than a fraction
-              of a second. You need to adjust GET_LIFEFORCE to be the same percentage of the new max as
-              it was the old. To do this you find out the old */
-         /* Example: percent = ((long double)(GET_LIFEMAX(ch)) / 100) * (long double)(GET_LIFEFORCE(ch))
+		if (!IS_ANDROID(ch)) {
+			/* Handle Lifeforce */
+			/*R: Tried changing initial GET_LIFEFORCE to GET_LIFEMAX
+			I: You are setting lifemax, which is set dynamically by what KI and Stamina's maxes are.
+			This is updated all the time, so it isn't going to do anything for more than a fraction
+			of a second. You need to adjust GET_LIFEFORCE to be the same percentage of the new max as
+			it was the old. To do this you find out the old */
+			/* Example: percent = ((long double)(GET_LIFEMAX(ch)) / 100) * (long double)(GET_LIFEFORCE(ch))
 
 
-            This will give you the percent (in decimal form) of lifemax. Do this prior to the transformation
-            change at the start of handle_transformation. Then here at the end you do: 
-	            GET_LIFEFORCE(ch) = GET_LIFEMAX(ch) * percent;          
-            The percent will remain the same, but based off the new detransformed lifeforce max. Make sure the
-            variable, percent, hasn't already been used. Declare it or something else for your code.*/
+			This will give you the percent (in decimal form) of lifemax. Do this prior to the transformation
+			change at the start of handle_transformation. Then here at the end you do:
+			GET_LIFEFORCE(ch) = GET_LIFEMAX(ch) * percent;
+			The percent will remain the same, but based off the new detransformed lifeforce max. Make sure the
+			variable, percent, hasn't already been used. Declare it or something else for your code.*/
 
-          GET_LIFEFORCE(ch) = GET_LIFEMAX(ch) * dapercent;
-          if (GET_LIFEFORCE(ch) > GET_LIFEMAX(ch)) {
-            GET_LIFEFORCE(ch) = GET_LIFEMAX(ch);
-            }
-        }
-         
+			GET_LIFEFORCE(ch) = GET_LIFEMAX(ch) * dapercent;
+			if (GET_LIFEFORCE(ch) > GET_LIFEMAX(ch)) {
+				GET_LIFEFORCE(ch) = GET_LIFEMAX(ch);
+			}
+		}
 
- }
+
+	}
 }
 
 /* This handles reverting Current and Max PL/KI/ST */
-static void handle_revert(struct char_data *ch, int add, double mult)
+static void handle_revert(struct char_data *ch, uint64_t add, double mult)
 {
-   if (!ch)
-    return;
-   if (IS_NPC(ch))
-    return;
-   else {
-     long double convert, dapercent = GET_LIFEPERC(ch);
-     convert = ((long double)(GET_HIT(ch)) / (long double)(GET_MAX_HIT(ch)));
-     GET_HIT(ch) = (GET_HIT(ch) - ((add * mult) * (convert))) / mult;
-     convert = ((long double)(GET_MANA(ch)) / (long double)(GET_MAX_MANA(ch)));
-     GET_MANA(ch) = (GET_MANA(ch) - ((add * mult) * (convert))) / mult;
-     convert = ((long double)(GET_MOVE(ch)) / (long double)(GET_MAX_MOVE(ch)));
-     GET_MOVE(ch) = (GET_MOVE(ch) - ((add * mult) * (convert))) / mult;
-     /*R: Trying to add lifeforce revert */
-     GET_LIFEFORCE(ch) = GET_LIFEMAX(ch) * dapercent;
-     if (GET_LIFEFORCE(ch) > GET_LIFEMAX(ch)) {
-            GET_LIFEFORCE(ch) = GET_LIFEMAX(ch);
-            }
+	if (!ch)
+		return;
+	if (IS_NPC(ch))
+		return;
+	else {
+		long double convert, dapercent = GET_LIFEPERC(ch);
+		convert = ((long double)(GET_HIT(ch)) / (long double)(GET_MAX_HIT(ch)));
+		GET_HIT(ch) = (GET_HIT(ch) - ((add * mult) * (convert))) / mult;
+		convert = ((long double)(GET_MANA(ch)) / (long double)(GET_MAX_MANA(ch)));
+		GET_MANA(ch) = (GET_MANA(ch) - ((add * mult) * (convert))) / mult;
+		convert = ((long double)(GET_MOVE(ch)) / (long double)(GET_MAX_MOVE(ch)));
+		GET_MOVE(ch) = (GET_MOVE(ch) - ((add * mult) * (convert))) / mult;
+		/*R: Trying to add lifeforce revert */
+		GET_LIFEFORCE(ch) = GET_LIFEMAX(ch) * dapercent;
+		if (GET_LIFEFORCE(ch) > GET_LIFEMAX(ch)) {
+			GET_LIFEFORCE(ch) = GET_LIFEMAX(ch);
+		}
 
-     if (GET_MOVE(ch) < 1) {
-      GET_MOVE(ch) = 1;
-     } if (GET_MANA(ch) < 1) {
-      GET_MANA(ch) = 1;
-     } if (GET_HIT(ch) < 1) {
-      GET_HIT(ch) = 1;
-     } if (GET_LIFEFORCE(ch) < 1) {
-      GET_LIFEFORCE(ch) = 1;
-      }
-     if (GET_HIT(ch) > gear_pl(ch)) {
-      GET_HIT(ch) = gear_pl(ch);
-     }
+		if (GET_MOVE(ch) < 1) {
+			GET_MOVE(ch) = 1;
+		} if (GET_MANA(ch) < 1) {
+			GET_MANA(ch) = 1;
+		} if (GET_HIT(ch) < 1) {
+			GET_HIT(ch) = 1;
+		} if (GET_LIFEFORCE(ch) < 1) {
+			GET_LIFEFORCE(ch) = 1;
+		}
+		if (GET_HIT(ch) > gear_pl(ch)) {
+			GET_HIT(ch) = gear_pl(ch);
+		}
 
-     GET_MAX_HIT(ch) = GET_BASE_PL(ch);
-     GET_MAX_MANA(ch) = GET_BASE_KI(ch);
-     GET_MAX_MOVE(ch) = GET_BASE_ST(ch);
-   }
+		GET_MAX_HIT(ch) = GET_BASE_PL(ch);
+		GET_MAX_MANA(ch) = GET_BASE_KI(ch);
+		GET_MAX_MOVE(ch) = GET_BASE_ST(ch);
+	}
 }
 
 ACMD(do_transform)
@@ -11526,11 +11529,11 @@ ACMD(do_transform)
 				act("@WYou stop for a moment as the nano-machines within your body reprogram and restructure you. You are now more powerful and efficient!@n", TRUE, ch, 0, 0, TO_CHAR);
 				act("@C$n @Wstops for a moment as the nano-machines within $s body reprogram and restructure $m. $e is now more powerful and efficient!@n", TRUE, ch, 0, 0, TO_ROOM);
 
-				int add = 5000000;
+				int add = 5000000u;
 				double mult = 1;
 
 				if (PLR_FLAGGED(ch, PLR_SENSEM)) {
-					add += 7500000;
+					add += 7500000u;
 				}
 
 				/* handle_transform: ch, add, mult, drain*/
@@ -11574,11 +11577,11 @@ ACMD(do_transform)
 					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS1);
 				}
 
-				int add = 20000000;
+				int add = 20000000u;
 				double mult = 1;
 
 				if (PLR_FLAGGED(ch, PLR_SENSEM)) {
-					add += 30000000;
+					add += 30000000u;
 				}
 
 				/* handle_transform: ch, add, mult, drain*/
@@ -11748,8 +11751,8 @@ ACMD(do_transform)
 					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS4);
 				}
 
-				//uint64_t add = 25000000000u;
-				unsigned long long int add = 2500000000000;
+				uint64_t add = 25000000000u;
+				//unsigned long long int add = 2500000000000;
 				//add *= 100;
 				double mult = 1;
 

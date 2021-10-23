@@ -557,6 +557,8 @@ const char *player_bits[NUM_PLR_FLAGS+1] = {
   "AURALIGHT",
   "RDISPLAY",
   "ROBBED",
+  "TAILH",
+  "NOGROW",
   "\n"
 };
 
@@ -1056,6 +1058,7 @@ const char *extra_bits[NUM_ITEM_FLAGS+1] = {
   "CARDCASE",
   "MOB_NOPICKUP",
   "NOSTEAL",
+  "RESTRING",
   "\n"
 };
 

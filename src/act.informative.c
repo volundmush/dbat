@@ -2921,273 +2921,287 @@ static void diag_char_to_char(struct char_data *i, struct char_data *ch)
 
 static void look_at_char(struct char_data *i, struct char_data *ch)
 {
-  int j, found, clan = FALSE;
-  char buf[100];
-  struct obj_data *tmp_obj;
+	int j, found, clan = FALSE;
+	char buf[100];
+	struct obj_data *tmp_obj;
 
-  if (!ch->desc) {
-    return;
-  }
-  if (i->description) {
-   send_to_char(ch, "%s", i->description);
-  }
-  if (!MOB_FLAGGED(i, MOB_JUSTDESC)) {
-   bringdesc(ch, i);
-  }
-    send_to_char(ch, "\r\n");
-  if (!IS_NPC(i)) {
-   if (GET_LIMBCOND(i, 1) >= 50 && !PLR_FLAGGED(i, PLR_CRARM)) {
-    send_to_char(ch, "            @D[@cRight Arm   @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(i, 1), "%", "%");
-   } else if (GET_LIMBCOND(i, 1) > 0 && !PLR_FLAGGED(i, PLR_CRARM)) {
-    send_to_char(ch, "            @D[@cRight Arm   @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", GET_LIMBCOND(i, 1), "%", "%");
-   } else if (GET_LIMBCOND(i, 1) > 0 && PLR_FLAGGED(i, PLR_CRARM)) {
-    send_to_char(ch, "            @D[@cRight Arm   @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", GET_LIMBCOND(i, 1), "%", "%");
-   } else if (GET_LIMBCOND(i, 1) <= 0) {
-    send_to_char(ch, "            @D[@cRight Arm   @D: @rMissing.            @D]@n\r\n");
-   }
-   if (GET_LIMBCOND(i, 2) >= 50 && !PLR_FLAGGED(i, PLR_CLARM)) {
-    send_to_char(ch, "            @D[@cLeft Arm    @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(i, 2), "%", "%");
-   } else if (GET_LIMBCOND(i, 2) > 0 && !PLR_FLAGGED(i, PLR_CLARM)) {
-    send_to_char(ch, "            @D[@cLeft Arm    @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", GET_LIMBCOND(i, 2), "%", "%");
-   } else if (GET_LIMBCOND(i, 2) > 0 && PLR_FLAGGED(i, PLR_CLARM)) {
-    send_to_char(ch, "            @D[@cLeft Arm    @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", GET_LIMBCOND(i, 2), "%", "%");
-   } else if (GET_LIMBCOND(i, 2) <= 0) {
-    send_to_char(ch, "            @D[@cLeft Arm    @D: @rMissing.            @D]@n\r\n");
-   }
-   if (GET_LIMBCOND(i, 3) >= 50 && !PLR_FLAGGED(i, PLR_CLARM)) {
-    send_to_char(ch, "            @D[@cRight Leg   @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(i, 3), "%", "%");
-   } else if (GET_LIMBCOND(i, 3) > 0 && !PLR_FLAGGED(i, PLR_CRLEG)) {
-    send_to_char(ch, "            @D[@cRight Leg   @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", GET_LIMBCOND(i, 3), "%", "%");
-   } else if (GET_LIMBCOND(i, 3) > 0 && PLR_FLAGGED(i, PLR_CRLEG)) {
-    send_to_char(ch, "            @D[@cRight Leg   @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", GET_LIMBCOND(i, 3), "%", "%");
-   } else if (GET_LIMBCOND(i, 3) <= 0) {
-    send_to_char(ch, "            @D[@cRight Leg   @D: @rMissing.            @D]@n\r\n");
-   }
-   if (GET_LIMBCOND(i, 4) >= 50 && !PLR_FLAGGED(i, PLR_CLLEG)) {
-    send_to_char(ch, "            @D[@cLeft Leg    @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(i, 4), "%", "%");
-   } else if (GET_LIMBCOND(i, 4) > 0 && !PLR_FLAGGED(i, PLR_CLLEG)) {
-    send_to_char(ch, "            @D[@cLeft Leg    @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", GET_LIMBCOND(i, 4), "%", "%");
-   } else if (GET_LIMBCOND(i, 4) > 0 && PLR_FLAGGED(i, PLR_CLLEG)) {
-    send_to_char(ch, "            @D[@cLeft Leg    @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", GET_LIMBCOND(i, 4), "%", "%");
-   } else if (GET_LIMBCOND(i, 4) <= 0) {
-    send_to_char(ch, "            @D[@cLeft Leg    @D: @rMissing.             @D]@n\r\n");
-   }
-   if (PLR_FLAGGED(i, PLR_HEAD)) {
-    send_to_char(ch, "            @D[@cHead        @D: @GHas.                 @D]@n\r\n");
-   }
-   if (!PLR_FLAGGED(i, PLR_HEAD)) {
-    send_to_char(ch, "            @D[@cHead        @D: @rMissing.             @D]@n\r\n");
-   }
-   if ((IS_SAIYAN(i) || IS_HALFBREED(i)) && PLR_FLAGGED(i, PLR_STAIL)) {
-    send_to_char(ch, "            @D[@cTail        @D: @GHas.                 @D]@n\r\n");
-   }
-   if ((IS_SAIYAN(i) || IS_HALFBREED(i)) && !PLR_FLAGGED(i, PLR_STAIL)) {
-    send_to_char(ch, "            @D[@cTail        @D: @rMissing.             @D]@n\r\n");
-   }
-   if ((IS_ICER(i) || IS_BIO(i)) && PLR_FLAGGED(i, PLR_TAIL)) {
-    send_to_char(ch, "            @D[@cTail        @D: @GHas.                 @D]@n\r\n");
-   }
-   if ((IS_ICER(i) || IS_BIO(i)) && !PLR_FLAGGED(i, PLR_TAIL)) {
-    send_to_char(ch, "            @D[@cTail        @D: @rMissing.             @D]@n\r\n");
-   }
-  }
-  send_to_char(ch, "\r\n");
-    if (GET_CLAN(i) != NULL && strstr(GET_CLAN(i), "None") == FALSE) {
-     sprintf(buf, "%s", GET_CLAN(i));
-     clan = TRUE;
-    }
-    if (GET_CLAN(i) == NULL) {
-     clan = FALSE;
-    }
-    if (!IS_NPC(i)) {
-    send_to_char(ch, "            @D[@mClan        @D: @W%-20s@D]@n\r\n", clan ? buf : "None.");
-    }
-    if (!IS_NPC(i)) {
-     send_to_char(ch, "\r\n         @D----------------------------------------@n\r\n");
-     trans_check(ch, i);
-     send_to_char(ch, "         @D----------------------------------------@n\r\n");
-    }
-    send_to_char(ch, "\r\n");
+	if (!ch->desc) {
+		return;
+	}
+	if (i->description) {
+		send_to_char(ch, "%s", i->description);
+	}
+	if (!MOB_FLAGGED(i, MOB_JUSTDESC)) {
+		bringdesc(ch, i);
+	}
+	send_to_char(ch, "\r\n");
+	if (!IS_NPC(i)) {
+		if (GET_LIMBCOND(i, 1) >= 50 && !PLR_FLAGGED(i, PLR_CRARM)) {
+			send_to_char(ch, "            @D[@cRight Arm   @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(i, 1), "%", "%");
+		}
+		else if (GET_LIMBCOND(i, 1) > 0 && !PLR_FLAGGED(i, PLR_CRARM)) {
+			send_to_char(ch, "            @D[@cRight Arm   @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", GET_LIMBCOND(i, 1), "%", "%");
+		}
+		else if (GET_LIMBCOND(i, 1) > 0 && PLR_FLAGGED(i, PLR_CRARM)) {
+			send_to_char(ch, "            @D[@cRight Arm   @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", GET_LIMBCOND(i, 1), "%", "%");
+		}
+		else if (GET_LIMBCOND(i, 1) <= 0) {
+			send_to_char(ch, "            @D[@cRight Arm   @D: @rMissing.            @D]@n\r\n");
+		}
+		if (GET_LIMBCOND(i, 2) >= 50 && !PLR_FLAGGED(i, PLR_CLARM)) {
+			send_to_char(ch, "            @D[@cLeft Arm    @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(i, 2), "%", "%");
+		}
+		else if (GET_LIMBCOND(i, 2) > 0 && !PLR_FLAGGED(i, PLR_CLARM)) {
+			send_to_char(ch, "            @D[@cLeft Arm    @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", GET_LIMBCOND(i, 2), "%", "%");
+		}
+		else if (GET_LIMBCOND(i, 2) > 0 && PLR_FLAGGED(i, PLR_CLARM)) {
+			send_to_char(ch, "            @D[@cLeft Arm    @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", GET_LIMBCOND(i, 2), "%", "%");
+		}
+		else if (GET_LIMBCOND(i, 2) <= 0) {
+			send_to_char(ch, "            @D[@cLeft Arm    @D: @rMissing.            @D]@n\r\n");
+		}
+		if (GET_LIMBCOND(i, 3) >= 50 && !PLR_FLAGGED(i, PLR_CLARM)) {
+			send_to_char(ch, "            @D[@cRight Leg   @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(i, 3), "%", "%");
+		}
+		else if (GET_LIMBCOND(i, 3) > 0 && !PLR_FLAGGED(i, PLR_CRLEG)) {
+			send_to_char(ch, "            @D[@cRight Leg   @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", GET_LIMBCOND(i, 3), "%", "%");
+		}
+		else if (GET_LIMBCOND(i, 3) > 0 && PLR_FLAGGED(i, PLR_CRLEG)) {
+			send_to_char(ch, "            @D[@cRight Leg   @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", GET_LIMBCOND(i, 3), "%", "%");
+		}
+		else if (GET_LIMBCOND(i, 3) <= 0) {
+			send_to_char(ch, "            @D[@cRight Leg   @D: @rMissing.            @D]@n\r\n");
+		}
+		if (GET_LIMBCOND(i, 4) >= 50 && !PLR_FLAGGED(i, PLR_CLLEG)) {
+			send_to_char(ch, "            @D[@cLeft Leg    @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(i, 4), "%", "%");
+		}
+		else if (GET_LIMBCOND(i, 4) > 0 && !PLR_FLAGGED(i, PLR_CLLEG)) {
+			send_to_char(ch, "            @D[@cLeft Leg    @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", GET_LIMBCOND(i, 4), "%", "%");
+		}
+		else if (GET_LIMBCOND(i, 4) > 0 && PLR_FLAGGED(i, PLR_CLLEG)) {
+			send_to_char(ch, "            @D[@cLeft Leg    @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", GET_LIMBCOND(i, 4), "%", "%");
+		}
+		else if (GET_LIMBCOND(i, 4) <= 0) {
+			send_to_char(ch, "            @D[@cLeft Leg    @D: @rMissing.             @D]@n\r\n");
+		}
+		if (PLR_FLAGGED(i, PLR_HEAD)) {
+			send_to_char(ch, "            @D[@cHead        @D: @GHas.                 @D]@n\r\n");
+		}
+		if (!PLR_FLAGGED(i, PLR_HEAD)) {
+			send_to_char(ch, "            @D[@cHead        @D: @rMissing.             @D]@n\r\n");
+		}
+		if (((IS_SAIYAN(i) || IS_HALFBREED(i)) && PLR_FLAGGED(i, PLR_STAIL)) && !PLR_FLAGGED(i, PLR_TAILHIDE)) {
+			send_to_char(ch, "            @D[@cTail        @D: @GHas.                 @D]@n\r\n");
+		}
+		if ((IS_SAIYAN(i) || IS_HALFBREED(i)) && (!PLR_FLAGGED(i, PLR_STAIL)) && (!PLR_FLAGGED(i, PLR_TAILHIDE))) {
+			send_to_char(ch, "            @D[@cTail        @D: @rMissing.             @D]@n\r\n");
+		}
+		if ((IS_ICER(i) || IS_BIO(i)) && PLR_FLAGGED(i, PLR_TAIL)) {
+			send_to_char(ch, "            @D[@cTail        @D: @GHas.                 @D]@n\r\n");
+		}
+		if ((IS_ICER(i) || IS_BIO(i)) && !PLR_FLAGGED(i, PLR_TAIL)) {
+			send_to_char(ch, "            @D[@cTail        @D: @rMissing.             @D]@n\r\n");
+		}
+	}
+	send_to_char(ch, "\r\n");
+	if (GET_CLAN(i) != NULL && strstr(GET_CLAN(i), "None") == FALSE) {
+		sprintf(buf, "%s", GET_CLAN(i));
+		clan = TRUE;
+	}
+	if (GET_CLAN(i) == NULL) {
+		clan = FALSE;
+	}
+	if (!IS_NPC(i)) {
+		send_to_char(ch, "            @D[@mClan        @D: @W%-20s@D]@n\r\n", clan ? buf : "None.");
+	}
+	if (!IS_NPC(i)) {
+		send_to_char(ch, "\r\n         @D----------------------------------------@n\r\n");
+		trans_check(ch, i);
+		send_to_char(ch, "         @D----------------------------------------@n\r\n");
+	}
+	send_to_char(ch, "\r\n");
 
-  if ((!PLR_FLAGGED(i, PLR_DISGUISED) && (readIntro(ch, i) == 1 && !IS_NPC(i)))) {
-   if (GET_SEX(i) == SEX_NEUTRAL) 
-    send_to_char(ch, "%s appears to be %s %s, ", get_i_name(ch, i), AN(RACE(i)), LRACE(i));
-   else
-    send_to_char(ch, "%s appears to be %s %s %s, ", get_i_name(ch, i), AN(MAFE(i)), MAFE(i), LRACE(i));
-  }
-  else if (ch == i || IS_NPC(i)) {
-   if (GET_SEX(i) == SEX_NEUTRAL)
-    send_to_char(ch, "%c%s appears to be %s %s, ", UPPER(*GET_NAME(i)), GET_NAME(i) + 1, AN(RACE(i)), LRACE(i));
-   else
-    send_to_char(ch, "%c%s appears to be %s %s %s, ", UPPER(*GET_NAME(i)), GET_NAME(i) + 1, AN(MAFE(i)), MAFE(i), LRACE(i));
-  }
-  else {
-   if (GET_SEX(i) == SEX_NEUTRAL)
-    send_to_char(ch, "Appears to be %s %s, ", AN(RACE(i)), LRACE(i));
-   else
-    send_to_char(ch, "Appears to be %s %s %s, ", AN(MAFE(i)), MAFE(i), LRACE(i));
-  }
+	if ((!PLR_FLAGGED(i, PLR_DISGUISED) && (readIntro(ch, i) == 1 && !IS_NPC(i)))) {
+		if (GET_SEX(i) == SEX_NEUTRAL)
+			send_to_char(ch, "%s appears to be %s %s, ", get_i_name(ch, i), AN(RACE(i)), LRACE(i));
+		else
+			send_to_char(ch, "%s appears to be %s %s %s, ", get_i_name(ch, i), AN(MAFE(i)), MAFE(i), LRACE(i));
+	}
+	else if (ch == i || IS_NPC(i)) {
+		if (GET_SEX(i) == SEX_NEUTRAL)
+			send_to_char(ch, "%c%s appears to be %s %s, ", UPPER(*GET_NAME(i)), GET_NAME(i) + 1, AN(RACE(i)), LRACE(i));
+		else
+			send_to_char(ch, "%c%s appears to be %s %s %s, ", UPPER(*GET_NAME(i)), GET_NAME(i) + 1, AN(MAFE(i)), MAFE(i), LRACE(i));
+	}
+	else {
+		if (GET_SEX(i) == SEX_NEUTRAL)
+			send_to_char(ch, "Appears to be %s %s, ", AN(RACE(i)), LRACE(i));
+		else
+			send_to_char(ch, "Appears to be %s %s %s, ", AN(MAFE(i)), MAFE(i), LRACE(i));
+	}
 
-  if (IS_NPC(i)) {
-   send_to_char(ch, "is %s sized, and\r\n", size_names[get_size(i)]);
-  }
-  if (!IS_NPC(i)) {
-   if (!PLR_FLAGGED(i, PLR_OOZARU) && (!IS_ICER(i)|| !IS_TRANSFORMED(i)) && GET_GENOME(i, 0) < 11) {
-    send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], GET_PC_HEIGHT(i), GET_PC_WEIGHT(i));
-   }
-   else if (IS_ICER(i)&& PLR_FLAGGED(i, PLR_TRANS1)) {
-    int num1 = GET_PC_HEIGHT(i) * 3;
-    int num2 = GET_PC_WEIGHT(i) * 4;
-    send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], num1, num2);
-   }
-   else if (IS_ICER(i)&& PLR_FLAGGED(i, PLR_TRANS2)) {
-    int num1 = GET_PC_HEIGHT(i) * 3;
-    int num2 = GET_PC_WEIGHT(i) * 4;
-    send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], num1, num2);
-   }
-   else if (IS_ICER(i)&& PLR_FLAGGED(i, PLR_TRANS3)) {
-    int num1 = GET_PC_HEIGHT(i) * 1.5;
-    int num2 = GET_PC_WEIGHT(i) * 2;
-    send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], num1, num2);
-   }
-   else if (IS_ICER(i)&& PLR_FLAGGED(i, PLR_TRANS4)) {
-    int num1 = GET_PC_HEIGHT(i) * 2;
-    int num2 = GET_PC_WEIGHT(i) * 3;
-    send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], num1, num2);
-   }
-   else if (PLR_FLAGGED(i, PLR_OOZARU) || GET_GENOME(i, 0) == 11) {
-    int num1 = GET_PC_HEIGHT(i) * 10;
-    int num2 = GET_PC_WEIGHT(i) * 50;
-    send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], num1, num2);
-   }
-   if (i == ch) {
-    send_to_char(ch, " and ");
-   }
-   else if (GET_AGE(ch) >= GET_AGE(i) + 30) {
-    send_to_char(ch, " appears to be very much younger than you, and ");
-   }
-   else if (GET_AGE(ch) >= GET_AGE(i) + 25) {
-    send_to_char(ch, " appears to be much younger than you, and ");
-   }
-   else if (GET_AGE(ch) >= GET_AGE(i) + 15) {
-    send_to_char(ch, " appears to be a good amount younger than you, and ");
-   }
-   else if (GET_AGE(ch) >= GET_AGE(i) + 10) {
-    send_to_char(ch, " appears to be about a decade younger than you, and ");
-   }
-   else if (GET_AGE(ch) >= GET_AGE(i) + 5) {
-    send_to_char(ch, " appears to be several years younger than you, and ");
-   }
-   else if (GET_AGE(ch) >= GET_AGE(i) + 2) {
-    send_to_char(ch, " appears to be a bit younger than you, and ");
-   }
-   else if (GET_AGE(ch) > GET_AGE(i)) {
-    send_to_char(ch, " appears to be slightly younger than you, and ");
-   }
-   else if (GET_AGE(ch) == GET_AGE(i)) {
-    send_to_char(ch, " appears to be the same age as you, and ");
-   }
-   if (GET_AGE(i) >= GET_AGE(ch) + 30) {
-    send_to_char(ch, " appears to be very much older than you, and ");
-   }
-   else if (GET_AGE(i) >= GET_AGE(ch) + 25) {
-    send_to_char(ch, " appears to be much older than you, and ");
-   }
-   else if (GET_AGE(i) >= GET_AGE(ch) + 15) {
-    send_to_char(ch, " appears to be a good amount older than you, and ");
-   }
-   else if (GET_AGE(i) >= GET_AGE(ch) + 10) {
-    send_to_char(ch, " appears to be about a decade older than you, and ");
-   }
-   else if (GET_AGE(i) >= GET_AGE(ch) + 5) {
-    send_to_char(ch, " appears to be several years older than you, and ");
-   }
-   else if (GET_AGE(i) >= GET_AGE(ch) + 2) {
-    send_to_char(ch, " appears to be a bit older than you, and ");
-   }
-   else if (GET_AGE(i) > GET_AGE(ch)) {
-    send_to_char(ch, " appears to be slightly older than you, and ");
-   }
-  }
-  diag_char_to_char(i, ch);
-  found = FALSE;
-  for (j = 0; !found && j < NUM_WEARS; j++)
-    if (GET_EQ(i, j) && CAN_SEE_OBJ(ch, GET_EQ(i, j)))
-      found = TRUE;
+	if (IS_NPC(i)) {
+		send_to_char(ch, "is %s sized, and\r\n", size_names[get_size(i)]);
+	}
+	if (!IS_NPC(i)) {
+		if (!PLR_FLAGGED(i, PLR_OOZARU) && (!IS_ICER(i) || !IS_TRANSFORMED(i)) && GET_GENOME(i, 0) < 11) {
+			send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], GET_PC_HEIGHT(i), GET_PC_WEIGHT(i));
+		}
+		else if (IS_ICER(i) && PLR_FLAGGED(i, PLR_TRANS1)) {
+			int num1 = GET_PC_HEIGHT(i) * 3;
+			int num2 = GET_PC_WEIGHT(i) * 4;
+			send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], num1, num2);
+		}
+		else if (IS_ICER(i) && PLR_FLAGGED(i, PLR_TRANS2)) {
+			int num1 = GET_PC_HEIGHT(i) * 3;
+			int num2 = GET_PC_WEIGHT(i) * 4;
+			send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], num1, num2);
+		}
+		else if (IS_ICER(i) && PLR_FLAGGED(i, PLR_TRANS3)) {
+			int num1 = GET_PC_HEIGHT(i) * 1.5;
+			int num2 = GET_PC_WEIGHT(i) * 2;
+			send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], num1, num2);
+		}
+		else if (IS_ICER(i) && PLR_FLAGGED(i, PLR_TRANS4)) {
+			int num1 = GET_PC_HEIGHT(i) * 2;
+			int num2 = GET_PC_WEIGHT(i) * 3;
+			send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], num1, num2);
+		}
+		else if (PLR_FLAGGED(i, PLR_OOZARU) || GET_GENOME(i, 0) == 11) {
+			int num1 = GET_PC_HEIGHT(i) * 10;
+			int num2 = GET_PC_WEIGHT(i) * 50;
+			send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], num1, num2);
+		}
+		if (i == ch) {
+			send_to_char(ch, " and ");
+		}
+		else if (GET_AGE(ch) >= GET_AGE(i) + 30) {
+			send_to_char(ch, " appears to be very much younger than you, and ");
+		}
+		else if (GET_AGE(ch) >= GET_AGE(i) + 25) {
+			send_to_char(ch, " appears to be much younger than you, and ");
+		}
+		else if (GET_AGE(ch) >= GET_AGE(i) + 15) {
+			send_to_char(ch, " appears to be a good amount younger than you, and ");
+		}
+		else if (GET_AGE(ch) >= GET_AGE(i) + 10) {
+			send_to_char(ch, " appears to be about a decade younger than you, and ");
+		}
+		else if (GET_AGE(ch) >= GET_AGE(i) + 5) {
+			send_to_char(ch, " appears to be several years younger than you, and ");
+		}
+		else if (GET_AGE(ch) >= GET_AGE(i) + 2) {
+			send_to_char(ch, " appears to be a bit younger than you, and ");
+		}
+		else if (GET_AGE(ch) > GET_AGE(i)) {
+			send_to_char(ch, " appears to be slightly younger than you, and ");
+		}
+		else if (GET_AGE(ch) == GET_AGE(i)) {
+			send_to_char(ch, " appears to be the same age as you, and ");
+		}
+		if (GET_AGE(i) >= GET_AGE(ch) + 30) {
+			send_to_char(ch, " appears to be very much older than you, and ");
+		}
+		else if (GET_AGE(i) >= GET_AGE(ch) + 25) {
+			send_to_char(ch, " appears to be much older than you, and ");
+		}
+		else if (GET_AGE(i) >= GET_AGE(ch) + 15) {
+			send_to_char(ch, " appears to be a good amount older than you, and ");
+		}
+		else if (GET_AGE(i) >= GET_AGE(ch) + 10) {
+			send_to_char(ch, " appears to be about a decade older than you, and ");
+		}
+		else if (GET_AGE(i) >= GET_AGE(ch) + 5) {
+			send_to_char(ch, " appears to be several years older than you, and ");
+		}
+		else if (GET_AGE(i) >= GET_AGE(ch) + 2) {
+			send_to_char(ch, " appears to be a bit older than you, and ");
+		}
+		else if (GET_AGE(i) > GET_AGE(ch)) {
+			send_to_char(ch, " appears to be slightly older than you, and ");
+		}
+	}
+	diag_char_to_char(i, ch);
+	found = FALSE;
+	for (j = 0; !found && j < NUM_WEARS; j++)
+		if (GET_EQ(i, j) && CAN_SEE_OBJ(ch, GET_EQ(i, j)))
+			found = TRUE;
 
-  if (found && (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NOEQSEE))) {
-    send_to_char(ch, "\r\n");	/* act() does capitalization. */
-    if (!PLR_FLAGGED(i, PLR_DISGUISED)) {
-    act("$n is using:", FALSE, i, 0, ch, TO_VICT);
-    }
-    else {
-    act("The disguised person is using:", FALSE, i, 0, ch, TO_VICT);
-    }
-    for (j = 0; j < NUM_WEARS; j++)
-      if (GET_EQ(i, j) && CAN_SEE_OBJ(ch, GET_EQ(i, j)) && (j != WEAR_WIELD1 && j != WEAR_WIELD2)) {
-        send_to_char(ch, "%s", wear_where[j]);
-        show_obj_to_char(GET_EQ(i, j), ch, SHOW_OBJ_SHORT);
-       if (OBJ_FLAGGED(GET_EQ(i, j), ITEM_SHEATH)) {
-         struct obj_data *obj2 = NULL, *next_obj = NULL, *sheath = GET_EQ(i, j);
-         for (obj2 = sheath->contains; obj2; obj2 = next_obj) {
-         next_obj = obj2->next_content;
-         if (obj2) {
-          send_to_char(ch, "@D  ---- @YSheathed@D ----@c> @n");
-          show_obj_to_char(obj2, ch, SHOW_OBJ_SHORT);
-         }
-        }
-        obj2 = NULL;
-       }
-      } else if (GET_EQ(i, j) && CAN_SEE_OBJ(ch, GET_EQ(i, j)) && (!PLR_FLAGGED(i, PLR_THANDW))) {
-        send_to_char(ch, "%s", wear_where[j]);
-        show_obj_to_char(GET_EQ(i, j), ch, SHOW_OBJ_SHORT);
-       if (OBJ_FLAGGED(GET_EQ(i, j), ITEM_SHEATH)) {
-         struct obj_data *obj2 = NULL, *next_obj = NULL, *sheath = GET_EQ(i, j);
-         for (obj2 = sheath->contains; obj2; obj2 = next_obj) {
-         next_obj = obj2->next_content;
-         if (obj2) {
-          send_to_char(ch, "@D  ---- @YSheathed@D ----@c> @n");
-          show_obj_to_char(obj2, ch, SHOW_OBJ_SHORT);
-         }
+	if (found && (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NOEQSEE))) {
+		send_to_char(ch, "\r\n");	/* act() does capitalization. */
+		if (!PLR_FLAGGED(i, PLR_DISGUISED)) {
+			act("$n is using:", FALSE, i, 0, ch, TO_VICT);
+		}
+		else {
+			act("The disguised person is using:", FALSE, i, 0, ch, TO_VICT);
+		}
+		for (j = 0; j < NUM_WEARS; j++)
+			if (GET_EQ(i, j) && CAN_SEE_OBJ(ch, GET_EQ(i, j)) && (j != WEAR_WIELD1 && j != WEAR_WIELD2)) {
+				send_to_char(ch, "%s", wear_where[j]);
+				show_obj_to_char(GET_EQ(i, j), ch, SHOW_OBJ_SHORT);
+				if (OBJ_FLAGGED(GET_EQ(i, j), ITEM_SHEATH)) {
+					struct obj_data *obj2 = NULL, *next_obj = NULL, *sheath = GET_EQ(i, j);
+					for (obj2 = sheath->contains; obj2; obj2 = next_obj) {
+						next_obj = obj2->next_content;
+						if (obj2) {
+							send_to_char(ch, "@D  ---- @YSheathed@D ----@c> @n");
+							show_obj_to_char(obj2, ch, SHOW_OBJ_SHORT);
+						}
+					}
+					obj2 = NULL;
+				}
+			}
+			else if (GET_EQ(i, j) && CAN_SEE_OBJ(ch, GET_EQ(i, j)) && (!PLR_FLAGGED(i, PLR_THANDW))) {
+				send_to_char(ch, "%s", wear_where[j]);
+				show_obj_to_char(GET_EQ(i, j), ch, SHOW_OBJ_SHORT);
+				if (OBJ_FLAGGED(GET_EQ(i, j), ITEM_SHEATH)) {
+					struct obj_data *obj2 = NULL, *next_obj = NULL, *sheath = GET_EQ(i, j);
+					for (obj2 = sheath->contains; obj2; obj2 = next_obj) {
+						next_obj = obj2->next_content;
+						if (obj2) {
+							send_to_char(ch, "@D  ---- @YSheathed@D ----@c> @n");
+							show_obj_to_char(obj2, ch, SHOW_OBJ_SHORT);
+						}
 
-        }
-        obj2 = NULL;
-       }
-      } else if (GET_EQ(i, j) && CAN_SEE_OBJ(ch, GET_EQ(i, j)) && (PLR_FLAGGED(i, PLR_THANDW))) {
-        send_to_char(ch, "@c<@CWielded by B. Hands@c>@n ");
-        show_obj_to_char(GET_EQ(i, j), ch, SHOW_OBJ_SHORT);
-      }
-  }
-  if (ch != i && ((GET_SKILL(ch, SKILL_KEEN) && AFF_FLAGGED(ch, AFF_SNEAK)) || GET_ADMLEVEL(ch))) {
-    found = FALSE;
-    act("\r\nYou attempt to peek at $s inventory:", FALSE, i, 0, ch, TO_VICT);
-    if (CAN_SEE(i, ch))
-     act("$n tries to evaluate what you have in your inventory.", TRUE, ch, 0, i, TO_VICT);
-    if (GET_SKILL(ch, SKILL_KEEN) > axion_dice(0) && (!IS_NPC(i) || GET_ADMLEVEL(ch) > 1)) {
-     for (tmp_obj = i->carrying; tmp_obj; tmp_obj = tmp_obj->next_content) {
-      if (CAN_SEE_OBJ(ch, tmp_obj) &&
-          (ADM_FLAGGED(ch, ADM_SEEINV) || (rand_number(0, 20) < GET_LEVEL(ch)))) {
-	show_obj_to_char(tmp_obj, ch, SHOW_OBJ_SHORT);
-	found = TRUE;
-      }
-     }
-     improve_skill(ch, SKILL_KEEN, 1);
-    }
-    else if (IS_NPC(i) && GET_ADMLEVEL(ch) < 2) {
-     return;
-    }
-    else {
-     act("You are unsure about $s inventory.", FALSE, i, 0, ch, TO_VICT);
-     if (CAN_SEE(i, ch))
-      act("$n didn't seem to get a good enough look.", TRUE, ch, 0, i, TO_VICT);
-     improve_skill(ch, SKILL_KEEN, 1);
-     return;
-    }
-    if (!found) {
-      send_to_char(ch, "You can't see anything.\r\n");
-      improve_skill(ch, SKILL_KEEN, 1);
-    }
-  }
+					}
+					obj2 = NULL;
+				}
+			}
+			else if (GET_EQ(i, j) && CAN_SEE_OBJ(ch, GET_EQ(i, j)) && (PLR_FLAGGED(i, PLR_THANDW))) {
+				send_to_char(ch, "@c<@CWielded by B. Hands@c>@n ");
+				show_obj_to_char(GET_EQ(i, j), ch, SHOW_OBJ_SHORT);
+			}
+	}
+	if (ch != i && ((GET_SKILL(ch, SKILL_KEEN) && AFF_FLAGGED(ch, AFF_SNEAK)) || GET_ADMLEVEL(ch))) {
+		found = FALSE;
+		act("\r\nYou attempt to peek at $s inventory:", FALSE, i, 0, ch, TO_VICT);
+		if (CAN_SEE(i, ch))
+			act("$n tries to evaluate what you have in your inventory.", TRUE, ch, 0, i, TO_VICT);
+		if (GET_SKILL(ch, SKILL_KEEN) > axion_dice(0) && (!IS_NPC(i) || GET_ADMLEVEL(ch) > 1)) {
+			for (tmp_obj = i->carrying; tmp_obj; tmp_obj = tmp_obj->next_content) {
+				if (CAN_SEE_OBJ(ch, tmp_obj) &&
+					(ADM_FLAGGED(ch, ADM_SEEINV) || (rand_number(0, 20) < GET_LEVEL(ch)))) {
+					show_obj_to_char(tmp_obj, ch, SHOW_OBJ_SHORT);
+					found = TRUE;
+				}
+			}
+			improve_skill(ch, SKILL_KEEN, 1);
+		}
+		else if (IS_NPC(i) && GET_ADMLEVEL(ch) < 2) {
+			return;
+		}
+		else {
+			act("You are unsure about $s inventory.", FALSE, i, 0, ch, TO_VICT);
+			if (CAN_SEE(i, ch))
+				act("$n didn't seem to get a good enough look.", TRUE, ch, 0, i, TO_VICT);
+			improve_skill(ch, SKILL_KEEN, 1);
+			return;
+		}
+		if (!found) {
+			send_to_char(ch, "You can't see anything.\r\n");
+			improve_skill(ch, SKILL_KEEN, 1);
+		}
+	}
 }
 
 static void list_one_char(struct char_data *i, struct char_data *ch)
@@ -5987,490 +6001,523 @@ ACMD(do_status)
 
   one_argument(argument, arg);
 
- if (!*arg) {
-  send_to_char(ch, "@D<@b------------------------@D[@YYour Status@D]@b-------------------------@D>@n\r\n\r\n");
-  send_to_char(ch, "            @D---------------@CAppearance@D---------------\n");
-  bringdesc(ch, ch);
-  send_to_char(ch, "            @D---------------@RAppendages@D---------------\n");
+ 	if (!*arg) {
+		send_to_char(ch, "@D<@b------------------------@D[@YYour Status@D]@b-------------------------@D>@n\r\n\r\n");
+		send_to_char(ch, "            @D---------------@CAppearance@D---------------\n");
+		bringdesc(ch, ch);
+		send_to_char(ch, "            @D---------------@RAppendages@D---------------\n");
 
-  if (PLR_FLAGGED(ch, PLR_HEAD)) {
-   send_to_char(ch, "            @D[@cHead        @D: @GHave.          @D]@n\r\n");
-  }
-  if (!PLR_FLAGGED(ch, PLR_HEAD)) {
-   send_to_char(ch, "            @D[@cHead        @D: @rMissing.         @D]@n\r\n");
-  }
-  if (GET_LIMBCOND(ch, 1) >= 50 && !PLR_FLAGGED(ch, PLR_CRARM)) {
-   send_to_char(ch, "            @D[@cRight Arm   @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(ch, 1), "%", "%");
-  } else if (GET_LIMBCOND(ch, 1) > 0 && !PLR_FLAGGED(ch, PLR_CRARM)) {
-   send_to_char(ch, "            @D[@cRight Arm   @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", GET_LIMBCOND(ch, 1), "%", "%");
-  } else if (GET_LIMBCOND(ch, 1) > 0 && PLR_FLAGGED(ch, PLR_CRARM)) {
-   send_to_char(ch, "            @D[@cRight Arm   @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", GET_LIMBCOND(ch, 1), "%", "%");
-  } else if (GET_LIMBCOND(ch, 1) <= 0) {
-   send_to_char(ch, "            @D[@cRight Arm   @D: @rMissing.         @D]@n\r\n");
-  }
-  if (GET_LIMBCOND(ch, 2) >= 50 && !PLR_FLAGGED(ch, PLR_CLARM)) {
-   send_to_char(ch, "            @D[@cLeft Arm    @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(ch, 2), "%", "%");
-  } else if (GET_LIMBCOND(ch, 2) > 0 && !PLR_FLAGGED(ch, PLR_CLARM)) {
-   send_to_char(ch, "            @D[@cLeft Arm    @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", GET_LIMBCOND(ch, 2), "%", "%");
-  } else if (GET_LIMBCOND(ch, 2) > 0 && PLR_FLAGGED(ch, PLR_CLARM)) {
-   send_to_char(ch, "            @D[@cLeft Arm    @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", GET_LIMBCOND(ch, 2), "%", "%");
-  } else if (GET_LIMBCOND(ch, 2) <= 0) {
-   send_to_char(ch, "            @D[@cLeft Arm    @D: @rMissing.         @D]@n\r\n");
-  }
-  if (GET_LIMBCOND(ch, 3) >= 50 && !PLR_FLAGGED(ch, PLR_CLARM)) {
-   send_to_char(ch, "            @D[@cRight Leg   @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(ch, 3), "%", "%");
-  } else if (GET_LIMBCOND(ch, 3) > 0 && !PLR_FLAGGED(ch, PLR_CRLEG)) {
-   send_to_char(ch, "            @D[@cRight Leg   @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", GET_LIMBCOND(ch, 3), "%", "%");
-  } else if (GET_LIMBCOND(ch, 3) > 0 && PLR_FLAGGED(ch, PLR_CRLEG)) {
-   send_to_char(ch, "            @D[@cRight Leg   @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", GET_LIMBCOND(ch, 3), "%", "%");
-  } else if (GET_LIMBCOND(ch, 3) <= 0) {
-   send_to_char(ch, "            @D[@cRight Leg   @D: @rMissing.         @D]@n\r\n");
-  }
-  if (GET_LIMBCOND(ch, 4) >= 50 && !PLR_FLAGGED(ch, PLR_CLLEG)) {
-   send_to_char(ch, "            @D[@cLeft Leg    @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(ch, 4), "%", "%");
-  } else if (GET_LIMBCOND(ch, 4) > 0 && !PLR_FLAGGED(ch, PLR_CLLEG)) {
-   send_to_char(ch, "            @D[@cLeft Leg    @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", GET_LIMBCOND(ch, 4), "%", "%");
-  } else if (GET_LIMBCOND(ch, 4) > 0 && PLR_FLAGGED(ch, PLR_CLLEG)) {
-   send_to_char(ch, "            @D[@cLeft Leg    @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", GET_LIMBCOND(ch, 4), "%", "%");
-  } else if (GET_LIMBCOND(ch, 4) <= 0) {
-   send_to_char(ch, "            @D[@cLeft Leg    @D: @rMissing.         @D]@n\r\n");
-  }
+		if (PLR_FLAGGED(ch, PLR_HEAD)) {
+			send_to_char(ch, "            @D[@cHead        @D: @GHave.          @D]@n\r\n");
+		}
+		if (!PLR_FLAGGED(ch, PLR_HEAD)) {
+			send_to_char(ch, "            @D[@cHead        @D: @rMissing.         @D]@n\r\n");
+		}
+		if (GET_LIMBCOND(ch, 1) >= 50 && !PLR_FLAGGED(ch, PLR_CRARM)) {
+			send_to_char(ch, "            @D[@cRight Arm   @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(ch, 1), "%", "%");
+		}
+		else if (GET_LIMBCOND(ch, 1) > 0 && !PLR_FLAGGED(ch, PLR_CRARM)) {
+			send_to_char(ch, "            @D[@cRight Arm   @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", GET_LIMBCOND(ch, 1), "%", "%");
+		}
+		else if (GET_LIMBCOND(ch, 1) > 0 && PLR_FLAGGED(ch, PLR_CRARM)) {
+			send_to_char(ch, "            @D[@cRight Arm   @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", GET_LIMBCOND(ch, 1), "%", "%");
+		}
+		else if (GET_LIMBCOND(ch, 1) <= 0) {
+			send_to_char(ch, "            @D[@cRight Arm   @D: @rMissing.         @D]@n\r\n");
+		}
+		if (GET_LIMBCOND(ch, 2) >= 50 && !PLR_FLAGGED(ch, PLR_CLARM)) {
+			send_to_char(ch, "            @D[@cLeft Arm    @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(ch, 2), "%", "%");
+		}
+		else if (GET_LIMBCOND(ch, 2) > 0 && !PLR_FLAGGED(ch, PLR_CLARM)) {
+			send_to_char(ch, "            @D[@cLeft Arm    @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", GET_LIMBCOND(ch, 2), "%", "%");
+		}
+		else if (GET_LIMBCOND(ch, 2) > 0 && PLR_FLAGGED(ch, PLR_CLARM)) {
+			send_to_char(ch, "            @D[@cLeft Arm    @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", GET_LIMBCOND(ch, 2), "%", "%");
+		}
+		else if (GET_LIMBCOND(ch, 2) <= 0) {
+			send_to_char(ch, "            @D[@cLeft Arm    @D: @rMissing.         @D]@n\r\n");
+		}
+		if (GET_LIMBCOND(ch, 3) >= 50 && !PLR_FLAGGED(ch, PLR_CLARM)) {
+			send_to_char(ch, "            @D[@cRight Leg   @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(ch, 3), "%", "%");
+		}
+		else if (GET_LIMBCOND(ch, 3) > 0 && !PLR_FLAGGED(ch, PLR_CRLEG)) {
+			send_to_char(ch, "            @D[@cRight Leg   @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", GET_LIMBCOND(ch, 3), "%", "%");
+		}
+		else if (GET_LIMBCOND(ch, 3) > 0 && PLR_FLAGGED(ch, PLR_CRLEG)) {
+			send_to_char(ch, "            @D[@cRight Leg   @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", GET_LIMBCOND(ch, 3), "%", "%");
+		}
+		else if (GET_LIMBCOND(ch, 3) <= 0) {
+			send_to_char(ch, "            @D[@cRight Leg   @D: @rMissing.         @D]@n\r\n");
+		}
+		if (GET_LIMBCOND(ch, 4) >= 50 && !PLR_FLAGGED(ch, PLR_CLLEG)) {
+			send_to_char(ch, "            @D[@cLeft Leg    @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(ch, 4), "%", "%");
+		}
+		else if (GET_LIMBCOND(ch, 4) > 0 && !PLR_FLAGGED(ch, PLR_CLLEG)) {
+			send_to_char(ch, "            @D[@cLeft Leg    @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", GET_LIMBCOND(ch, 4), "%", "%");
+		}
+		else if (GET_LIMBCOND(ch, 4) > 0 && PLR_FLAGGED(ch, PLR_CLLEG)) {
+			send_to_char(ch, "            @D[@cLeft Leg    @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", GET_LIMBCOND(ch, 4), "%", "%");
+		}
+		else if (GET_LIMBCOND(ch, 4) <= 0) {
+			send_to_char(ch, "            @D[@cLeft Leg    @D: @rMissing.         @D]@n\r\n");
+		}
 
-  if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && PLR_FLAGGED(ch, PLR_STAIL)) {
-   send_to_char(ch, "            @D[@cTail        @D: @GHave.            @D]@n\r\n");
-  }
-  if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && !PLR_FLAGGED(ch, PLR_STAIL)) {
-   send_to_char(ch, "            @D[@cTail        @D: @rMissing.         @D]@n\r\n");
-  }
-  if ((IS_ICER(ch) || IS_BIO(ch)) && PLR_FLAGGED(ch, PLR_TAIL)) {
-   send_to_char(ch, "            @D[@cTail        @D: @GHave.            @D]@n\r\n");
-  }
-  if ((IS_ICER(ch) || IS_BIO(ch)) && !PLR_FLAGGED(ch, PLR_TAIL)) {
-   send_to_char(ch, "            @D[@cTail        @D: @rMissing.         @D]@n\r\n");
-  }
-  send_to_char(ch, "\r\n");
+		if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && PLR_FLAGGED(ch, PLR_STAIL)) {
+			send_to_char(ch, "            @D[@cTail        @D: @GHave.            @D]@n\r\n");
+		}
+		if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && !PLR_FLAGGED(ch, PLR_STAIL)) {
+			send_to_char(ch, "            @D[@cTail        @D: @rMissing.         @D]@n\r\n");
+		}
+		if ((IS_ICER(ch) || IS_BIO(ch)) && PLR_FLAGGED(ch, PLR_TAIL)) {
+			send_to_char(ch, "            @D[@cTail        @D: @GHave.            @D]@n\r\n");
+		}
+		if ((IS_ICER(ch) || IS_BIO(ch)) && !PLR_FLAGGED(ch, PLR_TAIL)) {
+			send_to_char(ch, "            @D[@cTail        @D: @rMissing.         @D]@n\r\n");
+		}
+		send_to_char(ch, "\r\n");
 
-  send_to_char(ch, "         @D-----------------@YHunger@D/@yThirst@D-----------------@n\r\n");
-  if (GET_COND(ch, HUNGER) >= 48) {
-     send_to_char(ch, "         You are full.\r\n");
-  }
-  else if (GET_COND(ch, HUNGER) >= 40) {
-     send_to_char(ch, "         You are nearly full.\r\n");
-  }
-  else if (GET_COND(ch, HUNGER) >= 30) {
-     send_to_char(ch, "         You are not hungry.\r\n");
-  }
-  else if (GET_COND(ch, HUNGER) >= 21) {
-     send_to_char(ch, "         You wouldn't mind a snack.\r\n");
-  }
-  else if (GET_COND(ch, HUNGER) >= 15) {
-     send_to_char(ch, "         You are slightly hungry.\r\n");
-  }
-  else if (GET_COND(ch, HUNGER) >= 10) {
-     send_to_char(ch, "         You are partially hungry.\r\n");
-  }
-  else if (GET_COND(ch, HUNGER) >= 5) {
-     send_to_char(ch, "         You are really hungry.\r\n");
-  }
-  else if (GET_COND(ch, HUNGER) >= 2) {
-     send_to_char(ch, "         You are extremely hungry.\r\n");
-  }
-  else if (GET_COND(ch, HUNGER) >= 0) {
-     send_to_char(ch, "         You are starving!\r\n");
-  }
-  else if (GET_COND(ch, HUNGER) < 0) {
-     send_to_char(ch, "         You need not eat.\r\n");
-  }
-  if (GET_COND(ch, THIRST) >= 48) {
-     send_to_char(ch, "         You are not thirsty.\r\n");
-  }
-  else if (GET_COND(ch, THIRST) >= 40) {
-     send_to_char(ch, "         You are nearly quenched.\r\n");
-  }
-  else if (GET_COND(ch, THIRST) >= 30) {
-     send_to_char(ch, "         You are not thirsty.\r\n");
-  }
-  else if (GET_COND(ch, THIRST) >= 21) {
-     send_to_char(ch, "         You wouldn't mind a drink.\r\n");
-  }
-  else if (GET_COND(ch, THIRST) >= 15) {
-     send_to_char(ch, "         You are slightly thirsty.\r\n");
-  }
-  else if (GET_COND(ch, THIRST) >= 10) {
-     send_to_char(ch, "         You are partially thirsty.\r\n");
-  }
-  else if (GET_COND(ch, THIRST) >= 5) {
-     send_to_char(ch, "         You are really thirsty.\r\n");
-  }
-  else if (GET_COND(ch, THIRST) >= 2) {
-     send_to_char(ch, "         You are extremely thirsty.\r\n");
-  }
-  else if (GET_COND(ch, THIRST) >= 0) {
-     send_to_char(ch, "         You are dehydrated!\r\n");
-  }
-  else if (GET_COND(ch, THIRST) < 0) {
-     send_to_char(ch, "         You need not drink.\r\n");
-  }
-  send_to_char(ch, "         @D--------------------@D[@GInfo@D]---------------------@n\r\n");
-  trans_check(ch, ch);
-  send_to_char(ch, "         You have died %d times.\r\n", GET_DCOUNT(ch));
-  if (PLR_FLAGGED(ch, PLR_NOSHOUT)) {
-  send_to_char(ch, "         You have been @rmuted@n on public channels.\r\n");
-  }
-  if (IN_ROOM(ch) == real_room(9)) {
-  send_to_char(ch, "         You are in punishment hell, so sad....\r\n");
-  }
-  if (!PRF_FLAGGED(ch, PRF_HINTS)) {
-  send_to_char(ch, "         You have hints turned off.\r\n");
-  }
-  if (NEWSUPDATE > GET_LPLAY(ch)) {
-  send_to_char(ch, "         Check the 'news', it has been updated recently.\r\n");
-  }
-  if (has_mail(GET_IDNUM(ch))) {
-  send_to_char(ch, "         Check your mail at the nearest postmaster.\r\n");
-  }
-  if (PRF_FLAGGED(ch, PRF_HIDE)) {
-  send_to_char(ch, "         You are hidden from who and ooc.\r\n");
-  }
-  if (GET_VOICE(ch) != NULL) {
-   send_to_char(ch, "         Your voice desc: '%s'\r\n", GET_VOICE(ch));
-  }
-  if (GET_DISTFEA(ch) == DISTFEA_EYE) {
-   send_to_char(ch, "         Your eyes are your most distinctive feature.\r\n");
-  }
-  if (GET_PREFERENCE(ch) == 0) {
-   send_to_char(ch, "         You preferred a balanced form of fighting.\r\n");
-  } else if (GET_PREFERENCE(ch) == PREFERENCE_KI) {
-   send_to_char(ch, "         You preferred a ki dominate form of fighting.\r\n");
-  } else if (GET_PREFERENCE(ch) == PREFERENCE_WEAPON) {
-   send_to_char(ch, "         You preferred a weapon dominate form of fighting.\r\n");
-  } else if (GET_PREFERENCE(ch) == PREFERENCE_H2H) {
-   send_to_char(ch, "         You preferred a body dominate form of fighting.\r\n");
-  } else if (GET_PREFERENCE(ch) == PREFERENCE_THROWING) {
-   send_to_char(ch, "         You preferred a throwing dominate form of fighting.\r\n");
-  }
-  if (GET_DISTFEA(ch) == DISTFEA_HAIR && !IS_DEMON(ch) && !IS_MAJIN(ch) && !IS_ICER(ch) && !IS_NAMEK(ch)) {
-   send_to_char(ch, "         Your hair is your most distinctive feature.\r\n");
-  } else if (GET_DISTFEA(ch) == DISTFEA_HAIR && IS_DEMON(ch)) {
-   send_to_char(ch, "         Your horns are your most distinctive feature.\r\n");
-  } else if (GET_DISTFEA(ch) == DISTFEA_HAIR && IS_MAJIN(ch)) {
-   send_to_char(ch, "         Your forelock is your most distinctive feature.\r\n");
-  } else if (GET_DISTFEA(ch) == DISTFEA_HAIR && IS_ICER(ch)) {
-   send_to_char(ch, "         Your horns are your most distinctive feature.\r\n");
-  } else if (GET_DISTFEA(ch) == DISTFEA_HAIR && IS_NAMEK(ch)) {
-   send_to_char(ch, "         Your antennae are your most distinctive feature.\r\n");
-  }
+		send_to_char(ch, "         @D-----------------@YHunger@D/@yThirst@D-----------------@n\r\n");
+		if (GET_COND(ch, HUNGER) >= 48) {
+			send_to_char(ch, "         You are full.\r\n");
+		}
+		else if (GET_COND(ch, HUNGER) >= 40) {
+			send_to_char(ch, "         You are nearly full.\r\n");
+		}
+		else if (GET_COND(ch, HUNGER) >= 30) {
+			send_to_char(ch, "         You are not hungry.\r\n");
+		}
+		else if (GET_COND(ch, HUNGER) >= 21) {
+			send_to_char(ch, "         You wouldn't mind a snack.\r\n");
+		}
+		else if (GET_COND(ch, HUNGER) >= 15) {
+			send_to_char(ch, "         You are slightly hungry.\r\n");
+		}
+		else if (GET_COND(ch, HUNGER) >= 10) {
+			send_to_char(ch, "         You are partially hungry.\r\n");
+		}
+		else if (GET_COND(ch, HUNGER) >= 5) {
+			send_to_char(ch, "         You are really hungry.\r\n");
+		}
+		else if (GET_COND(ch, HUNGER) >= 2) {
+			send_to_char(ch, "         You are extremely hungry.\r\n");
+		}
+		else if (GET_COND(ch, HUNGER) >= 0) {
+			send_to_char(ch, "         You are starving!\r\n");
+		}
+		else if (GET_COND(ch, HUNGER) < 0) {
+			send_to_char(ch, "         You need not eat.\r\n");
+		}
+		if (GET_COND(ch, THIRST) >= 48) {
+			send_to_char(ch, "         You are not thirsty.\r\n");
+		}
+		else if (GET_COND(ch, THIRST) >= 40) {
+			send_to_char(ch, "         You are nearly quenched.\r\n");
+		}
+		else if (GET_COND(ch, THIRST) >= 30) {
+			send_to_char(ch, "         You are not thirsty.\r\n");
+		}
+		else if (GET_COND(ch, THIRST) >= 21) {
+			send_to_char(ch, "         You wouldn't mind a drink.\r\n");
+		}
+		else if (GET_COND(ch, THIRST) >= 15) {
+			send_to_char(ch, "         You are slightly thirsty.\r\n");
+		}
+		else if (GET_COND(ch, THIRST) >= 10) {
+			send_to_char(ch, "         You are partially thirsty.\r\n");
+		}
+		else if (GET_COND(ch, THIRST) >= 5) {
+			send_to_char(ch, "         You are really thirsty.\r\n");
+		}
+		else if (GET_COND(ch, THIRST) >= 2) {
+			send_to_char(ch, "         You are extremely thirsty.\r\n");
+		}
+		else if (GET_COND(ch, THIRST) >= 0) {
+			send_to_char(ch, "         You are dehydrated!\r\n");
+		}
+		else if (GET_COND(ch, THIRST) < 0) {
+			send_to_char(ch, "         You need not drink.\r\n");
+		}
+		send_to_char(ch, "         @D--------------------@D[@GInfo@D]---------------------@n\r\n");
+		trans_check(ch, ch);
+		send_to_char(ch, "         You have died %d times.\r\n", GET_DCOUNT(ch));
+		if (PLR_FLAGGED(ch, PLR_NOSHOUT)) {
+			send_to_char(ch, "         You have been @rmuted@n on public channels.\r\n");
+		}
+		if (IN_ROOM(ch) == real_room(9)) {
+			send_to_char(ch, "         You are in punishment hell, so sad....\r\n");
+		}
+		if (!PRF_FLAGGED(ch, PRF_HINTS)) {
+			send_to_char(ch, "         You have hints turned off.\r\n");
+		}
+		if (NEWSUPDATE > GET_LPLAY(ch)) {
+			send_to_char(ch, "         Check the 'news', it has been updated recently.\r\n");
+		}
+		if (has_mail(GET_IDNUM(ch))) {
+			send_to_char(ch, "         Check your mail at the nearest postmaster.\r\n");
+		}
+		if (PRF_FLAGGED(ch, PRF_HIDE)) {
+			send_to_char(ch, "         You are hidden from who and ooc.\r\n");
+		}
+		if (GET_VOICE(ch) != NULL) {
+			send_to_char(ch, "         Your voice desc: '%s'\r\n", GET_VOICE(ch));
+		}
+		if (GET_DISTFEA(ch) == DISTFEA_EYE) {
+			send_to_char(ch, "         Your eyes are your most distinctive feature.\r\n");
+		}
+		if (GET_PREFERENCE(ch) == 0) {
+			send_to_char(ch, "         You preferred a balanced form of fighting.\r\n");
+		}
+		else if (GET_PREFERENCE(ch) == PREFERENCE_KI) {
+			send_to_char(ch, "         You preferred a ki dominate form of fighting.\r\n");
+		}
+		else if (GET_PREFERENCE(ch) == PREFERENCE_WEAPON) {
+			send_to_char(ch, "         You preferred a weapon dominate form of fighting.\r\n");
+		}
+		else if (GET_PREFERENCE(ch) == PREFERENCE_H2H) {
+			send_to_char(ch, "         You preferred a body dominate form of fighting.\r\n");
+		}
+		else if (GET_PREFERENCE(ch) == PREFERENCE_THROWING) {
+			send_to_char(ch, "         You preferred a throwing dominate form of fighting.\r\n");
+		}
+		if (GET_DISTFEA(ch) == DISTFEA_HAIR && !IS_DEMON(ch) && !IS_MAJIN(ch) && !IS_ICER(ch) && !IS_NAMEK(ch)) {
+			send_to_char(ch, "         Your hair is your most distinctive feature.\r\n");
+		}
+		else if (GET_DISTFEA(ch) == DISTFEA_HAIR && IS_DEMON(ch)) {
+			send_to_char(ch, "         Your horns are your most distinctive feature.\r\n");
+		}
+		else if (GET_DISTFEA(ch) == DISTFEA_HAIR && IS_MAJIN(ch)) {
+			send_to_char(ch, "         Your forelock is your most distinctive feature.\r\n");
+		}
+		else if (GET_DISTFEA(ch) == DISTFEA_HAIR && IS_ICER(ch)) {
+			send_to_char(ch, "         Your horns are your most distinctive feature.\r\n");
+		}
+		else if (GET_DISTFEA(ch) == DISTFEA_HAIR && IS_NAMEK(ch)) {
+			send_to_char(ch, "         Your antennae are your most distinctive feature.\r\n");
+		}
 
-  if (GET_DISTFEA(ch) == DISTFEA_SKIN) {
-   send_to_char(ch, "         Your skin is your most distinctive feature.\r\n");
-  }
-  if (GET_DISTFEA(ch) == DISTFEA_HEIGHT) {
-   send_to_char(ch, "         Your height is your most distinctive feature.\r\n");
-  }
-  if (GET_DISTFEA(ch) == DISTFEA_WEIGHT) {
-   send_to_char(ch, "         Your weight is your most distinctive feature.\r\n");
-  }
-  if (GET_EQ(ch, WEAR_EYE)) {
-   struct obj_data *obj = GET_EQ(ch, WEAR_EYE);
-   if (SFREQ(obj) == 0) {
-    SFREQ(obj) = 1;
-   }
-   send_to_char(ch, "         Your scouter is on frequency @G%d@n\r\n", SFREQ(obj));
-   obj = NULL;
-  }
-  if (GET_CHARGE(ch) > 0) {
-       send_to_char(ch, "         You have @C%s@n ki charged.\r\n", add_commas(GET_CHARGE(ch)));
-  }
-  if (GET_KAIOKEN(ch) > 0) {
-       send_to_char(ch, "         You are focusing Kaioken x %d.\r\n", GET_KAIOKEN(ch));
-  }
-  if (AFF_FLAGGED(ch, AFF_SANCTUARY)) {
-   send_to_char(ch, "         You are surrounded by a barrier @D(@Y%s@D)@n\r\n", add_commas(GET_BARRIER(ch)));
-  }
-  if (AFF_FLAGGED(ch, AFF_FIRESHIELD)) {
-   send_to_char(ch, "         You are surrounded by flames!@n\r\n");
-  }
-  if (GET_SUPPRESS(ch) > 0) {
-       send_to_char(ch, "         You are suppressing current PL to %"I64T".\r\n", GET_SUPPRESS(ch));
-  }
-  if (IS_MAJIN(ch)) {
-       send_to_char(ch, "         You have ingested %d people.\r\n", GET_ABSORBS(ch));
-  }
-  if (IS_BIO(ch)) {
-       send_to_char(ch, "         You have %d absorbs left.\r\n", GET_ABSORBS(ch));
-  }
-       send_to_char(ch, "         You have %s colored aura.\r\n", aura_types[GET_AURA(ch)]);
+		if (GET_DISTFEA(ch) == DISTFEA_SKIN) {
+			send_to_char(ch, "         Your skin is your most distinctive feature.\r\n");
+		}
+		if (GET_DISTFEA(ch) == DISTFEA_HEIGHT) {
+			send_to_char(ch, "         Your height is your most distinctive feature.\r\n");
+		}
+		if (GET_DISTFEA(ch) == DISTFEA_WEIGHT) {
+			send_to_char(ch, "         Your weight is your most distinctive feature.\r\n");
+		}
+		if (GET_EQ(ch, WEAR_EYE)) {
+			struct obj_data *obj = GET_EQ(ch, WEAR_EYE);
+			if (SFREQ(obj) == 0) {
+				SFREQ(obj) = 1;
+			}
+			send_to_char(ch, "         Your scouter is on frequency @G%d@n\r\n", SFREQ(obj));
+			obj = NULL;
+		}
+		if (GET_CHARGE(ch) > 0) {
+			send_to_char(ch, "         You have @C%s@n ki charged.\r\n", add_commas(GET_CHARGE(ch)));
+		}
+		if (GET_KAIOKEN(ch) > 0) {
+			send_to_char(ch, "         You are focusing Kaioken x %d.\r\n", GET_KAIOKEN(ch));
+		}
+		if (AFF_FLAGGED(ch, AFF_SANCTUARY)) {
+			send_to_char(ch, "         You are surrounded by a barrier @D(@Y%s@D)@n\r\n", add_commas(GET_BARRIER(ch)));
+		}
+		if (AFF_FLAGGED(ch, AFF_FIRESHIELD)) {
+			send_to_char(ch, "         You are surrounded by flames!@n\r\n");
+		}
+		if (GET_SUPPRESS(ch) > 0) {
+			send_to_char(ch, "         You are suppressing current PL to %"I64T".\r\n", GET_SUPPRESS(ch));
+		}
+		if (IS_MAJIN(ch)) {
+			send_to_char(ch, "         You have ingested %d people.\r\n", GET_ABSORBS(ch));
+		}
+		if (IS_BIO(ch)) {
+			send_to_char(ch, "         You have %d absorbs left.\r\n", GET_ABSORBS(ch));
+		}
+		send_to_char(ch, "         You have %s colored aura.\r\n", aura_types[GET_AURA(ch)]);
 
-  if (GET_LEVEL(ch) < 100) {
-   if ((IS_ANDROID(ch) && PLR_FLAGGED(ch, PLR_ABSORB)) || (!IS_ANDROID(ch) && !IS_BIO(ch) && !IS_MAJIN(ch))) {
-       send_to_char(ch, "         @R%s@n to SC a stat this level.\r\n", add_commas(show_softcap(ch)));
-   } else {
-       send_to_char(ch, "         @R%s@n in PL/KI/ST combined to SC this level.\r\n", add_commas(show_softcap(ch)));
-   }
-  } else {
-       send_to_char(ch, "         Your strengths are potentially limitless.\r\n");
-  }
+		if (GET_LEVEL(ch) < 100) {
+			if ((IS_ANDROID(ch) && PLR_FLAGGED(ch, PLR_ABSORB)) || (!IS_ANDROID(ch) && !IS_BIO(ch) && !IS_MAJIN(ch))) {
+				send_to_char(ch, "         @R%s@n to SC a stat this level.\r\n", add_commas(show_softcap(ch)));
+			}
+			else {
+				send_to_char(ch, "         @R%s@n in PL/KI/ST combined to SC this level.\r\n", add_commas(show_softcap(ch)));
+			}
+		}
+		else {
+			send_to_char(ch, "         Your strengths are potentially limitless.\r\n");
+		}
 
-  if (GET_FORGETING(ch) != 0) {
-   send_to_char(ch, "         @MForgetting @D[@m%s - %s@D]@n\r\n", spell_info[GET_FORGETING(ch)].name, forget_level[GET_FORGET_COUNT(ch)]);
-  } else {
-   send_to_char(ch, "         @MForgetting @D[@mNothing.@D]@n\r\n");
-  }
+		if (GET_FORGETING(ch) != 0) {
+			send_to_char(ch, "         @MForgetting @D[@m%s - %s@D]@n\r\n", spell_info[GET_FORGETING(ch)].name, forget_level[GET_FORGET_COUNT(ch)]);
+		}
+		else {
+			send_to_char(ch, "         @MForgetting @D[@mNothing.@D]@n\r\n");
+		}
 
-  if (GET_SKILL(ch, SKILL_DAGGER) > 0) {
-   if (GET_BACKSTAB_COOL(ch) > 0) {
-    send_to_char(ch, "         @yYou can't preform a backstab yet.@n\r\n");
-   } else {
-    send_to_char(ch, "         @YYou can backstab.@n\r\n");
-   }
-  }
-  
-   if (GET_FEATURE(ch)) {
-   send_to_char(ch, "         Extra Feature: @C%s@n\r\n", GET_FEATURE(ch));
-  }
-  
-  if (GET_RDISPLAY(ch)) {
-    if (GET_RDISPLAY(ch) != "Empty") {
-     send_to_char(ch, "         Room Display: @C...%s@n\r\n", GET_RDISPLAY(ch));
-	}
-  }
+		if (GET_SKILL(ch, SKILL_DAGGER) > 0) {
+			if (GET_BACKSTAB_COOL(ch) > 0) {
+				send_to_char(ch, "         @yYou can't preform a backstab yet.@n\r\n");
+			}
+			else {
+				send_to_char(ch, "         @YYou can backstab.@n\r\n");
+			}
+		}
 
-  send_to_char(ch, "\r\n@D<@b-------------------------@D[@BCondition@D]@b--------------------------@D>@n\r\n");
+		if (GET_FEATURE(ch)) {
+			send_to_char(ch, "         Extra Feature: @C%s@n\r\n", GET_FEATURE(ch));
+		}
 
- if (GET_BONUS(ch, BONUS_INSOMNIAC)) {
-   send_to_char(ch, "You can not sleep.\r\n");
-  } else {
-	  if (GET_SLEEPT(ch) > 6 && GET_POS(ch) != POS_SLEEPING) {
-	   send_to_char(ch, "You are well rested.\r\n");
-	  }
-	  else if (GET_SLEEPT(ch) > 6 && GET_POS(ch) == POS_SLEEPING) {
-	   send_to_char(ch, "You are getting the rest you need.\r\n");
-	  }
-	  else if (GET_SLEEPT(ch) > 4) {
-	   send_to_char(ch, "You are rested.\r\n");
-	  }
-	  else if (GET_SLEEPT(ch) > 2) {
-	   send_to_char(ch, "You are not sleepy.\r\n");
-	  }
-	  else if (GET_SLEEPT(ch) >= 1) {
-	   send_to_char(ch, "You are getting a little sleepy.\r\n");
-	  }
-	  else if (GET_SLEEPT(ch) == 0) {
-	   send_to_char(ch, "You could sleep at any time.\r\n");
-	  }
-	}
-  
-  
-  if (GET_RELAXCOUNT(ch) > 464) {
-   send_to_char(ch, "You are far too at ease to train hard like you should. Get out of the house more often.\r\n");
-  } else if (GET_RELAXCOUNT(ch) > 232) {
-   send_to_char(ch, "You are too at ease to train hard like you should. Get out of the house more often.\r\n");
-  } else if (GET_RELAXCOUNT(ch) > 116) {
-   send_to_char(ch, "You are a bit at ease and your training suffers. Get out of the house more often.\r\n");
-  }
+		if (GET_RDISPLAY(ch)) {
+			if (GET_RDISPLAY(ch) != "Empty") {
+				send_to_char(ch, "         Room Display: @C...%s@n\r\n", GET_RDISPLAY(ch));
+			}
+		}
 
-  if (GET_MIMIC(ch) > 0) {
-   send_to_char(ch, "You are mimicing the general appearance of %s %s\r\n", AN(LRACE(ch)), LRACE(ch));
-  }
-  if (IS_MUTANT(ch)) {
-   send_to_char(ch, "Your Mutations:\r\n");
-   if (GET_GENOME(ch, 0) == 1) {
-    send_to_char(ch, "  Extreme Speed.\r\n");
-   }
-   if (GET_GENOME(ch, 0) == 2) {
-    send_to_char(ch, "  Increased Cell Regeneration.\r\n");
-   }
-   if (GET_GENOME(ch, 0) == 3) {
-    send_to_char(ch, "  Extreme Reflexes.\r\n");
-   }
-   if (GET_GENOME(ch, 0) == 4) {
-    send_to_char(ch, "  Infravision.\r\n");
-   }
-   if (GET_GENOME(ch, 0) == 5) {
-    send_to_char(ch, "  Natural Camo.\r\n");
-   }
-   if (GET_GENOME(ch, 0) == 6) {
-    send_to_char(ch, "  Limb Regen.\r\n");
-   }
-   if (GET_GENOME(ch, 0) == 7) {
-    send_to_char(ch, "  Poisonous (you can use the bite attack).\r\n");
-   }
-   if (GET_GENOME(ch, 0) == 8) {
-    send_to_char(ch, "  Rubbery Body.\r\n");
-   }
-   if (GET_GENOME(ch, 0) == 9) {
-    send_to_char(ch, "  Innate Telepathy.\r\n");
-   }
-   if (GET_GENOME(ch, 0) == 10) {
-    send_to_char(ch, "  Natural Energy.\r\n");
-   }
-   if (GET_GENOME(ch, 1) == 1) {
-    send_to_char(ch, "  Extreme Speed.\r\n");
-   }
-   if (GET_GENOME(ch, 1) == 2) {
-    send_to_char(ch, "  Increased Cell Regeneration.\r\n");
-   }
-   if (GET_GENOME(ch, 1) == 3) {
-    send_to_char(ch, "  Extreme Reflexes.\r\n");
-   }
-   if (GET_GENOME(ch, 1) == 4) {
-    send_to_char(ch, "  Infravision.\r\n");
-   }
-   if (GET_GENOME(ch, 1) == 5) {
-    send_to_char(ch, "  Natural Camo.\r\n");
-   }
-   if (GET_GENOME(ch, 1) == 6) {
-    send_to_char(ch, "  Limb Regen.\r\n");
-   }
-   if (GET_GENOME(ch, 1) == 7) {
-    send_to_char(ch, "  Poisonous (you can use the bite attack).\r\n");
-   }
-   if (GET_GENOME(ch, 1) == 8) {
-    send_to_char(ch, "  Rubbery Body.\r\n");
-   }
-   if (GET_GENOME(ch, 1) == 9) {
-    send_to_char(ch, "  Innate Telepathy.\r\n");
-   }
-   if (GET_GENOME(ch, 1) == 10) {
-    send_to_char(ch, "  Natural Energy.\r\n");
-   }
-  }
-  if (IS_BIO(ch)) {
-   send_to_char(ch, "Your genes carry:\r\n");
-   if (GET_GENOME(ch, 0) == 1) {
-    send_to_char(ch, "  Human DNA.\r\n");
-   }
-   if (GET_GENOME(ch, 0) == 2) {
-    send_to_char(ch, "  Saiyan DNA.\r\n");
-   }
-   if (GET_GENOME(ch, 0) == 3) {
-    send_to_char(ch, "  Namek DNA.\r\n");
-   }
-   if (GET_GENOME(ch, 0) == 4) {
-    send_to_char(ch, "  Icer DNA.\r\n");
-   }
-   if (GET_GENOME(ch, 0) == 5) {
-    send_to_char(ch, "  Truffle DNA.\r\n");
-   }
-   if (GET_GENOME(ch, 0) == 6) {
-    send_to_char(ch, "  Arlian DNA.\r\n");
-   }
-   if (GET_GENOME(ch, 0) == 7) {
-    send_to_char(ch, "  Kai DNA.\r\n");
-   }
-   if (GET_GENOME(ch, 0) == 8) {
-    send_to_char(ch, "  Konatsu DNA.\r\n");
-   }
-   if (GET_GENOME(ch, 1) == 1) {
-    send_to_char(ch, "  Human DNA.\r\n");
-   }
-   if (GET_GENOME(ch, 1) == 2) {
-    send_to_char(ch, "  Saiyan DNA.\r\n");
-   }
-   if (GET_GENOME(ch, 1) == 3) {
-    send_to_char(ch, "  Namek DNA.\r\n");
-   }
-   if (GET_GENOME(ch, 1) == 4) {
-    send_to_char(ch, "  Icer DNA.\r\n");
-   }
-   if (GET_GENOME(ch, 1) == 5) {
-    send_to_char(ch, "  Truffle DNA.\r\n");
-   }
-   if (GET_GENOME(ch, 1) == 6) {
-    send_to_char(ch, "  Arlian DNA.\r\n");
-   }
-   if (GET_GENOME(ch, 1) == 7) {
-    send_to_char(ch, "  Kai DNA.\r\n");
-   }
-   if (GET_GENOME(ch, 1) == 8) {
-    send_to_char(ch, "  Konatsu DNA.\r\n");
-   }
-  }
-  if (GET_GENOME(ch, 0) == 11) {
-   send_to_char(ch, "You have used kyodaika.\r\n");
-  }
-  if (PRF_FLAGGED(ch, PRF_NOPARRY)) {
-   send_to_char(ch, "You have decided not to parry attacks.\r\n");
-  }
-  switch (GET_POS(ch)) {
-  case POS_DEAD:
-    send_to_char(ch, "You are DEAD!\r\n");
-  break;
-  case POS_MORTALLYW:
-    send_to_char(ch, "You are mortally wounded! You should seek help!\r\n");
-  break;
-  case POS_INCAP:
-    send_to_char(ch, "You are incapacitated, slowly fading away...\r\n");
-  break;
-  case POS_STUNNED:
-    send_to_char(ch, "You are stunned! You can't move!\r\n");
-  break;
-  case POS_SLEEPING:
-    send_to_char(ch, "You are sleeping.\r\n");
-  break;
-  case POS_RESTING:
-    send_to_char(ch, "You are resting.\r\n");
-  break;
-  case POS_SITTING:
-    send_to_char(ch, "You are sitting.\r\n");
-  break;
-  case POS_FIGHTING:
-    send_to_char(ch, "You are fighting %s.\r\n", FIGHTING(ch) ? PERS(FIGHTING(ch), ch) : "thin air");
-  break;
-  case POS_STANDING:
-    send_to_char(ch, "You are standing.\r\n");
-  break;
-  default:
-    send_to_char(ch, "You are floating.\r\n");
-  break;
-  }
+		send_to_char(ch, "\r\n@D<@b-------------------------@D[@BCondition@D]@b--------------------------@D>@n\r\n");
 
-  if (has_group(ch)) {
-   send_to_char(ch, "@GGroup Victories@D: @w%s@n\r\n", add_commas(GET_GROUPKILLS(ch)));
-  }
+		if (GET_BONUS(ch, BONUS_INSOMNIAC)) {
+			send_to_char(ch, "You can not sleep.\r\n");
+		}
+		else {
+			if (GET_SLEEPT(ch) > 6 && GET_POS(ch) != POS_SLEEPING) {
+				send_to_char(ch, "You are well rested.\r\n");
+			}
+			else if (GET_SLEEPT(ch) > 6 && GET_POS(ch) == POS_SLEEPING) {
+				send_to_char(ch, "You are getting the rest you need.\r\n");
+			}
+			else if (GET_SLEEPT(ch) > 4) {
+				send_to_char(ch, "You are rested.\r\n");
+			}
+			else if (GET_SLEEPT(ch) > 2) {
+				send_to_char(ch, "You are not sleepy.\r\n");
+			}
+			else if (GET_SLEEPT(ch) >= 1) {
+				send_to_char(ch, "You are getting a little sleepy.\r\n");
+			}
+			else if (GET_SLEEPT(ch) == 0) {
+				send_to_char(ch, "You could sleep at any time.\r\n");
+			}
+		}
 
-  if (PLR_FLAGGED(ch, PLR_EYEC)) {
-   send_to_char(ch, "Your eyes are closed.\r\n");
-  }
-  if (AFF_FLAGGED(ch, AFF_SNEAK)) {
-   send_to_char(ch, "You are prepared to sneak where ever you go.\r\n");
-  }
-  if (PLR_FLAGGED(ch, PLR_DISGUISED)) {
-   send_to_char(ch, "You have disguised your facial features.\r\n");
-  }
-  if (AFF_FLAGGED(ch, AFF_FLYING)) {
-   send_to_char(ch, "You are flying.\r\n");
-  }
-  if (PLR_FLAGGED(ch, PLR_PILOTING)) {
-   send_to_char(ch, "You are busy piloting a ship.\r\n");
-  }
-  if (GET_SONG(ch) > 0) {
-   send_to_char(ch, "You are playing @y'@Y%s@y'@n.\r\n", song_types[GET_SONG(ch)]);
-  }
 
-  if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-   send_to_char(ch, "You are prepared to zanzoken.\r\n");
-  }
-  if (AFF_FLAGGED(ch, AFF_HASS)) {
-   send_to_char(ch, "Your arms are moving fast.\r\n");
-  }
-  if (AFF_FLAGGED(ch, AFF_INFUSE)) {
-   send_to_char(ch, "Your ki will be infused in your next physical attack.\r\n");
-  }
-  if (PLR_FLAGGED(ch, PLR_POSE)) {
-   send_to_char(ch, "You are feeling confident from your pose earlier.\r\n");
-  }
-  if (AFF_FLAGGED(ch, AFF_HYDROZAP)) {
-   send_to_char(ch, "You are effected by Kanso Suru.\r\n");
-  }
-  if (GET_COND(ch, DRUNK) > 15)
-    send_to_char(ch, "You are extremely drunk.\r\n"); 
-  else if (GET_COND(ch, DRUNK) > 10)
-    send_to_char(ch, "You are pretty drunk.\r\n");
-  else if (GET_COND(ch, DRUNK) > 4)
-    send_to_char(ch, "You are drunk.\r\n");
-  else if (GET_COND(ch, DRUNK) > 0)
-    send_to_char(ch, "You have an alcoholic buzz.\r\n");
+		if (GET_RELAXCOUNT(ch) > 464) {
+			send_to_char(ch, "You are far too at ease to train hard like you should. Get out of the house more often.\r\n");
+		}
+		else if (GET_RELAXCOUNT(ch) > 232) {
+			send_to_char(ch, "You are too at ease to train hard like you should. Get out of the house more often.\r\n");
+		}
+		else if (GET_RELAXCOUNT(ch) > 116) {
+			send_to_char(ch, "You are a bit at ease and your training suffers. Get out of the house more often.\r\n");
+		}
+
+		if (GET_MIMIC(ch) > 0) {
+			send_to_char(ch, "You are mimicing the general appearance of %s %s\r\n", AN(LRACE(ch)), LRACE(ch));
+		}
+		if (IS_MUTANT(ch)) {
+			send_to_char(ch, "Your Mutations:\r\n");
+			if (GET_GENOME(ch, 0) == 1) {
+				send_to_char(ch, "  Extreme Speed.\r\n");
+			}
+			if (GET_GENOME(ch, 0) == 2) {
+				send_to_char(ch, "  Increased Cell Regeneration.\r\n");
+			}
+			if (GET_GENOME(ch, 0) == 3) {
+				send_to_char(ch, "  Extreme Reflexes.\r\n");
+			}
+			if (GET_GENOME(ch, 0) == 4) {
+				send_to_char(ch, "  Infravision.\r\n");
+			}
+			if (GET_GENOME(ch, 0) == 5) {
+				send_to_char(ch, "  Natural Camo.\r\n");
+			}
+			if (GET_GENOME(ch, 0) == 6) {
+				send_to_char(ch, "  Limb Regen.\r\n");
+			}
+			if (GET_GENOME(ch, 0) == 7) {
+				send_to_char(ch, "  Poisonous (you can use the bite attack).\r\n");
+			}
+			if (GET_GENOME(ch, 0) == 8) {
+				send_to_char(ch, "  Rubbery Body.\r\n");
+			}
+			if (GET_GENOME(ch, 0) == 9) {
+				send_to_char(ch, "  Innate Telepathy.\r\n");
+			}
+			if (GET_GENOME(ch, 0) == 10) {
+				send_to_char(ch, "  Natural Energy.\r\n");
+			}
+			if (GET_GENOME(ch, 1) == 1) {
+				send_to_char(ch, "  Extreme Speed.\r\n");
+			}
+			if (GET_GENOME(ch, 1) == 2) {
+				send_to_char(ch, "  Increased Cell Regeneration.\r\n");
+			}
+			if (GET_GENOME(ch, 1) == 3) {
+				send_to_char(ch, "  Extreme Reflexes.\r\n");
+			}
+			if (GET_GENOME(ch, 1) == 4) {
+				send_to_char(ch, "  Infravision.\r\n");
+			}
+			if (GET_GENOME(ch, 1) == 5) {
+				send_to_char(ch, "  Natural Camo.\r\n");
+			}
+			if (GET_GENOME(ch, 1) == 6) {
+				send_to_char(ch, "  Limb Regen.\r\n");
+			}
+			if (GET_GENOME(ch, 1) == 7) {
+				send_to_char(ch, "  Poisonous (you can use the bite attack).\r\n");
+			}
+			if (GET_GENOME(ch, 1) == 8) {
+				send_to_char(ch, "  Rubbery Body.\r\n");
+			}
+			if (GET_GENOME(ch, 1) == 9) {
+				send_to_char(ch, "  Innate Telepathy.\r\n");
+			}
+			if (GET_GENOME(ch, 1) == 10) {
+				send_to_char(ch, "  Natural Energy.\r\n");
+			}
+		}
+		if (IS_BIO(ch)) {
+			send_to_char(ch, "Your genes carry:\r\n");
+			if (GET_GENOME(ch, 0) == 1) {
+				send_to_char(ch, "  Human DNA.\r\n");
+			}
+			if (GET_GENOME(ch, 0) == 2) {
+				send_to_char(ch, "  Saiyan DNA.\r\n");
+			}
+			if (GET_GENOME(ch, 0) == 3) {
+				send_to_char(ch, "  Namek DNA.\r\n");
+			}
+			if (GET_GENOME(ch, 0) == 4) {
+				send_to_char(ch, "  Icer DNA.\r\n");
+			}
+			if (GET_GENOME(ch, 0) == 5) {
+				send_to_char(ch, "  Truffle DNA.\r\n");
+			}
+			if (GET_GENOME(ch, 0) == 6) {
+				send_to_char(ch, "  Arlian DNA.\r\n");
+			}
+			if (GET_GENOME(ch, 0) == 7) {
+				send_to_char(ch, "  Kai DNA.\r\n");
+			}
+			if (GET_GENOME(ch, 0) == 8) {
+				send_to_char(ch, "  Konatsu DNA.\r\n");
+			}
+			if (GET_GENOME(ch, 1) == 1) {
+				send_to_char(ch, "  Human DNA.\r\n");
+			}
+			if (GET_GENOME(ch, 1) == 2) {
+				send_to_char(ch, "  Saiyan DNA.\r\n");
+			}
+			if (GET_GENOME(ch, 1) == 3) {
+				send_to_char(ch, "  Namek DNA.\r\n");
+			}
+			if (GET_GENOME(ch, 1) == 4) {
+				send_to_char(ch, "  Icer DNA.\r\n");
+			}
+			if (GET_GENOME(ch, 1) == 5) {
+				send_to_char(ch, "  Truffle DNA.\r\n");
+			}
+			if (GET_GENOME(ch, 1) == 6) {
+				send_to_char(ch, "  Arlian DNA.\r\n");
+			}
+			if (GET_GENOME(ch, 1) == 7) {
+				send_to_char(ch, "  Kai DNA.\r\n");
+			}
+			if (GET_GENOME(ch, 1) == 8) {
+				send_to_char(ch, "  Konatsu DNA.\r\n");
+			}
+		}
+		if (GET_GENOME(ch, 0) == 11) {
+			send_to_char(ch, "You have used kyodaika.\r\n");
+		}
+		if (PRF_FLAGGED(ch, PRF_NOPARRY)) {
+			send_to_char(ch, "You have decided not to parry attacks.\r\n");
+		}
+		switch (GET_POS(ch)) {
+		case POS_DEAD:
+			send_to_char(ch, "You are DEAD!\r\n");
+			break;
+		case POS_MORTALLYW:
+			send_to_char(ch, "You are mortally wounded! You should seek help!\r\n");
+			break;
+		case POS_INCAP:
+			send_to_char(ch, "You are incapacitated, slowly fading away...\r\n");
+			break;
+		case POS_STUNNED:
+			send_to_char(ch, "You are stunned! You can't move!\r\n");
+			break;
+		case POS_SLEEPING:
+			send_to_char(ch, "You are sleeping.\r\n");
+			break;
+		case POS_RESTING:
+			send_to_char(ch, "You are resting.\r\n");
+			break;
+		case POS_SITTING:
+			send_to_char(ch, "You are sitting.\r\n");
+			break;
+		case POS_FIGHTING:
+			send_to_char(ch, "You are fighting %s.\r\n", FIGHTING(ch) ? PERS(FIGHTING(ch), ch) : "thin air");
+			break;
+		case POS_STANDING:
+			send_to_char(ch, "You are standing.\r\n");
+			break;
+		default:
+			send_to_char(ch, "You are floating.\r\n");
+			break;
+		}
+
+		if (has_group(ch)) {
+			send_to_char(ch, "@GGroup Victories@D: @w%s@n\r\n", add_commas(GET_GROUPKILLS(ch)));
+		}
+
+		if (PLR_FLAGGED(ch, PLR_EYEC)) {
+			send_to_char(ch, "Your eyes are closed.\r\n");
+		}
+		if (AFF_FLAGGED(ch, AFF_SNEAK)) {
+			send_to_char(ch, "You are prepared to sneak where ever you go.\r\n");
+		}
+		if (PLR_FLAGGED(ch, PLR_DISGUISED)) {
+			send_to_char(ch, "You have disguised your facial features.\r\n");
+		}
+		if (AFF_FLAGGED(ch, AFF_FLYING)) {
+			send_to_char(ch, "You are flying.\r\n");
+		}
+		if (PLR_FLAGGED(ch, PLR_PILOTING)) {
+			send_to_char(ch, "You are busy piloting a ship.\r\n");
+		}
+		if (GET_SONG(ch) > 0) {
+			send_to_char(ch, "You are playing @y'@Y%s@y'@n.\r\n", song_types[GET_SONG(ch)]);
+		}
+
+		if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
+			send_to_char(ch, "You are prepared to zanzoken.\r\n");
+		}
+		if (AFF_FLAGGED(ch, AFF_HASS)) {
+			send_to_char(ch, "Your arms are moving fast.\r\n");
+		}
+		if (AFF_FLAGGED(ch, AFF_INFUSE)) {
+			send_to_char(ch, "Your ki will be infused in your next physical attack.\r\n");
+		}
+    if (PLR_FLAGGED(ch, PLR_TAILHIDE)) {
+      send_to_char(ch, "Your tail is hidden!\r\n");
+    }
+    if (PLR_FLAGGED(ch, PLR_NOGROW)) {
+      send_to_char(ch, "Your tail is no longer regrowing!\r\n");
+    }
+		if (PLR_FLAGGED(ch, PLR_POSE)) {
+			send_to_char(ch, "You are feeling confident from your pose earlier.\r\n");
+		}
+		if (AFF_FLAGGED(ch, AFF_HYDROZAP)) {
+			send_to_char(ch, "You are effected by Kanso Suru.\r\n");
+		}
+		if (GET_COND(ch, DRUNK) > 15)
+			send_to_char(ch, "You are extremely drunk.\r\n");
+		else if (GET_COND(ch, DRUNK) > 10)
+			send_to_char(ch, "You are pretty drunk.\r\n");
+		else if (GET_COND(ch, DRUNK) > 4)
+			send_to_char(ch, "You are drunk.\r\n");
+		else if (GET_COND(ch, DRUNK) > 0)
+			send_to_char(ch, "You have an alcoholic buzz.\r\n");
 
   if (ch->affected) {
    int lasttype = 0;
@@ -6662,7 +6709,7 @@ const char *list_bonuses[] = {
                    "Insomniac   - Can't Sleep. Immune to yoikominminken and paralysis ", /* Bonus  20 */
                    "Evasive     - +15% to dodge rolls                                 ", /* Bonus  21 */
                    "The Wall    - +20% chance to block                                ", /* Bonus  22 */
-                   "Accurate    - +15% chance to hit physical, +8% to hit with ki     ", /* Bonus  23 */
+                   "Accurate    - +20% chance to hit physical, +10% to hit with ki     ", /* Bonus  23 */
                    "Energy Leech- -2% ki damage received for every 5 character levels,\n                  @cas long as you can take that ki to your charge pool.@D        ", /* Bonus  24*/
                    "Good Memory - +2 Skill Slots initially, +1 every 20 levels after  ", /* Bonus 25 */
                    "Soft Touch  - Half damage for all hit locations                   ", /* Neg 26 */
@@ -6671,7 +6718,7 @@ const char *list_bonuses[] = {
                    "Sickly      - Suffer from harmful effects longer                  ", /* Neg 29 */
                    "Punching Bag- -15% to dodge rolls                                 ", /* Neg 30 */
                    "Pushover    - -20% block chance                                   ", /* Neg 31 */
-                   "Poor D. Perc- -15% chance to hit with physical, -8% with ki       ", /* Neg 32 */
+                   "Poor D. Perc- -20% chance to hit with physical, -10% with ki       ", /* Neg 32 */
                    "Thin Skin   - +20% physical and +10% ki damage received           ", /* Neg 33 */
                    "Fireprone   - +50% Fire Dmg taken, +10% ki, always burned         ", /* Neg 34 */
                    "Energy Int. - +2% ki damage received for every 5 character levels,\n                  @rif you have ki charged you have 10% chance to lose   \n                  it and to take 1/4th damage equal to it.@D                    ", /* Neg 35 */

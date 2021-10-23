@@ -22,6 +22,7 @@
 #include "handler.h"
 #include "combat.h"
 #include "constants.h"
+#include "obj_edit.h"
 
 /* local functions  */
 static void generate_multiform(struct char_data *ch, struct char_data *multi1, struct char_data *multi2, struct char_data *multi3);
@@ -58,6 +59,100 @@ ACMD(do_spiritcontrol)
   }
  }
 }
+
+ACMD(do_tailhide)
+{
+
+ if (IS_NPC(ch))
+  return;
+ 
+ if (!(IS_SAIYAN(ch)) && !(IS_HALFBREED(ch))) 
+  {
+    send_to_char(ch, "You have no need to hide your tail!\r\n");
+   }
+  if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && !(PLR_FLAGGED(ch, PLR_TAILHIDE)))
+  {
+    SET_BIT_AR(PLR_FLAGS(ch), PLR_TAILHIDE);
+    send_to_char(ch, "You have decided to hide your tail!\r\n");
+   }
+ else if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && PLR_FLAGGED(ch, PLR_TAILHIDE)) 
+  {
+    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TAILHIDE);
+    send_to_char(ch, "You have decided to display your tail for all to see!\r\n");
+    }
+   }
+ 
+ ACMD(do_nogrow)
+{
+
+ if (IS_NPC(ch))
+  return;
+
+ if (!(IS_SAIYAN(ch)) && !(IS_HALFBREED(ch))) 
+  {
+    send_to_char(ch, "What do you mean?\r\n");
+   }
+  if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && !(PLR_FLAGGED(ch, PLR_NOGROW)))
+  {
+    SET_BIT_AR(PLR_FLAGS(ch), PLR_NOGROW);
+    send_to_char(ch, "You have decided to halt your tail growth!\r\n");
+   }
+ else if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && PLR_FLAGGED(ch, PLR_NOGROW)) 
+  {
+    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_NOGROW);
+    send_to_char(ch, "You have decided to regrow your tail!\r\n");
+    }
+   }
+ 
+ ACMD(do_restring) {
+
+  char arg[MAX_INPUT_LENGTH];
+  struct obj_data *obj;
+  int pay = 0;
+  
+  one_argument(argument, arg);
+
+		if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 178 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 184) {
+			pay = 5000;
+			if (GET_GOLD(ch) < pay) {
+				send_to_char(ch, "You need at least 5,000 zenni to initiate an equipment restring.\r\n");
+				return;
+			}
+			else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
+				send_to_char(ch, "You don't have a that equipment to restring in your inventory.\r\n");
+				send_to_char(ch, "Syntax: restring (obj name)\r\n");
+				return;
+			}
+			else if (OBJ_FLAGGED(obj, ITEM_CUSTOM)) {
+				send_to_char(ch, "You can not restring a custom piece. Why? Because you already restrung it you dummy.\r\n");
+				return;
+			}
+			else {
+				STATE(ch->desc) = CON_POBJ;
+				char thename[MAX_INPUT_LENGTH], theshort[MAX_INPUT_LENGTH], thelong[MAX_INPUT_LENGTH];
+
+				*thename = '\0';
+				*theshort = '\0';
+				*thelong = '\0';
+
+				sprintf(thename, "%s", obj->name);
+				sprintf(theshort, "%s", obj->short_description);
+				sprintf(thelong, "%s", obj->description);
+
+				ch->desc->obj_name = strdup(thename);
+				ch->desc->obj_was = strdup(theshort);
+				ch->desc->obj_short = strdup(theshort);
+				ch->desc->obj_long = strdup(thelong);
+				ch->desc->obj_point = obj;
+				ch->desc->obj_type = 1;
+				ch->desc->obj_weapon = 0;
+				disp_restring_menu(ch->desc);
+				ch->desc->obj_editflag = EDIT_RESTRING;
+				ch->desc->obj_editval = EDIT_RESTRING_MAIN;
+				return;
+			}
+		}
+  }
 
 ACMD(do_multiform)
 {

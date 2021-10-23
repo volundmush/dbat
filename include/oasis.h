@@ -52,10 +52,10 @@
 #define MAX_WEAPON_SDICE         50
 #define MAX_WEAPON_NDICE         50
 
-#define MAX_OBJ_WEIGHT      5000000
+#define MAX_OBJ_WEIGHT      100000000
 #define MAX_OBJ_COST        2000000
 #define MAX_OBJ_RENT        2000000
-#define MAX_CONTAINER_SIZE  5000000
+#define MAX_CONTAINER_SIZE  100000000
 
 #define MAX_MOB_GOLD        1000000 
 #define MAX_MOB_EXP         1500000
