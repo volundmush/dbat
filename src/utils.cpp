@@ -22,6 +22,7 @@
 #include "genzon.h"
 #include "constants.h"
 #include "act.informative.h"
+#include "screen.h"
 
 /* local functions */
 char commastring[MAX_STRING_LENGTH];
@@ -4616,6 +4617,108 @@ int cook_element(room_rnum room) {
  }
  return (found);
 }
+
+// A C++ version of proc_color from comm.c. it returns the colored string.
+std::string processColors(const std::string& txt, int parse, char **choices) {
+    extern char *default_color_choices[NUM_COLOR+1];
+    char *dest_char, *source_char, *color_char, *save_pos, *replacement = nullptr;
+    int i, temp_color;
+    size_t wanted;
+
+    if (!txt.size() || !strchr(txt.c_str(), '@')) /* skip out if no color codes     */
+        return txt;
+
+
+    std::string out;
+    source_char = (char*)txt.c_str();
+
+    save_pos = dest_char;
+    for( ; *source_char; ) {
+        /* no color code - just copy */
+        if (*source_char != '@') {
+            out.push_back(*source_char++);
+            continue;
+        }
+
+        /* if we get here we have a color code */
+
+        source_char++; /* source_char now points to the code */
+
+        /* look for a random color code picks a random number between 1 and 14 */
+        if (*source_char == 'x') {
+            temp_color = (rand() % 14);
+            *source_char = RANDOM_COLORS[temp_color];
+        }
+
+        if (*source_char == '\0') { /* string was terminated with color code - just put it in */
+            out.push_back('@');
+            /* source_char will now point to '\0' in the for() check */
+            continue;
+        }
+
+        if (!parse) { /* not parsing, just skip the code, unless it's @@ */
+            if (*source_char == '@') {
+                out.push_back('@');
+            }
+            if (*source_char == '[') { /* Multi-character code */
+                source_char++;
+                while (*source_char && isdigit(*source_char))
+                    source_char++;
+                if (!*source_char)
+                    source_char--;
+            }
+            source_char++; /* skip to next (non-colorcode) char */
+            continue;
+        }
+
+        /* parse the color code */
+        if (*source_char == '[') { /* User configurable color */
+            source_char++;
+            if (*source_char) {
+                i = atoi(source_char);
+                if (i < 0 || i >= NUM_COLOR)
+                    i = COLOR_NORMAL;
+                replacement = default_color_choices[i];
+                if (choices && choices[i])
+                    replacement = choices[i];
+                while (*source_char && isdigit(*source_char))
+                    source_char++;
+                if (!*source_char)
+                    source_char--;
+            }
+        } else if (*source_char == 'n') {
+            replacement = default_color_choices[COLOR_NORMAL];
+            if (choices && choices[COLOR_NORMAL])
+                replacement = choices[COLOR_NORMAL];
+        } else {
+            for (i = 0; CCODE[i] != '!'; i++) { /* do we find it ? */
+                if ((*source_char) == CCODE[i]) {           /* if so :*/
+                    replacement = ANSI[i];
+                    break;
+                }
+            }
+        }
+        if (replacement) {
+            if (isdigit(replacement[0]))
+                for(color_char = ANSISTART ; *color_char ; )
+                    out.push_back(*color_char++);
+            for(color_char = replacement ; *color_char ; )
+                out.push_back(*color_char++);
+            if (isdigit(replacement[0]))
+                out.push_back(ANSIEND);
+            replacement = nullptr;
+        }
+        /* If we couldn't find any correct color code, or we found it and
+         * substituted above, let's just process the next character.
+         * - Welcor
+         */
+        source_char++;
+
+    } /* for loop */
+
+    return out;
+}
+
 
 /* Rules (unless overridden by ROOM_DARK):
  *

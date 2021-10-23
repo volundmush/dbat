@@ -880,9 +880,9 @@ void handle_grand(struct char_data *keeper, int guild_nr, struct char_data *ch, 
 
 }
 
-void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *ch, char *argument, int skill)
+void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *ch, char *argument)
 {
-  int percent = GET_SKILL(ch, skill);
+  //int percent = GET_SKILL(ch, skill);
   int skill_num, learntype, pointcost, highest, i;
   char buf[MAX_STRING_LENGTH];
 

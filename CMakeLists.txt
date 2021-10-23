@@ -20,11 +20,33 @@ if(${LIBBSD})
     add_compile_definitions(HAVE_LIBBSD)
 endif()
 
+# Support for ASIO
+include_directories(libs/asio/asio/include)
+
+# Support for SQLITEPP
+include_directories(libs/sqlitepp)
+
+# Support for FMT
+include_directories(libs/fmt/include)
+add_compile_definitions(FMT_HEADER_ONLY=1)
 
 #find_package(ZLIB REQUIRED)
 #link_libraries(ZLIB::ZLIB)
 find_library(ZLIB NAMES z libz REQUIRED)
 link_libraries(${ZLIB})
+
+find_package(SQLite3 REQUIRED)
+if(SQLite3_FOUND)
+    message("Found SQLite3.")
+    link_libraries(SQLite::SQLite3)
+endif()
+
+find_package(OpenSSL REQUIRED)
+if(OpenSSL_FOUND)
+    message("Found OpenSSL.")
+    link_libraries(OpenSSL::Crypto)
+endif()
+
 
 # this is the core library we're making.
 add_library(circlemud ${CIRCLE_INCLUDE} ${CIRCLE_SRC})
@@ -46,26 +68,14 @@ add_executable(wld2html apps/wld2html.cpp)
 target_compile_definitions(circlemud PUBLIC USING_CMAKE=1 CIRCLE_UNIX=1 POSIX=1)
 
 
-#find_package(SQLite3 REQUIRED)
-#if(SQLite3_FOUND)
-#    message("Found SQLite3.")
-#    target_link_libraries(circlemud SQLite::SQLite3)
-#endif()
 
-#find_package(OpenSSL REQUIRED)
-#if(OpenSSL_FOUND)
-#    message("Found OpenSSL.")
-#    target_link_libraries(circlemud OpenSSL::Crypto)
-#endif()
 
-# Support for FMT
-#target_include_directories(circlemud PUBLIC libs/fmt/include)
-#target_compile_definitions(circlemud PUBLIC FMT_HEADER_ONLY=1)
 
-# Support for SQLITEPP
-#target_include_directories(circlemud PUBLIC libs/sqlitepp/include)
 
-# Support for ASIO
-#target_include_directories(circlemud PUBLIC libs/asio/asio/include)
+
+
+
+
+
 
 SET(circle_link ${CMAKE_INSTALL_PREFIX}/bin/)
