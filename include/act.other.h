@@ -18,7 +18,6 @@ void log_custom(struct descriptor_data *d, struct obj_data *obj);
 void wishSYS(void);
 void bring_to_cap(struct char_data *ch);
 void base_update(void);
-void log_custom(struct descriptor_data *d, struct obj_data *obj);
 void load_shadow_dragons();
 void innate_remove(struct char_data * ch, struct innate_node * inn);
 void innate_add(struct char_data * ch, int innate, int timer);
