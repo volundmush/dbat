@@ -11761,7 +11761,7 @@ ACMD(do_transform)
 				double mult = 1;
 
 				if (PLR_FLAGGED(ch, PLR_SENSEM)) {
-					add += 3750000000u;
+					add += 2500000000u;
 				}
 
 				/* handle_transform: ch, add, mult, drain*/
@@ -11817,16 +11817,11 @@ ACMD(do_transform)
 					REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TRANS5);
 				}
 
-				uint64_t add = 1000000000u;
-				add += 1000000000u;
-				add += 1000000000u;
-				add += 1000000000u;
-				add += 1000000000u;
+				uint64_t add = 5000000000u;
 				double mult = 1;
 
 				if (PLR_FLAGGED(ch, PLR_SENSEM)) {
-					add += 750000000u;
-					add *= 100u;
+					add += 5000000000u;
 				}
 
 				/* handle_transform: ch, add, mult, drain*/

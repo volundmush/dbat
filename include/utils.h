@@ -201,7 +201,7 @@ int wield_type(int chsize, const struct obj_data *weap);
  *	and utils.c for other places to change.
  */
 /* mud-life time */
-#define SECS_PER_MUD_HOUR	900
+#define SECS_PER_MUD_HOUR	300
 #define SECS_PER_MUD_DAY	(24*SECS_PER_MUD_HOUR)
 #define SECS_PER_MUD_MONTH	(30*SECS_PER_MUD_DAY)
 #define SECS_PER_MUD_YEAR	(12*SECS_PER_MUD_MONTH)
