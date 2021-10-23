@@ -34,13 +34,17 @@
 #include <signal.h>
 #include <sys/uio.h>
 #include <sys/stat.h>
-#include <bsd/string.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <arpa/telnet.h>
 #include <dirent.h>
 #include <linux/limits.h>
 
+#ifdef HAVE_LIBBSD
+#include <bsd/string.h>
+#else
+#include "stringutils.h"
+#endif
 
 /* Basic system dependencies *******************************************/
 #if CIRCLE_GNU_LIBC_MEMORY_TRACK && !defined(HAVE_MCHECK_H)
