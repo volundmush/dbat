@@ -13,10 +13,13 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 set(CMAKE_CXX_FLAGS "-fpermissive")
 
-find_library(LIBBSD NAMES bsd libbsd REQUIRED)
-
+find_library(LIBBSD NAMES bsd libbsd)
 include_directories(include)
-link_libraries(${LIBBSD})
+if(${LIBBSD})
+    link_libraries(${LIBBSD})
+    add_compile_definitions(HAVE_LIBBSD)
+endif()
+
 
 find_package(ZLIB REQUIRED)
 link_libraries(ZLIB::ZLIB)
