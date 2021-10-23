@@ -32,12 +32,16 @@
 #include "shop.h"
 #include "feats.h"
 #include "guild.h"
+#include "dg_scripts.h"
+#include "objsave.h"
+#include "mail.h"
+#include "clan.h"
 
 /* local functions */
 static int has_scanner(struct char_data *ch);
 static void boost_obj(struct obj_data *obj, struct char_data *ch, int type);
 static void handle_revert(struct char_data *ch, uint64_t add, double mult);
-static void handle_transform(struct char_data *ch, int add, double mult, double drain);
+static void handle_transform(struct char_data *ch, int64_t add, double mult, double drain);
 static int perform_group(struct char_data *ch, struct char_data *vict, int highlvl, int lowlvl, int64_t highpl, int64_t lowpl);
 static void print_group(struct char_data *ch);
 static void check_eq(struct char_data *ch);
@@ -9017,7 +9021,7 @@ ACMD(do_summon)
 }
 
 /* This handles transforming Current and Max PL/KI/ST them */
-static void handle_transform(struct char_data *ch, int add, double mult, double drain)
+static void handle_transform(struct char_data *ch, int64_t add, double mult, double drain)
 {
 
 	if (!ch)
