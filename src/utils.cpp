@@ -273,8 +273,8 @@ const char *report_party_health(struct char_data *ch)
   }
   sprintf(result1, "@D[@BG@D]-------@mF@D------- -------@mF@D------- -------@mF@D------- -------@mF@D-------[@BG@D] <@RV@Y%s@R>@n\n", add_commas(GET_GROUPKILLS(ch)));
   sprintf(result2, "@D[@BR@D]@C%-15s %-15s %-15s %-15s@D[@BR@D]@n\n", party1 ? get_i_name(ch, party1) : "Empty", party2 ? get_i_name(ch, party2) : "Empty", party3 ? get_i_name(ch, party3) : "Empty", party4 ? get_i_name(ch, party4) : "Empty");
-  sprintf(result3, "@D[@BO@D]@RPL@D:%s%11"I64T"@w%s @RPL@D:%s%11"I64T"@w%s @RPL@D:%s%11"I64T"@w%s @RPL@D:%s%11"I64T"@w%s@D[@BO@D]@n\n", plcol[plc1], plperc1, "%", plcol[plc2], plperc2, "%", plcol[plc3], plperc3, "%", plcol[plc4], plperc4, "%");
-  sprintf(result4, "@D[@BU@D]@cCharge@D:@B%7"I64T"@w%s @cCharge@D:@B%7"I64T"@w%s @cCharge@D:@B%7"I64T"@w%s @cCharge@D:@B%7"I64T"@w%s@D[@BU@D]@n\n", kiperc1, "%", kiperc2, "%", kiperc3, "%", kiperc4, "%");
+  sprintf(result3, "@D[@BO@D]@RPL@D:%s%11" I64T "@w%s @RPL@D:%s%11" I64T "@w%s @RPL@D:%s%11" I64T "@w%s @RPL@D:%s%11" I64T "@w%s@D[@BO@D]@n\n", plcol[plc1], plperc1, "%", plcol[plc2], plperc2, "%", plcol[plc3], plperc3, "%", plcol[plc4], plperc4, "%");
+  sprintf(result4, "@D[@BU@D]@cCharge@D:@B%7" I64T "@w%s @cCharge@D:@B%7" I64T "@w%s @cCharge@D:@B%7" I64T "@w%s @cCharge@D:@B%7" I64T "@w%s@D[@BU@D]@n\n", kiperc1, "%", kiperc2, "%", kiperc3, "%", kiperc4, "%");
   sprintf(result5, "@D[@BP@D]@gSt@D:%s%12s @gSt@D:%s%12s @gSt@D:%s%12s @gSt@D:%s%12s@D[@BP@D]@n", excol[stam1], exhaust[stam1], excol[stam2], exhaust[stam2], excol[stam3], exhaust[stam3], excol[stam4], exhaust[stam4]);
   sprintf(result_party_health, "%s%s%s%s%s\n", result1, result2, result3, result4, result5);
   ch->temp_prompt = strdup(result_party_health);
@@ -417,8 +417,8 @@ const char *report_party_health(struct char_data *ch)
 
   sprintf(result1, "@D[@BG@D]-------@YL@D------- -------@mF@D------- -------@mF@D------- -------@mF@D-------[@BG@D]@n\n");
   sprintf(result2, "@D[@BR@D]@C%-15s %-15s %-15s %-15s@D[@BR@D]@n\n", party1 ? get_i_name(ch, party1) : "Empty", party2 ? get_i_name(ch, party2) : "Empty", party3 ? get_i_name(ch, party3) : "Empty", party4 ? get_i_name(ch, party4) : "Empty");
-  sprintf(result3, "@D[@BO@D]@RPL@D:%s%11"I64T"@w%s @RPL@D:%s%11"I64T"@w%s @RPL@D:%s%11"I64T"@w%s @RPL@D:%s%11"I64T"@w%s@D[@BO@D]@n\n", plcol[plc1], plperc1, "%", plcol[plc2], plperc2, "%", plcol[plc3], plperc3, "%", plcol[plc4], plperc4, "%");
-  sprintf(result4, "@D[@BU@D]@cCharge@D:@B%7"I64T"@w%s @cCharge@D:@B%7"I64T"@w%s @cCharge@D:@B%7"I64T"@w%s @cCharge@D:@B%7"I64T"@w%s@D[@BU@D]@n\n", kiperc1, "%", kiperc2, "%", kiperc3, "%", kiperc4, "%");
+  sprintf(result3, "@D[@BO@D]@RPL@D:%s%11" I64T "@w%s @RPL@D:%s%11" I64T "@w%s @RPL@D:%s%11" I64T "@w%s @RPL@D:%s%11" I64T "@w%s@D[@BO@D]@n\n", plcol[plc1], plperc1, "%", plcol[plc2], plperc2, "%", plcol[plc3], plperc3, "%", plcol[plc4], plperc4, "%");
+  sprintf(result4, "@D[@BU@D]@cCharge@D:@B%7" I64T "@w%s @cCharge@D:@B%7" I64T "@w%s @cCharge@D:@B%7" I64T "@w%s @cCharge@D:@B%7" I64T "@w%s@D[@BU@D]@n\n", kiperc1, "%", kiperc2, "%", kiperc3, "%", kiperc4, "%");
   sprintf(result5, "@D[@BP@D]@gSt@D:%s%12s @gSt@D:%s%12s @gSt@D:%s%12s @gSt@D:%s%12s@D[@BP@D]@n", excol[stam1], exhaust[stam1], excol[stam2], exhaust[stam2], excol[stam3], exhaust[stam3], excol[stam4], exhaust[stam4]);
   sprintf(result_party_health, "%s%s%s%s%s\n", result1, result2, result3, result4, result5);
   ch->temp_prompt = strdup(result_party_health);
@@ -1998,7 +1998,7 @@ void randomize_eq(struct obj_data *obj)
 char *sense_location(struct char_data *ch)
 {
 
-	char *message = malloc(MAX_INPUT_LENGTH);
+	char *message = new char[MAX_INPUT_LENGTH];
 	int roomnum = GET_ROOM_VNUM(IN_ROOM(ch)), num = 0;
 	if ((num = real_zone_by_thing(roomnum)) != NOWHERE) {
 		num = real_zone_by_thing(roomnum);
@@ -4388,21 +4388,21 @@ int num_followers_charmed(struct char_data *ch)
   return (total);
 }
 
-void switch_leader(struct char_data *old, struct char_data *new) 
+void switch_leader(struct char_data *old, struct char_data *new_leader)
 { 
 struct follow_type *f; 
 struct char_data *tch = NULL;
 
   for (f = old->followers; f; f = f->next) { 
-    if (f->follower == new) {
-      tch = new;
+    if (f->follower == new_leader) {
+      tch = new_leader;
       stop_follower(tch);
     }
-    if (f->follower != new) 
+    if (f->follower != new_leader)
     { 
       tch = f->follower;
       stop_follower(tch);
-      add_follower(tch, new);
+      add_follower(tch, new_leader);
     } 
   } 
 }
@@ -4566,7 +4566,7 @@ int get_filename(char *filename, size_t fbufsize, int mode, const char *orig_nam
     break;
   }
 
-  snprintf(filename, fbufsize, "%s%s"SLASH"%s.%s", prefix, middle, name, suffix);
+  snprintf(filename, fbufsize, "%s%s" SLASH "%s.%s", prefix, middle, name, suffix);
   return (1);
 }
 
@@ -4969,7 +4969,7 @@ char *add_commas(int64_t num)
   static char comma_string[BUFFER_COUNT][DIGITS_PER_BUFFER]; 
   static int64_t which = 0;
 
-  sprintf(num_string, "%"I64T"", num); 
+  sprintf(num_string, "%" I64T "", num);
   len = strlen(num_string); 
 
   for (i = j = 0; num_string[i]; ++i) { 

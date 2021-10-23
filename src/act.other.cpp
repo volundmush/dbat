@@ -15071,7 +15071,7 @@ ACMD(do_report)
     return;
   }
 
-  snprintf(buf, sizeof(buf), "$n reports: %"I64T"/%"I64T"H, %"I64T"/%"I64T"M, %"I64T"/%"I64T"V\r\n",
+  snprintf(buf, sizeof(buf), "$n reports: %" I64T "/%" I64T "H, %" I64T "/%" I64T "M, %" I64T "/%" I64T "V\r\n",
 	  GET_HIT(ch), GET_MAX_HIT(ch),
 	  GET_MANA(ch), GET_MAX_MANA(ch),
 	  GET_MOVE(ch), GET_MAX_MOVE(ch));
@@ -15207,6 +15207,7 @@ ACMD(do_use)
       return;
     }
   }
+    int refreshed;
   switch (subcmd) {
   case SCMD_QUAFF:
     if (GET_OBJ_TYPE(mag_item) != ITEM_POTION) {
@@ -15286,7 +15287,7 @@ ACMD(do_use)
         act("@C$n@W eyesight seems to have returned.@n", TRUE, ch, mag_item, 0, TO_ROOM);
         null_affect(ch, AFF_BLIND);
        }
-        int refreshed = FALSE;
+        refreshed = FALSE;
         if (GET_HIT(ch) <= gear_pl(ch) * 0.99) {
          GET_HIT(ch) += large_rand(gear_pl(ch) * 0.08, gear_pl(ch) * 0.16);
          if (GET_HIT(ch) > gear_pl(ch))

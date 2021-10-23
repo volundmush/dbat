@@ -494,8 +494,8 @@ void medit_disp_menu(struct descriptor_data *d)
   "@g6@n) Level:       [@c%4d@n],  @g7@n) Alignment:    [@c%5d@n]\r\n"
   "@g8@n) Accuracy Mod:[@c%4d@n],  @g9@n) Damage Mod:   [@c%5d@n]\r\n"
   "@gA@n) NumDamDice:  [@c%4d@n],  @gB@n) SizeDamDice:  [@c%5d@n]\r\n"
-  "@gC@n) Num HP Dice: [@c%4"I64T"@n],  @gD@n) Size HP Dice: [@c%5"I64T"@n],  @gE@n) HP Bonus: [@c%5"I64T"@n]\r\n"
-  "@gF@n) Armor Class: [@c%4d@n],  @gG@n) Exp:      [@c%"I64T"@n],  @gH@n) Gold:  [@c%8d@n]\r\n",
+  "@gC@n) Num HP Dice: [@c%4" I64T "@n],  @gD@n) Size HP Dice: [@c%5" I64T "@n],  @gE@n) HP Bonus: [@c%5" I64T "@n]\r\n"
+  "@gF@n) Armor Class: [@c%4d@n],  @gG@n) Exp:      [@c%" I64T "@n],  @gH@n) Gold:  [@c%8d@n]\r\n",
 
 	  OLC_NUM(d), genders[(int)GET_SEX(mob)], GET_ALIAS(mob),
 	  GET_SDESC(mob), GET_LDESC(mob), GET_DDESC(mob), GET_HITDICE(mob),

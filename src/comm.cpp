@@ -874,17 +874,17 @@ char *make_prompt(struct descriptor_data *d)
     if (PRF_FLAGGED(d->character, PRF_DISPAUTO) && GET_LEVEL(d->character) >= 500 && len < sizeof(prompt)) {
       struct char_data *ch = d->character;
       if (GET_HIT(ch) << 2 < GET_MAX_HIT(ch) ) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "PL: %"I64T" ", GET_HIT(ch));
+        count = snprintf(prompt + len, sizeof(prompt) - len, "PL: %" I64T " ", GET_HIT(ch));
         if (count >= 0)
           len += count;
       }
       if (GET_MOVE(ch) << 2 < GET_MAX_MOVE(ch) && len < sizeof(prompt)) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "STA: %"I64T" ", GET_MOVE(ch));
+        count = snprintf(prompt + len, sizeof(prompt) - len, "STA: %" I64T " ", GET_MOVE(ch));
         if (count >= 0)
           len += count;
       }
       if (GET_KI(ch) << 2 < GET_MAX_KI(ch) && len < sizeof(prompt)) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "KI: %"I64T" ", GET_KI(ch));
+        count = snprintf(prompt + len, sizeof(prompt) - len, "KI: %" I64T " ", GET_KI(ch));
         if (count >= 0)
           len += count;
       }
@@ -1222,7 +1222,7 @@ char *make_prompt(struct descriptor_data *d)
      if (PRF_FLAGGED(d->character, PRF_DISPERC) && !PRF_FLAGGED(d->character, PRF_NODEC)) {
       if (GET_CHARGE(d->character) > 0) {
         int64_t perc = (GET_CHARGE(d->character) * 100) / GET_MAX_MANA(d->character);
-        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@BCharge@Y: @C%"I64T"%s@D]@n\n", perc, "%");
+        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@BCharge@Y: @C%" I64T "%s@D]@n\n", perc, "%");
         if (count >= 0)
           len += count;
       }
@@ -1230,7 +1230,7 @@ char *make_prompt(struct descriptor_data *d)
       if (PRF_FLAGGED(d->character, PRF_NODEC)) {
       if (charge > 0) {
         int64_t perc = (charge * 100) / GET_MAX_MANA(d->character);
-        count = snprintf(prompt + len, sizeof(prompt) - len, "Ki is charged to %"I64T" percent.\n", perc);
+        count = snprintf(prompt + len, sizeof(prompt) - len, "Ki is charged to %" I64T " percent.\n", perc);
         if (count >= 0)
           len += count;
        }
@@ -1245,7 +1245,7 @@ char *make_prompt(struct descriptor_data *d)
        if (PRF_FLAGGED(d->character, PRF_DISPERC) && !PRF_FLAGGED(d->character, PRF_NODEC)) {
         if (GET_BARRIER(d->character) > 0) {
          int64_t perc = (GET_BARRIER(d->character) * 100) / GET_MAX_MANA(d->character);
-         count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GBarrier@Y: @B%"I64T"%s@D]@n\n", perc, "%");
+         count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GBarrier@Y: @B%" I64T "%s@D]@n\n", perc, "%");
          if (count >= 0)
           len += count;
         }
@@ -1336,7 +1336,7 @@ char *make_prompt(struct descriptor_data *d)
        if(PRF_FLAGGED(d->character, PRF_NODEC)) {
         if (GET_BARRIER(d->character) > 0) {
          int64_t perc = (GET_BARRIER(d->character) * 100) / GET_MAX_MANA(d->character);
-         count = snprintf(prompt + len, sizeof(prompt) - len, "A barrier charged to %"I64T" percent surrounds you.@n\n", perc);
+         count = snprintf(prompt + len, sizeof(prompt) - len, "A barrier charged to %" I64T " percent surrounds you.@n\n", perc);
          if (count >= 0)
           len += count;
          }

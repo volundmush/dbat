@@ -982,7 +982,7 @@ void auc_save()
     for (obj = world[real_room(80)].contents; obj; obj = next_obj) {
      next_obj = obj->next_content;
      if (obj) {
-      fprintf(fl, "%"I64T" %s %d %d %d %d %ld\n", obj->unique_id, GET_AUCTERN(obj), GET_AUCTER(obj), GET_CURBID(obj), GET_STARTBID(obj), GET_BID(obj), GET_AUCTIME(obj));
+      fprintf(fl, "%" I64T " %s %d %d %d %d %ld\n", obj->unique_id, GET_AUCTERN(obj), GET_AUCTER(obj), GET_CURBID(obj), GET_STARTBID(obj), GET_BID(obj), GET_AUCTIME(obj));
      }
     }
     fprintf(fl, "~END~\n");
@@ -1004,7 +1004,7 @@ void auc_load(struct obj_data *obj)
   else {
    while (!feof(fl)) {
     get_line(fl, line);
-    sscanf(line, "%"I64T" %s %d %d %d %d %ld\n", &oID, filler, &aID, &bID, &startc, &cost, &timer);
+    sscanf(line, "%" I64T " %s %d %d %d %d %ld\n", &oID, filler, &aID, &bID, &startc, &cost, &timer);
     if (obj->unique_id == oID) {
      GET_AUCTERN(obj) = strdup(filler);
      GET_AUCTER(obj) = aID;
@@ -3773,7 +3773,7 @@ char *sprintuniques(int low, int high)
           ptr += count;
           remain -= count;
         }
-        count = snprintf(ptr, remain, "| |- [@g%6d@n] - [@y%10"TMT":%-19"I64T"@n] - %s\r\n",
+        count = snprintf(ptr, remain, "| |- [@g%6d@n] - [@y%10"TMT":%-19" I64T "@n] - %s\r\n",
                 GET_OBJ_VNUM(q->obj), q->generation, q->unique_id,
                 q->obj->short_description ? q->obj->short_description : "<Unknown>");
         ptr += count;
@@ -4936,7 +4936,7 @@ static int check_object(struct obj_data *obj)
   int error = FALSE, y;
 
   if (GET_OBJ_WEIGHT(obj) < 0 && (error = TRUE))
-    log("SYSERR: Object #%d (%s) has negative weight (%"I64T").",
+    log("SYSERR: Object #%d (%s) has negative weight (%" I64T ").",
 	GET_OBJ_VNUM(obj), obj->short_description, GET_OBJ_WEIGHT(obj));
 
   if (GET_OBJ_RENT(obj) < 0 && (error = TRUE))
@@ -5108,7 +5108,7 @@ int my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate)
     "%s~\n"
     "%s~\n"
     "%s~\n"
-    "%d %d %d %d %d %"I64T" %d %d\n", obj->name ? obj->name : "undefined",
+    "%d %d %d %d %d %" I64T " %d %d\n", obj->name ? obj->name : "undefined",
     obj->short_description ? obj->short_description : "undefined",
     obj->description ? obj->description : "undefined",
     buf1, GET_OBJ_TYPE(obj), GET_OBJ_WEAR(obj)[0], 
@@ -5118,7 +5118,7 @@ int my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate)
   if (obj->generation)
   fprintf(fp, "G\n%ld\n", obj->generation);
   if (obj->unique_id)
-  fprintf(fp, "U\n%"I64T"\n", obj->unique_id);
+  fprintf(fp, "U\n%" I64T "\n", obj->unique_id);
 
   fprintf(fp, "Z\n%d\n", GET_OBJ_SIZE(obj));
 

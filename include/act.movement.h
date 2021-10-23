@@ -8,7 +8,7 @@
 #include "structs.h"
 
 // global variables
-const char *cmd_door[NUM_DOOR_CMD];
+extern const char *cmd_door[NUM_DOOR_CMD];
 
 // functions
 void handle_teleport(struct char_data *ch, struct char_data *tar, int location);

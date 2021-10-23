@@ -709,7 +709,7 @@ in the vault (vnum: 453) now and then. you can just use
 
               gain_exp(c, addition);
             }
-            snprintf(str, slen, "%"I64T"", GET_EXP(c));
+            snprintf(str, slen, "%" I64T "", GET_EXP(c));
           }
           break;
         case 'f':
@@ -763,7 +763,7 @@ in the vault (vnum: 453) now and then. you can just use
               GET_HIT(c) += addition;
               update_pos(c);
             }
-            snprintf(str, slen, "%"I64T"", GET_HIT(c));
+            snprintf(str, slen, "%" I64T "", GET_HIT(c));
           }
           else if (!strcasecmp(field, "hunger")) {
             if (subfield && *subfield) {
@@ -851,7 +851,7 @@ in the vault (vnum: 453) now and then. you can just use
               int64_t addition = atol(subfield);
               GET_MAX_HIT(c) = MAX(GET_MAX_HIT(c) + addition, 1);
             }
-            snprintf(str, slen, "%"I64T"", GET_MAX_HIT(c));
+            snprintf(str, slen, "%" I64T "", GET_MAX_HIT(c));
           }
 
           else if (!strcasecmp(field, "mana")) {
@@ -859,14 +859,14 @@ in the vault (vnum: 453) now and then. you can just use
               int64_t addition = atol(subfield);
               GET_MANA(c) += addition;
             }
-            snprintf(str, slen, "%"I64T"", GET_MANA(c));
+            snprintf(str, slen, "%" I64T "", GET_MANA(c));
           }
           else if (!strcasecmp(field, "maxmana")) {
             if (subfield && *subfield) {
               int64_t addition = atol(subfield);
               GET_MAX_MANA(c) = MAX(GET_MAX_MANA(c) + addition, 1);
             }
-            snprintf(str, slen, "%"I64T"", GET_MAX_MANA(c));
+            snprintf(str, slen, "%" I64T "", GET_MAX_MANA(c));
           }
 
           else if (!strcasecmp(field, "move")) {
@@ -874,7 +874,7 @@ in the vault (vnum: 453) now and then. you can just use
               int64_t addition = atol(subfield);
               GET_MOVE(c) += addition;
             }
-            snprintf(str, slen, "%"I64T"", GET_MOVE(c));
+            snprintf(str, slen, "%" I64T "", GET_MOVE(c));
           }
 
           else if (!strcasecmp(field, "maxmove")) {
@@ -882,7 +882,7 @@ in the vault (vnum: 453) now and then. you can just use
               int64_t addition = atol(subfield);
               GET_MAX_MOVE(c) = MAX(GET_MAX_MOVE(c) + addition, 1);
             }
-            snprintf(str, slen, "%"I64T"", GET_MAX_MOVE(c));
+            snprintf(str, slen, "%" I64T "", GET_MAX_MOVE(c));
           }
 
           else if (!strcasecmp(field, "master")) {
@@ -1359,7 +1359,7 @@ in the vault (vnum: 453) now and then. you can just use
                GET_OBJ_WEIGHT(o) = 0;
               }
             }
-            snprintf(str, slen, "%"I64T"", GET_OBJ_WEIGHT(o));
+            snprintf(str, slen, "%" I64T "", GET_OBJ_WEIGHT(o));
           }
 
           else if (!strcasecmp(field, "worn_by")) {

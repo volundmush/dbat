@@ -603,7 +603,7 @@ void gedit_save_to_disk(int num);
 void copy_guild(struct guild_data *tgm, struct guild_data *fgm);
 void free_guild_strings(struct guild_data *guild);
 void free_guild(struct guild_data *guild);
-void gedit_modify_string(char **str, char *new);
+void gedit_modify_string(char **str, char *new_g);
 ACMD(do_oasis_gedit);
 
 void zedit_setup(struct descriptor_data *d, int room_num);

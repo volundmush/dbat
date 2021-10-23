@@ -262,7 +262,7 @@ int save_objects(zone_rnum zone_num)
       fprintf(fp,
                 "%d %s %s %s %s %s %s %s %s %s %s %s %s\n"
                 "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n"
-	        "%"I64T" %d %d %d\n",
+	        "%" I64T " %d %d %d\n",
 
 	      GET_OBJ_TYPE(obj), 
               ebuf1, ebuf2, ebuf3, ebuf4,

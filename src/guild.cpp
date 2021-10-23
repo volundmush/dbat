@@ -1316,7 +1316,7 @@ void handle_learn(struct char_data *keeper, int guild_nr, struct char_data *ch, 
   char *ptr;
   const char *cptr;
   char buf[MAX_STRING_LENGTH];
-
+    int snum;
   if (!*argument) {
     send_to_char(ch, "Which feat would you like to learn?\r\n");
     return;
@@ -1489,7 +1489,7 @@ void handle_learn(struct char_data *keeper, int guild_nr, struct char_data *ch, 
       send_to_char(ch, "I don't recognize that skill.\r\n");
       return;
     }
-    int snum = GET_SKILL(ch, subval);
+    snum = GET_SKILL(ch, subval);
     if (snum > 100) {
       send_to_char(ch, "You have already focused that skill as high as possible.\r\n");
       return;

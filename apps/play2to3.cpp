@@ -111,7 +111,7 @@ struct THREE_char_file_u {
   char description[THREE_EXDSCR_LENGTH];
   char title[THREE_MAX_TITLE_LENGTH + 1];
   int8_t sex;
-  int8_t class;
+  int8_t char_class;
   int8_t level;
   int16_t hometown;
   time_t birth;			/* Time of birth of character     */
@@ -208,7 +208,7 @@ struct TWO_affected_type {
 
 struct TWO_char_file_u {
   int8_t sex;
-  int8_t class;
+  int8_t char_class;
   int8_t level;
   time_t birth;			/* Time of birth of character     */
   int played;			/* Number of secs played in total */
@@ -263,7 +263,7 @@ int main(int argc, char *argv[])
     strcpy(stThree.description, stTwo.description);
     strcpy(stThree.title, stTwo.title);
     stThree.sex = stTwo.sex;
-    stThree.class = stTwo.class - 1;
+    stThree.char_class = stTwo.char_class - 1;
     stThree.level = stTwo.level;
     stThree.hometown = stTwo.hometown;
     stThree.birth = stTwo.birth;
@@ -360,7 +360,7 @@ int main(int argc, char *argv[])
     strcpy(stThree.host, stTwo.host);
 
     printf("[%2d %s] %s %s\n",
-	   stThree.level, apcClassAbbrev[(int)stThree.class],
+	   stThree.level, apcClassAbbrev[(int)stThree.char_class],
 	   stThree.name, stThree.title);
 
     fwrite(&stThree, sizeof(struct THREE_char_file_u), 1, ptThreeHndl);

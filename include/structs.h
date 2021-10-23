@@ -1306,7 +1306,7 @@
 #define ITEM_NOPICKUP                  93
 #define ITEM_NOSTEAL                   94
 
-#define NUM_ITEM_FLAGS 95
+#define NUM_ITEM_FLAGS 96
 
 /* Modifier constants used with obj affects ('A' fields) */
 #define APPLY_NONE              0	/* No effect			*/

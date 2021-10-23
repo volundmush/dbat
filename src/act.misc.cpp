@@ -1741,7 +1741,7 @@ static void catch_fish(struct char_data *ch, int quality)
  GET_OBJ_VAL(pole, 0) = 0;
  obj_to_room(fish, IN_ROOM(ch));
  do_get(ch, "fish", 0, 0);
- send_to_char(ch, "@D[@cFish Weight@D: @G%"I64T"@D]@n\r\n", GET_OBJ_WEIGHT(fish));
+ send_to_char(ch, "@D[@cFish Weight@D: @G%" I64T "@D]@n\r\n", GET_OBJ_WEIGHT(fish));
  REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_FISHING);
  GET_FISHD(ch) = 0;
  GET_FISHSTATE(ch) = FISH_NOFISH;

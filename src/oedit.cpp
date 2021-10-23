@@ -981,7 +981,7 @@ void oedit_disp_menu(struct descriptor_data *d)
 
   write_to_output(d,
 	  "@g7@n) Wear flags  : @c%s@n\r\n"
-	  "@g8@n) Weight      : @c%-4"I64T"@n, 	@g9@n) Cost        : @c%-4d@n\r\n"
+	  "@g8@n) Weight      : @c%-4" I64T "@n, 	@g9@n) Cost        : @c%-4d@n\r\n"
 	  "@gA@n) Cost/Day    : @c%-4d@n, 	@gB@n) Timer       : @c%-4d@n\r\n"
 	  "@gC@n) Values      : @c%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d@n\r\n"
 	  "@gD@n) Applies menu@n\r\n"

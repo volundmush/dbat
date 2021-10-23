@@ -15,9 +15,9 @@
 #include "handler.h"
 #include "dg_event.h"
 #include "db.h"
-#include "screen.h"
 #include "spells.h"
 #include "constants.h"
+#include "fight.h"
 
 /* copied from spell_parser.c: */
 #define SINFO spell_info[spellnum]

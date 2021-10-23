@@ -1547,7 +1547,7 @@ void topLoad()
 
   while (!feof(file)) {
     get_line(file, line);
-    sscanf(line, "%s %"I64T"\n", filler, &toppoint[x]);
+    sscanf(line, "%s %" I64T "\n", filler, &toppoint[x]);
     topname[x] = strdup(filler);
     *filler = '\0';
     x++;
@@ -1843,7 +1843,7 @@ void topWrite(struct char_data *ch)
    }
     x = 0;
     while(x < 25) {
-     fprintf(fl, "%s %"I64T"\n", topname[x], toppoint[x]);
+     fprintf(fl, "%s %" I64T "\n", topname[x], toppoint[x]);
      x++;
     }
 
@@ -2150,7 +2150,7 @@ int perform_dupe_check(struct descriptor_data *d)
   struct descriptor_data *k, *next_k;
   struct char_data *target = NULL, *ch, *next_ch;
   int mode = 0;
-
+  int count = 0, oldcount = HIGHPCOUNT;
   int id = GET_IDNUM(d->character);
 
   /*
@@ -2260,7 +2260,7 @@ int perform_dupe_check(struct descriptor_data *d)
   case RECON:
     write_to_output(d, "Reconnecting.\r\n");
     /*~~~ For PCOUNT and HIGHPCOUNT ~~~*/
-     int count = 0, oldcount = HIGHPCOUNT;
+     count = 0, oldcount = HIGHPCOUNT;
      struct descriptor_data *k;
 
       for (k = descriptor_list; k; k = k->next) {
@@ -3937,8 +3937,8 @@ void nanny(struct descriptor_data *d, char *arg)
   int total, rr, moveon = FALSE, penalty = FALSE;
   int player_i;
   int value, roll = rand_number(1, 6); /* For parse_bonuses */
-  struct descriptor_data *k; 
-
+  struct descriptor_data *k;
+    int count = 0, oldcount = HIGHPCOUNT;
   /* OasisOLC states */
   struct {
     int state;
@@ -6697,7 +6697,7 @@ void nanny(struct descriptor_data *d, char *arg)
 	 }
 
      /*~~~ For PCOUNT and HIGHPCOUNT ~~~*/
-     int count = 0, oldcount = HIGHPCOUNT;
+     count = 0, oldcount = HIGHPCOUNT;
      struct descriptor_data *k;
 
       for (k = descriptor_list; k; k = k->next) {

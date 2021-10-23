@@ -48,7 +48,7 @@ char buf2[MAX_STRING_LENGTH];
 char arg[MAX_STRING_LENGTH];
 
 int get_line(FILE * fl, char *buf);
-int real_room(int virtual, int reference);
+int real_room(int virtual_room, int reference);
 
 /* room-related structures *********************************************** */
 
@@ -458,7 +458,7 @@ char *fread_string(FILE * fl, char *error)
 
 
 /* returns the real number of the room with given virtual number */
-int real_room(int virtual, int reference)
+int real_room(int virtual_room, int reference)
 {
   int bot, top, mid;
 
@@ -469,13 +469,13 @@ int real_room(int virtual, int reference)
   for (;;) {
     mid = (bot + top) / 2;
 
-    if ((world + mid)->number == virtual)
+    if ((world + mid)->number == virtual_room)
       return (mid);
     if (bot >= top) {
-      fprintf(stderr, "Room %d does not exist in database (referenced in room %d)\n", virtual, reference);
+      fprintf(stderr, "Room %d does not exist in database (referenced in room %d)\n", virtual_room, reference);
       return (-1);
     }
-    if ((world + mid)->number > virtual)
+    if ((world + mid)->number > virtual_room)
       top = mid - 1;
     else
       bot = mid + 1;

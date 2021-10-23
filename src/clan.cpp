@@ -627,14 +627,14 @@ bool clanApply(const char *name, struct char_data *ch) {
   if(clanMemberFromList(GET_IDNUM(ch), S->applicants))
     return TRUE;
 
-  struct clan_member *new;
-  CREATE(new, struct clan_member, 1);
-  new->id = GET_IDNUM(ch);
+  struct clan_member *new_member;
+  CREATE(new_member, struct clan_member, 1);
+    new_member->id = GET_IDNUM(ch);
   
   sprintf(buf, "Applying for %s", S->name);
   set_clan(ch, buf);
-  new->next = S->applicants;
-  S->applicants = new;
+    new_member->next = S->applicants;
+  S->applicants = new_member;
   clanSave(S, clanFilename(S));
 
   return TRUE;
