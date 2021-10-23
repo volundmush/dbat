@@ -15,13 +15,10 @@
 #include "spells.h"
 #include "handler.h"
 #include "mail.h"
-#include "screen.h"
-#include "genolc.h"
 #include "oasis.h"
 #include "tedit.h"
 #include "improved-edit.h"
 #include "dg_scripts.h"
-#include "constants.h"
 #include "shop.h"
 #include "guild.h"
 #include "imc.h"
@@ -487,7 +484,7 @@ struct command_info *complete_cmd_info;
  * priority.
  */
 
-cpp_extern const struct command_info cmd_info[] = {
+const struct command_info cmd_info[] = {
   { "RESERVED", "", 0, 0, 0, ADMLVL_NONE	, 0 },     /* this must be first -- for specprocs */
 
   /* directions must come before other commands but after RESERVED */
@@ -844,6 +841,8 @@ cpp_extern const struct command_info cmd_info[] = {
   { "rbank"    , "rban"         , POS_RESTING , do_rbank    , 0, ADMLVL_IMMORT  , 0 },
   { "refuel"   , "refue"        , POS_SITTING, do_refuel   , 0, ADMLVL_NONE    , 0 },
   { "resize"   , "resiz"        , POS_STANDING, do_resize   , 0, ADMLVL_NONE    , 0 },
+  { "rescue"   , "rescu"        , POS_STANDING, do_rescue   , 0, ADMLVL_NONE    , 0 },
+  { "rest"     , "re"		, POS_RESTING , do_rest     , 0, ADMLVL_NONE	, 0 },
   { "restring" , "restring"       , POS_STANDING, do_restring , 0, ADMLVL_NONE    , 0 },
   { "rclone"   , "rclon"        , POS_DEAD    , do_rcopy    , 0, ADMLVL_BUILDER      , 0 },
   { "rcopy"    , "rcopy"        , POS_DEAD    , do_rcopy    , 0, ADMLVL_BUILDER      , 0 },
@@ -855,8 +854,6 @@ cpp_extern const struct command_info cmd_info[] = {
   { "renzokou" , "renzo"        , POS_FIGHTING, do_renzo     , 0, ADMLVL_NONE    , 0 },
   { "repair"   , "repai"        , POS_STANDING, do_srepair   , 0, ADMLVL_NONE    , 0 },
   { "reply"    , "rep"		, POS_SLEEPING, do_reply    , 0, ADMLVL_NONE	, 0 },
-  { "rescue"   , "rescu"        , POS_STANDING, do_rescue   , 0, ADMLVL_NONE    , 0 },
-  { "rest"     , "re"		, POS_RESTING , do_rest     , 0, ADMLVL_NONE	, 0 },
   { "reward"   , "rewar"        , POS_RESTING , do_reward   , 0, ADMLVL_IMMORT  , 0 },
   { "reload"   , "reload"	, POS_DEAD    , do_reboot   , 0, 5	, 0 },
   { "receive"  , "rece"		, POS_STANDING, do_not_here , 1, ADMLVL_NONE	, 0 },
@@ -1136,7 +1133,6 @@ void command_interpreter(struct char_data *ch, char *argument)
   skip_spaces(&argument);
   if (!*argument)
     return;
-
 
   /*
    * special case to handle one-character, non-alphanumeric commands;

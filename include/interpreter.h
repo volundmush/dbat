@@ -18,6 +18,7 @@
 #define IS_MOVE(cmdnum) (complete_cmd_info[cmdnum].command_pointer == do_move)
 
 extern const char *list_bonus[];
+extern const struct command_info cmd_info[];
 
 void userLoad(struct descriptor_data *d, char *name);
 int perform_alias(struct descriptor_data *d, char *orig, size_t maxlen);
