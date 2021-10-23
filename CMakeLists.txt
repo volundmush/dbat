@@ -21,8 +21,10 @@ if(${LIBBSD})
 endif()
 
 
-find_package(ZLIB REQUIRED)
-link_libraries(ZLIB::ZLIB)
+#find_package(ZLIB REQUIRED)
+#link_libraries(ZLIB::ZLIB)
+find_library(ZLIB NAMES z libz REQUIRED)
+link_libraries(${ZLIB})
 
 # this is the core library we're making.
 add_library(circlemud ${CIRCLE_INCLUDE} ${CIRCLE_SRC})
