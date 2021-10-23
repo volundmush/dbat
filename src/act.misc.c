@@ -23,6 +23,8 @@
 #include "combat.h"
 #include "constants.h"
 #include "obj_edit.h"
+#include "fight.h"
+#include "class.h"
 
 /* local functions  */
 static void generate_multiform(struct char_data *ch, struct char_data *multi1, struct char_data *multi2, struct char_data *multi3);
