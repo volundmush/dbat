@@ -23,6 +23,7 @@
 #include "comm.h"
 #include "constants.h"
 #include "combat.h"
+#include "class.h"
 
 ACMD(do_lightgrenade)
 {
@@ -2145,7 +2146,7 @@ ACMD(do_head)
  struct obj_data *obj;
  char arg[MAX_INPUT_LENGTH];
  double attperc = 0;
-
+ int mult;
   one_argument(argument, arg);
 
  if (!can_grav(ch)) {
@@ -2344,7 +2345,7 @@ ACMD(do_head)
         }
         GET_POS(vict) = POS_SLEEPING;
        }
-      int mult = calc_critical(ch, 0);
+      mult = calc_critical(ch, 0);
       if (IS_KURZAK(ch) && !IS_NPC(ch)) {
        if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
         mult += 1;

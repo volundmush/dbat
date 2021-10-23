@@ -1508,7 +1508,7 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j)
   send_to_char(ch, "VNum: [@g%5d@n], RNum: [%5d], Idnum: [%5d], Type: %s, SpecProc: %s\r\n",
 	vnum, GET_OBJ_RNUM(j), GET_ID(j), buf, GET_OBJ_SPEC(j) ? "Exists" : "None");
 
-  send_to_char(ch, "Generation time: @g%s@nUnique ID: @g%"I64T"@n\r\n",
+  send_to_char(ch, "Generation time: @g%s@nUnique ID: @g%" I64T "@n\r\n",
     ctime(&j->generation), j->unique_id);
 
   send_to_char(ch, "Object Hit Points: [ @g%3d@n/@g%3d@n]\r\n",
@@ -1541,7 +1541,7 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j)
   sprintbitarray(GET_OBJ_EXTRA(j), extra_bits, EF_ARRAY_MAX, buf);
   send_to_char(ch, "Extra flags   : %s\r\n", buf);
 
-  send_to_char(ch, "Weight: %"I64T", Value: %d, Cost/day: %d, Timer: %d, Min Level: %d\r\n",
+  send_to_char(ch, "Weight: %" I64T ", Value: %d, Cost/day: %d, Timer: %d, Min Level: %d\r\n",
      GET_OBJ_WEIGHT(j), GET_OBJ_COST(j), GET_OBJ_RENT(j), GET_OBJ_TIMER(j), GET_OBJ_LEVEL(j));
 
   send_to_char(ch, "In room: %d (%s), ", GET_ROOM_VNUM(IN_ROOM(j)),
@@ -1718,7 +1718,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
     sprinttype(k->chclass, pc_class_types, buf, sizeof(buf));
   }
   sprinttype(k->race, pc_race_types, buf2, sizeof(buf2));
-  send_to_char(ch, "Class: %s, Race: %s, Lev: [@y%2d(%dHD+%dcl+%d)@n], XP: [@y%"I64T"@n]\r\n",
+  send_to_char(ch, "Class: %s, Race: %s, Lev: [@y%2d(%dHD+%dcl+%d)@n], XP: [@y%" I64T "@n]\r\n",
                    buf, buf2, GET_LEVEL(k), GET_HITDICE(k),
                    GET_CLASS_LEVEL(k), GET_LEVEL_ADJ(k), GET_EXP(k));
 
@@ -3533,7 +3533,7 @@ ACMD(do_show)
     send_to_char(ch, "Player: %-12s (%s) [%2d %s %s]\r\n", GET_NAME(vict),
       genders[(int) GET_SEX(vict)], GET_LEVEL(vict), class_abbrevs[(int)
       GET_CLASS(vict)], race_abbrevs[(int) GET_RACE(vict)]);
-    send_to_char(ch, "Au: %-8d  Bal: %-8d  Exp: %"I64T"  Align: %-5d  Ethic: %-5d\r\n",
+    send_to_char(ch, "Au: %-8d  Bal: %-8d  Exp: %" I64T "  Align: %-5d  Ethic: %-5d\r\n",
                  GET_GOLD(vict), GET_BANK_GOLD(vict), GET_EXP(vict),
                  GET_ALIGNMENT(vict), GET_ETHIC_ALIGNMENT(vict));
     if (CONFIG_ALLOW_MULTICLASS)
@@ -3927,7 +3927,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
 
     value = strtoll(val_arg, &ptr, 10);
   /*    value = atoi(val_arg); */
-    send_to_char(ch, "%s's %s set to %"I64T".\r\n", GET_NAME(vict), set_fields[mode].cmd, value);
+    send_to_char(ch, "%s's %s set to %" I64T ".\r\n", GET_NAME(vict), set_fields[mode].cmd, value);
   } else
     send_to_char(ch, "%s", CONFIG_OK);
 
@@ -4104,7 +4104,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
       value = atoi(val_arg);
       RANGE(0, 24);
       GET_COND(vict, (mode - 29)) = value; /* and here too */
-      send_to_char(ch, "%s's %s set to %"I64T".\r\n", GET_NAME(vict), set_fields[mode].cmd, value);
+      send_to_char(ch, "%s's %s set to %" I64T ".\r\n", GET_NAME(vict), set_fields[mode].cmd, value);
     } else {
       send_to_char(ch, "Must be 'off' or a value from 0 to 24.\r\n");
       return (0);
@@ -5096,7 +5096,7 @@ ACMD (do_zcheck)
 
         if (GET_EXP(mob)>MAX_EXP_ALLOWED && (found=1))
           len += snprintf(buf + len, sizeof(buf) - len,
-                          "- Has %"I64T" experience (limit: %d)\r\n",
+                          "- Has %" I64T " experience (limit: %d)\r\n",
                               GET_EXP(mob), MAX_EXP_ALLOWED);
         if (AFF_FLAGGED(mob, AFF_GROUP | AFF_CHARM | AFF_POISON) && (found = 1))
           len += snprintf(buf + len, sizeof(buf) - len,
@@ -5168,7 +5168,7 @@ ACMD (do_zcheck)
         if ((GET_OBJ_COST(obj) || (GET_OBJ_WEIGHT(obj) && GET_OBJ_TYPE(obj) != ITEM_FOUNTAIN) ||
            GET_OBJ_RENT(obj)) && (found = 1))
           len += snprintf(buf + len, sizeof(buf) - len,
-                          "- is NO_TAKE, but has cost (%d) weight (%"I64T") or rent (%d) set.\r\n",
+                          "- is NO_TAKE, but has cost (%d) weight (%" I64T ") or rent (%d) set.\r\n",
                           GET_OBJ_COST(obj), GET_OBJ_WEIGHT(obj), GET_OBJ_RENT(obj));
       } else {
         if (GET_OBJ_COST(obj) == 0 && (found=1))
@@ -5181,7 +5181,7 @@ ACMD (do_zcheck)
 
         if (GET_OBJ_WEIGHT(obj) > MAX_OBJ_WEIGHT && (found=1))
           len += snprintf(buf + len, sizeof(buf) - len,
-                          "  Weight is too high: %"I64T" (limit  %d).\r\n",
+                          "  Weight is too high: %" I64T " (limit  %d).\r\n",
                           GET_OBJ_WEIGHT(obj), MAX_OBJ_WEIGHT);
 
 

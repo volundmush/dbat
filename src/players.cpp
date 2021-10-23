@@ -1099,13 +1099,13 @@ void save_char(struct char_data * ch)
     fprintf(fl, "Drnk: %d\n", GET_COND(ch, DRUNK));
 
   if (GET_HIT(ch)	   != PFDEF_HIT  || GET_MAX_HIT(ch)  != PFDEF_MAXHIT)
-    fprintf(fl, "Hit : %"I64T"/%"I64T"\n", GET_HIT(ch),  GET_MAX_HIT(ch));
+    fprintf(fl, "Hit : %" I64T "/%" I64T "\n", GET_HIT(ch),  GET_MAX_HIT(ch));
   if (GET_MANA(ch)	   != PFDEF_MANA || GET_MAX_MANA(ch) != PFDEF_MAXMANA)
-    fprintf(fl, "Mana: %"I64T"/%"I64T"\n", GET_MANA(ch), GET_MAX_MANA(ch));
+    fprintf(fl, "Mana: %" I64T "/%" I64T "\n", GET_MANA(ch), GET_MAX_MANA(ch));
   if (GET_MOVE(ch)	   != PFDEF_MOVE || GET_MAX_MOVE(ch) != PFDEF_MAXMOVE)
-    fprintf(fl, "Move: %"I64T"/%"I64T"\n", GET_MOVE(ch), GET_MAX_MOVE(ch));
+    fprintf(fl, "Move: %" I64T "/%" I64T "\n", GET_MOVE(ch), GET_MAX_MOVE(ch));
   if (GET_KI(ch)	   != PFDEF_KI || GET_MAX_KI(ch) != PFDEF_MAXKI)
-    fprintf(fl, "Ki  : %"I64T"/%"I64T"\n", GET_KI(ch), GET_MAX_KI(ch));
+    fprintf(fl, "Ki  : %" I64T "/%" I64T "\n", GET_KI(ch), GET_MAX_KI(ch));
 
   if (GET_STR(ch)	   != PFDEF_STR)        fprintf(fl, "Str : %d\n", GET_STR(ch));
   if (GET_INT(ch)	   != PFDEF_INT)	fprintf(fl, "Int : %d\n", GET_INT(ch));
@@ -1125,10 +1125,10 @@ void save_char(struct char_data * ch)
   if (GET_KAIOKEN(ch)      != PFDEF_GOLD)       fprintf(fl, "Kaio: %d\n", GET_KAIOKEN(ch));
   if (GET_GOLD(ch)	   != PFDEF_GOLD)	fprintf(fl, "Gold: %d\n", GET_GOLD(ch));
   if (GET_BANK_GOLD(ch)	   != PFDEF_BANK)	fprintf(fl, "Bank: %d\n", GET_BANK_GOLD(ch));
-  if (GET_EXP(ch)	   != PFDEF_EXP)	fprintf(fl, "Exp : %"I64T"\n", GET_EXP(ch));
+  if (GET_EXP(ch)	   != PFDEF_EXP)	fprintf(fl, "Exp : %" I64T "\n", GET_EXP(ch));
   if (GET_TRANSCLASS(ch)   != PFDEF_EXP)        fprintf(fl, "Tcla: %d\n", GET_TRANSCLASS(ch));
-  if (GET_MOLT_EXP(ch)     != PFDEF_EXP)        fprintf(fl, "Mexp: %"I64T"\n", GET_MOLT_EXP(ch));
-  if (GET_MAJINIZED(ch)    != PFDEF_EXP)        fprintf(fl, "Majm: %"I64T"\n", GET_MAJINIZED(ch));
+  if (GET_MOLT_EXP(ch)     != PFDEF_EXP)        fprintf(fl, "Mexp: %" I64T "\n", GET_MOLT_EXP(ch));
+  if (GET_MAJINIZED(ch)    != PFDEF_EXP)        fprintf(fl, "Majm: %" I64T "\n", GET_MAJINIZED(ch));
   if (GET_MOLT_LEVEL(ch)   != PFDEF_EXP)        fprintf(fl, "Mlvl: %d\n", GET_MOLT_LEVEL(ch));
   if (GET_FISHD(ch)        != PFDEF_ACCURACY)	fprintf(fl, "Fisd: %d\n", GET_FISHD(ch));
   if (GET_POLE_BONUS(ch)   != PFDEF_ACCURACY)	fprintf(fl, "Pole: %d\n", GET_POLE_BONUS(ch));
@@ -1141,11 +1141,11 @@ void save_char(struct char_data * ch)
   if (GET_GENOME(ch, 0)    != PFDEF_EYE)        fprintf(fl, "Geno: %d\n", GET_GENOME(ch, 0));
   if (GET_GENOME(ch, 1)    != PFDEF_EYE)        fprintf(fl, "Gen1: %d\n", GET_GENOME(ch, 1));
   if (GET_POS(ch)          != POS_STANDING)     fprintf(fl, "Posi: %d\n", GET_POS(ch));
-  if (GET_LIFEFORCE(ch)    != PFDEF_BASEPL)     fprintf(fl, "LF  : %"I64T"\n", GET_LIFEFORCE(ch));
+  if (GET_LIFEFORCE(ch)    != PFDEF_BASEPL)     fprintf(fl, "LF  : %" I64T "\n", GET_LIFEFORCE(ch));
   if (GET_LIFEPERC(ch)     != PFDEF_WEIGHT)     fprintf(fl, "LFPC: %d\n", GET_LIFEPERC(ch));
-  if (GET_BASE_PL(ch)      != PFDEF_BASEPL)     fprintf(fl, "Bpl : %"I64T"\n", GET_BASE_PL(ch)); 
-  if (GET_BASE_KI(ch)      != PFDEF_BASEKI)     fprintf(fl, "Bki : %"I64T"\n", GET_BASE_KI(ch));
-  if (GET_BASE_ST(ch)      != PFDEF_BASEST)     fprintf(fl, "Bst : %"I64T"\n", GET_BASE_ST(ch));
+  if (GET_BASE_PL(ch)      != PFDEF_BASEPL)     fprintf(fl, "Bpl : %" I64T "\n", GET_BASE_PL(ch));
+  if (GET_BASE_KI(ch)      != PFDEF_BASEKI)     fprintf(fl, "Bki : %" I64T "\n", GET_BASE_KI(ch));
+  if (GET_BASE_ST(ch)      != PFDEF_BASEST)     fprintf(fl, "Bst : %" I64T "\n", GET_BASE_ST(ch));
   if (GET_DROOM(ch)        != PFDEF_DROOM)      fprintf(fl, "Droo: %d\n", GET_DROOM(ch)); 
   if (GET_HAIRL(ch)        != PFDEF_HAIRL)      fprintf(fl, "Hrl : %d\n", GET_HAIRL(ch));
   if (GET_HAIRS(ch)        != PFDEF_HAIRS)      fprintf(fl, "Hrs : %d\n", GET_HAIRS(ch));
@@ -1178,8 +1178,8 @@ void save_char(struct char_data * ch)
   if (GET_CRANK(ch)        != PFDEF_CRANK)      fprintf(fl, "Clar: %d\n", GET_CRANK(ch));
   if (GET_RP(ch)           != PFDEF_SKIN)       fprintf(fl, "RPP : %d\n", GET_RP(ch));
   if (GET_RBANK(ch)        != PFDEF_SKIN)       fprintf(fl, "RBan: %d\n", GET_RBANK(ch));
-  if (GET_SUPPRESS(ch)     != PFDEF_SKIN)       fprintf(fl, "Supp: %"I64T"\n", GET_SUPPRESS(ch));
-  if (GET_SUPP(ch)         != PFDEF_SKIN)       fprintf(fl, "Sups: %"I64T"\n", GET_SUPP(ch));
+  if (GET_SUPPRESS(ch)     != PFDEF_SKIN)       fprintf(fl, "Supp: %" I64T "\n", GET_SUPPRESS(ch));
+  if (GET_SUPP(ch)         != PFDEF_SKIN)       fprintf(fl, "Sups: %" I64T "\n", GET_SUPP(ch));
   if (GET_TRP(ch)          != PFDEF_SKIN)       fprintf(fl, "Trp : %d\n", GET_TRP(ch));
   if (GET_DCOUNT(ch)       != PFDEF_EYE)        fprintf(fl, "Deac: %d\n", GET_DCOUNT(ch));
   if (GET_TRAINAGL(ch)     != PFDEF_EYE)        fprintf(fl, "Trag: %d\n", GET_TRAINAGL(ch));
@@ -1462,7 +1462,7 @@ void load_HMVS(struct char_data *ch, const char *line, int mode)
 {
   int64_t num = 0, num2 = 0;
 
-  sscanf(line, "%"I64T"/%"I64T"", &num, &num2);
+  sscanf(line, "%" I64T "/%" I64T "", &num, &num2);
 
   switch (mode) {
   case LOAD_HIT:
@@ -1491,7 +1491,7 @@ void load_BASE(struct char_data *ch, const char *line, int mode)
 {
   int64_t num = 0;
 
-  sscanf(line, "%"I64T"", &num);
+  sscanf(line, "%" I64T "", &num);
 
   switch (mode) {
   case LOAD_HIT:
@@ -1516,7 +1516,7 @@ void load_majin(struct char_data *ch, const char *line)
 {
   int64_t num = 0;
 
-  sscanf(line, "%"I64T"", &num);
+  sscanf(line, "%" I64T "", &num);
   GET_MAJINIZED(ch) = num;
 
 }
@@ -1525,7 +1525,7 @@ void load_molt(struct char_data *ch, const char *line)
 {
   int64_t num = 0;
 
-  sscanf(line, "%"I64T"", &num);
+  sscanf(line, "%" I64T "", &num);
   GET_MOLT_EXP(ch) = num;
 
 }

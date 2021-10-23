@@ -17,7 +17,7 @@
 #include "handler.h"
 #include "constants.h"
 #include "fight.h"
-
+#include "guild.h"
 
 /* Combat commands below this line */
 
@@ -2209,7 +2209,7 @@ ACMD(do_genki)
 
   int perc, prob;
   double attperc = .5, minimum = .4;
-  struct char_data *friend = NULL, *vict = NULL, *next_v = NULL;
+  struct char_data *friend_char = NULL, *vict = NULL, *next_v = NULL;
   char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
   two_arguments(argument, arg, arg2);
@@ -2284,12 +2284,12 @@ ACMD(do_genki)
    return;
   }
 
-  for (friend = world[IN_ROOM(ch)].people; friend; friend = next_v) {
-   next_v = friend->next_in_room;
-   if (friend == ch) {
+  for (friend_char = world[IN_ROOM(ch)].people; friend_char; friend_char = next_v) {
+   next_v = friend_char->next_in_room;
+   if (friend_char == ch) {
     continue;
    }
-   if (AFF_FLAGGED(friend, AFF_GROUP) && (friend->master == ch || ch->master == friend || friend->master == ch->master)) {
+   if (AFF_FLAGGED(friend_char, AFF_GROUP) && (friend_char->master == ch || ch->master == friend_char || friend_char->master == ch->master)) {
     GET_CHARGE(ch) += GET_MANA(ch) / 10;
     GET_MANA(ch) -= GET_MANA(ch) / 10;
    }
@@ -12442,7 +12442,7 @@ ACMD(do_kiball)
        pcost(ch, 0, GET_MAX_MANA(ch) * 0.01);
        }
      } */
-    // log("Log 1 - attperc: %f, minimum: %f, charge: %"I64T"", attperc, minimum, GET_CHARGE(ch));
+    // log("Log 1 - attperc: %f, minimum: %f, charge: %" I64T "", attperc, minimum, GET_CHARGE(ch));
   //}
 
   if (*arg2) {
@@ -12461,11 +12461,11 @@ ACMD(do_kiball)
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
-   // log("Log 2 - attperc: %f, minimum: %f, charge: %"I64T"", attperc, minimum, GET_CHARGE(ch));
+   // log("Log 2 - attperc: %f, minimum: %f, charge: %" I64T "", attperc, minimum, GET_CHARGE(ch));
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
    return;
   }
-   // log("Log 3 - attperc: %f, minimum: %f, charge: %"I64T"", attperc, minimum, GET_CHARGE(ch));
+   // log("Log 3 - attperc: %f, minimum: %f, charge: %" I64T "", attperc, minimum, GET_CHARGE(ch));
  skill = init_skill(ch, SKILL_KIBALL);
 
  vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
@@ -15968,7 +15968,7 @@ ACMD(do_powerup)
    return;
    }
   if (GET_SUPPRESS(ch) > 0) {
-   send_to_char(ch, "@WYou currently have your powerlevel suppressed to %"I64T" percent.@n", GET_SUPPRESS(ch));
+   send_to_char(ch, "@WYou currently have your powerlevel suppressed to %" I64T " percent.@n", GET_SUPPRESS(ch));
    return;
   }
   if (PLR_FLAGGED(ch, PLR_POWERUP)) {

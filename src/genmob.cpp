@@ -381,7 +381,7 @@ int write_mobile_espec(mob_vnum mvnum, struct char_data *mob, FILE *fd)
   if (GET_CHA(mob) != 0)
     fprintf(fd, "Cha: %d\n", GET_CHA(mob));
   if (mob_proto + real_mobile(mvnum) != mob) { /* Not saving a prototype */
-    fprintf(fd, "Hit: %"I64T"\nMaxHit: %"I64T"\nMana: %"I64T"\nMaxMana: %"I64T"\nMoves: %"I64T"\nMaxMoves: %"I64T"\n",
+    fprintf(fd, "Hit: %" I64T "\nMaxHit: %" I64T "\nMana: %" I64T "\nMaxMana: %" I64T "\nMoves: %" I64T "\nMaxMoves: %" I64T "\n",
             GET_HIT(mob), GET_MAX_HIT(mob), GET_MANA(mob), GET_MAX_MANA(mob),
             GET_MOVE(mob), GET_MAX_MOVE(mob));
     for (aff = mob->affected; aff; aff = aff->next)
@@ -449,7 +449,7 @@ int write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd)
   sprintascii(abuf4, AFF_FLAGS(mob)[3]);
 
   fprintf(fd, "%s %s %s %s %s %s %s %s %d E\n"
-              "%d %d %d %"I64T"d%"I64T"+%"I64T" %dd%d+%d\n",
+              "%d %d %d %" I64T "d%" I64T "+%" I64T " %dd%d+%d\n",
                 fbuf1, fbuf2, fbuf3, fbuf4,
                 abuf1, abuf2, abuf3, abuf4,
 		GET_ALIGNMENT(mob),

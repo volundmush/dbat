@@ -24,6 +24,7 @@
 #include "constants.h"
 #include "spell_parser.h"
 #include "act.movement.h"
+#include "spells.h"
 
 /*
  *  General functions used by several triggers

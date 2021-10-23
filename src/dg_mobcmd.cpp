@@ -36,17 +36,15 @@
 **************************************************************************/
 
 #include "structs.h"
-#include "screen.h"
 #include "dg_scripts.h"
 #include "db.h"
 #include "utils.h"
 #include "handler.h"
 #include "interpreter.h"
 #include "comm.h"
-#include "spells.h"
 #include "constants.h"
 #include "act.wizard.h"
-#include "act.offensive.h"
+#include "fight.h"
 
 /*
  * Local functions.

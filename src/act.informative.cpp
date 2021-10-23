@@ -6217,7 +6217,7 @@ ACMD(do_status)
             send_to_char(ch, "         You are surrounded by flames!@n\r\n");
         }
         if (GET_SUPPRESS(ch) > 0) {
-            send_to_char(ch, "         You are suppressing current PL to %"I64T".\r\n", GET_SUPPRESS(ch));
+            send_to_char(ch, "         You are suppressing current PL to %" I64T ".\r\n", GET_SUPPRESS(ch));
         }
         if (IS_MAJIN(ch)) {
             send_to_char(ch, "         You have ingested %d people.\r\n", GET_ABSORBS(ch));
@@ -8353,7 +8353,7 @@ ACMD(do_toplist)
     get_line(file, line);
     switch (count) {
      default:
-      sscanf(line, "%s %"I64T"\n", filler, &stats);
+      sscanf(line, "%s %" I64T "\n", filler, &stats);
       break;
 
     }
