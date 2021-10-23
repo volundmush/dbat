@@ -726,11 +726,13 @@
 #define PLR_FISHING     72
 #define PLR_GOOP        73
 #define PLR_MULTIHIT    74
-#define PLR_AURALIGHT   75   /* Aura Light by Slanith */
-#define PLR_RDISPLAY    76   /* By Slanith */
+#define PLR_AURALIGHT   75
+#define PLR_RDISPLAY    76
 #define PLR_STOLEN      77
+#define PLR_TAILHIDE    78  /* Hides tail for S & HB            */
+#define PLR_NOGROW      79  /* Halt Growth for S & HB           */
 
-#define NUM_PLR_FLAGS 78
+#define NUM_PLR_FLAGS 80
 
 /* Mob Personalty */
 #define MAX_PERSONALITIES 5
@@ -1559,8 +1561,8 @@
 #define PULSE_AUTOSAVE	(CONFIG_PULSE_AUTOSAVE RL_SEC)
 #define PULSE_IDLEPWD	(CONFIG_PULSE_IDLEPWD RL_SEC)
 #define PULSE_SANITY	(CONFIG_PULSE_SANITY RL_SEC)
-#define PULSE_USAGE	(CONFIG_PULSE_SANITY * 60 RL_SEC)   /* 5 mins */
-#define PULSE_TIMESAVE	(CONFIG_PULSE_TIMESAVE * 300 RL_SEC) /* should be >= SECS_PER_MUD_HOUR */
+#define PULSE_USAGE	(CONFIG_PULSE_SANITY * 300 RL_SEC)   /* 5 mins */
+#define PULSE_TIMESAVE	(CONFIG_PULSE_TIMESAVE * 900 RL_SEC) /* should be >= SECS_PER_MUD_HOUR */
 #define PULSE_CURRENT	(CONFIG_PULSE_CURRENT RL_SEC)
 #define PULSE_1SEC      (1 RL_SEC)
 #define PULSE_2SEC      (2 RL_SEC)

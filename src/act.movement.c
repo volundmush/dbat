@@ -663,7 +663,10 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
     if (IS_KANASSAN(ch) && !has_flight(ch)) {
       act("@CYou swim swiftly.@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@c$n@C swims swiftly.@n", TRUE, ch, 0, 0, TO_ROOM);
-    } else if (!IS_KANASSAN(ch) && !has_flight(ch)) {
+    } else if (IS_ICER(ch) && !has_flight(ch)) {
+      act("@CYou swim swiftly.@n", TRUE, ch, 0, 0, TO_CHAR);
+      act("@c$n@C swims swiftly.@n", TRUE, ch, 0, 0, TO_ROOM);
+    } else if (!IS_KANASSAN(ch) && !IS_ICER(ch) && !has_flight(ch)) {
       if (!check_swim(ch)) {
        return (0);
       } else {

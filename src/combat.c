@@ -1101,14 +1101,14 @@ int roll_accuracy(struct char_data *ch, int skill, bool kiatt)
  if (!IS_NPC(ch)) {
   if (GET_BONUS(ch, BONUS_ACCURATE)) {
    if (kiatt == TRUE)
-    skill += skill * 0.08;
+    skill += skill * 0.10;
    else
-    skill += skill * 0.15;
+    skill += skill * 0.20;
   } else if (GET_BONUS(ch, BONUS_POORDEPTH)) {
    if (kiatt == TRUE)
-    skill -= skill * 0.08;
+    skill -= skill * 0.10;
    else
-    skill -= skill * 0.15;
+    skill -= skill * 0.20;
   }
  }
 

@@ -664,119 +664,119 @@ static int64_t move_gain(struct char_data *ch)
 
 static void update_flags(struct char_data *ch)
 {
-  if (ch == NULL) {
-    send_to_imm("ERROR: Empty ch variable sent to update_flags.");
-    return;
-  }
+	if (ch == NULL) {
+		send_to_imm("ERROR: Empty ch variable sent to update_flags.");
+		return;
+	}
 
-  if (GET_BONUS(ch, BONUS_LATE) && GET_POS(ch) == POS_SLEEPING && rand_number(1, 3) == 3) {
-   if (GET_HIT(ch) >= gear_pl(ch) && GET_MOVE(ch) >= GET_MAX_MOVE(ch) && GET_MANA(ch) >= GET_MAX_MANA(ch)) {
-    send_to_char(ch, "You FINALLY wake up.\r\n");
-    act("$n wakes up.", TRUE, ch, 0, 0, TO_ROOM);
-    GET_POS(ch) = POS_SITTING;
-   }
-  }
-  
-  if (AFF_FLAGGED(ch, AFF_KNOCKED) && !FIGHTING(ch)) {
-    act("@W$n is no longer senseless, and wakes up.@n", FALSE, ch, 0, 0, TO_ROOM);
-    send_to_char(ch, "You are no longer knocked out, and wake up!@n\r\n");
-    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_KNOCKED);
-    GET_POS(ch) = POS_SITTING;
-  }
+	if (GET_BONUS(ch, BONUS_LATE) && GET_POS(ch) == POS_SLEEPING && rand_number(1, 3) == 3) {
+		if (GET_HIT(ch) >= gear_pl(ch) && GET_MOVE(ch) >= GET_MAX_MOVE(ch) && GET_MANA(ch) >= GET_MAX_MANA(ch)) {
+			send_to_char(ch, "You FINALLY wake up.\r\n");
+			act("$n wakes up.", TRUE, ch, 0, 0, TO_ROOM);
+			GET_POS(ch) = POS_SITTING;
+		}
+	}
 
-  barrier_shed(ch);
+	if (AFF_FLAGGED(ch, AFF_KNOCKED) && !FIGHTING(ch)) {
+		act("@W$n is no longer senseless, and wakes up.@n", FALSE, ch, 0, 0, TO_ROOM);
+		send_to_char(ch, "You are no longer knocked out, and wake up!@n\r\n");
+		REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_KNOCKED);
+		GET_POS(ch) = POS_SITTING;
+	}
 
-  if (AFF_FLAGGED(ch, AFF_FIRESHIELD) && !FIGHTING(ch) && rand_number(1, 101) > GET_SKILL(ch, SKILL_FIRESHIELD)) {
-   send_to_char(ch, "Your fireshield disappears.\r\n");
-   REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FIRESHIELD);
-  }
-  if (AFF_FLAGGED(ch, AFF_ZANZOKEN) && !FIGHTING(ch) && rand_number(1, 3) == 2) {
-   send_to_char(ch, "You lose concentration and no longer are ready to zanzoken.\r\n");
-   REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-  }
-  if (AFF_FLAGGED(ch, AFF_ENSNARED) && rand_number(1, 3) == 2) {
-   send_to_char(ch, "The silk ensnaring your arms disolves enough for you to break it!\r\n");
-   REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ENSNARED);
-  }
-  if (!IS_NPC(ch) && !PLR_FLAGGED(ch, PLR_STAIL) && (IS_SAIYAN(ch) || IS_HALFBREED(ch))) {  
-   if (RACIAL_PREF(ch) == 1 && rand_number(1, 50) >= 40) {
-    GET_TGROWTH(ch) += 1;
-   } else if (RACIAL_PREF(ch) != 1 || IS_SAIYAN(ch)) {
-    GET_TGROWTH(ch) += 1;
-   }
-   if (GET_TGROWTH(ch) == 10) {
-    send_to_char(ch, "@wYour tail grows back.@n\r\n");
-    act("$n@w's tail grows back.@n", TRUE, ch, 0, 0, TO_ROOM);
-    SET_BIT_AR(PLR_FLAGS(ch), PLR_STAIL);
-    GET_TGROWTH(ch) = 0;
-   }
-  }
-  if (!IS_NPC(ch) && !PLR_FLAGGED(ch, PLR_TAIL) && (IS_ICER(ch) || IS_BIO(ch))) {
-   GET_TGROWTH(ch) += 1;
-   if (GET_TGROWTH(ch) == 10) {
-    send_to_char(ch, "@wYour tail grows back.@n\r\n");
-    act("$n@w's tail grows back.@n", TRUE, ch, 0, 0, TO_ROOM);
-    SET_BIT_AR(PLR_FLAGS(ch), PLR_TAIL);
-    GET_TGROWTH(ch) = 0;
-   }
-  }
-  if (AFF_FLAGGED(ch, AFF_MBREAK) && rand_number(1, 3 + sick_fail) == 2) {
-   send_to_char(ch, "@wYour mind is no longer in turmoil, you can charge ki again.@n\r\n");
-   act("$n@w's mind is no longer broken.@n", TRUE, ch, 0, 0, TO_ROOM);
-   REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_MBREAK);
-   if (GET_SKILL(ch, SKILL_TELEPATHY) <= 0 && rand_number(1, 2) == 2) {
-    ch->real_abils.intel -= 1;
-    ch->real_abils.wis -= 1;
-    send_to_char(ch, "@RDue to the stress you've lost 1 Intelligence and Wisdom!@n\r\n");
-    if (ch->real_abils.wis < 4)
-     ch->real_abils.wis = 4;
-    if (ch->real_abils.intel < 4)
-     ch->real_abils.intel = 4;
-   } else if (GET_SKILL(ch, SKILL_TELEPATHY) <= 0 && rand_number(1, 20) == 1) {
-    ch->real_abils.intel -= 1;
-    ch->real_abils.wis -= 1;
-    send_to_char(ch, "@RDue to the stress you've lost 1 Intelligence and Wisdom!@n\r\n");
-    if (ch->real_abils.wis < 4)
-     ch->real_abils.wis = 4;
-    if (ch->real_abils.intel < 4)
-     ch->real_abils.intel = 4;
-   }
-  }
-  if (AFF_FLAGGED(ch, AFF_SHOCKED) && rand_number(1, 4) == 4) {
-   send_to_char(ch, "@wYour mind is no longer shocked.@n\r\n");
-   act("$n@w's mind is no longer shocked.@n", TRUE, ch, 0, 0, TO_ROOM);
-   if (GET_SKILL(ch, SKILL_TELEPATHY) > 0) {
-    int skill = GET_SKILL(ch, SKILL_TELEPATHY), stop = FALSE;
-    improve_skill(ch, SKILL_TELEPATHY, 0);
-    while (stop == FALSE)
-    {
-     if (rand_number(1, 8) == 5)
-      stop = TRUE;
-     else
-      improve_skill(ch, SKILL_TELEPATHY, 0);
-    }
-    if (skill < GET_SKILL(ch, SKILL_TELEPATHY))
-     send_to_char(ch, "Your mental damage and recovery has taught you things about your own mind.\r\n");
-   }
-   REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_SHOCKED);
-  }
-  if (AFF_FLAGGED(ch, AFF_FROZEN) && rand_number(1, 2) == 2) {
-   send_to_char(ch, "@wYou realize you have thawed enough and break out of the ice holding you prisoner!\r\n");
-   act("$n@W breaks out of the ice holding $m prisoner!", TRUE, ch, 0, 0, TO_ROOM);
-   REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FROZEN);
-  }
-  if (AFF_FLAGGED(ch, AFF_WITHER) && rand_number(1, 6 + sick_fail) == 2) {
-   send_to_char(ch, "@wYour body returns to normal and you beat the withering that plagued you.\r\n");
-   act("$n@W's looks more fit now.", TRUE, ch, 0, 0, TO_ROOM);
-   ch->real_abils.str += 3;
-   ch->real_abils.cha += 3;
-   save_char(ch);
-   REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_WITHER);
-  }
-  if (wearing_stardust(ch) == 1) {
-   SET_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   send_to_char(ch, "The stardust armor blesses you with a free zanzoken when you next need it.\r\n");
-  }
+	barrier_shed(ch);
+
+	if (AFF_FLAGGED(ch, AFF_FIRESHIELD) && !FIGHTING(ch) && rand_number(1, 101) > GET_SKILL(ch, SKILL_FIRESHIELD)) {
+		send_to_char(ch, "Your fireshield disappears.\r\n");
+		REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FIRESHIELD);
+	}
+	if (AFF_FLAGGED(ch, AFF_ZANZOKEN) && !FIGHTING(ch) && rand_number(1, 3) == 2) {
+		send_to_char(ch, "You lose concentration and no longer are ready to zanzoken.\r\n");
+		REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
+	}
+	if (AFF_FLAGGED(ch, AFF_ENSNARED) && rand_number(1, 3) == 2) {
+		send_to_char(ch, "The silk ensnaring your arms disolves enough for you to break it!\r\n");
+		REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ENSNARED);
+	}
+	if (!IS_NPC(ch) && !PLR_FLAGGED(ch, PLR_STAIL) && !PLR_FLAGGED(ch, PLR_NOGROW) && (IS_SAIYAN(ch) || IS_HALFBREED(ch))) {
+		if (RACIAL_PREF(ch) == 1 && rand_number(1, 50) >= 40) {
+			GET_TGROWTH(ch) += 1;
+		}
+		else if (RACIAL_PREF(ch) != 1 || IS_SAIYAN(ch)) {
+			GET_TGROWTH(ch) += 1;
+		}
+		if (GET_TGROWTH(ch) == 10) {
+			send_to_char(ch, "@wYour tail grows back.@n\r\n");
+			act("$n@w's tail grows back.@n", TRUE, ch, 0, 0, TO_ROOM);
+			SET_BIT_AR(PLR_FLAGS(ch), PLR_STAIL);
+			GET_TGROWTH(ch) = 0;
+		}
+	}
+	if (!IS_NPC(ch) && !PLR_FLAGGED(ch, PLR_TAIL) && (IS_ICER(ch) || IS_BIO(ch))) {
+		GET_TGROWTH(ch) += 1;
+		if (GET_TGROWTH(ch) == 10) {
+			send_to_char(ch, "@wYour tail grows back.@n\r\n");
+			act("$n@w's tail grows back.@n", TRUE, ch, 0, 0, TO_ROOM);
+			SET_BIT_AR(PLR_FLAGS(ch), PLR_TAIL);
+			GET_TGROWTH(ch) = 0;
+		}
+	}
+	if (AFF_FLAGGED(ch, AFF_MBREAK) && rand_number(1, 3 + sick_fail) == 2) {
+		send_to_char(ch, "@wYour mind is no longer in turmoil, you can charge ki again.@n\r\n");
+		REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_MBREAK);
+		if (GET_SKILL(ch, SKILL_TELEPATHY) <= 0 && rand_number(1, 2) == 2) {
+			ch->real_abils.intel -= 1;
+			ch->real_abils.wis -= 1;
+			send_to_char(ch, "@RDue to the stress you've lost 1 Intelligence and Wisdom!@n\r\n");
+			if (ch->real_abils.wis < 4)
+				ch->real_abils.wis = 4;
+			if (ch->real_abils.intel < 4)
+				ch->real_abils.intel = 4;
+		}
+		else if (GET_SKILL(ch, SKILL_TELEPATHY) <= 0 && rand_number(1, 20) == 1) {
+			ch->real_abils.intel -= 1;
+			ch->real_abils.wis -= 1;
+			send_to_char(ch, "@RDue to the stress you've lost 1 Intelligence and Wisdom!@n\r\n");
+			if (ch->real_abils.wis < 4)
+				ch->real_abils.wis = 4;
+			if (ch->real_abils.intel < 4)
+				ch->real_abils.intel = 4;
+		}
+	}
+	if (AFF_FLAGGED(ch, AFF_SHOCKED) && rand_number(1, 4) == 4) {
+		send_to_char(ch, "@wYour mind is no longer shocked.@n\r\n");
+		if (GET_SKILL(ch, SKILL_TELEPATHY) > 0) {
+			int skill = GET_SKILL(ch, SKILL_TELEPATHY), stop = FALSE;
+			improve_skill(ch, SKILL_TELEPATHY, 0);
+			while (stop == FALSE)
+			{
+				if (rand_number(1, 8) == 5)
+					stop = TRUE;
+				else
+					improve_skill(ch, SKILL_TELEPATHY, 0);
+			}
+			if (skill < GET_SKILL(ch, SKILL_TELEPATHY))
+				send_to_char(ch, "Your mental damage and recovery has taught you things about your own mind.\r\n");
+		}
+		REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_SHOCKED);
+	}
+	if (AFF_FLAGGED(ch, AFF_FROZEN) && rand_number(1, 2) == 2) {
+		send_to_char(ch, "@wYou realize you have thawed enough and break out of the ice holding you prisoner!\r\n");
+		act("$n@W breaks out of the ice holding $m prisoner!", TRUE, ch, 0, 0, TO_ROOM);
+		REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FROZEN);
+	}
+	if (AFF_FLAGGED(ch, AFF_WITHER) && rand_number(1, 6 + sick_fail) == 2) {
+		send_to_char(ch, "@wYour body returns to normal and you beat the withering that plagued you.\r\n");
+		act("$n@W's looks more fit now.", TRUE, ch, 0, 0, TO_ROOM);
+		ch->real_abils.str += 3;
+		ch->real_abils.cha += 3;
+		save_char(ch);
+		REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_WITHER);
+	}
+	if (wearing_stardust(ch) == 1) {
+		SET_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
+		send_to_char(ch, "The stardust armor blesses you with a free zanzoken when you next need it.\r\n");
+	}
 
 }
 
@@ -1583,11 +1583,10 @@ void point_update(void)
       }
 	  
 	  if (PLR_FLAGGED(i, PLR_AURALIGHT)) {
-	   if ((GET_MANA(i) - mana_gain(i)) > GET_MAX_MANA(i) * 0.15) {
+	   if ((GET_MANA(i) - mana_gain(i)) > GET_MAX_MANA(i) * 0.05) {
          send_to_char(i, "You send more energy into your aura to keep the light active.\r\n");
-		 act("$n's aura slowly flickers as energy is sent into it.\r\n", TRUE, i, 0, 0, TO_ROOM);
          GET_MANA(i) -= mana_gain(i);
-         GET_MANA(i) -= GET_MAX_MANA(i) * 0.15;
+         GET_MANA(i) -= GET_MAX_MANA(i) * 0.05;
        } else {
 	     send_to_char(i, "You don't have enough energy to keep the aura active.\r\n");
 		 act("$n's aura slowly stops shining and fades.\r\n", TRUE, i, 0, 0, TO_ROOM);

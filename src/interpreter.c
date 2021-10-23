@@ -191,7 +191,7 @@ ACMD(do_drop);
 ACMD(do_eat);
 ACMD(do_commune);
 ACMD(do_rptrans);
-ACMD(do_rpbank); /* By Andros*/
+ACMD(do_rpbank);
 ACMD(do_aura);
 ACMD(do_escape);
 ACMD(do_eavesdrop);
@@ -244,7 +244,7 @@ ACMD(do_pushup);
 ACMD(do_paralyze);
 ACMD(do_perf);
 ACMD(do_permission);
-ACMD(do_rbank); /*By Andros*/
+ACMD(do_rbank);
 ACMD(do_reward);
 ACMD(do_plant);
 ACMD(do_meditate);
@@ -439,6 +439,9 @@ ACMD(do_zen);
 ACMD(do_zanzoken);
 ACMD(do_zreset);
 ACMD(do_zpurge);
+ACMD(do_tailhide);
+ACMD(do_nogrow);
+ACMD(do_restring);
 
 /* DG Script ACMD's */
 ACMD(do_attach);
@@ -780,6 +783,7 @@ cpp_extern const struct command_info cmd_info[] = {
   { "noooc"    , "noooc"	, POS_DEAD    , do_gen_tog  , 0, ADMLVL_NONE	, SCMD_NOGOSSIP },
   { "nogive"   , "nogiv"        , POS_DEAD    , do_gen_tog   , 0, 0, SCMD_NOGIVE },
   { "nograts"  , "nograts"	, POS_DEAD    , do_gen_tog  , 0, ADMLVL_NONE	, SCMD_NOGRATZ },
+  { "nogrow"   , "nogro"        , POS_DEAD    , do_nogrow   , 0, ADMLVL_NONE    , 0 },
   { "nohassle" , "nohassle"	, POS_DEAD    , do_gen_tog  , 0, ADMLVL_IMMORT	, SCMD_NOHASSLE },
   { "nomail"   , "nomail"       , POS_DEAD    , do_gen_tog  , 0, ADMLVL_NONE    , SCMD_NMWARN },
   { "nonewbie" , "nonewbie"     , POS_DEAD    , do_gen_tog  , 0, ADMLVL_NONE    , SCMD_NOAUCTION },
@@ -840,6 +844,7 @@ cpp_extern const struct command_info cmd_info[] = {
   { "rbank"    , "rban"         , POS_RESTING , do_rbank    , 0, ADMLVL_IMMORT  , 0 },
   { "refuel"   , "refue"        , POS_SITTING, do_refuel   , 0, ADMLVL_NONE    , 0 },
   { "resize"   , "resiz"        , POS_STANDING, do_resize   , 0, ADMLVL_NONE    , 0 },
+  { "restring" , "restring"       , POS_STANDING, do_restring , 0, ADMLVL_NONE    , 0 },
   { "rclone"   , "rclon"        , POS_DEAD    , do_rcopy    , 0, ADMLVL_BUILDER      , 0 },
   { "rcopy"    , "rcopy"        , POS_DEAD    , do_rcopy    , 0, ADMLVL_BUILDER      , 0 },
   { "roomdisplay" , "roomdisplay"     , POS_STANDING	, do_rdisplay	, 0, ADMLVL_NONE	, 0 },
@@ -941,6 +946,7 @@ cpp_extern const struct command_info cmd_info[] = {
   { "syslog"   , "syslog"	, POS_DEAD    , do_syslog   , 0, ADMLVL_IMMORT	, 0 },
 
   /*{ "tcopy"    , "tcopy"  	, POS_DEAD    , do_oasis_copy, 0, ADMLVL_GOD	, SCMD_TEDIT },*/
+  { "tailhide" , "tailh"  , POS_RESTING , do_tailhide       , 0, ADMLVL_NONE    , 0 },
   { "table"    , "tabl"         , POS_SITTING , do_table    , 0, ADMLVL_NONE    , 0 },
   { "teach"    , "teac"         , POS_STANDING, do_teach    , 0, ADMLVL_NONE    , 0 },
   { "tell"     , "tel"		, POS_DEAD    , do_tell     , 0, ADMLVL_NONE	, 0 },
@@ -3275,7 +3281,7 @@ void display_bonus_menu(struct char_data *ch, int type)
                    "Insomniac   - Can't Sleep. Immune to yoikominminken and paralysis    @D[@G-2pts @D]", /* Bonus  20 */
                    "Evasive     - +15% to dodge rolls                                    @D[@G-3pts @D]", /* Bonus  21 */
                    "The Wall    - +20% chance to block                                   @D[@G-3pts @D]", /* Bonus  22 */
-                   "Accurate    - +15% chance to hit physical, +8% to hit with ki        @D[@G-3pts @D]", /* Bonus  23 */
+                   "Accurate    - +20% chance to hit physical, +10% to hit with ki       @D[@G-3pts @D]", /* Bonus  23 */
                    "Energy Leech- -2% ki damage received for every 5 character levels,   @D[@G-5pts @D]\n                  @cas long as you can take that ki to your charge pool.@D        ", /* Bonus  24*/
                    "Good Memory - +2 Skill Slots initially, +1 every 20 levels after     @D[@G-6pts @D]", /* Bonus 25 */
                    "Soft Touch  - Half damage for all hit locations                      @D[@G+5pts @D]", /* Neg 26 */
@@ -3284,7 +3290,7 @@ void display_bonus_menu(struct char_data *ch, int type)
                    "Sickly      - Suffer from harmful effects longer                     @D[@G+5pts @D]", /* Neg 29 */
                    "Punching Bag- -15% to dodge rolls                                    @D[@G+3pts @D]", /* Neg 30 */
                    "Pushover    - -20% block chance                                      @D[@G+3pts @D]", /* Neg 31 */
-                   "Poor D. Perc- -15% chance to hit with physical, -8% with ki          @D[@G+3pts @D]", /* Neg 32 */
+                   "Poor D. Perc- -20% chance to hit with physical, -10% with ki         @D[@G+3pts @D]", /* Neg 32 */
                    "Thin Skin   - +20% physical and +10% ki damage received              @D[@G+4pts @D]", /* Neg 33 */
                    "Fireprone   - +50% Fire Dmg taken, +10% ki, always burned            @D[@G+5pts @D]", /* Neg 34 */
                    "Energy Int. - +2% ki damage received for every 5 character levels,   @D[@G+6pts @D]\n                  @rif you have ki charged you have 10% chance to lose   \n                  it and to take 1/4th damage equal to it.@D                    ", /* Neg 35 */
@@ -3505,7 +3511,7 @@ const int list_bonus_cost[] = {
  -2, /* Bonus 20 */
  -3, /* Bonus 21 */
  -3, /* Bonus 22 */
- -3, /* Bonus 23 */
+ -4, /* Bonus 23 */
  -5, /* Bonus 24 */
  -6, /* Bonus 25*/
  5, /* Negative 26 */
@@ -3514,7 +3520,7 @@ const int list_bonus_cost[] = {
  5, /* Negative 29 */
  3, /* Negative 30 */
  3, /* Negative 31 */
- 3, /* Negative 32 */
+ 4, /* Negative 32 */
  4, /* Negative 33 */
  5, /* Negative 34 */
  6, /* Negative 35 */
