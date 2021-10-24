@@ -21,14 +21,14 @@ if(${LIBBSD})
 endif()
 
 # Support for ASIO
-include_directories(libs/asio/asio/include)
+#include_directories(libs/asio/asio/include)
 
 # Support for SQLITEPP
-include_directories(libs/sqlitepp)
+#include_directories(libs/sqlitepp)
 
 # Support for FMT
-include_directories(libs/fmt/include)
-add_compile_definitions(FMT_HEADER_ONLY=1)
+#include_directories(libs/fmt/include)
+#add_compile_definitions(FMT_HEADER_ONLY=1)
 
 #find_package(ZLIB REQUIRED)
 #link_libraries(ZLIB::ZLIB)
