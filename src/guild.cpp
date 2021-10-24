@@ -880,9 +880,9 @@ void handle_grand(struct char_data *keeper, int guild_nr, struct char_data *ch, 
 
 }
 
-void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *ch, char *argument, int skill)
+void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *ch, char *argument)
 {
-  int percent = GET_SKILL(ch, skill);
+  //int percent = GET_SKILL(ch, skill);
   int skill_num, learntype, pointcost, highest, i;
   char buf[MAX_STRING_LENGTH];
 
@@ -932,8 +932,6 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
       do_tell(keeper, buf, cmd_tell, 0);
       return;
     case SKLEARN_CROSSCLASS:
-      highest = highest_skill_value(GET_LEVEL(ch), learntype);
-      break;
     case SKLEARN_CLASS:
       highest = highest_skill_value(GET_LEVEL(ch), learntype);
       break;
@@ -1098,17 +1096,18 @@ void handle_gain(struct char_data *keeper, int guild_nr, struct char_data *ch, c
   int whichclass = GET_CLASS(ch);
 
   skip_spaces(&argument);
+  auto rpp_cost = rpp_to_level(ch);
 
 
   if (GET_LEVEL(ch) < 100 && GET_EXP(ch) >= level_exp(ch, GET_LEVEL(ch) + 1)) {
-    if (GET_RP(ch) < rpp_to_level(ch)) {
-     send_to_char(ch, "You need at least %d RPP to gain the next level.\r\n", rpp_to_level(ch));
+    if (GET_RP(ch) < rpp_cost) {
+     send_to_char(ch, "You need at least %d RPP to gain the next level.\r\n", rpp_cost);
     }
-    else if (rpp_to_level(ch) <= GET_RP(ch)) {
-     GET_RP(ch) -= rpp_to_level(ch);
+    else if (rpp_cost <= GET_RP(ch)) {
+     GET_RP(ch) -= rpp_cost;
      ch->desc->rpp = GET_RP(ch);
      userWrite(ch->desc, 0, 0, 0, "index");
-     send_to_char(ch, "@D(@cRPP@W: @w-%d@D)@n\n\n", rpp_to_level(ch));
+     send_to_char(ch, "@D(@cRPP@W: @w-%d@D)@n\n\n", rpp_cost);
      gain_level(ch, whichclass);
     }
     else {
@@ -1120,105 +1119,35 @@ void handle_gain(struct char_data *keeper, int guild_nr, struct char_data *ch, c
   return;
 }
 
-int rpp_to_level(struct char_data *ch)
-{
+int rpp_to_level(struct char_data *ch) {
 
- if (GET_LEVEL(ch) == 2) {
-   if IS_SAIYAN(ch)
-    return 60;
-   else if IS_BIO(ch)
-    return 35;
-   else if IS_MAJIN(ch)
-    return 55;
-   else if IS_GOBLIN(ch)
-    return 30;
-  } else if (GET_LEVEL(ch) >= 90) {
-    if (GET_LEVEL(ch) == 91)
-     return 3;
-    else if (GET_LEVEL(ch) == 92)
-     return 3;
-    else if (GET_LEVEL(ch) == 93)
-     return 3;
-    else if (GET_LEVEL(ch) == 94)
-     return 3;
-    else if (GET_LEVEL(ch) == 95)
-     return 3;
-    else if (GET_LEVEL(ch) == 96)
-     return 4;
-    else if (GET_LEVEL(ch) == 97)
-     return 4;
-    else if (GET_LEVEL(ch) == 98)
-     return 4;
-    else if (GET_LEVEL(ch) == 99)
-     return 5;
-    } else {
-     return 0;
-     }
-/*
- if (!IS_TRUFFLE(ch) && !IS_MUTANT(ch) && !IS_KONATSU(ch)) {
-  if (GET_LEVEL(ch) >= 60) {
-   if (GET_LEVEL(ch) == 61)
-    return 0;
-   else if (GET_LEVEL(ch) == 71)
-    return 0;
-   else if (GET_LEVEL(ch) == 81)
-    return 0;
-   else if (GET_LEVEL(ch) == 91)
-    return 0;
-   else if (GET_LEVEL(ch) % 2 == 0)
-    return 2;
-   else
-    return 3;
-  } else if (GET_LEVEL(ch) >= 30) {
-   if (GET_LEVEL(ch) == 31)
-    return 0;
-   else if (GET_LEVEL(ch) == 41)
-    return 0;
-   else if (GET_LEVEL(ch) == 51)
-    return 0;
-   else if (GET_LEVEL(ch) % 2 == 0)
-    return 1;
-   else
-    return 2;
-  } else if (GET_LEVEL(ch) >= 15) {
-   if (GET_LEVEL(ch) == 21)
-    return 0;
-   else if (GET_LEVEL(ch) % 2 == 0)
-    return 0;
-   else
-    return 1;
-  } else {
-   return 0;
-  }
- } else {
-  if (GET_LEVEL(ch) >= 60) {
-   if (GET_LEVEL(ch) == 61)
-    return 0;
-   else if (GET_LEVEL(ch) == 71)
-    return 0;
-   else if (GET_LEVEL(ch) == 81)
-    return 0;
-   else if (GET_LEVEL(ch) == 91)
-    return 0;
-   else if (GET_LEVEL(ch) % 2 == 0)
-    return 2;
-   else
-    return 3;
-  } else if (GET_LEVEL(ch) >= 30) {
-   if (GET_LEVEL(ch) == 31)
-    return 0;
-   else if (GET_LEVEL(ch) == 41)
-    return 0;
-   else if (GET_LEVEL(ch) == 51)
-    return 0;
-   else if (GET_LEVEL(ch) % 2 == 0)
-    return 1;
-   else
-    return 2;
-  } else {
-   return 0;
-  }
- }*/
+    switch (GET_LEVEL(ch)) {
+        case 2:
+            if IS_SAIYAN(ch)
+                return 60;
+            else if IS_BIO(ch)
+                return 35;
+            else if IS_MAJIN(ch)
+                return 55;
+            else if IS_GOBLIN(ch)
+                return 30;
+            else
+                return 0;
+        case 91:
+        case 92:
+        case 93:
+        case 94:
+        case 95:
+            return 3;
+        case 96:
+        case 97:
+        case 98:
+            return 4;
+        case 99:
+            return 5;
+        default:
+            return 0;
+    }
 }
 
 void handle_exp(struct char_data *keeper, int guild_nr, struct char_data *ch, char *argument)
