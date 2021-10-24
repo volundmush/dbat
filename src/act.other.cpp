@@ -4444,10 +4444,12 @@ ACMD(do_form)
   return;
  }
 
+ /* -- code disabled as of 10/24/2021
   if (GET_COOLDOWN(ch) > 0) {
    send_to_char(ch, "You must wait a short period before concentrating again.\r\n");
    return;
   }
+   */
 
  skill = GET_SKILL(ch, SKILL_CREATE);
 
@@ -4644,8 +4646,8 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
   else {
    obj = read_object(16, VIRTUAL);
     add_unique_id(obj);
-   obj_to_char(obj, ch);
-   reveal_hiding(ch, 0);  GET_COOLDOWN(ch) = 10;
+   obj_to_char(obj, ch);  // cooldown removed on 10/24/2021
+   reveal_hiding(ch, 0);  //GET_COOLDOWN(ch) = 10;
    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
    GET_MANA(ch) -= cost;

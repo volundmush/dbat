@@ -1554,15 +1554,18 @@ void point_update(void)
      GET_RELAXCOUNT(i) = 0;
     }
    }
-   if (rand_number(1, 2) == 2) {	
-    gain_condition(i, HUNGER, -1);
+   // making it so that you don't get hungry/thirsty if you're just leisurely idling, rping, etc.
+   if(GET_HIT(i) < GET_MAX_HIT(i)) {
+       if (rand_number(1, 2) == 2) {
+           gain_condition(i, HUNGER, -1);
+       }
+       if (rand_number(1, 2) == 2) {
+           gain_condition(i, THIRST, -1);
+       }
    }
-   if (rand_number(1, 2) == 2) {
-    gain_condition(i, DRUNK, -1);
-   }
-   if (rand_number(1, 2) == 2) {
-    gain_condition(i, THIRST, -1);
-   }
+  if (rand_number(1, 2) == 2) {
+      gain_condition(i, DRUNK, -1);
+  }
    if (IS_NPC(i)) {
     i->aggtimer = 0;
    }

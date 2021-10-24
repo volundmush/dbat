@@ -56,9 +56,9 @@
 #include <memory>
 
 // non-standard libraries
-#include "asio.hpp"
-#include "fmt/core.h"
-#include "sqlitepp.h"
+//#include "asio.hpp"
+//#include "fmt/core.h"
+//#include "sqlitepp.h"
 
 /* Basic system dependencies *******************************************/
 #if CIRCLE_GNU_LIBC_MEMORY_TRACK && !defined(HAVE_MCHECK_H)

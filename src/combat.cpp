@@ -6060,19 +6060,34 @@ int handle_combo(struct char_data *ch, struct char_data *vict)
  if (count_physical(ch) < 3)
   return 0;
 
- int chance = (GET_CHA(ch) * 2) - GET_CHA(vict), bottom = chance / 2;
- 
- if (LASTATK(ch) == 0 || LASTATK(ch) == 1) {
-  chance += 10;
- }
- if (LASTATK(ch) == 2 || LASTATK(ch) == 3) {
-  chance += 5;
- }
-  if (chance > 110) {
-   chance = 110;
-  }
+    int chance;
+    int speedPercentage = ((double)(GET_SPEEDI(ch)) / (double)GET_SPEEDI(vict)) *(double)100;
+    if (speedPercentage < 1)
+    {
+        chance = 1;
+    }
+    else if (speedPercentage > 100)
+    {
+        chance = 100;
+    }
+    else
+    {
+        chance = speedPercentage;
+    }
+    chance = 100 - chance;
+    if (chance < 1)
+    {
+        chance = 1;
+    }
+    chance += 25;
+    if (LASTATK(ch) == 0 || LASTATK(ch) == 1) {
+        chance -= 10;
+    }
+    if (LASTATK(ch) == 2 || LASTATK(ch) == 3) {
+        chance -= 5;
+    }
 
- if (COMBO(ch) <= -1 && rand_number(bottom, 125) < chance) {
+    if (COMBO(ch) <= -1 && rand_number(1, 100) > chance) {
  while (success == FALSE) {
   switch(rand_number(1, 24)) {
    case 1:
