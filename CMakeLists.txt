@@ -35,17 +35,17 @@ endif()
 find_library(ZLIB NAMES z libz REQUIRED)
 link_libraries(${ZLIB})
 
-find_package(SQLite3 REQUIRED)
-if(SQLite3_FOUND)
-    message("Found SQLite3.")
-    link_libraries(SQLite::SQLite3)
-endif()
+#find_package(SQLite3 REQUIRED)
+#if(SQLite3_FOUND)
+#    message("Found SQLite3.")
+#    link_libraries(SQLite::SQLite3)
+#endif()
 
-find_package(OpenSSL REQUIRED)
-if(OpenSSL_FOUND)
-    message("Found OpenSSL.")
-    link_libraries(OpenSSL::Crypto)
-endif()
+#find_package(OpenSSL REQUIRED)
+#if(OpenSSL_FOUND)
+#    message("Found OpenSSL.")
+#    link_libraries(OpenSSL::Crypto)
+#endif()
 
 
 # this is the core library we're making.
