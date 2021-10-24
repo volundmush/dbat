@@ -103,13 +103,14 @@ void mob_talk(struct char_data *ch, const char *speech);
 int block_calc(struct char_data *ch);
 void reveal_hiding(struct char_data *ch, int type);
 
+std::string processColors(const std::string& txt, int parse, char **choices);
+
 #define core_dump()		core_dump_real(__FILE__, __LINE__)
 
 /*
  * Only provide our versions if one isn't in the C library. These macro names
  * will be defined by sysdep.h if a strcasecmp or stricmp exists.
  */
-
 
 
 /* undefine MAX and MIN so that our functions are used instead */

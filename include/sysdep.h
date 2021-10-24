@@ -6,21 +6,22 @@
 
 #define CIRCLE_GNU_LIBC_MEMORY_TRACK	0	/* 0 = off, 1 = on */
 
-#include <stdio.h>
-#include <ctype.h>
-#include <stdarg.h>
-#include <stdint.h>
-#include <string.h>
+// Some C libraires
+#include <cstdio>
+#include <cctype>
+#include <cstdarg>
+#include <cstdint>
+#include <cstring>
 #include <strings.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <sys/types.h>
 #include <unistd.h>
-#include <limits.h>
-#include <errno.h>
+#include <climits>
+#include <cerrno>
 #include <crypt.h>
 #include <sys/time.h>
-#include <time.h>
-#include <assert.h>
+#include <ctime>
+#include <cassert>
 #include <zlib.h>
 #include <sys/select.h>
 #include <fcntl.h>
@@ -31,11 +32,10 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-#include <signal.h>
+#include <csignal>
 #include <sys/uio.h>
 #include <sys/stat.h>
-#include <stdbool.h>
-#include <stddef.h>
+#include <cstddef>
 #include <arpa/telnet.h>
 #include <dirent.h>
 #include <linux/limits.h>
@@ -45,6 +45,20 @@
 #else
 #include "stringutils.h"
 #endif
+
+// C++ STD libraries
+#include <string>
+#include <list>
+#include <vector>
+#include <map>
+#include <unordered_map>
+#include <optional>
+#include <memory>
+
+// non-standard libraries
+#include "asio.hpp"
+#include "fmt/core.h"
+#include "sqlitepp.h"
 
 /* Basic system dependencies *******************************************/
 #if CIRCLE_GNU_LIBC_MEMORY_TRACK && !defined(HAVE_MCHECK_H)

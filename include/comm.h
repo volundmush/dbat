@@ -83,6 +83,9 @@ extern int no_specials, scheck;
 extern const char compress_offer[4];
 extern bool fCopyOver;
 extern char *last_act_message;
+extern const char RANDOM_COLORS[];
+extern const char CCODE[];
+extern char *ANSI[];
 
 // functions
 void free_user(struct descriptor_data *d);
