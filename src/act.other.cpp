@@ -9102,8 +9102,6 @@ static void handle_transform(struct char_data *ch, int64_t add, double mult, dou
 				GET_LIFEFORCE(ch) = GET_LIFEMAX(ch);
 			}
 		}
-
-
 	}
 }
 
@@ -9156,24 +9154,13 @@ ACMD(do_transform)
 	if (IS_NPC(ch)) {
 		return;
 	}
-	two_arguments(argument, arg, arg2);
 
-	if (PLR_FLAGGED(ch, PLR_OOZARU)) {
-		send_to_char(ch, "You are the great Oozaru right now and can't transform!\r\n");
-		return;
-	}
-	if (GET_KAIOKEN(ch) > 0) {
-		send_to_char(ch, "You are in kaioken right now and can't transform!\r\n");
-		return;
-	}
-	if (GET_SUPPRESS(ch) > 0) {
-		send_to_char(ch, "You are suppressing right now and can't transform!\r\n");
-		return;
-	}
-	if (GET_CLONES(ch) > 0) {
-		send_to_char(ch, "You can't concentrate on transforming while your body is split into multiple forms!\r\n");
-		return;
-	}
+    if(!ch->race->raceCanTransform()) {
+        send_to_char(ch, "You do not have a transformation.\r\n");
+        return;
+    }
+
+    // Why is this here? -Volund
 	reveal_hiding(ch, 0);
 	/*R: Hidden transformation stuff following this*/
 	if (GET_BASE_PL(ch) < 50000) {
@@ -9181,132 +9168,14 @@ ACMD(do_transform)
 		return;
 	}
 
+    // Moved this further down. No need to parse the entry if we quit early. -Volund
+    two_arguments(argument, arg, arg2);
+
+    /* Called with no argument - display transformation information */
 	if (!*arg) {
-		if (IS_HUMAN(ch)) {
-			send_to_char(ch, "              @YSuper @CHuman@n\r\n");
-			send_to_char(ch, "@b------------------------------------------------@n\r\n");
-			send_to_char(ch, "@YSuper @CHuman @WFirst  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
-			send_to_char(ch, "@YSuper @CHuman @WSecond @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
-			send_to_char(ch, "@YSuper @CHuman @WThird  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
-			send_to_char(ch, "@YSuper @CHuman @WFourth @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4)) : "??????????");
-			send_to_char(ch, "@b------------------------------------------------@n\r\n");
-		}
-		else if (IS_SAIYAN(ch) && !PLR_FLAGGED(ch, PLR_LSSJ)) {
-			send_to_char(ch, "              @YSuper @CSaiyan@n\r\n");
-			send_to_char(ch, "@b------------------------------------------------@n\r\n");
-			send_to_char(ch, "@YSuper @CSaiyan @WFirst  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
-			send_to_char(ch, "@YSuper @CSaiyan @WSecond @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
-			send_to_char(ch, "@YSuper @CSaiyan @WThird  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
-			send_to_char(ch, "@YSuper @CSaiyan @WFourth @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4)) : "??????????");
-			send_to_char(ch, "@b------------------------------------------------@n\r\n");
-		}
-		else if (IS_SAIYAN(ch) && PLR_FLAGGED(ch, PLR_LSSJ)) {
-			send_to_char(ch, "                @YSuper @CSaiyan@n\r\n");
-			send_to_char(ch, "@b-------------------------------------------------@n\r\n");
-			send_to_char(ch, "@YSuper @CSaiyan @WFirst   @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
-			send_to_char(ch, "@YLegendary @CSuper Saiyan @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
-			send_to_char(ch, "@b-------------------------------------------------@n\r\n");
-		}
-		else if (IS_HALFBREED(ch)) {
-			send_to_char(ch, "              @YSuper @CSaiyan@n\r\n");
-			send_to_char(ch, "@b------------------------------------------------@n\r\n");
-			send_to_char(ch, "@YSuper @CSaiyan @WFirst  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
-			send_to_char(ch, "@YSuper @CSaiyan @WSecond @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
-			send_to_char(ch, "@YSuper @CSaiyan @WThird  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
-			send_to_char(ch, "@b------------------------------------------------@n\r\n");
-		}
-		else if (IS_NAMEK(ch)) {
-			send_to_char(ch, "              @YSuper @CNamek@n\r\n");
-			send_to_char(ch, "@b------------------------------------------------@n\r\n");
-			send_to_char(ch, "@YSuper @CNamek @WFirst  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
-			send_to_char(ch, "@YSuper @CNamek @WSecond @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
-			send_to_char(ch, "@YSuper @CNamek @WThird  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
-			send_to_char(ch, "@YSuper @CNamek @WFourth @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4)) : "??????????");
-			send_to_char(ch, "@b------------------------------------------------@n\r\n");
-		}
-		else if (IS_ICER(ch)) {
-			send_to_char(ch, "              @YTransform@n\r\n");
-			send_to_char(ch, "@b------------------------------------------------@n\r\n");
-			send_to_char(ch, "@YTransform @WFirst  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
-			send_to_char(ch, "@YTransform @WSecond @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
-			send_to_char(ch, "@YTransform @WThird  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
-			send_to_char(ch, "@YTransform @WFourth @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4)) : "??????????");
-			send_to_char(ch, "@b------------------------------------------------@n\r\n");
-		}
-		else if (IS_MUTANT(ch)) {
-			send_to_char(ch, "              @YMutate@n\r\n");
-			send_to_char(ch, "@b------------------------------------------------@n\r\n");
-			send_to_char(ch, "@YMutate @WFirst  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
-			send_to_char(ch, "@YMutate @WSecond @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
-			send_to_char(ch, "@YMutate @WThird  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
-			send_to_char(ch, "@b------------------------------------------------@n\r\n");
-		}
-		else if (IS_KONATSU(ch)) {
-			send_to_char(ch, "              @YShadow@n\r\n");
-			send_to_char(ch, "@b------------------------------------------------@n\r\n");
-			send_to_char(ch, "@YShadow @WFirst  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
-			send_to_char(ch, "@YShadow @WSecond @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
-			send_to_char(ch, "@YShadow @WThird  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
-			send_to_char(ch, "@b------------------------------------------------@n\r\n");
-		}
-		else if (IS_ANDROID(ch)) {
-			send_to_char(ch, "              @YUpgrade@n\r\n");
-			send_to_char(ch, "@b------------------------------------------------@n\r\n");
-			send_to_char(ch, "@Y1.0 @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
-			send_to_char(ch, "@Y2.0 @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
-			send_to_char(ch, "@Y3.0 @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
-			send_to_char(ch, "@Y4.0 @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4)) : "??????????");
-			send_to_char(ch, "@Y5.0 @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 5) * 0.75) ? add_commas(trans_req(ch, 5)) : "??????????");
-			send_to_char(ch, "@Y6.0 @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 6) * 0.75) ? add_commas(trans_req(ch, 6)) : "??????????");
-			send_to_char(ch, "@b------------------------------------------------@n\r\n");
-		}
-		else if (IS_BIO(ch)) {
-			send_to_char(ch, "              @YPerfection@n\r\n");
-			send_to_char(ch, "@b------------------------------------------------@n\r\n");
-			send_to_char(ch, "@YMature        @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
-			send_to_char(ch, "@YSemi-Perfect  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
-			send_to_char(ch, "@YPerfect       @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
-			send_to_char(ch, "@YSuper Perfect @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4)) : "??????????");
-			send_to_char(ch, "@b------------------------------------------------@n\r\n");
-		}
-		else if (IS_TRUFFLE(ch)) {
-			send_to_char(ch, "              @YAscend@n\r\n");
-			send_to_char(ch, "@b------------------------------------------------@n\r\n");
-			send_to_char(ch, "@YAscend @WFirst  @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
-			send_to_char(ch, "@YAscend @WSecond @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
-			send_to_char(ch, "@YAscend @WThird @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
-			send_to_char(ch, "@b------------------------------------------------@n\r\n");
-		}
-		else if (IS_MAJIN(ch)) {
-			send_to_char(ch, "              @YMorph@n\r\n");
-			send_to_char(ch, "@b------------------------------------------------@n\r\n");
-			send_to_char(ch, "@YMorph @WAffinity @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
-			send_to_char(ch, "@YMorph @WSuper    @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
-			send_to_char(ch, "@YMorph @WTrue     @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
-			send_to_char(ch, "@b------------------------------------------------@n\r\n");
-		}
-		else if (IS_KAI(ch)) {
-			send_to_char(ch, "              @YMystic@n\r\n");
-			send_to_char(ch, "@b------------------------------------------------@n\r\n");
-			send_to_char(ch, "@YMystic @WFirst     @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1)) : "??????????");
-			send_to_char(ch, "@YMystic @WSecond    @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2)) : "??????????");
-			send_to_char(ch, "@YMystic @WThird     @R-@G %s BPL Req\r\n", GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3)) : "??????????");
-			send_to_char(ch, "@b------------------------------------------------@n\r\n");
-		}
-		else {
-			send_to_char(ch, "You do not have a transformation.\r\n");
-			return;
-		}
+        ch->race->display_forms();
 		if (trans_req(ch, 1) > 0) {
-			if (GET_TRANSCLASS(ch) == 1) {
-				send_to_char(ch, "\r\n@RYou have @rterrible@R transformation BPL Requirements.@n\r\n");
-			}
-			else if (GET_TRANSCLASS(ch) == 2) {
-				send_to_char(ch, "\r\n@CYou have @caverage@C transformation BPL Requirements.@n\r\n");
-			}
-			else if (GET_TRANSCLASS(ch) == 3) {
-				send_to_char(ch, "\r\n@GYou have @gGREAT@G transformation BPL Requirements.@n\r\n");
-			}
+            ch->race->displayTransReq(ch);
 		}
 		return;
 	}/* End of No Argument */
@@ -9362,7 +9231,6 @@ ACMD(do_transform)
 				return;
 			}
 		} /* End of Human First Trans */
-
 
 		if (IS_TRUFFLE(ch)) {
 			if (PLR_FLAGGED(ch, PLR_TRANS2) || PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
@@ -10294,7 +10162,6 @@ ACMD(do_transform)
 			}
 		} /* End of Saiyan Second Trans */
 
-
 		return;
 	}/* End of Second Trans */
 
@@ -11094,8 +10961,10 @@ ACMD(do_transform)
 				return;
 			}
 		} /* End of Saiyan Fourth Trans */
+
 		return;
 	}/* End of Fourth Trans */
+
 	else if (!strcasecmp("mature", arg)) {
 		if (IS_BIO(ch)) {
 			if (PLR_FLAGGED(ch, PLR_TRANS2)) {
@@ -11387,6 +11256,7 @@ ACMD(do_transform)
 		} /* End of MAJIN First Trans */
 
 	} /* Majin First trans block */
+
 	else if (!strcasecmp("super", arg)) {
 		if (IS_MAJIN(ch)) {
 			if (PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
@@ -11551,6 +11421,7 @@ ACMD(do_transform)
 		} /* End of ANDROID First Trans */
 
 	}
+
 	else if (!strcasecmp("2.0", arg)) {
 		if (IS_ANDROID(ch)) {
 			if (PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4)) {
@@ -11599,6 +11470,7 @@ ACMD(do_transform)
 		} /* End of ANDROID Second Trans */
 
 	}
+
 	else if (!strcasecmp("3.0", arg)) {
 		if (IS_ANDROID(ch)) {
 			if (PLR_FLAGGED(ch, PLR_TRANS4)) {
@@ -11654,6 +11526,7 @@ ACMD(do_transform)
 		} /* End of ANDROID Third Trans */
 
 	}
+
 	else if (!strcasecmp("4.0", arg)) {
 		if (IS_ANDROID(ch)) {
 			if (PLR_FLAGGED(ch, PLR_TRANS5) || PLR_FLAGGED(ch, PLR_TRANS6)) {
@@ -11712,6 +11585,7 @@ ACMD(do_transform)
 		} /* End of ANDROID Fourth Trans */
 
 	}
+
 	else if (!strcasecmp("5.0", arg)) {
 		if (IS_ANDROID(ch)) {
 			if (PLR_FLAGGED(ch, PLR_TRANS6)) {
@@ -11775,6 +11649,7 @@ ACMD(do_transform)
 		} /* End of ANDROID Fifth Trans */
 
 	}
+
 	else if (!strcasecmp("6.0", arg)) {
 		if (IS_ANDROID(ch)) {
 			if (PLR_FLAGGED(ch, PLR_TRANS6)) {

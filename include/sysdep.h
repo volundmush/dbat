@@ -54,6 +54,7 @@
 #include <unordered_map>
 #include <optional>
 #include <memory>
+#include <algorithm>
 
 // non-standard libraries
 //#include "asio.hpp"
