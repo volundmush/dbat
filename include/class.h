@@ -6,7 +6,7 @@
 #define CIRCLE_CLASS_H
 
 #include "structs.h"
-
+#include "races.h"
 
 // global variables
 extern int prestige_classes[NUM_CLASSES];
@@ -33,5 +33,54 @@ int highest_skill_value(int level, int type);
 int calc_penalty_exp(struct char_data *ch, int gain);
 time_t birth_age(struct char_data *ch);
 time_t max_age(struct char_data *ch);
+
+namespace dbat::sensei {
+    enum sensei_id : uint8_t {
+        roshi = 0,
+        piccolo = 1,
+        krane = 2,
+        nail = 3,
+        bardock = 4,
+        ginyu = 5,
+        frieza = 6,
+        tapion = 7,
+        sixteen = 8,
+        dabura = 9,
+        kibito = 10,
+        jinto = 11,
+        tsuna = 12,
+        kurzak = 13
+    };
+
+    class Sensei;
+    typedef std::map<sensei_id, Sensei*> SenseiMap;
+    extern SenseiMap sensei_map;
+
+
+    class Sensei {
+    public:
+        Sensei(sensei_id sid, const std::string &name, std::string abbr, std::string style);
+        sensei_id getID() const;
+        const std::string &getName() const;
+        const std::string &getNameLower() const;
+        const std::string &getAbbr() const;
+        const std::string &getStyleName() const;
+
+        // stats stuff
+        int getRPPCost(race::race_id rid) const;
+        bool senseiAvailableForRace(race::race_id r_id) const;
+        int getGravTolerance() const;
+
+    protected:
+        sensei_id s_id;
+        std::string name, lower_name, abbr, style;
+    };
+
+    void load_sensei();
+
+    Sensei* find_sensei(const std::string& arg);
+    Sensei* find_sensei_map(const std::string& arg, const SenseiMap& s_map);
+    Sensei* find_sensei_map_id(const int id, const SenseiMap& s_map);
+}
 
 #endif //CIRCLE_CLASS_H

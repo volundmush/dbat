@@ -16,9 +16,11 @@ namespace dbat {
 
     namespace race {
         class Race;
-        class RaceHandler;
     }
 
+    namespace sensei {
+        class Sensei;
+    }
 }
 
 #endif //CIRCLE_TYPESTUBS_H
