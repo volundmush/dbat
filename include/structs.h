@@ -562,13 +562,13 @@
 #define RACE_TRUFFLE		13
 #define RACE_GOBLIN		14
 #define RACE_ANIMAL		15
-#define RACE_ORC		16
-#define RACE_SNAKE		17
-#define RACE_TROLL		18
-#define RACE_MINOTAUR		19
-#define RACE_KOBOLD		20
-#define RACE_LIZARDFOLK		21
-#define RACE_WARHOST		22
+#define RACE_SAIBA		16
+#define RACE_SERPENT		17
+#define RACE_OGRE		18
+#define RACE_YARDRATIAN		19
+#define RACE_ARLIAN		20
+#define RACE_DRAGON		21
+#define RACE_MECHANICAL		22
 #define RACE_FAERIE		23
 
 #define NUM_RACES		24
@@ -2266,7 +2266,8 @@ struct char_data {
   char *title;			/* PC / NPC's title                     */
   int size;			/* Size class of char                   */
   int8_t sex;			/* PC / NPC's sex                       */
-  int8_t race;		/* PC / NPC's race                      */
+  dbat::race::Race* race;
+  //int8_t race;		/* PC / NPC's race                      */
   int8_t hairl;               /* PC hair length                       */
   int8_t hairs;               /* PC hair style                        */
   int8_t hairc;               /* PC hair color                        */
@@ -2452,7 +2453,7 @@ struct char_data {
   int combhits;
   int ping;
   int starphase;
-  int mimic;
+  dbat::race::Race* mimic;
   int bonuses[MAX_BONUSES];
   int ccpoints;
   int negcount;
@@ -2515,8 +2516,13 @@ struct char_data {
   struct char_data *original;
   short clones;
   int relax_count;
- 	int ingestLearned;
+  int ingestLearned;
+
+  // C++ reworking
+  const std::string &juggleRaceName(bool capitalized) const;
+
 };
+
 
 /* ====================================================================== */
 

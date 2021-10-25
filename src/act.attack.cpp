@@ -3240,7 +3240,7 @@ ACMD(do_throw)
      act("$n@n smiles as $p breaks on your face!", TRUE, ch, obj, vict, TO_VICT);
      TOGGLE_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_BROKEN);
     } else if (GET_DEX(ch) >= axion_dice(0)) {
-      if (IS_ANDROID(vict) || IS_WARHOST(vict)) {
+      if (IS_ANDROID(vict) || IS_MECHANICAL(vict)) {
        act("@RSome pieces of metal are sent flying!@n", TRUE, ch, 0, vict, TO_CHAR);
        act("@RSome pieces of metal are sent flying!@n", TRUE, ch, 0, vict, TO_VICT);
        act("@RSome pieces of metal are sent flying!@n", TRUE, ch, 0, vict, TO_NOTVICT);

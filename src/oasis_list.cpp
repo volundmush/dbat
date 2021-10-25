@@ -223,7 +223,7 @@ void list_mobiles(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnu
 
       admg = ((mob_proto[i].mob_specials.damsizedice + 1) / 2.0) * (mob_proto[i].mob_specials.damnodice);
       send_to_char(ch, "@g%4d@n) [@g%-5d@n] @[3]%-*s @C%-9s @c%-9s @y[%4d]@n %s\r\n",
-                   counter, mob_index[i].vnum, count_color_chars(mob_proto[i].short_descr)+30, mob_proto[i].short_descr, pc_race_types[mob_proto[i].race], pc_class_types[mob_proto[i].chclass], 
+                   counter, mob_index[i].vnum, count_color_chars(mob_proto[i].short_descr)+30, mob_proto[i].short_descr, TRUE_RACE(&mob_proto[i]), pc_class_types[mob_proto[i].chclass],
                    mob_proto[i].level + mob_proto[i].level_adj + mob_proto[i].race_level, mob_proto[i].proto_script ? " [TRIG]" : "");
     }
   }

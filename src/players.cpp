@@ -343,7 +343,7 @@ int load_char(const char *name, struct char_data *ch)
       GET_CLASS_EPIC(ch, i) = 0;
     }
     GET_LOG_USER(ch) = strdup("NOUSER");
-    GET_RACE(ch) = PFDEF_RACE;
+    ch->race = dbat::race::find_race_map_id(PFDEF_RACE, dbat::race::race_map);
     GET_ADMLEVEL(ch) = PFDEF_LEVEL;
     GET_CLASS_LEVEL(ch) = PFDEF_LEVEL;
     GET_HITDICE(ch) = PFDEF_LEVEL;
@@ -383,7 +383,7 @@ int load_char(const char *name, struct char_data *ch)
     GET_LINTEREST(ch) = PFDEF_LPLAY;
     GET_DTIME(ch) = PFDEF_LPLAY;
     GET_PHASE(ch) = PFDEF_EYE;
-    GET_MIMIC(ch) = PFDEF_EYE;
+    ch->mimic = nullptr;
     GET_SLOTS(ch) = 0;
     GET_TGROWTH(ch) = 0;
     GET_TRAINSTR(ch) = PFDEF_EYE;
@@ -641,7 +641,7 @@ int load_char(const char *name, struct char_data *ch)
                                           GET_CLASS_NONEPIC(ch, num) = num2; }
         else if (!strcmp(tag, "Maji"))  MAJINIZED(ch)           = atoi(line);
         else if (!strcmp(tag, "Majm"))  load_majin(ch, line);
-        else if (!strcmp(tag, "Mimi"))  GET_MIMIC(ch)           = atoi(line);
+        else if (!strcmp(tag, "Mimi"))  ch->mimic = dbat::race::find_race_map_id(atoi(line), dbat::race::race_map);
         else if (!strcmp(tag, "MxAg"))  ch->time.maxage         = atol(line);
       break;
 
@@ -676,7 +676,7 @@ int load_char(const char *name, struct char_data *ch)
       break;
 
       case 'R':
-             if (!strcmp(tag, "Race"))  GET_RACE(ch)            = atoi(line);
+             if (!strcmp(tag, "Race"))  ch->race = dbat::race::find_race_map_id(atoi(line), dbat::race::race_map);
         else if (!strcmp(tag, "Raci"))  RACIAL_PREF(ch)         = atoi(line);
 	else if (!strcmp(tag, "RBan"))  GET_RBANK(ch)           = atoi(line);
 	else if (!strcmp(tag, "rDis"))  GET_RDISPLAY(ch)        = strdup(line);
@@ -1021,7 +1021,7 @@ void save_char(struct char_data * ch)
   if (GET_SEX(ch)	   != PFDEF_SEX)	fprintf(fl, "Sex : %d\n", GET_SEX(ch)); 
   if (ch->size		   != PFDEF_SIZE)	fprintf(fl, "Size: %d\n", ch->size); 
   if (GET_CLASS(ch)	   != PFDEF_CLASS)	fprintf(fl, "Clas: %d\n", GET_CLASS(ch)); 
-  if (GET_RACE(ch)	   != PFDEF_RACE)	fprintf(fl, "Race: %d\n", GET_RACE(ch)); 
+  if (GET_RACE(ch)	   != PFDEF_RACE)	fprintf(fl, "Race: %d\n", GET_RACE(ch));
   if (RACIAL_PREF(ch)      != PFDEF_BANK)       fprintf(fl, "Raci: %d\n", RACIAL_PREF(ch));
   if (GET_ADMLEVEL(ch)	   != PFDEF_LEVEL)	fprintf(fl, "AdmL: %d\n", GET_ADMLEVEL(ch));
   if (GET_CLASS_LEVEL(ch)  != PFDEF_LEVEL)	fprintf(fl, "Levl: %d\n", GET_CLASS_LEVEL(ch));
@@ -1189,7 +1189,7 @@ void save_char(struct char_data * ch)
   if (GET_TRAINSTR(ch)     != PFDEF_EYE)        fprintf(fl, "Trst: %d\n", GET_TRAINSTR(ch));
   if (GET_TRAINWIS(ch)     != PFDEF_EYE)        fprintf(fl, "Trwi: %d\n", GET_TRAINWIS(ch));
   if (GET_PHASE(ch)        != PFDEF_EYE)        fprintf(fl, "Phse: %d\n", GET_PHASE(ch));
-  if (GET_MIMIC(ch)        != PFDEF_EYE)        fprintf(fl, "Mimi: %d\n", GET_MIMIC(ch));
+  if (GET_MIMIC(ch))        fprintf(fl, "Mimi: %d\n", GET_MIMIC(ch));
   if (GET_SLOTS(ch)        != PFDEF_EYE)        fprintf(fl, "Slot: %d\n", GET_SLOTS(ch));
   if (GET_TGROWTH(ch)      != PFDEF_EYE)        fprintf(fl, "Tgro: %d\n", GET_TGROWTH(ch));
   if (GET_STUPIDKISS(ch)   != PFDEF_EYE)        fprintf(fl, "Stuk: %d\n", GET_STUPIDKISS(ch));

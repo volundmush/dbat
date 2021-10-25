@@ -76,7 +76,6 @@ int64_t gear_exp(struct char_data *ch, int64_t exp);
 int get_flag_by_name(const char *flag_list[], char *flag_name);
 char* add_commas(int64_t X);
 void trim(char *s);
-char *handle_racial(struct char_data *ch, int type);
 char *introd_calc(struct char_data *ch);
 void	basic_mud_log(const char *format, ...) __attribute__ ((format (printf, 1, 2)));
 void	basic_mud_vlog(const char *format, va_list args);
@@ -396,7 +395,7 @@ int wield_type(int chsize, const struct obj_data *weap);
 #define GET_TITLE(ch)   ((ch)->desc ? ((ch)->desc->title ? (ch)->desc->title : "[Unset Title]") : "@D[@GNew User@D]")
 #define GET_USER_TITLE(d) ((d)->title)
 #define GET_PHASE(ch)   ((ch)->starphase)
-#define GET_MIMIC(ch)   ((ch)->mimic)
+#define GET_MIMIC(ch)   ((ch)->mimic ? (ch)->mimic->getID()+1 : 0)
 #define GET_VOICE(ch)   ((ch)->voice)
 #define GET_CLAN(ch)    ((ch)->clan)
 #define GET_TRANSCLASS(ch) ((ch)->transclass)
@@ -416,7 +415,7 @@ int wield_type(int chsize, const struct obj_data *weap);
 #define GET_CLASS_EPIC(ch, whichclass) ((ch)->epicclasses[whichclass])
 #define GET_CLASS_RANKS(ch, whichclass) (GET_CLASS_NONEPIC(ch, whichclass) + \
                                          GET_CLASS_EPIC(ch, whichclass))
-#define GET_RACE(ch)    ((ch)->race)
+#define GET_RACE(ch)    ((ch)->race->getID())
 #define GET_HAIRL(ch)   ((ch)->hairl)
 #define GET_HAIRC(ch)   ((ch)->hairc)
 #define GET_HAIRS(ch)   ((ch)->hairs)
@@ -828,7 +827,7 @@ int wield_type(int chsize, const struct obj_data *weap);
 
 #define PERS(ch, vict) ((DISG(ch, vict) ? (CAN_SEE(vict, ch) ? (INTROD(vict, ch) ? (ISWIZ(ch, vict) ? GET_NAME(ch) :\
                         get_i_name(vict, ch)) : introd_calc(ch)) : "Someone") :\
-                        d_race_types[(int)GET_RACE(ch)]))
+                        (ch)->race->getName().c_str()))
 
 #define OBJS(obj, vict) (CAN_SEE_OBJ((vict), (obj)) ? \
 	(obj)->short_description  : "something")
@@ -847,12 +846,12 @@ int wield_type(int chsize, const struct obj_data *weap);
 			 (EXIT(ch,door)->to_room != NOWHERE) && \
 			 !IS_SET(EXIT(ch, door)->exit_info, EX_CLOSED))
 
-#define RACE(ch)      (JUGGLERACE(ch))
-#define JUGGLERACE(ch)	(IS_HOSHIJIN(ch) ? (GET_MIMIC(ch) > 0 ? pc_race_types[GET_MIMIC(ch) - 1] : pc_race_types[GET_RACE(ch)]) : handle_racial(ch, 1))
-#define LRACE(ch)     (JUGGLERACELOWER(ch))
-#define JUGGLERACELOWER(ch)  (IS_HOSHIJIN(ch) ? (GET_MIMIC(ch) > 0 ? race_names[GET_MIMIC(ch) - 1] : race_names[GET_RACE(ch)]) : handle_racial(ch, 0))
+#define RACE(ch)      ((ch)->juggleRaceName(true).c_str())
+#define LRACE(ch)     ((ch)->juggleRaceName(false).c_str())
+#define TRUE_RACE(ch) ((ch)->race->getName().c_str())
+
 #define CLASS_ABBR(ch) (class_abbrevs[(int)GET_CLASS(ch)])
-#define RACE_ABBR(ch) (race_abbrevs[(int)GET_RACE(ch)])
+#define RACE_ABBR(ch) ((ch)->race->getAbbr().c_str())
 
 #define IS_ROSHI(ch)            (GET_CLASS(ch) == CLASS_ROSHI)
 #define IS_PICCOLO(ch)          (GET_CLASS(ch) == CLASS_PICCOLO)
@@ -868,6 +867,7 @@ int wield_type(int chsize, const struct obj_data *weap);
 #define IS_JINTO(ch)            (GET_CLASS(ch) == CLASS_JINTO)
 #define IS_TSUNA(ch)            (GET_CLASS(ch) == CLASS_TSUNA)
 #define IS_KURZAK(ch)           (GET_CLASS(ch) == CLASS_KURZAK)
+
 #define IS_ASSASSIN(ch)         (GET_CLASS_RANKS(ch, CLASS_ASSASSIN) > 0)
 #define IS_BLACKGUARD(ch)       (GET_CLASS_RANKS(ch, CLASS_BLACKGUARD) > 0)
 #define IS_DRAGON_DISCIPLE(ch)  (GET_CLASS_RANKS(ch, CLASS_DRAGON_DISCIPLE) > 0)
@@ -891,7 +891,8 @@ int wield_type(int chsize, const struct obj_data *weap);
 #define IS_SHADOW_DRAGON6(ch)   (IS_NPC(ch) && GET_MOB_VNUM(ch) == SHADOW_DRAGON6_VNUM)
 #define IS_SHADOW_DRAGON7(ch)   (IS_NPC(ch) && GET_MOB_VNUM(ch) == SHADOW_DRAGON7_VNUM)
 #define CAN_GRAND_MASTER(ch)    (IS_HUMAN(ch))
-#define IS_HUMANOID(ch)         (!IS_SNAKE(ch) && !IS_ANIMAL(ch))
+#define IS_HUMANOID(ch)         (!IS_SERPENT(ch) && !IS_ANIMAL(ch))
+#define IS_ROBOT(ch)            (IS_ANDROID(ch) || IS_MECHANICAL(ch))
 #define RESTRICTED_RACE(ch)     (IS_MAJIN(ch) || IS_SAIYAN(ch) || IS_BIO(ch) || IS_HOSHIJIN(ch))
 #define CHEAP_RACE(ch)          (IS_TRUFFLE(ch) || IS_MUTANT(ch) || IS_KONATSU(ch) || IS_DEMON(ch) || IS_KANASSAN(ch))
 #define SPAR_TRAIN(ch)          (FIGHTING(ch) && !IS_NPC(ch) && PLR_FLAGGED(ch, PLR_SPAR) &&\
@@ -946,16 +947,15 @@ int wield_type(int chsize, const struct obj_data *weap);
 #define IS_MAJIN(ch)            (GET_RACE(ch) == RACE_MAJIN)
 #define IS_KAI(ch)              (GET_RACE(ch) == RACE_KAI)
 #define IS_TRUFFLE(ch)          (GET_RACE(ch) == RACE_TRUFFLE)
-#define IS_GOBLIN(ch)           (GET_RACE(ch) == RACE_GOBLIN)
 #define IS_HOSHIJIN(ch)         (GET_RACE(ch) == RACE_GOBLIN)
 #define IS_ANIMAL(ch)           (GET_RACE(ch) == RACE_ANIMAL)
-#define IS_ORC(ch)              (GET_RACE(ch) == RACE_ORC)
-#define IS_SNAKE(ch)            (GET_RACE(ch) == RACE_SNAKE)
-#define IS_TROLL(ch)            (GET_RACE(ch) == RACE_TROLL)
-#define IS_MINOTAUR(ch)         (GET_RACE(ch) == RACE_MINOTAUR)
-#define IS_ARLIAN(ch)           (GET_RACE(ch) == RACE_KOBOLD)
-#define IS_DRAGON(ch)           (GET_RACE(ch) == RACE_LIZARDFOLK)
-#define IS_WARHOST(ch)          (GET_RACE(ch) == RACE_WARHOST)
+#define IS_SAIBA(ch)              (GET_RACE(ch) == RACE_SAIBA)
+#define IS_SERPENT(ch)            (GET_RACE(ch) == RACE_SERPENT)
+#define IS_OGRE(ch)            (GET_RACE(ch) == RACE_OGRE)
+#define IS_YARDRATIAN(ch)         (GET_RACE(ch) == RACE_YARDRATIAN)
+#define IS_ARLIAN(ch)           (GET_RACE(ch) == RACE_ARLIAN)
+#define IS_DRAGON(ch)           (GET_RACE(ch) == RACE_DRAGON)
+#define IS_MECHANICAL(ch)          (GET_RACE(ch) == RACE_MECHANICAL)
 #define IS_FAERIE(ch)           (GET_RACE(ch) == RACE_FAERIE)
 #define IS_UNDEAD(ch)           (IS_AFFECTED(ch, AFF_UNDEAD))
 

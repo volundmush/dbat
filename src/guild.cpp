@@ -563,13 +563,13 @@ int is_guild_ok_char(struct char_data * keeper, struct char_data * ch, int guild
  		 (IS_MAJIN(ch) && NOTRAIN_MAJIN(guild_nr)) ||
  		 (IS_KAI(ch) && NOTRAIN_KAI(guild_nr)) ||
  		 (IS_TRUFFLE(ch) && NOTRAIN_TRUFFLE(guild_nr)) ||
- 		 (IS_GOBLIN(ch) && NOTRAIN_GOBLIN(guild_nr)) ||
+ 		 (IS_HOSHIJIN(ch) && NOTRAIN_GOBLIN(guild_nr)) ||
  		 (IS_ANIMAL(ch) && NOTRAIN_ANIMAL(guild_nr)) ||
- 		 (IS_ORC(ch) && NOTRAIN_ORC(guild_nr)) ||
- 		 (IS_SNAKE(ch) && NOTRAIN_SNAKE(guild_nr)) ||
-		 (IS_TROLL(ch) && NOTRAIN_TROLL(guild_nr)) ||
+ 		 (IS_SAIBA(ch) && NOTRAIN_ORC(guild_nr)) ||
+ 		 (IS_SERPENT(ch) && NOTRAIN_SNAKE(guild_nr)) ||
+		 (IS_OGRE(ch) && NOTRAIN_TROLL(guild_nr)) ||
  		 (IS_HALFBREED(ch) && NOTRAIN_HALFBREED(guild_nr)) ||
- 		 (IS_MINOTAUR(ch) && NOTRAIN_MINOTAUR(guild_nr)) ||
+ 		 (IS_YARDRATIAN(ch) && NOTRAIN_MINOTAUR(guild_nr)) ||
  		 (IS_ARLIAN(ch) && NOTRAIN_KOBOLD(guild_nr))) {
 		snprintf(buf, sizeof(buf), "%s %s", 
 					GET_NAME(ch), MSG_TRAINER_DISLIKE_RACE);
@@ -1129,7 +1129,7 @@ int rpp_to_level(struct char_data *ch) {
                 return 35;
             else if IS_MAJIN(ch)
                 return 55;
-            else if IS_GOBLIN(ch)
+            else if IS_HOSHIJIN(ch)
                 return 30;
             else
                 return 0;

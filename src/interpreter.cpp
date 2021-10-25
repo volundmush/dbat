@@ -1945,42 +1945,25 @@ char *three_arguments(char *argument, char *first_arg, char *second_arg, char *t
  return (one_argument(one_argument(one_argument(argument, first_arg), second_arg), third_arg)); /* >.> */
 }
 
+static dbat::race::RaceMap valid_races(descriptor_data *d) {
+    return dbat::race::valid_for_sex_pc(GET_SEX(d->character));
+}
+
+static void display_races_sub(descriptor_data *d) {
+    auto v_races = valid_races(d);
+    int i = 0;
+    for (const auto& r : v_races)
+        send_to_char(d->character, "@C%-15s@D[@R%i RPP@D]@n%s", r.second->getName().c_str(), r.second->getRPPCost(), !(++i %2) ? "\r\n" : "   ");
+}
+
 void display_races(struct descriptor_data *d)
 {
-  int x, i=0;
-  const char *cost[23] = {"Free",  /* 0 */
-                          "60 RPP", /* 1 */
-                          "Free", /* 2 */
-                          "Free",  /* 3 */
-                          "Free",  /* 4 */
-                          "Free",  /* 5 */
-                          "Free",  /* 6 */
-                          "Free",  /* 7 */
-                          "35 RPP",  /* 8 */
-                          "Free",  /* 9 */
-                          "Free",  /* 10 */
-                          "55 RPP",  /* 11 */
-                          "Free",  /* 12 */
-                          "Free",  /* 13 */
-                          "30 RPP",  /* 14 */
-                          "Free",  /* 15 */
-                          "Free", /* 16 */
-                          "Free",  /* 17 */
-                          "Free", /* 18 */
-                          "Free",  /* 19 */
-                          "Free", /* 20 */
-                          "Free",  /* 21 */
-                          "Free", /* 22 */
-                          };
+    send_to_char(d->character, "\r\n@YRace SELECTION menu:\r\n@D---------------------------------------\r\n@n");
+    display_races_sub(d);
 
-  send_to_char(d->character, "\r\n@YRace SELECTION menu:\r\n@D---------------------------------------\r\n@n");
-  for (x = 0; x < NUM_RACES; x++)
-    if (race_ok_gender[(int)GET_SEX(d->character)][x])
-      send_to_char(d->character, "@B%2d@W) @C%-15s@D[@R%-6s@D]@n%s", (x+1) != 21 ? x+1 : 16, pc_race_types[x], cost[x], !(++i %2) ? "\r\n" : "   ");
-
-      send_to_char(d->character, "\n @BR@W) @CRandom Race Selection!\r\n@n");
-      send_to_char(d->character, "\n @BT@W) @CToggle between SELECTION/HELP Menu\r\n@n");
-      send_to_char(d->character, "\n@WRace: @n");
+    send_to_char(d->character, "\n @BR@W) @CRandom Race Selection!\r\n@n");
+    send_to_char(d->character, "\n @BT@W) @CToggle between SELECTION/HELP Menu\r\n@n");
+    send_to_char(d->character, "\n@WRace: @n");
 }
 
 void display_classes(struct descriptor_data *d)
@@ -1999,15 +1982,11 @@ void display_classes(struct descriptor_data *d)
 
 void display_races_help(struct descriptor_data *d)
 {
-  int x, i=0;
+    send_to_char(d->character, "\r\n@YRace HELP menu:\r\n@G--------------------------------------------\r\n@n");
+    display_races_sub(d);
 
-  send_to_char(d->character, "\r\n@YRace HELP menu:\r\n@G--------------------------------------------\r\n@n");
-  for (x = 0; x < NUM_RACES; x++)
-    if (race_ok_gender[(int)GET_SEX(d->character)][x])
-      send_to_char(d->character, "@B%2d@W) @C%-15s@n%s", x+1, pc_race_types[x], !(++i%2) ? "\r\n" : "	");
-
-      send_to_char(d->character, "\n @BT@W) @CToggle between SELECTION/HELP Menu\r\n@n");
-      send_to_char(d->character, "\n@WHelp on Race #: @n");
+    send_to_char(d->character, "\n @BT@W) @CToggle between SELECTION/HELP Menu\r\n@n");
+    send_to_char(d->character, "\n@WHelp on Race #: @n");
 }
 
 void display_classes_help(struct descriptor_data *d)
@@ -3934,6 +3913,9 @@ void nanny(struct descriptor_data *d, char *arg)
   int player_i;
   int value, roll = rand_number(1, 6); /* For parse_bonuses */
   struct descriptor_data *k;
+  dbat::race::Race *chosen_race;
+  dbat::race::RaceMap v_races;
+
     int count = 0, oldcount = HIGHPCOUNT;
   /* OasisOLC states */
   struct {
@@ -4709,39 +4691,24 @@ void nanny(struct descriptor_data *d, char *arg)
 
     case CON_QRACE:
     switch (*arg) {
-      case 'r':
-      case 'R':
-        while (load_result == RACE_UNDEFINED) {
-          rr = rand_number(1, NUM_RACES);
-          load_result = parse_race(d->character, rr);
-        }
-        break;
       case 't':
       case 'T':
         display_races_help(d);
         STATE(d) = CON_RACE_HELP;
         return;
+      default:
+          v_races = valid_races(d);
+          chosen_race = dbat::race::find_race_map(arg, v_races);
+          if(!chosen_race) {
+              write_to_output(d, "\r\nThat's not a race.\r\nRace: ");
+              return;
+          }
+          if(chosen_race->getRPPCost()) {
+              write_to_output(d, "\r\n%i RPP will be paid upon your first level up.\r\n", chosen_race->getRPPCost());
+              return;
+          }
+          d->character->race = chosen_race;
     }
-    if (load_result == RACE_UNDEFINED)
-      load_result = parse_race(d->character, atoi(arg));
-      if (load_result == RACE_UNDEFINED && (atoi(arg) != 2 && atoi(arg) != 12 && atoi(arg) != 9)) {
-        write_to_output(d, "\r\nThat's not a race.\r\nRace: ");
-        return;
-      } else if (load_result == RACE_UNDEFINED && (atoi(arg) == 2)) {
-        write_to_output(d, "\r\nThat race is restricted, You need 60 RPP to unlock it.\r\nRace: ");
-        return;
-      } else if (load_result == RACE_UNDEFINED && (atoi(arg) == 12)) {
-        write_to_output(d, "\r\nThat race is restricted, You need 55 RPP to unlock it.\r\nRace: ");
-        return;
-      } else if (load_result == RACE_UNDEFINED && (atoi(arg) == 9)) {
-        write_to_output(d, "\r\nThat race is restricted, You need 30 RPP to unlock it.\r\nRace: ");
-        return;
-      } else if (load_result == RACE_UNDEFINED && (atoi(arg) == 15)) {
-        write_to_output(d, "\r\nThat race is restricted, You need 20 RPP to unlock it.\r\nRace: ");
-        return;
-      }
-        else
-        GET_RACE(d->character) = load_result;
 
     if (IS_HALFBREED(d->character)) {
      write_to_output(d, "@YWhat race do you prefer to by identified with?\r\n");
@@ -4795,18 +4762,15 @@ void nanny(struct descriptor_data *d, char *arg)
       STATE(d) = CON_QRACE;
       return;
     }
-    if (isdigit(*arg)) {
-      player_i = atoi(arg);
-      if (player_i > NUM_RACES || player_i < 1) {
-	write_to_output(d, "\r\nThat's not a race.\r\nHelp on Race #: ");
-	break;
-      }
-      player_i -= 1;
-      if (race_ok_gender[(int)GET_SEX(d->character)][player_i])
-	show_help(d, race_names[player_i]);
-      else
-	write_to_output(d, "\r\nThat's not a race.\r\nHelp on Race #: ");
-    } else {
+    if (*arg) {
+        v_races = valid_races(d);
+        chosen_race = dbat::race::find_race_map(arg, v_races);
+        if(!chosen_race) {
+            write_to_output(d, "\r\nThat's not a race.\r\nHelp on Race #: ");
+        } else {
+            show_help(d, chosen_race->getName().c_str());
+        }
+} else {
       display_races_help(d);
     }
     STATE(d) = CON_RACE_HELP;
@@ -6627,7 +6591,7 @@ void nanny(struct descriptor_data *d, char *arg)
             GET_DEX(d->character) / 2 + GET_CHA(d->character) / 2;
     total -= 30;
     mudlog(CMP, ADMLVL_GOD, TRUE, "New player: %s [%s %s]", 
-           GET_NAME(d->character), pc_race_types[GET_RACE(d->character)], 
+           GET_NAME(d->character), TRUE_RACE(d->character),
            pc_class_types[GET_CLASS(d->character)]);
     break;
 
@@ -6653,7 +6617,7 @@ void nanny(struct descriptor_data *d, char *arg)
             GET_DEX(d->character) / 2 + GET_CHA(d->character) / 2;
     total -= 30;
     mudlog(CMP, ADMLVL_GOD, TRUE, "New player: %s [%s %s]", 
-           GET_NAME(d->character), pc_race_types[GET_RACE(d->character)], 
+           GET_NAME(d->character), TRUE_RACE(d->character),
            pc_class_types[GET_CLASS(d->character)]);
     mudlog(CMP, ADMLVL_GOD, TRUE, "Str: %2d Dex: %2d Con: %2d Int: %2d "
            "Wis:  %2d Cha: %2d mod total: %2d", GET_STR(d->character), 

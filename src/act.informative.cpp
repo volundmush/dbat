@@ -309,26 +309,6 @@ static const char *weapon_disp[6] = {
  "Brawling"
 };
 
-/* Used for mimic - Iovan */
-int yesrace(int num)
-{
- int okay = TRUE;
-
- switch (num) {
-  case 2:
-  case 4:
-  case 8:
-  case 10:
-  case 11:
-  case 14:
-  case 20:
-   okay = FALSE;
-   break;
- }
-
- return (okay);
-}
-
 ACMD(do_mimic)
 {
 
@@ -345,77 +325,74 @@ ACMD(do_mimic)
  }
 
  int count = 0, x = 0;
-   
+
+ // generate a list of mimic'able races.
+ dbat::race::RaceMap r_map;
+    for(const auto& r : dbat::race::race_map) {
+        if (r.second->raceCanBeMimiced() && r.second->isValidSex(GET_SEX(ch))) {
+            r_map[r.first] = r.second;
+        }
+    }
+
  if (!*arg) {
    send_to_char(ch, "@CMimic Menu\n@c--------------------@W\r\n");
-   for (x = 0; x < NUM_RACES; x++) {
-    if (race_ok_gender[(int)GET_SEX(ch)][x]) {
-	 if (yesrace(x)) {
-	  if (count == 2) {
-	   send_to_char(ch, "%s\n", pc_race_types[x]);
-	   count = 0;
-	  } else {
-	   send_to_char(ch, "%s\n", pc_race_types[x]);
-	   count += 1;
-	  }
-	 }
-	}
+   for(const auto& r : r_map) {
+       if (count == 2) {
+           send_to_char(ch, "%s\n", r.second->getName().c_str());
+           count = 0;
+       } else {
+           send_to_char(ch, "%s\n", r.second->getName().c_str());
+           count++;
+       }
    }
    send_to_char(ch, "Stop@n\r\n");
+   if(ch->mimic) {
+       send_to_char(ch, "You currently Mimic a %s", ch->mimic->getName().c_str());
+   }
+
    return;
  }
+
+  if(!strcasecmp(arg, "stop")) {
+      if(!ch->mimic) {
+          send_to_char(ch, "You are not imitating another race.\r\n");
+          return;
+      }
+      act("@mYou concentrate for a moment and release the illusion that was mimicing another race.@n", TRUE, ch, 0, 0, TO_CHAR);
+      act("@M$n@m concentrates for a moment and SUDDENLY $s appearance changes some what!@n", TRUE, ch, 0, 0, TO_ROOM);
+      ch->mimic = nullptr;
+  }
+
+  auto race = dbat::race::find_race_map(arg, r_map);
+  if(!race) {
+      send_to_char(ch, "That is not a race you can change into. Enter mimic without arugments for the mimic menu.\r\n");
+      return;
+  }
 
   int prob = GET_SKILL(ch, SKILL_MIMIC), perc = axion_dice(0);
   double mult = 1 / prob;
   int64_t cost = GET_MAX_MANA(ch) * mult;
-  int israce = FALSE, change = -1;
 
-  x = 0;
- 
-   for (x = 0; x < NUM_RACES; x++) {
-    if (race_ok_gender[(int)GET_SEX(ch)][x]) {
-	 if (yesrace(x)) {
-	  if (!strcasecmp(arg, pc_race_types[x])) {
-	    if (GET_MIMIC(ch) == x + 1) {
-		  israce = TRUE;
-		  x = NUM_RACES + 1;
-		} else {
-		  change = x + 1;
-		  x = NUM_RACES + 1;
-		}
-	  }
-	 }
-	}
-   }
- 
- if (israce == TRUE) {
+ if (race == ch->mimic) {
 	send_to_char(ch, "You are already mimicing that race. To stop enter 'mimic stop'\r\n");
 	return;
- } else if (change > -1 && GET_MANA(ch) < cost) {
+ } else if (race && GET_MANA(ch) < cost) {
    send_to_char(ch, "You do not have enough ki to perform the technique.\r\n");
    return;
- } else if (change > -1 && prob < perc) {
+ } else if (race && prob < perc) {
    GET_MANA(ch) -= cost;
    act("@mYou concentrate and attempt to create an illusion to obscure your racial features. However you frown as you realize you have failed.@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@M$n@m concentrates and the light around them seems to shift and blur. It stops a moment later and $e frowns.@n", TRUE, ch, 0, 0, TO_ROOM);
    return;
- } else if (change > -1) {
+ } else {
 	char buf[MAX_STRING_LENGTH];
-	GET_MIMIC(ch) = change;
+	ch->mimic = race;
 	GET_MANA(ch) -= cost;
 	sprintf(buf, "@M$n@m concentrates for a moment and $s features start to blur as light bends around $m. Now $e appears to be %s @M%s!@n", AN(RACE(ch)), LRACE(ch));
 	send_to_char(ch, "@mYou concentrate for a moment and your features start to blur as you use your ki to bend the light around your body. You now appear to be %s %s.@n\r\n", AN(RACE(ch)), LRACE(ch));
 	act(buf, TRUE, ch, 0, 0, TO_ROOM);
 	return;
- } else if (!strcasecmp(arg, "stop")) {
-	act("@mYou concentrate for a moment and release the illusion that was mimicing another race.@n", TRUE, ch, 0, 0, TO_CHAR);
-	act("@M$n@m concentrates for a moment and SUDDENLY $s appearance changes some what!@n", TRUE, ch, 0, 0, TO_ROOM);
-	GET_MIMIC(ch) = 0;
- } else {
-	send_to_char(ch, "That is not a race you can change into. Enter mimic without arugments for the mimic menu.\r\n");
-	return;
  }
- 
 }
 
 ACMD(do_kyodaika)
@@ -5697,7 +5674,7 @@ ACMD(do_score)
   if (GET_CLAN(ch) != NULL) {
    send_to_char(ch, "  @D|  @CClan@D: @W%-64s@D|@n\n", GET_CLAN(ch));
   }
- send_to_char(ch, "  @D|  @CRace@D: @W%10s@D,  @CSensei@D: @W%15s@D,     @CArt@D: @W%-17s@D|@n\n", pc_race_types[(int)GET_RACE(ch)], pc_class_types[(int)GET_CLASS(ch)], sensei_style[GET_CLASS(ch)]);
+ send_to_char(ch, "  @D|  @CRace@D: @W%10s@D,  @CSensei@D: @W%15s@D,     @CArt@D: @W%-17s@D|@n\n", TRUE_RACE(ch), pc_class_types[(int)GET_CLASS(ch)], sensei_style[GET_CLASS(ch)]);
   char hei[300], wei[300];
   sprintf(hei, "%dcm", get_measure(ch, GET_PC_HEIGHT(ch), 0));
   sprintf(wei, "%dkg", get_measure(ch, 0, GET_PC_WEIGHT(ch)));
@@ -8525,7 +8502,7 @@ ACMD(do_whois)
       send_to_char(ch, "@cTitle    @D: @G%s\r\n", GET_TITLE(victim));
     }
     else {
-      send_to_char(ch, "@cName  @D: @w%s\r\n@cSensei@D: @w%s\r\n@cRace  @D: @w%s\r\n@cTitle @D: @w%s@n\r\n@cClan  @D: @w%s@n\r\n", GET_NAME(victim), pc_class_types[(int)GET_CLASS(victim)], pc_race_types[(int)GET_RACE(victim)], GET_TITLE(victim), clan ? buf : "None.");
+      send_to_char(ch, "@cName  @D: @w%s\r\n@cSensei@D: @w%s\r\n@cRace  @D: @w%s\r\n@cTitle @D: @w%s@n\r\n@cClan  @D: @w%s@n\r\n", GET_NAME(victim), pc_class_types[(int)GET_CLASS(victim)], victim->race->getName().c_str(), GET_TITLE(victim), clan ? buf : "None.");
       if (clan == TRUE && !strstr(GET_CLAN(victim), "Applying")) {
        if (checkCLAN(victim) == TRUE) {
         clanRANKD(GET_CLAN(victim), ch, victim);

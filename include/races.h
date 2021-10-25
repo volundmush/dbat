@@ -9,26 +9,19 @@
 
 
 // global variables
-extern const int race_ok_gender[NUM_SEX][NUM_RACES];
-extern const char *d_race_types[NUM_RACES+1];
-extern const char *race_names[NUM_RACES+1];
-extern const char *pc_race_types[NUM_RACES+1];
 extern const struct guild_info_type guild_info[6];
-extern const int race_def_sizetable[NUM_RACES + 1];
-extern const char *race_abbrevs[NUM_RACES+1];
 
 // functions
 void racial_body_parts(struct char_data *ch);
 void racial_ability_modifiers(struct char_data *ch);
 void set_height_and_weight_by_race(struct char_data *ch);
 int invalid_race(struct char_data *ch, struct obj_data *obj);
-int parse_race(struct char_data *ch, int arg);
 
 // C++ conversion
 
 
 
-namespace dbat { namespace race {
+namespace dbat::race {
 
         enum race_id : uint8_t {
             human = 0,
@@ -57,194 +50,72 @@ namespace dbat { namespace race {
             spirit = 23
         };
 
+        struct transform_bonus {
+            int64_t bonus;
+            double mult, drain;
+            int flag;
+        };
+
         class Race;
         class RaceHandler;
-        extern std::map<race_id, Race*> race_map;
+        typedef std::map<race_id, Race*> RaceMap;
+        extern RaceMap race_map;
 
         class Race {
         public:
-            Race(race_id rid, std::string name, std::string abbr, int size, bool pc);
+            Race(race_id rid, const std::string& name, std::string abbr, int size, bool pc);
             race_id getID() const;
             const std::string& getName() const;
             const std::string& getNameLower() const;
             const std::string& getAbbr() const;
+            const std::string& getDisguised() const;
             int getSize() const;
             bool isPcOk() const;
 
-            void displayTransReq(char_data *ch) const;
-            // virtual functions
-            virtual bool isValidSex(int sex_id) const;
-            virtual bool checkCanTransform(char_data *ch) const;
-            virtual int getMaxTransformTier() const;
-            virtual bool checkCanTransformTier(char_data *ch, int tier) const;
-            virtual bool raceCanTransform() const;
-            virtual bool raceCanRevert() const;
-            virtual void parse_transform(char_data *ch, char *arg) const;
-            virtual void handle_transform(char_data *ch, int64_t add, double mult, double drain) const;
-            virtual void revert_transform(char_data *ch) const;
-            virtual void display_forms(char_data *ch) const;
 
+            // stats stuff
+            bool raceCanBeSensed() const;
+            bool isValidSex(int sex_id) const;
+            bool raceCanBeMimiced() const;
+            int getRPPCost() const;
+
+            // transform stuff
+            void displayTransReq(char_data *ch) const;
+            bool checkCanTransform(char_data *ch) const;
+            bool checkTransUnlock(char_data *ch, int tier) const;
+            int getMaxTransformTier(char_data *ch) const;
+            int getCurrentTransTier(char_data *ch) const;
+            const std::unordered_map<std::string, int>& getTierMap(char_data *ch) const;
+            const std::map<int, transform_bonus>& getTransMap(char_data *ch) const;
+            int flagToTier(int flag) const;
+            std::optional<transform_bonus> findForm(char_data *ch, const std::string& arg) const;
+            bool raceCanTransform() const;
+            bool raceCanRevert() const;
+            void handleTransform(char_data *ch, const transform_bonus& trans) const;
+            void revertTransform(char_data *ch) const;
+            void revertTransform(char_data *ch, int tier) const;
+            void displayForms(char_data *ch) const;
+            bool raceHasNoisyTransformations() const;
+            void echoTransform(char_data *ch, int tier) const;
+            void echoRevert(char_data *ch, int tier) const;
         protected:
             race_id r_id;
             std::string name, lower_name, race_abbr, disg;
             int race_size;
             bool pc_check;
+
+
         };
 
-        class Human : public Race {
-        public:
-            using Race::Race;
-            void display_forms(char_data *ch) const override;
-        };
-
-        class Saiyan : public Race {
-        public:
-            using Race::Race;
-            void display_forms(char_data *ch) const override;
-            bool checkCanTransform(char_data *ch) const override;
-        };
-
-        class Icer : public Race {
-        public:
-            using Race::Race;
-            void display_forms(char_data *ch) const override;
-        };
-        class Konatsu : public Race {
-        public:
-            using Race::Race;
-            void display_forms(char_data *ch) const override;
-        };
-
-        class Namekian : public Race {
-        public:
-            using Race::Race;
-            void display_forms(char_data *ch) const override;
-        };
-
-        class Mutant : public Race {
-        public:
-            using Race::Race;
-            void display_forms(char_data *ch) const override;
-        };
-
-        class Kanassan : public Race {
-        public:
-            using Race::Race;
-            bool raceCanTransform() const;
-        };
-
-        class Halfbreed : public Saiyan {
-        public:
-            using Saiyan::Saiyan;
-            void display_forms(char_data *ch) const override;
-        };
-
-        class BioAndroid : public Race {
-        public:
-            using Race::Race;
-            void display_forms(char_data *ch) const override;
-        };
-
-        class Android : public Race {
-        public:
-            using Race::Race;
-            void display_forms(char_data *ch) const override;
-        };
-
-        class Demon : public Race {
-        public:
-            using Race::Race;
-            bool raceCanTransform() const;
-        };
-
-
-        class Majin : public Race {
-        public:
-            using Race::Race;
-            void display_forms(char_data *ch) const override;
-        };
-
-        class Kai : public Race {
-        public:
-            using Race::Race;
-            void display_forms(char_data *ch) const override;
-        };
-
-        class Truffle : public Race {
-        public:
-            using Race::Race;
-            void display_forms(char_data *ch) const override;
-        };
-
-        class Hoshijin : public Race {
-        public:
-            using Race::Race;
-            bool raceCanTransform() const;
-        };
-
-        class Animal : public Race {
-        public:
-            using Race::Race;
-            bool raceCanTransform() const;
-        };
-
-        class Saiba : public Race {
-        public:
-            using Race::Race;
-            bool raceCanTransform() const;
-        };
-
-        class Serpent : public Race {
-        public:
-            using Race::Race;
-            bool raceCanTransform() const;
-        };
-
-        class Ogre : public Race {
-        public:
-            using Race::Race;
-            bool raceCanTransform() const;
-        };
-
-        class Yardratian : public Race {
-        public:
-            using Race::Race;
-            bool raceCanTransform() const;
-        };
-
-        class Arlian : public Race {
-        public:
-            using Race::Race;
-            bool raceCanTransform() const;
-        };
-
-        class Dragon : public Race {
-        public:
-            using Race::Race;
-            bool raceCanTransform() const;
-        };
-
-        class Mechanical : public Race {
-        public:
-            using Race::Race;
-            bool raceCanTransform() const;
-        };
-
-        class Spirit : public Race {
-        public:
-            using Race::Race;
-            bool raceCanTransform() const;
-        };
-
-
-
+    RaceMap valid_for_sex(int sex);
+    RaceMap valid_for_sex_pc(int sex);
     Race* find_race(const std::string& arg);
     Race* find_pc_race(const std::string& arg);
+    Race* find_race_map(const std::string& arg, const RaceMap& r_map);
     void load_races();
+    Race* find_race_map_id(const int id, const RaceMap& r_map);
 
-
-
-} }
+}
 
 
 

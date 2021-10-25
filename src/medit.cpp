@@ -441,12 +441,12 @@ void medit_disp_class(struct descriptor_data *d)
  */
 void medit_disp_race(struct descriptor_data *d)
 {
-  int i, columns = 0;
+  int columns = 0;
   char buf[MAX_INPUT_LENGTH];
 
   clear_screen(d);
-  for (i = 0; i < NUM_RACES; i++) {
-    sprintf(buf, "@g%2d@n) %-20.20s  %s", i , pc_race_types[i],
+  for (const auto &r : dbat::race::race_map) {
+    sprintf(buf, "@g%2d@n) %-20.20s  %s", r.first , r.second->getName().c_str(),
                         !(++columns % 2) ? "\r\n" : "");
     write_to_output(d, buf);
   }
@@ -522,7 +522,7 @@ void medit_disp_menu(struct descriptor_data *d)
 	  position_types[(int)GET_DEFAULT_POS(mob)],
           npc_personality[GET_PERSONALITY(mob)],
 	  flags, flag2, pc_class_types[(int)GET_CLASS(mob)],
-          pc_race_types[(int)GET_RACE(mob)],
+          TRUE_RACE(mob),
           OLC_SCRIPT(d) ?"Set.":"Not Set.", size_names[get_size(mob)]
 	  );
 
@@ -537,6 +537,7 @@ void medit_parse(struct descriptor_data *d, char *arg)
 {
   int i = -1;
   char *oldtext = NULL;
+  dbat::race::Race *chosen_race;
 
   if (OLC_MODE(d) > MEDIT_NUMERICAL_RESPONSE) {
     i = atoi(arg);
@@ -548,6 +549,7 @@ void medit_parse(struct descriptor_data *d, char *arg)
     if (!genolc_checkstring(d, arg))
       return;
   }
+
   switch (OLC_MODE(d)) {
 /*-------------------------------------------------------------------*/
   case MEDIT_CONFIRM_SAVESTRING:
@@ -950,9 +952,14 @@ void medit_parse(struct descriptor_data *d, char *arg)
     break;
 
   case MEDIT_RACE:
-    GET_RACE(OLC_MOB(d)) = LIMIT(i, 0, NUM_RACES);
+      chosen_race = dbat::race::find_race_map_id(i, dbat::race::race_map);
+      if(!chosen_race) {
+          write_to_output(d, "That's not a race!");
+          break;
+      }
+      OLC_MOB(d)->race = chosen_race;
     /*  Change racial size based on race choice. */
-    OLC_MOB(d)->size = race_def_sizetable[GET_RACE(OLC_MOB(d))];
+    OLC_MOB(d)->size = OLC_MOB(d)->race->getSize();
     break;
 
   case MEDIT_SIZE:

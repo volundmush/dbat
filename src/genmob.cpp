@@ -362,9 +362,8 @@ int write_mobile_espec(mob_vnum mvnum, struct char_data *mob, FILE *fd)
 {
   struct affected_type *aff;
   int i;
-  extern const int race_def_sizetable[NUM_RACES + 1];
 
-  if (get_size(mob) != race_def_sizetable[GET_RACE(mob)])
+  if (get_size(mob) != mob->race->getSize())
     fprintf(fd, "Size: %d\n", get_size(mob));
   if (GET_ATTACK(mob) != 0)
     fprintf(fd, "BareHandAttack: %d\n", GET_ATTACK(mob));

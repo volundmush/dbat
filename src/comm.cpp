@@ -192,6 +192,8 @@ void copyover_recover()
 void init_game(uint16_t cmport)
 {
 
+    dbat::race::load_races();
+
   /* We don't want to restart if we crash before we get up. */
   touch(KILLSCRIPT_FILE);
 
