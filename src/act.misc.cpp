@@ -13,7 +13,6 @@
 ************************************************************************ */
 #include "act.misc.h"
 #include "dg_comm.h"
-#include "act.item.h"
 #include "act.wizard.h"
 #include "act.movement.h"
 #include "utils.h"
@@ -278,28 +277,28 @@ static void generate_multiform(struct char_data *ch, struct char_data *multi1, s
   char_to_room(clone, IN_ROOM(ch));
   char buf[MAX_INPUT_LENGTH];
 
-  clone->name = '\0';
+  clone->name = "\0";
   *buf = '\0';
   snprintf(buf, sizeof(buf), "%s's Clone", GET_NAME(ch));
   clone->name = strdup(buf);
 
-  clone->short_descr = '\0';  
+  clone->short_descr = "\0";
   *buf = '\0';
   snprintf(buf, sizeof(buf), "%s's @CClone@n", GET_NAME(ch));
   clone->short_descr = strdup(buf);
   
-  clone->long_descr = '\0';
+  clone->long_descr = "\0";
   *buf = '\0';
    snprintf(buf, sizeof(buf), "%s's @CClone@w is standing here.@n\n", GET_NAME(ch));  
    clone->long_descr = strdup(buf);
 
-  clone->description = '\0';
+  clone->description = "\0";
   *buf = '\0';
    snprintf(buf, sizeof(buf), "%s", ch->description);
    clone->description = strdup(buf);
   
 
-  GET_RACE(clone) = GET_RACE(ch);
+  clone->race = ch->race;
   GET_CLASS(clone) = GET_CLASS(ch);
 
   int multi_forms = 0;

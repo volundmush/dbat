@@ -12,4 +12,13 @@ struct shop_buy_data;
 struct command_info;
 struct descriptor_data;
 
+namespace dbat {
+
+    namespace race {
+        class Race;
+        class RaceHandler;
+    }
+
+}
+
 #endif //CIRCLE_TYPESTUBS_H

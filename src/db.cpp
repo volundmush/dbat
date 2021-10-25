@@ -1898,7 +1898,7 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
  
   GET_GOLD(ch) = t[0];
   GET_EXP(ch) = 0;
-  GET_RACE(ch) = t[2];
+  ch->race = dbat::race::find_race_map_id(t[2], dbat::race::race_map);
   GET_CLASS(ch) = t[3];
 
   GET_SAVE_BASE(ch, SAVING_FORTITUDE) = 0;
@@ -3773,7 +3773,7 @@ char *sprintuniques(int low, int high)
           ptr += count;
           remain -= count;
         }
-        count = snprintf(ptr, remain, "| |- [@g%6d@n] - [@y%10"TMT":%-19" I64T "@n] - %s\r\n",
+        count = snprintf(ptr, remain, "| |- [@g%6d@n] - [@y%10" TMT ":%-19" I64T "@n] - %s\r\n",
                 GET_OBJ_VNUM(q->obj), q->generation, q->unique_id,
                 q->obj->short_description ? q->obj->short_description : "<Unknown>");
         ptr += count;
@@ -5060,7 +5060,7 @@ static int check_bitvector_names(bitvector_t bits, size_t namecount, const char 
 
   for (flagnum = namecount; flagnum < sizeof(bitvector_t) * 8; flagnum++)
     if ((1 << flagnum) & bits) {
-      log("SYSERR: %s has unknown %s flag, bit %d (0 through %"SZT" known).", whatami, whatbits, flagnum, namecount - 1);
+      log("SYSERR: %s has unknown %s flag, bit %d (0 through %" SZT " known).", whatami, whatbits, flagnum, namecount - 1);
       error = TRUE;
     }
 
@@ -5166,7 +5166,7 @@ int my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate)
 
  void strip_string(char *buffer)
  {
-   register char *ptr, *str;
+   char *ptr, *str;
 
    ptr = buffer;
    str = ptr;

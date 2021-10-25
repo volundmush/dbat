@@ -1717,7 +1717,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
   } else {
     sprinttype(k->chclass, pc_class_types, buf, sizeof(buf));
   }
-  sprinttype(k->race, pc_race_types, buf2, sizeof(buf2));
+    snprintf(buf2, sizeof(buf2), k->race->getName().c_str());
   send_to_char(ch, "Class: %s, Race: %s, Lev: [@y%2d(%dHD+%dcl+%d)@n], XP: [@y%" I64T "@n]\r\n",
                    buf, buf2, GET_LEVEL(k), GET_HITDICE(k),
                    GET_CLASS_LEVEL(k), GET_LEVEL_ADJ(k), GET_EXP(k));
@@ -3056,7 +3056,7 @@ ACMD(do_last)
 
   send_to_char(ch, "[%5d] [%2d %s %s] %-12s : %-18s : %-20s\r\n",
     GET_IDNUM(vict), (int) GET_LEVEL(vict),
-    race_abbrevs[(int) GET_RACE(vict)], class_abbrevs[(int) GET_CLASS(vict)],
+               vict->race->getAbbr().c_str(), class_abbrevs[(int) GET_CLASS(vict)],
     GET_NAME(vict), vict->player_specials->host && *vict->player_specials->host
     ? vict->player_specials->host : "(NOHOST)",
     ctime(&vict->time.logon));
@@ -3532,7 +3532,7 @@ ACMD(do_show)
     }
     send_to_char(ch, "Player: %-12s (%s) [%2d %s %s]\r\n", GET_NAME(vict),
       genders[(int) GET_SEX(vict)], GET_LEVEL(vict), class_abbrevs[(int)
-      GET_CLASS(vict)], race_abbrevs[(int) GET_RACE(vict)]);
+      GET_CLASS(vict)], vict->race->getAbbr().c_str());
     send_to_char(ch, "Au: %-8d  Bal: %-8d  Exp: %" I64T "  Align: %-5d  Ethic: %-5d\r\n",
                  GET_GOLD(vict), GET_BANK_GOLD(vict), GET_EXP(vict),
                  GET_ALIGNMENT(vict), GET_ETHIC_ALIGNMENT(vict));
@@ -3889,6 +3889,8 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
   int64_t value = 0;
   room_rnum rnum;
   room_vnum rvnum;
+  dbat::race::RaceMap v_races;
+  dbat::race::Race *chosen_race;
 
   /* Check to make sure all the levels are correct */
   if (GET_ADMLEVEL(ch) != ADMLVL_IMPL) {
@@ -4241,11 +4243,16 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
     break;
 
   case 52:
-    if ((i = search_block(val_arg, race_names, FALSE )) < 0) {
-      send_to_char(ch, "That is not a race.\r\n");
-      return (0);
-    }
-    GET_RACE(vict) = i;
+      if(IS_NPC(vict)) {
+          chosen_race = dbat::race::find_race_map(val_arg, dbat::race::valid_for_sex(GET_SEX(ch)));
+      } else {
+          chosen_race = dbat::race::find_race_map(val_arg, dbat::race::valid_for_sex_pc(GET_SEX(ch)));
+      }
+      if(!chosen_race) {
+          send_to_char(ch, "That is not a valid race for them.\r\n");
+          return (0);
+      }
+      vict->race = chosen_race;
     racial_body_parts(vict);
     break;
 

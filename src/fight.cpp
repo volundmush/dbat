@@ -614,7 +614,7 @@ static void mob_attack(struct char_data *ch, char *buf)
    } /* End power switch */
   } /* End special attacks */
  } else if (!IS_HUMANOID(ch) || dragonpass == FALSE) { /* Is not a humanoid mob */
-   if (IS_SNAKE(ch) && rand_number(1, 5) == 5) {
+   if (IS_SERPENT(ch) && rand_number(1, 5) == 5) {
     do_strike(ch, buf, 0, 0);
    } else if (IS_DRAGON(ch) && rand_number(1, 12) >= 10 && GET_MOB_VNUM(ch) != 17917) {
     do_breath(ch, buf, 0, 0);
@@ -691,42 +691,42 @@ void remove_limb(struct char_data *vict, int num)
           snprintf(buf, sizeof(buf), "%s bloody head", GET_NAME(vict));
           break;
          case 1:
-          snprintf(part, sizeof(part), "@w%s right arm@n", pc_race_types[(int)GET_RACE(vict)]);
+          snprintf(part, sizeof(part), "@w%s right arm@n", TRUE_RACE(vict));
           snprintf(buf, sizeof(buf), "right arm");
           if (PLR_FLAGGED(vict, PLR_CRARM)) {
            REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_CRARM);
           }
           break;
          case 2:
-          snprintf(part, sizeof(part), "@w%s left arm@n", pc_race_types[(int)GET_RACE(vict)]);
+          snprintf(part, sizeof(part), "@w%s left arm@n", TRUE_RACE(vict));
           snprintf(buf, sizeof(buf), "left arm");
           if (PLR_FLAGGED(vict, PLR_CLARM)) {
            REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_CLARM);
           }
           break;
          case 3:
-          snprintf(part, sizeof(part), "@w%s right leg@n", pc_race_types[(int)GET_RACE(vict)]);
+          snprintf(part, sizeof(part), "@w%s right leg@n", TRUE_RACE(vict));
           snprintf(buf, sizeof(buf), "right leg");
           if (PLR_FLAGGED(vict, PLR_CRLEG)) {
            REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_CRLEG);
           }
           break;
          case 4:
-          snprintf(part, sizeof(part), "@w%s left leg@n", pc_race_types[(int)GET_RACE(vict)]);
+          snprintf(part, sizeof(part), "@w%s left leg@n", TRUE_RACE(vict));
           snprintf(buf, sizeof(buf), "left leg");
           if (PLR_FLAGGED(vict, PLR_CLLEG)) {
            REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_CLLEG);
           }
           break;
          case 5:
-          snprintf(part, sizeof(part), "@wA %s tail@n", pc_race_types[(int)GET_RACE(vict)]);
+          snprintf(part, sizeof(part), "@wA %s tail@n", TRUE_RACE(vict));
           snprintf(buf, sizeof(buf), "tail");
           break;
          case 6:
           snprintf(buf, sizeof(buf), "tail");
           break;
          default:
-          snprintf(part, sizeof(part), "@w%s body part@n", pc_race_types[(int)GET_RACE(vict)]);
+          snprintf(part, sizeof(part), "@w%s body part@n", TRUE_RACE(vict));
           snprintf(buf, sizeof(buf), "body part");
           break;
         }
