@@ -4705,7 +4705,6 @@ void nanny(struct descriptor_data *d, char *arg)
           }
           if(chosen_race->getRPPCost()) {
               write_to_output(d, "\r\n%i RPP will be paid upon your first level up.\r\n", chosen_race->getRPPCost());
-              return;
           }
           d->character->race = chosen_race;
     }

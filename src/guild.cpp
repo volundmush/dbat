@@ -1123,16 +1123,8 @@ int rpp_to_level(struct char_data *ch) {
 
     switch (GET_LEVEL(ch)) {
         case 2:
-            if IS_SAIYAN(ch)
-                return 60;
-            else if IS_BIO(ch)
-                return 35;
-            else if IS_MAJIN(ch)
-                return 55;
-            else if IS_HOSHIJIN(ch)
-                return 30;
-            else
-                return 0;
+            // charge the RPP races to level for the first time.
+            return ch->race->getRPPCost();
         case 91:
         case 92:
         case 93:
