@@ -193,6 +193,7 @@ void init_game(uint16_t cmport)
 {
 
     dbat::race::load_races();
+    dbat::sensei::load_sensei();
 
   /* We don't want to restart if we crash before we get up. */
   touch(KILLSCRIPT_FILE);
