@@ -6863,25 +6863,10 @@ void nanny(struct descriptor_data *d, char *arg)
       if (GET_LEVEL(d->character) <= 40 && CHEAP_RACE(d->character)) {
        write_to_output(d, "@D[@gSince your race doesn't cost RPP to level before 40 you are refunded 0 RPP.@D]@n\r\n");
       }
-      if (IS_MAJIN(d->character)) {
-       int refund = 35;
-       write_to_output(d, "@D[@g%d RPP refunded to your account for your majin character.@D]@n\r\n", refund);
-       d->rpp += refund;
-      }
-      if (IS_HOSHIJIN(d->character)) {
-       int refund = 15;
-       write_to_output(d, "@D[@g%d RPP refunded to your account for your hoshijin character.@D]@n\r\n", refund);
-       d->rpp += refund;
-      }
-      if (IS_SAIYAN(d->character)) {
-       int refund = 40;
-       write_to_output(d, "@D[@g%d RPP refunded to your account for your saiyan character.@D]@n\r\n", refund);
-       d->rpp += refund;
-      }
-      if (IS_BIO(d->character)) {
-       int refund = 20;
-       write_to_output(d, "@D[@g%d RPP refunded to your account for your bio-android character.@D]@n\r\n", refund);
-       d->rpp += refund;
+      int refund = d->character->race->getRPPRefund();
+      if(refund && GET_LEVEL(d->character) > 1) {
+          write_to_output(d, "@D[@g%d RPP refunded to your account for your %s character.@D]@n\r\n", refund, d->character->race->getName().c_str());
+          d->rpp += refund;
       }
       mudlog(NRM, ADMLVL_GOD, TRUE, "User %s has deleted character %s (lev %d).", d->user, GET_NAME(d->character), GET_LEVEL(d->character));
       
