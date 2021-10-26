@@ -309,16 +309,16 @@ void mobile_activity(void)
      }
     }
 
-    /* Be helpful */
-    if (IS_HUMANOID(ch) && !MOB_FLAGGED(ch, MOB_NOKILL)) {
+    /* Be helpful */ /* - temporarily disabled by the first false check */
+    if (false && IS_HUMANOID(ch) && !MOB_FLAGGED(ch, MOB_NOKILL)) {
      struct char_data *vict, *next_v;
      int done = FALSE;
      for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
       next_v = vict->next_in_room;
       if (vict == ch)
        continue;
-      if (IS_NPC(vict) && FIGHTING(vict) && done == FALSE) {
-       if (GET_HIT(vict) < GET_HIT(ch) * 0.6 && axion_dice(0) >= 90) {
+      if (IS_NPC(vict) && vict->race->raceIsPeople() && FIGHTING(vict) && done == FALSE) {
+       if (!is_sparring(vict) && !is_sparring(ch) && GET_HIT(vict) < GET_HIT(ch) * 0.6 && axion_dice(0) >= 90) {
         act("@c$n@C rushes to @c$N's@C aid!@n", TRUE, ch, 0, vict, TO_ROOM);
         char buf[MAX_INPUT_LENGTH];
         sprintf(buf, "%s", GET_NAME(vict));
@@ -345,16 +345,16 @@ void mobile_activity(void)
      } /* End of for */
     }
 
-    /* Help those under attack! */
-    if (!FIGHTING(ch) && rand_number(1, 20) >= 14 && IS_HUMANOID(ch) && !MOB_FLAGGED(ch, MOB_NOKILL)) {
+    /* Help those under attack! */ /* - temporarily disabled by the first false check */
+    if (false && !FIGHTING(ch) && rand_number(1, 20) >= 14 && IS_HUMANOID(ch) && !MOB_FLAGGED(ch, MOB_NOKILL)) {
           struct char_data *vict, *next_v;
      int done = FALSE;
      for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
       next_v = vict->next_in_room;
       if (vict == ch)
        continue;
-      if (IS_NPC(vict) && FIGHTING(vict) && done == FALSE) {
-       if (GET_HIT(vict) < GET_HIT(ch) * 0.6 && axion_dice(0) >= 70) {
+      if (IS_NPC(vict) && vict->race->raceIsPeople() && FIGHTING(vict) && done == FALSE) {
+       if (!is_sparring(vict) && !is_sparring(ch) && GET_HIT(vict) < GET_HIT(ch) * 0.6 && axion_dice(0) >= 70) {
         act("@c$n@C rushes to @c$N's@C aid!@n", TRUE, ch, 0, vict, TO_ROOM);
         char buf[MAX_INPUT_LENGTH];
         sprintf(buf, "%s", GET_NAME(vict));

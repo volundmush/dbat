@@ -78,6 +78,8 @@ namespace dbat::race {
             bool isValidSex(int sex_id) const;
             bool raceCanBeMimiced() const;
             int getRPPCost() const;
+            int getRPPRefund() const;
+            bool raceIsPeople() const;
 
             // transform stuff
             void displayTransReq(char_data *ch) const;
