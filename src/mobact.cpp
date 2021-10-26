@@ -317,8 +317,8 @@ void mobile_activity(void)
       next_v = vict->next_in_room;
       if (vict == ch)
        continue;
-      if (IS_NPC(vict) && FIGHTING(vict) && done == FALSE) {
-       if (GET_HIT(vict) < GET_HIT(ch) * 0.6 && axion_dice(0) >= 90) {
+      if (IS_NPC(vict) && vict->race->raceIsPeople() && FIGHTING(vict) && done == FALSE) {
+       if (!is_sparring(vict) && !is_sparring(ch) && GET_HIT(vict) < GET_HIT(ch) * 0.6 && axion_dice(0) >= 90) {
         act("@c$n@C rushes to @c$N's@C aid!@n", TRUE, ch, 0, vict, TO_ROOM);
         char buf[MAX_INPUT_LENGTH];
         sprintf(buf, "%s", GET_NAME(vict));
@@ -353,8 +353,8 @@ void mobile_activity(void)
       next_v = vict->next_in_room;
       if (vict == ch)
        continue;
-      if (IS_NPC(vict) && FIGHTING(vict) && done == FALSE) {
-       if (GET_HIT(vict) < GET_HIT(ch) * 0.6 && axion_dice(0) >= 70) {
+      if (IS_NPC(vict) && vict->race->raceIsPeople() && FIGHTING(vict) && done == FALSE) {
+       if (!is_sparring(vict) && !is_sparring(ch) && GET_HIT(vict) < GET_HIT(ch) * 0.6 && axion_dice(0) >= 70) {
         act("@c$n@C rushes to @c$N's@C aid!@n", TRUE, ch, 0, vict, TO_ROOM);
         char buf[MAX_INPUT_LENGTH];
         sprintf(buf, "%s", GET_NAME(vict));

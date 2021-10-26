@@ -1423,7 +1423,34 @@ namespace dbat::race {
             }
         }
 
-        std::map<race_id, Race*> race_map;
+    int Race::getRPPRefund() const {
+        switch(r_id) {
+            case majin:
+                return 35;
+            case hoshijin:
+                return 15;
+            case saiyan:
+                return 40;
+            case bio:
+                return 20;
+            default:
+                return 0;
+        }
+    }
+
+    bool Race::raceIsPeople() const {
+        switch(r_id) {
+            case animal:
+            case saiba:
+            case mechanical:
+            case spirit:
+                return false;
+            default:
+                return true;
+        }
+    }
+
+    RaceMap race_map;
 
         RaceMap valid_for_sex(int sex) {
             RaceMap v_map;
