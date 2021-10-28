@@ -89,7 +89,7 @@ namespace dbat::race {
             const std::unordered_map<std::string, int>& getTierMap(char_data *ch) const;
             const std::map<int, transform_bonus>& getTransMap(char_data *ch) const;
             int flagToTier(int flag) const;
-            std::optional<transform_bonus> findForm(char_data *ch, const std::string& arg) const;
+            std::experimental::optional<transform_bonus> findForm(char_data *ch, const std::string& arg) const;
             bool raceCanTransform() const;
             bool raceCanRevert() const;
             void handleTransform(char_data *ch, const transform_bonus& trans) const;
