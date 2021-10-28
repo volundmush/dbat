@@ -757,7 +757,7 @@ namespace dbat::race {
 
 
 
-        std::optional<transform_bonus> Race::findForm(char_data *ch, const std::string& arg) const {
+        std::experimental::optional<transform_bonus> Race::findForm(char_data *ch, const std::string& arg) const {
             auto trans_map = getTierMap(ch);
             auto trans_bonuses = getTransMap(ch);
             for(const auto& form : trans_map) {
