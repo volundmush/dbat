@@ -5866,9 +5866,9 @@ ACMD(do_absorb)
   else {
    act("@WYou rush at @c$N@W and stab them with your tail! You quickly suck out all the bio extract you need and leave the empty husk behind!", TRUE, ch, 0, vict, TO_CHAR);
    act("@C$n@w rushes at @c$N@W and stabs $M with $s tail! $e quickly sucks out all the bio extract and leaves the empty husk of @c$N@W behind!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-   int64_t stam = GET_BASE_ST(vict) / 5000;
-   int64_t ki = GET_BASE_KI(vict) / 5000;
-   int64_t pl = GET_BASE_PL(vict) / 5000;
+   int64_t stam = GET_BASE_ST(vict) / 2000;
+   int64_t ki = GET_BASE_KI(vict) / 2000;
+   int64_t pl = GET_BASE_PL(vict) / 2000;
    stam += rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
    pl += rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
    ki += rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
@@ -9244,8 +9244,9 @@ ACMD(do_transform)
         return;
     }
 
-    // Revert races must auto-revert so that's handled here.
-    if(cur_tier && can_revert) {
+    // Existing forms must be reverted first. This is done under the hood even for
+    // non-revert races.
+    if(cur_tier) {
         ch->race->revertTransform(ch, cur_tier);
     }
 

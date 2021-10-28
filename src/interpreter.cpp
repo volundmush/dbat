@@ -3256,7 +3256,7 @@ void display_bonus_menu(struct char_data *ch, int type)
                    "Insomniac   - Can't Sleep. Immune to yoikominminken and paralysis    @D[@G-2pts @D]", /* Bonus  20 */
                    "Evasive     - +15% to dodge rolls                                    @D[@G-3pts @D]", /* Bonus  21 */
                    "The Wall    - +20% chance to block                                   @D[@G-3pts @D]", /* Bonus  22 */
-                   "Accurate    - +20% chance to hit physical, +10% to hit with ki       @D[@G-3pts @D]", /* Bonus  23 */
+                   "Accurate    - +20% chance to hit physical, +10% to hit with ki       @D[@G-4pts @D]", /* Bonus  23 */
                    "Energy Leech- -2% ki damage received for every 5 character levels,   @D[@G-5pts @D]\n                  @cas long as you can take that ki to your charge pool.@D        ", /* Bonus  24*/
                    "Good Memory - +2 Skill Slots initially, +1 every 20 levels after     @D[@G-6pts @D]", /* Bonus 25 */
                    "Soft Touch  - Half damage for all hit locations                      @D[@G+5pts @D]", /* Neg 26 */
@@ -3265,7 +3265,7 @@ void display_bonus_menu(struct char_data *ch, int type)
                    "Sickly      - Suffer from harmful effects longer                     @D[@G+5pts @D]", /* Neg 29 */
                    "Punching Bag- -15% to dodge rolls                                    @D[@G+3pts @D]", /* Neg 30 */
                    "Pushover    - -20% block chance                                      @D[@G+3pts @D]", /* Neg 31 */
-                   "Poor D. Perc- -20% chance to hit with physical, -10% with ki         @D[@G+3pts @D]", /* Neg 32 */
+                   "Poor D. Perc- -20% chance to hit with physical, -10% with ki         @D[@G+4pts @D]", /* Neg 32 */
                    "Thin Skin   - +20% physical and +10% ki damage received              @D[@G+4pts @D]", /* Neg 33 */
                    "Fireprone   - +50% Fire Dmg taken, +10% ki, always burned            @D[@G+5pts @D]", /* Neg 34 */
                    "Energy Int. - +2% ki damage received for every 5 character levels,   @D[@G+6pts @D]\n                  @rif you have ki charged you have 10% chance to lose   \n                  it and to take 1/4th damage equal to it.@D                    ", /* Neg 35 */

@@ -638,21 +638,21 @@ namespace dbat::race {
         };
 
         static const std::map<int, transform_bonus> android_trans_bonus_sense = {
-                {1, {.bonus=5000000u + 7500000u, .mult=1, .drain=0, .flag=PLR_TRANS1}},
-                {2, {.bonus=20000000u + 30000000u, .mult=1, .drain=0, .flag=PLR_TRANS2}},
-                {3, {.bonus=125000000u + 187500000u, .mult=1, .drain=0, .flag=PLR_TRANS3}},
-                {4, {.bonus=1000000000u + 1500000000u, .mult=1, .drain=0, .flag=PLR_TRANS4}},
-                {5, {.bonus=25000000000u + 2500000000u, .mult=1, .drain=0, .flag=PLR_TRANS5}},
-                {6, {.bonus=5000000000u + 5000000000u, .mult=1, .drain=0, .flag=PLR_TRANS6}},
+                {1, {.bonus=12500000, .mult=1, .drain=0, .flag=PLR_TRANS1}},
+                {2, {.bonus=50000000, .mult=1, .drain=0, .flag=PLR_TRANS2}},
+                {3, {.bonus=312000000, .mult=1, .drain=0, .flag=PLR_TRANS3}},
+                {4, {.bonus=2500000000, .mult=1, .drain=0, .flag=PLR_TRANS4}},
+                {5, {.bonus=5000000000, .mult=1, .drain=0, .flag=PLR_TRANS5}},
+                {6, {.bonus=10000000000, .mult=1, .drain=0, .flag=PLR_TRANS6}},
         };
 
         static const std::map<int, transform_bonus> android_trans_bonus = {
-                {1, {.bonus=5000000u, .mult=1, .drain=0, .flag=PLR_TRANS1}},
-                {2, {.bonus=20000000u, .mult=1, .drain=0, .flag=PLR_TRANS2}},
-                {3, {.bonus=125000000u, .mult=1, .drain=0, .flag=PLR_TRANS3}},
-                {4, {.bonus=1000000000u, .mult=1, .drain=0, .flag=PLR_TRANS4}},
-                {5, {.bonus=25000000000u, .mult=1, .drain=0, .flag=PLR_TRANS5}},
-                {6, {.bonus=5000000000u, .mult=1, .drain=0, .flag=PLR_TRANS6}},
+                {1, {.bonus=5000000, .mult=1, .drain=0, .flag=PLR_TRANS1}},
+                {2, {.bonus=20000000, .mult=1, .drain=0, .flag=PLR_TRANS2}},
+                {3, {.bonus=125000000, .mult=1, .drain=0, .flag=PLR_TRANS3}},
+                {4, {.bonus=1000000000, .mult=1, .drain=0, .flag=PLR_TRANS4}},
+                {5, {.bonus=2500000000, .mult=1, .drain=0, .flag=PLR_TRANS5}},
+                {6, {.bonus=5000000000, .mult=1, .drain=0, .flag=PLR_TRANS6}},
         };
 
         const std::map<int, transform_bonus>& Race::getTransMap(char_data *ch) const {

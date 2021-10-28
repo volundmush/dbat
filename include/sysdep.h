@@ -55,6 +55,7 @@
 #include <optional>
 #include <memory>
 #include <algorithm>
+#include <set>
 
 // non-standard libraries
 //#include "asio.hpp"
