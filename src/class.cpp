@@ -499,7 +499,6 @@ void cedit_creation(struct char_data *ch)
     default:
       break;
   }
-  racial_ability_modifiers(ch);
   racial_body_parts(ch);
   ch->aff_abils = ch->real_abils;
 }

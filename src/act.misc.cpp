@@ -300,6 +300,7 @@ static void generate_multiform(struct char_data *ch, struct char_data *multi1, s
 
   clone->race = ch->race;
   GET_CLASS(clone) = GET_CLASS(ch);
+  GET_CLASS_LEVEL(clone) = GET_CLASS_LEVEL(ch);
 
   int multi_forms = 0;
 
@@ -315,93 +316,96 @@ static void generate_multiform(struct char_data *ch, struct char_data *multi1, s
 
   GET_CLONES(ch) += 1;
 
-  int64_t mult = 1;
-/* Rillao: transloc, add new transes here */
-  if (IS_BIO(ch)) {
-   if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-    mult = 2;
-   }
-   else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-    mult = 3;
-   }
-   else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-    mult = 3.5;
-   }
-   else if (PLR_FLAGGED(ch, PLR_TRANS4)) {
-    mult = 4;
-   }
-  } else if (IS_MAJIN(ch)) {
-   if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-    mult = 2;
-   }
-   else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-    mult = 3;
-   }
-   else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-    mult = 4.5;
-   }
-  } else if (IS_TRUFFLE(ch)) {
-   if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-    mult = 3;
-   }
-   else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-    mult = 4;
-   }
-   else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-    mult = 5;
-   }
-  } else if (PLR_FLAGGED(ch, PLR_TRANS1) || PLR_FLAGGED(ch, PLR_TRANS2) || PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4) || PLR_FLAGGED(ch, PLR_TRANS5) || PLR_FLAGGED(ch, PLR_TRANS6)) {
-   do_transform(ch, "revert", 0, 0);
-  }
+    int64_t mult = 1;
+    /* Rillao: transloc, add new transes here */
+    if (IS_BIO(ch)) {
+        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+            mult = 2;
+        }
+        else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+            mult = 3;
+        }
+        else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+            mult = 3.5;
+        }
+        else if (PLR_FLAGGED(ch, PLR_TRANS4)) {
+            mult = 4;
+        }
+    }
+    else if (IS_MAJIN(ch)) {
+        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+            mult = 2;
+        }
+        else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+            mult = 3;
+        }
+        else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+            mult = 4.5;
+        }
+    }
+    else if (IS_TRUFFLE(ch)) {
+        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+            mult = 3;
+        }
+        else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+            mult = 4;
+        }
+        else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+            mult = 5;
+        }
+    }
+    else if (PLR_FLAGGED(ch, PLR_TRANS1) || PLR_FLAGGED(ch, PLR_TRANS2) || PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4) || PLR_FLAGGED(ch, PLR_TRANS5) || PLR_FLAGGED(ch, PLR_TRANS6)) {
+        do_transform(ch, "revert", 0, 0);
+    }
 
-   GET_MAX_HIT(ch) -= (GET_BASE_PL(ch) * 0.25) * mult;
-   GET_MAX_MOVE(ch) -= (GET_BASE_ST(ch) * 0.25) * mult;
-   GET_MAX_MANA(ch) -= (GET_BASE_KI(ch) * 0.25) * mult;
-   char blamo[MAX_INPUT_LENGTH];
-   sprintf(blamo, "p.%s", GET_NAME(ch));
-   do_follow(clone, blamo, 0, 0);
-   if (GET_HIT(ch) > gear_pl(ch)) {
-    GET_HIT(ch) = gear_pl(ch);
-   }
-   if (GET_MANA(ch) > GET_MAX_MANA(ch)) {
-    GET_MANA(ch) = GET_MAX_MANA(ch);
-   }
-   if (GET_MOVE(ch) > GET_MAX_MOVE(ch)) {
-    GET_MOVE(ch) = GET_MAX_MOVE(ch);
-   }
-   if (multi1) {
-    GET_HIT(multi1) = GET_HIT(ch);
-    GET_MAX_HIT(multi1) = GET_MAX_HIT(ch);
-    GET_MOVE(multi1) = GET_MOVE(ch);
-    GET_MAX_MOVE(multi1) = GET_MAX_MOVE(ch);
-    GET_MANA(multi1) = GET_MANA(ch);
-    GET_MAX_MANA(multi1) = GET_MAX_MANA(ch);
-   }
-   if (multi2) {
-    GET_HIT(multi2) = GET_HIT(ch);
-    GET_MAX_HIT(multi2) = GET_MAX_HIT(ch);
-    GET_MOVE(multi2) = GET_MOVE(ch);
-    GET_MAX_MOVE(multi2) = GET_MAX_MOVE(ch);
-    GET_MANA(multi2) = GET_MANA(ch);
-    GET_MAX_MANA(multi2) = GET_MAX_MANA(ch);
-   }
-   if (multi3) {
-    GET_HIT(multi3) = GET_HIT(ch);
-    GET_MAX_HIT(multi3) = GET_MAX_HIT(ch);
-    GET_MOVE(multi3) = GET_MOVE(ch);
-    GET_MAX_MOVE(multi3) = GET_MAX_MOVE(ch);
-    GET_MANA(multi3) = GET_MANA(ch);
-    GET_MAX_MANA(multi3) = GET_MAX_MANA(ch);
-   }
+    GET_MAX_HIT(ch) -= (GET_BASE_PL(ch) * 0.25) * mult;
+    GET_MAX_MOVE(ch) -= (GET_BASE_ST(ch) * 0.25) * mult;
+    GET_MAX_MANA(ch) -= (GET_BASE_KI(ch) * 0.25) * mult;
+    char blamo[MAX_INPUT_LENGTH];
+    sprintf(blamo, "p.%s", GET_NAME(ch));
+    do_follow(clone, blamo, 0, 0);
+    if (GET_HIT(ch) > gear_pl(ch)) {
+        GET_HIT(ch) = gear_pl(ch);
+    }
+    if (GET_MANA(ch) > GET_MAX_MANA(ch)) {
+        GET_MANA(ch) = GET_MAX_MANA(ch);
+    }
+    if (GET_MOVE(ch) > GET_MAX_MOVE(ch)) {
+        GET_MOVE(ch) = GET_MAX_MOVE(ch);
+    }
+    if (multi1) {
+        GET_HIT(multi1) = GET_HIT(ch);
+        GET_MAX_HIT(multi1) = GET_MAX_HIT(ch);
+        GET_MOVE(multi1) = GET_MOVE(ch);
+        GET_MAX_MOVE(multi1) = GET_MAX_MOVE(ch);
+        GET_MANA(multi1) = GET_MANA(ch);
+        GET_MAX_MANA(multi1) = GET_MAX_MANA(ch);
+    }
+    if (multi2) {
+        GET_HIT(multi2) = GET_HIT(ch);
+        GET_MAX_HIT(multi2) = GET_MAX_HIT(ch);
+        GET_MOVE(multi2) = GET_MOVE(ch);
+        GET_MAX_MOVE(multi2) = GET_MAX_MOVE(ch);
+        GET_MANA(multi2) = GET_MANA(ch);
+        GET_MAX_MANA(multi2) = GET_MAX_MANA(ch);
+    }
+    if (multi3) {
+        GET_HIT(multi3) = GET_HIT(ch);
+        GET_MAX_HIT(multi3) = GET_MAX_HIT(ch);
+        GET_MOVE(multi3) = GET_MOVE(ch);
+        GET_MAX_MOVE(multi3) = GET_MAX_MOVE(ch);
+        GET_MANA(multi3) = GET_MANA(ch);
+        GET_MAX_MANA(multi3) = GET_MAX_MANA(ch);
+    }
 
-  GET_HIT(clone) = GET_HIT(ch);
-  GET_MAX_HIT(clone) = GET_MAX_HIT(ch);
-  GET_MOVE(clone) = GET_MOVE(ch);
-  GET_MAX_MOVE(clone) = GET_MAX_MOVE(ch);
-  GET_MANA(clone) = GET_MANA(ch);
-  GET_MAX_MANA(clone) = GET_MAX_MANA(ch);
-  
-  GET_ORIGINAL(clone) = ch;
+    GET_HIT(clone) = GET_HIT(ch);
+    GET_MAX_HIT(clone) = GET_MAX_HIT(ch);
+    GET_MOVE(clone) = GET_MOVE(ch);
+    GET_MAX_MOVE(clone) = GET_MAX_MOVE(ch);
+    GET_MANA(clone) = GET_MANA(ch);
+    GET_MAX_MANA(clone) = GET_MAX_MANA(ch);
+
+    GET_ORIGINAL(clone) = ch;
 }
 
 void handle_multi_merge(struct char_data *form)
