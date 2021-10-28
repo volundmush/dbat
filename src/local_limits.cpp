@@ -1555,7 +1555,7 @@ void point_update(void)
     }
    }
    // making it so that you don't get hungry/thirsty if you're just leisurely idling, rping, etc.
-   if(GET_HIT(i) < GET_MAX_HIT(i)) {
+   if(GET_HIT(i) < gear_pl(i)) {
        if (rand_number(1, 2) == 2) {
            gain_condition(i, HUNGER, -1);
        }
