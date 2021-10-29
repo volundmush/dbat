@@ -2265,6 +2265,8 @@ namespace dbat::sensei {
         switch(s_id) {
             case sixteen:
                 return r_id == race::android;
+            case dabura:
+                return r_id == race::demon;
             default:
                 return r_id != race::android;
         }

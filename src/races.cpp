@@ -543,6 +543,7 @@ namespace dbat::race {
                 case halfbreed:
                 case majin:
                 case kai:
+                case konatsu:
                     return 3;
                 case android:
                     return 6;
@@ -1520,7 +1521,7 @@ namespace dbat::race {
             race_map[race_id::kai] = new Race(race_id::kai, "Kai", "Kai", SIZE_MEDIUM, true);
             race_map[race_id::truffle] = new Race(race_id::truffle, "Truffle", "Tru", SIZE_SMALL, true);
             race_map[race_id::hoshijin] = new Race(race_id::hoshijin, "Hoshijin", "Hos", SIZE_MEDIUM, true);
-            race_map[race_id::animal] = new Race(race_id::animal, "Animal", "Ict", SIZE_FINE, true);
+            race_map[race_id::animal] = new Race(race_id::animal, "Animal", "Ict", SIZE_FINE, false);
             race_map[race_id::saiba] = new Race(race_id::saiba, "Saiba", "Sab", SIZE_LARGE, false);
             race_map[race_id::serpent] = new Race(race_id::serpent, "Serpent", "Ser", SIZE_MEDIUM, false);
             race_map[race_id::ogre] = new Race(race_id::ogre, "Ogre", "Ogr", SIZE_LARGE, false);
