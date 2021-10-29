@@ -4695,24 +4695,31 @@ void nanny(struct descriptor_data *d, char *arg)
     break;
 
     case CON_QRACE:
-    switch (*arg) {
-      case 't':
-      case 'T':
-        display_races_help(d);
-        STATE(d) = CON_RACE_HELP;
-        return;
-      default:
-          v_races = valid_races(d);
-          chosen_race = dbat::race::find_race_map(arg, v_races);
-          if(!chosen_race) {
-              write_to_output(d, "\r\nThat's not a race.\r\nRace: ");
-              return;
-          }
-          if(chosen_race->getRPPCost()) {
-              write_to_output(d, "\r\n%i RPP will be paid upon your first level up.\r\n", chosen_race->getRPPCost());
-          }
-          d->character->race = chosen_race;
-    }
+        switch(strlen(arg)) {
+            case 1:
+                switch(*arg) {
+                    case 't':
+                    case 'T':
+                        display_races_help(d);
+                        STATE(d) = CON_RACE_HELP;
+                        return;
+                    default:
+                        write_to_output(d, "\r\nThat's not a race.\r\nRace: ");
+                        return;
+                }
+                break;
+            default:
+                v_races = valid_races(d);
+                chosen_race = dbat::race::find_race_map(arg, v_races);
+                if(!chosen_race) {
+                    write_to_output(d, "\r\nThat's not a race.\r\nRace: ");
+                    return;
+                }
+                if(chosen_race->getRPPCost()) {
+                    write_to_output(d, "\r\n%i RPP will be paid upon your first level up.\r\n", chosen_race->getRPPCost());
+                }
+                d->character->race = chosen_race;
+        }
 
     if (IS_HALFBREED(d->character)) {
      write_to_output(d, "@YWhat race do you prefer to by identified with?\r\n");
