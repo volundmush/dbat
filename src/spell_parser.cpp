@@ -18,6 +18,7 @@
 #include "dg_scripts.h"
 #include "fight.h"
 #include "act.other.h"
+#include "class.h"
 
 /* extern globals */
 

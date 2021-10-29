@@ -2276,7 +2276,7 @@ struct char_data {
   int8_t distfea;             /* PC's Distinguishing Feature          */
   int race_level;		/* PC / NPC's racial level / hit dice   */
   int level_adj;		/* PC level adjustment                  */
-  int8_t chclass;		/* Last class taken                     */
+  dbat::sensei::Sensei *chclass;		/* Last class taken                     */
   int chclasses[NUM_CLASSES];	/* Ranks in all classes        */
   int epicclasses[NUM_CLASSES];	/* Ranks in all epic classes */
   struct levelup_data *level_info;

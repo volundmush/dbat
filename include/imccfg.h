@@ -14,8 +14,6 @@ typedef struct social_messg SOCIAL_DATA;
 typedef struct char_data CHAR_DATA;
 typedef struct descriptor_data DESCRIPTOR_DATA;
 
-extern const char *class_abbrevs[];
-
 const char *title_female( int chclass, int level );
 const char *title_male( int chclass, int level );
 

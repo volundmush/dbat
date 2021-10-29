@@ -52,8 +52,6 @@ long top_idnum = 0;		/* highest idnum in use		 */
 
 /* external ASCII Player Files vars */
 
-extern const char *class_names[];
-
 /* ASCII Player Files - set this TRUE if you want poofin/poofout
    strings saved in the pfiles
  */
@@ -337,7 +335,7 @@ int load_char(const char *name, struct char_data *ch)
     }
     GET_SEX(ch) = PFDEF_SEX;
     ch->size = PFDEF_SIZE;
-    GET_CLASS(ch) = PFDEF_CLASS;
+    ch->chclass = dbat::sensei::sensei_map[dbat::sensei::roshi];
     for (i = 0; i < NUM_CLASSES; i++) {
       GET_CLASS_NONEPIC(ch, i) = 0;
       GET_CLASS_EPIC(ch, i) = 0;
@@ -545,7 +543,7 @@ int load_char(const char *name, struct char_data *ch)
              if (!strcmp(tag, "Cha "))  ch->real_abils.cha      = atoi(line);
         else if (!strcmp(tag, "Clan"))  GET_CLAN(ch)            = strdup(line);
         else if (!strcmp(tag, "Clar"))  GET_CRANK(ch)           = atoi(line);
-	else if (!strcmp(tag, "Clas"))  GET_CLASS(ch)           = atoi(line);
+	else if (!strcmp(tag, "Clas"))  ch->chclass = dbat::sensei::find_sensei_map_id(atoi(line), dbat::sensei::sensei_map);
         else if (!strcmp(tag, "Colr"))  {
           sscanf(line, "%d %s", &num, buf2);
           ch->player_specials->color_choices[num] = strdup(buf2);

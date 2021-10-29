@@ -21,6 +21,7 @@
 #include "dg_scripts.h"
 #include "boards.h"
 #include "improved-edit.h"
+#include "class.h"
 
 /* local functions */
 static void perform_tell(struct char_data *ch, struct char_data *vict, char *arg);

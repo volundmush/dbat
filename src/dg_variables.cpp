@@ -623,7 +623,7 @@ in the vault (vnum: 453) now and then. you can just use
           }
           else if (!strcasecmp(field, "class")) {
            if (!IS_NPC(c))
-            snprintf(str, slen, "%s", pc_class_types[(int)GET_CLASS(c)]);
+            snprintf(str, slen, "%s", c->chclass->getName().c_str());
            else
             snprintf(str, slen, "blank");
           }

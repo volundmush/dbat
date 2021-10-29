@@ -15,6 +15,7 @@
 #include "dg_scripts.h"
 #include "handler.h"
 #include "dg_olc.h"
+#include "class.h"
 
 /* From db.c */
 void init_mobile_skills(void);

@@ -69,43 +69,6 @@ const char *class_abbrevs[NUM_CLASSES+1] = {
   "\n"
 };
 
-
-/* Copied from the SRD under OGL, see ../doc/srd.txt for information */
-const char *pc_class_types[NUM_CLASSES+1] = {
-  "Roshi",
-  "Piccolo",
-  "Krane",
-  "Nail",
-  "Bardock",
-  "Ginyu",
-  "Frieza",
-  "Tapion",
-  "Android 16",
-  "Dabura",
-  "Kibito",
-  "Jinto",
-  "Tsuna",
-  "Kurzak",
-  "Assassin",
-  "Blackguard",
-  "Dragon Disciple",
-  "Duelist",
-  "Dwarven Defender",
-  "Eldritch Knight",
-  "Hierophant",
-  "Horizon Walker",
-  "Loremaster",
-  "Mystic Theurge",
-  "Shinobi",
-  "Thaumaturgist",
-  "Expert",
-  "Adept",
-  "Commoner",
-  "Aristrocrat",
-  "Warrior",
-  "\n"
-};
-
 /* Copied from the SRD under OGL, see ../doc/srd.txt for information */
 const char *class_names[NUM_CLASSES+1] = {
   "roshi",
@@ -178,186 +141,10 @@ const char *class_display[NUM_CLASSES] = {
   "Soldier NPC\r\n",
 };
 
-#define Y   TRUE
-#define N   FALSE
-
-/* Some races copied from the SRD under OGL, see ../doc/srd.txt for information */
-const int class_ok_race[NUM_RACES][NUM_CLASSES] = {
-  /*                Wi,Cl,Ro,Fi,Mo,Pa,So,Dr,Ba,Ra,Bn,Aa,At,Am,As,Bg,Dd,Du,Dw,Ek,Ht,Hw,Lr,Mt,Sd,Th,Ad,Ma,No,Nl,So,   */
-  /* Human      */ { Y, Y, Y, Y, Y, Y, Y, Y, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N },
-  /* Saiyan     */ { Y, Y, Y, Y, Y, Y, Y, Y, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N },
-  /* Icer       */ { Y, Y, Y, Y, Y, Y, Y, Y, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N },
-  /* Konatsu    */ { Y, Y, Y, Y, Y, Y, Y, Y, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N },
-  /* Namek      */ { Y, Y, Y, Y, Y, Y, Y, Y, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N },
-  /* Mutant     */ { Y, Y, Y, Y, Y, Y, Y, Y, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N },
-  /* Kanassan   */ { Y, Y, Y, Y, Y, Y, Y, Y, N, N, Y, N, Y, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N },
-  /* Halfbreed  */ { Y, Y, Y, Y, Y, Y, Y, Y, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N },
-  /* Bio        */ { Y, Y, Y, Y, Y, Y, Y, Y, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N },
-  /* Android    */ { N, N, N, N, N, N, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N },
-  /* Demon      */ { Y, Y, Y, Y, Y, Y, Y, Y, N, Y, Y, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N },
-  /* Majin      */ { Y, Y, Y, Y, Y, Y, Y, Y, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N },
-  /* Kai        */ { Y, Y, Y, Y, Y, Y, Y, Y, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N },
-  /* Truffle    */ { Y, Y, Y, Y, Y, Y, Y, Y, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N },
-  /* Hoshijin   */ { Y, Y, Y, Y, Y, Y, Y, Y, N, N, Y, Y, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N },
-  /* Animal     */ { N, N, N, N, N, N, Y, Y, Y, Y, Y, N, Y, N, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N },
-  /* Orc        */ { N, N, N, N, N, N, Y, Y, Y, Y, Y, N, Y, N, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N },
-  /* Snake      */ { N, N, N, N, N, N, Y, Y, Y, Y, Y, N, Y, N, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N },
-  /* Troll      */ { N, N, N, N, N, N, Y, Y, Y, Y, Y, N, Y, N, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N },
-  /* Minotaur   */ { N, N, N, N, N, N, Y, Y, Y, Y, Y, N, Y, N, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N },
-  /* Arlian     */ { Y, Y, Y, Y, Y, Y, Y, Y, N, N, Y, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N },
-  /* Mindflayer */ { N, N, N, N, N, N, Y, Y, Y, Y, Y, N, Y, N, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N },
-  /* Warhost    */ { N, N, N, N, N, N, Y, Y, Y, Y, Y, N, Y, N, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N },
-  /* Faerie     */ { N, N, N, N, N, N, Y, Y, Y, Y, Y, N, Y, N, N, N, Y, N, N, N, N, N, N, N, N, N, N, N, N }
-};
-
-/* Adapted from the SRD under OGL, see ../doc/srd.txt for information */
-int class_ok_align[NUM_ALIGNS][NUM_CLASSES] = {
-/*         Wi,Cl,Ro,Fi,Mo,Pa,So,Dr,Ba,Ra,Bn,Aa,At,Am,As,Bg,Dd,Du,Dw,Ek,He,Hw,Lm,Mt,Sd,Th*/
-/* LG */ { Y, Y, Y, Y, Y, Y, Y, N, N, Y, N, Y, N, Y, N, N, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y },
-/* NG */ { Y, Y, Y, Y, N, N, Y, Y, Y, Y, Y, Y, Y, Y, N, N, Y, Y, N, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y },
-/* CG */ { Y, Y, Y, Y, N, N, Y, N, Y, Y, Y, Y, Y, Y, N, N, Y, Y, N, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y },
-/* LN */ { Y, Y, Y, Y, Y, N, Y, Y, N, Y, N, Y, N, Y, N, N, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y },
-/* NN */ { Y, Y, Y, Y, N, N, Y, Y, Y, Y, Y, Y, Y, Y, N, N, Y, Y, N, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y },
-/* CN */ { Y, Y, Y, Y, N, N, Y, Y, Y, Y, Y, Y, Y, Y, N, N, Y, Y, N, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y },
-/* LE */ { Y, Y, Y, Y, Y, N, Y, N, N, Y, N, Y, N, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y },
-/* NE */ { Y, Y, Y, Y, N, N, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, N, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y },
-/* CE */ { Y, Y, Y, Y, N, N, Y, N, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, N, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y }
-};
-
-/* Adapted from the SRD under OGL, see ../doc/srd.txt for information */
-int favored_class[NUM_RACES] = {
-/* -1 means highest class is considered favored */
-/* Human      */ -1,
-/* Saiyan     */ -1,
-/* Icer       */ -1,
-/* Konatsu    */ -1,
-/* Namek      */ -1,
-/* Mutant     */ -1,
-/* Kanassan   */ -1,
-/* Halfbreed  */ -1,
-/* Bio-android*/ -1,
-/* Android    */ -1,
-/* Demon      */ -1,
-/* Majin      */ -1,
-/* Kai        */ -1,
-/* TRuffle    */ -1,
-/* Goblin     */ -1,
-/* Insect     */ -1,
-/* Orc        */ -1,
-/* Snake      */ -1,
-/* Troll      */ -1,
-/* Minotaur   */ -1,
-/* Arlian     */ -1,
-/* Lizardfolk */ -1,
-/* Warhost    */ -1,
-/* Faerie     */ -1
-};
-
-/* Adapted from the SRD under OGL, see ../doc/srd.txt for information */
-int prestige_classes[NUM_CLASSES] = {
-/* WIZARD	*/ N,
-/* CLERIC	*/ N,
-/* ROGUE	*/ N,
-/* FIGHTER	*/ N,
-/* MONK		*/ N,
-/* PALADIN	*/ N,
-/* SORCERER	*/ N,
-/* DRUID	*/ N,
-/* BARD 	*/ N,
-/* RANGER	*/ N,
-/* BARBARIAN	*/ N,
-/* Arcane ARCHER    */ N,
-/* ARCANE TRICKSTER */ N,
-/* ARCHMAGE         */ N,
-/* ASSASSIN         */ Y,
-/* BLACKGUARD       */ Y,
-/* DRAGON DISCIPLE  */ Y,
-/* DUELIST          */ Y,
-/* DWARVEN DEFENDER */ Y,
-/* ELDRITCH KNIGHT  */ Y,
-/* HIEROPHANT       */ Y,
-/* HORIZON WALKER   */ Y,
-/* LOREMASTER       */ Y,
-/* MYSTIC THEURGE   */ Y,
-/* SHADOWDANCER     */ Y,
-/* THAUMATURGIST    */ Y,
-/* ARTISAN	*/ N,
-/* MAGI		*/ N,
-/* NORMAL	*/ N,
-/* NOBLE	*/ N,
-/* SOLDIER	*/ N
-};
-
-/* Adapted from the SRD under OGL, see ../doc/srd.txt for information */
-/* -1 indicates no limit to the number of levels in this class under
- * epic rules */
-int class_max_ranks[NUM_CLASSES] = {
-/* WIZARD	*/ -1,
-/* CLERIC	*/ -1,
-/* ROGUE	*/ -1,
-/* FIGHTER	*/ -1,
-/* MONK		*/ -1,
-/* PALADIN	*/ -1,
-/* SORCERER	*/ -1,
-/* DRUID	*/ -1,
-/* BARD 	*/ -1,
-/* RANGER	*/ -1,
-/* BARBARIAN	*/ -1,
-/* ARCANE ARCHER    */ -1,
-/* ARCANE TRICKSTER */ -1,
-/* ARCHMAGE         */ -1,
-/* ASSASSIN         */ 10,
-/* BLACKGUARD       */ 10,
-/* DRAGON DISCIPLE  */ 10,
-/* DUELIST          */ 10,
-/* DWARVEN DEFENDER */ 10,
-/* ELDRITCH KNIGHT  */ 10,
-/* HIEROPHANT       */ 5,
-/* HORIZON WALKER   */ 10,
-/* LOREMASTER       */ 10,
-/* MYSTIC THEURGE   */ 10,
-/* SHADOWDANCER     */ 10,
-/* THAUMATURGIST    */ 5,
-/* ARTISAN	*/ -1,
-/* MAGI		*/ -1,
-/* NORMAL	*/ -1,
-/* NOBLE	*/ -1,
-/* SOLDIER	*/ -1
-};
-
-
 /*
  * The code to interpret a class letter -- used in interpreter.c when a
  * new character is selecting a class and by 'set class' in act.wizard.c.
  */
-
-int parse_class(struct char_data *ch, int arg)
-{
-  int chclass = CLASS_UNDEFINED;
-
-  switch (arg) {
-  case 1 : chclass = CLASS_ROSHI    ; break;
-  case 2 : chclass = CLASS_PICCOLO  ; break;
-  case 3 : chclass = CLASS_KRANE    ; break;
-  case 4 : chclass = CLASS_NAIL     ; break;
-  case 5 : chclass = CLASS_BARDOCK  ; break;
-  case 6 : chclass = CLASS_GINYU    ; break;
-  case 7 : chclass = CLASS_FRIEZA   ; break;
-  case 8 : chclass = CLASS_TAPION   ; break;
-  case 9 : chclass = CLASS_ANDSIX   ; break;
-  case 10 : chclass = CLASS_DABURA   ; break;
-  case 11 : chclass = CLASS_KABITO   ; break;
-  case 12 : chclass = CLASS_JINTO    ; break;
-  case 13 : chclass = CLASS_TSUNA    ; break;
-  case 14 : chclass = CLASS_KURZAK   ; break;
-  default:  chclass = CLASS_UNDEFINED; break;
-  }
-  if (chclass >= 0 && chclass < NUM_BASIC_CLASSES)
-    if (!class_ok_race[(int)GET_RACE(ch)][chclass])
-      chclass = CLASS_UNDEFINED;
-
-  return (chclass);
-}
 
 /*
  * ...And the appropriate rooms for each guildmaster/guildguard; controls
@@ -729,7 +516,7 @@ void do_start(struct char_data *ch)
 
   if (GET_CLASS(ch) < 0 || GET_CLASS(ch) > NUM_CLASSES) {
     log("Unknown character class %d in do_start, resetting.", GET_CLASS(ch));
-    GET_CLASS(ch) = 0;
+    //GET_CLASS(ch) = 0;
   }
   if (GET_ALIGNMENT(ch) < 51 && GET_ALIGNMENT(ch) > -51) {
    set_title(ch, "the Warrior");
@@ -2194,7 +1981,7 @@ char *class_desc_str(struct char_data *ch, int howlong, int wantthe)
   char *buf, *buf2, *buf3;
 
   if (IS_NPC(ch)) {
-    snprintf(ptr, sizeof(str) - (ptr - str), "%s%d", class_abbrevs[GET_CLASS(ch)], GET_LEVEL(ch) );
+    snprintf(ptr, sizeof(str) - (ptr - str), "%s%d", CLASS_ABBR(ch), GET_LEVEL(ch) );
     return str;
   }
 
@@ -2215,12 +2002,9 @@ char *class_desc_str(struct char_data *ch, int howlong, int wantthe)
     rankorder[0] = GET_CLASS(ch); /* we always want primary class first */
     rankorder[GET_CLASS(ch)] = 0;
     qsort((void *)rankorder, NUM_CLASSES, sizeof(int), comp_rank);
-    for (i = 0; i < NUM_CLASSES; i++) {
-      rank = rankorder[i];
-      if (cabbr_ranktable[rank] == 0)
-        continue;
+    for(const auto& sen : dbat::sensei::sensei_map) {
       ptr += snprintf(ptr, sizeof(str) - (ptr - str), "%s%s%s%s%s%d", buf, buf2, buf,
-                      (howlong == 2 ? pc_class_types : class_abbrevs)[rank], buf3,
+                      (howlong == 2 ? sen.second->getName().c_str() : sen.second->getAbbr().c_str()), buf3,
                       cabbr_ranktable[rank]);
       buf2 = "/";
       if (howlong == 2)
@@ -2236,7 +2020,7 @@ char *class_desc_str(struct char_data *ch, int howlong, int wantthe)
         rank = GET_CLASS_RANKS(ch, j);
       }
     rank = GET_CLASS_RANKS(ch, GET_CLASS(ch));
-    snprintf(ptr, sizeof(str) - (ptr - str), "%s%d%s", class_names[GET_CLASS(ch)],
+    snprintf(ptr, sizeof(str) - (ptr - str), "%s%d%s", ch->chclass->getNameLower().c_str(),
              rank, GET_LEVEL(ch) == rank ? "" : "+");
     return str;
   }
@@ -2344,15 +2128,6 @@ int load_levels()
     }
   }
   fclose(fp);
-
-  for (cls = 0; cls < NUM_CLASSES; cls++) 
-    log("Base hit for class %s: %s", class_names[cls], basehit_type_names[basehit_classes[cls]]);
-
-  for (cls = 0; cls < NUM_CLASSES; cls++)
-    log("Saves for class %s: fort=%s, reflex=%s, will=%s", class_names[cls],
-        save_type_names[save_classes[SAVING_FORTITUDE][cls]],
-        save_type_names[save_classes[SAVING_REFLEX][cls]],
-        save_type_names[save_classes[SAVING_WILL][cls]]);
 
   return 0;
 }
@@ -2504,6 +2279,15 @@ namespace dbat::sensei {
         }
     }
 
+    bool Sensei::senseiIsPcOk() const {
+        switch(s_id) {
+            case commoner:
+                return false;
+            default:
+                return true;
+        }
+    }
+
     int Sensei::getRPPCost(race::race_id rid) const {
         switch(s_id) {
             case kibito:
@@ -2534,6 +2318,8 @@ namespace dbat::sensei {
         sensei_map[jinto] = new Sensei(jinto, "Jinto", "Ji", "Star's Radiance");
         sensei_map[tsuna] = new Sensei(tsuna, "Tsuna", "Ts", "Sacred Tsunami");
         sensei_map[kurzak] = new Sensei(kurzak, "Kurzak", "Kurzak", "Adaptive Taijutsu");
+
+        sensei_map[commoner] = new Sensei(commoner, "Commoner", "--", "Like a Bum");
     }
 
     Sensei* find_sensei(const std::string& arg) {
@@ -2559,5 +2345,15 @@ namespace dbat::sensei {
             }
         }
         return nullptr;
+    }
+
+    SenseiMap valid_for_race_pc(char_data *ch) {
+        SenseiMap out;
+        for(const auto& s : sensei_map) {
+            if(s.second->senseiIsPcOk() && s.second->senseiAvailableForRace(ch->race->getID())) {
+                out[s.first] = s.second;
+            }
+        }
+        return out;
     }
 }

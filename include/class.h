@@ -9,13 +9,9 @@
 #include "races.h"
 
 // global variables
-extern int prestige_classes[NUM_CLASSES];
-extern const int class_ok_race[NUM_RACES][NUM_CLASSES];
+
 extern const char *config_sect[NUM_CONFIG_SECTIONS+1];
 extern const int class_hit_die_size[NUM_CLASSES];
-extern const char *pc_class_types[NUM_CLASSES+1];
-extern const char *class_names[NUM_CLASSES+1];
-extern const char *class_abbrevs[NUM_CLASSES+1];
 
 // functions
 void do_start(struct char_data *ch);
@@ -23,7 +19,6 @@ int invalid_class(struct char_data *ch, struct obj_data *obj);
 int level_exp(struct char_data *ch, int level);
 int load_levels();
 void cedit_creation(struct char_data *ch);
-int parse_class(struct char_data *ch, int arg);
 void advance_level(struct char_data *ch, int whichclass);
 int8_t ability_mod_value(int abil);
 int8_t dex_mod_capped(const struct char_data *ch);
@@ -49,7 +44,8 @@ namespace dbat::sensei {
         kibito = 10,
         jinto = 11,
         tsuna = 12,
-        kurzak = 13
+        kurzak = 13,
+        commoner = 255
     };
 
     class Sensei;
@@ -70,6 +66,7 @@ namespace dbat::sensei {
         int getRPPCost(race::race_id rid) const;
         bool senseiAvailableForRace(race::race_id r_id) const;
         int getGravTolerance() const;
+        bool senseiIsPcOk() const;
 
     protected:
         sensei_id s_id;
@@ -81,6 +78,7 @@ namespace dbat::sensei {
     Sensei* find_sensei(const std::string& arg);
     Sensei* find_sensei_map(const std::string& arg, const SenseiMap& s_map);
     Sensei* find_sensei_map_id(const int id, const SenseiMap& s_map);
+    SenseiMap valid_for_race_pc(char_data *ch);
 }
 
 #endif //CIRCLE_CLASS_H

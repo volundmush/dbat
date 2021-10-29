@@ -249,7 +249,8 @@ void init_mobile(struct char_data *mob)
   GET_NDD(mob) = 0;
   GET_SEX(mob) = SEX_MALE;
   GET_HITDICE(mob) = 0;
-  GET_CLASS(mob) = CLASS_NPC_COMMONER;
+  mob->chclass = dbat::sensei::sensei_map[dbat::sensei::commoner];
+
   GET_WEIGHT(mob) = rand_number(100, 200);
   GET_HEIGHT(mob) = rand_number(100, 200);
 
@@ -427,10 +428,10 @@ void medit_disp_class(struct descriptor_data *d)
 {
   int i;
   char buf[MAX_INPUT_LENGTH];
-
   clear_screen(d);
-  for (i = 0; i < NUM_CLASSES; i++) {
-    sprintf(buf, "@g%2d@n) %s\r\n", i, pc_class_types[i]);
+
+  for (const auto cl : dbat::sensei::sensei_map) {
+    sprintf(buf, "@g%2d@n) %s\r\n", cl.first, cl.second->getName().c_str());
     write_to_output(d, buf);
   }
   write_to_output(d, "Enter class number : ");
@@ -521,7 +522,7 @@ void medit_disp_menu(struct descriptor_data *d)
 	  position_types[(int)GET_POS(mob)],
 	  position_types[(int)GET_DEFAULT_POS(mob)],
           npc_personality[GET_PERSONALITY(mob)],
-	  flags, flag2, pc_class_types[(int)GET_CLASS(mob)],
+	  flags, flag2, mob->chclass->getName().c_str(),
           TRUE_RACE(mob),
           OLC_SCRIPT(d) ?"Set.":"Not Set.", size_names[get_size(mob)]
 	  );
@@ -922,7 +923,9 @@ void medit_parse(struct descriptor_data *d, char *arg)
     break;
 
   case MEDIT_CLASS:
-    GET_CLASS(OLC_MOB(d)) = LIMIT(i, 0, NUM_CLASSES);
+    if(!OLC_MOB(d)->chclass) {
+        OLC_MOB(d)->chclass = dbat::sensei::sensei_map[dbat::sensei::commoner];
+    };
     /* Change size HP dice based on class choice. */
     GET_MANA(OLC_MOB(d)) = class_hit_die_size[GET_CLASS(OLC_MOB(d))];
     break;

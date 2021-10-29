@@ -22,6 +22,7 @@
 #include "guild.h"
 #include "races.h"
 #include "act.comm.h"
+#include "class.h"
 
 /* local functions */
 

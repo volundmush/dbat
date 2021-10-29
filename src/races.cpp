@@ -5,6 +5,7 @@
 #include "interpreter.h"
 #include "spells.h"
 #include "comm.h"
+#include "class.h"
 
 const char *race_abbrevs[NUM_RACES+1] = {
   "Hum",
@@ -754,8 +755,6 @@ namespace dbat::race {
                     return true;
             }
         }
-
-
 
         std::experimental::optional<transform_bonus> Race::findForm(char_data *ch, const std::string& arg) const {
             auto trans_map = getTierMap(ch);

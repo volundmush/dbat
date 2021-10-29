@@ -25,6 +25,7 @@
 #include "act.social.h"
 #include "dg_comm.h"
 #include "act.other.h"
+#include "class.h"
 
 /* Forward/External function declarations */
 static void sort_keeper_objs(struct char_data *keeper, int shop_nr);
