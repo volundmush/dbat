@@ -23,6 +23,8 @@
 #include "act.item.h"
 #include "act.social.h"
 #include "spec_procs.h"
+#include "class.h"
+
 
 /* local functions */
 int player_present(struct char_data *ch);

@@ -410,7 +410,7 @@ int wield_type(int chsize, const struct obj_data *weap);
 #define GET_LEVEL(ch)	(GET_CLASS_LEVEL(ch) + GET_LEVEL_ADJ(ch) + GET_HITDICE(ch))
 #define GET_PFILEPOS(ch)((ch)->pfilepos)
 
-#define GET_CLASS(ch)   ((ch)->chclass)
+#define GET_CLASS(ch)   ((ch)->chclass ? (ch)->chclass->getID() : 0)
 #define GET_CLASS_NONEPIC(ch, whichclass) ((ch)->chclasses[whichclass])
 #define GET_CLASS_EPIC(ch, whichclass) ((ch)->epicclasses[whichclass])
 #define GET_CLASS_RANKS(ch, whichclass) (GET_CLASS_NONEPIC(ch, whichclass) + \
@@ -850,7 +850,7 @@ int wield_type(int chsize, const struct obj_data *weap);
 #define LRACE(ch)     ((ch)->juggleRaceName(false).c_str())
 #define TRUE_RACE(ch) ((ch)->race->getName().c_str())
 
-#define CLASS_ABBR(ch) (class_abbrevs[(int)GET_CLASS(ch)])
+#define CLASS_ABBR(ch) ((ch)->chclass->getAbbr().c_str())
 #define RACE_ABBR(ch) ((ch)->race->getAbbr().c_str())
 
 #define IS_ROSHI(ch)            (GET_CLASS(ch) == CLASS_ROSHI)

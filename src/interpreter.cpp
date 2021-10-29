@@ -1966,14 +1966,21 @@ void display_races(struct descriptor_data *d)
     send_to_char(d->character, "\n@WRace: @n");
 }
 
+static dbat::sensei::SenseiMap valid_classes(descriptor_data *d) {
+    return dbat::sensei::valid_for_race_pc(d->character);
+}
+
+static void display_classes_sub(descriptor_data *d) {
+    auto v_classes = valid_classes(d);
+    int i = 0;
+    for (const auto& s : v_classes)
+        send_to_char(d->character, "@C%s@n%s", s.second->getName().c_str(), !(++i%2) ? "\r\n" : "	");
+}
+
 void display_classes(struct descriptor_data *d)
 {
-  int x, i=0;
-
   send_to_char(d->character, "\r\n@YSensei SELECTION menu:\r\n@D--------------------------------------\r\n@n");
-  for (x = 0; x < NUM_BASIC_CLASSES; x++)
-    if (class_ok_race[(int)GET_RACE(d->character)][x])
-      send_to_char(d->character, "@B%2d@W) @C%s@n%s", x+1, pc_class_types[x], !(++i%2) ? "\r\n" : "	");
+  display_classes_sub(d);
 
       send_to_char(d->character, "\n @BR@W) @CRandom Sensei Selection!\r\n@n");
       send_to_char(d->character, "\n @BT@W) @CToggle between SELECTION/HELP Menu\r\n@n");
@@ -1991,12 +1998,8 @@ void display_races_help(struct descriptor_data *d)
 
 void display_classes_help(struct descriptor_data *d)
 {
-  int x, i=0;
-
   send_to_char(d->character, "\r\n@YClass HELP menu:\r\n@G-------------------------------------------\r\n@n");
-  for (x = 0; x < NUM_BASIC_CLASSES; x++)
-    if (class_ok_race[(int)GET_RACE(d->character)][x])
-      send_to_char(d->character, "@B%2d@W) @C%s@n%s", x+1, pc_class_types[x], !(++i%2) ? "\r\n" : "	");
+  display_classes_sub(d);
 
       send_to_char(d->character, "\n @BT@W) @CToggle between SELECTION/HELP Menu\r\n@n");
       send_to_char(d->character, "\n@WHelp on Class #: @n");
@@ -3915,6 +3918,8 @@ void nanny(struct descriptor_data *d, char *arg)
   struct descriptor_data *k;
   dbat::race::Race *chosen_race;
   dbat::race::RaceMap v_races;
+  dbat::sensei::Sensei *chosen_sensei;
+  dbat::sensei::SenseiMap v_sensei;
 
     int count = 0, oldcount = HIGHPCOUNT;
   /* OasisOLC states */
@@ -4781,21 +4786,12 @@ void nanny(struct descriptor_data *d, char *arg)
       STATE(d) = CON_QCLASS;
       return;
     }
-    if (isdigit(*arg)) {
-      player_i = atoi(arg);
-      if (player_i > NUM_BASIC_CLASSES || player_i < 1) {
-	write_to_output(d, "\r\nThat's not a sensei.\r\nHelp on Sensei #: ");
-	break;
-      }
-      player_i -= 1;
-      if (class_ok_race[(int)GET_SEX(d->character)][player_i])
-        show_help(d, class_names[player_i]);
-      else
-	write_to_output(d, "\r\nThat's not a sensei.\r\nHelp on Sensei #: ");
+    chosen_sensei = dbat::sensei::find_sensei(arg);
+    if(chosen_sensei) {
+        show_help(d, chosen_sensei->getName().c_str());
     } else {
-      display_classes_help(d);
+        write_to_output(d, "\r\nThat's not a sensei.\r\nHelp on Sensei #: ");
     }
-    STATE(d) = CON_CLASS_HELP;
     break;
 
   case CON_HAIRL:                /* query hair length */
@@ -6404,30 +6400,24 @@ void nanny(struct descriptor_data *d, char *arg)
 
   case CON_QCLASS:
     switch (*arg) {
-      case 'r':
-      case 'R':
-        while (load_result == CLASS_UNDEFINED) {
-          rr = rand_number(1, NUM_BASIC_CLASSES);
-          load_result = parse_class(d->character, rr);
-        }
-        break;
       case 't':
       case 'T':
         display_classes_help(d);
         STATE(d) = CON_CLASS_HELP;
         return;
     }
-    if (load_result == CLASS_UNDEFINED)
-    load_result = parse_class(d->character, atoi(arg));
-    if (load_result == CLASS_UNDEFINED) {
+
+    if (!chosen_sensei)
+    chosen_sensei = dbat::sensei::find_sensei(arg);
+    if (!chosen_sensei) {
       write_to_output(d, "\r\nThat's not a sensei.\r\nSensei: ");
       return;
-    } else if (load_result == CLASS_KABITO && !IS_KAI(d->character) && d->character->desc->rbank < 10 && d->character->rbank < 10) {
-      write_to_output(d, "\r\nIt costs 10 RPP to select that sensei unless you are a Kai.\r\nSensei: ");
+    } else if (chosen_sensei->getID() == dbat::sensei::kibito && !IS_KAI(d->character) && d->character->desc->rbank < 10 && d->character->rbank < 10) {
+      write_to_output(d, "\r\nIt costs 10 RPP to select Kibito unless you are a Kai.\r\nSensei: ");
       return;
     } else {
-      GET_CLASS(d->character) = load_result;
-      if (load_result == CLASS_KABITO && !IS_KAI(d->character)) {
+      d->character->chclass = chosen_sensei;
+      if (chosen_sensei->getID() == dbat::sensei::kibito && !IS_KAI(d->character)) {
        if (d->character->desc->rbank >= 10)
         d->character->desc->rbank -= 10;
        else
@@ -6591,7 +6581,7 @@ void nanny(struct descriptor_data *d, char *arg)
     total -= 30;
     mudlog(CMP, ADMLVL_GOD, TRUE, "New player: %s [%s %s]", 
            GET_NAME(d->character), TRUE_RACE(d->character),
-           pc_class_types[GET_CLASS(d->character)]);
+           d->character->chclass->getName().c_str());
     break;
 
   case CON_QSTATS:
@@ -6617,7 +6607,7 @@ void nanny(struct descriptor_data *d, char *arg)
     total -= 30;
     mudlog(CMP, ADMLVL_GOD, TRUE, "New player: %s [%s %s]", 
            GET_NAME(d->character), TRUE_RACE(d->character),
-           pc_class_types[GET_CLASS(d->character)]);
+           d->character->chclass->getName().c_str());
     mudlog(CMP, ADMLVL_GOD, TRUE, "Str: %2d Dex: %2d Con: %2d Int: %2d "
            "Wis:  %2d Cha: %2d mod total: %2d", GET_STR(d->character), 
            GET_DEX(d->character), GET_CON(d->character), GET_INT(d->character),

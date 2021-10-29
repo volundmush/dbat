@@ -1715,9 +1715,9 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
   if (CONFIG_ALLOW_MULTICLASS) {
     strncpy(buf, class_desc_str(k, 1, 0), sizeof(buf));
   } else {
-    sprinttype(k->chclass, pc_class_types, buf, sizeof(buf));
+    snprintf(buf, sizeof(buf), "%s", k->chclass->getName().c_str());
   }
-    snprintf(buf2, sizeof(buf2), k->race->getName().c_str());
+    snprintf(buf2, sizeof(buf2), "%s", k->race->getName().c_str());
   send_to_char(ch, "Class: %s, Race: %s, Lev: [@y%2d(%dHD+%dcl+%d)@n], XP: [@y%" I64T "@n]\r\n",
                    buf, buf2, GET_LEVEL(k), GET_HITDICE(k),
                    GET_CLASS_LEVEL(k), GET_LEVEL_ADJ(k), GET_EXP(k));
@@ -3056,7 +3056,7 @@ ACMD(do_last)
 
   send_to_char(ch, "[%5d] [%2d %s %s] %-12s : %-18s : %-20s\r\n",
     GET_IDNUM(vict), (int) GET_LEVEL(vict),
-               vict->race->getAbbr().c_str(), class_abbrevs[(int) GET_CLASS(vict)],
+               vict->race->getAbbr().c_str(), CLASS_ABBR(vict),
     GET_NAME(vict), vict->player_specials->host && *vict->player_specials->host
     ? vict->player_specials->host : "(NOHOST)",
     ctime(&vict->time.logon));
@@ -3531,8 +3531,7 @@ ACMD(do_show)
       return;
     }
     send_to_char(ch, "Player: %-12s (%s) [%2d %s %s]\r\n", GET_NAME(vict),
-      genders[(int) GET_SEX(vict)], GET_LEVEL(vict), class_abbrevs[(int)
-      GET_CLASS(vict)], vict->race->getAbbr().c_str());
+      genders[(int) GET_SEX(vict)], GET_LEVEL(vict), CLASS_ABBR(vict), vict->race->getAbbr().c_str());
     send_to_char(ch, "Au: %-8d  Bal: %-8d  Exp: %" I64T "  Align: %-5d  Ethic: %-5d\r\n",
                  GET_GOLD(vict), GET_BANK_GOLD(vict), GET_EXP(vict),
                  GET_ALIGNMENT(vict), GET_ETHIC_ALIGNMENT(vict));
@@ -3891,6 +3890,8 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
   room_vnum rvnum;
   dbat::race::RaceMap v_races;
   dbat::race::Race *chosen_race;
+  dbat::sensei::SenseiMap v_sensei;
+  dbat::sensei::Sensei *chosen_sensei;
 
   /* Check to make sure all the levels are correct */
   if (GET_ADMLEVEL(ch) != ADMLVL_IMPL) {
@@ -4145,12 +4146,12 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
     SET_OR_REMOVE(PLR_FLAGS(vict), PLR_DELETED);
     break;
   case 39:
-    if ((i = search_block(val_arg, class_names, FALSE)) < 0) {
+      if(!(chosen_sensei = dbat::sensei::find_sensei(val_arg))) {
       send_to_char(ch, "That is not a class.\r\n");
       return (0);
     }
     value = GET_CLASS_RANKS(vict, GET_CLASS(vict));
-    GET_CLASS(vict) = i;
+    vict->chclass = chosen_sensei;
     break;
   case 40:
     SET_OR_REMOVE(PLR_FLAGS(vict), PLR_NOWIZLIST);

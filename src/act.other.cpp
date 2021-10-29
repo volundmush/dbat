@@ -3855,7 +3855,7 @@ ACMD(do_telepathy)
     GET_MANA(ch) -= GET_MAX_MANA(ch) / 40;
     send_to_char(ch, "@GName      @D: @W%s@n\r\n", GET_NAME(vict));
     send_to_char(ch, "@GRace      @D: @W%s@n\r\n", TRUE_RACE(vict));
-    send_to_char(ch, "@GSensei    @D: @W%s@n\r\n", pc_class_types[(int)GET_CLASS(vict)]);
+    send_to_char(ch, "@GSensei    @D: @W%s@n\r\n", vict->chclass->getName().c_str());
     send_to_char(ch, "@GStr       @D: @W%d@n\r\n", GET_STR(vict));
     send_to_char(ch, "@GCon       @D: @W%d@n\r\n", GET_CON(vict));
     send_to_char(ch, "@GInt       @D: @W%d@n\r\n", GET_INT(vict));

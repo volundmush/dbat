@@ -842,6 +842,8 @@ void init_obj_unique_hash()
 void boot_db(void)
 {
   zone_rnum i;
+    dbat::race::load_races();
+    dbat::sensei::load_sensei();
 
   log("Boot db -- BEGIN.");
 
@@ -1899,7 +1901,7 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
   GET_GOLD(ch) = t[0];
   GET_EXP(ch) = 0;
   ch->race = dbat::race::find_race_map_id(t[2], dbat::race::race_map);
-  GET_CLASS(ch) = t[3];
+  ch->chclass = dbat::sensei::find_sensei_map_id(t[3], dbat::sensei::sensei_map);
 
   GET_SAVE_BASE(ch, SAVING_FORTITUDE) = 0;
   GET_SAVE_BASE(ch, SAVING_REFLEX) = 0;

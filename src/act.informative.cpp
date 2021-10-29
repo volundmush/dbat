@@ -5674,7 +5674,7 @@ ACMD(do_score)
   if (GET_CLAN(ch) != NULL) {
    send_to_char(ch, "  @D|  @CClan@D: @W%-64s@D|@n\n", GET_CLAN(ch));
   }
- send_to_char(ch, "  @D|  @CRace@D: @W%10s@D,  @CSensei@D: @W%15s@D,     @CArt@D: @W%-17s@D|@n\n", TRUE_RACE(ch), pc_class_types[(int)GET_CLASS(ch)], sensei_style[GET_CLASS(ch)]);
+ send_to_char(ch, "  @D|  @CRace@D: @W%10s@D,  @CSensei@D: @W%15s@D,     @CArt@D: @W%-17s@D|@n\n", TRUE_RACE(ch), ch->chclass->getName().c_str(), ch->chclass->getStyleName().c_str());
   char hei[300], wei[300];
   sprintf(hei, "%dcm", get_measure(ch, GET_PC_HEIGHT(ch), 0));
   sprintf(wei, "%dkg", get_measure(ch, 0, GET_PC_WEIGHT(ch)));
@@ -7094,7 +7094,7 @@ ACMD(do_who)
 
     if (short_list) {
         send_to_char(ch, "               @B[@W%3d @Y%s @C%s@B]@W %-12.12s@n%s@n",
-          GET_LEVEL(tch), RACE_ABBR(tch), CLASS_ABBR(tch), GET_NAME(tch), 
+          GET_LEVEL(tch), RACE_ABBR(tch), tch->chclass->getAbbr().c_str(), GET_NAME(tch),
 	  ((!(++num_can_see % 4)) ? "\r\n" : ""));
     } else {
        num_can_see++;
@@ -8502,7 +8502,7 @@ ACMD(do_whois)
       send_to_char(ch, "@cTitle    @D: @G%s\r\n", GET_TITLE(victim));
     }
     else {
-      send_to_char(ch, "@cName  @D: @w%s\r\n@cSensei@D: @w%s\r\n@cRace  @D: @w%s\r\n@cTitle @D: @w%s@n\r\n@cClan  @D: @w%s@n\r\n", GET_NAME(victim), pc_class_types[(int)GET_CLASS(victim)], victim->race->getName().c_str(), GET_TITLE(victim), clan ? buf : "None.");
+      send_to_char(ch, "@cName  @D: @w%s\r\n@cSensei@D: @w%s\r\n@cRace  @D: @w%s\r\n@cTitle @D: @w%s@n\r\n@cClan  @D: @w%s@n\r\n", GET_NAME(victim), victim->chclass->getName().c_str(), victim->race->getName().c_str(), GET_TITLE(victim), clan ? buf : "None.");
       if (clan == TRUE && !strstr(GET_CLAN(victim), "Applying")) {
        if (checkCLAN(victim) == TRUE) {
         clanRANKD(GET_CLAN(victim), ch, victim);

@@ -23,6 +23,7 @@
 #include "local_limits.h"
 #include "house.h"
 #include "constants.h"
+#include "class.h"
 
 /* local functions */
 static void handle_fall(struct char_data *ch);

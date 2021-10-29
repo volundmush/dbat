@@ -299,7 +299,7 @@ static void generate_multiform(struct char_data *ch, struct char_data *multi1, s
   
 
   clone->race = ch->race;
-  GET_CLASS(clone) = GET_CLASS(ch);
+  clone->chclass = ch->chclass;
   GET_CLASS_LEVEL(clone) = GET_CLASS_LEVEL(ch);
 
   int multi_forms = 0;
