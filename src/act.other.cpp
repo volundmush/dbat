@@ -727,61 +727,8 @@ ACMD(do_rpp)
      send_to_char(ch, "You aren't even dead!");
      return;
 	} else {
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ETHEREAL);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_SPIRIT);
-     GET_HIT(ch) = gear_pl(ch);
-     GET_MANA(ch) = GET_MAX_MANA(ch);
-     GET_MOVE(ch) = GET_MAX_MOVE(ch);
-     GET_LIMBCOND(ch, 1) = 100;
-     GET_LIMBCOND(ch, 2) = 100;
-     GET_LIMBCOND(ch, 3) = 100;
-     GET_LIMBCOND(ch, 4) = 100;
-     SET_BIT_AR(PLR_FLAGS(ch), PLR_HEAD);
-     REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_PDEATH);
-     char_from_room(ch);
-     if (GET_DROOM(ch) != NOWHERE && GET_DROOM(ch) != 0 && GET_DROOM(ch) != 1) {
-      char_to_room(ch, real_room(GET_DROOM(ch)));
-     } else {
-         char_to_room(ch, real_room(ch->chclass->senseiStartRoom()));
-     }
-     look_at_room(IN_ROOM(ch), ch, 0);
-     GET_DTIME(ch) = 0;
-
-     act("$n's body forms in a pool of @Bblue light@n.", TRUE, ch, 0, 0, TO_ROOM);
+        ch->resurrect(RPP);
      send_to_char(ch, "You have been revived.\r\n");
-    if (GET_LEVEL(ch) > 9) {
-    int losschance = axion_dice(0);
-     if (GET_LEVEL(ch) > 9) {
-        send_to_char(ch, "@RThe the strain of this type of revival has caused you to be in a weakened state for 100 hours (Game time)! Strength, constitution, wisdom, intelligence, speed, and agility have been reduced by 8 points for the duration.@n\r\n");
-        int str = -8, intel = -8, wis = -8, spd = -8, con = -8, agl = -8;
-        if (ch->real_abils.str <= 16) {
-         str = -4;
-        }
-        if (ch->real_abils.intel <= 16) {
-         intel = -4;
-        }
-        if (ch->real_abils.cha <= 16) {
-         spd = -4;
-        }
-        if (ch->real_abils.dex <= 16) {
-         agl = -4;
-        }
-        if (ch->real_abils.wis <= 16) {
-         wis = -4;
-        }
-        if (ch->real_abils.con <= 16) {
-         con = -4;
-        }
-        assign_affect(ch, AFF_WEAKENED_STATE, SKILL_WARP, 100, str, con, intel, agl, wis, spd);
-      } if (losschance >= 100) {
-        int psloss = rand_number(100, 300);
-        GET_PRACTICES(ch, GET_CLASS(ch)) -= psloss;
-        send_to_char(ch, "@R...and a loss of @r%d@R PS!@n", psloss);
-        if (GET_PRACTICES(ch, GET_CLASS(ch)) < 0) {
-         GET_PRACTICES(ch, GET_CLASS(ch)) = 0;
-        }
-      }
-     }
     } /* Can pay for it */
    } /* End Simple Revival Reward */
 

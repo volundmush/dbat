@@ -1936,6 +1936,13 @@ static void final_combat_resolve(struct char_data *ch)
 
 }
 
+enum DeathType : uint8_t {
+    Afterlife = 0,
+    Northran = 1,
+    Past = 2,
+    Newbie = 3
+};
+
 void raw_kill(struct char_data * ch, struct char_data * killer)
 {
   struct char_data *k, *temp;
@@ -2127,115 +2134,66 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
       if (FIGHTING(k) == ch)
         stop_fighting(k);
     }
-    /* we can't forget the hunters either... */
-    if (GET_LEVEL(ch) >= 9 && !IS_NPC(ch) && !ROOM_FLAGGED(IN_ROOM(ch), ROOM_PAST) && (GET_ROOM_VNUM(IN_ROOM(ch)) < 17900 || GET_ROOM_VNUM(IN_ROOM(ch)) > 17999)) {
-    /*af.type = -1;
-    af.duration = -1;
-    af.modifier = 0;
-    af.location = APPLY_NONE;
-    af.specific = 0;
-    af.bitvector = AFF_SPIRIT;
-    affect_to_char(ch, &af);
-    af.bitvector = AFF_ETHEREAL;
-    affect_to_char(ch, &af);*/
-    SET_BIT_AR(AFF_FLAGS(ch), AFF_SPIRIT);
-    SET_BIT_AR(AFF_FLAGS(ch), AFF_ETHEREAL);
 
-    GET_LIMBCOND(ch, 1) = 100;
-    GET_LIMBCOND(ch, 2) = 100;
-    GET_LIMBCOND(ch, 3) = 100;
-    GET_LIMBCOND(ch, 4) = 100;
-    SET_BIT_AR(PLR_FLAGS(ch), PLR_HEAD);
-    if (!PRF_FLAGGED(ch, PRF_LKEEP)) {
-     if (PLR_FLAGGED(ch, PLR_CLLEG)) {
-      REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CLLEG);
-     }
-     if (PLR_FLAGGED(ch, PLR_CRLEG)) {
-      REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CRLEG);
-     }
-     if (PLR_FLAGGED(ch, PLR_CRARM)) {
-      REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CRARM);
-     }
-     if (PLR_FLAGGED(ch, PLR_CLARM)) {
-      REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CLARM);
-     }
-    }
-    if (AFF_FLAGGED(ch, AFF_FROZEN)) {
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FROZEN);
-    }
-    GET_HIT(ch) = 1;
-    purge_homing(ch);
-    if (has_group(ch)) {
-    }
-    char_from_room(ch);
-    char_to_room(ch, real_room(6000));
-    if (GET_LEVEL(ch) > 0 && has_group(ch)) {
-     if (ch->master != NULL) {
-      group_bonus(ch, 1);
-     } else {
-      group_bonus(ch, 0);
-     }
+    bool android_lose = true;
+    DeathType death_type = Afterlife;
+    if(ch->is_newbie())
+        death_type = Newbie;
+    if(ch->in_northran())
+        death_type = Northran;
+    if(ch->in_past())
+        death_type = Past;
+
+    switch(death_type) {
+        case Afterlife:
+            ch->ghostify();
+            purge_homing(ch);
+            if (GET_LEVEL(ch) > 0 && has_group(ch)) {
+                if (ch->master != NULL) {
+                    group_bonus(ch, 1);
+                } else {
+                    group_bonus(ch, 0);
+                }
+            }
+            ch->teleport_to(6000);
+            break;
+        case Northran:
+            ch->restore();
+            ch->teleport_to(17900);
+            android_lose = false;
+            send_to_char(ch, "You wake up and realise that you didn't die, how or why are a mystery.\r\n");
+            break;
+        case Past:
+            ch->restore();
+            ch->teleport_to(1561);
+            android_lose = false;
+            send_to_char(ch, "You wake up and realise that you died, but only in your mind.\r\n");
+            break;
+        case Newbie:
+            ch->restore();
+            ch->teleport_to(ch->chclass->senseiStartRoom());
+            send_to_char(ch, "\r\n@RYou should beware, when you reach level 9, you will actually die. So you\r\n"
+                             "should learn to be more careful. Since when you die past that point and\r\n"
+                             "actually reach the afterlife you need to realise that being revived will\r\n"
+                             "not be very easy. So treat your character's dying with as much care as\r\n"
+                             "possible.@n\r\n");
+            break;
     }
 
-    if (AFF_FLAGGED(ch, AFF_BLIND))
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_BLIND);
-    look_at_room(IN_ROOM(ch), ch, 0);
-    Crash_delete_crashfile(ch);
-    update_pos(ch);
-    save_char(ch);
-    }
-    else if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 17900 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 17999) {
-     GET_HIT(ch) = GET_MAX_HIT(ch) - gear_weight(ch);
-     char_from_room(ch);
-     char_to_room(ch, real_room(17900));
-     look_at_room(IN_ROOM(ch), ch, 0);
-     send_to_char(ch, "You wake up and realise that you didn't die, how or why are a mystery.\r\n");
-     Crash_delete_crashfile(ch);
-     update_pos(ch);
-     save_char(ch);
-    }
-    else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PAST)) {
-     GET_HIT(ch) = GET_MAX_HIT(ch) - gear_weight(ch);
-     char_from_room(ch);
-     char_to_room(ch, real_room(1561));
-     look_at_room(IN_ROOM(ch), ch, 0);
-     send_to_char(ch, "You wake up and realise that you died, but only in your mind.\r\n");
-     final_combat_resolve(ch);
-     Crash_delete_crashfile(ch);
-     update_pos(ch);
-     save_char(ch);
-    }
-    else if (GET_LEVEL(ch) <= 8 && !IS_NPC(ch)) {
-    GET_HIT(ch) = 1;
-    GET_MANA(ch) = GET_MAX_MANA(ch) / 10;
-    GET_MOVE(ch) = GET_MAX_MOVE(ch) / 10;
-    char_from_room(ch);
-    char_to_room(ch, real_room(ch->chclass->senseiStartRoom()));
-    look_at_room(IN_ROOM(ch), ch, 0);
-    GET_LIMBCOND(ch, 1) = 100;
-    GET_LIMBCOND(ch, 2) = 100;
-    GET_LIMBCOND(ch, 3) = 100;
-    GET_LIMBCOND(ch, 4) = 100;
-    SET_BIT_AR(PLR_FLAGS(ch), PLR_HEAD);
-    Crash_delete_crashfile(ch);
-    update_pos(ch);
-    save_char(ch);
-    send_to_char(ch, "\r\n@RYou should beware, when you reach level 9, you will actually die. So you\r\n"
-                           "should learn to be more careful. Since when you die past that point and\r\n"
-                           "actually reach the afterlife you need to realise that being revived will\r\n"
-                           "not be very easy. So treat your character's dying with as much care as\r\n"
-                           "possible.@n\r\n");
-    }
-    if (IS_ANDROID(ch) && !PLR_FLAGGED(ch, PLR_ABSORB) && !AFF_FLAGGED(ch, AFF_SPIRIT) && !ROOM_FLAGGED(IN_ROOM(ch), ROOM_PAST) && (GET_ROOM_VNUM(IN_ROOM(ch)) < 17900 || GET_ROOM_VNUM(IN_ROOM(ch)) > 17999) && GET_UP(ch) > 5) {
-     int loss = GET_UP(ch) / 5;
-     GET_UP(ch) -= loss;
-     send_to_char(ch, "@rYou lose @R%s@r upgrade points!@n\r\n", add_commas(loss));
+    if(!IS_NPC(ch)) {
+        if (IS_ANDROID(ch) && !PLR_FLAGGED(ch, PLR_ABSORB) && android_lose && GET_UP(ch) > 5) {
+            int loss = GET_UP(ch) / 5;
+            GET_UP(ch) -= loss;
+            send_to_char(ch, "@rYou lose @R%s@r upgrade points!@n\r\n", add_commas(loss));
+        }
+        Crash_delete_crashfile(ch);
+        save_char(ch);
     }
     WAIT_STATE(ch, PULSE_VIOLENCE);
   }
 }
 
-void die(struct char_data * ch, struct char_data * killer)
+void die(struct char_data *ch, struct char_data *killer)
 {
   if (!IS_NPC(ch)) {
    if (PLR_FLAGGED(ch, PLR_HEALT)) {
@@ -2265,8 +2223,7 @@ void die(struct char_data * ch, struct char_data * killer)
     stop_fighting(ch);
    }
    GET_POS(ch) = POS_SITTING;
-   char_from_room(ch);
-   char_to_room(ch, ch->chclass->senseiStartRoom());
+   ch->teleport_to(ch->chclass->senseiStartRoom());
    return;
   }
     REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_KILLER);
@@ -2286,11 +2243,9 @@ void die(struct char_data * ch, struct char_data * killer)
       if (killer != NULL) {
        cleanup_arena_watch(killer);
        send_to_all("@R%s@r manages to defeat @R%s@r in the Arena!@n\r\n", GET_NAME(killer), GET_NAME(ch));
-       char_from_room(killer);
-       char_to_room(killer, real_room(17875));
-       look_at_room(IN_ROOM(killer), killer, 0);
        final_combat_resolve(killer);
        final_combat_resolve(ch);
+       killer->teleport_to(17875);
       }
       else {
        send_to_all("@R%s@r dies in the water of the Arena and is disqualified!@n\r\n", GET_NAME(ch));
@@ -2337,6 +2292,8 @@ void die(struct char_data * ch, struct char_data * killer)
      }
    }
   }
+
+
   raw_kill(ch, killer);
 }
 
