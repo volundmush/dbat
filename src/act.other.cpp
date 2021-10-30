@@ -13861,7 +13861,7 @@ ACMD(do_aura) {
   }
    
  if (!strcasecmp(arg, "light")) {
-  if (GET_SKILL(ch, SKILL_FOCUS) && GET_SKILL(ch, SKILL_CONCENTRATION) < 75) {
+  if (GET_SKILL(ch, SKILL_FOCUS) < 75 || GET_SKILL(ch, SKILL_CONCENTRATION) < 75) {
     send_to_char(ch, "You need at least a skill level of 75 in Focus and Concentration to use this.\r\n");
 	return;
   } else {
