@@ -51,7 +51,7 @@ namespace dbat::race {
 
         struct transform_bonus {
             int64_t bonus;
-            double mult, drain;
+            long double mult, drain;
             int flag;
         };
 
