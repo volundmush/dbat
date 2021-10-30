@@ -3907,7 +3907,7 @@ static void majin_gain(struct char_data *ch, int type)
    return;
   }
 /* Rillao: transloc, add new transes here */
-  if (!soft_cap(ch, 0)) {
+  if (ch->is_soft_cap(0)) {
     send_to_char(ch, "You can not gain anymore from candy consumption at your current level.\r\n");
     return;
   }

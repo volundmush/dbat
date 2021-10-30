@@ -56,9 +56,13 @@ namespace dbat::race {
         };
 
         class Race;
-        class RaceHandler;
         typedef std::map<race_id, Race*> RaceMap;
         extern RaceMap race_map;
+
+        enum SoftCapType : uint8_t {
+            Fixed = 0,
+            Variable = 1
+        };
 
         class Race {
         public:
@@ -79,6 +83,10 @@ namespace dbat::race {
             int getRPPCost() const;
             int getRPPRefund() const;
             bool raceIsPeople() const;
+
+            // softcap stuff
+            const std::map<int, int64_t>& getSoftMap(const char_data *ch) const;
+            SoftCapType getSoftType(const char_data *ch) const;
 
             // transform stuff
             void displayTransReq(char_data *ch) const;

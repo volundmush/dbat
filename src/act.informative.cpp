@@ -6206,9 +6206,9 @@ ACMD(do_status)
 
         if (GET_LEVEL(ch) < 100) {
             if ((IS_ANDROID(ch) && PLR_FLAGGED(ch, PLR_ABSORB)) || (!IS_ANDROID(ch) && !IS_BIO(ch) && !IS_MAJIN(ch))) {
-                send_to_char(ch, "         @R%s@n to SC a stat this level.\r\n", add_commas(show_softcap(ch)));
+                send_to_char(ch, "         @R%s@n to SC a stat this level.\r\n", add_commas(ch->calc_soft_cap()));
             } else {
-                send_to_char(ch, "         @R%s@n in PL/KI/ST combined to SC this level.\r\n", add_commas(show_softcap(ch)));
+                send_to_char(ch, "         @R%s@n in PL/KI/ST combined to SC this level.\r\n", add_commas(ch->calc_soft_cap()));
             }
         } else {
             send_to_char(ch, "         Your strengths are potentially limitless.\r\n");

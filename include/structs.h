@@ -2530,11 +2530,15 @@ struct char_data {
   void restore_by(char_data *ch);
   void resurrect(ResurrectionMode mode);
   void teleport_to(IDXTYPE rnum);
-  bool in_room_range(IDXTYPE low_rnum, IDXTYPE high_rnum);
-  bool in_past();
-  bool is_newbie();
-  bool in_northran();
-  bool can_tolerate_gravity(int grav);
+  bool in_room_range(IDXTYPE low_rnum, IDXTYPE high_rnum) const;
+  bool in_past() const;
+  bool is_newbie() const;
+  bool in_northran() const;
+  bool can_tolerate_gravity(int grav) const;
+  int calcTier() const;
+  int64_t calc_soft_cap() const;
+  bool is_soft_cap(int64_t type, long double mult) const;
+  bool is_soft_cap(int64_t type) const;
 };
 
 
