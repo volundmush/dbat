@@ -4,6 +4,10 @@
 #include "structs.h"
 #include "races.h"
 #include "utils.h"
+#include "spells.h"
+#include "comm.h"
+#include "class.h"
+#include "fight.h"
 
 static std::string robot = "Robotic-Humanoid", robot_lower = "robotic-humanoid", unknown = "UNKNOWN";
 

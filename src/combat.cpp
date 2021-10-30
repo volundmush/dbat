@@ -5453,48 +5453,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
    }
    GET_POS(vict) = POS_SITTING;
    char_from_room(vict);
-    if (IS_ROSHI(vict)) {
-     char_to_room(vict, real_room(1130));
-    }
-    if (IS_KABITO(vict)) {
-     char_to_room(vict, real_room(12098));
-    }
-    if (IS_NAIL(vict)) {
-     char_to_room(vict, real_room(11683));
-    }
-    if (IS_BARDOCK(vict)) {
-     char_to_room(vict, real_room(2268));
-    }
-    if (IS_KRANE(vict)) {
-     char_to_room(vict, real_room(13009));
-    }
-    if (IS_TAPION(vict)) {
-     char_to_room(vict, real_room(8231));
-    }
-    if (IS_PICCOLO(vict)) {
-     char_to_room(vict, real_room(1659));
-    }
-    if (IS_ANDSIX(vict)) {
-     char_to_room(vict, real_room(1713));
-    }
-    if (IS_DABURA(vict)) {
-     char_to_room(vict, real_room(6486));
-    }
-    if (IS_FRIEZA(vict)) {
-     char_to_room(vict, real_room(4282));
-    }
-    if (IS_GINYU(vict)) {
-     char_to_room(vict, real_room(4289));
-    }
-    if (IS_JINTO(vict)) {
-     char_to_room(vict, real_room(3499));
-    }
-    if (IS_TSUNA(vict)) {
-     char_to_room(vict, real_room(15000));
-    }
-    if (IS_KURZAK(vict)) {
-     char_to_room(vict, real_room(16100));
-    }
+   char_to_room(vict, real_room(vict->chclass->senseiStartRoom()));
    }
    return;
   }
