@@ -220,3 +220,28 @@ bool char_data::is_newbie() {
 bool char_data::in_northran() {
     return in_room_range(17900, 17999);
 }
+
+static std::map<int, uint16_t> grav_threshold = {
+        {10, 5000},
+        {20, 20000},
+        {30, 50000},
+        {40, 100000},
+        {50, 200000},
+        {100, 400000},
+        {200, 1000000},
+        {300, 5000000},
+        {400, 8000000},
+        {500, 15000000},
+        {1000, 25000000},
+        {5000, 100000000},
+        {10000, 200000000}
+};
+
+bool char_data::can_tolerate_gravity(int grav) {
+    if(IS_NPC(this)) return true;
+    int tolerance = 0;
+    tolerance = std::max(tolerance, this->chclass->getGravTolerance());
+    if(tolerance >= grav)
+        return true;
+    return GET_MAX_HIT(this) >= grav_threshold[grav];
+}

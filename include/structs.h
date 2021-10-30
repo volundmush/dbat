@@ -2256,7 +2256,6 @@ enum ResurrectionMode : uint8_t {
     RPP = 2
 };
 
-
 /* ================== Structure for player/non-player ===================== */
 struct char_data {
   int pfilepos;			/* playerfile pos			*/
@@ -2535,6 +2534,7 @@ struct char_data {
   bool in_past();
   bool is_newbie();
   bool in_northran();
+  bool can_tolerate_gravity(int grav);
 };
 
 
