@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(circle)
+project(circle CXX)
 
 file(GLOB CIRCLE_INCLUDE src/*.h)
 file(GLOB CIRCLE_SRC src/*.cpp)
@@ -11,8 +11,17 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 set(CMAKE_CXX_FLAGS "-fpermissive")
 
+include_directories(libs/asio/asio/include)
+include_directories(libs/sqlitepp)
+
 add_subdirectory(libs/random)
 link_libraries(effolkronium_random)
+
+add_subdirectory(libs/fmt)
+include_directories(libs/fmt/include)
+
+add_subdirectory(libs/json)
+link_libraries(nlohmann_json)
 
 find_library(LIBBSD NAMES bsd libbsd)
 include_directories(include)
