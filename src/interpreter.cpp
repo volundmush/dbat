@@ -4695,13 +4695,25 @@ void nanny(struct descriptor_data *d, char *arg)
     break;
 
     case CON_QRACE:
+    case CON_RACE_HELP:
         switch(strlen(arg)) {
+            case 0:
+                write_to_output(d, "\r\nThat's not a race.\r\nRace: ");
+                return;
             case 1:
                 switch(*arg) {
                     case 't':
                     case 'T':
-                        display_races_help(d);
-                        STATE(d) = CON_RACE_HELP;
+                        switch(STATE(d)) {
+                            case CON_QRACE:
+                                display_races_help(d);
+                                STATE(d) = CON_RACE_HELP;
+                                break;
+                            case CON_RACE_HELP:
+                                display_races(d);
+                                STATE(d) = CON_QRACE;
+                                break;
+                        }
                         return;
                     default:
                         write_to_output(d, "\r\nThat's not a race.\r\nRace: ");
@@ -4715,10 +4727,19 @@ void nanny(struct descriptor_data *d, char *arg)
                     write_to_output(d, "\r\nThat's not a race.\r\nRace: ");
                     return;
                 }
-                if(chosen_race->getRPPCost()) {
-                    write_to_output(d, "\r\n%i RPP will be paid upon your first level up.\r\n", chosen_race->getRPPCost());
+
+                switch(STATE(d)) {
+                    case CON_QRACE:
+                        if(chosen_race->getRPPCost()) {
+                            write_to_output(d, "\r\n%i RPP will be paid upon your first level up.\r\n", chosen_race->getRPPCost());
+                        }
+                        d->character->race = chosen_race;
+                        break;
+                    case CON_RACE_HELP:
+                        show_help(d, chosen_race->getName().c_str());
+                        chosen_sensei = nullptr;
+                        return;
                 }
-                d->character->race = chosen_race;
         }
 
     if (IS_HALFBREED(d->character)) {
@@ -4766,40 +4787,6 @@ void nanny(struct descriptor_data *d, char *arg)
      write_to_output(d, "\r\n@wWhat is your sex @W(@BM@W/@MF@W/@GN@W)@w?@n");
      STATE(d) = CON_QSEX;
    break;
-
-  case CON_RACE_HELP:
-    if (*arg == 't' || *arg == 'T') {
-      display_races(d);
-      STATE(d) = CON_QRACE;
-      return;
-    }
-    if (*arg) {
-        v_races = valid_races(d);
-        chosen_race = dbat::race::find_race_map(arg, v_races);
-        if(!chosen_race) {
-            write_to_output(d, "\r\nThat's not a race.\r\nHelp on Race #: ");
-        } else {
-            show_help(d, chosen_race->getName().c_str());
-        }
-} else {
-      display_races_help(d);
-    }
-    STATE(d) = CON_RACE_HELP;
-    break;
-  
-  case CON_CLASS_HELP:
-    if (*arg == 't' || *arg == 'T') {
-      display_classes(d);
-      STATE(d) = CON_QCLASS;
-      return;
-    }
-    chosen_sensei = dbat::sensei::find_sensei(arg);
-    if(chosen_sensei) {
-        show_help(d, chosen_sensei->getName().c_str());
-    } else {
-        write_to_output(d, "\r\nThat's not a sensei.\r\nHelp on Sensei #: ");
-    }
-    break;
 
   case CON_HAIRL:                /* query hair length */
     if (IS_HUMAN(d->character) || IS_SAIYAN(d->character) || IS_KONATSU(d->character) || IS_MUTANT(d->character) || IS_ANDROID(d->character) || IS_KAI(d->character) || IS_HALFBREED(d->character) || IS_TRUFFLE(d->character) || (IS_HOSHIJIN(d->character) && IS_FEMALE(d->character))) {
@@ -6406,33 +6393,59 @@ void nanny(struct descriptor_data *d, char *arg)
     break;
 
   case CON_QCLASS:
-    switch (*arg) {
-      case 't':
-      case 'T':
-        display_classes_help(d);
-        STATE(d) = CON_CLASS_HELP;
-        return;
-    }
+  case CON_CLASS_HELP:
+      switch(strlen(arg)) {
+          case 1:
+              switch(*arg) {
+                  case 't':
+                  case 'T':
+                      switch(STATE(d)) {
+                          case CON_CLASS_HELP:
+                              STATE(d) = CON_QCLASS;
+                              display_classes(d);
+                              return;
+                          case CON_QCLASS:
+                              display_classes_help(d);
+                              STATE(d) = CON_CLASS_HELP;
+                              return;
+                      }
+                      break;
+                  default:
+                      write_to_output(d, "\r\nThat's not a sensei.\r\nSensei: ");
+                      return;
+              }
+              break;
+          default:
+              chosen_sensei = dbat::sensei::find_sensei(arg);
+              if (!chosen_sensei) {
+                  write_to_output(d, "\r\nThat's not a sensei.\r\nSensei: ");
+                  return;
+              }
 
-    if (!chosen_sensei)
-    chosen_sensei = dbat::sensei::find_sensei(arg);
-    if (!chosen_sensei) {
-      write_to_output(d, "\r\nThat's not a sensei.\r\nSensei: ");
-      return;
-    } else if (chosen_sensei->getID() == dbat::sensei::kibito && !IS_KAI(d->character) && d->character->desc->rbank < 10 && d->character->rbank < 10) {
-      write_to_output(d, "\r\nIt costs 10 RPP to select Kibito unless you are a Kai.\r\nSensei: ");
-      return;
-    } else {
-      d->character->chclass = chosen_sensei;
-      if (chosen_sensei->getID() == dbat::sensei::kibito && !IS_KAI(d->character)) {
-       if (d->character->desc->rbank >= 10)
-        d->character->desc->rbank -= 10;
-       else
-        d->character->desc->rbank -= 10;
-       userWrite(d->character->desc, 0, 0, 0, "index");
-       write_to_output(d, "\r\n10 RPP deducted from your bank since you are not a kai.\n");
+              switch(STATE(d)) {
+                  case CON_CLASS_HELP:
+                      show_help(d, chosen_sensei->getName().c_str());
+                      chosen_sensei = nullptr;
+                      return;
+                  case CON_QRACE:
+                      if (chosen_sensei->getID() == dbat::sensei::kibito && !IS_KAI(d->character) && d->character->desc->rbank < 10 && d->character->rbank < 10) {
+                          write_to_output(d, "\r\nIt costs 10 RPP to select Kibito unless you are a Kai.\r\nSensei: ");
+                          return;
+                      } else {
+                          d->character->chclass = chosen_sensei;
+                          if (chosen_sensei->getID() == dbat::sensei::kibito && !IS_KAI(d->character)) {
+                              if (d->character->desc->rbank >= 10)
+                                  d->character->desc->rbank -= 10;
+                              else
+                                  d->character->desc->rbank -= 10;
+                              userWrite(d->character->desc, 0, 0, 0, "index");
+                              write_to_output(d, "\r\n10 RPP deducted from your bank since you are not a kai.\n");
+                          }
+                      }
+                      break;
+              }
       }
-    }
+
     if (IS_ANDROID(d->character)) {
          write_to_output(d, "\r\n@YChoose your model type.\r\n");
          write_to_output(d, "@D---------------------------------------@n\r\n");
