@@ -638,14 +638,8 @@ static int64_t move_gain(struct char_data *ch)
     gain /= 4;
 
   if (!grav_cost(ch, 0)) {
-   if ((!IS_NPC(ch) && !IS_BARDOCK(ch) && ROOM_GRAVITY(IN_ROOM(ch)) >= 10)) {
-    send_to_char(ch, "This gravity is wearing you out!\r\n");
-    gain /= 4;
-   }
-   if ((!IS_NPC(ch) && IS_BARDOCK(ch) && ROOM_GRAVITY(IN_ROOM(ch)) > 10)) {
-    send_to_char(ch, "This gravity is wearing you out!\r\n");
-    gain /= 4;
-   }
+      send_to_char(ch, "This gravity is wearing you out!\r\n");
+      gain /= 4;
   }
 
   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {

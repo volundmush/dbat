@@ -14,9 +14,7 @@
 #include "random.h"
 #include "spells.h"
 #include "db.h"
-#include "config.h"
 #include "fight.h"
-#include "races.h"
 #include "class.h"
 #include "feats.h"
 #include "genzon.h"
@@ -30,7 +28,7 @@ char commastring[MAX_STRING_LENGTH];
 
 void dispel_ash(struct char_data *ch)
 {
- struct obj_data *obj, *next_obj, *ash = NULL;
+ struct obj_data *obj, *next_obj, *ash = nullptr;
  int there = FALSE;
 
  for (obj = world[IN_ROOM(ch)].contents; obj; obj = next_obj) {
@@ -3424,81 +3422,30 @@ bool soft_cap(struct char_data *ch, int64_t type)
  return TRUE;
 }
 
+
+
 int grav_cost(struct char_data *ch, int64_t num)
 {
- int cost = 0;
-if (num == 0) {
- if (ROOM_GRAVITY(IN_ROOM(ch)) == 10 && GET_MAX_HIT(ch) < 5000 && !IS_BARDOCK(ch) && !IS_NPC(ch)) {
-  send_to_char(ch, "You sweat bullets straining against the current gravity.\r\n");
- }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 20 && GET_MAX_HIT(ch) < 20000) {
-  send_to_char(ch, "You sweat bullets straining against the current gravity.\r\n");
- }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 30 && GET_MAX_HIT(ch) < 50000) {
-  send_to_char(ch, "You sweat bullets straining against the current gravity.\r\n");
- }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 40 && GET_MAX_HIT(ch) < 100000) {
-  send_to_char(ch, "You sweat bullets straining against the current gravity.\r\n");
- }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 50 && GET_MAX_HIT(ch) < 200000) {
-  send_to_char(ch, "You sweat bullets straining against the current gravity.\r\n");
- }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 100 && GET_MAX_HIT(ch) < 400000) {
-  send_to_char(ch, "You sweat bullets straining against the current gravity.\r\n");
- }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 200 && GET_MAX_HIT(ch) < 1000000) {
-  send_to_char(ch, "You sweat bullets straining against the current gravity.\r\n");
- }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 300 && GET_MAX_HIT(ch) < 5000000) {
-  send_to_char(ch, "You sweat bullets straining against the current gravity.\r\n");
- }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 400 && GET_MAX_HIT(ch) < 8000000) {
-  send_to_char(ch, "You sweat bullets straining against the current gravity.\r\n");
- }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 500 && GET_MAX_HIT(ch) < 15000000) {
-  send_to_char(ch, "You sweat bullets straining against the current gravity.\r\n");
- }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 1000 && GET_MAX_HIT(ch) < 25000000) {
-  send_to_char(ch, "You sweat bullets straining against the current gravity.\r\n");
- }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 5000 && GET_MAX_HIT(ch) < 100000000) {
-  send_to_char(ch, "You sweat bullets straining against the current gravity.\r\n");
- }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 10000 && GET_MAX_HIT(ch) < 200000000) {
-  send_to_char(ch, "You sweat bullets straining against the current gravity.\r\n");
- }
- if (ROOM_GRAVITY(IN_ROOM(ch)) != 0) {
-  if (ROOM_GRAVITY(IN_ROOM(ch)) == 10 && IS_BARDOCK(ch) && !IS_NPC(ch)) {
-   cost = 0;
-  }
-  else {
-   cost = ROOM_GRAVITY(IN_ROOM(ch)) * ROOM_GRAVITY(IN_ROOM(ch));
-  }
- }
- if (GET_MOVE(ch) > cost) {
-  GET_MOVE(ch) -= cost;
-  return 1;
- }
- else {
-  GET_MOVE(ch) -= GET_MOVE(ch) - 1;
-  return 0;
- }
-}
-if (num >= 1) {
-  if (ROOM_GRAVITY(IN_ROOM(ch)) == 10 && IS_BARDOCK(ch) && !IS_NPC(ch)) {
-   cost = 0;
-  }
-  else {
-   cost = ROOM_GRAVITY(IN_ROOM(ch)) * ROOM_GRAVITY(IN_ROOM(ch));
-  }
-   if (GET_MOVE(ch) > (cost + num)) {
-     return 1;
-   }
-   else {
-    return 0;
-   }
- }
- return 0;
+    int cost = 0;
+    if(!ch->can_tolerate_gravity(ROOM_GRAVITY(IN_ROOM(ch))))
+        cost = ROOM_GRAVITY(IN_ROOM(ch)) ^ 2;
+
+    if (!num) {
+        if(cost) {
+            send_to_char(ch, "You sweat bullets straining against the current gravity.\r\n");
+        }
+         if (GET_MOVE(ch) > cost) {
+          GET_MOVE(ch) -= cost;
+          return 1;
+         }
+         else {
+          GET_MOVE(ch) -= GET_MOVE(ch) - 1;
+          return 0;
+         }
+    }
+    else {
+        return GET_MOVE(ch) > (cost + num);
+     }
 }
 
 double speednar(struct char_data *ch)

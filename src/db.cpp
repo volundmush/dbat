@@ -1901,8 +1901,14 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
   GET_GOLD(ch) = t[0];
   GET_EXP(ch) = 0;
   ch->race = dbat::race::find_race_map_id(t[2], dbat::race::race_map);
-  ch->chclass = dbat::sensei::find_sensei_map_id(t[3], dbat::sensei::sensei_map);
+  if(!ch->race) {
+      ch->race = dbat::race::race_map[dbat::race::human];
+  }
 
+  ch->chclass = dbat::sensei::find_sensei_map_id(t[3], dbat::sensei::sensei_map);
+  if(!ch->chclass) {
+      ch->chclass = dbat::sensei::sensei_map[dbat::sensei::commoner];
+  }
   GET_SAVE_BASE(ch, SAVING_FORTITUDE) = 0;
   GET_SAVE_BASE(ch, SAVING_REFLEX) = 0;
   GET_SAVE_BASE(ch, SAVING_WILL) = 0;

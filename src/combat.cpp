@@ -4197,7 +4197,7 @@ void saiyan_gain(struct char_data *ch, struct char_data *vict)
  int gain = rand_number(GET_LEVEL(ch) * 6, GET_LEVEL(ch) * 8);
  int weak = FALSE;
 
-  if (vict == NULL)
+  if (!vict)
    return;
 
   if (IS_NPC(ch))
@@ -4232,7 +4232,7 @@ void saiyan_gain(struct char_data *ch, struct char_data *vict)
    gain /= 2;
   }
  if (rand_number(1, 22) >= 18 && (GET_LEVEL(ch) == 100 || level_exp(ch, GET_LEVEL(ch) + 1) - (GET_EXP(ch)) > 0)) {
-  if (weak == TRUE) {
+  if (weak) {
      send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WThey are too weak to inspire your saiyan soul!@n\r\n");
   } else {
    switch (rand_number(1, 3)) {
@@ -4242,7 +4242,6 @@ void saiyan_gain(struct char_data *ch, struct char_data *vict)
       send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel slightly stronger. @D[@G+%s@D]@n\r\n", add_commas(gain));
      break;
     case 2:
-
       GET_MAX_MANA(ch) += gain;
       GET_BASE_KI(ch) += gain;
       send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel your spirit grow. @D[@G+%s@D]@n\r\n", add_commas(gain));
