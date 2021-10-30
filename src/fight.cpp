@@ -2210,48 +2210,7 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
     GET_MANA(ch) = GET_MAX_MANA(ch) / 10;
     GET_MOVE(ch) = GET_MAX_MOVE(ch) / 10;
     char_from_room(ch);
-    if (IS_ROSHI(ch)) {
-     char_to_room(ch, real_room(1130));
-    }
-    if (IS_KABITO(ch)) {
-     char_to_room(ch, real_room(12098));
-    }
-    if (IS_NAIL(ch)) {
-     char_to_room(ch, real_room(11683));
-    }
-    if (IS_BARDOCK(ch)) {
-     char_to_room(ch, real_room(2268));
-    }
-    if (IS_KRANE(ch)) {
-     char_to_room(ch, real_room(13009));
-    }
-    if (IS_TAPION(ch)) {
-     char_to_room(ch, real_room(8231));
-    }
-    if (IS_PICCOLO(ch)) {
-     char_to_room(ch, real_room(1659));
-    }
-    if (IS_ANDSIX(ch)) {
-     char_to_room(ch, real_room(1713));
-    }
-    if (IS_DABURA(ch)) {
-     char_to_room(ch, real_room(6486));
-    }
-    if (IS_FRIEZA(ch)) {
-     char_to_room(ch, real_room(4282));
-    }
-    if (IS_GINYU(ch)) {
-     char_to_room(ch, real_room(4289));
-    }
-    if (IS_JINTO(ch)) {
-     char_to_room(ch, real_room(3499));
-    }
-    if (IS_TSUNA(ch)) {
-     char_to_room(ch, real_room(15000));
-    }
-    if (IS_KURZAK(ch)) {
-     char_to_room(ch, real_room(16100));
-    }
+    char_to_room(ch, real_room(ch->chclass->senseiStartRoom()));
     look_at_room(IN_ROOM(ch), ch, 0);
     GET_LIMBCOND(ch, 1) = 100;
     GET_LIMBCOND(ch, 2) = 100;
@@ -2307,45 +2266,7 @@ void die(struct char_data * ch, struct char_data * killer)
    }
    GET_POS(ch) = POS_SITTING;
    char_from_room(ch);
-    if (IS_ROSHI(ch)) {
-     char_to_room(ch, real_room(1130));
-    }
-    if (IS_KABITO(ch)) {
-     char_to_room(ch, real_room(12098));
-    }
-    if (IS_NAIL(ch)) {
-     char_to_room(ch, real_room(11683));
-    }
-    if (IS_BARDOCK(ch)) {
-     char_to_room(ch, real_room(2268));
-    }
-    if (IS_KRANE(ch)) {
-     char_to_room(ch, real_room(13009));
-    }
-    if (IS_TAPION(ch)) {
-     char_to_room(ch, real_room(8231));
-    }
-    if (IS_PICCOLO(ch)) {
-     char_to_room(ch, real_room(1659));
-    }
-    if (IS_ANDSIX(ch)) {
-     char_to_room(ch, real_room(1713));
-    }
-    if (IS_DABURA(ch)) {
-     char_to_room(ch, real_room(6486));
-    }
-    if (IS_FRIEZA(ch)) {
-     char_to_room(ch, real_room(4282));
-    }
-    if (IS_GINYU(ch)) {
-     char_to_room(ch, real_room(4289));
-    }
-    if (IS_JINTO(ch)) {
-     char_to_room(ch, real_room(3499));
-    }
-    if (IS_KURZAK(ch)) {
-     char_to_room(ch, real_room(16100));
-    }
+   char_to_room(ch, ch->chclass->senseiStartRoom());
    return;
   }
     REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_KILLER);

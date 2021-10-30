@@ -67,6 +67,7 @@ namespace dbat::sensei {
         bool senseiAvailableForRace(race::race_id r_id) const;
         int getGravTolerance() const;
         bool senseiIsPcOk() const;
+        IDXTYPE senseiStartRoom() const;
 
     protected:
         sensei_id s_id;
