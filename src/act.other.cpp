@@ -741,37 +741,8 @@ ACMD(do_rpp)
      char_from_room(ch);
      if (GET_DROOM(ch) != NOWHERE && GET_DROOM(ch) != 0 && GET_DROOM(ch) != 1) {
       char_to_room(ch, real_room(GET_DROOM(ch)));
-     } else if (IS_ROSHI(ch)) {
-      char_to_room(ch, real_room(1130));
-     } else if (IS_KABITO(ch)) {
-      char_to_room(ch, real_room(12098));
-     } else if (IS_NAIL(ch)) {
-      char_to_room(ch, real_room(11683));
-     } else if (IS_BARDOCK(ch)) {
-      char_to_room(ch, real_room(2268));
-     } else if (IS_KRANE(ch)) {
-      char_to_room(ch, real_room(13009));
-     } else if (IS_TAPION(ch)) {
-      char_to_room(ch, real_room(8231));
-     } else if (IS_PICCOLO(ch)) {
-      char_to_room(ch, real_room(1659));
-     } else if (IS_ANDSIX(ch)) {
-      char_to_room(ch, real_room(1713));
-     } else if (IS_DABURA(ch)) {
-      char_to_room(ch, real_room(6486));
-     } else if (IS_FRIEZA(ch)) {
-      char_to_room(ch, real_room(4282));
-     } else if (IS_GINYU(ch)) {
-      char_to_room(ch, real_room(4289));
-     } else if (IS_JINTO(ch)) {
-      char_to_room(ch, real_room(3499));
-     } else if (IS_TSUNA(ch)) {
-      char_to_room(ch, real_room(15000));
-     } else if (IS_KURZAK(ch)) {
-      char_to_room(ch, real_room(16100));
      } else {
-      char_to_room(ch, real_room(300));
-      send_to_imm("ERROR: Player %s without acceptable sensei.\r\n", GET_NAME(ch));
+         char_to_room(ch, real_room(ch->chclass->senseiStartRoom()));
      }
      look_at_room(IN_ROOM(ch), ch, 0);
      GET_DTIME(ch) = 0;
@@ -1017,7 +988,7 @@ ACMD(do_rpp)
   } /* End Instant Reward Section */
 
    /* Resuest Only Section */
-  if (selection <= 2) {
+  if(selection <= 2) {
    FILE *fl;
    const char *filename;
    struct stat fbuf;
