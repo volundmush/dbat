@@ -2520,6 +2520,8 @@ struct char_data {
 
   // C++ reworking
   const std::string &juggleRaceName(bool capitalized) const;
+  void die(char_data *killer);
+
 
 };
 

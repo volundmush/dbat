@@ -4707,51 +4707,8 @@ ACMD(do_raise)
     if (GET_DROOM(vict) != NOWHERE && GET_DROOM(vict) != 0 && GET_DROOM(vict) != 1) {
      char_to_room(vict, real_room(GET_DROOM(vict)));
     }
-    else if (IS_ROSHI(vict)) {
-     char_to_room(vict, real_room(1130));
-    }
-    else if (IS_KABITO(vict)) {
-     char_to_room(vict, real_room(12098));
-    }
-    else if (IS_NAIL(vict)) {
-     char_to_room(vict, real_room(11683));
-    }
-    else if (IS_BARDOCK(vict)) {
-     char_to_room(vict, real_room(2268));
-    }
-    else if (IS_KRANE(vict)) {
-     char_to_room(vict, real_room(13009));
-    }
-    else if (IS_TAPION(vict)) {
-     char_to_room(vict, real_room(8231));
-    }
-    else if (IS_PICCOLO(vict)) {
-     char_to_room(vict, real_room(1659));
-    }
-    else if (IS_ANDSIX(vict)) {
-     char_to_room(vict, real_room(1713));
-    }
-    else if (IS_DABURA(vict)) {
-     char_to_room(vict, real_room(6486));
-    }
-    else if (IS_FRIEZA(vict)) {
-     char_to_room(vict, real_room(4282));
-    }
-    else if (IS_GINYU(vict)) {
-     char_to_room(vict, real_room(4289));
-    }
-    else if (IS_JINTO(vict)) {
-     char_to_room(vict, real_room(3499));
-    }
-    else if (IS_TSUNA(vict)) {
-     char_to_room(vict, real_room(15000));
-    }
-    else if (IS_KURZAK(vict)) {
-     char_to_room(vict, real_room(16100));
-    }
     else {
-     char_to_room(vict, real_room(300));
-     send_to_imm("ERROR: Player %s without acceptable sensei.\r\n", GET_NAME(vict));
+     char_to_room(vict, real_room(vict->chclass->senseiStartRoom()));
     }
   look_at_room(IN_ROOM(vict), vict, 0);
      int losschance = axion_dice(0);

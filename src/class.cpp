@@ -2272,6 +2272,41 @@ namespace dbat::sensei {
         }
     }
 
+    IDXTYPE Sensei::senseiStartRoom() const {
+        switch(s_id) {
+            case roshi:
+                return 1130;
+            case kibito:
+                return 12098;
+            case nail:
+                return 11683;
+            case bardock:
+                return 2268;
+            case krane:
+                return 13009;
+            case tapion:
+                return 8231;
+            case piccolo:
+                return 1659;
+            case sixteen:
+                return 1713;
+            case dabura:
+                return 6486;
+            case frieza:
+                return 4282;
+            case ginyu:
+                return 4289;
+            case jinto:
+                return 3499;
+            case kurzak:
+                return 16100;
+            case tsuna:
+                return 15009;
+            case commoner:
+                return 300;
+        }
+    }
+
     int Sensei::getGravTolerance() const {
         switch(s_id) {
             case bardock:
