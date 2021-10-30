@@ -4763,7 +4763,7 @@ int check_points(struct char_data *ch, int64_t ki, int64_t st)
   }
  }
  else {
-  if (!grav_cost(ch, st) && ki <= 0) {
+  if (!ch->calcGravCost(st) && ki <= 0) {
     send_to_char(ch, "You do not have enough stamina to perform it in this gravity!\r\n");
     return 0;
   }
@@ -4836,7 +4836,7 @@ void pcost(struct char_data *ch, double ki, int64_t st)
  if (GET_LEVEL(ch) > 1 && !IS_NPC(ch)) {
   if (ki == 0) {
    before = GET_MOVE(ch);
-   if (grav_cost(ch, 0)) {
+   if (ch->calcGravCost(0)) {
     if (before > GET_MOVE(ch)) {
      send_to_char(ch, "You exert more stamina in this gravity.\r\n");
     }

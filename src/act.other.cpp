@@ -40,8 +40,6 @@
 /* local functions */
 static int has_scanner(struct char_data *ch);
 static void boost_obj(struct obj_data *obj, struct char_data *ch, int type);
-static void handle_revert(struct char_data *ch, uint64_t add, double mult);
-static void handle_transform(struct char_data *ch, int64_t add, double mult, double drain);
 static int perform_group(struct char_data *ch, struct char_data *vict, int highlvl, int lowlvl, int64_t highpl, int64_t lowpl);
 static void print_group(struct char_data *ch);
 static void check_eq(struct char_data *ch);
@@ -8933,128 +8931,6 @@ ACMD(do_summon)
     }
 }
 
-/* This handles transforming Current and Max PL/KI/ST them */
-static void handle_transform(struct char_data *ch, int64_t add, double mult, double drain)
-{
-
-	if (!ch)
-		return;
-	if (IS_NPC(ch))
-		return;
-	else {
-		long double cur, max, dapercent = GET_LIFEPERC(ch);
-		/* Handle Pl */
-		cur = (long double)(GET_HIT(ch));
-		max = (long double)(GET_MAX_HIT(ch));
-		GET_MAX_HIT(ch) = (GET_BASE_PL(ch) + add) * mult;
-		if (android_can(ch) == 1)
-			GET_MAX_HIT(ch) += 50000000;
-		else if (android_can(ch) == 2)
-			GET_MAX_HIT(ch) += 20000000;
-
-		if ((GET_HIT(ch) + (add * (cur / max))) * mult <= gear_pl(ch)) {
-			GET_HIT(ch) = (GET_HIT(ch) + (add * (cur / max))) * mult;
-		}
-		else if ((GET_HIT(ch) + (add * (cur / max))) * mult > gear_pl(ch)) {
-			GET_HIT(ch) = gear_pl(ch);
-		}
-
-		/* Handle Ki */
-		cur = (long double)(GET_MANA(ch));
-		max = (long double)(GET_MAX_MANA(ch));
-		GET_MAX_MANA(ch) = (GET_BASE_KI(ch) + add) * mult;
-		if (android_can(ch) == 1)
-			GET_MAX_MANA(ch) += 50000000;
-		else if (android_can(ch) == 2)
-			GET_MAX_MANA(ch) += 20000000;
-
-		if ((GET_MANA(ch) + (add * (cur / max))) * mult <= GET_MAX_MANA(ch)) {
-			GET_MANA(ch) = (GET_MANA(ch) + (add * (cur / max))) * mult;
-		}
-		else if ((GET_MANA(ch) + (add * (cur / max))) * mult > GET_MAX_MANA(ch)) {
-			GET_MANA(ch) = GET_MAX_MANA(ch);
-		}
-
-		/* Handle St */
-		GET_MOVE(ch) -= GET_MOVE(ch) * drain;
-		cur = (long double)(GET_MOVE(ch));
-		max = (long double)(GET_MAX_MOVE(ch));
-		GET_MAX_MOVE(ch) = (GET_BASE_ST(ch) + add) * mult;
-		if (android_can(ch) == 1)
-			GET_MAX_MOVE(ch) += 50000000;
-		else if (android_can(ch) == 2)
-			GET_MAX_MOVE(ch) += 20000000;
-
-		if ((GET_MOVE(ch) + (add * (cur / max))) * mult <= GET_MAX_MOVE(ch)) {
-			GET_MOVE(ch) = (GET_MOVE(ch) + (add * (cur / max))) * mult;
-		}
-		else if ((GET_MOVE(ch) + (add * (cur / max))) * mult > GET_MAX_MOVE(ch)) {
-			GET_MOVE(ch) = GET_MAX_MOVE(ch);
-		}
-
-		if (!IS_ANDROID(ch)) {
-			/* Handle Lifeforce */
-			/*R: Tried changing initial GET_LIFEFORCE to GET_LIFEMAX
-			I: You are setting lifemax, which is set dynamically by what KI and Stamina's maxes are.
-			This is updated all the time, so it isn't going to do anything for more than a fraction
-			of a second. You need to adjust GET_LIFEFORCE to be the same percentage of the new max as
-			it was the old. To do this you find out the old */
-			/* Example: percent = ((long double)(GET_LIFEMAX(ch)) / 100) * (long double)(GET_LIFEFORCE(ch))
-
-
-			This will give you the percent (in decimal form) of lifemax. Do this prior to the transformation
-			change at the start of handle_transformation. Then here at the end you do:
-			GET_LIFEFORCE(ch) = GET_LIFEMAX(ch) * percent;
-			The percent will remain the same, but based off the new detransformed lifeforce max. Make sure the
-			variable, percent, hasn't already been used. Declare it or something else for your code.*/
-
-			GET_LIFEFORCE(ch) = GET_LIFEMAX(ch) * dapercent;
-			if (GET_LIFEFORCE(ch) > GET_LIFEMAX(ch)) {
-				GET_LIFEFORCE(ch) = GET_LIFEMAX(ch);
-			}
-		}
-	}
-}
-
-/* This handles reverting Current and Max PL/KI/ST */
-static void handle_revert(struct char_data *ch, uint64_t add, double mult)
-{
-	if (!ch)
-		return;
-	if (IS_NPC(ch))
-		return;
-	else {
-		long double convert, dapercent = GET_LIFEPERC(ch);
-		convert = ((long double)(GET_HIT(ch)) / (long double)(GET_MAX_HIT(ch)));
-		GET_HIT(ch) = (GET_HIT(ch) - ((add * mult) * (convert))) / mult;
-		convert = ((long double)(GET_MANA(ch)) / (long double)(GET_MAX_MANA(ch)));
-		GET_MANA(ch) = (GET_MANA(ch) - ((add * mult) * (convert))) / mult;
-		convert = ((long double)(GET_MOVE(ch)) / (long double)(GET_MAX_MOVE(ch)));
-		GET_MOVE(ch) = (GET_MOVE(ch) - ((add * mult) * (convert))) / mult;
-		/*R: Trying to add lifeforce revert */
-		GET_LIFEFORCE(ch) = GET_LIFEMAX(ch) * dapercent;
-		if (GET_LIFEFORCE(ch) > GET_LIFEMAX(ch)) {
-			GET_LIFEFORCE(ch) = GET_LIFEMAX(ch);
-		}
-
-		if (GET_MOVE(ch) < 1) {
-			GET_MOVE(ch) = 1;
-		} if (GET_MANA(ch) < 1) {
-			GET_MANA(ch) = 1;
-		} if (GET_HIT(ch) < 1) {
-			GET_HIT(ch) = 1;
-		} if (GET_LIFEFORCE(ch) < 1) {
-			GET_LIFEFORCE(ch) = 1;
-		}
-		if (GET_HIT(ch) > gear_pl(ch)) {
-			GET_HIT(ch) = gear_pl(ch);
-		}
-
-		GET_MAX_HIT(ch) = GET_BASE_PL(ch);
-		GET_MAX_MANA(ch) = GET_BASE_KI(ch);
-		GET_MAX_MOVE(ch) = GET_BASE_ST(ch);
-	}
-}
 
 ACMD(do_transform)
 {

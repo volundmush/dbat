@@ -666,22 +666,6 @@ int64_t physical_cost(struct char_data *ch, int skill)
  return (result);
 }
 
-int android_can(struct char_data *ch)
-{
-
- struct obj_data *obj = GET_EQ(ch, WEAR_BACKPACK);
-
- if (!obj)
-  return (0);
- else if (GET_OBJ_VNUM(obj) == 1806)
-  return (1);
- else if (GET_OBJ_VNUM(obj) == 1807)
-  return (2);
- else
-  return (0);
-
-}
-
 int trans_cost(struct char_data *ch, int trans)
 {
 
@@ -2983,30 +2967,6 @@ void game_info(const char *format, ...)
     va_end(args); 
     write_to_output(i, "@n\r\n@R>>>@GMake sure to pick up your bed items and save.@n\r\n"); 
   } 
-}
-
-int grav_cost(struct char_data *ch, int64_t num)
-{
-    int cost = 0;
-    if(!ch->can_tolerate_gravity(ROOM_GRAVITY(IN_ROOM(ch))))
-        cost = ROOM_GRAVITY(IN_ROOM(ch)) ^ 2;
-
-    if (!num) {
-        if(cost) {
-            send_to_char(ch, "You sweat bullets straining against the current gravity.\r\n");
-        }
-         if (GET_MOVE(ch) > cost) {
-          GET_MOVE(ch) -= cost;
-          return 1;
-         }
-         else {
-          GET_MOVE(ch) -= GET_MOVE(ch) - 1;
-          return 0;
-         }
-    }
-    else {
-        return GET_MOVE(ch) > (cost + num);
-     }
 }
 
 double speednar(struct char_data *ch)
