@@ -23,6 +23,7 @@
 #include "screen.h"
 #include "effolkronium/random.hpp"
 
+
 /* local functions */
 char commastring[MAX_STRING_LENGTH];
 
