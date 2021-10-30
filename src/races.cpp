@@ -448,32 +448,27 @@ namespace dbat::race {
                 auto mult = trans.mult;
                 auto drain = trans.drain;
                 SET_BIT_AR(PLR_FLAGS(ch), trans.flag);
+                int64_t android_bonus = 0;
+                switch(ch->wearing_android_canister()) {
+                    case 1:
+                        android_bonus = 50000000;
+                        break;
+                    case 2:
+                        android_bonus = 20000000;
+                }
 
                 long double cur, max, dapercent = GET_LIFEPERC(ch);
                 /* Handle Pl */
                 cur = (long double)(GET_HIT(ch));
                 max = (long double)(GET_MAX_HIT(ch));
                 GET_MAX_HIT(ch) = (GET_BASE_PL(ch) + add) * mult;
-                if (android_can(ch) == 1)
-                    GET_MAX_HIT(ch) += 50000000;
-                else if (android_can(ch) == 2)
-                    GET_MAX_HIT(ch) += 20000000;
-
-                if ((GET_HIT(ch) + (add * (cur / max))) * mult <= gear_pl(ch)) {
-                    GET_HIT(ch) = (GET_HIT(ch) + (add * (cur / max))) * mult;
-                }
-                else if ((GET_HIT(ch) + (add * (cur / max))) * mult > gear_pl(ch)) {
-                    GET_HIT(ch) = gear_pl(ch);
-                }
+                GET_MAX_HIT(ch) += android_bonus;
 
                 /* Handle Ki */
                 cur = (long double)(GET_MANA(ch));
                 max = (long double)(GET_MAX_MANA(ch));
                 GET_MAX_MANA(ch) = (GET_BASE_KI(ch) + add) * mult;
-                if (android_can(ch) == 1)
-                    GET_MAX_MANA(ch) += 50000000;
-                else if (android_can(ch) == 2)
-                    GET_MAX_MANA(ch) += 20000000;
+                GET_MAX_MANA(ch) += android_bonus;
 
                 if ((GET_MANA(ch) + (add * (cur / max))) * mult <= GET_MAX_MANA(ch)) {
                     GET_MANA(ch) = (GET_MANA(ch) + (add * (cur / max))) * mult;
@@ -487,10 +482,7 @@ namespace dbat::race {
                 cur = (long double)(GET_MOVE(ch));
                 max = (long double)(GET_MAX_MOVE(ch));
                 GET_MAX_MOVE(ch) = (GET_BASE_ST(ch) + add) * mult;
-                if (android_can(ch) == 1)
-                    GET_MAX_MOVE(ch) += 50000000;
-                else if (android_can(ch) == 2)
-                    GET_MAX_MOVE(ch) += 20000000;
+                GET_MAX_MOVE(ch) += android_bonus;
 
                 if ((GET_MOVE(ch) + (add * (cur / max))) * mult <= GET_MAX_MOVE(ch)) {
                     GET_MOVE(ch) = (GET_MOVE(ch) + (add * (cur / max))) * mult;

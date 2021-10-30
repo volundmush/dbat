@@ -637,7 +637,7 @@ static int64_t move_gain(struct char_data *ch)
   if (AFF_FLAGGED(ch, AFF_POISON))
     gain /= 4;
 
-  if (!grav_cost(ch, 0)) {
+  if (!ch->calcGravCost(0)) {
       send_to_char(ch, "This gravity is wearing you out!\r\n");
       gain /= 4;
   }

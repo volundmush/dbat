@@ -2539,6 +2539,8 @@ struct char_data {
   int64_t calc_soft_cap() const;
   bool is_soft_cap(int64_t type, long double mult) const;
   bool is_soft_cap(int64_t type) const;
+  int wearing_android_canister() const;
+  int calcGravCost(int64_t num);
 };
 
 

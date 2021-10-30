@@ -301,3 +301,42 @@ bool char_data::is_soft_cap(int64_t type, long double mult) const {
     }
     return against >= cur_cap;
 }
+
+int char_data::wearing_android_canister() const {
+    if(!IS_ANDROID(this))
+        return 0;
+    auto obj = GET_EQ(this, WEAR_BACKPACK);
+    if(!obj)
+        return 0;
+    switch(GET_OBJ_VNUM(obj)) {
+        case 1806:
+            return 1;
+        case 1807:
+            return 2;
+        default:
+            return 0;
+    }
+}
+
+int char_data::calcGravCost(int64_t num) {
+    int cost = 0;
+    if(!this->can_tolerate_gravity(ROOM_GRAVITY(IN_ROOM(this))))
+        cost = ROOM_GRAVITY(IN_ROOM(this)) ^ 2;
+
+    if (!num) {
+        if(cost) {
+            send_to_char(this, "You sweat bullets straining against the current gravity.\r\n");
+        }
+        if (GET_MOVE(this) > cost) {
+            GET_MOVE(this) -= cost;
+            return 1;
+        }
+        else {
+            GET_MOVE(this) -= GET_MOVE(this) - 1;
+            return 0;
+        }
+    }
+    else {
+        return GET_MOVE(this) > (cost + num);
+    }
+}

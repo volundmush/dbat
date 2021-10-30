@@ -30,7 +30,7 @@ struct time_info_data *mud_time_passed(time_t t2, time_t t1);
 int masadv(char *tmp, struct char_data *ch);
 void demon_refill_lf(struct char_data *ch, int64_t num);
 void dispel_ash(struct char_data *ch);
-int grav_cost(struct char_data *ch, int64_t num);
+
 void prune_crlf(char *txt);
 int count_metamagic_feats(struct char_data *ch);
 int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech);
@@ -44,7 +44,6 @@ void assign_affect(struct char_data *ch, int aff_flag, int skill, int dur, int s
 int sec_roll_check(struct char_data *ch);
 int get_measure(struct char_data *ch, int height, int weight);
 int64_t physical_cost(struct char_data *ch, int skill);
-int android_can(struct char_data *ch);
 int trans_cost(struct char_data *ch, int trans);
 int trans_req(struct char_data *ch, int trans);
 void customRead(struct descriptor_data *d, int type, char *name);
