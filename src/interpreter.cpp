@@ -6427,7 +6427,7 @@ void nanny(struct descriptor_data *d, char *arg)
                       show_help(d, chosen_sensei->getName().c_str());
                       chosen_sensei = nullptr;
                       return;
-                  case CON_QRACE:
+                  case CON_QCLASS:
                       if (chosen_sensei->getID() == dbat::sensei::kibito && !IS_KAI(d->character) && d->character->desc->rbank < 10 && d->character->rbank < 10) {
                           write_to_output(d, "\r\nIt costs 10 RPP to select Kibito unless you are a Kai.\r\nSensei: ");
                           return;

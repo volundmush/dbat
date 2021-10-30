@@ -2716,20 +2716,9 @@ ACMD(do_restore)
      for (j = descriptor_list; j; j = j->next) 
     { 
       if (!IS_PLAYING(j) || !(vict = j->character)) 
-       continue; 
-      if (GET_HIT(vict) < gear_pl(vict)) { 
-       GET_HIT(vict)  = gear_pl(vict); 
-      }
-      GET_MANA(vict) = GET_MAX_MANA(vict); 
-      GET_MOVE(vict) = GET_MAX_MOVE(vict); 
- 
-      update_pos(vict); 
-      act("You have been fully healed by $N!", FALSE, vict, 0, ch, TO_CHAR | TO_SLEEP); 
-      if (GET_SUPPRESS(vict) > 0 && GET_HIT(vict) > (((gear_pl(vict)) / 100) * GET_SUPPRESS(vict))) {
-       GET_HIT(vict) = (((gear_pl(vict)) / 100) * GET_SUPPRESS(vict));
-       send_to_char(vict, "@mYou are healed to your suppression limit.@n\r\n");
-      }
-    } 
+       continue;
+      vict->restore_by(ch);
+    }
     send_to_char(ch, "Okay.\r\n");
   }
   else if (!(vict = get_char_vis(ch, buf, NULL, FIND_CHAR_WORLD)))
@@ -2737,40 +2726,10 @@ ACMD(do_restore)
   else if (!IS_NPC(vict) && ch != vict && GET_ADMLEVEL(vict) >= GET_ADMLEVEL(ch))
     send_to_char(ch, "They don't need your help.\r\n");
   else {
-    GET_HIT(vict) = gear_pl(vict);
-    GET_MANA(vict) = GET_MAX_MANA(vict);
-    GET_MOVE(vict) = GET_MAX_MOVE(vict);
-    GET_KI(vict) = GET_MAX_KI(vict);
-    REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_BLIND);
-    GET_LIMBCOND(vict, 1) = 100;
-    GET_LIMBCOND(vict, 2) = 100;
-    GET_LIMBCOND(vict, 3) = 100;
-    GET_LIMBCOND(vict, 4) = 100;
-    SET_BIT_AR(PLR_FLAGS(vict), PLR_HEAD);
-    if (!IS_NPC(vict) && GET_ADMLEVEL(ch) >= ADMLVL_VICE) {
-      if (GET_ADMLEVEL(vict) >= ADMLVL_IMMORT)
-        for (i = 1; i <= MAX_SKILLS; i++)
-          SET_SKILL(vict, i, 100);
-      
-      if (GET_ADMLEVEL(vict) >= ADMLVL_GRGOD) {
-	vict->real_abils.intel = 25;
-	vict->real_abils.wis = 25;
-	vict->real_abils.dex = 25;
-	vict->real_abils.str = 25;
-	vict->real_abils.con = 25;
-	vict->real_abils.cha = 25;
-      }
-    }
-    update_pos(vict);
-    affect_total(vict);
+      vict->restore_by(ch);
     send_to_char(ch, "%s", CONFIG_OK);
     send_to_imm("[Log: %s restored %s.]", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("RESTORE: %s has restored %s.", GET_NAME(ch), GET_NAME(vict));
-    act("You have been fully healed by $N!", FALSE, vict, 0, ch, TO_CHAR);
-      if (GET_SUPPRESS(vict) > 0 && GET_HIT(vict) > (((gear_pl(vict)) / 100) * GET_SUPPRESS(vict))) {
-       GET_HIT(vict) = (((gear_pl(vict)) / 100) * GET_SUPPRESS(vict));
-       send_to_char(vict, "@mYou are healed to your suppression limit.@n\r\n");
-      }
   }
 }
 
@@ -4678,81 +4637,19 @@ ACMD(do_raise)
     return;
   }
 
+    if (GET_ADMLEVEL(ch) <= 0) {
+        vict->resurrect(Basic);
+    } else {
+        vict->resurrect(Costless);
+    }
+
   send_to_char(ch, "@wYou return %s from the @Bspirit@w world, to the world of the living!@n\r\n", GET_NAME(vict));
   send_to_char(vict, "@wYour @Bspirit@w has been returned to the world of the living by %s!@n\r\n", GET_NAME(ch));
-
-  REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ETHEREAL);
-  REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_SPIRIT);
 
   send_to_imm("Log: %s has raised %s from the dead.", GET_NAME(ch), GET_NAME(vict));
   log_imm_action("RAISE: %s has raised %s from the dead.", GET_NAME(ch), GET_NAME(vict));
 
-  int statpunish = FALSE;  
 
-  if (GET_ADMLEVEL(ch) <= 0) {
-   statpunish = TRUE;
-  }
-
-  if (GET_HIT(vict) < 1)
-    GET_HIT(vict) = gear_pl(vict);
-  GET_MANA(vict) = GET_MAX_MANA(vict);
-  GET_MOVE(vict) = GET_MAX_MOVE(vict);
-  GET_LIMBCOND(vict, 1) = 100;
-  GET_LIMBCOND(vict, 2) = 100;
-  GET_LIMBCOND(vict, 3) = 100;
-  GET_LIMBCOND(vict, 4) = 100;
-  SET_BIT_AR(PLR_FLAGS(vict), PLR_HEAD);
-  REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_PDEATH);
-  char_from_room(vict);
-    if (GET_DROOM(vict) != NOWHERE && GET_DROOM(vict) != 0 && GET_DROOM(vict) != 1) {
-     char_to_room(vict, real_room(GET_DROOM(vict)));
-    }
-    else {
-     char_to_room(vict, real_room(vict->chclass->senseiStartRoom()));
-    }
-  look_at_room(IN_ROOM(vict), vict, 0);
-     int losschance = axion_dice(0);
-     if (GET_LEVEL(vict) > 9 && statpunish == TRUE) {
-        send_to_char(vict, "@RThe the strain of this type of revival has caused you to be in a weakened state for 100 hours (Game time)! Strength, constitution, wisdom, intelligence, speed, and agility have been reduced by 8 points for the duration.@n\r\n");
-        int str = -8, intel = -8, wis = -8, spd = -8, con = -8, agl = -8;
-        int dur = 100;
-        if (GET_DCOUNT(vict) >= 8 && GET_DCOUNT(vict) < 10) {
-         dur = 90;
-        } else if (GET_DCOUNT(vict) >= 5 && GET_DCOUNT(vict) < 8) {
-         dur = 75;
-        } else if (GET_DCOUNT(vict) >= 3 && GET_DCOUNT(vict) < 5) {
-         dur = 60;
-        } else if (GET_DCOUNT(vict) >= 1 && GET_DCOUNT(vict) < 3) {
-         dur = 40;
-        }
-        if (vict->real_abils.intel <= 16) {
-         intel = -4;
-        }
-        if (vict->real_abils.cha <= 16) {
-         spd = -4;
-        }
-        if (vict->real_abils.dex <= 16) {
-         agl = -4;
-        }
-        if (vict->real_abils.wis <= 16) {
-         wis = -4;
-        }
-        if (vict->real_abils.con <= 16) {
-         con = -4;
-        }
-        assign_affect(vict, AFF_WEAKENED_STATE, SKILL_WARP, dur, str, con, intel, agl, wis, spd);
-      if (losschance >= 100) {
-         int psloss = rand_number(100, 300);
-         GET_PRACTICES(vict, GET_CLASS(vict)) -= psloss;
-         send_to_char(vict, "@R...and a loss of @r%d@R PS!@n", psloss);
-        if (GET_PRACTICES(vict, GET_CLASS(vict)) < 0) {
-         GET_PRACTICES(vict, GET_CLASS(vict)) = 0;
-        }
-      }
-     }
-  GET_DTIME(ch) = 0;
-
-  act("$n's body forms in a pool of @Bblue light@n.", TRUE, vict, 0, 0, TO_ROOM);
 }
 
 ACMD(do_chown)

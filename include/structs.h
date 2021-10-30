@@ -2250,6 +2250,12 @@ struct levelup_data {
   struct level_learn_entry *feats;	/* Head of linked list		*/
 };
 
+enum ResurrectionMode : uint8_t {
+    Costless = 0,
+    Basic = 1,
+    RPP = 2
+};
+
 
 /* ================== Structure for player/non-player ===================== */
 struct char_data {
@@ -2520,9 +2526,15 @@ struct char_data {
 
   // C++ reworking
   const std::string &juggleRaceName(bool capitalized) const;
-  void die(char_data *killer);
-
-
+  void restore();
+  void ghostify();
+  void restore_by(char_data *ch);
+  void resurrect(ResurrectionMode mode);
+  void teleport_to(IDXTYPE rnum);
+  bool in_room_range(IDXTYPE low_rnum, IDXTYPE high_rnum);
+  bool in_past();
+  bool is_newbie();
+  bool in_northran();
 };
 
 
