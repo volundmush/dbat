@@ -25,6 +25,7 @@
 #include "genzon.h"
 #include "dg_scripts.h"
 #include "class.h"
+#include "effolkronium/random.hpp"
 
 /* local functions */
 void damage_weapon(struct char_data *ch, struct obj_data *obj, struct char_data *vict)
@@ -4235,18 +4236,30 @@ void saiyan_gain(struct char_data *ch, struct char_data *vict)
   if (weak) {
      send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WThey are too weak to inspire your saiyan soul!@n\r\n");
   } else {
-   switch (rand_number(1, 3)) {
-    case 1:
+   std::vector<int64_t> stats;
+   for(const auto stat : {0, 1, 2}) {
+       if(!ch->is_soft_cap(stat, 1.5))
+           stats.push_back(stat);
+   }
+   if(stats.empty()) {
+       send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel you have reached your current limits.@n\r\n");
+       return;
+   }
+
+   effolkronium::random_static::shuffle(stats.begin(), stats.end());
+
+   switch (stats[0]) {
+    case 0:
       GET_MAX_HIT(ch) += gain;
       GET_BASE_PL(ch) += gain;
       send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel slightly stronger. @D[@G+%s@D]@n\r\n", add_commas(gain));
      break;
-    case 2:
+    case 1:
       GET_MAX_MANA(ch) += gain;
       GET_BASE_KI(ch) += gain;
       send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel your spirit grow. @D[@G+%s@D]@n\r\n", add_commas(gain));
      break;
-    case 3:
+    case 2:
       GET_MAX_MOVE(ch) += gain;
       GET_BASE_ST(ch) += gain;
       send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel slightly more vigorous. @D[@G+%s@D]@n\r\n", add_commas(gain));

@@ -1450,6 +1450,80 @@ namespace dbat::race {
         }
     }
 
+    static std::map<int, int64_t> soft_cap_variable = {
+            {0, 1500},
+            {1, 4500},
+            {2, 15000},
+            {3, 45000},
+            {4, 60000},
+            {5, 240000},
+            {6, 600000},
+            {7, 750000},
+            {8, 2400000},
+            {9, 4500000}
+    };
+
+    static std::map<int, int64_t> soft_cap_fixed = {
+            {0, 500},
+            {1, 1500},
+            {2, 5000},
+            {3, 15000},
+            {4, 20000},
+            {5, 80000},
+            {6, 200000},
+            {7, 250000},
+            {8, 800000},
+            {9, 1500000}
+    };
+
+    static std::map<int, int64_t> soft_cap_demon = {
+            {0, 500},
+            {1, 1500},
+            {2, 5000},
+            {3, 25000},
+            {4, 40000},
+            {5, 100000},
+            {6, 250000},
+            {7, 300000},
+            {8, 1000000},
+            {9, 2000000}
+    };
+
+    const std::map<int, int64_t>& Race::getSoftMap(const char_data *ch) const {
+        switch(r_id) {
+            case demon:
+            case kanassan:
+                return soft_cap_demon;
+            case android:
+                if(PLR_FLAGGED(ch, PLR_ABSORB)) {
+                    return soft_cap_fixed;
+                } else {
+                    return soft_cap_variable;
+                }
+            case bio:
+            case majin:
+                return soft_cap_variable;
+            default:
+                return soft_cap_fixed;
+        }
+    }
+
+    SoftCapType Race::getSoftType(const char_data *ch) const {
+        switch(r_id) {
+            case bio:
+            case majin:
+                return Variable;
+            case android:
+                if(PLR_FLAGGED(ch, PLR_ABSORB)) {
+                    return Fixed;
+                } else {
+                    return Variable;
+                }
+            default:
+                return Fixed;
+        }
+    }
+
     RaceMap race_map;
 
         RaceMap valid_for_sex(int sex) {

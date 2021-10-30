@@ -11,6 +11,9 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 set(CMAKE_CXX_FLAGS "-fpermissive")
 
+add_subdirectory(libs/random)
+link_libraries(effolkronium_random)
+
 find_library(LIBBSD NAMES bsd libbsd)
 include_directories(include)
 if(${LIBBSD})

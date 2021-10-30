@@ -205,19 +205,19 @@ void char_data::teleport_to(IDXTYPE rnum) {
     update_pos(this);
 }
 
-bool char_data::in_room_range(IDXTYPE low_rnum, IDXTYPE high_rnum) {
+bool char_data::in_room_range(IDXTYPE low_rnum, IDXTYPE high_rnum) const {
     return GET_ROOM_VNUM(IN_ROOM(this)) >= low_rnum && GET_ROOM_VNUM(IN_ROOM(this)) <= high_rnum;
 }
 
-bool char_data::in_past() {
+bool char_data::in_past() const {
     return ROOM_FLAGGED(IN_ROOM(this), ROOM_PAST);
 }
 
-bool char_data::is_newbie() {
+bool char_data::is_newbie() const {
     return GET_LEVEL(this) < 9;
 }
 
-bool char_data::in_northran() {
+bool char_data::in_northran() const {
     return in_room_range(17900, 17999);
 }
 
@@ -237,11 +237,67 @@ static std::map<int, uint16_t> grav_threshold = {
         {10000, 200000000}
 };
 
-bool char_data::can_tolerate_gravity(int grav) {
+bool char_data::can_tolerate_gravity(int grav) const {
     if(IS_NPC(this)) return true;
     int tolerance = 0;
     tolerance = std::max(tolerance, this->chclass->getGravTolerance());
     if(tolerance >= grav)
         return true;
     return GET_MAX_HIT(this) >= grav_threshold[grav];
+}
+
+
+int char_data::calcTier() const {
+    int tier = level / 10;
+    if((level % 10) == 0)
+        tier--;
+    tier = std::max(tier, 0);
+    tier = std::min(tier, 9);
+    return tier;
+}
+
+int64_t char_data::calc_soft_cap() const {
+    auto tier = calcTier();
+    auto softmap = race->getSoftMap(this);
+    return level * softmap[tier];
+}
+
+bool char_data::is_soft_cap(int64_t type) const {
+    return is_soft_cap(type, 1.0);
+}
+
+bool char_data::is_soft_cap(int64_t type, long double mult) const {
+    if(IS_NPC(this))
+        return true;
+
+    // Level 100 characters are never softcapped.
+    if(level >= 100) {
+        return false;
+    }
+    auto cur_cap = calc_soft_cap() * mult;
+
+    int64_t against = 0;
+
+    switch(race->getSoftType(this)) {
+        case dbat::race::Fixed:
+            switch(type) {
+                case 0:
+                    against = GET_BASE_PL(this);
+                    break;
+                case 1:
+                    against = GET_BASE_KI(this);
+                    break;
+                case 2:
+                    against = GET_BASE_ST(this);
+                    break;
+            }
+            break;
+        case dbat::race::Variable:
+            against = GET_BASE_PL(this) + GET_BASE_KI(this) + GET_BASE_ST(this);
+            if(IS_ANDROID(this) && type > 0) {
+                cur_cap += type;
+            }
+            break;
+    }
+    return against >= cur_cap;
 }

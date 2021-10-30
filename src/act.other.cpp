@@ -137,15 +137,8 @@ void log_custom(struct descriptor_data *d, struct obj_data *obj)
 /* Used by do_rpp for soft-cap */
 void bring_to_cap(struct char_data *ch)
 {
- int skippl = FALSE, skipki = FALSE, skipst = FALSE, mult = 1;
+ int skippl = ch->is_soft_cap(0), skipki = ch->is_soft_cap(1), skipst = ch->is_soft_cap(2), mult = 1;
 
- if (!soft_cap(ch, 0)) {
-  skippl = TRUE;
- } if (!soft_cap(ch, 1)) {
-  skipki = TRUE;
- } if (!soft_cap(ch, 2)) {
-  skipst = TRUE;
- }
 /* Rillao: transloc, add new transes here */
   if (IS_BIO(ch)) {
    if (PLR_FLAGGED(ch, PLR_TRANS1)) {
@@ -806,7 +799,7 @@ ACMD(do_rpp)
          send_to_char(ch, "This is not available to bugs.\r\n");
          return;
     } else {
-     if (!soft_cap(ch, 0) && !soft_cap(ch, 1) && !soft_cap(ch, 2)) {
+     if (ch->is_soft_cap(0) && ch->is_soft_cap(1) && ch->is_soft_cap(2)) {
        send_to_char(ch, "You are already above your softcap for this level.\r\n");
        return;
      }
@@ -5255,7 +5248,7 @@ ACMD(do_upgrade)
   return;
  }
 
- if (!soft_cap(ch, 0)) {
+ if (ch->is_soft_cap(0)) {
   send_to_char(ch, "@mYou are unable to spend anymore UGP right now (Softcap)@n\r\n");
   return;
  }
@@ -5309,7 +5302,7 @@ ACMD(do_upgrade)
    send_to_char(ch, "You need %s upgrade points, and only have %s.\r\n", add_commas(cost), add_commas(GET_UP(ch)));
    return;
   }
-  else if (!soft_cap(ch, bonus)) {
+  else if (ch->is_soft_cap(bonus)) {
    send_to_char(ch, "@mYou can't spend that much UGP on it as it will go over your softcap.@n\r\n");
    return;
   }
@@ -5354,7 +5347,7 @@ ACMD(do_upgrade)
    send_to_char(ch, "You need %s upgrade points, and only have %s.\r\n", add_commas(cost), add_commas(GET_UP(ch)));
    return;
   }
-  else if (!soft_cap(ch, bonus)) {
+  else if (ch->is_soft_cap(bonus)) {
    send_to_char(ch, "@mYou can't spend that much UGP on it as it will go over your softcap.@n\r\n");
    return;
   }
@@ -5399,7 +5392,7 @@ ACMD(do_upgrade)
    send_to_char(ch, "You need %s upgrade points, and only have %s.\r\n", add_commas(cost), add_commas(GET_UP(ch)));
    return;
   }
-  else if (!soft_cap(ch, bonus)) {
+  else if (ch->is_soft_cap(bonus)) {
    send_to_char(ch, "@mYou can't spend that much UGP on it as it will go over your softcap.@n\r\n");
    return;
   }
@@ -5763,7 +5756,7 @@ ACMD(do_absorb)
    send_to_char(ch, "You can't absorb their bio extract, you need to swallow them with your tail!\r\n");
    return;
   }
-  if (!soft_cap(ch, 0)) {
+  if (ch->is_soft_cap(0)) {
     send_to_char(ch, "You can not handle any more bio extract at your current level.\r\n");
     return;
   }
@@ -9391,7 +9384,7 @@ ACMD(do_situp)
     send_to_char(ch, "This gravity is just perfect for you...\r\n");
     bonus *= 4;
    }
-   if (!soft_cap(ch, 2)) {
+   if (ch->is_soft_cap(2)) {
     bonus = 0;
    }
    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
@@ -9738,7 +9731,7 @@ ACMD(do_meditate)
     send_to_char(ch, "This gravity is just perfect for you....\r\n");
     bonus *= 4;
    }
-    if (!soft_cap(ch, 1)) {
+    if (ch->is_soft_cap(1)) {
      bonus = 0;
     }
    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
@@ -10026,7 +10019,7 @@ ACMD(do_pushup)
     send_to_char(ch, "This gravity is just perfect for you....\r\n");
     bonus *= 4;
    }
-   if (!soft_cap(ch, 0)) {
+   if (ch->is_soft_cap(0)) {
     bonus = 0;
    }
    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
@@ -10479,20 +10472,11 @@ void base_update(void)
 					ABSORBBY(ABSORBING(d->character)) = NULL;
 					ABSORBING(d->character) = NULL;
 				}
-				int sum = 1;
-				int mum = 1;
-				int ium = 1;
-				if (!soft_cap(d->character, 0)) {
-					sum = 0;
-				}
-				if (!soft_cap(d->character, 2)) {
-					mum = 0;
-				}
-				if (!soft_cap(d->character, 1)) {
-					ium = 0;
-				}
+				bool sum = !d->character->is_soft_cap(0);
+                bool mum = !d->character->is_soft_cap(2);
+                bool ium = !d->character->is_soft_cap(1);
 
-				if (sum == 1) {
+				if (sum) {
 					if (rand_number(1, 8) >= 6) {
 						int gain = rand_number(GET_LEVEL(d->character) / 2, GET_LEVEL(d->character) * 3) + (GET_LEVEL(d->character) * 18);
 						if (GET_LEVEL(d->character) > 30) {
@@ -10519,7 +10503,7 @@ void base_update(void)
 						GET_BASE_PL(d->character) += gain;
 					}
 				}
-				if (mum == 1) {
+				if (mum) {
 					if (rand_number(1, 8) >= 6) {
 						int gain = rand_number(GET_LEVEL(d->character) / 2, GET_LEVEL(d->character) * 3) + (GET_LEVEL(d->character) * 18);
 						if (GET_LEVEL(d->character) > 30) {
@@ -10546,7 +10530,7 @@ void base_update(void)
 						GET_BASE_ST(d->character) += gain;
 					}
 				}
-				if (ium == 1) {
+				if (ium) {
 					if (rand_number(1, 8) >= 6) {
 						int gain = rand_number(GET_LEVEL(d->character) / 2, GET_LEVEL(d->character) * 3) + (GET_LEVEL(d->character) * 18);
 						if (GET_LEVEL(d->character) > 30) {
@@ -10573,7 +10557,7 @@ void base_update(void)
 						GET_BASE_KI(d->character) += gain;
 					}
 				}
-				if (sum == 0) {
+				if (!sum) {
 					if (rand_number(1, 8) >= 6) {
 						int gain = 1;
 						send_to_char(d->character, "@gYou gain +@G%d@g permanent powerlevel. You may need to level.@n\r\n", gain);
@@ -10581,7 +10565,7 @@ void base_update(void)
 						GET_BASE_PL(d->character) += gain;
 					}
 				}
-				if (mum == 0) {
+				if (!mum) {
 					if (rand_number(1, 8) >= 6) {
 						int gain = 1;
 						send_to_char(d->character, "@gYou gain +@G%d@g permanent stamina. You may need to level.@n\r\n", gain);
@@ -10589,7 +10573,7 @@ void base_update(void)
 						GET_BASE_ST(d->character) += gain;
 					}
 				}
-				if (ium == 0) {
+				if (!ium) {
 					if (rand_number(1, 8) >= 6) {
 						int gain = 1;
 						send_to_char(d->character, "@gYou gain +@G%d@g permanent ki. You may need to level.@n\r\n", gain);
