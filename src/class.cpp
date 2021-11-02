@@ -2267,6 +2267,12 @@ namespace dbat::sensei {
                 return r_id == race::android;
             case dabura:
                 return r_id == race::demon;
+            case tsuna:
+                return r_id == race::kanassan;
+            case kurzak:
+                return r_id == race::arlian;
+            case jinto:
+                return r_id == race::hoshijin;
             default:
                 return r_id != race::android;
         }
