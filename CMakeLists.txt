@@ -14,14 +14,13 @@ set(CMAKE_CXX_FLAGS "-fpermissive")
 include_directories(libs/asio/asio/include)
 include_directories(libs/sqlitepp)
 
-add_subdirectory(libs/random)
-link_libraries(effolkronium_random)
+include_directories(libs/random/include)
 
-add_subdirectory(libs/fmt)
 include_directories(libs/fmt/include)
+add_compile_definitions(FMT_HEADER_ONLY=1)
 
-add_subdirectory(libs/json)
-link_libraries(nlohmann_json)
+include_directories(libs/json/single_include)
+
 
 find_library(LIBBSD NAMES bsd libbsd)
 include_directories(include)
@@ -30,15 +29,6 @@ if(${LIBBSD})
     add_compile_definitions(HAVE_LIBBSD)
 endif()
 
-# Support for ASIO
-#include_directories(libs/asio/asio/include)
-
-# Support for SQLITEPP
-#include_directories(libs/sqlitepp)
-
-# Support for FMT
-#include_directories(libs/fmt/include)
-#add_compile_definitions(FMT_HEADER_ONLY=1)
 
 #find_package(ZLIB REQUIRED)
 #link_libraries(ZLIB::ZLIB)
@@ -76,16 +66,5 @@ add_executable(split apps/split.cpp)
 add_executable(wld2html apps/wld2html.cpp)
 
 target_compile_definitions(circlemud PUBLIC USING_CMAKE=1 CIRCLE_UNIX=1 POSIX=1)
-
-
-
-
-
-
-
-
-
-
-
 
 SET(circle_link ${CMAKE_INSTALL_PREFIX}/bin/)
