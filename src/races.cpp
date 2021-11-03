@@ -875,11 +875,15 @@ namespace dbat::race {
         if (!tier) {
             return;
         }
-        auto trans_data = trans_map[tier];
-        auto add = trans_data.bonus;
-        auto mult = trans_data.mult;
+        auto trans = trans_map[tier];
+        revertTransform(ch, trans);
+    }
 
-        REMOVE_BIT_AR(PLR_FLAGS(ch), trans_data.flag);
+    void Race::revertTransform(char_data *ch, const transform_bonus &trans) const {
+        auto add = trans.bonus;
+        auto mult = trans.mult;
+
+        REMOVE_BIT_AR(PLR_FLAGS(ch), trans.flag);
 
         long double convert, dapercent = GET_LIFEPERC(ch);
         convert = ((long double) (GET_HIT(ch)) / (long double) (GET_MAX_HIT(ch)));
@@ -913,7 +917,6 @@ namespace dbat::race {
         GET_MAX_HIT(ch) = GET_BASE_PL(ch);
         GET_MAX_MANA(ch) = GET_BASE_KI(ch);
         GET_MAX_MOVE(ch) = GET_BASE_ST(ch);
-
     }
 
     bool Race::checkTransUnlock(char_data *ch, int tier) const {
