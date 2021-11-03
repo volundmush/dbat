@@ -2557,6 +2557,100 @@ struct char_data {
     int wearing_android_canister() const;
 
     int calcGravCost(int64_t num);
+
+    // Stats stuff
+
+    int64_t getCurHealth() const;
+    int64_t getMaxHealth() const;
+    double getCurHealthPercent() const;
+    int64_t getPercentOfCurHealth(double amt) const;
+    int64_t getPercentOfMaxHealth(double amt) const;
+    bool isFullHealth() const;
+
+    int64_t setCurHealth(int64_t amt);
+    int64_t setCurHealthPercent(double amt);
+    int64_t incCurHealth(int64_t amt, bool limit_max = true);
+    int64_t decCurHealth(int64_t amt);
+    int64_t incCurHealthPercent(double amt, bool limit_max = true);
+    int64_t decCurHealthPercent(double amt);
+    void restoreHealth(bool announce = true);
+
+    int64_t healCurHealth(int64_t amt);
+    int64_t harmCurHealth(int64_t amt);
+    void refreshSuppress();
+
+    int64_t getMaxPL() const;
+    int64_t getCurPL() const;
+    double getCurPLPercent() const;
+    int64_t getPercentOfCurPL(double amt) const;
+    int64_t getPercentOfMaxPL(double amt) const;
+    void transformPL(int64_t amt);
+    void revertPL(int64_t amt);
+    bool isFullPL() const;
+
+    int64_t getCurKI() const;
+    int64_t getMaxKI() const;
+    double getCurKIPercent() const;
+    int64_t getPercentOfCurKI(double amt) const;
+    int64_t getPercentOfMaxKI(double amt) const;
+    bool isFullKI() const;
+
+    int64_t setCurKI(int64_t amt);
+    int64_t setCurKIPercent(double amt);
+    int64_t incCurKI(int64_t amt, bool limit_max = true);
+    int64_t decCurKI(int64_t amt);
+    int64_t incCurKIPercent(double amt, bool limit_max = true);
+    int64_t decCurKIPercent(double amt);
+    void transformKI(int64_t amt);
+    void revertKI(int64_t amt);
+    void restoreKI(bool announce = true);
+
+    int64_t getCurST() const;
+    int64_t getMaxST() const;
+    double getCurSTPercent() const;
+    int64_t getPercentOfCurST(double amt) const;
+    int64_t getPercentOfMaxST(double amt) const;
+    bool isFullST() const;
+
+    int64_t setCurST(int64_t amt);
+    int64_t setCurSTPercent(double amt);
+    int64_t incCurST(int64_t amt, bool limit_max = true);
+    int64_t decCurST(int64_t amt);
+    int64_t incCurSTPercent(double amt, bool limit_max = true);
+    int64_t decCurSTPercent(double amt);
+    void transformST(int64_t amt);
+    void revertST(int64_t amt);
+    void restoreST(bool announce = true);
+
+    bool isFullVitals() const;
+    void restoreVitals(bool announce = true);
+    void restoreStatus(bool announce = true);
+    void restoreLimbs(bool announce = true);
+
+    int64_t gainBasePL(int64_t amt, bool trans_mult = false);
+    int64_t gainBaseKI(int64_t amt, bool trans_mult = false);
+    int64_t gainBaseST(int64_t amt, bool trans_mult = false);
+    void gainBaseAll(int64_t amt, bool trans_mult = false);
+
+    int64_t loseBasePL(int64_t amt, bool trans_mult = false);
+    int64_t loseBaseKI(int64_t amt, bool trans_mult = false);
+    int64_t loseBaseST(int64_t amt, bool trans_mult = false);
+    void loseBaseAll(int64_t amt, bool trans_mult = false);
+
+    int64_t gainBasePLPercent(double amt, bool trans_mult = false);
+    int64_t gainBaseKIPercent(double amt, bool trans_mult = false);
+    int64_t gainBaseSTPercent(double amt, bool trans_mult = false);
+    void gainBaseAllPercent(double amt, bool trans_mult = false);
+
+    int64_t loseBasePLPercent(double amt, bool trans_mult = false);
+    int64_t loseBaseKIPercent(double amt, bool trans_mult = false);
+    int64_t loseBaseSTPercent(double amt, bool trans_mult = false);
+    void loseBaseAllPercent(double amt, bool trans_mult = false);
+
+    // status stuff
+    void cureStatusKnockedOut(bool announce = true);
+    void cureStatusBurn(bool announce = true);
+    void cureStatusPoison(bool announce = true);
 };
 
 

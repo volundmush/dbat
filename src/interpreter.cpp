@@ -2500,10 +2500,10 @@ int enter_player_game (struct descriptor_data *d)
     d->character->rp = d->rpp;
 	d->character->rbank = d->rbank;
     if (MOON_UP == FALSE && (IS_SAIYAN(d->character) || IS_HALFBREED(d->character))) {
-     oozaru_drop(d->character);
+     oozaru_revert(d->character);
     }
     if (MOON_UP == TRUE && (IS_SAIYAN(d->character) || IS_HALFBREED(d->character))) {
-     oozaru_add(d->character);
+     oozaru_transform(d->character);
     }
     if (IS_HOSHIJIN(d->character)) {
        if (time_info.day <= 14) {

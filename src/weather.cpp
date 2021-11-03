@@ -77,12 +77,12 @@ static void another_hour(int mode)
       if (MOON_DATE) {
        send_to_moon("The full moon disappears.\r\n");
        MOON_UP = FALSE;
-       oozaru_drop(NULL);
+       oozaru_drop();
       }
       else if (time_info.day == 22) {
         send_to_moon("The full moon disappears.\r\n");
         MOON_UP = FALSE;
-        oozaru_drop(NULL);
+        oozaru_drop();
       }
       break;
     case 5:
@@ -112,7 +112,7 @@ static void another_hour(int mode)
       if (MOON_DATE) {
        send_to_moon("The full moon has risen.\r\n");
        MOON_UP = TRUE;
-       oozaru_add(NULL);
+       oozaru_add();
       }
       break;
     default:
@@ -236,150 +236,91 @@ static void weather_change(void)
   }
 }
 
-void oozaru_add(struct char_data *tch)
-{
- struct descriptor_data *d;
-if (tch == NULL) {
- for (d = descriptor_list; d; d = d->next) {
-  if (!IS_PLAYING(d)) {
-   continue;
-  }
-  if (MOON_OK(d->character) && !PLR_FLAGGED(d->character, PLR_OOZARU)) {
-   act("@rLooking up at the moon your heart begins to beat loudly. Sudden rage begins to fill your mind while your body begins to grow. Hair sprouts  all over your body and your teeth become sharp as your body takes on the Oozaru form!@n", TRUE, d->character, 0, 0, TO_CHAR);
-   act("@R$n@r looks up at the moon as $s eyes turn red and $s heart starts to beat loudly. Hair starts to grow all over $s body as $e starts screaming. The scream turns into a roar as $s body begins to grow into a giant ape!@n", TRUE, d->character, 0, 0, TO_ROOM);
-   if (GET_KAIOKEN(d->character) > 0) {
-    do_kaioken(d->character, "0", 0, 0);
-   }
-   SET_BIT_AR(PLR_FLAGS(d->character), PLR_OOZARU);
-        int add = 10000;
-        int mult = 2;
+void oozaru_transform(char_data *ch) {
+    if (PLR_FLAGGED(ch, PLR_OOZARU))
+        return;
 
-        /* handle pl */
-        GET_MAX_HIT(d->character) = (GET_BASE_PL(d->character) + add) * mult;
-        if ((GET_HIT(d->character) + add) * mult <= GET_MAX_HIT(d->character)) {
-         GET_HIT(d->character) = (GET_HIT(d->character) + add) * mult;
-        }
-        else if ((GET_HIT(d->character) + add) * mult > GET_MAX_HIT(d->character)) {
-         GET_HIT(d->character) = GET_MAX_HIT(d->character);
-        }
+    act("@rLooking up at the moon your heart begins to beat loudly. Sudden rage begins to fill your mind while your body begins to grow. Hair sprouts  all over your body and your teeth become sharp as your body takes on the Oozaru form!@n", TRUE, ch, 0, 0, TO_CHAR);
+    act("@R$n@r looks up at the moon as $s eyes turn red and $s heart starts to beat loudly. Hair starts to grow all over $s body as $e starts screaming. The scream turns into a roar as $s body begins to grow into a giant ape!@n", TRUE, ch, 0, 0, TO_ROOM);
+    SET_BIT_AR(PLR_FLAGS(ch), PLR_OOZARU);
+    int add = 10000;
+    int mult = 2;
 
-        /* handle ki */
-        GET_MAX_MANA(d->character) = (GET_BASE_KI(d->character) + add) * mult;
-        if ((GET_MANA(d->character) + add) * mult <= GET_MAX_MANA(d->character)) {
-         GET_MANA(d->character) = (GET_MANA(d->character) + add) * mult;
-        }
-        else if ((GET_MANA(d->character) + add) * mult > GET_MAX_MANA(d->character)) {
-         GET_MANA(d->character) = GET_MAX_MANA(d->character);
-        }
+    /* handle pl */
+    GET_MAX_HIT(ch) = (GET_BASE_PL(ch) + add) * mult;
+    if ((GET_HIT(ch) + add) * mult <= GET_MAX_HIT(ch)) {
+        GET_HIT(ch) = (GET_HIT(ch) + add) * mult;
+    }
+    else if ((GET_HIT(ch) + add) * mult > GET_MAX_HIT(ch)) {
+        GET_HIT(ch) = GET_MAX_HIT(ch);
+    }
 
-        /* handle st */
-        GET_MAX_MOVE(d->character) = (GET_BASE_ST(d->character) + add) * mult;
-        if ((GET_MOVE(d->character) + add) * mult <= GET_MAX_MOVE(d->character)) {
-         GET_MOVE(d->character) = (GET_MOVE(d->character) + add) * mult;
-        }
-        else if ((GET_MOVE(d->character) + add) * mult > GET_MAX_MOVE(d->character)) {
-         GET_MOVE(d->character) = GET_MAX_MOVE(d->character);
-        }
-   continue;
-  }
- }
- }
- else {
-  if (MOON_OK(tch) && !PLR_FLAGGED(tch, PLR_OOZARU)) {
-   act("@rLooking up at the moon your heart begins to beat loudly. Sudden rage begins to fill your mind while your body begins to grow. Hair sprouts  all over your body and your teeth become sharp as your body takes on the Oozaru form!@n", TRUE, tch, 0, 0, TO_CHAR);
-   act("@R$n@r looks up at the moon as $s eyes turn red and $s heart starts to beat loudly. Hair starts to grow all over $s body as $e starts screaming. The scream turns into a roar as $s body begins to grow into a giant ape!@n", TRUE, tch, 0, 0, TO_ROOM);
-   SET_BIT_AR(PLR_FLAGS(tch), PLR_OOZARU);
-        int add = 10000;
-        int mult = 2;
+    /* handle ki */
+    GET_MAX_MANA(ch) = (GET_BASE_KI(ch) + add) * mult;
+    if ((GET_MANA(ch) + add) * mult <= GET_MAX_MANA(ch)) {
+        GET_MANA(ch) = (GET_MANA(ch) + add) * mult;
+    }
+    else if ((GET_MANA(ch) + add) * mult > GET_MAX_MANA(ch)) {
+        GET_MANA(ch) = GET_MAX_MANA(ch);
+    }
 
-        /* handle pl */
-        GET_MAX_HIT(tch) = (GET_BASE_PL(tch) + add) * mult;
-        if ((GET_HIT(tch) + add) * mult <= GET_MAX_HIT(tch)) {
-         GET_HIT(tch) = (GET_HIT(tch) + add) * mult;
-        }
-        else if ((GET_HIT(tch) + add) * mult > GET_MAX_HIT(tch)) {
-         GET_HIT(tch) = GET_MAX_HIT(tch);
-        }
-
-        /* handle ki */
-        GET_MAX_MANA(tch) = (GET_BASE_KI(tch) + add) * mult;
-        if ((GET_MANA(tch) + add) * mult <= GET_MAX_MANA(tch)) {
-         GET_MANA(tch) = (GET_MANA(tch) + add) * mult;
-        }
-        else if ((GET_MANA(tch) + add) * mult > GET_MAX_MANA(tch)) {
-         GET_MANA(tch) = GET_MAX_MANA(tch);
-        }
-
-        /* handle st */
-        GET_MAX_MOVE(tch) = (GET_BASE_ST(tch) + add) * mult;
-        if ((GET_MOVE(tch) + add) * mult <= GET_MAX_MOVE(tch)) {
-         GET_MOVE(tch) = (GET_MOVE(tch) + add) * mult;
-        }
-        else if ((GET_MOVE(tch) + add) * mult > GET_MAX_MOVE(tch)) {
-         GET_MOVE(tch) = GET_MAX_MOVE(tch);
-        }
-  }
- }
+    /* handle st */
+    GET_MAX_MOVE(ch) = (GET_BASE_ST(ch) + add) * mult;
+    if ((GET_MOVE(ch) + add) * mult <= GET_MAX_MOVE(ch)) {
+        GET_MOVE(ch) = (GET_MOVE(ch) + add) * mult;
+    }
+    else if ((GET_MOVE(ch) + add) * mult > GET_MAX_MOVE(ch)) {
+        GET_MOVE(ch) = GET_MAX_MOVE(ch);
+    }
 }
 
-void oozaru_drop(struct char_data *tch)
+void oozaru_add()
 {
- struct descriptor_data *d;
-if (tch == NULL) {
- for (d = descriptor_list; d; d = d->next) {
-  if (!IS_PLAYING(d)) {
-   continue;
-  }
-  if (PLR_FLAGGED(d->character, PLR_OOZARU)) {
-   act("@CYour body begins to shrink back to its normal form as the power of the Oozaru leaves you. You fall asleep shortly after returning to normal!@n", TRUE, d->character, 0, 0, TO_CHAR);
-   act("@c$n@C's body begins to shrink and return to normal. Their giant ape features fading back into humanoid features until $e is left normal and asleep.@n", TRUE, d->character, 0, 0, TO_ROOM);
-   REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_OOZARU);
-   GET_POS(d->character) = POS_SLEEPING;
-        GET_HIT(d->character) = (GET_HIT(d->character) / 2) - 10000;
-        GET_MANA(d->character) = (GET_MANA(d->character) / 2) - 10000;
-        GET_MOVE(d->character) = (GET_MOVE(d->character) / 2) - 10000;
+    for (descriptor_data *d = descriptor_list; d; d = d->next) {
+        if (!IS_PLAYING(d)) {
+            continue;
+        }
+        if(MOON_OK(d->character) && !PLR_FLAGGED(d->character, PLR_OOZARU)) {
+            oozaru_transform(d->character);
+        }
 
-        GET_MAX_HIT(d->character) = GET_BASE_PL(d->character);
-        GET_MAX_MANA(d->character) = GET_BASE_KI(d->character);
-        GET_MAX_MOVE(d->character) = GET_BASE_ST(d->character);
+    }
+}
 
-        if (GET_MOVE(d->character) < 1) {
-         GET_MOVE(d->character) = 1;
-        }
-        if (GET_MANA(d->character) < 1) {
-         GET_MANA(d->character) = 1;
-        }
-        if (GET_HIT(d->character) < 1) {
-         GET_HIT(d->character) = 1;
-        }
-   }
-  }
- }
- else {
-   if (PLR_FLAGGED(tch, PLR_OOZARU)) {
-   act("@CYour body begins to shrink back to its normal form as the power of the Oozaru leaves you. You fall asleep shortly after returning to normal!@n", TRUE, tch, 0, 0, TO_CHAR);
-   act("@c$n@C's body begins to shrink and return to normal. Their giant ape features fading back into humanoid features until $e is left normal and asleep.@n", TRUE, tch, 0, 0, TO_ROOM);
-   REMOVE_BIT_AR(PLR_FLAGS(tch), PLR_OOZARU);
-   GET_POS(tch) = POS_SLEEPING;
-        GET_HIT(tch) = (GET_HIT(tch) / 2) - 10000;
-        GET_MANA(tch) = (GET_MANA(tch) / 2) - 10000;
-        GET_MOVE(tch) = (GET_MOVE(tch) / 2) - 10000;
+void oozaru_revert(char_data *ch) {
+    if (!PLR_FLAGGED(ch, PLR_OOZARU))
+        return;
 
-        GET_MAX_HIT(tch) = GET_BASE_PL(tch);
-        GET_MAX_MANA(tch) = GET_BASE_KI(tch);
-        GET_MAX_MOVE(tch) = GET_BASE_ST(tch);
+    act("@CYour body begins to shrink back to its normal form as the power of the Oozaru leaves you. You fall asleep shortly after returning to normal!@n", TRUE, ch, 0, 0, TO_CHAR);
+    act("@c$n@C's body begins to shrink and return to normal. Their giant ape features fading back into humanoid features until $e is left normal and asleep.@n", TRUE, ch, 0, 0, TO_ROOM);
+    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_OOZARU);
+    GET_POS(ch) = POS_SLEEPING;
+    GET_HIT(ch) = (GET_HIT(ch) / 2) - 10000;
+    GET_MANA(ch) = (GET_MANA(ch) / 2) - 10000;
+    GET_MOVE(ch) = (GET_MOVE(ch) / 2) - 10000;
 
-        if (GET_MOVE(tch) < 1) {
-         GET_MOVE(tch) = 1;
-        }
-        if (GET_MANA(tch) < 1) {
-         GET_MANA(tch) = 1;
-        }
-        if (GET_HIT(tch) < 1) {
-         GET_HIT(tch) = 1;
-        }
-   }
- }
+    GET_MAX_HIT(ch) = GET_BASE_PL(ch);
+    GET_MAX_MANA(ch) = GET_BASE_KI(ch);
+    GET_MAX_MOVE(ch) = GET_BASE_ST(ch);
+
+    if (GET_MOVE(ch) < 1) {
+        GET_MOVE(ch) = 1;
+    }
+    if (GET_MANA(ch) < 1) {
+        GET_MANA(ch) = 1;
+    }
+    if (GET_HIT(ch) < 1) {
+        GET_HIT(ch) = 1;
+    }
+}
+
+void oozaru_drop()
+{
+    for (descriptor_data *d = descriptor_list; d; d = d->next) {
+        if (!IS_PLAYING(d))
+            continue;
+        oozaru_revert(d->character);
+    }
 }
 
 /* This controls the powering up of Hoshi-jin from their Eldritch Star */

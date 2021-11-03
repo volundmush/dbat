@@ -15,5 +15,8 @@ exit 1
 ;;
 esac
 
-cmake -D CMAKE_BUILD_TYPE:STRING=$MODE .
-cmake --build .
+OUTFOLDER=cmake-build-${MODE}
+
+mkdir -p $OUTFOLDER
+cmake3 -S . -B $OUTFOLDER -D CMAKE_BUILD_TYPE=$MODE
+cmake3 --build $OUTFOLDER
