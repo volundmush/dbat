@@ -16,6 +16,7 @@
 #include "dg_comm.h"
 #include "act.other.h"
 #include "config.h"
+#include "races.h"
 
 static void another_hour(int mode);
 static void weather_change(void);
@@ -236,42 +237,15 @@ static void weather_change(void)
   }
 }
 
+static dbat::race::transform_bonus oozaru = {.bonus = 10000, .mult=2, .drain=0, .flag=PLR_OOZARU};
+
 void oozaru_transform(char_data *ch) {
     if (PLR_FLAGGED(ch, PLR_OOZARU))
         return;
 
     act("@rLooking up at the moon your heart begins to beat loudly. Sudden rage begins to fill your mind while your body begins to grow. Hair sprouts  all over your body and your teeth become sharp as your body takes on the Oozaru form!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@R$n@r looks up at the moon as $s eyes turn red and $s heart starts to beat loudly. Hair starts to grow all over $s body as $e starts screaming. The scream turns into a roar as $s body begins to grow into a giant ape!@n", TRUE, ch, 0, 0, TO_ROOM);
-    SET_BIT_AR(PLR_FLAGS(ch), PLR_OOZARU);
-    int add = 10000;
-    int mult = 2;
-
-    /* handle pl */
-    GET_MAX_HIT(ch) = (GET_BASE_PL(ch) + add) * mult;
-    if ((GET_HIT(ch) + add) * mult <= GET_MAX_HIT(ch)) {
-        GET_HIT(ch) = (GET_HIT(ch) + add) * mult;
-    }
-    else if ((GET_HIT(ch) + add) * mult > GET_MAX_HIT(ch)) {
-        GET_HIT(ch) = GET_MAX_HIT(ch);
-    }
-
-    /* handle ki */
-    GET_MAX_MANA(ch) = (GET_BASE_KI(ch) + add) * mult;
-    if ((GET_MANA(ch) + add) * mult <= GET_MAX_MANA(ch)) {
-        GET_MANA(ch) = (GET_MANA(ch) + add) * mult;
-    }
-    else if ((GET_MANA(ch) + add) * mult > GET_MAX_MANA(ch)) {
-        GET_MANA(ch) = GET_MAX_MANA(ch);
-    }
-
-    /* handle st */
-    GET_MAX_MOVE(ch) = (GET_BASE_ST(ch) + add) * mult;
-    if ((GET_MOVE(ch) + add) * mult <= GET_MAX_MOVE(ch)) {
-        GET_MOVE(ch) = (GET_MOVE(ch) + add) * mult;
-    }
-    else if ((GET_MOVE(ch) + add) * mult > GET_MAX_MOVE(ch)) {
-        GET_MOVE(ch) = GET_MAX_MOVE(ch);
-    }
+    ch->race->handleTransform(ch, oozaru);
 }
 
 void oozaru_add()
@@ -293,25 +267,9 @@ void oozaru_revert(char_data *ch) {
 
     act("@CYour body begins to shrink back to its normal form as the power of the Oozaru leaves you. You fall asleep shortly after returning to normal!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@c$n@C's body begins to shrink and return to normal. Their giant ape features fading back into humanoid features until $e is left normal and asleep.@n", TRUE, ch, 0, 0, TO_ROOM);
-    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_OOZARU);
     GET_POS(ch) = POS_SLEEPING;
-    GET_HIT(ch) = (GET_HIT(ch) / 2) - 10000;
-    GET_MANA(ch) = (GET_MANA(ch) / 2) - 10000;
-    GET_MOVE(ch) = (GET_MOVE(ch) / 2) - 10000;
 
-    GET_MAX_HIT(ch) = GET_BASE_PL(ch);
-    GET_MAX_MANA(ch) = GET_BASE_KI(ch);
-    GET_MAX_MOVE(ch) = GET_BASE_ST(ch);
-
-    if (GET_MOVE(ch) < 1) {
-        GET_MOVE(ch) = 1;
-    }
-    if (GET_MANA(ch) < 1) {
-        GET_MANA(ch) = 1;
-    }
-    if (GET_HIT(ch) < 1) {
-        GET_HIT(ch) = 1;
-    }
+    ch->race->revertTransform(ch, oozaru);
 }
 
 void oozaru_drop()

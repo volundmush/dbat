@@ -142,6 +142,8 @@ namespace dbat::race {
 
         void revertTransform(char_data *ch, int tier) const;
 
+        void revertTransform(char_data *ch, const transform_bonus &trans) const;
+
         void displayForms(char_data *ch) const;
 
         bool raceHasNoisyTransformations() const;
