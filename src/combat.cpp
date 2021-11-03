@@ -4937,10 +4937,11 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
  }
 
  if (AFF_FLAGGED(ch, AFF_INFUSE) && !AFF_FLAGGED(ch, AFF_HASS) && type <= 0) {
-  if (GET_MANA(ch) - (GET_MAX_MANA(ch) * 0.005) > 0 && dmg > 1) {
-   GET_MANA(ch) -= (GET_MAX_MANA(ch) * 0.005);
+     auto infuse_cost = ch->getPercentOfMaxKI(.005);
+  if ((ch->getCurKI() - infuse_cost) > 0 && dmg > 1) {
+      ch->decCurKI(infuse_cost);
    send_to_room(IN_ROOM(ch), "@CA swirl of ki explodes from the attack!@n\r\n");
-  } else if (GET_MANA(ch) - (GET_MAX_MANA(ch) * 0.005) <= 0) {
+  } else {
    act("@wYou can no longer infuse ki into your attacks!@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@c$n@w can no longer infuse ki into $s attacks!@n", TRUE, ch, 0, 0, TO_ROOM);
    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_INFUSE);
@@ -4966,10 +4967,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
   if (IS_MUTANT(vict) && (GET_GENOME(vict, 0) == 8 || GET_GENOME(vict, 1) == 8) && type == 0) {
    int64_t drain = dmg * 0.1;
    dmg -= drain;
-   GET_MOVE(ch) -= drain;
-   if (GET_MOVE(ch) < 0) {
-    GET_MOVE(ch) = 1;
-   }
+   ch->decCurST(drain, 1);
    act("@Y$N's rubbery body makes hitting it tiring!@n", TRUE, ch, 0, vict, TO_CHAR);
    act("@Y$n's stamina is sapped a bit by hitting your rubbery body!@n", TRUE, ch, 0, vict, TO_VICT);
   }
@@ -5254,12 +5252,12 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
  }
 
  if (!AFF_FLAGGED(vict, AFF_KNOCKED) && (GET_POS(vict) == POS_SITTING || GET_POS(vict) == POS_RESTING) && GET_SKILL(vict, SKILL_ROLL) > axion_dice(0)) {
-  int64_t rollcost = (GET_MAX_HIT(vict) / 300) * (GET_STR(ch) / 2);
+  int64_t rollcost = (vict->getMaxHealth() / 300) * (GET_STR(ch) / 2);
   if (GET_MOVE(vict) >= rollcost) {
    act("@GYou roll to your feet in an agile fashion!@n", TRUE, vict, 0, 0, TO_CHAR);
    act("@G$n rolls to $s feet in an agile fashion!@n", TRUE, vict, 0, 0, TO_ROOM);
    do_stand(vict, 0, 0, 0);
-   GET_MOVE(vict) -= rollcost;
+   vict->decCurST(rollcost);
   }
  }
 
@@ -5280,21 +5278,11 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
     act("@c$N@W seems to be more aware now.@n", TRUE, ch, 0, vict, TO_NOTVICT);
   }
   if (AFF_FLAGGED(vict, AFF_KNOCKED) && rand_number(1, 12) >= 11) {
-         act("@W$n@W is no longer senseless, and wakes up.@n", FALSE, vict, 0, 0, TO_ROOM);
-         send_to_char(vict, "You are no longer knocked out, and wake up!@n\r\n");
-         if (CARRIED_BY(vict)) {
-          if (GET_ALIGNMENT(CARRIED_BY(vict)) > 50) {
-           carry_drop(CARRIED_BY(vict), 0);
-          } else {
-           carry_drop(CARRIED_BY(vict), 1);
-          }
-         }
-         REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_KNOCKED);
-          GET_POS(vict) = POS_SITTING;
-         if (IS_NPC(vict) && rand_number(1, 20) >= 12) {
+      vict->cureStatusKnockedOut(true);
+      if (IS_NPC(vict) && rand_number(1, 20) >= 12) {
           act("@W$n@W stands up.@n", FALSE, vict, 0, 0, TO_ROOM);
           GET_POS(vict) = POS_STANDING;
-         }
+      }
   }
   if (IS_NPC(ch)) {
    if (GET_LEVEL(ch) > 10) {
@@ -5336,9 +5324,9 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
   if (dmg >= 50 && chance > 0) {
    hurt_limb(ch, vict, chance, limb, dmg);
   }
-  if (IS_NPC(vict) && dmg > GET_MAX_HIT(vict) * .7 && GET_BONUS(ch, BONUS_SADISTIC) > 0) {
+  if (IS_NPC(vict) && dmg > vict->getMaxHealth() * .7 && GET_BONUS(ch, BONUS_SADISTIC) > 0) {
    GET_EXP(vict) /= 2;
-  } else if (IS_NPC(vict) && dmg > GET_HIT(vict) && GET_HIT(vict) >= GET_MAX_HIT(vict) * .5 && GET_BONUS(ch, BONUS_SADISTIC) > 0) {
+  } else if (IS_NPC(vict) && dmg > vict->getCurHealth() && vict->isFullHealth() * .5 && GET_BONUS(ch, BONUS_SADISTIC) > 0) {
    GET_EXP(vict) /= 2;
   }
  
@@ -5347,16 +5335,16 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
    carry_drop(vict, 2);
   }
 
-  if (GET_POS(vict) == POS_SITTING && IS_NPC(vict) && GET_HIT(vict) >= (gear_pl(vict)) * .98) {
+  if (GET_POS(vict) == POS_SITTING && IS_NPC(vict) && vict->getCurHealth() >= (gear_pl(vict)) * .98) {
     do_stand(vict, 0, 0, 0);
   }
  int suppresso = FALSE;
-  if (is_sparring(ch) && is_sparring(vict) && (GET_SUPP(vict) + GET_HIT(vict)) - dmg <= 0) {
+  if (is_sparring(ch) && is_sparring(vict) && (GET_SUPP(vict) + vict->getCurHealth()) - dmg <= 0) {
     if (!IS_NPC(vict)) {
      act("@c$N@w falls down unconscious, and you stop sparring with $M.@n", TRUE, ch, 0, vict, TO_CHAR);
      act("@C$n@w stops sparring with you as you fall unconscious.@n", TRUE, ch, 0, vict, TO_VICT);
      act("@c$N@w falls down unconscious, and @C$n@w stops sparring with $M.@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     GET_HIT(vict) = 1;
+     vict->setCurHealth(1);
      if (GET_SUPP(vict) > 0) {
       GET_SUPP(vict) = 0;
       GET_SUPPRESS(vict) = 0;
@@ -5389,7 +5377,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
      if (founded == 1) {
       act("@c$N@w leaves a reward behind out of respect.@n", TRUE, ch, 0, vict, TO_CHAR);
      }
-     GET_HIT(vict) = 0;
+        vict->setCurHealth(0);
      extract_char(vict);
      return;
    }
@@ -5398,7 +5386,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
    act("@c$N@w falls down unconscious, and you spare $S life.@n", TRUE, ch, 0, vict, TO_CHAR);
    act("@C$n@w spares your life as you fall unconscious.@n", TRUE, ch, 0, vict, TO_VICT);
    act("@c$N@w falls down unconscious, and @C$n@w spares $S life.@n", TRUE, ch, 0, vict, TO_NOTVICT);
-   GET_HIT(vict) = 1;
+      vict->setCurHealth(1);
    if (FIGHTING(vict)) {
     stop_fighting(vict);
    }
@@ -5432,7 +5420,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
    }
 
 
-  if (PLR_FLAGGED(vict, PLR_IMMORTAL) && !is_sparring(ch) && GET_HIT(vict) - dmg <= 0) {
+  if (PLR_FLAGGED(vict, PLR_IMMORTAL) && !is_sparring(ch) && vict->getCurHealth() - dmg <= 0) {
    if (IN_ARENA(vict)) {
        send_to_all("@R%s@r manages to defeat @R%s@r in the Arena!@n\r\n", GET_NAME(ch), GET_NAME(vict));
        char_from_room(ch);
@@ -5440,7 +5428,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
        look_at_room(IN_ROOM(ch), ch, 0);
        char_from_room(vict);
        char_to_room(vict, real_room(17875));
-       GET_HIT(vict) = 1;
+       vict->setCurHealth(1);
        look_at_room(IN_ROOM(vict), vict, 0);
        if (FIGHTING(vict)) {
         stop_fighting(vict);

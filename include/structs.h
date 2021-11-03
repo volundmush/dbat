@@ -2570,9 +2570,9 @@ struct char_data {
     int64_t setCurHealth(int64_t amt);
     int64_t setCurHealthPercent(double amt);
     int64_t incCurHealth(int64_t amt, bool limit_max = true);
-    int64_t decCurHealth(int64_t amt);
+    int64_t decCurHealth(int64_t amt, int64_t floor = 0);
     int64_t incCurHealthPercent(double amt, bool limit_max = true);
-    int64_t decCurHealthPercent(double amt);
+    int64_t decCurHealthPercent(double amt, int64_t floor = 0);
     void restoreHealth(bool announce = true);
 
     int64_t healCurHealth(int64_t amt);
@@ -2598,9 +2598,9 @@ struct char_data {
     int64_t setCurKI(int64_t amt);
     int64_t setCurKIPercent(double amt);
     int64_t incCurKI(int64_t amt, bool limit_max = true);
-    int64_t decCurKI(int64_t amt);
+    int64_t decCurKI(int64_t amt, int64_t floor = 0);
     int64_t incCurKIPercent(double amt, bool limit_max = true);
-    int64_t decCurKIPercent(double amt);
+    int64_t decCurKIPercent(double amt, int64_t floor = 0);
     void transformKI(int64_t amt);
     void revertKI(int64_t amt);
     void restoreKI(bool announce = true);
@@ -2615,9 +2615,9 @@ struct char_data {
     int64_t setCurST(int64_t amt);
     int64_t setCurSTPercent(double amt);
     int64_t incCurST(int64_t amt, bool limit_max = true);
-    int64_t decCurST(int64_t amt);
+    int64_t decCurST(int64_t amt, int64_t floor = 0);
     int64_t incCurSTPercent(double amt, bool limit_max = true);
-    int64_t decCurSTPercent(double amt);
+    int64_t decCurSTPercent(double amt, int64_t floor = 0);
     void transformST(int64_t amt);
     void revertST(int64_t amt);
     void restoreST(bool announce = true);
