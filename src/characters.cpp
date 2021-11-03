@@ -8,6 +8,7 @@
 #include "comm.h"
 #include "class.h"
 #include "fight.h"
+#include "act.movement.h"
 
 static std::string robot = "Robotic-Humanoid", robot_lower = "robotic-humanoid", unknown = "UNKNOWN";
 
@@ -384,8 +385,8 @@ int64_t char_data::incCurHealth(int64_t amt, bool limit_max) {
     return hit;
 };
 
-int64_t char_data::decCurHealth(int64_t amt) {
-    hit = std::max(0L, hit-std::abs(amt));
+int64_t char_data::decCurHealth(int64_t amt, int64_t floor) {
+    hit = std::max(floor, hit-std::abs(amt));
     return hit;
 }
 
@@ -393,8 +394,8 @@ int64_t char_data::incCurHealthPercent(double amt, bool limit_max) {
     return incCurHealth((int64_t)(getMaxHealth() * std::abs(amt)), limit_max);
 }
 
-int64_t char_data::decCurHealthPercent(double amt) {
-    return decCurHealth((int64_t)getMaxHealth() * std::abs(amt));
+int64_t char_data::decCurHealthPercent(double amt, int64_t floor) {
+    return decCurHealth((int64_t)getMaxHealth() * std::abs(amt), floor);
 }
 
 void char_data::restoreHealth(bool announce) {
@@ -484,8 +485,8 @@ int64_t char_data::incCurKI(int64_t amt, bool limit_max) {
     return mana;
 };
 
-int64_t char_data::decCurKI(int64_t amt) {
-    mana = std::max(0L, mana-std::abs(amt));
+int64_t char_data::decCurKI(int64_t amt, int64_t floor) {
+    mana = std::max(floor, mana-std::abs(amt));
     return mana;
 }
 
@@ -493,8 +494,8 @@ int64_t char_data::incCurKIPercent(double amt, bool limit_max) {
     return incCurKI((int64_t)(getMaxKI() * std::abs(amt)), limit_max);
 }
 
-int64_t char_data::decCurKIPercent(double amt) {
-    return decCurKI((int64_t)getMaxKI() * std::abs(amt));
+int64_t char_data::decCurKIPercent(double amt, int64_t floor) {
+    return decCurKI((int64_t)getMaxKI() * std::abs(amt), floor);
 }
 
 void char_data::transformKI(int64_t amt) {
@@ -553,8 +554,8 @@ int64_t char_data::incCurST(int64_t amt, bool limit_max) {
     return move;
 };
 
-int64_t char_data::decCurST(int64_t amt) {
-    move = std::max(0L, move-std::abs(amt));
+int64_t char_data::decCurST(int64_t amt, int64_t floor) {
+    move = std::max(floor, move-std::abs(amt));
     return move;
 }
 
@@ -562,8 +563,8 @@ int64_t char_data::incCurSTPercent(double amt, bool limit_max) {
     return incCurST((int64_t)(getMaxST() * std::abs(amt)), limit_max);
 }
 
-int64_t char_data::decCurSTPercent(double amt) {
-    return decCurST((int64_t)getMaxST() * std::abs(amt));
+int64_t char_data::decCurSTPercent(double amt, int64_t floor) {
+    return decCurST((int64_t)getMaxST() * std::abs(amt), floor);
 }
 
 void char_data::transformST(int64_t amt) {
@@ -602,6 +603,15 @@ void char_data::cureStatusKnockedOut(bool announce) {
             ::act("@W$n@W is no longer senseless, and wakes up.@n", FALSE, this, 0, 0, TO_ROOM);
             send_to_char(this, "You are no longer knocked out, and wake up!@n\r\n");
         }
+
+        if (CARRIED_BY(this)) {
+            if (GET_ALIGNMENT(CARRIED_BY(this)) > 50) {
+                carry_drop(CARRIED_BY(this), 0);
+            } else {
+                carry_drop(CARRIED_BY(this), 1);
+            }
+        }
+
         REMOVE_BIT_AR(AFF_FLAGS(this), AFF_KNOCKED);
         GET_POS(this) = POS_SITTING;
     }
