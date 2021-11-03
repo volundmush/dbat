@@ -340,3 +340,406 @@ int char_data::calcGravCost(int64_t num) {
         return GET_MOVE(this) > (cost + num);
     }
 }
+
+
+int64_t char_data::getCurHealth() const {
+    return getCurPL();
+}
+
+int64_t char_data::getMaxHealth() const {
+    return getMaxPL();
+}
+
+double char_data::getCurHealthPercent() const {
+    return getCurPLPercent();
+}
+
+int64_t char_data::getPercentOfCurHealth(double amt) const {
+    return getPercentOfCurPL(amt);
+}
+
+int64_t char_data::getPercentOfMaxHealth(double amt) const {
+    return getPercentOfMaxPL(amt);
+}
+
+bool char_data::isFullHealth() const {
+    return isFullPL();
+}
+
+int64_t char_data::setCurHealth(int64_t amt) {
+    hit = std::max(0L, std::abs(amt));
+    return hit;
+}
+
+int64_t char_data::setCurHealthPercent(double amt) {
+    hit = std::max(0L, (int64_t)(getMaxHealth() * std::abs(amt)));
+    return hit;
+}
+
+int64_t char_data::incCurHealth(int64_t amt, bool limit_max) {
+    if(limit_max)
+        hit = std::min(getMaxHealth(), hit+std::abs(amt));
+    else
+        hit += std::abs(amt);
+    return hit;
+};
+
+int64_t char_data::decCurHealth(int64_t amt) {
+    hit = std::max(0L, hit-std::abs(amt));
+    return hit;
+}
+
+int64_t char_data::incCurHealthPercent(double amt, bool limit_max) {
+    return incCurHealth((int64_t)(getMaxHealth() * std::abs(amt)), limit_max);
+}
+
+int64_t char_data::decCurHealthPercent(double amt) {
+    return decCurHealth((int64_t)getMaxHealth() * std::abs(amt));
+}
+
+void char_data::restoreHealth(bool announce) {
+    if(!isFullHealth()) hit = getMaxHealth();
+}
+
+int64_t char_data::getMaxPL() const {
+    return max_hit;
+}
+
+int64_t char_data::getCurPL() const {
+    return hit;
+}
+
+double char_data::getCurPLPercent() const {
+    return (double)getCurPL() / (double)getMaxPL();
+}
+
+int64_t char_data::getPercentOfCurPL(double amt) const {
+    return getCurPL() * std::abs(amt);
+}
+
+int64_t char_data::getPercentOfMaxPL(double amt) const {
+    return getMaxPL() * std::abs(amt);
+}
+
+void char_data::refreshSuppress() {
+    if (GET_SUPPRESS(this) > 0 && GET_HIT(this) > ((GET_MAX_HIT(this) / 100) * GET_SUPPRESS(this))) {
+        GET_HIT(this) = ((GET_MAX_HIT(this) / 100) * GET_SUPPRESS(this));
+        send_to_char(this, "@mYou are healed to your suppression limit.@n\r\n");
+    }
+}
+
+void char_data::transformPL(int64_t amt) {
+    hit += std::abs(amt);
+    max_hit += std::abs(amt);
+}
+
+void char_data::revertPL(int64_t amt) {
+    hit = std::max(1L, hit-std::abs(amt));
+    max_hit = std::max(1L, max_hit-std::abs(amt));
+}
+
+bool char_data::isFullPL() const {
+    return getCurPL() >= getMaxPL();
+}
+
+int64_t char_data::getCurKI() const {
+    return mana;
+}
+
+int64_t char_data::getMaxKI() const {
+    return max_mana;
+}
+
+double char_data::getCurKIPercent() const {
+    return (double)getCurKI() / (double)getMaxKI();
+}
+
+int64_t char_data::getPercentOfCurKI(double amt) const {
+    return getCurKI() * std::abs(amt);
+}
+
+int64_t char_data::getPercentOfMaxKI(double amt) const {
+    return getMaxKI() * std::abs(amt);
+}
+
+bool char_data::isFullKI() const {
+    return getCurKI() >= getMaxKI();
+}
+
+int64_t char_data::setCurKI(int64_t amt) {
+    mana = std::max(0L, std::abs(amt));
+    return mana;
+}
+
+int64_t char_data::setCurKIPercent(double amt) {
+    mana = std::max(0L, (int64_t)(getMaxKI() * std::abs(amt)));
+    return mana;
+}
+
+int64_t char_data::incCurKI(int64_t amt, bool limit_max) {
+    if(limit_max)
+        mana = std::min(getMaxKI(), mana+std::abs(amt));
+    else
+        mana += std::abs(amt);
+    return mana;
+};
+
+int64_t char_data::decCurKI(int64_t amt) {
+    mana = std::max(0L, mana-std::abs(amt));
+    return mana;
+}
+
+int64_t char_data::incCurKIPercent(double amt, bool limit_max) {
+    return incCurKI((int64_t)(getMaxKI() * std::abs(amt)), limit_max);
+}
+
+int64_t char_data::decCurKIPercent(double amt) {
+    return decCurKI((int64_t)getMaxKI() * std::abs(amt));
+}
+
+void char_data::transformKI(int64_t amt) {
+    mana += std::abs(amt);
+    max_mana += std::abs(amt);
+}
+
+void char_data::revertKI(int64_t amt) {
+    mana = std::max(1L, mana-std::abs(amt));
+    max_mana = std::max(1L, max_mana-std::abs(amt));
+}
+
+void char_data::restoreKI(bool announce) {
+    if(!isFullKI()) mana = getMaxKI();
+}
+
+int64_t char_data::getCurST() const {
+    return move;
+}
+
+int64_t char_data::getMaxST() const {
+    return max_move;
+}
+
+double char_data::getCurSTPercent() const {
+    return (double)getCurST() / (double)getMaxST();
+}
+
+int64_t char_data::getPercentOfCurST(double amt) const {
+    return getCurST() * std::abs(amt);
+}
+
+int64_t char_data::getPercentOfMaxST(double amt) const {
+    return getMaxST() * std::abs(amt);
+}
+
+bool char_data::isFullST() const {
+    return getCurST() >= getMaxST();
+}
+
+int64_t char_data::setCurST(int64_t amt) {
+    move = std::max(0L, std::abs(amt));
+    return move;
+}
+
+int64_t char_data::setCurSTPercent(double amt) {
+    move = std::max(0L, (int64_t)(getMaxST() * std::abs(amt)));
+    return move;
+}
+
+int64_t char_data::incCurST(int64_t amt, bool limit_max) {
+    if(limit_max)
+        move = std::min(getMaxST(), move+std::abs(amt));
+    else
+        move += std::abs(amt);
+    return move;
+};
+
+int64_t char_data::decCurST(int64_t amt) {
+    move = std::max(0L, move-std::abs(amt));
+    return move;
+}
+
+int64_t char_data::incCurSTPercent(double amt, bool limit_max) {
+    return incCurST((int64_t)(getMaxST() * std::abs(amt)), limit_max);
+}
+
+int64_t char_data::decCurSTPercent(double amt) {
+    return decCurST((int64_t)getMaxST() * std::abs(amt));
+}
+
+void char_data::transformST(int64_t amt) {
+    move += std::abs(amt);
+    max_move += std::abs(amt);
+}
+
+void char_data::revertST(int64_t amt) {
+    move = std::max(1L, move-std::abs(amt));
+    max_move = std::max(1L, max_move-std::abs(amt));
+}
+
+void char_data::restoreST(bool announce) {
+    if(!isFullST()) mana = getMaxST();
+}
+
+bool char_data::isFullVitals() const {
+    return isFullHealth() && isFullKI() && isFullST();
+}
+
+void char_data::restoreVitals(bool announce) {
+    restoreHealth(announce);
+    restoreKI(announce);
+    restoreST(announce);
+}
+
+void char_data::restoreStatus(bool announce) {
+    cureStatusKnockedOut(announce);
+    cureStatusBurn(announce);
+    cureStatusPoison(announce);
+}
+
+void char_data::cureStatusKnockedOut(bool announce) {
+    if (AFF_FLAGGED(this, AFF_KNOCKED)) {
+        if(announce) {
+            ::act("@W$n@W is no longer senseless, and wakes up.@n", FALSE, this, 0, 0, TO_ROOM);
+            send_to_char(this, "You are no longer knocked out, and wake up!@n\r\n");
+        }
+        REMOVE_BIT_AR(AFF_FLAGS(this), AFF_KNOCKED);
+        GET_POS(this) = POS_SITTING;
+    }
+}
+
+void char_data::cureStatusBurn(bool announce) {
+    if (AFF_FLAGGED(this, AFF_BURNED)) {
+        if(announce) {
+            send_to_char(this, "Your burns are healed now.\r\n");
+            ::act("$n@w's burns are now healed.@n", TRUE, this, 0, 0, TO_ROOM);
+        }
+        REMOVE_BIT_AR(AFF_FLAGS(this), AFF_BURNED);
+    }
+}
+
+void char_data::cureStatusPoison(bool announce) {
+    ::act("@C$n@W suddenly looks a lot better!@b", FALSE, this, 0, 0, TO_NOTVICT);
+    affect_from_char(this, SPELL_POISON);
+}
+
+static const std::map<int, std::string> limb_names = {
+        {1, "right arm"},
+        {2, "left arm"},
+        {3, "right leg"},
+        {4, "left leg"}
+};
+
+void char_data::restoreLimbs(bool announce) {
+    // restore head...
+    GET_LIMBCOND(this, 0) = 100;
+
+    // limbs...
+    for(const auto& l : limb_names) {
+        if(announce) {
+            if(GET_LIMBCOND(this, l.first) <= 0)
+                send_to_char(this, "Your %s grows back!\r\n", l.second.c_str());
+            else if (GET_LIMBCOND(this, l.first) < 50)
+                send_to_char(this, "Your %s is no longer broken!\r\n", l.second.c_str());
+        }
+        GET_LIMBCOND(this, l.first) = 100;
+    }
+
+    // and lastly, tail.
+    this->race->gainTail(this, announce);
+}
+
+int64_t char_data::gainBasePL(int64_t amt, bool trans_mult) {
+    auto mult = trans_mult ? this->race->getCurFormMult(this) : 1;
+    auto to_add = (int64_t)(amt * mult);
+    max_hit += to_add;
+    basepl += amt;
+    return basepl;
+}
+
+int64_t char_data::gainBaseST(int64_t amt, bool trans_mult) {
+    auto mult = trans_mult ? this->race->getCurFormMult(this) : 1;
+    auto to_add = (int64_t)(amt * mult);
+    max_move += to_add;
+    basest += amt;
+    return basest;
+}
+
+int64_t char_data::gainBaseKI(int64_t amt, bool trans_mult) {
+    auto mult = trans_mult ? this->race->getCurFormMult(this) : 1;
+    auto to_add = (int64_t)(amt * mult);
+    max_mana += to_add;
+    baseki += amt;
+    return baseki;
+}
+
+void char_data::gainBaseAll(int64_t amt, bool trans_mult) {
+    gainBasePL(amt, trans_mult);
+    gainBaseKI(amt, trans_mult);
+    gainBaseST(amt, trans_mult);
+}
+
+int64_t char_data::loseBasePL(int64_t amt, bool trans_mult) {
+    auto mult = trans_mult ? this->race->getCurFormMult(this) : 1;
+    auto to_lose = (int64_t)(amt * mult);
+    max_hit = std::max(1L, max_hit-to_lose);
+    basepl = std::max(1L, basepl-amt);
+    return basepl;
+}
+
+int64_t char_data::loseBaseST(int64_t amt, bool trans_mult) {
+    auto mult = trans_mult ? this->race->getCurFormMult(this) : 1;
+    auto to_lose = (int64_t)(amt * mult);
+    max_move = std::max(1L, max_move-to_lose);
+    basest = std::max(1L, basest-amt);
+    return basest;
+}
+
+int64_t char_data::loseBaseKI(int64_t amt, bool trans_mult) {
+    auto mult = trans_mult ? this->race->getCurFormMult(this) : 1;
+    auto to_lose = (int64_t)(amt * mult);
+    max_mana = std::max(1L, max_mana-to_lose);
+    baseki = std::max(1L, baseki-amt);
+    return baseki;
+}
+
+void char_data::loseBaseAll(int64_t amt, bool trans_mult) {
+    loseBasePL(amt, trans_mult);
+    loseBaseKI(amt, trans_mult);
+    loseBaseST(amt, trans_mult);
+}
+
+int64_t char_data::gainBasePLPercent(double amt, bool trans_mult) {
+    return gainBasePL(basepl * amt, trans_mult);
+}
+
+int64_t char_data::gainBaseKIPercent(double amt, bool trans_mult) {
+    return gainBaseKI(baseki * amt, trans_mult);
+}
+
+int64_t char_data::gainBaseSTPercent(double amt, bool trans_mult) {
+    return gainBaseST(basest * amt, trans_mult);
+}
+
+int64_t char_data::loseBasePLPercent(double amt, bool trans_mult) {
+    return loseBasePL(basepl * amt, trans_mult);
+}
+
+int64_t char_data::loseBaseKIPercent(double amt, bool trans_mult) {
+    return loseBaseKI(baseki * amt, trans_mult);
+}
+
+int64_t char_data::loseBaseSTPercent(double amt, bool trans_mult) {
+    return loseBaseST(basest * amt, trans_mult);
+}
+
+void char_data::gainBaseAllPercent(double amt, bool trans_mult) {
+    gainBasePLPercent(amt, trans_mult);
+    gainBaseKIPercent(amt, trans_mult);
+    gainBaseSTPercent(amt, trans_mult);
+}
+
+void char_data::loseBaseAllPercent(double amt, bool trans_mult) {
+    loseBasePLPercent(amt, trans_mult);
+    loseBaseKIPercent(amt, trans_mult);
+    loseBaseSTPercent(amt, trans_mult);
+}

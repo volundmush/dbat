@@ -2567,7 +2567,7 @@ ACMD(do_rip)
     act("@R$n@R rushes at @R$N@r and grab $S tail! With a powerful tug $e pulls it off!@n", TRUE, ch, 0, vict, TO_NOTVICT);
     REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_TAIL);
     REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_STAIL);
-    oozaru_drop(vict);
+    oozaru_revert(vict);
     return;
    } else {
           reveal_hiding(ch, 0);
@@ -2590,7 +2590,7 @@ ACMD(do_rip)
    act("@R$n@r grabs $s own tail and yanks it off!@n", TRUE, ch, 0, 0, TO_ROOM);
    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TAIL);
    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_STAIL);
-    oozaru_drop(vict);
+    oozaru_revert(vict);
  } else {
   if (GET_MOVE(ch) < GET_MAX_MOVE(ch) / 20) {
    send_to_char(ch, "You are too tired to manage to grab their tail!\r\n");
@@ -2603,7 +2603,7 @@ ACMD(do_rip)
     act("@R$n@R reaches and grabs @R$N's@r tail! With a powerful tug $e pulls it off!@n", TRUE, ch, 0, vict, TO_NOTVICT);
     REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_TAIL);
     REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_STAIL);
-    oozaru_drop(vict);
+    oozaru_revert(vict);
     return;
  }
 }
@@ -10242,7 +10242,7 @@ void base_update(void)
 			COMBHITS(d->character) = 0;
 		}
 		if (MOON_UP && (IS_SAIYAN(d->character) || IS_HALFBREED(d->character)) && !PLR_FLAGGED(d->character, PLR_OOZARU)) {
-			oozaru_add(d->character);
+			oozaru_transform(d->character);
 		}
 		if (cash == TRUE && GET_BANK_GOLD(d->character) > 0) {
 			inc = (GET_BANK_GOLD(d->character) / 50) * 2;
