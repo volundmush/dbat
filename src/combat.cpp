@@ -2964,6 +2964,12 @@ static void damtype_unarmed_preference(char_data *ch, int64_t *dam) {
     }
 }
 
+static void damtype_focus(char_data *ch, int64_t *dam, int64_t focus, int divby) {
+    if (focus > 0) {
+        dam += focus * (*dam / divby);
+    }
+}
+
 static void damtype_unarmed(char_data *ch, int skill, int64_t *dam) {
     // General Arlian bonus.
     if (IS_ARLIAN(ch)) {
@@ -3016,6 +3022,43 @@ static void damtype_unarmed(char_data *ch, int skill, int64_t *dam) {
 
 }
 
+static void damtype_human_grandmaster(char_data *ch, int skill, int64_t *dam) {
+    if(IS_HUMAN(ch)) {
+        switch(skill) {
+            case 101:
+                *dam = *dam * 1.1;
+            case 102:
+                *dam = *dam * 1.2;
+            case 103:
+                *dam = *dam * 1.3;
+        }
+    }
+}
+
+static void damtype_human_ki(char_data *ch, int64_t *dam, int bon) {
+    if (IS_HUMAN(ch)) {
+        *dam += (*dam / 100) * bon;
+    }
+}
+
+static void damtype_saiyan_ki(char_data *ch, int64_t *dam, int bon) {
+    if (IS_SAIYAN(ch)) {
+        *dam += (*dam / 100) * bon;
+    }
+}
+
+static void damtype_kai_ki(char_data *ch, int64_t *dam, int bon) {
+    if (IS_KAI(ch)) {
+        *dam += (*dam / 100) * bon;
+    }
+}
+
+static void damtype_icer_ki(char_data *ch, int64_t *dam, int bon) {
+    if (IS_ICER(ch) || (IS_BIO(ch) && (GET_GENOME(ch, 0) == 4 || GET_GENOME(ch, 1) == 4))) {
+        *dam += (*dam / 100) * bon;
+    }
+}
+
 /* Damage for player and NPC attacks  */
 int64_t damtype(struct char_data *ch, int type, int skill, double percent)
 {
@@ -3031,35 +3074,149 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent)
   } else {
    type = 0;
   }
+
+  // split switch approach to compress code.
+  switch(type) {
+      // big list of h2h stuff for starters.
+      case -1:
+          cou1 = 1 + ((skill / 4) * ((GET_HIT(ch) / 1200) + GET_STR(ch)));
+          cou2 = 1 + ((skill / 4) * ((GET_HIT(ch) / 1000) + GET_STR(ch)));
+      case 0: /* Punch */
+          cou1 = 15 + ((skill / 4) * ((GET_HIT(ch) / 1600) + GET_STR(ch)));
+          cou2 = 15 + ((skill / 4) * ((GET_HIT(ch) / 1300) + GET_STR(ch)));
+      case 1: /* Kick */
+          cou1 = 40 + ((skill / 4) * ((GET_HIT(ch) / 1200) + GET_STR(ch)));
+          cou2 = 40 + ((skill / 4) * ((GET_HIT(ch) / 1000) + GET_STR(ch)));
+      case 2: /* Elbow */
+          cou1 = 100 + ((skill / 4) * ((GET_HIT(ch) / 1300) + GET_STR(ch)));
+          cou2 = 100 + ((skill / 4) * ((GET_HIT(ch) / 1050) + GET_STR(ch)));
+      case 3: /* Knee */
+          cou1 = 150 + ((skill / 4) * ((GET_HIT(ch) / 1100) + GET_STR(ch)));
+          cou2 = 150 + ((skill / 4) * ((GET_HIT(ch) / 1000) + GET_STR(ch)));
+      case 4: /* Roundhouse */
+          cou1 = 500 + ((skill / 4) * ((GET_HIT(ch) / 1000) + GET_STR(ch)));
+          cou2 = 500 + ((skill / 4) * ((GET_HIT(ch) / 800) + GET_STR(ch)));
+      case 5: /* Uppercut */
+          cou1 = 350 + ((skill / 4) * ((GET_HIT(ch) / 1100) + GET_STR(ch)));
+          cou2 = 350 + ((skill / 4) * ((GET_HIT(ch) / 900) + GET_STR(ch)));
+      case 6: /* Slam */
+          cou1 = 8000 + ((skill / 4) * ((GET_HIT(ch) / 800) + GET_STR(ch)));
+          cou2 = 8000 + ((skill / 4) * ((GET_HIT(ch) / 500) + GET_STR(ch)));
+      case 8: /* Heeldrop */
+          cou1 = 12500 + ((skill / 4) * ((GET_HIT(ch) / 700) + GET_STR(ch)));
+          cou2 = 12500 + ((skill / 4) * ((GET_HIT(ch) / 400) + GET_STR(ch)));
+      case 51: /* Bash */
+          cou1 = 1000 + ((skill / 4) * ((GET_HIT(ch) / 700) + GET_STR(ch)));
+          cou2 = 1000 + ((skill / 4) * ((GET_HIT(ch) / 550) + GET_STR(ch)));
+      case 52: /* Headbutt */
+          cou1 = 800 + ((skill / 4) * ((GET_HIT(ch) / 900) + GET_STR(ch)));
+          cou2 = 800 + ((skill / 4) * ((GET_HIT(ch) / 650) + GET_STR(ch)));
+      case 56: /* TAILWHIP */
+          cou1 = 400 + ((skill / 4) * ((GET_HIT(ch) / 1100) + GET_STR(ch)));
+          cou2 = 400 + ((skill / 4) * ((GET_HIT(ch) / 1000) + GET_STR(ch)));
+  }
+
+  bool ki = false;
+  // Set initial damage value.
+  switch(type) {
+      // h2h commonalities
+      case -1:
+      case 0:
+      case 1:
+      case 2:
+      case 3:
+      case 4:
+      case 5:
+      case 6:
+      case 8:
+          dam = large_rand(cou1, cou2);
+          dam += GET_STR(ch) * (dam * 0.005);
+          break;
+      case 51:
+      case 52:
+      case 56: /* TAILWHIP */
+          dam = large_rand(cou1, cou2);
+          dam += GET_LEVEL(ch) * 100;
+          dam += GET_STR(ch) * (dam * 0.005);
+          break;
+      default: // all ki abilities.
+          dam = GET_MAX_MANA(ch) * percent;
+          ki = true;
+  }
+
+  // ki type move pre-processing
+  switch(type) {
+      case 11: /* Tsuihidan */
+      case 12: /* Renzo */
+      case 23: /* Rogafufuken */
+      case 25: /* Kienzan */
+          dam += GET_LEVEL(ch) * 500;
+      case 13: /* Kamehameha */
+      case 16: /* Galik Gun */
+      case 26: /* Tribeam */
+      case 50: /* Seishou Enko */
+          dam += GET_LEVEL(ch) * 800;
+      case 14: /* Masenko */
+      case 30: /* Darkness Dragon Slash */
+      case 44: /* Spiral Comet 1 */
+      case 45: /* Spiral Comet 2 */
+      case 43: /* Water Spikes */
+          dam += GET_LEVEL(ch) * 1000;
+      case 15: /* Dodonpa */
+      case 17: /* Deathbeam */
+      case 19: /* Twin Slash */
+          dam += GET_LEVEL(ch) * 650;
+      case 18: /* Eraser Cannon */
+      case 33: /* Hell Spear Blast */
+      case 54: /* Zen Blade */
+      case 55: /* Sundering Force */
+          dam += GET_LEVEL(ch) * 700;
+      case 20: /* Psychic Blast */
+      case 27: /* Special Beam Cannon */
+      case 29: /* Crusher Ball */
+      case 37: /* Phoenix Slash */
+          dam += GET_LEVEL(ch) * 1200;
+      case 21: /* Honoo */
+      case 39: /* Spirit ball */
+      case 47: /* Water Razor */
+      case 48: /* Koteiru Bakuha */
+      case 49: /* Hell Spiral */
+          dam += GET_LEVEL(ch) * 900;
+      case 22: /* Dual Beam */
+      case 24: /* Bakuhatsuha */
+          dam += GET_LEVEL(ch) * 600;
+      case 28: /* Final Flash */
+          dam += GET_LEVEL(ch) * 1500;
+      case 31: /* Psychic Barrage */
+      case 36: /* Big Bang */
+          dam += GET_LEVEL(ch) * 1100;
+      case 32: /* Hell Flash */
+      case 46: /* Star Breaker */
+          dam += GET_LEVEL(ch) * 1400;
+      case 34: /* Kakusanha */
+          dam += GET_LEVEL(ch) * 1050;
+      case 35: /* Scatter Shot */
+      case 53: /* Star Nova */
+          dam += GET_LEVEL(ch) * 1600;
+      case 38: /* Deathball */
+          dam += GET_LEVEL(ch) * 1700;
+      case 40: /* Genki Dama */
+      case 41: /* Genocide */
+          dam += GET_LEVEL(ch) * 2000;
+      case 42: /* Kousengan */
+          dam += GET_LEVEL(ch) * 550;
+      case 57: /* Light Grenade */
+          dam += GET_LEVEL(ch) * 1700;
+  }
+
+  if(ki) dam *= 1.25;
+
+
   switch (type) {
    case -1:
-    cou1 = 1 + ((skill / 4) * ((GET_HIT(ch) / 1200) + GET_STR(ch)));
-    cou2 = 1 + ((skill / 4) * ((GET_HIT(ch) / 1000) + GET_STR(ch)));
-    dam = large_rand(cou1, cou2);
-    dam += GET_STR(ch) * (dam * 0.005);
-    if (AFF_FLAGGED(ch, AFF_HASS) && !PLR_FLAGGED(ch, PLR_THANDW)) {
-     dam *= 2;
-     if (IS_KRANE(ch)) {
-      if (GET_SKILL(ch, SKILL_HASSHUKEN) >= 100) {
-       dam += dam * 0.3;
-      } else if (GET_SKILL(ch, SKILL_HASSHUKEN) >= 60) {
-       dam += dam * 0.2;
-      } else if (GET_SKILL(ch, SKILL_HASSHUKEN) >= 40) {
-       dam += dam * 0.1;
-      }
-     }
-    } else if (AFF_FLAGGED(ch, AFF_INFUSE)) {
-     dam += (dam / 100) * (GET_SKILL(ch, SKILL_INFUSE) / 2);
-     if (IS_JINTO(ch)) {
-      if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.5;
-      } else if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.25;
-      } else if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.05;
-      }
-     }
-    }
+    if(!PLR_FLAGGED(ch, PLR_THANDW))
+        damtype_unarmed_hasshuken_or_infuse(ch, &dam);
+
     if (GET_BONUS(ch, BONUS_BRAWLER) > 0) {
      dam += dam * .2;
     }
@@ -3078,728 +3235,193 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent)
     }
    break;
    case 0: /* Punch */
-    cou1 = 15 + ((skill / 4) * ((GET_HIT(ch) / 1600) + GET_STR(ch)));
-    cou2 = 15 + ((skill / 4) * ((GET_HIT(ch) / 1300) + GET_STR(ch)));
-    dam = large_rand(cou1, cou2);
-    dam += GET_STR(ch) * (dam * 0.005);
-    damtype_unarmed(ch, skill, &dam);
-   break;
    case 1: /* Kick */
-    cou1 = 40 + ((skill / 4) * ((GET_HIT(ch) / 1200) + GET_STR(ch)));
-    cou2 = 40 + ((skill / 4) * ((GET_HIT(ch) / 1000) + GET_STR(ch)));
-    dam = large_rand(cou1, cou2);
-    dam += GET_STR(ch) * (dam * 0.005);
-    damtype_unarmed(ch, skill, &dam);
-   break;
    case 2: /* Elbow */
-    cou1 = 100 + ((skill / 4) * ((GET_HIT(ch) / 1300) + GET_STR(ch)));
-    cou2 = 100 + ((skill / 4) * ((GET_HIT(ch) / 1050) + GET_STR(ch)));
-    dam = large_rand(cou1, cou2);
-    dam += GET_STR(ch) * (dam * 0.005);
-    damtype_unarmed(ch, skill, &dam);
-   break;
    case 3: /* Knee */
-    cou1 = 150 + ((skill / 4) * ((GET_HIT(ch) / 1100) + GET_STR(ch)));
-    cou2 = 150 + ((skill / 4) * ((GET_HIT(ch) / 1000) + GET_STR(ch)));
-    dam = large_rand(cou1, cou2);
-    dam += GET_STR(ch) * (dam * 0.005);
-    damtype_unarmed(ch, skill, &dam);
-   break;
    case 4: /* Roundhouse */
-    cou1 = 500 + ((skill / 4) * ((GET_HIT(ch) / 1000) + GET_STR(ch)));
-    cou2 = 500 + ((skill / 4) * ((GET_HIT(ch) / 800) + GET_STR(ch)));
-    dam = large_rand(cou1, cou2);
-    dam += GET_STR(ch) * (dam * 0.005);
-    damtype_unarmed(ch, skill, &dam);
-   break;
    case 5: /* Uppercut */
-    cou1 = 350 + ((skill / 4) * ((GET_HIT(ch) / 1100) + GET_STR(ch)));
-    cou2 = 350 + ((skill / 4) * ((GET_HIT(ch) / 900) + GET_STR(ch)));
-    dam = large_rand(cou1, cou2);
-    dam += GET_STR(ch) * (dam * 0.005);
-    damtype_unarmed(ch, skill, &dam);
-   break;
    case 6: /* Slam */
-    cou1 = 8000 + ((skill / 4) * ((GET_HIT(ch) / 800) + GET_STR(ch)));
-    cou2 = 8000 + ((skill / 4) * ((GET_HIT(ch) / 500) + GET_STR(ch)));
-    dam = large_rand(cou1, cou2);
-    dam += GET_STR(ch) * (dam * 0.005);
-    damtype_unarmed(ch, skill, &dam);
-   break;
-   case 7: /* Kiball */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 1000);
-    }
-    if (IS_HUMAN(ch)) {
-     dam += (dam / 100) * 25;
-    }
-   break;
    case 8: /* Heeldrop */
-   cou1 = 12500 + ((skill / 4) * ((GET_HIT(ch) / 700) + GET_STR(ch)));
-   cou2 = 12500 + ((skill / 4) * ((GET_HIT(ch) / 400) + GET_STR(ch)));
-   dam = large_rand(cou1, cou2);
-   dam += GET_STR(ch) * (dam * 0.005);
-   damtype_unarmed(ch, skill, &dam);
+   case 51: /* Bash */
+   case 52: /* Headbutt */
+      damtype_unarmed(ch, skill, &dam);
+      break;
+   case 56: /* TAILWHIP */
+    damtype_unarmed_infuse(ch, &dam);
+    damtype_unarmed_preference(ch, &dam);
+    break;
+
+   case 7: /* Kiball */
+    damtype_focus(ch, &dam, focus, 1000);
+    damtype_human_ki(ch, &dam, 25);
    break;
    case 9: /* Kiblast */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 500);
-    }
-    if (IS_HUMAN(ch)) {
-     dam += (dam / 100) * 25;
-    }
+    damtype_focus(ch, &dam, focus, 500);
+    damtype_human_ki(ch, &dam, 25);
    break;
    case 10: /* Beam/Shog */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-    if (IS_HUMAN(ch)) {
-     dam += (dam / 100) * 25;
-    }
-   break;
    case 11: /* Tsuihidan */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 500;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-    if (IS_HUMAN(ch)) {
-     dam += (dam / 100) * 25;
-    }
-   break;
    case 12: /* Renzo */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 500;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-    if (IS_HUMAN(ch)) {
-     dam += (dam / 100) * 25;
-    }
+    damtype_focus(ch, &dam, focus, 200);
+    damtype_human_ki(ch, &dam, 25);
    break;
    case 13: /* Kamehameha */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 800;
-    dam += dam * 0.25;
     if (focus > 0) {
      dam += (dam * 0.005) * focus;
     }
-    if (IS_HUMAN(ch)) {
-     dam += (dam / 100) * 15;
-     if (skill == 101) {
-      dam = dam * 1.1;
-     } else if (skill == 102) {
-      dam = dam * 1.2;
-     } else if (skill == 103) {
-      dam = dam * 1.3;
-     }
-    }
+    damtype_human_grandmaster(ch, skill, &dam);
+    damtype_human_ki(ch, &dam, 15);
    break;
    case 14: /* Masenko */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 1000;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-    if (IS_HUMAN(ch)) {
-     dam += (dam / 100) * 15;
-     if (skill == 101) {
-      dam = dam * 1.1;
-     } else if (skill == 102) {
-      dam = dam * 1.2;
-     } else if (skill == 103) {
-      dam = dam * 1.3;
-     }
-    }
-   break;
    case 15: /* Dodonpa */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 650;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-    if (IS_HUMAN(ch)) {
-     dam += (dam / 100) * 15;
-     if (skill == 101) {
-      dam = dam * 1.1;
-     } else if (skill == 102) {
-      dam = dam * 1.2;
-     } else if (skill == 103) {
-      dam = dam * 1.3;
-     }
-    }
-   break;
    case 16: /* Galik Gun */
-    dam += GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 800;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-    if (IS_HUMAN(ch)) {
-     dam += (dam / 100) * 15;
-     if (skill == 101) {
-      dam = dam * 1.1;
-     } else if (skill == 102) {
-      dam = dam * 1.2;
-     } else if (skill == 103) {
-      dam = dam * 1.3;
-     }
-    }
-   break;
    case 17: /* Deathbeam */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 650;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-    if (IS_HUMAN(ch)) {
-     dam += (dam / 100) * 15;
-     if (skill == 101) {
-      dam = dam * 1.1;
-     } else if (skill == 102) {
-      dam = dam * 1.2;
-     } else if (skill == 103) {
-      dam = dam * 1.3;
-     }
-    }
-   break;
    case 18: /* Eraser Cannon */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 700;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-    if (IS_HUMAN(ch)) {
-     dam += (dam / 100) * 15;
-     if (skill == 101) {
-      dam = dam * 1.1;
-     } else if (skill == 102) {
-      dam = dam * 1.2;
-     } else if (skill == 103) {
-      dam = dam * 1.3;
-     }
-    }
-   break;
    case 19: /* Twin Slash */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 650;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-    if (IS_HUMAN(ch)) {
-     dam += (dam / 100) * 15;
-     if (skill == 101) {
-      dam = dam * 1.1;
-     } else if (skill == 102) {
-      dam = dam * 1.2;
-     } else if (skill == 103) {
-      dam = dam * 1.3;
-     }
-    }
-   break;
    case 20: /* Psychic Blast */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 1200;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-    if (IS_HUMAN(ch)) {
-     dam += (dam / 100) * 15;
-     if (skill == 101) {
-      dam = dam * 1.1;
-     } else if (skill == 102) {
-      dam = dam * 1.2;
-     } else if (skill == 103) {
-      dam = dam * 1.3;
-     }
-    }
-   break;
    case 21: /* Honoo */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 900;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-    if (IS_HUMAN(ch)) {
-     dam += (dam / 100) * 15;
-     if (skill == 101) {
-      dam = dam * 1.1;
-     } else if (skill == 102) {
-      dam = dam * 1.2;
-     } else if (skill == 103) {
-      dam = dam * 1.3;
-     }
-    }
+   case 24: /* Bakuhatsuha */
+    damtype_focus(ch, &dam, focus, 200);
+    damtype_human_ki(ch, &dam, 15);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 22: /* Dual Beam */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 600;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
+    damtype_focus(ch, &dam, focus, 200);
    break;
    case 23: /* Rogafufuken */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 500;
-    dam *= 1.25;
     dam += (dam / 100) * GET_STR(ch);
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
+    damtype_focus(ch, &dam, focus, 200);
     if (GET_BONUS(ch, BONUS_BRAWLER) > 0) {
      dam += dam * .2;
     }
-    if (IS_HUMAN(ch) && skill == 101) {
-     dam = dam * 1.1;
-    } else if (IS_HUMAN(ch) && skill == 102) {
-     dam = dam * 1.2;
-    } else if (IS_HUMAN(ch) && skill == 103) {
-     dam = dam * 1.3;
-    }
-   break;
-   case 24: /* Bakuhatsuha */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 600;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-    if (IS_HUMAN(ch)) {
-     dam += (dam / 100) * 15;
-    }
-     if (IS_HUMAN(ch) && skill == 101) {
-      dam = dam * 1.1;
-     } else if (IS_HUMAN(ch) && skill == 102) {
-      dam = dam * 1.2;
-     } else if (IS_HUMAN(ch) && skill == 103) {
-      dam = dam * 1.3;
-     }
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 25: /* Kienzan */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 500;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-    if (IS_SAIYAN(ch)) {
-     dam += (dam / 100) * 20;
-    }
-     if (IS_HUMAN(ch) && skill == 101) {
-      dam = dam * 1.1;
-     } else if (IS_HUMAN(ch) && skill == 102) {
-      dam = dam * 1.2;
-     } else if (IS_HUMAN(ch) && skill == 103) {
-      dam = dam * 1.3;
-     }
+    damtype_focus(ch, &dam, focus, 200);
+    damtype_saiyan_ki(ch, &dam, 20);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 26: /* Tribeam */
+
     if (!IS_NPC(ch) && percent > 0.15) {
      double hitperc = (percent - 0.15) * 5;
      int64_t amount = gear_pl(ch) * hitperc;
      int64_t difference = GET_HIT(ch) - amount;
 
      if (difference < 1) {
-      dam = GET_MAX_MANA(ch) * percent;
-      dam += GET_LEVEL(ch) * 800;
-      dam *= 1.25;
       dam += GET_HIT(ch) - 1;
       GET_HIT(ch) = 1;
      } else {
       GET_HIT(ch) = difference;
-      dam = GET_MAX_MANA(ch) * percent;
-      dam += GET_LEVEL(ch) * 800;
-      dam *= 1.25;
       dam += amount;
      }
-     if (focus > 0) {
-      dam += focus * (dam / 200);
-     }
+     damtype_focus(ch, &dam, focus, 200);
    } else {
-     dam = GET_MAX_MANA(ch) * percent;
-     dam += GET_LEVEL(ch) * 800;
-     dam *= 1.25;
-     if (focus > 0) {
-      dam += focus * (dam / 200);
-     }
+        damtype_focus(ch, &dam, focus, 200);
    }
-   if (IS_SAIYAN(ch)) {
-     dam += (dam / 100) * 20;
-    }
-     if (IS_HUMAN(ch) && skill == 101) {
-      dam = dam * 1.1;
-     } else if (IS_HUMAN(ch) && skill == 102) {
-      dam = dam * 1.2;
-     } else if (IS_HUMAN(ch) && skill == 103) {
-      dam = dam * 1.3;
-     }
+    damtype_saiyan_ki(ch, &dam, 20);
+   damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 27: /* Special Beam Cannon */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 1200;
-    dam *= 1.25;
     dam += (dam / 100) * GET_INT(ch);
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-    if (IS_SAIYAN(ch)) {
-     dam += (dam / 100) * 20;
-    }
-     if (IS_HUMAN(ch) && skill == 101) {
-      dam = dam * 1.1;
-     } else if (IS_HUMAN(ch) && skill == 102) {
-      dam = dam * 1.2;
-     } else if (IS_HUMAN(ch) && skill == 103) {
-      dam = dam * 1.3;
-     }
+    damtype_focus(ch, &dam, focus, 200);
+    damtype_saiyan_ki(ch, &dam, 20);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 28: /* Final Flash */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 1500;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-    if (IS_SAIYAN(ch)) {
-     dam += (dam / 100) * 20;
-    }
-     if (IS_HUMAN(ch) && skill == 101) {
-      dam = dam * 1.1;
-     } else if (IS_HUMAN(ch) && skill == 102) {
-      dam = dam * 1.2;
-     } else if (IS_HUMAN(ch) && skill == 103) {
-      dam = dam * 1.3;
-     }
+    damtype_focus(ch, &dam, focus, 200);
+    damtype_saiyan_ki(ch, &dam, 20);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 29: /* Crusher Ball */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 1200;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-     if (IS_HUMAN(ch) && skill == 101) {
-      dam = dam * 1.1;
-     } else if (IS_HUMAN(ch) && skill == 102) {
-      dam = dam * 1.2;
-     } else if (IS_HUMAN(ch) && skill == 103) {
-      dam = dam * 1.3;
-     }
+    damtype_focus(ch, &dam, focus, 200);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 30: /* Darkness Dragon Slash */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 1000;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-    if (IS_SAIYAN(ch)) {
-     dam += (dam / 100) * 20;
-    }
-     if (IS_HUMAN(ch) && skill == 101) {
-      dam = dam * 1.1;
-     } else if (IS_HUMAN(ch) && skill == 102) {
-      dam = dam * 1.2;
-     } else if (IS_HUMAN(ch) && skill == 103) {
-      dam = dam * 1.3;
-     }
+    damtype_focus(ch, &dam, focus, 200);
+    damtype_saiyan_ki(ch, &dam, 20);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 31: /* Psychic Barrage */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 1100;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-    if (IS_SAIYAN(ch)) {
-     dam += (dam / 100) * 20;
-    }
-     if (IS_HUMAN(ch) && skill == 101) {
-      dam = dam * 1.1;
-     } else if (IS_HUMAN(ch) && skill == 102) {
-      dam = dam * 1.2;
-     } else if (IS_HUMAN(ch) && skill == 103) {
-      dam = dam * 1.3;
-     }
+    damtype_focus(ch, &dam, focus, 200);
+    damtype_saiyan_ki(ch, &dam, 20);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 32: /* Hell Flash */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 1400;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-     if (IS_HUMAN(ch) && skill == 101) {
-      dam = dam * 1.1;
-     } else if (IS_HUMAN(ch) && skill == 102) {
-      dam = dam * 1.2;
-     } else if (IS_HUMAN(ch) && skill == 103) {
-      dam = dam * 1.3;
-     }
+    damtype_focus(ch, &dam, focus, 200);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 33: /* Hell Spear Blast */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 700;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-    if (IS_SAIYAN(ch)) {
-     dam += (dam / 100) * 20;
-    }
+    damtype_focus(ch, &dam, focus, 200);
+    damtype_saiyan_ki(ch, &dam, 20);
    break;
    case 34: /* Kakusanha */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 1050;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-    if (IS_ICER(ch) || (IS_BIO(ch) && (GET_GENOME(ch, 0) == 4 || GET_GENOME(ch, 1) == 4))) {
-     dam += (dam / 100) * 20;
-    }
-     if (IS_HUMAN(ch) && skill == 101) {
-      dam = dam * 1.1;
-     } else if (IS_HUMAN(ch) && skill == 102) {
-      dam = dam * 1.2;
-     } else if (IS_HUMAN(ch) && skill == 103) {
-      dam = dam * 1.3;
-     }
+    damtype_focus(ch, &dam, focus, 200);
+    damtype_icer_ki(ch, &dam, 20);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 35: /* Scatter Shot */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 1600;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-    if (IS_ICER(ch) || (IS_BIO(ch) && (GET_GENOME(ch, 0) == 4 || GET_GENOME(ch, 1) == 4))) {
-     dam += (dam / 100) * 20;
-    }
-     if (IS_HUMAN(ch) && skill == 101) {
-      dam = dam * 1.1;
-     } else if (IS_HUMAN(ch) && skill == 102) {
-      dam = dam * 1.2;
-     } else if (IS_HUMAN(ch) && skill == 103) {
-      dam = dam * 1.3;
-     }
+    damtype_focus(ch, &dam, focus, 200);
+    damtype_icer_ki(ch, &dam, 20);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 36: /* Big Bang */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 1100;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-    if (IS_ICER(ch) || (IS_BIO(ch) && (GET_GENOME(ch, 0) == 4 || GET_GENOME(ch, 1) == 4))) {
-     dam += (dam / 100) * 20;
-    }
-     if (IS_HUMAN(ch) && skill == 101) {
-      dam = dam * 1.1;
-     } else if (IS_HUMAN(ch) && skill == 102) {
-      dam = dam * 1.2;
-     } else if (IS_HUMAN(ch) && skill == 103) {
-      dam = dam * 1.3;
-     }
+    damtype_focus(ch, &dam, focus, 200);
+    damtype_icer_ki(ch, &dam, 20);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 37: /* Phoenix Slash */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 1200;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-    if (IS_ICER(ch) || (IS_BIO(ch) && (GET_GENOME(ch, 0) == 4 || GET_GENOME(ch, 1) == 4))) {
-     dam += (dam / 100) * 20;
-    }
-     if (IS_HUMAN(ch) && skill == 101) {
-      dam = dam * 1.1;
-     } else if (IS_HUMAN(ch) && skill == 102) {
-      dam = dam * 1.2;
-     } else if (IS_HUMAN(ch) && skill == 103) {
-      dam = dam * 1.3;
-     }
+    damtype_focus(ch, &dam, focus, 200);
+    damtype_icer_ki(ch, &dam, 20);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 38: /* Deathball */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 1700;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-    if (IS_ICER(ch) || (IS_BIO(ch) && (GET_GENOME(ch, 0) == 4 || GET_GENOME(ch, 1) == 4))) {
-     dam += (dam / 100) * 20;
-    }
-     if (IS_HUMAN(ch) && skill == 101) {
-      dam = dam * 1.1;
-     } else if (IS_HUMAN(ch) && skill == 102) {
-      dam = dam * 1.2;
-     } else if (IS_HUMAN(ch) && skill == 103) {
-      dam = dam * 1.3;
-     }
+    damtype_focus(ch, &dam, focus, 200);
+    damtype_icer_ki(ch, &dam, 20);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 39: /* Spirit ball */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 900;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-    if (IS_ICER(ch) || (IS_BIO(ch) && (GET_GENOME(ch, 0) == 4 || GET_GENOME(ch, 1) == 4))) {
-     dam += (dam / 100) * 20;
-    }
-     if (IS_HUMAN(ch) && skill == 101) {
-      dam = dam * 1.1;
-     } else if (IS_HUMAN(ch) && skill == 102) {
-      dam = dam * 1.2;
-     } else if (IS_HUMAN(ch) && skill == 103) {
-      dam = dam * 1.3;
-     }
+    damtype_focus(ch, &dam, focus, 200);
+    damtype_icer_ki(ch, &dam, 20);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 40: /* Genki Dama */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 2000;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-    if (IS_KAI(ch)) {
-     dam += (dam / 100) * 20;
-    }
-     if (IS_HUMAN(ch) && skill == 101) {
-      dam = dam * 1.1;
-     } else if (IS_HUMAN(ch) && skill == 102) {
-      dam = dam * 1.2;
-     } else if (IS_HUMAN(ch) && skill == 103) {
-      dam = dam * 1.3;
-     }
+    damtype_focus(ch, &dam, focus, 200);
+    damtype_kai_ki(ch, &dam, 20);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 41: /* Genocide */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 2000;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-    if (IS_KAI(ch)) {
-     dam += (dam / 100) * 20;
-    }
-     if (IS_HUMAN(ch) && skill == 101) {
-      dam = dam * 1.1;
-     } else if (IS_HUMAN(ch) && skill == 102) {
-      dam = dam * 1.2;
-     } else if (IS_HUMAN(ch) && skill == 103) {
-      dam = dam * 1.3;
-     }
+    damtype_focus(ch, &dam, focus, 200);
+    damtype_kai_ki(ch, &dam, 20);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 42: /* Kousengan */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 550;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-     if (IS_HUMAN(ch) && skill == 101) {
-      dam = dam * 1.1;
-     } else if (IS_HUMAN(ch) && skill == 102) {
-      dam = dam * 1.2;
-     } else if (IS_HUMAN(ch) && skill == 103) {
-      dam = dam * 1.3;
-     }
+    damtype_focus(ch, &dam, focus, 200);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 43: /* Water Spikes */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 1000;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-     if (IS_HUMAN(ch) && skill == 101) {
-      dam = dam * 1.1;
-     } else if (IS_HUMAN(ch) && skill == 102) {
-      dam = dam * 1.2;
-     } else if (IS_HUMAN(ch) && skill == 103) {
-      dam = dam * 1.3;
-     }
+    damtype_focus(ch, &dam, focus, 200);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 44: /* Spiral Comet 1 */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 1000;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-     if (IS_HUMAN(ch) && skill == 101) {
-      dam = dam * 1.1;
-     } else if (IS_HUMAN(ch) && skill == 102) {
-      dam = dam * 1.2;
-     } else if (IS_HUMAN(ch) && skill == 103) {
-      dam = dam * 1.3;
-     }
+    damtype_focus(ch, &dam, focus, 200);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 45: /* Spiral Comet 2 */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 1000;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-     if (IS_HUMAN(ch) && skill == 101) {
-      dam = dam * 1.1;
-     } else if (IS_HUMAN(ch) && skill == 102) {
-      dam = dam * 1.2;
-     } else if (IS_HUMAN(ch) && skill == 103) {
-      dam = dam * 1.3;
-     }
+    damtype_focus(ch, &dam, focus, 200);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 46: /* Star Breaker */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 1400;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
+    damtype_focus(ch, &dam, focus, 200);
    break;
    case 47: /* Water Razor */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 900;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
+    damtype_focus(ch, &dam, focus, 200);
    break;
    case 48: /* Koteiru Bakuha */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 900;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
+    damtype_focus(ch, &dam, focus, 200);
    break;
    case 49: /* Hell Spiral */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 900;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
+    damtype_focus(ch, &dam, focus, 200);
     if (!IS_NPC(ch)) {
      if (PLR_FLAGGED(ch, PLR_TRANS6)) {
       dam += dam;
@@ -3817,89 +3439,23 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent)
     }
    break;
    case 50: /* Seishou Enko */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 800;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-    break;
-   case 51: /* Bash */
-    cou1 = 1000 + ((skill / 4) * ((GET_HIT(ch) / 700) + GET_STR(ch)));
-    cou2 = 1000 + ((skill / 4) * ((GET_HIT(ch) / 550) + GET_STR(ch)));
-    dam = large_rand(cou1, cou2);
-    dam += GET_LEVEL(ch) * 100;
-    dam += GET_STR(ch) * (dam * 0.005);
-    damtype_unarmed(ch, skill, &dam);
-    break;
-   case 52: /* Headbutt */
-    cou1 = 800 + ((skill / 4) * ((GET_HIT(ch) / 900) + GET_STR(ch)));
-    cou2 = 800 + ((skill / 4) * ((GET_HIT(ch) / 650) + GET_STR(ch)));
-    dam = large_rand(cou1, cou2);
-    dam += GET_LEVEL(ch) * 100;
-    dam += GET_STR(ch) * (dam * 0.005);
-    damtype_unarmed(ch, skill, &dam);
+    damtype_focus(ch, &dam, focus, 200);
     break;
    case 53: /* Star Nova */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 1600;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-    if (IS_HUMAN(ch)) {
-     dam += (dam / 100) * 15;
-    }
+    damtype_focus(ch, &dam, focus, 200);
+    damtype_human_ki(ch, &dam, 15);
    break;
    case 54: /* Zen Blade */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 700;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-    if (IS_SAIYAN(ch)) {
-     dam += (dam / 100) * 20;
-    }
-     if (IS_HUMAN(ch) && skill == 101) {
-      dam = dam * 1.1;
-     } else if (IS_HUMAN(ch) && skill == 102) {
-      dam = dam * 1.2;
-     } else if (IS_HUMAN(ch) && skill == 103) {
-      dam = dam * 1.3;
-     }
+    damtype_focus(ch, &dam, focus, 200);
+    damtype_saiyan_ki(ch, &dam, 20);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 55: /* Sundering Force */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 700;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
-     if (IS_HUMAN(ch) && skill == 101) {
-      dam = dam * 1.1;
-     } else if (IS_HUMAN(ch) && skill == 102) {
-      dam = dam * 1.2;
-     } else if (IS_HUMAN(ch) && skill == 103) {
-      dam = dam * 1.3;
-     }
-   break;
-   case 56: /* TAILWHIP */
-   cou1 = 400 + ((skill / 4) * ((GET_HIT(ch) / 1100) + GET_STR(ch)));
-   cou2 = 400 + ((skill / 4) * ((GET_HIT(ch) / 1000) + GET_STR(ch)));
-   dam = large_rand(cou1, cou2);
-   dam += GET_LEVEL(ch) * 100;
-   dam += GET_STR(ch) * (dam * 0.005);
-   damtype_unarmed_infuse(ch, &dam);
-   damtype_unarmed_preference(ch, &dam);
+    damtype_focus(ch, &dam, focus, 200);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 57: /* Light Grenade */
-    dam = GET_MAX_MANA(ch) * percent;
-    dam += GET_LEVEL(ch) * 1700;
-    dam *= 1.25;
-    if (focus > 0) {
-     dam += focus * (dam / 200);
-    }
+    damtype_focus(ch, &dam, focus, 200);
    break;
   }
  }
