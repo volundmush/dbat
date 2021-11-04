@@ -2918,6 +2918,104 @@ void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2,
   }
 }
 
+static void damtype_unarmed_infuse(char_data *ch, int64_t *dam) {
+    if (AFF_FLAGGED(ch, AFF_INFUSE)) {
+        *dam += (*dam / 100) * (GET_SKILL(ch, SKILL_INFUSE) / 2);
+        if (IS_JINTO(ch)) {
+            if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
+                *dam += ((*dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.5;
+            } else if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
+                *dam += ((*dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.25;
+            } else if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
+                *dam += ((*dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.05;
+            }
+        }
+    }
+}
+
+static void damtype_unarmed_hasshuken(char_data *ch, int64_t *dam) {
+    if (AFF_FLAGGED(ch, AFF_HASS)) {
+        *dam *= 2;
+        if (IS_KRANE(ch)) {
+            if (GET_SKILL(ch, SKILL_HASSHUKEN) >= 100) {
+                *dam += *dam * 0.3;
+            } else if (GET_SKILL(ch, SKILL_HASSHUKEN) >= 60) {
+                *dam += *dam * 0.2;
+            } else if (GET_SKILL(ch, SKILL_HASSHUKEN) >= 40) {
+                *dam += *dam * 0.1;
+            }
+        }
+    }
+}
+
+static void damtype_unarmed_hasshuken_or_infuse(char_data *ch, int64_t *dam) {
+    if(AFF_FLAGGED(ch, AFF_HASS)) {
+        damtype_unarmed_hasshuken(ch, dam);
+    } else {
+        damtype_unarmed_infuse(ch, dam);
+    }
+}
+
+static void damtype_unarmed_preference(char_data *ch, int64_t *dam) {
+    if (GET_PREFERENCE(ch) == PREFERENCE_THROWING) {
+        *dam -= *dam * 0.15;
+    } else if (GET_PREFERENCE(ch) == PREFERENCE_H2H) {
+        *dam += *dam * 0.20;
+    }
+}
+
+static void damtype_unarmed(char_data *ch, int skill, int64_t *dam) {
+    // General Arlian bonus.
+    if (IS_ARLIAN(ch)) {
+        *dam += *dam * 0.02;
+    }
+
+    // Sixteen's Iron Hand Bonus.
+    if (IS_ANDSIX(ch)) {
+        if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
+            *dam += *dam * 0.1;
+    }
+
+    // Brawler bonus
+    if (GET_BONUS(ch, BONUS_BRAWLER) > 0) {
+        *dam += *dam * .2;
+    }
+
+    switch(skill) {
+        // Punch.
+        case 0:
+            damtype_unarmed_hasshuken_or_infuse(ch, dam);
+            // Kame Arts bonus.
+            if (IS_ROSHI(ch)) {
+                if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
+                    *dam += *dam * 0.2;
+            }
+        // Kick
+        case 1:
+            damtype_unarmed_infuse(ch, dam);
+            // Crane Arts
+            if (IS_KRANE(ch)) {
+                if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
+                    *dam += *dam * 0.2;
+            }
+
+        case 2: // Elbow
+        case 5: // Uppercut
+            damtype_unarmed_hasshuken_or_infuse(ch, dam);
+            break;
+        case 3:
+        case 4:
+        case 6:
+        case 8:
+        case 51:
+        case 52:
+            damtype_unarmed_infuse(ch, dam);
+    }
+
+    damtype_unarmed_preference(ch, dam);
+
+}
+
 /* Damage for player and NPC attacks  */
 int64_t damtype(struct char_data *ch, int type, int skill, double percent)
 {
@@ -2984,264 +3082,49 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent)
     cou2 = 15 + ((skill / 4) * ((GET_HIT(ch) / 1300) + GET_STR(ch)));
     dam = large_rand(cou1, cou2);
     dam += GET_STR(ch) * (dam * 0.005);
-    if (IS_ARLIAN(ch)) {
-     dam += dam * 0.02;
-    }
-    if (AFF_FLAGGED(ch, AFF_HASS)) {
-     dam *= 2;
-     if (IS_KRANE(ch)) {
-      if (GET_SKILL(ch, SKILL_HASSHUKEN) >= 100) {
-       dam += dam * 0.3;
-      } else if (GET_SKILL(ch, SKILL_HASSHUKEN) >= 60) {
-       dam += dam * 0.2;
-      } else if (GET_SKILL(ch, SKILL_HASSHUKEN) >= 40) {
-       dam += dam * 0.1;
-      }
-     }
-    } else if (AFF_FLAGGED(ch, AFF_INFUSE)) {
-     dam += (dam / 100) * (GET_SKILL(ch, SKILL_INFUSE) / 2);
-     if (IS_JINTO(ch)) {
-      if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.5;
-      } else if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.25;
-      } else if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.05;
-      }
-     }
-    }
-    if (GET_BONUS(ch, BONUS_BRAWLER) > 0) {
-     dam += dam * .2;
-    }
-    if (IS_ROSHI(ch)) {
-     if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
-      dam += dam * 0.2;
-    } else if (IS_ANDSIX(ch)) {
-     if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
-      dam += dam * 0.1;
-    }
-    if (GET_PREFERENCE(ch) == PREFERENCE_THROWING) {
-     dam -= dam * 0.15;
-    } else if (GET_PREFERENCE(ch) == PREFERENCE_H2H) {
-     dam += dam * 0.20;
-    }
+    damtype_unarmed(ch, skill, &dam);
    break;
    case 1: /* Kick */
     cou1 = 40 + ((skill / 4) * ((GET_HIT(ch) / 1200) + GET_STR(ch)));
     cou2 = 40 + ((skill / 4) * ((GET_HIT(ch) / 1000) + GET_STR(ch)));
     dam = large_rand(cou1, cou2);
     dam += GET_STR(ch) * (dam * 0.005);
-    if (IS_ARLIAN(ch)) {
-     dam += dam * 0.02;
-    }
-    if (AFF_FLAGGED(ch, AFF_INFUSE)) {
-     dam += (dam / 100) * (GET_SKILL(ch, SKILL_INFUSE) / 2);
-     if (IS_JINTO(ch)) {
-      if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.5;
-      } else if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.25;
-      } else if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.05;
-      }
-     }
-    }
-    if (IS_ANDSIX(ch)) {
-     if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
-      dam += dam * 0.1;
-    } if (IS_KRANE(ch)) {
-     if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
-      dam += dam * 0.2;
-    }
-    if (GET_PREFERENCE(ch) == PREFERENCE_THROWING) {
-     dam -= dam * 0.15;
-    } else if (GET_PREFERENCE(ch) == PREFERENCE_H2H) {
-     dam += dam * 0.20;
-    }
+    damtype_unarmed(ch, skill, &dam);
    break;
    case 2: /* Elbow */
     cou1 = 100 + ((skill / 4) * ((GET_HIT(ch) / 1300) + GET_STR(ch)));
     cou2 = 100 + ((skill / 4) * ((GET_HIT(ch) / 1050) + GET_STR(ch)));
     dam = large_rand(cou1, cou2);
     dam += GET_STR(ch) * (dam * 0.005);
-    if (IS_ARLIAN(ch)) {
-     dam += dam * 0.02;
-    }
-    if (AFF_FLAGGED(ch, AFF_HASS)) {
-     dam *= 2;
-     if (IS_KRANE(ch)) {
-      if (GET_SKILL(ch, SKILL_HASSHUKEN) >= 100) {
-       dam += dam * 0.3;
-      } else if (GET_SKILL(ch, SKILL_HASSHUKEN) >= 60) {
-       dam += dam * 0.2;
-      } else if (GET_SKILL(ch, SKILL_HASSHUKEN) >= 40) {
-       dam += dam * 0.1;
-      }
-     }
-    } else if (AFF_FLAGGED(ch, AFF_INFUSE)) {
-     dam += (dam / 100) * (GET_SKILL(ch, SKILL_INFUSE) / 2);
-     if (IS_JINTO(ch)) {
-      if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.5;
-      } else if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.25;
-      } else if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.05;
-      }
-     }
-    }
-    if (GET_BONUS(ch, BONUS_BRAWLER) > 0) {
-     dam += dam * .2;
-    }
-    if (IS_ANDSIX(ch)) {
-     if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
-      dam += dam * 0.1;
-    }
-    if (GET_PREFERENCE(ch) == PREFERENCE_THROWING) {
-     dam -= dam * 0.15;
-    } else if (GET_PREFERENCE(ch) == PREFERENCE_H2H) {
-     dam += dam * 0.20;
-    }
+    damtype_unarmed(ch, skill, &dam);
    break;
    case 3: /* Knee */
     cou1 = 150 + ((skill / 4) * ((GET_HIT(ch) / 1100) + GET_STR(ch)));
     cou2 = 150 + ((skill / 4) * ((GET_HIT(ch) / 1000) + GET_STR(ch)));
     dam = large_rand(cou1, cou2);
     dam += GET_STR(ch) * (dam * 0.005);
-    if (IS_ARLIAN(ch)) {
-     dam += dam * 0.02;
-    }
-    if (AFF_FLAGGED(ch, AFF_INFUSE)) {
-     dam += (dam / 100) * (GET_SKILL(ch, SKILL_INFUSE) / 2);
-     if (IS_JINTO(ch)) {
-      if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.5;
-      } else if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.25;
-      } else if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.05;
-      }
-     }
-    }
-    if (IS_ANDSIX(ch)) {
-     if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
-      dam += dam * 0.1;
-    }
-    if (GET_PREFERENCE(ch) == PREFERENCE_THROWING) {
-     dam -= dam * 0.15;
-    } else if (GET_PREFERENCE(ch) == PREFERENCE_H2H) {
-     dam += dam * 0.20;
-    }
+    damtype_unarmed(ch, skill, &dam);
    break;
    case 4: /* Roundhouse */
     cou1 = 500 + ((skill / 4) * ((GET_HIT(ch) / 1000) + GET_STR(ch)));
     cou2 = 500 + ((skill / 4) * ((GET_HIT(ch) / 800) + GET_STR(ch)));
     dam = large_rand(cou1, cou2);
     dam += GET_STR(ch) * (dam * 0.005);
-    if (IS_ARLIAN(ch)) {
-     dam += dam * 0.02;
-    }
-    if (AFF_FLAGGED(ch, AFF_INFUSE)) {
-     dam += (dam / 100) * (GET_SKILL(ch, SKILL_INFUSE) / 2);
-     if (IS_JINTO(ch)) {
-      if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.5;
-      } else if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.25;
-      } else if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.05;
-      }
-     }
-    }
-    if (GET_BONUS(ch, BONUS_BRAWLER) > 0) {
-     dam += dam * .2;
-    }
-    if (IS_ANDSIX(ch)) {
-     if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
-      dam += dam * 0.1;
-    }
-    if (GET_PREFERENCE(ch) == PREFERENCE_THROWING) {
-     dam -= dam * 0.15;
-    } else if (GET_PREFERENCE(ch) == PREFERENCE_H2H) {
-     dam += dam * 0.20;
-    }
+    damtype_unarmed(ch, skill, &dam);
    break;
    case 5: /* Uppercut */
     cou1 = 350 + ((skill / 4) * ((GET_HIT(ch) / 1100) + GET_STR(ch)));
     cou2 = 350 + ((skill / 4) * ((GET_HIT(ch) / 900) + GET_STR(ch)));
     dam = large_rand(cou1, cou2);
     dam += GET_STR(ch) * (dam * 0.005);
-    if (IS_ARLIAN(ch)) {
-     dam += dam * 0.02;
-    }
-    if (AFF_FLAGGED(ch, AFF_HASS)) {
-     dam *= 2;
-     if (IS_KRANE(ch)) {
-      if (GET_SKILL(ch, SKILL_HASSHUKEN) >= 100) {
-       dam += dam * 0.3;
-      } else if (GET_SKILL(ch, SKILL_HASSHUKEN) >= 60) {
-       dam += dam * 0.2;
-      } else if (GET_SKILL(ch, SKILL_HASSHUKEN) >= 40) {
-       dam += dam * 0.1;
-      }
-     }
-    } else if (AFF_FLAGGED(ch, AFF_INFUSE)) {
-     dam += (dam / 100) * (GET_SKILL(ch, SKILL_INFUSE) / 2);
-     if (IS_JINTO(ch)) {
-      if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.5;
-      } else if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.25;
-      } else if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.05;
-      }
-     }
-    }
-    if (GET_BONUS(ch, BONUS_BRAWLER) > 0) {
-     dam += dam * .2;
-    }
-    if (IS_ANDSIX(ch)) {
-     if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
-      dam += dam * 0.1;
-    }
-    if (GET_PREFERENCE(ch) == PREFERENCE_THROWING) {
-     dam -= dam * 0.15;
-    } else if (GET_PREFERENCE(ch) == PREFERENCE_H2H) {
-     dam += dam * 0.20;
-    }
+    damtype_unarmed(ch, skill, &dam);
    break;
    case 6: /* Slam */
     cou1 = 8000 + ((skill / 4) * ((GET_HIT(ch) / 800) + GET_STR(ch)));
     cou2 = 8000 + ((skill / 4) * ((GET_HIT(ch) / 500) + GET_STR(ch)));
     dam = large_rand(cou1, cou2);
     dam += GET_STR(ch) * (dam * 0.005);
-    if (IS_ARLIAN(ch)) {
-     dam += dam * 0.02;
-    }
-    if (AFF_FLAGGED(ch, AFF_INFUSE)) {
-     dam += (dam / 100) * (GET_SKILL(ch, SKILL_INFUSE) / 2);
-     if (IS_JINTO(ch)) {
-      if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.5;
-      } else if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.25;
-      } else if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.05;
-      }
-     }
-    }
-    if (GET_BONUS(ch, BONUS_BRAWLER) > 0) {
-     dam += dam * .2;
-    }
-    if (IS_ANDSIX(ch)) {
-     if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
-      dam += dam * 0.1;
-    }
-    if (GET_PREFERENCE(ch) == PREFERENCE_THROWING) {
-     dam -= dam * 0.15;
-    } else if (GET_PREFERENCE(ch) == PREFERENCE_H2H) {
-     dam += dam * 0.20;
-    }
+    damtype_unarmed(ch, skill, &dam);
    break;
    case 7: /* Kiball */
     dam = GET_MAX_MANA(ch) * percent;
@@ -3258,33 +3141,7 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent)
    cou2 = 12500 + ((skill / 4) * ((GET_HIT(ch) / 400) + GET_STR(ch)));
    dam = large_rand(cou1, cou2);
    dam += GET_STR(ch) * (dam * 0.005);
-   if (IS_ARLIAN(ch)) {
-    dam += dam * 0.02;
-   }
-   if (AFF_FLAGGED(ch, AFF_INFUSE)) {
-    dam += (dam / 100) * (GET_SKILL(ch, SKILL_INFUSE) / 2);
-     if (IS_JINTO(ch)) {
-      if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.5;
-      } else if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.25;
-      } else if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.05;
-      }
-     }
-   }
-   if (GET_BONUS(ch, BONUS_BRAWLER) > 0) {
-    dam += dam * .2;
-   }
-   if (IS_ANDSIX(ch)) {
-    if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
-     dam += dam * 0.1;
-   }
-    if (GET_PREFERENCE(ch) == PREFERENCE_THROWING) {
-     dam -= dam * 0.15;
-    } else if (GET_PREFERENCE(ch) == PREFERENCE_H2H) {
-     dam += dam * 0.20;
-    }
+   damtype_unarmed(ch, skill, &dam);
    break;
    case 9: /* Kiblast */
     dam = GET_MAX_MANA(ch) * percent;
@@ -3973,33 +3830,7 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent)
     dam = large_rand(cou1, cou2);
     dam += GET_LEVEL(ch) * 100;
     dam += GET_STR(ch) * (dam * 0.005);
-    if (IS_ARLIAN(ch)) {
-     dam += dam * 0.02;
-    }
-    if (GET_BONUS(ch, BONUS_BRAWLER) > 0) {
-     dam += dam * .2;
-    }
-    if (IS_ANDSIX(ch)) {
-     if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
-      dam += dam * 0.1;
-    }
-    if (GET_PREFERENCE(ch) == PREFERENCE_THROWING) {
-     dam -= dam * 0.15;
-    } else if (GET_PREFERENCE(ch) == PREFERENCE_H2H) {
-     dam += dam * 0.20;
-    }
-    if (AFF_FLAGGED(ch, AFF_INFUSE)) {
-     dam += (dam / 100) * (GET_SKILL(ch, SKILL_INFUSE) / 2);
-     if (IS_JINTO(ch)) {
-      if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.5;
-      } else if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.25;
-      } else if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.05;
-      }
-     }
-    }
+    damtype_unarmed(ch, skill, &dam);
     break;
    case 52: /* Headbutt */
     cou1 = 800 + ((skill / 4) * ((GET_HIT(ch) / 900) + GET_STR(ch)));
@@ -4007,33 +3838,7 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent)
     dam = large_rand(cou1, cou2);
     dam += GET_LEVEL(ch) * 100;
     dam += GET_STR(ch) * (dam * 0.005);
-    if (IS_ARLIAN(ch)) {
-     dam += dam * 0.02;
-    }
-    if (GET_BONUS(ch, BONUS_BRAWLER) > 0) {
-     dam += dam * .2;
-    }
-    if (IS_ANDSIX(ch)) {
-     if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
-      dam += dam * 0.1;
-    }
-    if (GET_PREFERENCE(ch) == PREFERENCE_THROWING) {
-     dam -= dam * 0.15;
-    } else if (GET_PREFERENCE(ch) == PREFERENCE_H2H) {
-     dam += dam * 0.20;
-    }
-    if (AFF_FLAGGED(ch, AFF_INFUSE)) {
-     dam += (dam / 100) * (GET_SKILL(ch, SKILL_INFUSE) / 2);
-     if (IS_JINTO(ch)) {
-      if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.5;
-      } else if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.25;
-      } else if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.05;
-      }
-     }
-    }
+    damtype_unarmed(ch, skill, &dam);
     break;
    case 53: /* Star Nova */
     dam = GET_MAX_MANA(ch) * percent;
@@ -4083,25 +3888,10 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent)
    cou1 = 400 + ((skill / 4) * ((GET_HIT(ch) / 1100) + GET_STR(ch)));
    cou2 = 400 + ((skill / 4) * ((GET_HIT(ch) / 1000) + GET_STR(ch)));
    dam = large_rand(cou1, cou2);
-    dam += GET_LEVEL(ch) * 100;
+   dam += GET_LEVEL(ch) * 100;
    dam += GET_STR(ch) * (dam * 0.005);
-   if (AFF_FLAGGED(ch, AFF_INFUSE)) {
-    dam += (dam / 100) * (GET_SKILL(ch, SKILL_INFUSE) / 2);
-     if (IS_JINTO(ch)) {
-      if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.5;
-      } else if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.25;
-      } else if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
-       dam += ((dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.05;
-      }
-     }
-   }
-    if (GET_PREFERENCE(ch) == PREFERENCE_THROWING) {
-     dam -= dam * 0.15;
-    } else if (GET_PREFERENCE(ch) == PREFERENCE_H2H) {
-     dam += dam * 0.20;
-    }
+   damtype_unarmed_infuse(ch, &dam);
+   damtype_unarmed_preference(ch, &dam);
    break;
    case 57: /* Light Grenade */
     dam = GET_MAX_MANA(ch) * percent;
