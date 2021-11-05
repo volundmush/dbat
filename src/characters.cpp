@@ -597,6 +597,15 @@ void char_data::restoreStatus(bool announce) {
     cureStatusPoison(announce);
 }
 
+void char_data::setStatusKnockedOut() {
+    SET_BIT_AR(AFF_FLAGS(this), AFF_KNOCKED);
+    if (AFF_FLAGGED(this, AFF_FLYING)) {
+        REMOVE_BIT_AR(AFF_FLAGS(this), AFF_FLYING);
+        GET_ALT(this) = 0;
+    }
+    GET_POS(this) = POS_SLEEPING;
+}
+
 void char_data::cureStatusKnockedOut(bool announce) {
     if (AFF_FLAGGED(this, AFF_KNOCKED)) {
         if(announce) {

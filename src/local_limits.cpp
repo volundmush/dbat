@@ -672,10 +672,7 @@ static void update_flags(struct char_data *ch)
 	}
 
 	if (AFF_FLAGGED(ch, AFF_KNOCKED) && !FIGHTING(ch)) {
-		act("@W$n is no longer senseless, and wakes up.@n", FALSE, ch, 0, 0, TO_ROOM);
-		send_to_char(ch, "You are no longer knocked out, and wake up!@n\r\n");
-		REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_KNOCKED);
-		GET_POS(ch) = POS_SITTING;
+		ch->cureStatusKnockedOut(true);
 	}
 
 	barrier_shed(ch);

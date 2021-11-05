@@ -2651,6 +2651,7 @@ struct char_data {
     void cureStatusKnockedOut(bool announce = true);
     void cureStatusBurn(bool announce = true);
     void cureStatusPoison(bool announce = true);
+    void setStatusKnockedOut();
 };
 
 
