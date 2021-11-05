@@ -7,6 +7,7 @@
 #include "utils.h"
 #include "combat.h"
 #include "comm.h"
+#include "spells.h"
 
 bool tech_handle_zanzoken(char_data *ch, char_data *vict, const std::string& name) {
     if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
@@ -105,4 +106,25 @@ void tech_handle_fireshield(char_data *ch, char_data *vict, const std::string& p
     } else if (GET_HIT(vict) > 0 && !AFF_FLAGGED(vict, AFF_SPIRIT) && AFF_FLAGGED(vict, AFF_FIRESHIELD) && (GET_BONUS(ch, BONUS_FIREPROOF) || IS_DEMON(ch))) {
         send_to_char(vict, "@RThey appear to be fireproof!@n\r\n");
     }
+}
+
+bool tech_handle_android_absorb(char_data *ch, char_data *vict) {
+    if (IS_ANDROID(vict) && HAS_ARMS(vict) && GET_SKILL(vict, SKILL_ABSORB) > rand_number(1, 140)) {
+        act("@C$N@W absorbs your ki attack and all your charged ki with $S hand!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+        act("@WYou absorb @C$n's@W ki attack and all $s charged ki with your hand!@n", TRUE, ch, nullptr, vict, TO_VICT);
+        act("@C$N@W absorbs @c$n's@W ki attack and all $s charged ki with $S hand!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
+        int amot = GET_CHARGE(ch);
+        if (IS_NPC(ch)) {
+            amot = GET_MAX_MANA(ch) / 20;
+        }
+        if (GET_CHARGE(vict) + amot > GET_MAX_MANA(vict)) {
+            GET_MANA(vict) += GET_MAX_MANA(vict) - GET_CHARGE(vict);
+            GET_CHARGE(vict) = GET_MAX_MANA(vict);
+        }
+        else {
+            GET_CHARGE(vict) += amot;
+        }
+        return true;
+    }
+    return false;
 }

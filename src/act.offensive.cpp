@@ -118,22 +118,8 @@ ACMD(do_galikgun)
 
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
-    if (IS_ANDROID(vict) && HAS_ARMS(vict) && GET_SKILL(vict, SKILL_ABSORB) > rand_number(1, 140)) {
-     act("@C$N@W absorbs your ki attack and all your charged ki with $S hand!@n", TRUE, ch, 0, vict, TO_CHAR);
-     act("@WYou absorb @C$n's@W ki attack and all $s charged ki with your hand!@n", TRUE, ch, 0, vict, TO_VICT);
-     act("@C$N@W absorbs @c$n's@W ki attack and all $s charged ki with $S hand!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     int amot = GET_CHARGE(ch);
-     if (IS_NPC(ch)) {
-      amot = GET_MAX_MANA(ch) / 20;
-     }
-     if (GET_CHARGE(vict) + amot > GET_MAX_MANA(vict)) {
-      GET_MANA(vict) += GET_MAX_MANA(vict) - GET_CHARGE(vict);
-      GET_CHARGE(vict) = GET_MAX_MANA(vict);
-     }
-     else {
-      GET_CHARGE(vict) += amot;
-     }
-     pcost(ch, 1, 0);
+    if (tech_handle_android_absorb(ch, vict)) {
+        pcost(ch, 1, 0);
      return;
     } else if (blk > axion_dice(10)) {
      act("@C$N@W moves quickly and blocks your Galik Gun!@n", FALSE, ch, 0, vict, TO_CHAR);
@@ -384,22 +370,8 @@ ACMD(do_honoo)
 
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
-    if (IS_ANDROID(vict) && HAS_ARMS(vict) && GET_SKILL(vict, SKILL_ABSORB) > rand_number(1, 140)) {
-     act("@C$N@W absorbs your ki attack and all your charged ki with $S hand!@n", TRUE, ch, 0, vict, TO_CHAR);
-     act("@WYou absorb @C$n's@W ki attack and all $s charged ki with your hand!@n", TRUE, ch, 0, vict, TO_VICT);
-     act("@C$N@W absorbs @c$n's@W ki attack and all $s charged ki with $S hand!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     int amot = GET_CHARGE(ch);
-     if (IS_NPC(ch)) {
-      amot = GET_MAX_MANA(ch) / 20;
-     }
-     if (GET_CHARGE(vict) + amot > GET_MAX_MANA(vict)) {
-      GET_MANA(vict) += GET_MAX_MANA(vict) - GET_CHARGE(vict);
-      GET_CHARGE(vict) = GET_MAX_MANA(vict);
-     }
-     else {
-      GET_CHARGE(vict) += amot;
-     }
-     pcost(ch, 1, 0);
+    if (tech_handle_android_absorb(ch, vict)) {
+        pcost(ch, 1, 0);
      return;
     }
     else if (blk > axion_dice(10)) {
@@ -710,23 +682,8 @@ ACMD(do_psyblast)
 
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
-    if (IS_ANDROID(vict) && HAS_ARMS(vict) && GET_SKILL(vict, SKILL_ABSORB) > rand_number(1, 140)) {
-     act("@C$N@W absorbs your ki attack and all your charged ki with $S hand!@n", TRUE, ch, 0, vict, TO_CHAR);
-     act("@WYou absorb @C$n's@W ki attack and all $s charged ki with your hand!@n", TRUE, ch, 0, vict, TO_VICT);
-     act("@C$N@W absorbs @c$n's@W ki attack and all $s charged ki with $S hand!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     int amot = GET_CHARGE(ch);
-     if (IS_NPC(ch)) {
-      amot = GET_MAX_MANA(ch) / 20;
-     }
-     if (GET_CHARGE(vict) + amot > GET_MAX_MANA(vict)) {
-      GET_MANA(vict) += GET_MAX_MANA(vict) - GET_CHARGE(vict);
-      GET_CHARGE(vict) = GET_MAX_MANA(vict);
-     }
-     else {
-      GET_CHARGE(vict) += amot;
-     }
-     pcost(ch, 1, 0);
-     
+    if (tech_handle_android_absorb(ch, vict)) {
+        pcost(ch, 1, 0);
      return;
     }
     else if (blk > axion_dice(10)) {
@@ -1397,23 +1354,8 @@ ACMD(do_eraser)
 
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
-    if (IS_ANDROID(vict) && HAS_ARMS(vict) && GET_SKILL(vict, SKILL_ABSORB) > rand_number(1, 140)) {
-     act("@C$N@W absorbs your ki attack and all your charged ki with $S hand!@n", TRUE, ch, 0, vict, TO_CHAR);
-     act("@WYou absorb @C$n's@W ki attack and all $s charged ki with your hand!@n", TRUE, ch, 0, vict, TO_VICT);
-     act("@C$N@W absorbs @c$n's@W ki attack and all $s charged ki with $S hand!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     int amot = GET_CHARGE(ch);
-     if (IS_NPC(ch)) {
-      amot = GET_MAX_MANA(ch) / 20;
-     }
-     if (GET_CHARGE(vict) + amot > GET_MAX_MANA(vict)) {
-      GET_MANA(vict) += GET_MAX_MANA(vict) - GET_CHARGE(vict);
-      GET_CHARGE(vict) = GET_MAX_MANA(vict);
-     }
-     else {
-      GET_CHARGE(vict) += amot;
-     }
-     pcost(ch, 1, 0);
-     
+    if (tech_handle_android_absorb(ch, vict)) {
+        pcost(ch, 1, 0);
      return;
     }
     else if (blk > axion_dice(10)) {
@@ -7317,21 +7259,7 @@ ACMD(do_masenko)
 
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
-    if (IS_ANDROID(vict) && HAS_ARMS(vict) && GET_SKILL(vict, SKILL_ABSORB) > rand_number(1, 140)) {
-     act("@C$N@W absorbs your ki attack and all your charged ki with $S hand!@n", TRUE, ch, 0, vict, TO_CHAR);
-     act("@WYou absorb @C$n's@W ki attack and all $s charged ki with your hand!@n", TRUE, ch, 0, vict, TO_VICT);
-     act("@C$N@W absorbs @c$n's@W ki attack and all $s charged ki with $S hand!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     int amot = GET_CHARGE(ch);
-     if (IS_NPC(ch)) {
-      amot = GET_MAX_MANA(ch) / 20;
-     }
-     if (GET_CHARGE(vict) + amot > GET_MAX_MANA(vict)) {
-      GET_MANA(vict) += GET_MAX_MANA(vict) - GET_CHARGE(vict);
-      GET_CHARGE(vict) = GET_MAX_MANA(vict);
-     }
-     else {
-      GET_CHARGE(vict) += amot;
-     }
+    if (tech_handle_android_absorb(ch, vict)) {
      if (GET_SKILL_PERF(ch, SKILL_MASENKO) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
@@ -7620,27 +7548,12 @@ ACMD(do_kamehameha)
 
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
-    if (IS_ANDROID(vict) && HAS_ARMS(vict) && GET_SKILL(vict, SKILL_ABSORB) > rand_number(1, 140)) {
-     act("@C$N@W absorbs your ki attack and all your charged ki with $S hand!@n", TRUE, ch, 0, vict, TO_CHAR);
-     act("@WYou absorb @C$n's@W ki attack and all $s charged ki with your hand!@n", TRUE, ch, 0, vict, TO_VICT);
-     act("@C$N@W absorbs @c$n's@W ki attack and all $s charged ki with $S hand!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     int amot = GET_CHARGE(ch);
-     if (IS_NPC(ch)) {
-      amot = GET_MAX_MANA(ch) / 20;
-     }
-     if (GET_CHARGE(vict) + amot > GET_MAX_MANA(vict)) {
-      GET_MANA(vict) += GET_MAX_MANA(vict) - GET_CHARGE(vict);
-      GET_CHARGE(vict) = GET_MAX_MANA(vict);
-     }
-     else {
-      GET_CHARGE(vict) += amot;
-     }
+    if (tech_handle_android_absorb(ch, vict)) {
      if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
      }
-
      return;
     }
     else if (blk > axion_dice(10)) {
@@ -8014,23 +7927,8 @@ ACMD(do_renzo)
   }
   if (count == 0) {
    if (GET_MOVE(vict) > 0) {
-    if (IS_ANDROID(vict) && HAS_ARMS(vict) && GET_SKILL(vict, SKILL_ABSORB) > rand_number(1, 140)) {
-     act("@C$N@W absorbs your ki attack and all your charged ki with $S hand!@n", TRUE, ch, 0, vict, TO_CHAR);
-     act("@WYou absorb @C$n's@W ki attack and all $s charged ki with your hand!@n", TRUE, ch, 0, vict, TO_VICT);
-     act("@C$N@W absorbs @c$n's@W ki attack and all $s charged ki with $S hand!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     int amot = GET_CHARGE(ch);
-     if (IS_NPC(ch)) {
-      amot = GET_MAX_MANA(ch) / 20;
-     }
-     if (GET_CHARGE(vict) + amot > GET_MAX_MANA(vict)) {
-      GET_MANA(vict) += GET_MAX_MANA(vict) - GET_CHARGE(vict);
-      GET_CHARGE(vict) = GET_MAX_MANA(vict);
-     }
-     else {
-      GET_CHARGE(vict) += amot;
-     }
+    if (tech_handle_android_absorb(ch, vict)) {
      pcost(ch, 1, 0);
-     
      return;
     }
     else if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
@@ -9634,23 +9532,8 @@ ACMD(do_tsuihidan)
 
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
-    if (IS_ANDROID(vict) && HAS_ARMS(vict) && GET_SKILL(vict, SKILL_ABSORB) > rand_number(1, 140)) {
-     act("@C$N@W absorbs your ki attack and all your charged ki with $S hand!@n", TRUE, ch, 0, vict, TO_CHAR);
-     act("@WYou absorb @C$n's@W ki attack and all $s charged ki with your hand!@n", TRUE, ch, 0, vict, TO_VICT);
-     act("@C$N@W absorbs @c$n's@W ki attack and all $s charged ki with $S hand!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     int amot = GET_CHARGE(ch);
-     if (IS_NPC(ch)) {
-      amot = GET_MAX_MANA(ch) / 20;
-     }
-     if (GET_CHARGE(vict) + amot > GET_MAX_MANA(vict)) {
-      GET_MANA(vict) += GET_MAX_MANA(vict) - GET_CHARGE(vict);
-      GET_CHARGE(vict) = GET_MAX_MANA(vict);
-     }
-     else {
-      GET_CHARGE(vict) += amot;
-     }
+    if (tech_handle_android_absorb(ch, vict)) {
      pcost(ch, 1, 0);
-     
      return;
     }
     else if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
@@ -10803,23 +10686,8 @@ ACMD(do_kiball)
 
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
-    if (IS_ANDROID(vict) && HAS_ARMS(vict) && GET_SKILL(vict, SKILL_ABSORB) > rand_number(1, 140)) {
-     act("@C$N@W absorbs your ki attack and all your charged ki with $S hand!@n", TRUE, ch, 0, vict, TO_CHAR);
-     act("@WYou absorb @C$n's@W ki attack and all $s charged ki with your hand!@n", TRUE, ch, 0, vict, TO_VICT);
-     act("@C$N@W absorbs @c$n's@W ki attack and all $s charged ki with $S hand!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     int amot = GET_CHARGE(ch);
-     if (IS_NPC(ch)) {
-      amot = GET_MAX_MANA(ch) / 20;
-     }
-     if (GET_CHARGE(vict) + amot > GET_MAX_MANA(vict)) {
-      GET_MANA(vict) += GET_MAX_MANA(vict) - GET_CHARGE(vict);
-      GET_CHARGE(vict) = GET_MAX_MANA(vict);
-     }
-     else {
-      GET_CHARGE(vict) += amot;
-     }
+    if (tech_handle_android_absorb(ch, vict)) {
      pcost(ch, 1, 0);
-     
      return;
     }
     else if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
@@ -11059,23 +10927,8 @@ ACMD(do_beam)
 
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
-    if (IS_ANDROID(vict) && HAS_ARMS(vict) && GET_SKILL(vict, SKILL_ABSORB) > rand_number(1, 140)) {
-     act("@C$N@W absorbs your ki attack and all your charged ki with $S hand!@n", TRUE, ch, 0, vict, TO_CHAR);
-     act("@WYou absorb @C$n's@W ki attack and all $s charged ki with your hand!@n", TRUE, ch, 0, vict, TO_VICT);
-     act("@C$N@W absorbs @c$n's@W ki attack and all $s charged ki with $S hand!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     int amot = GET_CHARGE(ch);
-     if (IS_NPC(ch)) {
-      amot = GET_MAX_MANA(ch) / 20;
-     }
-     if (GET_CHARGE(vict) + amot > GET_MAX_MANA(vict)) {
-      GET_MANA(vict) += GET_MAX_MANA(vict) - GET_CHARGE(vict);
-      GET_CHARGE(vict) = GET_MAX_MANA(vict);
-     }
-     else {
-      GET_CHARGE(vict) += amot;
-     }
+    if (tech_handle_android_absorb(ch, vict)) {
      pcost(ch, 1, 0);
-     
      return;
     }
     else if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
@@ -11361,23 +11214,8 @@ ACMD(do_kiblast)
 
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
-    if (IS_ANDROID(vict) && HAS_ARMS(vict) && GET_SKILL(vict, SKILL_ABSORB) > rand_number(1, 140)) {
-     act("@C$N@W absorbs your ki attack and all your charged ki with $S hand!@n", TRUE, ch, 0, vict, TO_CHAR);
-     act("@WYou absorb @C$n's@W ki attack and all $s charged ki with your hand!@n", TRUE, ch, 0, vict, TO_VICT);
-     act("@C$N@W absorbs @c$n's@W ki attack and all $s charged ki with $S hand!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     int amot = GET_CHARGE(ch);
-     if (IS_NPC(ch)) {
-      amot = GET_MAX_MANA(ch) / 20;
-     }
-     if (GET_CHARGE(vict) + amot > GET_MAX_MANA(vict)) {
-      GET_MANA(vict) += GET_MAX_MANA(vict) - GET_CHARGE(vict);
-      GET_CHARGE(vict) = GET_MAX_MANA(vict);
-     }
-     else {
-      GET_CHARGE(vict) += amot;
-     }
+    if (tech_handle_android_absorb(ch, vict)) {
      pcost(ch, 1, 0);
-     
      return;
     }
     else if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
