@@ -19,6 +19,7 @@
 #include "fight.h"
 #include "guild.h"
 #include "class.h"
+#include "techniques.h"
 
 /* Combat commands below this line */
 
@@ -61,17 +62,8 @@ ACMD(do_galikgun)
    }
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
+
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
   }
@@ -84,15 +76,7 @@ ACMD(do_galikgun)
 
  skill = init_skill(ch, SKILL_GALIKGUN); /* Set skill value */
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
  /* There is a player/mob targeted */
  handle_cooldown(ch, 6);
@@ -120,46 +104,19 @@ ACMD(do_galikgun)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
-  } else if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  } else if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+
+  if(!tech_handle_zanzoken(ch, vict, "Galik Gun")) {
+      if (GET_SKILL_PERF(ch, SKILL_GALIKGUN) == 3 && attperc > minimum) {
+          pcost(ch, attperc - 0.05, 0);
+      } else {
+          pcost(ch, attperc, 0);
+      }
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      return;
   }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your Galik Gun before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c Galik Gun before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c Galik Gun before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     if (GET_SKILL_PERF(ch, SKILL_GALIKGUN) == 3 && attperc > minimum) {
-      pcost(ch, attperc - 0.05, 0);
-     } else {
-      pcost(ch, attperc, 0);
-     }
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     return;
-   } else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  } if (prob < perc - 20) {
+
+  if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (IS_ANDROID(vict) && HAS_ARMS(vict) && GET_SKILL(vict, SKILL_ABSORB) > rand_number(1, 140)) {
      act("@C$N@W absorbs your ki attack and all your charged ki with $S hand!@n", TRUE, ch, 0, vict, TO_CHAR);
@@ -364,17 +321,7 @@ ACMD(do_honoo)
    }
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -387,15 +334,7 @@ ACMD(do_honoo)
 
  skill = init_skill(ch, SKILL_HONOO); /* Set skill value */
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
  /* There is a player/mob targeted */
  handle_cooldown(ch, 6);
@@ -424,56 +363,25 @@ ACMD(do_honoo)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+
+  if(!tech_handle_zanzoken(ch, vict, "Honoo")) {
+      if (GET_SKILL_PERF(ch, SKILL_HONOO) == 3 && attperc > minimum) {
+          pcost(ch, attperc - 0.05, 0);
+      } else {
+          pcost(ch, attperc, 0);
+      }
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      if (ROOM_EFFECT(IN_ROOM(ch)) < -1) {
+          send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates some!\r\n");
+          ROOM_EFFECT(IN_ROOM(ch)) += 1;
+      } else if (ROOM_EFFECT(IN_ROOM(ch)) == -1) {
+          send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates completely away!\r\n");
+          ROOM_EFFECT(IN_ROOM(ch)) = 0;
+      }
+      return;
   }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your Honoo before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c Honoo before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c Honoo before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     if (GET_SKILL_PERF(ch, SKILL_HONOO) == 3 && attperc > minimum) {
-      pcost(ch, attperc - 0.05, 0);
-     } else {
-      pcost(ch, attperc, 0);
-     }
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     if (ROOM_EFFECT(IN_ROOM(ch)) < -1) {
-      send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates some!\r\n");
-      ROOM_EFFECT(IN_ROOM(ch)) += 1;
-     } else if (ROOM_EFFECT(IN_ROOM(ch)) == -1) {
-      send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates completely away!\r\n");
-      ROOM_EFFECT(IN_ROOM(ch)) = 0;
-     }
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (IS_ANDROID(vict) && HAS_ARMS(vict) && GET_SKILL(vict, SKILL_ABSORB) > rand_number(1, 140)) {
@@ -745,17 +653,7 @@ ACMD(do_psyblast)
    }
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -769,15 +667,7 @@ ACMD(do_psyblast)
 
  skill = init_skill(ch, SKILL_PSYBLAST); /* Set skill value */
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
  /* There is a player/mob targeted */
  handle_cooldown(ch, 6);
@@ -806,50 +696,18 @@ ACMD(do_psyblast)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+
+  if(!tech_handle_zanzoken(ch, vict, "Psychic Blast")) {
+      if (GET_SKILL_PERF(ch, SKILL_PSYBLAST) == 3 && attperc > minimum) {
+          pcost(ch, attperc - 0.05, 0);
+      } else {
+          pcost(ch, attperc, 0);
+      }
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      return;
   }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your Psychic Blast before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c Psychic Blast before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c Psychic Blast before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     if (GET_SKILL_PERF(ch, SKILL_PSYBLAST) == 3 && attperc > minimum) {
-      pcost(ch, attperc - 0.05, 0);
-     } else {
-      pcost(ch, attperc, 0);
-     }
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (IS_ANDROID(vict) && HAS_ARMS(vict) && GET_SKILL(vict, SKILL_ABSORB) > rand_number(1, 140)) {
@@ -1115,17 +973,7 @@ ACMD(do_tslash)
    }
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -1139,15 +987,7 @@ ACMD(do_tslash)
 
  skill = init_skill(ch, SKILL_TSLASH); /* Set skill value */
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
  /* There is a player/mob targeted */
  handle_cooldown(ch, 6);
@@ -1176,50 +1016,19 @@ ACMD(do_tslash)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+
+  if(!tech_handle_zanzoken(ch, vict, "Twin Slash")) {
+      if (GET_SKILL_PERF(ch, SKILL_TSLASH) == 3 && attperc > minimum) {
+          pcost(ch, attperc - 0.05, 0);
+      } else {
+          pcost(ch, attperc, 0);
+      }
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+
+      return;
   }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your Twin Slash before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c Twin Slash before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c Twin Slash before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     if (GET_SKILL_PERF(ch, SKILL_TSLASH) == 3 && attperc > minimum) {
-      pcost(ch, attperc - 0.05, 0);
-     } else {
-      pcost(ch, attperc, 0);
-     }
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (blk > axion_dice(10)) {
@@ -1529,17 +1338,7 @@ ACMD(do_eraser)
    return;
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -1553,15 +1352,7 @@ ACMD(do_eraser)
 
  skill = init_skill(ch, SKILL_ERASER); /* Set skill value */
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
  /* There is a player/mob targeted */
  handle_cooldown(ch, 6);
@@ -1587,54 +1378,23 @@ ACMD(do_eraser)
   handle_defense(vict, &pry, &blk, &dge);
  
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
-  }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your Eraser Cannon before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c Eraser Cannon before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c Eraser Cannon before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     pcost(ch, attperc, 0);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
 
-     if (GET_SKILL(ch, SKILL_ERASER) >= 100) {
-      GET_MANA(ch) += (GET_MAX_MANA(ch) * attperc) * 0.15;
-     } else if (GET_SKILL(ch, SKILL_ERASER) >= 60) {
-      GET_MANA(ch) += (GET_MAX_MANA(ch) * attperc) * 0.10;
-     } else if (GET_SKILL(ch, SKILL_ERASER) >= 40) {
-      GET_MANA(ch) += (GET_MAX_MANA(ch) * attperc) * 0.05;
-     }
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
+  if(!tech_handle_zanzoken(ch, vict, "Eraser Cannon")) {
+      pcost(ch, attperc, 0);
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+
+      if (GET_SKILL(ch, SKILL_ERASER) >= 100) {
+          GET_MANA(ch) += (GET_MAX_MANA(ch) * attperc) * 0.15;
+      } else if (GET_SKILL(ch, SKILL_ERASER) >= 60) {
+          GET_MANA(ch) += (GET_MAX_MANA(ch) * attperc) * 0.10;
+      } else if (GET_SKILL(ch, SKILL_ERASER) >= 40) {
+          GET_MANA(ch) += (GET_MAX_MANA(ch) * attperc) * 0.05;
+      }
+
+      return;
   }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (IS_ANDROID(vict) && HAS_ARMS(vict) && GET_SKILL(vict, SKILL_ABSORB) > rand_number(1, 140)) {
@@ -1853,17 +1613,7 @@ ACMD(do_pbarrage)
    return;
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -1877,15 +1627,7 @@ ACMD(do_pbarrage)
 
  skill = init_skill(ch, SKILL_PBARRAGE); /* Set skill value */
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
  /* There is a player/mob targeted */
  handle_cooldown(ch, 7);
@@ -1911,46 +1653,15 @@ ACMD(do_pbarrage)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+
+  if(!tech_handle_zanzoken(ch, vict, "Psychic Barrage")) {
+      pcost(ch, attperc, 0);
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+
+      return;
   }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your Psychic Barrage before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c Psychic Barrage before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c Psychic Barrage before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     pcost(ch, attperc, 0);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (blk > axion_dice(10)) {
@@ -2125,17 +1836,7 @@ ACMD(do_geno)
    return;
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -2233,17 +1934,7 @@ ACMD(do_genki)
    return;
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -2354,17 +2045,7 @@ ACMD(do_spiritball)
    return;
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -2378,15 +2059,7 @@ ACMD(do_spiritball)
 
  skill = init_skill(ch, SKILL_SPIRITBALL); /* Set skill value */
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
  /* There is a player/mob targeted */
  handle_cooldown(ch, 8);
@@ -2413,50 +2086,18 @@ ACMD(do_spiritball)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
-  }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your Spirit Ball before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c Spirit Ball before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c Spirit Ball before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     pcost(ch, attperc, 0);
-     dodge_ki(ch, vict, 2, 39, skill, SKILL_SPIRITBALL); /* Effects on the room from dodging a ki attack
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+
+  if(!tech_handle_zanzoken(ch, vict, "Spirit Ball")) {
+      pcost(ch, attperc, 0);
+      dodge_ki(ch, vict, 2, 39, skill, SKILL_SPIRITBALL); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
-     hurt(0, 0, ch, vict, NULL, 0, 1);    
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
+      hurt(0, 0, ch, vict, NULL, 0, 1);
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      return;
   }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
@@ -2636,17 +2277,7 @@ ACMD(do_deathball)
    return;
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -2660,15 +2291,7 @@ ACMD(do_deathball)
 
  skill = init_skill(ch, SKILL_DEATHBALL); /* Set skill value */
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
  /* There is a player/mob targeted */
  handle_cooldown(ch, 8);
@@ -2694,47 +2317,15 @@ ACMD(do_deathball)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
-  }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
   prob -= rand_number(8, 10);
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your Deathball before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c Deathball before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c Deathball before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     pcost(ch, attperc, 0);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
+
+  if(!tech_handle_zanzoken(ch, vict, "Deathball")) {
+      pcost(ch, attperc, 0);
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      return;
   }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (dge > axion_dice(10)) {
@@ -2905,17 +2496,7 @@ ACMD(do_pslash)
    return;
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -2937,15 +2518,7 @@ ACMD(do_pslash)
 
  skill = init_skill(ch, SKILL_PSLASH); /* Set skill value */
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
  /* There is a player/mob targeted */
  handle_cooldown(ch, 8);
@@ -2971,46 +2544,14 @@ ACMD(do_pslash)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+
+  if(!tech_handle_zanzoken(ch, vict, "Phoenix Slash")) {
+      pcost(ch, attperc, 0);
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      return;
   }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your Phoenix Slash before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c Phoenix Slash before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c Phoenix Slash before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     pcost(ch, attperc, 0);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (blk > axion_dice(10)) {
@@ -3190,17 +2731,7 @@ ACMD(do_bigbang)
    return;
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -3214,15 +2745,7 @@ ACMD(do_bigbang)
 
  skill = init_skill(ch, SKILL_BIGBANG); /* Set skill value */
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
  /* There is a player/mob targeted */
  handle_cooldown(ch, 8);
@@ -3248,46 +2771,15 @@ ACMD(do_bigbang)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+
+  if(!tech_handle_zanzoken(ch, vict, "Big Bang")) {
+      pcost(ch, attperc, 0);
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+
+      return;
   }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your Big Bang before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c Big Bang before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c Big Bang before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     pcost(ch, attperc, 0);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (blk > axion_dice(10)) {
@@ -3454,17 +2946,7 @@ ACMD(do_scatter)
    return;
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -3478,15 +2960,7 @@ ACMD(do_scatter)
 
  skill = init_skill(ch, SKILL_SCATTER); /* Set skill value */
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
  /* There is a player/mob targeted */
  int cool = 8;
@@ -3526,48 +3000,14 @@ ACMD(do_scatter)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
-  }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
 
   prob += rand_number(10, 20);
 
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your Scatter Shot before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c Scatter Shot before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c Scatter Shot before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     pcost(ch, attperc, 0);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
+  if(!tech_handle_zanzoken(ch, vict, "Scatter Shot")) {
+      pcost(ch, attperc, 0);
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      return;
   }
 
   if (prob < perc - 20) {
@@ -3737,17 +3177,7 @@ ACMD(do_balefire)
    return;
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -3761,15 +3191,7 @@ ACMD(do_balefire)
 
  skill = init_skill(ch, SKILL_BALEFIRE); /* Set skill value */
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
  /* There is a player/mob targeted */
  int cool = 8;
@@ -3809,48 +3231,15 @@ ACMD(do_balefire)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
-  }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
 
   prob += rand_number(10, 20);
 
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your Balefire before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c Balefire before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c Balefire before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     pcost(ch, attperc, 0);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
+  if(!tech_handle_zanzoken(ch, vict, "Balefire")) {
+      pcost(ch, attperc, 0);
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+
+      return;
   }
 
   if (prob < perc - 20) {
@@ -4015,17 +3404,7 @@ ACMD(do_kakusanha)
    return;
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -4293,17 +3672,7 @@ ACMD(do_hellspear)
    return;
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -4376,6 +3745,9 @@ ACMD(do_hellspear)
        continue;
        }
       dge = handle_dodge(vict);
+
+      if(!tech_handle_zanzoken(ch, vict, ""))
+
       if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
        act("@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", FALSE, ch, 0, vict, TO_CHAR);
        act("@cYou disappear, avoiding the explosion before reappearing elsewhere!@n", FALSE, ch, 0, vict, TO_VICT);
@@ -4452,17 +3824,7 @@ ACMD(do_hellflash)
    }
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -4476,15 +3838,7 @@ ACMD(do_hellflash)
 
  skill = init_skill(ch, SKILL_HELLFLASH); /* Set skill value */
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
  /* There is a player/mob targeted */
  handle_cooldown(ch, 7);
@@ -4513,50 +3867,19 @@ ACMD(do_hellflash)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+
+  if(!tech_handle_zanzoken(ch, vict, "Hell Flash")) {
+      if (GET_SKILL_PERF(ch, SKILL_HELLFLASH) == 3 && attperc > minimum) {
+          pcost(ch, attperc - 0.05, 0);
+      } else {
+          pcost(ch, attperc, 0);
+      }
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+
+      return;
   }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your Hell Flash before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c Hell Flash before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c Hell Flash before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     if (GET_SKILL_PERF(ch, SKILL_HELLFLASH) == 3 && attperc > minimum) {
-      pcost(ch, attperc - 0.05, 0);
-     } else {
-      pcost(ch, attperc, 0);
-     }
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (blk > axion_dice(10)) {
@@ -4765,17 +4088,7 @@ ACMD(do_ddslash)
    return;
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -4798,15 +4111,7 @@ ACMD(do_ddslash)
 
  skill = init_skill(ch, SKILL_DDSLASH); /* Set skill value */
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
  /* There is a player/mob targeted */
  handle_cooldown(ch, 7);
@@ -4832,46 +4137,14 @@ ACMD(do_ddslash)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+
+  if(!tech_handle_zanzoken(ch, vict, "Darkness Dragon Slash")) {
+      pcost(ch, attperc, 0);
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      return;
   }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your Darkness Dragon Slash before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c Darkness Dragon Slash before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c Darkness Dragon Slash before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     pcost(ch, attperc, 0);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (blk > axion_dice(10)) {
@@ -5051,17 +4324,7 @@ ACMD(do_crusher)
    }
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -5075,15 +4338,7 @@ ACMD(do_crusher)
 
  skill = init_skill(ch, SKILL_CRUSHER); /* Set skill value */
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
  /* There is a player/mob targeted */
  handle_cooldown(ch, 7);
@@ -5112,50 +4367,19 @@ ACMD(do_crusher)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+
+  if(!tech_handle_zanzoken(ch, vict, "Crusher Ball")) {
+      if (GET_SKILL_PERF(ch, SKILL_CRUSHER) == 3 && attperc > minimum) {
+          pcost(ch, attperc - 0.05, 0);
+      } else {
+          pcost(ch, attperc, 0);
+      }
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+
+      return;
   }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your Crusher Ball before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c Crusher Ball before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c Crusher Ball before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     if (GET_SKILL_PERF(ch, SKILL_CRUSHER) == 3 && attperc > minimum) {
-      pcost(ch, attperc - 0.05, 0);
-     } else {
-      pcost(ch, attperc, 0);
-     }
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (blk > axion_dice(10)) {
@@ -5350,17 +4574,7 @@ ACMD(do_final)
    return;
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -5374,15 +4588,7 @@ ACMD(do_final)
 
  skill = init_skill(ch, SKILL_FINALFLASH); /* Set skill value */
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
  /* There is a player/mob targeted */
  handle_cooldown(ch, 7);
@@ -5408,46 +4614,14 @@ ACMD(do_final)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+
+  if(!tech_handle_zanzoken(ch, vict, "Final Flash")) {
+      pcost(ch, attperc, 0);
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      return;
   }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your Final Flash before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c Final Flash before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c Final Flash before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     pcost(ch, attperc, 0);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (blk > axion_dice(10)) {
@@ -5619,17 +4793,7 @@ ACMD(do_sbc)
    return;
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -5643,15 +4807,7 @@ ACMD(do_sbc)
 
  skill = init_skill(ch, SKILL_SBC); /* Set skill value */
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
  /* There is a player/mob targeted */
  handle_cooldown(ch, 7);
@@ -5677,46 +4833,14 @@ ACMD(do_sbc)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+
+  if(!tech_handle_zanzoken(ch, vict, "Special Beam Cannon")) {
+      pcost(ch, attperc, 0);
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      return;
   }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your Special Beam Cannon before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c Special Beam Cannon before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c Special Beam Cannon before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     pcost(ch, attperc, 0);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (dge > axion_dice(10)) {
@@ -5872,17 +4996,7 @@ ACMD(do_tribeam)
    return;
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -5896,15 +5010,7 @@ ACMD(do_tribeam)
 
  skill = init_skill(ch, SKILL_TRIBEAM); /* Set skill value */
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
  /* There is a player/mob targeted */
  handle_cooldown(ch, 7);
@@ -5930,46 +5036,14 @@ ACMD(do_tribeam)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+
+  if(!tech_handle_zanzoken(ch, vict, "Tribeam")) {
+      pcost(ch, attperc, 0);
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      return;
   }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your Tribeam before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c Tribeam before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c Tribeam before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     pcost(ch, attperc, 0);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (blk > axion_dice(10)) {
@@ -6148,17 +5222,7 @@ ACMD(do_kienzan)
    return;
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -6172,15 +5236,7 @@ ACMD(do_kienzan)
 
  skill = init_skill(ch, SKILL_KIENZAN); /* Set skill value */
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
  /* There is a player/mob targeted */
  handle_cooldown(ch, 7);
@@ -6206,46 +5262,14 @@ ACMD(do_kienzan)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+
+  if(!tech_handle_zanzoken(ch, vict, "Kienzan")) {
+      pcost(ch, attperc, 0);
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      return;
   }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your Kienzan before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c Kienzan before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c Kienzan before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     pcost(ch, attperc, 0);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (dge > axion_dice(10)) {
@@ -6573,17 +5597,7 @@ ACMD(do_baku)
    return;
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -6751,17 +5765,7 @@ ACMD(do_rogafufuken)
    return;
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -6775,15 +5779,7 @@ ACMD(do_rogafufuken)
 
  skill = init_skill(ch, SKILL_ROGAFUFUKEN); /* Set skill value */
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
  /* There is a player/mob targeted */
  handle_cooldown(ch, 7);
@@ -6809,46 +5805,14 @@ ACMD(do_rogafufuken)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+
+  if(!tech_handle_zanzoken(ch, vict, "Rogafufuken")) {
+      pcost(ch, attperc, 0);
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      return;
   }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your Rogafufuken before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c Rogafufuken before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c Rogafufuken before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     pcost(ch, attperc, 0);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
@@ -6962,24 +5926,7 @@ ACMD(do_rogafufuken)
       /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
      break;
    }
-   if (GET_HIT(vict) > 0 && !AFF_FLAGGED(vict, AFF_SPIRIT) && AFF_FLAGGED(vict, AFF_FIRESHIELD) && !GET_BONUS(ch, BONUS_FIREPROOF) && !IS_DEMON(ch)) {
-    act("@c$N's@W fireshield burns your hands and feet!@n", TRUE, ch, 0, vict, TO_CHAR);
-    act("@C$n's@W hands and feet are burned by your fireshield!@n", TRUE, ch, 0, vict, TO_VICT);
-    act("@c$n's@W hands and feet are burned by @C$N's@W fireshield!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-    dmg = GET_MAX_MANA(vict) * 0.04;
-    hurt(0, 0, vict, ch, NULL, dmg, 0);
-    if (GET_BONUS(ch, BONUS_FIREPRONE)) {
-     send_to_char(ch, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
-     send_to_char(vict, "@RThey are easily burned!@n\r\n");
-     SET_BIT_AR(AFF_FLAGS(ch), AFF_BURNED);
-    } else if (GET_CON(ch) < axion_dice(0)) {
-     send_to_char(ch, "@RYou are badly burned!@n\r\n");
-     send_to_char(vict, "@RThey are burned!@n\r\n");
-     SET_BIT_AR(AFF_FLAGS(ch), AFF_BURNED);
-    }
-   } else if (GET_HIT(vict) > 0 && !AFF_FLAGGED(vict, AFF_SPIRIT) && AFF_FLAGGED(vict, AFF_FIRESHIELD) && (GET_BONUS(ch, BONUS_FIREPROOF) || IS_DEMON(ch))) {
-    send_to_char(vict, "@RThey appear to be fireproof!@n\r\n");
-   }
+   tech_handle_fireshield(ch, vict, "hands and feet");
      pcost(ch, attperc, 0);
      
     return;
@@ -7037,17 +5984,7 @@ ACMD(do_dualbeam)
    return;
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -7061,15 +5998,7 @@ ACMD(do_dualbeam)
 
  skill = init_skill(ch, SKILL_DUALBEAM); /* Set skill value */
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
  /* There is a player/mob targeted */
  handle_cooldown(ch, 6);
@@ -7095,46 +6024,15 @@ ACMD(do_dualbeam)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+
+  if(!tech_handle_zanzoken(ch, vict, "Dualbeam")) {
+      pcost(ch, attperc, 0);
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+
+      return;
   }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your Dualbeam before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c Dualbeam before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c Dualbeam before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     pcost(ch, attperc, 0);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
+
   int hits = 3;
   while (hits > 0) {
    hits -= 1;
@@ -7340,17 +6238,7 @@ ACMD(do_blessedhammer)
    return;
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -7364,16 +6252,7 @@ ACMD(do_blessedhammer)
 
  skill = init_skill(ch, SKILL_BLESSEDHAMMER); /* Set skill value */
 
-
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
  /* There is a player/mob targeted */
  handle_cooldown(ch, 5);
@@ -7401,46 +6280,14 @@ ACMD(do_blessedhammer)
   prob += 15; /* kousengan bonus */
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+
+  if(!tech_handle_zanzoken(ch, vict, "@WB@Dl@We@Ds@Ws@De@Wd @DH@Wa@Dm@Wm@De@Wr@C")) {
+      pcost(ch, attperc, 0);
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      return;
   }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your @WB@Dl@We@Ds@Ws@De@Wd @DH@Wa@Dm@Wm@De@Wr@C before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c @WB@Dl@We@Ds@Ws@De@Wd @DH@Wa@Dm@Wm@De@Wr@C before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c @WB@Dl@We@Ds@Ws@De@Wd @DH@Wa@Dm@Wm@De@Wr@C before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     pcost(ch, attperc, 0);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (blk > axion_dice(10)) {
@@ -7616,17 +6463,9 @@ ACMD(do_kousengan)
    return;
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
+
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -7641,15 +6480,6 @@ ACMD(do_kousengan)
  skill = init_skill(ch, SKILL_KOUSENGAN); /* Set skill value */
 
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
 
  /* There is a player/mob targeted */
  handle_cooldown(ch, 5);
@@ -7677,46 +6507,14 @@ ACMD(do_kousengan)
   prob += 15; /* kousengan bonus */
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+
+  if(!tech_handle_zanzoken(ch, vict, "kousengan")) {
+      pcost(ch, attperc, 0);
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      return;
   }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your kousengan before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c kousengan before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c kousengan before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     pcost(ch, attperc, 0);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (blk > axion_dice(10)) {
@@ -7905,17 +6703,7 @@ ACMD(do_deathbeam)
    }
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -7929,15 +6717,7 @@ ACMD(do_deathbeam)
 
  skill = init_skill(ch, SKILL_DEATHBEAM); /* Set skill value */
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
  /* There is a player/mob targeted */
  handle_cooldown(ch, 5);
@@ -7968,53 +6748,22 @@ ACMD(do_deathbeam)
   prob += 15; /* deathbeam bonus */
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+
+  if(!tech_handle_zanzoken(ch, vict, "Deathbeam")) {
+      if (GET_SKILL_PERF(ch, SKILL_DEATHBEAM) == 3 && attperc > minimum) {
+          pcost(ch, attperc - 0.05, 0);
+      } else {
+          pcost(ch, attperc, 0);
+      }
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      if (GET_SKILL_PERF(ch, SKILL_DEATHBEAM) == 3) {
+          WAIT_STATE(ch, PULSE_3SEC);
+      }
+
+      return;
   }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your Deathbeam before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c Deathbeam before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c Deathbeam before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     if (GET_SKILL_PERF(ch, SKILL_DEATHBEAM) == 3 && attperc > minimum) {
-      pcost(ch, attperc - 0.05, 0);
-     } else {
-      pcost(ch, attperc, 0);
-     }
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-	 if (GET_SKILL_PERF(ch, SKILL_DEATHBEAM) == 3) {
-		WAIT_STATE(ch, PULSE_3SEC);
-	  }
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (blk > axion_dice(10)) {
@@ -8253,17 +7002,7 @@ ACMD(do_dodonpa)
    }
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -8276,15 +7015,7 @@ ACMD(do_dodonpa)
 
  skill = init_skill(ch, SKILL_DODONPA); /* Set skill value */
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
  /* There is a player/mob targeted */
  handle_cooldown(ch, 6);
@@ -8313,55 +7044,22 @@ ACMD(do_dodonpa)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
-  }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
   
      if (GET_SKILL_PERF(ch, SKILL_DODONPA) == 3) {
 		WAIT_STATE(ch, PULSE_3SEC);
 	  }
-  
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your Dodonpa before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c Dodonpa before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c Dodonpa before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
+
+     if(!tech_handle_zanzoken(ch, vict, "Dodonpa")) {
+         if (GET_SKILL_PERF(ch, SKILL_DODONPA) == 3 && attperc > minimum) {
+             pcost(ch, attperc - 0.05, 0);
+         } else {
+             pcost(ch, attperc, 0);
+         }
+         pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+         return;
      }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     if (GET_SKILL_PERF(ch, SKILL_DODONPA) == 3 && attperc > minimum) {
-      pcost(ch, attperc - 0.05, 0);
-     } else {
-      pcost(ch, attperc, 0);
-     }
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (blk > axion_dice(10)) {
@@ -8561,18 +7259,7 @@ ACMD(do_masenko)
    }
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -8586,15 +7273,7 @@ ACMD(do_masenko)
 
  skill = init_skill(ch, SKILL_MASENKO); /* Set skill value */
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
  /* There is a player/mob targeted */
  handle_cooldown(ch, 6);
@@ -8623,50 +7302,19 @@ ACMD(do_masenko)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+
+  if(tech_handle_zanzoken(ch, vict, "Masenko")) {
+      if (GET_SKILL_PERF(ch, SKILL_MASENKO) == 3 && attperc > minimum) {
+          pcost(ch, attperc - 0.05, 0);
+      } else {
+          pcost(ch, attperc, 0);
+      }
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+
+      return;
   }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your Masenko before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c Masenko before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c Masenko before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     if (GET_SKILL_PERF(ch, SKILL_MASENKO) == 3 && attperc > minimum) {
-      pcost(ch, attperc - 0.05, 0);
-     } else {
-      pcost(ch, attperc, 0);
-     }
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (IS_ANDROID(vict) && HAS_ARMS(vict) && GET_SKILL(vict, SKILL_ABSORB) > rand_number(1, 140)) {
@@ -8904,17 +7552,7 @@ ACMD(do_kamehameha)
    }
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -8928,15 +7566,7 @@ ACMD(do_kamehameha)
 
  skill = init_skill(ch, SKILL_KAMEHAMEHA); /* Set skill value */
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
  /* There is a player/mob targeted */
  handle_cooldown(ch, 6);
@@ -8965,60 +7595,29 @@ ACMD(do_kamehameha)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
-  }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your Kamehameha Wave before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c Kamehameha Wave before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c Kamehameha Wave before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 3 && attperc > minimum) {
-      pcost(ch, attperc - 0.05, 0);
-     } else {
-      pcost(ch, attperc, 0);
-     }
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
 
-     if (GET_SKILL(ch, SKILL_KAMEHAMEHA) >= 100) {
-      GET_MANA(ch) += (GET_MAX_MANA(ch) * attperc) * 0.25;
-     } else if (GET_SKILL(ch, SKILL_KAMEHAMEHA) >= 60) {
-      GET_MANA(ch) += (GET_MAX_MANA(ch) * attperc) * 0.10;
-     } else if (GET_SKILL(ch, SKILL_KAMEHAMEHA) >= 40) {
-      GET_MANA(ch) += (GET_MAX_MANA(ch) * attperc) * 0.05;
-     }
-     if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 3) {
-		WAIT_STATE(ch, PULSE_3SEC);
-	  }
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
+  if(!tech_handle_zanzoken(ch, vict, "KameHameHa Wave")) {
+      if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 3 && attperc > minimum) {
+          pcost(ch, attperc - 0.05, 0);
+      } else {
+          pcost(ch, attperc, 0);
+      }
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+
+      if (GET_SKILL(ch, SKILL_KAMEHAMEHA) >= 100) {
+          GET_MANA(ch) += (GET_MAX_MANA(ch) * attperc) * 0.25;
+      } else if (GET_SKILL(ch, SKILL_KAMEHAMEHA) >= 60) {
+          GET_MANA(ch) += (GET_MAX_MANA(ch) * attperc) * 0.10;
+      } else if (GET_SKILL(ch, SKILL_KAMEHAMEHA) >= 40) {
+          GET_MANA(ch) += (GET_MAX_MANA(ch) * attperc) * 0.05;
+      }
+      if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 3) {
+          WAIT_STATE(ch, PULSE_3SEC);
+      }
+      return;
   }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (IS_ANDROID(vict) && HAS_ARMS(vict) && GET_SKILL(vict, SKILL_ABSORB) > rand_number(1, 140)) {
@@ -9297,18 +7896,9 @@ ACMD(do_renzo)
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
+  if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -9322,15 +7912,7 @@ ACMD(do_renzo)
 
  skill = init_skill(ch, SKILL_RENZO); /* Set skill value */
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+
 
  /* There is a player/mob targeted */
  handle_cooldown(ch, 5);
@@ -9356,24 +7938,7 @@ ACMD(do_renzo)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
-  }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
 
   /* Renzokou Energy Dan Mastery */
 
@@ -9402,33 +7967,18 @@ ACMD(do_renzo)
 
   /*=============================*/
 
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your Renzokou Energy Dan before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c Renzokou Energy Dan before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c Renzokou Energy Dan before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     if (master_pass == 1)
-      pcost(ch, attperc * 0.25, 0);
-     else if (master_pass == 2)
-      pcost(ch, attperc * 0.5, 0);
-     else
-      pcost(ch, attperc, 0);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
+  if(!tech_handle_zanzoken(ch, vict, "Renzokou Energy Dan")) {
+      if (master_pass == 1)
+          pcost(ch, attperc * 0.25, 0);
+      else if (master_pass == 2)
+          pcost(ch, attperc * 0.5, 0);
+      else
+          pcost(ch, attperc, 0);
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+
+      return;
   }
+
   int count = 0;
   if (prob + 20 < perc) {
    count = 0;
@@ -9663,15 +8213,8 @@ ACMD(do_heeldrop)
 
  skill = init_skill(ch, SKILL_HEELDROP);
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
+
  if (IS_PICCOLO(ch)) {
   if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
    handle_cooldown(ch, 7);
@@ -9777,48 +8320,16 @@ ACMD(do_heeldrop)
    dge = rand_number(70, 100);
   }
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+
+  if(!tech_handle_zanzoken(ch, vict, "Heeldrop")) {
+      COMBO(ch) = -1;
+      COMBHITS(ch) = 0;
+      pcost(ch, 0, stcost / 2);
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      return;
   }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your Heeldrop before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c Heeldrop before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c Heeldrop before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     COMBO(ch) = -1;
-     COMBHITS(ch) = 0;
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     pcost(ch, 0, stcost / 2);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
@@ -9954,25 +8465,7 @@ ACMD(do_heeldrop)
       /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
      break;
    }
-   if (GET_HIT(vict) > 0 && !AFF_FLAGGED(vict, AFF_SPIRIT) && AFF_FLAGGED(vict, AFF_FIRESHIELD) && !GET_BONUS(ch, BONUS_FIREPROOF) && !IS_DEMON(ch)) {
-    act("@c$N's@W fireshield burns your leg!@n", TRUE, ch, 0, vict, TO_CHAR);
-    act("@C$n's@W leg is burned by your fireshield!@n", TRUE, ch, 0, vict, TO_VICT);
-    act("@c$n's@W leg is burned by @C$N's@W fireshield!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-    dmg = GET_MAX_MANA(vict) * 0.02;
-    LASTATK(vict) += 1000;
-    hurt(0, 0, vict, ch, NULL, dmg, 0);
-    if (GET_BONUS(ch, BONUS_FIREPRONE)) {
-     send_to_char(ch, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
-     send_to_char(vict, "@RThey are easily burned!@n\r\n");
-     SET_BIT_AR(AFF_FLAGS(ch), AFF_BURNED);
-    } else if (GET_CON(ch) < axion_dice(0)) {
-     send_to_char(ch, "@RYou are badly burned!@n\r\n");
-     send_to_char(vict, "@RThey are burned!@n\r\n");
-     SET_BIT_AR(AFF_FLAGS(ch), AFF_BURNED);
-    }
-   } else if (GET_HIT(vict) > 0 && !AFF_FLAGGED(vict, AFF_SPIRIT) && AFF_FLAGGED(vict, AFF_FIRESHIELD) && (GET_BONUS(ch, BONUS_FIREPROOF) || IS_DEMON(ch))) {
-    send_to_char(vict, "@RThey appear to be fireproof!@n\r\n");
-   } 
+   tech_handle_fireshield(ch, vict, "leg");
    pcost(ch, 0, stcost);
    handle_multihit(ch, vict);
      
@@ -10051,15 +8544,8 @@ ACMD(do_attack)
   }
  }
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
+
  if (GET_EQ(ch, WEAR_WIELD1)) {
   if (vict) {
    if (GET_OBJ_VAL(GET_EQ(ch, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT) {
@@ -10233,47 +8719,15 @@ ACMD(do_attack)
   if (PLR_FLAGGED(ch, PLR_THANDW)) {
    perc += 15;
   }
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+
+  if(!tech_handle_zanzoken(ch, vict, "attack")) {
+      if ((wielded == 2 && gun == FALSE) || (gun2 == FALSE && gun == FALSE))
+          pcost(ch, 0, stcost / 3);
+      pcost(vict, 0, GET_MAX_HIT(vict) / 150);
+      return;
   }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your attack before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c attack before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c attack before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     if ((wielded == 2 && gun == FALSE) || (gun2 == FALSE && gun == FALSE))
-      pcost(ch, 0, stcost / 3);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 150);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
@@ -10857,17 +9311,7 @@ ACMD(do_shogekiha)
    return;
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -10881,15 +9325,7 @@ ACMD(do_shogekiha)
 
  skill = init_skill(ch, SKILL_SHOGEKIHA); /* Set skill value */
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
  /* There is a player/mob targeted */
  if (!IS_KABITO(ch)) {
@@ -10922,24 +9358,7 @@ ACMD(do_shogekiha)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
-  }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
 
   /* Shogekiha Mastery Bonus Area of Funstuff */
    int master_roll = rand_number(1, 100), master_chance = 0, master_pass = FALSE;
@@ -10956,28 +9375,12 @@ ACMD(do_shogekiha)
 
   /*==========================================*/
 
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your Shogekiha before reappearing!@n", TRUE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c Shogekiha before reappearing!@n", TRUE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c Shogekiha before reappearing!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     pcost(ch, attperc, 0);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
+  if(!tech_handle_zanzoken(ch, vict, "Shogekiha")) {
+      pcost(ch, attperc, 0);
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      return;
   }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (blk > axion_dice(10)) {
@@ -11161,17 +9564,7 @@ ACMD(do_tsuihidan)
    return;
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -11185,15 +9578,7 @@ ACMD(do_tsuihidan)
 
  skill = init_skill(ch, SKILL_TSUIHIDAN); /* Set skill value */
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
  /* There is a player/mob targeted */
  handle_cooldown(ch, 5);
@@ -11219,24 +9604,7 @@ ACMD(do_tsuihidan)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
-  }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
 
   /* Tsuihidan Mastery */
 
@@ -11253,33 +9621,17 @@ ACMD(do_tsuihidan)
    master_pass = TRUE;
 
   /*===================*/
-  
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your Tsuihidan before reappearing!@n", TRUE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c Tsuihidan before reappearing!@n", TRUE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c Tsuihidan before reappearing!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     dodge_ki(ch, vict, 1, 11, skill, SKILL_TSUIHIDAN); /* Effects on the room from dodging a ki attack
+
+  if(!tech_handle_zanzoken(ch, vict, "Tsuihidan")) {
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      dodge_ki(ch, vict, 1, 11, skill, SKILL_TSUIHIDAN); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
-     hurt(0, 0, ch, vict, NULL, 0, 1);
-     pcost(ch, attperc, 0);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
+      hurt(0, 0, ch, vict, NULL, 0, 1);
+      pcost(ch, attperc, 0);
+      return;
   }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (IS_ANDROID(vict) && HAS_ARMS(vict) && GET_SKILL(vict, SKILL_ABSORB) > rand_number(1, 140)) {
@@ -11638,47 +9990,16 @@ ACMD(do_attack2)
   }
    
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+
+  if(!tech_handle_zanzoken(ch, vict, "attack")) {
+      if (gun2 == FALSE)
+          pcost(ch, 0, stcost / 3);
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+
+      return;
   }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your attack before reappearing!@n", TRUE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c attack before reappearing!@n", TRUE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c attack before reappearing!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     if (gun2 == FALSE)
-      pcost(ch, 0, stcost / 3);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
@@ -12209,46 +10530,15 @@ ACMD(do_bite)
 		handle_defense(vict, &pry, &blk, &dge);
 
 		prob -= avo;
-		if (GET_POS(vict) == POS_SLEEPING) {
-			pry = 0;
-			blk = 0;
-			dge = 0;
-			prob += 50;
-		}
-		if (GET_POS(vict) == POS_RESTING) {
-			pry /= 4;
-			blk /= 4;
-			dge /= 4;
-			prob += 25;
-		}
-		if (GET_POS(vict) == POS_SITTING) {
-			pry /= 2;
-			blk /= 2;
-			dge /= 2;
-			prob += 10;
-		}
-		if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-			if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-				act("@C$N@c disappears, avoiding your bite before reappearing!@n", TRUE, ch, 0, vict, TO_CHAR);
-				act("@cYou disappear, avoiding @C$n's@c bite before reappearing!@n", TRUE, ch, 0, vict, TO_VICT);
-				act("@C$N@c disappears, avoiding @C$n's@c bite before reappearing!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-				if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-					REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-				}
-				REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-				pcost(ch, 0, stcost / 2);
-				pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+        tech_handle_posmodifier(vict, pry, blk, dge, prob);
 
-				return;
-			}
-			else {
-				act("@C$N@c disappears, trying to avoid your bite, but your zanzoken is faster!@n", TRUE, ch, 0, vict, TO_CHAR);
-				act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-				act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-				REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-				REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-			}
-		}
+        if(!tech_handle_zanzoken(ch, vict, "bite")) {
+            pcost(ch, 0, stcost / 2);
+            pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+
+            return;
+        }
+
 		if (prob < perc - 20) {
 			if (GET_MOVE(vict) > 0) {
 				if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
@@ -12446,17 +10736,7 @@ ACMD(do_kiball)
     // log("Log 1 - attperc: %f, minimum: %f, charge: %" I64T "", attperc, minimum, GET_CHARGE(ch));
   //}
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (!frompool && GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -12469,15 +10749,8 @@ ACMD(do_kiball)
    // log("Log 3 - attperc: %f, minimum: %f, charge: %" I64T "", attperc, minimum, GET_CHARGE(ch));
  skill = init_skill(ch, SKILL_KIBALL);
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+  if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
+
  handle_cooldown(ch, 5);
  if (vict) {
   if (!can_kill(ch, vict, NULL, 1)) {
@@ -12515,50 +10788,19 @@ ACMD(do_kiball)
   /*-----------------------------------*/
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+
+  if(!tech_handle_zanzoken(ch, vict, "kiball")) {
+      if (frompool == TRUE) {
+          GET_MANA(ch) -= GET_MAX_MANA(ch) * attperc;
+      } else {
+          pcost(ch, attperc, 0);
+      }
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      return;
   }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your kiball before reappearing!@n", TRUE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c kiball before reappearing!@n", TRUE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c kiball before reappearing!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     if (frompool == TRUE) {
-       GET_MANA(ch) -= GET_MAX_MANA(ch) * attperc;
-       } else {
-       pcost(ch, attperc, 0);
-       }
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
+
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (IS_ANDROID(vict) && HAS_ARMS(vict) && GET_SKILL(vict, SKILL_ABSORB) > rand_number(1, 140)) {
@@ -12772,17 +11014,7 @@ ACMD(do_beam)
    return;
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -12794,15 +11026,8 @@ ACMD(do_beam)
 
  skill = init_skill(ch, SKILL_BEAM);
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+  if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
+
  handle_cooldown(ch, 5);
  if (vict) {
   if (!can_kill(ch, vict, NULL, 1)) {
@@ -12824,46 +11049,14 @@ ACMD(do_beam)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+
+  if(!tech_handle_zanzoken(ch, vict, "beam")) {
+      pcost(ch, attperc, 0);
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      return;
   }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your beam before reappearing!@n", TRUE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c beam before reappearing!@n", TRUE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c beam before reappearing!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     pcost(ch, attperc, 0);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (IS_ANDROID(vict) && HAS_ARMS(vict) && GET_SKILL(vict, SKILL_ABSORB) > rand_number(1, 140)) {
@@ -13104,17 +11297,7 @@ ACMD(do_kiblast)
    return;
   }
 
-  if (*arg2) {
-   double adjust = (double)(atoi(arg2)) * 0.01;
-   if (adjust < 0.01 || adjust > 1.00) {
-    send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-    return;
-   } else if (adjust < attperc && adjust >= minimum) {
-    attperc = adjust;
-   } else if (adjust < minimum) {
-    attperc = minimum;
-   }
-  }
+  if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
   if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
    attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
@@ -13126,15 +11309,8 @@ ACMD(do_kiblast)
 
  skill = init_skill(ch, SKILL_KIBLAST);
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+  if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
+
  if (!IS_ANDROID(ch) || GET_SKILL(ch, SKILL_KIBLAST) < 100) {
   handle_cooldown(ch, 5);
  }
@@ -13158,24 +11334,7 @@ ACMD(do_kiblast)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
-  }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
 
   /* Kiblast mastery Area */
 
@@ -13192,29 +11351,14 @@ ACMD(do_kiblast)
     master_pass = TRUE;
  
   /*======================*/
- 
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your kiblast before reappearing!@n", TRUE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c kiblast before reappearing!@n", TRUE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c kiblast before reappearing!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     pcost(ch, attperc, 0);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
+
+  if(!tech_handle_zanzoken(ch, vict, "kiblast")) {
+      pcost(ch, attperc, 0);
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      return;
   }
+
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (IS_ANDROID(vict) && HAS_ARMS(vict) && GET_SKILL(vict, SKILL_ABSORB) > rand_number(1, 140)) {
@@ -13446,15 +11590,8 @@ ACMD(do_slam)
 
  skill = init_skill(ch, SKILL_SLAM);
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
+
  if (IS_BARDOCK(ch)) {
   if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
    handle_cooldown(ch, 7);
@@ -13489,48 +11626,16 @@ ACMD(do_slam)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  if(!tech_handle_zanzoken(ch, vict, "slam")) {
+      COMBO(ch) = -1;
+      COMBHITS(ch) = 0;
+      REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
+      pcost(ch, 0, stcost / 2);
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      return;
   }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your slam before reappearing!@n", TRUE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c slam before reappearing!@n", TRUE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c slam before reappearing!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     COMBO(ch) = -1;
-     COMBHITS(ch) = 0;
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     pcost(ch, 0, stcost / 2);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
@@ -13762,25 +11867,7 @@ ACMD(do_slam)
       /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
      break;
    }
-   if (GET_HIT(vict) > 0 && !AFF_FLAGGED(vict, AFF_SPIRIT) && AFF_FLAGGED(vict, AFF_FIRESHIELD) && !GET_BONUS(ch, BONUS_FIREPROOF) && !IS_DEMON(ch)) {
-    act("@c$N's@W fireshield burns your hands!@n", TRUE, ch, 0, vict, TO_CHAR);
-    act("@C$n's@W hands are burned by your fireshield!@n", TRUE, ch, 0, vict, TO_VICT);
-    act("@c$n's@W hands are burned by @C$N's@W fireshield!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-    dmg = GET_MAX_MANA(vict) * 0.02;
-    LASTATK(vict) += 1000;
-    hurt(0, 0, vict, ch, NULL, dmg, 0);
-    if (GET_BONUS(ch, BONUS_FIREPRONE)) {
-     send_to_char(ch, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
-     send_to_char(vict, "@RThey are easily burned!@n\r\n");
-     SET_BIT_AR(AFF_FLAGS(ch), AFF_BURNED);
-    } else if (GET_CON(ch) < axion_dice(0)) {
-     send_to_char(ch, "@RYou are badly burned!@n\r\n");
-     send_to_char(vict, "@RThey are burned!@n\r\n");
-     SET_BIT_AR(AFF_FLAGS(ch), AFF_BURNED);
-    }
-   } else if (GET_HIT(vict) > 0 && !AFF_FLAGGED(vict, AFF_SPIRIT) && AFF_FLAGGED(vict, AFF_FIRESHIELD) && (GET_BONUS(ch, BONUS_FIREPROOF) || IS_DEMON(ch))) {
-    send_to_char(vict, "@RThey appear to be fireproof!@n\r\n");
-   }
+   tech_handle_fireshield(ch, vict, "hands");
    pcost(ch, 0, stcost);
    handle_multihit(ch, vict);
      
@@ -13847,15 +11934,8 @@ ACMD(do_uppercut)
 
  skill = init_skill(ch, SKILL_UPPERCUT);
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
+
  if (IS_FRIEZA(ch)) {
   if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
    handle_cooldown(ch, 5);
@@ -13889,48 +11969,16 @@ ACMD(do_uppercut)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+
+  if(!tech_handle_zanzoken(ch, vict, "uppercut")) {
+      COMBO(ch) = -1;
+      COMBHITS(ch) = 0;
+      pcost(ch, 0, stcost / 2);
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      return;
   }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your uppercut before reappearing!@n", TRUE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c uppercut before reappearing!@n", TRUE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c uppercut before reappearing!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     COMBO(ch) = -1;
-     COMBHITS(ch) = 0;
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     pcost(ch, 0, stcost / 2);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
@@ -14051,25 +12099,7 @@ ACMD(do_uppercut)
       /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
      break;
    }
-   if (GET_HIT(vict) > 0 && !AFF_FLAGGED(vict, AFF_SPIRIT) && AFF_FLAGGED(vict, AFF_FIRESHIELD) && !GET_BONUS(ch, BONUS_FIREPROOF) && !IS_DEMON(ch)) {
-    act("@c$N's@W fireshield burns your hand!@n", TRUE, ch, 0, vict, TO_CHAR);
-    act("@C$n's@W hand is burned by your fireshield!@n", TRUE, ch, 0, vict, TO_VICT);
-    act("@c$n's@W hand is burned by @C$N's@W fireshield!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-    dmg = GET_MAX_MANA(vict) * 0.02;
-    LASTATK(vict) += 1000;
-    hurt(0, 0, vict, ch, NULL, dmg, 0);
-    if (GET_BONUS(ch, BONUS_FIREPRONE)) {
-     send_to_char(ch, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
-     send_to_char(vict, "@RThey are easily burned!@n\r\n");
-     SET_BIT_AR(AFF_FLAGS(ch), AFF_BURNED);
-    } else if (GET_CON(ch) < axion_dice(0)) {
-     send_to_char(ch, "@RYou are badly burned!@n\r\n");
-     send_to_char(vict, "@RThey are burned!@n\r\n");
-     SET_BIT_AR(AFF_FLAGS(ch), AFF_BURNED);
-    }
-   } else if (GET_HIT(vict) > 0 && !AFF_FLAGGED(vict, AFF_SPIRIT) && AFF_FLAGGED(vict, AFF_FIRESHIELD) && (GET_BONUS(ch, BONUS_FIREPROOF) || IS_DEMON(ch))) {
-    send_to_char(vict, "@RThey appear to be fireproof!@n\r\n");
-   }
+   tech_handle_fireshield(ch, vict, "hand");
    pcost(ch, 0, stcost);
    handle_multihit(ch, vict);
      
@@ -14131,15 +12161,8 @@ ACMD(do_tailwhip)
 
  skill = init_skill(ch, SKILL_TAILWHIP);
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
+
  handle_cooldown(ch, 7);
  if (vict) {
   if (!can_kill(ch, vict, NULL, 0)) {
@@ -14166,48 +12189,14 @@ ACMD(do_tailwhip)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+
+  if(!tech_handle_zanzoken(ch, vict, "tailwhip")) {
+      pcost(ch, 0, stcost / 2);
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      return;
   }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     COMBO(ch) -= 1;
-     COMBHITS(ch) = 0;
-     act("@C$N@c disappears, avoiding your tailwhip before reappearing!@n", TRUE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c tailwhip before reappearing!@n", TRUE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c tailwhip before reappearing!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     pcost(ch, 0, stcost / 2);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
@@ -14330,6 +12319,7 @@ ACMD(do_tailwhip)
       /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
      break;
    }
+   tech_handle_fireshield(ch, vict, "tail");
    pcost(ch, 0, stcost);
    handle_multihit(ch, vict);
      
@@ -14405,16 +12395,8 @@ ACMD(do_roundhouse)
 
  skill = init_skill(ch, SKILL_ROUNDHOUSE);
 
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
  if (IS_NAIL(ch)) {
   if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
    handle_cooldown(ch, 5);
@@ -14448,48 +12430,16 @@ ACMD(do_roundhouse)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+
+  if(!tech_handle_zanzoken(ch, vict, "roundhouse")) {
+      COMBO(ch) = -1;
+      COMBHITS(ch) = 0;
+      pcost(ch, 0, stcost / 2);
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      return;
   }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your roundhouse before reappearing!@n", TRUE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c roundhouse before reappearing!@n", TRUE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c roundhouse before reappearing!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     COMBO(ch) = -1;
-     COMBHITS(ch) = 0;
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     pcost(ch, 0, stcost / 2);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
@@ -14606,25 +12556,7 @@ ACMD(do_roundhouse)
       /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
      break;
    }
-   if (GET_HIT(vict) > 0 && !AFF_FLAGGED(vict, AFF_SPIRIT) && AFF_FLAGGED(vict, AFF_FIRESHIELD) && !GET_BONUS(ch, BONUS_FIREPROOF) && !IS_DEMON(ch)) {
-    act("@c$N's@W fireshield burns your leg!@n", TRUE, ch, 0, vict, TO_CHAR);
-    act("@C$n's@W leg is burned by your fireshield!@n", TRUE, ch, 0, vict, TO_VICT);
-    act("@c$n's@W leg is burned by @C$N's@W fireshield!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-    dmg = GET_MAX_MANA(vict) * 0.02;
-    LASTATK(vict) += 1000;
-    hurt(0, 0, vict, ch, NULL, dmg, 0);
-    if (GET_BONUS(ch, BONUS_FIREPRONE)) {
-     send_to_char(ch, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
-     send_to_char(vict, "@RThey are easily burned!@n\r\n");
-     SET_BIT_AR(AFF_FLAGS(ch), AFF_BURNED);
-    } else if (GET_CON(ch) < axion_dice(0)) {
-     send_to_char(ch, "@RYou are badly burned!@n\r\n");
-     send_to_char(vict, "@RThey are burned!@n\r\n");
-     SET_BIT_AR(AFF_FLAGS(ch), AFF_BURNED);
-    }
-   } else if (GET_HIT(vict) > 0 && !AFF_FLAGGED(vict, AFF_SPIRIT) && AFF_FLAGGED(vict, AFF_FIRESHIELD) && (GET_BONUS(ch, BONUS_FIREPROOF) || IS_DEMON(ch))) {
-    send_to_char(vict, "@RThey appear to be fireproof!@n\r\n");
-   }
+   tech_handle_fireshield(ch, vict, "leg");
    pcost(ch, 0, stcost);
    handle_multihit(ch, vict);
      
@@ -14691,15 +12623,8 @@ ACMD(do_elbow)
 
  skill = init_skill(ch, SKILL_ELBOW);
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
+
  handle_cooldown(ch, 6);
  if (vict) {
   if (!can_kill(ch, vict, NULL, 0)) {
@@ -14727,48 +12652,16 @@ ACMD(do_elbow)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+
+  if(tech_handle_zanzoken(ch, vict, "elbow")) {
+      COMBO(ch) = -1;
+      COMBHITS(ch) = 0;
+      pcost(ch, 0, stcost / 2);
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      return;
   }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your elbow before reappearing!@n", TRUE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c elbow before reappearing!@n", TRUE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c elbow before reappearing!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     COMBO(ch) = -1;
-     COMBHITS(ch) = 0;
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     pcost(ch, 0, stcost / 2);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
@@ -14882,25 +12775,8 @@ ACMD(do_elbow)
       /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
      break;
    }
-   if (GET_HIT(vict) > 0 && !AFF_FLAGGED(vict, AFF_SPIRIT) && AFF_FLAGGED(vict, AFF_FIRESHIELD) && !GET_BONUS(ch, BONUS_FIREPROOF) && !IS_DEMON(ch)) {
-    act("@c$N's@W fireshield burns your elbow!@n", TRUE, ch, 0, vict, TO_CHAR);
-    act("@C$n's@W elbow is burned by your fireshield!@n", TRUE, ch, 0, vict, TO_VICT);
-    act("@c$n's@W elbow is burned by @C$N's@W fireshield!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-    dmg = GET_MAX_MANA(vict) * 0.02;
-    LASTATK(vict) += 1000;
-    hurt(0, 0, vict, ch, NULL, dmg, 0);
-    if (GET_BONUS(ch, BONUS_FIREPRONE)) {
-     send_to_char(ch, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
-     send_to_char(vict, "@RThey are easily burned!@n\r\n");
-     SET_BIT_AR(AFF_FLAGS(ch), AFF_BURNED);
-    } else if (GET_CON(ch) < axion_dice(0)) {
-     send_to_char(ch, "@RYou are badly burned!@n\r\n");
-     send_to_char(vict, "@RThey are burned!@n\r\n");
-     SET_BIT_AR(AFF_FLAGS(ch), AFF_BURNED);
-    }
-   } else if (GET_HIT(vict) > 0 && !AFF_FLAGGED(vict, AFF_SPIRIT) && AFF_FLAGGED(vict, AFF_FIRESHIELD) && (GET_BONUS(ch, BONUS_FIREPROOF) || IS_DEMON(ch))) {
-    send_to_char(vict, "@RThey appear to be fireproof!@n\r\n");
-   }
+   tech_handle_fireshield(ch, vict, "elbow");
+
      pcost(ch, 0, stcost);
    handle_multihit(ch, vict);
      
@@ -14973,15 +12849,8 @@ ACMD(do_kick)
 
  skill = init_skill(ch, SKILL_KICK);
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
+
  handle_cooldown(ch, 5);
  if (vict) {
   if (!can_kill(ch, vict, NULL, 0)) {
@@ -15008,48 +12877,16 @@ ACMD(do_kick)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+
+  if(!tech_handle_zanzoken(ch, vict, "kick")) {
+      COMBO(ch) = -1;
+      COMBHITS(ch) = 0;
+      pcost(ch, 0, stcost / 2);
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      return;
   }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your kick before reappearing!@n", TRUE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c kick before reappearing!@n", TRUE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c kick before reappearing!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     COMBO(ch) = -1;
-     COMBHITS(ch) = 0;
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     pcost(ch, 0, stcost / 2);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
@@ -15164,25 +13001,7 @@ ACMD(do_kick)
       /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
      break;
    }
-   if (GET_HIT(vict) > 0 && !AFF_FLAGGED(vict, AFF_SPIRIT) && AFF_FLAGGED(vict, AFF_FIRESHIELD) && !GET_BONUS(ch, BONUS_FIREPROOF) && !IS_DEMON(ch)) {
-    act("@c$N's@W fireshield burns your leg!@n", TRUE, ch, 0, vict, TO_CHAR);
-    act("@C$n's@W leg is burned by your fireshield!@n", TRUE, ch, 0, vict, TO_VICT);
-    act("@c$n's@W leg is burned by @C$N's@W fireshield!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-    dmg = GET_MAX_MANA(vict) * 0.02;
-    LASTATK(vict) += 1000;
-    hurt(0, 0, vict, ch, NULL, dmg, 0);
-    if (GET_BONUS(ch, BONUS_FIREPRONE)) {
-     send_to_char(ch, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
-     send_to_char(vict, "@RThey are easily burned!@n\r\n");
-     SET_BIT_AR(AFF_FLAGS(ch), AFF_BURNED);
-    } else if (GET_CON(ch) < axion_dice(0)) {
-     send_to_char(ch, "@RYou are badly burned!@n\r\n");
-     send_to_char(vict, "@RThey are burned!@n\r\n");
-     SET_BIT_AR(AFF_FLAGS(ch), AFF_BURNED);
-    }
-   } else if (GET_HIT(vict) > 0 && !AFF_FLAGGED(vict, AFF_SPIRIT) && AFF_FLAGGED(vict, AFF_FIRESHIELD) && (GET_BONUS(ch, BONUS_FIREPROOF) || IS_DEMON(ch))) {
-    send_to_char(vict, "@RThey appear to be fireproof!@n\r\n");
-   }
+   tech_handle_fireshield(ch, vict, "leg");
      pcost(ch, 0, stcost);
      handle_multihit(ch, vict);
      
@@ -15255,15 +13074,8 @@ ACMD(do_knee)
 
  skill = init_skill(ch, SKILL_KNEE);
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
+
  handle_cooldown(ch, 6);
  if (vict) {
   if (!can_kill(ch, vict, NULL, 0)) {
@@ -15290,48 +13102,16 @@ ACMD(do_knee)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+
+  if(!tech_handle_zanzoken(ch, vict, "knee strike")) {
+      COMBO(ch) = -1;
+      COMBHITS(ch) = 0;
+      pcost(ch, 0, stcost / 2);
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      return;
   }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your knee strike before reappearing!@n", TRUE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c knee strike before reappearing!@n", TRUE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c knee strike before reappearing!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     COMBO(ch) = -1;
-     COMBHITS(ch) = 0;
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     pcost(ch, 0, stcost / 2);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
@@ -15445,25 +13225,7 @@ ACMD(do_knee)
       /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
      break;
    }
-   if (GET_HIT(vict) > 0 && !AFF_FLAGGED(vict, AFF_SPIRIT) && AFF_FLAGGED(vict, AFF_FIRESHIELD) && !GET_BONUS(ch, BONUS_FIREPROOF) && !IS_DEMON(ch)) {
-    act("@c$N's@W fireshield burns your knee!@n", TRUE, ch, 0, vict, TO_CHAR);
-    act("@C$n's@W knee is burned by your fireshield!@n", TRUE, ch, 0, vict, TO_VICT);
-    act("@c$n's@W knee is burned by @C$N's@W fireshield!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-    dmg = GET_MAX_MANA(vict) * 0.02;
-    LASTATK(vict) += 1000;
-    hurt(0, 0, vict, ch, NULL, dmg, 0);
-    if (GET_BONUS(ch, BONUS_FIREPRONE)) {
-     send_to_char(ch, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
-     send_to_char(vict, "@RThey are easily burned!@n\r\n");
-     SET_BIT_AR(AFF_FLAGS(ch), AFF_BURNED);
-    } else if (GET_CON(ch) < axion_dice(0)) {
-     send_to_char(ch, "@RYou are badly burned!@n\r\n");
-     send_to_char(vict, "@RThey are burned!@n\r\n");
-     SET_BIT_AR(AFF_FLAGS(ch), AFF_BURNED);
-    }
-   } else if (GET_HIT(vict) > 0 && !AFF_FLAGGED(vict, AFF_SPIRIT) && AFF_FLAGGED(vict, AFF_FIRESHIELD) && (GET_BONUS(ch, BONUS_FIREPROOF) || IS_DEMON(ch))) {
-    send_to_char(vict, "@RThey appear to be fireproof!@n\r\n");
-   }
+   tech_handle_fireshield(ch, vict, "knee");
      pcost(ch, 0, stcost);
    handle_multihit(ch, vict);
           
@@ -15526,15 +13288,8 @@ ACMD(do_punch)
  }
  skill = init_skill(ch, SKILL_PUNCH);
 
- vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
-  }
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
-   send_to_char(ch, "Nothing around here by that name.\r\n");
-   return;
-  }
- }
+ if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
+
  handle_cooldown(ch, 4);
  if (vict) {
   if (!can_kill(ch, vict, NULL, 0)) {
@@ -15561,48 +13316,17 @@ ACMD(do_punch)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
+
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+
+  if(!tech_handle_zanzoken(ch, vict, "punch")) {
+      COMBO(ch) = -1;
+      COMBHITS(ch) = 0;
+      pcost(ch, 0, stcost / 2);
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      return;
   }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
-  }
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your punch before reappearing!@n", TRUE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c punch before reappearing!@n", TRUE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c punch before reappearing!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     COMBO(ch) = -1;
-     COMBHITS(ch) = 0;
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     pcost(ch, 0, stcost / 2);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
+
   if (prob < perc - 20) {
    if (GET_MOVE(vict) > 0) {
     if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
@@ -15711,25 +13435,7 @@ ACMD(do_punch)
       /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
      break;
    }
-   if (GET_HIT(vict) > 0 && !AFF_FLAGGED(vict, AFF_SPIRIT) && AFF_FLAGGED(vict, AFF_FIRESHIELD) && !GET_BONUS(ch, BONUS_FIREPROOF) && !IS_DEMON(ch)) {
-    act("@c$N's@W fireshield burns your hand!@n", TRUE, ch, 0, vict, TO_CHAR);
-    act("@C$n's@W hand is burned by your fireshield!@n", TRUE, ch, 0, vict, TO_VICT);
-    act("@c$n's@W hand is burned by @C$N's@W fireshield!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-    dmg = GET_MAX_MANA(vict) * 0.02;
-    LASTATK(vict) += 1000;
-    hurt(0, 0, vict, ch, NULL, dmg, 0);
-    if (GET_BONUS(ch, BONUS_FIREPRONE)) {
-     send_to_char(ch, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
-     send_to_char(vict, "@RThey are easily burned!@n\r\n");
-     SET_BIT_AR(AFF_FLAGS(ch), AFF_BURNED);
-    } else if (GET_CON(ch) < axion_dice(0)) {
-     send_to_char(ch, "@RYou are badly burned!@n\r\n");
-     send_to_char(vict, "@RThey are burned!@n\r\n");
-     SET_BIT_AR(AFF_FLAGS(ch), AFF_BURNED);
-    }
-   } else if (GET_HIT(vict) > 0 && !AFF_FLAGGED(vict, AFF_SPIRIT) && AFF_FLAGGED(vict, AFF_FIRESHIELD) && (GET_BONUS(ch, BONUS_FIREPROOF) || IS_DEMON(ch))) {
-    send_to_char(vict, "@RThey appear to be fireproof!@n\r\n");
-   }
+   tech_handle_fireshield(ch, vict, "hand");
    pcost(ch, 0, stcost);
    handle_multihit(ch, vict);
      

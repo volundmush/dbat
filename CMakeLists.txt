@@ -19,6 +19,7 @@ link_libraries(effolkronium_random)
 
 add_subdirectory(libs/fmt)
 include_directories(libs/fmt/include)
+link_libraries(fmt::fmt)
 
 add_subdirectory(libs/json)
 link_libraries(nlohmann_json)
