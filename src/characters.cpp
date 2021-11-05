@@ -410,6 +410,10 @@ int64_t char_data::getCurPL() const {
     return hit;
 }
 
+int64_t char_data::getBasePL() const {
+    return basepl;
+}
+
 double char_data::getCurPLPercent() const {
     return (double)getCurPL() / (double)getMaxPL();
 }
@@ -449,6 +453,10 @@ int64_t char_data::getCurKI() const {
 
 int64_t char_data::getMaxKI() const {
     return max_mana;
+}
+
+int64_t char_data::getBaseKI() const {
+    return baseki;
 }
 
 double char_data::getCurKIPercent() const {
@@ -518,6 +526,10 @@ int64_t char_data::getCurST() const {
 
 int64_t char_data::getMaxST() const {
     return max_move;
+}
+
+int64_t char_data::getBaseST() const {
+    return basest;
 }
 
 double char_data::getCurSTPercent() const {
