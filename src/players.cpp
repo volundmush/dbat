@@ -365,8 +365,8 @@ int load_char(const char *name, struct char_data *ch)
     GET_POS(ch) = POS_STANDING;
     GET_MAJINIZED(ch) = PFDEF_BASEPL;
     GET_GAUNTLET(ch)   = PFDEF_GAUNTLET;
-    GET_BASE_KI(ch) = PFDEF_BASEKI;
-    GET_BASE_ST(ch) = PFDEF_BASEST;
+    ch->baseki = PFDEF_BASEKI;
+    ch->basest = PFDEF_BASEST;
     GET_HAIRL(ch) = PFDEF_HAIRL;
     GET_HAIRC(ch) = PFDEF_HAIRC;
     GET_SKIN(ch) = PFDEF_SKIN;
@@ -1141,9 +1141,9 @@ void save_char(struct char_data * ch)
   if (GET_POS(ch)          != POS_STANDING)     fprintf(fl, "Posi: %d\n", GET_POS(ch));
   if (GET_LIFEFORCE(ch)    != PFDEF_BASEPL)     fprintf(fl, "LF  : %" I64T "\n", GET_LIFEFORCE(ch));
   if (GET_LIFEPERC(ch)     != PFDEF_WEIGHT)     fprintf(fl, "LFPC: %d\n", GET_LIFEPERC(ch));
-  if (GET_BASE_PL(ch)      != PFDEF_BASEPL)     fprintf(fl, "Bpl : %" I64T "\n", GET_BASE_PL(ch));
-  if (GET_BASE_KI(ch)      != PFDEF_BASEKI)     fprintf(fl, "Bki : %" I64T "\n", GET_BASE_KI(ch));
-  if (GET_BASE_ST(ch)      != PFDEF_BASEST)     fprintf(fl, "Bst : %" I64T "\n", GET_BASE_ST(ch));
+  if ((ch->getBasePL())      != PFDEF_BASEPL)     fprintf(fl, "Bpl : %" I64T "\n", (ch->getBasePL()));
+  if ((ch->getBaseKI())      != PFDEF_BASEKI)     fprintf(fl, "Bki : %" I64T "\n", (ch->getBaseKI()));
+  if ((ch->getBaseST())      != PFDEF_BASEST)     fprintf(fl, "Bst : %" I64T "\n", (ch->getBaseST()));
   if (GET_DROOM(ch)        != PFDEF_DROOM)      fprintf(fl, "Droo: %d\n", GET_DROOM(ch)); 
   if (GET_HAIRL(ch)        != PFDEF_HAIRL)      fprintf(fl, "Hrl : %d\n", GET_HAIRL(ch));
   if (GET_HAIRS(ch)        != PFDEF_HAIRS)      fprintf(fl, "Hrs : %d\n", GET_HAIRS(ch));

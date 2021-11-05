@@ -3651,7 +3651,7 @@ ACMD(do_majinize)
 
 		if (GET_MAJINIZED(vict) == 0)
 		{
-			GET_MAJINIZED(vict) = (GET_BASE_PL(vict) * .4);
+			GET_MAJINIZED(vict) = ((vict->getBasePL()) * .4);
 		}
         vict->loseBasePL(GET_MAJINIZED(vict));
 		return;
@@ -3686,7 +3686,7 @@ ACMD(do_majinize)
 		MAJINIZED(vict) = GET_ID(ch);
 		GET_BOOSTS(ch) -= 1;
 
-		GET_MAJINIZED(vict) = GET_BASE_PL(vict) * .4;
+		GET_MAJINIZED(vict) = (vict->getBasePL()) * .4;
         vict->gainBasePLPercent(.4, true);
 		return;
 	}
@@ -4866,8 +4866,7 @@ ACMD(do_upgrade)
   else {
    GET_UP(ch) -= cost;
    send_to_char(ch, "You upgrade your system and gain %s %s!", add_commas(bonus), arg);
-   GET_MAX_MANA(ch) += bonus;
-   GET_BASE_KI(ch) += bonus;
+   ch->gainBaseKI(bonus, true);
   }
  }
  else if (!strcasecmp("stamina", arg)) {
@@ -4911,8 +4910,7 @@ ACMD(do_upgrade)
   else {
    GET_UP(ch) -= cost;
    send_to_char(ch, "You upgrade your system and gain %s %s!", add_commas(bonus), arg);
-   GET_MAX_MOVE(ch) += bonus;
-   GET_BASE_ST(ch) += bonus;
+   ch->gainBaseST(bonus, true);
   }
  }
  else {
@@ -4968,7 +4966,7 @@ ACMD(do_ingest)
    return;
   }
   
-  if (GET_MAX_HIT(vict) >= GET_BASE_PL(ch) * 3) {
+  if (GET_MAX_HIT(vict) >= (ch->getBasePL()) * 3) {
    send_to_char(ch, "You are too weak to ingest them into your body!\r\n");
    return;
   }
@@ -4997,9 +4995,9 @@ ACMD(do_ingest)
     act("@C$n@W flings a piece of goo at you! The goo engulfs your body and then returns to @C$n@W!@n", TRUE, ch, 0, vict, TO_VICT);
     act("@C$n@w flings a piece of goo at @c$N@W! The goo engulfs $M and then return to @C$n@W!@n", TRUE, ch, 0, vict, TO_NOTVICT);
     GET_ABSORBS(ch) += 1;
-    int64_t pl = GET_BASE_PL(vict) / 6;
-    int64_t stam = GET_BASE_ST(vict) / 6;
-    int64_t ki = GET_BASE_KI(vict) / 6;
+    int64_t pl = (vict->getBasePL()) / 6;
+    int64_t stam = (vict->getBaseST()) / 6;
+    int64_t ki = (vict->getBaseKI()) / 6;
     ch->gainBasePL(pl, true);
     ch->gainBaseST(stam, true);
     ch->gainBaseKI(ki, true);
@@ -5200,7 +5198,7 @@ ACMD(do_absorb)
     send_to_char(ch, "You already have already absorbed 3 people.\r\n");
     return;
   }
-  if (GET_MAX_HIT(vict) >= GET_BASE_PL(ch) * 3) {
+  if (GET_MAX_HIT(vict) >= (ch->getBasePL()) * 3) {
    send_to_char(ch, "You are too weak to absorb them into your cellular structure!\r\n");
    return;
   }
@@ -5224,9 +5222,9 @@ ACMD(do_absorb)
     act("@C$n@w rushes at @c$N@W and $s tail engulfs $M! You quickly suck $S squirming body into your tail, absorbing @c$N@W!@n", TRUE, ch, 0, vict, TO_NOTVICT);
     GET_ABSORBS(ch) -= 1;
 
-      int64_t stam = GET_BASE_ST(vict) / 5;
-      int64_t ki = GET_BASE_KI(vict) / 5;
-      int64_t pl = GET_BASE_PL(vict) / 5;
+      int64_t stam = (vict->getBaseST()) / 5;
+      int64_t ki = (vict->getBaseKI()) / 5;
+      int64_t pl = (vict->getBasePL()) / 5;
 
     ch->gainBasePL(pl, true);
       ch->gainBaseST(stam, true);
@@ -5287,9 +5285,9 @@ ACMD(do_absorb)
   else {
    act("@WYou rush at @c$N@W and stab them with your tail! You quickly suck out all the bio extract you need and leave the empty husk behind!", TRUE, ch, 0, vict, TO_CHAR);
    act("@C$n@w rushes at @c$N@W and stabs $M with $s tail! $e quickly sucks out all the bio extract and leaves the empty husk of @c$N@W behind!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-   int64_t stam = GET_BASE_ST(vict) / 2000;
-   int64_t ki = GET_BASE_KI(vict) / 2000;
-   int64_t pl = GET_BASE_PL(vict) / 2000;
+   int64_t stam = (vict->getBaseST()) / 2000;
+   int64_t ki = (vict->getBaseKI()) / 2000;
+   int64_t pl = (vict->getBasePL()) / 2000;
    stam += rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
    pl += rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
    ki += rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
@@ -8430,7 +8428,7 @@ ACMD(do_transform)
     }
 
 	/*R: Hidden transformation stuff following this*/
-	if (GET_BASE_PL(ch) < 50000) {
+	if ((ch->getBasePL()) < 50000) {
 		send_to_char(ch, "@RYou are too weak to comprehend transforming!@n\r\n");
 		return;
 	}
@@ -8498,7 +8496,7 @@ ACMD(do_transform)
         return;
     }
 
-    if (GET_BASE_PL(ch) < trans_req(ch, to_tier)) {
+    if ((ch->getBasePL()) < trans_req(ch, to_tier)) {
         send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
         return;
     }
@@ -8783,25 +8781,7 @@ ACMD(do_situp)
       bonus += bonus * 0.1;
     }
     send_to_char(ch, "You feel slightly more vigorous @D[@G+%s@D]@n.\r\n", add_commas(bonus));
-     if (IS_TRUFFLE(ch) && PLR_FLAGGED(ch, PLR_TRANS1)) {
-      GET_MAX_MOVE(ch) += bonus * 3;
-     }
-     else if (IS_TRUFFLE(ch) && PLR_FLAGGED(ch, PLR_TRANS2)) {
-      GET_MAX_MOVE(ch) += bonus * 4;
-     }
-     else if (IS_TRUFFLE(ch) && PLR_FLAGGED(ch, PLR_TRANS3)) {
-      GET_MAX_MOVE(ch) += bonus * 5;
-     }
-     else if (IS_HOSHIJIN(ch) && GET_PHASE(ch) == 1) {
-      GET_MAX_MOVE(ch) += bonus * 2;
-     }
-     else if (IS_HOSHIJIN(ch) && GET_PHASE(ch) == 2) {
-      GET_MAX_MOVE(ch) += bonus * 3;
-     }
-     else {
-      GET_MAX_MOVE(ch) += bonus;
-     }
-     GET_BASE_ST(ch) += bonus;
+     ch->gainBaseST(bonus, true);
    if (ROOM_GRAVITY(IN_ROOM(ch)) <= 50) {
    WAIT_STATE(ch, PULSE_2SEC);  
    }
@@ -9132,25 +9112,7 @@ ACMD(do_meditate)
     }
     /* Rillao: transloc, add new transes here */
     send_to_char(ch, "You feel your spirit grow stronger @D[@G+%s@D]@n.\r\n", add_commas(bonus));
-     if (IS_TRUFFLE(ch) && PLR_FLAGGED(ch, PLR_TRANS1)) {
-      GET_MAX_MANA(ch) += bonus * 3;
-     }
-     else if (IS_TRUFFLE(ch) && PLR_FLAGGED(ch, PLR_TRANS2)) {
-      GET_MAX_MANA(ch) += bonus * 4;
-     }
-     else if (IS_TRUFFLE(ch) && PLR_FLAGGED(ch, PLR_TRANS3)) {
-      GET_MAX_MANA(ch) += bonus * 5;
-     }
-     else if (IS_HOSHIJIN(ch) && GET_PHASE(ch) == 1) {
-      GET_MAX_MANA(ch) += bonus * 2;
-     }
-     else if (IS_HOSHIJIN(ch) && GET_PHASE(ch) == 2) {
-      GET_MAX_MANA(ch) += bonus * 3;
-     }
-     else {
-     GET_MAX_MANA(ch) += bonus;
-     }
-    GET_BASE_KI(ch) += bonus;
+    ch->gainBaseKI(bonus, true);
    if (ROOM_GRAVITY(IN_ROOM(ch)) <= 50) {
    WAIT_STATE(ch, PULSE_2SEC);
    }
@@ -9610,9 +9572,9 @@ void base_update(void)
 			{
 
 				int zenkaiPL, zenkaiKi, zenkaiSt;
-				zenkaiPL = GET_BASE_PL(d->character) * 1.03;
-				zenkaiKi = GET_BASE_KI(d->character) * 1.015;
-				zenkaiSt = GET_BASE_ST(d->character) * 1.015;
+				zenkaiPL = (d->character->getBasePL()) * 1.03;
+				zenkaiKi = (d->character->getBaseKI()) * 1.015;
+				zenkaiSt = (d->character->getBaseST()) * 1.015;
 
 				GET_HIT(d->character) = gear_pl(d->character) * .5;
 				GET_MANA(d->character) = GET_MAX_MANA(d->character) *.2;
