@@ -1294,42 +1294,12 @@ ACMD(do_zen)
       hurt(0, 0, ch, vict, NULL, dmg, 1);
       dam_eq_loc(vict, 4);
       /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
-       if ((IS_ICER(vict) || IS_BIO(vict)) && PLR_FLAGGED(vict, PLR_TAIL)) {
-        act("@rYou cut off $S tail!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@rYour tail is cut off!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@R$N@r's tail is cut off!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-        REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_TAIL);
-         remove_limb(vict, 6);
-       }
-       if ((IS_SAIYAN(vict) || IS_HALFBREED(vict)) && PLR_FLAGGED(vict, PLR_STAIL)) {
-        act("@rYou cut off $S tail!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@rYour tail is cut off!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@R$N@r's tail is cut off!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-        REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_STAIL);
-         remove_limb(vict, 5);
-        if (PLR_FLAGGED(vict, PLR_OOZARU)) {
-        act("@CYour body begins to shrink back to its normal form as the power of the Oozaru leaves you. You fall asleep shortly after returning to normal!@n", TRUE, vict, 0, 0, TO_CHAR);
-        act("@c$n@C's body begins to shrink and return to normal. Their giant ape features fading back into humanoid features until $e is left normal and asleep.@n", TRUE, vict, 0, 0, TO_ROOM);
-         REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_OOZARU);
-         GET_HIT(vict) = (GET_HIT(vict) / 2) - 10000;
-         GET_MANA(vict) = (GET_MANA(vict) / 2) - 10000;
-         GET_MOVE(vict) = (GET_MOVE(vict) / 2) - 10000;
-
-         GET_MAX_HIT(vict) = GET_BASE_PL(vict);
-         GET_MAX_MANA(vict) = GET_BASE_KI(vict);
-         GET_MAX_MOVE(vict) = GET_BASE_ST(vict);
-
-         if (GET_MOVE(vict) < 1) {
-          GET_MOVE(vict) = 1;
-         }
-         if (GET_MANA(vict) < 1) {
-          GET_MANA(vict) = 1;
-         }
-         if (GET_HIT(vict) < 1) {
-          GET_HIT(vict) = 1;
-         }
-        }
-       }
+      if(vict->race->hasTail(vict)) {
+          act("@rYou cut off $S tail!@n", TRUE, ch, 0, vict, TO_CHAR);
+          act("@rYour tail is cut off!@n", TRUE, ch, 0, vict, TO_VICT);
+          act("@R$N@r's tail is cut off!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          vict->race->loseTail(vict);
+      }
      break;
     case 2: /* Critical */
       act("@CRaising your blade above your head, and closing your eyes, you focus ki into its edge. The edge of the blade begins to glow a soft blue as the blade begins to throb with excess energy. Peels of lighting begin to arc from the blade in all directions as you open your eyes and instantly move past @g$N's@C body while slashing with the pure energy of your resolve! A large explosion of energy erupts across $S head!@n", TRUE, ch, 0, vict, TO_CHAR);
