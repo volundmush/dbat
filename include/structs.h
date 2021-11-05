@@ -2581,6 +2581,7 @@ struct char_data {
 
     int64_t getMaxPL() const;
     int64_t getCurPL() const;
+    int64_t getBasePL() const;
     double getCurPLPercent() const;
     int64_t getPercentOfCurPL(double amt) const;
     int64_t getPercentOfMaxPL(double amt) const;
@@ -2590,6 +2591,7 @@ struct char_data {
 
     int64_t getCurKI() const;
     int64_t getMaxKI() const;
+    int64_t getBaseKI() const;
     double getCurKIPercent() const;
     int64_t getPercentOfCurKI(double amt) const;
     int64_t getPercentOfMaxKI(double amt) const;
@@ -2607,6 +2609,7 @@ struct char_data {
 
     int64_t getCurST() const;
     int64_t getMaxST() const;
+    int64_t getBaseST() const;
     double getCurSTPercent() const;
     int64_t getPercentOfCurST(double amt) const;
     int64_t getPercentOfMaxST(double amt) const;
