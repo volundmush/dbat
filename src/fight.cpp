@@ -1020,16 +1020,15 @@ void fight_stack()
         act("@W$n@W is no longer blind.@n", FALSE, ch, 0, 0, TO_ROOM);
          REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_BLIND);
       }
+
       if (AFF_FLAGGED(ch, AFF_KNOCKED) && rand_number(1, 200) >= 195) {
-         act("@W$n@W is no longer senseless, and wakes up.@n", FALSE, ch, 0, 0, TO_ROOM);
-         send_to_char(ch, "You are no longer knocked out, and wake up!@n\r\n");
-         REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_KNOCKED);
-          GET_POS(ch) = POS_SITTING;
+         ch->cureStatusKnockedOut(true);
          if (IS_NPC(ch) && rand_number(1, 20) >= 12) {
          act("@W$n@W stands up.@n", FALSE, ch, 0, 0, TO_ROOM);
           GET_POS(ch) = POS_STANDING;
 	 }
       }
+
       if (!IS_NPC(ch) && !(ch->desc) && GET_POS(ch) > POS_STUNNED && !IS_AFFECTED(ch, AFF_FROZEN)) {
        if (FIGHTING(ch)) {
         do_flee(ch, NULL, 0, 0);

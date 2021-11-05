@@ -118,8 +118,8 @@ std::string processColors(const std::string& txt, int parse, char **choices);
 #undef MIN
 #endif
 
-int MAX(int a, int b);
-int MIN(int a, int b);
+int64_t MAX(int64_t a, int64_t b);
+int64_t MIN(int64_t a, int64_t b);
 char *CAP(char *txt);
 
 /* Followers */

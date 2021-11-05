@@ -3419,15 +3419,15 @@ int dice(int num, int size)
 
 
 /* Be wary of sign issues with this. */
-int MIN(int a, int b)
+int64_t MIN(int64_t a, int64_t b)
 {
-  return (a < b ? a : b);
+    return std::min(a, b);
 }
 
 /* Be wary of sign issues with this. */
-int MAX(int a, int b)
+int64_t MAX(int64_t a, int64_t b)
 {
-  return (a > b ? a : b);
+  return std::max(a, b);
 }
 
 char *CAP(char *txt)

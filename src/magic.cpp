@@ -1034,12 +1034,9 @@ void mag_points(int level, struct char_data *ch, struct char_data *victim,
     }
     GET_MANA(victim) = GET_MAX_MANA(victim);
     GET_MOVE(victim) = GET_MAX_MOVE(victim);
-    if (AFF_FLAGGED(victim, AFF_KNOCKED)) {
-     act("@W$n@W is no longer senseless, and wakes up.@n", FALSE, ch, 0, 0, TO_ROOM);
-     send_to_char(victim, "You are no longer knocked out, and wake up!@n\r\n");
-     REMOVE_BIT_AR(AFF_FLAGS(victim), AFF_KNOCKED);
-     GET_POS(victim) = POS_SITTING;
-    }
+
+    victim->cureStatusKnockedOut(true);
+
     if (GET_SUPPRESS(victim) > 0 && GET_HIT(victim) > ((GET_MAX_HIT(victim) / 100) * GET_SUPPRESS(victim))) {
      GET_HIT(victim) = ((GET_MAX_HIT(victim) / 100) * GET_SUPPRESS(victim));
      send_to_char(victim, "@mYou are healed to your suppression limit.@n\r\n");

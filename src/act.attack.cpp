@@ -2008,12 +2008,7 @@ ACMD(do_head)
         act("@C$N@W is knocked out!@n", TRUE, ch, 0, vict, TO_CHAR);
         act("@WYou are knocked out!@n", TRUE, ch, 0, vict, TO_VICT);
         act("@C$N@W is knocked out!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-        SET_BIT_AR(AFF_FLAGS(vict), AFF_KNOCKED);
-        if (AFF_FLAGGED(vict, AFF_FLYING)) {
-         REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_FLYING);
-         GET_ALT(vict) = 0;
-        }
-        GET_POS(vict) = POS_SLEEPING;
+        vict->setStatusKnockedOut();
        }
       mult = calc_critical(ch, 0);
       if (IS_KURZAK(ch) && !IS_NPC(ch)) {
@@ -2262,30 +2257,12 @@ ACMD(do_bash)
    }
    tech_handle_fireshield(ch, vict, "body");
 
-    if (vict && rand_number(1, 5) >= 4) {
-     if (AFF_FLAGGED(vict, AFF_FLYING)) {
-      act("@w$N@w is knocked out of the air!@n", TRUE, ch, 0, vict, TO_CHAR);
-      act("@wYou are knocked out of the air!@n", TRUE, ch, 0, vict, TO_VICT);
-      act("@w$N@w is knocked out of the air!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_FLYING);
-      GET_ALT(vict) = 0;
-      GET_POS(vict) = POS_SITTING;
-     } else {
-      handle_knockdown(vict);
-     }
-    }
-    if (rand_number(1, 5) >= 5) {
-     if (AFF_FLAGGED(ch, AFF_FLYING)) {
-      act("@w$N@w is knocked out of the air!@n", TRUE, vict, 0, ch, TO_CHAR);
-      act("@wYou are knocked out of the air!@n", TRUE, vict, 0, ch, TO_VICT);
-      act("@w$N@w is knocked out of the air!@n", TRUE, vict, 0, ch, TO_NOTVICT);
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-      GET_ALT(ch) = 0;
-      GET_POS(ch) = POS_SITTING;
-     } else {
-        handle_knockdown(vict);
-     }
-    }
+    if (vict && rand_number(1, 5) >= 4)
+        tech_handle_crashdown(vict, ch);
+
+    if (rand_number(1, 5) >= 5)
+        tech_handle_crashdown(ch, vict);
+
      pcost(ch, 0, stcost);
      handle_multihit(ch, vict);
 
@@ -3526,12 +3503,7 @@ ACMD(do_spike)
         act("@C$N@W is knocked out!@n", TRUE, ch, 0, vict, TO_CHAR);
         act("@WYou are knocked out!@n", TRUE, ch, 0, vict, TO_VICT);
         act("@C$N@W is knocked out!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-        SET_BIT_AR(AFF_FLAGS(vict), AFF_KNOCKED);
-        if (AFF_FLAGGED(vict, AFF_FLYING)) {
-         REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_FLYING);
-         GET_ALT(vict) = 0;
-        }
-        GET_POS(vict) = POS_SLEEPING;
+        vict->setStatusKnockedOut();
       }
      break;
     case 3:

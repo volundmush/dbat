@@ -4416,15 +4416,10 @@ ACMD(do_crusher)
       /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
      break;
    }
-     if (!AFF_FLAGGED(vict, AFF_FLYING) && GET_POS(vict) == POS_STANDING && rand_number(1, 3) == 3) {
-      handle_knockdown(vict);
+     if(rand_number(1, 3) == 3) {
+         tech_handle_crashdown(ch, vict);
      }
-     else if (AFF_FLAGGED(vict, AFF_FLYING) && rand_number(1, 3) == 3) {
-      act("@mYou are knocked out of the air by the attack!", TRUE, vict, 0, 0, TO_CHAR);
-      act("@W$n@m is knocked out of the air by the attack!", TRUE, vict, 0, 0, TO_ROOM);
-      REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_FLYING);
-      GET_ALT(ch) = 0;
-     }
+
      if (GET_SKILL_PERF(ch, SKILL_CRUSHER) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
@@ -8235,17 +8230,8 @@ ACMD(do_heeldrop)
       act("@WYou disappear, appearing above @C$N@W you spin and heeldrop $M in the face!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W disappears, only to appear above you, spinning quickly and heeldropping you in the face!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@c$n@W disappears, only to appear above @C$N@W, spinning quickly and heeldropping $M in the face!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (AFF_FLAGGED(vict, AFF_FLYING)) {
-       act("@w$N@w is knocked out of the air!@n", TRUE, ch, 0, vict, TO_CHAR);
-       act("@wYou are knocked out of the air!@n", TRUE, ch, 0, vict, TO_VICT);
-       act("@w$N@w is knocked out of the air!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-       REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_FLYING);
-       GET_ALT(vict) = 0;
-       GET_POS(vict) = POS_SITTING;
-      }
-      else {
-        handle_knockdown(vict);
-      }
+      tech_handle_crashdown(ch, vict);
+
       if (GET_BONUS(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
@@ -8257,17 +8243,7 @@ ACMD(do_heeldrop)
       act("@WYou disappear, reappearing in front of @C$N@W, you flip upside down and slam your heel into the top of $S head!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W disappears, reappearing in front of you, $e flips upside down and slams $s heel into the top of your head!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@c$n@W disappears, reappearing in front of @C$N@W, $e flips upside down and slams $s heel into the top of @C$N@W's head!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (AFF_FLAGGED(vict, AFF_FLYING)) {
-       act("@w$N@w is knocked out of the air!@n", TRUE, ch, 0, vict, TO_CHAR);
-       act("@wYou are knocked out of the air!@n", TRUE, ch, 0, vict, TO_VICT);
-       act("@w$N@w is knocked out of the air!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-       REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_FLYING);
-       GET_ALT(vict) = 0;
-       GET_POS(vict) = POS_SITTING;
-      }
-      else {
-        handle_knockdown(vict);       
-      }
+      tech_handle_crashdown(ch, vict);
       dmg *= calc_critical(ch, 0);
       hurt(0, 0, ch, vict, NULL, dmg, 0);
       dam_eq_loc(vict, 3);
@@ -11295,12 +11271,7 @@ ACMD(do_kiblast)
         act("@C$N@W is knocked out!@n", TRUE, ch, 0, vict, TO_CHAR);
         act("@WYou are knocked out!@n", TRUE, ch, 0, vict, TO_VICT);
         act("@C$N@W is knocked out!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-        SET_BIT_AR(AFF_FLAGS(vict), AFF_KNOCKED);
-        if (AFF_FLAGGED(vict, AFF_FLYING)) {
-         REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_FLYING);
-         GET_ALT(vict) = 0;
-        }
-        GET_POS(vict) = POS_SLEEPING;
+        vict->setStatusKnockedOut();
        }
      }
      pcost(ch, attperc, 0);
@@ -11497,12 +11468,7 @@ ACMD(do_slam)
         act("@C$N@W is knocked out!@n", TRUE, ch, 0, vict, TO_CHAR);
         act("@WYou are knocked out!@n", TRUE, ch, 0, vict, TO_VICT);
         act("@C$N@W is knocked out!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-        SET_BIT_AR(AFF_FLAGS(vict), AFF_KNOCKED);
-        if (AFF_FLAGGED(vict, AFF_FLYING)) {
-         REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_FLYING);
-         GET_ALT(vict) = 0;
-        }
-        GET_POS(vict) = POS_SLEEPING;
+        vict->setStatusKnockedOut();
        }
        else if ((GET_POS(vict) == POS_STANDING || GET_POS(vict) == POS_FIGHTING) && !AFF_FLAGGED(vict, AFF_KNOCKED)) {
         GET_POS(vict) = POS_SITTING;
@@ -11839,8 +11805,7 @@ ACMD(do_uppercut)
         act("@C$N@W is knocked out!@n", TRUE, ch, 0, vict, TO_CHAR);
         act("@WYou are knocked out!@n", TRUE, ch, 0, vict, TO_VICT);
         act("@C$N@W is knocked out!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-        SET_BIT_AR(AFF_FLAGS(vict), AFF_KNOCKED);
-        GET_POS(vict) = POS_SLEEPING;
+        vict->setStatusKnockedOut();
        }
       dmg *= calc_critical(ch, 0);
       hurt(0, 0, ch, vict, NULL, dmg, 0);
