@@ -410,9 +410,9 @@ static void phase_powerup(struct char_data *ch, int type, int phase)
 
 
  if (type == 0) { // Drop their stats
-	 GET_HIT(ch) = ((GET_HIT(ch) - ((GET_BASE_PL(ch) * .1) * mult)) / change);
-	 GET_MANA(ch) = ((GET_MANA(ch) - ((GET_BASE_KI(ch) * .1) * mult)) / change);
-	 GET_MOVE(ch) = ((GET_MOVE(ch) - ((GET_BASE_ST(ch) * .1) * mult)) / change);
+	 GET_HIT(ch) = ((GET_HIT(ch) - (((ch->getBasePL()) * .1) * mult)) / change);
+	 GET_MANA(ch) = ((GET_MANA(ch) - (((ch->getBaseKI()) * .1) * mult)) / change);
+	 GET_MOVE(ch) = ((GET_MOVE(ch) - (((ch->getBaseST()) * .1) * mult)) / change);
 
          if (GET_HIT(ch) < 0) {
           GET_HIT(ch) = 1;
@@ -424,9 +424,9 @@ static void phase_powerup(struct char_data *ch, int type, int phase)
           GET_MOVE(ch) = 1;
          }
 	 
-	 GET_MAX_HIT(ch) = GET_BASE_PL(ch);
-	 GET_MAX_MANA(ch) = GET_BASE_KI(ch);
-	 GET_MAX_MOVE(ch) = GET_BASE_ST(ch);
+	 GET_MAX_HIT(ch) = (ch->getBasePL());
+	 GET_MAX_MANA(ch) = (ch->getBaseKI());
+	 GET_MAX_MOVE(ch) = (ch->getBaseST());
          if (GET_BONUS(ch, BONUS_WIMP) > 0 && GET_STR(ch) < 25) {	 
    	  ch->real_abils.str -= bonus;
          }
@@ -437,13 +437,13 @@ static void phase_powerup(struct char_data *ch, int type, int phase)
 	 GET_PHASE(ch) = 0;
  } else { // Raise their stats
  
-	 GET_HIT(ch) = ((GET_HIT(ch) + ((GET_BASE_PL(ch) * .1) * mult)) * change);
-	 GET_MANA(ch) = ((GET_MANA(ch) + ((GET_BASE_KI(ch) * .1) * mult)) * change);
-	 GET_MOVE(ch) = ((GET_MOVE(ch) + ((GET_BASE_ST(ch) * .1) * mult)) * change);
+	 GET_HIT(ch) = ((GET_HIT(ch) + (((ch->getBasePL()) * .1) * mult)) * change);
+	 GET_MANA(ch) = ((GET_MANA(ch) + (((ch->getBaseKI()) * .1) * mult)) * change);
+	 GET_MOVE(ch) = ((GET_MOVE(ch) + (((ch->getBaseST()) * .1) * mult)) * change);
 
-	 GET_MAX_HIT(ch) = ((GET_BASE_PL(ch) + ((GET_BASE_PL(ch) * .1) * mult)) * change);
-	 GET_MAX_MANA(ch) = ((GET_BASE_KI(ch) + ((GET_BASE_KI(ch) * .1) * mult)) * change);
-	 GET_MAX_MOVE(ch) = ((GET_BASE_ST(ch) + ((GET_BASE_ST(ch) * .1) * mult)) * change);
+	 GET_MAX_HIT(ch) = (((ch->getBasePL()) + (((ch->getBasePL()) * .1) * mult)) * change);
+	 GET_MAX_MANA(ch) = (((ch->getBaseKI()) + (((ch->getBaseKI()) * .1) * mult)) * change);
+	 GET_MAX_MOVE(ch) = (((ch->getBaseST()) + (((ch->getBaseST()) * .1) * mult)) * change);
 
          if (GET_HIT(ch) > GET_MAX_HIT(ch)) {
           GET_HIT(ch) = GET_MAX_HIT(ch);

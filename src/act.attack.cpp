@@ -2970,8 +2970,8 @@ ACMD(do_selfd)
   tch = GRAPPLING(ch);
   dmg += GET_CHARGE(ch);
   GET_CHARGE(ch) = 0;
-  dmg += GET_BASE_PL(ch) * 0.6;
-  dmg += GET_BASE_ST(ch);
+  dmg += (ch->getBasePL()) * 0.6;
+  dmg += (ch->getBaseST());
   GET_HIT(ch) = 1;
   GET_SUPP(ch) = 0;
   GET_SUPPRESS(ch) = 0;
@@ -3001,8 +3001,8 @@ ACMD(do_selfd)
  } else {
   dmg += GET_CHARGE(ch);
   GET_CHARGE(ch) = 0;
-  dmg += GET_BASE_PL(ch) * 0.6;
-  dmg += GET_BASE_ST(ch);
+  dmg += (ch->getBasePL()) * 0.6;
+  dmg += (ch->getBaseST());
   dmg *= 1.5;
   GET_HIT(ch) = 1;
   GET_SUPP(ch) = 0;

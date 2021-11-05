@@ -1767,7 +1767,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
   send_to_char(ch, "MPL:[@g%12s@n]  MKI:[@g%12s@n]  MST:[@g%12s@n]\r\n",
           add_commas(GET_MAX_HIT(k)), add_commas(GET_MAX_MANA(k)), add_commas(GET_MAX_MOVE(k)));
   send_to_char(ch, "BPL:[@g%12s@n]  BKI:[@g%12s@n]  BST:[@g%12s@n]\r\n",
-          add_commas(GET_BASE_PL(k)), add_commas(GET_BASE_KI(k)), add_commas(GET_BASE_ST(k)));
+          add_commas((k->getBasePL())), add_commas((k->getBaseKI())), add_commas((k->getBaseST())));
   send_to_char(ch, "LF :[@g%12s@n]  MLF:[@g%12s@n]  LFP:[@g%3d@n]\r\n",
           add_commas(GET_LIFEFORCE(k)), add_commas(GET_LIFEMAX(k)), GET_LIFEPERC(k));
 

@@ -3877,8 +3877,7 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
     gain_exp(vict, gain);
     if (rand_number(1, 5) >= 4) {
      send_to_char(vict, "@D[@Y+ @G%s @gSt@D]@n ", st > 0 ? add_commas(st) : "SOFT-CAP");
-     GET_MAX_MOVE(vict) += st;
-     GET_BASE_ST(vict) += st;
+     vict->gainBaseST(st);
     }
     send_to_char(vict, "@D[@R- @M%d @mPS@D]@n ", pscost);
     send_to_char(vict, "\r\n");

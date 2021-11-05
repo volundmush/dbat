@@ -283,18 +283,18 @@ bool char_data::is_soft_cap(int64_t type, long double mult) const {
         case dbat::race::Fixed:
             switch(type) {
                 case 0:
-                    against = GET_BASE_PL(this);
+                    against = (this->getBasePL());
                     break;
                 case 1:
-                    against = GET_BASE_KI(this);
+                    against = (this->getBaseKI());
                     break;
                 case 2:
-                    against = GET_BASE_ST(this);
+                    against = (this->getBaseST());
                     break;
             }
             break;
         case dbat::race::Variable:
-            against = GET_BASE_PL(this) + GET_BASE_KI(this) + GET_BASE_ST(this);
+            against = (this->getBasePL()) + (this->getBaseKI()) + (this->getBaseST());
             if(IS_ANDROID(this) && type > 0) {
                 cur_cap += type;
             }

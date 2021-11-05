@@ -994,12 +994,12 @@ void advance_level(struct char_data *ch, int whichclass)
    }
 
    if (!IS_HUMAN(ch)) {
-    add_hp = (GET_BASE_PL(ch) * 0.01) * pl_percent;
+    add_hp = ((ch->getBasePL()) * 0.01) * pl_percent;
    } else if (IS_HUMAN(ch)) {
-    add_hp = ((GET_BASE_PL(ch) * 0.01) * pl_percent) * 0.8;
+    add_hp = (((ch->getBasePL()) * 0.01) * pl_percent) * 0.8;
    }
-   add_mana = (GET_BASE_KI(ch) * 0.01) * ki_percent;
-   add_move = (GET_BASE_ST(ch) * 0.01) * st_percent;
+   add_mana = ((ch->getBaseKI()) * 0.01) * ki_percent;
+   add_move = ((ch->getBaseST()) * 0.01) * st_percent;
    add_prac = prac_reward + GET_INT(ch);
   }
   if (add_hp >= 300000 && add_hp < 600000) {

@@ -526,7 +526,7 @@ namespace dbat::race {
             /* Handle Pl */
             cur = (long double) (GET_HIT(ch));
             max = (long double) (GET_MAX_HIT(ch));
-            GET_MAX_HIT(ch) = (GET_BASE_PL(ch) + add) * mult;
+            GET_MAX_HIT(ch) = ((ch->getBasePL()) + add) * mult;
             GET_MAX_HIT(ch) += android_bonus;
 
             if ((GET_HIT(ch) + (add * (cur / max))) * mult <= gear_pl(ch)) {
@@ -539,7 +539,7 @@ namespace dbat::race {
             /* Handle Ki */
             cur = (long double) (GET_MANA(ch));
             max = (long double) (GET_MAX_MANA(ch));
-            GET_MAX_MANA(ch) = (GET_BASE_KI(ch) + add) * mult;
+            GET_MAX_MANA(ch) = ((ch->getBaseKI()) + add) * mult;
             GET_MAX_MANA(ch) += android_bonus;
 
             if ((GET_MANA(ch) + (add * (cur / max))) * mult <= GET_MAX_MANA(ch)) {
@@ -552,7 +552,7 @@ namespace dbat::race {
             GET_MOVE(ch) -= GET_MOVE(ch) * drain;
             cur = (long double) (GET_MOVE(ch));
             max = (long double) (GET_MAX_MOVE(ch));
-            GET_MAX_MOVE(ch) = (GET_BASE_ST(ch) + add) * mult;
+            GET_MAX_MOVE(ch) = ((ch->getBaseST()) + add) * mult;
             GET_MAX_MOVE(ch) += android_bonus;
 
             if ((GET_MOVE(ch) + (add * (cur / max))) * mult <= GET_MAX_MOVE(ch)) {
@@ -914,9 +914,9 @@ namespace dbat::race {
             GET_HIT(ch) = gear_pl(ch);
         }
 
-        GET_MAX_HIT(ch) = GET_BASE_PL(ch);
-        GET_MAX_MANA(ch) = GET_BASE_KI(ch);
-        GET_MAX_MOVE(ch) = GET_BASE_ST(ch);
+        GET_MAX_HIT(ch) = (ch->getBasePL());
+        GET_MAX_MANA(ch) = (ch->getBaseKI());
+        GET_MAX_MOVE(ch) = (ch->getBaseST());
     }
 
     bool Race::checkTransUnlock(char_data *ch, int tier) const {
@@ -1037,16 +1037,16 @@ namespace dbat::race {
                 send_to_char(ch, "              @YSuper @CHuman@n\r\n");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 send_to_char(ch, "@YSuper @CHuman @WFirst  @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
+                             (ch->getBasePL()) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
                                                                           : "??????????");
                 send_to_char(ch, "@YSuper @CHuman @WSecond @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
+                             (ch->getBasePL()) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
                                                                           : "??????????");
                 send_to_char(ch, "@YSuper @CHuman @WThird  @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
+                             (ch->getBasePL()) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
                                                                           : "??????????");
                 send_to_char(ch, "@YSuper @CHuman @WFourth @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4))
+                             (ch->getBasePL()) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4))
                                                                           : "??????????");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 break;
@@ -1055,26 +1055,26 @@ namespace dbat::race {
                     send_to_char(ch, "                @YSuper @CSaiyan@n\r\n");
                     send_to_char(ch, "@b-------------------------------------------------@n\r\n");
                     send_to_char(ch, "@YSuper @CSaiyan @WFirst   @R-@G %s BPL Req\r\n",
-                                 GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
+                                 (ch->getBasePL()) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
                                                                               : "??????????");
                     send_to_char(ch, "@YLegendary @CSuper Saiyan @R-@G %s BPL Req\r\n",
-                                 GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
+                                 (ch->getBasePL()) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
                                                                               : "??????????");
                     send_to_char(ch, "@b-------------------------------------------------@n\r\n");
                 } else {
                     send_to_char(ch, "              @YSuper @CSaiyan@n\r\n");
                     send_to_char(ch, "@b------------------------------------------------@n\r\n");
                     send_to_char(ch, "@YSuper @CSaiyan @WFirst  @R-@G %s BPL Req\r\n",
-                                 GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
+                                 (ch->getBasePL()) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
                                                                               : "??????????");
                     send_to_char(ch, "@YSuper @CSaiyan @WSecond @R-@G %s BPL Req\r\n",
-                                 GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
+                                 (ch->getBasePL()) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
                                                                               : "??????????");
                     send_to_char(ch, "@YSuper @CSaiyan @WThird  @R-@G %s BPL Req\r\n",
-                                 GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
+                                 (ch->getBasePL()) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
                                                                               : "??????????");
                     send_to_char(ch, "@YSuper @CSaiyan @WFourth @R-@G %s BPL Req\r\n",
-                                 GET_BASE_PL(ch) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4))
+                                 (ch->getBasePL()) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4))
                                                                               : "??????????");
                     send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 }
@@ -1083,16 +1083,16 @@ namespace dbat::race {
                 send_to_char(ch, "              @YTransform@n\r\n");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 send_to_char(ch, "@YTransform @WFirst  @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
+                             (ch->getBasePL()) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
                                                                           : "??????????");
                 send_to_char(ch, "@YTransform @WSecond @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
+                             (ch->getBasePL()) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
                                                                           : "??????????");
                 send_to_char(ch, "@YTransform @WThird  @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
+                             (ch->getBasePL()) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
                                                                           : "??????????");
                 send_to_char(ch, "@YTransform @WFourth @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4))
+                             (ch->getBasePL()) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4))
                                                                           : "??????????");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 break;
@@ -1100,13 +1100,13 @@ namespace dbat::race {
                 send_to_char(ch, "              @YShadow@n\r\n");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 send_to_char(ch, "@YShadow @WFirst  @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
+                             (ch->getBasePL()) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
                                                                           : "??????????");
                 send_to_char(ch, "@YShadow @WSecond @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
+                             (ch->getBasePL()) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
                                                                           : "??????????");
                 send_to_char(ch, "@YShadow @WThird  @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
+                             (ch->getBasePL()) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
                                                                           : "??????????");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 break;
@@ -1114,16 +1114,16 @@ namespace dbat::race {
                 send_to_char(ch, "              @YSuper @CNamek@n\r\n");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 send_to_char(ch, "@YSuper @CNamek @WFirst  @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
+                             (ch->getBasePL()) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
                                                                           : "??????????");
                 send_to_char(ch, "@YSuper @CNamek @WSecond @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
+                             (ch->getBasePL()) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
                                                                           : "??????????");
                 send_to_char(ch, "@YSuper @CNamek @WThird  @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
+                             (ch->getBasePL()) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
                                                                           : "??????????");
                 send_to_char(ch, "@YSuper @CNamek @WFourth @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4))
+                             (ch->getBasePL()) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4))
                                                                           : "??????????");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 break;
@@ -1131,13 +1131,13 @@ namespace dbat::race {
                 send_to_char(ch, "              @YMutate@n\r\n");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 send_to_char(ch, "@YMutate @WFirst  @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
+                             (ch->getBasePL()) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
                                                                           : "??????????");
                 send_to_char(ch, "@YMutate @WSecond @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
+                             (ch->getBasePL()) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
                                                                           : "??????????");
                 send_to_char(ch, "@YMutate @WThird  @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
+                             (ch->getBasePL()) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
                                                                           : "??????????");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 break;
@@ -1145,13 +1145,13 @@ namespace dbat::race {
                 send_to_char(ch, "              @YSuper @CSaiyan@n\r\n");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 send_to_char(ch, "@YSuper @CSaiyan @WFirst  @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
+                             (ch->getBasePL()) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
                                                                           : "??????????");
                 send_to_char(ch, "@YSuper @CSaiyan @WSecond @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
+                             (ch->getBasePL()) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
                                                                           : "??????????");
                 send_to_char(ch, "@YSuper @CSaiyan @WThird  @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
+                             (ch->getBasePL()) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
                                                                           : "??????????");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 break;
@@ -1159,16 +1159,16 @@ namespace dbat::race {
                 send_to_char(ch, "              @YPerfection@n\r\n");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 send_to_char(ch, "@YMature        @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
+                             (ch->getBasePL()) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
                                                                           : "??????????");
                 send_to_char(ch, "@YSemi-Perfect  @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
+                             (ch->getBasePL()) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
                                                                           : "??????????");
                 send_to_char(ch, "@YPerfect       @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
+                             (ch->getBasePL()) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
                                                                           : "??????????");
                 send_to_char(ch, "@YSuper Perfect @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4))
+                             (ch->getBasePL()) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4))
                                                                           : "??????????");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 break;
@@ -1176,22 +1176,22 @@ namespace dbat::race {
                 send_to_char(ch, "              @YUpgrade@n\r\n");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 send_to_char(ch, "@Y1.0 @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
+                             (ch->getBasePL()) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
                                                                           : "??????????");
                 send_to_char(ch, "@Y2.0 @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
+                             (ch->getBasePL()) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
                                                                           : "??????????");
                 send_to_char(ch, "@Y3.0 @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
+                             (ch->getBasePL()) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
                                                                           : "??????????");
                 send_to_char(ch, "@Y4.0 @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4))
+                             (ch->getBasePL()) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4))
                                                                           : "??????????");
                 send_to_char(ch, "@Y5.0 @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 5) * 0.75) ? add_commas(trans_req(ch, 5))
+                             (ch->getBasePL()) >= (trans_req(ch, 5) * 0.75) ? add_commas(trans_req(ch, 5))
                                                                           : "??????????");
                 send_to_char(ch, "@Y6.0 @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 6) * 0.75) ? add_commas(trans_req(ch, 6))
+                             (ch->getBasePL()) >= (trans_req(ch, 6) * 0.75) ? add_commas(trans_req(ch, 6))
                                                                           : "??????????");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 break;
@@ -1199,13 +1199,13 @@ namespace dbat::race {
                 send_to_char(ch, "              @YMorph@n\r\n");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 send_to_char(ch, "@YMorph @WAffinity @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
+                             (ch->getBasePL()) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
                                                                           : "??????????");
                 send_to_char(ch, "@YMorph @WSuper    @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
+                             (ch->getBasePL()) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
                                                                           : "??????????");
                 send_to_char(ch, "@YMorph @WTrue     @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
+                             (ch->getBasePL()) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
                                                                           : "??????????");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 break;
@@ -1213,13 +1213,13 @@ namespace dbat::race {
                 send_to_char(ch, "              @YMystic@n\r\n");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 send_to_char(ch, "@YMystic @WFirst     @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
+                             (ch->getBasePL()) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
                                                                           : "??????????");
                 send_to_char(ch, "@YMystic @WSecond    @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
+                             (ch->getBasePL()) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
                                                                           : "??????????");
                 send_to_char(ch, "@YMystic @WThird     @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
+                             (ch->getBasePL()) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
                                                                           : "??????????");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 break;
@@ -1227,13 +1227,13 @@ namespace dbat::race {
                 send_to_char(ch, "              @YAscend@n\r\n");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 send_to_char(ch, "@YAscend @WFirst  @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
+                             (ch->getBasePL()) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
                                                                           : "??????????");
                 send_to_char(ch, "@YAscend @WSecond @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
+                             (ch->getBasePL()) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
                                                                           : "??????????");
                 send_to_char(ch, "@YAscend @WThird @R-@G %s BPL Req\r\n",
-                             GET_BASE_PL(ch) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
+                             (ch->getBasePL()) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
                                                                           : "??????????");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 break;

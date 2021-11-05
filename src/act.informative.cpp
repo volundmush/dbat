@@ -96,7 +96,7 @@ ACMD(do_evolve)
    send_to_char(ch, "You do not have enough evolution experience.\r\n");
    return;
   } else {
-   int64_t plgain = GET_BASE_PL(ch) * 0.01;
+   int64_t plgain = (ch->getBasePL()) * 0.01;
 
    if (plgain <= 0) {
     plgain = rand_number(1, 5);
@@ -115,7 +115,7 @@ ACMD(do_evolve)
    send_to_char(ch, "You do not have enough evolution experience.\r\n");
    return;
   } else {
-   int64_t kigain = GET_BASE_KI(ch) * 0.01;
+   int64_t kigain = (ch->getBaseKI()) * 0.01;
 
    if (kigain <= 0) {
     kigain = rand_number(1, 5);
@@ -134,7 +134,7 @@ ACMD(do_evolve)
    send_to_char(ch, "You do not have enough evolution experience.\r\n");
    return;
   } else {
-   int64_t stgain = GET_BASE_ST(ch) * 0.01;
+   int64_t stgain = (ch->getBaseST()) * 0.01;
 
    if (stgain <= 0) {
     stgain = rand_number(1, 5);
@@ -5680,7 +5680,8 @@ ACMD(do_score)
  send_to_char(ch, "                 @D<@rPowerlevel@D>          <@BKi@D>             <@GStamina@D>@n\n");
  send_to_char(ch, "    @wCurrent   @D-[@R%-16s@D]-[@R%-16s@D]-[@R%-16s@D]@n\n", add_commas(GET_HIT(ch)), add_commas(GET_MANA(ch)), add_commas(GET_MOVE(ch)));
  send_to_char(ch, "    @wMaximum   @D-[@r%-16s@D]-[@r%-16s@D]-[@r%-16s@D]@n\n", add_commas(GET_MAX_HIT(ch)), add_commas(GET_MAX_MANA(ch)), add_commas(GET_MAX_MOVE(ch)));
- send_to_char(ch, "    @wBase      @D-[@m%-16s@D]-[@m%-16s@D]-[@m%-16s@D]@n\n", add_commas(GET_BASE_PL(ch)), add_commas(GET_BASE_KI(ch)), add_commas(GET_BASE_ST(ch)));
+ send_to_char(ch, "    @wBase      @D-[@m%-16s@D]-[@m%-16s@D]-[@m%-16s@D]@n\n", add_commas((ch->getBasePL())), add_commas(
+         (ch->getBaseKI())), add_commas((ch->getBaseST())));
   if (!IS_ANDROID(ch) && GET_LIFEFORCE(ch) > 0) {
    send_to_char(ch, "    @wLife Force@D-[@C%16s@D%s@c%16s@D]- @wLife Percent@D-[@Y%3d%s@D]@n\n", add_commas(GET_LIFEFORCE(ch)), "/", add_commas(GET_LIFEMAX(ch)), GET_LIFEPERC(ch), "%");
   } else if (!IS_ANDROID(ch)) {

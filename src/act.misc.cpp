@@ -358,9 +358,9 @@ static void generate_multiform(struct char_data *ch, struct char_data *multi1, s
         do_transform(ch, "revert", 0, 0);
     }
 
-    GET_MAX_HIT(ch) -= (GET_BASE_PL(ch) * 0.25) * mult;
-    GET_MAX_MOVE(ch) -= (GET_BASE_ST(ch) * 0.25) * mult;
-    GET_MAX_MANA(ch) -= (GET_BASE_KI(ch) * 0.25) * mult;
+    GET_MAX_HIT(ch) -= ((ch->getBasePL()) * 0.25) * mult;
+    GET_MAX_MOVE(ch) -= ((ch->getBaseST()) * 0.25) * mult;
+    GET_MAX_MANA(ch) -= ((ch->getBaseKI()) * 0.25) * mult;
     char blamo[MAX_INPUT_LENGTH];
     sprintf(blamo, "p.%s", GET_NAME(ch));
     do_follow(clone, blamo, 0, 0);
@@ -457,12 +457,12 @@ void handle_multi_merge(struct char_data *form)
  
  GET_CLONES(ch) -= 1;
  
- GET_MAX_HIT(ch) += (GET_BASE_PL(ch) * 0.25) * mult;
- GET_MAX_MANA(ch) += (GET_BASE_KI(ch) * 0.25) * mult;
- GET_MAX_MOVE(ch) += (GET_BASE_ST(ch) * 0.25) * mult;
- GET_HIT(ch) += (GET_BASE_PL(ch) * 0.25) * mult;
- GET_MANA(ch) += (GET_BASE_KI(ch) * 0.25) * mult;
- GET_MOVE(ch) += (GET_BASE_ST(ch) * 0.25) * mult;
+ GET_MAX_HIT(ch) += ((ch->getBasePL()) * 0.25) * mult;
+ GET_MAX_MANA(ch) += ((ch->getBaseKI()) * 0.25) * mult;
+ GET_MAX_MOVE(ch) += ((ch->getBaseST()) * 0.25) * mult;
+ GET_HIT(ch) += ((ch->getBasePL()) * 0.25) * mult;
+ GET_MANA(ch) += ((ch->getBaseKI()) * 0.25) * mult;
+ GET_MOVE(ch) += ((ch->getBaseST()) * 0.25) * mult;
  
  if (GET_HIT(ch) > gear_pl(ch)) {
   GET_HIT(ch) = gear_pl(ch);
