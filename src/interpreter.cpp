@@ -6003,9 +6003,8 @@ void nanny(struct descriptor_data *d, char *arg)
        write_to_output(d, "keep or forget: \r\n");
        STATE(d) = CON_SKILLS;
      } else if (penalty == TRUE) {
-        GET_MAX_HIT(d->character) -= (GET_MAX_HIT(d->character) * 0.2);
-        GET_BASE_PL(d->character) -= (GET_BASE_PL(d->character) * 0.2);
-        GET_HIT(d->character) = GET_MAX_HIT(d->character);
+         d->character->loseBasePLPercent(.2);
+
         switch (roll) {
          case 1:
           d->character->real_abils.str -= 1;

@@ -518,7 +518,7 @@ int wield_type(int chsize, const struct obj_data *weap);
 #define GET_PERSONALITY(ch) ((ch)->personality)
 #define GET_COMBINE(ch)   ((ch)->combine)
 #define GET_PREFERENCE(ch) ((ch)->preference)
-#define GET_BASE_PL(ch)   ((ch)->basepl)
+#define GET_BASE_PL(ch)   (ch->getBasePL())
 #define GET_RELAXCOUNT(ch) ((ch)->relax_count)
 #define GET_BLESSLVL(ch)  ((ch)->blesslvl)
 #define GET_ASB(ch)       ((ch)->asb)

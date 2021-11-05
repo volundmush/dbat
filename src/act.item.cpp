@@ -3911,162 +3911,32 @@ static void majin_gain(struct char_data *ch, int type)
     send_to_char(ch, "You can not gain anymore from candy consumption at your current level.\r\n");
     return;
   }
-  else if (type == -1) {
-	  int st = (GET_BASE_ST(ch) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
-	  int pl = (GET_BASE_PL(ch) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
-	  int ki = (GET_BASE_KI(ch) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
-	  if (st > 300000) {
-		  st = 300000;
-	  }
-	  if (ki > 300000) {
-		  ki = 300000;
-	  }
-	  if (pl > 300000) {
-		  pl = 300000;
-	  }
-	  if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-		  GET_MAX_HIT(ch) += pl * 2;
-		  GET_MAX_MANA(ch) += ki * 2;
-		  GET_MAX_MOVE(ch) += st * 2;
-	  }
-	  else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-		  GET_MAX_HIT(ch) += pl * 3;
-		  GET_MAX_MANA(ch) += ki * 3;
-		  GET_MAX_MOVE(ch) += st * 3;
-	  }
-	  else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-		  GET_MAX_HIT(ch) += pl * 4.5;
-		  GET_MAX_MANA(ch) += ki * 4.5;
-		  GET_MAX_MOVE(ch) += st * 4.5;
-	  }
-	  else {
-		  GET_MAX_HIT(ch) += pl;
-		  GET_MAX_MANA(ch) += ki;
-		  GET_MAX_MOVE(ch) += st;
-	  }
-	  GET_BASE_PL(ch) += pl;
-	  GET_BASE_KI(ch) += ki;
-	  GET_BASE_ST(ch) += st;
-	  send_to_char(ch, "@mYou feel stronger after consuming the candy @D[@RPL@W: @r%s @CKi@D: @c%s @GSt@D: @g%s@D]@m!@n\r\n", add_commas(pl), add_commas(ki), add_commas(st));
-	  return;
+
+  int64_t st = 0, ki = 0, pl = 0;
+
+  switch(type) {
+      case -1:
+          st = std::min(300000L, (GET_BASE_ST(ch) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
+          pl = std::min(300000L, (GET_BASE_PL(ch) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
+          ki = std::min(300000L, (GET_BASE_KI(ch) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
+      case 0:
+          st = std::min(500000L, (GET_BASE_ST(ch) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
+          pl = std::min(500000L, (GET_BASE_PL(ch) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
+          ki = std::min(500000L, (GET_BASE_KI(ch) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
+      case 1:
+          st = std::min(1200000L, (GET_BASE_ST(ch) / 1000) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
+          pl = std::min(1200000L, (GET_BASE_PL(ch) / 1000) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
+          ki = std::min(1200000L, (GET_BASE_KI(ch) / 1000) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
+      case 2:
+          st = std::min(1500000L, (GET_BASE_ST(ch) / 900) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
+          pl = std::min(1500000L, (GET_BASE_PL(ch) / 900) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
+          ki = std::min(1500000L, (GET_BASE_KI(ch) / 900) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
   }
-  else if (type == 0) {
-    int st = (GET_BASE_ST(ch) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
-    int pl = (GET_BASE_PL(ch) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
-    int ki = (GET_BASE_KI(ch) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
-    if (st > 500000) {
-      st = 500000;
-    }
-    if (ki > 500000) {
-      ki = 500000;
-    }
-    if (pl > 500000) {
-      pl = 500000;
-    }
-     if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-      GET_MAX_HIT(ch) += pl * 2;
-      GET_MAX_MANA(ch) += ki * 2;
-      GET_MAX_MOVE(ch) += st * 2;
-     }
-     else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-      GET_MAX_HIT(ch) += pl * 3;
-      GET_MAX_MANA(ch) += ki * 3;
-      GET_MAX_MOVE(ch) += st * 3;
-     }
-     else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-      GET_MAX_HIT(ch) += pl * 4.5;
-      GET_MAX_MANA(ch) += ki * 4.5;
-      GET_MAX_MOVE(ch) += st * 4.5;
-     }
-     else {
-      GET_MAX_HIT(ch) += pl;
-      GET_MAX_MANA(ch) += ki;
-      GET_MAX_MOVE(ch) += st;
-     }
-    GET_BASE_PL(ch) += pl;
-    GET_BASE_KI(ch) += ki;
-    GET_BASE_ST(ch) += st;
+    ch->gainBasePL(pl, true);
+  ch->gainBaseKI(ki, true);
+  ch->gainBaseST(st, true);
+
     send_to_char(ch, "@mYou feel stronger after consuming the candy @D[@RPL@W: @r%s @CKi@D: @c%s @GSt@D: @g%s@D]@m!@n\r\n", add_commas(pl), add_commas(ki), add_commas(st));
-    return;
-  }
-  else if (type == 1) {
-    int st = (GET_BASE_ST(ch) / 1000) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
-    int pl = (GET_BASE_PL(ch) / 1000) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
-    int ki = (GET_BASE_KI(ch) / 1000) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
-    if (st > 1200000) {
-      st = 1200000;
-    }
-    if (ki > 1200000) {
-      ki = 1200000;
-    }
-    if (pl > 1200000) {
-      pl = 1200000;
-    }
-     if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-      GET_MAX_HIT(ch) += pl * 2;
-      GET_MAX_MANA(ch) += ki * 2;
-      GET_MAX_MOVE(ch) += st * 2;
-     }
-     else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-      GET_MAX_HIT(ch) += pl * 3;
-      GET_MAX_MANA(ch) += ki * 3;
-      GET_MAX_MOVE(ch) += st * 3;
-     }
-     else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-      GET_MAX_HIT(ch) += pl * 4.5;
-      GET_MAX_MANA(ch) += ki * 4.5;
-      GET_MAX_MOVE(ch) += st * 4.5;
-     }
-     else {
-      GET_MAX_HIT(ch) += pl;
-      GET_MAX_MANA(ch) += ki;
-      GET_MAX_MOVE(ch) += st;
-     }
-    GET_BASE_PL(ch) += pl;
-    GET_BASE_KI(ch) += ki;
-    GET_BASE_ST(ch) += st;
-    send_to_char(ch, "@mYou feel stronger after consuming the candy @D[@RPL@W: @r%s @CKi@D: @c%s @GSt@D: @g%s@D]@m!@n\r\n", add_commas(pl), add_commas(ki), add_commas(st));
-    return;
-  }
-  else if (type == 2) {
-    int st = (GET_BASE_ST(ch) / 900) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
-    int pl = (GET_BASE_PL(ch) / 900) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
-    int ki = (GET_BASE_KI(ch) / 900) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
-    if (st > 1500000) {
-      st = 1500000;
-    }
-    if (ki > 1500000) {
-      ki = 1500000;
-    }
-    if (pl > 1500000) {
-      pl = 1500000;
-    }
-     if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-      GET_MAX_HIT(ch) += pl * 2;
-      GET_MAX_MANA(ch) += ki * 2;
-      GET_MAX_MOVE(ch) += st * 2;
-     }
-     else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-      GET_MAX_HIT(ch) += pl * 3;
-      GET_MAX_MANA(ch) += ki * 3;
-      GET_MAX_MOVE(ch) += st * 3;
-     }
-     else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-      GET_MAX_HIT(ch) += pl * 4.5;
-      GET_MAX_MANA(ch) += ki * 4.5;
-      GET_MAX_MOVE(ch) += st * 4.5;
-     }
-     else {
-      GET_MAX_HIT(ch) += pl;
-      GET_MAX_MANA(ch) += ki;
-      GET_MAX_MOVE(ch) += st;
-     }
-    GET_BASE_PL(ch) += pl;
-    GET_BASE_KI(ch) += ki;
-    GET_BASE_ST(ch) += st;
-    send_to_char(ch, "@mYou feel stronger after consuming the candy @D[@RPL@W: @r%s @CKi@D: @c%s @GSt@D: @g%s@D]@m!@n\r\n", add_commas(pl), add_commas(ki), add_commas(st));
-    return;
-  }
 }
 
 ACMD(do_pour)

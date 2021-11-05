@@ -103,9 +103,7 @@ ACMD(do_evolve)
    } else {
     plgain = rand_number(plgain, plgain * .5);
    }
-   GET_HIT(ch) += plgain;
-   GET_MAX_HIT(ch) += plgain;
-   GET_BASE_PL(ch) += plgain;
+   ch->gainBasePL(plgain);
    GET_MOLT_EXP(ch) -= plcost;
    send_to_char(ch, "Your body evolves to make better use of the way it is now, and you feel that your body has strengthened. @D[@RPL@D: @Y+%s@D]@n\r\n", add_commas(plgain));
   }
@@ -124,9 +122,7 @@ ACMD(do_evolve)
    } else {
     kigain = rand_number(kigain, kigain * .5);
    }
-   GET_MANA(ch) += kigain;
-   GET_MAX_MANA(ch) += kigain;
-   GET_BASE_KI(ch) += kigain;
+   ch->gainBaseKI(kigain);
    GET_MOLT_EXP(ch) -= kicost;
    send_to_char(ch, "Your body evolves to make better use of the way it is now, and you feel that your spirit has strengthened. @D[@CKi@D: @Y+%s@D]@n\r\n", add_commas(kigain));
   }
@@ -145,9 +141,7 @@ ACMD(do_evolve)
    } else {
     stgain = rand_number(stgain, stgain * .5);
    }
-   GET_MOVE(ch) += stgain;
-   GET_MAX_MOVE(ch) += stgain;
-   GET_BASE_ST(ch) += stgain;
+   ch->gainBaseST(stgain);
    GET_MOLT_EXP(ch) -= stcost;
    send_to_char(ch, "Your body evolves to make better use of the way it is now, and you feel that your body has more stamina. @D[@GST@D: @Y+%s@D]@n\r\n", add_commas(stgain));
   }

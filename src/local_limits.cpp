@@ -964,27 +964,22 @@ void gain_exp(struct char_data *ch, int64_t gain)
     }
     if (rand_number(1, 5) >= 2) {
      if (IS_HUMAN(ch)) {
-      GET_BASE_PL(ch) += diff * 0.8;;
-      GET_MAX_HIT(ch) += diff * 0.8;
+         ch->gainBasePL(diff * 0.8);
      } else {
-      GET_BASE_PL(ch) += diff;
-      GET_MAX_HIT(ch) += diff;
+         ch->gainBasePL(diff);
      }
      send_to_char(ch, "@D[@G+@Y%s @RPL@D]@n ", add_commas(diff));
     }
     if (rand_number(1, 5) >= 2) {
      if (IS_HALFBREED(ch)) {
-      GET_BASE_ST(ch) += diff * 0.85;
-      GET_MAX_MOVE(ch) += diff * 0.85;
+         ch->gainBaseST(diff * 0.85);
      } else {
-      GET_BASE_ST(ch) += diff;
-      GET_MAX_MOVE(ch) += diff;
+         ch->gainBaseST(diff);
      }
      send_to_char(ch, "@D[@G+@Y%s @gSTA@D]@n ", add_commas(diff));
     }
     if (rand_number(1, 5) >= 2) {
-     GET_BASE_KI(ch) += diff;
-     GET_MAX_MANA(ch) += diff;
+        ch->gainBaseKI(diff);
      send_to_char(ch, "@D[@G+@Y%s @CKi@D]@n", add_commas(diff));
     }
    }

@@ -2624,12 +2624,9 @@ ACMD(do_advance)
   else if ((newlevel = atoi(level)) <= 0) {
    if (!strcasecmp("demote", level)) {
    victim->level = 1;
-   GET_MAX_HIT(victim) = 150;
-   GET_MAX_MANA(victim) = 150;
-   GET_MAX_MOVE(victim) = 150;
-   GET_BASE_PL(victim) = 150;
-   GET_BASE_KI(victim) = 150;
-   GET_BASE_ST(victim) = 150;
+   victim->basepl = 150;
+   victim->baseki = 150;
+   victim->basest = 150;
    send_to_char(ch, "They have now been demoted!\r\n");
    send_to_char(victim, "You were demoted to level 1!\r\n");
    return;
@@ -4299,19 +4296,19 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
    break;
 
   case 64:
-    GET_BASE_PL(vict) = value;
+    vict->basepl = value;
     mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set basepl for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set basepl for %s.", GET_NAME(ch), GET_NAME(vict));
     break;
 
   case 65:
-    GET_BASE_KI(vict) = value;
+      vict->baseki = value;
     mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set baseki for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set baseki for %s.", GET_NAME(ch), GET_NAME(vict));
     break;
 
   case 66:
-    GET_BASE_ST(vict) = value;
+      vict->basest = value;
     mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set basest for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set basest for %s.", GET_NAME(ch), GET_NAME(vict));
     break;
