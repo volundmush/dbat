@@ -2293,34 +2293,10 @@ ACMD(do_scry)
   act("@GYou see @C$n@G begin to focus, and then without warning, your mind is flooded painfully with images, energy and information. The data streams in a mad torrent through your psyche, and just when you think snapping is possible, the voice of @C$n@G comes to you and eases and guides you. You see images of potential futures, information not yet known, knowledge yet undiscovered. Though you could not fully  grasp what is to come, you feel more prepared at facing the unknown.@n", TRUE, ch, 0, vict, TO_VICT);
   act("@C$n@W appears to be performing some sort of ritual or something with @c$N@W.@n", TRUE, ch, 0, vict, TO_NOTVICT);
   int64_t boost = GET_INT(ch) * 0.5;
-  double mult = 1;
-/* Rillao: transloc, add new transes here */
-   if (IS_TRUFFLE(vict) && PLR_FLAGGED(vict, PLR_TRANS1)) {
-     mult = 3;
-    } else if (IS_TRUFFLE(vict) && PLR_FLAGGED(vict, PLR_TRANS2)) {
-     mult = 4;
-     } else if (IS_TRUFFLE(vict) && PLR_FLAGGED(vict, PLR_TRANS3)) {
-     mult = 5;
-    } else if (IS_HOSHIJIN(vict) && GET_PHASE(vict) == 1) {
-      mult = 2;
-    }  else if (IS_HOSHIJIN(vict) && GET_PHASE(vict) == 2) {
-      mult = 3;
-    }  else if (IS_BIO(vict) && PLR_FLAGGED(vict, PLR_TRANS1)) {
-      mult = 2;
-    }  else if (IS_BIO(vict) && PLR_FLAGGED(vict, PLR_TRANS2)) {
-      mult = 3;
-    }  else if (IS_BIO(vict) && PLR_FLAGGED(vict, PLR_TRANS3)) {
-      mult = 3.5;
-    }  else if (IS_BIO(vict) && PLR_FLAGGED(vict, PLR_TRANS4)) {
-      mult = 4;
-    }
 
-  GET_MAX_HIT(vict) += ((GET_BASE_PL(vict) * 0.01) * boost) * mult;
-  GET_BASE_PL(vict) += (GET_BASE_PL(vict) * 0.01) * boost;
-  GET_MAX_MANA(vict) += ((GET_BASE_KI(vict) * 0.01) * boost) * mult;
-  GET_BASE_KI(vict) += (GET_BASE_KI(vict) * 0.01) * boost;
-  GET_MAX_MOVE(vict) += ((GET_BASE_ST(vict) * 0.01) * boost) * mult;
-  GET_BASE_ST(vict) += (GET_BASE_ST(vict) * 0.01) * boost;
+  vict->gainBasePL((vict->getBasePL() * .01) * boost);
+  vict->gainBaseKI((vict->getBaseKI() * .01) * boost);
+  vict->gainBaseST((vict->getBaseST() * .01) * boost);
 
   send_to_char(vict, "Your Powerlevel, Ki, and Stamina have improved drastically! On top of that your Intelligence and Wisdom have improved permanantly!\r\n");
   vict->real_abils.intel += 2;
@@ -2335,12 +2311,7 @@ ACMD(do_scry)
     send_to_char(ch, "Due to already having enough experience to level up you gain no expereince.\r\n");
    }
   } else {
-   GET_MAX_HIT(ch) += GET_BASE_PL(ch) * 0.025;
-   GET_BASE_PL(ch) += GET_BASE_PL(ch) * 0.025;
-   GET_MAX_MOVE(ch) += GET_BASE_ST(ch) * 0.025;
-   GET_BASE_ST(ch) += GET_BASE_ST(ch) * 0.025;
-   GET_MAX_MANA(ch) += GET_BASE_KI(ch) * 0.025;
-   GET_BASE_KI(ch) += GET_BASE_KI(ch) * 0.025;
+      ch->gainBaseAllPercent(.025, true);
    send_to_char(ch, "Your Powerlevel, Ki, and Stamina have improved!\r\n");
   }
  }

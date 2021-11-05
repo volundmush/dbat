@@ -3299,7 +3299,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     GET_MAX_HIT(mob) *= 2;
    }
    GET_HIT(mob) = GET_MAX_HIT(mob);
-   GET_BASE_PL(mob) = GET_MAX_HIT(mob);
+   mob->basepl = GET_MAX_HIT(mob);
   }
   if (GET_MAX_MANA(mob) <= 1) {
    GET_MAX_MANA(mob) = GET_LEVEL(mob) * mult;
@@ -3332,7 +3332,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
   if (GET_MOB_VNUM(mob) == 2245) {
    GET_MAX_HIT(mob) = rand_number(1, 4);
    GET_HIT(mob) = GET_MAX_HIT(mob);
-   GET_BASE_PL(mob) = GET_MAX_HIT(mob);
+   mob->basepl = GET_MAX_HIT(mob);
    GET_MAX_MANA(mob) = rand_number(1, 4);
    GET_MANA(mob) = GET_MAX_MANA(mob);
    GET_BASE_KI(mob) = GET_MAX_MANA(mob);

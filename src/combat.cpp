@@ -3597,18 +3597,15 @@ void saiyan_gain(struct char_data *ch, struct char_data *vict)
 
    switch (stats[0]) {
     case 0:
-      GET_MAX_HIT(ch) += gain;
-      GET_BASE_PL(ch) += gain;
+        ch->gainBasePL(gain);
       send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel slightly stronger. @D[@G+%s@D]@n\r\n", add_commas(gain));
      break;
     case 1:
-      GET_MAX_MANA(ch) += gain;
-      GET_BASE_KI(ch) += gain;
+        ch->gainBaseKI(gain);
       send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel your spirit grow. @D[@G+%s@D]@n\r\n", add_commas(gain));
      break;
     case 2:
-      GET_MAX_MOVE(ch) += gain;
-      GET_BASE_ST(ch) += gain;
+        ch->gainBaseST(gain);
       send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel slightly more vigorous. @D[@G+%s@D]@n\r\n", add_commas(gain));
      break;
    }
@@ -3765,13 +3762,11 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
     send_to_char(ch, "@D[@Y+ @G%s @mExp@D]@n ", add_commas(gain));
     if (type == 0 && rand_number(1, 5) >= 4) {
      send_to_char(ch, "@D[@Y+ @R%s @rPL@D]@n ", pl > 0 ? add_commas(pl) : "SOFT-CAP");
-     GET_MAX_HIT(ch) += pl;
-     GET_BASE_PL(ch) += pl;
+     ch->gainBasePL(pl);
     }
     else if (type == 1 && rand_number(1, 5) >= 4) {
      send_to_char(ch, "@D[@Y+ @C%s @cKi@D]@n ", ki > 0 ? add_commas(ki) : "SOFT-CAP");
-     GET_MAX_MANA(ch) += ki;
-     GET_BASE_KI(ch) += ki;
+     ch->gainBaseKI(ki);
     }
     send_to_char(ch, "@D[@R- @M%d @mPS@D]@n ", pscost);
     send_to_char(ch, "\r\n");

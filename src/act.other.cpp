@@ -135,370 +135,19 @@ void log_custom(struct descriptor_data *d, struct obj_data *obj)
 /* Used by do_rpp for soft-cap */
 void bring_to_cap(struct char_data *ch)
 {
- int skippl = ch->is_soft_cap(0), skipki = ch->is_soft_cap(1), skipst = ch->is_soft_cap(2), mult = 1;
 
-/* Rillao: transloc, add new transes here */
-  if (IS_BIO(ch)) {
-   if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-    mult = 2;
-   }
-   else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-    mult = 3;
-   }
-   else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-    mult = 3.5;
-   }
-   else if (PLR_FLAGGED(ch, PLR_TRANS4)) {
-    mult = 4;
-   }
-  } else if (IS_MAJIN(ch)) {
-   if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-    mult = 2;
-   }
-   else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-    mult = 3;
-   }
-   else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-    mult = 4.5;
-   }
-  } else if (IS_TRUFFLE(ch)) {
-   if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-    mult = 3;
-   }
-   else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-    mult = 4;
-   }
-   else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-    mult = 5;
-   }
-  }
-if (IS_KANASSAN(ch) || IS_DEMON(ch)) {
- if (skippl == FALSE) {
-   int64_t base = GET_BASE_PL(ch), diff;
-   if ((base < GET_LEVEL(ch) * 2000000) && GET_LEVEL(ch) > 90 && GET_LEVEL(ch) <= 99) {
-    diff = (GET_LEVEL(ch) * 2000000) - GET_BASE_PL(ch);
-    GET_MAX_HIT(ch) += diff * mult;
-    GET_BASE_PL(ch) = GET_LEVEL(ch) * 2000000;
-   }
-   if ((base < GET_LEVEL(ch) * 1000000) && GET_LEVEL(ch) > 80 && GET_LEVEL(ch) <= 90) {
-    diff = (GET_LEVEL(ch) * 1000000) - GET_BASE_PL(ch);
-    GET_MAX_HIT(ch) += diff * mult;
-    GET_BASE_PL(ch) = GET_LEVEL(ch) * 1000000;
-   }
-   if ((base < GET_LEVEL(ch) * 300000) && GET_LEVEL(ch) > 70 && GET_LEVEL(ch) <= 80) {
-    diff = (GET_LEVEL(ch) * 300000) - GET_BASE_PL(ch);
-    GET_MAX_HIT(ch) += diff * mult;
-    GET_BASE_PL(ch) = GET_LEVEL(ch) * 300000;
-   }
-   if ((base < GET_LEVEL(ch) * 250000) && GET_LEVEL(ch) > 60 && GET_LEVEL(ch) <= 70) {
-    diff = (GET_LEVEL(ch) * 250000) - GET_BASE_PL(ch);
-    GET_MAX_HIT(ch) += diff * mult;
-    GET_BASE_PL(ch) = GET_LEVEL(ch) * 250000;
-   }
-   if ((base < GET_LEVEL(ch) * 100000) && GET_LEVEL(ch) > 50 && GET_LEVEL(ch) <= 60) {
-    diff = (GET_LEVEL(ch) * 100000) - GET_BASE_PL(ch);
-    GET_MAX_HIT(ch) += diff * mult;
-    GET_BASE_PL(ch) = GET_LEVEL(ch) * 100000;
-   }
-   if ((base < GET_LEVEL(ch) * 40000) && GET_LEVEL(ch) > 40 && GET_LEVEL(ch) <= 50) {
-    diff = (GET_LEVEL(ch) * 40000) - GET_BASE_PL(ch);
-    GET_MAX_HIT(ch) += diff * mult;
-    GET_BASE_PL(ch) = GET_LEVEL(ch) * 40000;
-   }
-   if ((base < GET_LEVEL(ch) * 25000) && GET_LEVEL(ch) > 30 && GET_LEVEL(ch) <= 40) {
-    diff = (GET_LEVEL(ch) * 25000) - GET_BASE_PL(ch);
-    GET_MAX_HIT(ch) += diff * mult;
-    GET_BASE_PL(ch) = GET_LEVEL(ch) * 25000;
-   }
-   if ((base < GET_LEVEL(ch) * 5000) && GET_LEVEL(ch) > 20 && GET_LEVEL(ch) <= 30) {
-    diff = (GET_LEVEL(ch) * 5000) - GET_BASE_PL(ch);
-    GET_MAX_HIT(ch) += diff * mult;
-    GET_BASE_PL(ch) = GET_LEVEL(ch) * 5000;
-   }
-   if ((base < GET_LEVEL(ch) * 1500) && GET_LEVEL(ch) > 10 && GET_LEVEL(ch) <= 20) {
-    diff = (GET_LEVEL(ch) * 1500) - GET_BASE_PL(ch);
-    GET_MAX_HIT(ch) += diff * mult;
-    GET_BASE_PL(ch) = GET_LEVEL(ch) * 1500;
-   }
-   if ((base < GET_LEVEL(ch) * 500) && GET_LEVEL(ch) <= 10) {
-    diff = (GET_LEVEL(ch) * 500) - GET_BASE_PL(ch);
-    GET_MAX_HIT(ch) += diff * mult;
-    GET_BASE_PL(ch) = GET_LEVEL(ch) * 500;
-   }
- } /* End powerlevel section */
+ auto p_trans = (ch->race->raceCanTransform() && !ch->race->raceCanRevert());
+ auto cap = ch->calc_soft_cap();
 
- if (skipki == FALSE) {
-   int64_t base = GET_BASE_KI(ch), diff;
-   if ((base < GET_LEVEL(ch) * 2000000) && GET_LEVEL(ch) > 90 && GET_LEVEL(ch) <= 99) {
-    diff = (GET_LEVEL(ch) * 2000000) - GET_BASE_KI(ch);
-    GET_MAX_MANA(ch) += diff * mult;
-    GET_BASE_KI(ch) = GET_LEVEL(ch) * 2000000;
-   }
-   if ((base < GET_LEVEL(ch) * 1000000) && GET_LEVEL(ch) > 80 && GET_LEVEL(ch) <= 90) {
-    diff = (GET_LEVEL(ch) * 1000000) - GET_BASE_KI(ch);
-    GET_MAX_MANA(ch) += diff * mult;
-    GET_BASE_KI(ch) = GET_LEVEL(ch) * 1000000;
-   }
-   if ((base < GET_LEVEL(ch) * 300000) && GET_LEVEL(ch) > 70 && GET_LEVEL(ch) <= 80) {
-    diff = (GET_LEVEL(ch) * 300000) - GET_BASE_KI(ch);
-    GET_MAX_MANA(ch) += diff * mult;
-    GET_BASE_KI(ch) = GET_LEVEL(ch) * 300000;
-   }
-   if ((base < GET_LEVEL(ch) * 250000) && GET_LEVEL(ch) > 60 && GET_LEVEL(ch) <= 70) {
-    diff = (GET_LEVEL(ch) * 250000) - GET_BASE_KI(ch);
-    GET_MAX_MANA(ch) += diff * mult;
-    GET_BASE_KI(ch) = GET_LEVEL(ch) * 250000;
-   }
-   if ((base < GET_LEVEL(ch) * 100000) && GET_LEVEL(ch) > 50 && GET_LEVEL(ch) <= 60) {
-    diff = (GET_LEVEL(ch) * 100000) - GET_BASE_KI(ch);
-    GET_MAX_MANA(ch) += diff * mult;
-    GET_BASE_KI(ch) = GET_LEVEL(ch) * 100000;
-   }
-   if ((base < GET_LEVEL(ch) * 40000) && GET_LEVEL(ch) > 40 && GET_LEVEL(ch) <= 50) {
-    diff = (GET_LEVEL(ch) * 40000) - GET_BASE_KI(ch);
-    GET_MAX_MANA(ch) += diff * mult;
-    GET_BASE_KI(ch) = GET_LEVEL(ch) * 40000;
-   }
-   if ((base < GET_LEVEL(ch) * 25000) && GET_LEVEL(ch) > 30 && GET_LEVEL(ch) <= 40) {
-    diff = (GET_LEVEL(ch) * 25000) - GET_BASE_KI(ch);
-    GET_MAX_MANA(ch) += diff * mult;
-    GET_BASE_KI(ch) = GET_LEVEL(ch) * 25000;
-   }
-   if ((base < GET_LEVEL(ch) * 5000) && GET_LEVEL(ch) > 20 && GET_LEVEL(ch) <= 30) {
-    diff = (GET_LEVEL(ch) * 5000) - GET_BASE_KI(ch);
-    GET_MAX_MANA(ch) += diff * mult;
-    GET_BASE_KI(ch) = GET_LEVEL(ch) * 5000;
-   }
-   if ((base < GET_LEVEL(ch) * 1500) && GET_LEVEL(ch) > 10 && GET_LEVEL(ch) <= 20) {
-    diff = (GET_LEVEL(ch) * 1500) - GET_BASE_KI(ch);
-    GET_MAX_MANA(ch) += diff * mult;
-    GET_BASE_KI(ch) = GET_LEVEL(ch) * 1500;
-   }
-   if ((base < GET_LEVEL(ch) * 500) && GET_LEVEL(ch) <= 10) {
-    diff = (GET_LEVEL(ch) * 500) - GET_BASE_KI(ch);
-    GET_MAX_MANA(ch) += diff * mult;
-    GET_BASE_KI(ch) = GET_LEVEL(ch) * 500;
-   }
- } /* End ki section */
-
- if (skipst == FALSE) {
-   int64_t base = GET_BASE_ST(ch), diff;
-   if ((base < GET_LEVEL(ch) * 2000000) && GET_LEVEL(ch) > 90 && GET_LEVEL(ch) <= 99) {
-    diff = (GET_LEVEL(ch) * 2000000) - GET_BASE_ST(ch);
-    GET_MAX_MOVE(ch) += diff * mult;
-    GET_BASE_ST(ch) = GET_LEVEL(ch) * 2000000;
-   }
-   if ((base < GET_LEVEL(ch) * 1000000) && GET_LEVEL(ch) > 80 && GET_LEVEL(ch) <= 90) {
-    diff = (GET_LEVEL(ch) * 1000000) - GET_BASE_ST(ch);
-    GET_MAX_MOVE(ch) += diff * mult;
-    GET_BASE_ST(ch) = GET_LEVEL(ch) * 1000000;
-   }
-   if ((base < GET_LEVEL(ch) * 300000) && GET_LEVEL(ch) > 70 && GET_LEVEL(ch) <= 80) {
-    diff = (GET_LEVEL(ch) * 300000) - GET_BASE_ST(ch);
-    GET_MAX_MOVE(ch) += diff * mult;
-    GET_BASE_ST(ch) = GET_LEVEL(ch) * 300000;
-   }
-   if ((base < GET_LEVEL(ch) * 250000) && GET_LEVEL(ch) > 60 && GET_LEVEL(ch) <= 70) {
-    diff = (GET_LEVEL(ch) * 250000) - GET_BASE_ST(ch);
-    GET_MAX_MOVE(ch) += diff * mult;
-    GET_BASE_ST(ch) = GET_LEVEL(ch) * 250000;
-   }
-   if ((base < GET_LEVEL(ch) * 100000) && GET_LEVEL(ch) > 50 && GET_LEVEL(ch) <= 60) {
-    diff = (GET_LEVEL(ch) * 100000) - GET_BASE_ST(ch);
-    GET_MAX_MOVE(ch) += diff * mult;
-    GET_BASE_ST(ch) = GET_LEVEL(ch) * 100000;
-   }
-   if ((base < GET_LEVEL(ch) * 40000) && GET_LEVEL(ch) > 40 && GET_LEVEL(ch) <= 50) {
-    diff = (GET_LEVEL(ch) * 40000) - GET_BASE_ST(ch);
-    GET_MAX_MOVE(ch) += diff * mult;
-    GET_BASE_ST(ch) = GET_LEVEL(ch) * 40000;
-   }
-   if ((base < GET_LEVEL(ch) * 25000) && GET_LEVEL(ch) > 30 && GET_LEVEL(ch) <= 40) {
-    diff = (GET_LEVEL(ch) * 25000) - GET_BASE_ST(ch);
-    GET_MAX_MOVE(ch) += diff * mult;
-    GET_BASE_ST(ch) = GET_LEVEL(ch) * 25000;
-   }
-   if ((base < GET_LEVEL(ch) * 5000) && GET_LEVEL(ch) > 20 && GET_LEVEL(ch) <= 30) {
-    diff = (GET_LEVEL(ch) * 5000) - GET_BASE_ST(ch);
-    GET_MAX_MOVE(ch) += diff * mult;
-    GET_BASE_ST(ch) = GET_LEVEL(ch) * 5000;
-   }
-   if ((base < GET_LEVEL(ch) * 1500) && GET_LEVEL(ch) > 10 && GET_LEVEL(ch) <= 20) {
-    diff = (GET_LEVEL(ch) * 1500) - GET_BASE_ST(ch);
-    GET_MAX_MOVE(ch) += diff * mult;
-    GET_BASE_ST(ch) = GET_LEVEL(ch) * 1500;
-   }
-   if ((base < GET_LEVEL(ch) * 500) && GET_LEVEL(ch) <= 10) {
-    diff = (GET_LEVEL(ch) * 500) - GET_BASE_ST(ch);
-    GET_MAX_MOVE(ch) += diff * mult;
-    GET_BASE_ST(ch) = GET_LEVEL(ch) * 500;
-   }
- } /* End stamina section */
-}
- else {
-  if (skippl == FALSE) {
-   int64_t base = GET_BASE_PL(ch), diff;
-   if ((base < GET_LEVEL(ch) * 1500000) && GET_LEVEL(ch) > 90 && GET_LEVEL(ch) <= 99) {
-    diff = (GET_LEVEL(ch) * 1500000) - GET_BASE_PL(ch);
-    GET_MAX_HIT(ch) += diff * mult;
-    GET_BASE_PL(ch) = GET_LEVEL(ch) * 1500000;
-   }
-   if ((base < GET_LEVEL(ch) * 800000) && GET_LEVEL(ch) > 80 && GET_LEVEL(ch) <= 90) {
-    diff = (GET_LEVEL(ch) * 800000) - GET_BASE_PL(ch);
-    GET_MAX_HIT(ch) += diff * mult;
-    GET_BASE_PL(ch) = GET_LEVEL(ch) * 800000;
-   }
-   if ((base < GET_LEVEL(ch) * 250000) && GET_LEVEL(ch) > 70 && GET_LEVEL(ch) <= 80) {
-    diff = (GET_LEVEL(ch) * 250000) - GET_BASE_PL(ch);
-    GET_MAX_HIT(ch) += diff * mult;
-    GET_BASE_PL(ch) = GET_LEVEL(ch) * 250000;
-   }
-   if ((base < GET_LEVEL(ch) * 200000) && GET_LEVEL(ch) > 60 && GET_LEVEL(ch) <= 70) {
-    diff = (GET_LEVEL(ch) * 200000) - GET_BASE_PL(ch);
-    GET_MAX_HIT(ch) += diff * mult;
-    GET_BASE_PL(ch) = GET_LEVEL(ch) * 200000;
-   }
-   if ((base < GET_LEVEL(ch) * 80000) && GET_LEVEL(ch) > 50 && GET_LEVEL(ch) <= 60) {
-    diff = (GET_LEVEL(ch) * 80000) - GET_BASE_PL(ch);
-    GET_MAX_HIT(ch) += diff * mult;
-    GET_BASE_PL(ch) = GET_LEVEL(ch) * 80000;
-   }
-   if ((base < GET_LEVEL(ch) * 20000) && GET_LEVEL(ch) > 40 && GET_LEVEL(ch) <= 50) {
-    diff = (GET_LEVEL(ch) * 20000) - GET_BASE_PL(ch);
-    GET_MAX_HIT(ch) += diff * mult;
-    GET_BASE_PL(ch) = GET_LEVEL(ch) * 20000;
-   }
-   if ((base < GET_LEVEL(ch) * 15000) && GET_LEVEL(ch) > 30 && GET_LEVEL(ch) <= 40) {
-    diff = (GET_LEVEL(ch) * 15000) - GET_BASE_PL(ch);
-    GET_MAX_HIT(ch) += diff * mult;
-    GET_BASE_PL(ch) = GET_LEVEL(ch) * 15000;
-   }
-   if ((base < GET_LEVEL(ch) * 5000) && GET_LEVEL(ch) > 20 && GET_LEVEL(ch) <= 30) {
-    diff = (GET_LEVEL(ch) * 5000) - GET_BASE_PL(ch);
-    GET_MAX_HIT(ch) += diff * mult;
-    GET_BASE_PL(ch) = GET_LEVEL(ch) * 5000;
-   }
-   if ((base < GET_LEVEL(ch) * 1500) && GET_LEVEL(ch) > 10 && GET_LEVEL(ch) <= 20) {
-    diff = (GET_LEVEL(ch) * 1500) - GET_BASE_PL(ch);
-    GET_MAX_HIT(ch) += diff * mult;
-    GET_BASE_PL(ch) = GET_LEVEL(ch) * 1500;
-   }
-   if ((base < GET_LEVEL(ch) * 500) && GET_LEVEL(ch) <= 10) {
-    diff = (GET_LEVEL(ch) * 500) - GET_BASE_PL(ch);
-    GET_MAX_HIT(ch) += diff * mult;
-    GET_BASE_PL(ch) = GET_LEVEL(ch) * 500;
-   }
- } /* End Powerlevel Section */
-
- if (skipki == FALSE) {
-   int64_t base = GET_BASE_KI(ch), diff;
-   if ((base < GET_LEVEL(ch) * 1500000) && GET_LEVEL(ch) > 90 && GET_LEVEL(ch) <= 99) {
-    diff = (GET_LEVEL(ch) * 1500000) - GET_BASE_KI(ch);
-    GET_MAX_MANA(ch) += diff * mult;
-    GET_BASE_KI(ch) = GET_LEVEL(ch) * 1500000;
-   }
-   if ((base < GET_LEVEL(ch) * 800000) && GET_LEVEL(ch) > 80 && GET_LEVEL(ch) <= 90) {
-    diff = (GET_LEVEL(ch) * 800000) - GET_BASE_KI(ch);
-    GET_MAX_MANA(ch) += diff * mult;
-    GET_BASE_KI(ch) = GET_LEVEL(ch) * 800000;
-   }
-   if ((base < GET_LEVEL(ch) * 250000) && GET_LEVEL(ch) > 70 && GET_LEVEL(ch) <= 80) {
-    diff = (GET_LEVEL(ch) * 250000) - GET_BASE_KI(ch);
-    GET_MAX_MANA(ch) += diff * mult;
-    GET_BASE_KI(ch) = GET_LEVEL(ch) * 250000;
-   }
-   if ((base < GET_LEVEL(ch) * 200000) && GET_LEVEL(ch) > 60 && GET_LEVEL(ch) <= 70) {
-    diff = (GET_LEVEL(ch) * 200000) - GET_BASE_KI(ch);
-    GET_MAX_MANA(ch) += diff * mult;
-    GET_BASE_KI(ch) = GET_LEVEL(ch) * 200000;
-   }
-   if ((base < GET_LEVEL(ch) * 80000) && GET_LEVEL(ch) > 50 && GET_LEVEL(ch) <= 60) {
-    diff = (GET_LEVEL(ch) * 80000) - GET_BASE_KI(ch);
-    GET_MAX_MANA(ch) += diff * mult;
-    GET_BASE_KI(ch) = GET_LEVEL(ch) * 80000;
-   }
-   if ((base < GET_LEVEL(ch) * 20000) && GET_LEVEL(ch) > 40 && GET_LEVEL(ch) <= 50) {
-    diff = (GET_LEVEL(ch) * 20000) - GET_BASE_KI(ch);
-    GET_MAX_MANA(ch) += diff * mult;
-    GET_BASE_KI(ch) = GET_LEVEL(ch) * 20000;
-   }
-   if ((base < GET_LEVEL(ch) * 15000) && GET_LEVEL(ch) > 30 && GET_LEVEL(ch) <= 40) {
-    diff = (GET_LEVEL(ch) * 15000) - GET_BASE_KI(ch);
-    GET_MAX_MANA(ch) += diff * mult;
-    GET_BASE_KI(ch) = GET_LEVEL(ch) * 15000;
-   }
-   if ((base < GET_LEVEL(ch) * 5000) && GET_LEVEL(ch) > 20 && GET_LEVEL(ch) <= 30) {
-    diff = (GET_LEVEL(ch) * 5000) - GET_BASE_KI(ch);
-    GET_MAX_MANA(ch) += diff * mult;
-    GET_BASE_KI(ch) = GET_LEVEL(ch) * 5000;
-   }
-   if ((base < GET_LEVEL(ch) * 1500) && GET_LEVEL(ch) > 10 && GET_LEVEL(ch) <= 20) {
-    diff = (GET_LEVEL(ch) * 1500) - GET_BASE_KI(ch);
-    GET_MAX_MANA(ch) += diff * mult;
-    GET_BASE_KI(ch) = GET_LEVEL(ch) * 1500;
-   }
-   if ((base < GET_LEVEL(ch) * 500) && GET_LEVEL(ch) <= 10) {
-    diff = (GET_LEVEL(ch) * 500) - GET_BASE_KI(ch);
-    GET_MAX_MANA(ch) += diff * mult;
-    GET_BASE_KI(ch) = GET_LEVEL(ch) * 500;
-   }
- } /* End Ki Section */
-
- if (skipst == FALSE) {
-   int64_t base = GET_BASE_ST(ch), diff;
-   if ((base < GET_LEVEL(ch) * 1500000) && GET_LEVEL(ch) > 90 && GET_LEVEL(ch) <= 99) {
-    diff = (GET_LEVEL(ch) * 1500000) - GET_BASE_ST(ch);
-    GET_MAX_MOVE(ch) += diff * mult;
-    GET_BASE_ST(ch) = GET_LEVEL(ch) * 1500000;
-   }
-   if ((base < GET_LEVEL(ch) * 800000) && GET_LEVEL(ch) > 80 && GET_LEVEL(ch) <= 90) {
-    diff = (GET_LEVEL(ch) * 800000) - GET_BASE_ST(ch);
-    GET_MAX_MOVE(ch) += diff * mult;
-    GET_BASE_ST(ch) = GET_LEVEL(ch) * 800000;
-   }
-   if ((base < GET_LEVEL(ch) * 250000) && GET_LEVEL(ch) > 70 && GET_LEVEL(ch) <= 80) {
-    diff = (GET_LEVEL(ch) * 250000) - GET_BASE_ST(ch);
-    GET_MAX_MOVE(ch) += diff * mult;
-    GET_BASE_ST(ch) = GET_LEVEL(ch) * 250000;
-   }
-   if ((base < GET_LEVEL(ch) * 200000) && GET_LEVEL(ch) > 60 && GET_LEVEL(ch) <= 70) {
-    diff = (GET_LEVEL(ch) * 200000) - GET_BASE_ST(ch);
-    GET_MAX_MOVE(ch) += diff * mult;
-    GET_BASE_ST(ch) = GET_LEVEL(ch) * 200000;
-   }
-   if ((base < GET_LEVEL(ch) * 80000) && GET_LEVEL(ch) > 50 && GET_LEVEL(ch) <= 60) {
-    diff = (GET_LEVEL(ch) * 80000) - GET_BASE_ST(ch);
-    GET_MAX_MOVE(ch) += diff * mult;
-    GET_BASE_ST(ch) = GET_LEVEL(ch) * 80000;
-   }
-   if ((base < GET_LEVEL(ch) * 20000) && GET_LEVEL(ch) > 40 && GET_LEVEL(ch) <= 50) {
-    diff = (GET_LEVEL(ch) * 20000) - GET_BASE_ST(ch);
-    GET_MAX_MOVE(ch) += diff * mult;
-    GET_BASE_ST(ch) = GET_LEVEL(ch) * 20000;
-   }
-   if ((base < GET_LEVEL(ch) * 15000) && GET_LEVEL(ch) > 30 && GET_LEVEL(ch) <= 40) {
-    diff = (GET_LEVEL(ch) * 15000) - GET_BASE_ST(ch);
-    GET_MAX_MOVE(ch) += diff * mult;
-    GET_BASE_ST(ch) = GET_LEVEL(ch) * 15000;
-   }
-   if ((base < GET_LEVEL(ch) * 5000) && GET_LEVEL(ch) > 20 && GET_LEVEL(ch) <= 30) {
-    diff = (GET_LEVEL(ch) * 5000) - GET_BASE_ST(ch);
-    GET_MAX_MOVE(ch) += diff * mult;
-    GET_BASE_ST(ch) = GET_LEVEL(ch) * 5000;
-   }
-   if ((base < GET_LEVEL(ch) * 1500) && GET_LEVEL(ch) > 10 && GET_LEVEL(ch) <= 20) {
-    diff = (GET_LEVEL(ch) * 1500) - GET_BASE_ST(ch);
-    GET_MAX_MOVE(ch) += diff * mult;
-    GET_BASE_ST(ch) = GET_LEVEL(ch) * 1500;
-   }
-   if ((base < GET_LEVEL(ch) * 500) && GET_LEVEL(ch) <= 10) {
-    diff = (GET_LEVEL(ch) * 500) - GET_BASE_ST(ch);
-    GET_MAX_MOVE(ch) += diff * mult;
-    GET_BASE_ST(ch) = GET_LEVEL(ch) * 500;
-   }
-  } /* End Stamina Section */
+ switch(ch->race->getSoftType(ch)) {
+     case dbat::race::Fixed:
+         if(ch->getBasePL() < cap)
+             ch->gainBasePL(cap - ch->getBasePL()-1, p_trans);
+         if(ch->getBaseKI() < cap)
+             ch->gainBaseKI(cap - ch->getBaseKI()-1, p_trans);
+         if(ch->getBaseST() < cap)
+             ch->gainBaseST(cap - ch->getBaseST()-1, p_trans);
  }
-
 }
 
 /* Let's Reward Those Roleplayers! - Iovan*/
@@ -3906,42 +3555,13 @@ ACMD(do_potential)
  /* Rillao: transloc, add new transes here */
  else {
   boost = GET_SKILL(ch, SKILL_POTENTIAL) / 2;
-           double mult = 1;
-           if (IS_TRUFFLE(vict) && PLR_FLAGGED(vict, PLR_TRANS1)) {
-            mult = 3;
-           }
-           else if (IS_TRUFFLE(vict) && PLR_FLAGGED(vict, PLR_TRANS2)) {
-            mult = 4;
-           }
-           else if (IS_TRUFFLE(vict) && PLR_FLAGGED(vict, PLR_TRANS3)) {
-            mult = 5;
-           }
-           else if (IS_HOSHIJIN(vict) && GET_PHASE(vict) == 1) {
-            mult = 2;
-           }
-           else if (IS_HOSHIJIN(vict) && GET_PHASE(vict) == 2) {
-            mult = 3;
-           }
-           else if (IS_BIO(vict) && PLR_FLAGGED(vict, PLR_TRANS1)) {
-            mult = 2;
-           }
-           else if (IS_BIO(vict) && PLR_FLAGGED(vict, PLR_TRANS2)) {
-            mult = 3;
-           }
-           else if (IS_BIO(vict) && PLR_FLAGGED(vict, PLR_TRANS3)) {
-            mult = 3.5;
-           }
-           else if (IS_BIO(vict) && PLR_FLAGGED(vict, PLR_TRANS4)) {
-            mult = 4;
-           }
+
   SET_BIT_AR(PLR_FLAGS(vict), PLR_PR);
-  GET_MAX_HIT(vict) += ((GET_BASE_PL(vict) / 100) * boost) * mult;
-  GET_BASE_PL(vict) += (GET_BASE_PL(vict) / 100) * boost;
+
+  vict->gainBasePL((vict->getBasePL() / 100) * boost);
   if (IS_HALFBREED(vict)) {
-     GET_MAX_MANA(vict) += ((GET_BASE_KI(vict) / 100) * boost) * mult;
-     GET_BASE_KI(vict) += (GET_BASE_KI(vict) / 100) * boost;
-     GET_MAX_MOVE(vict) += ((GET_BASE_ST(vict) / 100) * boost) * mult;
-     GET_BASE_ST(vict) += (GET_BASE_ST(vict) / 100) * boost;
+      vict->gainBaseKI((vict->getBaseKI() / 100) * boost);
+      vict->gainBaseST((vict->getBaseST() / 100) * boost);
   }
         reveal_hiding(ch, 0);
   act("You place your hand on top of $N's head. After a moment of concentrating you release their hidden potential.", TRUE, ch, 0, vict, TO_CHAR);
@@ -4028,65 +3648,12 @@ ACMD(do_majinize)
 		act("$n waves a hand at $N, and instantly the glowing M on $S forehead disappears!", TRUE, ch, 0, vict, TO_NOTVICT);
 		MAJINIZED(vict) = 0;
 		GET_BOOSTS(ch) += 1;
-		double mult = 1;
-		if (IS_TRUFFLE(vict) && PLR_FLAGGED(vict, PLR_TRANS1))
-		{
-			mult = 3;
-		}
-		else if (IS_TRUFFLE(vict) && PLR_FLAGGED(vict, PLR_TRANS2))
-		{
-			mult = 4;
-		}
-		else if (IS_TRUFFLE(vict) && PLR_FLAGGED(vict, PLR_TRANS3))
-		{
-			mult = 5;
-		}
-		else if (IS_BIO(vict) && PLR_FLAGGED(vict, PLR_TRANS1))
-		{
-			mult = 2;
-		}
-		else if (IS_BIO(vict) && PLR_FLAGGED(vict, PLR_TRANS2))
-		{
-			mult = 3;
-		}
-		else if (IS_BIO(vict) && PLR_FLAGGED(vict, PLR_TRANS3))
-		{
-			mult = 3.5;
-		}
-		else if (IS_BIO(vict) && PLR_FLAGGED(vict, PLR_TRANS4))
-		{
-			mult = 4;
-		}
-		else if (IS_MAJIN(vict) && PLR_FLAGGED(vict, PLR_TRANS1))
-		{
-			mult = 2;
-		}
-		else if (IS_MAJIN(vict) && PLR_FLAGGED(vict, PLR_TRANS2))
-		{
-			mult = 3;
-		}
-		else if (IS_MAJIN(vict) && PLR_FLAGGED(vict, PLR_TRANS3))
-		{
-			mult = 4.5;
-		}
-		else if (IS_HOSHIJIN(vict) && GET_PHASE(vict) == 1)
-		{
-			mult = 2;
-		}
-		else if (IS_HOSHIJIN(vict) && GET_PHASE(vict) == 2)
-		{
-			mult = 3;
-		}
-		if (GET_MAJINIZED(vict) == 0)
-		{
-			GET_MAJINIZED(vict) = (GET_BASE_PL(vict) * .4) * mult;
-		}
-		GET_MAX_HIT(vict) -= GET_MAJINIZED(vict) * mult;
+
 		if (GET_MAJINIZED(vict) == 0)
 		{
 			GET_MAJINIZED(vict) = (GET_BASE_PL(vict) * .4);
 		}
-		GET_BASE_PL(vict) -= GET_MAJINIZED(vict);
+        vict->loseBasePL(GET_MAJINIZED(vict));
 		return;
 	}
 	else if (GET_BOOSTS(ch) == 0)
@@ -4118,58 +3685,9 @@ ACMD(do_majinize)
 		act("$n focuses power into $N, influencing their mind and increasing their strength! After the struggle ends in $S mind a glowing purple M forms on $S forehead.", TRUE, ch, 0, vict, TO_NOTVICT);
 		MAJINIZED(vict) = GET_ID(ch);
 		GET_BOOSTS(ch) -= 1;
-		double mult = 1;
-		if (IS_TRUFFLE(vict) && PLR_FLAGGED(vict, PLR_TRANS1))
-		{
-			mult = 3;
-		}
-		else if (IS_TRUFFLE(vict) && PLR_FLAGGED(vict, PLR_TRANS2))
-		{
-			mult = 4;
-		}
-		else if (IS_TRUFFLE(vict) && PLR_FLAGGED(vict, PLR_TRANS3))
-		{
-			mult = 5;
-		}
-		else if (IS_BIO(vict) && PLR_FLAGGED(vict, PLR_TRANS1))
-		{
-			mult = 2;
-		}
-		else if (IS_BIO(vict) && PLR_FLAGGED(vict, PLR_TRANS2))
-		{
-			mult = 3;
-		}
-		else if (IS_BIO(vict) && PLR_FLAGGED(vict, PLR_TRANS3))
-		{
-			mult = 3.5;
-		}
-		else if (IS_BIO(vict) && PLR_FLAGGED(vict, PLR_TRANS4))
-		{
-			mult = 4;
-		}
-		else if (IS_MAJIN(vict) && PLR_FLAGGED(vict, PLR_TRANS1))
-		{
-			mult = 2;
-		}
-		else if (IS_MAJIN(vict) && PLR_FLAGGED(vict, PLR_TRANS2))
-		{
-			mult = 3;
-		}
-		else if (IS_MAJIN(vict) && PLR_FLAGGED(vict, PLR_TRANS3))
-		{
-			mult = 4.5;
-		}
-		else if (IS_HOSHIJIN(vict) && GET_PHASE(vict) == 1)
-		{
-			mult = 2;
-		}
-		else if (IS_HOSHIJIN(vict) && GET_PHASE(vict) == 2)
-		{
-			mult = 3;
-		}
+
 		GET_MAJINIZED(vict) = GET_BASE_PL(vict) * .4;
-		GET_MAX_HIT(vict) += (GET_BASE_PL(vict) * .4) * mult;
-		GET_BASE_PL(vict) += GET_BASE_PL(vict) * .4;
+        vict->gainBasePLPercent(.4, true);
 		return;
 	}
 
@@ -5212,8 +4730,7 @@ ACMD(do_upgrade)
     extract_obj(obj);
     act("@WYou install the circuits and upgrade your maximum powerlevel.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@C$n@W installs some circuits and upgrades $s systems.@n", TRUE, ch, 0, 0, TO_ROOM);
-    GET_MAX_HIT(ch) += gain;
-    GET_BASE_PL(ch) += gain;
+    ch->gainBasePL(gain, true);
     send_to_char(ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain));
     return;
    } else if (!strcasecmp("ki", arg2)) {
@@ -5221,8 +4738,7 @@ ACMD(do_upgrade)
     extract_obj(obj);
     act("@WYou install the circuits and upgrade your maximum ki.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@C$n@W installs some circuits and upgrades $s systems.@n", TRUE, ch, 0, 0, TO_ROOM);
-    GET_MAX_MANA(ch) += gain;
-    GET_BASE_KI(ch) += gain;
+    ch->gainBaseKI(gain, true);
     send_to_char(ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain));
     return;
    } else if (!strcasecmp("stamina", arg2)) {
@@ -5230,8 +4746,7 @@ ACMD(do_upgrade)
     extract_obj(obj);
     act("@WYou install the circuits and upgrade your maximum stamina.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@C$n@W installs some circuits and upgrades $s systems.@n", TRUE, ch, 0, 0, TO_ROOM);
-    GET_MAX_MOVE(ch) += gain;
-    GET_BASE_ST(ch) += gain;
+    ch->gainBaseST(gain, true);
     send_to_char(ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain));
     return;
    } else {
@@ -5307,8 +4822,7 @@ ACMD(do_upgrade)
   else {
    GET_UP(ch) -= cost;
    send_to_char(ch, "You upgrade your system and gain %s %s!", add_commas(bonus), arg);
-   GET_MAX_HIT(ch) += bonus;
-   GET_BASE_PL(ch) += bonus;
+   ch->gainBasePL(bonus, true);
   }
  }
  else if (!strcasecmp("ki", arg)) {
@@ -5486,12 +5000,9 @@ ACMD(do_ingest)
     int64_t pl = GET_BASE_PL(vict) / 6;
     int64_t stam = GET_BASE_ST(vict) / 6;
     int64_t ki = GET_BASE_KI(vict) / 6;
-    GET_MAX_HIT(ch) += pl;
-    GET_BASE_PL(ch) += pl;
-    GET_MAX_MANA(ch) += ki;
-    GET_BASE_KI(ch) += ki;
-    GET_MAX_MOVE(ch) += stam;
-    GET_BASE_ST(ch) += stam;
+    ch->gainBasePL(pl, true);
+    ch->gainBaseST(stam, true);
+    ch->gainBaseKI(ki, true);
     if (!IS_NPC(vict) && !IS_NPC(ch)) {
      send_to_imm("[PK] %s killed %s at room [%d]\r\n", GET_NAME(ch), GET_NAME(vict), GET_ROOM_VNUM(IN_ROOM(vict)));
      SET_BIT_AR(PLR_FLAGS(vict), PLR_ABSORBED);
@@ -5712,19 +5223,20 @@ ACMD(do_absorb)
     act("@C$n@W rushes at you and $s tail engulfs you! $e quickly sucks your squirming body into $s tail, absorbing you!@n", TRUE, ch, 0, vict, TO_VICT);
     act("@C$n@w rushes at @c$N@W and $s tail engulfs $M! You quickly suck $S squirming body into your tail, absorbing @c$N@W!@n", TRUE, ch, 0, vict, TO_NOTVICT);
     GET_ABSORBS(ch) -= 1;
-    GET_MAX_HIT(ch) += GET_BASE_PL(vict) / 5;
-    GET_BASE_PL(ch) += GET_BASE_PL(vict) / 5;
-    GET_MAX_MANA(ch) += GET_BASE_KI(vict) / 5;
-    GET_BASE_KI(ch) += GET_BASE_KI(vict) / 5;
-    GET_MAX_MOVE(ch) += GET_BASE_ST(vict) / 5;
-    GET_BASE_ST(ch) += GET_BASE_ST(vict) / 5;
+
+      int64_t stam = GET_BASE_ST(vict) / 5;
+      int64_t ki = GET_BASE_KI(vict) / 5;
+      int64_t pl = GET_BASE_PL(vict) / 5;
+
+    ch->gainBasePL(pl, true);
+      ch->gainBaseST(stam, true);
+      ch->gainBaseKI(ki, true);
+
     if (!IS_NPC(vict) && !IS_NPC(ch)) {
      send_to_imm("[PK] %s killed %s at room [%d]\r\n", GET_NAME(ch), GET_NAME(vict), GET_ROOM_VNUM(IN_ROOM(vict)));
      SET_BIT_AR(PLR_FLAGS(vict), PLR_ABSORBED);
     }
-    int64_t stam = GET_BASE_ST(vict) / 5;
-    int64_t ki = GET_BASE_KI(vict) / 5;
-    int64_t pl = GET_BASE_PL(vict) / 5;
+
     send_to_char(ch, "@D[@gABSORB@D] @rPL@W: @D(@y%s@D) @cKi@W: @D(@y%s@D) @gSt@W: @D(@y%s@D)@n\r\n", add_commas(pl), add_commas(ki), add_commas(stam));
     improve_skill(ch, SKILL_ABSORB, 1);
     die(vict, NULL);
@@ -5781,43 +5293,13 @@ ACMD(do_absorb)
    stam += rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
    pl += rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
    ki += rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
-   if (stam > 1500000) {
-     stam = 1500000;
-   }
-   if (pl > 1500000) {
-    pl = 1500000;
-   }
-   if (ki > 1500000) {
-    ki = 1500000;
-   }
-   if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-    GET_MAX_HIT(ch) += pl * 2;
-    GET_MAX_MOVE(ch) += stam * 2;
-    GET_MAX_MANA(ch) += ki * 2;
-   }
-   else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-    GET_MAX_HIT(ch) += pl * 3;
-    GET_MAX_MOVE(ch) += stam * 3;
-    GET_MAX_MANA(ch) += ki * 3;
-   }
-   else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-    GET_MAX_HIT(ch) += pl * 3.5;
-    GET_MAX_MOVE(ch) += stam * 3.5;
-    GET_MAX_MANA(ch) += ki * 3.5;
-   }
-   else if (PLR_FLAGGED(ch, PLR_TRANS4)) {
-    GET_MAX_HIT(ch) += pl * 4;
-    GET_MAX_MOVE(ch) += stam * 4;
-    GET_MAX_MANA(ch) += ki * 4;
-   }
-   else {
-    GET_MAX_HIT(ch) += pl;
-    GET_MAX_MOVE(ch) += stam;
-    GET_MAX_MANA(ch) += ki;
-   }
-   GET_BASE_PL(ch) += pl;
-   GET_BASE_ST(ch) += stam;
-   GET_BASE_KI(ch) += ki;
+   stam = std::min(stam, 1500000L);
+   ki = std::min(ki, 1500000L);
+   pl = std::min(pl, 1500000L);
+
+   ch->gainBasePL(pl, true);
+   ch->gainBaseST(stam, true);
+   ch->gainBaseKI(ki, true);
    GET_LIFEFORCE(ch) += GET_LIFEMAX(ch) * 0.05;
     if (GET_LIFEFORCE(ch) > GET_LIFEMAX(ch)) {
      GET_LIFEFORCE(ch) = GET_LIFEMAX(ch);
@@ -9638,8 +9120,7 @@ ACMD(do_meditate)
    }
    if (bonus != 1 && IS_DEMON(ch) && rand_number(1, 100) >= 80) {
     send_to_char(ch, "Your spirit magnifies the strength of your body! @D[@G+%s@D]@n\r\n", add_commas(bonus / 2));
-    GET_MAX_HIT(ch) += bonus / 2;
-    GET_BASE_PL(ch) += bonus / 2;
+    ch->gainBasePL(bonus / 2);
     }
 
     bonus += GET_LEVEL(ch) / 20;
@@ -9936,28 +9417,11 @@ ACMD(do_pushup)
     }
     /* Rillao: transloc, add new transes here */
     send_to_char(ch, "You feel slightly stronger @D[@G+%s@D]@n.\r\n", add_commas(bonus));
-     if (IS_TRUFFLE(ch) && PLR_FLAGGED(ch, PLR_TRANS1)) {
-      GET_MAX_HIT(ch) += bonus * 3;
+
+     if (IS_HUMAN(ch)) {
+         bonus = bonus * 0.8;
      }
-     else if (IS_TRUFFLE(ch) && PLR_FLAGGED(ch, PLR_TRANS2)) {
-      GET_MAX_HIT(ch) += bonus * 4;
-     }
-     else if (IS_TRUFFLE(ch) && PLR_FLAGGED(ch, PLR_TRANS3)) {
-      GET_MAX_HIT(ch) += bonus * 5;
-     }
-     else if (IS_HOSHIJIN(ch) && GET_PHASE(ch) == 1) {
-      GET_MAX_HIT(ch) += bonus * 2;
-     }
-     else if (IS_HOSHIJIN(ch) && GET_PHASE(ch) == 2) {
-      GET_MAX_HIT(ch) += bonus * 3;
-     }
-     else {
-      if (IS_HUMAN(ch)) {
-       bonus = bonus * 0.8;
-      }
-      GET_MAX_HIT(ch) += bonus;
-     }
-     GET_BASE_PL(ch) += bonus;
+     ch->gainBasePL(bonus, true);
    if (ROOM_GRAVITY(IN_ROOM(ch)) <= 50) {
    WAIT_STATE(ch, PULSE_2SEC);  
    }
@@ -10155,12 +9619,10 @@ void base_update(void)
 				GET_MOVE(d->character) = GET_MAX_MOVE(d->character) *.2;
 				if (!IN_ARENA(d->character))
 				{
-					GET_BASE_PL(d->character) = zenkaiPL;
-					GET_BASE_KI(d->character) = zenkaiKi;
-					GET_BASE_ST(d->character) = zenkaiSt;
-					GET_MAX_HIT(d->character) = zenkaiPL;
-					GET_MAX_MANA(d->character) = zenkaiKi;
-					GET_MAX_MOVE(d->character) = zenkaiSt;
+                    d->character->gainBasePL(zenkaiPL);
+                    d->character->gainBaseKI(zenkaiKi);
+                    d->character->gainBaseST(zenkaiSt);
+
 					send_to_char(d->character, "@D[@YZ@ye@wn@Wk@Ya@yi @YB@yo@wo@Ws@Yt@D] @WYou feel much stronger!\r\n");
 					send_to_char(d->character, "@D[@RPL@Y:@n+%s@D] @D[@CKI@Y:@n+%s@D] @D[@GSTA@Y:@n+%s@D]@n\r\n", add_commas(zenkaiPL), add_commas(zenkaiKi), add_commas(zenkaiSt));
 				}
@@ -10375,8 +9837,7 @@ void base_update(void)
 								send_to_char(d->character, "The leader of your group conveys an extra bonus! @D[@G+%s@D]@n \r\n", add_commas(gbonus));
 							}
 						}
-						GET_MAX_HIT(d->character) += gain;
-						GET_BASE_PL(d->character) += gain;
+                        d->character->gainBasePL(gain);
 					}
 				}
 				if (mum) {
@@ -10402,8 +9863,7 @@ void base_update(void)
 								send_to_char(d->character, "The leader of your group conveys an extra bonus! @D[@G+%s@D]@n \r\n", add_commas(gbonus));
 							}
 						}
-						GET_MAX_MOVE(d->character) += gain;
-						GET_BASE_ST(d->character) += gain;
+                        d->character->gainBaseST(gain);
 					}
 				}
 				if (ium) {
@@ -10429,32 +9889,28 @@ void base_update(void)
 								send_to_char(d->character, "The leader of your group conveys an extra bonus! @D[@G+%s@D]@n \r\n", add_commas(gbonus));
 							}
 						}
-						GET_MAX_MANA(d->character) += gain;
-						GET_BASE_KI(d->character) += gain;
+                        d->character->gainBaseKI(gain);
 					}
 				}
 				if (!sum) {
 					if (rand_number(1, 8) >= 6) {
 						int gain = 1;
 						send_to_char(d->character, "@gYou gain +@G%d@g permanent powerlevel. You may need to level.@n\r\n", gain);
-						GET_MAX_HIT(d->character) += gain;
-						GET_BASE_PL(d->character) += gain;
+						d->character->gainBasePL(gain);
 					}
 				}
 				if (!mum) {
 					if (rand_number(1, 8) >= 6) {
 						int gain = 1;
 						send_to_char(d->character, "@gYou gain +@G%d@g permanent stamina. You may need to level.@n\r\n", gain);
-						GET_MAX_MOVE(d->character) += gain;
-						GET_BASE_ST(d->character) += gain;
+						d->character->gainBaseST(gain);
 					}
 				}
 				if (!ium) {
 					if (rand_number(1, 8) >= 6) {
 						int gain = 1;
 						send_to_char(d->character, "@gYou gain +@G%d@g permanent ki. You may need to level.@n\r\n", gain);
-						GET_MAX_MANA(d->character) += gain;
-						GET_BASE_KI(d->character) += gain;
+						d->character->gainBaseKI(gain);
 					}
 				}
 			}

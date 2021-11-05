@@ -356,7 +356,7 @@ int load_char(const char *name, struct char_data *ch)
     GET_HOME(ch) = PFDEF_HOMETOWN;
     GET_HEIGHT(ch) = PFDEF_HEIGHT;
     GET_WEIGHT(ch) = PFDEF_WEIGHT;
-    GET_BASE_PL(ch) = PFDEF_BASEPL;
+    ch->basepl = PFDEF_BASEPL;
     GET_RELAXCOUNT(ch) = PFDEF_EYE;
     GET_BLESSLVL(ch) = PFDEF_HEIGHT;
     GET_LIFEFORCE(ch) = PFDEF_BASEPL;
@@ -1493,15 +1493,15 @@ void load_BASE(struct char_data *ch, const char *line, int mode)
 
   switch (mode) {
   case LOAD_HIT:
-    GET_BASE_PL(ch) = num;
+    ch->basepl = num;
     break;
 
   case LOAD_MANA:
-    GET_BASE_KI(ch) = num;
+      ch->baseki = num;
     break;
 
   case LOAD_MOVE:
-    GET_BASE_ST(ch) = num;
+      ch->basest = num;
     break;
   
   case LOAD_LIFE:

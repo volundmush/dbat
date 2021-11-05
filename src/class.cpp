@@ -607,30 +607,17 @@ void do_start(struct char_data *ch)
   advance_level(ch, GET_CLASS(ch));
   /*mudlog(BRF, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s advanced to level %d", GET_NAME(ch), GET_LEVEL(ch));*/
 
-  if (GET_MAX_HIT(ch) < 100) {
-   GET_MAX_HIT(ch) = 100;
-  }
-  if (GET_MAX_MANA(ch) < 100) {
-   GET_MAX_MANA(ch) = 100;
-  }
-  if (GET_MAX_MOVE(ch) < 100) {
-   GET_MAX_MOVE(ch) = 100;
-  }
+  ch->basepl = std::max(ch->basepl, 100L);
+  ch->baseki = std::max(ch->baseki, 100L);
+  ch->basest = std::max(ch->basest, 100L);
 
   if (IS_ANDROID(ch) && PLR_FLAGGED(ch, PLR_SENSEM)) {
    SET_SKILL(ch, SKILL_SENSE, 100);
-   GET_MAX_HIT(ch) += rand_number(400, 500);
-   GET_MAX_MANA(ch) += rand_number(400, 500);
-   GET_MAX_MOVE(ch) += rand_number(400, 500);
+   ch->gainBasePL(rand_number(400, 500));
+   ch->gainBaseST(rand_number(400, 500));
+   ch->gainBaseKI(rand_number(400, 500));
   }
 
-  GET_HIT(ch) = GET_MAX_HIT(ch);
-  GET_MANA(ch) = GET_MAX_MANA(ch);
-  GET_MOVE(ch) = GET_MAX_MOVE(ch);
-  
-  GET_BASE_PL(ch) = GET_MAX_HIT(ch);
-  GET_BASE_KI(ch) = GET_MAX_MANA(ch);
-  GET_BASE_ST(ch) = GET_MAX_MOVE(ch);
      if (ch->real_abils.str > 20) {
       ch->real_abils.str = 20;
      }
@@ -677,6 +664,8 @@ void do_start(struct char_data *ch)
      SET_BIT_AR(PLR_FLAGS(ch), PLR_LSSJ);
      write_to_output(ch->desc, "@GYou were one of the few born a Legendary Super Saiyan!@n\r\n");
   }
+  ch->restoreVitals();
+
   ch->player_specials->olc_zone = NOWHERE;
   save_char(ch);
 }
@@ -1170,19 +1159,11 @@ void advance_level(struct char_data *ch, int whichclass)
   if (GET_LEVEL(ch) > 1) {
     /* blah */
   } else {
-    GET_MAX_HIT(ch) += rand_number(1, 20);
-    if (GET_MAX_HIT(ch) > 250) {
-      GET_MAX_HIT(ch) = 250;
-    }
-    if (GET_MAX_MANA(ch) > 250) {
-      GET_MAX_MANA(ch) = 250;
-    }
-    if (GET_MAX_MOVE(ch) > 250) {
-      GET_MAX_MOVE(ch) = 250;
-    }
-    GET_BASE_PL(ch) = GET_MAX_HIT(ch);
-    GET_BASE_KI(ch) = GET_MAX_MANA(ch);
-    GET_BASE_ST(ch) = GET_MAX_HIT(ch);
+      ch->gainBasePL(rand_number(1, 20));
+      ch->basepl = std::max(ch->basepl, 250L);
+      ch->baseki = std::max(ch->baseki, 250L);
+      ch->basest = std::max(ch->basest, 250L);
+
     add_prac = 5;
     if (PLR_FLAGGED(ch, PLR_SKILLP)) {
     REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_SKILLP);
@@ -1232,9 +1213,9 @@ void advance_level(struct char_data *ch, int whichclass)
   llog->ki_roll = add_ki;
   llog->add_skill = add_prac;
   GET_PRACTICES(ch, whichclass) += add_prac;
-  GET_BASE_PL(ch) += add_hp;
-  GET_BASE_KI(ch) += add_mana;
-  GET_BASE_ST(ch) += add_move;
+  ch->gainBasePL(add_hp);
+  ch->gainBaseKI(add_mana);
+  ch->gainBaseST(add_move);
   int nhp = add_hp;
   int nma = add_mana;
   int nmo = add_move;

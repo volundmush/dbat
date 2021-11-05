@@ -682,6 +682,7 @@ void char_data::restoreLimbs(bool announce) {
 int64_t char_data::gainBasePL(int64_t amt, bool trans_mult) {
     auto mult = trans_mult ? this->race->getCurFormMult(this) : 1;
     auto to_add = (int64_t)(amt * mult);
+    hit += to_add;
     max_hit += to_add;
     basepl += amt;
     return basepl;

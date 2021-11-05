@@ -2533,10 +2533,8 @@ void handle_evolution(struct char_data *ch, int64_t dmg)
    }
    int64_t plgain = GET_MAX_HIT(ch) * rand1, armorgain = 0, stamgain = GET_MAX_MOVE(ch) * rand2;
    armorgain = armor_evolve(ch);
-   GET_MAX_HIT(ch) += plgain;
-   GET_BASE_PL(ch) += plgain;
-   GET_MAX_MOVE(ch) += stamgain;
-   GET_BASE_ST(ch) += stamgain;
+   ch->gainBasePL(plgain);
+   ch->gainBaseST(stamgain);
    GET_ARMOR(ch) += armorgain;
    if (GET_ARMOR(ch) > 50000) {
     GET_ARMOR(ch) = 50000;
