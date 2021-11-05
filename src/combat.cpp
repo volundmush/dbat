@@ -26,6 +26,7 @@
 #include "dg_scripts.h"
 #include "class.h"
 #include "effolkronium/random.hpp"
+#include "techniques.h"
 
 /* local functions */
 void damage_weapon(struct char_data *ch, struct obj_data *obj, struct char_data *vict)
@@ -5978,46 +5979,14 @@ void handle_spiral(struct char_data *ch, struct char_data *vict, int skill, int 
   else if (avo >= 70) {
    prob -= 69;
   }
-  if (GET_POS(vict) == POS_SLEEPING) {
-   pry = 0;
-   blk = 0;
-   dge = 0;
-   prob += 50;
-  }
-  if (GET_POS(vict) == POS_RESTING) {
-   pry /= 4;
-   blk /= 4;
-   dge /= 4;
-   prob += 25;
-  }
-  if (GET_POS(vict) == POS_SITTING) {
-   pry /= 2;
-   blk /= 2;
-   dge /= 2;
-   prob += 10;
+  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+
+  if(!tech_handle_zanzoken(ch, vict, "Spiral Comet Blast")) {
+      pcost(ch, amount, 0);
+      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      return;
   }
 
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
-     act("@C$N@c disappears, avoiding your Spiral Comet blast before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c Spiral Comet blast before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c Spiral Comet blast before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-     }
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     pcost(ch, amount, 0);
-     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-     return;
-   }
-   else {
-     act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-   }
-  }
   if (prob < perc) {
    if (GET_MOVE(vict) > 0) {
     if (blk > rand_number(1, 130)) {

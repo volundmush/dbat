@@ -61,7 +61,7 @@
 
 // non-standard libraries
 //#include "asio.hpp"
-//#include "fmt/core.h"
+#include "fmt/core.h"
 //#include "sqlitepp.h"
 
 /* Basic system dependencies *******************************************/
