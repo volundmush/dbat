@@ -357,6 +357,7 @@ int load_char(const char *name, struct char_data *ch)
     GET_HEIGHT(ch) = PFDEF_HEIGHT;
     GET_WEIGHT(ch) = PFDEF_WEIGHT;
     ch->basepl = PFDEF_BASEPL;
+    ch->health = 1.0;
     GET_RELAXCOUNT(ch) = PFDEF_EYE;
     GET_BLESSLVL(ch) = PFDEF_HEIGHT;
     GET_LIFEFORCE(ch) = PFDEF_BASEPL;
@@ -366,7 +367,9 @@ int load_char(const char *name, struct char_data *ch)
     GET_MAJINIZED(ch) = PFDEF_BASEPL;
     GET_GAUNTLET(ch)   = PFDEF_GAUNTLET;
     ch->baseki = PFDEF_BASEKI;
+    ch->energy = 1.0;
     ch->basest = PFDEF_BASEST;
+    ch->stamina = 1.0;
     GET_HAIRL(ch) = PFDEF_HAIRL;
     GET_HAIRC(ch) = PFDEF_HAIRC;
     GET_SKIN(ch) = PFDEF_SKIN;
@@ -468,12 +471,12 @@ int load_char(const char *name, struct char_data *ch)
     ch->real_abils.wis = PFDEF_WIS;
     ch->real_abils.con = PFDEF_CON;
     ch->real_abils.cha = PFDEF_CHA;
-    GET_HIT(ch) = PFDEF_HIT;
-    GET_MAX_HIT(ch) = PFDEF_MAXHIT;
-    GET_MANA(ch) = PFDEF_MANA;
-    GET_MAX_MANA(ch) = PFDEF_MAXMANA;
-    GET_MOVE(ch) = PFDEF_MOVE;
-    GET_MAX_MOVE(ch) = PFDEF_MAXMOVE;
+    //GET_HIT(ch) = PFDEF_HIT;
+    //ch->max_hit = PFDEF_MAXHIT;
+    //GET_MANA(ch) = PFDEF_MANA;
+    //ch->max_mana = PFDEF_MAXMANA;
+    //GET_MOVE(ch) = PFDEF_MOVE;
+    //ch->max_move = PFDEF_MAXMOVE;
     GET_KI(ch) = PFDEF_KI;
     GET_MAX_KI(ch) = PFDEF_MAXKI;
     SPEAKING(ch) = PFDEF_SPEAKING;
@@ -1098,10 +1101,10 @@ void save_char(struct char_data * ch)
 
   if (GET_HIT(ch)	   != PFDEF_HIT  || GET_MAX_HIT(ch)  != PFDEF_MAXHIT)
     fprintf(fl, "Hit : %" I64T "/%" I64T "\n", GET_HIT(ch),  GET_MAX_HIT(ch));
-  if (GET_MANA(ch)	   != PFDEF_MANA || GET_MAX_MANA(ch) != PFDEF_MAXMANA)
-    fprintf(fl, "Mana: %" I64T "/%" I64T "\n", GET_MANA(ch), GET_MAX_MANA(ch));
-  if (GET_MOVE(ch)	   != PFDEF_MOVE || GET_MAX_MOVE(ch) != PFDEF_MAXMOVE)
-    fprintf(fl, "Move: %" I64T "/%" I64T "\n", GET_MOVE(ch), GET_MAX_MOVE(ch));
+  if ((ch->getCurKI())	   != PFDEF_MANA || GET_MAX_MANA(ch) != PFDEF_MAXMANA)
+    fprintf(fl, "Mana: %" I64T "/%" I64T "\n", (ch->getCurKI()), GET_MAX_MANA(ch));
+  if ((ch->getCurST())	   != PFDEF_MOVE || GET_MAX_MOVE(ch) != PFDEF_MAXMOVE)
+    fprintf(fl, "Move: %" I64T "/%" I64T "\n", (ch->getCurST()), GET_MAX_MOVE(ch));
   if (GET_KI(ch)	   != PFDEF_KI || GET_MAX_KI(ch) != PFDEF_MAXKI)
     fprintf(fl, "Ki  : %" I64T "/%" I64T "\n", GET_KI(ch), GET_MAX_KI(ch));
 
@@ -1464,23 +1467,23 @@ void load_HMVS(struct char_data *ch, const char *line, int mode)
 
   switch (mode) {
   case LOAD_HIT:
-    GET_HIT(ch) = num;
-    GET_MAX_HIT(ch) = num2;
+    //GET_HIT(ch) = num;
+    ch->max_hit = num2;
     break;
 
   case LOAD_MANA:
-    GET_MANA(ch) = num;
-    GET_MAX_MANA(ch) = num2;
+    //GET_MANA(ch) = num;
+    ch->max_mana = num2;
     break;
 
   case LOAD_MOVE:
-    GET_MOVE(ch) = num;
-    GET_MAX_MOVE(ch) = num2;
+    //GET_MOVE(ch) = num;
+    ch->max_move = num2;
     break;
 
   case LOAD_KI:
-    GET_KI(ch) = num;
-    GET_MAX_KI(ch) = num2;
+    //GET_KI(ch) = num;
+    ch->max_ki = num2;
     break;
   }
 }

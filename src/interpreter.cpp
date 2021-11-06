@@ -6298,19 +6298,11 @@ void nanny(struct descriptor_data *d, char *arg)
            STATE(d) = CON_NEGATIVE;
          } else if (!strcasecmp(arg, "x") || !strcasecmp(arg, "X")) {
           GET_NEGCOUNT(d->character) = 0;
-          if (d->character->max_hit <= 0) {
-           d->character->max_hit = 90;
-          }
-          if (d->character->max_mana <= 0) {
-           d->character->max_mana = 90;
-          }
-          if (d->character->max_move <= 0) {
-           d->character->max_move = 90;
-          }
-           d->character->basepl = d->character->max_hit;
-           d->character->baseki = d->character->max_mana;
-           d->character->basest = d->character->max_move;
-           d->character->lifeforce = d->character->max_move + d->character->max_mana;
+
+           d->character->basepl = std::max(90L, d->character->basepl);
+           d->character->baseki = std::max(90L, d->character->baseki);
+           d->character->basest = std::max(90L, d->character->basest);
+           d->character->lifeforce = d->character->basest + d->character->baseki;
            write_to_output(d, "\r\n@wTo check the bonuses/negatives you have in game use the status command");
            if (GET_CCPOINTS(d->character) > 0) {
             write_to_output(d, "\r\n@GYour left over points were spent on Practice Sessions@w");

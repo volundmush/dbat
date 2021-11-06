@@ -1763,7 +1763,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
 	  GET_STR(k), GET_INT(k), GET_WIS(k), GET_DEX(k), GET_CON(k), GET_CHA(k));
 
   send_to_char(ch, "PL :[@g%12s@n]  KI :[@g%12s@n]  ST :[@g%12s@n]\r\n",
-	  add_commas(GET_HIT(k)), add_commas(GET_MANA(k)), add_commas(GET_MOVE(k)));
+	  add_commas(GET_HIT(k)), add_commas((k->getCurKI())), add_commas((k->getCurST())));
   send_to_char(ch, "MPL:[@g%12s@n]  MKI:[@g%12s@n]  MST:[@g%12s@n]\r\n",
           add_commas(GET_MAX_HIT(k)), add_commas(GET_MAX_MANA(k)), add_commas(GET_MAX_MOVE(k)));
   send_to_char(ch, "BPL:[@g%12s@n]  BKI:[@g%12s@n]  BST:[@g%12s@n]\r\n",

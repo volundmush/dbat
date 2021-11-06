@@ -364,6 +364,9 @@ void racial_body_parts(struct char_data *ch) {
 
 namespace dbat::race {
 
+    transform_bonus base_form = {0, 1, 0, 0};
+    transform_bonus oozaru = {.bonus = 10000, .mult=2, .drain=0, .flag=PLR_OOZARU};
+
     Race::Race(race_id rid, const std::string &name, std::string abbr, int size, bool pc) {
         this->r_id = rid;
         this->name = name;
@@ -491,99 +494,10 @@ namespace dbat::race {
             send_to_char(ch, "You are in kaioken right now and can't transform!\r\n");
             return false;
         }
-        if (GET_SUPPRESS(ch) > 0) {
-            send_to_char(ch, "You are suppressing right now and can't transform!\r\n");
-            return false;
-        }
-        if (GET_CLONES(ch) > 0) {
-            send_to_char(ch, "You can't concentrate on transforming while your body is split into multiple forms!\r\n");
-            return false;
-        }
+
         return true;
     }
 
-
-    void Race::handleTransform(char_data *ch, const transform_bonus &trans) const {
-        if (!ch)
-            return;
-        if (IS_NPC(ch))
-            return;
-        else {
-            auto add = trans.bonus;
-            auto mult = trans.mult;
-            auto drain = trans.drain;
-            SET_BIT_AR(PLR_FLAGS(ch), trans.flag);
-            int64_t android_bonus = 0;
-            switch (ch->wearing_android_canister()) {
-                case 1:
-                    android_bonus = 50000000;
-                    break;
-                case 2:
-                    android_bonus = 20000000;
-            }
-
-            long double cur, max, dapercent = GET_LIFEPERC(ch);
-            /* Handle Pl */
-            cur = (long double) (GET_HIT(ch));
-            max = (long double) (GET_MAX_HIT(ch));
-            GET_MAX_HIT(ch) = ((ch->getBasePL()) + add) * mult;
-            GET_MAX_HIT(ch) += android_bonus;
-
-            if ((GET_HIT(ch) + (add * (cur / max))) * mult <= gear_pl(ch)) {
-                GET_HIT(ch) = (GET_HIT(ch) + (add * (cur / max))) * mult;
-            }
-            else if ((GET_HIT(ch) + (add * (cur / max))) * mult > gear_pl(ch)) {
-                GET_HIT(ch) = gear_pl(ch);
-            }
-
-            /* Handle Ki */
-            cur = (long double) (GET_MANA(ch));
-            max = (long double) (GET_MAX_MANA(ch));
-            GET_MAX_MANA(ch) = ((ch->getBaseKI()) + add) * mult;
-            GET_MAX_MANA(ch) += android_bonus;
-
-            if ((GET_MANA(ch) + (add * (cur / max))) * mult <= GET_MAX_MANA(ch)) {
-                GET_MANA(ch) = (GET_MANA(ch) + (add * (cur / max))) * mult;
-            } else if ((GET_MANA(ch) + (add * (cur / max))) * mult > GET_MAX_MANA(ch)) {
-                GET_MANA(ch) = GET_MAX_MANA(ch);
-            }
-
-            /* Handle St */
-            GET_MOVE(ch) -= GET_MOVE(ch) * drain;
-            cur = (long double) (GET_MOVE(ch));
-            max = (long double) (GET_MAX_MOVE(ch));
-            GET_MAX_MOVE(ch) = ((ch->getBaseST()) + add) * mult;
-            GET_MAX_MOVE(ch) += android_bonus;
-
-            if ((GET_MOVE(ch) + (add * (cur / max))) * mult <= GET_MAX_MOVE(ch)) {
-                GET_MOVE(ch) = (GET_MOVE(ch) + (add * (cur / max))) * mult;
-            } else if ((GET_MOVE(ch) + (add * (cur / max))) * mult > GET_MAX_MOVE(ch)) {
-                GET_MOVE(ch) = GET_MAX_MOVE(ch);
-            }
-
-            if (!IS_ANDROID(ch)) {
-                /* Handle Lifeforce */
-                /*R: Tried changing initial GET_LIFEFORCE to GET_LIFEMAX
-                I: You are setting lifemax, which is set dynamically by what KI and Stamina's maxes are.
-                This is updated all the time, so it isn't going to do anything for more than a fraction
-                of a second. You need to adjust GET_LIFEFORCE to be the same percentage of the new max as
-                it was the old. To do this you find out the old */
-                /* Example: percent = ((long double)(GET_LIFEMAX(ch)) / 100) * (long double)(GET_LIFEFORCE(ch))
-
-
-                This will give you the percent (in decimal form) of lifemax. Do this prior to the transformation
-                change at the start of handle_transformation. Then here at the end you do:
-                GET_LIFEFORCE(ch) = GET_LIFEMAX(ch) * percent;
-                The percent will remain the same, but based off the new detransformed lifeforce max. Make sure the
-                variable, percent, hasn't already been used. Declare it or something else for your code.*/
-
-                GET_LIFEFORCE(ch) = GET_LIFEMAX(ch) * dapercent;
-                if (GET_LIFEFORCE(ch) > GET_LIFEMAX(ch)) {
-                    GET_LIFEFORCE(ch) = GET_LIFEMAX(ch);
-                }
-            }
-        }
-    }
 
     int Race::getMaxTransformTier(char_data *ch) const {
         switch (r_id) {
@@ -733,7 +647,7 @@ namespace dbat::race {
             {6, {.bonus=5000000000, .mult=1, .drain=0, .flag=PLR_TRANS6}},
     };
 
-    const std::map<int, transform_bonus>& Race::getTransMap(char_data *ch) const {
+    const std::map<int, transform_bonus>& Race::getTransMap(const char_data *ch) const {
         switch (r_id) {
             case android:
                 if (PLR_FLAGGED(ch, PLR_SENSEM)) {
@@ -815,13 +729,13 @@ namespace dbat::race {
         }
     }
 
-    long double Race::getCurFormMult(char_data *ch) const {
+    transform_bonus Race::getCurForm(const char_data *ch) const {
+        if(PLR_FLAGGED(ch, PLR_OOZARU)) return oozaru;
         auto tier = getCurrentTransTier(ch);
-        if(!tier) return 1;
+        if(!tier) return base_form;
         auto t_map = getTransMap(ch);
-        if(t_map.empty()) return 1;
-        auto data = t_map[tier];
-        return data.mult;
+        if(t_map.empty()) return base_form;
+        return t_map[tier];
     }
 
     bool Race::raceCanBeSensed() const {
@@ -853,7 +767,7 @@ namespace dbat::race {
         return {};
     }
 
-    int Race::getCurrentTransTier(char_data *ch) const {
+    int Race::getCurrentTransTier(const char_data *ch) const {
         int trans_tier = 0;
 
         for (const auto &flag: {PLR_TRANS1, PLR_TRANS2, PLR_TRANS3, PLR_TRANS4, PLR_TRANS5, PLR_TRANS6}) {
@@ -865,59 +779,6 @@ namespace dbat::race {
         return 0;
     }
 
-    void Race::revertTransform(char_data *ch) const {
-        int trans_tier = getCurrentTransTier(ch);
-        revertTransform(ch, trans_tier);
-    }
-
-    void Race::revertTransform(char_data *ch, int tier) const {
-        auto trans_map = getTransMap(ch);
-        if (!tier) {
-            return;
-        }
-        auto trans = trans_map[tier];
-        revertTransform(ch, trans);
-    }
-
-    void Race::revertTransform(char_data *ch, const transform_bonus &trans) const {
-        auto add = trans.bonus;
-        auto mult = trans.mult;
-
-        REMOVE_BIT_AR(PLR_FLAGS(ch), trans.flag);
-
-        long double convert, dapercent = GET_LIFEPERC(ch);
-        convert = ((long double) (GET_HIT(ch)) / (long double) (GET_MAX_HIT(ch)));
-        GET_HIT(ch) = (GET_HIT(ch) - ((add * mult) * (convert))) / mult;
-        convert = ((long double) (GET_MANA(ch)) / (long double) (GET_MAX_MANA(ch)));
-        GET_MANA(ch) = (GET_MANA(ch) - ((add * mult) * (convert))) / mult;
-        convert = ((long double) (GET_MOVE(ch)) / (long double) (GET_MAX_MOVE(ch)));
-        GET_MOVE(ch) = (GET_MOVE(ch) - ((add * mult) * (convert))) / mult;
-        /*R: Trying to add lifeforce revert */
-        GET_LIFEFORCE(ch) = GET_LIFEMAX(ch) * dapercent;
-        if (GET_LIFEFORCE(ch) > GET_LIFEMAX(ch)) {
-            GET_LIFEFORCE(ch) = GET_LIFEMAX(ch);
-        }
-
-        if (GET_MOVE(ch) < 1) {
-            GET_MOVE(ch) = 1;
-        }
-        if (GET_MANA(ch) < 1) {
-            GET_MANA(ch) = 1;
-        }
-        if (GET_HIT(ch) < 1) {
-            GET_HIT(ch) = 1;
-        }
-        if (GET_LIFEFORCE(ch) < 1) {
-            GET_LIFEFORCE(ch) = 1;
-        }
-        if (GET_HIT(ch) > gear_pl(ch)) {
-            GET_HIT(ch) = gear_pl(ch);
-        }
-
-        GET_MAX_HIT(ch) = (ch->getBasePL());
-        GET_MAX_MANA(ch) = (ch->getBaseKI());
-        GET_MAX_MOVE(ch) = (ch->getBaseST());
-    }
 
     bool Race::checkTransUnlock(char_data *ch, int tier) const {
         // First, check for special requirements which are not 'paid'.

@@ -311,13 +311,8 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
       act("$n suddenly appears looking relieved after $s trial in the Gauntlet",FALSE,ch,0,ch,TO_NOTVICT); 
       act("You are returned to the start of the Gauntlet",FALSE,ch,0,ch,TO_VICT); 
 
-      /* Hit point penalty for surrendering */ 
-      if(GET_HIT(ch) > 2000) 
-        GET_HIT(ch) = GET_HIT(ch) / 5; 
-      else if(GET_HIT(ch) > 500) 
-        GET_HIT(ch) = 100; 
-      else 
-        GET_HIT(ch) = 1; 
+      /* Hit point penalty for surrendering */
+      ch->decCurHealth(2000);
 
       look_at_room(IN_ROOM(ch), ch, 0); 
       return TRUE; 

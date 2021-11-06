@@ -76,9 +76,9 @@ ACMD(do_evolve)
 
  int64_t plcost = GET_LEVEL(ch), stcost = GET_LEVEL(ch), kicost = GET_LEVEL(ch);
 
- plcost += molt_threshold(ch) * 0.65 + (GET_MAX_HIT(ch) * 0.15);
- kicost += (molt_threshold(ch) * 0.50) + (GET_MAX_MANA(ch) * 0.22);
- stcost += (molt_threshold(ch) * 0.50) + (GET_MAX_MOVE(ch) * 0.15); 
+ plcost += molt_threshold(ch) * 0.65 + (ch->getBasePL() * 0.15);
+ kicost += (molt_threshold(ch) * 0.50) + (ch->getBaseKI() * 0.22);
+ stcost += (molt_threshold(ch) * 0.50) + (ch->getBaseST() * 0.15);
 
  if (!*arg) {
   send_to_char(ch, "@D-=@YConvert Evolution Points To What?@D=-@n\r\n");
@@ -233,7 +233,7 @@ static void search_room(struct char_data *ch)
  int prob = 0, found = 0;
  double bonus = 1.0, terrain = 1.0;
 
- if (GET_MOVE(ch) < GET_MAX_MOVE(ch) * 0.001) {
+ if ((ch->getCurST()) < GET_MAX_MOVE(ch) * 0.001) {
   send_to_char(ch, "You do not have enough stamina.\r\n");
   return;
  }
@@ -284,8 +284,8 @@ static void search_room(struct char_data *ch)
    found++;
   }
  }
+ ch->decCurSTPercent(.001);
 
- GET_MOVE(ch) -= GET_MAX_MOVE(ch) * 0.001;
 
  if (found == 0) {
   send_to_char(ch, "You find nothing hidden.\r\n");
@@ -370,18 +370,18 @@ ACMD(do_mimic)
  if (race == ch->mimic) {
 	send_to_char(ch, "You are already mimicing that race. To stop enter 'mimic stop'\r\n");
 	return;
- } else if (race && GET_MANA(ch) < cost) {
+ } else if (race && (ch->getCurKI()) < cost) {
    send_to_char(ch, "You do not have enough ki to perform the technique.\r\n");
    return;
  } else if (race && prob < perc) {
-   GET_MANA(ch) -= cost;
+     ch->decCurKI(cost);
    act("@mYou concentrate and attempt to create an illusion to obscure your racial features. However you frown as you realize you have failed.@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@M$n@m concentrates and the light around them seems to shift and blur. It stops a moment later and $e frowns.@n", TRUE, ch, 0, 0, TO_ROOM);
    return;
  } else {
 	char buf[MAX_STRING_LENGTH];
 	ch->mimic = race;
-	GET_MANA(ch) -= cost;
+     ch->decCurKI(cost);
 	sprintf(buf, "@M$n@m concentrates for a moment and $s features start to blur as light bends around $m. Now $e appears to be %s @M%s!@n", AN(RACE(ch)), LRACE(ch));
 	send_to_char(ch, "@mYou concentrate for a moment and your features start to blur as you use your ki to bend the light around your body. You now appear to be %s %s.@n\r\n", AN(RACE(ch)), LRACE(ch));
 	act(buf, TRUE, ch, 0, 0, TO_ROOM);
@@ -2836,7 +2836,7 @@ static void diag_char_to_char(struct char_data *i, struct char_data *ch)
   };
   int percent, ar_index;
 
-  int64_t hit = GET_HIT(i), max = gear_pl(i);
+  int64_t hit = GET_HIT(i), max = (i->getEffMaxPL());
  
   int64_t total = 0;
    if (GET_SUPPRESS(i) > 0) {
@@ -3197,25 +3197,25 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
   if (IS_NPC(i) && i->long_descr && GET_POS(i) == GET_DEFAULT_POS(i) && !FIGHTING(i)) {
     send_to_char(ch, "%s", i->long_descr);
 
-    if (IS_NPC(i) && GET_HIT(i) >= gear_pl(i) * .9 && GET_HIT(i) != gear_pl(i))
+    if (IS_NPC(i) && GET_HIT(i) >= (i->getEffMaxPL()) * .9 && GET_HIT(i) != (i->getEffMaxPL()))
      act("@R...Some slight wounds on $s body.@w", TRUE, i, 0, ch, TO_VICT);
-    else if (IS_NPC(i) && GET_HIT(i) >= gear_pl(i) * .8 && GET_HIT(i) < gear_pl(i) * .9)
+    else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffMaxPL()) * .8 && GET_HIT(i) < (i->getEffMaxPL()) * .9)
      act("@R...A few wounds on $s body.@w", TRUE, i, 0, ch, TO_VICT);
-    else if (IS_NPC(i) && GET_HIT(i) >= gear_pl(i) * .7 && GET_HIT(i) < gear_pl(i) * .8)
+    else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffMaxPL()) * .7 && GET_HIT(i) < (i->getEffMaxPL()) * .8)
      act("@R...Many wounds on $s body.@w", TRUE, i, 0, ch, TO_VICT);
-    else if (IS_NPC(i) && GET_HIT(i) >= gear_pl(i) * .6 && GET_HIT(i) < gear_pl(i) * .7)
+    else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffMaxPL()) * .6 && GET_HIT(i) < (i->getEffMaxPL()) * .7)
      act("@R...Quite a few wounds on $s body.@w", TRUE, i, 0, ch, TO_VICT);
-    else if (IS_NPC(i) && GET_HIT(i) >= gear_pl(i) * .5 && GET_HIT(i) < gear_pl(i) * .6)
+    else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffMaxPL()) * .5 && GET_HIT(i) < (i->getEffMaxPL()) * .6)
      act("@R...Horrible wounds on $s body.@w", TRUE, i, 0, ch, TO_VICT);
-    else if (IS_NPC(i) && GET_HIT(i) >= gear_pl(i) * .4 && GET_HIT(i) < gear_pl(i) * .5)
+    else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffMaxPL()) * .4 && GET_HIT(i) < (i->getEffMaxPL()) * .5)
      act("@R...Blood is seeping from the wounds on $s body.@w", TRUE, i, 0, ch, TO_VICT);
-    else if (IS_NPC(i) && GET_HIT(i) >= gear_pl(i) * .3 && GET_HIT(i) < gear_pl(i) * .4)
+    else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffMaxPL()) * .3 && GET_HIT(i) < (i->getEffMaxPL()) * .4)
      act("@R...$s body is in terrible shape.@w", TRUE, i, 0, ch, TO_VICT);
-    else if (IS_NPC(i) && GET_HIT(i) >= gear_pl(i) * .2 && GET_HIT(i) < gear_pl(i) * .3)
+    else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffMaxPL()) * .2 && GET_HIT(i) < (i->getEffMaxPL()) * .3)
      act("@R...Is absolutely covered in wounds.@w", TRUE, i, 0, ch, TO_VICT);
-    else if (IS_NPC(i) && GET_HIT(i) >= gear_pl(i) * .1 && GET_HIT(i) < gear_pl(i) * .2)
+    else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffMaxPL()) * .1 && GET_HIT(i) < (i->getEffMaxPL()) * .2)
      act("@R...Is on $s last leg.@w", TRUE, i, 0, ch, TO_VICT);
-    else if (IS_NPC(i) && GET_HIT(i) < gear_pl(i) * .1)
+    else if (IS_NPC(i) && GET_HIT(i) < (i->getEffMaxPL()) * .1)
      act("@R...Should be DEAD soon.@w", TRUE, i, 0, ch, TO_VICT);
 
 
@@ -3700,7 +3700,7 @@ static void list_char_to_char(struct char_data *list, struct char_data *ch)
                (AFF_FLAGS(i)[2]    == AFF_FLAGS(j)[2]     ) &&
                (AFF_FLAGS(i)[3]    == AFF_FLAGS(j)[3]     ) &&
                (!FIGHTING(i) && !FIGHTING(j)) &&
-               (GET_HIT(i) == gear_pl(i) && GET_HIT(j) == gear_pl(j)) &&
+               (GET_HIT(i) == (i->getEffMaxPL()) && GET_HIT(j) == (j->getEffMaxPL())) &&
                !strcmp(GET_NAME(i), GET_NAME(j))         ) {
             for (tmphide = hideinfo; tmphide; tmphide = tmphide->next)
               if (tmphide->hidden == j)
@@ -5678,10 +5678,11 @@ ACMD(do_score)
  if (view == full || view == health) {
  send_to_char(ch, "  @cO@D-----------------------------@D[   @cHealth   @D]-----------------------------@cO@n\n");
  send_to_char(ch, "                 @D<@rPowerlevel@D>          <@BKi@D>             <@GStamina@D>@n\n");
- send_to_char(ch, "    @wCurrent   @D-[@R%-16s@D]-[@R%-16s@D]-[@R%-16s@D]@n\n", add_commas(GET_HIT(ch)), add_commas(GET_MANA(ch)), add_commas(GET_MOVE(ch)));
- send_to_char(ch, "    @wMaximum   @D-[@r%-16s@D]-[@r%-16s@D]-[@r%-16s@D]@n\n", add_commas(GET_MAX_HIT(ch)), add_commas(GET_MAX_MANA(ch)), add_commas(GET_MAX_MOVE(ch)));
- send_to_char(ch, "    @wBase      @D-[@m%-16s@D]-[@m%-16s@D]-[@m%-16s@D]@n\n", add_commas((ch->getBasePL())), add_commas(
-         (ch->getBaseKI())), add_commas((ch->getBaseST())));
+ send_to_char(ch, "    @wCurrent   @D-[@R%-16s@D]-[@R%-16s@D]-[@R%-16s@D]@n\n", add_commas(ch->getCurPL()), add_commas(
+         (ch->getCurKI())), add_commas((ch->getCurST())));
+ send_to_char(ch, "    @wMaximum   @D-[@r%-16s@D]-[@r%-16s@D]-[@r%-16s@D]@n\n", add_commas(ch->getEffMaxPL()), add_commas(GET_MAX_MANA(ch)), add_commas(GET_MAX_MOVE(ch)));
+ send_to_char(ch, "    @wBase      @D-[@m%-16s@D]-[@m%-16s@D]-[@m%-16s@D]@n\n", add_commas((ch->getEffBasePL())), add_commas(
+         (ch->getEffBaseKI())), add_commas((ch->getEffBaseST())));
   if (!IS_ANDROID(ch) && GET_LIFEFORCE(ch) > 0) {
    send_to_char(ch, "    @wLife Force@D-[@C%16s@D%s@c%16s@D]- @wLife Percent@D-[@Y%3d%s@D]@n\n", add_commas(GET_LIFEFORCE(ch)), "/", add_commas(GET_LIFEMAX(ch)), GET_LIFEPERC(ch), "%");
   } else if (!IS_ANDROID(ch)) {
@@ -5698,7 +5699,8 @@ ACMD(do_score)
  if (view == full || view == other) {
  send_to_char(ch, "  @cO@D-----------------------------@D[   @cOther    @D]-----------------------------@cO@n\n");
  send_to_char(ch, "                @D<@YZenni@D>                 <@rInventory Weight@D>@n\n");
- send_to_char(ch, "      @D[   @CCarried@D| @W%-15s@D] [   @CCarried@D| @W%-15s@D]@n\n", add_commas(GET_GOLD(ch)), add_commas(gear_weight(ch)));
+ send_to_char(ch, "      @D[   @CCarried@D| @W%-15s@D] [   @CCarried@D| @W%-15s@D]@n\n", add_commas(GET_GOLD(ch)), add_commas(
+         (ch->getCurCarriedWeight())));
  send_to_char(ch, "      @D[      @CBank@D| @W%-15s@D] [ @CMax Carry@D| @W%-15s@D]@n\n", add_commas(GET_BANK_GOLD(ch)), add_commas(CAN_CARRY_W(ch)));
  send_to_char(ch, "      @D[ @CMax Carry@D| @W%-15s@D]@n\n", add_commas(GOLD_CARRY(ch)));
   int numb = 0;

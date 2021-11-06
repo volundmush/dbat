@@ -245,7 +245,7 @@ void oozaru_transform(char_data *ch) {
 
     act("@rLooking up at the moon your heart begins to beat loudly. Sudden rage begins to fill your mind while your body begins to grow. Hair sprouts  all over your body and your teeth become sharp as your body takes on the Oozaru form!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@R$n@r looks up at the moon as $s eyes turn red and $s heart starts to beat loudly. Hair starts to grow all over $s body as $e starts screaming. The scream turns into a roar as $s body begins to grow into a giant ape!@n", TRUE, ch, 0, 0, TO_ROOM);
-    ch->race->handleTransform(ch, oozaru);
+    SET_BIT_AR(PLR_FLAGS(ch), oozaru.flag);
 }
 
 void oozaru_add()
@@ -269,7 +269,7 @@ void oozaru_revert(char_data *ch) {
     act("@c$n@C's body begins to shrink and return to normal. Their giant ape features fading back into humanoid features until $e is left normal and asleep.@n", TRUE, ch, 0, 0, TO_ROOM);
     GET_POS(ch) = POS_SLEEPING;
 
-    ch->race->revertTransform(ch, oozaru);
+    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_OOZARU);
 }
 
 void oozaru_drop()
@@ -410,23 +410,23 @@ static void phase_powerup(struct char_data *ch, int type, int phase)
 
 
  if (type == 0) { // Drop their stats
-	 GET_HIT(ch) = ((GET_HIT(ch) - (((ch->getBasePL()) * .1) * mult)) / change);
-	 GET_MANA(ch) = ((GET_MANA(ch) - (((ch->getBaseKI()) * .1) * mult)) / change);
-	 GET_MOVE(ch) = ((GET_MOVE(ch) - (((ch->getBaseST()) * .1) * mult)) / change);
+	 //GET_HIT(ch) = ((GET_HIT(ch) - (((ch->getBasePL()) * .1) * mult)) / change);
+	 //GET_MANA(ch) = ((GET_MANA(ch) - (((ch->getBaseKI()) * .1) * mult)) / change);
+	 //GET_MOVE(ch) = ((GET_MOVE(ch) - (((ch->getBaseST()) * .1) * mult)) / change);
 
          if (GET_HIT(ch) < 0) {
-          GET_HIT(ch) = 1;
+          //GET_HIT(ch) = 1;
          }
-         if (GET_MANA(ch) < 0) {
-          GET_MANA(ch) = 1;
+         if ((ch->getCurKI()) < 0) {
+          //GET_MANA(ch) = 1;
          }
-         if (GET_MOVE(ch) < 0) {
-          GET_MOVE(ch) = 1;
+         if ((ch->getCurST()) < 0) {
+          //GET_MOVE(ch) = 1;
          }
 	 
-	 GET_MAX_HIT(ch) = (ch->getBasePL());
-	 GET_MAX_MANA(ch) = (ch->getBaseKI());
-	 GET_MAX_MOVE(ch) = (ch->getBaseST());
+	 //GET_MAX_HIT(ch) = (ch->getBasePL());
+	 //GET_MAX_MANA(ch) = (ch->getBaseKI());
+	 //GET_MAX_MOVE(ch) = (ch->getBaseST());
          if (GET_BONUS(ch, BONUS_WIMP) > 0 && GET_STR(ch) < 25) {	 
    	  ch->real_abils.str -= bonus;
          }
@@ -437,22 +437,22 @@ static void phase_powerup(struct char_data *ch, int type, int phase)
 	 GET_PHASE(ch) = 0;
  } else { // Raise their stats
  
-	 GET_HIT(ch) = ((GET_HIT(ch) + (((ch->getBasePL()) * .1) * mult)) * change);
-	 GET_MANA(ch) = ((GET_MANA(ch) + (((ch->getBaseKI()) * .1) * mult)) * change);
-	 GET_MOVE(ch) = ((GET_MOVE(ch) + (((ch->getBaseST()) * .1) * mult)) * change);
+	 //GET_HIT(ch) = ((GET_HIT(ch) + (((ch->getBasePL()) * .1) * mult)) * change);
+	 //GET_MANA(ch) = ((GET_MANA(ch) + (((ch->getBaseKI()) * .1) * mult)) * change);
+	 //GET_MOVE(ch) = ((GET_MOVE(ch) + (((ch->getBaseST()) * .1) * mult)) * change);
 
-	 GET_MAX_HIT(ch) = (((ch->getBasePL()) + (((ch->getBasePL()) * .1) * mult)) * change);
-	 GET_MAX_MANA(ch) = (((ch->getBaseKI()) + (((ch->getBaseKI()) * .1) * mult)) * change);
-	 GET_MAX_MOVE(ch) = (((ch->getBaseST()) + (((ch->getBaseST()) * .1) * mult)) * change);
+	 //GET_MAX_HIT(ch) = (((ch->getBasePL()) + (((ch->getBasePL()) * .1) * mult)) * change);
+	 //GET_MAX_MANA(ch) = (((ch->getBaseKI()) + (((ch->getBaseKI()) * .1) * mult)) * change);
+	 //GET_MAX_MOVE(ch) = (((ch->getBaseST()) + (((ch->getBaseST()) * .1) * mult)) * change);
 
          if (GET_HIT(ch) > GET_MAX_HIT(ch)) {
-          GET_HIT(ch) = GET_MAX_HIT(ch);
+          //GET_HIT(ch) = GET_MAX_HIT(ch);
          }
-         if (GET_MANA(ch) > GET_MAX_MANA(ch)) {
-          GET_MANA(ch) = GET_MAX_MANA(ch);
+         if ((ch->getCurKI()) > GET_MAX_MANA(ch)) {
+          //GET_MANA(ch) = GET_MAX_MANA(ch);
          }
-         if (GET_MOVE(ch) > GET_MAX_MOVE(ch)) {
-          GET_MOVE(ch) = GET_MAX_MOVE(ch);
+         if ((ch->getCurST()) > GET_MAX_MOVE(ch)) {
+          //GET_MOVE(ch) = GET_MAX_MOVE(ch);
          }
 
         if (GET_BONUS(ch, BONUS_WIMP) > 0 && GET_STR(ch) + bonus <= 25) {

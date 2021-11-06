@@ -158,20 +158,11 @@ ACMD(do_mheal)
     amount = GET_MAX_HIT(ch) * perc;
 
     if (!strcasecmp(arg, "pl")) {
-		GET_HIT(ch) += GET_MAX_HIT(ch) * num;
-        if (GET_HIT(ch) > GET_MAX_HIT(ch)) {
-         GET_HIT(ch) = GET_MAX_HIT(ch);
-        } 
+        ch->incCurHealthPercent(num);
     } else if (!strcasecmp(arg, "ki")) {
-		GET_MANA(ch) += GET_MAX_MANA(ch) * num;
-        if (GET_MANA(ch) > GET_MAX_MANA(ch)) {
-         GET_MANA(ch) = GET_MAX_MANA(ch);
-        } 
+        ch->incCurKIPercent(num);
     } else if (!strcasecmp(arg, "st")) {
-		GET_MOVE(ch) += GET_MAX_MOVE(ch) * num;
-        if (GET_MOVE(ch) > GET_MAX_MOVE(ch)) {
-         GET_MOVE(ch) = GET_MAX_MOVE(ch);
-        } 
+        ch->incCurSTPercent(num);
     } else {
         mob_log(ch, "mheal called with wrong argument [pl | ki | st]");
         return;

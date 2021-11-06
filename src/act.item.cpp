@@ -448,7 +448,7 @@ ACMD(do_garden)
  int64_t cost = (GET_MAX_MOVE(ch) * 0.005) + rand_number(50, 150);
  int skill = GET_SKILL(ch, SKILL_GARDENING);
  
- if (GET_MOVE(ch) < cost) {
+ if ((ch->getCurST()) < cost) {
   send_to_char(ch, "@WYou need at least @G%s@W stamina to garden.\r\n", add_commas(cost));
   return;
  } else {
@@ -475,7 +475,8 @@ ACMD(do_garden)
    } else if (skill < axion_dice(0)) {
     act("@GAs you go to water @g$p@G you end up sloppily wasting about half of it on the ground.@n", TRUE, ch, obj, 0, TO_CHAR);
     act("@g$n@G takes a bottle of grow water and sloshes some of it on @g$p@G.@n", TRUE, ch, obj, 0, TO_ROOM);
-    GET_MOVE(ch) -= cost;
+
+    ch->decCurST(cost);
     GET_OBJ_VAL(obj, VAL_WATERLEVEL) += 40;
     if (GET_OBJ_VAL(obj, VAL_WATERLEVEL) > 500) {
      GET_OBJ_VAL(obj, VAL_WATERLEVEL) = 500;
@@ -488,7 +489,7 @@ ACMD(do_garden)
    } else {
     act("@GYou calmly and expertly pour the grow water on @g$p@G.@n", TRUE, ch, obj, 0, TO_CHAR);
     act("@g$n@G calmly and expertly pours some grow water on @g$p@G.@n", TRUE, ch, obj, 0, TO_ROOM);
-    GET_MOVE(ch) -= cost;
+       ch->decCurST(cost);
     GET_OBJ_VAL(obj, VAL_WATERLEVEL) += 225;
     if (GET_OBJ_VAL(obj, VAL_WATERLEVEL) >= 500) {
      GET_OBJ_VAL(obj, VAL_WATERLEVEL) = 500;
@@ -525,7 +526,7 @@ ACMD(do_garden)
    } else if (skill < axion_dice(-5)) {
     act("@GAs you go to harvest @g$p@G you end up cutting it in half instead!@n", TRUE, ch, obj, 0, TO_CHAR);
     act("@g$n@G attempts to harvest @g$p@G with $s clippers, but accidently cuts the plant in half!@n", TRUE, ch, obj, 0, TO_ROOM);
-    GET_MOVE(ch) -= cost;
+       ch->decCurST(cost);
     extract_obj(obj);
     WAIT_STATE(ch, PULSE_3SEC);
     improve_skill(ch, SKILL_GARDENING, 0);
@@ -533,7 +534,7 @@ ACMD(do_garden)
    } else {
     act("@GYou calmly and expertly harvest @g$p@G.@n", TRUE, ch, obj, 0, TO_CHAR);
     act("@g$n@G calmly and expertly harvests @g$p@G.@n", TRUE, ch, obj, 0, TO_ROOM);
-    GET_MOVE(ch) -= cost;
+       ch->decCurST(cost);
     GET_OBJ_VAL(clippers, VAL_ALL_HEALTH) -= 1;
     if (GET_OBJ_VAL(clippers, VAL_ALL_HEALTH) <= 0) {
      send_to_char(ch, "The clippers are now too dull to use.\r\n");
@@ -561,7 +562,7 @@ ACMD(do_garden)
    } else {
     act("@GYou calmly dig up @g$p@G.@n", TRUE, ch, obj, 0, TO_CHAR);
     act("@g$n@G calmly digs up @g$p@G.@n", TRUE, ch, obj, 0, TO_ROOM);
-    GET_MOVE(ch) -= cost;
+       ch->decCurST(cost);
     obj_from_room(obj);
     obj_to_char(obj, ch);
     GET_OBJ_VAL(obj, VAL_SOILQ) = 0;
@@ -605,7 +606,7 @@ ACMD(do_garden)
    } else if (skill < axion_dice(-5)) {
     act("@GYou end up digging a hole too shallow to hold @g$p@G. Better try again.@n", TRUE, ch, obj, 0, TO_CHAR);
     act("@g$n@G digs a very shallow hole in one of the planters and then realizes @g$p@G won't fit in it.@n", TRUE, ch, obj, 0, TO_ROOM);
-    GET_MOVE(ch) -= cost;
+       ch->decCurST(cost);
     WAIT_STATE(ch, PULSE_3SEC);
     improve_skill(ch, SKILL_GARDENING, 0);
     return;
@@ -614,7 +615,7 @@ ACMD(do_garden)
     act("@g$n@G digs a proper sized hole in a planter and plants @g$p@G in it.@n", TRUE, ch, obj, 0, TO_ROOM);
     obj_from_char(obj);
     obj_to_room(obj, IN_ROOM(ch));
-    GET_MOVE(ch) -= cost;
+       ch->decCurST(cost);
     GET_OBJ_VAL(obj, VAL_MAXMATURE) = 6;
     GET_OBJ_VAL(obj, VAL_MATGOAL) = 200;
     GET_OBJ_VAL(obj, VAL_SOILQ) = GET_OBJ_VAL(soil, 0);
@@ -664,7 +665,7 @@ ACMD(do_garden)
     act("@g$n@G grabs a hold of @g$p@G and carefully picks it out of the soil.@n", TRUE, ch, obj, 0, TO_ROOM);
     obj_from_room(obj);
     obj_to_char(obj, ch);
-    GET_MOVE(ch) -= cost;
+       ch->decCurST(cost);
     WAIT_STATE(ch, PULSE_3SEC);
     improve_skill(ch, SKILL_GARDENING, 0);
     return;
@@ -2439,10 +2440,10 @@ static int can_take_obj(struct char_data *ch, struct obj_data *obj)
   } else if (IS_CARRYING_N(ch) >= CAN_CARRY_N(ch)) {
     act("$p: your arms are full!", FALSE, ch, obj, 0, TO_CHAR);
     return (0);
-  } else if ((gear_weight(ch) + GET_OBJ_WEIGHT(obj)) > CAN_CARRY_W(ch)) {
+  } else if (((ch->getCurCarriedWeight()) + GET_OBJ_WEIGHT(obj)) > CAN_CARRY_W(ch)) {
     act("$p: you can't carry that much weight.", FALSE, ch, obj, 0, TO_CHAR);
     return (0);
-  } else if ((GET_OBJ_WEIGHT(obj) + ROOM_GRAVITY(IN_ROOM(ch))) + gear_weight(ch) > CAN_CARRY_W(ch)) {
+  } else if ((GET_OBJ_WEIGHT(obj) + ROOM_GRAVITY(IN_ROOM(ch))) + (ch->getCurCarriedWeight()) > CAN_CARRY_W(ch)) {
     act("$p: you can't carry that much weight because of the gravity.", FALSE, ch, obj, 0, TO_CHAR);
     return (0);
   }
@@ -2508,9 +2509,9 @@ static void perform_get_from_container(struct char_data *ch, struct obj_data *ob
       }
       if (OBJ_FLAGGED(obj, ITEM_HOT)) {
        if (GET_BONUS(ch, BONUS_FIREPROOF) <= 0 && !IS_DEMON(ch)) {
-        GET_HIT(ch) -= GET_HIT(ch) * 0.25;
+           ch->decCurHealthPercent(.25);
         if (GET_BONUS(ch, BONUS_FIREPRONE) > 0)
-         GET_HIT(ch) = 1;
+            ch->decCurHealthPercent(1, 1);
 
         SET_BIT_AR(AFF_FLAGS(ch), AFF_BURNED);
         act("@RYou are burned by it!@n", TRUE, ch, 0, 0, TO_CHAR);
@@ -2603,9 +2604,9 @@ int perform_get_from_room(struct char_data *ch, struct obj_data *obj)
 
       if (OBJ_FLAGGED(obj, ITEM_HOT)) {
        if (GET_BONUS(ch, BONUS_FIREPROOF) <= 0 && !IS_DEMON(ch)) {
-        GET_HIT(ch) -= GET_HIT(ch) * 0.25;
+           ch->decCurHealthPercent(.25, 1);
         if (GET_BONUS(ch, BONUS_FIREPRONE) > 0)
-         GET_HIT(ch) = 1;
+            ch->decCurHealthPercent(1, 1);
 
         SET_BIT_AR(AFF_FLAGS(ch), AFF_BURNED);
         act("@RYou are burned by it!@n", TRUE, ch, 0, 0, TO_CHAR);
@@ -3102,7 +3103,7 @@ static void perform_give(struct char_data *ch, struct char_data *vict,
    do_say(vict, "I don't want that piece of junk.", 0, 0);
    return;
   }
-  if (GET_OBJ_WEIGHT(obj) + gear_weight(vict) > CAN_CARRY_W(vict)) {
+  if (GET_OBJ_WEIGHT(obj) + (vict->getCurCarriedWeight()) > CAN_CARRY_W(vict)) {
     act("$E can't carry that much weight.", FALSE, ch, 0, vict, TO_CHAR);
     if (IS_NPC(ch)) {
      act("$n@n drops $p because you can't carry anymore.", TRUE, ch, obj, vict, TO_VICT);
@@ -3112,7 +3113,7 @@ static void perform_give(struct char_data *ch, struct char_data *vict,
     }
     return;
   }
-  if ((GET_OBJ_WEIGHT(obj) + ROOM_GRAVITY(IN_ROOM(vict))) + gear_weight(vict) > CAN_CARRY_W(vict)) {
+  if ((GET_OBJ_WEIGHT(obj) + ROOM_GRAVITY(IN_ROOM(vict))) + (vict->getCurCarriedWeight()) > CAN_CARRY_W(vict)) {
     act("$E can't carry that much weight because of the gravity.", FALSE, ch, 0, vict, TO_CHAR);
     if (IS_NPC(ch)) {
      act("$n@n drops $p because you can't carry anymore.", TRUE, ch, obj, vict, TO_VICT);
@@ -3138,9 +3139,9 @@ static void perform_give(struct char_data *ch, struct char_data *vict,
 
       if (OBJ_FLAGGED(obj, ITEM_HOT)) {
        if (GET_BONUS(vict, BONUS_FIREPROOF) <= 0 && !IS_DEMON(vict)) {
-        GET_HIT(vict) -= GET_HIT(vict) * 0.25;
+           ch->decCurHealthPercent(.25, 1);
         if (GET_BONUS(vict, BONUS_FIREPRONE) > 0)
-         GET_HIT(vict) = 1;
+            ch->decCurHealthPercent(1, 1);
 
         SET_BIT_AR(AFF_FLAGS(vict), AFF_BURNED);
         act("@RYou are burned by it!@n", TRUE, vict, 0, 0, TO_CHAR);
@@ -3412,12 +3413,10 @@ ACMD(do_drink)
         act(buf, TRUE, ch, 0, 0, TO_ROOM);
         send_to_char(ch, "You take a refreshing drink from the surrounding water.\r\n");
         gain_condition(ch, THIRST, 1);
-        if (GET_SKILL(ch, SKILL_WELLSPRING) && GET_MANA(ch) < GET_MAX_MANA(ch) && wasthirsty <= 30 && subcmd != SCMD_SIP) {
-         GET_MANA(ch) += ((GET_MAX_MANA(ch) * 0.005) + (GET_WIS(ch) * rand_number(80, 100))) * GET_SKILL(ch, SKILL_WELLSPRING);
+        if (GET_SKILL(ch, SKILL_WELLSPRING) && (ch->getCurKI()) < GET_MAX_MANA(ch) && wasthirsty <= 30 && subcmd != SCMD_SIP) {
 
-         if (GET_MANA(ch) > GET_MAX_MANA(ch)) {
-          GET_MANA(ch) = GET_MAX_MANA(ch);
-         }
+        ch->incCurKI(((GET_MAX_MANA(ch) * 0.005) + (GET_WIS(ch) * rand_number(80, 100))) * GET_SKILL(ch, SKILL_WELLSPRING));
+
          send_to_char(ch, "You feel your ki return to full strength.\r\n");
         }
         if (GET_COND(ch, THIRST) >= 48)
@@ -3432,14 +3431,11 @@ ACMD(do_drink)
         act(buf, TRUE, ch, 0, 0, TO_ROOM);
         send_to_char(ch, "You take a refreshing drink from the surrounding water.\r\n");
         gain_condition(ch, THIRST, 1);
-        if (GET_SKILL(ch, SKILL_WELLSPRING) && GET_MANA(ch) < GET_MAX_MANA(ch) && wasthirsty <= 30 && subcmd != SCMD_SIP) {
-         GET_MANA(ch) += ((GET_MAX_MANA(ch) * 0.005) + (GET_WIS(ch) * rand_number(80, 100))) * GET_SKILL(ch, SKILL_WELLSPRING);
-
-         if (GET_MANA(ch) > GET_MAX_MANA(ch)) {
-          GET_MANA(ch) = GET_MAX_MANA(ch);
-          send_to_char(ch, "You feel your ki return to full strength.\r\n");
+        if (GET_SKILL(ch, SKILL_WELLSPRING) && !ch->isFullKI() && wasthirsty <= 30 && subcmd != SCMD_SIP) {
+         if(ch->incCurKI(((GET_MAX_MANA(ch) * 0.005) + (GET_WIS(ch) * rand_number(80, 100))) * GET_SKILL(ch, SKILL_WELLSPRING)) == ch->getMaxKI()) {
+             send_to_char(ch, "You feel your ki return to full strength.\r\n");
          } else {
-          send_to_char(ch, "You feel your ki has rejuvenated.\r\n");
+             send_to_char(ch, "You feel your ki has rejuvenated.\r\n");
          }
         }
         if (GET_COND(ch, THIRST) >= 48)
@@ -3462,7 +3458,7 @@ ACMD(do_drink)
      act("@C$n@w uncorks the $p and tips it to $s lips. Drinking it down and then smiling.@n", TRUE, ch, temp, 0, TO_ROOM);
      obj_from_char(temp);
      extract_obj(temp);
-     GET_MANA(ch) = GET_MAX_MANA(ch);
+     ch->decCurKIPercent(1, 1);
      GET_COND(ch, THIRST) += 8;
      return;
     } else if (GET_OBJ_VNUM(temp) == 86 && on_ground == 1) {
@@ -3548,23 +3544,17 @@ ACMD(do_drink)
   gain_condition(ch, HUNGER, drink_aff[GET_OBJ_VAL(temp, VAL_DRINKCON_LIQUID)][HUNGER] * amount);
   gain_condition(ch, THIRST, drink_aff[GET_OBJ_VAL(temp, VAL_DRINKCON_LIQUID)][THIRST] * amount);
   if (GET_FOODR(ch) == 0 && subcmd != SCMD_SIP) {
-   GET_MOVE(ch) += (GET_MAX_MOVE(ch) / 100) * amount;
+      ch->incCurST((ch->getMaxST() / 100) * amount);
    GET_FOODR(ch) = 2;
-   if (GET_MOVE(ch) > GET_MAX_MOVE(ch)) {
-     GET_MOVE(ch) = GET_MAX_MOVE(ch);
-   }
    send_to_char(ch, "You feel rejuvinated by it.\r\n");
-  } if (GET_SKILL(ch, SKILL_WELLSPRING) && GET_MANA(ch) < GET_MAX_MANA(ch) && wasthirsty <= 30 && subcmd != SCMD_SIP) {
+  } if (GET_SKILL(ch, SKILL_WELLSPRING) && (ch->getCurKI()) < GET_MAX_MANA(ch) && wasthirsty <= 30 && subcmd != SCMD_SIP) {
    if (GET_OBJ_VAL(temp, VAL_DRINKCON_LIQUID) == 0 || GET_OBJ_VAL(temp, VAL_DRINKCON_LIQUID) == 14 || GET_OBJ_VAL(temp, VAL_DRINKCON_LIQUID) == 15) {
-     GET_MANA(ch) += ((GET_MAX_MANA(ch) * 0.005) + (GET_WIS(ch) * rand_number(80, 100))) * GET_SKILL(ch, SKILL_WELLSPRING);
 
-     if (GET_MANA(ch) > GET_MAX_MANA(ch)) {
-      GET_MANA(ch) = GET_MAX_MANA(ch);
-      send_to_char(ch, "You feel your ki return to full strength.\r\n");
-     } else {
-      send_to_char(ch, "You feel your ki has rejuvenated.\r\n");
-     }
-
+    if(ch->incCurKI(((GET_MAX_MANA(ch) * 0.005) + (GET_WIS(ch) * rand_number(80, 100))) * GET_SKILL(ch, SKILL_WELLSPRING)) == ch->getMaxKI()) {
+        send_to_char(ch, "You feel your ki return to full strength.\r\n");
+    } else {
+        send_to_char(ch, "You feel your ki has rejuvenated.\r\n");
+    }
     }
    }
 
@@ -3667,13 +3657,10 @@ ACMD(do_eat)
 
   gain_condition(ch, HUNGER, amount);
   if (GET_FOODR(ch) == 0 && subcmd != SCMD_TASTE) {
-   GET_MOVE(ch) += (GET_MAX_MOVE(ch) / 100) * amount;
+      ch->incCurST((ch->getMaxST() / 100) * amount);
    GET_FOODR(ch) = 2;
    if (OBJ_FLAGGED(food, ITEM_YUM)) {
-    GET_MOVE(ch) += GET_MAX_MOVE(ch) * 0.25;
-   }
-   if (GET_MOVE(ch) > GET_MAX_MOVE(ch)) {
-     GET_MOVE(ch) = GET_MAX_MOVE(ch);
+    ch->incCurSTPercent(.25);
    }
    send_to_char(ch, "You feel rejuvinated by it.\r\n");
   }
@@ -3705,23 +3692,15 @@ ACMD(do_eat)
      send_to_char(ch, "You have recently puked. You must wait a while for your body to adjust before excellent food gives you any bonuses.\r\n");
     }
    }
-   if (!GET_OBJ_VAL(food, VAL_FOOD_POISON) && GET_HIT(ch) < gear_pl(ch) && subcmd != SCMD_TASTE) {
-    int64_t suppress = (gear_pl(ch) * 0.01) * GET_SUPPRESS(ch);
+   if (!GET_OBJ_VAL(food, VAL_FOOD_POISON) && GET_HIT(ch) < (ch->getEffMaxPL()) && subcmd != SCMD_TASTE) {
+    int64_t suppress = ((ch->getEffMaxPL()) * 0.01) * GET_SUPPRESS(ch);
     if (GET_WEIGHT(food) < 6) {
-     GET_HIT(ch) += gear_pl(ch) * 0.05;
+        ch->incCurHealthPercent(.05);
     } else {
-     GET_HIT(ch) += gear_pl(ch) * 0.1;
+        ch->incCurHealthPercent(.1);
     }
     if (OBJ_FLAGGED(food, ITEM_YUM)) {
-     GET_HIT(ch) += gear_pl(ch) * 0.20;
-    }
-    if (GET_HIT(ch) > gear_pl(ch)) {
-     GET_HIT(ch) = gear_pl(ch);
-    }
-    if (suppress > 0) {
-     if (GET_HIT(ch) > suppress) {
-      GET_HIT(ch) = suppress;
-     }
+        ch->incCurHealthPercent(.2);
     }
     
     send_to_char(ch, "@MYou feel some of your strength return!@n\r\n");
@@ -3748,11 +3727,8 @@ ACMD(do_eat)
   {
    send_to_char(ch, "You finish the last bite.\r\n");
    if (GET_OBJ_VNUM(food) == 53) {
-	   GET_MOVE(ch) += GET_MAX_MOVE(ch) / 30;
+       ch->incCurST(ch->getMaxST() / 30);
 	   GET_LIFEFORCE(ch) += GET_LIFEMAX(ch) * 0.01;
-	   if (GET_MOVE(ch) > GET_MAX_MOVE(ch)) {
-		   GET_MOVE(ch) = GET_MAX_MOVE(ch);
-	   }
 	   if (GET_LIFEFORCE(ch) > GET_LIFEMAX(ch)) {
 		   GET_LIFEFORCE(ch) = GET_LIFEMAX(ch);
 	   }
@@ -3765,11 +3741,8 @@ ACMD(do_eat)
 	   }
    }
    if (GET_OBJ_VNUM(food) == 93) {
-	   GET_MOVE(ch) += GET_MAX_MOVE(ch) / 20;
+       ch->incCurST(ch->getMaxST() / 20);
 	   GET_LIFEFORCE(ch) += GET_LIFEMAX(ch) * 0.01;
-	   if (GET_MOVE(ch) > GET_MAX_MOVE(ch)) {
-		   GET_MOVE(ch) = GET_MAX_MOVE(ch);
-	   }
 	   if (GET_LIFEFORCE(ch) > GET_LIFEMAX(ch)) {
 		   GET_LIFEFORCE(ch) = GET_LIFEMAX(ch);
 	   }
@@ -3782,11 +3755,8 @@ ACMD(do_eat)
 	   }
    }
    if (GET_OBJ_VNUM(food) == 94) {
-    GET_MOVE(ch) += GET_MAX_MOVE(ch) / 10;
+       ch->incCurST(ch->getMaxST() / 10);
    GET_LIFEFORCE(ch) += GET_LIFEMAX(ch) * 0.01;
-    if (GET_MOVE(ch) > GET_MAX_MOVE(ch)) {
-     GET_MOVE(ch) = GET_MAX_MOVE(ch);
-    }
     if (GET_LIFEFORCE(ch) > GET_LIFEMAX(ch)) {
      GET_LIFEFORCE(ch) = GET_LIFEMAX(ch);
     }
@@ -3799,11 +3769,8 @@ ACMD(do_eat)
     }
    }
    if (GET_OBJ_VNUM(food) == 95) {
-    GET_MOVE(ch) += GET_MAX_MOVE(ch) / 10;
+       ch->incCurST(ch->getMaxST() / 10);
     GET_LIFEFORCE(ch) += GET_LIFEMAX(ch) * 0.02;
-    if (GET_MOVE(ch) > GET_MAX_MOVE(ch)) {
-     GET_MOVE(ch) = GET_MAX_MOVE(ch);
-    }
     if (GET_LIFEFORCE(ch) > GET_LIFEMAX(ch)) {
      GET_LIFEFORCE(ch) = GET_LIFEMAX(ch);
     }
@@ -3820,11 +3787,8 @@ ACMD(do_eat)
   else {
    GET_OBJ_VAL(food, VAL_FOOD_FOODVAL) -= foob;
    if (GET_OBJ_VNUM(food) == 53) {
-	   GET_MOVE(ch) += GET_MAX_MOVE(ch) / 30;
+       ch->incCurST(ch->getMaxST() / 30);
 	   GET_LIFEFORCE(ch) += GET_LIFEMAX(ch) * 0.01;
-	   if (GET_MOVE(ch) > GET_MAX_MOVE(ch)) {
-		   GET_MOVE(ch) = GET_MAX_MOVE(ch);
-	   }
 	   if (GET_LIFEFORCE(ch) > GET_LIFEMAX(ch)) {
 		   GET_LIFEFORCE(ch) = GET_LIFEMAX(ch);
 	   }
@@ -3838,11 +3802,8 @@ ACMD(do_eat)
 	   }
    }
    if (GET_OBJ_VNUM(food) == 93) {
-	   GET_MOVE(ch) += GET_MAX_MOVE(ch) / 20;
+       ch->incCurST(ch->getMaxST() / 20);
 	   GET_LIFEFORCE(ch) += GET_LIFEMAX(ch) * 0.01;
-	   if (GET_MOVE(ch) > GET_MAX_MOVE(ch)) {
-		   GET_MOVE(ch) = GET_MAX_MOVE(ch);
-	   }
 	   if (GET_LIFEFORCE(ch) > GET_LIFEMAX(ch)) {
 		   GET_LIFEFORCE(ch) = GET_LIFEMAX(ch);
 	   }
@@ -3856,11 +3817,8 @@ ACMD(do_eat)
 	   }
    }
    if (GET_OBJ_VNUM(food) == 94) {
-    GET_MOVE(ch) += GET_MAX_MOVE(ch) / 10;
+       ch->incCurST(ch->getMaxST() / 10);
     GET_LIFEFORCE(ch) += GET_LIFEMAX(ch) * 0.02;
-    if (GET_MOVE(ch) > GET_MAX_MOVE(ch)) {
-     GET_MOVE(ch) = GET_MAX_MOVE(ch);
-    }
     if (GET_LIFEFORCE(ch) > GET_LIFEMAX(ch)) {
      GET_LIFEFORCE(ch) = GET_LIFEMAX(ch);
     }
@@ -3874,11 +3832,8 @@ ACMD(do_eat)
     }
    }
    if (GET_OBJ_VNUM(food) == 95) {
-    GET_MOVE(ch) += GET_MAX_MOVE(ch) / 10;
+       ch->incCurST(ch->getMaxST() / 10);
     GET_LIFEFORCE(ch) += GET_LIFEMAX(ch) * 0.03;
-    if (GET_MOVE(ch) > GET_MAX_MOVE(ch)) {
-     GET_MOVE(ch) = GET_MAX_MOVE(ch);
-    }
     if (GET_LIFEFORCE(ch) > GET_LIFEMAX(ch)) {
      GET_LIFEFORCE(ch) = GET_LIFEMAX(ch);
     }

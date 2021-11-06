@@ -1837,9 +1837,9 @@ static void renum_zone_table(void)
 static void mob_autobalance(struct char_data *ch)
 {
     /* Try to add some baseline defaults based on level choice. */
-    GET_HIT(ch) = 0;
-    GET_MANA(ch) = 0;
-    GET_MOVE(ch) = 0;
+    //GET_HIT(ch) = 0;
+    //GET_MANA(ch) = 0;
+    //GET_MOVE(ch) = 0;
     GET_EXP(ch) = 0;
     GET_ARMOR(ch) = 0;
     GET_NDD(ch) = 0;
@@ -1877,10 +1877,12 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
   GET_ARMOR(ch) = 10 * (10 - t[2]);
  
   /* max hit = 0 is a flag that H, M, V is xdy+z */
-  GET_MAX_HIT(ch) = 0;
-  GET_HIT(ch) = t[3];
-  GET_MANA(ch) = t[4];
-  GET_MOVE(ch) = t[5];
+  ch->basepl = t[3];
+  ch->baseki = t[4];
+  ch->basest = t[5];
+  ch->health = 1.0;
+  ch->energy = 1.0;
+  ch->stamina = 1.0;
 
   ch->mob_specials.damnodice = t[6];
   ch->mob_specials.damsizedice = t[7];
@@ -2030,32 +2032,32 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
  
   CASE("Hit") {
     RANGE(0, 99999);
-    GET_HIT(ch) = num_arg;
+    //GET_HIT(ch) = num_arg;
   }
  
   CASE("MaxHit") {
     RANGE(0, 99999);
-    GET_MAX_HIT(ch) = num_arg;
+    ch->max_hit = num_arg;
   }
  
   CASE("Mana") {
     RANGE(0, 99999);
-    GET_MANA(ch) = num_arg;
+    //GET_MANA(ch) = num_arg;
   }
  
   CASE("MaxMana") {
     RANGE(0, 99999);
-    GET_MAX_MANA(ch) = num_arg;
+    ch->max_mana = num_arg;
   }
  
   CASE("Moves") {
     RANGE(0, 99999);
-    GET_MOVE(ch) = num_arg;
+    //GET_MOVE(ch) = num_arg;
   }
  
   CASE("MaxMoves") {
     RANGE(0, 99999);
-    GET_MAX_MOVE(ch) = num_arg;
+    ch->max_move = num_arg;
   }
  
   CASE("Affect") {
@@ -3036,7 +3038,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
   character_list = mob;
   mob->next_affect = NULL;
   mob->next_affectv = NULL;
-  
+
   if (IS_HOSHIJIN(mob) && GET_SEX(mob) == SEX_MALE) {
    mob->hairl = 0;
    mob->hairc = 0;
@@ -3286,59 +3288,48 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
   }
 
   GET_LPLAY(mob) = time(0);
-
-  if (GET_MAX_HIT(mob) <= 1) {
-   GET_MAX_HIT(mob) = GET_LEVEL(mob) * mult;
+ bool autoset = false;
+  if (mob->basepl <= 1) {
+      autoset = true;
+      mob->basepl = GET_LEVEL(mob) * mult;
    if (GET_LEVEL(mob) > 140) {
-    GET_MAX_HIT(mob) *= 8;
+       mob->basepl *= 8;
    } else if (GET_LEVEL(mob) > 130) {
-    GET_MAX_HIT(mob) *= 6;
+       mob->basepl *= 6;
    } else if (GET_LEVEL(mob) > 120) {
-    GET_MAX_HIT(mob) *= 3; 
+       mob->basepl *= 3;
    } else if (GET_LEVEL(mob) > 110) {
-    GET_MAX_HIT(mob) *= 2;
+       mob->basepl *= 2;
    }
-   GET_HIT(mob) = GET_MAX_HIT(mob);
-   mob->basepl = GET_MAX_HIT(mob);
   }
-  if (GET_MAX_MANA(mob) <= 1) {
-   GET_MAX_MANA(mob) = GET_LEVEL(mob) * mult;
+  if (autoset) {
+      mob->baseki = GET_LEVEL(mob) * mult;
    if (GET_LEVEL(mob) > 140) {
-    GET_MAX_MANA(mob) *= 8;
+       mob->baseki *= 8;
    } else if (GET_LEVEL(mob) > 130) {
-    GET_MAX_MANA(mob) *= 6;
+       mob->baseki *= 6;
    } else if (GET_LEVEL(mob) > 120) {
-    GET_MAX_MANA(mob) *= 3;
+       mob->baseki *= 3;
    } else if (GET_LEVEL(mob) > 110) {
-    GET_MAX_MANA(mob) *= 2;
+       mob->baseki *= 2;
    }
-   GET_MANA(mob) = GET_MAX_MANA(mob);
-   mob->baseki = GET_MAX_MANA(mob);
   }
-  if (GET_MAX_MOVE(mob) <= 1) {
-   GET_MAX_MOVE(mob) = GET_LEVEL(mob) * mult;
+  if (autoset) {
+      mob->basest = GET_LEVEL(mob) * mult;
    if (GET_LEVEL(mob) > 140) {
-    GET_MAX_MOVE(mob) *= 8;
+       mob->basest *= 8;
    } else if (GET_LEVEL(mob) > 130) {
-    GET_MAX_MOVE(mob) *= 6;
+       mob->basest *= 6;
    } else if (GET_LEVEL(mob) > 120) {
-    GET_MAX_MOVE(mob) *= 3;
+       mob->basest *= 3;
    } else if (GET_LEVEL(mob) > 110) {
-    GET_MAX_MOVE(mob) *= 2;
+       mob->basest *= 2;
    }
-   GET_MOVE(mob) = GET_MAX_MOVE(mob);
-   mob->basest = GET_MAX_MOVE(mob);
   }
   if (GET_MOB_VNUM(mob) == 2245) {
-   GET_MAX_HIT(mob) = rand_number(1, 4);
-   GET_HIT(mob) = GET_MAX_HIT(mob);
-   mob->basepl = GET_MAX_HIT(mob);
-   GET_MAX_MANA(mob) = rand_number(1, 4);
-   GET_MANA(mob) = GET_MAX_MANA(mob);
-   mob->baseki = GET_MAX_MANA(mob);
-   GET_MAX_MOVE(mob) = rand_number(1, 4);
-   GET_MOVE(mob) = GET_MAX_MOVE(mob);
-   mob->basest = GET_MAX_MOVE(mob);
+   mob->basepl = rand_number(1, 4);
+   mob->baseki = rand_number(1, 4);
+   mob->basest = rand_number(1, 4);
   }
 
   int base = 0;
@@ -3593,10 +3584,6 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     GET_EXP(mob) = 20000000;
    }
   }
-
-  GET_HIT(mob) = GET_MAX_HIT(mob);
-  GET_MANA(mob) = GET_MAX_HIT(mob);
-  GET_MOVE(mob) = GET_MAX_HIT(mob);
 
   mob->time.birth = time(0) - birth_age(mob);
   mob->time.created = mob->time.logon = time(0); /* why not */
@@ -4666,15 +4653,6 @@ void reset_char(struct char_data *ch)
   ch->carry_items = 0;
   ch->time.logon = time(0);
 
-  if (GET_HIT(ch) <= 0)
-    GET_HIT(ch) = 1;
-  if (GET_MOVE(ch) <= 0)
-    GET_MOVE(ch) = 1;
-  if (GET_MANA(ch) <= 0)
-    GET_MANA(ch) = 1;
-  if (GET_KI(ch) < 0)
-    GET_KI(ch) = 0;
-
   GET_LAST_TELL(ch) = NOBODY;
 }
 
@@ -4741,14 +4719,9 @@ void init_char(struct char_data *ch)
     GET_CLASS_NONEPIC(ch, GET_CLASS(ch)) = GET_LEVEL(ch);
 
     /* The implementor never goes through do_start(). */
-    GET_MAX_HIT(ch) = 1000;
-    GET_MAX_MANA(ch) = 1000;
-    GET_MAX_MOVE(ch) = 1000;
-    GET_MAX_KI(ch) = 1000;
-    GET_HIT(ch) = GET_MAX_HIT(ch);
-    GET_MANA(ch) = GET_MAX_MANA(ch);
-    GET_MOVE(ch) = GET_MAX_MOVE(ch);
-    GET_KI(ch) = GET_MAX_KI(ch);
+    ch->baseki = 1000;
+    ch->basepl = 1000;
+    ch->basest = 1000;
   }
 
   set_title(ch, NULL);

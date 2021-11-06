@@ -45,11 +45,6 @@ void affect_update(void)
             if (GET_SPEEDBOOST(i) > 0 && af->type == SPELL_HAYASA) {
              GET_SPEEDBOOST(i) = 0;
             }
-            if (af->type == SKILL_METAMORPH) {
-             if (GET_HIT(i) > gear_pl(i)) {
-              GET_HIT(i) = gear_pl(i);
-             }
-            }
           }
 	affect_remove(i, af);
       }
@@ -1029,54 +1024,7 @@ void mag_points(int level, struct char_data *ch, struct char_data *victim,
     if (GET_COND(victim, HUNGER) > -1) {
      GET_COND(victim, HUNGER) = 48;
     }
-    if (GET_KAIOKEN(victim) <= 0) {
-     GET_HIT(victim) = GET_MAX_HIT(victim);
-    }
-    GET_MANA(victim) = GET_MAX_MANA(victim);
-    GET_MOVE(victim) = GET_MAX_MOVE(victim);
-
-    victim->cureStatusKnockedOut(true);
-
-    if (GET_SUPPRESS(victim) > 0 && GET_HIT(victim) > ((GET_MAX_HIT(victim) / 100) * GET_SUPPRESS(victim))) {
-     GET_HIT(victim) = ((GET_MAX_HIT(victim) / 100) * GET_SUPPRESS(victim));
-     send_to_char(victim, "@mYou are healed to your suppression limit.@n\r\n");
-    }
-    send_to_char(victim, "@GYour wounds heal and your strength returns.@n\r\n");
-    act("@C$n@W suddenly looks a lot better!@b", FALSE, victim, 0, 0, TO_NOTVICT);
-    affect_from_char(victim, SPELL_POISON);
-    if (AFF_FLAGGED(victim, AFF_BURNED)) {
-        send_to_char(victim, "Your burns are healed now.\r\n");
-        act("$n@w's burns are now healed.@n", TRUE, victim, 0, 0, TO_ROOM);
-        REMOVE_BIT_AR(AFF_FLAGS(victim), AFF_BURNED);
-    }
-    if (GET_LIMBCOND(victim, 1) <= 0) {
-     send_to_char(victim, "Your right arm grows back!\r\n");
-     GET_LIMBCOND(victim, 1) = 100;
-    } else if (GET_LIMBCOND(victim, 1) < 50) {
-     send_to_char(victim, "Your right arm is no longer broken!\r\n");
-     GET_LIMBCOND(victim, 1) = 100;
-    }
-    if (GET_LIMBCOND(victim, 2) <= 0) {
-     send_to_char(victim, "Your left arm grows back!\r\n");
-     GET_LIMBCOND(victim, 2) = 100;
-    } else if (GET_LIMBCOND(victim, 2) < 50) {
-     send_to_char(victim, "Your left arm is no longer broken!\r\n");
-     GET_LIMBCOND(victim, 2) = 100;
-    }
-    if (GET_LIMBCOND(victim, 3) <= 0) {
-     send_to_char(victim, "Your right leg grows back!\r\n");
-     GET_LIMBCOND(victim, 3) = 100;
-    } else if (GET_LIMBCOND(victim, 3) < 50) {
-     send_to_char(victim, "Your right leg is no longer broken!\r\n");
-     GET_LIMBCOND(victim, 3) = 100;
-    }
-    if (GET_LIMBCOND(victim, 4) <= 0) {
-     send_to_char(victim, "Your left leg grows back!\r\n");
-     GET_LIMBCOND(victim, 4) = 100;
-    } else if (GET_LIMBCOND(victim, 4) < 50) {
-     send_to_char(victim, "Your left leg is no longer broken!\r\n");
-     GET_LIMBCOND(victim, 4) = 100;
-    }
+    victim->restore(true);
     break;
 
   case ART_WHOLENESS_OF_BODY:

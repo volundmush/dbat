@@ -1213,75 +1213,12 @@ void advance_level(struct char_data *ch, int whichclass)
   llog->ki_roll = add_ki;
   llog->add_skill = add_prac;
   GET_PRACTICES(ch, whichclass) += add_prac;
-  ch->gainBasePL(add_hp);
-  ch->gainBaseKI(add_mana);
-  ch->gainBaseST(add_move);
+  ch->gainBasePL(add_hp, true);
+  ch->gainBaseKI(add_mana, true);
+  ch->gainBaseST(add_move, true);
   int nhp = add_hp;
   int nma = add_mana;
   int nmo = add_move;
- if (IS_TRUFFLE(ch) && PLR_FLAGGED(ch, PLR_TRANS1)) {
-  add_hp *= 3;
-  add_move *= 3;
-  add_mana *= 3;
- }
- else if (IS_TRUFFLE(ch) && PLR_FLAGGED(ch, PLR_TRANS2)) {
-  add_hp *= 4;
-  add_move *= 4;
-  add_mana *= 4;
- }
- else if (IS_TRUFFLE(ch) && PLR_FLAGGED(ch, PLR_TRANS3)) {
-  add_hp *= 5;
-  add_move *= 5;
-  add_mana *= 5;
- }
- else if (IS_HOSHIJIN(ch) && GET_PHASE(ch) == 1) {
-  add_hp *= 2;
-  add_move *= 2;
-  add_mana *= 2;
- }
- else if (IS_HOSHIJIN(ch) && GET_PHASE(ch) == 2) {
-  add_hp *= 3;
-  add_move *= 3;
-  add_mana *= 3;
- }
- else if (IS_BIO(ch) && PLR_FLAGGED(ch, PLR_TRANS1)) {
-  add_hp *= 2;
-  add_move *= 2;
-  add_mana *= 2;
- }
- else if (IS_BIO(ch) && PLR_FLAGGED(ch, PLR_TRANS2)) {
-  add_hp *= 3;
-  add_move *= 3;
-  add_mana *= 3;
- }
- else if (IS_BIO(ch) && PLR_FLAGGED(ch, PLR_TRANS3)) {
-  add_hp *= 3.5;
-  add_move *= 3.5;
-  add_mana *= 3.5;
- }
- else if (IS_BIO(ch) && PLR_FLAGGED(ch, PLR_TRANS4)) {
-  add_hp *= 4;
-  add_move *= 4;
-  add_mana *= 4;
- }
- else if (IS_MAJIN(ch) && PLR_FLAGGED(ch, PLR_TRANS1)) {
-  add_hp *= 2;
-  add_move *= 2;
-  add_mana *= 2;
- }
- else if (IS_MAJIN(ch) && PLR_FLAGGED(ch, PLR_TRANS2)) {
-  add_hp *= 3;
-  add_move *= 3;
-  add_mana *= 3;
- }
- else if (IS_MAJIN(ch) && PLR_FLAGGED(ch, PLR_TRANS3)) {
-  add_hp *= 4.5;
-  add_move *= 4.5;
-  add_mana *= 4.5;
- }
- GET_MAX_HIT(ch) += add_hp;
- GET_MAX_MOVE(ch) += add_move;
- GET_MAX_MANA(ch) += add_mana;
  add_hp = nhp;
  add_mana = nma;
  add_move = nmo;
@@ -2256,6 +2193,41 @@ namespace dbat::sensei {
                 return r_id == race::hoshijin;
             default:
                 return r_id != race::android;
+        }
+    }
+
+    IDXTYPE Sensei::senseiLocationID() const {
+        switch(s_id) {
+            case roshi:
+                return 1131;
+            case kibito:
+                return 12098;
+            case nail:
+                return 11683;
+            case bardock:
+                return 2267;
+            case krane:
+                return 13012;
+            case tapion:
+                return 8233;
+            case piccolo:
+                return 1662;
+            case sixteen:
+                return 1714;
+            case dabura:
+                return 6487;
+            case frieza:
+                return 4283;
+            case ginyu:
+                return 4290;
+            case jinto:
+                return 3499;
+            case kurzak:
+                return 16100;
+            case tsuna:
+                return 15009;
+            case commoner:
+                return 300;
         }
     }
 
