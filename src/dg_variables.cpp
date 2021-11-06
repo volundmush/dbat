@@ -760,7 +760,7 @@ in the vault (vnum: 453) now and then. you can just use
           else if (!strcasecmp(field, "hitp")) {
             if (subfield && *subfield) {
               int64_t addition = atol(subfield);
-              GET_HIT(c) += addition;
+              c->incCurHealth(addition);
               update_pos(c);
             }
             snprintf(str, slen, "%" I64T "", GET_HIT(c));
@@ -849,7 +849,7 @@ in the vault (vnum: 453) now and then. you can just use
           if (!strcasecmp(field, "maxhitp")) {
             if (subfield && *subfield) {
               int64_t addition = atoll(subfield);
-              GET_MAX_HIT(c) = MAX(GET_MAX_HIT(c) + addition, 1);
+              //GET_MAX_HIT(c) = MAX(GET_MAX_HIT(c) + addition, 1);
             }
             snprintf(str, slen, "%" I64T "", GET_MAX_HIT(c));
           }
@@ -857,14 +857,14 @@ in the vault (vnum: 453) now and then. you can just use
           else if (!strcasecmp(field, "mana")) {
             if (subfield && *subfield) {
               int64_t addition = atoll(subfield);
-              GET_MANA(c) += addition;
+              c->incCurKI(addition);
             }
-            snprintf(str, slen, "%" I64T "", GET_MANA(c));
+            snprintf(str, slen, "%" I64T "", (c->getCurKI()));
           }
           else if (!strcasecmp(field, "maxmana")) {
             if (subfield && *subfield) {
               int64_t addition = atoll(subfield);
-              GET_MAX_MANA(c) = MAX(GET_MAX_MANA(c) + addition, 1);
+              //GET_MAX_MANA(c) = MAX(GET_MAX_MANA(c) + addition, 1);
             }
             snprintf(str, slen, "%" I64T "", GET_MAX_MANA(c));
           }
@@ -872,15 +872,15 @@ in the vault (vnum: 453) now and then. you can just use
           else if (!strcasecmp(field, "move")) {
             if (subfield && *subfield) {
               int64_t addition = atoll(subfield);
-              GET_MOVE(c) += addition;
+              c->incCurST(addition);
             }
-            snprintf(str, slen, "%" I64T "", GET_MOVE(c));
+            snprintf(str, slen, "%" I64T "", (c->getCurST()));
           }
 
           else if (!strcasecmp(field, "maxmove")) {
             if (subfield && *subfield) {
               int64_t addition = atoll(subfield);
-              GET_MAX_MOVE(c) = MAX(GET_MAX_MOVE(c) + addition, 1);
+              //GET_MAX_MOVE(c) = MAX(GET_MAX_MOVE(c) + addition, 1);
             }
             snprintf(str, slen, "%" I64T "", GET_MAX_MOVE(c));
           }

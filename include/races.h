@@ -57,6 +57,9 @@ namespace dbat::race {
         int flag;
     };
 
+    extern transform_bonus base_form;
+    extern transform_bonus oozaru;
+
     class Race;
 
     typedef std::map<race_id, Race *> RaceMap;
@@ -120,13 +123,13 @@ namespace dbat::race {
 
         int getMaxTransformTier(char_data *ch) const;
 
-        int getCurrentTransTier(char_data *ch) const;
+        int getCurrentTransTier(const char_data *ch) const;
 
-        long double getCurFormMult(char_data *ch) const;
+        transform_bonus getCurForm(const char_data *ch) const;
 
         const std::unordered_map<std::string, int> &getTierMap(char_data *ch) const;
 
-        const std::map<int, transform_bonus>& getTransMap(char_data *ch) const;
+        const std::map<int, transform_bonus>& getTransMap(const char_data *ch) const;
 
         int flagToTier(int flag) const;
 
@@ -135,14 +138,6 @@ namespace dbat::race {
         bool raceCanTransform() const;
 
         bool raceCanRevert() const;
-
-        void handleTransform(char_data *ch, const transform_bonus &trans) const;
-
-        void revertTransform(char_data *ch) const;
-
-        void revertTransform(char_data *ch, int tier) const;
-
-        void revertTransform(char_data *ch, const transform_bonus &trans) const;
 
         void displayForms(char_data *ch) const;
 

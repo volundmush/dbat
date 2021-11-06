@@ -221,19 +221,19 @@ void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *ms
     break;
 
   case APPLY_MANA:
-    GET_MAX_MANA(ch) += mod;
+    //GET_MAX_MANA(ch) += mod;
     break;
 
   case APPLY_HIT:
-    GET_MAX_HIT(ch) += mod;
+    //GET_MAX_HIT(ch) += mod;
     break;
 
   case APPLY_MOVE:
-    GET_MAX_MOVE(ch) += mod;
+    //GET_MAX_MOVE(ch) += mod;
     break;
 
   case APPLY_KI:
-    GET_MAX_KI(ch) += mod;
+    //GET_MAX_KI(ch) += mod;
     break;
 
   case APPLY_GOLD:
@@ -720,32 +720,14 @@ void obj_to_char(struct obj_data *object, struct char_data *ch)
     IS_CARRYING_W(ch) += GET_OBJ_WEIGHT(object);
     IS_CARRYING_N(ch)++;
     if ((GET_KAIOKEN(ch) <= 0 && !AFF_FLAGGED(ch, AFF_METAMORPH)) && !OBJ_FLAGGED(object, ITEM_THROW)) {
-     if (GET_HIT(ch) > gear_pl(ch)) {
-      GET_HIT(ch) = gear_pl(ch);
-     } if (GET_HIT(ch) <= 0) {
-      GET_HIT(ch) = 1;
-     }
-    } else if (GET_HIT(ch) > gear_pl(ch)) {
+
+    } else if (GET_HIT(ch) > (ch->getEffMaxPL())) {
        if (GET_KAIOKEN(ch) > 0) {
         send_to_char(ch, "@RThe strain of the weight has reduced your kaioken somewhat!@n\n");
-        GET_HIT(ch) -= GET_OBJ_WEIGHT(object) * 5;
-        if (GET_HIT(ch) <= 0) {
-         GET_HIT(ch) = 1;
-        }
        } else if (AFF_FLAGGED(ch, AFF_METAMORPH)) {
         send_to_char(ch, "@RYour metamorphosis strains under the additional weight!@n\n");
-        GET_HIT(ch) -= GET_OBJ_WEIGHT(object) * 5;
-        if (GET_HIT(ch) <= 0) {
-         GET_HIT(ch) = 1;
-        }
        }
-    } else if (GET_HIT(ch) <= gear_pl(ch) && GET_KAIOKEN(ch) > 0) {
-       send_to_char(ch, "You've dropped out of kaioken due to the weight!\r\n");
-       GET_KAIOKEN(ch) = 0;
-       if (GET_HIT(ch) <= 0) {
-       GET_HIT(ch) = 1;
-       }
-    } 
+    }
 
     /* set flag for crash-save system, but not on mobs! */
     if (GET_OBJ_VAL(object, 0) != 0) {
@@ -775,18 +757,10 @@ void obj_from_char(struct obj_data *object)
   if (!IS_NPC(object->carried_by))
     SET_BIT_AR(PLR_FLAGS(object->carried_by), PLR_CRASH);
  
-  int64_t previous = gear_pl(object->carried_by);
+  int64_t previous = (object->carried_by->getEffMaxPL());
 
   IS_CARRYING_W(object->carried_by) -= GET_OBJ_WEIGHT(object);
   IS_CARRYING_N(object->carried_by)--;
-  if (GET_KAIOKEN(object->carried_by) <= 0 && GET_HIT(object->carried_by) >= gear_pl(object->carried_by)) {
-   if (gear_pl_restore(object->carried_by, previous) > 0) {
-    GET_HIT(object->carried_by) += gear_pl_restore(object->carried_by, previous);
-    if (GET_HIT(object->carried_by) > GET_MAX_HIT(object->carried_by)) {
-     GET_HIT(object->carried_by) = GET_MAX_HIT(object->carried_by);
-    }
-   }
-  }
 
     if (GET_OBJ_VAL(object, 0) != 0) {
      if (GET_OBJ_VNUM(object) == 16705 || GET_OBJ_VNUM(object) == 16706 || GET_OBJ_VNUM(object) == 16707) {

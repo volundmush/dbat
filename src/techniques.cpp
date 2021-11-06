@@ -10,7 +10,8 @@
 #include "spells.h"
 
 bool tech_handle_zanzoken(char_data *ch, char_data *vict, const std::string& name) {
-    if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
+    if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&
+            (vict->getCurST()) >= 1 && GET_POS(vict) != POS_SLEEPING) {
         if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
             auto msg = fmt::format("@C$N@c disappears, avoiding your {} before reappearing!@n", name);
             act(msg.c_str(), TRUE, ch, nullptr, vict, TO_CHAR);
@@ -71,15 +72,18 @@ bool tech_handle_charge(char_data *ch, char *arg, double minimum, double *attper
 }
 
 bool tech_handle_targeting(char_data *ch, char *arg, char_data **vict, obj_data **obj) {
-    *vict = nullptr; *obj = nullptr; if (!*arg || !(*vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
+    *vict = nullptr; *obj = nullptr;
+    if (!*arg || !(*vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
         if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
             *vict = FIGHTING(ch);
+            return true;
         } else if (!(*obj = get_obj_in_list_vis(ch, arg, nullptr, world[IN_ROOM(ch)].contents))) {
             send_to_char(ch, "Nothing around here by that name.\r\n");
             return false;
         }
         return true;
     }
+    return true;
 }
 
 
@@ -118,7 +122,7 @@ bool tech_handle_android_absorb(char_data *ch, char_data *vict) {
             amot = GET_MAX_MANA(ch) / 20;
         }
         if (GET_CHARGE(vict) + amot > GET_MAX_MANA(vict)) {
-            GET_MANA(vict) += GET_MAX_MANA(vict) - GET_CHARGE(vict);
+            vict->incCurKI(vict->getMaxKI() - GET_CHARGE(vict));
             GET_CHARGE(vict) = GET_MAX_MANA(vict);
         }
         else {

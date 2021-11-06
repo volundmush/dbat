@@ -94,11 +94,8 @@ static void barrier_shed(struct char_data *ch)
   act("@c$n@c's barrier sends some sparks into the air as it seems to get a bit weaker.@n", TRUE, ch, 0, 0, TO_ROOM);
  }
 
- if (recharge > 0 && GET_MANA(ch) < GET_MAX_MANA(ch)) {
-  GET_MANA(ch) += recharge;
-  if (GET_MANA(ch) > GET_MAX_MANA(ch)) {
-   GET_MANA(ch) = GET_MAX_MANA(ch);
-  }
+ if (recharge > 0 && (ch->getCurKI()) < GET_MAX_MANA(ch)) {
+     ch->incCurKI(recharge);
   send_to_char(ch, "@CYou reabsorb some of the energy lost into your body!@n\r\n");
  }
 }
@@ -643,7 +640,7 @@ static int64_t move_gain(struct char_data *ch)
   }
 
   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
-   gain = GET_MAX_MOVE(ch) - GET_MOVE(ch);
+   gain = GET_MAX_MOVE(ch) - (ch->getCurST());
   }
   if (cook_element(IN_ROOM(ch)) == 1)
    gain *= 2;
@@ -664,7 +661,7 @@ static void update_flags(struct char_data *ch)
 	}
 
 	if (GET_BONUS(ch, BONUS_LATE) && GET_POS(ch) == POS_SLEEPING && rand_number(1, 3) == 3) {
-		if (GET_HIT(ch) >= gear_pl(ch) && GET_MOVE(ch) >= GET_MAX_MOVE(ch) && GET_MANA(ch) >= GET_MAX_MANA(ch)) {
+		if (GET_HIT(ch) >= (ch->getEffMaxPL()) && (ch->getCurST()) >= GET_MAX_MOVE(ch) && (ch->getCurKI()) >= GET_MAX_MANA(ch)) {
 			send_to_char(ch, "You FINALLY wake up.\r\n");
 			act("$n wakes up.", TRUE, ch, 0, 0, TO_ROOM);
 			GET_POS(ch) = POS_SITTING;
@@ -1142,20 +1139,14 @@ void gain_condition(struct char_data *ch, int condition, int value)
 			case HUNGER:
 				switch (GET_COND(ch, condition)) {
 				case 0:
-					if (GET_MOVE(ch) >= GET_MAX_MOVE(ch) / 3) {
+					if ((ch->getCurST()) >= GET_MAX_MOVE(ch) / 3) {
 						send_to_char(ch, "@RYou are starving to death!@n\r\n");
-						GET_MOVE(ch) -= GET_MOVE(ch) / 3;
+                        ch->decCurSTPercent(.33);
 					}
-					else if (GET_MOVE(ch) < GET_MAX_MOVE(ch) / 3) {
+					else if ((ch->getCurST()) < GET_MAX_MOVE(ch) / 3) {
 						send_to_char(ch, "@RYou are starving to death!@n\r\n");
-						GET_MOVE(ch) = 0;
-						if (GET_SUPPRESS(ch) > 0) {
-							send_to_char(ch, "@RYou stop suppressing!@n\r\n");
-							GET_SUPP(ch) = 0;
-							GET_HIT(ch) += GET_SUPPRESS(ch);
-							GET_SUPPRESS(ch) = 0;
-						}
-						GET_HIT(ch) -= GET_MAX_HIT(ch) / 3;
+                        ch->decCurSTPercent(1, 0);
+                        ch->decCurHealthPercent(.34);
 					}
 					break;
 				case 1:
@@ -1201,20 +1192,14 @@ void gain_condition(struct char_data *ch, int condition, int value)
 			case THIRST:
 				switch (GET_COND(ch, condition)) {
 				case 0:
-					if (GET_MOVE(ch) >= GET_MAX_MOVE(ch) / 3) {
+					if ((ch->getCurST()) >= GET_MAX_MOVE(ch) / 3) {
 						send_to_char(ch, "@RYou are dehydrated!@n\r\n");
-						GET_MOVE(ch) -= GET_MOVE(ch) / 3;
+                        ch->decCurSTPercent(.33);
 					}
-					else if (GET_MOVE(ch) < GET_MAX_MOVE(ch) / 3) {
+					else if ((ch->getCurST()) < GET_MAX_MOVE(ch) / 3) {
 						send_to_char(ch, "@RYou are dehydrated!@n\r\n");
-						GET_MOVE(ch) = 0;
-						if (GET_SUPPRESS(ch) > 0) {
-							send_to_char(ch, "@RYou stop suppressing!@n\r\n");
-							GET_SUPP(ch) = 0;
-							GET_HIT(ch) += GET_SUPPRESS(ch);
-							GET_SUPPRESS(ch) = 0;
-						}
-						GET_HIT(ch) -= GET_MAX_HIT(ch) / 3;
+                        ch->decCurSTPercent(1, 0);
+                        ch->decCurHealthPercent(.34);
 					}
 					break;
 				case 1:
@@ -1269,7 +1254,7 @@ void gain_condition(struct char_data *ch, int condition, int value)
 			}
 			if (GET_HIT(ch) <= 0 && GET_COND(ch, HUNGER) == 0) {
 				send_to_char(ch, "You have starved to death!\r\n");
-				GET_MOVE(ch) = 0;
+                ch->decCurSTPercent(1, 0);
 				act("@W$n@W falls down dead before you...@n", FALSE, ch, 0, 0, TO_ROOM);
 				die(ch, NULL);
 				if (GET_COND(ch, HUNGER) != -1) {
@@ -1281,7 +1266,7 @@ void gain_condition(struct char_data *ch, int condition, int value)
 			}
 			if (GET_HIT(ch) <= 0 && GET_COND(ch, THIRST) == 0) {
 				send_to_char(ch, "You have died of dehydration!\r\n");
-				GET_MOVE(ch) = 0;
+                ch->decCurSTPercent(1, 0);
 				act("@W$n@W falls down dead before you...@n", FALSE, ch, 0, 0, TO_ROOM);
 				die(ch, NULL);
 				if (GET_COND(ch, HUNGER) != -1) {
@@ -1521,7 +1506,6 @@ void point_update(void)
 
   for (i = character_list; i; i = next_char) {
     next_char = i->next;
-   
 
    if (!IS_NPC(i) && IN_ROOM(i) != NOWHERE) {
     if (ROOM_FLAGGED(IN_ROOM(i), ROOM_HOUSE)) {
@@ -1541,7 +1525,7 @@ void point_update(void)
     }
    }
    // making it so that you don't get hungry/thirsty if you're just leisurely idling, rping, etc.
-   if(GET_HIT(i) < gear_pl(i)) {
+   if(GET_HIT(i) < (i->getEffMaxPL())) {
        if (rand_number(1, 2) == 2) {
            gain_condition(i, HUNGER, -1);
        }
@@ -1560,22 +1544,21 @@ void point_update(void)
       int change = FALSE;
        update_flags(i);
       if (!IS_NPC(i)) {
-       if (GET_HIT(i) < gear_pl(i)) {
+       if (GET_HIT(i) < (i->getEffMaxPL())) {
         change = TRUE;
        }
-       if (GET_MANA(i) < GET_MAX_MANA(i)) {
+       if ((i->getCurKI()) < GET_MAX_MANA(i)) {
         change = TRUE;
        }
-       if (GET_MOVE(i) < GET_MAX_MOVE(i)) {
+       if ((i->getCurST()) < GET_MAX_MOVE(i)) {
         change = TRUE;
        }
       }
 	  
 	  if (PLR_FLAGGED(i, PLR_AURALIGHT)) {
-	   if ((GET_MANA(i) - mana_gain(i)) > GET_MAX_MANA(i) * 0.05) {
+	   if ((i->getCurKI()) > (mana_gain(i) + i->getPercentOfMaxKI(.05))) {
          send_to_char(i, "You send more energy into your aura to keep the light active.\r\n");
-         GET_MANA(i) -= mana_gain(i);
-         GET_MANA(i) -= GET_MAX_MANA(i) * 0.05;
+         i->decCurKI(mana_gain(i) + i->getPercentOfMaxKI(.05));
        } else {
 	     send_to_char(i, "You don't have enough energy to keep the aura active.\r\n");
 		 act("$n's aura slowly stops shining and fades.\r\n", TRUE, i, 0, 0, TO_ROOM);
@@ -1596,37 +1579,12 @@ void point_update(void)
         GET_SLEEPT(i) = 8;
        }
       }
-      if (GET_KAIOKEN(i) > 0 && (GET_SKILL(i, SKILL_KAIOKEN) < rand_number(1, x) || GET_MOVE(i) <= GET_MAX_MOVE(i) / 10)) {
-       send_to_char(i, "You lose focus and your kaioken disappears.\r\n");
-       act("$n loses focus and $s kaioken aura disappears.", TRUE, i, 0, 0, TO_ROOM);
-       if (GET_HIT(i) - (gear_pl(i) / 10) * GET_KAIOKEN(i) > 0) {
-         GET_HIT(i) -= (gear_pl(i) / 10) * GET_KAIOKEN(i);
-       } else {
-         GET_HIT(i) = 1;
-       }
-       GET_KAIOKEN(i) = 0;
-      } else if (GET_KAIOKEN(i) <= 0 && !AFF_FLAGGED(i, AFF_BURNED)) {
-      // if (!AFF_FLAGGED(i, AFF_METAMORPH) || (AFF_FLAGGED(i, AFF_METAMORPH) && GET_HIT(i) < gear_pl(i))) {
-      if (AFF_FLAGGED(i, AFF_METAMORPH) && GET_HIT(i) < gear_pl(i) + (gear_pl(i) * 0.6)) {
-        GET_HIT(i) += hit_gain(i);
-        if (GET_HIT(i) > gear_pl(i) + (gear_pl(i) * 0.6)) {
-         GET_HIT(i) = gear_pl(i) + (gear_pl(i) * 0.6);
-         }
-        } else {
-        if (!AFF_FLAGGED(i, AFF_METAMORPH) && GET_HIT(i) < gear_pl(i)) {
-         GET_HIT(i) += hit_gain(i);
-         if (GET_HIT(i) > gear_pl(i)) {
-          GET_HIT(i) = gear_pl(i);
-         }
-        }
-       }
-        if (GET_SUPPRESS(i) > 0) {
-         if (GET_HIT(i) > (gear_pl(i) * 0.01) * GET_SUPPRESS(i)) {
-          GET_HIT(i) = (gear_pl(i) * 0.01) * GET_SUPPRESS(i);
-          GET_SUPP(i) = gear_pl(i) - GET_HIT(i);
-         }
-        }
-       }
+
+      if(GET_KAIOKEN(i) > 0) {
+          improve_skill(i, SKILL_KAIOKEN, -1);
+          if((GET_SKILL(i, SKILL_KAIOKEN) < rand_number(1, x) || (i->getCurST()) <= GET_MAX_MOVE(i) / 10))
+              i->remove_kaioken(2);
+      }
 
       if (AFF_FLAGGED(i, AFF_BURNED)) {
        if (rand_number(1, 5) >= 4) {
@@ -1635,84 +1593,63 @@ void point_update(void)
         REMOVE_BIT_AR(AFF_FLAGS(i), AFF_BURNED);
        }
       }
-       GET_MOVE(i) += move_gain(i);
-       GET_MANA(i) += mana_gain(i);
-       if (GET_MOVE(i) > GET_MAX_MOVE(i)) {
-        GET_MOVE(i) = GET_MAX_MOVE(i);
-       }
-       if (GET_MANA(i) > GET_MAX_MANA(i)) {
-        GET_MANA(i) = GET_MAX_MANA(i);
-       }
+
+      i->incCurST(move_gain(i));
+      i->incCurKI(mana_gain(i));
 
     if (!IS_NPC(i)) {
      heal_limb(i);
     }
 
     if (SECT(IN_ROOM(i)) == SECT_WATER_NOSWIM && !CARRIED_BY(i) && !IS_KANASSAN(i)) {
-     if (GET_MOVE(i) >= gear_weight(i)) {
+     if ((i->getCurST()) >= (i->getCurCarriedWeight())) {
       act("@bYou swim in place.@n", TRUE, i, 0, 0, TO_CHAR);
       act("@C$n@b swims in place.@n", TRUE, i, 0, 0, TO_ROOM);
-      GET_MOVE(i) -= gear_weight(i);
+      i->decCurST(i->getCurCarriedWeight());
+
      } else {
-      GET_MOVE(i) -= gear_weight(i);
-      if (GET_MOVE(i) < 0) {
-       GET_MOVE(i) = 0;
-      }
+         i->decCurST(i->getCurCarriedWeight());
       act("@RYou are drowning!@n", TRUE, i, 0, 0, TO_CHAR);
       act("@C$n@b gulps water as $e struggles to stay above the water line.@n", TRUE, i, 0, 0, TO_ROOM);
-      if (GET_HIT(i) - (gear_pl(i) / 3) <= 0) {
+      if (GET_HIT(i) - ((i->getEffMaxPL()) / 3) <= 0) {
        act("@rYou drown!@n", TRUE, i, 0, 0, TO_CHAR);
        act("@R$n@r drowns!@n", TRUE, i, 0, 0, TO_ROOM);
        die(i, NULL);
-       GET_HIT(i) = 1;
       } else {
-       GET_HIT(i) -= gear_pl(i) / 3;
+          i->decCurHealth((i->getEffMaxPL()) / 3);
       }
      }
     }
       if (!has_o2(i) && SUNKEN(IN_ROOM(i)) && !ROOM_FLAGGED(IN_ROOM(i), ROOM_SPACE)) {
-       if ((GET_MANA(i) - mana_gain(i)) > GET_MAX_MANA(i) / 200) {
+       if (((i->getCurKI()) - mana_gain(i)) > GET_MAX_MANA(i) / 200) {
          send_to_char(i, "Your ki holds an atmosphere around you.\r\n");
-         GET_MANA(i) -= mana_gain(i);
-         GET_MANA(i) -= GET_MAX_MANA(i) * 0.005;
+         i->decCurKI(mana_gain(i) + i->getPercentOfMaxKI(.005));
        }
        else {
-        if (GET_SUPP(i) > 0 && GET_SUPP(i) > gear_pl(i) * 0.05) {
+        if ((GET_HIT(i) - hit_gain(i)) > (i->getEffMaxPL()) * 0.05) {
          send_to_char(i, "You struggle trying to hold your breath!\r\n");
-         GET_SUPP(i) -= GET_MAX_HIT(i) * 0.05;
-        }
-        else if ((GET_HIT(i) - hit_gain(i)) > gear_pl(i) * 0.05) {
-         send_to_char(i, "You struggle trying to hold your breath!\r\n");
-         GET_HIT(i) -= hit_gain(i);
-         GET_HIT(i) -= GET_MAX_HIT(i) * 0.05;
+         i->decCurHealth(hit_gain(i) + i->getPercentOfMaxHealth(.05));
         }
         else if (GET_HIT(i) <= GET_MAX_HIT(i) / 20) {
          send_to_char(i, "You have drowned!\r\n");
-         GET_HIT(i) = 1;
          act("@W$n@W drowns right in front of you.@n", FALSE, i, 0, 0, TO_ROOM);
          die(i, NULL);
         }
        }
       }
       if (!has_o2(i) && ROOM_FLAGGED(IN_ROOM(i), ROOM_SPACE)) {
-       if ((GET_MANA(i) - mana_gain(i)) > GET_MAX_MANA(i) * 0.005) {
+       if (((i->getCurKI()) - mana_gain(i)) > GET_MAX_MANA(i) * 0.005) {
          send_to_char(i, "Your ki holds an atmosphere around you.\r\n");
-         GET_MANA(i) -= mana_gain(i);
-         GET_MANA(i) -= GET_MAX_MANA(i) * 0.005;
+         i->decCurKI(mana_gain(i) + i->getPercentOfMaxKI(.005));
        }
        else {
-        if (GET_SUPP(i) > 0 && GET_SUPP(i) > gear_pl(i) * 0.05) {
+        if ((GET_HIT(i) - hit_gain(i)) > (i->getEffMaxPL()) * 0.05) {
          send_to_char(i, "You struggle trying to hold your breath!\r\n");
-         GET_SUPP(i) -= GET_MAX_HIT(i) * 0.05;
-        }
-       else if ((GET_HIT(i) - hit_gain(i)) > gear_pl(i) * 0.05) {
-         send_to_char(i, "You struggle trying to hold your breath!\r\n");
-         GET_HIT(i) -= hit_gain(i);
-         GET_HIT(i) -= GET_MAX_HIT(i) * 0.05;
+         i->decCurHealth(hit_gain(i) + i->getPercentOfMaxHealth(.05));
        }
         else if (GET_HIT(i) <= GET_MAX_HIT(i) / 20) {
          send_to_char(i, "You have drowned!\r\n");
-         GET_HIT(i) = 1;
+         i->decCurHealthPercent(1, 1);
          act("@W$n@W drowns right in front of you.@n", FALSE, i, 0, 0, TO_ROOM);
          die(i, NULL);
         }
@@ -1724,18 +1661,12 @@ void point_update(void)
        if (IS_NPC(i) && IS_HUMANOID(i) && rand_number(1, 2) == 2) {
         do_fly(i, 0, 0, 0);
        }
-       if (GET_SUPP(i) > gear_pl(i) * 0.05) {
-        GET_SUPP(i) -= gear_pl(i) * 0.05;
-       } else {
-        GET_SUPP(i) = 0;
-        GET_SUPPRESS(i) = 0;
-        GET_HIT(i) -= gear_pl(i) * 0.05;
-        if (GET_HIT(i) < 0) {
-         act("@rYou have burned to death!@n", TRUE, i, 0, 0, TO_CHAR);
-         act("@R$n@r has burned to death!@n", TRUE, i, 0, 0, TO_ROOM);
-         die(i, NULL);
-        }
-       }
+       i->decCurHealthPercent(.05);
+          if (GET_HIT(i) < 0) {
+              act("@rYou have burned to death!@n", TRUE, i, 0, 0, TO_CHAR);
+              act("@R$n@r has burned to death!@n", TRUE, i, 0, 0, TO_ROOM);
+              die(i, NULL);
+          }
       }
       if (change == TRUE && !AFF_FLAGGED(i, AFF_POISON)) {
        if (PLR_FLAGGED(i, PLR_HEALT) && SITS(i) != NULL) {
@@ -1749,7 +1680,7 @@ void point_update(void)
          SITTING(SITS(i)) = NULL;
          SITS(i) = NULL;
         }
-        else if (GET_HIT(i) == (gear_pl(i)) && GET_MANA(i) == GET_MAX_MANA(i) && GET_MOVE(i) == GET_MAX_MOVE(i)) {
+        else if (GET_HIT(i) == ((i->getEffMaxPL())) && (i->getCurKI()) == GET_MAX_MANA(i) && (i->getCurST()) == GET_MAX_MOVE(i)) {
          send_to_char(i, "@wYou are fully recovered now.\r\n");
          act("You step out of the now empty healing tank.", TRUE, i, 0, 0, TO_CHAR);
          act("@C$n@w steps out of the now empty healing tank.@n", TRUE, i, 0, 0, TO_ROOM);
@@ -1766,7 +1697,7 @@ void point_update(void)
        } else if (GET_POS(i) == POS_RESTING) {
         send_to_char(i, "@wYou feel relaxed and better.@n\r\n");
 		if (GET_LIFEFORCE(i) != GET_LIFEMAX(i)) {
-          if (!IS_ANDROID(i) && !FIGHTING(i) && GET_SUPPRESS(i) <= 0 && GET_HIT(i) != gear_pl(i)) {
+          if (!IS_ANDROID(i) && !FIGHTING(i) && GET_SUPPRESS(i) <= 0 && GET_HIT(i) != (i->getEffMaxPL())) {
 			 GET_LIFEFORCE(i) += GET_LIFEMAX(i) * 0.15;
 			 if (GET_LIFEFORCE(i) > GET_LIFEMAX(i)) {
 			  GET_LIFEFORCE(i) = GET_LIFEMAX(i);
@@ -1779,9 +1710,6 @@ void point_update(void)
         send_to_char(i, "@wYou feel rested and better.@n\r\n");
        else
         send_to_char(i, "You feel slightly better.\r\n");
-      }
-      if (GET_HIT(i) <= 0) {
-       GET_HIT(i) = 1;
       }
       if (AFF_FLAGGED(i, AFF_POISON)) {
        double cost = 0.0;
@@ -1801,7 +1729,7 @@ void point_update(void)
        if (GET_HIT(i) - GET_MAX_HIT(i) * cost > 0) {
         send_to_char(i, "You puke as the poison burns through your blood.\r\n");
         act("$n shivers and then pukes.", TRUE, i, 0, 0, TO_ROOM);
-        GET_HIT(i) -= GET_MAX_HIT(i) * cost;
+        i->decCurHealth(i->getEffMaxPL() * cost);
        } else {
         send_to_char(i, "The poison claims your life!\r\n");
         act("$n pukes up blood and falls down dead!", TRUE, i, 0, 0, TO_ROOM);
@@ -1824,7 +1752,7 @@ void point_update(void)
     } else if (GET_POS(i) == POS_MORTALLYW) {
 	continue;
     }
-    if (GET_MANA(i) >= GET_MAX_MANA(i) * 0.5 && GET_CHARGE(i) < GET_MAX_MANA(i) * 0.1 && GET_PREFERENCE(i) == PREFERENCE_KI && !PLR_FLAGGED(i, PLR_AURALIGHT)) {
+    if ((i->getCurKI()) >= GET_MAX_MANA(i) * 0.5 && GET_CHARGE(i) < GET_MAX_MANA(i) * 0.1 && GET_PREFERENCE(i) == PREFERENCE_KI && !PLR_FLAGGED(i, PLR_AURALIGHT)) {
      GET_CHARGE(i) = GET_MAX_MANA(i) * 0.1;
     }
     if (!IS_NPC(i)) {

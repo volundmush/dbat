@@ -63,46 +63,21 @@ const std::string& char_data::juggleRaceName(bool capitalized) const {
 }
 
 void char_data::restore_by(char_data *ch) {
-    this->restore();
+    this->restore(true);
 
     ::act("You have been fully healed by $N!", FALSE, this, 0, ch, TO_CHAR | TO_SLEEP);
-    if (GET_SUPPRESS(this) > 0) {
-        send_to_char(this, "@mYou are healed to your suppression limit.@n\r\n");
-    }
 }
 
-void char_data::restore() {
-    GET_HIT(this) = gear_pl(this);
-    GET_MANA(this) = GET_MAX_MANA(this);
-    GET_MOVE(this) = GET_MAX_MOVE(this);
-    GET_KI(this) = GET_MAX_KI(this);
-    if (GET_SUPPRESS(this) > 0 && GET_HIT(this) > (((gear_pl(this)) / 100) * GET_SUPPRESS(this))) {
-        GET_HIT(this) = (((gear_pl(this)) / 100) * GET_SUPPRESS(this));
-    }
-
-    null_affect(this, AFF_POISON);
-    REMOVE_BIT_AR(AFF_FLAGS(this), AFF_BLIND);
-    REMOVE_BIT_AR(AFF_FLAGS(this), AFF_FROZEN);
-    GET_LIMBCOND(this, 1) = 100;
-    GET_LIMBCOND(this, 2) = 100;
-    GET_LIMBCOND(this, 3) = 100;
-    GET_LIMBCOND(this, 4) = 100;
-    SET_BIT_AR(PLR_FLAGS(this), PLR_HEAD);
-
-    if (AFF_FLAGGED(this, AFF_KNOCKED)) {
-        ::act("@W$n is no longer senseless, and wakes up.@n", FALSE, this, 0, 0, TO_ROOM);
-        send_to_char(this, "You are no longer knocked out, and wake up!@n\r\n");
-        REMOVE_BIT_AR(AFF_FLAGS(this), AFF_KNOCKED);
-        GET_POS(this) = POS_SITTING;
-    }
-
-    update_pos(this);
-    affect_total(this);
+void char_data::restore(bool announce) {
+    restoreVitals(announce);
+    restoreLimbs(announce);
+    restoreStatus(announce);
+    this->lifeforce = GET_LIFEMAX(this);
 }
 
 void char_data::resurrect(ResurrectionMode mode) {
     // First, fully heal the character.
-    restore();
+    restore(true);
     REMOVE_BIT_AR(AFF_FLAGS(this), AFF_ETHEREAL);
     REMOVE_BIT_AR(AFF_FLAGS(this), AFF_SPIRIT);
     REMOVE_BIT_AR(PLR_FLAGS(this), PLR_PDEATH);
@@ -172,7 +147,7 @@ void char_data::resurrect(ResurrectionMode mode) {
 }
 
 void char_data::ghostify() {
-    restore();
+    restore(true);
     SET_BIT_AR(AFF_FLAGS(this), AFF_SPIRIT);
     SET_BIT_AR(AFF_FLAGS(this), AFF_ETHEREAL);
 
@@ -328,17 +303,17 @@ int char_data::calcGravCost(int64_t num) {
         if(cost) {
             send_to_char(this, "You sweat bullets straining against the current gravity.\r\n");
         }
-        if (GET_MOVE(this) > cost) {
-            GET_MOVE(this) -= cost;
+        if ((this->getCurST()) > cost) {
+            this->decCurST(cost);
             return 1;
         }
         else {
-            GET_MOVE(this) -= GET_MOVE(this) - 1;
+            this->decCurST(cost);
             return 0;
         }
     }
     else {
-        return GET_MOVE(this) > (cost + num);
+        return (this->getCurST()) > (cost + num);
     }
 }
 
@@ -379,35 +354,69 @@ int64_t char_data::setCurHealthPercent(double amt) {
 
 int64_t char_data::incCurHealth(int64_t amt, bool limit_max) {
     if(limit_max)
-        hit = std::min(getMaxHealth(), hit+std::abs(amt));
+        health = std::max(1.0, health+(double)std::abs(amt) / (double)getEffMaxPL());
     else
-        hit += std::abs(amt);
-    return hit;
+        health += (double)std::abs(amt) / (double)getEffMaxPL();
+    return getCurHealth();
 };
 
 int64_t char_data::decCurHealth(int64_t amt, int64_t floor) {
-    hit = std::max(floor, hit-std::abs(amt));
-    return hit;
+    auto fl = 0.0;
+    if(floor > 0)
+        fl = (double)floor / (double)getEffMaxPL();
+    health = std::max(fl, health-(double)std::abs(amt) / (double)getEffMaxPL());
+    return getCurHealth();
 }
 
 int64_t char_data::incCurHealthPercent(double amt, bool limit_max) {
-    return incCurHealth((int64_t)(getMaxHealth() * std::abs(amt)), limit_max);
+    if(limit_max)
+        health = std::min(1.0, health+std::abs(amt));
+    else
+        health += std::abs(amt);
+    return getCurHealth();
 }
 
 int64_t char_data::decCurHealthPercent(double amt, int64_t floor) {
-    return decCurHealth((int64_t)getMaxHealth() * std::abs(amt), floor);
+    auto fl = 0.0;
+    if(floor > 0)
+        fl = (double)floor / (double)getEffMaxPL();
+    health = std::max(fl, health-std::abs(amt));
+    return getCurHealth();
 }
 
 void char_data::restoreHealth(bool announce) {
-    if(!isFullHealth()) hit = getMaxHealth();
+    if(!isFullHealth()) health = 1;
 }
 
 int64_t char_data::getMaxPL() const {
-    return max_hit;
+    auto form = race->getCurForm(this);
+    int64_t total = 0;
+    if(form.flag) {
+        total = form.bonus + (getEffBasePL() * form.mult);
+    } else {
+        total = getEffBasePL() * form.mult;
+    }
+    if(GET_KAIOKEN(this) > 0) {
+        total += (total / 10) * GET_KAIOKEN(this);
+    }
+    return total;
 }
 
 int64_t char_data::getCurPL() const {
-    return hit;
+    if(suppression > 0){
+        return getEffMaxPL() * std::min(health, (double)suppression/100);
+    } else {
+        return getEffMaxPL() * health;
+    }
+}
+
+int64_t char_data::getEffBasePL() const {
+    if(original) return original->getEffBasePL();
+    if(clones) {
+        return getBasePL() / clones + 1;
+    } else {
+        return getBasePL();
+    }
 }
 
 int64_t char_data::getBasePL() const {
@@ -426,33 +435,30 @@ int64_t char_data::getPercentOfMaxPL(double amt) const {
     return getMaxPL() * std::abs(amt);
 }
 
-void char_data::refreshSuppress() {
-    if (GET_SUPPRESS(this) > 0 && GET_HIT(this) > ((GET_MAX_HIT(this) / 100) * GET_SUPPRESS(this))) {
-        GET_HIT(this) = ((GET_MAX_HIT(this) / 100) * GET_SUPPRESS(this));
-        send_to_char(this, "@mYou are healed to your suppression limit.@n\r\n");
-    }
-}
-
-void char_data::transformPL(int64_t amt) {
-    hit += std::abs(amt);
-    max_hit += std::abs(amt);
-}
-
-void char_data::revertPL(int64_t amt) {
-    hit = std::max(1L, hit-std::abs(amt));
-    max_hit = std::max(1L, max_hit-std::abs(amt));
-}
-
 bool char_data::isFullPL() const {
     return getCurPL() >= getMaxPL();
 }
 
 int64_t char_data::getCurKI() const {
-    return mana;
+    return getMaxKI() * energy;
 }
 
 int64_t char_data::getMaxKI() const {
-    return max_mana;
+    auto form = race->getCurForm(this);
+    if(form.flag) {
+        return form.bonus + (getEffBaseKI() * form.mult);
+    } else {
+        return getEffBaseKI();
+    }
+}
+
+int64_t char_data::getEffBaseKI() const {
+    if(original) return original->getEffBaseKI();
+    if(clones) {
+        return getBaseKI() / clones + 1;
+    } else {
+        return getBaseKI();
+    }
 }
 
 int64_t char_data::getBaseKI() const {
@@ -487,45 +493,64 @@ int64_t char_data::setCurKIPercent(double amt) {
 
 int64_t char_data::incCurKI(int64_t amt, bool limit_max) {
     if(limit_max)
-        mana = std::min(getMaxKI(), mana+std::abs(amt));
+        energy = std::min(1.0, energy+(double)std::abs(amt) / (double)getMaxKI());
     else
-        mana += std::abs(amt);
-    return mana;
+        energy += (double)std::abs(amt) / (double)getMaxKI();
+    return getCurKI();
 };
 
 int64_t char_data::decCurKI(int64_t amt, int64_t floor) {
-    mana = std::max(floor, mana-std::abs(amt));
-    return mana;
+    auto fl = 0.0;
+    if(floor > 0)
+        fl = (double)floor / (double)getMaxKI();
+    energy = std::max(fl, energy-(double)std::abs(amt) / (double)getMaxKI());
+    return getCurKI();
 }
 
 int64_t char_data::incCurKIPercent(double amt, bool limit_max) {
-    return incCurKI((int64_t)(getMaxKI() * std::abs(amt)), limit_max);
+    if(limit_max)
+        energy = std::min(1.0, energy+std::abs(amt));
+    else
+        energy += std::abs(amt);
+    return getCurKI();
 }
 
 int64_t char_data::decCurKIPercent(double amt, int64_t floor) {
-    return decCurKI((int64_t)getMaxKI() * std::abs(amt), floor);
+    if(!strcasecmp(this->name, "Wayland")) {
+        send_to_char(this, "decCurKIPercent called with: %f\r\n", amt);
+    }
+    auto fl = 0.0;
+    if(floor > 0)
+        fl = (double)floor / (double)getMaxKI();
+    energy = std::max(fl, energy-std::abs(amt));
+    return getCurKI();
 }
 
-void char_data::transformKI(int64_t amt) {
-    mana += std::abs(amt);
-    max_mana += std::abs(amt);
-}
-
-void char_data::revertKI(int64_t amt) {
-    mana = std::max(1L, mana-std::abs(amt));
-    max_mana = std::max(1L, max_mana-std::abs(amt));
-}
 
 void char_data::restoreKI(bool announce) {
-    if(!isFullKI()) mana = getMaxKI();
+    if(!isFullKI()) energy = 1;
 }
 
 int64_t char_data::getCurST() const {
-    return move;
+    return getMaxST() * stamina;
 }
 
 int64_t char_data::getMaxST() const {
-    return max_move;
+    auto form = race->getCurForm(this);
+    if(form.flag) {
+        return form.bonus + (getEffBaseST() * form.mult);
+    } else {
+        return getEffBaseST();
+    }
+}
+
+int64_t char_data::getEffBaseST() const {
+    if(original) return original->getEffBaseST();
+    if(clones) {
+        return getBaseST() / clones + 1;
+    } else {
+        return getBaseST();
+    }
 }
 
 int64_t char_data::getBaseST() const {
@@ -560,37 +585,39 @@ int64_t char_data::setCurSTPercent(double amt) {
 
 int64_t char_data::incCurST(int64_t amt, bool limit_max) {
     if(limit_max)
-        move = std::min(getMaxST(), move+std::abs(amt));
+        stamina = std::min(1.0, stamina+(double)std::abs(amt) / (double)getMaxST());
     else
-        move += std::abs(amt);
-    return move;
+        stamina += (double)std::abs(amt) / (double)getMaxST();
+    return getMaxST();
 };
 
 int64_t char_data::decCurST(int64_t amt, int64_t floor) {
-    move = std::max(floor, move-std::abs(amt));
-    return move;
+    auto fl = 0.0;
+    if(floor > 0)
+        fl = (double)floor / (double)getMaxST();
+    stamina = std::max(fl, stamina-(double)std::abs(amt) / (double)getMaxST());
+    return getCurST();
 }
 
 int64_t char_data::incCurSTPercent(double amt, bool limit_max) {
-    return incCurST((int64_t)(getMaxST() * std::abs(amt)), limit_max);
+    if(limit_max)
+        stamina = std::min(1.0, stamina+std::abs(amt));
+    else
+        stamina += std::abs(amt);
+    return getMaxST();
 }
 
 int64_t char_data::decCurSTPercent(double amt, int64_t floor) {
-    return decCurST((int64_t)getMaxST() * std::abs(amt), floor);
+    auto fl = 0.0;
+    if(floor > 0)
+        fl = (double)floor / (double)getMaxST();
+    stamina = std::max(fl, stamina-std::abs(amt));
+    return getCurST();
 }
 
-void char_data::transformST(int64_t amt) {
-    move += std::abs(amt);
-    max_move += std::abs(amt);
-}
-
-void char_data::revertST(int64_t amt) {
-    move = std::max(1L, move-std::abs(amt));
-    max_move = std::max(1L, max_move-std::abs(amt));
-}
 
 void char_data::restoreST(bool announce) {
-    if(!isFullST()) mana = getMaxST();
+    if(!isFullST()) stamina = 1;
 }
 
 bool char_data::isFullVitals() const {
@@ -680,8 +707,8 @@ void char_data::restoreLimbs(bool announce) {
 }
 
 int64_t char_data::gainBasePL(int64_t amt, bool trans_mult) {
-    auto mult = trans_mult ? this->race->getCurFormMult(this) : 1;
-    auto to_add = (int64_t)(amt * mult);
+    auto form = race->getCurForm(this);
+    auto to_add = (int64_t)(amt * form.mult);
     hit += to_add;
     max_hit += to_add;
     basepl += amt;
@@ -689,16 +716,16 @@ int64_t char_data::gainBasePL(int64_t amt, bool trans_mult) {
 }
 
 int64_t char_data::gainBaseST(int64_t amt, bool trans_mult) {
-    auto mult = trans_mult ? this->race->getCurFormMult(this) : 1;
-    auto to_add = (int64_t)(amt * mult);
+    auto form = race->getCurForm(this);
+    auto to_add = (int64_t)(amt * form.mult);
     max_move += to_add;
     basest += amt;
     return basest;
 }
 
 int64_t char_data::gainBaseKI(int64_t amt, bool trans_mult) {
-    auto mult = trans_mult ? this->race->getCurFormMult(this) : 1;
-    auto to_add = (int64_t)(amt * mult);
+    auto form = race->getCurForm(this);
+    auto to_add = (int64_t)(amt * form.mult);
     max_mana += to_add;
     baseki += amt;
     return baseki;
@@ -711,24 +738,24 @@ void char_data::gainBaseAll(int64_t amt, bool trans_mult) {
 }
 
 int64_t char_data::loseBasePL(int64_t amt, bool trans_mult) {
-    auto mult = trans_mult ? this->race->getCurFormMult(this) : 1;
-    auto to_lose = (int64_t)(amt * mult);
+    auto form = race->getCurForm(this);
+    auto to_lose = (int64_t)(amt * form.mult);
     max_hit = std::max(1L, max_hit-to_lose);
     basepl = std::max(1L, basepl-amt);
     return basepl;
 }
 
 int64_t char_data::loseBaseST(int64_t amt, bool trans_mult) {
-    auto mult = trans_mult ? this->race->getCurFormMult(this) : 1;
-    auto to_lose = (int64_t)(amt * mult);
+    auto form = race->getCurForm(this);
+    auto to_lose = (int64_t)(amt * form.mult);
     max_move = std::max(1L, max_move-to_lose);
     basest = std::max(1L, basest-amt);
     return basest;
 }
 
 int64_t char_data::loseBaseKI(int64_t amt, bool trans_mult) {
-    auto mult = trans_mult ? this->race->getCurFormMult(this) : 1;
-    auto to_lose = (int64_t)(amt * mult);
+    auto form = race->getCurForm(this);
+    auto to_lose = (int64_t)(amt * form.mult);
     max_mana = std::max(1L, max_mana-to_lose);
     baseki = std::max(1L, baseki-amt);
     return baseki;
@@ -774,4 +801,76 @@ void char_data::loseBaseAllPercent(double amt, bool trans_mult) {
     loseBasePLPercent(amt, trans_mult);
     loseBaseKIPercent(amt, trans_mult);
     loseBaseSTPercent(amt, trans_mult);
+}
+
+
+int64_t char_data::getMaxCarryWeight() const {
+    return std::max(1L, (getMaxPL() / 200) + (GET_STR(this) * 50));
+}
+
+int64_t char_data::getCurGearWeight() const {
+    int64_t total_weight = 0;
+
+    for (int i = 0; i < NUM_WEARS; i++) {
+        if (GET_EQ(this, i)) {
+            total_weight += GET_OBJ_WEIGHT(GET_EQ(this, i));
+        }
+    }
+    return total_weight;
+}
+
+int64_t char_data::getCurCarriedWeight() const {
+    return getCurGearWeight() + carry_weight;
+}
+
+int64_t char_data::getAvailableCarryWeight() const {
+    return getMaxCarryWeight() - getCurCarriedWeight();
+}
+
+double char_data::speednar() const {
+    auto ratio = (double)getCurCarriedWeight() / (double)getMaxCarryWeight();
+    return std::max(0.01,std::min(1.0, 1.0-ratio));
+}
+
+int64_t char_data::getEffMaxPL() const {
+    if(IS_NPC(this)) {
+        return getMaxPL();
+    }
+    return getMaxPL() * speednar();
+}
+
+bool char_data::isWeightedPL() const {
+    return getMaxPL() > getEffMaxPL();
+}
+
+void char_data::apply_kaioken(int times, bool announce) {
+    int64_t boost = (getEffMaxPL() / 10) * times;
+    if (getCurPL() > getEffMaxPL()) {
+        hit = getEffMaxPL();
+    }
+    hit += boost;
+    GET_KAIOKEN(this) = times;
+    REMOVE_BIT_AR(PLR_FLAGS(this), PLR_POWERUP);
+
+    if(announce) {
+        send_to_char(this, "@rA dark red aura bursts up around your body as you achieve Kaioken x %d!@n\r\n", times);
+        ::act("@rA dark red aura bursts up around @R$n@r as they achieve a level of Kaioken!@n", TRUE, this, 0, 0, TO_ROOM);
+    }
+
+}
+
+void char_data::remove_kaioken(int8_t announce) {
+    auto kaio = GET_KAIOKEN(this);
+    hit = std::max(1L, hit - ((getEffMaxPL() / 10) * kaio > 0));
+    GET_KAIOKEN(this) = 0;
+
+    switch(announce) {
+        case 1:
+            send_to_char(this, "You drop out of kaioken.\r\n");
+            ::act("$n@w drops out of kaioken.@n", TRUE, this, 0, 0, TO_ROOM);
+            break;
+        case 2:
+            send_to_char(this, "You lose focus and your kaioken disappears.\r\n");
+            ::act("$n loses focus and $s kaioken aura disappears.", TRUE, this, 0, 0, TO_ROOM);
+    }
 }

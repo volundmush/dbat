@@ -2526,7 +2526,7 @@ struct char_data {
     // C++ reworking
     const std::string &juggleRaceName(bool capitalized) const;
 
-    void restore();
+    void restore(bool announce);
 
     void ghostify();
 
@@ -2577,21 +2577,20 @@ struct char_data {
 
     int64_t healCurHealth(int64_t amt);
     int64_t harmCurHealth(int64_t amt);
-    void refreshSuppress();
 
     int64_t getMaxPL() const;
     int64_t getCurPL() const;
     int64_t getBasePL() const;
+    int64_t getEffBasePL() const;
     double getCurPLPercent() const;
     int64_t getPercentOfCurPL(double amt) const;
     int64_t getPercentOfMaxPL(double amt) const;
-    void transformPL(int64_t amt);
-    void revertPL(int64_t amt);
     bool isFullPL() const;
 
     int64_t getCurKI() const;
     int64_t getMaxKI() const;
     int64_t getBaseKI() const;
+    int64_t getEffBaseKI() const;
     double getCurKIPercent() const;
     int64_t getPercentOfCurKI(double amt) const;
     int64_t getPercentOfMaxKI(double amt) const;
@@ -2603,13 +2602,12 @@ struct char_data {
     int64_t decCurKI(int64_t amt, int64_t floor = 0);
     int64_t incCurKIPercent(double amt, bool limit_max = true);
     int64_t decCurKIPercent(double amt, int64_t floor = 0);
-    void transformKI(int64_t amt);
-    void revertKI(int64_t amt);
     void restoreKI(bool announce = true);
 
     int64_t getCurST() const;
     int64_t getMaxST() const;
     int64_t getBaseST() const;
+    int64_t getEffBaseST() const;
     double getCurSTPercent() const;
     int64_t getPercentOfCurST(double amt) const;
     int64_t getPercentOfMaxST(double amt) const;
@@ -2621,8 +2619,6 @@ struct char_data {
     int64_t decCurST(int64_t amt, int64_t floor = 0);
     int64_t incCurSTPercent(double amt, bool limit_max = true);
     int64_t decCurSTPercent(double amt, int64_t floor = 0);
-    void transformST(int64_t amt);
-    void revertST(int64_t amt);
     void restoreST(bool announce = true);
 
     bool isFullVitals() const;
@@ -2655,6 +2651,23 @@ struct char_data {
     void cureStatusBurn(bool announce = true);
     void cureStatusPoison(bool announce = true);
     void setStatusKnockedOut();
+
+    // stats refactor stuff
+    int64_t getMaxCarryWeight() const;
+    int64_t getCurGearWeight() const;
+    int64_t getCurCarriedWeight() const;
+    int64_t getAvailableCarryWeight() const;
+
+    double speednar() const;
+    int64_t getEffMaxPL() const;
+    bool isWeightedPL() const;
+
+    void apply_kaioken(int times, bool announce);
+    void remove_kaioken(int8_t announce);
+
+    double health = 1;
+    double energy = 1;
+    double stamina = 1;
 };
 
 

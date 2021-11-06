@@ -382,8 +382,8 @@ int write_mobile_espec(mob_vnum mvnum, struct char_data *mob, FILE *fd)
     fprintf(fd, "Cha: %d\n", GET_CHA(mob));
   if (mob_proto + real_mobile(mvnum) != mob) { /* Not saving a prototype */
     fprintf(fd, "Hit: %" I64T "\nMaxHit: %" I64T "\nMana: %" I64T "\nMaxMana: %" I64T "\nMoves: %" I64T "\nMaxMoves: %" I64T "\n",
-            GET_HIT(mob), GET_MAX_HIT(mob), GET_MANA(mob), GET_MAX_MANA(mob),
-            GET_MOVE(mob), GET_MAX_MOVE(mob));
+            GET_HIT(mob), GET_MAX_HIT(mob), (mob->getCurKI()), GET_MAX_MANA(mob),
+            (mob->getCurST()), GET_MAX_MOVE(mob));
     for (aff = mob->affected; aff; aff = aff->next)
       if (aff->type)
         fprintf(fd, "Affect: %d %d %d %d %d %d\n", aff->type, aff->duration,
@@ -454,7 +454,7 @@ int write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd)
                 abuf1, abuf2, abuf3, abuf4,
 		GET_ALIGNMENT(mob),
 		GET_HITDICE(mob), GET_FISHD(mob), 10 - (GET_ARMOR(mob) / 10),
-                GET_HIT(mob), GET_MANA(mob), GET_MOVE(mob), GET_NDD(mob), GET_SDD(mob),
+                GET_HIT(mob), (mob->getCurKI()), (mob->getCurST()), GET_NDD(mob), GET_SDD(mob),
 		GET_DAMAGE_MOD(mob)
   );
   fprintf(fd, 	"%d 0 %d %d\n"

@@ -877,8 +877,8 @@ char *make_prompt(struct descriptor_data *d)
         if (count >= 0)
           len += count;
       }
-      if (GET_MOVE(ch) << 2 < GET_MAX_MOVE(ch) && len < sizeof(prompt)) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "STA: %" I64T " ", GET_MOVE(ch));
+      if ((ch->getCurST()) << 2 < GET_MAX_MOVE(ch) && len < sizeof(prompt)) {
+        count = snprintf(prompt + len, sizeof(prompt) - len, "STA: %" I64T " ", (ch->getCurST()));
         if (count >= 0)
           len += count;
       }
@@ -1342,7 +1342,8 @@ char *make_prompt(struct descriptor_data *d)
        }
       }
       if (!PRF_FLAGGED(d->character, PRF_DISPERC)) {
-       if (PRF_FLAGGED(d->character, PRF_DISPHP) && len < sizeof(prompt) && GET_HIT(d->character) >= gear_pl(d->character) && GET_HIT(d->character) < GET_MAX_HIT(d->character)) {
+       if (PRF_FLAGGED(d->character, PRF_DISPHP) && len < sizeof(prompt) && GET_HIT(d->character) >=
+                                                                                    (d->character->getEffMaxPL()) && GET_HIT(d->character) < GET_MAX_HIT(d->character)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RPL@n@Y: @m%s@D]@n", add_commas(GET_HIT(d->character)));
         if (count >= 0)
           len += count;
@@ -1352,17 +1353,17 @@ char *make_prompt(struct descriptor_data *d)
         if (count >= 0)
           len += count;
        }
-       else if (PRF_FLAGGED(d->character, PRF_DISPHP) && len < sizeof(prompt) && GET_HIT(d->character) > (gear_pl(d->character)) / 2) {
+       else if (PRF_FLAGGED(d->character, PRF_DISPHP) && len < sizeof(prompt) && GET_HIT(d->character) > ((d->character->getEffMaxPL())) / 2) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RPL@n@Y: @c%s@D]@n", add_commas(GET_HIT(d->character)));
         if (count >= 0)
           len += count;
        }
-       else if (PRF_FLAGGED(d->character, PRF_DISPHP) && len < sizeof(prompt) && GET_HIT(d->character) > (gear_pl(d->character)) / 10) {
+       else if (PRF_FLAGGED(d->character, PRF_DISPHP) && len < sizeof(prompt) && GET_HIT(d->character) > ((d->character->getEffMaxPL())) / 10) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RPL@n@Y: @y%s@D]@n", add_commas(GET_HIT(d->character)));
         if (count >= 0)
           len += count;
        }
-       else if (PRF_FLAGGED(d->character, PRF_DISPHP) && len < sizeof(prompt) && GET_HIT(d->character) <= (gear_pl(d->character))/ 10) {
+       else if (PRF_FLAGGED(d->character, PRF_DISPHP) && len < sizeof(prompt) && GET_HIT(d->character) <= ((d->character->getEffMaxPL()))/ 10) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RPL@n@Y: @r%s@D]@n", add_commas(GET_HIT(d->character)));
         if (count >= 0)
           len += count;
@@ -1377,7 +1378,7 @@ char *make_prompt(struct descriptor_data *d)
        }
        perc = (power * 100) / maxpower;
        if (perc > 100) {
-        if (power >= gear_pl(d->character) && power < GET_MAX_HIT(d->character)) {
+        if (power >= (d->character->getEffMaxPL()) && power < GET_MAX_HIT(d->character)) {
          count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RPL@n@Y: @m%d%s@D]@n", perc, "@w%");
         } else if (power > GET_MAX_HIT(d->character)) {
          count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RPL@n@Y: @G%d%s@D]@n", perc, "@w%");
@@ -1405,23 +1406,29 @@ char *make_prompt(struct descriptor_data *d)
        }
       }
       if (!PRF_FLAGGED(d->character, PRF_DISPERC)) {
-       if (PRF_FLAGGED(d->character, PRF_DISPKI) && len < sizeof(prompt) && GET_MANA(d->character) > GET_MAX_MANA(d->character) / 2) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@CKI@Y: @c%s@D]@n", add_commas(GET_MANA(d->character)));
+       if (PRF_FLAGGED(d->character, PRF_DISPKI) && len < sizeof(prompt) &&
+               (d->character->getCurKI()) > GET_MAX_MANA(d->character) / 2) {
+        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@CKI@Y: @c%s@D]@n", add_commas(
+                (d->character->getCurKI())));
         if (count >= 0)
           len += count;
        }
-       else if (PRF_FLAGGED(d->character, PRF_DISPKI) && len < sizeof(prompt) && GET_MANA(d->character) > GET_MAX_MANA(d->character) / 10) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@CKI@Y: @y%s@D]@n", add_commas(GET_MANA(d->character)));
+       else if (PRF_FLAGGED(d->character, PRF_DISPKI) && len < sizeof(prompt) &&
+               (d->character->getCurKI()) > GET_MAX_MANA(d->character) / 10) {
+        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@CKI@Y: @y%s@D]@n", add_commas(
+                (d->character->getCurKI())));
         if (count >= 0)
           len += count;
        }
-       else if (PRF_FLAGGED(d->character, PRF_DISPKI) && len < sizeof(prompt) && GET_MANA(d->character) <= GET_MAX_MANA(d->character) / 10) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@CKI@Y: @r%s@D]@n", add_commas(GET_MANA(d->character)));
+       else if (PRF_FLAGGED(d->character, PRF_DISPKI) && len < sizeof(prompt) &&
+               (d->character->getCurKI()) <= GET_MAX_MANA(d->character) / 10) {
+        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@CKI@Y: @r%s@D]@n", add_commas(
+                (d->character->getCurKI())));
         if (count >= 0)
           len += count;
        }
       } else if (PRF_FLAGGED(d->character, PRF_DISPKI)) {
-       int64_t power = GET_MANA(d->character), maxpower = GET_MAX_MANA(d->character);
+       int64_t power = (d->character->getCurKI()), maxpower = GET_MAX_MANA(d->character);
        int perc = 0;
        if (power <= 0) {
         power = 1;
@@ -1452,23 +1459,29 @@ char *make_prompt(struct descriptor_data *d)
        }
       }
       if (!PRF_FLAGGED(d->character, PRF_DISPERC)) {
-       if (PRF_FLAGGED(d->character, PRF_DISPMOVE) && len < sizeof(prompt) && GET_MOVE(d->character) > GET_MAX_MOVE(d->character) / 2) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GSTA@Y: @c%s@D]@n", add_commas(GET_MOVE(d->character)));
+       if (PRF_FLAGGED(d->character, PRF_DISPMOVE) && len < sizeof(prompt) &&
+               (d->character->getCurST()) > GET_MAX_MOVE(d->character) / 2) {
+        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GSTA@Y: @c%s@D]@n", add_commas(
+                (d->character->getCurST())));
         if (count >= 0)
           len += count;
        }
-       else if (PRF_FLAGGED(d->character, PRF_DISPMOVE) && len < sizeof(prompt) && GET_MOVE(d->character) > GET_MAX_MOVE(d->character) / 10) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GSTA@Y: @y%s@D]@n", add_commas(GET_MOVE(d->character)));
+       else if (PRF_FLAGGED(d->character, PRF_DISPMOVE) && len < sizeof(prompt) &&
+               (d->character->getCurST()) > GET_MAX_MOVE(d->character) / 10) {
+        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GSTA@Y: @y%s@D]@n", add_commas(
+                (d->character->getCurST())));
         if (count >= 0)
           len += count;
        }
-       else if (PRF_FLAGGED(d->character, PRF_DISPMOVE) && len < sizeof(prompt) && GET_MOVE(d->character) <= GET_MAX_MOVE(d->character) / 10) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GSTA@Y: @r%s@D]@n", add_commas(GET_MOVE(d->character)));
+       else if (PRF_FLAGGED(d->character, PRF_DISPMOVE) && len < sizeof(prompt) &&
+               (d->character->getCurST()) <= GET_MAX_MOVE(d->character) / 10) {
+        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GSTA@Y: @r%s@D]@n", add_commas(
+                (d->character->getCurST())));
         if (count >= 0)
           len += count;
        }
       } else if (PRF_FLAGGED(d->character, PRF_DISPMOVE)) {
-       int64_t power = GET_MOVE(d->character), maxpower = GET_MAX_MOVE(d->character);
+       int64_t power = (d->character->getCurST()), maxpower = GET_MAX_MOVE(d->character);
        int perc = 0;
        if (power <= 0) {
         power = 1;

@@ -68,6 +68,7 @@ namespace dbat::sensei {
         int getGravTolerance() const;
         bool senseiIsPcOk() const;
         IDXTYPE senseiStartRoom() const;
+        IDXTYPE senseiLocationID() const;
 
     protected:
         sensei_id s_id;

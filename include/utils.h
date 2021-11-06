@@ -63,12 +63,11 @@ void handle_evolution(struct char_data *ch, int64_t dmg);
 int64_t molt_threshold(struct char_data *ch);
 int cook_element(room_rnum room);
 void purge_homing(struct char_data *ch);
-int64_t gear_pl_restore(struct char_data *ch, int64_t previous);
-int64_t gear_pl(struct char_data *ch);
+
 int planet_check(struct char_data *ch, struct char_data *vict);
 void improve_skill(struct char_data *ch, int skill, int num);
 double speednar(struct char_data *ch);
-int gear_weight(struct char_data *ch);
+
 int64_t gear_exp(struct char_data *ch, int64_t exp);
 int get_flag_by_name(const char *flag_list[], char *flag_name);
 char* add_commas(int64_t X);
@@ -460,7 +459,7 @@ int wield_type(int chsize, const struct obj_data *weap);
 #define IS_GRAP(ch)     (GRAPPLING(ch) || GRAPPLED(ch))
 #define GET_SPEEDINT(ch) (IS_BIO(ch) ? ((GET_CHA(ch) * GET_DEX(ch)) * (GET_MAX_HIT(ch) / 1200) / 1200) + (GET_CHA(ch) * (GET_KAIOKEN(ch) * 100)) : ((GET_CHA(ch) * GET_DEX(ch)) * (GET_MAX_HIT(ch) / 1000) / 1000) + (GET_CHA(ch) * (GET_KAIOKEN(ch) * 100)))
 #define IS_INFERIOR(ch) (IS_KONATSU(ch) || IS_DEMON(ch))
-#define IS_WEIGHTED(ch) (gear_pl(ch) < GET_MAX_HIT(ch))
+#define IS_WEIGHTED(ch) (ch->getEffMaxPL() < GET_MAX_HIT(ch))
 
 
 #define GET_EXP(ch)	  ((ch)->exp)
@@ -478,12 +477,10 @@ int wield_type(int chsize, const struct obj_data *weap);
 #define GET_CHARGETO(ch)  ((ch)->chargeto)
 #define GET_ARMOR(ch)     ((ch)->armor)
 #define GET_ARMOR_LAST(ch) ((ch)->armor_last)
-#define GET_HIT(ch)	  ((ch)->hit)
-#define GET_MAX_HIT(ch)	  ((ch)->max_hit)
-#define GET_MOVE(ch)	  ((ch)->move)
-#define GET_MAX_MOVE(ch)  ((ch)->max_move)
-#define GET_MANA(ch)	  ((ch)->mana)
-#define GET_MAX_MANA(ch)  ((ch)->max_mana)
+#define GET_HIT(ch)	  ((ch)->getCurPL())
+#define GET_MAX_HIT(ch)	  ((ch)->getEffMaxPL())
+#define GET_MAX_MOVE(ch)  ((ch)->getMaxST())
+#define GET_MAX_MANA(ch)  (ch->getMaxKI())
 #define GET_KI(ch)	  ((ch)->ki)
 #define GET_MAX_KI(ch)    ((ch)->max_ki)
 #define GET_DROOM(ch)     ((ch)->droom)

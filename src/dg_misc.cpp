@@ -300,16 +300,7 @@ void script_damage(struct char_data *vict, int dam)
     return;
   }
 
-  if (GET_SUPP(vict) <= 0) {
-   GET_HIT(vict) -= dam;
-   GET_HIT(vict) = MIN(GET_HIT(vict), GET_MAX_HIT(vict));
-  } else if (GET_SUPP(vict) - dam >= 0) {
-   GET_SUPP(vict) -= dam;
-  } else {
-   dam -= GET_SUPP(vict);
-   GET_HIT(vict) -= dam;
-   GET_HIT(vict) = MIN(GET_HIT(vict), GET_MAX_HIT(vict));
-  }
+  vict->decCurHealth(dam);
 
   update_pos(vict);
   send_char_pos(vict, dam);

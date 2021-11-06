@@ -159,19 +159,19 @@ const char *report_party_health(struct char_data *ch)
      else
       plc1 = 0;
 
-     if (GET_MOVE(party1) >= GET_MAX_MOVE(party1)) {
+     if ((party1->getCurST()) >= GET_MAX_MOVE(party1)) {
       stam1 = 7;
-     } else if (GET_MOVE(party1) >= GET_MAX_MOVE(party1) * .9) {
+     } else if ((party1->getCurST()) >= GET_MAX_MOVE(party1) * .9) {
       stam1 = 6;
-     } else if (GET_MOVE(party1) >= GET_MAX_MOVE(party1) * .8) {
+     } else if ((party1->getCurST()) >= GET_MAX_MOVE(party1) * .8) {
       stam1 = 5;
-     } else if (GET_MOVE(party1) >= GET_MAX_MOVE(party1) * .7) {
+     } else if ((party1->getCurST()) >= GET_MAX_MOVE(party1) * .7) {
       stam1 = 4;
-     } else if (GET_MOVE(party1) >= GET_MAX_MOVE(party1) * .5) {
+     } else if ((party1->getCurST()) >= GET_MAX_MOVE(party1) * .5) {
       stam1 = 3;
-     } else if (GET_MOVE(party1) >= GET_MAX_MOVE(party1) * .4) {
+     } else if ((party1->getCurST()) >= GET_MAX_MOVE(party1) * .4) {
       stam1 = 2;
-     } else if (GET_MOVE(party1) >= GET_MAX_MOVE(party1) * .2) {
+     } else if ((party1->getCurST()) >= GET_MAX_MOVE(party1) * .2) {
       stam1 = 1;
      } else {
       stam1 = 0;
@@ -190,19 +190,19 @@ const char *report_party_health(struct char_data *ch)
      else
       plc2 = 0;
 
-     if (GET_MOVE(party2) >= GET_MAX_MOVE(party2)) {
+     if ((party2->getCurST()) >= GET_MAX_MOVE(party2)) {
       stam2 = 7;
-     } else if (GET_MOVE(party2) >= GET_MAX_MOVE(party2) * .9) {
+     } else if ((party2->getCurST()) >= GET_MAX_MOVE(party2) * .9) {
       stam2 = 6;
-     } else if (GET_MOVE(party2) >= GET_MAX_MOVE(party2) * .8) {
+     } else if ((party2->getCurST()) >= GET_MAX_MOVE(party2) * .8) {
       stam2 = 5;
-     } else if (GET_MOVE(party2) >= GET_MAX_MOVE(party2) * .7) {
+     } else if ((party2->getCurST()) >= GET_MAX_MOVE(party2) * .7) {
       stam2 = 4;
-     } else if (GET_MOVE(party2) >= GET_MAX_MOVE(party2) * .5) {
+     } else if ((party2->getCurST()) >= GET_MAX_MOVE(party2) * .5) {
       stam2 = 3;
-     } else if (GET_MOVE(party2) >= GET_MAX_MOVE(party2) * .4) {
+     } else if ((party2->getCurST()) >= GET_MAX_MOVE(party2) * .4) {
       stam2 = 2;
-     } else if (GET_MOVE(party2) >= GET_MAX_MOVE(party2) * .2) {
+     } else if ((party2->getCurST()) >= GET_MAX_MOVE(party2) * .2) {
       stam2 = 1;
      } else {
       stam2 = 0;
@@ -221,19 +221,19 @@ const char *report_party_health(struct char_data *ch)
      else
       plc3 = 0;
 
-     if (GET_MOVE(party3) >= GET_MAX_MOVE(party3)) {
+     if ((party3->getCurST()) >= GET_MAX_MOVE(party3)) {
       stam3 = 7;
-     } else if (GET_MOVE(party3) >= GET_MAX_MOVE(party3) * .9) {
+     } else if ((party3->getCurST()) >= GET_MAX_MOVE(party3) * .9) {
       stam3 = 6;
-     } else if (GET_MOVE(party3) >= GET_MAX_MOVE(party3) * .8) {
+     } else if ((party3->getCurST()) >= GET_MAX_MOVE(party3) * .8) {
       stam3 = 5;
-     } else if (GET_MOVE(party3) >= GET_MAX_MOVE(party3) * .7) {
+     } else if ((party3->getCurST()) >= GET_MAX_MOVE(party3) * .7) {
       stam3 = 4;
-     } else if (GET_MOVE(party3) >= GET_MAX_MOVE(party3) * .5) {
+     } else if ((party3->getCurST()) >= GET_MAX_MOVE(party3) * .5) {
       stam3 = 3;
-     } else if (GET_MOVE(party3) >= GET_MAX_MOVE(party3) * .4) {
+     } else if ((party3->getCurST()) >= GET_MAX_MOVE(party3) * .4) {
       stam3 = 2;
-     } else if (GET_MOVE(party3) >= GET_MAX_MOVE(party3) * .2) {
+     } else if ((party3->getCurST()) >= GET_MAX_MOVE(party3) * .2) {
       stam3 = 1;
      } else {
       stam3 = 0;
@@ -252,19 +252,19 @@ const char *report_party_health(struct char_data *ch)
      else
       plc4 = 0;
 
-     if (GET_MOVE(party4) >= GET_MAX_MOVE(party4)) {
+     if ((party4->getCurST()) >= GET_MAX_MOVE(party4)) {
       stam4 = 7;
-     } else if (GET_MOVE(party4) >= GET_MAX_MOVE(party4) * .9) {
+     } else if ((party4->getCurST()) >= GET_MAX_MOVE(party4) * .9) {
       stam4 = 6;
-     } else if (GET_MOVE(party4) >= GET_MAX_MOVE(party4) * .8) {
+     } else if ((party4->getCurST()) >= GET_MAX_MOVE(party4) * .8) {
       stam4 = 5;
-     } else if (GET_MOVE(party4) >= GET_MAX_MOVE(party4) * .7) {
+     } else if ((party4->getCurST()) >= GET_MAX_MOVE(party4) * .7) {
       stam4 = 4;
-     } else if (GET_MOVE(party4) >= GET_MAX_MOVE(party4) * .5) {
+     } else if ((party4->getCurST()) >= GET_MAX_MOVE(party4) * .5) {
       stam4 = 3;
-     } else if (GET_MOVE(party4) >= GET_MAX_MOVE(party4) * .4) {
+     } else if ((party4->getCurST()) >= GET_MAX_MOVE(party4) * .4) {
       stam4 = 2;
-     } else if (GET_MOVE(party4) >= GET_MAX_MOVE(party4) * .2) {
+     } else if ((party4->getCurST()) >= GET_MAX_MOVE(party4) * .2) {
       stam4 = 1;
      } else {
       stam4 = 0;
@@ -294,19 +294,19 @@ const char *report_party_health(struct char_data *ch)
      else
       plc1 = 0;
 
-     if (GET_MOVE(party1) >= GET_MAX_MOVE(party1)) {
+     if ((party1->getCurST()) >= GET_MAX_MOVE(party1)) {
       stam1 = 7;
-     } else if (GET_MOVE(party1) >= GET_MAX_MOVE(party1) * .9) {
+     } else if ((party1->getCurST()) >= GET_MAX_MOVE(party1) * .9) {
       stam1 = 6;
-     } else if (GET_MOVE(party1) >= GET_MAX_MOVE(party1) * .8) {
+     } else if ((party1->getCurST()) >= GET_MAX_MOVE(party1) * .8) {
       stam1 = 5;
-     } else if (GET_MOVE(party1) >= GET_MAX_MOVE(party1) * .7) {
+     } else if ((party1->getCurST()) >= GET_MAX_MOVE(party1) * .7) {
       stam1 = 4;
-     } else if (GET_MOVE(party1) >= GET_MAX_MOVE(party1) * .5) {
+     } else if ((party1->getCurST()) >= GET_MAX_MOVE(party1) * .5) {
       stam1 = 3;
-     } else if (GET_MOVE(party1) >= GET_MAX_MOVE(party1) * .4) {
+     } else if ((party1->getCurST()) >= GET_MAX_MOVE(party1) * .4) {
       stam1 = 2;
-     } else if (GET_MOVE(party1) >= GET_MAX_MOVE(party1) * .2) {
+     } else if ((party1->getCurST()) >= GET_MAX_MOVE(party1) * .2) {
       stam1 = 1;
      } else {
       stam1 = 0;
@@ -333,19 +333,19 @@ const char *report_party_health(struct char_data *ch)
       else
        plc2 = 0;
 
-      if (GET_MOVE(party2) >= GET_MAX_MOVE(party2)) {
+      if ((party2->getCurST()) >= GET_MAX_MOVE(party2)) {
        stam2 = 7;
-      } else if (GET_MOVE(party2) >= GET_MAX_MOVE(party2) * .9) {
+      } else if ((party2->getCurST()) >= GET_MAX_MOVE(party2) * .9) {
        stam2 = 6;
-      } else if (GET_MOVE(party2) >= GET_MAX_MOVE(party2) * .8) {
+      } else if ((party2->getCurST()) >= GET_MAX_MOVE(party2) * .8) {
        stam2 = 5;
-      } else if (GET_MOVE(party2) >= GET_MAX_MOVE(party2) * .7) {
+      } else if ((party2->getCurST()) >= GET_MAX_MOVE(party2) * .7) {
        stam2 = 4;
-      } else if (GET_MOVE(party2) >= GET_MAX_MOVE(party2) * .5) {
+      } else if ((party2->getCurST()) >= GET_MAX_MOVE(party2) * .5) {
        stam2 = 3;
-      } else if (GET_MOVE(party2) >= GET_MAX_MOVE(party2) * .4) {
+      } else if ((party2->getCurST()) >= GET_MAX_MOVE(party2) * .4) {
        stam2 = 2;
-      } else if (GET_MOVE(party2) >= GET_MAX_MOVE(party2) * .2) {
+      } else if ((party2->getCurST()) >= GET_MAX_MOVE(party2) * .2) {
        stam2 = 1;
       } else {
        stam2 = 0;
@@ -364,19 +364,19 @@ const char *report_party_health(struct char_data *ch)
       else
        plc3 = 0;
 
-      if (GET_MOVE(party3) >= GET_MAX_MOVE(party3)) {
+      if ((party3->getCurST()) >= GET_MAX_MOVE(party3)) {
        stam3 = 7;
-      } else if (GET_MOVE(party3) >= GET_MAX_MOVE(party3) * .9) {
+      } else if ((party3->getCurST()) >= GET_MAX_MOVE(party3) * .9) {
        stam3 = 6;
-      } else if (GET_MOVE(party3) >= GET_MAX_MOVE(party3) * .8) {
+      } else if ((party3->getCurST()) >= GET_MAX_MOVE(party3) * .8) {
        stam3 = 5;
-      } else if (GET_MOVE(party3) >= GET_MAX_MOVE(party3) * .7) {
+      } else if ((party3->getCurST()) >= GET_MAX_MOVE(party3) * .7) {
        stam3 = 4;
-      } else if (GET_MOVE(party3) >= GET_MAX_MOVE(party3) * .5) {
+      } else if ((party3->getCurST()) >= GET_MAX_MOVE(party3) * .5) {
        stam3 = 3;
-      } else if (GET_MOVE(party3) >= GET_MAX_MOVE(party3) * .4) {
+      } else if ((party3->getCurST()) >= GET_MAX_MOVE(party3) * .4) {
        stam3 = 2;
-      } else if (GET_MOVE(party3) >= GET_MAX_MOVE(party3) * .2) {
+      } else if ((party3->getCurST()) >= GET_MAX_MOVE(party3) * .2) {
        stam3 = 1;
       } else {
        stam3 = 0;
@@ -395,19 +395,19 @@ const char *report_party_health(struct char_data *ch)
       else
        plc4 = 0;
 
-      if (GET_MOVE(party4) >= GET_MAX_MOVE(party4)) {
+      if ((party4->getCurST()) >= GET_MAX_MOVE(party4)) {
        stam4 = 7;
-      } else if (GET_MOVE(party4) >= GET_MAX_MOVE(party4) * .9) {
+      } else if ((party4->getCurST()) >= GET_MAX_MOVE(party4) * .9) {
        stam4 = 6;
-      } else if (GET_MOVE(party4) >= GET_MAX_MOVE(party4) * .8) {
+      } else if ((party4->getCurST()) >= GET_MAX_MOVE(party4) * .8) {
        stam4 = 5;
-      } else if (GET_MOVE(party4) >= GET_MAX_MOVE(party4) * .7) {
+      } else if ((party4->getCurST()) >= GET_MAX_MOVE(party4) * .7) {
        stam4 = 4;
-      } else if (GET_MOVE(party4) >= GET_MAX_MOVE(party4) * .5) {
+      } else if ((party4->getCurST()) >= GET_MAX_MOVE(party4) * .5) {
        stam4 = 3;
-      } else if (GET_MOVE(party4) >= GET_MAX_MOVE(party4) * .4) {
+      } else if ((party4->getCurST()) >= GET_MAX_MOVE(party4) * .4) {
        stam4 = 2;
-      } else if (GET_MOVE(party4) >= GET_MAX_MOVE(party4) * .2) {
+      } else if ((party4->getCurST()) >= GET_MAX_MOVE(party4) * .2) {
        stam4 = 1;
       } else {
        stam4 = 0;
@@ -2436,27 +2436,23 @@ int64_t molt_threshold(struct char_data *ch)
  if (!IS_ARLIAN(ch))
   return (0);
  else if (GET_MOLT_LEVEL(ch) < 100) {
-  threshold = (((GET_MOLT_LEVEL(ch) + 1) * (GET_MAX_HIT(ch) * 0.02)) * GET_CON(ch)) / 4;
+  threshold = (((GET_MOLT_LEVEL(ch) + 1) * (ch->getBasePL() * 0.02)) * GET_CON(ch)) / 4;
   threshold = threshold * 0.25;
  } else if (GET_MOLT_LEVEL(ch) < 200) {
-  threshold = (((GET_MOLT_LEVEL(ch) + 1) * (GET_MAX_HIT(ch) * 0.02)) * GET_CON(ch)) / 2;
+  threshold = (((GET_MOLT_LEVEL(ch) + 1) * (ch->getBasePL() * 0.02)) * GET_CON(ch)) / 2;
   threshold = threshold * 0.20;
  } else if (GET_MOLT_LEVEL(ch) < 400) {
-  threshold = (((GET_MOLT_LEVEL(ch) + 1) * (GET_MAX_HIT(ch) * 0.02)) * GET_CON(ch));
+  threshold = (((GET_MOLT_LEVEL(ch) + 1) * (ch->getBasePL() * 0.02)) * GET_CON(ch));
   threshold = threshold * 0.17;
  } else if (GET_MOLT_LEVEL(ch) < 800) {
-  threshold = (((GET_MOLT_LEVEL(ch) + 1) * (GET_MAX_HIT(ch) * 0.02)) * GET_CON(ch)) * 2;
+  threshold = (((GET_MOLT_LEVEL(ch) + 1) * (ch->getBasePL() * 0.02)) * GET_CON(ch)) * 2;
   threshold = threshold * 0.15;
  } else {
-  threshold = (((GET_MOLT_LEVEL(ch) + 1) * (GET_MAX_HIT(ch) * 0.02)) * GET_CON(ch)) * 4;
+  threshold = (((GET_MOLT_LEVEL(ch) + 1) * (ch->getBasePL() * 0.02)) * GET_CON(ch)) * 4;
   threshold = threshold * 0.12;
  }
 
- if (threshold > max) {
-  threshold = max;
- }
-
- return (threshold);
+ return std::min(threshold, max);
 }
 
 int armor_evolve(struct char_data *ch)
@@ -2972,87 +2968,49 @@ double speednar(struct char_data *ch)
 
  double result = 0;
 
- if (gear_weight(ch) >= CAN_CARRY_W(ch)) {
+ if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch)) {
   result = 1.0;
- } else if (gear_weight(ch) >= CAN_CARRY_W(ch) * 0.95) {
+ } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.95) {
   result = 0.95;
- } else if (gear_weight(ch) >= CAN_CARRY_W(ch) * 0.9) {
+ } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.9) {
   result = 0.90;
- } else if (gear_weight(ch) >= CAN_CARRY_W(ch) * 0.85) {
+ } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.85) {
   result = 0.85;
- } else if (gear_weight(ch) >= CAN_CARRY_W(ch) * 0.80) {
+ } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.80) {
   result = 0.80;
- } else if (gear_weight(ch) >= CAN_CARRY_W(ch) * 0.75) {
+ } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.75) {
   result = 0.75;
- } else if (gear_weight(ch) >= CAN_CARRY_W(ch) * 0.70) {
+ } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.70) {
   result = 0.70;
- } else if (gear_weight(ch) >= CAN_CARRY_W(ch) * 0.65) {
+ } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.65) {
   result = 0.65;
- } else if (gear_weight(ch) >= CAN_CARRY_W(ch) * 0.60) {
+ } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.60) {
   result = 0.60;
- } else if (gear_weight(ch) >= CAN_CARRY_W(ch) * 0.55) {
+ } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.55) {
   result = 0.55;
- } else if (gear_weight(ch) >= CAN_CARRY_W(ch) * 0.50) {
+ } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.50) {
   result = 0.50;
- } else if (gear_weight(ch) >= CAN_CARRY_W(ch) * 0.45) {
+ } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.45) {
   result = 0.45;
- } else if (gear_weight(ch) >= CAN_CARRY_W(ch) * 0.40) {
+ } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.40) {
   result = 0.40;
- } else if (gear_weight(ch) >= CAN_CARRY_W(ch) * 0.35) {
+ } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.35) {
   result = 0.35;
- } else if (gear_weight(ch) >= CAN_CARRY_W(ch) * 0.30) {
+ } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.30) {
   result = 0.30;
- } else if (gear_weight(ch) >= CAN_CARRY_W(ch) * 0.25) {
+ } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.25) {
   result = 0.25;
- } else if (gear_weight(ch) >= CAN_CARRY_W(ch) * 0.20) {
+ } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.20) {
   result = 0.20;
- } else if (gear_weight(ch) >= CAN_CARRY_W(ch) * 0.15) {
+ } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.15) {
   result = 0.15;
- } else if (gear_weight(ch) >= CAN_CARRY_W(ch) * 0.10) {
+ } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.10) {
   result = 0.10;
- } else if (gear_weight(ch) >= CAN_CARRY_W(ch) * 0.05) {
+ } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.05) {
   result = 0.05;
- } else if (gear_weight(ch) >= CAN_CARRY_W(ch) * 0.01) {
+ } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.01) {
   result = 0.01;
  }
-
- return (result);
-
-}
-
-int64_t gear_pl_restore(struct char_data *ch, int64_t previous)
-{
-
- if (IS_NPC(ch)) {
-  return (GET_MAX_HIT(ch));
- }
-  
-
- int64_t result = 0, adjust = 0, max = GET_MAX_HIT(ch), cur = 0;
-
- if (GET_SUPPRESS(ch) > 0) {
-  max = (GET_MAX_HIT(ch) * 0.01) * GET_SUPPRESS(ch);
- }
-
- adjust = max * speednar(ch);
- cur = max - adjust;
- result = cur - previous;
-
- return (result);
-
-}
-
-int64_t gear_pl(struct char_data *ch)
-{
-
- if (IS_NPC(ch)) {
-  return (GET_MAX_HIT(ch));
- }
-
- int64_t result = 0, adjust = 0, max = GET_MAX_HIT(ch);
-
- adjust = max * speednar(ch);
- result = max - adjust;
 
  return (result);
 
@@ -3065,73 +3023,9 @@ int64_t gear_exp(struct char_data *ch, int64_t exp)
   return 0;
  }
 
- int64_t out = 0;
-
- if (speednar(ch) >= 1) {
-  out = exp * 3;
- } else if (speednar(ch) >= 0.95) {
-  out = exp * 2.8;
- } else if (speednar(ch) >= 0.9) {
-  out = exp * 2.6;
- } else if (speednar(ch) >= 0.85) {
-  out = exp * 2.4;
- } else if (speednar(ch) >= 0.8) {
-  out = exp * 2.2;
- } else if (speednar(ch) >= 0.75) {
-  out = exp * 2;
- } else if (speednar(ch) >= 0.7) {
-  out = exp * 1.8;
- } else if (speednar(ch) >= 0.65) {
-  out = exp * 1.7;
- } else if (speednar(ch) >= 0.6) {
-  out = exp * 1.6;
- } else if (speednar(ch) >= 0.55) {
-  out = exp * 1.55;
- } else if (speednar(ch) >= 0.5) {
-  out = exp * 1.5;
- } else if (speednar(ch) >= 0.45) {
-  out = exp * 1.45;
- } else if (speednar(ch) >= 0.4) {
-  out = exp * 1.4;
- } else if (speednar(ch) >= 0.35) {
-  out = exp * 1.35;
- } else if (speednar(ch) >= 0.3) {
-  out = exp * 1.3;
- } else if (speednar(ch) >= 0.25) {
-  out = exp * 1.25;
- } else if (speednar(ch) >= 0.20) {
-  out = exp * 1.2;
- } else if (speednar(ch) >= 0.15) {
-  out = exp * 1.15;
- } else if (speednar(ch) >= 0.10) {
-  out = exp * 1.1;
- } else if (speednar(ch) >= 0.05) {
-  out = exp * 1.05;
- } else if (speednar(ch) >= 0.025) {
-  out = exp * 1.025;
- } else if (speednar(ch) >= 0.01) {
-  out = exp * 1.01;
- } else {
-  out = exp;
- }
- 
- return (out);
-}
-
-int gear_weight(struct char_data *ch)
-{
-
- int i, weight = 0;
-
- for (i = 0; i < NUM_WEARS; i++) {
-  if (GET_EQ(ch, i)) {
-   weight += GET_OBJ_WEIGHT(GET_EQ(ch, i));
-  }
- }
-
- weight += IS_CARRYING_W(ch);
-
- return (weight);
+ double ratio = 2 * ch->speednar();
+ ratio += 1.0;
+ return exp * ratio;
 }
 
 int planet_check(struct char_data *ch, struct char_data *vict)
@@ -3273,10 +3167,8 @@ void improve_skill(struct char_data *ch, int skill, int num)
  if (GET_ASB(ch) > 0) {
   roll -= (roll * 0.01) * GET_ASB(ch);
  }
- 
- if (roll < 300) {
-  roll = 300;
- }
+
+ roll = std::max(roll, 300);
 
   if (rand_number(1, roll) > ((GET_INT(ch) * 2) + GET_WIS(ch))) {
      return;

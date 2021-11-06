@@ -773,9 +773,7 @@ void club_stamina(struct char_data *ch, struct char_data *vict, int wlvl, int64_
   drain += 0.05;
 
  drained = dmg * drain;
- GET_MOVE(vict) -= drained;
- if (GET_MOVE(vict) < 0)
-  GET_MOVE(vict) = 0;
+ vict->decCurST(drained);
 
  send_to_char(ch, "@D[@YVictim's @GStamina @cLoss@W: @g%s@D]@n\r\n", add_commas(drained));
  send_to_char(vict, "@D[@rYour @GStamina @cLoss@W: @g%s@D]@n\r\n", add_commas(drained));
@@ -1088,9 +1086,7 @@ int64_t advanced_energy(struct char_data *ch, int64_t dmg)
    if (GET_CHARGE(ch) > 0 && rand_number(1, 100) <= 10) {
     act("@MThe attack causes your weak control to slip and you are shocked by your own charged energy!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@m$n@M suffers shock from their own charged energy!@n", TRUE, ch, 0, 0, TO_ROOM);
-    GET_HIT(ch) -= GET_CHARGE(ch) / 4;
-    if (GET_HIT(ch) <= 0)
-     GET_HIT(ch) = 1;
+    ch->decCurHealth(GET_CHARGE(ch) / 4, 1);
    }
    add = dmg * rate;
   }
@@ -1383,13 +1379,13 @@ void hurt_limb(struct char_data *ch, struct char_data *vict, int chance, int are
    return;
   }
 
-  if (power > gear_pl(vict) * 0.5) {
+  if (power > (vict->getEffMaxPL()) * 0.5) {
    dmg = rand_number(25, 40);
-  } else if (power > gear_pl(vict) * 0.25) {
+  } else if (power > (vict->getEffMaxPL()) * 0.25) {
    dmg = rand_number(15, 24);
-  } else if (power > gear_pl(vict) * 0.10) {
+  } else if (power > (vict->getEffMaxPL()) * 0.10) {
    dmg = rand_number(8, 14);
-  } else if (power > gear_pl(vict) * 0.05) {
+  } else if (power > (vict->getEffMaxPL()) * 0.05) {
    dmg = rand_number(4, 7);
   } else {
    dmg = rand_number(1, 3);;
@@ -1679,29 +1675,23 @@ void update_mob_absorb()
      stam += stam * rand_number(2, 4);
      pl += pl * rand_number(2, 4);
     }
-    
-    GET_HIT(vict) -= pl;
-    GET_HIT(i) += pl;
-    GET_MANA(vict) -= ki;
-    GET_MANA(i) += ki;
-    GET_MOVE(vict) -= stam;
-    GET_MOVE(i) += stam;
 
-    if (GET_MANA(vict) < 0)
-     GET_MANA(vict) = 0;
-    if (GET_MOVE(vict) < 0)
-     GET_MOVE(vict) = 0;
-    
-    if (GET_HIT(i) > GET_MAX_HIT(i)) {
-     GET_HIT(i) = GET_MAX_HIT(i);
+    vict->decCurHealth(pl);
+    i->incCurHealth(pl);
+
+    vict->decCurKI(ki);
+    i->incCurKI(ki);
+
+    vict->decCurST(stam);
+    i->incCurST(stam);
+
+    if (i->isFullHealth()) {
      maxed += 1;
     }
-    if (GET_MOVE(i) > GET_MAX_MOVE(i)) {
-     GET_MOVE(i) = GET_MAX_MOVE(i);
+    if (i->isFullST()) {
      maxed += 1;
     }
-    if (GET_MANA(i) > GET_MAX_MANA(i)) {
-     GET_MANA(i) = GET_MAX_MANA(i);
+    if (i->isFullKI()) {
      maxed += 1;
     }
 
@@ -1716,10 +1706,8 @@ void update_mob_absorb()
      act("@R$n@r absorbs some of YOUR energy!@n", TRUE, i, 0, vict, TO_VICT);
      act("@R$n@r absorbs some of @R$N's@r energy.@n", TRUE, i, 0, vict, TO_NOTVICT);
     }
-
    }
   }
-
 }
 
 /* This is for huge attacks that are slowly descending on a room */
@@ -1796,7 +1784,8 @@ void huge_update()
       continue;
      }
      dge = handle_dodge(vict);
-     if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
+     if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&
+             (vict->getCurST()) >= 1 && GET_POS(vict) != POS_SLEEPING) {
        act("@C$N@c disappears, avoiding the explosion!@n", FALSE, ch, 0, vict, TO_CHAR);
        act("@cYou disappear, avoiding the explosion!@n", FALSE, ch, 0, vict, TO_VICT);
        act("@C$N@c disappears, avoiding the explosion!@n", FALSE, ch, 0, vict, TO_NOTVICT);
@@ -1851,7 +1840,7 @@ void huge_update()
     act("@WYou manage to overpower the attack! You lift up into the sky slowly with it and toss it up and away out of sight!@n", TRUE, TARGET(k), 0, 0, TO_CHAR);
     act("@C$n@W manages to unbelievably overpower the attack! It is lifted up into the sky and tossed away dramaticly!@n", TRUE, TARGET(k), 0, 0, TO_ROOM); 
     hurt(0, 0, ch, TARGET(k), NULL, 0, 1);
-    GET_MOVE(TARGET(k)) -= KICHARGE(k) / 4;
+    TARGET(k)->decCurST(KICHARGE(k) / 4);
     extract_obj(k);
     continue;
    }
@@ -1886,7 +1875,8 @@ void huge_update()
       continue;
      }
      dge = handle_dodge(vict);
-     if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
+     if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&
+             (vict->getCurST()) >= 1 && GET_POS(vict) != POS_SLEEPING) {
        act("@C$N@c disappears, avoiding the explosion!@n", FALSE, ch, 0, vict, TO_CHAR);
        act("@cYou disappear, avoiding the explosion!@n", FALSE, ch, 0, vict, TO_VICT);
        act("@C$N@c disappears, avoiding the explosion!@n", FALSE, ch, 0, vict, TO_NOTVICT);
@@ -1970,7 +1960,8 @@ void huge_update()
       continue;
      }
      dge = handle_dodge(vict);
-     if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
+     if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&
+             (vict->getCurST()) >= 1 && GET_POS(vict) != POS_SLEEPING) {
        act("@C$N@c disappears, avoiding the explosion!@n", FALSE, ch, 0, vict, TO_CHAR);
        act("@cYou disappear, avoiding the explosion!@n", FALSE, ch, 0, vict, TO_VICT);
        act("@C$N@c disappears, avoiding the explosion!@n", FALSE, ch, 0, vict, TO_NOTVICT);
@@ -2023,7 +2014,7 @@ void huge_update()
     act("@WYou manage to overpower the attack! You lift up into the sky slowly with it and toss it up and away out of sight!@n", TRUE, TARGET(k), 0, 0, TO_CHAR);
     act("@C$n@W manages to unbelievably overpower the attack! It is lifted up into the sky and tossed away dramaticly!@n", TRUE, TARGET(k), 0, 0, TO_ROOM); 
     hurt(0, 0, ch, TARGET(k), NULL, 0, 1);
-    GET_MOVE(TARGET(k)) -= KICHARGE(k) / 4;
+       TARGET(k)->decCurST(KICHARGE(k) / 4);
     extract_obj(k);
     continue;
    }
@@ -2058,7 +2049,8 @@ void huge_update()
       continue;
      }
      dge = handle_dodge(vict);
-     if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) && GET_MOVE(vict) >= 1 && GET_POS(vict) != POS_SLEEPING) {
+     if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&
+             (vict->getCurST()) >= 1 && GET_POS(vict) != POS_SLEEPING) {
        act("@C$N@c disappears, avoiding the explosion!@n", FALSE, ch, 0, vict, TO_CHAR);
        act("@cYou disappear, avoiding the explosion!@n", FALSE, ch, 0, vict, TO_VICT);
        act("@C$N@c disappears, avoiding the explosion!@n", FALSE, ch, 0, vict, TO_NOTVICT);
@@ -2198,18 +2190,18 @@ void homing_update()
         do_get(ch, "all corpse", 0, 0);
        }
       } else if (dmg > GET_MAX_HIT(vict) / 5 && (IS_MAJIN(vict) || IS_BIO(vict))) {
-       if (GET_SKILL(vict, SKILL_REGENERATE) > rand_number(1, 101) && GET_MANA(vict) >= GET_MAX_MANA(vict) / 40) {
+       if (GET_SKILL(vict, SKILL_REGENERATE) > rand_number(1, 101) && (vict->getCurKI()) >= GET_MAX_MANA(vict) / 40) {
         act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_CHAR);
         act("@rYou are cut in half by the attack but regenerate a moment later!@n", TRUE, ch, 0, vict, TO_VICT);
         act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-        GET_MANA(vict) -= GET_MAX_MANA(vict) / 40;
+        vict->decCurKI(vict->getMaxKI() / 40);
         hurt(0, 0, ch, vict, NULL, dmg, 1);
        } else if (dmg > GET_MAX_HIT(vict) / 5 && (IS_MAJIN(vict) || IS_BIO(vict))) {
-       if (GET_SKILL(vict, SKILL_REGENERATE) > rand_number(1, 101) && GET_MANA(vict) >= GET_MAX_MANA(vict) / 40) {
+       if (GET_SKILL(vict, SKILL_REGENERATE) > rand_number(1, 101) && (vict->getCurKI()) >= GET_MAX_MANA(vict) / 40) {
         act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_CHAR);
         act("@rYou are cut in half by the attack but regenerate a moment later!@n", TRUE, ch, 0, vict, TO_VICT);
         act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-        GET_MANA(vict) -= GET_MAX_MANA(vict) / 40;
+           vict->decCurKI(vict->getMaxKI() / 40);
         hurt(0, 0, ch, vict, NULL, dmg, 1);
        }
        else {
@@ -3306,16 +3298,11 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent)
 
     if (!IS_NPC(ch) && percent > 0.15) {
      double hitperc = (percent - 0.15) * 5;
-     int64_t amount = gear_pl(ch) * hitperc;
+     int64_t amount = ch->getEffMaxPL() * hitperc;
      int64_t difference = GET_HIT(ch) - amount;
 
-     if (difference < 1) {
-      dam += GET_HIT(ch) - 1;
-      GET_HIT(ch) = 1;
-     } else {
-      GET_HIT(ch) = difference;
-      dam += amount;
-     }
+     ch->decCurHealth(amount, 1);
+
      damtype_focus(ch, &dam, focus, 200);
    } else {
         damtype_focus(ch, &dam, focus, 200);
@@ -3479,8 +3466,10 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent)
    } else {
     dam += GET_INT(ch) * (dam * 0.005);
    }
-  
-   int64_t mobperc = (GET_HIT(ch) * 100) / GET_MAX_HIT(ch);
+
+   auto mob_hit = GET_HIT(ch);
+   auto max_hit = GET_MAX_HIT(ch);
+   int64_t mobperc = (mob_hit * 100) / max_hit;
    if (mobperc < 98 && mobperc >= 90) {
     dam = dam * 0.95;
    } else if (mobperc < 90 && mobperc >= 80) {
@@ -4094,11 +4083,11 @@ int check_points(struct char_data *ch, int64_t ki, int64_t st)
 
  int fail = FALSE;
  if (IS_NPC(ch)) {
-  if (GET_MANA(ch) < ki) {
+  if ((ch->getCurKI()) < ki) {
    send_to_char(ch, "You do not have enough ki!\r\n");
    fail = TRUE;
   }
-  if (GET_MOVE(ch) < st) {
+  if ((ch->getCurST()) < st) {
    send_to_char(ch, "You do not have enough stamina!\r\n");
    fail = TRUE;
   }
@@ -4157,7 +4146,7 @@ int check_points(struct char_data *ch, int64_t ki, int64_t st)
     st -= st * 0.8;
    }
   }
-  if (GET_MOVE(ch) < st) {
+  if ((ch->getCurST()) < st) {
    send_to_char(ch, "You do not have enough stamina.\r\n@C%s@n needed.\r\n", add_commas(st));
    fail = TRUE;
   } 
@@ -4176,9 +4165,9 @@ void pcost(struct char_data *ch, double ki, int64_t st)
  int before = 0;
  if (GET_LEVEL(ch) > 1 && !IS_NPC(ch)) {
   if (ki == 0) {
-   before = GET_MOVE(ch);
+   before = (ch->getCurST());
    if (ch->calcGravCost(0)) {
-    if (before > GET_MOVE(ch)) {
+    if (before > (ch->getCurST())) {
      send_to_char(ch, "You exert more stamina in this gravity.\r\n");
     }
    }
@@ -4231,11 +4220,11 @@ void pcost(struct char_data *ch, double ki, int64_t st)
     st -= st * 0.8;
    }
   }
-   GET_MOVE(ch) -= st;
+  ch->decCurST(st);
  }
  if (IS_NPC(ch)) {
-  GET_MANA(ch) -= ki;
-  GET_MOVE(ch) -= st;
+     ch->decCurKI(ki);
+     ch->decCurST(st);
  }
 }
 
@@ -4547,7 +4536,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
  }
 
  if (GET_CLAN(vict) != NULL && !strcasecmp(GET_CLAN(vict), "Heavenly Kaios")) {
-  if (GET_MANA(vict) >= GET_MAX_MANA(vict) / 2) {
+  if ((vict->getCurKI()) >= GET_MAX_MANA(vict) / 2) {
    dmg -= (dmg / 100) * 20;
    act("@wYou are covered in a pristine @Cglow@w.@n", TRUE, vict, 0, 0, TO_CHAR);
    act("@w$n is covered in a pristine @Cglow@w!@n", TRUE, vict, 0, 0, TO_ROOM);
@@ -4594,7 +4583,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
 
  if (!AFF_FLAGGED(vict, AFF_KNOCKED) && (GET_POS(vict) == POS_SITTING || GET_POS(vict) == POS_RESTING) && GET_SKILL(vict, SKILL_ROLL) > axion_dice(0)) {
   int64_t rollcost = (vict->getMaxHealth() / 300) * (GET_STR(ch) / 2);
-  if (GET_MOVE(vict) >= rollcost) {
+  if ((vict->getCurST()) >= rollcost) {
    act("@GYou roll to your feet in an agile fashion!@n", TRUE, vict, 0, 0, TO_CHAR);
    act("@G$n rolls to $s feet in an agile fashion!@n", TRUE, vict, 0, 0, TO_ROOM);
    do_stand(vict, 0, 0, 0);
@@ -4609,7 +4598,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
  if (IS_HUMANOID(vict) && !IS_NPC(ch) && IS_NPC(vict) && (!is_sparring(ch) || !is_sparring(vict))) {
   remember(vict, ch);
  }
-  if (IS_NPC(vict) && GET_HIT(vict) > (gear_pl(vict)) / 4) {
+  if (IS_NPC(vict) && GET_HIT(vict) > ((vict->getEffMaxPL())) / 4) {
     LASTHIT(vict) = GET_IDNUM(ch);
   }
   if (AFF_FLAGGED(vict, AFF_SLEEP) && rand_number(1, 2) == 2) {
@@ -4672,11 +4661,11 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
   }
  
 
-  if (CARRYING(vict) && dmg > ((gear_pl(vict)) * 0.01) && rand_number(1, 10) >= 8) {
+  if (CARRYING(vict) && dmg > (((vict->getEffMaxPL())) * 0.01) && rand_number(1, 10) >= 8) {
    carry_drop(vict, 2);
   }
 
-  if (GET_POS(vict) == POS_SITTING && IS_NPC(vict) && vict->getCurHealth() >= (gear_pl(vict)) * .98) {
+  if (GET_POS(vict) == POS_SITTING && IS_NPC(vict) && vict->getCurHealth() >= ((vict->getEffMaxPL())) * .98) {
     do_stand(vict, 0, 0, 0);
   }
  int suppresso = FALSE;
@@ -4783,9 +4772,10 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
    act("@c$N@w disappears right before dying. $N appears to be immortal.@n", TRUE, ch, 0, vict, TO_CHAR);
    act("@CYou disappear right before death, having been saved by your immortality.@n", TRUE, ch, 0, vict, TO_VICT);
    act("@c$N@w disappears right before dying. $N appears to be immortal.@n.", TRUE, ch, 0, vict, TO_NOTVICT);
-   GET_HIT(vict) = 1;
-   GET_MANA(vict) = 1;
-   GET_MOVE(vict) = 1;
+   vict->decCurHealthPercent(1, 1);
+   vict->decCurSTPercent(1, 1);
+   vict->decCurKIPercent(1, 1);
+
    if (FIGHTING(vict)) {
     stop_fighting(vict);
    }
@@ -4813,7 +4803,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
   }
   if (!is_sparring(ch) && !PLR_FLAGGED(vict, PLR_IMMORTAL) && GET_HIT(vict) - dmg <= 0) {
   if (GET_HIT(vict) - dmg <= 0 && suppresso == FALSE) {
-   GET_HIT(vict) = 0;
+   vict->decCurHealthPercent(1, 0);
     if (!IS_NPC(vict) && GET_LIFEFORCE(vict) - (dmg - GET_HIT(vict)) >= 0) {
         act("@c$N@w barely clings to life!@n", TRUE, ch, 0, vict, TO_CHAR);
         act("@CYou barely cling to life!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -4823,10 +4813,10 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         send_to_char(vict, "@D[@CLifeforce@D: @R-%s@D]\n", add_commas(lifeloss));
       if (GET_LIFEFORCE(vict) >= GET_LIFEMAX(vict) * 0.05) {
         send_to_char(vict, "@YYou recover a bit thanks to your strong life force.@n\r\n");
-        GET_HIT(vict) = GET_LIFEMAX(vict) * 0.05;
+        vict->incCurHealth(GET_LIFEMAX(vict) * .05);
         GET_LIFEFORCE(vict) -= GET_LIFEMAX(vict) * 0.05;
        } else {
-        GET_HIT(vict) = GET_LEVEL(vict) * 100;
+          vict->incCurHealth(GET_LEVEL(vict) * 100);
        }
      return;
     }
@@ -4842,12 +4832,9 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
       act("@R$N@w self destructs with a mild explosion!@n", TRUE, ch, 0, vict, TO_ROOM);
    }
    if (dmg > 1) {
-    if (type <= 0 && GET_HIT(ch) >= (gear_pl(ch) * 0.5)) {
+    if (type <= 0 && GET_HIT(ch) >= ((ch->getEffMaxPL()) * 0.5)) {
      int64_t raise = (GET_MAX_MANA(ch) * 0.005) + 1;
-     if (GET_MANA(ch) + raise < GET_MAX_MANA(ch))
-      GET_MANA(ch) += raise;
-     else
-      GET_MANA(ch) = GET_MAX_MANA(ch);
+     ch->incCurKI(raise);
     }
     send_to_char(ch, "@D[@GDamage@W: @R%s@D]@n\r\n", add_commas(dmg));
     send_to_char(vict, "@D[@rDamage@W: @R%s@D]@n\r\n", add_commas(dmg));
@@ -4855,13 +4842,10 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
     if (AFF_FLAGGED(ch, AFF_METAMORPH) && GET_HIT(ch) <= GET_MAX_HIT(ch)) {
      act("@RYour dark aura saps some of @r$N's@R life energy!@n", TRUE, ch, 0, vict, TO_CHAR);
      act("@r$n@R's dark aura saps some of your life energy!@n", TRUE, ch, 0, vict, TO_VICT);
-     GET_HIT(ch) += healhp;  
+     ch->incCurHealth(healhp);
     }
     if (IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 10 || GET_GENOME(ch, 1) == 10)) {
-     GET_MANA(ch) += dmg * 0.05;
-     if (GET_MANA(ch) > GET_MAX_MANA(ch)) {
-      GET_MANA(ch) = GET_MAX_MANA(ch);
-     }
+        ch->incCurKI(dmg * .05);
     }
     if (!is_sparring(ch) && IS_NPC(vict)) {
      if (type == 0 && rand_number(1, 100) >= 97) {
@@ -4895,7 +4879,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
     send_to_char(vict, "@D[@rDamage@W: @BPitiful...@D]@n\r\n");
    }
 
-   GET_HIT(vict) = 0;
+   vict->decCurHealthPercent(1, 0);
 
    if (AFF_FLAGGED(ch, AFF_GROUP)) {
     group_gain(ch, vict);
@@ -4910,7 +4894,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
    }
   } else if (GET_HIT(vict) - dmg > 0 || suppresso == TRUE){
    if (suppresso == FALSE) {
-   GET_HIT(vict) -= dmg;
+   vict->decCurHealth(dmg);
    }
    if (FIGHTING(ch) == NULL) {
     set_fighting(ch, vict);
@@ -4923,18 +4907,12 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
     set_fighting(vict, ch);
    }
    if (dmg > 1 && suppresso == FALSE) {
-    if (type == 0 && GET_HIT(ch) >= (gear_pl(ch) * 0.5)) {
+    if (type == 0 && GET_HIT(ch) >= ((ch->getEffMaxPL()) * 0.5)) {
      int64_t raise = (GET_MAX_MANA(ch) * 0.005) + 1;
-     if (GET_MANA(ch) + raise < GET_MAX_MANA(ch))
-      GET_MANA(ch) += raise;
-     else
-      GET_MANA(ch) = GET_MAX_MANA(ch);
+     ch->incCurKI(raise);
     }
     if (IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 10 || GET_GENOME(ch, 1) == 10)) {
-     GET_MANA(ch) += dmg * 0.05;
-     if (GET_MANA(ch) > GET_MAX_MANA(ch)) {
-      GET_MANA(ch) = GET_MAX_MANA(ch);
-     }
+        ch->incCurKI(dmg * .05);
     }
     send_to_char(ch, "@D[@GDamage@W: @R%s@D]@n", add_commas(dmg));
     send_to_char(vict, "@D[@rDamage@W: @R%s@D]@n\r\n", add_commas(dmg));
@@ -5982,7 +5960,7 @@ void handle_spiral(struct char_data *ch, struct char_data *vict, int skill, int 
   }
 
   if (prob < perc) {
-   if (GET_MOVE(vict) > 0) {
+   if ((vict->getCurST()) > 0) {
     if (blk > rand_number(1, 130)) {
      act("@C$N@W moves quickly and blocks your Spiral Comet blast!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou move quickly and block @C$n's@W Spiral Comet blast!@n", FALSE, ch, 0, vict, TO_VICT);

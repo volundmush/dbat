@@ -1063,7 +1063,7 @@ void handle_train(struct char_data *keeper, int guild_nr, struct char_data *ch, 
     ch->real_abils.con += 1;
     /* Give them retroactive hit points for constitution */
     if (! (ch->real_abils.con % 2))
-      GET_MAX_HIT(ch) += GET_LEVEL(ch);
+      //GET_MAX_HIT(ch) += GET_LEVEL(ch);
     GET_TRAINS(ch) -= 1;
   } else if (!strncasecmp("agility", argument, strlen(argument))) {
     send_to_char(ch, CONFIG_OK);
@@ -1388,7 +1388,7 @@ void handle_learn(struct char_data *keeper, int guild_nr, struct char_data *ch, 
   case FEAT_TOUGHNESS:
     subval = HAS_FEAT(ch, feat_num) + 1;
     SET_FEAT(ch, feat_num, subval);
-    GET_MAX_HIT(ch) += 3;
+    //GET_MAX_HIT(ch) += 3;
     break;
   case FEAT_SKILL_FOCUS:
     if (!ptr || !*ptr) {

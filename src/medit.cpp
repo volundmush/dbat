@@ -244,8 +244,8 @@ void init_mobile(struct char_data *mob)
 {
   clear_char(mob);
 
-  GET_HIT(mob) = 0;
-  GET_MAX_MANA(mob) = 0;
+  //GET_HIT(mob) = 0;
+  //GET_MAX_MANA(mob) = 0;
   GET_NDD(mob) = 0;
   GET_SEX(mob) = SEX_MALE;
   GET_HITDICE(mob) = 0;
@@ -501,8 +501,8 @@ void medit_disp_menu(struct descriptor_data *d)
 	  OLC_NUM(d), genders[(int)GET_SEX(mob)], GET_ALIAS(mob),
 	  GET_SDESC(mob), GET_LDESC(mob), GET_DDESC(mob), GET_HITDICE(mob),
 	  GET_ALIGNMENT(mob), GET_FISHD(mob), GET_DAMAGE_MOD(mob),
-	  GET_NDD(mob), GET_SDD(mob), GET_HIT(mob), GET_MANA(mob),
-	  GET_MOVE(mob), GET_ARMOR(mob), GET_EXP(mob), GET_GOLD(mob)
+	  GET_NDD(mob), GET_SDD(mob), GET_HIT(mob), (mob->getCurKI()),
+                  (mob->getCurST()), GET_ARMOR(mob), GET_EXP(mob), GET_GOLD(mob)
 	  );
   sprintbitarray(MOB_FLAGS(mob), action_bits, AF_ARRAY_MAX, flags);
   sprintbitarray(AFF_FLAGS(mob), affected_bits, AF_ARRAY_MAX, flag2);
@@ -863,21 +863,21 @@ void medit_parse(struct descriptor_data *d, char *arg)
     break;
 
   case MEDIT_NUM_HP_DICE:
-    GET_HIT(OLC_MOB(d)) = LIMIT(i, 0, CONFIG_LEVEL_CAP);
+    //GET_HIT(OLC_MOB(d)) = LIMIT(i, 0, CONFIG_LEVEL_CAP);
     if (MOB_FLAGGED(OLC_MOB(d), MOB_AUTOBALANCE)) {
       TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_AUTOBALANCE);
     }
     break;
 
   case MEDIT_SIZE_HP_DICE:
-    GET_MANA(OLC_MOB(d)) = LIMIT(i, 0, 1000);
+    //GET_MANA(OLC_MOB(d)) = LIMIT(i, 0, 1000);
     if (MOB_FLAGGED(OLC_MOB(d), MOB_AUTOBALANCE)) {
       TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_AUTOBALANCE);
     }
     break;
 
   case MEDIT_ADD_HP:
-    GET_MOVE(OLC_MOB(d)) = LIMIT(i, 0, 30000);
+    //GET_MOVE(OLC_MOB(d)) = LIMIT(i, 0, 30000);
     if (MOB_FLAGGED(OLC_MOB(d), MOB_AUTOBALANCE)) {
       TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_AUTOBALANCE);
     }
@@ -927,7 +927,7 @@ void medit_parse(struct descriptor_data *d, char *arg)
         OLC_MOB(d)->chclass = dbat::sensei::sensei_map[dbat::sensei::commoner];
     };
     /* Change size HP dice based on class choice. */
-    GET_MANA(OLC_MOB(d)) = class_hit_die_size[GET_CLASS(OLC_MOB(d))];
+    //GET_MANA(OLC_MOB(d)) = class_hit_die_size[GET_CLASS(OLC_MOB(d))];
     break;
 
   case MEDIT_COPY:
