@@ -2621,6 +2621,22 @@ struct char_data {
     int64_t decCurSTPercent(double amt, int64_t floor = 0);
     void restoreST(bool announce = true);
 
+    int64_t getCurLF() const;
+    int64_t getMaxLF() const;
+    double getCurLFPercent() const;
+    int64_t getPercentOfCurLF(double amt) const;
+    int64_t getPercentOfMaxLF(double amt) const;
+    bool isFullLF() const;
+
+    int64_t setCurLF(int64_t amt);
+    int64_t setCurLFPercent(double amt);
+    int64_t incCurLF(int64_t amt, bool limit_max = true);
+    int64_t decCurLF(int64_t amt, int64_t floor = 0);
+    int64_t incCurLFPercent(double amt, bool limit_max = true);
+    int64_t decCurLFPercent(double amt, int64_t floor = 0);
+    void restoreLF(bool announce = true);
+
+
     bool isFullVitals() const;
     void restoreVitals(bool announce = true);
     void restoreStatus(bool announce = true);
@@ -2668,6 +2684,7 @@ struct char_data {
     double health = 1;
     double energy = 1;
     double stamina = 1;
+    double life = 1;
 };
 
 

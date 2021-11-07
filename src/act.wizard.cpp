@@ -1769,7 +1769,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
   send_to_char(ch, "BPL:[@g%12s@n]  BKI:[@g%12s@n]  BST:[@g%12s@n]\r\n",
           add_commas((k->getBasePL())), add_commas((k->getBaseKI())), add_commas((k->getBaseST())));
   send_to_char(ch, "LF :[@g%12s@n]  MLF:[@g%12s@n]  LFP:[@g%3d@n]\r\n",
-          add_commas(GET_LIFEFORCE(k)), add_commas(GET_LIFEMAX(k)), GET_LIFEPERC(k));
+          add_commas((k->getCurLF())), add_commas((k->getMaxLF())), GET_LIFEPERC(k));
 
   if (GET_ADMLEVEL(k))
     send_to_char(ch, "Admin Level: [@y%d - %s@n]\r\n", GET_ADMLEVEL(k), admin_level_names[GET_ADMLEVEL(k)]);

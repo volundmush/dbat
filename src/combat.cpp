@@ -4804,17 +4804,17 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
   if (!is_sparring(ch) && !PLR_FLAGGED(vict, PLR_IMMORTAL) && GET_HIT(vict) - dmg <= 0) {
   if (GET_HIT(vict) - dmg <= 0 && suppresso == FALSE) {
    vict->decCurHealthPercent(1, 0);
-    if (!IS_NPC(vict) && GET_LIFEFORCE(vict) - (dmg - GET_HIT(vict)) >= 0) {
+    if (!IS_NPC(vict) && (vict->getCurLF()) - (dmg - GET_HIT(vict)) >= 0) {
         act("@c$N@w barely clings to life!@n", TRUE, ch, 0, vict, TO_CHAR);
         act("@CYou barely cling to life!@n", TRUE, ch, 0, vict, TO_VICT);
         act("@c$N@w barely clings to life!@n.", TRUE, ch, 0, vict, TO_NOTVICT);
         int64_t lifeloss = dmg - GET_HIT(vict);
-        GET_LIFEFORCE(vict) -= lifeloss;
+        vict->decCurLF(lifeloss);
         send_to_char(vict, "@D[@CLifeforce@D: @R-%s@D]\n", add_commas(lifeloss));
-      if (GET_LIFEFORCE(vict) >= GET_LIFEMAX(vict) * 0.05) {
+      if ((vict->getCurLF()) >= (vict->getMaxLF()) * 0.05) {
         send_to_char(vict, "@YYou recover a bit thanks to your strong life force.@n\r\n");
-        vict->incCurHealth(GET_LIFEMAX(vict) * .05);
-        GET_LIFEFORCE(vict) -= GET_LIFEMAX(vict) * 0.05;
+        vict->incCurHealth((vict->getMaxLF()) * .05);
+        vict->decCurLFPercent(.05);
        } else {
           vict->incCurHealth(GET_LEVEL(vict) * 100);
        }
