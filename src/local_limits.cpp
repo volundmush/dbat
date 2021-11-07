@@ -1693,15 +1693,12 @@ void point_update(void)
        } else if (GET_POS(i) == POS_SLEEPING) {
         send_to_char(i, "@wYour sleep does you some good.@n\r\n");
         if (!IS_ANDROID(i) && !FIGHTING(i))
-         GET_LIFEFORCE(i) = GET_LIFEMAX(i);
+         i->restoreLF(false);
        } else if (GET_POS(i) == POS_RESTING) {
         send_to_char(i, "@wYou feel relaxed and better.@n\r\n");
-		if (GET_LIFEFORCE(i) != GET_LIFEMAX(i)) {
+		if (!i->isFullLF()) {
           if (!IS_ANDROID(i) && !FIGHTING(i) && GET_SUPPRESS(i) <= 0 && GET_HIT(i) != (i->getEffMaxPL())) {
-			 GET_LIFEFORCE(i) += GET_LIFEMAX(i) * 0.15;
-			 if (GET_LIFEFORCE(i) > GET_LIFEMAX(i)) {
-			  GET_LIFEFORCE(i) = GET_LIFEMAX(i);
-			 }
+			 i->incCurLFPercent(.15);
 			 send_to_char(i, "@CYou feel more lively.@n\r\n");
 			 }
 		  }

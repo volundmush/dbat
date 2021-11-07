@@ -58,17 +58,11 @@ int group_bonus(struct char_data *ch, int type)
     continue;
    } else {
     if (type == 0) {
-     GET_LIFEFORCE(k->follower) += GET_LIFEMAX(k->follower) * 0.25;
-     if (GET_LIFEFORCE(k->follower) > GET_LIFEMAX(k->follower)) {
-      GET_LIFEFORCE(k->follower) = GET_LIFEMAX(k->follower);
-     }
+        k->follower->incCurLFPercent(.25);
       send_to_char(k->follower, "@CIncensed by the death of your comrade your life force swells!@n");
      return (TRUE);
     } else if (type == 1) {
-     GET_LIFEFORCE(k->follower) += GET_LIFEMAX(k->follower) * 0.4;
-     if (GET_LIFEFORCE(k->follower) > GET_LIFEMAX(k->follower)) {
-      GET_LIFEFORCE(k->follower) = GET_LIFEMAX(k->follower);
-     }
+        k->follower->incCurLFPercent(.4);
       send_to_char(k->follower, "@CIncensed by the death of your comrade your life force swells!@n");
      return (TRUE);
     } else if (type == 2) {
@@ -838,29 +832,30 @@ void fight_stack()
        DRAGGING(ch) = NULL;
       }
 
-      if (GET_LIFEPERC(ch) > 0 && ch->health < (double)GET_LIFEPERC(ch)/100 && GET_LIFEFORCE(ch) > 0 && !IS_ANDROID(ch)) {
+      if (GET_LIFEPERC(ch) > 0 && ch->health < (double)GET_LIFEPERC(ch)/100 && (ch->getCurLF()) > 0 && !IS_ANDROID(ch)) {
        if (rand_number(1, 15) >= 14) {
-        if (GET_LIFEFORCE(ch) >= GET_LIFEMAX(ch) * 0.05 || AFF_FLAGGED(ch, AFF_HEALGLOW) || (IS_KANASSAN(ch) && GET_LIFEFORCE(ch) >= GET_LIFEMAX(ch) * 0.03)) {
-         int64_t refill = 0, lfcost = GET_LIFEMAX(ch) * 0.05;
+        if ((ch->getCurLF()) >= (ch->getMaxLF()) * 0.05 || AFF_FLAGGED(ch, AFF_HEALGLOW) || (IS_KANASSAN(ch) &&
+                (ch->getCurLF()) >= (ch->getMaxLF()) * 0.03)) {
+         int64_t refill = 0, lfcost = (ch->getMaxLF()) * 0.05;
          if (GET_BONUS(ch, BONUS_DIEHARD) > 0 && (!IS_MUTANT(ch) || (GET_GENOME(ch, 0) != 2 && GET_GENOME(ch, 1) != 2))) {
-          refill = GET_LIFEMAX(ch) * 0.1;
+          refill = (ch->getMaxLF()) * 0.1;
          } else if (GET_BONUS(ch, BONUS_DIEHARD) > 0 && IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 2 || GET_GENOME(ch, 1) == 2)) {
-          refill = GET_LIFEMAX(ch) * 0.17;
+          refill = (ch->getMaxLF()) * 0.17;
          } else if (IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 2 || GET_GENOME(ch, 1) == 2)) {
-          refill = GET_LIFEMAX(ch) * 0.12;
+          refill = (ch->getMaxLF()) * 0.12;
          } else if (IS_KANASSAN(ch)) {
-          lfcost = GET_LIFEMAX(ch) * 0.03;
-          refill = GET_LIFEMAX(ch) * 0.03;
+          lfcost = (ch->getMaxLF()) * 0.03;
+          refill = (ch->getMaxLF()) * 0.03;
          } else {
-          refill = GET_LIFEMAX(ch) * 0.05;
+          refill = (ch->getMaxLF()) * 0.05;
          }
          ch->incCurHealth(refill);
          if (!AFF_FLAGGED(ch, AFF_HEALGLOW)) {
-          GET_LIFEFORCE(ch) -= lfcost;
+          ch->decCurLF(lfcost);
          }
         } else {
-            ch->incCurHealth(GET_LIFEFORCE(ch));
-         GET_LIFEFORCE(ch) = -1;
+            ch->incCurHealth((ch->getCurLF()));
+            ch->decCurLFPercent(2, -1);
         }
 
         send_to_char(ch, "@YYour life force has kept you strong@n!\r\n");
@@ -943,7 +938,7 @@ void fight_stack()
           }
         }
         else if (IS_NONPTRANS(ch) && !IS_ICER(ch) && (ch->getCurST()) >= GET_MAX_MOVE(ch) / 900 && PLR_FLAGGED(ch, PLR_TRANS1) && !IS_KONATSU(ch) && !IS_KAI(ch) && !IS_NAMEK(ch)) {
-         if (IS_SAIYAN(ch) && GET_LIFEFORCE(ch) >= GET_LIFEMAX(ch) * 0.7) {
+         if (IS_SAIYAN(ch) && (ch->getCurLF()) >= (ch->getMaxLF()) * 0.7) {
           ch->decCurST(ch->getMaxST() / 1000);
          } else
              ch->decCurST(ch->getMaxST() / 900);
@@ -955,13 +950,13 @@ void fight_stack()
          } */
         }
         else if (IS_NONPTRANS(ch) && !IS_ICER(ch) && (ch->getCurST()) >= GET_MAX_MOVE(ch) / 800 && PLR_FLAGGED(ch, PLR_TRANS1)) {
-         if (IS_SAIYAN(ch) && GET_LIFEFORCE(ch) >= GET_LIFEMAX(ch) * 0.7) {
+         if (IS_SAIYAN(ch) && (ch->getCurLF()) >= (ch->getMaxLF()) * 0.7) {
              ch->decCurST(ch->getMaxST() / 900);
          } else
             ch->decCurST(ch->getMaxST() / 800);
         }
         else if (IS_NONPTRANS(ch) && !IS_ICER(ch) && (ch->getCurST()) >= GET_MAX_MOVE(ch) / 600 && PLR_FLAGGED(ch, PLR_TRANS2) && !IS_KONATSU(ch) && !IS_KAI(ch) && !IS_NAMEK(ch)) {
-         if (IS_SAIYAN(ch) && GET_LIFEFORCE(ch) >= GET_LIFEMAX(ch) * 0.7) {
+         if (IS_SAIYAN(ch) && (ch->getCurLF()) >= (ch->getMaxLF()) * 0.7) {
              ch->decCurST(ch->getMaxST() / 700);
          } else
             ch->decCurST(ch->getMaxST() / 600);
@@ -973,7 +968,7 @@ void fight_stack()
             ch->decCurST(ch->getMaxST() / 400);
         }
         else if (IS_NONPTRANS(ch) && !IS_ICER(ch) && (ch->getCurST()) >= GET_MAX_MOVE(ch) / 250 && PLR_FLAGGED(ch, PLR_TRANS3)) {
-         if (IS_SAIYAN(ch) && GET_LIFEFORCE(ch) >= GET_LIFEMAX(ch) * 0.7) {
+         if (IS_SAIYAN(ch) && (ch->getCurLF()) >= (ch->getMaxLF()) * 0.7) {
              ch->decCurST(ch->getMaxST() / 300);
          } else
              ch->decCurST(ch->getMaxST() / 250);
@@ -982,7 +977,7 @@ void fight_stack()
             ch->decCurST(ch->getMaxST() / 200);
         }
         else if (IS_NONPTRANS(ch) && !IS_ICER(ch) && (ch->getCurST()) >= GET_MAX_MOVE(ch) / 170 && PLR_FLAGGED(ch, PLR_TRANS4)) {
-         if (IS_SAIYAN(ch) && GET_LIFEFORCE(ch) >= GET_LIFEMAX(ch) * 0.7) {
+         if (IS_SAIYAN(ch) && (ch->getCurLF()) >= (ch->getMaxLF()) * 0.7) {
              ch->decCurST(ch->getMaxST() / 240);
          } else
              ch->decCurST(ch->getMaxST() / 170);
@@ -2174,8 +2169,9 @@ void die(struct char_data *ch, struct char_data *killer)
    if (PLR_FLAGGED(ch, PLR_HEALT)) {
     REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_HEALT);
    }
-   if ((IS_MAJIN(ch) || IS_BIO(ch)) && (GET_LIFEFORCE(ch) >= GET_LIFEMAX(ch) * 0.75 || (PLR_FLAGGED(ch, PLR_SELFD2) && GET_LIFEFORCE(ch) >= GET_LIFEMAX(ch) * 0.5))) {
-    GET_LIFEFORCE(ch) = -1;
+   if ((IS_MAJIN(ch) || IS_BIO(ch)) && ((ch->getCurLF()) >= (ch->getMaxLF()) * 0.75 || (PLR_FLAGGED(ch, PLR_SELFD2) &&
+           (ch->getCurLF()) >= (ch->getMaxLF()) * 0.5))) {
+    ch->decCurLFPercent(2,-1);
        ch->decCurHealthPercent(1, 1);
     SET_BIT_AR(PLR_FLAGS(ch), PLR_GOOP);
     ch->gooptime = 32;

@@ -909,7 +909,7 @@ ACMD(do_moondust)
    return;
   }
 
-  cost += GET_LIFEMAX(ch) * 0.02;
+  cost += (ch->getMaxLF()) * 0.02;
   heal = cost * 3;
 
   if (GET_HIT(ch) >= (ch->getEffMaxPL()) * 0.8) {

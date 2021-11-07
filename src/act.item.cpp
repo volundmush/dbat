@@ -3728,10 +3728,7 @@ ACMD(do_eat)
    send_to_char(ch, "You finish the last bite.\r\n");
    if (GET_OBJ_VNUM(food) == 53) {
        ch->incCurST(ch->getMaxST() / 30);
-	   GET_LIFEFORCE(ch) += GET_LIFEMAX(ch) * 0.01;
-	   if (GET_LIFEFORCE(ch) > GET_LIFEMAX(ch)) {
-		   GET_LIFEFORCE(ch) = GET_LIFEMAX(ch);
-	   }
+       ch->incCurLFPercent(.01);
 	   if (OBJ_FLAGGED(food, ITEM_FORGED)) {
 		   send_to_char(ch, "This is a forgery. You gain nothing!\r\n");
 	   }
@@ -3742,10 +3739,7 @@ ACMD(do_eat)
    }
    if (GET_OBJ_VNUM(food) == 93) {
        ch->incCurST(ch->getMaxST() / 20);
-	   GET_LIFEFORCE(ch) += GET_LIFEMAX(ch) * 0.01;
-	   if (GET_LIFEFORCE(ch) > GET_LIFEMAX(ch)) {
-		   GET_LIFEFORCE(ch) = GET_LIFEMAX(ch);
-	   }
+       ch->incCurLFPercent(.01);
 	   if (OBJ_FLAGGED(food, ITEM_FORGED)) {
 		   send_to_char(ch, "This is a forgery. You gain nothing!\r\n");
 	   }
@@ -3756,10 +3750,7 @@ ACMD(do_eat)
    }
    if (GET_OBJ_VNUM(food) == 94) {
        ch->incCurST(ch->getMaxST() / 10);
-   GET_LIFEFORCE(ch) += GET_LIFEMAX(ch) * 0.01;
-    if (GET_LIFEFORCE(ch) > GET_LIFEMAX(ch)) {
-     GET_LIFEFORCE(ch) = GET_LIFEMAX(ch);
-    }
+       ch->incCurLFPercent(.01);
 	if (OBJ_FLAGGED(food, ITEM_FORGED)) {
 	send_to_char(ch, "This is a forgery. You gain nothing!\r\n");
 	}
@@ -3770,10 +3761,7 @@ ACMD(do_eat)
    }
    if (GET_OBJ_VNUM(food) == 95) {
        ch->incCurST(ch->getMaxST() / 10);
-    GET_LIFEFORCE(ch) += GET_LIFEMAX(ch) * 0.02;
-    if (GET_LIFEFORCE(ch) > GET_LIFEMAX(ch)) {
-     GET_LIFEFORCE(ch) = GET_LIFEMAX(ch);
-    }
+       ch->incCurLFPercent(.02);
 	if (OBJ_FLAGGED(food, ITEM_FORGED)) {
 	send_to_char(ch, "This is a forgery. You gain nothing!\r\n");
 	}
@@ -3788,10 +3776,7 @@ ACMD(do_eat)
    GET_OBJ_VAL(food, VAL_FOOD_FOODVAL) -= foob;
    if (GET_OBJ_VNUM(food) == 53) {
        ch->incCurST(ch->getMaxST() / 30);
-	   GET_LIFEFORCE(ch) += GET_LIFEMAX(ch) * 0.01;
-	   if (GET_LIFEFORCE(ch) > GET_LIFEMAX(ch)) {
-		   GET_LIFEFORCE(ch) = GET_LIFEMAX(ch);
-	   }
+       ch->incCurLFPercent(.01);
 	   if (OBJ_FLAGGED(food, ITEM_FORGED)) {
 		   send_to_char(ch, "This is a forgery. You gain nothing!\r\n");
 	   }
@@ -3803,10 +3788,7 @@ ACMD(do_eat)
    }
    if (GET_OBJ_VNUM(food) == 93) {
        ch->incCurST(ch->getMaxST() / 20);
-	   GET_LIFEFORCE(ch) += GET_LIFEMAX(ch) * 0.01;
-	   if (GET_LIFEFORCE(ch) > GET_LIFEMAX(ch)) {
-		   GET_LIFEFORCE(ch) = GET_LIFEMAX(ch);
-	   }
+       ch->incCurLFPercent(.01);
 	   if (OBJ_FLAGGED(food, ITEM_FORGED)) {
 		   send_to_char(ch, "This is a forgery. You gain nothing!\r\n");
 	   }
@@ -3818,10 +3800,7 @@ ACMD(do_eat)
    }
    if (GET_OBJ_VNUM(food) == 94) {
        ch->incCurST(ch->getMaxST() / 10);
-    GET_LIFEFORCE(ch) += GET_LIFEMAX(ch) * 0.02;
-    if (GET_LIFEFORCE(ch) > GET_LIFEMAX(ch)) {
-     GET_LIFEFORCE(ch) = GET_LIFEMAX(ch);
-    }
+       ch->incCurLFPercent(.02);
         if (OBJ_FLAGGED(food, ITEM_FORGED)) {
         send_to_char(ch, "This is a forgery. You gain nothing!\r\n");
         }
@@ -3833,10 +3812,7 @@ ACMD(do_eat)
    }
    if (GET_OBJ_VNUM(food) == 95) {
        ch->incCurST(ch->getMaxST() / 10);
-    GET_LIFEFORCE(ch) += GET_LIFEMAX(ch) * 0.03;
-    if (GET_LIFEFORCE(ch) > GET_LIFEMAX(ch)) {
-     GET_LIFEFORCE(ch) = GET_LIFEMAX(ch);
-    }
+       ch->incCurLFPercent(.03);
         if (OBJ_FLAGGED(food, ITEM_FORGED)) {
         send_to_char(ch, "This is a forgery. You gain nothing!\r\n");
         }

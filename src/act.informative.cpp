@@ -5683,10 +5683,12 @@ ACMD(do_score)
  send_to_char(ch, "    @wMaximum   @D-[@r%-16s@D]-[@r%-16s@D]-[@r%-16s@D]@n\n", add_commas(ch->getEffMaxPL()), add_commas(GET_MAX_MANA(ch)), add_commas(GET_MAX_MOVE(ch)));
  send_to_char(ch, "    @wBase      @D-[@m%-16s@D]-[@m%-16s@D]-[@m%-16s@D]@n\n", add_commas((ch->getEffBasePL())), add_commas(
          (ch->getEffBaseKI())), add_commas((ch->getEffBaseST())));
-  if (!IS_ANDROID(ch) && GET_LIFEFORCE(ch) > 0) {
-   send_to_char(ch, "    @wLife Force@D-[@C%16s@D%s@c%16s@D]- @wLife Percent@D-[@Y%3d%s@D]@n\n", add_commas(GET_LIFEFORCE(ch)), "/", add_commas(GET_LIFEMAX(ch)), GET_LIFEPERC(ch), "%");
+  if (!IS_ANDROID(ch) && (ch->getCurLF()) > 0) {
+   send_to_char(ch, "    @wLife Force@D-[@C%16s@D%s@c%16s@D]- @wLife Percent@D-[@Y%3d%s@D]@n\n", add_commas(
+           (ch->getCurLF())), "/", add_commas((ch->getMaxLF())), GET_LIFEPERC(ch), "%");
   } else if (!IS_ANDROID(ch)) {
-   send_to_char(ch, "    @wLife Force@D-[@C%16s@D%s@c%16s@D]- @wLife Percent@D-[@Y%3d%s@D]@n\n", add_commas(0), "/", add_commas(GET_LIFEMAX(ch)), GET_LIFEPERC(ch), "%");
+   send_to_char(ch, "    @wLife Force@D-[@C%16s@D%s@c%16s@D]- @wLife Percent@D-[@Y%3d%s@D]@n\n", add_commas(0), "/", add_commas(
+           (ch->getMaxLF())), GET_LIFEPERC(ch), "%");
   }
  }
  if (view == full || view == stats) {

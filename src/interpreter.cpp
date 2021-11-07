@@ -2402,9 +2402,6 @@ int enter_player_game (struct descriptor_data *d)
      userWrite(d, 0, 0, 0, "index");
     }
 
-    if (GET_LIFEFORCE(d->character) == 0 || GET_LIFEFORCE(d->character) > GET_LIFEMAX(d->character)) {
-     GET_LIFEFORCE(d->character) = GET_LIFEMAX(d->character);
-    }   
 
     if (PLR_FLAGGED(d->character, PLR_RARM)) {
      GET_LIMBCOND(d->character, 1) = 100;

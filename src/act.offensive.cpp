@@ -5011,11 +5011,11 @@ ACMD(do_tribeam)
   else {
    dmg = damtype(ch, 26, skill, attperc);
    if (GET_SKILL(ch, SKILL_TRIBEAM) >= 100) {
-    dmg += GET_LIFEMAX(ch) * 0.20;
+    dmg += (ch->getMaxLF()) * 0.20;
    } else if (GET_SKILL(ch, SKILL_TRIBEAM) >= 60) {
-    dmg += GET_LIFEMAX(ch) * 0.10;
+    dmg += (ch->getMaxLF()) * 0.10;
    } else if (GET_SKILL(ch, SKILL_TRIBEAM) >= 40) {
-    dmg += GET_LIFEMAX(ch) * 0.05;
+    dmg += (ch->getMaxLF()) * 0.05;
    }
 
    int hitspot = 1;
@@ -6795,20 +6795,11 @@ ACMD(do_deathbeam)
      break;
    }
      if (GET_SKILL(ch, SKILL_DEATHBEAM) >= 100 && GET_HIT(vict) >= 2) {
-      GET_LIFEFORCE(vict) -= dmg * 0.4;
-      if (GET_LIFEFORCE(vict) < -1) {
-       GET_LIFEFORCE(vict) = -1;
-      }
+         ch->decCurLF(dmg * .4, -1);
      } else if (GET_SKILL(ch, SKILL_DEATHBEAM) >= 60 && GET_HIT(vict) >= 2) {
-      GET_LIFEFORCE(vict) -= dmg * 0.2;
-      if (GET_LIFEFORCE(vict) < -1) {
-       GET_LIFEFORCE(vict) = -1;
-      }
+         ch->decCurLF(dmg * .2, -1);
      } else if (GET_SKILL(ch, SKILL_DEATHBEAM) >= 40 && GET_HIT(vict) >= 2) {
-      GET_LIFEFORCE(vict) -= dmg * 0.05;
-      if (GET_LIFEFORCE(vict) < -1) {
-       GET_LIFEFORCE(vict) = -1;
-      }
+         ch->decCurLF(dmg * .05, -1);
      }
      if (GET_SKILL_PERF(ch, SKILL_DEATHBEAM) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);

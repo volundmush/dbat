@@ -2552,12 +2552,10 @@ void demon_refill_lf(struct char_data *ch, int64_t num)
   for (tch = world[IN_ROOM(ch)].people; tch; tch = tch->next_in_room) {
    if (!IS_DEMON(tch))
     continue;
-   if (GET_LIFEFORCE(tch) >= GET_LIFEMAX(tch))
+   if ((tch->getCurLF()) >= (tch->getMaxLF()))
     continue;
    else {
-    GET_LIFEFORCE(tch) += num;
-    if (GET_LIFEFORCE(tch) > GET_LIFEMAX(tch))
-     GET_LIFEFORCE(tch) = GET_LIFEMAX(tch);
+       tch->incCurLF(num);
     act("@CYou feel the life energy from @c$N@C's cursed body flow out and you draw it into yourself!@n", TRUE, tch, 0, ch, TO_CHAR);
    }
   }

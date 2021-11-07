@@ -72,7 +72,7 @@ void char_data::restore(bool announce) {
     restoreVitals(announce);
     restoreLimbs(announce);
     restoreStatus(announce);
-    this->lifeforce = GET_LIFEMAX(this);
+    restoreLF(announce);
 }
 
 void char_data::resurrect(ResurrectionMode mode) {
@@ -399,6 +399,9 @@ int64_t char_data::getMaxPL() const {
     if(GET_KAIOKEN(this) > 0) {
         total += (total / 10) * GET_KAIOKEN(this);
     }
+    if(AFF_FLAGGED(this, AFF_METAMORPH)) {
+        total += (total * .6);
+    }
     return total;
 }
 
@@ -588,7 +591,7 @@ int64_t char_data::incCurST(int64_t amt, bool limit_max) {
         stamina = std::min(1.0, stamina+(double)std::abs(amt) / (double)getMaxST());
     else
         stamina += (double)std::abs(amt) / (double)getMaxST();
-    return getMaxST();
+    return getCurST();
 };
 
 int64_t char_data::decCurST(int64_t amt, int64_t floor) {
@@ -619,6 +622,79 @@ int64_t char_data::decCurSTPercent(double amt, int64_t floor) {
 void char_data::restoreST(bool announce) {
     if(!isFullST()) stamina = 1;
 }
+
+
+int64_t char_data::getCurLF() const {
+    return getMaxLF() * life;
+}
+
+int64_t char_data::getMaxLF() const {
+    return (IS_DEMON(this) ? (((GET_MAX_MANA(this) * 0.5) + (GET_MAX_MOVE(this) * 0.5)) * 0.75) + GET_LIFEBONUSES(this) : (IS_KONATSU(this) ? (((GET_MAX_MANA(this) * 0.5) + (GET_MAX_MOVE(this) * 0.5)) * 0.85) + GET_LIFEBONUSES(this) : (GET_MAX_MANA(this) * 0.5) + (GET_MAX_MOVE(this) * 0.5) + GET_LIFEBONUSES(this)));
+}
+
+double char_data::getCurLFPercent() const {
+    return life;
+}
+
+int64_t char_data::getPercentOfCurLF(double amt) const {
+    return getCurLF() * std::abs(amt);
+}
+
+int64_t char_data::getPercentOfMaxLF(double amt) const {
+    return getMaxLF() * std::abs(amt);
+}
+
+bool char_data::isFullLF() const {
+    return life >= 1.0;
+}
+
+int64_t char_data::setCurLF(int64_t amt) {
+    life = std::max(0L, std::abs(amt));
+    return getCurLF();
+}
+
+int64_t char_data::setCurLFPercent(double amt) {
+    life = std::max(0L, (int64_t)(getMaxLF() * std::abs(amt)));
+    return getCurLF();
+}
+
+int64_t char_data::incCurLF(int64_t amt, bool limit_max) {
+    if(limit_max)
+        life = std::min(1.0, stamina+(double)std::abs(amt) / (double)getMaxLF());
+    else
+        life += (double)std::abs(amt) / (double)getMaxLF();
+    return getCurLF();
+};
+
+int64_t char_data::decCurLF(int64_t amt, int64_t floor) {
+    auto fl = 0.0;
+    if(floor > 0)
+        fl = (double)floor / (double)getMaxLF();
+    life = std::max(fl, life-(double)std::abs(amt) / (double)getMaxLF());
+    return getCurLF();
+}
+
+int64_t char_data::incCurLFPercent(double amt, bool limit_max) {
+    if(limit_max)
+        life = std::min(1.0, life+std::abs(amt));
+    else
+        life += std::abs(amt);
+    return getCurLF();
+}
+
+int64_t char_data::decCurLFPercent(double amt, int64_t floor) {
+    auto fl = 0.0;
+    if(floor > 0)
+        fl = (double)floor / (double)getMaxLF();
+    life = std::max(fl, life-std::abs(amt));
+    return getCurLF();
+}
+
+
+void char_data::restoreLF(bool announce) {
+    if(!isFullLF()) life = 1;
+}
+
 
 bool char_data::isFullVitals() const {
     return isFullHealth() && isFullKI() && isFullST();

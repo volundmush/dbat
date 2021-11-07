@@ -2981,8 +2981,8 @@ ACMD(do_selfd)
   if (PLR_FLAGGED(ch, PLR_IMMORTAL)) {
     GET_SDCOOLDOWN(ch) = 600;
   }
-  if ((IS_MAJIN(ch) || IS_BIO(ch)) && GET_LIFEFORCE(ch) >= GET_LIFEMAX(ch) * 0.5) {
-   GET_LIFEFORCE(ch) = -1;
+  if ((IS_MAJIN(ch) || IS_BIO(ch)) && ch->getCurLFPercent() > 0.5) {
+   ch->decCurLFPercent(2,-1);
    SET_BIT_AR(PLR_FLAGS(ch), PLR_GOOP);
    ch->gooptime = 70;
   } else {

@@ -2471,12 +2471,9 @@ ACMD(do_pose)
   ch->real_abils.str += 8;
   ch->real_abils.dex += 8;
   save_char(ch);
-  int64_t before = GET_LIFEMAX(ch);
+  int64_t before = (ch->getMaxLF());
   SET_BIT_AR(PLR_FLAGS(ch), PLR_POSE);
-  GET_LIFEFORCE(ch) += GET_LIFEMAX(ch) - before;
-  if (GET_LIFEFORCE(ch) > GET_LIFEMAX(ch)) {
-   GET_LIFEFORCE(ch) = GET_LIFEMAX(ch);
-  }
+  ch->incCurLF((ch->getMaxLF()) - before);
      ch->decCurST(ch->getMaxST() / 40);
   improve_skill(ch, SKILL_POSE, 0);
   return;
@@ -2509,12 +2506,12 @@ ACMD(do_fury) {
 
   if (!*arg) {
    if (GET_HIT(ch) < (ch->getEffMaxPL())) {
-    if (GET_LIFEFORCE(ch) >= GET_LIFEMAX(ch) * 0.2) {
+    if ((ch->getCurLF()) >= (ch->getMaxLF()) * 0.2) {
      ch->restoreHealth(false);
-     GET_LIFEFORCE(ch) -= GET_LIFEMAX(ch) * 0.2;
+     ch->decCurLFPercent(.2);
     } else {
-        ch->incCurHealth(GET_LIFEFORCE(ch));
-     GET_LIFEFORCE(ch) = -1;
+        ch->incCurHealth((ch->getCurLF()));
+        ch->decCurLFPercent(2,-1);
     }
    }
    GET_FURY(ch) = 0;
@@ -4639,10 +4636,7 @@ ACMD(do_absorb)
    ch->gainBasePL(pl, true);
    ch->gainBaseST(stam, true);
    ch->gainBaseKI(ki, true);
-   GET_LIFEFORCE(ch) += GET_LIFEMAX(ch) * 0.05;
-    if (GET_LIFEFORCE(ch) > GET_LIFEMAX(ch)) {
-     GET_LIFEFORCE(ch) = GET_LIFEMAX(ch);
-    }
+   ch->incCurLFPercent(.05);
    send_to_char(ch, "@D[@gABSORB@D] @rPL@W: @D(@y%s@D) @cKi@W: @D(@y%s@D) @gSt@W: @D(@y%s@D)@n\r\n", add_commas(pl), add_commas(ki), add_commas(stam));
    improve_skill(ch, SKILL_ABSORB, 0);
    WAIT_STATE(ch, PULSE_4SEC);
@@ -4850,7 +4844,7 @@ ACMD(do_regenerate) {
   amt = amt * 0.9;
  }
 
- int64_t life = (GET_LIFEFORCE(ch) - amt * 0.8), energy = ((ch->getCurKI()) - amt * 0.2);
+ int64_t life = ((ch->getCurLF()) - amt * 0.8), energy = ((ch->getCurKI()) - amt * 0.2);
 
  if ((life <= 0 || energy <= 0) && !IS_NPC(ch)) {
   send_to_char(ch, "Your life force or ki are too low to regenerate that much.\r\n");
@@ -4863,7 +4857,8 @@ ACMD(do_regenerate) {
  ch->incCurHealth(amt * 2);
 
  if (!IS_NPC(ch))
-  GET_LIFEFORCE(ch) -= amt * 0.8;
+     ch->decCurLF(amt * .8);
+
  ch->decCurKI(amt * .2);
 
    reveal_hiding(ch, 0);
@@ -6026,16 +6021,26 @@ ACMD(do_kaioken)
         return;
     }
 
-    if (GET_KAIOKEN(ch) > 0) {
-        ch->remove_kaioken(1);
+    x = atoi(arg);
+
+    if (x < 0 || x > 20) {
+        send_to_char(ch, "That level of kaioken dosn't exist...\r\n"
+                         "Syntax: kaioken 0-20\r\n");
         return;
     }
 
-    x = atoi(arg);
+    if(x == 0) {
+        if (GET_KAIOKEN(ch) > 0) {
+            ch->remove_kaioken(1);
+            return;
+        } else {
+            send_to_char(ch, "You are not in kaioken!\r\n");
+            return;
+        }
+    }
 
-    if (x <= 0 || x > 20) {
-        send_to_char(ch, "That level of kaioken dosn't exist...\r\n"
-                         "Syntax: kaioken 1-20\r\n");
+    if(x == GET_KAIOKEN(ch)) {
+        send_to_char(ch, "You are already at that kaioken level! To release, try kaioken 0\r\n");
         return;
     }
 
@@ -6046,7 +6051,16 @@ ACMD(do_kaioken)
         }
     }
 
-    if ((ch->getCurKI()) < ((GET_MAX_MANA(ch) / 50) * x)) {
+    auto cost_unit = ch->getMaxKI() / 50;
+    auto cost_diff = cost_unit * GET_KAIOKEN(ch);
+    auto cost = (cost_unit * x) - cost_diff;
+
+    // it costs nothing to reduce your kaioken level.
+    if(x < GET_KAIOKEN(ch)) {
+        cost = 0;
+    }
+
+    if ((ch->getCurKI()) < cost) {
         send_to_char(ch, "You do not have enough ki to focus into your body for that level.\r\n");
         return;
     }
@@ -6055,7 +6069,7 @@ ACMD(do_kaioken)
     roll = rand_number(1, xnum);
     reveal_hiding(ch, 0);
 
-    ch->decCurKI((ch->getMaxKI() / 50) * x);
+    ch->decCurKI(cost);
     improve_skill(ch, SKILL_KAIOKEN, 1);
 
     if (init_skill(ch, SKILL_KAIOKEN) < roll) {
@@ -6837,11 +6851,8 @@ ACMD(do_heal)
    GET_LIMBCOND(vict, 2) = 100;
    GET_LIMBCOND(vict, 3) = 100;
    GET_LIMBCOND(vict, 4) = 100;
-   if (GET_LIFEFORCE(vict) <= GET_LIFEMAX(vict) * 0.5 && !IS_ANDROID(vict)) {
-    GET_LIFEFORCE(vict) += GET_LIFEMAX(ch) * 0.35;
-    if (GET_LIFEFORCE(vict) > GET_LIFEMAX(ch)) {
-     GET_LIFEFORCE(vict) = GET_LIFEMAX(ch);
-    }
+   if ((vict->getCurLF()) <= (vict->getMaxLF()) * 0.5 && !IS_ANDROID(vict)) {
+       vict->incCurLF((ch->getMaxLF()) * .35);
     send_to_char(vict, "You feel that your lifeforce has recovered some!\r\n");
    }
    improve_skill(ch, SKILL_HEAL, 0);
@@ -8643,11 +8654,13 @@ void base_update(void)
 		if (!IS_NPC(d->character) && rand_number(1, 15) >= 14) {
 			ash_burn(d->character);
 		}
-		if (AFF_FLAGGED(d->character, AFF_CURSE) && GET_LIFEFORCE(d->character) > GET_LIFEMAX(d->character) * 0.4) {
-			GET_LIFEFORCE(d->character) -= GET_LIFEMAX(d->character) * 0.01;
-			demon_refill_lf(d->character, GET_LIFEMAX(d->character) * 0.01);
-			if (GET_LIFEFORCE(d->character) < GET_LIFEMAX(d->character) * 0.4) {
-				GET_LIFEFORCE(d->character) = GET_LIFEMAX(d->character) * 0.4;
+        auto forty_lf = (d->character->getMaxLF()) * 0.4;
+		if (AFF_FLAGGED(d->character, AFF_CURSE) && (d->character->getCurLF()) > forty_lf) {
+			d->character->decCurLFPercent(.01);
+			demon_refill_lf(d->character, (d->character->getMaxLF()) * 0.01);
+
+			if ((d->character->getCurLF()) < forty_lf) {
+                d->character->incCurLF(forty_lf - d->character->getCurLF());
 			}
 		}
 		if (GET_BACKSTAB_COOL(d->character) > 0) {
