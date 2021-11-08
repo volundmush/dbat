@@ -416,7 +416,7 @@ int64_t char_data::getCurPL() const {
 int64_t char_data::getEffBasePL() const {
     if(original) return original->getEffBasePL();
     if(clones) {
-        return getBasePL() / clones + 1;
+        return getBasePL() / (clones + 1);
     } else {
         return getBasePL();
     }
@@ -458,7 +458,7 @@ int64_t char_data::getMaxKI() const {
 int64_t char_data::getEffBaseKI() const {
     if(original) return original->getEffBaseKI();
     if(clones) {
-        return getBaseKI() / clones + 1;
+        return getBaseKI() / (clones + 1);
     } else {
         return getBaseKI();
     }
@@ -550,7 +550,7 @@ int64_t char_data::getMaxST() const {
 int64_t char_data::getEffBaseST() const {
     if(original) return original->getEffBaseST();
     if(clones) {
-        return getBaseST() / clones + 1;
+        return getBaseST() / (clones + 1);
     } else {
         return getBaseST();
     }
