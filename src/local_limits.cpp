@@ -1525,7 +1525,7 @@ void point_update(void)
     }
    }
    // making it so that you don't get hungry/thirsty if you're just leisurely idling, rping, etc.
-   if(GET_HIT(i) < (i->getEffMaxPL())) {
+   if(!i->isFullHealth()) {
        if (rand_number(1, 2) == 2) {
            gain_condition(i, HUNGER, -1);
        }
@@ -1544,13 +1544,7 @@ void point_update(void)
       int change = FALSE;
        update_flags(i);
       if (!IS_NPC(i)) {
-       if (GET_HIT(i) < (i->getEffMaxPL())) {
-        change = TRUE;
-       }
-       if ((i->getCurKI()) < GET_MAX_MANA(i)) {
-        change = TRUE;
-       }
-       if ((i->getCurST()) < GET_MAX_MOVE(i)) {
+       if (!i->isFullVitals()) {
         change = TRUE;
        }
       }
@@ -1561,7 +1555,7 @@ void point_update(void)
          i->decCurKI(mana_gain(i) + i->getPercentOfMaxKI(.05));
        } else {
 	     send_to_char(i, "You don't have enough energy to keep the aura active.\r\n");
-		 act("$n's aura slowly stops shining and fades.\r\n", TRUE, i, 0, 0, TO_ROOM);
+		 act("$n's aura slowly stops shining and fades.\r\n", TRUE, i, nullptr, nullptr, TO_ROOM);
 		 REMOVE_BIT_AR(PLR_FLAGS(i), PLR_AURALIGHT);
 		 world[IN_ROOM(i)].light--;
 		}
@@ -1569,7 +1563,9 @@ void point_update(void)
       if (IS_MUTANT(i) && (GET_GENOME(i, 0) == 6 || GET_GENOME(i, 1) == 6)) {
        mutant_limb_regen(i);
       }
+
       int x = (GET_KAIOKEN(i) * 5) + 5;
+
       if (GET_SLEEPT(i) > 0 && GET_POS(i) != POS_SLEEPING) {
        GET_SLEEPT(i) -= 1;
       }
@@ -1680,7 +1676,7 @@ void point_update(void)
          SITTING(SITS(i)) = NULL;
          SITS(i) = NULL;
         }
-        else if (GET_HIT(i) == ((i->getEffMaxPL())) && (i->getCurKI()) == GET_MAX_MANA(i) && (i->getCurST()) == GET_MAX_MOVE(i)) {
+        else if (i->isFullVitals()) {
          send_to_char(i, "@wYou are fully recovered now.\r\n");
          act("You step out of the now empty healing tank.", TRUE, i, 0, 0, TO_CHAR);
          act("@C$n@w steps out of the now empty healing tank.@n", TRUE, i, 0, 0, TO_ROOM);

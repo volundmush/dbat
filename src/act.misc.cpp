@@ -211,12 +211,13 @@ ACMD(do_multiform)
     return;
    }
    improve_skill(ch, SKILL_MULTIFORM, 1);
-   ch->decCurST(cost);
-   ch->decCurKI(cost);
+
 
    if (GET_SKILL(ch, SKILL_MULTIFORM) < roll) {
     act("@YYou focus your ki into your body while concentrating on the image of your body splitting into two. @yYou lose your concentration and fail to split though...@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@y$n@Y seems to concentrate really hard for a moment, before relaxing.@n", TRUE, ch, 0, 0, TO_ROOM);
+       ch->decCurST(cost);
+       ch->decCurKI(cost);
     return;
    }
    act("@YYou focus your ki into your body while concentrating on the image of your body splitting into two. Another you splits out of your body!@n",
