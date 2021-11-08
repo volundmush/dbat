@@ -1169,7 +1169,7 @@ ACMD(do_train)
 
  one_argument(argument, arg);
 
- weight = (ch->getCurCarriedWeight()) - IS_CARRYING_W(ch);
+ weight = ch->getCurCarriedWeight();
 
  int strcap = 5000, spdcap = 5000, intcap = 5000, wiscap = 5000, concap = 5000, aglcap = 5000;
 
@@ -1204,7 +1204,7 @@ ACMD(do_train)
   send_to_char(ch, "  @mWisdom Progress      @D: @R%6s/%6s@n\r\n", add_commas(GET_TRAINWIS(ch)), ch->real_abils.wis >= 80 ? "@rCAPPED" : add_commas(wiscap));
   send_to_char(ch, "  @mAgility Progress     @D: @R%6s/%6s@n\r\n", add_commas(GET_TRAINAGL(ch)), ch->real_abils.dex >= 80 ? "@rCAPPED" : add_commas(aglcap));
   send_to_char(ch, "@D  -----------------------------------------  @n\r\n");
-  send_to_char(ch, "  @CCurrent Weight Worn  @D: @c%s@n\r\n", add_commas(weight));
+  send_to_char(ch, "  @CCurrent Weight Held  @D: @c%s@n\r\n", add_commas(weight));
   send_to_char(ch, "@D---------------------------------------------@n\r\n");
   send_to_char(ch, "Syntax: train (str | spd | agl | wis | int | con)\r\n");
   return;
@@ -1316,7 +1316,7 @@ ACMD(do_train)
       needed = concap;
   } else if (!strcasecmp("agl", arg)) {
       stat_id = 4;
-      stat_val = &(ch->real_abils.con);
+      stat_val = &(ch->real_abils.dex);
       stat_name = "agility";
       bonus_trait = BONUS_AGILE;
       nega_trait = BONUS_CLUMSY;
@@ -1502,6 +1502,7 @@ ACMD(do_train)
     } else if (GET_LEVEL(ch) > 60) {
         plus += 25;
     }
+
     if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19800 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19899) {
         plus *= 4;
     }
@@ -1607,9 +1608,7 @@ ACMD(do_rip)
     act("@rYou rush at @R$N@r and grab $S tail! With a powerful tug you pull it off!@n", TRUE, ch, 0, vict, TO_CHAR);
     act("@R$n@r rushes at YOU and grabs your tail! With a powerful tug $e pulls it off!@n", TRUE, ch, 0, vict, TO_VICT);
     act("@R$n@R rushes at @R$N@r and grab $S tail! With a powerful tug $e pulls it off!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-    REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_TAIL);
-    REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_STAIL);
-    oozaru_revert(vict);
+       vict->race->loseTail(vict);
     return;
    } else {
           reveal_hiding(ch, 0);
@@ -1630,9 +1629,7 @@ ACMD(do_rip)
          reveal_hiding(ch, 0);
    act("@rYou grab your own tail and yank it off!@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@R$n@r grabs $s own tail and yanks it off!@n", TRUE, ch, 0, 0, TO_ROOM);
-   REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TAIL);
-   REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_STAIL);
-    oozaru_revert(vict);
+   vict->race->loseTail(vict);
  } else {
   if ((ch->getCurST()) < GET_MAX_MOVE(ch) / 20) {
    send_to_char(ch, "You are too tired to manage to grab their tail!\r\n");
@@ -1643,9 +1640,7 @@ ACMD(do_rip)
     act("@rYou reach and grab @R$N's@r tail! With a powerful tug you pull it off!@n", TRUE, ch, 0, vict, TO_CHAR);
     act("@RYou feel your tail pulled off!@n", TRUE, ch, 0, vict, TO_VICT);
     act("@R$n@R reaches and grabs @R$N's@r tail! With a powerful tug $e pulls it off!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-    REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_TAIL);
-    REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_STAIL);
-    oozaru_revert(vict);
+     vict->race->loseTail(vict);
     return;
  }
 }
@@ -8908,7 +8903,7 @@ void base_update(void)
 				bool sum = !d->character->is_soft_cap(0);
                 bool mum = !d->character->is_soft_cap(2);
                 bool ium = !d->character->is_soft_cap(1);
-
+                auto leader = d->character->master ? d->character->master : d->character;
 				if (sum) {
 					if (rand_number(1, 8) >= 6) {
 						int gain = rand_number(GET_LEVEL(d->character) / 2, GET_LEVEL(d->character) * 3) + (GET_LEVEL(d->character) * 18);
@@ -8925,8 +8920,7 @@ void base_update(void)
 							gain *= 4;
 						}
 						send_to_char(d->character, "@gYou gain +@G%d@g permanent powerlevel!@n\r\n", gain);
-						if (group_bonus(d->character, 2) == 7) {
-							if (PLR_FLAGGED(d->character->master, PLR_SENSEM)) {
+						if (group_bonus(d->character, 2) == 7) {if (PLR_FLAGGED(leader, PLR_SENSEM)) {
 								int gbonus = gain * 0.15;
 								gain += gbonus;
 								send_to_char(d->character, "The leader of your group conveys an extra bonus! @D[@G+%s@D]@n \r\n", add_commas(gbonus));
@@ -8952,7 +8946,7 @@ void base_update(void)
 						}
 						send_to_char(d->character, "@gYou gain +@G%d@g permanent stamina!@n\r\n", gain);
 						if (group_bonus(d->character, 2) == 7) {
-							if (PLR_FLAGGED(d->character->master, PLR_SENSEM)) {
+							if (PLR_FLAGGED(leader, PLR_SENSEM)) {
 								int gbonus = gain * 0.15;
 								gain += gbonus;
 								send_to_char(d->character, "The leader of your group conveys an extra bonus! @D[@G+%s@D]@n \r\n", add_commas(gbonus));
@@ -8977,8 +8971,8 @@ void base_update(void)
 							gain *= 4;
 						}
 						send_to_char(d->character, "@gYou gain +@G%d@g permanent ki!@n\r\n", gain);
-						if (group_bonus(d->character, 2) == 7) {
-							if (PLR_FLAGGED(d->character->master, PLR_SENSEM)) {
+						if (d->character->master && group_bonus(d->character, 2) == 7) {
+							if (PLR_FLAGGED(leader, PLR_SENSEM)) {
 								int gbonus = gain * 0.15;
 								gain += gbonus;
 								send_to_char(d->character, "The leader of your group conveys an extra bonus! @D[@G+%s@D]@n \r\n", add_commas(gbonus));

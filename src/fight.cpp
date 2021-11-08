@@ -2283,6 +2283,7 @@ static void perform_group_gain(struct char_data *ch, int base, struct char_data 
   if (IN_ARENA(ch)) {
    return;
   }
+  auto leader = ch->master ? ch->master : ch;
 
   /*share = MIN(CONFIG_MAX_EXP_GAIN, MAX(1, base * GET_LEVEL(ch)));*/
   share = MIN(2000000, base * GET_LEVEL(ch));
@@ -2379,14 +2380,14 @@ static void perform_group_gain(struct char_data *ch, int base, struct char_data 
     send_to_char(ch, "You receive a bonus from your group's leader! @D[@G2%s PL/ST/Ki Regenerated!@D]@n\r\n", "%");
   } else if (group_bonus(ch, 2) == 7) {
    if(IS_ANDROID(ch)) {
-       if (PLR_FLAGGED(ch->master, PLR_ABSORB)) {
+       if (PLR_FLAGGED(leader, PLR_ABSORB)) {
            ch->incCurKIPercent(.02);
            ch->incCurSTPercent(.02);
            send_to_char(ch, "You receive a bonus from your group's leader! @D[@G2%s PL/ST/Ki Recovered!@D]@n\r\n", "%");
-       } else if (PLR_FLAGGED(ch->master, PLR_REPAIR)) {
+       } else if (PLR_FLAGGED(leader, PLR_REPAIR)) {
            ch->incCurHealthPercent(.02);
            send_to_char(ch, "You receive a bonus from your group's leader! @D[@G5%s PL Repaired@D]@n\r\n", "%");
-       } else if (PLR_FLAGGED(ch->master, PLR_SENSEM) && !PLR_FLAGGED(ch, PLR_ABSORB)) {
+       } else if (PLR_FLAGGED(leader, PLR_SENSEM) && !PLR_FLAGGED(ch, PLR_ABSORB)) {
            GET_UP(ch) += 5;
            send_to_char(ch, "You receive a bonus from your group's leader! @D[@G+5 @mUpgrade Points@D]@n\r\n");
        }
@@ -2399,10 +2400,10 @@ static void perform_group_gain(struct char_data *ch, int base, struct char_data 
       ch->incCurSTPercent(.04);
     send_to_char(ch, "You receive a bonus from your group's leader! @D[@G4%s ST Regenerated!@D]@n\r\n", "%");
   } else if (group_bonus(ch, 2) == 13) {
-   if (GET_PHASE(ch->master) == 1) {
+   if (GET_PHASE(leader) == 1) {
     share += share * 0.05;
     send_to_char(ch, "You receive a bonus from your group's leader! @D[@G+5%s Exp!@D]@n\r\n", "%");
-   } else if (GET_PHASE(ch->master) == 2) {
+   } else if (GET_PHASE(leader) == 2) {
     share += share * 0.1;
     send_to_char(ch, "You receive a bonus from your group's leader! @D[@G+10%s Exp!@D]@n\r\n", "%");
    }
