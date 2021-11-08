@@ -910,7 +910,9 @@ int64_t char_data::getAvailableCarryWeight() const {
 
 double char_data::speednar() const {
     auto ratio = (double)getCurCarriedWeight() / (double)getMaxCarryWeight();
-    return std::max(0.01,std::min(1.0, 1.0-ratio));
+    if(ratio >= .05)
+        return std::max(0.01,std::min(1.0, 1.0-ratio));
+    return 1.0;
 }
 
 int64_t char_data::getEffMaxPL() const {
