@@ -7,9 +7,8 @@
 *  Based on the Circle 3.0 syntax checker program (scheck.c)              *
 ************************************************************************ */
 
-#define log(msg) fprintf(stderr, "%s\n", msg)
-
 #include "sysdep.h"
+#define log(msg) fprintf(stderr, "%s\n", msg)
 
 /* The cardinal directions: used as index to room_data.dir_option[] */
 #define NORTH          0
