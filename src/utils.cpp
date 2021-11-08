@@ -3214,6 +3214,7 @@ void improve_skill(struct char_data *ch, int skill, int num)
     roll += 250;
   }
 
+  /*
   if ((IS_JINTO(ch) || IS_TSUNA(ch) || IS_DABURA(ch) || IS_TAPION(ch) && GET_SKILL(ch, SKILL_SENSE) >= 75) && skill == SKILL_SENSE) {
     return;
   }
@@ -3221,6 +3222,7 @@ void improve_skill(struct char_data *ch, int skill, int num)
   if ((IS_BARDOCK(ch) || IS_KURZAK(ch) || IS_FRIEZA(ch) || IS_GINYU(ch) || IS_ANDSIX(ch) && GET_SKILL(ch, SKILL_SENSE) >= 50) && skill == SKILL_SENSE) {
     return;
   }
+   */
 
   newpercent = 1;
   percent += newpercent;
