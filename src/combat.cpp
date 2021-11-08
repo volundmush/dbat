@@ -2989,6 +2989,7 @@ static void damtype_unarmed(char_data *ch, int skill, int64_t *dam) {
                 if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
                     *dam += *dam * 0.2;
             }
+            break;
         // Kick
         case 1:
             damtype_unarmed_infuse(ch, dam);
@@ -2997,7 +2998,7 @@ static void damtype_unarmed(char_data *ch, int skill, int64_t *dam) {
                 if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
                     *dam += *dam * 0.2;
             }
-
+            break;
         case 2: // Elbow
         case 5: // Uppercut
             damtype_unarmed_hasshuken_or_infuse(ch, dam);
@@ -3074,39 +3075,51 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent)
       case -1:
           cou1 = 1 + ((skill / 4) * ((GET_HIT(ch) / 1200) + GET_STR(ch)));
           cou2 = 1 + ((skill / 4) * ((GET_HIT(ch) / 1000) + GET_STR(ch)));
+          break;
       case 0: /* Punch */
           cou1 = 15 + ((skill / 4) * ((GET_HIT(ch) / 1600) + GET_STR(ch)));
           cou2 = 15 + ((skill / 4) * ((GET_HIT(ch) / 1300) + GET_STR(ch)));
+          break;
       case 1: /* Kick */
           cou1 = 40 + ((skill / 4) * ((GET_HIT(ch) / 1200) + GET_STR(ch)));
           cou2 = 40 + ((skill / 4) * ((GET_HIT(ch) / 1000) + GET_STR(ch)));
+          break;
       case 2: /* Elbow */
           cou1 = 100 + ((skill / 4) * ((GET_HIT(ch) / 1300) + GET_STR(ch)));
           cou2 = 100 + ((skill / 4) * ((GET_HIT(ch) / 1050) + GET_STR(ch)));
+          break;
       case 3: /* Knee */
           cou1 = 150 + ((skill / 4) * ((GET_HIT(ch) / 1100) + GET_STR(ch)));
           cou2 = 150 + ((skill / 4) * ((GET_HIT(ch) / 1000) + GET_STR(ch)));
+          break;
       case 4: /* Roundhouse */
           cou1 = 500 + ((skill / 4) * ((GET_HIT(ch) / 1000) + GET_STR(ch)));
           cou2 = 500 + ((skill / 4) * ((GET_HIT(ch) / 800) + GET_STR(ch)));
+          break;
       case 5: /* Uppercut */
           cou1 = 350 + ((skill / 4) * ((GET_HIT(ch) / 1100) + GET_STR(ch)));
           cou2 = 350 + ((skill / 4) * ((GET_HIT(ch) / 900) + GET_STR(ch)));
+          break;
       case 6: /* Slam */
           cou1 = 8000 + ((skill / 4) * ((GET_HIT(ch) / 800) + GET_STR(ch)));
           cou2 = 8000 + ((skill / 4) * ((GET_HIT(ch) / 500) + GET_STR(ch)));
+          break;
       case 8: /* Heeldrop */
           cou1 = 12500 + ((skill / 4) * ((GET_HIT(ch) / 700) + GET_STR(ch)));
           cou2 = 12500 + ((skill / 4) * ((GET_HIT(ch) / 400) + GET_STR(ch)));
+          break;
       case 51: /* Bash */
           cou1 = 1000 + ((skill / 4) * ((GET_HIT(ch) / 700) + GET_STR(ch)));
           cou2 = 1000 + ((skill / 4) * ((GET_HIT(ch) / 550) + GET_STR(ch)));
+          break;
       case 52: /* Headbutt */
           cou1 = 800 + ((skill / 4) * ((GET_HIT(ch) / 900) + GET_STR(ch)));
           cou2 = 800 + ((skill / 4) * ((GET_HIT(ch) / 650) + GET_STR(ch)));
+          break;
       case 56: /* TAILWHIP */
           cou1 = 400 + ((skill / 4) * ((GET_HIT(ch) / 1100) + GET_STR(ch)));
           cou2 = 400 + ((skill / 4) * ((GET_HIT(ch) / 1000) + GET_STR(ch)));
+          break;
   }
 
   bool ki = false;
@@ -3144,62 +3157,78 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent)
       case 23: /* Rogafufuken */
       case 25: /* Kienzan */
           dam += GET_LEVEL(ch) * 500;
+          break;
       case 13: /* Kamehameha */
       case 16: /* Galik Gun */
       case 26: /* Tribeam */
       case 50: /* Seishou Enko */
           dam += GET_LEVEL(ch) * 800;
+          break;
       case 14: /* Masenko */
       case 30: /* Darkness Dragon Slash */
       case 44: /* Spiral Comet 1 */
       case 45: /* Spiral Comet 2 */
       case 43: /* Water Spikes */
           dam += GET_LEVEL(ch) * 1000;
+          break;
       case 15: /* Dodonpa */
       case 17: /* Deathbeam */
       case 19: /* Twin Slash */
           dam += GET_LEVEL(ch) * 650;
+          break;
       case 18: /* Eraser Cannon */
       case 33: /* Hell Spear Blast */
       case 54: /* Zen Blade */
       case 55: /* Sundering Force */
           dam += GET_LEVEL(ch) * 700;
+          break;
       case 20: /* Psychic Blast */
       case 27: /* Special Beam Cannon */
       case 29: /* Crusher Ball */
       case 37: /* Phoenix Slash */
           dam += GET_LEVEL(ch) * 1200;
+          break;
       case 21: /* Honoo */
       case 39: /* Spirit ball */
       case 47: /* Water Razor */
       case 48: /* Koteiru Bakuha */
       case 49: /* Hell Spiral */
           dam += GET_LEVEL(ch) * 900;
+          break;
       case 22: /* Dual Beam */
       case 24: /* Bakuhatsuha */
           dam += GET_LEVEL(ch) * 600;
+          break;
       case 28: /* Final Flash */
           dam += GET_LEVEL(ch) * 1500;
       case 31: /* Psychic Barrage */
       case 36: /* Big Bang */
           dam += GET_LEVEL(ch) * 1100;
+          break;
       case 32: /* Hell Flash */
       case 46: /* Star Breaker */
           dam += GET_LEVEL(ch) * 1400;
+          break;
       case 34: /* Kakusanha */
           dam += GET_LEVEL(ch) * 1050;
+          break;
       case 35: /* Scatter Shot */
       case 53: /* Star Nova */
           dam += GET_LEVEL(ch) * 1600;
+          break;
       case 38: /* Deathball */
           dam += GET_LEVEL(ch) * 1700;
+          break;
       case 40: /* Genki Dama */
       case 41: /* Genocide */
           dam += GET_LEVEL(ch) * 2000;
+          break;
       case 42: /* Kousengan */
           dam += GET_LEVEL(ch) * 550;
+          break;
       case 57: /* Light Grenade */
           dam += GET_LEVEL(ch) * 1700;
+          break;
   }
 
   if(ki) dam *= 1.25;
