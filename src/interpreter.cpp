@@ -507,7 +507,7 @@ const struct command_info cmd_info[] = {
   { "outside"  , "out"     , POS_RESTING, do_move     , 0, ADMLVL_NONE , SCMD_OUT },
 
   /* now, the main list */
-  { "absorb"   , "absor"        , POS_STANDING, do_absorb   , 0, ADMLVL_NONE    , 0 },
+  { "absorb"   , "absor"        , POS_FIGHTING, do_absorb   , 0, ADMLVL_NONE    , 0 },
   { "at"       , "at"		, POS_DEAD    , do_at       , 0, ADMLVL_BUILDER	, 0 },
   { "adrenaline"  , "adrenalin" , POS_DEAD    , do_adrenaline, 0, ADMLVL_NONE    , 0 },
   { "advance"  , "adv"		, POS_DEAD    , do_advance  , 0, ADMLVL_IMPL	, 0 },
@@ -846,7 +846,7 @@ const struct command_info cmd_info[] = {
   { "restring" , "restring"       , POS_STANDING, do_restring , 0, ADMLVL_NONE    , 0 },
   { "rclone"   , "rclon"        , POS_DEAD    , do_rcopy    , 0, ADMLVL_BUILDER      , 0 },
   { "rcopy"    , "rcopy"        , POS_DEAD    , do_rcopy    , 0, ADMLVL_BUILDER      , 0 },
-  { "roomdisplay" , "roomdisplay"     , POS_STANDING	, do_rdisplay	, 0, ADMLVL_NONE	, 0 },
+  { "roomdisplay" , "roomdisplay"     , POS_RESTING	, do_rdisplay	, 0, ADMLVL_NONE	, 0 },
   { "read"     , "rea"          , POS_RESTING , do_look     , 0, ADMLVL_NONE    , SCMD_READ },
   { "recall"   , "reca"         , POS_STANDING, do_recall   , 0, ADMLVL_IMMORT     , 0 },
   { "recharge" , "rechar"       , POS_STANDING, do_recharge , 0, ADMLVL_NONE    , 0 },
