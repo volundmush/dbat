@@ -3026,7 +3026,7 @@ int64_t gear_exp(struct char_data *ch, int64_t exp)
   return 0;
  }
 
- double ratio = 2 * ch->speednar();
+ double ratio = 2 * (1-ch->speednar());
  ratio += 1.0;
  return exp * ratio;
 }

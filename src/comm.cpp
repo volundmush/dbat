@@ -1342,68 +1342,41 @@ char *make_prompt(struct descriptor_data *d)
        }
       }
       if (!PRF_FLAGGED(d->character, PRF_DISPERC)) {
-       if (PRF_FLAGGED(d->character, PRF_DISPHP) && len < sizeof(prompt) && GET_HIT(d->character) >=
-                                                                                    (d->character->getEffMaxPL()) && GET_HIT(d->character) < GET_MAX_HIT(d->character)) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RPL@n@Y: @m%s@D]@n", add_commas(GET_HIT(d->character)));
-        if (count >= 0)
-          len += count;
-       }
-       else if (PRF_FLAGGED(d->character, PRF_DISPHP) && len < sizeof(prompt) && GET_HIT(d->character) > GET_MAX_HIT(d->character)) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RPL@n@Y: @G%s@D]@n", add_commas(GET_HIT(d->character)));
-        if (count >= 0)
-          len += count;
-       }
-       else if (PRF_FLAGGED(d->character, PRF_DISPHP) && len < sizeof(prompt) && GET_HIT(d->character) > ((d->character->getEffMaxPL())) / 2) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RPL@n@Y: @c%s@D]@n", add_commas(GET_HIT(d->character)));
-        if (count >= 0)
-          len += count;
-       }
-       else if (PRF_FLAGGED(d->character, PRF_DISPHP) && len < sizeof(prompt) && GET_HIT(d->character) > ((d->character->getEffMaxPL())) / 10) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RPL@n@Y: @y%s@D]@n", add_commas(GET_HIT(d->character)));
-        if (count >= 0)
-          len += count;
-       }
-       else if (PRF_FLAGGED(d->character, PRF_DISPHP) && len < sizeof(prompt) && GET_HIT(d->character) <= ((d->character->getEffMaxPL()))/ 10) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RPL@n@Y: @r%s@D]@n", add_commas(GET_HIT(d->character)));
-        if (count >= 0)
-          len += count;
-       }
+          if(PRF_FLAGGED(d->character, PRF_DISPHP) && len < sizeof(prompt)) {
+              auto col = "n";
+              auto ch = d->character;
+              if(ch->getMaxPL() > ch->getMaxPLTrans())
+                  col = "g";
+              else if(ch->isWeightedPL())
+                  col = "m";
+              else if(ch->getCurHealthPercent() > .5)
+                  col = "c";
+              else if(ch->getCurHealthPercent() > .1)
+                  col = "y";
+              else if(ch->getCurHealthPercent() <= .1)
+                  col = "r";
+
+              if((count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RPL@n@Y: @%s%s@D]@n", col, add_commas(ch->getCurPL()))) > 0)
+                  len += count;
+          }
       } else if (PRF_FLAGGED(d->character, PRF_DISPHP)) {
-       int64_t power = GET_HIT(d->character), maxpower = (GET_MAX_HIT(d->character));
-       int perc = 0;
-       if (power <= 0) {
-        power = 1;
-       } if (maxpower <= 0) {
-        maxpower = 1;
-       }
-       perc = (power * 100) / maxpower;
-       if (perc > 100) {
-        if (power >= (d->character->getEffMaxPL()) && power < GET_MAX_HIT(d->character)) {
-         count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RPL@n@Y: @m%d%s@D]@n", perc, "@w%");
-        } else if (power > GET_MAX_HIT(d->character)) {
-         count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RPL@n@Y: @G%d%s@D]@n", perc, "@w%");
-        } else {
-         count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RPL@n@Y: @g%d%s@D]@n", perc, "@w%");
-        }
-         if (count >= 0)
-           len += count;
-       } else if (perc >= 70) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RPL@n@Y: @c%d%s@D]@n", perc, "@w%");
-        if (count >= 0)
-          len += count;
-       } else if (perc >= 51) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RPL@n@Y: @Y%d%s@D]@n", perc, "@w%");
-        if (count >= 0)
-          len += count;
-       } else if (perc >= 20) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RPL@n@Y: @y%d%s@D]@n", perc, "@w%");
-        if (count >= 0)
-          len += count;
-       } else {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RPL@n@Y: @r%d%s@D]@n", perc, "@w%");
-        if (count >= 0)
-          len += count;
-       }
+
+          auto ch = d->character;
+          auto perc = ((double)ch->getCurHealth() / (double)ch->getMaxPLTrans()) * 100;
+          auto col = "n";
+          if(perc > 100)
+              col = "g";
+          else if(perc >= 70)
+              col = "c";
+          else if(perc >= 51)
+              col = "Y";
+          else if(perc >= 20)
+              col = "y";
+          else
+              col = "r";
+
+          if((count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RPL@n@Y: @%s%d%s@D]@n", col, (int)perc, "@w%")) > 0)
+              len += count;
       }
       if (!PRF_FLAGGED(d->character, PRF_DISPERC)) {
        if (PRF_FLAGGED(d->character, PRF_DISPKI) && len < sizeof(prompt) &&
