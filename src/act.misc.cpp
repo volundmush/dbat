@@ -3819,14 +3819,14 @@ ACMD(do_adrenaline)
 
    double percent = atoi(arg2) * 0.01;
 
-   if ((ch->getCurST()) - ((ch->getBasePL()) * percent) < 0) {
+   if ((ch->getCurST() - (ch->getBasePL() * percent)) < 0) {
     send_to_char(ch, "You do not have enough stamina to trade for adrenaline!\r\n");
     return;
    }
  
-   int64_t trade = (ch->getBasePL()) * percent;
+   int64_t trade = ch->getBaseST() * percent;
 
-    if (!strcasecmp(arg, "pl") || !strcasecmp(arg, "PL")) {
+    if (!strcasecmp(arg, "pl")) {
      act("@GYou focus your mind and begin to overwork your powerful adrenal glands and your wounds begin to heal!@n", TRUE, ch, 0, 0, TO_CHAR);
      act("@g$n@G seems to concentrate and $s wounds begin to heal!@n", TRUE, ch, 0, 0, TO_ROOM);
 
@@ -3835,7 +3835,7 @@ ACMD(do_adrenaline)
         ch->incCurHealth(trade);
         ch->decCurST(trade);
 
-    } else if (!strcasecmp(arg, "ki") || !strcasecmp(arg, "KI")) {
+    } else if (!strcasecmp(arg, "ki")) {
      act("@GYou focus your mind and begin to overwork your powerful adrenal glands and you feel your ki replenish!@n", TRUE, ch, 0, 0, TO_CHAR);
      act("@g$n@G seems to concentrate and $e appears energized!@n", TRUE, ch, 0, 0, TO_ROOM);
 
