@@ -1230,7 +1230,7 @@ void fight_stack()
           GET_CHARGE(ch) = 0;
           GET_CHARGETO(ch) = 0;
       }
-      if(GET_CHARGE(ch) > 0) {
+      if(GET_CHARGE(ch) >= ch->getMaxKI() / 2) {
           improve_skill(ch, SKILL_CONCENTRATION, 1);
       }
       if (!PLR_FLAGGED(ch, PLR_CHARGE) && rand_number(1, 40) >= 38 && !FIGHTING(ch) && (GET_PREFERENCE(ch) != PREFERENCE_KI || GET_CHARGE(ch) > GET_MAX_MANA(ch) * 0.1)) {

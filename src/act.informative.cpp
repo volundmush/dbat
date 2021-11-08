@@ -5506,7 +5506,7 @@ ACMD(do_look)
       } else {
        look_at_room(IN_ROOM(ch), ch, 1);
        if (GET_ADMLEVEL(ch) < 1 && !AFF_FLAGGED(ch, AFF_HIDE)) {
-        act("@w$n@w looks around the room.@n", TRUE, ch, 0, 0, TO_ROOM);
+        //act("@w$n@w looks around the room.@n", TRUE, ch, 0, 0, TO_ROOM);
        }
       }
     } else if (is_abbrev(arg, "inside")   && EXIT(ch, INDIR) && !*arg2) {
