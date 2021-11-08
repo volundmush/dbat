@@ -1093,6 +1093,11 @@ void fight_stack()
       if (GET_POS(ch) <= POS_RESTING && PLR_FLAGGED(ch, PLR_POWERUP)) {
        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_POWERUP);
       }
+
+      if(GET_BARRIER(ch) > 0) {
+          improve_skill(ch, SKILL_BARRIER, 0);
+      }
+
       if (PLR_FLAGGED(ch, PLR_POWERUP) && rand_number(1, 3) == 3) {
        char buf3[MAX_STRING_LENGTH];
        if (GET_HIT(ch) >= (ch->getEffMaxPL()) && (ch->getCurKI()) >= GET_MAX_MANA(ch) / 20 && GET_PREFERENCE(ch) != PREFERENCE_KI) {
@@ -1224,6 +1229,9 @@ void fight_stack()
           ch->incCurKI(GET_CHARGE(ch));
           GET_CHARGE(ch) = 0;
           GET_CHARGETO(ch) = 0;
+      }
+      if(GET_CHARGE(ch) > 0) {
+          improve_skill(ch, SKILL_CONCENTRATION, 1);
       }
       if (!PLR_FLAGGED(ch, PLR_CHARGE) && rand_number(1, 40) >= 38 && !FIGHTING(ch) && (GET_PREFERENCE(ch) != PREFERENCE_KI || GET_CHARGE(ch) > GET_MAX_MANA(ch) * 0.1)) {
         if (GET_CHARGE(ch) >= GET_MAX_MANA(ch) / 100) {
@@ -2369,17 +2377,23 @@ static void perform_group_gain(struct char_data *ch, int base, struct char_data 
       ch->incCurSTPercent(.02);
       ch->incCurHealthPercent(.02);
     send_to_char(ch, "You receive a bonus from your group's leader! @D[@G2%s PL/ST/Ki Regenerated!@D]@n\r\n", "%");
-  } else if (group_bonus(ch, 2) == 7 && IS_ANDROID(ch)) {
-   if (PLR_FLAGGED(ch->master, PLR_ABSORB)) {
-       ch->incCurKIPercent(.02);
-       ch->incCurSTPercent(.02);
-    send_to_char(ch, "You receive a bonus from your group's leader! @D[@G2%s PL/ST/Ki Recovered!@D]@n\r\n", "%");
-   } else if (PLR_FLAGGED(ch->master, PLR_REPAIR)) {
-       ch->incCurHealthPercent(.02);
-    send_to_char(ch, "You receive a bonus from your group's leader! @D[@G5%s PL Repaired@D]@n\r\n", "%");
-   } else if (PLR_FLAGGED(ch->master, PLR_SENSEM) && !PLR_FLAGGED(ch, PLR_ABSORB)) {
-     GET_UP(ch) += 5;
-     send_to_char(ch, "You receive a bonus from your group's leader! @D[@G+5 @mUpgrade Points@D]@n\r\n");
+  } else if (group_bonus(ch, 2) == 7) {
+   if(IS_ANDROID(ch)) {
+       if (PLR_FLAGGED(ch->master, PLR_ABSORB)) {
+           ch->incCurKIPercent(.02);
+           ch->incCurSTPercent(.02);
+           send_to_char(ch, "You receive a bonus from your group's leader! @D[@G2%s PL/ST/Ki Recovered!@D]@n\r\n", "%");
+       } else if (PLR_FLAGGED(ch->master, PLR_REPAIR)) {
+           ch->incCurHealthPercent(.02);
+           send_to_char(ch, "You receive a bonus from your group's leader! @D[@G5%s PL Repaired@D]@n\r\n", "%");
+       } else if (PLR_FLAGGED(ch->master, PLR_SENSEM) && !PLR_FLAGGED(ch, PLR_ABSORB)) {
+           GET_UP(ch) += 5;
+           send_to_char(ch, "You receive a bonus from your group's leader! @D[@G+5 @mUpgrade Points@D]@n\r\n");
+       }
+   } else {
+       ch->incCurHealthPercent(.01);
+       ch->incCurKIPercent(.01);
+       ch->incCurSTPercent(.01);
    }
   } else if (group_bonus(ch, 2) == 11) {
       ch->incCurSTPercent(.04);
