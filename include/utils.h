@@ -642,7 +642,7 @@ int wield_type(int chsize, const struct obj_data *weap);
           (GET_ADD(ch) <= 99) ? 29 :  30 ) ) )                   \
         ) */
 
-#define CAN_CARRY_W(ch) (max_carry_weight(ch))
+#define CAN_CARRY_W(ch) ((ch)->getMaxCarryWeight())
 #define CAN_CARRY_N(ch) (50)
 #define AWAKE(ch) (GET_POS(ch) > POS_SLEEPING)
 #define CAN_SEE_IN_DARK(ch) \

@@ -388,14 +388,19 @@ void char_data::restoreHealth(bool announce) {
     if(!isFullHealth()) health = 1;
 }
 
-int64_t char_data::getMaxPL() const {
+int64_t char_data::getMaxPLTrans() const {
     auto form = race->getCurForm(this);
     int64_t total = 0;
     if(form.flag) {
-        total = form.bonus + (getEffBasePL() * form.mult);
+        total = (form.bonus + getEffBasePL()) * form.mult;
     } else {
         total = getEffBasePL() * form.mult;
     }
+    return total;
+}
+
+int64_t char_data::getMaxPL() const {
+    auto total = getMaxPLTrans();
     if(GET_KAIOKEN(this) > 0) {
         total += (total / 10) * GET_KAIOKEN(this);
     }
@@ -449,7 +454,7 @@ int64_t char_data::getCurKI() const {
 int64_t char_data::getMaxKI() const {
     auto form = race->getCurForm(this);
     if(form.flag) {
-        return form.bonus + (getEffBaseKI() * form.mult);
+        return (form.bonus + getEffBaseKI()) * form.mult;
     } else {
         return getEffBaseKI();
     }
@@ -541,7 +546,7 @@ int64_t char_data::getCurST() const {
 int64_t char_data::getMaxST() const {
     auto form = race->getCurForm(this);
     if(form.flag) {
-        return form.bonus + (getEffBaseST() * form.mult);
+        return (form.bonus + getEffBaseST()) * form.mult;
     } else {
         return getEffBaseST();
     }
@@ -920,11 +925,6 @@ bool char_data::isWeightedPL() const {
 }
 
 void char_data::apply_kaioken(int times, bool announce) {
-    int64_t boost = (getEffMaxPL() / 10) * times;
-    if (getCurPL() > getEffMaxPL()) {
-        hit = getEffMaxPL();
-    }
-    hit += boost;
     GET_KAIOKEN(this) = times;
     REMOVE_BIT_AR(PLR_FLAGS(this), PLR_POWERUP);
 
@@ -937,7 +937,6 @@ void char_data::apply_kaioken(int times, bool announce) {
 
 void char_data::remove_kaioken(int8_t announce) {
     auto kaio = GET_KAIOKEN(this);
-    hit = std::max(1L, hit - ((getEffMaxPL() / 10) * kaio > 0));
     GET_KAIOKEN(this) = 0;
 
     switch(announce) {

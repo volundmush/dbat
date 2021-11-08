@@ -2579,6 +2579,7 @@ struct char_data {
     int64_t harmCurHealth(int64_t amt);
 
     int64_t getMaxPL() const;
+    int64_t getMaxPLTrans() const;
     int64_t getCurPL() const;
     int64_t getBasePL() const;
     int64_t getEffBasePL() const;

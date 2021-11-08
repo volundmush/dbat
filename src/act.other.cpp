@@ -1252,11 +1252,6 @@ ACMD(do_train)
        send_to_char(ch, "@G%s begins to instruct you in training technique.@n\r\n", ch->chclass->getName().c_str());
    }
 
-    if(sensei > -1) {
-        GET_GOLD(ch) -= 8;
-        GET_PRACTICES(ch, GET_CLASS(ch)) -= 1;
-    }
- 
  if (total > GET_MAX_HIT(ch) * 2) {
   bonus = 5;
  } else if (total > GET_MAX_HIT(ch)) {
@@ -1382,6 +1377,7 @@ ACMD(do_train)
           }
           plus = (((total / 20) + (GET_MAX_MOVE(ch) / 50)) * 100) / GET_MAX_MOVE(ch);
           ch->decCurST(cost);
+          break;
       case 5:
       case 6:
           if ((ch->getCurKI()) < ((total / 20) + (GET_MAX_MANA(ch) / 50))) {
@@ -1393,6 +1389,7 @@ ACMD(do_train)
               ch->decCurKI((total / 20) + (GET_MAX_MANA(ch) / 50));
           else
               ch->decCurKI((total / 25) + (GET_MAX_MANA(ch) / 60));
+          break;
   }
 
     /* what training message is displayed? */
@@ -1555,6 +1552,11 @@ ACMD(do_train)
             send_to_char(ch, "You barely feel any improvement. @D[@G+1@D]@n\r\n");
             WAIT_STATE(ch, PULSE_3SEC);
             break;
+    }
+
+    if(sensei > -1) {
+        GET_GOLD(ch) -= 8;
+        GET_PRACTICES(ch, GET_CLASS(ch)) -= 1;
     }
 
     if (*stat_train >= needed) {

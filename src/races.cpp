@@ -1608,7 +1608,7 @@ namespace dbat::race {
     }
 
     void Race::loseTail(char_data *ch) const {
-        if(hasTail(ch)) return;
+        if(!hasTail(ch)) return;
         switch(r_id) {
             case icer:
             case bio:
@@ -1627,7 +1627,7 @@ namespace dbat::race {
     }
 
     void Race::gainTail(char_data *ch, bool announce) const {
-        if(!hasTail(ch)) return;
+        if(hasTail(ch)) return;
         switch(r_id) {
             case icer:
             case bio:
@@ -1636,7 +1636,7 @@ namespace dbat::race {
             case saiyan:
             case halfbreed:
                 SET_BIT_AR(PLR_FLAGS(ch), PLR_STAIL);
-                if(MOON_OK(ch) && !PLR_FLAGGED(ch, PLR_OOZARU)) {
+                if(MOON_DATE && MOON_OK(ch) && !PLR_FLAGGED(ch, PLR_OOZARU)) {
                     oozaru_transform(ch);
                 }
                 break;
