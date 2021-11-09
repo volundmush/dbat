@@ -444,7 +444,7 @@ int64_t char_data::getPercentOfMaxPL(double amt) const {
 }
 
 bool char_data::isFullPL() const {
-    return getCurPL() >= getMaxPL();
+    return health >= 1.0;
 }
 
 int64_t char_data::getCurKI() const {
@@ -486,7 +486,7 @@ int64_t char_data::getPercentOfMaxKI(double amt) const {
 }
 
 bool char_data::isFullKI() const {
-    return getCurKI() >= getMaxKI();
+    return energy >= 1.0;
 }
 
 int64_t char_data::setCurKI(int64_t amt) {
@@ -578,7 +578,7 @@ int64_t char_data::getPercentOfMaxST(double amt) const {
 }
 
 bool char_data::isFullST() const {
-    return getCurST() >= getMaxST();
+    return stamina >= 1;
 }
 
 int64_t char_data::setCurST(int64_t amt) {
