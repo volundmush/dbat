@@ -1179,7 +1179,8 @@ void handle_study(struct char_data *keeper, int guild_nr, struct char_data *ch, 
 
  if (GET_LEVEL(ch) >= 100) {
   goldadjust = 500;
-  expadjust = 15000;
+  //expadjust = 15000;
+  expcost = 0;
  } else if (GET_LEVEL(ch) >= 91) {
   goldadjust = 450;
   expadjust = 12500;
