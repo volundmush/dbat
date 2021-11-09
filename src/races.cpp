@@ -784,22 +784,9 @@ namespace dbat::race {
         // First, check for special requirements which are not 'paid'.
         switch (r_id) {
             case bio:
-                switch (tier) {
-                    case 1:
-                        if (GET_ABSORBS(ch) > 2) {
-                            send_to_char(ch, "You need to absorb something to transform!\r\n");
-                            return false;
-                        }
-                    case 2:
-                        if (GET_ABSORBS(ch) > 1) {
-                            send_to_char(ch, "You need to absorb something to transform!\r\n");
-                            return false;
-                        }
-                    case 3:
-                        if (GET_ABSORBS(ch) > 0) {
-                            send_to_char(ch, "You need to absorb something to transform!\r\n");
-                            return false;
-                        }
+                if(GET_ABSORBS(ch) < tier) {
+                    send_to_char(ch, "You need to absorb something to transform!\r\n");
+                    return false;
                 }
                 break;
             case majin:
@@ -810,6 +797,7 @@ namespace dbat::race {
                             return false;
                         }
                 }
+                break;
         }
         int rpp_cost = 0;
 

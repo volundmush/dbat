@@ -1501,7 +1501,7 @@ void point_update(void)
 {
   struct char_data *i, *next_char;
   struct obj_data *j, *next_thing, *jj, *next_thing2, *vehicle = NULL;
-
+    int change = FALSE;
   /* characters */
 
   for (i = character_list; i; i = next_char) {
@@ -1541,7 +1541,7 @@ void point_update(void)
    }
 	
     if (GET_POS(i) >= POS_STUNNED) {
-      int change = FALSE;
+      change = FALSE;
        update_flags(i);
       if (!IS_NPC(i)) {
        if (!i->isFullVitals()) {
@@ -1590,6 +1590,7 @@ void point_update(void)
        }
       }
 
+      i->incCurHealth(hit_gain(i));
       i->incCurST(move_gain(i));
       i->incCurKI(mana_gain(i));
 
@@ -1664,7 +1665,7 @@ void point_update(void)
               die(i, NULL);
           }
       }
-      if (change == TRUE && !AFF_FLAGGED(i, AFF_POISON)) {
+      if (change && !AFF_FLAGGED(i, AFF_POISON)) {
        if (PLR_FLAGGED(i, PLR_HEALT) && SITS(i) != NULL) {
         send_to_char(i, "@wThe healing tank works wonders on your injuries.@n\r\n");
          HCHARGE(SITS(i)) -= rand_number(1, 2);
