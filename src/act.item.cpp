@@ -3850,18 +3850,22 @@ static void majin_gain(struct char_data *ch, int type)
           st = std::min(300000L, ((ch->getBaseST()) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
           pl = std::min(300000L, ((ch->getBasePL()) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
           ki = std::min(300000L, ((ch->getBaseKI()) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
+          break;
       case 0:
           st = std::min(500000L, ((ch->getBaseST()) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
           pl = std::min(500000L, ((ch->getBasePL()) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
           ki = std::min(500000L, ((ch->getBaseKI()) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
+          break;
       case 1:
           st = std::min(1200000L, ((ch->getBaseST()) / 1000) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
           pl = std::min(1200000L, ((ch->getBasePL()) / 1000) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
           ki = std::min(1200000L, ((ch->getBaseKI()) / 1000) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
+          break;
       case 2:
           st = std::min(1500000L, ((ch->getBaseST()) / 900) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
           pl = std::min(1500000L, ((ch->getBasePL()) / 900) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
           ki = std::min(1500000L, ((ch->getBaseKI()) / 900) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
+          break;
   }
     ch->gainBasePL(pl, true);
   ch->gainBaseKI(ki, true);
