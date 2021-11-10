@@ -354,7 +354,7 @@ int64_t char_data::setCurHealthPercent(double amt) {
 
 int64_t char_data::incCurHealth(int64_t amt, bool limit_max) {
     if(limit_max)
-        health = std::max(1.0, health+(double)std::abs(amt) / (double)getEffMaxPL());
+        health = std::min(1.0, health+(double)std::abs(amt) / (double)getEffMaxPL());
     else
         health += (double)std::abs(amt) / (double)getEffMaxPL();
     return getCurHealth();
