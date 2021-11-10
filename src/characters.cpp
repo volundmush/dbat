@@ -788,26 +788,16 @@ void char_data::restoreLimbs(bool announce) {
 }
 
 int64_t char_data::gainBasePL(int64_t amt, bool trans_mult) {
-    auto form = race->getCurForm(this);
-    auto to_add = (int64_t)(amt * form.mult);
-    hit += to_add;
-    max_hit += to_add;
     basepl += amt;
     return basepl;
 }
 
 int64_t char_data::gainBaseST(int64_t amt, bool trans_mult) {
-    auto form = race->getCurForm(this);
-    auto to_add = (int64_t)(amt * form.mult);
-    max_move += to_add;
     basest += amt;
     return basest;
 }
 
 int64_t char_data::gainBaseKI(int64_t amt, bool trans_mult) {
-    auto form = race->getCurForm(this);
-    auto to_add = (int64_t)(amt * form.mult);
-    max_mana += to_add;
     baseki += amt;
     return baseki;
 }
@@ -819,25 +809,16 @@ void char_data::gainBaseAll(int64_t amt, bool trans_mult) {
 }
 
 int64_t char_data::loseBasePL(int64_t amt, bool trans_mult) {
-    auto form = race->getCurForm(this);
-    auto to_lose = (int64_t)(amt * form.mult);
-    max_hit = std::max(1L, max_hit-to_lose);
     basepl = std::max(1L, basepl-amt);
     return basepl;
 }
 
 int64_t char_data::loseBaseST(int64_t amt, bool trans_mult) {
-    auto form = race->getCurForm(this);
-    auto to_lose = (int64_t)(amt * form.mult);
-    max_move = std::max(1L, max_move-to_lose);
     basest = std::max(1L, basest-amt);
     return basest;
 }
 
 int64_t char_data::loseBaseKI(int64_t amt, bool trans_mult) {
-    auto form = race->getCurForm(this);
-    auto to_lose = (int64_t)(amt * form.mult);
-    max_mana = std::max(1L, max_mana-to_lose);
     baseki = std::max(1L, baseki-amt);
     return baseki;
 }
@@ -939,6 +920,9 @@ void char_data::apply_kaioken(int times, bool announce) {
 
 void char_data::remove_kaioken(int8_t announce) {
     auto kaio = GET_KAIOKEN(this);
+    if(!kaio) {
+        return;
+    }
     GET_KAIOKEN(this) = 0;
 
     switch(announce) {
