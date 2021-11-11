@@ -548,7 +548,7 @@ namespace dbat::race {
                                                                           {"6.0", 6}};
     static const std::unordered_map<std::string, int> majin_form_map = {{"affinity", 1},
                                                                         {"super",    2},
-                                                                        {"pure",     3}};
+                                                                        {"true",     3}};
 
     static const std::map<int, transform_bonus> no_trans_bonus{};
 
@@ -784,7 +784,7 @@ namespace dbat::race {
         // First, check for special requirements which are not 'paid'.
         switch (r_id) {
             case bio:
-                if(GET_ABSORBS(ch) < tier) {
+                if(tier > 3-GET_ABSORBS(ch)) {
                     send_to_char(ch, "You need to absorb something to transform!\r\n");
                     return false;
                 }
@@ -792,8 +792,12 @@ namespace dbat::race {
             case majin:
                 switch (tier) {
                     case 2:
-                        if (GET_ABSORBS(ch) > 0 && GET_LEVEL(ch) < 50) {
+                        if (GET_ABSORBS(ch) > 0) {
                             send_to_char(ch, "You need to ingest someone before you can use that form.\r\n");
+                            return false;
+                        }
+                        if(GET_LEVEL(ch) < 50) {
+                            send_to_char(ch, "You must be at least level 50 to reach that form.\r\n");
                             return false;
                         }
                 }
