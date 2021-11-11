@@ -647,6 +647,13 @@ namespace dbat::race {
             {6, {.bonus=5000000000, .mult=1, .drain=0, .flag=PLR_TRANS6}},
     };
 
+    static const transform_bonus hoshi_birth = {
+            .bonus=0, .mult=2, .drain=0, .flag=PLR_TRANS1
+    };
+    static const transform_bonus hoshi_life = {
+            .bonus=0, .mult=3, .drain=0, .flag=PLR_TRANS2
+    };
+
     const std::map<int, transform_bonus>& Race::getTransMap(const char_data *ch) const {
         switch (r_id) {
             case android:
@@ -731,6 +738,29 @@ namespace dbat::race {
 
     transform_bonus Race::getCurForm(const char_data *ch) const {
         if(PLR_FLAGGED(ch, PLR_OOZARU)) return oozaru;
+        if(IS_HOSHIJIN(ch)) {
+            transform_bonus hoshi_form;
+            double bon_mult = 0;
+            switch(GET_PHASE(ch)) {
+                case 0: // death phase
+                    return base_form;
+                case 1: // birth phase
+                    hoshi_form = hoshi_birth;
+                    bon_mult = 4;
+                    break;
+                case 2: // life phase
+                    hoshi_form = hoshi_life;
+                    bon_mult = 8;
+                    break;
+                default:
+                    return base_form;
+            }
+            if(ETHER_STREAM(ch))
+                bon_mult += .5;
+            hoshi_form.bonus = (ch->getBasePL() * .1) * bon_mult;
+            return hoshi_form;
+        }
+
         auto tier = getCurrentTransTier(ch);
         if(!tier) return base_form;
         auto t_map = getTransMap(ch);
