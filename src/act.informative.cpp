@@ -5794,9 +5794,12 @@ static void trans_check(struct char_data *ch, struct char_data *vict)
   }
  }
  else if (IS_SAIYAN(vict) && PLR_FLAGGED(vict, PLR_LSSJ)) {
-  if (PLR_FLAGGED(vict, PLR_TRANS1)) {
-   send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Saiyan First@n\r\n");
-  }
+     if (PLR_FLAGGED(vict, PLR_TRANS1) && !PLR_FLAGGED(vict, PLR_FPSSJ)) {
+         send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Saiyan First@n\r\n");
+     }
+     else if (PLR_FLAGGED(vict, PLR_TRANS1) && PLR_FLAGGED(vict, PLR_FPSSJ)) {
+         send_to_char(ch, "         @cCurrent Transformation@D: @YFull Powered @CSuper Saiyan@n\r\n");
+     }
   else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @YLegendary @CSuper Saiyan@n\r\n");
   }
