@@ -693,7 +693,7 @@ static void update_flags(struct char_data *ch)
 		else if (RACIAL_PREF(ch) != 1 || IS_SAIYAN(ch)) {
 			GET_TGROWTH(ch) += 1;
 		}
-		if (GET_TGROWTH(ch) == 10) {
+		if (GET_TGROWTH(ch) >= 10) {
 			send_to_char(ch, "@wYour tail grows back.@n\r\n");
 			act("$n@w's tail grows back.@n", TRUE, ch, 0, 0, TO_ROOM);
             ch->race->gainTail(ch);
@@ -702,7 +702,7 @@ static void update_flags(struct char_data *ch)
 	}
 	if (!IS_NPC(ch) && !PLR_FLAGGED(ch, PLR_TAIL) && (IS_ICER(ch) || IS_BIO(ch))) {
 		GET_TGROWTH(ch) += 1;
-		if (GET_TGROWTH(ch) == 10) {
+		if (GET_TGROWTH(ch) >= 10) {
 			send_to_char(ch, "@wYour tail grows back.@n\r\n");
 			act("$n@w's tail grows back.@n", TRUE, ch, 0, 0, TO_ROOM);
             ch->race->gainTail(ch);

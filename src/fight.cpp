@@ -2115,12 +2115,13 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
 
     bool android_lose = true;
     DeathType death_type = Afterlife;
-    if(ch->is_newbie())
-        death_type = Newbie;
-    if(ch->in_northran())
+      if(ch->in_past())
+          death_type = Past;
+    else if(ch->in_northran())
         death_type = Northran;
-    if(ch->in_past())
-        death_type = Past;
+      else if(ch->is_newbie())
+          death_type = Newbie;
+
 
     switch(death_type) {
         case Afterlife:
