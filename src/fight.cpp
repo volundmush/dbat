@@ -929,14 +929,6 @@ void fight_stack()
       if(!IS_NPC(ch) && IS_TRANSFORMED(ch) && !IS_ICER(ch) && IS_NONPTRANS(ch)) {
           auto tier = ch->race->getCurrentTransTier(ch);
 
-          if(IS_SAIYAN(ch) || IS_HALFBREED(ch) && tier == 1 && !PLR_FLAGGED(ch, PLR_FPSSJ)) {
-              GET_ABSORBS(ch) += 1;
-              if(GET_ABSORBS(ch) >= 300) {
-                  send_to_char(ch, "You have mastered the base Super Saiyan transformation and have achieved Full Power Super Saiyan! You will now no longer use stamina while in this form.\r\n");
-                  SET_BIT_AR(PLR_FLAGS(ch), PLR_FPSSJ);
-              }
-          }
-
           if (ch->getCurST() < GET_MAX_MOVE(ch) / 60) {
               if(!(tier == 1 && PLR_FLAGGED(ch, PLR_FPSSJ))) {
                   act("@mExhausted of stamina, your body forcibly reverts from its form.@n", TRUE, ch, 0, 0, TO_CHAR);
