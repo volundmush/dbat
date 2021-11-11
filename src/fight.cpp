@@ -925,64 +925,66 @@ void fight_stack()
         send_to_char(ch, "Your fury has called forth more of your hidden power and you feel better!\r\n");
        }
       }
-      if (!IS_NPC(ch) && IS_TRANSFORMED(ch)) {
-        if (IS_NONPTRANS(ch) && !IS_ICER(ch) && (ch->getCurST()) < GET_MAX_MOVE(ch) / 60) {
-          act("@mExhausted of stamina, your body forcibly reverts from its form.@n", TRUE, ch, 0, 0, TO_CHAR);
-          act("@C$n @wbreathing heavily, reverts from $s form, returning to normal.@n", TRUE, ch, 0, 0, TO_ROOM);
-          if (GET_KAIOKEN(ch) < 1) {
-           do_transform(ch, "revert", 0, 0);
+
+      if(!IS_NPC(ch) && IS_TRANSFORMED(ch) && !IS_ICER(ch) && IS_NONPTRANS(ch)) {
+          auto tier = ch->race->getCurrentTransTier(ch);
+
+          if(IS_SAIYAN(ch) || IS_HALFBREED(ch) && tier == 1 && !PLR_FLAGGED(ch, PLR_FPSSJ)) {
+              GET_ABSORBS(ch) += 1;
+              if(GET_ABSORBS(ch) >= 300) {
+                  send_to_char(ch, "You have mastered the base Super Saiyan transformation and have achieved Full Power Super Saiyan! You will now no longer use stamina while in this form.\r\n");
+                  SET_BIT_AR(PLR_FLAGS(ch), PLR_FPSSJ);
+              }
           }
-          else if (GET_KAIOKEN(ch) >= 1) {
-           do_kaioken(ch, "0", 0, 0);
-           do_transform(ch, "revert", 0, 0);
+
+          if (ch->getCurST() < GET_MAX_MOVE(ch) / 60) {
+              if(!(tier == 1 && PLR_FLAGGED(ch, PLR_FPSSJ))) {
+                  act("@mExhausted of stamina, your body forcibly reverts from its form.@n", TRUE, ch, 0, 0, TO_CHAR);
+                  act("@C$n @wbreathing heavily, reverts from $s form, returning to normal.@n", TRUE, ch, 0, 0, TO_ROOM);
+                  if (GET_KAIOKEN(ch) < 1)
+                      do_kaioken(ch, "0", 0, 0);
+                  do_transform(ch, "revert", 0, 0);
+              }
           }
-        }
-        else if (IS_NONPTRANS(ch) && !IS_ICER(ch) && (ch->getCurST()) >= GET_MAX_MOVE(ch) / 900 && PLR_FLAGGED(ch, PLR_TRANS1) && !IS_KONATSU(ch) && !IS_KAI(ch) && !IS_NAMEK(ch)) {
-         if (IS_SAIYAN(ch) && (ch->getCurLF()) >= (ch->getMaxLF()) * 0.7) {
-          ch->decCurST(ch->getMaxST() / 1000);
-         } else
-             ch->decCurST(ch->getMaxST() / 900);
-        /* if (IS_SAIYAN(ch) || IS_HALFBREED(ch)) {
-          if (!PLR_FLAGGED(ch, PLR_LSSJ) && !PLR_FLAGGED(ch, PLR_FPSSJ) && rand_number(1, 500) >= 496 && GET_MAX_HIT(ch) > 3000000) {
-           send_to_char(ch, "You have mastered the super saiyan first transformation and have achieved Full Power Super Saiyan! You will now no longer use stamina while in this form.\r\n");
-           SET_BIT_AR(PLR_FLAGS(ch), PLR_FPSSJ);
+
+          if (ch->getCurST() >= GET_MAX_MOVE(ch) / 800 && PLR_FLAGGED(ch, PLR_TRANS1)) {
+              if(!PLR_FLAGGED(ch, PLR_FPSSJ)) {
+                  if (IS_SAIYAN(ch) && (ch->getCurLF()) >= (ch->getMaxLF()) * 0.7) {
+                      ch->decCurST(ch->getMaxST() / 900);
+                  } else
+                      ch->decCurST(ch->getMaxST() / 800);
+              }
           }
-         } */
-        }
-        else if (IS_NONPTRANS(ch) && !IS_ICER(ch) && (ch->getCurST()) >= GET_MAX_MOVE(ch) / 800 && PLR_FLAGGED(ch, PLR_TRANS1)) {
-         if (IS_SAIYAN(ch) && (ch->getCurLF()) >= (ch->getMaxLF()) * 0.7) {
-             ch->decCurST(ch->getMaxST() / 900);
-         } else
-            ch->decCurST(ch->getMaxST() / 800);
-        }
-        else if (IS_NONPTRANS(ch) && !IS_ICER(ch) && (ch->getCurST()) >= GET_MAX_MOVE(ch) / 600 && PLR_FLAGGED(ch, PLR_TRANS2) && !IS_KONATSU(ch) && !IS_KAI(ch) && !IS_NAMEK(ch)) {
-         if (IS_SAIYAN(ch) && (ch->getCurLF()) >= (ch->getMaxLF()) * 0.7) {
-             ch->decCurST(ch->getMaxST() / 700);
-         } else
-            ch->decCurST(ch->getMaxST() / 600);
-        }
-        else if (IS_NONPTRANS(ch) && !IS_ICER(ch) && (ch->getCurST()) >= GET_MAX_MOVE(ch) / 500 && PLR_FLAGGED(ch, PLR_TRANS2)) {
-            ch->decCurST(ch->getMaxST() / 500);
-        }
-        else if (IS_NONPTRANS(ch) && !IS_ICER(ch) && (ch->getCurST()) >= GET_MAX_MOVE(ch) / 400 && PLR_FLAGGED(ch, PLR_TRANS3) && !IS_SAIYAN(ch)) {
-            ch->decCurST(ch->getMaxST() / 400);
-        }
-        else if (IS_NONPTRANS(ch) && !IS_ICER(ch) && (ch->getCurST()) >= GET_MAX_MOVE(ch) / 250 && PLR_FLAGGED(ch, PLR_TRANS3)) {
-         if (IS_SAIYAN(ch) && (ch->getCurLF()) >= (ch->getMaxLF()) * 0.7) {
-             ch->decCurST(ch->getMaxST() / 300);
-         } else
-             ch->decCurST(ch->getMaxST() / 250);
-        }
-        else if (IS_NONPTRANS(ch) && !IS_ICER(ch) && (ch->getCurST()) >= GET_MAX_MOVE(ch) / 200 && PLR_FLAGGED(ch, PLR_TRANS4) && !IS_SAIYAN(ch)) {
-            ch->decCurST(ch->getMaxST() / 200);
-        }
-        else if (IS_NONPTRANS(ch) && !IS_ICER(ch) && (ch->getCurST()) >= GET_MAX_MOVE(ch) / 170 && PLR_FLAGGED(ch, PLR_TRANS4)) {
-         if (IS_SAIYAN(ch) && (ch->getCurLF()) >= (ch->getMaxLF()) * 0.7) {
-             ch->decCurST(ch->getMaxST() / 240);
-         } else
-             ch->decCurST(ch->getMaxST() / 170);
-        }
+          else if (ch->getCurST() >= GET_MAX_MOVE(ch) / 600 && PLR_FLAGGED(ch, PLR_TRANS2) && !IS_KONATSU(ch) && !IS_KAI(ch) && !IS_NAMEK(ch)) {
+              if (IS_SAIYAN(ch) && (ch->getCurLF()) >= (ch->getMaxLF()) * 0.7) {
+                  ch->decCurST(ch->getMaxST() / 700);
+              } else
+                  ch->decCurST(ch->getMaxST() / 600);
+          }
+          else if (ch->getCurST() >= GET_MAX_MOVE(ch) / 500 && PLR_FLAGGED(ch, PLR_TRANS2)) {
+              ch->decCurST(ch->getMaxST() / 500);
+          }
+          else if (ch->getCurST() >= GET_MAX_MOVE(ch) / 400 && PLR_FLAGGED(ch, PLR_TRANS3) && !IS_SAIYAN(ch)) {
+              ch->decCurST(ch->getMaxST() / 400);
+          }
+          else if (ch->getCurST() >= GET_MAX_MOVE(ch) / 250 && PLR_FLAGGED(ch, PLR_TRANS3)) {
+              if (IS_SAIYAN(ch) && (ch->getCurLF()) >= (ch->getMaxLF()) * 0.7) {
+                  ch->decCurST(ch->getMaxST() / 300);
+              } else
+                  ch->decCurST(ch->getMaxST() / 250);
+          }
+          else if (ch->getCurST() >= GET_MAX_MOVE(ch) / 200 && PLR_FLAGGED(ch, PLR_TRANS4) && !IS_SAIYAN(ch)) {
+              ch->decCurST(ch->getMaxST() / 200);
+          }
+          else if (ch->getCurST() >= GET_MAX_MOVE(ch) / 170 && PLR_FLAGGED(ch, PLR_TRANS4)) {
+              if (IS_SAIYAN(ch) && (ch->getCurLF()) >= (ch->getMaxLF()) * 0.7) {
+                  ch->decCurST(ch->getMaxST() / 240);
+              } else
+                  ch->decCurST(ch->getMaxST() / 170);
+          }
+
       }
+
       if (!IS_NPC(ch) && GET_WIMP_LEV(ch) && GET_HIT(ch) < GET_WIMP_LEV(ch) && GET_HIT(ch) > 0 && FIGHTING(ch)) {
         send_to_char(ch, "You wimp out, and attempt to flee!\r\n");
         do_flee(ch, NULL, 0, 0);
@@ -2472,6 +2474,7 @@ void group_gain(struct char_data *ch, struct char_data *victim)
   else
     base = 0;
 
+  /*
   if (AFF_FLAGGED(k, AFF_GROUP) && IN_ROOM(k) == IN_ROOM(ch)) {
    if (!IS_WEIGHTED(k)) {
     perform_group_gain(k, base, victim);
@@ -2487,12 +2490,13 @@ void group_gain(struct char_data *ch, struct char_data *victim)
     }
    }
   }
+   */
+  perform_group_gain(k, base, victim);
 
   for (f = k->followers; f; f = f->next) {
     if (AFF_FLAGGED(f->follower, AFF_GROUP) && IN_ROOM(f->follower) == IN_ROOM(ch)) {
-     if ((f->follower->getEffMaxPL()) >= GET_MAX_HIT(ch) * 0.5) {
+     //if ((f->follower->getEffMaxPL()) >= GET_MAX_HIT(ch) * 0.5)
       perform_group_gain(f->follower, base, victim);
-     }
     }
   }
 }
