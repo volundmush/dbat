@@ -372,98 +372,49 @@ void star_phase(struct char_data *ch, int type)
 }
 
 /* This handles powering up a Hoshijin or powering them down */
-static void phase_powerup(struct char_data *ch, int type, int phase)
-{
- if (ch == NULL) {
-  return;
- }
- if (IS_NPC(ch)) {
-  return;
- }
- 
-	 int change = 0, bonus = 0;
-         double mult = 0.0;
-	 
- 	 switch (phase) {
-	  case 0:
-	   return;
-	   break;
-	  case 1:
-	   change = 2;
-	   mult = 4.0;
-	   bonus = 5;
-	   break;
-	  case 2:
-	   change = 3;
-	   mult = 8.0;
-	   bonus = 8;
-	   break;
-	  default:
-	   send_to_imm("Error: phase_powerup called with GET_PHASE equal to zero by: %s", GET_NAME(ch));
-	   return;
-	   break;
-	 }
+static void phase_powerup(struct char_data *ch, int type, int phase) {
+    if (!ch) {
+        return;
+    }
+    if (IS_NPC(ch)) {
+        return;
+    }
 
-           if (ETHER_STREAM(ch)) {
-            mult += 0.5;
-           }
+    int bonus = 0;
 
+    switch (phase) {
+        case 0:
+            return;
+        case 1:
+            bonus = 5;
+            break;
+        case 2:
+            bonus = 8;
+            break;
+        default:
+            send_to_imm("Error: phase_powerup called with GET_PHASE equal to zero by: %s", GET_NAME(ch));
+            return;
+    }
 
- if (type == 0) { // Drop their stats
-	 //GET_HIT(ch) = ((GET_HIT(ch) - (((ch->getBasePL()) * .1) * mult)) / change);
-	 //GET_MANA(ch) = ((GET_MANA(ch) - (((ch->getBaseKI()) * .1) * mult)) / change);
-	 //GET_MOVE(ch) = ((GET_MOVE(ch) - (((ch->getBaseST()) * .1) * mult)) / change);
+    if (type == 0) { // Drop their stats
 
-         if (GET_HIT(ch) < 0) {
-          //GET_HIT(ch) = 1;
-         }
-         if ((ch->getCurKI()) < 0) {
-          //GET_MANA(ch) = 1;
-         }
-         if ((ch->getCurST()) < 0) {
-          //GET_MOVE(ch) = 1;
-         }
-	 
-	 //GET_MAX_HIT(ch) = (ch->getBasePL());
-	 //GET_MAX_MANA(ch) = (ch->getBaseKI());
-	 //GET_MAX_MOVE(ch) = (ch->getBaseST());
-         if (GET_BONUS(ch, BONUS_WIMP) > 0 && GET_STR(ch) < 25) {	 
-   	  ch->real_abils.str -= bonus;
-         }
-         if (GET_BONUS(ch, BONUS_SLOW) > 0 && GET_CHA(ch) < 25) {
-          ch->real_abils.cha -= bonus;
-         }
-	 
-	 GET_PHASE(ch) = 0;
- } else { // Raise their stats
- 
-	 //GET_HIT(ch) = ((GET_HIT(ch) + (((ch->getBasePL()) * .1) * mult)) * change);
-	 //GET_MANA(ch) = ((GET_MANA(ch) + (((ch->getBaseKI()) * .1) * mult)) * change);
-	 //GET_MOVE(ch) = ((GET_MOVE(ch) + (((ch->getBaseST()) * .1) * mult)) * change);
-
-	 //GET_MAX_HIT(ch) = (((ch->getBasePL()) + (((ch->getBasePL()) * .1) * mult)) * change);
-	 //GET_MAX_MANA(ch) = (((ch->getBaseKI()) + (((ch->getBaseKI()) * .1) * mult)) * change);
-	 //GET_MAX_MOVE(ch) = (((ch->getBaseST()) + (((ch->getBaseST()) * .1) * mult)) * change);
-
-         if (GET_HIT(ch) > GET_MAX_HIT(ch)) {
-          //GET_HIT(ch) = GET_MAX_HIT(ch);
-         }
-         if ((ch->getCurKI()) > GET_MAX_MANA(ch)) {
-          //GET_MANA(ch) = GET_MAX_MANA(ch);
-         }
-         if ((ch->getCurST()) > GET_MAX_MOVE(ch)) {
-          //GET_MOVE(ch) = GET_MAX_MOVE(ch);
-         }
+        if (GET_BONUS(ch, BONUS_WIMP) > 0 && GET_STR(ch) < 25) {
+            ch->real_abils.str -= bonus;
+        }
+        if (GET_BONUS(ch, BONUS_SLOW) > 0 && GET_CHA(ch) < 25) {
+            ch->real_abils.cha -= bonus;
+        }
+        GET_PHASE(ch) = 0;
+    } else { // Raise their stats
 
         if (GET_BONUS(ch, BONUS_WIMP) > 0 && GET_STR(ch) + bonus <= 25) {
-         ch->real_abils.str += bonus;
-        } if (GET_BONUS(ch, BONUS_SLOW) > 0 && GET_CHA(ch) + bonus <= 25) {
-         ch->real_abils.cha += bonus;
+            ch->real_abils.str += bonus;
         }
-	 
-	 GET_PHASE(ch) = phase;
- }
+        if (GET_BONUS(ch, BONUS_SLOW) > 0 && GET_CHA(ch) + bonus <= 25) {
+            ch->real_abils.cha += bonus;
+        }
 
-  save_char(ch);   
-  return;
+        GET_PHASE(ch) = phase;
+    }
+    save_char(ch);
 }

@@ -1010,9 +1010,9 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
         }
         else {
           if (skill_num != 539)
-           send_to_char(ch, "You practice for a while and manage to advance your technique.\r\n");
+           send_to_char(ch, "You practice for a while and manage to advance your technique. (%d)\r\n", GET_SKILL_BASE(ch, skill_num) + 1);
           else
-           send_to_char(ch, "You practice the basics of %s\r\n", sensei_style[GET_CLASS(ch)]);
+           send_to_char(ch, "You practice the basics of %s. (%d)\r\n", sensei_style[GET_CLASS(ch)], GET_SKILL_BASE(ch, skill_num) + 1);
          SET_SKILL(ch, skill_num, GET_SKILL_BASE(ch, skill_num) + 1);
          GET_PRACTICES(ch, GET_CLASS(ch)) -= pointcost;
          if (GET_SKILL_BASE(ch, skill_num) >= 100) {

@@ -5695,8 +5695,8 @@ ACMD(do_score)
  send_to_char(ch, "  @cO@D-----------------------------@D[ @cStatistics @D]-----------------------------@cO@n\n");
  send_to_char(ch, "      @D<@wCharacter Level@D: @w%-3d@D> <@wRPP@D: @w%-3d@D> <@wRPP Bank@D: @w%-3d@D>@n\n", GET_LEVEL(ch), GET_RP(ch), GET_RBANK(ch));
  send_to_char(ch, "      @D<@wSpeed Index@D: @w%-15s@D> <@wArmor Index@D: @w%-15s@D>@n\n", add_commas(GET_SPEEDI(ch)), add_commas(GET_ARMOR(ch)));
- send_to_char(ch, "        @D[    @RStrength@D|@G%3d@D] [     @YAgility@D|@G%3d@D] [       @BSpeed@D|@G%3d@D]@n\n", GET_STR(ch), GET_DEX(ch), GET_CHA(ch));
- send_to_char(ch, "        @D[@gConstitution@D|@G%3d@D] [@CIntelligence@D|@G%3d@D] [      @MWisdom@D|@G%3d@D]@n\n", GET_CON(ch), GET_INT(ch), GET_WIS(ch));
+ send_to_char(ch, "    @D[    @RStrength@D|@G%2d (%3d)@D] [     @YAgility@D|@G%2d (%3d)@D] [      @BSpeed@D|@G%2d (%3d)@D]@n\n", ch->real_abils.str, GET_STR(ch), ch->real_abils.dex, GET_DEX(ch), ch->real_abils.cha, GET_CHA(ch));
+ send_to_char(ch, "    @D[@gConstitution@D|@G%2d (%3d)@D] [@CIntelligence@D|@G%2d (%3d)@D] [     @MWisdom@D|@G%2d (%3d)@D]@n\n", ch->real_abils.con, GET_CON(ch), ch->real_abils.intel, GET_INT(ch), ch->real_abils.wis, GET_WIS(ch));
  }
  if (view == full || view == other) {
  send_to_char(ch, "  @cO@D-----------------------------@D[   @cOther    @D]-----------------------------@cO@n\n");
