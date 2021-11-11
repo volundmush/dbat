@@ -686,6 +686,16 @@ static void update_flags(struct char_data *ch)
 		send_to_char(ch, "The silk ensnaring your arms disolves enough for you to break it!\r\n");
 		REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ENSNARED);
 	}
+
+    if((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && PLR_FLAGGED(ch, PLR_TRANS1) && !PLR_FLAGGED(ch, PLR_FPSSJ)) {
+        GET_ABSORBS(ch) += 1;
+        if(GET_ABSORBS(ch) >= 300) {
+            send_to_char(ch, "You have mastered the base Super Saiyan transformation and achieved Full Power Super Saiyan! Super Saiyan First can now be maintained effortlessly.\r\n");
+            SET_BIT_AR(PLR_FLAGS(ch), PLR_FPSSJ);
+            GET_ABSORBS(ch) = 0;
+        }
+    }
+
 	if (!IS_NPC(ch) && !PLR_FLAGGED(ch, PLR_STAIL) && !PLR_FLAGGED(ch, PLR_NOGROW) && (IS_SAIYAN(ch) || IS_HALFBREED(ch))) {
 		if (RACIAL_PREF(ch) == 1 && rand_number(1, 50) >= 40) {
 			GET_TGROWTH(ch) += 1;
