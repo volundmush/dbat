@@ -231,8 +231,9 @@ static void mob_attack(struct char_data *ch, char *buf)
   }
  }
 
- if (axion_dice(-10) > 90 && GET_HIT(ch) <= GET_MAX_HIT(ch) / 2 && !MOB_FLAGGED(ch, MOB_POWERUP) && GET_MOB_VNUM(ch) != 25)  {
-  do_powerup(ch, NULL, 0, 0);
+ if (axion_dice(-10) > 90 && ch->getCurHealthPercent() <= .5 && !MOB_FLAGGED(ch, MOB_POWERUP) && GET_MOB_VNUM(ch) != 25 &&
+ !(IS_ANDROID(ch) || IS_ANIMAL(ch) || ch->chclass->getID() == dbat::sensei::commoner))  {
+  do_powerup(ch, nullptr, 0, 0);
   return;
  }
 
