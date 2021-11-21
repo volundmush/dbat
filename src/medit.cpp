@@ -201,6 +201,7 @@ void medit_setup_new(struct descriptor_data *d)
   GET_SDESC(mob) = strdup("the unfinished mob");
   GET_LDESC(mob) = strdup("An unfinished mob stands here.\r\n");
   GET_DDESC(mob) = strdup("It looks unfinished.\r\n");
+  mob->race = dbat::race::race_map[dbat::race::human];
   SCRIPT(mob) = NULL;
   mob->proto_script = OLC_SCRIPT(d) = NULL;
 
