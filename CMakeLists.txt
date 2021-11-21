@@ -1,6 +1,28 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.18)
 
-project(circle CXX)
+set(CPM_DOWNLOAD_VERSION 0.34.0)
+set(CPM_DOWNLOAD_LOCATION "${CMAKE_BINARY_DIR}/cmake/CPM_${CPM_DOWNLOAD_VERSION}.cmake")
+
+if(NOT (EXISTS ${CPM_DOWNLOAD_LOCATION}))
+    message(STATUS "Downloading CPM.cmake")
+    file(DOWNLOAD https://github.com/TheLartians/CPM.cmake/releases/download/v${CPM_DOWNLOAD_VERSION}/CPM.cmake ${CPM_DOWNLOAD_LOCATION})
+endif()
+
+include(${CPM_DOWNLOAD_LOCATION})
+
+project(circle)
+
+CPMAddPackage(
+        NAME json
+        GITHUB_REPOSITORY nlohmann/json
+        VERSION 3.10.4
+)
+
+CPMAddPackage(
+        NAME eff_random
+        GITHUB_REPOSITORY effolkronium/random
+        VERSION 1.4.0
+)
 
 file(GLOB CIRCLE_INCLUDE src/*.h)
 file(GLOB CIRCLE_SRC src/*.cpp)
@@ -14,22 +36,20 @@ set(CMAKE_CXX_FLAGS "-fpermissive")
 include_directories(libs/asio/asio/include)
 include_directories(libs/sqlitepp)
 
-add_subdirectory(libs/random)
-link_libraries(effolkronium_random)
-
 add_subdirectory(libs/fmt)
 include_directories(libs/fmt/include)
 link_libraries(fmt::fmt)
 
-add_subdirectory(libs/json)
-link_libraries(nlohmann_json)
 
 find_library(LIBBSD NAMES bsd libbsd)
-include_directories(include)
+
 if(${LIBBSD})
     link_libraries(${LIBBSD})
     add_compile_definitions(HAVE_LIBBSD)
 endif()
+
+include_directories(PUBLIC include ${eff_random_SOURCE_DIR}/include $${json_SOURCE_DIR}/single_include)
+
 
 # Support for ASIO
 #include_directories(libs/asio/asio/include)
@@ -66,6 +86,7 @@ link_libraries(circlemud)
 
 # the various binaries
 add_executable(circle apps/circle.cpp)
+add_executable(test apps/test.cpp)
 #add_executable(asciipasswd apps/circle.cpp)
 #add_executable(autowiz apps/autowiz.cpp)
 #add_executable(delobjs apps/delobjs.cpp)
@@ -77,16 +98,5 @@ add_executable(circle apps/circle.cpp)
 #add_executable(wld2html apps/wld2html.cpp)
 
 target_compile_definitions(circlemud PUBLIC USING_CMAKE=1 CIRCLE_UNIX=1 POSIX=1)
-
-
-
-
-
-
-
-
-
-
-
 
 SET(circle_link ${CMAKE_INSTALL_PREFIX}/bin/)

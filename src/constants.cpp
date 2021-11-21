@@ -187,6 +187,7 @@ const char *dirs[NUM_OF_DIRS+1] =
   "outside",
   "\n"
 };
+
 const char *abbr_dirs[NUM_OF_DIRS+1] = 
 {
   "n",
