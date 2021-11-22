@@ -842,7 +842,7 @@ namespace dbat::race {
                     case 1:
                         break; // free for androids. They pay PS instead.
                     case 6:
-                        rpp_cost = 6;
+                        rpp_cost = 5;
                         break;
                     default:
                         rpp_cost = 1;
