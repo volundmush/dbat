@@ -1366,31 +1366,28 @@ ACMD(do_train)
       return;
   }
 
-  switch(stat_id) {
-      case 1:
-      case 2:
-      case 3:
-      case 4:
-          if ((ch->getCurST()) < cost) {
-              send_to_char(ch, "You do not have enough stamina with the current weight worn and gravity!\r\n");
-              return;
-          }
-          plus = (((total / 20) + (GET_MAX_MOVE(ch) / 50)) * 100) / GET_MAX_MOVE(ch);
-          ch->decCurST(cost);
-          break;
-      case 5:
-      case 6:
-          if ((ch->getCurKI()) < ((total / 20) + (GET_MAX_MANA(ch) / 50))) {
-              send_to_char(ch, "You do not have enough ki with the current weight worn and gravity!\r\n");
-              return;
-          }
-          plus = (((total / 20) + (GET_MAX_MANA(ch) / 50)) * 100) / GET_MAX_MANA(ch);
-          if (sensei < 0)
-              ch->decCurKI((total / 20) + (GET_MAX_MANA(ch) / 50));
-          else
-              ch->decCurKI((total / 25) + (GET_MAX_MANA(ch) / 60));
-          break;
-  }
+    switch(stat_id) {
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+            if ((ch->getCurST()) < cost) {
+                send_to_char(ch, "You do not have enough stamina with the current weight worn and gravity!\r\n");
+                return;
+            }
+            plus = (((total / 20) + (GET_MAX_MOVE(ch) / 50)) * 100) / GET_MAX_MOVE(ch);
+            ch->decCurST(cost);
+            break;
+        case 5:
+        case 6:
+            if ((ch->getCurKI()) < ((total / 20) + (GET_MAX_MANA(ch) / 50))) {
+                send_to_char(ch, "You do not have enough ki with the current weight worn and gravity!\r\n");
+                return;
+            }
+            plus = (((total / 20) + (GET_MAX_MANA(ch) / 50)) * 100) / GET_MAX_MANA(ch);
+            ch->decCurKI((total / sensei<0 ? 20 : 25) + (GET_MAX_MANA(ch) / sensei<0 ? 50 : 60));
+            break;
+    }
 
     /* what training message is displayed? */
     reveal_hiding(ch, 0);
@@ -1497,11 +1494,14 @@ ACMD(do_train)
     }
 
 
+    plus += 75;
+    /*
     if (GET_LEVEL(ch) > 80) {
         plus += 50;
     } else if (GET_LEVEL(ch) > 60) {
         plus += 25;
     }
+     */
 
     if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19800 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19899) {
         plus *= 4;
