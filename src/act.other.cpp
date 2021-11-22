@@ -1380,12 +1380,12 @@ ACMD(do_train)
             break;
         case 5:
         case 6:
-            if ((ch->getCurKI()) < ((total / 20) + (GET_MAX_MANA(ch) / 50))) {
+            if ((ch->getCurKI()) < cost) {
                 send_to_char(ch, "You do not have enough ki with the current weight worn and gravity!\r\n");
                 return;
             }
             plus = (((total / 20) + (GET_MAX_MANA(ch) / 50)) * 100) / GET_MAX_MANA(ch);
-            ch->decCurKI((total / sensei<0 ? 20 : 25) + (GET_MAX_MANA(ch) / sensei<0 ? 50 : 60));
+            ch->decCurKI(cost);
             break;
     }
 
