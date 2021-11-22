@@ -8450,35 +8450,35 @@ ACMD(do_pushup)
     act("@gYou do a pushup, and it was a really hard one to finish.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@g$n does a pushup, while sweating profusely.@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-   if (cost >= GET_MAX_HIT(ch) / 2) {
+   if (cost >= ch->getMaxPLTrans() / 2) {
     send_to_char(ch, "This gravity is a great challenge for you!\r\n");
     bonus *= 10;
    }
-   else if (cost >= GET_MAX_HIT(ch) / 4) {
+   else if (cost >= ch->getMaxPLTrans() / 4) {
     send_to_char(ch, "This gravity is an awesome challenge for you!\r\n");
     bonus *= 8;
    }
-   else if (cost >= GET_MAX_HIT(ch) / 10) {
+   else if (cost >= ch->getMaxPLTrans() / 10) {
     send_to_char(ch, "This gravity is a good challenge for you!\r\n");
     bonus *= 6;
    }
-   else if (cost < GET_MAX_HIT(ch) / 1000) {
+   else if (cost < ch->getMaxPLTrans() / 1000) {
     send_to_char(ch, "This gravity is so easy to you, you could do it in your sleep....\r\n");
     bonus /= 8;
    }
-   else if (cost < GET_MAX_HIT(ch) / 100) {
+   else if (cost < ch->getMaxPLTrans() / 100) {
     send_to_char(ch, "This gravity is the opposite of a challenge for you....\r\n");
     bonus /= 5;
    }
-   else if (cost < GET_MAX_HIT(ch) / 50) {
+   else if (cost < ch->getMaxPLTrans() / 50) {
     send_to_char(ch, "This gravity is definitely not a challenge for you....\r\n");
     bonus /= 4;
    }
-   else if (cost < GET_MAX_HIT(ch) / 30) {
+   else if (cost < ch->getMaxPLTrans() / 30) {
     send_to_char(ch, "This gravity is barely a challenge for you....\r\n");
     bonus /= 3;
    }
-   else if (cost < GET_MAX_HIT(ch) / 20) {
+   else if (cost < ch->getMaxPLTrans() / 20) {
     send_to_char(ch, "This gravity is hardly a challenge for you....\r\n");
     bonus /= 2;
    }
