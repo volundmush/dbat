@@ -3565,7 +3565,7 @@ ACMD(do_hellspear)
 {
  int perc, dge = 2, count = 0, skill;
  int64_t dmg;
- double attperc = .3, minimum = .10;
+ double attperc = .3, minimum = .1;
   struct char_data *vict = NULL, *next_v = NULL;
   char arg2[MAX_INPUT_LENGTH];
 
@@ -3658,8 +3658,6 @@ ACMD(do_hellspear)
        continue;
        }
       dge = handle_dodge(vict);
-
-      if(!tech_handle_zanzoken(ch, vict, ""))
 
       if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&
               (vict->getCurST()) >= 1 && GET_POS(vict) != POS_SLEEPING) {
