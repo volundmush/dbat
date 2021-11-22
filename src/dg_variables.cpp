@@ -759,8 +759,13 @@ in the vault (vnum: 453) now and then. you can just use
 
           else if (!strcasecmp(field, "hitp")) {
             if (subfield && *subfield) {
-              int64_t addition = atol(subfield);
-              c->incCurHealth(addition);
+              int64_t addition = atoll(subfield);
+              if(addition > 0 ) {
+                  c->incCurHealth(addition);
+              } else {
+                  c->decCurHealth(addition);
+              }
+
               update_pos(c);
             }
             snprintf(str, slen, "%" I64T "", GET_HIT(c));
@@ -857,7 +862,11 @@ in the vault (vnum: 453) now and then. you can just use
           else if (!strcasecmp(field, "mana")) {
             if (subfield && *subfield) {
               int64_t addition = atoll(subfield);
-              c->incCurKI(addition);
+              if(addition > 0) {
+                  c->incCurKI(addition);
+              } else {
+                  c->decCurKI(addition);
+              }
             }
             snprintf(str, slen, "%" I64T "", (c->getCurKI()));
           }
@@ -872,7 +881,12 @@ in the vault (vnum: 453) now and then. you can just use
           else if (!strcasecmp(field, "move")) {
             if (subfield && *subfield) {
               int64_t addition = atoll(subfield);
-              c->incCurST(addition);
+              if(addition > 0) {
+                  c->incCurST(addition);
+              } else {
+                  c->decCurST(addition);
+              }
+
             }
             snprintf(str, slen, "%" I64T "", (c->getCurST()));
           }
