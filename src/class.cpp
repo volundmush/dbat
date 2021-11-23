@@ -479,6 +479,7 @@ void do_start(struct char_data *ch)
    if (IS_DEMON(ch)) {
     punch = rand_number(50, 60);
     SET_SKILL(ch, SKILL_SPEAR, punch);
+    SET_SKILL(ch, SKILL_HONOO, punch);
    }
 
    punch = 0;

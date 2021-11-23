@@ -2673,10 +2673,15 @@ ACMD(do_shimmer)
 ACMD(do_channel)
 {
 
- if (!IS_DABURA(ch) || GET_SKILL_BASE(ch, SKILL_STYLE) <= 0) {
-  send_to_char(ch, "You do not know how to do that!\r\n");
-  return;
- }
+    if (!IS_DEMON(ch) || GET_SKILL_BASE(ch, SKILL_STYLE) < 40) {
+        send_to_char(ch, "You are not a Demon!\r\n");
+        return;
+    }
+
+    if (GET_SKILL_BASE(ch, SKILL_STYLE) < 40) {
+        send_to_char(ch, "This requires a fighting style at level 40 or more!!\r\n");
+        return;
+    }
 
  int64_t cost = GET_MAX_MANA(ch) * 0.15;
 
