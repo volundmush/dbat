@@ -99,7 +99,7 @@ namespace fs = std::filesystem;
 #define CIRCLE_UNSIGNED_INDEX 1	/* 0 = signed, 1 = unsigned */
 
 #if CIRCLE_UNSIGNED_INDEX
-#define IDXTYPE	uint16_t
+#define IDXTYPE	uint32_t
 #define NOWHERE	((IDXTYPE)~0)
 #define NOTHING	((IDXTYPE)~0)
 #define NOBODY	((IDXTYPE)~0)
