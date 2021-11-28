@@ -24,6 +24,33 @@ CPMAddPackage(
         VERSION 1.4.0
 )
 
+CPMAddPackage(
+        NAME fmt
+        GITHUB_REPOSITORY fmtlib/fmt
+        GIT_TAG 8.0.1
+)
+
+CPMAddPackage(
+        name sqlitepp
+        GITHUB_REPOSITORY mpaland/sqlitepp
+        GIT_TAG 1.6.0
+)
+
+CPMAddPackage(
+        name argh
+        GITHUB_REPOSITORY adishavit/argh
+        VERSION 1.3.1
+)
+
+include_directories(PUBLIC
+        include
+        ${json_SOURCE_DIR}/single_include
+        ${fmt_SOURCE_DIR}/include
+        ${eff_random_SOURCE_DIR}/include
+        ${sqlitepp_SOURCE_DIR}
+        ${argh_SOURCE_DIR}
+)
+
 file(GLOB CIRCLE_INCLUDE src/*.h)
 file(GLOB CIRCLE_SRC src/*.cpp)
 
@@ -33,51 +60,10 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 set(CMAKE_CXX_FLAGS "-fpermissive")
 
-include_directories(libs/asio/asio/include)
-include_directories(libs/sqlitepp)
-
-add_subdirectory(libs/fmt)
-include_directories(libs/fmt/include)
-link_libraries(fmt::fmt)
-
-
-find_library(LIBBSD NAMES bsd libbsd)
-
-if(${LIBBSD})
-    link_libraries(${LIBBSD})
-    add_compile_definitions(HAVE_LIBBSD)
-endif()
-
-include_directories(PUBLIC include ${eff_random_SOURCE_DIR}/include $${json_SOURCE_DIR}/single_include)
-
-
-# Support for ASIO
-#include_directories(libs/asio/asio/include)
-
-# Support for SQLITEPP
-#include_directories(libs/sqlitepp)
-
-# Support for FMT
-#include_directories(libs/fmt/include)
-#add_compile_definitions(FMT_HEADER_ONLY=1)
-
-#find_package(ZLIB REQUIRED)
-#link_libraries(ZLIB::ZLIB)
 find_library(ZLIB NAMES z libz REQUIRED)
-link_libraries(${ZLIB})
-
-#find_package(SQLite3 REQUIRED)
-#if(SQLite3_FOUND)
-#    message("Found SQLite3.")
-#    link_libraries(SQLite::SQLite3)
-#endif()
-
-#find_package(OpenSSL REQUIRED)
-#if(OpenSSL_FOUND)
-#    message("Found OpenSSL.")
-#    link_libraries(OpenSSL::Crypto)
-#endif()
-
+find_library(LIBBSD NAMES bsd libbsd REQUIRED)
+add_compile_definitions(HAVE_LIBBSD)
+link_libraries(${ZLIB} fmt::fmt ${LIBBSD})
 
 # this is the core library we're making.
 add_library(circlemud ${CIRCLE_INCLUDE} ${CIRCLE_SRC})
@@ -87,15 +73,6 @@ link_libraries(circlemud)
 # the various binaries
 add_executable(circle apps/circle.cpp)
 add_executable(test apps/test.cpp)
-#add_executable(asciipasswd apps/circle.cpp)
-#add_executable(autowiz apps/autowiz.cpp)
-#add_executable(delobjs apps/delobjs.cpp)
-#add_executable(play2to3 apps/play2to3.cpp)
-#add_executable(shopconv apps/shopconv.cpp)
-#add_executable(showplay apps/showplay.cpp)
-#add_executable(sign apps/sign.cpp)
-#add_executable(split apps/split.cpp)
-#add_executable(wld2html apps/wld2html.cpp)
 
 target_compile_definitions(circlemud PUBLIC USING_CMAKE=1 CIRCLE_UNIX=1 POSIX=1)
 
