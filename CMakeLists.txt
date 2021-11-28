@@ -60,10 +60,14 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 set(CMAKE_CXX_FLAGS "-fpermissive")
 
-find_library(ZLIB NAMES z libz REQUIRED)
-find_library(LIBBSD NAMES bsd libbsd REQUIRED)
-add_compile_definitions(HAVE_LIBBSD)
-link_libraries(${ZLIB} fmt::fmt ${LIBBSD})
+find_library(LIBBSD NAMES bsd libbsd)
+
+if(${LIBBSD})
+    link_libraries(${LIBBSD})
+    add_compile_definitions(HAVE_LIBBSD)
+endif()
+
+link_libraries(${ZLIB} fmt::fmt)
 
 # this is the core library we're making.
 add_library(circlemud ${CIRCLE_INCLUDE} ${CIRCLE_SRC})
