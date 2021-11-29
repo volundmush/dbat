@@ -1660,7 +1660,7 @@ namespace dbat::race {
             case saiyan:
             case halfbreed:
                 SET_BIT_AR(PLR_FLAGS(ch), PLR_STAIL);
-                if(MOON_OK(ch) && !PLR_FLAGGED(ch, PLR_OOZARU)) {
+                if(MOON_OK(ch)) {
                     oozaru_transform(ch);
                 }
                 break;
