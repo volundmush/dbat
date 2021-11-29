@@ -8806,7 +8806,7 @@ void base_update(void)
 			COMBO(d->character) = -1;
 			COMBHITS(d->character) = 0;
 		}
-		if (MOON_UP && (IS_SAIYAN(d->character) || IS_HALFBREED(d->character)) && !PLR_FLAGGED(d->character, PLR_OOZARU)) {
+		if (MOON_OK(d->character)) {
 			oozaru_transform(d->character);
 		}
 		if (cash == TRUE && GET_BANK_GOLD(d->character) > 0) {

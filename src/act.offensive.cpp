@@ -11363,7 +11363,6 @@ ACMD(do_slam)
   if(!tech_handle_zanzoken(ch, vict, "slam")) {
       COMBO(ch) = -1;
       COMBHITS(ch) = 0;
-      REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
       pcost(ch, 0, stcost / 2);
       pcost(vict, 0, GET_MAX_HIT(vict) / 200);
       return;
@@ -11489,7 +11488,7 @@ ACMD(do_slam)
 	break;
         case 6:
          /* One less message */
-	break;
+	        break;
         default:
 	 /* we want no message for the default */
 	break;
