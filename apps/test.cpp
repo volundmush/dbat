@@ -3,10 +3,12 @@
 //
 
 
-#include "structs.h"
+#include "sysdep.h"
+#include "sqlitepp.h"
+#include <iostream>
 
 int main(int argc, char **argv) {
-    auto c = new char_data;
-    c->player_specials = new player_special_data;
-
+    sqlitepp::db d("test.sqlite3");
+    assert(d.is_open());
+    std::cout << "Yup it works!" << std::endl;
 }
