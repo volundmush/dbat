@@ -280,10 +280,6 @@ static void generate_multiform(struct char_data *ch, int count)
         clone->level = ch->level;
         clone->time = ch->time;
 
-        if(ch->race->raceHasTail()) {
-            clone->race->gainTail(clone);
-        }
-
         clone->tail_growth = ch->tail_growth;
         ch->transclass = ch->transclass;
 
