@@ -320,6 +320,7 @@ extern struct config_data config_info;
 extern struct room_data *world;
 extern room_rnum top_of_world;
 
+
 extern struct zone_data *zone_table;
 extern zone_rnum top_of_zone_table;
 

@@ -68,6 +68,9 @@ struct htree_node *obj_htree = NULL;	/* hash tree for fast obj lookup */
 
 struct zone_data *zone_table;	/* zone table			 */
 zone_rnum top_of_zone_table = 0;/* top element of zone tab	 */
+
+
+
 struct message_list fight_messages[MAX_MESSAGES];	/* fighting messages	 */
 
 struct index_data **trig_index; /* index table for triggers      */
@@ -2427,10 +2430,12 @@ static char *parse_object(FILE *obj_f, int nr)
     GET_OBJ_EXTRA(obj_proto + i)[1] = asciiflag_conv(f2);
     GET_OBJ_EXTRA(obj_proto + i)[2] = asciiflag_conv(f3);
     GET_OBJ_EXTRA(obj_proto + i)[3] = asciiflag_conv(f4);
+
     GET_OBJ_WEAR(obj_proto + i)[0] = asciiflag_conv(f5);
     GET_OBJ_WEAR(obj_proto + i)[1] = asciiflag_conv(f6);
     GET_OBJ_WEAR(obj_proto + i)[2] = asciiflag_conv(f7);
     GET_OBJ_WEAR(obj_proto + i)[3] = asciiflag_conv(f8);
+
     GET_OBJ_PERM(obj_proto + i)[0] = asciiflag_conv(f9);
     GET_OBJ_PERM(obj_proto + i)[1] = asciiflag_conv(f10);
     GET_OBJ_PERM(obj_proto + i)[2] = asciiflag_conv(f11);
@@ -2765,7 +2770,7 @@ static void load_zones(FILE *fl, char *zonename)
       break;
     }
     error = 0;
-    if (strchr("MOEPDTVG", ZCMD2.command) == NULL) {	/* a 4-arg command */
+    if (strchr("MOEPDTVG", ZCMD2.command) == nullptr) {	/* a 4-arg command */
       if (sscanf(ptr, " %d %d %d %d ", &tmp, &ZCMD2.arg1, &ZCMD2.arg2, &ZCMD2.arg3) != 4)
 	error = 1;
     } else if (ZCMD2.command=='V') { /* a string-arg command */
