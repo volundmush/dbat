@@ -1341,42 +1341,42 @@ void eval_op(char *op, char *lhs, char *rhs, char *result, void *go,
 
   else if (!strcmp("==", op)) {
     if (is_num(lhs) && is_num(rhs))
-      sprintf(result, "%d", atoi(lhs) == atoi(rhs));
+      sprintf(result, "%d", atoll(lhs) == atoll(rhs));
     else
       sprintf(result, "%d", !strcasecmp(lhs, rhs));
   }
 
   else if (!strcmp("!=", op)) {
     if (is_num(lhs) && is_num(rhs))
-      sprintf(result, "%d", atoi(lhs) != atoi(rhs));
+      sprintf(result, "%d", atoll(lhs) != atoll(rhs));
     else
       sprintf(result, "%d", strcasecmp(lhs, rhs));
   }
 
   else if (!strcmp("<=", op)) {
     if (is_num(lhs) && is_num(rhs))
-      sprintf(result, "%d", atoi(lhs) <= atoi(rhs));
+      sprintf(result, "%d", atoll(lhs) <= atoll(rhs));
     else
       sprintf(result, "%d", strcasecmp(lhs, rhs) <= 0);
   }
 
   else if (!strcmp(">=", op)) {
     if (is_num(lhs) && is_num(rhs))
-      sprintf(result, "%d", atoi(lhs) >= atoi(rhs));
+      sprintf(result, "%d", atoll(lhs) >= atoll(rhs));
     else
       sprintf(result, "%d", strcasecmp(lhs, rhs) <= 0);
   }
 
   else if (!strcmp("<", op)) {
     if (is_num(lhs) && is_num(rhs))
-      sprintf(result, "%d", atoi(lhs) < atoi(rhs));
+      sprintf(result, "%d", atoll(lhs) < atoll(rhs));
     else
       sprintf(result, "%d", strcasecmp(lhs, rhs) < 0);
   }
 
   else if (!strcmp(">", op)) {
     if (is_num(lhs) && is_num(rhs))
-      sprintf(result, "%d", atoi(lhs) > atoi(rhs));
+      sprintf(result, "%d", atoll(lhs) > atoll(rhs));
     else
       sprintf(result, "%d", strcasecmp(lhs, rhs) > 0);
   }
@@ -1385,20 +1385,20 @@ void eval_op(char *op, char *lhs, char *rhs, char *result, void *go,
     sprintf(result, "%c", str_str(lhs, rhs) ? '1' : '0');
 
   else if (!strcmp("*", op))
-    sprintf(result, "%d", atoi(lhs) * atoi(rhs));
+    sprintf(result, "%d", atoll(lhs) * atoll(rhs));
 
   else if (!strcmp("/", op))
-    sprintf(result, "%d", (n = atoi(rhs)) ? (atoi(lhs) / n) : 0);
+    sprintf(result, "%d", (n = atoll(rhs)) ? (atoll(lhs) / n) : 0);
 
   else if (!strcmp("+", op))
-    sprintf(result, "%d", atoi(lhs) + atoi(rhs));
+    sprintf(result, "%d", atoll(lhs) + atoll(rhs));
 
   else if (!strcmp("-", op))
-    sprintf(result, "%d", atoi(lhs) - atoi(rhs));
+    sprintf(result, "%d", atoll(lhs) - atoll(rhs));
 
   else if (!strcmp("!", op)) {
     if (is_num(rhs))
-      sprintf(result, "%d", !atoi(rhs));
+      sprintf(result, "%d", !atoll(rhs));
     else
       sprintf(result, "%d", !*rhs);
   }
