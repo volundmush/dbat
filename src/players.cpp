@@ -1144,7 +1144,7 @@ void save_char(struct char_data * ch)
   if (GET_GENOME(ch, 0)    != PFDEF_EYE)        fprintf(fl, "Geno: %d\n", GET_GENOME(ch, 0));
   if (GET_GENOME(ch, 1)    != PFDEF_EYE)        fprintf(fl, "Gen1: %d\n", GET_GENOME(ch, 1));
   if (GET_POS(ch)          != POS_STANDING)     fprintf(fl, "Posi: %d\n", GET_POS(ch));
-  if ((ch->getCurLF())    != PFDEF_BASEPL)     fprintf(fl, "LF  : %" I64T "\n", (ch->getCurLF()));
+  //if ((ch->getCurLF())    != PFDEF_BASEPL)     fprintf(fl, "LF  : %" I64T "\n", (ch->getCurLF()));
   if (GET_LIFEPERC(ch)     != PFDEF_WEIGHT)     fprintf(fl, "LFPC: %d\n", GET_LIFEPERC(ch));
   if ((ch->getBasePL())      != PFDEF_BASEPL)     fprintf(fl, "Bpl : %" I64T "\n", (ch->getBasePL()));
   if ((ch->getBaseKI())      != PFDEF_BASEKI)     fprintf(fl, "Bki : %" I64T "\n", (ch->getBaseKI()));
