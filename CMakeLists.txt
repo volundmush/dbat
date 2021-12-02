@@ -67,7 +67,9 @@ if(${LIBBSD})
     add_compile_definitions(HAVE_LIBBSD)
 endif()
 
-link_libraries(${ZLIB} fmt::fmt)
+find_package(ZLIB REQUIRED)
+
+link_libraries(ZLIB::ZLIB fmt::fmt)
 
 # this is the core library we're making.
 add_library(circlemud ${CIRCLE_INCLUDE} ${CIRCLE_SRC})
