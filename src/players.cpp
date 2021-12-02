@@ -1100,6 +1100,7 @@ void save_char(struct char_data * ch)
   if (GET_COND(ch, DRUNK)  != PFDEF_DRUNK  && GET_ADMLEVEL(ch) < ADMLVL_IMMORT)
     fprintf(fl, "Drnk: %d\n", GET_COND(ch, DRUNK));
 
+  /*
   if (GET_HIT(ch)	   != PFDEF_HIT  || GET_MAX_HIT(ch)  != PFDEF_MAXHIT)
     fprintf(fl, "Hit : %" I64T "/%" I64T "\n", GET_HIT(ch),  GET_MAX_HIT(ch));
   if ((ch->getCurKI())	   != PFDEF_MANA || GET_MAX_MANA(ch) != PFDEF_MAXMANA)
@@ -1108,7 +1109,7 @@ void save_char(struct char_data * ch)
     fprintf(fl, "Move: %" I64T "/%" I64T "\n", (ch->getCurST()), GET_MAX_MOVE(ch));
   if (GET_KI(ch)	   != PFDEF_KI || GET_MAX_KI(ch) != PFDEF_MAXKI)
     fprintf(fl, "Ki  : %" I64T "/%" I64T "\n", GET_KI(ch), GET_MAX_KI(ch));
-
+  */
   if (GET_STR(ch)	   != PFDEF_STR)        fprintf(fl, "Str : %d\n", GET_STR(ch));
   if (GET_INT(ch)	   != PFDEF_INT)	fprintf(fl, "Int : %d\n", GET_INT(ch));
   if (GET_WIS(ch)	   != PFDEF_WIS)	fprintf(fl, "Wis : %d\n", GET_WIS(ch));
