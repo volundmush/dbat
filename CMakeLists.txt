@@ -68,8 +68,9 @@ if(${LIBBSD})
 endif()
 
 find_package(ZLIB REQUIRED)
+find_package(SQLite3 REQUIRED)
 
-link_libraries(ZLIB::ZLIB fmt::fmt)
+link_libraries(ZLIB::ZLIB fmt::fmt ${SQLite3_LIBRARIES})
 
 # this is the core library we're making.
 add_library(circlemud ${CIRCLE_INCLUDE} ${CIRCLE_SRC})
