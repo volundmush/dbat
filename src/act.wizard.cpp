@@ -3834,6 +3834,7 @@ static const struct set_struct {
    { "feature",         ADMLVL_IMMORT,  PC,     BINARY },
    { "tclass",          ADMLVL_VICE,  PC,     NUMBER },
    { "clones",          ADMLVL_IMPL,   PC,     NUMBER },
+   { "armor",          ADMLVL_IMPL,   PC,     NUMBER },
    { "\n", 0, BOTH, MISC }
   };
 
@@ -4380,6 +4381,11 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
 
   case 81:
    GET_CLONES(vict) = RANGE(1, 3);
+   send_to_char(ch, "Done.\r\n");
+   break;
+
+  case 82:
+   GET_ARMOR(vict) = RANGE(0, 1000000);
    send_to_char(ch, "Done.\r\n");
    break;
 
