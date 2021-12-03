@@ -2527,7 +2527,8 @@ void handle_evolution(struct char_data *ch, int64_t dmg)
     rand1 += 0.01;
     rand2 += 0.01;
    }
-   int64_t plgain = ch->getBasePL() * rand1, armorgain = 0, stamgain = ch->getBaseST() * rand2;
+   int armorgain = 0;
+   int64_t plgain = ch->getBasePL() * rand1, stamgain = ch->getBaseST() * rand2;
    armorgain = armor_evolve(ch);
    ch->gainBasePL(plgain);
    ch->gainBaseST(stamgain);
