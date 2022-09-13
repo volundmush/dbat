@@ -653,7 +653,7 @@ int House_load(room_vnum rvnum)
         temp->cost_per_day = t[7];
 
         /* buf2 is error codes pretty much */
-        strcat(buf2, ", after numeric constants (expecting E/#xxx)");
+        //strcat(buf2, ", after numeric constants (expecting E/#xxx)");
         
         /*add_unique_id(temp);*/
         /* we're clearing these for good luck */
