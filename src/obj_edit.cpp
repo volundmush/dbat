@@ -217,9 +217,9 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
 
      d->obj_editflag = EDIT_NONE;
      d->obj_editval = EDIT_NONE;
-     d->character->rbank -= 2;
-     GET_RBANK(d->character) = d->character->rbank;
-     d->rbank -= 2;
+     d->character->rp -= 2;
+     GET_RP(d->character) = d->character->rp;
+     d->rpp -= 2;
      userWrite(d, 0, 0, 0, "index");
      SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_RESTRING);
      write_to_output(d, "Purchase complete.");
@@ -513,9 +513,9 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
      SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_SLOT2);
      d->obj_editflag = EDIT_NONE;
      d->obj_editval = EDIT_NONE;
-     d->character->rbank -= 30;
-     GET_RBANK(d->character) = d->character->rbank;
-     d->rbank -= 30;
+     d->character->rp -= 30;
+     GET_RP(d->character) = d->character->rp;
+     d->rpp -= 30;
      userWrite(d, 0, 0, 0, "index");
      GET_OBJ_SIZE(obj) = get_size(d->character);
      SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_CUSTOM);

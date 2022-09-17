@@ -6421,10 +6421,10 @@ void nanny(struct descriptor_data *d, char *arg)
                       } else {
                           d->character->chclass = chosen_sensei;
                           if (chosen_sensei->getID() == dbat::sensei::kibito && !IS_KAI(d->character)) {
-                              if (d->character->desc->rbank >= 10)
-                                  d->character->desc->rbank -= 10;
+                              if (d->character->desc->rpp >= 10)
+                                  d->character->desc->rpp -= 10;
                               else
-                                  d->character->desc->rbank -= 10;
+                                  d->character->desc->rpp -= 10;
                               userWrite(d->character->desc, 0, 0, 0, "index");
                               write_to_output(d, "\r\n10 RPP deducted from your bank since you are not a kai.\n");
                           }
