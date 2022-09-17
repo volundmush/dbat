@@ -69,8 +69,6 @@ struct htree_node *obj_htree = NULL;	/* hash tree for fast obj lookup */
 struct zone_data *zone_table;	/* zone table			 */
 zone_rnum top_of_zone_table = 0;/* top element of zone tab	 */
 
-
-
 struct message_list fight_messages[MAX_MESSAGES];	/* fighting messages	 */
 
 struct index_data **trig_index; /* index table for triggers      */
