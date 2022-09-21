@@ -1098,7 +1098,6 @@ void handle_gain(struct char_data *keeper, int guild_nr, struct char_data *ch, c
   skip_spaces(&argument);
   auto rpp_cost = rpp_to_level(ch);
 
-
   if (GET_LEVEL(ch) < 100 && GET_EXP(ch) >= level_exp(ch, GET_LEVEL(ch) + 1)) {
     if (GET_RP(ch) < rpp_cost) {
      send_to_char(ch, "You need at least %d RPP to gain the next level.\r\n", rpp_cost);
@@ -1116,7 +1115,6 @@ void handle_gain(struct char_data *keeper, int guild_nr, struct char_data *ch, c
   } else {
     send_to_char(ch, "You are not yet ready for further advancement.\r\n");
   }
-  return;
 }
 
 int rpp_to_level(struct char_data *ch) {

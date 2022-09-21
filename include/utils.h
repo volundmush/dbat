@@ -901,7 +901,7 @@ int wield_type(int chsize, const struct obj_data *weap);
 #define MOON_OK(ch)             (HAS_MOON(ch) && MOON_DATE && MOON_TIME && OOZARU_OK(ch))
 #define OOZARU_OK(ch)           (OOZARU_RACE(ch) && PLR_FLAGGED(ch, PLR_STAIL) && !IS_TRANSFORMED(ch))
 #define OOZARU_RACE(ch)         (IS_SAIYAN(ch) || IS_HALFBREED(ch))
-#define MOON_TIME               (time_info.hours >= 4 || time_info.hours <= 22)
+#define MOON_TIME               (time_info.hours >= 22 || time_info.hours <= 4)
 #define MOON_DATE               (time_info.day == 19 || time_info.day == 20 || time_info.day == 21)
 #define ETHER_STREAM(ch)        (ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_AETHER) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_NAMEK) || PLANET_ZENITH(IN_ROOM(ch)))
 #define HAS_MOON(ch)            (ROOM_FLAGGED(IN_ROOM(ch), ROOM_VEGETA) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH) ||\

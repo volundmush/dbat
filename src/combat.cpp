@@ -2915,11 +2915,11 @@ static void damtype_unarmed_infuse(char_data *ch, int64_t *dam) {
     if (AFF_FLAGGED(ch, AFF_INFUSE)) {
         *dam += (*dam / 100) * (GET_SKILL(ch, SKILL_INFUSE) / 2);
         if (IS_JINTO(ch)) {
-            if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
+            if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 100) {
                 *dam += ((*dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.5;
-            } else if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
+            } else if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 60) {
                 *dam += ((*dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.25;
-            } else if (GET_SKILL(ch, SKILL_INFUSE) >= 100) {
+            } else if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 40) {
                 *dam += ((*dam * 0.01) * (GET_SKILL(ch, SKILL_INFUSE) / 2)) * 0.05;
             }
         }
@@ -4297,13 +4297,15 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
 
  if (AFF_FLAGGED(ch, AFF_INFUSE) && !AFF_FLAGGED(ch, AFF_HASS) && type <= 0) {
      auto infuse_cost = ch->getPercentOfMaxKI(.005);
-  if ((ch->getCurKI() - infuse_cost) > 0 && dmg > 1) {
-      ch->decCurKI(infuse_cost);
-   send_to_room(IN_ROOM(ch), "@CA swirl of ki explodes from the attack!@n\r\n");
-  } else {
-   act("@wYou can no longer infuse ki into your attacks!@n", TRUE, ch, 0, 0, TO_CHAR);
-   act("@c$n@w can no longer infuse ki into $s attacks!@n", TRUE, ch, 0, 0, TO_ROOM);
-   REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_INFUSE);
+  if (dmg > 0) {
+      if (ch->getCurKI() - infuse_cost) {
+          ch->decCurKI(infuse_cost);
+          send_to_room(IN_ROOM(ch), "@CA swirl of ki explodes from the attack!@n\r\n");
+      } else {
+          act("@wYou can no longer infuse ki into your attacks!@n", TRUE, ch, 0, 0, TO_CHAR);
+          act("@c$n@w can no longer infuse ki into $s attacks!@n", TRUE, ch, 0, 0, TO_ROOM);
+          REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_INFUSE);
+      }
   }
  }
 
