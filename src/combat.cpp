@@ -3291,7 +3291,7 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent)
     if (focus > 0) {
      dam += (dam * 0.005) * focus;
     }
-    damtype_human_grandmaster(ch, type, &dam);
+    damtype_human_grandmaster(ch, skill, &dam);
     damtype_human_ki(ch, &dam, 15);
    break;
    case 14: /* Masenko */
@@ -3305,7 +3305,7 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent)
    case 24: /* Bakuhatsuha */
     damtype_focus(ch, &dam, focus, 200);
     damtype_human_ki(ch, &dam, 15);
-    damtype_human_grandmaster(ch, type, &dam);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 22: /* Dual Beam */
     damtype_focus(ch, &dam, focus, 200);
@@ -3316,12 +3316,12 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent)
     if (GET_BONUS(ch, BONUS_BRAWLER) > 0) {
      dam += dam * .2;
     }
-    damtype_human_grandmaster(ch, type, &dam);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 25: /* Kienzan */
     damtype_focus(ch, &dam, focus, 200);
     damtype_saiyan_ki(ch, &dam, 20);
-    damtype_human_grandmaster(ch, type, &dam);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 26: /* Tribeam */
 
@@ -3337,36 +3337,36 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent)
         damtype_focus(ch, &dam, focus, 200);
    }
     damtype_saiyan_ki(ch, &dam, 20);
-   damtype_human_grandmaster(ch, type, &dam);
+   damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 27: /* Special Beam Cannon */
     dam += (dam / 100) * GET_INT(ch);
     damtype_focus(ch, &dam, focus, 200);
     damtype_saiyan_ki(ch, &dam, 20);
-    damtype_human_grandmaster(ch, type, &dam);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 28: /* Final Flash */
     damtype_focus(ch, &dam, focus, 200);
     damtype_saiyan_ki(ch, &dam, 20);
-    damtype_human_grandmaster(ch, type, &dam);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 29: /* Crusher Ball */
     damtype_focus(ch, &dam, focus, 200);
-    damtype_human_grandmaster(ch, type, &dam);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 30: /* Darkness Dragon Slash */
     damtype_focus(ch, &dam, focus, 200);
     damtype_saiyan_ki(ch, &dam, 20);
-    damtype_human_grandmaster(ch, type, &dam);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 31: /* Psychic Barrage */
     damtype_focus(ch, &dam, focus, 200);
     damtype_saiyan_ki(ch, &dam, 20);
-    damtype_human_grandmaster(ch, type, &dam);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 32: /* Hell Flash */
     damtype_focus(ch, &dam, focus, 200);
-    damtype_human_grandmaster(ch, type, &dam);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 33: /* Hell Spear Blast */
     damtype_focus(ch, &dam, focus, 200);
@@ -3375,58 +3375,58 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent)
    case 34: /* Kakusanha */
     damtype_focus(ch, &dam, focus, 200);
     damtype_icer_ki(ch, &dam, 20);
-    damtype_human_grandmaster(ch, type, &dam);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 35: /* Scatter Shot */
     damtype_focus(ch, &dam, focus, 200);
     damtype_icer_ki(ch, &dam, 20);
-    damtype_human_grandmaster(ch, type, &dam);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 36: /* Big Bang */
     damtype_focus(ch, &dam, focus, 200);
     damtype_icer_ki(ch, &dam, 20);
-    damtype_human_grandmaster(ch, type, &dam);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 37: /* Phoenix Slash */
     damtype_focus(ch, &dam, focus, 200);
     damtype_icer_ki(ch, &dam, 20);
-    damtype_human_grandmaster(ch, type, &dam);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 38: /* Deathball */
     damtype_focus(ch, &dam, focus, 200);
     damtype_icer_ki(ch, &dam, 20);
-    damtype_human_grandmaster(ch, type, &dam);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 39: /* Spirit ball */
     damtype_focus(ch, &dam, focus, 200);
     damtype_icer_ki(ch, &dam, 20);
-    damtype_human_grandmaster(ch, type, &dam);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 40: /* Genki Dama */
     damtype_focus(ch, &dam, focus, 200);
     damtype_kai_ki(ch, &dam, 20);
-    damtype_human_grandmaster(ch, type, &dam);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 41: /* Genocide */
     damtype_focus(ch, &dam, focus, 200);
     damtype_kai_ki(ch, &dam, 20);
-    damtype_human_grandmaster(ch, type, &dam);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 42: /* Kousengan */
     damtype_focus(ch, &dam, focus, 200);
-    damtype_human_grandmaster(ch, type, &dam);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 43: /* Water Spikes */
     damtype_focus(ch, &dam, focus, 200);
-    damtype_human_grandmaster(ch, type, &dam);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 44: /* Spiral Comet 1 */
     damtype_focus(ch, &dam, focus, 200);
-    damtype_human_grandmaster(ch, type, &dam);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 45: /* Spiral Comet 2 */
     damtype_focus(ch, &dam, focus, 200);
-    damtype_human_grandmaster(ch, type, &dam);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 46: /* Star Breaker */
     damtype_focus(ch, &dam, focus, 200);
@@ -3465,11 +3465,11 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent)
    case 54: /* Zen Blade */
     damtype_focus(ch, &dam, focus, 200);
     damtype_saiyan_ki(ch, &dam, 20);
-    damtype_human_grandmaster(ch, type, &dam);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 55: /* Sundering Force */
     damtype_focus(ch, &dam, focus, 200);
-    damtype_human_grandmaster(ch, type, &dam);
+    damtype_human_grandmaster(ch, skill, &dam);
    break;
    case 57: /* Light Grenade */
     damtype_focus(ch, &dam, focus, 200);
