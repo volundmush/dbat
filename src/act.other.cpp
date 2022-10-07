@@ -182,13 +182,13 @@ ACMD(do_rpp)
   send_to_char(ch, "@C                             Rewards Menu\n");
   send_to_char(ch, "@b  ------------------------------------------------------------------\n");
   send_to_char(ch, "  @C1@D)@R Disabled            @D[@G -- RPP @D]  @C2@D)@R Disabled              @D[@G -- RPP @D]@n\n");
-  send_to_char(ch, "  @C3@D)@c Custom Equipment    @D[@G 30 RPP @D]  @C4@D)@c Alignment Change      @D[@G 20 RPP @D]\n");
+  send_to_char(ch, "  @C3@D)@c Custom Equipment    @D[@G 20 RPP @D]  @C4@D)@c Alignment Change      @D[@G 20 RPP @D]\n");
   send_to_char(ch, "  @C5@D)@c 7,500 zenni         @D[@G  1 RPP @D]  @C6@D)@c +2 To A Stat          @D[@G  2 RPP @D]\n");
   send_to_char(ch, "  @C7@D)@c +750 PS             @D[@G  4 RPP @D]  @C8@D)@c Revival               @D[@G%3d RPP @D]\n", revcost);
   send_to_char(ch, "  @C9@D)@c 50%s TNL Exp         @D[@G%3d RPP @D] @C10@D)@c Aura Change           @D[@G  2 RPP @D]\n", "%", tnlcost);
-  send_to_char(ch, " @C11@D)@c Reach Softcap       @D[@G  6 RPP @D] @C12@D)@c RPP Store             @D[@G ?? RPP @D]\n");
+  send_to_char(ch, " @C11@D)@c Reach Softcap       @D[@G  5 RPP @D] @C12@D)@c RPP Store             @D[@G ?? RPP @D]\n");
   send_to_char(ch, " @C13@D)@c Extra Feature       @D[@G  1 RPP @D] @C14@D)@c Restring Equipment    @D[@G  1 RPP @D]\n");
-  send_to_char(ch, " @C15@D)@c Extra Skillslot     @D[@G  5 RPP @D] @C16@D)@R Disabled              @D[@G -- RPP @D]@n\n");
+  send_to_char(ch, " @C15@D)@c Extra Skillslot     @D[@G  3 RPP @D] @C16@D)@R Disabled              @D[@G -- RPP @D]@n\n");
   send_to_char(ch, "@b  ------------------------------------------------------------------@n\n");
   send_to_char(ch, "@D                           [@YYour RPP@D:@G %3d@D]@n\n", GET_RP(ch));
  // send_to_char(ch, "@D                           [@YRPP Bank@D:@G %3d@D]@n\n", GET_RBANK(ch));
@@ -209,8 +209,8 @@ ACMD(do_rpp)
   if (selection > 2) {
    
    if (selection == 3) { /* Custom Equipment Construction */
-    if (GET_RP(ch) < 30) {
-     send_to_char(ch, "You need at least 30 RPP to initiate a custom equipment build.\r\n");
+    if (GET_RP(ch) < 20) {
+     send_to_char(ch, "You need at least 20 RPP to initiate a custom equipment build.\r\n");
      return;
     } else {
      STATE(ch->desc) = CON_POBJ;
@@ -435,7 +435,7 @@ ACMD(do_rpp)
    } /* End Simple Aura Change */
 
    if (selection == 11) {     /* Simple Soft-cap Reward*/
-    pay = 6;
+    pay = 5;
     if (GET_RP(ch) < pay) {
 	 send_to_char(ch, "You do not have enough RPP for that selection.\r\n");
 	 return;
@@ -512,7 +512,7 @@ ACMD(do_rpp)
    } /* End equipment restring reward */
   
   if (selection == 15) { /* Skillslot Reward */
-    pay = 5;
+    pay = 3;
     if (GET_RP(ch) < pay) {
 	 send_to_char(ch, "You do not have enough RPP in your bank for that selection.\r\n");
 	 return;
