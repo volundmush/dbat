@@ -138,7 +138,7 @@ namespace dbat::race {
 
         int flagToTier(int flag) const;
 
-        opt_type<transform_bonus> findForm(char_data *ch, const std::string &arg) const;
+        std::optional<transform_bonus> findForm(char_data *ch, const std::string &arg) const;
 
         bool raceCanTransform() const;
 
