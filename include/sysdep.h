@@ -57,31 +57,11 @@
 #include <set>
 #include <random>
 #include <chrono>
-
-#if __has_include(<filesystem>)
-#include <filesystem>
-namespace fs = std::filesystem;
-#elif __has_include(<experimental/filesystem>)
-#include <experimental/filesystem>
-    namespace fs = std::experimental::filesystem;
-#else
-#error "no filesystem support ='("
-#endif
-
-#if __has_include(<optional>)
 #include <optional>
-#define opt_type std::optional
-#elif __has_include(<experimental/optional>)
-#include <experimental/optional>
-#define opt_type std::experimental::optional
-#else
-#error "no optional support ='("
-#endif
+#include <filesystem>
 
 // non-standard libraries
-//#include "asio.hpp"
 #include "fmt/core.h"
-//#include "sqlitepp.h"
 
 /* Basic system dependencies *******************************************/
 #if CIRCLE_GNU_LIBC_MEMORY_TRACK && !defined(HAVE_MCHECK_H)

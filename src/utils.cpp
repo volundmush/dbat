@@ -21,7 +21,6 @@
 #include "constants.h"
 #include "act.informative.h"
 #include "screen.h"
-#include "effolkronium/random.hpp"
 
 
 /* local functions */
@@ -3279,7 +3278,8 @@ int rand_number(int from, int to)
     from = to;
     to = tmp;
   }
-  return effolkronium::random_static::get(from, to);
+  srand(time(NULL));
+  return rand() % (to - from + 1) + from;
 }
 
 /* Axion engine dice function */

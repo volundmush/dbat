@@ -13,62 +13,17 @@ include(${CPM_DOWNLOAD_LOCATION})
 project(circle)
 
 CPMAddPackage(
-        NAME json
-        GITHUB_REPOSITORY nlohmann/json
-        VERSION 3.11.2
-)
-
-CPMAddPackage(
-        NAME eff_random
-        GITHUB_REPOSITORY effolkronium/random
-        VERSION 1.4.1
-        OPTIONS "Random_BuildTests OFF"
-)
-
-CPMAddPackage(
-        NAME cppcodec
-        GITHUB_REPOSITORY tplgy/cppcodec
-        VERSION 0.2
-        OPTIONS "BUILD_TESTING OFF"
-)
-
-CPMAddPackage(
         NAME fmt
         GITHUB_REPOSITORY fmtlib/fmt
         GIT_TAG 9.1.0
 )
 
-CPMAddPackage(
-        name sqlitepp
-        GITHUB_REPOSITORY mpaland/sqlitepp
-        GIT_TAG 1.6.0
-)
-
-CPMAddPackage(
-        NAME spdlog
-        GITHUB_REPOSITORY gabime/spdlog
-        VERSION 1.10.0
-)
-
-CPMAddPackage(
-        name argh
-        GITHUB_REPOSITORY adishavit/argh
-        VERSION 1.3.2
-        OPTIONS "BUILD_EXAMPLES OFF" "BUILD_TESTS OFF"
-)
-
 find_package(ZLIB REQUIRED)
-find_package(Boost REQUIRED)
 
 include_directories(PUBLIC
         include
-        ${Boost_SOURCE_DIR}
-        ${json_SOURCE_DIR}/single_include
         ${fmt_SOURCE_DIR}/include
         ${eff_random_SOURCE_DIR}/include
-        ${argh_SOURCE_DIR}
-        ${cppcodec_SOURCE_DIR}/cppcodec
-        ${spdlog_SOURCE_DIR}/include
         )
 
 file(GLOB_RECURSE CIRCLE_INCLUDE include/*.h)

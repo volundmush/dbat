@@ -1826,4 +1826,3 @@ namespace dbat::race {
 
     }
 }
-

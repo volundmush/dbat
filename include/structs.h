@@ -2511,9 +2511,8 @@ struct char_data {
     int rbank;
     int con_sdcooldown;
 
-    int limb_condition[4];
-
-    char placeholder[2];
+    // This should be [4] but index access needs to be done to fix it.
+    int limb_condition[5];
 
     char *rdisplay;
 

@@ -25,7 +25,6 @@
 #include "genzon.h"
 #include "dg_scripts.h"
 #include "class.h"
-#include "effolkronium/random.hpp"
 #include "techniques.h"
 
 /* local functions */
@@ -3555,7 +3554,7 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent)
    }
   }
 
-  return (dam);
+  return dam;
 }
 
 void saiyan_gain(struct char_data *ch, struct char_data *vict)
@@ -3610,8 +3609,7 @@ void saiyan_gain(struct char_data *ch, struct char_data *vict)
        send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel you have reached your current limits.@n\r\n");
        return;
    }
-
-   effolkronium::random_static::shuffle(stats.begin(), stats.end());
+    std::random_shuffle(stats.begin(), stats.end());
 
    switch (stats[0]) {
     case 0:

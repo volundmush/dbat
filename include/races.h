@@ -7,7 +7,6 @@
 
 #include "structs.h"
 
-
 // global variables
 extern const struct guild_info_type guild_info[6];
 
@@ -20,7 +19,13 @@ int invalid_race(struct char_data *ch, struct obj_data *obj);
 
 // C++ conversion
 
-
+struct race_data {
+    int race_id;
+    char *name;
+    char *abbr;
+    int size;
+    bool playable;
+};
 
 namespace dbat::race {
 
