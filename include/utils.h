@@ -8,96 +8,165 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 #pragma once
+
 #include "structs.h"
 #include "db.h"
 #include "races.h"
 #include "handler.h"
 
-#define log			basic_mud_log
+#define log            basic_mud_log
 
-#define READ_SIZE	256
+#define READ_SIZE    256
 
 /* global variables */
 extern FILE *player_fl;
 
 /* public functions in utils.c */
 struct time_info_data *real_time_passed(time_t t2, time_t t1);
+
 struct time_info_data *mud_time_passed(time_t t2, time_t t1);
 
 extern int masadv(char *tmp, struct char_data *ch);
+
 extern void demon_refill_lf(struct char_data *ch, int64_t num);
+
 extern void dispel_ash(struct char_data *ch);
+
 extern char *strlwr(char *s);
+
 extern void prune_crlf(char *txt);
+
 extern int count_metamagic_feats(struct char_data *ch);
+
 extern int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech);
+
 extern int armor_evolve(struct char_data *ch);
+
 extern int has_group(struct char_data *ch);
+
 const char *report_party_health(struct char_data *ch);
+
 extern int know_skill(struct char_data *ch, int skill);
+
 extern int roll_aff_duration(int num, int add);
+
 extern void null_affect(struct char_data *ch, int aff_flag);
-extern void assign_affect(struct char_data *ch, int aff_flag, int skill, int dur, int str, int con, int intel, int agl, int wis, int spd);
+
+extern void
+assign_affect(struct char_data *ch, int aff_flag, int skill, int dur, int str, int con, int intel, int agl, int wis,
+              int spd);
+
 extern int sec_roll_check(struct char_data *ch);
+
 extern int get_measure(struct char_data *ch, int height, int weight);
+
 extern int64_t physical_cost(struct char_data *ch, int skill);
+
 extern int trans_cost(struct char_data *ch, int trans);
+
 extern int trans_req(struct char_data *ch, int trans);
+
 extern void customRead(struct descriptor_data *d, int type, char *name);
+
 extern void customWrite(struct char_data *ch, struct obj_data *obj);
+
 extern void customCreate(struct descriptor_data *d);
+
 extern int axion_dice(int adjust);
+
 const char *disp_align(struct char_data *ch);
+
 extern void senseCreate(struct char_data *ch);
+
 extern void sense_memory_write(struct char_data *ch, struct char_data *vict);
+
 extern int read_sense_memory(struct char_data *ch, struct char_data *vict);
+
 extern int roll_pursue(struct char_data *ch, struct char_data *vict);
+
 extern void broken_update();
+
 extern int wearable_obj(struct obj_data *obj);
+
 extern void randomize_eq(struct obj_data *obj);
+
 extern char *sense_location(struct char_data *ch);
+
 extern void handle_evolution(struct char_data *ch, int64_t dmg);
+
 extern int64_t molt_threshold(struct char_data *ch);
+
 extern int cook_element(room_rnum room);
+
 extern void purge_homing(struct char_data *ch);
 
 extern int planet_check(struct char_data *ch, struct char_data *vict);
+
 extern void improve_skill(struct char_data *ch, int skill, int num);
+
 extern double speednar(struct char_data *ch);
 
 extern int64_t gear_exp(struct char_data *ch, int64_t exp);
+
 extern int get_flag_by_name(const char *flag_list[], char *flag_name);
-char* add_commas(int64_t X);
+
+char *add_commas(int64_t X);
+
 extern void trim(char *s);
+
 extern char *introd_calc(struct char_data *ch);
+
 extern void basic_mud_log(const char *format, ...) __attribute__ ((format (printf, 1, 2)));
+
 extern void basic_mud_vlog(const char *format, va_list args);
+
 extern int touch(const char *path);
+
 extern void mudlog(int type, int level, int file, const char *str, ...) __attribute__ ((format (printf, 4, 5)));
+
 extern void log_death_trap(struct char_data *ch);
+
 extern int rand_number(int from, int to);
+
 extern int64_t large_rand(int64_t from, int64_t to);
+
 extern int dice(int number, int size);
+
 extern size_t sprintbit(bitvector_t vektor, const char *names[], char *result, size_t reslen);
+
 extern size_t sprinttype(int type, const char *names[], char *result, size_t reslen);
+
 extern void sprintbitarray(int bitvector[], const char *names[], int maxar, char *result);
+
 extern int get_line(FILE *fl, char *buf);
+
 extern int get_filename(char *filename, size_t fbufsize, int mode, const char *orig_name);
+
 extern time_t mud_time_to_secs(struct time_info_data *now);
+
 struct time_info_data *age(struct char_data *ch);
+
 extern int num_pc_in_room(struct room_data *room);
+
 extern void core_dump_real(const char *who, int line);
+
 extern int room_is_dark(room_rnum room);
+
 extern int count_color_chars(char *string);
+
 extern void game_info(const char *format, ...) __attribute__ ((format (printf, 1, 2)));
+
 extern bool is_sparring(struct char_data *ch);
+
 extern void mob_talk(struct char_data *ch, const char *speech);
+
 extern int block_calc(struct char_data *ch);
+
 extern void reveal_hiding(struct char_data *ch, int type);
 
-std::string processColors(const std::string& txt, int parse, char **choices);
+std::string processColors(const std::string &txt, int parse, char **choices);
 
-#define core_dump()		core_dump_real(__FILE__, __LINE__)
+#define core_dump()        core_dump_real(__FILE__, __LINE__)
 
 /*
  * Only provide our versions if one isn't in the C library. These macro names
@@ -115,22 +184,30 @@ std::string processColors(const std::string& txt, int parse, char **choices);
 #endif
 
 extern int64_t MAX(int64_t a, int64_t b);
+
 extern int64_t MIN(int64_t a, int64_t b);
+
 extern char *CAP(char *txt);
 
 /* Followers */
 extern int num_followers_charmed(struct char_data *ch);
+
 extern void die_follower(struct char_data *ch);
+
 extern void add_follower(struct char_data *ch, struct char_data *leader);
+
 extern void stop_follower(struct char_data *ch);
+
 extern bool circle_follow(struct char_data *ch, struct char_data *victim);
 
 /* in act.informative.c */
-extern void	look_at_room(room_rnum target_room, struct char_data *ch, int mode);
-extern void	add_history(struct char_data *ch, char *msg, int type);
+extern void look_at_room(room_rnum target_room, struct char_data *ch, int mode);
+
+extern void add_history(struct char_data *ch, char *msg, int type);
 
 /* in act.movement.c */
 extern int do_simple_move(struct char_data *ch, int dir, int following);
+
 extern int perform_move(struct char_data *ch, int dir, int following);
 
 /* in act.item.c */
@@ -138,40 +215,54 @@ extern int64_t max_carry_weight(struct char_data *ch);
 
 /* in limits.c */
 extern void advance_level(struct char_data *ch, int whichclass);
+
 extern void set_title(struct char_data *ch, char *title);
+
 extern void gain_exp(struct char_data *ch, int64_t gain);
+
 extern void gain_exp_regardless(struct char_data *ch, int gain);
+
 extern void gain_condition(struct char_data *ch, int condition, int value);
+
 extern void point_update();
+
 extern void update_pos(struct char_data *victim);
 
 /* in class.c */
-char *  class_desc_str(struct char_data *ch, int howlong, int wantthe);
+char *class_desc_str(struct char_data *ch, int howlong, int wantthe);
+
 extern int total_skill_levels(struct char_data *ch, int skill);
+
 extern int8_t ability_mod_value(int abil);
+
 extern int8_t dex_mod_capped(const struct char_data *ch);
+
 extern int highest_skill_value(int level, int type);
+
 extern int calc_penalty_exp(struct char_data *ch, int gain);
+
 extern int raise_class_only(struct char_data *ch, int cl, int v);
 
 /* in races.c */
 extern int get_size(struct char_data *ch);
+
 extern int get_size_bonus(int sz);
+
 extern int wield_type(int chsize, const struct obj_data *weap);
 
 
 /* various constants *****************************************************/
 
 /* defines for mudlog() */
-#define OFF	0
-#define BRF	1
-#define NRM	2
-#define CMP	3
+#define OFF    0
+#define BRF    1
+#define NRM    2
+#define CMP    3
 
 /* get_filename() */
-#define CRASH_FILE	0
-#define ETEXT_FILE	1
-#define ALIAS_FILE	2
+#define CRASH_FILE    0
+#define ETEXT_FILE    1
+#define ALIAS_FILE    2
 #define SCRIPT_VARS_FILE 3
 #define NEW_OBJ_FILES   4
 #define PLR_FILE        5
@@ -184,26 +275,26 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define MAX_FILES       12
 
 /* breadth-first searching */
-#define BFS_ERROR		(-1)
-#define BFS_ALREADY_THERE	(-2)
+#define BFS_ERROR        (-1)
+#define BFS_ALREADY_THERE    (-2)
 #define BFS_TO_FAR              (-3)
-#define BFS_NO_PATH		(-4)
+#define BFS_NO_PATH        (-4)
 
 /*
  * XXX: These constants should be configurable. See act.informative.c
  *	and utils.c for other places to change.
  */
 /* mud-life time */
-#define SECS_PER_MUD_HOUR	300
-#define SECS_PER_MUD_DAY	(24*SECS_PER_MUD_HOUR)
-#define SECS_PER_MUD_MONTH	(30*SECS_PER_MUD_DAY)
-#define SECS_PER_MUD_YEAR	(12*SECS_PER_MUD_MONTH)
+#define SECS_PER_MUD_HOUR    300
+#define SECS_PER_MUD_DAY    (24*SECS_PER_MUD_HOUR)
+#define SECS_PER_MUD_MONTH    (30*SECS_PER_MUD_DAY)
+#define SECS_PER_MUD_YEAR    (12*SECS_PER_MUD_MONTH)
 
 /* real-life time (remember Real Life?) */
-#define SECS_PER_REAL_MIN	60
-#define SECS_PER_REAL_HOUR	(60*SECS_PER_REAL_MIN)
-#define SECS_PER_REAL_DAY	(24*SECS_PER_REAL_HOUR)
-#define SECS_PER_REAL_YEAR	(365*SECS_PER_REAL_DAY)
+#define SECS_PER_REAL_MIN    60
+#define SECS_PER_REAL_HOUR    (60*SECS_PER_REAL_MIN)
+#define SECS_PER_REAL_DAY    (24*SECS_PER_REAL_HOUR)
+#define SECS_PER_REAL_YEAR    (365*SECS_PER_REAL_DAY)
 
 
 /* string utils **********************************************************/
@@ -215,7 +306,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define LOWER(c)   (((c)>='A'  && (c) <= 'Z') ? ((c)+('a'-'A')) : (c))
 #define UPPER(c)   (((c)>='a'  && (c) <= 'z') ? ((c)+('A'-'a')) : (c) )
 
-#define ISNEWL(ch) ((ch) == '\n' || (ch) == '\r') 
+#define ISNEWL(ch) ((ch) == '\n' || (ch) == '\r')
 
 /* See also: ANA, SANA */
 #define AN(string) (strchr("aeiouAEIOU", *(string)) ? "an" : "a")
@@ -225,14 +316,14 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 
 
 #define CREATE(result, type, number)  do {\
-	if ((number) * sizeof(type) <= 0)	\
-		log("SYSERR: Zero bytes or less requested at %s:%d.", __FILE__, __LINE__);	\
-	if (!((result) = (type *) calloc ((number), sizeof(type))))	\
-		{ perror("SYSERR: malloc failure"); abort(); } } while(0)
+    if ((number) * sizeof(type) <= 0)    \
+        log("SYSERR: Zero bytes or less requested at %s:%d.", __FILE__, __LINE__);    \
+    if (!((result) = (type *) calloc ((number), sizeof(type))))    \
+        { perror("SYSERR: malloc failure"); abort(); } } while(0)
 
-#define RECREATE(result,type,number) do {\
+#define RECREATE(result, type, number) do {\
   if (!((result) = (type *) realloc ((result), sizeof(type) * (number))))\
-		{ perror("SYSERR: realloc failure"); abort(); } } while(0)
+        { perror("SYSERR: realloc failure"); abort(); } } while(0)
 
 /*
  * the source previously used the same code in many places to remove an item
@@ -243,51 +334,51 @@ extern int wield_type(int chsize, const struct obj_data *weap);
  * a great application for C++ templates but, alas, this is not C++.  Maybe
  * CircleMUD 4.0 will be...
  */
-#define REMOVE_FROM_LIST(item, head, next, cmtemp)	\
-   if ((item) == (head))		\
-      (head) = (item)->next;		\
-   else {				\
-      (cmtemp) = head;			\
+#define REMOVE_FROM_LIST(item, head, next, cmtemp)    \
+   if ((item) == (head))        \
+      (head) = (item)->next;        \
+   else {                \
+      (cmtemp) = head;            \
       while ((cmtemp) && ((cmtemp)->next != (item))) \
-	 (cmtemp) = (cmtemp)->next;		\
-      if (cmtemp)				\
-         (cmtemp)->next = (item)->next;	\
-   }					\
+     (cmtemp) = (cmtemp)->next;        \
+      if (cmtemp)                \
+         (cmtemp)->next = (item)->next;    \
+   }                    \
 
 #define REMOVE_FROM_DOUBLE_LIST(item, head, next, prev)\
-      if((item) == (head))			\
-      {						\
-            (head) = (item)->next;  		\
-            if(head) (head)->prev = nullptr;		\
-      }						\
-      else					\
-      {						\
-        temp = head;				\
-          while(temp && (temp->next != (item)))	\
-            temp = temp->next;			\
-             if(temp)				\
-            {					\
-               temp->next = (item)->next;		\
-               if((item)->next)			\
-                (item)->next->prev = temp;	\
-            }					\
-      }						\
+      if((item) == (head))            \
+      {                        \
+            (head) = (item)->next;        \
+            if(head) (head)->prev = nullptr;        \
+      }                        \
+      else                    \
+      {                        \
+        temp = head;                \
+          while(temp && (temp->next != (item)))    \
+            temp = temp->next;            \
+             if(temp)                \
+            {                    \
+               temp->next = (item)->next;        \
+               if((item)->next)            \
+                (item)->next->prev = temp;    \
+            }                    \
+      }                        \
 
 /* basic bitvector utils *************************************************/
 
 
 #define Q_FIELD(x)  ((int) (x) / 32)
 #define Q_BIT(x)    (1 << ((x) % 32))
- 
+
 #define IS_SET_AR(var, bit)       ((var)[Q_FIELD(bit)] & Q_BIT(bit))
 #define SET_BIT_AR(var, bit)      ((var)[Q_FIELD(bit)] |= Q_BIT(bit))
 #define REMOVE_BIT_AR(var, bit)   ((var)[Q_FIELD(bit)] &= ~Q_BIT(bit))
 #define TOGGLE_BIT_AR(var, bit)   ((var)[Q_FIELD(bit)] = \
                                    (var)[Q_FIELD(bit)] ^ Q_BIT(bit))
-#define IS_SET(flag,bit)  ((flag) & (bit))
-#define SET_BIT(var,bit)  ((var) |= (bit))
-#define REMOVE_BIT(var,bit)  ((var) &= ~(bit))
-#define TOGGLE_BIT(var,bit) ((var) ^= (bit))
+#define IS_SET(flag, bit)  ((flag) & (bit))
+#define SET_BIT(var, bit)  ((var) |= (bit))
+#define REMOVE_BIT(var, bit)  ((var) &= ~(bit))
+#define TOGGLE_BIT(var, bit) ((var) ^= (bit))
 
 /*
  * Accessing player specific data structures on a mobile is a very bad thing
@@ -299,31 +390,31 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #if 1
 /* Subtle bug in the '#var', but works well for now. */
 #define CHECK_PLAYER_SPECIAL(ch, var) \
-	(*(((ch)->player_specials == &dummy_mob) ? (log("OHNO: Mob using '"#var"' at %s:%d.", __FILE__, __LINE__), &(var)) : &(var)))
+    (*(((ch)->player_specials == &dummy_mob) ? (log("OHNO: Mob using '"#var"' at %s:%d.", __FILE__, __LINE__), &(var)) : &(var)))
 #else
 #define CHECK_PLAYER_SPECIAL(ch, var)	(var)
 #endif
 
-#define MOB_FLAGS(ch)	((ch)->act)
-#define PLR_FLAGS(ch)	((ch)->act)
+#define MOB_FLAGS(ch)    ((ch)->act)
+#define PLR_FLAGS(ch)    ((ch)->act)
 #define PRF_FLAGS(ch) CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->pref))
-#define AFF_FLAGS(ch)	((ch)->affected_by)
-#define ADM_FLAGS(ch)	((ch)->admflags)
-#define ROOM_FLAGS(loc)	(world[(loc)].room_flags)
-#define SPELL_ROUTINES(spl)	(spell_info[spl].routines)
+#define AFF_FLAGS(ch)    ((ch)->affected_by)
+#define ADM_FLAGS(ch)    ((ch)->admflags)
+#define ROOM_FLAGS(loc)    (world[(loc)].room_flags)
+#define SPELL_ROUTINES(spl)    (spell_info[spl].routines)
 #define ZONE_FLAGS(rnum)       (zone_table[(rnum)].zone_flags)
 #define ZONE_MINLVL(rnum)      (zone_table[(rnum)].min_level)
 #define ZONE_MAXLVL(rnum)      (zone_table[(rnum)].max_level)
-/* Return the gauntlet highest room for ch */ 
+/* Return the gauntlet highest room for ch */
 #define GET_GAUNTLET(ch)    CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->gauntlet))
 
 /*
  * See http://www.circlemud.org/~greerga/todo/todo.009 to eliminate MOB_ISNPC.
  * IS_MOB() acts as a VALID_MOB_RNUM()-like function.
  */
-#define IS_NPC(ch)	(IS_SET_AR(MOB_FLAGS(ch), MOB_ISNPC))
-#define IS_MOB(ch)	(IS_NPC(ch) && GET_MOB_RNUM(ch) <= top_of_mobt && \
-				GET_MOB_RNUM(ch) != NOBODY)
+#define IS_NPC(ch)    (IS_SET_AR(MOB_FLAGS(ch), MOB_ISNPC))
+#define IS_MOB(ch)    (IS_NPC(ch) && GET_MOB_RNUM(ch) <= top_of_mobt && \
+                GET_MOB_RNUM(ch) != NOBODY)
 
 #define MOB_FLAGGED(ch, flag) (IS_NPC(ch) && IS_SET_AR(MOB_FLAGS(ch), (flag)))
 #define PLR_FLAGGED(ch, flag) (!IS_NPC(ch) && IS_SET_AR(PLR_FLAGS(ch), (flag)))
@@ -343,10 +434,10 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 /* IS_AFFECTED for backwards compatibility */
 #define IS_AFFECTED(ch, skill) (AFF_FLAGGED((ch), (skill)))
 
-#define PLR_TOG_CHK(ch,flag) ((TOGGLE_BIT_AR(PLR_FLAGS(ch), (flag))) & Q_BIT(flag))
-#define PRF_TOG_CHK(ch,flag) ((TOGGLE_BIT_AR(PRF_FLAGS(ch), (flag))) & Q_BIT(flag))
-#define ADM_TOG_CHK(ch,flag) ((TOGGLE_BIT_AR(ADM_FLAGS(ch), (flag))) & Q_BIT(flag))
-#define AFF_TOG_CHK(ch,flag) ((TOGGLE_BIT_AR(AFF_FLAGS(ch), (flag))) & Q_BIT(flag))
+#define PLR_TOG_CHK(ch, flag) ((TOGGLE_BIT_AR(PLR_FLAGS(ch), (flag))) & Q_BIT(flag))
+#define PRF_TOG_CHK(ch, flag) ((TOGGLE_BIT_AR(PRF_FLAGS(ch), (flag))) & Q_BIT(flag))
+#define ADM_TOG_CHK(ch, flag) ((TOGGLE_BIT_AR(ADM_FLAGS(ch), (flag))) & Q_BIT(flag))
+#define AFF_TOG_CHK(ch, flag) ((TOGGLE_BIT_AR(AFF_FLAGS(ch), (flag))) & Q_BIT(flag))
 
 /* new define for quick check */
 #define DEAD(ch) (PLR_FLAGGED((ch), PLR_NOTDEADYET) || MOB_FLAGGED((ch), MOB_NOTDEADYET))
@@ -354,37 +445,37 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 /* room utils ************************************************************/
 
 
-#define SECT(room)	(VALID_ROOM_RNUM(room) ? \
-				world[(room)].sector_type : SECT_INSIDE)
+#define SECT(room)    (VALID_ROOM_RNUM(room) ? \
+                world[(room)].sector_type : SECT_INSIDE)
 #define ROOM_DAMAGE(room)   (world[(room)].dmg)
 #define ROOM_EFFECT(room)   (world[(room)].geffect)
 #define ROOM_GRAVITY(room)  (world[(room)].gravity)
 #define SUNKEN(room)    (ROOM_EFFECT(room) < 0 || SECT(room) == SECT_UNDERWATER)
 
-#define IS_DARK(room)	room_is_dark((room))
+#define IS_DARK(room)    room_is_dark((room))
 #define IS_LIGHT(room)  (!IS_DARK(room))
 
-#define VALID_ROOM_RNUM(rnum)	((rnum) != NOWHERE && (rnum) <= top_of_world)
+#define VALID_ROOM_RNUM(rnum)    ((rnum) != NOWHERE && (rnum) <= top_of_world)
 #define GET_ROOM_VNUM(rnum) \
-	((room_vnum)(VALID_ROOM_RNUM(rnum) ? world[(rnum)].number : NOWHERE))
+    ((room_vnum)(VALID_ROOM_RNUM(rnum) ? world[(rnum)].number : NOWHERE))
 #define GET_ROOM_SPEC(room) \
-	(VALID_ROOM_RNUM(room) ? world[(room)].func : 0)
+    (VALID_ROOM_RNUM(room) ? world[(room)].func : 0)
 
 /* Minor Planet Defines */
 #define PLANET_ZENITH(room) ((GET_ROOM_VNUM(room) >= 3400 && GET_ROOM_VNUM(room) <= 3599) || (GET_ROOM_VNUM(room) >= 62900 && GET_ROOM_VNUM(room) <= 62999) || \
-				(GET_ROOM_VNUM(room) == 19600))
+                (GET_ROOM_VNUM(room) == 19600))
 
 /* char utils ************************************************************/
 
 
-#define IN_ROOM(ch)	((ch)->in_room)
+#define IN_ROOM(ch)    ((ch)->in_room)
 #define IN_ZONE(ch)   (zone_table[(world[(IN_ROOM(ch))].zone)].number)
-#define GET_WAS_IN(ch)	((ch)->was_in_room)
+#define GET_WAS_IN(ch)    ((ch)->was_in_room)
 #define GET_AGE(ch)     (age(ch)->year)
 
-#define GET_PC_NAME(ch)	((ch)->name)
+#define GET_PC_NAME(ch)    ((ch)->name)
 #define GET_NAME(ch)    (IS_NPC(ch) ? \
-			 (ch)->short_descr : GET_PC_NAME(ch))
+             (ch)->short_descr : GET_PC_NAME(ch))
 #define GET_TITLE(ch)   ((ch)->desc ? ((ch)->desc->title ? (ch)->desc->title : "[Unset Title]") : "@D[@GNew User@D]")
 #define GET_USER_TITLE(d) ((d)->title)
 #define GET_PHASE(ch)   ((ch)->starphase)
@@ -396,11 +487,11 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define GET_USER(ch)    ((ch)->desc ? ((ch)->desc->user ? (ch)->desc->user : "NOUSER") : "NOUSER")
 #define GET_LOG_USER(ch) ((ch)->loguser)
 #define GET_CRANK(ch)   ((ch)->crank)
-#define GET_ADMLEVEL(ch)	((ch)->admlevel)
-#define GET_CLASS_LEVEL(ch)	((ch)->level)
-#define GET_LEVEL_ADJ(ch)	((ch)->level_adj)
-#define GET_HITDICE(ch)		((ch)->race_level)
-#define GET_LEVEL(ch)	(GET_CLASS_LEVEL(ch) + GET_LEVEL_ADJ(ch) + GET_HITDICE(ch))
+#define GET_ADMLEVEL(ch)    ((ch)->admlevel)
+#define GET_CLASS_LEVEL(ch)    ((ch)->level)
+#define GET_LEVEL_ADJ(ch)    ((ch)->level_adj)
+#define GET_HITDICE(ch)        ((ch)->race_level)
+#define GET_LEVEL(ch)    (GET_CLASS_LEVEL(ch) + GET_LEVEL_ADJ(ch) + GET_HITDICE(ch))
 #define GET_PFILEPOS(ch)((ch)->pfilepos)
 
 #define GET_CLASS(ch)   ((ch)->chclass ? (ch)->chclass->getID() : 0)
@@ -415,13 +506,13 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define GET_SKIN(ch)    ((ch)->skin)
 #define GET_EYE(ch)     ((ch)->eye)
 #define GET_DISTFEA(ch) ((ch)->distfea)
-#define GET_HOME(ch)	((ch)->hometown)
+#define GET_HOME(ch)    ((ch)->hometown)
 #define GET_WEIGHT(ch)  ((ch)->weight)
 #define GET_HEIGHT(ch)  ((ch)->height)
-#define GET_PC_HEIGHT(ch)	(!IS_NPC(ch) ? age(ch)->year <= 10 ? (int)((ch)->height * 0.68) : age(ch)->year <= 12 ? (int)((ch)->height * 0.72) : age(ch)->year <= 14 ? (int)((ch)->height * 0.85) : age(ch)->year <= 16 ? (int)((ch)->height * 0.92) : (ch)->height : (ch)->height)
-#define GET_PC_WEIGHT(ch)	(!IS_NPC(ch) ? age(ch)->year <= 10 ? (int)((ch)->weight * 0.48) : age(ch)->year <= 12 ? (int)((ch)->weight * 0.55) : age(ch)->year <= 14 ? (int)((ch)->weight * 0.7) : age(ch)->year <= 16 ? (int)((ch)->weight * 0.85) : (ch)->weight : (ch)->weight)
-#define GET_SEX(ch)	((ch)->sex)
-#define GET_TLEVEL(ch)	((ch)->player_specials->tlevel)
+#define GET_PC_HEIGHT(ch)    (!IS_NPC(ch) ? age(ch)->year <= 10 ? (int)((ch)->height * 0.68) : age(ch)->year <= 12 ? (int)((ch)->height * 0.72) : age(ch)->year <= 14 ? (int)((ch)->height * 0.85) : age(ch)->year <= 16 ? (int)((ch)->height * 0.92) : (ch)->height : (ch)->height)
+#define GET_PC_WEIGHT(ch)    (!IS_NPC(ch) ? age(ch)->year <= 10 ? (int)((ch)->weight * 0.48) : age(ch)->year <= 12 ? (int)((ch)->weight * 0.55) : age(ch)->year <= 14 ? (int)((ch)->weight * 0.7) : age(ch)->year <= 16 ? (int)((ch)->weight * 0.85) : (ch)->weight : (ch)->weight)
+#define GET_SEX(ch)    ((ch)->sex)
+#define GET_TLEVEL(ch)    ((ch)->player_specials->tlevel)
 #define CARRYING(ch)    ((ch)->player_specials->carrying)
 #define CARRIED_BY(ch)  ((ch)->player_specials->carried_by)
 #define RACIAL_PREF(ch) ((ch)->player_specials->racial_pref)
@@ -459,7 +550,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define IS_WEIGHTED(ch) ((ch)->getEffMaxPL() < GET_MAX_HIT(ch))
 
 
-#define GET_EXP(ch)	  ((ch)->exp)
+#define GET_EXP(ch)      ((ch)->exp)
 /*
  * Changed GET_AC to GET_ARMOR so that code with GET_AC will need to be
  * looked at to see if it needs to change before being converted to use
@@ -474,11 +565,11 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define GET_CHARGETO(ch)  ((ch)->chargeto)
 #define GET_ARMOR(ch)     ((ch)->armor)
 #define GET_ARMOR_LAST(ch) ((ch)->armor_last)
-#define GET_HIT(ch)	  ((ch)->getCurPL())
-#define GET_MAX_HIT(ch)	  ((ch)->getEffMaxPL())
+#define GET_HIT(ch)      ((ch)->getCurPL())
+#define GET_MAX_HIT(ch)      ((ch)->getEffMaxPL())
 #define GET_MAX_MOVE(ch)  ((ch)->getMaxST())
 #define GET_MAX_MANA(ch)  ((ch)->getMaxKI())
-#define GET_KI(ch)	  ((ch)->ki)
+#define GET_KI(ch)      ((ch)->ki)
 #define GET_MAX_KI(ch)    ((ch)->max_ki)
 #define GET_DROOM(ch)     ((ch)->droom)
 #define GET_OVERFLOW(ch)  ((ch)->overf)
@@ -516,7 +607,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define GET_BLESSLVL(ch)  ((ch)->blesslvl)
 #define GET_ASB(ch)       ((ch)->asb)
 #define GET_REGEN(ch)     ((ch)->regen)
-#define GET_BLESSBONUS(ch) (AFF_FLAGGED(ch, AFF_BLESS) ? (GET_BLESSLVL(ch) >= 100 ? ((GET_MAX_MANA(ch) * 0.5) + (GET_MAX_MOVE(ch) * 0.5)) * 0.1 : GET_BLESSLVL(ch) >= 60 ? ((GET_MAX_MANA(ch) * 0.5) + (GET_MAX_MOVE(ch) * 0.5)) * 0.05 : GET_BLESSLVL(ch) >= 40 ? ((GET_MAX_MANA(ch) * 0.5) + (GET_MAX_MOVE(ch) * 0.5)) * 0.02 : 0) : 0) 
+#define GET_BLESSBONUS(ch) (AFF_FLAGGED(ch, AFF_BLESS) ? (GET_BLESSLVL(ch) >= 100 ? ((GET_MAX_MANA(ch) * 0.5) + (GET_MAX_MOVE(ch) * 0.5)) * 0.1 : GET_BLESSLVL(ch) >= 60 ? ((GET_MAX_MANA(ch) * 0.5) + (GET_MAX_MOVE(ch) * 0.5)) * 0.05 : GET_BLESSLVL(ch) >= 40 ? ((GET_MAX_MANA(ch) * 0.5) + (GET_MAX_MOVE(ch) * 0.5)) * 0.02 : 0) : 0)
 #define GET_POSELF(ch)    (!IS_NPC(ch) ? PLR_FLAGGED(ch, PLR_POSE) ? GET_SKILL(ch, SKILL_POSE) >= 100 ? 0.15 : GET_SKILL(ch, SKILL_POSE) >= 60 ? 0.1 : GET_SKILL(ch, SKILL_POSE) >= 40 ? 0.05 : 0 : 0 : 0)
 #define GET_POSEBONUS(ch) (((GET_MAX_MANA(ch) * 0.5) + (GET_MAX_MOVE(ch) * 0.5)) * GET_POSELF(ch))
 #define GET_LIFEBONUS(ch) (IS_ARLIAN(ch) ? ((GET_MAX_MANA(ch) * 0.01) * (GET_MOLT_LEVEL(ch) / 100)) + ((GET_MAX_MOVE(ch) * 0.01) * (GET_MOLT_LEVEL(ch) / 100)) : 0)
@@ -527,7 +618,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define GET_BACKSTAB_COOL(ch) ((ch)->backstabcool)
 #define GET_COOLDOWN(ch)  ((ch)->con_cooldown)
 #define GET_BARRIER(ch)   ((ch)->barrier)
-#define GET_GOLD(ch)	  ((ch)->gold)
+#define GET_GOLD(ch)      ((ch)->gold)
 #define GET_KAIOKEN(ch)   ((ch)->kaioken)
 #define GET_BOOSTS(ch)    ((ch)->boosts)
 #define MAJINIZED(ch)     ((ch)->majinize)
@@ -549,19 +640,19 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define GET_MOLT_LEVEL(ch) ((ch)->moltlevel)
 #define GET_SDCOOLDOWN(ch) ((ch)->con_sdcooldown)
 #define GET_INGESTLEARNED(ch) ((ch)->ingestLearned)
-#define GET_POS(ch)		((ch)->position)
-#define GET_IDNUM(ch)		((ch)->idnum)
-#define GET_ID(x)		((x)->id)
-#define IS_CARRYING_W(ch)	((ch)->carry_weight)
-#define IS_CARRYING_N(ch)	((ch)->carry_items)
-#define FIGHTING(ch)		((ch)->fighting)
-#define GET_POWERATTACK(ch)	((ch)->powerattack)
-#define GET_GROUPKILLS(ch)	((ch)->combatexpertise)
-#define GET_SAVE_BASE(ch, i)	((ch)->saving_throw[i])
-#define GET_SAVE_MOD(ch, i)	((ch)->apply_saving_throw[i])
-#define GET_SAVE(ch, i)		(GET_SAVE_BASE(ch, i) + GET_SAVE_MOD(ch, i))
-#define GET_ALIGNMENT(ch)	((ch)->alignment)
-#define GET_ETHIC_ALIGNMENT(ch)	((ch)->alignment_ethic)
+#define GET_POS(ch)        ((ch)->position)
+#define GET_IDNUM(ch)        ((ch)->idnum)
+#define GET_ID(x)        ((x)->id)
+#define IS_CARRYING_W(ch)    ((ch)->carry_weight)
+#define IS_CARRYING_N(ch)    ((ch)->carry_items)
+#define FIGHTING(ch)        ((ch)->fighting)
+#define GET_POWERATTACK(ch)    ((ch)->powerattack)
+#define GET_GROUPKILLS(ch)    ((ch)->combatexpertise)
+#define GET_SAVE_BASE(ch, i)    ((ch)->saving_throw[i])
+#define GET_SAVE_MOD(ch, i)    ((ch)->apply_saving_throw[i])
+#define GET_SAVE(ch, i)        (GET_SAVE_BASE(ch, i) + GET_SAVE_MOD(ch, i))
+#define GET_ALIGNMENT(ch)    ((ch)->alignment)
+#define GET_ETHIC_ALIGNMENT(ch)    ((ch)->alignment_ethic)
 #define SITS(ch)                ((ch)->sits)
 #define MINDLINK(ch)            ((ch)->mindlink)
 #define LINKER(ch)              ((ch)->linker)
@@ -584,50 +675,50 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define GET_ABSORBS(ch)         ((ch)->absorbs)
 #define GET_LINTEREST(ch)       ((ch)->lastint)
 
-#define GET_COND(ch, i)		CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->conditions[(i)]))
-#define GET_LOADROOM(ch)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->load_room))
-#define GET_PRACTICES(ch,cl)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->class_skill_points[cl]))
-#define GET_RACE_PRACTICES(ch)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->skill_points))
-#define GET_TRAINS(ch)		CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->ability_trains))
+#define GET_COND(ch, i)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->conditions[(i)]))
+#define GET_LOADROOM(ch)    CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->load_room))
+#define GET_PRACTICES(ch, cl)    CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->class_skill_points[cl]))
+#define GET_RACE_PRACTICES(ch)    CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->skill_points))
+#define GET_TRAINS(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->ability_trains))
 #define GET_TRAINSTR(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->trainstr))
 #define GET_TRAININT(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->trainint))
 #define GET_TRAINCON(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->traincon))
 #define GET_TRAINWIS(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->trainwis))
 #define GET_TRAINAGL(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->trainagl))
 #define GET_TRAINSPD(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->trainspd))
-#define GET_INVIS_LEV(ch)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->invis_level))
-#define GET_WIMP_LEV(ch)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->wimp_level))
-#define GET_FREEZE_LEV(ch)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->freeze_level))
-#define GET_BAD_PWS(ch)		CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->bad_pws))
-#define GET_TALK(ch, i)		CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->talks[i]))
-#define POOFIN(ch)		CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->poofin))
-#define POOFOUT(ch)		CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->poofout))
-#define GET_OLC_ZONE(ch)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->olc_zone))
-#define GET_LAST_OLC_TARG(ch)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->last_olc_targ))
-#define GET_LAST_OLC_MODE(ch)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->last_olc_mode))
-#define GET_ALIASES(ch)		CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->aliases))
-#define GET_LAST_TELL(ch)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->last_tell))
-#define GET_HOST(ch)		CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->host))
+#define GET_INVIS_LEV(ch)    CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->invis_level))
+#define GET_WIMP_LEV(ch)    CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->wimp_level))
+#define GET_FREEZE_LEV(ch)    CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->freeze_level))
+#define GET_BAD_PWS(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->bad_pws))
+#define GET_TALK(ch, i)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->talks[i]))
+#define POOFIN(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->poofin))
+#define POOFOUT(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->poofout))
+#define GET_OLC_ZONE(ch)    CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->olc_zone))
+#define GET_LAST_OLC_TARG(ch)    CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->last_olc_targ))
+#define GET_LAST_OLC_MODE(ch)    CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->last_olc_mode))
+#define GET_ALIASES(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->aliases))
+#define GET_LAST_TELL(ch)    CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->last_tell))
+#define GET_HOST(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->host))
 #define GET_HISTORY(ch, i)      CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->comm_hist[i]))
 
-#define GET_SKILL_BONUS(ch, i)		((ch)->skillmods[i])
+#define GET_SKILL_BONUS(ch, i)        ((ch)->skillmods[i])
 #define GET_SKILL_PERF(ch, i)           ((ch)->skillperfs[i])
-#define SET_SKILL_BONUS(ch, i, value)	do { (ch)->skillmods[i] = value; } while (0)
+#define SET_SKILL_BONUS(ch, i, value)    do { (ch)->skillmods[i] = value; } while (0)
 #define SET_SKILL_PERF(ch, i, value)    do { (ch)->skillperfs[i] = value; } while (0)
-#define GET_SKILL_BASE(ch, i)		((ch)->skills[i])
-#define GET_SKILL(ch, i)		((ch)->skills[i] + GET_SKILL_BONUS(ch, i))
-#define SET_SKILL(ch, i, val)		do { (ch)->skills[i] = val; } while(0)
+#define GET_SKILL_BASE(ch, i)        ((ch)->skills[i])
+#define GET_SKILL(ch, i)        ((ch)->skills[i] + GET_SKILL_BONUS(ch, i))
+#define SET_SKILL(ch, i, val)        do { (ch)->skills[i] = val; } while(0)
 #define BODY_PARTS(ch)  ((ch)->bodyparts)
 
-#define GET_EQ(ch, i)		((ch)->equipment[i])
+#define GET_EQ(ch, i)        ((ch)->equipment[i])
 
-#define GET_MOB_SPEC(ch)	(IS_MOB(ch) ? mob_index[(ch)->nr].func : 0)
-#define GET_MOB_RNUM(mob)	((mob)->nr)
-#define GET_MOB_VNUM(mob)	(IS_MOB(mob) ? \
-				 mob_index[GET_MOB_RNUM(mob)].vnum : NOBODY)
+#define GET_MOB_SPEC(ch)    (IS_MOB(ch) ? mob_index[(ch)->nr].func : 0)
+#define GET_MOB_RNUM(mob)    ((mob)->nr)
+#define GET_MOB_VNUM(mob)    (IS_MOB(mob) ? \
+                 mob_index[GET_MOB_RNUM(mob)].vnum : NOBODY)
 
-#define GET_DEFAULT_POS(ch)	((ch)->mob_specials.default_pos)
-#define MEMORY(ch)		((ch)->mob_specials.memory)
+#define GET_DEFAULT_POS(ch)    ((ch)->mob_specials.default_pos)
+#define MEMORY(ch)        ((ch)->mob_specials.memory)
 #define MOB_COOLDOWN(ch)        ((ch)->cooldown)
 
 /* STRENGTH_APPLY_INDEX is no longer needed with the death of GET_ADD */
@@ -651,7 +742,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define IS_CHAOTIC(ch)  (GET_ETHIC_ALIGNMENT(ch) <= -350)
 #define IS_NEUTRAL(ch) (!IS_GOOD(ch) && !IS_EVIL(ch))
 #define IS_ENEUTRAL(ch) (!IS_LAWFUL(ch) && !IS_CHAOTIC(ch))
-#define ALIGN_TYPE(ch)	((IS_GOOD(ch) ? 0 : (IS_EVIL(ch) ? 6 : 3)) + \
+#define ALIGN_TYPE(ch)    ((IS_GOOD(ch) ? 0 : (IS_EVIL(ch) ? 6 : 3)) + \
                          (IS_LAWFUL(ch) ? 0 : (IS_CHAOTIC(ch) ? 2 : 1)))
 
 #define IN_ARENA(ch)   (GET_ROOM_VNUM(IN_ROOM(ch)) >= 17800 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 17874)
@@ -680,7 +771,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 /* descriptor-based utils ************************************************/
 
 /* Hrm, not many.  We should make more. -gg 3/4/99 */
-#define STATE(d)	((d)->connected)
+#define STATE(d)    ((d)->connected)
 
 /* object utils **********************************************************/
 
@@ -689,20 +780,20 @@ extern int wield_type(int chsize, const struct obj_data *weap);
  * If using unsigned types, the top array index will catch everything.
  * If using signed types, NOTHING will catch the majority of bad accesses.
  */
-#define VALID_OBJ_RNUM(obj)	(GET_OBJ_RNUM(obj) <= top_of_objt && \
-				 GET_OBJ_RNUM(obj) != NOTHING)
+#define VALID_OBJ_RNUM(obj)    (GET_OBJ_RNUM(obj) <= top_of_objt && \
+                 GET_OBJ_RNUM(obj) != NOTHING)
 
 #define GET_OBJ_LEVEL(obj)      ((obj)->level)
 #define GET_OBJ_PERM(obj)       ((obj)->bitvector)
-#define GET_OBJ_TYPE(obj)	((obj)->type_flag)
-#define GET_OBJ_COST(obj)	((obj)->cost)
-#define GET_OBJ_RENT(obj)	((obj)->cost_per_day)
-#define GET_OBJ_EXTRA(obj)	((obj)->extra_flags)
+#define GET_OBJ_TYPE(obj)    ((obj)->type_flag)
+#define GET_OBJ_COST(obj)    ((obj)->cost)
+#define GET_OBJ_RENT(obj)    ((obj)->cost_per_day)
+#define GET_OBJ_EXTRA(obj)    ((obj)->extra_flags)
 #define GET_OBJ_EXTRA_AR(obj, i)   ((obj)->extra_flags[(i)])
-#define GET_OBJ_WEAR(obj)	((obj)->wear_flags)
-#define GET_OBJ_VAL(obj, val)	((obj)->value[(val)])
-#define GET_OBJ_WEIGHT(obj)	((obj)->weight)
-#define GET_OBJ_TIMER(obj)	((obj)->timer)
+#define GET_OBJ_WEAR(obj)    ((obj)->wear_flags)
+#define GET_OBJ_VAL(obj, val)    ((obj)->value[(val)])
+#define GET_OBJ_WEIGHT(obj)    ((obj)->weight)
+#define GET_OBJ_TIMER(obj)    ((obj)->timer)
 #define SITTING(obj)            ((obj)->sitting)
 #define GET_OBJ_POSTTYPE(obj)   ((obj)->posttype)
 #define GET_OBJ_POSTED(obj)     ((obj)->posted_to)
@@ -724,21 +815,21 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define SFREQ(obj)              ((obj)->scoutfreq)
 #define HCHARGE(obj)            ((obj)->healcharge)
 #define GET_LAST_LOAD(obj)      ((obj)->lload)
-#define GET_OBJ_SIZE(obj)	((obj)->size)
-#define GET_OBJ_RNUM(obj)	((obj)->item_number)
-#define GET_OBJ_VNUM(obj)	(VALID_OBJ_RNUM(obj) ? \
-				obj_index[GET_OBJ_RNUM(obj)].vnum : NOTHING)
-#define GET_OBJ_SPEC(obj)	(VALID_OBJ_RNUM(obj) ? \
-				obj_index[GET_OBJ_RNUM(obj)].func : 0)
+#define GET_OBJ_SIZE(obj)    ((obj)->size)
+#define GET_OBJ_RNUM(obj)    ((obj)->item_number)
+#define GET_OBJ_VNUM(obj)    (VALID_OBJ_RNUM(obj) ? \
+                obj_index[GET_OBJ_RNUM(obj)].vnum : NOTHING)
+#define GET_OBJ_SPEC(obj)    (VALID_OBJ_RNUM(obj) ? \
+                obj_index[GET_OBJ_RNUM(obj)].func : 0)
 #define GET_FUEL(obj)           (GET_OBJ_VAL((obj), 2))
 #define GET_FUELCOUNT(obj)      (GET_OBJ_VAL((obj), 3))
 
-#define IS_CORPSE(obj)		(GET_OBJ_TYPE(obj) == ITEM_CONTAINER && \
-					GET_OBJ_VAL((obj), VAL_CONTAINER_CORPSE) == 1)
+#define IS_CORPSE(obj)        (GET_OBJ_TYPE(obj) == ITEM_CONTAINER && \
+                    GET_OBJ_VAL((obj), VAL_CONTAINER_CORPSE) == 1)
 
-#define CAN_WEAR(obj, part)	OBJWEAR_FLAGGED((obj), (part))
+#define CAN_WEAR(obj, part)    OBJWEAR_FLAGGED((obj), (part))
 #define GET_OBJ_MATERIAL(obj)   ((obj)->value[7])
-#define GET_OBJ_SHORT(obj)	((obj)->short_description)
+#define GET_OBJ_SHORT(obj)    ((obj)->short_description)
 
 /* compound utilities and other macros **********************************/
 
@@ -747,7 +838,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
  * than 3.0pl13, you would use: #if _CIRCLEMUD > CIRCLEMUD_VERSION(3,0,13)
  */
 #define CIRCLEMUD_VERSION(major, minor, patchlevel) \
-	(((major) << 16) + ((minor) << 8) + (patchlevel))
+    (((major) << 16) + ((minor) << 8) + (patchlevel))
 
 #define HSHR(ch) (GET_SEX(ch) ? (GET_SEX(ch)==SEX_MALE ? "his":"her") :"its")
 #define HSSH(ch) (GET_SEX(ch) ? (GET_SEX(ch)==SEX_MALE ? "he" :"she") : "it")
@@ -760,7 +851,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 
 /* Various macros building up to CAN_SEE */
 
-#define LIGHT_OK(sub)	(!AFF_FLAGGED(sub, AFF_BLIND) && !PLR_FLAGGED(sub, PLR_EYEC) && \
+#define LIGHT_OK(sub)    (!AFF_FLAGGED(sub, AFF_BLIND) && !PLR_FLAGGED(sub, PLR_EYEC) && \
    (IS_LIGHT(IN_ROOM(sub)) || AFF_FLAGGED((sub), AFF_INFRAVISION) || (IS_MUTANT(sub) && (GET_GENOME(sub, 0) == 4 || GET_GENOME(sub, 1) == 4)) || PLR_FLAGGED(sub, PLR_AURALIGHT)) )
 
 #define INVIS_OK(sub, obj) \
@@ -787,7 +878,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 
 /* Is anyone carrying this object and if so, are they visible? */
 #define CAN_SEE_OBJ_CARRIER(sub, obj) \
-  ((!(obj)->carried_by || CAN_SEE((sub), (obj)->carried_by)) &&	\
+  ((!(obj)->carried_by || CAN_SEE((sub), (obj)->carried_by)) &&    \
    (!(obj)->worn_by || CAN_SEE((sub), (obj)->worn_by)))
 
 #define MORT_CAN_SEE_OBJ(sub, obj) \
@@ -796,7 +887,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define CAN_SEE_OBJ(sub, obj) \
    (MORT_CAN_SEE_OBJ(sub, obj) || (!IS_NPC(sub) && PRF_FLAGGED((sub), PRF_HOLYLIGHT)))
 
-#define CAN_CARRY_OBJ(ch,obj)  \
+#define CAN_CARRY_OBJ(ch, obj)  \
    (((IS_CARRYING_W(ch) + GET_OBJ_WEIGHT(obj)) <= CAN_CARRY_W(ch)) &&   \
     ((IS_CARRYING_N(ch) + 1) <= CAN_CARRY_N(ch)))
 
@@ -816,21 +907,21 @@ extern int wield_type(int chsize, const struct obj_data *weap);
                         (ch)->race->getName().c_str()))
 
 #define OBJS(obj, vict) (CAN_SEE_OBJ((vict), (obj)) ? \
-	(obj)->short_description  : "something")
+    (obj)->short_description  : "something")
 
 #define OBJN(obj, vict) (CAN_SEE_OBJ((vict), (obj)) ? \
-	fname((obj)->name) : "something")
+    fname((obj)->name) : "something")
 
 
 #define EXIT(ch, door)  (world[IN_ROOM(ch)].dir_option[door])
-#define SECOND_EXIT(ch, door) (world[EXIT(ch, door)->to_room].dir_option[door]) 
+#define SECOND_EXIT(ch, door) (world[EXIT(ch, door)->to_room].dir_option[door])
 #define THIRD_EXIT(ch, door) (world[_2ND_EXIT(ch, door)->to_room].dir_option[door])
 #define W_EXIT(room, num)     (world[(room)].dir_option[(num)])
 #define R_EXIT(room, num)     ((room)->dir_option[(num)])
 
 #define CAN_GO(ch, door) (EXIT(ch,door) && \
-			 (EXIT(ch,door)->to_room != NOWHERE) && \
-			 !IS_SET(EXIT(ch, door)->exit_info, EX_CLOSED))
+             (EXIT(ch,door)->to_room != NOWHERE) && \
+             !IS_SET(EXIT(ch, door)->exit_info, EX_CLOSED))
 
 #define RACE(ch)      ((ch)->juggleRaceName(true).c_str())
 #define LRACE(ch)     ((ch)->juggleRaceName(false).c_str())
@@ -868,7 +959,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define IS_THAUMATURGIST(ch)    (GET_CLASS_RANKS(ch, CLASS_THAUMATURGIST) > 0)
 
 
-#define GOLD_CARRY(ch)		(GET_LEVEL(ch) < 100 ? (GET_LEVEL(ch) < 50 ? GET_LEVEL(ch) * 10000 : 500000) : 50000000)
+#define GOLD_CARRY(ch)        (GET_LEVEL(ch) < 100 ? (GET_LEVEL(ch) < 50 ? GET_LEVEL(ch) * 10000 : 500000) : 50000000)
 #define IS_SHADOW_DRAGON1(ch)   (IS_NPC(ch) && GET_MOB_VNUM(ch) == SHADOW_DRAGON1_VNUM)
 #define IS_SHADOW_DRAGON2(ch)   (IS_NPC(ch) && GET_MOB_VNUM(ch) == SHADOW_DRAGON2_VNUM)
 #define IS_SHADOW_DRAGON3(ch)   (IS_NPC(ch) && GET_MOB_VNUM(ch) == SHADOW_DRAGON3_VNUM)
@@ -951,13 +1042,13 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define IS_FEMALE(ch)           (GET_SEX(ch) == SEX_FEMALE)
 #define IS_NEUTER(ch)           (!IS_MALE(ch) && !IS_FEMALE(ch))
 
-#define OUTSIDE(ch)	(OUTSIDE_ROOMFLAG(ch) && OUTSIDE_SECTTYPE(ch))
+#define OUTSIDE(ch)    (OUTSIDE_ROOMFLAG(ch) && OUTSIDE_SECTTYPE(ch))
 
-#define OUTSIDE_ROOMFLAG(ch)	(!ROOM_FLAGGED(IN_ROOM(ch), ROOM_INDOORS) && \
-			 !ROOM_FLAGGED(IN_ROOM(ch), ROOM_UNDERGROUND) && \
+#define OUTSIDE_ROOMFLAG(ch)    (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_INDOORS) && \
+             !ROOM_FLAGGED(IN_ROOM(ch), ROOM_UNDERGROUND) && \
                           !ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE))
 
-#define OUTSIDE_SECTTYPE(ch)	((SECT(IN_ROOM(ch)) != SECT_INSIDE) && \
+#define OUTSIDE_SECTTYPE(ch)    ((SECT(IN_ROOM(ch)) != SECT_INSIDE) && \
                          (SECT(IN_ROOM(ch)) != SECT_UNDERWATER) && \
                           (SECT(IN_ROOM(ch)) != SECT_IMPORTANT) && \
                            (SECT(IN_ROOM(ch)) != SECT_SHOP) && \
@@ -989,7 +1080,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
  * automatically sets when it determines whether or not the system is
  * capable of encrypting.
  */
-#define CRYPT(a,b) ((char *) crypt((a),(b)))
+#define CRYPT(a, b) ((char *) crypt((a),(b)))
 
 /*******************  Config macros *********************/
 
@@ -1010,22 +1101,22 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define CONFIG_DTS_ARE_DUMPS    config_info.play.dts_are_dumps
 #define CONFIG_LOAD_INVENTORY   config_info.play.load_into_inventory
 #define CONFIG_TRACK_T_DOORS    config_info.play.track_through_doors
-#define CONFIG_LEVEL_CAP	config_info.play.level_cap
-#define CONFIG_STACK_MOBS	config_info.play.stack_mobs
-#define CONFIG_STACK_OBJS	config_info.play.stack_objs
-#define CONFIG_MOB_FIGHTING	config_info.play.mob_fighting
+#define CONFIG_LEVEL_CAP    config_info.play.level_cap
+#define CONFIG_STACK_MOBS    config_info.play.stack_mobs
+#define CONFIG_STACK_OBJS    config_info.play.stack_objs
+#define CONFIG_MOB_FIGHTING    config_info.play.mob_fighting
 #define CONFIG_OK               config_info.play.OK
 #define CONFIG_NOPERSON         config_info.play.NOPERSON
 #define CONFIG_NOEFFECT         config_info.play.NOEFFECT
 #define CONFIG_DISP_CLOSED_DOORS config_info.play.disp_closed_doors
-#define CONFIG_REROLL_PLAYER_CREATION	config_info.play.reroll_player
-#define CONFIG_INITIAL_POINTS_POOL	config_info.play.initial_points
-#define CONFIG_ENABLE_COMPRESSION	config_info.play.enable_compression
-#define CONFIG_ENABLE_LANGUAGES	config_info.play.enable_languages
-#define CONFIG_ALL_ITEMS_UNIQUE	config_info.play.all_items_unique
-#define CONFIG_EXP_MULTIPLIER	config_info.play.exp_multiplier
+#define CONFIG_REROLL_PLAYER_CREATION    config_info.play.reroll_player
+#define CONFIG_INITIAL_POINTS_POOL    config_info.play.initial_points
+#define CONFIG_ENABLE_COMPRESSION    config_info.play.enable_compression
+#define CONFIG_ENABLE_LANGUAGES    config_info.play.enable_languages
+#define CONFIG_ALL_ITEMS_UNIQUE    config_info.play.all_items_unique
+#define CONFIG_EXP_MULTIPLIER    config_info.play.exp_multiplier
 
-  /** Crash Saves **/
+/** Crash Saves **/
 #define CONFIG_FREE_RENT        config_info.csd.free_rent
 #define CONFIG_MAX_OBJ_SAVE     config_info.csd.max_obj_save
 #define CONFIG_MIN_RENT_COST    config_info.csd.min_rent_cost
@@ -1034,7 +1125,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define CONFIG_CRASH_TIMEOUT    config_info.csd.crash_file_timeout
 #define CONFIG_RENT_TIMEOUT     config_info.csd.rent_file_timeout
 
-  /** Room Numbers **/
+/** Room Numbers **/
 #define CONFIG_MORTAL_START     config_info.room_nums.mortal_start_room
 #define CONFIG_IMMORTAL_START   config_info.room_nums.immort_start_room
 #define CONFIG_FROZEN_START     config_info.room_nums.frozen_start_room
@@ -1043,7 +1134,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define CONFIG_DON_ROOM_3       config_info.room_nums.donation_room_3
 #define CONFIG_DEATH_START      config_info.room_nums.death_start_room
 
-  /** Game Operation **/
+/** Game Operation **/
 #define CONFIG_DFLT_PORT        config_info.operation.DFLT_PORT
 #define CONFIG_DFLT_IP          config_info.operation.DFLT_IP
 #define CONFIG_MAX_PLAYING      config_info.operation.max_playing
@@ -1061,56 +1152,56 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 /** Can players communicate on the IMC channel ? */
 #define CONFIG_IMC_ENABLED      config_info.operation.imc_enabled
 
-  /** Autowiz **/
+/** Autowiz **/
 #define CONFIG_USE_AUTOWIZ      config_info.autowiz.use_autowiz
 #define CONFIG_MIN_WIZLIST_LEV  config_info.autowiz.min_wizlist_lev
 
-  /** Character Advancement **/
-#define CONFIG_ALLOW_MULTICLASS	config_info.advance.allow_multiclass
-#define CONFIG_ALLOW_PRESTIGE	config_info.advance.allow_prestige
+/** Character Advancement **/
+#define CONFIG_ALLOW_MULTICLASS    config_info.advance.allow_multiclass
+#define CONFIG_ALLOW_PRESTIGE    config_info.advance.allow_prestige
 
-  /** For tick system **/
-#define CONFIG_PULSE_VIOLENCE	config_info.ticks.pulse_violence
-#define CONFIG_PULSE_MOBILE	config_info.ticks.pulse_mobile
-#define CONFIG_PULSE_ZONE	config_info.ticks.pulse_zone
-#define CONFIG_PULSE_AUTOSAVE	config_info.ticks.pulse_autosave
-#define CONFIG_PULSE_IDLEPWD	config_info.ticks.pulse_idlepwd
-#define CONFIG_PULSE_SANITY	config_info.ticks.pulse_sanity
-#define CONFIG_PULSE_USAGE	config_info.ticks.pulse_usage
-#define CONFIG_PULSE_TIMESAVE	config_info.ticks.pulse_timesave
-#define CONFIG_PULSE_CURRENT	config_info.ticks.pulse_current
+/** For tick system **/
+#define CONFIG_PULSE_VIOLENCE    config_info.ticks.pulse_violence
+#define CONFIG_PULSE_MOBILE    config_info.ticks.pulse_mobile
+#define CONFIG_PULSE_ZONE    config_info.ticks.pulse_zone
+#define CONFIG_PULSE_AUTOSAVE    config_info.ticks.pulse_autosave
+#define CONFIG_PULSE_IDLEPWD    config_info.ticks.pulse_idlepwd
+#define CONFIG_PULSE_SANITY    config_info.ticks.pulse_sanity
+#define CONFIG_PULSE_USAGE    config_info.ticks.pulse_usage
+#define CONFIG_PULSE_TIMESAVE    config_info.ticks.pulse_timesave
+#define CONFIG_PULSE_CURRENT    config_info.ticks.pulse_current
 
-  /** Character Creation Method **/
-#define CONFIG_CREATION_METHOD	config_info.creation.method
+/** Character Creation Method **/
+#define CONFIG_CREATION_METHOD    config_info.creation.method
 
-#define GET_SPELLMEM(ch, i)	((ch)->player_specials->spellmem[i])
-#define GET_MEMCURSOR(ch)	((ch)->player_specials->memcursor)
+#define GET_SPELLMEM(ch, i)    ((ch)->player_specials->spellmem[i])
+#define GET_MEMCURSOR(ch)    ((ch)->player_specials->memcursor)
 /* returns the number of spells per slot */
-#define GET_SPELL_LEVEL(ch, i)	((ch)->player_specials->spell_level[i])
-#define IS_ARCANE(ch)		(IS_WIZARD(ch))
-#define IS_DIVINE(ch)		(IS_CLERIC(ch))
-#define HAS_FEAT(ch, i)		((ch)->feats[i])
-#define HAS_COMBAT_FEAT(ch,i,j)	IS_SET_AR((ch)->combat_feats[(i)], (j))
-#define SET_COMBAT_FEAT(ch,i,j)	SET_BIT_AR((ch)->combat_feats[(i)], (j))
-#define HAS_SCHOOL_FEAT(ch,i,j)	IS_SET((ch)->school_feats[(i)], (j))
-#define SET_SCHOOL_FEAT(ch,i,j)	SET_BIT((ch)->school_feats[(i)], (j))
-#define GET_BAB(ch)		GET_POLE_BONUS(ch)
-#define SET_FEAT(ch, i, value)	do { CHECK_PLAYER_SPECIAL((ch), (ch)->feats[i]) = value; } while(0)
+#define GET_SPELL_LEVEL(ch, i)    ((ch)->player_specials->spell_level[i])
+#define IS_ARCANE(ch)        (IS_WIZARD(ch))
+#define IS_DIVINE(ch)        (IS_CLERIC(ch))
+#define HAS_FEAT(ch, i)        ((ch)->feats[i])
+#define HAS_COMBAT_FEAT(ch, i, j)    IS_SET_AR((ch)->combat_feats[(i)], (j))
+#define SET_COMBAT_FEAT(ch, i, j)    SET_BIT_AR((ch)->combat_feats[(i)], (j))
+#define HAS_SCHOOL_FEAT(ch, i, j)    IS_SET((ch)->school_feats[(i)], (j))
+#define SET_SCHOOL_FEAT(ch, i, j)    SET_BIT((ch)->school_feats[(i)], (j))
+#define GET_BAB(ch)        GET_POLE_BONUS(ch)
+#define SET_FEAT(ch, i, value)    do { CHECK_PLAYER_SPECIAL((ch), (ch)->feats[i]) = value; } while(0)
 #define GET_SPELL_MASTERY_POINTS(ch) \
-				((ch)->player_specials->spell_mastery_points)
-#define GET_FEAT_POINTS(ch)	((ch)->player_specials->feat_points)
+                ((ch)->player_specials->spell_mastery_points)
+#define GET_FEAT_POINTS(ch)    ((ch)->player_specials->feat_points)
 #define GET_EPIC_FEAT_POINTS(ch) \
-				((ch)->player_specials->epic_feat_points)
-#define GET_CLASS_FEATS(ch,cl)	((ch)->player_specials->class_feat_points[cl])
-#define GET_EPIC_CLASS_FEATS(ch,cl) \
-				((ch)->player_specials->epic_class_feat_points[cl])
-#define IS_EPIC_LEVEL(ch)	(GET_CLASS_LEVEL(ch) >= 20)
-#define HAS_CRAFT_SKILL(ch,i,j)	IS_SET_AR((ch)->craft_skill[(i)], (j))
-#define SET_CRAFT_SKILL(ch,i,j)	SET_BIT_AR((ch)->craft_skill[(i)], (j))
-#define HAS_KNOWLEDGE_SKILL(ch,i,j)	IS_SET_AR((ch)->knowledge_skill[(i)], (j))
-#define SET_KNOWLEDGE_SKILL(ch,i,j)	SET_BIT_AR((ch)->knowledge_skill[(i)], (j))
-#define HAS_PROFESSION_SKILL(ch,i,j)	IS_SET_AR((ch)->profession_skill[(i)], (j))
-#define SET_PROFESSION_SKILL(ch,i,j)	SET_BIT_AR((ch)->profession_skill[(i)], (j))
+                ((ch)->player_specials->epic_feat_points)
+#define GET_CLASS_FEATS(ch, cl)    ((ch)->player_specials->class_feat_points[cl])
+#define GET_EPIC_CLASS_FEATS(ch, cl) \
+                ((ch)->player_specials->epic_class_feat_points[cl])
+#define IS_EPIC_LEVEL(ch)    (GET_CLASS_LEVEL(ch) >= 20)
+#define HAS_CRAFT_SKILL(ch, i, j)    IS_SET_AR((ch)->craft_skill[(i)], (j))
+#define SET_CRAFT_SKILL(ch, i, j)    SET_BIT_AR((ch)->craft_skill[(i)], (j))
+#define HAS_KNOWLEDGE_SKILL(ch, i, j)    IS_SET_AR((ch)->knowledge_skill[(i)], (j))
+#define SET_KNOWLEDGE_SKILL(ch, i, j)    SET_BIT_AR((ch)->knowledge_skill[(i)], (j))
+#define HAS_PROFESSION_SKILL(ch, i, j)    IS_SET_AR((ch)->profession_skill[(i)], (j))
+#define SET_PROFESSION_SKILL(ch, i, j)    SET_BIT_AR((ch)->profession_skill[(i)], (j))
 
 /* General use directory functions & structures. Required due to */
 /* various differences between directory handling code on        */
@@ -1123,20 +1214,28 @@ struct xap_dir {
 };
 
 extern int xdir_scan(char *dir_name, struct xap_dir *xapdirp);
+
 extern int xdir_get_total(struct xap_dir *xd);
+
 extern char *xdir_get_name(struct xap_dir *xd, int num);
+
 extern char *xdir_next(struct xap_dir *xd);
+
 extern void xdir_close(struct xap_dir *xd);
+
 extern int insure_directory(char *path, int isfile);
+
 extern void admin_set(struct char_data *ch, int value);
+
 #define GET_PAGE_LENGTH(ch)         CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->page_length))
 #define IS_COLOR_CHAR(c)  ((c) == 'n' || (c) == 'b' || (c) == 'B' || (c) == '(c)' || \
    (c) == '(c)' || (c) == 'g' || (c) == 'G' || (c) == 'm' || (c) == 'M' || (c) == 'r' || \
    (c) == 'R' || (c) == 'y' || (c) == 'Y' || (c) == 'w' || (c) == 'W' || (c) == 'k' || \
    (c) == 'K' || (c) == '0' || (c) == '2' || (c) == '3' || (c) == '4' || (c) == '5' || \
-   (c) == '6' || (c) == '7' || (c) == 'o' || (c) == 'e' || (c) == 'u' || (c) == 'l') 
+   (c) == '6' || (c) == '7' || (c) == 'o' || (c) == 'e' || (c) == 'u' || (c) == 'l')
 #define MOB_LOADROOM(ch)      ((ch)->hometown)  /*hometown not used for mobs*/
 #define OBJ_LOADROOM(obj)     ((obj)->room_loaded)
 
 extern int levenshtein_distance(char *s1, char *s2);
+
 #define GET_MURDER(ch)          CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->murder))

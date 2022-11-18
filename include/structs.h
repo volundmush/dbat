@@ -8,6 +8,7 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 #pragma once
+
 #include "defs.h"
 
 /**********************************************************************
@@ -20,8 +21,6 @@ struct extra_descr_data {
     char *description;             /* What to see                      */
     struct extra_descr_data *next; /* Next in list                     */
 };
-
-
 
 
 struct obj_affected_type {
@@ -656,125 +655,206 @@ struct char_data {
     // Stats stuff
 
     int64_t getCurHealth() const;
+
     int64_t getMaxHealth() const;
+
     double getCurHealthPercent() const;
+
     int64_t getPercentOfCurHealth(double amt) const;
+
     int64_t getPercentOfMaxHealth(double amt) const;
+
     bool isFullHealth() const;
 
     int64_t setCurHealth(int64_t amt);
+
     int64_t setCurHealthPercent(double amt);
+
     int64_t incCurHealth(int64_t amt, bool limit_max = true);
+
     int64_t decCurHealth(int64_t amt, int64_t floor = 0);
+
     int64_t incCurHealthPercent(double amt, bool limit_max = true);
+
     int64_t decCurHealthPercent(double amt, int64_t floor = 0);
+
     void restoreHealth(bool announce = true);
 
     int64_t healCurHealth(int64_t amt);
+
     int64_t harmCurHealth(int64_t amt);
 
     int64_t getMaxPL() const;
+
     int64_t getMaxPLTrans() const;
+
     int64_t getCurPL() const;
+
     int64_t getBasePL() const;
+
     int64_t getEffBasePL() const;
+
     double getCurPLPercent() const;
+
     int64_t getPercentOfCurPL(double amt) const;
+
     int64_t getPercentOfMaxPL(double amt) const;
+
     bool isFullPL() const;
 
     int64_t getCurKI() const;
+
     int64_t getMaxKI() const;
+
     int64_t getBaseKI() const;
+
     int64_t getEffBaseKI() const;
+
     double getCurKIPercent() const;
+
     int64_t getPercentOfCurKI(double amt) const;
+
     int64_t getPercentOfMaxKI(double amt) const;
+
     bool isFullKI() const;
 
     int64_t setCurKI(int64_t amt);
+
     int64_t setCurKIPercent(double amt);
+
     int64_t incCurKI(int64_t amt, bool limit_max = true);
+
     int64_t decCurKI(int64_t amt, int64_t floor = 0);
+
     int64_t incCurKIPercent(double amt, bool limit_max = true);
+
     int64_t decCurKIPercent(double amt, int64_t floor = 0);
+
     void restoreKI(bool announce = true);
 
     int64_t getCurST() const;
+
     int64_t getMaxST() const;
+
     int64_t getBaseST() const;
+
     int64_t getEffBaseST() const;
+
     double getCurSTPercent() const;
+
     int64_t getPercentOfCurST(double amt) const;
+
     int64_t getPercentOfMaxST(double amt) const;
+
     bool isFullST() const;
 
     int64_t setCurST(int64_t amt);
+
     int64_t setCurSTPercent(double amt);
+
     int64_t incCurST(int64_t amt, bool limit_max = true);
+
     int64_t decCurST(int64_t amt, int64_t floor = 0);
+
     int64_t incCurSTPercent(double amt, bool limit_max = true);
+
     int64_t decCurSTPercent(double amt, int64_t floor = 0);
+
     void restoreST(bool announce = true);
 
     int64_t getCurLF() const;
+
     int64_t getMaxLF() const;
+
     double getCurLFPercent() const;
+
     int64_t getPercentOfCurLF(double amt) const;
+
     int64_t getPercentOfMaxLF(double amt) const;
+
     bool isFullLF() const;
 
     int64_t setCurLF(int64_t amt);
+
     int64_t setCurLFPercent(double amt);
+
     int64_t incCurLF(int64_t amt, bool limit_max = true);
+
     int64_t decCurLF(int64_t amt, int64_t floor = 0);
+
     int64_t incCurLFPercent(double amt, bool limit_max = true);
+
     int64_t decCurLFPercent(double amt, int64_t floor = 0);
+
     void restoreLF(bool announce = true);
 
 
     bool isFullVitals() const;
+
     void restoreVitals(bool announce = true);
+
     void restoreStatus(bool announce = true);
+
     void restoreLimbs(bool announce = true);
 
     int64_t gainBasePL(int64_t amt, bool trans_mult = false);
+
     int64_t gainBaseKI(int64_t amt, bool trans_mult = false);
+
     int64_t gainBaseST(int64_t amt, bool trans_mult = false);
+
     void gainBaseAll(int64_t amt, bool trans_mult = false);
 
     int64_t loseBasePL(int64_t amt, bool trans_mult = false);
+
     int64_t loseBaseKI(int64_t amt, bool trans_mult = false);
+
     int64_t loseBaseST(int64_t amt, bool trans_mult = false);
+
     void loseBaseAll(int64_t amt, bool trans_mult = false);
 
     int64_t gainBasePLPercent(double amt, bool trans_mult = false);
+
     int64_t gainBaseKIPercent(double amt, bool trans_mult = false);
+
     int64_t gainBaseSTPercent(double amt, bool trans_mult = false);
+
     void gainBaseAllPercent(double amt, bool trans_mult = false);
 
     int64_t loseBasePLPercent(double amt, bool trans_mult = false);
+
     int64_t loseBaseKIPercent(double amt, bool trans_mult = false);
+
     int64_t loseBaseSTPercent(double amt, bool trans_mult = false);
+
     void loseBaseAllPercent(double amt, bool trans_mult = false);
 
     // status stuff
     void cureStatusKnockedOut(bool announce = true);
+
     void cureStatusBurn(bool announce = true);
+
     void cureStatusPoison(bool announce = true);
+
     void setStatusKnockedOut();
 
     // stats refactor stuff
     int64_t getMaxCarryWeight() const;
+
     int64_t getCurGearWeight() const;
+
     int64_t getCurCarriedWeight() const;
+
     int64_t getAvailableCarryWeight() const;
 
     double speednar() const;
+
     int64_t getEffMaxPL() const;
+
     bool isWeightedPL() const;
 
     void apply_kaioken(int times, bool announce);
+
     void remove_kaioken(int8_t announce);
 
     double health = 1;

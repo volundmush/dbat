@@ -15,7 +15,7 @@
 ************************************************************************ */
 
 #include "config.h"
-#include "interpreter.h"	/* alias_data definition for structs.h */
+#include "interpreter.h"    /* alias_data definition for structs.h */
 
 /*
  * Update:  The following constants and variables are now the default values
@@ -72,11 +72,11 @@ int number_of_assassins = 0;
 
 char last_user_freed[MAX_INPUT_LENGTH];
 
- /* Toplist Data */
- int TOPLOADED = false;
- char *topname[25];
- int64_t toppoint[25] = {0};
- /* End Top Data */
+/* Toplist Data */
+int TOPLOADED = false;
+char *topname[25];
+int64_t toppoint[25] = {0};
+/* End Top Data */
 
 int ERAPLAYERS = 0;
 int TOPCOUNTDOWN = 60;
@@ -103,26 +103,26 @@ int PCOUNT = 0;
 int HIGHPCOUNT = 0;
 time_t PCOUNTDATE = 0;
 time_t PCOUNTDAY = 0;
- /* This is for the dragon ball system */
- int SELFISHMETER = 0;
- int SHADOW_DRAGON1 = -1;
- int SHADOW_DRAGON2 = -1;
- int SHADOW_DRAGON3 = -1;
- int SHADOW_DRAGON4 = -1;
- int SHADOW_DRAGON5 = -1;
- int SHADOW_DRAGON6 = -1;
- int SHADOW_DRAGON7 = -1;
+/* This is for the dragon ball system */
+int SELFISHMETER = 0;
+int SHADOW_DRAGON1 = -1;
+int SHADOW_DRAGON2 = -1;
+int SHADOW_DRAGON3 = -1;
+int SHADOW_DRAGON4 = -1;
+int SHADOW_DRAGON5 = -1;
+int SHADOW_DRAGON6 = -1;
+int SHADOW_DRAGON7 = -1;
 
- int DBALL_HUNTER1 = -1;
- int DBALL_HUNTER2 = -1;
- int DBALL_HUNTER3 = -1;
- int DBALL_HUNTER4 = -1;
+int DBALL_HUNTER1 = -1;
+int DBALL_HUNTER2 = -1;
+int DBALL_HUNTER3 = -1;
+int DBALL_HUNTER4 = -1;
 
- int DBALL_HUNTER1_VNUM = 88;
- int DBALL_HUNTER2_VNUM = 89;
- int DBALL_HUNTER3_VNUM = 0;
- int DBALL_HUNTER4_VNUM = 0;
- /* End dragon ball system stuff       */
+int DBALL_HUNTER1_VNUM = 88;
+int DBALL_HUNTER2_VNUM = 89;
+int DBALL_HUNTER3_VNUM = 0;
+int DBALL_HUNTER4_VNUM = 0;
+/* End dragon ball system stuff       */
 
 /*  how many people can get into a tunnel?  The default is two, but there
  *  is also an alternate message in the case of one person being allowed.
@@ -130,8 +130,8 @@ time_t PCOUNTDAY = 0;
 int tunnel_size = 2;
 
 /* exp change limits */
-int max_exp_gain = 1000000;	/* max gainable per kill */
-int max_exp_loss = 250000;	/* max losable per death */
+int max_exp_gain = 1000000;    /* max gainable per kill */
+int max_exp_loss = 250000;    /* max losable per death */
 
 /* number of tics (usually 75 seconds) before PC/NPC corpses decompose */
 int max_npc_corpse_time = 5;
@@ -285,13 +285,13 @@ int auto_pwipe = true;
 */
 const struct pclean_criteria_data pclean_criteria[7] = {
 /*	LEVEL		DAYS	*/
-  {	0		,0	}, /* level 0 */
-  {	1		,30	},
-  {	4		,90	},
-  {	10		,180	},
-  {	50		,360	}, /* highest mortal */
-  {	100		,360	}, /* all immortals */
-  {	-1		,0	}  /* no more level checks */
+        {0,   0}, /* level 0 */
+        {1,   30},
+        {4,   90},
+        {10,  180},
+        {50,  360}, /* highest mortal */
+        {100, 360}, /* all immortals */
+        {-1,  0}  /* no more level checks */
 };
 
 /* Do you want players who self-delete to be wiped immediately with no
@@ -321,8 +321,8 @@ room_vnum frozen_start_room = 2;
  * donation rooms.
  */
 room_vnum donation_room_1 = 3063;
-room_vnum donation_room_2 = NOWHERE;	/* unused - room for expansion */
-room_vnum donation_room_3 = NOWHERE;	/* unused - room for expansion */
+room_vnum donation_room_2 = NOWHERE;    /* unused - room for expansion */
+room_vnum donation_room_3 = NOWHERE;    /* unused - room for expansion */
 
 
 /****************************************************************************/
@@ -433,28 +433,27 @@ int auto_save_olc = 1;
 int use_new_socials = 1;
 
 const char *MENU =
-"\r\n"
-"@GWelcome to @YCircleMUD!@n\r\n"
-"@B0@W) @CExit from @YCircleMUD.@n\r\n"
-"@B1@W) @CEnter the game.@n\r\n"
-"@B2@W) @CEnter description.@n\r\n"
-"@B3@W) @CGame Info (Please Read)@n\r\n"
-"@B4@W) @CChange password.@n\r\n"
-"@B5@W) @CDelete this character.@n\r\n"
-"\r\n"
-"   @WMake your choice: @n";
-
+        "\r\n"
+        "@GWelcome to @YCircleMUD!@n\r\n"
+        "@B0@W) @CExit from @YCircleMUD.@n\r\n"
+        "@B1@W) @CEnter the game.@n\r\n"
+        "@B2@W) @CEnter description.@n\r\n"
+        "@B3@W) @CGame Info (Please Read)@n\r\n"
+        "@B4@W) @CChange password.@n\r\n"
+        "@B5@W) @CDelete this character.@n\r\n"
+        "\r\n"
+        "   @WMake your choice: @n";
 
 
 const char *WELC_MESSG =
-"\r\n"
-"Welcome to the land of CircleMUD!  May your visit here be... Interesting."
-"\r\n\r\n";
+        "\r\n"
+        "Welcome to the land of CircleMUD!  May your visit here be... Interesting."
+        "\r\n\r\n";
 
 const char *START_MESSG =
-"Welcome.  This is your new CircleMUD character!  You can now earn gold,\r\n"
-"gain experience, find weapons and equipment, and much more -- while\r\n"
-"meeting people from around the world!\r\n";
+        "Welcome.  This is your new CircleMUD character!  You can now earn gold,\r\n"
+        "gain experience, find weapons and equipment, and much more -- while\r\n"
+        "meeting people from around the world!\r\n";
 
 /****************************************************************************/
 /****************************************************************************/

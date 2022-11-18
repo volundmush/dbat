@@ -654,7 +654,7 @@ namespace dbat::race {
             .bonus=0, .mult=3, .drain=0, .flag=PLR_TRANS2
     };
 
-    const std::map<int, transform_bonus>& Race::getTransMap(const char_data *ch) const {
+    const std::map<int, transform_bonus> &Race::getTransMap(const char_data *ch) const {
         switch (r_id) {
             case android:
                 if (PLR_FLAGGED(ch, PLR_SENSEM)) {
@@ -737,11 +737,11 @@ namespace dbat::race {
     }
 
     transform_bonus Race::getCurForm(const char_data *ch) const {
-        if(PLR_FLAGGED(ch, PLR_OOZARU)) return oozaru;
-        if(IS_HOSHIJIN(ch)) {
+        if (PLR_FLAGGED(ch, PLR_OOZARU)) return oozaru;
+        if (IS_HOSHIJIN(ch)) {
             transform_bonus hoshi_form;
             double bon_mult = 0;
-            switch(GET_PHASE(ch)) {
+            switch (GET_PHASE(ch)) {
                 case 0: // death phase
                     return base_form;
                 case 1: // birth phase
@@ -755,16 +755,16 @@ namespace dbat::race {
                 default:
                     return base_form;
             }
-            if(ETHER_STREAM(ch))
+            if (ETHER_STREAM(ch))
                 bon_mult += .5;
             hoshi_form.bonus = (ch->getBasePL() * .1) * bon_mult;
             return hoshi_form;
         }
 
         auto tier = getCurrentTransTier(ch);
-        if(!tier) return base_form;
+        if (!tier) return base_form;
         auto t_map = getTransMap(ch);
-        if(t_map.empty()) return base_form;
+        if (t_map.empty()) return base_form;
         return t_map[tier];
     }
 
@@ -814,7 +814,7 @@ namespace dbat::race {
         // First, check for special requirements which are not 'paid'.
         switch (r_id) {
             case bio:
-                if(tier > 3-GET_ABSORBS(ch)) {
+                if (tier > 3 - GET_ABSORBS(ch)) {
                     send_to_char(ch, "You need to absorb something to transform!\r\n");
                     return false;
                 }
@@ -826,7 +826,7 @@ namespace dbat::race {
                             send_to_char(ch, "You need to ingest someone before you can use that form.\r\n");
                             return false;
                         }
-                        if(GET_LEVEL(ch) < 50) {
+                        if (GET_LEVEL(ch) < 50) {
                             send_to_char(ch, "You must be at least level 50 to reach that form.\r\n");
                             return false;
                         }
@@ -921,16 +921,16 @@ namespace dbat::race {
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 send_to_char(ch, "@YSuper @CHuman @WFirst  @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@YSuper @CHuman @WSecond @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@YSuper @CHuman @WThird  @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@YSuper @CHuman @WFourth @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 break;
             case saiyan:
@@ -939,26 +939,26 @@ namespace dbat::race {
                     send_to_char(ch, "@b-------------------------------------------------@n\r\n");
                     send_to_char(ch, "@YSuper @CSaiyan @WFirst   @R-@G %s BPL Req\r\n",
                                  (ch->getBasePL()) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
-                                                                              : "??????????");
+                                                                                : "??????????");
                     send_to_char(ch, "@YLegendary @CSuper Saiyan @R-@G %s BPL Req\r\n",
                                  (ch->getBasePL()) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
-                                                                              : "??????????");
+                                                                                : "??????????");
                     send_to_char(ch, "@b-------------------------------------------------@n\r\n");
                 } else {
                     send_to_char(ch, "              @YSuper @CSaiyan@n\r\n");
                     send_to_char(ch, "@b------------------------------------------------@n\r\n");
                     send_to_char(ch, "@YSuper @CSaiyan @WFirst  @R-@G %s BPL Req\r\n",
                                  (ch->getBasePL()) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
-                                                                              : "??????????");
+                                                                                : "??????????");
                     send_to_char(ch, "@YSuper @CSaiyan @WSecond @R-@G %s BPL Req\r\n",
                                  (ch->getBasePL()) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
-                                                                              : "??????????");
+                                                                                : "??????????");
                     send_to_char(ch, "@YSuper @CSaiyan @WThird  @R-@G %s BPL Req\r\n",
                                  (ch->getBasePL()) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
-                                                                              : "??????????");
+                                                                                : "??????????");
                     send_to_char(ch, "@YSuper @CSaiyan @WFourth @R-@G %s BPL Req\r\n",
                                  (ch->getBasePL()) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4))
-                                                                              : "??????????");
+                                                                                : "??????????");
                     send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 }
                 break;
@@ -967,16 +967,16 @@ namespace dbat::race {
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 send_to_char(ch, "@YTransform @WFirst  @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@YTransform @WSecond @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@YTransform @WThird  @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@YTransform @WFourth @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 break;
             case konatsu:
@@ -984,13 +984,13 @@ namespace dbat::race {
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 send_to_char(ch, "@YShadow @WFirst  @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@YShadow @WSecond @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@YShadow @WThird  @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 break;
             case namekian:
@@ -998,16 +998,16 @@ namespace dbat::race {
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 send_to_char(ch, "@YSuper @CNamek @WFirst  @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@YSuper @CNamek @WSecond @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@YSuper @CNamek @WThird  @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@YSuper @CNamek @WFourth @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 break;
             case mutant:
@@ -1015,13 +1015,13 @@ namespace dbat::race {
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 send_to_char(ch, "@YMutate @WFirst  @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@YMutate @WSecond @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@YMutate @WThird  @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 break;
             case halfbreed:
@@ -1029,13 +1029,13 @@ namespace dbat::race {
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 send_to_char(ch, "@YSuper @CSaiyan @WFirst  @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@YSuper @CSaiyan @WSecond @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@YSuper @CSaiyan @WThird  @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 break;
             case bio:
@@ -1043,16 +1043,16 @@ namespace dbat::race {
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 send_to_char(ch, "@YMature        @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@YSemi-Perfect  @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@YPerfect       @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@YSuper Perfect @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 break;
             case android:
@@ -1060,22 +1060,22 @@ namespace dbat::race {
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 send_to_char(ch, "@Y1.0 @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@Y2.0 @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@Y3.0 @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@Y4.0 @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 4) * 0.75) ? add_commas(trans_req(ch, 4))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@Y5.0 @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 5) * 0.75) ? add_commas(trans_req(ch, 5))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@Y6.0 @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 6) * 0.75) ? add_commas(trans_req(ch, 6))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 break;
             case majin:
@@ -1083,13 +1083,13 @@ namespace dbat::race {
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 send_to_char(ch, "@YMorph @WAffinity @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@YMorph @WSuper    @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@YMorph @WTrue     @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 break;
             case kai:
@@ -1097,13 +1097,13 @@ namespace dbat::race {
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 send_to_char(ch, "@YMystic @WFirst     @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@YMystic @WSecond    @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@YMystic @WThird     @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 break;
             case truffle:
@@ -1111,13 +1111,13 @@ namespace dbat::race {
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 send_to_char(ch, "@YAscend @WFirst  @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 1) * 0.75) ? add_commas(trans_req(ch, 1))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@YAscend @WSecond @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@YAscend @WThird @R-@G %s BPL Req\r\n",
                              (ch->getBasePL()) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
-                                                                          : "??????????");
+                                                                            : "??????????");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 break;
             default:
@@ -1475,12 +1475,16 @@ namespace dbat::race {
                         return;
                     case 2:
                         if (PLR_FLAGGED(ch, PLR_LSSJ)) {
-                            act("@wYou revert from your @YLegendary @CSuper Saiyan@w form.@n", true, ch, nullptr, nullptr, TO_CHAR);
-                            act("@w$n@w reverts from $s @YLegendary @CSuper Saiyan@w form@w.@n", true, ch, nullptr, nullptr,
+                            act("@wYou revert from your @YLegendary @CSuper Saiyan@w form.@n", true, ch, nullptr,
+                                nullptr, TO_CHAR);
+                            act("@w$n@w reverts from $s @YLegendary @CSuper Saiyan@w form@w.@n", true, ch, nullptr,
+                                nullptr,
                                 TO_ROOM);
                         } else {
-                            act("@wYou revert from @CSuper @cSaiyan @GSecond@w.@n", true, ch, nullptr, nullptr, TO_CHAR);
-                            act("@w$n@w reverts from @CSuper @cSaiyan @GSecond@w.@n", true, ch, nullptr, nullptr, TO_ROOM);
+                            act("@wYou revert from @CSuper @cSaiyan @GSecond@w.@n", true, ch, nullptr, nullptr,
+                                TO_CHAR);
+                            act("@w$n@w reverts from @CSuper @cSaiyan @GSecond@w.@n", true, ch, nullptr, nullptr,
+                                TO_ROOM);
                         }
                         return;
                     case 1:
@@ -1603,7 +1607,7 @@ namespace dbat::race {
     }
 
     bool Race::raceHasTail() const {
-        switch(r_id) {
+        switch (r_id) {
             case icer:
             case bio:
             case saiyan:
@@ -1615,9 +1619,9 @@ namespace dbat::race {
     }
 
     bool Race::hasTail(char_data *ch) const {
-        if(!raceHasTail())
+        if (!raceHasTail())
             return false;
-        switch(r_id) {
+        switch (r_id) {
             case icer:
             case bio:
                 return PLR_FLAGGED(ch, PLR_TAIL);
@@ -1630,8 +1634,8 @@ namespace dbat::race {
     }
 
     void Race::loseTail(char_data *ch) const {
-        if(!hasTail(ch)) return;
-        switch(r_id) {
+        if (!hasTail(ch)) return;
+        switch (r_id) {
             case icer:
             case bio:
                 REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TAIL);
@@ -1642,7 +1646,7 @@ namespace dbat::race {
             case halfbreed:
                 REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_STAIL);
                 remove_limb(ch, 5);
-                if(PLR_FLAGGED(ch, PLR_OOZARU)) {
+                if (PLR_FLAGGED(ch, PLR_OOZARU)) {
                     oozaru_revert(ch);
                 }
                 GET_TGROWTH(ch) = 0;
@@ -1651,8 +1655,8 @@ namespace dbat::race {
     }
 
     void Race::gainTail(char_data *ch, bool announce) const {
-        if(hasTail(ch)) return;
-        switch(r_id) {
+        if (hasTail(ch)) return;
+        switch (r_id) {
             case icer:
             case bio:
                 SET_BIT_AR(PLR_FLAGS(ch), PLR_TAIL);
@@ -1660,7 +1664,7 @@ namespace dbat::race {
             case saiyan:
             case halfbreed:
                 SET_BIT_AR(PLR_FLAGS(ch), PLR_STAIL);
-                if(MOON_OK(ch)) {
+                if (MOON_OK(ch)) {
                     oozaru_transform(ch);
                 }
                 break;

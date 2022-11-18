@@ -26,20 +26,27 @@
  * $FreeBSD: src/lib/libmd/sha256.h,v 1.1 2005/03/09 19:23:04 cperciva Exp $
  */
 #pragma once
+
 #include <sys/types.h>
 
-typedef struct SHA256Context
-{
-   int state[8];
-   int count[2];
-   unsigned char buf[64];
+typedef struct SHA256Context {
+    int state[8];
+    int count[2];
+    unsigned char buf[64];
 } SHA256_CTX;
 
-extern void SHA256_Init( SHA256_CTX * );
-extern void SHA256_Update( SHA256_CTX *, const unsigned char *, size_t );
-extern void SHA256_Final( unsigned char [32], SHA256_CTX * );
-extern char *SHA256_End( SHA256_CTX *, char * );
-extern char *SHA256_File( const char *, char * );
-extern char *SHA256_FileChunk( const char *, char *, off_t, off_t );
-extern char *SHA256_Data( const unsigned char *, unsigned int, char * );
-extern char *sha256_crypt( const char *pwd );
+extern void SHA256_Init(SHA256_CTX *);
+
+extern void SHA256_Update(SHA256_CTX *, const unsigned char *, size_t);
+
+extern void SHA256_Final(unsigned char [32], SHA256_CTX *);
+
+extern char *SHA256_End(SHA256_CTX *, char *);
+
+extern char *SHA256_File(const char *, char *);
+
+extern char *SHA256_FileChunk(const char *, char *, off_t, off_t);
+
+extern char *SHA256_Data(const unsigned char *, unsigned int, char *);
+
+extern char *sha256_crypt(const char *pwd);

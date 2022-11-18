@@ -1,4 +1,5 @@
 #pragma once
+
 #include "structs.h"
 
 // global variables
@@ -96,8 +97,11 @@ namespace dbat::race {
         // limts stuff
 
         bool raceHasTail() const;
+
         bool hasTail(char_data *ch) const;
+
         void loseTail(char_data *ch) const;
+
         void gainTail(char_data *ch, bool announce = true) const;
 
         // softcap stuff
@@ -120,7 +124,7 @@ namespace dbat::race {
 
         const std::unordered_map<std::string, int> &getTierMap(char_data *ch) const;
 
-        const std::map<int, transform_bonus>& getTransMap(const char_data *ch) const;
+        const std::map<int, transform_bonus> &getTransMap(const char_data *ch) const;
 
         int flagToTier(int flag) const;
 

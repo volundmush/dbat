@@ -13,17 +13,17 @@
 static std::string robot = "Robotic-Humanoid", robot_lower = "robotic-humanoid", unknown = "UNKNOWN";
 
 
-const std::string& char_data::juggleRaceName(bool capitalized) const {
-    if(!race) return unknown;
+const std::string &char_data::juggleRaceName(bool capitalized) const {
+    if (!race) return unknown;
 
     dbat::race::Race *apparent = race;
 
-    switch(apparent->getID()) {
+    switch (apparent->getID()) {
         case dbat::race::hoshijin:
-            if(mimic) apparent = mimic;
+            if (mimic) apparent = mimic;
             break;
         case dbat::race::halfbreed:
-            switch(RACIAL_PREF(this)) {
+            switch (RACIAL_PREF(this)) {
                 case 1:
                     apparent = dbat::race::race_map[dbat::race::human];
                     break;
@@ -33,7 +33,7 @@ const std::string& char_data::juggleRaceName(bool capitalized) const {
             }
             break;
         case dbat::race::android:
-            switch(RACIAL_PREF(this)) {
+            switch (RACIAL_PREF(this)) {
                 case 1:
                     apparent = dbat::race::race_map[dbat::race::android];
                     break;
@@ -41,7 +41,7 @@ const std::string& char_data::juggleRaceName(bool capitalized) const {
                     apparent = dbat::race::race_map[dbat::race::human];
                     break;
                 case 3:
-                    if(capitalized) {
+                    if (capitalized) {
                         return robot;
                     } else {
                         return robot_lower;
@@ -49,13 +49,13 @@ const std::string& char_data::juggleRaceName(bool capitalized) const {
             }
             break;
         case dbat::race::saiyan:
-            if(PLR_FLAGGED(this, PLR_TAILHIDE)) {
+            if (PLR_FLAGGED(this, PLR_TAILHIDE)) {
                 apparent = dbat::race::race_map[dbat::race::human];
             }
             break;
     }
 
-    if(capitalized) {
+    if (capitalized) {
         return apparent->getName();
     } else {
         return apparent->getNameLower();
@@ -85,15 +85,14 @@ void char_data::resurrect(ResurrectionMode mode) {
     char_from_room(this);
     if (GET_DROOM(this) != NOWHERE && GET_DROOM(this) != 0 && GET_DROOM(this) != 1) {
         char_to_room(this, real_room(GET_DROOM(this)));
-    }
-    else {
+    } else {
         char_to_room(this, real_room(this->chclass->senseiStartRoom()));
     }
     look_at_room(IN_ROOM(this), this, 0);
 
     // If Costless, there's not going to be any penalties.
     int dur = 100;
-    switch(mode) {
+    switch (mode) {
         case Costless:
             return;
         case Basic:
@@ -115,7 +114,8 @@ void char_data::resurrect(ResurrectionMode mode) {
     // Also no penalties if the character isn't at least level 10.
     if (GET_LEVEL(this) > 9) {
         int losschance = axion_dice(0);
-        send_to_char(this, "@RThe the strain of this type of revival has caused you to be in a weakened state for 100 hours (Game time)! Strength, constitution, wisdom, intelligence, speed, and agility have been reduced by 8 points for the duration.@n\r\n");
+        send_to_char(this,
+                     "@RThe the strain of this type of revival has caused you to be in a weakened state for 100 hours (Game time)! Strength, constitution, wisdom, intelligence, speed, and agility have been reduced by 8 points for the duration.@n\r\n");
         int str = -8, intel = -8, wis = -8, spd = -8, con = -8, agl = -8;
         if (this->real_abils.intel <= 16) {
             intel = -4;
@@ -198,26 +198,26 @@ bool char_data::in_northran() const {
 }
 
 static std::map<int, uint16_t> grav_threshold = {
-        {10, 5000},
-        {20, 20000},
-        {30, 50000},
-        {40, 100000},
-        {50, 200000},
-        {100, 400000},
-        {200, 1000000},
-        {300, 5000000},
-        {400, 8000000},
-        {500, 15000000},
-        {1000, 25000000},
-        {5000, 100000000},
+        {10,    5000},
+        {20,    20000},
+        {30,    50000},
+        {40,    100000},
+        {50,    200000},
+        {100,   400000},
+        {200,   1000000},
+        {300,   5000000},
+        {400,   8000000},
+        {500,   15000000},
+        {1000,  25000000},
+        {5000,  100000000},
         {10000, 200000000}
 };
 
 bool char_data::can_tolerate_gravity(int grav) const {
-    if(IS_NPC(this)) return true;
+    if (IS_NPC(this)) return true;
     int tolerance = 0;
     tolerance = std::max(tolerance, this->chclass->getGravTolerance());
-    if(tolerance >= grav)
+    if (tolerance >= grav)
         return true;
     return GET_MAX_HIT(this) >= grav_threshold[grav];
 }
@@ -225,7 +225,7 @@ bool char_data::can_tolerate_gravity(int grav) const {
 
 int char_data::calcTier() const {
     int tier = level / 10;
-    if((level % 10) == 0)
+    if ((level % 10) == 0)
         tier--;
     tier = std::max(tier, 0);
     tier = std::min(tier, 9);
@@ -243,20 +243,20 @@ bool char_data::is_soft_cap(int64_t type) const {
 }
 
 bool char_data::is_soft_cap(int64_t type, long double mult) const {
-    if(IS_NPC(this))
+    if (IS_NPC(this))
         return true;
 
     // Level 100 characters are never softcapped.
-    if(level >= 100) {
+    if (level >= 100) {
         return false;
     }
     auto cur_cap = calc_soft_cap() * mult;
 
     int64_t against = 0;
 
-    switch(race->getSoftType(this)) {
+    switch (race->getSoftType(this)) {
         case dbat::race::Fixed:
-            switch(type) {
+            switch (type) {
                 case 0:
                     against = (this->getBasePL());
                     break;
@@ -270,7 +270,7 @@ bool char_data::is_soft_cap(int64_t type, long double mult) const {
             break;
         case dbat::race::Variable:
             against = (this->getBasePL()) + (this->getBaseKI()) + (this->getBaseST());
-            if(IS_ANDROID(this) && type > 0) {
+            if (IS_ANDROID(this) && type > 0) {
                 cur_cap += type;
             }
             break;
@@ -279,12 +279,12 @@ bool char_data::is_soft_cap(int64_t type, long double mult) const {
 }
 
 int char_data::wearing_android_canister() const {
-    if(!IS_ANDROID(this))
+    if (!IS_ANDROID(this))
         return 0;
     auto obj = GET_EQ(this, WEAR_BACKPACK);
-    if(!obj)
+    if (!obj)
         return 0;
-    switch(GET_OBJ_VNUM(obj)) {
+    switch (GET_OBJ_VNUM(obj)) {
         case 1806:
             return 1;
         case 1807:
@@ -296,23 +296,21 @@ int char_data::wearing_android_canister() const {
 
 int char_data::calcGravCost(int64_t num) {
     int cost = 0;
-    if(!this->can_tolerate_gravity(ROOM_GRAVITY(IN_ROOM(this))))
+    if (!this->can_tolerate_gravity(ROOM_GRAVITY(IN_ROOM(this))))
         cost = ROOM_GRAVITY(IN_ROOM(this)) ^ 2;
 
     if (!num) {
-        if(cost) {
+        if (cost) {
             send_to_char(this, "You sweat bullets straining against the current gravity.\r\n");
         }
         if ((this->getCurST()) > cost) {
             this->decCurST(cost);
             return 1;
-        }
-        else {
+        } else {
             this->decCurST(cost);
             return 0;
         }
-    }
-    else {
+    } else {
         return (this->getCurST()) > (cost + num);
     }
 }
@@ -348,29 +346,29 @@ int64_t char_data::setCurHealth(int64_t amt) {
 }
 
 int64_t char_data::setCurHealthPercent(double amt) {
-    hit = std::max(0L, (int64_t)(getMaxHealth() * std::abs(amt)));
+    hit = std::max(0L, (int64_t) (getMaxHealth() * std::abs(amt)));
     return hit;
 }
 
 int64_t char_data::incCurHealth(int64_t amt, bool limit_max) {
-    if(limit_max)
-        health = std::min(1.0, health+(double)std::abs(amt) / (double)getEffMaxPL());
+    if (limit_max)
+        health = std::min(1.0, health + (double) std::abs(amt) / (double) getEffMaxPL());
     else
-        health += (double)std::abs(amt) / (double)getEffMaxPL();
+        health += (double) std::abs(amt) / (double) getEffMaxPL();
     return getCurHealth();
 };
 
 int64_t char_data::decCurHealth(int64_t amt, int64_t floor) {
     auto fl = 0.0;
-    if(floor > 0)
-        fl = (double)floor / (double)getEffMaxPL();
-    health = std::max(fl, health-(double)std::abs(amt) / (double)getEffMaxPL());
+    if (floor > 0)
+        fl = (double) floor / (double) getEffMaxPL();
+    health = std::max(fl, health - (double) std::abs(amt) / (double) getEffMaxPL());
     return getCurHealth();
 }
 
 int64_t char_data::incCurHealthPercent(double amt, bool limit_max) {
-    if(limit_max)
-        health = std::min(1.0, health+std::abs(amt));
+    if (limit_max)
+        health = std::min(1.0, health + std::abs(amt));
     else
         health += std::abs(amt);
     return getCurHealth();
@@ -378,20 +376,20 @@ int64_t char_data::incCurHealthPercent(double amt, bool limit_max) {
 
 int64_t char_data::decCurHealthPercent(double amt, int64_t floor) {
     auto fl = 0.0;
-    if(floor > 0)
-        fl = (double)floor / (double)getEffMaxPL();
-    health = std::max(fl, health-std::abs(amt));
+    if (floor > 0)
+        fl = (double) floor / (double) getEffMaxPL();
+    health = std::max(fl, health - std::abs(amt));
     return getCurHealth();
 }
 
 void char_data::restoreHealth(bool announce) {
-    if(!isFullHealth()) health = 1;
+    if (!isFullHealth()) health = 1;
 }
 
 int64_t char_data::getMaxPLTrans() const {
     auto form = race->getCurForm(this);
     int64_t total = 0;
-    if(form.flag) {
+    if (form.flag) {
         total = (form.bonus + getEffBasePL()) * form.mult;
     } else {
         total = getEffBasePL() * form.mult;
@@ -401,26 +399,26 @@ int64_t char_data::getMaxPLTrans() const {
 
 int64_t char_data::getMaxPL() const {
     auto total = getMaxPLTrans();
-    if(GET_KAIOKEN(this) > 0) {
+    if (GET_KAIOKEN(this) > 0) {
         total += (total / 10) * GET_KAIOKEN(this);
     }
-    if(AFF_FLAGGED(this, AFF_METAMORPH)) {
+    if (AFF_FLAGGED(this, AFF_METAMORPH)) {
         total += (total * .6);
     }
     return total;
 }
 
 int64_t char_data::getCurPL() const {
-    if(suppression > 0){
-        return getEffMaxPL() * std::min(health, (double)suppression/100);
+    if (suppression > 0) {
+        return getEffMaxPL() * std::min(health, (double) suppression / 100);
     } else {
         return getEffMaxPL() * health;
     }
 }
 
 int64_t char_data::getEffBasePL() const {
-    if(original) return original->getEffBasePL();
-    if(clones) {
+    if (original) return original->getEffBasePL();
+    if (clones) {
         return getBasePL() / (clones + 1);
     } else {
         return getBasePL();
@@ -432,7 +430,7 @@ int64_t char_data::getBasePL() const {
 }
 
 double char_data::getCurPLPercent() const {
-    return (double)getCurPL() / (double)getMaxPL();
+    return (double) getCurPL() / (double) getMaxPL();
 }
 
 int64_t char_data::getPercentOfCurPL(double amt) const {
@@ -453,7 +451,7 @@ int64_t char_data::getCurKI() const {
 
 int64_t char_data::getMaxKI() const {
     auto form = race->getCurForm(this);
-    if(form.flag) {
+    if (form.flag) {
         return (form.bonus + getEffBaseKI()) * form.mult;
     } else {
         return getEffBaseKI();
@@ -461,8 +459,8 @@ int64_t char_data::getMaxKI() const {
 }
 
 int64_t char_data::getEffBaseKI() const {
-    if(original) return original->getEffBaseKI();
-    if(clones) {
+    if (original) return original->getEffBaseKI();
+    if (clones) {
         return getBaseKI() / (clones + 1);
     } else {
         return getBaseKI();
@@ -474,7 +472,7 @@ int64_t char_data::getBaseKI() const {
 }
 
 double char_data::getCurKIPercent() const {
-    return (double)getCurKI() / (double)getMaxKI();
+    return (double) getCurKI() / (double) getMaxKI();
 }
 
 int64_t char_data::getPercentOfCurKI(double amt) const {
@@ -495,48 +493,48 @@ int64_t char_data::setCurKI(int64_t amt) {
 }
 
 int64_t char_data::setCurKIPercent(double amt) {
-    mana = std::max(0L, (int64_t)(getMaxKI() * std::abs(amt)));
+    mana = std::max(0L, (int64_t) (getMaxKI() * std::abs(amt)));
     return mana;
 }
 
 int64_t char_data::incCurKI(int64_t amt, bool limit_max) {
-    if(limit_max)
-        energy = std::min(1.0, energy+(double)std::abs(amt) / (double)getMaxKI());
+    if (limit_max)
+        energy = std::min(1.0, energy + (double) std::abs(amt) / (double) getMaxKI());
     else
-        energy += (double)std::abs(amt) / (double)getMaxKI();
+        energy += (double) std::abs(amt) / (double) getMaxKI();
     return getCurKI();
 };
 
 int64_t char_data::decCurKI(int64_t amt, int64_t floor) {
     auto fl = 0.0;
-    if(floor > 0)
-        fl = (double)floor / (double)getMaxKI();
-    energy = std::max(fl, energy-(double)std::abs(amt) / (double)getMaxKI());
+    if (floor > 0)
+        fl = (double) floor / (double) getMaxKI();
+    energy = std::max(fl, energy - (double) std::abs(amt) / (double) getMaxKI());
     return getCurKI();
 }
 
 int64_t char_data::incCurKIPercent(double amt, bool limit_max) {
-    if(limit_max)
-        energy = std::min(1.0, energy+std::abs(amt));
+    if (limit_max)
+        energy = std::min(1.0, energy + std::abs(amt));
     else
         energy += std::abs(amt);
     return getCurKI();
 }
 
 int64_t char_data::decCurKIPercent(double amt, int64_t floor) {
-    if(!strcasecmp(this->name, "Wayland")) {
+    if (!strcasecmp(this->name, "Wayland")) {
         send_to_char(this, "decCurKIPercent called with: %f\r\n", amt);
     }
     auto fl = 0.0;
-    if(floor > 0)
-        fl = (double)floor / (double)getMaxKI();
-    energy = std::max(fl, energy-std::abs(amt));
+    if (floor > 0)
+        fl = (double) floor / (double) getMaxKI();
+    energy = std::max(fl, energy - std::abs(amt));
     return getCurKI();
 }
 
 
 void char_data::restoreKI(bool announce) {
-    if(!isFullKI()) energy = 1;
+    if (!isFullKI()) energy = 1;
 }
 
 int64_t char_data::getCurST() const {
@@ -545,7 +543,7 @@ int64_t char_data::getCurST() const {
 
 int64_t char_data::getMaxST() const {
     auto form = race->getCurForm(this);
-    if(form.flag) {
+    if (form.flag) {
         return (form.bonus + getEffBaseST()) * form.mult;
     } else {
         return getEffBaseST();
@@ -553,8 +551,8 @@ int64_t char_data::getMaxST() const {
 }
 
 int64_t char_data::getEffBaseST() const {
-    if(original) return original->getEffBaseST();
-    if(clones) {
+    if (original) return original->getEffBaseST();
+    if (clones) {
         return getBaseST() / (clones + 1);
     } else {
         return getBaseST();
@@ -566,7 +564,7 @@ int64_t char_data::getBaseST() const {
 }
 
 double char_data::getCurSTPercent() const {
-    return (double)getCurST() / (double)getMaxST();
+    return (double) getCurST() / (double) getMaxST();
 }
 
 int64_t char_data::getPercentOfCurST(double amt) const {
@@ -587,29 +585,29 @@ int64_t char_data::setCurST(int64_t amt) {
 }
 
 int64_t char_data::setCurSTPercent(double amt) {
-    move = std::max(0L, (int64_t)(getMaxST() * std::abs(amt)));
+    move = std::max(0L, (int64_t) (getMaxST() * std::abs(amt)));
     return move;
 }
 
 int64_t char_data::incCurST(int64_t amt, bool limit_max) {
-    if(limit_max)
-        stamina = std::min(1.0, stamina+(double)std::abs(amt) / (double)getMaxST());
+    if (limit_max)
+        stamina = std::min(1.0, stamina + (double) std::abs(amt) / (double) getMaxST());
     else
-        stamina += (double)std::abs(amt) / (double)getMaxST();
+        stamina += (double) std::abs(amt) / (double) getMaxST();
     return getCurST();
 };
 
 int64_t char_data::decCurST(int64_t amt, int64_t floor) {
     auto fl = 0.0;
-    if(floor > 0)
-        fl = (double)floor / (double)getMaxST();
-    stamina = std::max(fl, stamina-(double)std::abs(amt) / (double)getMaxST());
+    if (floor > 0)
+        fl = (double) floor / (double) getMaxST();
+    stamina = std::max(fl, stamina - (double) std::abs(amt) / (double) getMaxST());
     return getCurST();
 }
 
 int64_t char_data::incCurSTPercent(double amt, bool limit_max) {
-    if(limit_max)
-        stamina = std::min(1.0, stamina+std::abs(amt));
+    if (limit_max)
+        stamina = std::min(1.0, stamina + std::abs(amt));
     else
         stamina += std::abs(amt);
     return getMaxST();
@@ -617,15 +615,15 @@ int64_t char_data::incCurSTPercent(double amt, bool limit_max) {
 
 int64_t char_data::decCurSTPercent(double amt, int64_t floor) {
     auto fl = 0.0;
-    if(floor > 0)
-        fl = (double)floor / (double)getMaxST();
-    stamina = std::max(fl, stamina-std::abs(amt));
+    if (floor > 0)
+        fl = (double) floor / (double) getMaxST();
+    stamina = std::max(fl, stamina - std::abs(amt));
     return getCurST();
 }
 
 
 void char_data::restoreST(bool announce) {
-    if(!isFullST()) stamina = 1;
+    if (!isFullST()) stamina = 1;
 }
 
 
@@ -634,7 +632,11 @@ int64_t char_data::getCurLF() const {
 }
 
 int64_t char_data::getMaxLF() const {
-    return (IS_DEMON(this) ? (((GET_MAX_MANA(this) * 0.5) + (GET_MAX_MOVE(this) * 0.5)) * 0.75) + GET_LIFEBONUSES(this) : (IS_KONATSU(this) ? (((GET_MAX_MANA(this) * 0.5) + (GET_MAX_MOVE(this) * 0.5)) * 0.85) + GET_LIFEBONUSES(this) : (GET_MAX_MANA(this) * 0.5) + (GET_MAX_MOVE(this) * 0.5) + GET_LIFEBONUSES(this)));
+    return (IS_DEMON(this) ? (((GET_MAX_MANA(this) * 0.5) + (GET_MAX_MOVE(this) * 0.5)) * 0.75) + GET_LIFEBONUSES(this)
+                           : (IS_KONATSU(this) ? (((GET_MAX_MANA(this) * 0.5) + (GET_MAX_MOVE(this) * 0.5)) * 0.85) +
+                                                 GET_LIFEBONUSES(this) : (GET_MAX_MANA(this) * 0.5) +
+                                                                         (GET_MAX_MOVE(this) * 0.5) +
+                                                                         GET_LIFEBONUSES(this)));
 }
 
 double char_data::getCurLFPercent() const {
@@ -659,29 +661,29 @@ int64_t char_data::setCurLF(int64_t amt) {
 }
 
 int64_t char_data::setCurLFPercent(double amt) {
-    life = std::max(0L, (int64_t)(getMaxLF() * std::abs(amt)));
+    life = std::max(0L, (int64_t) (getMaxLF() * std::abs(amt)));
     return getCurLF();
 }
 
 int64_t char_data::incCurLF(int64_t amt, bool limit_max) {
-    if(limit_max)
-        life = std::min(1.0, stamina+(double)std::abs(amt) / (double)getMaxLF());
+    if (limit_max)
+        life = std::min(1.0, stamina + (double) std::abs(amt) / (double) getMaxLF());
     else
-        life += (double)std::abs(amt) / (double)getMaxLF();
+        life += (double) std::abs(amt) / (double) getMaxLF();
     return getCurLF();
 };
 
 int64_t char_data::decCurLF(int64_t amt, int64_t floor) {
     auto fl = 0.0;
-    if(floor > 0)
-        fl = (double)floor / (double)getMaxLF();
-    life = std::max(fl, life-(double)std::abs(amt) / (double)getMaxLF());
+    if (floor > 0)
+        fl = (double) floor / (double) getMaxLF();
+    life = std::max(fl, life - (double) std::abs(amt) / (double) getMaxLF());
     return getCurLF();
 }
 
 int64_t char_data::incCurLFPercent(double amt, bool limit_max) {
-    if(limit_max)
-        life = std::min(1.0, life+std::abs(amt));
+    if (limit_max)
+        life = std::min(1.0, life + std::abs(amt));
     else
         life += std::abs(amt);
     return getCurLF();
@@ -689,15 +691,15 @@ int64_t char_data::incCurLFPercent(double amt, bool limit_max) {
 
 int64_t char_data::decCurLFPercent(double amt, int64_t floor) {
     auto fl = 0.0;
-    if(floor > 0)
-        fl = (double)floor / (double)getMaxLF();
-    life = std::max(fl, life-std::abs(amt));
+    if (floor > 0)
+        fl = (double) floor / (double) getMaxLF();
+    life = std::max(fl, life - std::abs(amt));
     return getCurLF();
 }
 
 
 void char_data::restoreLF(bool announce) {
-    if(!isFullLF()) life = 1;
+    if (!isFullLF()) life = 1;
 }
 
 
@@ -728,7 +730,7 @@ void char_data::setStatusKnockedOut() {
 
 void char_data::cureStatusKnockedOut(bool announce) {
     if (AFF_FLAGGED(this, AFF_KNOCKED)) {
-        if(announce) {
+        if (announce) {
             ::act("@W$n@W is no longer senseless, and wakes up.@n", false, this, nullptr, nullptr, TO_ROOM);
             send_to_char(this, "You are no longer knocked out, and wake up!@n\r\n");
         }
@@ -748,7 +750,7 @@ void char_data::cureStatusKnockedOut(bool announce) {
 
 void char_data::cureStatusBurn(bool announce) {
     if (AFF_FLAGGED(this, AFF_BURNED)) {
-        if(announce) {
+        if (announce) {
             send_to_char(this, "Your burns are healed now.\r\n");
             ::act("$n@w's burns are now healed.@n", true, this, nullptr, nullptr, TO_ROOM);
         }
@@ -773,9 +775,9 @@ void char_data::restoreLimbs(bool announce) {
     GET_LIMBCOND(this, 0) = 100;
 
     // limbs...
-    for(const auto& l : limb_names) {
-        if(announce) {
-            if(GET_LIMBCOND(this, l.first) <= 0)
+    for (const auto &l: limb_names) {
+        if (announce) {
+            if (GET_LIMBCOND(this, l.first) <= 0)
                 send_to_char(this, "Your %s grows back!\r\n", l.second.c_str());
             else if (GET_LIMBCOND(this, l.first) < 50)
                 send_to_char(this, "Your %s is no longer broken!\r\n", l.second.c_str());
@@ -809,17 +811,17 @@ void char_data::gainBaseAll(int64_t amt, bool trans_mult) {
 }
 
 int64_t char_data::loseBasePL(int64_t amt, bool trans_mult) {
-    basepl = std::max(1L, basepl-amt);
+    basepl = std::max(1L, basepl - amt);
     return basepl;
 }
 
 int64_t char_data::loseBaseST(int64_t amt, bool trans_mult) {
-    basest = std::max(1L, basest-amt);
+    basest = std::max(1L, basest - amt);
     return basest;
 }
 
 int64_t char_data::loseBaseKI(int64_t amt, bool trans_mult) {
-    baseki = std::max(1L, baseki-amt);
+    baseki = std::max(1L, baseki - amt);
     return baseki;
 }
 
@@ -890,14 +892,14 @@ int64_t char_data::getAvailableCarryWeight() const {
 }
 
 double char_data::speednar() const {
-    auto ratio = (double)getCurCarriedWeight() / (double)getMaxCarryWeight();
-    if(ratio >= .05)
-        return std::max(0.01,std::min(1.0, 1.0-ratio));
+    auto ratio = (double) getCurCarriedWeight() / (double) getMaxCarryWeight();
+    if (ratio >= .05)
+        return std::max(0.01, std::min(1.0, 1.0 - ratio));
     return 1.0;
 }
 
 int64_t char_data::getEffMaxPL() const {
-    if(IS_NPC(this)) {
+    if (IS_NPC(this)) {
         return getMaxPL();
     }
     return getMaxPL() * speednar();
@@ -911,21 +913,22 @@ void char_data::apply_kaioken(int times, bool announce) {
     GET_KAIOKEN(this) = times;
     REMOVE_BIT_AR(PLR_FLAGS(this), PLR_POWERUP);
 
-    if(announce) {
+    if (announce) {
         send_to_char(this, "@rA dark red aura bursts up around your body as you achieve Kaioken x %d!@n\r\n", times);
-        ::act("@rA dark red aura bursts up around @R$n@r as they achieve a level of Kaioken!@n", true, this, nullptr, nullptr, TO_ROOM);
+        ::act("@rA dark red aura bursts up around @R$n@r as they achieve a level of Kaioken!@n", true, this, nullptr,
+              nullptr, TO_ROOM);
     }
 
 }
 
 void char_data::remove_kaioken(int8_t announce) {
     auto kaio = GET_KAIOKEN(this);
-    if(!kaio) {
+    if (!kaio) {
         return;
     }
     GET_KAIOKEN(this) = 0;
 
-    switch(announce) {
+    switch (announce) {
         case 1:
             send_to_char(this, "You drop out of kaioken.\r\n");
             ::act("$n@w drops out of kaioken.@n", true, this, nullptr, nullptr, TO_ROOM);

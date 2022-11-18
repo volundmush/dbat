@@ -1,4 +1,5 @@
 #pragma once
+
 #include "structs.h"
 
 
@@ -23,8 +24,8 @@
  * Type aliases.                                                       *
  * ******************************************************************** */
 
-typedef struct assembly_data   ASSEMBLY;
-typedef struct component_data  COMPONENT;
+typedef struct assembly_data ASSEMBLY;
+typedef struct component_data COMPONENT;
 
 /* ******************************************************************** *
  * Structure definitions.                                              *
@@ -32,18 +33,18 @@ typedef struct component_data  COMPONENT;
 
 /* Assembly structure definition. */
 struct assembly_data {
-  long         lVnum;                  /* Vnum of the object assembled. */
-  long         lNumComponents;         /* Number of components. */
-  unsigned char        uchAssemblyType;        /* Type of assembly (ASSM_xxx).
+    long lVnum;                  /* Vnum of the object assembled. */
+    long lNumComponents;         /* Number of components. */
+    unsigned char uchAssemblyType;        /* Type of assembly (ASSM_xxx).
 */
-  struct component_data *pComponents;          /* Array of component info. */
+    struct component_data *pComponents;          /* Array of component info. */
 };
 
 /* Assembly component structure definition. */
 struct component_data {
-  bool         bExtract;               /* Extract the object after use. */
-  bool         bInRoom;                /* Component in room, not inven. */
-  long         lVnum;                  /* Vnum of the component object. */
+    bool bExtract;               /* Extract the object after use. */
+    bool bInRoom;                /* Component in room, not inven. */
+    long lVnum;                  /* Vnum of the component object. */
 };
 
 /* ******************************************************************** *
@@ -52,26 +53,36 @@ struct component_data {
  * ******************************************************************** */
 
 extern void assemblyBootAssemblies();
+
 extern void assemblySaveAssemblies();
-extern void assemblyListToChar( struct char_data *pCharacter );
 
-extern bool assemblyAddComponent( long lVnum, long lComponentVnum,
-                 bool bExtract, bool bInRoom );
-extern bool assemblyCheckComponents( long lVnum, struct char_data
-                 *pCharacter, int extract_yes );
-extern bool assemblyCreate( long lVnum, int iAssembledType );
-extern bool assemblyDestroy( long lVnum );
-extern bool assemblyHasComponent( long lVnum, long lComponentVnum );
-extern bool assemblyRemoveComponent( long lVnum, long lComponentVnum );
+extern void assemblyListToChar(struct char_data *pCharacter);
 
-extern int assemblyGetType( long lVnum );
+extern bool assemblyAddComponent(long lVnum, long lComponentVnum,
+                                 bool bExtract, bool bInRoom);
 
-extern long assemblyCountComponents( long lVnum );
-extern long assemblyFindAssembly( const char *pszAssemblyName );
-extern long assemblyGetAssemblyIndex( long lVnum );
-extern long assemblyGetComponentIndex( ASSEMBLY *pAssembly,
-                 long lComponentVnum );
+extern bool assemblyCheckComponents(long lVnum, struct char_data
+*pCharacter, int extract_yes);
 
-ASSEMBLY*      assemblyGetAssemblyPtr( long lVnum );
+extern bool assemblyCreate(long lVnum, int iAssembledType);
+
+extern bool assemblyDestroy(long lVnum);
+
+extern bool assemblyHasComponent(long lVnum, long lComponentVnum);
+
+extern bool assemblyRemoveComponent(long lVnum, long lComponentVnum);
+
+extern int assemblyGetType(long lVnum);
+
+extern long assemblyCountComponents(long lVnum);
+
+extern long assemblyFindAssembly(const char *pszAssemblyName);
+
+extern long assemblyGetAssemblyIndex(long lVnum);
+
+extern long assemblyGetComponentIndex(ASSEMBLY *pAssembly,
+                                      long lComponentVnum);
+
+ASSEMBLY *assemblyGetAssemblyPtr(long lVnum);
 
 /* ******************************************************************** */

@@ -8,22 +8,25 @@
 *                                                            Iovan 1/6/13 *
 ************************************************************************ */
 #pragma once
+
 #include "structs.h"
 
 
 /* obj_edit.c functions */
 extern void pobj_edit_parse(struct descriptor_data *d, char *arg);
+
 extern void disp_custom_menu(struct descriptor_data *d);
+
 extern void disp_restring_menu(struct descriptor_data *d);
 
-               /*-------------  obj_edit.c defines -------------*/
+/*-------------  obj_edit.c defines -------------*/
 
 /* What object edit menu are we in? */
 #define EDIT_NONE         0
 #define EDIT_CUSTOM       1
 #define EDIT_RESTRING     2
 
-                                 /* Menu Values */
+/* Menu Values */
 /* Custom Equipment */
 #define EDIT_CUSTOM_MAIN   1
 #define EDIT_CUSTOM_NAME   2

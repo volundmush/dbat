@@ -13,6 +13,7 @@ namespace dbat {
 
     namespace race {
         class Race;
+
         struct transform_bonus;
     }
 

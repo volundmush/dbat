@@ -52,39 +52,58 @@
 void mob_log(char_data *mob, const char *format, ...);
 
 ACMD(do_masound);
+
 ACMD(do_mkill);
+
 ACMD(do_mheal);
+
 ACMD(do_mjunk);
+
 ACMD(do_mechoaround);
+
 ACMD(do_msend);
+
 ACMD(do_mecho);
+
 ACMD(do_mzoneecho);
+
 ACMD(do_mload);
+
 ACMD(do_mpurge);
+
 ACMD(do_mgoto);
+
 ACMD(do_mat);
+
 ACMD(do_mteleport);
+
 ACMD(do_mdamage);
+
 ACMD(do_mforce);
+
 ACMD(do_mremember);
+
 ACMD(do_mforget);
+
 ACMD(do_mtransform);
+
 ACMD(do_mdoor);
+
 ACMD(do_mfollow);
+
 ACMD(do_mrecho);
 
 /* attaches mob's name and vnum to msg and sends it to script_log */
-void mob_log(char_data *mob, const char *format, ...)
-{
-  va_list args;
-  char output[MAX_STRING_LENGTH];
+void mob_log(char_data *mob, const char *format, ...) {
+    va_list args;
+    char output[MAX_STRING_LENGTH];
 
-  snprintf(output, sizeof(output), "Mob (%s, VNum %d):: %s",
-                   GET_SHORT(mob), GET_MOB_VNUM(mob), format);
+    snprintf(output, sizeof(output), "Mob (%s, VNum %d):: %s",
+             GET_SHORT(mob), GET_MOB_VNUM(mob), format);
 
-  va_start(args, format);
-  script_vlog(output, args);
-  va_end(args);
+    va_start(args, format);
+    script_vlog(output, args);
+    va_end(args);
 }
 
 /*
@@ -96,13 +115,11 @@ void mob_log(char_data *mob, const char *format, ...)
 /* mob commands */
 
 /* prints the argument to all the rooms aroud the mobile */
-ACMD(do_masound)
-{
+ACMD(do_masound) {
     room_rnum was_in_room;
-    int  door;
+    int door;
 
-    if (!MOB_OR_IMPL(ch))
-    {
+    if (!MOB_OR_IMPL(ch)) {
         send_to_char(ch, "Huh?!?\r\n");
         return;
     }
@@ -110,8 +127,7 @@ ACMD(do_masound)
     if (AFF_FLAGGED(ch, AFF_CHARM))
         return;
 
-    if (!*argument)
-    {
+    if (!*argument) {
         mob_log(ch, "masound called with no argument");
         return;
     }
@@ -119,13 +135,11 @@ ACMD(do_masound)
     skip_spaces(&argument);
 
     was_in_room = IN_ROOM(ch);
-    for (door = 0; door < NUM_OF_DIRS; door++)
-    {
+    for (door = 0; door < NUM_OF_DIRS; door++) {
         struct room_direction_data *newexit;
 
         if (((newexit = world[was_in_room].dir_option[door]) != nullptr) &&
-            newexit->to_room != NOWHERE && newexit->to_room != was_in_room)
-        {
+            newexit->to_room != NOWHERE && newexit->to_room != was_in_room) {
             IN_ROOM(ch) = newexit->to_room;
             sub_write(argument, ch, true, TO_ROOM);
         }
@@ -135,8 +149,7 @@ ACMD(do_masound)
 }
 
 /* Heals a stat of the mob */
-ACMD(do_mheal)
-{
+ACMD(do_mheal) {
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
     if (!MOB_OR_IMPL(ch)) {
@@ -170,8 +183,7 @@ ACMD(do_mheal)
 }
 
 /* lets the mobile kill any player or mobile without murder*/
-ACMD(do_mkill)
-{
+ACMD(do_mkill) {
     char arg[MAX_INPUT_LENGTH];
     char_data *victim;
     char buf[MAX_INPUT_LENGTH];
@@ -192,12 +204,12 @@ ACMD(do_mkill)
     }
 
     if (*arg == UID_CHAR) {
-      if (!(victim = get_char(arg))) {
-        mob_log(ch, "mkill: victim (%s) not found",arg);
-        return;
-      }
+        if (!(victim = get_char(arg))) {
+            mob_log(ch, "mkill: victim (%s) not found", arg);
+            return;
+        }
     } else if (!(victim = get_char_room_vis(ch, arg, nullptr))) {
-        mob_log(ch, "mkill: victim (%s) not found",arg);
+        mob_log(ch, "mkill: victim (%s) not found", arg);
         return;
     }
 
@@ -211,32 +223,31 @@ ACMD(do_mkill)
         return;
     }
 
-        sprintf(buf, "%s", GET_NAME(victim));
-        if (IS_HUMANOID(ch)) {
-         switch (rand_number(1, 7)) {
-          case 1:
-           do_punch(ch, buf, 0, 0);
-           break;
-          case 2:
-           do_kick(ch, buf, 0, 0);
-           break;
-          case 3:
-           do_elbow(ch, buf, 0, 0);
-           break;
-          case 4:
-           do_knee(ch, buf, 0, 0);
-           break;
-          case 5:
-           do_kick(ch, buf, 0, 0);
-           break;
-          default:
-           do_punch(ch, buf, 0, 0);
-           break;
-          }//end switch
-         }
-         else {
-          do_bite(ch, buf, 0, 0);
-         }//end humanoid if
+    sprintf(buf, "%s", GET_NAME(victim));
+    if (IS_HUMANOID(ch)) {
+        switch (rand_number(1, 7)) {
+            case 1:
+                do_punch(ch, buf, 0, 0);
+                break;
+            case 2:
+                do_kick(ch, buf, 0, 0);
+                break;
+            case 3:
+                do_elbow(ch, buf, 0, 0);
+                break;
+            case 4:
+                do_knee(ch, buf, 0, 0);
+                break;
+            case 5:
+                do_kick(ch, buf, 0, 0);
+                break;
+            default:
+                do_punch(ch, buf, 0, 0);
+                break;
+        }//end switch
+    } else {
+        do_bite(ch, buf, 0, 0);
+    }//end humanoid if
     return;
 }
 
@@ -246,8 +257,7 @@ ACMD(do_mkill)
  * it can also destroy a worn object and it can destroy
  * items using all.xxxxx or just plain all of them
  */
-ACMD(do_mjunk)
-{
+ACMD(do_mjunk) {
     char arg[MAX_INPUT_LENGTH];
     int pos, junk_all = 0;
     obj_data *obj;
@@ -271,32 +281,31 @@ ACMD(do_mjunk)
     if (!strcasecmp(arg, "all")) junk_all = 1;
 
     if ((find_all_dots(arg) != FIND_INDIV) && !junk_all) {
-      /* Thanks to Carlos Myers for fixing the line below */
-      if ((pos = get_obj_pos_in_equip_vis(ch, arg, nullptr, ch->equipment)) >= 0) {
-         extract_obj(unequip_char(ch, pos));
-         return;
-      }
-      if ((obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying)) != nullptr )
-        extract_obj(obj);
-      return;
+        /* Thanks to Carlos Myers for fixing the line below */
+        if ((pos = get_obj_pos_in_equip_vis(ch, arg, nullptr, ch->equipment)) >= 0) {
+            extract_obj(unequip_char(ch, pos));
+            return;
+        }
+        if ((obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying)) != nullptr)
+            extract_obj(obj);
+        return;
     } else {
         for (obj = ch->carrying; obj != nullptr; obj = obj_next) {
             obj_next = obj->next_content;
-            if (arg[3] == '\0' || isname(arg+4, obj->name)) {
+            if (arg[3] == '\0' || isname(arg + 4, obj->name)) {
                 extract_obj(obj);
             }
         }
-      /* Thanks to Carlos Myers for fixing the line below */
-      while ((pos = get_obj_pos_in_equip_vis(ch, arg, nullptr, ch->equipment)) >= 0)
-        extract_obj(unequip_char(ch, pos));
+        /* Thanks to Carlos Myers for fixing the line below */
+        while ((pos = get_obj_pos_in_equip_vis(ch, arg, nullptr, ch->equipment)) >= 0)
+            extract_obj(unequip_char(ch, pos));
     }
     return;
 }
 
 
 /* prints the message to everyone in the room other than the mob and victim */
-ACMD(do_mechoaround)
-{
+ACMD(do_mechoaround) {
     char arg[MAX_INPUT_LENGTH];
     char_data *victim;
     char *p;
@@ -318,15 +327,15 @@ ACMD(do_mechoaround)
     }
 
     if (*arg == UID_CHAR) {
-      if (!(victim = get_char(arg))) {
-        mob_log(ch, "mechoaround: victim (%s) does not exist",arg);
-        return;
-      }
+        if (!(victim = get_char(arg))) {
+            mob_log(ch, "mechoaround: victim (%s) does not exist", arg);
+            return;
+        }
     } else if (!(victim = get_char_room_vis(ch, arg, nullptr))) {
-        mob_log(ch, "mechoaround: victim (%s) does not exist",arg);
+        mob_log(ch, "mechoaround: victim (%s) does not exist", arg);
         return;
     }
-    
+
     char buf[MAX_STRING_LENGTH];
 
     sprintf(buf, p);
@@ -337,8 +346,7 @@ ACMD(do_mechoaround)
 
 
 /* sends the message to only the victim */
-ACMD(do_msend)
-{
+ACMD(do_msend) {
     char arg[MAX_INPUT_LENGTH];
     char_data *victim;
     char *p;
@@ -360,12 +368,12 @@ ACMD(do_msend)
     }
 
     if (*arg == UID_CHAR) {
-      if (!(victim = get_char(arg))) {
-        mob_log(ch, "msend: victim (%s) does not exist",arg);
-        return;
-      }
+        if (!(victim = get_char(arg))) {
+            mob_log(ch, "msend: victim (%s) does not exist", arg);
+            return;
+        }
     } else if (!(victim = get_char_room_vis(ch, arg, nullptr))) {
-        mob_log(ch, "msend: victim (%s) does not exist",arg);
+        mob_log(ch, "msend: victim (%s) does not exist", arg);
         return;
     }
 
@@ -374,8 +382,7 @@ ACMD(do_msend)
 
 
 /* prints the message to the room at large */
-ACMD(do_mecho)
-{
+ACMD(do_mecho) {
     char *p;
 
     if (!MOB_OR_IMPL(ch)) {
@@ -396,8 +403,7 @@ ACMD(do_mecho)
     sub_write(p, ch, true, TO_ROOM);
 }
 
-ACMD(do_mzoneecho)
-{
+ACMD(do_mzoneecho) {
     int zone;
     char room_number[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH], *msg;
 
@@ -420,8 +426,7 @@ ACMD(do_mzoneecho)
  * lets the mobile load an item or mobile.  All items
  * are loaded into inventory, unless it is NO-TAKE.
  */
-ACMD(do_mload)
-{
+ACMD(do_mload) {
     char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
     int number = 0;
     char_data *mob;
@@ -439,7 +444,7 @@ ACMD(do_mload)
     if (AFF_FLAGGED(ch, AFF_CHARM))
         return;
 
-    if( ch->desc && GET_ADMLEVEL(ch->desc->original) < ADMLVL_IMPL)
+    if (ch->desc && GET_ADMLEVEL(ch->desc->original) < ADMLVL_IMPL)
         return;
 
     target = two_arguments(argument, arg1, arg2);
@@ -449,82 +454,78 @@ ACMD(do_mload)
         return;
     }
 
-     /* load mob to target room - Jamie Nelson, April 13 2004 */
+    /* load mob to target room - Jamie Nelson, April 13 2004 */
     if (is_abbrev(arg1, "mob")) {
-      room_rnum rnum;
-      if (!target || !*target) {
-        rnum = IN_ROOM(ch);
-      } else {
-        if (!isdigit(*target) || (rnum = real_room(atoi(target))) == NOWHERE) {
-          mob_log(ch, "mload: room target vnum doesn't exist "
-                      "(loading mob vnum %d to room %s)", number, target);
-          return;
-        }
-      }
-      if ((mob = read_mobile(number, VIRTUAL)) == nullptr) {
-        mob_log(ch, "mload: bad mob vnum");
-        return;
-      }
-      char_to_room(mob, rnum);
-      if (SCRIPT(ch)) { /* It _should_ have, but it might be detached. */
-        char buf[MAX_INPUT_LENGTH];
-        sprintf(buf, "%c%d", UID_CHAR, GET_ID(mob));
-        add_var(&(SCRIPT(ch)->global_vars), "lastloaded", buf, 0);
-      }
-      load_mtrigger(mob);
-    }
-
-    else if (is_abbrev(arg1, "obj")) {
-      if ((object = read_object(number, VIRTUAL)) == nullptr) {
-          mob_log(ch, "mload: bad object vnum");
-          return;
-      }
-      if (SCRIPT(ch)) { /* It _should_ have, but it might be detached. */
-        char buf[MAX_INPUT_LENGTH];
-        sprintf(buf, "%c%d", UID_CHAR, GET_ID(object));
-        add_var(&(SCRIPT(ch)->global_vars), "lastloaded", buf, 0);
-      }
-      randomize_eq(object);
-      /* special handling to make objects able to load on a person/in a container/worn etc. */
-      if (!target || !*target) {
-        add_unique_id(object);
-        if (CAN_WEAR(object, ITEM_WEAR_TAKE)) {
-            obj_to_char(object, ch);
+        room_rnum rnum;
+        if (!target || !*target) {
+            rnum = IN_ROOM(ch);
         } else {
-            obj_to_room(object, IN_ROOM(ch));
+            if (!isdigit(*target) || (rnum = real_room(atoi(target))) == NOWHERE) {
+                mob_log(ch, "mload: room target vnum doesn't exist "
+                            "(loading mob vnum %d to room %s)", number, target);
+                return;
+            }
         }
+        if ((mob = read_mobile(number, VIRTUAL)) == nullptr) {
+            mob_log(ch, "mload: bad mob vnum");
+            return;
+        }
+        char_to_room(mob, rnum);
+        if (SCRIPT(ch)) { /* It _should_ have, but it might be detached. */
+            char buf[MAX_INPUT_LENGTH];
+            sprintf(buf, "%c%d", UID_CHAR, GET_ID(mob));
+            add_var(&(SCRIPT(ch)->global_vars), "lastloaded", buf, 0);
+        }
+        load_mtrigger(mob);
+    } else if (is_abbrev(arg1, "obj")) {
+        if ((object = read_object(number, VIRTUAL)) == nullptr) {
+            mob_log(ch, "mload: bad object vnum");
+            return;
+        }
+        if (SCRIPT(ch)) { /* It _should_ have, but it might be detached. */
+            char buf[MAX_INPUT_LENGTH];
+            sprintf(buf, "%c%d", UID_CHAR, GET_ID(object));
+            add_var(&(SCRIPT(ch)->global_vars), "lastloaded", buf, 0);
+        }
+        randomize_eq(object);
+        /* special handling to make objects able to load on a person/in a container/worn etc. */
+        if (!target || !*target) {
+            add_unique_id(object);
+            if (CAN_WEAR(object, ITEM_WEAR_TAKE)) {
+                obj_to_char(object, ch);
+            } else {
+                obj_to_room(object, IN_ROOM(ch));
+            }
+            load_otrigger(object);
+            return;
+        }
+        two_arguments(target, arg1, arg2); /* recycling ... */
+        tch = (arg1 != nullptr && *arg1 == UID_CHAR) ? get_char(arg1) : get_char_room_vis(ch, arg1, nullptr);
+        if (tch) {
+            if (arg2 != nullptr && *arg2 &&
+                (pos = find_eq_pos_script(arg2)) >= 0 &&
+                !GET_EQ(tch, pos) &&
+                can_wear_on_pos(object, pos)) {
+                equip_char(tch, object, pos);
+                load_otrigger(object);
+                return;
+            }
+            obj_to_char(object, tch);
+            load_otrigger(object);
+            return;
+        }
+        cnt = (arg1 != nullptr && *arg1 == UID_CHAR) ? get_obj(arg1) : get_obj_vis(ch, arg1, nullptr);
+        if (cnt && GET_OBJ_TYPE(cnt) == ITEM_CONTAINER) {
+            obj_to_obj(object, cnt);
+            load_otrigger(object);
+            return;
+        }
+        /* neither char nor container found - just dump it in room */
+        add_unique_id(object);
+        obj_to_room(object, IN_ROOM(ch));
         load_otrigger(object);
         return;
-      }
-      two_arguments(target, arg1, arg2); /* recycling ... */
-      tch = (arg1 != nullptr && *arg1 == UID_CHAR) ? get_char(arg1) : get_char_room_vis(ch, arg1, nullptr);
-      if (tch) {
-        if (arg2 != nullptr && *arg2 &&
-            (pos = find_eq_pos_script(arg2)) >= 0 &&
-            !GET_EQ(tch, pos) &&
-            can_wear_on_pos(object, pos)) {
-          equip_char(tch, object, pos);
-          load_otrigger(object);
-          return;
-        }
-        obj_to_char(object, tch);
-        load_otrigger(object);
-        return;
-      }
-      cnt = (arg1 != nullptr && *arg1 == UID_CHAR) ? get_obj(arg1) : get_obj_vis(ch, arg1, nullptr);
-      if (cnt && GET_OBJ_TYPE(cnt) == ITEM_CONTAINER) {
-      	obj_to_obj(object, cnt);
-        load_otrigger(object);
-      	return;
-      }
-      /* neither char nor container found - just dump it in room */
-      add_unique_id(object);
-      obj_to_room(object, IN_ROOM(ch));
-      load_otrigger(object);
-      return;
-    }
-
-    else
+    } else
         mob_log(ch, "mload: bad type");
 }
 
@@ -534,77 +535,75 @@ ACMD(do_mload)
  * or purge a specified object or mob in the room.  It can purge
  *  itself, but this will be the last command it does.
  */
-ACMD(do_mpurge)
-{
-  char arg[MAX_INPUT_LENGTH];
-  char_data *victim;
-  obj_data  *obj;
+ACMD(do_mpurge) {
+    char arg[MAX_INPUT_LENGTH];
+    char_data *victim;
+    obj_data *obj;
 
-  if (!MOB_OR_IMPL(ch)) {
-    send_to_char(ch, "Huh?!?\r\n");
-    return;
-  }
-
-  if (AFF_FLAGGED(ch, AFF_CHARM))
-    return;
-
-  if (ch->desc && (GET_ADMLEVEL(ch->desc->original) < ADMLVL_IMPL))
-    return;
-
-  one_argument(argument, arg);
-
-  if (!*arg) {
-    /* 'purge' */
-    char_data *vnext;
-    obj_data  *obj_next;
-
-    for (victim = world[IN_ROOM(ch)].people; victim; victim = vnext) {
-      vnext = victim->next_in_room;
-      if (IS_NPC(victim) && victim != ch)
-        extract_char(victim);
+    if (!MOB_OR_IMPL(ch)) {
+        send_to_char(ch, "Huh?!?\r\n");
+        return;
     }
 
-    for (obj = world[IN_ROOM(ch)].contents; obj; obj = obj_next) {
-      obj_next = obj->next_content;
-      extract_obj(obj);
+    if (AFF_FLAGGED(ch, AFF_CHARM))
+        return;
+
+    if (ch->desc && (GET_ADMLEVEL(ch->desc->original) < ADMLVL_IMPL))
+        return;
+
+    one_argument(argument, arg);
+
+    if (!*arg) {
+        /* 'purge' */
+        char_data *vnext;
+        obj_data *obj_next;
+
+        for (victim = world[IN_ROOM(ch)].people; victim; victim = vnext) {
+            vnext = victim->next_in_room;
+            if (IS_NPC(victim) && victim != ch)
+                extract_char(victim);
+        }
+
+        for (obj = world[IN_ROOM(ch)].contents; obj; obj = obj_next) {
+            obj_next = obj->next_content;
+            extract_obj(obj);
+        }
+
+        return;
     }
 
-    return;
-  }
-
-  if (*arg == UID_CHAR)
-    victim = get_char(arg);
-  else victim = get_char_room_vis(ch, arg, nullptr);
-
-  if (victim == nullptr) {
     if (*arg == UID_CHAR)
-      obj = get_obj(arg);
-    else
-      obj = get_obj_vis(ch, arg, nullptr);
+        victim = get_char(arg);
+    else victim = get_char_room_vis(ch, arg, nullptr);
 
-    if (obj) {
-      extract_obj(obj);
-      obj = nullptr;
-    } else
-      mob_log(ch, "mpurge: bad argument");
+    if (victim == nullptr) {
+        if (*arg == UID_CHAR)
+            obj = get_obj(arg);
+        else
+            obj = get_obj_vis(ch, arg, nullptr);
 
-    return;
-  }
+        if (obj) {
+            extract_obj(obj);
+            obj = nullptr;
+        } else
+            mob_log(ch, "mpurge: bad argument");
 
-  if (!IS_NPC(victim)) {
-      mob_log(ch, "mpurge: purging a PC");
-      return;
-  }
+        return;
+    }
 
-  if (victim==ch) dg_owner_purged = 1;
+    if (!IS_NPC(victim)) {
+        mob_log(ch, "mpurge: purging a PC");
+        return;
+    }
 
-  extract_char(victim);
+    if (victim == ch) dg_owner_purged = 1;
+
+    extract_char(victim);
 }
 
 
 /* lets the mobile goto any location it wishes that is not private */
-ACMD(do_mgoto)
-{
+ACMD(do_mgoto) {
     char arg[MAX_INPUT_LENGTH];
     room_rnum location;
 
@@ -627,7 +626,7 @@ ACMD(do_mgoto)
         mob_log(ch, "mgoto: invalid location");
         return;
     } else if ((location = find_target_room(ch, arg)) == NOWHERE) {
-     return;
+        return;
     }
 
     if (FIGHTING(ch))
@@ -640,8 +639,7 @@ ACMD(do_mgoto)
 
 
 /* lets the mobile do a command at another location. Very useful */
-ACMD(do_mat)
-{
+ACMD(do_mat) {
     char arg[MAX_INPUT_LENGTH];
     room_rnum location, original;
 
@@ -653,7 +651,7 @@ ACMD(do_mat)
     if (AFF_FLAGGED(ch, AFF_CHARM))
         return;
 
-    argument = one_argument( argument, arg );
+    argument = one_argument(argument, arg);
 
     if (!*arg || !*argument) {
         mob_log(ch, "mat: bad argument");
@@ -682,109 +680,107 @@ ACMD(do_mat)
  * lets the mobile transfer people.  the all argument transfers
  * everyone in the current room to the specified location
  */
-ACMD(do_mteleport)
-{
-  char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-  room_rnum target;
-  char_data *vict, *next_ch;
+ACMD(do_mteleport) {
+    char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+    room_rnum target;
+    char_data *vict, *next_ch;
 
-  if (!MOB_OR_IMPL(ch)) {
-    send_to_char(ch, "Huh?!?\r\n");
-    return;
-  }
-
-  if (AFF_FLAGGED(ch, AFF_CHARM))
-    return;
-
-  argument = two_arguments(argument, arg1, arg2);
-
-  if (!*arg1 || !*arg2) {
-    mob_log(ch, "mteleport: bad syntax");
-    return;
-  }
-
-  target = find_target_room(ch, arg2);
-
-  if (target == NOWHERE) {
-    mob_log(ch, "mteleport target is an invalid room");
-    return;
-  }
-
-  if (!strcasecmp(arg1, "all")) {
-    if (target == IN_ROOM(ch)) {
-      mob_log(ch, "mteleport all target is itself");
-      return;
-    }
-
-    for (vict = world[IN_ROOM(ch)].people; vict; vict = next_ch) {
-      next_ch = vict->next_in_room;
-
-      if (valid_dg_target(vict, DG_ALLOW_GODS)) {
-        char_from_room(vict);
-        char_to_room(vict, target);
-        enter_wtrigger(&world[IN_ROOM(ch)], ch, -1);
-      }
-    }
-  } else {
-    if (*arg1 == UID_CHAR) {
-      if (!(vict = get_char(arg1))) {
-        mob_log(ch, "mteleport: victim (%s) does not exist",arg1);
+    if (!MOB_OR_IMPL(ch)) {
+        send_to_char(ch, "Huh?!?\r\n");
         return;
-      }
-    } else if (!(vict = get_char_vis(ch, arg1, nullptr, FIND_CHAR_WORLD))) {
-      mob_log(ch, "mteleport: victim (%s) does not exist",arg1);
-      return;
     }
 
-    if (valid_dg_target(ch, DG_ALLOW_GODS)) {
-      char_from_room(vict);
-      char_to_room(vict, target);
-      enter_wtrigger(&world[IN_ROOM(ch)], ch, -1);
+    if (AFF_FLAGGED(ch, AFF_CHARM))
+        return;
+
+    argument = two_arguments(argument, arg1, arg2);
+
+    if (!*arg1 || !*arg2) {
+        mob_log(ch, "mteleport: bad syntax");
+        return;
     }
-  }
+
+    target = find_target_room(ch, arg2);
+
+    if (target == NOWHERE) {
+        mob_log(ch, "mteleport target is an invalid room");
+        return;
+    }
+
+    if (!strcasecmp(arg1, "all")) {
+        if (target == IN_ROOM(ch)) {
+            mob_log(ch, "mteleport all target is itself");
+            return;
+        }
+
+        for (vict = world[IN_ROOM(ch)].people; vict; vict = next_ch) {
+            next_ch = vict->next_in_room;
+
+            if (valid_dg_target(vict, DG_ALLOW_GODS)) {
+                char_from_room(vict);
+                char_to_room(vict, target);
+                enter_wtrigger(&world[IN_ROOM(ch)], ch, -1);
+            }
+        }
+    } else {
+        if (*arg1 == UID_CHAR) {
+            if (!(vict = get_char(arg1))) {
+                mob_log(ch, "mteleport: victim (%s) does not exist", arg1);
+                return;
+            }
+        } else if (!(vict = get_char_vis(ch, arg1, nullptr, FIND_CHAR_WORLD))) {
+            mob_log(ch, "mteleport: victim (%s) does not exist", arg1);
+            return;
+        }
+
+        if (valid_dg_target(ch, DG_ALLOW_GODS)) {
+            char_from_room(vict);
+            char_to_room(vict, target);
+            enter_wtrigger(&world[IN_ROOM(ch)], ch, -1);
+        }
+    }
 }
 
 
 ACMD(do_mdamage) {
-  char name[MAX_INPUT_LENGTH], amount[MAX_INPUT_LENGTH];
-  int dam = 0;
-  char_data *vict;
+    char name[MAX_INPUT_LENGTH], amount[MAX_INPUT_LENGTH];
+    int dam = 0;
+    char_data *vict;
 
-  if (!MOB_OR_IMPL(ch)) {
-    send_to_char(ch, "Huh?!?\r\n");
-    return;
-  }
-
-  if (AFF_FLAGGED(ch, AFF_CHARM))
-    return;
-
-  two_arguments(argument, name, amount);
-
-  /* who cares if it's a number ? if not it'll just be 0 */
-  if (!*name || !*amount) {
-      mob_log(ch, "mdamage: bad syntax");
-      return;
-  }
-
-  dam = atoi(amount);
-  if (*name == UID_CHAR) {
-    if (!(vict = get_char(name))) {
-      mob_log(ch, "mdamage: victim (%s) does not exist", name);
-      return;
+    if (!MOB_OR_IMPL(ch)) {
+        send_to_char(ch, "Huh?!?\r\n");
+        return;
     }
-  } else if (!(vict = get_char_room_vis(ch, name, nullptr))) {
-    mob_log(ch, "mdamage: victim (%s) does not exist", name);
-    return;
-  }
-  script_damage(vict, dam);
+
+    if (AFF_FLAGGED(ch, AFF_CHARM))
+        return;
+
+    two_arguments(argument, name, amount);
+
+    /* who cares if it's a number ? if not it'll just be 0 */
+    if (!*name || !*amount) {
+        mob_log(ch, "mdamage: bad syntax");
+        return;
+    }
+
+    dam = atoi(amount);
+    if (*name == UID_CHAR) {
+        if (!(vict = get_char(name))) {
+            mob_log(ch, "mdamage: victim (%s) does not exist", name);
+            return;
+        }
+    } else if (!(vict = get_char_room_vis(ch, name, nullptr))) {
+        mob_log(ch, "mdamage: victim (%s) does not exist", name);
+        return;
+    }
+    script_damage(vict, dam);
 }
 
 /*
  * lets the mobile force someone to do something.  must be mortal level
  * and the all argument only affects those in the room with the mobile
  */
-ACMD(do_mforce)
-{
+ACMD(do_mforce) {
     char arg[MAX_INPUT_LENGTH];
 
     if (!MOB_OR_IMPL(ch)) {
@@ -809,7 +805,7 @@ ACMD(do_mforce)
         struct descriptor_data *i;
         char_data *vch;
 
-        for (i = descriptor_list; i ; i = i->next) {
+        for (i = descriptor_list; i; i = i->next) {
             if ((i->character != ch) && !i->connected &&
                 (IN_ROOM(i->character) == IN_ROOM(ch))) {
                 vch = i->character;
@@ -823,10 +819,10 @@ ACMD(do_mforce)
         char_data *victim;
 
         if (*arg == UID_CHAR) {
-          if (!(victim = get_char(arg))) {
-            mob_log(ch, "mforce: victim (%s) does not exist",arg);
-            return;
-          }
+            if (!(victim = get_char(arg))) {
+                mob_log(ch, "mforce: victim (%s) does not exist", arg);
+                return;
+            }
         } else if ((victim = get_char_room_vis(ch, arg, nullptr)) == nullptr) {
             mob_log(ch, "mforce: no such victim");
             return;
@@ -844,8 +840,7 @@ ACMD(do_mforce)
 
 
 /* place someone into the mob's memory list */
-ACMD(do_mremember)
-{
+ACMD(do_mremember) {
     char_data *victim;
     struct script_memory *mem;
     char arg[MAX_INPUT_LENGTH];
@@ -869,12 +864,12 @@ ACMD(do_mremember)
     }
 
     if (*arg == UID_CHAR) {
-      if (!(victim = get_char(arg))) {
-        mob_log(ch, "mremember: victim (%s) does not exist", arg);
-        return;
-      }
+        if (!(victim = get_char(arg))) {
+            mob_log(ch, "mremember: victim (%s) does not exist", arg);
+            return;
+        }
     } else if (!(victim = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD))) {
-        mob_log(ch,"mremember: victim (%s) does not exist", arg);
+        mob_log(ch, "mremember: victim (%s) does not exist", arg);
         return;
     }
 
@@ -882,22 +877,21 @@ ACMD(do_mremember)
     CREATE(mem, struct script_memory, 1);
     if (!SCRIPT_MEM(ch)) SCRIPT_MEM(ch) = mem;
     else {
-      struct script_memory *tmpmem = SCRIPT_MEM(ch);
-      while (tmpmem->next) tmpmem = tmpmem->next;
-      tmpmem->next = mem;
+        struct script_memory *tmpmem = SCRIPT_MEM(ch);
+        while (tmpmem->next) tmpmem = tmpmem->next;
+        tmpmem->next = mem;
     }
 
     /* fill in the structure */
     mem->id = GET_ID(victim);
     if (argument && *argument) {
-      mem->cmd = strdup(argument);
+        mem->cmd = strdup(argument);
     }
 }
 
 
 /* remove someone from the list */
-ACMD(do_mforget)
-{
+ACMD(do_mforget) {
     char_data *victim;
     struct script_memory *mem, *prev;
     char arg[MAX_INPUT_LENGTH];
@@ -921,10 +915,10 @@ ACMD(do_mforget)
     }
 
     if (*arg == UID_CHAR) {
-      if (!(victim = get_char(arg))) {
-        mob_log(ch, "mforget: victim (%s) does not exist", arg);
-        return;
-      }
+        if (!(victim = get_char(arg))) {
+            mob_log(ch, "mforget: victim (%s) does not exist", arg);
+            return;
+        }
     } else if (!(victim = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD))) {
         mob_log(ch, "mforget: victim (%s) does not exist", arg);
         return;
@@ -933,33 +927,32 @@ ACMD(do_mforget)
     mem = SCRIPT_MEM(ch);
     prev = nullptr;
     while (mem) {
-      if (mem->id == GET_ID(victim)) {
-        if (mem->cmd) free(mem->cmd);
-        if (prev==nullptr) {
-          SCRIPT_MEM(ch) = mem->next;
-          free(mem);
-          mem = SCRIPT_MEM(ch);
+        if (mem->id == GET_ID(victim)) {
+            if (mem->cmd) free(mem->cmd);
+            if (prev == nullptr) {
+                SCRIPT_MEM(ch) = mem->next;
+                free(mem);
+                mem = SCRIPT_MEM(ch);
+            } else {
+                prev->next = mem->next;
+                free(mem);
+                mem = prev->next;
+            }
         } else {
-          prev->next = mem->next;
-          free(mem);
-          mem = prev->next;
+            prev = mem;
+            mem = mem->next;
         }
-      } else {
-        prev = mem;
-        mem = mem->next;
-      }
-   }
+    }
 }
 
 
 /* transform into a different mobile */
-ACMD(do_mtransform)
-{
-  char arg[MAX_INPUT_LENGTH];
-  char_data *m, tmpmob;
-  obj_data *obj[NUM_WEARS];
-  mob_rnum this_rnum = GET_MOB_RNUM(ch);
-  int pos;
+ACMD(do_mtransform) {
+    char arg[MAX_INPUT_LENGTH];
+    char_data *m, tmpmob;
+    obj_data *obj[NUM_WEARS];
+    mob_rnum this_rnum = GET_MOB_RNUM(ch);
+    int pos;
 
     if (!MOB_OR_IMPL(ch)) {
         send_to_char(ch, "Huh?!?\r\n");
@@ -970,88 +963,87 @@ ACMD(do_mtransform)
         return;
 
     if (ch->desc) {
-      send_to_char(ch, "You've got no VNUM to return to, dummy! try 'switch'\r\n");
-      return;
+        send_to_char(ch, "You've got no VNUM to return to, dummy! try 'switch'\r\n");
+        return;
     }
 
-  one_argument(argument, arg);
+    one_argument(argument, arg);
 
-  if (!*arg)
-    mob_log(ch, "mtransform: missing argument");
-  else if (!isdigit(*arg) && *arg!='-')
-    mob_log(ch, "mtransform: bad argument");
-  else {
-    if (isdigit(*arg))
-      m = read_mobile(atoi(arg), VIRTUAL);
+    if (!*arg)
+        mob_log(ch, "mtransform: missing argument");
+    else if (!isdigit(*arg) && *arg != '-')
+        mob_log(ch, "mtransform: bad argument");
     else {
-      m = read_mobile(atoi(arg+1), VIRTUAL);
+        if (isdigit(*arg))
+            m = read_mobile(atoi(arg), VIRTUAL);
+        else {
+            m = read_mobile(atoi(arg + 1), VIRTUAL);
+        }
+        if (m == nullptr) {
+            mob_log(ch, "mtransform: bad mobile vnum");
+            return;
+        }
+
+        /* move new obj info over to old object and delete new obj */
+
+        for (pos = 0; pos < NUM_WEARS; pos++) {
+            if (GET_EQ(ch, pos))
+                obj[pos] = unequip_char(ch, pos);
+            else
+                obj[pos] = nullptr;
+        }
+
+        /* put the mob in the same room as ch so extract will work */
+        char_to_room(m, IN_ROOM(ch));
+
+        memcpy(&tmpmob, m, sizeof(*m));
+
+        /* Thanks to Russell Ryan for this fix. RRfon we need to copy the
+           the strings so we don't end up free'ing the prototypes later */
+        if (m->name)
+            tmpmob.name = strdup(m->name);
+        if (m->title)
+            tmpmob.title = strdup(m->title);
+        if (m->short_descr)
+            tmpmob.short_descr = strdup(m->short_descr);
+        if (m->long_descr)
+            tmpmob.long_descr = strdup(m->long_descr);
+        if (m->description)
+            tmpmob.description = strdup(m->description);
+
+
+        tmpmob.id = ch->id;
+        tmpmob.affected = ch->affected;
+        tmpmob.carrying = ch->carrying;
+        tmpmob.proto_script = ch->proto_script;
+        tmpmob.script = ch->script;
+        tmpmob.memory = ch->memory;
+        tmpmob.next_in_room = ch->next_in_room;
+        tmpmob.next = ch->next;
+        tmpmob.next_fighting = ch->next_fighting;
+        tmpmob.followers = ch->followers;
+        tmpmob.master = ch->master;
+
+        GET_WAS_IN(&tmpmob) = GET_WAS_IN(ch);
+        GET_GOLD(&tmpmob) = GET_GOLD(ch);
+        GET_POS(&tmpmob) = GET_POS(ch);
+        IS_CARRYING_W(&tmpmob) = IS_CARRYING_W(ch);
+        IS_CARRYING_N(&tmpmob) = IS_CARRYING_N(ch);
+        FIGHTING(&tmpmob) = FIGHTING(ch);
+        memcpy(ch, &tmpmob, sizeof(*ch));
+
+        for (pos = 0; pos < NUM_WEARS; pos++) {
+            if (obj[pos])
+                equip_char(ch, obj[pos], pos);
+        }
+
+        ch->nr = this_rnum;
+        extract_char(m);
     }
-    if (m==nullptr) {
-      mob_log(ch, "mtransform: bad mobile vnum");
-      return;
-    }
-
-    /* move new obj info over to old object and delete new obj */
-
-    for (pos = 0; pos < NUM_WEARS; pos++) {
-      if (GET_EQ(ch, pos))
-        obj[pos] = unequip_char(ch, pos);
-      else
-        obj[pos] = nullptr;
-    }
-
-    /* put the mob in the same room as ch so extract will work */
-    char_to_room(m, IN_ROOM(ch));
-
-    memcpy(&tmpmob, m, sizeof(*m));
-
-    /* Thanks to Russell Ryan for this fix. RRfon we need to copy the
-       the strings so we don't end up free'ing the prototypes later */
-    if(m->name)
-      tmpmob.name = strdup(m->name);
-    if(m->title)
-      tmpmob.title = strdup(m->title);
-    if(m->short_descr)
-      tmpmob.short_descr = strdup(m->short_descr);
-    if(m->long_descr)
-      tmpmob.long_descr = strdup(m->long_descr);
-    if(m->description)
-      tmpmob.description = strdup(m->description);
-
-
-    tmpmob.id = ch->id;
-    tmpmob.affected = ch->affected;
-    tmpmob.carrying = ch->carrying;
-    tmpmob.proto_script = ch->proto_script;
-    tmpmob.script = ch->script;
-    tmpmob.memory = ch->memory;
-    tmpmob.next_in_room = ch->next_in_room;
-    tmpmob.next = ch->next;
-    tmpmob.next_fighting = ch->next_fighting;
-    tmpmob.followers = ch->followers;
-    tmpmob.master = ch->master;
-
-    GET_WAS_IN(&tmpmob) = GET_WAS_IN(ch);
-    GET_GOLD(&tmpmob) = GET_GOLD(ch);
-    GET_POS(&tmpmob) = GET_POS(ch);
-    IS_CARRYING_W(&tmpmob) = IS_CARRYING_W(ch);
-    IS_CARRYING_N(&tmpmob) = IS_CARRYING_N(ch);
-    FIGHTING(&tmpmob) = FIGHTING(ch);
-    memcpy(ch, &tmpmob, sizeof(*ch));
-
-    for (pos = 0; pos < NUM_WEARS; pos++) {
-      if (obj[pos])
-        equip_char(ch, obj[pos], pos);
-    }
-
-    ch->nr = this_rnum;
-    extract_char(m);
-  }
 }
 
 
-ACMD(do_mdoor)
-{
+ACMD(do_mdoor) {
     char target[MAX_INPUT_LENGTH], direction[MAX_INPUT_LENGTH];
     char field[MAX_INPUT_LENGTH], *value;
     room_data *rm;
@@ -1059,13 +1051,13 @@ ACMD(do_mdoor)
     int dir, fd, to_room;
 
     const char *door_field[] = {
-        "purge",
-        "description",
-        "flags",
-        "key",
-        "name",
-        "room",
-        "\n"
+            "purge",
+            "description",
+            "flags",
+            "key",
+            "name",
+            "room",
+            "\n"
     };
 
 
@@ -1113,131 +1105,127 @@ ACMD(do_mdoor)
             free(newexit);
             rm->dir_option[dir] = nullptr;
         }
-    }
-
-    else {
+    } else {
         if (!newexit) {
             CREATE(newexit, struct room_direction_data, 1);
             rm->dir_option[dir] = newexit;
         }
 
         switch (fd) {
-        case 1:  /* description */
-            if (newexit->general_description)
-                free(newexit->general_description);
-            CREATE(newexit->general_description, char, strlen(value) + 3);
-            strcpy(newexit->general_description, value);
-            strcat(newexit->general_description, "\r\n");
-            break;
-        case 2:  /* flags       */
-            newexit->exit_info = (int16_t)asciiflag_conv(value);
-            break;
-        case 3:  /* key         */
-            newexit->key = atoi(value);
-            break;
-        case 4:  /* name        */
-            if (newexit->keyword)
-                free(newexit->keyword);
-            CREATE(newexit->keyword, char, strlen(value) + 1);
-            strcpy(newexit->keyword, value);
-            break;
-        case 5:  /* room        */
-            if ((to_room = real_room(atoi(value))) != NOWHERE)
-                newexit->to_room = to_room;
-            else
-                mob_log(ch, "mdoor: invalid door target");
-            break;
+            case 1:  /* description */
+                if (newexit->general_description)
+                    free(newexit->general_description);
+                CREATE(newexit->general_description, char, strlen(value) + 3);
+                strcpy(newexit->general_description, value);
+                strcat(newexit->general_description, "\r\n");
+                break;
+            case 2:  /* flags       */
+                newexit->exit_info = (int16_t) asciiflag_conv(value);
+                break;
+            case 3:  /* key         */
+                newexit->key = atoi(value);
+                break;
+            case 4:  /* name        */
+                if (newexit->keyword)
+                    free(newexit->keyword);
+                CREATE(newexit->keyword, char, strlen(value) + 1);
+                strcpy(newexit->keyword, value);
+                break;
+            case 5:  /* room        */
+                if ((to_room = real_room(atoi(value))) != NOWHERE)
+                    newexit->to_room = to_room;
+                else
+                    mob_log(ch, "mdoor: invalid door target");
+                break;
         }
     }
 }
 
-ACMD(do_mfollow)
-{
-  char buf[MAX_INPUT_LENGTH];
-  struct char_data *leader;
-  struct follow_type *j, *k;
+ACMD(do_mfollow) {
+    char buf[MAX_INPUT_LENGTH];
+    struct char_data *leader;
+    struct follow_type *j, *k;
 
-  if (!MOB_OR_IMPL(ch)) {
-    send_to_char(ch, "Huh?!?\r\n");
-    return;
-  }
-
-  if (AFF_FLAGGED(ch, AFF_CHARM))
-    return;
-
-  one_argument(argument, buf);
-
-  if (!*buf) {
-    mob_log(ch, "mfollow: bad syntax");
-    return;
-  }
-
-  if (*buf == UID_CHAR) {
-    if (!(leader = get_char(buf))) {
-      mob_log(ch, "mfollow: victim (%s) does not exist", buf);
-      return;
+    if (!MOB_OR_IMPL(ch)) {
+        send_to_char(ch, "Huh?!?\r\n");
+        return;
     }
-  } else if (!(leader = get_char_vis(ch, buf, nullptr, FIND_CHAR_ROOM))) {
-      mob_log(ch,"mfollow: victim (%s) not found", buf);
-      return;
-  }
 
-  if (ch->master == leader) /* already following */
-    return;
+    if (AFF_FLAGGED(ch, AFF_CHARM))
+        return;
 
-  if (AFF_FLAGGED(ch, AFF_CHARM) && (ch->master))  /* can't override charm */
-    return;
+    one_argument(argument, buf);
 
-
-  /* stop following someone else first */
-  if (ch->master) {
-    if (ch->master->followers->follower == ch) {	/* Head of follower-list? */
-      k = ch->master->followers;
-      ch->master->followers = k->next;
-      free(k);
-    } else {			/* locate follower who is not head of list */
-      for (k = ch->master->followers; k->next->follower != ch; k = k->next);
-
-      j = k->next;
-      k->next = j->next;
-      free(j);
+    if (!*buf) {
+        mob_log(ch, "mfollow: bad syntax");
+        return;
     }
-    ch->master = nullptr;
-  }
 
-  if (ch == leader)
-    return;
+    if (*buf == UID_CHAR) {
+        if (!(leader = get_char(buf))) {
+            mob_log(ch, "mfollow: victim (%s) does not exist", buf);
+            return;
+        }
+    } else if (!(leader = get_char_vis(ch, buf, nullptr, FIND_CHAR_ROOM))) {
+        mob_log(ch, "mfollow: victim (%s) not found", buf);
+        return;
+    }
 
-  if (circle_follow(ch, leader)) {
-    mob_log(ch, "mfollow: Following in circles.");
-    return;
-  }
+    if (ch->master == leader) /* already following */
+        return;
 
-  ch->master = leader;
+    if (AFF_FLAGGED(ch, AFF_CHARM) && (ch->master))  /* can't override charm */
+        return;
 
-  CREATE(k, struct follow_type, 1);
 
-  k->follower = ch;
-  k->next = leader->followers;
-  leader->followers = k;
+    /* stop following someone else first */
+    if (ch->master) {
+        if (ch->master->followers->follower == ch) {    /* Head of follower-list? */
+            k = ch->master->followers;
+            ch->master->followers = k->next;
+            free(k);
+        } else {            /* locate follower who is not head of list */
+            for (k = ch->master->followers; k->next->follower != ch; k = k->next);
+
+            j = k->next;
+            k->next = j->next;
+            free(j);
+        }
+        ch->master = nullptr;
+    }
+
+    if (ch == leader)
+        return;
+
+    if (circle_follow(ch, leader)) {
+        mob_log(ch, "mfollow: Following in circles.");
+        return;
+    }
+
+    ch->master = leader;
+
+    CREATE(k, struct follow_type, 1);
+
+    k->follower = ch;
+    k->next = leader->followers;
+    leader->followers = k;
 }
 
 /* prints the message to everyone in the range of numbers */
 /* Thx to Jamie Nelson of 4D for this contribution */
-ACMD(do_mrecho)
-{
+ACMD(do_mrecho) {
     char start[MAX_INPUT_LENGTH], finish[MAX_INPUT_LENGTH], *msg;
 
     if (!MOB_OR_IMPL(ch)) {
-      send_to_char(ch, "Huh?!?\r\n");
-      return;
+        send_to_char(ch, "Huh?!?\r\n");
+        return;
     }
     msg = two_arguments(argument, start, finish);
 
     skip_spaces(&msg);
 
     if (!*msg || !*start || !*finish || !is_number(start) || !is_number(finish))
-      mob_log(ch, "mrecho called with too few args");
+        mob_log(ch, "mrecho called with too few args");
     else
-      send_to_range(atoi(start), atoi(finish), "%s\r\n", msg);
+        send_to_range(atoi(start), atoi(finish), "%s\r\n", msg);
 }

@@ -138,7 +138,8 @@ ACMD(do_galikgun) {
                 } else if (dge > axion_dice(10)) {
                     act("@C$N@W manages to dodge your Galik Gun, letting it slam into the surroundings!@n", false, ch,
                         nullptr, vict, TO_CHAR);
-                    act("@WYou dodge @C$n's@W Galik Gun, letting it slam into the surroundings!@n", false, ch, nullptr, vict,
+                    act("@WYou dodge @C$n's@W Galik Gun, letting it slam into the surroundings!@n", false, ch, nullptr,
+                        vict,
                         TO_VICT);
                     act("@C$N@W manages to dodge @c$n's@W Galik Gun, letting it slam into the surroundings!@n", false,
                         ch, nullptr, vict, TO_NOTVICT);
@@ -164,7 +165,8 @@ ACMD(do_galikgun) {
                     act("@WYou can't believe it but your Galik Gun misses, flying through the air harmlessly!@n", false,
                         ch, nullptr, vict, TO_CHAR);
                     act("@C$n@W fires a Galik Gun at you, but misses!@n ", false, ch, nullptr, vict, TO_VICT);
-                    act("@c$n@W fires a Galik Gun at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict, TO_NOTVICT);
+                    act("@c$n@W fires a Galik Gun at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict,
+                        TO_NOTVICT);
 
                     if (GET_SKILL_PERF(ch, SKILL_GALIKGUN) == 3 && attperc > minimum) {
                         pcost(ch, attperc - 0.05, 0);
@@ -409,9 +411,11 @@ ACMD(do_honoo) {
                     }
                     return;
                 } else if (dge > axion_dice(10)) {
-                    act("@C$N@W manages to dodge your honoo, letting it slam into the surroundings!@n", false, ch, nullptr,
+                    act("@C$N@W manages to dodge your honoo, letting it slam into the surroundings!@n", false, ch,
+                        nullptr,
                         vict, TO_CHAR);
-                    act("@WYou dodge @C$n's@W honoo, letting it slam into the surroundings!@n", false, ch, nullptr, vict,
+                    act("@WYou dodge @C$n's@W honoo, letting it slam into the surroundings!@n", false, ch, nullptr,
+                        vict,
                         TO_VICT);
                     act("@C$N@W manages to dodge @c$n's@W honoo, letting it slam into the surroundings!@n", false, ch,
                         nullptr, vict, TO_NOTVICT);
@@ -465,7 +469,8 @@ ACMD(do_honoo) {
                     return;
                 }
             } else {
-                act("@WYou can't believe it but your honoo misses, flying through the air harmlessly!@n", false, ch, nullptr,
+                act("@WYou can't believe it but your honoo misses, flying through the air harmlessly!@n", false, ch,
+                    nullptr,
                     vict, TO_CHAR);
                 act("@C$n@W fires a honoo at you, but misses!@n", false, ch, nullptr, vict, TO_VICT);
                 act("@c$n@W fires a honoo at @C$N@W, but somehow misses!@n", false, ch, nullptr, vict, TO_NOTVICT);
@@ -714,7 +719,8 @@ ACMD(do_psyblast) {
                 } else if (blk > axion_dice(10)) {
                     act("@C$N@W moves quickly and blocks your psychic blast!@n", false, ch, nullptr, vict, TO_CHAR);
                     act("@WYou move quickly and block @C$n's@W psychic blast!@n", false, ch, nullptr, vict, TO_VICT);
-                    act("@C$N@W moves quickly and blocks @c$n's@W psychic blast!@n", false, ch, nullptr, vict, TO_NOTVICT);
+                    act("@C$N@W moves quickly and blocks @c$n's@W psychic blast!@n", false, ch, nullptr, vict,
+                        TO_NOTVICT);
                     if (GET_SKILL_PERF(ch, SKILL_PSYBLAST) == 3 && attperc > minimum) {
                         pcost(ch, attperc - 0.05, 0);
                     } else {
@@ -729,7 +735,8 @@ ACMD(do_psyblast) {
                 } else if (dge > axion_dice(10)) {
                     act("@C$N@W manages to dodge your psychic blast, letting it slam into the surroundings!@n", false,
                         ch, nullptr, vict, TO_CHAR);
-                    act("@WYou dodge @C$n's@W psychic blast, letting it slam into the surroundings!@n", false, ch, nullptr,
+                    act("@WYou dodge @C$n's@W psychic blast, letting it slam into the surroundings!@n", false, ch,
+                        nullptr,
                         vict, TO_VICT);
                     act("@C$N@W manages to dodge @c$n's@W psychic blast, letting it slam into the surroundings!@n",
                         false, ch, nullptr, vict, TO_NOTVICT);
@@ -772,7 +779,8 @@ ACMD(do_psyblast) {
                 act("@WYou can't believe it but your psychic blast misses, flying through the air harmlessly!@n", false,
                     ch, nullptr, vict, TO_CHAR);
                 act("@C$n@W fires a psychic blast at you, but misses!@n", false, ch, nullptr, vict, TO_VICT);
-                act("@c$n@W fires a psychic blast at @C$N@W, but somehow misses!@n", false, ch, nullptr, vict, TO_NOTVICT);
+                act("@c$n@W fires a psychic blast at @C$N@W, but somehow misses!@n", false, ch, nullptr, vict,
+                    TO_NOTVICT);
                 if (GET_SKILL_PERF(ch, SKILL_PSYBLAST) == 3 && attperc > minimum) {
                     pcost(ch, attperc - 0.05, 0);
                 } else {
@@ -1045,7 +1053,8 @@ ACMD(do_tslash) {
                 } else if (dge > axion_dice(10)) {
                     act("@C$N@W manages to dodge your twin slash, letting it slam into the surroundings!@n", false, ch,
                         nullptr, vict, TO_CHAR);
-                    act("@WYou dodge @C$n's@W twin slash, letting it slam into the surroundings!@n", false, ch, nullptr, vict,
+                    act("@WYou dodge @C$n's@W twin slash, letting it slam into the surroundings!@n", false, ch, nullptr,
+                        vict,
                         TO_VICT);
                     act("@C$N@W manages to dodge @c$n's@W twin slash, letting it slam into the surroundings!@n", false,
                         ch, nullptr, vict, TO_NOTVICT);
@@ -1072,7 +1081,8 @@ ACMD(do_tslash) {
                     act("@WYou can't believe it but your twin slash misses, flying through the air harmlessly!@n",
                         false, ch, nullptr, vict, TO_CHAR);
                     act("@C$n@W fires a twin slash at you, but misses!@n ", false, ch, nullptr, vict, TO_VICT);
-                    act("@c$n@W fires a twin slash at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict, TO_NOTVICT);
+                    act("@c$n@W fires a twin slash at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict,
+                        TO_NOTVICT);
 
                     if (GET_SKILL_PERF(ch, SKILL_TSLASH) == 3 && attperc > minimum) {
                         pcost(ch, attperc - 0.05, 0);
@@ -1379,7 +1389,8 @@ ACMD(do_eraser) {
                 } else if (blk > axion_dice(10)) {
                     act("@C$N@W moves quickly and blocks your eraser cannon!@n", false, ch, nullptr, vict, TO_CHAR);
                     act("@WYou move quickly and block @C$n's@W eraser cannon!@n", false, ch, nullptr, vict, TO_VICT);
-                    act("@C$N@W moves quickly and blocks @c$n's@W eraser cannon!@n", false, ch, nullptr, vict, TO_NOTVICT);
+                    act("@C$N@W moves quickly and blocks @c$n's@W eraser cannon!@n", false, ch, nullptr, vict,
+                        TO_NOTVICT);
                     pcost(ch, attperc, 0);
                     pcost(vict, 0, GET_MAX_HIT(vict) / 500);
                     if (GET_SKILL(ch, SKILL_ERASER) >= 100) {
@@ -1397,7 +1408,8 @@ ACMD(do_eraser) {
                 } else if (dge > axion_dice(10)) {
                     act("@C$N@W manages to dodge your eraser cannon, letting it slam into the surroundings!@n", false,
                         ch, nullptr, vict, TO_CHAR);
-                    act("@WYou dodge @C$n's@W eraser cannon, letting it slam into the surroundings!@n", false, ch, nullptr,
+                    act("@WYou dodge @C$n's@W eraser cannon, letting it slam into the surroundings!@n", false, ch,
+                        nullptr,
                         vict, TO_VICT);
                     act("@C$N@W manages to dodge @c$n's@W eraser cannon, letting it slam into the surroundings!@n",
                         false, ch, nullptr, vict, TO_NOTVICT);
@@ -1446,7 +1458,8 @@ ACMD(do_eraser) {
                 act("@WYou can't believe it but your eraser cannon misses, flying through the air harmlessly!@n", false,
                     ch, nullptr, vict, TO_CHAR);
                 act("@C$n@W fires a eraser cannon at you, but misses!@n", false, ch, nullptr, vict, TO_VICT);
-                act("@c$n@W fires a eraser cannon at @C$N@W, but somehow misses!@n", false, ch, nullptr, vict, TO_NOTVICT);
+                act("@c$n@W fires a eraser cannon at @C$N@W, but somehow misses!@n", false, ch, nullptr, vict,
+                    TO_NOTVICT);
                 pcost(ch, attperc, 0);
                 if (GET_SKILL(ch, SKILL_ERASER) >= 100) {
                     ch->decCurKI((GET_MAX_MANA(ch) * attperc) * 0.15);
@@ -1638,7 +1651,8 @@ ACMD(do_pbarrage) {
                 if (blk > axion_dice(10)) {
                     act("@C$N@W moves quickly and blocks your psychic barrage!@n", false, ch, nullptr, vict, TO_CHAR);
                     act("@WYou move quickly and block @C$n's@W psychic barrage!@n", false, ch, nullptr, vict, TO_VICT);
-                    act("@C$N@W moves quickly and blocks @c$n's@W psychic barrage!@n", false, ch, nullptr, vict, TO_NOTVICT);
+                    act("@C$N@W moves quickly and blocks @c$n's@W psychic barrage!@n", false, ch, nullptr, vict,
+                        TO_NOTVICT);
                     pcost(ch, attperc, 0);
                     pcost(vict, 0, GET_MAX_HIT(vict) / 500);
                     dmg = damtype(ch, 31, skill, attperc);
@@ -1649,7 +1663,8 @@ ACMD(do_pbarrage) {
                 } else if (dge > axion_dice(10)) {
                     act("@C$N@W manages to dodge your psychic barrage, letting it slam into the surroundings!@n", false,
                         ch, nullptr, vict, TO_CHAR);
-                    act("@WYou dodge @C$n's@W psychic barrage, letting it slam into the surroundings!@n", false, ch, nullptr,
+                    act("@WYou dodge @C$n's@W psychic barrage, letting it slam into the surroundings!@n", false, ch,
+                        nullptr,
                         vict, TO_VICT);
                     act("@C$N@W manages to dodge @c$n's@W psychic barrage, letting it slam into the surroundings!@n",
                         false, ch, nullptr, vict, TO_NOTVICT);
@@ -1684,7 +1699,8 @@ ACMD(do_pbarrage) {
                 act("@WYou can't believe it but your psychic barrage misses, flying through the air harmlessly!@n",
                     false, ch, nullptr, vict, TO_CHAR);
                 act("@C$n@W fires a psychic barrage at you, but misses!@n", false, ch, nullptr, vict, TO_VICT);
-                act("@c$n@W fires a psychic barrage at @C$N@W, but somehow misses!@n", false, ch, nullptr, vict, TO_NOTVICT);
+                act("@c$n@W fires a psychic barrage at @C$N@W, but somehow misses!@n", false, ch, nullptr, vict,
+                    TO_NOTVICT);
                 pcost(ch, attperc, 0);
 
             }
@@ -1761,7 +1777,8 @@ ACMD(do_pbarrage) {
                     break;
             }
             if (!AFF_FLAGGED(vict, AFF_MBREAK) && rand_number(1, 4) == 4 && !AFF_FLAGGED(vict, AFF_SANCTUARY)) {
-                act("@mYour mind's eye has been shattered, you can't charge ki until you recover!@n", true, vict, nullptr, nullptr,
+                act("@mYour mind's eye has been shattered, you can't charge ki until you recover!@n", true, vict,
+                    nullptr, nullptr,
                     TO_CHAR);
                 act("@M$n@m's mind has been damaged by the attack!@n", true, vict, nullptr, nullptr, TO_ROOM);
                 SET_BIT_AR(AFF_FLAGS(vict), AFF_MBREAK);
@@ -2096,8 +2113,10 @@ ACMD(do_spiritball) {
         if (prob < perc - 20) {
             if ((vict->getCurST()) > 0) {
                 if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
-                    act("@C$N@W deflects your Spirit Ball, sending it flying away!@n", true, ch, nullptr, vict, TO_CHAR);
-                    act("@WYou deflect @C$n's@W Spirit Ball sending it flying away!@n", true, ch, nullptr, vict, TO_VICT);
+                    act("@C$N@W deflects your Spirit Ball, sending it flying away!@n", true, ch, nullptr, vict,
+                        TO_CHAR);
+                    act("@WYou deflect @C$n's@W Spirit Ball sending it flying away!@n", true, ch, nullptr, vict,
+                        TO_VICT);
                     act("@C$N@W deflects @c$n's@W Spirit Ball sending it flying away!@n", true, ch, nullptr, vict,
                         TO_NOTVICT);
                     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
@@ -2123,7 +2142,8 @@ ACMD(do_spiritball) {
                 } else if (dge > axion_dice(10)) {
                     act("@C$N@W manages to dodge your Spirit Ball, letting it slam into the surroundings!@n", true, ch,
                         nullptr, vict, TO_CHAR);
-                    act("@WYou dodge @C$n's@W Spirit Ball, letting it slam into the surroundings!@n", true, ch, nullptr, vict,
+                    act("@WYou dodge @C$n's@W Spirit Ball, letting it slam into the surroundings!@n", true, ch, nullptr,
+                        vict,
                         TO_VICT);
                     act("@C$N@W manages to dodge @c$n's@W Spirit Ball, letting it slam into the surroundings!@n", true,
                         ch, nullptr, vict, TO_NOTVICT);
@@ -2136,7 +2156,8 @@ ACMD(do_spiritball) {
                     act("@WYou can't believe it but your spirit ball misses, flying through the air harmlessly!@n",
                         false, ch, nullptr, vict, TO_CHAR);
                     act("@C$n@W fires a spirit ball at you, but misses!@n ", false, ch, nullptr, vict, TO_VICT);
-                    act("@c$n@W fires a spirit ball at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict, TO_NOTVICT);
+                    act("@c$n@W fires a spirit ball at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict,
+                        TO_NOTVICT);
 
                     dodge_ki(ch, vict, 2, 39, skill, SKILL_SPIRITBALL); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -2151,7 +2172,8 @@ ACMD(do_spiritball) {
                 act("@WYou can't believe it but your spirit ball misses, flying through the air harmlessly!@n", false,
                     ch, nullptr, vict, TO_CHAR);
                 act("@C$n@W fires a spirit ball at you, but misses!@n", false, ch, nullptr, vict, TO_VICT);
-                act("@c$n@W fires a spirit ball at @C$N@W, but somehow misses!@n", false, ch, nullptr, vict, TO_NOTVICT);
+                act("@c$n@W fires a spirit ball at @C$N@W, but somehow misses!@n", false, ch, nullptr, vict,
+                    TO_NOTVICT);
                 dodge_ki(ch, vict, 2, 39, skill, SKILL_SPIRITBALL); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
@@ -2339,7 +2361,8 @@ ACMD(do_deathball) {
                 if (dge > axion_dice(10)) {
                     act("@C$N@W manages to dodge your deathball, letting it slam into the surroundings!@n", false, ch,
                         nullptr, vict, TO_CHAR);
-                    act("@WYou dodge @C$n's@W deathball, letting it slam into the surroundings!@n", false, ch, nullptr, vict,
+                    act("@WYou dodge @C$n's@W deathball, letting it slam into the surroundings!@n", false, ch, nullptr,
+                        vict,
                         TO_VICT);
                     act("@C$N@W manages to dodge @c$n's@W deathball, letting it slam into the surroundings!@n", false,
                         ch, nullptr, vict, TO_NOTVICT);
@@ -2362,7 +2385,8 @@ ACMD(do_deathball) {
                     act("@WYou can't believe it but your deathball misses, flying through the air harmlessly!@n", false,
                         ch, nullptr, vict, TO_CHAR);
                     act("@C$n@W fires a deathball at you, but misses!@n ", false, ch, nullptr, vict, TO_VICT);
-                    act("@c$n@W fires a deathball at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict, TO_NOTVICT);
+                    act("@c$n@W fires a deathball at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict,
+                        TO_NOTVICT);
 
                     pcost(ch, attperc, 0);
                     hurt(0, 0, ch, vict, nullptr, 0, 1);
@@ -2579,7 +2603,8 @@ ACMD(do_pslash) {
                 if (blk > axion_dice(10)) {
                     act("@C$N@W moves quickly and blocks your Phoenix Slash!@n", false, ch, nullptr, vict, TO_CHAR);
                     act("@WYou move quickly and block @C$n's@W Phoenix Slash!@n", false, ch, nullptr, vict, TO_VICT);
-                    act("@C$N@W moves quickly and blocks @c$n's@W Phoenix Slash!@n", false, ch, nullptr, vict, TO_NOTVICT);
+                    act("@C$N@W moves quickly and blocks @c$n's@W Phoenix Slash!@n", false, ch, nullptr, vict,
+                        TO_NOTVICT);
                     pcost(ch, attperc, 0);
                     pcost(vict, 0, GET_MAX_HIT(vict) / 500);
                     dmg = damtype(ch, 37, skill, attperc);
@@ -2588,11 +2613,14 @@ ACMD(do_pslash) {
 
                     return;
                 } else if (dge > axion_dice(10)) {
-                    act("@C$N@W manages to dodge your Phoenix Slash, letting it fly harmlessly by!@n", false, ch, nullptr,
+                    act("@C$N@W manages to dodge your Phoenix Slash, letting it fly harmlessly by!@n", false, ch,
+                        nullptr,
                         vict, TO_CHAR);
-                    act("@WYou dodge @C$n's@W Phoenix Slash, letting it letting it fly harmlessly by!@n", false, ch, nullptr,
+                    act("@WYou dodge @C$n's@W Phoenix Slash, letting it letting it fly harmlessly by!@n", false, ch,
+                        nullptr,
                         vict, TO_VICT);
-                    act("@C$N@W manages to dodge @c$n's@W Phoenix Slash, letting it fly harmlessly by!@n", false, ch, nullptr,
+                    act("@C$N@W manages to dodge @c$n's@W Phoenix Slash, letting it fly harmlessly by!@n", false, ch,
+                        nullptr,
                         vict, TO_NOTVICT);
 
                     pcost(ch, attperc, 0);
@@ -2615,7 +2643,8 @@ ACMD(do_pslash) {
                 act("@WYou can't believe it but your Phoenix Slash misses, flying through the air harmlessly!@n", false,
                     ch, nullptr, vict, TO_CHAR);
                 act("@C$n@W fires a Phoenix Slash at you, but misses!@n", false, ch, nullptr, vict, TO_VICT);
-                act("@c$n@W fires a Phoenix Slash at @C$N@W, but somehow misses!@n", false, ch, nullptr, vict, TO_NOTVICT);
+                act("@c$n@W fires a Phoenix Slash at @C$N@W, but somehow misses!@n", false, ch, nullptr, vict,
+                    TO_NOTVICT);
                 pcost(ch, attperc, 0);
 
             }
@@ -2831,9 +2860,11 @@ ACMD(do_bigbang) {
 
                     return;
                 } else if (dge > axion_dice(10)) {
-                    act("@C$N@W manages to dodge your Big Bang, letting it slam into the surroundings!@n", false, ch, nullptr,
+                    act("@C$N@W manages to dodge your Big Bang, letting it slam into the surroundings!@n", false, ch,
+                        nullptr,
                         vict, TO_CHAR);
-                    act("@WYou dodge @C$n's@W Big Bang, letting it slam into the surroundings!@n", false, ch, nullptr, vict,
+                    act("@WYou dodge @C$n's@W Big Bang, letting it slam into the surroundings!@n", false, ch, nullptr,
+                        vict,
                         TO_VICT);
                     act("@C$N@W manages to dodge @c$n's@W Big Bang, letting it slam into the surroundings!@n", false,
                         ch, nullptr, vict, TO_NOTVICT);
@@ -2856,7 +2887,8 @@ ACMD(do_bigbang) {
                     act("@WYou can't believe it but your Big Bang misses, flying through the air harmlessly!@n", false,
                         ch, nullptr, vict, TO_CHAR);
                     act("@C$n@W fires a Big Bang at you, but misses!@n ", false, ch, nullptr, vict, TO_VICT);
-                    act("@c$n@W fires a Big Bang at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict, TO_NOTVICT);
+                    act("@c$n@W fires a Big Bang at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict,
+                        TO_NOTVICT);
 
                     pcost(ch, attperc, 0);
                     hurt(0, 0, ch, vict, nullptr, 0, 1);
@@ -3063,11 +3095,14 @@ ACMD(do_scatter) {
         if (prob < perc - 20) {
             if ((vict->getCurST()) > 0) {
                 if (blk > axion_dice(10)) {
-                    act("@C$N@W moves quickly and blocks every kiball of your scatter shot!@n", false, ch, nullptr, vict,
+                    act("@C$N@W moves quickly and blocks every kiball of your scatter shot!@n", false, ch, nullptr,
+                        vict,
                         TO_CHAR);
-                    act("@WYou move quickly and block every kiball of @C$n's@W scatter shot!@n", false, ch, nullptr, vict,
+                    act("@WYou move quickly and block every kiball of @C$n's@W scatter shot!@n", false, ch, nullptr,
+                        vict,
                         TO_VICT);
-                    act("@C$N@W moves quickly and blocks every kiball of @c$n's@W scatter shot!@n", false, ch, nullptr, vict,
+                    act("@C$N@W moves quickly and blocks every kiball of @c$n's@W scatter shot!@n", false, ch, nullptr,
+                        vict,
                         TO_NOTVICT);
                     pcost(ch, attperc, 0);
                     pcost(vict, 0, GET_MAX_HIT(vict) / 500);
@@ -3101,8 +3136,10 @@ ACMD(do_scatter) {
                 } else {
                     act("@WYou can't believe it but all the kiballs of your scatter shot miss, flying through the air harmlessly!@n",
                         false, ch, nullptr, vict, TO_CHAR);
-                    act("@C$n@W fires scatter shot kiballs at you, but they miss!@n ", false, ch, nullptr, vict, TO_VICT);
-                    act("@c$n@W fires scatter shot kiballs at @C$N@W, but somehow they miss!@n ", false, ch, nullptr, vict,
+                    act("@C$n@W fires scatter shot kiballs at you, but they miss!@n ", false, ch, nullptr, vict,
+                        TO_VICT);
+                    act("@c$n@W fires scatter shot kiballs at @C$N@W, but somehow they miss!@n ", false, ch, nullptr,
+                        vict,
                         TO_NOTVICT);
 
                     pcost(ch, attperc, 0);
@@ -3313,11 +3350,14 @@ ACMD(do_balefire) {
         if (prob < perc - 20) {
             if ((vict->getCurST()) > 0) {
                 if (blk > axion_dice(10)) {
-                    act("@C$N@W moves quickly and blocks every kiball of your scatter shot!@n", false, ch, nullptr, vict,
+                    act("@C$N@W moves quickly and blocks every kiball of your scatter shot!@n", false, ch, nullptr,
+                        vict,
                         TO_CHAR);
-                    act("@WYou move quickly and block every kiball of @C$n's@W scatter shot!@n", false, ch, nullptr, vict,
+                    act("@WYou move quickly and block every kiball of @C$n's@W scatter shot!@n", false, ch, nullptr,
+                        vict,
                         TO_VICT);
-                    act("@C$N@W moves quickly and blocks every kiball of @c$n's@W scatter shot!@n", false, ch, nullptr, vict,
+                    act("@C$N@W moves quickly and blocks every kiball of @c$n's@W scatter shot!@n", false, ch, nullptr,
+                        vict,
                         TO_NOTVICT);
                     pcost(ch, attperc, 0);
                     pcost(vict, 0, GET_MAX_HIT(vict) / 500);
@@ -3327,9 +3367,11 @@ ACMD(do_balefire) {
 
                     return;
                 } else if (dge > axion_dice(10)) {
-                    act("@C$N@W manages to dodge your balefire, letting it slam into the surroundings!@n", false, ch, nullptr,
+                    act("@C$N@W manages to dodge your balefire, letting it slam into the surroundings!@n", false, ch,
+                        nullptr,
                         vict, TO_CHAR);
-                    act("@WYou dodge @C$n's@W balefire, letting it slam into the surroundings!@n", false, ch, nullptr, vict,
+                    act("@WYou dodge @C$n's@W balefire, letting it slam into the surroundings!@n", false, ch, nullptr,
+                        vict,
                         TO_VICT);
                     act("@C$N@W manages to dodge @c$n's@W balefire, letting it slam into the surroundings!@n", false,
                         ch, nullptr, vict, TO_NOTVICT);
@@ -3351,8 +3393,10 @@ ACMD(do_balefire) {
                 } else {
                     act("@WYou can't believe it but all the kiballs of your scatter shot miss, flying through the air harmlessly!@n",
                         false, ch, nullptr, vict, TO_CHAR);
-                    act("@C$n@W fires scatter shot kiballs at you, but they miss!@n ", false, ch, nullptr, vict, TO_VICT);
-                    act("@c$n@W fires scatter shot kiballs at @C$N@W, but somehow they miss!@n ", false, ch, nullptr, vict,
+                    act("@C$n@W fires scatter shot kiballs at you, but they miss!@n ", false, ch, nullptr, vict,
+                        TO_VICT);
+                    act("@c$n@W fires scatter shot kiballs at @C$N@W, but somehow they miss!@n ", false, ch, nullptr,
+                        vict,
                         TO_NOTVICT);
 
                     pcost(ch, attperc, 0);
@@ -3624,8 +3668,10 @@ ACMD(do_kakusanha) {
                 impact_sound(ch, "@wA loud roar is heard nearby!@n\r\n");
                 switch (rand_number(1, 8)) {
                     case 1:
-                        act("Debris is thrown into the air and showers down thunderously!", true, ch, nullptr, nullptr, TO_CHAR);
-                        act("Debris is thrown into the air and showers down thunderously!", true, ch, nullptr, nullptr, TO_ROOM);
+                        act("Debris is thrown into the air and showers down thunderously!", true, ch, nullptr, nullptr,
+                            TO_CHAR);
+                        act("Debris is thrown into the air and showers down thunderously!", true, ch, nullptr, nullptr,
+                            TO_ROOM);
                         break;
                     case 2:
                         if (rand_number(1, 4) == 4 && ROOM_EFFECT(IN_ROOM(ch)) == 0) {
@@ -3641,12 +3687,16 @@ ACMD(do_kakusanha) {
                         act("A cloud of dust envelopes the entire area!", true, ch, nullptr, nullptr, TO_ROOM);
                         break;
                     case 4:
-                        act("The surrounding area roars and shudders from the impact!", true, ch, nullptr, nullptr, TO_CHAR);
-                        act("The surrounding area roars and shudders from the impact!", true, ch, nullptr, nullptr, TO_ROOM);
+                        act("The surrounding area roars and shudders from the impact!", true, ch, nullptr, nullptr,
+                            TO_CHAR);
+                        act("The surrounding area roars and shudders from the impact!", true, ch, nullptr, nullptr,
+                            TO_ROOM);
                         break;
                     case 5:
-                        act("The ground shatters apart from the stress of the impact!", true, ch, nullptr, nullptr, TO_CHAR);
-                        act("The ground shatters apart from the stress of the impact!", true, ch, nullptr, nullptr, TO_ROOM);
+                        act("The ground shatters apart from the stress of the impact!", true, ch, nullptr, nullptr,
+                            TO_CHAR);
+                        act("The ground shatters apart from the stress of the impact!", true, ch, nullptr, nullptr,
+                            TO_ROOM);
                         break;
                     case 6:
                         act("The explosion continues to burn spreading out and devouring some more of the ground before dying out.",
@@ -3682,13 +3732,17 @@ ACMD(do_kakusanha) {
                         act("A huge column of water erupts from the impact!", true, ch, nullptr, nullptr, TO_ROOM);
                         break;
                     case 2:
-                        act("The impact briefly causes a swirling vortex of water!", true, ch, nullptr, nullptr, TO_CHAR);
-                        act("The impact briefly causes a swirling vortex of water!", true, ch, nullptr, nullptr, TO_ROOM);
+                        act("The impact briefly causes a swirling vortex of water!", true, ch, nullptr, nullptr,
+                            TO_CHAR);
+                        act("The impact briefly causes a swirling vortex of water!", true, ch, nullptr, nullptr,
+                            TO_ROOM);
                         break;
                     case 3:
-                        act("A huge depression forms in the water and erupts into a wave from the impact!", true, ch, nullptr,
+                        act("A huge depression forms in the water and erupts into a wave from the impact!", true, ch,
+                            nullptr,
                             nullptr, TO_CHAR);
-                        act("A huge depression forms in the water and erupts into a wave from the impact!", true, ch, nullptr,
+                        act("A huge depression forms in the water and erupts into a wave from the impact!", true, ch,
+                            nullptr,
                             nullptr, TO_ROOM);
                         break;
                 }
@@ -3697,30 +3751,42 @@ ACMD(do_kakusanha) {
                 impact_sound(ch, "@wA loud roar is heard nearby!@n\r\n");
                 switch (rand_number(1, 8)) {
                     case 1:
-                        act("Debris is thrown into the air and showers down thunderously!", true, ch, nullptr, nullptr, TO_CHAR);
-                        act("Debris is thrown into the air and showers down thunderously!", true, ch, nullptr, nullptr, TO_ROOM);
+                        act("Debris is thrown into the air and showers down thunderously!", true, ch, nullptr, nullptr,
+                            TO_CHAR);
+                        act("Debris is thrown into the air and showers down thunderously!", true, ch, nullptr, nullptr,
+                            TO_ROOM);
                         break;
                     case 2:
-                        act("The structure of the surrounding room cracks and quakes from the blast!", true, ch, nullptr, nullptr,
+                        act("The structure of the surrounding room cracks and quakes from the blast!", true, ch,
+                            nullptr, nullptr,
                             TO_CHAR);
-                        act("The structure of the surrounding room cracks and quakes from the blast!", true, ch, nullptr, nullptr,
+                        act("The structure of the surrounding room cracks and quakes from the blast!", true, ch,
+                            nullptr, nullptr,
                             TO_ROOM);
                         break;
                     case 3:
-                        act("Parts of the ceiling collapse, crushing into the floor!", true, ch, nullptr, nullptr, TO_CHAR);
-                        act("Parts of the ceiling collapse, crushing into the floor!", true, ch, nullptr, nullptr, TO_ROOM);
+                        act("Parts of the ceiling collapse, crushing into the floor!", true, ch, nullptr, nullptr,
+                            TO_CHAR);
+                        act("Parts of the ceiling collapse, crushing into the floor!", true, ch, nullptr, nullptr,
+                            TO_ROOM);
                         break;
                     case 4:
-                        act("The surrounding area roars and shudders from the impact!", true, ch, nullptr, nullptr, TO_CHAR);
-                        act("The surrounding area roars and shudders from the impact!", true, ch, nullptr, nullptr, TO_ROOM);
+                        act("The surrounding area roars and shudders from the impact!", true, ch, nullptr, nullptr,
+                            TO_CHAR);
+                        act("The surrounding area roars and shudders from the impact!", true, ch, nullptr, nullptr,
+                            TO_ROOM);
                         break;
                     case 5:
-                        act("The ground shatters apart from the stress of the impact!", true, ch, nullptr, nullptr, TO_CHAR);
-                        act("The ground shatters apart from the stress of the impact!", true, ch, nullptr, nullptr, TO_ROOM);
+                        act("The ground shatters apart from the stress of the impact!", true, ch, nullptr, nullptr,
+                            TO_CHAR);
+                        act("The ground shatters apart from the stress of the impact!", true, ch, nullptr, nullptr,
+                            TO_ROOM);
                         break;
                     case 6:
-                        act("The walls of the surrounding room crack in the same instant!", true, ch, nullptr, nullptr, TO_CHAR);
-                        act("The walls of the surrounding room crack in the same instant!", true, ch, nullptr, nullptr, TO_ROOM);
+                        act("The walls of the surrounding room crack in the same instant!", true, ch, nullptr, nullptr,
+                            TO_CHAR);
+                        act("The walls of the surrounding room crack in the same instant!", true, ch, nullptr, nullptr,
+                            TO_ROOM);
                         break;
                     default:
                         /* we want no message for the default */
@@ -3844,11 +3910,13 @@ ACMD(do_hellspear) {
 
             if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&
                 (vict->getCurST()) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-                act("@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", false, ch, nullptr, vict,
+                act("@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", false, ch, nullptr,
+                    vict,
                     TO_CHAR);
                 act("@cYou disappear, avoiding the explosion before reappearing elsewhere!@n", false, ch, nullptr, vict,
                     TO_VICT);
-                act("@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", false, ch, nullptr, vict,
+                act("@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", false, ch, nullptr,
+                    vict,
                     TO_NOTVICT);
                 REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
                 pcost(vict, 0, GET_MAX_HIT(vict) / 200);
@@ -3995,7 +4063,8 @@ ACMD(do_hellflash) {
                 } else if (dge > axion_dice(10)) {
                     act("@C$N@W manages to dodge your Hell Flash, letting it slam into the surroundings!@n", false, ch,
                         nullptr, vict, TO_CHAR);
-                    act("@WYou dodge @C$n's@W Hell Flash, letting it slam into the surroundings!@n", false, ch, nullptr, vict,
+                    act("@WYou dodge @C$n's@W Hell Flash, letting it slam into the surroundings!@n", false, ch, nullptr,
+                        vict,
                         TO_VICT);
                     act("@C$N@W manages to dodge @c$n's@W Hell Flash, letting it slam into the surroundings!@n", false,
                         ch, nullptr, vict, TO_NOTVICT);
@@ -4022,7 +4091,8 @@ ACMD(do_hellflash) {
                     act("@WYou can't believe it but your Hell Flash misses, flying through the air harmlessly!@n",
                         false, ch, nullptr, vict, TO_CHAR);
                     act("@C$n@W fires a Hell Flash at you, but misses!@n ", false, ch, nullptr, vict, TO_VICT);
-                    act("@c$n@W fires a Hell Flash at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict, TO_NOTVICT);
+                    act("@c$n@W fires a Hell Flash at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict,
+                        TO_NOTVICT);
                     if (GET_SKILL_PERF(ch, SKILL_HELLFLASH) == 3 && attperc > minimum) {
                         pcost(ch, attperc - 0.05, 0);
                     } else {
@@ -4256,8 +4326,10 @@ ACMD(do_ddslash) {
         if (prob < perc - 20) {
             if ((vict->getCurST()) > 0) {
                 if (blk > axion_dice(10)) {
-                    act("@C$N@W moves quickly and blocks your Darkness Dragon Slash!@n", false, ch, nullptr, vict, TO_CHAR);
-                    act("@WYou move quickly and block @C$n's@W Darkness Dragon Slash!@n", false, ch, nullptr, vict, TO_VICT);
+                    act("@C$N@W moves quickly and blocks your Darkness Dragon Slash!@n", false, ch, nullptr, vict,
+                        TO_CHAR);
+                    act("@WYou move quickly and block @C$n's@W Darkness Dragon Slash!@n", false, ch, nullptr, vict,
+                        TO_VICT);
                     act("@C$N@W moves quickly and blocks @c$n's@W Darkness Dragon Slash!@n", false, ch, nullptr, vict,
                         TO_NOTVICT);
                     pcost(ch, attperc, 0);
@@ -4282,8 +4354,10 @@ ACMD(do_ddslash) {
                 } else {
                     act("@WYou can't believe it but your Darkness Dragon Slash misses, flying through the air harmlessly!@n",
                         false, ch, nullptr, vict, TO_CHAR);
-                    act("@C$n@W fires a Darkness Dragon Slash at you, but misses!@n ", false, ch, nullptr, vict, TO_VICT);
-                    act("@c$n@W fires a Darkness Dragon Slash at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict,
+                    act("@C$n@W fires a Darkness Dragon Slash at you, but misses!@n ", false, ch, nullptr, vict,
+                        TO_VICT);
+                    act("@c$n@W fires a Darkness Dragon Slash at @C$N@W, but somehow misses!@n ", false, ch, nullptr,
+                        vict,
                         TO_NOTVICT);
 
                     pcost(ch, attperc, 0);
@@ -4509,7 +4583,8 @@ ACMD(do_crusher) {
                 if (blk > axion_dice(10)) {
                     act("@C$N@W moves quickly and blocks your crusher ball!@n", false, ch, nullptr, vict, TO_CHAR);
                     act("@WYou move quickly and block @C$n's@W crusher ball!@n", false, ch, nullptr, vict, TO_VICT);
-                    act("@C$N@W moves quickly and blocks @c$n's@W crusher ball!@n", false, ch, nullptr, vict, TO_NOTVICT);
+                    act("@C$N@W moves quickly and blocks @c$n's@W crusher ball!@n", false, ch, nullptr, vict,
+                        TO_NOTVICT);
                     if (GET_SKILL_PERF(ch, SKILL_CRUSHER) == 3 && attperc > minimum) {
                         pcost(ch, attperc - 0.05, 0);
                     } else {
@@ -4524,7 +4599,8 @@ ACMD(do_crusher) {
                 } else if (dge > axion_dice(10)) {
                     act("@C$N@W manages to dodge your crusher ball, letting it slam into the surroundings!@n", false,
                         ch, nullptr, vict, TO_CHAR);
-                    act("@WYou dodge @C$n's@W crusher ball, letting it slam into the surroundings!@n", false, ch, nullptr,
+                    act("@WYou dodge @C$n's@W crusher ball, letting it slam into the surroundings!@n", false, ch,
+                        nullptr,
                         vict, TO_VICT);
                     act("@C$N@W manages to dodge @c$n's@W crusher ball, letting it slam into the surroundings!@n",
                         false, ch, nullptr, vict, TO_NOTVICT);
@@ -4565,7 +4641,8 @@ ACMD(do_crusher) {
                 act("@WYou can't believe it but your crusher ball misses, flying through the air harmlessly!@n", false,
                     ch, nullptr, vict, TO_CHAR);
                 act("@C$n@W fires a crusher ball at you, but misses!@n", false, ch, nullptr, vict, TO_VICT);
-                act("@c$n@W fires a crusher ball at @C$N@W, but somehow misses!@n", false, ch, nullptr, vict, TO_NOTVICT);
+                act("@c$n@W fires a crusher ball at @C$N@W, but somehow misses!@n", false, ch, nullptr, vict,
+                    TO_NOTVICT);
                 if (GET_SKILL_PERF(ch, SKILL_CRUSHER) == 3 && attperc > minimum) {
                     pcost(ch, attperc - 0.05, 0);
                 } else {
@@ -4760,7 +4837,8 @@ ACMD(do_final) {
                 if (blk > axion_dice(10)) {
                     act("@C$N@W moves quickly and blocks your final flash!@n", false, ch, nullptr, vict, TO_CHAR);
                     act("@WYou move quickly and block @C$n's@W final flash!@n", false, ch, nullptr, vict, TO_VICT);
-                    act("@C$N@W moves quickly and blocks @c$n's@W final flash!@n", false, ch, nullptr, vict, TO_NOTVICT);
+                    act("@C$N@W moves quickly and blocks @c$n's@W final flash!@n", false, ch, nullptr, vict,
+                        TO_NOTVICT);
                     pcost(ch, attperc, 0);
                     pcost(vict, 0, GET_MAX_HIT(vict) / 500);
                     dmg = damtype(ch, 28, skill, attperc);
@@ -4771,7 +4849,8 @@ ACMD(do_final) {
                 } else if (dge > axion_dice(10)) {
                     act("@C$N@W manages to dodge your final flash, letting it slam into the surroundings!@n", false, ch,
                         nullptr, vict, TO_CHAR);
-                    act("@WYou dodge @C$n's@W final flash, letting it slam into the surroundings!@n", false, ch, nullptr,
+                    act("@WYou dodge @C$n's@W final flash, letting it slam into the surroundings!@n", false, ch,
+                        nullptr,
                         vict, TO_VICT);
                     act("@C$N@W manages to dodge @c$n's@W final flash, letting it slam into the surroundings!@n", false,
                         ch, nullptr, vict, TO_NOTVICT);
@@ -4794,7 +4873,8 @@ ACMD(do_final) {
                     act("@WYou can't believe it but your final flash misses, flying through the air harmlessly!@n",
                         false, ch, nullptr, vict, TO_CHAR);
                     act("@C$n@W fires a final flash at you, but misses!@n ", false, ch, nullptr, vict, TO_VICT);
-                    act("@c$n@W fires a final flash at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict, TO_NOTVICT);
+                    act("@c$n@W fires a final flash at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict,
+                        TO_NOTVICT);
 
                     pcost(ch, attperc, 0);
                     hurt(0, 0, ch, vict, nullptr, 0, 1);
@@ -4805,7 +4885,8 @@ ACMD(do_final) {
                 act("@WYou can't believe it but your final flash misses, flying through the air harmlessly!@n", false,
                     ch, nullptr, vict, TO_CHAR);
                 act("@C$n@W fires a final flash at you, but misses!@n", false, ch, nullptr, vict, TO_VICT);
-                act("@c$n@W fires a final flash at @C$N@W, but somehow misses!@n", false, ch, nullptr, vict, TO_NOTVICT);
+                act("@c$n@W fires a final flash at @C$N@W, but somehow misses!@n", false, ch, nullptr, vict,
+                    TO_NOTVICT);
                 pcost(ch, attperc, 0);
 
             }
@@ -5015,7 +5096,8 @@ ACMD(do_sbc) {
                     act("@WYou can't believe it but your special beam cannon misses, flying through the air harmlessly!@n",
                         false, ch, nullptr, vict, TO_CHAR);
                     act("@C$n@W fires a special beam cannon at you, but misses!@n ", false, ch, nullptr, vict, TO_VICT);
-                    act("@c$n@W fires a special beam cannon at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict,
+                    act("@c$n@W fires a special beam cannon at @C$N@W, but somehow misses!@n ", false, ch, nullptr,
+                        vict,
                         TO_NOTVICT);
 
                     pcost(ch, attperc, 0);
@@ -5220,9 +5302,11 @@ ACMD(do_tribeam) {
 
                     return;
                 } else if (dge > axion_dice(10)) {
-                    act("@C$N@W manages to dodge your tribeam, letting it slam into the surroundings!@n", false, ch, nullptr,
+                    act("@C$N@W manages to dodge your tribeam, letting it slam into the surroundings!@n", false, ch,
+                        nullptr,
                         vict, TO_CHAR);
-                    act("@WYou dodge @C$n's@W tribeam, letting it slam into the surroundings!@n", false, ch, nullptr, vict,
+                    act("@WYou dodge @C$n's@W tribeam, letting it slam into the surroundings!@n", false, ch, nullptr,
+                        vict,
                         TO_VICT);
                     act("@C$N@W manages to dodge @c$n's@W tribeam, letting it slam into the surroundings!@n", false, ch,
                         nullptr, vict, TO_NOTVICT);
@@ -5245,7 +5329,8 @@ ACMD(do_tribeam) {
                     act("@WYou can't believe it but your tribeam misses, flying through the air harmlessly!@n", false,
                         ch, nullptr, vict, TO_CHAR);
                     act("@C$n@W fires a tribeam at you, but misses!@n ", false, ch, nullptr, vict, TO_VICT);
-                    act("@c$n@W fires a tribeam at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict, TO_NOTVICT);
+                    act("@c$n@W fires a tribeam at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict,
+                        TO_NOTVICT);
 
                     pcost(ch, attperc, 0);
                     hurt(0, 0, ch, vict, nullptr, 0, 1);
@@ -5448,9 +5533,11 @@ ACMD(do_kienzan) {
         if (prob < perc - 20) {
             if ((vict->getCurST()) > 0) {
                 if (dge > axion_dice(10)) {
-                    act("@C$N@W manages to dodge your kienzan, letting it slam into the surroundings!@n", false, ch, nullptr,
+                    act("@C$N@W manages to dodge your kienzan, letting it slam into the surroundings!@n", false, ch,
+                        nullptr,
                         vict, TO_CHAR);
-                    act("@WYou dodge @C$n's@W kienzan, letting it slam into the surroundings!@n", false, ch, nullptr, vict,
+                    act("@WYou dodge @C$n's@W kienzan, letting it slam into the surroundings!@n", false, ch, nullptr,
+                        vict,
                         TO_VICT);
                     act("@C$N@W manages to dodge @c$n's@W kienzan, letting it slam into the surroundings!@n", false, ch,
                         nullptr, vict, TO_NOTVICT);
@@ -5473,7 +5560,8 @@ ACMD(do_kienzan) {
                     act("@WYou can't believe it but your kienzan misses, flying through the air harmlessly!@n", false,
                         ch, nullptr, vict, TO_CHAR);
                     act("@C$n@W fires a kienzan at you, but misses!@n ", false, ch, nullptr, vict, TO_VICT);
-                    act("@c$n@W fires a kienzan at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict, TO_NOTVICT);
+                    act("@c$n@W fires a kienzan at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict,
+                        TO_NOTVICT);
 
                     dodge_ki(ch, vict, 2, 25, skill, SKILL_KIENZAN); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -5537,11 +5625,14 @@ ACMD(do_kienzan) {
                     } else if (dmg > GET_MAX_HIT(vict) / 5 && (IS_MAJIN(vict) || IS_BIO(vict))) {
                         if (GET_SKILL(vict, SKILL_REGENERATE) > rand_number(1, 101) &&
                             (vict->getCurKI()) >= GET_MAX_MANA(vict) / 40) {
-                            act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", true, ch, nullptr,
+                            act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", true, ch,
+                                nullptr,
                                 vict, TO_CHAR);
-                            act("@rYou are cut in half by the attack but regenerate a moment later!@n", true, ch, nullptr,
+                            act("@rYou are cut in half by the attack but regenerate a moment later!@n", true, ch,
+                                nullptr,
                                 vict, TO_VICT);
-                            act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", true, ch, nullptr,
+                            act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", true, ch,
+                                nullptr,
                                 vict, TO_NOTVICT);
                             vict->decCurKI(vict->getMaxKI() / 40);
                             hurt(0, 0, ch, vict, nullptr, dmg, 1);
@@ -5859,11 +5950,13 @@ ACMD(do_baku) {
             dge = handle_dodge(vict);
             if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&
                 (vict->getCurST()) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-                act("@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", false, ch, nullptr, vict,
+                act("@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", false, ch, nullptr,
+                    vict,
                     TO_CHAR);
                 act("@cYou disappear, avoiding the explosion before reappearing elsewhere!@n", false, ch, nullptr, vict,
                     TO_VICT);
-                act("@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", false, ch, nullptr, vict,
+                act("@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", false, ch, nullptr,
+                    vict,
                     TO_NOTVICT);
                 REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
                 pcost(vict, 0, GET_MAX_HIT(vict) / 200);
@@ -5977,7 +6070,8 @@ ACMD(do_rogafufuken) {
             if ((vict->getCurST()) > 0) {
                 if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
                     act("@C$N@W parries your rogafufuken with a punch of $s own!@n", false, ch, nullptr, vict, TO_CHAR);
-                    act("@WYou parry @C$n's@W rogafufuken with a punch of your own!@n", false, ch, nullptr, vict, TO_VICT);
+                    act("@WYou parry @C$n's@W rogafufuken with a punch of your own!@n", false, ch, nullptr, vict,
+                        TO_VICT);
                     act("@C$N@W parries @c$n's@W rogafufuken with a punch of $s own!@n", false, ch, nullptr, vict,
                         TO_NOTVICT);
                     improve_skill(vict, SKILL_PARRY, 0);
@@ -5991,7 +6085,8 @@ ACMD(do_rogafufuken) {
                 } else if (blk > axion_dice(10)) {
                     act("@C$N@W moves quickly and blocks your rogafufuken!@n", false, ch, nullptr, vict, TO_CHAR);
                     act("@WYou move quickly and block @C$n's@W rogafufuken!@n", false, ch, nullptr, vict, TO_VICT);
-                    act("@C$N@W moves quickly and blocks @c$n's@W rogafufuken!@n", false, ch, nullptr, vict, TO_NOTVICT);
+                    act("@C$N@W moves quickly and blocks @c$n's@W rogafufuken!@n", false, ch, nullptr, vict,
+                        TO_NOTVICT);
                     pcost(ch, attperc, 0);
                     pcost(vict, 0, GET_MAX_HIT(vict) / 500);
                     dmg = damtype(ch, 23, skill, attperc);
@@ -6011,7 +6106,8 @@ ACMD(do_rogafufuken) {
                 } else {
                     act("@WYou can't believe it but your rogafufuken misses!@n", false, ch, nullptr, vict, TO_CHAR);
                     act("@C$n@W fires a rogafufuken at you, but misses!@n ", false, ch, nullptr, vict, TO_VICT);
-                    act("@c$n@W fires a rogafufuken at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict, TO_NOTVICT);
+                    act("@c$n@W fires a rogafufuken at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict,
+                        TO_NOTVICT);
 
                     pcost(ch, attperc, 0);
                     hurt(0, 0, ch, vict, nullptr, 0, 1);
@@ -6021,7 +6117,8 @@ ACMD(do_rogafufuken) {
             } else {
                 act("@WYou can't believe it but your rogafufuken misses!@n", false, ch, nullptr, vict, TO_CHAR);
                 act("@C$n@W fires a rogafufuken at you, but misses!@n", false, ch, nullptr, vict, TO_VICT);
-                act("@c$n@W fires a rogafufuken at @C$N@W, but somehow misses!@n", false, ch, nullptr, vict, TO_NOTVICT);
+                act("@c$n@W fires a rogafufuken at @C$N@W, but somehow misses!@n", false, ch, nullptr, vict,
+                    TO_NOTVICT);
                 pcost(ch, attperc, 0);
 
             }
@@ -6218,7 +6315,8 @@ ACMD(do_dualbeam) {
                     if (blk > axion_dice(10)) {
                         act("@C$N@W moves quickly and blocks your dualbeam!@n", false, ch, nullptr, vict, TO_CHAR);
                         act("@WYou move quickly and block @C$n's@W dualbeam!@n", false, ch, nullptr, vict, TO_VICT);
-                        act("@C$N@W moves quickly and blocks @c$n's@W dualbeam!@n", false, ch, nullptr, vict, TO_NOTVICT);
+                        act("@C$N@W moves quickly and blocks @c$n's@W dualbeam!@n", false, ch, nullptr, vict,
+                            TO_NOTVICT);
                         if (hits == 1) {
                             pcost(ch, attperc, 0);
                         }
@@ -6231,7 +6329,8 @@ ACMD(do_dualbeam) {
                     } else if (dge > axion_dice(10)) {
                         act("@C$N@W manages to dodge your dualbeam, letting it slam into the surroundings!@n", false,
                             ch, nullptr, vict, TO_CHAR);
-                        act("@WYou dodge @C$n's@W dualbeam, letting it slam into the surroundings!@n", false, ch, nullptr,
+                        act("@WYou dodge @C$n's@W dualbeam, letting it slam into the surroundings!@n", false, ch,
+                            nullptr,
                             vict, TO_VICT);
                         act("@C$N@W manages to dodge @c$n's@W dualbeam, letting it slam into the surroundings!@n",
                             false, ch, nullptr, vict, TO_NOTVICT);
@@ -6269,7 +6368,8 @@ ACMD(do_dualbeam) {
                     act("@WYou can't believe it but your dualbeam misses, flying through the air harmlessly!@n", false,
                         ch, nullptr, vict, TO_CHAR);
                     act("@C$n@W fires a dualbeam at you, but misses!@n", false, ch, nullptr, vict, TO_VICT);
-                    act("@c$n@W fires a dualbeam at @C$N@W, but somehow misses!@n", false, ch, nullptr, vict, TO_NOTVICT);
+                    act("@c$n@W fires a dualbeam at @C$N@W, but somehow misses!@n", false, ch, nullptr, vict,
+                        TO_NOTVICT);
                     if (hits == 1) {
                         pcost(ch, attperc, 0);
                     }
@@ -6524,7 +6624,8 @@ ACMD(do_blessedhammer) {
             } else {
                 act("@WYou can't believe it but your @WB@Dl@We@Ds@Ws@De@Wd @DH@Wa@Dm@Wm@De@Wr@W misses, flying through the air harmlessly!@n",
                     false, ch, nullptr, vict, TO_CHAR);
-                act("@C$n@W fires a @WB@Dl@We@Ds@Ws@De@Wd @DH@Wa@Dm@Wm@De@Wr@W at you, but misses!@n", false, ch, nullptr,
+                act("@C$n@W fires a @WB@Dl@We@Ds@Ws@De@Wd @DH@Wa@Dm@Wm@De@Wr@W at you, but misses!@n", false, ch,
+                    nullptr,
                     vict, TO_VICT);
                 act("@c$n@W fires a @WB@Dl@We@Ds@Ws@De@Wd @DH@Wa@Dm@Wm@De@Wr@W at @C$N@W, but somehow misses!@n", false,
                     ch, nullptr, vict, TO_NOTVICT);
@@ -6733,7 +6834,8 @@ ACMD(do_kousengan) {
                 } else if (dge > axion_dice(10)) {
                     act("@C$N@W manages to dodge your kousengan, letting it slam into the surroundings!@n", false, ch,
                         nullptr, vict, TO_CHAR);
-                    act("@WYou dodge @C$n's@W kousengan, letting it slam into the surroundings!@n", false, ch, nullptr, vict,
+                    act("@WYou dodge @C$n's@W kousengan, letting it slam into the surroundings!@n", false, ch, nullptr,
+                        vict,
                         TO_VICT);
                     act("@C$N@W manages to dodge @c$n's@W kousengan, letting it slam into the surroundings!@n", false,
                         ch, nullptr, vict, TO_NOTVICT);
@@ -6756,7 +6858,8 @@ ACMD(do_kousengan) {
                     act("@WYou can't believe it but your kousengan misses, flying through the air harmlessly!@n", false,
                         ch, nullptr, vict, TO_CHAR);
                     act("@C$n@W fires a kousengan at you, but misses!@n ", false, ch, nullptr, vict, TO_VICT);
-                    act("@c$n@W fires a kousengan at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict, TO_NOTVICT);
+                    act("@c$n@W fires a kousengan at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict,
+                        TO_NOTVICT);
 
                     pcost(ch, attperc, 0);
                     hurt(0, 0, ch, vict, nullptr, 0, 1);
@@ -7002,7 +7105,8 @@ ACMD(do_deathbeam) {
                 } else if (dge > axion_dice(10)) {
                     act("@C$N@W manages to dodge your deathbeam, letting it slam into the surroundings!@n", false, ch,
                         nullptr, vict, TO_CHAR);
-                    act("@WYou dodge @C$n's@W deathbeam, letting it slam into the surroundings!@n", false, ch, nullptr, vict,
+                    act("@WYou dodge @C$n's@W deathbeam, letting it slam into the surroundings!@n", false, ch, nullptr,
+                        vict,
                         TO_VICT);
                     act("@C$N@W manages to dodge @c$n's@W deathbeam, letting it slam into the surroundings!@n", false,
                         ch, nullptr, vict, TO_NOTVICT);
@@ -7031,7 +7135,8 @@ ACMD(do_deathbeam) {
                     act("@WYou can't believe it but your deathbeam misses, flying through the air harmlessly!@n", false,
                         ch, nullptr, vict, TO_CHAR);
                     act("@C$n@W fires a deathbeam at you, but misses!@n ", false, ch, nullptr, vict, TO_VICT);
-                    act("@c$n@W fires a deathbeam at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict, TO_NOTVICT);
+                    act("@c$n@W fires a deathbeam at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict,
+                        TO_NOTVICT);
                     if (GET_SKILL_PERF(ch, SKILL_DEATHBEAM) == 3 && attperc > minimum) {
                         pcost(ch, attperc - 0.05, 0);
                     } else {
@@ -7297,9 +7402,11 @@ ACMD(do_dodonpa) {
 
                     return;
                 } else if (dge > axion_dice(10)) {
-                    act("@C$N@W manages to dodge your dodonpa, letting it slam into the surroundings!@n", false, ch, nullptr,
+                    act("@C$N@W manages to dodge your dodonpa, letting it slam into the surroundings!@n", false, ch,
+                        nullptr,
                         vict, TO_CHAR);
-                    act("@WYou dodge @C$n's@W dodonpa, letting it slam into the surroundings!@n", false, ch, nullptr, vict,
+                    act("@WYou dodge @C$n's@W dodonpa, letting it slam into the surroundings!@n", false, ch, nullptr,
+                        vict,
                         TO_VICT);
                     act("@C$N@W manages to dodge @c$n's@W dodonpa, letting it slam into the surroundings!@n", false, ch,
                         nullptr, vict, TO_NOTVICT);
@@ -7325,7 +7432,8 @@ ACMD(do_dodonpa) {
                     act("@WYou can't believe it but your dodonpa misses, flying through the air harmlessly!@n", false,
                         ch, nullptr, vict, TO_CHAR);
                     act("@C$n@W fires a dodonpa at you, but misses!@n ", false, ch, nullptr, vict, TO_VICT);
-                    act("@c$n@W fires a dodonpa at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict, TO_NOTVICT);
+                    act("@c$n@W fires a dodonpa at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict,
+                        TO_NOTVICT);
                     if (GET_SKILL_PERF(ch, SKILL_DODONPA) == 3 && attperc > minimum) {
                         pcost(ch, attperc - 0.05, 0);
                     } else {
@@ -7569,9 +7677,11 @@ ACMD(do_masenko) {
 
                     return;
                 } else if (dge > axion_dice(10)) {
-                    act("@C$N@W manages to dodge your masenko, letting it slam into the surroundings!@n", false, ch, nullptr,
+                    act("@C$N@W manages to dodge your masenko, letting it slam into the surroundings!@n", false, ch,
+                        nullptr,
                         vict, TO_CHAR);
-                    act("@WYou dodge @C$n's@W masenko, letting it slam into the surroundings!@n", false, ch, nullptr, vict,
+                    act("@WYou dodge @C$n's@W masenko, letting it slam into the surroundings!@n", false, ch, nullptr,
+                        vict,
                         TO_VICT);
                     act("@C$N@W manages to dodge @c$n's@W masenko, letting it slam into the surroundings!@n", false, ch,
                         nullptr, vict, TO_NOTVICT);
@@ -7598,7 +7708,8 @@ ACMD(do_masenko) {
                     act("@WYou can't believe it but your masenko misses, flying through the air harmlessly!@n", false,
                         ch, nullptr, vict, TO_CHAR);
                     act("@C$n@W fires a masenko at you, but misses!@n ", false, ch, nullptr, vict, TO_VICT);
-                    act("@c$n@W fires a masenko at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict, TO_NOTVICT);
+                    act("@c$n@W fires a masenko at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict,
+                        TO_NOTVICT);
                     if (GET_SKILL_PERF(ch, SKILL_MASENKO) == 3 && attperc > minimum) {
                         pcost(ch, attperc - 0.05, 0);
                     } else {
@@ -7880,7 +7991,8 @@ ACMD(do_kamehameha) {
                 } else if (dge > axion_dice(10)) {
                     act("@C$N@W manages to dodge your kamehameha, letting it slam into the surroundings!@n", false, ch,
                         nullptr, vict, TO_CHAR);
-                    act("@WYou dodge @C$n's@W kamehameha, letting it slam into the surroundings!@n", false, ch, nullptr, vict,
+                    act("@WYou dodge @C$n's@W kamehameha, letting it slam into the surroundings!@n", false, ch, nullptr,
+                        vict,
                         TO_VICT);
                     act("@C$N@W manages to dodge @c$n's@W kamehameha, letting it slam into the surroundings!@n", false,
                         ch, nullptr, vict, TO_NOTVICT);
@@ -7916,7 +8028,8 @@ ACMD(do_kamehameha) {
                     act("@WYou can't believe it but your kamehameha misses, flying through the air harmlessly!@n",
                         false, ch, nullptr, vict, TO_CHAR);
                     act("@C$n@W fires a kamehameha at you, but misses!@n ", false, ch, nullptr, vict, TO_VICT);
-                    act("@c$n@W fires a kamehameha at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict, TO_NOTVICT);
+                    act("@c$n@W fires a kamehameha at @C$N@W, but somehow misses!@n ", false, ch, nullptr, vict,
+                        TO_NOTVICT);
                     if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 3 && attperc > minimum) {
                         pcost(ch, attperc - 0.05, 0);
                     } else {
@@ -8252,10 +8365,13 @@ ACMD(do_renzo) {
 
                     return;
                 } else if (blk > axion_dice(10)) {
-                    act("@C$N@W moves quickly and blocks every renzokou energy dan shot with $S arms!@n", true, ch, nullptr,
+                    act("@C$N@W moves quickly and blocks every renzokou energy dan shot with $S arms!@n", true, ch,
+                        nullptr,
                         vict, TO_CHAR);
-                    act("@WYou move quickly and block @C$n's@W renzokou energy dan!@n", true, ch, nullptr, vict, TO_VICT);
-                    act("@C$N@W moves quickly and blocks @c$n's@W renzokou energy dan with $S arms!@n", true, ch, nullptr,
+                    act("@WYou move quickly and block @C$n's@W renzokou energy dan!@n", true, ch, nullptr, vict,
+                        TO_VICT);
+                    act("@C$N@W moves quickly and blocks @c$n's@W renzokou energy dan with $S arms!@n", true, ch,
+                        nullptr,
                         vict, TO_NOTVICT);
                     if (master_pass == 1)
                         pcost(ch, attperc * 0.25, 0);
@@ -8288,7 +8404,8 @@ ACMD(do_renzo) {
                 } else {
                     act("@WYou can't believe it but all your renzokou energy dan shots miss, flying through the air harmlessly!@n",
                         true, ch, nullptr, vict, TO_CHAR);
-                    act("@C$n@W fires hundreds of renzokou energy dan shots at you, but misses!@n ", true, ch, nullptr, vict,
+                    act("@C$n@W fires hundreds of renzokou energy dan shots at you, but misses!@n ", true, ch, nullptr,
+                        vict,
                         TO_VICT);
                     act("@c$n@W fires hundreds of renzokou energy dan shots at @C$N@W, but somehow misses!@n ", true,
                         ch, nullptr, vict, TO_NOTVICT);
@@ -8307,7 +8424,8 @@ ACMD(do_renzo) {
                     true, ch, nullptr, vict, TO_CHAR);
                 act("@C$n@W fires hundreds of renzokou energy dan shots at you, but misses!@n", true, ch, nullptr, vict,
                     TO_VICT);
-                act("@c$n@W fires hundreds of renzokou energy dan shots at @C$N@W, but somehow misses!@n", true, ch, nullptr,
+                act("@c$n@W fires hundreds of renzokou energy dan shots at @C$N@W, but somehow misses!@n", true, ch,
+                    nullptr,
                     vict, TO_NOTVICT);
                 if (master_pass == 1)
                     pcost(ch, attperc * 0.25, 0);
@@ -8548,7 +8666,8 @@ ACMD(do_heeldrop) {
                 if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
                     act("@C$N@W parries your heeldrop with a punch of $S own!@n", true, ch, nullptr, vict, TO_CHAR);
                     act("@WYou parry @C$n's@W heeldrop with a punch of your own!@n", true, ch, nullptr, vict, TO_VICT);
-                    act("@C$N@W parries @c$n's@W heeldrop with a punch of $S own!@n", true, ch, nullptr, vict, TO_NOTVICT);
+                    act("@C$N@W parries @c$n's@W heeldrop with a punch of $S own!@n", true, ch, nullptr, vict,
+                        TO_NOTVICT);
                     improve_skill(vict, SKILL_PARRY, 0);
                     pcost(ch, 0, stcost / 2);
                     pcost(vict, 0, GET_MAX_HIT(vict) / 500);
@@ -8602,7 +8721,8 @@ ACMD(do_heeldrop) {
             hitspot = roll_hitloc(ch, vict, skill);
             switch (hitspot) {
                 case 1:
-                    act("@WYou disappear, appearing above @C$N@W you spin and heeldrop $M in the face!@n", true, ch, nullptr,
+                    act("@WYou disappear, appearing above @C$N@W you spin and heeldrop $M in the face!@n", true, ch,
+                        nullptr,
                         vict, TO_CHAR);
                     act("@C$n@W disappears, only to appear above you, spinning quickly and heeldropping you in the face!@n",
                         true, ch, nullptr, vict, TO_VICT);
@@ -8633,7 +8753,8 @@ ACMD(do_heeldrop) {
                 case 3:
                     act("@WYou fly at @C$N@W, heeldropping $S gut as you fly!@n", true, ch, nullptr, vict, TO_CHAR);
                     act("@C$n@W flies at you, heeldropping your gut as $e flies!@n", true, ch, nullptr, vict, TO_VICT);
-                    act("@c$n@W flies at @C$N@W, heeldropping $S gut as $e flies!@n", true, ch, nullptr, vict, TO_NOTVICT);
+                    act("@c$n@W flies at @C$N@W, heeldropping $S gut as $e flies!@n", true, ch, nullptr, vict,
+                        TO_NOTVICT);
                     if (GET_BONUS(ch, BONUS_SOFT)) {
                         dmg *= calc_critical(ch, 2);
                     }
@@ -9588,9 +9709,11 @@ ACMD(do_shogekiha) {
 
                     return;
                 } else if (dge > axion_dice(10)) {
-                    act("@C$N@W manages to dodge your shogekiha, letting it slam into the surroundings!@n", true, ch, nullptr,
+                    act("@C$N@W manages to dodge your shogekiha, letting it slam into the surroundings!@n", true, ch,
+                        nullptr,
                         vict, TO_CHAR);
-                    act("@WYou dodge @C$n's@W shogekiha, letting it slam into the surroundings!@n", true, ch, nullptr, vict,
+                    act("@WYou dodge @C$n's@W shogekiha, letting it slam into the surroundings!@n", true, ch, nullptr,
+                        vict,
                         TO_VICT);
                     act("@C$N@W manages to dodge @c$n's@W shogekiha, letting it slam into the surroundings!@n", true,
                         ch, nullptr, vict, TO_NOTVICT);
@@ -9604,7 +9727,8 @@ ACMD(do_shogekiha) {
                         ch, nullptr, vict, TO_CHAR);
                     act("@C$n@W aims $s hand and releases a shogekiha at you, but misses!@n ", true, ch, nullptr, vict,
                         TO_VICT);
-                    act("@c$n@W aims $s hand and releases a shogekiha at @C$N@W, but somehow misses!@n ", true, ch, nullptr,
+                    act("@c$n@W aims $s hand and releases a shogekiha at @C$N@W, but somehow misses!@n ", true, ch,
+                        nullptr,
                         vict, TO_NOTVICT);
 
                     pcost(ch, attperc, 0);
@@ -9615,8 +9739,10 @@ ACMD(do_shogekiha) {
             } else {
                 act("@WYou can't believe it but your shogekiha misses, flying through the air harmlessly!@n", true, ch,
                     nullptr, vict, TO_CHAR);
-                act("@C$n@W aims $s hand and releases a shogekiha at you, but misses!@n", true, ch, nullptr, vict, TO_VICT);
-                act("@c$n@W aims $s hand and releases a shogekiha at @C$N@W, but somehow misses!@n", true, ch, nullptr, vict,
+                act("@C$n@W aims $s hand and releases a shogekiha at you, but misses!@n", true, ch, nullptr, vict,
+                    TO_VICT);
+                act("@c$n@W aims $s hand and releases a shogekiha at @C$N@W, but somehow misses!@n", true, ch, nullptr,
+                    vict,
                     TO_NOTVICT);
                 pcost(ch, attperc, 0);
 
@@ -9697,8 +9823,10 @@ ACMD(do_shogekiha) {
                     break;
             }
             if (master_pass == true) {
-                act("@CYour skillful shogekiha disipated some of @c$N's@C charged ki!@n", true, ch, nullptr, vict, TO_CHAR);
-                act("@C$n@C's skillful shogekiha disipated some of YOUR charged ki!@n", true, ch, nullptr, vict, TO_VICT);
+                act("@CYour skillful shogekiha disipated some of @c$N's@C charged ki!@n", true, ch, nullptr, vict,
+                    TO_CHAR);
+                act("@C$n@C's skillful shogekiha disipated some of YOUR charged ki!@n", true, ch, nullptr, vict,
+                    TO_VICT);
                 act("@C$n@C's skillful shogekiha disipated some of @c$N's@C charged ki!", true, ch, nullptr, vict,
                     TO_NOTVICT);
                 GET_CHARGE(vict) -= GET_CHARGE(vict) * 0.25;
@@ -9852,7 +9980,8 @@ ACMD(do_tsuihidan) {
                 } else if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
                     act("@C$N@W deflects your tsuihidan, sending it flying away!@n", true, ch, nullptr, vict, TO_CHAR);
                     act("@WYou deflect @C$n's@W tsuihidan sending it flying away!@n", true, ch, nullptr, vict, TO_VICT);
-                    act("@C$N@W deflects @c$n's@W tsuihidan sending it flying away!@n", true, ch, nullptr, vict, TO_NOTVICT);
+                    act("@C$N@W deflects @c$n's@W tsuihidan sending it flying away!@n", true, ch, nullptr, vict,
+                        TO_NOTVICT);
                     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
 
                     parry_ki(attperc, ch, vict, "tsuihidan", prob, perc, skill, 11);
@@ -9873,9 +10002,11 @@ ACMD(do_tsuihidan) {
 
                     return;
                 } else if (dge > axion_dice(10)) {
-                    act("@C$N@W manages to dodge your tsuihidan, letting it slam into the surroundings!@n", true, ch, nullptr,
+                    act("@C$N@W manages to dodge your tsuihidan, letting it slam into the surroundings!@n", true, ch,
+                        nullptr,
                         vict, TO_CHAR);
-                    act("@WYou dodge @C$n's@W tsuihidan, letting it slam into the surroundings!@n", true, ch, nullptr, vict,
+                    act("@WYou dodge @C$n's@W tsuihidan, letting it slam into the surroundings!@n", true, ch, nullptr,
+                        vict,
                         TO_VICT);
                     act("@C$N@W manages to dodge @c$n's@W tsuihidan, letting it slam into the surroundings!@n", true,
                         ch, nullptr, vict, TO_NOTVICT);
@@ -9888,7 +10019,8 @@ ACMD(do_tsuihidan) {
                     act("@WYou can't believe it but your tsuihidan misses, flying through the air harmlessly!@n", true,
                         ch, nullptr, vict, TO_CHAR);
                     act("@C$n@W fires a tsuihidan at you, but misses!@n ", true, ch, nullptr, vict, TO_VICT);
-                    act("@c$n@W fires a tsuihidan at @C$N@W, but somehow misses!@n ", true, ch, nullptr, vict, TO_NOTVICT);
+                    act("@c$n@W fires a tsuihidan at @C$N@W, but somehow misses!@n ", true, ch, nullptr, vict,
+                        TO_NOTVICT);
 
                     dodge_ki(ch, vict, 1, 11, skill, SKILL_TSUIHIDAN); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -9979,7 +10111,8 @@ ACMD(do_tsuihidan) {
             }
             if (master_pass == true) {
                 vict->decCurST(dmg);
-                act("@CYour tsuihidan hits a vital spot and seems to sap some of @c$N's@C stamina!@n", true, ch, nullptr,
+                act("@CYour tsuihidan hits a vital spot and seems to sap some of @c$N's@C stamina!@n", true, ch,
+                    nullptr,
                     vict, TO_CHAR);
                 act("@C$n's@C tsuihidan hits a vital spot and saps some of your stamina!@n", true, ch, nullptr, vict,
                     TO_VICT);
@@ -10817,7 +10950,8 @@ ACMD(do_bite) {
                 case 3:
                     act("@WYou bite @C$N's@W body!@n", true, ch, nullptr, vict, TO_CHAR);
                     act("@C$n@W bites you on the body, sending blood flying!@n", true, ch, nullptr, vict, TO_VICT);
-                    act("@C$n@W bites @c$N@W on the body, sending blood flying!@n", true, ch, nullptr, vict, TO_NOTVICT);
+                    act("@C$n@W bites @c$N@W on the body, sending blood flying!@n", true, ch, nullptr, vict,
+                        TO_NOTVICT);
                     if (GET_BONUS(ch, BONUS_SOFT)) {
                         dmg *= calc_critical(ch, 2);
                     }
@@ -10995,7 +11129,8 @@ ACMD(do_kiball) {
                 } else if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
                     act("@C$N@W deflects your kiball, sending it flying away!@n", true, ch, nullptr, vict, TO_CHAR);
                     act("@WYou deflect @C$n's@W kiball sending it flying away!@n", true, ch, nullptr, vict, TO_VICT);
-                    act("@C$N@W deflects @c$n's@W kiball sending it flying away!@n", true, ch, nullptr, vict, TO_NOTVICT);
+                    act("@C$N@W deflects @c$n's@W kiball sending it flying away!@n", true, ch, nullptr, vict,
+                        TO_NOTVICT);
                     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
 
                     parry_ki(attperc, ch, vict, "kiball", prob, perc, skill, 7);
@@ -11020,9 +11155,11 @@ ACMD(do_kiball) {
 
                     return;
                 } else if (dge > axion_dice(10)) {
-                    act("@C$N@W manages to dodge your kiball, letting it slam into the surroundings!@n", true, ch, nullptr,
+                    act("@C$N@W manages to dodge your kiball, letting it slam into the surroundings!@n", true, ch,
+                        nullptr,
                         vict, TO_CHAR);
-                    act("@WYou dodge @C$n's@W kiball, letting it slam into the surroundings!@n", true, ch, nullptr, vict,
+                    act("@WYou dodge @C$n's@W kiball, letting it slam into the surroundings!@n", true, ch, nullptr,
+                        vict,
                         TO_VICT);
                     act("@C$N@W manages to dodge @c$n's@W kiball, letting it slam into the surroundings!@n", true, ch,
                         nullptr, vict, TO_NOTVICT);
@@ -11051,7 +11188,8 @@ ACMD(do_kiball) {
                     return;
                 }
             } else {
-                act("@WYou can't believe it but your kiball misses, flying through the air harmlessly!@n", true, ch, nullptr,
+                act("@WYou can't believe it but your kiball misses, flying through the air harmlessly!@n", true, ch,
+                    nullptr,
                     vict, TO_CHAR);
                 act("@C$n@W fires a bright yellow kiball at you, but misses!@n", true, ch, nullptr, vict, TO_VICT);
                 act("@c$n@W fires a bright yellow kiball at @C$N@W, but somehow misses!@n", true, ch, nullptr, vict,
@@ -11063,8 +11201,10 @@ ACMD(do_kiball) {
             return;
         } else {
             if (mult_count > 1) {
-                act("@CYour expertise has allowed you to fire multiple shots in a row!@n", true, ch, nullptr, vict, TO_CHAR);
-                act("@C$n's@C expertise has allowed $m to fire multiple shots in a row!@n", true, ch, nullptr, vict, TO_ROOM);
+                act("@CYour expertise has allowed you to fire multiple shots in a row!@n", true, ch, nullptr, vict,
+                    TO_CHAR);
+                act("@C$n's@C expertise has allowed $m to fire multiple shots in a row!@n", true, ch, nullptr, vict,
+                    TO_ROOM);
             }
             while (mult_count > 0) {
                 mult_count -= 1;
@@ -11274,11 +11414,13 @@ ACMD(do_beam) {
 
                     return;
                 } else if (dge > axion_dice(10)) {
-                    act("@C$N@W manages to dodge your beam, letting it slam into the surroundings!@n", true, ch, nullptr,
+                    act("@C$N@W manages to dodge your beam, letting it slam into the surroundings!@n", true, ch,
+                        nullptr,
                         vict, TO_CHAR);
                     act("@WYou dodge @C$n's@W beam, letting it slam into the surroundings!@n", true, ch, nullptr, vict,
                         TO_VICT);
-                    act("@C$N@W manages to dodge @c$n's@W beam, letting it slam into the surroundings!@n", true, ch, nullptr,
+                    act("@C$N@W manages to dodge @c$n's@W beam, letting it slam into the surroundings!@n", true, ch,
+                        nullptr,
                         vict, TO_NOTVICT);
 
                     dodge_ki(ch, vict, 0, 10, skill, SKILL_BEAM); /* Effects on the room from dodging a ki attack
@@ -11305,7 +11447,8 @@ ACMD(do_beam) {
                     return;
                 }
             } else {
-                act("@WYou can't believe it but your beam misses, flying through the air harmlessly!@n", true, ch, nullptr,
+                act("@WYou can't believe it but your beam misses, flying through the air harmlessly!@n", true, ch,
+                    nullptr,
                     vict, TO_CHAR);
                 act("@C$n@W fires a bright yellow beam at you, but misses!@n", true, ch, nullptr, vict, TO_VICT);
                 act("@c$n@W fires a bright yellow beam at @C$N@W, but somehow misses!@n", true, ch, nullptr, vict,
@@ -11416,11 +11559,14 @@ ACMD(do_beam) {
                     act("$N@W is pushed away by the blast!@n", true, ch, nullptr, vict, TO_NOTVICT);
                     do_simple_move(vict, attempt, true);
                 } else {
-                    act("$N@W is pushed away by the blast, but is slammed into an obstruction!@n", true, ch, nullptr, vict,
+                    act("$N@W is pushed away by the blast, but is slammed into an obstruction!@n", true, ch, nullptr,
+                        vict,
                         TO_CHAR);
-                    act("@WYou are pushed away by the blast, but are slammed into an obstruction!@n", true, ch, nullptr, vict,
+                    act("@WYou are pushed away by the blast, but are slammed into an obstruction!@n", true, ch, nullptr,
+                        vict,
                         TO_VICT);
-                    act("$N@W is pushed away by the blast, but is slammed into an obstruction!@n", true, ch, nullptr, vict,
+                    act("$N@W is pushed away by the blast, but is slammed into an obstruction!@n", true, ch, nullptr,
+                        vict,
                         TO_NOTVICT);
                     dmg *= 2;
                     hurt(1, 195, ch, vict, nullptr, dmg, 1);
@@ -11551,7 +11697,8 @@ ACMD(do_kiblast) {
                 } else if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
                     act("@C$N@W deflects your kiblast, sending it flying away!@n", true, ch, nullptr, vict, TO_CHAR);
                     act("@WYou deflect @C$n's@W kiblast sending it flying away!@n", true, ch, nullptr, vict, TO_VICT);
-                    act("@C$N@W deflects @c$n's@W kiblast sending it flying away!@n", true, ch, nullptr, vict, TO_NOTVICT);
+                    act("@C$N@W deflects @c$n's@W kiblast sending it flying away!@n", true, ch, nullptr, vict,
+                        TO_NOTVICT);
                     pcost(vict, 0, GET_MAX_HIT(vict) / 200);
 
                     parry_ki(attperc, ch, vict, "kiblast", prob, perc, skill, 9);
@@ -11576,9 +11723,11 @@ ACMD(do_kiblast) {
 
                     return;
                 } else if (dge > axion_dice(10)) {
-                    act("@C$N@W manages to dodge your kiblast, letting it slam into the surroundings!@n", true, ch, nullptr,
+                    act("@C$N@W manages to dodge your kiblast, letting it slam into the surroundings!@n", true, ch,
+                        nullptr,
                         vict, TO_CHAR);
-                    act("@WYou dodge @C$n's@W kiblast, letting it slam into the surroundings!@n", true, ch, nullptr, vict,
+                    act("@WYou dodge @C$n's@W kiblast, letting it slam into the surroundings!@n", true, ch, nullptr,
+                        vict,
                         TO_VICT);
                     act("@C$N@W manages to dodge @c$n's@W kiblast, letting it slam into the surroundings!@n", true, ch,
                         nullptr, vict, TO_NOTVICT);
@@ -11598,8 +11747,10 @@ ACMD(do_kiblast) {
                 } else {
                     act("@WYou can't believe it but your kiblast misses, flying through the air harmlessly!@n", true,
                         ch, nullptr, vict, TO_CHAR);
-                    act("@C$n@W fires a bright yellow kiblast at you, but misses!@n ", true, ch, nullptr, vict, TO_VICT);
-                    act("@c$n@W fires a bright yellow kiblast at @C$N@W, but somehow misses!@n ", true, ch, nullptr, vict,
+                    act("@C$n@W fires a bright yellow kiblast at you, but misses!@n ", true, ch, nullptr, vict,
+                        TO_VICT);
+                    act("@c$n@W fires a bright yellow kiblast at @C$N@W, but somehow misses!@n ", true, ch, nullptr,
+                        vict,
                         TO_NOTVICT);
                     pcost(ch, attperc, 0);
                     hurt(0, 0, ch, vict, nullptr, 0, 1);
@@ -11607,7 +11758,8 @@ ACMD(do_kiblast) {
                     return;
                 }
             } else {
-                act("@WYou can't believe it but your kiblast misses, flying through the air harmlessly!@n", true, ch, nullptr,
+                act("@WYou can't believe it but your kiblast misses, flying through the air harmlessly!@n", true, ch,
+                    nullptr,
                     vict, TO_CHAR);
                 act("@C$n@W fires a bright yellow kiblast at you, but misses!@n", true, ch, nullptr, vict, TO_VICT);
                 act("@c$n@W fires a bright yellow kiblast at @C$N@W, but somehow misses!@n", true, ch, nullptr, vict,
@@ -11851,7 +12003,8 @@ ACMD(do_slam) {
                 } else {
                     act("@WYou can't believe it but your slam misses!@n", true, ch, nullptr, vict, TO_CHAR);
                     act("@C$n@W moves to slam you with both $s fists, but misses!@n", true, ch, nullptr, vict, TO_VICT);
-                    act("@c$n@W moves to slam @C$N@W with both $s fists, but somehow misses!@n", true, ch, nullptr, vict,
+                    act("@c$n@W moves to slam @C$N@W with both $s fists, but somehow misses!@n", true, ch, nullptr,
+                        vict,
                         TO_NOTVICT);
                     pcost(ch, 0, stcost / 2);
                     hurt(0, 0, ch, vict, nullptr, 0, 0);
@@ -11874,7 +12027,8 @@ ACMD(do_slam) {
             hitspot = roll_hitloc(ch, vict, skill);
             switch (hitspot) {
                 case 1:
-                    act("@WYou disappear, appearing above @C$N@W and slam a double fisted blow into $M!@n", true, ch, nullptr,
+                    act("@WYou disappear, appearing above @C$N@W and slam a double fisted blow into $M!@n", true, ch,
+                        nullptr,
                         vict, TO_CHAR);
                     act("@C$n@W disappears, only to appear above you, slamming a double fisted blow into you!@n", true,
                         ch, nullptr, vict, TO_VICT);
@@ -11907,27 +12061,34 @@ ACMD(do_slam) {
                         GET_POS(vict) = POS_SITTING;
                     }
                     if (ROOM_DAMAGE(IN_ROOM(vict)) <= 95 && !ROOM_FLAGGED(IN_ROOM(vict), ROOM_SPACE)) {
-                        act("@W$N@W slams into the ground forming a large crater with $S body!@n", true, ch, nullptr, vict,
+                        act("@W$N@W slams into the ground forming a large crater with $S body!@n", true, ch, nullptr,
+                            vict,
                             TO_CHAR);
-                        act("@WYou slam into the ground forming a large crater with your body!@n", true, ch, nullptr, vict,
+                        act("@WYou slam into the ground forming a large crater with your body!@n", true, ch, nullptr,
+                            vict,
                             TO_VICT);
-                        act("@W$N@W slams into the ground forming a large crater with $S body!@n", true, ch, nullptr, vict,
+                        act("@W$N@W slams into the ground forming a large crater with $S body!@n", true, ch, nullptr,
+                            vict,
                             TO_NOTVICT);
                         if (SECT(IN_ROOM(vict)) != SECT_INSIDE && SECT(IN_ROOM(vict)) != SECT_UNDERWATER &&
                             SECT(IN_ROOM(vict)) != SECT_WATER_SWIM && SECT(IN_ROOM(vict)) != SECT_WATER_NOSWIM) {
                             impact_sound(ch, "@wA loud roar is heard nearby!@n\r\n");
                             switch (rand_number(1, 8)) {
                                 case 1:
-                                    act("Debris is thrown into the air and showers down thunderously!", true, ch, nullptr,
+                                    act("Debris is thrown into the air and showers down thunderously!", true, ch,
+                                        nullptr,
                                         vict, TO_CHAR);
-                                    act("Debris is thrown into the air and showers down thunderously!", true, ch, nullptr,
+                                    act("Debris is thrown into the air and showers down thunderously!", true, ch,
+                                        nullptr,
                                         vict, TO_ROOM);
                                     break;
                                 case 2:
                                     if (rand_number(1, 4) == 4 && ROOM_EFFECT(IN_ROOM(vict)) == 0) {
                                         ROOM_EFFECT(IN_ROOM(vict)) = 1;
-                                        act("Lava leaks up through cracks in the crater!", true, ch, nullptr, vict, TO_CHAR);
-                                        act("Lava leaks up through cracks in the crater!", true, ch, nullptr, vict, TO_ROOM);
+                                        act("Lava leaks up through cracks in the crater!", true, ch, nullptr, vict,
+                                            TO_CHAR);
+                                        act("Lava leaks up through cracks in the crater!", true, ch, nullptr, vict,
+                                            TO_ROOM);
                                     }
                                     break;
                                 case 3:
@@ -11935,15 +12096,19 @@ ACMD(do_slam) {
                                     act("A cloud of dust envelopes the entire area!", true, ch, nullptr, vict, TO_ROOM);
                                     break;
                                 case 4:
-                                    act("The surrounding area roars and shudders from the impact!", true, ch, nullptr, vict,
+                                    act("The surrounding area roars and shudders from the impact!", true, ch, nullptr,
+                                        vict,
                                         TO_CHAR);
-                                    act("The surrounding area roars and shudders from the impact!", true, ch, nullptr, vict,
+                                    act("The surrounding area roars and shudders from the impact!", true, ch, nullptr,
+                                        vict,
                                         TO_ROOM);
                                     break;
                                 case 5:
-                                    act("The ground shatters apart from the stress of the impact!", true, ch, nullptr, vict,
+                                    act("The ground shatters apart from the stress of the impact!", true, ch, nullptr,
+                                        vict,
                                         TO_CHAR);
-                                    act("The ground shatters apart from the stress of the impact!", true, ch, nullptr, vict,
+                                    act("The ground shatters apart from the stress of the impact!", true, ch, nullptr,
+                                        vict,
                                         TO_ROOM);
                                     break;
                                 case 6:
@@ -11965,7 +12130,8 @@ ACMD(do_slam) {
                                     act("Large bubbles rise from the movement!", true, ch, nullptr, vict, TO_ROOM);
                                     break;
                                 case 3:
-                                    act("The water collapses in on the hole created!", true, ch, nullptr, vict, TO_CHAR);
+                                    act("The water collapses in on the hole created!", true, ch, nullptr, vict,
+                                        TO_CHAR);
                                     act("The water collapses in on the hole create!", true, ch, nullptr, vict, TO_ROOM);
                                     break;
                             }
@@ -11973,13 +12139,17 @@ ACMD(do_slam) {
                         if (SECT(IN_ROOM(vict)) == SECT_WATER_SWIM || SECT(IN_ROOM(vict)) == SECT_WATER_NOSWIM) {
                             switch (rand_number(1, 3)) {
                                 case 1:
-                                    act("A huge column of water erupts from the impact!", true, ch, nullptr, vict, TO_CHAR);
-                                    act("A huge column of water erupts from the impact!", true, ch, nullptr, vict, TO_ROOM);
+                                    act("A huge column of water erupts from the impact!", true, ch, nullptr, vict,
+                                        TO_CHAR);
+                                    act("A huge column of water erupts from the impact!", true, ch, nullptr, vict,
+                                        TO_ROOM);
                                     break;
                                 case 2:
-                                    act("The impact briefly causes a swirling vortex of water!", true, ch, nullptr, vict,
+                                    act("The impact briefly causes a swirling vortex of water!", true, ch, nullptr,
+                                        vict,
                                         TO_CHAR);
-                                    act("The impact briefly causes a swirling vortex of water!", true, ch, nullptr, vict,
+                                    act("The impact briefly causes a swirling vortex of water!", true, ch, nullptr,
+                                        vict,
                                         TO_ROOM);
                                     break;
                                 case 3:
@@ -11994,9 +12164,11 @@ ACMD(do_slam) {
                             impact_sound(ch, "@wA loud roar is heard nearby!@n\r\n");
                             switch (rand_number(1, 8)) {
                                 case 1:
-                                    act("Debris is thrown into the air and showers down thunderously!", true, ch, nullptr,
+                                    act("Debris is thrown into the air and showers down thunderously!", true, ch,
+                                        nullptr,
                                         vict, TO_CHAR);
-                                    act("Debris is thrown into the air and showers down thunderously!", true, ch, nullptr,
+                                    act("Debris is thrown into the air and showers down thunderously!", true, ch,
+                                        nullptr,
                                         vict, TO_ROOM);
                                     break;
                                 case 2:
@@ -12006,27 +12178,35 @@ ACMD(do_slam) {
                                         true, ch, nullptr, vict, TO_ROOM);
                                     break;
                                 case 3:
-                                    act("Parts of the ceiling collapse, crushing into the floor!", true, ch, nullptr, vict,
+                                    act("Parts of the ceiling collapse, crushing into the floor!", true, ch, nullptr,
+                                        vict,
                                         TO_CHAR);
-                                    act("Parts of the ceiling collapse, crushing into the floor!", true, ch, nullptr, vict,
+                                    act("Parts of the ceiling collapse, crushing into the floor!", true, ch, nullptr,
+                                        vict,
                                         TO_ROOM);
                                     break;
                                 case 4:
-                                    act("The surrounding area roars and shudders from the impact!", true, ch, nullptr, vict,
+                                    act("The surrounding area roars and shudders from the impact!", true, ch, nullptr,
+                                        vict,
                                         TO_CHAR);
-                                    act("The surrounding area roars and shudders from the impact!", true, ch, nullptr, vict,
+                                    act("The surrounding area roars and shudders from the impact!", true, ch, nullptr,
+                                        vict,
                                         TO_ROOM);
                                     break;
                                 case 5:
-                                    act("The ground shatters apart from the stress of the impact!", true, ch, nullptr, vict,
+                                    act("The ground shatters apart from the stress of the impact!", true, ch, nullptr,
+                                        vict,
                                         TO_CHAR);
-                                    act("The ground shatters apart from the stress of the impact!", true, ch, nullptr, vict,
+                                    act("The ground shatters apart from the stress of the impact!", true, ch, nullptr,
+                                        vict,
                                         TO_ROOM);
                                     break;
                                 case 6:
-                                    act("The walls of the surrounding room crack in the same instant!", true, ch, nullptr,
+                                    act("The walls of the surrounding room crack in the same instant!", true, ch,
+                                        nullptr,
                                         vict, TO_CHAR);
-                                    act("The walls of the surrounding room crack in the same instant!", true, ch, nullptr,
+                                    act("The walls of the surrounding room crack in the same instant!", true, ch,
+                                        nullptr,
                                         vict, TO_ROOM);
                                     break;
                                 default:
@@ -12041,11 +12221,14 @@ ACMD(do_slam) {
                     /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
                     break;
                 case 3:
-                    act("@WYou fly at @C$N@W, slamming both your fists into $S gut as you fly!@n", true, ch, nullptr, vict,
+                    act("@WYou fly at @C$N@W, slamming both your fists into $S gut as you fly!@n", true, ch, nullptr,
+                        vict,
                         TO_CHAR);
-                    act("@C$n@W flies at you, slamming both $s fists into your gut as $e flies!@n", true, ch, nullptr, vict,
+                    act("@C$n@W flies at you, slamming both $s fists into your gut as $e flies!@n", true, ch, nullptr,
+                        vict,
                         TO_VICT);
-                    act("@c$n@W flies at @C$N@W, slamming both $s fists into $S gut as $e flies!@n", true, ch, nullptr, vict,
+                    act("@c$n@W flies at @C$N@W, slamming both $s fists into $S gut as $e flies!@n", true, ch, nullptr,
+                        vict,
                         TO_NOTVICT);
                     if (GET_BONUS(ch, BONUS_SOFT)) {
                         dmg *= calc_critical(ch, 2);
@@ -12055,8 +12238,10 @@ ACMD(do_slam) {
                     /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
                     break;
                 case 4: /* Weak */
-                    act("@WYou slam both your fists into @C$N@W, hitting $M in the arm!@n", true, ch, nullptr, vict, TO_CHAR);
-                    act("@C$n@W slams both $s fists into you, hitting you in the arm!@n", true, ch, nullptr, vict, TO_VICT);
+                    act("@WYou slam both your fists into @C$N@W, hitting $M in the arm!@n", true, ch, nullptr, vict,
+                        TO_CHAR);
+                    act("@C$n@W slams both $s fists into you, hitting you in the arm!@n", true, ch, nullptr, vict,
+                        TO_VICT);
                     act("@c$n@W slams both $s fists into @C$N@W, hitting $M in the arm!@n", true, ch, nullptr, vict,
                         TO_NOTVICT);
                     dmg *= calc_critical(ch, 1);
@@ -12188,7 +12373,8 @@ ACMD(do_uppercut) {
                 if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
                     act("@C$N@W parries your uppercut with a punch of $S own!@n", true, ch, nullptr, vict, TO_CHAR);
                     act("@WYou parry @C$n's@W uppercut with a punch of your own!@n", true, ch, nullptr, vict, TO_VICT);
-                    act("@C$N@W parries @c$n's@W uppercut with a punch of $S own!@n", true, ch, nullptr, vict, TO_NOTVICT);
+                    act("@C$N@W parries @c$n's@W uppercut with a punch of $S own!@n", true, ch, nullptr, vict,
+                        TO_NOTVICT);
                     improve_skill(vict, SKILL_PARRY, 0);
                     pcost(ch, 0, stcost / 2);
                     pcost(vict, 0, GET_MAX_HIT(vict) / 500);
@@ -12221,7 +12407,8 @@ ACMD(do_uppercut) {
                 } else {
                     act("@WYou can't believe it but your uppercut misses!@n", true, ch, nullptr, vict, TO_CHAR);
                     act("@C$n@W throws an uppercut at you but somehow misses!@n", true, ch, nullptr, vict, TO_VICT);
-                    act("@c$n@W throws an uppercut at @C$N@W but somehow misses!@n", true, ch, nullptr, vict, TO_NOTVICT);
+                    act("@c$n@W throws an uppercut at @C$N@W but somehow misses!@n", true, ch, nullptr, vict,
+                        TO_NOTVICT);
                     pcost(ch, 0, stcost / 2);
                     hurt(0, 0, ch, vict, nullptr, 0, 0);
 
@@ -12273,7 +12460,8 @@ ACMD(do_uppercut) {
                 case 3:
                     act("@WYou uppercut @C$N@W, hitting $M directly in chest!@n", true, ch, nullptr, vict, TO_CHAR);
                     act("@C$n@W uppercuts you, hitting you directly in the chest!@n", true, ch, nullptr, vict, TO_VICT);
-                    act("@c$n@W uppercuts @C$N@W, hitting $M directly in the chest!@n", true, ch, nullptr, vict, TO_NOTVICT);
+                    act("@c$n@W uppercuts @C$N@W, hitting $M directly in the chest!@n", true, ch, nullptr, vict,
+                        TO_NOTVICT);
                     if (GET_BONUS(ch, BONUS_SOFT)) {
                         dmg *= calc_critical(ch, 2);
                     }
@@ -12284,7 +12472,8 @@ ACMD(do_uppercut) {
                 case 4: /* Weak */
                     act("@WYour poorly aimed uppercut hits @C$N@W in the arm!@n", true, ch, nullptr, vict, TO_CHAR);
                     act("@C$n@W poorly aims an uppercut and hits you in the arm!@n", true, ch, nullptr, vict, TO_VICT);
-                    act("@c$n@W poorly aims an uppercut and hits @C$N@W in the arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
+                    act("@c$n@W poorly aims an uppercut and hits @C$N@W in the arm!@n", true, ch, nullptr, vict,
+                        TO_NOTVICT);
                     dmg *= calc_critical(ch, 1);
                     hurt(0, 195, ch, vict, nullptr, dmg, 0);
                     dam_eq_loc(vict, 1);
@@ -12400,7 +12589,8 @@ ACMD(do_tailwhip) {
                 if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
                     act("@C$N@W parries your tailwhip with a punch of $S own!@n", true, ch, nullptr, vict, TO_CHAR);
                     act("@WYou parry @C$n's@W tailwhip with a punch of your own!@n", true, ch, nullptr, vict, TO_VICT);
-                    act("@C$N@W parries @c$n's@W tailwhip with a punch of $S own!@n", true, ch, nullptr, vict, TO_NOTVICT);
+                    act("@C$N@W parries @c$n's@W tailwhip with a punch of $S own!@n", true, ch, nullptr, vict,
+                        TO_NOTVICT);
                     improve_skill(vict, SKILL_PARRY, 0);
                     pcost(ch, 0, stcost / 2);
                     pcost(vict, 0, GET_MAX_HIT(vict) / 500);
@@ -12433,7 +12623,8 @@ ACMD(do_tailwhip) {
                 } else {
                     act("@WYou can't believe it but your tailwhip misses!@n", true, ch, nullptr, vict, TO_CHAR);
                     act("@C$n@W throws a tailwhip at you but somehow misses!@n", true, ch, nullptr, vict, TO_VICT);
-                    act("@c$n@W throws a tailwhip at @C$N@W but somehow misses!@n", true, ch, nullptr, vict, TO_NOTVICT);
+                    act("@c$n@W throws a tailwhip at @C$N@W but somehow misses!@n", true, ch, nullptr, vict,
+                        TO_NOTVICT);
                     pcost(ch, 0, stcost / 2);
                     hurt(0, 0, ch, vict, nullptr, 0, 0);
 
@@ -12454,8 +12645,10 @@ ACMD(do_tailwhip) {
             hitspot = roll_hitloc(ch, vict, skill);
             switch (hitspot) {
                 case 1:
-                    act("@WYou spin to swing your tail and slam it into @c$N@W's body!@n", true, ch, nullptr, vict, TO_CHAR);
-                    act("@C$n@W spins to swing $s tail and slams it into YOUR body!@n", true, ch, nullptr, vict, TO_VICT);
+                    act("@WYou spin to swing your tail and slam it into @c$N@W's body!@n", true, ch, nullptr, vict,
+                        TO_CHAR);
+                    act("@C$n@W spins to swing $s tail and slams it into YOUR body!@n", true, ch, nullptr, vict,
+                        TO_VICT);
                     act("@C$n@W spins to swing $s tail and slams it into @c$N@W's body!@n", true, ch, nullptr, vict,
                         TO_NOTVICT);
                     if (!AFF_FLAGGED(vict, AFF_FLYING) && GET_POS(vict) == POS_STANDING && rand_number(1, 8) >= 7) {
@@ -12469,11 +12662,14 @@ ACMD(do_tailwhip) {
                     /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
                     break;
                 case 2: /* Critical */
-                    act("@WYou flip forward and slam your tail into the top of @c$N@W's head brutally!@n", true, ch, nullptr,
+                    act("@WYou flip forward and slam your tail into the top of @c$N@W's head brutally!@n", true, ch,
+                        nullptr,
                         vict, TO_CHAR);
-                    act("@C$n@W flips forward and slams $s tail into the top of YOUR head brutally!@n", true, ch, nullptr,
+                    act("@C$n@W flips forward and slams $s tail into the top of YOUR head brutally!@n", true, ch,
+                        nullptr,
                         vict, TO_VICT);
-                    act("@C$n@W flips forward and slams $s tail into the top of @c$N@W's head brutally!@n", true, ch, nullptr,
+                    act("@C$n@W flips forward and slams $s tail into the top of @c$N@W's head brutally!@n", true, ch,
+                        nullptr,
                         vict, TO_NOTVICT);
                     if (!AFF_FLAGGED(vict, AFF_FLYING) && GET_POS(vict) == POS_STANDING && rand_number(1, 8) >= 6) {
                         handle_knockdown(vict);
@@ -12484,8 +12680,10 @@ ACMD(do_tailwhip) {
                     /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
                     break;
                 case 3:
-                    act("@WYou swing your tail and manage to slam it into @c$N@W's gut!@n", true, ch, nullptr, vict, TO_CHAR);
-                    act("@C$n@W swings $s tail and manages to slam it into YOUR gut!@n", true, ch, nullptr, vict, TO_VICT);
+                    act("@WYou swing your tail and manage to slam it into @c$N@W's gut!@n", true, ch, nullptr, vict,
+                        TO_CHAR);
+                    act("@C$n@W swings $s tail and manages to slam it into YOUR gut!@n", true, ch, nullptr, vict,
+                        TO_VICT);
                     act("@C$n@W swings $s tail and manages to slam it into @c$N@W's gut!@n", true, ch, nullptr, vict,
                         TO_NOTVICT);
                     if (!AFF_FLAGGED(vict, AFF_FLYING) && GET_POS(vict) == POS_STANDING && rand_number(1, 8) >= 7) {
@@ -12499,8 +12697,10 @@ ACMD(do_tailwhip) {
                     /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
                     break;
                 case 4: /* Weak */
-                    act("@WYou swing your tail and manage to slam it into @c$N@W's arm!@n", true, ch, nullptr, vict, TO_CHAR);
-                    act("@C$n@W swings $s tail and manages to slam it into YOUR arm!@n", true, ch, nullptr, vict, TO_VICT);
+                    act("@WYou swing your tail and manage to slam it into @c$N@W's arm!@n", true, ch, nullptr, vict,
+                        TO_CHAR);
+                    act("@C$n@W swings $s tail and manages to slam it into YOUR arm!@n", true, ch, nullptr, vict,
+                        TO_VICT);
                     act("@C$n@W swings $s tail and manages to slam it into @c$N@W's arm!@n", true, ch, nullptr, vict,
                         TO_NOTVICT);
                     dmg *= calc_critical(ch, 1);
@@ -12509,8 +12709,10 @@ ACMD(do_tailwhip) {
                     /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
                     break;
                 case 5: /* Weak 2 */
-                    act("@WYou swing your tail and manage to slam it into @c$N@W's leg!@n", true, ch, nullptr, vict, TO_CHAR);
-                    act("@C$n@W swings $s tail and manages to slam it into YOUR leg!@n", true, ch, nullptr, vict, TO_VICT);
+                    act("@WYou swing your tail and manage to slam it into @c$N@W's leg!@n", true, ch, nullptr, vict,
+                        TO_CHAR);
+                    act("@C$n@W swings $s tail and manages to slam it into YOUR leg!@n", true, ch, nullptr, vict,
+                        TO_VICT);
                     act("@C$n@W swings $s tail and manages to slam it into @c$N@W's leg!@n", true, ch, nullptr, vict,
                         TO_NOTVICT);
                     dmg *= calc_critical(ch, 1);
@@ -12641,8 +12843,10 @@ ACMD(do_roundhouse) {
             if ((vict->getCurST()) > 0) {
                 if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
                     act("@C$N@W parries your roundhouse with a punch of $S own!@n", true, ch, nullptr, vict, TO_CHAR);
-                    act("@WYou parry @C$n's@W roundhouse with a punch of your own!@n", true, ch, nullptr, vict, TO_VICT);
-                    act("@C$N@W parries @c$n's@W roundhouse with a punch of $S own!@n", true, ch, nullptr, vict, TO_NOTVICT);
+                    act("@WYou parry @C$n's@W roundhouse with a punch of your own!@n", true, ch, nullptr, vict,
+                        TO_VICT);
+                    act("@C$N@W parries @c$n's@W roundhouse with a punch of $S own!@n", true, ch, nullptr, vict,
+                        TO_NOTVICT);
                     improve_skill(vict, SKILL_PARRY, 0);
                     pcost(ch, 0, stcost / 2);
                     pcost(vict, 0, GET_MAX_HIT(vict) / 500);
@@ -12675,7 +12879,8 @@ ACMD(do_roundhouse) {
                 } else {
                     act("@WYou can't believe it but your roundhouse misses!@n", true, ch, nullptr, vict, TO_CHAR);
                     act("@C$n@W throws a roundhouse at you but somehow misses!@n", true, ch, nullptr, vict, TO_VICT);
-                    act("@c$n@W throws a roundhouse at @C$N@W but somehow misses!@n", true, ch, nullptr, vict, TO_NOTVICT);
+                    act("@c$n@W throws a roundhouse at @C$N@W but somehow misses!@n", true, ch, nullptr, vict,
+                        TO_NOTVICT);
                     pcost(ch, 0, stcost / 2);
                     hurt(0, 0, ch, vict, nullptr, 0, 0);
 
@@ -12696,7 +12901,8 @@ ACMD(do_roundhouse) {
             hitspot = roll_hitloc(ch, vict, skill);
             switch (hitspot) {
                 case 1:
-                    act("@WYou spin in mid air and land a kick into @C$N's@W body!@n", true, ch, nullptr, vict, TO_CHAR);
+                    act("@WYou spin in mid air and land a kick into @C$N's@W body!@n", true, ch, nullptr, vict,
+                        TO_CHAR);
                     act("@C$n@W spins in mid air and lands a kick into your body!@n", true, ch, nullptr, vict, TO_VICT);
                     act("@c$n@W spins in mid air and lands a kick into @C$N's@W body!@n", true, ch, nullptr, vict,
                         TO_NOTVICT);
@@ -12720,11 +12926,14 @@ ACMD(do_roundhouse) {
                     /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
                     break;
                 case 3:
-                    act("@WYou throw a roundhouse at @C$N@W, hitting $M directly in the neck!@n", true, ch, nullptr, vict,
+                    act("@WYou throw a roundhouse at @C$N@W, hitting $M directly in the neck!@n", true, ch, nullptr,
+                        vict,
                         TO_CHAR);
-                    act("@C$n@W throws a roundhouse at you, hitting YOU directly in the neck!@n", true, ch, nullptr, vict,
+                    act("@C$n@W throws a roundhouse at you, hitting YOU directly in the neck!@n", true, ch, nullptr,
+                        vict,
                         TO_VICT);
-                    act("@c$n@W throws a roundhouse at @C$N@W, hitting $M directly in the face!@n", true, ch, nullptr, vict,
+                    act("@c$n@W throws a roundhouse at @C$N@W, hitting $M directly in the face!@n", true, ch, nullptr,
+                        vict,
                         TO_NOTVICT);
                     if (GET_BONUS(ch, BONUS_SOFT)) {
                         dmg *= calc_critical(ch, 2);
@@ -12736,7 +12945,8 @@ ACMD(do_roundhouse) {
                 case 4: /* Weak */
                     act("@WYour poorly aimed roundhouse hits @C$N@W in the arm!@n", true, ch, nullptr, vict, TO_CHAR);
                     act("@C$n@W poorly aims a roundhouse and hits you in the arm!@n", true, ch, nullptr, vict, TO_VICT);
-                    act("@c$n@W poorly aims a roundhouse and hits @C$N@W in the arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
+                    act("@c$n@W poorly aims a roundhouse and hits @C$N@W in the arm!@n", true, ch, nullptr, vict,
+                        TO_NOTVICT);
                     dmg *= calc_critical(ch, 1);
                     hurt(0, 195, ch, vict, nullptr, dmg, 0);
                     dam_eq_loc(vict, 1);
@@ -12860,7 +13070,8 @@ ACMD(do_elbow) {
                 if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
                     act("@C$N@W parries your elbow with an elbow of $S own!@n", true, ch, nullptr, vict, TO_CHAR);
                     act("@WYou parry @C$n's@W elbow with one of your own!@n", true, ch, nullptr, vict, TO_VICT);
-                    act("@C$N@W parries @c$n's@W elbow with an elbow of $S own!@n", true, ch, nullptr, vict, TO_NOTVICT);
+                    act("@C$N@W parries @c$n's@W elbow with an elbow of $S own!@n", true, ch, nullptr, vict,
+                        TO_NOTVICT);
                     improve_skill(vict, SKILL_PARRY, 0);
                     pcost(ch, 0, stcost / 2);
                     pcost(vict, 0, GET_MAX_HIT(vict) / 500);
@@ -12892,7 +13103,8 @@ ACMD(do_elbow) {
                     return;
                 } else {
                     act("@WYou can't believe it, your elbow strike misses!@n", true, ch, nullptr, vict, TO_CHAR);
-                    act("@C$n@W throws an elbow strike at you, but thankfully misses!@n", true, ch, nullptr, vict, TO_VICT);
+                    act("@C$n@W throws an elbow strike at you, but thankfully misses!@n", true, ch, nullptr, vict,
+                        TO_VICT);
                     act("@c$n@W throws an elbow strike at @C$N@W, but misses!@n", true, ch, nullptr, vict, TO_NOTVICT);
                     pcost(ch, 0, stcost / 2);
                     hurt(0, 0, ch, vict, nullptr, 0, 0);
@@ -13326,7 +13538,8 @@ ACMD(do_knee) {
                     return;
                 } else {
                     act("@WYou can't believe it, your knee strike misses!@n", true, ch, nullptr, vict, TO_CHAR);
-                    act("@C$n@W throws a knee strike at you, but thankfully misses!@n", true, ch, nullptr, vict, TO_VICT);
+                    act("@C$n@W throws a knee strike at you, but thankfully misses!@n", true, ch, nullptr, vict,
+                        TO_VICT);
                     act("@c$n@W throws a knee strike at @C$N@W, but misses!@n", true, ch, nullptr, vict, TO_NOTVICT);
                     pcost(ch, 0, stcost / 2);
                     hurt(0, 0, ch, vict, nullptr, 0, 0);
@@ -13790,24 +14003,36 @@ ACMD(do_powerup) {
             act("@RYou begin to powerup, and air billows outward around you!@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@R$n begins to powerup, and air billows outward around $m!@n", true, ch, nullptr, nullptr, TO_ROOM);
         } else if (GET_MAX_HIT(ch) < 500000) {
-            act("@RYou begin to powerup, and loose objects are lifted into the air!@n", true, ch, nullptr, nullptr, TO_CHAR);
-            act("@R$n begins to powerup, and loose objects are lifted into the air!@n", true, ch, nullptr, nullptr, TO_ROOM);
-        } else if (GET_MAX_HIT(ch) < 5000000) {
-            act("@RYou begin to powerup, and torrents of energy crackle around you!@n", true, ch, nullptr, nullptr, TO_CHAR);
-            act("@R$n begins to powerup, and torrents of energy crackle around $m!@n", true, ch, nullptr, nullptr, TO_ROOM);
-        } else if (GET_MAX_HIT(ch) < 50000000) {
-            act("@RYou begin to powerup, and the entire area begins to shudder!@n", true, ch, nullptr, nullptr, TO_CHAR);
-            act("@R$n begins to powerup, and the entire area begins to shudder!@n", true, ch, nullptr, nullptr, TO_ROOM);
-        } else if (GET_MAX_HIT(ch) < 100000000) {
-            act("@RYou begin to powerup, and massive cracks begin to form beneath you!@n", true, ch, nullptr, nullptr, TO_CHAR);
-            act("@R$n begins to powerup, and massive cracks begin to form beneath $m!@n", true, ch, nullptr, nullptr, TO_ROOM);
-        } else if (GET_MAX_HIT(ch) < 300000000) {
-            act("@RYou begin to powerup, and everything around you shudders from the power!@n", true, ch, nullptr, nullptr,
+            act("@RYou begin to powerup, and loose objects are lifted into the air!@n", true, ch, nullptr, nullptr,
                 TO_CHAR);
-            act("@R$n begins to powerup, and everything around $m shudders from the power!@n", true, ch, nullptr, nullptr, TO_ROOM);
+            act("@R$n begins to powerup, and loose objects are lifted into the air!@n", true, ch, nullptr, nullptr,
+                TO_ROOM);
+        } else if (GET_MAX_HIT(ch) < 5000000) {
+            act("@RYou begin to powerup, and torrents of energy crackle around you!@n", true, ch, nullptr, nullptr,
+                TO_CHAR);
+            act("@R$n begins to powerup, and torrents of energy crackle around $m!@n", true, ch, nullptr, nullptr,
+                TO_ROOM);
+        } else if (GET_MAX_HIT(ch) < 50000000) {
+            act("@RYou begin to powerup, and the entire area begins to shudder!@n", true, ch, nullptr, nullptr,
+                TO_CHAR);
+            act("@R$n begins to powerup, and the entire area begins to shudder!@n", true, ch, nullptr, nullptr,
+                TO_ROOM);
+        } else if (GET_MAX_HIT(ch) < 100000000) {
+            act("@RYou begin to powerup, and massive cracks begin to form beneath you!@n", true, ch, nullptr, nullptr,
+                TO_CHAR);
+            act("@R$n begins to powerup, and massive cracks begin to form beneath $m!@n", true, ch, nullptr, nullptr,
+                TO_ROOM);
+        } else if (GET_MAX_HIT(ch) < 300000000) {
+            act("@RYou begin to powerup, and everything around you shudders from the power!@n", true, ch, nullptr,
+                nullptr,
+                TO_CHAR);
+            act("@R$n begins to powerup, and everything around $m shudders from the power!@n", true, ch, nullptr,
+                nullptr, TO_ROOM);
         } else {
-            act("@RYou begin to powerup, and the very air around you begins to burn!@n", true, ch, nullptr, nullptr, TO_CHAR);
-            act("@R$n begins to powerup, and the very air around $m begins to burn!@n", true, ch, nullptr, nullptr, TO_ROOM);
+            act("@RYou begin to powerup, and the very air around you begins to burn!@n", true, ch, nullptr, nullptr,
+                TO_CHAR);
+            act("@R$n begins to powerup, and the very air around $m begins to burn!@n", true, ch, nullptr, nullptr,
+                TO_ROOM);
         }
         return;
     }
@@ -13841,24 +14066,36 @@ ACMD(do_powerup) {
             act("@RYou begin to powerup, and air billows outward around you!@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@R$n begins to powerup, and air billows outward around $m!@n", true, ch, nullptr, nullptr, TO_ROOM);
         } else if (GET_MAX_HIT(ch) < 500000) {
-            act("@RYou begin to powerup, and loose objects are lifted into the air!@n", true, ch, nullptr, nullptr, TO_CHAR);
-            act("@R$n begins to powerup, and loose objects are lifted into the air!@n", true, ch, nullptr, nullptr, TO_ROOM);
-        } else if (GET_MAX_HIT(ch) < 5000000) {
-            act("@RYou begin to powerup, and torrents of energy crackle around you!@n", true, ch, nullptr, nullptr, TO_CHAR);
-            act("@R$n begins to powerup, and torrents of energy crackle around $m!@n", true, ch, nullptr, nullptr, TO_ROOM);
-        } else if (GET_MAX_HIT(ch) < 50000000) {
-            act("@RYou begin to powerup, and the entire area begins to shudder!@n", true, ch, nullptr, nullptr, TO_CHAR);
-            act("@R$n begins to powerup, and the entire area begins to shudder!@n", true, ch, nullptr, nullptr, TO_ROOM);
-        } else if (GET_MAX_HIT(ch) < 100000000) {
-            act("@RYou begin to powerup, and massive cracks begin to form beneath you!@n", true, ch, nullptr, nullptr, TO_CHAR);
-            act("@R$n begins to powerup, and massive cracks begin to form beneath $m!@n", true, ch, nullptr, nullptr, TO_ROOM);
-        } else if (GET_MAX_HIT(ch) < 300000000) {
-            act("@RYou begin to powerup, and everything around you shudders from the power!@n", true, ch, nullptr, nullptr,
+            act("@RYou begin to powerup, and loose objects are lifted into the air!@n", true, ch, nullptr, nullptr,
                 TO_CHAR);
-            act("@R$n begins to powerup, and everything around $m shudders from the power!@n", true, ch, nullptr, nullptr, TO_ROOM);
+            act("@R$n begins to powerup, and loose objects are lifted into the air!@n", true, ch, nullptr, nullptr,
+                TO_ROOM);
+        } else if (GET_MAX_HIT(ch) < 5000000) {
+            act("@RYou begin to powerup, and torrents of energy crackle around you!@n", true, ch, nullptr, nullptr,
+                TO_CHAR);
+            act("@R$n begins to powerup, and torrents of energy crackle around $m!@n", true, ch, nullptr, nullptr,
+                TO_ROOM);
+        } else if (GET_MAX_HIT(ch) < 50000000) {
+            act("@RYou begin to powerup, and the entire area begins to shudder!@n", true, ch, nullptr, nullptr,
+                TO_CHAR);
+            act("@R$n begins to powerup, and the entire area begins to shudder!@n", true, ch, nullptr, nullptr,
+                TO_ROOM);
+        } else if (GET_MAX_HIT(ch) < 100000000) {
+            act("@RYou begin to powerup, and massive cracks begin to form beneath you!@n", true, ch, nullptr, nullptr,
+                TO_CHAR);
+            act("@R$n begins to powerup, and massive cracks begin to form beneath $m!@n", true, ch, nullptr, nullptr,
+                TO_ROOM);
+        } else if (GET_MAX_HIT(ch) < 300000000) {
+            act("@RYou begin to powerup, and everything around you shudders from the power!@n", true, ch, nullptr,
+                nullptr,
+                TO_CHAR);
+            act("@R$n begins to powerup, and everything around $m shudders from the power!@n", true, ch, nullptr,
+                nullptr, TO_ROOM);
         } else {
-            act("@RYou begin to powerup, and the very air around you begins to burn!@n", true, ch, nullptr, nullptr, TO_CHAR);
-            act("@R$n begins to powerup, and the very air around $m begins to burn!@n", true, ch, nullptr, nullptr, TO_ROOM);
+            act("@RYou begin to powerup, and the very air around you begins to burn!@n", true, ch, nullptr, nullptr,
+                TO_CHAR);
+            act("@R$n begins to powerup, and the very air around $m begins to burn!@n", true, ch, nullptr, nullptr,
+                TO_ROOM);
         }
         SET_BIT_AR(PLR_FLAGS(ch), PLR_POWERUP);
         return;
@@ -13890,8 +14127,10 @@ ACMD(do_rescue) {
             mobbonus = GET_SPEEDI(ch) * 0.2;
         }
         if (GET_SPEEDI(ch) + mobbonus < GET_SPEEDI(opponent) && rand_number(1, 3) != 3) {
-            act("@GYou leap towards @g$N@G and try to rescue $M but are too slow!@n", true, ch, nullptr, helpee, TO_CHAR);
-            act("@g$n@G leaps towards you! $n is too slow and fails to rescue you!@n", true, ch, nullptr, helpee, TO_VICT);
+            act("@GYou leap towards @g$N@G and try to rescue $M but are too slow!@n", true, ch, nullptr, helpee,
+                TO_CHAR);
+            act("@g$n@G leaps towards you! $n is too slow and fails to rescue you!@n", true, ch, nullptr, helpee,
+                TO_VICT);
             act("@g$n@G leaps towards @g$N@G and tries to rescue $M but is too slow!@n", true, ch, nullptr, helpee,
                 TO_NOTVICT);
             return;
@@ -14071,7 +14310,8 @@ ACMD(do_flee) {
                     WAIT_STATE(ch, PULSE_2SEC);
                     return;
                 } else {
-                    act("@c$N@W manages to break loose of @C$n's@W hold!@n", true, ABSORBBY(ch), nullptr, ch, TO_NOTVICT);
+                    act("@c$N@W manages to break loose of @C$n's@W hold!@n", true, ABSORBBY(ch), nullptr, ch,
+                        TO_NOTVICT);
                     act("@WYou manage to break loose of @C$n's@W hold!@n", true, ABSORBBY(ch), nullptr, ch, TO_VICT);
                     act("@c$N@W manages to break loose of your hold!@n", true, ABSORBBY(ch), nullptr, ch, TO_CHAR);
                     ABSORBING(ABSORBBY(ch)) = nullptr;

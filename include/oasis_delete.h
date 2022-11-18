@@ -1,5 +1,7 @@
 #pragma once
+
 #include "structs.h"
+
 /*
  * Function prototypes defined in oasis_delete.c.
  */
