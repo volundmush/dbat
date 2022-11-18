@@ -1,4 +1,5 @@
 #pragma once
 
 #include "sysdep.h"
-unsigned long circle_random();
+extern unsigned long circle_random();
+extern void circle_srandom(unsigned long initial_seed);

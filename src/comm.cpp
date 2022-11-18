@@ -195,8 +195,7 @@ void init_game(uint16_t cmport) {
         log("Opening mother connection.");
         mother_desc = init_socket(cmport);
     }
-
-
+    circle_srandom(time(nullptr));
     event_init();
 
     /* set up hash table for find_char() */
