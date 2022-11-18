@@ -3270,6 +3270,12 @@ void improve_skill(struct char_data *ch, int skill, int num) {
     }
 }
 
+namespace {
+    std::random_device _device;
+    std::mt19937 _generator(_device());
+
+}
+
 /* creates a random number in long long int */
 int64_t large_rand(int64_t from, int64_t to) {
     /* error checking in case people call this incorrectly */
@@ -3278,6 +3284,7 @@ int64_t large_rand(int64_t from, int64_t to) {
         from = to;
         to = tmp;
     }
+    std::uniform_int_distribution<int64_t> _distribution(from,to);
 
     /* This should always be of the form:
    *
@@ -3288,7 +3295,7 @@ int64_t large_rand(int64_t from, int64_t to) {
    * though, which shouldn't have that problem. Mean and standard
    * deviation of both are identical (within the realm of statistical
    * identity) if the rand() implementation is non-broken.  */
-    return ((circle_random() % (to - from + 1)) + from);
+    return _distribution(_generator);
 }
 
 /* creates a random number in interval [from;to] */
@@ -3299,8 +3306,10 @@ int rand_number(int from, int to) {
         from = to;
         to = tmp;
     }
-    srand(time(nullptr));
-    return rand() % (to - from + 1) + from;
+    std::random_device device;
+    std::mt19937 generator(device());
+    std::uniform_int_distribution<int> distribution(from,to);
+    return distribution(generator);
 }
 
 /* Axion engine dice function */

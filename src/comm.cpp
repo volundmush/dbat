@@ -188,8 +188,6 @@ void init_game(uint16_t cmport) {
     /* We don't want to restart if we crash before we get up. */
     touch(KILLSCRIPT_FILE);
 
-    circle_srandom(time(nullptr));
-
     log("Finding player limit.");
     max_players = get_max_players();
 
