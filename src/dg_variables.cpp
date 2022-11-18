@@ -137,7 +137,7 @@ int char_has_item(char *item, struct char_data *ch)
 {
 
   /* If this works, no more searching needed */
-  if (get_object_in_equip(ch, item) != NULL)
+  if (get_object_in_equip(ch, item) != nullptr)
     return 1;
 
   if (item_in_list(item, ch->carrying) == 0)
@@ -154,7 +154,7 @@ int text_processed(char *field, char *subfield, struct trig_var_data *vd,
 
   if (!strcasecmp(field, "strlen")) {                     /* strlen    */
     char limit[200];
-    sprintf(limit, "%"SZT, strlen(vd->value));
+    sprintf(limit, "%" SZT, strlen(vd->value));
     snprintf(str, slen, "%d", atoi(limit));
     return TRUE;
   } else if (!strcasecmp(field, "trim")) {                /* trim      */
@@ -224,10 +224,10 @@ int text_processed(char *field, char *subfield, struct trig_var_data *vd,
 /* sets str to be the value of var.field */
 void find_replacement(void *go, struct script_data *sc, trig_data *trig, int type, char *var, char *field, char *subfield, char *str, size_t slen)
 {
-  struct trig_var_data *vd=NULL;
-  char_data *ch, *c = NULL, *rndm;
-  obj_data *obj, *o = NULL;
-  struct room_data *room, *r = NULL;
+  struct trig_var_data *vd=nullptr;
+  char_data *ch, *c = nullptr, *rndm;
+  obj_data *obj, *o = nullptr;
+  struct room_data *room, *r = nullptr;
   char *name;
   int num, count, i, j, doors;
 
@@ -250,13 +250,13 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 
   *str = '\0';
 
-  /* X.global() will have a NULL trig */
+  /* X.global() will have a nullptr trig */
   if (trig)
     for (vd = GET_TRIG_VARS(trig); vd; vd = vd->next)
       if (!strcasecmp(vd->name, var))
         break;
 
-  /* some evil waitstates could crash the mud if sent here with sc==NULL*/
+  /* some evil waitstates could crash the mud if sent here with sc==nullptr*/
   if (!vd && sc)
     for (vd = sc->global_vars; vd; vd = vd->next)
       if (!strcasecmp(vd->name, var) &&
@@ -286,7 +286,7 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
         return;
       }
       else if (!strcasecmp(var, "ctime"))
-        snprintf(str, slen, "%ld", time(0));
+        snprintf(str, slen, "%ld", time(nullptr));
       else if (!strcasecmp(var, "door"))
         snprintf(str, slen, "%s", door[type]);
       else if (!strcasecmp(var, "force"))
@@ -363,18 +363,18 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
         switch (type) {
         case MOB_TRIGGER:
           c = (char_data *) go;
-          r = NULL;
-          o = NULL;  /* NULL assignments added to avoid self to always be    */
+          r = nullptr;
+          o = nullptr;  /* nullptr assignments added to avoid self to always be    */
           break;     /* the room.  - Welcor        */
         case OBJ_TRIGGER:
           o = (obj_data *) go;
-          c = NULL;
-          r = NULL;
+          c = nullptr;
+          r = nullptr;
           break;
         case WLD_TRIGGER:
           r = (struct room_data *) go;
-          c = NULL;
-          o = NULL;
+          c = nullptr;
+          o = nullptr;
           break;
         }
       }
@@ -472,7 +472,7 @@ in the vault (vnum: 453) now and then. you can just use
       }
       else if (!strcasecmp(var, "random")) {
         if (!strcasecmp(field, "char")) {
-          rndm = NULL;
+          rndm = nullptr;
           count = 0;
 
           if (type == MOB_TRIGGER) {
@@ -560,8 +560,8 @@ in the vault (vnum: 453) now and then. you can just use
 
       else if (!strcasecmp(field, "global")) { /* get global of something else */
         if (IS_NPC(c) && c->script) {
-          find_replacement(go, c->script, NULL, MOB_TRIGGER,
-            subfield, NULL, NULL, str, slen);
+          find_replacement(go, c->script, nullptr, MOB_TRIGGER,
+            subfield, nullptr, nullptr, str, slen);
         }
       }
       /* set str to some 'non-text' first */
@@ -616,7 +616,7 @@ in the vault (vnum: 453) now and then. you can just use
              strcpy(str, "0");
           }
           else if (!strcasecmp(field, "clan")) {
-            if (GET_CLAN(c) != NULL && strstr(GET_CLAN(c), subfield))
+            if (GET_CLAN(c) != nullptr && strstr(GET_CLAN(c), subfield))
              strcpy(str, "1");
             else
              strcpy(str, "0");
@@ -1789,7 +1789,7 @@ void var_subst(void *go, struct script_data *sc, trig_data *trig,
                int type, char *line, char *buf)
 {
   char tmp[MAX_INPUT_LENGTH], repl_str[MAX_INPUT_LENGTH];
-  char *var = NULL, *field = NULL, *p = NULL;
+  char *var = nullptr, *field = nullptr, *p = nullptr;
   char tmp2[MAX_INPUT_LENGTH];
   char *subfield_p, subfield[MAX_INPUT_LENGTH];
   int left, len;

@@ -28,7 +28,7 @@
 #define C_NRM	C_ON	/* Compatibility hack */
 #define C_CMP	C_ON	/* Compatibility hack */
 
-#define COLOR_CHOICES(ch)	(IS_NPC(ch) ? NULL : ch->player_specials ? ch->player_specials->color_choices : NULL)
+#define COLOR_CHOICES(ch)	(IS_NPC(ch) ? nullptr : ch->player_specials ? ch->player_specials->color_choices : nullptr)
 #define _clrlevel(ch) (!IS_NPC(ch) ? (PRF_FLAGGED((ch), PRF_COLOR) ? 1 : 0) : 0)
 #define clr(ch,lvl) (_clrlevel(ch) >= (lvl))
 #define CCNRM(ch,lvl)  (clr((ch),(lvl))?KNRM:KNUL)

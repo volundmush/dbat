@@ -54,7 +54,7 @@ const char *get_i_name(struct char_data *ch, struct char_data *vict) {
   FILE *fl;
 
   /* Read Introduction File */
-  if (vict == NULL) {
+  if (vict == nullptr) {
     return ("");
   }
 
@@ -531,7 +531,7 @@ void affect_remove(struct char_data *ch, struct affected_type *af)
 {
   struct affected_type *cmtemp;
 
-  if (ch->affected == NULL) {
+  if (ch->affected == nullptr) {
     core_dump();
     return;
   }
@@ -543,7 +543,7 @@ void affect_remove(struct char_data *ch, struct affected_type *af)
   if (!ch->affected) {
     struct char_data *temp;
     REMOVE_FROM_LIST(ch, affect_list, next_affect, temp);
-    ch->next_affect = NULL;
+    ch->next_affect = nullptr;
   }
 }
 
@@ -647,18 +647,18 @@ void char_from_room(struct char_data *ch)
   struct char_data *temp;
   int i;
 
-  if (ch == NULL || IN_ROOM(ch) == NOWHERE) {
-    log("SYSERR: NULL character or NOWHERE in %s, char_from_room", __FILE__);
+  if (ch == nullptr || IN_ROOM(ch) == NOWHERE) {
+    log("SYSERR: nullptr character or NOWHERE in %s, char_from_room", __FILE__);
     return;
   }
 
-  if (FIGHTING(ch) != NULL && !AFF_FLAGGED(ch, AFF_PURSUIT))
+  if (FIGHTING(ch) != nullptr && !AFF_FLAGGED(ch, AFF_PURSUIT))
     stop_fighting(ch);
-  if (AFF_FLAGGED(ch, AFF_PURSUIT) && FIGHTING(ch) == NULL)
+  if (AFF_FLAGGED(ch, AFF_PURSUIT) && FIGHTING(ch) == nullptr)
     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_PURSUIT);
 
   for (i = 0; i < NUM_WEARS; i++)
-    if (GET_EQ(ch, i) != NULL)
+    if (GET_EQ(ch, i) != nullptr)
       if (GET_OBJ_TYPE(GET_EQ(ch, i)) == ITEM_LIGHT)
         if (GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_HOURS))
 	  world[IN_ROOM(ch)].light--;
@@ -668,7 +668,7 @@ void char_from_room(struct char_data *ch)
 
   REMOVE_FROM_LIST(ch, world[IN_ROOM(ch)].people, next_in_room, temp);
   IN_ROOM(ch) = NOWHERE;
-  ch->next_in_room = NULL;
+  ch->next_in_room = nullptr;
 }
 
 
@@ -677,7 +677,7 @@ void char_to_room(struct char_data *ch, room_rnum room)
 {
   int i;
 
-  if (ch == NULL || room == NOWHERE || room > top_of_world)
+  if (ch == nullptr || room == NOWHERE || room > top_of_world)
     log("SYSERR: Illegal value(s) passed to char_to_room. (Room: %d/%d Ch: %p",
 		room, top_of_world, ch);
   else {
@@ -738,7 +738,7 @@ void obj_to_char(struct obj_data *object, struct char_data *ch)
     if (!IS_NPC(ch))
       SET_BIT_AR(PLR_FLAGS(ch), PLR_CRASH);
   } else
-    log("SYSERR: NULL obj (%p) or char (%p) passed to obj_to_char.", object, ch);
+    log("SYSERR: nullptr obj (%p) or char (%p) passed to obj_to_char.", object, ch);
 }
 
 
@@ -747,8 +747,8 @@ void obj_from_char(struct obj_data *object)
 {
   struct obj_data *temp;
 
-  if (object == NULL) {
-    log("SYSERR: NULL object passed to obj_from_char.");
+  if (object == nullptr) {
+    log("SYSERR: nullptr object passed to obj_from_char.");
     return;
   }
   REMOVE_FROM_LIST(object, object->carried_by->carrying, next_content, temp);
@@ -768,8 +768,8 @@ void obj_from_char(struct obj_data *object)
      }
     }
 
-  object->carried_by = NULL;
-  object->next_content = NULL;
+  object->carried_by = nullptr;
+  object->next_content = nullptr;
 }
 
 
@@ -777,7 +777,7 @@ void obj_from_char(struct obj_data *object)
 /* Return the effect of a piece of armor in position eq_pos */
 static int apply_ac(struct char_data *ch, int eq_pos)
 {
-  if (GET_EQ(ch, eq_pos) == NULL) {
+  if (GET_EQ(ch, eq_pos) == nullptr) {
     core_dump();
     return (0);
   }
@@ -843,8 +843,8 @@ void equip_char(struct char_data *ch, struct obj_data *obj, int pos)
     return;
   }
   if (invalid_align(ch, obj) || invalid_class(ch, obj) || invalid_race(ch, obj)) {
-    act("You stop wearing $p as something prevents you.", FALSE, ch, obj, 0, TO_CHAR);
-    act("$n stops wearing $p as something prevents $m.", FALSE, ch, obj, 0, TO_ROOM);
+    act("You stop wearing $p as something prevents you.", FALSE, ch, obj, nullptr, TO_CHAR);
+    act("$n stops wearing $p as something prevents $m.", FALSE, ch, obj, nullptr, TO_ROOM);
     /* Changed to drop in inventory instead of the ground. */
     obj_to_char(obj, ch);
     return;
@@ -880,13 +880,13 @@ struct obj_data *unequip_char(struct char_data *ch, int pos)
   int j;
   struct obj_data *obj;
 
-  if ((pos < 0 || pos >= NUM_WEARS) || GET_EQ(ch, pos) == NULL) {
+  if ((pos < 0 || pos >= NUM_WEARS) || GET_EQ(ch, pos) == nullptr) {
     core_dump();
-    return (NULL);
+    return (nullptr);
   }
 
   obj = GET_EQ(ch, pos);
-  obj->worn_by = NULL;
+  obj->worn_by = nullptr;
   obj->worn_on = -1;
 
   if (GET_OBJ_TYPE(obj) == ITEM_ARMOR)
@@ -899,7 +899,7 @@ struct obj_data *unequip_char(struct char_data *ch, int pos)
   } else
     log("SYSERR: IN_ROOM(ch) = NOWHERE when unequipping char %s.", GET_NAME(ch));
 
-  GET_EQ(ch, pos) = NULL;
+  GET_EQ(ch, pos) = nullptr;
 
   for (j = 0; j < MAX_OBJ_AFFECT; j++)
     affect_modify_ar(ch, obj->affected[j].location,
@@ -921,7 +921,7 @@ int get_number(char **name)
 
   *number = '\0';
 
-  if ((ppos = strchr(*name, '.')) != NULL) {
+  if ((ppos = strchr(*name, '.')) != nullptr) {
     *ppos++ = '\0';
     strlcpy(number, *name, sizeof(number));
     strcpy(*name, ppos);	/* strcpy: OK (always smaller) */
@@ -946,7 +946,7 @@ struct obj_data *get_obj_in_list_num(int num, struct obj_data *list)
     if (GET_OBJ_RNUM(i) == num)
       return (i);
 
-  return (NULL);
+  return (nullptr);
 }
 
 
@@ -960,7 +960,7 @@ struct obj_data *get_obj_num(obj_rnum nr)
     if (GET_OBJ_RNUM(i) == nr)
       return (i);
 
-  return (NULL);
+  return (nullptr);
 }
 
 
@@ -977,14 +977,14 @@ struct char_data *get_char_room(char *name, int *number, room_rnum room)
   }
 
   if (*number == 0)
-    return (NULL);
+    return (nullptr);
 
   for (i = world[room].people; i && *number; i = i->next_in_room)
     if (isname(name, i->name))
       if (--(*number) == 0)
 	return (i);
 
-  return (NULL);
+  return (nullptr);
 }
 
 
@@ -998,7 +998,7 @@ struct char_data *get_char_num(mob_rnum nr)
     if (GET_MOB_RNUM(i) == nr)
       return (i);
 
-  return (NULL);
+  return (nullptr);
 }
 
 
@@ -1006,7 +1006,7 @@ struct char_data *get_char_num(mob_rnum nr)
 /* put an object in a room */
 void obj_to_room(struct obj_data *object, room_rnum room)
 {
-  struct obj_data *vehicle = NULL;
+  struct obj_data *vehicle = nullptr;
 
   if (!object || room == NOWHERE || room > top_of_world)
     log("SYSERR: Illegal value(s) passed to obj_to_room. (Room #%d/%d, obj %p)",
@@ -1025,8 +1025,8 @@ void obj_to_room(struct obj_data *object, room_rnum room)
     object->next_content = world[room].contents;
     world[room].contents = object;
     IN_ROOM(object) = room;
-    object->carried_by = NULL;
-    GET_LAST_LOAD(object) = time(0);
+    object->carried_by = nullptr;
+    GET_LAST_LOAD(object) = time(nullptr);
     if (GET_OBJ_TYPE(object) == ITEM_VEHICLE && !OBJ_FLAGGED(object, ITEM_UNBREAKABLE) && GET_OBJ_VNUM(object) > 19199) {
       SET_BIT_AR(GET_OBJ_EXTRA(object), ITEM_UNBREAKABLE);
     } if (GET_OBJ_TYPE(object) == ITEM_HATCH && GET_OBJ_VNUM(object) <= 19199) {
@@ -1068,18 +1068,18 @@ void obj_to_room(struct obj_data *object, room_rnum room)
      }
     }
     if (EXIT(object, 5) && (SECT(IN_ROOM(object)) == SECT_UNDERWATER || SECT(IN_ROOM(object)) == SECT_WATER_NOSWIM)) {
-     act("$p @Bsinks to deeper waters.@n", TRUE, 0, object, 0, TO_ROOM);
+     act("$p @Bsinks to deeper waters.@n", TRUE, nullptr, object, nullptr, TO_ROOM);
      int numb = GET_ROOM_VNUM(EXIT(object, 5)->to_room);
      obj_from_room(object);
      obj_to_room(object, real_room(numb));
     }
     if (EXIT(object, 5) && SECT(IN_ROOM(object)) == SECT_FLYING && (GET_OBJ_VNUM(object) < 80 || GET_OBJ_VNUM(object) > 83)) {
-     act("$p @Cfalls down.@n", TRUE, 0, object, 0, TO_ROOM);
+     act("$p @Cfalls down.@n", TRUE, nullptr, object, nullptr, TO_ROOM);
      int numb = GET_ROOM_VNUM(EXIT(object, 5)->to_room);
      obj_from_room(object);
      obj_to_room(object, real_room(numb));
      if (SECT(IN_ROOM(object)) != SECT_FLYING) {
-      act("$p @Cfalls down and smacks the ground.@n", TRUE, 0, object, 0, TO_ROOM);
+      act("$p @Cfalls down and smacks the ground.@n", TRUE, nullptr, object, nullptr, TO_ROOM);
      }
     }
     if (GET_OBJ_VAL(object, 0) != 0) {
@@ -1099,21 +1099,21 @@ void obj_from_room(struct obj_data *object)
   struct obj_data *temp;
 
   if (!object || IN_ROOM(object) == NOWHERE) {
-    log("SYSERR: NULL object (%p) or obj not in a room (%d) passed to obj_from_room",
+    log("SYSERR: nullptr object (%p) or obj not in a room (%d) passed to obj_from_room",
 	object, IN_ROOM(object));
     return;
   }
 
-  if (GET_OBJ_POSTED(object) && object->in_obj == NULL) {
+  if (GET_OBJ_POSTED(object) && object->in_obj == nullptr) {
    struct obj_data *obj = GET_OBJ_POSTED(object);
    if (GET_OBJ_POSTTYPE(object) <= 0) {
     send_to_room(IN_ROOM(obj), "%s@W shakes loose from %s@W.@n\r\n", obj->short_description, object->short_description);
    } else {
     send_to_room(IN_ROOM(obj), "%s@W comes loose from %s@W.@n\r\n", object->short_description, obj->short_description);
    }
-   GET_OBJ_POSTED(obj) = NULL;
+   GET_OBJ_POSTED(obj) = nullptr;
    GET_OBJ_POSTTYPE(obj) = 0;
-   GET_OBJ_POSTED(object) = NULL;
+   GET_OBJ_POSTED(object) = nullptr;
    GET_OBJ_POSTTYPE(object) = 0;
   }
 
@@ -1122,7 +1122,7 @@ void obj_from_room(struct obj_data *object)
   if (ROOM_FLAGGED(IN_ROOM(object), ROOM_HOUSE))
     SET_BIT_AR(ROOM_FLAGS(IN_ROOM(object)), ROOM_HOUSE_CRASH);
   IN_ROOM(object) = NOWHERE;
-  object->next_content = NULL;
+  object->next_content = nullptr;
 }
 
 
@@ -1132,7 +1132,7 @@ void obj_to_obj(struct obj_data *obj, struct obj_data *obj_to)
   struct obj_data *tmp_obj;
 
   if (!obj || !obj_to || obj == obj_to) {
-    log("SYSERR: NULL object (%p) or same source (%p) and target (%p VNUM: %d) obj passed to obj_to_obj.",
+    log("SYSERR: nullptr object (%p) or same source (%p) and target (%p VNUM: %d) obj passed to obj_to_obj.",
 	obj, obj, obj_to, obj_to ? GET_OBJ_VNUM(obj_to) : -1);
     return;
   }
@@ -1165,7 +1165,7 @@ void obj_from_obj(struct obj_data *obj)
 {
   struct obj_data *temp, *obj_from;
 
-  if (obj->in_obj == NULL) {
+  if (obj->in_obj == nullptr) {
     log("SYSERR: (%s): trying to illegally extract obj from obj.", __FILE__);
     return;
   }
@@ -1191,8 +1191,8 @@ void obj_from_obj(struct obj_data *obj)
    SET_BIT_AR(ROOM_FLAGS(IN_ROOM(obj_from)), ROOM_HOUSE_CRASH);
   }
 
-  obj->in_obj = NULL;
-  obj->next_content = NULL;
+  obj->in_obj = nullptr;
+  obj->next_content = nullptr;
 }
 
 
@@ -1213,7 +1213,7 @@ void extract_obj(struct obj_data *obj)
   struct obj_data *temp;
   struct char_data *ch;
 
-  if (obj->worn_by != NULL)
+  if (obj->worn_by != nullptr)
     if (unequip_char(obj->worn_by, obj->worn_on) != obj)
       log("SYSERR: Inconsistent worn_by and worn_on pointers!!");
   if (IN_ROOM(obj) != NOWHERE)
@@ -1227,26 +1227,26 @@ void extract_obj(struct obj_data *obj)
   if (GET_FELLOW_WALL(obj) && GET_OBJ_VNUM(obj) == 79) {
    struct obj_data *trash;
    trash = GET_FELLOW_WALL(obj);
-   GET_FELLOW_WALL(obj) = NULL;
-   GET_FELLOW_WALL(trash) = NULL;
+   GET_FELLOW_WALL(obj) = nullptr;
+   GET_FELLOW_WALL(trash) = nullptr;
    extract_obj(trash);
   }
   if (SITTING(obj)) {
    ch = SITTING(obj);
-   SITTING(obj) = NULL;
-   SITS(ch) = NULL;
+   SITTING(obj) = nullptr;
+   SITS(ch) = nullptr;
   }
-  if (GET_OBJ_POSTED(obj) && obj->in_obj == NULL) {
+  if (GET_OBJ_POSTED(obj) && obj->in_obj == nullptr) {
    struct obj_data *obj2 = GET_OBJ_POSTED(obj);
-   GET_OBJ_POSTED(obj2) = NULL;
+   GET_OBJ_POSTED(obj2) = nullptr;
    GET_OBJ_POSTTYPE(obj2) = 0;
-   GET_OBJ_POSTED(obj) = NULL;
+   GET_OBJ_POSTED(obj) = nullptr;
   }
   if (TARGET(obj)) {
-   TARGET(obj) = NULL;
+   TARGET(obj) = nullptr;
   }
   if (USER(obj)) {
-   USER(obj) = NULL;
+   USER(obj) = nullptr;
   }
 
   while (obj->contains)
@@ -1295,10 +1295,10 @@ void update_char_objects(struct char_data *ch)
         GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_TIME) = 3;
 	if (j == 1) {
 	  send_to_char(ch, "Your light begins to flicker and fade.\r\n");
-	  act("$n's light begins to flicker and fade.", FALSE, ch, 0, 0, TO_ROOM);
+	  act("$n's light begins to flicker and fade.", FALSE, ch, nullptr, nullptr, TO_ROOM);
 	} else if (j == 0) {
 	  send_to_char(ch, "Your light sputters out and dies.\r\n");
-	  act("$n's light sputters out and dies.", FALSE, ch, 0, 0, TO_ROOM);
+	  act("$n's light sputters out and dies.", FALSE, ch, nullptr, nullptr, TO_ROOM);
 	  world[IN_ROOM(ch)].light--;
 	}
       } else if (GET_OBJ_TYPE(GET_EQ(ch, i)) == ITEM_LIGHT && GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_HOURS) > 0) {
@@ -1335,7 +1335,7 @@ void extract_char_final(struct char_data *ch)
   if (!IS_NPC(ch) && !ch->desc) {
     for (d = descriptor_list; d; d = d->next)
       if (d->original == ch) {
-	do_return(d->character, NULL, 0, 0);
+	do_return(d->character, nullptr, 0, 0);
         break;
       }
   }
@@ -1350,7 +1350,7 @@ void extract_char_final(struct char_data *ch)
      * body after the removal so dump them to the main menu.
      */
     if (ch->desc->original)
-      do_return(ch, NULL, 0, 0);
+      do_return(ch, nullptr, 0, 0);
     else {
       /*
        * Now we boot anybody trying to log in with the same character, to
@@ -1376,8 +1376,8 @@ void extract_char_final(struct char_data *ch)
 
   if (SITS(ch)) {
    chair = SITS(ch);
-   SITTING(chair) = NULL;
-   SITS(ch) = NULL;
+   SITTING(chair) = nullptr;
+   SITS(ch) = nullptr;
   }
 
   if (IS_NPC(ch) && GET_MOB_VNUM(ch) == 25) {
@@ -1387,7 +1387,7 @@ void extract_char_final(struct char_data *ch)
   }
 
   if (!IS_NPC(ch) && GET_CLONES(ch) > 0) {
-   struct char_data *clone = NULL;
+   struct char_data *clone = nullptr;
     for (clone = character_list; clone; clone = clone->next) {
      if (IS_NPC(clone)) {
       if (GET_MOB_VNUM(clone) == 25) {
@@ -1402,24 +1402,24 @@ void extract_char_final(struct char_data *ch)
   purge_homing(ch);
 
   if (MINDLINK(ch)) {
-   MINDLINK(MINDLINK(ch)) = NULL;
-   MINDLINK(ch) = NULL;
+   MINDLINK(MINDLINK(ch)) = nullptr;
+   MINDLINK(ch) = nullptr;
   }
 
   if (GRAPPLING(ch)) {
-   act("@WYou stop grappling with @C$N@W!@n", TRUE, ch, 0, GRAPPLING(ch), TO_CHAR);
-   act("@C$n@W stops grappling with @c$N@W!@n", TRUE, ch, 0, GRAPPLING(ch), TO_ROOM);
+   act("@WYou stop grappling with @C$N@W!@n", TRUE, ch, nullptr, GRAPPLING(ch), TO_CHAR);
+   act("@C$n@W stops grappling with @c$N@W!@n", TRUE, ch, nullptr, GRAPPLING(ch), TO_ROOM);
    GRAPTYPE(GRAPPLING(ch)) = -1;
-   GRAPPLED(GRAPPLING(ch)) = NULL;
-   GRAPPLING(ch) = NULL;
+   GRAPPLED(GRAPPLING(ch)) = nullptr;
+   GRAPPLING(ch) = nullptr;
    GRAPTYPE(ch) = -1;
   }
   if (GRAPPLED(ch)) {
-   act("@WYou stop being grappled with by @C$N@W!@n", TRUE, ch, 0, GRAPPLED(ch), TO_CHAR);
-   act("@C$n@W stops being grappled with by @c$N@W!@n", TRUE, ch, 0, GRAPPLED(ch), TO_ROOM);
+   act("@WYou stop being grappled with by @C$N@W!@n", TRUE, ch, nullptr, GRAPPLED(ch), TO_CHAR);
+   act("@C$n@W stops being grappled with by @c$N@W!@n", TRUE, ch, nullptr, GRAPPLED(ch), TO_ROOM);
    GRAPTYPE(GRAPPLED(ch)) = -1;
-   GRAPPLING(GRAPPLED(ch)) = NULL;
-   GRAPPLED(ch) = NULL;
+   GRAPPLING(GRAPPLED(ch)) = nullptr;
+   GRAPPLED(ch) = nullptr;
    GRAPTYPE(ch) = -1;
   }
 
@@ -1431,47 +1431,47 @@ void extract_char_final(struct char_data *ch)
   }
 
   if (ch->poisonby) {
-   ch->poisonby = NULL;
+   ch->poisonby = nullptr;
   }
 
   if (DRAGGING(ch)) {
-   act("@WYou stop dragging @C$N@W!@n", TRUE, ch, 0, DRAGGING(ch), TO_CHAR);
-   act("@C$n@W stops dragging @c$N@W!@n", TRUE, ch, 0, DRAGGING(ch), TO_ROOM);
-   DRAGGED(DRAGGING(ch)) = NULL;
-   DRAGGING(ch) = NULL;
+   act("@WYou stop dragging @C$N@W!@n", TRUE, ch, nullptr, DRAGGING(ch), TO_CHAR);
+   act("@C$n@W stops dragging @c$N@W!@n", TRUE, ch, nullptr, DRAGGING(ch), TO_ROOM);
+   DRAGGED(DRAGGING(ch)) = nullptr;
+   DRAGGING(ch) = nullptr;
   }
 
   if (DRAGGED(ch)) {
-   act("@WYou stop being dragged by @C$N@W!@n", TRUE, ch, 0, DRAGGED(ch), TO_CHAR);
-   act("@C$n@W stops being dragged by @c$N@W!@n", TRUE, ch, 0, DRAGGED(ch), TO_ROOM);
-   DRAGGING(DRAGGED(ch)) = NULL;
-   DRAGGED(ch) = NULL;
+   act("@WYou stop being dragged by @C$N@W!@n", TRUE, ch, nullptr, DRAGGED(ch), TO_CHAR);
+   act("@C$n@W stops being dragged by @c$N@W!@n", TRUE, ch, nullptr, DRAGGED(ch), TO_ROOM);
+   DRAGGING(DRAGGED(ch)) = nullptr;
+   DRAGGED(ch) = nullptr;
   }
 
   if (GET_DEFENDER(ch)) {
-   GET_DEFENDING(GET_DEFENDER(ch)) = NULL;
-   GET_DEFENDER(ch) = NULL;
+   GET_DEFENDING(GET_DEFENDER(ch)) = nullptr;
+   GET_DEFENDER(ch) = nullptr;
   }
   if (GET_DEFENDING(ch)) {
-   GET_DEFENDER(GET_DEFENDING(ch)) = NULL;
-   GET_DEFENDING(ch) = NULL;
+   GET_DEFENDER(GET_DEFENDING(ch)) = nullptr;
+   GET_DEFENDING(ch) = nullptr;
   }
 
   if (BLOCKED(ch)) {
-   BLOCKS(BLOCKED(ch)) = NULL;
-   BLOCKED(ch) = NULL;
+   BLOCKS(BLOCKED(ch)) = nullptr;
+   BLOCKED(ch) = nullptr;
   }
   if (BLOCKS(ch)) {
-   BLOCKED(BLOCKS(ch)) = NULL;
-   BLOCKS(ch) = NULL;
+   BLOCKED(BLOCKS(ch)) = nullptr;
+   BLOCKS(ch) = nullptr;
   }
   if (ABSORBING(ch)) {
-   ABSORBBY(ABSORBING(ch)) = NULL;
-   ABSORBING(ch) = NULL;
+   ABSORBBY(ABSORBING(ch)) = nullptr;
+   ABSORBING(ch) = nullptr;
   }
   if (ABSORBBY(ch)) {
-   ABSORBING(ABSORBBY(ch)) = NULL;
-   ABSORBBY(ch) = NULL;
+   ABSORBING(ABSORBBY(ch)) = nullptr;
+   ABSORBBY(ch) = nullptr;
   }
 
   /* transfer objects to room, if any */
@@ -1591,7 +1591,7 @@ void extract_pending_chars(void)
   if (extractions_pending < 0)
     log("SYSERR: Negative (%d) extractions pending.", extractions_pending);
 
-  for (vict = character_list, prev_vict = NULL; vict && extractions_pending; vict = next_vict) {
+  for (vict = character_list, prev_vict = nullptr; vict && extractions_pending; vict = next_vict) {
     next_vict = vict->next;
 
     if (MOB_FLAGGED(vict, MOB_NOTDEADYET))
@@ -1676,7 +1676,7 @@ struct char_data *get_player_vis(struct char_data *ch, char *name, int *number, 
     return (i);
   }
 
-  return (NULL);
+  return (nullptr);
 }
 
 
@@ -1696,7 +1696,7 @@ struct char_data *get_char_room_vis(struct char_data *ch, char *name, int *numbe
 
   /* 0.<name> means PC with name */
   if (*number == 0)
-    return (get_player_vis(ch, name, NULL, FIND_CHAR_ROOM));
+    return (get_player_vis(ch, name, nullptr, FIND_CHAR_ROOM));
 
   for (i = world[IN_ROOM(ch)].people; i && *number; i = i->next_in_room) {
     if (!strcasecmp(name, "last") && LASTHIT(i) != 0 && LASTHIT(i) == GET_IDNUM(ch)) {
@@ -1745,7 +1745,7 @@ struct char_data *get_char_room_vis(struct char_data *ch, char *name, int *numbe
           return (i);
     }
   }
-  return (NULL);
+  return (nullptr);
 }
 
 
@@ -1759,11 +1759,11 @@ struct char_data *get_char_world_vis(struct char_data *ch, char *name, int *numb
     num = get_number(&name);
   }
 
-  if ((i = get_char_room_vis(ch, name, number)) != NULL)
+  if ((i = get_char_room_vis(ch, name, number)) != nullptr)
     return (i);
 
   if (*number == 0)
-    return get_player_vis(ch, name, NULL, 0);
+    return get_player_vis(ch, name, nullptr, 0);
 
   for (i = character_list; i && *number; i = i->next) {
     if (IN_ROOM(ch) == IN_ROOM(i))
@@ -1801,7 +1801,7 @@ struct char_data *get_char_world_vis(struct char_data *ch, char *name, int *numb
 
     return (i);
   }
-  return (NULL);
+  return (nullptr);
 }
 
 
@@ -1812,7 +1812,7 @@ struct char_data *get_char_vis(struct char_data *ch, char *name, int *number, in
   else if (where == FIND_CHAR_WORLD)
     return get_char_world_vis(ch, name, number);
   else
-    return (NULL);
+    return (nullptr);
 }
 
 
@@ -1827,7 +1827,7 @@ struct obj_data *get_obj_in_list_vis(struct char_data *ch, char *name, int *numb
   }
 
   if (*number == 0)
-    return (NULL);
+    return (nullptr);
 
   for (i = list; i && *number; i = i->next_content)
     if (isname(name, i->name))
@@ -1835,7 +1835,7 @@ struct obj_data *get_obj_in_list_vis(struct char_data *ch, char *name, int *numb
 	if (--(*number) == 0)
 	  return (i);
 
-  return (NULL);
+  return (nullptr);
 }
 
 
@@ -1851,14 +1851,14 @@ struct obj_data *get_obj_vis(struct char_data *ch, char *name, int *number)
   }
 
   if (*number == 0)
-    return (NULL);
+    return (nullptr);
 
   /* scan items carried */
-  if ((i = get_obj_in_list_vis(ch, name, number, ch->carrying)) != NULL)
+  if ((i = get_obj_in_list_vis(ch, name, number, ch->carrying)) != nullptr)
     return (i);
 
   /* scan room */
-  if ((i = get_obj_in_list_vis(ch, name, number, world[IN_ROOM(ch)].contents)) != NULL)
+  if ((i = get_obj_in_list_vis(ch, name, number, world[IN_ROOM(ch)].contents)) != nullptr)
     return (i);
 
   /* ok.. no luck yet. scan the entire obj list   */
@@ -1868,7 +1868,7 @@ struct obj_data *get_obj_vis(struct char_data *ch, char *name, int *number)
 	if (--(*number) == 0)
 	  return (i);
 
-  return (NULL);
+  return (nullptr);
 }
 
 
@@ -1882,14 +1882,14 @@ struct obj_data *get_obj_in_equip_vis(struct char_data *ch, char *arg, int *numb
   }
 
   if (*number == 0)
-    return (NULL);
+    return (nullptr);
 
   for (j = 0; j < NUM_WEARS; j++)
     if (equipment[j] && CAN_SEE_OBJ(ch, equipment[j]) && isname(arg, equipment[j]->name))
       if (--(*number) == 0)
         return (equipment[j]);
 
-  return (NULL);
+  return (nullptr);
 }
 
 
@@ -1935,12 +1935,12 @@ const char *money_desc(int amount)
     {      20000, "a mountain of zenni"		        },
     {      25000, "a huge mountain of zenni"	        },
     {      50000, "an enormous mountain of zenni"	},
-    {          0, NULL					},
+    {          0, nullptr					},
   };
 
   if (amount <= 0) {
     log("SYSERR: Try to create negative or 0 money (%d).", amount);
-    return (NULL);
+    return (nullptr);
   }
 
   for (cnt = 0; money_table[cnt].limit; cnt++)
@@ -1960,7 +1960,7 @@ struct obj_data *create_money(int amount)
 
   if (amount <= 0) {
     log("SYSERR: Try to create negative or 0 money. (%d)", amount);
-    return (NULL);
+    return (nullptr);
   }
   obj = create_obj();
   CREATE(new_descr, struct extra_descr_data, 1);
@@ -1992,7 +1992,7 @@ struct obj_data *create_money(int amount)
     new_descr->description = strdup(buf);
   }
 
-  new_descr->next = NULL;
+  new_descr->next = nullptr;
   obj->ex_description = new_descr;
 
   GET_OBJ_TYPE(obj) = ITEM_MONEY;
@@ -2019,8 +2019,8 @@ struct obj_data *create_money(int amount)
  *  bitv..   All those bits that you want to "search through".
  *           Bit found will be result of the function
  *  *ch      This is the person that is trying to "find"
- *  **tar_ch Will be NULL if no character was found, otherwise points
- * **tar_obj Will be NULL if no object was found, otherwise points
+ *  **tar_ch Will be nullptr if no character was found, otherwise points
+ * **tar_obj Will be nullptr if no object was found, otherwise points
  *
  * The routine used to return a pointer to the next word in *arg (just
  * like the one_argument routine), but now it returns an integer that
@@ -2033,8 +2033,8 @@ int generic_find(char *arg, bitvector_t bitvector, struct char_data *ch,
   char name_val[MAX_INPUT_LENGTH];
   char *name = name_val;
 
-  *tar_ch = NULL;
-  *tar_obj = NULL;
+  *tar_ch = nullptr;
+  *tar_obj = nullptr;
 
   one_argument(arg, name);
 
@@ -2044,12 +2044,12 @@ int generic_find(char *arg, bitvector_t bitvector, struct char_data *ch,
     return (0);
 
   if (IS_SET(bitvector, FIND_CHAR_ROOM)) {	/* Find person in room */
-    if ((*tar_ch = get_char_room_vis(ch, name, &number)) != NULL)
+    if ((*tar_ch = get_char_room_vis(ch, name, &number)) != nullptr)
       return (FIND_CHAR_ROOM);
   }
 
   if (IS_SET(bitvector, FIND_CHAR_WORLD)) {
-    if ((*tar_ch = get_char_world_vis(ch, name, &number)) != NULL)
+    if ((*tar_ch = get_char_world_vis(ch, name, &number)) != nullptr)
       return (FIND_CHAR_WORLD);
   }
 
@@ -2064,12 +2064,12 @@ int generic_find(char *arg, bitvector_t bitvector, struct char_data *ch,
   }
 
   if (IS_SET(bitvector, FIND_OBJ_INV)) {
-    if ((*tar_obj = get_obj_in_list_vis(ch, name, &number, ch->carrying)) != NULL)
+    if ((*tar_obj = get_obj_in_list_vis(ch, name, &number, ch->carrying)) != nullptr)
       return (FIND_OBJ_INV);
   }
 
   if (IS_SET(bitvector, FIND_OBJ_ROOM)) {
-    if ((*tar_obj = get_obj_in_list_vis(ch, name, &number, world[IN_ROOM(ch)].contents)) != NULL)
+    if ((*tar_obj = get_obj_in_list_vis(ch, name, &number, world[IN_ROOM(ch)].contents)) != nullptr)
       return (FIND_OBJ_ROOM);
   }
 
@@ -2116,7 +2116,7 @@ void affectv_remove(struct char_data *ch, struct affected_type *af)
 {
   struct affected_type *cmtemp;
 
-  if (ch->affectedv == NULL) {
+  if (ch->affectedv == nullptr) {
     core_dump();
     return;
   }
@@ -2128,7 +2128,7 @@ void affectv_remove(struct char_data *ch, struct affected_type *af)
   if (!ch->affectedv) {
     struct char_data *temp;
     REMOVE_FROM_LIST(ch, affectv_list, next_affectv, temp);
-    ch->next_affectv = NULL;
+    ch->next_affectv = nullptr;
   }
 }
 
@@ -2206,7 +2206,7 @@ void item_check(struct obj_data *object, struct char_data *ch)
       break;
       case ITEM_ARMOR:
       case ITEM_WORN:
-        where = find_eq_pos(ch, object, 0);
+        where = find_eq_pos(ch, object, nullptr);
         if (!GET_EQ(ch, where)) {
           perform_wear(ch, object, where);
         } else {

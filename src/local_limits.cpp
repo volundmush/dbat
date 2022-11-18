@@ -86,12 +86,12 @@ static void barrier_shed(struct char_data *ch)
 
  if (GET_BARRIER(ch) <= 0) {
   GET_BARRIER(ch) = 0;
-  act("@cYour barrier disappears.@n", TRUE, ch, 0, 0, TO_CHAR);
-  act("@c$n@c's barrier disappears.@n", TRUE, ch, 0, 0, TO_ROOM);
+  act("@cYour barrier disappears.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+  act("@c$n@c's barrier disappears.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
  } else {
-  act("@cYour barrier loses some energy.@n", TRUE, ch, 0, 0, TO_CHAR);
+  act("@cYour barrier loses some energy.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
   send_to_char(ch, "@D[@C%s@D]@n\r\n", add_commas(loss));
-  act("@c$n@c's barrier sends some sparks into the air as it seems to get a bit weaker.@n", TRUE, ch, 0, 0, TO_ROOM);
+  act("@c$n@c's barrier sends some sparks into the air as it seems to get a bit weaker.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
  }
 
  if (recharge > 0 && (ch->getCurKI()) < GET_MAX_MANA(ch)) {
@@ -316,7 +316,7 @@ static int64_t mana_gain(struct char_data *ch)
    gain *= 2;
   }
 
-  if (PLR_FLAGGED(ch, PLR_HEALT) && SITS(ch) != NULL) {
+  if (PLR_FLAGGED(ch, PLR_HEALT) && SITS(ch) != nullptr) {
    gain *= 20;
   }
   if (PLR_FLAGGED(ch, PLR_POSE) && axion_dice(0) > GET_SKILL(ch, SKILL_POSE)) {
@@ -484,7 +484,7 @@ int64_t hit_gain(struct char_data *ch)
   if (IS_HOSHIJIN(ch) && GET_PHASE(ch) > 0) {
    gain *= 2;
   }
-  if (PLR_FLAGGED(ch, PLR_HEALT) && SITS(ch) != NULL) {
+  if (PLR_FLAGGED(ch, PLR_HEALT) && SITS(ch) != nullptr) {
    gain *= 20;
   }
 
@@ -620,7 +620,7 @@ static int64_t move_gain(struct char_data *ch)
   if (IS_HOSHIJIN(ch) && GET_PHASE(ch) > 0) {
    gain *= 2;
   }
-  if (PLR_FLAGGED(ch, PLR_HEALT) && SITS(ch) != NULL) {
+  if (PLR_FLAGGED(ch, PLR_HEALT) && SITS(ch) != nullptr) {
    gain *= 20;
   }
 
@@ -655,7 +655,7 @@ static int64_t move_gain(struct char_data *ch)
 
 static void update_flags(struct char_data *ch)
 {
-	if (ch == NULL) {
+	if (ch == nullptr) {
 		send_to_imm("ERROR: Empty ch variable sent to update_flags.");
 		return;
 	}
@@ -663,7 +663,7 @@ static void update_flags(struct char_data *ch)
 	if (GET_BONUS(ch, BONUS_LATE) && GET_POS(ch) == POS_SLEEPING && rand_number(1, 3) == 3) {
 		if (GET_HIT(ch) >= (ch->getEffMaxPL()) && (ch->getCurST()) >= GET_MAX_MOVE(ch) && (ch->getCurKI()) >= GET_MAX_MANA(ch)) {
 			send_to_char(ch, "You FINALLY wake up.\r\n");
-			act("$n wakes up.", TRUE, ch, 0, 0, TO_ROOM);
+			act("$n wakes up.", TRUE, ch, nullptr, nullptr, TO_ROOM);
 			GET_POS(ch) = POS_SITTING;
 		}
 	}
@@ -705,7 +705,7 @@ static void update_flags(struct char_data *ch)
 		}
 		if (GET_TGROWTH(ch) >= 10) {
 			send_to_char(ch, "@wYour tail grows back.@n\r\n");
-			act("$n@w's tail grows back.@n", TRUE, ch, 0, 0, TO_ROOM);
+			act("$n@w's tail grows back.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
             ch->race->gainTail(ch);
 			GET_TGROWTH(ch) = 0;
 		}
@@ -714,7 +714,7 @@ static void update_flags(struct char_data *ch)
 		GET_TGROWTH(ch) += 1;
 		if (GET_TGROWTH(ch) >= 10) {
 			send_to_char(ch, "@wYour tail grows back.@n\r\n");
-			act("$n@w's tail grows back.@n", TRUE, ch, 0, 0, TO_ROOM);
+			act("$n@w's tail grows back.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
             ch->race->gainTail(ch);
 			GET_TGROWTH(ch) = 0;
 		}
@@ -760,12 +760,12 @@ static void update_flags(struct char_data *ch)
 	}
 	if (AFF_FLAGGED(ch, AFF_FROZEN) && rand_number(1, 2) == 2) {
 		send_to_char(ch, "@wYou realize you have thawed enough and break out of the ice holding you prisoner!\r\n");
-		act("$n@W breaks out of the ice holding $m prisoner!", TRUE, ch, 0, 0, TO_ROOM);
+		act("$n@W breaks out of the ice holding $m prisoner!", TRUE, ch, nullptr, nullptr, TO_ROOM);
 		REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FROZEN);
 	}
 	if (AFF_FLAGGED(ch, AFF_WITHER) && rand_number(1, 6 + sick_fail) == 2) {
 		send_to_char(ch, "@wYour body returns to normal and you beat the withering that plagued you.\r\n");
-		act("$n@W's looks more fit now.", TRUE, ch, 0, 0, TO_ROOM);
+		act("$n@W's looks more fit now.", TRUE, ch, nullptr, nullptr, TO_ROOM);
 		ch->real_abils.str += 3;
 		ch->real_abils.cha += 3;
 		save_char(ch);
@@ -824,14 +824,14 @@ void set_title(struct char_data *ch, char *title)
   return;
  }
  /*
-  if (title == NULL) {
+  if (title == nullptr) {
     title = class_desc_str(ch, 2, TRUE);
   }
 
   if (strlen(title) > MAX_TITLE_LENGTH)
     title[MAX_TITLE_LENGTH] = '\0';
 
-  if (GET_TITLE(ch) != NULL)
+  if (GET_TITLE(ch) != nullptr)
     free(GET_TITLE(ch));
 
   GET_TITLE(ch) = strdup(title);
@@ -850,7 +850,7 @@ void gain_level(struct char_data *ch, int whichclass)
              GET_NAME(ch), GET_LEVEL(ch));
       send_to_char(ch, "You rise a level!\r\n");
       GET_EXP(ch) -= level_exp(ch, GET_LEVEL(ch));
-      /*set_title(ch, NULL);*/
+      /*set_title(ch, nullptr);*/
       write_aliases(ch);
       save_char(ch);
   }  
@@ -927,13 +927,13 @@ void gain_exp(struct char_data *ch, int64_t gain)
       if (GET_LEVEL(ch) + 20 < GET_LEVEL(MINDLINK(ch)) || GET_LEVEL(ch) - 20 > GET_LEVEL(MINDLINK(ch))) {
        send_to_char(MINDLINK(ch), "The level difference between the two of you is too great to gain from mind read.\r\n");
       } else {
-       act("@GYou've absorbed some new experiences from @W$n@G!@n", FALSE, ch, 0, MINDLINK(ch), TO_VICT);
+       act("@GYou've absorbed some new experiences from @W$n@G!@n", FALSE, ch, nullptr, MINDLINK(ch), TO_VICT);
        int read = gain * 0.12;
        gain -= read;
         if (read == 0)
          read = 1;
        gain_exp(MINDLINK(ch), read);
-       act("@RYou sense that @W$N@R has stolen some of your experiences with $S mind!@n", FALSE, ch, 0, MINDLINK(ch), TO_CHAR);
+       act("@RYou sense that @W$N@R has stolen some of your experiences with $S mind!@n", FALSE, ch, nullptr, MINDLINK(ch), TO_CHAR);
       }
      }
      int64_t difff = level_exp(ch, GET_LEVEL(ch) + 1) * 5;
@@ -959,14 +959,14 @@ void gain_exp(struct char_data *ch, int64_t gain)
      if (GET_LEVEL(ch) + 20 < GET_LEVEL(MINDLINK(ch)) || GET_LEVEL(ch) - 20 > GET_LEVEL(MINDLINK(ch))) {
       send_to_char(MINDLINK(ch), "The level difference between the two of you is too great to gain from mind read.\r\n");
      } else {
-      act("@GYou've absorbed some new experiences from @W$n@G!@n", FALSE, ch, 0, MINDLINK(ch), TO_VICT);
+      act("@GYou've absorbed some new experiences from @W$n@G!@n", FALSE, ch, nullptr, MINDLINK(ch), TO_VICT);
       int64_t read = gain * 0.12;
       diff -= (read * 0.15);
       gain -= read;
        if (read == 0)
         read = 1;
       gain_exp(MINDLINK(ch), read);
-      act("@RYou sense that @W$N@R has stolen some of your experiences with $S mind!@n", FALSE, ch, 0, MINDLINK(ch), TO_CHAR);
+      act("@RYou sense that @W$N@R has stolen some of your experiences with $S mind!@n", FALSE, ch, nullptr, MINDLINK(ch), TO_CHAR);
      }
     }
     if (rand_number(1, 5) >= 2) {
@@ -1025,7 +1025,7 @@ void gain_exp_regardless(struct char_data *ch, int gain)
         send_to_char(ch, "You rise a level!\r\n");
       else
 	send_to_char(ch, "You rise %d levels!\r\n", num_levels);
-      /*set_title(ch, NULL);*/
+      /*set_title(ch, nullptr);*/
     }
   }
 }
@@ -1068,8 +1068,8 @@ void gain_condition(struct char_data *ch, int condition, int value)
        ocond = HUNGER;
 
       if (pukeroll > GET_CON(ch) + 19) {
-							act("@r@6You retch violently until your stomach is empty! Your constitution couldn't handle being that stuffed!@n", TRUE, ch, 0, 0, TO_CHAR);
-							act("@m@6$n@r@6 retches violently! It seems $e stuffed $mself too much!@n", TRUE, ch, 0, 0, TO_ROOM);
+							act("@r@6You retch violently until your stomach is empty! Your constitution couldn't handle being that stuffed!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+							act("@m@6$n@r@6 retches violently! It seems $e stuffed $mself too much!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
 							SET_BIT_AR(AFF_FLAGS(ch), AFF_PUKED);
 							if (!IS_NAMEK(ch)) {
 								GET_COND(ch, HUNGER) -= 40;
@@ -1088,8 +1088,8 @@ void gain_condition(struct char_data *ch, int condition, int value)
 							}
 						}
 						else if (pukeroll > GET_CON(ch) + 9) {
-							act("@r@6You puke violently! Your constitution couldn't handle being that stuffed!@n", TRUE, ch, 0, 0, TO_CHAR);
-							act("@m@6$n@r@6 pukes violently! It seems $e stuffed $mself too much!@n", TRUE, ch, 0, 0, TO_ROOM);
+							act("@r@6You puke violently! Your constitution couldn't handle being that stuffed!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+							act("@m@6$n@r@6 pukes violently! It seems $e stuffed $mself too much!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
 							SET_BIT_AR(AFF_FLAGS(ch), AFF_PUKED);
 							if (!IS_NAMEK(ch)) {
 								GET_COND(ch, HUNGER) -= 20;
@@ -1106,8 +1106,8 @@ void gain_condition(struct char_data *ch, int condition, int value)
 							}
 						}
 						else if (pukeroll > GET_CON(ch)) {
-							act("@r@6You puke a little! Your constitution couldn't handle being that stuffed!@n", TRUE, ch, 0, 0, TO_CHAR);
-							act("@m@6$n@r@6 pukes a little! It seems $e stuffed $mself too much!@n", TRUE, ch, 0, 0, TO_ROOM);
+							act("@r@6You puke a little! Your constitution couldn't handle being that stuffed!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+							act("@m@6$n@r@6 pukes a little! It seems $e stuffed $mself too much!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
 							SET_BIT_AR(AFF_FLAGS(ch), AFF_PUKED);
 							if (!IS_NAMEK(ch)) {
 								GET_COND(ch, HUNGER) -= 8;
@@ -1265,8 +1265,8 @@ void gain_condition(struct char_data *ch, int condition, int value)
 			if (GET_HIT(ch) <= 0 && GET_COND(ch, HUNGER) == 0) {
 				send_to_char(ch, "You have starved to death!\r\n");
                 ch->decCurSTPercent(1, 0);
-				act("@W$n@W falls down dead before you...@n", FALSE, ch, 0, 0, TO_ROOM);
-				die(ch, NULL);
+				act("@W$n@W falls down dead before you...@n", FALSE, ch, nullptr, nullptr, TO_ROOM);
+				die(ch, nullptr);
 				if (GET_COND(ch, HUNGER) != -1) {
 					GET_COND(ch, HUNGER) = 48;
 				}
@@ -1277,8 +1277,8 @@ void gain_condition(struct char_data *ch, int condition, int value)
 			if (GET_HIT(ch) <= 0 && GET_COND(ch, THIRST) == 0) {
 				send_to_char(ch, "You have died of dehydration!\r\n");
                 ch->decCurSTPercent(1, 0);
-				act("@W$n@W falls down dead before you...@n", FALSE, ch, 0, 0, TO_ROOM);
-				die(ch, NULL);
+				act("@W$n@W falls down dead before you...@n", FALSE, ch, nullptr, nullptr, TO_ROOM);
+				die(ch, nullptr);
 				if (GET_COND(ch, HUNGER) != -1) {
 					GET_COND(ch, HUNGER) = 48;
 				}
@@ -1359,7 +1359,7 @@ static void check_idling(struct char_data *ch)
         }       
        }
       }
-      act("$n disappears into the void.", TRUE, ch, 0, 0, TO_ROOM);
+      act("$n disappears into the void.", TRUE, ch, nullptr, nullptr, TO_ROOM);
       send_to_char(ch, "You have been idle, and are pulled into a void.\r\n");
       save_char(ch);
       char_from_room(ch);
@@ -1376,8 +1376,8 @@ static void check_idling(struct char_data *ch)
 	 * For the 'if (d->character)' test in close().
 	 * -gg 3/1/98 (Happy anniversary.)
 	 */
-	ch->desc->character = NULL;
-	ch->desc = NULL;
+	ch->desc->character = nullptr;
+	ch->desc = nullptr;
       }
       Crash_rentsave(ch, 0);
       cp(ch);
@@ -1406,8 +1406,8 @@ static void heal_limb(struct char_data *ch)
  if (healrate > 0) {
  if (GET_LIMBCOND(ch, 1) > 0 && GET_LIMBCOND(ch, 1) < 50) {
   if (GET_LIMBCOND(ch, 1) + healrate >= 50) {
-   act("You realize your right arm is no longer broken.", TRUE, ch, 0, 0, TO_CHAR);
-   act("$n starts moving $s right arm gingerly for a moment.", TRUE, ch, 0, 0, TO_ROOM);
+   act("You realize your right arm is no longer broken.", TRUE, ch, nullptr, nullptr, TO_CHAR);
+   act("$n starts moving $s right arm gingerly for a moment.", TRUE, ch, nullptr, nullptr, TO_ROOM);
    GET_LIMBCOND(ch, 1) += healrate;
    recovered = TRUE;
   } else {
@@ -1424,8 +1424,8 @@ static void heal_limb(struct char_data *ch)
 
  if (GET_LIMBCOND(ch, 2) > 0 && GET_LIMBCOND(ch, 2) < 50) {
   if (GET_LIMBCOND(ch, 2) + healrate >= 50) {
-   act("You realize your left arm is no longer broken.", TRUE, ch, 0, 0, TO_CHAR);
-   act("$n starts moving $s left arm gingerly for a moment.", TRUE, ch, 0, 0, TO_ROOM);
+   act("You realize your left arm is no longer broken.", TRUE, ch, nullptr, nullptr, TO_CHAR);
+   act("$n starts moving $s left arm gingerly for a moment.", TRUE, ch, nullptr, nullptr, TO_ROOM);
    GET_LIMBCOND(ch, 2) += healrate;
    recovered = TRUE;
   } else {
@@ -1442,8 +1442,8 @@ static void heal_limb(struct char_data *ch)
 
  if (GET_LIMBCOND(ch, 3) > 0 && GET_LIMBCOND(ch, 3) < 50) {
   if (GET_LIMBCOND(ch, 3) + healrate >= 50) {
-   act("You realize your right leg is no longer broken.", TRUE, ch, 0, 0, TO_CHAR);
-   act("$n starts moving $s right leg gingerly for a moment.", TRUE, ch, 0, 0, TO_ROOM);
+   act("You realize your right leg is no longer broken.", TRUE, ch, nullptr, nullptr, TO_CHAR);
+   act("$n starts moving $s right leg gingerly for a moment.", TRUE, ch, nullptr, nullptr, TO_ROOM);
    GET_LIMBCOND(ch, 3) += healrate;
    recovered = TRUE;
   } else {
@@ -1460,8 +1460,8 @@ static void heal_limb(struct char_data *ch)
 
  if (GET_LIMBCOND(ch, 4) > 0 && GET_LIMBCOND(ch, 4) < 50) {
   if (GET_LIMBCOND(ch, 4) + healrate >= 50) {
-   act("You realize your left leg is no longer broken.", TRUE, ch, 0, 0, TO_CHAR);
-   act("$n starts moving $s left leg gingerly for a moment.", TRUE, ch, 0, 0, TO_ROOM);
+   act("You realize your left leg is no longer broken.", TRUE, ch, nullptr, nullptr, TO_CHAR);
+   act("$n starts moving $s left leg gingerly for a moment.", TRUE, ch, nullptr, nullptr, TO_ROOM);
    GET_LIMBCOND(ch, 4) += healrate;
    recovered = TRUE;
   } else {
@@ -1510,7 +1510,7 @@ static void heal_limb(struct char_data *ch)
 void point_update(void)
 {
   struct char_data *i, *next_char;
-  struct obj_data *j, *next_thing, *jj, *next_thing2, *vehicle = NULL;
+  struct obj_data *j, *next_thing, *jj, *next_thing2, *vehicle = nullptr;
     int change = FALSE;
   /* characters */
 
@@ -1595,7 +1595,7 @@ void point_update(void)
       if (AFF_FLAGGED(i, AFF_BURNED)) {
        if (rand_number(1, 5) >= 4) {
         send_to_char(i, "Your burns are healed now.\r\n");
-        act("$n@w's burns are now healed.@n", TRUE, i, 0, 0, TO_ROOM);
+        act("$n@w's burns are now healed.@n", TRUE, i, nullptr, nullptr, TO_ROOM);
         REMOVE_BIT_AR(AFF_FLAGS(i), AFF_BURNED);
        }
       }
@@ -1610,18 +1610,18 @@ void point_update(void)
 
     if (SECT(IN_ROOM(i)) == SECT_WATER_NOSWIM && !CARRIED_BY(i) && !IS_KANASSAN(i)) {
      if ((i->getCurST()) >= (i->getCurCarriedWeight())) {
-      act("@bYou swim in place.@n", TRUE, i, 0, 0, TO_CHAR);
-      act("@C$n@b swims in place.@n", TRUE, i, 0, 0, TO_ROOM);
+      act("@bYou swim in place.@n", TRUE, i, nullptr, nullptr, TO_CHAR);
+      act("@C$n@b swims in place.@n", TRUE, i, nullptr, nullptr, TO_ROOM);
       i->decCurST(i->getCurCarriedWeight());
 
      } else {
          i->decCurST(i->getCurCarriedWeight());
-      act("@RYou are drowning!@n", TRUE, i, 0, 0, TO_CHAR);
-      act("@C$n@b gulps water as $e struggles to stay above the water line.@n", TRUE, i, 0, 0, TO_ROOM);
+      act("@RYou are drowning!@n", TRUE, i, nullptr, nullptr, TO_CHAR);
+      act("@C$n@b gulps water as $e struggles to stay above the water line.@n", TRUE, i, nullptr, nullptr, TO_ROOM);
       if (GET_HIT(i) - ((i->getEffMaxPL()) / 3) <= 0) {
-       act("@rYou drown!@n", TRUE, i, 0, 0, TO_CHAR);
-       act("@R$n@r drowns!@n", TRUE, i, 0, 0, TO_ROOM);
-       die(i, NULL);
+       act("@rYou drown!@n", TRUE, i, nullptr, nullptr, TO_CHAR);
+       act("@R$n@r drowns!@n", TRUE, i, nullptr, nullptr, TO_ROOM);
+       die(i, nullptr);
       } else {
           i->decCurHealth((i->getEffMaxPL()) / 3);
       }
@@ -1639,8 +1639,8 @@ void point_update(void)
         }
         else if (GET_HIT(i) <= GET_MAX_HIT(i) / 20) {
          send_to_char(i, "You have drowned!\r\n");
-         act("@W$n@W drowns right in front of you.@n", FALSE, i, 0, 0, TO_ROOM);
-         die(i, NULL);
+         act("@W$n@W drowns right in front of you.@n", FALSE, i, nullptr, nullptr, TO_ROOM);
+         die(i, nullptr);
         }
        }
       }
@@ -1657,45 +1657,45 @@ void point_update(void)
         else if (GET_HIT(i) <= GET_MAX_HIT(i) / 20) {
          send_to_char(i, "You have drowned!\r\n");
          i->decCurHealthPercent(1, 1);
-         act("@W$n@W drowns right in front of you.@n", FALSE, i, 0, 0, TO_ROOM);
-         die(i, NULL);
+         act("@W$n@W drowns right in front of you.@n", FALSE, i, nullptr, nullptr, TO_ROOM);
+         die(i, nullptr);
         }
        }
       }
       if (!AFF_FLAGGED(i, AFF_FLYING) && ROOM_EFFECT(IN_ROOM(i)) == 6 && !MOB_FLAGGED(i, MOB_NOKILL) && !IS_DEMON(i)) {
-       act("@rYour legs are burned by the lava!@n", TRUE, i, 0, 0, TO_CHAR);
-       act("@R$n@r's legs are burned by the lava!@n", TRUE, i, 0, 0, TO_ROOM);
+       act("@rYour legs are burned by the lava!@n", TRUE, i, nullptr, nullptr, TO_CHAR);
+       act("@R$n@r's legs are burned by the lava!@n", TRUE, i, nullptr, nullptr, TO_ROOM);
        if (IS_NPC(i) && IS_HUMANOID(i) && rand_number(1, 2) == 2) {
-        do_fly(i, 0, 0, 0);
+        do_fly(i, nullptr, 0, 0);
        }
        i->decCurHealthPercent(.05);
           if (GET_HIT(i) < 0) {
-              act("@rYou have burned to death!@n", TRUE, i, 0, 0, TO_CHAR);
-              act("@R$n@r has burned to death!@n", TRUE, i, 0, 0, TO_ROOM);
-              die(i, NULL);
+              act("@rYou have burned to death!@n", TRUE, i, nullptr, nullptr, TO_CHAR);
+              act("@R$n@r has burned to death!@n", TRUE, i, nullptr, nullptr, TO_ROOM);
+              die(i, nullptr);
           }
       }
       if (change && !AFF_FLAGGED(i, AFF_POISON)) {
-       if (PLR_FLAGGED(i, PLR_HEALT) && SITS(i) != NULL) {
+       if (PLR_FLAGGED(i, PLR_HEALT) && SITS(i) != nullptr) {
         send_to_char(i, "@wThe healing tank works wonders on your injuries.@n\r\n");
          HCHARGE(SITS(i)) -= rand_number(1, 2);
         if (HCHARGE(SITS(i)) == 0) {
          send_to_char(i, "@wThe healing tank is now too low on energy to heal you.\r\n");
-         act("You step out of the now empty healing tank.", TRUE, i, 0, 0, TO_CHAR);
-         act("@C$n@w steps out of the now empty healing tank.@n", TRUE, i, 0, 0, TO_ROOM);
+         act("You step out of the now empty healing tank.", TRUE, i, nullptr, nullptr, TO_CHAR);
+         act("@C$n@w steps out of the now empty healing tank.@n", TRUE, i, nullptr, nullptr, TO_ROOM);
          REMOVE_BIT_AR(PLR_FLAGS(i), PLR_HEALT);
-         SITTING(SITS(i)) = NULL;
-         SITS(i) = NULL;
+         SITTING(SITS(i)) = nullptr;
+         SITS(i) = nullptr;
         }
         else if (i->isFullVitals()) {
          send_to_char(i, "@wYou are fully recovered now.\r\n");
-         act("You step out of the now empty healing tank.", TRUE, i, 0, 0, TO_CHAR);
-         act("@C$n@w steps out of the now empty healing tank.@n", TRUE, i, 0, 0, TO_ROOM);
+         act("You step out of the now empty healing tank.", TRUE, i, nullptr, nullptr, TO_CHAR);
+         act("@C$n@w steps out of the now empty healing tank.@n", TRUE, i, nullptr, nullptr, TO_ROOM);
          REMOVE_BIT_AR(PLR_FLAGS(i), PLR_HEALT);
-         SITTING(SITS(i)) = NULL;
-         SITS(i) = NULL;
+         SITTING(SITS(i)) = nullptr;
+         SITS(i) = nullptr;
         }
-       } else if (PLR_FLAGGED(i, PLR_HEALT) && SITS(i) == NULL) {
+       } else if (PLR_FLAGGED(i, PLR_HEALT) && SITS(i) == nullptr) {
          REMOVE_BIT_AR(PLR_FLAGS(i), PLR_HEALT);
        } else if (GET_POS(i) == POS_SLEEPING) {
         send_to_char(i, "@wYour sleep does you some good.@n\r\n");
@@ -1732,11 +1732,11 @@ void point_update(void)
        }
        if (GET_HIT(i) - GET_MAX_HIT(i) * cost > 0) {
         send_to_char(i, "You puke as the poison burns through your blood.\r\n");
-        act("$n shivers and then pukes.", TRUE, i, 0, 0, TO_ROOM);
+        act("$n shivers and then pukes.", TRUE, i, nullptr, nullptr, TO_ROOM);
         i->decCurHealth(i->getEffMaxPL() * cost);
        } else {
         send_to_char(i, "The poison claims your life!\r\n");
-        act("$n pukes up blood and falls down dead!", TRUE, i, 0, 0, TO_ROOM);
+        act("$n pukes up blood and falls down dead!", TRUE, i, nullptr, nullptr, TO_ROOM);
         if (i->poisonby) {
          if (AFF_FLAGGED(i->poisonby, AFF_GROUP)) {
           group_gain(i->poisonby, i);
@@ -1745,7 +1745,7 @@ void point_update(void)
          }
          die(i, i->poisonby);
         } else {
-         die(i, NULL);
+         die(i, nullptr);
         }
        }
       }
@@ -1775,10 +1775,10 @@ void point_update(void)
 
 
     /* Let's get rid of dropped norent items. */
-    if (OBJ_FLAGGED(j, ITEM_NORENT) && j->worn_by == NULL && j->carried_by == NULL && obj_selling != j && GET_OBJ_VNUM(j) != 7200) {
+    if (OBJ_FLAGGED(j, ITEM_NORENT) && j->worn_by == nullptr && j->carried_by == nullptr && obj_selling != j && GET_OBJ_VNUM(j) != 7200) {
       time_t diff = 0;
 
-      diff = time(0) - GET_LAST_LOAD(j);
+      diff = time(nullptr) - GET_LAST_LOAD(j);
       if (diff > 240 && GET_LAST_LOAD(j) > 0) {
        log("No rent object (%s) extracted from room (%d)", j->short_description, GET_ROOM_VNUM(IN_ROOM(j)));
        extract_obj(j);
@@ -1799,26 +1799,26 @@ void point_update(void)
       if (!strstr(j->name, "android") && !strstr(j->name, "Android") && !OBJ_FLAGGED(j, ITEM_BURIED)) {
        if (GET_OBJ_TIMER(j) == 5) {
         if ((IN_ROOM(j) != NOWHERE) && (world[IN_ROOM(j)].people)) {
-         act("@DFlies start to gather around $p@D.@n", TRUE, world[IN_ROOM(j)].people, j, 0, TO_CHAR);
-         act("@DFlies start to gather around $p@D.@n", TRUE, world[IN_ROOM(j)].people, j, 0, TO_ROOM);
+         act("@DFlies start to gather around $p@D.@n", TRUE, world[IN_ROOM(j)].people, j, nullptr, TO_CHAR);
+         act("@DFlies start to gather around $p@D.@n", TRUE, world[IN_ROOM(j)].people, j, nullptr, TO_ROOM);
         }
        }
        if (GET_OBJ_TIMER(j) == 3) {
         if ((IN_ROOM(j) != NOWHERE) && (world[IN_ROOM(j)].people)) {
-         act("@DA cloud of flies has formed over $p@D.@n", TRUE, world[IN_ROOM(j)].people, j, 0, TO_CHAR);
-         act("@DA cloud of flies has formed over $p@D.@n", TRUE, world[IN_ROOM(j)].people, j, 0, TO_ROOM);
+         act("@DA cloud of flies has formed over $p@D.@n", TRUE, world[IN_ROOM(j)].people, j, nullptr, TO_CHAR);
+         act("@DA cloud of flies has formed over $p@D.@n", TRUE, world[IN_ROOM(j)].people, j, nullptr, TO_ROOM);
         }
        }
        if (GET_OBJ_TIMER(j) == 2) {
         if ((IN_ROOM(j) != NOWHERE) && (world[IN_ROOM(j)].people)) {
-         act("@DMaggots can be seen crawling all over $p@D.@n", TRUE, world[IN_ROOM(j)].people, j, 0, TO_CHAR);
-         act("@DMaggots can be seen crawling all over $p@D.@n", TRUE, world[IN_ROOM(j)].people, j, 0, TO_ROOM);
+         act("@DMaggots can be seen crawling all over $p@D.@n", TRUE, world[IN_ROOM(j)].people, j, nullptr, TO_CHAR);
+         act("@DMaggots can be seen crawling all over $p@D.@n", TRUE, world[IN_ROOM(j)].people, j, nullptr, TO_ROOM);
         }
        }
        if (GET_OBJ_TIMER(j) == 1) {
         if ((IN_ROOM(j) != NOWHERE) && (world[IN_ROOM(j)].people)) {
-         act("@DMaggots have nearly stripped $p of all its flesh@D.@n", TRUE, world[IN_ROOM(j)].people, j, 0, TO_CHAR);
-         act("@DMaggots have nearly stripped $p of all its flesh@D.@n", TRUE, world[IN_ROOM(j)].people, j, 0, TO_ROOM);
+         act("@DMaggots have nearly stripped $p of all its flesh@D.@n", TRUE, world[IN_ROOM(j)].people, j, nullptr, TO_CHAR);
+         act("@DMaggots have nearly stripped $p of all its flesh@D.@n", TRUE, world[IN_ROOM(j)].people, j, nullptr, TO_ROOM);
         }
        }
       }
@@ -1826,20 +1826,20 @@ void point_update(void)
 
 	if (j->carried_by) {
          if (!strstr(j->name, "android")) {
-	  act("$p decays in your hands.", FALSE, j->carried_by, j, 0, TO_CHAR);
+	  act("$p decays in your hands.", FALSE, j->carried_by, j, nullptr, TO_CHAR);
           if ((IN_ROOM(j) != NOWHERE) && (world[IN_ROOM(j)].people)) {
 	   act("A quivering horde of maggots consumes $p.",
-	      TRUE, world[IN_ROOM(j)].people, j, 0, TO_ROOM);
+	      TRUE, world[IN_ROOM(j)].people, j, nullptr, TO_ROOM);
 	   act("A quivering horde of maggots consumes $p.",
-	      TRUE, world[IN_ROOM(j)].people, j, 0, TO_CHAR);
+	      TRUE, world[IN_ROOM(j)].people, j, nullptr, TO_CHAR);
           }
          } else {
-          act("$p decays in your hands.", FALSE, j->carried_by, j, 0, TO_CHAR);
+          act("$p decays in your hands.", FALSE, j->carried_by, j, nullptr, TO_CHAR);
           if ((IN_ROOM(j) != NOWHERE) && (world[IN_ROOM(j)].people)) {
            act("$p breaks down completely into a pile of junk.",
-              TRUE, world[IN_ROOM(j)].people, j, 0, TO_ROOM);
+              TRUE, world[IN_ROOM(j)].people, j, nullptr, TO_ROOM);
            act("$p breaks down completely into a pile of junk.",
-              TRUE, world[IN_ROOM(j)].people, j, 0, TO_CHAR);
+              TRUE, world[IN_ROOM(j)].people, j, nullptr, TO_CHAR);
            }
           }
 	}
@@ -1871,9 +1871,9 @@ void point_update(void)
 
       if (GET_OBJ_TIMER(j) == 0) {
         act("A glowing portal fades from existence.",
-  	   TRUE, world[IN_ROOM(j)].people, j, 0, TO_ROOM);
+  	   TRUE, world[IN_ROOM(j)].people, j, nullptr, TO_ROOM);
         act("A glowing portal fades from existence.",
-  	   TRUE, world[IN_ROOM(j)].people, j, 0, TO_CHAR);
+  	   TRUE, world[IN_ROOM(j)].people, j, nullptr, TO_CHAR);
         extract_obj(j);
       }
     } else if (GET_OBJ_VNUM(j) == 1306) {
@@ -1882,9 +1882,9 @@ void point_update(void)
 
       if (GET_OBJ_TIMER(j) == 0) {
         act("The $p@n settles to the ground and goes out.",
-           TRUE, world[IN_ROOM(j)].people, j, 0, TO_ROOM);
+           TRUE, world[IN_ROOM(j)].people, j, nullptr, TO_ROOM);
         act("A $p@n settles to the ground and goes out.",
-           TRUE, world[IN_ROOM(j)].people, j, 0, TO_CHAR);
+           TRUE, world[IN_ROOM(j)].people, j, nullptr, TO_CHAR);
         extract_obj(j);
       }
     } else if (OBJ_FLAGGED(j, ITEM_ICE)) {
@@ -1945,7 +1945,7 @@ void timed_dt(struct char_data *ch)
   struct char_data *vict;
   room_rnum rrnum;
   
-  if (ch == NULL) {
+  if (ch == nullptr) {
   /* BY -WELCOR
     first make sure all rooms in the world have thier 'timed'
     value decreased if its not -1.

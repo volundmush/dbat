@@ -61,10 +61,10 @@ ACMD(do_oasis_cedit)
   
   if (!*buf1) {
     CREATE(d->olc, struct oasis_olc_data, 1);
-    OLC_ZONE(d) = 0;
+    OLC_ZONE(d) = nullptr;
     cedit_setup(d);
     STATE(d) = CON_CEDIT;
-    act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
+    act("$n starts using OLC.", TRUE, d->character, nullptr, nullptr, TO_ROOM);
     SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
     
     mudlog(BRF, ADMLVL_IMMORT, TRUE, 
@@ -181,32 +181,32 @@ void cedit_setup(struct descriptor_data *d)
   if (CONFIG_DFLT_IP)
     OLC_CONFIG(d)->operation.DFLT_IP     = strdup(CONFIG_DFLT_IP);
   else
-    OLC_CONFIG(d)->operation.DFLT_IP     = NULL;
+    OLC_CONFIG(d)->operation.DFLT_IP     = nullptr;
   
   if (CONFIG_DFLT_DIR)
     OLC_CONFIG(d)->operation.DFLT_DIR    = strdup(CONFIG_DFLT_DIR);
   else
-    OLC_CONFIG(d)->operation.DFLT_DIR    = NULL;
+    OLC_CONFIG(d)->operation.DFLT_DIR    = nullptr;
 
   if (CONFIG_LOGNAME)
     OLC_CONFIG(d)->operation.LOGNAME     = strdup(CONFIG_LOGNAME);
   else
-    OLC_CONFIG(d)->operation.LOGNAME     = NULL;
+    OLC_CONFIG(d)->operation.LOGNAME     = nullptr;
   
   if (CONFIG_MENU)
     OLC_CONFIG(d)->operation.MENU        = strdup(CONFIG_MENU);
   else
-    OLC_CONFIG(d)->operation.MENU        = NULL;
+    OLC_CONFIG(d)->operation.MENU        = nullptr;
   
   if (CONFIG_WELC_MESSG)
     OLC_CONFIG(d)->operation.WELC_MESSG  = strdup(CONFIG_WELC_MESSG);
   else
-    OLC_CONFIG(d)->operation.WELC_MESSG  = NULL;
+    OLC_CONFIG(d)->operation.WELC_MESSG  = nullptr;
   
   if (CONFIG_START_MESSG)
     OLC_CONFIG(d)->operation.START_MESSG = strdup(CONFIG_START_MESSG);
   else
-    OLC_CONFIG(d)->operation.START_MESSG = NULL;
+    OLC_CONFIG(d)->operation.START_MESSG = nullptr;
   
   cedit_disp_menu(d);
 
@@ -340,7 +340,7 @@ void cedit_save_internally(struct descriptor_data *d)
   if (OLC_CONFIG(d)->operation.DFLT_IP)
     CONFIG_DFLT_IP     = strdup(OLC_CONFIG(d)->operation.DFLT_IP);
   else
-    CONFIG_DFLT_IP     = NULL;
+    CONFIG_DFLT_IP     = nullptr;
   
   
   if (CONFIG_DFLT_DIR)
@@ -348,35 +348,35 @@ void cedit_save_internally(struct descriptor_data *d)
   if (OLC_CONFIG(d)->operation.DFLT_DIR)
     CONFIG_DFLT_DIR    = strdup(OLC_CONFIG(d)->operation.DFLT_DIR);
   else
-    CONFIG_DFLT_DIR    = NULL;
+    CONFIG_DFLT_DIR    = nullptr;
 
   if (CONFIG_LOGNAME)
     free(CONFIG_LOGNAME);
   if (OLC_CONFIG(d)->operation.LOGNAME)
     CONFIG_LOGNAME     = strdup(OLC_CONFIG(d)->operation.LOGNAME);
   else
-    CONFIG_LOGNAME     = NULL;
+    CONFIG_LOGNAME     = nullptr;
   
   if (CONFIG_MENU)
     free(CONFIG_MENU);
   if (OLC_CONFIG(d)->operation.MENU)
     CONFIG_MENU        = strdup(OLC_CONFIG(d)->operation.MENU);
   else
-    CONFIG_MENU        = NULL;
+    CONFIG_MENU        = nullptr;
   
   if (CONFIG_WELC_MESSG)
     free(CONFIG_WELC_MESSG);
   if (OLC_CONFIG(d)->operation.WELC_MESSG)
     CONFIG_WELC_MESSG  = strdup(OLC_CONFIG(d)->operation.WELC_MESSG);
   else
-    CONFIG_WELC_MESSG  = NULL;
+    CONFIG_WELC_MESSG  = nullptr;
   
   if (CONFIG_START_MESSG)
     free(CONFIG_START_MESSG);
   if (OLC_CONFIG(d)->operation.START_MESSG)
     CONFIG_START_MESSG = strdup(OLC_CONFIG(d)->operation.START_MESSG);
   else
-    CONFIG_START_MESSG = NULL;
+    CONFIG_START_MESSG = nullptr;
   
   /* if we changed the dts to/from dumps, reassign - Welcor */
   if (reassign)
@@ -1048,7 +1048,7 @@ void cedit_disp_points_menu(struct descriptor_data *d)
 
 void cedit_parse(struct descriptor_data *d, char *arg)
 {
-  char *oldtext = NULL;
+  char *oldtext = nullptr;
   
   switch (OLC_MODE(d)) {
     case CEDIT_CONFIRM_SAVESTRING:
@@ -2263,7 +2263,7 @@ void reassign_rooms(void)
 
   /* remove old funcs */
   for (i = 0; i < top_of_world; i++)
-    world[i].func = NULL;
+    world[i].func = nullptr;
         
   /* reassign spec_procs */
   assign_rooms();

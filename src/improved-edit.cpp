@@ -5,7 +5,6 @@ improved-edit.c		Routines specific to the improved editor.
 */
 #include "improved-edit.h"
 #include "utils.h"
-#include "db.h"
 #include "comm.h"
 #include "interpreter.h"
 
@@ -38,7 +37,7 @@ int improved_editor_execute(struct descriptor_data *d, char *str)
   case 'c':
     if (*(d->str)) {
       free(*d->str);
-      *(d->str) = NULL;
+      *(d->str) = nullptr;
       write_to_output(d, "Current buffer cleared.\r\n");
     } else
       write_to_output(d, "Current buffer empty.\r\n");
@@ -179,16 +178,16 @@ void parse_edit_action(int command, char *string, struct descriptor_data *d)
       if (string[j++] == 'a' && !indent)
 	rep_all = 1;
 
-    if ((s = strtok(string, "'")) == NULL) {
+    if ((s = strtok(string, "'")) == nullptr) {
       write_to_output(d, "Invalid format.\r\n");
       return;
-    } else if ((s = strtok(NULL, "'")) == NULL) {
+    } else if ((s = strtok(nullptr, "'")) == nullptr) {
       write_to_output(d, "Target string must be enclosed in single quotes.\r\n");
       return;
-    } else if ((t = strtok(NULL, "'")) == NULL) {
+    } else if ((t = strtok(nullptr, "'")) == nullptr) {
       write_to_output(d, "No replacement string.\r\n");
       return;
-    } else if ((t = strtok(NULL, "'")) == NULL) {
+    } else if ((t = strtok(nullptr, "'")) == nullptr) {
       write_to_output(d, "Replacement string must be enclosed in single quotes.\r\n");
       return;
       /*wb's fix for empty buffer replacement crashing */
@@ -222,27 +221,27 @@ void parse_edit_action(int command, char *string, struct descriptor_data *d)
 
     i = 1;
     total_len = 1;
-    if ((s = *d->str) == NULL) {
+    if ((s = *d->str) == nullptr) {
       write_to_output(d, "Buffer is empty.\r\n");
       return;
     } else if (line_low > 0) {
       while (s && i < line_low)
-	if ((s = strchr(s, '\n')) != NULL) {
+	if ((s = strchr(s, '\n')) != nullptr) {
 	  i++;
 	  s++;
 	}
-      if (s == NULL || i < line_low) {
+      if (s == nullptr || i < line_low) {
 	write_to_output(d, "Line(s) out of range; not deleting.\r\n");
 	return;
       }
       t = s;
       while (s && i < line_high)
-	if ((s = strchr(s, '\n')) != NULL) {
+	if ((s = strchr(s, '\n')) != nullptr) {
 	  i++;
 	  total_len++;
 	  s++;
 	}
-      if (s && (s = strchr(s, '\n')) != NULL) {
+      if (s && (s = strchr(s, '\n')) != nullptr) {
 	while (*(++s))
 	  *(t++) = *s;
       } else
@@ -290,17 +289,17 @@ void parse_edit_action(int command, char *string, struct descriptor_data *d)
     total_len = 0;
     s = *d->str;
     while (s && (i < line_low))
-      if ((s = strchr(s, '\n')) != NULL) {
+      if ((s = strchr(s, '\n')) != nullptr) {
 	i++;
 	s++;
       }
-    if (i < line_low || s == NULL) {
+    if (i < line_low || s == nullptr) {
       write_to_output(d, "Line(s) out of range; no buffer listing.\r\n");
       return;
     }
     t = s;
     while (s && i <= line_high)
-      if ((s = strchr(s, '\n')) != NULL) {
+      if ((s = strchr(s, '\n')) != nullptr) {
 	i++;
 	total_len++;
 	s++;
@@ -351,17 +350,17 @@ void parse_edit_action(int command, char *string, struct descriptor_data *d)
     total_len = 0;
     s = *d->str;
     while (s && i < line_low)
-      if ((s = strchr(s, '\n')) != NULL) {
+      if ((s = strchr(s, '\n')) != nullptr) {
 	i++;
 	s++;
       }
-    if (i < line_low || s == NULL) {
+    if (i < line_low || s == nullptr) {
       write_to_output(d, "Line(s) out of range; no buffer listing.\r\n");
       return;
     }
     t = s;
     while (s && i <= line_high)
-      if ((s = strchr(s, '\n')) != NULL) {
+      if ((s = strchr(s, '\n')) != nullptr) {
 	i++;
 	total_len++;
 	s++;
@@ -394,17 +393,17 @@ void parse_edit_action(int command, char *string, struct descriptor_data *d)
 
     i = 1;
     *buf = '\0';
-    if ((s = *d->str) == NULL) {
+    if ((s = *d->str) == nullptr) {
       write_to_output(d, "Buffer is empty, nowhere to insert.\r\n");
       return;
     }
     if (line_low > 0) {
       while (s && (i < line_low))
-	if ((s = strchr(s, '\n')) != NULL) {
+	if ((s = strchr(s, '\n')) != nullptr) {
 	  i++;
 	  s++;
 	}
-      if (i < line_low || s == NULL) {
+      if (i < line_low || s == nullptr) {
 	write_to_output(d, "Line number out of range; insert aborted.\r\n");
 	return;
       }
@@ -442,7 +441,7 @@ void parse_edit_action(int command, char *string, struct descriptor_data *d)
 
     i = 1;
     *buf = '\0';
-    if ((s = *d->str) == NULL) {
+    if ((s = *d->str) == nullptr) {
       write_to_output(d, "Buffer is empty, nothing to change.\r\n");
       return;
     }
@@ -451,14 +450,14 @@ void parse_edit_action(int command, char *string, struct descriptor_data *d)
        * Loop through the text counting \n characters until we get to the line.
        */
       while (s && i < line_low)
-	if ((s = strchr(s, '\n')) != NULL) {
+	if ((s = strchr(s, '\n')) != nullptr) {
 	  i++;
 	  s++;
 	}
       /*
        * Make sure that there was a THAT line in the text.
        */
-      if (s == NULL || i < line_low) {
+      if (s == nullptr || i < line_low) {
 	write_to_output(d, "Line number out of range; change aborted.\r\n");
 	return;
       }
@@ -482,7 +481,7 @@ void parse_edit_action(int command, char *string, struct descriptor_data *d)
        * Put the new 'good' line into place.
        */
       strcat(buf, buf2);
-      if ((s = strchr(s, '\n')) != NULL) {
+      if ((s = strchr(s, '\n')) != nullptr) {
 	/*
 	 * This means that we are at the END of the line, we want out of
 	 * there, but we want s to point to the beginning of the line
@@ -527,7 +526,7 @@ void parse_edit_action(int command, char *string, struct descriptor_data *d)
 int format_text(char **ptr_string, int mode, struct descriptor_data *d, unsigned int maxlen, int low, int high) 
 { 
   int line_chars, cap_next = TRUE, cap_next_next = FALSE, color_chars = 0, i, pass_line = 0; 
-  char *flow, *start = NULL, temp; 
+  char *flow, *start = nullptr, temp;
   char formatted[MAX_STRING_LENGTH] = ""; 
 
   /* Fix memory overrun. */ 
@@ -538,7 +537,7 @@ int format_text(char **ptr_string, int mode, struct descriptor_data *d, unsigned
 
   /* XXX: Want to make sure the string doesn't grow either... */ 
 
-  if ((flow = *ptr_string) == NULL) 
+  if ((flow = *ptr_string) == nullptr)
     return 0; 
 
   char str[MAX_STRING_LENGTH]; 
@@ -680,7 +679,7 @@ int format_text(char **ptr_string, int mode, struct descriptor_data *d, unsigned
 
 int replace_str(char **string, char *pattern, char *replacement, int rep_all, unsigned int max_size)
 {
-  char *replace_buffer = NULL;
+  char *replace_buffer = nullptr;
   char *flow, *jetsam, temp;
   int len, i;
 
@@ -694,7 +693,7 @@ int replace_str(char **string, char *pattern, char *replacement, int rep_all, un
   *replace_buffer = '\0';
 
   if (rep_all) {
-    while ((flow = (char *)strstr(flow, pattern)) != NULL) {
+    while ((flow = (char *)strstr(flow, pattern)) != nullptr) {
       i++;
       temp = *flow;
       *flow = '\0';
@@ -710,7 +709,7 @@ int replace_str(char **string, char *pattern, char *replacement, int rep_all, un
     }
     strcat(replace_buffer, jetsam);
   } else {
-    if ((flow = (char *)strstr(*string, pattern)) != NULL) {
+    if ((flow = (char *)strstr(*string, pattern)) != nullptr) {
       i++;
       flow += strlen(pattern);
       len = ((char *)flow - (char *)*string) - strlen(pattern);

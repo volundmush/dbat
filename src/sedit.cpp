@@ -37,17 +37,16 @@ void sedit_save_to_disk(int num)
 
 ACMD(do_oasis_sedit)
 {
-  int number = NOWHERE, save = 0;
+  vnum number = NOWHERE, save = 0;
   shop_rnum real_num;
   struct descriptor_data *d;
-  char *buf3;
   char buf1[MAX_INPUT_LENGTH];
   char buf2[MAX_INPUT_LENGTH];
   
   /****************************************************************************/
   /** Parse any arguments.                                                   **/
   /****************************************************************************/
-  buf3 = two_arguments(argument, buf1, buf2);
+  two_arguments(argument, buf1, buf2);
   
   if (!*buf1) {
     send_to_char(ch, "Specify a shop VNUM to edit.\r\n");
@@ -119,7 +118,7 @@ ACMD(do_oasis_sedit)
   if (OLC_ZNUM(d) == NOWHERE) {
     send_to_char(ch, "Sorry, there is no zone for that number!\r\n");
     free(d->olc);
-    d->olc = NULL;
+    d->olc = nullptr;
     return;
   }
   
@@ -133,7 +132,7 @@ ACMD(do_oasis_sedit)
     /** Free the OLC structure.                                              **/
     /**************************************************************************/
     free(d->olc);
-    d->olc = NULL;
+    d->olc = nullptr;
     return;
   }
   
@@ -153,7 +152,7 @@ ACMD(do_oasis_sedit)
     /** Free the OLC structure.                                              **/
     /**************************************************************************/
     free(d->olc);
-    d->olc = NULL;
+    d->olc = nullptr;
     return;
   }
   
@@ -167,7 +166,7 @@ ACMD(do_oasis_sedit)
   sedit_disp_menu(d);  
   STATE(d) = CON_SEDIT;
   
-  act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
+  act("$n starts using OLC.", TRUE, d->character, nullptr, nullptr, TO_ROOM);
   SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
   
   mudlog(BRF, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing zone %d allowed zone %d",
@@ -222,14 +221,14 @@ void sedit_setup_new(struct descriptor_data *d)
 
 /*-------------------------------------------------------------------*/
 
-void sedit_setup_existing(struct descriptor_data *d, int rshop_num)
+void sedit_setup_existing(struct descriptor_data *d, vnum rshop_num)
 {
   /*
    * Create a scratch shop structure.
    */
   CREATE(OLC_SHOP(d), struct shop_data, 1);
 
-  /* don't waste time trying to free NULL strings -- Welcor */
+  /* don't waste time trying to free nullptr strings -- Welcor */
   copy_shop(OLC_SHOP(d), shop_index + rshop_num, FALSE);
 }
 
@@ -723,7 +722,7 @@ void sedit_parse(struct descriptor_data *d, char *arg)
     /*
      * Fiddle with special procs.
      */
-    S_FUNC(OLC_SHOP(d)) = mob_index[i].func != shop_keeper ? mob_index[i].func : NULL;
+    S_FUNC(OLC_SHOP(d)) = mob_index[i].func != shop_keeper ? mob_index[i].func : nullptr;
     mob_index[i].func = shop_keeper;
     break;
   case SEDIT_OPEN1:

@@ -21,7 +21,7 @@ void ping_ship(int vnum, int vnum2)
 {
 
  struct char_data *tch, *next_ch;
- struct obj_data *controls = NULL, *obj = NULL;
+ struct obj_data *controls = nullptr, *obj = nullptr;
  int found = FALSE;
  
  if (vnum2 == -1) {
@@ -49,7 +49,7 @@ void ping_ship(int vnum, int vnum2)
 
 int checkship(int rnum, int vnum)
 {
- struct obj_data *i = NULL;
+ struct obj_data *i = nullptr;
  int there = FALSE;
 
  for (i = world[rnum].contents; i; i = i->next_content) {
@@ -61,7 +61,7 @@ int checkship(int rnum, int vnum)
   }
  }
 
- i = NULL;
+ i = nullptr;
 
  return there;
 }

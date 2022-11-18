@@ -261,7 +261,7 @@ int wield_type(int chsize, const struct obj_data *weap);
       if((item) == (head))			\
       {						\
             head = (item)->next;  		\
-            if(head) head->prev = NULL;		\
+            if(head) head->prev = nullptr;		\
       }						\
       else					\
       {						\
@@ -371,7 +371,7 @@ int wield_type(int chsize, const struct obj_data *weap);
 #define GET_ROOM_VNUM(rnum) \
 	((room_vnum)(VALID_ROOM_RNUM(rnum) ? world[(rnum)].number : NOWHERE))
 #define GET_ROOM_SPEC(room) \
-	(VALID_ROOM_RNUM(room) ? world[(room)].func : NULL)
+	(VALID_ROOM_RNUM(room) ? world[(room)].func : 0)
 
 /* Minor Planet Defines */
 #define PLANET_ZENITH(room) ((GET_ROOM_VNUM(room) >= 3400 && GET_ROOM_VNUM(room) <= 3599) || (GET_ROOM_VNUM(room) >= 62900 && GET_ROOM_VNUM(room) <= 62999) || \
@@ -624,7 +624,7 @@ int wield_type(int chsize, const struct obj_data *weap);
 
 #define GET_EQ(ch, i)		((ch)->equipment[i])
 
-#define GET_MOB_SPEC(ch)	(IS_MOB(ch) ? mob_index[(ch)->nr].func : NULL)
+#define GET_MOB_SPEC(ch)	(IS_MOB(ch) ? mob_index[(ch)->nr].func : 0)
 #define GET_MOB_RNUM(mob)	((mob)->nr)
 #define GET_MOB_VNUM(mob)	(IS_MOB(mob) ? \
 				 mob_index[GET_MOB_RNUM(mob)].vnum : NOBODY)
@@ -732,7 +732,7 @@ int wield_type(int chsize, const struct obj_data *weap);
 #define GET_OBJ_VNUM(obj)	(VALID_OBJ_RNUM(obj) ? \
 				obj_index[GET_OBJ_RNUM(obj)].vnum : NOTHING)
 #define GET_OBJ_SPEC(obj)	(VALID_OBJ_RNUM(obj) ? \
-				obj_index[GET_OBJ_RNUM(obj)].func : NULL)
+				obj_index[GET_OBJ_RNUM(obj)].func : 0)
 #define GET_FUEL(obj)           (GET_OBJ_VAL((obj), 2))
 #define GET_FUELCOUNT(obj)      (GET_OBJ_VAL((obj), 3))
 
@@ -974,10 +974,8 @@ int wield_type(int chsize, const struct obj_data *weap);
 /* OS compatibility ******************************************************/
 
 
-/* there could be some strange OS which doesn't have NULL... */
-#ifndef NULL
-#define NULL (void *)0
-#endif
+/* there could be some strange OS which doesn't have nullptr... */
+
 
 #if !defined(FALSE)
 #define FALSE 0

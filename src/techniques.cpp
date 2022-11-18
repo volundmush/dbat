@@ -26,9 +26,9 @@ bool tech_handle_zanzoken(char_data *ch, char_data *vict, const std::string& nam
             return false;
         }
         else {
-            act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-            act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-            act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+            act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, nullptr, vict, TO_CHAR);
+            act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, nullptr, vict, TO_VICT);
+            act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, nullptr, vict, TO_NOTVICT);
             REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
             REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
         }
@@ -135,9 +135,9 @@ bool tech_handle_android_absorb(char_data *ch, char_data *vict) {
 
 bool tech_handle_crashdown(char_data *ch, char_data *vict) {
     if (AFF_FLAGGED(vict, AFF_FLYING)) {
-        act("@w$N@w is knocked out of the air!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@wYou are knocked out of the air!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@w$N@w is knocked out of the air!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@w$N@w is knocked out of the air!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+        act("@wYou are knocked out of the air!@n", TRUE, ch, nullptr, vict, TO_VICT);
+        act("@w$N@w is knocked out of the air!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
         REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_FLYING);
         GET_ALT(vict) = 0;
         GET_POS(vict) = POS_SITTING;

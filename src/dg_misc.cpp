@@ -34,10 +34,10 @@
 void do_dg_cast(void *go, struct script_data *sc, trig_data *trig,
 		 int type, char *cmd)
 {
-  struct char_data *caster = NULL;
-  struct char_data *tch = NULL;
-  struct obj_data *tobj = NULL;
-  struct room_data *caster_room = NULL;
+  struct char_data *caster = nullptr;
+  struct char_data *tch = nullptr;
+  struct obj_data *tobj = nullptr;
+  struct room_data *caster_room = nullptr;
   char *s, *t;
   int spellnum, target = 0;
   char buf2[MAX_STRING_LENGTH], orig_cmd[MAX_INPUT_LENGTH];
@@ -65,18 +65,18 @@ void do_dg_cast(void *go, struct script_data *sc, trig_data *trig,
   strcpy(orig_cmd, cmd);
   /* get: blank, spell name, target name */
   s = strtok(cmd, "'");
-  if (s == NULL) {
+  if (s == nullptr) {
     script_log("Trigger: %s, VNum %d. dg_cast needs spell name.",
       GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig));
     return;
   }
-  s = strtok(NULL, "'");
-  if (s == NULL) {
+  s = strtok(nullptr, "'");
+  if (s == nullptr) {
     script_log("Trigger: %s, VNum %d. dg_cast needs spell name in `'s.",
       GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig));
     return;
   }
-  t = strtok(NULL, "\0");
+  t = strtok(nullptr, "\0");
 
   /* spellnum = search_block(s, spells, 0); */
   spellnum = find_skill_num(s, SKTYPE_SPELL);
@@ -87,17 +87,17 @@ void do_dg_cast(void *go, struct script_data *sc, trig_data *trig,
   }
 
   /* Find the target */
-  if (t != NULL) {
+  if (t != nullptr) {
     one_argument(strcpy(buf2, t), t);
     skip_spaces(&t);
   }
   if (IS_SET(SINFO.targets, TAR_IGNORE)) {
     target = TRUE;
-  } else if (t != NULL && *t) {
+  } else if (t != nullptr && *t) {
     if (!target &&
           (IS_SET(SINFO.targets, TAR_CHAR_ROOM) ||
            IS_SET(SINFO.targets, TAR_CHAR_WORLD))) {
-      if ((tch = get_char(t)) != NULL)
+      if ((tch = get_char(t)) != nullptr)
         target = TRUE;
     }
 
@@ -106,7 +106,7 @@ void do_dg_cast(void *go, struct script_data *sc, trig_data *trig,
            IS_SET(SINFO.targets, TAR_OBJ_EQUIP) ||
            IS_SET(SINFO.targets, TAR_OBJ_ROOM) ||
            IS_SET(SINFO.targets, TAR_OBJ_WORLD))) {
-      if ((tobj = get_obj(t)) != NULL)
+      if ((tobj = get_obj(t)) != nullptr)
         target = TRUE;
     }
 
@@ -154,7 +154,7 @@ void do_dg_cast(void *go, struct script_data *sc, trig_data *trig,
 #define AFFECT_TYPE	2
 void do_dg_affect(void *go, struct script_data *sc, trig_data *trig, int script_type, char *cmd)
 {
-  struct char_data *ch = NULL;
+  struct char_data *ch = nullptr;
   int value=0, duration=0;
   char junk[MAX_INPUT_LENGTH]; /* will be set to "dg_affect" */
   char charname[MAX_INPUT_LENGTH], property[MAX_INPUT_LENGTH];
@@ -169,8 +169,8 @@ void do_dg_affect(void *go, struct script_data *sc, trig_data *trig, int script_
   half_chop(cmd, value_p, duration_p);
 
   /* make sure all parameters are present */
-  if (charname == NULL || !*charname || property == NULL || !*property ||
-      value_p == NULL || !*value_p || duration_p == NULL || !*duration_p) {
+  if (charname == nullptr || !*charname || property == nullptr || !*property ||
+      value_p == nullptr || !*value_p || duration_p == nullptr || !*duration_p) {
     script_log("Trigger: %s, VNum %d. dg_affect usage: <target> <property> <value> <duration>",
       GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig));
     return;
@@ -247,24 +247,24 @@ void send_char_pos(struct char_data *ch, int dam)
 {
   switch (GET_POS(ch)) {
     case POS_MORTALLYW:
-      act("$n is mortally wounded, and will die soon, if not aided.", TRUE, ch, 0, 0, TO_ROOM);
+      act("$n is mortally wounded, and will die soon, if not aided.", TRUE, ch, nullptr, nullptr, TO_ROOM);
       send_to_char(ch, "You are mortally wounded, and will die soon, if not aided.\r\n");
       break;
     case POS_INCAP:
-      act("$n is incapacitated and will slowly die, if not aided.", TRUE, ch, 0, 0, TO_ROOM);
+      act("$n is incapacitated and will slowly die, if not aided.", TRUE, ch, nullptr, nullptr, TO_ROOM);
       send_to_char(ch, "You are incapacitated and will slowly die, if not aided.\r\n");
       break;
     case POS_STUNNED:
-      act("$n is stunned, but will probably regain consciousness again.", TRUE, ch, 0, 0, TO_ROOM);
+      act("$n is stunned, but will probably regain consciousness again.", TRUE, ch, nullptr, nullptr, TO_ROOM);
       send_to_char(ch, "You're stunned, but will probably regain consciousness again.\r\n");
       break;
     case POS_DEAD:
-      act("$n is dead!  R.I.P.", FALSE, ch, 0, 0, TO_ROOM);
+      act("$n is dead!  R.I.P.", FALSE, ch, nullptr, nullptr, TO_ROOM);
       send_to_char(ch, "You are dead!  Sorry...\r\n");
       break;
     default:                        /* >= POSITION SLEEPING */
       if (dam > (GET_MAX_HIT(ch) >> 2))
-        act("That really did HURT!", FALSE, ch, 0, 0, TO_CHAR);
+        act("That really did HURT!", FALSE, ch, nullptr, nullptr, TO_CHAR);
       if (GET_HIT(ch) < (GET_MAX_HIT(ch) >> 2))
         send_to_char(ch, "@rYou wish that your wounds would stop BLEEDING so much!@n\r\n");
   }
@@ -309,7 +309,7 @@ void script_damage(struct char_data *vict, int dam)
     if (!IS_NPC(vict))
       mudlog( BRF, 0, TRUE, "%s killed by script at %s",
                             GET_NAME(vict), world[IN_ROOM(vict)].name);
-    die(vict, NULL);
+    die(vict, nullptr);
   }
 }
 

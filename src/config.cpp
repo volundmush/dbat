@@ -357,25 +357,25 @@ uint16_t DFLT_PORT = 5001;
  * IP address to which the MUD should bind.  This is only useful if
  * you're running Circle on a host that host more than one IP interface,
  * and you only want to bind to *one* of them instead of all of them.
- * Setting this to NULL (the default) causes Circle to bind to all
+ * Setting this to nullptr (the default) causes Circle to bind to all
  * interfaces on the host.  Otherwise, specify a numeric IP address in
  * dotted quad format, and Circle will only bind to that IP address.  (Of
  * course, that IP address must be one of your host's interfaces, or it
  * won't work.)
  */
-const char *DFLT_IP = NULL; /* bind to all interfaces */
+const char *DFLT_IP = nullptr; /* bind to all interfaces */
 /* const char *DFLT_IP = "192.168.1.1";  -- bind only to one interface */
 
 /* default directory to use as data directory */
 const char *DFLT_DIR = "lib";
 
 /*
- * What file to log messages to (ex: "log/syslog").  Setting this to NULL
+ * What file to log messages to (ex: "log/syslog").  Setting this to nullptr
  * means you want to log to stderr, which was the default in earlier
  * versions of Circle.  If you specify a file, you don't get messages to
  * the screen. (Hint: Try 'tail -f' if you have a UNIX machine.)
  */
-const char *LOGNAME = NULL;
+const char *LOGNAME = nullptr;
 /* const char *LOGNAME = "log/syslog";  -- useful for Windows users */
 
 /* maximum number of players allowed before game starts to turn people away */

@@ -154,7 +154,7 @@ void sub_write(char *arg, struct char_data *ch, int8_t find_invis, int targets)
 	    *s = '\0';
 	    p = any_one_name(++p, name);
 	    otokens[i] =
-		find_invis ? (void *)get_char_in_room(&world[IN_ROOM(ch)], name) : (void *)get_char_room_vis(ch, name, NULL);
+		find_invis ? (void *)get_char_in_room(&world[IN_ROOM(ch)], name) : (void *)get_char_room_vis(ch, name, nullptr);
 	    tokens[++i] = ++s;
 	    break;
 
@@ -165,9 +165,9 @@ void sub_write(char *arg, struct char_data *ch, int8_t find_invis, int targets)
 	    p = any_one_name(++p, name);
 
             if (find_invis) obj = get_obj_in_room(&world[IN_ROOM(ch)], name);
-            else if (!(obj = get_obj_in_list_vis(ch, name, NULL, world[IN_ROOM(ch)].contents))) ;
+            else if (!(obj = get_obj_in_list_vis(ch, name, nullptr, world[IN_ROOM(ch)].contents))) ;
             else if (!(obj = get_obj_in_equip_vis(ch, name, &tmp, ch->equipment))) ;
-            else obj = get_obj_in_list_vis(ch, name, NULL, ch->carrying);
+            else obj = get_obj_in_list_vis(ch, name, nullptr, ch->carrying);
 
 	    otokens[i] = (void *)obj;
 	    tokens[++i] = ++s;
@@ -184,7 +184,7 @@ void sub_write(char *arg, struct char_data *ch, int8_t find_invis, int targets)
     }
 
     *s = '\0';
-    tokens[++i] = NULL;
+    tokens[++i] = nullptr;
 
     if (IS_SET(targets, TO_CHAR) && SENDOK(ch))
 	sub_write_to_char(ch, tokens, otokens, type);

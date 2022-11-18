@@ -88,7 +88,7 @@ ACMD(do_oasis_aedit)
     OLC_MODE(d) = AEDIT_CONFIRM_EDIT;
   }
   STATE(d) = CON_AEDIT;
-  act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
+  act("$n starts using OLC.", TRUE, d->character, nullptr, nullptr, TO_ROOM);
   SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
   mudlog(CMP, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing actions.", GET_NAME(ch));
 }
@@ -104,17 +104,17 @@ void aedit_setup_new(struct descriptor_data *d) {
    OLC_ACTION(d)->min_level_char      = 0;
    OLC_ACTION(d)->char_no_arg         = strdup("This action is unfinished.");
    OLC_ACTION(d)->others_no_arg       = strdup("This action is unfinished.");
-   OLC_ACTION(d)->char_found          = NULL;
-   OLC_ACTION(d)->others_found        = NULL;
-   OLC_ACTION(d)->vict_found          = NULL;
-   OLC_ACTION(d)->not_found           = NULL;
-   OLC_ACTION(d)->char_auto           = NULL;
-   OLC_ACTION(d)->others_auto         = NULL;
-   OLC_ACTION(d)->char_body_found     = NULL;
-   OLC_ACTION(d)->others_body_found   = NULL;
-   OLC_ACTION(d)->vict_body_found     = NULL;
-   OLC_ACTION(d)->char_obj_found      = NULL;
-   OLC_ACTION(d)->others_obj_found    = NULL;
+   OLC_ACTION(d)->char_found          = nullptr;
+   OLC_ACTION(d)->others_found        = nullptr;
+   OLC_ACTION(d)->vict_found          = nullptr;
+   OLC_ACTION(d)->not_found           = nullptr;
+   OLC_ACTION(d)->char_auto           = nullptr;
+   OLC_ACTION(d)->others_auto         = nullptr;
+   OLC_ACTION(d)->char_body_found     = nullptr;
+   OLC_ACTION(d)->others_body_found   = nullptr;
+   OLC_ACTION(d)->vict_body_found     = nullptr;
+   OLC_ACTION(d)->char_obj_found      = nullptr;
+   OLC_ACTION(d)->others_obj_found    = nullptr;
    aedit_disp_menu(d);
    OLC_VAL(d) = 0;
 }
@@ -162,7 +162,7 @@ void aedit_setup_existing(struct descriptor_data *d, int real_num) {
 
       
 void aedit_save_internally(struct descriptor_data *d) {
-   struct social_messg *new_soc_mess_list = NULL;
+   struct social_messg *new_soc_mess_list = nullptr;
    int i;
    
    /* add a new social into the list */
@@ -419,21 +419,21 @@ void aedit_parse(struct descriptor_data * d, char *arg) {
          write_to_output(d, "Enter social shown to the Character when there is no argument supplied.\r\n"
                             "[OLD]: %s\r\n"
                             "[NEW]: ",
-                 ((OLC_ACTION(d)->char_no_arg)?OLC_ACTION(d)->char_no_arg:"NULL"));
+                 ((OLC_ACTION(d)->char_no_arg)?OLC_ACTION(d)->char_no_arg:"nullptr"));
          OLC_MODE(d) = AEDIT_NOVICT_CHAR;
          return;
        case 'b': case 'B':
          write_to_output(d, "Enter social shown to Others when there is no argument supplied.\r\n"
                             "[OLD]: %s\r\n"
                             "[NEW]: ",
-                            ((OLC_ACTION(d)->others_no_arg)?OLC_ACTION(d)->others_no_arg:"NULL"));
+                            ((OLC_ACTION(d)->others_no_arg)?OLC_ACTION(d)->others_no_arg:"nullptr"));
          OLC_MODE(d) = AEDIT_NOVICT_OTHERS;
          return;
        case 'c': case 'C':
          write_to_output(d, "Enter text shown to the Character when his victim isnt found.\r\n"
                             "[OLD]: %s\r\n"
                             "[NEW]: ",
-                            ((OLC_ACTION(d)->not_found)?OLC_ACTION(d)->not_found:"NULL"));
+                            ((OLC_ACTION(d)->not_found)?OLC_ACTION(d)->not_found:"nullptr"));
          
          OLC_MODE(d) = AEDIT_VICT_NOT_FOUND;
          return;
@@ -441,7 +441,7 @@ void aedit_parse(struct descriptor_data * d, char *arg) {
          write_to_output(d, "Enter social shown to the Character when it is its own victim.\r\n"
                             "[OLD]: %s\r\n"
                             "[NEW]: ",
-                            ((OLC_ACTION(d)->char_auto)?OLC_ACTION(d)->char_auto:"NULL"));
+                            ((OLC_ACTION(d)->char_auto)?OLC_ACTION(d)->char_auto:"nullptr"));
          
          OLC_MODE(d) = AEDIT_SELF_CHAR;
          return;
@@ -449,7 +449,7 @@ void aedit_parse(struct descriptor_data * d, char *arg) {
          write_to_output(d, "Enter social shown to Others when the Char is its own victim.\r\n"
                             "[OLD]: %s\r\n"
                             "[NEW]: ",
-                            ((OLC_ACTION(d)->others_auto)?OLC_ACTION(d)->others_auto:"NULL"));
+                            ((OLC_ACTION(d)->others_auto)?OLC_ACTION(d)->others_auto:"nullptr"));
          
          OLC_MODE(d) = AEDIT_SELF_OTHERS;
          return;
@@ -457,7 +457,7 @@ void aedit_parse(struct descriptor_data * d, char *arg) {
          write_to_output(d, "Enter normal social shown to the Character when the victim is found.\r\n"
                             "[OLD]: %s\r\n"
                             "[NEW]: ",
-                            ((OLC_ACTION(d)->char_found)?OLC_ACTION(d)->char_found:"NULL"));
+                            ((OLC_ACTION(d)->char_found)?OLC_ACTION(d)->char_found:"nullptr"));
          
          OLC_MODE(d) = AEDIT_VICT_CHAR_FOUND;
          return;
@@ -465,7 +465,7 @@ void aedit_parse(struct descriptor_data * d, char *arg) {
          write_to_output(d, "Enter normal social shown to Others when the victim is found.\r\n"
                             "[OLD]: %s\r\n"
                             "[NEW]: ",
-                            ((OLC_ACTION(d)->others_found)?OLC_ACTION(d)->others_found:"NULL"));
+                            ((OLC_ACTION(d)->others_found)?OLC_ACTION(d)->others_found:"nullptr"));
          
          OLC_MODE(d) = AEDIT_VICT_OTHERS_FOUND;
          return;
@@ -473,7 +473,7 @@ void aedit_parse(struct descriptor_data * d, char *arg) {
          write_to_output(d, "Enter normal social shown to the Victim when the victim is found.\r\n"
                             "[OLD]: %s\r\n"
                             "[NEW]: ",
-                            ((OLC_ACTION(d)->vict_found)?OLC_ACTION(d)->vict_found:"NULL"));
+                            ((OLC_ACTION(d)->vict_found)?OLC_ACTION(d)->vict_found:"nullptr"));
          
          OLC_MODE(d) = AEDIT_VICT_VICT_FOUND;
          return;
@@ -481,7 +481,7 @@ void aedit_parse(struct descriptor_data * d, char *arg) {
          write_to_output(d, "Enter 'body part' social shown to the Character when the victim is found.\r\n"
                             "[OLD]: %s\r\n"
                             "[NEW]: ",
-                            ((OLC_ACTION(d)->char_body_found)?OLC_ACTION(d)->char_body_found:"NULL"));
+                            ((OLC_ACTION(d)->char_body_found)?OLC_ACTION(d)->char_body_found:"nullptr"));
          
          OLC_MODE(d) = AEDIT_VICT_CHAR_BODY_FOUND;
          return;
@@ -489,7 +489,7 @@ void aedit_parse(struct descriptor_data * d, char *arg) {
          write_to_output(d, "Enter 'body part' social shown to Others when the victim is found.\r\n"
                             "[OLD]: %s\r\n"
                             "[NEW]: ",
-                            ((OLC_ACTION(d)->others_body_found)?OLC_ACTION(d)->others_body_found:"NULL"));
+                            ((OLC_ACTION(d)->others_body_found)?OLC_ACTION(d)->others_body_found:"nullptr"));
          
          OLC_MODE(d) = AEDIT_VICT_OTHERS_BODY_FOUND;
          return;
@@ -497,7 +497,7 @@ void aedit_parse(struct descriptor_data * d, char *arg) {
          write_to_output(d, "Enter 'body part' social shown to the Victim when the victim is found.\r\n"
                             "[OLD]: %s\r\n"
                             "[NEW]: ",
-                            ((OLC_ACTION(d)->vict_body_found)?OLC_ACTION(d)->vict_body_found:"NULL"));
+                            ((OLC_ACTION(d)->vict_body_found)?OLC_ACTION(d)->vict_body_found:"nullptr"));
          
          OLC_MODE(d) = AEDIT_VICT_VICT_BODY_FOUND;
          return;
@@ -505,7 +505,7 @@ void aedit_parse(struct descriptor_data * d, char *arg) {
          write_to_output(d, "Enter 'object' social shown to the Character when the object is found.\r\n"
                             "[OLD]: %s\r\n"
                             "[NEW]: ",
-                            ((OLC_ACTION(d)->char_obj_found)?OLC_ACTION(d)->char_obj_found:"NULL"));
+                            ((OLC_ACTION(d)->char_obj_found)?OLC_ACTION(d)->char_obj_found:"nullptr"));
          
          OLC_MODE(d) = AEDIT_OBJ_CHAR_FOUND;
          return;
@@ -513,7 +513,7 @@ void aedit_parse(struct descriptor_data * d, char *arg) {
          write_to_output(d, "Enter 'object' social shown to the Room when the object is found.\r\n"
                             "[OLD]: %s\r\n"
                             "[NEW]: ",
-                            ((OLC_ACTION(d)->others_obj_found)?OLC_ACTION(d)->others_obj_found:"NULL"));
+                            ((OLC_ACTION(d)->others_obj_found)?OLC_ACTION(d)->others_obj_found:"nullptr"));
          
          OLC_MODE(d) = AEDIT_OBJ_OTHERS_FOUND;
          return;
@@ -582,7 +582,7 @@ void aedit_parse(struct descriptor_data * d, char *arg) {
         delete_doubledollar(arg);
         OLC_ACTION(d)->char_no_arg = strdup(arg);
       } else 
-        OLC_ACTION(d)->char_no_arg = NULL;
+        OLC_ACTION(d)->char_no_arg = nullptr;
       break;
 
     case AEDIT_NOVICT_OTHERS:
@@ -592,7 +592,7 @@ void aedit_parse(struct descriptor_data * d, char *arg) {
         delete_doubledollar(arg);
         OLC_ACTION(d)->others_no_arg = strdup(arg);
       } else
-        OLC_ACTION(d)->others_no_arg = NULL;
+        OLC_ACTION(d)->others_no_arg = nullptr;
       break;
 
     case AEDIT_VICT_CHAR_FOUND:
@@ -602,7 +602,7 @@ void aedit_parse(struct descriptor_data * d, char *arg) {
         delete_doubledollar(arg);
         OLC_ACTION(d)->char_found = strdup(arg);
       } else
-        OLC_ACTION(d)->char_found = NULL;
+        OLC_ACTION(d)->char_found = nullptr;
       break;
 
     case AEDIT_VICT_OTHERS_FOUND:
@@ -612,7 +612,7 @@ void aedit_parse(struct descriptor_data * d, char *arg) {
         delete_doubledollar(arg);
         OLC_ACTION(d)->others_found = strdup(arg);
       } else
-        OLC_ACTION(d)->others_found = NULL;
+        OLC_ACTION(d)->others_found = nullptr;
       break;
 
     case AEDIT_VICT_VICT_FOUND:
@@ -622,7 +622,7 @@ void aedit_parse(struct descriptor_data * d, char *arg) {
         delete_doubledollar(arg);
         OLC_ACTION(d)->vict_found = strdup(arg);
       } else
-        OLC_ACTION(d)->vict_found = NULL;
+        OLC_ACTION(d)->vict_found = nullptr;
       break;
 
     case AEDIT_VICT_NOT_FOUND:
@@ -632,7 +632,7 @@ void aedit_parse(struct descriptor_data * d, char *arg) {
         delete_doubledollar(arg);
         OLC_ACTION(d)->not_found = strdup(arg);
       } else
-        OLC_ACTION(d)->not_found = NULL;
+        OLC_ACTION(d)->not_found = nullptr;
       break;
 
     case AEDIT_SELF_CHAR:
@@ -642,7 +642,7 @@ void aedit_parse(struct descriptor_data * d, char *arg) {
         delete_doubledollar(arg);
         OLC_ACTION(d)->char_auto = strdup(arg);
       } else
-        OLC_ACTION(d)->char_auto = NULL;
+        OLC_ACTION(d)->char_auto = nullptr;
       break;
 
     case AEDIT_SELF_OTHERS:
@@ -652,7 +652,7 @@ void aedit_parse(struct descriptor_data * d, char *arg) {
         delete_doubledollar(arg);
         OLC_ACTION(d)->others_auto = strdup(arg);
       } else
-        OLC_ACTION(d)->others_auto = NULL;
+        OLC_ACTION(d)->others_auto = nullptr;
       break;
 
     case AEDIT_VICT_CHAR_BODY_FOUND:
@@ -662,7 +662,7 @@ void aedit_parse(struct descriptor_data * d, char *arg) {
         delete_doubledollar(arg);
         OLC_ACTION(d)->char_body_found = strdup(arg);
       } else
-        OLC_ACTION(d)->char_body_found = NULL;
+        OLC_ACTION(d)->char_body_found = nullptr;
       break;
 
     case AEDIT_VICT_OTHERS_BODY_FOUND:
@@ -672,7 +672,7 @@ void aedit_parse(struct descriptor_data * d, char *arg) {
         delete_doubledollar(arg);
         OLC_ACTION(d)->others_body_found = strdup(arg);
       } else
-        OLC_ACTION(d)->others_body_found = NULL;
+        OLC_ACTION(d)->others_body_found = nullptr;
       break;
 
     case AEDIT_VICT_VICT_BODY_FOUND:
@@ -682,7 +682,7 @@ void aedit_parse(struct descriptor_data * d, char *arg) {
         delete_doubledollar(arg);
         OLC_ACTION(d)->vict_body_found = strdup(arg);
       } else
-        OLC_ACTION(d)->vict_body_found = NULL;
+        OLC_ACTION(d)->vict_body_found = nullptr;
       break;
 
     case AEDIT_OBJ_CHAR_FOUND:
@@ -692,7 +692,7 @@ void aedit_parse(struct descriptor_data * d, char *arg) {
         delete_doubledollar(arg);
         OLC_ACTION(d)->char_obj_found = strdup(arg);
       } else
-        OLC_ACTION(d)->char_obj_found = NULL;
+        OLC_ACTION(d)->char_obj_found = nullptr;
       break;
 
     case AEDIT_OBJ_OTHERS_FOUND:
@@ -702,7 +702,7 @@ void aedit_parse(struct descriptor_data * d, char *arg) {
         delete_doubledollar(arg);
         OLC_ACTION(d)->others_obj_found = strdup(arg);
       } else
-        OLC_ACTION(d)->others_obj_found = NULL;
+        OLC_ACTION(d)->others_obj_found = nullptr;
       break;
 
     default:

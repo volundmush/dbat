@@ -260,11 +260,11 @@ extern struct shop_data *shop_index;
 extern int top_shop, cmd_say, cmd_tell, cmd_emote, cmd_slap, cmd_puke;
 
 // functions
-int shop_producing(struct obj_data *item, int shop_nr);
+int shop_producing(struct obj_data *item, vnum shop_nr);
 int ok_damage_shopkeeper(struct char_data *ch, struct char_data *victim);
 void boot_the_shops(FILE *shop_f, char *filename, int rec_count);
 void assign_the_shopkeepers(void);
-int ok_shop_room(int shop_nr, room_vnum room);
+int ok_shop_room(vnum shop_nr, room_vnum room);
 void destroy_shops(void);
 void show_shops(struct char_data *ch, char *arg);
 int count_shops(shop_vnum low, shop_vnum high);

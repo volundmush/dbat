@@ -129,7 +129,7 @@ ACMD(do_oasis_oedit)
     /** Free the descriptor's OLC structure.                                 **/
     /**************************************************************************/
     free(d->olc);
-    d->olc = NULL;
+    d->olc = nullptr;
     return;
   }
   
@@ -143,7 +143,7 @@ ACMD(do_oasis_oedit)
     /** Free the descriptor's OLC structure.                                 **/
     /**************************************************************************/
     free(d->olc);
-    d->olc = NULL;
+    d->olc = nullptr;
     return;
   }
   
@@ -166,7 +166,7 @@ ACMD(do_oasis_oedit)
     /** Free the descriptor's OLC structure.                                 **/
     /**************************************************************************/
     free(d->olc);
-    d->olc = NULL;
+    d->olc = nullptr;
     return;
   }
   
@@ -187,7 +187,7 @@ ACMD(do_oasis_oedit)
   /****************************************************************************/
   /** Send the OLC message to the players in the same room as the builder.   **/
   /****************************************************************************/
-  act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
+  act("$n starts using OLC.", TRUE, d->character, nullptr, nullptr, TO_ROOM);
   SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
   
   /****************************************************************************/
@@ -214,8 +214,8 @@ void oedit_setup_new(struct descriptor_data *d)
   GET_OBJ_VAL(OLC_OBJ(d), VAL_ALL_MATERIAL) = MATERIAL_STEEL;
   GET_OBJ_SIZE(OLC_OBJ(d)) = SIZE_MEDIUM;
 
-  SCRIPT(OLC_OBJ(d)) = NULL;
-  OLC_OBJ(d)->proto_script = OLC_SCRIPT(d) = NULL;
+  SCRIPT(OLC_OBJ(d)) = nullptr;
+  OLC_OBJ(d)->proto_script = OLC_SCRIPT(d) = nullptr;
 }
 
 /*------------------------------------------------------------------------*/
@@ -241,8 +241,8 @@ void oedit_setup_existing(struct descriptor_data *d, int real_num)
    * The edited obj must not have a script.
    * It will be assigned to the updated obj later, after editing.
    */
-  SCRIPT(obj) = NULL;
-  OLC_OBJ(d)->proto_script = NULL;
+  SCRIPT(obj) = nullptr;
+  OLC_OBJ(d)->proto_script = nullptr;
 }
 
 /*------------------------------------------------------------------------*/
@@ -1018,7 +1018,7 @@ void oedit_disp_menu(struct descriptor_data *d)
 void oedit_parse(struct descriptor_data *d, char *arg)
 {
   int number, max_val, min_val;
-  char *oldtext = NULL;
+  char *oldtext = nullptr;
   struct board_info *tmp;
   struct obj_data *obj;
   obj_rnum robj;
@@ -1038,7 +1038,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
       } else
         write_to_output(d, "Object saved to memory.\r\n");
       if(GET_OBJ_TYPE(OLC_OBJ(d)) == ITEM_BOARD) {
-	if((tmp=locate_board(GET_OBJ_VNUM(OLC_OBJ(d)))) != NULL) {
+	if((tmp=locate_board(GET_OBJ_VNUM(OLC_OBJ(d)))) != nullptr) {
 	  save_board(tmp);
 	} else {
 	  tmp = create_new_board(GET_OBJ_VNUM(OLC_OBJ(d)));
@@ -1111,7 +1111,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
           /* remove any old scripts */
           if (SCRIPT(obj)) {
             extract_script(obj, OBJ_TRIGGER);
-            SCRIPT(obj) = NULL;
+            SCRIPT(obj) = nullptr;
           }
 
           free_proto_script(obj, OBJ_TRIGGER);
@@ -1126,10 +1126,10 @@ void oedit_parse(struct descriptor_data *d, char *arg)
         if (d->character) {
           REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_WRITING);
           STATE(d) = CON_PLAYING;
-          act("$n stops using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
+          act("$n stops using OLC.", TRUE, d->character, nullptr, nullptr, TO_ROOM);
         }
         free(d->olc);
-        d->olc = NULL;
+        d->olc = nullptr;
       }
       return;
     case '1':
@@ -1209,9 +1209,9 @@ void oedit_parse(struct descriptor_data *d, char *arg)
       /*
        * If extra descriptions don't exist.
        */
-      if (OLC_OBJ(d)->ex_description == NULL) {
+      if (OLC_OBJ(d)->ex_description == nullptr) {
 	CREATE(OLC_OBJ(d)->ex_description, struct extra_descr_data, 1);
-	OLC_OBJ(d)->ex_description->next = NULL;
+	OLC_OBJ(d)->ex_description->next = nullptr;
       }
       OLC_DESC(d) = OLC_OBJ(d)->ex_description;
       oedit_disp_extradesc_menu(d);
@@ -1658,7 +1658,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
 	 */
 	REMOVE_FROM_LIST(OLC_DESC(d), OLC_OBJ(d)->ex_description, next, temp);
 	free(OLC_DESC(d));
-	OLC_DESC(d) = NULL;
+	OLC_DESC(d) = nullptr;
       }
     break;
 
@@ -1789,7 +1789,7 @@ void iedit_setup_existing(struct descriptor_data *d, struct obj_data *real_num)
   /* free any assigned scripts */
   if (SCRIPT(obj))
     extract_script(obj, OBJ_TRIGGER);
-  SCRIPT(obj) = NULL;
+  SCRIPT(obj) = nullptr;
   /* find_obj helper */
   remove_from_lookup_table(GET_ID(obj));
 
@@ -1811,13 +1811,13 @@ ACMD(do_iedit) {
     send_to_char(ch, "You must supply an object name.\r\n");
   }
 
-  if ((k = get_obj_in_equip_vis(ch, arg, NULL, ch->equipment))) {
+  if ((k = get_obj_in_equip_vis(ch, arg, nullptr, ch->equipment))) {
     found=1;
-  } else if ((k = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
+  } else if ((k = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
     found=1;
-  } else if ((k = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
+  } else if ((k = get_obj_in_list_vis(ch, arg, nullptr, world[IN_ROOM(ch)].contents))) {
     found =1;
-  } else if ((k = get_obj_vis(ch, arg, NULL))) {
+  } else if ((k = get_obj_vis(ch, arg, nullptr))) {
     found=1;
   }
 
@@ -1834,7 +1834,7 @@ ACMD(do_iedit) {
   iedit_setup_existing(ch->desc,k);
   OLC_VAL(ch->desc) = 0;
 
-  act("$n starts using OLC.", TRUE, ch, 0, 0, TO_ROOM);
+  act("$n starts using OLC.", TRUE, ch, nullptr, nullptr, TO_ROOM);
 
   STATE(ch->desc) = CON_IEDIT;
 

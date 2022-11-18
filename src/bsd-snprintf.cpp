@@ -46,7 +46,7 @@
  * snprintf() is used instead of sprintf() as it does limit checks
  * for string length.  This covers a nasty loophole.
  *
- * The other functions are there to prevent NULL pointers from
+ * The other functions are there to prevent nullptr pointers from
  * causing nast effects.
  *
  * More Recently:
@@ -412,7 +412,7 @@ fmtstr(char *buffer, size_t *currlen, size_t maxlen,
 	int cnt = 0;
   
 	if (value == 0) 
-		value = "<NULL>";
+		value = "<nullptr>";
 
 	for (strln = 0; value[strln]; ++strln); /* strlen */
 	padlen = min - strln;
@@ -720,7 +720,7 @@ main(void)
 		"%4f",
 		"%3.1f",
 		"%3.2f",
-		NULL
+		nullptr
 	};
 	double fp_nums[] = { 
 		-1.5, 
@@ -747,7 +747,7 @@ main(void)
 		"%4d",
 		"%lld",
 		"%qd",
-		NULL
+		nullptr
 	};
 	long long int_nums[] = { -1, 134, 91340, 341, 0203, 0, 9999999 };
 	int x, y;
@@ -756,7 +756,7 @@ main(void)
 
 	printf("Testing snprintf format codes against system sprintf...\n");
 
-	for (x = 0; fp_fmt[x] != NULL ; x++) {
+	for (x = 0; fp_fmt[x] != nullptr ; x++) {
 		for (y = 0; fp_nums[y] != 0 ; y++) {
 			snprintf(buf1, sizeof (buf1), fp_fmt[x], fp_nums[y]);
 			sprintf (buf2, fp_fmt[x], fp_nums[y]);
@@ -769,7 +769,7 @@ main(void)
 			num++;
 		}
 	}
-	for (x = 0; int_fmt[x] != NULL ; x++) {
+	for (x = 0; int_fmt[x] != nullptr ; x++) {
 		for (y = 0; int_nums[y] != 0 ; y++) {
 			snprintf(buf1, sizeof (buf1), int_fmt[x], int_nums[y]);
 			sprintf(buf2, int_fmt[x], int_nums[y]);

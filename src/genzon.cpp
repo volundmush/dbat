@@ -383,7 +383,7 @@ int save_zone(zone_rnum zone_num)
 {
   int subcmd, arg1 = -1, arg2 = -1, arg3 = -1, arg4 = -1, arg5 = -1;
   char fname[128], oldname[128];
-  const char *comment = NULL;
+  const char *comment = nullptr;
   FILE *zfile;
   char zbuf1[MAX_STRING_LENGTH];
   char zbuf2[MAX_STRING_LENGTH];

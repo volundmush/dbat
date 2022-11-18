@@ -123,7 +123,7 @@ ACMD(do_masound)
     {
         struct room_direction_data *newexit;
 
-        if (((newexit = world[was_in_room].dir_option[door]) != NULL) &&
+        if (((newexit = world[was_in_room].dir_option[door]) != nullptr) &&
             newexit->to_room != NOWHERE && newexit->to_room != was_in_room)
         {
             IN_ROOM(ch) = newexit->to_room;
@@ -196,7 +196,7 @@ ACMD(do_mkill)
         mob_log(ch, "mkill: victim (%s) not found",arg);
         return;
       }
-    } else if (!(victim = get_char_room_vis(ch, arg, NULL))) {
+    } else if (!(victim = get_char_room_vis(ch, arg, nullptr))) {
         mob_log(ch, "mkill: victim (%s) not found",arg);
         return;
     }
@@ -272,22 +272,22 @@ ACMD(do_mjunk)
 
     if ((find_all_dots(arg) != FIND_INDIV) && !junk_all) {
       /* Thanks to Carlos Myers for fixing the line below */
-      if ((pos = get_obj_pos_in_equip_vis(ch, arg, NULL, ch->equipment)) >= 0) {
+      if ((pos = get_obj_pos_in_equip_vis(ch, arg, nullptr, ch->equipment)) >= 0) {
          extract_obj(unequip_char(ch, pos));
          return;
       }
-      if ((obj = get_obj_in_list_vis(ch, arg, NULL, ch->carrying)) != NULL )
+      if ((obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying)) != nullptr )
         extract_obj(obj);
       return;
     } else {
-        for (obj = ch->carrying; obj != NULL; obj = obj_next) {
+        for (obj = ch->carrying; obj != nullptr; obj = obj_next) {
             obj_next = obj->next_content;
             if (arg[3] == '\0' || isname(arg+4, obj->name)) {
                 extract_obj(obj);
             }
         }
       /* Thanks to Carlos Myers for fixing the line below */
-      while ((pos = get_obj_pos_in_equip_vis(ch, arg, NULL, ch->equipment)) >= 0)
+      while ((pos = get_obj_pos_in_equip_vis(ch, arg, nullptr, ch->equipment)) >= 0)
         extract_obj(unequip_char(ch, pos));
     }
     return;
@@ -322,7 +322,7 @@ ACMD(do_mechoaround)
         mob_log(ch, "mechoaround: victim (%s) does not exist",arg);
         return;
       }
-    } else if (!(victim = get_char_room_vis(ch, arg, NULL))) {
+    } else if (!(victim = get_char_room_vis(ch, arg, nullptr))) {
         mob_log(ch, "mechoaround: victim (%s) does not exist",arg);
         return;
     }
@@ -331,7 +331,7 @@ ACMD(do_mechoaround)
 
     sprintf(buf, p);
     search_replace(buf, GET_NAME(victim), "$n");
-    act(buf, TRUE, victim, 0, 0, TO_ROOM);
+    act(buf, TRUE, victim, nullptr, nullptr, TO_ROOM);
     /*sub_write(p, victim, TRUE, TO_ROOM);*/
 }
 
@@ -364,7 +364,7 @@ ACMD(do_msend)
         mob_log(ch, "msend: victim (%s) does not exist",arg);
         return;
       }
-    } else if (!(victim = get_char_room_vis(ch, arg, NULL))) {
+    } else if (!(victim = get_char_room_vis(ch, arg, nullptr))) {
         mob_log(ch, "msend: victim (%s) does not exist",arg);
         return;
     }
@@ -461,7 +461,7 @@ ACMD(do_mload)
           return;
         }
       }
-      if ((mob = read_mobile(number, VIRTUAL)) == NULL) {
+      if ((mob = read_mobile(number, VIRTUAL)) == nullptr) {
         mob_log(ch, "mload: bad mob vnum");
         return;
       }
@@ -475,7 +475,7 @@ ACMD(do_mload)
     }
 
     else if (is_abbrev(arg1, "obj")) {
-      if ((object = read_object(number, VIRTUAL)) == NULL) {
+      if ((object = read_object(number, VIRTUAL)) == nullptr) {
           mob_log(ch, "mload: bad object vnum");
           return;
       }
@@ -497,9 +497,9 @@ ACMD(do_mload)
         return;
       }
       two_arguments(target, arg1, arg2); /* recycling ... */
-      tch = (arg1 != NULL && *arg1 == UID_CHAR) ? get_char(arg1) : get_char_room_vis(ch, arg1, NULL);
+      tch = (arg1 != nullptr && *arg1 == UID_CHAR) ? get_char(arg1) : get_char_room_vis(ch, arg1, nullptr);
       if (tch) {
-        if (arg2 != NULL && *arg2 &&
+        if (arg2 != nullptr && *arg2 &&
             (pos = find_eq_pos_script(arg2)) >= 0 &&
             !GET_EQ(tch, pos) &&
             can_wear_on_pos(object, pos)) {
@@ -511,7 +511,7 @@ ACMD(do_mload)
         load_otrigger(object);
         return;
       }
-      cnt = (arg1 != NULL && *arg1 == UID_CHAR) ? get_obj(arg1) : get_obj_vis(ch, arg1, NULL);
+      cnt = (arg1 != nullptr && *arg1 == UID_CHAR) ? get_obj(arg1) : get_obj_vis(ch, arg1, nullptr);
       if (cnt && GET_OBJ_TYPE(cnt) == ITEM_CONTAINER) {
       	obj_to_obj(object, cnt);
         load_otrigger(object);
@@ -574,17 +574,17 @@ ACMD(do_mpurge)
 
   if (*arg == UID_CHAR)
     victim = get_char(arg);
-  else victim = get_char_room_vis(ch, arg, NULL);
+  else victim = get_char_room_vis(ch, arg, nullptr);
 
-  if (victim == NULL) {
+  if (victim == nullptr) {
     if (*arg == UID_CHAR)
       obj = get_obj(arg);
     else
-      obj = get_obj_vis(ch, arg, NULL);
+      obj = get_obj_vis(ch, arg, nullptr);
 
     if (obj) {
       extract_obj(obj);
-      obj = NULL;
+      obj = nullptr;
     } else
       mob_log(ch, "mpurge: bad argument");
 
@@ -731,7 +731,7 @@ ACMD(do_mteleport)
         mob_log(ch, "mteleport: victim (%s) does not exist",arg1);
         return;
       }
-    } else if (!(vict = get_char_vis(ch, arg1, NULL, FIND_CHAR_WORLD))) {
+    } else if (!(vict = get_char_vis(ch, arg1, nullptr, FIND_CHAR_WORLD))) {
       mob_log(ch, "mteleport: victim (%s) does not exist",arg1);
       return;
     }
@@ -772,7 +772,7 @@ ACMD(do_mdamage) {
       mob_log(ch, "mdamage: victim (%s) does not exist", name);
       return;
     }
-  } else if (!(vict = get_char_room_vis(ch, name, NULL))) {
+  } else if (!(vict = get_char_room_vis(ch, name, nullptr))) {
     mob_log(ch, "mdamage: victim (%s) does not exist", name);
     return;
   }
@@ -827,7 +827,7 @@ ACMD(do_mforce)
             mob_log(ch, "mforce: victim (%s) does not exist",arg);
             return;
           }
-        } else if ((victim = get_char_room_vis(ch, arg, NULL)) == NULL) {
+        } else if ((victim = get_char_room_vis(ch, arg, nullptr)) == nullptr) {
             mob_log(ch, "mforce: no such victim");
             return;
         }
@@ -873,7 +873,7 @@ ACMD(do_mremember)
         mob_log(ch, "mremember: victim (%s) does not exist", arg);
         return;
       }
-    } else if (!(victim = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))) {
+    } else if (!(victim = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD))) {
         mob_log(ch,"mremember: victim (%s) does not exist", arg);
         return;
     }
@@ -925,17 +925,17 @@ ACMD(do_mforget)
         mob_log(ch, "mforget: victim (%s) does not exist", arg);
         return;
       }
-    } else if (!(victim = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))) {
+    } else if (!(victim = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD))) {
         mob_log(ch, "mforget: victim (%s) does not exist", arg);
         return;
     }
 
     mem = SCRIPT_MEM(ch);
-    prev = NULL;
+    prev = nullptr;
     while (mem) {
       if (mem->id == GET_ID(victim)) {
         if (mem->cmd) free(mem->cmd);
-        if (prev==NULL) {
+        if (prev==nullptr) {
           SCRIPT_MEM(ch) = mem->next;
           free(mem);
           mem = SCRIPT_MEM(ch);
@@ -986,7 +986,7 @@ ACMD(do_mtransform)
     else {
       m = read_mobile(atoi(arg+1), VIRTUAL);
     }
-    if (m==NULL) {
+    if (m==nullptr) {
       mob_log(ch, "mtransform: bad mobile vnum");
       return;
     }
@@ -997,7 +997,7 @@ ACMD(do_mtransform)
       if (GET_EQ(ch, pos))
         obj[pos] = unequip_char(ch, pos);
       else
-        obj[pos] = NULL;
+        obj[pos] = nullptr;
     }
 
     /* put the mob in the same room as ch so extract will work */
@@ -1086,7 +1086,7 @@ ACMD(do_mdoor)
         return;
     }
 
-    if ((rm = get_room(target)) == NULL) {
+    if ((rm = get_room(target)) == nullptr) {
         mob_log(ch, "mdoor: invalid target");
         return;
     }
@@ -1111,7 +1111,7 @@ ACMD(do_mdoor)
             if (newexit->keyword)
                 free(newexit->keyword);
             free(newexit);
-            rm->dir_option[dir] = NULL;
+            rm->dir_option[dir] = nullptr;
         }
     }
 
@@ -1177,7 +1177,7 @@ ACMD(do_mfollow)
       mob_log(ch, "mfollow: victim (%s) does not exist", buf);
       return;
     }
-  } else if (!(leader = get_char_vis(ch, buf, NULL, FIND_CHAR_ROOM))) {
+  } else if (!(leader = get_char_vis(ch, buf, nullptr, FIND_CHAR_ROOM))) {
       mob_log(ch,"mfollow: victim (%s) not found", buf);
       return;
   }
@@ -1202,7 +1202,7 @@ ACMD(do_mfollow)
       k->next = j->next;
       free(j);
     }
-    ch->master = NULL;
+    ch->master = nullptr;
   }
 
   if (ch == leader)

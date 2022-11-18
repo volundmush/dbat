@@ -88,7 +88,7 @@ ACMD(do_oasis_hedit)
 
   STATE(d) = CON_HEDIT;
   /*send_to_room(IN_ROOM(ch), "%s starts using OLC.\r\n", GET_NAME(ch));*/
-  act("$n starts using OLC.", TRUE, ch, 0, 0, TO_ROOM);
+  act("$n starts using OLC.", TRUE, ch, nullptr, nullptr, TO_ROOM);
   HEDITS = TRUE;
   SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
   mudlog(CMP, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing help files.", GET_NAME(ch));
@@ -126,7 +126,7 @@ static void hedit_setup_existing(struct descriptor_data *d, int rnum)
 
 static void hedit_save_internally(struct descriptor_data *d)
 {
-  struct help_index_element *new_help_table = NULL;
+  struct help_index_element *new_help_table = nullptr;
   if (OLC_ZNUM(d) == NOWHERE) {
   /*if (OLC_ZNUM(d) > top_of_helpt) {*/
     int i;
@@ -205,7 +205,7 @@ void hedit_parse(struct descriptor_data *d, char *arg)
     switch (*arg) {
     case 'y':
     case 'Y':
-      if (OLC_HELP(d)->keywords == NULL) {
+      if (OLC_HELP(d)->keywords == nullptr) {
        hedit_disp_menu(d);
        write_to_output(d, "\n@RYou must fill in the keywords before you save.@n\r\n");
       }

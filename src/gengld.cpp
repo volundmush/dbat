@@ -51,11 +51,11 @@ void free_guild_strings(struct guild_data *guild)
 {
 	if (G_NO_SKILL(guild)) {
 		free(G_NO_SKILL(guild));
-		G_NO_SKILL(guild) = NULL;
+		G_NO_SKILL(guild) = nullptr;
 	}
 	if (G_NO_GOLD(guild)) {
 		free(G_NO_GOLD(guild));
-		G_NO_GOLD(guild) = NULL;
+		G_NO_GOLD(guild) = nullptr;
 	}
 }
 

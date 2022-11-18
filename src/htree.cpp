@@ -13,14 +13,14 @@
 
 #undef HTREE_TEST_CYCLES
 
-struct htree_node *HTREE_NULL = NULL;
+struct htree_node *HTREE_NULL = nullptr;
 int htree_total_nodes = 0;
 int htree_depth_used = 0;
 
 void htree_shutdown()
 {
   free(HTREE_NULL);
-  HTREE_NULL = NULL;
+  HTREE_NULL = nullptr;
 }
 
 struct htree_node *htree_init()
@@ -35,7 +35,7 @@ struct htree_node *htree_init()
       HTREE_NULL->subs[i] = HTREE_NULL;
     }
     HTREE_NULL->content = NOWHERE;
-    HTREE_NULL->parent = NULL;
+    HTREE_NULL->parent = nullptr;
   }
 
   if (! htree_depth_used)
@@ -156,28 +156,28 @@ void htree_test()
   struct timeval start, finish;
   float t1, t2;
 
-  if (gettimeofday(&start, NULL)) {
+  if (gettimeofday(&start, nullptr)) {
     log("error getting time: gettimeofday(): %s", strerror(errno));
   }
   for (i = 0; i < HTREE_TEST_CYCLES; i++) {
     n = rand_number(1, top_of_world);
     l = real_room_old(world[n].number);
   }
-  if (gettimeofday(&finish, NULL)) {
+  if (gettimeofday(&finish, nullptr)) {
     log("error getting time: gettimeofday(): %s", strerror(errno));
   }
   log("old start: %2d.%06d", start.tv_sec, start.tv_usec);
   log("old   end: %2d.%06d", finish.tv_sec, finish.tv_usec);
   t1 = ((float)finish.tv_sec + ((float)finish.tv_usec) / 1000000) -
        ((float)start.tv_sec + ((float)start.tv_usec) / 1000000);
-  if (gettimeofday(&start, NULL)) {
+  if (gettimeofday(&start, nullptr)) {
     log("error getting time: gettimeofday(): %s", strerror(errno));
   }
   for (i = 0; i < HTREE_TEST_CYCLES; i++) {
     n = rand_number(1, top_of_world);
     l = real_room(world[n].number);
   }
-  if (gettimeofday(&finish, NULL)) {
+  if (gettimeofday(&finish, nullptr)) {
     log("error getting time: gettimeofday(): %s", strerror(errno));
   }
   log("new start: %2d.%06d", start.tv_sec, start.tv_usec);
@@ -186,5 +186,5 @@ void htree_test()
        ((float)start.tv_sec + ((float)start.tv_usec) / 1000000);
   log("htree_test: htree speedup factor: %.0f%% (%.2f/%.2f)", t1 * 100 / t2, t1, t2);
 #endif /* HTREE_TEST_CYCLES */
-  log("htree stats (global): %d nodes, %"SZT" bytes (depth %d/%"SZT" used/possible)", htree_total_nodes, htree_total_nodes * sizeof(struct htree_node), htree_depth_used, HTREE_MAX_DEPTH);
+  log("htree stats (global): %d nodes, %" SZT" bytes (depth %d/%" SZT" used/possible)", htree_total_nodes, htree_total_nodes * sizeof(struct htree_node), htree_depth_used, HTREE_MAX_DEPTH);
 }

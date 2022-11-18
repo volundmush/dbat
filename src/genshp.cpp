@@ -249,31 +249,31 @@ void free_shop_strings(struct shop_data *shop)
 {
   if (S_NOITEM1(shop)) {
     free(S_NOITEM1(shop));
-    S_NOITEM1(shop) = NULL;
+    S_NOITEM1(shop) = nullptr;
   }
   if (S_NOITEM2(shop)) {
     free(S_NOITEM2(shop));
-    S_NOITEM2(shop) = NULL;
+    S_NOITEM2(shop) = nullptr;
   }
   if (S_NOCASH1(shop)) {
     free(S_NOCASH1(shop));
-    S_NOCASH1(shop) = NULL;
+    S_NOCASH1(shop) = nullptr;
   }
   if (S_NOCASH2(shop)) {
     free(S_NOCASH2(shop));
-    S_NOCASH2(shop) = NULL;
+    S_NOCASH2(shop) = nullptr;
   }
   if (S_NOBUY(shop)) {
     free(S_NOBUY(shop));
-    S_NOBUY(shop) = NULL;
+    S_NOBUY(shop) = nullptr;
   }
   if (S_BUY(shop)) {
     free(S_BUY(shop));
-    S_BUY(shop) = NULL;
+    S_BUY(shop) = nullptr;
   }
   if (S_SELL(shop)) {
     free(S_SELL(shop));
-    S_SELL(shop) = NULL;
+    S_SELL(shop) = nullptr;
   }
 }
 
@@ -291,7 +291,7 @@ void free_type_list(struct shop_buy_data **list)
       free(BUY_WORD((*list)[i]));
 
   free(*list);
-  *list = NULL;
+  *list = nullptr;
 }
 
 /*-------------------------------------------------------------------*/
@@ -397,9 +397,9 @@ int add_shop(struct shop_data *nshp)
       found = rshop;
 
       /* Make a "nofree" variant and remove these later. */
-      shop_index[rshop].in_room = NULL;
-      shop_index[rshop].producing = NULL;
-      shop_index[rshop].type = NULL;
+      shop_index[rshop].in_room = nullptr;
+      shop_index[rshop].producing = nullptr;
+      shop_index[rshop].type = nullptr;
       /* don't free old strings - they're still in use -- Welcor */
       copy_shop(&shop_index[rshop], nshp, FALSE);
       break;
@@ -409,9 +409,9 @@ int add_shop(struct shop_data *nshp)
 
   if (!found) {
     /* Make a "nofree" variant and remove these later. */
-    shop_index[rshop].in_room = NULL;
-    shop_index[rshop].producing = NULL;
-    shop_index[rshop].type = NULL;
+    shop_index[rshop].in_room = nullptr;
+    shop_index[rshop].producing = nullptr;
+    shop_index[rshop].type = nullptr;
     /* don't free old strings - they're still in use -- Welcor */
     copy_shop(&shop_index[0], nshp, FALSE);
   }

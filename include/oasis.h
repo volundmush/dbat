@@ -580,7 +580,7 @@ void free_room(struct room_data *room);
 ACMD(do_oasis_redit);
 
 void sedit_setup_new(struct descriptor_data *d);
-void sedit_setup_existing(struct descriptor_data *d, int rshop_num);
+void sedit_setup_existing(struct descriptor_data *d, vnum rshop_num);
 void sedit_save_internally(struct descriptor_data *d);
 void sedit_save_to_disk(int zone_num);
 void sedit_products_menu(struct descriptor_data *d);

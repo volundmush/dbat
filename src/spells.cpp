@@ -35,7 +35,7 @@ ASPELL(spell_create_water)
 {
   int water;
 
-  if (ch == NULL || obj == NULL)
+  if (ch == nullptr || obj == nullptr)
     return;
   /* level = MAX(MIN(level, LVL_IMPL), 1);	 - not used */
 
@@ -53,7 +53,7 @@ ASPELL(spell_create_water)
 	GET_OBJ_VAL(obj, VAL_DRINKCON_HOWFULL) += water;
 	name_to_drinkcon(obj, LIQ_WATER);
 	weight_change_object(obj, water);
-	act("$p is filled.", FALSE, ch, obj, 0, TO_CHAR);
+	act("$p is filled.", FALSE, ch, obj, nullptr, TO_CHAR);
       }
     }
   }
@@ -62,13 +62,13 @@ ASPELL(spell_create_water)
 
 ASPELL(spell_recall)
 {
-  if (victim == NULL || IS_NPC(victim))
+  if (victim == nullptr || IS_NPC(victim))
     return;
 
-  act("$n disappears.", TRUE, victim, 0, 0, TO_ROOM);
+  act("$n disappears.", TRUE, victim, nullptr, nullptr, TO_ROOM);
   char_from_room(victim);
   char_to_room(victim, real_room(CONFIG_MORTAL_START));
-  act("$n appears in the middle of the room.", TRUE, victim, 0, 0, TO_ROOM);
+  act("$n appears in the middle of the room.", TRUE, victim, nullptr, nullptr, TO_ROOM);
   look_at_room(IN_ROOM(victim), victim, 0);
   entry_memory_mtrigger(victim);
   greet_mtrigger(victim, -1);
@@ -80,7 +80,7 @@ ASPELL(spell_teleport)
 {
   room_rnum to_room;
 
-  if (victim == NULL || IS_NPC(victim))
+  if (victim == nullptr || IS_NPC(victim))
     return;
 
   do {
@@ -88,10 +88,10 @@ ASPELL(spell_teleport)
   } while (ROOM_FLAGGED(to_room, ROOM_PRIVATE | ROOM_DEATH | ROOM_GODROOM));
 
   act("$n slowly fades out of existence and is gone.",
-      FALSE, victim, 0, 0, TO_ROOM);
+      FALSE, victim, nullptr, nullptr, TO_ROOM);
   char_from_room(victim);
   char_to_room(victim, to_room);
-  act("$n slowly fades into existence.", FALSE, victim, 0, 0, TO_ROOM);
+  act("$n slowly fades into existence.", FALSE, victim, nullptr, nullptr, TO_ROOM);
   look_at_room(IN_ROOM(victim), victim, 0);
   entry_memory_mtrigger(victim);
   greet_mtrigger(victim, -1);
@@ -103,7 +103,7 @@ ASPELL(spell_teleport)
 
 ASPELL(spell_summon)
 {
-  if (ch == NULL || victim == NULL)
+  if (ch == nullptr || victim == nullptr)
     return;
 
   if (GET_LEVEL(victim) > level + 3) {
@@ -116,7 +116,7 @@ ASPELL(spell_summon)
       act("As the words escape your lips and $N travels\r\n"
 	  "through time and space towards you, you realize that $E is\r\n"
 	  "aggressive and might harm you, so you wisely send $M back.",
-	  FALSE, ch, 0, victim, TO_CHAR);
+	  FALSE, ch, nullptr, victim, TO_CHAR);
       return;
     }
     if (!IS_NPC(victim) && !PRF_FLAGGED(victim, PRF_SUMMONABLE) &&
@@ -139,13 +139,13 @@ ASPELL(spell_summon)
     return;
   }
 
-  act("$n disappears suddenly.", TRUE, victim, 0, 0, TO_ROOM);
+  act("$n disappears suddenly.", TRUE, victim, nullptr, nullptr, TO_ROOM);
 
   char_from_room(victim);
   char_to_room(victim, IN_ROOM(ch));
 
-  act("$n arrives suddenly.", TRUE, victim, 0, 0, TO_ROOM);
-  act("$n has summoned you!", FALSE, ch, 0, victim, TO_VICT);
+  act("$n arrives suddenly.", TRUE, victim, nullptr, nullptr, TO_ROOM);
+  act("$n has summoned you!", FALSE, ch, nullptr, victim, TO_VICT);
   look_at_room(IN_ROOM(victim), victim, 0);
   entry_memory_mtrigger(victim);
   greet_mtrigger(victim, -1);
@@ -205,7 +205,7 @@ ASPELL(spell_charm)
 {
   struct affected_type af;
 
-  if (victim == NULL || ch == NULL)
+  if (victim == nullptr || ch == nullptr)
     return;
 
   if (victim == ch)
@@ -247,7 +247,7 @@ ASPELL(spell_charm)
     af.bitvector = AFF_CHARM;
     affect_to_char(victim, &af);
 
-    act("Isn't $n just such a nice fellow?", FALSE, ch, 0, victim, TO_VICT);
+    act("Isn't $n just such a nice fellow?", FALSE, ch, nullptr, victim, TO_VICT);
     if (IS_NPC(victim))
       REMOVE_BIT_AR(MOB_FLAGS(victim), MOB_SPEC);
   }
@@ -353,7 +353,7 @@ ASPELL(spell_enchant_weapon)
 {
   int i;
 
-  if (ch == NULL || obj == NULL)
+  if (ch == nullptr || obj == nullptr)
     return;
 
   /* Either already enchanted or not a weapon. */
@@ -385,12 +385,12 @@ ASPELL(spell_enchant_weapon)
 
   if (IS_GOOD(ch)) {
     SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_ANTI_EVIL);
-    act("$p glows blue.", FALSE, ch, obj, 0, TO_CHAR);
+    act("$p glows blue.", FALSE, ch, obj, nullptr, TO_CHAR);
   } else if (IS_EVIL(ch)) {
     SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_ANTI_GOOD);
-    act("$p glows red.", FALSE, ch, obj, 0, TO_CHAR);
+    act("$p glows red.", FALSE, ch, obj, nullptr, TO_CHAR);
   } else
-    act("$p glows yellow.", FALSE, ch, obj, 0, TO_CHAR);
+    act("$p glows yellow.", FALSE, ch, obj, nullptr, TO_CHAR);
 }
 
 
@@ -404,9 +404,9 @@ ASPELL(spell_detect_poison)
         send_to_char(ch, "You feel healthy.\r\n");
     } else {
       if (AFF_FLAGGED(victim, AFF_POISON))
-        act("You sense that $E is poisoned.", FALSE, ch, 0, victim, TO_CHAR);
+        act("You sense that $E is poisoned.", FALSE, ch, nullptr, victim, TO_CHAR);
       else
-        act("You sense that $E is healthy.", FALSE, ch, 0, victim, TO_CHAR);
+        act("You sense that $E is healthy.", FALSE, ch, nullptr, victim, TO_CHAR);
     }
   }
 
@@ -416,9 +416,9 @@ ASPELL(spell_detect_poison)
     case ITEM_FOUNTAIN:
     case ITEM_FOOD:
       if (GET_OBJ_VAL(obj, VAL_FOOD_POISON))
-	act("You sense that $p has been contaminated.",FALSE,ch,obj,0,TO_CHAR);
+	act("You sense that $p has been contaminated.",FALSE,ch,obj,nullptr,TO_CHAR);
       else
-	act("You sense that $p is safe for consumption.", FALSE, ch, obj, 0,
+	act("You sense that $p is safe for consumption.", FALSE, ch, obj, nullptr,
 	    TO_CHAR);
       break;
     default:
@@ -433,7 +433,7 @@ ASPELL(spell_portal)
   struct room_data *rm;
   rm = &world[IN_ROOM(victim)];
 
-  if (ch == NULL || victim == NULL)
+  if (ch == nullptr || victim == nullptr)
     return;
 
   if (!can_edit_zone(ch, rm->zone) && ZONE_FLAGGED(rm->zone, ZONE_QUEST)) {
@@ -460,9 +460,9 @@ ASPELL(spell_portal)
   add_unique_id(portal);
   obj_to_room(portal, IN_ROOM(ch));
   act("$n opens a portal in thin air.",
-       TRUE, ch, 0, 0, TO_ROOM);
+       TRUE, ch, nullptr, nullptr, TO_ROOM);
   act("You open a portal out of thin air.",
-       TRUE, ch, 0, 0, TO_CHAR);
+       TRUE, ch, nullptr, nullptr, TO_CHAR);
   /* create the portal at the other end */
   tportal = read_object(portal_object, VIRTUAL);
   GET_OBJ_VAL(tportal, VAL_PORTAL_DEST) = GET_ROOM_VNUM(IN_ROOM(ch));
@@ -472,9 +472,9 @@ ASPELL(spell_portal)
   add_unique_id(portal);
   obj_to_room(tportal, IN_ROOM(victim));
   act("A shimmering portal appears out of thin air.",
-       TRUE, victim, 0, 0, TO_ROOM);
+       TRUE, victim, nullptr, nullptr, TO_ROOM);
   act("A shimmering portal opens here for you.",
-       TRUE, victim, 0, 0, TO_CHAR);
+       TRUE, victim, nullptr, nullptr, TO_CHAR);
 }
 
 
@@ -535,12 +535,12 @@ ASPELL(art_abundant_step)
       break;
   }
   send_to_char(ch, "Your will bends reality as you travel through the ethereal plane.\r\n");
-  act("$n is suddenly absent.", TRUE, ch, 0, 0, TO_ROOM);
+  act("$n is suddenly absent.", TRUE, ch, nullptr, nullptr, TO_ROOM);
 
   char_from_room(ch);
   char_to_room(ch, r);
 
-  act("$n is suddenly present.", TRUE, ch, 0, 0, TO_ROOM);
+  act("$n is suddenly present.", TRUE, ch, nullptr, nullptr, TO_ROOM);
 
   look_at_room(IN_ROOM(ch), ch, 0);
 

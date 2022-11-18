@@ -57,7 +57,7 @@ int physical_mastery(struct char_data *ch);
 int count_physical(struct char_data *ch);
 int handle_dodge(struct char_data *ch);
 int handle_block(struct char_data *ch);
-void update_mob_absorb(void);
+
 void cut_limb(struct char_data *ch, struct char_data *vict, int wlvl, int hitspot);
 void club_stamina(struct char_data *ch, struct char_data *vict, int wlvl, int64_t dmg);
 int boom_headshot(struct char_data *ch);

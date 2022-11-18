@@ -646,7 +646,7 @@ void list_feats_available(struct char_data *ch)
       strcat(buf2, "**OVERFLOW**\r\n"); 
       break;   
     }
-    if (feat_is_available(ch, i, 0, NULL) && feat_list[i].in_game && feat_list[i].can_learn) {
+    if (feat_is_available(ch, i, 0, nullptr) && feat_list[i].in_game && feat_list[i].can_learn) {
       sprintf(buf, "%-20s\r\n", feat_list[i].name);
       strcat(buf2, buf);        /* The above, @ should always be safe to do. */
       none_shown = FALSE;

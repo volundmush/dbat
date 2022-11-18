@@ -123,7 +123,7 @@ ACMD(do_oasis_gedit)
   if ((OLC_ZNUM(d) = real_zone_by_thing(number)) == NOWHERE) {
     send_to_char(ch, "Sorry, there is no zone for that number!\r\n");
     free(d->olc);
-    d->olc = NULL;
+    d->olc = nullptr;
     return;
   }
   
@@ -137,7 +137,7 @@ ACMD(do_oasis_gedit)
     /** Free the OLC structure.                                              **/
     /**************************************************************************/
     free(d->olc);
-    d->olc = NULL;
+    d->olc = nullptr;
     return;
   }
   
@@ -157,7 +157,7 @@ ACMD(do_oasis_gedit)
     /** Free the OLC structure.                                              **/
     /**************************************************************************/
     free(d->olc);
-    d->olc = NULL;
+    d->olc = nullptr;
     return;
   }
   
@@ -170,7 +170,7 @@ ACMD(do_oasis_gedit)
   
   STATE(d) = CON_GEDIT;
   
-  act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
+  act("$n starts using OLC.", TRUE, d->character, nullptr, nullptr, TO_ROOM);
   SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
   
   mudlog(BRF, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing zone %d allowed zone %d",
@@ -192,7 +192,7 @@ void gedit_setup_new(struct descriptor_data *d)
 	G_CHARGE(guilddata) = 1.0;
 	for (i = 0; i < GW_ARRAY_MAX; i++)
 		G_WITH_WHO(guilddata)[i] = 0;
-	G_FUNC(guilddata) = NULL;
+	G_FUNC(guilddata) = nullptr;
 	G_MINLVL(guilddata) = 0;
 
 	/*. Some default strings . */
@@ -592,7 +592,7 @@ void gedit_parse(struct descriptor_data *d, char *arg)
 				if (i == -1)
 					break;
 				/*. Fiddle with special procs . */
-				G_FUNC(OLC_GUILD(d)) = mob_index[i].func != guild ? mob_index[i].func : NULL;
+				G_FUNC(OLC_GUILD(d)) = mob_index[i].func != guild ? mob_index[i].func : nullptr;
 				mob_index[i].func = guild;
 				break;
 			} else {

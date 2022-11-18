@@ -71,13 +71,13 @@ ACMD(do_vdelete);
 ACMD(do_tstat);
 
 /* Return pointer to first occurrence of string ct in */
-/* cs, or NULL if not present.  Case insensitive */
+/* cs, or nullptr if not present.  Case insensitive */
 char *str_str(char *cs, char *ct)
 {
   char *s, *t;
 
   if (!cs || !ct || !*ct)
-    return NULL;
+    return nullptr;
 
   while (*cs) {
     t = ct;
@@ -96,7 +96,7 @@ char *str_str(char *cs, char *ct)
       return s;
   }
 
-  return NULL;
+  return nullptr;
 }
 
 
@@ -110,7 +110,7 @@ int trgvar_in_room(room_vnum vnum) {
         return (-1);
     }
 
-    for (ch = world[rnum].people; ch !=NULL; ch = ch->next_in_room)
+    for (ch = world[rnum].people; ch !=nullptr; ch = ch->next_in_room)
         i++;
 
     return i;
@@ -132,7 +132,7 @@ obj_data *get_obj_in_list(char *name, obj_data *list)
           return i;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 obj_data *get_object_in_equip(char_data * ch, char *name)
@@ -159,7 +159,7 @@ obj_data *get_object_in_equip(char_data * ch, char *name)
   } else {
     snprintf(tmpname, sizeof(tmpname), "%s", name);
     if (!(number = get_number(&tmp)))
-      return NULL;
+      return nullptr;
 
     for (j = 0; (j < NUM_WEARS) && (n <= number); j++)
       if ((obj = GET_EQ(ch, j)))
@@ -168,7 +168,7 @@ obj_data *get_object_in_equip(char_data * ch, char *name)
             return (obj);
   }
 
-  return NULL;
+  return nullptr;
 }
 
 /* Handles 'held', 'light' and 'wield' positions - Welcor
@@ -253,7 +253,7 @@ int can_wear_on_pos(struct obj_data *obj, int pos)
 struct char_data *find_char(long n)
 {
   if (n>=ROOM_ID_BASE) /* See note in dg_scripts.h */
-    return NULL;
+    return nullptr;
 
   return find_char_by_uid_in_lookup_table(n);
 }
@@ -263,7 +263,7 @@ struct char_data *find_char(long n)
 obj_data *find_obj(long n)
 {
   if (n < OBJ_ID_BASE) /* see note in dg_scripts.h */
-    return NULL;
+    return nullptr;
 
   return find_obj_by_uid_in_lookup_table(n);
 }
@@ -275,13 +275,13 @@ room_data *find_room(long n)
 
   n -= ROOM_ID_BASE;
   if (n<0)
-    return NULL;
+    return nullptr;
   rnum = real_room((room_vnum)n);
 
   if (rnum != NOWHERE)
     return &world[rnum];
 
-  return NULL;
+  return nullptr;
 }
 
 /************************************************************
@@ -305,7 +305,7 @@ char_data *get_char(char *name)
         return i;
   }
 
-  return NULL;
+  return nullptr;
 }
 
 /*
@@ -329,13 +329,13 @@ char_data *get_char_near_obj(obj_data *obj, char *name)
           return ch;
   }
 
-  return NULL;
+  return nullptr;
 }
 
 
 /*
  * returns a pointer to the first character in world by name name,
- * or NULL if none found.  Starts searching in room room first
+ * or nullptr if none found.  Starts searching in room room first
  */
 char_data *get_char_in_room(room_data *room, char *name)
 {
@@ -353,14 +353,14 @@ char_data *get_char_in_room(room_data *room, char *name)
         return ch;
     }
 
-  return NULL;
+  return nullptr;
 }
 
 /* searches the room with the object for an object with name 'name'*/
 
 obj_data *get_obj_near_obj(obj_data *obj, char *name)
 {
-  obj_data *i = NULL;
+  obj_data *i = nullptr;
   char_data *ch;
   int rm;
   long id;
@@ -399,10 +399,10 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name)
       if ((i = get_object_in_equip(ch, name)))
         return i;
   }
-  return NULL;
+  return nullptr;
 }
 
-/* returns the object in the world with name name, or NULL if not found */
+/* returns the object in the world with name name, or nullptr if not found */
 obj_data *get_obj(char *name)
 {
   obj_data *obj;
@@ -415,11 +415,11 @@ obj_data *get_obj(char *name)
         return obj;
   }
 
-  return NULL;
+  return nullptr;
 }
 
 
-/* finds room by id or vnum.  returns NULL if not found */
+/* finds room by id or vnum.  returns nullptr if not found */
 room_data *get_room(char *name)
 {
   room_rnum nr;
@@ -427,7 +427,7 @@ room_data *get_room(char *name)
   if (*name == UID_CHAR)
     return find_room(atoi(name + 1));
   else if ((nr = real_room(atoi(name))) == NOWHERE)
-    return NULL;
+    return nullptr;
   else
     return &world[nr];
 }
@@ -435,7 +435,7 @@ room_data *get_room(char *name)
 
 /*
  * returns a pointer to the first character in world by name name,
- * or NULL if none found.  Starts searching with the person owing the object
+ * or nullptr if none found.  Starts searching with the person owing the object
  */
 char_data *get_char_by_obj(obj_data *obj, char *name)
 {
@@ -463,13 +463,13 @@ char_data *get_char_by_obj(obj_data *obj, char *name)
         return ch;
   }
 
-  return NULL;
+  return nullptr;
 }
 
 
 /*
  * returns a pointer to the first character in world by name name,
- * or NULL if none found.  Starts searching in room room first
+ * or nullptr if none found.  Starts searching in room room first
  */
 char_data *get_char_by_room(room_data *room, char *name)
 {
@@ -492,17 +492,17 @@ char_data *get_char_by_room(room_data *room, char *name)
         return ch;
   }
 
-  return NULL;
+  return nullptr;
 }
 
 
 /*
- * returns the object in the world with name name, or NULL if not found
+ * returns the object in the world with name name, or nullptr if not found
  * search based on obj
  */
 obj_data *get_obj_by_obj(obj_data *obj, char *name)
 {
-  obj_data *i = NULL;
+  obj_data *i = nullptr;
   int rm;
 
   if (*name == UID_CHAR)
@@ -548,7 +548,7 @@ obj_data *get_obj_in_room(room_data *room, char *name)
               return obj;
   }
 
-  return NULL;
+  return nullptr;
 }
 
 /* returns obj with name - searches room, then world */
@@ -567,7 +567,7 @@ obj_data *get_obj_by_room(room_data *room, char *name)
     if (isname(name, obj->name))
       return obj;
 
-  return NULL;
+  return nullptr;
 }
 
 /* checks every PULSE_SCRIPT for random triggers */
@@ -575,7 +575,7 @@ void script_trigger_check(void)
 {
   char_data *ch;
   obj_data *obj;
-  struct room_data *room=NULL;
+  struct room_data *room=nullptr;
   int nr;
   struct script_data *sc;
 
@@ -616,7 +616,7 @@ void check_time_triggers(void)
 {
   char_data *ch;
   obj_data *obj;
-  struct room_data *room=NULL;
+  struct room_data *room=nullptr;
   int nr;
   struct script_data *sc;
 
@@ -666,7 +666,7 @@ EVENTFUNC(trig_wait_event)
   type = wait_event_obj->type;
 
   free(wait_event_obj);
-  GET_TRIG_WAIT(trig) = NULL;
+  GET_TRIG_WAIT(trig) = nullptr;
 
 #if 1  /* debugging */
   {
@@ -712,7 +712,7 @@ void do_stat_trigger(struct char_data *ch, trig_data *trig)
 
     if (!trig)
     {
-        log("SYSERR: NULL trigger passed to do_stat_trigger.");
+        log("SYSERR: nullptr trigger passed to do_stat_trigger.");
         return;
     }
 
@@ -914,7 +914,7 @@ ACMD(do_attach)
   loc = (*loc_name) ? atoi(loc_name) : -1;
 
   if (is_abbrev(arg, "mobile") || is_abbrev(arg, "mtr")) {
-    victim = get_char_vis(ch, targ_name, NULL, FIND_CHAR_WORLD);
+    victim = get_char_vis(ch, targ_name, nullptr, FIND_CHAR_WORLD);
     if (!victim) { /* search room for one with this vnum */
       for (victim = world[IN_ROOM(ch)].people;victim;victim=victim->next_in_room)
         if (GET_MOB_VNUM(victim) == num_arg)
@@ -949,7 +949,7 @@ ACMD(do_attach)
   }
 
   else if (is_abbrev(arg, "object") || is_abbrev(arg, "otr")) {
-    object = get_obj_vis(ch, targ_name, NULL);
+    object = get_obj_vis(ch, targ_name, nullptr);
     if (!object) { /* search room for one with this vnum */
       for (object = world[IN_ROOM(ch)].contents;object;object=object->next_content)
         if (GET_OBJ_VNUM(object) == num_arg)
@@ -1056,7 +1056,7 @@ int remove_trigger(struct script_data *sc, char *name)
   } else
     num = atoi(name);
 
-  for (n = 0, j = NULL, i = TRIGGERS(sc); i; j = i, i = i->next) {
+  for (n = 0, j = nullptr, i = TRIGGERS(sc); i; j = i, i = i->next) {
     if (string) {
       if (isname(name, GET_TRIG_NAME(i)))
         if (++n >= num)
@@ -1096,11 +1096,11 @@ int remove_trigger(struct script_data *sc, char *name)
 
 ACMD(do_detach)
 {
-  char_data *victim = NULL;
-  obj_data *object = NULL;
+  char_data *victim = nullptr;
+  obj_data *object = nullptr;
   struct room_data *room;
   char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], arg3[MAX_INPUT_LENGTH];
-  char *trigger = 0;
+  char *trigger = nullptr;
   int num_arg;
 
   argument = two_arguments(argument, arg1, arg2);
@@ -1137,7 +1137,7 @@ ACMD(do_detach)
 
   else {
     if (is_abbrev(arg1, "mobile") || !strcasecmp(arg1, "mtr")) {
-      victim = get_char_vis(ch, arg2, NULL, FIND_CHAR_WORLD);
+      victim = get_char_vis(ch, arg2, nullptr, FIND_CHAR_WORLD);
       if (!victim) { /* search room for one with this vnum */
         for (victim = world[IN_ROOM(ch)].people;victim;victim=victim->next_in_room)
           if (GET_MOB_VNUM(victim) == num_arg)
@@ -1149,14 +1149,14 @@ ACMD(do_detach)
         }
       }
 
-      if (arg3 == NULL || !*arg3)
+      if (arg3 == nullptr || !*arg3)
         send_to_char(ch, "You must specify a trigger to remove.\r\n");
       else
         trigger = arg3;
     }
 
     else if (is_abbrev(arg1, "object") || !strcasecmp(arg1, "otr")) {
-      object = get_obj_vis(ch, arg2, NULL);
+      object = get_obj_vis(ch, arg2, nullptr);
       if (!object) { /* search room for one with this vnum */
         for (object = world[IN_ROOM(ch)].contents;object;object=object->next_content)
           if (GET_OBJ_VNUM(object) == num_arg)
@@ -1174,19 +1174,19 @@ ACMD(do_detach)
         }
       }
 
-      if (arg3 == NULL || !*arg3)
+      if (arg3 == nullptr || !*arg3)
         send_to_char(ch, "You must specify a trigger to remove.\r\n");
       else
         trigger = arg3;
     }
     else  {
       /* Thanks to Carlos Myers for fixing the line below */
-      if ((object = get_obj_in_equip_vis(ch, arg1, NULL, ch->equipment)));
-      else if ((object = get_obj_in_list_vis(ch, arg1, NULL, ch->carrying)));
-      else if ((victim = get_char_room_vis(ch, arg1, NULL)));
-      else if ((object = get_obj_in_list_vis(ch, arg1, NULL, world[IN_ROOM(ch)].contents)));
-      else if ((victim = get_char_vis(ch, arg1, NULL, FIND_CHAR_WORLD)));
-      else if ((object = get_obj_vis(ch, arg1, NULL)));
+      if ((object = get_obj_in_equip_vis(ch, arg1, nullptr, ch->equipment)));
+      else if ((object = get_obj_in_list_vis(ch, arg1, nullptr, ch->carrying)));
+      else if ((victim = get_char_room_vis(ch, arg1, nullptr)));
+      else if ((object = get_obj_in_list_vis(ch, arg1, nullptr, world[IN_ROOM(ch)].contents)));
+      else if ((victim = get_char_vis(ch, arg1, nullptr, FIND_CHAR_WORLD)));
+      else if ((object = get_obj_vis(ch, arg1, nullptr)));
       else
         send_to_char(ch, "Nothing around by that name.\r\n");
 
@@ -1520,7 +1520,7 @@ int eval_lhs_op_rhs(char *expr, char *result, void *go, struct script_data *sc,
     else
       p++;
   }
-  tokens[j] = NULL;
+  tokens[j] = nullptr;
 
   for (i = 0; *ops[i] != '\n'; i++)
     for (j = 0; tokens[j]; j++)
@@ -1751,9 +1751,9 @@ void process_attach(void *go, struct script_data *sc, trig_data *trig,
   char arg[MAX_INPUT_LENGTH], trignum_s[MAX_INPUT_LENGTH];
   char result[MAX_INPUT_LENGTH], *id_p;
   trig_data *newtrig;
-  char_data *c=NULL;
-  obj_data *o=NULL;
-  room_data *r=NULL;
+  char_data *c=nullptr;
+  obj_data *o=nullptr;
+  room_data *r=nullptr;
   long trignum, id;
 
   id_p = two_arguments(cmd, arg, trignum_s);
@@ -1834,9 +1834,9 @@ void process_detach(void *go, struct script_data *sc, trig_data *trig,
 {
   char arg[MAX_INPUT_LENGTH], trignum_s[MAX_INPUT_LENGTH];
   char result[MAX_INPUT_LENGTH], *id_p;
-  char_data *c=NULL;
-  obj_data *o=NULL;
-  room_data *r=NULL;
+  char_data *c=nullptr;
+  obj_data *o=nullptr;
+  room_data *r=nullptr;
   long id;
 
   id_p = two_arguments(cmd, arg, trignum_s);
@@ -1922,7 +1922,7 @@ struct room_data *dg_room_of_obj(struct obj_data *obj)
   if (obj->carried_by)        return &world[IN_ROOM(obj->carried_by)];
   if (obj->worn_by)           return &world[IN_ROOM(obj->worn_by)];
   if (obj->in_obj)            return (dg_room_of_obj(obj->in_obj));
-  return NULL;
+  return nullptr;
 }
 
 
@@ -1947,7 +1947,7 @@ void makeuid_var(void *go, struct script_data *sc, trig_data *trig,
     return;
   }
 
-  if (arg == NULL || !*arg) {
+  if (arg == nullptr || !*arg) {
     script_log("Trigger: %s, VNum %d. makeuid invalid id arg: '%s'",
             GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), cmd);
     return;
@@ -1959,14 +1959,14 @@ void makeuid_var(void *go, struct script_data *sc, trig_data *trig,
     eval_expr(arg, result, go, sc, trig, type);
     snprintf(uid, sizeof(uid), "%c%s", UID_CHAR, result);
   } else { /* a lot more work without it */
-    if (name == NULL || !*name) {
+    if (name == nullptr || !*name) {
       script_log("Trigger: %s, VNum %d. makeuid needs name: '%s'",
             GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), cmd);
       return;
     }
 
     if (is_abbrev(arg, "mob")) {
-      struct char_data *c = NULL;
+      struct char_data *c = nullptr;
       switch (type) {
         case WLD_TRIGGER:
           c = get_char_in_room((struct room_data *)go, name);
@@ -1975,13 +1975,13 @@ void makeuid_var(void *go, struct script_data *sc, trig_data *trig,
           c = get_char_near_obj((struct obj_data *)go, name);
           break;
         case MOB_TRIGGER:
-          c = get_char_room_vis((struct char_data *)go, name, NULL);
+          c = get_char_room_vis((struct char_data *)go, name, nullptr);
           break;
       }
       if (c)
         snprintf(uid, sizeof(uid), "%c%d", UID_CHAR, GET_ID(c));
     } else if (is_abbrev(arg, "obj")) {
-      struct obj_data *o = NULL;
+      struct obj_data *o = nullptr;
       switch (type) {
         case WLD_TRIGGER:
           o = get_obj_in_room((struct room_data *)go, name);
@@ -1990,9 +1990,9 @@ void makeuid_var(void *go, struct script_data *sc, trig_data *trig,
           o = get_obj_near_obj((struct obj_data *)go, name);
           break;
         case MOB_TRIGGER:
-          if ((o = get_obj_in_list_vis((struct char_data *)go, name, NULL,
-                    ((struct char_data *)go)->carrying)) == NULL)
-            o = get_obj_in_list_vis((struct char_data *)go, name, NULL,
+          if ((o = get_obj_in_list_vis((struct char_data *)go, name, nullptr,
+                    ((struct char_data *)go)->carrying)) == nullptr)
+            o = get_obj_in_list_vis((struct char_data *)go, name, nullptr,
                     world[IN_ROOM((struct char_data *)go)].contents);
           break;
       }
@@ -2075,7 +2075,7 @@ void process_unset(struct script_data *sc, trig_data *trig, char *cmd)
 void process_remote(struct script_data *sc, trig_data *trig, char *cmd)
 {
   struct trig_var_data *vd;
-  struct script_data *sc_remote=NULL;
+  struct script_data *sc_remote=nullptr;
   char *line, *var, *uid_p;
   char arg[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
   long uid, context;
@@ -2138,7 +2138,7 @@ void process_remote(struct script_data *sc, trig_data *trig, char *cmd)
     return;
   }
 
-  if (sc_remote==NULL) return; /* no script to assign */
+  if (sc_remote==nullptr) return; /* no script to assign */
 
   add_var(&(sc_remote->global_vars), vd->name, vd->value, context);
 }
@@ -2150,8 +2150,8 @@ void process_remote(struct script_data *sc, trig_data *trig, char *cmd)
  */
 ACMD(do_vdelete)
 {
-  struct trig_var_data *vd, *vd_prev=NULL;
-  struct script_data *sc_remote=NULL;
+  struct trig_var_data *vd, *vd_prev=nullptr;
+  struct script_data *sc_remote=nullptr;
   char *var, *uid_p;
   char buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
   long uid, context;
@@ -2192,12 +2192,12 @@ ACMD(do_vdelete)
     return;
   }
 
-  if (sc_remote==NULL) {
+  if (sc_remote==nullptr) {
     send_to_char(ch, "That id represents no global variables.(1)\r\n");
     return;
   }
 
-  if (sc_remote->global_vars==NULL) {
+  if (sc_remote->global_vars==nullptr) {
     send_to_char(ch, "That id represents no global variables.(2)\r\n");
     return;
   }
@@ -2210,7 +2210,7 @@ ACMD(do_vdelete)
       free(vd->name);
       free(vd);
     }
-    sc_remote->global_vars = NULL;
+    sc_remote->global_vars = nullptr;
     send_to_char(ch, "All variables deleted from that id.\r\n");
     return;
   }
@@ -2247,7 +2247,7 @@ int perform_set_dg_var(struct char_data *ch, struct char_data *vict, char *val_a
 
 	var_value = any_one_arg(val_arg, var_name);
 
-	if (var_name == NULL || !*var_name || var_value == NULL || !*var_value) {
+	if (var_name == nullptr || !*var_name || var_value == nullptr || !*var_value) {
 		send_to_char(ch, "Usage: set <char> <varname> <value>\r\n");
 		return 0;
   }
@@ -2264,8 +2264,8 @@ int perform_set_dg_var(struct char_data *ch, struct char_data *vict, char *val_a
  */
 void process_rdelete(struct script_data *sc, trig_data *trig, char *cmd)
 {
-  struct trig_var_data *vd, *vd_prev=NULL;
-  struct script_data *sc_remote=NULL;
+  struct trig_var_data *vd, *vd_prev=nullptr;
+  struct script_data *sc_remote=nullptr;
   char *line, *var, *uid_p;
   char arg[MAX_INPUT_LENGTH], buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
   long uid, context;
@@ -2310,8 +2310,8 @@ void process_rdelete(struct script_data *sc, trig_data *trig, char *cmd)
     return;
   }
 
-  if (sc_remote==NULL) return; /* no script to delete a trigger from */
-  if (sc_remote->global_vars==NULL) return; /* no script globals */
+  if (sc_remote==nullptr) return; /* no script to delete a trigger from */
+  if (sc_remote->global_vars==nullptr) return; /* no script globals */
 
   /* find the global */
   for (vd = sc_remote->global_vars; vd; vd_prev = vd, vd = vd->next)
@@ -2484,10 +2484,10 @@ int script_driver(void *go_adress, trig_data *trig, int type, int mode)
   int ret_val = 1;
   struct cmdlist_element *cl;
   char cmd[MAX_INPUT_LENGTH], *p;
-  struct script_data *sc = 0;
+  struct script_data *sc = nullptr;
   struct cmdlist_element *temp;
   unsigned long loops = 0;
-  void *go = NULL;
+  void *go = nullptr;
 
   void obj_command_interpreter(obj_data *obj, char *argument);
   void wld_command_interpreter(struct room_data *room, char *argument);
@@ -2602,7 +2602,7 @@ int script_driver(void *go_adress, trig_data *trig, int type, int mode)
       }
       GET_TRIG_DEPTH(trig)--;
     } else if (!strncasecmp("done", p, 4)) {
-      /* if in a while loop, cl->original is non-NULL */
+      /* if in a while loop, cl->original is non-nullptr */
       if (cl->original) {
       char *orig_cmd = cl->original->cmd;
       while (*orig_cmd && isspace(*orig_cmd)) orig_cmd++;
@@ -2710,7 +2710,7 @@ int script_driver(void *go_adress, trig_data *trig, int type, int mode)
         if (dg_owner_purged) {
           depth--;
           if (type == OBJ_TRIGGER)
-            *(obj_data **)go_adress = NULL;
+            *(obj_data **)go_adress = nullptr;
           return ret_val;
         }
       }
@@ -2725,7 +2725,7 @@ int script_driver(void *go_adress, trig_data *trig, int type, int mode)
   }
   if (sc)
   free_varlist(GET_TRIG_VARS(trig));
-  GET_TRIG_VARS(trig) = NULL;
+  GET_TRIG_VARS(trig) = nullptr;
   GET_TRIG_DEPTH(trig) = 0;
 
   depth--;
@@ -2818,7 +2818,7 @@ find_case(struct trig_data *trig, struct cmdlist_element *cl,
 * scans for end of while/switch-blocks.
 * returns the line containg 'end', or the last
 * line of the trigger if not found.
-* Malformed scripts may cause NULL to be returned.
+* Malformed scripts may cause nullptr to be returned.
 */
 struct cmdlist_element *find_done(struct cmdlist_element *cl)
 {
@@ -2918,7 +2918,7 @@ void save_char_vars(struct char_data *ch)
 
   /* immediate return if no script (and therefore no variables) structure */
   /* has been created. this will happen when the player is logging in */
-  if (SCRIPT(ch) == NULL) return;
+  if (SCRIPT(ch) == nullptr) return;
 
   /* we should never be called for an NPC, but just in case... */
   if (IS_NPC(ch)) return;
@@ -2927,7 +2927,7 @@ void save_char_vars(struct char_data *ch)
   unlink(fn);
 
   /* make sure this char has global variables to save */
-  if (ch->script->global_vars == NULL) return;
+  if (ch->script->global_vars == nullptr) return;
   vars = ch->script->global_vars;
 
   file = fopen(fn,"wt");
@@ -2992,13 +2992,13 @@ void save_char_vars_ascii(FILE *file, struct char_data *ch)
   int count = 0;
   /* immediate return if no script (and therefore no variables) structure */
   /* has been created. this will happen when the player is logging in */
-  if (SCRIPT(ch) == NULL) return;
+  if (SCRIPT(ch) == nullptr) return;
 
   /* we should never be called for an NPC, but just in case... */
   if (IS_NPC(ch)) return;
 
   /* make sure this char has global variables to save */
-  if (ch->script->global_vars == NULL) return;
+  if (ch->script->global_vars == nullptr) return;
 
   /* note that currently, context will always be zero. this may change */
   /* in the future */
@@ -3034,8 +3034,8 @@ void init_lookup_table(void)
   int i;
   for (i = 0; i < BUCKET_COUNT; i++) {
     lookup_table[i].uid  = UID_OUT_OF_RANGE;
-    lookup_table[i].c    = NULL;
-    lookup_table[i].next = NULL;
+    lookup_table[i].c    = nullptr;
+    lookup_table[i].next = nullptr;
   }
 }
 
@@ -3050,7 +3050,7 @@ struct char_data *find_char_by_uid_in_lookup_table(long uid)
     return (struct char_data *)(lt->c);
 
   log("find_char_by_uid_in_lookup_table : No entity with number %ld in lookup table", uid);
-  return NULL;
+  return nullptr;
 }
 
 struct obj_data *find_obj_by_uid_in_lookup_table(long uid)
@@ -3064,7 +3064,7 @@ struct obj_data *find_obj_by_uid_in_lookup_table(long uid)
     return (struct obj_data *)(lt->c);
 
   log("find_obj_by_uid_in_lookup_table : No entity with number %ld in lookup table", uid);
-  return NULL;
+  return nullptr;
 }
 
 void add_to_lookup_table(long uid, void *c)
@@ -3086,7 +3086,7 @@ void add_to_lookup_table(long uid, void *c)
 void remove_from_lookup_table(long uid)
 {
   int bucket = (int) (uid & (BUCKET_COUNT - 1));
-  struct lookup_table_t *lt = &lookup_table[bucket], *flt = NULL;
+  struct lookup_table_t *lt = &lookup_table[bucket], *flt = nullptr;
 
   /*
    * This is not supposed to happen. UID 0 is not used.

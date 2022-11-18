@@ -65,12 +65,12 @@ struct event *event_create(EVENTFUNC(*func), void *event_obj, long when)
 void event_cancel(struct event *event)
 {
   if (!event) {
-    log("SYSERR:  Attempted to cancel a NULL event");
+    log("SYSERR:  Attempted to cancel a nullptr event");
     return;
     }
 
   if (!event->q_el) {
-    log("SYSERR:  Attempted to cancel a non-NULL unqueued event, freeing anyway");
+    log("SYSERR:  Attempted to cancel a non-nullptr unqueued event, freeing anyway");
   } else
     queue_deq(event_q, event->q_el);
 
@@ -88,16 +88,16 @@ void event_process(void)
 
   while ((long) pulse >= queue_key(event_q)) {
     if (!(the_event = (struct event *) queue_head(event_q))) {
-      log("SYSERR: Attempt to get a NULL event");
+      log("SYSERR: Attempt to get a nullptr event");
       return;
     }
 
     /*
-    ** Set the_event->q_el to NULL so that any functions called beneath
+    ** Set the_event->q_el to nullptr so that any functions called beneath
     ** event_process can tell if they're being called beneath the actual
     ** event function.
     */
-    the_event->q_el = NULL;
+    the_event->q_el = nullptr;
 
     /* call event func, reenqueue event if retval > 0 */
     if ((new_time = (the_event->func)(the_event->event_obj)) > 0)
@@ -186,7 +186,7 @@ struct q_element *queue_enq(struct queue *q, void *data, long key)
       }
     }
 
-    if (i == NULL) { /* insertion point is front of list */
+    if (i == nullptr) { /* insertion point is front of list */
       qe->next = q->head[bucket];
       q->head[bucket] = qe;
       qe->next->prev = qe;
@@ -206,12 +206,12 @@ void queue_deq(struct queue *q, struct q_element *qe)
 
   i = qe->key % NUM_EVENT_QUEUES;
 
-  if (qe->prev == NULL)
+  if (qe->prev == nullptr)
     q->head[i] = qe->next;
   else
     qe->prev->next = qe->next;
 
-  if (qe->next == NULL)
+  if (qe->next == nullptr)
     q->tail[i] = qe->prev;
   else
     qe->next->prev = qe->prev;
@@ -232,7 +232,7 @@ void *queue_head(struct queue *q)
   i = pulse % NUM_EVENT_QUEUES;
 
   if (!q->head[i])
-    return NULL;
+    return nullptr;
 
   dg_data = q->head[i]->data;
   queue_deq(q, q->head[i]);
@@ -242,7 +242,7 @@ void *queue_head(struct queue *q)
 
 /*
  * returns the key of the head element of the priority queue
- * if q is NULL, then return the largest unsigned number
+ * if q is nullptr, then return the largest unsigned number
  */
 long queue_key(struct queue *q)
 {
@@ -274,7 +274,7 @@ void queue_free(struct queue *q)
   for (i = 0; i < NUM_EVENT_QUEUES; i++)
     for (qe = q->head[i]; qe; qe = next_qe) {
       next_qe = qe->next;
-      if ((event = (struct event *) qe->data) != NULL) {
+      if ((event = (struct event *) qe->data) != nullptr) {
        if (event->event_obj)
          free(event->event_obj);
        free(event);

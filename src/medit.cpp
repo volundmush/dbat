@@ -115,7 +115,7 @@ ACMD(do_oasis_medit)
   if (OLC_ZNUM(d) == NOWHERE) {
     send_to_char(ch, "Sorry, there is no zone for that number!\r\n");
     free(d->olc);
-    d->olc = NULL;
+    d->olc = nullptr;
     return;
   }
   
@@ -125,7 +125,7 @@ ACMD(do_oasis_medit)
   if (!can_edit_zone(ch, OLC_ZNUM(d))) {
     send_cannot_edit(ch, zone_table[OLC_ZNUM(d)].number);
     free(d->olc);
-    d->olc = NULL;
+    d->olc = nullptr;
     return;
   }
   
@@ -148,7 +148,7 @@ ACMD(do_oasis_medit)
     /** Free the olc structure stored in the descriptor.                     **/
     /**************************************************************************/
     free(d->olc);
-    d->olc = NULL;
+    d->olc = nullptr;
     return;
   }
   
@@ -170,7 +170,7 @@ ACMD(do_oasis_medit)
   /** Display the OLC messages to the players in the same room as the        **/
   /** builder and also log it.                                               **/
   /****************************************************************************/
-  act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
+  act("$n starts using OLC.", TRUE, d->character, nullptr, nullptr, TO_ROOM);
   SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
   
   mudlog(BRF, ADMLVL_IMMORT, TRUE,"OLC: %s starts editing zone %d allowed zone %d",
@@ -202,8 +202,8 @@ void medit_setup_new(struct descriptor_data *d)
   GET_LDESC(mob) = strdup("An unfinished mob stands here.\r\n");
   GET_DDESC(mob) = strdup("It looks unfinished.\r\n");
   mob->race = dbat::race::race_map[dbat::race::human];
-  SCRIPT(mob) = NULL;
-  mob->proto_script = OLC_SCRIPT(d) = NULL;
+  SCRIPT(mob) = nullptr;
+  mob->proto_script = OLC_SCRIPT(d) = nullptr;
 
   OLC_MOB(d) = mob;
   /* Has changed flag. (It hasn't so far, we just made it.) */
@@ -231,8 +231,8 @@ void medit_setup_existing(struct descriptor_data *d, int rmob_num)
    * The edited mob must not have a script.
    * It will be assigned to the updated mob later, after editing.
    */
-  SCRIPT(mob) = NULL;
-  OLC_MOB(d)->proto_script = NULL;
+  SCRIPT(mob) = nullptr;
+  OLC_MOB(d)->proto_script = nullptr;
 }
 
 /*-------------------------------------------------------------------*/
@@ -538,7 +538,7 @@ void medit_disp_menu(struct descriptor_data *d)
 void medit_parse(struct descriptor_data *d, char *arg)
 {
   int i = -1;
-  char *oldtext = NULL;
+  char *oldtext = nullptr;
   dbat::race::Race *chosen_race;
 
   if (OLC_MODE(d) > MEDIT_NUMERICAL_RESPONSE) {

@@ -62,11 +62,11 @@ struct obj_data {
     char *short_description;       /* when worn/carry/in cont.         */
     char *action_description;      /* What to write when used          */
     struct extra_descr_data *ex_description; /* extra descriptions     */
-    struct char_data *carried_by;  /* Carried by :NULL in room/conta   */
+    struct char_data *carried_by;  /* Carried by :nullptr in room/conta   */
     struct char_data *worn_by;      /* Worn by?			      */
     int16_t worn_on;          /* Worn where?		      */
 
-    struct obj_data *in_obj;       /* In what object NULL when none    */
+    struct obj_data *in_obj;       /* In what object nullptr when none    */
     struct obj_data *contains;     /* Contains objects                 */
 
     int32_t id;                       /* used by DG triggers              */
@@ -409,7 +409,7 @@ struct char_data {
     /* Equipment array			*/
     struct obj_data *carrying;    /* Head of list				*/
 
-    struct descriptor_data *desc;    /* NULL for mobiles			*/
+    struct descriptor_data *desc;    /* nullptr for mobiles			*/
     int32_t id;            /* used by DG triggers			*/
 
     struct trig_proto_list *proto_script;

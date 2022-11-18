@@ -34,9 +34,9 @@ struct {
   { SL_ZON, save_zone, "zone" },
   { SL_CFG, save_config, "config" },
   { SL_GLD, save_guilds, "guild" },
-  { SL_ACT, NULL, "social" },
-  { SL_HLP, NULL, "help" },
-  { -1, NULL, NULL },
+  { SL_ACT, nullptr, "social" },
+  { SL_HLP, nullptr, "help" },
+  { -1, nullptr, nullptr },
 };
 
 int genolc_checkstring(struct descriptor_data *d, char *arg)
@@ -80,7 +80,7 @@ void strip_cr(char *buffer)
 {
   int rpos, wpos;
 
-  if (buffer == NULL)
+  if (buffer == nullptr)
     return;
 
   for (rpos = 0, wpos = 0; buffer[rpos]; rpos++) {
@@ -110,7 +110,7 @@ void free_ex_descriptions(struct extra_descr_data *head)
   struct extra_descr_data *thised, *next_one;
 
   if (!head) {
-    log("free_ex_descriptions: NULL pointer or NULL data.");
+    log("free_ex_descriptions: nullptr pointer or nullptr data.");
     return;
   }
 
@@ -132,7 +132,7 @@ int remove_from_save_list(zone_vnum zone, int type)
     if (ritem->zone == zone && ritem->type == type)
       break;
 
-  if (ritem == NULL) {
+  if (ritem == nullptr) {
     log("SYSERR: remove_from_save_list: Saved item not found. (%d/%d)", zone, type);
     return FALSE;
   }
@@ -193,7 +193,7 @@ void free_save_list(void)
 /* Used from do_show(), ideally.  */
 ACMD(do_show_save_list)
 {
-  if (save_list == NULL)
+  if (save_list == nullptr)
     send_to_char(ch, "All world files are up to date.\r\n");
   else {
     struct save_list_data *item;

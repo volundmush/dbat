@@ -103,7 +103,7 @@ bool prereset_gauntlet_zone(void)
         if ((real_mobile(gauntlet_mobs[i].vmob)) && (real_room(gauntlet_mobs[i].vroom))) 
         { 
           /* Load the correct mob */ 
-          if ((mob = read_mobile(gauntlet_mobs[i].vmob, VIRTUAL)) != NULL) 
+          if ((mob = read_mobile(gauntlet_mobs[i].vmob, VIRTUAL)) != nullptr)
           { 
             /* And put it in the room */ 
             char_to_room(mob, real_room(gauntlet_mobs[i].vroom)); 

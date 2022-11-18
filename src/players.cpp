@@ -44,7 +44,7 @@ void load_majin(struct char_data *ch, const char *line);
 
 
 /* 'global' vars */
-struct player_index_element *player_table = NULL;	/* index to plr file	 */
+struct player_index_element *player_table = nullptr;	/* index to plr file	 */
 int top_of_p_table = 0;		/* ref to top of table		 */
 int top_of_p_file = 0;		/* ref of size of p file	 */
 long top_idnum = 0;		/* highest idnum in use		 */
@@ -137,7 +137,7 @@ void build_player_index(void)
   rewind(plr_index);
 
   if (rec_count == 0) {
-    player_table = NULL;
+    player_table = nullptr;
     top_of_p_table = -1;
     return;
   }
@@ -230,7 +230,7 @@ void free_player_index(void)
   }
 
   free(player_table);
-  player_table = NULL;
+  player_table = nullptr;
   top_of_p_table = 0;
 }
 
@@ -267,7 +267,7 @@ char *get_name_by_id(long id)
     if (player_table[i].id == id)
       return (player_table[i].name);
 
-  return (NULL);
+  return (nullptr);
 }
 
 
@@ -326,8 +326,8 @@ int load_char(const char *name, struct char_data *ch)
 
     /* character initializations */
     /* initializations necessary to keep some things straight */
-    ch->affected = NULL;
-    ch->affectedv = NULL;
+    ch->affected = nullptr;
+    ch->affectedv = nullptr;
     for (i = 1; i <= SKILL_TABLE_SIZE; i++) {
       SET_SKILL(ch, i, 0);
       SET_SKILL_BONUS(ch, i, 0);
@@ -482,17 +482,17 @@ int load_char(const char *name, struct char_data *ch)
     GET_MAX_KI(ch) = PFDEF_MAXKI;
     SPEAKING(ch) = PFDEF_SPEAKING;
     GET_OLC_ZONE(ch) = PFDEF_OLC;
-    GET_HOST(ch) = NULL;
+    GET_HOST(ch) = nullptr;
     for(i = 1; i < MAX_MEM; i++)
       GET_SPELLMEM(ch, i) = 0;
     for(i = 0; i < MAX_SPELL_LEVEL; i++)
       GET_SPELL_LEVEL(ch, i) = 0;
     GET_MEMCURSOR(ch) = 0;
     ch->time.birth = ch->time.created = ch->time.maxage = 0;
-    ch->followers = NULL;
+    ch->followers = nullptr;
     GET_PAGE_LENGTH(ch) = PFDEF_PAGELENGTH;
     for (i = 0; i < NUM_COLOR; i++)
-      ch->player_specials->color_choices[i] = NULL;
+      ch->player_specials->color_choices[i] = nullptr;
 
     while (get_line(fl, line)) {
       tag_argument(line, tag);
@@ -765,12 +765,12 @@ int load_char(const char *name, struct char_data *ch)
 
   if (! ch->time.created) {
     log("No creation timestamp for user %s, using current time", GET_NAME(ch));
-    ch->time.created = time(0);
+    ch->time.created = time(nullptr);
   }
 
   if (! ch->time.birth) {
     log("No birthday for user %s, using standard starting age determination", GET_NAME(ch));
-    ch->time.birth = time(0) - birth_age(ch);
+    ch->time.birth = time(nullptr) - birth_age(ch);
   }
 
   if (! ch->time.maxage) {
@@ -878,7 +878,7 @@ void load_char_pets(struct char_data *ch)
        load_room = real_room(IN_ROOM(ch));
   }
     char_to_room(foll->follower, load_room);
-    act("You are joined by $N.", FALSE, ch, 0, foll->follower, TO_CHAR);
+    act("You are joined by $N.", FALSE, ch, nullptr, foll->follower, TO_CHAR);
   }
 }
 
@@ -921,8 +921,8 @@ void save_char(struct char_data * ch)
      * is playing.
      */
     if (STATE(ch->desc) == CON_PLAYING) {
-      ch->time.played += time(0) - ch->time.logon;
-      ch->time.logon = time(0);
+      ch->time.played += time(nullptr) - ch->time.logon;
+      ch->time.logon = time(nullptr);
     }
   }
 
@@ -939,7 +939,7 @@ void save_char(struct char_data * ch)
   if (GET_TRP(ch) < GET_RP(ch)) {
    GET_TRP(ch) = GET_RP(ch);
   }
-  if (ch->desc != NULL && ch->desc->user != NULL) {
+  if (ch->desc != nullptr && ch->desc->user != nullptr) {
    userWrite(ch->desc, 0, 0, 0, "index");
   }
 
@@ -950,13 +950,13 @@ void save_char(struct char_data * ch)
       remove_otrigger(char_eq[i], ch);
 #endif
     else
-      char_eq[i] = NULL;
+      char_eq[i] = nullptr;
   }
 
   for (aff = ch->affected, i = 0; i < MAX_AFFECT; i++) {
     if (aff) {
       tmp_aff[i] = *aff;
-      tmp_aff[i].next = 0;
+      tmp_aff[i].next = nullptr;
       aff = aff->next;
     } else {
       tmp_aff[i].type = 0;	/* Zero signifies not used */
@@ -965,14 +965,14 @@ void save_char(struct char_data * ch)
       tmp_aff[i].specific = 0;
       tmp_aff[i].location = 0;
       tmp_aff[i].bitvector = 0;
-      tmp_aff[i].next = 0;
+      tmp_aff[i].next = nullptr;
     }
   }
 
   for (aff = ch->affectedv, i = 0; i < MAX_AFFECT; i++) {
     if (aff) {
       tmp_affv[i] = *aff;
-      tmp_affv[i].next = 0;
+      tmp_affv[i].next = nullptr;
       aff = aff->next;
     } else {
       tmp_affv[i].type = 0;      /* Zero signifies not used */
@@ -981,7 +981,7 @@ void save_char(struct char_data * ch)
       tmp_affv[i].location = 0;
       tmp_affv[i].specific = 0;
       tmp_affv[i].bitvector = 0;
-      tmp_affv[i].next = 0;
+      tmp_affv[i].next = nullptr;
     }
   }
 
@@ -1321,11 +1321,11 @@ void save_char(struct char_data * ch)
     save_index = TRUE;
     player_table[id].played = GET_LPLAY(ch);
   }
-  if (GET_CLAN(ch) != NULL && player_table[id].clan != GET_CLAN(ch)) {
+  if (GET_CLAN(ch) != nullptr && player_table[id].clan != GET_CLAN(ch)) {
     save_index = TRUE;
     player_table[id].clan = strdup(GET_CLAN(ch));
   }
-  if (GET_CLAN(ch) == NULL) {
+  if (GET_CLAN(ch) == nullptr) {
     save_index = TRUE;
     player_table[id].clan = strdup("None.");
   }
@@ -1593,7 +1593,7 @@ void clean_pfiles(void)
 	for (ci = 0; pclean_criteria[ci].level > -1; ci++) {
           if (player_table[i].admlevel > 1)
            continue;
-	  else if (player_table[i].level <= pclean_criteria[ci].level && ((time(0) - player_table[i].last) >= (pclean_criteria[ci].days * SECS_PER_REAL_DAY))) {
+	  else if (player_table[i].level <= pclean_criteria[ci].level && ((time(nullptr) - player_table[i].last) >= (pclean_criteria[ci].days * SECS_PER_REAL_DAY))) {
 	    remove_player(i);
 	    break;
 	  }

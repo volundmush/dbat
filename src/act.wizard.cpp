@@ -222,7 +222,7 @@ ACMD(do_news)
   fclose(fl);
 
   if (entries > 0) {
-   GET_LPLAY(ch) = time(0);
+   GET_LPLAY(ch) = time(nullptr);
    WAIT_STATE(ch, PULSE_1SEC);
    page_string(ch->desc, buf, TRUE);
   } else {
@@ -240,7 +240,7 @@ ACMD(do_news)
 
  if (found == TRUE) {
   send_to_char(ch, "%s\r\n", buf);
-  GET_LPLAY(ch) = time(0);
+  GET_LPLAY(ch) = time(nullptr);
   *buf = '\0';
   *title = '\0';
   *lastline = '\0';
@@ -311,11 +311,11 @@ ACMD(do_newsedit)
   } fields[] = {
         /* edit the lvls to your own needs */
         { "news",       ADMLVL_IMMORT, &immlist,       2000,  IMMLIST_FILE},
-        { "\n",         0,              NULL,           0,      NULL }
+        { "\n",         0,              nullptr,           0,      nullptr }
   };
 
          char *tmstr;
-         time_t mytime = time(0);
+         time_t mytime = time(nullptr);
          tmstr = (char *) asctime(localtime(&mytime));
          *(tmstr + strlen(tmstr) - 1) = '\0';
 
@@ -329,8 +329,8 @@ ACMD(do_newsedit)
   } else {
    lookup = lastentry + 1;
   }
-  char *backstr = NULL;
-  act("$n begins to edit the news.", TRUE, ch, 0, 0, TO_ROOM);
+  char *backstr = nullptr;
+  act("$n begins to edit the news.", TRUE, ch, nullptr, nullptr, TO_ROOM);
   send_to_char(ch, "@D----------------------=[@GNews Edit@D]=----------------------@n\n");
   send_to_char(ch, " @RRemember that using # in newsedit is not possible. That\n");
   send_to_char(ch, "character will be eaten because it is required for the news\n");
@@ -369,7 +369,7 @@ static void print_lockout(struct char_data *ch)
   while (!feof(file)) {
     get_line(file, line);
     sscanf(line, "%s\n", filler);
-    if (first != TRUE && strstr(buf, filler) == NULL) {
+    if (first != TRUE && strstr(buf, filler) == nullptr) {
      if (count == 0) {
       sprintf(buf+strlen(buf), "%-23s@D|@n", filler);
       count = 1;
@@ -398,7 +398,7 @@ ACMD(do_approve)
 {
 
  char arg[MAX_INPUT_LENGTH];
- struct char_data *vict = NULL;
+ struct char_data *vict = nullptr;
 
  one_argument(argument, arg);
 
@@ -407,7 +407,7 @@ ACMD(do_approve)
   return;
  }
 
- if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))) {
+ if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD))) {
   send_to_char(ch, "That player is not in the game.\r\n");
   return;
  }
@@ -486,7 +486,7 @@ static void lockWrite(struct char_data *ch, char *name)
 
 ACMD(do_reward)
 {
- struct char_data *vict = NULL;
+ struct char_data *vict = nullptr;
  struct descriptor_data *k;
  int amt = 0;
 
@@ -522,7 +522,7 @@ ACMD(do_reward)
   }
 
  if (amt > 0) {
-  if (vict != NULL) {
+  if (vict != nullptr) {
    send_to_char(ch, "@WYou award @C%s @D(@G%d@D)@W RP points.@n\r\n", GET_NAME(vict), amt);
    send_to_char(vict, "@D[@YROLEPLAY@D] @WYou have been awarded @D(@G%d@D)@W RP points by @C%s@W.@n\r\n", amt, GET_NAME(ch));
    send_to_imm("ROLEPLAY: %s has been awarded %d RP points by %s.", arg, amt, GET_NAME(ch));
@@ -539,11 +539,11 @@ ACMD(do_reward)
    send_to_char(ch, "@WYou award user @C%s @D(@G%d@D)@W RP points.@n\r\n", arg, amt);
    send_to_imm("ROLEPLAY: User %s has been awarded %d RP points by %s.", arg, amt, GET_NAME(ch));
    log_imm_action("ROLEPLAY: %s has been awarded %d RP points by %s.", arg, amt, GET_NAME(ch));
-   userWrite(NULL, 0, amt, 0, arg);
+   userWrite(nullptr, 0, amt, 0, arg);
   }
  }
  else {
-  if (vict != NULL) {
+  if (vict != nullptr) {
    send_to_char(ch, "@WYou deduct @D(@G%d@D)@W RP points from @C%s@W.@n\r\n", amt, GET_NAME(vict));
    send_to_char(vict, "@D[@YROLEPLAY@D] @C%s@W deducts @D(@G%d@D)@W RP points from you.@n\r\n", GET_NAME(ch), amt);
    send_to_imm("ROLEPLAY: %s has had %d RP points deducted by %s.", GET_NAME(vict), amt, GET_NAME(ch));
@@ -557,7 +557,7 @@ ACMD(do_reward)
    send_to_char(ch, "@WYou deduct @D(@G%d@D)@W RP points from user @C%s@W.@n\r\n", amt, arg);
    send_to_imm("ROLEPLAY: User %s has had %d RP points deducted by %s.", arg, amt, GET_NAME(ch));
    log_imm_action("ROLEPLAY: %s has been awarded %d RP points by %s.", arg, amt, GET_NAME(ch));
-   userWrite(NULL, 0, amt, 0, arg);
+   userWrite(nullptr, 0, amt, 0, arg);
   }
  }
 
@@ -565,7 +565,7 @@ ACMD(do_reward)
 
 ACMD(do_rbank)
 {
- struct char_data *vict = NULL;
+ struct char_data *vict = nullptr;
  struct descriptor_data *k;
  int amt = 0;
 
@@ -601,7 +601,7 @@ ACMD(do_rbank)
   }
 
  if (amt > 0) {
-  if (vict != NULL) {
+  if (vict != nullptr) {
    send_to_char(ch, "@WYou put @D(@G%d@D)@W RP points into @C%s@W's Bank.@n\r\n", amt, GET_NAME(vict));
    send_to_char(vict, "@D[@YROLEPLAY@D] @WYou have had @D(@G%d@D)@W RP points added to your RPP Bank by @C%s@W.@n\r\n", amt, GET_NAME(ch));
    send_to_imm("ROLEPLAY: %s has had %d RP points put into their RPP Bank by %s.", arg, amt, GET_NAME(ch));
@@ -618,11 +618,11 @@ ACMD(do_rbank)
    send_to_char(ch, "@WYou put @D(@G%d@D)@W RP points into @C%s@W's Bank.@n\r\n", amt, arg);
    send_to_imm("ROLEPLAY: %s has had %d RP points put into their RPP Bank by %s.", arg, amt, GET_NAME(ch));
    log_imm_action("ROLEPLAY: %s has had %d RP points put into their RPP Bank by %s.", arg, amt, GET_NAME(ch));
-   userWrite(NULL, 0, 0, amt, arg);
+   userWrite(nullptr, 0, 0, amt, arg);
   }
  }
  else {
-  if (vict != NULL) {
+  if (vict != nullptr) {
    send_to_char(ch, "@WYou deduct @D(@G%d@D)@W RP points from @C%s@W's Bank.@n\r\n", amt, GET_NAME(vict));
    send_to_char(vict, "@D[@YROLEPLAY@D] @C%s@W deducts @D(@G%d@D)@W RP points from your RPP Bank.@n\r\n", GET_NAME(ch), amt);
    send_to_imm("ROLEPLAY: %s has had %d RP points deducted from their RPP Bank by %s.", GET_NAME(vict), amt, GET_NAME(ch));
@@ -636,7 +636,7 @@ ACMD(do_rbank)
    send_to_char(ch, "@WYou deduct @D(@G%d@D)@W RP points from @C%s@W's Bank.@n\r\n", amt, arg);
    send_to_imm("ROLEPLAY: %s has had %d RP points deducted from their RPP Bank by %s.", arg, amt, GET_NAME(ch));
    log_imm_action("ROLEPLAY: %s has had %d RP points put deducted from RPP Bank by %s.", arg, amt, GET_NAME(ch));
-   userWrite(NULL, 0, 0, amt, arg);
+   userWrite(nullptr, 0, 0, amt, arg);
   }
  }
 
@@ -706,15 +706,15 @@ ACMD(do_transobj)
   return;
  }
 
- if (!(obj = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
+ if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
   send_to_char(ch, "You want to send what?\r\n");
   return;
  }
  else if (!strcasecmp("all", arg2)) {
   int num = GET_OBJ_VNUM(obj);
-  struct obj_data *obj2 = NULL;
+  struct obj_data *obj2 = nullptr;
 
-  act("You send $p to everyone in the game.", TRUE, ch, obj, 0, TO_CHAR);
+  act("You send $p to everyone in the game.", TRUE, ch, obj, nullptr, TO_CHAR);
 
   for (d = descriptor_list; d; d = d->next) {
    if (IS_NPC(d->character))
@@ -730,7 +730,7 @@ ACMD(do_transobj)
    }
   }
  }
- else if (!(vict = get_char_vis(ch, arg2, NULL, FIND_CHAR_WORLD))) {
+ else if (!(vict = get_char_vis(ch, arg2, nullptr, FIND_CHAR_WORLD))) {
   send_to_char(ch, "That player is not in the game.\r\n");
   return;
  }
@@ -748,7 +748,7 @@ void search_replace(char *string, const char *find, const char *replace)
         char final[MAX_STRING_LENGTH], temp[2];
         size_t start, end, i;
 
-        while (strstr(string, find) != NULL) {
+        while (strstr(string, find) != nullptr) {
 
                 final[0] = '\0';
                 start = strstr(string, find) - string;
@@ -786,8 +786,8 @@ ACMD(do_interest)
    return;
   }
   send_to_char(ch, "Interest time has been initiated!\r\n");
-  INTERESTTIME = time(0) + 86400;
-  LASTINTEREST = time(0) + 86400;
+  INTERESTTIME = time(nullptr) + 86400;
+  LASTINTEREST = time(nullptr) + 86400;
   return;
  }
 }
@@ -851,7 +851,7 @@ ACMD(do_recall)
  }
  else {
   send_to_char(ch, "You disappear in a burst of light!\r\n");
-  act("$n disappears in a burst of light!", FALSE, ch, 0, 0, TO_ROOM);
+  act("$n disappears in a burst of light!", FALSE, ch, nullptr, nullptr, TO_ROOM);
   if (real_room(2) != NOWHERE) {
   char_from_room(ch);
   char_to_room(ch, real_room(2));
@@ -885,7 +885,7 @@ ACMD(do_hell)
   return;
  }
 
- if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))) {
+ if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD))) {
    lockWrite(ch, arg);
    return;
  } else {
@@ -895,8 +895,8 @@ ACMD(do_hell)
   lockWrite(ch, GET_NAME(vict));
   if (d && STATE(d) != CON_PLAYING) {
    STATE(d) = CON_CLOSE;
-   vict->desc->character = NULL;
-   vict->desc = NULL;
+   vict->desc->character = nullptr;
+   vict->desc = nullptr;
   }
   return;
  }
@@ -914,7 +914,7 @@ ACMD(do_echo)
     char buf[MAX_INPUT_LENGTH + 4];
     char name[128];
     int found = FALSE, trunc = 0;
-    struct char_data *vict = NULL, *next_v = NULL, *tch = NULL;
+    struct char_data *vict = nullptr, *next_v = nullptr, *tch = nullptr;
 
     if (strlen(argument) > 1000) {
      trunc = strlen(argument) - 1000;
@@ -976,19 +976,19 @@ ACMD(do_echo)
     }
     if (NoName == TRUE) {
      char blom[MAX_INPUT_LENGTH];
-     sprintf(blom, "@D(@GOOC@W: @gSmote by user %s@D)@n", IS_NPC(ch) ? GET_NAME(ch) : (ch->desc->user == NULL ? "ERROR REPORT" : ch->desc->user));
-     act(blom, FALSE, ch, 0, 0, TO_ROOM);
+     sprintf(blom, "@D(@GOOC@W: @gSmote by user %s@D)@n", IS_NPC(ch) ? GET_NAME(ch) : (ch->desc->user == nullptr ? "ERROR REPORT" : ch->desc->user));
+     act(blom, FALSE, ch, nullptr, nullptr, TO_ROOM);
     }
     if (found == FALSE) {
-     act(buf, FALSE, ch, 0, 0, TO_CHAR);
-     act(buf, FALSE, ch, 0, 0, TO_ROOM);
+     act(buf, FALSE, ch, nullptr, nullptr, TO_CHAR);
+     act(buf, FALSE, ch, nullptr, nullptr, TO_ROOM);
     }
     else {
 
-     act(buf, FALSE, ch, 0, tch, TO_CHAR);
-     act(buf, FALSE, ch, 0, tch, TO_NOTVICT);
+     act(buf, FALSE, ch, nullptr, tch, TO_CHAR);
+     act(buf, FALSE, ch, nullptr, tch, TO_NOTVICT);
      search_replace(buf, "$N", "you");
-     act(buf, FALSE, ch, 0, tch, TO_VICT);
+     act(buf, FALSE, ch, nullptr, tch, TO_VICT);
     }
   }
 }
@@ -1004,7 +1004,7 @@ ACMD(do_send)
     send_to_char(ch, "Send what to who?\r\n");
     return;
   }
-  if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))) {
+  if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD))) {
     send_to_char(ch, "%s", CONFIG_NOPERSON);
     return;
   }
@@ -1041,12 +1041,12 @@ room_rnum find_target_room(struct char_data *ch, char *rawroomstr)
     int num;
 
     num = get_number(&mobobjstr);
-    if ((target_mob = get_char_vis(ch, mobobjstr, &num, FIND_CHAR_WORLD)) != NULL) {
+    if ((target_mob = get_char_vis(ch, mobobjstr, &num, FIND_CHAR_WORLD)) != nullptr) {
       if ((location = IN_ROOM(target_mob)) == NOWHERE) {
         send_to_char(ch, "That character is currently lost.\r\n");
         return (NOWHERE);
       }
-    } else if ((target_obj = get_obj_vis(ch, mobobjstr, &num)) != NULL) {
+    } else if ((target_obj = get_obj_vis(ch, mobobjstr, &num)) != nullptr) {
       if (IN_ROOM(target_obj) != NOWHERE)
         location = IN_ROOM(target_obj);
       else if (target_obj->carried_by && IN_ROOM(target_obj->carried_by) != NOWHERE)
@@ -1136,13 +1136,13 @@ ACMD(do_goto)
   }
 
   snprintf(buf, sizeof(buf), "$n %s", POOFOUT(ch) ? POOFOUT(ch) : "disappears in a puff of smoke.");
-  act(buf, TRUE, ch, 0, 0, TO_ROOM);
+  act(buf, TRUE, ch, nullptr, nullptr, TO_ROOM);
 
   char_from_room(ch);
   char_to_room(ch, location);
 
   snprintf(buf, sizeof(buf), "$n %s", POOFIN(ch) ? POOFIN(ch) : "appears with an ear-splitting bang.");
-  act(buf, TRUE, ch, 0, 0, TO_ROOM);
+  act(buf, TRUE, ch, nullptr, nullptr, TO_ROOM);
 
   look_at_room(IN_ROOM(ch), ch, 0);
   enter_wtrigger(&world[IN_ROOM(ch)], ch, -1);
@@ -1158,7 +1158,7 @@ ACMD(do_trans)
   if (!*buf)
     send_to_char(ch, "Whom do you wish to transfer?\r\n");
   else if (strcasecmp("all", buf)) {
-    if (!(victim = get_char_vis(ch, buf, NULL, FIND_CHAR_WORLD)))
+    if (!(victim = get_char_vis(ch, buf, nullptr, FIND_CHAR_WORLD)))
       send_to_char(ch, "%s", CONFIG_NOPERSON);
     else if (victim == ch)
       send_to_char(ch, "That doesn't make much sense, does it?\r\n");
@@ -1171,11 +1171,11 @@ ACMD(do_trans)
        send_to_char(ch, "They are inside a healing tank!\r\n");
        return;
       }
-      act("$n disappears in a mushroom cloud.", FALSE, victim, 0, 0, TO_ROOM);
+      act("$n disappears in a mushroom cloud.", FALSE, victim, nullptr, nullptr, TO_ROOM);
       char_from_room(victim);
       char_to_room(victim, IN_ROOM(ch));
-      act("$n arrives from a puff of smoke.", FALSE, victim, 0, 0, TO_ROOM);
-      act("$n has transferred you!", FALSE, ch, 0, victim, TO_VICT);
+      act("$n arrives from a puff of smoke.", FALSE, victim, nullptr, nullptr, TO_ROOM);
+      act("$n has transferred you!", FALSE, ch, nullptr, victim, TO_VICT);
       look_at_room(IN_ROOM(victim), victim, 0);
       enter_wtrigger(&world[IN_ROOM(victim)], victim, -1);
     }
@@ -1190,11 +1190,11 @@ ACMD(do_trans)
 	victim = i->character;
 	if (GET_ADMLEVEL(victim) >= GET_ADMLEVEL(ch))
 	  continue;
-	act("$n disappears in a mushroom cloud.", FALSE, victim, 0, 0, TO_ROOM);
+	act("$n disappears in a mushroom cloud.", FALSE, victim, nullptr, nullptr, TO_ROOM);
 	char_from_room(victim);
 	char_to_room(victim, IN_ROOM(ch));
-	act("$n arrives from a puff of smoke.", FALSE, victim, 0, 0, TO_ROOM);
-	act("$n has transferred you!", FALSE, ch, 0, victim, TO_VICT);
+	act("$n arrives from a puff of smoke.", FALSE, victim, nullptr, nullptr, TO_ROOM);
+	act("$n has transferred you!", FALSE, ch, nullptr, victim, TO_VICT);
         look_at_room(IN_ROOM(victim), victim, 0);
         enter_wtrigger(&world[IN_ROOM(victim)], victim, -1);
       }
@@ -1212,7 +1212,7 @@ ACMD(do_teleport)
 
   if (!*buf)
     send_to_char(ch, "Whom do you wish to teleport?\r\n");
-  else if (!(victim = get_char_vis(ch, buf, NULL, FIND_CHAR_WORLD)))
+  else if (!(victim = get_char_vis(ch, buf, nullptr, FIND_CHAR_WORLD)))
     send_to_char(ch, "%s", CONFIG_NOPERSON);
   else if (victim == ch)
     send_to_char(ch, "Use 'goto' to teleport yourself.\r\n");
@@ -1226,11 +1226,11 @@ ACMD(do_teleport)
      return;
     }
     send_to_char(ch, "%s", CONFIG_OK);
-    act("$n disappears in a puff of smoke.", FALSE, victim, 0, 0, TO_ROOM);
+    act("$n disappears in a puff of smoke.", FALSE, victim, nullptr, nullptr, TO_ROOM);
     char_from_room(victim);
     char_to_room(victim, target);
-    act("$n arrives from a puff of smoke.", FALSE, victim, 0, 0, TO_ROOM);
-    act("$n has teleported you!", FALSE, ch, 0, (char *) victim, TO_VICT);
+    act("$n arrives from a puff of smoke.", FALSE, victim, nullptr, nullptr, TO_ROOM);
+    act("$n has teleported you!", FALSE, ch, nullptr, (char *) victim, TO_VICT);
     look_at_room(IN_ROOM(victim), victim, 0);
     enter_wtrigger(&world[IN_ROOM(victim)], victim, -1);
   }
@@ -1409,7 +1409,7 @@ static void do_stat_room(struct char_data *ch)
 
   sprintbitarray(rm->room_flags, room_bits, RF_ARRAY_MAX, buf2);
   send_to_char(ch, "Room Damage: %d, Room Effect: %d\r\n", rm->dmg, rm->geffect);
-  send_to_char(ch, "SpecProc: %s, Flags: %s\r\n", rm->func == NULL ? "None" : "Exists", buf2);
+  send_to_char(ch, "SpecProc: %s, Flags: %s\r\n", rm->func == nullptr ? "None" : "Exists", buf2);
 
   send_to_char(ch, "Description:\r\n%s", rm->description ? rm->description : "  None.\r\n");
 
@@ -1733,7 +1733,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
 	    buf1, cmbuf2, (int)k->time.played / 3600,
 	    (int)((k->time.played % 3600) / 60), age(k)->year);
 
-    if (k->desc != NULL) {
+    if (k->desc != nullptr) {
      send_to_char(ch, "@YOwned by User@D: [@C%s@D]@n\r\n", GET_USER(k));
     } else {
      send_to_char(ch, "@YOwned by User@D: [@C%s@D]@n\r\n", GET_LOG_USER(k));
@@ -1944,7 +1944,7 @@ ACMD(do_varstat)
 
  one_argument(argument, arg); 
 
- if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))) {
+ if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD))) {
   send_to_char(ch, "That player is not in the game.\r\n");
   return;
  } else if (IS_NPC(vict)) {
@@ -1990,7 +1990,7 @@ ACMD(do_stat)
     if (!*buf2)
       send_to_char(ch, "Stats on which mobile?\r\n");
     else {
-      if ((victim = get_char_vis(ch, buf2, NULL, FIND_CHAR_WORLD)) != NULL)
+      if ((victim = get_char_vis(ch, buf2, nullptr, FIND_CHAR_WORLD)) != nullptr)
 	do_stat_character(ch, victim);
       else
 	send_to_char(ch, "No such mobile around.\r\n");
@@ -1999,7 +1999,7 @@ ACMD(do_stat)
     if (!*buf2) {
       send_to_char(ch, "Stats on which player?\r\n");
     } else {
-      if ((victim = get_player_vis(ch, buf2, NULL, FIND_CHAR_WORLD)) != NULL)
+      if ((victim = get_player_vis(ch, buf2, nullptr, FIND_CHAR_WORLD)) != nullptr)
 	do_stat_character(ch, victim);
       else
 	send_to_char(ch, "No such player around.\r\n");
@@ -2007,7 +2007,7 @@ ACMD(do_stat)
   } else if (is_abbrev(buf1, "file")) {
     if (!*buf2)
       send_to_char(ch, "Stats on which player?\r\n");
-    else if ((victim = get_player_vis(ch, buf2, NULL, FIND_CHAR_WORLD)) != NULL)
+    else if ((victim = get_player_vis(ch, buf2, nullptr, FIND_CHAR_WORLD)) != nullptr)
 	do_stat_character(ch, victim);
     else {
       CREATE(victim, struct char_data, 1);
@@ -2029,7 +2029,7 @@ ACMD(do_stat)
     if (!*buf2)
       send_to_char(ch, "Stats on which object?\r\n");
     else {
-      if ((object = get_obj_vis(ch, buf2, NULL)) != NULL)
+      if ((object = get_obj_vis(ch, buf2, nullptr)) != nullptr)
 	do_stat_object(ch, object);
       else
 	send_to_char(ch, "No such object around.\r\n");
@@ -2046,17 +2046,17 @@ ACMD(do_stat)
     char *name = buf1;
     int number = get_number(&name);
 
-    if ((object = get_obj_in_equip_vis(ch, name, &number, ch->equipment)) != NULL)
+    if ((object = get_obj_in_equip_vis(ch, name, &number, ch->equipment)) != nullptr)
       do_stat_object(ch, object);
-    else if ((object = get_obj_in_list_vis(ch, name, &number, ch->carrying)) != NULL)
+    else if ((object = get_obj_in_list_vis(ch, name, &number, ch->carrying)) != nullptr)
       do_stat_object(ch, object);
-    else if ((victim = get_char_vis(ch, name, &number, FIND_CHAR_ROOM)) != NULL)
+    else if ((victim = get_char_vis(ch, name, &number, FIND_CHAR_ROOM)) != nullptr)
       do_stat_character(ch, victim);
-    else if ((object = get_obj_in_list_vis(ch, name, &number, world[IN_ROOM(ch)].contents)) != NULL)
+    else if ((object = get_obj_in_list_vis(ch, name, &number, world[IN_ROOM(ch)].contents)) != nullptr)
       do_stat_object(ch, object);
-    else if ((victim = get_char_vis(ch, name, &number, FIND_CHAR_WORLD)) != NULL)
+    else if ((victim = get_char_vis(ch, name, &number, FIND_CHAR_WORLD)) != nullptr)
       do_stat_character(ch, victim);
-    else if ((object = get_obj_vis(ch, name, &number)) != NULL)
+    else if ((object = get_obj_vis(ch, name, &number)) != nullptr)
       do_stat_object(ch, object);
     else
       send_to_char(ch, "Nothing around by that name.\r\n");
@@ -2112,14 +2112,14 @@ void snoop_check(struct char_data *ch)
     return;
   if (ch->desc->snooping &&
      (GET_ADMLEVEL(ch->desc->snooping->character) >= GET_ADMLEVEL(ch))) {
-    ch->desc->snooping->snoop_by = NULL;
-    ch->desc->snooping = NULL;
+    ch->desc->snooping->snoop_by = nullptr;
+    ch->desc->snooping = nullptr;
   }
 
   if (ch->desc->snoop_by &&
      (GET_ADMLEVEL(ch) >= GET_ADMLEVEL(ch->desc->snoop_by->character))) {
-    ch->desc->snoop_by->snooping = NULL;
-    ch->desc->snoop_by = NULL;
+    ch->desc->snoop_by->snooping = nullptr;
+    ch->desc->snoop_by = nullptr;
   }
 }
 
@@ -2129,8 +2129,8 @@ static void stop_snooping(struct char_data *ch)
     send_to_char(ch, "You aren't snooping anyone.\r\n");
   else {
     send_to_char(ch, "You stop snooping.\r\n");
-    ch->desc->snooping->snoop_by = NULL;
-    ch->desc->snooping = NULL;
+    ch->desc->snooping->snoop_by = nullptr;
+    ch->desc->snooping = nullptr;
   }
 }
 
@@ -2146,7 +2146,7 @@ ACMD(do_snoop)
 
   if (!*arg)
     stop_snooping(ch);
-  else if (!(victim = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD)))
+  else if (!(victim = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD)))
     send_to_char(ch, "No such person around.\r\n");
   else if (!victim->desc)
     send_to_char(ch, "There's no link.. nothing to snoop.\r\n");
@@ -2169,7 +2169,7 @@ ACMD(do_snoop)
     send_to_char(ch, "%s", CONFIG_OK);
 
     if (ch->desc->snooping)
-      ch->desc->snooping->snoop_by = NULL;
+      ch->desc->snooping->snoop_by = nullptr;
 
     ch->desc->snooping = victim->desc;
     victim->desc->snoop_by = ch->desc;
@@ -2187,7 +2187,7 @@ ACMD(do_switch)
     send_to_char(ch, "You're already switched.\r\n");
   else if (!*arg)
     send_to_char(ch, "Switch with who?\r\n");
-  else if (!(victim = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD)))
+  else if (!(victim = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD)))
     send_to_char(ch, "No such character.\r\n");
   else if (ch == victim)
     send_to_char(ch, "Hee hee... we are jolly funny today, eh?\r\n");
@@ -2204,7 +2204,7 @@ ACMD(do_switch)
     ch->desc->original = ch;
 
     victim->desc = ch->desc;
-    ch->desc = NULL;
+    ch->desc = nullptr;
   }
 }
 
@@ -2218,22 +2218,22 @@ ACMD(do_return)
      *   - JE 2/22/95
      *
      * Zmey: here we put someone switched in our body to disconnect state
-     * but we must also NULL his pointer to our character, otherwise
+     * but we must also nullptr his pointer to our character, otherwise
      * close() will damage our character's pointer to our descriptor
      * (which is assigned below in this function). 12/17/99
      */
     if (ch->desc->original->desc) {
-      ch->desc->original->desc->character = NULL;
+      ch->desc->original->desc->character = nullptr;
       STATE(ch->desc->original->desc) = CON_DISCONNECT;
     }
 
     /* Now our descriptor points to our original body. */
     ch->desc->character = ch->desc->original;
-    ch->desc->original = NULL;
+    ch->desc->original = nullptr;
 
     /* And our body's pointer to descriptor now points to our descriptor. */
     ch->desc->character->desc = ch->desc;
-    ch->desc = NULL;
+    ch->desc = nullptr;
   }
 }
 
@@ -2265,7 +2265,7 @@ ACMD(do_load)
   }
 
   if (is_abbrev(buf, "mob")) {
-    struct char_data *mob=NULL;
+    struct char_data *mob=nullptr;
     mob_rnum r_num;
 
     if ((r_num = real_mobile(atoi(buf2))) == NOBODY) {
@@ -2276,9 +2276,9 @@ ACMD(do_load)
     mob = read_mobile(r_num, REAL);
     char_to_room(mob, IN_ROOM(ch));
 
-      act("$n makes a quaint, magical gesture with one hand.", TRUE, ch, 0, 0, TO_ROOM);
-    act("$n has created $N!", FALSE, ch, 0, mob, TO_ROOM);
-    act("You create $N.", FALSE, ch, 0, mob, TO_CHAR);
+      act("$n makes a quaint, magical gesture with one hand.", TRUE, ch, nullptr, nullptr, TO_ROOM);
+    act("$n has created $N!", FALSE, ch, nullptr, mob, TO_ROOM);
+    act("You create $N.", FALSE, ch, nullptr, mob, TO_CHAR);
     load_mtrigger(mob);
     }
   } else if (is_abbrev(buf, "obj")) {
@@ -2300,9 +2300,9 @@ ACMD(do_load)
       obj_to_char(obj, ch);
     else
       obj_to_room(obj, IN_ROOM(ch));
-    act("$n makes a strange magical gesture.", TRUE, ch, 0, 0, TO_ROOM);
-    act("$n has created $p!", FALSE, ch, obj, 0, TO_ROOM);
-    act("You create $p.", FALSE, ch, obj, 0, TO_CHAR);
+    act("$n makes a strange magical gesture.", TRUE, ch, nullptr, nullptr, TO_ROOM);
+    act("$n has created $p!", FALSE, ch, obj, nullptr, TO_ROOM);
+    act("You create $p.", FALSE, ch, obj, nullptr, TO_CHAR);
     load_otrigger(obj);
     }
   } else
@@ -2362,12 +2362,12 @@ ACMD(do_purge)
 
   /* argument supplied. destroy single object or char */
   if (*buf) {
-    if ((vict = get_char_vis(ch, buf, NULL, FIND_CHAR_WORLD)) != NULL) {
+    if ((vict = get_char_vis(ch, buf, nullptr, FIND_CHAR_WORLD)) != nullptr) {
       if (!IS_NPC(vict) && (GET_ADMLEVEL(ch) <= GET_ADMLEVEL(vict))) {
 	send_to_char(ch, "Fuuuuuuuuu!\r\n");
 	return;
       }
-      act("$n disintegrates $N.", FALSE, ch, 0, vict, TO_NOTVICT);
+      act("$n disintegrates $N.", FALSE, ch, nullptr, vict, TO_NOTVICT);
       if (!IS_NPC(vict)) {
        send_to_all("@R%s@r purges @R%s's@r sorry ass right off the MUD!@n\r\n", GET_NAME(ch), GET_NAME(vict));
       }
@@ -2378,13 +2378,13 @@ ACMD(do_purge)
         log_imm_action("PURGED: %s burned %s's sorry ass off the MUD!", GET_NAME(ch), GET_NAME(vict));
 	if (vict->desc) {
 	  STATE(vict->desc) = CON_CLOSE;
-	  vict->desc->character = NULL;
-	  vict->desc = NULL;
+	  vict->desc->character = nullptr;
+	  vict->desc = nullptr;
 	}
       }
       extract_char(vict);
-    } else if ((obj = get_obj_in_list_vis(ch, buf, NULL, world[IN_ROOM(ch)].contents)) != NULL) {
-      act("$n destroys $p.", FALSE, ch, obj, 0, TO_ROOM);
+    } else if ((obj = get_obj_in_list_vis(ch, buf, nullptr, world[IN_ROOM(ch)].contents)) != nullptr) {
+      act("$n destroys $p.", FALSE, ch, obj, nullptr, TO_ROOM);
       extract_obj(obj);
     } else {
       send_to_char(ch, "Nothing here by that name.\r\n");
@@ -2396,7 +2396,7 @@ ACMD(do_purge)
     int i;
 
     act("$n gestures... You are surrounded by scorching flames!",
-	FALSE, ch, 0, 0, TO_ROOM);
+	FALSE, ch, nullptr, nullptr, TO_ROOM);
     send_to_room(IN_ROOM(ch), "The world seems a little cleaner.\r\n");
 
     for (vict = world[IN_ROOM(ch)].people; vict; vict = vict->next_in_room) {
@@ -2564,7 +2564,7 @@ static void execute_copyover(void)
   sprintf (buf, "%d", port);
   sprintf (buf2, "-C%d", mother_desc);
   chdir ("..");
-  execl (EXE_FILE, "circle", buf2, buf, (char *) NULL);
+  execl (EXE_FILE, "circle", buf2, buf, (char *) nullptr);
   /* Failed - sucessful exec will not return */
 
   perror ("do_copyover: execl");
@@ -2604,7 +2604,7 @@ ACMD(do_advance)
   two_arguments(argument, name, level);
 
   if (*name) {
-    if (!(victim = get_char_vis(ch, name, NULL, FIND_CHAR_WORLD))) {
+    if (!(victim = get_char_vis(ch, name, nullptr, FIND_CHAR_WORLD))) {
       send_to_char(ch, "That player is not here.\r\n");
       return;
     }
@@ -2655,7 +2655,7 @@ ACMD(do_advance)
 	"Your head seems to be filled with demons from another plane as your\r\n"
         "body dissolves to the elements of time and space itself.\r\n\r\n"
 	"Suddenly a silent explosion of light snaps you back to reality.\r\n\r\n"
-	"You feel slightly different.", FALSE, ch, 0, victim, TO_VICT);
+	"You feel slightly different.", FALSE, ch, nullptr, victim, TO_VICT);
   }
 
   send_to_char(ch, "%s", CONFIG_OK);
@@ -2718,7 +2718,7 @@ ACMD(do_restore)
     }
     send_to_char(ch, "Okay.\r\n");
   }
-  else if (!(vict = get_char_vis(ch, buf, NULL, FIND_CHAR_WORLD)))
+  else if (!(vict = get_char_vis(ch, buf, nullptr, FIND_CHAR_WORLD)))
     send_to_char(ch, "%s", CONFIG_NOPERSON);
   else if (!IS_NPC(vict) && ch != vict && GET_ADMLEVEL(vict) >= GET_ADMLEVEL(ch))
     send_to_char(ch, "They don't need your help.\r\n");
@@ -2743,10 +2743,10 @@ static void perform_immort_invis(struct char_data *ch, int level)
     if (tch == ch)
       continue;
     if (GET_ADMLEVEL(tch) >= GET_INVIS_LEV(ch) && GET_ADMLEVEL(tch) < level)
-      act("You blink and suddenly realize that $n is gone.", FALSE, ch, 0,
+      act("You blink and suddenly realize that $n is gone.", FALSE, ch, nullptr,
 	  tch, TO_VICT);
     if (GET_ADMLEVEL(tch) < GET_INVIS_LEV(ch) && GET_ADMLEVEL(tch) >= level)
-      act("You suddenly realize that $n is standing beside you.", FALSE, ch, 0,
+      act("You suddenly realize that $n is standing beside you.", FALSE, ch, nullptr,
 	  tch, TO_VICT);
   }
 
@@ -2839,7 +2839,7 @@ ACMD(do_poofset)
     free(*msg);
 
   if (!*argument)
-    *msg = NULL;
+    *msg = nullptr;
   else
     *msg = strdup(argument);
 
@@ -2968,7 +2968,7 @@ ACMD(do_date)
   int d, h, m;
 
   if (subcmd == SCMD_DATE)
-    mytime = time(0);
+    mytime = time(nullptr);
   else
     mytime = boot_time;
 
@@ -2978,7 +2978,7 @@ ACMD(do_date)
   if (subcmd == SCMD_DATE)
     send_to_char(ch, "Current machine time: %s\r\n", tmstr);
   else {
-    mytime = time(0) - boot_time;
+    mytime = time(nullptr) - boot_time;
     d = mytime / 86400;
     h = (mytime / 3600) % 24;
     m = (mytime / 60) % 60;
@@ -2990,7 +2990,7 @@ ACMD(do_date)
 ACMD(do_last)
 {
   char arg[MAX_INPUT_LENGTH];
-  struct char_data *vict = NULL;
+  struct char_data *vict = nullptr;
 
   one_argument(argument, arg);
   if (!*arg) {
@@ -3032,13 +3032,13 @@ ACMD(do_force)
   if (!*arg || !*to_force)
     send_to_char(ch, "Whom do you wish to force do what?\r\n");
   else if (!ADM_FLAGGED(ch, ADM_FORCEMASS) || (strcasecmp("all", arg) && strcasecmp("room", arg))) {
-    if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD)))
+    if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD)))
       send_to_char(ch, "%s", CONFIG_NOPERSON);
     else if (!IS_NPC(vict) && GET_ADMLEVEL(ch) <= GET_ADMLEVEL(vict))
       send_to_char(ch, "No, no, no!\r\n");
     else {
       send_to_char(ch, "%s", CONFIG_OK);
-      act(buf1, TRUE, ch, NULL, vict, TO_VICT);
+      act(buf1, TRUE, ch, nullptr, vict, TO_VICT);
       mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s forced %s to %s", GET_NAME(ch), GET_NAME(vict), to_force);
       command_interpreter(vict, to_force);
     }
@@ -3051,7 +3051,7 @@ ACMD(do_force)
       next_force = vict->next_in_room;
       if (!IS_NPC(vict) && GET_ADMLEVEL(vict) >= GET_ADMLEVEL(ch))
 	continue;
-      act(buf1, TRUE, ch, NULL, vict, TO_VICT);
+      act(buf1, TRUE, ch, nullptr, vict, TO_VICT);
       command_interpreter(vict, to_force);
     }
   } else { /* force all */
@@ -3063,7 +3063,7 @@ ACMD(do_force)
 
       if (STATE(i) != CON_PLAYING || !(vict = i->character) || (!IS_NPC(vict) && GET_ADMLEVEL(vict) >= GET_ADMLEVEL(ch)))
 	continue;
-      act(buf1, TRUE, ch, NULL, vict, TO_VICT);
+      act(buf1, TRUE, ch, nullptr, vict, TO_VICT);
       command_interpreter(vict, to_force);
     }
   }
@@ -3214,7 +3214,7 @@ ACMD(do_wizutil)
 
   if (!*arg)
     send_to_char(ch, "Yes, but for whom?!?\r\n");
-  else if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD)))
+  else if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD)))
     send_to_char(ch, "There is no such player.\r\n");
   else if (IS_NPC(vict))
     send_to_char(ch, "You can't do that to a mob!\r\n");
@@ -3270,7 +3270,7 @@ ACMD(do_wizutil)
       GET_FREEZE_LEV(vict) = GET_ADMLEVEL(ch);
       send_to_char(vict, "A bitter wind suddenly rises and drains every erg of heat from your body!\r\nYou feel frozen!\r\n");
       send_to_char(ch, "Frozen.\r\n");
-      act("A sudden cold wind conjured from nowhere freezes $n!", FALSE, vict, 0, 0, TO_ROOM);
+      act("A sudden cold wind conjured from nowhere freezes $n!", FALSE, vict, nullptr, nullptr, TO_ROOM);
       mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s frozen by %s.", GET_NAME(vict), GET_NAME(ch));
       break;
     case SCMD_THAW:
@@ -3287,7 +3287,7 @@ ACMD(do_wizutil)
       REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_FROZEN);
       send_to_char(vict, "A fireball suddenly explodes in front of you, melting the ice!\r\nYou feel thawed.\r\n");
       send_to_char(ch, "Thawed.\r\n");
-      act("A sudden fireball conjured from nowhere thaws $n!", FALSE, vict, 0, 0, TO_ROOM);
+      act("A sudden fireball conjured from nowhere thaws $n!", FALSE, vict, nullptr, nullptr, TO_ROOM);
       break;
     case SCMD_UNAFFECT:
       if (vict->affected || AFF_FLAGS(vict) || vict->affectedv) {
@@ -3390,7 +3390,7 @@ ACMD(do_show)
   zone_vnum zvn;
   int low, high;
   int8_t self = FALSE;
-  struct char_data *vict = NULL;
+  struct char_data *vict = nullptr;
   struct obj_data *obj;
   struct descriptor_data *d;
   struct affected_type *aff;
@@ -3621,7 +3621,7 @@ ACMD(do_show)
     i = 0;
     send_to_char(ch, "People currently snooping:\r\n--------------------------\r\n");
     for (d = descriptor_list; d; d = d->next) {
-      if (d->snooping == NULL || d->character == NULL)
+      if (d->snooping == nullptr || d->character == nullptr)
 	continue;
       if (STATE(d) != CON_PLAYING || GET_ADMLEVEL(ch) < GET_ADMLEVEL(d->character))
 	continue;
@@ -3648,7 +3648,7 @@ ACMD(do_show)
     break;
 
   case 14:
-    if (value != NULL && *value) {
+    if (value != nullptr && *value) {
       if (sscanf(value, "%d-%d", &low, &high) != 2) {
         if (sscanf(value, "%d", &low) != 1) {
           send_to_char(ch, "Usage: show uniques, show uniques [vnum], or show uniques [low-high]\r\n");
@@ -3673,7 +3673,7 @@ ACMD(do_show)
       vict = (l == 15) ? affect_list : affectv_list;
     } else {
       low = 0;
-      if (! (vict = get_char_world_vis(ch, value, NULL))) {
+      if (! (vict = get_char_world_vis(ch, value, nullptr))) {
         send_to_char(ch, "Cannot find that character.\r\n");
         return;
       }
@@ -4173,7 +4173,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
      * division used elsewhere in the code.  Seems to only happen for
      * some values below the starting age (17) anyway. -gg 5/27/98
      */
-    vict->time.birth = time(0) - (value * SECS_PER_MUD_YEAR);
+    vict->time.birth = time(nullptr) - (value * SECS_PER_MUD_YEAR);
     break;
 
   case 49:	/* Blame/Thank Rick Glover. :) */
@@ -4353,7 +4353,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
     send_to_char(ch, "No.");
     break;
   case 76:
-   if (vict->desc != NULL) {
+   if (vict->desc != nullptr) {
     star_phase(vict, RANGE(0, 2));
    } else {
     send_to_char(ch, "They aren't even in the game!\r\n");
@@ -4400,7 +4400,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
 
 ACMD(do_set)
 {
-  struct char_data *vict = NULL, *cbuf = NULL;
+  struct char_data *vict = nullptr, *cbuf = nullptr;
   char field[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH];
   int mode, len, player_i = 0, retval;
   char is_file = 0, is_player = 0;
@@ -4426,12 +4426,12 @@ ACMD(do_set)
   /* find the target */
   if (!is_file) {
     if (is_player) {
-      if (!(vict = get_player_vis(ch, name, NULL, FIND_CHAR_WORLD))) {
+      if (!(vict = get_player_vis(ch, name, nullptr, FIND_CHAR_WORLD))) {
 	send_to_char(ch, "There is no such player.\r\n");
 	return;
       }
     } else { /* is_mob */
-      if (!(vict = get_char_vis(ch, name, NULL, FIND_CHAR_WORLD))) {
+      if (!(vict = get_char_vis(ch, name, nullptr, FIND_CHAR_WORLD))) {
 	send_to_char(ch, "There is no such creature.\r\n");
 	return;
       }
@@ -4569,7 +4569,7 @@ ACMD(do_plist)
     if (player_table[i].level < low || player_table[i].level > high) 
       continue; 
  
-    time_away = *real_time_passed(time(0), player_table[i].last); 
+    time_away = *real_time_passed(time(nullptr), player_table[i].last); 
  
     if (*name_search && strcasecmp(name_search, player_table[i].name))
       continue; 
@@ -4616,7 +4616,7 @@ ACMD(do_wizupdate)
 
 ACMD(do_raise)
 {
-  struct char_data *vict = NULL;
+  struct char_data *vict = nullptr;
   char name[MAX_INPUT_LENGTH];
 
   one_argument(argument, name);
@@ -4625,7 +4625,7 @@ ACMD(do_raise)
    return;
   }
 
-  if (!(vict = get_player_vis(ch, name, NULL, FIND_CHAR_WORLD))) {
+  if (!(vict = get_player_vis(ch, name, nullptr, FIND_CHAR_WORLD))) {
     send_to_char(ch, "There is no such player.\r\n");
     return;
   }
@@ -4667,7 +4667,7 @@ ACMD(do_chown)
 
  if (!*buf2)
    send_to_char(ch, "Syntax: chown <object> <character>.\r\n");
- else if (!(victim = get_char_vis(ch, buf3, NULL, FIND_CHAR_WORLD)))
+ else if (!(victim = get_char_vis(ch, buf3, nullptr, FIND_CHAR_WORLD)))
    send_to_char(ch, "No one by that name here.\r\n");
  else if (victim == ch)
    send_to_char(ch, "Are you sure you're feeling ok?\r\n");
@@ -4684,8 +4684,8 @@ ACMD(do_chown)
      }
    }
 
- if (!(obj = get_obj_in_list_vis(victim, buf2, NULL, victim->carrying))) {
-   if (!k && !(obj = get_obj_in_list_vis(victim, buf2, NULL, victim->carrying))) {
+ if (!(obj = get_obj_in_list_vis(victim, buf2, nullptr, victim->carrying))) {
+   if (!k && !(obj = get_obj_in_list_vis(victim, buf2, nullptr, victim->carrying))) {
      send_to_char(ch, "%s does not appear to have the %s.\r\n", GET_NAME(victim), buf2);
      return;
    }
@@ -4874,7 +4874,7 @@ ACMD (do_zcheck)
 { 
   zone_rnum zrnum;
   struct obj_data *obj;
-  struct char_data *mob = NULL;
+  struct char_data *mob = nullptr;
   room_vnum exroom=0;
   int ac=0;
   int affs=0, tohit, todam, value;
@@ -4885,7 +4885,7 @@ ACMD (do_zcheck)
   struct extra_descr_data *ext, *ext2;
   one_argument(argument, buf);
 
-  if (buf == NULL || !*buf || !strcmp(buf, "."))
+  if (buf == nullptr || !*buf || !strcmp(buf, "."))
     zrnum = world[IN_ROOM(ch)].zone;
   else 
     zrnum = real_zone(atoi(buf));
@@ -5106,7 +5106,7 @@ ACMD (do_zcheck)
                        tohit, MAX_APPLY_ACCURCY_MOD_TOTAL);
        
      
-     for (ext2 = NULL, ext = obj->ex_description; ext; ext = ext->next)
+     for (ext2 = nullptr, ext = obj->ex_description; ext; ext = ext->next)
        if (strncmp(ext->description, "   ", 3))
          ext2 = ext;
      
@@ -5158,7 +5158,7 @@ ACMD (do_zcheck)
 
       if ((MIN_ROOM_DESC_LENGTH) && strlen(world[i].description)<MIN_ROOM_DESC_LENGTH && (found=1))
         len += snprintf(buf + len, sizeof(buf) - len,
-                        "- Room description is too short. (%4.4"SZT" of min. %d characters).\r\n",
+                        "- Room description is too short. (%4.4" SZT" of min. %d characters).\r\n",
                              strlen(world[i].description), MIN_ROOM_DESC_LENGTH);
 
       if (strncmp(world[i].description, "   ", 3) && (found=1))
@@ -5171,7 +5171,7 @@ ACMD (do_zcheck)
                         "- Room description not wrapped at %d chars (/fi in the editor).\r\n",
                              MAX_COLOUMN_WIDTH);
            
-     for (ext2 = NULL, ext = world[i].ex_description; ext; ext = ext->next)
+     for (ext2 = nullptr, ext = world[i].ex_description; ext; ext = ext->next)
        if (strncmp(ext->description, "   ", 3))
          ext2 = ext;
 

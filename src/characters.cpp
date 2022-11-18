@@ -65,7 +65,7 @@ const std::string& char_data::juggleRaceName(bool capitalized) const {
 void char_data::restore_by(char_data *ch) {
     this->restore(true);
 
-    ::act("You have been fully healed by $N!", FALSE, this, 0, ch, TO_CHAR | TO_SLEEP);
+    ::act("You have been fully healed by $N!", FALSE, this, nullptr, ch, TO_CHAR | TO_SLEEP);
 }
 
 void char_data::restore(bool announce) {
@@ -729,7 +729,7 @@ void char_data::setStatusKnockedOut() {
 void char_data::cureStatusKnockedOut(bool announce) {
     if (AFF_FLAGGED(this, AFF_KNOCKED)) {
         if(announce) {
-            ::act("@W$n@W is no longer senseless, and wakes up.@n", FALSE, this, 0, 0, TO_ROOM);
+            ::act("@W$n@W is no longer senseless, and wakes up.@n", FALSE, this, nullptr, nullptr, TO_ROOM);
             send_to_char(this, "You are no longer knocked out, and wake up!@n\r\n");
         }
 
@@ -750,14 +750,14 @@ void char_data::cureStatusBurn(bool announce) {
     if (AFF_FLAGGED(this, AFF_BURNED)) {
         if(announce) {
             send_to_char(this, "Your burns are healed now.\r\n");
-            ::act("$n@w's burns are now healed.@n", TRUE, this, 0, 0, TO_ROOM);
+            ::act("$n@w's burns are now healed.@n", TRUE, this, nullptr, nullptr, TO_ROOM);
         }
         REMOVE_BIT_AR(AFF_FLAGS(this), AFF_BURNED);
     }
 }
 
 void char_data::cureStatusPoison(bool announce) {
-    ::act("@C$n@W suddenly looks a lot better!@b", FALSE, this, 0, 0, TO_NOTVICT);
+    ::act("@C$n@W suddenly looks a lot better!@b", FALSE, this, nullptr, nullptr, TO_NOTVICT);
     affect_from_char(this, SPELL_POISON);
 }
 
@@ -913,7 +913,7 @@ void char_data::apply_kaioken(int times, bool announce) {
 
     if(announce) {
         send_to_char(this, "@rA dark red aura bursts up around your body as you achieve Kaioken x %d!@n\r\n", times);
-        ::act("@rA dark red aura bursts up around @R$n@r as they achieve a level of Kaioken!@n", TRUE, this, 0, 0, TO_ROOM);
+        ::act("@rA dark red aura bursts up around @R$n@r as they achieve a level of Kaioken!@n", TRUE, this, nullptr, nullptr, TO_ROOM);
     }
 
 }
@@ -928,10 +928,10 @@ void char_data::remove_kaioken(int8_t announce) {
     switch(announce) {
         case 1:
             send_to_char(this, "You drop out of kaioken.\r\n");
-            ::act("$n@w drops out of kaioken.@n", TRUE, this, 0, 0, TO_ROOM);
+            ::act("$n@w drops out of kaioken.@n", TRUE, this, nullptr, nullptr, TO_ROOM);
             break;
         case 2:
             send_to_char(this, "You lose focus and your kaioken disappears.\r\n");
-            ::act("$n loses focus and $s kaioken aura disappears.", TRUE, this, 0, 0, TO_ROOM);
+            ::act("$n loses focus and $s kaioken aura disappears.", TRUE, this, nullptr, nullptr, TO_ROOM);
     }
 }

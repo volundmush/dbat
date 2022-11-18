@@ -15,7 +15,7 @@
 
 /* Local global variables. */
 static long           g_lNumAssemblies = 0;
-static ASSEMBLY       *g_pAssemblyTable = NULL;
+static ASSEMBLY       *g_pAssemblyTable = nullptr;
 
 
 void assemblyBootAssemblies( void )
@@ -29,9 +29,9 @@ void assemblyBootAssemblies( void )
   long         lLineCount = 0;
   long         lPartVnum = NOTHING;
   long         lVnum = NOTHING;
-  FILE         *pFile = NULL;
+  FILE         *pFile = nullptr;
 
-  if( (pFile = fopen( ASSEMBLIES_FILE, "rt" )) == NULL )
+  if( (pFile = fopen( ASSEMBLIES_FILE, "rt" )) == nullptr )
   {
     log( "SYSERR: assemblyBootAssemblies(): Couldn't open file '%s' for "
       "reading.", ASSEMBLIES_FILE );
@@ -99,10 +99,10 @@ void assemblySaveAssemblies( void )
   char         szType[ MAX_STRING_LENGTH ] = { '\0' };
   long         i = 0;
   long         j = 0;
-  ASSEMBLY     *pAssembly = NULL;
-  FILE         *pFile = NULL;
+  ASSEMBLY     *pAssembly = nullptr;
+  FILE         *pFile = nullptr;
 
-  if( (pFile = fopen( ASSEMBLIES_FILE, "wt" )) == NULL )
+  if( (pFile = fopen( ASSEMBLIES_FILE, "wt" )) == nullptr )
   {
     log( "SYSERR: assemblySaveAssemblies(): Couldn't open file '%s' for "
       "writing.", ASSEMBLIES_FILE );
@@ -138,12 +138,12 @@ void assemblyListToChar( struct char_data *pCharacter )
   long         j = 0;                  // Inner iterator.
   long         lRnum = 0;              // Object rnum for obj_proto indexing.
 
-  if( pCharacter == NULL )
+  if( pCharacter == nullptr )
   {
-    log( "SYSERR: assemblyListAssembliesToChar(): NULL 'pCharacter'." );
+    log( "SYSERR: assemblyListAssembliesToChar(): nullptr 'pCharacter'." );
     return;
   }
-  else if( g_pAssemblyTable == NULL )
+  else if( g_pAssemblyTable == nullptr )
   {
     send_to_char(pCharacter, "No assemblies exist.\r\n");
     return;
@@ -189,9 +189,9 @@ void assemblyListToChar( struct char_data *pCharacter )
 
 bool assemblyAddComponent( long lVnum, long lComponentVnum, bool bExtract, bool bInRoom )
 {
-  ASSEMBLY     *pAssembly = NULL;
+  ASSEMBLY     *pAssembly = nullptr;
 
-  if( (pAssembly = assemblyGetAssemblyPtr( lVnum )) == NULL )
+  if( (pAssembly = assemblyGetAssemblyPtr( lVnum )) == nullptr )
   {
     log( "SYSERR: assemblyAddComponent(): Invalid 'lVnum' #%ld.", lVnum );
     return (FALSE);
@@ -215,7 +215,7 @@ bool assemblyAddComponent( long lVnum, long lComponentVnum, bool bExtract, bool 
   } */
 
   /* Create a new component table with room for one more entry. */
-  if( pAssembly->pComponents == NULL )
+  if( pAssembly->pComponents == nullptr )
     CREATE( pAssembly->pComponents, COMPONENT, pAssembly->lNumComponents + 1 );
   else
     RECREATE( pAssembly->pComponents, COMPONENT, pAssembly->lNumComponents + 1 );
@@ -238,21 +238,21 @@ bool assemblyCheckComponents( long lVnum, struct char_data *pCharacter, int extr
   bool         bOk = TRUE;
   long         i = 0;
   long         lRnum = 0;
-  struct obj_data **ppComponentObjects = NULL;
-  ASSEMBLY     *pAssembly = NULL;
+  struct obj_data **ppComponentObjects = nullptr;
+  ASSEMBLY     *pAssembly = nullptr;
 
-  if( pCharacter == NULL )
+  if( pCharacter == nullptr )
   {
-    log( "SYSERR: NULL assemblyCheckComponents(): 'pCharacter'." );
+    log( "SYSERR: nullptr assemblyCheckComponents(): 'pCharacter'." );
     return (FALSE);
   }
-  else if( (pAssembly = assemblyGetAssemblyPtr( lVnum )) == NULL )
+  else if( (pAssembly = assemblyGetAssemblyPtr( lVnum )) == nullptr )
   {
-    log( "SYSERR: NULL assemblyCheckComponents(): Invalid 'lVnum' #%ld.", lVnum );
+    log( "SYSERR: nullptr assemblyCheckComponents(): Invalid 'lVnum' #%ld.", lVnum );
     return (FALSE);
   }
 
-  if( pAssembly->pComponents == NULL )
+  if( pAssembly->pComponents == nullptr )
     return (FALSE);
   else if( pAssembly->lNumComponents <= 0 )
     return (FALSE);
@@ -268,7 +268,7 @@ bool assemblyCheckComponents( long lVnum, struct char_data *pCharacter, int extr
       if( pAssembly->pComponents[ i ].bInRoom )
       {
        if((ppComponentObjects[ i ] = get_obj_in_list_num( lRnum,
-         world[ IN_ROOM( pCharacter ) ].contents )) == NULL )
+         world[ IN_ROOM( pCharacter ) ].contents )) == nullptr )
          bOk = FALSE;
         else {
           obj_from_room( ppComponentObjects[ i ] );
@@ -277,7 +277,7 @@ bool assemblyCheckComponents( long lVnum, struct char_data *pCharacter, int extr
       else
       {
        if( (ppComponentObjects[ i ] = get_obj_in_list_num( lRnum,
-         pCharacter->carrying )) == NULL )
+         pCharacter->carrying )) == nullptr )
          bOk = FALSE;
         else {
           obj_from_char( ppComponentObjects[ i ] );
@@ -288,7 +288,7 @@ bool assemblyCheckComponents( long lVnum, struct char_data *pCharacter, int extr
 
   for( i = 0; i < pAssembly->lNumComponents; i++ )
   {
-    if( ppComponentObjects[ i ] == NULL )
+    if( ppComponentObjects[ i ] == nullptr )
       continue;
 
     if( pAssembly->pComponents[ i ].bExtract && bOk && extract_yes == TRUE)
@@ -309,14 +309,14 @@ bool assemblyCreate( long lVnum, int iAssembledType )
   long         lBottom = 0;
   long         lMiddle = 0;
   long         lTop = 0;
-  ASSEMBLY     *pNewAssemblyTable = NULL;
+  ASSEMBLY     *pNewAssemblyTable = nullptr;
 
   if( lVnum < 0 )
     return (FALSE);
   else if( iAssembledType < 0 || iAssembledType >= MAX_ASSM )
     return (FALSE);
 
-  if( g_pAssemblyTable == NULL )
+  if( g_pAssemblyTable == nullptr )
   {
     CREATE( g_pAssemblyTable, ASSEMBLY, 1 );
     g_lNumAssemblies = 1;
@@ -358,7 +358,7 @@ bool assemblyCreate( long lVnum, int iAssembledType )
 
   g_pAssemblyTable[ lMiddle ].lNumComponents = 0;
   g_pAssemblyTable[ lMiddle ].lVnum = lVnum;
-  g_pAssemblyTable[ lMiddle ].pComponents = NULL;
+  g_pAssemblyTable[ lMiddle ].pComponents = nullptr;
   g_pAssemblyTable[ lMiddle ].uchAssemblyType = (unsigned char) iAssembledType;
   return (TRUE);
 }
@@ -366,10 +366,10 @@ bool assemblyCreate( long lVnum, int iAssembledType )
 bool assemblyDestroy( long lVnum )
 {
   long         lIndex = 0;
-  ASSEMBLY     *pNewAssemblyTable = NULL;
+  ASSEMBLY     *pNewAssemblyTable = nullptr;
 
   /* Find the real number of the assembled vnum. */
-  if( g_pAssemblyTable == NULL || (lIndex = assemblyGetAssemblyIndex( lVnum ))
+  if( g_pAssemblyTable == nullptr || (lIndex = assemblyGetAssemblyIndex( lVnum ))
 < 0 )
   {
     log( "SYSERR: assemblyDestroy(): Invalid 'lVnum' #%ld.", lVnum );
@@ -377,7 +377,7 @@ bool assemblyDestroy( long lVnum )
   }
 
   /* Deallocate component array. */
-  if( g_pAssemblyTable[ lIndex ].pComponents != NULL )
+  if( g_pAssemblyTable[ lIndex ].pComponents != nullptr )
     free( g_pAssemblyTable[ lIndex ].pComponents );
 
   if( g_lNumAssemblies > 1 )
@@ -409,9 +409,9 @@ bool assemblyDestroy( long lVnum )
 
 bool assemblyHasComponent( long lVnum, long lComponentVnum )
 {
-  ASSEMBLY     *pAssembly = NULL;
+  ASSEMBLY     *pAssembly = nullptr;
 
-  if( (pAssembly = assemblyGetAssemblyPtr( lVnum )) == NULL )
+  if( (pAssembly = assemblyGetAssemblyPtr( lVnum )) == nullptr )
   {
     log( "SYSERR: assemblyHasComponent(): Invalid 'lVnum' #%ld.", lVnum );
     return (FALSE);
@@ -423,10 +423,10 @@ bool assemblyHasComponent( long lVnum, long lComponentVnum )
 bool assemblyRemoveComponent( long lVnum, long lComponentVnum )
 {
   long         lIndex = 0;
-  ASSEMBLY     *pAssembly = NULL;
-  COMPONENT    *pNewComponents = NULL;
+  ASSEMBLY     *pAssembly = nullptr;
+  COMPONENT    *pNewComponents = nullptr;
 
-  if( (pAssembly = assemblyGetAssemblyPtr( lVnum )) == NULL )
+  if( (pAssembly = assemblyGetAssemblyPtr( lVnum )) == nullptr )
   {
     log( "SYSERR: assemblyRemoveComponent(): Invalid 'lVnum' #%ld.", lVnum );
     return (FALSE);
@@ -439,7 +439,7 @@ bool assemblyRemoveComponent( long lVnum, long lComponentVnum )
     return (FALSE);
   }
 
-  if( pAssembly->pComponents != NULL && pAssembly->lNumComponents > 1 )
+  if( pAssembly->pComponents != nullptr && pAssembly->lNumComponents > 1 )
   {
     CREATE( pNewComponents, COMPONENT, pAssembly->lNumComponents - 1 );
 
@@ -462,9 +462,9 @@ bool assemblyRemoveComponent( long lVnum, long lComponentVnum )
 
 int assemblyGetType( long lVnum )
 {
-  ASSEMBLY     *pAssembly = NULL;
+  ASSEMBLY     *pAssembly = nullptr;
 
-  if( (pAssembly = assemblyGetAssemblyPtr( lVnum )) == NULL )
+  if( (pAssembly = assemblyGetAssemblyPtr( lVnum )) == nullptr )
   {
     log( "SYSERR: assemblyGetType(): Invalid 'lVnum' #%ld.", lVnum );
     return (-1);
@@ -475,9 +475,9 @@ int assemblyGetType( long lVnum )
 
 long assemblyCountComponents( long lVnum )
 {
-  ASSEMBLY     *pAssembly = NULL;
+  ASSEMBLY     *pAssembly = nullptr;
 
-  if( (pAssembly = assemblyGetAssemblyPtr( lVnum )) == NULL )
+  if( (pAssembly = assemblyGetAssemblyPtr( lVnum )) == nullptr )
   {
     log( "SYSERR: assemblyCountComponents(): Invalid 'lVnum' #%ld.", lVnum );
     return (0);
@@ -491,9 +491,9 @@ long assemblyFindAssembly( const char *pszAssemblyName )
   long         i = 0;
   long         lRnum = NOTHING;
 
-  if( g_pAssemblyTable == NULL )
+  if( g_pAssemblyTable == nullptr )
     return (-1);
-  else if( pszAssemblyName == NULL || *pszAssemblyName == '\0' )
+  else if( pszAssemblyName == nullptr || *pszAssemblyName == '\0' )
     return (-1);
 
   for( i = 0; i < g_lNumAssemblies; i++ )
@@ -534,7 +534,7 @@ long assemblyGetComponentIndex( ASSEMBLY *pAssembly, long lComponentVnum )
 {
   long         i = 0;
 
-  if( pAssembly == NULL )
+  if( pAssembly == nullptr )
     return (-1);
 
   for( i = 0; i < pAssembly->lNumComponents; i++ )
@@ -550,13 +550,13 @@ ASSEMBLY* assemblyGetAssemblyPtr( long lVnum )
 {
   long         lIndex = 0;
 
-  if( g_pAssemblyTable == NULL )
-    return (NULL);
+  if( g_pAssemblyTable == nullptr )
+    return (nullptr);
 
   if( (lIndex = assemblyGetAssemblyIndex( lVnum )) >= 0 )
     return (g_pAssemblyTable + lIndex);
 
-  return (NULL);
+  return (nullptr);
 }
 
 #undef __ASSEMBLIES_C__
@@ -565,7 +565,7 @@ void free_assemblies(void)
 {
  int i;
 
- if (g_pAssemblyTable == NULL)
+ if (g_pAssemblyTable == nullptr)
    return;
 
  for (i = 0; i < g_lNumAssemblies; i++) {

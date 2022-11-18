@@ -256,7 +256,7 @@ OCMD(do_osend)
  
          sprintf(buf, msg);
          search_replace(buf, GET_NAME(ch), "$n");
-         act(buf, TRUE, ch, 0, 0, TO_ROOM);
+         act(buf, TRUE, ch, nullptr, nullptr, TO_ROOM);
          /*sub_write(msg, ch, TRUE, TO_ROOM);*/
         }
     }
@@ -306,7 +306,7 @@ OCMD(do_otransform)
 {
   char arg[MAX_INPUT_LENGTH];
   obj_data *o, tmpobj;
-  struct char_data *wearer=NULL;
+  struct char_data *wearer=nullptr;
   int pos = 0;
 
   one_argument(argument, arg);
@@ -317,7 +317,7 @@ OCMD(do_otransform)
     obj_log(obj, "otransform: bad argument");
   else {
     o = read_object(atoi(arg), VIRTUAL);
-    if (o==NULL) {
+    if (o==nullptr) {
       obj_log(obj, "otransform: bad object vnum");
       return;
     }
@@ -527,7 +527,7 @@ OCMD(do_dgoload)
           return;
         }
       }
-      if ((mob = read_mobile(number, VIRTUAL)) == NULL) {
+      if ((mob = read_mobile(number, VIRTUAL)) == nullptr) {
         obj_log(obj, "oload: bad mob vnum");
         return;
       }
@@ -543,7 +543,7 @@ OCMD(do_dgoload)
     }
 
     else if (is_abbrev(arg1, "obj")) {
-      if ((object = read_object(number, VIRTUAL)) == NULL) {
+      if ((object = read_object(number, VIRTUAL)) == nullptr) {
         obj_log(obj, "oload: bad object vnum");
         return;
       }
@@ -564,7 +564,7 @@ OCMD(do_dgoload)
       two_arguments(target, arg1, arg2); /* recycling ... */
       tch = get_char_near_obj(obj, arg1);
       if (tch) {
-        if (arg2 != NULL && *arg2 &&
+        if (arg2 != nullptr && *arg2 &&
             (pos = find_eq_pos_script(arg2)) >= 0 &&
             !GET_EQ(tch, pos) &&
             can_wear_on_pos(object, pos)) {
@@ -636,7 +636,7 @@ OCMD(do_oasound)
   }
 
   for (door = 0; door < NUM_OF_DIRS; door++) {
-    if (world[room].dir_option[door] != NULL &&
+    if (world[room].dir_option[door] != nullptr &&
        (world[room].dir_option[door])->to_room != NOWHERE &&
        (world[room].dir_option[door])->to_room != room &&
        world[(world[room].dir_option[door])->to_room].people) {
@@ -675,7 +675,7 @@ OCMD(do_odoor)
         return;
     }
 
-    if ((rm = get_room(target)) == NULL) {
+    if ((rm = get_room(target)) == nullptr) {
         obj_log(obj, "odoor: invalid target");
         return;
     }
@@ -700,7 +700,7 @@ OCMD(do_odoor)
             if (newexit->keyword)
                 free(newexit->keyword);
             free(newexit);
-            rm->dir_option[dir] = NULL;
+            rm->dir_option[dir] = nullptr;
         }
     }
 
@@ -747,7 +747,7 @@ OCMD(do_osetval)
   int position, new_value;
 
   two_arguments(argument, arg1, arg2);
-  if (arg1 == NULL || !*arg1 || arg2 == NULL || !*arg2 ||
+  if (arg1 == nullptr || !*arg1 || arg2 == nullptr || !*arg2 ||
       !is_number(arg1) || !is_number(arg2)) {
     obj_log(obj, "osetval: bad syntax");
     return;
@@ -805,7 +805,7 @@ OCMD(do_oat)
 }
 
 const struct obj_command_info obj_cmd_info[] = {
-    { "RESERVED", 0, 0 },/* this must be first -- for specprocs */
+    { "RESERVED", nullptr, 0 },/* this must be first -- for specprocs */
 
     { "oasound "    , do_oasound  , 0 },
     { "oat "        , do_oat      , 0 },
@@ -826,7 +826,7 @@ const struct obj_command_info obj_cmd_info[] = {
     { "otransform " , do_otransform, 0 },
     { "ozoneecho "  , do_ozoneecho , 0 }, /* fix by Rumble */
 
-    { "\n", 0, 0 }        /* this must be last */
+    { "\n", nullptr, 0 }        /* this must be last */
 };
 
 

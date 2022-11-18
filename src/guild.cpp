@@ -164,7 +164,7 @@ ACMD(do_teach)
   return;
  }
 
- if (!(vict = get_char_vis(ch, arg2, NULL, FIND_CHAR_ROOM))) {
+ if (!(vict = get_char_vis(ch, arg2, nullptr, FIND_CHAR_ROOM))) {
   send_to_char(ch, "@wTeach who?@n\r\n");
   send_to_char(ch, "@wSyntax: teach (skill) (target)@n\r\n");
   return;
@@ -206,9 +206,9 @@ ACMD(do_teach)
   sprintf(tochar, "@YYou instruct @y$N@Y in the finer points of @C%s@Y.@n\r\n", spell_info[skill].name);
   sprintf(tovict, "@y$n@Y instructs you in the finer points of @C%s@Y.@n\r\n", spell_info[skill].name);
   sprintf(toother, "@y$n@Y instructs @y$N@Y in the finer points of @C%s@Y.@n\r\n", spell_info[skill].name);
-  act(tochar, TRUE, ch, 0, vict, TO_CHAR);
-  act(tovict, TRUE, ch, 0, vict, TO_VICT);
-  act(toother, TRUE, ch, 0, vict, TO_NOTVICT);
+  act(tochar, TRUE, ch, nullptr, vict, TO_CHAR);
+  act(tovict, TRUE, ch, nullptr, vict, TO_VICT);
+  act(toother, TRUE, ch, nullptr, vict, TO_NOTVICT);
   SET_SKILL(vict, skill, GET_SKILL_BASE(vict, skill) + 1);
   if (free == FALSE) {
    GET_PRACTICES(vict, GET_CLASS(vict)) -= cost;
@@ -660,7 +660,7 @@ void what_does_guild_know(int guild_nr, struct char_data * ch)
 
   for (sortpos = 1; sortpos <= NUM_FEATS_DEFINED; sortpos++) {
     i = feat_sort_info[sortpos];
-    if (does_guild_know_feat(guild_nr, i) && feat_is_available(ch, i, 0, NULL) && feat_list[i].in_game && feat_list[i].can_learn) {
+    if (does_guild_know_feat(guild_nr, i) && feat_is_available(ch, i, 0, nullptr) && feat_list[i].in_game && feat_list[i].can_learn) {
       nlen = snprintf(buf2 + len, sizeof(buf2) - len, "@b%-20s@n\r\n", feat_list[i].name);
       if (len + nlen >= sizeof(buf2) || nlen < 0)
         break;
@@ -1155,8 +1155,8 @@ void handle_exp(struct char_data *keeper, int guild_nr, struct char_data *ch, ch
   if (GET_LEVEL(ch) == 100) {
    amt = 400000;
   }
-  act("@c$n@W spends time training you in $s fighting style.@n", TRUE, keeper, 0, ch, TO_VICT);
-  act("@c$n@W spends time training @C$N@W in $s fighting style.@n", TRUE, keeper, 0, ch, TO_NOTVICT);
+  act("@c$n@W spends time training you in $s fighting style.@n", TRUE, keeper, nullptr, ch, TO_VICT);
+  act("@c$n@W spends time training @C$N@W in $s fighting style.@n", TRUE, keeper, nullptr, ch, TO_NOTVICT);
   send_to_char(ch, "@wExperience Gained: @C%s@n\r\n", add_commas(amt));
   GET_PRACTICES(ch, GET_CLASS(ch)) -= 25;
   if (IS_SAIYAN(ch) || IS_HALFBREED(ch)) {
@@ -1224,8 +1224,8 @@ void handle_study(struct char_data *keeper, int guild_nr, struct char_data *ch, 
  GET_GOLD(ch) -= goldcost;
  GET_PRACTICES(ch, GET_CLASS(ch)) += 25;
  
- act("@c$N@W spends time lecturing you on various subjects.@n", TRUE, ch, 0, keeper, TO_CHAR);
- act("@c$N@W spends time lecturing @C$n@W on various subjects.@n", TRUE, ch, 0, keeper, TO_ROOM);
+ act("@c$N@W spends time lecturing you on various subjects.@n", TRUE, ch, nullptr, keeper, TO_CHAR);
+ act("@c$N@W spends time lecturing @C$n@W on various subjects.@n", TRUE, ch, nullptr, keeper, TO_ROOM);
  send_to_char(ch, "@wYou have gained %d practice sessions in exchange for %s EXP and %s zenni.\r\n", reward, add_commas(expcost), add_commas(goldcost));
 
 }
@@ -1265,7 +1265,7 @@ void handle_learn(struct char_data *keeper, int guild_nr, struct char_data *ch, 
     return;
   }
 
-  if (!feat_is_available(ch, feat_num, 0, NULL) || !feat_list[feat_num].in_game || !feat_list[feat_num].can_learn) {
+  if (!feat_is_available(ch, feat_num, 0, nullptr) || !feat_list[feat_num].in_game || !feat_list[feat_num].can_learn) {
     send_to_char(ch, "The %s feat is not available to you at this time.\r\n", argument);
     return;
   }
@@ -1287,7 +1287,7 @@ void handle_learn(struct char_data *keeper, int guild_nr, struct char_data *ch, 
       send_to_char(ch, "That feat is not yet ready for use.\r\n");
       return;
     }
-    if (ptr == NULL || !*ptr) {
+    if (ptr == nullptr || !*ptr) {
       if (sftype == 2)
         cptr = "spell school";
       else
@@ -1349,7 +1349,7 @@ void handle_learn(struct char_data *keeper, int guild_nr, struct char_data *ch, 
       page_string(ch->desc, buf, TRUE);
       return;
     }
-    if (!feat_is_available(ch, feat_num, subval, NULL)) {
+    if (!feat_is_available(ch, feat_num, subval, nullptr)) {
       send_to_char(ch, "You do not satisfy the prerequisites for that feat.\r\n");
       return;
     }
@@ -1524,7 +1524,7 @@ SPECIAL(guild)
     { "forget",		handle_forget },
     { "study",		handle_study },
     { "grand",          handle_grand },
-    { NULL,		NULL }
+    { nullptr,		nullptr }
   };
 
   for (guild_nr = 0; guild_nr <= top_guild; guild_nr++)
@@ -1637,7 +1637,7 @@ void boot_the_guilds(FILE * gm_f, char *filename, int rec_count)
       read_guild_line(gm_f, "%d", &GM_OPEN(top_guild), "GM_OPEN");
       read_guild_line(gm_f, "%d", &GM_CLOSE(top_guild), "GM_CLOSE");
 
-      GM_FUNC(top_guild) = NULL;
+      GM_FUNC(top_guild) = nullptr;
       CREATE(buf, char, READ_SIZE);
       get_line(gm_f, buf);
       if (buf && *buf != '#' && *buf != '$') {
@@ -1881,7 +1881,7 @@ void destroy_guilds(void)
   }
 
   free(guild_index);
-  guild_index = NULL;
+  guild_index = nullptr;
   top_guild = -1;
 }
 

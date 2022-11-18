@@ -48,8 +48,8 @@ int passcomm(struct char_data *ch, char *comm);
 
 
 /* local globals */
-struct descriptor_data *descriptor_list = NULL;		/* master desc list */
-struct txt_block *bufpool = 0;	/* pool of large output buffers */
+struct descriptor_data *descriptor_list = nullptr;		/* master desc list */
+struct txt_block *bufpool = nullptr;	/* pool of large output buffers */
 int buf_largecount = 0;		/* # of large buffers which exist */
 int buf_overflows = 0;		/* # of overflows of output */
 int buf_switches = 0;		/* # of switches from small to large buf */
@@ -62,14 +62,14 @@ int scheck = 0;			/* for syntax checking mode */
 struct timeval null_time;	/* zero-valued time structure */
 int8_t reread_wizlist;		/* signal: SIGUSR1 */
 int8_t emergency_unban;		/* signal: SIGUSR2 */
-FILE *logfile = NULL;		/* Where to send the log messages. */
+FILE *logfile = nullptr;		/* Where to send the log messages. */
 const char *text_overflow = "**OVERFLOW**\r\n";
 int dg_act_check;               /* toggle for act_trigger */
 unsigned long pulse = 0;        /* number of pulses since game start */
 bool fCopyOver;          /* Are we booting in copyover mode? */
 uint16_t port;
 socklen_t mother_desc;
-char *last_act_message = NULL;
+char *last_act_message = nullptr;
 
 
 void *z_alloc(void *opaque, uInt items, uInt size)
@@ -111,7 +111,7 @@ void copyover_recover()
   int set_loadroom = NOWHERE;
 	
   log ("Copyover recovery initiated");
-  PCOUNTDAY = time(0) + 60;
+  PCOUNTDAY = time(nullptr) + 60;
   fp = fopen (COPYOVER_FILE, "r");
 	
   if (!fp) {
@@ -128,7 +128,7 @@ void copyover_recover()
       break;
 
     /* Write something, and check if it goes error-free */		
-    if (write_to_descriptor (desc, "\n\rFolding initiated...\n\r", NULL) < 0) {
+    if (write_to_descriptor (desc, "\n\rFolding initiated...\n\r", nullptr) < 0) {
       close (desc); /* nope */
       continue;
     }
@@ -166,10 +166,10 @@ void copyover_recover()
      fOld = FALSE;
 		
     if (!fOld) /* Player file not found?! */ {
-       write_to_descriptor (desc, "\n\rSomehow, your character was lost during the folding. Sorry.\n\r", NULL);
+       write_to_descriptor (desc, "\n\rSomehow, your character was lost during the folding. Sorry.\n\r", nullptr);
        close_socket(d);
      } else {
-       write_to_descriptor (desc, "\n\rFolding complete.\n\r", NULL);
+       write_to_descriptor (desc, "\n\rFolding complete.\n\r", nullptr);
         if (CONFIG_ENABLE_COMPRESSION && !PRF_FLAGGED(d->character, PRF_NOCOMPRESS)) {
             d->comp->state = 1; /* indicates waiting for comp negotiation */
             write_to_output(d, "%s", compress_offer);
@@ -194,7 +194,7 @@ void init_game(uint16_t cmport)
   /* We don't want to restart if we crash before we get up. */
   touch(KILLSCRIPT_FILE);
 
-  circle_srandom(time(0));
+  circle_srandom(time(nullptr));
 
   log("Finding player limit.");
   max_players = get_max_players();
@@ -397,15 +397,15 @@ void game_loop(socklen_t cmmother_desc)
   opt_time.tv_sec = 0;
   FD_ZERO(&null_set);
 
-  gettimeofday(&last_time, (struct timezone *) 0);
+  gettimeofday(&last_time, (struct timezone *) nullptr);
 
   /* The Main Loop.  The Big Cheese.  The Top Dog.  The Head Honcho.  The.. */
   while (!circle_shutdown) {
 
     /* Sleep if we don't have any connections */
-    if (descriptor_list == NULL) {
+    if (descriptor_list == nullptr) {
        if (CONFIG_IMC_ENABLED) {
-         top_desc = this_imcmud != NULL ? MAX( cmmother_desc, this_imcmud->desc ) : cmmother_desc;
+         top_desc = this_imcmud != nullptr ? MAX( cmmother_desc, this_imcmud->desc ) : cmmother_desc;
        } else {
          top_desc = cmmother_desc;
        }
@@ -416,10 +416,10 @@ void game_loop(socklen_t cmmother_desc)
       FD_SET(cmmother_desc, &input_set);
 
        if (CONFIG_IMC_ENABLED) {
-         if ( this_imcmud != NULL && this_imcmud->desc != -1 )
+         if ( this_imcmud != nullptr && this_imcmud->desc != -1 )
             FD_SET(this_imcmud->desc, &input_set);
        }
-      if (select(top_desc + 1, &input_set, (fd_set *) 0, (fd_set *) 0, NULL) < 0) {
+      if (select(top_desc + 1, &input_set, (fd_set *) nullptr, (fd_set *) nullptr, nullptr) < 0) {
 	if (errno == EINTR)
 	  log("Waking up to process signal.");
 	else
@@ -428,7 +428,7 @@ void game_loop(socklen_t cmmother_desc)
          if (!CONFIG_IMC_ENABLED) {
           log("New connection.  Waking up.");
          }
-      gettimeofday(&last_time, (struct timezone *) 0);
+      gettimeofday(&last_time, (struct timezone *) nullptr);
     }
     /* Set up the input, output, and exception sets for select(). */
     FD_ZERO(&input_set);
@@ -452,7 +452,7 @@ void game_loop(socklen_t cmmother_desc)
      * calculate how long we took processing the previous iteration.
      */
     
-    gettimeofday(&before_sleep, (struct timezone *) 0); /* current time */
+    gettimeofday(&before_sleep, (struct timezone *) nullptr); /* current time */
     timediff(&process_time, &before_sleep, &last_time);
 
     /*
@@ -473,13 +473,13 @@ void game_loop(socklen_t cmmother_desc)
     timeadd(&last_time, &before_sleep, &temp_time);
 
     /* Now keep sleeping until that time has come */
-    gettimeofday(&now, (struct timezone *) 0);
+    gettimeofday(&now, (struct timezone *) nullptr);
     timediff(&timeout, &last_time, &now);
 
     /* Go to sleep */
     do {
       circle_sleep(&timeout);
-      gettimeofday(&now, (struct timezone *) 0);
+      gettimeofday(&now, (struct timezone *) nullptr);
       timediff(&timeout, &last_time, &now);
     } while (timeout.tv_usec || timeout.tv_sec);
 
@@ -540,7 +540,7 @@ void game_loop(socklen_t cmmother_desc)
 	    char_from_room(d->character);
 	  char_to_room(d->character, GET_WAS_IN(d->character));
 	  GET_WAS_IN(d->character) = NOWHERE;
-	  act("$n has returned.", TRUE, d->character, 0, 0, TO_ROOM);
+	  act("$n has returned.", TRUE, d->character, nullptr, nullptr, TO_ROOM);
 	}
         GET_WAIT_STATE(d->character) = 1;
       }
@@ -626,7 +626,7 @@ void game_loop(socklen_t cmmother_desc)
     if (emergency_unban) {
       emergency_unban = FALSE;
       mudlog(BRF, ADMLVL_IMMORT, TRUE, "Received SIGUSR2 - completely unrestricting game (emergent)");
-      ban_list = NULL;
+      ban_list = nullptr;
       circle_restrict = 0;
       num_invalid = 0;
     }
@@ -721,7 +721,7 @@ void heartbeat(int heart_pulse)
     save_mud_time(&time_info);
 
   if (!(heart_pulse % (30 * PASSES_PER_SEC))) {
-    timed_dt(NULL);
+    timed_dt(nullptr);
    }
 
   /* Every pulse! Don't want them to stink the place up... */
@@ -835,7 +835,7 @@ void echo_on(struct descriptor_data *d)
 char *make_prompt(struct descriptor_data *d)
 {
   static char prompt[MAX_PROMPT_LENGTH];
-  struct obj_data *chair = NULL;
+  struct obj_data *chair = nullptr;
   int flagged = FALSE;
 
   /* Note, prompt is truncated at MAX_PROMPT_LENGTH chars (structs.h) */
@@ -941,13 +941,13 @@ char *make_prompt(struct descriptor_data *d)
         if (count >= 0)
           len += count;
       }
-      if (d->snooping && d->snooping->character != NULL && len < sizeof(prompt)) {
+      if (d->snooping && d->snooping->character != nullptr && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "Snooping: (%s) - ", GET_NAME(d->snooping->character));
         flagged = TRUE;
         if (count >= 0)
           len += count;
       }
-      if (DRAGGING(d->character) && DRAGGING(d->character) != NULL && len < sizeof(prompt)) {
+      if (DRAGGING(d->character) && DRAGGING(d->character) != nullptr && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "Dragging: (%s) - ", GET_NAME(DRAGGING(d->character)));
         flagged = TRUE;
         if (count >= 0)
@@ -1587,12 +1587,12 @@ void write_to_q(const char *txt, struct txt_q *queue, int aliased)
 
   /* queue empty? */
   if (!queue->head) {
-    newt->next = NULL;
+    newt->next = nullptr;
     queue->head = queue->tail = newt;
   } else {
     queue->tail->next = newt;
     queue->tail = newt;
-    newt->next = NULL;
+    newt->next = nullptr;
   }
 }
 
@@ -1709,7 +1709,7 @@ const char RANDOM_COLORS[] = "bgcrmywBGCRMWY";
 size_t proc_colors(char *txt, size_t maxlen, int parse, char **choices)
 {
   extern char *default_color_choices[NUM_COLOR+1];
-  char *dest_char, *source_char, *color_char, *save_pos, *replacement = NULL;
+  char *dest_char, *source_char, *color_char, *save_pos, *replacement = nullptr;
   int i, temp_color;
   size_t wanted;
 
@@ -1794,7 +1794,7 @@ size_t proc_colors(char *txt, size_t maxlen, int parse, char **choices)
         if (isdigit(replacement[0]))
           *dest_char++ = ANSIEND;
       }
-      replacement = NULL;
+      replacement = nullptr;
     }
    /* If we couldn't find any correct color code, or we found it and
     * substituted above, let's just process the next character.
@@ -1804,7 +1804,7 @@ size_t proc_colors(char *txt, size_t maxlen, int parse, char **choices)
 
   } /* for loop */
 
-  /* make sure output is NULL - terminated */
+  /* make sure output is nullptr - terminated */
   *dest_char = '\0';
 
   wanted = strlen(source_char); /* see if we wanted more space */
@@ -1861,7 +1861,7 @@ size_t vwrite_to_output(struct descriptor_data *t, const char *format, va_list a
   buf_switches++;
 
   /* if the pool has a buffer in it, grab it */
-  if (bufpool != NULL) {
+  if (bufpool != nullptr) {
     t->large_outbuf = bufpool;
     bufpool = bufpool->next;
   } else {                      /* else create a new one */
@@ -1917,7 +1917,7 @@ struct in_addr *get_bind_addr()
   memset((char *) &bind_addr, 0, sizeof(bind_addr));
 
   /* If DLFT_IP is unspecified, use INADDR_ANY */
-  if (CONFIG_DFLT_IP == NULL) {
+  if (CONFIG_DFLT_IP == nullptr) {
     bind_addr.s_addr = htonl(INADDR_ANY);
   } else {
     /* If the parsing fails, use INADDR_ANY */
@@ -1959,7 +1959,7 @@ void init_descriptor (struct descriptor_data *newd, int desc)
   newd->idle_tics = 0;
   newd->output = newd->small_outbuf;
   newd->bufspace = SMALL_BUFSIZE - 1;
-  newd->login_time = time(0);
+  newd->login_time = time(nullptr);
   *newd->output = '\0';
   newd->bufptr = 0;
   newd->has_prompt = 1;  /* prompt is part of greetings */
@@ -1971,12 +1971,12 @@ void init_descriptor (struct descriptor_data *newd, int desc)
 
   CREATE(newd->comp, struct compr, 1);
   newd->comp->state = 0; /* we start in normal mode */
-    newd->comp->stream = NULL;
+    newd->comp->stream = nullptr;
 }
 
 void set_color(struct descriptor_data *d)
 {
-   if (d->character == NULL) {
+   if (d->character == nullptr) {
       CREATE(d->character, struct char_data, 1);
       clear_char(d->character);
       CREATE(d->character->player_specials, struct player_special_data, 1);
@@ -2007,7 +2007,7 @@ int new_descriptor(socklen_t s)
   socklen_t i;
   struct descriptor_data *newd;
   struct sockaddr_in peer;
-  struct hostent *from = NULL;
+  struct hostent *from = nullptr;
 
   /* accept the new connection */
   i = sizeof(peer);
@@ -2029,7 +2029,7 @@ int new_descriptor(socklen_t s)
     sockets_connected++;
 
   if (sockets_connected >= CONFIG_MAX_PLAYING) {
-    write_to_descriptor(desc, "Sorry, CircleMUD is full right now... please try again later!\r\n", NULL);
+    write_to_descriptor(desc, "Sorry, CircleMUD is full right now... please try again later!\r\n", nullptr);
       close(desc);
     return (0);
   }
@@ -2138,7 +2138,7 @@ int process_output(struct descriptor_data *t)
     if (t->large_outbuf) {
       t->large_outbuf->next = bufpool;
       bufpool = t->large_outbuf;
-      t->large_outbuf = NULL;
+      t->large_outbuf = nullptr;
       t->output = t->small_outbuf;
     }
     /* reset total bufspace back to that of a small buffer */
@@ -2384,7 +2384,7 @@ int process_input(struct descriptor_data *t)
   int buf_length, failed_subst;
   ssize_t bytes_read;
   size_t space_left;
-  char *ptr, *read_point, *write_point, *nl_pos = NULL;
+  char *ptr, *read_point, *write_point, *nl_pos = nullptr;
   char tmp[MAX_INPUT_LENGTH];
 
 const char compress_start[] =
@@ -2424,7 +2424,7 @@ const char compress_start[] =
       if (*read_point == (char)IAC && *(read_point + 1) == (char)DO && *(read_point + 2) == (char)COMPRESS2) {
 	/* compression just turned on */
 	/* first send plaintext start of the compression stream */
-	write_to_descriptor(t->descriptor, compress_start, NULL);
+	write_to_descriptor(t->descriptor, compress_start, nullptr);
 	
 	/* init the compression stream */	
 	CREATE(t->comp->stream, z_stream, 1);
@@ -2475,7 +2475,7 @@ const char compress_start[] =
  * that data is ready (process_input is only called if select indicates that
  * this descriptor is in the read set).  JE 2/23/95.
  */
-  } while (nl_pos == NULL);
+  } while (nl_pos == nullptr);
 
   /*
    * okay, at this point we have at least one newline in the string; now we
@@ -2484,7 +2484,7 @@ const char compress_start[] =
 
   read_point = t->inbuf;
 
-  while (nl_pos != NULL) {
+  while (nl_pos != nullptr) {
     write_point = tmp;
     space_left = MAX_INPUT_LENGTH - 1;
 
@@ -2568,7 +2568,7 @@ const char compress_start[] =
 
     /* see if there's another newline in the input buffer */
     read_point = ptr = nl_pos;
-    for (nl_pos = NULL; *ptr && !nl_pos; ptr++)
+    for (nl_pos = nullptr; *ptr && !nl_pos; ptr++)
       if (ISNEWL(*ptr))
 	nl_pos = ptr;
   }
@@ -2641,7 +2641,7 @@ void free_user(struct descriptor_data *d)
    return;
   }
 
-   if (d->user == NULL) {
+   if (d->user == nullptr) {
     send_to_imm("ERROR: free_user called but no user to free!");
     return;
    }
@@ -2689,32 +2689,32 @@ void close_socket(struct descriptor_data *d)
 
   /* Forget snooping */
   if (d->snooping)
-    d->snooping->snoop_by = NULL;
+    d->snooping->snoop_by = nullptr;
 
   if (d->snoop_by) {
     write_to_output(d->snoop_by, "Your victim is no longer among us.\r\n");
-    d->snoop_by->snooping = NULL;
+    d->snoop_by->snooping = nullptr;
   }
 
   if (d->character) {
     /* If we're switched, this resets the mobile taken. */
-    d->character->desc = NULL;
+    d->character->desc = nullptr;
 
     /* Plug memory leak, from Eric Green. */
     if (!IS_NPC(d->character) && PLR_FLAGGED(d->character, PLR_MAILING) && d->str) {
       if (*(d->str))
         free(*(d->str));
       free(d->str);
-      d->str = NULL;
+      d->str = nullptr;
     } else if (d->backstr && !IS_NPC(d->character) && !PLR_FLAGGED(d->character, PLR_WRITING)) {
       free(d->backstr);      /* editing description ... not olc */
-      d->backstr = NULL;
+      d->backstr = nullptr;
     }
     if (IS_PLAYING(d) || STATE(d) == CON_DISCONNECT) {
       struct char_data *link_challenged = d->original ? d->original : d->character;
 
       /* We are guaranteed to have a person. */
-      act("$n has lost $s link.", TRUE, link_challenged, 0, 0, TO_ROOM);
+      act("$n has lost $s link.", TRUE, link_challenged, nullptr, nullptr, TO_ROOM);
       save_char(link_challenged);
       mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(link_challenged)), TRUE, "Closing link to: %s.", GET_NAME(link_challenged));
     } else {
@@ -2725,7 +2725,7 @@ void close_socket(struct descriptor_data *d)
 
   /* JE 2/22/95 -- part of my unending quest to make switch stable */
   if (d->original && d->original->desc)
-    d->original->desc = NULL;
+    d->original->desc = nullptr;
 
   /* Clear the command history. */
   if (d->history) {
@@ -2858,7 +2858,7 @@ void unrestrict_game(int sig)
 /* clean up our zombie kids to avoid defunct processes */
 void reap(int sig)
 {
-  while (waitpid(-1, NULL, WNOHANG) > 0);
+  while (waitpid(-1, nullptr, WNOHANG) > 0);
 
   signal(SIGCHLD, reap);
 }
@@ -2920,7 +2920,7 @@ void signal_setup(void)
   interval.tv_usec = 0;
   itime.it_interval = interval;
   itime.it_value = interval;
-  setitimer(ITIMER_VIRTUAL, &itime, NULL);
+  setitimer(ITIMER_VIRTUAL, &itime, nullptr);
   signal(SIGVTALRM, checkpointing);
 
   /* just to be on the safe side: */
@@ -3004,7 +3004,7 @@ void send_to_all(const char *messg, ...)
   struct descriptor_data *i;
   va_list args;
 
-  if (messg == NULL)
+  if (messg == nullptr)
     return;
 
   for (i = descriptor_list; i; i = i->next) {
@@ -3028,7 +3028,7 @@ void send_to_outdoor(const char *messg, ...)
   for (i = descriptor_list; i; i = i->next) {
     va_list args;
 
-    if (STATE(i) != CON_PLAYING || i->character == NULL)
+    if (STATE(i) != CON_PLAYING || i->character == nullptr)
       continue;
     if (!AWAKE(i->character) || !OUTSIDE(i->character))
       continue;
@@ -3049,7 +3049,7 @@ void send_to_moon(const char *messg, ...)
   for (i = descriptor_list; i; i = i->next) {
     va_list args;
 
-    if (STATE(i) != CON_PLAYING || i->character == NULL)
+    if (STATE(i) != CON_PLAYING || i->character == nullptr)
       continue;
     if (!AWAKE(i->character) || !HAS_MOON(i->character))
       continue;
@@ -3070,7 +3070,7 @@ void send_to_planet(int type, int planet, const char *messg, ...)
   for (i = descriptor_list; i; i = i->next) {
     va_list args;
 
-    if (STATE(i) != CON_PLAYING || i->character == NULL)
+    if (STATE(i) != CON_PLAYING || i->character == nullptr)
       continue;
     if (!AWAKE(i->character) || !ROOM_FLAGGED(IN_ROOM(i->character), planet))
       continue;
@@ -3094,7 +3094,7 @@ void send_to_room(room_rnum room, const char *messg, ...)
   struct char_data *i;
   va_list args;
 
-  if (messg == NULL)
+  if (messg == nullptr)
     return;
 
   for (i = world[room].people; i; i = i->next_in_room) {
@@ -3140,21 +3140,21 @@ void send_to_room(room_rnum room, const char *messg, ...)
 
 
 
-const char *ACTNULL = "<NULL>";
+const char *ACTNULL = "<nullptr>";
 
 #define CHECK_NULL(pointer, expression) \
-  if ((pointer) == NULL) i = ACTNULL; else i = (expression);
+  if ((pointer) == nullptr) i = ACTNULL; else i = (expression);
 
 
 /* higher-level communication: the act() function */
 void perform_act(const char *orig, struct char_data *ch, struct obj_data *obj, const void *vict_obj, struct char_data *to)
 {
-  const char *i = NULL;
+  const char *i = nullptr;
   char lbuf[MAX_STRING_LENGTH], *buf, *j;
   bool uppercasenext = FALSE;
-  const struct char_data *dg_victim = NULL;
-  const struct obj_data *dg_target = NULL;
-  const char *dg_arg = NULL;
+  const struct char_data *dg_victim = nullptr;
+  const struct obj_data *dg_target = nullptr;
+  const char *dg_arg = nullptr;
 
   buf = lbuf;
 
@@ -3280,7 +3280,7 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
   int to_sleeping, res_sneak, res_hide, dcval = 0, resskill = 0;
 
   if (!str || !*str)
-    return NULL;
+    return nullptr;
 
   /* Warning: the following TO_SLEEP code is a hack. I wanted to be able to tell
    * act to deliver a message regardless of sleep without adding an additional 
@@ -3325,15 +3325,15 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
       perform_act(str, ch, obj, vict_obj, ch);
       return last_act_message;
     }
-    return NULL;
+    return nullptr;
   }
 
   if (type == TO_VICT) {
-    if ((to = (struct char_data *) vict_obj) != NULL && SENDOK(to) && (!resskill || (roll_skill(to, resskill) >= dcval))) {
+    if ((to = (struct char_data *) vict_obj) != nullptr && SENDOK(to) && (!resskill || (roll_skill(to, resskill) >= dcval))) {
       perform_act(str, ch, obj, vict_obj, to);
       return last_act_message;
     }
-    return NULL;
+    return nullptr;
   }
 
   if (type == TO_GMOTE) { 
@@ -3362,7 +3362,7 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
   else if (obj && IN_ROOM(obj) != NOWHERE)
     to = world[IN_ROOM(obj)].people;
   else {
-    return NULL;
+    return nullptr;
   }
 
   if ((type & TO_ROOM)) {
@@ -3372,7 +3372,7 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
      if(STATE(d) != CON_PLAYING)
       continue;
 
-     if (ch != NULL) {
+     if (ch != nullptr) {
       if (IN_ARENA(ch)) {
        if (PRF_FLAGGED(d->character, PRF_ARENAWATCH)) {
         if (arena_watch(d->character) == GET_ROOM_VNUM(IN_ROOM(ch))) {
@@ -3386,13 +3386,13 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
      } if (GET_EAVESDROP(d->character) > 0) {
        int roll = rand_number(1, 101);
        if (!resskill || (roll_skill(d->character, resskill) >= dcval)) {
-        if (ch != NULL && GET_EAVESDROP(d->character) == GET_ROOM_VNUM(IN_ROOM(ch)) && GET_SKILL(d->character, SKILL_EAVESDROP) > roll) {
+        if (ch != nullptr && GET_EAVESDROP(d->character) == GET_ROOM_VNUM(IN_ROOM(ch)) && GET_SKILL(d->character, SKILL_EAVESDROP) > roll) {
          char buf3[1000];
          *buf3 = '\0';
          sprintf(buf3, "-----Eavesdrop-----\r\n%s\r\n-----Eavesdrop-----\r\n", str);
          perform_act(buf3, ch, obj, vict_obj, d->character);
         }
-        else if (obj != NULL && GET_EAVESDROP(d->character) == GET_ROOM_VNUM(IN_ROOM(obj)) && GET_SKILL(d->character, SKILL_EAVESDROP) > roll) {
+        else if (obj != nullptr && GET_EAVESDROP(d->character) == GET_ROOM_VNUM(IN_ROOM(obj)) && GET_SKILL(d->character, SKILL_EAVESDROP) > roll) {
          char buf3[1000];
          *buf3 = '\0';
          sprintf(buf3, "-----Eavesdrop-----\r\n%s\r\n-----Eavesdrop-----\r\n", str);
@@ -3425,7 +3425,7 @@ void setup_log(const char *filename, int fd)
 
     s_fp = stderr;
 
-  if (filename == NULL || *filename == '\0') {
+  if (filename == nullptr || *filename == '\0') {
     /* No filename, set us up with the descriptor we just opened. */
     logfile = s_fp;
     puts("Using file descriptor for logging.");
@@ -3473,7 +3473,7 @@ int open_logfile(const char *filename, FILE *stderr_fp)
 
 void circle_sleep(struct timeval *timeout)
 {
-  if (select(0, (fd_set *) 0, (fd_set *) 0, (fd_set *) 0, timeout) < 0) {
+  if (select(0, (fd_set *) nullptr, (fd_set *) nullptr, (fd_set *) nullptr, timeout) < 0) {
     if (errno != EINTR) {
       perror("SYSERR: Select sleep");
       exit(1);
@@ -3525,7 +3525,7 @@ void send_to_range(room_vnum start, room_vnum finish, const char *messg, ...)
     log("send_to_range passed start room value greater then finish.");
     return;
   }
-  if (messg == NULL)
+  if (messg == nullptr)
     return;
 
   for (j = 0; j < top_of_world; j++) {

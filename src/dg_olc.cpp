@@ -78,7 +78,7 @@ ACMD(do_oasis_trigedit)
   if ((OLC_ZNUM(d) = real_zone_by_thing(number)) == NOWHERE) {
     send_to_char(ch, "Sorry, there is no zone for that number!\r\n");
     free(d->olc);
-    d->olc = NULL;
+    d->olc = nullptr;
     return;
   }
 
@@ -88,7 +88,7 @@ ACMD(do_oasis_trigedit)
   if (!can_edit_zone(ch, OLC_ZNUM(d))) {
     send_cannot_edit(ch, zone_table[OLC_ZNUM(d)].number);
     free(d->olc);
-    d->olc = NULL;
+    d->olc = nullptr;
     return;
   }
   OLC_NUM(d) = number;
@@ -108,7 +108,7 @@ ACMD(do_oasis_trigedit)
   disp = 1;
   }
 
-  act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
+  act("$n starts using OLC.", TRUE, d->character, nullptr, nullptr, TO_ROOM);
   SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
 
   mudlog(CMP, ADMLVL_IMMORT, TRUE,"OLC: %s starts editing zone %d [trigger](allowed zone %d)",
@@ -313,7 +313,7 @@ void trigedit_parse(struct descriptor_data *d, char *arg)
          case '6':
            OLC_MODE(d) = TRIGEDIT_COMMANDS;
            write_to_output(d, "Enter trigger commands: (/s saves /h for help)\r\n\r\n");
-           d->backstr = NULL;
+           d->backstr = nullptr;
            if (OLC_STORAGE(d)) {
              write_to_output(d, "%s", OLC_STORAGE(d));
              d->backstr = strdup(OLC_STORAGE(d));
@@ -381,7 +381,7 @@ void trigedit_parse(struct descriptor_data *d, char *arg)
 
     case TRIGEDIT_ARGUMENT:
       smash_tilde(arg);
-      OLC_TRIG(d)->arglist = (*arg?strdup(arg):NULL);
+      OLC_TRIG(d)->arglist = (*arg?strdup(arg):nullptr);
       OLC_VAL(d)++;
       break;
 
@@ -447,14 +447,14 @@ void trigedit_save(struct descriptor_data *d)
 
     CREATE(trig->cmdlist, struct cmdlist_element, 1);
     if (s) {
-      char *t = strtok(s, "\n\r"); /* strtok returns NULL if s is "\r\n" */
+      char *t = strtok(s, "\n\r"); /* strtok returns nullptr if s is "\r\n" */
       if (t)
         trig->cmdlist->cmd = strdup(t);
       else
         trig->cmdlist->cmd = strdup("* No script");
 
       cmd = trig->cmdlist;
-      while ((s = strtok(NULL, "\n\r"))) {
+      while ((s = strtok(nullptr, "\n\r"))) {
         CREATE(cmd->next, struct cmdlist_element, 1);
         cmd = cmd->next;
         cmd->cmd = strdup(s);
@@ -472,11 +472,11 @@ void trigedit_save(struct descriptor_data *d)
       if (GET_TRIG_RNUM(live_trig) == rnum) {
         if (live_trig->arglist) {
           free(live_trig->arglist);
-          live_trig->arglist = NULL;
+          live_trig->arglist = nullptr;
         }
         if (live_trig->name) {
           free(live_trig->name);
-          live_trig->name = NULL;
+          live_trig->name = nullptr;
         }
 
         if (proto->arglist)
@@ -487,11 +487,11 @@ void trigedit_save(struct descriptor_data *d)
         /* anything could have happened so we don't want to keep these */
         if (GET_TRIG_WAIT(live_trig)) {
           event_cancel(GET_TRIG_WAIT(live_trig));
-          GET_TRIG_WAIT(live_trig)=NULL;
+          GET_TRIG_WAIT(live_trig)=nullptr;
         }
         if (live_trig->var_list) {
           free_varlist(live_trig->var_list);
-          live_trig->var_list=NULL;
+          live_trig->var_list=nullptr;
         }
 
         live_trig->cmdlist = proto->cmdlist;
@@ -515,12 +515,12 @@ void trigedit_save(struct descriptor_data *d)
 
     CREATE(trig->cmdlist, struct cmdlist_element, 1);
     if (s) {
-      /* strtok returns NULL if s is "\r\n" */
+      /* strtok returns nullptr if s is "\r\n" */
       char *t = strtok(s, "\n\r");
       trig->cmdlist->cmd = strdup(t ? t : "* No script");
       cmd = trig->cmdlist;
 
-      while ((s = strtok(NULL, "\n\r"))) {
+      while ((s = strtok(nullptr, "\n\r"))) {
         CREATE(cmd->next, struct cmdlist_element, 1);
         cmd = cmd->next;
         cmd->cmd = strdup(s);
@@ -538,7 +538,7 @@ void trigedit_save(struct descriptor_data *d)
           GET_TRIG_RNUM(OLC_TRIG(d)) = rnum;
           new_index[rnum]->vnum = OLC_NUM(d);
           new_index[rnum]->number = 0;
-          new_index[rnum]->func = NULL;
+          new_index[rnum]->func = nullptr;
           CREATE(proto, struct trig_data, 1);
           new_index[rnum]->proto = proto;
           trig_data_copy(proto, trig);
@@ -563,7 +563,7 @@ void trigedit_save(struct descriptor_data *d)
       GET_TRIG_RNUM(OLC_TRIG(d)) = rnum;
       new_index[rnum]->vnum = OLC_NUM(d);
       new_index[rnum]->number = 0;
-      new_index[rnum]->func = NULL;
+      new_index[rnum]->func = nullptr;
 
       CREATE(proto, struct trig_data, 1);
       new_index[rnum]->proto = proto;
@@ -683,7 +683,7 @@ void dg_olc_script_copy(struct descriptor_data *d)
       editscript = editscript->next;
     }
   } else
-      OLC_SCRIPT(d) = NULL;
+      OLC_SCRIPT(d) = nullptr;
 }
 
 void dg_script_menu(struct descriptor_data *d)
@@ -751,7 +751,7 @@ int dg_script_edit_parse(struct descriptor_data *d, char *arg)
              After updating to OasisOLC 2.0.3 I discovered some malfunctions
              in this code, so I restructured it a bit. Now things work like this:
              OLC_SCRIPT(d) is assigned a copy of the edited things' proto_script.
-             OLC_OBJ(d), etc.. are initalized with proto_script = NULL;
+             OLC_OBJ(d), etc.. are initalized with proto_script = nullptr;
              On save, the saved copy is updated with OLC_SCRIPT(d) as new proto_script (freeing the old one).
              On quit/nosave, OLC_SCRIPT is free()'d, and the prototype not touched.
 
@@ -941,7 +941,7 @@ int format_script(struct descriptor_data *d)
       indent++;
       indent_next = FALSE;
     }
-    t = strtok(NULL, "\n\r");
+    t = strtok(nullptr, "\n\r");
   }
 
   if (indent)

@@ -37,7 +37,7 @@ SPECIAL(dump)
   int value = 0;
 
   for (k = world[IN_ROOM(ch)].contents; k; k = world[IN_ROOM(ch)].contents) {
-    act("$p vanishes in a puff of smoke!", FALSE, 0, k, 0, TO_ROOM);
+    act("$p vanishes in a puff of smoke!", FALSE, nullptr, k, nullptr, TO_ROOM);
     extract_obj(k);
   }
 
@@ -47,14 +47,14 @@ SPECIAL(dump)
   do_drop(ch, argument, cmd, SCMD_DROP);
 
   for (k = world[IN_ROOM(ch)].contents; k; k = world[IN_ROOM(ch)].contents) {
-    act("$p vanishes in a puff of smoke!", FALSE, 0, k, 0, TO_ROOM);
+    act("$p vanishes in a puff of smoke!", FALSE, nullptr, k, nullptr, TO_ROOM);
     value += MAX(1, MIN(50, GET_OBJ_COST(k) / 10));
     extract_obj(k);
   }
 
   if (value) {
     send_to_char(ch, "You are awarded for outstanding performance.\r\n");
-    act("$n has been awarded for being a good citizen.", TRUE, ch, 0, 0, TO_ROOM);
+    act("$n has been awarded for being a good citizen.", TRUE, ch, nullptr, nullptr, TO_ROOM);
 
     if (GET_LEVEL(ch) < 3)
       gain_exp(ch, value);
@@ -74,7 +74,7 @@ SPECIAL(mayor)
   const char close_path[] =
 	"W3a3003b33000c111d0d111CE333333CE22c222112212111a1S.";
 
-  static const char *path = NULL;
+  static const char *path = nullptr;
   static int path_index;
   static bool move = FALSE;
 
@@ -103,39 +103,39 @@ SPECIAL(mayor)
 
   case 'W':
     GET_POS(ch) = POS_STANDING;
-    act("$n awakens and groans loudly.", FALSE, ch, 0, 0, TO_ROOM);
+    act("$n awakens and groans loudly.", FALSE, ch, nullptr, nullptr, TO_ROOM);
     break;
 
   case 'S':
     GET_POS(ch) = POS_SLEEPING;
-    act("$n lies down and instantly falls asleep.", FALSE, ch, 0, 0, TO_ROOM);
+    act("$n lies down and instantly falls asleep.", FALSE, ch, nullptr, nullptr, TO_ROOM);
     break;
 
   case 'a':
-    act("$n says 'Hello Honey!'", FALSE, ch, 0, 0, TO_ROOM);
-    act("$n smirks.", FALSE, ch, 0, 0, TO_ROOM);
+    act("$n says 'Hello Honey!'", FALSE, ch, nullptr, nullptr, TO_ROOM);
+    act("$n smirks.", FALSE, ch, nullptr, nullptr, TO_ROOM);
     break;
 
   case 'b':
     act("$n says 'What a view!  I must get something done about that dump!'",
-	FALSE, ch, 0, 0, TO_ROOM);
+	FALSE, ch, nullptr, nullptr, TO_ROOM);
     break;
 
   case 'c':
     act("$n says 'Vandals!  Youngsters nowadays have no respect for anything!'",
-	FALSE, ch, 0, 0, TO_ROOM);
+	FALSE, ch, nullptr, nullptr, TO_ROOM);
     break;
 
   case 'd':
-    act("$n says 'Good day, citizens!'", FALSE, ch, 0, 0, TO_ROOM);
+    act("$n says 'Good day, citizens!'", FALSE, ch, nullptr, nullptr, TO_ROOM);
     break;
 
   case 'e':
-    act("$n says 'I hereby declare the bazaar open!'", FALSE, ch, 0, 0, TO_ROOM);
+    act("$n says 'I hereby declare the bazaar open!'", FALSE, ch, nullptr, nullptr, TO_ROOM);
     break;
 
   case 'E':
-    act("$n says 'I hereby declare Midgaard closed!'", FALSE, ch, 0, 0, TO_ROOM);
+    act("$n says 'I hereby declare Midgaard closed!'", FALSE, ch, nullptr, nullptr, TO_ROOM);
     break;
 
   case 'O':
@@ -308,8 +308,8 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
       /* OK, player has had enough - position is already stored, so throw them back to the start */ 
       char_from_room(ch); 
       char_to_room(ch, real_room(gauntlet_info[0][1])); 
-      act("$n suddenly appears looking relieved after $s trial in the Gauntlet",FALSE,ch,0,ch,TO_NOTVICT); 
-      act("You are returned to the start of the Gauntlet",FALSE,ch,0,ch,TO_VICT); 
+      act("$n suddenly appears looking relieved after $s trial in the Gauntlet",FALSE,ch,nullptr,ch,TO_NOTVICT); 
+      act("You are returned to the start of the Gauntlet",FALSE,ch,nullptr,ch,TO_VICT); 
 
       /* Hit point penalty for surrendering */
       ch->decCurHealth(2000);
@@ -380,7 +380,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
         if (proceed == 0) 
         { 
           send_to_char(ch, buf); 
-          act(buf2, FALSE, ch, 0, ch, TO_ROOM); 
+          act(buf2, FALSE, ch, nullptr, ch, TO_ROOM); 
           return TRUE; 
         } 
       } 
@@ -518,7 +518,7 @@ SPECIAL(gauntlet_rest)  /* Jamdog - 20th Feb 2007 */
         if (proceed == 0) 
         { 
           send_to_char(ch, buf); 
-          act(buf2, FALSE, ch, 0, ch, TO_ROOM); 
+          act(buf2, FALSE, ch, nullptr, ch, TO_ROOM); 
           return TRUE; 
         } 
       } 
@@ -541,8 +541,8 @@ void npc_steal(struct char_data *ch, struct char_data *victim)
     return;
 
   if (AWAKE(victim) && (rand_number(0, GET_LEVEL(ch)) == 0)) {
-    act("You discover that $n has $s hands in your wallet.", FALSE, ch, 0, victim, TO_VICT);
-    act("$n tries to steal zenni from $N.", TRUE, ch, 0, victim, TO_NOTVICT);
+    act("You discover that $n has $s hands in your wallet.", FALSE, ch, nullptr, victim, TO_VICT);
+    act("$n tries to steal zenni from $N.", TRUE, ch, nullptr, victim, TO_NOTVICT);
   } else {
     /* Steal some gold coins */
     gold = (GET_GOLD(victim) * rand_number(1, 10)) / 100;
@@ -565,9 +565,9 @@ SPECIAL(snake)
   if (IN_ROOM(FIGHTING(ch)) != IN_ROOM(ch) || rand_number(0, GET_LEVEL(ch)) != 0)
     return (FALSE);
 
-  act("$n bites $N!", 1, ch, 0, FIGHTING(ch), TO_NOTVICT);
-  act("$n bites you!", 1, ch, 0, FIGHTING(ch), TO_VICT);
-  call_magic(ch, FIGHTING(ch), 0, SPELL_POISON, GET_LEVEL(ch), CAST_SPELL, NULL);
+  act("$n bites $N!", 1, ch, nullptr, FIGHTING(ch), TO_NOTVICT);
+  act("$n bites you!", 1, ch, nullptr, FIGHTING(ch), TO_VICT);
+  call_magic(ch, FIGHTING(ch), nullptr, SPELL_POISON, GET_LEVEL(ch), CAST_SPELL, nullptr);
   return (TRUE);
 }
 
@@ -605,24 +605,24 @@ SPECIAL(magic_user_orig)
       break;
 
   /* if I didn't pick any of those, then just slam the guy I'm fighting */
-  if (vict == NULL && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch))
+  if (vict == nullptr && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch))
     vict = FIGHTING(ch);
 
   /* Hm...didn't pick anyone...I'll wait a round. */
-  if (vict == NULL)
+  if (vict == nullptr)
     return (TRUE);
 
   if (GET_LEVEL(ch) > 13 && rand_number(0, 10) == 0)
-    cast_spell(ch, vict, NULL, SPELL_POISON, NULL);
+    cast_spell(ch, vict, nullptr, SPELL_POISON, nullptr);
 
   if (GET_LEVEL(ch) > 7 && rand_number(0, 8) == 0)
-    cast_spell(ch, vict, NULL, SPELL_BLINDNESS, NULL);
+    cast_spell(ch, vict, nullptr, SPELL_BLINDNESS, nullptr);
 
   if (GET_LEVEL(ch) > 12 && rand_number(0, 12) == 0) {
     if (IS_EVIL(ch))
-      cast_spell(ch, vict, NULL, SPELL_ENERGY_DRAIN, NULL);
+      cast_spell(ch, vict, nullptr, SPELL_ENERGY_DRAIN, nullptr);
     else if (IS_GOOD(ch))
-      cast_spell(ch, vict, NULL, SPELL_DISPEL_EVIL, NULL);
+      cast_spell(ch, vict, nullptr, SPELL_DISPEL_EVIL, nullptr);
   }
 
   if (rand_number(0, 4))
@@ -631,32 +631,32 @@ SPECIAL(magic_user_orig)
   switch (GET_LEVEL(ch)) {
   case 4:
   case 5:
-    cast_spell(ch, vict, NULL, SPELL_MAGIC_MISSILE, NULL);
+    cast_spell(ch, vict, nullptr, SPELL_MAGIC_MISSILE, nullptr);
     break;
   case 6:
   case 7:
-    cast_spell(ch, vict, NULL, SPELL_CHILL_TOUCH, NULL);
+    cast_spell(ch, vict, nullptr, SPELL_CHILL_TOUCH, nullptr);
     break;
   case 8:
   case 9:
-    cast_spell(ch, vict, NULL, SPELL_BURNING_HANDS, NULL);
+    cast_spell(ch, vict, nullptr, SPELL_BURNING_HANDS, nullptr);
     break;
   case 10:
   case 11:
-    cast_spell(ch, vict, NULL, SPELL_SHOCKING_GRASP, NULL);
+    cast_spell(ch, vict, nullptr, SPELL_SHOCKING_GRASP, nullptr);
     break;
   case 12:
   case 13:
-    cast_spell(ch, vict, NULL, SPELL_LIGHTNING_BOLT, NULL);
+    cast_spell(ch, vict, nullptr, SPELL_LIGHTNING_BOLT, nullptr);
     break;
   case 14:
   case 15:
   case 16:
   case 17:
-    cast_spell(ch, vict, NULL, SPELL_COLOR_SPRAY, NULL);
+    cast_spell(ch, vict, nullptr, SPELL_COLOR_SPRAY, nullptr);
     break;
   default:
-    cast_spell(ch, vict, NULL, SPELL_FIREBALL, NULL);
+    cast_spell(ch, vict, nullptr, SPELL_FIREBALL, nullptr);
     break;
   }
   return (TRUE);
@@ -691,7 +691,7 @@ SPECIAL(guild_guard)
       continue;
 
     send_to_char(ch, "%s", buf);
-    act(buf2, FALSE, ch, 0, 0, TO_ROOM);
+    act(buf2, FALSE, ch, nullptr, nullptr, TO_ROOM);
     return (TRUE);
   }
 
@@ -735,7 +735,7 @@ SPECIAL(fido)
     if (!IS_CORPSE(i))
       continue;
 
-    act("$n savagely devours a corpse.", FALSE, ch, 0, 0, TO_ROOM);
+    act("$n savagely devours a corpse.", FALSE, ch, nullptr, nullptr, TO_ROOM);
     for (temp = i->contains; temp; temp = next_obj) {
       next_obj = temp->next_content;
       obj_from_obj(temp);
@@ -760,7 +760,7 @@ SPECIAL(janitor)
       continue;
     if (GET_OBJ_TYPE(i) == ITEM_DRINKCON || GET_OBJ_COST(i) >= 100)
       continue;
-    act("$n picks up some trash.", FALSE, ch, 0, 0, TO_ROOM);
+    act("$n picks up some trash.", FALSE, ch, nullptr, nullptr, TO_ROOM);
     obj_from_room(i);
     obj_to_char(i, ch);
     return (TRUE);
@@ -779,19 +779,19 @@ SPECIAL(cityguard)
 
   max_evil = 1000;
   min_cha = 6;
-  spittle = evil = NULL;
+  spittle = evil = nullptr;
 
   for (tch = world[IN_ROOM(ch)].people; tch; tch = tch->next_in_room) {
     if (!CAN_SEE(ch, tch))
       continue;
 
     if (!IS_NPC(tch) && PLR_FLAGGED(tch, PLR_KILLER)) {
-      act("$n screams 'HEY!!!  You're one of those PLAYER KILLERS!!!!!!'", FALSE, ch, 0, 0, TO_ROOM);
+      act("$n screams 'HEY!!!  You're one of those PLAYER KILLERS!!!!!!'", FALSE, ch, nullptr, nullptr, TO_ROOM);
       return (TRUE);
     }
 
     if (!IS_NPC(tch) && PLR_FLAGGED(tch, PLR_THIEF)) {
-      act("$n screams 'HEY!!!  You're one of those PLAYER THIEVES!!!!!!'", FALSE, ch, 0, 0, TO_ROOM);
+      act("$n screams 'HEY!!!  You're one of those PLAYER THIEVES!!!!!!'", FALSE, ch, nullptr, nullptr, TO_ROOM);
       return (TRUE);
     }
 
@@ -807,7 +807,7 @@ SPECIAL(cityguard)
   }
 
   if (evil && GET_ALIGNMENT(FIGHTING(evil)) >= 0) {
-    act("$n screams 'PROTECT THE INNOCENT!  BANZAI!  CHARGE!  ARARARAGGGHH!'", FALSE, ch, 0, 0, TO_ROOM);
+    act("$n screams 'PROTECT THE INNOCENT!  BANZAI!  CHARGE!  ARARARAGGGHH!'", FALSE, ch, nullptr, nullptr, TO_ROOM);
     return (TRUE);
   }
 
@@ -856,7 +856,7 @@ SPECIAL(pet_shops)
 
     two_arguments(argument, buf, pet_name);
 
-    if (!(pet = get_char_room(buf, NULL, pet_room)) || !IS_NPC(pet)) {
+    if (!(pet = get_char_room(buf, nullptr, pet_room)) || !IS_NPC(pet)) {
       send_to_char(ch, "There is no such pet!\r\n");
       return (TRUE);
     }
@@ -889,7 +889,7 @@ SPECIAL(pet_shops)
     IS_CARRYING_N(pet) = 100;
 
     send_to_char(ch, "May you enjoy your pet.\r\n");
-    act("$n buys $N as a pet.", FALSE, ch, 0, pet, TO_ROOM);
+    act("$n buys $N as a pet.", FALSE, ch, nullptr, pet, TO_ROOM);
 
     return (TRUE);
   }
@@ -901,7 +901,7 @@ SPECIAL(pet_shops)
 SPECIAL(auction)
 {
   room_rnum auct_room;
-  struct obj_data *obj, *next_obj, *obj2 = NULL;
+  struct obj_data *obj, *next_obj, *obj2 = nullptr;
   int found = FALSE;
 
   /* Gross. */
@@ -915,9 +915,9 @@ SPECIAL(auction)
       obj2 = obj;
       found = TRUE;
 
-      if (GET_CURBID(obj2) != -1 && GET_AUCTIME(obj2) + 518400 > time(0)) {
+      if (GET_CURBID(obj2) != -1 && GET_AUCTIME(obj2) + 518400 > time(nullptr)) {
        send_to_char(ch, "Unable to cancel. Someone has already bid on it and their bid license hasn't expired.\r\n");
-       time_t remain = (GET_AUCTIME(obj2) + 518400) - time(0);
+       time_t remain = (GET_AUCTIME(obj2) + 518400) - time(nullptr);
        int day = (int)((remain % 604800) / 86400);
        int hour = (int)((remain % 86400) / 3600);
        int minu = (int)((remain % 3600) / 60);
@@ -968,8 +968,8 @@ SPECIAL(auction)
         continue;
       }
 
-      if (GET_AUCTIME(obj2) + 86400 > time(0)) {
-        time_t remain = (GET_AUCTIME(obj2) + 86400) - time(0);
+      if (GET_AUCTIME(obj2) + 86400 > time(nullptr)) {
+        time_t remain = (GET_AUCTIME(obj2) + 86400) - time(nullptr);
         int hour = (int)((remain % 86400) / 3600);
         int minu = (int)((remain % 3600) / 60);
         send_to_char(ch, "Unable to purchase %s, minimum time to bid is 24 hours. %d hour%s and %d minute%s remain.\r\n", obj2->short_description, hour, hour > 1 ? "s" : "", minu, minu > 1 ? "s" : "");
@@ -1000,7 +1000,7 @@ SPECIAL(auction)
       }
 
       if (founded == FALSE) {
-       struct char_data *vict = NULL;
+       struct char_data *vict = nullptr;
        int is_file = FALSE, player_i = 0;
 
        CREATE(vict, struct char_data, 1);
@@ -1043,7 +1043,7 @@ SPECIAL(auction)
 
     value = atoi(arg2);
 
-    if (!(obj2 = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
+    if (!(obj2 = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
      send_to_char(ch, "You don't have that item to auction.\r\n");
      return (TRUE);
     }
@@ -1053,12 +1053,12 @@ SPECIAL(auction)
     }
 
     if (OBJ_FLAGGED(obj2, ITEM_BROKEN)) {
-     act("$P is broken and we will not accept it.", FALSE, ch, 0, obj2, TO_CHAR);
+     act("$P is broken and we will not accept it.", FALSE, ch, nullptr, obj2, TO_CHAR);
      return (TRUE);
     }
 
     if (OBJ_FLAGGED(obj2, ITEM_NODONATE)) {
-     act("$P is junk and we will not accept it.", FALSE, ch, 0, obj2, TO_CHAR);
+     act("$P is junk and we will not accept it.", FALSE, ch, nullptr, obj2, TO_CHAR);
      return (TRUE);
     }
  
@@ -1073,7 +1073,7 @@ SPECIAL(auction)
     GET_STARTBID(obj2) = GET_BID(obj2);
     GET_AUCTER(obj2) = GET_ID(ch);
     GET_AUCTERN(obj2) = strdup(GET_NAME(ch));
-    GET_AUCTIME(obj2) = time(0);
+    GET_AUCTIME(obj2) = time(nullptr);
     GET_CURBID(obj2) = -1;
     obj_from_char(obj2);
     obj_to_room(obj2, auct_room);
@@ -1103,7 +1103,7 @@ SPECIAL(auction)
 
 SPECIAL(healtank)
 {
-   struct obj_data *htank = NULL, *i;
+   struct obj_data *htank = nullptr, *i;
    char arg[MAX_INPUT_LENGTH];
    one_argument(argument, arg);
 
@@ -1155,8 +1155,8 @@ SPECIAL(healtank)
      REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CHARGE);
      GET_CHARGETO(ch) = 0;
      GET_BARRIER(ch) = 0;
-     act("@wYou step inside the healing tank and put on its breathing mask. A water like solution pours over your body until the tank is full.@n", TRUE, ch, 0, 0, TO_CHAR);
-     act("@C$n@w steps inside the healing tank and puts on its breathing mask. A water like solution pours over $s body until the tank is full.@n", TRUE, ch, 0, 0, TO_ROOM);
+     act("@wYou step inside the healing tank and put on its breathing mask. A water like solution pours over your body until the tank is full.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+     act("@C$n@w steps inside the healing tank and puts on its breathing mask. A water like solution pours over $s body until the tank is full.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
      SET_BIT_AR(PLR_FLAGS(ch), PLR_HEALT);
      SITS(ch) = htank;
      SITTING(htank) = ch;
@@ -1171,11 +1171,11 @@ SPECIAL(healtank)
     return (TRUE);
    }
    else {
-    act("@wThe healing tank drains and you exit it shortly after.", TRUE, ch, 0, 0, TO_CHAR);
-    act("@C$n@w exits the healing tank after letting it drain.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@wThe healing tank drains and you exit it shortly after.", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@C$n@w exits the healing tank after letting it drain.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
     REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_HEALT);
-    SITTING(htank) = NULL;
-    SITS(ch) = NULL;
+    SITTING(htank) = nullptr;
+    SITS(ch) = nullptr;
     return (TRUE);
    }
   } // End of Exit argument
@@ -1243,8 +1243,8 @@ SPECIAL(augmenter)
      else if (GET_GOLD(ch) < strcost)
       send_to_char(ch, "You can not afford the price!\r\n");
      else { /* They can augment it! */
-      act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+      act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
       ch->real_abils.str += 1;
       GET_GOLD(ch) -= strcost;
       save_char(ch);
@@ -1255,8 +1255,8 @@ SPECIAL(augmenter)
      else if (GET_GOLD(ch) < intcost)
       send_to_char(ch, "You can not afford the price!\r\n");
      else { /* They can augment it! */
-      act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+      act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
       ch->real_abils.intel += 1;
       GET_GOLD(ch) -= intcost;
       save_char(ch);
@@ -1267,8 +1267,8 @@ SPECIAL(augmenter)
      else if (GET_GOLD(ch) < concost)
       send_to_char(ch, "You can not afford the price!\r\n");
      else { /* They can augment it! */
-      act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+      act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
       ch->real_abils.con += 1;
       GET_GOLD(ch) -= concost;
       save_char(ch);
@@ -1279,8 +1279,8 @@ SPECIAL(augmenter)
      else if (GET_GOLD(ch) < specost)
       send_to_char(ch, "You can not afford the price!\r\n");
      else { /* They can augment it! */
-      act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+      act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
       ch->real_abils.cha += 1;
       GET_GOLD(ch) -= specost;
       save_char(ch);
@@ -1291,8 +1291,8 @@ SPECIAL(augmenter)
      else if (GET_GOLD(ch) < agicost)
       send_to_char(ch, "You can not afford the price!\r\n");
      else { /* They can augment it! */
-      act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+      act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
       ch->real_abils.dex += 1;
       GET_GOLD(ch) -= agicost;
       save_char(ch);
@@ -1303,8 +1303,8 @@ SPECIAL(augmenter)
      else if (GET_GOLD(ch) < wiscost)
       send_to_char(ch, "You can not afford the price!\r\n");
      else { /* They can augment it! */
-      act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+      act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
       ch->real_abils.wis += 1;
       GET_GOLD(ch) -= wiscost;
       save_char(ch);
@@ -1322,7 +1322,7 @@ SPECIAL(augmenter)
 /* This controls gravity generator functions */
 SPECIAL(gravity)
 {
-   struct obj_data *i, *obj = NULL;
+   struct obj_data *i, *obj = nullptr;
    char arg[MAX_INPUT_LENGTH];
    int match = FALSE;
 
@@ -1352,7 +1352,7 @@ SPECIAL(gravity)
    }
    else if (!strcasecmp("N", arg) || !strcasecmp("n", arg) || !strcasecmp("0", arg)) {
     send_to_char(ch, "You punch in normal gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-    act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_VEGETA) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_GRAVITYX10)) {
      ROOM_GRAVITY(IN_ROOM(ch)) = 10;
      GET_OBJ_WEIGHT(obj) = 0;
@@ -1373,7 +1373,7 @@ SPECIAL(gravity)
    }
    else if (!strcasecmp("10", arg) && ROOM_GRAVITY(IN_ROOM(ch)) != 10 && (ROOM_FLAGGED(IN_ROOM(ch), ROOM_VEGETA) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_GRAVITYX10))) {
     send_to_char(ch, "You punch in normal gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-    act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
      REMOVE_BIT_AR(ROOM_FLAGS(IN_ROOM(ch)), ROOM_AURA);
      send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
@@ -1384,7 +1384,7 @@ SPECIAL(gravity)
    }
    else if (!strcasecmp("10", arg)) {
     send_to_char(ch, "You punch in ten times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-    act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
     ROOM_GRAVITY(IN_ROOM(ch)) = 10;
      GET_OBJ_WEIGHT(obj) = 10;
     match = TRUE;
@@ -1395,7 +1395,7 @@ SPECIAL(gravity)
    }
    else if (!strcasecmp("20", arg)) {
     send_to_char(ch, "You punch in twenty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-    act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
      REMOVE_BIT_AR(ROOM_FLAGS(IN_ROOM(ch)), ROOM_AURA);
      send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
@@ -1410,7 +1410,7 @@ SPECIAL(gravity)
    }
    else if (!strcasecmp("30", arg)) {
     send_to_char(ch, "You punch in thirty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-    act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
      REMOVE_BIT_AR(ROOM_FLAGS(IN_ROOM(ch)), ROOM_AURA);
      send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
@@ -1425,7 +1425,7 @@ SPECIAL(gravity)
    }
    else if (!strcasecmp("40", arg)) {
     send_to_char(ch, "You punch in fourty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-    act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
      REMOVE_BIT_AR(ROOM_FLAGS(IN_ROOM(ch)), ROOM_AURA);
      send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
@@ -1440,7 +1440,7 @@ SPECIAL(gravity)
    }
    else if (!strcasecmp("50", arg)) {
     send_to_char(ch, "You punch in fifty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-    act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
      REMOVE_BIT_AR(ROOM_FLAGS(IN_ROOM(ch)), ROOM_AURA);
      send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
@@ -1455,7 +1455,7 @@ SPECIAL(gravity)
    }
    else if (!strcasecmp("100", arg)) {
     send_to_char(ch, "You punch in one hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-    act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
      REMOVE_BIT_AR(ROOM_FLAGS(IN_ROOM(ch)), ROOM_AURA);
      send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
@@ -1470,7 +1470,7 @@ SPECIAL(gravity)
    }
    else if (!strcasecmp("200", arg)) {
     send_to_char(ch, "You punch in two hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-    act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
      REMOVE_BIT_AR(ROOM_FLAGS(IN_ROOM(ch)), ROOM_AURA);
      send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
@@ -1485,7 +1485,7 @@ SPECIAL(gravity)
    }
    else if (!strcasecmp("300", arg)) {
     send_to_char(ch, "You punch in three hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-    act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
      REMOVE_BIT_AR(ROOM_FLAGS(IN_ROOM(ch)), ROOM_AURA);
      send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
@@ -1500,7 +1500,7 @@ SPECIAL(gravity)
    }
    else if (!strcasecmp("400", arg)) {
     send_to_char(ch, "You punch in four hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-    act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
      REMOVE_BIT_AR(ROOM_FLAGS(IN_ROOM(ch)), ROOM_AURA);
      send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
@@ -1515,7 +1515,7 @@ SPECIAL(gravity)
    }
    else if (!strcasecmp("500", arg)) {
     send_to_char(ch, "You punch in five hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-    act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
      REMOVE_BIT_AR(ROOM_FLAGS(IN_ROOM(ch)), ROOM_AURA);
      send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
@@ -1530,7 +1530,7 @@ SPECIAL(gravity)
    }
    else if (!strcasecmp("1000", arg)) {
     send_to_char(ch, "You punch in one thousand times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-    act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
      REMOVE_BIT_AR(ROOM_FLAGS(IN_ROOM(ch)), ROOM_AURA);
      send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
@@ -1545,7 +1545,7 @@ SPECIAL(gravity)
    }
    else if (!strcasecmp("5000", arg)) {
     send_to_char(ch, "You punch in five thousand times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-    act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
      REMOVE_BIT_AR(ROOM_FLAGS(IN_ROOM(ch)), ROOM_AURA);
      send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
@@ -1560,7 +1560,7 @@ SPECIAL(gravity)
    }
    else if (!strcasecmp("10000", arg)) {
     send_to_char(ch, "You punch in ten thousand times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-    act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
      REMOVE_BIT_AR(ROOM_FLAGS(IN_ROOM(ch)), ROOM_AURA);
      send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
@@ -1587,7 +1587,7 @@ SPECIAL(bank)
 {
   int amount, num = 0;
 
-   struct obj_data *i, *obj = NULL;
+   struct obj_data *i, *obj = nullptr;
 
    for (i = world[IN_ROOM(ch)].contents; i; i = i->next_content) {
     if (GET_OBJ_VNUM(i) == 3034) {
@@ -1611,7 +1611,7 @@ SPECIAL(bank)
     return (TRUE);
   } else if (CMD_IS("wire")) {
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-    struct char_data *vict = NULL;
+    struct char_data *vict = nullptr;
 
     two_arguments(argument, arg, arg2);
 
@@ -1632,7 +1632,7 @@ SPECIAL(bank)
       send_to_char(ch, "You want to transfer it to who?!\r\n");
       return (TRUE);
     }
-    if (!(vict = get_player_vis(ch, arg2, NULL, FIND_CHAR_WORLD))) {
+    if (!(vict = get_player_vis(ch, arg2, nullptr, FIND_CHAR_WORLD))) {
        int is_file = FALSE, player_i = 0;
        char name[MAX_INPUT_LENGTH];
 
@@ -1649,7 +1649,7 @@ SPECIAL(bank)
           send_to_char(ch, "That person doesn't exist.\r\n");
           return (TRUE);
        }
-       if (ch->desc->user == NULL) {
+       if (ch->desc->user == nullptr) {
         send_to_char(ch, "There is an error. Report to Iovan.");
         return (TRUE);
        }
@@ -1672,7 +1672,7 @@ SPECIAL(bank)
        send_to_char(vict, "@WYou have just had @Y%s@W zenni wired into your bank account.@n\r\n", add_commas(amount));
      }
     send_to_char(ch, "You transfer %s zenni to them.\r\n", add_commas(amount));
-    act("$n makes a bank transaction.", TRUE, ch, 0, FALSE, TO_ROOM);
+    act("$n makes a bank transaction.", TRUE, ch, nullptr, FALSE, TO_ROOM);
     return (TRUE);
   } else if (CMD_IS("deposit")) {
 
@@ -1692,7 +1692,7 @@ SPECIAL(bank)
     GET_GOLD(ch) -= amount;
     GET_BANK_GOLD(ch) += amount;
     send_to_char(ch, "You deposit %d zenni.\r\n", amount);
-    act("$n makes a bank transaction.", TRUE, ch, 0, FALSE, TO_ROOM);
+    act("$n makes a bank transaction.", TRUE, ch, nullptr, FALSE, TO_ROOM);
     return (TRUE);
   } else if (CMD_IS("withdraw")) {
 
@@ -1732,7 +1732,7 @@ SPECIAL(bank)
        GET_BANK_GOLD(ch) -= amount + 1;
       }
       send_to_char(ch, "You withdraw %s zenni,  and pay %s in withdraw fees.\r\n.\r\n", add_commas(amount), add_commas(num));
-      act("$n makes a bank transaction.", TRUE, ch, 0, FALSE, TO_ROOM);
+      act("$n makes a bank transaction.", TRUE, ch, nullptr, FALSE, TO_ROOM);
       return (TRUE);
     }
     GET_GOLD(ch) += amount;
@@ -1744,7 +1744,7 @@ SPECIAL(bank)
        GET_BANK_GOLD(ch) -= amount + 1;
       }
     send_to_char(ch, "You withdraw %s zenni, and pay %s in withdraw fees.\r\n", add_commas(amount), add_commas(num));
-    act("$n makes a bank transaction.", TRUE, ch, 0, FALSE, TO_ROOM);
+    act("$n makes a bank transaction.", TRUE, ch, nullptr, FALSE, TO_ROOM);
     return (TRUE);
   } else
     return (FALSE);
@@ -1764,7 +1764,7 @@ SPECIAL(cleric_marduk)
       break;
 
   /* if I didn't pick any of those, then just slam the guy I'm fighting */
-  if (vict == NULL)
+  if (vict == nullptr)
     vict = FIGHTING(ch);
 
   num_used = 12;
@@ -1774,51 +1774,51 @@ SPECIAL(cleric_marduk)
   if ( (tmp == 7 ) || (tmp == 8) || (tmp == 9) || (tmp == 10)) {
     tmp = rand_number(1, num_used);
       if ((tmp == 1) && (GET_LEVEL(ch) > 13)) {
-        cast_spell(ch, vict, NULL, SPELL_EARTHQUAKE, NULL);
+        cast_spell(ch, vict, nullptr, SPELL_EARTHQUAKE, nullptr);
         return TRUE;
       }
       if ((tmp == 2) && ( (GET_LEVEL(ch) > 8) && (IS_EVIL(vict)))) {
-        cast_spell(ch, vict, NULL, SPELL_DISPEL_EVIL, NULL);
+        cast_spell(ch, vict, nullptr, SPELL_DISPEL_EVIL, nullptr);
         return TRUE;
       }
       if ((tmp == 3) && (GET_LEVEL(ch) > 4 )) {
-        cast_spell(ch, vict, NULL, SPELL_BESTOW_CURSE, NULL);
+        cast_spell(ch, vict, nullptr, SPELL_BESTOW_CURSE, nullptr);
         return TRUE;
       }
       if ((tmp == 4) && ((GET_LEVEL(ch) > 8) && (IS_GOOD(vict)))) {
-        cast_spell(ch, vict, NULL, SPELL_DISPEL_GOOD, NULL);
+        cast_spell(ch, vict, nullptr, SPELL_DISPEL_GOOD, nullptr);
         return TRUE;
       }
       if ((tmp == 5) && (GET_LEVEL(ch) > 4 && affected_by_spell(ch, SPELL_BESTOW_CURSE))) {
-        cast_spell(ch, ch, NULL, SPELL_REMOVE_CURSE, NULL);
+        cast_spell(ch, ch, nullptr, SPELL_REMOVE_CURSE, nullptr);
         return TRUE;
       }
       if ((tmp == 6) && (GET_LEVEL(ch) > 6 && affected_by_spell(ch, SPELL_POISON))) {
-        cast_spell(ch, ch, NULL, SPELL_NEUTRALIZE_POISON, NULL);
+        cast_spell(ch, ch, nullptr, SPELL_NEUTRALIZE_POISON, nullptr);
         return TRUE;
       }
       if (tmp == 7) {
-        cast_spell(ch, ch, NULL, SPELL_CURE_LIGHT, NULL);
+        cast_spell(ch, ch, nullptr, SPELL_CURE_LIGHT, nullptr);
         return TRUE;
       }
       if ((tmp == 8) && (GET_LEVEL(ch) > 6 ) && (!IS_UNDEAD(vict))) {
-        cast_spell(ch, vict, NULL, SPELL_POISON, NULL);
+        cast_spell(ch, vict, nullptr, SPELL_POISON, nullptr);
         return TRUE;
       }
       if (tmp == 9 && GET_LEVEL(ch) > 8) {
-        cast_spell(ch, ch, NULL, SPELL_CURE_CRITIC, NULL);
+        cast_spell(ch, ch, nullptr, SPELL_CURE_CRITIC, nullptr);
         return TRUE;
       }
       if ((tmp == 10) && (GET_LEVEL(ch) > 10)) {
-        cast_spell(ch, vict, NULL, SPELL_HARM, NULL);
+        cast_spell(ch, vict, nullptr, SPELL_HARM, nullptr);
         return TRUE;
       }
       if (tmp == 11) {
-        cast_spell(ch, vict, NULL, SPELL_INFLICT_LIGHT, NULL);
+        cast_spell(ch, vict, nullptr, SPELL_INFLICT_LIGHT, nullptr);
         return TRUE;
       }
       if (tmp == 12 && GET_LEVEL(ch) > 8) {
-        cast_spell(ch, vict, NULL, SPELL_INFLICT_CRITIC, NULL);
+        cast_spell(ch, vict, nullptr, SPELL_INFLICT_CRITIC, nullptr);
         return TRUE;
       }
   }
@@ -1838,7 +1838,7 @@ SPECIAL(cleric_ao)
       break;
 
   /* if I didn't pick any of those, then just slam the guy I'm fighting */
-  if (vict == NULL)
+  if (vict == nullptr)
     vict = FIGHTING(ch);
 
   num_used = 8;
@@ -1848,43 +1848,43 @@ SPECIAL(cleric_ao)
   if ( (tmp == 7 ) || (tmp == 8) || (tmp == 9) || (tmp == 10)) {
     tmp = rand_number(1, num_used);
     if ((tmp == 1) && (GET_LEVEL(ch) > 13)) {
-      cast_spell(ch, vict, NULL, SPELL_EARTHQUAKE, NULL);
+      cast_spell(ch, vict, nullptr, SPELL_EARTHQUAKE, nullptr);
       return TRUE;
     }
     if ((tmp == 2) && ( (GET_LEVEL(ch) > 8) && (IS_EVIL(vict)))) {
-      cast_spell(ch, vict, NULL, SPELL_DISPEL_EVIL, NULL);
+      cast_spell(ch, vict, nullptr, SPELL_DISPEL_EVIL, nullptr);
       return TRUE;
     }
     if ((tmp == 3) && ((GET_LEVEL(ch) > 8) && (IS_GOOD(vict)))) {
-      cast_spell(ch, vict, NULL, SPELL_DISPEL_GOOD, NULL);
+      cast_spell(ch, vict, nullptr, SPELL_DISPEL_GOOD, nullptr);
       return TRUE;
     }
     if ((tmp == 4) && (GET_LEVEL(ch) > 4 && affected_by_spell(ch, SPELL_BESTOW_CURSE))) {
-      cast_spell(ch, ch, NULL, SPELL_REMOVE_CURSE, NULL);
+      cast_spell(ch, ch, nullptr, SPELL_REMOVE_CURSE, nullptr);
       return TRUE;
     }
     if ((tmp == 5) && (GET_LEVEL(ch) > 6 && affected_by_spell(ch, SPELL_POISON))) {
-      cast_spell(ch, ch, NULL, SPELL_NEUTRALIZE_POISON, NULL);
+      cast_spell(ch, ch, nullptr, SPELL_NEUTRALIZE_POISON, nullptr);
       return TRUE;
     }
     if (tmp == 6) {
-      cast_spell(ch, ch, NULL, SPELL_CURE_LIGHT, NULL);
+      cast_spell(ch, ch, nullptr, SPELL_CURE_LIGHT, nullptr);
       return TRUE;
     }
     if (tmp == 7 && GET_LEVEL(ch) > 8) {
-      cast_spell(ch, ch, NULL, SPELL_CURE_CRITIC, NULL);
+      cast_spell(ch, ch, nullptr, SPELL_CURE_CRITIC, nullptr);
       return TRUE;
     }
     if (tmp == 8 && GET_LEVEL(ch) > 10) {
-      cast_spell(ch, ch, NULL, SPELL_HEAL, NULL);
+      cast_spell(ch, ch, nullptr, SPELL_HEAL, nullptr);
       return TRUE;
     }
     if (tmp == 9) {
-      cast_spell(ch, vict, NULL, SPELL_INFLICT_LIGHT, NULL);
+      cast_spell(ch, vict, nullptr, SPELL_INFLICT_LIGHT, nullptr);
       return TRUE;
     }
     if (tmp == 10 && GET_LEVEL(ch) > 8) {
-      cast_spell(ch, vict, NULL, SPELL_INFLICT_CRITIC, NULL);
+      cast_spell(ch, vict, nullptr, SPELL_INFLICT_CRITIC, nullptr);
       return TRUE;
     }
   }
@@ -1904,7 +1904,7 @@ SPECIAL(dziak)
       break;
 
   /* if I didn't pick any of those, then just slam the guy I'm fighting */
-  if (vict == NULL)
+  if (vict == nullptr)
     vict = FIGHTING(ch);
 
   num_used = 9;
@@ -1915,35 +1915,35 @@ SPECIAL(dziak)
     tmp = rand_number(1, num_used);
 
     if (tmp == 2 || tmp == 1) {
-      cast_spell(ch, vict, NULL, SPELL_SHOCKING_GRASP, NULL);
+      cast_spell(ch, vict, nullptr, SPELL_SHOCKING_GRASP, nullptr);
       return TRUE;
     }
     if (tmp == 3) {
-      cast_spell(ch, vict, NULL, SPELL_MAGIC_MISSILE, NULL);
+      cast_spell(ch, vict, nullptr, SPELL_MAGIC_MISSILE, nullptr);
       return TRUE;
     }
     if (tmp == 4) {
-      cast_spell(ch, vict, NULL, SPELL_LIGHTNING_BOLT, NULL);
+      cast_spell(ch, vict, nullptr, SPELL_LIGHTNING_BOLT, nullptr);
       return TRUE;
     }
     if (tmp == 5) {
-      cast_spell(ch, vict, NULL, SPELL_FIREBALL, NULL);
+      cast_spell(ch, vict, nullptr, SPELL_FIREBALL, nullptr);
       return TRUE;
     }
     if (tmp == 6) {
-      cast_spell(ch, ch, NULL, SPELL_CURE_CRITIC, NULL);
+      cast_spell(ch, ch, nullptr, SPELL_CURE_CRITIC, nullptr);
       return TRUE;
     }
     if (tmp == 7) {
-      cast_spell(ch, vict, NULL, SPELL_INFLICT_CRITIC, NULL);
+      cast_spell(ch, vict, nullptr, SPELL_INFLICT_CRITIC, nullptr);
       return TRUE;
     }
     if ((tmp == 8) && (IS_GOOD(vict))) {
-      cast_spell(ch, vict, NULL, SPELL_DISPEL_GOOD, NULL);
+      cast_spell(ch, vict, nullptr, SPELL_DISPEL_GOOD, nullptr);
       return TRUE;
     }
     if (tmp == 9) {
-      cast_spell(ch, ch, NULL, SPELL_HEAL, NULL);
+      cast_spell(ch, ch, nullptr, SPELL_HEAL, nullptr);
       return TRUE;
     }
   }
@@ -1964,7 +1964,7 @@ SPECIAL(azimer)
       break;
 
   /* if I didn't pick any of those, then just slam the guy I'm fighting */
-  if (vict == NULL)
+  if (vict == nullptr)
     vict = FIGHTING(ch);
 
   num_used = 8;
@@ -1975,31 +1975,31 @@ SPECIAL(azimer)
     tmp = rand_number(1, num_used);
 
     if (tmp == 2 || tmp == 1) {
-      cast_spell(ch, vict, NULL, SPELL_MAGIC_MISSILE, NULL);
+      cast_spell(ch, vict, nullptr, SPELL_MAGIC_MISSILE, nullptr);
       return TRUE;
     }
     if (tmp == 3) {
-      cast_spell(ch, vict, NULL, SPELL_SHOCKING_GRASP, NULL);
+      cast_spell(ch, vict, nullptr, SPELL_SHOCKING_GRASP, nullptr);
       return TRUE;
     }
     if (tmp == 4) {
-      cast_spell(ch, vict, NULL, SPELL_LIGHTNING_BOLT, NULL);
+      cast_spell(ch, vict, nullptr, SPELL_LIGHTNING_BOLT, nullptr);
       return TRUE;
     }
     if (tmp == 5) {
-      cast_spell(ch, vict, NULL, SPELL_FIREBALL, NULL);
+      cast_spell(ch, vict, nullptr, SPELL_FIREBALL, nullptr);
       return TRUE;
     }
     if (tmp == 6) {
-      cast_spell(ch, ch, NULL, SPELL_CURE_CRITIC, NULL);
+      cast_spell(ch, ch, nullptr, SPELL_CURE_CRITIC, nullptr);
       return TRUE;
     }
     if (tmp == 7) {
-      cast_spell(ch, vict, NULL, SPELL_INFLICT_CRITIC, NULL);
+      cast_spell(ch, vict, nullptr, SPELL_INFLICT_CRITIC, nullptr);
       return TRUE;
     }
     if ((tmp == 8) && (IS_GOOD(vict))) {
-      cast_spell(ch, vict, NULL, SPELL_DISPEL_GOOD, NULL);
+      cast_spell(ch, vict, nullptr, SPELL_DISPEL_GOOD, nullptr);
       return TRUE;
     }
   }
@@ -2020,7 +2020,7 @@ SPECIAL(lyrzaxyn)
       break;
 
   /* if I didn't pick any of those, then just slam the guy I'm fighting */
-  if (vict == NULL)
+  if (vict == nullptr)
     vict = FIGHTING(ch);
 
   num_used = 8;
@@ -2031,31 +2031,31 @@ SPECIAL(lyrzaxyn)
     tmp = rand_number(1, num_used);
 
     if (tmp == 2 || tmp == 1) {
-      cast_spell(ch, vict, NULL, SPELL_MAGIC_MISSILE, NULL);
+      cast_spell(ch, vict, nullptr, SPELL_MAGIC_MISSILE, nullptr);
       return TRUE;
     }
     if (tmp == 3) {
-      cast_spell(ch, vict, NULL, SPELL_SHOCKING_GRASP, NULL);
+      cast_spell(ch, vict, nullptr, SPELL_SHOCKING_GRASP, nullptr);
       return TRUE;
     }
     if (tmp == 4) {
-      cast_spell(ch, vict, NULL, SPELL_LIGHTNING_BOLT, NULL);
+      cast_spell(ch, vict, nullptr, SPELL_LIGHTNING_BOLT, nullptr);
       return TRUE;
     }
     if (tmp == 5) {
-      cast_spell(ch, vict, NULL, SPELL_FIREBALL, NULL);
+      cast_spell(ch, vict, nullptr, SPELL_FIREBALL, nullptr);
       return TRUE;
     }
     if (tmp == 6) {
-      cast_spell(ch, ch, NULL, SPELL_CURE_CRITIC, NULL);
+      cast_spell(ch, ch, nullptr, SPELL_CURE_CRITIC, nullptr);
       return TRUE;
     }
     if (tmp == 7) {
-      cast_spell(ch, vict, NULL, SPELL_INFLICT_CRITIC, NULL);
+      cast_spell(ch, vict, nullptr, SPELL_INFLICT_CRITIC, nullptr);
       return TRUE;
     }
     if ((tmp == 8) && (IS_GOOD(vict))) {
-      cast_spell(ch, vict, NULL, SPELL_DISPEL_GOOD, NULL);
+      cast_spell(ch, vict, nullptr, SPELL_DISPEL_GOOD, nullptr);
       return TRUE;
     }
   }
@@ -2069,7 +2069,7 @@ SPECIAL(magic_user)
 
   if (IS_NPC(ch) && GET_POS(ch) > POS_SITTING && GET_CLASS(ch) == CLASS_KABITO) {
     if (!affected_by_spell(ch, SPELL_MAGE_ARMOR)) {
-      cast_spell(ch, ch, NULL, SPELL_MAGE_ARMOR, NULL);
+      cast_spell(ch, ch, nullptr, SPELL_MAGE_ARMOR, nullptr);
       return TRUE;
     }
   }
@@ -2083,7 +2083,7 @@ SPECIAL(magic_user)
       break;
 
   /* if I didn't pick any of those, then just slam the guy I'm fighting */
-  if (vict == NULL)
+  if (vict == nullptr)
     vict = FIGHTING(ch);
 
   num_used = 6;
@@ -2094,27 +2094,27 @@ SPECIAL(magic_user)
     tmp = rand_number(1, num_used);
 
     if ((tmp == 1) && GET_LEVEL(ch) > 1) {
-      cast_spell(ch, vict, NULL, SPELL_CHILL_TOUCH, NULL);
+      cast_spell(ch, vict, nullptr, SPELL_CHILL_TOUCH, nullptr);
       return TRUE;
     }
     if ((tmp == 2) && !affected_by_spell(ch, SPELL_MAGE_ARMOR)) {
-      cast_spell(ch, ch, NULL, SPELL_MAGE_ARMOR, NULL);
+      cast_spell(ch, ch, nullptr, SPELL_MAGE_ARMOR, nullptr);
       return TRUE;
     }
     if ((tmp == 3) && GET_LEVEL(ch) > 1) {
-      cast_spell(ch, vict, NULL, SPELL_BURNING_HANDS, NULL);
+      cast_spell(ch, vict, nullptr, SPELL_BURNING_HANDS, nullptr);
       return TRUE;
     }
     if ((tmp == 4) && GET_LEVEL(ch) > 1) {
-      cast_spell(ch, vict, NULL, SPELL_MAGIC_MISSILE, NULL);
+      cast_spell(ch, vict, nullptr, SPELL_MAGIC_MISSILE, nullptr);
       return TRUE;
     }
     if ((tmp == 5) && GET_LEVEL(ch) > 5) {
-      cast_spell(ch, vict, NULL, SPELL_SHOCKING_GRASP, NULL);
+      cast_spell(ch, vict, nullptr, SPELL_SHOCKING_GRASP, nullptr);
       return TRUE;
     }
     if ((tmp == 6) && GET_LEVEL(ch) > 9) {
-      cast_spell(ch, vict, NULL, SPELL_LIGHTNING_BOLT, NULL);
+      cast_spell(ch, vict, nullptr, SPELL_LIGHTNING_BOLT, nullptr);
       return TRUE;
     }
   }

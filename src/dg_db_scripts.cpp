@@ -41,7 +41,7 @@ void parse_trigger(FILE *trig_f, int nr)
 
     t_index->vnum = nr;
     t_index->number = 0;
-    t_index->func = NULL;
+    t_index->func = nullptr;
     t_index->proto = trig;
 
     snprintf(errors, sizeof(errors), "trig vnum %d", nr);
@@ -63,7 +63,7 @@ void parse_trigger(FILE *trig_f, int nr)
     trig->cmdlist->cmd = strdup(strtok(s, "\n\r"));
     cle = trig->cmdlist;
 
-    while ((s = strtok(NULL, "\n\r"))) {
+    while ((s = strtok(nullptr, "\n\r"))) {
 	CREATE(cle->next, struct cmdlist_element, 1);
 	cle = cle->next;
 	cle->cmd = strdup(s);
@@ -84,9 +84,9 @@ trig_data *read_trigger(int nr)
     index_data *t_index;
     trig_data *trig;
 
-    if (nr >= top_of_trigt) return NULL;
-    if ((t_index = trig_index[nr]) == NULL)
-	return NULL;
+    if (nr >= top_of_trigt) return nullptr;
+    if ((t_index = trig_index[nr]) == nullptr)
+	return nullptr;
 
     CREATE(trig, trig_data, 1);
     trig_data_copy(trig, t_index->proto);
@@ -102,18 +102,18 @@ void trig_data_init(trig_data *this_data)
 {
     this_data->nr = NOTHING;
     this_data->data_type = 0;
-    this_data->name = NULL;
+    this_data->name = nullptr;
     this_data->trigger_type = 0;
-    this_data->cmdlist = NULL;
-    this_data->curr_state = NULL;
+    this_data->cmdlist = nullptr;
+    this_data->curr_state = nullptr;
     this_data->narg = 0;
-    this_data->arglist = NULL;
+    this_data->arglist = nullptr;
     this_data->depth = 0;
-    this_data->wait_event = NULL;
+    this_data->wait_event = nullptr;
     this_data->purged = FALSE;
-    this_data->var_list = NULL;
+    this_data->var_list = nullptr;
 
-    this_data->next = NULL;
+    this_data->next = nullptr;
 }
 
 
@@ -180,7 +180,7 @@ void dg_read_trigger(FILE *fp, void *proto, int type)
     case MOB_TRIGGER:
       CREATE(new_trg, struct trig_proto_list, 1);
       new_trg->vnum = vnum;
-      new_trg->next = NULL;
+      new_trg->next = nullptr;
 
       mob = (char_data *)proto;
       trg_proto = mob->proto_script;
@@ -195,7 +195,7 @@ void dg_read_trigger(FILE *fp, void *proto, int type)
     case WLD_TRIGGER:
       CREATE(new_trg, struct trig_proto_list, 1);
       new_trg->vnum = vnum;
-      new_trg->next = NULL;
+      new_trg->next = nullptr;
       room = (room_data *)proto;
       trg_proto = room->proto_script;
       if (!trg_proto) {
@@ -246,7 +246,7 @@ void dg_obj_trigger(char *line, struct obj_data *obj)
 
   CREATE(new_trg, struct trig_proto_list, 1);
   new_trg->vnum = vnum;
-  new_trg->next = NULL;
+  new_trg->next = nullptr;
 
   trg_proto = obj->proto_script;
   if (!trg_proto) {
@@ -259,9 +259,9 @@ void dg_obj_trigger(char *line, struct obj_data *obj)
 
 void assign_triggers(void *i, int type)
 {
-  struct char_data *mob = NULL;
-  struct obj_data *obj = NULL;
-  struct room_data *room = NULL;
+  struct char_data *mob = nullptr;
+  struct obj_data *obj = nullptr;
+  struct room_data *room = nullptr;
   int rnum;
   struct trig_proto_list *trg_proto;
 

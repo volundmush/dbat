@@ -57,7 +57,7 @@ it.
 #include "dg_comm.h"
 #include "config.h"
 
-struct board_info *bboards = NULL;  /* our global board structure */
+struct board_info *bboards = nullptr;  /* our global board structure */
 
 void init_boards(void) 
 {
@@ -89,7 +89,7 @@ void init_boards(void)
         strcmp(".", xdir_get_name(&xd, j)) &&
         strcmp(".cvsignore", xdir_get_name(&xd, j))) {
       sscanf(xdir_get_name(&xd, j), "%ld", &board_vnum);
-      if((tmp_board = load_board(board_vnum)) != NULL) {
+      if((tmp_board = load_board(board_vnum)) != nullptr) {
         tmp_board->next = bboards;
         bboards = tmp_board;
       }
@@ -102,8 +102,8 @@ void init_boards(void)
 struct board_info *create_new_board(obj_vnum board_vnum) {
   char buf[512];
   FILE *fl;
-  struct board_info *temp=NULL,*backup;
-  struct obj_data *obj=NULL;
+  struct board_info *temp=nullptr,*backup;
+  struct obj_data *obj=nullptr;
   
   /* object exists, but no board file (yet) */
 
@@ -114,7 +114,7 @@ struct board_info *create_new_board(obj_vnum board_vnum) {
     /* unlink file, clear existing board */
     unlink(buf);
 
-    for(temp = bboards,backup=NULL; temp && !backup; temp = temp->next) {
+    for(temp = bboards,backup=nullptr; temp && !backup; temp = temp->next) {
       if(BOARD_VNUM(temp) == board_vnum) {
 	backup = temp;
       }
@@ -139,13 +139,13 @@ struct board_info *create_new_board(obj_vnum board_vnum) {
   BOARD_VNUM(temp)=board_vnum;
   BOARD_MNUM(temp)=0;
   BOARD_VERSION(temp) = CURRENT_BOARD_VER;
-  temp->next=NULL;
-  BOARD_MESSAGES(temp)=NULL;
+  temp->next=nullptr;
+  BOARD_MESSAGES(temp)=nullptr;
 
   if(!save_board(temp)) {
     log("Hm. Error while creating new board file [vnum: %d]. Unable to create new file.",board_vnum);
     free(temp);
-    return NULL;
+    return nullptr;
   }
   return temp;
 }
@@ -198,7 +198,7 @@ int save_board(struct board_info *ts) {
 struct board_info *load_board(obj_vnum board_vnum) {
   struct board_info *temp_board;
   struct board_msg *bmsg;
-  struct obj_data *obj=NULL;
+  struct obj_data *obj=nullptr;
   struct stat st;
   struct board_memory *memboard, *list;
   int t[10], mnum, poster, timestamp, msg_num, retval = 0;
@@ -209,13 +209,13 @@ struct board_info *load_board(obj_vnum board_vnum) {
   sprintf(filebuf,"%s%d", BOARD_DIRECTORY,board_vnum);
   if(!(fl=fopen(filebuf,"r"))) {
     log("Request to open board [vnum %d] failed - unable to open file '%s'.",board_vnum,filebuf);
-    return NULL;
+    return nullptr;
   }
   /* this won't be the most graceful thing you've ever seen .. */
   get_line(fl,buf);
   if(strcmp("Board File",buf)) {
     log("Invalid board file '%s' [vnum: %d] - failed to load.", filebuf,board_vnum);
-    return NULL;
+    return nullptr;
   }
   
   CREATE(temp_board, struct board_info, 1);
@@ -244,11 +244,11 @@ struct board_info *load_board(obj_vnum board_vnum) {
     
     
     stat(filebuf, &st);
-    if(time(NULL) - st.st_mtime > (60*60*24*7)) {
+    if(time(nullptr) - st.st_mtime > (60*60*24*7)) {
       log("Deleting old board file '%s' [vnum %d].  7 days without modification & no associated object.", filebuf,board_vnum);
       unlink(filebuf);
       free(temp_board);
-      return NULL;
+      return nullptr;
     }
     READ_LVL(temp_board)=t[0];
     WRITE_LVL(temp_board)=t[1];
@@ -271,8 +271,8 @@ struct board_info *load_board(obj_vnum board_vnum) {
     BOARD_VERSION(temp_board)=t[4]; 
   }
   
-  BOARD_NEXT(temp_board)=NULL;
-  BOARD_MESSAGES(temp_board)=NULL;
+  BOARD_NEXT(temp_board)=nullptr;
+  BOARD_MESSAGES(temp_board)=nullptr;
   
   /* now loop and parse messages and memory */
   msg_num = 0;
@@ -291,9 +291,9 @@ struct board_info *load_board(obj_vnum board_vnum) {
 	/* now, validate the memory => insure that for this slot, id, and timestamp there
 	   is a valid message, and poster.  Memory is deleted for mundane reasons; character
 	   deletions, message deletions, etc.  'Failures' will not be logged */
-       if ((get_name_by_id(poster) == NULL) && (BOARD_VERSION(temp_board) != CURRENT_BOARD_VER)) {
+       if ((get_name_by_id(poster) == nullptr) && (BOARD_VERSION(temp_board) != CURRENT_BOARD_VER)) {
 	   free(memboard);
-       }else if ((poster_name == NULL) && (BOARD_VERSION(temp_board) == CURRENT_BOARD_VER)) {
+       }else if ((poster_name == nullptr) && (BOARD_VERSION(temp_board) == CURRENT_BOARD_VER)) {
 	  free(memboard);
 	} else {
 	  /* locate specific message this pertains to - therefore, messages MUST be loaded first! */
@@ -322,7 +322,7 @@ struct board_info *load_board(obj_vnum board_vnum) {
 	      MEMORY_NEXT(memboard)=list;
 	    } else {
 	      BOARD_MEMORY(temp_board,mnum)=memboard;
-	      MEMORY_NEXT(memboard)=NULL;
+	      MEMORY_NEXT(memboard)=nullptr;
 	    }
 	  } else {
 	    free(memboard);
@@ -377,10 +377,10 @@ int parse_message(FILE *fl, struct board_info *temp_board) {
 
   MESG_SUBJECT(tmsg)=strdup(subject);
   MESG_DATA(tmsg)=fread_string(fl,buf);
-  MESG_NEXT(tmsg)=NULL;
+  MESG_NEXT(tmsg)=nullptr;
 
   /* always add to the END of the list. */
-  MESG_NEXT(tmsg) = MESG_PREV(tmsg)= NULL;
+  MESG_NEXT(tmsg) = MESG_PREV(tmsg)= nullptr;
   if(BOARD_MESSAGES(temp_board)) {
     t2msg=BOARD_MESSAGES(temp_board);
     while(MESG_NEXT(t2msg)) {
@@ -389,7 +389,7 @@ int parse_message(FILE *fl, struct board_info *temp_board) {
     MESG_NEXT(t2msg)=tmsg;
     MESG_PREV(tmsg)=t2msg;
   } else {
-    MESG_PREV(tmsg) = NULL;
+    MESG_PREV(tmsg) = nullptr;
     BOARD_MESSAGES(temp_board) = tmsg;
   }
   return 1;
@@ -444,7 +444,7 @@ void clear_one_board(struct board_info *tmp) {
     }
   }
   free(tmp);
-  tmp=NULL;
+  tmp=nullptr;
 }
 
 void show_board(obj_vnum board_vnum, struct char_data *ch) {
@@ -493,7 +493,7 @@ void show_board(obj_vnum board_vnum, struct char_data *ch) {
   bnum = GET_OBJ_VNUM(obj);
   char clan[120];
    if (OBJ_FLAGGED(obj, ITEM_CBOARD)) {
-    if (GET_CLAN(ch) != NULL) {
+    if (GET_CLAN(ch) != nullptr) {
       sprintf(clan, "%s", GET_CLAN(ch));
     }
     if (!strstr(obj->action_description, clan)) {
@@ -551,19 +551,19 @@ void show_board(obj_vnum board_vnum, struct char_data *ch) {
   strcpy(buf2, buf);
   page_string(ch->desc, buf2, 1);
   if (bnum == 3092) {
-   GET_BOARD(ch, 0) = time(0);
+   GET_BOARD(ch, 0) = time(nullptr);
    /* Mort board */
   }
   if (bnum == 3099) {
-   GET_BOARD(ch, 3) = time(0);
+   GET_BOARD(ch, 3) = time(nullptr);
    /* Duo's board */
   }
   if (bnum == 3098) {
-   GET_BOARD(ch, 1) = time(0);
+   GET_BOARD(ch, 1) = time(nullptr);
    /* Imm board */
   }
   if (bnum == 3090) {
-   GET_BOARD(ch, 4) = time(0);
+   GET_BOARD(ch, 4) = time(nullptr);
    /* Builder board */
   }
   save_char(ch);
@@ -612,7 +612,7 @@ void board_display_msg(obj_vnum board_vnum, struct char_data * ch, int arg) {
   bnum = GET_OBJ_VNUM(obj);
    char clan[200];
    if (OBJ_FLAGGED(obj, ITEM_CBOARD)) {
-    if (GET_CLAN(ch) != NULL) {
+    if (GET_CLAN(ch) != nullptr) {
       sprintf(clan, "%s", GET_CLAN(ch));
     }
     if (!strstr(obj->action_description, clan)) {
@@ -662,7 +662,7 @@ void board_display_msg(obj_vnum board_vnum, struct char_data * ch, int arg) {
   else
    MEMORY_READER_NAME(mboard_type) = strdup(GET_NAME(ch)); 
   MEMORY_TIMESTAMP(mboard_type)=MESG_TIMESTAMP(message);
-  MEMORY_NEXT(mboard_type)=NULL;
+  MEMORY_NEXT(mboard_type)=nullptr;
   /* Let's make sure that we don't already have this memory recorded */
 
   list=BOARD_MEMORY(thisboard,mem);
@@ -709,19 +709,19 @@ void board_display_msg(obj_vnum board_vnum, struct char_data * ch, int arg) {
 	  MESG_DATA(message) ? MESG_DATA(message) : "Looks like this message is empty.");
   page_string(ch->desc, buf, 1);
   if (bnum == 3092) {
-   GET_BOARD(ch, 0) = time(0);
+   GET_BOARD(ch, 0) = time(nullptr);
    /* Mort board */
   }
   if (bnum == 3099) {
-   GET_BOARD(ch, 3) = time(0);
+   GET_BOARD(ch, 3) = time(nullptr);
    /* Duo's board */
   }
   if (bnum == 3098) {
-   GET_BOARD(ch, 1) = time(0);
+   GET_BOARD(ch, 1) = time(nullptr);
    /* Imm board */
   }
   if (bnum == 3090) {
-   GET_BOARD(ch, 4) = time(0);
+   GET_BOARD(ch, 4) = time(nullptr);
    /* Builder board */
   }
   /* really it's not so important to save after each view even if something WAS updated */
@@ -739,7 +739,7 @@ int mesglookup(struct board_msg *message,struct char_data *ch, struct board_info
 {
   int mem = 0;
   struct board_memory *mboard_type;
-  char *tempname = NULL; 
+  char *tempname = nullptr;
 
   if (BOARD_VERSION(board) != CURRENT_BOARD_VER)
     mem = ((MESG_TIMESTAMP(message)%301 + MESG_POSTER(message)%301)%301);
@@ -802,7 +802,7 @@ void write_board_message(obj_vnum board_vnum, struct char_data *ch, char *arg)
    send_to_char(ch, "Your subject can only be 45 characters long(including colorcode).\r\n");
    return;
   }
-  act("@C$n@w starts writing on the board.@n", TRUE, ch, 0, 0, TO_ROOM);
+  act("@C$n@w starts writing on the board.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
   skip_spaces(&arg);
   delete_doubledollar(arg);
   arg[81] = '\0';
@@ -810,11 +810,11 @@ void write_board_message(obj_vnum board_vnum, struct char_data *ch, char *arg)
 
   CREATE(message, struct board_msg, 1);
   MESG_POSTER_NAME(message) = strdup(GET_NAME(ch));
-  MESG_TIMESTAMP(message)=time(0);
+  MESG_TIMESTAMP(message)=time(nullptr);
   MESG_SUBJECT(message) = strdup(arg);
-  MESG_NEXT(message)=NULL;
-  MESG_PREV(message) = NULL;
-  MESG_DATA(message)=NULL;
+  MESG_NEXT(message)=nullptr;
+  MESG_PREV(message) = nullptr;
+  MESG_DATA(message)=nullptr;
   BOARD_MNUM(thisboard) = MAX(BOARD_MNUM(thisboard) + 1,1);
 
   MESG_NEXT(message)=BOARD_MESSAGES(thisboard);
@@ -827,18 +827,18 @@ void write_board_message(obj_vnum board_vnum, struct char_data *ch, char *arg)
   send_to_char(ch,"Write your message.  (/s saves /h for help)\r\n");
 
   SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
-  string_write(ch->desc, &(MESG_DATA(message)), MAX_MESSAGE_LENGTH, board_vnum + BOARD_MAGIC, NULL);
+  string_write(ch->desc, &(MESG_DATA(message)), MAX_MESSAGE_LENGTH, board_vnum + BOARD_MAGIC, nullptr);
   if (board_vnum == 3092) {
-   BOARDNEWMORT = time(0);
+   BOARDNEWMORT = time(nullptr);
   }
   if (board_vnum == 3098) {
-   BOARDNEWIMM = time(0);
+   BOARDNEWIMM = time(nullptr);
   }
   if (board_vnum == 3099) {
-   BOARDNEWDUO = time(0);
+   BOARDNEWDUO = time(nullptr);
   }
   if (board_vnum == 3090) {
-   BOARDNEWBUI = time(0);
+   BOARDNEWBUI = time(nullptr);
   }
   save_mud_time(&time_info);
   struct descriptor_data *d;
@@ -901,11 +901,11 @@ void board_respond(long board_vnum, struct char_data *ch, int mnum){
   
   CREATE(message, struct board_msg, 1);
   MESG_POSTER_NAME(message) = strdup(GET_NAME(ch));
-  MESG_TIMESTAMP(message)=time(0);
+  MESG_TIMESTAMP(message)=time(nullptr);
   sprintf(buf,"Re: %s",MESG_SUBJECT(other));
   MESG_SUBJECT(message)=strdup(buf);
-  MESG_NEXT(message)=MESG_PREV(message)=NULL;
-  MESG_DATA(message)=NULL;
+  MESG_NEXT(message)=MESG_PREV(message)=nullptr;
+  MESG_DATA(message)=nullptr;
   BOARD_MNUM(thisboard) = BOARD_MNUM(thisboard) + 1;
   MESG_NEXT(message) = BOARD_MESSAGES(thisboard);
   if (BOARD_MESSAGES(thisboard)) {
@@ -914,7 +914,7 @@ void board_respond(long board_vnum, struct char_data *ch, int mnum){
   BOARD_MESSAGES(thisboard) = message;
 
   send_to_char(ch,"Write your message.  (/s saves /h for help)\r\n\r\n");
-  act("@C$n@w starts writing on the board.@n", TRUE, ch, 0, 0, TO_ROOM);
+  act("@C$n@w starts writing on the board.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
 
   if (!IS_NPC(ch)) {
     SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
@@ -926,18 +926,18 @@ void board_respond(long board_vnum, struct char_data *ch, int mnum){
   ch->desc->backstr = strdup(number);
   write_to_output(ch->desc,number);
 
-  string_write(ch->desc, &(MESG_DATA(message)), MAX_MESSAGE_LENGTH, board_vnum + BOARD_MAGIC, NULL);
+  string_write(ch->desc, &(MESG_DATA(message)), MAX_MESSAGE_LENGTH, board_vnum + BOARD_MAGIC, nullptr);
   if (board_vnum == 3092) {
-   BOARDNEWMORT = time(0);
+   BOARDNEWMORT = time(nullptr);
   }
   if (board_vnum == 3098) {
-   BOARDNEWIMM = time(0);
+   BOARDNEWIMM = time(nullptr);
   }
   if (board_vnum == 3099) {
-   BOARDNEWDUO = time(0);
+   BOARDNEWDUO = time(nullptr);
   }
   if (board_vnum == 3090) {
-   BOARDNEWBUI = time(0);
+   BOARDNEWBUI = time(nullptr);
   }
   save_mud_time(&time_info);
   struct descriptor_data *d;
@@ -970,7 +970,7 @@ struct board_info *locate_board(obj_vnum board_vnum) {
     thisboard=BOARD_NEXT(thisboard);
 
   }
-  return NULL;
+  return nullptr;
 }
 
 
@@ -1023,7 +1023,7 @@ void remove_board_msg(obj_vnum board_vnum, struct char_data * ch, int arg)
    char clan[120];
    obj = read_object(board_vnum, REAL);
    if (OBJ_FLAGGED(obj, ITEM_CBOARD)) {
-    if (GET_CLAN(ch) != NULL) {
+    if (GET_CLAN(ch) != nullptr) {
       sprintf(clan, "%s", GET_CLAN(ch));
     }
     if (clanIsModerator(clan, ch) && strstr(obj->action_description, clan)) {
@@ -1056,11 +1056,11 @@ void remove_board_msg(obj_vnum board_vnum, struct char_data * ch, int arg)
   REMOVE_FROM_DOUBLE_LIST(cur, BOARD_MESSAGES(thisboard), next, prev);
   
   free(cur);
-  cur = NULL;
+  cur = nullptr;
   BOARD_MNUM (thisboard) = BOARD_MNUM (thisboard) - 1;
   send_to_char (ch,"Message removed.\r\n");
   sprintf(buf, "$n just removed message %d.", arg);
-  act (buf, FALSE, ch, 0, 0, TO_ROOM);
+  act (buf, FALSE, ch, nullptr, nullptr, TO_ROOM);
   save_board(thisboard);
   return;
 }

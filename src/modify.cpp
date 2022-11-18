@@ -86,7 +86,7 @@ void smash_tilde(char *str)
    * Derived from an idea by Sammy <samedi@dhc.net> (who happens to like
    * his tildes thank you very much.), -gg 2/20/98
    */
-    while ((str = strchr(str, '~')) != NULL)
+    while ((str = strchr(str, '~')) != nullptr)
       *str = ' ';
 #endif
 }
@@ -110,7 +110,7 @@ static void smash_numb(char *str)
    * Derived from an idea by Sammy <samedi@dhc.net> (who happens to like
    * his tildes thank you very much.), -gg 2/20/98
    */
-    while ((str = strchr(str, '#')) != NULL)
+    while ((str = strchr(str, '#')) != nullptr)
       *str = ' ';
 #endif
 }
@@ -203,8 +203,8 @@ void string_add(struct descriptor_data *d, char *str)
         case CON_HEDIT:
           free(*d->str);
           *d->str = d->backstr;
-          d->backstr = NULL;
-          d->str = NULL;
+          d->backstr = nullptr;
+          d->str = nullptr;
           break;
       case CON_PLAYING:
 	/* all CON_PLAYING are handled below in playing_string_cleanup */
@@ -222,7 +222,7 @@ void string_add(struct descriptor_data *d, char *str)
       }
       if (d->backstr)
         free(d->backstr);
-      d->backstr = NULL;
+      d->backstr = nullptr;
       break;
     case STRINGADD_ACTION:
       break;
@@ -247,7 +247,7 @@ void string_add(struct descriptor_data *d, char *str)
       { CON_IEDIT  , oedit_string_cleanup },
       { CON_HEDIT  , hedit_string_cleanup },
       { CON_NEWSEDIT  , news_string_cleanup },
-      { -1, NULL }
+      { -1, nullptr }
     };
 
     for (i = 0; cleanup_modes[i].func; i++)
@@ -255,7 +255,7 @@ void string_add(struct descriptor_data *d, char *str)
         (*cleanup_modes[i].func)(d, action);
 
     /* Common post cleanup code. */
-    d->str = NULL;
+    d->str = nullptr;
       d->mail_to = 0;
     d->max_str = 0;
     if (d->character && !IS_NPC(d->character)) {
@@ -288,15 +288,15 @@ static void playing_string_cleanup(struct descriptor_data *d, int action)
       if (action == STRINGADD_ABORT) {
 	/* find the message */
 	board = locate_board(d->mail_to - BOARD_MAGIC);
-	fore=cur=aft=NULL;
+	fore=cur=aft=nullptr;
 	for(cur = BOARD_MESSAGES(board);cur;cur = aft) {
 	  aft=MESG_NEXT(cur);
 	  if(cur->data == *d->str) {
 	    if(BOARD_MESSAGES(board) == cur) {
-	      if(MESG_NEXT(cur) != NULL) {
+	      if(MESG_NEXT(cur) != nullptr) {
 		BOARD_MESSAGES(board) = MESG_NEXT(cur);
 	      } else {
-		BOARD_MESSAGES(board) = NULL;
+		BOARD_MESSAGES(board) = nullptr;
 	      }
 	    }
 	    if(fore) {
@@ -363,7 +363,7 @@ ACMD(do_skillset)
     return;
   }
 
-  if (!(vict = get_char_vis(ch, name, NULL, FIND_CHAR_WORLD))) {
+  if (!(vict = get_char_vis(ch, name, nullptr, FIND_CHAR_WORLD))) {
     send_to_char(ch, "%s", CONFIG_NOPERSON);
     return;
   }
@@ -372,12 +372,12 @@ ACMD(do_skillset)
   /* If there is no chars in argument */
   if (!*argument) {
     i = snprintf(help, sizeof(help) - i, "\r\nSkills:\r\n");
-    i += print_skills_by_type(vict, help + i, sizeof(help) - i, SKTYPE_SKILL, NULL);
+    i += print_skills_by_type(vict, help + i, sizeof(help) - i, SKTYPE_SKILL, nullptr);
     i += snprintf(help + i, sizeof(help) - i, "\r\nSpells:\r\n");
-    i += print_skills_by_type(vict, help + i, sizeof(help) - i, SKTYPE_SPELL, NULL);
+    i += print_skills_by_type(vict, help + i, sizeof(help) - i, SKTYPE_SPELL, nullptr);
     if (CONFIG_ENABLE_LANGUAGES) {
       i += snprintf(help + i, sizeof(help) - i, "\r\nLanguages:\r\n");
-      i += print_skills_by_type(vict, help + i, sizeof(help) - i, SKTYPE_SKILL | SKTYPE_LANG, NULL);
+      i += print_skills_by_type(vict, help + i, sizeof(help) - i, SKTYPE_SKILL | SKTYPE_LANG, nullptr);
     }
     if (i >= sizeof(help))
       strcpy(help + sizeof(help) - strlen("** OVERFLOW **") - 1, "** OVERFLOW **"); /* strcpy: OK */
@@ -436,16 +436,16 @@ ACMD(do_skillset)
 *********************************************************************/
 
 /* Traverse down the string until the begining of the next page has been
- * reached.  Return NULL if this is the last page of the string.
+ * reached.  Return nullptr if this is the last page of the string.
  */
 static char *next_page(char *str, struct char_data *ch)
 { 
   int col = 1, line = 1; 
 
   for (;; str++) { 
-    /* If end of string, return NULL. */ 
+    /* If end of string, return nullptr. */
     if (*str == '\0') 
-      return (NULL); 
+      return (nullptr);
 
     /* If we're at the start of the next page, return this fact. */ 
     else if (line > (GET_PAGE_LENGTH(ch) - (PRF_FLAGGED(ch, PRF_COMPACT) ? 1 : 2)))
@@ -546,11 +546,11 @@ void show_string(struct descriptor_data *d, char *input)
   /* Q is for quit. :) */
   if (LOWER(*buf) == 'q') {
     free(d->showstr_vector);
-    d->showstr_vector = NULL;
+    d->showstr_vector = nullptr;
     d->showstr_count = 0;
     if (d->showstr_head) {
       free(d->showstr_head);
-      d->showstr_head = NULL;
+      d->showstr_head = nullptr;
     }
     return;
   }
@@ -582,11 +582,11 @@ void show_string(struct descriptor_data *d, char *input)
   if (d->showstr_page + 1 >= d->showstr_count) {
     send_to_char(d->character, "%s", d->showstr_vector[d->showstr_page]);
     free(d->showstr_vector);
-    d->showstr_vector = NULL;
+    d->showstr_vector = nullptr;
     d->showstr_count = 0;
     if (d->showstr_head) {
       free(d->showstr_head);
-      d->showstr_head = NULL;
+      d->showstr_head = nullptr;
     }
   }
   /* Or if we have more to show.... */

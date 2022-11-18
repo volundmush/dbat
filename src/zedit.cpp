@@ -148,7 +148,7 @@ ACMD(do_oasis_zedit)
     /** Free the descriptor's OLC structure.                                 **/
     /**************************************************************************/
     free(d->olc);
-    d->olc = NULL;
+    d->olc = nullptr;
     return;
   }
   
@@ -158,7 +158,7 @@ ACMD(do_oasis_zedit)
   if (!can_edit_zone(ch, OLC_ZNUM(d))) {
     send_cannot_edit(ch, zone_table[OLC_ZNUM(d)].number);
     free(d->olc);
-    d->olc = NULL;
+    d->olc = nullptr;
     return;
   }
   
@@ -181,7 +181,7 @@ ACMD(do_oasis_zedit)
     /** Free the descriptor's OLC structure.                                 **/
     /**************************************************************************/
     free(d->olc);
-    d->olc = NULL;
+    d->olc = nullptr;
     return;
   }
   
@@ -194,14 +194,14 @@ ACMD(do_oasis_zedit)
     /** Free the descriptor's OLC structure.                                 **/
     /**************************************************************************/
     free(d->olc);
-    d->olc = NULL;
+    d->olc = nullptr;
     return;
   }
 
   zedit_setup(d, real_num);
   STATE(d) = CON_ZEDIT;
   
-  act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
+  act("$n starts using OLC.", TRUE, d->character, nullptr, nullptr, TO_ROOM);
   SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
   
   mudlog(CMP, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing zone %d allowed zone %d",
@@ -1056,7 +1056,7 @@ void zedit_parse(struct descriptor_data *d, char *arg)
      * quiz.
      */
     OLC_CMD(d).command = toupper(*arg);
-    if (!OLC_CMD(d).command || (strchr("MOPEDGRTV", OLC_CMD(d).command) == NULL)) {
+    if (!OLC_CMD(d).command || (strchr("MOPEDGRTV", OLC_CMD(d).command) == nullptr)) {
       write_to_output(d, "Invalid choice, try again : ");
     } else {
       if (OLC_VAL(d)) {	/* If there was a previous command. */

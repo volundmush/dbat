@@ -88,7 +88,7 @@ void disp_restring_menu(struct descriptor_data *d)
 void pobj_edit_parse(struct descriptor_data *d, char *arg)
 {
 
- struct obj_data *obj = NULL;
+ struct obj_data *obj = nullptr;
  char buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH], buf3[MAX_INPUT_LENGTH];
 
  /* This section is dedicated to equipment restringing */

@@ -178,7 +178,7 @@ void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type)
   /*
    * Clean up WHAT?
    */
-  if (d->olc == NULL)
+  if (d->olc == nullptr)
     return;
 
   /*
@@ -306,7 +306,7 @@ if(OLC_HOUSE(d))
     */
    if (OLC_STORAGE(d)) { 
     free(OLC_STORAGE(d));
-     OLC_STORAGE(d) = NULL;
+     OLC_STORAGE(d) = nullptr;
    }
    /*
     * Free this one regardless. If we've left olc, we've either made
@@ -315,7 +315,7 @@ if(OLC_HOUSE(d))
     */
    if (OLC_TRIG(d)) {
      free_trigger(OLC_TRIG(d));
-     OLC_TRIG(d) = NULL;
+     OLC_TRIG(d) = nullptr;
    }
   /*
     * OLC_SCRIPT is always set as trig_proto of OLC_OBJ/MOB/ROOM.
@@ -327,7 +327,7 @@ if(OLC_HOUSE(d))
    */
   if (d->character) {
     REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_WRITING);
-    act("$n stops using OLC.", TRUE, d->character, NULL, NULL, TO_ROOM);
+    act("$n stops using OLC.", TRUE, d->character, nullptr, nullptr, TO_ROOM);
     
     if (cleanup_type == CLEANUP_CONFIG)
       mudlog(BRF, ADMLVL_IMMORT, TRUE, "OLC: %s stops editing the game configuration", GET_NAME(d->character));
@@ -342,7 +342,7 @@ if(OLC_HOUSE(d))
   }
 
   free(d->olc);
-  d->olc = NULL;
+  d->olc = nullptr;
 }
 
 /*

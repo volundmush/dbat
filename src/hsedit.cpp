@@ -52,7 +52,7 @@ void hsedit_setup_new(struct descriptor_data *d)
   OLC_HOUSE(d)->owner     = 0; 
   OLC_HOUSE(d)->atrium    = 0; 
   OLC_HOUSE(d)->exit_num  = -1; 
-  OLC_HOUSE(d)->built_on  = time(0); 
+  OLC_HOUSE(d)->built_on  = time(nullptr); 
   OLC_HOUSE(d)->mode      = HOUSE_PRIVATE; 
   OLC_HOUSE(d)->bitvector = 0; 
   OLC_HOUSE(d)->builtby = 0; 
@@ -329,24 +329,24 @@ void hsedit_disp_guest_menu(struct descriptor_data *d)
      "@gQ@D)@g Back to main menu\r\n" 
      "@gEnter selection @D(@gA@D/@gD@D/@gC@D/@gQ@D)@n: ", 
 
-     get_name_by_id(house->guests[0]) == NULL ? not_set : get_name_by_id(house->guests[0]), 
+     get_name_by_id(house->guests[0]) == nullptr ? not_set : get_name_by_id(house->guests[0]),
      house->guests[0] < 1 ? 0 : house->guests[0], 
-     get_name_by_id(house->guests[1]) == NULL ? not_set : get_name_by_id(house->guests[1]), 
+     get_name_by_id(house->guests[1]) == nullptr ? not_set : get_name_by_id(house->guests[1]),
      house->guests[1] < 1 ? 0 : house->guests[1], 
-     get_name_by_id(house->guests[2]) == NULL ? not_set : get_name_by_id(house->guests[2]), 
-     house->guests[2] < 1 ? 0 : house->guests[2], get_name_by_id(house->guests[3]) == NULL ? not_set : get_name_by_id(house->guests[3]), 
+     get_name_by_id(house->guests[2]) == nullptr ? not_set : get_name_by_id(house->guests[2]),
+     house->guests[2] < 1 ? 0 : house->guests[2], get_name_by_id(house->guests[3]) == nullptr ? not_set : get_name_by_id(house->guests[3]),
      house->guests[3] < 1 ? 0 : house->guests[3], 
-     get_name_by_id(house->guests[4]) == NULL ? not_set : get_name_by_id(house->guests[4]),
+     get_name_by_id(house->guests[4]) == nullptr ? not_set : get_name_by_id(house->guests[4]),
      house->guests[4] < 1 ? 0 : house->guests[4],
-     get_name_by_id(house->guests[5]) == NULL ? not_set : get_name_by_id(house->guests[5]),
+     get_name_by_id(house->guests[5]) == nullptr ? not_set : get_name_by_id(house->guests[5]),
      house->guests[5] < 1 ? 0 : house->guests[5],
-     get_name_by_id(house->guests[6]) == NULL ? not_set : get_name_by_id(house->guests[6]), 
+     get_name_by_id(house->guests[6]) == nullptr ? not_set : get_name_by_id(house->guests[6]),
      house->guests[6] < 1 ? 0 : house->guests[6], 
-     get_name_by_id(house->guests[7]) == NULL ? not_set : get_name_by_id(house->guests[7]), 
+     get_name_by_id(house->guests[7]) == nullptr ? not_set : get_name_by_id(house->guests[7]),
      house->guests[7] < 1 ? 0 : house->guests[7],
-     get_name_by_id(house->guests[8]) == NULL ? not_set : get_name_by_id(house->guests[8]), 
+     get_name_by_id(house->guests[8]) == nullptr ? not_set : get_name_by_id(house->guests[8]),
      house->guests[8] < 1 ? 0 : house->guests[8],
-     get_name_by_id(house->guests[9]) == NULL ? not_set : get_name_by_id(house->guests[9]), 
+     get_name_by_id(house->guests[9]) == nullptr ? not_set : get_name_by_id(house->guests[9]),
      house->guests[9] < 1 ? 0 : house->guests[9]); 
   send_to_char(d->character, buf); 
 
@@ -413,7 +413,7 @@ char *hsedit_list_guests(struct house_control_rec *thishouse, char *guestlist)
 
   for (num_printed = j = 0; j < thishouse->num_of_guests; j++) { 
     /* Avoid <UNDEF>. -gg 6/21/98 */ 
-    if ((temp = get_name_by_id(thishouse->guests[j])) == NULL) 
+    if ((temp = get_name_by_id(thishouse->guests[j])) == nullptr)
       continue; 
 
     num_printed++; 
@@ -472,7 +472,7 @@ last_pay[128], buf2[MAX_STRING_LENGTH];
    "@gEnter choice : @n", 
 
    OLC_NUM(d), zone_table[OLC_ZNUM(d)].number, 
-   house->owner, get_name_by_id(house->owner) == NULL ? no_name : get_name_by_id(house->owner), 
+   house->owner, get_name_by_id(house->owner) == nullptr ? no_name : get_name_by_id(house->owner),
    house->atrium, ((house->exit_num >= 0) && (house->exit_num <= 11)) ? dirs[(house->exit_num)] : "NONE", 
    house_types[(house->mode)], built_on, last_pay, hsedit_list_guests(house, buf2), buf1); 
   send_to_char(d->character, buf); 
@@ -636,7 +636,7 @@ void hsedit_parse(struct descriptor_data * d, char *arg)
 
   case HSEDIT_OWNER_ID: 
     id = atoi(arg); 
-    if ((tmp = get_name_by_id(id)) == NULL) 
+    if ((tmp = get_name_by_id(id)) == nullptr)
     { 
       send_to_char(d->character, "There is no such player.\r\n"); 
       hsedit_owner_menu(d); 
@@ -734,7 +734,7 @@ void hsedit_parse(struct descriptor_data * d, char *arg)
     { 
       case 'y': 
       case 'Y': 
-        OLC_HOUSE(d)->built_on = time(0); 
+        OLC_HOUSE(d)->built_on = time(nullptr); 
         break;    
       case 'n': 
       case 'N': 
@@ -778,7 +778,7 @@ void hsedit_parse(struct descriptor_data * d, char *arg)
     { 
       case 'y': 
       case 'Y': 
-        OLC_HOUSE(d)->last_payment = time(0); 
+        OLC_HOUSE(d)->last_payment = time(nullptr); 
         break;    
       case 'n': 
       case 'N': 
@@ -1097,7 +1097,7 @@ ACMD(do_oasis_hsedit)
     
 /**************************************************************************/ 
     free(d->olc); 
-    d->olc = NULL; 
+    d->olc = nullptr;
     return; 
   } 
   
@@ -1117,7 +1117,7 @@ ACMD(do_oasis_hsedit)
     
 /**************************************************************************/ 
     free(d->olc); 
-    d->olc = NULL; 
+    d->olc = nullptr;
     return; 
   } 
   
@@ -1146,7 +1146,7 @@ ACMD(do_oasis_hsedit)
     
 /**************************************************************************/ 
     free(d->olc); 
-    d->olc = NULL; 
+    d->olc = nullptr;
     return; 
   } 
   
@@ -1185,7 +1185,7 @@ ACMD(do_oasis_hsedit)
   /** Send the OLC message to the players in the same room as the builder.   **/ 
   
 /****************************************************************************/ 
-  act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM); 
+  act("$n starts using OLC.", TRUE, d->character, nullptr, nullptr, TO_ROOM); 
   SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING); 
   
   

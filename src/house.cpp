@@ -189,7 +189,7 @@ void House_boot(void)
     if (feof(fl))
       break;
 
-    if (get_name_by_id(temp_house.owner) == NULL)
+    if (get_name_by_id(temp_house.owner) == nullptr)
       continue;			/* owner no longer exists -- skip */
 
     if ((real_house = real_room(temp_house.vnum)) == NOWHERE)
@@ -234,7 +234,7 @@ void hcontrol_list_houses(struct char_data *ch)
 
   for (i = 0; i < num_of_houses; i++) {
     /* Avoid seeing <UNDEF> entries from self-deleted people. -gg 6/21/98 */
-    if ((temp = get_name_by_id(house_control[i].owner)) == NULL)
+    if ((temp = get_name_by_id(house_control[i].owner)) == nullptr)
      continue;
 
     if (house_control[i].built_on) {
@@ -324,7 +324,7 @@ void hcontrol_build_house(struct char_data *ch, char *arg)
   temp_house.mode = HOUSE_PRIVATE;
   temp_house.vnum = virt_house;
   temp_house.exit_num = exit_num;
-  temp_house.built_on = time(0);
+  temp_house.built_on = time(nullptr);
   temp_house.last_payment = 0;
   temp_house.owner = owner;
   temp_house.num_of_guests = 0;
@@ -397,7 +397,7 @@ void hcontrol_pay_house(struct char_data *ch, char *arg)
   else {
     mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "Payment for house %s collected by %s.", arg, GET_NAME(ch));
 
-    house_control[i].last_payment = time(0);
+    house_control[i].last_payment = time(nullptr);
     House_save_control();
     send_to_char(ch, "Payment recorded.\r\n");
   }
@@ -520,7 +520,7 @@ void House_list_guests(struct char_data *ch, int i, int quiet)
 
   for (num_printed = j = 0; j < house_control[i].num_of_guests; j++) {
     /* Avoid <UNDEF>. -gg 6/21/98 */
-    if ((temp = get_name_by_id(house_control[i].guests[j])) == NULL)
+    if ((temp = get_name_by_id(house_control[i].guests[j])) == nullptr)
       continue;
 
     num_printed++;
@@ -564,12 +564,12 @@ int House_load(room_vnum rvnum)
   }
 
   for (j = 0;j < MAX_BAG_ROWS;j++)
-    cont_row[j] = NULL; /* empty all cont lists (you never know ...) */
+    cont_row[j] = nullptr; /* empty all cont lists (you never know ...) */
 
   if(!feof(fl))
     get_line(fl, line);
   while (!feof(fl)) {
-        temp=NULL;
+        temp=nullptr;
         /* first, we get the number. Not too hard. */
     if(*line == '#') {
       if (sscanf(line, "#%d", &nr) != 1) {
@@ -614,27 +614,27 @@ int House_load(room_vnum rvnum)
       GET_OBJ_VAL(temp, 13) = t[18]; 
       GET_OBJ_VAL(temp, 14) = t[19]; 
       GET_OBJ_VAL(temp, 15) = t[20];
-      GET_OBJ_POSTED(temp) = NULL;
+      GET_OBJ_POSTED(temp) = nullptr;
       GET_OBJ_POSTTYPE(temp) = 0;
 
       get_line(fl,line);
        /* read line check for xap. */
       if(!strcmp("XAP",line)) {  /* then this is a Xap Obj, requires
                                        special care */
-        if ((temp->name = fread_string(fl, buf2)) == NULL) {
+        if ((temp->name = fread_string(fl, buf2)) == nullptr) {
           temp->name = "undefined";
         }
 
-        if ((temp->short_description = fread_string(fl, buf2)) == NULL) {
+        if ((temp->short_description = fread_string(fl, buf2)) == nullptr) {
           temp->short_description = "undefined";
         }
 
-        if ((temp->description = fread_string(fl, buf2)) == NULL) {
+        if ((temp->description = fread_string(fl, buf2)) == nullptr) {
           temp->description = "undefined";
         }
 
-        if ((temp->action_description = fread_string(fl, buf2)) == NULL) {
-          temp->action_description=0;
+        if ((temp->action_description = fread_string(fl, buf2)) == nullptr) {
+          temp->action_description=nullptr;
         }
 
 
@@ -664,7 +664,7 @@ int House_load(room_vnum rvnum)
           temp->affected[j].specific = 0;
         }
 
-        temp->ex_description = NULL;
+        temp->ex_description = nullptr;
 
         get_line(fl,line);
         for (k=j=zwei=0;!zwei && !feof(fl);) {
@@ -693,12 +693,12 @@ int House_load(room_vnum rvnum)
 
             case 'G': 
               get_line(fl, line); 
-              sscanf(line, "%"TMT, &temp->generation); 
+              sscanf(line, "%" TMT, &temp->generation); 
               get_line(fl, line); 
               break; 
             case 'U': 
               get_line(fl, line); 
-              sscanf(line, "%"I64T, &temp->unique_id); 
+              sscanf(line, "%" I64T, &temp->unique_id); 
               get_line(fl, line); 
               break; 
             case 'S': 
@@ -733,7 +733,7 @@ int House_load(room_vnum rvnum)
           }
         }      /* exit our for loop */
       }   /* exit our xap loop */
-      if(temp != NULL) {
+      if(temp != nullptr) {
         num_objs++;
         obj_to_room(temp, rrnum);
       } else {
@@ -747,14 +747,14 @@ int House_load(room_vnum rvnum)
                 obj1 = cont_row[j]->next_content;
                 obj_to_room(cont_row[j], rrnum);
               }
-              cont_row[j] = NULL;
+              cont_row[j] = nullptr;
             }
 
           if (j == -locate && cont_row[j]) { /* content list existing */
             if (GET_OBJ_TYPE(temp) == ITEM_CONTAINER) {
               /* take item ; fill ; give to char again */
               obj_from_room(temp);
-              temp->contains = NULL;
+              temp->contains = nullptr;
               for (;cont_row[j];cont_row[j] = obj1) {
                 obj1 = cont_row[j]->next_content;
                 obj_to_obj(cont_row[j], temp);
@@ -765,7 +765,7 @@ int House_load(room_vnum rvnum)
                 obj1 = cont_row[j]->next_content;
                 obj_to_room(cont_row[j], rrnum);
               }
-              cont_row[j] = NULL;
+              cont_row[j] = nullptr;
             }
           }
 

@@ -98,7 +98,7 @@ int is_substring(char *sub, char *string)
 /*
  * return 1 if str contains a word or phrase from wordlist.
  * phrases are in double quotes (").
- * if wrdlist is NULL, then return 1, if str is NULL, return 0.
+ * if wrdlist is nullptr, then return 1, if str is nullptr, return 0.
  */
 int word_check(char *str, char *wordlist)
 {
@@ -556,7 +556,7 @@ int cast_mtrigger(char_data *actor, char_data *ch, int spellnum)
   trig_data *t;
   char buf[MAX_INPUT_LENGTH];
 
-  if (ch == NULL)
+  if (ch == nullptr)
     return 1;
 
   if (!SCRIPT_CHECK(ch, MTRIG_CAST) || AFF_FLAGGED(ch, AFF_CHARM))
@@ -927,7 +927,7 @@ int cast_otrigger(char_data *actor, obj_data *obj, int spellnum)
   trig_data *t;
   char buf[MAX_INPUT_LENGTH];
 
-  if (obj == NULL)
+  if (obj == nullptr)
     return 1;
 
   if (!SCRIPT_CHECK(obj, OTRIG_CAST))

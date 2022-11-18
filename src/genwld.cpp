@@ -9,10 +9,7 @@
 #include "utils.h"
 #include "db.h"
 #include "handler.h"
-#include "comm.h"
 #include "genolc.h"
-#include "genwld.h"
-#include "genzon.h"
 #include "shop.h"
 #include "dg_olc.h"
 #include "htree.h"
@@ -29,7 +26,7 @@ room_rnum add_room(struct room_data *room)
   int j, found = FALSE;
   room_rnum i;
 
-  if (room == NULL)
+  if (room == nullptr)
     return NOWHERE;
 
   if ((i = real_room(room->number)) != NOWHERE) {
@@ -193,7 +190,7 @@ int delete_room(room_rnum rnum)
   do {
     i--;
     for (j = 0; j < NUM_OF_DIRS; j++)
-      if (W_EXIT(i, j) == NULL)
+      if (W_EXIT(i, j) == nullptr)
         continue;
       else if (W_EXIT(i, j)->to_room > rnum)
         W_EXIT(i, j)->to_room -= (W_EXIT(i, j)->to_room != NOWHERE); /* with unsigned NOWHERE > any rnum */
@@ -206,7 +203,7 @@ int delete_room(room_rnum rnum)
           if (W_EXIT(i, j)->general_description)
             free(W_EXIT(i, j)->general_description);
           free(W_EXIT(i, j));
-          W_EXIT(i, j) = NULL;
+          W_EXIT(i, j) = nullptr;
         } else { 
           /* description is set, just point to nowhere */
           W_EXIT(i, j)->to_room = NOWHERE;
@@ -432,8 +429,8 @@ int copy_room(struct room_data *to, struct room_data *from)
 
   /* Don't put people and objects in two locations.
      Am thinking this shouldn't be done here... */
-  from->people = NULL;
-  from->contents = NULL;
+  from->people = nullptr;
+  from->contents = nullptr;
 
   return TRUE;
 }
@@ -450,8 +447,8 @@ int copy_room_strings(struct room_data *dest, struct room_data *source)
 {
   int i;
 
-  if (dest == NULL || source == NULL) {
-    log("SYSERR: GenOLC: copy_room_strings: NULL values passed.");
+  if (dest == nullptr || source == nullptr) {
+    log("SYSERR: GenOLC: copy_room_strings: nullptr values passed.");
     return FALSE;
   }
 
@@ -496,7 +493,7 @@ int free_room_strings(struct room_data *room)
       if (room->dir_option[i]->keyword)
         free(room->dir_option[i]->keyword);
       free(room->dir_option[i]);
-      room->dir_option[i] = NULL;
+      room->dir_option[i] = nullptr;
     }
   }
 

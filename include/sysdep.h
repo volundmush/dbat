@@ -89,29 +89,31 @@
 #define NOWHERE	(-1)	/* nil reference for rooms	*/
 #define NOTHING	(-1)	/* nil reference for objects	*/
 #define NOBODY		(-1)	/* nil reference for mobiles	*/
+#define NOFLAG (-1)
 #endif
 
-#define I64T "ld"
-#define SZT "ld"
+#define I64T "lld"
+#define SZT "lld"
 #define TMT "ld"
 
 /* Various virtual (human-reference) number types. */
-typedef IDXTYPE room_vnum;
-typedef IDXTYPE obj_vnum;
-typedef IDXTYPE mob_vnum;
-typedef IDXTYPE zone_vnum;
-typedef IDXTYPE shop_vnum;
-typedef IDXTYPE trig_vnum;
-typedef IDXTYPE guild_vnum;
+typedef IDXTYPE vnum;
+typedef vnum room_vnum;
+typedef vnum obj_vnum;
+typedef vnum mob_vnum;
+typedef vnum zone_vnum;
+typedef vnum shop_vnum;
+typedef vnum trig_vnum;
+typedef vnum guild_vnum;
 
 /* Various real (array-reference) number types. */
-typedef IDXTYPE room_rnum;
-typedef IDXTYPE obj_rnum;
-typedef IDXTYPE mob_rnum;
-typedef IDXTYPE zone_rnum;
-typedef IDXTYPE shop_rnum;
-typedef IDXTYPE trig_rnum;
-typedef IDXTYPE guild_rnum;
+typedef vnum room_rnum;
+typedef vnum obj_rnum;
+typedef vnum mob_rnum;
+typedef vnum zone_rnum;
+typedef vnum shop_rnum;
+typedef vnum trig_rnum;
+typedef vnum guild_rnum;
 
 /*
  * Bitvector type for 32 bit unsigned long bitvectors.

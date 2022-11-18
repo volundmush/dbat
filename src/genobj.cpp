@@ -173,16 +173,16 @@ obj_rnum insert_object(struct obj_data *obj, obj_vnum ovnum)
 obj_rnum index_object(struct obj_data *obj, obj_vnum ovnum, obj_rnum ornum)
 {
 #if CIRCLE_UNSIGNED_INDEX
-  if (obj == NULL || ornum == NOTHING || ornum > top_of_objt)
+  if (obj == nullptr || ornum == NOTHING || ornum > top_of_objt)
 #else
-  if (obj == NULL || ovnum < 0 || ornum < 0 || ornum > top_of_objt)
+  if (obj == nullptr || ovnum < 0 || ornum < 0 || ornum > top_of_objt)
 #endif
     return NOWHERE;
 
   obj->item_number = ornum;
   obj_index[ornum].vnum = ovnum;
   obj_index[ornum].number = 0;
-  obj_index[ornum].func = NULL;
+  obj_index[ornum].func = nullptr;
 
   copy_object_preserve(&obj_proto[ornum], obj);
   obj_proto[ornum].in_room = NOWHERE;
@@ -416,15 +416,15 @@ void free_object_strings_proto(struct obj_data *obj)
 
 void copy_object_strings(struct obj_data *to, struct obj_data *from)
 {
-  to->name = from->name ? strdup(from->name) : NULL;
-  to->description = from->description ? strdup(from->description) : NULL;
-  to->short_description = from->short_description ? strdup(from->short_description) : NULL;
-  to->action_description = from->action_description ? strdup(from->action_description) : NULL;
+  to->name = from->name ? strdup(from->name) : nullptr;
+  to->description = from->description ? strdup(from->description) : nullptr;
+  to->short_description = from->short_description ? strdup(from->short_description) : nullptr;
+  to->action_description = from->action_description ? strdup(from->action_description) : nullptr;
 
   if (from->ex_description)
     copy_ex_descriptions(&to->ex_description, from->ex_description);
   else
-    to->ex_description = NULL;
+    to->ex_description = nullptr;
 }
 
 int copy_object(struct obj_data *to, struct obj_data *from)

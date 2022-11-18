@@ -80,7 +80,7 @@ void log_imm_action(char *messg, ...)
 
       return;
      }
-    time_t ct = time(0);
+    time_t ct = time(nullptr);
     char *time_s = asctime(localtime(&ct));
 
     va_list args;
@@ -478,7 +478,7 @@ ACMD(do_rpp)
     if (GET_RP(ch) < pay) {
      send_to_char(ch, "You need at least 1 RPP to initiate an equipment restring.\r\n");
      return;
-    } else if (!(obj = get_obj_in_list_vis(ch, arg2, NULL, ch->carrying))) {
+    } else if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->carrying))) {
      send_to_char(ch, "You don't have a that equipment to restring in your inventory.\r\n");
      send_to_char(ch, "Syntax: rpp 14 (obj name)\r\n");
      return;
@@ -534,7 +534,7 @@ ACMD(do_rpp)
          return;
     } else {
      int found = FALSE;
-     struct obj_data *k = NULL;
+     struct obj_data *k = nullptr;
      for (k = object_list; k; k = k->next) {
       if (OBJ_FLAGGED(k, ITEM_FORGED)) {
        continue;
@@ -636,12 +636,12 @@ ACMD(do_rpp)
    if (selection == 1) {
       fprintf(fl, "@D[@cName@W: @C%-20s @cRequest@W: @Y%-20s@D]\n", GET_NAME(ch), "House");
       send_to_imm("RPP Request: %s paid for house", GET_NAME(ch));
-      BOARDNEWCOD = time(0);
+      BOARDNEWCOD = time(nullptr);
       save_mud_time(&time_info);
    } else if (selection == 2) {
       fprintf(fl, "@D[@cName@W: @C%-20s @cRequest@W: @Y%-20s@D]\n", GET_NAME(ch), "Custom Skill");
       send_to_imm("RPP Request: %s paid for Custom Skill, uhoh spaggettios", GET_NAME(ch));
-      BOARDNEWCOD = time(0);
+      BOARDNEWCOD = time(nullptr);
       save_mud_time(&time_info);
    }
    GET_RP(ch) -= pay;
@@ -699,8 +699,8 @@ ACMD(do_commune)
  if (prob < perc) {
      ch->decCurKI(cost);
         reveal_hiding(ch, 0);
-  act("@cYou close your eyes and try to commune with the Eldritch Star. You are unable to concentrate though.@n", TRUE, ch, 0, 0, TO_CHAR);
-  act("@W$n closes $s eyes for a moment. Then $e reopens them and frowns.@n", TRUE, ch, 0, 0, TO_ROOM);
+  act("@cYou close your eyes and try to commune with the Eldritch Star. You are unable to concentrate though.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+  act("@W$n closes $s eyes for a moment. Then $e reopens them and frowns.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
   WAIT_STATE(ch, PULSE_2SEC);
   return;
  }
@@ -708,8 +708,8 @@ ACMD(do_commune)
      ch->decCurKI(cost);
      ch->decCurST(cost);
         reveal_hiding(ch, 0);
-  act("@cYou close your eyes and commune with the Eldritch Star spiritually. You feel your stamina replenish some.@n", TRUE, ch, 0, 0, TO_CHAR);
-  act("@W$n closes $s eyes for a moment. Then $e reopens them and smiles.@n", TRUE, ch, 0, 0, TO_ROOM);
+  act("@cYou close your eyes and commune with the Eldritch Star spiritually. You feel your stamina replenish some.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+  act("@W$n closes $s eyes for a moment. Then $e reopens them and smiles.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
   WAIT_STATE(ch, PULSE_2SEC);
   return;
  }
@@ -751,8 +751,8 @@ ACMD(do_willpower)
    }
    if (rand_number(10, 100) - GET_INT(ch) > 60) {
           reveal_hiding(ch, 0);
-    act("@WYou focus all your knowledge and will on breaking free. Dark purple energy swirls around your body and the M on your forehead burns brightly. After a few moments you give up, having failed to overcome the majinization!@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@W$n focuses hard with $s eyes closed. Dark purple energy swirls around $s body and the M on $s head burns brightly. After a few moments $n seems to give up and the commotion dies down.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@WYou focus all your knowledge and will on breaking free. Dark purple energy swirls around your body and the M on your forehead burns brightly. After a few moments you give up, having failed to overcome the majinization!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@W$n focuses hard with $s eyes closed. Dark purple energy swirls around $s body and the M on $s head burns brightly. After a few moments $n seems to give up and the commotion dies down.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
     return;
    }
    else {
@@ -762,8 +762,8 @@ ACMD(do_willpower)
       GET_PRACTICES(ch, GET_CLASS(ch)) -= 100;
    }
           reveal_hiding(ch, 0);
-    act("@WYou focus all your knowledge and will on breaking free. Dark purple energy swirls around your body and the M on your forehead burns brightly. After a few moments the ground splits beneath you and while letting out a piercing scream the M disappears from your forehead! You are free while still keeping the boost you had recieved from the majinization!@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@W$n focuses hard with $s eyes closed. Dark purple energy swirls around $s body and the M on $s head burns brightly. After a few moments the ground beneath $n splits and $e lets out a piercing scream. The M on $s forehead disappears!@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@WYou focus all your knowledge and will on breaking free. Dark purple energy swirls around your body and the M on your forehead burns brightly. After a few moments the ground splits beneath you and while letting out a piercing scream the M disappears from your forehead! You are free while still keeping the boost you had recieved from the majinization!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@W$n focuses hard with $s eyes closed. Dark purple energy swirls around $s body and the M on $s head burns brightly. After a few moments the ground beneath $n splits and $e lets out a piercing scream. The M on $s forehead disappears!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
     MAJINIZED(ch) = 3;
     return;
    }
@@ -795,18 +795,18 @@ ACMD(do_grapple)
   return;
  }
 
- if (GRAPPLING(ch) != NULL) {
-  act("@RYou stop grappling with @r$N@R!@n", TRUE, ch, 0, GRAPPLING(ch), TO_CHAR);
-  act("@r$n@R stops grappling with @rYOU!!@n", TRUE, ch, 0, GRAPPLING(ch), TO_VICT);
-  act("@r$n@R stops grappling with @r$N@R!@n", TRUE, ch, 0, GRAPPLING(ch), TO_NOTVICT);
+ if (GRAPPLING(ch) != nullptr) {
+  act("@RYou stop grappling with @r$N@R!@n", TRUE, ch, nullptr, GRAPPLING(ch), TO_CHAR);
+  act("@r$n@R stops grappling with @rYOU!!@n", TRUE, ch, nullptr, GRAPPLING(ch), TO_VICT);
+  act("@r$n@R stops grappling with @r$N@R!@n", TRUE, ch, nullptr, GRAPPLING(ch), TO_NOTVICT);
   GRAPTYPE(GRAPPLING(ch)) = -1;
-  GRAPPLED(GRAPPLING(ch)) = NULL;
-  GRAPPLING(ch) = NULL;
+  GRAPPLED(GRAPPLING(ch)) = nullptr;
+  GRAPPLING(ch) = nullptr;
   GRAPTYPE(ch) = -1;
   return;
  }
 
- if (GRAPPLED(ch) != NULL) {
+ if (GRAPPLED(ch) != nullptr) {
   send_to_char(ch, "You are currently a victim of grappling! Try 'escape' to break free!\r\n");
   return;
  }
@@ -826,7 +826,7 @@ ACMD(do_grapple)
   return;
  }
 
- if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
+ if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
   if (!FIGHTING(ch)) {
    send_to_char(ch, "That target isn't here.\r\n");
    return;
@@ -835,7 +835,7 @@ ACMD(do_grapple)
   }
  }
 
- if (!can_kill(ch, vict, NULL, 0)) {
+ if (!can_kill(ch, vict, nullptr, 0)) {
   return;
  }
 
@@ -875,9 +875,9 @@ ACMD(do_grapple)
           (vict->getCurST()) >= 1 && GET_POS(vict) != POS_SLEEPING) {
    if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
            reveal_hiding(ch, 0);
-     act("@C$N@c disappears, avoiding your grapple attempt before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c grapple attempt before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c grapple attempt before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+     act("@C$N@c disappears, avoiding your grapple attempt before reappearing!@n", FALSE, ch, nullptr, vict, TO_CHAR);
+     act("@cYou disappear, avoiding @C$n's@c grapple attempt before reappearing!@n", FALSE, ch, nullptr, vict, TO_VICT);
+     act("@C$N@c disappears, avoiding @C$n's@c grapple attempt before reappearing!@n", FALSE, ch, nullptr, vict, TO_NOTVICT);
      if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
       REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
      }
@@ -888,9 +888,9 @@ ACMD(do_grapple)
    }
    else {
            reveal_hiding(ch, 0);
-     act("@C$N@c disappears, trying to avoid your grapple but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the grapple attempt but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c grapple attempt but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+     act("@C$N@c disappears, trying to avoid your grapple but your zanzoken is faster!@n", FALSE, ch, nullptr, vict, TO_CHAR);
+     act("@cYou zanzoken to avoid the grapple attempt but @C$n's@c zanzoken is faster!@n", FALSE, ch, nullptr, vict, TO_VICT);
+     act("@C$N@c disappears, trying to avoid @C$n's@c grapple attempt but @C$n's@c zanzoken is faster!@n", FALSE, ch, nullptr, vict, TO_NOTVICT);
      REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
    }
@@ -908,27 +908,27 @@ ACMD(do_grapple)
 
   if ((GET_HIT(ch) * 0.02) * GET_STR(ch) < (GET_HIT(vict) * 0.01) * GET_STR(vict)) {
          reveal_hiding(ch, 0);
-   act("@RYou try to grapple with @r$N@R, but $E manages to overpower you!@n", TRUE, ch, 0, vict, TO_CHAR);
-   act("@r$n@R tries to grapple with YOU, but you manage to overpower $m!@n", TRUE, ch, 0, vict, TO_VICT);
-   act("@r$n@R tries to grapple with @r$N@R, but $E manages to overpower @r$n@R!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+   act("@RYou try to grapple with @r$N@R, but $E manages to overpower you!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+   act("@r$n@R tries to grapple with YOU, but you manage to overpower $m!@n", TRUE, ch, nullptr, vict, TO_VICT);
+   act("@r$n@R tries to grapple with @r$N@R, but $E manages to overpower @r$n@R!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
       ch->decCurST(cost);
    improve_skill(ch, SKILL_GRAPPLE, 1);
    WAIT_STATE(ch, PULSE_4SEC);
    return;
   } else if ((GET_HIT(ch) * 0.01) * GET_STR(ch) < (GET_HIT(vict) * 0.01) * GET_STR(vict) && rand_number(1, 4) == 1) {
          reveal_hiding(ch, 0);
-   act("@RYou try to grapple with @r$N@R, but $E manages to overpower you!@n", TRUE, ch, 0, vict, TO_CHAR);
-   act("@r$n@R tries to grapple with YOU, but you manage to overpower $m!@n", TRUE, ch, 0, vict, TO_VICT);
-   act("@r$n@R tries to grapple with @r$N@R, but $E manages to overpower @r$n@R!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+   act("@RYou try to grapple with @r$N@R, but $E manages to overpower you!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+   act("@r$n@R tries to grapple with YOU, but you manage to overpower $m!@n", TRUE, ch, nullptr, vict, TO_VICT);
+   act("@r$n@R tries to grapple with @r$N@R, but $E manages to overpower @r$n@R!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
       ch->decCurST(cost);
    improve_skill(ch, SKILL_GRAPPLE, 1);
    WAIT_STATE(ch, PULSE_4SEC);
    return;
   } else if (perc < prob) {
          reveal_hiding(ch, 0);
-   act("@RYou try to grapple with @r$N@R, but $E manages to avoid it!@n", TRUE, ch, 0, vict, TO_CHAR);
-   act("@r$n@R tries to grapple with YOU, but you manage to avoid it!@n", TRUE, ch, 0, vict, TO_VICT);
-   act("@r$n@R tries to grapple with @r$N@R, but $E manages to avoid it!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+   act("@RYou try to grapple with @r$N@R, but $E manages to avoid it!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+   act("@r$n@R tries to grapple with YOU, but you manage to avoid it!@n", TRUE, ch, nullptr, vict, TO_VICT);
+   act("@r$n@R tries to grapple with @r$N@R, but $E manages to avoid it!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
       ch->decCurST(cost);
    improve_skill(ch, SKILL_GRAPPLE, 1);
    WAIT_STATE(ch, PULSE_4SEC);
@@ -938,9 +938,9 @@ ACMD(do_grapple)
     return;
   } else if (!strcasecmp("hold", arg2)) {
          reveal_hiding(ch, 0);
-   act("@RYou rush at @r$N@R and manage to get $M in a hold from behind!@n", TRUE, ch, 0, vict, TO_CHAR);
-   act("@r$n@R rushes at YOU and manages to get you in a hold from behind!@n", TRUE, ch, 0, vict, TO_VICT);
-   act("@r$n@R rushes at @r$N@R and manages to get $M in a hold from behind!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+   act("@RYou rush at @r$N@R and manage to get $M in a hold from behind!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+   act("@r$n@R rushes at YOU and manages to get you in a hold from behind!@n", TRUE, ch, nullptr, vict, TO_VICT);
+   act("@r$n@R rushes at @r$N@R and manages to get $M in a hold from behind!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
 
    /* Let's grapple! */
    GRAPPLING(ch) = vict;
@@ -955,9 +955,9 @@ ACMD(do_grapple)
    return;
   } else if (!strcasecmp("choke", arg2)) {
          reveal_hiding(ch, 0);
-   act("@RYou rush at @r$N@R and manage to grab $S throat with both hands!@n", TRUE, ch, 0, vict, TO_CHAR);
-   act("@r$n@R rushes at YOU and manages to grab your throat with both hands!@n", TRUE, ch, 0, vict, TO_VICT);
-   act("@r$n@R rushes at @r$N@R and manages to grab $S throat with both hands!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+   act("@RYou rush at @r$N@R and manage to grab $S throat with both hands!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+   act("@r$n@R rushes at YOU and manages to grab your throat with both hands!@n", TRUE, ch, nullptr, vict, TO_VICT);
+   act("@r$n@R rushes at @r$N@R and manages to grab $S throat with both hands!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
 
    /* Let's grapple! */
    GRAPPLING(ch) = vict;
@@ -976,9 +976,9 @@ ACMD(do_grapple)
     return;
    }
 
-   act("@MMoving quickly you stretch your body out and wrap it around the length of @c$N's@M body! You tighten your body until you begin crushing @c$N@M!", TRUE, ch, 0, vict, TO_CHAR);
-   act("@C$n@M quickly stretches out $s body and wraps it around @RYOU@M! You feel $s body begin to crush your own!@n", TRUE, ch, 0, vict, TO_VICT);
-   act("@C$n@M quickly stretches out $s body and wraps it around @c$N@M! It appears that @c$N's@M body is being crushed slowly!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+   act("@MMoving quickly you stretch your body out and wrap it around the length of @c$N's@M body! You tighten your body until you begin crushing @c$N@M!", TRUE, ch, nullptr, vict, TO_CHAR);
+   act("@C$n@M quickly stretches out $s body and wraps it around @RYOU@M! You feel $s body begin to crush your own!@n", TRUE, ch, nullptr, vict, TO_VICT);
+   act("@C$n@M quickly stretches out $s body and wraps it around @c$N@M! It appears that @c$N's@M body is being crushed slowly!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
 
    /* Let's grapple! */
    GRAPPLING(ch) = vict;
@@ -993,9 +993,9 @@ ACMD(do_grapple)
    return;
   } else if (!strcasecmp("grab", arg2)) {
          reveal_hiding(ch, 0);
-   act("@RYou rush at @r$N@R and manage to lock your arm onto $S!@n", TRUE, ch, 0, vict, TO_CHAR);
-   act("@r$n@R rushes at YOU and manages to lock $s arm onto your's!@n", TRUE, ch, 0, vict, TO_VICT);
-   act("@r$n@R rushes at @r$N@R and manages to lock $s arm onto @r$N's@R!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+   act("@RYou rush at @r$N@R and manage to lock your arm onto $S!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+   act("@r$n@R rushes at YOU and manages to lock $s arm onto your's!@n", TRUE, ch, nullptr, vict, TO_VICT);
+   act("@r$n@R rushes at @r$N@R and manages to lock $s arm onto @r$N's@R!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
 
    /* Let's grapple! */
    GRAPPLING(ch) = vict;
@@ -1024,7 +1024,7 @@ ACMD(do_trip)
 {
 
  char arg[200];
- struct char_data *vict = NULL;
+ struct char_data *vict = nullptr;
  
  one_argument(argument, arg);
 
@@ -1045,8 +1045,8 @@ ACMD(do_trip)
   perc = GET_LEVEL(ch) + rand_number(1, 10);
  }
 
- vict = NULL; vict = NULL;
- if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
+ vict = nullptr; vict = nullptr;
+ if (!*arg || !(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
   if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
    vict = FIGHTING(ch);
   } else {
@@ -1055,11 +1055,11 @@ ACMD(do_trip)
   }
  }
 
- if (!can_kill(ch, vict, NULL, 0)) {
+ if (!can_kill(ch, vict, nullptr, 0)) {
   return;
  }
 
- if (vict != NULL) {
+ if (vict != nullptr) {
   if (AFF_FLAGGED(vict, AFF_FLYING)) {
    send_to_char(ch, "They are flying and are not on their feet!\r\n");
    return;
@@ -1087,9 +1087,9 @@ ACMD(do_trip)
           (vict->getCurST()) >= 1 && GET_POS(vict) != POS_SLEEPING) {
    if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
           reveal_hiding(ch, 0);
-     act("@C$N@c disappears, avoiding your trip before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c trip before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c trip before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+     act("@C$N@c disappears, avoiding your trip before reappearing!@n", FALSE, ch, nullptr, vict, TO_CHAR);
+     act("@cYou disappear, avoiding @C$n's@c trip before reappearing!@n", FALSE, ch, nullptr, vict, TO_VICT);
+     act("@C$N@c disappears, avoiding @C$n's@c trip before reappearing!@n", FALSE, ch, nullptr, vict, TO_NOTVICT);
      if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
       REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
      }
@@ -1100,9 +1100,9 @@ ACMD(do_trip)
    }
    else {
            reveal_hiding(ch, 0);
-     act("@C$N@c disappears, trying to avoid your trip but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou zanzoken to avoid the trip but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, trying to avoid @C$n's@c trip but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+     act("@C$N@c disappears, trying to avoid your trip but your zanzoken is faster!@n", FALSE, ch, nullptr, vict, TO_CHAR);
+     act("@cYou zanzoken to avoid the trip but @C$n's@c zanzoken is faster!@n", FALSE, ch, nullptr, vict, TO_VICT);
+     act("@C$N@c disappears, trying to avoid @C$n's@c trip but @C$n's@c zanzoken is faster!@n", FALSE, ch, nullptr, vict, TO_NOTVICT);
      REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
    }
@@ -1110,18 +1110,18 @@ ACMD(do_trip)
 
   if (perc < prob) { /* Fail! */
           reveal_hiding(ch, 0);
-   act("@mYou move to trip $N@m, but you screw up and $E keeps $S footing!@n", TRUE, ch, 0, vict, TO_CHAR);
-   act("@m$n@m moves to trip YOU, but $e screws up and you manage to keep your footing!@n", TRUE, ch, 0, vict, TO_VICT);
-   act("@m$n@m moves to trip $N@m, but $e screws up and $N@m manages to keep $S footing!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+   act("@mYou move to trip $N@m, but you screw up and $E keeps $S footing!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+   act("@m$n@m moves to trip YOU, but $e screws up and you manage to keep your footing!@n", TRUE, ch, nullptr, vict, TO_VICT);
+   act("@m$n@m moves to trip $N@m, but $e screws up and $N@m manages to keep $S footing!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
    improve_skill(ch, SKILL_TRIP, 0);
       ch->decCurST(cost);
    WAIT_STATE(ch, PULSE_4SEC);
-   if (FIGHTING(ch) == NULL) {
+   if (FIGHTING(ch) == nullptr) {
     set_fighting(ch, vict);
    } else if (FIGHTING(ch) != vict) {
     set_fighting(ch, vict);
    }
-   if (FIGHTING(vict) == NULL) {
+   if (FIGHTING(vict) == nullptr) {
     set_fighting(vict, ch);
    } else if (FIGHTING(vict) != ch) {
     set_fighting(vict, ch);
@@ -1129,17 +1129,17 @@ ACMD(do_trip)
    return;
   } else { /* Success! */
          reveal_hiding(ch, 0);
-   act("@mYou move to trip $N@m, and manage to knock $M off $S feet!@n", TRUE, ch, 0, vict, TO_CHAR);
-   act("@m$n@m moves to trip YOU, and manages to knock you off your feet!@n", TRUE, ch, 0, vict, TO_VICT);
-   act("@m$n@m moves to trip $N@m, and manages to knock $N@m off $S feet!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+   act("@mYou move to trip $N@m, and manage to knock $M off $S feet!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+   act("@m$n@m moves to trip YOU, and manages to knock you off your feet!@n", TRUE, ch, nullptr, vict, TO_VICT);
+   act("@m$n@m moves to trip $N@m, and manages to knock $N@m off $S feet!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
    improve_skill(ch, SKILL_TRIP, 0);
       ch->decCurST(cost);
    GET_POS(vict) = POS_SITTING;
    WAIT_STATE(ch, PULSE_4SEC);
-   if (FIGHTING(ch) == NULL) {
+   if (FIGHTING(ch) == nullptr) {
     set_fighting(ch, vict);
    }
-   if (FIGHTING(vict) == NULL) {
+   if (FIGHTING(vict) == nullptr) {
     set_fighting(vict, ch);
    }
    return;
@@ -1398,96 +1398,96 @@ ACMD(do_train)
         case 1:
             switch (msg_case) {
                 case 1:
-                    act("@WYou throw a flurry of punches into the air at an invisible opponent.@n", TRUE, ch, 0, 0, TO_CHAR);
-                    act("@W$n throws a flurry of punches into the air.@n", TRUE, ch, 0, 0, TO_ROOM);
+                    act("@WYou throw a flurry of punches into the air at an invisible opponent.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+                    act("@W$n throws a flurry of punches into the air.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
                     break;
                 case 2:
-                    act("@WYou leap into the air and throw a wild kick at an invisible opponent@n", TRUE, ch, 0, 0, TO_CHAR);
-                    act("@W$n leaps into the air and throws a wild kick at nothing.@n", TRUE, ch, 0, 0, TO_ROOM);
+                    act("@WYou leap into the air and throw a wild kick at an invisible opponent@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+                    act("@W$n leaps into the air and throws a wild kick at nothing.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
                     break;
                 case 3:
-                    act("@WYou leap high into the air and unleash a flurry of punches and kicks at an invisible opponent@n", TRUE, ch, 0, 0, TO_CHAR);
-                    act("@W$n leaps high into the air and unleashes a flurry of punches and kicks at nothing.@n", TRUE, ch, 0, 0, TO_ROOM);
+                    act("@WYou leap high into the air and unleash a flurry of punches and kicks at an invisible opponent@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+                    act("@W$n leaps high into the air and unleashes a flurry of punches and kicks at nothing.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
                     break;
             }
             break;
         case 2:
             switch (msg_case) {
                 case 1:
-                    act("@WYou dash quickly around the surrounding area as fast as you can!@n", TRUE, ch, 0, 0, TO_CHAR);
-                    act("@W$n dashes quickly around the surrounding area as fast as $e can!@n", TRUE, ch, 0, 0, TO_ROOM);
+                    act("@WYou dash quickly around the surrounding area as fast as you can!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+                    act("@W$n dashes quickly around the surrounding area as fast as $e can!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
                     break;
                 case 2:
-                    act("@WYou dodge to the side as fast as you can!@n", TRUE, ch, 0, 0, TO_CHAR);
-                    act("@W$n dodges to the side as fast as $e can!@n", TRUE, ch, 0, 0, TO_ROOM);
+                    act("@WYou dodge to the side as fast as you can!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+                    act("@W$n dodges to the side as fast as $e can!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
                     break;
                 case 3:
-                    act("@WYou dash backwards as fast as you can!@n", TRUE, ch, 0, 0, TO_CHAR);
-                    act("@W$n dashes backwards as fast as $e can!@n", TRUE, ch, 0, 0, TO_ROOM);
+                    act("@WYou dash backwards as fast as you can!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+                    act("@W$n dashes backwards as fast as $e can!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
                     break;
             }
             break;
         case 3:
             switch (msg_case) {
                 case 1:
-                    act("@WYou leap into the air and then slam into the ground with your feet outstretched!@n", TRUE, ch, 0, 0, TO_CHAR);
-                    act("@W$n leaps into the air and then slams into the ground with $s feet outstretched!?@n", TRUE, ch, 0, 0, TO_ROOM);
+                    act("@WYou leap into the air and then slam into the ground with your feet outstretched!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+                    act("@W$n leaps into the air and then slams into the ground with $s feet outstretched!?@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
                     break;
                 case 2:
-                    act("@WYou leap into the air and then slam into the ground with your fists!@n", TRUE, ch, 0, 0, TO_CHAR);
-                    act("@W$n leaps into the air and then slams into the ground with $s fists!?@n", TRUE, ch, 0, 0, TO_ROOM);
+                    act("@WYou leap into the air and then slam into the ground with your fists!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+                    act("@W$n leaps into the air and then slams into the ground with $s fists!?@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
                     break;
                 case 3:
-                    act("@WYou leap into the air and then slam into the ground with your body!@n", TRUE, ch, 0, 0, TO_CHAR);
-                    act("@W$n leaps into the air and then slams into the ground with $s body!?@n", TRUE, ch, 0, 0, TO_ROOM);
+                    act("@WYou leap into the air and then slam into the ground with your body!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+                    act("@W$n leaps into the air and then slams into the ground with $s body!?@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
                     break;
             }
             break;
         case 4:
             switch (msg_case) {
                 case 1:
-                    act("@WYou do a series of backflips through the air, landing gracefully on one foot a moment later.@n", TRUE, ch, 0, 0, TO_CHAR);
-                    act("@W$n does a series of backflips through the air, landing gracefully on one foot a moment later.@n", TRUE, ch, 0, 0, TO_ROOM);
+                    act("@WYou do a series of backflips through the air, landing gracefully on one foot a moment later.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+                    act("@W$n does a series of backflips through the air, landing gracefully on one foot a moment later.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
                     break;
                 case 2:
-                    act("@WYou flip forward and launch off your hands into the air. You land gracefully on one foot a moment later.@n", TRUE, ch, 0, 0, TO_CHAR);
-                    act("@W$n flips forward and launches off $s hands into the air. Then $e lands gracefully on one foot a moment later.@n", TRUE, ch, 0, 0, TO_ROOM);
+                    act("@WYou flip forward and launch off your hands into the air. You land gracefully on one foot a moment later.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+                    act("@W$n flips forward and launches off $s hands into the air. Then $e lands gracefully on one foot a moment later.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
                     break;
                 case 3:
-                    act("@WYou flip to the side off one hand and then land on your feet.@n", TRUE, ch, 0, 0, TO_CHAR);
-                    act("@W$n flips to the side off one hand and then lands on $s feet.@n", TRUE, ch, 0, 0, TO_ROOM);
+                    act("@WYou flip to the side off one hand and then land on your feet.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+                    act("@W$n flips to the side off one hand and then lands on $s feet.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
                     break;
             }
             break;
         case 5:
             switch (msg_case) {
                 case 1:
-                    act("@WConcentrating you fly high into the air as fast as you can before settling slowly back to the ground.@n", TRUE, ch, 0, 0, TO_CHAR);
-                    act("@W$n flies high into the air as fast as $e can before settling slowly back to the ground.@n", TRUE, ch, 0, 0, TO_ROOM);
+                    act("@WConcentrating you fly high into the air as fast as you can before settling slowly back to the ground.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+                    act("@W$n flies high into the air as fast as $e can before settling slowly back to the ground.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
                     break;
                 case 2:
-                    act("@WYou focus your ki at your outstretched hand and send a mild shockwave in that direction!@n", TRUE, ch, 0, 0, TO_CHAR);
-                    act("@W$n focuses $s ki at $s outstretched hand and sends a mild shockwave in that direction!@n", TRUE, ch, 0, 0, TO_ROOM);
+                    act("@WYou focus your ki at your outstretched hand and send a mild shockwave in that direction!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+                    act("@W$n focuses $s ki at $s outstretched hand and sends a mild shockwave in that direction!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
                     break;
                 case 3:
-                    act("@WYou concentrate on your ki and force torrents of it to rush out from your body randomly!@n", TRUE, ch, 0, 0, TO_CHAR);
-                    act("@W$n seems to concentrate before torrents of ki randomly blasts out from $s body!@n", TRUE, ch, 0, 0, TO_ROOM);
+                    act("@WYou concentrate on your ki and force torrents of it to rush out from your body randomly!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+                    act("@W$n seems to concentrate before torrents of ki randomly blasts out from $s body!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
                     break;
             }
             break;
         case 6:
             switch (msg_case) {
                 case 1:
-                    act("@WYou close your eyes and wage a mental battle against an imaginary opponent.@n", TRUE, ch, 0, 0, TO_CHAR);
-                    act("@W$n closes $s eyes for a moment and an expression of intensity forms on it.@n", TRUE, ch, 0, 0, TO_ROOM);
+                    act("@WYou close your eyes and wage a mental battle against an imaginary opponent.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+                    act("@W$n closes $s eyes for a moment and an expression of intensity forms on it.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
                     break;
                 case 2:
-                    act("@WYou look around and contemplate battle tactics for an imaginary scenario.@n", TRUE, ch, 0, 0, TO_CHAR);
-                    act("@W$n looks around and appears to be imagining things that aren't there.@n", TRUE, ch, 0, 0, TO_ROOM);
+                    act("@WYou look around and contemplate battle tactics for an imaginary scenario.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+                    act("@W$n looks around and appears to be imagining things that aren't there.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
                     break;
                 case 3:
-                    act("@WYou invent a battle plan for a battle that doesn't exist!@n", TRUE, ch, 0, 0, TO_CHAR);
-                    act("@W$n seems to have thought of something.@n", TRUE, ch, 0, 0, TO_ROOM);
+                    act("@WYou invent a battle plan for a battle that doesn't exist!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+                    act("@W$n seems to have thought of something.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
                     break;
             }
             break;
@@ -1587,7 +1587,7 @@ ACMD(do_rip)
   return;
  }
 
- if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
+ if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
   send_to_char(ch, "That target isn't here.\r\n");
   return;
  }
@@ -1605,30 +1605,30 @@ ACMD(do_rip)
       ch->decCurST(ch->getMaxST() / 20);
    if (GET_HIT(ch) > GET_HIT(vict) * 2) {
           reveal_hiding(ch, 0);
-    act("@rYou rush at @R$N@r and grab $S tail! With a powerful tug you pull it off!@n", TRUE, ch, 0, vict, TO_CHAR);
-    act("@R$n@r rushes at YOU and grabs your tail! With a powerful tug $e pulls it off!@n", TRUE, ch, 0, vict, TO_VICT);
-    act("@R$n@R rushes at @R$N@r and grab $S tail! With a powerful tug $e pulls it off!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+    act("@rYou rush at @R$N@r and grab $S tail! With a powerful tug you pull it off!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+    act("@R$n@r rushes at YOU and grabs your tail! With a powerful tug $e pulls it off!@n", TRUE, ch, nullptr, vict, TO_VICT);
+    act("@R$n@R rushes at @R$N@r and grab $S tail! With a powerful tug $e pulls it off!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
        vict->race->loseTail(vict);
     return;
    } else {
           reveal_hiding(ch, 0);
-    act("@rYou rush at @R$N@r and grab $S tail! You are too weak to pull it off though!@n", TRUE, ch, 0, vict, TO_CHAR);
-    act("@R$n@r rushes at YOU and grabs your tail! $e is too weak to pull it off though!@n", TRUE, ch, 0, vict, TO_VICT);
-    act("@R$n@R rushes at @R$N@r and grab $S tail! $e is too weak to pull it off though!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+    act("@rYou rush at @R$N@r and grab $S tail! You are too weak to pull it off though!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+    act("@R$n@r rushes at YOU and grabs your tail! $e is too weak to pull it off though!@n", TRUE, ch, nullptr, vict, TO_VICT);
+    act("@R$n@R rushes at @R$N@r and grab $S tail! $e is too weak to pull it off though!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
     return;
    }
   } else {
       ch->decCurST(ch->getMaxST() / 20);
          reveal_hiding(ch, 0);
-   act("@rYou rush at @R$N@r and try to grab $S tail, but fail!@n", TRUE, ch, 0, vict, TO_CHAR);
-   act("@R$n@r rushes at YOU and tries to grab your tail, but fails!@n", TRUE, ch, 0, vict, TO_VICT);
-   act("@R$n@R rushes at @R$N@r and tries to grab $S tail, but fails!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+   act("@rYou rush at @R$N@r and try to grab $S tail, but fail!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+   act("@R$n@r rushes at YOU and tries to grab your tail, but fails!@n", TRUE, ch, nullptr, vict, TO_VICT);
+   act("@R$n@R rushes at @R$N@r and tries to grab $S tail, but fails!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
    return;
   }
  } else if (ch == vict) {
          reveal_hiding(ch, 0);
-   act("@rYou grab your own tail and yank it off!@n", TRUE, ch, 0, 0, TO_CHAR);
-   act("@R$n@r grabs $s own tail and yanks it off!@n", TRUE, ch, 0, 0, TO_ROOM);
+   act("@rYou grab your own tail and yank it off!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+   act("@R$n@r grabs $s own tail and yanks it off!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    vict->race->loseTail(vict);
  } else {
   if ((ch->getCurST()) < GET_MAX_MOVE(ch) / 20) {
@@ -1637,9 +1637,9 @@ ACMD(do_rip)
   }
      ch->decCurST(ch->getMaxKI() / 20);
           reveal_hiding(ch, 0);
-    act("@rYou reach and grab @R$N's@r tail! With a powerful tug you pull it off!@n", TRUE, ch, 0, vict, TO_CHAR);
-    act("@RYou feel your tail pulled off!@n", TRUE, ch, 0, vict, TO_VICT);
-    act("@R$n@R reaches and grabs @R$N's@r tail! With a powerful tug $e pulls it off!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+    act("@rYou reach and grab @R$N's@r tail! With a powerful tug you pull it off!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+    act("@RYou feel your tail pulled off!@n", TRUE, ch, nullptr, vict, TO_VICT);
+    act("@R$n@R reaches and grabs @R$N's@r tail! With a powerful tug $e pulls it off!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
      vict->race->loseTail(vict);
     return;
  }
@@ -1653,8 +1653,8 @@ ACMD(do_infuse)
  }
 
  if (AFF_FLAGGED(ch, AFF_INFUSE)) {
-  act("You stop infusing ki into your attacks.", TRUE, ch, 0, 0, TO_CHAR);
-  act("$n stops infusing ki into $s attacks.", TRUE, ch, 0, 0, TO_ROOM);
+  act("You stop infusing ki into your attacks.", TRUE, ch, nullptr, nullptr, TO_CHAR);
+  act("$n stops infusing ki into $s attacks.", TRUE, ch, nullptr, nullptr, TO_ROOM);
   REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_INFUSE);
   return;
  }
@@ -1664,8 +1664,8 @@ ACMD(do_infuse)
   return;
  }
        reveal_hiding(ch, 0);
- act("You start infusing ki into your attacks.", TRUE, ch, 0, 0, TO_CHAR);
- act("$n starts infusing ki into $s attacks.", TRUE, ch, 0, 0, TO_ROOM);
+ act("You start infusing ki into your attacks.", TRUE, ch, nullptr, nullptr, TO_CHAR);
+ act("$n starts infusing ki into $s attacks.", TRUE, ch, nullptr, nullptr, TO_ROOM);
  SET_BIT_AR(AFF_FLAGS(ch), AFF_INFUSE);
  ch->decCurKI(ch->getMaxKI() / 100);
 }
@@ -1690,11 +1690,11 @@ ACMD(do_paralyze)
   return;
  }
 
- if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
+ if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
   send_to_char(ch, "That target isn't here.\r\n");
   return;
  }
- if (!can_kill(ch, vict, NULL, 0)) {
+ if (!can_kill(ch, vict, nullptr, 0)) {
   return;
  } 
  if (AFF_FLAGGED(vict, AFF_PARA)) {
@@ -1718,22 +1718,22 @@ ACMD(do_paralyze)
 
  if (GET_BONUS(vict, BONUS_INSOMNIAC)) {
      ch->decCurKI(GET_HIT(vict) / 6 + (GET_MAX_MANA(ch) / 20));
-  act("@RYou focus ki and point both your arms at @r$N@R. However $N seems to shake off your paralysis attack!@n", TRUE, ch, 0, vict, TO_CHAR);
-  act("@r$n @Rfocuses ki and points both $s arms at YOU! Your insomnia makes you immune to $s feeble paralysis attempt.@n", TRUE, ch, 0, vict, TO_VICT);
-  act("@r$n @Rfocuses ki and points both $s arms at @r$N@R. However $N seems to shake off $s paralysis attack!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+  act("@RYou focus ki and point both your arms at @r$N@R. However $N seems to shake off your paralysis attack!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+  act("@r$n @Rfocuses ki and points both $s arms at YOU! Your insomnia makes you immune to $s feeble paralysis attempt.@n", TRUE, ch, nullptr, vict, TO_VICT);
+  act("@r$n @Rfocuses ki and points both $s arms at @r$N@R. However $N seems to shake off $s paralysis attack!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
   return;
  } else if (prob < perc) {
         reveal_hiding(ch, 0);
-  act("@RYou focus ki and point both your arms at @r$N@R. However $E manages to avoid your attempt to paralyze $M!@n", TRUE, ch, 0, vict, TO_CHAR);
-  act("@r$n @Rfocuses ki and points both $s arms at YOU! You manage to avoid $s technique though...@n", TRUE, ch, 0, vict, TO_VICT);
-  act("@r$n @Rfocuses ki and points both $s arms at @r$N@R. However $E manages to avoid @r$n's@R attempted technique...@n", TRUE, ch, 0, vict, TO_NOTVICT);
+  act("@RYou focus ki and point both your arms at @r$N@R. However $E manages to avoid your attempt to paralyze $M!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+  act("@r$n @Rfocuses ki and points both $s arms at YOU! You manage to avoid $s technique though...@n", TRUE, ch, nullptr, vict, TO_VICT);
+  act("@r$n @Rfocuses ki and points both $s arms at @r$N@R. However $E manages to avoid @r$n's@R attempted technique...@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
      ch->decCurKI(GET_HIT(vict) / 6 + (GET_MAX_MANA(ch) / 20));
   improve_skill(ch, SKILL_PARALYZE, 0);
  } else {
         reveal_hiding(ch, 0);
-  act("@RYou focus ki and point both your arms at @r$N@R. Your ki flows into $S body and partially paralyzes $M!@n", TRUE, ch, 0, vict, TO_CHAR);
-  act("@r$n @Rfocuses ki and points both $s arms at YOU! You are caught in $s paralysis technique and now can barely move!@n", TRUE, ch, 0, vict, TO_VICT);
-  act("@r$n @Rfocuses ki and points both $s arms at @r$N@R. @r$n's@R ki flows into @r$N@R body and partially paralyzes $M!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+  act("@RYou focus ki and point both your arms at @r$N@R. Your ki flows into $S body and partially paralyzes $M!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+  act("@r$n @Rfocuses ki and points both $s arms at YOU! You are caught in $s paralysis technique and now can barely move!@n", TRUE, ch, nullptr, vict, TO_VICT);
+  act("@r$n @Rfocuses ki and points both $s arms at @r$N@R. @r$n's@R ki flows into @r$N@R body and partially paralyzes $M!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
      int duration = GET_INT(ch) / 15;
      assign_affect(vict, AFF_PARA, SKILL_PARALYZE, duration, 0, 0, 0, 0, 0, 0);
      ch->decCurKI(GET_HIT(vict) / 6 + (GET_MAX_MANA(ch) / 20));
@@ -1771,15 +1771,15 @@ ACMD(do_taisha)
  ch->decCurKI(ch->getMaxKI() / 3);
  if (prob < perc) {
         reveal_hiding(ch, 0);
-  act("@WYou hold up your hands while channeling ki. Your technique fails to produce an aura though....@n", TRUE, ch, 0, 0, TO_CHAR);
-  act("@g$n@W holds up $s hands while channeling ki. $s technique fails to produce an aura though....", TRUE, ch, 0, 0, TO_ROOM);
+  act("@WYou hold up your hands while channeling ki. Your technique fails to produce an aura though....@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+  act("@g$n@W holds up $s hands while channeling ki. $s technique fails to produce an aura though....", TRUE, ch, nullptr, nullptr, TO_ROOM);
   improve_skill(ch, SKILL_TAISHA, 1);
   return;
  }
  else {
         reveal_hiding(ch, 0);
-  act("@WYou hold up your hands while channeling ki. Suddenly a @wburst@W of calming @Cblue@W light covers the surrounding area!@n", TRUE, ch, 0, 0, TO_CHAR);
-  act("@g$n holds up $s hands while channeling ki. Suddenly a @wburst@W of calming @Cblue@W light covers the surrounding area!@n", TRUE, ch, 0, 0, TO_ROOM);
+  act("@WYou hold up your hands while channeling ki. Suddenly a @wburst@W of calming @Cblue@W light covers the surrounding area!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+  act("@g$n holds up $s hands while channeling ki. Suddenly a @wburst@W of calming @Cblue@W light covers the surrounding area!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
   improve_skill(ch, SKILL_TAISHA, 1);
   SET_BIT_AR(ROOM_FLAGS(IN_ROOM(ch)), ROOM_AURA);
   return;
@@ -1829,8 +1829,8 @@ ACMD(do_kura)
  if (skill <= axion_dice(0)) {
      ch->decCurST(cost);
         reveal_hiding(ch, 0);
-  act("You crouch down and scream as your eyes turn red. You attempt to tap into your dark energies but you fail!", TRUE, ch, 0, 0, TO_CHAR);
-  act("@c$n@w crouches down and screams as $s eyes turn red and $e attempts to tap into dark energies but fails!", TRUE, ch, 0, 0, TO_ROOM);
+  act("You crouch down and scream as your eyes turn red. You attempt to tap into your dark energies but you fail!", TRUE, ch, nullptr, nullptr, TO_CHAR);
+  act("@c$n@w crouches down and screams as $s eyes turn red and $e attempts to tap into dark energies but fails!", TRUE, ch, nullptr, nullptr, TO_ROOM);
   improve_skill(ch, SKILL_KURA, 0);
   WAIT_STATE(ch, PULSE_2SEC);
   return;
@@ -1839,8 +1839,8 @@ ACMD(do_kura)
      ch->decCurST(cost);
      ch->incCurKI(bonus);
         reveal_hiding(ch, 0);
-  act("You crouch down and scream as your eyes turn red. You attempt to tap into your dark energies and succeed as a rush of energy explodes around you!", TRUE, ch, 0, 0, TO_CHAR);
-  act("@c$n@w crouches down and screams as $s eyes turn red. Suddenly $e manages to tap into dark energies and a rush of energy explodes around $m!", TRUE, ch, 0, 0, TO_ROOM);
+  act("You crouch down and scream as your eyes turn red. You attempt to tap into your dark energies and succeed as a rush of energy explodes around you!", TRUE, ch, nullptr, nullptr, TO_CHAR);
+  act("@c$n@w crouches down and screams as $s eyes turn red. Suddenly $e manages to tap into dark energies and a rush of energy explodes around $m!", TRUE, ch, nullptr, nullptr, TO_ROOM);
   improve_skill(ch, SKILL_KURA, 0);
   WAIT_STATE(ch, PULSE_2SEC);
   return;
@@ -1866,11 +1866,11 @@ ACMD(do_candy)
     //return;
     //}
 
-    if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
+    if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
         send_to_char(ch, "Turn who into candy?\r\n");
         return;
     }
-    if (!can_kill(ch, vict, NULL, 0)) {
+    if (!can_kill(ch, vict, nullptr, 0)) {
         return;
     }
 
@@ -1900,8 +1900,8 @@ ACMD(do_candy)
     if (rand_number(1, 6) == 6) {
         ch->decCurKI(ch->getMaxKI() / 15);
         reveal_hiding(ch, 0);
-        act("@cYou aim your forelock at @R$N@c and fire a beam of energy but it is dodged!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@c aims $s forelock at @R$N@c and fires a beam of energy but the beam is dodged!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@cYou aim your forelock at @R$N@c and fire a beam of energy but it is dodged!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+        act("@C$n@c aims $s forelock at @R$N@c and fires a beam of energy but the beam is dodged!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
         if (!FIGHTING(ch)) {
             set_fighting(ch, vict);
         }
@@ -1914,8 +1914,8 @@ ACMD(do_candy)
     else {
         ch->decCurKI(ch->getMaxKI() / 15);
         reveal_hiding(ch, 0);
-        act("@cYou aim your forelock at @R$N@c and fire a beam of energy that envelopes $S entire body and changes $M into candy!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@c aims $s forelock at @R$N@c and fires a beam of energy that envelopes $S entire body and changes $M into candy!@n ", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@cYou aim your forelock at @R$N@c and fire a beam of energy that envelopes $S entire body and changes $M into candy!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+        act("@C$n@c aims $s forelock at @R$N@c and fires a beam of energy that envelopes $S entire body and changes $M into candy!@n ", TRUE, ch, nullptr, vict, TO_NOTVICT);
         if (vict_max >= ch_max * 1.5) {
             send_to_char(ch, "You grab the candy as it falls.\r\n");
             obj = read_object(95, VIRTUAL);
@@ -1945,7 +1945,7 @@ ACMD(do_candy)
 ACMD(do_future)
 {
  char arg[MAX_INPUT_LENGTH];
- struct char_data *vict = NULL;
+ struct char_data *vict = nullptr;
  one_argument(argument, arg);
 
  if (IS_NPC(ch) || !IS_KANASSAN(ch)) {
@@ -1958,7 +1958,7 @@ ACMD(do_future)
   return;
  }
  
- if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
+ if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
   send_to_char(ch, "Bestow advance future sight on who?\r\n");
   return;
  }
@@ -1995,9 +1995,9 @@ ACMD(do_future)
      ch->decCurKI(ch->getMaxKI() / 40);
   GET_PRACTICES(ch, GET_CLASS(ch)) -= 100;
         reveal_hiding(ch, 0);
-  act("@CYou focus your energy into your fingers before stabbing your claws into $N and bestowing the power of Future Sight upon $M. Shortly after $E passes out.@n", TRUE, ch, 0, vict, TO_CHAR);
-  act("@C$n focuses $s energy into $s fingers before stabbing $s claws into YOUR neck and bestowing the power of Future Sight upon you! Soon after you pass out!@n", TRUE, ch, 0, vict, TO_VICT);
-  act("@C$n focuses $s energy into $s fingers before stabbing $s claws into $N's neck and bestowing the power of Future Sight upon $M! Soon after $E passes out!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+  act("@CYou focus your energy into your fingers before stabbing your claws into $N and bestowing the power of Future Sight upon $M. Shortly after $E passes out.@n", TRUE, ch, nullptr, vict, TO_CHAR);
+  act("@C$n focuses $s energy into $s fingers before stabbing $s claws into YOUR neck and bestowing the power of Future Sight upon you! Soon after you pass out!@n", TRUE, ch, nullptr, vict, TO_VICT);
+  act("@C$n focuses $s energy into $s fingers before stabbing $s claws into $N's neck and bestowing the power of Future Sight upon $M! Soon after $E passes out!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
   SET_BIT_AR(AFF_FLAGS(vict), AFF_FUTURE);
   vict->real_abils.cha += 5;
   vict->real_abils.intel += 2;
@@ -2016,9 +2016,9 @@ ACMD(do_future)
      ch->decCurKI(ch->getMaxKI() / 40);
   GET_PRACTICES(ch, GET_CLASS(ch)) -= 100;
         reveal_hiding(ch, 0);
-  act("@CYou focus your energy into your mind and awaken your latent Future Sight powers!@n", TRUE, ch, 0, vict, TO_CHAR);
-  act("@C$n focuses $s energy while closing $s eyes for a moment.@n", TRUE, ch, 0, vict, TO_VICT);
-  act("@C$n focuses $s energy while closing $s eyes for a moment.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+  act("@CYou focus your energy into your mind and awaken your latent Future Sight powers!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+  act("@C$n focuses $s energy while closing $s eyes for a moment.@n", TRUE, ch, nullptr, vict, TO_VICT);
+  act("@C$n focuses $s energy while closing $s eyes for a moment.@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
   SET_BIT_AR(AFF_FLAGS(ch), AFF_FUTURE);
   ch->real_abils.cha += 5;
   ch->real_abils.intel += 2;
@@ -2031,7 +2031,7 @@ ACMD(do_future)
 
 ACMD(do_drag)
 {
- struct char_data *vict = NULL;
+ struct char_data *vict = nullptr;
  char arg[MAX_INPUT_LENGTH];
 
  one_argument(argument, arg);
@@ -2041,10 +2041,10 @@ ACMD(do_drag)
 
  if (DRAGGING(ch)) {
   vict = DRAGGING(ch);
-  DRAGGING(ch) = NULL;
-  DRAGGED(vict) = NULL;
-  act("@wYou stop dragging @C$N@W.@n", TRUE, ch, 0, vict, TO_CHAR);
-  act("@C$n@W stops dragging @c$N@W.@n", TRUE, ch, 0, vict, TO_ROOM);
+  DRAGGING(ch) = nullptr;
+  DRAGGED(vict) = nullptr;
+  act("@wYou stop dragging @C$N@W.@n", TRUE, ch, nullptr, vict, TO_CHAR);
+  act("@C$n@W stops dragging @c$N@W.@n", TRUE, ch, nullptr, vict, TO_ROOM);
   return;
  }
 
@@ -2073,7 +2073,7 @@ ACMD(do_drag)
   return;
  }
 
- if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
+ if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
   send_to_char(ch, "Drag who?\r\n");
   return;
  }
@@ -2096,9 +2096,9 @@ ACMD(do_drag)
 
  if (GET_POS(vict) != POS_SLEEPING) {
         reveal_hiding(ch, 0);
-  act("@wYou try to grab and pull @C$N@W with you, but $E resists!@n", TRUE, ch, 0, vict, TO_CHAR);
-  act("@C$n@W tries to grab and pull you! However you resist!@n", TRUE, ch, 0, vict, TO_VICT);
-  act("@C$n@W tries to grab and pull @c$N@W but $E resists!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+  act("@wYou try to grab and pull @C$N@W with you, but $E resists!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+  act("@C$n@W tries to grab and pull you! However you resist!@n", TRUE, ch, nullptr, vict, TO_VICT);
+  act("@C$n@W tries to grab and pull @c$N@W but $E resists!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
   if (IS_NPC(vict) && !FIGHTING(vict)) {
    set_fighting(vict, ch);
   }
@@ -2106,14 +2106,14 @@ ACMD(do_drag)
  }
  else if (GET_PC_WEIGHT(vict) + IS_CARRYING_W(vict) > CAN_CARRY_W(ch)) {
         reveal_hiding(ch, 0);
-  act("@wYou try to grab and pull @C$N@W with you, but $E is too heavy!@n", TRUE, ch, 0, vict, TO_CHAR);
-  act("@C$n@W tries to grab and pull @c$N@W but $E is too heavy!@n", TRUE, ch, 0, vict, TO_ROOM);
+  act("@wYou try to grab and pull @C$N@W with you, but $E is too heavy!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+  act("@C$n@W tries to grab and pull @c$N@W but $E is too heavy!@n", TRUE, ch, nullptr, vict, TO_ROOM);
   return;
  }
  else {
         reveal_hiding(ch, 0);
-  act("@wYou grab and start dragging @C$N@W.@n", TRUE, ch, 0, vict, TO_CHAR);
-  act("@C$n@W grabs and starts dragging @c$N@W.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+  act("@wYou grab and start dragging @C$N@W.@n", TRUE, ch, nullptr, vict, TO_CHAR);
+  act("@C$n@W grabs and starts dragging @c$N@W.@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
   DRAGGING(ch) = vict;
   DRAGGED(vict) = ch;
   if (!AFF_FLAGGED(vict, AFF_KNOCKED) && !AFF_FLAGGED(vict, AFF_SLEEP) && rand_number(1, 3)) {
@@ -2136,8 +2136,8 @@ ACMD(do_stop)
   return;
  }
  else {
-  act("@CYou move out of your fighting posture.@n", TRUE, ch, 0, 0, TO_CHAR);
-  act("@c$n@C moves out of $s fighting posture.@n", TRUE, ch, 0, 0, TO_ROOM);
+  act("@CYou move out of your fighting posture.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+  act("@c$n@C moves out of $s fighting posture.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
   stop_fighting(ch);
   WAIT_STATE(ch, PULSE_2SEC);
   return;
@@ -2177,8 +2177,8 @@ ACMD(do_suppress)
  if (!strcasecmp(arg, "release")) {
   if (GET_SUPPRESS(ch)) {
         reveal_hiding(ch, 0);
-   act("@GYou stop suppressing your current powerlevel!@n", TRUE, ch, 0, 0, TO_CHAR);
-   act("@G$n smiles as a rush of power erupts around $s body briefly.@n", TRUE, ch, 0, 0, TO_ROOM);
+   act("@GYou stop suppressing your current powerlevel!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+   act("@G$n smiles as a rush of power erupts around $s body briefly.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    GET_SUPPRESS(ch) = 0;
    return;
   } else {
@@ -2200,12 +2200,12 @@ ACMD(do_suppress)
     reveal_hiding(ch, 0);
 
  if(GET_SUPPRESS(ch) != 0) {
-     act("@GYou alter your suppression level!@n", TRUE, ch, 0, 0, TO_CHAR);
-     act("@G$n seems to concentrate for a moment.@n", TRUE, ch, 0, 0, TO_ROOM);
+     act("@GYou alter your suppression level!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+     act("@G$n seems to concentrate for a moment.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
 
  } else {
-     act("@GYou suppress your current powerlevel!@n", TRUE, ch, 0, 0, TO_CHAR);
-     act("@G$n seems to concentrate for a moment.@n", TRUE, ch, 0, 0, TO_ROOM);
+     act("@GYou suppress your current powerlevel!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+     act("@G$n seems to concentrate for a moment.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
  }
     GET_SUPPRESS(ch) = num;
     return;
@@ -2229,16 +2229,16 @@ ACMD(do_hass)
 
  if (perc < prob) {
          reveal_hiding(ch, 0);
-  act("@WYou try to move your arms at incredible speeds but screw up and waste some of your stamina.@n", TRUE, ch, 0, 0, TO_CHAR);
-  act("@C$n@W tries to move $s arms at incredible speeds but screws up and wastes some of $s stamina.@n", TRUE, ch, 0, 0, TO_ROOM);
+  act("@WYou try to move your arms at incredible speeds but screw up and waste some of your stamina.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+  act("@C$n@W tries to move $s arms at incredible speeds but screws up and wastes some of $s stamina.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
   ch->decCurST(ch->getMaxST() / 30);
   improve_skill(ch, SKILL_HASSHUKEN, 0);
   return;
  }
  else {
         reveal_hiding(ch, 0);
-  act("@WYou concentrate and start to move your arms at incredible speeds.@n", TRUE, ch, 0, 0, TO_CHAR);
-  act("@C$n@W concentrates and starts to move $s arms at incredible speeds.@n", TRUE, ch, 0, 0, TO_ROOM);
+  act("@WYou concentrate and start to move your arms at incredible speeds.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+  act("@C$n@W concentrates and starts to move $s arms at incredible speeds.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
   int duration = perc / 15;
   assign_affect(ch, AFF_HASS, SKILL_HASSHUKEN, duration, 0, 0, 0, 0, 0, 0);
   ch->decCurST(ch->getMaxST() / 30);
@@ -2250,8 +2250,8 @@ ACMD(do_hass)
 ACMD(do_implant)
 {
  
- struct obj_data *limb = NULL, *obj = NULL, *next_obj;
- struct char_data *vict = NULL;
+ struct obj_data *limb = nullptr, *obj = nullptr, *next_obj;
+ struct char_data *vict = nullptr;
  char arg[MAX_INPUT_LENGTH];
  char arg2[MAX_INPUT_LENGTH];
  int found = FALSE;
@@ -2270,7 +2270,7 @@ ACMD(do_implant)
  if (!*arg2) {
   vict = ch;
  }
- else if (!(vict = get_char_vis(ch, arg2, NULL, FIND_CHAR_ROOM))) {
+ else if (!(vict = get_char_vis(ch, arg2, nullptr, FIND_CHAR_ROOM))) {
    send_to_char(ch, "That person isn't here.\r\n");
    return;
  }
@@ -2306,8 +2306,8 @@ ACMD(do_implant)
    }
    if (vict == ch) {
          reveal_hiding(ch, 0);
-   act("@WYou place the $p@W up to your body. It automaticly adjusts itself, becoming a new right arm!@n", TRUE, ch, limb, 0, TO_CHAR);
-   act("@C$n@W places the $p@W up to $s body. It automaticly adjusts itself, becoming a new right arm!@n", TRUE, ch, limb, 0, TO_ROOM);
+   act("@WYou place the $p@W up to your body. It automaticly adjusts itself, becoming a new right arm!@n", TRUE, ch, limb, nullptr, TO_CHAR);
+   act("@C$n@W places the $p@W up to $s body. It automaticly adjusts itself, becoming a new right arm!@n", TRUE, ch, limb, nullptr, TO_ROOM);
    }
    SET_BIT_AR(PLR_FLAGS(vict), PLR_CRARM);
    obj_from_char(limb);
@@ -2334,8 +2334,8 @@ ACMD(do_implant)
    }
    if (vict == ch) {
          reveal_hiding(ch, 0);
-   act("@WYou place the $p@W up to your body. It automaticly adjusts itself, becoming a new left arm!@n", TRUE, ch, limb, 0, TO_CHAR);
-   act("@C$n@W places the $p@W up to $s body. It automaticly adjusts itself, becoming a new left arm!@n", TRUE, ch, limb, 0, TO_ROOM);
+   act("@WYou place the $p@W up to your body. It automaticly adjusts itself, becoming a new left arm!@n", TRUE, ch, limb, nullptr, TO_CHAR);
+   act("@C$n@W places the $p@W up to $s body. It automaticly adjusts itself, becoming a new left arm!@n", TRUE, ch, limb, nullptr, TO_ROOM);
    }
    SET_BIT_AR(PLR_FLAGS(vict), PLR_CLARM);
    obj_from_char(limb);
@@ -2362,8 +2362,8 @@ ACMD(do_implant)
    }
    if (vict == ch) {
          reveal_hiding(ch, 0);
-   act("@WYou place the $p@W up to your body. It automaticly adjusts itself, becoming a new right leg!@n", TRUE, ch, limb, 0, TO_CHAR);
-   act("@C$n@W places the $p@W up to $s body. It automaticly adjusts itself, becoming a new right leg!@n", TRUE, ch, limb, 0, TO_ROOM);
+   act("@WYou place the $p@W up to your body. It automaticly adjusts itself, becoming a new right leg!@n", TRUE, ch, limb, nullptr, TO_CHAR);
+   act("@C$n@W places the $p@W up to $s body. It automaticly adjusts itself, becoming a new right leg!@n", TRUE, ch, limb, nullptr, TO_ROOM);
    }
    SET_BIT_AR(PLR_FLAGS(vict), PLR_CRLEG);
    obj_from_char(limb);
@@ -2390,8 +2390,8 @@ ACMD(do_implant)
    }
    if (!vict || vict == ch) {
          reveal_hiding(ch, 0);
-   act("@WYou place the $p@W up to your body. It automaticly adjusts itself, becoming a new left leg!@n", TRUE, ch, limb, 0, TO_CHAR);
-   act("@C$n@W places the $p@W up to $s body. It automaticly adjusts itself, becoming a new left leg!@n", TRUE, ch, limb, 0, TO_ROOM);
+   act("@WYou place the $p@W up to your body. It automaticly adjusts itself, becoming a new left leg!@n", TRUE, ch, limb, nullptr, TO_CHAR);
+   act("@C$n@W places the $p@W up to $s body. It automaticly adjusts itself, becoming a new left leg!@n", TRUE, ch, limb, nullptr, TO_ROOM);
    }
    SET_BIT_AR(PLR_FLAGS(vict), PLR_CLLEG);
    obj_from_char(limb);
@@ -2441,8 +2441,8 @@ ACMD(do_pose)
 
  if (prob < perc) {
         reveal_hiding(ch, 0);
-  act("@WYou attempt to strike an awe inspiring pose, but end up falling on your face!@n", TRUE, ch, 0, 0, TO_CHAR);
-  act("@C$n@W attempts to strike an awe inspiring pose, but ends up falling on $s face!@n", TRUE, ch, 0, 0, TO_ROOM);
+  act("@WYou attempt to strike an awe inspiring pose, but end up falling on your face!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+  act("@C$n@W attempts to strike an awe inspiring pose, but ends up falling on $s face!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
      ch->decCurST(ch->getMaxST() / 40);
   improve_skill(ch, SKILL_POSE, 0);
   return;
@@ -2451,20 +2451,20 @@ ACMD(do_pose)
         reveal_hiding(ch, 0);
   switch (rand_number(1, 4)) {
    case 1:
-   act("@WYou turn around with your back to everyone. You bend forward dramatically and put your head between your legs!@n", TRUE, ch, 0, 0, TO_CHAR);
-   act("@C$n@W turns around with $s back to you. $e bends forward dramatically and puts $s head between $s legs. Strange...@n", TRUE, ch, 0, 0, TO_ROOM);
+   act("@WYou turn around with your back to everyone. You bend forward dramatically and put your head between your legs!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+   act("@C$n@W turns around with $s back to you. $e bends forward dramatically and puts $s head between $s legs. Strange...@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    break;
    case 2:
-   act("@WYou turn to the side while flexing your muscles and extend your arms up at an angle dramatically!@n", TRUE, ch, 0, 0, TO_CHAR);
-   act("@C$n@W turns to the side while flexing $s muscles and extending $s arms up at an angle dramatically!@n", TRUE, ch, 0, 0, TO_ROOM);  
+   act("@WYou turn to the side while flexing your muscles and extend your arms up at an angle dramatically!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+   act("@C$n@W turns to the side while flexing $s muscles and extending $s arms up at an angle dramatically!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);  
    break;
    case 3:
-   act("@WYou extend one leg outward while you bend forward, balancing on a single leg!@n", TRUE, ch, 0, 0, TO_CHAR);
-   act("@C$n@W extends one leg outward while $e bends forward, balancing on a single leg!@n", TRUE, ch, 0, 0, TO_ROOM);  
+   act("@WYou extend one leg outward while you bend forward, balancing on a single leg!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+   act("@C$n@W extends one leg outward while $e bends forward, balancing on a single leg!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);  
    break;
    case 4:
-   act("@WYou drop down to one knee while angling your arms up to either side and slanting your hands down like wings!@n", TRUE, ch, 0, 0, TO_CHAR);
-   act("@C$n@W drops down to one knee while angling $s arms up to either side and slanting $s hands down like wings!@n", TRUE, ch, 0, 0, TO_ROOM);  
+   act("@WYou drop down to one knee while angling your arms up to either side and slanting your hands down like wings!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+   act("@C$n@W drops down to one knee while angling $s arms up to either side and slanting $s hands down like wings!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);  
    break;
   }
   send_to_char(ch, "@WYou feel your confidence increase! @G+3 Str @Wand@G +3 Agl!@n\r\n");
@@ -2523,8 +2523,8 @@ ACMD(do_fury) {
   }
 
   reveal_hiding(ch, 0);
-  act("You release your fury! Your very next attack is guaranteed to rip your foes a new one!", TRUE, ch, 0, 0, TO_CHAR);
-  act("$n screams furiously as a look of anger appears on $s face!", TRUE, ch, 0, 0, TO_ROOM);
+  act("You release your fury! Your very next attack is guaranteed to rip your foes a new one!", TRUE, ch, nullptr, nullptr, TO_CHAR);
+  act("$n screams furiously as a look of anger appears on $s face!", TRUE, ch, nullptr, nullptr, TO_ROOM);
   SET_BIT_AR(PLR_FLAGS(ch), PLR_FURY);
 }
 
@@ -2636,7 +2636,7 @@ ACMD(do_telepathy)
  if (!(strcmp(arg, "far"))) {
   if (IS_NPC(ch)) {
    return;
-  } else if (!(vict = get_char_vis(ch, arg2, NULL, FIND_CHAR_WORLD))) {
+  } else if (!(vict = get_char_vis(ch, arg2, nullptr, FIND_CHAR_WORLD))) {
    send_to_char(ch, "Look through who's eyes?\r\n");
    return;
   } else if (vict == ch) {
@@ -2681,13 +2681,13 @@ ACMD(do_telepathy)
    return;
   }
   if (MINDLINK(ch)) {
-   act("@CYou remove the link your mind had with @w$N.@n", TRUE, ch, 0, MINDLINK(ch), TO_CHAR);
-   act("@w$n@C removes the link $s mind had with yours.@n", TRUE, ch, 0, MINDLINK(ch), TO_VICT);
-   MINDLINK(MINDLINK(ch)) = NULL;
-   MINDLINK(ch) = NULL;
+   act("@CYou remove the link your mind had with @w$N.@n", TRUE, ch, nullptr, MINDLINK(ch), TO_CHAR);
+   act("@w$n@C removes the link $s mind had with yours.@n", TRUE, ch, nullptr, MINDLINK(ch), TO_VICT);
+   MINDLINK(MINDLINK(ch)) = nullptr;
+   MINDLINK(ch) = nullptr;
    LINKER(ch) = 0;
    return;
-  } else if (!(vict = get_char_vis(ch, arg2, NULL, FIND_CHAR_WORLD))) {
+  } else if (!(vict = get_char_vis(ch, arg2, nullptr, FIND_CHAR_WORLD))) {
    send_to_char(ch, "Link with the mind of who?\r\n");
    return;
   } else if (vict == ch) {
@@ -2706,12 +2706,12 @@ ACMD(do_telepathy)
    send_to_char(ch, "Someone else is already telepathically linked with them.\r\n");
    return;
   } else if (GET_SKILL(ch, SKILL_TELEPATHY) < axion_dice(GET_INT(vict) * 0.1)) {
-   act("@R$n@r tried to link $s mind with yours, but you manage to force a break in the link!@n", FALSE, ch, 0, vict, TO_VICT);
-   act("@R$N@r manages to sense the intrusion and with $S intelligence push you out!@n", FALSE, ch, 0, vict, TO_CHAR);
+   act("@R$n@r tried to link $s mind with yours, but you manage to force a break in the link!@n", FALSE, ch, nullptr, vict, TO_VICT);
+   act("@R$N@r manages to sense the intrusion and with $S intelligence push you out!@n", FALSE, ch, nullptr, vict, TO_CHAR);
    return;
   } else {
-   act("@CYou link your mind with @w$N.@n", TRUE, ch, 0, vict, TO_CHAR);
-   act("@w$n@C links $s mind with yours. You can speak your thoughts to $m with 'think'.@n", TRUE, ch, 0, vict, TO_VICT);
+   act("@CYou link your mind with @w$N.@n", TRUE, ch, nullptr, vict, TO_CHAR);
+   act("@w$n@C links $s mind with yours. You can speak your thoughts to $m with 'think'.@n", TRUE, ch, nullptr, vict, TO_VICT);
    send_to_char(vict, "@wIf this is undesirable, Try: meditate break@n\r\n");
    MINDLINK(vict) = ch;
    MINDLINK(ch) = vict;
@@ -2720,7 +2720,7 @@ ACMD(do_telepathy)
   }
  }
  else if (!(strcmp(arg, "read"))) {
-  if (!(vict = get_char_vis(ch, arg2, NULL, FIND_CHAR_ROOM))) {
+  if (!(vict = get_char_vis(ch, arg2, nullptr, FIND_CHAR_ROOM))) {
    send_to_char(ch, "Read the mind of who?\r\n");
    return;
   }  
@@ -2735,9 +2735,9 @@ ACMD(do_telepathy)
   else {
    if (axion_dice(0) > GET_SKILL(ch, SKILL_TELEPATHY)) {
        ch->decCurKI(ch->getMaxKI() / 40);
-    act("@wYou attempt to read $N's@w mind, but fail to see it clearly.@n", TRUE, ch, 0, vict, TO_CHAR);
+    act("@wYou attempt to read $N's@w mind, but fail to see it clearly.@n", TRUE, ch, nullptr, vict, TO_CHAR);
     if (rand_number(1, 15) >= 14 && !AFF_FLAGGED(ch, AFF_SHOCKED)) {
-     act("@MYour mind has been shocked!@n", TRUE, ch, 0, 0, TO_CHAR);
+     act("@MYour mind has been shocked!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
      SET_BIT_AR(AFF_FLAGS(ch), AFF_SHOCKED);
     } else {
      improve_skill(ch, SKILL_TELEPATHY, 0);
@@ -2746,8 +2746,8 @@ ACMD(do_telepathy)
    }
    else if (GET_SKILL(vict, SKILL_TELEPATHY) >= GET_SKILL(ch, SKILL_TELEPATHY) && rand_number(1, 2) == 2) {
        ch->decCurKI(ch->getMaxKI() / 40);
-    act("@wYou fail to read @c$N's@w mind and they seemed to have noticed the attempt!@n", TRUE, ch, 0, vict, TO_CHAR);
-    act("@C$n@w attempts to read your mind, but you resist and force $m out!@n", TRUE, ch, 0, vict, TO_VICT);
+    act("@wYou fail to read @c$N's@w mind and they seemed to have noticed the attempt!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+    act("@C$n@w attempts to read your mind, but you resist and force $m out!@n", TRUE, ch, nullptr, vict, TO_VICT);
     improve_skill(ch, SKILL_TELEPATHY, 0);
     return;
    }
@@ -2814,7 +2814,7 @@ ACMD(do_telepathy)
   if (MINDLINK(ch)) {
    vict = MINDLINK(ch);
   }
-  else if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))) {
+  else if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD))) {
    send_to_char(ch, "Send your thoughts to who?\r\n");
    return;
   }  
@@ -2862,7 +2862,7 @@ ACMD(do_potential)
   send_to_char(ch, "Potential Releases: %d\r\n", GET_BOOSTS(ch));
   return;
  }
- if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
+ if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
   send_to_char(ch, "That target isn't here.\r\n");
   return;
  }
@@ -2907,9 +2907,9 @@ ACMD(do_potential)
       vict->gainBaseST((vict->getBaseST() / 100) * boost);
   }
         reveal_hiding(ch, 0);
-  act("You place your hand on top of $N's head. After a moment of concentrating you release their hidden potential.", TRUE, ch, 0, vict, TO_CHAR);
-  act("$n places $s hand on top of your head. After a moment you feel a rush of power as your hidden potential is released!", TRUE, ch, 0, vict, TO_VICT);
-  act("$n places $s hand on $N's head. After a moment a rush of power explodes off of $N's body!", TRUE, ch, 0, vict, TO_NOTVICT);
+  act("You place your hand on top of $N's head. After a moment of concentrating you release their hidden potential.", TRUE, ch, nullptr, vict, TO_CHAR);
+  act("$n places $s hand on top of your head. After a moment you feel a rush of power as your hidden potential is released!", TRUE, ch, nullptr, vict, TO_VICT);
+  act("$n places $s hand on $N's head. After a moment a rush of power explodes off of $N's body!", TRUE, ch, nullptr, vict, TO_NOTVICT);
   improve_skill(ch, SKILL_POTENTIAL, 0);
   improve_skill(ch, SKILL_POTENTIAL, 0);
   improve_skill(ch, SKILL_POTENTIAL, 0);
@@ -2939,7 +2939,7 @@ ACMD(do_majinize)
 		return;
 	}
 
-	if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM)))
+	if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM)))
 	{
 		send_to_char(ch, "That target isn't here.\r\n");
 		return;
@@ -2986,9 +2986,9 @@ ACMD(do_majinize)
 	else if (MAJINIZED(vict) > 0 && MAJINIZED(vict) == GET_ID(ch))
 	{
 		reveal_hiding(ch, 0);
-		act("You remove $N's majinization, freeing them from your influence, but also weakening them.", TRUE, ch, 0, vict, TO_CHAR);
-		act("$n removes your majinization, freeing you from their influence, and weakening you!", TRUE, ch, 0, vict, TO_VICT);
-		act("$n waves a hand at $N, and instantly the glowing M on $S forehead disappears!", TRUE, ch, 0, vict, TO_NOTVICT);
+		act("You remove $N's majinization, freeing them from your influence, but also weakening them.", TRUE, ch, nullptr, vict, TO_CHAR);
+		act("$n removes your majinization, freeing you from their influence, and weakening you!", TRUE, ch, nullptr, vict, TO_VICT);
+		act("$n waves a hand at $N, and instantly the glowing M on $S forehead disappears!", TRUE, ch, nullptr, vict, TO_NOTVICT);
 		MAJINIZED(vict) = 0;
 		GET_BOOSTS(ch) += 1;
 
@@ -3023,9 +3023,9 @@ ACMD(do_majinize)
 	else
 	{
 		reveal_hiding(ch, 0);
-		act("You focus your power into $N, influencing their mind and increasing their strength! After the struggle ends in $S mind a glowing purple M forms on $S forehead.", TRUE, ch, 0, vict, TO_CHAR);
-		act("$n focuses power into you, influencing your mind and increasing your strength! After the struggle in your mind ends a glowing purple M forms on your forehead.", TRUE, ch, 0, vict, TO_VICT);
-		act("$n focuses power into $N, influencing their mind and increasing their strength! After the struggle ends in $S mind a glowing purple M forms on $S forehead.", TRUE, ch, 0, vict, TO_NOTVICT);
+		act("You focus your power into $N, influencing their mind and increasing their strength! After the struggle ends in $S mind a glowing purple M forms on $S forehead.", TRUE, ch, nullptr, vict, TO_CHAR);
+		act("$n focuses power into you, influencing your mind and increasing your strength! After the struggle in your mind ends a glowing purple M forms on your forehead.", TRUE, ch, nullptr, vict, TO_VICT);
+		act("$n focuses power into $N, influencing their mind and increasing their strength! After the struggle ends in $S mind a glowing purple M forms on $S forehead.", TRUE, ch, nullptr, vict, TO_NOTVICT);
 		MAJINIZED(vict) = GET_ID(ch);
 		GET_BOOSTS(ch) -= 1;
 
@@ -3058,15 +3058,15 @@ ACMD(do_spit)
   return;
  }
 
- if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
+ if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
   send_to_char(ch, "That target isn't here.\r\n");
   return;
  }
-  if (!can_kill(ch, vict, NULL, 0)) {
+  if (!can_kill(ch, vict, nullptr, 0)) {
    return;
   }
  if (AFF_FLAGGED(vict, AFF_PARALYZE)) {
-  act("$N has already been turned to stone.", TRUE, ch, 0, vict, TO_CHAR);
+  act("$N has already been turned to stone.", TRUE, ch, nullptr, vict, TO_CHAR);
   return;
  }
  if (FIGHTING(vict)) {
@@ -3084,9 +3084,9 @@ ACMD(do_spit)
  if (GET_SKILL(ch, SKILL_SPIT) < axion_dice(0)) {
   ch->decCurKI(cost);
         reveal_hiding(ch, 0);
-  act("@WGathering spit you concentrate ki into a wicked loogie and let it loose, but it falls short of hitting @c$N@W!@n", TRUE, ch, 0, vict, TO_CHAR);
-  act("@C$n@W seems to focus ki before hawking a loogie at you! Fortunatly the loogie falls short.@n", TRUE, ch, 0, vict, TO_VICT);
-  act("@C$n@W seems to focus ki before hawking a loogie at @c$N@W! Fortunatly for @c$N@W the loogie falls short.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+  act("@WGathering spit you concentrate ki into a wicked loogie and let it loose, but it falls short of hitting @c$N@W!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+  act("@C$n@W seems to focus ki before hawking a loogie at you! Fortunatly the loogie falls short.@n", TRUE, ch, nullptr, vict, TO_VICT);
+  act("@C$n@W seems to focus ki before hawking a loogie at @c$N@W! Fortunatly for @c$N@W the loogie falls short.@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
   improve_skill(ch, SKILL_SPIT, 1);
   WAIT_STATE(ch, PULSE_2SEC);
   return;
@@ -3094,9 +3094,9 @@ ACMD(do_spit)
  else if (AFF_FLAGGED(vict, AFF_ZANZOKEN) && (vict->getCurST()) >= 1 && GET_POS(vict) != POS_SLEEPING) {
      ch->decCurKI(cost);
            reveal_hiding(ch, 0);
-     act("@C$N@c disappears, avoiding your spit before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c @rstone spit@c before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c @rstone spit@c before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+     act("@C$N@c disappears, avoiding your spit before reappearing!@n", FALSE, ch, nullptr, vict, TO_CHAR);
+     act("@cYou disappear, avoiding @C$n's@c @rstone spit@c before reappearing!@n", FALSE, ch, nullptr, vict, TO_VICT);
+     act("@C$N@c disappears, avoiding @C$n's@c @rstone spit@c before reappearing!@n", FALSE, ch, nullptr, vict, TO_NOTVICT);
      REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
      WAIT_STATE(ch, PULSE_2SEC);
      improve_skill(ch, SKILL_SPIT, 1);
@@ -3112,9 +3112,9 @@ ACMD(do_spit)
 
      ch->decCurKI(cost);
         reveal_hiding(ch, 0);
-  act("@WGathering spit you concentrate ki into a wicked loogie and let it loose, and it smacks into @c$N@W turning $M into stone!@n", TRUE, ch, 0, vict, TO_CHAR);
-  act("@C$n@W seems to focus ki before hawking a loogie at you! It manages to hit and you instantly turn to stone!@n", TRUE, ch, 0, vict, TO_VICT);
-  act("@C$n@W seems to focus ki before hawking a loogie at @c$N@W! It manages to hit and $E instantly turns to stone!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+  act("@WGathering spit you concentrate ki into a wicked loogie and let it loose, and it smacks into @c$N@W turning $M into stone!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+  act("@C$n@W seems to focus ki before hawking a loogie at you! It manages to hit and you instantly turn to stone!@n", TRUE, ch, nullptr, vict, TO_VICT);
+  act("@C$n@W seems to focus ki before hawking a loogie at @c$N@W! It manages to hit and $E instantly turns to stone!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
   improve_skill(ch, SKILL_SPIT, 1);
   WAIT_STATE(ch, PULSE_2SEC);
   return;
@@ -3328,8 +3328,8 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    }
    obj_to_char(obj, ch);
    reveal_hiding(ch, 0);  GET_COOLDOWN(ch) = 10;
-   act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
-   act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
+   act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, nullptr, TO_CHAR);
+   act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, nullptr, TO_ROOM);
       ch->decCurKI(cost);
    return;
   }
@@ -3372,8 +3372,8 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    }
    obj_to_char(obj, ch);
    reveal_hiding(ch, 0);  GET_COOLDOWN(ch) = 10;
-   act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
-   act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
+   act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, nullptr, TO_CHAR);
+   act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, nullptr, TO_ROOM);
       ch->decCurKI(cost);
    return;
   }
@@ -3395,8 +3395,8 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    add_unique_id(obj);
    obj_to_char(obj, ch);
    reveal_hiding(ch, 0);  GET_COOLDOWN(ch) = 10;
-   act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
-   act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
+   act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, nullptr, TO_CHAR);
+   act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, nullptr, TO_ROOM);
       ch->decCurKI(cost);
    return;
   }
@@ -3418,8 +3418,8 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
     add_unique_id(obj);
    obj_to_char(obj, ch);  // cooldown removed on 10/24/2021
    reveal_hiding(ch, 0);  //GET_COOLDOWN(ch) = 10;
-   act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
-   act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
+   act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, nullptr, TO_CHAR);
+   act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, nullptr, TO_ROOM);
       ch->decCurKI(cost);
    return;
   }
@@ -3549,8 +3549,8 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    obj_to_char(obj, ch);
    GET_OBJ_SIZE(obj) = get_size(ch);
    reveal_hiding(ch, 0);  GET_COOLDOWN(ch) = 10;
-   act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
-   act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
+   act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, nullptr, TO_CHAR);
+   act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, nullptr, TO_ROOM);
       ch->decCurKI(cost);
    return;
   }
@@ -3572,9 +3572,9 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    return;
   }
 
-  struct char_data *vict = NULL;
+  struct char_data *vict = nullptr;
 
-  if (!(vict = get_char_vis(ch, arg2, NULL, FIND_CHAR_ROOM))) {
+  if (!(vict = get_char_vis(ch, arg2, nullptr, FIND_CHAR_ROOM))) {
    send_to_char(ch, "Clothesbeam who?\r\nSyntax: create clothesbeam (target)\r\n");
    return;
   }
@@ -3610,8 +3610,8 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    GET_OBJ_SIZE(obj) = get_size(vict);
    do_wear(vict, "all", 0, 0);
    reveal_hiding(ch, 0);  GET_COOLDOWN(ch) = 10;
-   act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
-   act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
+   act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, nullptr, TO_CHAR);
+   act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, nullptr, TO_ROOM);
       ch->decCurKI(cost);
    return;
   }
@@ -3634,8 +3634,8 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    obj_to_char(obj, ch);
    GET_OBJ_SIZE(obj) = get_size(ch);
    reveal_hiding(ch, 0);  GET_COOLDOWN(ch) = 10;
-   act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
-   act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
+   act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, nullptr, TO_CHAR);
+   act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, nullptr, TO_ROOM);
       ch->decCurKI(cost);
    return;
   }
@@ -3659,8 +3659,8 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_NOSELL);
    GET_OBJ_SIZE(obj) = get_size(ch);
    reveal_hiding(ch, 0);  GET_COOLDOWN(ch) = 10;
-   act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
-   act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
+   act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, nullptr, TO_CHAR);
+   act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, nullptr, TO_ROOM);
       ch->decCurKI(cost);
    return;
   }
@@ -3684,8 +3684,8 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    obj_to_char(obj, ch);
    GET_OBJ_SIZE(obj) = get_size(ch);
    reveal_hiding(ch, 0);  GET_COOLDOWN(ch) = 10;
-   act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
-   act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
+   act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, nullptr, TO_CHAR);
+   act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, nullptr, TO_ROOM);
       ch->decCurKI(cost);
    return;
   }
@@ -3709,8 +3709,8 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    obj_to_char(obj, ch);
    GET_OBJ_SIZE(obj) = get_size(ch);
    reveal_hiding(ch, 0);  GET_COOLDOWN(ch) = 10;
-   act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
-   act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
+   act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, nullptr, TO_CHAR);
+   act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, nullptr, TO_ROOM);
       ch->decCurKI(cost);
    return;
   }
@@ -3734,8 +3734,8 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    obj_to_char(obj, ch);
    GET_OBJ_SIZE(obj) = get_size(ch);
    reveal_hiding(ch, 0);  GET_COOLDOWN(ch) = 10;
-   act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
-   act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
+   act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, nullptr, TO_CHAR);
+   act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, nullptr, TO_ROOM);
       ch->decCurKI(cost);
    return;
   }
@@ -3758,8 +3758,8 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    obj_to_char(obj, ch);
    GET_OBJ_SIZE(obj) = get_size(ch);
    reveal_hiding(ch, 0);  GET_COOLDOWN(ch) = 10;
-   act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
-   act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
+   act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, nullptr, TO_CHAR);
+   act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, nullptr, TO_ROOM);
       ch->decCurKI(cost);
    return;
   }
@@ -3782,8 +3782,8 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    obj_to_room(obj, IN_ROOM(ch));
    GET_OBJ_SIZE(obj) = get_size(ch);
    reveal_hiding(ch, 0);  GET_COOLDOWN(ch) = 10;
-   act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
-   act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
+   act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, nullptr, TO_CHAR);
+   act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, nullptr, TO_ROOM);
       ch->decCurKI(cost);
    return;
   }
@@ -3814,8 +3814,8 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    obj_to_room(obj, IN_ROOM(ch));
    GET_OBJ_SIZE(obj) = get_size(ch);
    reveal_hiding(ch, 0);  GET_COOLDOWN(ch) = 10;
-   act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
-   act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
+   act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, nullptr, TO_CHAR);
+   act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, nullptr, TO_ROOM);
       ch->decCurKI(cost);
    ch->decCurHealthPercent(1, 1);
    GET_PRACTICES(ch, GET_CLASS(ch)) -= 10;   
@@ -3851,8 +3851,8 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
     add_unique_id(obj);
    obj_to_char(obj, ch);
    reveal_hiding(ch, 0);  GET_COOLDOWN(ch) = 10;
-   act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
-   act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
+   act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, nullptr, TO_CHAR);
+   act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, nullptr, TO_ROOM);
       ch->decCurKI(cost);
       ch->decCurHealth(cost2);
       ch->decCurSTPercent(1, 1);
@@ -3899,8 +3899,8 @@ ACMD(do_recharge)
   }
   else {
    reveal_hiding(ch, 0);  GET_COOLDOWN(ch) = 10;
-   act("You focus your ki into your energy reserves, recharging them some.", TRUE, ch, 0, 0, TO_CHAR);
-   act("$n stops and glows green briefly.", TRUE, ch, 0, 0, TO_ROOM);
+   act("You focus your ki into your energy reserves, recharging them some.", TRUE, ch, nullptr, nullptr, TO_CHAR);
+   act("$n stops and glows green briefly.", TRUE, ch, nullptr, nullptr, TO_ROOM);
       ch->decCurKI(cost);
    if ((ch->getCurST()) + (cost * 2) < GET_MAX_MOVE(ch)) {
     ch->incCurST(cost * 2);
@@ -3947,8 +3947,8 @@ ACMD(do_srepair)
   }
   else {
    reveal_hiding(ch, 0);  GET_COOLDOWN(ch) = 10;
-   act("You repair some of your outer casings and internal systems, with the small nano-robots contained in your body.", TRUE, ch, 0, 0, TO_CHAR);
-   act("$n stops a moment as small glowing particles move across $s body.", TRUE, ch, 0, 0, TO_ROOM);
+   act("You repair some of your outer casings and internal systems, with the small nano-robots contained in your body.", TRUE, ch, nullptr, nullptr, TO_CHAR);
+   act("$n stops a moment as small glowing particles move across $s body.", TRUE, ch, nullptr, nullptr, TO_ROOM);
 
    int repaired = FALSE;
    if (!IS_NPC(ch)) {
@@ -4019,13 +4019,13 @@ ACMD(do_upgrade)
  }
 
  if (!strcasecmp("augment", arg)) {
-   struct obj_data *obj = NULL;
+   struct obj_data *obj = nullptr;
    int64_t gain = 0;
   if (GET_LEVEL(ch) < 80) {
    send_to_char(ch, "You need to be at least level 80 to use these kits.\r\n");
    return;
   }
-  if (!(obj = get_obj_in_list_vis(ch, "Augmentation", NULL, ch->carrying))) {
+  if (!(obj = get_obj_in_list_vis(ch, "Augmentation", nullptr, ch->carrying))) {
    send_to_char(ch, "You don't have a Circuit Augmentation Kit.\r\n");
    return;
   } else {
@@ -4066,24 +4066,24 @@ ACMD(do_upgrade)
    if (!strcasecmp("powerlevel", arg2)) {
     obj_from_char(obj);
     extract_obj(obj);
-    act("@WYou install the circuits and upgrade your maximum powerlevel.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@C$n@W installs some circuits and upgrades $s systems.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@WYou install the circuits and upgrade your maximum powerlevel.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@C$n@W installs some circuits and upgrades $s systems.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
     ch->gainBasePL(gain, true);
     send_to_char(ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain));
     return;
    } else if (!strcasecmp("ki", arg2)) {
     obj_from_char(obj);
     extract_obj(obj);
-    act("@WYou install the circuits and upgrade your maximum ki.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@C$n@W installs some circuits and upgrades $s systems.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@WYou install the circuits and upgrade your maximum ki.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@C$n@W installs some circuits and upgrades $s systems.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
     ch->gainBaseKI(gain, true);
     send_to_char(ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain));
     return;
    } else if (!strcasecmp("stamina", arg2)) {
     obj_from_char(obj);
     extract_obj(obj);
-    act("@WYou install the circuits and upgrade your maximum stamina.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@C$n@W installs some circuits and upgrades $s systems.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@WYou install the circuits and upgrade your maximum stamina.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@C$n@W installs some circuits and upgrades $s systems.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
     ch->gainBaseST(gain, true);
     send_to_char(ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain));
     return;
@@ -4272,11 +4272,11 @@ ACMD(do_ingest)
   return;
  }
 
-  if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
+  if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
    send_to_char(ch, "Ingest who?\r\n");
    return;
   }
-  if (!can_kill(ch, vict, NULL, 0)) {
+  if (!can_kill(ch, vict, nullptr, 0)) {
    return;
   }
   if (ABSORBBY(vict)) {
@@ -4314,24 +4314,24 @@ ACMD(do_ingest)
   }
    reveal_hiding(ch, 0);
   if (AFF_FLAGGED(vict, AFF_ZANZOKEN) && (vict->getCurST()) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-     act("@C$N@c disappears, avoiding your attempted ingestion!@n", FALSE, ch, 0, vict, TO_CHAR);
-     act("@cYou disappear, avoiding @C$n's@c attempted @ringestion@c before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-     act("@C$N@c disappears, avoiding @C$n's@c attempted @ringestion@c before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+     act("@C$N@c disappears, avoiding your attempted ingestion!@n", FALSE, ch, nullptr, vict, TO_CHAR);
+     act("@cYou disappear, avoiding @C$n's@c attempted @ringestion@c before reappearing!@n", FALSE, ch, nullptr, vict, TO_VICT);
+     act("@C$N@c disappears, avoiding @C$n's@c attempted @ringestion@c before reappearing!@n", FALSE, ch, nullptr, vict, TO_NOTVICT);
      REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
      WAIT_STATE(ch, PULSE_3SEC);
      return;
   }
   if (GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(ch) + rand_number(1, 5)) {
-   act("@WYou fling a piece of goo at @c$N@W, and try to ingest $M! $E manages to avoid your blob of goo though!@n", TRUE, ch, 0, vict, TO_CHAR);
-   act("@C$n@W flings a piece of goo at you, you manage to avoid it though!@n", TRUE, ch, 0, vict, TO_VICT);
-   act("@C$n@w flings a piece of goo at @c$N@W, but the goo misses $M@W!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+   act("@WYou fling a piece of goo at @c$N@W, and try to ingest $M! $E manages to avoid your blob of goo though!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+   act("@C$n@W flings a piece of goo at you, you manage to avoid it though!@n", TRUE, ch, nullptr, vict, TO_VICT);
+   act("@C$n@w flings a piece of goo at @c$N@W, but the goo misses $M@W!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
    WAIT_STATE(ch, PULSE_3SEC);   
    return;
   }
   else {
-    act("@WYou flings a piece of goo at @c$N@W! The goo engulfs $M and then returns to your body!@n", TRUE, ch, 0, vict, TO_CHAR);
-    act("@C$n@W flings a piece of goo at you! The goo engulfs your body and then returns to @C$n@W!@n", TRUE, ch, 0, vict, TO_VICT);
-    act("@C$n@w flings a piece of goo at @c$N@W! The goo engulfs $M and then return to @C$n@W!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+    act("@WYou flings a piece of goo at @c$N@W! The goo engulfs $M and then returns to your body!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+    act("@C$n@W flings a piece of goo at you! The goo engulfs your body and then returns to @C$n@W!@n", TRUE, ch, nullptr, vict, TO_VICT);
+    act("@C$n@w flings a piece of goo at @c$N@W! The goo engulfs $M and then return to @C$n@W!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
     GET_ABSORBS(ch) += 1;
     int64_t pl = (vict->getBasePL()) / 6;
     int64_t stam = (vict->getBaseST()) / 6;
@@ -4377,7 +4377,7 @@ ACMD(do_ingest)
      GET_HAIRL(ch) = GET_HAIRL(vict);
     }
     handle_ingest_learn(ch, vict);
-    die(vict, NULL);
+    die(vict, nullptr);
     return;
   }
  } // End of ingest
@@ -4391,7 +4391,7 @@ ACMD(do_ingest)
 
 ACMD(do_absorb)
 {
-  struct char_data *vict = NULL;
+  struct char_data *vict = nullptr;
   char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
  two_arguments(argument, arg, arg2);
@@ -4433,14 +4433,14 @@ ACMD(do_absorb)
  }
 
  if (ABSORBING(ch)) {
-  act("@WYou stop absorbing from @c$N@W!@n", TRUE, ch, 0, ABSORBING(ch), TO_CHAR);
-  act("$n stops absorbing from you!", TRUE, ch, 0, ABSORBING(ch), TO_VICT);
-  act("$n stops absorbing from $N!", TRUE, ch, 0, ABSORBING(ch), TO_NOTVICT);
+  act("@WYou stop absorbing from @c$N@W!@n", TRUE, ch, nullptr, ABSORBING(ch), TO_CHAR);
+  act("$n stops absorbing from you!", TRUE, ch, nullptr, ABSORBING(ch), TO_VICT);
+  act("$n stops absorbing from $N!", TRUE, ch, nullptr, ABSORBING(ch), TO_NOTVICT);
   if (IS_NPC(ABSORBING(ch)) && !FIGHTING(ABSORBING(ch))) {
   set_fighting(ABSORBING(ch), ch);
   }
-  ABSORBBY(ABSORBING(ch)) = NULL;
-  ABSORBING(ch) = NULL;
+  ABSORBBY(ABSORBING(ch)) = nullptr;
+  ABSORBING(ch) = nullptr;
  }
 
  if (!*arg && IS_ANDROID(ch)) {
@@ -4449,7 +4449,7 @@ ACMD(do_absorb)
  }
 
  if (IS_ANDROID(ch)) {
-  if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
+  if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
    send_to_char(ch, "Absorb %s?\r\n", IS_ANDROID(ch) ? "from who" : "who");
    return;
   }
@@ -4459,7 +4459,7 @@ ACMD(do_absorb)
    send_to_char(ch, "Syntax: absorb (swallow | extract) (target)\r\n");
    return;
   }
-  else if (!(vict = get_char_vis(ch, arg2, NULL, FIND_CHAR_ROOM))) {
+  else if (!(vict = get_char_vis(ch, arg2, nullptr, FIND_CHAR_ROOM))) {
    send_to_char(ch, "Syntax: absorb (swallow | extract) (target)\r\n");
    return;
   }
@@ -4476,7 +4476,7 @@ ACMD(do_absorb)
      return;
     }
    }
-   if (!can_kill(ch, vict, NULL, 0)) {
+   if (!can_kill(ch, vict, nullptr, 0)) {
     return;
    }
    if (ABSORBBY(vict)) {
@@ -4497,15 +4497,15 @@ ACMD(do_absorb)
    }
    reveal_hiding(ch, 0);
    if (init_skill(ch, SKILL_ABSORB) < axion_dice(0)) {
-    act("@WYou rush at @c$N@W and try to absorb from them, but $E manages to avoid you!@n", TRUE, ch, 0, vict, TO_CHAR);
-    act("@C$n@W rushes at you and tries to grab you, but you manage to avoid $m!@n", TRUE, ch, 0, vict, TO_VICT);
-    act("@C$n@w rushes at @c$N@W and tries to grab $M, but @c$N@W manages to avoid @c$n@W!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+    act("@WYou rush at @c$N@W and try to absorb from them, but $E manages to avoid you!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+    act("@C$n@W rushes at you and tries to grab you, but you manage to avoid $m!@n", TRUE, ch, nullptr, vict, TO_VICT);
+    act("@C$n@w rushes at @c$N@W and tries to grab $M, but @c$N@W manages to avoid @c$n@W!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
     improve_skill(ch, SKILL_ABSORB, 1);
     if (IS_NPC(vict) && IS_HUMANOID(vict) && rand_number(1, 3) == 3) {
-      if (FIGHTING(ch) == NULL) {
+      if (FIGHTING(ch) == nullptr) {
        set_fighting(ch, vict);
       }
-      if (FIGHTING(vict) == NULL) {
+      if (FIGHTING(vict) == nullptr) {
        set_fighting(vict, ch);
       }
     }
@@ -4513,9 +4513,9 @@ ACMD(do_absorb)
     return;
    }
    else {
-    act("@WYou rush at @c$N@W and try to absorb from them, and manage to grab on!@n", TRUE, ch, 0, vict, TO_CHAR);
-    act("@C$n@W rushes at you and tries to grab you, and manages to grab on!@n", TRUE, ch, 0, vict, TO_VICT);
-    act("@C$n@w rushes at @c$N@W and tries to grab $M, and manages to grab on!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+    act("@WYou rush at @c$N@W and try to absorb from them, and manage to grab on!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+    act("@C$n@W rushes at you and tries to grab you, and manages to grab on!@n", TRUE, ch, nullptr, vict, TO_VICT);
+    act("@C$n@w rushes at @c$N@W and tries to grab $M, and manages to grab on!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
     improve_skill(ch, SKILL_ABSORB, 1);
     ABSORBING(ch) = vict;
     ABSORBBY(vict) = ch;
@@ -4529,7 +4529,7 @@ ACMD(do_absorb)
     send_to_char(ch, "%s is already absorbing from them!", GET_NAME(ABSORBBY(vict)));
     return;
   }
-  if (!can_kill(ch, vict, NULL, 0)) {
+  if (!can_kill(ch, vict, nullptr, 0)) {
    return;
   }
   if (GET_ABSORBS(ch) < 1) {
@@ -4542,9 +4542,9 @@ ACMD(do_absorb)
   }
    reveal_hiding(ch, 0);
   if (GET_SKILL(ch, SKILL_ABSORB) < axion_dice(0)) {
-   act("@WYou rush at @c$N@W and try to absorb from them, but $E manages to avoid you!@n", TRUE, ch, 0, vict, TO_CHAR);
-   act("@C$n@W rushes at you and tries to grab you, but you manage to avoid $m!@n", TRUE, ch, 0, vict, TO_VICT);
-   act("@C$n@w rushes at @c$N@W and tries to grab $M, but @c$N@W manages to avoid @c$n@W!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+   act("@WYou rush at @c$N@W and try to absorb from them, but $E manages to avoid you!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+   act("@C$n@W rushes at you and tries to grab you, but you manage to avoid $m!@n", TRUE, ch, nullptr, vict, TO_VICT);
+   act("@C$n@w rushes at @c$N@W and tries to grab $M, but @c$N@W manages to avoid @c$n@W!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
     improve_skill(ch, SKILL_ABSORB, 1);
    if (!FIGHTING(ch)) {
     set_fighting(ch, vict);
@@ -4555,9 +4555,9 @@ ACMD(do_absorb)
    WAIT_STATE(ch, PULSE_3SEC);   
   }
   else {
-    act("@WYou rush at @c$N@W and your tail engulfs $M! You quickly suck $S squirming body into your tail, absorbing $m!@n", TRUE, ch, 0, vict, TO_CHAR);
-    act("@C$n@W rushes at you and $s tail engulfs you! $e quickly sucks your squirming body into $s tail, absorbing you!@n", TRUE, ch, 0, vict, TO_VICT);
-    act("@C$n@w rushes at @c$N@W and $s tail engulfs $M! You quickly suck $S squirming body into your tail, absorbing @c$N@W!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+    act("@WYou rush at @c$N@W and your tail engulfs $M! You quickly suck $S squirming body into your tail, absorbing $m!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+    act("@C$n@W rushes at you and $s tail engulfs you! $e quickly sucks your squirming body into $s tail, absorbing you!@n", TRUE, ch, nullptr, vict, TO_VICT);
+    act("@C$n@w rushes at @c$N@W and $s tail engulfs $M! You quickly suck $S squirming body into your tail, absorbing @c$N@W!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
     GET_ABSORBS(ch) -= 1;
 
       int64_t stam = (vict->getBaseST()) / 5;
@@ -4575,7 +4575,7 @@ ACMD(do_absorb)
 
     send_to_char(ch, "@D[@gABSORB@D] @rPL@W: @D(@y%s@D) @cKi@W: @D(@y%s@D) @gSt@W: @D(@y%s@D)@n\r\n", add_commas(pl), add_commas(ki), add_commas(stam));
     improve_skill(ch, SKILL_ABSORB, 1);
-    die(vict, NULL);
+    die(vict, nullptr);
   }
  } // End of bio absorb
  else if (IS_BIO(ch) && !(strcmp(arg, "extract"))) {
@@ -4587,7 +4587,7 @@ ACMD(do_absorb)
     send_to_char(ch, "%s is already absorbing from them!", GET_NAME(ABSORBBY(vict)));
     return;
   }
-  if (!can_kill(ch, vict, NULL, 0)) {
+  if (!can_kill(ch, vict, nullptr, 0)) {
    return;
   }
   if (GET_MAX_HIT(vict) >= GET_MAX_HIT(ch)) {
@@ -4607,9 +4607,9 @@ ACMD(do_absorb)
     return;
   }
   if (GET_SKILL(ch, SKILL_ABSORB) < failthresh) {
-   act("@WYou rush at @c$N@W and try to absorb from them, but $E manages to avoid you!@n", TRUE, ch, 0, vict, TO_CHAR);
-   act("@C$n@W rushes at you and tries to grab you, but you manage to avoid $m!@n", TRUE, ch, 0, vict, TO_VICT);
-   act("@C$n@w rushes at @c$N@W and tries to grab $M, but @c$N@W manages to avoid @c$n@W!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+   act("@WYou rush at @c$N@W and try to absorb from them, but $E manages to avoid you!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+   act("@C$n@W rushes at you and tries to grab you, but you manage to avoid $m!@n", TRUE, ch, nullptr, vict, TO_VICT);
+   act("@C$n@w rushes at @c$N@W and tries to grab $M, but @c$N@W manages to avoid @c$n@W!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
    improve_skill(ch, SKILL_ABSORB, 0);
    if (!FIGHTING(ch)) {
     set_fighting(ch, vict);
@@ -4621,8 +4621,8 @@ ACMD(do_absorb)
   }
   /* Rillao: transloc, add new transes here */
   else {
-   act("@WYou rush at @c$N@W and stab them with your tail! You quickly suck out all the bio extract you need and leave the empty husk behind!", TRUE, ch, 0, vict, TO_CHAR);
-   act("@C$n@w rushes at @c$N@W and stabs $M with $s tail! $e quickly sucks out all the bio extract and leaves the empty husk of @c$N@W behind!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+   act("@WYou rush at @c$N@W and stab them with your tail! You quickly suck out all the bio extract you need and leave the empty husk behind!", TRUE, ch, nullptr, vict, TO_CHAR);
+   act("@C$n@w rushes at @c$N@W and stabs $M with $s tail! $e quickly sucks out all the bio extract and leaves the empty husk of @c$N@W behind!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
    int64_t stam = (vict->getBaseST()) / 2000;
    int64_t ki = (vict->getBaseKI()) / 2000;
    int64_t pl = (vict->getBasePL()) / 2000;
@@ -4686,31 +4686,31 @@ ACMD(do_escape)
    skill -= rand_number(2, 5);
   }
  if (num > skill) {
-  act("@c$N@W manages to break loose of @C$n's@W hold!@n", TRUE, ABSORBBY(ch), 0, ch, TO_NOTVICT);
-  act("@WYou manage to break loose of @C$n's@W hold!@n", TRUE, ABSORBBY(ch), 0, ch, TO_VICT);
-  act("@c$N@W manages to break loose of your hold!@n", TRUE, ABSORBBY(ch), 0, ch, TO_CHAR);
-  if (FIGHTING(ch) == NULL) {
+  act("@c$N@W manages to break loose of @C$n's@W hold!@n", TRUE, ABSORBBY(ch), nullptr, ch, TO_NOTVICT);
+  act("@WYou manage to break loose of @C$n's@W hold!@n", TRUE, ABSORBBY(ch), nullptr, ch, TO_VICT);
+  act("@c$N@W manages to break loose of your hold!@n", TRUE, ABSORBBY(ch), nullptr, ch, TO_CHAR);
+  if (FIGHTING(ch) == nullptr) {
    set_fighting(ch, ABSORBBY(ch));
   }
-  if (FIGHTING(ABSORBBY(ch)) == NULL) {
+  if (FIGHTING(ABSORBBY(ch)) == nullptr) {
     set_fighting(ABSORBBY(ch), ch);
   }
-  ABSORBING(ABSORBBY(ch)) = NULL;
-  ABSORBBY(ch) = NULL;
+  ABSORBING(ABSORBBY(ch)) = nullptr;
+  ABSORBBY(ch) = nullptr;
  }
  else {
-  act("@c$N@W struggles to break loose of @C$n's@W hold!@n", TRUE, ABSORBBY(ch), 0, ch, TO_NOTVICT);
-  act("@WYou struggle to break loose of @C$n's@W hold!@n", TRUE, ABSORBBY(ch), 0, ch, TO_VICT);
-  act("@c$N@W struggles to break loose of your hold!@n", TRUE, ABSORBBY(ch), 0, ch, TO_CHAR);
+  act("@c$N@W struggles to break loose of @C$n's@W hold!@n", TRUE, ABSORBBY(ch), nullptr, ch, TO_NOTVICT);
+  act("@WYou struggle to break loose of @C$n's@W hold!@n", TRUE, ABSORBBY(ch), nullptr, ch, TO_VICT);
+  act("@c$N@W struggles to break loose of your hold!@n", TRUE, ABSORBBY(ch), nullptr, ch, TO_CHAR);
   if (rand_number(1, 3) == 3) {
    int64_t dmg = GET_MAX_HIT(ch) * 0.025;
-   hurt(0, 0, ch, ABSORBBY(ch), NULL, dmg, 0);
+   hurt(0, 0, ch, ABSORBBY(ch), nullptr, dmg, 0);
    if (GET_POS(ABSORBBY(ch)) == POS_SLEEPING) {
-    act("@c$N@W manages to break loose of @C$n's@W hold!@n", TRUE, ABSORBBY(ch), 0, ch, TO_NOTVICT);
-    act("@WYou manage to break loose of @C$n's@W hold!@n", TRUE, ABSORBBY(ch), 0, ch, TO_VICT);
-    act("@c$N@W manages to break loose of your hold!@n", TRUE, ABSORBBY(ch), 0, ch, TO_CHAR);
-    ABSORBING(ABSORBBY(ch)) = NULL;
-    ABSORBBY(ch) = NULL;
+    act("@c$N@W manages to break loose of @C$n's@W hold!@n", TRUE, ABSORBBY(ch), nullptr, ch, TO_NOTVICT);
+    act("@WYou manage to break loose of @C$n's@W hold!@n", TRUE, ABSORBBY(ch), nullptr, ch, TO_VICT);
+    act("@c$N@W manages to break loose of your hold!@n", TRUE, ABSORBBY(ch), nullptr, ch, TO_CHAR);
+    ABSORBING(ABSORBBY(ch)) = nullptr;
+    ABSORBBY(ch) = nullptr;
    }
   }
   WAIT_STATE(ch, PULSE_2SEC);
@@ -4738,41 +4738,41 @@ ACMD(do_escape)
 
  if (num > skill) {
   if (GRAPTYPE(GRAPPLED(ch)) == 4) {
-   act("@c$N@M flexes with all $S might and causes your body to explode outward into gooey chunks!@n", TRUE, GRAPPLED(ch), 0, ch, TO_CHAR);
-   act("@MYou flex with all your might and cause @C$n's@M body to explode outward into gooey chunks!@n", TRUE, GRAPPLED(ch), 0, ch, TO_VICT);
-   act("@c$N@M flexes with all $S might and causes @C$n's@M body to explode outward into gooey chunks!@n", TRUE, GRAPPLED(ch), 0, ch, TO_NOTVICT);
+   act("@c$N@M flexes with all $S might and causes your body to explode outward into gooey chunks!@n", TRUE, GRAPPLED(ch), nullptr, ch, TO_CHAR);
+   act("@MYou flex with all your might and cause @C$n's@M body to explode outward into gooey chunks!@n", TRUE, GRAPPLED(ch), nullptr, ch, TO_VICT);
+   act("@c$N@M flexes with all $S might and causes @C$n's@M body to explode outward into gooey chunks!@n", TRUE, GRAPPLED(ch), nullptr, ch, TO_NOTVICT);
 
-   act("@MYou reform your body mere moments later.@n", TRUE, GRAPPLED(ch), 0, 0, TO_CHAR);
-   act("@C$n@M reforms $s body mere moments later.", TRUE, GRAPPLED(ch), 0, 0, TO_ROOM);
+   act("@MYou reform your body mere moments later.@n", TRUE, GRAPPLED(ch), nullptr, nullptr, TO_CHAR);
+   act("@C$n@M reforms $s body mere moments later.", TRUE, GRAPPLED(ch), nullptr, nullptr, TO_ROOM);
   } else {
-   act("@c$N@W manages to break loose of @C$n's@W hold!@n", TRUE, GRAPPLED(ch), 0, ch, TO_NOTVICT);
-   act("@WYou manage to break loose of @C$n's@W hold!@n", TRUE, GRAPPLED(ch), 0, ch, TO_VICT);
-   act("@c$N@W manages to break loose of your hold!@n", TRUE, GRAPPLED(ch), 0, ch, TO_CHAR);
+   act("@c$N@W manages to break loose of @C$n's@W hold!@n", TRUE, GRAPPLED(ch), nullptr, ch, TO_NOTVICT);
+   act("@WYou manage to break loose of @C$n's@W hold!@n", TRUE, GRAPPLED(ch), nullptr, ch, TO_VICT);
+   act("@c$N@W manages to break loose of your hold!@n", TRUE, GRAPPLED(ch), nullptr, ch, TO_CHAR);
   }
-  if (FIGHTING(ch) == NULL) {
+  if (FIGHTING(ch) == nullptr) {
    set_fighting(ch, GRAPPLED(ch));
   }
-  if (FIGHTING(GRAPPLED(ch)) == NULL) {
+  if (FIGHTING(GRAPPLED(ch)) == nullptr) {
     set_fighting(GRAPPLED(ch), ch);
   }
   GRAPTYPE(GRAPPLED(ch)) = -1;
-  GRAPPLING(GRAPPLED(ch)) = NULL;
-  GRAPPLED(ch) = NULL;
+  GRAPPLING(GRAPPLED(ch)) = nullptr;
+  GRAPPLED(ch) = nullptr;
   GRAPTYPE(ch) = -1;
  } else {
-  act("@c$N@W struggles to break loose of @C$n's@W hold!@n", TRUE, GRAPPLED(ch), 0, ch, TO_NOTVICT);
-  act("@WYou struggle to break loose of @C$n's@W hold!@n", TRUE, GRAPPLED(ch), 0, ch, TO_VICT);
-  act("@c$N@W struggles to break loose of your hold!@n", TRUE, GRAPPLED(ch), 0, ch, TO_CHAR);
+  act("@c$N@W struggles to break loose of @C$n's@W hold!@n", TRUE, GRAPPLED(ch), nullptr, ch, TO_NOTVICT);
+  act("@WYou struggle to break loose of @C$n's@W hold!@n", TRUE, GRAPPLED(ch), nullptr, ch, TO_VICT);
+  act("@c$N@W struggles to break loose of your hold!@n", TRUE, GRAPPLED(ch), nullptr, ch, TO_CHAR);
   if (rand_number(1, 3) == 3) {
    int64_t dmg = GET_MAX_HIT(ch) * 0.025;
-   hurt(0, 0, ch, GRAPPLED(ch), NULL, dmg, 0);
+   hurt(0, 0, ch, GRAPPLED(ch), nullptr, dmg, 0);
    if (GET_POS(GRAPPLED(ch)) == POS_SLEEPING) {
-    act("@c$N@W manages to break loose of @C$n's@W hold!@n", TRUE, GRAPPLED(ch), 0, ch, TO_NOTVICT);
-    act("@WYou manage to break loose of @C$n's@W hold!@n", TRUE, GRAPPLED(ch), 0, ch, TO_VICT);
-    act("@c$N@W manages to break loose of your hold!@n", TRUE, GRAPPLED(ch), 0, ch, TO_CHAR);
+    act("@c$N@W manages to break loose of @C$n's@W hold!@n", TRUE, GRAPPLED(ch), nullptr, ch, TO_NOTVICT);
+    act("@WYou manage to break loose of @C$n's@W hold!@n", TRUE, GRAPPLED(ch), nullptr, ch, TO_VICT);
+    act("@c$N@W manages to break loose of your hold!@n", TRUE, GRAPPLED(ch), nullptr, ch, TO_CHAR);
     GRAPTYPE(GRAPPLED(ch)) = -1;
-    GRAPPLING(GRAPPLED(ch)) = NULL;
-    GRAPPLED(ch) = NULL;
+    GRAPPLING(GRAPPLED(ch)) = nullptr;
+    GRAPPLED(ch) = nullptr;
     GRAPTYPE(ch) = -1;
    }
   }
@@ -4864,73 +4864,73 @@ ACMD(do_regenerate) {
    reveal_hiding(ch, 0);
 
  if (GET_HIT(ch) >= (ch->getEffMaxPL())) {
-  act("You concentrate your ki and regenerate your body completely.", TRUE, ch, 0, 0, TO_CHAR);
-  act("$n concentrates and regenerates $s body completely.", TRUE, ch, 0, 0, TO_ROOM);
+  act("You concentrate your ki and regenerate your body completely.", TRUE, ch, nullptr, nullptr, TO_CHAR);
+  act("$n concentrates and regenerates $s body completely.", TRUE, ch, nullptr, nullptr, TO_ROOM);
  }
  else if (amt < GET_MAX_HIT(ch) / 10) {
- act("You concentrate your ki and regenerate your body a little.", TRUE, ch, 0, 0, TO_CHAR);
- act("$n concentrates and regenerates $s body a little.", TRUE, ch, 0, 0, TO_ROOM);
+ act("You concentrate your ki and regenerate your body a little.", TRUE, ch, nullptr, nullptr, TO_CHAR);
+ act("$n concentrates and regenerates $s body a little.", TRUE, ch, nullptr, nullptr, TO_ROOM);
  }
  else if (amt < GET_MAX_HIT(ch) / 5) {
- act("You concentrate your ki and regenerate your body some.", TRUE, ch, 0, 0, TO_CHAR);
- act("$n concentrates and regenerates $s body some.", TRUE, ch, 0, 0, TO_ROOM);
+ act("You concentrate your ki and regenerate your body some.", TRUE, ch, nullptr, nullptr, TO_CHAR);
+ act("$n concentrates and regenerates $s body some.", TRUE, ch, nullptr, nullptr, TO_ROOM);
  }
  else if (amt < GET_MAX_HIT(ch) / 2) {
- act("You concentrate your ki and regenerate your body a great deal.", TRUE, ch, 0, 0, TO_CHAR);
- act("$n concentrates and regenerates $s body a great deal.", TRUE, ch, 0, 0, TO_ROOM);
+ act("You concentrate your ki and regenerate your body a great deal.", TRUE, ch, nullptr, nullptr, TO_CHAR);
+ act("$n concentrates and regenerates $s body a great deal.", TRUE, ch, nullptr, nullptr, TO_ROOM);
  }
  else if (GET_HIT(ch) < GET_MAX_HIT(ch)) {
- act("You concentrate your ki and regenerate you nearly completely.", TRUE, ch, 0, 0, TO_CHAR);
- act("$n concentrates and regenerates $s body nearly completely.", TRUE, ch, 0, 0, TO_ROOM);
+ act("You concentrate your ki and regenerate you nearly completely.", TRUE, ch, nullptr, nullptr, TO_CHAR);
+ act("$n concentrates and regenerates $s body nearly completely.", TRUE, ch, nullptr, nullptr, TO_ROOM);
  }
  improve_skill(ch, SKILL_REGENERATE, 0);
  if (AFF_FLAGGED(ch, AFF_BURNED)) {
   send_to_char(ch, "Your burns are healed now.\r\n");
-  act("$n@w's burns are now healed.@n", TRUE, ch, 0, 0, TO_ROOM);
+  act("$n@w's burns are now healed.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
   null_affect(ch, AFF_BURNED);
  }
 
  if (!IS_NPC(ch)) {
   if (GET_LIMBCOND(ch, 1) <= 0) {
-   act("You regrow your right arm!", TRUE, ch, 0, 0, TO_CHAR);
-   act("$n regrows $s right arm!", TRUE, ch, 0, 0, TO_ROOM);
+   act("You regrow your right arm!", TRUE, ch, nullptr, nullptr, TO_CHAR);
+   act("$n regrows $s right arm!", TRUE, ch, nullptr, nullptr, TO_ROOM);
    GET_LIMBCOND(ch, 1) = 100;
   } else if (GET_LIMBCOND(ch, 1) >= 0 && GET_LIMBCOND(ch, 1) < 50) {
-   act("Your broken right arm mends itself!", TRUE, ch, 0, 0, TO_CHAR);
-   act("$n regenerates $s broken right arm!", TRUE, ch, 0, 0, TO_ROOM);
+   act("Your broken right arm mends itself!", TRUE, ch, nullptr, nullptr, TO_CHAR);
+   act("$n regenerates $s broken right arm!", TRUE, ch, nullptr, nullptr, TO_ROOM);
    GET_LIMBCOND(ch, 1) = 100;
   }
   if (GET_LIMBCOND(ch, 2) <= 0) {
    GET_LIMBCOND(ch, 2) = 100;
-   act("You regrow your left arm!", TRUE, ch, 0, 0, TO_CHAR);
-   act("$n regrows $s left arm!", TRUE, ch, 0, 0, TO_ROOM);
+   act("You regrow your left arm!", TRUE, ch, nullptr, nullptr, TO_CHAR);
+   act("$n regrows $s left arm!", TRUE, ch, nullptr, nullptr, TO_ROOM);
   } else if (GET_LIMBCOND(ch, 2) > 0 && GET_LIMBCOND(ch, 2) < 50) {
-   act("Your broken left arm mends itself!", TRUE, ch, 0, 0, TO_CHAR);
-   act("$n regenerates $s broken left arm!", TRUE, ch, 0, 0, TO_ROOM);
+   act("Your broken left arm mends itself!", TRUE, ch, nullptr, nullptr, TO_CHAR);
+   act("$n regenerates $s broken left arm!", TRUE, ch, nullptr, nullptr, TO_ROOM);
    GET_LIMBCOND(ch, 2) = 100;
   }
   if (GET_LIMBCOND(ch, 4) <= 0) {
    GET_LIMBCOND(ch, 4) = 100;
-   act("You regrow your left leg!", TRUE, ch, 0, 0, TO_CHAR);
-   act("$n regrows $s left leg!", TRUE, ch, 0, 0, TO_ROOM);
+   act("You regrow your left leg!", TRUE, ch, nullptr, nullptr, TO_CHAR);
+   act("$n regrows $s left leg!", TRUE, ch, nullptr, nullptr, TO_ROOM);
   } else if (GET_LIMBCOND(ch, 4) > 0 && GET_LIMBCOND(ch, 4) < 50) {
-   act("Your broken left leg mends itself!", TRUE, ch, 0, 0, TO_CHAR);
-   act("$n regenerates $s broken left leg!", TRUE, ch, 0, 0, TO_ROOM);
+   act("Your broken left leg mends itself!", TRUE, ch, nullptr, nullptr, TO_CHAR);
+   act("$n regenerates $s broken left leg!", TRUE, ch, nullptr, nullptr, TO_ROOM);
    GET_LIMBCOND(ch, 4) = 100;
   }
   if (GET_LIMBCOND(ch, 3) <= 0) {
    GET_LIMBCOND(ch, 3) = 100;
-   act("You regrow your right leg!", TRUE, ch, 0, 0, TO_CHAR);
-   act("$n regrows $s right leg!", TRUE, ch, 0, 0, TO_ROOM);
+   act("You regrow your right leg!", TRUE, ch, nullptr, nullptr, TO_CHAR);
+   act("$n regrows $s right leg!", TRUE, ch, nullptr, nullptr, TO_ROOM);
   }  else if (GET_LIMBCOND(ch, 3) > 0 && GET_LIMBCOND(ch, 3) < 50) {
    GET_LIMBCOND(ch, 3) = 100;
-   act("Your broken right leg mends itself!", TRUE, ch, 0, 0, TO_CHAR);
-   act("$n regenerates $s broken right leg!", TRUE, ch, 0, 0, TO_ROOM);
+   act("Your broken right leg mends itself!", TRUE, ch, nullptr, nullptr, TO_CHAR);
+   act("$n regenerates $s broken right leg!", TRUE, ch, nullptr, nullptr, TO_ROOM);
   }
   if (!PLR_FLAGGED(ch, PLR_TAIL) && IS_BIO(ch)) {
    SET_BIT_AR(PLR_FLAGS(ch), PLR_TAIL);
-   act("You regrow your tail!", TRUE, ch, 0, 0, TO_CHAR);
-   act("$n regrows $s tail!", TRUE, ch, 0, 0, TO_ROOM);
+   act("You regrow your tail!", TRUE, ch, nullptr, nullptr, TO_CHAR);
+   act("$n regrows $s tail!", TRUE, ch, nullptr, nullptr, TO_ROOM);
   }
   improve_skill(ch, SKILL_REGENERATE, 0);
  }
@@ -4938,7 +4938,7 @@ ACMD(do_regenerate) {
 
 ACMD(do_focus) 
 {
- struct char_data *vict = NULL;
+ struct char_data *vict = nullptr;
  char arg[MAX_INPUT_LENGTH];
  char name[MAX_INPUT_LENGTH];
 
@@ -4975,8 +4975,8 @@ ACMD(do_focus)
    else if (GET_SKILL(ch, SKILL_TSKIN) < axion_dice(0)) {
     ch->decCurKI(ch->getMaxKI() / 20);
     reveal_hiding(ch, 0);
-    act("You focus ki into your skin, but fail in making it tough!", TRUE, ch, 0, 0, TO_CHAR);
-    act("$n focuses ki into $s skin, but fails in making it tough!", TRUE, ch, 0, 0, TO_ROOM);
+    act("You focus ki into your skin, but fail in making it tough!", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("$n focuses ki into $s skin, but fails in making it tough!", TRUE, ch, nullptr, nullptr, TO_ROOM);
     return;
    }
    else {
@@ -4984,18 +4984,18 @@ ACMD(do_focus)
     assign_affect(ch, AFF_STONESKIN, SKILL_TSKIN, duration, 0, 0, 0, 0, 0, 0);
        ch->decCurKI(ch->getMaxKI() / 20);
     reveal_hiding(ch, 0);
-    act("You focus ki into your skin, making it tough!", TRUE, ch, 0, 0, TO_CHAR);
-    act("$n focuses ki into $s skin, making it tough!", TRUE, ch, 0, 0, TO_ROOM);
+    act("You focus ki into your skin, making it tough!", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("$n focuses ki into $s skin, making it tough!", TRUE, ch, nullptr, nullptr, TO_ROOM);
     return;
    }
   } // End of no vict tough skin
 
   else {
-   if (!(vict = get_char_vis(ch, name, NULL, FIND_CHAR_ROOM))) {
+   if (!(vict = get_char_vis(ch, name, nullptr, FIND_CHAR_ROOM))) {
     send_to_char(ch, "Focus your ki into who's skin?\r\n");
     return;
    }
-   if (!can_kill(ch, vict, NULL, 2)) {
+   if (!can_kill(ch, vict, nullptr, 2)) {
     return;
    }
    else {
@@ -5018,9 +5018,9 @@ ACMD(do_focus)
     else if (GET_SKILL(ch, SKILL_TSKIN) < axion_dice(0)) {
         ch->decCurKI(ch->getMaxKI() / 20);
      reveal_hiding(ch, 0);
-     act("You focus ki into $N's skin, but fail in making it tough!", TRUE, ch, 0, vict, TO_CHAR);
-     act("$n focuses ki into your skin, but fails in making it tough!", TRUE, ch, 0, vict, TO_VICT);
-     act("$n focuses ki into $N's skin, but fails in making it tough!", TRUE, ch, 0, vict, TO_NOTVICT);
+     act("You focus ki into $N's skin, but fail in making it tough!", TRUE, ch, nullptr, vict, TO_CHAR);
+     act("$n focuses ki into your skin, but fails in making it tough!", TRUE, ch, nullptr, vict, TO_VICT);
+     act("$n focuses ki into $N's skin, but fails in making it tough!", TRUE, ch, nullptr, vict, TO_NOTVICT);
      return;
     }
     else {
@@ -5028,9 +5028,9 @@ ACMD(do_focus)
      assign_affect(vict, AFF_STONESKIN, SKILL_TSKIN, duration, 0, 0, 0, 0, 0, 0);
         ch->decCurKI(ch->getMaxKI() / 20);
      reveal_hiding(ch, 0);
-     act("You focus ki into $N's skin, making it tough!", TRUE, ch, 0, vict, TO_CHAR);
-     act("$n focuses ki into your skin, making it tough!", TRUE, ch, 0, vict, TO_VICT);
-     act("$n focuses ki into $N's skin, making it tough!", TRUE, ch, 0, vict, TO_NOTVICT);
+     act("You focus ki into $N's skin, making it tough!", TRUE, ch, nullptr, vict, TO_CHAR);
+     act("$n focuses ki into your skin, making it tough!", TRUE, ch, nullptr, vict, TO_VICT);
+     act("$n focuses ki into $N's skin, making it tough!", TRUE, ch, nullptr, vict, TO_NOTVICT);
      return;
     }
    }
@@ -5058,8 +5058,8 @@ ACMD(do_focus)
    } else if (GET_SKILL(ch, SKILL_MIGHT) < axion_dice(0)) {
        ch->decCurKI(ch->getMaxKI() / 20);
     reveal_hiding(ch, 0);
-    act("You focus ki into your muscles, but fail in making them mighty!", TRUE, ch, 0, 0, TO_CHAR);
-    act("$n focuses ki into $s muscles, but fails in making them mighty!", TRUE, ch, 0, 0, TO_ROOM);
+    act("You focus ki into your muscles, but fail in making them mighty!", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("$n focuses ki into $s muscles, but fails in making them mighty!", TRUE, ch, nullptr, nullptr, TO_ROOM);
     return;
    } else {
     SET_BIT_AR(AFF_FLAGS(ch), AFF_MIGHT);
@@ -5068,18 +5068,18 @@ ACMD(do_focus)
                                         /* Str , Con, Int, Agl, Wis, Spd */
     assign_affect(ch, AFF_MIGHT, SKILL_MIGHT, duration, 10, 2, 0, 0, 0, 0);
     reveal_hiding(ch, 0);
-    act("You focus ki into your muscles, making them mighty!", TRUE, ch, 0, 0, TO_CHAR);
-    act("$n focuses ki into $s muscles, making them mighty!", TRUE, ch, 0, 0, TO_ROOM);
+    act("You focus ki into your muscles, making them mighty!", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("$n focuses ki into $s muscles, making them mighty!", TRUE, ch, nullptr, nullptr, TO_ROOM);
     return;
    }
   } // End of no vict might
 
   else {
-   if (!(vict = get_char_vis(ch, name, NULL, FIND_CHAR_ROOM))) {
+   if (!(vict = get_char_vis(ch, name, nullptr, FIND_CHAR_ROOM))) {
     send_to_char(ch, "Focus your ki into who's muscles?\r\n");
     return;
    }
-   if (!can_kill(ch, vict, NULL, 2)) {
+   if (!can_kill(ch, vict, nullptr, 2)) {
     return;
    }
    else {
@@ -5105,9 +5105,9 @@ ACMD(do_focus)
     } else if (GET_SKILL(ch, SKILL_MIGHT) < axion_dice(0)) {
         ch->decCurKI(ch->getMaxKI() / 20);
      reveal_hiding(ch, 0);
-     act("You focus ki into $N's muscles, but fail in making them mighty!", TRUE, ch, 0, vict, TO_CHAR);
-     act("$n focuses ki into your muscles, but fails in making them mighty!", TRUE, ch, 0, vict, TO_VICT);
-     act("$n focuses ki into $N's muscles, but fails in making them mighty!", TRUE, ch, 0, vict, TO_NOTVICT);
+     act("You focus ki into $N's muscles, but fail in making them mighty!", TRUE, ch, nullptr, vict, TO_CHAR);
+     act("$n focuses ki into your muscles, but fails in making them mighty!", TRUE, ch, nullptr, vict, TO_VICT);
+     act("$n focuses ki into $N's muscles, but fails in making them mighty!", TRUE, ch, nullptr, vict, TO_NOTVICT);
      return;
     } else {
         ch->decCurKI(ch->getMaxKI() / 20);
@@ -5115,9 +5115,9 @@ ACMD(do_focus)
                                         /* Str , Con, Int, Agl, Wis, Spd */
      assign_affect(vict, AFF_MIGHT, SKILL_MIGHT, duration, 10, 2, 0, 0, 0, 0);
      reveal_hiding(ch, 0);
-     act("You focus ki into $N's muscles, making them mighty!", TRUE, ch, 0, vict, TO_CHAR);
-     act("$n focuses ki into your muscles, making them mighty!", TRUE, ch, 0, vict, TO_VICT);
-     act("$n focuses ki into $N's muscles, making them mighty!", TRUE, ch, 0, vict, TO_NOTVICT);
+     act("You focus ki into $N's muscles, making them mighty!", TRUE, ch, nullptr, vict, TO_CHAR);
+     act("$n focuses ki into your muscles, making them mighty!", TRUE, ch, nullptr, vict, TO_VICT);
+     act("$n focuses ki into $N's muscles, making them mighty!", TRUE, ch, nullptr, vict, TO_NOTVICT);
      return;
     }
    }
@@ -5129,7 +5129,7 @@ ACMD(do_focus)
   if (!know_skill(ch, SKILL_WITHER)) {
    return;
   }
-    if (!(vict = get_char_vis(ch, name, NULL, FIND_CHAR_ROOM))) {
+    if (!(vict = get_char_vis(ch, name, nullptr, FIND_CHAR_ROOM))) {
      send_to_char(ch, "Focus your ki into who's muscles?\r\n");
      return;
     }
@@ -5137,7 +5137,7 @@ ACMD(do_focus)
      send_to_char(ch, "You don't want to wither your own body!\r\n");
      return;
     }
-    if (!can_kill(ch, vict, NULL, 2)) {
+    if (!can_kill(ch, vict, nullptr, 2)) {
      return;
     }
     if (AFF_FLAGGED(vict, AFF_WITHER)) {
@@ -5149,9 +5149,9 @@ ACMD(do_focus)
     } else if (GET_SKILL(ch, SKILL_WITHER) < axion_dice(0)) {
         ch->decCurKI(ch->getMaxKI() / 20);
      reveal_hiding(ch, 0);
-     act("You focus ki into $N's body, but fail in withering it!", TRUE, ch, 0, vict, TO_CHAR);
-     act("$n focuses ki into your body, but fails in withering it!", TRUE, ch, 0, vict, TO_VICT);
-     act("$n focuses ki into $N's body, but fails in withering it!", TRUE, ch, 0, vict, TO_NOTVICT);
+     act("You focus ki into $N's body, but fail in withering it!", TRUE, ch, nullptr, vict, TO_CHAR);
+     act("$n focuses ki into your body, but fails in withering it!", TRUE, ch, nullptr, vict, TO_VICT);
+     act("$n focuses ki into $N's body, but fails in withering it!", TRUE, ch, nullptr, vict, TO_NOTVICT);
      return;
     } else {
      SET_BIT_AR(AFF_FLAGS(vict), AFF_WITHER);
@@ -5160,9 +5160,9 @@ ACMD(do_focus)
      vict->real_abils.cha -= 3;
      save_char(vict);
      reveal_hiding(ch, 0);
-     act("You focus ki into $N's body, and succeed in withering it!", TRUE, ch, 0, vict, TO_CHAR);
-     act("$n focuses ki into your body, and succeeds in withering it!", TRUE, ch, 0, vict, TO_VICT);
-     act("$n focuses ki into $N's body, and succeeds in withering it!", TRUE, ch, 0, vict, TO_NOTVICT);
+     act("You focus ki into $N's body, and succeed in withering it!", TRUE, ch, nullptr, vict, TO_CHAR);
+     act("$n focuses ki into your body, and succeeds in withering it!", TRUE, ch, nullptr, vict, TO_VICT);
+     act("$n focuses ki into $N's body, and succeeds in withering it!", TRUE, ch, nullptr, vict, TO_NOTVICT);
      return;
     }
  } // End of wither
@@ -5187,8 +5187,8 @@ ACMD(do_focus)
    else if (GET_SKILL(ch, SKILL_ENLIGHTEN) < axion_dice(0)) {
        ch->decCurKI(ch->getMaxKI() / 20);
     reveal_hiding(ch, 0);
-    act("You focus ki into your mind, but fail in awakening it to cosmic wisdom!", TRUE, ch, 0, 0, TO_CHAR);
-    act("$n focuses ki into $s mind, but fails in awakening it to cosmic wisdom!", TRUE, ch, 0, 0, TO_ROOM);
+    act("You focus ki into your mind, but fail in awakening it to cosmic wisdom!", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("$n focuses ki into $s mind, but fails in awakening it to cosmic wisdom!", TRUE, ch, nullptr, nullptr, TO_ROOM);
     return;
    }
    else {
@@ -5197,8 +5197,8 @@ ACMD(do_focus)
     assign_affect(ch, AFF_ENLIGHTEN, SKILL_ENLIGHTEN, duration, 0, 0, 0, 0, 10, 0);
        ch->decCurKI(ch->getMaxKI() / 20);
     reveal_hiding(ch, 0);
-    act("You focus ki into your mind, awakening it to cosmic wisdom!", TRUE, ch, 0, 0, TO_CHAR);
-    act("$n focuses ki into $s mind, awakening it to cosmic wisdom!", TRUE, ch, 0, 0, TO_ROOM);
+    act("You focus ki into your mind, awakening it to cosmic wisdom!", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("$n focuses ki into $s mind, awakening it to cosmic wisdom!", TRUE, ch, nullptr, nullptr, TO_ROOM);
     if (IS_JINTO(ch) && level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0 && GET_PRACTICES(ch, GET_CLASS(ch)) >= 15 && rand_number(1, 4) >= 3) {
      int64_t gain = 0;
      GET_PRACTICES(ch, GET_CLASS(ch)) -= 15;
@@ -5221,11 +5221,11 @@ ACMD(do_focus)
   } // End of no vict enlighten
   
     else {
-   if (!(vict = get_char_vis(ch, name, NULL, FIND_CHAR_ROOM))) {
+   if (!(vict = get_char_vis(ch, name, nullptr, FIND_CHAR_ROOM))) {
     send_to_char(ch, "Focus your ki into who's mind?\r\n");
     return;
    }
-   if (!can_kill(ch, vict, NULL, 2)) {
+   if (!can_kill(ch, vict, nullptr, 2)) {
     return;
    }
    else {
@@ -5252,9 +5252,9 @@ ACMD(do_focus)
     else if (GET_SKILL(ch, SKILL_ENLIGHTEN) < axion_dice(0)) {
         ch->decCurKI(ch->getMaxKI() / 20);
      reveal_hiding(ch, 0);
-     act("You focus ki into $N's mind, but fail in awakening it to cosmic wisdom!", TRUE, ch, 0, vict, TO_CHAR);
-     act("$n focuses ki into your mind, but fails in awakening it to cosmic wisdom!", TRUE, ch, 0, vict, TO_VICT);
-     act("$n focuses ki into $N's mind, but fails in awakening it to cosmic wisdom!", TRUE, ch, 0, vict, TO_NOTVICT);
+     act("You focus ki into $N's mind, but fail in awakening it to cosmic wisdom!", TRUE, ch, nullptr, vict, TO_CHAR);
+     act("$n focuses ki into your mind, but fails in awakening it to cosmic wisdom!", TRUE, ch, nullptr, vict, TO_VICT);
+     act("$n focuses ki into $N's mind, but fails in awakening it to cosmic wisdom!", TRUE, ch, nullptr, vict, TO_NOTVICT);
      return;
     }
     else {
@@ -5263,9 +5263,9 @@ ACMD(do_focus)
      assign_affect(vict, AFF_ENLIGHTEN, SKILL_ENLIGHTEN, duration, 0, 0, 0, 0, 10, 0);
         ch->decCurKI(ch->getMaxKI() / 20);
      reveal_hiding(ch, 0);
-     act("You focus ki into $N's mind, awakening it to cosmic wisdom!", TRUE, ch, 0, vict, TO_CHAR);
-     act("$n focuses ki into your mind, awakening it to cosmic wisdom!", TRUE, ch, 0, vict, TO_VICT);
-     act("$n focuses ki into $N's mind, awakening it to cosmic wisdom!", TRUE, ch, 0, vict, TO_NOTVICT);
+     act("You focus ki into $N's mind, awakening it to cosmic wisdom!", TRUE, ch, nullptr, vict, TO_CHAR);
+     act("$n focuses ki into your mind, awakening it to cosmic wisdom!", TRUE, ch, nullptr, vict, TO_VICT);
+     act("$n focuses ki into $N's mind, awakening it to cosmic wisdom!", TRUE, ch, nullptr, vict, TO_NOTVICT);
     if (IS_JINTO(ch) && level_exp(vict, GET_LEVEL(vict) + 1) - GET_EXP(vict) > 0 && GET_PRACTICES(ch, GET_CLASS(ch)) >= 15 && rand_number(1, 4) >= 3) {
      int64_t gain = 0;
      GET_PRACTICES(ch, GET_CLASS(ch)) -= 15;
@@ -5310,8 +5310,8 @@ ACMD(do_focus)
    else if (GET_SKILL(ch, SKILL_GENIUS) < axion_dice(0)) {
        ch->decCurKI(ch->getMaxKI() / 20);
     reveal_hiding(ch, 0);
-    act("You focus ki into your mind, but fail in making it work faster!", TRUE, ch, 0, 0, TO_CHAR);
-    act("$n focuses ki into $s muscles, but fails in making it work faster!", TRUE, ch, 0, 0, TO_ROOM);
+    act("You focus ki into your mind, but fail in making it work faster!", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("$n focuses ki into $s muscles, but fails in making it work faster!", TRUE, ch, nullptr, nullptr, TO_ROOM);
     return;
    }
    else {
@@ -5320,18 +5320,18 @@ ACMD(do_focus)
     assign_affect(ch, AFF_GENIUS, SKILL_GENIUS, duration, 0, 0, 10, 0, 0, 0);
        ch->decCurKI(ch->getMaxKI() / 20);
     reveal_hiding(ch, 0);
-    act("You focus ki into your mind, making it work faster!", TRUE, ch, 0, 0, TO_CHAR);
-    act("$n focuses ki into $s mind, making it work faster!", TRUE, ch, 0, 0, TO_ROOM);
+    act("You focus ki into your mind, making it work faster!", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("$n focuses ki into $s mind, making it work faster!", TRUE, ch, nullptr, nullptr, TO_ROOM);
     return;
    }
   } // End of no vict genius
 
   else {
-   if (!(vict = get_char_vis(ch, name, NULL, FIND_CHAR_ROOM))) {
+   if (!(vict = get_char_vis(ch, name, nullptr, FIND_CHAR_ROOM))) {
     send_to_char(ch, "Focus your ki into who's mind?\r\n");
     return;
    }
-   if (!can_kill(ch, vict, NULL, 2)) {
+   if (!can_kill(ch, vict, nullptr, 2)) {
     return;
    }
    else {
@@ -5358,9 +5358,9 @@ ACMD(do_focus)
     else if (GET_SKILL(ch, SKILL_GENIUS) < axion_dice(0)) {
         ch->decCurKI(ch->getMaxKI() / 20);
      reveal_hiding(ch, 0);
-     act("You focus ki into $N's mind, but fail in making it work faster!", TRUE, ch, 0, vict, TO_CHAR);
-     act("$n focuses ki into your mind, but fails in making it work faster!", TRUE, ch, 0, vict, TO_VICT);
-     act("$n focuses ki into $N's mind, but fails in making it work faster!", TRUE, ch, 0, vict, TO_NOTVICT);
+     act("You focus ki into $N's mind, but fail in making it work faster!", TRUE, ch, nullptr, vict, TO_CHAR);
+     act("$n focuses ki into your mind, but fails in making it work faster!", TRUE, ch, nullptr, vict, TO_VICT);
+     act("$n focuses ki into $N's mind, but fails in making it work faster!", TRUE, ch, nullptr, vict, TO_NOTVICT);
      return;
     }
     else {
@@ -5369,9 +5369,9 @@ ACMD(do_focus)
      assign_affect(vict, AFF_GENIUS, SKILL_GENIUS, duration, 0, 0, 10, 0, 0, 0);
         ch->decCurKI(ch->getMaxKI() / 20);
      reveal_hiding(ch, 0);
-     act("You focus ki into $N's mind, making it work faster!", TRUE, ch, 0, vict, TO_CHAR);
-     act("$n focuses ki into your mind, making it work faster!", TRUE, ch, 0, vict, TO_VICT);
-     act("$n focuses ki into $N's mind, making it work faster!", TRUE, ch, 0, vict, TO_NOTVICT);
+     act("You focus ki into $N's mind, making it work faster!", TRUE, ch, nullptr, vict, TO_CHAR);
+     act("$n focuses ki into your mind, making it work faster!", TRUE, ch, nullptr, vict, TO_VICT);
+     act("$n focuses ki into $N's mind, making it work faster!", TRUE, ch, nullptr, vict, TO_NOTVICT);
      if ((vict->master == ch || ch->master == vict || ch->master == vict->master) && AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(vict, AFF_GROUP)) {
       if (IS_KAI(ch) && level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0 && rand_number(1, 3) == 3) {
        GET_EXP(ch) += level_exp(ch, GET_LEVEL(ch) + 1) * 0.05;
@@ -5404,8 +5404,8 @@ ACMD(do_focus)
    else if (GET_SKILL(ch, SKILL_FLEX) < axion_dice(0)) {
        ch->decCurKI(ch->getMaxKI() / 20);
     reveal_hiding(ch, 0);
-    act("You focus ki into your limbs, but fail in making them more flexible!", TRUE, ch, 0, 0, TO_CHAR);
-    act("$n focuses ki into $s muscles, but fails in making them more flexible!", TRUE, ch, 0, 0, TO_ROOM);
+    act("You focus ki into your limbs, but fail in making them more flexible!", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("$n focuses ki into $s muscles, but fails in making them more flexible!", TRUE, ch, nullptr, nullptr, TO_ROOM);
     return;
    }
    else {
@@ -5414,18 +5414,18 @@ ACMD(do_focus)
                                         /* Str , Con, Int, Agl, Wis, Spd */
     assign_affect(ch, AFF_FLEX, SKILL_FLEX, duration, 0, 0, 0, 10, 0, 0);
     reveal_hiding(ch, 0);
-    act("You focus ki into your limbs, making them more flexible!", TRUE, ch, 0, 0, TO_CHAR);
-    act("$n focuses ki into $s limbs, making them more flexible!", TRUE, ch, 0, 0, TO_ROOM);
+    act("You focus ki into your limbs, making them more flexible!", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("$n focuses ki into $s limbs, making them more flexible!", TRUE, ch, nullptr, nullptr, TO_ROOM);
     return;
    }
   } // End of no vict FLEX
 
   else {
-   if (!(vict = get_char_vis(ch, name, NULL, FIND_CHAR_ROOM))) {
+   if (!(vict = get_char_vis(ch, name, nullptr, FIND_CHAR_ROOM))) {
     send_to_char(ch, "Focus your ki into who's limbs?\r\n");
     return;
    }
-   if (!can_kill(ch, vict, NULL, 2)) {
+   if (!can_kill(ch, vict, nullptr, 2)) {
     return;
    }
    else {
@@ -5452,9 +5452,9 @@ ACMD(do_focus)
     else if (GET_SKILL(ch, SKILL_FLEX) < axion_dice(0)) {
         ch->decCurKI(ch->getMaxKI() / 20);
      reveal_hiding(ch, 0);
-     act("You focus ki into $N's limbs, but fail in making them more flexible!", TRUE, ch, 0, vict, TO_CHAR);
-     act("$n focuses ki into your limbs, but fails in making them more flexible!", TRUE, ch, 0, vict, TO_VICT);
-     act("$n focuses ki into $N's limbs, but fails in making them more flexible!", TRUE, ch, 0, vict, TO_NOTVICT);
+     act("You focus ki into $N's limbs, but fail in making them more flexible!", TRUE, ch, nullptr, vict, TO_CHAR);
+     act("$n focuses ki into your limbs, but fails in making them more flexible!", TRUE, ch, nullptr, vict, TO_VICT);
+     act("$n focuses ki into $N's limbs, but fails in making them more flexible!", TRUE, ch, nullptr, vict, TO_NOTVICT);
      return;
     }
     else {
@@ -5463,9 +5463,9 @@ ACMD(do_focus)
                                         /* Str , Con, Int, Agl, Wis, Spd */
      assign_affect(vict, AFF_FLEX, SKILL_FLEX, duration, 0, 0, 0, 10, 0, 0);
      reveal_hiding(ch, 0);
-     act("You focus ki into $N's limbs, making them more flexible!", TRUE, ch, 0, vict, TO_CHAR);
-     act("$n focuses ki into your limbs, making them more flexible!", TRUE, ch, 0, vict, TO_VICT);
-     act("$n focuses ki into $N's limbs, making them more flexible!", TRUE, ch, 0, vict, TO_NOTVICT);
+     act("You focus ki into $N's limbs, making them more flexible!", TRUE, ch, nullptr, vict, TO_CHAR);
+     act("$n focuses ki into your limbs, making them more flexible!", TRUE, ch, nullptr, vict, TO_VICT);
+     act("$n focuses ki into $N's limbs, making them more flexible!", TRUE, ch, nullptr, vict, TO_NOTVICT);
      if ((vict->master == ch || ch->master == vict || ch->master == vict->master) && AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(vict, AFF_GROUP)) {
       if (IS_KAI(ch) && level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0 && rand_number(1, 3) == 3) {
        GET_EXP(ch) += level_exp(ch, GET_LEVEL(ch) + 1) * 0.05;
@@ -5494,8 +5494,8 @@ ACMD(do_focus)
    else if (GET_SKILL(ch, SKILL_BLESS) < axion_dice(0)) {
        ch->decCurKI(ch->getMaxKI() / 20);
     reveal_hiding(ch, 0);
-    act("You focus ki while chanting spiritual words. Your blessing does nothing though, you must have messed up!", TRUE, ch, 0, 0, TO_CHAR);
-    act("$n focuses ki while chanting spiritual words. $n seems disappointed.", TRUE, ch, 0, 0, TO_ROOM);
+    act("You focus ki while chanting spiritual words. Your blessing does nothing though, you must have messed up!", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("$n focuses ki while chanting spiritual words. $n seems disappointed.", TRUE, ch, nullptr, nullptr, TO_ROOM);
     return;
    }
    else {
@@ -5509,8 +5509,8 @@ ACMD(do_focus)
     } else {
      GET_BLESSLVL(ch) = 0;
     }
-    act("You focus ki while chanting spiritual words. You feel your body recovering at above normal speed!", TRUE, ch, 0, 0, TO_CHAR);
-    act("$n focuses ki while chanting spiritual words. $n smiles after finishing $s chant.", TRUE, ch, 0, 0, TO_ROOM);
+    act("You focus ki while chanting spiritual words. You feel your body recovering at above normal speed!", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("$n focuses ki while chanting spiritual words. $n smiles after finishing $s chant.", TRUE, ch, nullptr, nullptr, TO_ROOM);
     if (AFF_FLAGGED(ch, AFF_CURSE)) {
      send_to_char(ch, "Your cursing was nullified!\r\n");
      null_affect(ch, AFF_CURSE);
@@ -5520,11 +5520,11 @@ ACMD(do_focus)
   } // End of no vict BLESS
 
   else {
-   if (!(vict = get_char_vis(ch, name, NULL, FIND_CHAR_ROOM))) {
+   if (!(vict = get_char_vis(ch, name, nullptr, FIND_CHAR_ROOM))) {
     send_to_char(ch, "Bless who?\r\n");
     return;
    }
-   if (!can_kill(ch, vict, NULL, 2)) {
+   if (!can_kill(ch, vict, nullptr, 2)) {
     return;
    }
    else {
@@ -5547,9 +5547,9 @@ ACMD(do_focus)
     else if (GET_SKILL(ch, SKILL_BLESS) < axion_dice(0)) {
         ch->decCurKI(ch->getMaxKI() / 20);
      reveal_hiding(ch, 0);
-     act("You focus ki while chanting spiritual words. Your blessing fails!", TRUE, ch, 0, 0, TO_CHAR);
-     act("$n focuses ki while chanting spiritual words. $n places a hand on your head, but nothing happens!", TRUE, ch, 0, vict, TO_VICT);
-     act("$n focuses ki while chanting spiritual words. $n places a hand on $N's head, but nothing happens!", TRUE, ch, 0, vict, TO_NOTVICT);
+     act("You focus ki while chanting spiritual words. Your blessing fails!", TRUE, ch, nullptr, nullptr, TO_CHAR);
+     act("$n focuses ki while chanting spiritual words. $n places a hand on your head, but nothing happens!", TRUE, ch, nullptr, vict, TO_VICT);
+     act("$n focuses ki while chanting spiritual words. $n places a hand on $N's head, but nothing happens!", TRUE, ch, nullptr, vict, TO_NOTVICT);
      return;
     }
     else {
@@ -5563,9 +5563,9 @@ ACMD(do_focus)
      } else {
       GET_BLESSLVL(vict) = 0;
      }
-     act("You focus ki while chanting spiritual words. Blessing $N with faster regeneration!", TRUE, ch, 0, vict, TO_CHAR);
-     act("$n focuses ki while chanting spiritual words. $n then places a hand on your head, blessing you!", TRUE, ch, 0, vict, TO_VICT);
-     act("$n focuses ki while chanting spiritual words. $n then places a hand on $N's head, blessing them!", TRUE, ch, 0, vict, TO_NOTVICT);
+     act("You focus ki while chanting spiritual words. Blessing $N with faster regeneration!", TRUE, ch, nullptr, vict, TO_CHAR);
+     act("$n focuses ki while chanting spiritual words. $n then places a hand on your head, blessing you!", TRUE, ch, nullptr, vict, TO_VICT);
+     act("$n focuses ki while chanting spiritual words. $n then places a hand on $N's head, blessing them!", TRUE, ch, nullptr, vict, TO_NOTVICT);
      if ((vict->master == ch || ch->master == vict || ch->master == vict->master) && AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(vict, AFF_GROUP)) {
       if (IS_KAI(ch) && level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0 && rand_number(1, 3) == 3) {
        GET_EXP(ch) += level_exp(ch, GET_LEVEL(ch) + 1) * 0.05;
@@ -5602,8 +5602,8 @@ ACMD(do_focus)
    else if (GET_SKILL(ch, SKILL_CURSE) < axion_dice(0)) {
        ch->decCurKI(ch->getMaxKI() / 20);
     reveal_hiding(ch, 0);
-    act("You focus ki while chanting demonic words. Your cursing does nothing though, you must have messed up!", TRUE, ch, 0, 0, TO_CHAR);
-    act("$n focuses ki while chanting demonic words. $n seems disappointed.", TRUE, ch, 0, 0, TO_ROOM);
+    act("You focus ki while chanting demonic words. Your cursing does nothing though, you must have messed up!", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("$n focuses ki while chanting demonic words. $n seems disappointed.", TRUE, ch, nullptr, nullptr, TO_ROOM);
     return;
    }
    else {
@@ -5612,8 +5612,8 @@ ACMD(do_focus)
     assign_affect(vict, AFF_CURSE, SKILL_CURSE, duration, 0, 0, 0, 0, 0, 0);
        ch->decCurKI(ch->getMaxKI() / 20);
     reveal_hiding(ch, 0);
-    act("You focus ki while chanting demonic words. You feel your body recovering at below normal speed!", TRUE, ch, 0, 0, TO_CHAR);
-    act("$n focuses ki while chanting demonic words. $n grins after finishing $s chant.", TRUE, ch, 0, 0, TO_ROOM);
+    act("You focus ki while chanting demonic words. You feel your body recovering at below normal speed!", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("$n focuses ki while chanting demonic words. $n grins after finishing $s chant.", TRUE, ch, nullptr, nullptr, TO_ROOM);
     if (AFF_FLAGGED(ch, AFF_BLESS)) {
      send_to_char(ch, "Your blessing was nullified!\r\n");
      null_affect(ch, AFF_BLESS);
@@ -5623,11 +5623,11 @@ ACMD(do_focus)
   } // End of no vict CURSE
 
   else {
-   if (!(vict = get_char_vis(ch, name, NULL, FIND_CHAR_ROOM))) {
+   if (!(vict = get_char_vis(ch, name, nullptr, FIND_CHAR_ROOM))) {
     send_to_char(ch, "Curse who?\r\n");
     return;
    }
-   if (!can_kill(ch, vict, NULL, 0)) {
+   if (!can_kill(ch, vict, nullptr, 0)) {
     return;
    }
    else {
@@ -5654,9 +5654,9 @@ ACMD(do_focus)
     else if (GET_SKILL(ch, SKILL_CURSE) < axion_dice(0)) {
         ch->decCurKI(ch->getMaxKI() / 20);
      reveal_hiding(ch, 0);
-     act("You focus ki while chanting demonic words. Your cursing fails!", TRUE, ch, 0, 0, TO_CHAR);
-     act("$n focuses ki while chanting demonic words. $n places a hand on your head, but nothing happens!", TRUE, ch, 0, vict, TO_VICT);
-     act("$n focuses ki while chanting demonic words. $n places a hand on $N's head, but nothing happens!", TRUE, ch, 0, vict, TO_NOTVICT);
+     act("You focus ki while chanting demonic words. Your cursing fails!", TRUE, ch, nullptr, nullptr, TO_CHAR);
+     act("$n focuses ki while chanting demonic words. $n places a hand on your head, but nothing happens!", TRUE, ch, nullptr, vict, TO_VICT);
+     act("$n focuses ki while chanting demonic words. $n places a hand on $N's head, but nothing happens!", TRUE, ch, nullptr, vict, TO_NOTVICT);
      return;
     }
     else {
@@ -5665,9 +5665,9 @@ ACMD(do_focus)
      assign_affect(vict, AFF_CURSE, SKILL_CURSE, duration, 0, 0, 0, 0, 0, 0);
         ch->decCurKI(ch->getMaxKI() / 20);
      reveal_hiding(ch, 0);
-     act("You focus ki while chanting demonic words. cursing $N with slower regeneration!", TRUE, ch, 0, vict, TO_CHAR);
-     act("$n focuses ki while chanting demonic words. $n then places a hand on your head, cursing you!", TRUE, ch, 0, vict, TO_VICT);
-     act("$n focuses ki while chanting demonic words. $n then places a hand on $N's head, cursing them!", TRUE, ch, 0, vict, TO_NOTVICT);
+     act("You focus ki while chanting demonic words. cursing $N with slower regeneration!", TRUE, ch, nullptr, vict, TO_CHAR);
+     act("$n focuses ki while chanting demonic words. $n then places a hand on your head, cursing you!", TRUE, ch, nullptr, vict, TO_VICT);
+     act("$n focuses ki while chanting demonic words. $n then places a hand on $N's head, cursing them!", TRUE, ch, nullptr, vict, TO_NOTVICT);
      if (AFF_FLAGGED(vict, AFF_BLESS)) {
       send_to_char(vict, "Your blessing was nullified!\r\n");
       null_affect(vict, AFF_BLESS);
@@ -5683,11 +5683,11 @@ ACMD(do_focus)
    if (!know_skill(ch, SKILL_YOIK)) {
     return;
    }
-   if (!(vict = get_char_vis(ch, name, NULL, FIND_CHAR_ROOM))) {
+   if (!(vict = get_char_vis(ch, name, nullptr, FIND_CHAR_ROOM))) {
     send_to_char(ch, "Use Yoikominminken on who?\r\n");
     return;
    }
-   if (!can_kill(ch, vict, NULL, 0)) {
+   if (!can_kill(ch, vict, nullptr, 0)) {
     return;
    }
    else {
@@ -5706,16 +5706,16 @@ ACMD(do_focus)
     } else if (GET_BONUS(vict, BONUS_INSOMNIAC)) {
         ch->decCurKI(ch->getMaxKI() / 20);
      reveal_hiding(ch, 0);
-     act("You focus ki while moving your hands in lulling patterns, but $N doesn't look the least bit sleepy!", TRUE, ch, 0, vict, TO_CHAR);
-     act("$n focuses ki while moving $s hands in a lulling pattern, but you just don't feel tired.", TRUE, ch, 0, vict, TO_VICT);
-     act("$n focuses ki while moving $s hands in a lulling pattern, but $N doesn't look the least bit sleepy!", TRUE, ch, 0, vict, TO_NOTVICT);
+     act("You focus ki while moving your hands in lulling patterns, but $N doesn't look the least bit sleepy!", TRUE, ch, nullptr, vict, TO_CHAR);
+     act("$n focuses ki while moving $s hands in a lulling pattern, but you just don't feel tired.", TRUE, ch, nullptr, vict, TO_VICT);
+     act("$n focuses ki while moving $s hands in a lulling pattern, but $N doesn't look the least bit sleepy!", TRUE, ch, nullptr, vict, TO_NOTVICT);
      return;
     } else if (GET_SKILL(ch, SKILL_YOIK) < axion_dice(0) || (GET_INT(ch) + rand_number(1, 3) < GET_INT(vict) + rand_number(1, 5))) {
         ch->decCurKI(ch->getMaxKI() / 20);
      reveal_hiding(ch, 0);
-     act("You focus ki while moving your hands in lulling patterns, but fail to put $N to sleep!", TRUE, ch, 0, vict, TO_CHAR);
-     act("$n focuses ki while moving $s hands in a lulling pattern, but you resist the technique!", TRUE, ch, 0, vict, TO_VICT);
-     act("$n focuses ki while moving $s hands in a lulling pattern, but $N resists the technique!", TRUE, ch, 0, vict, TO_NOTVICT);
+     act("You focus ki while moving your hands in lulling patterns, but fail to put $N to sleep!", TRUE, ch, nullptr, vict, TO_CHAR);
+     act("$n focuses ki while moving $s hands in a lulling pattern, but you resist the technique!", TRUE, ch, nullptr, vict, TO_VICT);
+     act("$n focuses ki while moving $s hands in a lulling pattern, but $N resists the technique!", TRUE, ch, nullptr, vict, TO_NOTVICT);
      return;
     } else {
      int duration = rand_number(1, 2);
@@ -5723,9 +5723,9 @@ ACMD(do_focus)
      assign_affect(vict, AFF_SLEEP, SKILL_YOIK, duration, 0, 0, 0, 0, 0, 0);
         ch->decCurKI(ch->getMaxKI() / 20);
      reveal_hiding(ch, 0);
-     act("You focus ki while moving your hands in lulling patterns, putting $N to sleep!", TRUE, ch, 0, vict, TO_CHAR);
-     act("$n focuses ki while moving $s hands in a lulling pattern, before you realise it you are asleep!", TRUE, ch, 0, vict, TO_VICT);
-     act("$n focuses ki while moving $s hands in a lulling pattern, putting $N to sleep!", TRUE, ch, 0, vict, TO_NOTVICT);
+     act("You focus ki while moving your hands in lulling patterns, putting $N to sleep!", TRUE, ch, nullptr, vict, TO_CHAR);
+     act("$n focuses ki while moving $s hands in a lulling pattern, before you realise it you are asleep!", TRUE, ch, nullptr, vict, TO_VICT);
+     act("$n focuses ki while moving $s hands in a lulling pattern, putting $N to sleep!", TRUE, ch, nullptr, vict, TO_NOTVICT);
      GET_POS(vict) = POS_SLEEPING;
      if (AFF_FLAGGED(vict, AFF_FLYING)) {
       REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_FLYING);
@@ -5748,8 +5748,8 @@ ACMD(do_focus)
    else if (GET_SKILL(ch, SKILL_VIGOR) < axion_dice(0)) {
        ch->decCurKI(ch->getMaxKI() / 10);
     reveal_hiding(ch, 0);
-    act("You focus ki into your very cells, but fail at re-engerizing them!", TRUE, ch, 0, 0, TO_CHAR);
-    act("$n focuses ki and glows green for a moment, $e then frowns.", TRUE, ch, 0, 0, TO_ROOM);
+    act("You focus ki into your very cells, but fail at re-engerizing them!", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("$n focuses ki and glows green for a moment, $e then frowns.", TRUE, ch, nullptr, nullptr, TO_ROOM);
     WAIT_STATE(ch, PULSE_2SEC);
     return;
    }
@@ -5767,19 +5767,19 @@ ACMD(do_focus)
     }
 
     reveal_hiding(ch, 0);
-    act("You focus ki into your very cells, and manage to re-energize them!", TRUE, ch, 0, 0, TO_CHAR);
-    act("$n focuses ki and glows green for a moment, $e then smiles.", TRUE, ch, 0, 0, TO_ROOM);
+    act("You focus ki into your very cells, and manage to re-energize them!", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("$n focuses ki and glows green for a moment, $e then smiles.", TRUE, ch, nullptr, nullptr, TO_ROOM);
     WAIT_STATE(ch, PULSE_2SEC);
     return;
    }
   } // End of no vict VIGOR
 
   else {
-   if (!(vict = get_char_vis(ch, name, NULL, FIND_CHAR_ROOM))) {
+   if (!(vict = get_char_vis(ch, name, nullptr, FIND_CHAR_ROOM))) {
     send_to_char(ch, "VIGOR who?\r\n");
     return;
    }
-   if (!can_kill(ch, vict, NULL, 2)) {
+   if (!can_kill(ch, vict, nullptr, 2)) {
     return;
    }
    else {
@@ -5798,9 +5798,9 @@ ACMD(do_focus)
     else if (GET_SKILL(ch, SKILL_VIGOR) < axion_dice(0)) {
         ch->decCurKI(ch->getMaxKI() / 10);
      reveal_hiding(ch, 0);
-     act("You focus ki into $N's very cells, and fail at re-energizing them!", TRUE, ch, 0, vict, TO_CHAR);
-     act("$n focuses ki into your very cells, but nothing happens!", TRUE, ch, 0, vict, TO_VICT);
-     act("$n focuses ki and $N glows green for a moment, $N frowns.", TRUE, ch, 0, vict, TO_NOTVICT);
+     act("You focus ki into $N's very cells, and fail at re-energizing them!", TRUE, ch, nullptr, vict, TO_CHAR);
+     act("$n focuses ki into your very cells, but nothing happens!", TRUE, ch, nullptr, vict, TO_VICT);
+     act("$n focuses ki and $N glows green for a moment, $N frowns.", TRUE, ch, nullptr, vict, TO_NOTVICT);
      WAIT_STATE(ch, PULSE_2SEC);
      return;
     }
@@ -5813,9 +5813,9 @@ ACMD(do_focus)
          ch->decCurKI(ch->getMaxKI() / 10);
      }
      reveal_hiding(ch, 0);
-     act("You focus ki into $N's very cells, and manage to re-energize them!", TRUE, ch, 0, vict, TO_CHAR);
-     act("$n focuses ki into your very cells, and manages to re-energize them!", TRUE, ch, 0, vict, TO_VICT);
-     act("$n focuses ki and $N glows green for a moment, $N smiles.", TRUE, ch, 0, vict, TO_NOTVICT);
+     act("You focus ki into $N's very cells, and manage to re-energize them!", TRUE, ch, nullptr, vict, TO_CHAR);
+     act("$n focuses ki into your very cells, and manages to re-energize them!", TRUE, ch, nullptr, vict, TO_VICT);
+     act("$n focuses ki and $N glows green for a moment, $N smiles.", TRUE, ch, nullptr, vict, TO_NOTVICT);
      WAIT_STATE(ch, PULSE_2SEC);
      return;
     }
@@ -5840,27 +5840,27 @@ ACMD(do_focus)
    else if (GET_SKILL(ch, SKILL_CURE) < axion_dice(0)) {
        ch->decCurKI(ch->getMaxKI() / 20);
     reveal_hiding(ch, 0);
-    act("You focus ki and aim a pulsing light at your body. Nothing happens!", TRUE, ch, 0, 0, TO_CHAR);
-    act("$n focuses ki and aims a pulsing light at $s body. Nothing seems to happen.", TRUE, ch, 0, 0, TO_ROOM);
+    act("You focus ki and aim a pulsing light at your body. Nothing happens!", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("$n focuses ki and aims a pulsing light at $s body. Nothing seems to happen.", TRUE, ch, nullptr, nullptr, TO_ROOM);
     return;
    }
    else {
     affect_from_char(ch, SPELL_POISON);
        ch->decCurKI(ch->getMaxKI() / 20);
     reveal_hiding(ch, 0);
-    act("You focus ki and aim a pulsing light at your body. You feel the poison in your blood disappear!", TRUE, ch, 0, 0, TO_CHAR);
-    act("$n focuses ki and aims a pulsing light at $s body. $n smiles.", TRUE, ch, 0, 0, TO_ROOM);
+    act("You focus ki and aim a pulsing light at your body. You feel the poison in your blood disappear!", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("$n focuses ki and aims a pulsing light at $s body. $n smiles.", TRUE, ch, nullptr, nullptr, TO_ROOM);
     null_affect(ch, AFF_POISON);
     return;
    }
   } // End of no vict cure
 
   else {
-   if (!(vict = get_char_vis(ch, name, NULL, FIND_CHAR_ROOM))) {
+   if (!(vict = get_char_vis(ch, name, nullptr, FIND_CHAR_ROOM))) {
     send_to_char(ch, "cure who?\r\n");
     return;
    }
-   if (!can_kill(ch, vict, NULL, 2)) {
+   if (!can_kill(ch, vict, nullptr, 2)) {
     return;
    }
    else {
@@ -5879,18 +5879,18 @@ ACMD(do_focus)
     else if (GET_SKILL(ch, SKILL_CURE) < axion_dice(0)) {
         ch->decCurKI(ch->getMaxKI() / 20);
      reveal_hiding(ch, 0);
-     act("You focus ki and aim a pulsing light at $N's body. Nothing happens.", TRUE, ch, 0, vict, TO_CHAR);
-     act("$n focuses ki and aims a pulsing light at your body. You are STILL poisoned!", TRUE, ch, 0, vict, TO_VICT);
-     act("$n focuses ki and aims a pulsing light at $N's body. $N looks disappointed.", TRUE, ch, 0, vict, TO_NOTVICT);
+     act("You focus ki and aim a pulsing light at $N's body. Nothing happens.", TRUE, ch, nullptr, vict, TO_CHAR);
+     act("$n focuses ki and aims a pulsing light at your body. You are STILL poisoned!", TRUE, ch, nullptr, vict, TO_VICT);
+     act("$n focuses ki and aims a pulsing light at $N's body. $N looks disappointed.", TRUE, ch, nullptr, vict, TO_NOTVICT);
      return;
     }
     else {
      affect_from_char(vict, SPELL_POISON);
         ch->decCurKI(ch->getMaxKI() / 20);
      reveal_hiding(ch, 0);
-     act("You focus ki and aim a pulsing light at $N's body. $e is cured.", TRUE, ch, 0, vict, TO_CHAR);
-     act("$n focuses ki and aims a pulsing light at your body. You have been cured of your poison!", TRUE, ch, 0, vict, TO_VICT);
-     act("$n focuses ki and aims a pulsing light at $N's body. $N smiles.", TRUE, ch, 0, vict, TO_NOTVICT);
+     act("You focus ki and aim a pulsing light at $N's body. $e is cured.", TRUE, ch, nullptr, vict, TO_CHAR);
+     act("$n focuses ki and aims a pulsing light at your body. You have been cured of your poison!", TRUE, ch, nullptr, vict, TO_VICT);
+     act("$n focuses ki and aims a pulsing light at $N's body. $N smiles.", TRUE, ch, nullptr, vict, TO_NOTVICT);
      null_affect(vict, AFF_POISON);
      return;
     }
@@ -5904,11 +5904,11 @@ ACMD(do_focus)
    if (!know_skill(ch, SKILL_POISON)) {
     return;
    }
-   if (!(vict = get_char_vis(ch, name, NULL, FIND_CHAR_ROOM))) {
+   if (!(vict = get_char_vis(ch, name, nullptr, FIND_CHAR_ROOM))) {
     send_to_char(ch, "Poison who?\r\n");
     return;
    }
-   if (!can_kill(ch, vict, NULL, 0)) {
+   if (!can_kill(ch, vict, nullptr, 0)) {
     return;
    }
    else {
@@ -5933,24 +5933,24 @@ ACMD(do_focus)
     else if (GET_SKILL(ch, SKILL_POISON) < axion_dice(0)) {
         ch->decCurKI(ch->getMaxKI() / 20);
      reveal_hiding(ch, 0);
-     act("You focus ki and fling poison at $N. You missed!", TRUE, ch, 0, vict, TO_CHAR);
-     act("$n focuses ki and flings poison at you, but misses!", TRUE, ch, 0, vict, TO_VICT);
-     act("$n focuses ki and flings poison at $N, but misses!", TRUE, ch, 0, vict, TO_NOTVICT);
+     act("You focus ki and fling poison at $N. You missed!", TRUE, ch, nullptr, vict, TO_CHAR);
+     act("$n focuses ki and flings poison at you, but misses!", TRUE, ch, nullptr, vict, TO_VICT);
+     act("$n focuses ki and flings poison at $N, but misses!", TRUE, ch, nullptr, vict, TO_NOTVICT);
      return;
     }
     else {
         ch->decCurKI(ch->getMaxKI() / 20);
      reveal_hiding(ch, 0);
-     act("You focus ki and fling poison at $N! The poison burns into $s skin!", TRUE, ch, 0, vict, TO_CHAR);
-     act("$n focuses ki and flings poison at you! The poison burns into your skin!", TRUE, ch, 0, vict, TO_VICT);
-     act("$n focuses ki and flings poison at $N! The poison burns into $s skin!", TRUE, ch, 0, vict, TO_NOTVICT);
+     act("You focus ki and fling poison at $N! The poison burns into $s skin!", TRUE, ch, nullptr, vict, TO_CHAR);
+     act("$n focuses ki and flings poison at you! The poison burns into your skin!", TRUE, ch, nullptr, vict, TO_VICT);
+     act("$n focuses ki and flings poison at $N! The poison burns into $s skin!", TRUE, ch, nullptr, vict, TO_NOTVICT);
      if (IS_NPC(vict)) {
       set_fighting(vict, ch);
      }
      if (IS_MUTANT(vict) && (GET_GENOME(vict, 0) == 7 || GET_GENOME(vict, 1) == 7)) {
-      act("However $N seems unaffected by the poison.", TRUE, ch, 0, vict, TO_CHAR);
-      act("Your natural immunity to poison prevents it from affecting you.", TRUE, ch, 0, vict, TO_VICT);
-      act("However $N seems unaffected by the poison.", TRUE, ch, 0, vict, TO_NOTVICT);
+      act("However $N seems unaffected by the poison.", TRUE, ch, nullptr, vict, TO_CHAR);
+      act("Your natural immunity to poison prevents it from affecting you.", TRUE, ch, nullptr, vict, TO_VICT);
+      act("However $N seems unaffected by the poison.", TRUE, ch, nullptr, vict, TO_NOTVICT);
      } else {
       vict->poisonby = ch;
       if (GET_CHARGE(ch) > 0) {
@@ -6074,14 +6074,14 @@ ACMD(do_kaioken)
 
     if (init_skill(ch, SKILL_KAIOKEN) < roll) {
         send_to_char(ch, "You try to focus your ki into your body but mess up somehow.\r\n");
-        act("$n tries to use kaioken but messes up somehow.", TRUE, ch, 0, 0, TO_ROOM);
+        act("$n tries to use kaioken but messes up somehow.", TRUE, ch, nullptr, nullptr, TO_ROOM);
         WAIT_STATE(ch, PULSE_1SEC);
         return;
     }
 
     if(ch->getMaxHealth() < kaioken_levels[x]) {
-        act("@rA blazing red aura bursts up around your body, flashing intensely before your body gives out and you release the kaioken because of the pressure!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@rA blazing red aura bursts up around @R$n's @rbody, flashing intensely before $s body gives out and $e releases the kaioken because of the pressure!@n", TRUE, ch, 0, 0, TO_ROOM);
+        act("@rA blazing red aura bursts up around your body, flashing intensely before your body gives out and you release the kaioken because of the pressure!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+        act("@rA blazing red aura bursts up around @R$n's @rbody, flashing intensely before $s body gives out and $e releases the kaioken because of the pressure!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
         return;
     }
 
@@ -6104,7 +6104,7 @@ ACMD(do_plant)
 
   two_arguments(argument, obj_name, vict_name);
 
-  if (!(vict = get_char_vis(ch, vict_name, NULL, FIND_CHAR_ROOM))) {
+  if (!(vict = get_char_vis(ch, vict_name, nullptr, FIND_CHAR_ROOM))) {
     send_to_char(ch, "Plant what on who?\r\n");
     return;
   } else if (vict == ch) {
@@ -6132,7 +6132,7 @@ ACMD(do_plant)
     roll = -10;         /* Failure */
 
 
-  if (!(obj = get_obj_in_list_vis(ch, obj_name, NULL, ch->carrying))) {
+  if (!(obj = get_obj_in_list_vis(ch, obj_name, nullptr, ch->carrying))) {
    send_to_char(ch, "You don't have that to plant on them.\r\n"); 
    return;
   }
@@ -6172,8 +6172,8 @@ ACMD(do_plant)
 
 ACMD(do_forgery) {
 
-  struct obj_data *obj2, *obj3 = NULL;
-  struct obj_data *obj, *obj4 = NULL, *next_obj;
+  struct obj_data *obj2, *obj3 = nullptr;
+  struct obj_data *obj, *obj4 = nullptr, *next_obj;
   int found = FALSE;
   char arg[MAX_INPUT_LENGTH];
  
@@ -6192,7 +6192,7 @@ ACMD(do_forgery) {
    return;
   }
 
-  if (!(obj2 = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
+  if (!(obj2 = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
    send_to_char(ch, "You want to make a fake copy of what?\r\n");
    return;
   }
@@ -6205,7 +6205,7 @@ ACMD(do_forgery) {
    }
   }
 
-  if (found == FALSE || obj4 == NULL) {
+  if (found == FALSE || obj4 == nullptr) {
    send_to_char(ch, "You need a forgery kit.\r\n");
    return;
   }
@@ -6250,7 +6250,7 @@ ACMD(do_forgery) {
   }
 
   reveal_hiding(ch, 0);
-  act("@c$n@w looks at $p, begins to work on forging a fake copy of it.@n", TRUE, ch, obj2, 0, TO_ROOM);
+  act("@c$n@w looks at $p, begins to work on forging a fake copy of it.@n", TRUE, ch, obj2, nullptr, TO_ROOM);
   improve_skill(ch, SKILL_FORGERY, 1);
   if (GET_SKILL(ch, SKILL_FORGERY) < axion_dice(0)) {
    if (rand_number(1, 10) >= 9) { /* Uh oh */
@@ -6260,7 +6260,7 @@ ACMD(do_forgery) {
     return;
    }
    send_to_char(ch, "You start to make a forgery of %s but screw up and waste your forgery kit..\r\n", obj2->short_description);
-   act("@c$n@w tried to duplicate $p but screws up somehow.@n", TRUE, ch, obj2, 0, TO_ROOM);
+   act("@c$n@w tried to duplicate $p but screws up somehow.@n", TRUE, ch, obj2, nullptr, TO_ROOM);
    obj_from_char(obj4);
    extract_obj(obj4);
    WAIT_STATE(ch, PULSE_2SEC);
@@ -6280,7 +6280,7 @@ ACMD(do_forgery) {
   obj_from_char(obj4);
   extract_obj(obj4);
   send_to_char(ch, "You make an excellent forgery of %s@n!\r\n", obj2->short_description);
-  act("@c$n@w makes a perfect forgery of $p.@n", TRUE, ch, obj2, 0, TO_ROOM);
+  act("@c$n@w makes a perfect forgery of $p.@n", TRUE, ch, obj2, nullptr, TO_ROOM);
   WAIT_STATE(ch, PULSE_2SEC);
 }
 
@@ -6305,31 +6305,31 @@ ACMD(do_appraise) {
    return;
   }
 
-  if (!(obj = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
+  if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
    send_to_char(ch, "You want to appraise what?\r\n");
    return;
   }
 
   reveal_hiding(ch, 0);
-  act("@c$n@w looks at $p, turning it over in $s hands.@n", TRUE, ch, obj, 0, TO_ROOM);
+  act("@c$n@w looks at $p, turning it over in $s hands.@n", TRUE, ch, obj, nullptr, TO_ROOM);
   improve_skill(ch, SKILL_APPRAISE, 1);
   if (GET_SKILL(ch, SKILL_APPRAISE) < axion_dice(-10)) {
    send_to_char(ch, "You fail to perceive the worth of %s..\r\n", obj->short_description);
-   act("@c$n@w looks stumped about $p.@n", TRUE, ch, obj, 0, TO_ROOM);
+   act("@c$n@w looks stumped about $p.@n", TRUE, ch, obj, nullptr, TO_ROOM);
    WAIT_STATE(ch, PULSE_2SEC);
    return;
   }
 
   if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
    send_to_char(ch, "%s is broken!\r\n", obj->short_description);
-   act("@c$n@w looks at $p and frowns.@n", TRUE, ch, obj, 0, TO_ROOM);
+   act("@c$n@w looks at $p and frowns.@n", TRUE, ch, obj, nullptr, TO_ROOM);
    WAIT_STATE(ch, PULSE_2SEC);
    return;
   }
 
   if (OBJ_FLAGGED(obj, ITEM_FORGED)) {
    send_to_char(ch, "%s is fake and worthless!\r\n", obj->short_description);
-   act("@c$n@w looks at $p with an angry face.@n", TRUE, ch, obj, 0, TO_ROOM);
+   act("@c$n@w looks at $p with an angry face.@n", TRUE, ch, obj, nullptr, TO_ROOM);
    WAIT_STATE(ch, PULSE_2SEC);
    return;
   }
@@ -6370,7 +6370,7 @@ ACMD(do_appraise) {
    send_to_char(ch, "Token Slots  : @m2/2@n\n");
   }
   send_to_char(ch, "Bonuses:");
-  act("@c$n@w looks at $p and nods, a satisfied look on $s face.@n", TRUE, ch, obj, 0, TO_ROOM);
+  act("@c$n@w looks at $p and nods, a satisfied look on $s face.@n", TRUE, ch, obj, nullptr, TO_ROOM);
   int percent = FALSE;
   for (i = 0; i < MAX_OBJ_AFFECT; i++) {
     if (obj->affected[i].modifier) {
@@ -6410,7 +6410,7 @@ ACMD(do_disguise) {
  if (PLR_FLAGGED(ch, PLR_DISGUISED)) {
   send_to_char(ch, "You stop disguising yourself.\r\n");
   REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_DISGUISED);
-  act("@C$n @wpulls off $s disguise and reveals $mself!", TRUE, ch, 0, 0, TO_ROOM);
+  act("@C$n @wpulls off $s disguise and reveals $mself!", TRUE, ch, nullptr, nullptr, TO_ROOM);
   return;
  }
 
@@ -6433,13 +6433,13 @@ ACMD(do_disguise) {
  
  if (skill > roll) {
   send_to_char(ch, "You managed to disguise yourself with some skilled manipulation of your headwear.\r\n");
-  act("@C$n @wmanages to disguise $mself with some skilled manipulation of $s headwear.", TRUE, ch, 0, 0, TO_ROOM);
+  act("@C$n @wmanages to disguise $mself with some skilled manipulation of $s headwear.", TRUE, ch, nullptr, nullptr, TO_ROOM);
   SET_BIT_AR(PLR_FLAGS(ch), PLR_DISGUISED);
   return;
  }
  else {
   send_to_char(ch, "You finish attempting to disguise yourself, but realize you failed and need to try again.\r\n");
-  act("@C$n @wattempts and fails to disguise $mself properly and must try again.", TRUE, ch, 0, 0, TO_ROOM);
+  act("@C$n @wattempts and fails to disguise $mself properly and must try again.", TRUE, ch, nullptr, nullptr, TO_ROOM);
   ch->decCurST(ch->getMaxST() / 50);
   return;
  }
@@ -6534,7 +6534,7 @@ ACMD(do_zanzoken)
   return;
  }
  
- act("@wYou focus your ki, preparing to move at super speeds if necessary.@n", TRUE, ch, 0, 0, TO_CHAR);
+ act("@wYou focus your ki, preparing to move at super speeds if necessary.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
     ch->decCurKI(cost);
  SET_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
  improve_skill(ch, SKILL_ZANZOKEN, 2);
@@ -6557,17 +6557,17 @@ ACMD(do_block)
     return;
    }
    if (BLOCKS(ch)) {
-    act("@wYou stop blocking @c$N@w.@n", TRUE, ch, 0, BLOCKS(ch), TO_CHAR);
-    act("@C$n@w stops blocking you.@n", TRUE, ch, 0, BLOCKS(ch), TO_VICT);
-    act("@C$n@w stops blocking @c$N@w.@n", TRUE, ch, 0, BLOCKS(ch), TO_NOTVICT);
+    act("@wYou stop blocking @c$N@w.@n", TRUE, ch, nullptr, BLOCKS(ch), TO_CHAR);
+    act("@C$n@w stops blocking you.@n", TRUE, ch, nullptr, BLOCKS(ch), TO_VICT);
+    act("@C$n@w stops blocking @c$N@w.@n", TRUE, ch, nullptr, BLOCKS(ch), TO_NOTVICT);
     vict = BLOCKS(ch);
-    BLOCKED(vict) = NULL;
-    BLOCKS(ch) = NULL;
+    BLOCKED(vict) = nullptr;
+    BLOCKS(ch) = nullptr;
     return;
    }
   }
 
-  if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
+  if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
    send_to_char(ch, "You do not see the target here.\r\n");
    return;
   }
@@ -6588,26 +6588,26 @@ ACMD(do_block)
   }
 
   if (BLOCKS(ch)) {
-    act("@wYou stop blocking @c$N@w.@n", TRUE, ch, 0, BLOCKS(ch), TO_CHAR);
-    act("@C$n@w stops blocking you.@n", TRUE, ch, 0, BLOCKS(ch), TO_VICT);
-    act("@C$n@w stops blocking @c$N@w.@n", TRUE, ch, 0, BLOCKS(ch), TO_NOTVICT);
+    act("@wYou stop blocking @c$N@w.@n", TRUE, ch, nullptr, BLOCKS(ch), TO_CHAR);
+    act("@C$n@w stops blocking you.@n", TRUE, ch, nullptr, BLOCKS(ch), TO_VICT);
+    act("@C$n@w stops blocking @c$N@w.@n", TRUE, ch, nullptr, BLOCKS(ch), TO_NOTVICT);
     struct char_data *oldv = BLOCKS(ch); 
-    BLOCKED(oldv) = NULL;
+    BLOCKED(oldv) = nullptr;
     BLOCKS(ch) = vict;
     BLOCKED(vict) = ch;
     reveal_hiding(ch, 0);
-    act("@wYou start blocking @c$N's@w escape.@n", TRUE, ch, 0, BLOCKS(ch), TO_CHAR);
-    act("@C$n@w starts blocking your escape.@n", TRUE, ch, 0, BLOCKS(ch), TO_VICT);
-    act("@C$n@w starts blocking @c$N's@w escape.@n", TRUE, ch, 0, BLOCKS(ch), TO_NOTVICT);
+    act("@wYou start blocking @c$N's@w escape.@n", TRUE, ch, nullptr, BLOCKS(ch), TO_CHAR);
+    act("@C$n@w starts blocking your escape.@n", TRUE, ch, nullptr, BLOCKS(ch), TO_VICT);
+    act("@C$n@w starts blocking @c$N's@w escape.@n", TRUE, ch, nullptr, BLOCKS(ch), TO_NOTVICT);
    return;
   }
   else {
     BLOCKS(ch) = vict;
     BLOCKED(vict) = ch;
     reveal_hiding(ch, 0);
-    act("@wYou start blocking @c$N's@w escape.@n", TRUE, ch, 0, BLOCKS(ch), TO_CHAR);
-    act("@C$n@w starts blocking your escape.@n", TRUE, ch, 0, BLOCKS(ch), TO_VICT);
-    act("@C$n@w starts blocking @c$N's@w escape.@n", TRUE, ch, 0, BLOCKS(ch), TO_NOTVICT);
+    act("@wYou start blocking @c$N's@w escape.@n", TRUE, ch, nullptr, BLOCKS(ch), TO_CHAR);
+    act("@C$n@w starts blocking your escape.@n", TRUE, ch, nullptr, BLOCKS(ch), TO_VICT);
+    act("@C$n@w starts blocking @c$N's@w escape.@n", TRUE, ch, nullptr, BLOCKS(ch), TO_NOTVICT);
    return;
   }
 
@@ -6621,14 +6621,14 @@ ACMD(do_eyec)
 
  if (PLR_FLAGGED(ch, PLR_EYEC)) {
   REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_EYEC);  
-  act("@wYou open your eyes.@n", TRUE, ch, 0, 0, TO_CHAR);
-  act("@C$n@w opens $s eyes.@n", TRUE, ch, 0, 0, TO_ROOM);
+  act("@wYou open your eyes.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+  act("@C$n@w opens $s eyes.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
  }
 
  else if (!PLR_FLAGGED(ch, PLR_EYEC)) {
   SET_BIT_AR(PLR_FLAGS(ch), PLR_EYEC);
-  act("@wYou close your eyes.@n", TRUE, ch, 0, 0, TO_CHAR);
-  act("@C$n@w closes $s eyes.@n", TRUE, ch, 0, 0, TO_ROOM);
+  act("@wYou close your eyes.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+  act("@C$n@w closes $s eyes.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
  }
 
  WAIT_STATE(ch, PULSE_1SEC);
@@ -6636,7 +6636,7 @@ ACMD(do_eyec)
 
 ACMD(do_solar)
 {
- struct char_data *vict = NULL, *next_v = NULL;
+ struct char_data *vict = nullptr, *next_v = nullptr;
 
  int prob = 0, perc = 0, cost = 0, bonus = 0;
 
@@ -6673,16 +6673,16 @@ ACMD(do_solar)
  prob += bonus;
 
  if (prob < perc) {
-  act("@WYou raise both your hands to either side of your face, while closing your eyes, and shout '@YSolar Flare@W' but nothing happens!@n", TRUE, ch, 0, 0, TO_CHAR);
-  act("@C$n@W raises both $s hands to either side of $s face, while closing $s eyes, and shouts '@YSolar Flare@W' but nothing happens!@n", TRUE, ch, 0, 0, TO_ROOM);
+  act("@WYou raise both your hands to either side of your face, while closing your eyes, and shout '@YSolar Flare@W' but nothing happens!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+  act("@C$n@W raises both $s hands to either side of $s face, while closing $s eyes, and shouts '@YSolar Flare@W' but nothing happens!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
      ch->decCurKI(cost);
   WAIT_STATE(ch, PULSE_3SEC);
   improve_skill(ch, SKILL_SOLARF, 0);
   return;
  }
  
- act("@WYou raise both your hands to either side of your face, while closing your eyes, and shout '@YSolar Flare@W' as a blinding light fills the area!@n", TRUE, ch, 0, 0, TO_CHAR);
- act("@C$n@W raises both $s hands to either side of $s face, while closing $s eyes, and shouts '@YSolar Flare@W' as a blinding light fills the area!@n", TRUE, ch, 0, 0, TO_ROOM);
+ act("@WYou raise both your hands to either side of your face, while closing your eyes, and shout '@YSolar Flare@W' as a blinding light fills the area!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+ act("@C$n@W raises both $s hands to either side of $s face, while closing $s eyes, and shouts '@YSolar Flare@W' as a blinding light fills the area!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
 
   for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
    next_v = vict->next_in_room;
@@ -6698,9 +6698,9 @@ ACMD(do_solar)
    else {
     int duration = 1;
     assign_affect(vict, AFF_BLIND, SKILL_SOLARF, duration, 0, 0, 0, 0, 0, 0);
-    act("@W$N@W is @YBLINDED@W!@n", TRUE, ch, 0, vict, TO_CHAR);
-    act("@RYou are @YBLINDED@R!@n", TRUE, ch, 0, vict, TO_VICT);
-    act("@W$N@W is @YBLINDED@W!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+    act("@W$N@W is @YBLINDED@W!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+    act("@RYou are @YBLINDED@R!@n", TRUE, ch, nullptr, vict, TO_VICT);
+    act("@W$N@W is @YBLINDED@W!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
    }
   }
   improve_skill(ch, SKILL_SOLARF, 0);
@@ -6729,7 +6729,7 @@ ACMD(do_heal)
    return;
   }
   
-  if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
+  if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
    send_to_char(ch, "You do not see the target here.\r\n");
    return;
   }
@@ -6794,17 +6794,17 @@ ACMD(do_heal)
 
   if (prob < perc) {
    if (vict != ch) {
-    act("@WYou place your hands near @c$N@W, but fail to concentrate enough to heal them!@n", TRUE, ch, 0, vict, TO_CHAR);
-    act("@C$n@W places $s hands near you, but nothing happens!@n", TRUE, ch, 0, vict, TO_VICT);
-    act("@C$n@W places $s hands near @c$N@W, but nothing happens.", TRUE, ch, 0, vict, TO_NOTVICT);
+    act("@WYou place your hands near @c$N@W, but fail to concentrate enough to heal them!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+    act("@C$n@W places $s hands near you, but nothing happens!@n", TRUE, ch, nullptr, vict, TO_VICT);
+    act("@C$n@W places $s hands near @c$N@W, but nothing happens.", TRUE, ch, nullptr, vict, TO_NOTVICT);
        ch->decCurKI(cost);
     improve_skill(ch, SKILL_HEAL, 0);
     WAIT_STATE(ch, PULSE_2SEC);
     return;
    }
    if (vict == ch) {
-    act("@WYou place your hands on your body, but fail to concentrate to heal yourself!@n", TRUE, ch, 0, vict, TO_CHAR);
-    act("@C$n@W places $s hands on $s body, but nothing happens.", TRUE, ch, 0, vict, TO_NOTVICT);
+    act("@WYou place your hands on your body, but fail to concentrate to heal yourself!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+    act("@C$n@W places $s hands on $s body, but nothing happens.", TRUE, ch, nullptr, vict, TO_NOTVICT);
        ch->decCurKI(cost);
     improve_skill(ch, SKILL_HEAL, 0);
     WAIT_STATE(ch, PULSE_2SEC);
@@ -6816,9 +6816,9 @@ ACMD(do_heal)
    if (GET_BONUS(ch, BONUS_HEALER) > 0) {
     heal += heal * .25;
    }
-   act("@WYou place your hands near @c$N@W and an orange glow surrounds $M!@n", TRUE, ch, 0, vict, TO_CHAR);
-   act("@C$n@W places $s hands near you and an orange glow surrounds you!@n", TRUE, ch, 0, vict, TO_VICT);
-   act("@C$n@W places $s hands near @c$N@W and an orange glow surrounds $M.", TRUE, ch, 0, vict, TO_NOTVICT);
+   act("@WYou place your hands near @c$N@W and an orange glow surrounds $M!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+   act("@C$n@W places $s hands near you and an orange glow surrounds you!@n", TRUE, ch, nullptr, vict, TO_VICT);
+   act("@C$n@W places $s hands near @c$N@W and an orange glow surrounds $M.", TRUE, ch, nullptr, vict, TO_NOTVICT);
       ch->decCurKI(cost);
       vict->incCurHealth(heal);
 
@@ -6839,12 +6839,12 @@ ACMD(do_heal)
    null_affect(ch, AFF_BLIND);
     if (AFF_FLAGGED(vict, AFF_BURNED)) {
         send_to_char(vict, "Your burns are healed now.\r\n");
-        act("$n@w's burns are now healed.@n", TRUE, vict, 0, 0, TO_ROOM);
+        act("$n@w's burns are now healed.@n", TRUE, vict, nullptr, nullptr, TO_ROOM);
         REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_BURNED);
     }
     if (AFF_FLAGGED(vict, AFF_HYDROZAP)) {
         send_to_char(vict, "You no longer feel a great thirst.\r\n");
-        act("$n@w no longer looks as if they could drink an ocean.@n", TRUE, vict, 0, 0, TO_ROOM);
+        act("$n@w no longer looks as if they could drink an ocean.@n", TRUE, vict, nullptr, nullptr, TO_ROOM);
         REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_HYDROZAP);
     }
    GET_LIMBCOND(vict, 1) = 100;
@@ -6870,8 +6870,8 @@ ACMD(do_heal)
    if (GET_BONUS(ch, BONUS_HEALER) > 0) {
     heal += heal * .25;
    }
-   act("@WYou place your hands on your body and an orange glow surrounds you!@n", TRUE, ch, 0, vict, TO_CHAR);
-   act("@C$n@W places $s hands on $s body and an orange glow surrounds $m.", TRUE, ch, 0, vict, TO_NOTVICT);
+   act("@WYou place your hands on your body and an orange glow surrounds you!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+   act("@C$n@W places $s hands on $s body and an orange glow surrounds $m.", TRUE, ch, nullptr, vict, TO_NOTVICT);
       ch->decCurKI(cost);
       vict->incCurHealth(heal);
 
@@ -6922,8 +6922,8 @@ ACMD(do_barrier)
   }
 
   if (AFF_FLAGGED(ch, AFF_SANCTUARY) && !strcasecmp("release", arg)) {
-   act("@BYou dispel your barrier, releasing its energy.@n", TRUE, ch, 0, 0, TO_CHAR);
-   act("@B$n@B dispels $s barrier, releasing its energy.@n", TRUE, ch, 0, 0, TO_ROOM);
+   act("@BYou dispel your barrier, releasing its energy.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+   act("@B$n@B dispels $s barrier, releasing its energy.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    GET_BARRIER(ch) = 0;
    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_SANCTUARY);
    return;
@@ -6972,8 +6972,8 @@ ACMD(do_barrier)
    return;
   }
   else if (prob < perc) {
-   act("@BYou shout as you form a barrier of ki around your body, but you imbalance it and it explodes outward!@n", TRUE, ch, 0, 0, TO_CHAR);
-   act("@B$n@B shouts as $e forms a barrier of ki around $s body, but it becomes imbalanced and explodes outward!@n", TRUE, ch, 0, 0, TO_ROOM);
+   act("@BYou shout as you form a barrier of ki around your body, but you imbalance it and it explodes outward!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+   act("@B$n@B shouts as $e forms a barrier of ki around $s body, but it becomes imbalanced and explodes outward!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    GET_CHARGE(ch) -= cost;
    if (GET_SKILL(ch, SKILL_BARRIER)) {
     improve_skill(ch, SKILL_BARRIER, 2);
@@ -6985,11 +6985,11 @@ ACMD(do_barrier)
   }
   else {
    if (GET_SKILL(ch, SKILL_BARRIER)) {
-    act("@BYou shout as you form a barrier of ki around your body!@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@B$n@B shouts as $e forms a barrier of ki around $s body!@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@BYou shout as you form a barrier of ki around your body!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@B$n@B shouts as $e forms a barrier of ki around $s body!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    } else {
-    act("@BYou shout as you form a barrier of ki and raging waters around your body!@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@B$n@B shouts as $e forms a barrier of ki and raging waters around $s body!@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@BYou shout as you form a barrier of ki and raging waters around your body!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@B$n@B shouts as $e forms a barrier of ki and raging waters around $s body!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    }
    GET_BARRIER(ch) = (GET_MAX_MANA(ch) / 100) * size;
    GET_CHARGE(ch) -= cost;
@@ -7009,7 +7009,7 @@ ACMD(do_instant)
 
   int skill = 0, perc = 0, skill_num = 0, location = 0;
   int64_t cost = 0;
-  struct char_data *tar = NULL;
+  struct char_data *tar = nullptr;
 
   char arg[MAX_INPUT_LENGTH] = "";
 
@@ -7076,7 +7076,7 @@ ACMD(do_instant)
    location = 8006;
   } else if (!strcasecmp(arg, "planet-aether")) {
    location = 12024;
-  } else if (!(tar = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))) {
+  } else if (!(tar = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD))) {
    send_to_char(ch, "@RThat target was not found.@n\r\n");
    send_to_char(ch, "Who or where do you want to instant transmission to? [target | planet-(planet name)]\r\n");
    send_to_char(ch, "Example: instant goku\nExample 2: instant planet-earth\r\n");
@@ -7084,7 +7084,7 @@ ACMD(do_instant)
   }
 
   if (skill < perc || (FIGHTING(ch) && rand_number(1, 2) <= 1)) {
-   if (tar != NULL) {
+   if (tar != nullptr) {
     if (tar != ch) {
      send_to_char(ch, "You prepare to move instantly but mess up the process and waste some of your ki!\r\n");
         ch->decCurKI(cost);
@@ -7106,7 +7106,7 @@ ACMD(do_instant)
 
  reveal_hiding(ch, 0);
  WAIT_STATE(ch, PULSE_2SEC);
- if (tar != NULL) {
+ if (tar != nullptr) {
   if (tar == ch) {
    send_to_char(ch, "Moving to yourself would be kinda impossible wouldn't it? If not that then it would at least be pointless.\r\n");
    return;
@@ -7134,17 +7134,17 @@ ACMD(do_instant)
   }
 
      ch->decCurKI(cost);
-  act("@wPlacing two fingers on your forehead you close your eyes and concentrate. Accelerating to such a speed that you move through the molecules of the universe faster than the speed of light. You stop as you arrive at $N@w!@n", TRUE, ch, 0, tar, TO_CHAR);
-  act("@w$n@w appears in an instant out of nowhere right next to you!@n", TRUE, ch, 0, tar, TO_VICT);
-  act("@w$n@w places two fingers on $s forehead and disappears in an instant!@n", TRUE, ch, 0, tar, TO_NOTVICT);
+  act("@wPlacing two fingers on your forehead you close your eyes and concentrate. Accelerating to such a speed that you move through the molecules of the universe faster than the speed of light. You stop as you arrive at $N@w!@n", TRUE, ch, nullptr, tar, TO_CHAR);
+  act("@w$n@w appears in an instant out of nowhere right next to you!@n", TRUE, ch, nullptr, tar, TO_VICT);
+  act("@w$n@w places two fingers on $s forehead and disappears in an instant!@n", TRUE, ch, nullptr, tar, TO_NOTVICT);
   SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANSMISSION);
   handle_teleport(ch, tar, 0);
   improve_skill(ch, skill_num, 2);
  } else {
      ch->decCurKI(cost);
-  act("@wPlacing two fingers on your forehead you close your eyes and concentrate. Accelerating to such a speed that you move faster than light and arrive almost instantly at your destination. Having located the planet by its collective population's ki.@n", TRUE, ch, 0, 0, TO_CHAR);
-  act("@w$n@w places two fingers on $s forehead and disappears in an instant!@n", TRUE, ch, 0, 0, TO_NOTVICT);
-  handle_teleport(ch, NULL, location);
+  act("@wPlacing two fingers on your forehead you close your eyes and concentrate. Accelerating to such a speed that you move faster than light and arrive almost instantly at your destination. Having located the planet by its collective population's ki.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+  act("@w$n@w places two fingers on $s forehead and disappears in an instant!@n", TRUE, ch, nullptr, nullptr, TO_NOTVICT);
+  handle_teleport(ch, nullptr, location);
   improve_skill(ch, skill_num, 2);
  }
 
@@ -7152,49 +7152,49 @@ ACMD(do_instant)
 
 void load_shadow_dragons()
 {
-  struct char_data *mob = NULL;
+  struct char_data *mob = nullptr;
   mob_rnum r_num;
 
   if (SHADOW_DRAGON1 > 0) {
    r_num = real_mobile(SHADOW_DRAGON1_VNUM);
    mob = read_mobile(r_num, REAL);
    char_to_room(mob, real_room(SHADOW_DRAGON1));
-   mob = NULL;
+   mob = nullptr;
   }
 
   if (SHADOW_DRAGON2 > 0) {
    r_num = real_mobile(SHADOW_DRAGON2_VNUM);
    mob = read_mobile(r_num, REAL);
    char_to_room(mob, real_room(SHADOW_DRAGON2));
-   mob = NULL;
+   mob = nullptr;
   }
 
   if (SHADOW_DRAGON3 > 0) {
    r_num = real_mobile(SHADOW_DRAGON3_VNUM);
    mob = read_mobile(r_num, REAL);
    char_to_room(mob, real_room(SHADOW_DRAGON3));
-   mob = NULL;
+   mob = nullptr;
   }
 
   if (SHADOW_DRAGON4 > 0) {
    r_num = real_mobile(SHADOW_DRAGON4_VNUM);
    mob = read_mobile(r_num, REAL);
    char_to_room(mob, real_room(SHADOW_DRAGON4));
-   mob = NULL;
+   mob = nullptr;
   }
 
   if (SHADOW_DRAGON5 > 0) {
    r_num = real_mobile(SHADOW_DRAGON5_VNUM);
    mob = read_mobile(r_num, REAL);
    char_to_room(mob, real_room(SHADOW_DRAGON5));
-   mob = NULL;
+   mob = nullptr;
   }
 
   if (SHADOW_DRAGON6 > 0) {
    r_num = real_mobile(SHADOW_DRAGON6_VNUM);
    mob = read_mobile(r_num, REAL);
    char_to_room(mob, real_room(SHADOW_DRAGON6));
-   mob = NULL;
+   mob = nullptr;
   }
 
   if (SHADOW_DRAGON7 > 0) {
@@ -7370,43 +7370,43 @@ void wishSYS(void)
      } /* End switch */
      save_mud_time(&time_info);
     } /* End while */
-     struct char_data *mob = NULL;
+     struct char_data *mob = nullptr;
      mob_rnum r_num;
 
      r_num = real_mobile(SHADOW_DRAGON1_VNUM);
      mob = read_mobile(r_num, REAL);
      char_to_room(mob, real_room(SHADOW_DRAGON1));
-     mob = NULL;
+     mob = nullptr;
 
      r_num = real_mobile(SHADOW_DRAGON2_VNUM);
      mob = read_mobile(r_num, REAL);
      char_to_room(mob, real_room(SHADOW_DRAGON2));
-     mob = NULL;
+     mob = nullptr;
 
      r_num = real_mobile(SHADOW_DRAGON3_VNUM);
      mob = read_mobile(r_num, REAL);
      char_to_room(mob, real_room(SHADOW_DRAGON3));
-     mob = NULL;
+     mob = nullptr;
 
      r_num = real_mobile(SHADOW_DRAGON4_VNUM);
      mob = read_mobile(r_num, REAL);
      char_to_room(mob, real_room(SHADOW_DRAGON4));
-     mob = NULL;
+     mob = nullptr;
 
      r_num = real_mobile(SHADOW_DRAGON5_VNUM);
      mob = read_mobile(r_num, REAL);
      char_to_room(mob, real_room(SHADOW_DRAGON5));
-     mob = NULL;
+     mob = nullptr;
 
      r_num = real_mobile(SHADOW_DRAGON6_VNUM);
      mob = read_mobile(r_num, REAL);
      char_to_room(mob, real_room(SHADOW_DRAGON6));
-     mob = NULL;
+     mob = nullptr;
 
      r_num = real_mobile(SHADOW_DRAGON7_VNUM);
      mob = read_mobile(r_num, REAL);
      char_to_room(mob, real_room(SHADOW_DRAGON7));
-     mob = NULL;
+     mob = nullptr;
  
      extract_char(EDRAGON);
      SHENRON = FALSE;
@@ -7422,7 +7422,7 @@ ACMD(do_summon)
    int dball[7] = {20, 21, 22, 23, 24, 25, 26};
    int dball2[7] = {20, 21, 22, 23, 24, 25, 26};
    struct obj_data *obj, *next_obj;
-   struct char_data *mob=NULL;
+   struct char_data *mob=nullptr;
    mob_rnum r_num;
 
 
@@ -7491,8 +7491,8 @@ ACMD(do_summon)
 
     if (summoned == TRUE) {
      reveal_hiding(ch, 0);
-     act("@WYou place the dragon balls on the ground and with both hands outstretched towards them you say '@CArise Eternal Dragon Shenron!@W'@n", TRUE, ch, 0, 0, TO_CHAR);
-     act("@W$n places the dragon balls on the ground and with both hands outstretched towards them $e says '@CArise Eternal Dragon Shenron!@W'@n", TRUE, ch, 0, 0, TO_ROOM);
+     act("@WYou place the dragon balls on the ground and with both hands outstretched towards them you say '@CArise Eternal Dragon Shenron!@W'@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+     act("@W$n places the dragon balls on the ground and with both hands outstretched towards them $e says '@CArise Eternal Dragon Shenron!@W'@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
      SHENRON = TRUE;
      DRAGONC = 300;
      DRAGONR = GET_ROOM_VNUM(IN_ROOM(ch));
@@ -7789,73 +7789,73 @@ ACMD(do_situp)
  else {
    if (ROOM_GRAVITY(IN_ROOM(ch)) == 0) {
     bonus = 1;
-    act("@gYou do a situp.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@g$n does a situp.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@gYou do a situp.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@g$n does a situp.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    }
    else if (ROOM_GRAVITY(IN_ROOM(ch)) == 10) {
     bonus = rand_number(3, 7);
-    act("@gYou do a situp, feeling the strain of gravity.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@g$n does a situp, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@gYou do a situp, feeling the strain of gravity.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@g$n does a situp, while sweating.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    }
    else if (ROOM_GRAVITY(IN_ROOM(ch)) == 20) {
     bonus = rand_number(8, 14);
-    act("@gYou do a situp, and feel gravity's pull.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@g$n does a situp, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@gYou do a situp, and feel gravity's pull.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@g$n does a situp, while sweating.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    }
    else if (ROOM_GRAVITY(IN_ROOM(ch)) == 30) {
     bonus = rand_number(14, 20);
-    act("@gYou do a situp, and feel the burn.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@g$n does a situp, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@gYou do a situp, and feel the burn.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@g$n does a situp, while sweating.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    }
    else if (ROOM_GRAVITY(IN_ROOM(ch)) == 40) {
     bonus = rand_number(20, 35);
-    act("@gYou do a situp, and feel the burn.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@g$n does a situp, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@gYou do a situp, and feel the burn.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@g$n does a situp, while sweating.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    }
    else if (ROOM_GRAVITY(IN_ROOM(ch)) == 50) {
     bonus = rand_number(40, 60);
-    act("@gYou do a situp, and feel the burn.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@g$n does a situp, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@gYou do a situp, and feel the burn.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@g$n does a situp, while sweating.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    }
    else if (ROOM_GRAVITY(IN_ROOM(ch)) == 100) {
     bonus = rand_number(180, 250);
-    act("@gYou do a situp, and really strain against the gravity.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@g$n does a situp, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@gYou do a situp, and really strain against the gravity.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@g$n does a situp, while sweating.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    }
    else if (ROOM_GRAVITY(IN_ROOM(ch)) == 200) {
     bonus = rand_number(400, 600);
-    act("@gYou do a situp, and really strain against the gravity.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@g$n does a situp, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@gYou do a situp, and really strain against the gravity.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@g$n does a situp, while sweating.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    }
    else if (ROOM_GRAVITY(IN_ROOM(ch)) == 300) {
     bonus = rand_number(800, 1200);
-    act("@gYou do a situp, and really strain against the gravity.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@g$n does a situp, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@gYou do a situp, and really strain against the gravity.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@g$n does a situp, while sweating.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    }
    else if (ROOM_GRAVITY(IN_ROOM(ch)) == 400) {
     bonus = rand_number(2000, 3000);
-    act("@gYou do a situp, and really strain against the gravity.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@g$n does a situp, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@gYou do a situp, and really strain against the gravity.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@g$n does a situp, while sweating.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    }
    else if (ROOM_GRAVITY(IN_ROOM(ch)) == 500) {
     bonus = rand_number(4000, 6000);
-    act("@gYou do a situp, and really strain against the gravity.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@g$n does a situp, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@gYou do a situp, and really strain against the gravity.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@g$n does a situp, while sweating.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    }
    else if (ROOM_GRAVITY(IN_ROOM(ch)) == 1000) {
     bonus = rand_number(9000, 10000);
-    act("@gYou do a situp, and it was a really hard one to finish.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@g$n does a situp, while sweating profusely.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@gYou do a situp, and it was a really hard one to finish.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@g$n does a situp, while sweating profusely.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    }
    else if (ROOM_GRAVITY(IN_ROOM(ch)) == 5000) {
     bonus = rand_number(15000, 20000);
-    act("@gYou do a situp, and it was a really hard one to finish.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@g$n does a situp, while sweating profusely.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@gYou do a situp, and it was a really hard one to finish.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@g$n does a situp, while sweating profusely.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    }
    else if (ROOM_GRAVITY(IN_ROOM(ch)) == 10000) {
     bonus = rand_number(25000, 30000);
-    act("@gYou do a situp, and it was a really hard one to finish.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@g$n does a situp, while sweating profusely.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@gYou do a situp, and it was a really hard one to finish.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@g$n does a situp, while sweating profusely.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    }
    if (cost >= GET_MAX_MOVE(ch) / 2) {
     send_to_char(ch, "This gravity is a great challenge for you!\r\n");
@@ -8036,7 +8036,7 @@ ACMD(do_meditate)
   }
   return;
  } else if (!strcasecmp(arg, "break")) {
-  if (MINDLINK(ch) == NULL) {
+  if (MINDLINK(ch) == nullptr) {
    send_to_char(ch, "You are not mind linked with anyone.\r\n");
    return;
   } else if (LINKER(ch) == 1) {
@@ -8046,8 +8046,8 @@ ACMD(do_meditate)
    send_to_char(ch, "You do not have enough ki to manage a break.\r\n");
    return;
   } else if (GET_INT(ch) + rand_number(-5, 10) >= GET_INT(MINDLINK(ch)) + (GET_SKILL(MINDLINK(ch), SKILL_TELEPATHY) * 0.1)) {
-   act("@rYou manage to break the mind link between you and @R$N@r!@n", FALSE, ch, 0, MINDLINK(ch), TO_CHAR);
-   act("$n closes their eyes for a few seconds.", FALSE, ch, 0, MINDLINK(ch), TO_ROOM);
+   act("@rYou manage to break the mind link between you and @R$N@r!@n", FALSE, ch, nullptr, MINDLINK(ch), TO_CHAR);
+   act("$n closes their eyes for a few seconds.", FALSE, ch, nullptr, MINDLINK(ch), TO_ROOM);
    send_to_char(MINDLINK(ch), "@rYour mind linked target manages to push you out!@n\r\n");
    if (GET_INT(MINDLINK(ch)) < axion_dice(-10) && !AFF_FLAGGED(MINDLINK(ch), AFF_SHOCKED)) {
     send_to_char(MINDLINK(ch), "Your mind is shocked by the flood of mental energy that pushed it out!@n\r\n");
@@ -8055,18 +8055,18 @@ ACMD(do_meditate)
    }
  
    LINKER(MINDLINK(ch)) = 0;
-   MINDLINK(MINDLINK(ch)) = NULL;
-   MINDLINK(ch) = NULL;
+   MINDLINK(MINDLINK(ch)) = nullptr;
+   MINDLINK(ch) = nullptr;
    return;
   } else {
-   act("@rYou struggle to free your mind of @R$N's@r link, but fail!@n", FALSE, ch, 0, MINDLINK(ch), TO_CHAR);
-   act("$n closes their eyes for a few seconds, and appears to struggle quite a bit.", FALSE, ch, 0, MINDLINK(ch), TO_ROOM);
+   act("@rYou struggle to free your mind of @R$N's@r link, but fail!@n", FALSE, ch, nullptr, MINDLINK(ch), TO_CHAR);
+   act("$n closes their eyes for a few seconds, and appears to struggle quite a bit.", FALSE, ch, nullptr, MINDLINK(ch), TO_ROOM);
    send_to_char(MINDLINK(ch), "@rYour mind linked target struggles to free their mind, but fails!@n\r\n");
 
    ch->decCurKI(GET_MAX_MANA(MINDLINK(ch)) * .05);
    return;
   }
- } else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
+ } else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, world[IN_ROOM(ch)].contents))) {
    send_to_char(ch, "Syntax: meditate (object)\nSyntax: meditate expand\nSyntax: meditate break\r\n");
    return;
  }
@@ -8136,8 +8136,8 @@ ACMD(do_meditate)
 
  else {
  /* Meditate Message */
- act("@cYou close your eyes and concentrate, lifting $p@c with your ki.@n", TRUE, ch, obj, 0, TO_CHAR);
- act("@c$n closes $s eyes and lifts $p@c with $s ki.@n", TRUE, ch, obj, 0, TO_ROOM);
+ act("@cYou close your eyes and concentrate, lifting $p@c with your ki.@n", TRUE, ch, obj, nullptr, TO_CHAR);
+ act("@c$n closes $s eyes and lifts $p@c with $s ki.@n", TRUE, ch, obj, nullptr, TO_ROOM);
 
  if (ROOM_GRAVITY(IN_ROOM(ch)) == 0) {
     bonus = 1;
@@ -8382,73 +8382,73 @@ ACMD(do_pushup)
  else {
    if (ROOM_GRAVITY(IN_ROOM(ch)) == 0) {
     bonus = 1;
-    act("@gYou do a pushup.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@g$n does a pushup.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@gYou do a pushup.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@g$n does a pushup.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    }
    else if (ROOM_GRAVITY(IN_ROOM(ch)) == 10) {
     bonus = rand_number(3, 7);
-    act("@gYou do a pushup, feeling the strain of gravity.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@g$n does a pushup, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@gYou do a pushup, feeling the strain of gravity.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@g$n does a pushup, while sweating.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    }
    else if (ROOM_GRAVITY(IN_ROOM(ch)) == 20) {
     bonus = rand_number(8, 14);
-    act("@gYou do a pushup, and feel gravity's pull.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@g$n does a pushup, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@gYou do a pushup, and feel gravity's pull.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@g$n does a pushup, while sweating.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    }
    else if (ROOM_GRAVITY(IN_ROOM(ch)) == 30) {
     bonus = rand_number(14, 20);
-    act("@gYou do a pushup, and feel the burn.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@g$n does a pushup, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@gYou do a pushup, and feel the burn.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@g$n does a pushup, while sweating.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    }
    else if (ROOM_GRAVITY(IN_ROOM(ch)) == 40) {
     bonus = rand_number(20, 35);
-    act("@gYou do a pushup, and feel the burn.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@g$n does a pushup, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@gYou do a pushup, and feel the burn.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@g$n does a pushup, while sweating.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    }
    else if (ROOM_GRAVITY(IN_ROOM(ch)) == 50) {
     bonus = rand_number(40, 60);
-    act("@gYou do a pushup, and feel the burn.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@g$n does a pushup, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@gYou do a pushup, and feel the burn.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@g$n does a pushup, while sweating.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    }
    else if (ROOM_GRAVITY(IN_ROOM(ch)) == 100) {
     bonus = rand_number(180, 250);
-    act("@gYou do a pushup, and really strain against the gravity.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@g$n does a pushup, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@gYou do a pushup, and really strain against the gravity.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@g$n does a pushup, while sweating.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    }
    else if (ROOM_GRAVITY(IN_ROOM(ch)) == 200) {
     bonus = rand_number(400, 600);
-    act("@gYou do a pushup, and really strain against the gravity.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@g$n does a pushup, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@gYou do a pushup, and really strain against the gravity.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@g$n does a pushup, while sweating.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    }
    else if (ROOM_GRAVITY(IN_ROOM(ch)) == 300) {
     bonus = rand_number(800, 1200);
-    act("@gYou do a pushup, and really strain against the gravity.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@g$n does a pushup, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@gYou do a pushup, and really strain against the gravity.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@g$n does a pushup, while sweating.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    }
    else if (ROOM_GRAVITY(IN_ROOM(ch)) == 400) {
     bonus = rand_number(2000, 3000);
-    act("@gYou do a pushup, and really strain against the gravity.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@g$n does a pushup, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@gYou do a pushup, and really strain against the gravity.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@g$n does a pushup, while sweating.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    }
    else if (ROOM_GRAVITY(IN_ROOM(ch)) == 500) {
     bonus = rand_number(4000, 6000);
-    act("@gYou do a pushup, and really strain against the gravity.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@g$n does a pushup, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@gYou do a pushup, and really strain against the gravity.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@g$n does a pushup, while sweating.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    }
    else if (ROOM_GRAVITY(IN_ROOM(ch)) == 1000) {
     bonus = rand_number(9000, 10000);
-    act("@gYou do a pushup, and it was a really hard one to finish.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@g$n does a pushup, while sweating profusely.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@gYou do a pushup, and it was a really hard one to finish.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@g$n does a pushup, while sweating profusely.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    }
    else if (ROOM_GRAVITY(IN_ROOM(ch)) == 5000) {
     bonus = rand_number(15000, 20000);
-    act("@gYou do a pushup, and it was a really hard one to finish.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@g$n does a pushup, while sweating profusely.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@gYou do a pushup, and it was a really hard one to finish.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@g$n does a pushup, while sweating profusely.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    }
    else if (ROOM_GRAVITY(IN_ROOM(ch)) == 10000) {
     bonus = rand_number(25000, 30000);
-    act("@gYou do a pushup, and it was a really hard one to finish.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@g$n does a pushup, while sweating profusely.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@gYou do a pushup, and it was a really hard one to finish.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("@g$n does a pushup, while sweating profusely.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
    }
    if (cost >= ch->getMaxPLTrans() / 2) {
     send_to_char(ch, "This gravity is a great challenge for you!\r\n");
@@ -8561,12 +8561,12 @@ ACMD(do_spar)
  }
  else {
   if (PLR_FLAGGED(ch, PLR_SPAR)) {
-   act("@wYou cease your sparring stance.@n", FALSE, ch, 0, 0, TO_CHAR);
-   act("@C$n@w ceases $s sparring stance.@n", FALSE, ch, 0, 0, TO_ROOM);
+   act("@wYou cease your sparring stance.@n", FALSE, ch, nullptr, nullptr, TO_CHAR);
+   act("@C$n@w ceases $s sparring stance.@n", FALSE, ch, nullptr, nullptr, TO_ROOM);
   }
   if (!PLR_FLAGGED(ch, PLR_SPAR)) {
-   act("@wYou move into your sparring stance.@n", FALSE, ch, 0, 0, TO_CHAR);
-   act("@C$n@w moves into $s sparring stance.@n", FALSE, ch, 0, 0, TO_ROOM);
+   act("@wYou move into your sparring stance.@n", FALSE, ch, nullptr, nullptr, TO_CHAR);
+   act("@C$n@w moves into $s sparring stance.@n", FALSE, ch, nullptr, nullptr, TO_ROOM);
   }
   TOGGLE_BIT_AR(PLR_FLAGS(ch), PLR_SPAR);
  }
@@ -8580,20 +8580,20 @@ static void check_eq(struct char_data *ch)
    if (GET_EQ(ch, i)) {
       obj = GET_EQ(ch, i);
     if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
-     act("@W$p@W falls apart and you remove it.@n", FALSE, ch, obj, 0, TO_CHAR);
-     act("@W$p@W falls apart and @C$n@W remove it.@n", FALSE, ch, obj, 0, TO_ROOM);
+     act("@W$p@W falls apart and you remove it.@n", FALSE, ch, obj, nullptr, TO_CHAR);
+     act("@W$p@W falls apart and @C$n@W remove it.@n", FALSE, ch, obj, nullptr, TO_ROOM);
      perform_remove(ch, i);
      return;
     }
     if (obj == GET_EQ(ch, WEAR_WIELD1) && GET_LIMBCOND(ch, 1) <= 0) {
-     act("@WWithout your right arm you let go of @c$p@W!@n", FALSE, ch, obj, 0, TO_CHAR);
-     act("@C$n@W lets go of @c$p@W!@n", FALSE, ch, obj, 0, TO_ROOM);
+     act("@WWithout your right arm you let go of @c$p@W!@n", FALSE, ch, obj, nullptr, TO_CHAR);
+     act("@C$n@W lets go of @c$p@W!@n", FALSE, ch, obj, nullptr, TO_ROOM);
      perform_remove(ch, i);
      return;
     }
     if (obj == GET_EQ(ch, WEAR_WIELD2) && GET_LIMBCOND(ch, 2) <= 0) {
-     act("@WWithout your left arm you let go of @c$p@W!@n", FALSE, ch, obj, 0, TO_CHAR);
-     act("@C$n@W lets go of @c$p@W!@n", FALSE, ch, obj, 0, TO_ROOM);
+     act("@WWithout your left arm you let go of @c$p@W!@n", FALSE, ch, obj, nullptr, TO_CHAR);
+     act("@C$n@W lets go of @c$p@W!@n", FALSE, ch, obj, nullptr, TO_ROOM);
      perform_remove(ch, i);
      return;
     }
@@ -8608,9 +8608,9 @@ void base_update(void)
 	int cash = FALSE, inc = 0;
 	int countch = FALSE, pcoun = 0;
 
-	if (INTERESTTIME != 0 && INTERESTTIME <= time(0) && time(0) != 0) {
-		INTERESTTIME = time(0) + 86400;
-		LASTINTEREST = time(0);
+	if (INTERESTTIME != 0 && INTERESTTIME <= time(nullptr) && time(nullptr) != 0) {
+		INTERESTTIME = time(nullptr) + 86400;
+		LASTINTEREST = time(nullptr);
 		save_mud_time(&time_info);
 		cash = TRUE;
 		countch = TRUE;
@@ -8626,8 +8626,8 @@ void base_update(void)
 		if (IS_NPC(d->character)) {
 			if (ABSORBING(d->character) && IN_ROOM(d->character) != IN_ROOM(ABSORBING(d->character))) {
 				send_to_char(d->character, "You stop absorbing %s!\r\n", GET_NAME(ABSORBING(d->character)));
-				ABSORBBY(ABSORBING(d->character)) = NULL;
-				ABSORBING(d->character) = NULL;
+				ABSORBBY(ABSORBING(d->character)) = nullptr;
+				ABSORBING(d->character) = nullptr;
 			}
 			if (IS_ANDROID(d->character) && ABSORBING(d->character) && rand_number(1, 10) >= 7) {
 				int64_t drain1 = GET_MAX_MANA(d->character) * 0.01, drain2 = GET_MAX_MOVE(d->character) * 0.01;
@@ -8643,7 +8643,7 @@ void base_update(void)
                 d->character->incCurHealth(drain1 * .5);
 
 				if (d->character->isFullKI() && d->character->isFullST()) {
-					do_absorb(d->character, NULL, 0, 0);
+					do_absorb(d->character, nullptr, 0, 0);
 				}
 			}
 			continue;
@@ -8668,33 +8668,33 @@ void base_update(void)
 		}
 		if (PLR_FLAGGED(d->character, PLR_GOOP) && d->character->gooptime == 60) {
 			if (IS_BIO(d->character)) {
-				act("@GConciousness slowly returns to you. You realize quickly that some of your cells have survived. You take control of your regenerative processes and focus on growing a new body!@n", TRUE, d->character, 0, 0, TO_CHAR);
+				act("@GConciousness slowly returns to you. You realize quickly that some of your cells have survived. You take control of your regenerative processes and focus on growing a new body!@n", TRUE, d->character, nullptr, nullptr, TO_CHAR);
 			}
 			else {
-				act("@MSlowly you regain conciousness. The various split off chunks of your body begin to likewise stir.@n", TRUE, d->character, 0, 0, TO_CHAR);
-				act("@MYou think you notice the chunks of @m$n@M's moving slightly.@n", TRUE, d->character, 0, 0, TO_ROOM);
+				act("@MSlowly you regain conciousness. The various split off chunks of your body begin to likewise stir.@n", TRUE, d->character, nullptr, nullptr, TO_CHAR);
+				act("@MYou think you notice the chunks of @m$n@M's moving slightly.@n", TRUE, d->character, nullptr, nullptr, TO_ROOM);
 			}
 			d->character->gooptime -= 1;
 		}
 		else if (PLR_FLAGGED(d->character, PLR_GOOP) && d->character->gooptime == 30) {
 			if (IS_BIO(d->character)) {
-				act("@GFrom the collection of cells growing a crude form of your body starts to take shape!@n", TRUE, d->character, 0, 0, TO_CHAR);
-				act("@GYou start to notice a large mass of pulsing flesh growing before you!@n", TRUE, d->character, 0, 0, TO_ROOM);
+				act("@GFrom the collection of cells growing a crude form of your body starts to take shape!@n", TRUE, d->character, nullptr, nullptr, TO_CHAR);
+				act("@GYou start to notice a large mass of pulsing flesh growing before you!@n", TRUE, d->character, nullptr, nullptr, TO_ROOM);
 			}
 			else {
-				act("@MYou will the various chunks of your body to return and slowly more and more of them begin to fly into you. Your body begins to grow larger and larger as this process unfolds!@n ", TRUE, d->character, 0, 0, TO_CHAR);
-				act("@MThe various chunks of @m$n@M's body start to fly into the largest chunk! As the chunks collide they begin to form a larger and still growing blob of goo!@n", TRUE, d->character, 0, 0, TO_ROOM);
+				act("@MYou will the various chunks of your body to return and slowly more and more of them begin to fly into you. Your body begins to grow larger and larger as this process unfolds!@n ", TRUE, d->character, nullptr, nullptr, TO_CHAR);
+				act("@MThe various chunks of @m$n@M's body start to fly into the largest chunk! As the chunks collide they begin to form a larger and still growing blob of goo!@n", TRUE, d->character, nullptr, nullptr, TO_ROOM);
 			}
 			d->character->gooptime -= 1;
 		}
 		else if (PLR_FLAGGED(d->character, PLR_GOOP) && d->character->gooptime == 15) {
 			if (IS_BIO(d->character)) {
-				act("@GYour body has almost reached its previous form! Only a little more regenerating is needed!@n", TRUE, d->character, 0, 0, TO_CHAR);
-				act("@GThe lump of flesh has now grown to the size where the likeness of @g$n@G can be seen of it! It appears that $e is regenerating $s body from what was only a few cells!@n", TRUE, d->character, 0, 0, TO_ROOM);
+				act("@GYour body has almost reached its previous form! Only a little more regenerating is needed!@n", TRUE, d->character, nullptr, nullptr, TO_CHAR);
+				act("@GThe lump of flesh has now grown to the size where the likeness of @g$n@G can be seen of it! It appears that $e is regenerating $s body from what was only a few cells!@n", TRUE, d->character, nullptr, nullptr, TO_ROOM);
 			}
 			else {
-				act("@MYour body has reached half its previous size as your limbs ooze slowly out into their proper shape!@n", TRUE, d->character, 0, 0, TO_CHAR);
-				act("@m$n@M's body has regenerated to half its previous size! Slowly $s limbs ooze out into their proper shape! It won't be long now till $e has fully regenerated!@n", TRUE, d->character, 0, 0, TO_ROOM);
+				act("@MYour body has reached half its previous size as your limbs ooze slowly out into their proper shape!@n", TRUE, d->character, nullptr, nullptr, TO_CHAR);
+				act("@m$n@M's body has regenerated to half its previous size! Slowly $s limbs ooze out into their proper shape! It won't be long now till $e has fully regenerated!@n", TRUE, d->character, nullptr, nullptr, TO_ROOM);
 			}
 			d->character->gooptime -= 1;
 		}
@@ -8703,8 +8703,8 @@ void base_update(void)
 			if (IS_BIO(d->character))
 			{
                 d->character->restoreHealth();
-				act("@GYour body has fully regenerated! You flex your arms and legs outward with a rush of renewed strength!@n", TRUE, d->character, 0, 0, TO_CHAR);
-				act("@g$n@G's body has fully regenerated! Suddenly $e flexes $s arms and legs and a rush of power erupts from off of $s body!@n", TRUE, d->character, 0, 0, TO_ROOM);
+				act("@GYour body has fully regenerated! You flex your arms and legs outward with a rush of renewed strength!@n", TRUE, d->character, nullptr, nullptr, TO_CHAR);
+				act("@g$n@G's body has fully regenerated! Suddenly $e flexes $s arms and legs and a rush of power erupts from off of $s body!@n", TRUE, d->character, nullptr, nullptr, TO_ROOM);
 			}
 			//Zenkai Boost
 			else if (IS_SAIYAN(d->character))
@@ -8729,13 +8729,13 @@ void base_update(void)
 					send_to_char(d->character, "@D[@YZ@ye@wn@Wk@Ya@yi @YB@yo@wo@Ws@Yt@D] @WYou feel much stronger!\r\n");
 					send_to_char(d->character, "@D[@RPL@Y:@n+%s@D] @D[@CKI@Y:@n+%s@D] @D[@GSTA@Y:@n+%s@D]@n\r\n", add_commas(zenkaiPL), add_commas(zenkaiKi), add_commas(zenkaiSt));
 				}
-				act("@RYou collapse to the ground, body pushed beyond the typical limits of exhaustion. The passage of time distorts and an indescribable amount of time passes as raw emotions pass through your very being. Your eyes open and focus with a newfound clarity as your unadulterated emotions and feelings revive you for a second wind!@n", TRUE, d->character, 0, 0, TO_CHAR);
-				act("@r$n@R collapses to the ground, seemingly dead. After a brief moment, their eyes flash open with a determined look on their face!", TRUE, d->character, 0, 0, TO_ROOM);
+				act("@RYou collapse to the ground, body pushed beyond the typical limits of exhaustion. The passage of time distorts and an indescribable amount of time passes as raw emotions pass through your very being. Your eyes open and focus with a newfound clarity as your unadulterated emotions and feelings revive you for a second wind!@n", TRUE, d->character, nullptr, nullptr, TO_CHAR);
+				act("@r$n@R collapses to the ground, seemingly dead. After a brief moment, their eyes flash open with a determined look on their face!", TRUE, d->character, nullptr, nullptr, TO_ROOM);
 			}
 			else {
                 d->character->restoreHealth();
-				act("@MYour body has fully regenerated! You scream out in triumph and a short gust of steam erupts from your pores!@n", TRUE, d->character, 0, 0, TO_CHAR);
-				act("@m$n@M's body has fully regenerated! Suddenly $e screams out in gleeful triumph and short gust of steam erupts from $s skin pores!", TRUE, d->character, 0, 0, TO_ROOM);
+				act("@MYour body has fully regenerated! You scream out in triumph and a short gust of steam erupts from your pores!@n", TRUE, d->character, nullptr, nullptr, TO_CHAR);
+				act("@m$n@M's body has fully regenerated! Suddenly $e screams out in gleeful triumph and short gust of steam erupts from $s skin pores!", TRUE, d->character, nullptr, nullptr, TO_ROOM);
 			}
 			REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_GOOP);
 		}
@@ -8764,14 +8764,14 @@ void base_update(void)
 		}
 		if (GET_DEFENDER(d->character)) {
 			if (IN_ROOM(d->character) != IN_ROOM(GET_DEFENDER(d->character))) {
-				GET_DEFENDING(GET_DEFENDER(d->character)) = NULL;
-				GET_DEFENDER(d->character) = NULL;
+				GET_DEFENDING(GET_DEFENDER(d->character)) = nullptr;
+				GET_DEFENDER(d->character) = nullptr;
 			}
 		}
 		if (GET_DEFENDING(d->character)) {
 			if (IN_ROOM(d->character) != IN_ROOM(GET_DEFENDING(d->character))) {
-				GET_DEFENDER(GET_DEFENDING(d->character)) = NULL;
-				GET_DEFENDING(d->character) = NULL;
+				GET_DEFENDER(GET_DEFENDING(d->character)) = nullptr;
+				GET_DEFENDING(d->character) = nullptr;
 			}
 		}
 		if (PLR_FLAGGED(d->character, PLR_TRANSMISSION)) {
@@ -8783,8 +8783,8 @@ void base_update(void)
 		if (SITS(d->character)) {
 			if (IN_ROOM(d->character) != IN_ROOM(SITS(d->character))) {
 				struct obj_data *chair = SITS(d->character);
-				SITTING(chair) = NULL;
-				SITS(d->character) = NULL;
+				SITTING(chair) = nullptr;
+				SITS(d->character) = nullptr;
 			}
 		}
 		if (GET_PING(d->character) >= 1) {
@@ -8825,49 +8825,49 @@ void base_update(void)
 			if (ROOM_EFFECT(IN_ROOM(d->character)) <= 4) {
 				switch (rand_number(1, 4)) {
 				case 1:
-					act("@RLava spews up violently from the cracks in the ground!@n", FALSE, d->character, 0, 0, TO_ROOM);
-					act("@RLava spews up violently from the cracks in the ground!@n", FALSE, d->character, 0, 0, TO_CHAR);
+					act("@RLava spews up violently from the cracks in the ground!@n", FALSE, d->character, nullptr, nullptr, TO_ROOM);
+					act("@RLava spews up violently from the cracks in the ground!@n", FALSE, d->character, nullptr, nullptr, TO_CHAR);
 					break;
 				case 2:
-					act("@RThe lava bubbles and gives off tremendous heat!@n", FALSE, d->character, 0, 0, TO_ROOM);
-					act("@RThe lava bubbles and gives off tremendous heat!@n", FALSE, d->character, 0, 0, TO_CHAR);
+					act("@RThe lava bubbles and gives off tremendous heat!@n", FALSE, d->character, nullptr, nullptr, TO_ROOM);
+					act("@RThe lava bubbles and gives off tremendous heat!@n", FALSE, d->character, nullptr, nullptr, TO_CHAR);
 					break;
 				case 3:
-					act("@RNoxious fumes rise from the bubbling lava!@n", FALSE, d->character, 0, 0, TO_ROOM);
-					act("@RNoxious fumes rise from the bubbling lava!@n", FALSE, d->character, 0, 0, TO_CHAR);
+					act("@RNoxious fumes rise from the bubbling lava!@n", FALSE, d->character, nullptr, nullptr, TO_ROOM);
+					act("@RNoxious fumes rise from the bubbling lava!@n", FALSE, d->character, nullptr, nullptr, TO_CHAR);
 					break;
 				case 4:
-					act("@RSome of the lava cools as it spreads further from the source!@n", FALSE, d->character, 0, 0, TO_ROOM);
-					act("@RSome of the lava cools as it spreads further from the source!@n", FALSE, d->character, 0, 0, TO_CHAR);
+					act("@RSome of the lava cools as it spreads further from the source!@n", FALSE, d->character, nullptr, nullptr, TO_ROOM);
+					act("@RSome of the lava cools as it spreads further from the source!@n", FALSE, d->character, nullptr, nullptr, TO_CHAR);
 					break;
 				}
 				ROOM_EFFECT(IN_ROOM(d->character)) += 1;
 			}
 			else if (ROOM_EFFECT(IN_ROOM(d->character)) == 5) {
-				act("@RLava covers the entire area now!@n", FALSE, d->character, 0, 0, TO_ROOM);
-				act("@RLava covers the entire area now!@n", FALSE, d->character, 0, 0, TO_CHAR);
+				act("@RLava covers the entire area now!@n", FALSE, d->character, nullptr, nullptr, TO_ROOM);
+				act("@RLava covers the entire area now!@n", FALSE, d->character, nullptr, nullptr, TO_CHAR);
 				ROOM_EFFECT(IN_ROOM(d->character)) += 1;
 			}
 		}
 		if (ABSORBING(d->character) && IN_ROOM(d->character) != IN_ROOM(ABSORBING(d->character))) {
 			send_to_char(d->character, "You stop absorbing %s!\r\n", GET_NAME(ABSORBING(d->character)));
-			ABSORBBY(ABSORBING(d->character)) = NULL;
-			ABSORBING(d->character) = NULL;
+			ABSORBBY(ABSORBING(d->character)) = nullptr;
+			ABSORBING(d->character) = nullptr;
 		}
 		if (IS_ANDROID(d->character) && ABSORBING(d->character)) {
 			if ((((d->character)->absorbing)->getCurST()) < (GET_MAX_MOVE(d->character) / 15) &&
                     (((d->character)->absorbing)->getCurKI()) < (GET_MAX_MANA(d->character) / 15)) {
-				act("@WYou stop absorbing stamina and ki from @c$N as they don't have enough for you to take@W!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_CHAR);
-				act("@C$n@W stops absorbing stamina and ki from you!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_VICT);
-				act("@C$n@W stops absorbing stamina and ki from @c$N@w!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_NOTVICT);
+				act("@WYou stop absorbing stamina and ki from @c$N as they don't have enough for you to take@W!@n", TRUE, d->character, nullptr, ABSORBING(d->character), TO_CHAR);
+				act("@C$n@W stops absorbing stamina and ki from you!@n", TRUE, d->character, nullptr, ABSORBING(d->character), TO_VICT);
+				act("@C$n@W stops absorbing stamina and ki from @c$N@w!@n", TRUE, d->character, nullptr, ABSORBING(d->character), TO_NOTVICT);
 				if (!FIGHTING(d->character) || FIGHTING(d->character) != ABSORBING(d->character)) {
 					set_fighting(d->character, ABSORBBY(ABSORBING(d->character)));
 				}
 				if (!FIGHTING(ABSORBBY(ABSORBING(d->character))) || FIGHTING(ABSORBBY(ABSORBING(d->character))) != d->character) {
 					set_fighting(ABSORBBY(ABSORBING(d->character)), d->character);
 				}
-				ABSORBBY(ABSORBING(d->character)) = NULL;
-				ABSORBING(d->character) = NULL;
+				ABSORBBY(ABSORBING(d->character)) = nullptr;
+				ABSORBING(d->character) = nullptr;
 			}
 		}
 		if (IS_ANDROID(d->character) && ABSORBING(d->character) && rand_number(1, 9) >= 6) {
@@ -8880,10 +8880,10 @@ void base_update(void)
                 ABSORBING(d->character)->decCurKI(d->character->getMaxKI() / 20, 1);
                 ABSORBING(d->character)->decCurST(d->character->getMaxST() / 20, 1);
 
-				act("@WYou absorb stamina and ki from @c$N@W!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_CHAR);
-				act("@C$n@W absorbs stamina and ki from you!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_VICT);
+				act("@WYou absorb stamina and ki from @c$N@W!@n", TRUE, d->character, nullptr, ABSORBING(d->character), TO_CHAR);
+				act("@C$n@W absorbs stamina and ki from you!@n", TRUE, d->character, nullptr, ABSORBING(d->character), TO_VICT);
 				send_to_char(ABSORBING(d->character), "@wTry 'escape'!@n\r\n");
-				act("@C$n@W absorbs stamina and ki from @c$N@w!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_NOTVICT);
+				act("@C$n@W absorbs stamina and ki from @c$N@w!@n", TRUE, d->character, nullptr, ABSORBING(d->character), TO_NOTVICT);
 				if (GET_HIT(d->character) < (d->character->getEffMaxPL())) {
                     d->character->incCurHealth(d->character->getMaxKI() * .04);
 					send_to_char(d->character, "@CYou convert a portion of the absorbed energy into refilling your powerlevel.@n\r\n");
@@ -8891,17 +8891,17 @@ void base_update(void)
 
 				if (d->character->isFullST() && d->character->isFullKI()) {
 
-					act("@WYou stop absorbing stamina and ki from @c$N as you are full@W!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_CHAR);
-					act("@C$n@W stops absorbing stamina and ki from you!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_VICT);
-					act("@C$n@W stops absorbing stamina and ki from @c$N@w!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_NOTVICT);
+					act("@WYou stop absorbing stamina and ki from @c$N as you are full@W!@n", TRUE, d->character, nullptr, ABSORBING(d->character), TO_CHAR);
+					act("@C$n@W stops absorbing stamina and ki from you!@n", TRUE, d->character, nullptr, ABSORBING(d->character), TO_VICT);
+					act("@C$n@W stops absorbing stamina and ki from @c$N@w!@n", TRUE, d->character, nullptr, ABSORBING(d->character), TO_NOTVICT);
 					if (!FIGHTING(d->character) || FIGHTING(d->character) != ABSORBING(d->character)) {
 						set_fighting(d->character, ABSORBBY(ABSORBING(d->character)));
 					}
 					if (!FIGHTING(ABSORBBY(ABSORBING(d->character))) || FIGHTING(ABSORBBY(ABSORBING(d->character))) != d->character) {
 						set_fighting(ABSORBBY(ABSORBING(d->character)), d->character);
 					}
-					ABSORBBY(ABSORBING(d->character)) = NULL;
-					ABSORBING(d->character) = NULL;
+					ABSORBBY(ABSORBING(d->character)) = nullptr;
+					ABSORBING(d->character) = nullptr;
 				}
 				bool sum = !d->character->is_soft_cap(0);
                 bool mum = !d->character->is_soft_cap(2);
@@ -9010,8 +9010,8 @@ void base_update(void)
 		if (BLOCKS(d->character)) {
 			struct char_data *vict = BLOCKS(d->character);
 			if (IN_ROOM(vict) != IN_ROOM(d->character)) {
-				BLOCKED(vict) = NULL;
-				BLOCKS(d->character) = NULL;
+				BLOCKED(vict) = nullptr;
+				BLOCKS(d->character) = nullptr;
 			}
 		}
 		if (GET_OVERFLOW(d->character) == TRUE) {
@@ -9027,7 +9027,7 @@ void base_update(void)
 
 	if (countch == TRUE) {
 		PCOUNT = pcoun;
-		PCOUNTDAY = time(0);
+		PCOUNTDAY = time(nullptr);
 	}
 
 	if (TOPCOUNTDOWN <= 0) {
@@ -9061,8 +9061,8 @@ ACMD(do_snet)
 
  half_chop(argument, arg, arg2);
  
- struct obj_data *obj = NULL;
- struct obj_data *obj2 = NULL;
+ struct obj_data *obj = nullptr;
+ struct obj_data *obj2 = nullptr;
 
  if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
    send_to_char(ch, "This is a different dimension!\r\n");
@@ -9122,8 +9122,8 @@ ACMD(do_snet)
    if (channel > 999) {
      SFREQ(obj) = 999;
    }
-   act("@wYou push some buttons on $p@w and change its channel.", TRUE, ch, obj, 0, TO_CHAR);
-   act("@C$n@w pushes some buttons on $p@w and changes its channel.", TRUE, ch, obj, 0, TO_ROOM);
+   act("@wYou push some buttons on $p@w and change its channel.", TRUE, ch, obj, nullptr, TO_CHAR);
+   act("@C$n@w pushes some buttons on $p@w and changes its channel.", TRUE, ch, obj, nullptr, TO_ROOM);
    return;
  }
  else {
@@ -9137,10 +9137,10 @@ ACMD(do_snet)
   if (!strcasecmp(arg, "*") && call <= -1) {
    global = TRUE;
   }
-  if (GET_VOICE(ch) != NULL) {
+  if (GET_VOICE(ch) != nullptr) {
    sprintf(voice, "%s", GET_VOICE(ch));
   }
-  if (GET_VOICE(ch) == NULL) {
+  if (GET_VOICE(ch) == nullptr) {
    sprintf(voice, "A generic voice");
   }
   for (i = descriptor_list; i; i = i->next) {
@@ -9230,7 +9230,7 @@ ACMD(do_snet)
       add_history(ch, hist, HIST_SNET);
     char over[MAX_STRING_LENGTH];
     sprintf(over, "@C$n@W says into $s scouter, '@G@G%s %s@W'@n\r\n", CAP(arg), !*arg2 ? "" : arg2);
-    act(over, TRUE, ch, 0, 0, TO_ROOM);
+    act(over, TRUE, ch, nullptr, nullptr, TO_ROOM);
    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_RHELL) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL)) {
     send_to_char(ch, "@mThe transmission only reaches those who are in the afterlife.@n\r\n");
    }
@@ -9243,7 +9243,7 @@ ACMD(do_snet)
       add_history(ch, hist, HIST_SNET);
     char over[MAX_STRING_LENGTH];
     sprintf(over, "@C$n@W says into $s scouter, '@G@G%s@W'@n\r\n", !*arg2 ? "" : CAP(arg2));
-    act(over, TRUE, ch, 0, 0, TO_ROOM);
+    act(over, TRUE, ch, nullptr, nullptr, TO_ROOM);
    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_RHELL) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL)) {
     send_to_char(ch, "@mThe transmission only reaches those who are in the afterlife.@n\r\n");
    }
@@ -9256,7 +9256,7 @@ ACMD(do_snet)
       add_history(ch, hist, HIST_SNET);
     char over[MAX_STRING_LENGTH];
     sprintf(over, "@C$n@W says into $s scouter, '@G@G%s@W'@n\r\n", !*arg2 ? "" : CAP(arg2));
-    act(over, TRUE, ch, 0, 0, TO_ROOM);
+    act(over, TRUE, ch, nullptr, nullptr, TO_ROOM);
    if (reached == FALSE) {
     send_to_char(ch, "@mThe transmission didn't reach them.@n\r\n");
    }
@@ -9266,7 +9266,7 @@ ACMD(do_snet)
 
 ACMD(do_scouter)
 {
-    struct char_data *vict = NULL;
+    struct char_data *vict = nullptr;
     struct descriptor_data *i;
     int count = 0;
     char arg[MAX_INPUT_LENGTH];
@@ -9281,7 +9281,7 @@ ACMD(do_scouter)
     struct obj_data *obj = GET_EQ(ch, WEAR_EYE);
     if (!obj) {
      send_to_char(ch, "You do not even have a scouter!");
-     obj = NULL;
+     obj = nullptr;
      return;
     }
     else {
@@ -9350,13 +9350,13 @@ ACMD(do_scouter)
         return;
        }
      }
-     if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
+     if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
       send_to_char(ch, "They don't seem to be here.\r\n");
       return;
      }
      if (IS_ANDROID(vict)) {
-       act("$n points $s scouter at you.", FALSE, ch, 0, vict, TO_VICT);
-       act("$n points $s scouter at $N.", FALSE, ch, 0, vict, TO_NOTVICT);
+       act("$n points $s scouter at you.", FALSE, ch, nullptr, vict, TO_VICT);
+       act("$n points $s scouter at $N.", FALSE, ch, nullptr, vict, TO_NOTVICT);
 	   send_to_char(ch, "@D,==================================|@n\r\n");
        send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
        send_to_char(ch, "@D|@1@RReading target...                 @n@D|@n\r\n");
@@ -9372,31 +9372,31 @@ ACMD(do_scouter)
      }
      else {
       if (OBJ_FLAGGED(obj, ITEM_BSCOUTER) && GET_HIT(vict) >= 150000) {
-       act("$n points $s scouter at you.", FALSE, ch, 0, vict, TO_VICT);
-       act("$n points $s scouter at $N.", FALSE, ch, 0, vict, TO_NOTVICT);
+       act("$n points $s scouter at you.", FALSE, ch, nullptr, vict, TO_VICT);
+       act("$n points $s scouter at $N.", FALSE, ch, nullptr, vict, TO_NOTVICT);
        perform_remove(ch, WEAR_EYE);
        send_to_char(ch, "Your scouter overloads and explodes!\r\n");
-       act("$n's scouter explodes!", FALSE, ch, 0, 0, TO_ROOM);
+       act("$n's scouter explodes!", FALSE, ch, nullptr, nullptr, TO_ROOM);
        extract_obj(obj);
        save_char(ch);
        return;
       }
       else if (OBJ_FLAGGED(obj, ITEM_MSCOUTER) && GET_HIT(vict) >= 5000000) {
-       act("$n points $s scouter at you.", FALSE, ch, 0, vict, TO_VICT);
-       act("$n points $s scouter at $N.", FALSE, ch, 0, vict, TO_NOTVICT);
+       act("$n points $s scouter at you.", FALSE, ch, nullptr, vict, TO_VICT);
+       act("$n points $s scouter at $N.", FALSE, ch, nullptr, vict, TO_NOTVICT);
        perform_remove(ch, WEAR_EYE);
        send_to_char(ch, "Your scouter overloads and explodes!\r\n");
-       act("$n's scouter explodes!", FALSE, ch, 0, 0, TO_ROOM);
+       act("$n's scouter explodes!", FALSE, ch, nullptr, nullptr, TO_ROOM);
        extract_obj(obj);
        save_char(ch);
        return;
       }
       else if (OBJ_FLAGGED(obj, ITEM_ASCOUTER) && GET_HIT(vict) >= 15000000) {
-       act("$n points $s scouter at you.", FALSE, ch, 0, vict, TO_VICT);
-       act("$n points $s scouter at $N.", FALSE, ch, 0, vict, TO_NOTVICT);
+       act("$n points $s scouter at you.", FALSE, ch, nullptr, vict, TO_VICT);
+       act("$n points $s scouter at $N.", FALSE, ch, nullptr, vict, TO_NOTVICT);
        perform_remove(ch, WEAR_EYE);
        send_to_char(ch, "Your scouter overloads and explodes!\r\n");
-       act("$n's scouter explodes!", FALSE, ch, 0, 0, TO_ROOM);
+       act("$n's scouter explodes!", FALSE, ch, nullptr, nullptr, TO_ROOM);
        extract_obj(obj);
        save_char(ch);
        return;
@@ -9413,8 +9413,8 @@ ACMD(do_scouter)
        max = (long double)(mstam);
 
        percent = (cur / max) * 100;
-       act("$n points $s scouter at you.", FALSE, ch, 0, vict, TO_VICT);
-       act("$n points $s scouter at $N.", FALSE, ch, 0, vict, TO_NOTVICT);
+       act("$n points $s scouter at you.", FALSE, ch, nullptr, vict, TO_VICT);
+       act("$n points $s scouter at $N.", FALSE, ch, nullptr, vict, TO_NOTVICT);
        send_to_char(ch, "@D,==================================|@n\r\n");
        send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
        send_to_char(ch, "@D|@1@RReading target...                 @n@D|@n\r\n");
@@ -9471,7 +9471,7 @@ int dball_count(struct char_data *ch) {
 
    int dball[7] = {20, 21, 22, 23, 24, 25, 26};
    int count = 0;
-   struct obj_data *obj = NULL, *next_obj = NULL;
+   struct obj_data *obj = nullptr, *next_obj = nullptr;
 
     for (obj = ch->carrying; obj; obj = next_obj) {
      next_obj = obj->next_content;
@@ -9572,15 +9572,15 @@ ACMD(do_quit)
     send_to_char(ch, "No way!  You're fighting for your life!\r\n");
   else if (GET_POS(ch) < POS_STUNNED) {
     send_to_char(ch, "You die before your time...\r\n");
-    die(ch, NULL);
+    die(ch, nullptr);
   } else {
-    act("$n has left the game.", TRUE, ch, 0, 0, TO_ROOM);
+    act("$n has left the game.", TRUE, ch, nullptr, nullptr, TO_ROOM);
     mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s has quit the game.", GET_NAME(ch));
     send_to_char(ch, "Goodbye, friend.. Come back soon!\r\n");
     if (ch->followers || ch->master)
      die_follower(ch);
     if (ch == ch_selling)
-     stop_auction(AUC_QUIT_CANCEL, NULL);
+     stop_auction(AUC_QUIT_CANCEL, nullptr);
 
     /*  We used to check here for duping attempts, but we may as well
      *  do it right in extract_char(), since there is no check if a
@@ -9608,8 +9608,8 @@ ACMD(do_quit)
   /* Remove any snoopers */
   if (ch->desc->snoop_by) {
     write_to_output(ch->desc->snoop_by, "Your victim is no longer among us.\r\n");
-    ch->desc->snoop_by->snooping = NULL;
-    ch->desc->snoop_by = NULL;
+    ch->desc->snoop_by->snooping = nullptr;
+    ch->desc->snoop_by = nullptr;
   }
 }
 
@@ -9686,13 +9686,13 @@ ACMD(do_steal)
   return;
  }
 
- if (!(vict = get_char_vis(ch, arg2, NULL, FIND_CHAR_ROOM))) {
+ if (!(vict = get_char_vis(ch, arg2, nullptr, FIND_CHAR_ROOM))) {
   send_to_char(ch, "Steal what from who?\r\n");
   return;
  } else if (vict == ch) {
   send_to_char(ch, "Come on now, that's rather stupid!\r\n");
   return;
- } else if (!can_kill(ch, vict, NULL, 0)) {
+ } else if (!can_kill(ch, vict, nullptr, 0)) {
   return;
  } else if (GET_LEVEL(ch) <= 8) {
   send_to_char(ch, "You are trapped inside the newbie shield until level 9 and can't piss off those bigger and better than you. Awww...\r\n");
@@ -9730,17 +9730,17 @@ ACMD(do_steal)
 
  if (axion_dice(0) > 100 && GET_POS(vict) != POS_SLEEPING) { /* Unlucky! */
   reveal_hiding(ch, 0);
-  act("@r$N@R just happens to glance in your direction! What terrible luck!@n", TRUE, ch, 0, vict, TO_CHAR);
-  act("@RYou just happen to glance behind you and spot @r$n@R trying to STEAL from you!@n", TRUE, ch, 0, vict, TO_VICT);
-  act("@r$N@R just happens to glance in @r$n's@R direction and catches $m trying to STEAL!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+  act("@r$N@R just happens to glance in your direction! What terrible luck!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+  act("@RYou just happen to glance behind you and spot @r$n@R trying to STEAL from you!@n", TRUE, ch, nullptr, vict, TO_VICT);
+  act("@r$N@R just happens to glance in @r$n's@R direction and catches $m trying to STEAL!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
   prob = -1000;
  }
 
  if (prob + 20 < perc && GET_POS(vict) != POS_SLEEPING) { /* Critical failure! */
   reveal_hiding(ch, 0);
-  act("@rYou are caught trying to stick your hand in @R$N's@r possessions!@n", TRUE, ch, 0, vict, TO_CHAR);
-  act("@rYou catch @R$n@r trying to rummage through your possessions!@n", TRUE, ch, 0, vict, TO_VICT);
-  act("@R$n@R is caught by @R$N@r as $e sticks $s hand in @R$N's@r possessions!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+  act("@rYou are caught trying to stick your hand in @R$N's@r possessions!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+  act("@rYou catch @R$n@r trying to rummage through your possessions!@n", TRUE, ch, nullptr, vict, TO_VICT);
+  act("@R$n@R is caught by @R$N@r as $e sticks $s hand in @R$N's@r possessions!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
   WAIT_STATE(ch, PULSE_3SEC);
   if (IS_NPC(vict)) {
    set_fighting(vict, ch);
@@ -9772,7 +9772,7 @@ ACMD(do_steal)
      if (axion_dice(0) > prob) {
        send_to_char(ch, "You think that your movements might have been a bit obvious.\r\n");
        reveal_hiding(ch, 0);
-       act("@R$n@r just stole zenni from @R$N@r!@n", TRUE, ch, 0, vict, TO_ROOM);
+       act("@R$n@r just stole zenni from @R$N@r!@n", TRUE, ch, nullptr, vict, TO_ROOM);
        send_to_char(vict, "You feel like something may be missing...\r\n");
        if (IS_NPC(vict) && rand_number(1, 3) == 3) {
         set_fighting(vict, ch);
@@ -9787,9 +9787,9 @@ ACMD(do_steal)
     }
    } else { /* Failure! */
     reveal_hiding(ch, 0);
-    act("@rYou are caught trying to steal zenni from @R$N@r!@n", TRUE, ch, 0, vict, TO_CHAR);
-    act("@rYou catch @R$n's@r hand trying to snatch your zenni!@n", TRUE, ch, 0, vict, TO_VICT);
-    act("@R$N@r catches @R$n's@r hand trying to snatch $S zenni!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+    act("@rYou are caught trying to steal zenni from @R$N@r!@n", TRUE, ch, nullptr, vict, TO_CHAR);
+    act("@rYou catch @R$n's@r hand trying to snatch your zenni!@n", TRUE, ch, nullptr, vict, TO_VICT);
+    act("@R$N@r catches @R$n's@r hand trying to snatch $S zenni!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
     WAIT_STATE(ch, PULSE_3SEC);
     if (IS_NPC(vict)) {
      set_fighting(vict, ch);
@@ -9799,14 +9799,14 @@ ACMD(do_steal)
     return;
    }
   } else { /* It's an object... */
-   if (!(obj = get_obj_in_list_vis(ch, arg, NULL, vict->carrying))) {
+   if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, vict->carrying))) {
       for (eq_pos = 0; eq_pos < NUM_WEARS; eq_pos++)
         if (GET_EQ(vict, eq_pos) && (isname(arg, GET_EQ(vict, eq_pos)->name)) && CAN_SEE_OBJ(ch, GET_EQ(vict, eq_pos))) {
           obj = GET_EQ(vict, eq_pos);
           break;
         }
      if (!obj) {
-      act("$E isn't wearing that item.", FALSE, ch, 0, vict, TO_CHAR);
+      act("$E isn't wearing that item.", FALSE, ch, nullptr, vict, TO_CHAR);
       return;
      } else if (GET_POS(vict) > POS_SLEEPING) {
       send_to_char(ch, "Steal worn equipment from them while they are awake? That's a stupid idea...\r\n");
@@ -9967,7 +9967,7 @@ ACMD(do_visible)
     } else {
       send_to_char(ch, "You return to the material plane.\r\n");
       if (!appeared)
-        act("$n flashes into existence.", FALSE, ch, 0, 0, TO_ROOM);
+        act("$n flashes into existence.", FALSE, ch, nullptr, nullptr, TO_ROOM);
     }
     appeared = 1;
   }
@@ -10001,7 +10001,7 @@ static int perform_group(struct char_data *ch, struct char_data *vict, int highl
     return (0);
 
   if (GET_BONUS(vict, BONUS_LONER) > 0) {
-   act("$n is the loner type and refuses to be in your group.", TRUE, vict, 0, ch, TO_VICT);
+   act("$n is the loner type and refuses to be in your group.", TRUE, vict, nullptr, ch, TO_VICT);
    return (0);
   }
 
@@ -10031,9 +10031,9 @@ static int perform_group(struct char_data *ch, struct char_data *vict, int highl
 
   SET_BIT_AR(AFF_FLAGS(vict), AFF_GROUP);
   if (ch != vict)
-    act("$N is now a member of your group.", FALSE, ch, 0, vict, TO_CHAR);
-  act("You are now a member of $n's group.", FALSE, ch, 0, vict, TO_VICT);
-  act("$N is now a member of $n's group.", FALSE, ch, 0, vict, TO_NOTVICT);
+    act("$N is now a member of your group.", FALSE, ch, nullptr, vict, TO_CHAR);
+  act("You are now a member of $n's group.", FALSE, ch, nullptr, vict, TO_VICT);
+  act("$N is now a member of $n's group.", FALSE, ch, nullptr, vict, TO_NOTVICT);
   return (1);
 }
 
@@ -10063,7 +10063,7 @@ static void print_group(struct char_data *ch)
               add_commas(GET_HIT(k)), add_commas((k->getCurKI())), add_commas((k->getCurST())), GET_LEVEL(k),
               CLASS_ABBR(k), RACE_ABBR(k));
       }
-      act(buf, FALSE, ch, 0, k, TO_CHAR);
+      act(buf, FALSE, ch, nullptr, k, TO_CHAR);
     }
 
     for (f = k->followers; f; f = f->next) {
@@ -10082,7 +10082,7 @@ static void print_group(struct char_data *ch)
                       (f->follower->getCurST())),
               GET_LEVEL(f->follower), CLASS_ABBR(f->follower), RACE_ABBR(f->follower));
       }
-      act(buf, FALSE, ch, 0, f->follower, TO_CHAR);
+      act(buf, FALSE, ch, nullptr, f->follower, TO_CHAR);
     }
       send_to_char(ch, "@D----------------@n\r\n");
   }
@@ -10111,7 +10111,7 @@ ACMD(do_group)
 
   if (ch->master) {
     act("You cannot enroll group members without being head of a group.",
-	FALSE, ch, 0, 0, TO_CHAR);
+	FALSE, ch, nullptr, nullptr, TO_CHAR);
     return;
   }
 
@@ -10150,10 +10150,10 @@ ACMD(do_group)
     return;
   }
 
-  if (!(vict = get_char_vis(ch, buf, NULL, FIND_CHAR_ROOM)))
+  if (!(vict = get_char_vis(ch, buf, nullptr, FIND_CHAR_ROOM)))
     send_to_char(ch, "%s", CONFIG_NOPERSON);
   else if ((vict->master != ch) && (vict != ch))
-    act("$N must follow you to enter your group.", FALSE, ch, 0, vict, TO_CHAR);
+    act("$N must follow you to enter your group.", FALSE, ch, nullptr, vict, TO_CHAR);
   else {
     if (!AFF_FLAGGED(vict, AFF_GROUP)) {
      if (!AFF_FLAGGED(ch, AFF_GROUP)) {
@@ -10164,9 +10164,9 @@ ACMD(do_group)
     }
     else {
       if (ch != vict)
-	act("$N is no longer a member of your group.", FALSE, ch, 0, vict, TO_CHAR);
-      act("You have been kicked out of $n's group!", FALSE, ch, 0, vict, TO_VICT);
-      act("$N has been kicked out of $n's group!", FALSE, ch, 0, vict, TO_NOTVICT);
+	act("$N is no longer a member of your group.", FALSE, ch, nullptr, vict, TO_CHAR);
+      act("You have been kicked out of $n's group!", FALSE, ch, nullptr, vict, TO_VICT);
+      act("$N has been kicked out of $n's group!", FALSE, ch, nullptr, vict, TO_NOTVICT);
       REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_GROUP);
     }
   }
@@ -10190,7 +10190,7 @@ ACMD(do_ungroup)
       next_fol = f->next;
       if (AFF_FLAGGED(f->follower, AFF_GROUP)) {
 	REMOVE_BIT_AR(AFF_FLAGS(f->follower), AFF_GROUP);
-        act("$N has disbanded the group.", TRUE, f->follower, NULL, ch, TO_CHAR);
+        act("$N has disbanded the group.", TRUE, f->follower, nullptr, ch, TO_CHAR);
         GET_GROUPKILLS(f->follower) = 0;
         if (!AFF_FLAGGED(f->follower, AFF_CHARM))
 	  stop_follower(f->follower);
@@ -10202,7 +10202,7 @@ ACMD(do_ungroup)
     send_to_char(ch, "You disband the group.\r\n");
     return;
   }
-  if (!(tch = get_char_vis(ch, buf, NULL, FIND_CHAR_ROOM))) {
+  if (!(tch = get_char_vis(ch, buf, nullptr, FIND_CHAR_ROOM))) {
     send_to_char(ch, "There is no such person!\r\n");
     return;
   }
@@ -10219,9 +10219,9 @@ ACMD(do_ungroup)
   REMOVE_BIT_AR(AFF_FLAGS(tch), AFF_GROUP);
   GET_GROUPKILLS(tch) = 0;
 
-  act("$N is no longer a member of your group.", FALSE, ch, 0, tch, TO_CHAR);
-  act("You have been kicked out of $n's group!", FALSE, ch, 0, tch, TO_VICT);
-  act("$N has been kicked out of $n's group!", FALSE, ch, 0, tch, TO_NOTVICT);
+  act("$N is no longer a member of your group.", FALSE, ch, nullptr, tch, TO_CHAR);
+  act("You have been kicked out of $n's group!", FALSE, ch, nullptr, tch, TO_VICT);
+  act("$N has been kicked out of $n's group!", FALSE, ch, nullptr, tch, TO_NOTVICT);
  
   if (!AFF_FLAGGED(tch, AFF_CHARM))
     stop_follower(tch);
@@ -10247,10 +10247,10 @@ ACMD(do_report)
 
   for (f = k->followers; f; f = f->next)
     if (AFF_FLAGGED(f->follower, AFF_GROUP) && f->follower != ch)
-      act(buf, TRUE, ch, NULL, f->follower, TO_VICT);
+      act(buf, TRUE, ch, nullptr, f->follower, TO_VICT);
 
   if (k != ch)
-    act(buf, TRUE, ch, NULL, k, TO_VICT);
+    act(buf, TRUE, ch, nullptr, k, TO_VICT);
 
   send_to_char(ch, "You report to the group.\r\n");
 }
@@ -10342,7 +10342,7 @@ ACMD(do_split)
 ACMD(do_use)
 {
   char buf[100], arg[MAX_INPUT_LENGTH];
-  struct obj_data *mag_item = NULL;
+  struct obj_data *mag_item = nullptr;
 
   half_chop(argument, arg, buf);
   if (!*arg) {
@@ -10354,13 +10354,13 @@ ACMD(do_use)
     switch (subcmd) {
     case SCMD_RECITE:
     case SCMD_QUAFF:
-      if (!(mag_item = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
+      if (!(mag_item = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
 	send_to_char(ch, "You don't seem to have %s %s.\r\n", AN(arg), arg);
 	return;
       }
       break;
     case SCMD_USE:
-      if (!(mag_item = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
+      if (!(mag_item = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
         send_to_char(ch, "You don't seem to have %s %s.\r\n", AN(arg), arg);
         return;
       }
@@ -10412,8 +10412,8 @@ ACMD(do_use)
         send_to_char(ch, "Your stamina is full.\r\n");
         return;
        }
-       act("@WYou place the $p@W against your chest and feel a rush of stamina as it automatically administers the dose.@n", TRUE, ch, mag_item, 0, TO_CHAR);
-       act("@C$n@W places an $p@W against $s chest and a loud click is heard.@n", TRUE, ch, mag_item, 0, TO_ROOM);
+       act("@WYou place the $p@W against your chest and feel a rush of stamina as it automatically administers the dose.@n", TRUE, ch, mag_item, nullptr, TO_CHAR);
+       act("@C$n@W places an $p@W against $s chest and a loud click is heard.@n", TRUE, ch, mag_item, nullptr, TO_ROOM);
        if (GET_SKILL(ch, SKILL_FIRST_AID) > 0) {
         send_to_char(ch, "@CYour skill in First Aid has helped increase the use of the injector. You gain more stamina as a result.@n\r\n");
         ch->incCurST(ch->getMaxST() * .25);
@@ -10424,8 +10424,8 @@ ACMD(do_use)
        return;
       case 382:
        if (AFF_FLAGGED(ch, AFF_BURNED)) {
-        act("@WYou gently apply the salve to your burns.@n", TRUE, ch, mag_item, 0, TO_CHAR);
-        act("@C$n@W gently applies a burn salve to $s burns.@n", TRUE, ch, mag_item, 0, TO_ROOM);
+        act("@WYou gently apply the salve to your burns.@n", TRUE, ch, mag_item, nullptr, TO_CHAR);
+        act("@C$n@W gently applies a burn salve to $s burns.@n", TRUE, ch, mag_item, nullptr, TO_ROOM);
         REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_BURNED);
         extract_obj(mag_item);
        } else {
@@ -10434,8 +10434,8 @@ ACMD(do_use)
        return;
       case 383:
        if (AFF_FLAGGED(ch, AFF_POISON)) {
-        act("@WYou place the $p@W against your neck and feel a rush of relief as the antitoxiin enters your bloodstream.@n", TRUE, ch, mag_item, 0, TO_CHAR);
-        act("@C$n@W places an $p@W against $s neck and a loud click is heard.@n", TRUE, ch, mag_item, 0, TO_ROOM);
+        act("@WYou place the $p@W against your neck and feel a rush of relief as the antitoxiin enters your bloodstream.@n", TRUE, ch, mag_item, nullptr, TO_CHAR);
+        act("@C$n@W places an $p@W against $s neck and a loud click is heard.@n", TRUE, ch, mag_item, nullptr, TO_ROOM);
         null_affect(ch, AFF_POISON);
         extract_obj(mag_item);
        } else {
@@ -10443,11 +10443,11 @@ ACMD(do_use)
        }
        return;
       case 385:
-        act("@WYou drink the contents of the vial before disposing of it.@n", TRUE, ch, mag_item, 0, TO_CHAR);
-        act("@C$n@W dinks a $p and then disposes of it.@n", TRUE, ch, mag_item, 0, TO_ROOM);
+        act("@WYou drink the contents of the vial before disposing of it.@n", TRUE, ch, mag_item, nullptr, TO_CHAR);
+        act("@C$n@W dinks a $p and then disposes of it.@n", TRUE, ch, mag_item, nullptr, TO_ROOM);
        if (AFF_FLAGGED(ch, AFF_BLIND)) {
-        act("@WYour eyesight has returned!@n", TRUE, ch, mag_item, 0, TO_CHAR);
-        act("@C$n@W eyesight seems to have returned.@n", TRUE, ch, mag_item, 0, TO_ROOM);
+        act("@WYour eyesight has returned!@n", TRUE, ch, mag_item, nullptr, TO_CHAR);
+        act("@C$n@W eyesight seems to have returned.@n", TRUE, ch, mag_item, nullptr, TO_ROOM);
         null_affect(ch, AFF_BLIND);
        }
         refreshed = FALSE;
@@ -10639,7 +10639,7 @@ ACMD(do_gen_write)
     return;
   }
 
-  ct = time(0);
+  ct = time(nullptr);
   tmp = asctime(localtime(&ct));
 
   if (IS_NPC(ch)) {
@@ -10843,9 +10843,9 @@ ACMD(do_gen_tog)
   case SCMD_AFK:
     result = PRF_TOG_CHK(ch, PRF_AFK);
     if (PRF_FLAGGED(ch, PRF_AFK))
-      act("$n has gone AFK.", TRUE, ch, 0, 0, TO_ROOM);
+      act("$n has gone AFK.", TRUE, ch, nullptr, nullptr, TO_ROOM);
     else {
-      act("$n has come back from AFK.", TRUE, ch, 0, 0, TO_ROOM);
+      act("$n has come back from AFK.", TRUE, ch, nullptr, nullptr, TO_ROOM);
       if (has_mail(GET_IDNUM(ch)))
         send_to_char(ch, "You have mail waiting.\r\n");
     }
@@ -11048,7 +11048,7 @@ ACMD(do_file)
    }
 
    if (!strcasecmp(field, "request")) {
-    GET_BOARD(ch, 2) = time(0);
+    GET_BOARD(ch, 2) = time(nullptr);
    }
 
    if(!*value)
@@ -11095,7 +11095,7 @@ ACMD(do_compare)
   struct obj_data *obj1, *obj2;
   struct char_data *tchar;
   int value1 = 0, value2 = 0, o1, o2;
-  char *msg = NULL;
+  char *msg = nullptr;
 
   two_arguments(argument, arg1, arg2);
 
@@ -11131,7 +11131,7 @@ ACMD(do_compare)
     }
   }
 
-  if ( msg == NULL ) {
+  if ( msg == nullptr ) {
     if ( value1 == value2 )
       msg = "$p and $P look about the same.";
     else if ( value1  > value2 )
@@ -11148,7 +11148,7 @@ ACMD(do_break)
 {
   char arg[MAX_INPUT_LENGTH];
   struct obj_data *obj;
-  struct char_data *dummy = NULL;
+  struct char_data *dummy = nullptr;
   int cmbrk;
 
   one_argument(argument, arg);
@@ -11171,7 +11171,7 @@ ACMD(do_break)
 
   /* Ok, break it! */
   send_to_char(ch, "You ruin %s.\r\n", obj->short_description);
-  act("$n ruins $p.", FALSE, ch, obj, 0, TO_ROOM);
+  act("$n ruins $p.", FALSE, ch, obj, nullptr, TO_ROOM);
   GET_OBJ_VAL(obj, VAL_ALL_HEALTH) = 0;
   TOGGLE_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_BROKEN);
 
@@ -11181,8 +11181,8 @@ ACMD(do_break)
 ACMD(do_fix)
 {
   char arg[MAX_INPUT_LENGTH];
-  struct obj_data *obj, *obj4 = NULL, *rep, *next_obj;
-  struct char_data *dummy = NULL;
+  struct obj_data *obj, *obj4 = nullptr, *rep, *next_obj;
+  struct char_data *dummy = nullptr;
   int cmbrk, found = FALSE, self = FALSE, custom = FALSE;
 
   one_argument(argument, arg);
@@ -11262,8 +11262,8 @@ ACMD(do_fix)
 
   if (self == FALSE) {
    if (GET_SKILL(ch, SKILL_REPAIR) < axion_dice(0)) {
-    act("You try to repair $p but screw up..", TRUE, ch, obj, 0, TO_CHAR);
-    act("$n tries to repair $p but screws up..", TRUE, ch, obj, 0, TO_ROOM);
+    act("You try to repair $p but screw up..", TRUE, ch, obj, nullptr, TO_CHAR);
+    act("$n tries to repair $p but screws up..", TRUE, ch, obj, nullptr, TO_ROOM);
     extract_obj(obj4);
     improve_skill(ch, SKILL_REPAIR, 1);
     WAIT_STATE(ch, PULSE_2SEC);
@@ -11273,17 +11273,17 @@ ACMD(do_fix)
   
    if (GET_OBJ_VAL(obj, VAL_ALL_HEALTH) + GET_SKILL(ch, SKILL_REPAIR) < 100) {
     send_to_char(ch, "You repair %s a bit.\r\n", obj->short_description);
-    act("$n repairs $p a bit.", FALSE, ch, obj, 0, TO_ROOM);
+    act("$n repairs $p a bit.", FALSE, ch, obj, nullptr, TO_ROOM);
     GET_OBJ_VAL(obj, VAL_ALL_HEALTH) += GET_SKILL(ch, SKILL_REPAIR);
     REMOVE_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_BROKEN);
    }
    else {
     send_to_char(ch, "You repair %s completely.\r\n", obj->short_description);
-    act("$n repairs $p completely.", FALSE, ch, obj, 0, TO_ROOM);
+    act("$n repairs $p completely.", FALSE, ch, obj, nullptr, TO_ROOM);
     GET_OBJ_VAL(obj, VAL_ALL_HEALTH) = 100;
     REMOVE_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_BROKEN);
    }
-   if (obj->carried_by == NULL && !PLR_FLAGGED(ch, PLR_REPLEARN) && (level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0 || GET_LEVEL(ch) >= 100)) {
+   if (obj->carried_by == nullptr && !PLR_FLAGGED(ch, PLR_REPLEARN) && (level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0 || GET_LEVEL(ch) >= 100)) {
     int64_t gain = (level_exp(ch, GET_LEVEL(ch) + 1) * 0.0003) * GET_SKILL(ch, SKILL_REPAIR);
     send_to_char(ch, "@mYou've learned a bit from repairing it. @D[@gEXP@W: @G+%s@D]@n\r\n", add_commas(gain));
     SET_BIT_AR(PLR_FLAGS(ch), PLR_REPLEARN);
@@ -11302,15 +11302,15 @@ ACMD(do_fix)
     send_to_char(ch, "Your body is already in peak condition.\r\n");
     return; 
    } else if (GET_SKILL(ch, SKILL_REPAIR) < axion_dice(0)) {
-    act("You try to repair your body but screw up..", TRUE, ch, 0, 0, TO_CHAR);
-    act("$n tries to repair $s body but screws up..", TRUE, ch, 0, 0, TO_ROOM);
+    act("You try to repair your body but screw up..", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("$n tries to repair $s body but screws up..", TRUE, ch, nullptr, nullptr, TO_ROOM);
     extract_obj(obj4);
     improve_skill(ch, SKILL_REPAIR, 1);
     WAIT_STATE(ch, PULSE_5SEC);
     return;
    } else {
-    act("You use the repair kit to fix part of your body...", TRUE, ch, 0, 0, TO_CHAR);
-    act("$n works on their body with a repair kit.", TRUE, ch, 0, 0, TO_ROOM);
+    act("You use the repair kit to fix part of your body...", TRUE, ch, nullptr, nullptr, TO_CHAR);
+    act("$n works on their body with a repair kit.", TRUE, ch, nullptr, nullptr, TO_ROOM);
     int64_t mult = GET_SKILL(ch, SKILL_REPAIR);
     int64_t add = (((ch->getEffMaxPL()) * 0.005) + 10) * mult;
 
@@ -11332,7 +11332,7 @@ void innate_remove(struct char_data * ch, struct innate_node * inn)
 {
   struct innate_node *temp;
 
-  if (ch->innate == NULL) {
+  if (ch->innate == nullptr) {
     core_dump();
     return;
   }
@@ -11533,7 +11533,7 @@ ACMD(do_resurrect)
     look_at_room(IN_ROOM(ch), ch, 0);
   }
 
-  act("$n's body forms in a pool of @Bblue light@n.", TRUE, ch, 0, 0, TO_ROOM);
+  act("$n's body forms in a pool of @Bblue light@n.", TRUE, ch, nullptr, nullptr, TO_ROOM);
 }
 
 static void show_clan_info(struct char_data *ch) {
@@ -11580,7 +11580,7 @@ ACMD(do_clan) {
   char arg1[100];
   char arg2[MAX_INPUT_LENGTH];
 
-  if(ch == NULL || IS_NPC(ch))
+  if(ch == nullptr || IS_NPC(ch))
     return;
 
   half_chop(argument, arg1, arg2);
@@ -11648,14 +11648,14 @@ ACMD(do_clan) {
       show_clan_info(ch);
     else if(!isClan(arg2))
       send_to_char(ch, "%s is not a valid clan.\r\n", arg2);
-    else if(GET_CLAN(ch) != NULL && clanIsMember(GET_CLAN(ch), ch))
+    else if(GET_CLAN(ch) != nullptr && clanIsMember(GET_CLAN(ch), ch))
       send_to_char(ch, "You are already a member of %s.\r\n", GET_CLAN(ch));
     else if(clanOpenJoin(arg2)) {
       send_to_char(ch, "You can just join %s, it is open.\r\n", arg2);
       return;
     }
     else {
-      if (GET_CLAN(ch) != NULL && checkCLAN(ch) == TRUE) {
+      if (GET_CLAN(ch) != nullptr && checkCLAN(ch) == TRUE) {
        checkAPP(ch);
        send_to_char(ch, "You stop applying to %s\r\n", GET_CLAN(ch));
        clanDecline(GET_CLAN(ch), ch);
@@ -11677,10 +11677,10 @@ ACMD(do_clan) {
       send_to_char(ch, "%s is not a valid clan.\r\n", arg2);
     else if(clanIsMember(arg2, ch))
       send_to_char(ch, "You are already a member of %s.\r\n", arg2);
-    else if(GET_CLAN(ch) != NULL && checkCLAN(ch) == TRUE && strstr(GET_CLAN(ch), "Applying") == FALSE)
+    else if(GET_CLAN(ch) != nullptr && checkCLAN(ch) == TRUE && strstr(GET_CLAN(ch), "Applying") == FALSE)
       send_to_char(ch, "You are already a member of %s, you need to leave it first.\r\n", GET_CLAN(ch));
     else if(clanOpenJoin(arg2)) {
-      if (GET_CLAN(ch) != NULL && checkCLAN(ch) == TRUE) {
+      if (GET_CLAN(ch) != nullptr && checkCLAN(ch) == TRUE) {
        checkAPP(ch);
        send_to_char(ch, "You stop applying to %s\r\n", GET_CLAN(ch));
        clanDecline(GET_CLAN(ch), ch);
@@ -11716,7 +11716,7 @@ ACMD(do_clan) {
    return;
   }
   else if(!(strcmp(arg1, "infow"))) {
-   if (GET_CLAN(ch) == NULL || !(strcmp(GET_CLAN(ch), "None."))) {
+   if (GET_CLAN(ch) == nullptr || !(strcmp(GET_CLAN(ch), "None."))) {
      send_to_char(ch, "You are not in a clan.\r\n");
      return;
    }
@@ -11733,7 +11733,7 @@ ACMD(do_clan) {
   else if (!(strcmp(arg1, "deposit"))) {
    long bank = 0;
 
-   if (GET_CLAN(ch) == NULL || !(strcmp(GET_CLAN(ch), "None."))) {
+   if (GET_CLAN(ch) == nullptr || !(strcmp(GET_CLAN(ch), "None."))) {
      send_to_char(ch, "You are not in a clan.\r\n");
      return;
    }
@@ -11769,7 +11769,7 @@ ACMD(do_clan) {
   }
   else if(!(strcmp(arg1, "highrank"))) {
 
-   if (GET_CLAN(ch) == NULL || !(strcmp(GET_CLAN(ch), "None."))) {
+   if (GET_CLAN(ch) == nullptr || !(strcmp(GET_CLAN(ch), "None."))) {
      send_to_char(ch, "You are not in a clan.\r\n");
      return;
    }
@@ -11799,7 +11799,7 @@ ACMD(do_clan) {
   }
   else if(!(strcmp(arg1, "midrank"))) {
 
-   if (GET_CLAN(ch) == NULL || !(strcmp(GET_CLAN(ch), "None."))) {
+   if (GET_CLAN(ch) == nullptr || !(strcmp(GET_CLAN(ch), "None."))) {
      send_to_char(ch, "You are not in a clan.\r\n");
      return;
    }
@@ -11828,12 +11828,12 @@ ACMD(do_clan) {
    }
   }
   else if(!(strcmp(arg1, "rank"))) {
-   struct char_data *vict = NULL;
+   struct char_data *vict = nullptr;
     char arg3[100];
     char name[100];
     half_chop(arg2, name, arg3);
 
-   if (GET_CLAN(ch) == NULL || !(strcmp(GET_CLAN(ch), "None."))) {
+   if (GET_CLAN(ch) == nullptr || !(strcmp(GET_CLAN(ch), "None."))) {
      send_to_char(ch, "You are not in a clan.\r\n");
      return;
    }
@@ -11846,11 +11846,11 @@ ACMD(do_clan) {
      send_to_char(ch, "Who's rank do you want to change?\r\n");
      return;
     }
-    else if(!(vict = get_char_vis(ch, name, NULL, FIND_CHAR_WORLD))) {
+    else if(!(vict = get_char_vis(ch, name, nullptr, FIND_CHAR_WORLD))) {
      send_to_char(ch, "That person is no where to be found in the entire universe.\r\n");
      return;
     }
-    else if (GET_CLAN(vict) == NULL || !(strcmp(GET_CLAN(vict), "None."))) {
+    else if (GET_CLAN(vict) == nullptr || !(strcmp(GET_CLAN(vict), "None."))) {
      send_to_char(ch, "That person is not even in a clan, let alone your's.\r\n");
      return;
     }
@@ -11908,7 +11908,7 @@ ACMD(do_clan) {
   else if(!(strcmp(arg1, "withdraw"))) {
    long bank = 0;
 
-   if (GET_CLAN(ch) == NULL || !(strcmp(GET_CLAN(ch), "None."))) {
+   if (GET_CLAN(ch) == nullptr || !(strcmp(GET_CLAN(ch), "None."))) {
      send_to_char(ch, "You are not in a clan.\r\n");
      return;
    }
@@ -11949,7 +11949,7 @@ ACMD(do_clan) {
   }
   else if(!(strcmp(arg1, "bank"))) {
    long bank = 0;
-   if (GET_CLAN(ch) == NULL || !(strcmp(GET_CLAN(ch), "None."))) {
+   if (GET_CLAN(ch) == nullptr || !(strcmp(GET_CLAN(ch), "None."))) {
      send_to_char(ch, "You are not in a clan.\r\n");
      return;
    }
@@ -11964,7 +11964,7 @@ ACMD(do_clan) {
    return;
   }
   else if(!(strcmp(arg1, "members"))) {
-   if (GET_CLAN(ch) == NULL || !(strcmp(GET_CLAN(ch), "None."))) {
+   if (GET_CLAN(ch) == nullptr || !(strcmp(GET_CLAN(ch), "None."))) {
     send_to_char(ch, "You are not even in a clan.\r\n");
     return;
    } else {
@@ -11987,7 +11987,7 @@ ACMD(do_clan) {
       send_to_char(ch, "Only leaders can expel people from a clan.\r\n");
     } else if(clanOpenJoin(arg3)) {
       send_to_char(ch, "You can't kick someone out of an open-join clan.\r\n");
-    } else if(!(vict = get_char_vis(ch, name1, NULL, FIND_CHAR_WORLD))) {
+    } else if(!(vict = get_char_vis(ch, name1, nullptr, FIND_CHAR_WORLD))) {
        CREATE(vict, struct char_data, 1);
        clear_char(vict);
        CREATE(vict->player_specials, struct player_special_data, 1);
@@ -12047,7 +12047,7 @@ ACMD(do_clan) {
       send_to_char(ch, "%s is not a valid clan.\r\n", arg3);
     else if((clanIsModerator(arg3, ch) == FALSE && clanIsMember(arg3, ch) == FALSE && GET_ADMLEVEL(ch) < ADMLVL_IMPL) || (GET_CRANK(ch) < 2 && GET_ADMLEVEL(ch) < ADMLVL_IMPL))
       send_to_char(ch, "Only leaders or highrank can decline people from entering a clan.\r\n");
-    else if(!(vict = get_char_vis(ch, name, NULL, FIND_CHAR_WORLD)))
+    else if(!(vict = get_char_vis(ch, name, nullptr, FIND_CHAR_WORLD)))
       send_to_char(ch, "%s is not around at the moment.\r\n", name);
     else if(!clanIsApplicant(arg3, vict))
       send_to_char(ch, "%s isn't applying to join %s.\r\n", GET_NAME(vict), arg3);
@@ -12072,7 +12072,7 @@ ACMD(do_clan) {
       send_to_char(ch, "You are not in that clan.\r\n");
     else if(!(clanIsModerator(arg3, ch) || GET_ADMLEVEL(ch) >= ADMLVL_IMPL) && GET_CRANK(ch) < 2)
       send_to_char(ch, "Only leaders or captains can enroll people into their clan.\r\n");
-    else if(!(vict = get_char_vis(ch, name, NULL, FIND_CHAR_WORLD)))
+    else if(!(vict = get_char_vis(ch, name, nullptr, FIND_CHAR_WORLD)))
       send_to_char(ch, "%s is not around at the moment.\r\n", name);
     else if(!clanIsApplicant(arg3, vict))
       send_to_char(ch, "%s isn't applying to join %s.\r\n", GET_NAME(vict), arg3);
@@ -12097,7 +12097,7 @@ ACMD(do_clan) {
       send_to_char(ch, "%s is not a valid clan.\r\n", arg3);
     else if(!(clanIsModerator(arg3, ch) || GET_ADMLEVEL(ch) >= ADMLVL_IMPL))
       send_to_char(ch, "Only leaders can make other people in a clan a leader.\r\n");
-    else if(!(vict = get_char_vis(ch, name, NULL, FIND_CHAR_WORLD)))
+    else if(!(vict = get_char_vis(ch, name, nullptr, FIND_CHAR_WORLD)))
       send_to_char(ch, "%s is not around at the moment.\r\n", name);
     else {
       send_to_char(ch, "You make %s a leader of %s.\r\n", GET_NAME(vict), arg3);
@@ -12190,7 +12190,7 @@ ACMD(do_pagelength)
 ACMD(do_aid)
 {
   struct char_data *vict;
-  struct obj_data *obj = NULL, *aid_obj = NULL, *aid_prod = NULL, *next_obj;
+  struct obj_data *obj = nullptr, *aid_obj = nullptr, *aid_prod = nullptr, *next_obj;
   char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
   int dc = 0, found = FALSE, num = 47, num2 = 0, survival = 0;
 
@@ -12234,7 +12234,7 @@ ACMD(do_aid)
    }
   }
  
-  if (found == FALSE || aid_obj == NULL) {
+  if (found == FALSE || aid_obj == nullptr) {
     if (num == 47) {
      send_to_char(ch, "You need bandages to be able to use first aid.\r\n");
     } else {
@@ -12243,7 +12243,7 @@ ACMD(do_aid)
     return;
   }
   if (num == 47) {
-   if (!(vict = get_char_vis(ch, arg2, NULL, FIND_CHAR_ROOM))) {
+   if (!(vict = get_char_vis(ch, arg2, nullptr, FIND_CHAR_ROOM))) {
     send_to_char(ch, "Apply first aid to who?\r\n");
     return;
    } else if (IS_NPC(vict)) {
@@ -12258,7 +12258,7 @@ ACMD(do_aid)
     if (vict != ch) {
      send_to_char(ch, "You attempt to lend first aid to %s.\r\n", GET_NAME(vict));
     }
-    act("$n attempts to bandage $N's wounds.", TRUE, ch, 0, vict, TO_ROOM);
+    act("$n attempts to bandage $N's wounds.", TRUE, ch, nullptr, vict, TO_ROOM);
     dc = axion_dice(0);
     if ((GET_SKILL(ch, SKILL_FIRST_AID) + 1) > dc) {
       send_to_char(ch, "You bandage %s's wounds.\r\n", GET_NAME(vict));
@@ -12269,18 +12269,18 @@ ACMD(do_aid)
       vict->incCurHealth(roll);
 
       send_to_char(vict, "Your wounds are bandaged by %s!\r\n", GET_NAME(ch));
-      act("$n's wounds are stablized by $N!", TRUE, vict, 0, ch, TO_NOTVICT);
+      act("$n's wounds are stablized by $N!", TRUE, vict, nullptr, ch, TO_NOTVICT);
       SET_BIT_AR(PLR_FLAGS(vict), PLR_BANDAGED);
       extract_obj(aid_obj);
     } else {
       if (vict != ch) {
        send_to_char(ch, "You fail to bandage their wounds properly, wasting the set of bandages...\r\n");
-       act("$N fails to bandage $n's wounds properly, wasting an entire set of bandages...", TRUE, vict, 0, ch, TO_NOTVICT);
-       act("$N fails to bandage your wounds properly, wasting an entire set of bandages...", TRUE, vict, 0, ch, TO_CHAR);
+       act("$N fails to bandage $n's wounds properly, wasting an entire set of bandages...", TRUE, vict, nullptr, ch, TO_NOTVICT);
+       act("$N fails to bandage your wounds properly, wasting an entire set of bandages...", TRUE, vict, nullptr, ch, TO_CHAR);
       }
       else {
-       act("$N fails to bandage $s wounds properly, wasting an entire set of bandages...", TRUE, vict, 0, ch, TO_NOTVICT);
-       act("You fail to bandage your wounds properly, wasting an entire set of bandages...", TRUE, vict, 0, ch, TO_VICT);
+       act("$N fails to bandage $s wounds properly, wasting an entire set of bandages...", TRUE, vict, nullptr, ch, TO_NOTVICT);
+       act("You fail to bandage your wounds properly, wasting an entire set of bandages...", TRUE, vict, nullptr, ch, TO_VICT);
       }
       extract_obj(aid_obj);
     }
@@ -12298,12 +12298,12 @@ ACMD(do_aid)
      return;
     } else {
      if (GET_SKILL(ch, SKILL_FIRST_AID) < axion_dice(15)) {
-      act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. As you begin to construct an Andrenex Adreneline Injector you screw up and end up breaking the water tight seal. The adreneline leaks out and is wasted.@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A frown forms on $s face as it appears that $e has failed.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. As you begin to construct an Andrenex Adreneline Injector you screw up and end up breaking the water tight seal. The adreneline leaks out and is wasted.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+      act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A frown forms on $s face as it appears that $e has failed.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
       extract_obj(aid_obj);
      } else {
-      act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. Your knowledge in basic medical devices and treatments helps you as you successfully construct an Adrenex Adreneline Injector@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A moment later $e holds up a completed Adrenex Adreneline Injector!@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. Your knowledge in basic medical devices and treatments helps you as you successfully construct an Adrenex Adreneline Injector@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+      act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A moment later $e holds up a completed Adrenex Adreneline Injector!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
       aid_prod = read_object(num2, VIRTUAL);
       add_unique_id(aid_prod);
       obj_to_char(aid_prod, ch);
@@ -12317,12 +12317,12 @@ ACMD(do_aid)
      return;
     } else {
      if (GET_SKILL(ch, SKILL_FIRST_AID) < axion_dice(10)) {
-      act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. As you go to put the salve ingredients into the kit's salve compartment and set the temperature you accidentally set it too high. The salve is burned and ruined. Yes you managed to burn a burn salve.@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A frown forms on $s face as it appears that $e has failed.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. As you go to put the salve ingredients into the kit's salve compartment and set the temperature you accidentally set it too high. The salve is burned and ruined. Yes you managed to burn a burn salve.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+      act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A frown forms on $s face as it appears that $e has failed.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
       extract_obj(aid_obj);
      } else {
-      act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. Your knowledge in basic medical devices and treatments helps you as you successfully boil a burn salve to perfection and it is automatically placed in a jar.@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A moment later $e holds up a jar of burn salve!@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. Your knowledge in basic medical devices and treatments helps you as you successfully boil a burn salve to perfection and it is automatically placed in a jar.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+      act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A moment later $e holds up a jar of burn salve!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
       aid_prod = read_object(num2, VIRTUAL);
       add_unique_id(aid_prod);
       obj_to_char(aid_prod, ch);
@@ -12336,12 +12336,12 @@ ACMD(do_aid)
      return;
     } else {
      if (GET_SKILL(ch, SKILL_FIRST_AID) < axion_dice(5)) {
-      act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. As you complete the Antitoxin Injector you notice that you didn't seal the syringe properly and it all leaks out.@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A frown forms on $s face as it appears that $e has failed.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. As you complete the Antitoxin Injector you notice that you didn't seal the syringe properly and it all leaks out.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+      act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A frown forms on $s face as it appears that $e has failed.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
       extract_obj(aid_obj);
      } else {
-      act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. Your knowledge in basic medical devices and treatments helps you as you successfully assemble the Antitoxin Injector.@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A moment later $e holds up a completed Antitoxin Injector!@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. Your knowledge in basic medical devices and treatments helps you as you successfully assemble the Antitoxin Injector.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+      act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A moment later $e holds up a completed Antitoxin Injector!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
       aid_prod = read_object(num2, VIRTUAL);
       add_unique_id(aid_prod);
       obj_to_char(aid_prod, ch);
@@ -12355,12 +12355,12 @@ ACMD(do_aid)
      return;
     } else {
      if (GET_SKILL(ch, SKILL_FIRST_AID) < axion_dice(15)) {
-      act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. As you complete a vial of Formula 82 you notice that you read the mixture measurements wrong. You dispose of the vile vial immediately.@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A frown forms on $s face as it appears that $e has failed.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. As you complete a vial of Formula 82 you notice that you read the mixture measurements wrong. You dispose of the vile vial immediately.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+      act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A frown forms on $s face as it appears that $e has failed.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
       extract_obj(aid_obj);
      } else {
-      act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. Your knowledge in basic medical devices and treatments helps you as you successfully assemble a vial of Formula 82.@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A moment later $e holds up a completed Vial of Formula 82!@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. Your knowledge in basic medical devices and treatments helps you as you successfully assemble a vial of Formula 82.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
+      act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A moment later $e holds up a completed Vial of Formula 82!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
       aid_prod = read_object(num2, VIRTUAL);
       add_unique_id(aid_prod);
       obj_to_char(aid_prod, ch);
@@ -12400,7 +12400,7 @@ ACMD(do_aura) {
   } else {
      if (PLR_FLAGGED(ch, PLR_AURALIGHT)) {
 	   send_to_char(ch, "Your aura fades as you stop shining light.\r\n");
-	   act("$n's aura fades as they stop shining light on the area.", TRUE, ch, 0, 0, TO_ROOM);
+	   act("$n's aura fades as they stop shining light on the area.", TRUE, ch, nullptr, nullptr, TO_ROOM);
 	   REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_AURALIGHT);
 	   world[IN_ROOM(ch)].light--;
         
@@ -12413,7 +12413,7 @@ ACMD(do_aura) {
           send_to_char(ch, "A bright %s aura begins to burn around you as you provide light to the surrounding area!\r\n", aura_types[GET_AURA(ch)]);	
 	  char bloom[MAX_INPUT_LENGTH];
           sprintf(bloom, "@wA %s aura flashes up brightly around $n@w as they provide light to the area.@n", aura_types[GET_AURA(ch)]);
-          act(bloom, TRUE, ch, 0, 0, TO_ROOM);
+          act(bloom, TRUE, ch, nullptr, nullptr, TO_ROOM);
 	  SET_BIT_AR(PLR_FLAGS(ch), PLR_AURALIGHT);
 
      } else {

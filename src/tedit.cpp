@@ -32,19 +32,19 @@ void news_string_cleanup(struct descriptor_data *d, int terminator)
       mudlog(CMP, ADMLVL_IMPL, TRUE, "SYSERR: Can't write file '%s'.", storage);
     else {
          char *tmstr;
-         time_t mytime = time(0);
+         time_t mytime = time(nullptr);
          tmstr = (char *) asctime(localtime(&mytime));
          *(tmstr + strlen(tmstr) - 1) = '\0';
 
      fprintf(fl, "#%d %s\n@cUpdated By@D: @C%-13s @cDate@D: @Y%s@n\n", TOP_OF_NEWS, d->newsbuf, GET_NAME(d->character), tmstr);
      free(d->newsbuf);
-     d->newsbuf = NULL;
+     d->newsbuf = nullptr;
      strip_cr(*d->str);
      fprintf(fl, "%s\n", *d->str);
-     *d->str = NULL;
+     *d->str = nullptr;
      fclose(fl);
      
-     NEWSUPDATE = time(0);
+     NEWSUPDATE = time(nullptr);
      save_mud_time(&time_info);
      struct descriptor_data *i;
 
@@ -61,7 +61,7 @@ void news_string_cleanup(struct descriptor_data *d, int terminator)
     break;
   case STRINGADD_ABORT:
     write_to_output(d, "Edit aborted.\r\n");
-    act("$n stops editing the news.", TRUE, d->character, 0, 0, TO_ROOM);
+    act("$n stops editing the news.", TRUE, d->character, nullptr, nullptr, TO_ROOM);
     break;
   default:
     log("SYSERR: news_string_cleanup: Unknown terminator status.");
@@ -87,7 +87,7 @@ void tedit_string_cleanup(struct descriptor_data *d, int terminator)
     else {
       if (*d->str && !(strcmp(storage, "text/news"))) {
          char *tmstr;
-         time_t mytime = time(0);
+         time_t mytime = time(nullptr);
          tmstr = (char *) asctime(localtime(&mytime));
          *(tmstr + strlen(tmstr) - 1) = '\0';
 
@@ -103,7 +103,7 @@ void tedit_string_cleanup(struct descriptor_data *d, int terminator)
       write_to_output(d, "Saved.\r\n");
 
       if (!(strcmp(storage, "text/news"))) {
-       NEWSUPDATE = time(0);
+       NEWSUPDATE = time(nullptr);
        save_mud_time(&time_info);
        struct descriptor_data *i;
 
@@ -121,7 +121,7 @@ void tedit_string_cleanup(struct descriptor_data *d, int terminator)
     break;
   case STRINGADD_ABORT:
     write_to_output(d, "Edit aborted.\r\n");
-    act("$n stops editing some scrolls.", TRUE, d->character, 0, 0, TO_ROOM);
+    act("$n stops editing some scrolls.", TRUE, d->character, nullptr, nullptr, TO_ROOM);
     break;
   default:
     log("SYSERR: tedit_string_cleanup: Unknown terminator status.");
@@ -137,7 +137,7 @@ ACMD(do_tedit)
 {
   int l, i = 0;
   char field[MAX_INPUT_LENGTH];
-  char *backstr = NULL;
+  char *backstr = nullptr;
    
   struct {
     char *cmd;
@@ -157,10 +157,10 @@ ACMD(do_tedit)
 	{ "handbook",   ADMLVL_IMPL,	&handbook,	24000,  HANDBOOK_FILE},
 	{ "update",	ADMLVL_IMPL,	&policies,	24000,	POLICIES_FILE},
         { "ihelp",      ADMLVL_GRGOD,   &ihelp,         24000,  IHELP_PAGE_FILE},
-	{ "\n",		0,		NULL,		0,	NULL }
+	{ "\n",		0,		nullptr,		0,	nullptr }
   };
 
-  if (ch->desc == NULL)
+  if (ch->desc == nullptr)
     return;
    
   one_argument(argument, field);
@@ -213,7 +213,7 @@ ACMD(do_tedit)
   OLC_STORAGE(ch->desc) = strdup(fields[l].filename);
   string_write(ch->desc, fields[l].buffer, fields[l].size, 0, backstr);
 
-  act("$n begins editing a text file.", TRUE, ch, 0, 0, TO_ROOM);
+  act("$n begins editing a text file.", TRUE, ch, nullptr, nullptr, TO_ROOM);
   SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
   STATE(ch->desc) = CON_TEDIT;
 }

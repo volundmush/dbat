@@ -100,11 +100,11 @@ ACMD (do_assedit)
 void assedit_setup(struct descriptor_data *d, int number)
 {
 
-    ASSEMBLY    *pOldAssembly = NULL;
+    ASSEMBLY    *pOldAssembly = nullptr;
     CREATE(OLC_ASSEDIT(d), ASSEMBLY, 1 );
 
 
-    if( (pOldAssembly = assemblyGetAssemblyPtr( number )) == NULL ) {
+    if( (pOldAssembly = assemblyGetAssemblyPtr( number )) == nullptr ) {
       send_to_char(d->character, "That assembly does not exist\r\n");
       cleanup_olc(d, CLEANUP_ALL);
       return;
@@ -136,7 +136,7 @@ void assedit_setup(struct descriptor_data *d, int number)
       }
 
  STATE(d) = CON_ASSEDIT;
- act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
+ act("$n starts using OLC.", TRUE, d->character, nullptr, nullptr, TO_ROOM);
  SET_BIT_AR(PLR_FLAGS(d->character), PLR_WRITING);
  assedit_disp_menu(d);
 
@@ -200,7 +200,7 @@ void assedit_parse(struct descriptor_data *d, char *arg)
 {
  int pos = 0, i = 0,  counter, columns = 0;
 
-   COMPONENT   *pTComponents = NULL;
+   COMPONENT   *pTComponents = nullptr;
 
  switch (OLC_MODE(d)) {
 
@@ -300,7 +300,7 @@ send_to_char(d->character, "%c[H%c[J", 27, 27);
 
      CREATE( pTComponents, COMPONENT, OLC_ASSEDIT(d)->lNumComponents + 1);
 
-     if(OLC_ASSEDIT(d)->pComponents != NULL) {          /* Copy from olc to temp */
+     if(OLC_ASSEDIT(d)->pComponents != nullptr) {          /* Copy from olc to temp */
         memmove(pTComponents, OLC_ASSEDIT(d)->pComponents,
                   OLC_ASSEDIT(d)->lNumComponents * sizeof(COMPONENT) );
 /*        free(OLC_ASSEDIT(d)->pComponents); */

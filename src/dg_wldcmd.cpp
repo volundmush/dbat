@@ -81,8 +81,8 @@ void act_to_room(char *str, room_data *room)
      * TO_ROOM and TO_CHAR for some char in the room.
      * (just dont use $n or you might get strange results)
      */
-    act(str, FALSE, room->people, 0, 0, TO_ROOM);
-    act(str, FALSE, room->people, 0, 0, TO_CHAR);
+    act(str, FALSE, room->people, nullptr, nullptr, TO_ROOM);
+    act(str, FALSE, room->people, nullptr, nullptr, TO_CHAR);
 }
 
 
@@ -278,7 +278,7 @@ WCMD(do_wdoor)
         wld_log(room, "wdoor called with too few args");
         return;
     }
-    if ((rm = get_room(target)) == NULL) {
+    if ((rm = get_room(target)) == nullptr) {
         wld_log(room, "wdoor: invalid target");
         return;
     }
@@ -309,7 +309,7 @@ WCMD(do_wdoor)
             if (newexit->keyword)
                 free(newexit->keyword);
             free(newexit);
-            rm->dir_option[dir] = NULL;
+            rm->dir_option[dir] = nullptr;
         }
     }
 
@@ -526,7 +526,7 @@ WCMD(do_wload)
           return;
         }
       }
-      if ((mob = read_mobile(number, VIRTUAL)) == NULL) {
+      if ((mob = read_mobile(number, VIRTUAL)) == nullptr) {
         wld_log(room, "mload: bad mob vnum");
         return;
       }
@@ -540,7 +540,7 @@ WCMD(do_wload)
     }
 
     else if (is_abbrev(arg1, "obj")) {
-      if ((object = read_object(number, VIRTUAL)) == NULL) {
+      if ((object = read_object(number, VIRTUAL)) == nullptr) {
           wld_log(room, "wload: bad object vnum");
           return;
       }
@@ -560,7 +560,7 @@ WCMD(do_wload)
       two_arguments(target, arg1, arg2); /* recycling ... */
       tch = get_char_in_room(room, arg1);
       if (tch) {
-        if (arg2 != NULL && *arg2 &&
+        if (arg2 != nullptr && *arg2 &&
             (pos = find_eq_pos_script(arg2)) >= 0 &&
             !GET_EQ(tch, pos) &&
             can_wear_on_pos(object, pos)) {
@@ -648,7 +648,7 @@ WCMD(do_wat)
 }
 
 const struct wld_command_info wld_cmd_info[] = {
-    { "RESERVED", 0, 0 },/* this must be first -- for specprocs */
+    { "RESERVED", nullptr, 0 },/* this must be first -- for specprocs */
 
     { "wasound "    , do_wasound   , 0 },
     { "wdoor "      , do_wdoor     , 0 },
@@ -664,7 +664,7 @@ const struct wld_command_info wld_cmd_info[] = {
     { "wdamage "    , do_wdamage,    0 },
     { "wat "        , do_wat,        0 },
     { "weffect "    , do_weffect,    0 },
-    { "\n", 0, 0 }        /* this must be last */
+    { "\n", nullptr, 0 }        /* this must be last */
 };
 
 

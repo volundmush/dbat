@@ -65,7 +65,7 @@ int add_mobile(struct char_data *mob, mob_vnum vnum)
       copy_mobile_strings(mob_proto + i, mob);
       mob_index[i].vnum = vnum;
       mob_index[i].number = 0;
-      mob_index[i].func = 0;
+      mob_index[i].func = nullptr;
       found = i;
       break;
     }
@@ -80,7 +80,7 @@ int add_mobile(struct char_data *mob, mob_vnum vnum)
     copy_mobile_strings(&mob_proto[0], mob);
     mob_index[0].vnum = vnum;
     mob_index[0].number = 0;
-    mob_index[0].func = 0;
+    mob_index[0].func = nullptr;
     htree_add(mob_htree, mob_index[0].vnum, 0);
   }
 
@@ -257,7 +257,7 @@ int free_mobile(struct char_data *mob)
 {
   mob_rnum i;
 
-  if (mob == NULL)
+  if (mob == nullptr)
     return FALSE;
 
   /* Non-prototyped mobile.  Also known as new mobiles.  */
@@ -309,7 +309,7 @@ int save_mobiles(zone_rnum zone_num)
   }
 
   snprintf(mobfname, sizeof(mobfname), "%s%d.new", MOB_PREFIX, zone_table[zone_num].number);
-  if ((mobfd = fopen(mobfname, "w")) == NULL) {
+  if ((mobfd = fopen(mobfname, "w")) == nullptr) {
     mudlog(BRF, ADMLVL_GOD, TRUE, "SYSERR: GenOLC: Cannot open mob file for writing.");
     return FALSE;
   }
@@ -352,7 +352,7 @@ int write_mobile_mobprog(mob_vnum mvnum, struct char_data *mob, FILE *fd)
 	medit_get_mprog_type(mob_prog), wmmarg,
 	wmmcom, STRING_TERMINATOR
     );
-    if (mob_prog->next == NULL)
+    if (mob_prog->next == nullptr)
       fputs("|\n", fd);
   }
   return TRUE;
@@ -488,7 +488,7 @@ void check_mobile_strings(struct char_data *mob)
 
 void check_mobile_string(mob_vnum i, char **string, const char *dscr)
 {
-  if (*string == NULL || **string == '\0') {
+  if (*string == nullptr || **string == '\0') {
     char smbuf[128];
     sprintf(smbuf, "GenOLC: Mob #%d has an invalid %s.", i, dscr);
     mudlog(BRF, ADMLVL_GOD, TRUE, smbuf);

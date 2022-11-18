@@ -32,7 +32,7 @@ struct bfs_queue_struct {
   struct bfs_queue_struct *next;
 };
 
-static struct bfs_queue_struct *bfs_queue_head = 0, *bfs_queue_tail = 0;
+static struct bfs_queue_struct *bfs_queue_head = nullptr, *bfs_queue_tail = nullptr;
 
 /* Utility macros */
 #define MARK(room)	(SET_BIT_AR(ROOM_FLAGS(room), ROOM_BFS_MARK))
@@ -43,7 +43,7 @@ static struct bfs_queue_struct *bfs_queue_head = 0, *bfs_queue_tail = 0;
 
 int VALID_EDGE(room_rnum x, int y)
 {
-  if (world[x].dir_option[y] == NULL || TOROOM(x, y) == NOWHERE)
+  if (world[x].dir_option[y] == nullptr || TOROOM(x, y) == NOWHERE)
     return 0;
   if (CONFIG_TRACK_T_DOORS == FALSE && IS_CLOSED(x, y))
     return 0;
@@ -60,7 +60,7 @@ void bfs_enqueue(room_rnum room, int dir)
   CREATE(curr, struct bfs_queue_struct, 1);
   curr->room = room;
   curr->dir = dir;
-  curr->next = 0;
+  curr->next = nullptr;
 
   if (bfs_queue_tail) {
     bfs_queue_tail->next = curr;
@@ -77,7 +77,7 @@ void bfs_dequeue(void)
   curr = bfs_queue_head;
 
   if (!(bfs_queue_head = bfs_queue_head->next))
-    bfs_queue_tail = 0;
+    bfs_queue_tail = nullptr;
   free(curr);
 }
 
@@ -146,7 +146,7 @@ int find_first_step(room_rnum src, room_rnum target)
 
 ACMD(do_sradar)
 {
-  struct obj_data *vehicle = NULL, *controls = NULL;
+  struct obj_data *vehicle = nullptr, *controls = nullptr;
   int dir = 0, noship = FALSE;
   char arg[MAX_INPUT_LENGTH];
   char planet[20];
@@ -335,7 +335,7 @@ ACMD(do_radar)
 
  else {
     WAIT_STATE(ch, PULSE_2SEC);
- act("$n holds up a dragon radar and pushes its button.", FALSE, ch, 0, 0, TO_ROOM);
+ act("$n holds up a dragon radar and pushes its button.", FALSE, ch, nullptr, nullptr, TO_ROOM);
  while (num < 20000) {
  if (real_room(room) != NOWHERE) {
  for (obj = world[real_room(room)].contents; obj; obj = next_obj) {
@@ -435,9 +435,9 @@ ACMD(do_track)
 			send_to_char(ch, "You will remember their ki signal from now on.\r\n");
 			sense_memory_write(ch, vict);
 		}
-		act("You look at $N@n intently for a moment.", TRUE, ch, 0, vict, TO_CHAR);
-		act("$n looks at you intently for a moment.", TRUE, ch, 0, vict, TO_VICT);
-		act("$n looks at $N@n intently for a moment.", TRUE, ch, 0, vict, TO_NOTVICT);
+		act("You look at $N@n intently for a moment.", TRUE, ch, nullptr, vict, TO_CHAR);
+		act("$n looks at you intently for a moment.", TRUE, ch, nullptr, vict, TO_VICT);
+		act("$n looks at $N@n intently for a moment.", TRUE, ch, nullptr, vict, TO_NOTVICT);
 		if (!IS_ANDROID(vict)) {
 			if (GET_ALIGNMENT(vict) > 50 && GET_ALIGNMENT(vict) < 200) {
 				send_to_char(ch, "You sense slightly pure and good ki from them.\r\n");
@@ -607,7 +607,7 @@ ACMD(do_track)
 
 	/* The person can't see the victim. */
 
-	if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))) {
+	if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD))) {
 		send_to_char(ch, "No one is around by that name.\r\n");
 		return;
 	}
@@ -637,7 +637,7 @@ ACMD(do_track)
 	if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_YARDRAT)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_YARDRAT))))
 	{
 		send_to_char(ch, "@WSense@D: @YYardrat@n\r\n");
-		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
+		if (vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD))
 		{
 			char *blah = sense_location(vict);
 			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
@@ -647,7 +647,7 @@ ACMD(do_track)
 	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_EARTH))))
 	{
 		send_to_char(ch, "@WSense@D: @GEarth@n\r\n");
-		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
+		if (vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD))
 		{
 			char *blah = sense_location(vict);
 			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
@@ -657,7 +657,7 @@ ACMD(do_track)
 	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_VEGETA)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_VEGETA))))
 	{
 		send_to_char(ch, "@WSense@D: @YVegeta@n\r\n");
-		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
+		if (vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD))
 		{
 			char *blah = sense_location(vict);
 			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
@@ -667,7 +667,7 @@ ACMD(do_track)
 	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_NAMEK)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_NAMEK))))
 	{
 		send_to_char(ch, "@WSense@D: @gNamek@n\r\n");
-		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
+		if (vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD))
 		{
 			char *blah = sense_location(vict);
 			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
@@ -677,7 +677,7 @@ ACMD(do_track)
 	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_FRIGID)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_FRIGID))))
 	{
 		send_to_char(ch, "@WSense@D: @CFrigid@n\r\n");
-		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
+		if (vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD))
 		{
 			char *blah = sense_location(vict);
 			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
@@ -687,7 +687,7 @@ ACMD(do_track)
 	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_AETHER)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_AETHER))))
 	{
 		send_to_char(ch, "@WSense@D: @mAetherh@n\r\n");
-		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
+		if (vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD))
 		{
 			char *blah = sense_location(vict);
 			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
@@ -697,7 +697,7 @@ ACMD(do_track)
 	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_KONACK)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_KONACK))))
 	{
 		send_to_char(ch, "@WSense@D: @MKonack@n\r\n");
-		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
+		if (vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD))
 		{
 			char *blah = sense_location(vict);
 			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
@@ -707,7 +707,7 @@ ACMD(do_track)
 	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_KANASSA)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_KANASSA))))
 	{
 		send_to_char(ch, "@WSense@D: @cKanassa@n\r\n");
-		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
+		if (vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD))
 		{
 			char *blah = sense_location(vict);
 			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
@@ -717,7 +717,7 @@ ACMD(do_track)
 	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_ARLIA)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_ARLIA))))
 	{
 		send_to_char(ch, "@WSense@D: @yArlia@n\r\n");
-		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
+		if (vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD))
 		{
 			char *blah = sense_location(vict);
 			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
@@ -727,7 +727,7 @@ ACMD(do_track)
 	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(PLANET_ZENITH(IN_ROOM(ch))) && (PLANET_ZENITH(IN_ROOM(vict)))))
    {
 	send_to_char(ch, "@WSense@D: @CZenith@n\r\n");
-	if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
+	if (vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD))
 	{
 	 char *blah = sense_location(vict);
 	 send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
@@ -760,9 +760,9 @@ ACMD(do_track)
 			send_to_char(ch, "Hmm.. something seems to be wrong.\r\n");
 			break;
 		case BFS_ALREADY_THERE:
-			act("You look at $N@n intently for a moment.", TRUE, ch, 0, vict, TO_CHAR);
-			act("$n looks at you intently for a moment.", TRUE, ch, 0, vict, TO_VICT);
-			act("$n looks at $N intently for a moment.", TRUE, ch, 0, vict, TO_NOTVICT);
+			act("You look at $N@n intently for a moment.", TRUE, ch, nullptr, vict, TO_CHAR);
+			act("$n looks at you intently for a moment.", TRUE, ch, nullptr, vict, TO_VICT);
+			act("$n looks at $N intently for a moment.", TRUE, ch, nullptr, vict, TO_NOTVICT);
 			if (!IS_ANDROID(vict)) {
 				if (GET_ALIGNMENT(vict) > 50 && GET_ALIGNMENT(vict) < 200) {
 					send_to_char(ch, "You sense slightly pure and good ki from them.\r\n");

@@ -65,7 +65,7 @@ const char *olc_commands[] = {
    entity, checks permissions, and passes control to olc_interpreter */
 ACMD(do_olc)
 {
-  void *olc_targ = NULL;
+  void *olc_targ = nullptr;
   char mode_arg[MAX_INPUT_LENGTH], arg[MAX_INPUT_LENGTH];
   room_rnum rnum;
   room_vnum vnum = NOWHERE;
@@ -91,7 +91,7 @@ ACMD(do_olc)
     return;
   case OLC_REPEAT:
     if (!(olc_mode = GET_LAST_OLC_MODE(ch)) ||
-	((olc_targ = GET_LAST_OLC_TARG(ch)) == NULL)) {
+	((olc_targ = GET_LAST_OLC_TARG(ch)) == nullptr)) {
       send_to_char(ch, "No last OLC operation!\r\n");
       return;
     }
@@ -150,7 +150,7 @@ ACMD(do_olc)
     return;
   }
 
-  if (olc_targ == NULL)
+  if (olc_targ == nullptr)
     return;
 
   if (!can_modify(ch, vnum)) {
@@ -171,9 +171,9 @@ void olc_interpreter(void *targ, int mode, char *arg)
 {
   int error = 0, command;
   char command_string[MAX_INPUT_LENGTH];
-  struct char_data *olc_mob = NULL;
-  struct room_data *olc_room = NULL;
-  struct obj_data *olc_obj = NULL;
+  struct char_data *olc_mob = nullptr;
+  struct room_data *olc_room = nullptr;
+  struct obj_data *olc_obj = nullptr;
 
   half_chop(arg, command_string, arg);
   if ((command = search_block(command_string, olc_commands, FALSE)) < 0) {
@@ -276,12 +276,12 @@ void olc_string(char **string, size_t maxlen, char *arg)
   if (!*arg) {
     send_to_char(olc_ch, "Enter new string (max of %d characters); use '@' on a new line when done.\r\n", (int) maxlen);
     **string = '\0';
-    string_write(olc_ch->desc, string, maxlen, 0, NULL);
+    string_write(olc_ch->desc, string, maxlen, 0, nullptr);
   } else {
     if (strlen(arg) > maxlen) {
       send_to_char(olc_ch, "String too long (cannot be more than %d chars).\r\n", (int) maxlen);
     } else {
-      if (*string != NULL)
+      if (*string != nullptr)
 	free(*string);
       *string = strdup(arg);
       send_to_char(olc_ch, "%s", CONFIG_OK);

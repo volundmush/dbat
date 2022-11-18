@@ -47,7 +47,7 @@ ACMD(do_oasis_list)
   two_arguments(argument, smin, smax);
   
   if (subcmd == SCMD_OASIS_ZLIST) { /* special case */
-    if (smin != NULL && *smin && is_number(smin)) 
+    if (smin != nullptr && *smin && is_number(smin))
       print_zone(ch, atoi(smin));
     else
       list_zones(ch);  
@@ -103,7 +103,7 @@ ACMD(do_oasis_links)
   skip_spaces(&argument);
   one_argument(argument, arg);
 
-  if (!strcmp(arg, ".") || (arg == NULL || !*arg)) {
+  if (!strcmp(arg, ".") || (arg == nullptr || !*arg)) {
     zrnum = world[IN_ROOM(ch)].zone;
     zvnum = zone_table[zrnum].number;
   } else {
@@ -176,7 +176,7 @@ void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum 
                           world[i].name, world[i].proto_script ? "[TRIG] " : "");
 
       for (j = 0; j < NUM_OF_DIRS; j++) {
-        if (W_EXIT(i, j) == NULL)
+        if (W_EXIT(i, j) == nullptr)
           continue;
         if (W_EXIT(i, j)->to_room == NOWHERE)
           continue;

@@ -268,7 +268,7 @@ extern char *slc_names[];
 
 #ifdef	AUTH_NAMES
 char *authtype_names[] = {
-	"NULL", "KERBEROS_V4", "KERBEROS_V5", "SPX", "MINK", 0,
+	"nullptr", "KERBEROS_V4", "KERBEROS_V5", "SPX", "MINK", 0,
 };
 #else
 extern char *authtype_names[];

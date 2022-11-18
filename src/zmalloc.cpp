@@ -32,7 +32,7 @@ static unsigned char endPad[4] = {
   0xde, 0xad, 0xde, 0xad };
 #endif
 
-FILE *zfd = NULL;
+FILE *zfd = nullptr;
 
 typedef struct meminfo {
   struct meminfo *next;
@@ -70,7 +70,7 @@ void zmalloc_init(void)
   int i;
 
   for (i = 0; i < NUM_ZBUCKETS; i++)
-    memlist[i] = NULL;
+    memlist[i] = nullptr;
 
   zfd = fopen("zmalloc.log","w+");
 }
@@ -83,7 +83,7 @@ void zdump(meminfo *m)
   unsigned char hexline[37], ascline[17], *hexp, *ascp, *inp;
   int len, c = 1;
 
-  if (m->addr == NULL || m->size <= 0)
+  if (m->addr == nullptr || m->size <= 0)
     return;
 
   hexp = hexline;
@@ -121,7 +121,7 @@ unsigned char *zmalloc(int len, char *file, int line)
 
   if (!ret) {
     fprintf(zfd,"zmalloc: malloc FAILED");
-    return NULL;
+    return nullptr;
   }
 #ifndef NO_MEMORY_PADDING
   /* insert begin and end padding to detect buffer under/overruns: */
@@ -136,7 +136,7 @@ unsigned char *zmalloc(int len, char *file, int line)
   m = (meminfo *) calloc(1, sizeof(meminfo));
   if (!m) {
     fprintf(zfd,"zmalloc: FAILED mem alloc for zmalloc struct... bailing!\n");
-    return NULL;
+    return nullptr;
   }
   m->addr = ret;
   m->size = len;
@@ -145,7 +145,7 @@ unsigned char *zmalloc(int len, char *file, int line)
   if (!m->file) {
     fprintf(zfd,"zmalloc: FAILED mem alloc for zmalloc struct... bailing!\n");
     free(m);
-    return NULL;
+    return nullptr;
   }
   m->line = line;
   m->next = memlist[GET_ZBUCKET(ret)];
@@ -159,7 +159,7 @@ unsigned char *zrealloc(unsigned char *what, int len, char *file, int line)
   meminfo *m, *prev_m;
 
   if (what) {
-    for (prev_m = NULL, m = memlist[GET_ZBUCKET(what)]; m; prev_m = m, m = m->next) {
+    for (prev_m = nullptr, m = memlist[GET_ZBUCKET(what)]; m; prev_m = m, m = m->next) {
       if (m->addr == what) {
 #ifndef NO_MEMORY_PADDING
 	ret = (unsigned char *) realloc(what - sizeof(beginPad), len + sizeof(beginPad) + sizeof(endPad));
@@ -171,7 +171,7 @@ unsigned char *zrealloc(unsigned char *what, int len, char *file, int line)
 		      "          %d bytes reallocd at %s:%d.\n",
 		    m->addr, m->size, m->file, m->line, len, file, line);
 	  if (zmalloclogging > 1) zdump(m);
-	  return NULL;
+	  return nullptr;
 	}
 #ifndef NO_MEMORY_PADDING
 	/* insert begin and end padding to detect buffer under/overruns: */
@@ -206,7 +206,7 @@ unsigned char *zrealloc(unsigned char *what, int len, char *file, int line)
     }
   }
 
-  /* NULL or invalid pointer given */
+  /* nullptr or invalid pointer given */
   fprintf(zfd,"zrealloc: invalid pointer 0x%p, %d bytes to realloc at %s:%d.\n",
 	    what, len, file, line);
 
@@ -266,13 +266,13 @@ char *zstrdup(const char *src, char *file, int line)
 #ifndef NO_MEMORY_STRDUP    
   result = (char*)zmalloc(strlen(src) + 1, file, line);
   if (!result)
-    return NULL;
+    return nullptr;
   strcpy(result, src);
   return result;
 #else
   result = (char*)malloc(strlen(src) + 1);
   if (!result)
-    return NULL;
+    return nullptr;
   strcpy(result, src);  /* strcpy ok, size checked above */
   return result;
 #endif
@@ -290,7 +290,7 @@ void zmalloc_check()
   for (i = 0; i < NUM_ZBUCKETS; i++) {
     for (m = memlist[i]; m; m = next_m) {
       next_m = m->next;
-      if (m->addr != 0 && m->frees <= 0) {
+      if (m->addr != nullptr && m->frees <= 0) {
         fprintf(zfd,"zmalloc: UNfreed memory 0x%p %d bytes mallocd at %s:%d\n",
 		m->addr, m->size, m->file, m->line);
         if (zmalloclogging > 1) zdump(m);
@@ -390,8 +390,8 @@ int main()
   shit[-3] = 0x0f;
   free(shit);
 
-/* Free NULL pointer test... */
-  shit = NULL;
+/* Free nullptr pointer test... */
+  shit = nullptr;
   free(shit);
 
   printf("Test completed. See zmalloc.log for the messages.\n");

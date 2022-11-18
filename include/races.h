@@ -19,14 +19,6 @@ int invalid_race(struct char_data *ch, struct obj_data *obj);
 
 // C++ conversion
 
-struct race_data {
-    int race_id;
-    char *name;
-    char *abbr;
-    int size;
-    bool playable;
-};
-
 namespace dbat::race {
 
     enum race_id : uint8_t {

@@ -39,7 +39,7 @@ void trigedit_setup_existing(struct descriptor_data *d, int rnum);
 void redit_setup_existing(struct descriptor_data *d, int rnum);
 void oedit_setup_existing(struct descriptor_data *d, int rnum);
 void medit_setup_existing(struct descriptor_data *d, int rnum);
-void sedit_setup_existing(struct descriptor_data *d, int rnum);
+void sedit_setup_existing(struct descriptor_data *d, vnum rshop_num);
 
 
 /***********************************************************
@@ -68,7 +68,7 @@ ACMD(do_oasis_copy)
     { CON_MEDIT,  real_mobile, medit_save_internally, medit_setup_existing, "mcopy", "mobile" },
     { CON_SEDIT,  real_shop,   sedit_save_internally, sedit_setup_existing, "scopy", "shop" },
     { CON_TRIGEDIT, real_trigger, trigedit_save,   trigedit_setup_existing, "tcopy", "trigger" },
-    { -1,         NULL,        NULL,                  NULL,                 "\n", "\n" }
+    { -1,         nullptr,        nullptr,                  nullptr,                 "\n", "\n" }
   };
 
   /* Find the given connection type in the table (passed in subcmd). */
@@ -136,7 +136,7 @@ ACMD(do_oasis_copy)
   if ((OLC_ZNUM(d) = real_zone_by_thing(dst_vnum)) == NOWHERE) {
     send_to_char(ch, "Sorry, there is no zone for the given vnum (#%d)!\r\n", dst_vnum);
     free(d->olc);
-    d->olc = NULL;
+    d->olc = nullptr;
     return;
   }
 
@@ -144,7 +144,7 @@ ACMD(do_oasis_copy)
   if (!can_edit_zone(ch, OLC_ZNUM(d))) {
     send_cannot_edit(ch, zone_table[OLC_ZNUM(d)].number);
     free(d->olc);
-    d->olc = NULL;
+    d->olc = nullptr;
     return;
   }
 
@@ -223,7 +223,7 @@ ACMD(do_dig)
       if (W_EXIT(IN_ROOM(ch), dir)->keyword)
         free(W_EXIT(IN_ROOM(ch), dir)->keyword);
       free(W_EXIT(IN_ROOM(ch), dir));
-      W_EXIT(IN_ROOM(ch), dir) = NULL;
+      W_EXIT(IN_ROOM(ch), dir) = nullptr;
       add_to_save_list(zone_table[world[IN_ROOM(ch)].zone].number, SL_WLD);
       send_to_char(ch, "You remove the exit to the %s.\r\n", dirs[dir]);
       return;
@@ -300,8 +300,8 @@ ACMD(do_dig)
    * Now dig.
    */
   CREATE(W_EXIT(IN_ROOM(ch), dir), struct room_direction_data, 1);
-  W_EXIT(IN_ROOM(ch), dir)->general_description = NULL;
-  W_EXIT(IN_ROOM(ch), dir)->keyword = NULL;
+  W_EXIT(IN_ROOM(ch), dir)->general_description = nullptr;
+  W_EXIT(IN_ROOM(ch), dir)->keyword = nullptr;
   W_EXIT(IN_ROOM(ch), dir)->to_room = rrnum;
   add_to_save_list(zone_table[world[IN_ROOM(ch)].zone].number, SL_WLD);
   save_rooms(zone_table[world[rrnum].zone].number);
@@ -316,8 +316,8 @@ ACMD(do_dig)
                      rvnum, dirs[rev_dir[dir]]);
   else {
     CREATE(W_EXIT(rrnum, rev_dir[dir]), struct room_direction_data, 1);
-    W_EXIT(rrnum, rev_dir[dir])->general_description = NULL;
-    W_EXIT(rrnum, rev_dir[dir])->keyword = NULL;
+    W_EXIT(rrnum, rev_dir[dir])->general_description = nullptr;
+    W_EXIT(rrnum, rev_dir[dir])->keyword = nullptr;
     W_EXIT(rrnum, rev_dir[dir])->to_room = IN_ROOM(ch);
     add_to_save_list(zone_table[world[rrnum].zone].number, SL_WLD);
     save_rooms(zone_table[world[rrnum].zone].number);
@@ -397,7 +397,7 @@ ACMD(do_rcopy)
  if (world[trnum].ex_description) 
     copy_ex_descriptions(&world[rrnum].ex_description, world[trnum].ex_description); 
  else 
-   world[rrnum].ex_description = NULL; 
+   world[rrnum].ex_description = nullptr;
 
   /* Finally copy over room flags */ 
   for(i=0; i < AF_ARRAY_MAX; i++)  {

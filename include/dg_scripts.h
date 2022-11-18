@@ -206,7 +206,7 @@ typedef struct char_data char_data;
 /* used for actor memory triggers */
 struct script_memory {
   long id;				/* id of who to remember */
-  char *cmd;				/* command, or NULL for generic */
+  char *cmd;				/* command, or nullptr for generic */
   struct script_memory *next;
 };
 

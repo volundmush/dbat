@@ -585,12 +585,12 @@ void do_start(struct char_data *ch)
           throw_obj = read_object(19050, VIRTUAL);
        obj_to_char(throw_obj, ch);
        if (rand_number(1, 2) == 2) {
-           throw_obj = NULL;
+           throw_obj = nullptr;
            throw_obj = read_object(19050, VIRTUAL);
         obj_to_char(throw_obj, ch);
        }
        if (rand_number(1, 2) == 2) {
-           throw_obj = NULL;
+           throw_obj = nullptr;
            throw_obj = read_object(19050, VIRTUAL);
         obj_to_char(throw_obj, ch);
        }
@@ -599,7 +599,7 @@ void do_start(struct char_data *ch)
        struct obj_data *throw_obj;
           throw_obj = read_object(19055, VIRTUAL);
        obj_to_char(throw_obj, ch);
-          throw_obj = NULL;
+          throw_obj = nullptr;
           throw_obj = read_object(19055, VIRTUAL);
        obj_to_char(throw_obj, ch);
       }
@@ -826,12 +826,12 @@ void advance_level(struct char_data *ch, int whichclass)
 
   CREATE(llog, struct levelup_data, 1);
   llog->next = ch->level_info;
-  llog->prev = NULL;
+  llog->prev = nullptr;
   if (llog->next)
     llog->next->prev = llog;
   ch->level_info = llog;
 
-  llog->skills = llog->feats = NULL;
+  llog->skills = llog->feats = nullptr;
   llog->type = LEVELTYPE_CLASS;
   llog->spec = whichclass;
   llog->level = GET_LEVEL(ch);
