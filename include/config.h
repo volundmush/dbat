@@ -13,7 +13,7 @@ extern int64_t toppoint[25];
 
 extern int ERAPLAYERS, TOPCOUNTDOWN, HEDITS, WISHTIME, TOP_OF_NEWS, LASTNEWS;
 extern char *NEWS_TITLE;
-
+extern int crash_file_timeout, rent_file_timeout, imc_is_enabled;
 extern time_t BOARDNEWMORT, BOARDNEWIMM, BOARDNEWCOD, BOARDNEWDUO, BOARDNEWBUI, NEWSUPDATE;
 extern time_t INTERESTTIME, LASTINTEREST, LASTPAYOUT;
 extern int LASTPAYTYPE;

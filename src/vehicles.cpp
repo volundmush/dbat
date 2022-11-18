@@ -328,7 +328,6 @@ static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, ch
 
 struct obj_data *find_vehicle_by_vnum(int vnum) 
 {
-  extern struct obj_data * object_list;
   struct obj_data * i;
 
   for (i = object_list; i; i = i->next)
@@ -341,7 +340,6 @@ struct obj_data *find_vehicle_by_vnum(int vnum)
 
 struct obj_data *find_hatch_by_vnum(int vnum)
 {
-  extern struct obj_data * object_list;
   struct obj_data * i;
 
   for (i = object_list; i; i = i->next)

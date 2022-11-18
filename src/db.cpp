@@ -122,8 +122,6 @@ struct weather_data weather_info;    /* the infomation about the weather */
 struct player_special_data dummy_mob;    /* dummy spec area for mobs	*/
 struct reset_q_type reset_q;    /* queue of zones to be reset	 */
 
-extern struct board_info *boards; /* our boards */
-extern int imc_is_enabled;
 
 /* local functions */
 static void mob_stats(struct char_data *mob);
@@ -229,10 +227,6 @@ void sort_feats(void);
 void free_assemblies(void);
 
 /* external vars */
-extern int no_specials;
-extern int scheck;
-
-extern long top_idnum;
 
 static void dragon_level(struct char_data *ch) {
     struct descriptor_data *d;
@@ -5114,8 +5108,6 @@ void strip_string(char *buffer) {
 }
 
 /* External variables from config.c */
-extern int crash_file_timeout;
-extern int rent_file_timeout;
 
 void load_default_config(void) {
     /****************************************************************************/

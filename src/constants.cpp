@@ -10,11 +10,11 @@
 
 #include "constants.h"
 
-cpp_extern const char *circlemud_version = "CircleMUD, version 3.1";
+const char *circlemud_version = "CircleMUD, version 3.1";
 
-cpp_extern const char *oasisolc_version = "OasisOLC 2.0.6";
+const char *oasisolc_version = "OasisOLC 2.0.6";
 
-cpp_extern const char *ascii_pfiles_version = "ASCII Player Files 3.0.1";
+const char *ascii_pfiles_version = "ASCII Player Files 3.0.1";
 
 /* strings corresponding to ordinals/bitvectors in structs.h ***********/
 

@@ -37,7 +37,6 @@
 #include "local_limits.h"
 #include "clan.h"
 #include "mail.h"
-#include "races.h"
 #include "constants.h"
 #include "screen.h"
 
@@ -285,7 +284,7 @@ void init_game(uint16_t cmport)
 socklen_t init_socket(uint16_t cmport)
 {
   socklen_t s;
-  struct sockaddr_in sa;
+  struct sockaddr_in sa{};
   int opt;
 
     if ((s = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
@@ -302,7 +301,7 @@ socklen_t init_socket(uint16_t cmport)
   set_sendbuf(s);
 
     {
-        struct linger ld;
+        struct linger ld{};
 
         ld.l_onoff = 0;
         ld.l_linger = 0;
@@ -1708,7 +1707,6 @@ const char RANDOM_COLORS[] = "bgcrmywBGCRMWY";
 #define NEW_STRING_LENGTH (size_t)(dest_char-save_pos)
 size_t proc_colors(char *txt, size_t maxlen, int parse, char **choices)
 {
-  extern char *default_color_choices[NUM_COLOR+1];
   char *dest_char, *source_char, *color_char, *save_pos, *replacement = nullptr;
   int i, temp_color;
   size_t wanted;
@@ -2799,7 +2797,7 @@ void check_idle_passwords(void)
   }
 }
 
-void check_idle_menu(void)
+void check_idle_menu()
 {
   struct descriptor_data *d, *next_d;
 
@@ -2898,10 +2896,10 @@ void hupsig(int sig)
  * SunOS Release 4.0.2 (sun386) needs this too, according to Tim Aldric.
  */
 
-void signal_setup(void)
+void signal_setup()
 {
-  struct itimerval itime;
-  struct timeval interval;
+  struct itimerval itime{};
+  struct timeval interval{};
 
   /* user signal 1: reread wizlists.  Used by autowiz system. */
   signal(SIGUSR1, reread_wizlists);
@@ -2980,8 +2978,6 @@ int arena_watch(struct char_data *ch)
 void send_to_eaves(const char *messg, struct char_data *tch, ...)
 {
  struct descriptor_data *d;
-
-
 
  for (d = descriptor_list; d; d = d->next) {
      if(STATE(d) != CON_PLAYING)

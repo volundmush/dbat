@@ -202,7 +202,7 @@ int text_processed(char *field, char *subfield, struct trig_var_data *vd,
     /* find the mud command returned from this text */
 /* NOTE: you may need to replace "cmd_info" with "complete_cmd_info", */
 /* depending on what patches you've got applied.                      */
-    extern const struct command_info cmd_info[];
+
 /* on older source bases:    extern struct command_info *cmd_info; */
     int length, cmd;
     for (length = strlen(vd->value), cmd = 0;

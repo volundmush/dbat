@@ -12,6 +12,7 @@
 
 // global variables
 extern int *cmd_sort_info;
+extern char *default_color_choices[NUM_COLOR+1];
 
 // functions
 extern int readIntro(struct char_data *ch, struct char_data *vict);

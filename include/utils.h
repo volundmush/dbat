@@ -30,7 +30,7 @@ struct time_info_data *mud_time_passed(time_t t2, time_t t1);
 extern int masadv(char *tmp, struct char_data *ch);
 extern void demon_refill_lf(struct char_data *ch, int64_t num);
 extern void dispel_ash(struct char_data *ch);
-
+extern char *strlwr(char *s);
 extern void prune_crlf(char *txt);
 extern int count_metamagic_feats(struct char_data *ch);
 extern int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech);

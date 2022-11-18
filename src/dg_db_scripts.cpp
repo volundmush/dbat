@@ -22,7 +22,6 @@
 #include "comm.h"
 #include "constants.h"
 
-extern void half_chop(char *string, char *arg1, char *arg2);
 extern bitvector_t asciiflag_conv(char *flag);
 
 /* local functions */

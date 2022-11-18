@@ -29,9 +29,6 @@ int feat_sort_info[MAX_FEATS + 1];
 char buf3[MAX_STRING_LENGTH];
 char buf4[MAX_STRING_LENGTH];
 
-/* External variables and structures */
-extern int spell_sort_info[SKILL_TABLE_SIZE+1];
-
 /* External functions*/
 int count_metamagic_feats(struct char_data *ch);
 

@@ -22,6 +22,8 @@
 #include "fight.h"
 #include "races.h"
 #include "act.informative.h"
+#include "act.misc.h"
+#include "act.movement.h"
 
 /* local vars */
 static int extractions_pending = 0;
@@ -34,9 +36,6 @@ static void update_object(struct obj_data *obj, int use);
 
 
 /* external functions */
-extern void handle_multi_merge(struct char_data *form);
-extern void carry_drop(struct char_data *ch, int type);
-extern void auc_load(struct obj_data *obj);
 struct obj_data *find_vehicle_by_vnum(int vnum);
 void remove_follower(struct char_data *ch);
 void clearMemory(struct char_data *ch);
@@ -140,7 +139,7 @@ int is_name(const char *str, const char *namelist)
 int isname(const char *str, const char *namelist)
 {
   char *newlist;
-  register char *curtok;
+  char *curtok;
   static char newlistbuf[MAX_STRING_LENGTH];
 
   if (!str || !*str || !namelist || !*namelist) {

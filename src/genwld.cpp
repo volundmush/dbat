@@ -246,7 +246,6 @@ int delete_room(room_rnum rnum)
    * Remove this room from all shop lists.
    */
   {
-    extern int top_shop;
      for (i = 0; i < top_shop; i++) { 
       for (j = 0;SHOP_ROOM(i, j) != NOWHERE;j++) {
         if (SHOP_ROOM(i, j) == world[rnum].number)

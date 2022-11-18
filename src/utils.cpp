@@ -3895,7 +3895,6 @@ int cook_element(room_rnum room) {
 
 // A C++ version of proc_color from comm.c. it returns the colored string.
 std::string processColors(const std::string& txt, int parse, char **choices) {
-    extern char *default_color_choices[NUM_COLOR+1];
     char *dest_char, *source_char, *color_char, *save_pos, *replacement = nullptr;
     int i, temp_color;
     size_t wanted;
@@ -4112,8 +4111,6 @@ int insure_directory(char *path, int isfile) {
   char *p;
   char *temp;
   struct stat st;
-
-  extern int errno;
 
   /* if it's a file, remove that, we're only checking dirs; */
   if(isfile) {
