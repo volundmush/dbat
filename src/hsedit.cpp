@@ -133,7 +133,7 @@ void hsedit_save_internally(struct descriptor_data *d) {
 
 /*------------------------------------------------------------------------*/
 
-void hsedit_save_to_disk(void) {
+void hsedit_save_to_disk() {
     /* Why bother writing a new function when there is already one that does the job */
     House_save_control();
 }

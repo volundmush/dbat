@@ -65,9 +65,9 @@ IMC_FUN *imc_function(const char *func);
 
 const char *imc_send_social(CHAR_DATA *ch, const char *argument, int telloption);
 
-void imc_save_config(void);
+void imc_save_config();
 
-void imc_save_channels(void);
+void imc_save_channels();
 
 const char *const imcperm_names[] = {
         "Notset", "None", "Mort", "Imm", "Admin", "Imp"
@@ -622,7 +622,7 @@ bool imc_isignoring(CHAR_DATA *ch, const char *ignore) {
 }
 
 /* There should only one of these..... */
-void imc_delete_info(void) {
+void imc_delete_info() {
             IMCSTRFREE(this_imcmud->servername);
             IMCSTRFREE(this_imcmud->rhost);
             IMCSTRFREE(this_imcmud->network);
@@ -755,7 +755,7 @@ bool imccheck_permissions(CHAR_DATA *ch, int checkvalue, int targetvalue, bool e
     return true;
 }
 
-IMC_BAN *imc_newban(void) {
+IMC_BAN *imc_newban() {
     IMC_BAN *ban;
 
     IMCCREATE(ban, IMC_BAN, 1);
@@ -1909,7 +1909,7 @@ char *process_who_template(char *head, char *tail, char *plrlines, char *immline
     return master;
 }
 
-char *imc_assemble_who(void) {
+char *imc_assemble_who() {
     CHAR_DATA *person;
     DESCRIPTOR_DATA *d;
     int pcount = 0;
@@ -2237,7 +2237,7 @@ PFUN(imc_send_keepalive) {
     imc_write_packet(p);
 }
 
-void imc_request_keepalive(void) {
+void imc_request_keepalive() {
     IMC_PACKET *p;
 
     p = imc_newpacket("*", "keepalive-request", "*@*");
@@ -2246,7 +2246,7 @@ void imc_request_keepalive(void) {
     imc_send_keepalive(nullptr, "*@*");
 }
 
-void imc_firstrefresh(void) {
+void imc_firstrefresh() {
     IMC_PACKET *p;
 
     p = imc_newpacket("*", "ice-refresh", "IMC@$");
@@ -2363,7 +2363,7 @@ int imc_get_ucache_gender(const char *name) {
 }
 
 /* Saves the ucache info to disk because it would just be spamcity otherwise */
-void imc_save_ucache(void) {
+void imc_save_ucache() {
     FILE *fp;
     IMCUCACHE_DATA *user;
 
@@ -2383,7 +2383,7 @@ void imc_save_ucache(void) {
     IMCFCLOSE(fp);
 }
 
-void imc_prune_ucache(void) {
+void imc_prune_ucache() {
     IMCUCACHE_DATA *ucache, *next_ucache;
 
     for (ucache = first_imcucache; ucache; ucache = next_ucache) {
@@ -2504,7 +2504,7 @@ PFUN(imc_recv_closenotify) {
     r->expired = true;
 }
 
-void imc_register_default_packets(void) {
+void imc_register_default_packets() {
     /*
     * Once registered, these are not cleared unless the mud is shut down
     */
@@ -2652,7 +2652,7 @@ void imc_handle_autosetup(char *source, char *servername, char *cmd, char *txt, 
     imc_shutdown(false);
 }
 
-bool imc_write_socket(void) {
+bool imc_write_socket() {
     const char *ptr = this_imcmud->outbuf;
     int nleft = this_imcmud->outtop, nwritten = 0;
 
@@ -2783,7 +2783,7 @@ void imc_process_authentication(const char *packet) {
 /*
  * Transfer one line from input buffer to input line.
  */
-bool imc_read_buffer(void) {
+bool imc_read_buffer() {
     size_t i = 0, j = 0;
     unsigned char ended = 0;
     int k = 0;
@@ -2815,7 +2815,7 @@ bool imc_read_buffer(void) {
     return ended;
 }
 
-bool imc_read_socket(void) {
+bool imc_read_socket() {
     size_t iStart, iErr;
     short loop_count = 0;
     bool begin = true;
@@ -2855,7 +2855,7 @@ bool imc_read_socket(void) {
     return true;
 }
 
-void imc_loop(void) {
+void imc_loop() {
     fd_set in_set, out_set;
     struct timeval last_time, null_time;
 
@@ -3197,7 +3197,7 @@ void imc_initchar(CHAR_DATA *ch) {
  * Network Startup and Shutdown functions. *
  *******************************************/
 
-void imc_loadhistory(void) {
+void imc_loadhistory() {
     char filename[256];
     FILE *tempfile;
     IMC_CHANNEL *tempchan = nullptr;
@@ -3223,7 +3223,7 @@ void imc_loadhistory(void) {
     }
 }
 
-void imc_savehistory(void) {
+void imc_savehistory() {
     char filename[256];
     FILE *tempfile;
     IMC_CHANNEL *tempchan = nullptr;
@@ -3249,7 +3249,7 @@ void imc_savehistory(void) {
     }
 }
 
-void imc_save_channels(void) {
+void imc_save_channels() {
     IMC_CHANNEL *c;
     FILE *fp;
 
@@ -3328,7 +3328,7 @@ void imc_readchannel(IMC_CHANNEL *channel, FILE *fp) {
     }
 }
 
-void imc_loadchannels(void) {
+void imc_loadchannels() {
     FILE *fp;
     IMC_CHANNEL *channel;
 
@@ -3382,7 +3382,7 @@ void imc_loadchannels(void) {
 }
 
 /* Save current mud-level ban list. Short, simple. */
-void imc_savebans(void) {
+void imc_savebans() {
     FILE *out;
     IMC_BAN *ban;
 
@@ -3401,7 +3401,7 @@ void imc_savebans(void) {
     IMCFCLOSE(out);
 }
 
-void imc_readbans(void) {
+void imc_readbans() {
     FILE *inf;
     char *word;
     char temp[SMST];
@@ -3438,7 +3438,7 @@ void imc_readbans(void) {
     IMCFCLOSE(inf);
 }
 
-void imc_savecolor(void) {
+void imc_savecolor() {
     FILE *fp;
     IMC_COLOR *color;
 
@@ -3494,7 +3494,7 @@ void imc_readcolor(IMC_COLOR *color, FILE *fp) {
     }
 }
 
-void imc_load_color_table(void) {
+void imc_load_color_table() {
     FILE *fp;
     IMC_COLOR *color;
 
@@ -3538,7 +3538,7 @@ void imc_load_color_table(void) {
     IMCFCLOSE(fp);
 }
 
-void imc_savehelps(void) {
+void imc_savehelps() {
     FILE *fp;
     IMC_HELP_DATA *help;
 
@@ -3616,7 +3616,7 @@ void imc_readhelp(IMC_HELP_DATA *help, FILE *fp) {
     }
 }
 
-void imc_load_helps(void) {
+void imc_load_helps() {
     FILE *fp;
     IMC_HELP_DATA *help;
 
@@ -3660,7 +3660,7 @@ void imc_load_helps(void) {
     IMCFCLOSE(fp);
 }
 
-void imc_savecommands(void) {
+void imc_savecommands() {
     FILE *fp;
     IMC_CMD_DATA *cmd;
     IMC_ALIAS *alias;
@@ -3754,7 +3754,7 @@ void imc_readcommand(IMC_CMD_DATA *cmd, FILE *fp) {
     }
 }
 
-bool imc_load_commands(void) {
+bool imc_load_commands() {
     FILE *fp;
     IMC_CMD_DATA *cmd;
 
@@ -3835,7 +3835,7 @@ void imc_readucache(IMCUCACHE_DATA *user, FILE *fp) {
     }
 }
 
-void imc_load_ucache(void) {
+void imc_load_ucache() {
     FILE *fp;
     IMCUCACHE_DATA *user;
 
@@ -3879,7 +3879,7 @@ void imc_load_ucache(void) {
     imcucache_clock = imc_time + 86400;
 }
 
-void imc_save_config(void) {
+void imc_save_config() {
     FILE *fp;
 
     if (!(fp = fopen(IMC_CONFIG_FILE, "w"))) {
@@ -4128,7 +4128,7 @@ char *parse_who_tail(char *tail) {
     return newtail;
 }
 
-void imc_delete_who_template(void) {
+void imc_delete_who_template() {
             IMCSTRFREE(whot->head);
             IMCSTRFREE(whot->plrheader);
             IMCSTRFREE(whot->immheader);
@@ -4139,7 +4139,7 @@ void imc_delete_who_template(void) {
     IMCDISPOSE(whot);
 }
 
-void imc_load_who_template(void) {
+void imc_load_who_template() {
     FILE *fp;
     char hbuf[LGST];
     char *word;
@@ -4202,11 +4202,11 @@ void imc_load_who_template(void) {
     IMCFCLOSE(fp);
 }
 
-void imc_load_templates(void) {
+void imc_load_templates() {
     imc_load_who_template();
 }
 
-int ipv4_connect(void) {
+int ipv4_connect() {
     struct sockaddr_in sa;
     struct hostent *hostp;
 #ifdef WIN32
@@ -4275,7 +4275,7 @@ int ipv4_connect(void) {
     return desc;
 }
 
-bool imc_server_connect(void) {
+bool imc_server_connect() {
 #if defined(IPV6)
                                                                                                                             struct addrinfo hints, *ai_list, *ai;
    char rport[SMST];
@@ -4396,7 +4396,7 @@ bool imc_server_connect(void) {
     return true;
 }
 
-void imc_delete_templates(void) {
+void imc_delete_templates() {
     imc_delete_who_template();
 }
 
@@ -4481,7 +4481,7 @@ void free_imcdata(bool complete) {
     }
 }
 
-void imc_hotboot(void) {
+void imc_hotboot() {
     FILE *fp;
 
     if (this_imcmud && this_imcmud->state == IMC_ONLINE) {

@@ -1095,7 +1095,7 @@ static void start_auction(struct char_data *ch, struct obj_data *obj, int bid) {
     aucstat = AUC_OFFERING;
 }
 
-void check_auction(void) {
+void check_auction() {
     switch (aucstat) {
         case AUC_NULL_STATE:
             return;

@@ -166,7 +166,7 @@ int fgetlinetomax(FILE *file, char *p, const int maxlen) {
 // return a copy of where the clan should be saved to
 //
 char *clanFilename(const struct clan_data *S) {
-
+    static char buf[MAX_STRING_LENGTH];
     int i;
 
     for (i = 0; i < num_clans; i++)
@@ -176,9 +176,8 @@ char *clanFilename(const struct clan_data *S) {
     if (i == num_clans)
         return nullptr;
     else {
-        char buf[MAX_STRING_LENGTH]; // I doubt we'll ever have a billion clans ...
         sprintf(buf, "%s%d.cla", LIB_CLAN, i);
-        return strdup(buf);
+        return buf;
     }
 }
 
@@ -192,7 +191,7 @@ struct clan_data *clanLoad(const char *filename) {
 
     FILE *fl;
     char line[MAX_STRING_LENGTH];
-    char *info;
+
     int id, infolen;
     struct clan_data *S;
 
@@ -291,7 +290,6 @@ struct clan_data *clanLoad(const char *filename) {
 
 
     infolen = 0;
-    info = strdup("");
     // keep on taking in strings until we hit a line
     // that contains a single ~
     strcpy(line, "");
@@ -300,7 +298,6 @@ struct clan_data *clanLoad(const char *filename) {
     if (strlen(line) > 0) {
         // we should do something here ...
     }
-
 
     fclose(fl);
     return S;
@@ -590,7 +587,7 @@ void clanINFOW(char *name, struct char_data *ch) {
     }
 }
 
-void clan_update(void) {
+void clan_update() {
     int i;
 
     if (num_clans < 1) {

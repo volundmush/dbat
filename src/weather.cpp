@@ -19,14 +19,14 @@
 
 static void another_hour(int mode);
 
-static void weather_change(void);
+static void weather_change();
 
 static void phase_powerup(struct char_data *ch, int type, int phase);
 
-static void grow_plants(void);
+static void grow_plants();
 
 
-static void grow_plants(void) {
+static void grow_plants() {
     struct obj_data *k;
 
     for (k = object_list; k; k = k->next) {
@@ -136,7 +136,7 @@ static void another_hour(int mode) {
 }
 
 
-static void weather_change(void) {
+static void weather_change() {
     int diff, change;
     if ((time_info.month >= 9) && (time_info.month <= 16))
         diff = (weather_info.pressure > 985 ? -2 : 2);

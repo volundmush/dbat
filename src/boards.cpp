@@ -59,7 +59,7 @@ it.
 
 struct board_info *bboards = nullptr;  /* our global board structure */
 
-void init_boards(void) {
+void init_boards() {
     int i, j;
     long board_vnum;
     struct xap_dir xd;
@@ -198,15 +198,15 @@ int save_board(struct board_info *ts) {
 /* see accompanying document for board file format */
 
 struct board_info *load_board(obj_vnum board_vnum) {
-    struct board_info *temp_board;
-    struct board_msg *bmsg;
+    struct board_info *temp_board = nullptr;
+    struct board_msg *bmsg = nullptr;
     struct obj_data *obj = nullptr;
-    struct stat st;
-    struct board_memory *memboard, *list;
-    int t[10], mnum, poster, timestamp, msg_num, retval = 0;
+    struct stat st{};
+    struct board_memory *memboard = nullptr, *list = nullptr;
+    int t[10], mnum, poster = 0, timestamp = 0, msg_num = 0, retval = 0;
     char filebuf[512], buf[512], poster_name[128];
-    FILE *fl;
-    int sflag;
+    FILE *fl = nullptr;
+    int sflag = 0;
 
     sprintf(filebuf, "%s%d", BOARD_DIRECTORY, board_vnum);
     if (!(fl = fopen(filebuf, "r"))) {

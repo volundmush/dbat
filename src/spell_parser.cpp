@@ -34,7 +34,7 @@ void mag_nextstrike(int level, struct char_data *caster, int spellnum);
 
 void unused_spell(int spl);
 
-void mag_assign_spells(void);
+void mag_assign_spells();
 
 /*
  * This arrangement is pretty stupid, but the number of skills is limited by
@@ -1012,7 +1012,7 @@ void skillo(int skill, const char *name, int flags) {
  * or skill, look in class.c.  -JE 5 Feb 1996
  */
 
-void mag_assign_spells(void) {
+void mag_assign_spells() {
     int i;
 
     /* Do not change the loop below. */

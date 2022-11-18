@@ -18,7 +18,7 @@
 #include "class.h"
 
 /* From db.c */
-void init_mobile_skills(void);
+void init_mobile_skills();
 
 
 int update_mobile_strings(struct char_data *t, struct char_data *f);

@@ -33,7 +33,7 @@ void House_delete_file(room_vnum vnum);
 
 int find_house(room_vnum vnum);
 
-void House_save_control(void);
+void House_save_control();
 
 void hcontrol_build_house(struct char_data *ch, char *arg);
 
@@ -149,7 +149,7 @@ int find_house(room_vnum vnum) {
 
 
 /* Save the house control information */
-void House_save_control(void) {
+void House_save_control() {
     FILE *fl;
 
     if (!(fl = fopen(HCONTROL_FILE, "wb"))) {
@@ -165,7 +165,7 @@ void House_save_control(void) {
 
 /* call from boot_db - will load control recs, load objs, set atrium bits */
 /* should do sanity checks on vnums & remove invalid records */
-void House_boot(void) {
+void House_boot() {
     struct house_control_rec temp_house;
     room_rnum real_house;
     FILE *fl;
@@ -459,7 +459,7 @@ ACMD(do_house) {
 
 
 /* crash-save all the houses */
-void House_save_all(void) {
+void House_save_all() {
     int i;
     room_rnum real_house;
 

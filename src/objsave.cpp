@@ -183,7 +183,7 @@ static int inv_backup(struct char_data *ch) {
         sprintf(alpha, "U-Z");
     }
 
-    sprintf(buf, "" SLASH"home" SLASH"m053car2" SLASH"dbat" SLASH"lib"SLASH"plrobjs"SLASH"%s"SLASH"%s.copy", alpha,
+    sprintf(buf, "" SLASH"home" SLASH"m053car2" SLASH"dbat" SLASH"lib" SLASH"plrobjs" SLASH"%s" SLASH"%s.copy", alpha,
             ch->name);
 
     if (!(backup = fopen(buf, "r")))
@@ -219,11 +219,11 @@ int cp(struct char_data *ch) {
         sprintf(alpha, "U-Z");
     }
 
-    sprintf(target_file, ""SLASH"home"SLASH"m053car2"SLASH"dbat"SLASH"lib"SLASH"plrobjs"SLASH"%s"SLASH"%s.copy", alpha,
+    sprintf(target_file, "" SLASH"home" SLASH"m053car2" SLASH"dbat" SLASH"lib" SLASH"plrobjs" SLASH"%s" SLASH"%s.copy", alpha,
             ch->name);
     if (!get_filename(buf2, sizeof(buf2), NEW_OBJ_FILES, GET_NAME(ch)))
         return -1;
-    sprintf(source_file, ""SLASH"home"SLASH"m053car2"SLASH"dbat"SLASH"lib"SLASH"%s", buf2);
+    sprintf(source_file, "" SLASH"home" SLASH"m053car2" SLASH"dbat" SLASH"lib" SLASH"%s", buf2);
 
     if (!(source = fopen(source_file, "r"))) {
         log("Source failed to load.");
@@ -474,7 +474,7 @@ int Crash_clean_file(char *name) {
 }
 
 
-void update_obj_file(void) {
+void update_obj_file() {
     int i;
 
     for (i = 0; i <= top_of_p_table; i++)
@@ -1074,7 +1074,7 @@ SPECIAL(cryogenicist) {
 }
 
 
-void Crash_save_all(void) {
+void Crash_save_all() {
     struct descriptor_data *d;
     for (d = descriptor_list; d; d = d->next) {
         if ((STATE(d) == CON_PLAYING) && !IS_NPC(d->character)) {
@@ -1316,12 +1316,12 @@ int Crash_load(struct char_data *ch) {
                             break;
                         case 'G':
                             get_line(fl, line);
-                            sscanf(line, "%"TMT, &temp->generation);
+                            sscanf(line, "%" TMT, &temp->generation);
                             get_line(fl, line);
                             break;
                         case 'U':
                             get_line(fl, line);
-                            sscanf(line, "%"I64T, &temp->unique_id);
+                            sscanf(line, "%" I64T, &temp->unique_id);
                             get_line(fl, line);
                             break;
                         case 'S':

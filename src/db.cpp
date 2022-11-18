@@ -168,15 +168,15 @@ static int parse_enhanced_mob(FILE *mob_f, struct char_data *ch, int nr);
 
 static void get_one_line(FILE *fl, char *buf);
 
-static void check_start_rooms(void);
+static void check_start_rooms();
 
-static void renum_world(void);
+static void renum_world();
 
-static void renum_zone_table(void);
+static void renum_zone_table();
 
 static void log_zone_error(zone_rnum zone, int cmd_no, const char *message);
 
-static void reset_time(void);
+static void reset_time();
 
 static int suntzu_armor_convert(struct obj_data *obj);
 
@@ -192,39 +192,39 @@ void paginate_string(char *str, struct descriptor_data *d);
 
 void free_alias(struct alias_data *a);
 
-void mag_assign_spells(void);
+void mag_assign_spells();
 
-void create_command_list(void);
+void create_command_list();
 
-void sort_spells(void);
+void sort_spells();
 
-void load_banned(void);
+void load_banned();
 
-void Read_Invalid_List(void);
+void Read_Invalid_List();
 
 int hsort(const void *a, const void *b);
 
 void prune_crlf(char *txt);
 
-void build_player_index(void);
+void build_player_index();
 
-void clean_pfiles(void);
+void clean_pfiles();
 
 void boot_the_guilds(FILE *gm_f, char *filename, int rec_count);
 
-void destroy_guilds(void);
+void destroy_guilds();
 
-void assign_the_guilds(void);
+void assign_the_guilds();
 
 void memorize_add(struct char_data *ch, int spellnum, int timer);
 
-void assign_feats(void);
+void assign_feats();
 
-void free_feats(void);
+void free_feats();
 
-void sort_feats(void);
+void sort_feats();
 
-void free_assemblies(void);
+void free_assemblies();
 
 /* external vars */
 
@@ -475,13 +475,13 @@ static int suntzu_weapon_convert(int wp_type) {
 *************************************************************************/
 
 /* this is necessary for the autowiz system */
-void reboot_wizlists(void) {
+void reboot_wizlists() {
     file_to_string_alloc(WIZLIST_FILE, &wizlist);
     file_to_string_alloc(IMMLIST_FILE, &immlist);
 }
 
 /* Wipe out all the loaded text files, for shutting down. */
-void free_text_files(void) {
+void free_text_files() {
     char **textfiles[] = {
             &wizlist, &immlist, &news, &credits, &motd, &imotd, &help, &info,
             &policies, &handbook, &background, &GREETINGS, &GREETANSI, &ihelp, nullptr
@@ -601,7 +601,7 @@ ACMD(do_reboot) {
 }
 
 
-void boot_world(void) {
+void boot_world() {
     log("Loading level tables.");
     load_levels();
 
@@ -666,7 +666,7 @@ void free_extra_descriptions(struct extra_descr_data *edesc) {
 
 
 /* Free the world, in a memory allocation sense. */
-void destroy_db(void) {
+void destroy_db() {
     ssize_t cnt, itr;
     struct char_data *chtmp;
     struct obj_data *objtmp;
@@ -728,6 +728,7 @@ void destroy_db(void) {
             free(obj_proto[cnt].action_description);
         if (obj_proto[cnt].ex_description)
             free_extra_descriptions(obj_proto[cnt].ex_description);
+        if (obj_proto[cnt].sbinfo) free(obj_proto[cnt].sbinfo);
 
         /* free script proto list */
         free_proto_script(&obj_proto[cnt], OBJ_TRIGGER);
@@ -846,6 +847,12 @@ void destroy_db(void) {
 
     log("Freeing Assemblies.");
     free_assemblies();
+
+    for(auto &s : dbat::sensei::sensei_map) delete s.second;
+    dbat::sensei::sensei_map.clear();
+    for(auto &r : dbat::race::race_map) delete r.second;
+    dbat::race::race_map.clear();
+
 }
 
 
@@ -870,7 +877,7 @@ void init_obj_unique_hash() {
 }
 
 /* body of the booting system */
-void boot_db(void) {
+void boot_db() {
     zone_rnum i;
     dbat::race::load_races();
     dbat::sensei::load_sensei();
@@ -1050,7 +1057,7 @@ void auc_load(struct obj_data *obj) {
 }
 
 /* reset the time in the game from file */
-static void reset_time(void) {
+static void reset_time() {
     time_t beginning_of_time = 0;
     FILE *bgtime;
 
@@ -1749,7 +1756,7 @@ static void setup_dir(FILE *fl, int room, int dir) {
 
 
 /* make sure the start rooms exist & resolve their vnums to rnums */
-static void check_start_rooms(void) {
+static void check_start_rooms() {
     if ((r_mortal_start_room = real_room(CONFIG_MORTAL_START)) == NOWHERE) {
         log("SYSERR:  Mortal start room does not exist.  Change mortal_start_room in lib/etc/config.");
         exit(1);
@@ -1768,7 +1775,7 @@ static void check_start_rooms(void) {
 
 
 /* resolve all vnums into rnums in the world */
-static void renum_world(void) {
+static void renum_world() {
     int room, door;
 
     for (room = 0; room <= top_of_world; room++)
@@ -1793,7 +1800,7 @@ static void renum_world(void) {
  * NOTE 1: Assumes NOWHERE == NOBODY == NOTHING.
  * NOTE 2: Assumes sizeof(room_rnum) >= (sizeof(mob_rnum) and sizeof(obj_rnum))
  */
-static void renum_zone_table(void) {
+static void renum_zone_table() {
     int cmd_no;
     room_rnum a, b, c, olda, oldb, oldc;
     zone_rnum zone;
@@ -2609,7 +2616,6 @@ static char *parse_object(FILE *obj_f, int nr) {
                 }
                 if (!obj_proto[i].sbinfo) {
                     CREATE(obj_proto[i].sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE);
-                    memset((char *) obj_proto[i].sbinfo, 0, SPELLBOOK_SIZE * sizeof(struct obj_spellbook_spell));
                 }
                 obj_proto[i].sbinfo[j].spellname = t[0];
                 obj_proto[i].sbinfo[j].pages = t[1];
@@ -2840,7 +2846,7 @@ void free_help(struct help_index_element *cmhelp) {
     free(cmhelp);
 }
 
-void free_help_table(void) {
+void free_help_table() {
     if (help_table) {
         int hp;
         for (hp = 0; hp < top_of_helpt; hp++) {
@@ -3002,7 +3008,7 @@ int vnum_armortype(char *searchname, struct char_data *ch) {
 }
 
 /* create a character, and add it to the char list */
-struct char_data *create_char(void) {
+struct char_data *create_char() {
     struct char_data *ch;
 
     CREATE(ch, struct char_data, 1);
@@ -3769,7 +3775,7 @@ char *sprintuniques(int low, int high) {
 
 
 /* create an object, and add it to the object list */
-struct obj_data *create_obj(void) {
+struct obj_data *create_obj() {
     struct obj_data *obj;
 
     CREATE(obj, struct obj_data, 1);
@@ -3845,7 +3851,7 @@ struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
 #define ZO_DEAD  999
 
 /* update zone ages, queue for reset if necessary, and dequeue when possible */
-void zone_update(void) {
+void zone_update() {
     int i;
     struct reset_q_element *update_u, *temp;
     static int timer = 0;
@@ -5109,7 +5115,7 @@ void strip_string(char *buffer) {
 
 /* External variables from config.c */
 
-void load_default_config(void) {
+void load_default_config() {
     /****************************************************************************/
     /** This function is called only once, at boot-time.                       **/
     /** - We assume config_info is empty                          -- Welcor    **/
@@ -5228,7 +5234,7 @@ void load_default_config(void) {
     CONFIG_CREATION_METHOD = method;
 }
 
-void load_config(void) {
+void load_config() {
     FILE *fl;
     char line[MAX_STRING_LENGTH];
     char tag[MAX_INPUT_LENGTH];

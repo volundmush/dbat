@@ -1436,7 +1436,7 @@ static int has_pole(struct char_data *ch) {
     return (false);
 }
 
-void fish_update(void) {
+void fish_update() {
 
     struct char_data *i, *next_char, *ch = nullptr;
     int quality = 0;

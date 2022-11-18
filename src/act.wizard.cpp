@@ -45,7 +45,7 @@ static int copyover_timer = 0; /* for timed copyovers */
 /* local functions */
 static void print_lockout(struct char_data *ch);
 
-static void execute_copyover(void);
+static void execute_copyover();
 
 static int perform_set(struct char_data *ch, struct char_data *vict, int mode, char *val_arg);
 
@@ -124,7 +124,7 @@ ACMD(do_lag) {
 }
 
 /*Update things that need it. Just space for the moment - Iovan */
-void update_space(void) {
+void update_space() {
     FILE *mapfile;
     int rowcounter, colcounter;
     int vnum_read;
@@ -2485,7 +2485,7 @@ ACMD(do_copyover) {
 #endif
 }
 
-static void execute_copyover(void) {
+static void execute_copyover() {
     FILE *fp;
     struct descriptor_data *d, *d_next;
     char buf[100], buf2[100];
@@ -2559,7 +2559,7 @@ static void execute_copyover(void) {
     exit(1); /* too much trouble to try to recover! */
 }
 
-void copyover_check(void) {
+void copyover_check() {
     if (!copyover_timer) return;
     copyover_timer--;
     if (!copyover_timer) {

@@ -43,11 +43,11 @@ void feato(int featnum, char *name, int in_game, int can_learn, int can_stack) {
     feat_list[featnum].can_stack = can_stack;
 }
 
-void free_feats(void) {
+void free_feats() {
     /* Nothing to do right now */
 }
 
-void assign_feats(void) {
+void assign_feats() {
 
     int i;
 
@@ -529,7 +529,7 @@ int compare_feats(const void *x, const void *y) {
     return strcmp(feat_list[a].name, feat_list[b].name);
 }
 
-void sort_feats(void) {
+void sort_feats() {
     int a;
 
     /* initialize array, avoiding reserved. */

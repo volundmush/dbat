@@ -855,7 +855,7 @@ void gain_level(struct char_data *ch, int whichclass) {
     }
 }
 
-void run_autowiz(void) {
+void run_autowiz() {
 #if defined(CIRCLE_UNIX) || defined(CIRCLE_WINDOWS)
     if (CONFIG_USE_AUTOWIZ) {
         size_t res;
@@ -1519,7 +1519,7 @@ static void heal_limb(struct char_data *ch) {
 }
 
 /* Update PCs, NPCs, and objects */
-void point_update(void) {
+void point_update() {
     struct char_data *i, *next_char;
     struct obj_data *j, *next_thing, *jj, *next_thing2, *vehicle = nullptr;
     int change = false;

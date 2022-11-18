@@ -58,7 +58,7 @@ void ASSIGNROOM(room_vnum room, SPECIAL(fname)) {
 ******************************************************************** */
 
 /* assign special procedures to mobiles */
-void assign_mobiles(void) {
+void assign_mobiles() {
     /* Tower of the Ordeal */
     ASSIGNMOB(1, magic_user);
 
@@ -212,7 +212,7 @@ void assign_mobiles(void) {
 
 
 /* assign special procedures to objects */
-void assign_objects(void) {
+void assign_objects() {
     ASSIGNOBJ(3034, bank);    /* atm */
     ASSIGNOBJ(3036, bank);    /* cashcard */
     ASSIGNOBJ(11, gravity);       /* gravity generator */
@@ -222,7 +222,7 @@ void assign_objects(void) {
 
 
 /* assign special procedures to rooms */
-void assign_rooms(void) {
+void assign_rooms() {
     room_rnum i;
 
     ASSIGNROOM(5, dump);

@@ -52,7 +52,7 @@ char *str_udup(const char *txt) {
 }
 
 /* Original use: to be called at shutdown time.  */
-int save_all(void) {
+int save_all() {
     while (save_list) {
         if (save_list->type < 0 || save_list->type > SL_MAX) {
             switch (save_list->type) {
@@ -175,7 +175,7 @@ int in_save_list(zone_vnum zone, int type) {
     return false;
 }
 
-void free_save_list(void) {
+void free_save_list() {
     struct save_list_data *sld, *next_sld;
 
     for (sld = save_list; sld; sld = next_sld) {

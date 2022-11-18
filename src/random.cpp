@@ -44,12 +44,47 @@
  authors. WSE" )
 */
 
-namespace {
-    std::random_device _device;
-    std::mt19937 _generator(_device());
-    std::uniform_int_distribution<long> _distribution(LONG_MIN,LONG_MAX);
+#define    m  (unsigned long)2147483647
+#define    q  (unsigned long)127773
+
+#define    a (unsigned int)16807
+#define    r (unsigned int)2836
+
+/*
+** F(z)	= (az)%m
+**	= az-m(az/m)
+**
+** F(z)  = G(z)+mT(z)
+** G(z)  = a(z%q)- r(z/q)
+** T(z)  = (z/q) - (az/m)
+**
+** F(z)  = a(z%q)- rz/q+ m((z/q) - a(z/m))
+** 	 = a(z%q)- rz/q+ m(z/q) - az
+*/
+
+static unsigned long seed;
+
+/* local functions */
+
+
+
+void circle_srandom(unsigned long initial_seed) {
+    seed = initial_seed;
 }
 
+
 unsigned long circle_random() {
-    return _distribution(_generator);
+    int lo, hi, test;
+
+    hi = seed / q;
+    lo = seed % q;
+
+    test = a * lo - r * hi;
+
+    if (test > 0)
+        seed = test;
+    else
+        seed = test + m;
+
+    return (seed);
 }

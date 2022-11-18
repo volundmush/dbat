@@ -18,7 +18,7 @@ static long g_lNumAssemblies = 0;
 static ASSEMBLY *g_pAssemblyTable = nullptr;
 
 
-void assemblyBootAssemblies(void) {
+void assemblyBootAssemblies() {
     char szLine[MAX_STRING_LENGTH] = {'\0'};
     char szTag[MAX_STRING_LENGTH] = {'\0'};
     char szType[MAX_STRING_LENGTH] = {'\0'};
@@ -78,7 +78,7 @@ void assemblyBootAssemblies(void) {
     fclose(pFile);
 }
 
-void assemblySaveAssemblies(void) {
+void assemblySaveAssemblies() {
     char szType[MAX_STRING_LENGTH] = {'\0'};
     long i = 0;
     long j = 0;
@@ -491,7 +491,7 @@ ASSEMBLY *assemblyGetAssemblyPtr(long lVnum) {
 
 #undef __ASSEMBLIES_C__
 
-void free_assemblies(void) {
+void free_assemblies() {
     int i;
 
     if (g_pAssemblyTable == nullptr)

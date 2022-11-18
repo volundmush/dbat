@@ -318,7 +318,7 @@ socklen_t init_socket(uint16_t cmport) {
 }
 
 
-int get_max_players(void) {
+int get_max_players() {
 
     int max_descs = 0;
     const char *method;
@@ -763,7 +763,7 @@ void timeadd(struct timeval *rslt, struct timeval *a, struct timeval *b) {
 }
 
 
-void record_usage(void) {
+void record_usage() {
     int sockets_connected = 0, sockets_playing = 0;
     struct descriptor_data *d;
 
@@ -1839,7 +1839,7 @@ size_t vwrite_to_output(struct descriptor_data *t, const char *format, va_list a
     return (t->bufspace);
 }
 
-void free_bufpool(void) {
+void free_bufpool() {
     struct txt_block *tmp;
 
     while (bufpool) {
@@ -2726,7 +2726,7 @@ void close_socket(struct descriptor_data *d) {
     free(d);
 }
 
-void check_idle_passwords(void) {
+void check_idle_passwords() {
     struct descriptor_data *d, *next_d;
 
     for (d = descriptor_list; d; d = next_d) {

@@ -36,7 +36,7 @@ void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman, in
 
 void push_free_list(long pos);
 
-long pop_free_list(void);
+long pop_free_list();
 
 mail_index_type *find_char_in_index(long searchee);
 
@@ -50,7 +50,7 @@ int mail_recip_ok(const char *name);
 
 /* -------------------------------------------------------------------------- */
 
-void free_mail_index(void) {
+void free_mail_index() {
     mail_index_type *tmp;
 
     while (mail_index) {
@@ -104,7 +104,7 @@ void push_free_list(long pos) {
  * Typically used whenever a person mails a message.  The blocks are not
  * guaranteed to be sequential or in any order at all.
  */
-long pop_free_list(void) {
+long pop_free_list() {
     position_list_type *old_pos;
     long return_value;
 
@@ -125,7 +125,7 @@ long pop_free_list(void) {
 }
 
 
-void clear_free_list(void) {
+void clear_free_list() {
     while (free_list)
         pop_free_list();
 }
@@ -245,7 +245,7 @@ void index_mail(long id_to_index, long pos) {
  * This is called once during boot-up.  It scans through the mail file
  * and indexes all entries currently in the mail file.
  */
-int scan_file(void) {
+int scan_file() {
     FILE *mail_file;
     header_block_type next_block;
     int total_messages = 0, block_num = 0;

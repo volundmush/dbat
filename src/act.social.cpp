@@ -142,7 +142,7 @@ ACMD(do_insult) {
         send_to_char(ch, "I'm sure you don't want to insult *everybody*...\r\n");
 }
 
-void boot_social_messages(void) {
+void boot_social_messages() {
     FILE *fl;
     int nr = 0, hide, min_char_pos, min_pos, min_lvl, curr_soc = -1;
     char next_soc[MAX_STRING_LENGTH], sorted[MAX_INPUT_LENGTH];
@@ -265,7 +265,7 @@ void boot_social_messages(void) {
     top_of_socialt = curr_soc;
 }
 
-void create_command_list(void) {
+void create_command_list() {
     int i, j, k;
     struct social_messg temp;
 
@@ -313,8 +313,8 @@ void create_command_list(void) {
         complete_cmd_info[k++].subcmd = 0;
     }
 
-    complete_cmd_info[k].command = strdup("\n");
-    complete_cmd_info[k].sort_as = strdup("zzzzzzz");
+    complete_cmd_info[k].command = "\n";
+    complete_cmd_info[k].sort_as = "zzzzzzz";
     complete_cmd_info[k].minimum_position = 0;
     complete_cmd_info[k].command_pointer = nullptr;
     complete_cmd_info[k].minimum_level = 0;
@@ -323,7 +323,7 @@ void create_command_list(void) {
     log("Command info rebuilt, %d total commands.", k);
 }
 
-void free_command_list(void) {
+void free_command_list() {
     free(complete_cmd_info);
     complete_cmd_info = nullptr;
 }
@@ -348,7 +348,7 @@ char *fread_action(FILE *fl, int nr) {
     return (strdup(buf));
 }
 
-void free_social_messages(void) {
+void free_social_messages() {
     struct social_messg *mess;
     int i;
 

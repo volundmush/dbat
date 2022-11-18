@@ -1782,7 +1782,7 @@ void var_subst(void *go, struct script_data *sc, trig_data *trig,
                 strcpy(subfield, tmp2);
             }
 
-            find_replacement(go, sc, trig, type, var, field, subfield, repl_str, sizeof(repl_str));
+            find_replacement(go, sc, trig, type, var, field, subfield, repl_str, sizeof(repl_str) - 1);
 
             strncat(buf, repl_str, left);
             len = strlen(repl_str);

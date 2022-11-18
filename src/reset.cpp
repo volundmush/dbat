@@ -44,7 +44,7 @@ void post_reset(zone_vnum znum) {
     }
 }
 
-bool prereset_gauntlet_zone(void) {
+bool prereset_gauntlet_zone() {
     int i, gauntlet_players = 0;
     struct char_data *mob;
     /* The mobs in the gauntlet are ALL reset here... */

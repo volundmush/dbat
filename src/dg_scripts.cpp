@@ -605,7 +605,7 @@ obj_data *get_obj_by_room(room_data *room, char *name) {
 }
 
 /* checks every PULSE_SCRIPT for random triggers */
-void script_trigger_check(void) {
+void script_trigger_check() {
     char_data *ch;
     obj_data *obj;
     struct room_data *room = nullptr;
@@ -645,7 +645,7 @@ void script_trigger_check(void) {
     }
 }
 
-void check_time_triggers(void) {
+void check_time_triggers() {
     char_data *ch;
     obj_data *obj;
     struct room_data *room = nullptr;
@@ -1447,7 +1447,7 @@ void eval_expr(char *line, char *result, void *go, struct script_data *sc,
  */
 int eval_lhs_op_rhs(char *expr, char *result, void *go, struct script_data *sc,
                     trig_data *trig, int type) {
-    char *p, *tokens[MAX_INPUT_LENGTH];
+    char *p = nullptr, *tokens[MAX_INPUT_LENGTH];
     char line[MAX_INPUT_LENGTH], lhr[MAX_INPUT_LENGTH], rhr[MAX_INPUT_LENGTH];
     int i, j;
 
@@ -2964,7 +2964,7 @@ struct lookup_table_t {
 };
 struct lookup_table_t lookup_table[BUCKET_COUNT];
 
-void init_lookup_table(void) {
+void init_lookup_table() {
     int i;
     for (i = 0; i < BUCKET_COUNT; i++) {
         lookup_table[i].uid = UID_OUT_OF_RANGE;

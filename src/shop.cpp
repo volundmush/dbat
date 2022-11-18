@@ -1574,7 +1574,7 @@ void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
     }
 }
 
-void assign_the_shopkeepers(void) {
+void assign_the_shopkeepers() {
     int cindex;
 
     cmd_say = find_command("say");
@@ -1819,7 +1819,7 @@ void show_shops(struct char_data *ch, char *arg) {
     }
 }
 
-void destroy_shops(void) {
+void destroy_shops() {
     ssize_t cnt, itr;
 
     if (!shop_index)

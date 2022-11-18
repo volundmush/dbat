@@ -597,7 +597,7 @@ int does_guild_know_feat(int guild_nr, int i) {
 }
 
 
-void sort_spells(void) {
+void sort_spells() {
     int a;
 
     /* initialize array, avoiding reserved. */
@@ -1710,7 +1710,7 @@ void boot_the_guilds(FILE *gm_f, char *filename, int rec_count) {
 }
 
 
-void assign_the_guilds(void) {
+void assign_the_guilds() {
     int gdindex;
 
     cmd_say = find_command("say");
@@ -1899,7 +1899,7 @@ void list_guilds(struct char_data *ch, zone_rnum rnum, guild_vnum vmin, guild_vn
         send_to_char(ch, "None found.\r\n");
 }
 
-void destroy_guilds(void) {
+void destroy_guilds() {
     ssize_t cnt/*, itr*/;
 
     if (!guild_index)

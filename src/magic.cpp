@@ -28,7 +28,7 @@ int mag_materials(struct char_data *ch, int item0, int item1, int item2, int ext
 void perform_mag_groups(int level, struct char_data *ch, struct char_data *tch, int spellnum);
 
 /* affect_update: called from comm.c (causes spells to wear off) */
-void affect_update(void) {
+void affect_update() {
     struct affected_type *af, *next;
     struct char_data *i;
 
@@ -1172,7 +1172,7 @@ void mag_creations(int level, struct char_data *ch, int spellnum) {
 }
 
 /* affect_update_violence: called from fight.c (causes spells to wear off) */
-void affect_update_violence(void) {
+void affect_update_violence() {
     struct affected_type *af, *next;
     struct char_data *i;
     int dam;

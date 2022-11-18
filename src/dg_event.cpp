@@ -35,7 +35,7 @@
 static struct queue *event_q;          /* the event queue */
 
 /* initializes the event queue */
-void event_init(void) {
+void event_init() {
     event_q = queue_init();
 }
 
@@ -78,7 +78,7 @@ void event_cancel(struct event *event) {
 
 
 /* Process any events whose time has come. */
-void event_process(void) {
+void event_process() {
     struct event *the_event;
     long new_time;
 
@@ -115,7 +115,7 @@ long event_time(struct event *event) {
 
 
 /* frees all events in the queue */
-void event_free_all(void) {
+void event_free_all() {
     queue_free(event_q);
 }
 
@@ -127,7 +127,7 @@ void event_free_all(void) {
 ************************************************************************ */
 
 /* returns a new, initialized queue */
-struct queue *queue_init(void) {
+struct queue *queue_init() {
     struct queue *q;
 
     CREATE(q, struct queue, 1);

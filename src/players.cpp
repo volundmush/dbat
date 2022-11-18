@@ -29,7 +29,7 @@
 #define LOAD_LIFE       4
 
 /* local functions */
-void build_player_index(void);
+void build_player_index();
 
 void save_etext(struct char_data *ch);
 
@@ -124,7 +124,7 @@ void load_imc_pfile(struct char_data *ch) {
 
 /* new version to build player index for ASCII Player Files */
 /* generate index table for the player file */
-void build_player_index(void) {
+void build_player_index() {
     int rec_count = 0, i;
     FILE *plr_index;
     char index_name[40], line[256], bits[64];
@@ -198,7 +198,7 @@ int create_entry(char *name) {
 
 
 /* This function necessary to save a seperate ASCII player index */
-void save_player_index(void) {
+void save_player_index() {
     int i;
     char index_name[50], bits[64];
     FILE *index_file;
@@ -223,7 +223,7 @@ void save_player_index(void) {
 }
 
 
-void free_player_index(void) {
+void free_player_index() {
     int tp;
 
     if (!player_table)
@@ -308,10 +308,10 @@ void load_follower_from_file(FILE *fl, struct char_data *ch) {
 /* new load_char reads ASCII Player Files */
 /* Load a char, TRUE if loaded, FALSE if not */
 int load_char(const char *name, struct char_data *ch) {
-    int id, i, num = 0, num2 = 0, num3 = 0;
-    FILE *fl;
+    int id = 0, i, num = 0, num2 = 0, num3 = 0;
+    FILE *fl = nullptr;
     char fname[READ_SIZE];
-    char buf[128], buf2[128], line[MAX_INPUT_LENGTH + 1], tag[6];
+    char buf[128], buf2[128], line[MAX_INPUT_LENGTH], tag[6];
     char f1[128], f2[128], f3[128], f4[128];
 
     if ((id = get_ptable_by_name(name)) < 0)
@@ -1557,7 +1557,7 @@ void remove_player(int pfilepos) {
 }
 
 
-void clean_pfiles(void) {
+void clean_pfiles() {
     int i, ci;
 
     for (i = 0; i <= top_of_p_table; i++) {

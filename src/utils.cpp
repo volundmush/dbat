@@ -4209,7 +4209,7 @@ int *default_admin_flags[ADMLVL_IMPL + 1] = {
 };
 
 void admin_set(struct char_data *ch, int value) {
-    void run_autowiz(void);
+    void run_autowiz();
     int i;
     int orig = GET_ADMLEVEL(ch);
 

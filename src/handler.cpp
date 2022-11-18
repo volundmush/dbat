@@ -1553,7 +1553,7 @@ void extract_char(struct char_data *ch) {
  *
  * NOTE: This doesn't handle recursive extractions.
  */
-void extract_pending_chars(void) {
+void extract_pending_chars() {
     struct char_data *vict, *next_vict, *prev_vict, *temp;
 
     if (extractions_pending < 0)

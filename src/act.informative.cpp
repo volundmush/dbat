@@ -7938,7 +7938,7 @@ static int sort_commands_helper(const void *a, const void *b) {
                   complete_cmd_info[*(const int *) b].sort_as);
 }
 
-void sort_commands(void) {
+void sort_commands() {
     int a, num_of_cmds = 0;
 
     while (complete_cmd_info[num_of_cmds].command[0] != '\n')

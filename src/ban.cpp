@@ -21,7 +21,7 @@ struct ban_list_element *ban_list = nullptr;
 /* local functions */
 static void _write_one_node(FILE *fp, struct ban_list_element *node);
 
-static void write_ban_list(void);
+static void write_ban_list();
 
 
 static const char *ban_types[] = {
@@ -33,7 +33,7 @@ static const char *ban_types[] = {
 };
 
 
-void load_banned(void) {
+void load_banned() {
     FILE *fl;
     int i, date;
     char site_name[BANNED_SITE_LENGTH + 1], ban_type[100];
@@ -97,7 +97,7 @@ static void _write_one_node(FILE *fp, struct ban_list_element *node) {
     }
 }
 
-static void write_ban_list(void) {
+static void write_ban_list() {
     FILE *fl;
 
     if (!(fl = fopen(BAN_FILE, "w"))) {
@@ -279,7 +279,7 @@ int Valid_Name(char *newname) {
 
 
 /* What's with the wacky capitalization in here? */
-void Free_Invalid_List(void) {
+void Free_Invalid_List() {
     int invl;
 
     for (invl = 0; invl < num_invalid; invl++)
@@ -289,7 +289,7 @@ void Free_Invalid_List(void) {
 }
 
 
-void Read_Invalid_List(void) {
+void Read_Invalid_List() {
     FILE *fp;
     char temp[256];
 

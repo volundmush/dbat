@@ -35,11 +35,11 @@ void cedit_disp_menu(struct descriptor_data *d);
 
 void cedit_setup(struct descriptor_data *d);
 
-void cedit_save_to_disk(void);
+void cedit_save_to_disk();
 
 int save_config(IDXTYPE nowhere);
 
-void reassign_rooms(void);
+void reassign_rooms();
 
 /******************************************************************************/
 /** Routines                                                                 **/
@@ -408,7 +408,7 @@ void cedit_save_internally(struct descriptor_data *d) {
 
 /******************************************************************************/
 
-void cedit_save_to_disk(void) {
+void cedit_save_to_disk() {
     /****************************************************************************/
     /** Just call save_config and get it over with.                            **/
     /****************************************************************************/
@@ -2243,8 +2243,8 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 /*
  * End of parse_cedit()  
  */
-void reassign_rooms(void) {
-    void assign_rooms(void);
+void reassign_rooms() {
+    void assign_rooms();
     int i;
 
     /* remove old funcs */

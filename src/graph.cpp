@@ -25,9 +25,9 @@ int VALID_EDGE(room_rnum x, int y);
 
 void bfs_enqueue(room_rnum room, int dir);
 
-void bfs_dequeue(void);
+void bfs_dequeue();
 
-void bfs_clear_queue(void);
+void bfs_clear_queue();
 
 struct bfs_queue_struct {
     room_rnum room;
@@ -71,7 +71,7 @@ void bfs_enqueue(room_rnum room, int dir) {
 }
 
 
-void bfs_dequeue(void) {
+void bfs_dequeue() {
     struct bfs_queue_struct *curr;
 
     curr = bfs_queue_head;
@@ -82,7 +82,7 @@ void bfs_dequeue(void) {
 }
 
 
-void bfs_clear_queue(void) {
+void bfs_clear_queue() {
     while (bfs_queue_head)
         bfs_dequeue();
 }

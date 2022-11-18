@@ -45,7 +45,7 @@ static void change_alignment(struct char_data *ch, struct char_data *victim);
 
 static void final_combat_resolve(struct char_data *ch);
 
-static void shadow_dragons_live(void);
+static void shadow_dragons_live();
 
 static void cleanup_arena_watch(struct char_data *ch);
 

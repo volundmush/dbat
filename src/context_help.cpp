@@ -405,7 +405,7 @@ int context_help(struct descriptor_data *d, char *arg) {
     return true;
 }
 
-void boot_context_help(void) {
+void boot_context_help() {
     int i, num;
     FILE *fl;
     char line[READ_SIZE];
@@ -428,7 +428,7 @@ void boot_context_help(void) {
     fclose(fl);
 }
 
-void free_context_help(void) {
+void free_context_help() {
     int i;
 
     for (i = 0; i < NUM_CONTEXTS; i++)
