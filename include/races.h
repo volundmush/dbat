@@ -11,11 +11,11 @@
 extern const struct guild_info_type guild_info[6];
 
 // functions
-void racial_body_parts(struct char_data *ch);
+extern void racial_body_parts(struct char_data *ch);
 
-void set_height_and_weight_by_race(struct char_data *ch);
+extern void set_height_and_weight_by_race(struct char_data *ch);
 
-int invalid_race(struct char_data *ch, struct obj_data *obj);
+extern int invalid_race(struct char_data *ch, struct obj_data *obj);
 
 // C++ conversion
 

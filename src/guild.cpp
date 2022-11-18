@@ -170,12 +170,12 @@ ACMD(do_teach)
   return;
  }
 
- int cost = calculate_skill_cost(vict, skill), free = FALSE;
+ int cost = calculate_skill_cost(vict, skill), free = false;
  
  if (GET_SKILL_BASE(ch, skill) >= 103) {
   cost = cost * 0.5;
   if (rand_number(1, 4) == 4) {
-   free = TRUE;
+   free = true;
   }
  } else if (GET_SKILL_BASE(ch, skill) == 102) {
   cost = cost * 0.5;
@@ -206,11 +206,11 @@ ACMD(do_teach)
   sprintf(tochar, "@YYou instruct @y$N@Y in the finer points of @C%s@Y.@n\r\n", spell_info[skill].name);
   sprintf(tovict, "@y$n@Y instructs you in the finer points of @C%s@Y.@n\r\n", spell_info[skill].name);
   sprintf(toother, "@y$n@Y instructs @y$N@Y in the finer points of @C%s@Y.@n\r\n", spell_info[skill].name);
-  act(tochar, TRUE, ch, nullptr, vict, TO_CHAR);
-  act(tovict, TRUE, ch, nullptr, vict, TO_VICT);
-  act(toother, TRUE, ch, nullptr, vict, TO_NOTVICT);
+  act(tochar, true, ch, nullptr, vict, TO_CHAR);
+  act(tovict, true, ch, nullptr, vict, TO_VICT);
+  act(toother, true, ch, nullptr, vict, TO_NOTVICT);
   SET_SKILL(vict, skill, GET_SKILL_BASE(vict, skill) + 1);
-  if (free == FALSE) {
+  if (free == false) {
    GET_PRACTICES(vict, GET_CLASS(vict)) -= cost;
   } else {
    send_to_char(ch, "@GYou teach your lesson so well that it cost them nothing to learn from you!@n\r\n");
@@ -290,7 +290,7 @@ int print_skills_by_type(struct char_data *ch, char *buf, int maxsz, int sktype,
       known = 0;
     }
     if (*arg) {
-     if (atoi(arg) <= 0 && strstr(spell_info[i].name, arg) == FALSE) {
+     if (atoi(arg) <= 0 && strstr(spell_info[i].name, arg) == false) {
       known = 0;
      } else if (atoi(arg) > GET_SKILL(ch, i)) {
       known = 0;
@@ -328,85 +328,85 @@ int print_skills_by_type(struct char_data *ch, char *buf, int maxsz, int sktype,
 
 int slot_count(struct char_data *ch)
 {
-   int i, skills = -1, fail = FALSE;
-   int punch = FALSE, kick = FALSE, knee = FALSE, elbow = FALSE, kiball = FALSE, kiblast = FALSE, beam = FALSE, renzo = FALSE, shogekiha = FALSE;
+   int i, skills = -1, fail = false;
+   int punch = false, kick = false, knee = false, elbow = false, kiball = false, kiblast = false, beam = false, renzo = false, shogekiha = false;
 
    for (i = 1; i <= SKILL_TABLE_SIZE; i++) {
     if (GET_SKILL(ch, i) > 0) {
      switch (i) {
       case SKILL_PUNCH:
-       fail = TRUE;
-       punch = TRUE;
+       fail = true;
+       punch = true;
       break;
       case SKILL_KICK:
-       fail = TRUE;
-       kick = TRUE;
+       fail = true;
+       kick = true;
       break;
       case SKILL_ELBOW:
-       fail = TRUE;
-       elbow = TRUE;
+       fail = true;
+       elbow = true;
       break;
       case SKILL_KNEE:
-       fail = TRUE;
-       knee = TRUE;
+       fail = true;
+       knee = true;
       break;
       case SKILL_KIBALL:
-       fail = TRUE;
-       kiball = TRUE;
+       fail = true;
+       kiball = true;
       break;
       case SKILL_KIBLAST:
-       fail = TRUE;
-       kiblast = TRUE;
+       fail = true;
+       kiblast = true;
       break;
       case SKILL_BEAM:
-       fail = TRUE;
-       beam = TRUE;
+       fail = true;
+       beam = true;
       break;
       case SKILL_SHOGEKIHA:
-       fail = TRUE;
-       shogekiha = TRUE;
+       fail = true;
+       shogekiha = true;
       break;
       case SKILL_RENZO:
-       fail = TRUE;
-       renzo = TRUE;
+       fail = true;
+       renzo = true;
       break;
       case SKILL_TELEPATHY:
        if (IS_KANASSAN(ch) || IS_KAI(ch)) {
-        fail = TRUE;
+        fail = true;
        }
        break;
       case SKILL_ABSORB:
        if (IS_BIO(ch) || IS_ANDROID(ch)) {
-        fail = TRUE;
+        fail = true;
        }
        break;
       case SKILL_TAILWHIP:
        if (IS_ICER(ch)) {
-        fail = TRUE;
+        fail = true;
        }
        break;
       case SKILL_SEISHOU:
        if (IS_ARLIAN(ch)) {
-        fail = TRUE;
+        fail = true;
        }
        break;
       case SKILL_REGENERATE:
        if (IS_MAJIN(ch) || IS_NAMEK(ch) || IS_BIO(ch)) {
-        fail = TRUE;
+        fail = true;
        }
        break;
      }
-     if (fail == FALSE) {
+     if (fail == false) {
       skills += 1;
      }
-     fail = FALSE;
+     fail = false;
     }
    }
 
- if (punch == TRUE && kick == TRUE && elbow == TRUE && knee == TRUE) {
+ if (punch == true && kick == true && elbow == true && knee == true) {
   skills += 1;
  }
- if (kiball == TRUE && kiblast == TRUE && beam == TRUE && shogekiha == TRUE && renzo == TRUE) {
+ if (kiball == true && kiblast == true && beam == true && shogekiha == true && renzo == true) {
   skills += 1;
  }
 
@@ -417,7 +417,7 @@ void list_skills(struct char_data *ch, char *arg)
 {
   const char *overflow = "\r\n**OVERFLOW**\r\n";
   size_t len = 0;
-  int slots = FALSE;
+  int slots = false;
   char buf2[MAX_STRING_LENGTH];
 
   len = snprintf(buf2, sizeof(buf2), "You have %d practice session%s remaining.\r\n", GET_PRACTICES(ch, GET_CLASS(ch)), GET_PRACTICES(ch, GET_CLASS(ch)) == 1 ? "" : "s");
@@ -426,14 +426,14 @@ void list_skills(struct char_data *ch, char *arg)
 
   len += print_skills_by_type(ch, buf2 + len, sizeof(buf2) - len, SKTYPE_SKILL, arg);
 
-  if (slots == FALSE) {
+  if (slots == false) {
    len += snprintf(buf2 + len, sizeof(buf2) - len, "\r\n@DSkill Slots@W: @M%d@W/@m%d", slot_count(ch), GET_SLOTS(ch));
   }
 
   if (len >= sizeof(buf2))
     strcpy(buf2 + sizeof(buf2) - strlen(overflow) - 1, overflow); /* strcpy: OK */
 
-  page_string(ch->desc, buf2, TRUE);
+  page_string(ch->desc, buf2, true);
 }
 
 
@@ -447,11 +447,11 @@ int is_guild_open(struct char_data *keeper, int guild_nr, int msg)
   strlcpy(buf, MSG_TRAINER_NOT_OPEN, sizeof(buf));
 
   if (!*buf)
-    return (TRUE);
+    return (true);
   if (msg)
     do_say(keeper, buf, cmd_tell, 0);
 
-  return (FALSE);
+  return (false);
 }
 
 
@@ -461,7 +461,7 @@ int is_guild_ok_char(struct char_data * keeper, struct char_data * ch, int guild
 
 	if (!(CAN_SEE(keeper, ch))) {
 		do_say(keeper, MSG_TRAINER_NO_SEE_CH, cmd_say, 0);
-		return (FALSE);
+		return (false);
 	}
 
 	
@@ -469,7 +469,7 @@ int is_guild_ok_char(struct char_data * keeper, struct char_data * ch, int guild
 				snprintf(buf, sizeof(buf), "%s %s", 
 					GET_NAME(ch), MSG_TRAINER_MINLVL);
 		do_tell(keeper, buf, cmd_tell, 0); 
-		return (FALSE);
+		return (false);
 	}
 
 
@@ -479,11 +479,11 @@ int is_guild_ok_char(struct char_data * keeper, struct char_data * ch, int guild
 		snprintf(buf, sizeof(buf), "%s %s", 
 					GET_NAME(ch), MSG_TRAINER_DISLIKE_ALIGN);
 		do_tell(keeper, buf, cmd_tell, 0);
-		return (FALSE);
+		return (false);
 	}
 
 	if (IS_NPC(ch))
-		return (FALSE);
+		return (false);
 
 	if ((IS_ROSHI(ch) && NOTRAIN_WIZARD(guild_nr)) ||
 		(IS_PICCOLO(ch) && NOTRAIN_CLERIC(guild_nr)) ||
@@ -515,7 +515,7 @@ int is_guild_ok_char(struct char_data * keeper, struct char_data * ch, int guild
 		snprintf(buf, sizeof(buf), "%s %s", 
 					GET_NAME(ch), MSG_TRAINER_DISLIKE_CLASS);
 		do_tell(keeper, buf, cmd_tell, 0);
-		return (FALSE);
+		return (false);
 	}
 
 	if ((!IS_ROSHI(ch) && TRAIN_WIZARD(guild_nr)) ||
@@ -547,7 +547,7 @@ int is_guild_ok_char(struct char_data * keeper, struct char_data * ch, int guild
 		snprintf(buf, sizeof(buf), "%s %s", 
 					GET_NAME(ch), MSG_TRAINER_DISLIKE_CLASS);
 		do_tell(keeper, buf, cmd_tell, 0);
-		return (FALSE);
+		return (false);
 	}
 
 	if ((IS_HUMAN(ch) && NOTRAIN_HUMAN(guild_nr)) ||
@@ -574,18 +574,18 @@ int is_guild_ok_char(struct char_data * keeper, struct char_data * ch, int guild
 		snprintf(buf, sizeof(buf), "%s %s", 
 					GET_NAME(ch), MSG_TRAINER_DISLIKE_RACE);
 		do_tell(keeper, buf, cmd_tell, 0);
-		return (FALSE);
+		return (false);
 	}
-	return (TRUE);
+	return (true);
 }
 
 
 int is_guild_ok(struct char_data * keeper, struct char_data * ch, int guild_nr)
 {
-	if (is_guild_open(keeper, guild_nr, TRUE))
+	if (is_guild_open(keeper, guild_nr, true))
 		return (is_guild_ok_char(keeper, ch, guild_nr));
 
-	return (FALSE);
+	return (false);
 }
 
 
@@ -692,7 +692,7 @@ void what_does_guild_know(int guild_nr, struct char_data * ch)
   if (len >= sizeof(buf2))
     strcpy(buf2 + sizeof(buf2) - strlen(overflow) - 1, overflow); /* strcpy: OK */
 
-  page_string(ch->desc, buf2, TRUE);
+  page_string(ch->desc, buf2, true);
 }
 
 int prereq_pass(struct char_data *ch, int snum)
@@ -1155,8 +1155,8 @@ void handle_exp(struct char_data *keeper, int guild_nr, struct char_data *ch, ch
   if (GET_LEVEL(ch) == 100) {
    amt = 400000;
   }
-  act("@c$n@W spends time training you in $s fighting style.@n", TRUE, keeper, nullptr, ch, TO_VICT);
-  act("@c$n@W spends time training @C$N@W in $s fighting style.@n", TRUE, keeper, nullptr, ch, TO_NOTVICT);
+  act("@c$n@W spends time training you in $s fighting style.@n", true, keeper, nullptr, ch, TO_VICT);
+  act("@c$n@W spends time training @C$N@W in $s fighting style.@n", true, keeper, nullptr, ch, TO_NOTVICT);
   send_to_char(ch, "@wExperience Gained: @C%s@n\r\n", add_commas(amt));
   GET_PRACTICES(ch, GET_CLASS(ch)) -= 25;
   if (IS_SAIYAN(ch) || IS_HALFBREED(ch)) {
@@ -1173,7 +1173,7 @@ void handle_exp(struct char_data *keeper, int guild_nr, struct char_data *ch, ch
 void handle_study(struct char_data *keeper, int guild_nr, struct char_data *ch, char *argument)
 {
 
- int expcost = 25000, goldcost = 750, fail = FALSE, reward = 25, goldadjust = 0, expadjust = 0;
+ int expcost = 25000, goldcost = 750, fail = false, reward = 25, goldadjust = 0, expadjust = 0;
 
  if (GET_LEVEL(ch) >= 100) {
   goldadjust = 500;
@@ -1209,23 +1209,23 @@ void handle_study(struct char_data *keeper, int guild_nr, struct char_data *ch, 
 
  if (GET_EXP(ch) < expcost) {
   send_to_char(ch, "You do not have enough experience to study. @D[@wCost@W: @G%s@D]@n\r\n", add_commas(expcost));
-  fail = TRUE;
+  fail = true;
  }
 
  if (GET_GOLD(ch) < goldcost) {
   send_to_char(ch, "You do not have enough zenni to study. @D[@wCost@W: @Y%s@D]@n\r\n", add_commas(goldcost));
-  fail = TRUE;
+  fail = true;
  }
 
- if (fail == TRUE)
+ if (fail == true)
   return;
 
  GET_EXP(ch) -= expcost;
  GET_GOLD(ch) -= goldcost;
  GET_PRACTICES(ch, GET_CLASS(ch)) += 25;
  
- act("@c$N@W spends time lecturing you on various subjects.@n", TRUE, ch, nullptr, keeper, TO_CHAR);
- act("@c$N@W spends time lecturing @C$n@W on various subjects.@n", TRUE, ch, nullptr, keeper, TO_ROOM);
+ act("@c$N@W spends time lecturing you on various subjects.@n", true, ch, nullptr, keeper, TO_CHAR);
+ act("@c$N@W spends time lecturing @C$n@W on various subjects.@n", true, ch, nullptr, keeper, TO_ROOM);
  send_to_char(ch, "@wYou have gained %d practice sessions in exchange for %s EXP and %s zenni.\r\n", reward, add_commas(expcost), add_commas(goldcost));
 
 }
@@ -1304,7 +1304,7 @@ void handle_learn(struct char_data *keeper, int guild_nr, struct char_data *ch, 
           cptr = weapon_type[subval];
         subfeat += snprintf(buf + subfeat, sizeof(buf) - subfeat, "  %s\r\n", cptr);
       }
-      page_string(ch->desc, buf, TRUE);
+      page_string(ch->desc, buf, true);
       return;
     }
     if (*ptr == ':') ptr++;
@@ -1326,10 +1326,10 @@ void handle_learn(struct char_data *keeper, int guild_nr, struct char_data *ch, 
           cptr = weapon_type[subval];
         subfeat += snprintf(buf + subfeat, sizeof(buf) - subfeat, "  %s\r\n", cptr);
       }
-      page_string(ch->desc, buf, TRUE);
+      page_string(ch->desc, buf, true);
       return;
     }
-    subval = search_block(ptr, (sftype == 2) ? spell_schools : weapon_type, FALSE);
+    subval = search_block(ptr, (sftype == 2) ? spell_schools : weapon_type, false);
     if (subval == -1) {
       log("bad subval: %s", ptr);
       if (sftype == 2)
@@ -1346,7 +1346,7 @@ void handle_learn(struct char_data *keeper, int guild_nr, struct char_data *ch, 
           cptr = weapon_type[subval];
         subfeat += snprintf(buf + subfeat, sizeof(buf) - subfeat, "  %s\r\n", cptr);
       }
-      page_string(ch->desc, buf, TRUE);
+      page_string(ch->desc, buf, true);
       return;
     }
     if (!feat_is_available(ch, feat_num, subval, nullptr)) {
@@ -1498,7 +1498,12 @@ void handle_learn(struct char_data *keeper, int guild_nr, struct char_data *ch, 
     SET_SKILL_BONUS(ch, SKILL_MOVE_SILENTLY, GET_SKILL_BONUS(ch, SKILL_MOVE_SILENTLY) + 2);
     break;
   default:
-    SET_FEAT(ch, feat_num, TRUE);
+      do {
+          (*((((ch))->player_specials == &dummy_mob) ? (basic_mud_log(
+                  "OHNO: Mob using '" "(ch)->feats[feat_num]" "' at %s:%d.", "_file_name_",
+                  1501), &((ch)->feats[feat_num])) : &((ch)->feats[feat_num]))) = true;
+      }
+      while (0);
     break;
   }
   save_char(ch);
@@ -1532,29 +1537,29 @@ SPECIAL(guild)
       break;
 
   if (guild_nr > top_guild)
-    return (FALSE);
+    return (false);
 
   if (GM_FUNC(guild_nr))
     if ((GM_FUNC(guild_nr)) (ch, me, cmd, arg))
-      return (TRUE);
+      return (true);
 
   /*** Is the GM able to train?    ****/
   if (!AWAKE(keeper))
-    return (FALSE);
+    return (false);
 
   for (i = 0; guild_cmd_tab[i].cmd; i++)
     if (CMD_IS(guild_cmd_tab[i].cmd))
       break;
 
   if (!guild_cmd_tab[i].cmd)
-    return (FALSE);
+    return (false);
 
   if (!(is_guild_ok(keeper, ch, guild_nr)))
-    return (TRUE);
+    return (true);
 
   (guild_cmd_tab[i].func)(keeper, guild_nr, ch, argument);
 
-  return (TRUE);
+  return (true);
 }
 
 
@@ -1587,7 +1592,7 @@ void boot_the_guilds(FILE * gm_f, char *filename, int rec_count)
 {
   char *buf, buf2[256], *p, buf3[READ_SIZE];
   int temp, val, t1, t2, rv;
-  int done = FALSE;
+  int done = false;
 
   snprintf(buf2, sizeof(buf2), "beginning of GM file %s", filename);
 
@@ -1664,7 +1669,7 @@ void boot_the_guilds(FILE * gm_f, char *filename, int rec_count)
       }
     } else {
       if (*buf == '$')		/* EOF */
-	done = TRUE;
+	done = true;
       free(buf);		/* Plug memory leak! */
     }
   }
@@ -1750,10 +1755,10 @@ void list_all_guilds(struct char_data *ch)
       sprintf(buf1, "%6d", mob_index[GM_TRAINER(gm_nr)].vnum);  /* sprintf: OK (for 'buf1 >= 11', 32-bit int) */	
 
     len += snprintf(buf + len, sizeof(buf) - len, "%6d	%s		%5.2f	%s\r\n",
-      GM_NUM(gm_nr), buf1, GM_CHARGE(gm_nr), guild_customer_string(gm_nr, FALSE));
+      GM_NUM(gm_nr), buf1, GM_CHARGE(gm_nr), guild_customer_string(gm_nr, false));
   }
 
-  page_string(ch->desc, buf, TRUE);
+  page_string(ch->desc, buf, true);
 }
 
 
@@ -1772,7 +1777,7 @@ void list_detailed_guild(struct char_data * ch, int gm_nr)
   sprintf(buf, "%s Hours: %4d to %4d,  Surcharge: %5.2f\r\n", buf,
 			  GM_OPEN(gm_nr), GM_CLOSE(gm_nr), GM_CHARGE(gm_nr));
   sprintf(buf, "%s Min Level will train: %d\r\n", buf, GM_MINLVL(gm_nr));
-  sprintf(buf, "%s Whom will train: %s\r\n", buf, guild_customer_string(gm_nr, TRUE));
+  sprintf(buf, "%s Whom will train: %s\r\n", buf, guild_customer_string(gm_nr, true));
 
    /* now for the REAL reason why someone would want to see a Guild :) */
 

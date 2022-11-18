@@ -127,7 +127,7 @@ ACMD(do_masound)
             newexit->to_room != NOWHERE && newexit->to_room != was_in_room)
         {
             IN_ROOM(ch) = newexit->to_room;
-            sub_write(argument, ch, TRUE, TO_ROOM);
+            sub_write(argument, ch, true, TO_ROOM);
         }
     }
 
@@ -331,7 +331,7 @@ ACMD(do_mechoaround)
 
     sprintf(buf, p);
     search_replace(buf, GET_NAME(victim), "$n");
-    act(buf, TRUE, victim, nullptr, nullptr, TO_ROOM);
+    act(buf, true, victim, nullptr, nullptr, TO_ROOM);
     /*sub_write(p, victim, TRUE, TO_ROOM);*/
 }
 
@@ -369,7 +369,7 @@ ACMD(do_msend)
         return;
     }
 
-    sub_write(p, victim, TRUE, TO_CHAR);
+    sub_write(p, victim, true, TO_CHAR);
 }
 
 
@@ -393,7 +393,7 @@ ACMD(do_mecho)
     p = argument;
     skip_spaces(&p);
 
-    sub_write(p, ch, TRUE, TO_ROOM);
+    sub_write(p, ch, true, TO_ROOM);
 }
 
 ACMD(do_mzoneecho)
@@ -1091,12 +1091,12 @@ ACMD(do_mdoor)
         return;
     }
 
-    if ((dir = search_block(direction, dirs, FALSE)) == -1) {
+    if ((dir = search_block(direction, dirs, false)) == -1) {
         mob_log(ch, "mdoor: invalid direction");
         return;
     }
 
-    if ((fd = search_block(field, door_field, FALSE)) == -1) {
+    if ((fd = search_block(field, door_field, false)) == -1) {
         mob_log(ch, "odoor: invalid field");
         return;
     }

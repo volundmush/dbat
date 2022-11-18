@@ -36,7 +36,7 @@ void extract_mobile_all(mob_vnum vnum);
 
 int add_mobile(struct char_data *mob, mob_vnum vnum)
 {
-  int rnum, i, found = FALSE, shop, guild, cmd_no;
+  int rnum, i, found = false, shop, guild, cmd_no;
   zone_rnum zone;
   struct char_data *live_mob;
 
@@ -125,7 +125,7 @@ int copy_mobile(struct char_data *to, struct char_data *from)
   *to = *from;
   check_mobile_strings(from);
   copy_mobile_strings(to, from);
-  return TRUE;
+  return true;
 }
 
 void extract_mobile_all(mob_vnum vnum)
@@ -217,7 +217,7 @@ int copy_mobile_strings(struct char_data *t, struct char_data *f)
     t->long_descr = strdup(f->long_descr);
   if (f->description)
     t->description = strdup(f->description);
-  return TRUE;
+  return true;
 }
 
 int update_mobile_strings(struct char_data *t, struct char_data *f)
@@ -232,7 +232,7 @@ int update_mobile_strings(struct char_data *t, struct char_data *f)
     t->long_descr = f->long_descr;
   if (f->description)
     t->description = f->description;
-  return TRUE;
+  return true;
 }
 
 int free_mobile_strings(struct char_data *mob)
@@ -247,7 +247,7 @@ int free_mobile_strings(struct char_data *mob)
     free(mob->long_descr);
   if (mob->description)
     free(mob->description);
-  return TRUE;
+  return true;
 }
 
 
@@ -258,7 +258,7 @@ int free_mobile(struct char_data *mob)
   mob_rnum i;
 
   if (mob == nullptr)
-    return FALSE;
+    return false;
 
   /* Non-prototyped mobile.  Also known as new mobiles.  */
   if ((i = GET_MOB_RNUM(mob)) == NOBODY) {
@@ -288,7 +288,7 @@ int free_mobile(struct char_data *mob)
     extract_script(mob, MOB_TRIGGER);
 
   free(mob);
-  return TRUE;
+  return true;
 }
 
 int save_mobiles(zone_rnum zone_num)
@@ -305,13 +305,13 @@ int save_mobiles(zone_rnum zone_num)
   if (zone_num < 0 || zone_num > top_of_zone_table) {
 #endif
     log("SYSERR: GenOLC: save_mobiles: Invalid real zone number %d. (0-%d)", zone_num, top_of_zone_table);
-    return FALSE;
+    return false;
   }
 
   snprintf(mobfname, sizeof(mobfname), "%s%d.new", MOB_PREFIX, zone_table[zone_num].number);
   if ((mobfd = fopen(mobfname, "w")) == nullptr) {
-    mudlog(BRF, ADMLVL_GOD, TRUE, "SYSERR: GenOLC: Cannot open mob file for writing.");
-    return FALSE;
+    mudlog(BRF, ADMLVL_GOD, true, "SYSERR: GenOLC: Cannot open mob file for writing.");
+    return false;
   }
 
   for (i = genolc_zone_bottom(zone_num); i <= zone_table[zone_num].top; i++) {
@@ -409,7 +409,7 @@ int write_mobile_espec(mob_vnum mvnum, struct char_data *mob, FILE *fd)
       fprintf(fd, "EpicClass: %d %d\n", i, GET_CLASS_EPIC(mob, i));
   }
   fputs("E\n", fd);
-  return TRUE;
+  return true;
 }
 
 
@@ -474,7 +474,7 @@ int write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd)
     log("SYSERR: GenOLC: Error writing MobProgs for mobile #%d.", mvnum);
 #endif
 
-  return TRUE;
+  return true;
 }
 
 void check_mobile_strings(struct char_data *mob)
@@ -491,7 +491,7 @@ void check_mobile_string(mob_vnum i, char **string, const char *dscr)
   if (*string == nullptr || **string == '\0') {
     char smbuf[128];
     sprintf(smbuf, "GenOLC: Mob #%d has an invalid %s.", i, dscr);
-    mudlog(BRF, ADMLVL_GOD, TRUE, smbuf);
+    mudlog(BRF, ADMLVL_GOD, true, smbuf);
     if (*string)
       free(*string);
     *string = strdup("An undefined string.");

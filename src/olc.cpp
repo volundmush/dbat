@@ -80,7 +80,7 @@ ACMD(do_olc)
 
   /* first, figure out the first (mode) argument */
   half_chop(argument, mode_arg, argument);
-  if ((olc_mode = search_block(mode_arg, olc_modes, FALSE)) < 0) {
+  if ((olc_mode = search_block(mode_arg, olc_modes, false)) < 0) {
     send_to_char(ch, "Invalid mode '%s'.\r\n%s", mode_arg, OLC_USAGE);
     return;
   }
@@ -176,7 +176,7 @@ void olc_interpreter(void *targ, int mode, char *arg)
   struct obj_data *olc_obj = nullptr;
 
   half_chop(arg, command_string, arg);
-  if ((command = search_block(command_string, olc_commands, FALSE)) < 0) {
+  if ((command = search_block(command_string, olc_commands, false)) < 0) {
     send_to_char(olc_ch, "Invalid OLC command '%s'.\r\n", command_string);
     return;
   }
@@ -320,16 +320,16 @@ void olc_bitvector(int *bv, const char **names, char *arg)
     if (*buf == '+' || *buf == '-') {
       this_name = buf + 1;
       if (*buf == '-')
-	doremove = TRUE;
+	doremove = true;
       else
-	doremove = FALSE;
+	doremove = false;
     } else {
       this_name = buf;
-      doremove = FALSE;
+      doremove = false;
     }
 
     /* figure out which one we're dealing with */
-    if ((flagnum = search_block(this_name, names, TRUE)) < 0)
+    if ((flagnum = search_block(this_name, names, true)) < 0)
       send_to_char(olc_ch, "Unknown flag: %s\r\n", this_name);
     else {
       if (doremove)

@@ -125,7 +125,7 @@ void hsedit_save_internally(struct descriptor_data *d)
     else 
     { 
       send_to_char(d->character, "MAX House limit reached - Unable to save this house!"); 
-      mudlog(NRM, ADMLVL_BUILDER, TRUE, "HSEDIT: Max houses limit reached - Unable to save OLC data"); 
+      mudlog(NRM, ADMLVL_BUILDER, true, "HSEDIT: Max houses limit reached - Unable to save OLC data");
     } 
   } 
   /* The new house is stored - now to ensure the roomsflags are correct */ 
@@ -163,7 +163,7 @@ void hedit_delete_house(struct descriptor_data *d, int house_vnum)
   room_rnum real_atrium, real_house; 
 
   if ((i = find_house(house_vnum)) == NOWHERE) { 
-    mudlog(BRF, ADMLVL_BUILDER, TRUE, "SYSERR: hsedit: Invalid house vnum in hedit_delete_house\r\n"); 
+    mudlog(BRF, ADMLVL_BUILDER, true, "SYSERR: hsedit: Invalid house vnum in hedit_delete_house\r\n");
     cleanup_olc(d, CLEANUP_STRUCTS); 
     return; 
   } 
@@ -234,7 +234,7 @@ void hsedit_dir_menu(struct descriptor_data *d)
 
   house = OLC_HOUSE(d); 
 
-  mudlog(CMP, ADMLVL_BUILDER, TRUE, "(LOG) hsedit_dir_menu: house vnum = %d", house->vnum); 
+  mudlog(CMP, ADMLVL_BUILDER, true, "(LOG) hsedit_dir_menu: house vnum = %d", house->vnum);
   house_rnum = real_room(house->vnum); 
 
   if ((house_rnum < 0) || (house_rnum == NOWHERE)) 
@@ -491,9 +491,9 @@ void hsedit_parse(struct descriptor_data * d, char *arg)
 { 
   int number=0, id=0, i, room_rnum; 
   char *tmp; 
-  bool found=FALSE; 
+  bool found= false;
 
-  mudlog(CMP, ADMLVL_BUILDER, FALSE, "(LOG) hsedit_parse: OLC mode %d", OLC_MODE(d)); 
+  mudlog(CMP, ADMLVL_BUILDER, false, "(LOG) hsedit_parse: OLC mode %d", OLC_MODE(d));
 
   switch (OLC_MODE(d)) { 
   case HSEDIT_CONFIRM_SAVESTRING: 
@@ -501,7 +501,7 @@ void hsedit_parse(struct descriptor_data * d, char *arg)
     case 'y': 
     case 'Y': 
       hsedit_save_internally(d); 
-      mudlog(CMP, ADMLVL_BUILDER, TRUE, "OLC: %s edits house %d", GET_NAME(d->character), OLC_NUM(d)); 
+      mudlog(CMP, ADMLVL_BUILDER, true, "OLC: %s edits house %d", GET_NAME(d->character), OLC_NUM(d));
       if (CONFIG_OLC_SAVE) { 
         hsedit_save_to_disk(); 
         write_to_output(d, "House saved to disk.\r\n"); 
@@ -541,7 +541,7 @@ void hsedit_parse(struct descriptor_data * d, char *arg)
       if ((OLC_HOUSE(d)->vnum == NOWHERE) || (real_room(OLC_HOUSE(d)->vnum) == NOWHERE)) 
       { 
         send_to_char(d->character, "ERROR: Invalid house VNUM\r\n(Press Enter)\r\n"); 
-        mudlog(NRM, ADMLVL_GRGOD, TRUE, "SYSERR: Invalid house VNUM in hsedit"); 
+        mudlog(NRM, ADMLVL_GRGOD, true, "SYSERR: Invalid house VNUM in hsedit");
       } 
       else 
       { 
@@ -554,7 +554,7 @@ void hsedit_parse(struct descriptor_data * d, char *arg)
       if ((OLC_HOUSE(d)->vnum == NOWHERE) || (real_room(OLC_HOUSE(d)->vnum) == NOWHERE)) 
       { 
         send_to_char(d->character, "ERROR: Invalid house VNUM\r\n(Press Enter)\r\n"); 
-        mudlog(NRM, ADMLVL_BUILDER, TRUE, "SYSERR: Invalid house VNUM in hsedit"); 
+        mudlog(NRM, ADMLVL_BUILDER, true, "SYSERR: Invalid house VNUM in hsedit");
       } 
       else 
       { 
@@ -670,13 +670,13 @@ void hsedit_parse(struct descriptor_data * d, char *arg)
         { 
           if (world[room_rnum].dir_option[i]->to_room == real_room(number)) 
           { 
-            found=TRUE; 
+            found= true;
             id = i; 
           } 
         } 
       } 
 
-      if (found == FALSE) 
+      if (found == false)
       { 
         send_to_char(d->character, "Atrium MUST be an adjoining room.\r\nEnter a valid room VNUM for this atrium (0 to exit) : "); 
         return; 
@@ -979,7 +979,7 @@ expansion
     
   default: 
     /* we should never get here */ 
-    mudlog(BRF, ADMLVL_BUILDER,TRUE,"SYSERR: Reached default case in parse_hsedit"); 
+    mudlog(BRF, ADMLVL_BUILDER, true,"SYSERR: Reached default case in parse_hsedit");
     break; 
   } 
   /*. If we get this far, something has been changed .*/ 
@@ -1021,7 +1021,7 @@ ACMD(do_oasis_hsedit)
       send_to_char(ch, "Yikes!  Stop that, someone will get hurt!\r\n"); 
       return; 
     } 
-    save = TRUE; 
+    save = true;
     
     if (is_number(buf2)) 
       number = atoi(buf2); 
@@ -1076,7 +1076,7 @@ ACMD(do_oasis_hsedit)
   
 /****************************************************************************/ 
   if (d->olc) { 
-    mudlog(BRF, ADMLVL_BUILDER, TRUE, "SYSERR: do_oasis_hsedit: Player already had olc structure."); 
+    mudlog(BRF, ADMLVL_BUILDER, true, "SYSERR: do_oasis_hsedit: Player already had olc structure.");
     free(d->olc); 
   } 
   
@@ -1108,7 +1108,7 @@ ACMD(do_oasis_hsedit)
 /****************************************************************************/ 
   if (!can_edit_zone(ch, OLC_ZNUM(d))) { 
     send_to_char(ch, " You do not have permission to edit zone %d. Try zone %d.\r\n", zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch)); 
-    mudlog(BRF, ADMLVL_BUILDER, TRUE, "OLC: %s tried to edit zone %d allowed zone %d", 
+    mudlog(BRF, ADMLVL_BUILDER, true, "OLC: %s tried to edit zone %d allowed zone %d",
       GET_NAME(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch)); 
     
     
@@ -1129,7 +1129,7 @@ ACMD(do_oasis_hsedit)
   if (save) { 
     send_to_char(ch, "Saving all houses in zone %d.\r\n", 
       zone_table[OLC_ZNUM(d)].number); 
-    mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), TRUE, 
+    mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true,
       "OLC: %s saves house info for zone %d.", GET_NAME(ch), 
       zone_table[OLC_ZNUM(d)].number); 
     
@@ -1165,7 +1165,7 @@ ACMD(do_oasis_hsedit)
     if (num_of_houses >= MAX_HOUSES) 
     { 
       send_to_char(ch, "MAX houses limit reached (%d) - Unable to create more.\r\n", MAX_HOUSES); 
-      mudlog(NRM, ADMLVL_BUILDER, TRUE, "HSEDIT: MAX houses limit reached (%d)\r\n", MAX_HOUSES); 
+      mudlog(NRM, ADMLVL_BUILDER, true, "HSEDIT: MAX houses limit reached (%d)\r\n", MAX_HOUSES);
       return; 
     } 
     else 
@@ -1185,7 +1185,7 @@ ACMD(do_oasis_hsedit)
   /** Send the OLC message to the players in the same room as the builder.   **/ 
   
 /****************************************************************************/ 
-  act("$n starts using OLC.", TRUE, d->character, nullptr, nullptr, TO_ROOM); 
+  act("$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
   SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING); 
   
   
@@ -1193,6 +1193,6 @@ ACMD(do_oasis_hsedit)
   /** Log the OLC message.                                                   **/ 
   
 /****************************************************************************/ 
-  mudlog(CMP, ADMLVL_BUILDER, TRUE, "OLC: (hsedit) %s starts editing zone %d allowed zone %d", 
+  mudlog(CMP, ADMLVL_BUILDER, true, "OLC: (hsedit) %s starts editing zone %d allowed zone %d",
     GET_NAME(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch)); 
 }

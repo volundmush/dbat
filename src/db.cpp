@@ -84,7 +84,7 @@ int no_rent_check = 0;        /* skip rent check on boot?	 */
 time_t boot_time = 0;        /* time of mud boot		 */
 int circle_restrict = 0;    /* level of game restriction	 */
 int dballtime = 0;              /* used by dragonball load system*/
-int SHENRON = FALSE;            /* Shenron has been summoned     */
+int SHENRON = false;            /* Shenron has been summoned     */
 int DRAGONR = 0;                /* Room Shenron has been summoned to */
 int DRAGONZ = 0;                /* Zone Shenron has been summoned to */
 int WISH[2] = {0, 0};           /* Keeps track of wishes granted */
@@ -94,7 +94,7 @@ room_rnum r_mortal_start_room;    /* rnum of mortal start room	 */
 room_rnum r_immort_start_room;    /* rnum of immort start room	 */
 room_rnum r_frozen_start_room;    /* rnum of frozen start room	 */
 int xap_objs = 0;               /* Xap objs                      */
-int converting = FALSE;
+int converting = false;
 
 char *credits = nullptr;        /* game credits			 */
 char *news = nullptr;        /* mud news			 */
@@ -1455,7 +1455,7 @@ char fread_letter(FILE *fp) {
 
 bitvector_t asciiflag_conv(char *flag) {
     bitvector_t flags = 0;
-    int is_num = TRUE;
+    int is_num = true;
     char *p;
 
     for (p = flag; *p; p++) {
@@ -1465,7 +1465,7 @@ bitvector_t asciiflag_conv(char *flag) {
             flags |= 1 << (26 + (*p - 'A'));
 
         if (!(isdigit(*p) || (*p == '-')))
-            is_num = FALSE;
+            is_num = false;
     }
 
     if (is_num)
@@ -1476,7 +1476,7 @@ bitvector_t asciiflag_conv(char *flag) {
 
 static bitvector_t asciiflag_conv_aff(char *flag) {
     bitvector_t flags = 0;
-    int is_num = TRUE;
+    int is_num = true;
     char *p;
 
     for (p = flag; *p; p++) {
@@ -1486,7 +1486,7 @@ static bitvector_t asciiflag_conv_aff(char *flag) {
             flags |= 1 << (26 + (*p - 'A'));
 
         if (!(isdigit(*p) || (*p == '-')))
-            is_num = FALSE;
+            is_num = false;
     }
 
     if (is_num)
@@ -1532,10 +1532,10 @@ static void parse_room(FILE *fl, int virtual_nr) {
     }
 
     if (((retval = sscanf(line, " %d %s %s %s %s %d ", t, flags, flags2, flags3, flags4, t + 2)) == 3) &&
-        (bitwarning == TRUE)) {
+        (bitwarning == true)) {
         log("WARNING: Conventional worldfiles detected. Please read 128bit.readme.");
         exit(1);
-    } else if ((retval == 3) && (bitwarning == FALSE)) {
+    } else if ((retval == 3) && (bitwarning == false)) {
         /*
    * Looks like the implementor is ready, so let's load the worldfiles. We
    * load the extra three flags as 0, since they won't be anything anyway. We
@@ -1556,7 +1556,7 @@ static void parse_room(FILE *fl, int virtual_nr) {
 
         if (bitsavetodisk) { /* Maybe the implementor just wants to look at the 128bit files */
             add_to_save_list(zone_table[real_zone_by_thing(virtual_nr)].number, 3);
-            converting = TRUE;
+            converting = true;
         }
 
         log("   done.");
@@ -1681,10 +1681,10 @@ static void setup_dir(FILE *fl, int room, int dir) {
         exit(1);
     }
     if (((retval = sscanf(line, " %d %d %d %d %d %d %d %d %d %d %d", t, t + 1, t + 2, t + 3, t + 4, t + 5, t + 6, t + 7,
-                          t + 8, t + 9, t + 10)) == 3) && (bitwarning == TRUE)) {
+                          t + 8, t + 9, t + 10)) == 3) && (bitwarning == true)) {
         log("SYSERR: Format error, %s", buf2);
         exit(1);
-    } else if (bitwarning == FALSE) {
+    } else if (bitwarning == false) {
 
         if (t[0] == 1)
             world[room].dir_option[dir]->exit_info = EX_ISDOOR;
@@ -1712,7 +1712,7 @@ static void setup_dir(FILE *fl, int room, int dir) {
             world[room].dir_option[dir]->totalfailroom = NOWHERE;
             if (bitsavetodisk) {
                 add_to_save_list(zone_table[world[room].zone].number, 3);
-                converting = TRUE;
+                converting = true;
             }
         } else if (retval == 5) {
             world[room].dir_option[dir]->dclock = t[3];
@@ -1725,7 +1725,7 @@ static void setup_dir(FILE *fl, int room, int dir) {
             world[room].dir_option[dir]->totalfailroom = NOWHERE;
             if (bitsavetodisk) {
                 add_to_save_list(zone_table[world[room].zone].number, 3);
-                converting = TRUE;
+                converting = true;
             }
         } else if (retval == 7) {
             world[room].dir_option[dir]->dclock = t[3];
@@ -1738,7 +1738,7 @@ static void setup_dir(FILE *fl, int room, int dir) {
             world[room].dir_option[dir]->totalfailroom = NOWHERE;
             if (bitsavetodisk) {
                 add_to_save_list(zone_table[world[room].zone].number, 3);
-                converting = TRUE;
+                converting = true;
             }
         } else if (retval == 11) {
             world[room].dir_option[dir]->dclock = t[3];
@@ -1985,16 +1985,16 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr) {
  */
 
 #define CASE(test)    \
-    if (value && !matched && !strcasecmp(keyword, test) && (matched = TRUE))
+    if (value && !matched && !strcasecmp(keyword, test) && (matched = false))
 
 #define BOOL_CASE(test)    \
-    if (!value && !matched && !strcasecmp(keyword, test) && (matched = TRUE))
+    if (!value && !matched && !strcasecmp(keyword, test) && (matched = true))
 
 #define RANGE(low, high)    \
     (num_arg = MAX((low), MIN((high), (num_arg))))
 
 static void interpret_espec(const char *keyword, const char *value, struct char_data *ch, int nr) {
-    int num_arg = 0, matched = FALSE;
+    int num_arg = 0, matched = false;
     int num, num2, num3, num4, num5, num6;
     struct affected_type af;
 
@@ -2208,11 +2208,11 @@ int parse_mobile_from_file(FILE *mob_f, struct char_data *ch) {
     }
 
     if (((retval = sscanf(line, "%s %s %s %s %s %s %s %s %d %c", f1, f2, f3, f4, f5, f6, f7, f8, t + 2, &letter)) ==
-         10) && (bitwarning == TRUE)) {
+         10) && (bitwarning == true)) {
 /* Let's make the implementor read some, before converting his worldfiles */
         log("WARNING: Conventional mobilefiles detected. Please read 128bit.readme.");
         return 0;
-    } else if ((retval == 4) && (bitwarning == FALSE)) {
+    } else if ((retval == 4) && (bitwarning == false)) {
 
         log("Converting mobile #%d to 128bits..", nr);
         MOB_FLAGS(ch)[0] = asciiflag_conv(f1);
@@ -2252,7 +2252,7 @@ int parse_mobile_from_file(FILE *mob_f, struct char_data *ch) {
 
         if (bitsavetodisk) {
             add_to_save_list(zone_table[real_zone_by_thing(nr)].number, 0);
-            converting = TRUE;
+            converting = true;
         }
 
         log("   done.");
@@ -2406,11 +2406,11 @@ static char *parse_object(FILE *obj_f, int nr) {
     }
 
     if (((retval = sscanf(line, " %d %s %s %s %s %s %s %s %s %s %s %s %s", t, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10,
-                          f11, f12)) == 4) && (bitwarning == TRUE)) {
+                          f11, f12)) == 4) && (bitwarning == true)) {
         /* Let's make the implementor read some, before converting his worldfiles */
         log("WARNING: Conventional objectfiles detected. Please read 128bit.readme.");
         exit(1);
-    } else if (((retval == 4) || (retval == 3)) && (bitwarning == FALSE)) {
+    } else if (((retval == 4) || (retval == 3)) && (bitwarning == false)) {
 
         if (retval == 3)
             t[3] = 0;
@@ -2433,7 +2433,7 @@ static char *parse_object(FILE *obj_f, int nr) {
 
         if (bitsavetodisk) {
             add_to_save_list(zone_table[real_zone_by_thing(nr)].number, 1);
-            converting = TRUE;
+            converting = true;
         }
 
         log("   done.");
@@ -2489,7 +2489,7 @@ static char *parse_object(FILE *obj_f, int nr) {
         GET_OBJ_VAL(obj_proto + i, VAL_DOOR_DCHIDE) = 20;
         if (bitsavetodisk) {
             add_to_save_list(zone_table[real_zone_by_thing(nr)].number, 1);
-            converting = TRUE;
+            converting = true;
         }
     }
 
@@ -2498,7 +2498,7 @@ static char *parse_object(FILE *obj_f, int nr) {
 
         if (bitsavetodisk) {
             add_to_save_list(zone_table[real_zone_by_thing(nr)].number, 1);
-            converting = TRUE;
+            converting = true;
         }
     }
 
@@ -2665,7 +2665,7 @@ static void load_zones(FILE *fl, char *zonename) {
     static zone_rnum zone = 0;
     int cmd_no, num_of_cmds = 0, line_num = 0, tmp, error, arg_num, version = 1;
     char *ptr, buf[READ_SIZE], zname[READ_SIZE], buf2[MAX_STRING_LENGTH];
-    int zone_fix = FALSE;
+    int zone_fix = false;
     char t1[80], t2[80], line[MAX_STRING_LENGTH];
 
     strlcpy(zname, zonename, sizeof(zname));
@@ -2751,7 +2751,7 @@ static void load_zones(FILE *fl, char *zonename) {
             Z.name = strdup(Z.builders);
             free(Z.builders);
             Z.builders = strdup("None.");
-            zone_fix = TRUE;
+            zone_fix = true;
         }
     }
     if (Z.bot > Z.top) {
@@ -2763,13 +2763,13 @@ static void load_zones(FILE *fl, char *zonename) {
 
     for (;;) {
         /* skip reading one line if we fixed above (line is correct already) */
-        if (zone_fix != TRUE) {
+        if (zone_fix != true) {
             if ((tmp = get_line(fl, buf)) == 0) {
                 log("SYSERR: Format error in %s - premature end of file", zname);
                 exit(1);
             }
         } else
-            zone_fix = FALSE;
+            zone_fix = false;
 
         line_num += tmp;
         ptr = buf;
@@ -3691,17 +3691,17 @@ void remove_unique_id(struct obj_data *obj) {
 }
 
 void log_dupe_objects(struct obj_data *obj1, struct obj_data *obj2) {
-    mudlog(BRF, ADMLVL_GOD, TRUE, "DUPE: Dupe object found: %s [%d] [%" TMT ":%" I64T "]",
+    mudlog(BRF, ADMLVL_GOD, true, "DUPE: Dupe object found: %s [%d] [%" TMT ":%" I64T "]",
            obj1->short_description ? obj1->short_description : "<No name>",
            GET_OBJ_VNUM(obj1), obj1->generation, obj1->unique_id);
-    mudlog(BRF, ADMLVL_GOD, TRUE, "DUPE: First: In room: %d (%s), "
+    mudlog(BRF, ADMLVL_GOD, true, "DUPE: First: In room: %d (%s), "
                                   "In object: %s, Carried by: %s, Worn by: %s",
            GET_ROOM_VNUM(IN_ROOM(obj1)),
            IN_ROOM(obj1) == NOWHERE ? "Nowhere" : world[IN_ROOM(obj1)].name,
            obj1->in_obj ? obj1->in_obj->short_description : "None",
            obj1->carried_by ? GET_NAME(obj1->carried_by) : "Nobody",
            obj1->worn_by ? GET_NAME(obj1->worn_by) : "Nobody");
-    mudlog(BRF, ADMLVL_GOD, TRUE, "DUPE: Newer: In room: %d (%s), "
+    mudlog(BRF, ADMLVL_GOD, true, "DUPE: Newer: In room: %d (%s), "
                                   "In object: %s, Carried by: %s, Worn by: %s",
            GET_ROOM_VNUM(IN_ROOM(obj2)),
            IN_ROOM(obj2) == NOWHERE ? "Nowhere" : world[IN_ROOM(obj2)].name,
@@ -3900,7 +3900,7 @@ void zone_update(void) {
         if (zone_table[update_u->zone_to_reset].reset_mode == 2 ||
             is_empty(update_u->zone_to_reset)) {
             reset_zone(update_u->zone_to_reset);
-            mudlog(CMP, ADMLVL_GOD, FALSE, "Auto zone reset: %s (Zone %d)",
+            mudlog(CMP, ADMLVL_GOD, false, "Auto zone reset: %s (Zone %d)",
                    zone_table[update_u->zone_to_reset].name, zone_table[update_u->zone_to_reset].number);
             /* dequeue */
             if (update_u == reset_q.head)
@@ -3921,8 +3921,8 @@ void zone_update(void) {
 }
 
 static void log_zone_error(zone_rnum zone, int cmd_no, const char *message) {
-    mudlog(NRM, ADMLVL_GOD, TRUE, "SYSERR: zone file: %s", message);
-    mudlog(NRM, ADMLVL_GOD, TRUE, "SYSERR: ...offending cmd: '%c' cmd in zone #%d, line %d",
+    mudlog(NRM, ADMLVL_GOD, true, "SYSERR: zone file: %s", message);
+    mudlog(NRM, ADMLVL_GOD, true, "SYSERR: ...offending cmd: '%c' cmd in zone #%d, line %d",
            ZCMD2.command, zone_table[zone].number, ZCMD2.line);
 }
 
@@ -3938,18 +3938,18 @@ void reset_zone(zone_rnum zone) {
     room_rnum rrnum;
     struct char_data *tmob = nullptr; /* for trigger assignment */
     struct obj_data *tobj = nullptr;  /* for trigger assignment */
-    int mob_load = FALSE; /* ### */
-    int obj_load = FALSE; /* ### */
+    int mob_load = false; /* ### */
+    int obj_load = false; /* ### */
 
-    if (pre_reset(zone_table[zone].number) == FALSE) {
+    if (pre_reset(zone_table[zone].number) == false) {
         for (cmd_no = 0; ZCMD2.command != 'S'; cmd_no++) {
 
             if (ZCMD2.if_flag && !last_cmd && !mob_load && !obj_load)
                 continue;
 
             if (!ZCMD2.if_flag) { /* ### */
-                mob_load = FALSE;
-                obj_load = FALSE;
+                mob_load = false;
+                obj_load = false;
             }
 
             /*  This is the list of actual zone commands.  If any new
@@ -3998,7 +3998,7 @@ void reset_zone(zone_rnum zone) {
                         load_mtrigger(mob);
                         tmob = mob;
                         last_cmd = 1;
-                        mob_load = TRUE;
+                        mob_load = true;
                     } else
                         last_cmd = 0;
                     tobj = nullptr;
@@ -4050,14 +4050,14 @@ void reset_zone(zone_rnum zone) {
                             last_cmd = 1;
                             load_otrigger(obj);
                             tobj = obj;
-                            obj_load = TRUE;
+                            obj_load = true;
                         } else {
                             obj = read_object(ZCMD2.arg1, REAL);
                             add_unique_id(obj);
                             IN_ROOM(obj) = NOWHERE;
                             last_cmd = 1;
                             tobj = obj;
-                            obj_load = TRUE;
+                            obj_load = true;
                         }
                     } else
                         last_cmd = 0;
@@ -4872,13 +4872,13 @@ zone_rnum real_zone(zone_vnum vnum) {
  */
 static int check_object(struct obj_data *obj) {
     char objname[MAX_INPUT_LENGTH + 32];
-    int error = FALSE, y;
+    int error = false, y;
 
-    if (GET_OBJ_WEIGHT(obj) < 0 && (error = TRUE))
+    if (GET_OBJ_WEIGHT(obj) < 0 && (error = true))
         log("SYSERR: Object #%d (%s) has negative weight (%" I64T ").",
             GET_OBJ_VNUM(obj), obj->short_description, GET_OBJ_WEIGHT(obj));
 
-    if (GET_OBJ_RENT(obj) < 0 && (error = TRUE))
+    if (GET_OBJ_RENT(obj) < 0 && (error = true))
         log("SYSERR: Object #%d (%s) has negative cost/day (%d).",
             GET_OBJ_VNUM(obj), obj->short_description, GET_OBJ_RENT(obj));
 
@@ -4894,13 +4894,13 @@ static int check_object(struct obj_data *obj) {
             char onealias[MAX_INPUT_LENGTH], *space = strrchr(obj->name, ' ');
 
             strlcpy(onealias, space ? space + 1 : obj->name, sizeof(onealias));
-            if (search_block(onealias, drinknames, TRUE) < 0 && (error = TRUE)) {
+            if (search_block(onealias, drinknames, true) < 0 && (error = true)) {
                 //log("SYSERR: Object #%d (%s) doesn't have drink type as last alias. (%s)", GET_OBJ_VNUM(obj), obj->short_description, obj->name);
             }
         }
             /* Fall through. */
         case ITEM_FOUNTAIN:
-            if ((GET_OBJ_VAL(obj, 0) > 0) && (GET_OBJ_VAL(obj, 1) > GET_OBJ_VAL(obj, 0) && (error = TRUE)))
+            if ((GET_OBJ_VAL(obj, 0) > 0) && (GET_OBJ_VAL(obj, 1) > GET_OBJ_VAL(obj, 0) && (error = true)))
                 log("SYSERR: Object #%d (%s) contains (%d) more than maximum (%d).",
                     GET_OBJ_VNUM(obj), obj->short_description,
                     GET_OBJ_VAL(obj, 1), GET_OBJ_VAL(obj, 0));
@@ -4916,7 +4916,7 @@ static int check_object(struct obj_data *obj) {
         case ITEM_STAFF:
             error |= check_object_level(obj, 0);
             error |= check_object_spell_number(obj, 3);
-            if (GET_OBJ_VAL(obj, 2) > GET_OBJ_VAL(obj, 1) && (error = TRUE))
+            if (GET_OBJ_VAL(obj, 2) > GET_OBJ_VAL(obj, 1) && (error = true))
                 log("SYSERR: Object #%d (%s) has more charges (%d) than maximum (%d).",
                     GET_OBJ_VNUM(obj), obj->short_description,
                     GET_OBJ_VAL(obj, 2), GET_OBJ_VAL(obj, 1));
@@ -4928,7 +4928,7 @@ static int check_object(struct obj_data *obj) {
 
 
 static int check_object_spell_number(struct obj_data *obj, int val) {
-    int error = FALSE;
+    int error = false;
     const char *spellname;
 
     if (GET_OBJ_VAL(obj, val) == -1 ||
@@ -4940,11 +4940,11 @@ static int check_object_spell_number(struct obj_data *obj, int val) {
    * spell which is actually a skill.
    */
     if (GET_OBJ_VAL(obj, val) < 0)
-        error = TRUE;
+        error = true;
     if (GET_OBJ_VAL(obj, val) >= SKILL_TABLE_SIZE)
-        error = TRUE;
+        error = true;
     if (skill_type(GET_OBJ_VAL(obj, val)) != SKTYPE_SPELL)
-        error = TRUE;
+        error = true;
     if (error)
         log("SYSERR: Object #%d (%s) has out of range spell #%d.",
             GET_OBJ_VNUM(obj), obj->short_description, GET_OBJ_VAL(obj, val));
@@ -4967,7 +4967,7 @@ static int check_object_spell_number(struct obj_data *obj, int val) {
     /* Now check for unnamed spells. */
     spellname = skill_name(GET_OBJ_VAL(obj, val));
 
-    if ((spellname == unused_spellname || !strcasecmp("UNDEFINED", spellname)) && (error = TRUE))
+    if ((spellname == unused_spellname || !strcasecmp("UNDEFINED", spellname)) && (error = true))
         log("SYSERR: Object #%d (%s) uses '%s' spell #%d.",
             GET_OBJ_VNUM(obj), obj->short_description, spellname,
             GET_OBJ_VAL(obj, val));
@@ -4976,9 +4976,9 @@ static int check_object_spell_number(struct obj_data *obj, int val) {
 }
 
 static int check_object_level(struct obj_data *obj, int val) {
-    int error = FALSE;
+    int error = false;
 
-    if ((GET_OBJ_VAL(obj, val) < 0) && (error = TRUE))
+    if ((GET_OBJ_VAL(obj, val) < 0) && (error = true))
         log("SYSERR: Object #%d (%s) has out of range level #%d.",
             GET_OBJ_VNUM(obj), obj->short_description, GET_OBJ_VAL(obj, val));
 
@@ -4987,17 +4987,17 @@ static int check_object_level(struct obj_data *obj, int val) {
 
 static int check_bitvector_names(bitvector_t bits, size_t namecount, const char *whatami, const char *whatbits) {
     unsigned int flagnum;
-    bool error = FALSE;
+    bool error = false;
 
     /* See if any bits are set above the ones we know about. */
     if (bits <= (~(bitvector_t) 0 >> (sizeof(bitvector_t) * 8 - namecount)))
-        return (FALSE);
+        return (false);
 
     for (flagnum = namecount; flagnum < sizeof(bitvector_t) * 8; flagnum++)
         if ((1 << flagnum) & bits) {
             log("SYSERR: %s has unknown %s flag, bit %d (0 through %" SZT " known).", whatami, whatbits, flagnum,
                 namecount - 1);
-            error = TRUE;
+            error = true;
         }
 
     return (error);

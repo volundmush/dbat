@@ -45,7 +45,7 @@ int VALID_EDGE(room_rnum x, int y)
 {
   if (world[x].dir_option[y] == nullptr || TOROOM(x, y) == NOWHERE)
     return 0;
-  if (CONFIG_TRACK_T_DOORS == FALSE && IS_CLOSED(x, y))
+  if (CONFIG_TRACK_T_DOORS == false && IS_CLOSED(x, y))
     return 0;
   if (ROOM_FLAGGED(TOROOM(x, y), ROOM_NOTRACK) || IS_MARKED(TOROOM(x, y)))
     return 0;
@@ -147,7 +147,7 @@ int find_first_step(room_rnum src, room_rnum target)
 ACMD(do_sradar)
 {
   struct obj_data *vehicle = nullptr, *controls = nullptr;
-  int dir = 0, noship = FALSE;
+  int dir = 0, noship = false;
   char arg[MAX_INPUT_LENGTH];
   char planet[20];
 
@@ -164,23 +164,23 @@ ACMD(do_sradar)
   }
 
   if (!PLR_FLAGGED(ch, PLR_PILOTING) && GET_ADMLEVEL(ch) >= 1) {
-   noship = TRUE;
+   noship = true;
   }
   else if (!(vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(controls, 0))) ) {
     send_to_char(ch, "@wYou can't find anything to pilot.\r\n");
     return;
   }
 
-  if (noship == FALSE && SECT(IN_ROOM(vehicle)) != SECT_SPACE) {
+  if (noship == false && SECT(IN_ROOM(vehicle)) != SECT_SPACE) {
     send_to_char(ch, "@wYour ship is not in space!\r\n");
     return;
-  } if (noship == TRUE && SECT(IN_ROOM(ch)) != SECT_SPACE) {
+  } if (noship == true && SECT(IN_ROOM(ch)) != SECT_SPACE) {
     send_to_char(ch, "@wYou are not even in space!\r\n");
     return;
   } 
 
   if (!*arg) {
-   if (GET_ADMLEVEL(ch) >= 1 && noship == TRUE) {
+   if (GET_ADMLEVEL(ch) >= 1 && noship == true) {
     printmap(ch->in_room, ch, 0, -1);
    } else {
     printmap(IN_ROOM(vehicle), ch, 0, GET_OBJ_VNUM(vehicle));
@@ -201,7 +201,7 @@ ACMD(do_sradar)
     return;
   }
 
-  if (noship == FALSE) {
+  if (noship == false) {
   if (!strcasecmp(arg, "earth") || !strcasecmp(arg, "Earth")) {
    dir = find_first_step(IN_ROOM(vehicle), real_room(40979));
    sprintf(planet, "Earth");
@@ -247,7 +247,7 @@ ACMD(do_sradar)
   }
   }
 
-  if (noship == TRUE) {
+  if (noship == true) {
   if (!strcasecmp(arg, "earth") || !strcasecmp(arg, "Earth")) {
    dir = find_first_step(IN_ROOM(ch), real_room(40979));
    sprintf(planet, "Earth");
@@ -313,17 +313,17 @@ ACMD(do_sradar)
 
 ACMD(do_radar)
 {
-  int room = 0, dir, num = 0, found = FALSE, found2 = FALSE, fcount = 0 ;
+  int room = 0, dir, num = 0, found = false, found2 = false, fcount = 0 ;
   struct char_data *tch;
   struct obj_data *obj, *obj2, *next_obj;
 
   for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
        next_obj = obj2->next_content;
    if (GET_OBJ_VNUM(obj2) == 12 && (!OBJ_FLAGGED(obj2, ITEM_BROKEN)) && (!OBJ_FLAGGED(obj2, ITEM_FORGED))) {
-    found2 = TRUE;
+    found2 = true;
    }
   }
-  if (found2 == FALSE) {
+  if (found2 == false) {
    send_to_char(ch, "You do not even have a dragon radar!\r\n");
    return;
   }
@@ -335,7 +335,7 @@ ACMD(do_radar)
 
  else {
     WAIT_STATE(ch, PULSE_2SEC);
- act("$n holds up a dragon radar and pushes its button.", FALSE, ch, nullptr, nullptr, TO_ROOM);
+ act("$n holds up a dragon radar and pushes its button.", false, ch, nullptr, nullptr, TO_ROOM);
  while (num < 20000) {
  if (real_room(room) != NOWHERE) {
  for (obj = world[real_room(room)].contents; obj; obj = next_obj) {
@@ -359,7 +359,7 @@ ACMD(do_radar)
     send_to_char(ch, "@D<@G%d@D>@w The radar detects a dragonball %s of here.\r\n", fcount, dirs[dir]);
     break;
    }
-   found = TRUE;
+   found = true;
   }
  }
  for (tch = world[real_room(room)].people; tch; tch = tch->next_in_room) {
@@ -387,7 +387,7 @@ ACMD(do_radar)
     send_to_char(ch, "@D<@G%d@D>@w The radar detects a dragonball %s of here.\r\n", fcount, dirs[dir]);
     break;
    }
-      found = TRUE;
+      found = true;
    }
   }
   }
@@ -395,7 +395,7 @@ ACMD(do_radar)
   num += 1;
   room += 1;
  }
- if (found == FALSE) {
+ if (found == false) {
   send_to_char(ch, "The radar didn't detect any dragonballs on the planet.\r\n");
   return;
  }
@@ -435,9 +435,9 @@ ACMD(do_track)
 			send_to_char(ch, "You will remember their ki signal from now on.\r\n");
 			sense_memory_write(ch, vict);
 		}
-		act("You look at $N@n intently for a moment.", TRUE, ch, nullptr, vict, TO_CHAR);
-		act("$n looks at you intently for a moment.", TRUE, ch, nullptr, vict, TO_VICT);
-		act("$n looks at $N@n intently for a moment.", TRUE, ch, nullptr, vict, TO_NOTVICT);
+		act("You look at $N@n intently for a moment.", true, ch, nullptr, vict, TO_CHAR);
+		act("$n looks at you intently for a moment.", true, ch, nullptr, vict, TO_VICT);
+		act("$n looks at $N@n intently for a moment.", true, ch, nullptr, vict, TO_NOTVICT);
 		if (!IS_ANDROID(vict)) {
 			if (GET_ALIGNMENT(vict) > 50 && GET_ALIGNMENT(vict) < 200) {
 				send_to_char(ch, "You sense slightly pure and good ki from them.\r\n");
@@ -760,9 +760,9 @@ ACMD(do_track)
 			send_to_char(ch, "Hmm.. something seems to be wrong.\r\n");
 			break;
 		case BFS_ALREADY_THERE:
-			act("You look at $N@n intently for a moment.", TRUE, ch, nullptr, vict, TO_CHAR);
-			act("$n looks at you intently for a moment.", TRUE, ch, nullptr, vict, TO_VICT);
-			act("$n looks at $N intently for a moment.", TRUE, ch, nullptr, vict, TO_NOTVICT);
+			act("You look at $N@n intently for a moment.", true, ch, nullptr, vict, TO_CHAR);
+			act("$n looks at you intently for a moment.", true, ch, nullptr, vict, TO_VICT);
+			act("$n looks at $N intently for a moment.", true, ch, nullptr, vict, TO_NOTVICT);
 			if (!IS_ANDROID(vict)) {
 				if (GET_ALIGNMENT(vict) > 50 && GET_ALIGNMENT(vict) < 200) {
 					send_to_char(ch, "You sense slightly pure and good ki from them.\r\n");

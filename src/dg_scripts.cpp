@@ -241,7 +241,7 @@ int can_wear_on_pos(struct obj_data *obj, int pos)
     case WEAR_EAR_L:    return CAN_WEAR(obj, ITEM_WEAR_EAR);
     case WEAR_SH:       return CAN_WEAR(obj, ITEM_WEAR_SH);
     case WEAR_EYE:      return CAN_WEAR(obj, ITEM_WEAR_EYE);
-    default: return FALSE;
+    default: return false;
   }
 }
 
@@ -670,22 +670,22 @@ EVENTFUNC(trig_wait_event)
 
 #if 1  /* debugging */
   {
-    int found = FALSE;
+    int found = false;
     if (type == MOB_TRIGGER) {
       struct char_data *tch;
       for (tch = character_list;tch && !found;tch = tch->next)
         if (tch == (struct char_data *)go)
-          found = TRUE;
+          found = true;
     } else if (type == OBJ_TRIGGER) {
       struct obj_data *obj;
       for (obj = object_list;obj && !found;obj = obj->next)
         if (obj == (struct obj_data *)go)
-          found = TRUE;
+          found = true;
     } else {
       room_rnum i;
       for (i = 0;i<top_of_world && !found;i++)
         if (&world[i] == (struct room_data *)go)
-          found = TRUE;
+          found = true;
     }
     if (!found) {
       log("Trigger restarted on unknown entity. Vnum: %d", GET_TRIG_VNUM(trig));
@@ -1039,7 +1039,7 @@ ACMD(do_attach)
 int remove_trigger(struct script_data *sc, char *name)
 {
   trig_data *i, *j;
-  int num = 0, string = FALSE, n;
+  int num = 0, string = false, n;
   char *cname;
 
 
@@ -1047,7 +1047,7 @@ int remove_trigger(struct script_data *sc, char *name)
     return 0;
 
   if ((cname = strstr(name,".")) || (!isdigit(*name)) ) {
-    string = TRUE;
+    string = true;
     if (cname) {
       *cname = '\0';
       num = atoi(name);
@@ -1290,7 +1290,7 @@ void script_log(const char *format, ...)
 int is_num(char *arg)
 {
    if (*arg == '\0')
-      return FALSE;
+      return false;
 
    if (*arg == '+' || *arg == '-')
       arg++;
@@ -1298,10 +1298,10 @@ int is_num(char *arg)
    for (; *arg != '\0'; arg++)
    {
       if (!isdigit(*arg))
-         return FALSE;
+         return false;
    }
 
-   return TRUE;
+   return true;
 }
 
 
@@ -2693,7 +2693,7 @@ int script_driver(void *go_adress, trig_data *trig, int type, int mode)
         process_detach(go, sc, trig, type, cmd);
 
       else if (!strncasecmp(cmd, "version", 7))
-        mudlog(NRM, ADMLVL_GOD, TRUE, "%s", DG_SCRIPT_VERSION);
+        mudlog(NRM, ADMLVL_GOD, true, "%s", DG_SCRIPT_VERSION);
 
       else {
         switch (type) {
@@ -2932,7 +2932,7 @@ void save_char_vars(struct char_data *ch)
 
   file = fopen(fn,"wt");
   if (!file) {
-    mudlog( NRM, ADMLVL_GOD, TRUE,
+    mudlog( NRM, ADMLVL_GOD, true,
             "SYSERR: Could not open player variable file %s for writing.:%s",
             fn, strerror(errno));
     return;
@@ -3121,11 +3121,11 @@ int check_flags_by_name_ar(int *array, int numflags, char *search, const char *n
       item = i;
 
   if (item < 0) 
-    return FALSE;
+    return false;
 
   if (IS_SET_AR(array, item)) 
     return item;
 
-  return FALSE;
+  return false;
 }
 

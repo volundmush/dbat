@@ -50,7 +50,7 @@ SPECIAL(shop_keeper);
 const char *get_i_name(struct char_data *ch, struct char_data *vict) {
   char fname[40], filler[50], scrap[100], line[256];
   static char name[50];
-  int known = FALSE;
+  int known = false;
   FILE *fl;
 
   /* Read Introduction File */
@@ -78,12 +78,12 @@ const char *get_i_name(struct char_data *ch, struct char_data *vict) {
     sscanf(line, "%s %s\n", filler, scrap);
     if (!strcasecmp(GET_NAME(vict), filler)) {
      sprintf(name, "%s", scrap);
-     known = TRUE;
+     known = true;
     }
   }
   fclose(fl);
 
-   if (known == TRUE)
+   if (known == true)
     return (name);
    else
     return (RACE(vict));
@@ -433,12 +433,12 @@ void affect_total(struct char_data *ch)
 	affect_modify_ar(ch, GET_EQ(ch, i)->affected[j].location,
 		      GET_EQ(ch, i)->affected[j].modifier,
 		      GET_EQ(ch, i)->affected[j].specific,
-		      GET_OBJ_PERM(GET_EQ(ch, i)), FALSE);
+		      GET_OBJ_PERM(GET_EQ(ch, i)), false);
   }
 
 
   for (af = ch->affected; af; af = af->next)
-    affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, FALSE);
+    affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, false);
 
   ch->aff_abils = ch->real_abils;
 
@@ -458,13 +458,13 @@ void affect_total(struct char_data *ch)
 	affect_modify_ar(ch, GET_EQ(ch, i)->affected[j].location,
 		      GET_EQ(ch, i)->affected[j].modifier,
 		      GET_EQ(ch, i)->affected[j].specific,
-		      GET_OBJ_PERM(GET_EQ(ch, i)), TRUE);
+		      GET_OBJ_PERM(GET_EQ(ch, i)), true);
     }
   }
 
 
   for (af = ch->affected; af; af = af->next)
-    affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, TRUE);
+    affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, true);
 
   /* Make certain values are between 0..100, not < 0 and not > 100! */
 
@@ -516,7 +516,7 @@ void affect_to_char(struct char_data *ch, struct affected_type *af)
   affected_alloc->next = ch->affected;
   ch->affected = affected_alloc;
 
-  affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, TRUE);
+  affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, true);
   affect_total(ch);
 }
 
@@ -536,7 +536,7 @@ void affect_remove(struct char_data *ch, struct affected_type *af)
     return;
   }
 
-  affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, FALSE);
+  affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, false);
   REMOVE_FROM_LIST(af, ch->affected, next, cmtemp);
   free(af);
   affect_total(ch);
@@ -587,9 +587,9 @@ bool affected_by_spell(struct char_data *ch, int type)
 
   for (hjp = ch->affected; hjp; hjp = hjp->next)
     if (hjp->type == type)
-      return (TRUE);
+      return (true);
 
-  return (FALSE);
+  return (false);
 }
 
 
@@ -604,9 +604,9 @@ bool affectedv_by_spell(struct char_data *ch, int type)
 
   for (hjp = ch->affectedv; hjp; hjp = hjp->next)
     if (hjp->type == type)
-      return (TRUE);
+      return (true);
 
-  return (FALSE);
+  return (false);
 }
 
 
@@ -615,7 +615,7 @@ void affect_join(struct char_data *ch, struct affected_type *af,
 		      bool add_dur, bool avg_dur, bool add_mod, bool avg_mod)
 {
   struct affected_type *hjp, *next;
-  bool found = FALSE;
+  bool found = false;
 
   for (hjp = ch->affected; !found && hjp; hjp = next) {
     next = hjp->next;
@@ -633,7 +633,7 @@ void affect_join(struct char_data *ch, struct affected_type *af,
 
       affect_remove(ch, hjp);
       affect_to_char(ch, af);
-      found = TRUE;
+      found = true;
     }
   }
   if (!found)
@@ -812,12 +812,12 @@ static int apply_ac(struct char_data *ch, int eq_pos)
 int invalid_align(struct char_data *ch, struct obj_data *obj)
 {
   if (OBJ_FLAGGED(obj, ITEM_ANTI_EVIL) && IS_EVIL(ch))
-    return TRUE;
+    return true;
   if (OBJ_FLAGGED(obj, ITEM_ANTI_GOOD) && IS_GOOD(ch))
-    return TRUE;
+    return true;
   if (OBJ_FLAGGED(obj, ITEM_ANTI_NEUTRAL) && IS_NEUTRAL(ch))
-    return TRUE;
-  return FALSE;
+    return true;
+  return false;
 }
 
 void equip_char(struct char_data *ch, struct obj_data *obj, int pos)
@@ -843,8 +843,8 @@ void equip_char(struct char_data *ch, struct obj_data *obj, int pos)
     return;
   }
   if (invalid_align(ch, obj) || invalid_class(ch, obj) || invalid_race(ch, obj)) {
-    act("You stop wearing $p as something prevents you.", FALSE, ch, obj, nullptr, TO_CHAR);
-    act("$n stops wearing $p as something prevents $m.", FALSE, ch, obj, nullptr, TO_ROOM);
+    act("You stop wearing $p as something prevents you.", false, ch, obj, nullptr, TO_CHAR);
+    act("$n stops wearing $p as something prevents $m.", false, ch, obj, nullptr, TO_ROOM);
     /* Changed to drop in inventory instead of the ground. */
     obj_to_char(obj, ch);
     return;
@@ -868,7 +868,7 @@ void equip_char(struct char_data *ch, struct obj_data *obj, int pos)
     affect_modify_ar(ch, obj->affected[j].location,
 		  obj->affected[j].modifier,
 		  obj->affected[j].specific,
-		  GET_OBJ_PERM(obj), TRUE);
+		  GET_OBJ_PERM(obj), true);
 
   affect_total(ch);
 }
@@ -905,7 +905,7 @@ struct obj_data *unequip_char(struct char_data *ch, int pos)
     affect_modify_ar(ch, obj->affected[j].location,
 		  obj->affected[j].modifier,
 		  obj->affected[j].specific,
-		  GET_OBJ_PERM(obj), FALSE);
+		  GET_OBJ_PERM(obj), false);
 
   affect_total(ch);
 
@@ -1068,18 +1068,18 @@ void obj_to_room(struct obj_data *object, room_rnum room)
      }
     }
     if (EXIT(object, 5) && (SECT(IN_ROOM(object)) == SECT_UNDERWATER || SECT(IN_ROOM(object)) == SECT_WATER_NOSWIM)) {
-     act("$p @Bsinks to deeper waters.@n", TRUE, nullptr, object, nullptr, TO_ROOM);
+     act("$p @Bsinks to deeper waters.@n", true, nullptr, object, nullptr, TO_ROOM);
      int numb = GET_ROOM_VNUM(EXIT(object, 5)->to_room);
      obj_from_room(object);
      obj_to_room(object, real_room(numb));
     }
     if (EXIT(object, 5) && SECT(IN_ROOM(object)) == SECT_FLYING && (GET_OBJ_VNUM(object) < 80 || GET_OBJ_VNUM(object) > 83)) {
-     act("$p @Cfalls down.@n", TRUE, nullptr, object, nullptr, TO_ROOM);
+     act("$p @Cfalls down.@n", true, nullptr, object, nullptr, TO_ROOM);
      int numb = GET_ROOM_VNUM(EXIT(object, 5)->to_room);
      obj_from_room(object);
      obj_to_room(object, real_room(numb));
      if (SECT(IN_ROOM(object)) != SECT_FLYING) {
-      act("$p @Cfalls down and smacks the ground.@n", TRUE, nullptr, object, nullptr, TO_ROOM);
+      act("$p @Cfalls down and smacks the ground.@n", true, nullptr, object, nullptr, TO_ROOM);
      }
     }
     if (GET_OBJ_VAL(object, 0) != 0) {
@@ -1295,10 +1295,10 @@ void update_char_objects(struct char_data *ch)
         GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_TIME) = 3;
 	if (j == 1) {
 	  send_to_char(ch, "Your light begins to flicker and fade.\r\n");
-	  act("$n's light begins to flicker and fade.", FALSE, ch, nullptr, nullptr, TO_ROOM);
+	  act("$n's light begins to flicker and fade.", false, ch, nullptr, nullptr, TO_ROOM);
 	} else if (j == 0) {
 	  send_to_char(ch, "Your light sputters out and dies.\r\n");
-	  act("$n's light sputters out and dies.", FALSE, ch, nullptr, nullptr, TO_ROOM);
+	  act("$n's light sputters out and dies.", false, ch, nullptr, nullptr, TO_ROOM);
 	  world[IN_ROOM(ch)].light--;
 	}
       } else if (GET_OBJ_TYPE(GET_EQ(ch, i)) == ITEM_LIGHT && GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_HOURS) > 0) {
@@ -1407,16 +1407,16 @@ void extract_char_final(struct char_data *ch)
   }
 
   if (GRAPPLING(ch)) {
-   act("@WYou stop grappling with @C$N@W!@n", TRUE, ch, nullptr, GRAPPLING(ch), TO_CHAR);
-   act("@C$n@W stops grappling with @c$N@W!@n", TRUE, ch, nullptr, GRAPPLING(ch), TO_ROOM);
+   act("@WYou stop grappling with @C$N@W!@n", true, ch, nullptr, GRAPPLING(ch), TO_CHAR);
+   act("@C$n@W stops grappling with @c$N@W!@n", true, ch, nullptr, GRAPPLING(ch), TO_ROOM);
    GRAPTYPE(GRAPPLING(ch)) = -1;
    GRAPPLED(GRAPPLING(ch)) = nullptr;
    GRAPPLING(ch) = nullptr;
    GRAPTYPE(ch) = -1;
   }
   if (GRAPPLED(ch)) {
-   act("@WYou stop being grappled with by @C$N@W!@n", TRUE, ch, nullptr, GRAPPLED(ch), TO_CHAR);
-   act("@C$n@W stops being grappled with by @c$N@W!@n", TRUE, ch, nullptr, GRAPPLED(ch), TO_ROOM);
+   act("@WYou stop being grappled with by @C$N@W!@n", true, ch, nullptr, GRAPPLED(ch), TO_CHAR);
+   act("@C$n@W stops being grappled with by @c$N@W!@n", true, ch, nullptr, GRAPPLED(ch), TO_ROOM);
    GRAPTYPE(GRAPPLED(ch)) = -1;
    GRAPPLING(GRAPPLED(ch)) = nullptr;
    GRAPPLED(ch) = nullptr;
@@ -1435,15 +1435,15 @@ void extract_char_final(struct char_data *ch)
   }
 
   if (DRAGGING(ch)) {
-   act("@WYou stop dragging @C$N@W!@n", TRUE, ch, nullptr, DRAGGING(ch), TO_CHAR);
-   act("@C$n@W stops dragging @c$N@W!@n", TRUE, ch, nullptr, DRAGGING(ch), TO_ROOM);
+   act("@WYou stop dragging @C$N@W!@n", true, ch, nullptr, DRAGGING(ch), TO_CHAR);
+   act("@C$n@W stops dragging @c$N@W!@n", true, ch, nullptr, DRAGGING(ch), TO_ROOM);
    DRAGGED(DRAGGING(ch)) = nullptr;
    DRAGGING(ch) = nullptr;
   }
 
   if (DRAGGED(ch)) {
-   act("@WYou stop being dragged by @C$N@W!@n", TRUE, ch, nullptr, DRAGGED(ch), TO_CHAR);
-   act("@C$n@W stops being dragged by @c$N@W!@n", TRUE, ch, nullptr, DRAGGED(ch), TO_ROOM);
+   act("@WYou stop being dragged by @C$N@W!@n", true, ch, nullptr, DRAGGED(ch), TO_CHAR);
+   act("@C$n@W stops being dragged by @c$N@W!@n", true, ch, nullptr, DRAGGED(ch), TO_ROOM);
    DRAGGING(DRAGGED(ch)) = nullptr;
    DRAGGED(ch) = nullptr;
   }
@@ -2054,10 +2054,10 @@ int generic_find(char *arg, bitvector_t bitvector, struct char_data *ch,
   }
 
   if (IS_SET(bitvector, FIND_OBJ_EQUIP)) {
-    for (found = FALSE, i = 0; i < NUM_WEARS && !found; i++)
+    for (found = false, i = 0; i < NUM_WEARS && !found; i++)
       if (GET_EQ(ch, i) && isname(name, GET_EQ(ch, i)->name) && --number == 0) {
 	*tar_obj = GET_EQ(ch, i);
-	found = TRUE;
+	found = true;
       }
     if (found)
       return (FIND_OBJ_EQUIP);
@@ -2108,7 +2108,7 @@ void affectv_to_char(struct char_data *ch, struct affected_type *af)
   affected_alloc->next = ch->affectedv;
   ch->affectedv = affected_alloc;
 
-  affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, TRUE);
+  affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, true);
   affect_total(ch);
 }
 
@@ -2121,7 +2121,7 @@ void affectv_remove(struct char_data *ch, struct affected_type *af)
     return;
   }
 
-  affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, FALSE);
+  affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, false);
   REMOVE_FROM_LIST(af, ch->affectedv, next, cmtemp);
   free(af);
   affect_total(ch);
@@ -2136,7 +2136,7 @@ void affectv_join(struct char_data *ch, struct affected_type *af,
                       bool add_dur, bool avg_dur, bool add_mod, bool avg_mod)
 {
   struct affected_type *hjp, *next;
-  bool found = FALSE;
+  bool found = false;
 
   for (hjp = ch->affectedv; !found && hjp; hjp = next) {
     next = hjp->next;
@@ -2154,7 +2154,7 @@ void affectv_join(struct char_data *ch, struct affected_type *af,
 
       affectv_remove(ch, hjp);
       affectv_to_char(ch, af);
-      found = TRUE;
+      found = true;
     }
   }
   if (!found)

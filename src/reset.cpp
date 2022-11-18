@@ -94,7 +94,7 @@ bool prereset_gauntlet_zone(void)
 
   for (i=0; i<NUM_GAUNTLET_ROOMS; i++) 
   { 
-    if (check_mob_in_room(gauntlet_mobs[i].vmob, gauntlet_mobs[i].vroom) == FALSE) 
+    if (check_mob_in_room(gauntlet_mobs[i].vmob, gauntlet_mobs[i].vroom) == false)
     { 
       /* Mob isn't in the room, can we reset it? */ 
       if (num_players_in_room(gauntlet_mobs[i].vroom) == 0) 

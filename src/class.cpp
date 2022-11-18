@@ -1255,7 +1255,7 @@ void advance_level(struct char_data *ch, int whichclass)
    send_to_char(ch, "@GYou feel your body obtain its current optimal strength!@n\r\n");
   }
 
-  int gain_stat = FALSE;
+  int gain_stat = false;
 
   switch (GET_LEVEL(ch)) {
    case 10:
@@ -1268,83 +1268,83 @@ void advance_level(struct char_data *ch, int whichclass)
    case 80:
    case 90:
    case 100:
-    gain_stat = TRUE;
+    gain_stat = true;
     break;
   }
 
-  if (gain_stat == TRUE) {
-   int raise = FALSE, stat_fail = 0;
+  if (gain_stat == true) {
+   int raise = false, stat_fail = 0;
    if (IS_KONATSU(ch)) {
-    while (raise == FALSE) {
+    while (raise == false) {
      if (ch->real_abils.dex < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
       if (ch->real_abils.dex < 45 || GET_BONUS(ch, BONUS_CLUMSY) <= 0) { 
        ch->real_abils.dex += 1;
        send_to_char(ch, "@GYou feel your agility increase!@n\r\n");
-       raise = TRUE;
+       raise = true;
       } else {
        stat_fail += 1;
       }
-     } else if (ch->real_abils.cha < 100 && raise == FALSE && stat_fail < 2) {
+     } else if (ch->real_abils.cha < 100 && raise == false && stat_fail < 2) {
       if (ch->real_abils.cha < 45 || GET_BONUS(ch, BONUS_SLOW) > 0) {
        ch->real_abils.cha += 1;
        send_to_char(ch, "@GYou feel your speed increase!@n\r\n");
-       raise = TRUE;
+       raise = true;
       } else {
        stat_fail += 2;
       }
      } else if (stat_fail == 3) {
       send_to_char(ch, "@RBoth agility and speed are capped!@n");
-      raise = TRUE;
+      raise = true;
      }
     } // End while
    } // End Konatsu
 
    else if (IS_MUTANT(ch)) {
-    while (raise == FALSE) {
+    while (raise == false) {
      if (ch->real_abils.con < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
       if (ch->real_abils.con < 45 || GET_BONUS(ch, BONUS_FRAIL) <= 0) { 
        ch->real_abils.con += 1;
        send_to_char(ch, "@GYou feel your constitution increase!@n\r\n");
-       raise = TRUE;
+       raise = true;
       } else {
        stat_fail += 1;
       }
-     } else if (ch->real_abils.cha < 100 && raise == FALSE && stat_fail < 2) {
+     } else if (ch->real_abils.cha < 100 && raise == false && stat_fail < 2) {
       if (ch->real_abils.cha < 45 || GET_BONUS(ch, BONUS_SLOW) > 0) {
        ch->real_abils.cha += 1;
        send_to_char(ch, "@GYou feel your speed increase!@n\r\n");
-       raise = TRUE;
+       raise = true;
       } else {
        stat_fail += 2;
       }
      } else if (stat_fail == 3) {
       send_to_char(ch, "@RBoth constitution and speed are capped!@n");
-      raise = TRUE;
+      raise = true;
      }
     } // End while
    } // End Mutant
 
    else if (IS_HOSHIJIN(ch)) {
-    while (raise == FALSE) {
+    while (raise == false) {
      if (ch->real_abils.str < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
       if (ch->real_abils.str < 45 || GET_BONUS(ch, BONUS_WIMP) <= 0) { 
        ch->real_abils.str += 1;
        send_to_char(ch, "@GYou feel your strength increase!@n\r\n");
-       raise = TRUE;
+       raise = true;
       } else {
        stat_fail += 1;
       }
-     } else if (ch->real_abils.dex < 100 && raise == FALSE && stat_fail < 2) {
+     } else if (ch->real_abils.dex < 100 && raise == false && stat_fail < 2) {
       if (ch->real_abils.dex < 45 || GET_BONUS(ch, BONUS_SLOW) > 0) {
        ch->real_abils.dex += 1;
        send_to_char(ch, "@GYou feel your agility increase!@n\r\n");
-       raise = TRUE;
+       raise = true;
       } else {
        stat_fail += 2;
       }
      } else if (stat_fail == 3) {
       send_to_char(ch, "@RBoth strength and agility are capped!@n");
-      raise = TRUE;
+      raise = true;
      }
     } // End while
    } // End Mutant
@@ -1430,109 +1430,109 @@ void advance_level(struct char_data *ch, int whichclass)
 int invalid_class(struct char_data *ch, struct obj_data *obj)
 {
   if (OBJ_FLAGGED(obj, ITEM_ANTI_WIZARD) && IS_ROSHI(ch))
-    return TRUE;
+    return true;
 
   if (OBJ_FLAGGED(obj, ITEM_ANTI_CLERIC) && IS_PICCOLO(ch))
-    return TRUE;
+    return true;
 
   if (OBJ_FLAGGED(obj, ITEM_ANTI_FIGHTER) && IS_NAIL(ch))
-    return TRUE;
+    return true;
 
   if (OBJ_FLAGGED(obj, ITEM_ANTI_ROGUE) && IS_KRANE(ch))
-    return TRUE;
+    return true;
 
   if (OBJ_FLAGGED(obj, ITEM_ANTI_MONK) && IS_BARDOCK(ch))
-    return TRUE;
+    return true;
 
   if (OBJ_FLAGGED(obj, ITEM_ONLY_MONK) && !IS_BARDOCK(ch))
-    return TRUE;
+    return true;
 
   if (OBJ_FLAGGED(obj, ITEM_ONLY_WIZARD) && !IS_ROSHI(ch))
-    return TRUE;
+    return true;
 
   if (OBJ_FLAGGED(obj, ITEM_ONLY_JINTO) && !IS_JINTO(ch))
-    return TRUE;
+    return true;
 
   if (OBJ_FLAGGED(obj, ITEM_ONLY_CLERIC) && !IS_PICCOLO(ch))
-    return TRUE;
+    return true;
 
   if (OBJ_FLAGGED(obj, ITEM_ONLY_ROGUE) && !IS_KRANE(ch))
-    return TRUE;
+    return true;
 
   if (OBJ_FLAGGED(obj, ITEM_ANTI_ASSASSIN) && !IS_KURZAK(ch))
-    return TRUE;
+    return true;
 
   if (OBJ_FLAGGED(obj, ITEM_ONLY_FIGHTER) && !IS_NAIL(ch))
-    return TRUE;
+    return true;
 
   if (OBJ_FLAGGED(obj, ITEM_ONLY_PALADIN) && !IS_GINYU(ch))
-    return TRUE;
+    return true;
 
   if (OBJ_FLAGGED(obj, ITEM_ANTI_WIZARD) && IS_ROSHI(ch))
-    return TRUE;
+    return true;
 
   if (OBJ_FLAGGED(obj, ITEM_ANTI_PALADIN) && IS_GINYU(ch))
-    return TRUE;
+    return true;
 
   if (OBJ_FLAGGED(obj, ITEM_ANTI_BARBARIAN) && IS_KABITO(ch))
-    return TRUE;
+    return true;
 
   if (OBJ_FLAGGED(obj, ITEM_ANTI_BARD) && IS_ANDSIX(ch))
-    return TRUE;
+    return true;
 
   if (OBJ_FLAGGED(obj, ITEM_ONLY_BARD) && !IS_ANDSIX(ch))
-    return TRUE;
+    return true;
 
   if (OBJ_FLAGGED(obj, ITEM_ANTI_RANGER) && IS_DABURA(ch))
-    return TRUE;
+    return true;
 
   if (OBJ_FLAGGED(obj, ITEM_ANTI_DRUID) && IS_TAPION(ch))
-    return TRUE;
+    return true;
 
   if (OBJ_FLAGGED(obj, ITEM_ANTI_ARCANE_ARCHER) && IS_JINTO(ch))
-    return TRUE;
+    return true;
 
   if (OBJ_FLAGGED(obj, ITEM_ANTI_ARCANE_TRICKSTER) && IS_TSUNA(ch))
-    return TRUE;
+    return true;
 
   if (OBJ_FLAGGED(obj, ITEM_ANTI_ARCHMAGE) && IS_KURZAK(ch))
-    return TRUE;
+    return true;
 
   if (OBJ_FLAGGED(obj, ITEM_ANTI_BLACKGUARD) && IS_BLACKGUARD(ch))
-    return TRUE;
+    return true;
 
   if (OBJ_FLAGGED(obj, ITEM_ANTI_DRAGON_DISCIPLE) && IS_DRAGON_DISCIPLE(ch))
-    return TRUE;
+    return true;
 
   if (OBJ_FLAGGED(obj, ITEM_ANTI_DUELIST) && IS_DUELIST(ch))
-    return TRUE;
+    return true;
 
   if (OBJ_FLAGGED(obj, ITEM_ANTI_DWARVEN_DEFENDER) && IS_DWARVEN_DEFENDER(ch))
-    return TRUE;
+    return true;
 
   if (OBJ_FLAGGED(obj, ITEM_ANTI_ELDRITCH_KNIGHT) && IS_ELDRITCH_KNIGHT(ch))
-    return TRUE;
+    return true;
 
   if (OBJ_FLAGGED(obj, ITEM_ANTI_HIEROPHANT) && IS_HIEROPHANT(ch))
-    return TRUE;
+    return true;
 
   if (OBJ_FLAGGED(obj, ITEM_ANTI_HORIZON_WALKER) && IS_HORIZON_WALKER(ch))
-    return TRUE;
+    return true;
 
   if (OBJ_FLAGGED(obj, ITEM_ANTI_LOREMASTER) && IS_LOREMASTER(ch))
-    return TRUE;
+    return true;
 
   if (OBJ_FLAGGED(obj, ITEM_ANTI_MYSTIC_THEURGE) && IS_MYSTIC_THEURGE(ch))
-    return TRUE;
+    return true;
 
   if (OBJ_FLAGGED(obj, ITEM_ANTI_SHADOWDANCER) && IS_SHADOWDANCER(ch))
-    return TRUE;
+    return true;
 
   if (OBJ_FLAGGED(obj, ITEM_ANTI_THAUMATURGIST) && IS_THAUMATURGIST(ch))
-    return TRUE;
+    return true;
 
 
-  return FALSE;
+  return false;
 }
 
 
@@ -1989,7 +1989,7 @@ int load_levels()
         log("SYSERR: Format error in file %s, line number %d - text: %s.", 
              LEVEL_CONFIG, linenum, line);
         return -1;
-      } else if ((sect_type = search_block(sect_name, config_sect, FALSE)) == -1) {
+      } else if ((sect_type = search_block(sect_name, config_sect, false)) == -1) {
           log("SYSERR: Invalid section in file %s, line number %d: %s.", 
               LEVEL_CONFIG, linenum, sect_name);
           return -1;

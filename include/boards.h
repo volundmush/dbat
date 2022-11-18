@@ -1,16 +1,4 @@
-/* ************************************************************************
-*   File: boards.h                                      Part of CircleMUD *
-*  Usage: header file for bulletin boards                                 *
-*                                                                         *
-*  All rights reserved.  See license.doc for complete information.        *
-*                                                                         *
-*  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
-*  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
-************************************************************************ */
-
-#ifndef __BOARDS_H__
-#define __BOARDS_H__
-
+#pragma once
 #include "structs.h"
 
 /* New Dynamic boards v2.4 -PjD (dughi@imaxx.net) */
@@ -83,26 +71,24 @@ struct board_info {
 #define MEMORY_NEXT(i) (i->next)
 #define MEMORY_READER_NAME(i)	 (i->name)
 
-void init_boards(void);
+extern void init_boards(void);
 struct board_info *create_new_board(obj_vnum board_vnum);
 struct board_info *load_board(obj_vnum board_vnum);
-int save_board(struct board_info *temp_board);
-void clear_boards();
-void clear_one_board(struct board_info *temp_board);
-int parse_message( FILE *fl, struct board_info *temp_board);
-void look_at_boards(void);
-void show_board(obj_vnum board_vnum, struct char_data *ch);
-void board_display_msg(obj_vnum board_vnum, struct char_data * ch, int arg);
-int mesglookup(struct board_msg *message,struct char_data *ch,
+extern int save_board(struct board_info *temp_board);
+extern void clear_boards();
+extern void clear_one_board(struct board_info *temp_board);
+extern int parse_message( FILE *fl, struct board_info *temp_board);
+extern void look_at_boards(void);
+extern void show_board(obj_vnum board_vnum, struct char_data *ch);
+extern void board_display_msg(obj_vnum board_vnum, struct char_data * ch, int arg);
+extern int mesglookup(struct board_msg *message,struct char_data *ch,
 	       struct board_info *board);
 
-void write_board_message(obj_vnum board_vnum, struct char_data *ch, char *arg);
-void board_respond(long board_vnum, struct char_data *ch, int mnum);
+extern void write_board_message(obj_vnum board_vnum, struct char_data *ch, char *arg);
+extern void board_respond(long board_vnum, struct char_data *ch, int mnum);
 
 struct board_info *locate_board(obj_vnum board_vnum);
 
-void remove_board_msg(obj_vnum board_vnum, struct char_data * ch, int arg);
+extern void remove_board_msg(obj_vnum board_vnum, struct char_data * ch, int arg);
 
 extern struct board_info *bboards;
-
-#endif

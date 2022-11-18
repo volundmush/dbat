@@ -92,13 +92,13 @@ void do_dg_cast(void *go, struct script_data *sc, trig_data *trig,
     skip_spaces(&t);
   }
   if (IS_SET(SINFO.targets, TAR_IGNORE)) {
-    target = TRUE;
+    target = true;
   } else if (t != nullptr && *t) {
     if (!target &&
           (IS_SET(SINFO.targets, TAR_CHAR_ROOM) ||
            IS_SET(SINFO.targets, TAR_CHAR_WORLD))) {
       if ((tch = get_char(t)) != nullptr)
-        target = TRUE;
+        target = true;
     }
 
     if (!target &&
@@ -107,7 +107,7 @@ void do_dg_cast(void *go, struct script_data *sc, trig_data *trig,
            IS_SET(SINFO.targets, TAR_OBJ_ROOM) ||
            IS_SET(SINFO.targets, TAR_OBJ_WORLD))) {
       if ((tobj = get_obj(t)) != nullptr)
-        target = TRUE;
+        target = true;
     }
 
     if (!target) {
@@ -247,24 +247,24 @@ void send_char_pos(struct char_data *ch, int dam)
 {
   switch (GET_POS(ch)) {
     case POS_MORTALLYW:
-      act("$n is mortally wounded, and will die soon, if not aided.", TRUE, ch, nullptr, nullptr, TO_ROOM);
+      act("$n is mortally wounded, and will die soon, if not aided.", true, ch, nullptr, nullptr, TO_ROOM);
       send_to_char(ch, "You are mortally wounded, and will die soon, if not aided.\r\n");
       break;
     case POS_INCAP:
-      act("$n is incapacitated and will slowly die, if not aided.", TRUE, ch, nullptr, nullptr, TO_ROOM);
+      act("$n is incapacitated and will slowly die, if not aided.", true, ch, nullptr, nullptr, TO_ROOM);
       send_to_char(ch, "You are incapacitated and will slowly die, if not aided.\r\n");
       break;
     case POS_STUNNED:
-      act("$n is stunned, but will probably regain consciousness again.", TRUE, ch, nullptr, nullptr, TO_ROOM);
+      act("$n is stunned, but will probably regain consciousness again.", true, ch, nullptr, nullptr, TO_ROOM);
       send_to_char(ch, "You're stunned, but will probably regain consciousness again.\r\n");
       break;
     case POS_DEAD:
-      act("$n is dead!  R.I.P.", FALSE, ch, nullptr, nullptr, TO_ROOM);
+      act("$n is dead!  R.I.P.", false, ch, nullptr, nullptr, TO_ROOM);
       send_to_char(ch, "You are dead!  Sorry...\r\n");
       break;
     default:                        /* >= POSITION SLEEPING */
       if (dam > (GET_MAX_HIT(ch) >> 2))
-        act("That really did HURT!", FALSE, ch, nullptr, nullptr, TO_CHAR);
+        act("That really did HURT!", false, ch, nullptr, nullptr, TO_CHAR);
       if (GET_HIT(ch) < (GET_MAX_HIT(ch) >> 2))
         send_to_char(ch, "@rYou wish that your wounds would stop BLEEDING so much!@n\r\n");
   }
@@ -279,16 +279,16 @@ void send_char_pos(struct char_data *ch, int dam)
 int valid_dg_target(struct char_data *ch, int bitvector)
 {
   if (IS_NPC(ch))
-    return TRUE;  /* all npcs are allowed as targets */
+    return true;  /* all npcs are allowed as targets */
   else if (GET_ADMLEVEL(ch) < ADMLVL_IMMORT)
-    return TRUE;  /* as well as all mortals */
+    return true;  /* as well as all mortals */
   else if (!IS_SET(bitvector, DG_ALLOW_GODS) &&
      (GET_ADMLEVEL(ch) >= 2 && !PRF_FLAGGED(ch, PRF_TEST))) /* LVL_GOD has the advance command. Can't allow them to be forced. */
-    return FALSE; /* but not always the highest gods */
+    return false; /* but not always the highest gods */
   else if (!PRF_FLAGGED(ch, PRF_NOHASSLE) || PRF_FLAGGED(ch, PRF_TEST))
-    return TRUE;  /* the ones in between as allowed as long as they have no-hassle off.   */
+    return true;  /* the ones in between as allowed as long as they have no-hassle off.   */
   else
-    return FALSE;  /* The rest are gods with nohassle on... */
+    return false;  /* The rest are gods with nohassle on... */
 }
 
 
@@ -307,7 +307,7 @@ void script_damage(struct char_data *vict, int dam)
 
   if (GET_POS(vict) == POS_DEAD) {
     if (!IS_NPC(vict))
-      mudlog( BRF, 0, TRUE, "%s killed by script at %s",
+      mudlog( BRF, 0, true, "%s killed by script at %s",
                             GET_NAME(vict), world[IN_ROOM(vict)].name);
     die(vict, nullptr);
   }

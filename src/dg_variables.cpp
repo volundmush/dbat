@@ -156,7 +156,7 @@ int text_processed(char *field, char *subfield, struct trig_var_data *vd,
     char limit[200];
     sprintf(limit, "%" SZT, strlen(vd->value));
     snprintf(str, slen, "%d", atoi(limit));
-    return TRUE;
+    return true;
   } else if (!strcasecmp(field, "trim")) {                /* trim      */
     /* trim whitespace from ends */
     snprintf(tmpvar, sizeof(tmpvar)-1 , "%s", vd->value); /* -1 to use later*/
@@ -166,23 +166,23 @@ int text_processed(char *field, char *subfield, struct trig_var_data *vd,
     while ((p<=p2) && isspace(*p2)) p2--;
     if (p>p2) { /* nothing left */
       *str = '\0';
-      return TRUE;
+      return true;
     }
     *(++p2) = '\0';                                         /* +1 ok (see above) */
     snprintf(str, slen, "%s", p);
-    return TRUE;
+    return true;
   } else if (!strcasecmp(field, "contains")) {            /* contains  */
     if (str_str(vd->value, subfield))
       strcpy(str, "1");
     else
       strcpy(str, "0");
-    return TRUE;
+    return true;
   } else if (!strcasecmp(field, "car")) {                 /* car       */
     char *car = vd->value;
     while (*car && !isspace(*car))
       *str++ = *car++;
     *str = '\0';
-    return TRUE;
+    return true;
 
   } else if (!strcasecmp(field, "cdr")) {                 /* cdr       */
     char *cdr = vd->value;
@@ -190,14 +190,14 @@ int text_processed(char *field, char *subfield, struct trig_var_data *vd,
     while (*cdr && isspace(*cdr)) cdr++;  /* skip to next */
 
     snprintf(str, slen, "%s", cdr);
-    return TRUE;
+    return true;
   } else if (!strcasecmp(field, "charat")) {              /* CharAt    */
     size_t len = strlen(vd->value), dgindex = atoi(subfield);
     if (dgindex > len || dgindex < 1)
       strcpy(str, "");
     else
     	snprintf(str, slen, "%c", vd->value[dgindex - 1]);
-    return TRUE;
+    return true;
   } else if (!strcasecmp(field, "mudcommand")) {
     /* find the mud command returned from this text */
 /* NOTE: you may need to replace "cmd_info" with "complete_cmd_info", */
@@ -214,10 +214,10 @@ int text_processed(char *field, char *subfield, struct trig_var_data *vd,
       *str = '\0';
     else
       snprintf(str, slen, "%s", cmd_info[cmd].command);
-    return TRUE;
+    return true;
   }
 
-  return FALSE;
+  return false;
 }
 
 
@@ -1008,7 +1008,7 @@ in the vault (vnum: 453) now and then. you can just use
           else if (!strcasecmp(field, "size")) {
             if (subfield && *subfield) {
               int ns;
-              if ((ns = search_block(subfield, size_names, FALSE)) > -1) {
+              if ((ns = search_block(subfield, size_names, false)) > -1) {
                 (c)->size = ns;
               }
             }
@@ -1313,7 +1313,7 @@ in the vault (vnum: 453) now and then. you can just use
           else if (!strcasecmp(field, "size")) {
             if (subfield && *subfield) {
               int ns;
-              if ((ns = search_block(subfield, size_names, FALSE)) > -1) {
+              if ((ns = search_block(subfield, size_names, false)) > -1) {
                 (o)->size = ns;
               }
             }

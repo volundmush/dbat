@@ -36,10 +36,7 @@
  */
 
 /* $Id: bsd-snprintf.h,v 1.1.1.1 2004/12/21 00:32:50 fnord Exp $ */
-
-#ifndef _BSD_SNPRINTF_H
-#define _BSD_SNPRINTF_H
-
+#pragma once
 #if 0
 #include "config.h"
 
@@ -47,12 +44,9 @@
 #endif
 
 #ifndef HAVE_SNPRINTF
-int snprintf(char *str, size_t count, const char *fmt, ...);
+extern int snprintf(char *str, size_t count, const char *fmt, ...);
 #endif /* !HAVE_SNPRINTF */
 
 #ifndef HAVE_VSNPRINTF
-int vsnprintf(char *str, size_t count, const char *fmt, va_list args);
+extern int vsnprintf(char *str, size_t count, const char *fmt, va_list args);
 #endif /* !HAVE_SNPRINTF */
-
-
-#endif /* _BSD_SNPRINTF_H */

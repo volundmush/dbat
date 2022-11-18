@@ -64,7 +64,7 @@ ACMD(do_oasis_oedit)
       return;
     }
     
-    save = TRUE;
+    save = true;
     
     if (is_number(buf2))
       number = atoi(buf2);
@@ -111,7 +111,7 @@ ACMD(do_oasis_oedit)
   /** Give the descriptor an OLC structure.                                  **/
   /****************************************************************************/
   if (d->olc) {
-    mudlog(BRF, ADMLVL_IMMORT, TRUE,
+    mudlog(BRF, ADMLVL_IMMORT, true,
       "SYSERR: do_oasis: Player already had olc structure.");
     free(d->olc);
   }
@@ -153,7 +153,7 @@ ACMD(do_oasis_oedit)
   if (save) {
     send_to_char(ch, "Saving all objects in zone %d.\r\n",
       zone_table[OLC_ZNUM(d)].number);
-    mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), TRUE,
+    mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true,
       "OLC: %s saves object info for zone %d.", GET_NAME(ch),
       zone_table[OLC_ZNUM(d)].number);
     
@@ -187,13 +187,13 @@ ACMD(do_oasis_oedit)
   /****************************************************************************/
   /** Send the OLC message to the players in the same room as the builder.   **/
   /****************************************************************************/
-  act("$n starts using OLC.", TRUE, d->character, nullptr, nullptr, TO_ROOM);
+  act("$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
   SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
   
   /****************************************************************************/
   /** Log the OLC message.                                                   **/
   /****************************************************************************/
-  mudlog(BRF, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing zone %d allowed zone %d",
+  mudlog(BRF, ADMLVL_IMMORT, true, "OLC: %s starts editing zone %d allowed zone %d",
     GET_NAME(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
 }
 
@@ -1030,7 +1030,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
     case 'y':
     case 'Y':
       oedit_save_internally(d);
-      mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), TRUE,
+      mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), true,
 	"OLC: %s edits obj %d", GET_NAME(d->character), OLC_NUM(d));
       if (CONFIG_OLC_SAVE) {
 	oedit_save_to_disk(real_zone_by_thing(OLC_NUM(d)));
@@ -1121,12 +1121,12 @@ void oedit_parse(struct descriptor_data *d, char *arg)
         }
         SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_UNIQUE_SAVE);
   /* Xap - ought to save the old pointer, free after assignment I suppose */
-        mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), TRUE,
+        mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), true,
                "OLC: %s iedit a unique #%d", GET_NAME(d->character), GET_OBJ_VNUM(obj));
         if (d->character) {
           REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_WRITING);
           STATE(d) = CON_PLAYING;
-          act("$n stops using OLC.", TRUE, d->character, nullptr, nullptr, TO_ROOM);
+          act("$n stops using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
         }
         free(d->olc);
         d->olc = nullptr;
@@ -1752,7 +1752,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
     return;
 
   default:
-    mudlog(BRF, ADMLVL_BUILDER, TRUE, "SYSERR: OLC: Reached default case in oedit_parse()!");
+    mudlog(BRF, ADMLVL_BUILDER, true, "SYSERR: OLC: Reached default case in oedit_parse()!");
     write_to_output(d, "Oops...\r\n");
     break;
   }
@@ -1834,7 +1834,7 @@ ACMD(do_iedit) {
   iedit_setup_existing(ch->desc,k);
   OLC_VAL(ch->desc) = 0;
 
-  act("$n starts using OLC.", TRUE, ch, nullptr, nullptr, TO_ROOM);
+  act("$n starts using OLC.", true, ch, nullptr, nullptr, TO_ROOM);
 
   STATE(ch->desc) = CON_IEDIT;
 

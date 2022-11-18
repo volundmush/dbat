@@ -41,7 +41,7 @@ int free_strings(void *data, int type)
   switch (type) {
     case OASIS_MOB:
     case OASIS_OBJ:
-      return (FALSE);		/* For now... */
+      return (false);		/* For now... */
     
     case OASIS_CFG:
       config = (struct config_data *) data;
@@ -73,10 +73,10 @@ int free_strings(void *data, int type)
       if (config->operation.START_MESSG)
         free(config->operation.START_MESSG);
       
-      return (TRUE);
+      return (true);
     
     default:
-      mudlog(BRF, ADMLVL_GOD, TRUE, "SYSERR: oasis_delete.c: free_strings: Invalid type handled (Type %d).", type);
-      return (FALSE);
+      mudlog(BRF, ADMLVL_GOD, true, "SYSERR: oasis_delete.c: free_strings: Invalid type handled (Type %d).", type);
+      return (false);
   }
 }

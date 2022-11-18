@@ -802,7 +802,7 @@ void write_board_message(obj_vnum board_vnum, struct char_data *ch, char *arg)
    send_to_char(ch, "Your subject can only be 45 characters long(including colorcode).\r\n");
    return;
   }
-  act("@C$n@w starts writing on the board.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+  act("@C$n@w starts writing on the board.@n", true, ch, nullptr, nullptr, TO_ROOM);
   skip_spaces(&arg);
   delete_doubledollar(arg);
   arg[81] = '\0';
@@ -914,7 +914,7 @@ void board_respond(long board_vnum, struct char_data *ch, int mnum){
   BOARD_MESSAGES(thisboard) = message;
 
   send_to_char(ch,"Write your message.  (/s saves /h for help)\r\n\r\n");
-  act("@C$n@w starts writing on the board.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+  act("@C$n@w starts writing on the board.@n", true, ch, nullptr, nullptr, TO_ROOM);
 
   if (!IS_NPC(ch)) {
     SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
@@ -1060,7 +1060,7 @@ void remove_board_msg(obj_vnum board_vnum, struct char_data * ch, int arg)
   BOARD_MNUM (thisboard) = BOARD_MNUM (thisboard) - 1;
   send_to_char (ch,"Message removed.\r\n");
   sprintf(buf, "$n just removed message %d.", arg);
-  act (buf, FALSE, ch, nullptr, nullptr, TO_ROOM);
+  act (buf, false, ch, nullptr, nullptr, TO_ROOM);
   save_board(thisboard);
   return;
 }

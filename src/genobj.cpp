@@ -214,13 +214,13 @@ int save_objects(zone_rnum zone_num)
   if (zone_num < 0 || zone_num > top_of_zone_table) {
 #endif
     log("SYSERR: OasisOLC: save_objects: Invalid real zone number %d. (0-%d)", zone_num, top_of_zone_table);
-    return FALSE;
+    return false;
   }
 
   snprintf(cmfname, sizeof(cmfname), "%s%d.new", OBJ_PREFIX, zone_table[zone_num].number);
   if (!(fp = fopen(cmfname, "w+"))) {
-    mudlog(BRF, ADMLVL_IMMORT, TRUE, "SYSERR: OLC: Cannot open objects file %s!", cmfname);
-    return FALSE;
+    mudlog(BRF, ADMLVL_IMMORT, true, "SYSERR: OLC: Cannot open objects file %s!", cmfname);
+    return false;
   }
   /*
    * Start running through all objects in this zone.
@@ -292,7 +292,7 @@ int save_objects(zone_rnum zone_num)
 	   * Sanity check to prevent nasty protection faults.
 	   */
 	  if (!ex_desc->keyword || !ex_desc->description || !*ex_desc->keyword || !*ex_desc->description) {
-	    mudlog(BRF, ADMLVL_IMMORT, TRUE, "SYSERR: OLC: oedit_save_to_disk: Corrupt ex_desc!");
+	    mudlog(BRF, ADMLVL_IMMORT, true, "SYSERR: OLC: oedit_save_to_disk: Corrupt ex_desc!");
 	    continue;
 	  }
 	  strncpy(buf, ex_desc->description, sizeof(buf) - 1);
@@ -337,7 +337,7 @@ int save_objects(zone_rnum zone_num)
     create_world_index(zone_table[zone_num].number, "obj");
     log("GenOLC: save_objects: Saving objects '%s'", buf);
   }
-  return TRUE;
+  return true;
 }
 
 /*
@@ -430,19 +430,19 @@ void copy_object_strings(struct obj_data *to, struct obj_data *from)
 int copy_object(struct obj_data *to, struct obj_data *from)
 {
   free_object_strings(to);
-  return copy_object_main(to, from, TRUE);
+  return copy_object_main(to, from, true);
 }
 
 int copy_object_preserve(struct obj_data *to, struct obj_data *from)
 {
-  return copy_object_main(to, from, FALSE);
+  return copy_object_main(to, from, false);
 }
 
 static int copy_object_main(struct obj_data *to, struct obj_data *from, int free_object)
 {
   *to = *from;
   copy_object_strings(to, from);
-  return TRUE;
+  return true;
 }
 
 int delete_object(obj_rnum rnum)

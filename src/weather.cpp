@@ -76,12 +76,12 @@ static void another_hour(int mode)
     case 4:
       if (MOON_DATE) {
        send_to_moon("The full moon disappears.\r\n");
-       MOON_UP = FALSE;
+       MOON_UP = false;
        oozaru_drop();
       }
       else if (time_info.day == 22) {
         send_to_moon("The full moon disappears.\r\n");
-        MOON_UP = FALSE;
+        MOON_UP = false;
         oozaru_drop();
       }
       break;
@@ -111,7 +111,7 @@ static void another_hour(int mode)
     case 21:
       if (MOON_DATE) {
        send_to_moon("The full moon has risen.\r\n");
-       MOON_UP = TRUE;
+       MOON_UP = true;
        oozaru_add();
       }
       break;
@@ -242,8 +242,10 @@ void oozaru_transform(char_data *ch) {
     if (PLR_FLAGGED(ch, PLR_OOZARU))
         return;
 
-    act("@rLooking up at the moon your heart begins to beat loudly. Sudden rage begins to fill your mind while your body begins to grow. Hair sprouts  all over your body and your teeth become sharp as your body takes on the Oozaru form!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-    act("@R$n@r looks up at the moon as $s eyes turn red and $s heart starts to beat loudly. Hair starts to grow all over $s body as $e starts screaming. The scream turns into a roar as $s body begins to grow into a giant ape!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+    act("@rLooking up at the moon your heart begins to beat loudly. Sudden rage begins to fill your mind while your body begins to grow. Hair sprouts  all over your body and your teeth become sharp as your body takes on the Oozaru form!@n",
+        true, ch, nullptr, nullptr, TO_CHAR);
+    act("@R$n@r looks up at the moon as $s eyes turn red and $s heart starts to beat loudly. Hair starts to grow all over $s body as $e starts screaming. The scream turns into a roar as $s body begins to grow into a giant ape!@n",
+        true, ch, nullptr, nullptr, TO_ROOM);
     SET_BIT_AR(PLR_FLAGS(ch), oozaru.flag);
 }
 
@@ -264,8 +266,10 @@ void oozaru_revert(char_data *ch) {
     if (!PLR_FLAGGED(ch, PLR_OOZARU))
         return;
 
-    act("@CYour body begins to shrink back to its normal form as the power of the Oozaru leaves you. You fall asleep shortly after returning to normal!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-    act("@c$n@C's body begins to shrink and return to normal. Their giant ape features fading back into humanoid features until $e is left normal and asleep.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+    act("@CYour body begins to shrink back to its normal form as the power of the Oozaru leaves you. You fall asleep shortly after returning to normal!@n",
+        true, ch, nullptr, nullptr, TO_CHAR);
+    act("@c$n@C's body begins to shrink and return to normal. Their giant ape features fading back into humanoid features until $e is left normal and asleep.@n",
+        true, ch, nullptr, nullptr, TO_ROOM);
     GET_POS(ch) = POS_SLEEPING;
 
     REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_OOZARU);
@@ -301,23 +305,29 @@ void star_phase(struct char_data *ch, int type)
      switch (type) {
 	  case 0:
 	     if (GET_PHASE(ch) > 0) {
-		  act("@WYour eyes and the glyphs on your skin slowly start to lose their glow. You feel the power received from the @GE@gl@Dd@wri@Dt@gc@Gh @YS@yta@Yr@W drain away from your body. It has apparently entered the @rDeath Phase@W of its cycle...@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-		  act("@c$n@W's eyes and the glyphs on $s skin slowly start to lose their glow. You notice that $e seems weaker now for some reason.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+		  act("@WYour eyes and the glyphs on your skin slowly start to lose their glow. You feel the power received from the @GE@gl@Dd@wri@Dt@gc@Gh @YS@yta@Yr@W drain away from your body. It has apparently entered the @rDeath Phase@W of its cycle...@n",
+              true, ch, nullptr, nullptr, TO_CHAR);
+		  act("@c$n@W's eyes and the glyphs on $s skin slowly start to lose their glow. You notice that $e seems weaker now for some reason.@n",
+              true, ch, nullptr, nullptr, TO_ROOM);
 		  phase_powerup(ch, 0, GET_PHASE(ch));
          	 }
 	   break; // Drop Powerup
 	  case 1:
 	     if (GET_PHASE(ch) != 1) {
-		  act("@WYou suddenly feel a @RSURGE@W of power through your body. You feel the @GE@gl@Dd@wri@Dt@gc@Gh @YS@yta@Yr@W come into its @CBirth Phase@W and its power is flowing into your body! Finally your eyes and the glyphs on your skin begin to glow an electric @bb@Bl@Cue@W!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-		  act("@c$n@W suddenly seems to grow stronger for some reason. You notice $s eyes begin to glow an electric @bb@Bl@Cue@W. Suddenly glyphs start to appear all over $s skin and glow with the same light!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+		  act("@WYou suddenly feel a @RSURGE@W of power through your body. You feel the @GE@gl@Dd@wri@Dt@gc@Gh @YS@yta@Yr@W come into its @CBirth Phase@W and its power is flowing into your body! Finally your eyes and the glyphs on your skin begin to glow an electric @bb@Bl@Cue@W!@n",
+              true, ch, nullptr, nullptr, TO_CHAR);
+		  act("@c$n@W suddenly seems to grow stronger for some reason. You notice $s eyes begin to glow an electric @bb@Bl@Cue@W. Suddenly glyphs start to appear all over $s skin and glow with the same light!@n",
+              true, ch, nullptr, nullptr, TO_ROOM);
 		  phase_powerup(ch, 0, GET_PHASE(ch));
 		  phase_powerup(ch, 1, 1);
 		 }
 	   break; // Powerup Phase 1
 	  case 2:
 	     if (GET_PHASE(ch) != 2) {
-		  act("@WYou suddenly feel a @RSURGE@W of power through your body. You feel the @GE@gl@Dd@wri@Dt@gc@Gh @YS@yta@Yr@W come into its @GLife Phase@W and its power is flowing into your body! Finally your eyes and the glyphs on your skin begin to glow an fiery @Rr@re@Rd@W!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-		  act("@c$n@W suddenly seems to grow stronger for some reason. You notice $s eyes begin to glow a fiery @rR@Re@rd@W. Suddenly glyphs start to appear all over $s skin and glow with the same light!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+		  act("@WYou suddenly feel a @RSURGE@W of power through your body. You feel the @GE@gl@Dd@wri@Dt@gc@Gh @YS@yta@Yr@W come into its @GLife Phase@W and its power is flowing into your body! Finally your eyes and the glyphs on your skin begin to glow an fiery @Rr@re@Rd@W!@n",
+              true, ch, nullptr, nullptr, TO_CHAR);
+		  act("@c$n@W suddenly seems to grow stronger for some reason. You notice $s eyes begin to glow a fiery @rR@Re@rd@W. Suddenly glyphs start to appear all over $s skin and glow with the same light!@n",
+              true, ch, nullptr, nullptr, TO_ROOM);
 		  phase_powerup(ch, 0, GET_PHASE(ch));
 		  phase_powerup(ch, 1, 2);
 		 }
@@ -335,23 +345,29 @@ void star_phase(struct char_data *ch, int type)
      switch (type) {
 	  case 0:
 	    if (GET_PHASE(ch) > 0) {
-		 act("@WYour eyes and the glyphs on your skin slowly start to lose their glow. You feel the power received from the @GE@gl@Dd@wri@Dt@gc@Gh @YS@yta@Yr@W drain away from your body. It has apparently entered the @rDeath Phase@W of its cycle...@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-		 act("@c$n@W's eyes and the glyphs on $s skin slowly start to lose their glow. You notice that $e seems weaker now for some reason.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+		 act("@WYour eyes and the glyphs on your skin slowly start to lose their glow. You feel the power received from the @GE@gl@Dd@wri@Dt@gc@Gh @YS@yta@Yr@W drain away from your body. It has apparently entered the @rDeath Phase@W of its cycle...@n",
+             true, ch, nullptr, nullptr, TO_CHAR);
+		 act("@c$n@W's eyes and the glyphs on $s skin slowly start to lose their glow. You notice that $e seems weaker now for some reason.@n",
+             true, ch, nullptr, nullptr, TO_ROOM);
 		 phase_powerup(ch, 0, GET_PHASE(ch));
 		}
 	   break; // Drop Powerup
 	  case 1:
 	    if (GET_PHASE(ch) != 1) {
-		 act("@WYou suddenly feel a @RSURGE@W of power through your body. You feel the @GE@gl@Dd@wri@Dt@gc@Gh @YS@yta@Yr@W come into its @CBirth Phase@W and its power is flowing into your body! Finally your eyes and the glyphs on your skin begin to glow an electric @bb@Bl@Cue@W!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-		 act("@c$n@W suddenly seems to grow stronger for some reason. You notice $s eyes begin to glow an electric @bb@Bl@Cue@W. Suddenly glyphs start to appear all over $s skin and glow with the same light!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+		 act("@WYou suddenly feel a @RSURGE@W of power through your body. You feel the @GE@gl@Dd@wri@Dt@gc@Gh @YS@yta@Yr@W come into its @CBirth Phase@W and its power is flowing into your body! Finally your eyes and the glyphs on your skin begin to glow an electric @bb@Bl@Cue@W!@n",
+             true, ch, nullptr, nullptr, TO_CHAR);
+		 act("@c$n@W suddenly seems to grow stronger for some reason. You notice $s eyes begin to glow an electric @bb@Bl@Cue@W. Suddenly glyphs start to appear all over $s skin and glow with the same light!@n",
+             true, ch, nullptr, nullptr, TO_ROOM);
                  phase_powerup(ch, 0, GET_PHASE(ch));		 
 		 phase_powerup(ch, 1, 1);
 		}
 	   break; // Powerup Phase 1
 	  case 2:
 	    if (GET_PHASE(ch) != 2) {
-		 act("@WYou suddenly feel a @RSURGE@W of power through your body. You feel the @GE@gl@Dd@wri@Dt@gc@Gh @YS@yta@Yr@W come into its @GLife Phase@W and its power is flowing into your body! Finally your eyes and the glyphs on your skin begin to glow an fiery @Rr@re@Rd@W!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-		 act("@c$n@W suddenly seems to grow stronger for some reason. You notice $s eyes begin to glow a fiery @rR@Re@rd@W. Suddenly glyphs start to appear all over $s skin and glow with the same light!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+		 act("@WYou suddenly feel a @RSURGE@W of power through your body. You feel the @GE@gl@Dd@wri@Dt@gc@Gh @YS@yta@Yr@W come into its @GLife Phase@W and its power is flowing into your body! Finally your eyes and the glyphs on your skin begin to glow an fiery @Rr@re@Rd@W!@n",
+             true, ch, nullptr, nullptr, TO_CHAR);
+		 act("@c$n@W suddenly seems to grow stronger for some reason. You notice $s eyes begin to glow a fiery @rR@Re@rd@W. Suddenly glyphs start to appear all over $s skin and glow with the same light!@n",
+             true, ch, nullptr, nullptr, TO_ROOM);
          	 phase_powerup(ch, 0, GET_PHASE(ch));		 
 		 phase_powerup(ch, 1, 2);
 		}

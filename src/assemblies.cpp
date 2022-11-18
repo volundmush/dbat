@@ -68,7 +68,7 @@ void assemblyBootAssemblies( void )
          "line %ld.", ASSEMBLIES_FILE, lLineCount );
        lVnum = NOTHING;
       }
-      else if( (iType = search_block( szType, AssemblyTypes, TRUE )) < 0 )
+      else if( (iType = search_block( szType, AssemblyTypes, true )) < 0 )
       {
        log( "SYSERR: bootAssemblies(): Invalid type '%s' for assembly "
          "vnum #%ld at line %ld.", szType, lVnum, lLineCount );
@@ -194,7 +194,7 @@ bool assemblyAddComponent( long lVnum, long lComponentVnum, bool bExtract, bool 
   if( (pAssembly = assemblyGetAssemblyPtr( lVnum )) == nullptr )
   {
     log( "SYSERR: assemblyAddComponent(): Invalid 'lVnum' #%ld.", lVnum );
-    return (FALSE);
+    return (false);
   }
 #if CIRCLE_UNSIGNED_INDEX
   else if( real_object( lComponentVnum ) == NOTHING)
@@ -204,7 +204,7 @@ bool assemblyAddComponent( long lVnum, long lComponentVnum, bool bExtract, bool 
   {
     log( "SYSERR: assemblyAddComponent(): Invalid 'lComponentVnum' #%ld.",
       lComponentVnum );
-    return (FALSE);
+    return (false);
   }
   /* Removed as of 1.02.29 release */
   /* else if( assemblyHasComponent( lVnum, lComponentVnum ) )
@@ -230,12 +230,12 @@ bool assemblyAddComponent( long lVnum, long lComponentVnum, bool bExtract, bool 
   pAssembly->pComponents[ pAssembly->lNumComponents ].bInRoom = bInRoom;
   pAssembly->lNumComponents += 1;
 
-  return (TRUE);
+  return (true);
 }
 
 bool assemblyCheckComponents( long lVnum, struct char_data *pCharacter, int extract_yes)
 {
-  bool         bOk = TRUE;
+  bool         bOk = true;
   long         i = 0;
   long         lRnum = 0;
   struct obj_data **ppComponentObjects = nullptr;
@@ -244,32 +244,32 @@ bool assemblyCheckComponents( long lVnum, struct char_data *pCharacter, int extr
   if( pCharacter == nullptr )
   {
     log( "SYSERR: nullptr assemblyCheckComponents(): 'pCharacter'." );
-    return (FALSE);
+    return (false);
   }
   else if( (pAssembly = assemblyGetAssemblyPtr( lVnum )) == nullptr )
   {
     log( "SYSERR: nullptr assemblyCheckComponents(): Invalid 'lVnum' #%ld.", lVnum );
-    return (FALSE);
+    return (false);
   }
 
   if( pAssembly->pComponents == nullptr )
-    return (FALSE);
+    return (false);
   else if( pAssembly->lNumComponents <= 0 )
-    return (FALSE);
+    return (false);
 
   CREATE( ppComponentObjects, struct obj_data*, pAssembly->lNumComponents );
 
   for( i = 0; i < pAssembly->lNumComponents && bOk; i++ )
   {
     if( (lRnum = real_object( pAssembly->pComponents[ i ].lVnum )) < 0 )
-      bOk = FALSE;
+      bOk = false;
     else
     {
       if( pAssembly->pComponents[ i ].bInRoom )
       {
        if((ppComponentObjects[ i ] = get_obj_in_list_num( lRnum,
          world[ IN_ROOM( pCharacter ) ].contents )) == nullptr )
-         bOk = FALSE;
+         bOk = false;
         else {
           obj_from_room( ppComponentObjects[ i ] );
        }
@@ -278,7 +278,7 @@ bool assemblyCheckComponents( long lVnum, struct char_data *pCharacter, int extr
       {
        if( (ppComponentObjects[ i ] = get_obj_in_list_num( lRnum,
          pCharacter->carrying )) == nullptr )
-         bOk = FALSE;
+         bOk = false;
         else {
           obj_from_char( ppComponentObjects[ i ] );
        }
@@ -291,7 +291,7 @@ bool assemblyCheckComponents( long lVnum, struct char_data *pCharacter, int extr
     if( ppComponentObjects[ i ] == nullptr )
       continue;
 
-    if( pAssembly->pComponents[ i ].bExtract && bOk && extract_yes == TRUE)
+    if( pAssembly->pComponents[ i ].bExtract && bOk && extract_yes == true)
       extract_obj( ppComponentObjects[ i ] );
     else if( pAssembly->pComponents[ i ].bInRoom )
       obj_to_room( ppComponentObjects[ i ], IN_ROOM( pCharacter ) );
@@ -312,9 +312,9 @@ bool assemblyCreate( long lVnum, int iAssembledType )
   ASSEMBLY     *pNewAssemblyTable = nullptr;
 
   if( lVnum < 0 )
-    return (FALSE);
+    return (false);
   else if( iAssembledType < 0 || iAssembledType >= MAX_ASSM )
-    return (FALSE);
+    return (false);
 
   if( g_pAssemblyTable == nullptr )
   {
@@ -330,7 +330,7 @@ bool assemblyCreate( long lVnum, int iAssembledType )
       lMiddle = (lBottom + lTop) / 2;
 
       if( g_pAssemblyTable[ lMiddle ].lVnum == lVnum )
-       return (FALSE);
+       return (false);
       else if( lBottom >= lTop )
        break;
       else if( g_pAssemblyTable[ lMiddle ].lVnum > lVnum )
@@ -360,7 +360,7 @@ bool assemblyCreate( long lVnum, int iAssembledType )
   g_pAssemblyTable[ lMiddle ].lVnum = lVnum;
   g_pAssemblyTable[ lMiddle ].pComponents = nullptr;
   g_pAssemblyTable[ lMiddle ].uchAssemblyType = (unsigned char) iAssembledType;
-  return (TRUE);
+  return (true);
 }
 
 bool assemblyDestroy( long lVnum )
@@ -373,7 +373,7 @@ bool assemblyDestroy( long lVnum )
 < 0 )
   {
     log( "SYSERR: assemblyDestroy(): Invalid 'lVnum' #%ld.", lVnum );
-    return (FALSE);
+    return (false);
   }
 
   /* Deallocate component array. */
@@ -404,7 +404,7 @@ bool assemblyDestroy( long lVnum )
   g_lNumAssemblies -= 1;
   g_pAssemblyTable = pNewAssemblyTable;
 
-  return (TRUE);
+  return (true);
 }
 
 bool assemblyHasComponent( long lVnum, long lComponentVnum )
@@ -414,7 +414,7 @@ bool assemblyHasComponent( long lVnum, long lComponentVnum )
   if( (pAssembly = assemblyGetAssemblyPtr( lVnum )) == nullptr )
   {
     log( "SYSERR: assemblyHasComponent(): Invalid 'lVnum' #%ld.", lVnum );
-    return (FALSE);
+    return (false);
   }
 
   return (assemblyGetComponentIndex( pAssembly, lComponentVnum ) >= 0);
@@ -429,14 +429,14 @@ bool assemblyRemoveComponent( long lVnum, long lComponentVnum )
   if( (pAssembly = assemblyGetAssemblyPtr( lVnum )) == nullptr )
   {
     log( "SYSERR: assemblyRemoveComponent(): Invalid 'lVnum' #%ld.", lVnum );
-    return (FALSE);
+    return (false);
   }
   else if( (lIndex = assemblyGetComponentIndex( pAssembly, lComponentVnum )) <
 0 )
   {
     log( "SYSERR: assemblyRemoveComponent(): Vnum #%ld is not a "
       "component of assembled vnum #%ld.", lComponentVnum, lVnum );
-    return (FALSE);
+    return (false);
   }
 
   if( pAssembly->pComponents != nullptr && pAssembly->lNumComponents > 1 )
@@ -457,7 +457,7 @@ bool assemblyRemoveComponent( long lVnum, long lComponentVnum )
   pAssembly->pComponents = pNewComponents;
   pAssembly->lNumComponents -= 1;
 
-  return (TRUE);
+  return (true);
 }
 
 int assemblyGetType( long lVnum )

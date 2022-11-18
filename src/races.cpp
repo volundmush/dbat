@@ -37,8 +37,8 @@ const char *race_abbrevs[NUM_RACES + 1] = {
         "\n"
 };
 
-#define Y   TRUE
-#define N   FALSE
+#define Y   true
+#define N   false
 
 
 const char *race_display[NUM_RACES] = {
@@ -222,33 +222,33 @@ void set_height_and_weight_by_race(struct char_data *ch) {
 
 int invalid_race(struct char_data *ch, struct obj_data *obj) {
     if (GET_ADMLEVEL(ch) >= ADMLVL_IMMORT)
-        return FALSE;
+        return false;
 
     if (OBJ_FLAGGED(obj, ITEM_ANTI_HUMAN) && IS_HUMAN(ch))
-        return TRUE;
+        return true;
 
     if (OBJ_FLAGGED(obj, ITEM_ANTI_SAIYAN) && IS_SAIYAN(ch))
-        return TRUE;
+        return true;
 
     if (OBJ_FLAGGED(obj, ITEM_ANTI_ICER) && IS_ICER(ch))
-        return TRUE;
+        return true;
 
     if (OBJ_FLAGGED(obj, ITEM_ANTI_KONATSU) && IS_KONATSU(ch))
-        return TRUE;
+        return true;
 
     if (OBJ_FLAGGED(obj, ITEM_ONLY_HUMAN) && !IS_HUMAN(ch))
-        return TRUE;
+        return true;
 
     if (OBJ_FLAGGED(obj, ITEM_ONLY_ICER) && !IS_ICER(ch))
-        return TRUE;
+        return true;
 
     if (OBJ_FLAGGED(obj, ITEM_ONLY_SAIYAN) && !IS_SAIYAN(ch))
-        return TRUE;
+        return true;
 
     if (OBJ_FLAGGED(obj, ITEM_ONLY_KONATSU) && !IS_KONATSU(ch))
-        return TRUE;
+        return true;
 
-    return FALSE;
+    return false;
 }
 
 
@@ -870,13 +870,13 @@ namespace dbat::race {
         }
 
         if (rpp_cost) {
-            if (GET_TRANSCOST(ch, tier) == FALSE) {
+            if (GET_TRANSCOST(ch, tier) == false) {
                 if (GET_RP(ch) < rpp_cost) {
                     send_to_char(ch, "You need %i RPP in order to unlock this transformation.\r\n", rpp_cost);
                     return false;
                 } else {
                     GET_RP(ch) -= rpp_cost;
-                    GET_TRANSCOST(ch, tier) = TRUE;
+                    GET_TRANSCOST(ch, tier) = true;
                     send_to_char(ch, "You pay %i RPP to permanently unlock this transformation!\r\n", rpp_cost);
                 }
             }
@@ -894,7 +894,7 @@ namespace dbat::race {
         }
 
         if (ps_cost) {
-            if (GET_TRANSCOST(ch, tier) == FALSE) {
+            if (GET_TRANSCOST(ch, tier) == false) {
                 if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
                     send_to_char(ch,
                                  "You need %i practice points in order to obtain a transformation for the first time.\r\n",
@@ -902,7 +902,7 @@ namespace dbat::race {
                     return false;
                 } else {
                     GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
-                    GET_TRANSCOST(ch, tier) = TRUE;
+                    GET_TRANSCOST(ch, tier) = true;
                     send_to_char(ch, "You pay %i PS to permanently unlock this transformation!\r\n", ps_cost);
                 }
             }
@@ -1147,27 +1147,27 @@ namespace dbat::race {
                 switch (tier) {
                     case 1:
                         act("@WYou spread your feet out and crouch slightly as a bright white aura bursts around your body. Torrents of white and blue energy burn upwards around your body while your muscles grow and become more defined at the same time. In a sudden rush of power you achieve @CSuper @cHuman @GFirst@W sending surrounding debris high into the sky!",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@C$n@W crouches slightly while spreading $s feet as a bright white aura bursts up around $s body. Torrents of white and blue energy burn upwards around $s body while $s muscles grow and become more defined at the same time. In a sudden rush of power debris is sent flying high into the air with $m achieving @CSuper @cHuman @GFirst@W!",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 2:
                         act("@WSuddenly a bright white aura bursts into existance around your body, you feel the intensity of your hidden potential boil until it can't be contained any longer! Waves of ki shoot out from your aura streaking outwards in many directions. A roar that shakes everything in the surrounding area sounds right as your energy reaches its potential and you achieve @CSuper @cHuman @GSecond@W!",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@C$n@W is suddenly covered with a bright white aura as $e grits $s teeth, apparently struggling with the power boiling to the surface! Waves of ki shoot out from $s aura, streaking in several directions as a mighty roar shakes everything in the surrounding area. As $s aura calms $e smiles, having achieved @CSuper @cHuman @GSecond@W!",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 3:
                         act("@WYou clench both of your fists as the bright white aura around your body is absorbed back into your flesh. As it is absorbed, your muscles triple in size and electricity crackles across your flesh. You grin as you feel the power of @CSuper @cHuman @GThird@W!",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@C$n@W clenches both of $s fists as the bright white aura around $s body is absorbed back into $s flesh. As it is absorbed, $s muscles triple in size and bright electricity crackles across $s flesh. $e smiles as $e achieves the power of @CSuper @cHuman @GThird@W!",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 4:
                         act("@WYou grit your teeth and clench your fists as a sudden surge of power begins to tear through your body! Your muscles lose volume and gain mass, condensing into sleek hyper efficiency as a spectacular shimmering white aura flows over you, flashes of multicolored light flaring up in rising stars around your new form, a corona of glory! You feel your ultimate potential realized as you ascend to @CSuper @cHuman @GFourth@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@C$n@W grits $s teeth and clenches $s fists as a sudden surge of power begins to tear through $s body! $n@W's muscles lose volume and gain mass, condensing into sleek hyper efficiency as a spectacular shimmering white aura flows over $m, flashes of multicolored light flare up in rising stars around $s new form, a corona of glory! $n@W smiles as his ultimate potential is realized as $e ascends to @CSuper @cHuman @GFourth@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     default:
                         return;
@@ -1176,96 +1176,96 @@ namespace dbat::race {
                 switch (tier) {
                     case 1:
                         act("@WYou yell with pain as your body begins to grow and power surges within! Your legs expand outward to triple their previous length. Soon after your arms, chest, and head follow. Your horns grow longer and curve upwards while lastly your tail expands. You are left confidently standing, having completed your @GFirst @cTransformation@W.@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@C$n@W yells with pain as $s body begins to grow and power surges outward! $s legs expand outward to triple their previous length. Soon after $s arms, chest, and head follow. $s horns grow longer and curve upwards while lastly $s tail expands. $e is left confidently standing, having completed $s @GFirst @cTransformation@W.@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 2:
                         act("@WSpikes grow out from your elbows as your power begins to climb to new heights. The muscles along your forearms grow to double their former size as the spikes growing from your elbows flatten and sharpen into blades. You have achieved your @GSecond @mMutation@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@WSpikes grow out from @C$n@W's elbows as $s power begins to climb to new heights. The muscles along $s forearms grow to double their former size as the spikes growing from $s elbows flatten and sharpen into blades. $e has achieved your @GSecond @mMutation@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 3:
                         act("@WA blinding light surrounds your body while your rising power begins to rip up the ground beneath you! Your skin and torso shell begin to crack as your new body struggles to free its self. Huge chunks of debris lift free of the ground as your power begins to rise to unbelievable heights. Suddenly your old skin and torso shell burst off from your body, leaving a sleek form glowing where they had been. Everything comes crashing down as your power evens out, leaving you with your @GThird @cTransformation @Wcompleted!@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@WA blinding light surrounds @C$n@W's body while $s rising power begins to rip up the ground beneath $m! $s skin and torso shell begin to crack as $s new body struggles to free its self. Huge chunks of debris lift free of the ground as $s power begins to rise to unbelievable heights. Suddenly $s old skin and torso shell burst off from $s body, leaving a sleek form glowing where they had been. Everything comes crashing down as @C$n@W's power evens out, leaving $m with $s @GThird @cTransformation @Wcompleted!@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 4:
                         act("@WA feeling of complete power courses through your viens as your body begins to change radically! You triple in height while a hard shell forms over your entire torso. Hard bones grow out from your head forming four ridges that jut outward. A hard covering grows up over your mouth and nose completing the transformation! A dark crimson aura flames around your body as you realize your @GFourth @cTransformation@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@C$n@W's body begins to change radically! $e triples in height while a hard shell forms over $s entire torso. Hard bones grow out from $s head forming four ridges that jut outward. A hard covering grows up over $s mouth and nose completing the transformation! A dark crimson aura flames around @C$n@W's body as $e realizes $s @GFourth @cTransformation@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                 }
             case konatsu:
                 switch (tier) {
                     case 1:
                         act("@WA dark shadowy aura with flecks of white energy begins to burn around your body! Strength and agility can be felt rising up within as your form becomes blurred and ethereal looking. You smile as you realize your @GFirst @DShadow @BForm@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@WA dark shadowy aura with flecks of white energy begins to burn around @C$n@W's body! $s form becomes blurred and ethereal-looking as $s muscles become strong and lithe. $e smiles as $e achieves $s @GFirst @DShadow @BForm@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 2:
                         act("@WThe shadowy aura surrounding your body burns larger than ever as dark bolts of purple electricity crackles across your skin. Your eyes begin to glow white as shockwaves of power explode outward! All the shadows in the immediate area are absorbed into your aura in an instant as you achieve your @GSecond @DShadow @BForm@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@WThe shadowy aura surrounding @C$n@W's body burns larger than ever as dark bolts of purple electricity crackles across $s skin. $s eyes begin to glow white as shockwaves of power explode outward! All the shadows in the immediate area are absorbed into $s aura in an instant as $e achieves $s @GSecond @DShadow @BForm@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 3:
                         act("@WThe shadowy aura around you explodes outward as your power begins to rise!  You're overcome with a sudden realization, that the shadows are an extension of yourself, that light isn't needed for your shadows to bloom.  With this newfound wisdom comes ability and power!  The color in your aura drains as the shadows slide inward and cling to your body like a second, solid black skin!  Shockwaves roll off of you in quick succession, pelting the surrounding area harshly!  Accompanying the waves, a pool of darkness blossoms underneath you, slowly spreading the shadows to the whole area, projecting onto any surface nearby!  Purple and black electricity crackle in your solid white aura, and you grin as you realize your @GThird @DShadow @BForm@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@WThe shadowy aura around $n explodes outward as $s power begins to rise!  Realization dawns on $s face, followed shortly by confidence! The color in $s aura drains as the shadows slide inward to cling to $s body like a second, solid black skin! Shockwaves roll off of $n in quick succession, pelting the surrounding area harshly!  Accompanying the waves, a pool of darkness blossoms underneath them, slowly spreading the shadows to the whole area, projecting onto any surface nearby! Purple and black electricity crackle in $s solid white aura, and he grins as $e realizes $s @GThird @DShadow @BForm@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                 }
             case namekian:
                 switch (tier) {
                     case 1:
                         act("@WYou crouch down and clench your fists as your muscles begin to bulge! Sweat pours down your body as the ground beneath your feet cracks and warps under the pressure of your rising ki! With a sudden burst that sends debris flying you realize a new plateau in your power, having achieved @CSuper @gNamek @GFirst@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@C$n @Wcrouches down and clenches $s fists as $s muscles begin to bulge! Sweat pours down $s body as the ground beneath $s feet cracks and warps under the pressure of  $s rising ki! With a sudden burst that sends debris flying $e seems to realize a new plateau in $s power, having achieved @CSuper @gNamek @GFirst@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 2:
                         act("@WYou gasp in shock as a power within your body that you had not been aware of begins to surge to the surface! Your muscles grow larger as energy crackles between your antennae intensely! A shockwave of energy explodes outward as you achieve a new plateau in power, @CSuper @gNamek @GSecond@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@C$n @Wgasps in shock as a power within $s body begins to surge out! $s muscles grow larger as energy crackles between $s antennae intensely! A shockwave of energy explodes outward as $e achieves a new plateau in power, @CSuper @gNamek @GSecond@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 3:
                         act("@WA fierce clear aura bursts up around your body as you struggle to control a growing power within! Energy leaks off of your aura at an astounding rate filling the air around you with small orbs of ki. As your power begins to level off the ambient ki hovering around you is absorbed inward in a sudden shock that leaves your skin glowing! You have achieved a rare power, @CSuper @gNamek @GThird@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@WA fierce clear aura bursts up around @C$n@W's body as $e struggles to control $s own power! Energy leaks off of $s aura at an astounding rate filling the air around $m with small orbs of ki. As $s power begins to level off the ambient ki hovering around $m is absorbed inward in a sudden shock that leaves $s skin glowing! $e has achieved a rare power, @CSuper @gNamek @GThird@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 4:
                         act("@WAn inner calm fills your mind as your power surges higher than ever before. Complete clarity puts everything once questioned into perspective. While this inner calm is filling your mind, an outer storm of energy erupts around your body! The storm of energy boils and crackles while growing larger. You have achieved @CSuper @gNamek @GFourth@W, a mystery of the ages.@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@C$n@W smiles calmly as a look of complete understand fills $s eyes. While $e remains perfectly calm and detached a massivly powerful storm of energy erupts from his body. This storm of energy shimmers with the colors of the rainbow and boils and crackles with awesome power! $s smile disappears as he realizes a mysterious power of the ages, @CSuper @gNamek @GFourth@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                 }
             case mutant:
                 switch (tier) {
                     case 1:
                         act("@WYour flesh grows tougher as power surges up from within. Your fingernails grow longer, sharper, and more claw-like. Lastly your muscles double in size as you achieve your @GFirst @mMutation@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@C$n@W flesh grows tougher as power surges up around $m. $s fingernails grow longer, sharper, and more claw-like. Lastly $s muscles double in size as $e achieves $s @GFirst @mMutation@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 2:
                         act("@WSpikes grow out from your elbows as your power begins to climb to new heights. The muscles along your forearms grow to double their former size as the spikes growing from your elbows flatten and sharpen into blades. You have achieved your @GSecond @mMutation@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@WSpikes grow out from @C$n@W's elbows as $s power begins to climb to new heights. The muscles along $s forearms grow to double their former size as the spikes growing from $s elbows flatten and sharpen into blades. $e has achieved your @GSecond @mMutation@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 3:
                         act("@WA dark cyan aura bursts up around your body as the ground begins to crack beneath you! You scream out in pain as your power begins to explode! Two large spikes grow out from your shoulder blades as you reach your @GThird @mMutation!@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@WA dark cyan aura bursts up around @C$n@W's body as the ground begins to crack beneath $m and $e screams out in pain as $s power begins to explode! Two large spikes grow out from $s shoulder blades as $e reaches $s @GThird @mMutation!@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                 }
             case halfbreed:
@@ -1273,164 +1273,164 @@ namespace dbat::race {
                 switch (tier) {
                     case 1:
                         act("@WSomething inside your mind snaps as your rage spills over! Lightning begins to strike the ground all around you as you feel torrents of power rushing through every fiber of your being. Your hair suddenly turns golden as your eyes change to the color of emeralds. In a final rush of power a golden aura rushes up around your body! You have become a @CSuper @YSaiyan@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@C$n@W screams in rage as lightning begins to crash all around! $s hair turns golden and $s eyes change to an emerald color as a bright golden aura bursts up around $s body! As $s energy stabilizes $e wears a fierce look upon $s face, having transformed into a @CSuper @YSaiyan@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 2:
                         if (PLR_FLAGGED(ch, PLR_LSSJ)) {
                             act("@WYou roar and then stand at your full height. You flex every muscle in your body as you feel your strength grow! Your eyes begin to glow @wwhite@W with energy, your hair turns @Ygold@W, and at the same time a @wbright @Yg@yo@Yl@yd@Ye@yn@W aura flashes up around your body! You release your @YL@ye@Dg@We@wn@Yd@ya@Dr@Yy@W power upon the universe!@n",
-                                TRUE, ch, nullptr, nullptr, TO_CHAR);
+                                true, ch, nullptr, nullptr, TO_CHAR);
                             act("@C$n @Wroars and then stands at $s full height. Then $s muscles start to buldge and grow as $e flexes them! Suddenly $s eyes begin to glow @wwhite@W with energy, $s hair turns @Ygold@W, and at the same time a @wbright @Yg@yo@Yl@yd@Ye@yn@W aura flashes up around $s body! @C$n@W releases $s @YL@ye@Dg@We@wn@Yd@ya@Dr@Yy@W power upon the universe!@n",
-                                TRUE, ch, nullptr, nullptr, TO_ROOM);
+                                true, ch, nullptr, nullptr, TO_ROOM);
                             return;
                         } else {
                             act("@WBlinding rage burns through your mind as a sudden eruption of energy surges forth! A golden aura bursts up around your body, glowing as bright as the sun. Rushing winds rocket out from your body in every direction as bolts of electricity begin to crackle in your aura. As your aura dims you are left standing confidently, having achieved @CSuper @YSaiyan @GSecond@W!@n",
-                                TRUE, ch, nullptr, nullptr, TO_CHAR);
+                                true, ch, nullptr, nullptr, TO_CHAR);
                             act("@C$n@W stands up straight with $s head back as $e releases an ear piercing scream! A blindingly bright golden aura bursts up around $s body, glowing as bright as the sun. As rushing winds begin to rocket out from $m in every direction, bolts of electricity flash and crackle in $s aura. As $s aura begins to dim $e is left standing confidently, having achieved @CSuper @YSaiyan @GSecond@W!@n",
-                                TRUE, ch, nullptr, nullptr, TO_ROOM);
+                                true, ch, nullptr, nullptr, TO_ROOM);
                         }
                         return;
                     case 3:
                         act("@WElectricity begins to crackle around your body as your aura grows explosively! You yell as your powerlevel begins to skyrocket while your hair grows to multiple times the length it was previously. Your muscles become incredibly dense instead of growing in size, preserving your speed. Finally your irises appear just as your transformation becomes complete, having achieved @CSuper @YSaiyan @GThird@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@WElectricity begins to crackle around @C$n@W, as $s aura grows explosively! $e yells as the energy around $m skyrockets and $s hair grows to multiple times its previous length. $e smiles as $s irises appear and $s muscles tighten up. $s transformation complete, $e now stands confidently, having achieved @CSuper @YSaiyan @GThird@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 4:
                         act("@WHaving absorbed enough blutz waves, your body begins to transform! Red fur grows over certain parts of your skin as your hair grows longer and unkempt. A red outline forms around your eyes while the irises of those very same eyes change to an amber color. Energy crackles about your body violently as you achieve the peak of saiyan perfection, @CSuper @YSaiyan @GFourth@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@WHaving absorbed enough blutz waves, @C$n@W's body begins to transform! Red fur grows over certain parts of $s skin as $s hair grows longer and unkempt. A red outline forms around $s eyes while the irises of those very same eyes change to an amber color. Energy crackles about $s body violently as $e achieves the peak of saiyan perfection, @CSuper @YSaiyan @GFourth@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                 }
             case bio:
                 switch (tier) {
                     case 1:
                         act("@gYou bend over as @rpain@g wracks your body! Your limbs begin to grow out, becoming more defined and muscular. As your limbs finish growing outward you feel a painful sensation coming from your back as a long tail with a spike grows out of your back! As the pain subsides you stand up straight and a current of power shatters part of the ground beneath you. You have @rmatured@g beyond your @Gl@ga@Dr@gv@Ga@ge stage!@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@W$n @gbends over as a @rpainful@g look covers $s face! $s limbs begin to grow out, becoming more defined and muscular. As $s limbs finish growing outward $e screams as a long tail with a spike grows rips out of $s back! As $e calms $e stands up straight and a current of power shatters part of the ground beneath $m. $e has @rmatured@g beyond $s @Gl@ga@Dr@gv@Ga@ge stage!@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 2:
                         act("@WYour exoskeleton begins to glow spectacularly while the shape of your body begins to change. Your tail shrinks slightly. Your hands, feet, and facial features become more refined. While your body colors change slightly. The crests on your head change, standing up straighter on either side of your head as well. As you finish transforming a wave of power floods your being. You have achieved your @gSemi@D-@GPerfect @BForm@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@C$n@W's exoskeleton begins to glow spectacularly while the shape of $s body begins to change. $s tail shrinks slightly. $s hands, feet, and facial features become more refined. While $s body colors change slightly. The crests on $s head change, standing up straighter on either side of $s head as well. As $e finishes transforming a wave of power rushes out from $m. $e has achieved $s @gSemi@D-@GPerfect @BForm@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 3:
                         act("@WYour whole body is engulfed in blinding light as your exoskeleton begins to change shape! Your hands, feet, and facial features become more refined and humanoid. While your colors change, becoming more subdued and neutral. A bright golden aura bursts up around your body as you achieve your @GPerfect @BForm@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@C$n@W whole body is engulfed in blinding light as $s exoskeleton begins to change shape! $s hands, feet, and facial features become more refined and humanoid. While $s colors change, becoming more subdued and neutral. A bright golden aura bursts up around $s body as $e achieves $s @GPerfect @BForm@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 4:
                         act("@WA rush of power explodes from your perfect body, crushing nearby debris and sending dust billowing in all directions. Electricity crackles throughout your aura intensely while your muscles grow slightly larger but incredibly dense. You smile as you realize that you have taken your perfect form beyond imagination. You are now @CSuper @GPerfect@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@WA rush of power explodes from @C$n@W's perfect body, crushing nearby debris and sending dust billowing in all directions. Electricity crackles throughout $s aura intensely while $s muscles grow slightly larger but incredibly dense. $e smiles as $e has taken $s perfect form beyond imagination. $e is now @CSuper @GPerfect@W!@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                 }
             case android:
                 switch (tier) {
                     case 1:
                         act("@WYou stop for a moment as the nano-machines within your body reprogram and restructure you. You are now more powerful and efficient!@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@C$n @Wstops for a moment as the nano-machines within $s body reprogram and restructure $m. $e is now more powerful and efficient!@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 2:
                         act("@WYou stop for a moment as the nano-machines within your body reprogram and restructure you. You are now more powerful and efficient!@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@C$n @Wstops for a moment as the nano-machines within $s body reprogram and restructure $m. $e is now more powerful and efficient!@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 3:
                         act("@WYou stop for a moment as the nano-machines within your body reprogram and restructure you. You are now more powerful and efficient!@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@C$n @Wstops for a moment as the nano-machines within $s body reprogram and restructure $m. $e is now more powerful and efficient!@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 4:
                         act("@WYou stop for a moment as the nano-machines within your body reprogram and restructure you. You are now more powerful and efficient!@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@C$n @Wstops for a moment as the nano-machines within $s body reprogram and restructure $m. $e is now more powerful and efficient!@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 5:
                         act("@WYou stop for a moment as the nano-machines within your body reprogram and restructure you. You are now more powerful and efficient!@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@C$n @Wstops for a moment as the nano-machines within $s body reprogram and restructure $m. $e is now more powerful and efficient!@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 6:
                         act("@WYou stop for a moment as the nano-machines within your body reprogram and restructure you. You are now more powerful and efficient!@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@C$n @Wstops for a moment as the nano-machines within $s body reprogram and restructure $m. $e is now more powerful and efficient!@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                 }
             case majin:
                 switch (tier) {
                     case 1:
                         act("@WA dark pink aura bursts up around your body as images of good and evil fill your mind! You feel the power within your body growing intensely, reflecting your personal alignment as your body changes!@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@WA dark pink aura bursts up around @C$n@W's body as images of good and evil fill $s mind! $e feels the power within $s body growing intensely, reflecting $s personal alignment as $s body changes!@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 2:
                         act("@WAn intense pink aura surrounds your body as it begins to change, taking on the characteristics of those you have ingested! Explosions of pink energy burst into existence all around you as your power soars to sights unseen!@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@WAn intense pink aura surrounds @C$n@W's body as it begins to change, taking on the characteristics of those $e has ingested! Explosions of pink energy burst into existence all around $m as $s power soars to sights unseen!@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 3:
                         act("@WRipples of intense pink energy rush upwards around your body as it begins to morph into its truest form! The ground beneath your feet forms into a crater from the very pressure of your rising ki! Earthquakes shudder throughout the area as your finish morphing!@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@WRipples of intense pink energy rush upwards around @C$n@W's body as it begins to morph into its truest form! The ground beneath $s feet forms into a crater from the very pressure of $s rising ki! Earthquakes shudder throughout the area as $e finishes morphing!@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                 }
             case kai:
                 switch (tier) {
                     case 1:
                         act("@WThoughts begin to flow through your mind of events throughout your life. The progression leads up to more recent events and finally to this very moment. All of it's significance overwhelms you momentarily and your motivation and drive increase. As your attention is drawn back to your surroundings, you feel as though your thinking, senses, and reflexes have sharpened dramatically.  At the core of your being, a greater depth of power can be felt.@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@W$n@W's face tenses, it becoming clear momentarily that they are deep in thought. After a brief lapse in focus, their attention seems to return to their surroundings. Though it's not apparent why they were so distracted, something definitely seems different about $m.@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 2:
                         act("@WYou feel a sudden rush of emotion, escalating almost to a loss of control as your thoughts race. Your heart begins to beat fast as memories mix with the raw emotion. A faint blue glow begins to surround you. As your emotions level off, you feel a deeper understanding of the universe as you know it. You visibly calm back down to an almost steely eyed resolve as you assess your surroundings. The blue aura wicks around you for a few moments and then dissipates. Thought it's full impact is not yet clear to you, you are left feeling as though both your power and inner strength have turned into nearly bottomless wells.@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@W$n@W's appears to be hit by some sudden pangs of agony, their face contorted in pain.  After a moment a faint blue aura appears around them, glowing brighter as time passes. You can feel something in the pit of your stomach, letting you know that something very significant is changing around you. Before long $n@W's aura fades, leaving a very determined looking person in your presence.@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 3:
                         act("@WYour minds' eye becomes overwhelmed by secrets unimaginable. The threads of the very universe become visible in your heightened state of awareness. Reaching out, a single thread vibrates, producing a @Rred @Wcolor -- yours. Your fingertips brush against it and your senses become clouded by a vast expanse of white color and noise. As your vision and hearing return, you understand the threads tying every living being together. Your awareness has expanded beyond comprehension!@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@C$n@W's eyes grow wide, mouth agape. $s body begins to shiver uncontrollably! $s arms reaches out cautiously before falling back down to $s side. $s face relaxes visibly, features returning to a normal state. $s irises remain larger than before, a slight smile softening $s gaze.@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                 }
             case truffle:
                 switch (tier) {
                     case 1:
                         act("@WYour mind accelerates working through the mysteries of the universe while at the same time your body begins to change! Innate nano-technology within your body begins to activate, forming flexible metal plating across parts of your skin!@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@C$n@W begins to write complicated calculations in the air as though $e were possessed while at the same time $s body begins to change! Innate nano-technology within $s body begins to activate, forming flexible metal plating across parts of $s skin!@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 2:
                         act("@WComplete understanding of every physical thing floods your mind as the nano-technology within you continues to change your body! Your eyes change; becoming glassy, hard, and glowing. Your muscles merge with a nano-fiber strengthening them at the molecular level! Finally your very bones become plated in nano-metals that have yet to be invented naturally!@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@C$n@.s nano-technology continues to change $s body! $s eyes change; becoming glassy, hard, and glowing. $s muscles merge with a nano-fiber strengthening them at the molecular level! Finally $s very bones become plated in nano-metals that have yet to be invented naturally!@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 3:
                         act("@WYou have reached the final stage of enlightenment and the nano-technology thriving inside you begin to initiate the changes! Your neural pathways become refined, your reflexes honed, your auditory and ocular senses sharpening far beyond normal levels! Your gravitational awareness improves, increasing sensitivity and accuracy in your equilibrum!@n",
-                            TRUE, ch, nullptr, nullptr, TO_CHAR);
+                            true, ch, nullptr, nullptr, TO_CHAR);
                         act("@C$n begins to mumble quietly, slowly at first and gradually picking up speed. A glint is seen from $s eyes and $s arms reach outwards briefly as $e appears to catch his balance. $s arms drop back to $s sides as balance is regained, a vicious smile on $s face.@n",
-                            TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            true, ch, nullptr, nullptr, TO_ROOM);
                         return;
 
                 }
@@ -1445,20 +1445,20 @@ namespace dbat::race {
             case human:
                 switch (tier) {
                     case 1:
-                        act("@wYou revert from @CSuper @cHuman @GFirst@w.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-                        act("@w$n@w reverts from @CSuper @cHuman @GFirst.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+                        act("@wYou revert from @CSuper @cHuman @GFirst@w.@n", true, ch, nullptr, nullptr, TO_CHAR);
+                        act("@w$n@w reverts from @CSuper @cHuman @GFirst.@n", true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 2:
-                        act("@wYou revert from @CSuper @cHuman @GSecond@w.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-                        act("@w$n@w reverts from @CSuper @cHuman @GSecond@w.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+                        act("@wYou revert from @CSuper @cHuman @GSecond@w.@n", true, ch, nullptr, nullptr, TO_CHAR);
+                        act("@w$n@w reverts from @CSuper @cHuman @GSecond@w.@n", true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 3:
-                        act("@wYou revert from @CSuper @cHuman @GThird@w.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-                        act("@w$n@w reverts from @CSuper @cHuman @GThird@w.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+                        act("@wYou revert from @CSuper @cHuman @GThird@w.@n", true, ch, nullptr, nullptr, TO_CHAR);
+                        act("@w$n@w reverts from @CSuper @cHuman @GThird@w.@n", true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 4:
-                        act("@wYou revert from @CSuper @cHuman @GFourth@w.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-                        act("@w$n@w reverts from @CSuper @cHuman @GFourth@w.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+                        act("@wYou revert from @CSuper @cHuman @GFourth@w.@n", true, ch, nullptr, nullptr, TO_CHAR);
+                        act("@w$n@w reverts from @CSuper @cHuman @GFourth@w.@n", true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                 }
                 break;
@@ -1466,110 +1466,110 @@ namespace dbat::race {
             case halfbreed:
                 switch (tier) {
                     case 4:
-                        act("@wYou revert from @CSuper @cSaiyan @GFourth@w.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-                        act("@w$n@w reverts from @CSuper @cSaiyan @GFourth@w.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+                        act("@wYou revert from @CSuper @cSaiyan @GFourth@w.@n", true, ch, nullptr, nullptr, TO_CHAR);
+                        act("@w$n@w reverts from @CSuper @cSaiyan @GFourth@w.@n", true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 3:
-                        act("@wYou revert from @CSuper @cSaiyan @GThird@w.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-                        act("@w$n@w reverts from @CSuper @cSaiyan @GThird@w.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+                        act("@wYou revert from @CSuper @cSaiyan @GThird@w.@n", true, ch, nullptr, nullptr, TO_CHAR);
+                        act("@w$n@w reverts from @CSuper @cSaiyan @GThird@w.@n", true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 2:
                         if (PLR_FLAGGED(ch, PLR_LSSJ)) {
-                            act("@wYou revert from your @YLegendary @CSuper Saiyan@w form.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-                            act("@w$n@w reverts from $s @YLegendary @CSuper Saiyan@w form@w.@n", TRUE, ch, nullptr, nullptr,
+                            act("@wYou revert from your @YLegendary @CSuper Saiyan@w form.@n", true, ch, nullptr, nullptr, TO_CHAR);
+                            act("@w$n@w reverts from $s @YLegendary @CSuper Saiyan@w form@w.@n", true, ch, nullptr, nullptr,
                                 TO_ROOM);
                         } else {
-                            act("@wYou revert from @CSuper @cSaiyan @GSecond@w.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-                            act("@w$n@w reverts from @CSuper @cSaiyan @GSecond@w.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+                            act("@wYou revert from @CSuper @cSaiyan @GSecond@w.@n", true, ch, nullptr, nullptr, TO_CHAR);
+                            act("@w$n@w reverts from @CSuper @cSaiyan @GSecond@w.@n", true, ch, nullptr, nullptr, TO_ROOM);
                         }
                         return;
                     case 1:
-                        act("@wYou revert from @CSuper @cSaiyan @GFirst@w.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-                        act("@w$n@w reverts from @CSuper @cSaiyan @GFirst.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+                        act("@wYou revert from @CSuper @cSaiyan @GFirst@w.@n", true, ch, nullptr, nullptr, TO_CHAR);
+                        act("@w$n@w reverts from @CSuper @cSaiyan @GFirst.@n", true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                 }
             case icer:
                 switch (tier) {
                     case 4:
-                        act("@wYou revert from @CTransform @GFourth@w.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-                        act("@w$n@w reverts from @CTransform @GFourth@w.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+                        act("@wYou revert from @CTransform @GFourth@w.@n", true, ch, nullptr, nullptr, TO_CHAR);
+                        act("@w$n@w reverts from @CTransform @GFourth@w.@n", true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 3:
-                        act("@wYou revert from @CTransform @GThird@w.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-                        act("@w$n@w reverts from @CTransform @GThird@w.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+                        act("@wYou revert from @CTransform @GThird@w.@n", true, ch, nullptr, nullptr, TO_CHAR);
+                        act("@w$n@w reverts from @CTransform @GThird@w.@n", true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 2:
-                        act("@wYou revert from @CTransform @GSecond@w.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-                        act("@w$n@w reverts from @CTransform @GSecond@w.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+                        act("@wYou revert from @CTransform @GSecond@w.@n", true, ch, nullptr, nullptr, TO_CHAR);
+                        act("@w$n@w reverts from @CTransform @GSecond@w.@n", true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 1:
-                        act("@wYou revert from @CTransform @GFirst@w.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-                        act("@w$n@w reverts from @CTransform @GFirst.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+                        act("@wYou revert from @CTransform @GFirst@w.@n", true, ch, nullptr, nullptr, TO_CHAR);
+                        act("@w$n@w reverts from @CTransform @GFirst.@n", true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                 }
             case konatsu:
                 switch (tier) {
                     case 3:
-                        act("@wYou revert from @CShadow @GThird@w.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-                        act("@w$n@w reverts from @CShadow @GThird@w.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+                        act("@wYou revert from @CShadow @GThird@w.@n", true, ch, nullptr, nullptr, TO_CHAR);
+                        act("@w$n@w reverts from @CShadow @GThird@w.@n", true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 2:
-                        act("@wYou revert from @CShadow @GSecond@w.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-                        act("@w$n@w reverts from @CShadow @GSecond@w.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+                        act("@wYou revert from @CShadow @GSecond@w.@n", true, ch, nullptr, nullptr, TO_CHAR);
+                        act("@w$n@w reverts from @CShadow @GSecond@w.@n", true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 1:
-                        act("@wYou revert from @CShadow @GFirst@w.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-                        act("@w$n@w reverts from @CShadow @GFirst.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+                        act("@wYou revert from @CShadow @GFirst@w.@n", true, ch, nullptr, nullptr, TO_CHAR);
+                        act("@w$n@w reverts from @CShadow @GFirst.@n", true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                 }
             case namekian:
                 switch (tier) {
                     case 4:
-                        act("@wYou revert from @CSuper @cNamek @GFourth@w.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-                        act("@w$n@w reverts from @CSuper @cNamek @GFourth@w.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+                        act("@wYou revert from @CSuper @cNamek @GFourth@w.@n", true, ch, nullptr, nullptr, TO_CHAR);
+                        act("@w$n@w reverts from @CSuper @cNamek @GFourth@w.@n", true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 3:
-                        act("@wYou revert from @CSuper @cNamek @GThird@w.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-                        act("@w$n@w reverts from @CSuper @cNamek @GThird@w.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+                        act("@wYou revert from @CSuper @cNamek @GThird@w.@n", true, ch, nullptr, nullptr, TO_CHAR);
+                        act("@w$n@w reverts from @CSuper @cNamek @GThird@w.@n", true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 2:
-                        act("@wYou revert from @CSuper @cNamek @GSecond@w.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-                        act("@w$n@w reverts from @CSuper @cNamek @GSecond@w.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+                        act("@wYou revert from @CSuper @cNamek @GSecond@w.@n", true, ch, nullptr, nullptr, TO_CHAR);
+                        act("@w$n@w reverts from @CSuper @cNamek @GSecond@w.@n", true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 1:
-                        act("@wYou revert from @CSuper @cNamek @GFirst@w.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-                        act("@w$n@w reverts from @CSuper @cNamek @GFirst.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+                        act("@wYou revert from @CSuper @cNamek @GFirst@w.@n", true, ch, nullptr, nullptr, TO_CHAR);
+                        act("@w$n@w reverts from @CSuper @cNamek @GFirst.@n", true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                 }
                 break;
             case mutant:
                 switch (tier) {
                     case 3:
-                        act("@wYou revert from @CMutate @GThird@w.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-                        act("@w$n@w reverts from @CMutate @GThird@w.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+                        act("@wYou revert from @CMutate @GThird@w.@n", true, ch, nullptr, nullptr, TO_CHAR);
+                        act("@w$n@w reverts from @CMutate @GThird@w.@n", true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 2:
-                        act("@wYou revert from @CMutate @GSecond@w.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-                        act("@w$n@w reverts from @CMutate @GSecond@w.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+                        act("@wYou revert from @CMutate @GSecond@w.@n", true, ch, nullptr, nullptr, TO_CHAR);
+                        act("@w$n@w reverts from @CMutate @GSecond@w.@n", true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 1:
-                        act("@wYou revert from @CMutate @GFirst@w.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-                        act("@w$n@w reverts from @CMutate @GFirst.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+                        act("@wYou revert from @CMutate @GFirst@w.@n", true, ch, nullptr, nullptr, TO_CHAR);
+                        act("@w$n@w reverts from @CMutate @GFirst.@n", true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                 }
             case kai:
                 switch (tier) {
                     case 3:
-                        act("@wYou revert from @CMystic @GThird@w.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-                        act("@w$n@w reverts from @CMystic @GThird@w.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+                        act("@wYou revert from @CMystic @GThird@w.@n", true, ch, nullptr, nullptr, TO_CHAR);
+                        act("@w$n@w reverts from @CMystic @GThird@w.@n", true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 2:
-                        act("@wYou revert from @CMystic @GSecond@w.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-                        act("@w$n@w reverts from @CMystic @GSecond@w.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+                        act("@wYou revert from @CMystic @GSecond@w.@n", true, ch, nullptr, nullptr, TO_CHAR);
+                        act("@w$n@w reverts from @CMystic @GSecond@w.@n", true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                     case 1:
-                        act("@wYou revert from @CMystic @GFirst@w.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-                        act("@w$n@w reverts from @CMystic @GFirst.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+                        act("@wYou revert from @CMystic @GFirst@w.@n", true, ch, nullptr, nullptr, TO_CHAR);
+                        act("@w$n@w reverts from @CMystic @GFirst.@n", true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                 }
         }

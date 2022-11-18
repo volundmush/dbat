@@ -122,7 +122,7 @@ void copyover_recover()
 
   unlink (COPYOVER_FILE); /* In case it crashes - doesn't prevent reading */ 
   for (;;) {
-    fOld = TRUE;
+    fOld = true;
     fscanf (fp, "%d %s %s %d %s\n", &desc, name, host, &saved_loadroom, username);
     if (desc == -1)
       break;
@@ -163,7 +163,7 @@ void copyover_recover()
        fOld = FALSE;*/
     }
     else
-     fOld = FALSE;
+     fOld = false;
 		
     if (!fOld) /* Player file not found?! */ {
        write_to_descriptor (desc, "\n\rSomehow, your character was lost during the folding. Sorry.\n\r", nullptr);
@@ -213,7 +213,7 @@ void init_game(uint16_t cmport)
   boot_db();
 
   if (CONFIG_IMC_ENABLED) {
-    imc_startup(FALSE, -1, FALSE); // FALSE arg, so the autoconnect setting can govern it.
+    imc_startup(false, -1, false); // FALSE arg, so the autoconnect setting can govern it.
   }
 
        FILE *mapfile;
@@ -259,7 +259,7 @@ void init_game(uint16_t cmport)
   close(mother_desc);
 
   if (CONFIG_IMC_ENABLED) {
-    imc_shutdown(FALSE);
+    imc_shutdown(false);
   }
 
   if (circle_reboot != 2)
@@ -540,11 +540,11 @@ void game_loop(socklen_t cmmother_desc)
 	    char_from_room(d->character);
 	  char_to_room(d->character, GET_WAS_IN(d->character));
 	  GET_WAS_IN(d->character) = NOWHERE;
-	  act("$n has returned.", TRUE, d->character, nullptr, nullptr, TO_ROOM);
+	  act("$n has returned.", true, d->character, nullptr, nullptr, TO_ROOM);
 	}
         GET_WAIT_STATE(d->character) = 1;
       }
-      d->has_prompt = FALSE;
+      d->has_prompt = false;
 
       if (d->showstr_count) /* Reading something w/ pager */
 	show_string(d, comm);
@@ -554,7 +554,7 @@ void game_loop(socklen_t cmmother_desc)
 	nanny(d, comm);
       else {			/* else: we're playing normally. */
 	if (aliased)		/* To prevent recursive aliases. */
-	  d->has_prompt = TRUE;	/* To get newline before next cmd output. */
+	  d->has_prompt = true;	/* To get newline before next cmd output. */
 	else if (perform_alias(d, comm, sizeof(comm)))    /* Run it through aliasing system */
 	  get_from_q(&d->input, comm, &aliased);
 	command_interpreter(d->character, comm); /* Send it to interpreter */
@@ -580,7 +580,7 @@ void game_loop(socklen_t cmmother_desc)
       if (!d->has_prompt) {
         write_to_output(d, "@n");
         /*write_to_descriptor(d->descriptor, make_prompt(d), d->comp);*/
-        d->has_prompt = TRUE;
+        d->has_prompt = true;
       }
     }
 
@@ -619,13 +619,13 @@ void game_loop(socklen_t cmmother_desc)
 
     /* Check for any signals we may have received. */
     if (reread_wizlist) {
-      reread_wizlist = FALSE;
-      mudlog(CMP, ADMLVL_IMMORT, TRUE, "Signal received - rereading wizlists.");
+      reread_wizlist = false;
+      mudlog(CMP, ADMLVL_IMMORT, true, "Signal received - rereading wizlists.");
       reboot_wizlists();
     }
     if (emergency_unban) {
-      emergency_unban = FALSE;
-      mudlog(BRF, ADMLVL_IMMORT, TRUE, "Received SIGUSR2 - completely unrestricting game (emergent)");
+      emergency_unban = false;
+      mudlog(BRF, ADMLVL_IMMORT, true, "Received SIGUSR2 - completely unrestricting game (emergent)");
       ban_list = nullptr;
       circle_restrict = 0;
       num_invalid = 0;
@@ -836,7 +836,7 @@ char *make_prompt(struct descriptor_data *d)
 {
   static char prompt[MAX_PROMPT_LENGTH];
   struct obj_data *chair = nullptr;
-  int flagged = FALSE;
+  int flagged = false;
 
   /* Note, prompt is truncated at MAX_PROMPT_LENGTH chars (structs.h) */
 
@@ -895,173 +895,173 @@ char *make_prompt(struct descriptor_data *d)
       }
       if (PLR_FLAGGED(d->character, PLR_SELFD) && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RSELF-D@r: @w%s@D]@n", PLR_FLAGGED(d->character, PLR_SELFD2) ? "READY" : "PREP");
-        flagged = TRUE;
+        flagged = true;
         if (count >= 0)
           len += count;
       }
       if (IS_HALFBREED(d->character) && !PLR_FLAGGED(d->character, PLR_FURY) && PRF_FLAGGED(d->character, PRF_FURY)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mFury@W: @r%d@D]@w", GET_FURY(d->character));
-        flagged = TRUE;
+        flagged = true;
         if (count >= 0)
           len += count;
       }
       if (IS_HALFBREED(d->character) && PLR_FLAGGED(d->character, PLR_FURY) && PRF_FLAGGED(d->character, PRF_FURY)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mFury@W: @rENGAGED@D]@w");
-        flagged = TRUE;
+        flagged = true;
         if (count >= 0)
           len += count;
       }
       if (has_mail(GET_IDNUM(d->character)) && !PRF_FLAGGED(d->character, PRF_NMWARN) && (GET_ADMLEVEL(d->character) > 0) && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "CHECK MAIL - ");
-        flagged = TRUE;
+        flagged = true;
         if (count >= 0)
           len += count;
       }
       if (GET_KAIOKEN(d->character) > 0 && GET_ADMLEVEL(d->character) > 0) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "KAIOKEN X%d - ", GET_KAIOKEN(d->character));
-        flagged = TRUE;
+        flagged = true;
         if (count >= 0)
           len += count;
       }
       if (GET_SONG(d->character) > 0) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "%s - ", song_types[GET_SONG(d->character)]);
-        flagged = TRUE;
+        flagged = true;
         if (count >= 0)
           len += count;
       }
       if (GET_KAIOKEN(d->character) > 0 && GET_ADMLEVEL(d->character) <= 0) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "KAIOKEN X%d - ", GET_KAIOKEN(d->character));
-        flagged = TRUE;
+        flagged = true;
         if (count >= 0)
           len += count;
       }
       if (has_mail(GET_IDNUM(d->character)) && (GET_ADMLEVEL(d->character) <= 0) && !PRF_FLAGGED(d->character, PRF_NMWARN) && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "CHECK MAIL - ");
-        flagged = TRUE;
+        flagged = true;
         if (count >= 0)
           len += count;
       }
       if (d->snooping && d->snooping->character != nullptr && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "Snooping: (%s) - ", GET_NAME(d->snooping->character));
-        flagged = TRUE;
+        flagged = true;
         if (count >= 0)
           len += count;
       }
       if (DRAGGING(d->character) && DRAGGING(d->character) != nullptr && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "Dragging: (%s) - ", GET_NAME(DRAGGING(d->character)));
-        flagged = TRUE;
+        flagged = true;
         if (count >= 0)
           len += count;
       }
       if (PRF_FLAGGED(d->character, PRF_BUILDWALK) && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "BUILDWALKING - ");
-        flagged = TRUE;
+        flagged = true;
         if (count >= 0)
           len += count;
       }
       if (AFF_FLAGGED(d->character, AFF_FLYING) && len < sizeof(prompt) && !PRF_FLAGGED(d->character, PRF_NODEC)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "FLYING - ");
-        flagged = TRUE;
+        flagged = true;
         if (count >= 0)
           len += count;
       }
       if (AFF_FLAGGED(d->character, AFF_HIDE) && len < sizeof(prompt) && !PRF_FLAGGED(d->character, PRF_NODEC)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "HIDING - ");
-        flagged = TRUE;
+        flagged = true;
         if (count >= 0)
           len += count;
       }
       if (PLR_FLAGGED(d->character, PLR_SPAR) && len < sizeof(prompt) && !PRF_FLAGGED(d->character, PRF_NODEC)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "SPARRING - ");
-        flagged = TRUE;
+        flagged = true;
         if (count >= 0)
           len += count;
       }
       if (PLR_FLAGGED(d->character, PLR_NOSHOUT) && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "MUTED - ");
-        flagged = TRUE;
+        flagged = true;
         if (count >= 0)
           len += count;
       }
       if (COMBO(d->character) == 51 && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Bash) - ");
-        flagged = TRUE;
+        flagged = true;
         if (count >= 0)
           len += count;
       }
       if (COMBO(d->character) == 52 && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Headbutt) - ");
-        flagged = TRUE;
+        flagged = true;
         if (count >= 0)
           len += count;
       }
       if (COMBO(d->character) == 56 && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Tailwhip) - ");
-        flagged = TRUE;
+        flagged = true;
         if (count >= 0)
           len += count;
       }
       if (COMBO(d->character) == 0 && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Punch) - ");
-        flagged = TRUE;
+        flagged = true;
         if (count >= 0)
           len += count;
       }
       if (COMBO(d->character) == 1 && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Kick) - ");
-        flagged = TRUE;
+        flagged = true;
         if (count >= 0)
           len += count;
       }
       if (COMBO(d->character) == 2 && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Elbow) - ");
-        flagged = TRUE;
+        flagged = true;
         if (count >= 0)
           len += count;
       }
       if (COMBO(d->character) == 3 && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Knee) - ");
-        flagged = TRUE;
+        flagged = true;
         if (count >= 0)
           len += count;
       }
       if (COMBO(d->character) == 4 && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Roundhouse) - ");
-        flagged = TRUE;
+        flagged = true;
         if (count >= 0)
           len += count;
       }
       if (COMBO(d->character) == 5 && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Uppercut) - ");
-        flagged = TRUE;
+        flagged = true;
         if (count >= 0)
           len += count;
       }
       if (COMBO(d->character) == 6 && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Slam) - ");
-        flagged = TRUE;
+        flagged = true;
         if (count >= 0)
           len += count;
       }
       if (COMBO(d->character) == 8 && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Heeldrop) - ");
-        flagged = TRUE;
+        flagged = true;
         if (count >= 0)
           len += count;
       }
       if (PRF_FLAGGED(d->character, PRF_AFK) && len < sizeof(prompt) && !PRF_FLAGGED(d->character, PRF_NODEC)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "AFK - ");
-        flagged = TRUE;
+        flagged = true;
         if (count >= 0)
           len += count;
       }
       if (PLR_FLAGGED(d->character, PLR_FISHING) && len < sizeof(prompt) && !PRF_FLAGGED(d->character, PRF_NODEC)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "FISHING -");
-        flagged = TRUE;
+        flagged = true;
         if (count >= 0)
           len += count;
       }
-      if (flagged == TRUE && len < sizeof(prompt)) {
+      if (flagged == true && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@n\n");
         if (count >= 0)
           len += count;
@@ -1069,35 +1069,35 @@ char *make_prompt(struct descriptor_data *d)
       if ((SITS(d->character) && PLR_FLAGGED(d->character, PLR_HEALT)) && len < sizeof(prompt) && !PRF_FLAGGED(d->character, PRF_NODEC)) {
         chair = SITS(d->character);
         count = snprintf(prompt + len, sizeof(prompt) - len, "@c<@CFloating inside a healing tank@c>@n\r\n");
-        flagged = TRUE;
+        flagged = true;
         if (count >= 0)
           len += count;
       }
       if ((SITS(d->character) && GET_POS(d->character) == POS_SITTING) && len < sizeof(prompt) && !PRF_FLAGGED(d->character, PRF_NODEC)) {
         chair = SITS(d->character);
         count = snprintf(prompt + len, sizeof(prompt) - len, "Sitting on: %s\r\n", chair->short_description);
-        flagged = TRUE;
+        flagged = true;
         if (count >= 0)
           len += count;
       }
       if ((SITS(d->character) && GET_POS(d->character) == POS_RESTING) && len < sizeof(prompt) && !PRF_FLAGGED(d->character, PRF_NODEC)) {
         chair = SITS(d->character);
         count = snprintf(prompt + len, sizeof(prompt) - len, "Resting on: %s\r\n", chair->short_description);
-        flagged = TRUE;
+        flagged = true;
         if (count >= 0)
           len += count;
       }
       if ((SITS(d->character) && GET_POS(d->character) == POS_SLEEPING) && len < sizeof(prompt) && !PRF_FLAGGED(d->character, PRF_NODEC)) {
         chair = SITS(d->character);
         count = snprintf(prompt + len, sizeof(prompt) - len, "Sleeping on: %s\r\n", chair->short_description);
-        flagged = TRUE;
+        flagged = true;
         if (count >= 0)
           len += count;
       }
       if (AFF_FLAGGED(d->character, AFF_POSITION) && len < sizeof(prompt) && !PRF_FLAGGED(d->character, PRF_NODEC)) {
         chair = SITS(d->character);
         count = snprintf(prompt + len, sizeof(prompt) - len, "(Best Position)\r\n");
-        flagged = TRUE;
+        flagged = true;
         if (count >= 0)
           len += count;
       }
@@ -1843,7 +1843,7 @@ size_t vwrite_to_output(struct descriptor_data *t, const char *format, va_list a
   if (size + t->bufptr + 1 > LARGE_BUFSIZE) {
     size = LARGE_BUFSIZE - t->bufptr - 1;
     txt[size] = '\0';
-    GET_OVERFLOW(t->character) = TRUE;
+    GET_OVERFLOW(t->character) = true;
     buf_overflows++;
   }
 
@@ -2054,7 +2054,7 @@ int new_descriptor(socklen_t s)
   /* determine if the site is banned */
   if (isbanned(newd->host) == BAN_ALL) {
       close(desc);
-    mudlog(CMP, ADMLVL_GOD, TRUE, "Connection attempt denied from [%s]", newd->host);
+    mudlog(CMP, ADMLVL_GOD, true, "Connection attempt denied from [%s]", newd->host);
     free(newd);
     return (0);
   }
@@ -2113,7 +2113,7 @@ int process_output(struct descriptor_data *t)
    * CRLF, otherwise send the straight output sans CRLF.
    */
   if (t->has_prompt) {
-    t->has_prompt = FALSE;
+    t->has_prompt = false;
     result = write_to_descriptor(t->descriptor, i, t->comp);
     if (result >= 2)
       result -= 2;
@@ -2714,14 +2714,14 @@ void close_socket(struct descriptor_data *d)
       struct char_data *link_challenged = d->original ? d->original : d->character;
 
       /* We are guaranteed to have a person. */
-      act("$n has lost $s link.", TRUE, link_challenged, nullptr, nullptr, TO_ROOM);
+      act("$n has lost $s link.", true, link_challenged, nullptr, nullptr, TO_ROOM);
       save_char(link_challenged);
-      mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(link_challenged)), TRUE, "Closing link to: %s.", GET_NAME(link_challenged));
+      mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(link_challenged)), true, "Closing link to: %s.", GET_NAME(link_challenged));
     } else {
        free_char(d->character);
     }
   } else
-    mudlog(CMP, ADMLVL_IMMORT, TRUE, "Losing descriptor without char.");
+    mudlog(CMP, ADMLVL_IMMORT, true, "Losing descriptor without char.");
 
   /* JE 2/22/95 -- part of my unending quest to make switch stable */
   if (d->original && d->original->desc)
@@ -2846,13 +2846,13 @@ void nonblock(socklen_t s)
 
 void reread_wizlists(int sig)
 {
-    reread_wizlist = TRUE;
+    reread_wizlist = true;
 }
 
 
 void unrestrict_game(int sig)
 {
-    emergency_unban = TRUE;
+    emergency_unban = true;
 }
 
 /* clean up our zombie kids to avoid defunct processes */
@@ -2954,7 +2954,7 @@ int arena_watch(struct char_data *ch)
 {
 
  struct descriptor_data *d;
- int found = FALSE, room = NOWHERE;
+ int found = false, room = NOWHERE;
 
  for (d = descriptor_list; d; d = d->next) {
   if (STATE(d) != CON_PLAYING)
@@ -2962,13 +2962,13 @@ int arena_watch(struct char_data *ch)
 
   if (IN_ARENA(d->character)) {
    if (ARENA_IDNUM(ch) == GET_IDNUM(d->character)) {
-    found = TRUE;
+    found = true;
     room = GET_ROOM_VNUM(IN_ROOM(d->character));
    }
   }
  }
 
- if (found == FALSE) {
+ if (found == false) {
   REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_ARENAWATCH);
   ARENA_IDNUM(ch) = -1;
   return (NOWHERE);
@@ -3151,7 +3151,7 @@ void perform_act(const char *orig, struct char_data *ch, struct obj_data *obj, c
 {
   const char *i = nullptr;
   char lbuf[MAX_STRING_LENGTH], *buf, *j;
-  bool uppercasenext = FALSE;
+  bool uppercasenext = false;
   const struct char_data *dg_victim = nullptr;
   const struct obj_data *dg_target = nullptr;
   const char *dg_arg = nullptr;
@@ -3229,7 +3229,7 @@ void perform_act(const char *orig, struct char_data *ch, struct obj_data *obj, c
         break;
       /* uppercase next word */
       case 'U':
-        uppercasenext = TRUE;
+        uppercasenext = true;
         i = "";
         break;
       case '$':
@@ -3244,7 +3244,7 @@ void perform_act(const char *orig, struct char_data *ch, struct obj_data *obj, c
         if (uppercasenext && !isspace((int) *buf))
           {
           *buf = UPPER(*buf);
-          uppercasenext = FALSE;
+          uppercasenext = false;
           }
 	buf++;
         }
@@ -3253,7 +3253,7 @@ void perform_act(const char *orig, struct char_data *ch, struct obj_data *obj, c
       break;
     } else if (uppercasenext && !isspace((int) *(buf-1))) {
       *(buf-1) = UPPER(*(buf-1));
-      uppercasenext = FALSE;
+      uppercasenext = false;
     }
   }
 
@@ -3459,11 +3459,11 @@ int open_logfile(const char *filename, FILE *stderr_fp)
   if (logfile) {
     printf("Using log file '%s'%s.\n",
 		filename, stderr_fp ? " with redirection" : "");
-    return (TRUE);
+    return (true);
   }
 
   printf("SYSERR: Error opening file '%s': %s\n", filename, strerror(errno));
-  return (FALSE);
+  return (false);
 }
 
 /*
@@ -3546,52 +3546,52 @@ int passcomm(struct char_data *ch, char *comm)
 {
 
  if (!strcasecmp(comm, "score")) {
-  return TRUE;
+  return true;
  }
  else if (!strcasecmp(comm, "sco")) {
-  return TRUE;
+  return true;
  }
  else if (!strcasecmp(comm, "ooc")) {
-  return TRUE;
+  return true;
  }
  else if (!strcasecmp(comm, "newbie")) {
-  return TRUE;
+  return true;
  }
  else if (!strcasecmp(comm, "newb")) {
-  return TRUE;
+  return true;
  }
  else if (!strcasecmp(comm, "look")) {
-  return TRUE;
+  return true;
  }
  else if (!strcasecmp(comm, "lo")) {
-  return TRUE;
+  return true;
  }
  else if (!strcasecmp(comm, "l")) {
-  return TRUE;
+  return true;
  }
  else if (!strcasecmp(comm, "status")) {
-  return TRUE;
+  return true;
  }
  else if (!strcasecmp(comm, "stat")) {
-  return TRUE;
+  return true;
  }
  else if (!strcasecmp(comm, "sta")) {
-  return TRUE;
+  return true;
  }
  else if (!strcasecmp(comm, "tell")) {
-  return TRUE;
+  return true;
  }
  else if (!strcasecmp(comm, "reply")) {
-  return TRUE;
+  return true;
  }
  else if (!strcasecmp(comm, "say")) {
-  return TRUE;
+  return true;
  }
  else if (!strcasecmp(comm, "osay")) {
-  return TRUE;
+  return true;
  }
  else {
-  return FALSE;
+  return false;
  }
 
 }

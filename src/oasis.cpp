@@ -327,16 +327,16 @@ if(OLC_HOUSE(d))
    */
   if (d->character) {
     REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_WRITING);
-    act("$n stops using OLC.", TRUE, d->character, nullptr, nullptr, TO_ROOM);
+    act("$n stops using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
     
     if (cleanup_type == CLEANUP_CONFIG)
-      mudlog(BRF, ADMLVL_IMMORT, TRUE, "OLC: %s stops editing the game configuration", GET_NAME(d->character));
+      mudlog(BRF, ADMLVL_IMMORT, true, "OLC: %s stops editing the game configuration", GET_NAME(d->character));
     else if (STATE(d) == CON_TEDIT)
-      mudlog(BRF, ADMLVL_IMMORT, TRUE, "OLC: %s stops editing text files.", GET_NAME(d->character));
+      mudlog(BRF, ADMLVL_IMMORT, true, "OLC: %s stops editing text files.", GET_NAME(d->character));
     else if (STATE(d) == CON_HEDIT)
-      mudlog(CMP, ADMLVL_IMMORT, TRUE, "OLC: %s stops editing help files.", GET_NAME(d->character));
+      mudlog(CMP, ADMLVL_IMMORT, true, "OLC: %s stops editing help files.", GET_NAME(d->character));
     else
-      mudlog(BRF, ADMLVL_IMMORT, TRUE, "OLC: %s stops editing zone %d allowed zone %d", GET_NAME(d->character), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(d->character));
+      mudlog(BRF, ADMLVL_IMMORT, true, "OLC: %s stops editing zone %d allowed zone %d", GET_NAME(d->character), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(d->character));
 
     STATE(d) = CON_PLAYING;
   }
@@ -406,32 +406,32 @@ int can_edit_zone(struct char_data *ch, zone_rnum rnum)
 {
   /* no access if called with bad arguments */
   if (!ch->desc || IS_NPC(ch) || rnum == NOWHERE)
-    return FALSE;
+    return false;
 
   if (rnum == HEDIT_PERMISSION)
-    return TRUE;
+    return true;
 
   /* always access if ch is high enough level */
   if (GET_ADMLEVEL(ch) >= ADMLVL_GRGOD)
-    return (TRUE);
+    return (true);
   
   /* always access if a player helped build the zone in the first place */ 
   if (is_name(GET_NAME(ch), zone_table[rnum].builders))
-    return (TRUE);
+    return (true);
   
   /* no access if you haven't been assigned a zone */
   if (GET_OLC_ZONE(ch) == NOWHERE)
-    return FALSE;
+    return false;
 
   /* no access if you're not at least LVL_BUILDER */
   if (GET_ADMLEVEL(ch) < ADMLVL_BUILDER)
-    return FALSE;
+    return false;
 
   /* always access if you're assigned to this zone */
   if (real_zone(GET_OLC_ZONE(ch)) == rnum)
-    return TRUE;
+    return true;
 
-  return (FALSE);
+  return (false);
 }
 
 void send_cannot_edit(struct char_data *ch, zone_vnum zone)
@@ -440,7 +440,7 @@ void send_cannot_edit(struct char_data *ch, zone_vnum zone)
   if (GET_OLC_ZONE(ch) != NOWHERE)
     send_to_char(ch, "  Try zone %d.", GET_OLC_ZONE(ch));
   send_to_char(ch, "\r\n");
-  mudlog(BRF, ADMLVL_IMPL, TRUE, "OLC: %s tried to edit zone %d allowed zone %d",
+  mudlog(BRF, ADMLVL_IMPL, true, "OLC: %s tried to edit zone %d allowed zone %d",
     GET_NAME(ch), zone, GET_OLC_ZONE(ch));
 
 }

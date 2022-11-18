@@ -42,7 +42,7 @@ struct {
 int genolc_checkstring(struct descriptor_data *d, char *arg)
 {
   smash_tilde(arg);
-  return TRUE;
+  return true;
 }
 
 char *str_udup(const char *txt)
@@ -72,7 +72,7 @@ int save_all(void)
       save_list = save_list->next;	/* Fatal error, skip this one. */
   }
 
-  return TRUE;
+  return true;
 }
 
 /* NOTE: This changes the buffer passed in.  */
@@ -134,11 +134,11 @@ int remove_from_save_list(zone_vnum zone, int type)
 
   if (ritem == nullptr) {
     log("SYSERR: remove_from_save_list: Saved item not found. (%d/%d)", zone, type);
-    return FALSE;
+    return false;
   }
   REMOVE_FROM_LIST(ritem, save_list, next, temp);
   free(ritem);
-  return TRUE;
+  return true;
 }
 
 int add_to_save_list(zone_vnum zone, int type)
@@ -147,26 +147,26 @@ int add_to_save_list(zone_vnum zone, int type)
   zone_rnum rznum;
   
   if (type == SL_CFG)
-    return FALSE; 
+    return false;
     
   rznum = real_zone(zone);
   if (rznum == NOWHERE || rznum > top_of_zone_table) {
      if (zone != AEDIT_PERMISSION && zone != HEDIT_PERMISSION) {
       log("SYSERR: add_to_save_list: Invalid zone number passed. (%d => %d, 0-%d)", zone, rznum, top_of_zone_table);
-      return FALSE;
+      return false;
     }
   }
   
   for (nitem = save_list; nitem; nitem = nitem->next)
     if (nitem->zone == zone && nitem->type == type)
-      return FALSE;
+      return false;
   
   CREATE(nitem, struct save_list_data, 1);
   nitem->zone = zone;
   nitem->type = type;
   nitem->next = save_list;
   save_list = nitem;
-  return TRUE;
+  return true;
 }
 
 int in_save_list(zone_vnum zone, int type)
@@ -175,9 +175,9 @@ int in_save_list(zone_vnum zone, int type)
   
   for (nitem = save_list; nitem; nitem = nitem->next)
     if (nitem->zone == zone && nitem->type == type)
-      return TRUE;
+      return true;
   
-  return FALSE;
+  return false;
 }
 
 void free_save_list(void)

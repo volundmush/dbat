@@ -381,11 +381,11 @@ int add_shop(struct shop_data *nshp)
    */
   if ((rshop = real_shop(S_NUM(nshp))) != NOWHERE) {
    /* free old strings. They're not used in any other place -- Welcor */
-   copy_shop(&shop_index[rshop], nshp, TRUE);
+   copy_shop(&shop_index[rshop], nshp, true);
     if (rznum != NOWHERE)
       add_to_save_list(zone_table[rznum].number, SL_SHP);
     else
-      mudlog(BRF, ADMLVL_BUILDER, TRUE, "SYSERR: GenOLC: Cannot determine shop zone.");
+      mudlog(BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Cannot determine shop zone.");
     return rshop;
   }
 
@@ -401,7 +401,7 @@ int add_shop(struct shop_data *nshp)
       shop_index[rshop].producing = nullptr;
       shop_index[rshop].type = nullptr;
       /* don't free old strings - they're still in use -- Welcor */
-      copy_shop(&shop_index[rshop], nshp, FALSE);
+      copy_shop(&shop_index[rshop], nshp, false);
       break;
     }
     shop_index[rshop] = shop_index[rshop - 1];
@@ -413,13 +413,13 @@ int add_shop(struct shop_data *nshp)
     shop_index[rshop].producing = nullptr;
     shop_index[rshop].type = nullptr;
     /* don't free old strings - they're still in use -- Welcor */
-    copy_shop(&shop_index[0], nshp, FALSE);
+    copy_shop(&shop_index[0], nshp, false);
   }
 
   if (rznum != NOWHERE)
     add_to_save_list(zone_table[rznum].number, SL_SHP);
   else
-    mudlog(BRF, ADMLVL_BUILDER, TRUE, "SYSERR: GenOLC: Cannot determine shop zone.");
+    mudlog(BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Cannot determine shop zone.");
 
   return rshop;
 }
@@ -439,17 +439,17 @@ int save_shops(zone_rnum zone_num)
   if (zone_num < 0 || zone_num > top_of_zone_table) {
 #endif
     log("SYSERR: GenOLC: save_shops: Invalid real zone number %d. (0-%d)", zone_num, top_of_zone_table);
-    return FALSE;
+    return false;
   }
 
   snprintf(fname, sizeof(fname), "%s%d.new", SHP_PREFIX, zone_table[zone_num].number);
   if (!(shop_file = fopen(fname, "w"))) {
-    mudlog(BRF, ADMLVL_GOD, TRUE, "SYSERR: OLC: Cannot open shop file!");
-    return FALSE;
+    mudlog(BRF, ADMLVL_GOD, true, "SYSERR: OLC: Cannot open shop file!");
+    return false;
   } else if (fprintf(shop_file, "CircleMUD v3.0 Shop File~\n") < 0) {
-    mudlog(BRF, ADMLVL_GOD, TRUE, "SYSERR: OLC: Cannot write to shop file!");
+    mudlog(BRF, ADMLVL_GOD, true, "SYSERR: OLC: Cannot write to shop file!");
     fclose(shop_file);
-    return FALSE;
+    return false;
   }
   /*
    * Search database for shops in this zone.
@@ -543,5 +543,5 @@ int save_shops(zone_rnum zone_num)
     create_world_index(zone_table[zone_num].number, "shp");
     log("GenOLC: save_shops: Saving shops '%s'", oldname);
   }
-  return TRUE;
+  return true;
 }

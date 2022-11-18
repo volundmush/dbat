@@ -1519,7 +1519,7 @@ char *delete_doubledollar(char *string)
 
 int fill_word(char *argument)
 {
-  return (search_block(argument, fill, TRUE) >= 0);
+  return (search_block(argument, fill, true) >= 0);
 }
 
 void topLoad()
@@ -1539,7 +1539,7 @@ void topLoad()
   }
 
  
-  TOPLOADED = TRUE;
+  TOPLOADED = true;
 
   while (!feof(file)) {
     get_line(file, line);
@@ -1557,7 +1557,7 @@ void topWrite(struct char_data *ch)
   if (GET_ADMLEVEL(ch) > 0 || IS_NPC(ch))
    return;
 
-  if (TOPLOADED == FALSE) {
+  if (TOPLOADED == false) {
    return;
   }
 
@@ -1565,8 +1565,8 @@ void topWrite(struct char_data *ch)
   FILE *fl;
   char *positions[25];
   int64_t points[25] = {0};
-  int x = 0, writeEm = FALSE, placed = FALSE, start = 0, finish = 25, location = -1;
-  int progress = FALSE;
+  int x = 0, writeEm = false, placed = false, start = 0, finish = 25, location = -1;
+  int progress = false;
 
   if (!ch) {
    return;
@@ -1587,18 +1587,18 @@ void topWrite(struct char_data *ch)
     finish = 5;
 
    for (x = start; x < finish; x++) { /* Save the new spots */
-    if (placed == FALSE) { /* They Haven't Placed */
+    if (placed == false) { /* They Haven't Placed */
      if (strcasecmp(topname[x], GET_NAME(ch))) { /* Name doesn't match */
       if (GET_MAX_HIT(ch) > toppoint[x]) {
        free(topname[x]);
        toppoint[x] = GET_MAX_HIT(ch);
        topname[x] = strdup(GET_NAME(ch));
-       placed = TRUE;
-       writeEm = TRUE;
+       placed = true;
+       writeEm = true;
        location = x;
       }
      } else { /* This is their spot already */
-       placed = TRUE;
+       placed = true;
        location = finish;
      }
     } else { /* They have placed */
@@ -1609,7 +1609,7 @@ void topWrite(struct char_data *ch)
           topname[x] = strdup(positions[location]);
           location += 1;
          } else { /* This IS their old spot */
-           progress = TRUE;
+           progress = true;
            location += 1;
            free(topname[x]);
            toppoint[x] = points[location];
@@ -1620,33 +1620,33 @@ void topWrite(struct char_data *ch)
     }
    } /* End Save New Spots*/
 
-   if (progress == TRUE) {
+   if (progress == true) {
     send_to_all("@D[@GToplist@W: @C%s @Whas moved up in rank in the powerlevel section.@D]\r\n", GET_NAME(ch));
-   } else if (placed == TRUE && location != finish) {
+   } else if (placed == true && location != finish) {
     send_to_all("@D[@GToplist@W: @C%s @Whas placed in the powerlevel section.@D]\r\n", GET_NAME(ch));
    }
 
    location = -1;
-   placed = FALSE;
-   progress = FALSE;
+   placed = false;
+   progress = false;
   /* Ki Section         */
    /* Set the start and finish for this section */
     start = 5;
     finish = 10;
 
    for (x = start; x < finish; x++) { /* Save the new spots */
-    if (placed == FALSE) { /* They Haven't Placed */
+    if (placed == false) { /* They Haven't Placed */
      if (strcasecmp(topname[x], GET_NAME(ch))) { /* Name doesn't match */
       if (GET_MAX_MANA(ch) > toppoint[x]) {
        free(topname[x]);
        toppoint[x] = GET_MAX_MANA(ch);
        topname[x] = strdup(GET_NAME(ch));
-       placed = TRUE;
-       writeEm = TRUE;
+       placed = true;
+       writeEm = true;
        location = x;
       }
      } else { /* This is their spot already */
-       placed = TRUE;
+       placed = true;
        location = finish;
      }
     } else { /* They have placed */
@@ -1657,7 +1657,7 @@ void topWrite(struct char_data *ch)
           topname[x] = strdup(positions[location]);
           location += 1;
          } else { /* This IS their old spot */
-           progress = TRUE;
+           progress = true;
            location += 1;
            free(topname[x]);
            toppoint[x] = points[location];
@@ -1668,15 +1668,15 @@ void topWrite(struct char_data *ch)
     }
    } /* End Save New Spots*/
 
-   if (progress == TRUE) {
+   if (progress == true) {
     send_to_all("@D[@GToplist@W: @C%s @Whas moved up in rank in the ki section.@D]\r\n", GET_NAME(ch));
-   } else if (placed == TRUE && location != finish) {
+   } else if (placed == true && location != finish) {
     send_to_all("@D[@GToplist@W: @C%s @Whas placed in the ki section.@D]\r\n", GET_NAME(ch));
    }
 
    location = -1;
-   placed = FALSE;
-   progress = FALSE;
+   placed = false;
+   progress = false;
 
   /* Stamina Section    */
    /* Set the start and finish for this section */
@@ -1684,18 +1684,18 @@ void topWrite(struct char_data *ch)
     finish = 15;
 
    for (x = start; x < finish; x++) { /* Save the new spots */
-    if (placed == FALSE) { /* They Haven't Placed */
+    if (placed == false) { /* They Haven't Placed */
      if (strcasecmp(topname[x], GET_NAME(ch))) { /* Name doesn't match */
       if (GET_MAX_MOVE(ch) > toppoint[x]) {
        free(topname[x]);
        toppoint[x] = GET_MAX_MOVE(ch);
        topname[x] = strdup(GET_NAME(ch));
-       placed = TRUE;
-       writeEm = TRUE;
+       placed = true;
+       writeEm = true;
        location = x;
       }
      } else { /* This is their spot already */
-       placed = TRUE;
+       placed = true;
        location = finish;
      }
     } else { /* They have placed */
@@ -1706,7 +1706,7 @@ void topWrite(struct char_data *ch)
           topname[x] = strdup(positions[location]);
           location += 1;
          } else { /* This IS their old spot */
-           progress = TRUE;
+           progress = true;
            location += 1;
            free(topname[x]);
            toppoint[x] = points[location];
@@ -1717,15 +1717,15 @@ void topWrite(struct char_data *ch)
     }
    } /* End Save New Spots*/
 
-   if (progress == TRUE) {
+   if (progress == true) {
     send_to_all("@D[@GToplist@W: @C%s @Whas moved up in rank in the stamina section.@D]\r\n", GET_NAME(ch));
-   } else if (placed == TRUE && location != finish) {
+   } else if (placed == true && location != finish) {
     send_to_all("@D[@GToplist@W: @C%s @Whas placed in the stamina section.@D]\r\n", GET_NAME(ch));
    }
 
    location = -1;
-   placed = FALSE;
-   progress = FALSE;
+   placed = false;
+   progress = false;
 
   /* Zenni Section      */
    /* Set the start and finish for this section */
@@ -1733,18 +1733,18 @@ void topWrite(struct char_data *ch)
     finish = 20;
 
    for (x = start; x < finish; x++) { /* Save the new spots */
-    if (placed == FALSE) { /* They Haven't Placed */
+    if (placed == false) { /* They Haven't Placed */
      if (strcasecmp(topname[x], GET_NAME(ch))) { /* Name doesn't match */
       if (GET_BANK_GOLD(ch) + GET_GOLD(ch) > toppoint[x]) {
        free(topname[x]);
        toppoint[x] = GET_BANK_GOLD(ch) + GET_GOLD(ch);
        topname[x] = strdup(GET_NAME(ch));
-       placed = TRUE;
-       writeEm = TRUE;
+       placed = true;
+       writeEm = true;
        location = x;
       }
      } else { /* This is their spot already */
-       placed = TRUE;
+       placed = true;
        location = finish;
      }
     } else { /* They have placed */
@@ -1755,7 +1755,7 @@ void topWrite(struct char_data *ch)
           topname[x] = strdup(positions[location]);
           location += 1;
          } else { /* This IS their old spot */
-           progress = TRUE;
+           progress = true;
            location += 1;
            free(topname[x]);
            toppoint[x] = points[location];
@@ -1766,15 +1766,15 @@ void topWrite(struct char_data *ch)
     }
    } /* End Save New Spots*/
 
-   if (progress == TRUE) {
+   if (progress == true) {
     send_to_all("@D[@GToplist@W: @C%s @Whas moved up in rank in the zenni section.@D]\r\n", GET_NAME(ch));
-   } else if (placed == TRUE && location != finish) {
+   } else if (placed == true && location != finish) {
     send_to_all("@D[@GToplist@W: @C%s @Whas placed in the zenni section.@D]\r\n", GET_NAME(ch));
    }
 
    location = -1;
-   placed = FALSE;
-   progress = FALSE;
+   placed = false;
+   progress = false;
 
   /* RPP Section        */
    /* Set the start and finish for this section */
@@ -1782,18 +1782,18 @@ void topWrite(struct char_data *ch)
     finish = 25;
 
    for (x = start; x < finish; x++) { /* Save the new spots */
-    if (placed == FALSE) { /* They Haven't Placed */
+    if (placed == false) { /* They Haven't Placed */
      if (strcasecmp(topname[x], GET_USER(ch))) { /* Name doesn't match */
       if (GET_TRP(ch) > toppoint[x]) {
        free(topname[x]);
        toppoint[x] = GET_TRP(ch);
        topname[x] = strdup(GET_USER(ch));
-       placed = TRUE;
-       writeEm = TRUE;
+       placed = true;
+       writeEm = true;
        location = x;
       }
      } else { /* This is their spot already */
-       placed = TRUE;
+       placed = true;
        location = finish;
      }
     } else { /* They have placed */
@@ -1804,7 +1804,7 @@ void topWrite(struct char_data *ch)
           topname[x] = strdup(positions[location]);
           location += 1;
          } else { /* This IS their old spot */
-           progress = TRUE;
+           progress = true;
            location += 1;
            free(topname[x]);
            toppoint[x] = points[location];
@@ -1815,21 +1815,21 @@ void topWrite(struct char_data *ch)
     }
    } /* End Save New Spots*/
 
-   if (progress == TRUE) {
+   if (progress == true) {
     send_to_all("@D[@GToplist@W: @C%s @Whas moved up in rank in the RPP section.@D]\r\n", GET_USER(ch));
-   } else if (placed == TRUE && location != finish) {
+   } else if (placed == true && location != finish) {
     send_to_all("@D[@GToplist@W: @C%s @Whas placed in the RPP section.@D]\r\n", GET_USER(ch));
    }
 
    location = -1;
-   placed = FALSE;
-   progress = FALSE;
+   placed = false;
+   progress = false;
 
   for(x = 0; x < 25; x++) {
    free(positions[x]);
   }
 
-  if (writeEm == TRUE) {
+  if (writeEm == true) {
    if (!get_filename(fname, sizeof(fname), INTRO_FILE, "toplist"))
      return;
 
@@ -1850,7 +1850,7 @@ void topWrite(struct char_data *ch)
 
 int reserved_word(char *argument)
 {
-  return (search_block(argument, reserved, TRUE) >= 0);
+  return (search_block(argument, reserved, true) >= 0);
 }
 
 
@@ -2268,8 +2268,8 @@ int perform_dupe_check(struct descriptor_data *d)
       }
       /*~~~ End PCOUNT and HIGHPCOUNT ~~~*/
     d->character->time.logon = time(nullptr);
-    act("$n has reconnected.", TRUE, d->character, nullptr, nullptr, TO_ROOM);
-    mudlog(NRM, MAX(ADMLVL_NONE, GET_INVIS_LEV(d->character)), TRUE, "%s [%s] has reconnected.", GET_NAME(d->character), d->host);
+    act("$n has reconnected.", true, d->character, nullptr, nullptr, TO_ROOM);
+    mudlog(NRM, MAX(ADMLVL_NONE, GET_INVIS_LEV(d->character)), true, "%s [%s] has reconnected.", GET_NAME(d->character), d->host);
     d->character->rp = d->rpp;
     if (has_mail(GET_IDNUM(d->character)))
       write_to_output(d, "You have mail waiting.\r\n");
@@ -2324,9 +2324,9 @@ int perform_dupe_check(struct descriptor_data *d)
     write_to_output(d, "You take over your own body, already in use!\r\n");
     act("$n suddenly keels over in pain, surrounded by a white aura...\r\n"
         "$n's body has been taken over by a new spirit!",
-        TRUE, d->character, nullptr, nullptr, TO_ROOM);
+        true, d->character, nullptr, nullptr, TO_ROOM);
     d->character->rp = d->rpp;
-    mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(d->character)), TRUE,
+    mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(d->character)), true,
 	"%s has re-logged in ... disconnecting old socket.", GET_NAME(d->character));
           if (CONFIG_ENABLE_COMPRESSION && !PRF_FLAGGED(d->character, PRF_NOCOMPRESS)) {
               d->comp->state = 1;       /* waiting for response to offer */
@@ -2335,7 +2335,7 @@ int perform_dupe_check(struct descriptor_data *d)
     break;
   case UNSWITCH:
     write_to_output(d, "Reconnecting to unswitched char.");
-    mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(d->character)), TRUE, "%s [%s] has reconnected.", GET_NAME(d->character), d->host);
+    mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(d->character)), true, "%s [%s] has reconnected.", GET_NAME(d->character), d->host);
     break;
   }
 
@@ -2447,7 +2447,7 @@ int enter_player_game (struct descriptor_data *d)
     SITS(d->character) = nullptr;
     BLOCKED(d->character) = nullptr;
     BLOCKS(d->character) = nullptr;
-    GET_OVERFLOW(d->character) = FALSE;
+    GET_OVERFLOW(d->character) = false;
     GET_SPAM(d->character) = 0;
     GET_RMETER(d->character) = 0;
     if (!d->character->affected) {
@@ -2595,32 +2595,32 @@ int command_pass(char *cmd, struct char_data *ch)
  if (AFF_FLAGGED(ch, AFF_LIQUEFIED)) {
   if (strcasecmp(cmd, "liquefy") && strcasecmp(cmd, "ingest") && strcasecmp(cmd, "look") && strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") && strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status")) {
    send_to_char(ch, "You are not capable of performing that action while liquefied!\r\n");
-   return (FALSE);
+   return (false);
   }
  } else if (IS_AFFECTED(ch, AFF_PARALYZE)) {
   if (strcasecmp(cmd, "look") && strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") && strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status")) {
    send_to_char(ch, "You are not capable of performing that action while petrified!\r\n");
-   return (FALSE);
+   return (false);
   }
  } else if (IS_AFFECTED(ch, AFF_FROZEN)) {
   if (strcasecmp(cmd, "look") && strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") && strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status")) {
    send_to_char(ch, "You are not capable of performing that action while a frozen block of ice!\r\n");
-   return (FALSE);
+   return (false);
   }
  } else if (IS_AFFECTED(ch, AFF_PARA) && GET_INT(ch) < rand_number(1, 60)) {
   if (strcasecmp(cmd, "look") && strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") && strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status")) {
-   act("@yYou fail to overcome your paralysis!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-   act("@Y$n @ystruggles with $s paralysis!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
-   return (FALSE);
+   act("@yYou fail to overcome your paralysis!@n", true, ch, nullptr, nullptr, TO_CHAR);
+   act("@Y$n @ystruggles with $s paralysis!@n", true, ch, nullptr, nullptr, TO_ROOM);
+   return (false);
   }
  }
 
- return (TRUE);
+ return (true);
 }
 
 int lockRead(char *name) {
   char fname[40], filler[50], line[256];
-  int known = FALSE;
+  int known = false;
   FILE *fl;
 
   /* Read Introduction File */
@@ -2636,12 +2636,12 @@ int lockRead(char *name) {
     get_line(fl, line);
     sscanf(line, "%s\n", filler);
     if (!strcasecmp(CAP(name), CAP(filler))) {
-     known = TRUE;
+     known = true;
     }
   }
    fclose(fl);
 
-   if (known == TRUE)
+   if (known == true)
     return 1;
    else
     return 0;
@@ -2863,7 +2863,7 @@ void userDelete(struct descriptor_data *d) {
 char *rIntro(struct char_data *ch, char *arg) {
   char fname[40], filler[50], scrap[100], line[256];
   static char name[80];
-  int known = FALSE;
+  int known = false;
   FILE *fl;
 
   /* Read Introduction File */
@@ -2882,13 +2882,13 @@ char *rIntro(struct char_data *ch, char *arg) {
     get_line(fl, line);
     sscanf(line, "%s %s\n", filler, scrap);
     if (!strcasecmp(arg, scrap)) {
-     known = TRUE;
+     known = true;
      sprintf(name, "%s", filler);
     }
   }
    fclose(fl);
 
-   if (known == TRUE)
+   if (known == true)
     return (name);
    else
     return "NOTHING";
@@ -3518,306 +3518,306 @@ const int list_bonus_cost[] = {
 
 int opp_bonus(struct char_data *ch, int value, int type)
 {
- int give = TRUE;
+ int give = true;
 
  switch (value) {
   case 0:
    if (GET_BONUS(ch, BONUS_IMPULSE)) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[BONUS_IMPULSE], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 2:
    if (GET_BONUS(ch, 40) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[40], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 3:
    if (IS_ANDROID(ch)) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "You can not take %s as an android!@n\r\n", list_bonus[3]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 6:
    if (GET_BONUS(ch, 39) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[39], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 8:
    if (GET_BONUS(ch, 50) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[50], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 9:
    if (GET_BONUS(ch, 43) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[43], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 10:
    if (GET_BONUS(ch, 44) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[44], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 11:
    if (GET_BONUS(ch, 45) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[45], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 12:
    if (GET_BONUS(ch, 46) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[46], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 13:
    if (GET_BONUS(ch, 47) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[47], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 14:
    if (GET_BONUS(ch, 48) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[48], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 15:
    if (GET_BONUS(ch, 33) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[33], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 16:
    if (IS_ANDROID(ch)) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "You are an android and can not suppress anyway.\n\n");
-    give = FALSE;
+    give = false;
    }
    break;
   case 17:
    if (IS_DEMON(ch)) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "As a demon you are already fireproof.\r\n");
-    give = FALSE;
+    give = false;
    } else if (GET_BONUS(ch, 34) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[34], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 18:
    if (GET_BONUS(ch, 26) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[26], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 19:
    if (GET_BONUS(ch, 29) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[29], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 20:
    if (GET_BONUS(ch, 27) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[27], list_bonus[value]);
-    give = FALSE;
+    give = false;
    } else if (IS_ANDROID(ch)) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "You can not take %s as an android!@n\r\n", list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 21:
    if (GET_BONUS(ch, 30) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[30], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 22:
    if (GET_BONUS(ch, 31) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[31], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 23:
    if (GET_BONUS(ch, 32) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[32], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 24:
    if (GET_BONUS(ch, 35) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[35], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 25:
    if (GET_BONUS(ch, 51) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[51], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 26:
    if (GET_BONUS(ch, 18) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[18], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 27:
    if (GET_BONUS(ch, 20) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[27], list_bonus[value]);
-    give = FALSE;
+    give = false;
    } else if (IS_ANDROID(ch)) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "You can not take %s as an android!@n\r\n", list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 29:
    if (GET_BONUS(ch, 19) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[19], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 30:
    if (GET_BONUS(ch, 21) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[21], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 31:
    if (GET_BONUS(ch, 22) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[22], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 32:
    if (GET_BONUS(ch, 23) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[23], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 33:
    if (GET_BONUS(ch, 15) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[15], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 34:
    if (GET_BONUS(ch, 17) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[17], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 35:
    if (GET_BONUS(ch, 24) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[24], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 39:
    if (GET_BONUS(ch, 6) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[6], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 40:
    if (GET_BONUS(ch, 2) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[2], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 43:
    if (GET_BONUS(ch, 9) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[9], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 44:
    if (GET_BONUS(ch, 10) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[10], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 45:
    if (GET_BONUS(ch, 11) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[11], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 46:
    if (GET_BONUS(ch, 12) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[12], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 47:
    if (GET_BONUS(ch, 13) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[13], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 48:
    if (GET_BONUS(ch, 14) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[14], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 50:
    if (GET_BONUS(ch, 8) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[8], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
   case 51:
    if (GET_BONUS(ch, 25) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[25], list_bonus[value]);
-    give = FALSE;
+    give = false;
    }
    break;
  }
@@ -3908,7 +3908,7 @@ void exchange_ccpoints(struct char_data *ch, int value)
 void nanny(struct descriptor_data *d, char *arg)
 {
   int load_result=-1;	/* Overloaded variable */
-  int total, rr, moveon = FALSE, penalty = FALSE;
+  int total, rr, moveon = false, penalty = false;
   int player_i;
   int value, roll = rand_number(1, 6); /* For parse_bonuses */
   struct descriptor_data *k;
@@ -4042,7 +4042,7 @@ void nanny(struct descriptor_data *d, char *arg)
           if (isbanned(d->host) == BAN_SELECT &&
            !PLR_FLAGGED(d->character, PLR_SITEOK)) {
            write_to_output(d, "Sorry, this char has not been cleared for login from your site!\r\n");
-           mudlog(NRM, ADMLVL_GOD, TRUE, "Connection attempt for %s denied from %s", GET_NAME(d->character), d->host);
+           mudlog(NRM, ADMLVL_GOD, true, "Connection attempt for %s denied from %s", GET_NAME(d->character), d->host);
            STATE(d) = CON_CLOSE;
            return;
           }
@@ -4050,7 +4050,7 @@ void nanny(struct descriptor_data *d, char *arg)
            userRead(d);
            write_to_output(d, "The game is temporarily restricted to at least %d level.\r\n", circle_restrict);
            STATE(d) = CON_UMENU;
-           mudlog(NRM, ADMLVL_GOD, TRUE, "Request for character load denied for %s [%s] (wizlock)", GET_NAME(d->character), d->host);
+           mudlog(NRM, ADMLVL_GOD, true, "Request for character load denied for %s [%s] (wizlock)", GET_NAME(d->character), d->host);
            return;
           }
           /* check and make sure no other copies of this player are logged in */
@@ -4170,14 +4170,14 @@ void nanny(struct descriptor_data *d, char *arg)
   case CON_NAME_CNFRM:		/* wait for conf. of new name    */
     if (UPPER(*arg) == 'Y') {
       if (isbanned(d->host) >= BAN_NEW) {
-	mudlog(NRM, ADMLVL_GOD, TRUE, "Request for new char %s denied from [%s] (siteban)", GET_PC_NAME(d->character), d->host);
+	mudlog(NRM, ADMLVL_GOD, true, "Request for new char %s denied from [%s] (siteban)", GET_PC_NAME(d->character), d->host);
 	write_to_output(d, "Sorry, new characters are not allowed from your site!\r\n");
 	STATE(d) = CON_CLOSE;
 	return;
       }
       if (circle_restrict) {
 	write_to_output(d, "Sorry, new players can't be created at the moment.\r\n");
-	mudlog(NRM, ADMLVL_GOD, TRUE, "Request for new char %s denied from [%s] (wizlock)", GET_PC_NAME(d->character), d->host);
+	mudlog(NRM, ADMLVL_GOD, true, "Request for new char %s denied from [%s] (wizlock)", GET_PC_NAME(d->character), d->host);
 	STATE(d) = CON_CLOSE;
 	return;
       }
@@ -5952,53 +5952,53 @@ void nanny(struct descriptor_data *d, char *arg)
     switch (*arg) {
       case 'k':
       case 'K':
-        moveon = TRUE;
+        moveon = true;
         break;
       case '1':
         GET_ALIGNMENT(d->character) = 1000;
-        penalty = TRUE;
+        penalty = true;
         break;
       case '2':
         GET_ALIGNMENT(d->character) = 799;
-        penalty = TRUE;
+        penalty = true;
         break;
       case '3':
         GET_ALIGNMENT(d->character) = 599;
-        penalty = TRUE;
+        penalty = true;
         break;
       case '4':
         GET_ALIGNMENT(d->character) = 299;
-        penalty = TRUE;
+        penalty = true;
         break;
       case '5':
         GET_ALIGNMENT(d->character) = 0;
-        penalty = TRUE;
+        penalty = true;
         break;
       case '6':
         GET_ALIGNMENT(d->character) = -299;
-        penalty = TRUE;
+        penalty = true;
         break;
       case '7':
         GET_ALIGNMENT(d->character) = -599;
-        penalty = TRUE;
+        penalty = true;
         break;
       case '8':
         GET_ALIGNMENT(d->character) = -799;
-        penalty = TRUE;
+        penalty = true;
         break;
       case '9':
         GET_ALIGNMENT(d->character) = -1000;
-        penalty = TRUE;
+        penalty = true;
         break;
       default:
         write_to_output(d, "That is not an acceptable option! Choose again...\r\n");
        return;
      }
-     if (moveon == TRUE) {
+     if (moveon == true) {
        write_to_output(d, "@CWould you like to keep skills gained from your sensei/race combo (skills, not abilities)\r\nor would you prefer to keep those skill slots empty? If you choose\r\nto forget then you will receive 200 PS in exchange.@n\r\n");
        write_to_output(d, "keep or forget: \r\n");
        STATE(d) = CON_SKILLS;
-     } else if (penalty == TRUE) {
+     } else if (penalty == true) {
          d->character->loseBasePLPercent(.2);
 
         switch (roll) {
@@ -6586,7 +6586,7 @@ void nanny(struct descriptor_data *d, char *arg)
             GET_WIS(d->character) / 2 + GET_INT(d->character) / 2 + 
             GET_DEX(d->character) / 2 + GET_CHA(d->character) / 2;
     total -= 30;
-    mudlog(CMP, ADMLVL_GOD, TRUE, "New player: %s [%s %s]", 
+    mudlog(CMP, ADMLVL_GOD, true, "New player: %s [%s %s]",
            GET_NAME(d->character), TRUE_RACE(d->character),
            d->character->chclass->getName().c_str());
     break;
@@ -6612,10 +6612,10 @@ void nanny(struct descriptor_data *d, char *arg)
             GET_WIS(d->character) / 2 + GET_INT(d->character) / 2 + 
             GET_DEX(d->character) / 2 + GET_CHA(d->character) / 2;
     total -= 30;
-    mudlog(CMP, ADMLVL_GOD, TRUE, "New player: %s [%s %s]", 
+    mudlog(CMP, ADMLVL_GOD, true, "New player: %s [%s %s]",
            GET_NAME(d->character), TRUE_RACE(d->character),
            d->character->chclass->getName().c_str());
-    mudlog(CMP, ADMLVL_GOD, TRUE, "Str: %2d Dex: %2d Con: %2d Int: %2d "
+    mudlog(CMP, ADMLVL_GOD, true, "Str: %2d Dex: %2d Con: %2d Int: %2d "
            "Wis:  %2d Cha: %2d mod total: %2d", GET_STR(d->character), 
            GET_DEX(d->character), GET_CON(d->character), GET_INT(d->character),
            GET_WIS(d->character), GET_CHA(d->character), total);
@@ -6646,7 +6646,7 @@ void nanny(struct descriptor_data *d, char *arg)
      } else {
       load_result = enter_player_game(d);
       send_to_char(d->character, "%s", CONFIG_WELC_MESSG);
-      act("$n has entered the game.", TRUE, d->character, nullptr, nullptr, TO_ROOM);
+      act("$n has entered the game.", true, d->character, nullptr, nullptr, TO_ROOM);
       if (!strcasecmp(GET_NAME(d->character), "Codezan") || !strcasecmp(GET_NAME(d->character), "codezan")) {
        GET_ADMLEVEL(d->character) = 6;
       }
@@ -6865,7 +6865,7 @@ void nanny(struct descriptor_data *d, char *arg)
           write_to_output(d, "@D[@g%d RPP refunded to your account for your %s character.@D]@n\r\n", refund, d->character->race->getName().c_str());
           d->rpp += refund;
       }
-      mudlog(NRM, ADMLVL_GOD, TRUE, "User %s has deleted character %s (lev %d).", d->user, GET_NAME(d->character), GET_LEVEL(d->character));
+      mudlog(NRM, ADMLVL_GOD, true, "User %s has deleted character %s (lev %d).", d->user, GET_NAME(d->character), GET_LEVEL(d->character));
       
       if (!strcasecmp(d->tmp1, GET_NAME(d->character))) {
             if (d->tmp1) {
@@ -6989,7 +6989,7 @@ ACMD(do_disable)
 
     REMOVE_FROM_LIST(p, disabled_first, next, temp);
     send_to_char(ch, "Command '%s' enabled.\r\n", p->command->command);
-    mudlog(BRF, ADMLVL_IMMORT, TRUE, "(GC) %s has enabled the command '%s'.",
+    mudlog(BRF, ADMLVL_IMMORT, true, "(GC) %s has enabled the command '%s'.",
       GET_NAME(ch), p->command->command);
     free(p->disabled_by);
     free(p);
@@ -7023,7 +7023,7 @@ ACMD(do_disable)
     p->next = disabled_first;
     disabled_first = p; /* add before the current first element */
     send_to_char(ch, "Command '%s' disabled.\r\n", p->command->command);
-    mudlog(BRF, ADMLVL_IMMORT, TRUE, "(GC) %s has disabled the command '%s'.",
+    mudlog(BRF, ADMLVL_IMMORT, true, "(GC) %s has disabled the command '%s'.",
       GET_NAME(ch), p->command->command);
     save_disabled(); /* save to disk */
   }
@@ -7037,9 +7037,9 @@ int check_disabled(const struct command_info *command)
   for (p = disabled_first; p ; p = p->next)
     if (p->command->command_pointer == command->command_pointer)
       if (p->command->subcmd == command->subcmd)
-        return TRUE;
+        return true;
 
-  return FALSE;
+  return false;
 }
 
 /* Load disabled commands */

@@ -14,11 +14,11 @@ bool tech_handle_zanzoken(char_data *ch, char_data *vict, const std::string& nam
             (vict->getCurST()) >= 1 && GET_POS(vict) != POS_SLEEPING) {
         if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
             auto msg = fmt::format("@C$N@c disappears, avoiding your {} before reappearing!@n", name);
-            act(msg.c_str(), TRUE, ch, nullptr, vict, TO_CHAR);
+            act(msg.c_str(), true, ch, nullptr, vict, TO_CHAR);
             msg = fmt::format("@cYou disappear, avoiding @C$n's@c {} before reappearing!@n", name);
-            act(msg.c_str(), TRUE, ch, nullptr, vict, TO_VICT);
+            act(msg.c_str(), true, ch, nullptr, vict, TO_VICT);
             msg = fmt::format("@C$N@c disappears, avoiding @C$n's@c {} before reappearing!@n", name);
-            act(msg.c_str(), TRUE, ch, nullptr, vict, TO_NOTVICT);
+            act(msg.c_str(), true, ch, nullptr, vict, TO_NOTVICT);
             if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
                 REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
             }
@@ -26,9 +26,9 @@ bool tech_handle_zanzoken(char_data *ch, char_data *vict, const std::string& nam
             return false;
         }
         else {
-            act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, nullptr, vict, TO_CHAR);
-            act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, nullptr, vict, TO_VICT);
-            act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, nullptr, vict, TO_NOTVICT);
+            act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", false, ch, nullptr, vict, TO_CHAR);
+            act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", false, ch, nullptr, vict, TO_VICT);
+            act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", false, ch, nullptr, vict, TO_NOTVICT);
             REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
             REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
         }
@@ -90,11 +90,11 @@ bool tech_handle_targeting(char_data *ch, char *arg, char_data **vict, obj_data 
 void tech_handle_fireshield(char_data *ch, char_data *vict, const std::string& part) {
     if (GET_HIT(vict) > 0 && !AFF_FLAGGED(vict, AFF_SPIRIT) && AFF_FLAGGED(vict, AFF_FIRESHIELD) && !GET_BONUS(ch, BONUS_FIREPROOF) && !IS_DEMON(ch)) {
         auto msg = fmt::format("@c$N's@W fireshield burns your {}!@n", part);
-        act(msg.c_str(), TRUE, ch, nullptr, vict, TO_CHAR);
+        act(msg.c_str(), true, ch, nullptr, vict, TO_CHAR);
         msg = fmt::format("@C$n's@W {} is burned by your fireshield!@n", part);
-        act(msg.c_str(), TRUE, ch, nullptr, vict, TO_VICT);
+        act(msg.c_str(), true, ch, nullptr, vict, TO_VICT);
         msg = fmt::format("@c$n's@W {} is burned by @C$N's@W fireshield!@n", part);
-        act(msg.c_str(), TRUE, ch, nullptr, vict, TO_NOTVICT);
+        act(msg.c_str(), true, ch, nullptr, vict, TO_NOTVICT);
         int64_t dmg = GET_MAX_MANA(vict) * 0.02;
         LASTATK(vict) += 1000;
         hurt(0, 0, vict, ch, nullptr, dmg, 0);
@@ -114,9 +114,9 @@ void tech_handle_fireshield(char_data *ch, char_data *vict, const std::string& p
 
 bool tech_handle_android_absorb(char_data *ch, char_data *vict) {
     if (IS_ANDROID(vict) && HAS_ARMS(vict) && GET_SKILL(vict, SKILL_ABSORB) > rand_number(1, 140)) {
-        act("@C$N@W absorbs your ki attack and all your charged ki with $S hand!@n", TRUE, ch, nullptr, vict, TO_CHAR);
-        act("@WYou absorb @C$n's@W ki attack and all $s charged ki with your hand!@n", TRUE, ch, nullptr, vict, TO_VICT);
-        act("@C$N@W absorbs @c$n's@W ki attack and all $s charged ki with $S hand!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
+        act("@C$N@W absorbs your ki attack and all your charged ki with $S hand!@n", true, ch, nullptr, vict, TO_CHAR);
+        act("@WYou absorb @C$n's@W ki attack and all $s charged ki with your hand!@n", true, ch, nullptr, vict, TO_VICT);
+        act("@C$N@W absorbs @c$n's@W ki attack and all $s charged ki with $S hand!@n", true, ch, nullptr, vict, TO_NOTVICT);
         int amot = GET_CHARGE(ch);
         if (IS_NPC(ch)) {
             amot = GET_MAX_MANA(ch) / 20;
@@ -135,9 +135,9 @@ bool tech_handle_android_absorb(char_data *ch, char_data *vict) {
 
 bool tech_handle_crashdown(char_data *ch, char_data *vict) {
     if (AFF_FLAGGED(vict, AFF_FLYING)) {
-        act("@w$N@w is knocked out of the air!@n", TRUE, ch, nullptr, vict, TO_CHAR);
-        act("@wYou are knocked out of the air!@n", TRUE, ch, nullptr, vict, TO_VICT);
-        act("@w$N@w is knocked out of the air!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
+        act("@w$N@w is knocked out of the air!@n", true, ch, nullptr, vict, TO_CHAR);
+        act("@wYou are knocked out of the air!@n", true, ch, nullptr, vict, TO_VICT);
+        act("@w$N@w is knocked out of the air!@n", true, ch, nullptr, vict, TO_NOTVICT);
         REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_FLYING);
         GET_ALT(vict) = 0;
         GET_POS(vict) = POS_SITTING;

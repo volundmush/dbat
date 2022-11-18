@@ -381,7 +381,7 @@ ACMD(do_skillset)
     }
     if (i >= sizeof(help))
       strcpy(help + sizeof(help) - strlen("** OVERFLOW **") - 1, "** OVERFLOW **"); /* strcpy: OK */
-    page_string(ch->desc, help, TRUE);
+    page_string(ch->desc, help, true);
     return;
   }
 
@@ -422,7 +422,7 @@ ACMD(do_skillset)
    * checked for the -1 above so we are safe here.
    */
   SET_SKILL(vict, skill, value);
-  mudlog(BRF, ADMLVL_IMMORT, TRUE, "skillset: %s changed %s's '%s' to %d.", GET_NAME(ch), GET_NAME(vict), spell_info[skill].name, value);
+  mudlog(BRF, ADMLVL_IMMORT, true, "skillset: %s changed %s's '%s' to %d.", GET_NAME(ch), GET_NAME(vict), spell_info[skill].name, value);
   send_to_char(ch, "You change %s's %s to %d.\r\n", GET_NAME(vict), spell_info[skill].name, value);
 }
 

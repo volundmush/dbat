@@ -87,7 +87,7 @@ ACMD(do_oasis_list)
     case SCMD_OASIS_GLIST: list_guilds(ch, rzone, vmin, vmax); break;
     default: 
       send_to_char(ch, "You can't list that!\r\n");
-      mudlog(BRF, ADMLVL_IMMORT, TRUE, 
+      mudlog(BRF, ADMLVL_IMMORT, true,
         "SYSERR: do_oasis_list: Unknown list option: %d", subcmd);
   }
 }

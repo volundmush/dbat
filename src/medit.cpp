@@ -57,7 +57,7 @@ ACMD(do_oasis_medit)
       return;
     }
     
-    save = TRUE;
+    save = true;
     
     if (is_number(buf2))
       number = atoi(buf2);
@@ -101,7 +101,7 @@ ACMD(do_oasis_medit)
   /** Give descriptor an OLC structure.                                      **/
   /****************************************************************************/
   if (d->olc) {
-    mudlog(BRF, ADMLVL_IMMORT, TRUE,
+    mudlog(BRF, ADMLVL_IMMORT, true,
       "SYSERR: do_oasis_medit: Player already had olc structure.");
     free(d->olc);
   }
@@ -135,7 +135,7 @@ ACMD(do_oasis_medit)
   if (save) {
     send_to_char(ch, "Saving all mobiles in zone %d.\r\n",
       zone_table[OLC_ZNUM(d)].number);
-    mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), TRUE,
+    mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true,
       "OLC: %s saves mobile info for zone %d.",
       GET_NAME(ch), zone_table[OLC_ZNUM(d)].number);
     
@@ -170,10 +170,10 @@ ACMD(do_oasis_medit)
   /** Display the OLC messages to the players in the same room as the        **/
   /** builder and also log it.                                               **/
   /****************************************************************************/
-  act("$n starts using OLC.", TRUE, d->character, nullptr, nullptr, TO_ROOM);
+  act("$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
   SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
   
-  mudlog(BRF, ADMLVL_IMMORT, TRUE,"OLC: %s starts editing zone %d allowed zone %d",
+  mudlog(BRF, ADMLVL_IMMORT, true,"OLC: %s starts editing zone %d allowed zone %d",
     GET_NAME(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
 }
 
@@ -207,7 +207,7 @@ void medit_setup_new(struct descriptor_data *d)
 
   OLC_MOB(d) = mob;
   /* Has changed flag. (It hasn't so far, we just made it.) */
-  OLC_VAL(d) = FALSE;
+  OLC_VAL(d) = false;
   OLC_ITEM_TYPE(d) = MOB_TRIGGER;
 }
 
@@ -566,7 +566,7 @@ void medit_parse(struct descriptor_data *d, char *arg)
        * Save the mob in memory and to disk.
        */
       medit_save_internally(d);
-      mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), TRUE,
+      mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), true,
 	"OLC: %s edits mob %d", GET_NAME(d->character), OLC_NUM(d));
       if (CONFIG_OLC_SAVE) {
 	medit_save_to_disk(zone_table[real_zone_by_thing(OLC_NUM(d))].number);
@@ -795,7 +795,7 @@ void medit_parse(struct descriptor_data *d, char *arg)
      * We should never get here.
      */
     cleanup_olc(d, CLEANUP_ALL);
-    mudlog(BRF, ADMLVL_BUILDER, TRUE, "SYSERR: OLC: medit_parse(): Reached D_DESC case!");
+    mudlog(BRF, ADMLVL_BUILDER, true, "SYSERR: OLC: medit_parse(): Reached D_DESC case!");
     write_to_output(d, "Oops...\r\n");
     break;
 /*-------------------------------------------------------------------*/
@@ -976,7 +976,7 @@ void medit_parse(struct descriptor_data *d, char *arg)
      * We should never get here.
      */
     cleanup_olc(d, CLEANUP_ALL);
-    mudlog(BRF, ADMLVL_BUILDER, TRUE, "SYSERR: OLC: medit_parse(): Reached default case!");
+    mudlog(BRF, ADMLVL_BUILDER, true, "SYSERR: OLC: medit_parse(): Reached default case!");
     write_to_output(d, "Oops...\r\n");
     break;
   }
@@ -988,7 +988,7 @@ void medit_parse(struct descriptor_data *d, char *arg)
  * return to main menu.  Use OLC_VAL as a 'has changed' flag  
  */
 
-  OLC_VAL(d) = TRUE;
+  OLC_VAL(d) = true;
   medit_disp_menu(d);
 }
 

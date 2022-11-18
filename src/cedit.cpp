@@ -23,11 +23,9 @@ void free_config(struct config_data *data);
 /******************************************************************************/
 /** Internal Macros                                                          **/
 /******************************************************************************/
-#define NO 0
-#define YES 1
 
-#define CHECK_VAR(var)  ((var == YES) ? "Yes" : "No")
-#define TOGGLE_VAR(var)	if (var == YES) { var = NO; } else { var = YES; }
+#define CHECK_VAR(var)  ((var) ? "Yes" : "No")
+#define TOGGLE_VAR(var)	if (var == true) { var = false; } else { var = true; }
 
 
 /******************************************************************************/
@@ -64,10 +62,10 @@ ACMD(do_oasis_cedit)
     OLC_ZONE(d) = nullptr;
     cedit_setup(d);
     STATE(d) = CON_CEDIT;
-    act("$n starts using OLC.", TRUE, d->character, nullptr, nullptr, TO_ROOM);
+    act("$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
     SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
     
-    mudlog(BRF, ADMLVL_IMMORT, TRUE, 
+    mudlog(BRF, ADMLVL_IMMORT, true,
       "OLC: %s starts editing the game configuration.", GET_NAME(ch));
     return;
   } else if (strcasecmp("save", buf1) != 0) {
@@ -76,7 +74,7 @@ ACMD(do_oasis_cedit)
   }
   
   send_to_char(ch, "Saving the game configuration.\r\n");
-  mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), TRUE, 
+  mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true,
     "OLC: %s saves the game configuration.", GET_NAME(ch));
   
   cedit_save_to_disk();
@@ -233,7 +231,7 @@ void cedit_setup(struct descriptor_data *d)
 
 void cedit_save_internally(struct descriptor_data *d)
 {
- bool copyover_needed = FALSE;
+ bool copyover_needed = false;
   /* see if we need to reassign spec procs on rooms */
   int reassign = (CONFIG_DTS_ARE_DUMPS != OLC_CONFIG(d)->play.dts_are_dumps);
   /****************************************************************************/
@@ -304,11 +302,11 @@ void cedit_save_internally(struct descriptor_data *d)
   /****************************************************************************/
   /* IMC - if turning on or off, deal with IMC, and recommend a copyover */
   if (CONFIG_IMC_ENABLED != OLC_CONFIG(d)->operation.imc_enabled) {
-    copyover_needed = TRUE;
+    copyover_needed = true;
     if (OLC_CONFIG(d)->operation.imc_enabled)  /* If turning on  */
-      imc_startup(FALSE, -1, FALSE);           /* FALSE arg, so the autoconnect setting can govern it. */
+      imc_startup(false, -1, false);           /* FALSE arg, so the autoconnect setting can govern it. */
     else                                       /* If turning off */
-      imc_shutdown(FALSE);
+      imc_shutdown(false);
   }
   CONFIG_IMC_ENABLED        = OLC_CONFIG(d)->operation.imc_enabled;
   CONFIG_USE_AUTOWIZ          = OLC_CONFIG(d)->autowiz.use_autowiz;
@@ -426,7 +424,7 @@ int save_config( IDXTYPE nowhere )
 
   if (!(fl = fopen(CONFIG_CONFFILE, "w"))) {
     perror("SYSERR: save_config");
-    return (FALSE);
+    return (false);
   }
   
   fprintf(fl, 
@@ -726,7 +724,7 @@ int save_config( IDXTYPE nowhere )
   if (in_save_list(NOWHERE, SL_CFG))
     remove_from_save_list(NOWHERE, SL_CFG);
   
-  return (TRUE);
+  return (true);
 }
 
 /**************************************************************************
@@ -1056,7 +1054,7 @@ void cedit_parse(struct descriptor_data *d, char *arg)
         case 'y':
         case 'Y':
           cedit_save_internally(d);
-          mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), TRUE, "OLC: %s modifies the game configuration.", GET_NAME(d->character));
+          mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), true, "OLC: %s modifies the game configuration.", GET_NAME(d->character));
           cleanup_olc(d, CLEANUP_CONFIG);
 	  if (CONFIG_AUTO_SAVE) {
 	    cedit_save_to_disk();
@@ -2247,7 +2245,7 @@ void cedit_parse(struct descriptor_data *d, char *arg)
        * We should never get here, but just in case...
        */
       cleanup_olc(d, CLEANUP_CONFIG);
-      mudlog(BRF, ADMLVL_BUILDER, TRUE, "SYSERR: OLC: cedit_parse(): Reached default case!");
+      mudlog(BRF, ADMLVL_BUILDER, true, "SYSERR: OLC: cedit_parse(): Reached default case!");
       write_to_output(d, "Oops...\r\n");
       break;
   }

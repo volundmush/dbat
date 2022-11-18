@@ -52,7 +52,7 @@ ACMD(do_oasis_aedit)
   d = ch->desc;
 
   if (!strcasecmp("save", arg)) {
-    mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), TRUE, "OLC: %s saves socials.", GET_NAME(ch));
+    mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true, "OLC: %s saves socials.", GET_NAME(ch));
     send_to_char(ch, "Writing social file..\r\n");
     aedit_save_to_disk(d);
     send_to_char(ch, "Done.\r\n");
@@ -63,7 +63,7 @@ ACMD(do_oasis_aedit)
    * Give descriptor an OLC structure.
    */
   if (d->olc) {
-    mudlog(BRF, ADMLVL_IMMORT, TRUE, "SYSERR: do_oasis: Player already had olc structure.");
+    mudlog(BRF, ADMLVL_IMMORT, true, "SYSERR: do_oasis: Player already had olc structure.");
     free(d->olc);
   }
   CREATE(d->olc, struct oasis_olc_data, 1);
@@ -88,9 +88,9 @@ ACMD(do_oasis_aedit)
     OLC_MODE(d) = AEDIT_CONFIRM_EDIT;
   }
   STATE(d) = CON_AEDIT;
-  act("$n starts using OLC.", TRUE, d->character, nullptr, nullptr, TO_ROOM);
+  act("$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
   SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
-  mudlog(CMP, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing actions.", GET_NAME(ch));
+  mudlog(CMP, ADMLVL_IMMORT, true, "OLC: %s starts editing actions.", GET_NAME(ch));
 }
 
 
@@ -299,7 +299,7 @@ void aedit_parse(struct descriptor_data * d, char *arg) {
       switch (*arg) {
        case 'y': case 'Y':
          aedit_save_internally(d);
-         mudlog (CMP, ADMLVL_IMPL, TRUE, "OLC: %s edits action %s", 
+         mudlog (CMP, ADMLVL_IMPL, true, "OLC: %s edits action %s",
                  GET_NAME(d->character), OLC_ACTION(d)->command);
 
          /* do not free the strings.. just the structure */
@@ -715,7 +715,7 @@ void aedit_parse(struct descriptor_data * d, char *arg) {
 
 ACMD(do_astat)
 {
-  int i, real = FALSE;
+  int i, real = false;
   char arg[MAX_INPUT_LENGTH];
 
   if (IS_NPC(ch))
@@ -730,7 +730,7 @@ ACMD(do_astat)
 
   for (i = 0; i <= top_of_socialt; i++) {
     if (is_abbrev(arg, soc_mess_list[i].command)) {
-      real = TRUE;
+      real = true;
       break;
     }
   }

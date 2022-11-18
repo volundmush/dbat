@@ -82,7 +82,7 @@ ACMD(do_action)
   } 
   
     if (GET_POS(vict) < action->min_victim_position)
-      act("$N is not in a proper position for that.", FALSE, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
+      act("$N is not in a proper position for that.", false, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
     else {
     if (*part) {
       act(action->char_body_found, 0, ch, (struct obj_data *)part, vict, TO_CHAR | TO_SLEEP);
@@ -114,27 +114,27 @@ ACMD(do_insult)
 	case 0:
 	  if (GET_SEX(ch) == SEX_MALE) {
 	    if (GET_SEX(victim) == SEX_MALE)
-	      act("$n accuses you of fighting like a woman!", FALSE, ch, nullptr, victim, TO_VICT);
+	      act("$n accuses you of fighting like a woman!", false, ch, nullptr, victim, TO_VICT);
 	    else
-	      act("$n says that women can't fight.", FALSE, ch, nullptr, victim, TO_VICT);
+	      act("$n says that women can't fight.", false, ch, nullptr, victim, TO_VICT);
 	  } else {		/* Ch == Woman */
 	    if (GET_SEX(victim) == SEX_MALE)
 	      act("$n accuses you of having the smallest... (brain?)",
-		  FALSE, ch, nullptr, victim, TO_VICT);
+              false, ch, nullptr, victim, TO_VICT);
 	    else
 	      act("$n tells you that you'd lose a beauty contest against a troll.",
-		  FALSE, ch, nullptr, victim, TO_VICT);
+              false, ch, nullptr, victim, TO_VICT);
 	  }
 	  break;
 	case 1:
-	  act("$n calls your mother a bitch!", FALSE, ch, nullptr, victim, TO_VICT);
+	  act("$n calls your mother a bitch!", false, ch, nullptr, victim, TO_VICT);
 	  break;
 	default:
-	  act("$n tells you to get lost!", FALSE, ch, nullptr, victim, TO_VICT);
+	  act("$n tells you to get lost!", false, ch, nullptr, victim, TO_VICT);
 	  break;
 	}			/* end switch */
 
-	act("$n insults $N.", TRUE, ch, nullptr, victim, TO_NOTVICT);
+	act("$n insults $N.", true, ch, nullptr, victim, TO_NOTVICT);
       } else {			/* ch == victim */
 	send_to_char(ch, "You feel insulted.\r\n");
       }
@@ -149,7 +149,7 @@ void boot_social_messages(void)
   int nr = 0, hide, min_char_pos, min_pos, min_lvl, curr_soc = -1;
   char next_soc[MAX_STRING_LENGTH], sorted[MAX_INPUT_LENGTH];
 
-  if (CONFIG_NEW_SOCIALS == TRUE) {
+  if (CONFIG_NEW_SOCIALS == true) {
     /* open social file */
     if (!(fl = fopen(SOCMESS_FILE_NEW, "r"))) {
       log("SYSERR: can't open socials file '%s': %s", SOCMESS_FILE_NEW, strerror(errno));
@@ -190,7 +190,7 @@ void boot_social_messages(void)
     fscanf(fl, " %s ", next_soc);
     if (*next_soc == '$') break;
 
-    if (CONFIG_NEW_SOCIALS == TRUE) {
+    if (CONFIG_NEW_SOCIALS == true) {
       if (fscanf(fl, " %s %d %d %d %d \n",
   		sorted, &hide, &min_char_pos, &min_pos, &min_lvl) != 5) {
       log("SYSERR: format error in social file near social '%s'", next_soc);
@@ -242,7 +242,7 @@ void boot_social_messages(void)
     soc_mess_list[curr_soc].char_found = fread_action(fl, nr);
 
     /* if no char_found, the rest is to be ignored */
-    if (CONFIG_NEW_SOCIALS == FALSE && !soc_mess_list[curr_soc].char_found)
+    if (CONFIG_NEW_SOCIALS == false && !soc_mess_list[curr_soc].char_found)
       continue;
 
     soc_mess_list[curr_soc].others_found = fread_action(fl, nr);
@@ -251,7 +251,7 @@ void boot_social_messages(void)
     soc_mess_list[curr_soc].char_auto = fread_action(fl, nr);
     soc_mess_list[curr_soc].others_auto = fread_action(fl, nr);
 
-    if (CONFIG_NEW_SOCIALS == FALSE) 
+    if (CONFIG_NEW_SOCIALS == false)
       continue;
 
     soc_mess_list[curr_soc].char_body_found = fread_action(fl, nr);
@@ -439,7 +439,7 @@ ACMD(do_gmote)
 
   if ((act_nr = find_action(cmd)) < 0) { 
     snprintf(buf, sizeof(buf), "@D[@BOOC@D: @g%s %s@n@D]", GET_ADMLEVEL(ch) < 1 ? ch->desc->user : GET_NAME(ch), argument);
-    act(buf, FALSE, ch, nullptr, vict, TO_GMOTE);
+    act(buf, false, ch, nullptr, vict, TO_GMOTE);
     return;
   }
 
@@ -471,10 +471,10 @@ action = &soc_mess_list[act_nr];
   } else {
     if (GET_POS(vict) < action->min_victim_position) {
       act("$N is not in a proper position for that.",
-           FALSE, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
+          false, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
       return;
     }
     snprintf(buf, sizeof(buf), "@D[@BOOC@D: @g%s@D]@n", action->others_found);
   }
-  act(buf, FALSE, ch, nullptr, vict, TO_GMOTE);
+  act(buf, false, ch, nullptr, vict, TO_GMOTE);
 }

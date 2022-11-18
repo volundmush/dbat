@@ -243,7 +243,7 @@ static void search_room(struct char_data *ch)
  }
 
  reveal_hiding(ch, 0);
- act("@y$n@Y begins searching the room carefully.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+ act("@y$n@Y begins searching the room carefully.@n", true, ch, nullptr, nullptr, TO_ROOM);
  WAIT_STATE(ch, PULSE_1SEC);
 
  for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
@@ -265,9 +265,9 @@ static void search_room(struct char_data *ch)
    }
    terrain += terrain_bonus(vict);
    if (perc * bonus >= prob * terrain) { /* Found them. */
-    act("@YYou find @y$N@Y hiding nearby!@n", TRUE, ch, nullptr, vict, TO_CHAR);
-    act("@y$n@Y has found your hiding spot!@n", TRUE, ch, nullptr, vict, TO_VICT);
-    act("@y$n@Y has found @y$N's@Y hiding spot!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
+    act("@YYou find @y$N@Y hiding nearby!@n", true, ch, nullptr, vict, TO_CHAR);
+    act("@y$n@Y has found your hiding spot!@n", true, ch, nullptr, vict, TO_VICT);
+    act("@y$n@Y has found @y$N's@Y hiding spot!@n", true, ch, nullptr, vict, TO_NOTVICT);
     reveal_hiding(vict, 4);
     found++;
    }
@@ -278,8 +278,8 @@ static void search_room(struct char_data *ch)
 
  for (obj = world[IN_ROOM(ch)].contents; obj;obj=obj->next_content) {
   if (OBJ_FLAGGED(obj, ITEM_BURIED) && perc * bonus > rand_number(50, 200)) {
-   act("@YYou uncover @y$p@Y, which had been burried here.@n", TRUE, ch, obj, nullptr, TO_CHAR);
-   act("@y$n@Y uncovers @y$p@Y, which had burried here.@n", TRUE, ch, obj, nullptr, TO_ROOM);
+   act("@YYou uncover @y$p@Y, which had been burried here.@n", true, ch, obj, nullptr, TO_CHAR);
+   act("@y$n@Y uncovers @y$p@Y, which had burried here.@n", true, ch, obj, nullptr, TO_ROOM);
    REMOVE_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_BURIED);
    found++;
   }
@@ -352,8 +352,8 @@ ACMD(do_mimic)
           send_to_char(ch, "You are not imitating another race.\r\n");
           return;
       }
-      act("@mYou concentrate for a moment and release the illusion that was mimicing another race.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-      act("@M$n@m concentrates for a moment and SUDDENLY $s appearance changes some what!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+      act("@mYou concentrate for a moment and release the illusion that was mimicing another race.@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act("@M$n@m concentrates for a moment and SUDDENLY $s appearance changes some what!@n", true, ch, nullptr, nullptr, TO_ROOM);
       ch->mimic = nullptr;
   }
 
@@ -375,8 +375,10 @@ ACMD(do_mimic)
    return;
  } else if (race && prob < perc) {
      ch->decCurKI(cost);
-   act("@mYou concentrate and attempt to create an illusion to obscure your racial features. However you frown as you realize you have failed.@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-   act("@M$n@m concentrates and the light around them seems to shift and blur. It stops a moment later and $e frowns.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+   act("@mYou concentrate and attempt to create an illusion to obscure your racial features. However you frown as you realize you have failed.@n",
+       true, ch, nullptr, nullptr, TO_CHAR);
+   act("@M$n@m concentrates and the light around them seems to shift and blur. It stops a moment later and $e frowns.@n",
+       true, ch, nullptr, nullptr, TO_ROOM);
    return;
  } else {
 	char buf[MAX_STRING_LENGTH];
@@ -384,7 +386,7 @@ ACMD(do_mimic)
      ch->decCurKI(cost);
 	sprintf(buf, "@M$n@m concentrates for a moment and $s features start to blur as light bends around $m. Now $e appears to be %s @M%s!@n", AN(RACE(ch)), LRACE(ch));
 	send_to_char(ch, "@mYou concentrate for a moment and your features start to blur as you use your ki to bend the light around your body. You now appear to be %s %s.@n\r\n", AN(RACE(ch)), LRACE(ch));
-	act(buf, TRUE, ch, nullptr, nullptr, TO_ROOM);
+	act(buf, true, ch, nullptr, nullptr, TO_ROOM);
 	return;
  }
 }
@@ -407,8 +409,8 @@ ACMD(do_kyodaika)
  }
 
  if (GET_GENOME(ch, 0) == 0) {
-  act("@GYou growl as your body grows to ten times its normal size!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-  act("@g$n@G growls as $s body grows to ten times its normal size!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+  act("@GYou growl as your body grows to ten times its normal size!@n", true, ch, nullptr, nullptr, TO_CHAR);
+  act("@g$n@G growls as $s body grows to ten times its normal size!@n", true, ch, nullptr, nullptr, TO_ROOM);
   send_to_char(ch, "@cStrength@D: @C+5\r\n@cSpeed@D: @c-2@n\r\n");
   ch->real_abils.str += 5;
   ch->real_abils.cha -= 2;
@@ -416,8 +418,8 @@ ACMD(do_kyodaika)
   save_char(ch);
   return;
  } else {
-  act("@GYou growl as your body shrinks to its normal size!@n", TRUE, ch, nullptr, nullptr, TO_CHAR);
-  act("@g$n@G growls as $s body shrinks to its normal size!@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+  act("@GYou growl as your body shrinks to its normal size!@n", true, ch, nullptr, nullptr, TO_CHAR);
+  act("@g$n@G growls as $s body shrinks to its normal size!@n", true, ch, nullptr, nullptr, TO_ROOM);
   send_to_char(ch, "@cStrength@D: @C-5\r\n@cSpeed@D: @c+2@n\r\n");
   ch->real_abils.str -= 5;
   ch->real_abils.cha += 2;
@@ -452,7 +454,7 @@ ACMD(do_table)
 
  char buf[200];
  sprintf(buf, "$n looks at %s on %s.\r\n", obj2->short_description, obj->short_description);
- act(buf, TRUE, ch, nullptr, nullptr, TO_ROOM);
+ act(buf, true, ch, nullptr, nullptr, TO_ROOM);
  send_to_char(ch, "%s", obj2->action_description);
 }
 
@@ -469,7 +471,7 @@ ACMD(do_draw)
  }
 
  struct obj_data *obj = nullptr, *obj2 = nullptr, *obj3 = nullptr, *next_obj = nullptr;
- int drawn = FALSE;
+ int drawn = false;
 
  if (!(obj = get_obj_in_list_vis(ch, "case", nullptr, ch->carrying))) {
   send_to_char(ch, "You don't have a case.\r\n");
@@ -477,19 +479,19 @@ ACMD(do_draw)
  }
  for (obj2 = obj->contains; obj2; obj2 = next_obj) {
   next_obj = obj2->next_content;
-  if (drawn == FALSE) {
+  if (drawn == false) {
    obj_from_obj(obj2);
    obj_to_char(obj2, ch);
    obj3 = obj2;
-   drawn = TRUE;
+   drawn = true;
   }
  }
- if (drawn == FALSE) {
+ if (drawn == false) {
   send_to_char(ch, "You don't have any cards in the case!\r\n");
   return;
  }
  else {
-  act("$n draws a card from $s $p.\r\n", TRUE, ch, obj, nullptr, TO_ROOM);
+  act("$n draws a card from $s $p.\r\n", true, ch, obj, nullptr, TO_ROOM);
   send_to_char(ch, "You draw a card.\r\n%s\r\n", obj3->action_description);
   return;
  }
@@ -552,7 +554,7 @@ ACMD(do_shuffle)
   }
  }
  send_to_char(ch, "You shuffle the cards carefully.\r\n");
- act("$n shuffles their deck.", TRUE, ch, nullptr, nullptr, TO_ROOM);
+ act("$n shuffles their deck.", true, ch, nullptr, nullptr, TO_ROOM);
  send_to_room(IN_ROOM(ch), "There were %d cards in the deck.\r\n", total);
 }
 
@@ -582,23 +584,23 @@ ACMD(do_hand)
       send_to_char(ch, "%s\r\n", obj->short_description);
      }
    }
-   act("$n looks at $s hand.", TRUE, ch, nullptr, nullptr, TO_ROOM);
+   act("$n looks at $s hand.", true, ch, nullptr, nullptr, TO_ROOM);
    if (count == 0) {
     send_to_char(ch, "No cards.");
-    act("There were no cards.", TRUE, ch, nullptr, nullptr, TO_ROOM);
+    act("There were no cards.", true, ch, nullptr, nullptr, TO_ROOM);
    }
    else if (count > 7) {
-    act("You have more than seven cards in your hand.", TRUE, ch, nullptr, nullptr, TO_CHAR);
-    act("$n has more than seven cards in $s hand.", TRUE, ch, nullptr, nullptr, TO_ROOM);
+    act("You have more than seven cards in your hand.", true, ch, nullptr, nullptr, TO_CHAR);
+    act("$n has more than seven cards in $s hand.", true, ch, nullptr, nullptr, TO_ROOM);
    } else {
     char buf[200];
     sprintf(buf, "There are %d cards in the hand.", count);
-    act(buf, TRUE, ch, nullptr, nullptr, TO_ROOM);
+    act(buf, true, ch, nullptr, nullptr, TO_ROOM);
    }
  }
  else if (!strcasecmp("show", arg)) {
    send_to_char(ch, "You show off your hand to the room.\r\n");
-   act("@C$n's hand contains:\r\n@D---------------------------@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+   act("@C$n's hand contains:\r\n@D---------------------------@n", true, ch, nullptr, nullptr, TO_ROOM);
    for (obj = ch->carrying; obj; obj = next_obj) {
        next_obj = obj->next_content;
      if (obj && !OBJ_FLAGGED(obj, ITEM_ANTI_HIEROPHANT)) {
@@ -606,15 +608,15 @@ ACMD(do_hand)
      }
      if (obj) {
       count += 1;
-      act("$p", TRUE, ch, obj, nullptr, TO_ROOM);
+      act("$p", true, ch, obj, nullptr, TO_ROOM);
      }
    }
    if (count == 0) {
-      act("No cards.", TRUE, ch, nullptr, nullptr, TO_ROOM);
+      act("No cards.", true, ch, nullptr, nullptr, TO_ROOM);
    }
    if (count > 7) {
-    act("You have more than seven cards in your hand.", TRUE, ch, nullptr, nullptr, TO_CHAR);
-    act("$n has more than seven cards in $s hand.", TRUE, ch, nullptr, nullptr, TO_ROOM);
+    act("You have more than seven cards in your hand.", true, ch, nullptr, nullptr, TO_CHAR);
+    act("$n has more than seven cards in $s hand.", true, ch, nullptr, nullptr, TO_ROOM);
    }
  }
  else {
@@ -658,8 +660,8 @@ ACMD(do_post)
    send_to_char(ch, "You are not near any general structure you can post it on.\r\n");
    return;
   }
-  act("@WYou post $p@W on a nearby structure.@n", TRUE, ch, obj, nullptr, TO_CHAR);
-  act("@C$n@W posts $p@W on a nearby structure.@n", TRUE, ch, obj, nullptr, TO_ROOM);
+  act("@WYou post $p@W on a nearby structure.@n", true, ch, obj, nullptr, TO_CHAR);
+  act("@C$n@W posts $p@W on a nearby structure.@n", true, ch, obj, nullptr, TO_ROOM);
   obj_from_char(obj);
   obj_to_room(obj, IN_ROOM(ch));
   GET_OBJ_POSTTYPE(obj) = 1;
@@ -678,7 +680,7 @@ ACMD(do_post)
     char buf[MAX_STRING_LENGTH];
     sprintf(buf, "@C$n@W posts %s@W on %s@W.@n", obj->short_description, obj2->short_description);
     send_to_char(ch, "@WYou post %s@W on %s@W.@n\r\n", obj->short_description, obj2->short_description);
-    act(buf, TRUE, ch, nullptr, nullptr, TO_ROOM);   
+    act(buf, true, ch, nullptr, nullptr, TO_ROOM);
     obj_from_char(obj);
     obj_to_room(obj, IN_ROOM(ch));
     GET_OBJ_POSTTYPE(obj) = 2;
@@ -734,8 +736,8 @@ ACMD(do_play)
   return;
  }
 
- act("You play $p on your table.", TRUE, ch, obj, nullptr, TO_CHAR);
- act("$n plays $p on $s table.", TRUE, ch, obj, nullptr, TO_ROOM);
+ act("You play $p on your table.", true, ch, obj, nullptr, TO_CHAR);
+ act("$n plays $p on $s table.", true, ch, obj, nullptr, TO_ROOM);
  obj_from_char(obj);
  obj_to_obj(obj, obj2);
 }
@@ -767,15 +769,15 @@ ACMD(do_nickname)
 
   if (!strcasecmp(arg, "ship")) {
    struct obj_data *ship = nullptr, *next_obj = nullptr, *ship2 = nullptr;
-   int found = FALSE;
+   int found = false;
    for (ship = world[IN_ROOM(ch)].contents; ship; ship = next_obj) {
     next_obj = ship->next_content;
-    if (GET_OBJ_VNUM(ship) >= 45000 && GET_OBJ_VNUM(ship) <= 45999 && found == FALSE) {
-     found = TRUE;
+    if (GET_OBJ_VNUM(ship) >= 45000 && GET_OBJ_VNUM(ship) <= 45999 && found == false) {
+     found = true;
      ship2 = ship;
     }
    }
-   if (found == TRUE) {
+   if (found == true) {
     if (strstr(arg2, "@")) {
      send_to_char(ch, "You can't nickname a ship and use color codes. Sorry.\r\n");
      return;
@@ -853,9 +855,9 @@ ACMD(do_showoff)
    send_to_char(ch, "There is no such person around.\r\n");
    return;
  } else { /* Ok show that target the object! */
-  act("@WYou hold up $p@W for @C$N@W to see:@n", TRUE, ch, obj, vict, TO_CHAR);
-  act("@C$n@W holds up $p@W for you to see:@n", TRUE, ch, obj, vict, TO_VICT);
-  act("@C$n@W holds up $p@W for @c$N@W to see.@n", TRUE, ch, obj, vict, TO_NOTVICT);
+  act("@WYou hold up $p@W for @C$N@W to see:@n", true, ch, obj, vict, TO_CHAR);
+  act("@C$n@W holds up $p@W for you to see:@n", true, ch, obj, vict, TO_VICT);
+  act("@C$n@W holds up $p@W for @c$N@W to see.@n", true, ch, obj, vict, TO_NOTVICT);
   show_obj_to_char(obj, vict, SHOW_OBJ_ACTION);
   return;
  }
@@ -883,7 +885,7 @@ void introCreate(struct char_data *ch)
 
 int readIntro(struct char_data *ch, struct char_data *vict) {  
   char fname[40], filler[50], scrap[100], line[256];
-  int known = FALSE;
+  int known = false;
   FILE *fl;
 
   /* Read Introduction File */
@@ -910,12 +912,12 @@ int readIntro(struct char_data *ch, struct char_data *vict) {
     get_line(fl, line);
     sscanf(line, "%s %s\n", filler, scrap);
     if (!strcasecmp(GET_NAME(vict), filler)) {
-     known = TRUE;
+     known = true;
     }
   }
    fclose(fl);
 
-   if (known == TRUE)
+   if (known == true)
     return 1;
    else
     return 0;
@@ -1042,9 +1044,9 @@ ACMD(do_intro)
   }
   else {
    introWrite(ch, vict, arg2);
-   act("You decide to call $M, $N.", TRUE, ch, nullptr, vict, TO_CHAR);
-   act("$n seems to decide something about you.", TRUE, ch, nullptr, vict, TO_VICT);
-   act("$n seems to decide something about $N.", TRUE, ch, nullptr, vict, TO_NOTVICT);
+   act("You decide to call $M, $N.", true, ch, nullptr, vict, TO_CHAR);
+   act("$n seems to decide something about you.", true, ch, nullptr, vict, TO_VICT);
+   act("$n seems to decide something about $N.", true, ch, nullptr, vict, TO_NOTVICT);
    return;
   }
 }
@@ -2233,10 +2235,10 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
     return;
   }
 
-  int spotted = FALSE;
+  int spotted = false;
 
   if (GET_SKILL(ch, SKILL_SPOT) > rand_number(20, 110)) {
-   spotted = TRUE;
+   spotted = true;
   }
 
   switch (mode) {
@@ -2275,10 +2277,10 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
      } else {
       sprintf(bury, "recent grave covered by");
      }
-     if (spotted == TRUE && SECT(IN_ROOM(obj)) != SECT_DESERT) {
+     if (spotted == true && SECT(IN_ROOM(obj)) != SECT_DESERT) {
       send_to_char(ch, "@yA %s soft dirt is here.@n\r\n", bury);
       return;
-     } else if (spotted == TRUE && SECT(IN_ROOM(obj)) == SECT_DESERT) {
+     } else if (spotted == true && SECT(IN_ROOM(obj)) == SECT_DESERT) {
       send_to_char(ch, "@YA %s soft sand is here.@n\r\n", bury);
       return;
      } else {
@@ -2451,7 +2453,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
         char notebuf[MAX_NOTE_LENGTH];
 
         snprintf(notebuf, sizeof(notebuf), "There is something written on it:\r\n\r\n%s", obj->action_description);
-        page_string(ch->desc, notebuf, TRUE);
+        page_string(ch->desc, notebuf, true);
       } else
 	send_to_char(ch, "There appears to be nothing written on it.\r\n");
       return;
@@ -2550,47 +2552,47 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
       if (!IS_CORPSE(obj)) {
        send_to_char(ch, "You see nothing special..\r\n");
       } else {
-       int mention = FALSE;
+       int mention = false;
        send_to_char(ch, "This corpse has ");
       
        if (GET_OBJ_VAL(obj, VAL_CORPSE_HEAD) == 0) {
         send_to_char(ch, "no head,");
-        mention = TRUE;
+        mention = true;
        }
 
        if (GET_OBJ_VAL(obj, VAL_CORPSE_RARM) == 0) {
         send_to_char(ch, "no right arm, ");
-        mention = TRUE;
+        mention = true;
        } else if (GET_OBJ_VAL(obj, VAL_CORPSE_RARM) == 2) {
         send_to_char(ch, "a broken right arm, ");
-        mention = TRUE;
+        mention = true;
        }
 
        if (GET_OBJ_VAL(obj, VAL_CORPSE_LARM) == 0) {
         send_to_char(ch, "no left arm, ");
-        mention = TRUE;
+        mention = true;
        } else if (GET_OBJ_VAL(obj, VAL_CORPSE_LARM) == 2) {
         send_to_char(ch, "a broken left arm, ");
-        mention = TRUE;
+        mention = true;
        }
 
        if (GET_OBJ_VAL(obj, VAL_CORPSE_RLEG) == 0) {
         send_to_char(ch, "no right leg, ");
-        mention = TRUE;
+        mention = true;
        } else if (GET_OBJ_VAL(obj, VAL_CORPSE_RLEG) == 2) {
         send_to_char(ch, "a broken right leg, ");
-        mention = TRUE;
+        mention = true;
        }
 
        if (GET_OBJ_VAL(obj, VAL_CORPSE_LLEG) == 0) {
         send_to_char(ch, "no left leg, ");
-        mention = TRUE;
+        mention = true;
        } else if (GET_OBJ_VAL(obj, VAL_CORPSE_LLEG) == 2) {
         send_to_char(ch, "a broken left leg, ");
-        mention = TRUE;
+        mention = true;
        }
 
-       if (mention == FALSE) {
+       if (mention == false) {
         send_to_char(ch, "nothing missing from it but life.");
        } else {
         send_to_char(ch, "and is dead.");
@@ -2641,7 +2643,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
 
 static int show_obj_modifiers(struct obj_data *obj, struct char_data *ch)
 {
-  int found = FALSE;
+  int found = false;
 
   if (OBJ_FLAGGED(obj, ITEM_INVISIBLE)) {
     send_to_char(ch, " (invisible)");
@@ -2733,7 +2735,7 @@ static int show_obj_modifiers(struct obj_data *obj, struct char_data *ch)
 static void list_obj_to_char(struct obj_data *list, struct char_data *ch, int mode, int show)
 {
   struct obj_data *i, *j, *d;
-  bool found = FALSE;
+  bool found = false;
   int num;
 
   /* Loop through all objects in the list */
@@ -2778,7 +2780,7 @@ static void list_obj_to_char(struct obj_data *list, struct char_data *ch, int mo
       if (num > 1)
         send_to_char(ch, "@D(@Rx@Y%2i@D)@n ", num);
       show_obj_to_char(d, ch, mode);
-      found = TRUE;
+      found = true;
     }
   }
   if (!found && show)
@@ -2892,7 +2894,7 @@ static void diag_char_to_char(struct char_data *i, struct char_data *ch)
 
 static void look_at_char(struct char_data *i, struct char_data *ch)
 {
-	int j, found, clan = FALSE;
+	int j, found, clan = false;
 	char buf[100];
 	struct obj_data *tmp_obj;
 
@@ -2975,12 +2977,12 @@ static void look_at_char(struct char_data *i, struct char_data *ch)
 		}
 	}
 	send_to_char(ch, "\r\n");
-	if (GET_CLAN(i) != nullptr && strstr(GET_CLAN(i), "None") == FALSE) {
+	if (GET_CLAN(i) != nullptr && strstr(GET_CLAN(i), "None") == false) {
 		sprintf(buf, "%s", GET_CLAN(i));
-		clan = TRUE;
+		clan = true;
 	}
 	if (GET_CLAN(i) == nullptr) {
-		clan = FALSE;
+		clan = false;
 	}
 	if (!IS_NPC(i)) {
 		send_to_char(ch, "            @D[@mClan        @D: @W%-20s@D]@n\r\n", clan ? buf : "None.");
@@ -3093,18 +3095,18 @@ static void look_at_char(struct char_data *i, struct char_data *ch)
 		}
 	}
 	diag_char_to_char(i, ch);
-	found = FALSE;
+	found = false;
 	for (j = 0; !found && j < NUM_WEARS; j++)
 		if (GET_EQ(i, j) && CAN_SEE_OBJ(ch, GET_EQ(i, j)))
-			found = TRUE;
+			found = true;
 
 	if (found && (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NOEQSEE))) {
 		send_to_char(ch, "\r\n");	/* act() does capitalization. */
 		if (!PLR_FLAGGED(i, PLR_DISGUISED)) {
-			act("$n is using:", FALSE, i, nullptr, ch, TO_VICT);
+			act("$n is using:", false, i, nullptr, ch, TO_VICT);
 		}
 		else {
-			act("The disguised person is using:", FALSE, i, nullptr, ch, TO_VICT);
+			act("The disguised person is using:", false, i, nullptr, ch, TO_VICT);
 		}
 		for (j = 0; j < NUM_WEARS; j++)
 			if (GET_EQ(i, j) && CAN_SEE_OBJ(ch, GET_EQ(i, j)) && (j != WEAR_WIELD1 && j != WEAR_WIELD2)) {
@@ -3144,16 +3146,16 @@ static void look_at_char(struct char_data *i, struct char_data *ch)
 			}
 	}
 	if (ch != i && ((GET_SKILL(ch, SKILL_KEEN) && AFF_FLAGGED(ch, AFF_SNEAK)) || GET_ADMLEVEL(ch))) {
-		found = FALSE;
-		act("\r\nYou attempt to peek at $s inventory:", FALSE, i, nullptr, ch, TO_VICT);
+		found = false;
+		act("\r\nYou attempt to peek at $s inventory:", false, i, nullptr, ch, TO_VICT);
 		if (CAN_SEE(i, ch))
-			act("$n tries to evaluate what you have in your inventory.", TRUE, ch, nullptr, i, TO_VICT);
+			act("$n tries to evaluate what you have in your inventory.", true, ch, nullptr, i, TO_VICT);
 		if (GET_SKILL(ch, SKILL_KEEN) > axion_dice(0) && (!IS_NPC(i) || GET_ADMLEVEL(ch) > 1)) {
 			for (tmp_obj = i->carrying; tmp_obj; tmp_obj = tmp_obj->next_content) {
 				if (CAN_SEE_OBJ(ch, tmp_obj) &&
 					(ADM_FLAGGED(ch, ADM_SEEINV) || (rand_number(0, 20) < GET_LEVEL(ch)))) {
 					show_obj_to_char(tmp_obj, ch, SHOW_OBJ_SHORT);
-					found = TRUE;
+					found = true;
 				}
 			}
 			improve_skill(ch, SKILL_KEEN, 1);
@@ -3162,9 +3164,9 @@ static void look_at_char(struct char_data *i, struct char_data *ch)
 			return;
 		}
 		else {
-			act("You are unsure about $s inventory.", FALSE, i, nullptr, ch, TO_VICT);
+			act("You are unsure about $s inventory.", false, i, nullptr, ch, TO_VICT);
 			if (CAN_SEE(i, ch))
-				act("$n didn't seem to get a good enough look.", TRUE, ch, nullptr, i, TO_VICT);
+				act("$n didn't seem to get a good enough look.", true, ch, nullptr, i, TO_VICT);
 			improve_skill(ch, SKILL_KEEN, 1);
 			return;
 		}
@@ -3178,7 +3180,7 @@ static void look_at_char(struct char_data *i, struct char_data *ch)
 static void list_one_char(struct char_data *i, struct char_data *ch)
 {
   struct obj_data *chair = nullptr;
-  int count = FALSE;
+  int count = false;
   const char *positions[] = {
     " is dead",
     " is mortally wounded",
@@ -3198,58 +3200,58 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
     send_to_char(ch, "%s", i->long_descr);
 
     if (IS_NPC(i) && GET_HIT(i) >= (i->getEffMaxPL()) * .9 && GET_HIT(i) != (i->getEffMaxPL()))
-     act("@R...Some slight wounds on $s body.@w", TRUE, i, nullptr, ch, TO_VICT);
+     act("@R...Some slight wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
     else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffMaxPL()) * .8 && GET_HIT(i) < (i->getEffMaxPL()) * .9)
-     act("@R...A few wounds on $s body.@w", TRUE, i, nullptr, ch, TO_VICT);
+     act("@R...A few wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
     else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffMaxPL()) * .7 && GET_HIT(i) < (i->getEffMaxPL()) * .8)
-     act("@R...Many wounds on $s body.@w", TRUE, i, nullptr, ch, TO_VICT);
+     act("@R...Many wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
     else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffMaxPL()) * .6 && GET_HIT(i) < (i->getEffMaxPL()) * .7)
-     act("@R...Quite a few wounds on $s body.@w", TRUE, i, nullptr, ch, TO_VICT);
+     act("@R...Quite a few wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
     else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffMaxPL()) * .5 && GET_HIT(i) < (i->getEffMaxPL()) * .6)
-     act("@R...Horrible wounds on $s body.@w", TRUE, i, nullptr, ch, TO_VICT);
+     act("@R...Horrible wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
     else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffMaxPL()) * .4 && GET_HIT(i) < (i->getEffMaxPL()) * .5)
-     act("@R...Blood is seeping from the wounds on $s body.@w", TRUE, i, nullptr, ch, TO_VICT);
+     act("@R...Blood is seeping from the wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
     else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffMaxPL()) * .3 && GET_HIT(i) < (i->getEffMaxPL()) * .4)
-     act("@R...$s body is in terrible shape.@w", TRUE, i, nullptr, ch, TO_VICT);
+     act("@R...$s body is in terrible shape.@w", true, i, nullptr, ch, TO_VICT);
     else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffMaxPL()) * .2 && GET_HIT(i) < (i->getEffMaxPL()) * .3)
-     act("@R...Is absolutely covered in wounds.@w", TRUE, i, nullptr, ch, TO_VICT);
+     act("@R...Is absolutely covered in wounds.@w", true, i, nullptr, ch, TO_VICT);
     else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffMaxPL()) * .1 && GET_HIT(i) < (i->getEffMaxPL()) * .2)
-     act("@R...Is on $s last leg.@w", TRUE, i, nullptr, ch, TO_VICT);
+     act("@R...Is on $s last leg.@w", true, i, nullptr, ch, TO_VICT);
     else if (IS_NPC(i) && GET_HIT(i) < (i->getEffMaxPL()) * .1)
-     act("@R...Should be DEAD soon.@w", TRUE, i, nullptr, ch, TO_VICT);
+     act("@R...Should be DEAD soon.@w", true, i, nullptr, ch, TO_VICT);
 
 
     if (GET_EAVESDROP(i) > 0) {
      char eaves[300];
      sprintf(eaves, "@w...$e is spying on everything to the @c%s@w.", dirs[GET_EAVESDIR(i)]);
-     act(eaves, TRUE, i, nullptr, ch, TO_VICT);
+     act(eaves, true, i, nullptr, ch, TO_VICT);
     }
     if (AFF_FLAGGED(i, AFF_FLYING) && GET_ALT(i) == 1)
-      act("...$e is in the air!", FALSE, i, nullptr, ch, TO_VICT);
+      act("...$e is in the air!", false, i, nullptr, ch, TO_VICT);
     if (AFF_FLAGGED(i, AFF_FLYING) && GET_ALT(i) == 2)
-      act("...$e is high in the air!", FALSE, i, nullptr, ch, TO_VICT);
+      act("...$e is high in the air!", false, i, nullptr, ch, TO_VICT);
     if (AFF_FLAGGED(i, AFF_SANCTUARY) && !GET_SKILL(i, SKILL_AQUA_BARRIER))
-      act("...$e has a barrier around $s body!", FALSE, i, nullptr, ch, TO_VICT);
+      act("...$e has a barrier around $s body!", false, i, nullptr, ch, TO_VICT);
     if (AFF_FLAGGED(i, AFF_FIRESHIELD))
-      act("...$e has @rf@Rl@Ya@rm@Re@Ys@w around $s body!", FALSE, i, nullptr, ch, TO_VICT);
+      act("...$e has @rf@Rl@Ya@rm@Re@Ys@w around $s body!", false, i, nullptr, ch, TO_VICT);
     if (AFF_FLAGGED(i, AFF_SANCTUARY) && GET_SKILL(i, SKILL_AQUA_BARRIER))
-      act("...$e has a @Gbarrier@w of @cwater@w and @Cki@w around $s body!", FALSE, i, nullptr, ch, TO_VICT);
+      act("...$e has a @Gbarrier@w of @cwater@w and @Cki@w around $s body!", false, i, nullptr, ch, TO_VICT);
     if (!IS_NPC(i) && PLR_FLAGGED(i, PLR_SPIRAL))
-      act("...$e is spinning in a vortex!", FALSE, i, nullptr, ch, TO_VICT);
+      act("...$e is spinning in a vortex!", false, i, nullptr, ch, TO_VICT);
     if (GET_CHARGE(i))
-      act("...$e has a bright %s aura around $s body!", FALSE, i, nullptr, ch, TO_VICT);
+      act("...$e has a bright %s aura around $s body!", false, i, nullptr, ch, TO_VICT);
     if (AFF_FLAGGED(i, AFF_METAMORPH))
-      act("@w...$e has a dark, @rred@w aura and menacing presence.", FALSE, i, nullptr, ch, TO_VICT);
+      act("@w...$e has a dark, @rred@w aura and menacing presence.", false, i, nullptr, ch, TO_VICT);
     if (AFF_FLAGGED(i, AFF_HAYASA))
-      act("@w...$e has a soft @cblue@w glow around $s body!", FALSE, i, nullptr, ch, TO_VICT);
+      act("@w...$e has a soft @cblue@w glow around $s body!", false, i, nullptr, ch, TO_VICT);
     if (AFF_FLAGGED(i, AFF_BLIND))
-      act("...$e is groping around blindly!", FALSE, i, nullptr, ch, TO_VICT);
+      act("...$e is groping around blindly!", false, i, nullptr, ch, TO_VICT);
     if (affected_by_spell(i, SPELL_FAERIE_FIRE))
-      act("@m...$e @mis outlined with purple fire!@m", FALSE, i, nullptr, ch, TO_VICT);
+      act("@m...$e @mis outlined with purple fire!@m", false, i, nullptr, ch, TO_VICT);
     if (GET_FEATURE(i)) {
       char woo[MAX_STRING_LENGTH];
       sprintf(woo, "@C%s@n", GET_FEATURE(i));
-      act(woo, FALSE, i, nullptr, ch, TO_VICT);
+      act(woo, false, i, nullptr, ch, TO_VICT);
     }
 
     return;
@@ -3432,66 +3434,66 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
  if (!IS_NPC(i) || !FIGHTING(i)) {
   if (AFF_FLAGGED(i, AFF_INVISIBLE)) {
     send_to_char(ch, ", is invisible");
-    count = TRUE;
+    count = true;
   }
   if (AFF_FLAGGED(i, AFF_ETHEREAL)) {
     send_to_char(ch, ", has a halo");
-    count = TRUE;
+    count = true;
   }
   if (AFF_FLAGGED(i, AFF_HIDE) && i != ch) {
     send_to_char(ch, ", is hiding");
     if (GET_SKILL(i, SKILL_HIDE) && !IS_NPC(ch) && i != ch) {
      improve_skill(i, SKILL_HIDE, 1);
     }
-    count = TRUE;
+    count = true;
   }
   if (!IS_NPC(i) && !i->desc) {
     send_to_char(ch, ", has a blank stare");
-    count = TRUE;
+    count = true;
   }
   if (!IS_NPC(i) && PLR_FLAGGED(i, PLR_WRITING)) {
     send_to_char(ch, ", is writing");
-    count = TRUE;
+    count = true;
   }
   if (!IS_NPC(i) && PRF_FLAGGED(i, PRF_BUILDWALK)) {
     send_to_char(ch, ", is buildwalking");
-    count = TRUE;
+    count = true;
   }
   if (!IS_NPC(i) && ABSORBING(i) && ABSORBING(i) != ch) {
     send_to_char(ch, ", is absorbing from %s", GET_NAME(ABSORBING(i)));
-    count = TRUE;
+    count = true;
   }
   if (!IS_NPC(i) && GRAPPLING(i) && GRAPPLING(i) != ch) {
     send_to_char(ch, ", is grappling with %s", readIntro(ch, GRAPPLING(i)) == 1 ? get_i_name(ch, GRAPPLING(i)) : introd_calc(GRAPPLING(i)));
-    count = TRUE;
+    count = true;
   }
   if (!IS_NPC(i) && CARRYING(i) && CARRYING(i) != ch) {
     send_to_char(ch, ", is carrying %s", readIntro(ch, CARRYING(i)) == 1 ? get_i_name(ch, CARRYING(i)) : introd_calc(CARRYING(i)));
-    count = TRUE;
+    count = true;
   }
   if (!IS_NPC(i) && CARRIED_BY(i) && CARRIED_BY(i) != ch) {
     send_to_char(ch, ", is being carried by %s", readIntro(ch, CARRIED_BY(i)) == 1 ? get_i_name(ch, CARRIED_BY(i)) : introd_calc(CARRIED_BY(i)));
-    count = TRUE;
+    count = true;
   }
   if (!IS_NPC(i) && GRAPPLING(i) && GRAPPLING(i) == ch) {
     send_to_char(ch, ", is grappling with YOU");
-    count = TRUE;
+    count = true;
   }
   if (!IS_NPC(i) && ABSORBING(i) && ABSORBING(i) == ch) {
     send_to_char(ch, ", is absorbing from YOU");
-    count = TRUE;
+    count = true;
   }
   if (!IS_NPC(i) && ABSORBING(ch) && ABSORBING(ch) == i) {
     send_to_char(ch, ", is being absorbed from by YOU");
-    count = TRUE;
+    count = true;
   }
   if (!IS_NPC(i) && GRAPPLING(ch) && GRAPPLING(ch) == i) {
     send_to_char(ch, ", is being grappled with by YOU");
-    count = TRUE;
+    count = true;
   }
   if (!IS_NPC(i) && CARRYING(ch) && CARRYING(ch) == i) {
     send_to_char(ch, ", is being carried by you");
-    count = TRUE;
+    count = true;
   }
   if (!IS_NPC(ch) && !IS_NPC(i) && FIGHTING(i)) {
    if (!PLR_FLAGGED(i, PLR_SPAR) || (PLR_FLAGGED(i, PLR_SPAR) && (!PLR_FLAGGED(FIGHTING(i), PLR_SPAR) || IS_NPC(FIGHTING(i))))) {
@@ -3502,12 +3504,12 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
    }
      if (FIGHTING(i) == ch) {
         send_to_char(ch, "@rYOU@w");
-        count = TRUE;
+        count = true;
      }
      else {
       if (IN_ROOM(i) == IN_ROOM(FIGHTING(i))) {
        send_to_char(ch, "%s", GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch, FIGHTING(i)) : LRACE(FIGHTING(i))));
-       count = TRUE;
+       count = true;
       }
       else {
        send_to_char(ch,  "someone who has already left!");
@@ -3520,18 +3522,18 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
        if (PLR_FLAGGED(i, PLR_HEALT)) {
         send_to_char(ch, "@w is floating inside a healing tank.");
        }
-       else if (count == TRUE) {
+       else if (count == true) {
        send_to_char(ch, ",@w and%s on %s.", positions[(int) GET_POS(i)], chair->short_description);
        }
-       else if (count == FALSE) {
+       else if (count == false) {
        send_to_char(ch, "@w%s on %s.", positions[(int) GET_POS(i)], chair->short_description);
        }
   }
   else if (!PLR_FLAGGED(i, PLR_PILOTING) && !SITS(i) && (!IS_NPC(i) || !FIGHTING(i))) {
-   if (count == TRUE) {
+   if (count == true) {
     send_to_char(ch, "@w, and%s.", positions[(int) GET_POS(i)]);
    }
-   if (count == FALSE) {
+   if (count == false) {
     send_to_char(ch, "@w%s.", positions[(int) GET_POS(i)]);
    }
   }
@@ -3576,71 +3578,71 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
   if (GET_EAVESDROP(i) > 0) {
     char eaves[300];
     sprintf(eaves, "@w...$e is spying on everything to the @c%s@w.", dirs[GET_EAVESDIR(i)]);
-    act(eaves, TRUE, i, nullptr, ch, TO_VICT);
+    act(eaves, true, i, nullptr, ch, TO_VICT);
   }
   if (!IS_NPC(i)) {
    if (PLR_FLAGGED(i, PLR_FISHING)) {
-    act("@w...$e is @Cfishing@w.@n", TRUE, i, nullptr, ch, TO_VICT);
+    act("@w...$e is @Cfishing@w.@n", true, i, nullptr, ch, TO_VICT);
    }
   }
   if (PLR_FLAGGED(i, PLR_AURALIGHT)) {
 	  char bloom[MAX_INPUT_LENGTH];
       sprintf(bloom, "...is surrounded by a bright %s aura.@n", aura_types[GET_AURA(i)]);
-      act(bloom, TRUE, i, nullptr, ch, TO_VICT);
+      act(bloom, true, i, nullptr, ch, TO_VICT);
 	}
   if (AFF_FLAGGED(i, AFF_SANCTUARY) && !GET_SKILL(i, SKILL_AQUA_BARRIER))
-    act("@w...$e has a @bbarrier@w around $s body!", TRUE, i, nullptr, ch, TO_VICT);
+    act("@w...$e has a @bbarrier@w around $s body!", true, i, nullptr, ch, TO_VICT);
   if (AFF_FLAGGED(i, AFF_FIRESHIELD))
-      act("@w...$e has @rf@Rl@Ya@rm@Re@Ys@w around $s body!", FALSE, i, nullptr, ch, TO_VICT);
+      act("@w...$e has @rf@Rl@Ya@rm@Re@Ys@w around $s body!", false, i, nullptr, ch, TO_VICT);
   if (AFF_FLAGGED(i, AFF_HEALGLOW))
-      act("@w...$e has a serene @Cblue@Y glow@w around $s body.", TRUE, i, nullptr, ch, TO_VICT);
+      act("@w...$e has a serene @Cblue@Y glow@w around $s body.", true, i, nullptr, ch, TO_VICT);
   if (AFF_FLAGGED(i, AFF_EARMOR))
-      act("@w...$e has ghostly @Ggreen@w ethereal armor around $s body.", TRUE, i, nullptr, ch, TO_VICT);
+      act("@w...$e has ghostly @Ggreen@w ethereal armor around $s body.", true, i, nullptr, ch, TO_VICT);
   if (AFF_FLAGGED(i, AFF_SANCTUARY) && GET_SKILL(i, SKILL_AQUA_BARRIER))
-    act("@w...$e has a @bbarrier@w of @cwater@w and @CKi@w around $s body!", TRUE, i, nullptr, ch, TO_VICT);
+    act("@w...$e has a @bbarrier@w of @cwater@w and @CKi@w around $s body!", true, i, nullptr, ch, TO_VICT);
   if (AFF_FLAGGED(i, AFF_FLYING) && GET_ALT(i) == 1)
-    act("@w...$e is in the air!", TRUE, i, nullptr, ch, TO_VICT);
+    act("@w...$e is in the air!", true, i, nullptr, ch, TO_VICT);
   if (AFF_FLAGGED(i, AFF_FLYING) && GET_ALT(i) == 2)
-    act("@w...$e is high in the air!", TRUE, i, nullptr, ch, TO_VICT);
+    act("@w...$e is high in the air!", true, i, nullptr, ch, TO_VICT);
   if (GET_KAIOKEN(i) > 0)
-    act("@w...@r$e has a red aura around $s body!", TRUE, i, nullptr, ch, TO_VICT);
+    act("@w...@r$e has a red aura around $s body!", true, i, nullptr, ch, TO_VICT);
   if (!IS_NPC(i) && PLR_FLAGGED(i, PLR_SPIRAL))
-      act("@w...$e is spinning in a vortex!", FALSE, i, nullptr, ch, TO_VICT);
+      act("@w...$e is spinning in a vortex!", false, i, nullptr, ch, TO_VICT);
   if (IS_TRANSFORMED(i) && !IS_ANDROID(i) && !IS_SAIYAN(i) && !IS_HALFBREED(i))
-    act("@w...$e has energy crackling around $s body!", TRUE, i, nullptr, ch, TO_VICT);
+    act("@w...$e has energy crackling around $s body!", true, i, nullptr, ch, TO_VICT);
   if (GET_CHARGE(i) && !IS_SAIYAN(i) && !IS_HALFBREED(i)) {
     char aura[MAX_INPUT_LENGTH];
     sprintf(aura, "@w...$e has a @Ybright@w %s aura around $s body!", aura_types[GET_AURA(i)]);
-    act(aura, TRUE, i, nullptr, ch, TO_VICT);
+    act(aura, true, i, nullptr, ch, TO_VICT);
   }
   if (!PLR_FLAGGED(i, PLR_OOZARU) && GET_CHARGE(i) && IS_TRANSFORMED(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
-    act("@w...$e has a @Ybright @Yg@yo@Yl@yd@Ye@yn@w aura around $s body!", TRUE, i, nullptr, ch, TO_VICT);
+    act("@w...$e has a @Ybright @Yg@yo@Yl@yd@Ye@yn@w aura around $s body!", true, i, nullptr, ch, TO_VICT);
   if (!PLR_FLAGGED(i, PLR_OOZARU) && GET_CHARGE(i) && !IS_TRANSFORMED(i) && (IS_SAIYAN(i) || IS_HALFBREED(i))) {
     char aura[MAX_INPUT_LENGTH];
     sprintf(aura, "@w...$e has a @Ybright@w %s aura around $s body!", aura_types[GET_AURA(i)]);
-    act(aura, TRUE, i, nullptr, ch, TO_VICT);
+    act(aura, true, i, nullptr, ch, TO_VICT);
   }
   if (!PLR_FLAGGED(i, PLR_OOZARU) && !GET_CHARGE(i) && IS_TRANSFORMED(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
-    act("@w...$e has energy crackling around $s body!", TRUE, i, nullptr, ch, TO_VICT);
+    act("@w...$e has energy crackling around $s body!", true, i, nullptr, ch, TO_VICT);
   if (PLR_FLAGGED(i, PLR_OOZARU) && GET_CHARGE(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
-    act("@w...$e is in the form of a @rgreat ape@w!", TRUE, i, nullptr, ch, TO_VICT);
+    act("@w...$e is in the form of a @rgreat ape@w!", true, i, nullptr, ch, TO_VICT);
   if (GET_GENOME(i, 0) == 11)
-    act("@w...$e has expanded $s body size@w!", TRUE, i, nullptr, ch, TO_VICT);
+    act("@w...$e has expanded $s body size@w!", true, i, nullptr, ch, TO_VICT);
   if (AFF_FLAGGED(i, AFF_HAYASA))
-      act("@w...$e has a soft @cblue@w glow around $s body!", FALSE, i, nullptr, ch, TO_VICT);
+      act("@w...$e has a soft @cblue@w glow around $s body!", false, i, nullptr, ch, TO_VICT);
   if (PLR_FLAGGED(i, PLR_OOZARU) && !GET_CHARGE(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
-    act("@w...$e has energy crackling around $s @rgreat ape@w body!", TRUE, i, nullptr, ch, TO_VICT);
+    act("@w...$e has energy crackling around $s @rgreat ape@w body!", true, i, nullptr, ch, TO_VICT);
   if (GET_FEATURE(i)) {
    char woo[MAX_STRING_LENGTH];
    sprintf(woo, "@C%s@n", GET_FEATURE(i));
-   act(woo, FALSE, i, nullptr, ch, TO_VICT);
+   act(woo, false, i, nullptr, ch, TO_VICT);
   }
   
     if (GET_RDISPLAY(i)) {
 	 if (GET_RDISPLAY(i) != "Empty") {
 		char rdis[MAX_STRING_LENGTH];
 		sprintf(rdis, "...%s", GET_RDISPLAY(i));
-		act(rdis, FALSE, i, nullptr, ch, TO_VICT);
+		act(rdis, false, i, nullptr, ch, TO_VICT);
 	}
   }
 
@@ -3746,7 +3748,7 @@ static void list_char_to_char(struct char_data *list, struct char_data *ch)
 
 static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_mode)
 {
-  int door, door_found = 0, has_light = FALSE, i;
+  int door, door_found = 0, has_light = false, i;
   char dlist1[500];
   char dlist2[500];
   char dlist3[500];
@@ -3776,11 +3778,11 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
   if (exit_mode == EXIT_OFF) {
    send_to_char(ch, "@D------------------------------------------------------------------------@n\r\n");
   }
-  int space = FALSE;
+  int space = false;
   if (SECT(target_room) == SECT_SPACE && GET_ROOM_VNUM(target_room) >= 20000) {
-   space = TRUE;
+   space = true;
   }
-  if (exit_mode == EXIT_NORMAL && space == FALSE && IN_ROOM(ch) == target_room) {
+  if (exit_mode == EXIT_NORMAL && space == false && IN_ROOM(ch) == target_room) {
     /* Compass and Auto-map - Iovan 9-11-10 */
     send_to_char(ch, "@D------------------------------------------------------------------------@n\r\n");
     send_to_char(ch, "@w      Compass           Auto-Map            Map Key\r\n");
@@ -3788,14 +3790,14 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
     gen_map(ch, 0);
    send_to_char(ch, "@D------------------------------------------------------------------------@n\r\n");
   }
-  if (exit_mode == EXIT_NORMAL && space == TRUE) {
+  if (exit_mode == EXIT_NORMAL && space == true) {
     /* printmap */
     send_to_char(ch, "@D------------------------------[@CRadar@D]---------------------------------@n\r\n");
     printmap(target_room, ch, 1, -1);
     send_to_char(ch, "     @D[@wTurn autoexit complete on for directions instead of radar@D]@n\r\n");
     send_to_char(ch, "@D------------------------------------------------------------------------@n\r\n");
   }
-  if (exit_mode == EXIT_COMPLETE || (exit_mode == EXIT_NORMAL && space == FALSE && IN_ROOM(ch) != target_room)) {
+  if (exit_mode == EXIT_COMPLETE || (exit_mode == EXIT_NORMAL && space == false && IN_ROOM(ch) != target_room)) {
     send_to_char(ch, "@D----------------------------[@gObvious Exits@D]-----------------------------@n\r\n");
     if (IS_AFFECTED(ch, AFF_BLIND)) {
       send_to_char(ch, "You can't see a damned thing, you're blind!\r\n");
@@ -3815,10 +3817,10 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
       if (GET_EQ(ch, i))
         if (GET_OBJ_TYPE(GET_EQ(ch, i)) == ITEM_LIGHT)
           if (GET_OBJ_VAL(GET_EQ(ch, i),VAL_LIGHT_HOURS))
-            has_light = TRUE;
+            has_light = true;
 			
 	  if (PLR_FLAGGED(ch, PLR_AURALIGHT)) {
-	    has_light = TRUE;
+	    has_light = true;
 	  }
 
     for (door = 0; door < NUM_OF_DIRS; door++) {
@@ -4378,7 +4380,7 @@ ACMD(do_autoexit)
     send_to_char(ch, "Your current autoexit level is %s.\r\n", exitlevels[EXIT_LEV(ch)]);
     return;
   }
-  if (((tp = search_block(arg, exitlevels, FALSE)) == -1)) {
+  if (((tp = search_block(arg, exitlevels, false)) == -1)) {
     send_to_char(ch, "Usage: Autoexit { Off | Normal | Complete }\r\n");
     return;
   }
@@ -4720,7 +4722,7 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
    } else if (ROOM_FLAGGED(target_room, ROOM_HOUSE)) {
     send_to_char(ch, "@D[@GItems Stored@D: @g%d@D]@n\r\n", check_saveroom_count(ch, nullptr));
    }
-  list_obj_to_char(world[target_room].contents, ch, SHOW_OBJ_LONG, FALSE);
+  list_obj_to_char(world[target_room].contents, ch, SHOW_OBJ_LONG, false);
   list_char_to_char(world[target_room].people, ch);
 }
 
@@ -4731,14 +4733,14 @@ static void look_in_direction(struct char_data *ch, int dir)
       send_to_char(ch, "%s", EXIT(ch, dir)->general_description);
     else {
      struct obj_data *obj, *next_obj;
-     int founded = FALSE;
+     int founded = false;
      for (obj = ch->carrying; obj; obj = next_obj) {
        next_obj = obj->next_content;
        if (GET_OBJ_VNUM(obj) == 17) {
-        founded = TRUE;
+        founded = true;
        }
      }
-     if (founded == FALSE) {
+     if (founded == false) {
       send_to_char(ch, "You were unable to discern anything about that direction. Try looking again...\r\n");
       struct obj_data *obj;
       obj = read_object(17, VIRTUAL);
@@ -4821,7 +4823,7 @@ static void look_in_obj(struct char_data *ch, char *arg)
       else {
 	send_to_char(ch, "%s", obj->short_description);
         if (GET_OBJ_TYPE(obj) == ITEM_CONTAINER && (GET_OBJ_VNUM(obj) == 697 || GET_OBJ_VNUM(obj) == 698 || GET_OBJ_VNUM(obj) == 682 || GET_OBJ_VNUM(obj) == 683 || GET_OBJ_VNUM(obj) == 684)) {
-         act("$n looks in $p.", TRUE, ch, obj, nullptr, TO_ROOM);
+         act("$n looks in $p.", true, ch, obj, nullptr, TO_ROOM);
         }
 	switch (bits) {
 	case FIND_OBJ_INV:
@@ -4835,7 +4837,7 @@ static void look_in_obj(struct char_data *ch, char *arg)
 	  break;
 	}
 
-	list_obj_to_char(obj->contains, ch, SHOW_OBJ_SHORT, TRUE);
+	list_obj_to_char(obj->contains, ch, SHOW_OBJ_SHORT, true);
       }
     } else {		/* item must be a fountain or drink container */
       if (GET_OBJ_VAL(obj, VAL_DRINKCON_HOWFULL) <= 0 && (!GET_OBJ_VAL(obj, VAL_DRINKCON_CAPACITY) == 1))
@@ -4895,7 +4897,7 @@ char *find_exdesc(char *word, struct extra_descr_data *list)
  */
 static void look_at_target(struct char_data *ch, char *arg, int cmread)
 {
-  int bits, found = FALSE, j, fnum, i = 0, msg = 1;
+  int bits, found = false, j, fnum, i = 0, msg = 1;
   struct char_data *found_char = nullptr;
   struct obj_data *obj, *found_obj = nullptr;
   char *desc;
@@ -4912,14 +4914,14 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
   if (cmread) {
     for (obj = ch->carrying; obj;obj=obj->next_content) {
       if(GET_OBJ_TYPE(obj) == ITEM_BOARD) {
-	found = TRUE;
+	found = true;
 	break;
       }
     }
     if(!obj) {
       for (obj = world[IN_ROOM(ch)].contents; obj;obj=obj->next_content) {
 	if(GET_OBJ_TYPE(obj) == ITEM_BOARD) {
-	  found = TRUE;
+	  found = true;
 	  break;
 	}
       }
@@ -4955,8 +4957,8 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
     look_at_char(found_char, ch);
     if (ch != found_char) {
       if (!AFF_FLAGGED(ch, AFF_HIDE)) {
-	    act("$n looks at you.", TRUE, ch, nullptr, found_char, TO_VICT);
-        act("$n looks at $N.", TRUE, ch, nullptr, found_char, TO_NOTVICT);
+	    act("$n looks at you.", true, ch, nullptr, found_char, TO_VICT);
+        act("$n looks at $N.", true, ch, nullptr, found_char, TO_NOTVICT);
       }
     }
     return;
@@ -4970,7 +4972,7 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
 
   /* Does the argument match an extra desc in the room? */
   if ((desc = find_exdesc(arg, world[IN_ROOM(ch)].ex_description)) != nullptr && ++i == fnum) {
-    page_string(ch->desc, desc, FALSE);
+    page_string(ch->desc, desc, false);
     return;
   } 
 
@@ -4994,7 +4996,7 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
           diag_obj_to_char(GET_EQ(ch, j), ch);
           send_to_char(ch, "It appears to be made of %s", material_names[GET_OBJ_MATERIAL(GET_EQ(ch, j))]);
         }
-	found = TRUE;
+	found = true;
       }
 
   /* Does the argument match an extra desc in the char's inventory? */
@@ -5021,7 +5023,7 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
             send_to_char(ch, "It appears to be made of %s, and weights %s", material_names[GET_OBJ_MATERIAL(obj)], add_commas(GET_OBJ_WEIGHT(obj)));
           }
 	}
-	found = TRUE;
+	found = true;
       }
   }
 
@@ -5058,7 +5060,7 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
         diag_obj_to_char(obj, ch);
         send_to_char(ch, "It appears to be made of %s, and weights %s", material_names[GET_OBJ_MATERIAL(obj)], add_commas(GET_OBJ_WEIGHT(obj)));
 	}
-	found = TRUE;
+	found = true;
       }
 
   /* If an object was found back in generic_find */
@@ -5137,9 +5139,9 @@ static void look_out_window(struct char_data *ch, char *arg)
       send_to_char(ch, "You don't seem to be able to see outside.\r\n");
     } else {
       if (viewport->action_description)
-        act(viewport->action_description, TRUE, ch, viewport, nullptr, TO_CHAR);
+        act(viewport->action_description, true, ch, viewport, nullptr, TO_CHAR);
       else
-        act("$n looks out the window.", TRUE, ch, nullptr, nullptr, TO_ROOM);
+        act("$n looks out the window.", true, ch, nullptr, nullptr, TO_ROOM);
         send_to_char(ch, "You look outside and see:\r\n");
       look_at_room(target_room, ch, 0);
     }
@@ -5221,7 +5223,7 @@ ACMD(do_rptrans)
     ch->desc->rpp -= amt;
     userWrite(ch->desc, 0, 0, 0, "index");          
     send_to_char(ch, "@WYou exchange @C%d@W RPP to user @c%s@W for a warm fuzzy feeling.\r\n", amt, CAP(arg));
-    mudlog(NRM, MAX(ADMLVL_IMPL, GET_INVIS_LEV(ch)), TRUE, "EXCHANGE: %s gave %d RPP to user %s", GET_NAME(ch), amt, arg);
+    mudlog(NRM, MAX(ADMLVL_IMPL, GET_INVIS_LEV(ch)), true, "EXCHANGE: %s gave %d RPP to user %s", GET_NAME(ch), amt, arg);
     save_char(ch);
 }
 
@@ -5256,7 +5258,7 @@ ACMD(do_rpbank)
 	GET_RBANK(ch) += amt;
 	ch->desc->rbank += amt;
 	send_to_char(ch, "You send %d to your RPP Bank. Your total is now %d.\r\n", amt, GET_RBANK(ch));
-	mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "RPP Bank: %s has put %d RPP into their bank", GET_NAME(ch), amt);
+	mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), true, "RPP Bank: %s has put %d RPP into their bank", GET_NAME(ch), amt);
 	
 }
 
@@ -5314,7 +5316,7 @@ ACMD(do_rbanktrans)
     ch->desc->rbank -= amt;
     userWrite(ch->desc, 0, 0, 0, "index");          
     send_to_char(ch, "@wWELL @xGOLLY @xGEE @xWILLICKERS@x! @wYOU @RZ@YIM @RZ@YAMMED @C%d @wRIPROOZLES TO @C%s!@n\r\n", amt, CAP(arg));
-    mudlog(NRM, MAX(ADMLVL_IMPL, GET_INVIS_LEV(ch)), TRUE, "EXCHANGE: %s gave %d Banked RPP to user %s", GET_NAME(ch), amt, arg);
+    mudlog(NRM, MAX(ADMLVL_IMPL, GET_INVIS_LEV(ch)), true, "EXCHANGE: %s gave %d Banked RPP to user %s", GET_NAME(ch), amt, arg);
     save_char(ch);
 }
 
@@ -5393,7 +5395,7 @@ int perf_skill(int skill)
 ACMD(do_perf)
 {
  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
- int i, skill = 1, found = FALSE, type = 0;
+ int i, skill = 1, found = false, type = 0;
 
  two_arguments(argument, arg, arg2);
 
@@ -5417,15 +5419,15 @@ ACMD(do_perf)
   if (spell_info[i].skilltype != SKTYPE_SKILL)
    continue;
   
-  if (found == TRUE)
+  if (found == true)
    continue;
 
   if (strstr(spell_info[i].name, arg)) {
    skill = i;
-   found = TRUE;
+   found = true;
   }
  }
- if (found == FALSE) {
+ if (found == false) {
   send_to_char(ch, "The skill %s doesn't exist.\r\n", arg);
   return;
  }
@@ -5527,15 +5529,15 @@ ACMD(do_look)
     } else if (is_abbrev(arg, "outside") && 
                (subcmd == SCMD_LOOK) && !EXIT(ch, OUTDIR)) {
       look_out_window(ch, arg2);
-    } else if ((look_type = search_block(arg, dirs, FALSE)) >= 0 ||
-               (look_type = search_block(arg, abbr_dirs, FALSE)) >= 0) {
+    } else if ((look_type = search_block(arg, dirs, false)) >= 0 ||
+               (look_type = search_block(arg, abbr_dirs, false)) >= 0) {
       if (subcmd == SCMD_SEARCH)
         search_in_direction(ch, look_type);
       else
         look_in_direction(ch, look_type);
     } else if ((is_abbrev(arg, "towards")) &&
-               ((look_type = search_block(arg2, dirs, FALSE)) >= 0 ||
-                (look_type = search_block(arg2, abbr_dirs, FALSE)) >= 0 )) {
+               ((look_type = search_block(arg2, dirs, false)) >= 0 ||
+                (look_type = search_block(arg2, abbr_dirs, false)) >= 0 )) {
       if (subcmd == SCMD_SEARCH)
         search_in_direction(ch, look_type);
       else
@@ -6746,7 +6748,7 @@ ACMD(do_inventory)
     return;
    }
   }
-  list_obj_to_char(ch->carrying, ch, SHOW_OBJ_SHORT, TRUE);
+  list_obj_to_char(ch->carrying, ch, SHOW_OBJ_SHORT, true);
   send_to_char(ch, "\n");
 }
 
@@ -6941,7 +6943,7 @@ ACMD(do_help)
     int i, found = 0;
     send_to_char(ch, "There is no help on that word.\r\n");
     if (GET_ADMLEVEL(ch) < 3) {
-    mudlog(NRM, MAX(ADMLVL_IMPL, GET_INVIS_LEV(ch)), TRUE, "%s tried to get help on %s", GET_NAME(ch), argument);
+    mudlog(NRM, MAX(ADMLVL_IMPL, GET_INVIS_LEV(ch)), true, "%s tried to get help on %s", GET_NAME(ch), argument);
     }
     for (i = 0; i <= top_of_helpt; i++)  {
       if (help_table[i].min_level > GET_ADMLEVEL(ch))
@@ -7179,9 +7181,9 @@ ACMD(do_who)
   else {
     send_to_char(ch, "                           @Y%d@w characters displayed.\r\n", num_can_see);
    if (hide > 0) {
-    int bam = FALSE;
+    int bam = false;
     if (hide > 1) {
-     bam = TRUE;
+     bam = true;
     }
     send_to_char(ch, "                           and @Y%d@w character%s hidden.\r\n", hide, bam ? "s" : "");
    }
@@ -7480,7 +7482,7 @@ static void perform_immort_where(struct char_data *ch, char *arg)
 
 
   if (!*arg) {
-    mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "GODCMD: %s has checked where to check player locations", GET_NAME(ch));
+    mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true, "GODCMD: %s has checked where to check player locations", GET_NAME(ch));
     send_to_char(ch, "Players                  Vnum    Planet        Location\r\n-------                 ------   ----------    ----------------\r\n");
     for (d = descriptor_list; d; d = d->next)
       if (IS_PLAYING(d)) {
@@ -7522,7 +7524,7 @@ static void perform_immort_where(struct char_data *ch, char *arg)
 	}
       }
   } else {
-    mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "GODCMD: %s has checked where for the location of %s", GET_NAME(ch), arg);
+    mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true, "GODCMD: %s has checked where for the location of %s", GET_NAME(ch), arg);
     for (i = character_list; i; i = i->next) {
       if (CAN_SEE(ch, i) && IN_ROOM(i) != NOWHERE && isname(arg, i->name)) {
 	found = 1;
@@ -7540,7 +7542,7 @@ static void perform_immort_where(struct char_data *ch, char *arg)
     for (k = object_list; k; k = k->next)
       if (CAN_SEE_OBJ(ch, k) && isname(arg, k->name)) {
 	found = 1;
-	print_object_location(++num, k, ch, TRUE);
+	print_object_location(++num, k, ch, true);
       }
     if (!found) {
       send_to_char(ch, "Couldn't find any such thing.\r\n");
@@ -7583,7 +7585,7 @@ ACMD(do_levels)
     len += nlen;
   }
 
-  page_string(ch->desc, buf, TRUE);
+  page_string(ch->desc, buf, true);
 }
 
 ACMD(do_consider)
@@ -7937,7 +7939,7 @@ ACMD(do_color)
     send_to_char(ch, "Usage: color [ off | on ]\r\n");
     return;
   }
-  if (((tp = search_block(arg, ctypes, FALSE)) == -1)) {
+  if (((tp = search_block(arg, ctypes, false)) == -1)) {
     send_to_char(ch, "Usage: color [ off | on ]\r\n");
     return;
   }
@@ -8161,7 +8163,7 @@ ACMD(do_history)
  
   one_argument(argument, arg); 
  
-  type = search_block(arg, history_types, FALSE); 
+  type = search_block(arg, history_types, false);
   if (!*arg || type < 0) { 
     int i; 
  
@@ -8270,7 +8272,7 @@ ACMD(do_scan)
         send_to_char(ch,"          %s%s: %s %s\n\r", CCCYN(ch, C_NRM), dirnames[i], world[newroom].name ? world[newroom].name : "You don't think you saw what you just saw.", CCNRM(ch, C_NRM)); 
         send_to_char(ch, "@W          -----------------          @n\r\n");
 
-        list_obj_to_char(world[newroom].contents,ch,SHOW_OBJ_LONG, FALSE); 
+        list_obj_to_char(world[newroom].contents,ch,SHOW_OBJ_LONG, false);
         list_char_to_char(world[newroom].people,ch); 
          if (ROOM_EFFECT(newroom) >= 1 && ROOM_EFFECT(newroom) <= 5) {
            send_to_char(ch, "@rLava@w is pooling in someplaces here...@n\r\n");
@@ -8288,7 +8290,7 @@ ACMD(do_scan)
               send_to_char(ch,"          %sFar %s: %s %s\n\r", CCCYN(ch, C_NRM), dirnames[i], world[newroom].name ? world[newroom].name : "You don't think you saw what you just saw.", CCNRM(ch, C_NRM) ); 
               send_to_char(ch, "@W          -----------------          @n\r\n");
 
-             list_obj_to_char(world[newroom].contents,ch,SHOW_OBJ_LONG, FALSE); 
+             list_obj_to_char(world[newroom].contents,ch,SHOW_OBJ_LONG, false);
              list_char_to_char(world[newroom].people,ch); 
              if (ROOM_EFFECT(newroom) >= 1 && ROOM_EFFECT(newroom) <= 5) {
               send_to_char(ch, "@rLava@w is pooling in someplaces here...@n\r\n");
@@ -8463,7 +8465,7 @@ ACMD(do_toplist)
 ACMD(do_whois)
 {
   char buf[MAX_INPUT_LENGTH];
-  int clan = FALSE;
+  int clan = false;
   const char *immlevels[ADMLVL_IMPL + 2] = {
   "[Mortal]",          /* lowest admin level */
   "[Enforcer]",        /* lowest admin level +1 */
@@ -8487,15 +8489,15 @@ ACMD(do_whois)
     if (GET_CLAN(victim) != nullptr) {
      if (!strstr(GET_CLAN(victim), "None")) {
       sprintf(buf, "%s", GET_CLAN(victim));
-      clan = TRUE;
+      clan = true;
      }
      if (strstr(GET_CLAN(victim), "Applying")) {
        sprintf(buf, "%s", GET_CLAN(victim));
-      clan = TRUE;
+      clan = true;
      }
     }
     if (GET_CLAN(victim) == nullptr || strstr(GET_CLAN(victim), "None")) {
-     clan = FALSE;
+     clan = false;
     }
     send_to_char(ch, "@D~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\r\n");
     if (GET_ADMLEVEL(victim) >= ADMLVL_IMMORT) {
@@ -8505,8 +8507,8 @@ ACMD(do_whois)
     }
     else {
       send_to_char(ch, "@cName  @D: @w%s\r\n@cSensei@D: @w%s\r\n@cRace  @D: @w%s\r\n@cTitle @D: @w%s@n\r\n@cClan  @D: @w%s@n\r\n", GET_NAME(victim), victim->chclass->getName().c_str(), victim->race->getName().c_str(), GET_TITLE(victim), clan ? buf : "None.");
-      if (clan == TRUE && !strstr(GET_CLAN(victim), "Applying")) {
-       if (checkCLAN(victim) == TRUE) {
+      if (clan == true && !strstr(GET_CLAN(victim), "Applying")) {
+       if (checkCLAN(victim) == true) {
         clanRANKD(GET_CLAN(victim), ch, victim);
        }
       }
@@ -8523,10 +8525,10 @@ ACMD(do_whois)
 
 static void search_in_direction(struct char_data * ch, int dir)
 {
-  int check=FALSE, skill_lvl, dchide=20;
+  int check= false, skill_lvl, dchide=20;
 
   send_to_char(ch, "You search for secret doors.\r\n");
-  act("$n searches the area intently.", TRUE, ch, nullptr, nullptr, TO_ROOM);
+  act("$n searches the area intently.", true, ch, nullptr, nullptr, TO_ROOM);
 
   /* SEARCHING is allowed untrained */
   skill_lvl = GET_SKILL(ch, SKILL_SEARCH);
@@ -8539,7 +8541,7 @@ static void search_in_direction(struct char_data * ch, int dir)
     dchide = DOOR_DCHIDE(ch, dir);
 
   if (skill_lvl > dchide)
-    check = TRUE;
+    check = true;
 
   if (EXIT(ch, dir)) {
     if (EXIT(ch, dir)->general_description &&
@@ -8549,7 +8551,7 @@ static void search_in_direction(struct char_data * ch, int dir)
       send_to_char(ch, "There is a normal exit there.\r\n");
     else if (EXIT_FLAGGED(EXIT(ch, dir), EX_ISDOOR) &&
              EXIT_FLAGGED(EXIT(ch, dir), EX_SECRET) &&
-             EXIT(ch, dir)->keyword && (check == TRUE)  )
+             EXIT(ch, dir)->keyword && (check == true)  )
       send_to_char(ch, "There is a hidden door keyword: '%s' %sthere.\r\n",
                    fname (EXIT(ch, dir)->keyword),
                    (EXIT_FLAGGED(EXIT(ch, dir), EX_CLOSED)) ? "" : "open ");

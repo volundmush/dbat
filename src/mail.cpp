@@ -63,11 +63,11 @@ void free_mail_index(void)
 
 int mail_recip_ok(const char *name)
 {
-  int player_i, ret = FALSE;
+  int player_i, ret = false;
 
   if ((player_i = get_ptable_by_name(name)) >= 0) {
     if (!IS_SET(player_table[player_i].flags, PINDEX_DELETED))
-      ret = TRUE;
+      ret = true;
   }
   return ret;
 }
@@ -162,12 +162,12 @@ void write_to_file(void *buf, int size, long filepos)
 
   if (filepos % BLOCK_SIZE) {
     log("SYSERR: Mail system -- fatal error #2!!! (invalid file position %ld)", filepos);
-    no_mail = TRUE;
+    no_mail = true;
     return;
   }
   if (!(mail_file = fopen(MAIL_FILE, "r+b"))) {
     log("SYSERR: Unable to open mail file '%s'.", MAIL_FILE);
-    no_mail = TRUE;
+    no_mail = true;
     return;
   }
   fseek(mail_file, filepos, SEEK_SET);
@@ -195,12 +195,12 @@ void read_from_file(void *buf, int size, long filepos)
 
   if (filepos % BLOCK_SIZE) {
     log("SYSERR: Mail system -- fatal error #3!!! (invalid filepos read %ld)", filepos);
-    no_mail = TRUE;
+    no_mail = true;
     return;
   }
   if (!(mail_file = fopen(MAIL_FILE, "r+b"))) {
     log("SYSERR: Unable to open mail file '%s'.", MAIL_FILE);
-    no_mail = TRUE;
+    no_mail = true;
     return;
   }
 
@@ -452,7 +452,7 @@ char *read_delete(long recipient, char **from)
 
   if (header.block_type != HEADER_BLOCK) {
     log("SYSERR: Oh dear. (Header block %ld != %d)", header.block_type, HEADER_BLOCK);
-    no_mail = TRUE;
+    no_mail = true;
     log("SYSERR: Mail system disabled!  -- Error #9. (Invalid header block.)");
     return (nullptr);
   }
@@ -546,34 +546,34 @@ void postmaster_send_mail(struct char_data *ch, struct char_data *mailman,
 
   if (GET_LEVEL(ch) < MIN_MAIL_LEVEL && GET_ADMLEVEL(ch) < ADMLVL_IMMORT) {
     snprintf(buf, sizeof(buf), "$n tells you, 'Sorry, you have to be level %d to send mail!'", MIN_MAIL_LEVEL);
-    act(buf, FALSE, mailman, nullptr, ch, TO_VICT);
+    act(buf, false, mailman, nullptr, ch, TO_VICT);
     return;
   }
   one_argument(arg, buf);
 
   if (!*buf) {			/* you'll get no argument from me! */
     act("$n tells you, 'You need to specify an addressee!'",
-	FALSE, mailman, nullptr, ch, TO_VICT);
+        false, mailman, nullptr, ch, TO_VICT);
     return;
   }
   if (GET_GOLD(ch) < STAMP_PRICE && !ADM_FLAGGED(ch, ADM_MONEY)) {
     snprintf(buf, sizeof(buf), "$n tells you, 'A stamp costs %d zenni.'\r\n"
 	    "$n tells you, '...which I see you can't afford.'", STAMP_PRICE);
-    act(buf, FALSE, mailman, nullptr, ch, TO_VICT);
+    act(buf, false, mailman, nullptr, ch, TO_VICT);
     return;
   }
   if ((recipient = get_id_by_name(buf)) < 0 || !mail_recip_ok(buf)) {
     act("$n tells you, 'No one by that name is registered here!'",
-	FALSE, mailman, nullptr, ch, TO_VICT);
+        false, mailman, nullptr, ch, TO_VICT);
     return;
   }
-  act("$n starts to write some mail.", TRUE, ch, nullptr, nullptr, TO_ROOM);
+  act("$n starts to write some mail.", true, ch, nullptr, nullptr, TO_ROOM);
   snprintf(buf, sizeof(buf), "$n tells you, 'I'll take %d zenni for the stamp.'\r\n"
        "$n tells you, 'Write your message. (/s saves /h for help).'",
        STAMP_PRICE);
 
-  act(buf, FALSE, mailman, nullptr, ch, TO_VICT);
-  act("@C$n@w starts writing a letter.@n", TRUE, ch, nullptr, nullptr, TO_ROOM);
+  act(buf, false, mailman, nullptr, ch, TO_VICT);
+  act("@C$n@w starts writing a letter.@n", true, ch, nullptr, nullptr, TO_ROOM);
   GET_GOLD(ch) -= STAMP_PRICE;
   SET_BIT_AR(PLR_FLAGS(ch), PLR_MAILING);	/* string_write() sets writing. */
 
@@ -587,9 +587,9 @@ void postmaster_check_mail(struct char_data *ch, struct char_data *mailman,
 			  int cmd, char *arg)
 {
   if (has_mail(GET_IDNUM(ch)))
-    act("$n tells you, 'You have mail waiting.'", FALSE, mailman, nullptr, ch, TO_VICT);
+    act("$n tells you, 'You have mail waiting.'", false, mailman, nullptr, ch, TO_VICT);
   else
-    act("$n tells you, 'Sorry, you don't have any mail waiting.'", FALSE, mailman, nullptr, ch, TO_VICT);
+    act("$n tells you, 'Sorry, you don't have any mail waiting.'", false, mailman, nullptr, ch, TO_VICT);
 }
 
 
@@ -603,7 +603,7 @@ void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman,
 
   if (!has_mail(GET_IDNUM(ch)) && mailman != nullptr) {
     snprintf(buf, sizeof(buf), "$n tells you, 'Sorry, you don't have any mail waiting.'");
-    act(buf, FALSE, mailman, nullptr, ch, TO_VICT);
+    act(buf, false, mailman, nullptr, ch, TO_VICT);
     return;
   }
   while (has_mail(GET_IDNUM(ch))) {
@@ -643,8 +643,8 @@ void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman,
 
     if (IS_PLAYING(ch->desc) && mailman != nullptr) {
      obj_to_char(obj, ch);
-     act("$n gives you a piece of mail.", FALSE, mailman, nullptr, ch, TO_VICT);
-     act("$N gives $n a piece of mail.", FALSE, ch, nullptr, mailman, TO_ROOM);
+     act("$n gives you a piece of mail.", false, mailman, nullptr, ch, TO_VICT);
+     act("$N gives $n a piece of mail.", false, ch, nullptr, mailman, TO_ROOM);
     }
     else {
      extract_obj(obj);

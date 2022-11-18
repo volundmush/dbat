@@ -136,7 +136,7 @@ void assedit_setup(struct descriptor_data *d, int number)
       }
 
  STATE(d) = CON_ASSEDIT;
- act("$n starts using OLC.", TRUE, d->character, nullptr, nullptr, TO_ROOM);
+ act("$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
  SET_BIT_AR(PLR_FLAGS(d->character), PLR_WRITING);
  assedit_disp_menu(d);
 
@@ -308,8 +308,8 @@ send_to_char(d->character, "%c[H%c[J", 27, 27);
 
      OLC_ASSEDIT(d)->pComponents = pTComponents;
      OLC_ASSEDIT(d)->pComponents[ OLC_ASSEDIT(d)->lNumComponents ].lVnum = pos;
-     OLC_ASSEDIT(d)->pComponents[ OLC_ASSEDIT(d)->lNumComponents ].bExtract = YES;
-     OLC_ASSEDIT(d)->pComponents[ OLC_ASSEDIT(d)->lNumComponents ].bInRoom = NO;
+     OLC_ASSEDIT(d)->pComponents[ OLC_ASSEDIT(d)->lNumComponents ].bExtract = true;
+     OLC_ASSEDIT(d)->pComponents[ OLC_ASSEDIT(d)->lNumComponents ].bInRoom = false;
      OLC_ASSEDIT(d)->lNumComponents += 1;
 
      assedit_disp_menu(d);
@@ -361,13 +361,13 @@ send_to_char(d->character, "%c[H%c[J", 27, 27);
   switch (*arg) {
     case 'y':
     case 'Y':
-      OLC_ASSEDIT(d)->pComponents[ OLC_VAL(d) ].bExtract = TRUE;
+      OLC_ASSEDIT(d)->pComponents[ OLC_VAL(d) ].bExtract = true;
       assedit_edit_inroom(d);
     break;
 
     case 'n':
     case 'N':
-      OLC_ASSEDIT(d)->pComponents[ OLC_VAL(d) ].bExtract = FALSE;
+      OLC_ASSEDIT(d)->pComponents[ OLC_VAL(d) ].bExtract = false;
       assedit_edit_inroom(d);
     break;
 
@@ -380,13 +380,13 @@ send_to_char(d->character, "%c[H%c[J", 27, 27);
   switch (*arg) {
     case 'y':
     case 'Y':
-      OLC_ASSEDIT(d)->pComponents[ OLC_VAL(d) ].bInRoom = TRUE;
+      OLC_ASSEDIT(d)->pComponents[ OLC_VAL(d) ].bInRoom = true;
       assedit_disp_menu(d);
     break;
 
     case 'n':
     case 'N':
-      OLC_ASSEDIT(d)->pComponents[ OLC_VAL(d) ].bInRoom = FALSE;
+      OLC_ASSEDIT(d)->pComponents[ OLC_VAL(d) ].bInRoom = false;
       assedit_disp_menu(d);
     break;
 
@@ -398,7 +398,7 @@ send_to_char(d->character, "%c[H%c[J", 27, 27);
 
  default:                        /* default for whole assedit parse function */
                                  /* we should never get here */
- mudlog(BRF, ADMLVL_GOD, TRUE, "SYSERR: OLC assedit_parse(): Reached default case!");
+ mudlog(BRF, ADMLVL_GOD, true, "SYSERR: OLC assedit_parse(): Reached default case!");
  send_to_char(d->character, "Opps...\r\n");
  STATE(d) = CON_PLAYING;
  break;

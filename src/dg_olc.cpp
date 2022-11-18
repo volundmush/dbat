@@ -66,7 +66,7 @@ ACMD(do_oasis_trigedit)
    * Give descriptor an OLC structure.
    */
   if (d->olc) {
-    mudlog(BRF, ADMLVL_IMMORT, TRUE,
+    mudlog(BRF, ADMLVL_IMMORT, true,
       "SYSERR: do_oasis_trigedit: Player already had olc structure.");
     free(d->olc);
   }
@@ -108,10 +108,10 @@ ACMD(do_oasis_trigedit)
   disp = 1;
   }
 
-  act("$n starts using OLC.", TRUE, d->character, nullptr, nullptr, TO_ROOM);
+  act("$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
   SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
 
-  mudlog(CMP, ADMLVL_IMMORT, TRUE,"OLC: %s starts editing zone %d [trigger](allowed zone %d)",
+  mudlog(CMP, ADMLVL_IMMORT, true,"OLC: %s starts editing zone %d [trigger](allowed zone %d)",
          GET_NAME(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
 }
 
@@ -344,7 +344,7 @@ void trigedit_parse(struct descriptor_data *d, char *arg)
       switch(tolower(*arg)) {
         case 'y':
           trigedit_save(d);
-          mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), TRUE,
+          mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), true,
                  "OLC: %s edits trigger %d", GET_NAME(d->character),
                  OLC_NUM(d));
           /* fall through */
@@ -531,7 +531,7 @@ void trigedit_save(struct descriptor_data *d)
     for (i = 0; i < top_of_trigt; i++) {
       if (!found) {
         if (trig_index[i]->vnum > OLC_NUM(d)) {
-          found = TRUE;
+          found = true;
           rnum = i;
 
           CREATE(new_index[rnum], struct index_data, 1);
@@ -606,7 +606,7 @@ void trigedit_save(struct descriptor_data *d)
 #endif
 
   if (!(trig_file = fopen(fname, "w"))) {
-    mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(d->character)), TRUE,
+    mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(d->character)), true,
            "SYSERR: OLC: Can't open trig file \"%s\"", fname);
     return;
   }
@@ -616,7 +616,7 @@ void trigedit_save(struct descriptor_data *d)
       trig = trig_index[rnum]->proto;
 
       if (fprintf(trig_file, "#%d\n", i) < 0) {
-        mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(d->character)), TRUE,
+        mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(d->character)), true,
                "SYSERR: OLC: Can't write trig file!");
         fclose(trig_file);
         return;
@@ -868,10 +868,10 @@ int format_script(struct descriptor_data *d)
   char nsc[MAX_CMD_LENGTH], *t, line[READ_SIZE];
   char *sc;
   size_t len = 0, nlen = 0, llen = 0;
-  int indent = 0, indent_next = FALSE, found_case = FALSE, i, line_num = 0;
+  int indent = 0, indent_next = false, found_case = false, i, line_num = 0;
 
   if (!d->str || !*d->str)
-    return FALSE;
+    return false;
 
   sc = strdup(*d->str); /* we work on a copy, because of strtok() */
   t = strtok(sc, "\n\r");
@@ -882,44 +882,44 @@ int format_script(struct descriptor_data *d)
     skip_spaces(&t);
     if (!strncasecmp(t, "if ", 3) ||
         !strncasecmp(t, "switch ", 7)) {
-      indent_next = TRUE;
+      indent_next = true;
     } else if (!strncasecmp(t, "while ", 6)) {
-      found_case = TRUE;  /* so you can 'break' a loop without complains */
-      indent_next = TRUE;
+      found_case = true;  /* so you can 'break' a loop without complains */
+      indent_next = true;
     } else if (!strncasecmp(t, "end", 3) ||
                !strncasecmp(t, "done", 4)) {
       if (!indent) {
         write_to_output(d, "Unmatched 'end' or 'done' (line %d)!\r\n", line_num);
         free(sc);
-        return FALSE;
+        return false;
       }
       indent--;
-      indent_next = FALSE;
+      indent_next = false;
     } else if (!strncasecmp(t, "else", 4)) {
       if (!indent) {
         write_to_output(d, "Unmatched 'else' (line %d)!\r\n", line_num);
         free(sc);
-        return FALSE;
+        return false;
       }
       indent--;
-      indent_next = TRUE;
+      indent_next = true;
     } else if (!strncasecmp(t, "case", 4) ||
                !strncasecmp(t, "default", 7)) {
       if (!indent) {
         write_to_output(d, "Case/default outside switch (line %d)!\r\n", line_num);
         free(sc);
-        return FALSE;
+        return false;
       }
       if (!found_case) /* so we don't indent multiple case statements without a break */
-        indent_next = TRUE;
-      found_case = TRUE;
+        indent_next = true;
+      found_case = true;
     } else if (!strncasecmp(t, "break", 5)) {
       if (!found_case || !indent ) {
         write_to_output(d, "Break not in case (line %d)!\r\n", line_num);
         free(sc);
-        return FALSE;
+        return false;
       }
-      found_case = FALSE;
+      found_case = false;
       indent--;
     }
 
@@ -932,14 +932,14 @@ int format_script(struct descriptor_data *d)
     if (llen < 0 || llen + nlen + len > d->max_str - 1 ) {
       write_to_output(d, "String too long, formatting aborted\r\n");
       free(sc);
-      return FALSE;
+      return false;
     }
     len = len + nlen + llen;
     strcat(nsc, line);  /* strcat OK, size checked above */
 
     if (indent_next) {
       indent++;
-      indent_next = FALSE;
+      indent_next = false;
     }
     t = strtok(nullptr, "\n\r");
   }
@@ -951,5 +951,5 @@ int format_script(struct descriptor_data *d)
   *d->str = strdup(nsc);
   free(sc);
 
-  return TRUE;
+  return true;
 }

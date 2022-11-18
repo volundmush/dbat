@@ -114,7 +114,7 @@ ACMD(do_voice)
 
 ACMD(do_languages)
 {
-  int i, found = FALSE;
+  int i, found = false;
   char arg[MAX_STRING_LENGTH];
 
   if (CONFIG_ENABLE_LANGUAGES) {
@@ -123,10 +123,10 @@ ACMD(do_languages)
     list_languages(ch);
   else {
     for (i = MIN_LANGUAGES; i <= MAX_LANGUAGES; i++) {
-      if ((search_block(arg, languages, FALSE) == i-MIN_LANGUAGES) && GET_SKILL(ch, i)) {
+      if ((search_block(arg, languages, false) == i-MIN_LANGUAGES) && GET_SKILL(ch, i)) {
         SPEAKING(ch) = i;
         send_to_char(ch, "You now speak %s.\r\n", languages[i-MIN_LANGUAGES]);
-        found = TRUE;
+        found = true;
         break;
       }
     }
@@ -187,8 +187,8 @@ ACMD(do_osay) {
    if (PRF_FLAGGED(ch, PRF_HIDE)) {
     sprintf(buf2, "@WAnonymous @D[@mOSAY@D] @W'@w%s@W'@n", argument);
    }
-   act(buf, FALSE, ch, nullptr, nullptr, TO_CHAR);
-   act(buf2, FALSE, ch, nullptr, nullptr, TO_ROOM);
+   act(buf, false, ch, nullptr, nullptr, TO_CHAR);
+   act(buf2, false, ch, nullptr, nullptr, TO_ROOM);
  }
 }
 
@@ -197,7 +197,7 @@ ACMD(do_say)
   struct descriptor_data *d;
   struct char_data *wch = nullptr, *wch2 = nullptr, *wch3 = nullptr, *tch = nullptr, *sch = nullptr;
   struct obj_data *obj = nullptr;
-  int granted = FALSE, found = FALSE;
+  int granted = false, found = false;
   char buf2[MAX_INPUT_LENGTH];
   *buf2 = '\0';
 
@@ -254,13 +254,13 @@ ACMD(do_say)
      }
       if (!sch) {
        snprintf(buf, sizeof(buf), "@w$n @W%ss, '@C%s@W'@n", verb, argument);
-       act(buf, TRUE, ch, nullptr, nullptr, TO_ROOM);
+       act(buf, true, ch, nullptr, nullptr, TO_ROOM);
       }
       else {
        snprintf(buf, sizeof(buf), "@w$n @Wsays to @g$N@W, '@C%s@W'@n", argument);
        snprintf(buf2, sizeof(buf2), "@w$n @Wsays to @gyou@W, '@C%s@W'@n", argument);
-       act(buf2, TRUE, ch, nullptr, sch, TO_VICT);
-       act(buf, TRUE, ch, nullptr, sch, TO_NOTVICT);
+       act(buf2, true, ch, nullptr, sch, TO_VICT);
+       act(buf, true, ch, nullptr, sch, TO_NOTVICT);
       }
       if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_NOREPEAT)) {
         send_to_char(ch, "%s", CONFIG_OK);
@@ -274,7 +274,7 @@ ACMD(do_say)
         snprintf(buf, sizeof(buf), "@WYou %s, '@C%s@W'@n\r\n", verb, argument);
         send_to_char(ch, "%s", buf);
         add_history(ch, buf, HIST_SAY);
-       if (SHENRON == TRUE) {
+       if (SHENRON == true) {
        if (GET_ROOM_VNUM(IN_ROOM(ch)) == DRAGONR && GET_ROOM_VNUM(IN_ROOM(EDRAGON)) == DRAGONR) {
         if (strstr(argument, "wish")) {
 
@@ -284,7 +284,7 @@ ACMD(do_say)
 
            if (strstr(argument, GET_NAME(d->character)) && wch == nullptr) {
              wch = d->character;
-             found = TRUE;
+             found = true;
            }
            else if (strstr(argument, GET_NAME(d->character)) && wch2 == nullptr) {
              wch2 = d->character;
@@ -301,18 +301,18 @@ ACMD(do_say)
           return;
          }
 
-         if (granted == FALSE && strstr(argument, "knowledge")) {
+         if (granted == false && strstr(argument, "knowledge")) {
           if (wch != nullptr) {
           send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s now has more knowledge!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
            GET_PRACTICES(wch, GET_CLASS(wch)) += rand_number(2000, 5000);
-           granted = TRUE;
+           granted = true;
            SELFISHMETER += 1;
-		   mudlog(NRM, ADMLVL_GOD, TRUE, "Shenron: %s has made a knowledge wish on %s.", GET_NAME(ch), GET_NAME(wch));;
+		   mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a knowledge wish on %s.", GET_NAME(ch), GET_NAME(wch));;
 		   WAIT_STATE(ch, PULSE_4SEC);
           } /* is there a target for the wish? */
          } /* end knowledge wish if */
 
-         if (granted == FALSE && strstr(argument, "speed")) {
+         if (granted == false && strstr(argument, "speed")) {
           if (wch != nullptr) {
           send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s is now faster!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
            wch->real_abils.cha += 10;
@@ -320,25 +320,25 @@ ACMD(do_say)
             wch->real_abils.cha = 100;
            }
            save_char(wch);
-           granted = TRUE;
+           granted = true;
            SELFISHMETER += 1;
-		   mudlog(NRM, ADMLVL_GOD, TRUE, "Shenron: %s has made a speed wish on %s.", GET_NAME(ch), GET_NAME(wch));
+		   mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a speed wish on %s.", GET_NAME(ch), GET_NAME(wch));
 		   WAIT_STATE(ch, PULSE_4SEC);
           } /* is there a target for the wish? */
          } /* end speed wish if */
 
-         if (granted == FALSE && strstr(argument, "tough")) {
+         if (granted == false && strstr(argument, "tough")) {
           if (wch != nullptr) {
           send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s is now tougher!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
            GET_ARMOR(wch) += 5000;
-           granted = TRUE;
+           granted = true;
            SELFISHMETER += 1;
-		   mudlog(NRM, ADMLVL_GOD, TRUE, "Shenron: %s has made a tough wish on %s.", GET_NAME(ch), GET_NAME(wch));
+		   mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a tough wish on %s.", GET_NAME(ch), GET_NAME(wch));
 		   WAIT_STATE(ch, PULSE_4SEC);
           } /* is there a target for the wish? */
          } /* end tough wish if */
 
-         if (granted == FALSE && strstr(argument, "strength")) {
+         if (granted == false && strstr(argument, "strength")) {
           if (wch != nullptr) {
           send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s has more strength!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
            wch->real_abils.str += 10;
@@ -346,14 +346,14 @@ ACMD(do_say)
             wch->real_abils.str = 100;
            }
            save_char(wch);
-           granted = TRUE;
+           granted = true;
            SELFISHMETER += 1;
-		   mudlog(NRM, ADMLVL_GOD, TRUE, "Shenron: %s has made a strength wish on %s.", GET_NAME(ch), GET_NAME(wch));
+		   mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a strength wish on %s.", GET_NAME(ch), GET_NAME(wch));
 		   WAIT_STATE(ch, PULSE_4SEC);
           } /* is there a target for the wish? */
          } /* end strength wish if */
 
-         if (granted == FALSE && strstr(argument, "intelligence")) {
+         if (granted == false && strstr(argument, "intelligence")) {
           if (wch != nullptr) {
           send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s is now smarter!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
            wch->real_abils.intel += 10;
@@ -361,28 +361,28 @@ ACMD(do_say)
             wch->real_abils.intel = 100;
            }
            save_char(wch);
-           granted = TRUE;
+           granted = true;
            SELFISHMETER += 1;
-		   mudlog(NRM, ADMLVL_GOD, TRUE, "Shenron: %s has made a intelligence wish on %s.", GET_NAME(ch), GET_NAME(wch));
+		   mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a intelligence wish on %s.", GET_NAME(ch), GET_NAME(wch));
 		   WAIT_STATE(ch, PULSE_4SEC);
           } /* is there a target for the wish? */
          } /* end intelligence wish if */
 
-         if (granted == FALSE && strstr(argument, "wisdom")) {
+         if (granted == false && strstr(argument, "wisdom")) {
           if (wch != nullptr) {
           send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s is now wiser!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
            wch->real_abils.wis += 10;
            if (wch->real_abils.wis > 100) {
             wch->real_abils.wis = 100;
            }
-           granted = TRUE;
+           granted = true;
            SELFISHMETER += 1;
-		   mudlog(NRM, ADMLVL_GOD, TRUE, "Shenron: %s has made a wisdom wish on %s.", GET_NAME(ch), GET_NAME(wch));
+		   mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a wisdom wish on %s.", GET_NAME(ch), GET_NAME(wch));
 		   WAIT_STATE(ch, PULSE_4SEC);
           } /* is there a target for the wish? */
          } /* end wisdom wish if */
 
-         if (granted == FALSE && strstr(argument, "agility")) {
+         if (granted == false && strstr(argument, "agility")) {
           if (wch != nullptr) {
           send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s is now more agile!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
           wch->real_abils.dex += 10;
@@ -390,14 +390,14 @@ ACMD(do_say)
            wch->real_abils.dex = 100;
           }
            save_char(wch);
-           granted = TRUE;
+           granted = true;
            SELFISHMETER += 1;
-		   mudlog(NRM, ADMLVL_GOD, TRUE, "Shenron: %s has made a agility wish on %s.", GET_NAME(ch), GET_NAME(wch));
+		   mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a agility wish on %s.", GET_NAME(ch), GET_NAME(wch));
 		   WAIT_STATE(ch, PULSE_4SEC);
           } /* is there a target for the wish? */
          } /* end agility wish if */
 
-         if (granted == FALSE && strstr(argument, "constitution")) {
+         if (granted == false && strstr(argument, "constitution")) {
           if (wch != nullptr) {
           send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s has more guts!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
           wch->real_abils.con += 10;
@@ -405,28 +405,28 @@ ACMD(do_say)
            wch->real_abils.con = 100;
           }
            save_char(wch);
-           granted = TRUE;
+           granted = true;
            SELFISHMETER += 1;
-		   mudlog(NRM, ADMLVL_GOD, TRUE, "Shenron: %s has made a constitutionwish on %s.", GET_NAME(ch), GET_NAME(wch));
+		   mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a constitutionwish on %s.", GET_NAME(ch), GET_NAME(wch));
 		   WAIT_STATE(ch, PULSE_4SEC);
           } /* is there a target for the wish? */
          } /* end constitution wish if */
 
-         if (granted == FALSE && strstr(argument, "skill")) {
+         if (granted == false && strstr(argument, "skill")) {
           if (wch != nullptr) {
           send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s has more skill!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
           int roll = rand_number(1, 3);
           send_to_char(wch, "@GYou suddenly feel like you could learn %d more skills!@n\r\n", roll);
           GET_SLOTS(wch) += roll;
            save_char(wch);
-           granted = TRUE;
+           granted = true;
            SELFISHMETER += 1;
-		 mudlog(NRM, ADMLVL_GOD, TRUE, "Shenron: %s has made a skill wish on %s.", GET_NAME(ch), GET_NAME(wch));
+		 mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a skill wish on %s.", GET_NAME(ch), GET_NAME(wch));
 		 WAIT_STATE(ch, PULSE_4SEC);
           } /* is there a target for the wish? */
          } /* end skill wish if */
 /* Rillao: transloc, add new transes here */
-         if (granted == FALSE && strstr(argument, "power")) {
+         if (granted == false && strstr(argument, "power")) {
           if (wch != nullptr) {
            send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish cannot be granted, You might want to try something else instead, mortal!@w'@n\r\n");
           /* send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s now has grown stronger!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
@@ -474,29 +474,29 @@ ACMD(do_say)
           } /* is there a target for the wish? */
          } /* end power wish if */
 
-         if (granted == FALSE && strstr(argument, "money")) {
+         if (granted == false && strstr(argument, "money")) {
           if (wch != nullptr) {
            send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s now has become richer!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
            GET_BANK_GOLD(wch) += 1000000;
-           granted = TRUE;
+           granted = true;
            SELFISHMETER += 1;
-		   mudlog(NRM, ADMLVL_GOD, TRUE, "Shenron: %s has made a money wish on %s.", GET_NAME(ch), GET_NAME(wch));
+		   mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a money wish on %s.", GET_NAME(ch), GET_NAME(wch));
 		   WAIT_STATE(ch, PULSE_4SEC);
           } /* is there a target for the wish? */
          } /* end money wish if */
 
-         if (granted == FALSE && strstr(argument, "immunity")) {
+         if (granted == false && strstr(argument, "immunity")) {
           if (wch != nullptr) {
            send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s now has immunity to Burn, Freezing, Mind Break, Poison, Blindness, Yoikominminken, and Paralysis!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
            SET_BIT_AR(AFF_FLAGS(wch), AFF_IMMUNITY);
-           granted = TRUE;
+           granted = true;
            SELFISHMETER += 1;
-		   mudlog(NRM, ADMLVL_GOD, TRUE, "Shenron: %s has made a immunity wish on %s.", GET_NAME(ch), GET_NAME(wch));
+		   mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a immunity wish on %s.", GET_NAME(ch), GET_NAME(wch));
 		   WAIT_STATE(ch, PULSE_4SEC);
           } /* is there a target for the wish? */
          } /* end money wish if */
 
-         if (granted == FALSE && strstr(argument, "vitality")) {
+         if (granted == false && strstr(argument, "vitality")) {
           if (wch != nullptr) {
            send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish cannot be granted, You might want to try something else instead, mortal!%s@w'@n\r\n");
            /*send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s now will never hunger or thirst again!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
@@ -509,7 +509,7 @@ ACMD(do_say)
           } /* is there a target for the wish? */
          } /* end vitality if */
 
-         if (granted == FALSE && strstr(argument, "revive")) {
+         if (granted == false && strstr(argument, "revive")) {
           int count = 0;
           if (wch != nullptr) {
            count += 1;
@@ -541,9 +541,9 @@ ACMD(do_say)
             REMOVE_BIT_AR(AFF_FLAGS(wch), AFF_SPIRIT);
             REMOVE_BIT_AR(AFF_FLAGS(wch), AFF_ETHEREAL);
            }
-           granted = TRUE;
+           granted = true;
            SELFISHMETER -= 2;
-		   mudlog(NRM, ADMLVL_GOD, TRUE, "Shenron: %s has made a revive wish on %s.", GET_NAME(ch), GET_NAME(wch));
+		   mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a revive wish on %s.", GET_NAME(ch), GET_NAME(wch));
            }
           } /* is there a target for the wish? */
           if (count == 2) {
@@ -577,9 +577,9 @@ ACMD(do_say)
             REMOVE_BIT_AR(AFF_FLAGS(wch2), AFF_SPIRIT);
             REMOVE_BIT_AR(AFF_FLAGS(wch2), AFF_ETHEREAL);
            }
-           granted = TRUE;
+           granted = true;
            SELFISHMETER -= 3;
-		   mudlog(NRM, ADMLVL_GOD, TRUE, "Shenron: %s has made a revive wish on %s.", GET_NAME(ch), GET_NAME(wch2));
+		   mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a revive wish on %s.", GET_NAME(ch), GET_NAME(wch2));
 		   WAIT_STATE(ch, PULSE_4SEC);
            }
           } /* is there two targets for the wish? */
@@ -628,45 +628,45 @@ ACMD(do_say)
             REMOVE_BIT_AR(AFF_FLAGS(wch3), AFF_SPIRIT);
             REMOVE_BIT_AR(AFF_FLAGS(wch3), AFF_ETHEREAL);
            }
-           granted = TRUE;
+           granted = true;
            SELFISHMETER -= 3;
-		   mudlog(NRM, ADMLVL_GOD, TRUE, "Shenron: %s has made a revive wish on %s and %s.", GET_NAME(ch), GET_NAME(wch2), GET_NAME(wch3));
+		   mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a revive wish on %s and %s.", GET_NAME(ch), GET_NAME(wch2), GET_NAME(wch3));
 		   WAIT_STATE(ch, PULSE_4SEC);
            }
           } /* is there three targets for the wish? */
          } /* end revival if */
 
-         if (granted == FALSE && strstr(argument, "immortal") && WISH[0] == 0) {
+         if (granted == false && strstr(argument, "immortal") && WISH[0] == 0) {
           if (wch != nullptr) {
            send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s is now immortal!@w'@n\r\n" , GET_NAME(wch));
            SET_BIT_AR(PLR_FLAGS(wch), PLR_IMMORTAL);
            WISH[0] = 1;
            WISH[1] = 1;
-           granted = TRUE;
+           granted = true;
            SELFISHMETER += 4;
-		   mudlog(NRM, ADMLVL_GOD, TRUE, "Shenron: %s has made a immortal wish on %s.", GET_NAME(ch), GET_NAME(wch));
+		   mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a immortal wish on %s.", GET_NAME(ch), GET_NAME(wch));
 		   WAIT_STATE(ch, PULSE_4SEC);
           } /* is there a target for the wish? */
          } /* end immortal wish if */
 
-         if (granted == FALSE && strstr(argument, "immortal") && WISH[0] == 1) {
+         if (granted == false && strstr(argument, "immortal") && WISH[0] == 1) {
           if (wch != nullptr) {
            send_to_room(real_room(DRAGONR), "@wShenron says, '@CI can not grant that wish, there is not enough remaining power in this summoning!@w'@n\r\n");
           } /* is there a target for the wish? */
          }
 
-         if (granted == FALSE && strstr(argument, " mortal")) {
+         if (granted == false && strstr(argument, " mortal")) {
           if (wch != nullptr) {
            send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s is now mortal!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
            REMOVE_BIT_AR(PLR_FLAGS(wch), PLR_IMMORTAL);
-           granted = TRUE;
+           granted = true;
            SELFISHMETER += 4;
-		   mudlog(NRM, ADMLVL_GOD, TRUE, "Shenron: %s has made a mortal wish on %s.", GET_NAME(ch), GET_NAME(wch));
+		   mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a mortal wish on %s.", GET_NAME(ch), GET_NAME(wch));
 		   WAIT_STATE(ch, PULSE_4SEC);
           } /* is there a target for the wish? */
          } /* end mortal wish if */
 
-         if (granted == FALSE && strstr(argument, "senzu")) {
+         if (granted == false && strstr(argument, "senzu")) {
           if (wch != nullptr) {
            obj = read_object(1, VIRTUAL);
            obj_to_char(obj, ch);
@@ -689,22 +689,22 @@ ACMD(do_say)
            obj = read_object(1, VIRTUAL);
            obj_to_char(obj, ch);
            send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s now possesses 10 senzus!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
-           granted = TRUE;
+           granted = true;
            SELFISHMETER += 1;
-		   mudlog(NRM, ADMLVL_GOD, TRUE, "Shenron: %s has made a senzu wish.", GET_NAME(ch));
+		   mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a senzu wish.", GET_NAME(ch));
           } /* is there a target for the wish? */
          } /* end senzu wish if */
 		 
-		 if (granted == FALSE && strstr(argument, "roleplay")) {
+		 if (granted == false && strstr(argument, "roleplay")) {
 		  if(wch != nullptr) {
 			send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
-			granted = TRUE;
-			mudlog(NRM, ADMLVL_GOD, TRUE, "Shenron: %s has made a roleplay wish.", GET_NAME(ch));
+			granted = true;
+			mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a roleplay wish.", GET_NAME(ch));
 			WAIT_STATE(ch, PULSE_4SEC);
 		 }
 		}
 		
-         if (granted == TRUE) {
+         if (granted == true) {
            if (WISH[0] == 1) {
             WISH[1] = 1;
            }
@@ -738,7 +738,7 @@ ACMD(do_say)
     /* trigger check */
     speech_mtrigger(ch, argument);
     speech_wtrigger(ch, argument);
-    if (SHENRON == FALSE || (SHENRON == TRUE && IN_ROOM(ch) != real_room(DRAGONR))) {
+    if (SHENRON == false || (SHENRON == true && IN_ROOM(ch) != real_room(DRAGONR))) {
      mob_talk(ch, argument);
     }
 }
@@ -777,7 +777,7 @@ ACMD(do_gsay)
     if (CONFIG_ENABLE_LANGUAGES) {
       send_to_char(k, "%s@W tells the group%s @W'@G%s@W'@n\r\n", CAN_SEE(k, ch) ? GET_NAME(ch) : "Someone", GET_SKILL(k, SPEAKING(ch)) ? "," : ", in an unfamiliar tongue,", buf);
     } else {
-      act(blah, TRUE, ch, nullptr, k, TO_VICT);
+      act(blah, true, ch, nullptr, k, TO_VICT);
     }
   }
     for (f = k->followers; f; f = f->next)
@@ -790,7 +790,7 @@ ACMD(do_gsay)
         if (CONFIG_ENABLE_LANGUAGES) {
           send_to_char(f->follower, "%s@W tells the group%s @W'%s@W'@n\r\n", CAN_SEE(f->follower, ch) ? GET_NAME(ch) : "Someone", GET_SKILL(f->follower, SPEAKING(ch)) ? "," : ", in an unfamiliar tongue,", buf);
         } else {
-          act(blah, TRUE, ch, nullptr, f->follower, TO_VICT | TO_SLEEP);
+          act(blah, true, ch, nullptr, f->follower, TO_VICT | TO_SLEEP);
         }
       }
 
@@ -856,7 +856,7 @@ static int is_tell_ok(struct char_data *ch, struct char_data *vict)
   else if (!IS_NPC(ch) && PRF_FLAGGED(vict, PRF_AFK) && GET_ADMLEVEL(ch) < 1)
     send_to_char(ch, "They are AFK right now, try later.\r\n");
   else if (!IS_NPC(ch) && PRF_FLAGGED(vict, PRF_AFK) && GET_ADMLEVEL(ch) >= 1)
-    return (TRUE);
+    return (true);
   else if (!IS_NPC(vict) && GET_LEVEL(vict) < 3 && GET_ADMLEVEL(ch) < 1)
     send_to_char(ch, "They need to be level 3 or higher to send or receive tells");
   else if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_NOTELL) && GET_ADMLEVEL(vict) < 1)
@@ -866,15 +866,15 @@ static int is_tell_ok(struct char_data *ch, struct char_data *vict)
   else if (IS_NPC(vict))
     send_to_char(ch, "You can't send tells to mobs.\r\n");
   else if (!IS_NPC(vict) && !vict->desc)        /* linkless */
-    act("$E's linkless at the moment.", FALSE, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
+    act("$E's linkless at the moment.", false, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
   else if (PLR_FLAGGED(vict, PLR_WRITING))
-    act("$E's writing a message right now; try again later.", FALSE, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
+    act("$E's writing a message right now; try again later.", false, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
   else if ((!IS_NPC(vict)  && GET_ADMLEVEL(ch) < 1 && PRF_FLAGGED(vict, PRF_NOTELL)) || ROOM_FLAGGED(IN_ROOM(vict), ROOM_SOUNDPROOF))
-    act("$E can't hear you.", FALSE, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
+    act("$E can't hear you.", false, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
   else
-    return (TRUE);
+    return (true);
 
-  return (FALSE);
+  return (false);
 }
 
 /*
@@ -893,7 +893,7 @@ ACMD(do_tell)
     return;
   }
   struct descriptor_data *k;
-  int found = FALSE;
+  int found = false;
   if (!IS_NPC(ch)) {
   sprintf(buf, "%s", CAP(buf));
   for (k = descriptor_list; k; k = k->next) {
@@ -903,17 +903,17 @@ ACMD(do_tell)
     continue;
    if (k->user == nullptr)
     continue;
-   if (found == FALSE && !IS_NPC(ch) && (!strcasecmp(k->user, buf) || strstr(k->user, buf))) {
+   if (found == false && !IS_NPC(ch) && (!strcasecmp(k->user, buf) || strstr(k->user, buf))) {
     vict = k->character;
-    found = TRUE;
+    found = true;
    }
-   else if (!IS_NPC(ch) && found == FALSE && (!strcasecmp(GET_NAME(k->character), buf) || strstr(GET_NAME(k->character), buf)) && GET_ADMLEVEL(k->character) > 0) {
+   else if (!IS_NPC(ch) && found == false && (!strcasecmp(GET_NAME(k->character), buf) || strstr(GET_NAME(k->character), buf)) && GET_ADMLEVEL(k->character) > 0) {
     vict = k->character;
-    found = TRUE;
+    found = true;
    }
    }
   }
-  if (found == FALSE && !IS_NPC(ch))
+  if (found == false && !IS_NPC(ch))
      send_to_char(ch, "No user around with that name.");
   else if (IS_NPC(ch) && !(vict = get_player_vis(ch, buf, nullptr, FIND_CHAR_WORLD)))
     send_to_char(ch, "%s", CONFIG_NOPERSON);
@@ -1018,21 +1018,21 @@ ACMD(do_spec_comm)
       snprintf(buf1, sizeof(buf1), "@c$n @W%s you '@m%s@W'@n", action_plur, buf2);
     }
 
-    act(buf1, FALSE, ch, nullptr, vict, TO_VICT);
+    act(buf1, false, ch, nullptr, vict, TO_VICT);
 
     if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_NOREPEAT)) {
       send_to_char(ch, "%s", CONFIG_OK);
     } else {
       char blum[MAX_INPUT_LENGTH];
       sprintf(blum, "@WYou %s @C$N@W, '@m%s@W'@n\r\n", action_sing, buf2);
-      act(blum, TRUE, ch, nullptr, vict, TO_CHAR);
+      act(blum, true, ch, nullptr, vict, TO_CHAR);
     }
 
     if (subcmd == SCMD_WHISPER) {
-     act(action_others, FALSE, ch, nullptr, vict, TO_NOTVICT);
+     act(action_others, false, ch, nullptr, vict, TO_NOTVICT);
      handle_whisper(buf2, ch, vict);
     } else {
-     act(action_others, FALSE, ch, nullptr, vict, TO_NOTVICT);
+     act(action_others, false, ch, nullptr, vict, TO_NOTVICT);
     }
   }
 }
@@ -1194,7 +1194,7 @@ ACMD(do_write)
   
   if(obj) {                /* then there IS a board! */
     write_board_message(GET_OBJ_VNUM(obj),ch,argument);
-    act ("$n begins to write a note on $p.", TRUE, ch, obj, nullptr, TO_ROOM);
+    act ("$n begins to write a note on $p.", true, ch, obj, nullptr, TO_ROOM);
     return;
   }
   
@@ -1249,9 +1249,9 @@ ACMD(do_write)
 
   /* ok.. now let's see what kind of stuff we've found */
   if (GET_OBJ_TYPE(pen) != ITEM_PEN)
-    act("$p is no good for writing with.", FALSE, ch, pen, nullptr, TO_CHAR);
+    act("$p is no good for writing with.", false, ch, pen, nullptr, TO_CHAR);
   else if (GET_OBJ_TYPE(paper) != ITEM_NOTE)
-    act("You can't write on $p.", FALSE, ch, paper, nullptr, TO_CHAR);
+    act("You can't write on $p.", false, ch, paper, nullptr, TO_CHAR);
   else {
     char *backstr = nullptr;
  
@@ -1263,7 +1263,7 @@ ACMD(do_write)
     }
  
     /* we can write - hooray! */
-    act("$n begins to jot down a note.", TRUE, ch, nullptr, nullptr, TO_ROOM);
+    act("$n begins to jot down a note.", true, ch, nullptr, nullptr, TO_ROOM);
     SET_BIT_AR(GET_OBJ_EXTRA(paper),ITEM_UNIQUE_SAVE);
     send_editor_help(ch->desc);
     string_write(ch->desc, &paper->action_description, MAX_NOTE_LENGTH, 0, backstr);
@@ -1290,17 +1290,17 @@ ACMD(do_page)
       if (ADM_FLAGGED(ch, ADM_TELLALL)) {
 	for (d = descriptor_list; d; d = d->next)
 	  if (STATE(d) == CON_PLAYING && d->character)
-	    act(buf, FALSE, ch, nullptr, d->character, TO_VICT);
+	    act(buf, false, ch, nullptr, d->character, TO_VICT);
       } else
 	send_to_char(ch, "You will never be godly enough to do that!\r\n");
       return;
     }
     if ((vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD)) != nullptr) {
-      act(buf, FALSE, ch, nullptr, vict, TO_VICT);
+      act(buf, false, ch, nullptr, vict, TO_VICT);
       if (PRF_FLAGGED(ch, PRF_NOREPEAT))
 	send_to_char(ch, "%s", CONFIG_OK);
       else
-	act(buf, FALSE, ch, nullptr, vict, TO_CHAR);
+	act(buf, false, ch, nullptr, vict, TO_CHAR);
     } else
       send_to_char(ch, "There is no such person in the game!\r\n");
   }
@@ -1470,7 +1470,7 @@ ACMD(do_gen_comm)
         }
       }
 
-      msg = act(buf1, FALSE, ch, nullptr, i->character, TO_VICT | TO_SLEEP);
+      msg = act(buf1, false, ch, nullptr, i->character, TO_VICT | TO_SLEEP);
       add_history(i->character, msg, hist_type[subcmd]);
     }
   }
@@ -1503,9 +1503,9 @@ ACMD(do_qcomm)
       send_to_char(ch, "%s", CONFIG_OK);
     else if (subcmd == SCMD_QSAY) {
       snprintf(buf, sizeof(buf), "You quest-say, '%s'", argument);
-      act(buf, FALSE, ch, nullptr, argument, TO_CHAR);
+      act(buf, false, ch, nullptr, argument, TO_CHAR);
     } else
-      act(argument, FALSE, ch, nullptr, argument, TO_CHAR);
+      act(argument, false, ch, nullptr, argument, TO_CHAR);
 
     if (subcmd == SCMD_QSAY)
       snprintf(buf, sizeof(buf), "$n quest-says, '%s'", argument);

@@ -71,7 +71,7 @@ ACMD(do_lag)
   return;
  }
 
- int found = FALSE, num = atoi(arg2);
+ int found = false, num = atoi(arg2);
 
  if (num <= 0 || num > 5) {
   send_to_char(ch, "Keep it between 1 to 5 seconds please.\r\n");
@@ -101,11 +101,11 @@ ACMD(do_lag)
       WAIT_STATE(d->character, PULSE_5SEC);
       break;
     }
-    found = TRUE;
+    found = true;
   }
  }
 
- if (found == FALSE) {
+ if (found == false) {
   send_to_char(ch, "That player isn't around.\r\n");
   return;
  }
@@ -146,7 +146,7 @@ ACMD(do_news)
  const char *filename;
  char line[256];
  char arg[MAX_INPUT_LENGTH], buf[MAX_STRING_LENGTH], title[256], lastline[256];
- int entries = 0, lookup = 0, nr, found = FALSE, first = TRUE, exit = FALSE;
+ int entries = 0, lookup = 0, nr, found = false, first = true, exit = false;
 
  one_argument(argument, arg);
  filename = NEWS_FILE;
@@ -167,7 +167,7 @@ ACMD(do_news)
  }
 
  if (lookup > 0) {
-  while (!feof(fl) && exit == FALSE) {
+  while (!feof(fl) && exit == false) {
    get_line(fl, line);
     if(*line == '#') { /* Count the entries */
      if (sscanf(line, "#%d", &nr) != 1) { /* Check the entry */
@@ -178,12 +178,12 @@ ACMD(do_news)
      } else { /* One we want to read */
       sscanf(line, "#%d %50[0-9a-zA-Z,.!' ]s\n", &nr, title);
       sprintf(buf, "@w--------------------------------------------------------------\n@cNum@W: @D(@G%3d@D)                @cTitle@W: @g%-50s@n\n", nr, title);
-      found = TRUE;
-      while (!feof(fl) && exit == FALSE) {
+      found = true;
+      while (!feof(fl) && exit == false) {
         get_line(fl, line);
         if (*line != '#') { /* As long as it isn't a new entry*/
-         if (first == TRUE) {
-          first = FALSE;
+         if (first == true) {
+          first = false;
           sprintf(buf+strlen(buf), "%s\n@w--------------------------------------------------------------\n", line);
           sprintf(lastline, "%s", line);
          } else if (!strcasecmp(line, lastline)) {
@@ -193,7 +193,7 @@ ACMD(do_news)
           sprintf(lastline, "%s", line);
          }
         } else {
-         exit = TRUE;
+         exit = true;
         }
       } /* End write buffer with entry text */
      } /* End One We wanted to read */
@@ -208,10 +208,10 @@ ACMD(do_news)
      if (sscanf(line, "#%d", &nr) != 1) { /* Check the entry */
         continue;
      } else { /* One we want to read */
-      if (first == TRUE) {
+      if (first == true) {
         sscanf(line, "#%d %50[0-9a-zA-Z,.!' ]s\n", &nr, title);
         sprintf(buf, "@wNews Entries (Newest at the bottom, to read an entry use 'news (number)')\n@D[@cNum@W: @D(@G%3d@D) @cTitle@W: @g%-50s@D]@n\n", nr, title);
-        first = FALSE;
+        first = false;
       } else {
         sscanf(line, "#%d %50[0-9a-zA-Z,.!' ]s\n", &nr, title);
         sprintf(buf+strlen(buf), "@D[@cNum@W: @D(@G%3d@D) @cTitle@W: @g%-50s@D]@n\n", nr, title);
@@ -224,7 +224,7 @@ ACMD(do_news)
   if (entries > 0) {
    GET_LPLAY(ch) = time(nullptr);
    WAIT_STATE(ch, PULSE_1SEC);
-   page_string(ch->desc, buf, TRUE);
+   page_string(ch->desc, buf, true);
   } else {
    send_to_char(ch, "The news file is empty right now.\r\n");
   }
@@ -238,7 +238,7 @@ ACMD(do_news)
   return;
  }
 
- if (found == TRUE) {
+ if (found == true) {
   send_to_char(ch, "%s\r\n", buf);
   GET_LPLAY(ch) = time(nullptr);
   *buf = '\0';
@@ -330,7 +330,7 @@ ACMD(do_newsedit)
    lookup = lastentry + 1;
   }
   char *backstr = nullptr;
-  act("$n begins to edit the news.", TRUE, ch, nullptr, nullptr, TO_ROOM);
+  act("$n begins to edit the news.", true, ch, nullptr, nullptr, TO_ROOM);
   send_to_char(ch, "@D----------------------=[@GNews Edit@D]=----------------------@n\n");
   send_to_char(ch, " @RRemember that using # in newsedit is not possible. That\n");
   send_to_char(ch, "character will be eaten because it is required for the news\n");
@@ -354,7 +354,7 @@ static void print_lockout(struct char_data *ch)
 
   FILE *file;
   char fname[40], filler[50], line[256], buf[MAX_STRING_LENGTH * 4];
-  int count = 0, first = TRUE;
+  int count = 0, first = true;
 
   /* Read Introduction File */
   if (!get_filename(fname, sizeof(fname), INTRO_FILE, "lockout")) {
@@ -369,7 +369,7 @@ static void print_lockout(struct char_data *ch)
   while (!feof(file)) {
     get_line(file, line);
     sscanf(line, "%s\n", filler);
-    if (first != TRUE && strstr(buf, filler) == nullptr) {
+    if (first != true && strstr(buf, filler) == nullptr) {
      if (count == 0) {
       sprintf(buf+strlen(buf), "%-23s@D|@n", filler);
       count = 1;
@@ -377,9 +377,9 @@ static void print_lockout(struct char_data *ch)
       sprintf(buf+strlen(buf), "%-23s\n", filler);
       count = 0;
      }
-    } else if (first == TRUE) {
+    } else if (first == true) {
      sprintf(buf+strlen(buf), "%-23s@D|@n", filler);
-     first = FALSE;
+     first = false;
      count = 1;
     }
     *filler = '\0';
@@ -428,7 +428,7 @@ static void lockWrite(struct char_data *ch, char *name)
   char fname[40], filler[50], line[256];
   char *names[500] = {""};
   FILE *fl;
-  int count = 0, x = 0, found = FALSE;
+  int count = 0, x = 0, found = false;
 
   /* Read Introduction File */
   if (!get_filename(fname, sizeof(fname), INTRO_FILE, "lockout")) {
@@ -464,12 +464,12 @@ static void lockWrite(struct char_data *ch, char *name)
       fprintf(fl, "%s\n", CAP(names[x]));
      }
      else {
-      found = TRUE;
+      found = true;
      }
     }
     x++;
   }
-  if (found == FALSE) {
+  if (found == false) {
    fprintf(fl, "%s\n", CAP(name));
    send_to_all("@rLOCKOUT@D: @WThe character, @C%s@W, was locked out of the MUD by @c%s@W.@n\r\n", CAP(name), GET_NAME(ch));
    log("LOCKOUT: %s sentenced by %s.", CAP(name), GET_NAME(ch));
@@ -662,12 +662,12 @@ ACMD(do_permission)
   if (!strcasecmp("saiyan", arg2)) {
    send_to_char(ch, "You have unrestricted saiyans for the very next character creation.\r\n");
    send_to_imm("PERMISSION: %s unrestricted saiyans.", GET_NAME(ch));
-   SAIYAN_ALLOWED = TRUE;
+   SAIYAN_ALLOWED = true;
   }
   else if (!strcasecmp("majin", arg2)) {
    send_to_char(ch, "You have unrestricted majins for the very next character creation.\r\n");
    send_to_imm("PERMISSION: %s unrestricted majins.", GET_NAME(ch));
-   MAJIN_ALLOWED = TRUE;
+   MAJIN_ALLOWED = true;
   }
   else {
    send_to_char(ch, "You want to unrestrict which race? @Gsaiyan @nor @Gmajin@n?\r\n");
@@ -677,7 +677,7 @@ ACMD(do_permission)
  else if (!strcasecmp("restrict", arg)) {
   send_to_char(ch, "You have restricted character creation to standard race slection.\r\n");
   send_to_imm("PERMISSION: %s restricted races again.", GET_NAME(ch));
-  MAJIN_ALLOWED = FALSE;
+  MAJIN_ALLOWED = false;
  }
  else {
   send_to_char(ch, "You want to @Grestrict@n or @Gunrestrict@n?\r\n");
@@ -714,7 +714,7 @@ ACMD(do_transobj)
   int num = GET_OBJ_VNUM(obj);
   struct obj_data *obj2 = nullptr;
 
-  act("You send $p to everyone in the game.", TRUE, ch, obj, nullptr, TO_CHAR);
+  act("You send $p to everyone in the game.", true, ch, obj, nullptr, TO_CHAR);
 
   for (d = descriptor_list; d; d = d->next) {
    if (IS_NPC(d->character))
@@ -724,7 +724,7 @@ ACMD(do_transobj)
    else if (d->character == ch)
     continue;
    else {
-    act("$N sends $p across the universe to you.", TRUE, d->character, obj, ch, TO_CHAR);
+    act("$N sends $p across the universe to you.", true, d->character, obj, ch, TO_CHAR);
     obj2 = read_object(num, VIRTUAL);
     obj_to_char(obj2, d->character);    
    }
@@ -735,8 +735,8 @@ ACMD(do_transobj)
   return;
  }
  else {
-  act("You send $p to $N.", TRUE, ch, obj, vict, TO_CHAR);
-  act("$n sends $p across the universe to you.", TRUE, ch, obj, vict, TO_VICT);
+  act("You send $p to $N.", true, ch, obj, vict, TO_CHAR);
+  act("$n sends $p across the universe to you.", true, ch, obj, vict, TO_VICT);
   obj_from_char(obj);
   obj_to_char(obj, vict);
   return;
@@ -851,7 +851,7 @@ ACMD(do_recall)
  }
  else {
   send_to_char(ch, "You disappear in a burst of light!\r\n");
-  act("$n disappears in a burst of light!", FALSE, ch, nullptr, nullptr, TO_ROOM);
+  act("$n disappears in a burst of light!", false, ch, nullptr, nullptr, TO_ROOM);
   if (real_room(2) != NOWHERE) {
   char_from_room(ch);
   char_to_room(ch, real_room(2));
@@ -906,14 +906,14 @@ ACMD(do_hell)
 ACMD(do_echo)
 {
   skip_spaces(&argument);
-  bool NoName = FALSE;
+  bool NoName = false;
 
   if (!*argument)
     send_to_char(ch, "Yes.. but what?\r\n");
   else {
     char buf[MAX_INPUT_LENGTH + 4];
     char name[128];
-    int found = FALSE, trunc = 0;
+    int found = false, trunc = 0;
     struct char_data *vict = nullptr, *next_v = nullptr, *tch = nullptr;
 
     if (strlen(argument) > 1000) {
@@ -926,17 +926,17 @@ ACMD(do_echo)
      next_v = vict->next_in_room;
      if (vict == ch)
       continue;
-     if (found == FALSE) {
+     if (found == false) {
       sprintf(name, "*%s", GET_NAME(vict));
       if (strstr(argument, CAP(name))) {
-       found = TRUE;
+       found = true;
        tch = vict;
       }
-      if (found == FALSE && !IS_NPC(vict)) {
+      if (found == false && !IS_NPC(vict)) {
        if (readIntro(ch, vict) == 1) {
         sprintf(name, "*%s", get_i_name(ch, vict));
         if (strstr(argument, CAP(name))) {
-         found = TRUE;
+         found = true;
          tch = vict;
         }
        }
@@ -946,13 +946,13 @@ ACMD(do_echo)
 
     if (subcmd == SCMD_SMOTE) {
        if (!strstr(argument, "#")) {
-        NoName = TRUE;
+        NoName = true;
        }
       strlcpy(buf, argument, sizeof(buf));
       search_replace(buf, "#", "$n");
       search_replace(buf, "&1", "'@C");
       search_replace(buf, "&2", "@w'");
-      if (found == TRUE) {
+      if (found == true) {
        search_replace(buf, name, "$N");
       }
       else if (strstr(buf, "*")) {
@@ -964,7 +964,7 @@ ACMD(do_echo)
       search_replace(buf, "#", "$n");
       search_replace(buf, "&1", "'@C");
       search_replace(buf, "&2", "@w'");
-      if (found == TRUE) {
+      if (found == true) {
        search_replace(buf, name, "$N");
       }
     }
@@ -974,21 +974,21 @@ ACMD(do_echo)
     if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_NOREPEAT)) {
       send_to_char(ch, "%s", CONFIG_OK);
     }
-    if (NoName == TRUE) {
+    if (NoName == true) {
      char blom[MAX_INPUT_LENGTH];
      sprintf(blom, "@D(@GOOC@W: @gSmote by user %s@D)@n", IS_NPC(ch) ? GET_NAME(ch) : (ch->desc->user == nullptr ? "ERROR REPORT" : ch->desc->user));
-     act(blom, FALSE, ch, nullptr, nullptr, TO_ROOM);
+     act(blom, false, ch, nullptr, nullptr, TO_ROOM);
     }
-    if (found == FALSE) {
-     act(buf, FALSE, ch, nullptr, nullptr, TO_CHAR);
-     act(buf, FALSE, ch, nullptr, nullptr, TO_ROOM);
+    if (found == false) {
+     act(buf, false, ch, nullptr, nullptr, TO_CHAR);
+     act(buf, false, ch, nullptr, nullptr, TO_ROOM);
     }
     else {
 
-     act(buf, FALSE, ch, nullptr, tch, TO_CHAR);
-     act(buf, FALSE, ch, nullptr, tch, TO_NOTVICT);
+     act(buf, false, ch, nullptr, tch, TO_CHAR);
+     act(buf, false, ch, nullptr, tch, TO_NOTVICT);
      search_replace(buf, "$N", "you");
-     act(buf, FALSE, ch, nullptr, tch, TO_VICT);
+     act(buf, false, ch, nullptr, tch, TO_VICT);
     }
   }
 }
@@ -1136,13 +1136,13 @@ ACMD(do_goto)
   }
 
   snprintf(buf, sizeof(buf), "$n %s", POOFOUT(ch) ? POOFOUT(ch) : "disappears in a puff of smoke.");
-  act(buf, TRUE, ch, nullptr, nullptr, TO_ROOM);
+  act(buf, true, ch, nullptr, nullptr, TO_ROOM);
 
   char_from_room(ch);
   char_to_room(ch, location);
 
   snprintf(buf, sizeof(buf), "$n %s", POOFIN(ch) ? POOFIN(ch) : "appears with an ear-splitting bang.");
-  act(buf, TRUE, ch, nullptr, nullptr, TO_ROOM);
+  act(buf, true, ch, nullptr, nullptr, TO_ROOM);
 
   look_at_room(IN_ROOM(ch), ch, 0);
   enter_wtrigger(&world[IN_ROOM(ch)], ch, -1);
@@ -1171,11 +1171,11 @@ ACMD(do_trans)
        send_to_char(ch, "They are inside a healing tank!\r\n");
        return;
       }
-      act("$n disappears in a mushroom cloud.", FALSE, victim, nullptr, nullptr, TO_ROOM);
+      act("$n disappears in a mushroom cloud.", false, victim, nullptr, nullptr, TO_ROOM);
       char_from_room(victim);
       char_to_room(victim, IN_ROOM(ch));
-      act("$n arrives from a puff of smoke.", FALSE, victim, nullptr, nullptr, TO_ROOM);
-      act("$n has transferred you!", FALSE, ch, nullptr, victim, TO_VICT);
+      act("$n arrives from a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
+      act("$n has transferred you!", false, ch, nullptr, victim, TO_VICT);
       look_at_room(IN_ROOM(victim), victim, 0);
       enter_wtrigger(&world[IN_ROOM(victim)], victim, -1);
     }
@@ -1190,11 +1190,11 @@ ACMD(do_trans)
 	victim = i->character;
 	if (GET_ADMLEVEL(victim) >= GET_ADMLEVEL(ch))
 	  continue;
-	act("$n disappears in a mushroom cloud.", FALSE, victim, nullptr, nullptr, TO_ROOM);
+	act("$n disappears in a mushroom cloud.", false, victim, nullptr, nullptr, TO_ROOM);
 	char_from_room(victim);
 	char_to_room(victim, IN_ROOM(ch));
-	act("$n arrives from a puff of smoke.", FALSE, victim, nullptr, nullptr, TO_ROOM);
-	act("$n has transferred you!", FALSE, ch, nullptr, victim, TO_VICT);
+	act("$n arrives from a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
+	act("$n has transferred you!", false, ch, nullptr, victim, TO_VICT);
         look_at_room(IN_ROOM(victim), victim, 0);
         enter_wtrigger(&world[IN_ROOM(victim)], victim, -1);
       }
@@ -1226,11 +1226,11 @@ ACMD(do_teleport)
      return;
     }
     send_to_char(ch, "%s", CONFIG_OK);
-    act("$n disappears in a puff of smoke.", FALSE, victim, nullptr, nullptr, TO_ROOM);
+    act("$n disappears in a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
     char_from_room(victim);
     char_to_room(victim, target);
-    act("$n arrives from a puff of smoke.", FALSE, victim, nullptr, nullptr, TO_ROOM);
-    act("$n has teleported you!", FALSE, ch, nullptr, (char *) victim, TO_VICT);
+    act("$n arrives from a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
+    act("$n has teleported you!", false, ch, nullptr, (char *) victim, TO_VICT);
     look_at_room(IN_ROOM(victim), victim, 0);
     enter_wtrigger(&world[IN_ROOM(victim)], victim, -1);
   }
@@ -1422,7 +1422,7 @@ static void do_stat_room(struct char_data *ch)
 
   send_to_char(ch, "Chars present:");
   column = 14;	/* ^^^ strlen ^^^ */
-  for (found = FALSE, k = rm->people; k; k = k->next_in_room) {
+  for (found = false, k = rm->people; k; k = k->next_in_room) {
     if (!CAN_SEE(ch, k))
       continue;
 
@@ -1430,7 +1430,7 @@ static void do_stat_room(struct char_data *ch)
 		!IS_NPC(k) ? "PC" : (!IS_MOB(k) ? "NPC" : "MOB"));
     if (column >= 62) {
       send_to_char(ch, "%s\r\n", k->next_in_room ? "," : "");
-      found = FALSE;
+      found = false;
       column = 0;
     }
   }
@@ -1446,7 +1446,7 @@ static void do_stat_room(struct char_data *ch)
       column += send_to_char(ch, "%s %s", found++ ? "," : "", j->short_description);
       if (column >= 62) {
 	send_to_char(ch, "%s\r\n", j->next_content ? "," : "");
-	found = FALSE;
+	found = false;
         column = 0;
       }
     }
@@ -1646,14 +1646,14 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j)
       column += send_to_char(ch, "%s %s", found++ ? "," : "", j2->short_description);
       if (column >= 62) {
 	send_to_char(ch, "%s\r\n", j2->next_content ? "," : "");
-	found = FALSE;
+	found = false;
         column = 0;
       }
     }
     send_to_char(ch, "@n");
   }
 
-  found = FALSE;
+  found = false;
   send_to_char(ch, "Affections:");
   for (i = 0; i < MAX_OBJ_AFFECT; i++)
     if (j->affected[i].modifier) {
@@ -1681,7 +1681,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
 {
   char buf[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];
-  int i, i2, column, found = FALSE;
+  int i, i2, column, found = false;
   struct obj_data *j;
   struct obj_data *chair;
   struct follow_type *fol;
@@ -1838,7 +1838,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
       column += send_to_char(ch, "%s %s", found++ ? "," : "", PERS(fol->follower, ch));
       if (column >= 62) {
         send_to_char(ch, "%s\r\n", fol->next ? "," : "");
-        found = FALSE;
+        found = false;
         column = 0;
       }
     }
@@ -2276,9 +2276,9 @@ ACMD(do_load)
     mob = read_mobile(r_num, REAL);
     char_to_room(mob, IN_ROOM(ch));
 
-      act("$n makes a quaint, magical gesture with one hand.", TRUE, ch, nullptr, nullptr, TO_ROOM);
-    act("$n has created $N!", FALSE, ch, nullptr, mob, TO_ROOM);
-    act("You create $N.", FALSE, ch, nullptr, mob, TO_CHAR);
+      act("$n makes a quaint, magical gesture with one hand.", true, ch, nullptr, nullptr, TO_ROOM);
+    act("$n has created $N!", false, ch, nullptr, mob, TO_ROOM);
+    act("You create $N.", false, ch, nullptr, mob, TO_CHAR);
     load_mtrigger(mob);
     }
   } else if (is_abbrev(buf, "obj")) {
@@ -2300,9 +2300,9 @@ ACMD(do_load)
       obj_to_char(obj, ch);
     else
       obj_to_room(obj, IN_ROOM(ch));
-    act("$n makes a strange magical gesture.", TRUE, ch, nullptr, nullptr, TO_ROOM);
-    act("$n has created $p!", FALSE, ch, obj, nullptr, TO_ROOM);
-    act("You create $p.", FALSE, ch, obj, nullptr, TO_CHAR);
+    act("$n makes a strange magical gesture.", true, ch, nullptr, nullptr, TO_ROOM);
+    act("$n has created $p!", false, ch, obj, nullptr, TO_ROOM);
+    act("You create $p.", false, ch, obj, nullptr, TO_CHAR);
     load_otrigger(obj);
     }
   } else
@@ -2367,14 +2367,14 @@ ACMD(do_purge)
 	send_to_char(ch, "Fuuuuuuuuu!\r\n");
 	return;
       }
-      act("$n disintegrates $N.", FALSE, ch, nullptr, vict, TO_NOTVICT);
+      act("$n disintegrates $N.", false, ch, nullptr, vict, TO_NOTVICT);
       if (!IS_NPC(vict)) {
        send_to_all("@R%s@r purges @R%s's@r sorry ass right off the MUD!@n\r\n", GET_NAME(ch), GET_NAME(vict));
       }
 
 
       if (!IS_NPC(vict)) {
-	mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s has purged %s.", GET_NAME(ch), GET_NAME(vict));
+	mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s has purged %s.", GET_NAME(ch), GET_NAME(vict));
         log_imm_action("PURGED: %s burned %s's sorry ass off the MUD!", GET_NAME(ch), GET_NAME(vict));
 	if (vict->desc) {
 	  STATE(vict->desc) = CON_CLOSE;
@@ -2384,7 +2384,7 @@ ACMD(do_purge)
       }
       extract_char(vict);
     } else if ((obj = get_obj_in_list_vis(ch, buf, nullptr, world[IN_ROOM(ch)].contents)) != nullptr) {
-      act("$n destroys $p.", FALSE, ch, obj, nullptr, TO_ROOM);
+      act("$n destroys $p.", false, ch, obj, nullptr, TO_ROOM);
       extract_obj(obj);
     } else {
       send_to_char(ch, "Nothing here by that name.\r\n");
@@ -2396,7 +2396,7 @@ ACMD(do_purge)
     int i;
 
     act("$n gestures... You are surrounded by scorching flames!",
-	FALSE, ch, nullptr, nullptr, TO_ROOM);
+        false, ch, nullptr, nullptr, TO_ROOM);
     send_to_room(IN_ROOM(ch), "The world seems a little cleaner.\r\n");
 
     for (vict = world[IN_ROOM(ch)].people; vict; vict = vict->next_in_room) {
@@ -2439,7 +2439,7 @@ ACMD(do_syslog)
 	logtypes[(PRF_FLAGGED(ch, PRF_LOG1) ? 1 : 0) + (PRF_FLAGGED(ch, PRF_LOG2) ? 2 : 0)]);
     return;
   }
-  if (((tp = search_block(arg, logtypes, FALSE)) == -1)) {
+  if (((tp = search_block(arg, logtypes, false)) == -1)) {
     send_to_char(ch, "Usage: syslog { Off | Brief | Normal | Complete }\r\n");
     return;
   }
@@ -2655,7 +2655,7 @@ ACMD(do_advance)
 	"Your head seems to be filled with demons from another plane as your\r\n"
         "body dissolves to the elements of time and space itself.\r\n\r\n"
 	"Suddenly a silent explosion of light snaps you back to reality.\r\n\r\n"
-	"You feel slightly different.", FALSE, ch, nullptr, victim, TO_VICT);
+	"You feel slightly different.", false, ch, nullptr, victim, TO_VICT);
   }
 
   send_to_char(ch, "%s", CONFIG_OK);
@@ -2743,10 +2743,10 @@ static void perform_immort_invis(struct char_data *ch, int level)
     if (tch == ch)
       continue;
     if (GET_ADMLEVEL(tch) >= GET_INVIS_LEV(ch) && GET_ADMLEVEL(tch) < level)
-      act("You blink and suddenly realize that $n is gone.", FALSE, ch, nullptr,
+      act("You blink and suddenly realize that $n is gone.", false, ch, nullptr,
 	  tch, TO_VICT);
     if (GET_ADMLEVEL(tch) < GET_INVIS_LEV(ch) && GET_ADMLEVEL(tch) >= level)
-      act("You suddenly realize that $n is standing beside you.", FALSE, ch, nullptr,
+      act("You suddenly realize that $n is standing beside you.", false, ch, nullptr,
 	  tch, TO_VICT);
   }
 
@@ -3038,32 +3038,32 @@ ACMD(do_force)
       send_to_char(ch, "No, no, no!\r\n");
     else {
       send_to_char(ch, "%s", CONFIG_OK);
-      act(buf1, TRUE, ch, nullptr, vict, TO_VICT);
-      mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s forced %s to %s", GET_NAME(ch), GET_NAME(vict), to_force);
+      act(buf1, true, ch, nullptr, vict, TO_VICT);
+      mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s forced %s to %s", GET_NAME(ch), GET_NAME(vict), to_force);
       command_interpreter(vict, to_force);
     }
   } else if (!strcasecmp("room", arg)) {
     send_to_char(ch, "%s", CONFIG_OK);
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s forced room %d to %s",
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s forced room %d to %s",
 		GET_NAME(ch), GET_ROOM_VNUM(IN_ROOM(ch)), to_force);
 
     for (vict = world[IN_ROOM(ch)].people; vict; vict = next_force) {
       next_force = vict->next_in_room;
       if (!IS_NPC(vict) && GET_ADMLEVEL(vict) >= GET_ADMLEVEL(ch))
 	continue;
-      act(buf1, TRUE, ch, nullptr, vict, TO_VICT);
+      act(buf1, true, ch, nullptr, vict, TO_VICT);
       command_interpreter(vict, to_force);
     }
   } else { /* force all */
     send_to_char(ch, "%s", CONFIG_OK);
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s forced all to %s", GET_NAME(ch), to_force);
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s forced all to %s", GET_NAME(ch), to_force);
 
     for (i = descriptor_list; i; i = next_desc) {
       next_desc = i->next;
 
       if (STATE(i) != CON_PLAYING || !(vict = i->character) || (!IS_NPC(vict) && GET_ADMLEVEL(vict) >= GET_ADMLEVEL(ch)))
 	continue;
-      act(buf1, TRUE, ch, nullptr, vict, TO_VICT);
+      act(buf1, true, ch, nullptr, vict, TO_VICT);
       command_interpreter(vict, to_force);
     }
   }
@@ -3074,8 +3074,8 @@ ACMD(do_wiznet)
   char buf1[MAX_INPUT_LENGTH + MAX_NAME_LENGTH + 32],
 	buf2[MAX_INPUT_LENGTH + MAX_NAME_LENGTH + 32], *msg;
   struct descriptor_data *d;
-  char emote = FALSE;
-  char any = FALSE;
+  char emote = false;
+  char any = false;
   int level = ADMLVL_IMMORT;
 
   skip_spaces(&argument);
@@ -3087,7 +3087,7 @@ ACMD(do_wiznet)
   }
   switch (*argument) {
   case '*':
-    emote = TRUE;
+    emote = true;
   case '#':
     one_argument(argument + 1, buf1);
     if (is_number(buf1)) {
@@ -3179,7 +3179,7 @@ ACMD(do_zreset)
      }
     }
     send_to_char(ch, "Reset world.\r\n");
-    mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s reset all MUD zones.", GET_NAME(ch));
+    mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true, "(GC) %s reset all MUD zones.", GET_NAME(ch));
     log_imm_action("RESET: %s has reset all MUD zones.", GET_NAME(ch));
     return; 
      }
@@ -3194,7 +3194,7 @@ ACMD(do_zreset)
   if (i <= top_of_zone_table && (can_edit_zone(ch, i) || GET_ADMLEVEL(ch) > ADMLVL_IMMORT)) {
     reset_zone(i);
     send_to_char(ch, "Reset zone #%d: %s.\r\n", zone_table[i].number, zone_table[i].name);
-    mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s reset zone %d (%s)", GET_NAME(ch), zone_table[i].number, zone_table[i].name);
+    mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true, "(GC) %s reset zone %d (%s)", GET_NAME(ch), zone_table[i].number, zone_table[i].name);
     log_imm_action("RESET: %s has reset zone #%d: %s.", GET_NAME(ch), zone_table[i].number, zone_table[i].name);
   } else
     send_to_char(ch, "You do not have permission to reset this zone. Try %d.\r\n", GET_OLC_ZONE(ch));
@@ -3238,17 +3238,17 @@ ACMD(do_wizutil)
       REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_KILLER);
       send_to_char(ch, "Pardoned.\r\n");
       send_to_char(vict, "You have been pardoned by the Gods!\r\n");
-      mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s pardoned by %s", GET_NAME(vict), GET_NAME(ch));
+      mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s pardoned by %s", GET_NAME(vict), GET_NAME(ch));
       break;
     case SCMD_NOTITLE:
       result = PLR_TOG_CHK(vict, PLR_NOTITLE);
-      mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) Notitle %s for %s by %s.",
+      mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) Notitle %s for %s by %s.",
 		ONOFF(result), GET_NAME(vict), GET_NAME(ch));
       send_to_char(ch, "(GC) Notitle %s for %s by %s.\r\n", ONOFF(result), GET_NAME(vict), GET_NAME(ch));
       break;
     case SCMD_SQUELCH:
       result = PLR_TOG_CHK(vict, PLR_NOSHOUT);
-      mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) Squelch %s for %s by %s.",
+      mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) Squelch %s for %s by %s.",
 		ONOFF(result), GET_NAME(vict), GET_NAME(ch));
       send_to_char(ch, "(GC) Mute turned %s for %s by %s.\r\n", ONOFF(result), GET_NAME(vict), GET_NAME(ch));
       send_to_all("@D[@RMUTE@D] @C%s@W has had mute turned @r%s@W by @C%s@W.\r\n", GET_NAME(vict), ONOFF(result), GET_NAME(ch));
@@ -3270,8 +3270,8 @@ ACMD(do_wizutil)
       GET_FREEZE_LEV(vict) = GET_ADMLEVEL(ch);
       send_to_char(vict, "A bitter wind suddenly rises and drains every erg of heat from your body!\r\nYou feel frozen!\r\n");
       send_to_char(ch, "Frozen.\r\n");
-      act("A sudden cold wind conjured from nowhere freezes $n!", FALSE, vict, nullptr, nullptr, TO_ROOM);
-      mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s frozen by %s.", GET_NAME(vict), GET_NAME(ch));
+      act("A sudden cold wind conjured from nowhere freezes $n!", false, vict, nullptr, nullptr, TO_ROOM);
+      mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s frozen by %s.", GET_NAME(vict), GET_NAME(ch));
       break;
     case SCMD_THAW:
       if (!PLR_FLAGGED(vict, PLR_FROZEN)) {
@@ -3283,11 +3283,11 @@ ACMD(do_wizutil)
 		GET_FREEZE_LEV(vict), GET_NAME(vict), HMHR(vict));
 	return;
       }
-      mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s un-frozen by %s.", GET_NAME(vict), GET_NAME(ch));
+      mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s un-frozen by %s.", GET_NAME(vict), GET_NAME(ch));
       REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_FROZEN);
       send_to_char(vict, "A fireball suddenly explodes in front of you, melting the ice!\r\nYou feel thawed.\r\n");
       send_to_char(ch, "Thawed.\r\n");
-      act("A sudden fireball conjured from nowhere thaws $n!", FALSE, vict, nullptr, nullptr, TO_ROOM);
+      act("A sudden fireball conjured from nowhere thaws $n!", false, vict, nullptr, nullptr, TO_ROOM);
       break;
     case SCMD_UNAFFECT:
       if (vict->affected || AFF_FLAGS(vict) || vict->affectedv) {
@@ -3389,7 +3389,7 @@ ACMD(do_show)
   zone_rnum zrn;
   zone_vnum zvn;
   int low, high;
-  int8_t self = FALSE;
+  int8_t self = false;
   struct char_data *vict = nullptr;
   struct obj_data *obj;
   struct descriptor_data *d;
@@ -3444,7 +3444,7 @@ ACMD(do_show)
     return;
   }
   if (!strcmp(value, "."))
-    self = TRUE;
+    self = true;
   buf[0] = '\0';
 
   switch (l) {
@@ -3468,7 +3468,7 @@ ACMD(do_show)
           break;
         len += nlen;
       }
-    page_string(ch->desc, buf, TRUE);
+    page_string(ch->desc, buf, true);
     break;
 
   /* show player */
@@ -3577,7 +3577,7 @@ ACMD(do_show)
           len += nlen;
         }
       }
-    page_string(ch->desc, buf, TRUE);
+    page_string(ch->desc, buf, true);
     break;
 
   /* show death */
@@ -3590,7 +3590,7 @@ ACMD(do_show)
           break;
         len += nlen;
       }
-    page_string(ch->desc, buf, TRUE);
+    page_string(ch->desc, buf, true);
     break;
 
   /* show godrooms */
@@ -3603,7 +3603,7 @@ ACMD(do_show)
           break;
         len += nlen;
       }
-    page_string(ch->desc, buf, TRUE);
+    page_string(ch->desc, buf, true);
     break;
 
   /* show shops */
@@ -3662,7 +3662,7 @@ ACMD(do_show)
       high = 9999999;
     }
     strp = sprintuniques(low, high);
-    page_string(ch->desc, strp, TRUE);
+    page_string(ch->desc, strp, true);
     free(strp);
     break;
 
@@ -3717,7 +3717,7 @@ ACMD(do_show)
       else
         vict = vict->next_affectv;
     } while (low && vict);
-    page_string(ch->desc, strp, TRUE);
+    page_string(ch->desc, strp, true);
     free(strp);
     break;
 
@@ -3908,45 +3908,45 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
     break;
   case 4:
     vict->max_hit = value;
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set maxpl for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set maxpl for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set maxpl for %s.", GET_NAME(ch), GET_NAME(vict));
     break;
   case 5:
     vict->max_mana = value;
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set maxki for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set maxki for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set maxki for %s.", GET_NAME(ch), GET_NAME(vict));
     break;
   case 6:
     vict->max_move = value;
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set maxsta for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set maxsta for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set maxsta for %s.", GET_NAME(ch), GET_NAME(vict));
     break;
   case 7:
     vict->hit = value;
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set pl for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set pl for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set pl for %s.", GET_NAME(ch), GET_NAME(vict));
     break;
   case 8:
     vict->mana = value;
     affect_total(vict);
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set ki for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set ki for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set ki for %s.", GET_NAME(ch), GET_NAME(vict));
     break;
   case 9:
     vict->move = value;
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set st for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set st for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set st for %s.", GET_NAME(ch), GET_NAME(vict));
     break;
   case 10:
     GET_ALIGNMENT(vict) = RANGE(-1000, 1000);
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set align for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set align for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set align for %s.", GET_NAME(ch), GET_NAME(vict));
     affect_total(vict);
     break;
   case 11:
     RANGE(0, 100);
     vict->real_abils.str = value;
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set str for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set str for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set str for %s.", GET_NAME(ch), GET_NAME(vict));
     affect_total(vict);
     break;
@@ -3960,57 +3960,57 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
   case 13:
     RANGE(0, 100);
     vict->real_abils.intel = value;
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set intel for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set intel for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set intel for %s.", GET_NAME(ch), GET_NAME(vict));
     affect_total(vict);
     break;
   case 14:
     RANGE(0, 100);
     vict->real_abils.wis = value;
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set wis for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set wis for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set wis for %s.", GET_NAME(ch), GET_NAME(vict));
     affect_total(vict);
     break;
   case 15:
     RANGE(0, 100);
     vict->real_abils.dex = value;
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set dex for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set dex for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set dex for %s.", GET_NAME(ch), GET_NAME(vict));
     affect_total(vict);
     break;
   case 16:
     RANGE(0, 100);
     vict->real_abils.con = value;
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set con for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set con for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set con for %s.", GET_NAME(ch), GET_NAME(vict));
     affect_total(vict);
     break;
   case 17:
     RANGE(0, 100);
     vict->real_abils.cha = value;
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set speed for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set speed for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set speed for %s.", GET_NAME(ch), GET_NAME(vict));
     affect_total(vict);
     break;
   case 18:
     vict->armor = RANGE(-100, 500);
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set armor index for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set armor index for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set armor index for %s.", GET_NAME(ch), GET_NAME(vict));
     affect_total(vict);
     break;
   case 19:
     GET_GOLD(vict) = RANGE(0, 100000000);
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set zenni for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set zenni for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set zenni for %s.", GET_NAME(ch), GET_NAME(vict));
     break;
   case 20:
     GET_BANK_GOLD(vict) = RANGE(0, 100000000);
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set bank for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set bank for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set bank for %s.", GET_NAME(ch), GET_NAME(vict));
     break;
   case 21:
     vict->exp = RANGE(0, 50000000);
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set exp for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set exp for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set exp for %s.", GET_NAME(ch), GET_NAME(vict));
     break;
   case 22:
@@ -4045,12 +4045,12 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
   case 28:
     if (GET_CLASS_LEVEL(vict)) {
       GET_PRACTICES(vict, GET_CLASS(vict)) = RANGE(0, 10000);
-     mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set PS for %s.", GET_NAME(ch), GET_NAME(vict));
+     mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set PS for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set PS for %s.", GET_NAME(ch), GET_NAME(vict));
     }
     else {
       GET_RACE_PRACTICES(vict) = RANGE(0, 10000);
-      mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set PS for %s.", GET_NAME(ch), GET_NAME(vict));
+      mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set PS for %s.", GET_NAME(ch), GET_NAME(vict));
      log_imm_action("SET: %s has set PS for %s.", GET_NAME(ch), GET_NAME(vict));
     }
     break;
@@ -4157,7 +4157,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
     SET_OR_REMOVE(PLR_FLAGS(vict), PLR_NODELETE);
     break;
   case 47:
-    if ((i = search_block(val_arg, genders, FALSE)) < 0) {
+    if ((i = search_block(val_arg, genders, false)) < 0) {
       send_to_char(ch, "Must be 'male', 'female', or 'neutral'.\r\n");
       return (0);
     }
@@ -4298,19 +4298,19 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
 
   case 64:
     vict->basepl = value;
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set basepl for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set basepl for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set basepl for %s.", GET_NAME(ch), GET_NAME(vict));
     break;
 
   case 65:
       vict->baseki = value;
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set baseki for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set baseki for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set baseki for %s.", GET_NAME(ch), GET_NAME(vict));
     break;
 
   case 66:
       vict->basest = value;
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set basest for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set basest for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set basest for %s.", GET_NAME(ch), GET_NAME(vict));
     break;
 
@@ -4320,19 +4320,19 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
 
   case 68:
    GET_ABSORBS(vict) = RANGE(0, 3);
-   mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set absorbs for %s.", GET_NAME(ch), GET_NAME(vict));
+   mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set absorbs for %s.", GET_NAME(ch), GET_NAME(vict));
    log_imm_action("SET: %s has set absorbs for %s.", GET_NAME(ch), GET_NAME(vict));
    break;
 
   case 69:
    GET_UP(vict) += RANGE(1, 1000);
-   mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set upgrade points for %s.", GET_NAME(ch), GET_NAME(vict));
+   mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set upgrade points for %s.", GET_NAME(ch), GET_NAME(vict));
    log_imm_action("SET: %s has set upgrade points for %s.", GET_NAME(ch), GET_NAME(vict));
    break;
 
   case 70:
    GET_AURA(vict) = RANGE(0, 8);
-   mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set aura for %s.", GET_NAME(ch), GET_NAME(vict));
+   mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set aura for %s.", GET_NAME(ch), GET_NAME(vict));
    log_imm_action("SET: %s has set aura for %s.", GET_NAME(ch), GET_NAME(vict));
    break;
   case 71:
@@ -4346,7 +4346,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
     break;
   case 74:
    GET_DCOUNT(vict) = RANGE(-1000, 1000);
-   mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set death count for %s.", GET_NAME(ch), GET_NAME(vict));
+   mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set death count for %s.", GET_NAME(ch), GET_NAME(vict));
    log_imm_action("SET: %s has set death count for %s.", GET_NAME(ch), GET_NAME(vict));
    break;
   case 75:
@@ -4365,7 +4365,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
   
   case 78:
    GET_SLOTS(vict) = RANGE(1, 1000);
-   mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set skill slots for %s.", GET_NAME(ch), GET_NAME(vict));
+   mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set skill slots for %s.", GET_NAME(ch), GET_NAME(vict));
    log_imm_action("SET: %s has set skill slots for %s.", GET_NAME(ch), GET_NAME(vict));
    break;
 
@@ -4375,7 +4375,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
 
   case 80:
    GET_TRANSCLASS(vict) = RANGE(1, 3);
-   mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set transformation class for %s.", GET_NAME(ch), GET_NAME(vict));
+   mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set transformation class for %s.", GET_NAME(ch), GET_NAME(vict));
    log_imm_action("SET: %s has set transformation class for %s.", GET_NAME(ch), GET_NAME(vict));
    break;
 
@@ -4589,7 +4589,7 @@ ACMD(do_plist)
   } 
   snprintf(buf + len, sizeof(buf) - len, "%s-----------------------------------------------%s\r\n" 
            "%d players listed.\r\n", CCCYN(ch, C_NRM), CCNRM(ch, C_NRM), count); 
-  page_string(ch->desc, buf, TRUE); 
+  page_string(ch->desc, buf, true);
 }
 
 ACMD(do_peace)
@@ -4691,9 +4691,9 @@ ACMD(do_chown)
    }
  }
 
- act("@n$n makes a magical gesture and $p@n flies from $N to $m.", FALSE, ch, obj, victim, TO_NOTVICT);
- act("@n$n makes a magical gesture and $p@n flies away from you to $m.", FALSE, ch, obj, victim, TO_VICT);
- act("@nYou make a magical gesture and $p@n flies away from $N to you.", FALSE, ch, obj, victim, TO_CHAR);
+ act("@n$n makes a magical gesture and $p@n flies from $N to $m.", false, ch, obj, victim, TO_NOTVICT);
+ act("@n$n makes a magical gesture and $p@n flies away from you to $m.", false, ch, obj, victim, TO_VICT);
+ act("@nYou make a magical gesture and $p@n flies away from $N to you.", false, ch, obj, victim, TO_CHAR);
 
  obj_from_char(obj);
  obj_to_char(obj, ch);
@@ -4706,7 +4706,7 @@ ACMD(do_zpurge)
 {
    struct obj_data *obj, *next_obj;
    struct char_data *mob, *next_mob;
-   int i, stored = -1, zone, found = FALSE;
+   int i, stored = -1, zone, found = false;
    int room;
    char arg[MAX_INPUT_LENGTH];
 
@@ -4721,7 +4721,7 @@ ACMD(do_zpurge)
    for (i = 0; i <= top_of_zone_table && !found; i++) {
      if (zone_table[i].number == zone) {
        stored = i;
-       found = TRUE;
+       found = true;
      }
    }
 
@@ -4747,7 +4747,7 @@ ACMD(do_zpurge)
    }
 
    send_to_char(ch, "All mobiles and objects in zone %d purged.\r\n", zone);
-   mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s has purged zone %d.", GET_NAME(ch), zone);
+   mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s has purged zone %d.", GET_NAME(ch), zone);
 } 
 
 /******************************************************************************/
@@ -5484,8 +5484,8 @@ ACMD(do_findkey)
 
   if (!*arg) {
     send_to_char(ch, "Format: findkey <dir>\r\n");
-  } else if ((dir = search_block(arg, dirs, FALSE)) >= 0 ||
-      (dir = search_block(arg, abbr_dirs, FALSE)) >= 0 ) {
+  } else if ((dir = search_block(arg, dirs, false)) >= 0 ||
+      (dir = search_block(arg, abbr_dirs, false)) >= 0 ) {
     if (!EXIT(ch, dir)) {
       send_to_char(ch, "There's no exit in that direction!\r\n");
     } else if ((key = EXIT(ch, dir)->key) == NOTHING || key == 0) {

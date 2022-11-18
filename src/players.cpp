@@ -55,7 +55,7 @@ long top_idnum = 0;		/* highest idnum in use		 */
 /* ASCII Player Files - set this TRUE if you want poofin/poofout
    strings saved in the pfiles
  */
-#define ASCII_SAVE_POOFS  FALSE
+#define ASCII_SAVE_POOFS  false
 
 
 /*************************************************************************
@@ -320,7 +320,7 @@ int load_char(const char *name, struct char_data *ch)
     if (!get_filename(fname, sizeof(fname), PLR_FILE, player_table[id].name))
       return (-1);
     if (!(fl = fopen(fname, "r"))) {
-      mudlog(NRM, ADMLVL_GOD, TRUE, "SYSERR: Couldn't open player file %s", fname);
+      mudlog(NRM, ADMLVL_GOD, true, "SYSERR: Couldn't open player file %s", fname);
       return (-1);
     }
 
@@ -460,7 +460,7 @@ int load_char(const char *name, struct char_data *ch)
     GET_EXP(ch) = PFDEF_EXP;
     GET_TRANSCLASS(ch) = PFDEF_EXP;
     for (i = 0; i < 6; i++)
-     GET_TRANSCOST(ch, i) = FALSE;
+     GET_TRANSCOST(ch, i) = false;
     GET_MOLT_EXP(ch) = PFDEF_EXP;
     GET_FISHD(ch) = PFDEF_ACCURACY;
     GET_POLE_BONUS(ch) = PFDEF_ACCURACY;
@@ -536,7 +536,7 @@ int load_char(const char *name, struct char_data *ch)
         else if (!strcmp(tag, "Boac"))  GET_BOARD(ch, 2)        = atoi(line);
         else if (!strcmp(tag, "Boad"))  GET_BOARD(ch, 3)        = atoi(line);
         else if (!strcmp(tag, "Boab"))  GET_BOARD(ch, 4)        = atoi(line);
-        else if (!strcmp(tag, "Bonu"))  load_bonuses(fl, ch, FALSE);
+        else if (!strcmp(tag, "Bonu"))  load_bonuses(fl, ch, false);
         else if (!strcmp(tag, "Boos"))  GET_BOOSTS(ch)          = atoi(line);
         else if (!strcmp(tag, "Bpl "))  load_BASE(ch, line, LOAD_HIT);
         else if (!strcmp(tag, "Brth"))  ch->time.birth          = atol(line);
@@ -697,10 +697,10 @@ int load_char(const char *name, struct char_data *ch)
         else if (!strcmp(tag, "Ship"))  GET_SHIP(ch)            = atoi(line);
 		else if (!strcmp(tag, "Scoo"))  GET_SDCOOLDOWN(ch)      = atoi(line);
         else if (!strcmp(tag, "Shpr"))  GET_SHIPROOM(ch)        = atoi(line);
-        else if (!strcmp(tag, "Skil"))  load_skills(fl, ch, FALSE);
+        else if (!strcmp(tag, "Skil"))  load_skills(fl, ch, false);
         else if (!strcmp(tag, "Skn "))  GET_SKIN(ch)            = atoi(line);
         else if (!strcmp(tag, "Size"))  ch->size		= atoi(line);
-        else if (!strcmp(tag, "SklB"))  load_skills(fl, ch, TRUE);
+        else if (!strcmp(tag, "SklB"))  load_skills(fl, ch, true);
         else if (!strcmp(tag, "SkRc"))  GET_RACE_PRACTICES(ch)	= atoi(line);
         else if (!strcmp(tag, "SkCl")) {
           sscanf(line, "%d %d", &num2, &num3);
@@ -840,7 +840,7 @@ void save_char_pets(struct char_data *ch)
     return;
 
   if (!(fl = fopen(fname, "w"))) {
-    mudlog(NRM, ADMLVL_GOD, TRUE, "SYSERR: Couldn't open pet file %s for write", fname);
+    mudlog(NRM, ADMLVL_GOD, true, "SYSERR: Couldn't open pet file %s for write", fname);
     return;
   }
 
@@ -878,7 +878,7 @@ void load_char_pets(struct char_data *ch)
        load_room = real_room(IN_ROOM(ch));
   }
     char_to_room(foll->follower, load_room);
-    act("You are joined by $N.", FALSE, ch, nullptr, foll->follower, TO_CHAR);
+    act("You are joined by $N.", false, ch, nullptr, foll->follower, TO_CHAR);
   }
 }
 
@@ -893,7 +893,7 @@ void save_char(struct char_data * ch)
 {
   FILE *fl;
   char fname[40], buf[MAX_STRING_LENGTH];
-  int i, id, save_index = FALSE;
+  int i, id, save_index = false;
   struct affected_type *aff, tmp_aff[MAX_AFFECT], tmp_affv[MAX_AFFECT];
   struct obj_data *char_eq[NUM_WEARS];
   char fbuf1[MAX_STRING_LENGTH], fbuf2[MAX_STRING_LENGTH];
@@ -929,7 +929,7 @@ void save_char(struct char_data * ch)
   if (!get_filename(fname, sizeof(fname), PLR_FILE, GET_NAME(ch)))
     return;
   if (!(fl = fopen(fname, "w"))) {
-    mudlog(NRM, ADMLVL_GOD, TRUE, "SYSERR: Couldn't open player file %s for write", fname);
+    mudlog(NRM, ADMLVL_GOD, true, "SYSERR: Couldn't open player file %s for write", fname);
     return;
   }
 
@@ -1086,7 +1086,7 @@ void save_char(struct char_data * ch)
 
   if (GET_RACE_PRACTICES(ch)!= PFDEF_PRACTICES)	fprintf(fl, "SkRc: %d\n", GET_RACE_PRACTICES(ch));
   for (i = 0; i < 6; i++)
-   if (GET_TRANSCOST(ch, i) != FALSE)
+   if (GET_TRANSCOST(ch, i) != false)
     fprintf(fl, "Tcos: %d %d\n", i, GET_TRANSCOST(ch, i));
 
   for (i = 0; i < NUM_CLASSES; i++)
@@ -1306,35 +1306,35 @@ void save_char(struct char_data * ch)
 
   /* update the player in the player index */
   if (player_table[id].level != GET_LEVEL(ch)) {
-    save_index = TRUE;
+    save_index = true;
     player_table[id].level = GET_LEVEL(ch);
   }
   if (player_table[id].admlevel != GET_ADMLEVEL(ch)) {
-    save_index = TRUE;
+    save_index = true;
     player_table[id].admlevel = GET_ADMLEVEL(ch);
   }
   if (player_table[id].last != ch->time.logon) {
-    save_index = TRUE;
+    save_index = true;
     player_table[id].last = ch->time.logon;
   }
   if (player_table[id].played != GET_LPLAY(ch)) {
-    save_index = TRUE;
+    save_index = true;
     player_table[id].played = GET_LPLAY(ch);
   }
   if (GET_CLAN(ch) != nullptr && player_table[id].clan != GET_CLAN(ch)) {
-    save_index = TRUE;
+    save_index = true;
     player_table[id].clan = strdup(GET_CLAN(ch));
   }
   if (GET_CLAN(ch) == nullptr) {
-    save_index = TRUE;
+    save_index = true;
     player_table[id].clan = strdup("None.");
   }
   if (player_table[id].ship != GET_SHIP(ch)) {
-    save_index = TRUE;
+    save_index = true;
     player_table[id].ship = GET_SHIP(ch);
   }
   if (player_table[id].shiproom != GET_SHIPROOM(ch)) {
-    save_index = TRUE;
+    save_index = true;
     player_table[id].shiproom = GET_SHIPROOM(ch);
   }
   i = player_table[id].flags;

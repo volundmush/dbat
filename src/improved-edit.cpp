@@ -126,7 +126,7 @@ void parse_edit_action(int command, char *string, struct descriptor_data *d)
     }
     while (isalpha(string[j]) && j < 2) {
       if (string[j++] == 'i' && !indent) {
-	indent = TRUE;
+	indent = true;
 	flags += FORMAT_INDENT;
       }
     }
@@ -315,7 +315,7 @@ void parse_edit_action(int command, char *string, struct descriptor_data *d)
      * This is kind of annoying...but some people like it.
      */
     sprintf(buf + strlen(buf), "\r\n%d line%sshown.\r\n", total_len, (total_len != 1) ? "s " : " "); 
-    page_string(d, buf, TRUE);
+    page_string(d, buf, true);
     break;
   case PARSE_LIST_NUM:
     /*
@@ -379,7 +379,7 @@ void parse_edit_action(int command, char *string, struct descriptor_data *d)
     } else if (t)
       strcat(buf, t);
 
-    page_string(d, buf, TRUE);
+    page_string(d, buf, true);
     break;
 
   case PARSE_INSERT:
@@ -513,7 +513,7 @@ void parse_edit_action(int command, char *string, struct descriptor_data *d)
     break;
   default:
     write_to_output(d, "Invalid option.\r\n");
-    mudlog(BRF, ADMLVL_IMPL, TRUE, "SYSERR: invalid command passed to parse_edit_action");
+    mudlog(BRF, ADMLVL_IMPL, true, "SYSERR: invalid command passed to parse_edit_action");
     return;
   }
 }
@@ -525,7 +525,7 @@ void parse_edit_action(int command, char *string, struct descriptor_data *d)
  */
 int format_text(char **ptr_string, int mode, struct descriptor_data *d, unsigned int maxlen, int low, int high) 
 { 
-  int line_chars, cap_next = TRUE, cap_next_next = FALSE, color_chars = 0, i, pass_line = 0; 
+  int line_chars, cap_next = true, cap_next_next = false, color_chars = 0, i, pass_line = 0;
   char *flow, *start = nullptr, temp;
   char formatted[MAX_STRING_LENGTH] = ""; 
 
@@ -585,8 +585,8 @@ int format_text(char **ptr_string, int mode, struct descriptor_data *d, unsigned
       } 
 
       if (cap_next_next) { 
-        cap_next_next = FALSE; 
-        cap_next = TRUE; 
+        cap_next_next = false;
+        cap_next = true;
       } 
 
       /* 
@@ -594,7 +594,7 @@ int format_text(char **ptr_string, int mode, struct descriptor_data *d, unsigned
        * sentence delimiter. 
        */ 
       while (strchr(".!?", *flow)) { 
-        cap_next_next = TRUE; 
+        cap_next_next = true;
         flow++; 
       } 
 
@@ -637,7 +637,7 @@ int format_text(char **ptr_string, int mode, struct descriptor_data *d, unsigned
           line_chars++; 
         } 
       } else { 
-        cap_next = FALSE; 
+        cap_next = false;
         CAP(start); 
       } 
 

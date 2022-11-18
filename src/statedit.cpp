@@ -158,7 +158,7 @@ int stats_assign_stat(int abil, char *arg, struct descriptor_data *d)
   if (OLC_VAL(d) <= 0) {
     temp = 0;
     OLC_VAL(d) = 0;
-    mudlog(NRM, ADMLVL_IMMORT, TRUE, "Stat total below 0: possible code error");
+    mudlog(NRM, ADMLVL_IMMORT, true, "Stat total below 0: possible code error");
   }
   abil = temp;
   OLC_VAL(d) -= temp;
