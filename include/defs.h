@@ -325,7 +325,7 @@
 
 /* PC classes */
 /* Taken from the SRD under OGL, see ../doc/srd.txt for information */
-#define CLASS_UNDEFINED            -1
+#define CLASS_UNDEFINED            (-1)
 #define CLASS_ROSHI             0
 #define CLASS_PICCOLO           1
 #define CLASS_KRANE             2
@@ -455,7 +455,7 @@
 #define AURA_ORANGE             8
 
 /* Eye Color */
-#define EYE_UNDEFINED           -1
+#define EYE_UNDEFINED           (-1)
 #define EYE_BLUE                0
 #define EYE_BLACK               1
 #define EYE_GREEN               2
@@ -470,7 +470,7 @@
 #define EYE_EMERALD             11
 
 /*Hair Length */
-#define HAIRL_UNDEFINED         -1
+#define HAIRL_UNDEFINED         (-1)
 #define HAIRL_BALD              0
 #define HAIRL_SHORT             1
 #define HAIRL_MEDIUM            2
@@ -479,7 +479,7 @@
 
 
 /*Hair Color */
-#define HAIRC_UNDEFINED         -1
+#define HAIRC_UNDEFINED         (-1)
 #define HAIRC_NONE              0
 #define HAIRC_BLACK             1
 #define HAIRC_BROWN             2
@@ -496,7 +496,7 @@
 #define HAIRC_WHITE             13
 
 /* Hair Style */
-#define HAIRS_UNDEFINED         -1
+#define HAIRS_UNDEFINED         (-1)
 #define HAIRS_NONE              0
 #define HAIRS_PLAIN             1
 #define HAIRS_MOHAWK            2
@@ -512,7 +512,7 @@
 
 
 /* Skin Color */
-#define SKIN_UNDEFINED          -1
+#define SKIN_UNDEFINED          (-1)
 #define SKIN_WHITE              0
 #define SKIN_BLACK              1
 #define SKIN_GREEN              2
@@ -537,7 +537,7 @@
 #define PHASE_STRENGTH          6
 
 /* Races */
-#define RACE_UNDEFINED        -1
+#define RACE_UNDEFINED        (-1)
 #define RACE_HUMAN        0
 #define RACE_SAIYAN        1
 #define RACE_ICER        2
@@ -838,8 +838,8 @@
 #define EXIT_NA         2       /* Not implemented - do not use     */
 #define EXIT_COMPLETE   3       /* Full display                     */
 
-#define _exitlevel(ch) (!IS_NPC(ch) ? (PRF_FLAGGED((ch),PRF_AUTOEXIT) ? 1 : 0 ) + (PRF_FLAGGED((ch),PRF_FULL_EXIT) ? 2 : 0 ) : 0 )
-#define EXIT_LEV(ch) (_exitlevel(ch))
+#define exitlevel(ch) (!IS_NPC(ch) ? (PRF_FLAGGED((ch),PRF_AUTOEXIT) ? 1 : 0 ) + (PRF_FLAGGED((ch),PRF_FULL_EXIT) ? 2 : 0 ) : 0 )
+#define EXIT_LEV(ch) (exitlevel(ch))
 
 
 /* Affect bits: used in char_data.affected_by */
@@ -1062,7 +1062,7 @@
 #define MAX_SPELL_LEVEL   10                    /* how many spell levels */
 #define MAX_MEM          (MAX_SPELL_LEVEL * 10) /* how many total spells */
 
-#define DOMAIN_UNDEFINED    -1
+#define DOMAIN_UNDEFINED    (-1)
 #define DOMAIN_AIR        0
 #define DOMAIN_ANIMAL        1
 #define DOMAIN_CHAOS        2
@@ -1102,7 +1102,7 @@
 
 #define NUM_DOMAINS        37
 
-#define SCHOOL_UNDEFINED    -1
+#define SCHOOL_UNDEFINED    (-1)
 #define SCHOOL_ABJURATION    0
 #define SCHOOL_CONJURATION    1
 #define SCHOOL_DIVINATION    2
@@ -1115,7 +1115,7 @@
 
 #define NUM_SCHOOLS        10
 
-#define DEITY_UNDEFINED            -1
+#define DEITY_UNDEFINED            (-1)
 
 #define NUM_DEITIES            0
 

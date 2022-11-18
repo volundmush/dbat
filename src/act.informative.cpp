@@ -8281,11 +8281,11 @@ ACMD(do_scan)
            send_to_char(ch, "@RLava@r covers pretty much the entire area!@n\r\n");
          }
         /* Check 2nd room away */ 
-        if(_2ND_EXIT(ch, i) && _2ND_EXIT(ch, i)->to_room) { 
-          newroom = _2ND_EXIT(ch, i)->to_room; 
+        if(SECOND_EXIT(ch, i) && SECOND_EXIT(ch, i)->to_room) {
+          newroom = SECOND_EXIT(ch, i)->to_room;
 
-          if ((newroom != NOWHERE) && (!IS_SET(_2ND_EXIT(ch, i)->exit_info, EX_CLOSED)) ) { 
-            if (!IS_DARK(_2ND_EXIT(ch, i)->to_room)) { 
+          if ((newroom != NOWHERE) && (!IS_SET(SECOND_EXIT(ch, i)->exit_info, EX_CLOSED)) ) {
+            if (!IS_DARK(SECOND_EXIT(ch, i)->to_room)) {
               send_to_char(ch, "@w-----------------------------------------@n\r\n");
               send_to_char(ch,"          %sFar %s: %s %s\n\r", CCCYN(ch, C_NRM), dirnames[i], world[newroom].name ? world[newroom].name : "You don't think you saw what you just saw.", CCNRM(ch, C_NRM) ); 
               send_to_char(ch, "@W          -----------------          @n\r\n");

@@ -62,7 +62,7 @@ extern bool clanCreate(const char *name);
 //
 extern void clanINFOW(char *name, struct char_data *ch);
 extern void clanSAFE(char *name);
-extern void clan_update(void);
+extern void clan_update();
 
 //
 // Remove the clan with the given name from the list
@@ -176,14 +176,14 @@ extern bool clanOpenLeave(const char *name);
 // Sets open_join to true or false
 // returns true if successful and false otherwise
 //
-extern bool clanSetOpenJoin(const char *name, const int val);
+extern bool clanSetOpenJoin(const char *name, int val);
 
 
 //
 // Sets open_leave to true or false
 // returns true if successful and false otherwise
 //
-extern bool clanSetOpenLeave(const char *name, const int val);
+extern bool clanSetOpenLeave(const char *name, int val);
 
 
 //

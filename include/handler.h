@@ -7,10 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-
-#ifndef __HANDLER_H__
-#define __HANDLER_H__
-
+#pragma once
 #include "structs.h"
 
 /* handling the affected-structures */
@@ -67,7 +64,7 @@ extern void char_from_room(struct char_data *ch);
 extern void char_to_room(struct char_data *ch, room_rnum room);
 extern void extract_char(struct char_data *ch);
 extern void extract_char_final(struct char_data *ch);
-extern void extract_pending_chars(void);
+extern void extract_pending_chars();
 
 /* find if character can see */
 struct char_data *get_player_vis(struct char_data *ch, char *name, int *number, int inroom);
@@ -104,6 +101,3 @@ extern int generic_find(char *arg, bitvector_t bitvector, struct char_data *ch,
 #define FIND_OBJ_ROOM      (1 << 3)
 #define FIND_OBJ_WORLD     (1 << 4)
 #define FIND_OBJ_EQUIP     (1 << 5)
-
-
-#endif

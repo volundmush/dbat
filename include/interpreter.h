@@ -7,10 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-
-#ifndef __INTERPRETER_H__
-#define __INTERPRETER_H__
-
+#pragma once
 #include "structs.h"
 
 #define CMD_NAME (complete_cmd_info[cmd].command)
@@ -60,8 +57,7 @@ struct command_info {
    const char *command;
    const char *sort_as;
    int8_t minimum_position;
-   void	(*command_pointer)
-	   (struct char_data *ch, char *argument, int cmd, int subcmd);
+   CommandFunc command_pointer;
    int16_t minimum_level;
    int16_t minimum_admlevel;
    int	subcmd;
@@ -329,5 +325,3 @@ struct alias_data {
 #define SCMD_REDIT      1
 #define SCMD_OEDIT      2
 #define SCMD_MEDIT      3
-
-#endif

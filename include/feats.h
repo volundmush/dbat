@@ -5,10 +5,7 @@
 ** Created Thursday, September 5, 2002                                **
 **                                                                    **
 ***********************************************************************/
-
-#ifndef __FEATS_H__
-#define __FEATS_H__
-
+#pragma once
 #include "structs.h"
 
 /* Functions defined in feats.c */
@@ -16,8 +13,8 @@ extern int is_proficient_with_armor(const struct char_data *ch, int armor_type);
 extern int is_proficient_with_weapon(const struct char_data *ch, int weapon_type);
 extern int find_feat_num(char *name);
 extern int feat_to_subfeat(int feat);
-extern void assign_feats(void);
-extern void sort_feats(void);
+extern void assign_feats();
+extern void sort_feats();
 extern int feat_is_available(struct char_data *ch, int featnum, int iarg, char *sarg);
 
 extern int feat_sort_info[MAX_FEATS + 1];
@@ -225,5 +222,3 @@ extern struct feat_info feat_list[NUM_FEATS_DEFINED+1];
 #define HRANK_CASTER    3
 
 #define BASE_DC 10
-
-#endif

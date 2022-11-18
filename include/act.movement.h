@@ -6,8 +6,6 @@ extern const char *cmd_door[NUM_DOOR_CMD];
 
 // functions
 extern void handle_teleport(struct char_data *ch, struct char_data *tar, int location);
-extern void dismount_char(struct char_data *ch);
-extern void mount_char(struct char_data *ch, struct char_data *mount);
 extern int land_location(struct char_data *ch, char *arg);
 extern void carry_drop(struct char_data *ch, int type);
 extern int has_o2(struct char_data *ch);

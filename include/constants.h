@@ -6,9 +6,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  tbaMUD is based on CircleMUD and DikuMUD, Copyright (C) 1990, 1991.    *
 ************************************************************************ */
-
-#ifndef __CONSTANTS_H__
-#define __CONSTANTS_H__
+#pragma once
 
 #include "structs.h"
 #include "interpreter.h"	/* alias_data */
@@ -82,5 +80,3 @@ extern const char *skin_types[];
 extern const char *aura_types[];
 extern const char *npc_personality[MAX_PERSONALITIES + 1];
 extern const char *song_types[];
-
-#endif

@@ -3,9 +3,7 @@
  * If do not wish to use the improved editor, put #if 0 below, otherwise
  * you should leave the setting at #if 1.
  */
-#ifndef __IMPROVED_EDIT_H__
-#define __IMPROVED_EDIT_H__
-
+#pragma once
 #include "structs.h"
 
 
@@ -41,5 +39,3 @@ extern void send_editor_help(struct descriptor_data *d);
  
 /* Settings for formatter. */
 #define FORMAT_INDENT	(1 << 0)
-
-#endif

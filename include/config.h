@@ -38,7 +38,7 @@ extern const char *OK, *NOPERSON, *NOEFFECT;
 
 extern int track_through_doors, level_cap, show_obj_stacking, show_mob_stacking, mob_fighting;
 
-extern int imt_is_enabled, free_rent, max_obj_save, min_rent_cost, auto_save, autosave_time;
+extern int free_rent, max_obj_save, min_rent_cost, auto_save, autosave_time;
 
 extern int auto_pwipe, selfdelete_fastwipe;
 

@@ -7,10 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-
-#ifndef __SCREEN_H__
-#define __SCREEN_H__
-
+#pragma once
 #define KNRM  "\x1B[0m"
 #define KRED  "\x1B[31m"
 #define KGRN  "\x1B[32m"
@@ -28,7 +25,7 @@
 #define C_NRM	C_ON	/* Compatibility hack */
 #define C_CMP	C_ON	/* Compatibility hack */
 
-#define COLOR_CHOICES(ch)	(IS_NPC(ch) ? nullptr : ch->player_specials ? ch->player_specials->color_choices : nullptr)
+#define COLOR_CHOICES(ch)	(IS_NPC(ch) ? nullptr : (ch)->player_specials ? (ch)->player_specials->color_choices : nullptr)
 #define _clrlevel(ch) (!IS_NPC(ch) ? (PRF_FLAGGED((ch), PRF_COLOR) ? 1 : 0) : 0)
 #define clr(ch,lvl) (_clrlevel(ch) >= (lvl))
 #define CCNRM(ch,lvl)  (clr((ch),(lvl))?KNRM:KNUL)
@@ -82,5 +79,3 @@
 #define AB_MAGENTA      "45"
 #define AB_CYAN         "46"
 #define AB_WHITE        "47"
-
-#endif

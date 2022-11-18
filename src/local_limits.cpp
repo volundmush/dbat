@@ -1762,7 +1762,6 @@ void point_update(void)
     }
     if (!IS_NPC(i)) {
       update_char_objects(i);
-      update_innate(i);
       if (GET_ADMLEVEL(i) < CONFIG_IDLE_MAX_LEVEL)
 	check_idling(i);
       else

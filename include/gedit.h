@@ -1,10 +1,4 @@
-//
-// Created by volund on 10/20/21.
-//
-
-#ifndef CIRCLE_GEDIT_H
-#define CIRCLE_GEDIT_H
-
+#pragma once
 #include "structs.h"
 #include "guild.h"
 
@@ -19,5 +13,3 @@ extern void copy_guild(struct guild_data *tgm, struct guild_data *fgm);
 extern void free_guild_strings(struct guild_data *guild);
 extern void free_guild(struct guild_data *guild);
 extern void gedit_modify_string(char **str, char *new_g);
-
-#endif //CIRCLE_GEDIT_H

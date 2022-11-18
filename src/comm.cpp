@@ -2975,25 +2975,6 @@ int arena_watch(struct char_data *ch)
  }
 }
 
-void send_to_eaves(const char *messg, struct char_data *tch, ...)
-{
- struct descriptor_data *d;
-
- for (d = descriptor_list; d; d = d->next) {
-     if(STATE(d) != CON_PLAYING)
-      continue;
-
-     int roll = rand_number(1, 101);
-     if (GET_EAVESDROP(d->character) == GET_ROOM_VNUM(IN_ROOM(tch)) && GET_SKILL(d->character, SKILL_EAVESDROP) > roll) {
-      char buf[1000];
-      char buf2[1000];
-      *buf = '\0';
-      sprintf(buf2, "@W%s %s\r\n", PERS(d->character, tch), messg);
-      sprintf(buf, "-----Eavesdrop-----\r\n%s-----Eavesdrop-----\r\n", buf2);
-      send_to_char(d->character, buf);
-     }
-  }
-}
 
 void send_to_all(const char *messg, ...)
 {

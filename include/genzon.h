@@ -3,10 +3,7 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-
-#ifndef __GENZON_H__
-#define __GENZON_H__
-
+#pragma once
 #include "structs.h"
 #include "db.h"
 
@@ -18,9 +15,4 @@ extern void add_cmd_to_list(struct reset_com **list, struct reset_com *newcmd, i
 extern void remove_cmd_from_list(struct reset_com **list, int pos);
 extern int new_command(struct zone_data *zone, int pos);
 extern void delete_zone_command(struct zone_data *zone, int pos);
-extern zone_rnum real_zone(zone_vnum vznum);
 extern zone_rnum real_zone_by_thing(room_vnum vznum);
-
-/* Make delete_zone() */
-
-#endif

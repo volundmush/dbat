@@ -4,10 +4,7 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-
-#ifndef __GENOLC_H__
-#define __GENOLC_H__
-
+#pragma once
 #include "structs.h"
 #include "db.h"
 
@@ -21,12 +18,12 @@ extern int remove_from_save_list(zone_vnum, int type);
 extern int add_to_save_list(zone_vnum, int type);
 extern int in_save_list(zone_vnum, int type);
 extern void strip_cr(char *);
-extern int save_all(void);
+extern int save_all();
 extern char *str_udup(const char *);
 extern void copy_ex_descriptions(struct extra_descr_data **to, struct extra_descr_data *from);
 extern void free_ex_descriptions(struct extra_descr_data *head);
 extern int sprintascii(char *out, bitvector_t bits);
-extern void free_save_list(void);
+extern void free_save_list();
 
 struct save_list_data {
   int zone;
@@ -55,5 +52,4 @@ extern struct save_list_data *save_list;
 extern room_vnum genolc_zone_bottom(zone_rnum rznum);
 extern room_vnum genolc_zonep_bottom(struct zone_data *zone);
 extern void create_world_index(int znum, const char *type);
-extern void free_save_list(void);
-#endif
+extern void free_save_list();

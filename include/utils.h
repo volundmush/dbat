@@ -7,10 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-
-#ifndef __UTILS_H__
-#define __UTILS_H__
-
+#pragma once
 #include "structs.h"
 #include "db.h"
 #include "races.h"
@@ -55,7 +52,7 @@ extern void senseCreate(struct char_data *ch);
 extern void sense_memory_write(struct char_data *ch, struct char_data *vict);
 extern int read_sense_memory(struct char_data *ch, struct char_data *vict);
 extern int roll_pursue(struct char_data *ch, struct char_data *vict);
-extern void broken_update(void);
+extern void broken_update();
 extern int wearable_obj(struct obj_data *obj);
 extern void randomize_eq(struct obj_data *obj);
 extern char *sense_location(struct char_data *ch);
@@ -145,7 +142,7 @@ extern void set_title(struct char_data *ch, char *title);
 extern void gain_exp(struct char_data *ch, int64_t gain);
 extern void gain_exp_regardless(struct char_data *ch, int gain);
 extern void gain_condition(struct char_data *ch, int condition, int value);
-extern void point_update(void);
+extern void point_update();
 extern void update_pos(struct char_data *victim);
 
 /* in class.c */
@@ -221,7 +218,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define ISNEWL(ch) ((ch) == '\n' || (ch) == '\r') 
 
 /* See also: ANA, SANA */
-#define AN(string) (strchr("aeiouAEIOU", *string) ? "an" : "a")
+#define AN(string) (strchr("aeiouAEIOU", *(string)) ? "an" : "a")
 
 
 /* memory utils **********************************************************/
@@ -248,20 +245,20 @@ extern int wield_type(int chsize, const struct obj_data *weap);
  */
 #define REMOVE_FROM_LIST(item, head, next, cmtemp)	\
    if ((item) == (head))		\
-      head = (item)->next;		\
+      (head) = (item)->next;		\
    else {				\
-      cmtemp = head;			\
-      while (cmtemp && (cmtemp->next != (item))) \
-	 cmtemp = cmtemp->next;		\
+      (cmtemp) = head;			\
+      while ((cmtemp) && ((cmtemp)->next != (item))) \
+	 (cmtemp) = (cmtemp)->next;		\
       if (cmtemp)				\
-         cmtemp->next = (item)->next;	\
+         (cmtemp)->next = (item)->next;	\
    }					\
 
 #define REMOVE_FROM_DOUBLE_LIST(item, head, next, prev)\
       if((item) == (head))			\
       {						\
-            head = (item)->next;  		\
-            if(head) head->prev = nullptr;		\
+            (head) = (item)->next;  		\
+            if(head) (head)->prev = nullptr;		\
       }						\
       else					\
       {						\
@@ -270,9 +267,9 @@ extern int wield_type(int chsize, const struct obj_data *weap);
             temp = temp->next;			\
              if(temp)				\
             {					\
-               temp->next = item->next;		\
-               if(item->next)			\
-                item->next->prev = temp;	\
+               temp->next = (item)->next;		\
+               if((item)->next)			\
+                (item)->next->prev = temp;	\
             }					\
       }						\
 
@@ -459,7 +456,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define IS_GRAP(ch)     (GRAPPLING(ch) || GRAPPLED(ch))
 #define GET_SPEEDINT(ch) (IS_BIO(ch) ? ((GET_CHA(ch) * GET_DEX(ch)) * (GET_MAX_HIT(ch) / 1200) / 1200) + (GET_CHA(ch) * (GET_KAIOKEN(ch) * 100)) : ((GET_CHA(ch) * GET_DEX(ch)) * (GET_MAX_HIT(ch) / 1000) / 1000) + (GET_CHA(ch) * (GET_KAIOKEN(ch) * 100)))
 #define IS_INFERIOR(ch) (IS_KONATSU(ch) || IS_DEMON(ch))
-#define IS_WEIGHTED(ch) (ch->getEffMaxPL() < GET_MAX_HIT(ch))
+#define IS_WEIGHTED(ch) ((ch)->getEffMaxPL() < GET_MAX_HIT(ch))
 
 
 #define GET_EXP(ch)	  ((ch)->exp)
@@ -480,7 +477,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define GET_HIT(ch)	  ((ch)->getCurPL())
 #define GET_MAX_HIT(ch)	  ((ch)->getEffMaxPL())
 #define GET_MAX_MOVE(ch)  ((ch)->getMaxST())
-#define GET_MAX_MANA(ch)  (ch->getMaxKI())
+#define GET_MAX_MANA(ch)  ((ch)->getMaxKI())
 #define GET_KI(ch)	  ((ch)->ki)
 #define GET_MAX_KI(ch)    ((ch)->max_ki)
 #define GET_DROOM(ch)     ((ch)->droom)
@@ -613,11 +610,11 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define GET_HOST(ch)		CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->host))
 #define GET_HISTORY(ch, i)      CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->comm_hist[i]))
 
-#define GET_SKILL_BONUS(ch, i)		(ch->skillmods[i])
-#define GET_SKILL_PERF(ch, i)           (ch->skillperfs[i])
+#define GET_SKILL_BONUS(ch, i)		((ch)->skillmods[i])
+#define GET_SKILL_PERF(ch, i)           ((ch)->skillperfs[i])
 #define SET_SKILL_BONUS(ch, i, value)	do { (ch)->skillmods[i] = value; } while (0)
 #define SET_SKILL_PERF(ch, i, value)    do { (ch)->skillperfs[i] = value; } while (0)
-#define GET_SKILL_BASE(ch, i)		(ch->skills[i])
+#define GET_SKILL_BASE(ch, i)		((ch)->skills[i])
 #define GET_SKILL(ch, i)		((ch)->skills[i] + GET_SKILL_BONUS(ch, i))
 #define SET_SKILL(ch, i, val)		do { (ch)->skills[i] = val; } while(0)
 #define BODY_PARTS(ch)  ((ch)->bodyparts)
@@ -790,11 +787,11 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 
 /* Is anyone carrying this object and if so, are they visible? */
 #define CAN_SEE_OBJ_CARRIER(sub, obj) \
-  ((!obj->carried_by || CAN_SEE(sub, obj->carried_by)) &&	\
-   (!obj->worn_by || CAN_SEE(sub, obj->worn_by)))
+  ((!(obj)->carried_by || CAN_SEE((sub), (obj)->carried_by)) &&	\
+   (!(obj)->worn_by || CAN_SEE((sub), (obj)->worn_by)))
 
 #define MORT_CAN_SEE_OBJ(sub, obj) \
-  ((LIGHT_OK(sub) || obj->carried_by == sub || obj->worn_by) && INVIS_OK_OBJ(sub, obj) && CAN_SEE_OBJ_CARRIER(sub, obj))
+  ((LIGHT_OK(sub) || (obj)->carried_by == (sub) || (obj)->worn_by) && INVIS_OK_OBJ((sub), (obj)) && CAN_SEE_OBJ_CARRIER((sub), (obj)))
 
 #define CAN_SEE_OBJ(sub, obj) \
    (MORT_CAN_SEE_OBJ(sub, obj) || (!IS_NPC(sub) && PRF_FLAGGED((sub), PRF_HOLYLIGHT)))
@@ -810,9 +807,9 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define DISG(ch, vict) ((!PLR_FLAGGED(ch, PLR_DISGUISED)) || \
    (PLR_FLAGGED(ch, PLR_DISGUISED) && (GET_ADMLEVEL(vict) > 0 || IS_NPC(vict))))
 
-#define INTROD(ch, vict) (ch == vict || readIntro(ch, vict) == 1 || (IS_NPC(vict) || IS_NPC(ch) || (GET_ADMLEVEL(ch) > 0 || GET_ADMLEVEL(vict) > 0)))
+#define INTROD(ch, vict) ((ch) == (vict) || readIntro((ch), (vict)) == 1 || (IS_NPC(vict) || IS_NPC(ch) || (GET_ADMLEVEL(ch) > 0 || GET_ADMLEVEL(vict) > 0)))
 
-#define ISWIZ(ch, vict) (ch == vict || GET_ADMLEVEL(ch) > 0 || GET_ADMLEVEL(vict) > 0 || IS_NPC(vict) || IS_NPC(ch))
+#define ISWIZ(ch, vict) ((ch) == (vict) || GET_ADMLEVEL(ch) > 0 || GET_ADMLEVEL(vict) > 0 || IS_NPC(vict) || IS_NPC(ch))
 
 #define PERS(ch, vict) ((DISG(ch, vict) ? (CAN_SEE(vict, ch) ? (INTROD(vict, ch) ? (ISWIZ(ch, vict) ? GET_NAME(ch) :\
                         get_i_name(vict, ch)) : introd_calc(ch)) : "Someone") :\
@@ -826,8 +823,8 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 
 
 #define EXIT(ch, door)  (world[IN_ROOM(ch)].dir_option[door])
-#define _2ND_EXIT(ch, door) (world[EXIT(ch, door)->to_room].dir_option[door]) 
-#define _3RD_EXIT(ch, door) (world[_2ND_EXIT(ch, door)->to_room].dir_option[door])
+#define SECOND_EXIT(ch, door) (world[EXIT(ch, door)->to_room].dir_option[door]) 
+#define THIRD_EXIT(ch, door) (world[_2ND_EXIT(ch, door)->to_room].dir_option[door])
 #define W_EXIT(room, num)     (world[(room)].dir_option[(num)])
 #define R_EXIT(room, num)     ((room)->dir_option[(num)])
 
@@ -1086,8 +1083,8 @@ extern int wield_type(int chsize, const struct obj_data *weap);
   /** Character Creation Method **/
 #define CONFIG_CREATION_METHOD	config_info.creation.method
 
-#define GET_SPELLMEM(ch, i)	((ch->player_specials->spellmem[i]))
-#define GET_MEMCURSOR(ch)	((ch->player_specials->memcursor))
+#define GET_SPELLMEM(ch, i)	((ch)->player_specials->spellmem[i])
+#define GET_MEMCURSOR(ch)	((ch)->player_specials->memcursor)
 /* returns the number of spells per slot */
 #define GET_SPELL_LEVEL(ch, i)	((ch)->player_specials->spell_level[i])
 #define IS_ARCANE(ch)		(IS_WIZARD(ch))
@@ -1100,13 +1097,13 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define GET_BAB(ch)		GET_POLE_BONUS(ch)
 #define SET_FEAT(ch, i, value)	do { CHECK_PLAYER_SPECIAL((ch), (ch)->feats[i]) = value; } while(0)
 #define GET_SPELL_MASTERY_POINTS(ch) \
-				(ch->player_specials->spell_mastery_points)
-#define GET_FEAT_POINTS(ch)	(ch->player_specials->feat_points)
+				((ch)->player_specials->spell_mastery_points)
+#define GET_FEAT_POINTS(ch)	((ch)->player_specials->feat_points)
 #define GET_EPIC_FEAT_POINTS(ch) \
-				(ch->player_specials->epic_feat_points)
-#define GET_CLASS_FEATS(ch,cl)	(ch->player_specials->class_feat_points[cl])
+				((ch)->player_specials->epic_feat_points)
+#define GET_CLASS_FEATS(ch,cl)	((ch)->player_specials->class_feat_points[cl])
 #define GET_EPIC_CLASS_FEATS(ch,cl) \
-				(ch->player_specials->epic_class_feat_points[cl])
+				((ch)->player_specials->epic_class_feat_points[cl])
 #define IS_EPIC_LEVEL(ch)	(GET_CLASS_LEVEL(ch) >= 20)
 #define HAS_CRAFT_SKILL(ch,i,j)	IS_SET_AR((ch)->craft_skill[(i)], (j))
 #define SET_CRAFT_SKILL(ch,i,j)	SET_BIT_AR((ch)->craft_skill[(i)], (j))
@@ -1133,15 +1130,13 @@ extern void xdir_close(struct xap_dir *xd);
 extern int insure_directory(char *path, int isfile);
 extern void admin_set(struct char_data *ch, int value);
 #define GET_PAGE_LENGTH(ch)         CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->page_length))
-#define IS_COLOR_CHAR(c)  (c == 'n' || c == 'b' || c == 'B' || c == 'c' || \
-   c == 'C' || c == 'g' || c == 'G' || c == 'm' || c == 'M' || c == 'r' || \
-   c == 'R' || c == 'y' || c == 'Y' || c == 'w' || c == 'W' || c == 'k' || \
-   c == 'K' || c == '0' || c == '2' || c == '3' || c == '4' || c == '5' || \
-   c == '6' || c == '7' || c == 'o' || c == 'e' || c == 'u' || c == 'l') 
+#define IS_COLOR_CHAR(c)  ((c) == 'n' || (c) == 'b' || (c) == 'B' || (c) == '(c)' || \
+   (c) == '(c)' || (c) == 'g' || (c) == 'G' || (c) == 'm' || (c) == 'M' || (c) == 'r' || \
+   (c) == 'R' || (c) == 'y' || (c) == 'Y' || (c) == 'w' || (c) == 'W' || (c) == 'k' || \
+   (c) == 'K' || (c) == '0' || (c) == '2' || (c) == '3' || (c) == '4' || (c) == '5' || \
+   (c) == '6' || (c) == '7' || (c) == 'o' || (c) == 'e' || (c) == 'u' || (c) == 'l') 
 #define MOB_LOADROOM(ch)      ((ch)->hometown)  /*hometown not used for mobs*/
 #define OBJ_LOADROOM(obj)     ((obj)->room_loaded)
 
 extern int levenshtein_distance(char *s1, char *s2);
 #define GET_MURDER(ch)          CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->murder))
-
-#endif

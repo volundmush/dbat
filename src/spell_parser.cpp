@@ -739,8 +739,6 @@ ACMD(do_cast)
     return;
   }
 
-  if(is_innate(ch, spellnum))
-    innate = true;
 
   if (SINFO.violent && tch && IS_NPC(tch)) {
     if (!FIGHTING(tch))

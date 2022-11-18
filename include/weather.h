@@ -1,10 +1,7 @@
 //
 // Created by volund on 10/20/21.
 //
-
-#ifndef CIRCLE_WEATHER_H
-#define CIRCLE_WEATHER_H
-
+#pragma once
 #include "structs.h"
 
 
@@ -15,5 +12,3 @@ extern void oozaru_drop();
 extern void oozaru_transform(struct char_data *ch);
 extern void oozaru_revert(struct char_data *ch);
 extern void weather_and_time(int mode);
-
-#endif //CIRCLE_WEATHER_H

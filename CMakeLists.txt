@@ -37,12 +37,8 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 set(CMAKE_CXX_FLAGS "-fpermissive -w")
 
-find_library(LIBBSD NAMES bsd libbsd)
-
-if(${LIBBSD})
-    link_libraries(${LIBBSD})
-    add_compile_definitions(HAVE_LIBBSD)
-endif()
+find_library(LIBBSD NAMES bsd libbsd REQUIRED)
+add_compile_definitions(HAVE_LIBBSD)
 
 set(BUILD_TESTING OFF)
 
@@ -51,7 +47,7 @@ link_libraries(ZLIB::ZLIB fmt::fmt ${SQLite3_LIBRARIES})
 # this is the core library we're making.
 add_library(circlemud ${CIRCLE_INCLUDE} ${CIRCLE_SRC})
 # everything we make will link to it.
-link_libraries(circlemud)
+link_libraries(circlemud bsd)
 
 # the various binaries
 add_executable(circle apps/circle.cpp)

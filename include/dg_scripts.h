@@ -8,10 +8,7 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
-
-#ifndef __DG_SCRIPTS_H__
-#define __DG_SCRIPTS_H__
-
+#pragma once
 #include "structs.h"
 #include "db.h"
 #include "genzon.h"
@@ -139,7 +136,7 @@
 #define MAX_SCRIPT_DEPTH      10          /* maximum depth triggers can
 					     recurse into each other */
 
-#define SCRIPT_ERROR_CODE     -9999999   /* this shouldn't happen too often */
+#define SCRIPT_ERROR_CODE     (-9999999)   /* this shouldn't happen too often */
 
 /* one line of the trigger */
 struct cmdlist_element {
@@ -291,8 +288,8 @@ extern obj_data *get_obj_by_room(room_data *room, char *name);
 extern int trgvar_in_room(room_vnum vnum);
 extern obj_data *get_obj_in_list(char *name, obj_data *list);
 extern obj_data *get_object_in_equip(char_data * ch, char *name);
-extern void script_trigger_check(void);
-extern void check_time_triggers(void);
+extern void script_trigger_check();
+extern void check_time_triggers();
 extern void find_uid_name(char *uid, char *name, size_t nlen);
 extern void do_sstat_room(struct char_data * ch, struct room_data *rm);
 extern void do_sstat_object(char_data *ch, obj_data *j);
@@ -311,7 +308,7 @@ extern void process_eval(void *go, struct script_data *sc, trig_data *trig,
                  int type, char *cmd);
 extern void read_saved_vars(struct char_data *ch);
 extern void save_char_vars(struct char_data *ch);
-extern void init_lookup_table(void);
+extern void init_lookup_table();
 extern void add_to_lookup_table(long uid, void *c);
 extern void remove_from_lookup_table(long uid);
 
@@ -412,6 +409,3 @@ extern room_rnum obj_room(obj_data *obj);
 #define ADD_UID_VAR(buf, trig, go, name, context) do { \
 		         sprintf(buf, "%c%d", UID_CHAR, GET_ID(go)); \
                          add_var(&GET_TRIG_VARS(trig), name, buf, context); } while (0)
-
-
-#endif

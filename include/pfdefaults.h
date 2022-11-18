@@ -1,6 +1,4 @@
-#ifndef _PFDEFAULTS_H_
-#define _PFDEFAULTS_H_
-
+#pragma once
 /*
   ascii pfile variable defaults
 
@@ -80,5 +78,3 @@
 #define PFDEF_MURDER		0
 #define PFDEF_PAGELENGTH	50
 #define PFDEF_GAUNTLET          0
-
-#endif

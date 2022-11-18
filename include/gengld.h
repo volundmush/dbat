@@ -3,17 +3,14 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-
-#ifndef __GENGLD_H__
-#define __GENGLD_H__
-
+#pragma once
 #include "structs.h"
 #include "guild.h"
 
 extern void copy_guild(struct guild_data *tguild, struct guild_data *fguild);
-extern void copy_list(IDXTYPE **tlist, IDXTYPE *flist);
-extern void remove_from_int_list(IDXTYPE **list, IDXTYPE num);
-extern void add_to_int_list(IDXTYPE **tlist, IDXTYPE newi);
+extern void copy_list(vnum **tlist, vnum *flist);
+extern void remove_from_int_list(vnum **list, vnum num);
+extern void add_to_int_list(vnum **tlist, vnum newi);
 extern void free_guild_string(struct guild_data *guild);
 extern void free_guild(struct guild_data *guild);
 extern void free_guild_strings(struct guild_data *guild);
@@ -51,5 +48,3 @@ extern guild_rnum real_guild(guild_vnum vnum);
 #define MAX_PER_PRAC    1	/* max percent gain in skill per practice */
 #define MIN_PER_PRAC    2	/* min percent gain in skill per practice */
 #define PRAC_TYPE       3	/* should it say 'spell' or 'skill'?	 */
-
-#endif

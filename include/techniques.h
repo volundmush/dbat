@@ -1,10 +1,4 @@
-//
-// Created by volund on 11/4/21.
-//
-
-#ifndef CIRCLE_TECHNIQUES_H
-#define CIRCLE_TECHNIQUES_H
-
+#pragma once
 #include "sysdep.h"
 #include "typestubs.h"
 
@@ -15,5 +9,3 @@ extern void tech_handle_fireshield(char_data *ch, char_data *vict, const std::st
 extern bool tech_handle_targeting(char_data *ch, char *arg, char_data **vict, obj_data **obj);
 extern bool tech_handle_charge(char_data *ch, char *arg, double minimum, double *attperc);
 extern bool tech_handle_crashdown(char_data *ch, char_data *vict);
-
-#endif //CIRCLE_TECHNIQUES_H

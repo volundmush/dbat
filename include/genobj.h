@@ -4,12 +4,8 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-
-#ifndef __GENOBJ_H__
-#define __GENOBJ_H__
-
+#pragma once
 #include "structs.h"
-
 
 extern void copy_object_strings(struct obj_data *to, struct obj_data *from);
 extern void free_object_strings(struct obj_data *obj);
@@ -23,5 +19,3 @@ extern obj_rnum index_object(struct obj_data *obj, obj_vnum ovnum, obj_rnum ornu
 extern int update_objects(struct obj_data *refobj);
 extern obj_rnum add_object(struct obj_data *, obj_vnum ovnum);
 extern int delete_object(obj_rnum);
-
-#endif

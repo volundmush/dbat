@@ -15,6 +15,7 @@
 #include <strings.h>
 #include <cstdlib>
 #include <sys/types.h>
+#include <bsd/string.h>
 #include <unistd.h>
 #include <climits>
 #include <cerrno>

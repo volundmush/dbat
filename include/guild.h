@@ -4,11 +4,7 @@
 *                                                                         *
 * Written by Jason Goodwin.   jgoodwin@expert.cc.purdue.edu               *
 ************************************************************************ */
-
-#ifndef __GUILD_H__
-#define __GUILD_H__
-
-
+#pragma once
 #include "structs.h"
 
 #define GW_ARRAY_MAX    4
@@ -139,6 +135,4 @@ extern void list_skills(struct char_data *ch, char *arg);
 extern int count_guilds(guild_vnum low, guild_vnum high);
 
 /*. External . */
-SPECIAL(guild);
-
-#endif
+extern SPECIAL(guild);

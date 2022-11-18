@@ -7,9 +7,7 @@
 *  to house all player level object editing defines/declarations          *
 *                                                            Iovan 1/6/13 *
 ************************************************************************ */
-
-#ifndef __OBJ_EDIT_H__
-#define __OBJ_EDIT_H__
+#pragma once
 #include "structs.h"
 
 
@@ -42,5 +40,3 @@ extern void disp_restring_menu(struct descriptor_data *d);
 #define EDIT_RESTRING_LDESC 4
 #define EDIT_RESTRING_QUIT  5
 #define EDIT_RESTRING_CONF  6
-
-#endif

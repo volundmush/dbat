@@ -3,10 +3,7 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-
-#ifndef __GENMOB_H__
-#define __GENMOB_H__
-
+#pragma once
 #include "structs.h"
 
 
@@ -27,5 +24,3 @@ extern int write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd);
 #define GET_LDESC(mob)	((mob)->long_descr)
 #define GET_DDESC(mob)	((mob)->description)
 #define GET_ATTACK(mob)	((mob)->mob_specials.attack_type)
-
-#endif

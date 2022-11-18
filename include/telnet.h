@@ -32,10 +32,7 @@
  *
  *	@(#)telnet.h	8.2 (Berkeley) 12/15/93
  */
-
-#ifndef _ARPA_TELNET_H
-#define _ARPA_TELNET_H
-
+#pragma once
 /*
  * Definitions for the TELNET protocol.
  */
@@ -316,4 +313,3 @@ extern char *enctype_names[];
 
 #define	ENCTYPE_NAME_OK(x)	((unsigned int)(x) < ENCTYPE_CNT)
 #define	ENCTYPE_NAME(x)		enctype_names[x]
-#endif /* _ARPA_TELNET_H */

@@ -1,5 +1,4 @@
-#ifndef __OLC_H__
-#define __OLC_H__
+#pragma once
 #include "structs.h"
 
 #define OLC_SET		0
@@ -21,5 +20,3 @@
 #define MAX_ROOM_DESC	4096
 #define MAX_MOB_DESC	512
 #define MAX_OBJ_DESC	512
-
-#endif

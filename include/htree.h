@@ -6,10 +6,7 @@
  * Written by Elie Rosenblum <fnord@cosanostra.net>                        *
  * Copyright (c) 7-Oct-2004                                                *
  ***************************************************************************/
-
-#ifndef __HTREE_H__
-#define __HTREE_H__
-
+#pragma once
 #include "structs.h"
 
 
@@ -42,6 +39,3 @@ extern void htree_add(struct htree_node *root, IDXTYPE index, IDXTYPE content);
 extern void htree_del(struct htree_node *root, IDXTYPE index);
 extern IDXTYPE htree_find(struct htree_node *root, IDXTYPE index);
 extern void htree_test();
-
-
-#endif

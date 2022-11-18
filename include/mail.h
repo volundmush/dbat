@@ -7,10 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-
-#ifndef __MAIL_H__
-#define __MAIL_H__
-
+#pragma once
 #include "structs.h"
 
 /* ****** MUD MAIL SYSTEM HEADER FILE **********************
@@ -49,12 +46,12 @@
 ***************************************************************************
 **   DON'T TOUCH DEFINES BELOW  */
 
-extern int scan_file(void);
+extern int scan_file();
 extern int has_mail(long recipient);
 extern void store_mail(long to, long from, char *message_pointer);
 extern char *read_delete(long recipient, char **from);
-extern void clear_free_list(void);
-extern void free_mail_index(void);
+extern void clear_free_list();
+extern void free_mail_index();
 
 #define HEADER_BLOCK  (-1)
 #define LAST_BLOCK    (-2)
@@ -114,6 +111,4 @@ struct mail_index_type_d {
 typedef struct mail_index_type_d mail_index_type;
 extern void notify_if_playing(struct char_data *from, int recipient_id);
 
-SPECIAL(postmaster);
-
-#endif
+extern SPECIAL(postmaster);

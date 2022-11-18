@@ -4,14 +4,10 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-
-#ifndef __OASIS_H__
-#define __OASIS_H__
-
+#pragma once
 #include "structs.h"
 
-
-#define _OASISOLC	0x206   /* 2.0.6 */
+//#define _OASISOLC	0x206   /* 2.0.6 */
 /*
  * Used to determine what version of OasisOLC is installed.
  *
@@ -619,7 +615,7 @@ extern ACMD(do_oasis_zedit);
 
 extern void cedit_setup(struct descriptor_data *d);
 extern void cedit_parse(struct descriptor_data *d, char *arg);
-extern void cedit_save_to_disk( void );
+extern void cedit_save_to_disk();
 extern void cedit_string_cleanup(struct descriptor_data *d, int terminator);
 extern ACMD(do_oasis_cedit);
 
@@ -642,7 +638,7 @@ extern void hedit_string_cleanup(struct descriptor_data *d, int terminator);
 extern void free_help(struct help_index_element *help);
 extern ACMD(do_oasis_hedit);
 
-extern void hsedit_save_to_disk( void );
+extern void hsedit_save_to_disk();
 extern void hsedit_setup_new(struct descriptor_data *d);
 extern void hsedit_setup_existing(struct descriptor_data *d, int real_num);
 extern void hsedit_parse(struct descriptor_data *d, char *arg);
@@ -818,8 +814,8 @@ extern int find_context_gedit(struct descriptor_data *d);
 extern int find_context_trigedit(struct descriptor_data *d);
 extern int find_context_script_edit(struct descriptor_data *d);
 extern int context_help(struct descriptor_data *d, char *arg);
-extern void boot_context_help(void);
-extern void free_context_help(void);
+extern void boot_context_help();
+extern void free_context_help();
 #endif /* ifndef __GENOLC_C__ */
 
 
@@ -856,5 +852,3 @@ extern void free_context_help(void);
 #define STAT_GET_CHA  5
 #define STAT_QUIT     6
 #define STAT_PARSE_MENU 7
-
-#endif

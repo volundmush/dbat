@@ -1,10 +1,7 @@
 //
 // Created by basti on 10/21/2021.
 //
-
-#ifndef CIRCLE_TYPESTUBS_H
-#define CIRCLE_TYPESTUBS_H
-
+#pragma once
 struct reset_com;
 struct char_data;
 struct obj_data;
@@ -23,5 +20,3 @@ namespace dbat {
         class Sensei;
     }
 }
-
-#endif //CIRCLE_TYPESTUBS_H

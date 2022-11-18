@@ -9,17 +9,10 @@ extern void log_imm_action(char *messg, ...);
 extern void hint_system(struct char_data *ch, int num);
 extern int dball_count(struct char_data *ch);
 extern void log_custom(struct descriptor_data *d, struct obj_data *obj);
-extern void wishSYS(void);
+extern void wishSYS();
 extern void bring_to_cap(struct char_data *ch);
-extern void base_update(void);
+extern void base_update();
 extern void load_shadow_dragons();
-extern void innate_remove(struct char_data * ch, struct innate_node * inn);
-extern void innate_add(struct char_data * ch, int innate, int timer);
-extern int is_innate(struct char_data *ch, int spellnum);
-extern int is_innate_ready(struct char_data *ch, int spellnum);
-extern void add_innate_timer(struct char_data *ch, int spellnum);
-extern void add_innate_affects(struct char_data *ch);
-extern void update_innate(struct char_data *ch);
 
 // commands
 extern ACMD(do_gen_comm);

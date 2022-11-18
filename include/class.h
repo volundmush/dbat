@@ -61,8 +61,8 @@ namespace dbat::sensei {
         bool senseiAvailableForRace(race::race_id r_id) const;
         int getGravTolerance() const;
         bool senseiIsPcOk() const;
-        IDXTYPE senseiStartRoom() const;
-        IDXTYPE senseiLocationID() const;
+        room_vnum senseiStartRoom() const;
+        room_vnum senseiLocationID() const;
 
     protected:
         sensei_id s_id;
@@ -73,6 +73,6 @@ namespace dbat::sensei {
 
     Sensei* find_sensei(const std::string& arg);
     Sensei* find_sensei_map(const std::string& arg, const SenseiMap& s_map);
-    Sensei* find_sensei_map_id(const int id, const SenseiMap& s_map);
+    Sensei* find_sensei_map_id(int id, const SenseiMap& s_map);
     SenseiMap valid_for_race_pc(char_data *ch);
 }

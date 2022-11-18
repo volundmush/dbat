@@ -6,10 +6,7 @@
 *			     			     *
 * Paolo Libardi - pinkpallin@libero.it		     *
 *****************************************************/  
-
-#ifndef __MAPUTILS_H__
-#define __MAPUTILS_H__
-
+#pragma once
 #include "structs.h"
 
 
@@ -27,5 +24,3 @@ extern void printmap(int rnum, struct char_data * ch, int type, int vnum);
 extern void ping_ship(int vnum, int vnum2);
 
 extern int mapnums[MAP_ROWS+1][MAP_COLS+1];
-
-#endif

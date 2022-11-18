@@ -7,10 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-
-#ifndef __SHOP_H__
-#define __SHOP_H__
-
+#pragma once
 #include "structs.h"
 
 struct shop_buy_data {
@@ -263,16 +260,11 @@ extern int top_shop, cmd_say, cmd_tell, cmd_emote, cmd_slap, cmd_puke;
 extern int shop_producing(struct obj_data *item, vnum shop_nr);
 extern int ok_damage_shopkeeper(struct char_data *ch, struct char_data *victim);
 extern void boot_the_shops(FILE *shop_f, char *filename, int rec_count);
-extern void assign_the_shopkeepers(void);
+extern void assign_the_shopkeepers();
 extern int ok_shop_room(vnum shop_nr, room_vnum room);
-extern void destroy_shops(void);
+extern void destroy_shops();
 extern void show_shops(struct char_data *ch, char *arg);
 extern int count_shops(shop_vnum low, shop_vnum high);
 
 // special
-SPECIAL(shop_keeper);
-
-// commands
-
-
-#endif
+extern SPECIAL(shop_keeper);

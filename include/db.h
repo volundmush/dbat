@@ -7,10 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-
-#ifndef __DB_H__
-#define __DB_H__
-
+#pragma once
 #include "structs.h"
 
 
@@ -133,27 +130,27 @@ extern room_rnum r_frozen_start_room;	/* rnum of frozen start room	 */
 
 /* public procedures in db.c */
 extern void auc_load(struct obj_data *obj);
-extern void boot_world(void);
+extern void boot_world();
 extern int is_empty(zone_rnum zone_nr);
 extern void index_boot(int mode);
-extern void boot_db(void);
-extern void destroy_db(void);
+extern void boot_db();
+extern void destroy_db();
 extern int create_entry(char *name);
-extern void zone_update(void);
+extern void zone_update();
 extern char *fread_string(FILE *fl, const char *error);
 extern long get_id_by_name(const char *name);
 extern char *get_name_by_id(long id);
 extern void save_mud_time(struct time_info_data *when);
 extern void free_extra_descriptions(struct extra_descr_data *edesc);
-extern void free_text_files(void);
-extern void free_player_index(void);
-extern void load_disabled(void);
-extern void save_disabled(void);
-extern void free_disabled(void);
-extern void free_help_table(void);
+extern void free_text_files();
+extern void free_player_index();
+extern void load_disabled();
+extern void save_disabled();
+extern void free_disabled();
+extern void free_help_table();
 extern void load_help(FILE *fl, char *name);
-extern void auc_save(void);
-extern void load_config(void);
+extern void auc_save();
+extern void load_config();
 
 extern zone_rnum real_zone(zone_vnum vnum);
 extern room_rnum real_room(room_vnum vnum);
@@ -165,20 +162,20 @@ extern void load_char_pets(struct char_data *ch);
 extern void save_char(struct char_data *ch);
 extern void save_char_pets(struct char_data *ch);
 extern void init_char(struct char_data *ch);
-struct char_data* create_char(void);
+struct char_data* create_char();
 struct char_data *read_mobile(mob_vnum nr, int type);
 extern int vnum_mobile(char *searchname, struct char_data *ch);
 extern void clear_char(struct char_data *ch);
 extern void reset_char(struct char_data *ch);
 extern void free_char(struct char_data *ch);
-extern void save_player_index(void);
+extern void save_player_index();
 extern long get_ptable_by_name(const char *name);
 extern void read_level_data(struct char_data *ch, FILE *fl);
 extern void write_level_data(struct char_data *ch, FILE *fl);
 
 extern int parse_mobile_from_file(FILE *mob_f, struct char_data *ch);
 
-struct obj_data *create_obj(void);
+struct obj_data *create_obj();
 extern void clear_object(struct obj_data *obj);
 extern void free_obj(struct obj_data *obj);
 struct obj_data *read_object(obj_vnum nr, int type);
@@ -329,7 +326,6 @@ extern struct descriptor_data *descriptor_list;
 extern struct char_data *character_list;
 extern struct char_data *affect_list;
 extern struct char_data *affectv_list;
-extern struct player_special_data dummy_mob;
 
 extern struct index_data *mob_index;
 extern struct char_data *mob_proto;
@@ -348,7 +344,6 @@ extern struct social_messg *soc_mess_list;
 extern int top_of_socialt;
 extern struct index_data **trig_index;
 
-extern struct index_data **trig_index;
 extern struct trig_data *trigger_list;
 extern int top_of_trigt;
 extern long max_mob_id;
@@ -382,5 +377,3 @@ struct disabled_data {
 
 // commands
 extern ACMD(do_reboot);
-
-#endif

@@ -8,9 +8,7 @@
 *  Copyright (C) 2007 Stefan Cole (a.k.a. Jamdog)                        * 
 *  To see this in action, check out AderonMUD                            * 
 ************************************************************************ */ 
-
-#ifndef __RESET_H__
-#define __RESET_H__
+#pragma once
 #include "structs.h"
 
 /* returned by pre-reset function */ 
@@ -34,10 +32,8 @@ extern bool pre_reset(zone_vnum znum);
 extern void post_reset(zone_vnum znum);
 
 /* Zone pre-reset functions */ 
-extern bool prereset_gauntlet_zone(void);
+extern bool prereset_gauntlet_zone();
 
 /* Zone post-reset functions */ 
 
 /* Other local functions */
-
-#endif

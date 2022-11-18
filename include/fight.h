@@ -1,10 +1,7 @@
 //
 // Created by volund on 10/20/21.
 //
-
-#ifndef CIRCLE_FIGHT_H
-#define CIRCLE_FIGHT_H
-
+#pragma once
 #include "structs.h"
 #include "spells.h"
 
@@ -18,7 +15,7 @@ extern int group_bonus(struct char_data *ch, int type);
 extern void die(struct char_data *ch, struct char_data * killer);
 extern void remove_limb(struct char_data *vict, int num);
 extern void impact_sound(struct char_data *ch, char *mssg);
-extern void fight_stack(void);
+extern void fight_stack();
 extern void appear(struct char_data *ch);
 extern void raw_kill(struct char_data *ch, struct char_data * killer);
 extern void set_fighting(struct char_data *ch, struct char_data *victim);
@@ -103,5 +100,3 @@ extern ACMD(do_kaioken);
 extern ACMD(do_escape);
 extern ACMD(do_balefire);
 extern ACMD(do_blessedhammer);
-
-#endif //CIRCLE_FIGHT_H

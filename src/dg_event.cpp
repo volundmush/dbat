@@ -125,15 +125,6 @@ void event_free_all(void)
   queue_free(event_q);
 }
 
-/* boolean function to tell whether an event is queued or not */
-int event_is_queued(struct event *event)
-{
-   if (event->q_el)
-     return 1;
-   else
-     return 0;
-}
-
 /* ************************************************************************
 *  File: queue.c                                                          *
 *                                                                         *

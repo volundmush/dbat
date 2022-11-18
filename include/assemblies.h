@@ -51,8 +51,8 @@ struct component_data {
 *
  * ******************************************************************** */
 
-extern void assemblyBootAssemblies( void );
-extern void assemblySaveAssemblies( void );
+extern void assemblyBootAssemblies();
+extern void assemblySaveAssemblies();
 extern void assemblyListToChar( struct char_data *pCharacter );
 
 extern bool assemblyAddComponent( long lVnum, long lComponentVnum,

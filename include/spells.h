@@ -7,10 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-
-#ifndef __SPELLS_H__
-#define __SPELLS_H__
-
+#pragma once
 #include "structs.h"
 
 #define DEFAULT_STAFF_LVL	12
@@ -541,5 +538,3 @@ const char *skill_name(int num);
 extern int roll_skill(const struct char_data *ch, int snum);
 extern int roll_resisted(const struct char_data *actor, int sact, const struct char_data *resistor, int sres);
 extern int skill_type(int skill);
-
-#endif

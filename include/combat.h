@@ -13,7 +13,7 @@
 #include "structs.h"
 
 /* combat.c functions */
-extern void homing_update(void);
+extern void homing_update();
 extern void damage_weapon(struct char_data *ch, struct obj_data *obj, struct char_data *vict);
 extern int64_t advanced_energy(struct char_data *ch, int64_t dmg);
 extern int roll_accuracy(struct char_data *ch, int skill, bool kiatt);
@@ -32,7 +32,7 @@ extern void pcost(struct char_data *ch, double ki, int64_t st);
 extern void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, struct obj_data *obj, int64_t dmg, int type);
 extern int64_t damtype(struct char_data *ch, int type, int skill, double percent);
 extern int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj, int num);
-extern void huge_update(void);
+extern void huge_update();
 extern int init_skill(struct char_data *ch, int snum);
 extern int can_grav(struct char_data *ch);
 extern int limb_ok(struct char_data *ch, int type);
@@ -45,9 +45,7 @@ extern void spar_gain(struct char_data *ch, struct char_data *vict, int type, in
 extern int chance_to_hit(struct char_data *ch);
 extern int roll_hitloc(struct char_data *ch, struct char_data *vict, int skill);
 long double calc_critical(struct char_data *ch, int loc);
-extern void decapitate_vict(struct char_data *ch, struct char_data *vict, int64_t dmg);
-extern void sword_chop(struct char_data *ch, struct char_data *vict, int wlvl, int loc, int type);
-extern void armor_pierce(struct char_data *ch, struct char_data *vict, int wlvl, int type);
+
 extern int backstab(struct char_data *ch, struct char_data *vict, int wlvl, int64_t dmg);
 extern int64_t gun_dam(struct char_data *ch, int wlvl);
 extern int physical_mastery(struct char_data *ch);

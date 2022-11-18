@@ -7,10 +7,7 @@
  * Comments and suggestions welcome: http://www.mudbytes.net/imc2-support-forum
  * License terms are available in the imc2freedom.license file.
  */
-
-#ifndef __IMC2_H__
-#define __IMC2_H__
-
+#pragma once
 #include "structs.h"
 
 /* The all important version ID string, which is hardcoded for now out of laziness.
@@ -414,14 +411,14 @@ struct who_template
 };
 
 extern bool imc_command_hook( CHAR_DATA * ch, const char *command, char *argument );
-extern void imc_hotboot( void );
+extern void imc_hotboot();
 extern void imc_startup( bool force, int desc, bool connected );
 extern void imc_shutdown( bool reconnect );
 extern void imc_initchar( CHAR_DATA * ch );
 extern bool imc_loadchar( CHAR_DATA * ch, FILE * fp, const char *word );
 extern void imc_savechar( CHAR_DATA * ch, FILE * fp );
 extern void imc_freechardata( CHAR_DATA * ch );
-extern void imc_loop( void );
+extern void imc_loop();
 extern IMC_CHANNEL *imc_findchannel( const char *name );
 extern void imc_register_packet_handler( const char *name, PACKET_FUN * func );
 extern IMC_PACKET *imc_newpacket( const char *from, const char *type, const char *to );
@@ -437,6 +434,4 @@ extern char *imcfread_word( FILE * fp );
 #if defined(_DISKIO_H_)
 extern void imc_load_pfile( CHAR_DATA * ch, char *tag, int num, char *line );
 extern void imc_save_pfile( struct CHAR_DATA *ch, FBFILE * fp );
-#endif
-
 #endif

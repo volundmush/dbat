@@ -3,20 +3,17 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-
-#ifndef __GENSHP_H__
-#define __GENSHP_H__
-
+#pragma once
 #include "structs.h"
 #include "shop.h"
 
 extern void copy_shop(struct shop_data *tshop, struct shop_data *fshop, int free_old_strings);
-extern void copy_list(IDXTYPE **tlist, IDXTYPE *flist);
+extern void copy_list(vnum **tlist, vnum *flist);
 extern void copy_type_list(struct shop_buy_data **tlist, struct shop_buy_data *flist);
 extern void remove_from_type_list(struct shop_buy_data **list, int num);
-extern void remove_from_int_list(IDXTYPE **list, IDXTYPE num);
+extern void remove_from_int_list(vnum **list, vnum num);
 extern void add_to_type_list(struct shop_buy_data **list, struct shop_buy_data *newl);
-extern void add_to_int_list(IDXTYPE **tlist, IDXTYPE newi);
+extern void add_to_int_list(vnum **tlist, vnum newi);
 extern void free_shop_string(struct shop_data *shop);
 extern void free_type_list(struct shop_buy_data **list);
 extern void free_shop(struct shop_data *shop);
@@ -59,5 +56,3 @@ extern shop_rnum real_shop(shop_vnum vnum);
 #define S_NOBUY(i)		((i)->do_not_buy)
 #define S_BUY(i)		((i)->message_buy)
 #define S_SELL(i)		((i)->message_sell)
-
-#endif

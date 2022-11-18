@@ -47,38 +47,38 @@ struct board_info {
   struct board_memory *memory[301];
 };
 
-#define READ_LVL(i) (i->read_lvl)
-#define WRITE_LVL(i) (i->write_lvl)
-#define REMOVE_LVL(i) (i->remove_lvl)
-#define BOARD_MNUM(i) (i->num_messages)
-#define BOARD_VNUM(i) (i->vnum)
-#define BOARD_NEXT(i) (i->next)
-#define BOARD_MESSAGES(i) (i->messages)
-#define BOARD_MEMORY(i,j) (i->memory[j])
-#define BOARD_VERSION(i) 	 (i->version)
+#define READ_LVL(i) ((i)->read_lvl)
+#define WRITE_LVL(i) ((i)->write_lvl)
+#define REMOVE_LVL(i) ((i)->remove_lvl)
+#define BOARD_MNUM(i) ((i)->num_messages)
+#define BOARD_VNUM(i) ((i)->vnum)
+#define BOARD_NEXT(i) ((i)->next)
+#define BOARD_MESSAGES(i) ((i)->messages)
+#define BOARD_MEMORY(i,j) ((i)->memory[j])
+#define BOARD_VERSION(i) 	 ((i)->version)
 #define CURRENT_BOARD_VER	 2
 
-#define MESG_POSTER(i) (i->poster)
-#define MESG_TIMESTAMP(i) (i->timestamp)
-#define MESG_SUBJECT(i) (i->subject)
-#define MESG_DATA(i) (i->data)
-#define MESG_NEXT(i) (i->next)
-#define MESG_PREV(i) (i->prev)
-#define MESG_POSTER_NAME(i)	 (i->name)
+#define MESG_POSTER(i) ((i)->poster)
+#define MESG_TIMESTAMP(i) ((i)->timestamp)
+#define MESG_SUBJECT(i) ((i)->subject)
+#define MESG_DATA(i) ((i)->data)
+#define MESG_NEXT(i) ((i)->next)
+#define MESG_PREV(i) ((i)->prev)
+#define MESG_POSTER_NAME(i)	 ((i)->name)
 
-#define MEMORY_TIMESTAMP(i) (i->timestamp)
-#define MEMORY_READER(i) (i->reader)
-#define MEMORY_NEXT(i) (i->next)
-#define MEMORY_READER_NAME(i)	 (i->name)
+#define MEMORY_TIMESTAMP(i) ((i)->timestamp)
+#define MEMORY_READER(i) ((i)->reader)
+#define MEMORY_NEXT(i) ((i)->next)
+#define MEMORY_READER_NAME(i)	 ((i)->name)
 
-extern void init_boards(void);
+extern void init_boards();
 struct board_info *create_new_board(obj_vnum board_vnum);
 struct board_info *load_board(obj_vnum board_vnum);
 extern int save_board(struct board_info *temp_board);
 extern void clear_boards();
 extern void clear_one_board(struct board_info *temp_board);
 extern int parse_message( FILE *fl, struct board_info *temp_board);
-extern void look_at_boards(void);
+extern void look_at_boards();
 extern void show_board(obj_vnum board_vnum, struct char_data *ch);
 extern void board_display_msg(obj_vnum board_vnum, struct char_data * ch, int arg);
 extern int mesglookup(struct board_msg *message,struct char_data *ch,

@@ -9,9 +9,7 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
-#ifndef __DG_OLC_H__
-#define __DG_OLC_H__
-
+#pragma once
 #include "dg_scripts.h"
 
 
@@ -50,5 +48,3 @@ extern void trigedit_save(struct descriptor_data *d);
 extern int format_script(struct descriptor_data *d);
 
 extern ACMD(do_oasis_trigedit);
-
-#endif

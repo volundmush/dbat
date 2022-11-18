@@ -18,7 +18,7 @@ extern char *default_color_choices[NUM_COLOR+1];
 extern int readIntro(struct char_data *ch, struct char_data *vict);
 extern void introCreate(struct char_data *ch);
 extern int check_disabled(const struct command_info *command);
-extern void sort_commands(void);
+extern void sort_commands();
 extern char *find_exdesc(char *word, struct extra_descr_data *list);
 extern void add_history(struct char_data *ch, char *str, int type);
 extern void introWrite(struct char_data *ch, struct char_data *vict, char *name);
