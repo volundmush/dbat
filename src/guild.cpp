@@ -24,8 +24,8 @@
 
 /* Local variables */
 int spell_sort_info[SKILL_TABLE_SIZE + 1];
-int top_guild = -1;
-struct guild_data *guild_index;
+guild_vnum top_guild = NOTHING;
+std::map<guild_vnum, struct guild_data> guild_index;
 
 char *guild_customer_string(int guild_nr, int detailed);
 
@@ -282,7 +282,7 @@ int print_skills_by_type(struct char_data *ch, char *buf, int maxsz, int sktype,
             known = 0;
         }
         if (*arg) {
-            if (atoi(arg) <= 0 && strstr(spell_info[i].name, arg) == false) {
+            if (atoi(arg) <= 0 && !strstr(spell_info[i].name, arg)) {
                 known = 0;
             } else if (atoi(arg) > GET_SKILL(ch, i)) {
                 known = 0;
@@ -589,11 +589,11 @@ int is_guild_ok(struct char_data *keeper, struct char_data *ch, int guild_nr) {
 
 
 int does_guild_know(int guild_nr, int i) {
-    return ((int) (guild_index[guild_nr].skills[i]));
+    return guild_index[guild_nr].skills.count(i);
 }
 
 int does_guild_know_feat(int guild_nr, int i) {
-    return ((int) (guild_index[guild_nr].feats[i]));
+    return guild_index[guild_nr].feats.count(i);
 }
 
 
@@ -1600,16 +1600,6 @@ SPECIAL(guild) {
 }
 
 
-/**** This function is here just because I'm extremely paranoid.  Take
-      it out if you aren't ;)  ****/
-void clear_skills(int gdindex) {
-    int i;
-
-    for (i = 0; i < SKILL_TABLE_SIZE; i++)
-        guild_index[gdindex].skills[i] = 0;
-}
-
-
 /****  This is ripped off of read_line from shop.c.  They could be
  *  combined. But why? ****/
 
@@ -1636,22 +1626,21 @@ void boot_the_guilds(FILE *gm_f, char *filename, int rec_count) {
             sscanf(buf, "#%d\n", &temp);
             snprintf(buf2, sizeof(buf2), "GM #%d in GM file %s", temp, filename);
             free(buf);        /* Plug memory leak! */
-            top_guild++;
-            if (!top_guild)
-                CREATE(guild_index, struct guild_data, rec_count);
-            GM_NUM(top_guild) = temp;
+            top_guild = temp;
+            auto &g = guild_index[temp];
 
-            clear_skills(top_guild);
+            GM_NUM(top_guild) = temp;
+            
             get_line(gm_f, buf3);
             rv = sscanf(buf3, "%d %d", &t1, &t2);
             while (t1 > -1) {
                 if (rv == 1) { /* old style guilds, only skills */
-                    guild_index[top_guild].skills[(int) t1] = 1;
+                    g.skills.insert(t1);
                 } else if (rv == 2) { /* new style guilds, skills and feats */
                     if (t2 == 1) {
-                        guild_index[top_guild].skills[(int) t1] = 1;
+                        g.skills.insert(t1);
                     } else if (t2 == 2) {
-                        guild_index[top_guild].feats[(int) t1] = 1;
+                        g.feats.insert(t1);
                     } else {
                         log("SYSERR: Invalid 2nd arg in guild file!");
                         exit(1);
@@ -1663,20 +1652,19 @@ void boot_the_guilds(FILE *gm_f, char *filename, int rec_count) {
                 get_line(gm_f, buf3);
                 rv = sscanf(buf3, "%d %d", &t1, &t2);
             }
-            read_guild_line(gm_f, "%f", &GM_CHARGE(top_guild), "GM_CHARGE");
-            guild_index[top_guild].no_such_skill = fread_string(gm_f, buf2);
-            guild_index[top_guild].not_enough_gold = fread_string(gm_f, buf2);
+            read_guild_line(gm_f, "%f", &g.charge, "GM_CHARGE");
+            g.no_such_skill = fread_string(gm_f, buf2);
+            g.not_enough_gold = fread_string(gm_f, buf2);
 
-            read_guild_line(gm_f, "%d", &GM_MINLVL(top_guild), "GM_MINLVL");
-            read_guild_line(gm_f, "%d", &GM_TRAINER(top_guild), "GM_TRAINER");
+            read_guild_line(gm_f, "%d", &g.minlvl, "GM_MINLVL");
+            read_guild_line(gm_f, "%d", &g.gm, "GM_TRAINER");
 
-            GM_TRAINER(top_guild) = real_mobile(GM_TRAINER(top_guild));
-            read_guild_line(gm_f, "%d", &GM_WITH_WHO(top_guild)[0], "GM_WITH_WHO");
+            g.gm = real_mobile(g.gm);
+            read_guild_line(gm_f, "%d", &g.with_who[0], "GM_WITH_WHO");
 
-            read_guild_line(gm_f, "%d", &GM_OPEN(top_guild), "GM_OPEN");
-            read_guild_line(gm_f, "%d", &GM_CLOSE(top_guild), "GM_CLOSE");
+            read_guild_line(gm_f, "%d", &g.open, "GM_OPEN");
+            read_guild_line(gm_f, "%d", &g.close, "GM_CLOSE");
 
-            GM_FUNC(top_guild) = nullptr;
             CREATE(buf, char, READ_SIZE);
             get_line(gm_f, buf);
             if (buf && *buf != '#' && *buf != '$') {
@@ -1688,7 +1676,7 @@ void boot_the_guilds(FILE *gm_f, char *filename, int rec_count) {
                         log("SYSERR: Can't parse GM_WITH_WHO line in %s: '%s'", buf2, buf);
                         break;
                     }
-                    GM_WITH_WHO(top_guild)[temp] = val;
+                    g.with_who[temp] = val;
                     while (isdigit(*p) || *p == '-') {
                         p++;
                     }
@@ -1696,8 +1684,6 @@ void boot_the_guilds(FILE *gm_f, char *filename, int rec_count) {
                         p++;
                     }
                 }
-                while (temp < GW_ARRAY_MAX)
-                    GM_WITH_WHO(top_guild)[temp++] = 0;
                 free(buf);
                 buf = fread_string(gm_f, buf2);
             }
@@ -1711,19 +1697,20 @@ void boot_the_guilds(FILE *gm_f, char *filename, int rec_count) {
 
 
 void assign_the_guilds() {
-    int gdindex;
+    guild_vnum gdindex;
 
     cmd_say = find_command("say");
     cmd_tell = find_command("tell");
 
-    for (gdindex = 0; gdindex <= top_guild; gdindex++) {
-        if (GM_TRAINER(gdindex) == NOBODY)
+    for (auto &g : guild_index) {
+        gdindex = g.first;
+        if (g.second.gm == NOBODY)
             continue;
 
-        if (mob_index[GM_TRAINER(gdindex)].func && mob_index[GM_TRAINER(gdindex)].func != guild)
-            GM_FUNC(gdindex) = mob_index[GM_TRAINER(gdindex)].func;
+        if (mob_index[g.second.gm].func && mob_index[g.second.gm].func != guild)
+            g.second.func = mob_index[g.second.gm].func;
 
-        mob_index[GM_TRAINER(gdindex)].func = guild;
+        mob_index[g.second.gm].func = guild;
     }
 }
 
@@ -1900,36 +1887,29 @@ void list_guilds(struct char_data *ch, zone_rnum rnum, guild_vnum vmin, guild_vn
 }
 
 void destroy_guilds() {
-    ssize_t cnt/*, itr*/;
-
-    if (!guild_index)
-        return;
-
-    for (cnt = 0; cnt <= top_guild; cnt++) {
-        if (guild_index[cnt].no_such_skill)
-            free(guild_index[cnt].no_such_skill);
-        if (guild_index[cnt].not_enough_gold)
-            free(guild_index[cnt].not_enough_gold);
-    }
-
-    free(guild_index);
-    guild_index = nullptr;
-    top_guild = -1;
-}
-
-
-int count_guilds(guild_vnum low, guild_vnum high) {
-    int i, j;
-
-    for (i = j = 0; (GM_NUM(i) <= high && i <= top_guild); i++) {
-        if (GM_NUM(i) >= low) {
-            j++;
-        }
-    }
-
-    return j;
+    guild_index.clear();
 }
 
 
 void levelup_parse(struct descriptor_data *d, char *arg) {
+}
+
+guild_data::~guild_data() {
+    free_guild_strings(this);
+}
+
+void guild_data::toggle_skill(uint16_t skill_id) {
+    if(skills.count(skill_id)) {
+        skills.erase(skill_id);
+    } else {
+        skills.insert(skill_id);
+    }
+}
+
+void guild_data::toggle_feat(uint16_t skill_id) {
+    if(feats.count(skill_id)) {
+        feats.erase(skill_id);
+    } else {
+        feats.insert(skill_id);
+    }
 }

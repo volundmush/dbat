@@ -14,7 +14,6 @@
 #include "utils.h"
 #include "comm.h"
 #include "handler.h"
-#include "races.h"
 #include "interpreter.h"
 #include "spells.h"
 #include "feats.h"
@@ -175,39 +174,11 @@ ACMD(do_oasis_gedit) {
 }
 
 void gedit_setup_new(struct descriptor_data *d) {
-    int i;
-    struct guild_data *guilddata;
-
-    /*. Alloc some guild shaped space . */
-    CREATE(guilddata, struct guild_data, 1);
-
-    /*. Some default values . */
-    G_TRAINER(guilddata) = -1;
-    G_OPEN(guilddata) = 0;
-    G_CLOSE(guilddata) = 28;
-    G_CHARGE(guilddata) = 1.0;
-    for (i = 0; i < GW_ARRAY_MAX; i++)
-        G_WITH_WHO(guilddata)[i] = 0;
-    G_FUNC(guilddata) = nullptr;
-    G_MINLVL(guilddata) = 0;
+    auto guilddata = new guild_data();
 
     /*. Some default strings . */
     G_NO_SKILL(guilddata) = strdup("%s Sorry, but I don't know that one.");
     G_NO_GOLD(guilddata) = strdup("%s Sorry, but I'm gonna need more zenni first.");
-
-    /* init the wasteful skills and spells table */
-
-    for (i = 0; i < SKILL_TABLE_SIZE; i++)
-        if (spell_info[i].skilltype == SKTYPE_SKILL &&
-            strcmp(spell_info[i].name, "!UNUSED!")) {
-            G_SK_AND_SP(guilddata, i) = 0;
-        }
-
-    /* init the feats table */
-    for (i = 0; i < NUM_FEATS_DEFINED; i++)
-        if (feat_list[i].in_game) {
-            G_FEATS(guilddata, i) = 0;
-        }
 
     OLC_GUILD(d) = guilddata;
     gedit_disp_menu(d);
@@ -217,8 +188,8 @@ void gedit_setup_new(struct descriptor_data *d) {
 
 void gedit_setup_existing(struct descriptor_data *d, int rgm_num) {
     /*. Alloc some guild shaped space . */
-    CREATE(OLC_GUILD(d), struct guild_data, 1);
-    copy_guild(OLC_GUILD(d), guild_index + rgm_num);
+    OLC_GUILD(d) = new guild_data();
+    copy_guild(OLC_GUILD(d), &guild_index[rgm_num]);
     gedit_disp_menu(d);
 }
 
@@ -232,9 +203,7 @@ void gedit_setup_existing(struct descriptor_data *d, int rgm_num) {
 
 void gedit_select_skills_menu(struct descriptor_data *d) {
     int i, j = 0, found = 0;
-    struct guild_data *guilddata;
-
-    guilddata = OLC_GUILD(d);
+    auto guilddata = OLC_GUILD(d);
     clear_screen(d);
 
     write_to_output(d, "Skills known:\r\n");
@@ -243,7 +212,7 @@ void gedit_select_skills_menu(struct descriptor_data *d) {
         if (spell_info[i].skilltype == SKTYPE_SKILL &&
             strcmp(spell_info[i].name, "!UNUSED!")) {
             write_to_output(d, "@n[@c%-3s@n] %-3d %-20.20s  ",
-                            YESNO(G_SK_AND_SP(guilddata, i)), i, spell_info[i].name);
+                            YESNO(guilddata->skills.count(i)), i, spell_info[i].name);
             j++;
             found = 1;
         }
@@ -272,7 +241,7 @@ void gedit_select_spells_menu(struct descriptor_data *d) {
         if (IS_SET(spell_info[i].skilltype, SKTYPE_SPELL) &&
             strcmp(spell_info[i].name, "!UNUSED!")) {
             write_to_output(d, "@n[@c%-3s@n] %-3d %-20.20s  ",
-                            YESNO(G_SK_AND_SP(guilddata, i)), i, spell_info[i].name);
+                            YESNO(guilddata->skills.count(i)), i, spell_info[i].name);
             j++;
             found = 1;
         }
@@ -290,9 +259,7 @@ void gedit_select_spells_menu(struct descriptor_data *d) {
 
 void gedit_select_feats_menu(struct descriptor_data *d) {
     int i, j = 0, found = 0;
-    struct guild_data *guilddata;
-
-    guilddata = OLC_GUILD(d);
+    auto guilddata = OLC_GUILD(d);
     clear_screen(d);
 
     write_to_output(d, "Feats known:\r\n");
@@ -300,7 +267,7 @@ void gedit_select_feats_menu(struct descriptor_data *d) {
     for (i = 0; i <= NUM_FEATS_DEFINED; i++) {
         if (feat_list[i].in_game) {
             write_to_output(d, "@n[@c%-3s@n] %-3d %-20.20s  ",
-                            YESNO(G_FEATS(guilddata, i)), i, feat_list[i].name);
+                            YESNO(guilddata->feats.count(i)), i, feat_list[i].name);
             j++;
             found = 1;
         }
@@ -318,9 +285,7 @@ void gedit_select_feats_menu(struct descriptor_data *d) {
 
 void gedit_select_lang_menu(struct descriptor_data *d) {
     int i, j = 0, found = 0;
-    struct guild_data *guilddata;
-
-    guilddata = OLC_GUILD(d);
+    auto guilddata = OLC_GUILD(d);
     clear_screen(d);
 
     write_to_output(d, "Skills known:\r\n");
@@ -329,7 +294,7 @@ void gedit_select_lang_menu(struct descriptor_data *d) {
         if (IS_SET(spell_info[i].skilltype, SKTYPE_LANG) &&
             strcmp(spell_info[i].name, "!UNUSED!")) {
             write_to_output(d, "@n[@c%-3s@n] %-3d %-20.20s  ",
-                            YESNO(G_SK_AND_SP(guilddata, i)), i, spell_info[i].name);
+                            YESNO(guilddata->skills.count(i)), i, spell_info[i].name);
             j++;
             found = 1;
         }
@@ -347,9 +312,7 @@ void gedit_select_lang_menu(struct descriptor_data *d) {
 
 void gedit_select_wp_menu(struct descriptor_data *d) {
     int i, j = 0, found = 0;
-    struct guild_data *guilddata;
-
-    guilddata = OLC_GUILD(d);
+    auto guilddata = OLC_GUILD(d);
     clear_screen(d);
 
     write_to_output(d, "Skills known:\r\n");
@@ -358,7 +321,7 @@ void gedit_select_wp_menu(struct descriptor_data *d) {
         if (IS_SET(spell_info[i].skilltype, SKTYPE_WEAPON) &&
             strcmp(spell_info[i].name, "!UNUSED!")) {
             write_to_output(d, "@n[@c%-3s@n] %-3d %-20.20s  ",
-                            YESNO(G_SK_AND_SP(guilddata, i)), i, spell_info[i].name);
+                            YESNO(guilddata->skills.count(i)), i, spell_info[i].name);
             j++;
             found = 1;
         }
@@ -613,7 +576,7 @@ void gedit_parse(struct descriptor_data *d, char *arg) {
             if (i == 0)
                 break;
             i = MAX(1, MIN(i, SKILL_TABLE_SIZE));
-            G_SK_AND_SP(OLC_GUILD(d), i) = !G_SK_AND_SP(OLC_GUILD(d), i);
+            OLC_GUILD(d)->toggle_skill(i);
             gedit_select_spells_menu(d);
             return;
 
@@ -622,7 +585,7 @@ void gedit_parse(struct descriptor_data *d, char *arg) {
             if (i == 0)
                 break;
             i = MAX(1, MIN(i, NUM_FEATS_DEFINED));
-            G_FEATS(OLC_GUILD(d), i) = !G_FEATS(OLC_GUILD(d), i);
+            OLC_GUILD(d)->toggle_feat(i);
             gedit_select_feats_menu(d);
             return;
 
@@ -631,7 +594,7 @@ void gedit_parse(struct descriptor_data *d, char *arg) {
             if (i == 0)
                 break;
             i = MAX(1, MIN(i, SKILL_TABLE_SIZE));
-            G_SK_AND_SP(OLC_GUILD(d), i) = !G_SK_AND_SP(OLC_GUILD(d), i);
+            OLC_GUILD(d)->toggle_skill(i);
             gedit_select_skills_menu(d);
             return;
 
@@ -640,7 +603,7 @@ void gedit_parse(struct descriptor_data *d, char *arg) {
             if (i == 0)
                 break;
             i = MAX(1, MIN(i, SKILL_TABLE_SIZE));
-            G_SK_AND_SP(OLC_GUILD(d), i) = !G_SK_AND_SP(OLC_GUILD(d), i);
+            OLC_GUILD(d)->toggle_feat(i);
             gedit_select_wp_menu(d);
             return;
 
@@ -649,7 +612,7 @@ void gedit_parse(struct descriptor_data *d, char *arg) {
             if (i == 0)
                 break;
             i = MAX(1, MIN(i, SKILL_TABLE_SIZE));
-            G_SK_AND_SP(OLC_GUILD(d), i) = !G_SK_AND_SP(OLC_GUILD(d), i);
+            OLC_GUILD(d)->toggle_skill(i);
             gedit_select_lang_menu(d);
             return;
 

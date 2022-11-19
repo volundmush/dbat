@@ -14,7 +14,6 @@
 #include "genzon.h"
 #include "oasis.h"
 #include "constants.h"
-#include "races.h"
 #include "act.informative.h"
 
 /*
@@ -198,9 +197,7 @@ void sedit_setup_new(struct descriptor_data *d) {
     /*
      * Stir the lists lightly.
      */
-    CREATE(S_PRODUCTS(shop), obj_vnum, 1);
 
-    S_PRODUCT(shop, 0) = NOTHING;
     CREATE(S_ROOMS(shop), room_rnum, 1);
 
     S_ROOM(shop, 0) = NOWHERE;
@@ -224,7 +221,7 @@ void sedit_setup_existing(struct descriptor_data *d, vnum rshop_num) {
     CREATE(OLC_SHOP(d), struct shop_data, 1);
 
     /* don't waste time trying to free nullptr strings -- Welcor */
-    copy_shop(OLC_SHOP(d), shop_index + rshop_num, false);
+    copy_shop(OLC_SHOP(d), &shop_index[rshop_num], false);
 }
 
 /**************************************************************************
@@ -233,16 +230,15 @@ void sedit_setup_existing(struct descriptor_data *d, vnum rshop_num) {
 
 void sedit_products_menu(struct descriptor_data *d) {
     struct shop_data *shop;
-    int i;
 
     shop = OLC_SHOP(d);
 
     clear_screen(d);
     write_to_output(d, "##     VNUM     Product\r\n");
-    for (i = 0; S_PRODUCT(shop, i) != NOTHING; i++) {
+    for (auto i : shop->producing) {
         write_to_output(d, "%2d - [@c%5d@n] - @y%s@n\r\n", i,
-                        obj_index[S_PRODUCT(shop, i)].vnum,
-                        obj_proto[S_PRODUCT(shop, i)].short_description);
+                        i,
+                        obj_proto[i].short_description);
     }
     write_to_output(d, "\r\n"
                        "@gA@n) Add a new product.\r\n"
@@ -746,11 +742,11 @@ void sedit_parse(struct descriptor_data *d, char *arg) {
                     return;
                 }
             if (i > 0)
-                add_to_int_list(&(S_PRODUCTS(OLC_SHOP(d))), i);
+                OLC_SHOP(d)->add_product(i);
             sedit_products_menu(d);
             return;
         case SEDIT_DELETE_PRODUCT:
-            remove_from_int_list(&(S_PRODUCTS(OLC_SHOP(d))), atoi(arg));
+            OLC_SHOP(d)->remove_product(atol(arg));
             sedit_products_menu(d);
             return;
         case SEDIT_NEW_ROOM:

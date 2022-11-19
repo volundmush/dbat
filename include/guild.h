@@ -11,17 +11,20 @@
 #define GW_ARRAY_MAX    4
 
 struct guild_data {
-    room_vnum vnum;                /* number of the guild */
-    int skills[SKILL_TABLE_SIZE];  /* array to keep track of which feats things we'll train */
-    float charge;                  /* charge * skill level = how much we'll charge */
-    char *no_such_skill;           /* message when we don't teach that skill */
-    char *not_enough_gold;         /* message when the student doesn't have enough gold */
-    int minlvl;                    /* Minumum level guildmaster will train */
-    mob_rnum gm;                   /* GM's vnum */
-    int with_who[GW_ARRAY_MAX];    /* whom we dislike */
-    int open, close;               /* when we will train */
-    SPECIAL(*func);                /* secondary spec_proc for the GM */
-    int feats[NUM_FEATS_DEFINED];  /* array to keep track of which feats things we'll train */
+    ~guild_data();
+    room_vnum vnum{NOBODY};                /* number of the guild */
+    void toggle_skill(uint16_t skill_id);
+    void toggle_feat(uint16_t skill_id);
+    std::set<uint16_t> skills;  /* array to keep track of which feats things we'll train */
+    float charge{1.0};                  /* charge * skill level = how much we'll charge */
+    char *no_such_skill{};           /* message when we don't teach that skill */
+    char *not_enough_gold{};         /* message when the student doesn't have enough gold */
+    int minlvl{0};                    /* Minumum level guildmaster will train */
+    mob_rnum gm{NOBODY};                   /* GM's vnum */
+    bitvector_t with_who[GW_ARRAY_MAX];    /* whom we dislike */
+    int open{0}, close{28};               /* when we will train */
+    SpecialFunc func{};                /* secondary spec_proc for the GM */
+    std::set<uint8_t> feats;  /* array to keep track of which feats things we'll train */
 };
 
 #define GM_NUM(i)  (guild_index[i].vnum)
@@ -120,8 +123,8 @@ struct guild_data {
 #define NOTRAIN_LIZARDFOLK(i)    (IS_SET_AR((GM_WITH_WHO(i)), TRADE_NOLIZARDFOLK))
 
 
-extern struct guild_data *guild_index;
-extern int top_guild;
+extern std::map<guild_vnum, struct guild_data> guild_index;
+extern guild_vnum top_guild;
 extern int spell_sort_info[SKILL_TABLE_SIZE + 1];
 
 /* Functions defined in guild.c */
@@ -138,8 +141,6 @@ extern void show_guild(struct char_data *ch, char *arg);
 extern void handle_ingest_learn(struct char_data *ch, struct char_data *vict);
 
 extern void list_skills(struct char_data *ch, char *arg);
-
-extern int count_guilds(guild_vnum low, guild_vnum high);
 
 /*. External . */
 extern SPECIAL(guild);

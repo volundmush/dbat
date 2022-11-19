@@ -282,16 +282,6 @@ void oedit_save_internally(struct descriptor_data *d) {
     if (!i)    /* If it's not a new object, don't renumber. */
         return;
 
-    /*
-     * Renumber produce in shops being edited.
-     */
-    for (dsc = descriptor_list; dsc; dsc = dsc->next)
-        if (STATE(dsc) == CON_SEDIT)
-            for (i = 0; S_PRODUCT(OLC_SHOP(dsc), i) != NOTHING; i++)
-                if (S_PRODUCT(OLC_SHOP(dsc), i) >= robj_num)
-                    S_PRODUCT(OLC_SHOP(dsc), i)++;
-
-
     /* Update other people in zedit too. From: C.Raehl 4/27/99 */
     for (dsc = descriptor_list; dsc; dsc = dsc->next)
         if (STATE(dsc) == CON_ZEDIT)

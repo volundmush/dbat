@@ -128,24 +128,22 @@ int delete_mobile(mob_rnum refpt) {
     }
 
     /* Update shop keepers.  */
-    if (shop_index)
-        for (counter = 0; counter <= top_shop; counter++) {
-            /* Find the shop for this keeper and reset it's keeper to
-             * -1 to keep the shop so it could be assigned to someone else */
-            if (SHOP_KEEPER(counter) == refpt) {
-                SHOP_KEEPER(counter) = -1;
-            }
+    for (auto &sh : shop_index) {
+        /* Find the shop for this keeper and reset it's keeper to
+         * -1 to keep the shop so it could be assigned to someone else */
+        if (sh.second.keeper == refpt) {
+            sh.second.keeper = NOBODY;
         }
+    }
 
     /* Update guild masters */
-    if (guild_index)
-        for (counter = 0; counter <= top_guild; counter++) {
-            /* Find the guild for this trainer and reset it's trainer to
-             * -1 to keep the guild so it could be assigned to someone else */
-            if (GM_TRAINER(counter) == refpt) {
-                GM_TRAINER(counter) = -1;
-            }
+    for (auto &g : guild_index) {
+        /* Find the guild for this trainer and reset it's trainer to
+         * -1 to keep the guild so it could be assigned to someone else */
+        if (g.second.gm == refpt) {
+            g.second.gm = NOBODY;
         }
+    }
 
     mob_proto.erase(vnum);
     mob_index.erase(vnum);

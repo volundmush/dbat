@@ -14,6 +14,7 @@
 struct shop_buy_data {
     int type;
     char *keywords;
+    ~shop_buy_data();
 };
 
 #define BUY_TYPE(i)        ((i).type)
@@ -22,8 +23,11 @@ struct shop_buy_data {
 #define SW_ARRAY_MAX    4
 
 struct shop_data {
-    room_vnum vnum;        /* Virtual number of this shop		*/
-    obj_vnum *producing;        /* Which item to produce (virtual)	*/
+    ~shop_data();
+    void add_product(obj_vnum v);
+    void remove_product(obj_vnum v);
+    shop_vnum vnum;        /* Virtual number of this shop		*/
+    std::vector<obj_vnum> producing;        /* Which item to produce (virtual)	*/
     float profit_buy;        /* Factor to multiply cost with		*/
     float profit_sell;        /* Factor to multiply cost with		*/
     struct shop_buy_data *type;    /* Which items to trade			*/
@@ -37,7 +41,7 @@ struct shop_data {
     int temper1;        /* How does keeper react if no money	*/
     bitvector_t bitvector;    /* Can attack? Use bank? Cast here?	*/
     mob_rnum keeper;    /* The mobile who owns the shop (rnum)	*/
-    int with_who[SW_ARRAY_MAX];/* Who does the shop trade with?	*/
+    bitvector_t with_who[SW_ARRAY_MAX];/* Who does the shop trade with?	*/
     room_vnum *in_room;        /* Where is the shop?			*/
     int open1, open2;        /* When does the shop open?		*/
     int close1, close2;    /* When does the shop close?		*/
@@ -254,8 +258,9 @@ struct stack_data {
 // global variables
 extern const char *trade_letters[NUM_TRADERS + 1];
 extern const char *shop_bits[];
-extern struct shop_data *shop_index;
-extern int top_shop, cmd_say, cmd_tell, cmd_emote, cmd_slap, cmd_puke;
+extern std::map<shop_vnum, struct shop_data> shop_index;
+extern int cmd_say, cmd_tell, cmd_emote, cmd_slap, cmd_puke;
+extern shop_vnum top_shop;
 
 // functions
 extern int shop_producing(struct obj_data *item, vnum shop_nr);
@@ -271,8 +276,6 @@ extern int ok_shop_room(vnum shop_nr, room_vnum room);
 extern void destroy_shops();
 
 extern void show_shops(struct char_data *ch, char *arg);
-
-extern int count_shops(shop_vnum low, shop_vnum high);
 
 // special
 extern SPECIAL(shop_keeper);

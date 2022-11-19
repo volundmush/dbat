@@ -36,12 +36,8 @@ void copy_guild(struct guild_data *tgm, struct guild_data *fgm) {
     G_NO_SKILL(tgm) = str_udup(G_NO_SKILL(fgm));
     G_NO_GOLD(tgm) = str_udup(G_NO_GOLD(fgm));
 
-    for (i = 0; i < SKILL_TABLE_SIZE; i++)
-        G_SK_AND_SP(tgm, i) = G_SK_AND_SP(fgm, i);
-
-    for (i = 0; i < NUM_FEATS_DEFINED; i++)
-        G_FEATS(tgm, i) = G_FEATS(fgm, i);
-}
+    tgm->skills = fgm->skills;
+    tgm->feats = fgm->feats;}
 
 /*-------------------------------------------------------------------*/
 /*. Free all the character strings in a guild structure . */
@@ -73,31 +69,7 @@ void free_guild(struct guild_data *guild) {
  * We take so good care to keep it sorted - let's use it :) - Welcor
  */
 guild_rnum real_guild(guild_vnum vnum) {
-    guild_rnum bot, top, mid, last_top;
-
-    if (top_guild < 0)
-        return NOWHERE;
-
-    bot = 0;
-    top = top_guild;
-
-    /* perform binary search on guild_table */
-    for (;;) {
-        last_top = top;
-        mid = (bot + top) / 2;
-
-        if (GM_NUM(mid) == vnum)
-            return (mid);
-        if (bot >= top)
-            return (NOWHERE);
-        if (GM_NUM(mid) > vnum)
-            top = mid - 1;
-        else
-            bot = mid + 1;
-
-        if (top > last_top)
-            return NOWHERE;
-    }
+    return guild_index.count(vnum) ? vnum : NOTHING;
 }
 
 /*-------------------------------------------------------------------*/
@@ -123,15 +95,18 @@ void gedit_modify_string(char **str, char *new_g) {
 /*-------------------------------------------------------------------*/
 
 int add_guild(struct guild_data *ngld) {
-    guild_rnum rguild;
+    guild_rnum rguild = G_NUM(ngld);
     int found = 0;
-    zone_rnum rznum = real_zone_by_thing(G_NUM(ngld));
+    zone_rnum rznum = real_zone_by_thing(rguild);
+
+    auto exists = guild_index.count(rguild);
+    auto &g = guild_index[rguild];
 
     /*
      * The guild already exists, just update it.
      */
-    if ((rguild = real_guild(G_NUM(ngld))) != NOWHERE) {
-        copy_guild(&guild_index[rguild], ngld);
+    if (exists) {
+        copy_guild(&g, ngld);
         if (rznum != NOWHERE) {
             add_to_save_list(zone_table[rznum].number, SL_GLD);
         } else
@@ -140,29 +115,8 @@ int add_guild(struct guild_data *ngld) {
     }
 
     mudlog(BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Creating new guild.");
-
-    top_guild++;
-    RECREATE(guild_index, struct guild_data, top_guild + 1);
-
-    for (rguild = top_guild; rguild > 0; rguild--) {
-        if (ngld->vnum > GM_NUM(rguild - 1)) {
-            found = rguild;
-
-            copy_guild(&guild_index[rguild], ngld);
-            break;
-        }
-        guild_index[rguild] = guild_index[rguild - 1];
-    }
-
-    if (!found) {
-        copy_guild(&guild_index[0], ngld);
-    }
-
-    if (rznum != NOWHERE) {
-        add_to_save_list(zone_table[rznum].number, SL_GLD);
-    } else
-        mudlog(BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Cannot determine guild zone.");
-
+    copy_guild(&g, ngld);
+    add_to_save_list(zone_table[rznum].number, SL_GLD);
     return rguild;
 }
 
@@ -174,11 +128,7 @@ int save_guilds(zone_rnum zone_num) {
     char fname[64];
     struct guild_data *guild;
 
-#if CIRCLE_UNSIGNED_INDEX
     if (!zone_table.count(zone_num))
-#else
-        if (zone_num < 0 || zone_num > top_of_zone_table)
-#endif
     {
         log("SYSERR: GenOLC: save_guilds: Invalid real zone number %d.", zone_num);
         return false;
@@ -193,18 +143,16 @@ int save_guilds(zone_rnum zone_num) {
     }
 
     /*. Search database for guilds in this zone . */
-    for (auto i = z.bot; i <= z.top; i++) {
+    for (auto i : z.guilds) {
         if ((rguild = real_guild(i)) != NOWHERE) {
             fprintf(guild_file, "#%d~\n", i);
-            guild = guild_index + rguild;
+            guild = &guild_index[rguild];
 
-            for (j = 0; j < SKILL_TABLE_SIZE; j++)
-                if (G_SK_AND_SP(guild, j))
-                    fprintf(guild_file, "%d 1\n", j);
+            for (auto j : guild->skills)
+                fprintf(guild_file, "%d 1\n", j);
 
-            for (j = 0; j < NUM_FEATS_DEFINED; j++)
-                if (G_FEATS(guild, j))
-                    fprintf(guild_file, "%d 2\n", j);
+            for (auto j : guild->feats)
+                fprintf(guild_file, "%d 2\n", j);
 
             fprintf(guild_file, "-1\n");
 
@@ -245,4 +193,3 @@ int save_guilds(zone_rnum zone_num) {
     }
     return true;
 }
-

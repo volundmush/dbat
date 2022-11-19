@@ -134,14 +134,14 @@ int delete_room(room_rnum rnum) {
     /*
      * Remove this room from all shop lists.
      */
-    {
-        for (i = 0; i < top_shop; i++) {
-            for (j = 0; SHOP_ROOM(i, j) != NOWHERE; j++) {
-                if (SHOP_ROOM(i, j) == rnum)
-                    SHOP_ROOM(i, j) = 0; /* set to the void */
-            }
+    for (auto &sh : shop_index) {
+        i = sh.first;
+        for (j = 0; SHOP_ROOM(i, j) != NOWHERE; j++) {
+            if (SHOP_ROOM(i, j) == rnum)
+                SHOP_ROOM(i, j) = 0; /* set to the void */
         }
     }
+
     return true;
 }
 

@@ -26,13 +26,15 @@
 #include "dg_comm.h"
 #include "act.other.h"
 #include "class.h"
+#include "genzon.h"
+#include "genshp.h"
 
 /* Forward/External function declarations */
 static void sort_keeper_objs(struct char_data *keeper, vnum shop_nr);
 
 /* Local variables */
-struct shop_data *shop_index;
-int top_shop = -1;
+std::map<shop_vnum, struct shop_data> shop_index;
+shop_vnum top_shop = NOTHING;
 int cmd_say, cmd_tell, cmd_emote, cmd_slap, cmd_puke;
 
 /* local functions */
@@ -1263,15 +1265,19 @@ int ok_shop_room(vnum shop_nr, room_vnum room) {
 }
 
 SPECIAL(shop_keeper) {
-    struct char_data *keeper = (struct char_data *) me;
-    vnum shop_nr;
+    auto keeper = (struct char_data *) me;
+    vnum shop_nr = NOTHING;
 
-    for (shop_nr = 0; shop_nr <= top_shop; shop_nr++)
-        if (SHOP_KEEPER(shop_nr) == keeper->nr)
+    for (auto &sh : shop_index) {
+        if (sh.second.keeper == keeper->nr) {
+            shop_nr = sh.first;
             break;
+        }
+    }
 
-    if (shop_nr > top_shop)
-        return (false);
+
+    if (!shop_index.count(shop_nr))
+        return false;
 
     if (SHOP_FUNC(shop_nr))    /* Check secondary function */
         if ((SHOP_FUNC(shop_nr))(ch, me, cmd, argument))
@@ -1323,7 +1329,7 @@ SPECIAL(shop_keeper) {
 }
 
 int ok_damage_shopkeeper(struct char_data *ch, struct char_data *victim) {
-    int sindex;
+    shop_vnum sindex;
 
     if (!IS_MOB(victim) || mob_index[GET_MOB_RNUM(victim)].func != shop_keeper)
         return (true);
@@ -1332,7 +1338,8 @@ int ok_damage_shopkeeper(struct char_data *ch, struct char_data *victim) {
     if (AFF_FLAGGED(victim, AFF_CHARM))
         return (true);
 
-    for (sindex = 0; sindex <= top_shop; sindex++)
+    for (auto &sh : shop_index) {
+        sindex = sh.first;
         if (GET_MOB_RNUM(victim) == SHOP_KEEPER(sindex) && !SHOP_KILL_CHARS(sindex)) {
             char buf[MAX_INPUT_LENGTH];
 
@@ -1342,6 +1349,8 @@ int ok_damage_shopkeeper(struct char_data *ch, struct char_data *victim) {
             do_action(victim, GET_NAME(ch), cmd_slap, 0);
             return (false);
         }
+    }
+
 
     return (true);
 }
@@ -1486,8 +1495,9 @@ static char *read_shop_message(int mnum, room_vnum shr, FILE *shop_f, const char
 
 void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
     char *buf, buf2[256], *p;
-    int temp, count, new_format = false;
-    struct shop_buy_data list[MAX_SHOP_OBJ + 1];
+    shop_vnum temp, count, new_format = false;
+    int shop_temp;
+    struct shop_buy_data list[MAX_SHOP_OBJ + 1]{};
     int done = false;
 
     snprintf(buf2, sizeof(buf2), "beginning of shop file %s", filename);
@@ -1495,35 +1505,39 @@ void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
     while (!done) {
         buf = fread_string(shop_f, buf2);
         if (*buf == '#') {        /* New shop */
-            sscanf(buf, "#%d\n", &temp);
-            snprintf(buf2, sizeof(buf2), "shop #%d in shop file %s", temp, filename);
+            sscanf(buf, "#%ld\n", &temp);
+            snprintf(buf2, sizeof(buf2)-1, "shop #%ld in shop file %s", temp, filename);
+            auto &sh = shop_index[temp];
             free(buf);        /* Plug memory leak! */
-            top_shop++;
-            if (!top_shop)
-                CREATE(shop_index, struct shop_data, rec_count);
-            SHOP_NUM(top_shop) = temp;
-            temp = read_list(shop_f, list, new_format, MAX_PROD, LIST_PRODUCE);
-            CREATE(shop_index[top_shop].producing, obj_vnum, temp);
-            for (count = 0; count < temp; count++)
-                SHOP_PRODUCT(top_shop, count) = BUY_TYPE(list[count]);
+            sh.vnum = temp;
+            auto &z = zone_table[real_zone_by_thing(sh.vnum)];
+            z.shops.insert(sh.vnum);
+            top_shop = temp;
+            while(true) {
+                fscanf(shop_f, "%ld", &shop_temp);
+                if(shop_temp != -1) break;
+                temp = (shop_vnum)shop_temp;
+                if(obj_index.count(temp)) sh.producing.push_back(temp);
+            }
+            sh.producing.reserve(temp);
 
             read_line(shop_f, "%f", &SHOP_BUYPROFIT(top_shop));
             read_line(shop_f, "%f", &SHOP_SELLPROFIT(top_shop));
 
             temp = read_type_list(shop_f, list, new_format, MAX_TRADE);
-            CREATE(shop_index[top_shop].type, struct shop_buy_data, temp);
+            CREATE(sh.type, struct shop_buy_data, temp);
             for (count = 0; count < temp; count++) {
                 SHOP_BUYTYPE(top_shop, count) = BUY_TYPE(list[count]);
                 SHOP_BUYWORD(top_shop, count) = BUY_WORD(list[count]);
             }
 
-            shop_index[top_shop].no_such_item1 = read_shop_message(0, SHOP_NUM(top_shop), shop_f, buf2);
-            shop_index[top_shop].no_such_item2 = read_shop_message(1, SHOP_NUM(top_shop), shop_f, buf2);
-            shop_index[top_shop].do_not_buy = read_shop_message(2, SHOP_NUM(top_shop), shop_f, buf2);
-            shop_index[top_shop].missing_cash1 = read_shop_message(3, SHOP_NUM(top_shop), shop_f, buf2);
-            shop_index[top_shop].missing_cash2 = read_shop_message(4, SHOP_NUM(top_shop), shop_f, buf2);
-            shop_index[top_shop].message_buy = read_shop_message(5, SHOP_NUM(top_shop), shop_f, buf2);
-            shop_index[top_shop].message_sell = read_shop_message(6, SHOP_NUM(top_shop), shop_f, buf2);
+            sh.no_such_item1 = read_shop_message(0, SHOP_NUM(top_shop), shop_f, buf2);
+            sh.no_such_item2 = read_shop_message(1, SHOP_NUM(top_shop), shop_f, buf2);
+            sh.do_not_buy = read_shop_message(2, SHOP_NUM(top_shop), shop_f, buf2);
+            sh.missing_cash1 = read_shop_message(3, SHOP_NUM(top_shop), shop_f, buf2);
+            sh.missing_cash2 = read_shop_message(4, SHOP_NUM(top_shop), shop_f, buf2);
+            sh.message_buy = read_shop_message(5, SHOP_NUM(top_shop), shop_f, buf2);
+            sh.message_sell = read_shop_message(6, SHOP_NUM(top_shop), shop_f, buf2);
             read_line(shop_f, "%d", &SHOP_BROKE_TEMPER(top_shop));
             read_line(shop_f, "%ld", &SHOP_BITVECTOR(top_shop));
             read_line(shop_f, "%hd", &SHOP_KEEPER(top_shop));
@@ -1552,7 +1566,7 @@ void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
                 SHOP_TRADE_WITH(top_shop)[temp++] = 0;
 
             temp = read_list(shop_f, list, new_format, 1, LIST_ROOM);
-            CREATE(shop_index[top_shop].in_room, room_vnum, temp);
+            CREATE(sh.in_room, room_vnum, temp);
             for (count = 0; count < temp; count++)
                 SHOP_ROOM(top_shop, count) = BUY_TYPE(list[count]);
 
@@ -1575,23 +1589,21 @@ void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
 }
 
 void assign_the_shopkeepers() {
-    int cindex;
-
     cmd_say = find_command("say");
     cmd_tell = find_command("tell");
     cmd_emote = find_command("emote");
     cmd_slap = find_command("slap");
     cmd_puke = find_command("puke");
 
-    for (cindex = 0; cindex <= top_shop; cindex++) {
-        if (SHOP_KEEPER(cindex) == NOBODY)
+    for (auto &sh : shop_index) {
+        if (sh.second.keeper == NOBODY)
             continue;
 
         /* Having SHOP_FUNC() as 'shop_keeper' will cause infinite recursion. */
-        if (mob_index[SHOP_KEEPER(cindex)].func && mob_index[SHOP_KEEPER(cindex)].func != shop_keeper)
-            SHOP_FUNC(cindex) = mob_index[SHOP_KEEPER(cindex)].func;
+        if (mob_index[sh.second.keeper].func && mob_index[sh.second.keeper].func != shop_keeper)
+            sh.second.func = mob_index[sh.second.keeper].func;
 
-        mob_index[SHOP_KEEPER(cindex)].func = shop_keeper;
+        mob_index[sh.second.keeper].func = shop_keeper;
     }
 }
 
@@ -1636,7 +1648,9 @@ static void list_all_shops(struct char_data *ch) {
     char buf[MAX_STRING_LENGTH], buf1[16];
 
     *buf = '\0';
-    for (shop_nr = 0; shop_nr <= top_shop && len < sizeof(buf); shop_nr++) {
+    for (auto &sh : shop_index) {
+        if(!(len < sizeof(buf))) break;
+        shop_nr = sh.first;
         /* New page in page_string() mechanism, print the header again. */
         if (!(shop_nr % (PAGE_LENGTH - 2))) {
             /*
@@ -1792,26 +1806,29 @@ static void list_detailed_shop(struct char_data *ch, vnum shop_nr) {
 }
 
 void show_shops(struct char_data *ch, char *arg) {
-    vnum shop_nr;
+    vnum shop_nr = NOTHING;
 
     if (!*arg)
         list_all_shops(ch);
     else {
         if (!strcasecmp(arg, ".")) {
-            for (shop_nr = 0; shop_nr <= top_shop; shop_nr++)
-                if (ok_shop_room(shop_nr, GET_ROOM_VNUM(IN_ROOM(ch))))
+            for (auto &sh : shop_index) {
+                if (ok_shop_room(sh.first, GET_ROOM_VNUM(IN_ROOM(ch)))) {
+                    shop_nr = sh.first;
                     break;
+                }
+            }
 
-            if (shop_nr > top_shop) {
+            if (shop_nr == NOTHING) {
                 send_to_char(ch, "This isn't a shop!\r\n");
                 return;
             }
         } else if (is_number(arg))
-            shop_nr = atoi(arg) - 1;
+            shop_nr = atol(arg);
         else
-            shop_nr = -1;
+            shop_nr = NOTHING;
 
-        if (shop_nr < 0 || shop_nr > top_shop) {
+        if (!shop_index.count(shop_nr)) {
             send_to_char(ch, "Illegal shop number.\r\n");
             return;
         }
@@ -1820,52 +1837,30 @@ void show_shops(struct char_data *ch, char *arg) {
 }
 
 void destroy_shops() {
-    ssize_t cnt, itr;
-
-    if (!shop_index)
-        return;
-
-    for (cnt = 0; cnt <= top_shop; cnt++) {
-        if (shop_index[cnt].no_such_item1)
-            free(shop_index[cnt].no_such_item1);
-        if (shop_index[cnt].no_such_item2)
-            free(shop_index[cnt].no_such_item2);
-        if (shop_index[cnt].missing_cash1)
-            free(shop_index[cnt].missing_cash1);
-        if (shop_index[cnt].missing_cash2)
-            free(shop_index[cnt].missing_cash2);
-        if (shop_index[cnt].do_not_buy)
-            free(shop_index[cnt].do_not_buy);
-        if (shop_index[cnt].message_buy)
-            free(shop_index[cnt].message_buy);
-        if (shop_index[cnt].message_sell)
-            free(shop_index[cnt].message_sell);
-        if (shop_index[cnt].in_room)
-            free(shop_index[cnt].in_room);
-        if (shop_index[cnt].producing)
-            free(shop_index[cnt].producing);
-
-        if (shop_index[cnt].type) {
-            for (itr = 0; BUY_TYPE(shop_index[cnt].type[itr]) != NOTHING; itr++)
-                if (BUY_WORD(shop_index[cnt].type[itr]))
-                    free(BUY_WORD(shop_index[cnt].type[itr]));
-            free(shop_index[cnt].type);
-        }
-    }
-
-    free(shop_index);
-    shop_index = nullptr;
-    top_shop = -1;
+    shop_index.clear();
 }
 
-int count_shops(shop_vnum low, shop_vnum high) {
-    int i, j;
+shop_buy_data::~shop_buy_data() {
+    if(keywords) free(keywords);
+}
 
-    for (i = j = 0; SHOP_NUM(i) <= high; i++) {
-        if (SHOP_NUM(i) >= low) {
-            j++;
-        }
+shop_data::~shop_data() {
+    free_shop_strings(this);
+    if (in_room)
+        free(in_room);
+
+    if (type) {
+        for (auto itr = 0; type[itr].type != NOTHING; itr++)
+            if (type[itr].type)
+                free(type[itr].keywords);
+        free(type);
     }
+}
 
-    return j;
+void shop_data::add_product(obj_vnum v) {
+    producing.push_back(v);
+}
+
+void shop_data::remove_product(obj_vnum v) {
+    std::remove_if(producing.begin(), producing.end(), [&](obj_vnum &o) {return o == v;});
 }

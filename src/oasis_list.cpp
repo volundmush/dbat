@@ -298,7 +298,8 @@ void list_shops(struct char_data *ch, zone_rnum rnum, shop_vnum vmin, shop_vnum 
                  "Index VNum    Shop Room(s)\r\n"
                  "----- ------- ---------------------------------------------\r\n");
 
-    for (i = 0; i <= top_shop; i++) {
+    for (auto &sh : shop_index) {
+        i = sh.first;
         if (SHOP_NUM(i) >= bottom && SHOP_NUM(i) <= top) {
             counter++;
 

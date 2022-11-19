@@ -410,9 +410,9 @@ void mobile_activity() {
                 vnum shop_nr, shopnr = -1;
 
                 GET_LPLAY(ch) = time(nullptr);
-                for (shop_nr = 0; shop_nr <= top_shop; shop_nr++) {
-                    if (SHOP_KEEPER(shop_nr) == ch->nr) {
-                        shopnr = shop_nr;
+                for (auto &sh : shop_index) {
+                    if (sh.second.keeper == ch->nr) {
+                        shopnr = sh.first;
                     }
                 }
                 for (sobj = ch->carrying; sobj; sobj = next_obj) {
@@ -481,16 +481,19 @@ void mobile_activity() {
         /* Add new mobile actions here */
 
         if (IS_KABITO(ch)) {
-            vnum shop_nr;
+            vnum shop_nr = NOBODY;
             found = false;
             /* Is there a shopkeeper around? */
             for (vict = world[IN_ROOM(ch)].people; vict && !found; vict = vict->next_in_room) {
                 if (GET_MOB_SPEC(vict) == shop_keeper) {
                     /* Ok, vict is a shop keeper.  Which shop is his? */
-                    for (shop_nr = 0; shop_nr <= top_shop; shop_nr++)
-                        if (SHOP_KEEPER(shop_nr) == vict->nr)
+                    for (auto &sh : shop_index)
+                        if (sh.second.keeper == vict->nr) {
+                            shop_nr = sh.first;
                             break;
-                    if (shop_nr <= top_shop)
+                        }
+
+                    if (shop_nr != NOBODY)
                         /* Is the shopkeeper in his shop? */
                         if (ok_shop_room(shop_nr, IN_ROOM(vict)))
                             /* Does the shopkeeper prevent stealing? */

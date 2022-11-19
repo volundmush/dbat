@@ -45,8 +45,8 @@ void copy_shop(struct shop_data *tshop, struct shop_data *fshop, int free_old_st
      * Copy lists over.
      */
     copy_list(&(S_ROOMS(tshop)), S_ROOMS(fshop));
-    copy_list(&(S_PRODUCTS(tshop)), S_PRODUCTS(fshop));
-    copy_type_list(&(tshop->type), fshop->type);
+    tshop->producing = fshop->producing;
+    tshop->type = fshop->type;
 
     /*
      * Copy notification strings over.
@@ -294,7 +294,6 @@ void free_shop(struct shop_data *shop) {
     free_shop_strings(shop);
     free_type_list(&(S_NAMELISTS(shop)));
     free(S_ROOMS(shop));
-    free(S_PRODUCTS(shop));
     free(shop);
 }
 
@@ -305,31 +304,7 @@ void free_shop(struct shop_data *shop) {
  * We take so good care to keep it sorted - let's use it :) - Welcor
  */
 shop_rnum real_shop(shop_vnum vnum) {
-    shop_rnum bot, top, mid, last_top;
-
-    if (top_shop < 0)
-        return NOWHERE;
-
-    bot = 0;
-    top = top_shop;
-
-    /* perform binary search on shop_table */
-    for (;;) {
-        last_top = top;
-        mid = (bot + top) / 2;
-
-        if (SHOP_NUM(mid) == vnum)
-            return (mid);
-        if (bot >= top)
-            return (NOWHERE);
-        if (SHOP_NUM(mid) > vnum)
-            top = mid;
-        else
-            bot = mid + 1;
-
-        if (top > last_top)
-            return NOWHERE;
-    }
+    return shop_index.count(vnum) ? vnum : NOTHING;
 }
 
 /*-------------------------------------------------------------------*/
@@ -360,55 +335,13 @@ void modify_string(char **str, char *new_s) {
 
 int add_shop(struct shop_data *nshp) {
     shop_rnum rshop;
-    int found = 0;
     zone_rnum rznum = real_zone_by_thing(S_NUM(nshp));
-
-    /*
-     * The shop already exists, just update it.
-     */
-    if ((rshop = real_shop(S_NUM(nshp))) != NOWHERE) {
-        /* free old strings. They're not used in any other place -- Welcor */
-        copy_shop(&shop_index[rshop], nshp, true);
-        if (rznum != NOWHERE)
-            add_to_save_list(zone_table[rznum].number, SL_SHP);
-        else
-            mudlog(BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Cannot determine shop zone.");
-        return rshop;
-    }
-
-    top_shop++;
-    RECREATE(shop_index, struct shop_data, top_shop + 1);
-
-    for (rshop = top_shop; rshop > 0; rshop--) {
-        if (nshp->vnum > SHOP_NUM(rshop - 1)) {
-            found = rshop;
-
-            /* Make a "nofree" variant and remove these later. */
-            shop_index[rshop].in_room = nullptr;
-            shop_index[rshop].producing = nullptr;
-            shop_index[rshop].type = nullptr;
-            /* don't free old strings - they're still in use -- Welcor */
-            copy_shop(&shop_index[rshop], nshp, false);
-            break;
-        }
-        shop_index[rshop] = shop_index[rshop - 1];
-    }
-
-    if (!found) {
-        /* Make a "nofree" variant and remove these later. */
-        shop_index[rshop].in_room = nullptr;
-        shop_index[rshop].producing = nullptr;
-        shop_index[rshop].type = nullptr;
-        /* don't free old strings - they're still in use -- Welcor */
-        copy_shop(&shop_index[0], nshp, false);
-    }
-
-    if (rznum != NOWHERE)
-        add_to_save_list(zone_table[rznum].number, SL_SHP);
-    else
-        mudlog(BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Cannot determine shop zone.");
-
-    return rshop;
+    auto &z = zone_table[rznum];
+    z.shops.insert(S_NUM(nshp));
+    auto &sh = shop_index[S_NUM(nshp)];
+    copy_shop(&shop_index[rshop], nshp, false);
+    add_to_save_list(zone_table[rznum].number, SL_SHP);
+    return S_NUM(nshp);
 }
 
 /*-------------------------------------------------------------------*/
@@ -439,13 +372,13 @@ int save_shops(zone_rnum zone_num) {
     for (i = z.bot; i <= z.top; i++) {
         if ((rshop = real_shop(i)) != NOWHERE) {
             fprintf(shop_file, "#%d~\n", i);
-            shop = shop_index + rshop;
+            shop = &shop_index[rshop];
 
             /*
              * Save the products.
              */
-            for (j = 0; S_PRODUCT(shop, j) != NOTHING; j++)
-                fprintf(shop_file, "%d\n", obj_index[S_PRODUCT(shop, j)].vnum);
+            for (auto j : shop->producing)
+                fprintf(shop_file, "%d\n", j);
             fprintf(shop_file, "-1\n");
 
             /*
