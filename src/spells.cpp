@@ -81,7 +81,7 @@ ASPELL(spell_teleport) {
         return;
 
     do {
-        to_room = rand_number(0, top_of_world);
+        to_room = rand_number(0, world.size());
     } while (ROOM_FLAGGED(to_room, ROOM_PRIVATE | ROOM_DEATH | ROOM_GODROOM));
 
     act("$n slowly fades out of existence and is gone.",

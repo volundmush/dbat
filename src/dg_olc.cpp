@@ -172,7 +172,7 @@ void trigedit_setup_existing(struct descriptor_data *d, int rtrg_num) {
      */
     CREATE(trig, struct trig_data, 1);
 
-    trig_data_copy(trig, trig_index[rtrg_num]->proto);
+    trig_data_copy(trig, trig_index[rtrg_num].proto);
 
     /* convert cmdlist to a char string */
     c = trig->cmdlist;
@@ -419,15 +419,16 @@ void trigedit_save(struct descriptor_data *d) {
     char bitBuf[MAX_INPUT_LENGTH];
     char fname[MAX_INPUT_LENGTH];
 
-    if ((rnum = real_trigger(OLC_NUM(d))) != NOTHING) {
-        proto = trig_index[rnum]->proto;
+    auto exists = trig_index.count(OLC_NUM(d));
+    auto &t = trig_index[OLC_NUM(d)];
+    if (exists) {
+        proto = t.proto;
         for (cmd = proto->cmdlist; cmd; cmd = next_cmd) {
             next_cmd = cmd->next;
             if (cmd->cmd)
                 free(cmd->cmd);
             free(cmd);
         }
-
 
         free(proto->arglist);
         free(proto->name);
@@ -495,86 +496,11 @@ void trigedit_save(struct descriptor_data *d) {
             live_trig = live_trig->next_in_world;
         }
     } else {
-        /* this is a new trigger */
-        CREATE(new_index, struct index_data *, top_of_trigt + 2);
-
-        /* Recompile the command list from the new script */
-
-        s = OLC_STORAGE(d);
-
-        CREATE(trig->cmdlist, struct cmdlist_element, 1);
-        if (s) {
-            /* strtok returns nullptr if s is "\r\n" */
-            char *t = strtok(s, "\n\r");
-            trig->cmdlist->cmd = strdup(t ? t : "* No script");
-            cmd = trig->cmdlist;
-
-            while ((s = strtok(nullptr, "\n\r"))) {
-                CREATE(cmd->next, struct cmdlist_element, 1);
-                cmd = cmd->next;
-                cmd->cmd = strdup(s);
-            }
-        } else
-            trig->cmdlist->cmd = strdup("* No Script");
-
-        for (i = 0; i < top_of_trigt; i++) {
-            if (!found) {
-                if (trig_index[i]->vnum > OLC_NUM(d)) {
-                    found = true;
-                    rnum = i;
-
-                    CREATE(new_index[rnum], struct index_data, 1);
-                    GET_TRIG_RNUM(OLC_TRIG(d)) = rnum;
-                    new_index[rnum]->vnum = OLC_NUM(d);
-                    new_index[rnum]->number = 0;
-                    new_index[rnum]->func = nullptr;
-                    CREATE(proto, struct trig_data, 1);
-                    new_index[rnum]->proto = proto;
-                    trig_data_copy(proto, trig);
-
-                    new_index[rnum + 1] = trig_index[rnum];
-
-                    proto = trig_index[rnum]->proto;
-                    proto->nr = rnum + 1;
-                } else {
-                    new_index[i] = trig_index[i];
-                }
-            } else {
-                new_index[i + 1] = trig_index[i];
-                proto = trig_index[i]->proto;
-                proto->nr = i + 1;
-            }
+        {
+            t.vnum = OLC_NUM(d);
+            t.proto = new trig_data();
+            trig_data_copy(t.proto, trig);
         }
-
-        if (!found) {
-            rnum = i;
-            CREATE(new_index[rnum], struct index_data, 1);
-            GET_TRIG_RNUM(OLC_TRIG(d)) = rnum;
-            new_index[rnum]->vnum = OLC_NUM(d);
-            new_index[rnum]->number = 0;
-            new_index[rnum]->func = nullptr;
-
-            CREATE(proto, struct trig_data, 1);
-            new_index[rnum]->proto = proto;
-            trig_data_copy(proto, trig);
-        }
-
-        free(trig_index);
-
-        trig_index = new_index;
-        top_of_trigt++;
-
-        /* HERE IT HAS TO GO THROUGH AND FIX ALL SCRIPTS/TRIGS OF HIGHER RNUM */
-        for (live_trig = trigger_list; live_trig; live_trig = live_trig->next_in_world)
-            GET_TRIG_RNUM(live_trig) += (GET_TRIG_RNUM(live_trig) != NOTHING && GET_TRIG_RNUM(live_trig) > rnum);
-
-        /*
-         * Update other trigs being edited.
-         */
-        for (dsc = descriptor_list; dsc; dsc = dsc->next)
-            if (STATE(dsc) == CON_TRIGEDIT)
-                if (GET_TRIG_RNUM(OLC_TRIG(dsc)) >= rnum)
-                    GET_TRIG_RNUM(OLC_TRIG(dsc))++;
 
     }
 
@@ -588,11 +514,7 @@ void trigedit_save(struct descriptor_data *d) {
     zone = zone_table[OLC_ZNUM(d)].number;
     top = zone_table[OLC_ZNUM(d)].top;
 
-#ifdef CIRCLE_MAC
-    snprintf(fname, sizeof(fname), "%s:%i.new", TRG_PREFIX, zone);
-#else
     snprintf(fname, sizeof(fname), "%s/%i.new", TRG_PREFIX, zone);
-#endif
 
     if (!(trig_file = fopen(fname, "w"))) {
         mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(d->character)), true,
@@ -600,9 +522,12 @@ void trigedit_save(struct descriptor_data *d) {
         return;
     }
 
-    for (i = zone_table[OLC_ZNUM(d)].bot; i <= top; i++) {
+    auto &z = zone_table[OLC_ZNUM(d)];
+    z.triggers.insert(t.vnum);
+
+    for (auto i : z.triggers) {
         if ((rnum = real_trigger(i)) != NOTHING) {
-            trig = trig_index[rnum]->proto;
+            trig = trig_index[rnum].proto;
 
             if (fprintf(trig_file, "#%d\n", i) < 0) {
                 mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(d->character)), true,
@@ -637,11 +562,7 @@ void trigedit_save(struct descriptor_data *d) {
     fprintf(trig_file, "$%c\n", STRING_TERMINATOR);
     fclose(trig_file);
 
-#ifdef CIRCLE_MAC
-    snprintf(buf, sizeof(buf), "%s:%d.trg", TRG_PREFIX, zone);
-#else
     snprintf(buf, sizeof(buf), "%s%d.trg", TRG_PREFIX, zone);
-#endif
 
     remove(buf);
     rename(fname, buf);
@@ -689,8 +610,8 @@ void dg_script_menu(struct descriptor_data *d) {
 
     while (editscript) {
         write_to_output(d, "     %2d) [@c%d@n] @c%s@n", ++i, editscript->vnum,
-                        trig_index[real_trigger(editscript->vnum)]->proto->name);
-        if (trig_index[real_trigger(editscript->vnum)]->proto->attach_type != OLC_ITEM_TYPE(d))
+                        trig_index[real_trigger(editscript->vnum)].proto->name);
+        if (trig_index[real_trigger(editscript->vnum)].proto->attach_type != OLC_ITEM_TYPE(d))
             write_to_output(d, "   @g** Mis-matched Trigger Type **@n\r\n");
         else
             write_to_output(d, "\r\n");

@@ -632,9 +632,9 @@ void script_trigger_check() {
         }
     }
 
-    for (nr = 0; nr <= top_of_world; nr++) {
-        if (SCRIPT(&world[nr])) {
-            room = &world[nr];
+    for (auto &r : world) {
+        if (SCRIPT(&r.second)) {
+            room = &r.second;
             sc = SCRIPT(room);
 
             if (IS_SET(SCRIPT_TYPES(sc), WTRIG_RANDOM) &&
@@ -672,9 +672,9 @@ void check_time_triggers() {
         }
     }
 
-    for (nr = 0; nr <= top_of_world; nr++) {
-        if (SCRIPT(&world[nr])) {
-            room = &world[nr];
+    for (auto &r : world) {
+        if (SCRIPT(&r.second)) {
+            room = &r.second;
             sc = SCRIPT(room);
 
             if (IS_SET(SCRIPT_TYPES(sc), WTRIG_TIME) &&
@@ -714,14 +714,14 @@ EVENTFUNC(trig_wait_event) {
                     found = true;
         } else {
             room_rnum i;
-            for (i = 0; i < top_of_world && !found; i++)
-                if (&world[i] == (struct room_data *) go)
+            for (auto &r : world)
+                if (&r.second == (struct room_data *) go)
                     found = true;
         }
         if (!found) {
             log("Trigger restarted on unknown entity. Vnum: %d", GET_TRIG_VNUM(trig));
             log("Type: %s trigger", type == MOB_TRIGGER ? "Mob" : type == OBJ_TRIGGER ? "Obj" : "Room");
-            log("attached %d places", trig_index[trig->nr]->number);
+            log("attached %d places", trig_index[trig->nr].number);
             script_log("Trigger restart attempt on unknown entity.");
             return 0;
         }
@@ -1083,7 +1083,7 @@ int remove_trigger(struct script_data *sc, char *name) {
             /* is found. originally the number was position-only */
         else if (++n >= num)
             break;
-        else if (trig_index[i->nr]->vnum == num)
+        else if (trig_index[i->nr].vnum == num)
             break;
     }
 
@@ -2679,26 +2679,7 @@ int script_driver(void *go_adress, trig_data *trig, int type, int mode) {
 
 /* returns the real number of the trigger with given virtual number */
 trig_rnum real_trigger(trig_vnum vnum) {
-    trig_rnum bot, top, mid;
-
-    bot = 0;
-    top = top_of_trigt - 1;
-
-    if (!top_of_trigt || trig_index[bot]->vnum > vnum || trig_index[top]->vnum < vnum)
-        return (NOTHING);
-
-    /* perform binary search on trigger-table */
-    while (bot <= top) {
-        mid = (bot + top) / 2;
-
-        if (trig_index[mid]->vnum == vnum)
-            return (mid);
-        if (trig_index[mid]->vnum > vnum)
-            top = mid - 1;
-        else
-            bot = mid + 1;
-    }
-    return (NOTHING);
+    return trig_index.count(vnum) ? vnum : NOTHING;
 }
 
 ACMD(do_tstat) {
@@ -2713,7 +2694,7 @@ ACMD(do_tstat) {
             return;
         }
 
-        do_stat_trigger(ch, trig_index[rnum]->proto);
+        do_stat_trigger(ch, trig_index[rnum].proto);
     } else
         send_to_char(ch, "Usage: tstat <vnum>\r\n");
 }

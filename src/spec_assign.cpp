@@ -237,7 +237,7 @@ void assign_rooms() {
     /* Gauntlet rooms track how far a player progressed into zone  Jamdog - 13th Feb 2006 */
 
     if (CONFIG_DTS_ARE_DUMPS)
-        for (i = 0; i <= top_of_world; i++)
-            if (ROOM_FLAGGED(i, ROOM_DEATH))
-                world[i].func = dump;
+        for (auto &r : world)
+            if (ROOM_FLAGGED(r.first, ROOM_DEATH))
+                r.second.func = dump;
 }

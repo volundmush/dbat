@@ -226,8 +226,7 @@ void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type) {
             free(OLC_ZONE(d)->builders);
         if (OLC_ZONE(d)->name)
             free(OLC_ZONE(d)->name);
-        if (OLC_ZONE(d)->cmd)
-            free(OLC_ZONE(d)->cmd);
+        OLC_ZONE(d)->cmd.clear();
         free(OLC_ZONE(d));
     }
 

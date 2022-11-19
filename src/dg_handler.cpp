@@ -86,7 +86,7 @@ void free_trigger(struct trig_data *trig) {
     if (GET_TRIG_WAIT(trig))
         event_cancel(GET_TRIG_WAIT(trig));
 
-    free(trig);
+    delete trig;
 }
 
 
@@ -99,7 +99,7 @@ void extract_trigger(struct trig_data *trig) {
         GET_TRIG_WAIT(trig) = nullptr;
     }
 
-    trig_index[trig->nr]->number--;
+    trig_index[trig->nr].number--;
 
     /* walk the trigger list and remove this one */
     REMOVE_FROM_LIST(trig, trigger_list, next_in_world, temp);
@@ -145,8 +145,8 @@ void extract_script(void *thing, int type) {
             for (; j; j = j->next)
                 assert(sc != SCRIPT(j));
 
-            for (k = 0; k < top_of_world; k++)
-                assert(sc != SCRIPT(&world[k]));
+            for (auto &r : world)
+                assert(sc != SCRIPT(&r.second));
         }
     }
 #endif
@@ -208,8 +208,8 @@ void free_proto_script(void *thing, int type) {
             for (; j; j = j->next)
                 assert(proto != j->proto_script);
 
-            for (k = 0; k < top_of_world; k++)
-                assert(proto != world[k].proto_script);
+            for (auto &r : world)
+                assert(proto != r.second.proto_script);
         }
     }
 #endif

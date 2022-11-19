@@ -20,7 +20,7 @@
 #include "comm.h"
 
 /* List of zones to be saved.  */
-struct save_list_data *save_list;
+std::list<struct save_list_data> save_list;
 
 /* Structure defining all known save types.  */
 struct {
@@ -53,25 +53,22 @@ char *str_udup(const char *txt) {
 
 /* Original use: to be called at shutdown time.  */
 int save_all() {
-    while (save_list) {
-        if (save_list->type < 0 || save_list->type > SL_MAX) {
-            switch (save_list->type) {
+    for (auto &s : save_list) {
+        if (s.type < 0 || s.type > SL_MAX) {
+            switch (s.type) {
                 case SL_ACT:
                     log("Actions not saved - can not autosave. Use 'aedit save'.");
-                    save_list = save_list->next;    /* Fatal error, skip this one. */
                     break;
                 case SL_HLP:
                     log("Help not saved - can not autosave. Use 'hedit save'.");
-                    save_list = save_list->next;    /* Fatal error, skip this one. */
                     break;
                 default:
-                    log("SYSERR: GenOLC: Invalid save type %d in save list.\n", save_list->type);
+                    log("SYSERR: GenOLC: Invalid save type %d in save list.\n", s.type);
                     break;
             }
-        } else if ((*save_types[save_list->type].func)(real_zone(save_list->zone)) < 0)
-            save_list = save_list->next;    /* Fatal error, skip this one. */
+        } else if ((*save_types[s.type].func)(real_zone(s.zone)) < 0) {}
     }
-
+    save_list.clear();
     return true;
 }
 
@@ -122,79 +119,47 @@ void free_ex_descriptions(struct extra_descr_data *head) {
 }
 
 int remove_from_save_list(zone_vnum zone, int type) {
-    struct save_list_data *ritem, *temp;
+    int counter = 0;
+    auto check = [&](save_list_data &d) {if(d.zone == zone && d.type == type) {counter++; return true;}};
 
-    for (ritem = save_list; ritem; ritem = ritem->next)
-        if (ritem->zone == zone && ritem->type == type)
-            break;
-
-    if (ritem == nullptr) {
-        log("SYSERR: remove_from_save_list: Saved item not found. (%d/%d)", zone, type);
-        return false;
-    }
-    REMOVE_FROM_LIST(ritem, save_list, next, temp);
-    free(ritem);
-    return true;
+    std::remove_if(save_list.begin(), save_list.end(), check);
+    return counter;
 }
 
 int add_to_save_list(zone_vnum zone, int type) {
-    struct save_list_data *nitem;
-    zone_rnum rznum;
-
     if (type == SL_CFG)
         return false;
 
-    rznum = real_zone(zone);
-    if (rznum == NOWHERE || rznum > top_of_zone_table) {
+    if (!zone_table.count(zone)) {
         if (zone != AEDIT_PERMISSION && zone != HEDIT_PERMISSION) {
-            log("SYSERR: add_to_save_list: Invalid zone number passed. (%d => %d, 0-%d)", zone, rznum,
-                top_of_zone_table);
+            log("SYSERR: add_to_save_list: Invalid zone number passed. (%d)", zone);
             return false;
         }
     }
 
-    for (nitem = save_list; nitem; nitem = nitem->next)
-        if (nitem->zone == zone && nitem->type == type)
-            return false;
-
-    CREATE(nitem, struct save_list_data, 1);
-    nitem->zone = zone;
-    nitem->type = type;
-    nitem->next = save_list;
-    save_list = nitem;
+    auto &l = save_list.emplace_back();
+    l.zone = zone;
+    l.type = type;
     return true;
 }
 
 int in_save_list(zone_vnum zone, int type) {
-    struct save_list_data *nitem;
 
-    for (nitem = save_list; nitem; nitem = nitem->next)
-        if (nitem->zone == zone && nitem->type == type)
+    for (auto &i : save_list)
+        if (i.zone == zone && i.type == type)
             return true;
-
     return false;
-}
-
-void free_save_list() {
-    struct save_list_data *sld, *next_sld;
-
-    for (sld = save_list; sld; sld = next_sld) {
-        next_sld = sld->next;
-        free(sld);
-    }
 }
 
 /* Used from do_show(), ideally.  */
 ACMD(do_show_save_list) {
-    if (save_list == nullptr)
+    if (save_list.empty())
         send_to_char(ch, "All world files are up to date.\r\n");
     else {
-        struct save_list_data *item;
-
         send_to_char(ch, "The following files need saving:\r\n");
-        for (item = save_list; item; item = item->next) {
-            if (item->type != SL_CFG)
-                send_to_char(ch, " - %s data for zone %d.\r\n", save_types[item->type].message, item->zone);
+        for (auto &i : save_list) {
+            if (i.type != SL_CFG)
+                send_to_char(ch, " - %s data for zone %d.\r\n", save_types[i.type].message, i.zone);
             else
                 send_to_char(ch, " - Game configuration data.\r\n");
         }

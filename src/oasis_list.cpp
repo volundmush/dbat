@@ -120,28 +120,26 @@ ACMD(do_oasis_links) {
     skip_spaces(&argument);
     one_argument(argument, arg);
 
-    if (!strcmp(arg, ".") || (arg == nullptr || !*arg)) {
-        zrnum = world[IN_ROOM(ch)].zone;
-        zvnum = zone_table[zrnum].number;
+    if ((!arg || !*arg) || !strcmp(arg, ".")) {
+        zvnum = world[IN_ROOM(ch)].zone;
     } else {
-        zvnum = atoi(arg);
-        zrnum = real_zone(zvnum);
+        zvnum = atol(arg);
     }
 
-    if (zrnum == NOWHERE || zvnum == NOWHERE) {
+    if (!zone_table.count(zvnum)) {
         send_to_char(ch, "No zone was found with that number.\n\r");
         return;
     }
+    auto &z = zone_table[zvnum];
 
-    last = zone_table[zrnum].top;
-    first = zone_table[zrnum].bot;
-
-    send_to_char(ch, "Zone %d is linked to the following zones:\r\n", zvnum);
-    for (nr = 0; nr <= top_of_world && (GET_ROOM_VNUM(nr) <= last); nr++) {
-        if (GET_ROOM_VNUM(nr) >= first) {
+    send_to_char(ch, "Zone %d is linked to the following zones:\r\n", z.number);
+    for (auto nr : z.rooms) {
+        if (world.count(nr)) {
+            auto &r = world[nr];
             for (j = 0; j < NUM_OF_DIRS; j++) {
-                if (world[nr].dir_option[j]) {
-                    to_room = world[nr].dir_option[j]->to_room;
+                if (r.dir_option[j]) {
+                    auto &e = r.dir_option[j];
+                    to_room = e->to_room;
                     if (to_room != NOWHERE && (zrnum != world[to_room].zone))
                         send_to_char(ch, "%3d %-30s at %5d (%-5s) ---> %5d\r\n",
                                      zone_table[world[to_room].zone].number,
@@ -162,10 +160,11 @@ ACMD(do_oasis_links) {
  * List all rooms in a zone.                              
  */
 void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum vmax) {
-    int i, j, bottom, top, counter = 0;
+    room_vnum i, j, bottom, top, counter = 0;
     /*
      * Expect a minimum / maximum number if the rnum for the zone is NOWHERE.
      */
+
     if (rnum != NOWHERE) {
         bottom = zone_table[rnum].bot;
         top = zone_table[rnum].top;
@@ -178,26 +177,23 @@ void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum 
                  "@nIndex VNum    Room Name                                Exits\r\n"
                  "----- ------- ---------------------------------------- -----@n\r\n");
 
-    if (!top_of_world)
-        return;
-
-    for (i = 0; i <= top_of_world; i++) {
+    for (auto &r : world) {
 
         /** Check to see if this room is one of the ones needed to be listed.    **/
-        if ((world[i].number >= bottom) && (world[i].number <= top)) {
+        if ((r.first >= bottom) && (r.first <= top)) {
             counter++;
 
             send_to_char(ch, "%4d) [@g%-5d@n] @[1]%-*s@n %s",
-                         counter, world[i].number, count_color_chars(world[i].name) + 44,
-                         world[i].name, world[i].proto_script ? "[TRIG] " : "");
-
+                         counter, r.first, count_color_chars(r.second.name) + 44,
+                         r.second.name, r.second.proto_script ? "[TRIG] " : "");
+            i = r.first;
             for (j = 0; j < NUM_OF_DIRS; j++) {
                 if (W_EXIT(i, j) == nullptr)
                     continue;
                 if (W_EXIT(i, j)->to_room == NOWHERE)
                     continue;
 
-                if (world[W_EXIT(i, j)->to_room].zone != world[i].zone)
+                if (world[W_EXIT(i, j)->to_room].zone != r.second.zone)
                     send_to_char(ch, "(@y%d@n)", world[W_EXIT(i, j)->to_room].number);
 
             }
@@ -215,7 +211,7 @@ void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum 
  * List all mobiles in a zone.                              
  */
 void list_mobiles(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum vmax) {
-    int i, bottom, top, counter = 0, admg;
+    mob_vnum i, bottom, top, counter = 0, admg;
 
     if (rnum != NOWHERE) {
         bottom = zone_table[rnum].bot;
@@ -229,19 +225,15 @@ void list_mobiles(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnu
                  "@nIndex VNum    Mobile Name                    Race      Class     Level\r\n"
                  "----- ------- -------------------------      --------- --------- -----\r\n");
 
-    if (!top_of_mobt)
-        return;
-
-    for (i = 0; i <= top_of_mobt; i++) {
-        if (mob_index[i].vnum >= bottom && mob_index[i].vnum <= top) {
+    for (auto &m : mob_proto) {
+        if (m.first >= bottom && m.first <= top) {
             counter++;
 
-            admg = ((mob_proto[i].mob_specials.damsizedice + 1) / 2.0) * (mob_proto[i].mob_specials.damnodice);
             send_to_char(ch, "@g%4d@n) [@g%-5d@n] @[3]%-*s @C%-9s @c%-9s @y[%4d]@n %s\r\n",
-                         counter, mob_index[i].vnum, count_color_chars(mob_proto[i].short_descr) + 30,
-                         mob_proto[i].short_descr, TRUE_RACE(&mob_proto[i]), mob_proto[i].chclass->getName().c_str(),
-                         mob_proto[i].level + mob_proto[i].level_adj + mob_proto[i].race_level,
-                         mob_proto[i].proto_script ? " [TRIG]" : "");
+                         counter, m.first, count_color_chars(m.second.short_descr) + 30,
+                         m.second.short_descr, TRUE_RACE(&m.second), m.second.chclass->getName().c_str(),
+                         m.second.level + m.second.level_adj + m.second.race_level,
+                         m.second.proto_script ? " [TRIG]" : "");
         }
     }
 
@@ -254,7 +246,7 @@ void list_mobiles(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnu
  * List all objects in a zone.                              
  */
 void list_objects(struct char_data *ch, zone_rnum rnum, room_vnum vmin, room_vnum vmax) {
-    int i, bottom, top, counter = 0;
+    obj_vnum i, bottom, top, counter = 0;
 
     if (rnum != NOWHERE) {
         bottom = zone_table[rnum].bot;
@@ -268,17 +260,14 @@ void list_objects(struct char_data *ch, zone_rnum rnum, room_vnum vmin, room_vnu
                  "@nIndex VNum    Object Name                                  Object Type\r\n"
                  "----- ------- -------------------------------------------- ----------------\r\n");
 
-    if (!top_of_objt)
-        return;
-
-    for (i = 0; i <= top_of_objt; i++) {
-        if (obj_index[i].vnum >= bottom && obj_index[i].vnum <= top) {
+    for (auto &o : obj_proto) {
+        if (o.first >= bottom && o.first <= top) {
             counter++;
 
             send_to_char(ch, "@g%4d@n) [@g%-5d@n] @[2]%-*s @y[%s]@n%s\r\n",
-                         counter, obj_index[i].vnum, count_color_chars(obj_proto[i].short_description) + 44,
-                         obj_proto[i].short_description, item_types[obj_proto[i].type_flag],
-                         obj_proto[i].proto_script ? " [TRIG]" : "");
+                         counter, o.first, count_color_chars(o.second.short_description) + 44,
+                         o.second.short_description, item_types[o.second.type_flag],
+                         o.second.proto_script ? " [TRIG]" : "");
         }
     }
 
@@ -338,19 +327,15 @@ void list_shops(struct char_data *ch, zone_rnum rnum, shop_vnum vmin, shop_vnum 
  * List all zones in the world (sort of like 'show zones').                              
  */
 void list_zones(struct char_data *ch) {
-    int i;
 
     send_to_char(ch,
                  "VNum  Zone Name                      Builder(s)\r\n"
                  "----- ------------------------------ --------------------------------------\r\n");
 
-    if (!top_of_zone_table)
-        return;
-
-    for (i = 0; i <= top_of_zone_table; i++)
+    for (auto &z : zone_table)
         send_to_char(ch, "[@g%3d@n] @c%-*s @y%-1s@n\r\n",
-                     zone_table[i].number, count_color_chars(zone_table[i].name) + 30, zone_table[i].name,
-                     zone_table[i].builders ? zone_table[i].builders : "None.");
+                     z.first, count_color_chars(z.second.name) + 30, z.second.name,
+                     z.second.builders ? z.second.builders : "None.");
 }
 
 
@@ -359,63 +344,23 @@ void list_zones(struct char_data *ch) {
  */
 void print_zone(struct char_data *ch, zone_vnum vnum) {
     zone_rnum rnum;
-    int size_rooms, size_objects, size_mobiles, i;
-    int size_guilds, size_triggers, size_shops;
-    room_vnum top, bottom;
-    int largest_table;
+    std::size_t size_rooms, size_objects, size_mobiles, i;
+    std::size_t size_guilds, size_triggers, size_shops;
     char bits[MAX_STRING_LENGTH];
 
-    if ((rnum = real_zone(vnum)) == NOWHERE) {
+    if (!zone_table.count(vnum)) {
         send_to_char(ch, "Zone #%d does not exist in the database.\r\n", vnum);
         return;
     }
+    auto &z = zone_table[vnum];
+    sprintbitarray(z.zone_flags, zone_bits, ZF_ARRAY_MAX, bits);
+    size_rooms = z.rooms.size();
+    size_objects = z.objects.size();
+    size_mobiles = z.mobiles.size();
+    size_shops = z.shops.size();
+    size_triggers = z.triggers.size();
+    size_guilds = z.guilds.size();;
 
-    sprintbitarray(zone_table[rnum].zone_flags, zone_bits, ZF_ARRAY_MAX, bits);
-    /****************************************************************************/
-    /** Locate the largest of the three, top_of_world, top_of_mobt, or         **/
-    /** top_of_objt.                                                           **/
-    /****************************************************************************/
-    if (top_of_world >= top_of_objt && top_of_world >= top_of_mobt)
-        largest_table = top_of_world;
-    else if (top_of_objt >= top_of_mobt && top_of_objt >= top_of_world)
-        largest_table = top_of_objt;
-    else
-        largest_table = top_of_mobt;
-
-    /****************************************************************************/
-    /** Initialize some of the variables.                                      **/
-    /****************************************************************************/
-    size_rooms = 0;
-    size_objects = 0;
-    size_mobiles = 0;
-    top = zone_table[rnum].top;
-    bottom = zone_table[rnum].bot;
-    size_shops = 0;
-    size_triggers = 0;
-    size_guilds = 0;
-    size_shops = 0;
-
-    for (i = 0; i <= largest_table; i++) {
-        if (i <= top_of_world)
-            if (world[i].zone == rnum)
-                size_rooms++;
-
-        if (i <= top_of_objt)
-            if (obj_index[i].vnum >= bottom && obj_index[i].vnum <= top)
-                size_objects++;
-
-        if (i <= top_of_mobt)
-            if (mob_index[i].vnum >= bottom && mob_index[i].vnum <= top)
-                size_mobiles++;
-
-        size_shops = count_shops(bottom, top);
-
-        if (i < top_of_trigt)
-            if (trig_index[i]->vnum >= bottom && trig_index[i]->vnum <= top)
-                size_triggers++;
-
-        size_guilds = count_guilds(bottom, top);
-    }
 
     /****************************************************************************/
     /** Display all of the zone information at once.                           **/
@@ -470,22 +415,22 @@ void list_triggers(struct char_data *ch, zone_rnum rnum, trig_vnum vmin, trig_vn
 
 
     /** Loop through the world and find each room. **/
-    for (i = 0; i < top_of_trigt; i++) {
+    for (auto &t : trig_index) {
         /** Check to see if this room is one of the ones needed to be listed.    **/
-        if ((trig_index[i]->vnum >= bottom) && (trig_index[i]->vnum <= top)) {
+        if ((t.first >= bottom) && (t.first <= top)) {
             counter++;
 
             send_to_char(ch, "%4d) [@g%5d@n] @[1]%-45.45s ",
-                         counter, trig_index[i]->vnum, trig_index[i]->proto->name);
+                         counter, t.first, t.second.proto->name);
 
-            if (trig_index[i]->proto->attach_type == OBJ_TRIGGER) {
-                sprintbit(GET_TRIG_TYPE(trig_index[i]->proto), otrig_types, trgtypes, sizeof(trgtypes));
+            if (t.second.proto->attach_type == OBJ_TRIGGER) {
+                sprintbit(GET_TRIG_TYPE(t.second.proto), otrig_types, trgtypes, sizeof(trgtypes));
                 send_to_char(ch, "obj @y%s@n\r\n", trgtypes);
-            } else if (trig_index[i]->proto->attach_type == WLD_TRIGGER) {
-                sprintbit(GET_TRIG_TYPE(trig_index[i]->proto), wtrig_types, trgtypes, sizeof(trgtypes));
+            } else if (t.second.proto->attach_type == WLD_TRIGGER) {
+                sprintbit(GET_TRIG_TYPE(t.second.proto), wtrig_types, trgtypes, sizeof(trgtypes));
                 send_to_char(ch, "wld @y%s@n\r\n", trgtypes);
             } else {
-                sprintbit(GET_TRIG_TYPE(trig_index[i]->proto), trig_types, trgtypes, sizeof(trgtypes));
+                sprintbit(GET_TRIG_TYPE(t.second.proto), trig_types, trgtypes, sizeof(trgtypes));
                 send_to_char(ch, "mob @y%s@n\r\n", trgtypes);
             }
 

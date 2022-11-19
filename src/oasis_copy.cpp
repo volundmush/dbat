@@ -424,21 +424,11 @@ ACMD(do_rcopy) {
 
 /* For buildwalk. Finds the next free vnum in the zone */
 room_vnum redit_find_new_vnum(zone_rnum zone) {
-    room_vnum vnum = genolc_zone_bottom(zone);
-    room_rnum rnum = real_room(vnum);
-
-    if (rnum == NOWHERE)
-        return NOWHERE;
-
-    for (;;) {
-        if (vnum > zone_table[zone].top)
-            return (NOWHERE);
-        if (rnum > top_of_world || world[rnum].number > vnum)
-            break;
-        rnum++;
-        vnum++;
+    auto &z = zone_table[zone];
+    for(auto i = z.bot; i < z.top; i++) {
+        if(!world.count(i)) return i;
     }
-    return (vnum);
+    return NOWHERE;
 }
 
 int buildwalk(struct char_data *ch, int dir) {

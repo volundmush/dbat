@@ -665,9 +665,9 @@ void char_from_room(struct char_data *ch) {
 void char_to_room(struct char_data *ch, room_rnum room) {
     int i;
 
-    if (ch == nullptr || room == NOWHERE || room > top_of_world)
-        log("SYSERR: Illegal value(s) passed to char_to_room. (Room: %d/%d Ch: %p",
-            room, top_of_world, ch);
+    if (!ch || !world.count(room))
+        log("SYSERR: Illegal value(s) passed to char_to_room. (Room: %d, Ch: %p",
+            room, ch);
     else {
         ch->next_in_room = world[room].people;
         world[room].people = ch;
@@ -977,9 +977,9 @@ struct char_data *get_char_num(mob_rnum nr) {
 void obj_to_room(struct obj_data *object, room_rnum room) {
     struct obj_data *vehicle = nullptr;
 
-    if (!object || room == NOWHERE || room > top_of_world)
-        log("SYSERR: Illegal value(s) passed to obj_to_room. (Room #%d/%d, obj %p)",
-            room, top_of_world, object);
+    if (!object || !world.count(room))
+        log("SYSERR: Illegal value(s) passed to obj_to_room. (Room #%d, obj %p)",
+            room, object);
     else {
         if (ROOM_FLAGGED(room, ROOM_GARDEN1) || ROOM_FLAGGED(room, ROOM_GARDEN2)) {
             if (GET_OBJ_TYPE(object) != ITEM_PLANT) {

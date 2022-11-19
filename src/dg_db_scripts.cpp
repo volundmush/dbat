@@ -27,24 +27,21 @@ extern bitvector_t asciiflag_conv(char *flag);
 /* local functions */
 void trig_data_init(trig_data *this_data);
 
-void parse_trigger(FILE *trig_f, int nr) {
+void parse_trigger(FILE *trig_f, trig_vnum nr) {
     int t[2], k, attach_type;
     char line[256], *cmds, *s, flags[256], errors[MAX_INPUT_LENGTH];
     struct cmdlist_element *cle;
-    struct index_data *t_index;
-    struct trig_data *trig;
+    auto &idx = trig_index[nr];
+    idx.vnum = nr;
+    idx.number = 0;
 
-    CREATE(trig, trig_data, 1);
-    CREATE(t_index, index_data, 1);
+    auto trig = new trig_data();
 
-    t_index->vnum = nr;
-    t_index->number = 0;
-    t_index->func = nullptr;
-    t_index->proto = trig;
+    idx.proto = trig;
+    trig->nr = nr;
 
     snprintf(errors, sizeof(errors), "trig vnum %d", nr);
 
-    trig->nr = top_of_trigt;
     trig->name = fread_string(trig_f, errors);
 
     get_line(trig_f, line);
@@ -68,8 +65,6 @@ void parse_trigger(FILE *trig_f, int nr) {
     }
 
     free(cmds);
-
-    trig_index[top_of_trigt++] = t_index;
 }
 
 
@@ -78,17 +73,15 @@ void parse_trigger(FILE *trig_f, int nr) {
  * nr is the real number of the trigger.
  */
 trig_data *read_trigger(int nr) {
-    index_data *t_index;
-    trig_data *trig;
 
-    if (nr >= top_of_trigt) return nullptr;
-    if ((t_index = trig_index[nr]) == nullptr)
-        return nullptr;
+    if (!trig_index.count(nr)) return nullptr;
+    auto &idx = trig_index[nr];
 
-    CREATE(trig, trig_data, 1);
-    trig_data_copy(trig, t_index->proto);
+    auto trig = new trig_data();
 
-    t_index->number++;
+    trig_data_copy(trig, idx.proto);
+
+    idx.number++;
 
     return trig;
 }

@@ -170,7 +170,7 @@ int num_players_in_room(room_vnum room) {
             continue;
         if (!(i->character))
             continue;
-        if (IN_ROOM(i->character) == NOWHERE || IN_ROOM(i->character) > top_of_world)
+        if (!world.count(IN_ROOM(i->character)))
             continue;
         if (world[IN_ROOM(i->character)].number != room)
             continue;

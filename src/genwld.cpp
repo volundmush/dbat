@@ -22,10 +22,10 @@
 room_rnum add_room(struct room_data *room) {
     struct char_data *tch;
     struct obj_data *tobj;
-    int j, found = false;
+    vnum j, found = false;
     room_rnum i;
 
-    if (room == nullptr)
+    if (!room)
         return NOWHERE;
 
     if ((i = real_room(room->number)) != NOWHERE) {
@@ -41,82 +41,9 @@ room_rnum add_room(struct room_data *room) {
         return i;
     }
 
-    RECREATE(world, struct room_data, top_of_world + 2);
-    top_of_world++;
-
-    for (i = top_of_world; i > 0; i--) {
-        if (room->number > world[i - 1].number) {
-            world[i] = *room;
-            copy_room_strings(&world[i], room);
-            found = i;
-            break;
-        } else {
-            /* Copy the room over now. */
-            world[i] = world[i - 1];
-            update_wait_events(&world[i], &world[i - 1]);
-
-            /* People in this room must have their in_rooms moved up one. */
-            for (tch = world[i].people; tch; tch = tch->next_in_room)
-                IN_ROOM(tch) += (IN_ROOM(tch) != NOWHERE);
-
-            /* Move objects too. */
-            for (tobj = world[i].contents; tobj; tobj = tobj->next_content)
-                IN_ROOM(tobj) += (IN_ROOM(tobj) != NOWHERE);
-        }
-        htree_add(room_htree, world[i].number, i);
-    }
-    if (!found) {
-        world[0] = *room;    /* Last place, in front. */
-        copy_room_strings(&world[0], room);
-    }
-
-    log("GenOLC: add_room: Added room %d at index #%d.", room->number, found);
-
-    /* found is equal to the array index where we added the room. */
-
-    /*
-     * Find what zone that room was in so we can update the loading table.
-     */
-    for (i = room->zone; i <= top_of_zone_table; i++)
-        for (j = 0; ZCMD(i, j).command != 'S'; j++)
-            switch (ZCMD(i, j).command) {
-                case 'M':
-                case 'O':
-                case 'T':
-                case 'V':
-                    ZCMD(i, j).arg3 += (ZCMD(i, j).arg3 != NOWHERE && ZCMD(i, j).arg3 >= found);
-                    break;
-                case 'D':
-                case 'R':
-                    ZCMD(i, j).arg1 += (ZCMD(i, j).arg1 != NOWHERE && ZCMD(i, j).arg1 >= found);
-                case 'G':
-                case 'P':
-                case 'E':
-                case '*':
-                    /* Known zone entries we don't care about. */
-                    break;
-                default:
-                    mudlog(BRF, ADMLVL_GOD, true, "SYSERR: GenOLC: add_room: Unknown zone entry found!");
-            }
-
-    /*
-     * Update the loadroom table. Adds 1 or 0.
-     */
-    r_mortal_start_room += (r_mortal_start_room >= found);
-    r_immort_start_room += (r_immort_start_room >= found);
-    r_frozen_start_room += (r_frozen_start_room >= found);
-
-    /*
-     * Update world exits.
-     */
-    i = top_of_world + 1;
-    do {
-        i--;
-        for (j = 0; j < NUM_OF_DIRS; j++)
-            if (W_EXIT(i, j) && W_EXIT(i, j)->to_room != NOWHERE)
-                W_EXIT(i, j)->to_room += (W_EXIT(i, j)->to_room >= found);
-    } while (i > 0);
-
+    auto &r = world[room->number];
+    r = *room;
+    log("GenOLC: add_room: Added room %d.", room->number);
     add_to_save_list(zone_table[room->zone].number, SL_WLD);
 
     /*
@@ -134,15 +61,12 @@ int delete_room(room_rnum rnum) {
     struct obj_data *obj, *next_obj;
     struct room_data *room;
 
-    if (rnum <= 0 || rnum > top_of_world)    /* Can't delete void yet. */
+    if (!world.count(rnum))    /* Can't delete void yet. */
         return false;
 
     room = &world[rnum];
 
     add_to_save_list(zone_table[room->zone].number, SL_WLD);
-
-    /* remove from realnum lookup tree */
-    htree_del(room_htree, room->number);
 
     /* This is something you might want to read about in the logs. */
     log("GenOLC: delete_room: Deleting room #%d (%s).", room->number, room->name);
@@ -184,61 +108,28 @@ int delete_room(room_rnum rnum) {
      * Change any exit going to this room to go the void.
      * Also fix all the exits pointing to rooms above this.
      */
-    i = top_of_world + 1;
-    do {
-        i--;
-        for (j = 0; j < NUM_OF_DIRS; j++)
-            if (W_EXIT(i, j) == nullptr)
-                continue;
-            else if (W_EXIT(i, j)->to_room > rnum)
-                W_EXIT(i, j)->to_room -= (W_EXIT(i, j)->to_room != NOWHERE); /* with unsigned NOWHERE > any rnum */
-            else if (W_EXIT(i, j)->to_room == rnum) {
-                if ((!W_EXIT(i, j)->keyword || !*W_EXIT(i, j)->keyword) &&
-                    (!W_EXIT(i, j)->general_description || !*W_EXIT(i, j)->general_description)) {
-                    /* no description, remove exit completely */
-                    if (W_EXIT(i, j)->keyword)
-                        free(W_EXIT(i, j)->keyword);
-                    if (W_EXIT(i, j)->general_description)
-                        free(W_EXIT(i, j)->general_description);
-                    free(W_EXIT(i, j));
-                    W_EXIT(i, j) = nullptr;
-                } else {
-                    /* description is set, just point to nowhere */
-                    W_EXIT(i, j)->to_room = NOWHERE;
-                }
-            }
-    } while (i > 0);
 
-    /*
-     * Find what zone that room was in so we can update the loading table.
-     */
-    for (i = 0; i <= top_of_zone_table; i++)
-        for (j = 0; ZCMD(i, j).command != 'S'; j++)
-            switch (ZCMD(i, j).command) {
-                case 'M':
-                case 'O':
-                case 'T':
-                case 'V':
-                    if (ZCMD(i, j).arg3 == rnum)
-                        ZCMD(i, j).command = '*';    /* Cancel command. */
-                    else if (ZCMD(i, j).arg3 > rnum)
-                        ZCMD(i, j).arg3 -= (ZCMD(i, j).arg3 != NOWHERE); /* with unsigned NOWHERE > any rnum */
-                    break;
-                case 'D':
-                case 'R':
-                    if (ZCMD(i, j).arg1 == rnum)
-                        ZCMD(i, j).command = '*';    /* Cancel command. */
-                    else if (ZCMD(i, j).arg1 > rnum)
-                        ZCMD(i, j).arg1 -= (ZCMD(i, j).arg1 != NOWHERE); /* with unsigned NOWHERE > any rnum */
-                case 'G':
-                case 'P':
-                case 'E':
-                case '*':
-                    /* Known zone entries we don't care about. */
-                    break;
-                default:
-                    mudlog(BRF, ADMLVL_GOD, true, "SYSERR: GenOLC: delete_room: Unknown zone entry found!");
+    for(auto &r : world) {
+        for (j = 0; j < NUM_OF_DIRS; j++) {
+            auto &e = r.second.dir_option[j];
+            if (!e || e->to_room != rnum)
+                continue;
+            if ((!e->keyword || !*e->keyword) &&
+                (!e->general_description || !*e->general_description)) {
+                /* no description, remove exit completely */
+                if (e->keyword)
+                    free(e->keyword);
+                if (e->general_description)
+                    free(e->general_description);
+                free(e);
+                e = nullptr;
+            } else {
+                /* description is set, just point to nowhere */
+                e->to_room = NOWHERE;
             }
+        }
+
+    };
 
     /*
      * Remove this room from all shop lists.
@@ -246,28 +137,11 @@ int delete_room(room_rnum rnum) {
     {
         for (i = 0; i < top_shop; i++) {
             for (j = 0; SHOP_ROOM(i, j) != NOWHERE; j++) {
-                if (SHOP_ROOM(i, j) == world[rnum].number)
+                if (SHOP_ROOM(i, j) == rnum)
                     SHOP_ROOM(i, j) = 0; /* set to the void */
             }
         }
     }
-    /*
-     * Now we actually move the rooms down.
-     */
-    for (i = rnum; i < top_of_world; i++) {
-        world[i] = world[i + 1];
-        update_wait_events(&world[i], &world[i + 1]);
-
-        for (ppl = world[i].people; ppl; ppl = ppl->next_in_room)
-            IN_ROOM(ppl) -= (IN_ROOM(ppl) != NOWHERE);    /* Redundant check? */
-
-        for (obj = world[i].contents; obj; obj = obj->next_content)
-            IN_ROOM(obj) -= (IN_ROOM(obj) != NOWHERE);    /* Redundant check? */
-    }
-
-    top_of_world--;
-    RECREATE(world, struct room_data, top_of_world + 1);
-
     return true;
 }
 
@@ -281,31 +155,27 @@ int save_rooms(zone_rnum zone_num) {
     char rbuf1[MAX_STRING_LENGTH], rbuf2[MAX_STRING_LENGTH];
     char rbuf3[MAX_STRING_LENGTH], rbuf4[MAX_STRING_LENGTH];
 
-#if CIRCLE_UNSIGNED_INDEX
-    if (zone_num == NOWHERE || zone_num > top_of_zone_table) {
-#else
-        if (zone_num < 0 || zone_num > top_of_zone_table) {
-#endif
-        log("SYSERR: GenOLC: save_rooms: Invalid zone number %d passed! (0-%d)", zone_num, top_of_zone_table);
+    if (!zone_table.count(zone_num)) {
+        log("SYSERR: GenOLC: save_rooms: Invalid zone number %d passed!", zone_num);
         return false;
     }
-
+    auto &z = zone_table[zone_num];
     log("GenOLC: save_rooms: Saving rooms in zone #%d (%d-%d).",
-        zone_table[zone_num].number, genolc_zone_bottom(zone_num), zone_table[zone_num].top);
+        z.number, z.bot, z.top);
 
-    snprintf(filename, sizeof(filename), "%s%d.new", WLD_PREFIX, zone_table[zone_num].number);
+    snprintf(filename, sizeof(filename), "%s%d.new", WLD_PREFIX, z.number);
     if (!(sf = fopen(filename, "w"))) {
         perror("SYSERR: save_rooms");
         return false;
     }
 
-    for (i = genolc_zone_bottom(zone_num); i <= zone_table[zone_num].top; i++) {
+    for (auto &i : z.rooms) {
         room_rnum rnum;
 
         if ((rnum = real_room(i)) != NOWHERE) {
             int j;
 
-            room = (world + rnum);
+            room = &world[rnum];
 
             /*
              * Copy the description and strip off trailing newlines.
@@ -404,14 +274,14 @@ int save_rooms(zone_rnum zone_num) {
     fclose(sf);
 
     /* Old file we're replacing. */
-    snprintf(buf, sizeof(buf), "%s%d.wld", WLD_PREFIX, zone_table[zone_num].number);
+    snprintf(buf, sizeof(buf), "%s%d.wld", WLD_PREFIX, z.number);
 
     remove(buf);
     rename(filename, buf);
 
-    if (in_save_list(zone_table[zone_num].number, SL_WLD)) {
-        remove_from_save_list(zone_table[zone_num].number, SL_WLD);
-        create_world_index(zone_table[zone_num].number, "wld");
+    if (in_save_list(z.number, SL_WLD)) {
+        remove_from_save_list(z.number, SL_WLD);
+        create_world_index(z.number, "wld");
         log("GenOLC: save_rooms: Saving rooms '%s'", buf);
     }
     return true;

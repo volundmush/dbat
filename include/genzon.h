@@ -16,10 +16,6 @@ extern int save_zone(zone_rnum zone_num);
 
 extern int count_commands(struct reset_com *list);
 
-extern void add_cmd_to_list(struct reset_com **list, struct reset_com *newcmd, int pos);
-
-extern void remove_cmd_from_list(struct reset_com **list, int pos);
-
 extern int new_command(struct zone_data *zone, int pos);
 
 extern void delete_zone_command(struct zone_data *zone, int pos);

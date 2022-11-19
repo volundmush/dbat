@@ -22,8 +22,6 @@ extern int save_objects(zone_rnum vznum);
 
 extern obj_rnum insert_object(struct obj_data *obj, obj_vnum ovnum);
 
-extern obj_rnum adjust_objects(obj_rnum refpt);
-
 extern obj_rnum index_object(struct obj_data *obj, obj_vnum ovnum, obj_rnum ornum);
 
 extern int update_objects(struct obj_data *refobj);

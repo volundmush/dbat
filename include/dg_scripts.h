@@ -384,7 +384,7 @@ extern void add_to_lookup_table(long uid, void *c);
 extern void remove_from_lookup_table(long uid);
 
 /* from dg_db_scripts.c */
-extern void parse_trigger(FILE *trig_f, int nr);
+extern void parse_trigger(FILE *trig_f, trig_vnum nr);
 
 extern trig_data *read_trigger(int nr);
 
@@ -472,7 +472,7 @@ extern room_rnum obj_room(obj_data *obj);
 #define UID_CHAR   '}'
 #define GET_TRIG_NAME(t)          ((t)->name)
 #define GET_TRIG_RNUM(t)          ((t)->nr)
-#define GET_TRIG_VNUM(t)      (trig_index[(t)->nr]->vnum)
+#define GET_TRIG_VNUM(t)      (trig_index[(t)->nr].vnum)
 #define GET_TRIG_TYPE(t)          ((t)->trigger_type)
 #define GET_TRIG_DATA_TYPE(t)      ((t)->data_type)
 #define GET_TRIG_NARG(t)          ((t)->narg)

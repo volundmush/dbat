@@ -12,32 +12,8 @@
 
 /* real zone of room/mobile/object/shop given */
 zone_rnum real_zone_by_thing(room_vnum vznum) {
-    zone_rnum bot, top, mid, last_top;
-    int low, high;
-
-    bot = 0;
-    top = top_of_zone_table;
-
-    if (genolc_zone_bottom(bot) > vznum || zone_table[top].top < vznum)
-        return (NOWHERE);
-
-    /* perform binary search on zone-table */
-    while (bot <= top) {
-        last_top = top;
-        mid = (bot + top) / 2;
-
-        /* Upper/lower bounds of the zone. */
-        low = genolc_zone_bottom(mid);
-        high = zone_table[mid].top;
-
-        if (low <= vznum && vznum <= high)
-            return mid;
-        if (low > vznum)
-            top = mid - 1;
-        else
-            bot = mid + 1;
-    }
-    return (NOWHERE);
+    for(auto &z : zone_table) if(vznum >= z.second.bot && vznum <= z.second.top) return z.first;
+    return NOWHERE;
 }
 
 zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, const char **error) {
@@ -81,8 +57,7 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
         return NOWHERE;
       }
 #else
-    for (i = 0; i < top_of_zone_table; i++)
-        if (zone_table[i].number == vzone_num) {
+    if(zone_table.count(vzone_num)) {
             *error = "That virtual zone already exists.\r\n";
             return NOWHERE;
         }
@@ -198,57 +173,35 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
      * through top_of_zone (top_of_zone_table + 1 items) and a new one which
      * makes it top_of_zone_table + 2 elements large.
      */
-    RECREATE(zone_table, struct zone_data, top_of_zone_table + 2);
-    zone_table[top_of_zone_table + 1].number = 32000;
-
-    if (vzone_num > zone_table[top_of_zone_table].number)
-        rznum = top_of_zone_table + 1;
-    else {
-        int j, room;
-        for (i = top_of_zone_table + 1; i > 0 && vzone_num < zone_table[i - 1].number; i--) {
-            zone_table[i] = zone_table[i - 1];
-            for (j = zone_table[i].bot; j <= zone_table[i].top; j++)
-                if ((room = real_room(j)) != NOWHERE)
-                    world[room].zone++;
-        }
-        rznum = i;
-    }
-    zone = &zone_table[rznum];
-
+    auto &z = zone_table[vzone_num];
+    z.number = vzone_num;
+    
     /*
      * Ok, insert the new zone here.
      */
-    zone->name = strdup("New Zone");
-    zone->number = vzone_num;
-    zone->builders = strdup("None");
+    z.name = strdup("New Zone");
+    z.number = vzone_num;
+    z.builders = strdup("None");
 #if _CIRCLEMUD >= CIRCLEMUD_VERSION(3, 0, 21)
-    zone->bot = bottom;
-    zone->top = top;
+    z.bot = bottom;
+    z.top = top;
 #else
     zone->top = (vzone_num * 100) + 99;
 #endif
-    zone->lifespan = 30;
-    zone->age = 0;
-    zone->reset_mode = 2;
-    zone->zone_flags[0] = 0;
-    zone->zone_flags[1] = 0;
-    zone->zone_flags[2] = 0;
-    zone->zone_flags[3] = 0;
-    zone->min_level = 0;
-    zone->max_level = ADMLVL_IMPL;
+    z.lifespan = 30;
+    z.age = 0;
+    z.reset_mode = 2;
+    z.zone_flags[0] = 0;
+    z.zone_flags[1] = 0;
+    z.zone_flags[2] = 0;
+    z.zone_flags[3] = 0;
+    z.min_level = 0;
+    z.max_level = ADMLVL_IMPL;
     /*
      * No zone commands, just terminate it with an 'S'
      */
-    CREATE(zone->cmd, struct reset_com, 1);
-    zone->cmd[0].command = 'S';
-
-    top_of_zone_table++;
-
-    for (i = top_of_world; i > 0; i--)
-        if (world[i].zone < real_zone(rznum))
-            break;
-        else
-            world[i].zone = real_zone_by_thing(GET_ROOM_VNUM(i));
+    auto &c = z.cmd.emplace_back();
+    c.command = 'S';
 
     add_to_save_list(zone->number, SL_ZON);
     return rznum;
@@ -340,32 +293,21 @@ void create_world_index(int znum, const char *type) {
 /*-------------------------------------------------------------------*/
 
 void remove_room_zone_commands(zone_rnum zone, room_rnum room_num) {
-    int subcmd = 0, cmd_room = -2;
-
-    /*
-     * Delete all entries in zone_table that relate to this room so we
-     * can add all the ones we have in their place.
-     */
-    while (zone_table[zone].cmd[subcmd].command != 'S') {
-        switch (zone_table[zone].cmd[subcmd].command) {
+    auto &z = zone_table[zone];
+    std::remove_if(z.cmd.begin(), z.cmd.end(), [&](reset_com &c) {
+        switch(c.command) {
             case 'M':
             case 'O':
             case 'T':
             case 'V':
-                cmd_room = zone_table[zone].cmd[subcmd].arg3;
-                break;
+                return room_num == c.arg3;
             case 'D':
             case 'R':
-                cmd_room = zone_table[zone].cmd[subcmd].arg1;
-                break;
+                return room_num == c.arg1;
             default:
-                break;
+                return false;
         }
-        if (cmd_room == room_num)
-            remove_cmd_from_list(&zone_table[zone].cmd, subcmd);
-        else
-            subcmd++;
-    }
+    });
 }
 
 /*-------------------------------------------------------------------*/
@@ -385,47 +327,43 @@ int save_zone(zone_rnum zone_num) {
     char zbuf3[MAX_STRING_LENGTH];
     char zbuf4[MAX_STRING_LENGTH];
 
-#if CIRCLE_UNSIGNED_INDEX
-    if (zone_num == NOWHERE || zone_num > top_of_zone_table) {
-#else
-        if (zone_num < 0 || zone_num > top_of_zone_table) {
-#endif
-        log("SYSERR: GenOLC: save_zone: Invalid real zone number %d. (0-%d)", zone_num, top_of_zone_table);
+    if (!zone_table.count(zone_num)) {
+        log("SYSERR: GenOLC: save_zone: Invalid real zone number %d.", zone_num);
         return false;
     }
-
-    snprintf(fname, sizeof(fname), "%s%d.new", ZON_PREFIX, zone_table[zone_num].number);
+    auto &z = zone_table[zone_num];
+    snprintf(fname, sizeof(fname), "%s%d.new", ZON_PREFIX, z.number);
     if (!(zfile = fopen(fname, "w"))) {
         mudlog(BRF, ADMLVL_BUILDER, true, "SYSERR: OLC: save_zones:  Can't write zone %d.",
-               zone_table[zone_num].number);
+               z.number);
         return false;
     }
 
     /*
      * Print zone header to file
      */
-    sprintascii(zbuf1, zone_table[zone_num].zone_flags[0]);
-    sprintascii(zbuf2, zone_table[zone_num].zone_flags[1]);
-    sprintascii(zbuf3, zone_table[zone_num].zone_flags[2]);
-    sprintascii(zbuf4, zone_table[zone_num].zone_flags[3]);
+    sprintascii(zbuf1, z.zone_flags[0]);
+    sprintascii(zbuf2, z.zone_flags[1]);
+    sprintascii(zbuf3, z.zone_flags[2]);
+    sprintascii(zbuf4, z.zone_flags[3]);
 
     fprintf(zfile, "@Version: %d\n", CUR_ZONE_VERSION);
     fprintf(zfile, "#%d\n"
                    "%s~\n"
                    "%s~\n"
                    "%d %d %d %d %s %s %s %s %d %d\n",
-            zone_table[zone_num].number,
-            (zone_table[zone_num].builders && *zone_table[zone_num].builders)
-            ? zone_table[zone_num].builders : "None.",
-            (zone_table[zone_num].name && *zone_table[zone_num].name)
-            ? zone_table[zone_num].name : "undefined",
-            genolc_zone_bottom(zone_num),
-            zone_table[zone_num].top,
-            zone_table[zone_num].lifespan,
-            zone_table[zone_num].reset_mode,
+            z.number,
+            (z.builders && *z.builders)
+            ? z.builders : "None.",
+            (z.name && *z.name)
+            ? z.name : "undefined",
+            z.bot,
+            z.top,
+            z.lifespan,
+            z.reset_mode,
             zbuf1, zbuf2, zbuf3, zbuf4,
-            zone_table[zone_num].min_level,
-            zone_table[zone_num].max_level
+            z.min_level,
+            z.max_level
     );
 
     /*
@@ -501,11 +439,11 @@ int save_zone(zone_rnum zone_num) {
                 break;
             case 'T':
                 arg1 = ZCMD(zone_num, subcmd).arg1; /* trigger type */
-                arg2 = trig_index[ZCMD(zone_num, subcmd).arg2]->vnum; /* trigger vnum */
+                arg2 = trig_index[ZCMD(zone_num, subcmd).arg2].vnum; /* trigger vnum */
                 arg3 = world[ZCMD(zone_num, subcmd).arg3].number; /* room num */
                 arg4 = -1;
                 arg5 = ZCMD(zone_num, subcmd).arg5;
-                comment = GET_TRIG_NAME(trig_index[real_trigger(arg2)]->proto);
+                comment = GET_TRIG_NAME(trig_index[real_trigger(arg2)].proto);
                 break;
             case 'V':
                 arg1 = ZCMD(zone_num, subcmd).arg1; /* trigger type */
@@ -535,13 +473,13 @@ int save_zone(zone_rnum zone_num) {
     }
     fputs("S\n$\n", zfile);
     fclose(zfile);
-    snprintf(oldname, sizeof(oldname), "%s%d.zon", ZON_PREFIX, zone_table[zone_num].number);
+    snprintf(oldname, sizeof(oldname), "%s%d.zon", ZON_PREFIX, z.number);
     remove(oldname);
     rename(fname, oldname);
 
-    if (in_save_list(zone_table[zone_num].number, SL_ZON)) {
-        remove_from_save_list(zone_table[zone_num].number, SL_ZON);
-        create_world_index(zone_table[zone_num].number, "zon");
+    if (in_save_list(z.number, SL_ZON)) {
+        remove_from_save_list(z.number, SL_ZON);
+        create_world_index(z.number, "zon");
         log("GenOLC: save_zone: Saving zone '%s'", oldname);
     }
     return true;
@@ -567,71 +505,9 @@ int count_commands(struct reset_com *list) {
  * Adds a new reset command into a list.  Takes a pointer to the list
  * so that it may play with the memory locations.
  */
-void add_cmd_to_list(struct reset_com **list, struct reset_com *newcmd, int pos) {
-    int count, i, l;
-    struct reset_com *newlist;
-
-    /*
-     * Count number of commands (not including terminator).
-     */
-    count = count_commands(*list);
-
-    /*
-     * Value is +2 for the terminator and new field to add.
-     */
-    CREATE(newlist, struct reset_com, count + 2);
-
-    /*
-     * Even tighter loop to copy the old list and insert a new command.
-     */
-    for (i = 0, l = 0; i <= count; i++) {
-        newlist[i] = ((i == pos) ? *newcmd : (*list)[l++]);
-    }
-
-    /*
-     * Add terminator, then insert new list.
-     */
-    newlist[count + 1].command = 'S';
-    free(*list);
-    *list = newlist;
-}
 
 /*-------------------------------------------------------------------*/
 
-/*
- * Remove a reset command from a list.	Takes a pointer to the list
- * so that it may play with the memory locations.
- */
-void remove_cmd_from_list(struct reset_com **list, int pos) {
-    int count, i, l;
-    struct reset_com *newlist;
-
-    /*
-     * Count number of commands (not including terminator)
-     */
-    count = count_commands(*list);
-
-    /*
-     * Value is 'count' because we didn't include the terminator above
-     * but since we're deleting one thing anyway we want one less.
-     */
-    CREATE(newlist, struct reset_com, count);
-
-    /*
-     * Even tighter loop to copy old list and skip unwanted command.
-     */
-    for (i = 0, l = 0; i < count; i++) {
-        if (i != pos) {
-            newlist[l++] = (*list)[i];
-        }
-    }
-    /*
-     * Add the terminator, then insert the new list.
-     */
-    newlist[count - 1].command = 'S';
-    free(*list);
-    *list = newlist;
-}
 
 /*-------------------------------------------------------------------*/
 
@@ -641,6 +517,7 @@ void remove_cmd_from_list(struct reset_com **list, int pos) {
 int new_command(struct zone_data *zone, int pos) {
     int subcmd = 0;
     struct reset_com new_com;
+    new_com.command = 'N';
 
     /* * Error check to ensure users hasn't given too large an index  */
     while (zone->cmd[subcmd].command != 'S')
@@ -648,10 +525,7 @@ int new_command(struct zone_data *zone, int pos) {
 
     if (pos < 0 || pos > subcmd)
         return 0;
-
-    /* * Ok, let's add a new (blank) command */
-    new_com.command = 'N';
-    add_cmd_to_list(&zone->cmd, &new_com, pos);
+    zone->cmd.insert(zone->cmd.begin()+pos, new_com);
     return 1;
 }
 
@@ -661,21 +535,7 @@ int new_command(struct zone_data *zone, int pos) {
  * Error check user input and then remove command  
  */
 void delete_zone_command(struct zone_data *zone, int pos) {
-    int subcmd = 0;
-
-    /*
-     * Error check to ensure users hasn't given too large an index
-     */
-    while (zone->cmd[subcmd].command != 'S')
-        subcmd++;
-
-    if (pos < 0 || pos >= subcmd)
-        return;
-
-    /*
-     * Ok, let's zap it
-     */
-    remove_cmd_from_list(&zone->cmd, pos);
+    zone->cmd.erase(zone->cmd.begin()+pos);
 }
 
 /*-------------------------------------------------------------------*/

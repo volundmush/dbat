@@ -414,21 +414,17 @@ int add_shop(struct shop_data *nshp) {
 /*-------------------------------------------------------------------*/
 
 int save_shops(zone_rnum zone_num) {
-    int i, j, rshop;
+    vnum i, j, rshop;
     FILE *shop_file;
     char fname[128], oldname[128];
     struct shop_data *shop;
 
-#if CIRCLE_UNSIGNED_INDEX
-    if (zone_num == NOWHERE || zone_num > top_of_zone_table) {
-#else
-        if (zone_num < 0 || zone_num > top_of_zone_table) {
-#endif
-        log("SYSERR: GenOLC: save_shops: Invalid real zone number %d. (0-%d)", zone_num, top_of_zone_table);
+    if (!zone_table.count(zone_num)) {
+        log("SYSERR: GenOLC: save_shops: Invalid real zone number %d.", zone_num);
         return false;
     }
-
-    snprintf(fname, sizeof(fname), "%s%d.new", SHP_PREFIX, zone_table[zone_num].number);
+    auto &z = zone_table[zone_num];
+    snprintf(fname, sizeof(fname), "%s%d.new", SHP_PREFIX, z.number);
     if (!(shop_file = fopen(fname, "w"))) {
         mudlog(BRF, ADMLVL_GOD, true, "SYSERR: OLC: Cannot open shop file!");
         return false;
@@ -440,7 +436,7 @@ int save_shops(zone_rnum zone_num) {
     /*
      * Search database for shops in this zone.
      */
-    for (i = genolc_zone_bottom(zone_num); i <= zone_table[zone_num].top; i++) {
+    for (i = z.bot; i <= z.top; i++) {
         if ((rshop = real_shop(i)) != NOWHERE) {
             fprintf(shop_file, "#%d~\n", i);
             shop = shop_index + rshop;
@@ -520,13 +516,13 @@ int save_shops(zone_rnum zone_num) {
     }
     fprintf(shop_file, "$~\n");
     fclose(shop_file);
-    snprintf(oldname, sizeof(oldname), "%s%d.shp", SHP_PREFIX, zone_table[zone_num].number);
+    snprintf(oldname, sizeof(oldname), "%s%d.shp", SHP_PREFIX, z.number);
     remove(oldname);
     rename(fname, oldname);
 
-    if (in_save_list(zone_table[zone_num].number, SL_SHP)) {
-        remove_from_save_list(zone_table[zone_num].number, SL_SHP);
-        create_world_index(zone_table[zone_num].number, "shp");
+    if (in_save_list(z.number, SL_SHP)) {
+        remove_from_save_list(z.number, SL_SHP);
+        create_world_index(z.number, "shp");
         log("GenOLC: save_shops: Saving shops '%s'", oldname);
     }
     return true;

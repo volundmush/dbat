@@ -15,7 +15,6 @@
 #include "oasis.h"
 #include "dg_scripts.h"
 #include "act.informative.h"
-#include "races.h"
 #include "act.wizard.h"
 #include "handler.h"
 
@@ -238,37 +237,7 @@ void zedit_setup(struct descriptor_data *d, int room_num) {
     zone->number = 0;    /* Header information has changed.	*/
     zone->age = 0;    /* The commands have changed.		*/
 
-    /*
-     * Start the reset command list with a terminator.
-     */
-    CREATE(zone->cmd, struct reset_com, 1);
-    zone->cmd[0].command = 'S';
-
-    /*
-     * Add all entries in zone_table that relate to this room.
-     */
-    while (ZCMD(OLC_ZNUM(d), subcmd).command != 'S') {
-        switch (ZCMD(OLC_ZNUM(d), subcmd).command) {
-            case 'M':
-            case 'O':
-            case 'T':
-            case 'V':
-                cmd_room = ZCMD(OLC_ZNUM(d), subcmd).arg3;
-                break;
-            case 'D':
-            case 'R':
-                cmd_room = ZCMD(OLC_ZNUM(d), subcmd).arg1;
-                break;
-            default:
-                break;
-        }
-        if (cmd_room == room_num) {
-            add_cmd_to_list(&(zone->cmd), &ZCMD(OLC_ZNUM(d), subcmd), count);
-            count++;
-        }
-        subcmd++;
-    }
-
+    zone->cmd = zone_table[OLC_ZNUM(d)].cmd;
     OLC_ZONE(d) = zone;
     /*
      * Display main menu.
@@ -350,46 +319,8 @@ void zedit_save_internally(struct descriptor_data *d) {
     }
 
     remove_room_zone_commands(OLC_ZNUM(d), room_num);
-
-    /*
-     * Now add all the entries in the players descriptor list
-     */
-    for (subcmd = 0; MYCMD.command != 'S'; subcmd++) {
-        /*
-         * Since Circle does not keep track of what rooms the 'G', 'E', and
-         * 'P' commands are exitted in, but OasisOLC groups zone commands
-         * by rooms, this creates interesting problems when builders use these
-         * commands without loading a mob or object first.  This fix prevents such
-         * commands from being saved and 'wandering' through the zone command
-         * list looking for mobs/objects to latch onto.
-         * C.Raehl 4/27/99
-         */
-        switch (MYCMD.command) {
-            /* Possible fail cases. */
-            case 'G':
-            case 'E':
-                if (mobloaded)
-                    break;
-                write_to_output(d, "Equip/Give command not saved since no mob was loaded first.\r\n");
-                continue;
-            case 'P':
-                if (objloaded)
-                    break;
-                write_to_output(d, "Put command not saved since another object was not loaded first.\r\n");
-                continue;
-                /* Pass cases. */
-            case 'M':
-                mobloaded = true;
-                break;
-            case 'O':
-                objloaded = true;
-                break;
-            default:
-                mobloaded = objloaded = false;
-                break;
-        }
-        add_cmd_to_list(&(zone_table[OLC_ZNUM(d)].cmd), &MYCMD, subcmd);
-    }
+    auto &z = zone_table[OLC_ZNUM(d)];
+    z.cmd = OLC_ZONE(d)->cmd;
 
     /*
      * Finally, if zone headers have been changed, copy over
@@ -426,7 +357,7 @@ void zedit_save_to_disk(int zone) {
  * Error check user input and then setup change  
  */
 int start_change_command(struct descriptor_data *d, int pos) {
-    if (pos < 0 || pos >= count_commands(OLC_ZONE(d)->cmd))
+    if (pos < 0 || pos >= OLC_ZONE(d)->cmd.size())
         return 0;
 
     /*
@@ -548,8 +479,8 @@ void zedit_disp_menu(struct descriptor_data *d) {
             case 'T':
                 write_to_output(d, "%sAttach trigger @c%s@y [@c%d@y] to %s, %% Chance %d",
                                 MYCMD.if_flag ? " then " : "",
-                                trig_index[MYCMD.arg2]->proto->name,
-                                trig_index[MYCMD.arg2]->vnum,
+                                trig_index[MYCMD.arg2].proto->name,
+                                trig_index[MYCMD.arg2].vnum,
                                 ((MYCMD.arg1 == MOB_TRIGGER) ? "mobile" :
                                  ((MYCMD.arg1 == OBJ_TRIGGER) ? "object" :
                                   ((MYCMD.arg1 == WLD_TRIGGER) ? "room" : "????"))), MYCMD.arg5);
@@ -1428,11 +1359,8 @@ void zedit_parse(struct descriptor_data *d, char *arg) {
             /*
              * Parse and add new top room in zone and return to main menu.
              */
-            if (OLC_ZNUM(d) == top_of_zone_table)
-                OLC_ZONE(d)->top = LIMIT(atoi(arg), genolc_zonep_bottom(OLC_ZONE(d)), 65000);
-            else
-                OLC_ZONE(d)->top = LIMIT(atoi(arg), genolc_zonep_bottom(OLC_ZONE(d)),
-                                         genolc_zone_bottom(OLC_ZNUM(d) + 1) - 1);
+            OLC_ZONE(d)->top = LIMIT(atoi(arg), genolc_zonep_bottom(OLC_ZONE(d)),
+                                     genolc_zone_bottom(OLC_ZNUM(d) + 1) - 1);
             OLC_ZONE(d)->number = 1;
             zedit_disp_menu(d);
             break;

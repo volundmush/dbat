@@ -7,20 +7,16 @@
 #include "medit.h"
 #include "interpreter.h"
 #include "comm.h"
-#include "spells.h"
 #include "utils.h"
 #include "db.h"
-#include "shop.h"
 #include "genolc.h"
 #include "genmob.h"
 #include "genzon.h"
 #include "genshp.h"
 #include "oasis.h"
-#include "handler.h"
 #include "constants.h"
 #include "improved-edit.h"
 #include "dg_olc.h"
-#include "screen.h"
 #include "races.h"
 #include "class.h"
 #include "act.wizard.h"
@@ -218,7 +214,7 @@ void medit_setup_existing(struct descriptor_data *d, int rmob_num) {
      */
     CREATE(mob, struct char_data, 1);
 
-    copy_mobile(mob, mob_proto + rmob_num);
+    copy_mobile(mob, &mob_proto[rmob_num]);
 
     OLC_MOB(d) = mob;
     OLC_ITEM_TYPE(d) = MOB_TRIGGER;

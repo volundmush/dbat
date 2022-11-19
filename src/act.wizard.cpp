@@ -817,14 +817,15 @@ ACMD(do_finddoor) {
     if (vnum != NOTHING) {
         len = snprintf(buf, sizeof(buf), "Doors unlocked by key [%d] %s are:\r\n",
                        vnum, GET_OBJ_SHORT(obj));
-        for (i = 0; i <= top_of_world; i++) {
+        for (auto &r : world) {
             for (d = 0; d < NUM_OF_DIRS; d++) {
-                if (world[i].dir_option[d] && world[i].dir_option[d]->key &&
-                    world[i].dir_option[d]->key == vnum) {
+                auto &e = r.second.dir_option[d];
+                if (e && e->key &&
+                    e->key == vnum) {
                     nlen = snprintf(buf + len, sizeof(buf) - len,
                                     "[%3d] Room %d, %s (%s)\r\n",
-                                    ++num, world[i].number,
-                                    dirs[d], world[i].dir_option[d]->keyword);
+                                    ++num, r.first,
+                                    dirs[d], e->keyword);
                     if (len + nlen >= sizeof(buf) || nlen < 0)
                         break;
                     len += nlen;
@@ -1345,8 +1346,8 @@ void list_zone_commands_room(struct char_data *ch, room_vnum rvnum) {
                 case 'T':
                     send_to_char(ch, "%sAttach trigger @c%s@y [@c%d@y] to %s\r\n",
                                  ZOCMD.if_flag ? " then " : "",
-                                 trig_index[ZOCMD.arg2]->proto->name,
-                                 trig_index[ZOCMD.arg2]->vnum,
+                                 trig_index[ZOCMD.arg2].proto->name,
+                                 trig_index[ZOCMD.arg2].vnum,
                                  ((ZOCMD.arg1 == MOB_TRIGGER) ? "mobile" :
                                   ((ZOCMD.arg1 == OBJ_TRIGGER) ? "object" :
                                    ((ZOCMD.arg1 == WLD_TRIGGER) ? "room" : "????"))));
@@ -3148,9 +3149,9 @@ ACMD(do_zreset) {
             send_to_char(ch, "You do not have permission to reset the entire world.\r\n");
             return;
         } else {
-            for (i = 0; i <= top_of_zone_table; i++) {
-                if (i < 200) {
-                    reset_zone(i);
+            for (auto &z : zone_table) {
+                if (z.first < 200) {
+                    reset_zone(z.first);
                 }
             }
             send_to_char(ch, "Reset world.\r\n");
@@ -3161,19 +3162,18 @@ ACMD(do_zreset) {
     } else if (*arg == '.' || !*arg)
         i = world[IN_ROOM(ch)].zone;
     else {
-        j = atoi(arg);
-        for (i = 0; i <= top_of_zone_table; i++)
-            if (zone_table[i].number == j)
-                break;
+        i = atol(arg);
     }
-    if (i <= top_of_zone_table && (can_edit_zone(ch, i) || GET_ADMLEVEL(ch) > ADMLVL_IMMORT)) {
-        reset_zone(i);
-        send_to_char(ch, "Reset zone #%d: %s.\r\n", zone_table[i].number, zone_table[i].name);
-        mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true, "(GC) %s reset zone %d (%s)", GET_NAME(ch),
-               zone_table[i].number, zone_table[i].name);
-        log_imm_action("RESET: %s has reset zone #%d: %s.", GET_NAME(ch), zone_table[i].number, zone_table[i].name);
-    } else
+    if (!zone_table.count(i) || !(can_edit_zone(ch, i) || GET_ADMLEVEL(ch) > ADMLVL_IMMORT)) {
         send_to_char(ch, "You do not have permission to reset this zone. Try %d.\r\n", GET_OLC_ZONE(ch));
+        return;
+    }
+    auto &z = zone_table[i];
+    reset_zone(z.number);
+    send_to_char(ch, "Reset zone #%d: %s.\r\n", z.number, z.name);
+    mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true, "(GC) %s reset zone %d (%s)", GET_NAME(ch),
+           z.number, z.name);
+    log_imm_action("RESET: %s has reset zone #%d: %s.", GET_NAME(ch), z.number, z.name);
 }
 
 /*
@@ -3306,11 +3306,8 @@ ACMD(do_wizutil) {
 /* FIXME: overflow possible */
 static size_t print_zone_to_buf(char *bufptr, size_t left, zone_rnum zone, int listall) {
     size_t tmp;
-
+    auto &z = zone_table[zone];
     if (listall) {
-        int i, j, k, l, m, n, o;
-        int count_shops(shop_vnum low, shop_vnum high);
-        int count_guilds(guild_vnum low, guild_vnum high);
 
         tmp = snprintf(bufptr, left,
                        "%3d %-30.30s By: %-10.10s Age: %3d; Reset: %3d (%1d); Range: %5d-%5d\r\n",
@@ -3318,27 +3315,13 @@ static size_t print_zone_to_buf(char *bufptr, size_t left, zone_rnum zone, int l
                        zone_table[zone].age, zone_table[zone].lifespan,
                        zone_table[zone].reset_mode,
                        zone_table[zone].bot, zone_table[zone].top);
-        i = j = k = l = m = n = o = 0;
 
-        for (i = 0; i < top_of_world; i++)
-            if (world[i].number >= zone_table[zone].bot && world[i].number <= zone_table[zone].top)
-                j++;
-
-        for (i = 0; i < top_of_objt; i++)
-            if (obj_index[i].vnum >= zone_table[zone].bot && obj_index[i].vnum <= zone_table[zone].top)
-                k++;
-
-        for (i = 0; i < top_of_mobt; i++)
-            if (mob_index[i].vnum >= zone_table[zone].bot && mob_index[i].vnum <= zone_table[zone].top)
-                l++;
-
-        m = count_shops(zone_table[zone].bot, zone_table[zone].top);
-
-        for (i = 0; i < top_of_trigt; i++)
-            if (trig_index[i]->vnum >= zone_table[zone].bot && trig_index[i]->vnum <= zone_table[zone].top)
-                n++;
-
-        o = count_guilds(zone_table[zone].bot, zone_table[zone].top);
+        auto j = z.rooms.size();
+        auto k = z.objects.size();
+        auto l = z.mobiles.size();
+        auto m = z.shops.size();
+        auto n = z.triggers.size();
+        auto o = z.guilds.size();
 
         tmp += snprintf(bufptr + tmp, left - tmp,
                         "       Zone stats:\r\n"
@@ -3430,20 +3413,21 @@ ACMD(do_show) {
             if (self)
                 print_zone_to_buf(buf, sizeof(buf), world[IN_ROOM(ch)].zone, 1);
             else if (*value && is_number(value)) {
-                for (zvn = atoi(value), zrn = 0; zone_table[zrn].number != zvn && zrn <= top_of_zone_table; zrn++);
-                if (zrn <= top_of_zone_table)
-                    print_zone_to_buf(buf, sizeof(buf), zrn, 1);
-                else {
+                zvn = real_zone(atoi(value));
+                if (zvn == NOBODY) {
                     send_to_char(ch, "That is not a valid zone.\r\n");
                     return;
                 }
-            } else
-                for (len = zrn = 0; zrn <= top_of_zone_table; zrn++) {
-                    nlen = print_zone_to_buf(buf + len, sizeof(buf) - len, zrn, 0);
+                print_zone_to_buf(buf, sizeof(buf), zrn, 1);
+            } else {
+                len = 0;
+                for (auto &z : zone_table) {
+                    nlen = print_zone_to_buf(buf + len, sizeof(buf) - len, z.first, 0);
                     if (len + nlen >= sizeof(buf) || nlen < 0)
                         break;
                     len += nlen;
                 }
+            }
             page_string(ch->desc, buf, true);
             break;
 
@@ -3522,10 +3506,10 @@ ACMD(do_show) {
                          "  @Y%5d@W Wish Selfishness Meter@n\r\n",
                          i, con,
                          top_of_p_table + 1,
-                         j, top_of_mobt + 1,
-                         k, top_of_objt + 1,
-                         top_of_world + 1, top_of_zone_table + 1,
-                         top_of_trigt + 1,
+                         j, mob_proto.size(),
+                         k, obj_proto.size(),
+                         world.size(), zone_table.size(),
+                         trig_index.size(),
                          buf_largecount,
                          buf_switches, buf_overflows,
                          add_commas(mob_specials_used),
@@ -3537,37 +3521,41 @@ ACMD(do_show) {
             /* show errors */
         case 5:
             len = strlcpy(buf, "Errant Rooms\r\n------------\r\n", sizeof(buf));
-            for (i = 0, k = 0; i <= top_of_world; i++)
+            for (auto &r : world) {
                 for (j = 0; j < NUM_OF_DIRS; j++) {
-                    if (!W_EXIT(i, j))
+                    auto &e = r.second.dir_option[j];
+                    if (!e)
                         continue;
-                    if (W_EXIT(i, j)->to_room == 0) {
+                    if (e->to_room == 0) {
                         nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (void   ) [%5d] %-*s%s (%s)\r\n", ++k,
-                                        GET_ROOM_VNUM(i), count_color_chars(world[i].name) + 40, world[i].name, QNRM,
+                                        r.first, count_color_chars(r.second.name) + 40, r.second.name, QNRM,
                                         dirs[j]);
                         if (len + nlen >= sizeof(buf) || nlen < 0)
                             break;
                         len += nlen;
                     }
-                    if (W_EXIT(i, j)->to_room == NOWHERE && !W_EXIT(i, j)->general_description) {
+                    if (e->to_room == NOWHERE && !e->general_description) {
                         nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (Nowhere) [%5d] %-*s%s (%s)\r\n", ++k,
-                                        GET_ROOM_VNUM(i), count_color_chars(world[i].name) + 40, world[i].name, QNRM,
+                                        r.first, count_color_chars(r.second.name) + 40, r.second.name, QNRM,
                                         dirs[j]);
                         if (len + nlen >= sizeof(buf) || nlen < 0)
                             break;
                         len += nlen;
                     }
                 }
+            }
+
             page_string(ch->desc, buf, true);
             break;
 
             /* show death */
         case 6:
+            j = 0;
             len = strlcpy(buf, "Death Traps\r\n-----------\r\n", sizeof(buf));
-            for (i = 0, j = 0; i <= top_of_world; i++)
-                if (ROOM_FLAGGED(i, ROOM_DEATH)) {
-                    nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, GET_ROOM_VNUM(i),
-                                    world[i].name);
+            for (auto &r : world)
+                if (ROOM_FLAGGED(r.first, ROOM_DEATH)) {
+                    nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, r.first,
+                                    r.second.name);
                     if (len + nlen >= sizeof(buf) || nlen < 0)
                         break;
                     len += nlen;
@@ -3577,11 +3565,12 @@ ACMD(do_show) {
 
             /* show godrooms */
         case 7:
+            j = 0;
             len = strlcpy(buf, "Godrooms\r\n--------------------------\r\n", sizeof(buf));
-            for (i = 0, j = 0; i <= top_of_world; i++)
-                if (ROOM_FLAGGED(i, ROOM_GODROOM)) {
-                    nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, GET_ROOM_VNUM(i),
-                                    world[i].name);
+            for (auto &r : world)
+                if (ROOM_FLAGGED(r.first, ROOM_GODROOM)) {
+                    nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, r.first,
+                                    r.second.name);
                     if (len + nlen >= sizeof(buf) || nlen < 0)
                         break;
                     len += nlen;
@@ -4697,31 +4686,21 @@ ACMD(do_chown) {
 ACMD(do_zpurge) {
     struct obj_data *obj, *next_obj;
     struct char_data *mob, *next_mob;
-    int i, stored = -1, zone, found = false;
-    int room;
+    vnum i, stored = -1, zone;
     char arg[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg);
 
-    if (!*arg) {
-        zone = zone_table[world[IN_ROOM(ch)].zone].number;
-    } else {
-        zone = atoi(arg);
-    }
+    zone = !*arg ? zone_table[world[IN_ROOM(ch)].zone].number : atol(arg);
 
-    for (i = 0; i <= top_of_zone_table && !found; i++) {
-        if (zone_table[i].number == zone) {
-            stored = i;
-            found = true;
-        }
-    }
-
-    if (!found || !can_edit_zone(ch, zone)) {
+    if (!zone_table.count(zone) || !can_edit_zone(ch, zone)) {
         send_to_char(ch, "You cannot purge that zone. Try %d.\r\n", GET_OLC_ZONE(ch));
         return;
     }
 
-    for (room = genolc_zone_bottom(stored); room <= zone_table[stored].top; room++) {
+    auto &z = zone_table[zone];
+
+    for (auto room = z.bot; room <= z.top; room++) {
         if ((i = real_room(room)) != NOWHERE) {
             for (mob = world[i].people; mob; mob = next_mob) {
                 next_mob = mob->next_in_room;
@@ -4880,17 +4859,19 @@ ACMD (do_zcheck) {
     else
         zrnum = real_zone(atoi(buf));
 
+    auto &z = zone_table[zrnum];
+
     if (zrnum == NOWHERE) {
         send_to_char(ch, "Check what zone ?\r\n");
         return;
     } else
-        send_to_char(ch, "Checking zone %d!\r\n", zone_table[zrnum].number);
+        send_to_char(ch, "Checking zone %d!\r\n", z.number);
 
     /************** Check mobs *****************/
 
     send_to_char(ch, "Checking Mobs for limits...\r\n");
     /*check mobs first*/
-    for (i = 0; i < top_of_mobt; i++) {
+    for (auto &m : mob_proto) {
         if (real_zone_by_thing(mob_index[i].vnum) == zrnum) {  /*is mob in this zone?*/
             mob = &mob_proto[i];
             if (!strcmp(mob->name, "mob unfinished") && (found = 1))
@@ -4986,9 +4967,9 @@ ACMD (do_zcheck) {
 
     /************** Check objects *****************/
     send_to_char(ch, "\r\nChecking Objects for limits...\r\n");
-    for (i = 0; i < top_of_objt; i++) {
-        if (real_zone_by_thing(obj_index[i].vnum) == zrnum) { /*is object in this zone?*/
-            obj = &obj_proto[i];
+    for (auto &o : obj_proto) {
+        if (real_zone_by_thing(o.first) == zrnum) { /*is object in this zone?*/
+            obj = &o.second;
             switch (GET_OBJ_TYPE(obj)) {
                 case ITEM_MONEY:
                     if ((value = GET_OBJ_VAL(obj, 1)) > MAX_GOLD_ALLOWED && (found = 1))
@@ -5116,25 +5097,27 @@ ACMD (do_zcheck) {
 
     /************** Check rooms *****************/
     send_to_char(ch, "\r\nChecking Rooms for limits...\r\n");
-    for (i = 0; i < top_of_world; i++) {
-        if (world[i].zone == zrnum) {
+
+    for (auto &i : z.rooms) {
+        if (world.count(i)) {
+            auto &r = world[i];
             for (j = 0; j < NUM_OF_DIRS; j++) {
                 /*check for exit, but ignore off limits if you're in an offlimit zone*/
-                if (!world[i].dir_option[j])
+                if (!r.dir_option[j])
                     continue;
-                exroom = world[i].dir_option[j]->to_room;
-                if (exroom == NOWHERE)
+                auto &e = r.dir_option[j];
+                exroom = e->to_room;
+                if (exroom == NOWHERE || !world.count(exroom))
                     continue;
-                if (world[exroom].zone == zrnum)
-                    continue;
-                if (world[exroom].zone == world[i].zone)
+                auto &ex = world[exroom];
+                if (ex.zone == r.zone)
                     continue;
 
                 for (k = 0; offlimit_zones[k] != -1; k++) {
-                    if (world[exroom].zone == real_zone(offlimit_zones[k]) && (found = 1))
+                    if (ex.zone == real_zone(offlimit_zones[k]) && (found = 1))
                         len += snprintf(buf + len, sizeof(buf) - len,
                                         "- Exit %s cannot connect to %d (zone off limits).\r\n",
-                                        dirs[j], world[exroom].number);
+                                        dirs[j], ex.number);
                 } /* for (k.. */
             } /* cycle directions */
 
@@ -5147,22 +5130,22 @@ ACMD (do_zcheck) {
                                 ROOM_FLAGGED(i, ROOM_OLC) ? "OLC" : "",
                                 ROOM_FLAGGED(i, ROOM_BFS_MARK) ? "*" : "");
 
-            if ((MIN_ROOM_DESC_LENGTH) && strlen(world[i].description) < MIN_ROOM_DESC_LENGTH && (found = 1))
+            if ((MIN_ROOM_DESC_LENGTH) && strlen(r.description) < MIN_ROOM_DESC_LENGTH && (found = 1))
                 len += snprintf(buf + len, sizeof(buf) - len,
                                 "- Room description is too short. (%4.4" SZT" of min. %d characters).\r\n",
                                 strlen(world[i].description), MIN_ROOM_DESC_LENGTH);
 
-            if (strncmp(world[i].description, "   ", 3) && (found = 1))
+            if (strncmp(r.description, "   ", 3) && (found = 1))
                 len += snprintf(buf + len, sizeof(buf) - len,
                                 "- Room description not formatted with indent (/fi in the editor).\r\n");
 
             /* strcspan = size of text in first arg before any character in second arg */
-            if ((strcspn(world[i].description, "\r\n") > MAX_COLOUMN_WIDTH) && (found = 1))
+            if ((strcspn(r.description, "\r\n") > MAX_COLOUMN_WIDTH) && (found = 1))
                 len += snprintf(buf + len, sizeof(buf) - len,
                                 "- Room description not wrapped at %d chars (/fi in the editor).\r\n",
                                 MAX_COLOUMN_WIDTH);
 
-            for (ext2 = nullptr, ext = world[i].ex_description; ext; ext = ext->next)
+            for (ext2 = nullptr, ext = r.ex_description; ext; ext = ext->next)
                 if (strncmp(ext->description, "   ", 3))
                     ext2 = ext;
 
@@ -5172,7 +5155,7 @@ ACMD (do_zcheck) {
 
             if (found) {
                 send_to_char(ch, "[%5d] %-30s: \r\n%s",
-                             world[i].number, world[i].name ? world[i].name : "An unnamed room", buf);
+                             i, r.name ? r.name : "An unnamed room", buf);
                 strcpy(buf, "");
                 len = 0;
                 found = 0;
@@ -5180,8 +5163,8 @@ ACMD (do_zcheck) {
         } /*is room in this zone?*/
     } /*checking rooms*/
 
-    for (i = 0; i < top_of_world; i++) {
-        if (world[i].zone == zrnum) {
+    for (auto &i : z.rooms) {
+        if (world.count(i)) {
             m++;
             for (j = 0, k = 0; j < NUM_OF_DIRS; j++)
                 if (!world[i].dir_option[j])
@@ -5200,7 +5183,6 @@ ACMD (do_zcheck) {
 
 static void mob_checkload(struct char_data *ch, mob_vnum mvnum) {
     int cmd_no, count = 0;
-    zone_rnum zone;
     mob_rnum mrnum = real_mobile(mvnum);
 
     if (mrnum == NOBODY) {
@@ -5211,17 +5193,17 @@ static void mob_checkload(struct char_data *ch, mob_vnum mvnum) {
     send_to_char(ch, "Checking load info for the mob [%d] %s...\r\n",
                  mvnum, mob_proto[mrnum].short_descr);
 
-    for (zone = 0; zone <= top_of_zone_table; zone++) {
-        for (cmd_no = 0; ZCMD2.command != 'S'; cmd_no++) {
-            if (ZCMD2.command != 'M')
+    for (auto &z : zone_table) {
+        for (cmd_no = 0; z.second.cmd[cmd_no].command != 'S'; cmd_no++) {
+            if (z.second.cmd[cmd_no].command != 'M')
                 continue;
 
             /* read a mobile */
-            if (ZCMD2.arg1 == mrnum) {
+            if (z.second.cmd[cmd_no].arg1 == mrnum) {
                 send_to_char(ch, "  [%5d] %s (%d MAX)\r\n",
-                             world[ZCMD2.arg3].number,
-                             world[ZCMD2.arg3].name,
-                             ZCMD2.arg2);
+                             world[z.second.cmd[cmd_no].arg3].number,
+                             world[z.second.cmd[cmd_no].arg3].name,
+                             z.second.cmd[cmd_no].arg2);
                 count += 1;
             }
         }
@@ -5232,7 +5214,6 @@ static void mob_checkload(struct char_data *ch, mob_vnum mvnum) {
 
 static void obj_checkload(struct char_data *ch, obj_vnum ovnum) {
     int cmd_no, count = 0;
-    zone_rnum zone;
     obj_rnum ornum = real_object(ovnum);
     room_vnum lastroom_v = 0;
     room_rnum lastroom_r = 0;
@@ -5246,60 +5227,60 @@ static void obj_checkload(struct char_data *ch, obj_vnum ovnum) {
     send_to_char(ch, "Checking load info for the obj [%d] %s...\r\n",
                  ovnum, obj_proto[ornum].short_description);
 
-    for (zone = 0; zone <= top_of_zone_table; zone++) {
-        for (cmd_no = 0; ZCMD2.command != 'S'; cmd_no++) {
-            switch (ZCMD2.command) {
+    for (auto &z : zone_table) {
+        for (cmd_no = 0; z.second.cmd[cmd_no].command != 'S'; cmd_no++) {
+            switch (z.second.cmd[cmd_no].command) {
                 case 'M':
-                    lastroom_v = world[ZCMD2.arg3].number;
-                    lastroom_r = ZCMD2.arg3;
-                    lastmob_r = ZCMD2.arg1;
+                    lastroom_v = world[z.second.cmd[cmd_no].arg3].number;
+                    lastroom_r = z.second.cmd[cmd_no].arg3;
+                    lastmob_r = z.second.cmd[cmd_no].arg1;
                     break;
                 case 'O':                   /* read an object */
-                    lastroom_v = world[ZCMD2.arg3].number;
-                    lastroom_r = ZCMD2.arg3;
-                    if (ZCMD2.arg1 == ornum) {
+                    lastroom_v = world[z.second.cmd[cmd_no].arg3].number;
+                    lastroom_r = z.second.cmd[cmd_no].arg3;
+                    if (z.second.cmd[cmd_no].arg1 == ornum) {
                         send_to_char(ch, "  [%5d] %s (%d Max)\r\n",
                                      lastroom_v,
                                      world[lastroom_r].name,
-                                     ZCMD2.arg2);
+                                     z.second.cmd[cmd_no].arg2);
                         count += 1;
                     }
                     break;
                 case 'P':                   /* object to object */
-                    if (ZCMD2.arg1 == ornum) {
+                    if (z.second.cmd[cmd_no].arg1 == ornum) {
                         send_to_char(ch, "  [%5d] %s (Put in another object [%d Max])\r\n",
                                      lastroom_v,
                                      world[lastroom_r].name,
-                                     ZCMD2.arg2);
+                                     z.second.cmd[cmd_no].arg2);
                         count += 1;
                     }
                     break;
                 case 'G':                   /* obj_to_char */
-                    if (ZCMD2.arg1 == ornum) {
+                    if (z.second.cmd[cmd_no].arg1 == ornum) {
                         send_to_char(ch, "  [%5d] %s (Given to %s [%d][%d Max])\r\n",
                                      lastroom_v,
                                      world[lastroom_r].name,
                                      mob_proto[lastmob_r].short_descr,
                                      mob_index[lastmob_r].vnum,
-                                     ZCMD2.arg2);
+                                     z.second.cmd[cmd_no].arg2);
                         count += 1;
                     }
                     break;
                 case 'E':                   /* object to equipment list */
-                    if (ZCMD2.arg1 == ornum) {
+                    if (z.second.cmd[cmd_no].arg1 == ornum) {
                         send_to_char(ch, "  [%5d] %s (Equipped to %s [%d][%d Max])\r\n",
                                      lastroom_v,
                                      world[lastroom_r].name,
                                      mob_proto[lastmob_r].short_descr,
                                      mob_index[lastmob_r].vnum,
-                                     ZCMD2.arg2);
+                                     z.second.cmd[cmd_no].arg2);
                         count += 1;
                     }
                     break;
                 case 'R': /* rem obj from room */
-                    lastroom_v = world[ZCMD2.arg1].number;
-                    lastroom_r = ZCMD2.arg1;
-                    if (ZCMD2.arg2 == ornum) {
+                    lastroom_v = world[z.second.cmd[cmd_no].arg1].number;
+                    lastroom_r = z.second.cmd[cmd_no].arg1;
+                    if (z.second.cmd[cmd_no].arg2 == ornum) {
                         send_to_char(ch, "  [%5d] %s (Removed from room)\r\n",
                                      lastroom_v,
                                      world[lastroom_r].name);
@@ -5316,7 +5297,6 @@ static void obj_checkload(struct char_data *ch, obj_vnum ovnum) {
 
 static void trg_checkload(struct char_data *ch, trig_vnum tvnum) {
     int cmd_no, found = 0;
-    zone_rnum zone;
     trig_rnum trnum = real_trigger(tvnum);
     room_vnum lastroom_v = 0;
     room_rnum lastroom_r = 0, k;
@@ -5330,31 +5310,31 @@ static void trg_checkload(struct char_data *ch, trig_vnum tvnum) {
     }
 
     send_to_char(ch, "Checking load info for the %s trigger [%d] '%s':\r\n",
-                 trig_index[trnum]->proto->attach_type == MOB_TRIGGER ? "mobile" :
-                 (trig_index[trnum]->proto->attach_type == OBJ_TRIGGER ? "object" : "room"),
-                 tvnum, trig_index[trnum]->proto->name);
+                 trig_index[trnum].proto->attach_type == MOB_TRIGGER ? "mobile" :
+                 (trig_index[trnum].proto->attach_type == OBJ_TRIGGER ? "object" : "room"),
+                 tvnum, trig_index[trnum].proto->name);
 
-    for (zone = 0; zone <= top_of_zone_table; zone++) {
-        for (cmd_no = 0; ZCMD2.command != 'S'; cmd_no++) {
-            switch (ZCMD2.command) {
+    for (auto &z : zone_table) {
+        for (cmd_no = 0; z.second.cmd[cmd_no].command != 'S'; cmd_no++) {
+            switch (z.second.cmd[cmd_no].command) {
                 case 'M':
-                    lastroom_v = world[ZCMD2.arg3].number;
-                    lastroom_r = ZCMD2.arg3;
-                    lastmob_r = ZCMD2.arg1;
+                    lastroom_v = world[z.second.cmd[cmd_no].arg3].number;
+                    lastroom_r = z.second.cmd[cmd_no].arg3;
+                    lastmob_r = z.second.cmd[cmd_no].arg1;
                     break;
                 case 'O':                   /* read an object */
-                    lastroom_v = world[ZCMD2.arg3].number;
-                    lastroom_r = ZCMD2.arg3;
-                    lastobj_r = ZCMD2.arg1;
+                    lastroom_v = world[z.second.cmd[cmd_no].arg3].number;
+                    lastroom_r = z.second.cmd[cmd_no].arg3;
+                    lastobj_r = z.second.cmd[cmd_no].arg1;
                     break;
                 case 'P':                   /* object to object */
-                    lastobj_r = ZCMD2.arg1;
+                    lastobj_r = z.second.cmd[cmd_no].arg1;
                     break;
                 case 'G':                   /* obj_to_char */
-                    lastobj_r = ZCMD2.arg1;
+                    lastobj_r = z.second.cmd[cmd_no].arg1;
                     break;
                 case 'E':                   /* object to equipment list */
-                    lastobj_r = ZCMD2.arg1;
+                    lastobj_r = z.second.cmd[cmd_no].arg1;
                     break;
                 case 'R':                   /* rem obj from room */
                     lastroom_v = 0;
@@ -5362,21 +5342,21 @@ static void trg_checkload(struct char_data *ch, trig_vnum tvnum) {
                     lastobj_r = 0;
                     lastmob_r = 0;
                 case 'T':                   /* trigger to something */
-                    if (ZCMD2.arg2 != trnum)
+                    if (z.second.cmd[cmd_no].arg2 != trnum)
                         break;
-                    if (ZCMD2.arg1 == MOB_TRIGGER) {
+                    if (z.second.cmd[cmd_no].arg1 == MOB_TRIGGER) {
                         send_to_char(ch, "mob [%5d] %-60s (zedit room %5d)\r\n",
                                      mob_index[lastmob_r].vnum,
                                      mob_proto[lastmob_r].short_descr,
                                      lastroom_v);
                         found = 1;
-                    } else if (ZCMD2.arg1 == OBJ_TRIGGER) {
+                    } else if (z.second.cmd[cmd_no].arg1 == OBJ_TRIGGER) {
                         send_to_char(ch, "obj [%5d] %-60s  (zedit room %d)\r\n",
                                      obj_index[lastobj_r].vnum,
                                      obj_proto[lastobj_r].short_description,
                                      lastroom_v);
                         found = 1;
-                    } else if (ZCMD2.arg1 == WLD_TRIGGER) {
+                    } else if (z.second.cmd[cmd_no].arg1 == WLD_TRIGGER) {
                         send_to_char(ch, "room [%5d] %-60s (zedit)\r\n",
                                      lastroom_v,
                                      world[lastroom_r].name);
@@ -5387,43 +5367,43 @@ static void trg_checkload(struct char_data *ch, trig_vnum tvnum) {
         } /*for cmd_no......*/
     }  /*for zone...*/
 
-    for (i = 0; i < top_of_mobt; i++) {
-        if (!mob_proto[i].proto_script)
+    for (auto &m : mob_proto) {
+        if (!m.second.proto_script)
             continue;
 
-        for (tpl = mob_proto[i].proto_script; tpl; tpl = tpl->next)
+        for (tpl = m.second.proto_script; tpl; tpl = tpl->next)
             if (tpl->vnum == tvnum) {
                 send_to_char(ch, "mob [%5d] %s\r\n",
-                             mob_index[i].vnum,
-                             mob_proto[i].short_descr);
+                             m.first,
+                             m.second.short_descr);
                 found = 1;
             }
 
     }
 
-    for (j = 0; j < top_of_objt; j++) {
-        if (!obj_proto[j].proto_script)
+    for (auto &o : obj_proto) {
+        if (!o.second.proto_script)
             continue;
 
-        for (tpl = obj_proto[j].proto_script; tpl; tpl = tpl->next)
+        for (tpl = o.second.proto_script; tpl; tpl = tpl->next)
             if (tpl->vnum == tvnum) {
                 send_to_char(ch, "obj [%5d] %s\r\n",
-                             obj_index[j].vnum,
-                             obj_proto[j].short_description);
+                             o.first,
+                             o.second.short_description);
                 found = 1;
             }
 
     }
 
-    for (k = 0; k < top_of_world; k++) {
-        if (!world[k].proto_script)
+    for (auto &r : world) {
+        if (!r.second.proto_script)
             continue;
 
-        for (tpl = world[k].proto_script; tpl; tpl = tpl->next)
+        for (tpl = r.second.proto_script; tpl; tpl = tpl->next)
             if (tpl->vnum == tvnum) {
                 send_to_char(ch, "room[%5d] %s\r\n",
-                             world[k].number,
-                             world[k].name);
+                             r.first,
+                             r.second.name);
                 found = 1;
             }
     }

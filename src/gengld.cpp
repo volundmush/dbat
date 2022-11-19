@@ -169,29 +169,31 @@ int add_guild(struct guild_data *ngld) {
 /*-------------------------------------------------------------------*/
 
 int save_guilds(zone_rnum zone_num) {
-    int i, j, rguild;
+    vnum j, rguild;
     FILE *guild_file;
     char fname[64];
     struct guild_data *guild;
 
 #if CIRCLE_UNSIGNED_INDEX
-    if (zone_num == NOWHERE || zone_num > top_of_zone_table)
+    if (!zone_table.count(zone_num))
 #else
         if (zone_num < 0 || zone_num > top_of_zone_table)
 #endif
     {
-        log("SYSERR: GenOLC: save_guilds: Invalid real zone number %d. (0-%d)", zone_num, top_of_zone_table);
+        log("SYSERR: GenOLC: save_guilds: Invalid real zone number %d.", zone_num);
         return false;
     }
 
-    snprintf(fname, sizeof(fname), "%s%d.gld", GLD_PREFIX, zone_table[zone_num].number);
+    auto &z = zone_table[zone_num];
+
+    snprintf(fname, sizeof(fname), "%s%d.gld", GLD_PREFIX, z.number);
     if (!(guild_file = fopen(fname, "w"))) {
         mudlog(BRF, ADMLVL_GOD, true, "SYSERR: OLC: Cannot open Guild file!");
         return false;
     }
 
     /*. Search database for guilds in this zone . */
-    for (i = genolc_zone_bottom(zone_num); i <= zone_table[zone_num].top; i++) {
+    for (auto i = z.bot; i <= z.top; i++) {
         if ((rguild = real_guild(i)) != NOWHERE) {
             fprintf(guild_file, "#%d~\n", i);
             guild = guild_index + rguild;
@@ -236,9 +238,9 @@ int save_guilds(zone_rnum zone_num) {
     fprintf(guild_file, "$~\n");
     fclose(guild_file);
 
-    if (in_save_list(zone_table[zone_num].number, SL_GLD)) {
-        remove_from_save_list(zone_table[zone_num].number, SL_GLD);
-        create_world_index(zone_table[zone_num].number, "gld");
+    if (in_save_list(z.number, SL_GLD)) {
+        remove_from_save_list(z.number, SL_GLD);
+        create_world_index(z.number, "gld");
         log("GenOLC: save_guilds: Saving guilds '%s'", fname);
     }
     return true;

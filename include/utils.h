@@ -136,7 +136,7 @@ extern size_t sprintbit(bitvector_t vektor, const char *names[], char *result, s
 
 extern size_t sprinttype(int type, const char *names[], char *result, size_t reslen);
 
-extern void sprintbitarray(int bitvector[], const char *names[], int maxar, char *result);
+extern void sprintbitarray(bitvector_t bitvector[], const char *names[], int maxar, char *result);
 
 extern int get_line(FILE *fl, char *buf);
 
@@ -413,8 +413,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
  * IS_MOB() acts as a VALID_MOB_RNUM()-like function.
  */
 #define IS_NPC(ch)    (IS_SET_AR(MOB_FLAGS(ch), MOB_ISNPC))
-#define IS_MOB(ch)    (IS_NPC(ch) && GET_MOB_RNUM(ch) <= top_of_mobt && \
-                GET_MOB_RNUM(ch) != NOBODY)
+#define IS_MOB(ch)    (IS_NPC(ch) && mob_proto.count(GET_MOB_RNUM(ch)))
 
 #define MOB_FLAGGED(ch, flag) (IS_NPC(ch) && IS_SET_AR(MOB_FLAGS(ch), (flag)))
 #define PLR_FLAGGED(ch, flag) (!IS_NPC(ch) && IS_SET_AR(PLR_FLAGS(ch), (flag)))
@@ -455,11 +454,10 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define IS_DARK(room)    room_is_dark((room))
 #define IS_LIGHT(room)  (!IS_DARK(room))
 
-#define VALID_ROOM_RNUM(rnum)    ((rnum) != NOWHERE && (rnum) <= top_of_world)
-#define GET_ROOM_VNUM(rnum) \
-    ((room_vnum)(VALID_ROOM_RNUM(rnum) ? world[(rnum)].number : NOWHERE))
+#define VALID_ROOM_RNUM(rnum)    (world.count(rnum) > 0 && rnum != NOWHERE)
+#define GET_ROOM_VNUM(rnum) (VALID_ROOM_RNUM(rnum) ? world[(rnum)].number : NOWHERE)
 #define GET_ROOM_SPEC(room) \
-    (VALID_ROOM_RNUM(room) ? world[(room)].func : 0)
+    (VALID_ROOM_RNUM(room) ? world[(room)].func : nullptr)
 
 /* Minor Planet Defines */
 #define PLANET_ZENITH(room) ((GET_ROOM_VNUM(room) >= 3400 && GET_ROOM_VNUM(room) <= 3599) || (GET_ROOM_VNUM(room) >= 62900 && GET_ROOM_VNUM(room) <= 62999) || \
@@ -714,8 +712,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 
 #define GET_MOB_SPEC(ch)    (IS_MOB(ch) ? mob_index[(ch)->nr].func : 0)
 #define GET_MOB_RNUM(mob)    ((mob)->nr)
-#define GET_MOB_VNUM(mob)    (IS_MOB(mob) ? \
-                 mob_index[GET_MOB_RNUM(mob)].vnum : NOBODY)
+#define GET_MOB_VNUM(mob)    (IS_MOB(mob) ? (mob_index.count((mob)->nr) ? (mob)->nr : NOBODY) : NOBODY)
 
 #define GET_DEFAULT_POS(ch)    ((ch)->mob_specials.default_pos)
 #define MEMORY(ch)        ((ch)->mob_specials.memory)
@@ -780,8 +777,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
  * If using unsigned types, the top array index will catch everything.
  * If using signed types, NOTHING will catch the majority of bad accesses.
  */
-#define VALID_OBJ_RNUM(obj)    (GET_OBJ_RNUM(obj) <= top_of_objt && \
-                 GET_OBJ_RNUM(obj) != NOTHING)
+#define VALID_OBJ_RNUM(obj)    (obj_proto.count(GET_OBJ_RNUM(obj)))
 
 #define GET_OBJ_LEVEL(obj)      ((obj)->level)
 #define GET_OBJ_PERM(obj)       ((obj)->bitvector)

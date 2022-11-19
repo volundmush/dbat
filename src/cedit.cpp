@@ -14,6 +14,7 @@
 #include "imc.h"
 #include "improved-edit.h"
 #include "constants.h"
+#include "spec_assign.h"
 
 /******************************************************************************/
 /** External Functions                                                       **/
@@ -2244,12 +2245,10 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
  * End of parse_cedit()  
  */
 void reassign_rooms() {
-    void assign_rooms();
-    int i;
 
     /* remove old funcs */
-    for (i = 0; i < top_of_world; i++)
-        world[i].func = nullptr;
+    for (auto &r : world)
+        r.second.func = nullptr;
 
     /* reassign spec_procs */
     assign_rooms();

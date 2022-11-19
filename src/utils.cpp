@@ -3515,7 +3515,7 @@ size_t sprinttype(int type, const char *names[], char *result, size_t reslen) {
 }
 
 
-void sprintbitarray(int bitvector[], const char *names[], int maxar, char *result) {
+void sprintbitarray(bitvector_t bitvector[], const char *names[], int maxar, char *result) {
     int nr, teller, found = false;
 
     *result = '\0';
@@ -4018,7 +4018,7 @@ std::string processColors(const std::string &txt, int parse, char **choices) {
  * Outside rooms are dark at sunset and night.  */
 int room_is_dark(room_rnum room) {
     if (!VALID_ROOM_RNUM(room)) {
-        log("room_is_dark: Invalid room rnum %d. (0-%d)", room, top_of_world);
+        log("room_is_dark: Invalid room rnum %d.", room);
         return (false);
     }
 

@@ -115,7 +115,8 @@
 extern struct time_info_data time_info;/* the infomation about the time    */
 extern struct weather_data weather_info;    /* the infomation about the weather */
 extern struct player_special_data dummy_mob;    /* dummy spec area for mobs	*/
-extern struct reset_q_type reset_q;    /* queue of zones to be reset	 */
+extern std::set<zone_vnum> zone_reset_queue;
+
 extern struct char_data *EDRAGON;
 extern int WISH[2];
 extern int DRAGONR, DRAGONZ, DRAGONC, SHENRON;
@@ -243,6 +244,7 @@ extern int vnum_armortype(char *searchname, struct char_data *ch);
 
 /* structure for the reset commands */
 struct reset_com {
+    ~reset_com();
     char command;   /* current command                      */
 
     bool if_flag;    /* if TRUE: exe only if preceding exe'd */
@@ -281,15 +283,15 @@ struct zone_data {
     /* modify this zone.		  */
     int lifespan;           /* how long between resets (minutes)  */
     int age;                /* current age of this zone (minutes) */
-    room_vnum bot;           /* starting room number for this zone */
-    room_vnum top;           /* upper limit for rooms in this zone */
+    vnum bot;           /* starting room number for this zone */
+    vnum top;           /* upper limit for rooms in this zone */
 
     int reset_mode;         /* conditions for reset (see below)   */
     zone_vnum number;        /* virtual number of this zone	  */
-    struct reset_com *cmd;   /* command table for reset	          */
+    std::vector<struct reset_com> cmd;   /* command table for reset	          */
     int min_level;           /* Minimum level to enter zone        */
     int max_level;           /* Max Mortal level to enter zone     */
-    int zone_flags[ZF_ARRAY_MAX];          /* Flags for the zone.                */
+    bitvector_t zone_flags[ZF_ARRAY_MAX];          /* Flags for the zone.                */
 
 
     /*
@@ -298,20 +300,12 @@ struct zone_data {
      *   1: Reset if no PC's are located in zone.
      *   2: Just reset.
      */
-};
-
-
-/* for queueing zones for update   */
-struct reset_q_element {
-    zone_rnum zone_to_reset;            /* ref to zone_data */
-    struct reset_q_element *next;
-};
-
-
-/* structure for the update queue     */
-struct reset_q_type {
-    struct reset_q_element *head;
-    struct reset_q_element *tail;
+    std::set<room_vnum> rooms;
+    std::set<mob_vnum> mobiles;
+    std::set<obj_vnum> objects;
+    std::set<shop_vnum> shops;
+    std::set<trig_vnum> triggers;
+    std::set<guild_vnum> guilds;
 };
 
 
@@ -363,38 +357,30 @@ extern time_t boot_time;
 
 extern struct config_data config_info;
 
-extern struct room_data *world;
-extern room_rnum top_of_world;
+extern std::map<room_vnum, room_data> world;
+extern std::map<zone_vnum, struct zone_data> zone_table;
 
-
-extern struct zone_data *zone_table;
-extern zone_rnum top_of_zone_table;
 
 extern struct descriptor_data *descriptor_list;
 extern struct char_data *character_list;
 extern struct char_data *affect_list;
 extern struct char_data *affectv_list;
 
-extern struct index_data *mob_index;
-extern struct char_data *mob_proto;
-extern mob_rnum top_of_mobt;
+extern std::map<mob_vnum, struct index_data> mob_index;
+extern std::map<mob_vnum, struct char_data> mob_proto;
 
-extern struct index_data *obj_index;
+extern std::map<obj_vnum, struct index_data> obj_index;
 extern struct obj_data *object_list;
-extern struct obj_data *obj_proto;
-extern obj_rnum top_of_objt;
+extern std::map<obj_vnum, struct obj_data> obj_proto;
 
-extern struct htree_node *room_htree;
-extern struct htree_node *mob_htree;
-extern struct htree_node *obj_htree;
 
 extern struct social_messg *soc_mess_list;
 extern int top_of_socialt;
-extern struct index_data **trig_index;
+extern std::map<trig_vnum, struct index_data> trig_index;
 
 extern struct trig_data *trigger_list;
-extern int top_of_trigt;
-extern long max_mob_id;
+
+extern int32_t max_mob_id;
 extern long max_obj_id;
 extern int dg_owner_purged;
 extern int xap_objs;

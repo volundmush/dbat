@@ -32,7 +32,7 @@ obj_rnum add_object(struct obj_data *newobj, obj_vnum ovnum) {
     }
 
     found = insert_object(newobj, ovnum);
-    adjust_objects(found);
+
     add_to_save_list(zone_table[rznum].number, SL_OBJ);
     return found;
 }
@@ -76,60 +76,6 @@ int update_objects(struct obj_data *refobj) {
 
 /* ------------------------------------------------------------------------------------------------------------------------------ */
 
-/*
- * Adjust the internal values of other objects as if something was inserted at the given array index.
- * Might also be useful to make 'holes' in the array for some reason.
- */
-obj_rnum adjust_objects(obj_rnum refpt) {
-    int shop, i, zone, cmd_no;
-    struct obj_data *obj;
-
-#if CIRCLE_UNSIGNED_INDEX
-    if (refpt == NOTHING || refpt > top_of_objt)
-#else
-        if (refpt < 0 || refpt > top_of_objt)
-#endif
-        return NOTHING;
-
-    /*
-     * Renumber live objects.
-     */
-    for (obj = object_list; obj; obj = obj->next)
-        GET_OBJ_RNUM(obj) += (GET_OBJ_RNUM(obj) != NOTHING && GET_OBJ_RNUM(obj) >= refpt);
-
-    /*
-     * Renumber zone table.
-     */
-    for (zone = 0; zone <= top_of_zone_table; zone++) {
-        for (cmd_no = 0; ZCMD(zone, cmd_no).command != 'S'; cmd_no++) {
-            switch (ZCMD(zone, cmd_no).command) {
-                case 'P':
-                    ZCMD(zone, cmd_no).arg3 += (ZCMD(zone, cmd_no).arg3 >= refpt);
-                    /*
-                     * No break here - drop into next case.
-                     */
-                case 'O':
-                case 'G':
-                case 'E':
-                    ZCMD(zone, cmd_no).arg1 += (ZCMD(zone, cmd_no).arg1 >= refpt);
-                    break;
-                case 'R':
-                    ZCMD(zone, cmd_no).arg2 += (ZCMD(zone, cmd_no).arg2 >= refpt);
-                    break;
-            }
-        }
-    }
-
-    /*
-     * Renumber shop produce.
-     */
-    for (shop = 0; shop <= top_shop; shop++)
-        for (i = 0; SHOP_PRODUCT(shop, i) != NOTHING; i++)
-            SHOP_PRODUCT(shop, i) += (SHOP_PRODUCT(shop, i) >= refpt);
-
-    return refpt;
-}
-
 /* ------------------------------------------------------------------------------------------------------------------------------ */
 
 /*
@@ -137,41 +83,19 @@ obj_rnum adjust_objects(obj_rnum refpt) {
  * of other objects, use add_object() for that.
  */
 obj_rnum insert_object(struct obj_data *obj, obj_vnum ovnum) {
-    obj_rnum i;
 
-    top_of_objt++;
-    RECREATE(obj_index, struct index_data, top_of_objt + 1);
-    RECREATE(obj_proto, struct obj_data, top_of_objt + 1);
-
-    /*
-     * Start counting through both tables.
-     */
-    for (i = top_of_objt; i > 0; i--) {
-        /*
-         * Check if current virtual is bigger than our virtual number.
-         */
-        if (ovnum > obj_index[i - 1].vnum)
-            return index_object(obj, ovnum, i);
-
-        /* Copy over the object that should be here. */
-        obj_index[i] = obj_index[i - 1];
-        obj_proto[i] = obj_proto[i - 1];
-        obj_proto[i].item_number = i;
-        htree_add(obj_htree, obj_index[i].vnum, i);
-    }
+    auto exists = obj_proto.count(ovnum);
+    auto &o = obj_proto[ovnum];
+    o = *obj;
 
     /* Not found, place at 0. */
-    return index_object(obj, ovnum, 0);
+    return false;
 }
 
 /* ------------------------------------------------------------------------------------------------------------------------------ */
 
 obj_rnum index_object(struct obj_data *obj, obj_vnum ovnum, obj_rnum ornum) {
-#if CIRCLE_UNSIGNED_INDEX
-    if (obj == nullptr || ornum == NOTHING || ornum > top_of_objt)
-#else
-        if (obj == nullptr || ovnum < 0 || ornum < 0 || ornum > top_of_objt)
-#endif
+    if (!obj || ornum == NOTHING || !obj_proto.count(ornum))
         return NOWHERE;
 
     obj->item_number = ornum;
@@ -181,8 +105,6 @@ obj_rnum index_object(struct obj_data *obj, obj_vnum ovnum, obj_rnum ornum) {
 
     copy_object_preserve(&obj_proto[ornum], obj);
     obj_proto[ornum].in_room = NOWHERE;
-
-    htree_add(obj_htree, obj_index[ornum].vnum, ornum);
 
     return ornum;
 }
@@ -197,21 +119,17 @@ int save_objects(zone_rnum zone_num) {
     char wbuf3[MAX_STRING_LENGTH], wbuf4[MAX_STRING_LENGTH];
     char pbuf1[MAX_STRING_LENGTH], pbuf2[MAX_STRING_LENGTH];
     char pbuf3[MAX_STRING_LENGTH], pbuf4[MAX_STRING_LENGTH];
-    int counter, counter2, realcounter;
+    int counter2, realcounter;
     FILE *fp;
     struct obj_data *obj;
     struct extra_descr_data *ex_desc;
 
-#if CIRCLE_UNSIGNED_INDEX
-    if (zone_num == NOWHERE || zone_num > top_of_zone_table) {
-#else
-        if (zone_num < 0 || zone_num > top_of_zone_table) {
-#endif
-        log("SYSERR: OasisOLC: save_objects: Invalid real zone number %d. (0-%d)", zone_num, top_of_zone_table);
+    if (!zone_table.count(zone_num)) {
+        log("SYSERR: OasisOLC: save_objects: Invalid real zone number %d.", zone_num);
         return false;
     }
-
-    snprintf(cmfname, sizeof(cmfname), "%s%d.new", OBJ_PREFIX, zone_table[zone_num].number);
+    auto &z = zone_table[zone_num];
+    snprintf(cmfname, sizeof(cmfname), "%s%d.new", OBJ_PREFIX, z.number);
     if (!(fp = fopen(cmfname, "w+"))) {
         mudlog(BRF, ADMLVL_IMMORT, true, "SYSERR: OLC: Cannot open objects file %s!", cmfname);
         return false;
@@ -219,7 +137,7 @@ int save_objects(zone_rnum zone_num) {
     /*
      * Start running through all objects in this zone.
      */
-    for (counter = genolc_zone_bottom(zone_num); counter <= zone_table[zone_num].top; counter++) {
+    for (auto counter = z.bot; counter <= z.top; counter++) {
         if ((realcounter = real_object(counter)) != NOTHING) {
             if ((obj = &obj_proto[realcounter])->action_description) {
                 strncpy(buf, obj->action_description, sizeof(buf) - 1);
@@ -322,13 +240,13 @@ int save_objects(zone_rnum zone_num) {
      */
     fprintf(fp, "$~\n");
     fclose(fp);
-    snprintf(buf, sizeof(buf), "%s%d.obj", OBJ_PREFIX, zone_table[zone_num].number);
+    snprintf(buf, sizeof(buf), "%s%d.obj", OBJ_PREFIX, z.number);
     remove(buf);
     rename(cmfname, buf);
 
-    if (in_save_list(zone_table[zone_num].number, SL_OBJ)) {
-        remove_from_save_list(zone_table[zone_num].number, SL_OBJ);
-        create_world_index(zone_table[zone_num].number, "obj");
+    if (in_save_list(z.number, SL_OBJ)) {
+        remove_from_save_list(z.number, SL_OBJ);
+        create_world_index(z.number, "obj");
         log("GenOLC: save_objects: Saving objects '%s'", buf);
     }
     return true;
@@ -439,14 +357,12 @@ int delete_object(obj_rnum rnum) {
     struct obj_data *obj, *tmp;
     int shop, j, zone, cmd_no;
 
-    if (rnum == NOTHING || rnum > top_of_objt)
+    if (!obj_proto.count(rnum))
         return NOTHING;
 
     obj = &obj_proto[rnum];
 
-    zrnum = real_zone_by_thing(GET_OBJ_VNUM(obj));
-
-    htree_del(obj_htree, obj->item_number);
+    zrnum = real_zone_by_thing(rnum);
 
     /* This is something you might want to read about in the logs. */
     log("GenOLC: delete_object: Deleting object #%d (%s).", GET_OBJ_VNUM(obj), obj->short_description);
@@ -481,55 +397,8 @@ int delete_object(obj_rnum rnum) {
 
     /* Make sure all are removed. */
     assert(obj_index[rnum].number == 0);
-
-    /* Adjust rnums of all other objects. */
-    for (tmp = object_list; tmp; tmp = tmp->next) {
-        GET_OBJ_RNUM(tmp) -= (GET_OBJ_RNUM(tmp) > rnum);
-    }
-
-    for (i = rnum; i < top_of_objt; i++) {
-        obj_index[i] = obj_index[i + 1];
-        obj_proto[i] = obj_proto[i + 1];
-        obj_proto[i].item_number = i;
-    }
-
-    top_of_objt--;
-    RECREATE(obj_index, struct index_data, top_of_objt + 1);
-    RECREATE(obj_proto, struct obj_data, top_of_objt + 1);
-
-    /* Renumber shop produce. */
-    for (shop = 0; shop <= top_shop; shop++)
-        for (j = 0; SHOP_PRODUCT(shop, j) != NOTHING; j++)
-            SHOP_PRODUCT(shop, j) -= (SHOP_PRODUCT(shop, j) > rnum);
-
-    /* Renumber zone table. */
-    for (zone = 0; zone <= top_of_zone_table; zone++) {
-        for (cmd_no = 0; ZCMD(zone, cmd_no).command != 'S'; cmd_no++) {
-            switch (ZCMD(zone, cmd_no).command) {
-                case 'P':
-                    if (ZCMD(zone, cmd_no).arg3 == rnum) {
-                        delete_zone_command(&zone_table[zone], cmd_no);
-                    } else
-                        ZCMD(zone, cmd_no).arg3 -= (ZCMD(zone, cmd_no).arg3 > rnum);
-                    break;
-                case 'O':
-                case 'G':
-                case 'E':
-                    if (ZCMD(zone, cmd_no).arg1 == rnum) {
-                        delete_zone_command(&zone_table[zone], cmd_no);
-                    } else
-                        ZCMD(zone, cmd_no).arg1 -= (ZCMD(zone, cmd_no).arg1 > rnum);
-                    break;
-                case 'R':
-                    if (ZCMD(zone, cmd_no).arg2 == rnum) {
-                        delete_zone_command(&zone_table[zone], cmd_no);
-                    } else
-                        ZCMD(zone, cmd_no).arg2 -= (ZCMD(zone, cmd_no).arg2 > rnum);
-                    break;
-            }
-        }
-    }
-
+    obj_proto.erase(rnum);
+    obj_index.erase(rnum);
     save_objects(zrnum);
 
     return rnum;

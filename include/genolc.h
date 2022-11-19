@@ -33,15 +33,12 @@ extern void free_ex_descriptions(struct extra_descr_data *head);
 
 extern int sprintascii(char *out, bitvector_t bits);
 
-extern void free_save_list();
-
 struct save_list_data {
-    int zone;
+    zone_vnum zone;
     int type;
-    struct save_list_data *next;
 };
 
-extern struct save_list_data *save_list;
+extern std::list<struct save_list_data> save_list;
 
 /* save_list_data.type */
 #define SL_MOB    0
@@ -64,5 +61,3 @@ extern room_vnum genolc_zone_bottom(zone_rnum rznum);
 extern room_vnum genolc_zonep_bottom(struct zone_data *zone);
 
 extern void create_world_index(int znum, const char *type);
-
-extern void free_save_list();

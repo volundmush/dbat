@@ -1973,8 +1973,8 @@ void timed_dt(struct char_data *ch) {
           value decreased if its not -1.
           */
 
-        for (rrnum = 0; rrnum < top_of_world; rrnum++)
-            world[rrnum].timed -= (world[rrnum].timed != -1);
+        for (auto &r : world)
+            r.second.timed -= (r.second.timed != -1);
 
         for (vict = character_list; vict; vict = vict->next) {
             if (IS_NPC(vict))
