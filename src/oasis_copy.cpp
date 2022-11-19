@@ -286,9 +286,9 @@ ACMD(do_dig) {
             OLC_ROOM(d)->name = strdup("An unfinished room");
 
         /* Copy the room's description.*/
-        OLC_ROOM(d)->description = strdup("You are in an unfinished room.\r\n");
+        OLC_ROOM(d)->look_description = strdup("You are in an unfinished room.\r\n");
         OLC_ROOM(d)->zone = OLC_ZNUM(d);
-        OLC_ROOM(d)->number = NOWHERE;
+        OLC_ROOM(d)->vn = NOWHERE;
 
         /*
          * Save the new room to memory.
@@ -392,14 +392,14 @@ ACMD(do_rcopy) {
     /* Free descriptions. */
     if (world[rrnum].name)
         free(world[rrnum].name);
-    if (world[rrnum].description)
-        free(world[rrnum].description);
+    if (world[rrnum].look_description)
+        free(world[rrnum].look_description);
     if (world[rrnum].ex_description)
         free_ex_descriptions(world[rrnum].ex_description);
     world[rrnum].sector_type = world[trnum].sector_type;
 
     /* Copy over description name and extra descriptions */
-    world[rrnum].description = str_udup(world[trnum].description);
+    world[rrnum].look_description = str_udup(world[trnum].look_description);
     world[rrnum].name = str_udup(world[trnum].name);
 
     /* Copy over any existings extra descriptions */
@@ -461,9 +461,9 @@ int buildwalk(struct char_data *ch, int dir) {
             OLC_ROOM(d)->name = strdup("New BuildWalk Room");
 
             sprintf(buf, "This unfinished room was created by %s.\r\n", GET_NAME(ch));
-            OLC_ROOM(d)->description = strdup(buf);
+            OLC_ROOM(d)->look_description = strdup(buf);
             OLC_ROOM(d)->zone = OLC_ZNUM(d);
-            OLC_ROOM(d)->number = NOWHERE;
+            OLC_ROOM(d)->vn = NOWHERE;
 
             /*
              * Save the new room to memory.

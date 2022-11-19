@@ -1301,7 +1301,7 @@ ACMD(do_write) {
     char buf1[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
 
     /* before we do anything, lets see if there's a board involved. */
-    for (obj = ch->carrying; obj; obj = obj->next_content) {
+    for (obj = ch->contents; obj; obj = obj->next_content) {
         if (GET_OBJ_TYPE(obj) == ITEM_BOARD) {
             break;
         }
@@ -1334,16 +1334,16 @@ ACMD(do_write) {
         return;
     }
     if (*penname) {        /* there were two arguments */
-        if (!(paper = get_obj_in_list_vis(ch, papername, nullptr, ch->carrying))) {
+        if (!(paper = get_obj_in_list_vis(ch, papername, nullptr, ch->contents))) {
             send_to_char(ch, "You have no %s.\r\n", papername);
             return;
         }
-        if (!(pen = get_obj_in_list_vis(ch, penname, nullptr, ch->carrying))) {
+        if (!(pen = get_obj_in_list_vis(ch, penname, nullptr, ch->contents))) {
             send_to_char(ch, "You have no %s.\r\n", penname);
             return;
         }
     } else {        /* there was one arg.. let's see what we can find */
-        if (!(paper = get_obj_in_list_vis(ch, papername, nullptr, ch->carrying))) {
+        if (!(paper = get_obj_in_list_vis(ch, papername, nullptr, ch->contents))) {
             send_to_char(ch, "There is no %s in your inventory.\r\n", papername);
             return;
         }
@@ -1379,17 +1379,17 @@ ACMD(do_write) {
         char *backstr = nullptr;
 
         /* Something on it, display it as that's in input buffer. */
-        if (paper->action_description) {
-            backstr = strdup(paper->action_description);
+        if (paper->look_description) {
+            backstr = strdup(paper->look_description);
             send_to_char(ch, "There's something written on it already:\r\n");
-            send_to_char(ch, "%s", paper->action_description);
+            send_to_char(ch, "%s", paper->look_description);
         }
 
         /* we can write - hooray! */
         act("$n begins to jot down a note.", true, ch, nullptr, nullptr, TO_ROOM);
         SET_BIT_AR(GET_OBJ_EXTRA(paper), ITEM_UNIQUE_SAVE);
         send_editor_help(ch->desc);
-        string_write(ch->desc, &paper->action_description, MAX_NOTE_LENGTH, 0, backstr);
+        string_write(ch->desc, &paper->look_description, MAX_NOTE_LENGTH, 0, backstr);
     }
 }
 
@@ -1660,7 +1660,7 @@ ACMD(do_respond) {
         return;
     }
 
-    for (obj = ch->carrying; obj; obj = obj->next_content) {
+    for (obj = ch->contents; obj; obj = obj->next_content) {
         if (GET_OBJ_TYPE(obj) == ITEM_BOARD) {
             found = 1;
             break;

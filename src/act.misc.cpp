@@ -114,7 +114,7 @@ ACMD(do_restring) {
         if (GET_GOLD(ch) < pay) {
             send_to_char(ch, "You need at least 5,000 zenni to initiate an equipment restring.\r\n");
             return;
-        } else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
+        } else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
             send_to_char(ch, "You don't have a that equipment to restring in your inventory.\r\n");
             send_to_char(ch, "Syntax: restring (obj name)\r\n");
             return;
@@ -132,7 +132,7 @@ ACMD(do_restring) {
 
             sprintf(thename, "%s", obj->name);
             sprintf(theshort, "%s", obj->short_description);
-            sprintf(thelong, "%s", obj->description);
+            sprintf(thelong, "%s", obj->room_description);
 
             ch->desc->obj_name = strdup(thename);
             ch->desc->obj_was = strdup(theshort);
@@ -247,10 +247,10 @@ static void generate_multiform(struct char_data *ch, int count) {
         clone = read_mobile(r_num, REAL);
 
         clone->name = strdup(clone_name.c_str());
-        clone->short_descr = strdup(clone_sdesc.c_str());
-        clone->long_descr = strdup(clone_ldesc.c_str());
-        if (ch->description)
-            clone->description = strdup(ch->description);
+        clone->short_description = strdup(clone_sdesc.c_str());
+        clone->room_description = strdup(clone_ldesc.c_str());
+        if (ch->look_description)
+            clone->look_description = strdup(ch->look_description);
         clone->race = ch->race;
         clone->chclass = ch->chclass;
 
@@ -344,7 +344,7 @@ static void resolve_song(struct char_data *ch) {
         return;
     }
 
-    for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
+    for (obj2 = ch->contents; obj2; obj2 = next_obj) {
         next_obj = obj2->next_content;
         if (GET_OBJ_VNUM(obj2) == 8802 || GET_OBJ_VNUM(obj2) == 8807) {
             instrument = GET_OBJ_VNUM(obj2);
@@ -757,7 +757,7 @@ ACMD(do_song) {
     struct obj_data *obj2 = nullptr, *next_obj;
     int instrument = 0;
 
-    for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
+    for (obj2 = ch->contents; obj2; obj2 = next_obj) {
         next_obj = obj2->next_content;
         if (GET_OBJ_VNUM(obj2) == 8802 || GET_OBJ_VNUM(obj2) == 8807) {
             instrument = GET_OBJ_VNUM(obj2);
@@ -1389,7 +1389,7 @@ ACMD(do_fish) {
                     send_to_char(ch, "Syntax: fish apply (bait)\r\n");
                     return;
                 }
-                if (!(bait = get_obj_in_list_vis(ch, arg2, nullptr, ch->carrying))) {
+                if (!(bait = get_obj_in_list_vis(ch, arg2, nullptr, ch->contents))) {
                     send_to_char(ch, "You don't have that bait.\r\n");
                     return;
                 } else if (GET_OBJ_TYPE(bait) != ITEM_FISHBAIT) {
@@ -1694,11 +1694,11 @@ ACMD(do_extract) {
     }
 
     if (!strcasecmp(arg, "combine")) {
-        if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->carrying))) {
+        if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->contents))) {
             send_to_char(ch, "You do not have the first bottle that you were wanting to combine.\r\n");
             return;
         }
-        if (!(obj2 = get_obj_in_list_vis(ch, arg3, nullptr, ch->carrying))) {
+        if (!(obj2 = get_obj_in_list_vis(ch, arg3, nullptr, ch->contents))) {
             send_to_char(ch, "You do not have the second bottle that you were wanting to combine.\r\n");
             return;
         }
@@ -1738,7 +1738,7 @@ ACMD(do_extract) {
         }
     }
 
-    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
         send_to_char(ch, "You do not have that item.\r\n");
         return;
     } else {
@@ -1751,7 +1751,7 @@ ACMD(do_extract) {
             struct obj_data *bottle = nullptr, *next_obj, *obj2;
             int found = false;
 
-            for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
+            for (obj2 = ch->contents; obj2; obj2 = next_obj) {
                 next_obj = obj2->next_content;
                 if (GET_OBJ_VNUM(obj2) == 3423) {
                     bottle = obj2;
@@ -1847,7 +1847,7 @@ ACMD(do_runic) {
     struct obj_data *obj, *next_obj, *bottle = nullptr;
     int found = false, amount = 0, brush = false;
 
-    for (obj = ch->carrying; obj; obj = next_obj) {
+    for (obj = ch->contents; obj; obj = next_obj) {
         next_obj = obj->next_content;
         if (GET_OBJ_VNUM(obj) == 3424) {
             if (GET_OBJ_VAL(obj, 6) > amount) {
@@ -1858,7 +1858,7 @@ ACMD(do_runic) {
         }
     }
 
-    for (obj = ch->carrying; obj; obj = next_obj) {
+    for (obj = ch->contents; obj; obj = next_obj) {
         next_obj = obj->next_content;
         if (GET_OBJ_VNUM(obj) == 3427) {
             brush = true;
@@ -2353,7 +2353,7 @@ ACMD(do_ashcloud) {
     struct obj_data *ash = nullptr, *obj, *next_obj;
     int there = false;
 
-    for (obj = ch->carrying; obj; obj = next_obj) {
+    for (obj = ch->contents; obj; obj = next_obj) {
         next_obj = obj->next_content;
         if (GET_OBJ_VNUM(obj) == 1305) {
             ash = obj;
@@ -2482,7 +2482,7 @@ ACMD(do_resize) {
             send_to_char(ch, "Syntax: resize (obj) (small | medium)\r\n");
             return;
         }
-        if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
+        if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
             send_to_char(ch, "You don't have that object!\r\n");
             return;
         } else {
@@ -2864,7 +2864,7 @@ ACMD(do_channel) {
     struct obj_data *obj, *next_obj = nullptr, *ruby = nullptr;
     int found = false;
 
-    for (obj = ch->carrying; obj; obj = next_obj) {
+    for (obj = ch->contents; obj; obj = next_obj) {
         next_obj = obj->next_content;
         if (found == false && GET_OBJ_VNUM(obj) == 6600) {
             if (!OBJ_FLAGGED(obj, ITEM_HOT)) {
@@ -3246,12 +3246,12 @@ ACMD(do_instill) {
         return;
     }
 
-    if (!(token = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
+    if (!(token = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
         send_to_char(ch, "Syntax: instill (token) (target)\r\n");
         return;
     }
 
-    if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->carrying))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->contents))) {
         send_to_char(ch, "Syntax: instill (token) (target)\r\n");
         return;
     }
@@ -3450,7 +3450,7 @@ ACMD(do_bury) {
         if (!*arg2) {
             send_to_char(ch, "Bury what?\r\n");
             return;
-        } else if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->carrying))) {
+        } else if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->contents))) {
             send_to_char(ch, "You don't have that object to bury.\r\n");
             return;
         } else if (fobj != nullptr) {
@@ -3597,7 +3597,7 @@ ACMD(do_ensnare) {
     struct obj_data *weave, *obj = nullptr, *next_obj;
     int found = false;
 
-    for (weave = ch->carrying; weave; weave = next_obj) {
+    for (weave = ch->contents; weave; weave = next_obj) {
         next_obj = weave->next_content;
         if (found == false && valid_silk(weave) && !OBJ_FLAGGED(weave, ITEM_FORGED)) {
             found = true;
@@ -3759,7 +3759,7 @@ ACMD(do_silk) {
         int found = false, armor = 500, str = 0, intel = 0, olevel = 0;
         double price = 1;
 
-        for (weave = ch->carrying; weave; weave = next_obj) {
+        for (weave = ch->contents; weave; weave = next_obj) {
             next_obj = weave->next_content;
             if (found == false && valid_silk(weave) && !OBJ_FLAGGED(weave, ITEM_FORGED)) {
                 found = true;
@@ -4443,7 +4443,7 @@ static int valid_recipe(struct char_data *ch, int recipe, int type) {
 
     if (type == 0) {
         /* Check for ingredients in inventory */
-        for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
+        for (obj2 = ch->contents; obj2; obj2 = next_obj) {
             next_obj = obj2->next_content;
             switch (GET_OBJ_VNUM(obj2)) {
                 case RCP_TOMATO:
@@ -4561,7 +4561,7 @@ static int valid_recipe(struct char_data *ch, int recipe, int type) {
             }
         }
     } else { /* We know the ingredients are there, remove and exit. */
-        for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
+        for (obj2 = ch->contents; obj2; obj2 = next_obj) {
             next_obj = obj2->next_content;
             switch (GET_OBJ_VNUM(obj2)) {
                 case RCP_TOMATO:
@@ -5644,7 +5644,7 @@ ACMD(do_feed) {
         return;
     }
 
-    if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->carrying))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->contents))) {
         send_to_char(ch, "You need to give them a senzu.\r\n");
         return;
     }
@@ -5755,7 +5755,7 @@ ACMD(do_spoil) {
     *buf3 = '\0';
 
     body_part = create_obj();
-    body_part->item_number = NOTHING;
+    body_part->vn = NOTHING;
     IN_ROOM(body_part) = NOWHERE;
     snprintf(part, sizeof(part), "%s", obj->name);
     search_replace(part, "headless", "");
@@ -5771,7 +5771,7 @@ ACMD(do_spoil) {
     snprintf(buf3, sizeof(buf3), "@wThe bloody head of %s@w@n", part);
 
     body_part->name = strdup(buf);
-    body_part->description = strdup(buf2);
+    body_part->room_description = strdup(buf2);
     body_part->short_description = strdup(buf3);
 
     GET_OBJ_TYPE(body_part) = ITEM_OTHER;

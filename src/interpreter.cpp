@@ -2459,7 +2459,7 @@ int special(struct char_data *ch, int cmd, char *arg) {
                 return (1);
 
     /* special in inventory? */
-    for (i = ch->carrying; i; i = i->next_content)
+    for (i = ch->contents; i; i = i->next_content)
         if (GET_OBJ_SPEC(i) != nullptr)
             if (GET_OBJ_SPEC(i)(ch, i, cmd, arg))
                 return (1);
@@ -7150,8 +7150,8 @@ void nanny(struct descriptor_data *d, char *arg) {
                     break;
 
                 case '2':
-                    if (d->character->description) {
-                        write_to_output(d, "Current description:\r\n%s", d->character->description);
+                    if (d->character->look_description) {
+                        write_to_output(d, "Current description:\r\n%s", d->character->look_description);
                         /*
 	 * Don't free this now... so that the old description gets loaded
 	 * as the current buffer in the editor.  Do setup the ABORT buffer
@@ -7160,11 +7160,11 @@ void nanny(struct descriptor_data *d, char *arg) {
 	 * free(d->character->description);
 	 * d->character->description = nullptr;
 	 */
-                        d->backstr = strdup(d->character->description);
+                        d->backstr = strdup(d->character->look_description);
                     }
                     write_to_output(d, "Enter the new text you'd like others to see when they look at you.\r\n");
                     send_editor_help(d);
-                    d->str = &d->character->description;
+                    d->str = &d->character->look_description;
                     d->max_str = EXDSCR_LENGTH;
                     STATE(d) = CON_EXDESC;
                     break;

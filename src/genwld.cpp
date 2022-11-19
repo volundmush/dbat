@@ -28,7 +28,7 @@ room_rnum add_room(struct room_data *room) {
     if (!room)
         return NOWHERE;
 
-    if ((i = real_room(room->number)) != NOWHERE) {
+    if ((i = real_room(room->vn)) != NOWHERE) {
         if (SCRIPT(&world[i]))
             extract_script(&world[i], WLD_TRIGGER);
         tch = world[i].people;
@@ -37,13 +37,13 @@ room_rnum add_room(struct room_data *room) {
         world[i].people = tch;
         world[i].contents = tobj;
         add_to_save_list(zone_table[room->zone].number, SL_WLD);
-        log("GenOLC: add_room: Updated existing room #%d.", room->number);
+        log("GenOLC: add_room: Updated existing room #%d.", room->vn);
         return i;
     }
 
-    auto &r = world[room->number];
+    auto &r = world[room->vn];
     r = *room;
-    log("GenOLC: add_room: Added room %d.", room->number);
+    log("GenOLC: add_room: Added room %d.", room->vn);
     add_to_save_list(zone_table[room->zone].number, SL_WLD);
 
     /*
@@ -69,7 +69,7 @@ int delete_room(room_rnum rnum) {
     add_to_save_list(zone_table[room->zone].number, SL_WLD);
 
     /* This is something you might want to read about in the logs. */
-    log("GenOLC: delete_room: Deleting room #%d (%s).", room->number, room->name);
+    log("GenOLC: delete_room: Deleting room #%d (%s).", room->vn, room->name);
 
     if (r_mortal_start_room == rnum) {
         log("WARNING: GenOLC: delete_room: Deleting mortal start room!");
@@ -180,7 +180,7 @@ int save_rooms(zone_rnum zone_num) {
             /*
              * Copy the description and strip off trailing newlines.
              */
-            strncpy(buf, room->description ? room->description : "Empty room.", sizeof(buf) - 1);
+            strncpy(buf, room->look_description ? room->look_description : "Empty room.", sizeof(buf) - 1);
             strip_cr(buf);
 
             /*
@@ -194,7 +194,7 @@ int save_rooms(zone_rnum zone_num) {
                         "%s%c\n"
                         "%s%c\n"
                         "%d %s %s %s %s %d\n",
-                    room->number,
+                    room->vn,
                     room->name ? room->name : "Untitled", STRING_TERMINATOR,
                     buf, STRING_TERMINATOR,
                     zone_table[room->zone].number,
@@ -242,7 +242,7 @@ int save_rooms(zone_rnum zone_num) {
                                 "%s~\n"
                                 "%d %d %d %d %d %d %d %d %d %d %d\n", j, buf, buf1, dflag,
                             R_EXIT(room, j)->key != NOTHING ? R_EXIT(room, j)->key : -1,
-                            R_EXIT(room, j)->to_room != NOWHERE ? world[R_EXIT(room, j)->to_room].number : -1,
+                            R_EXIT(room, j)->to_room != NOWHERE ? world[R_EXIT(room, j)->to_room].vn : -1,
                             R_EXIT(room, j)->dclock, R_EXIT(room, j)->dchide,
                             R_EXIT(room, j)->dcskill, R_EXIT(room, j)->dcmove,
                             R_EXIT(room, j)->failsavetype, R_EXIT(room, j)->dcfailsave,
@@ -316,7 +316,7 @@ int copy_room_strings(struct room_data *dest, struct room_data *source) {
         return false;
     }
 
-    dest->description = str_udup(source->description);
+    dest->look_description = str_udup(source->look_description);
     dest->name = str_udup(source->name);
 
     for (i = 0; i < NUM_OF_DIRS; i++) {
@@ -343,8 +343,8 @@ int free_room_strings(struct room_data *room) {
     /* Free descriptions. */
     if (room->name)
         free(room->name);
-    if (room->description)
-        free(room->description);
+    if (room->look_description)
+        free(room->look_description);
     if (room->ex_description)
         free_ex_descriptions(room->ex_description);
 

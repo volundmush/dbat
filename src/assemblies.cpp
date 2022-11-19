@@ -235,7 +235,7 @@ bool assemblyCheckComponents(long lVnum, struct char_data *pCharacter, int extra
                 }
             } else {
                 if ((ppComponentObjects[i] = get_obj_in_list_num(lRnum,
-                                                                 pCharacter->carrying)) == nullptr)
+                                                                 pCharacter->contents)) == nullptr)
                     bOk = false;
                 else {
                     obj_from_char(ppComponentObjects[i]);

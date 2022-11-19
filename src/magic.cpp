@@ -66,7 +66,7 @@ int mag_materials(struct char_data *ch, int item0, int item1, int item2,
     struct obj_data *tobj;
     struct obj_data *obj0 = nullptr, *obj1 = nullptr, *obj2 = nullptr;
 
-    for (tobj = ch->carrying; tobj; tobj = tobj->next_content) {
+    for (tobj = ch->contents; tobj; tobj = tobj->next_content) {
         if ((item0 > 0) && (GET_OBJ_VNUM(tobj) == item0)) {
             obj0 = tobj;
             item0 = -1;
@@ -974,7 +974,7 @@ void mag_summons(int level, struct char_data *ch, struct obj_data *obj, int spel
         mob->master_id = GET_IDNUM(ch);
     }
     if (handle_corpse) {
-        for (tobj = obj->contains; tobj; tobj = next_obj) {
+        for (tobj = obj->contents; tobj; tobj = next_obj) {
             next_obj = tobj->next_content;
             obj_from_obj(tobj);
             obj_to_char(tobj, mob);

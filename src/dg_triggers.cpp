@@ -743,7 +743,7 @@ int command_otrigger(char_data *actor, char *cmd, char *argument) {
                 !OBJ_FLAGGED(GET_EQ(actor, i), ITEM_FORGED))
                 return 1;
 
-    for (obj = actor->carrying; obj; obj = obj->next_content)
+    for (obj = actor->contents; obj; obj = obj->next_content)
         if (cmd_otrig(obj, actor, cmd, argument, OCMD_INVEN) && !OBJ_FLAGGED(obj, ITEM_FORGED))
             return 1;
 

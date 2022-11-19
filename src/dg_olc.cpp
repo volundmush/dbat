@@ -497,7 +497,7 @@ void trigedit_save(struct descriptor_data *d) {
         }
     } else {
         {
-            t.vnum = OLC_NUM(d);
+            t.vn = OLC_NUM(d);
             t.proto = new trig_data();
             trig_data_copy(t.proto, trig);
         }
@@ -523,7 +523,7 @@ void trigedit_save(struct descriptor_data *d) {
     }
 
     auto &z = zone_table[OLC_ZNUM(d)];
-    z.triggers.insert(t.vnum);
+    z.triggers.insert(t.vn);
 
     for (auto i : z.triggers) {
         if ((rnum = real_trigger(i)) != NOTHING) {

@@ -415,8 +415,8 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
     switch (GET_OBJ_TYPE(obj)) {
         case ITEM_STAFF:
             act("You tap $p three times on the ground.", false, ch, obj, nullptr, TO_CHAR);
-            if (obj->action_description)
-                act(obj->action_description, false, ch, obj, nullptr, TO_ROOM);
+            if (obj->look_description)
+                act(obj->look_description, false, ch, obj, nullptr, TO_ROOM);
             else
                 act("$n taps $p three times on the ground.", false, ch, obj, nullptr, TO_ROOM);
 
@@ -456,15 +456,15 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
                     act("$n points $p at $mself.", false, ch, obj, nullptr, TO_ROOM);
                 } else {
                     act("You point $p at $N.", false, ch, obj, tch, TO_CHAR);
-                    if (obj->action_description)
-                        act(obj->action_description, false, ch, obj, tch, TO_ROOM);
+                    if (obj->look_description)
+                        act(obj->look_description, false, ch, obj, tch, TO_ROOM);
                     else
                         act("$n points $p at $N.", true, ch, obj, tch, TO_ROOM);
                 }
             } else if (tobj != nullptr) {
                 act("You point $p at $P.", false, ch, obj, tobj, TO_CHAR);
-                if (obj->action_description)
-                    act(obj->action_description, false, ch, obj, tobj, TO_ROOM);
+                if (obj->look_description)
+                    act(obj->look_description, false, ch, obj, tobj, TO_ROOM);
                 else
                     act("$n points $p at $P.", true, ch, obj, tobj, TO_ROOM);
             } else if (IS_SET(spell_info[GET_OBJ_VAL(obj, VAL_WAND_SPELL)].routines, MAG_AREAS | MAG_MASSES)) {
@@ -501,8 +501,8 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
                 tch = ch;
 
             act("You recite $p which dissolves.", true, ch, obj, nullptr, TO_CHAR);
-            if (obj->action_description)
-                act(obj->action_description, false, ch, obj, tch, TO_ROOM);
+            if (obj->look_description)
+                act(obj->look_description, false, ch, obj, tch, TO_ROOM);
             else
                 act("$n recites $p.", false, ch, obj, nullptr, TO_ROOM);
 
@@ -522,8 +522,8 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
                 return;
 
             act("You swallow $p.", false, ch, obj, nullptr, TO_CHAR);
-            if (obj->action_description)
-                act(obj->action_description, false, ch, obj, nullptr, TO_ROOM);
+            if (obj->look_description)
+                act(obj->look_description, false, ch, obj, nullptr, TO_ROOM);
             else
                 act("$n swallows $p.", true, ch, obj, nullptr, TO_ROOM);
 
@@ -726,7 +726,7 @@ ACMD(do_cast) {
                 target = true;
 
         if (!target && IS_SET(SINFO.targets, TAR_OBJ_INV))
-            if ((tobj = get_obj_in_list_vis(ch, t, nullptr, ch->carrying)) != nullptr)
+            if ((tobj = get_obj_in_list_vis(ch, t, nullptr, ch->contents)) != nullptr)
                 target = true;
 
         if (!target && IS_SET(SINFO.targets, TAR_OBJ_EQUIP)) {

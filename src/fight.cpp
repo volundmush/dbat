@@ -692,7 +692,7 @@ void remove_limb(struct char_data *vict, int num) {
     char buf2[1000];
 
     body_part = create_obj();
-    body_part->item_number = NOTHING;
+    body_part->vn = NOTHING;
     IN_ROOM(body_part) = NOWHERE;
 
     switch (num) {
@@ -747,7 +747,7 @@ void remove_limb(struct char_data *vict, int num) {
     } else {
         snprintf(buf2, sizeof(buf2), "%s@w is lying here@n", part);
     }
-    body_part->description = strdup(buf2);
+    body_part->room_description = strdup(buf2);
     body_part->short_description = strdup(part);
 
     GET_OBJ_TYPE(body_part) = ITEM_OTHER;
@@ -1062,8 +1062,8 @@ void fight_stack() {
                 GET_POS(ch) > POS_RESTING) {
                 if (rand_number(1, 30) >= 22 && !block_calc(ch)) {
                     act("$n@G flees in terror and you lose sight of $m!", true, ch, nullptr, nullptr, TO_ROOM);
-                    while (ch->carrying)
-                        extract_obj(ch->carrying);
+                    while (ch->contents)
+                        extract_obj(ch->contents);
 
                     extract_char(ch);
                     continue;
@@ -1072,8 +1072,8 @@ void fight_stack() {
             if (AFF_FLAGGED(FIGHTING(ch), AFF_FLYING) && IS_HUMANOID(ch) && GET_LEVEL(ch) <= 10) {
                 if (rand_number(1, 30) >= 22 && !block_calc(ch)) {
                     act("$n@G turns and runs away. You lose sight of $m!", true, ch, nullptr, nullptr, TO_ROOM);
-                    while (ch->carrying)
-                        extract_obj(ch->carrying);
+                    while (ch->contents)
+                        extract_obj(ch->contents);
                     extract_char(ch);
                     continue;
                 }
@@ -1515,7 +1515,7 @@ static void make_pcorpse(struct char_data *ch) {
 
     corpse = create_obj();
 
-    corpse->item_number = NOTHING;
+    corpse->vn = NOTHING;
     IN_ROOM(corpse) = NOWHERE;
 
     /* This handles how the corpse is viewed - Iovan */
@@ -1564,7 +1564,7 @@ static void make_pcorpse(struct char_data *ch) {
 
     struct obj_data *obj, *next_obj;
 
-    for (obj = ch->carrying; obj; obj = next_obj) {
+    for (obj = ch->contents; obj; obj = next_obj) {
         next_obj = obj->next_content;
 
         if (obj && GET_OBJ_VNUM(obj) < 19900 && GET_OBJ_VNUM(obj) != 17998) {
@@ -1621,7 +1621,7 @@ static void handle_corpse_condition(struct obj_data *corpse, struct char_data *c
 
             *descBuf = '\0';
             snprintf(descBuf, sizeof(descBuf), "The headless corpse of %s is lying here", GET_NAME(ch));
-            corpse->description = strdup(descBuf);
+            corpse->room_description = strdup(descBuf);
 
             *descBuf = '\0';
             snprintf(descBuf, sizeof(descBuf), "The headless remains of %s's corpse", GET_NAME(ch));
@@ -1635,7 +1635,7 @@ static void handle_corpse_condition(struct obj_data *corpse, struct char_data *c
 
             *descBuf = '\0';
             snprintf(descBuf, sizeof(descBuf), "Half of %s's corpse is lying here", GET_NAME(ch));
-            corpse->description = strdup(descBuf);
+            corpse->room_description = strdup(descBuf);
 
             *descBuf = '\0';
             snprintf(descBuf, sizeof(descBuf), "Half of %s's corpse", GET_NAME(ch));
@@ -1648,7 +1648,7 @@ static void handle_corpse_condition(struct obj_data *corpse, struct char_data *c
 
             *descBuf = '\0';
             snprintf(descBuf, sizeof(descBuf), "The burnt chunks of %s's corpse are scattered here", GET_NAME(ch));
-            corpse->description = strdup(descBuf);
+            corpse->room_description = strdup(descBuf);
 
             *descBuf = '\0';
             snprintf(descBuf, sizeof(descBuf), "The burnt chunks of %s's corpse", GET_NAME(ch));
@@ -1661,7 +1661,7 @@ static void handle_corpse_condition(struct obj_data *corpse, struct char_data *c
 
             *descBuf = '\0';
             snprintf(descBuf, sizeof(descBuf), "The bloody and beaten corpse of %s is lying here", GET_NAME(ch));
-            corpse->description = strdup(descBuf);
+            corpse->room_description = strdup(descBuf);
 
             *descBuf = '\0';
             snprintf(descBuf, sizeof(descBuf), "The bloody and beaten remains of %s's corpse", GET_NAME(ch));
@@ -1673,7 +1673,7 @@ static void handle_corpse_condition(struct obj_data *corpse, struct char_data *c
 
             *descBuf = '\0';
             snprintf(descBuf, sizeof(descBuf), "The corpse of %s is lying here", GET_NAME(ch));
-            corpse->description = strdup(descBuf);
+            corpse->room_description = strdup(descBuf);
 
             *descBuf = '\0';
             snprintf(descBuf, sizeof(descBuf), "the remains of %s's corpse", GET_NAME(ch));
@@ -1716,7 +1716,7 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
 
     corpse = create_obj();
 
-    corpse->item_number = NOTHING;
+    corpse->vn = NOTHING;
     IN_ROOM(corpse) = NOWHERE;
 
     /* This handles how the corpse is viewed - Iovan */
@@ -1757,7 +1757,7 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
                 sprintf(nick3, "@wA @Rraw %s@R steak@w is lying here@n", GET_NAME(ch));
                 meat->short_description = strdup(nick);
                 meat->name = strdup(nick2);
-                meat->description = strdup(nick3);
+                meat->room_description = strdup(nick3);
                 GET_OBJ_MATERIAL(meat) = 14;
             }
         }
@@ -1785,7 +1785,7 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
     SET_BIT_AR(GET_OBJ_EXTRA(corpse), ITEM_UNIQUE_SAVE);
 
     if (MOB_FLAGGED(ch, MOB_HUSK)) {
-        for (obj = ch->carrying; obj; obj = next_obj) {
+        for (obj = ch->contents; obj; obj = next_obj) {
             next_obj = obj->next_content;
             obj_from_char(obj);
             extract_obj(obj);
@@ -1794,8 +1794,8 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
 
     if (!MOB_FLAGGED(ch, MOB_HUSK)) {
         /* transfer character's inventory to the corpse */
-        corpse->contains = ch->carrying;
-        for (o = corpse->contains; o != nullptr; o = o->next_content) {
+        corpse->contents = ch->contents;
+        for (o = corpse->contents; o != nullptr; o = o->next_content) {
             o->in_obj = corpse;
         }
         object_list_new_owner(corpse, nullptr);
@@ -1825,7 +1825,7 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
         GET_GOLD(ch) = 0;
     }
     if (!MOB_FLAGGED(ch, MOB_HUSK)) {
-        ch->carrying = nullptr;
+        ch->contents = nullptr;
         IS_CARRYING_N(ch) = 0;
         IS_CARRYING_W(ch) = 0;
     }

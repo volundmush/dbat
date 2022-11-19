@@ -2630,7 +2630,7 @@ ACMD(do_throw) {
         two_arguments(chunk, arg2, arg3);
     }
 
-    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
         if (!(tch = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
             send_to_char(ch, "You do not have that object or character to throw!\r\n");
             return;

@@ -313,7 +313,7 @@ ACMD(do_radar) {
     struct char_data *tch;
     struct obj_data *obj, *obj2, *next_obj;
 
-    for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
+    for (obj2 = ch->contents; obj2; obj2 = next_obj) {
         next_obj = obj2->next_content;
         if (GET_OBJ_VNUM(obj2) == 12 && (!OBJ_FLAGGED(obj2, ITEM_BROKEN)) && (!OBJ_FLAGGED(obj2, ITEM_FORGED))) {
             found2 = true;
@@ -365,7 +365,7 @@ ACMD(do_radar) {
                     if (tch == ch) {
                         continue;
                     }
-                    for (obj = tch->carrying; obj; obj = next_obj) {
+                    for (obj = tch->contents; obj; obj = next_obj) {
                         next_obj = obj->next_content;
                         if (OBJ_FLAGGED(obj, ITEM_FORGED)) {
                             continue;

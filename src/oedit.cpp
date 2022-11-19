@@ -201,7 +201,7 @@ void oedit_setup_new(struct descriptor_data *d) {
 
     clear_object(OLC_OBJ(d));
     OLC_OBJ(d)->name = strdup("unfinished object");
-    OLC_OBJ(d)->description = strdup("An unfinished object is lying here.");
+    OLC_OBJ(d)->room_description = strdup("An unfinished object is lying here.");
     OLC_OBJ(d)->short_description = strdup("an unfinished object");
     SET_BIT_AR(GET_OBJ_WEAR(OLC_OBJ(d)), ITEM_WEAR_TAKE);
     OLC_VAL(d) = 0;
@@ -267,7 +267,7 @@ void oedit_save_internally(struct descriptor_data *d) {
 
     /* this takes care of the objects currently in-game */
     for (obj = object_list; obj; obj = obj->next) {
-        if (obj->item_number != robj_num)
+        if (obj->vn != robj_num)
             continue;
         /* remove any old scripts */
         if (SCRIPT(obj))
@@ -924,8 +924,8 @@ void oedit_disp_menu(struct descriptor_data *d) {
                     OLC_NUM(d),
                     (obj->name && *obj->name) ? obj->name : "undefined",
                     (obj->short_description && *obj->short_description) ? obj->short_description : "undefined",
-                    (obj->description && *obj->description) ? obj->description : "undefined",
-                    (obj->action_description && *obj->action_description) ? obj->action_description : "Not Set.\r\n",
+                    (obj->room_description && *obj->room_description) ? obj->room_description : "undefined",
+                    (obj->look_description && *obj->look_description) ? obj->look_description : "Not Set.\r\n",
                     tbitbuf,
                     ebitbuf
     );
@@ -1107,11 +1107,11 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
                     OLC_MODE(d) = OEDIT_ACTDESC;
                     send_editor_help(d);
                     write_to_output(d, "Enter action description:\r\n\r\n");
-                    if (OLC_OBJ(d)->action_description) {
-                        write_to_output(d, "%s", OLC_OBJ(d)->action_description);
-                        oldtext = strdup(OLC_OBJ(d)->action_description);
+                    if (OLC_OBJ(d)->look_description) {
+                        write_to_output(d, "%s", OLC_OBJ(d)->look_description);
+                        oldtext = strdup(OLC_OBJ(d)->look_description);
                     }
-                    string_write(d, &OLC_OBJ(d)->action_description, MAX_MESSAGE_LENGTH, 0, oldtext);
+                    string_write(d, &OLC_OBJ(d)->look_description, MAX_MESSAGE_LENGTH, 0, oldtext);
                     OLC_VAL(d) = 1;
                     break;
                 case '5':
@@ -1254,9 +1254,9 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
         case OEDIT_LONGDESC:
             if (!genolc_checkstring(d, arg))
                 break;
-            if (OLC_OBJ(d)->description)
-                free(OLC_OBJ(d)->description);
-            OLC_OBJ(d)->description = str_udup(arg);
+            if (OLC_OBJ(d)->room_description)
+                free(OLC_OBJ(d)->room_description);
+            OLC_OBJ(d)->room_description = str_udup(arg);
             break;
 
         case OEDIT_TYPE:
@@ -1770,7 +1770,7 @@ ACMD(do_iedit) {
 
     if ((k = get_obj_in_equip_vis(ch, arg, nullptr, ch->equipment))) {
         found = 1;
-    } else if ((k = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
+    } else if ((k = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
         found = 1;
     } else if ((k = get_obj_in_list_vis(ch, arg, nullptr, world[IN_ROOM(ch)].contents))) {
         found = 1;

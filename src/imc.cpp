@@ -6626,7 +6626,7 @@ CHAR_DATA *imc_make_skeleton(const char *name) {
     IMCCREATE(skeleton, CHAR_DATA, 1);
 
     skeleton->name = strdup(name);
-    skeleton->short_descr = strdup(name);
+    skeleton->short_description = strdup(name);
     skeleton->in_room = real_room(1);
 
     return skeleton;
@@ -6637,7 +6637,7 @@ void imc_purge_skeleton(CHAR_DATA *skeleton) {
         return;
 
             IMCSTRFREE(skeleton->name);
-            IMCSTRFREE(skeleton->short_descr);
+            IMCSTRFREE(skeleton->short_description);
     IMCDISPOSE(skeleton);
 }
 

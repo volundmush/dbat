@@ -423,15 +423,15 @@ void zedit_disp_menu(struct descriptor_data *d) {
             case 'M':
                 write_to_output(d, "%sLoad %s@y [@c%d@y], Max : %d, MaxR %d, Chance %d",
                                 MYCMD.if_flag ? " then " : "",
-                                mob_proto[MYCMD.arg1].short_descr,
-                                mob_index[MYCMD.arg1].vnum, MYCMD.arg2, MYCMD.arg4, MYCMD.arg5
+                                mob_proto[MYCMD.arg1].short_description,
+                                mob_index[MYCMD.arg1].vn, MYCMD.arg2, MYCMD.arg4, MYCMD.arg5
                 );
                 break;
             case 'G':
                 write_to_output(d, "%sGive it %s@y [@c%d@y], Max : %d, Chance %d",
                                 MYCMD.if_flag ? " then " : "",
                                 obj_proto[MYCMD.arg1].short_description,
-                                obj_index[MYCMD.arg1].vnum,
+                                obj_index[MYCMD.arg1].vn,
                                 MYCMD.arg2, MYCMD.arg5
                 );
                 break;
@@ -439,7 +439,7 @@ void zedit_disp_menu(struct descriptor_data *d) {
                 write_to_output(d, "%sLoad %s@y [@c%d@y], Max : %d, MaxR %d, Chance %d",
                                 MYCMD.if_flag ? " then " : "",
                                 obj_proto[MYCMD.arg1].short_description,
-                                obj_index[MYCMD.arg1].vnum,
+                                obj_index[MYCMD.arg1].vn,
                                 MYCMD.arg2, MYCMD.arg4, MYCMD.arg5
                 );
                 break;
@@ -447,7 +447,7 @@ void zedit_disp_menu(struct descriptor_data *d) {
                 write_to_output(d, "%sEquip with %s@y [@c%d@n], %s, Max : %d, Chance %d",
                                 MYCMD.if_flag ? " then " : "",
                                 obj_proto[MYCMD.arg1].short_description,
-                                obj_index[MYCMD.arg1].vnum,
+                                obj_index[MYCMD.arg1].vn,
                                 equipment_types[MYCMD.arg3],
                                 MYCMD.arg2, MYCMD.arg5
                 );
@@ -456,9 +456,9 @@ void zedit_disp_menu(struct descriptor_data *d) {
                 write_to_output(d, "%sPut %s@y [@c%d@n] in %s [@c%d@n], Max : %d, %% Chance %d",
                                 MYCMD.if_flag ? " then " : "",
                                 obj_proto[MYCMD.arg1].short_description,
-                                obj_index[MYCMD.arg1].vnum,
+                                obj_index[MYCMD.arg1].vn,
                                 obj_proto[MYCMD.arg3].short_description,
-                                obj_index[MYCMD.arg3].vnum,
+                                obj_index[MYCMD.arg3].vn,
                                 MYCMD.arg2, MYCMD.arg5
                 );
                 break;
@@ -466,7 +466,7 @@ void zedit_disp_menu(struct descriptor_data *d) {
                 write_to_output(d, "%sRemove %s@y [@c%d@n] from room.",
                                 MYCMD.if_flag ? " then " : "",
                                 obj_proto[MYCMD.arg2].short_description,
-                                obj_index[MYCMD.arg2].vnum
+                                obj_index[MYCMD.arg2].vn
                 );
                 break;
             case 'D':
@@ -480,7 +480,7 @@ void zedit_disp_menu(struct descriptor_data *d) {
                 write_to_output(d, "%sAttach trigger @c%s@y [@c%d@y] to %s, %% Chance %d",
                                 MYCMD.if_flag ? " then " : "",
                                 trig_index[MYCMD.arg2].proto->name,
-                                trig_index[MYCMD.arg2].vnum,
+                                trig_index[MYCMD.arg2].vn,
                                 ((MYCMD.arg1 == MOB_TRIGGER) ? "mobile" :
                                  ((MYCMD.arg1 == OBJ_TRIGGER) ? "object" :
                                   ((MYCMD.arg1 == WLD_TRIGGER) ? "room" : "????"))), MYCMD.arg5);

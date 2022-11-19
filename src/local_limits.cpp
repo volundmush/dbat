@@ -1860,7 +1860,7 @@ void point_update() {
                         }
                     }
                 }
-                for (jj = j->contains; jj; jj = next_thing2) {
+                for (jj = j->contents; jj; jj = next_thing2) {
                     next_thing2 = jj->next_content;    /* Next in inventory */
                     obj_from_obj(jj);
 

@@ -598,7 +598,7 @@ void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman,
     }
     while (has_mail(GET_IDNUM(ch))) {
         obj = create_obj();
-        obj->item_number = NOTHING;
+        obj->vn = NOTHING;
 
         GET_OBJ_TYPE(obj) = ITEM_NOTE;
         for (y = 0; y < TW_ARRAY_MAX; y++)
@@ -608,12 +608,12 @@ void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman,
         GET_OBJ_WEIGHT(obj) = 1;
         GET_OBJ_COST(obj) = 30;
         GET_OBJ_RENT(obj) = 10;
-        obj->action_description = read_delete(GET_IDNUM(ch), &from);
+        obj->look_description = read_delete(GET_IDNUM(ch), &from);
         char bla[256], blm[256];
         sprintf(bla, "@WA piece of mail@n");
         sprintf(blm, "@WSomeone has left a piece of mail here@n");
         obj->short_description = strdup(bla);
-        obj->description = strdup(blm);
+        obj->room_description = strdup(blm);
         sprintf(bla, "mail paper letter");
         obj->name = strdup(bla);
         *bla = '\0';
@@ -624,8 +624,8 @@ void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman,
         GET_OBJ_VAL(obj, VAL_NOTE_HEALTH) = 100;
         GET_OBJ_VAL(obj, VAL_NOTE_MAXHEALTH) = 100;
 
-        if (obj->action_description == nullptr)
-            obj->action_description =
+        if (obj->look_description == nullptr)
+            obj->look_description =
                     strdup("Mail system error - please report.  Error #11.\r\n");
 
         /* so it saves */

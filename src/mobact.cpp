@@ -411,11 +411,11 @@ void mobile_activity() {
 
                 GET_LPLAY(ch) = time(nullptr);
                 for (auto &sh : shop_index) {
-                    if (sh.second.keeper == ch->nr) {
+                    if (sh.second.keeper == ch->vn) {
                         shopnr = sh.first;
                     }
                 }
-                for (sobj = ch->carrying; sobj; sobj = next_obj) {
+                for (sobj = ch->contents; sobj; sobj = next_obj) {
                     next_obj = sobj->next_content;
                     if (sobj != nullptr && !shop_producing(sobj, shopnr)) {
                         GET_GOLD(ch) += GET_OBJ_COST(sobj);
@@ -488,7 +488,7 @@ void mobile_activity() {
                 if (GET_MOB_SPEC(vict) == shop_keeper) {
                     /* Ok, vict is a shop keeper.  Which shop is his? */
                     for (auto &sh : shop_index)
-                        if (sh.second.keeper == vict->nr) {
+                        if (sh.second.keeper == vict->vn) {
                             shop_nr = sh.first;
                             break;
                         }

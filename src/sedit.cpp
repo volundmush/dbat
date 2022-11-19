@@ -412,8 +412,8 @@ void sedit_disp_menu(struct descriptor_data *d) {
                     "Enter Choice : ",
 
                     OLC_NUM(d),
-                    S_KEEPER(shop) == NOBODY ? -1 : mob_index[S_KEEPER(shop)].vnum,
-                    S_KEEPER(shop) == NOBODY ? "None" : mob_proto[S_KEEPER(shop)].short_descr,
+                    S_KEEPER(shop) == NOBODY ? -1 : mob_index[S_KEEPER(shop)].vn,
+                    S_KEEPER(shop) == NOBODY ? "None" : mob_proto[S_KEEPER(shop)].short_description,
                     S_OPEN1(shop),
                     S_CLOSE1(shop),
                     S_OPEN2(shop),

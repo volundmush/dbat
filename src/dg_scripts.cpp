@@ -410,7 +410,7 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name) {
         return obj;
 
     /* is it inside ? */
-    if (obj->contains && (i = get_obj_in_list(name, obj->contains)))
+    if (obj->contents && (i = get_obj_in_list(name, obj->contents)))
         return i;
 
     /* or outside ? */
@@ -428,7 +428,7 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name) {
         return i;
         /* or carried ? */
     else if (obj->carried_by &&
-             (i = get_obj_in_list(name, obj->carried_by->carrying)))
+             (i = get_obj_in_list(name, obj->carried_by->contents)))
         return i;
     else if ((rm = obj_room(obj)) != NOWHERE) {
         /* check the floor */
@@ -547,7 +547,7 @@ obj_data *get_obj_by_obj(obj_data *obj, char *name) {
     if (!strcasecmp(name, "self") || !strcasecmp(name, "me"))
         return obj;
 
-    if (obj->contains && (i = get_obj_in_list(name, obj->contains)))
+    if (obj->contents && (i = get_obj_in_list(name, obj->contents)))
         return i;
 
     if (obj->in_obj && isname(name, obj->in_obj->name))
@@ -557,7 +557,7 @@ obj_data *get_obj_by_obj(obj_data *obj, char *name) {
         return i;
 
     if (obj->carried_by &&
-        (i = get_obj_in_list(name, obj->carried_by->carrying)))
+        (i = get_obj_in_list(name, obj->carried_by->contents)))
         return i;
 
     if (((rm = obj_room(obj)) != NOWHERE) &&
@@ -976,7 +976,7 @@ ACMD(do_attach) {
                     break;
 
             if (!object) { /* search inventory for one with this vnum */
-                for (object = ch->carrying; object; object = object->next_content)
+                for (object = ch->contents; object; object = object->next_content)
                     if (GET_OBJ_VNUM(object) == num_arg)
                         break;
 
@@ -1038,7 +1038,7 @@ ACMD(do_attach) {
         add_trigger(SCRIPT(room), trig, loc);
 
         send_to_char(ch, "Trigger %d (%s) attached to room %d.\r\n",
-                     tn, GET_TRIG_NAME(trig), world[rnum].number);
+                     tn, GET_TRIG_NAME(trig), world[rnum].vn);
     } else
         send_to_char(ch, "Please specify 'mob', 'obj', or 'room'.\r\n");
 }
@@ -1083,7 +1083,7 @@ int remove_trigger(struct script_data *sc, char *name) {
             /* is found. originally the number was position-only */
         else if (++n >= num)
             break;
-        else if (trig_index[i->nr].vnum == num)
+        else if (trig_index[i->nr].vn == num)
             break;
     }
 
@@ -1173,7 +1173,7 @@ ACMD(do_detach) {
                         break;
 
                 if (!object) { /* search inventory for one with this vnum */
-                    for (object = ch->carrying; object; object = object->next_content)
+                    for (object = ch->contents; object; object = object->next_content)
                         if (GET_OBJ_VNUM(object) == num_arg)
                             break;
 
@@ -1191,7 +1191,7 @@ ACMD(do_detach) {
         } else {
             /* Thanks to Carlos Myers for fixing the line below */
             if ((object = get_obj_in_equip_vis(ch, arg1, nullptr, ch->equipment)));
-            else if ((object = get_obj_in_list_vis(ch, arg1, nullptr, ch->carrying)));
+            else if ((object = get_obj_in_list_vis(ch, arg1, nullptr, ch->contents)));
             else if ((victim = get_char_room_vis(ch, arg1, nullptr)));
             else if ((object = get_obj_in_list_vis(ch, arg1, nullptr, world[IN_ROOM(ch)].contents)));
             else if ((victim = get_char_vis(ch, arg1, nullptr, FIND_CHAR_WORLD)));
@@ -1948,7 +1948,7 @@ void makeuid_var(void *go, struct script_data *sc, trig_data *trig,
                     break;
                 case MOB_TRIGGER:
                     if ((o = get_obj_in_list_vis((struct char_data *) go, name, nullptr,
-                                                 ((struct char_data *) go)->carrying)) == nullptr)
+                                                 ((struct char_data *) go)->contents)) == nullptr)
                         o = get_obj_in_list_vis((struct char_data *) go, name, nullptr,
                                                 world[IN_ROOM((struct char_data *) go)].contents);
                     break;
@@ -1959,7 +1959,7 @@ void makeuid_var(void *go, struct script_data *sc, trig_data *trig,
             room_rnum r = NOWHERE;
             switch (type) {
                 case WLD_TRIGGER:
-                    r = real_room(((struct room_data *) go)->number);
+                    r = real_room(((struct room_data *) go)->vn);
                     break;
                 case OBJ_TRIGGER:
                     r = obj_room((struct obj_data *) go);
@@ -1969,7 +1969,7 @@ void makeuid_var(void *go, struct script_data *sc, trig_data *trig,
                     break;
             }
             if (r != NOWHERE)
-                snprintf(uid, sizeof(uid), "%c%d", UID_CHAR, world[r].number + ROOM_ID_BASE);
+                snprintf(uid, sizeof(uid), "%c%d", UID_CHAR, world[r].vn + ROOM_ID_BASE);
         } else {
             script_log("Trigger: %s, VNum %d. makeuid syntax error: '%s'",
                        GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), cmd);
@@ -2466,7 +2466,7 @@ int script_driver(void *go_adress, trig_data *trig, int type, int mode) {
                 break;
             case WLD_TRIGGER:
                 script_log("It was attached to %s [%d]",
-                           ((room_data *) go)->name, ((room_data *) go)->number);
+                           ((room_data *) go)->name, ((room_data *) go)->vn);
                 break;
         }
 

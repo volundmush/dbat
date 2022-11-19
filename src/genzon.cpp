@@ -386,23 +386,23 @@ int save_zone(zone_rnum zone_num) {
     for (subcmd = 0; ZCMD(zone_num, subcmd).command != 'S'; subcmd++) {
         switch (ZCMD(zone_num, subcmd).command) {
             case 'M':
-                arg1 = mob_index[ZCMD(zone_num, subcmd).arg1].vnum;
+                arg1 = mob_index[ZCMD(zone_num, subcmd).arg1].vn;
                 arg2 = ZCMD(zone_num, subcmd).arg2;
-                arg3 = world[ZCMD(zone_num, subcmd).arg3].number;
+                arg3 = world[ZCMD(zone_num, subcmd).arg3].vn;
                 arg4 = ZCMD(zone_num, subcmd).arg4;
                 arg5 = ZCMD(zone_num, subcmd).arg5;
-                comment = mob_proto[ZCMD(zone_num, subcmd).arg1].short_descr;
+                comment = mob_proto[ZCMD(zone_num, subcmd).arg1].short_description;
                 break;
             case 'O':
-                arg1 = obj_index[ZCMD(zone_num, subcmd).arg1].vnum;
+                arg1 = obj_index[ZCMD(zone_num, subcmd).arg1].vn;
                 arg2 = ZCMD(zone_num, subcmd).arg2;
-                arg3 = world[ZCMD(zone_num, subcmd).arg3].number;
+                arg3 = world[ZCMD(zone_num, subcmd).arg3].vn;
                 arg4 = ZCMD(zone_num, subcmd).arg4;
                 arg5 = ZCMD(zone_num, subcmd).arg5;
                 comment = obj_proto[ZCMD(zone_num, subcmd).arg1].short_description;
                 break;
             case 'G':
-                arg1 = obj_index[ZCMD(zone_num, subcmd).arg1].vnum;
+                arg1 = obj_index[ZCMD(zone_num, subcmd).arg1].vn;
                 arg2 = ZCMD(zone_num, subcmd).arg2;
                 arg3 = -1;
                 arg4 = -1;
@@ -410,7 +410,7 @@ int save_zone(zone_rnum zone_num) {
                 comment = obj_proto[ZCMD(zone_num, subcmd).arg1].short_description;
                 break;
             case 'E':
-                arg1 = obj_index[ZCMD(zone_num, subcmd).arg1].vnum;
+                arg1 = obj_index[ZCMD(zone_num, subcmd).arg1].vn;
                 arg2 = ZCMD(zone_num, subcmd).arg2;
                 arg3 = ZCMD(zone_num, subcmd).arg3;
                 arg4 = -1;
@@ -418,29 +418,29 @@ int save_zone(zone_rnum zone_num) {
                 comment = obj_proto[ZCMD(zone_num, subcmd).arg1].short_description;
                 break;
             case 'P':
-                arg1 = obj_index[ZCMD(zone_num, subcmd).arg1].vnum;
+                arg1 = obj_index[ZCMD(zone_num, subcmd).arg1].vn;
                 arg2 = ZCMD(zone_num, subcmd).arg2;
-                arg3 = obj_index[ZCMD(zone_num, subcmd).arg3].vnum;
+                arg3 = obj_index[ZCMD(zone_num, subcmd).arg3].vn;
                 arg4 = -1;
                 arg5 = ZCMD(zone_num, subcmd).arg5;
                 comment = obj_proto[ZCMD(zone_num, subcmd).arg1].short_description;
                 break;
             case 'D':
-                arg1 = world[ZCMD(zone_num, subcmd).arg1].number;
+                arg1 = world[ZCMD(zone_num, subcmd).arg1].vn;
                 arg2 = ZCMD(zone_num, subcmd).arg2;
                 arg3 = ZCMD(zone_num, subcmd).arg3;
                 comment = world[ZCMD(zone_num, subcmd).arg1].name;
                 break;
             case 'R':
-                arg1 = world[ZCMD(zone_num, subcmd).arg1].number;
-                arg2 = obj_index[ZCMD(zone_num, subcmd).arg2].vnum;
+                arg1 = world[ZCMD(zone_num, subcmd).arg1].vn;
+                arg2 = obj_index[ZCMD(zone_num, subcmd).arg2].vn;
                 comment = obj_proto[ZCMD(zone_num, subcmd).arg2].short_description;
                 arg3 = -1;
                 break;
             case 'T':
                 arg1 = ZCMD(zone_num, subcmd).arg1; /* trigger type */
-                arg2 = trig_index[ZCMD(zone_num, subcmd).arg2].vnum; /* trigger vnum */
-                arg3 = world[ZCMD(zone_num, subcmd).arg3].number; /* room num */
+                arg2 = trig_index[ZCMD(zone_num, subcmd).arg2].vn; /* trigger vnum */
+                arg3 = world[ZCMD(zone_num, subcmd).arg3].vn; /* room num */
                 arg4 = -1;
                 arg5 = ZCMD(zone_num, subcmd).arg5;
                 comment = GET_TRIG_NAME(trig_index[real_trigger(arg2)].proto);
@@ -448,7 +448,7 @@ int save_zone(zone_rnum zone_num) {
             case 'V':
                 arg1 = ZCMD(zone_num, subcmd).arg1; /* trigger type */
                 arg2 = ZCMD(zone_num, subcmd).arg2; /* context */
-                arg3 = world[ZCMD(zone_num, subcmd).arg3].number;
+                arg3 = world[ZCMD(zone_num, subcmd).arg3].vn;
                 arg4 = -1;
                 arg5 = ZCMD(zone_num, subcmd).arg5;
                 break;

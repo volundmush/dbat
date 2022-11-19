@@ -386,8 +386,8 @@ void gedit_disp_menu(struct descriptor_data *d) {
                     "Enter Choice : ",
 
                     OLC_NUM(d),
-                    G_TRAINER(guilddata) == NOBODY ? -1 : mob_index[G_TRAINER(guilddata)].vnum,
-                    G_TRAINER(guilddata) == NOBODY ? "None" : mob_proto[G_TRAINER(guilddata)].short_descr,
+                    G_TRAINER(guilddata) == NOBODY ? -1 : mob_index[G_TRAINER(guilddata)].vn,
+                    G_TRAINER(guilddata) == NOBODY ? "None" : mob_proto[G_TRAINER(guilddata)].short_description,
                     G_NO_SKILL(guilddata),
                     G_NO_GOLD(guilddata),
                     G_OPEN(guilddata),

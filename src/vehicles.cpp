@@ -365,7 +365,7 @@ struct obj_data *find_control(struct char_data *ch) {
 
     controls = get_obj_in_list_type(ITEM_CONTROL, world[IN_ROOM(ch)].contents);
     if (!controls)
-        for (obj = ch->carrying; obj && !controls; obj = obj->next_content)
+        for (obj = ch->contents; obj && !controls; obj = obj->next_content)
             if (CAN_SEE_OBJ(ch, obj) && GET_OBJ_TYPE(obj) == ITEM_CONTROL)
                 controls = obj;
     if (!controls)

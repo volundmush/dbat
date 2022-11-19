@@ -1570,7 +1570,7 @@ SPECIAL(guild) {
     };
 
     for (guild_nr = 0; guild_nr <= top_guild; guild_nr++)
-        if (GM_TRAINER(guild_nr) == keeper->nr)
+        if (GM_TRAINER(guild_nr) == keeper->vn)
             break;
 
     if (guild_nr > top_guild)
@@ -1770,7 +1770,7 @@ void list_all_guilds(struct char_data *ch) {
         if (GM_TRAINER(gm_nr) == NOBODY)
             strcpy(buf1, "<NONE>");  /* strcpy: OK (for 'buf1 >= 7') */
         else
-            sprintf(buf1, "%6d", mob_index[GM_TRAINER(gm_nr)].vnum);  /* sprintf: OK (for 'buf1 >= 11', 32-bit int) */
+            sprintf(buf1, "%6d", mob_index[GM_TRAINER(gm_nr)].vn);  /* sprintf: OK (for 'buf1 >= 11', 32-bit int) */
 
         len += snprintf(buf + len, sizeof(buf) - len, "%6d	%s		%5.2f	%s\r\n",
                         GM_NUM(gm_nr), buf1, GM_CHARGE(gm_nr), guild_customer_string(gm_nr, false));
@@ -1788,7 +1788,7 @@ void list_detailed_guild(struct char_data *ch, int gm_nr) {
     if (GM_TRAINER(gm_nr) < NOBODY)
         strcpy(buf1, "<NONE>");
     else
-        sprintf(buf1, "%6d   ", mob_index[GM_TRAINER(gm_nr)].vnum);
+        sprintf(buf1, "%6d   ", mob_index[GM_TRAINER(gm_nr)].vn);
 
     sprintf(buf, " Guild Master: %s\r\n", buf1);
     sprintf(buf, "%s Hours: %4d to %4d,  Surcharge: %5.2f\r\n", buf,
@@ -1874,9 +1874,9 @@ void list_guilds(struct char_data *ch, zone_rnum rnum, guild_vnum vmin, guild_vn
 
             send_to_char(ch, " @c[@y%d@c]@y %s@n",
                          (GM_TRAINER(i) == NOBODY) ?
-                         -1 : mob_index[GM_TRAINER(i)].vnum,
+                         -1 : mob_index[GM_TRAINER(i)].vn,
                          (GM_TRAINER(i) == NOBODY) ?
-                         "" : mob_proto[GM_TRAINER(i)].short_descr);
+                         "" : mob_proto[GM_TRAINER(i)].short_description);
 
             send_to_char(ch, "\r\n");
         }

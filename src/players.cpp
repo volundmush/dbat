@@ -286,7 +286,7 @@ void load_follower_from_file(FILE *fl, struct char_data *ch) {
 
     nr = atoi(line + 1);
     newch = create_char();
-    newch->nr = real_mobile(nr);
+    newch->vn = real_mobile(nr);
 
     if (!parse_mobile_from_file(fl, newch)) {
         free(newch);
@@ -560,7 +560,7 @@ int load_char(const char *name, struct char_data *ch) {
                 case 'D':
                     if (!strcmp(tag, "Deat")) GET_DTIME(ch) = atoi(line);
                     else if (!strcmp(tag, "Deac")) GET_DCOUNT(ch) = atoi(line);
-                    else if (!strcmp(tag, "Desc")) ch->description = fread_string(fl, buf2);
+                    else if (!strcmp(tag, "Desc")) ch->look_description = fread_string(fl, buf2);
                     else if (!strcmp(tag, "Dex ")) ch->real_abils.dex = atoi(line);
                     else if (!strcmp(tag, "Drnk")) GET_COND(ch, DRUNK) = atoi(line);
                     else if (!strcmp(tag, "Damg")) GET_DAMAGE_MOD(ch) = atoi(line);
@@ -1006,8 +1006,8 @@ void save_char(struct char_data *ch) {
     if (GET_CLAN(ch)) fprintf(fl, "Clan: %s\n", GET_CLAN(ch));
     if (GET_FEATURE(ch)) fprintf(fl, "RPfe: %s\n", GET_FEATURE(ch));
     if (GET_TRAINS(ch)) fprintf(fl, "Trns: %d\n", GET_TRAINS(ch));
-    if (ch->description && *ch->description) {
-        strcpy(buf, ch->description);
+    if (ch->look_description && *ch->look_description) {
+        strcpy(buf, ch->look_description);
         kill_ems(buf);
         fprintf(fl, "Desc:\n%s~\n", buf);
     }

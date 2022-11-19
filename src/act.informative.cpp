@@ -494,7 +494,7 @@ ACMD(do_table) {
         return;
     }
 
-    if (!(obj2 = get_obj_in_list_vis(ch, arg2, nullptr, obj->contains))) {
+    if (!(obj2 = get_obj_in_list_vis(ch, arg2, nullptr, obj->contents))) {
         send_to_char(ch, "That card doesn't seem to be on that table.\r\n");
         return;
     }
@@ -502,7 +502,7 @@ ACMD(do_table) {
     char buf[200];
     sprintf(buf, "$n looks at %s on %s.\r\n", obj2->short_description, obj->short_description);
     act(buf, true, ch, nullptr, nullptr, TO_ROOM);
-    send_to_char(ch, "%s", obj2->action_description);
+    send_to_char(ch, "%s", obj2->look_description);
 }
 
 ACMD(do_draw) {
@@ -519,11 +519,11 @@ ACMD(do_draw) {
     struct obj_data *obj = nullptr, *obj2 = nullptr, *obj3 = nullptr, *next_obj = nullptr;
     int drawn = false;
 
-    if (!(obj = get_obj_in_list_vis(ch, "case", nullptr, ch->carrying))) {
+    if (!(obj = get_obj_in_list_vis(ch, "case", nullptr, ch->contents))) {
         send_to_char(ch, "You don't have a case.\r\n");
         return;
     }
-    for (obj2 = obj->contains; obj2; obj2 = next_obj) {
+    for (obj2 = obj->contents; obj2; obj2 = next_obj) {
         next_obj = obj2->next_content;
         if (drawn == false) {
             obj_from_obj(obj2);
@@ -537,7 +537,7 @@ ACMD(do_draw) {
         return;
     } else {
         act("$n draws a card from $s $p.\r\n", true, ch, obj, nullptr, TO_ROOM);
-        send_to_char(ch, "You draw a card.\r\n%s\r\n", obj3->action_description);
+        send_to_char(ch, "You draw a card.\r\n%s\r\n", obj3->look_description);
         return;
     }
 
@@ -558,12 +558,12 @@ ACMD(do_shuffle) {
     struct obj_data *obj = nullptr, *obj2 = nullptr, *next_obj = nullptr;
     int count = 0;
 
-    if (!(obj = get_obj_in_list_vis(ch, "case", nullptr, ch->carrying))) {
+    if (!(obj = get_obj_in_list_vis(ch, "case", nullptr, ch->contents))) {
         send_to_char(ch, "You don't have a case.\r\n");
         return;
     }
 
-    for (obj2 = obj->contains; obj2; obj2 = next_obj) {
+    for (obj2 = obj->contents; obj2; obj2 = next_obj) {
         next_obj = obj2->next_content;
         if (!OBJ_FLAGGED(obj2, ITEM_ANTI_HIEROPHANT)) {
             continue;
@@ -575,7 +575,7 @@ ACMD(do_shuffle) {
         return;
     }
     int total = count;
-    for (obj2 = obj->contains; obj2; obj2 = next_obj) {
+    for (obj2 = obj->contents; obj2; obj2 = next_obj) {
         next_obj = obj2->next_content;
         obj_from_obj(obj2);
         obj_to_room(obj2, real_room(48));
@@ -617,7 +617,7 @@ ACMD(do_hand) {
 
     if (!strcasecmp("look", arg)) {
         send_to_char(ch, "@CYour hand contains:\r\n@D---------------------------@n\r\n");
-        for (obj = ch->carrying; obj; obj = next_obj) {
+        for (obj = ch->contents; obj; obj = next_obj) {
             next_obj = obj->next_content;
             if (obj && !OBJ_FLAGGED(obj, ITEM_ANTI_HIEROPHANT)) {
                 continue;
@@ -642,7 +642,7 @@ ACMD(do_hand) {
     } else if (!strcasecmp("show", arg)) {
         send_to_char(ch, "You show off your hand to the room.\r\n");
         act("@C$n's hand contains:\r\n@D---------------------------@n", true, ch, nullptr, nullptr, TO_ROOM);
-        for (obj = ch->carrying; obj; obj = next_obj) {
+        for (obj = ch->contents; obj; obj = next_obj) {
             next_obj = obj->next_content;
             if (obj && !OBJ_FLAGGED(obj, ITEM_ANTI_HIEROPHANT)) {
                 continue;
@@ -679,7 +679,7 @@ ACMD(do_post) {
         return;
     }
 
-    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
         send_to_char(ch, "You don't seem to have that.\r\n");
         return;
     }
@@ -757,7 +757,7 @@ ACMD(do_play) {
         return;
     }
 
-    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
         send_to_char(ch, "You don't have that card to play.\r\n");
         return;
     }
@@ -794,7 +794,7 @@ ACMD(do_nickname) {
     }
 
     if (strcasecmp(arg, "ship")) {
-        if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
+        if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
             send_to_char(ch, "You don't have that item to nickname.\r\n");
             return;
         }
@@ -821,7 +821,7 @@ ACMD(do_nickname) {
             } else {
                 char nick[MAX_INPUT_LENGTH];
                 sprintf(nick, "%s", CAP(arg2));
-                ship2->action_description = strdup(nick);
+                ship2->look_description = strdup(nick);
                 struct obj_data *k;
                 for (k = object_list; k; k = k->next) {
                     if (GET_OBJ_VNUM(k) == GET_OBJ_VNUM(ship2) + 1000) {
@@ -884,7 +884,7 @@ ACMD(do_showoff) {
         return;
     }
 
-    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
         send_to_char(ch, "You don't seem to have that.\r\n");
         return;
     } else if (!(vict = get_player_vis(ch, arg2, nullptr, FIND_CHAR_ROOM))) {
@@ -2169,7 +2169,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
      * hide objects starting with . from non-holylighted people
      * Idea from Elaseth of TBA
      */
-            if (*obj->description == '.' && (IS_NPC(ch) || !PRF_FLAGGED(ch, PRF_HOLYLIGHT)))
+            if (*obj->room_description == '.' && (IS_NPC(ch) || !PRF_FLAGGED(ch, PRF_HOLYLIGHT)))
                 return;
             if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE && GET_ROOM_VNUM(IN_ROOM(ch)) == GET_OBJ_VAL(obj, 0)) {
                 return;
@@ -2241,7 +2241,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
                     }
                 } else {
                     if (!OBJ_FLAGGED(obj, ITEM_BURIED)) {
-                        send_to_char(ch, "%s@n", obj->description);
+                        send_to_char(ch, "%s@n", obj->room_description);
                     }
                 }
 
@@ -2374,11 +2374,11 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
         case SHOW_OBJ_ACTION:
             switch (GET_OBJ_TYPE(obj)) {
                 case ITEM_NOTE:
-                    if (obj->action_description) {
+                    if (obj->look_description) {
                         char notebuf[MAX_NOTE_LENGTH];
 
                         snprintf(notebuf, sizeof(notebuf), "There is something written on it:\r\n\r\n%s",
-                                 obj->action_description);
+                                 obj->look_description);
                         page_string(ch->desc, notebuf, true);
                     } else
                         send_to_char(ch, "There appears to be nothing written on it.\r\n");
@@ -2659,17 +2659,17 @@ static void list_obj_to_char(struct obj_data *list, struct char_data *ch, int mo
 
     /* Loop through all objects in the list */
     for (i = list; i; i = i->next_content) {
-        if (i->description == nullptr)
+        if (i->room_description == nullptr)
             continue;
-        if (strcasecmp(i->description, "undefined") == 0)
+        if (strcasecmp(i->room_description, "undefined") == 0)
             continue;
         num = 0;
         d = i;
         if (CONFIG_STACK_OBJS) {
             for (j = list; j != i; j = j->next_content)
                 if ((!strcasecmp(j->short_description, i->short_description) &&
-                     !strcasecmp(j->description, i->description)) &&
-                    (j->item_number == i->item_number) &&
+                     !strcasecmp(j->room_description, i->room_description)) &&
+                    (j->vn == i->vn) &&
                     ((OBJ_FLAGGED(j, ITEM_BROKEN) && OBJ_FLAGGED(i, ITEM_BROKEN)) ||
                      (!OBJ_FLAGGED(j, ITEM_BROKEN) && !OBJ_FLAGGED(i, ITEM_BROKEN))))
                     if ((!SITTING(j) && !SITTING(i)))
@@ -2690,8 +2690,8 @@ static void list_obj_to_char(struct obj_data *list, struct char_data *ch, int mo
                 continue;
             for (d = j = i; j; j = j->next_content)
                 if ((!strcasecmp(j->short_description, i->short_description) &&
-                     !strcasecmp(j->description, i->description)) &&
-                    (j->item_number == i->item_number) &&
+                     !strcasecmp(j->room_description, i->room_description)) &&
+                    (j->vn == i->vn) &&
                     ((OBJ_FLAGGED(j, ITEM_BROKEN) && OBJ_FLAGGED(i, ITEM_BROKEN)) ||
                      (!OBJ_FLAGGED(j, ITEM_BROKEN) && !OBJ_FLAGGED(i, ITEM_BROKEN))))
                     if ((!SITTING(j) && !SITTING(i)))
@@ -2714,7 +2714,7 @@ static void list_obj_to_char(struct obj_data *list, struct char_data *ch, int mo
                                                 }
         }
         if ((CAN_SEE_OBJ(ch, d) &&
-             ((*d->description != '.' && *d->short_description != '.') || PRF_FLAGGED(ch, PRF_HOLYLIGHT))) ||
+             ((*d->room_description != '.' && *d->short_description != '.') || PRF_FLAGGED(ch, PRF_HOLYLIGHT))) ||
             (GET_OBJ_TYPE(d) == ITEM_LIGHT)) {
             if (num > 1)
                 send_to_char(ch, "@D(@Rx@Y%2i@D)@n ", num);
@@ -2825,8 +2825,8 @@ static void look_at_char(struct char_data *i, struct char_data *ch) {
     if (!ch->desc) {
         return;
     }
-    if (i->description) {
-        send_to_char(ch, "%s", i->description);
+    if (i->look_description) {
+        send_to_char(ch, "%s", i->look_description);
     }
     if (!MOB_FLAGGED(i, MOB_JUSTDESC)) {
         bringdesc(ch, i);
@@ -3018,7 +3018,7 @@ static void look_at_char(struct char_data *i, struct char_data *ch) {
                 show_obj_to_char(GET_EQ(i, j), ch, SHOW_OBJ_SHORT);
                 if (OBJ_FLAGGED(GET_EQ(i, j), ITEM_SHEATH)) {
                     struct obj_data *obj2 = nullptr, *next_obj = nullptr, *sheath = GET_EQ(i, j);
-                    for (obj2 = sheath->contains; obj2; obj2 = next_obj) {
+                    for (obj2 = sheath->contents; obj2; obj2 = next_obj) {
                         next_obj = obj2->next_content;
                         if (obj2) {
                             send_to_char(ch, "@D  ---- @YSheathed@D ----@c> @n");
@@ -3032,7 +3032,7 @@ static void look_at_char(struct char_data *i, struct char_data *ch) {
                 show_obj_to_char(GET_EQ(i, j), ch, SHOW_OBJ_SHORT);
                 if (OBJ_FLAGGED(GET_EQ(i, j), ITEM_SHEATH)) {
                     struct obj_data *obj2 = nullptr, *next_obj = nullptr, *sheath = GET_EQ(i, j);
-                    for (obj2 = sheath->contains; obj2; obj2 = next_obj) {
+                    for (obj2 = sheath->contents; obj2; obj2 = next_obj) {
                         next_obj = obj2->next_content;
                         if (obj2) {
                             send_to_char(ch, "@D  ---- @YSheathed@D ----@c> @n");
@@ -3053,7 +3053,7 @@ static void look_at_char(struct char_data *i, struct char_data *ch) {
         if (CAN_SEE(i, ch))
             act("$n tries to evaluate what you have in your inventory.", true, ch, nullptr, i, TO_VICT);
         if (GET_SKILL(ch, SKILL_KEEN) > axion_dice(0) && (!IS_NPC(i) || GET_ADMLEVEL(ch) > 1)) {
-            for (tmp_obj = i->carrying; tmp_obj; tmp_obj = tmp_obj->next_content) {
+            for (tmp_obj = i->contents; tmp_obj; tmp_obj = tmp_obj->next_content) {
                 if (CAN_SEE_OBJ(ch, tmp_obj) &&
                     (ADM_FLAGGED(ch, ADM_SEEINV) || (rand_number(0, 20) < GET_LEVEL(ch)))) {
                     show_obj_to_char(tmp_obj, ch, SHOW_OBJ_SHORT);
@@ -3095,8 +3095,8 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
     if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_ROOMFLAGS) && IS_NPC(i))
         send_to_char(ch, "@D[@G%d@D]@w %s", GET_MOB_VNUM(i), SCRIPT(i) ? "[TRIG] " : "");
 
-    if (IS_NPC(i) && i->long_descr && GET_POS(i) == GET_DEFAULT_POS(i) && !FIGHTING(i)) {
-        send_to_char(ch, "%s", i->long_descr);
+    if (IS_NPC(i) && i->room_description && GET_POS(i) == GET_DEFAULT_POS(i) && !FIGHTING(i)) {
+        send_to_char(ch, "%s", i->room_description);
 
         if (IS_NPC(i) && GET_HIT(i) >= (i->getEffMaxPL()) * .9 && GET_HIT(i) != (i->getEffMaxPL()))
             act("@R...Some slight wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
@@ -3157,41 +3157,41 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
     }
 
     if (IS_NPC(i) && !FIGHTING(i) && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING)
-        send_to_char(ch, "@w%c%s", UPPER(*i->short_descr), i->short_descr + 1);
+        send_to_char(ch, "@w%c%s", UPPER(*i->short_description), i->short_description + 1);
     else if (IS_NPC(i) && GRAPPLED(i) && GRAPPLED(i) == ch)
-        send_to_char(ch, "@w%c%s is being grappled with by YOU!", UPPER(*i->short_descr), i->short_descr + 1);
+        send_to_char(ch, "@w%c%s is being grappled with by YOU!", UPPER(*i->short_description), i->short_description + 1);
     else if (IS_NPC(i) && GRAPPLED(i) && GRAPPLED(i) != ch)
-        send_to_char(ch, "@w%c%s is being absorbed from by %s!", UPPER(*i->short_descr), i->short_descr + 1,
+        send_to_char(ch, "@w%c%s is being absorbed from by %s!", UPPER(*i->short_description), i->short_description + 1,
                      readIntro(ch, GRAPPLED(i)) == 1 ? get_i_name(ch, GRAPPLED(i)) : AN(RACE(GRAPPLED(i))));
     else if (IS_NPC(i) && ABSORBBY(i) && ABSORBBY(i) == ch)
-        send_to_char(ch, "@w%c%s is being absorbed from by YOU!", UPPER(*i->short_descr), i->short_descr + 1);
+        send_to_char(ch, "@w%c%s is being absorbed from by YOU!", UPPER(*i->short_description), i->short_description + 1);
     else if (IS_NPC(i) && ABSORBBY(i) && ABSORBBY(i) != ch)
-        send_to_char(ch, "@w%c%s is being absorbed from by %s!", UPPER(*i->short_descr), i->short_descr + 1,
+        send_to_char(ch, "@w%c%s is being absorbed from by %s!", UPPER(*i->short_description), i->short_description + 1,
                      readIntro(ch, ABSORBBY(i)) == 1 ? get_i_name(ch, ABSORBBY(i)) : AN(RACE(ABSORBBY(i))));
     else if (IS_NPC(i) && FIGHTING(i) && FIGHTING(i) != ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING &&
              is_sparring(i))
-        send_to_char(ch, "@w%c%s is sparring with %s!", UPPER(*i->short_descr), i->short_descr + 1,
+        send_to_char(ch, "@w%c%s is sparring with %s!", UPPER(*i->short_description), i->short_description + 1,
                      GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch,
                                                                                                               FIGHTING(
                                                                                                                       i))
                                                                                                  : LRACE(FIGHTING(i))));
     else if (IS_NPC(i) && FIGHTING(i) && is_sparring(i) && FIGHTING(i) == ch && GET_POS(i) != POS_SITTING &&
              GET_POS(i) != POS_SLEEPING)
-        send_to_char(ch, "@w%c%s is sparring with you!", UPPER(*i->short_descr), i->short_descr + 1);
+        send_to_char(ch, "@w%c%s is sparring with you!", UPPER(*i->short_description), i->short_description + 1);
     else if (IS_NPC(i) && FIGHTING(i) && FIGHTING(i) != ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING)
-        send_to_char(ch, "@w%c%s is fighting %s!", UPPER(*i->short_descr), i->short_descr + 1,
+        send_to_char(ch, "@w%c%s is fighting %s!", UPPER(*i->short_description), i->short_description + 1,
                      GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch,
                                                                                                               FIGHTING(
                                                                                                                       i))
                                                                                                  : LRACE(FIGHTING(i))));
     else if (IS_NPC(i) && FIGHTING(i) && FIGHTING(i) == ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING)
-        send_to_char(ch, "@w%c%s is fighting YOU!", UPPER(*i->short_descr), i->short_descr + 1);
+        send_to_char(ch, "@w%c%s is fighting YOU!", UPPER(*i->short_description), i->short_description + 1);
     else if (IS_NPC(i) && FIGHTING(i) && GET_POS(i) == POS_SITTING)
-        send_to_char(ch, "@w%c%s is sitting here.", UPPER(*i->short_descr), i->short_descr + 1);
+        send_to_char(ch, "@w%c%s is sitting here.", UPPER(*i->short_description), i->short_description + 1);
     else if (IS_NPC(i) && FIGHTING(i) && GET_POS(i) == POS_SLEEPING)
-        send_to_char(ch, "@w%c%s is sleeping here.", UPPER(*i->short_descr), i->short_descr + 1);
+        send_to_char(ch, "@w%c%s is sleeping here.", UPPER(*i->short_description), i->short_description + 1);
     else if (IS_NPC(i))
-        send_to_char(ch, "@w%c%s", UPPER(*i->short_descr), i->short_descr + 1);
+        send_to_char(ch, "@w%c%s", UPPER(*i->short_description), i->short_description + 1);
     else if (!IS_NPC(i)) {
         if (IS_MAJIN(i) && AFF_FLAGGED(i, AFF_LIQUEFIED)) {
             send_to_char(ch, "@wSeveral blobs of %s colored goo spread out here.@n\n", skin_types[(int) GET_SKIN(i)]);
@@ -3559,7 +3559,7 @@ static void list_char_to_char(struct char_data *list, struct char_data *ch) {
         /* hide npcs whose description starts with a '.' from non-holylighted people
     - Idea from Elaseth of TBA */
         if ((ch == i) || (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_HOLYLIGHT) && IS_NPC(i)
-                          && i->long_descr && *i->long_descr == '.'))
+                          && i->room_description && *i->room_description == '.'))
             continue;
 
         for (tmphide = hideinfo; tmphide; tmphide = tmphide->next)
@@ -3573,7 +3573,7 @@ static void list_char_to_char(struct char_data *list, struct char_data *ch) {
             if (CONFIG_STACK_MOBS) {
                 /* How many other occurences of this mob are there? */
                 for (j = list; j != i; j = j->next_in_room)
-                    if ((i->nr == j->nr) &&
+                    if ((i->vn == j->vn) &&
                         (GET_POS(i) == GET_POS(j)) &&
                         (AFF_FLAGS(i)[0] == AFF_FLAGS(j)[0]) &&
                         (AFF_FLAGS(i)[1] == AFF_FLAGS(j)[1]) &&
@@ -3595,7 +3595,7 @@ static void list_char_to_char(struct char_data *list, struct char_data *ch) {
 	   */
                     continue;
                 for (j = i; j; j = j->next_in_room)
-                    if ((i->nr == j->nr) &&
+                    if ((i->vn == j->vn) &&
                         (GET_POS(i) == GET_POS(j)) &&
                         (AFF_FLAGS(i)[0] == AFF_FLAGS(j)[0]) &&
                         (AFF_FLAGS(i)[1] == AFF_FLAGS(j)[1]) &&
@@ -3712,7 +3712,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                     *blam = toupper(*blam);
                     if (door == 6) {
                         sprintf(dlist1, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam,
-                                world[W_EXIT(target_room, door)->to_room].number,
+                                world[W_EXIT(target_room, door)->to_room].vn,
                                 world[W_EXIT(target_room, door)->to_room].name);
                         if (IS_SET(W_EXIT(target_room, door)->exit_info, EX_ISDOOR) ||
                             IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET)) {
@@ -3744,7 +3744,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                     }
                     if (door == 0) {
                         sprintf(dlist2, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam,
-                                world[W_EXIT(target_room, door)->to_room].number,
+                                world[W_EXIT(target_room, door)->to_room].vn,
                                 world[W_EXIT(target_room, door)->to_room].name);
                         if (IS_SET(W_EXIT(target_room, door)->exit_info, EX_ISDOOR) ||
                             IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET)) {
@@ -3776,7 +3776,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                     }
                     if (door == 7) {
                         sprintf(dlist3, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam,
-                                world[W_EXIT(target_room, door)->to_room].number,
+                                world[W_EXIT(target_room, door)->to_room].vn,
                                 world[W_EXIT(target_room, door)->to_room].name);
                         if (IS_SET(W_EXIT(target_room, door)->exit_info, EX_ISDOOR) ||
                             IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET)) {
@@ -3808,7 +3808,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                     }
                     if (door == 1) {
                         sprintf(dlist4, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam,
-                                world[W_EXIT(target_room, door)->to_room].number,
+                                world[W_EXIT(target_room, door)->to_room].vn,
                                 world[W_EXIT(target_room, door)->to_room].name);
                         if (IS_SET(W_EXIT(target_room, door)->exit_info, EX_ISDOOR) ||
                             IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET)) {
@@ -3840,7 +3840,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                     }
                     if (door == 8) {
                         sprintf(dlist5, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam,
-                                world[W_EXIT(target_room, door)->to_room].number,
+                                world[W_EXIT(target_room, door)->to_room].vn,
                                 world[W_EXIT(target_room, door)->to_room].name);
                         if (IS_SET(W_EXIT(target_room, door)->exit_info, EX_ISDOOR) ||
                             IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET)) {
@@ -3872,7 +3872,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                     }
                     if (door == 2) {
                         sprintf(dlist6, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam,
-                                world[W_EXIT(target_room, door)->to_room].number,
+                                world[W_EXIT(target_room, door)->to_room].vn,
                                 world[W_EXIT(target_room, door)->to_room].name);
                         if (IS_SET(W_EXIT(target_room, door)->exit_info, EX_ISDOOR) ||
                             IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET)) {
@@ -3904,7 +3904,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                     }
                     if (door == 9) {
                         sprintf(dlist7, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam,
-                                world[W_EXIT(target_room, door)->to_room].number,
+                                world[W_EXIT(target_room, door)->to_room].vn,
                                 world[W_EXIT(target_room, door)->to_room].name);
                         if (IS_SET(W_EXIT(target_room, door)->exit_info, EX_ISDOOR) ||
                             IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET)) {
@@ -3936,7 +3936,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                     }
                     if (door == 3) {
                         sprintf(dlist8, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam,
-                                world[W_EXIT(target_room, door)->to_room].number,
+                                world[W_EXIT(target_room, door)->to_room].vn,
                                 world[W_EXIT(target_room, door)->to_room].name);
                         if (IS_SET(W_EXIT(target_room, door)->exit_info, EX_ISDOOR) ||
                             IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET)) {
@@ -3968,7 +3968,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                     }
                     if (door == 4) {
                         sprintf(dlist9, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam,
-                                world[W_EXIT(target_room, door)->to_room].number,
+                                world[W_EXIT(target_room, door)->to_room].vn,
                                 world[W_EXIT(target_room, door)->to_room].name);
                         if (IS_SET(W_EXIT(target_room, door)->exit_info, EX_ISDOOR) ||
                             IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET)) {
@@ -4000,7 +4000,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                     }
                     if (door == 5) {
                         sprintf(dlist10, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam,
-                                world[W_EXIT(target_room, door)->to_room].number,
+                                world[W_EXIT(target_room, door)->to_room].vn,
                                 world[W_EXIT(target_room, door)->to_room].name);
                         if (IS_SET(W_EXIT(target_room, door)->exit_info, EX_ISDOOR) ||
                             IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET)) {
@@ -4032,7 +4032,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                     }
                     if (door == 10) {
                         sprintf(dlist11, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam,
-                                world[W_EXIT(target_room, door)->to_room].number,
+                                world[W_EXIT(target_room, door)->to_room].vn,
                                 world[W_EXIT(target_room, door)->to_room].name);
                         if (IS_SET(W_EXIT(target_room, door)->exit_info, EX_ISDOOR) ||
                             IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET)) {
@@ -4064,7 +4064,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                     }
                     if (door == 11) {
                         sprintf(dlist12, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam,
-                                world[W_EXIT(target_room, door)->to_room].number,
+                                world[W_EXIT(target_room, door)->to_room].vn,
                                 world[W_EXIT(target_room, door)->to_room].name);
                         if (IS_SET(W_EXIT(target_room, door)->exit_info, EX_ISDOOR) ||
                             IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET)) {
@@ -4510,12 +4510,12 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
 
     if ((!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_BRIEF)) || ROOM_FLAGGED(target_room, ROOM_DEATH)) {
         if (ROOM_DAMAGE(target_room) <= 99) {
-            send_to_char(ch, "@w%s@n", world[target_room].description);
+            send_to_char(ch, "@w%s@n", world[target_room].look_description);
         }
         if (ROOM_DAMAGE(target_room) == 100 &&
             (SECT(target_room) == SECT_WATER_SWIM || SUNKEN(target_room) || SECT(target_room) == SECT_FLYING ||
              SECT(target_room) == SECT_SHOP || SECT(target_room) == SECT_IMPORTANT)) {
-            send_to_char(ch, "@w%s@n", world[target_room].description);
+            send_to_char(ch, "@w%s@n", world[target_room].look_description);
         }
         if (SECT(target_room) == SECT_INSIDE && ROOM_DAMAGE(target_room) > 0) {
             send_to_char(ch, "\r\n");
@@ -4671,7 +4671,7 @@ static void look_in_direction(struct char_data *ch, int dir) {
         else {
             struct obj_data *obj, *next_obj;
             int founded = false;
-            for (obj = ch->carrying; obj; obj = next_obj) {
+            for (obj = ch->contents; obj; obj = next_obj) {
                 next_obj = obj->next_content;
                 if (GET_OBJ_VNUM(obj) == 17) {
                     founded = true;
@@ -4776,7 +4776,7 @@ static void look_in_obj(struct char_data *ch, char *arg) {
                     break;
             }
 
-            list_obj_to_char(obj->contains, ch, SHOW_OBJ_SHORT, true);
+            list_obj_to_char(obj->contents, ch, SHOW_OBJ_SHORT, true);
         }
     } else {        /* item must be a fountain or drink container */
         if (GET_OBJ_VAL(obj, VAL_DRINKCON_HOWFULL) <= 0 && (!GET_OBJ_VAL(obj, VAL_DRINKCON_CAPACITY) == 1))
@@ -4847,7 +4847,7 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread) {
     }
 
     if (cmread) {
-        for (obj = ch->carrying; obj; obj = obj->next_content) {
+        for (obj = ch->contents; obj; obj = obj->next_content) {
             if (GET_OBJ_TYPE(obj) == ITEM_BOARD) {
                 found = true;
                 break;
@@ -4936,7 +4936,7 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread) {
                 }
 
         /* Does the argument match an extra desc in the char's inventory? */
-        for (obj = ch->carrying; obj && !found; obj = obj->next_content) {
+        for (obj = ch->contents; obj && !found; obj = obj->next_content) {
             if (CAN_SEE_OBJ(ch, obj))
                 if ((desc = find_exdesc(arg, obj->ex_description)) != nullptr && ++i == fnum) {
                     if (GET_OBJ_TYPE(obj) == ITEM_BOARD) {
@@ -5078,8 +5078,8 @@ static void look_out_window(struct char_data *ch, char *arg) {
         if (target_room == NOWHERE) {
             send_to_char(ch, "You don't seem to be able to see outside.\r\n");
         } else {
-            if (viewport->action_description)
-                act(viewport->action_description, true, ch, viewport, nullptr, TO_CHAR);
+            if (viewport->look_description)
+                act(viewport->look_description, true, ch, viewport, nullptr, TO_CHAR);
             else
                 act("$n looks out the window.", true, ch, nullptr, nullptr, TO_ROOM);
             send_to_char(ch, "You look outside and see:\r\n");
@@ -6628,7 +6628,7 @@ ACMD(do_inventory) {
             return;
         }
     }
-    list_obj_to_char(ch->carrying, ch, SHOW_OBJ_SHORT, true);
+    list_obj_to_char(ch->contents, ch, SHOW_OBJ_SHORT, true);
     send_to_char(ch, "\n");
 }
 
@@ -6644,7 +6644,7 @@ ACMD(do_equipment) {
 
                 if (OBJ_FLAGGED(GET_EQ(ch, i), ITEM_SHEATH)) {
                     struct obj_data *obj2 = nullptr, *next_obj = nullptr, *sheath = GET_EQ(ch, i);
-                    for (obj2 = sheath->contains; obj2; obj2 = next_obj) {
+                    for (obj2 = sheath->contents; obj2; obj2 = next_obj) {
                         next_obj = obj2->next_content;
                         if (obj2) {
                             send_to_char(ch, "@D  ---- @YSheathed@D ----@c> @n");
@@ -6659,7 +6659,7 @@ ACMD(do_equipment) {
                 show_obj_to_char(GET_EQ(ch, i), ch, SHOW_OBJ_SHORT);
                 if (OBJ_FLAGGED(GET_EQ(ch, i), ITEM_SHEATH)) {
                     struct obj_data *obj2 = nullptr, *next_obj = nullptr, *sheath = GET_EQ(ch, i);
-                    for (obj2 = sheath->contains; obj2; obj2 = next_obj) {
+                    for (obj2 = sheath->contents; obj2; obj2 = next_obj) {
                         next_obj = obj2->next_content;
                         if (obj2) {
                             send_to_char(ch, "@D  ---- @YSheathed@D ----> @n");

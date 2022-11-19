@@ -113,7 +113,7 @@ ACMD(do_refuel) {
 
     struct obj_data *rep = nullptr, *next_obj = nullptr, *fuel = nullptr;
 
-    for (rep = ch->carrying; rep; rep = next_obj) {
+    for (rep = ch->contents; rep; rep = next_obj) {
         next_obj = rep->next_content;
         if (GET_OBJ_VNUM(rep) == 17290) {
             fuel = rep;
@@ -392,7 +392,7 @@ ACMD(do_garden) {
             struct obj_data *obj2, *shovel = nullptr, *next_obj;
             int found = false;
 
-            for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
+            for (obj2 = ch->contents; obj2; obj2 = next_obj) {
                 next_obj = obj2->next_content;
                 if (GET_OBJ_VNUM(obj2) == 254 && !OBJ_FLAGGED(obj2, ITEM_BROKEN) && !OBJ_FLAGGED(obj2, ITEM_FORGED)) {
                     found = true;
@@ -454,7 +454,7 @@ ACMD(do_garden) {
     }
 
     if (!strcasecmp(arg2, "plant")) {
-        if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
+        if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
             send_to_char(ch, "What are you trying to plant?\r\n");
             send_to_char(ch, "Syntax: garden (plant in inventory) plant\r\n");
             return;
@@ -482,7 +482,7 @@ ACMD(do_garden) {
             struct obj_data *obj2, *water = nullptr, *next_obj;
             int found = false;
 
-            for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
+            for (obj2 = ch->contents; obj2; obj2 = next_obj) {
                 next_obj = obj2->next_content;
                 if (GET_OBJ_VNUM(obj2) == 251 && !OBJ_FLAGGED(obj2, ITEM_FORGED)) {
                     found = true;
@@ -532,7 +532,7 @@ ACMD(do_garden) {
             struct obj_data *obj2, *clippers = nullptr, *next_obj;
             int found = false;
 
-            for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
+            for (obj2 = ch->contents; obj2; obj2 = next_obj) {
                 next_obj = obj2->next_content;
                 if (GET_OBJ_VNUM(obj2) == 253 && !OBJ_FLAGGED(obj2, ITEM_BROKEN) && !OBJ_FLAGGED(obj2, ITEM_FORGED)) {
                     found = true;
@@ -579,7 +579,7 @@ ACMD(do_garden) {
             struct obj_data *obj2, *shovel = nullptr, *next_obj;
             int found = false;
 
-            for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
+            for (obj2 = ch->contents; obj2; obj2 = next_obj) {
                 next_obj = obj2->next_content;
                 if (GET_OBJ_VNUM(obj2) == 254 && !OBJ_FLAGGED(obj2, ITEM_BROKEN) && !OBJ_FLAGGED(obj2, ITEM_FORGED)) {
                     found = true;
@@ -604,7 +604,7 @@ ACMD(do_garden) {
             struct obj_data *obj2, *shovel, *next_obj;
             int found = false;
 
-            for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
+            for (obj2 = ch->contents; obj2; obj2 = next_obj) {
                 next_obj = obj2->next_content;
                 if (GET_OBJ_VNUM(obj2) == 254 && !OBJ_FLAGGED(obj2, ITEM_BROKEN) && !OBJ_FLAGGED(obj2, ITEM_FORGED)) {
                     found = true;
@@ -618,7 +618,7 @@ ACMD(do_garden) {
             found = false;
             struct obj_data *soil = nullptr;
 
-            for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
+            for (obj2 = ch->contents; obj2; obj2 = next_obj) {
                 next_obj = obj2->next_content;
                 if (GET_OBJ_VNUM(obj2) == 255 && !OBJ_FLAGGED(obj2, ITEM_FORGED)) {
                     found = true;
@@ -718,7 +718,7 @@ ACMD(do_garden) {
 static int has_housekey(struct char_data *ch, struct obj_data *obj) {
 
     struct obj_data *obj2 = nullptr, *next_obj;
-    for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
+    for (obj2 = ch->contents; obj2; obj2 = next_obj) {
         next_obj = obj2->next_content;
         if (OBJ_FLAGGED(obj, ITEM_DUPLICATE))
             continue;
@@ -821,7 +821,7 @@ ACMD(do_pack) {
                     }
                 }
                 struct obj_data *obj2 = nullptr, *next_obj;
-                for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
+                for (obj2 = ch->contents; obj2; obj2 = next_obj) {
                     next_obj = obj2->next_content;
                     if (GET_OBJ_VNUM(obj) == 18802) {
                         if (GET_OBJ_VNUM(obj2) == 18800) {
@@ -851,7 +851,7 @@ int check_insidebag(struct obj_data *cont, double mult) {
     struct obj_data *inside = nullptr, *next_obj2 = nullptr;
     int count = 0, containers = 0;
 
-    for (inside = cont->contains; inside; inside = next_obj2) {
+    for (inside = cont->contents; inside; inside = next_obj2) {
         next_obj2 = inside->next_content;
         if (GET_OBJ_TYPE(inside) == ITEM_CONTAINER) {
             count++;
@@ -908,14 +908,14 @@ ACMD(do_deploy) {
 
 
     if (!*arg) {
-        for (obj4 = ch->carrying; obj4; obj4 = next_obj) {
+        for (obj4 = ch->contents; obj4; obj4 = next_obj) {
             next_obj = obj4->next_content;
             if (GET_OBJ_VNUM(obj4) == 4 || GET_OBJ_VNUM(obj4) == 5 || GET_OBJ_VNUM(obj4) == 6) {
                 obj = obj4;
                 capsule = true;
             }
         }
-    } else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
+    } else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
         send_to_char(ch, "Syntax: deploy (no argument for houses)\nSyntax: deploy (target) <-- For furniture\r\n");
         return;
     }
@@ -1661,7 +1661,7 @@ ACMD(do_auction) {
     } else if (is_abbrev(arg1, "stats") || is_abbrev(arg1, "identify")) {
         auc_stat(ch, obj_selling);
         return;
-    } else if (!(obj = get_obj_in_list_vis(ch, arg1, nullptr, ch->carrying))) {
+    } else if (!(obj = get_obj_in_list_vis(ch, arg1, nullptr, ch->contents))) {
         sprintf(buf, "You don't seem to have %s %s.\r\n", AN(arg1), arg1);
         send_to_char(ch, buf);
         return;
@@ -2073,7 +2073,7 @@ ACMD(do_assemble) {
 
     struct obj_data *tools = nullptr, *tool = nullptr, *next_obj;
 
-    for (tools = ch->carrying; tools; tools = next_obj) {
+    for (tools = ch->contents; tools; tools = next_obj) {
         next_obj = tools->next_content;
         if (GET_OBJ_VNUM(tools) == 386 && GET_OBJ_VAL(tools, VAL_ALL_HEALTH) > 0) {
             tool = tools;
@@ -2299,7 +2299,7 @@ static void perform_put(struct char_data *ch, struct obj_data *obj,
     if (OBJ_FLAGGED(cont, ITEM_SHEATH)) {
         struct obj_data *obj2 = nullptr, *next_obj = nullptr;
         int count = 0, minus = 0;
-        for (obj2 = cont->contains; obj2; obj2 = next_obj) {
+        for (obj2 = cont->contents; obj2; obj2 = next_obj) {
             next_obj = obj2->next_content;
             minus += GET_OBJ_WEIGHT(obj2);
             count++;
@@ -2422,7 +2422,7 @@ ACMD(do_put) {
             send_to_char(ch, "You'd better open it first!\r\n");
         else {
             if (obj_dotmode == FIND_INDIV) {    /* put <obj> <container> */
-                if (!(obj = get_obj_in_list_vis(ch, theobj, nullptr, ch->carrying)))
+                if (!(obj = get_obj_in_list_vis(ch, theobj, nullptr, ch->contents)))
                     send_to_char(ch, "You aren't carrying %s %s.\r\n", AN(theobj), theobj);
                 else if (obj == cont && howmany == 1)
                     send_to_char(ch, "You attempt to fold it into itself, but fail.\r\n");
@@ -2437,7 +2437,7 @@ ACMD(do_put) {
                     }
                 }
             } else {
-                for (obj = ch->carrying; obj; obj = next_obj) {
+                for (obj = ch->contents; obj; obj = next_obj) {
                     next_obj = obj->next_content;
                     if (obj != cont && CAN_SEE_OBJ(ch, obj) &&
                         (obj_dotmode == FIND_ALL || isname(theobj, obj->name))) {
@@ -2559,7 +2559,7 @@ static void get_from_container(struct char_data *ch, struct obj_data *cont,
     if (OBJVAL_FLAGGED(cont, CONT_CLOSED))
         act("$p is closed.", false, ch, cont, nullptr, TO_CHAR);
     else if (obj_dotmode == FIND_INDIV) {
-        if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, cont->contains))) {
+        if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, cont->contents))) {
             char buf[MAX_STRING_LENGTH];
 
             snprintf(buf, sizeof(buf), "There doesn't seem to be %s %s in $p.", AN(arg), arg);
@@ -2577,7 +2577,7 @@ static void get_from_container(struct char_data *ch, struct obj_data *cont,
             send_to_char(ch, "Get all of what?\r\n");
             return;
         }
-        for (obj = cont->contains; obj; obj = next_obj) {
+        for (obj = cont->contents; obj; obj = next_obj) {
             next_obj = obj->next_content;
             if (CAN_SEE_OBJ(ch, obj) &&
                 (obj_dotmode == FIND_ALL || isname(arg, obj->name))) {
@@ -2745,7 +2745,7 @@ ACMD(do_get) {
                 send_to_char(ch, "Get from all of what?\r\n");
                 return;
             }
-            for (cont = ch->carrying; cont; cont = cont->next_content)
+            for (cont = ch->contents; cont; cont = cont->next_content)
                 if (CAN_SEE_OBJ(ch, cont) &&
                     (cont_dotmode == FIND_ALL || isname(arg2, cont->name))) {
                     if (GET_OBJ_TYPE(cont) == ITEM_CONTAINER) {
@@ -3025,7 +3025,7 @@ ACMD(do_drop) {
             send_to_char(ch, "Yeah, that makes sense.\r\n");
         else if (!*arg)
             send_to_char(ch, "What do you want to %s %d of?\r\n", sname, multi);
-        else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying)))
+        else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->contents)))
             send_to_char(ch, "You don't seem to have any %ss.\r\n", arg);
         else if (check_saveroom_count(ch, obj) > 150)
             send_to_char(ch,
@@ -3051,10 +3051,10 @@ ACMD(do_drop) {
         if (dotmode == FIND_ALL) {
             int fail = false;
 
-            if (!ch->carrying)
+            if (!ch->contents)
                 send_to_char(ch, "You don't seem to be carrying anything.\r\n");
             else {
-                for (obj = ch->carrying; obj; obj = next_obj) {
+                for (obj = ch->contents; obj; obj = next_obj) {
                     next_obj = obj->next_content;
                     if (check_saveroom_count(ch, obj) > 150) {
                         fail = true;
@@ -3074,7 +3074,7 @@ ACMD(do_drop) {
                 send_to_char(ch, "What do you want to %s all of?\r\n", sname);
                 return;
             }
-            if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying)))
+            if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->contents)))
                 send_to_char(ch, "You don't seem to have any %ss.\r\n", arg);
 
             while (obj) {
@@ -3091,7 +3091,7 @@ ACMD(do_drop) {
                              "Some of the items couldn't be dropped into this save room. It is too full. (150 max, containers half the count inside)\r\n");
             }
         } else {
-            if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
+            if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
                 send_to_char(ch, "You don't seem to have %s %s.\r\n", AN(arg), arg);
             } else if (check_saveroom_count(ch, obj) > 150) {
                 send_to_char(ch,
@@ -3266,7 +3266,7 @@ ACMD(do_give) {
             send_to_char(ch, "What do you want to give %d of?\r\n", amount);
         else if (!(vict = give_find_vict(ch, argument)))
             return;
-        else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying)))
+        else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->contents)))
             send_to_char(ch, "You don't seem to have any %ss.\r\n", arg);
         else {
             while (obj && amount--) {
@@ -3289,7 +3289,7 @@ ACMD(do_give) {
             return;
         dotmode = find_all_dots(arg);
         if (dotmode == FIND_INDIV) {
-            if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying)))
+            if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->contents)))
                 send_to_char(ch, "You don't seem to have %s %s.\r\n", AN(arg), arg);
             else {
                 perform_give(ch, vict, obj);
@@ -3305,10 +3305,10 @@ ACMD(do_give) {
                 send_to_char(ch, "All of what?\r\n");
                 return;
             }
-            if (!ch->carrying)
+            if (!ch->contents)
                 send_to_char(ch, "You don't seem to be holding anything.\r\n");
             else
-                for (obj = ch->carrying; obj; obj = next_obj) {
+                for (obj = ch->contents; obj; obj = next_obj) {
                     next_obj = obj->next_content;
                     if (CAN_SEE_OBJ(ch, obj) &&
                         ((dotmode == FIND_ALL || isname(arg, obj->name)))) {
@@ -3476,7 +3476,7 @@ ACMD(do_drink) {
                 return;;
         }
     }
-    if (!(temp = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
+    if (!(temp = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
         if (!(temp = get_obj_in_list_vis(ch, arg, nullptr, world[IN_ROOM(ch)].contents))) {
             send_to_char(ch, "You can't find it!\r\n");
             return;
@@ -3542,8 +3542,8 @@ ACMD(do_drink) {
         act(buf, true, ch, temp, nullptr, TO_ROOM);
 
         send_to_char(ch, "You drink the %s.\r\n", drinks[GET_OBJ_VAL(temp, VAL_DRINKCON_LIQUID)]);
-        if (temp->action_description)
-            act(temp->action_description, true, ch, temp, nullptr, TO_CHAR);
+        if (temp->look_description)
+            act(temp->look_description, true, ch, temp, nullptr, TO_CHAR);
 
         /* if (drink_aff[GET_OBJ_VAL(temp, VAL_DRINKCON_LIQUID)][DRUNK] > 0)
       amount = (25 - GET_COND(ch, THIRST)) / drink_aff[GET_OBJ_VAL(temp, VAL_DRINKCON_LIQUID)][DRUNK];
@@ -3653,7 +3653,7 @@ ACMD(do_eat) {
         send_to_char(ch, "Eat what?\r\n");
         return;
     }
-    if (!(food = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
+    if (!(food = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
         send_to_char(ch, "You don't seem to have %s %s.\r\n", AN(arg), arg);
         return;
     }
@@ -3676,8 +3676,8 @@ ACMD(do_eat) {
 
     if (subcmd == SCMD_EAT) {
         act("You eat some of $p.", false, ch, food, nullptr, TO_CHAR);
-        if (food->action_description)
-            act(food->action_description, false, ch, food, nullptr, TO_CHAR);
+        if (food->look_description)
+            act(food->look_description, false, ch, food, nullptr, TO_CHAR);
         act("$n eats some of $p.", true, ch, food, nullptr, TO_ROOM);
     } else {
         act("You nibble a little bit of $p.", false, ch, food, nullptr, TO_CHAR);
@@ -3915,7 +3915,7 @@ ACMD(do_pour) {
             send_to_char(ch, "From what do you want to pour?\r\n");
             return;
         }
-        if (!(from_obj = get_obj_in_list_vis(ch, arg1, nullptr, ch->carrying))) {
+        if (!(from_obj = get_obj_in_list_vis(ch, arg1, nullptr, ch->contents))) {
             send_to_char(ch, "You can't find it!\r\n");
             return;
         }
@@ -3929,7 +3929,7 @@ ACMD(do_pour) {
             send_to_char(ch, "What do you want to fill?  And what are you filling it from?\r\n");
             return;
         }
-        if (!(to_obj = get_obj_in_list_vis(ch, arg1, nullptr, ch->carrying))) {
+        if (!(to_obj = get_obj_in_list_vis(ch, arg1, nullptr, ch->contents))) {
             send_to_char(ch, "You can't find it!\r\n");
             return;
         }
@@ -3979,7 +3979,7 @@ ACMD(do_pour) {
 
             return;
         }
-        if (!(to_obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->carrying))) {
+        if (!(to_obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->contents))) {
             send_to_char(ch, "You can't find it!\r\n");
             return;
         }
@@ -4325,7 +4325,7 @@ ACMD(do_wear) {
         return;
     }
     if (dotmode == FIND_ALL) {
-        for (obj = ch->carrying; obj; obj = next_obj) {
+        for (obj = ch->contents; obj; obj = next_obj) {
             next_obj = obj->next_content;
             if (CAN_SEE_OBJ(ch, obj) && (where = find_eq_pos(ch, obj, nullptr)) >= 0) {
                 if (GET_LEVEL(ch) < GET_OBJ_LEVEL(obj)) {
@@ -4353,7 +4353,7 @@ ACMD(do_wear) {
             send_to_char(ch, "Wear all of what?\r\n");
             return;
         }
-        if (!(obj = get_obj_in_list_vis(ch, arg1, nullptr, ch->carrying)))
+        if (!(obj = get_obj_in_list_vis(ch, arg1, nullptr, ch->contents)))
             send_to_char(ch, "You don't seem to have any %ss.\r\n", arg1);
         else if (GET_LEVEL(ch) < GET_OBJ_LEVEL(obj))
             send_to_char(ch, "You are not experienced enough to use that.\r\n");
@@ -4371,7 +4371,7 @@ ACMD(do_wear) {
                 obj = next_obj;
             }
     } else {
-        if (!(obj = get_obj_in_list_vis(ch, arg1, nullptr, ch->carrying)))
+        if (!(obj = get_obj_in_list_vis(ch, arg1, nullptr, ch->contents)))
             send_to_char(ch, "You don't seem to have %s %s.\r\n", AN(arg1), arg1);
         else if (OBJ_FLAGGED(obj, ITEM_BROKEN))
             send_to_char(ch, "But it seems to be broken!\r\n");
@@ -4400,7 +4400,7 @@ ACMD(do_wield) {
 
     if (!*arg)
         send_to_char(ch, "Wield what?\r\n");
-    else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying)))
+    else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->contents)))
         send_to_char(ch, "You don't seem to have %s %s.\r\n", AN(arg), arg);
     else {
         if (!CAN_WEAR(obj, ITEM_WEAR_WIELD))
@@ -4433,7 +4433,7 @@ ACMD(do_grab) {
 
     if (!*arg)
         send_to_char(ch, "Hold what?\r\n");
-    else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying)))
+    else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->contents)))
         send_to_char(ch, "You don't seem to have %s %s.\r\n", AN(arg), arg);
     else if (GET_LEVEL(ch) < GET_OBJ_LEVEL(obj))
         send_to_char(ch, "You are not experienced enough to use that.\r\n");
@@ -4507,7 +4507,7 @@ ACMD(do_remove) {
         return;
     }
     /* lemme check for a board FIRST */
-    for (obj = ch->carrying; obj; obj = obj->next_content) {
+    for (obj = ch->contents; obj; obj = obj->next_content) {
         if (GET_OBJ_TYPE (obj) == ITEM_BOARD) {
             found = 1;
             break;
@@ -4581,7 +4581,7 @@ ACMD(do_sac) {
     }
 
     if (!(j = get_obj_in_list_vis(ch, arg, nullptr, world[IN_ROOM(ch)].contents)) &&
-        (!(j = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying)))) {
+        (!(j = get_obj_in_list_vis(ch, arg, nullptr, ch->contents)))) {
         send_to_char(ch, "It doesn't seem to be here.\n\r");
         return;
     }

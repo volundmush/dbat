@@ -173,7 +173,7 @@ int save_guilds(zone_rnum zone_num) {
 
             /*. Save the rest . */
             fprintf(guild_file, "%d\n%d\n%d\n%d\n",
-                    G_TRAINER(guild) == NOBODY ? -1 : mob_index[G_TRAINER(guild)].vnum,
+                    G_TRAINER(guild) == NOBODY ? -1 : mob_index[G_TRAINER(guild)].vn,
                     G_WITH_WHO(guild)[0],
                     G_OPEN(guild),
                     G_CLOSE(guild)

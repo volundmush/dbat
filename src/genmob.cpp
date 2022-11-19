@@ -48,7 +48,7 @@ int add_mobile(struct char_data *mob, mob_vnum vnum) {
 
         /* Now re-point all existing mobile strings to here. */
         for (live_mob = character_list; live_mob; live_mob = live_mob->next)
-            if (rnum == live_mob->nr)
+            if (rnum == live_mob->vn)
                 update_mobile_strings(live_mob, &mob_proto[rnum]);
 
         add_to_save_list(zone_table[real_zone_by_thing(vnum)].number, SL_MOB);
@@ -59,10 +59,10 @@ int add_mobile(struct char_data *mob, mob_vnum vnum) {
     auto &m = mob_proto[vnum];
     m = *mob;
 
-    m.nr = 0;
+    m.vn = 0;
     copy_mobile_strings(&m, mob);
     auto &ix = mob_index[vnum];
-    ix.vnum = vnum;
+    ix.vn = vnum;
 
     log("GenOLC: add_mobile: Added mobile %d.", vnum);
 
@@ -108,7 +108,7 @@ int delete_mobile(mob_rnum refpt) {
         return NOBODY;
     }
 
-    vnum = mob_index[refpt].vnum;
+    vnum = mob_index[refpt].vn;
     extract_mobile_all(vnum);
     auto &z = zone_table[real_zone_by_thing(refpt)];
     z.mobiles.erase(refpt);
@@ -157,12 +157,12 @@ int copy_mobile_strings(struct char_data *t, struct char_data *f) {
         t->name = strdup(f->name);
     if (f->title)
         t->title = strdup(f->title);
-    if (f->short_descr)
-        t->short_descr = strdup(f->short_descr);
-    if (f->long_descr)
-        t->long_descr = strdup(f->long_descr);
-    if (f->description)
-        t->description = strdup(f->description);
+    if (f->short_description)
+        t->short_description = strdup(f->short_description);
+    if (f->room_description)
+        t->room_description = strdup(f->room_description);
+    if (f->look_description)
+        t->look_description = strdup(f->look_description);
     return true;
 }
 
@@ -171,12 +171,12 @@ int update_mobile_strings(struct char_data *t, struct char_data *f) {
         t->name = f->name;
     if (f->title)
         t->title = f->title;
-    if (f->short_descr)
-        t->short_descr = f->short_descr;
-    if (f->long_descr)
-        t->long_descr = f->long_descr;
-    if (f->description)
-        t->description = f->description;
+    if (f->short_description)
+        t->short_description = f->short_description;
+    if (f->room_description)
+        t->room_description = f->room_description;
+    if (f->look_description)
+        t->look_description = f->look_description;
     return true;
 }
 
@@ -185,12 +185,12 @@ int free_mobile_strings(struct char_data *mob) {
         free(mob->name);
     if (mob->title)
         free(mob->title);
-    if (mob->short_descr)
-        free(mob->short_descr);
-    if (mob->long_descr)
-        free(mob->long_descr);
-    if (mob->description)
-        free(mob->description);
+    if (mob->short_description)
+        free(mob->short_description);
+    if (mob->room_description)
+        free(mob->room_description);
+    if (mob->look_description)
+        free(mob->look_description);
     return true;
 }
 
@@ -213,12 +213,12 @@ int free_mobile(struct char_data *mob) {
             free(mob->name);
         if (mob->title && mob->title != mob_proto[i].title)
             free(mob->title);
-        if (mob->short_descr && mob->short_descr != mob_proto[i].short_descr)
-            free(mob->short_descr);
-        if (mob->long_descr && mob->long_descr != mob_proto[i].long_descr)
-            free(mob->long_descr);
-        if (mob->description && mob->description != mob_proto[i].description)
-            free(mob->description);
+        if (mob->short_description && mob->short_description != mob_proto[i].short_description)
+            free(mob->short_description);
+        if (mob->room_description && mob->room_description != mob_proto[i].room_description)
+            free(mob->room_description);
+        if (mob->look_description && mob->look_description != mob_proto[i].look_description)
+            free(mob->look_description);
         /* free script proto list if it's not the prototype */
         if (mob->proto_script && mob->proto_script != mob_proto[i].proto_script)
             free_proto_script(mob, MOB_TRIGGER);
@@ -416,7 +416,7 @@ int write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd) {
 }
 
 void check_mobile_strings(struct char_data *mob) {
-    mob_vnum mvnum = mob_index[mob->nr].vnum;
+    mob_vnum mvnum = mob_index[mob->vn].vn;
     check_mobile_string(mvnum, &GET_LDESC(mob), "long description");
     check_mobile_string(mvnum, &GET_DDESC(mob), "detailed description");
     check_mobile_string(mvnum, &GET_ALIAS(mob), "alias list");

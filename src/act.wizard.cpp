@@ -708,7 +708,7 @@ ACMD(do_transobj) {
         return;
     }
 
-    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
         send_to_char(ch, "You want to send what?\r\n");
         return;
     } else if (!strcasecmp("all", arg2)) {
@@ -1289,8 +1289,8 @@ void list_zone_commands_room(struct char_data *ch, room_vnum rvnum) {
                 case 'M':
                     send_to_char(ch, "%sLoad %s@y [@c%d@y], MaxMud : %d, MaxR : %d, Chance : %d\r\n",
                                  ZOCMD.if_flag ? " then " : "",
-                                 mob_proto[ZOCMD.arg1].short_descr,
-                                 mob_index[ZOCMD.arg1].vnum, ZOCMD.arg2,
+                                 mob_proto[ZOCMD.arg1].short_description,
+                                 mob_index[ZOCMD.arg1].vn, ZOCMD.arg2,
                                  ZOCMD.arg4, ZOCMD.arg5
                     );
                     break;
@@ -1298,7 +1298,7 @@ void list_zone_commands_room(struct char_data *ch, room_vnum rvnum) {
                     send_to_char(ch, "%sGive it %s@y [@c%d@y], Max : %d, Chance : %d\r\n",
                                  ZOCMD.if_flag ? " then " : "",
                                  obj_proto[ZOCMD.arg1].short_description,
-                                 obj_index[ZOCMD.arg1].vnum,
+                                 obj_index[ZOCMD.arg1].vn,
                                  ZOCMD.arg2, ZOCMD.arg5
                     );
                     break;
@@ -1306,7 +1306,7 @@ void list_zone_commands_room(struct char_data *ch, room_vnum rvnum) {
                     send_to_char(ch, "%sLoad %s@y [@c%d@y], Max : %d, MaxR : %d, Chance : %d\r\n",
                                  ZOCMD.if_flag ? " then " : "",
                                  obj_proto[ZOCMD.arg1].short_description,
-                                 obj_index[ZOCMD.arg1].vnum,
+                                 obj_index[ZOCMD.arg1].vn,
                                  ZOCMD.arg2, ZOCMD.arg4, ZOCMD.arg5
                     );
                     break;
@@ -1314,7 +1314,7 @@ void list_zone_commands_room(struct char_data *ch, room_vnum rvnum) {
                     send_to_char(ch, "%sEquip with %s@y [@c%d@y], %s, Max : %d, Chance : %d\r\n",
                                  ZOCMD.if_flag ? " then " : "",
                                  obj_proto[ZOCMD.arg1].short_description,
-                                 obj_index[ZOCMD.arg1].vnum,
+                                 obj_index[ZOCMD.arg1].vn,
                                  equipment_types[ZOCMD.arg3],
                                  ZOCMD.arg2, ZOCMD.arg5
                     );
@@ -1323,9 +1323,9 @@ void list_zone_commands_room(struct char_data *ch, room_vnum rvnum) {
                     send_to_char(ch, "%sPut %s@y [@c%d@y] in %s@y [@c%d@y], Max : %d, Chance : %d\r\n",
                                  ZOCMD.if_flag ? " then " : "",
                                  obj_proto[ZOCMD.arg1].short_description,
-                                 obj_index[ZOCMD.arg1].vnum,
+                                 obj_index[ZOCMD.arg1].vn,
                                  obj_proto[ZOCMD.arg3].short_description,
-                                 obj_index[ZOCMD.arg3].vnum,
+                                 obj_index[ZOCMD.arg3].vn,
                                  ZOCMD.arg2, ZOCMD.arg5
                     );
                     break;
@@ -1333,7 +1333,7 @@ void list_zone_commands_room(struct char_data *ch, room_vnum rvnum) {
                     send_to_char(ch, "%sRemove %s@y [@c%d@y] from room.\r\n",
                                  ZOCMD.if_flag ? " then " : "",
                                  obj_proto[ZOCMD.arg2].short_description,
-                                 obj_index[ZOCMD.arg2].vnum
+                                 obj_index[ZOCMD.arg2].vn
                     );
                     break;
                 case 'D':
@@ -1347,7 +1347,7 @@ void list_zone_commands_room(struct char_data *ch, room_vnum rvnum) {
                     send_to_char(ch, "%sAttach trigger @c%s@y [@c%d@y] to %s\r\n",
                                  ZOCMD.if_flag ? " then " : "",
                                  trig_index[ZOCMD.arg2].proto->name,
-                                 trig_index[ZOCMD.arg2].vnum,
+                                 trig_index[ZOCMD.arg2].vn,
                                  ((ZOCMD.arg1 == MOB_TRIGGER) ? "mobile" :
                                   ((ZOCMD.arg1 == OBJ_TRIGGER) ? "object" :
                                    ((ZOCMD.arg1 == WLD_TRIGGER) ? "room" : "????"))));
@@ -1388,14 +1388,14 @@ static void do_stat_room(struct char_data *ch) {
 
     sprinttype(rm->sector_type, sector_types, buf2, sizeof(buf2));
     send_to_char(ch, "Zone: [%3d], VNum: [@g%5d@n], RNum: [%5d], IDNum: [%5ld], Type: %s\r\n",
-                 zone_table[rm->zone].number, rm->number, IN_ROOM(ch),
-                 (long) rm->number + ROOM_ID_BASE, buf2);
+                 zone_table[rm->zone].number, rm->vn, IN_ROOM(ch),
+                 (long) rm->vn + ROOM_ID_BASE, buf2);
 
     sprintbitarray(rm->room_flags, room_bits, RF_ARRAY_MAX, buf2);
     send_to_char(ch, "Room Damage: %d, Room Effect: %d\r\n", rm->dmg, rm->geffect);
     send_to_char(ch, "SpecProc: %s, Flags: %s\r\n", rm->func == nullptr ? "None" : "Exists", buf2);
 
-    send_to_char(ch, "Description:\r\n%s", rm->description ? rm->description : "  None.\r\n");
+    send_to_char(ch, "Description:\r\n%s", rm->look_description ? rm->look_description : "  None.\r\n");
 
     if (rm->ex_description) {
         send_to_char(ch, "Extra descs:");
@@ -1465,7 +1465,7 @@ static void do_stat_room(struct char_data *ch) {
     /* check the room for a script */
     do_sstat_room(ch, rm);
 
-    list_zone_commands_room(ch, rm->number);
+    list_zone_commands_room(ch, rm->vn);
 }
 
 static void do_stat_object(struct char_data *ch, struct obj_data *j) {
@@ -1628,13 +1628,13 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j) {
    * more or less useless and just takes up valuable screen space.
    */
 
-    if (j->contains) {
+    if (j->contents) {
         int column;
 
         send_to_char(ch, "\r\nContents:@g");
         column = 9;    /* ^^^ strlen ^^^ */
 
-        for (found = 0, j2 = j->contains; j2; j2 = j2->next_content) {
+        for (found = 0, j2 = j->contents; j2; j2 = j2->next_content) {
             column += send_to_char(ch, "%s %s", found++ ? "," : "", j2->short_description);
             if (column >= 62) {
                 send_to_char(ch, "%s\r\n", j2->next_content ? "," : "");
@@ -1703,7 +1703,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
 
         send_to_char(ch, "Title: %s\r\n", k->title ? k->title : "<None>");
 
-    send_to_char(ch, "L-Des: %s@n", k->long_descr ? k->long_descr : "<None>\r\n");
+    send_to_char(ch, "L-Des: %s@n", k->room_description ? k->room_description : "<None>\r\n");
     if (CONFIG_ALLOW_MULTICLASS) {
         strncpy(buf, class_desc_str(k, 1, 0), sizeof(buf));
     } else {
@@ -1808,7 +1808,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
     }
 
     int counts = 0, total = 0;
-    for (i = 0, j = k->carrying; j; j = j->next_content, i++) {
+    for (i = 0, j = k->contents; j; j = j->next_content, i++) {
         counts += check_insidebag(j, 0.5);
         counts++;
     }
@@ -2043,7 +2043,7 @@ ACMD(do_stat) {
 
         if ((object = get_obj_in_equip_vis(ch, name, &number, ch->equipment)) != nullptr)
             do_stat_object(ch, object);
-        else if ((object = get_obj_in_list_vis(ch, name, &number, ch->carrying)) != nullptr)
+        else if ((object = get_obj_in_list_vis(ch, name, &number, ch->contents)) != nullptr)
             do_stat_object(ch, object);
         else if ((victim = get_char_vis(ch, name, &number, FIND_CHAR_ROOM)) != nullptr)
             do_stat_character(ch, victim);
@@ -2392,8 +2392,8 @@ ACMD(do_purge) {
             delete_inv_backup(vict);
 
             /* Dump inventory. */
-            while (vict->carrying)
-                extract_obj(vict->carrying);
+            while (vict->contents)
+                extract_obj(vict->contents);
 
             /* Dump equipment. */
             for (i = 0; i < NUM_WEARS; i++)
@@ -4665,8 +4665,8 @@ ACMD(do_chown) {
             }
         }
 
-        if (!(obj = get_obj_in_list_vis(victim, buf2, nullptr, victim->carrying))) {
-            if (!k && !(obj = get_obj_in_list_vis(victim, buf2, nullptr, victim->carrying))) {
+        if (!(obj = get_obj_in_list_vis(victim, buf2, nullptr, victim->contents))) {
+            if (!k && !(obj = get_obj_in_list_vis(victim, buf2, nullptr, victim->contents))) {
                 send_to_char(ch, "%s does not appear to have the %s.\r\n", GET_NAME(victim), buf2);
                 return;
             }
@@ -4872,25 +4872,25 @@ ACMD (do_zcheck) {
     send_to_char(ch, "Checking Mobs for limits...\r\n");
     /*check mobs first*/
     for (auto &m : mob_proto) {
-        if (real_zone_by_thing(mob_index[i].vnum) == zrnum) {  /*is mob in this zone?*/
+        if (real_zone_by_thing(mob_index[i].vn) == zrnum) {  /*is mob in this zone?*/
             mob = &mob_proto[i];
             if (!strcmp(mob->name, "mob unfinished") && (found = 1))
                 len += snprintf(buf + len, sizeof(buf) - len,
                                 "- Alias hasn't been set.\r\n");
 
-            if (!strcmp(mob->short_descr, "the unfinished mob") && (found = 1))
+            if (!strcmp(mob->short_description, "the unfinished mob") && (found = 1))
                 len += snprintf(buf + len, sizeof(buf) - len,
                                 "- Short description hasn't been set.\r\n");
 
-            if (!strncmp(mob->long_descr, "An unfinished mob stands here.", 30) && (found = 1))
+            if (!strncmp(mob->room_description, "An unfinished mob stands here.", 30) && (found = 1))
                 len += snprintf(buf + len, sizeof(buf) - len,
                                 "- Long description hasn't been set.\r\n");
 
-            if (mob->description && *mob->description) {
-                if (!strncmp(mob->description, "It looks unfinished.", 20) && (found = 1))
+            if (mob->look_description && *mob->look_description) {
+                if (!strncmp(mob->look_description, "It looks unfinished.", 20) && (found = 1))
                     len += snprintf(buf + len, sizeof(buf) - len,
                                     "- Description hasn't been set.\r\n");
-                else if (strncmp(mob->description, "   ", 3) && (found = 1))
+                else if (strncmp(mob->look_description, "   ", 3) && (found = 1))
                     len += snprintf(buf + len, sizeof(buf) - len,
                                     "- Description hasn't been formatted. (/fi)\r\n");
             }
@@ -5032,7 +5032,7 @@ ACMD (do_zcheck) {
                                 "- has min level set to %d (max %d).\r\n",
                                 GET_OBJ_LEVEL(obj), ADMLVL_IMMORT - 1);
 
-            if (obj->action_description && *obj->action_description &&
+            if (obj->look_description && *obj->look_description &&
                 GET_OBJ_TYPE(obj) != ITEM_STAFF &&
                 GET_OBJ_TYPE(obj) != ITEM_WAND &&
                 GET_OBJ_TYPE(obj) != ITEM_SCROLL &&
@@ -5117,7 +5117,7 @@ ACMD (do_zcheck) {
                     if (ex.zone == real_zone(offlimit_zones[k]) && (found = 1))
                         len += snprintf(buf + len, sizeof(buf) - len,
                                         "- Exit %s cannot connect to %d (zone off limits).\r\n",
-                                        dirs[j], ex.number);
+                                        dirs[j], ex.vn);
                 } /* for (k.. */
             } /* cycle directions */
 
@@ -5130,17 +5130,17 @@ ACMD (do_zcheck) {
                                 ROOM_FLAGGED(i, ROOM_OLC) ? "OLC" : "",
                                 ROOM_FLAGGED(i, ROOM_BFS_MARK) ? "*" : "");
 
-            if ((MIN_ROOM_DESC_LENGTH) && strlen(r.description) < MIN_ROOM_DESC_LENGTH && (found = 1))
+            if ((MIN_ROOM_DESC_LENGTH) && strlen(r.look_description) < MIN_ROOM_DESC_LENGTH && (found = 1))
                 len += snprintf(buf + len, sizeof(buf) - len,
                                 "- Room description is too short. (%4.4" SZT" of min. %d characters).\r\n",
-                                strlen(world[i].description), MIN_ROOM_DESC_LENGTH);
+                                strlen(world[i].look_description), MIN_ROOM_DESC_LENGTH);
 
-            if (strncmp(r.description, "   ", 3) && (found = 1))
+            if (strncmp(r.look_description, "   ", 3) && (found = 1))
                 len += snprintf(buf + len, sizeof(buf) - len,
                                 "- Room description not formatted with indent (/fi in the editor).\r\n");
 
             /* strcspan = size of text in first arg before any character in second arg */
-            if ((strcspn(r.description, "\r\n") > MAX_COLOUMN_WIDTH) && (found = 1))
+            if ((strcspn(r.look_description, "\r\n") > MAX_COLOUMN_WIDTH) && (found = 1))
                 len += snprintf(buf + len, sizeof(buf) - len,
                                 "- Room description not wrapped at %d chars (/fi in the editor).\r\n",
                                 MAX_COLOUMN_WIDTH);
@@ -5191,7 +5191,7 @@ static void mob_checkload(struct char_data *ch, mob_vnum mvnum) {
     }
 
     send_to_char(ch, "Checking load info for the mob [%d] %s...\r\n",
-                 mvnum, mob_proto[mrnum].short_descr);
+                 mvnum, mob_proto[mrnum].short_description);
 
     for (auto &z : zone_table) {
         for (cmd_no = 0; z.second.cmd[cmd_no].command != 'S'; cmd_no++) {
@@ -5201,7 +5201,7 @@ static void mob_checkload(struct char_data *ch, mob_vnum mvnum) {
             /* read a mobile */
             if (z.second.cmd[cmd_no].arg1 == mrnum) {
                 send_to_char(ch, "  [%5d] %s (%d MAX)\r\n",
-                             world[z.second.cmd[cmd_no].arg3].number,
+                             world[z.second.cmd[cmd_no].arg3].vn,
                              world[z.second.cmd[cmd_no].arg3].name,
                              z.second.cmd[cmd_no].arg2);
                 count += 1;
@@ -5231,12 +5231,12 @@ static void obj_checkload(struct char_data *ch, obj_vnum ovnum) {
         for (cmd_no = 0; z.second.cmd[cmd_no].command != 'S'; cmd_no++) {
             switch (z.second.cmd[cmd_no].command) {
                 case 'M':
-                    lastroom_v = world[z.second.cmd[cmd_no].arg3].number;
+                    lastroom_v = world[z.second.cmd[cmd_no].arg3].vn;
                     lastroom_r = z.second.cmd[cmd_no].arg3;
                     lastmob_r = z.second.cmd[cmd_no].arg1;
                     break;
                 case 'O':                   /* read an object */
-                    lastroom_v = world[z.second.cmd[cmd_no].arg3].number;
+                    lastroom_v = world[z.second.cmd[cmd_no].arg3].vn;
                     lastroom_r = z.second.cmd[cmd_no].arg3;
                     if (z.second.cmd[cmd_no].arg1 == ornum) {
                         send_to_char(ch, "  [%5d] %s (%d Max)\r\n",
@@ -5260,8 +5260,8 @@ static void obj_checkload(struct char_data *ch, obj_vnum ovnum) {
                         send_to_char(ch, "  [%5d] %s (Given to %s [%d][%d Max])\r\n",
                                      lastroom_v,
                                      world[lastroom_r].name,
-                                     mob_proto[lastmob_r].short_descr,
-                                     mob_index[lastmob_r].vnum,
+                                     mob_proto[lastmob_r].short_description,
+                                     mob_index[lastmob_r].vn,
                                      z.second.cmd[cmd_no].arg2);
                         count += 1;
                     }
@@ -5271,14 +5271,14 @@ static void obj_checkload(struct char_data *ch, obj_vnum ovnum) {
                         send_to_char(ch, "  [%5d] %s (Equipped to %s [%d][%d Max])\r\n",
                                      lastroom_v,
                                      world[lastroom_r].name,
-                                     mob_proto[lastmob_r].short_descr,
-                                     mob_index[lastmob_r].vnum,
+                                     mob_proto[lastmob_r].short_description,
+                                     mob_index[lastmob_r].vn,
                                      z.second.cmd[cmd_no].arg2);
                         count += 1;
                     }
                     break;
                 case 'R': /* rem obj from room */
-                    lastroom_v = world[z.second.cmd[cmd_no].arg1].number;
+                    lastroom_v = world[z.second.cmd[cmd_no].arg1].vn;
                     lastroom_r = z.second.cmd[cmd_no].arg1;
                     if (z.second.cmd[cmd_no].arg2 == ornum) {
                         send_to_char(ch, "  [%5d] %s (Removed from room)\r\n",
@@ -5318,12 +5318,12 @@ static void trg_checkload(struct char_data *ch, trig_vnum tvnum) {
         for (cmd_no = 0; z.second.cmd[cmd_no].command != 'S'; cmd_no++) {
             switch (z.second.cmd[cmd_no].command) {
                 case 'M':
-                    lastroom_v = world[z.second.cmd[cmd_no].arg3].number;
+                    lastroom_v = world[z.second.cmd[cmd_no].arg3].vn;
                     lastroom_r = z.second.cmd[cmd_no].arg3;
                     lastmob_r = z.second.cmd[cmd_no].arg1;
                     break;
                 case 'O':                   /* read an object */
-                    lastroom_v = world[z.second.cmd[cmd_no].arg3].number;
+                    lastroom_v = world[z.second.cmd[cmd_no].arg3].vn;
                     lastroom_r = z.second.cmd[cmd_no].arg3;
                     lastobj_r = z.second.cmd[cmd_no].arg1;
                     break;
@@ -5346,13 +5346,13 @@ static void trg_checkload(struct char_data *ch, trig_vnum tvnum) {
                         break;
                     if (z.second.cmd[cmd_no].arg1 == MOB_TRIGGER) {
                         send_to_char(ch, "mob [%5d] %-60s (zedit room %5d)\r\n",
-                                     mob_index[lastmob_r].vnum,
-                                     mob_proto[lastmob_r].short_descr,
+                                     mob_index[lastmob_r].vn,
+                                     mob_proto[lastmob_r].short_description,
                                      lastroom_v);
                         found = 1;
                     } else if (z.second.cmd[cmd_no].arg1 == OBJ_TRIGGER) {
                         send_to_char(ch, "obj [%5d] %-60s  (zedit room %d)\r\n",
-                                     obj_index[lastobj_r].vnum,
+                                     obj_index[lastobj_r].vn,
                                      obj_proto[lastobj_r].short_description,
                                      lastroom_v);
                         found = 1;
@@ -5375,7 +5375,7 @@ static void trg_checkload(struct char_data *ch, trig_vnum tvnum) {
             if (tpl->vnum == tvnum) {
                 send_to_char(ch, "mob [%5d] %s\r\n",
                              m.first,
-                             m.second.short_descr);
+                             m.second.short_description);
                 found = 1;
             }
 

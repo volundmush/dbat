@@ -32,7 +32,7 @@ void parse_trigger(FILE *trig_f, trig_vnum nr) {
     char line[256], *cmds, *s, flags[256], errors[MAX_INPUT_LENGTH];
     struct cmdlist_element *cle;
     auto &idx = trig_index[nr];
-    idx.vnum = nr;
+    idx.vn = nr;
     idx.number = 0;
 
     auto trig = new trig_data();
@@ -152,7 +152,7 @@ void dg_read_trigger(FILE *fp, void *proto, int type) {
             case WLD_TRIGGER:
                 mudlog(BRF, ADMLVL_BUILDER, true,
                        "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (room:%d)",
-                       vnum, GET_ROOM_VNUM(((room_data *) proto)->number));
+                       vnum, GET_ROOM_VNUM(((room_data *) proto)->vn));
                 break;
             default:
                 mudlog(BRF, ADMLVL_BUILDER, true,
@@ -199,7 +199,7 @@ void dg_read_trigger(FILE *fp, void *proto, int type) {
             } else {
                 mudlog(BRF, ADMLVL_BUILDER, true,
                        "SYSERR: non-existant trigger #%d assigned to room #%d",
-                       vnum, room->number);
+                       vnum, room->vn);
             }
             break;
         default:
@@ -258,7 +258,7 @@ void assign_triggers(void *i, int type) {
                 if (rnum == NOTHING) {
                     mudlog(BRF, ADMLVL_BUILDER, true,
                            "SYSERR: trigger #%d non-existant, for mob #%d",
-                           trg_proto->vnum, mob_index[mob->nr].vnum);
+                           trg_proto->vnum, mob_index[mob->vn].vn);
                 } else {
                     if (!SCRIPT(mob))
                         CREATE(SCRIPT(mob), struct script_data, 1);
@@ -274,7 +274,7 @@ void assign_triggers(void *i, int type) {
                 rnum = real_trigger(trg_proto->vnum);
                 if (rnum == NOTHING) {
                     log("SYSERR: trigger #%d non-existant, for obj #%d",
-                        trg_proto->vnum, obj_index[obj->item_number].vnum);
+                        trg_proto->vnum, obj_index[obj->vn].vn);
                 } else {
                     if (!SCRIPT(obj))
                         CREATE(SCRIPT(obj), struct script_data, 1);
@@ -291,7 +291,7 @@ void assign_triggers(void *i, int type) {
                 if (rnum == NOTHING) {
                     mudlog(BRF, ADMLVL_BUILDER, true,
                            "SYSERR: trigger #%d non-existant, for room #%d",
-                           trg_proto->vnum, room->number);
+                           trg_proto->vnum, room->vn);
                 } else {
                     if (!SCRIPT(room))
                         CREATE(SCRIPT(room), struct script_data, 1);

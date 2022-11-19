@@ -700,8 +700,8 @@ void char_to_room(struct char_data *ch, room_rnum room) {
 /* give an object to a char   */
 void obj_to_char(struct obj_data *object, struct char_data *ch) {
     if (object && ch) {
-        object->next_content = ch->carrying;
-        ch->carrying = object;
+        object->next_content = ch->contents;
+        ch->contents = object;
         object->carried_by = ch;
         IN_ROOM(object) = NOWHERE;
         IS_CARRYING_W(ch) += GET_OBJ_WEIGHT(object);
@@ -737,7 +737,7 @@ void obj_from_char(struct obj_data *object) {
         log("SYSERR: nullptr object passed to obj_from_char.");
         return;
     }
-    REMOVE_FROM_LIST(object, object->carried_by->carrying, next_content, temp);
+    REMOVE_FROM_LIST(object, object->carried_by->contents, next_content, temp);
 
     /* set flag for crash-save system, but not on mobs! */
     if (!IS_NPC(object->carried_by))
@@ -1017,23 +1017,23 @@ void obj_to_room(struct obj_data *object, room_rnum room) {
                 if (real_room(GET_OBJ_VAL(object, 3)) != NOWHERE) {
                     vehicle = read_object(GET_OBJ_VAL(object, 0), VIRTUAL);
                     obj_to_room(vehicle, real_room(GET_OBJ_VAL(object, 3)));
-                    if (object->action_description) {
-                        if (strlen(object->action_description)) {
+                    if (object->look_description) {
+                        if (strlen(object->look_description)) {
                             char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH], nick3[MAX_INPUT_LENGTH];
                             if (GET_OBJ_VNUM(vehicle) <= 46099 && GET_OBJ_VNUM(vehicle) >= 46000) {
-                                sprintf(nick, "Saiyan Pod %s", object->action_description);
+                                sprintf(nick, "Saiyan Pod %s", object->look_description);
                                 sprintf(nick2, "@wA @Ys@ya@Yi@yy@Ya@yn @Dp@Wo@Dd@w named @D(@C%s@D)@w",
-                                        object->action_description);
+                                        object->look_description);
                             } else if (GET_OBJ_VNUM(vehicle) >= 46100 && GET_OBJ_VNUM(vehicle) <= 46199) {
-                                sprintf(nick, "EDI Xenofighter MK. II %s", object->action_description);
+                                sprintf(nick, "EDI Xenofighter MK. II %s", object->look_description);
                                 sprintf(nick2,
                                         "@wAn @YE@yD@YI @CX@ce@Wn@Do@Cf@ci@Wg@Dh@Wt@ce@Cr @RMK. II @wnamed @D(@C%s@D)@w",
-                                        object->action_description);
+                                        object->look_description);
                             }
                             sprintf(nick3, "%s is resting here@w", nick2);
                             vehicle->name = strdup(nick);
                             vehicle->short_description = strdup(nick2);
-                            vehicle->description = strdup(nick3);
+                            vehicle->room_description = strdup(nick3);
                         }
                     }
                     SET_BIT(GET_OBJ_VAL(object, VAL_CONTAINER_FLAGS), CONT_CLOSED);
@@ -1115,8 +1115,8 @@ void obj_to_obj(struct obj_data *obj, struct obj_data *obj_to) {
         return;
     }
 
-    obj->next_content = obj_to->contains;
-    obj_to->contains = obj;
+    obj->next_content = obj_to->contents;
+    obj_to->contents = obj;
     obj->in_obj = obj_to;
     tmp_obj = obj->in_obj;
 
@@ -1147,7 +1147,7 @@ void obj_from_obj(struct obj_data *obj) {
     }
     obj_from = obj->in_obj;
     temp = obj->in_obj;
-    REMOVE_FROM_LIST(obj, obj_from->contains, next_content, temp);
+    REMOVE_FROM_LIST(obj, obj_from->contents, next_content, temp);
 
     /* Subtract weight from containers container */
     /* Only worry about weight for non-eternal containers
@@ -1174,7 +1174,7 @@ void obj_from_obj(struct obj_data *obj) {
 /* Set all carried_by to point to new owner */
 void object_list_new_owner(struct obj_data *list, struct char_data *ch) {
     if (list) {
-        object_list_new_owner(list->contains, ch);
+        object_list_new_owner(list->contents, ch);
         object_list_new_owner(list->next_content, ch);
         list->carried_by = ch;
     }
@@ -1222,13 +1222,13 @@ void extract_obj(struct obj_data *obj) {
         USER(obj) = nullptr;
     }
 
-    while (obj->contains)
-        extract_obj(obj->contains);
+    while (obj->contents)
+        extract_obj(obj->contents);
 
     REMOVE_FROM_LIST(obj, object_list, next, temp);
 
     if (GET_OBJ_RNUM(obj) != NOTHING)
-        (obj_index[GET_OBJ_RNUM(obj)].number)--;
+        (obj_index[GET_OBJ_RNUM(obj)].vn)--;
 
     if (SCRIPT(obj))
         extract_script(obj, OBJ_TRIGGER);
@@ -1248,8 +1248,8 @@ static void update_object(struct obj_data *obj, int use) {
     /* dont update objects with a timer trigger */
     if (!SCRIPT_CHECK(obj, OTRIG_TIMER) && (GET_OBJ_TIMER(obj) > 0))
         GET_OBJ_TIMER(obj) -= use;
-    if (obj->contains)
-        update_object(obj->contains, use);
+    if (obj->contents)
+        update_object(obj->contents, use);
     if (obj->next_content)
         update_object(obj->next_content, use);
 }
@@ -1278,8 +1278,8 @@ void update_char_objects(struct char_data *ch) {
             update_object(GET_EQ(ch, i), 2);
         }
 
-    if (ch->carrying)
-        update_object(ch->carrying, 1);
+    if (ch->contents)
+        update_object(ch->contents, 1);
 }
 
 
@@ -1445,8 +1445,8 @@ void extract_char_final(struct char_data *ch) {
     }
 
     /* transfer objects to room, if any */
-    while (ch->carrying) {
-        obj = ch->carrying;
+    while (ch->contents) {
+        obj = ch->contents;
         obj_from_char(obj);
         obj_to_room(obj, IN_ROOM(ch));
     }
@@ -1522,8 +1522,8 @@ void extract_char(struct char_data *ch) {
         if (IS_NPC(foll->follower) && AFF_FLAGGED(foll->follower, AFF_CHARM) &&
             (IN_ROOM(foll->follower) == IN_ROOM(ch) || IN_ROOM(ch) == 1)) {
             /* transfer objects to char, if any */
-            while (foll->follower->carrying) {
-                obj = foll->follower->carrying;
+            while (foll->follower->contents) {
+                obj = foll->follower->contents;
                 obj_from_char(obj);
                 obj_to_char(obj, ch);
             }
@@ -1805,7 +1805,7 @@ struct obj_data *get_obj_vis(struct char_data *ch, char *name, int *number) {
         return (nullptr);
 
     /* scan items carried */
-    if ((i = get_obj_in_list_vis(ch, name, number, ch->carrying)) != nullptr)
+    if ((i = get_obj_in_list_vis(ch, name, number, ch->contents)) != nullptr)
         return (i);
 
     /* scan room */
@@ -1915,14 +1915,14 @@ struct obj_data *create_money(int amount) {
     if (amount == 1) {
         obj->name = strdup("zenni money");
         obj->short_description = strdup("a single zenni");
-        obj->description = strdup("One miserable zenni is lying here");
+        obj->room_description = strdup("One miserable zenni is lying here");
         new_descr->keyword = strdup("zenni money");
         new_descr->description = strdup("It's just one miserable little zenni.");
     } else {
         obj->name = strdup("zenni money");
         obj->short_description = strdup(money_desc(amount));
         snprintf(buf, sizeof(buf), "%s is lying here", money_desc(amount));
-        obj->description = strdup(CAP(buf));
+        obj->room_description = strdup(CAP(buf));
 
         new_descr->keyword = strdup("zenni money");
         if (amount < 10)
@@ -1951,7 +1951,7 @@ struct obj_data *create_money(int amount) {
     SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_TAKE);
     GET_OBJ_VAL(obj, VAL_MONEY_SIZE) = amount;
     GET_OBJ_COST(obj) = amount;
-    obj->item_number = NOTHING;
+    obj->vn = NOTHING;
 
     return (obj);
 }
@@ -2010,7 +2010,7 @@ int generic_find(char *arg, bitvector_t bitvector, struct char_data *ch,
     }
 
     if (IS_SET(bitvector, FIND_OBJ_INV)) {
-        if ((*tar_obj = get_obj_in_list_vis(ch, name, &number, ch->carrying)) != nullptr)
+        if ((*tar_obj = get_obj_in_list_vis(ch, name, &number, ch->contents)) != nullptr)
             return (FIND_OBJ_INV);
     }
 

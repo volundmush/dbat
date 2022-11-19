@@ -577,9 +577,9 @@ static struct obj_data *get_purchase_obj(struct char_data *ch, char *arg,
     one_argument(arg, name);
     do {
         if (*name == '#' || is_number(name))
-            obj = get_hash_obj_vis(ch, name, keeper->carrying);
+            obj = get_hash_obj_vis(ch, name, keeper->contents);
         else
-            obj = get_slide_obj_vis(ch, name, keeper->carrying);
+            obj = get_slide_obj_vis(ch, name, keeper->contents);
         if (!obj) {
             if (msg) {
                 char buf[MAX_INPUT_LENGTH];
@@ -914,7 +914,7 @@ static void shopping_buy(char *arg, struct char_data *ch, struct char_data *keep
     if (!ADM_FLAGGED(ch, ADM_MONEY))
         GET_GOLD(keeper) += goldamt;
 
-    strlcpy(tempstr, times_message(ch->carrying, nullptr, bought), sizeof(tempstr));
+    strlcpy(tempstr, times_message(ch->contents, nullptr, bought), sizeof(tempstr));
 
     snprintf(tempbuf, sizeof(tempbuf), "$n buys %s.", tempstr);
     act(tempbuf, false, ch, obj, nullptr, TO_ROOM);
@@ -937,7 +937,7 @@ get_selling_obj(struct char_data *ch, char *name, struct char_data *keeper, vnum
     struct obj_data *obj;
     int result;
 
-    if (!(obj = get_obj_in_list_vis(ch, name, nullptr, ch->carrying))) {
+    if (!(obj = get_obj_in_list_vis(ch, name, nullptr, ch->contents))) {
         if (msg) {
             char tbuf[MAX_INPUT_LENGTH];
 
@@ -996,9 +996,9 @@ static struct obj_data *slide_obj(struct obj_data *obj, struct char_data *keeper
         return (&obj_proto[temp]);
     }
     SHOP_SORT(shop_nr)++;
-    loop = keeper->carrying;
+    loop = keeper->contents;
     obj_to_char(obj, keeper);
-    keeper->carrying = loop;
+    keeper->contents = loop;
     while (loop) {
         if (same_obj(obj, loop)) {
             obj->next_content = loop->next_content;
@@ -1007,7 +1007,7 @@ static struct obj_data *slide_obj(struct obj_data *obj, struct char_data *keeper
         }
         loop = loop->next_content;
     }
-    keeper->carrying = obj;
+    keeper->contents = obj;
     return (obj);
 }
 
@@ -1015,7 +1015,7 @@ static void sort_keeper_objs(struct char_data *keeper, vnum shop_nr) {
     struct obj_data *list = nullptr, *temp;
 
     while (SHOP_SORT(shop_nr) < IS_CARRYING_N(keeper)) {
-        temp = keeper->carrying;
+        temp = keeper->contents;
         obj_from_char(temp);
         temp->next_content = list;
         list = temp;
@@ -1025,7 +1025,7 @@ static void sort_keeper_objs(struct char_data *keeper, vnum shop_nr) {
         temp = list;
         list = list->next_content;
         if (shop_producing(temp, shop_nr) &&
-            !get_obj_in_list_num(GET_OBJ_RNUM(temp), keeper->carrying)) {
+            !get_obj_in_list_num(GET_OBJ_RNUM(temp), keeper->contents)) {
             obj_to_char(temp, keeper);
             SHOP_SORT(shop_nr)++;
         } else
@@ -1213,8 +1213,8 @@ static void shopping_list(char *arg, struct char_data *ch, struct char_data *kee
 
     len = strlcpy(buf, " ##   Available   Item                             Min. Lvl       Cost\r\n"
                        "----------------------------------------------------------------------\r\n", sizeof(buf));
-    if (keeper->carrying)
-        for (obj = keeper->carrying; obj; obj = obj->next_content)
+    if (keeper->contents)
+        for (obj = keeper->contents; obj; obj = obj->next_content)
             if (CAN_SEE_OBJ(ch, obj) && GET_OBJ_COST(obj) > 0) {
                 if (!last_obj) {
                     last_obj = obj;
@@ -1269,7 +1269,7 @@ SPECIAL(shop_keeper) {
     vnum shop_nr = NOTHING;
 
     for (auto &sh : shop_index) {
-        if (sh.second.keeper == keeper->nr) {
+        if (sh.second.keeper == keeper->vn) {
             shop_nr = sh.first;
             break;
         }
@@ -1667,7 +1667,7 @@ static void list_all_shops(struct char_data *ch) {
             strcpy(buf1, "<NONE>");    /* strcpy: OK (for 'buf1 >= 7') */
         else
             sprintf(buf1, "%6d",
-                    mob_index[SHOP_KEEPER(shop_nr)].vnum);    /* sprintf: OK (for 'buf1 >= 11', 32-bit int) */
+                    mob_index[SHOP_KEEPER(shop_nr)].vn);    /* sprintf: OK (for 'buf1 >= 11', 32-bit int) */
 
         len += snprintf(buf + len, sizeof(buf) - len,
                         "%3d   %6d   %6d    %s   %3.2f   %3.2f    %s\r\n",
@@ -1721,7 +1721,7 @@ static void list_detailed_shop(struct char_data *ch, vnum shop_nr) {
     if (SHOP_KEEPER(shop_nr) != NOBODY) {
         send_to_char(ch, "%s (#%d), Special Function: %s\r\n",
                      GET_NAME(&mob_proto[SHOP_KEEPER(shop_nr)]),
-                     mob_index[SHOP_KEEPER(shop_nr)].vnum,
+                     mob_index[SHOP_KEEPER(shop_nr)].vn,
                      YESNO(SHOP_FUNC(shop_nr)));
 
         if ((k = get_char_num(SHOP_KEEPER(shop_nr))))
@@ -1746,7 +1746,7 @@ static void list_detailed_shop(struct char_data *ch, vnum shop_nr) {
         }
         linelen = snprintf(buf1, sizeof(buf1), "%s (#%d)",
                            obj_proto[SHOP_PRODUCT(shop_nr, sindex)].short_description,
-                           obj_index[SHOP_PRODUCT(shop_nr, sindex)].vnum);
+                           obj_index[SHOP_PRODUCT(shop_nr, sindex)].vn);
 
         /* Implementing word-wrapping: assumes screen-size == 80 */
         if (linelen + column >= 78 && column >= 20) {

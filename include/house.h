@@ -15,7 +15,7 @@
 
 
 struct house_control_rec {
-    room_vnum vnum;        /* vnum of this house		*/
+    room_vnum vn;        /* vnum of this house		*/
     room_vnum atrium;        /* vnum of atrium		*/
     int16_t exit_num;        /* direction of house's exit	*/
     time_t built_on;        /* date this house was built	*/

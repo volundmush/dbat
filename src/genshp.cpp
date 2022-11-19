@@ -427,7 +427,7 @@ int save_shops(zone_rnum zone_num) {
                     S_SELL(shop) ? S_SELL(shop) : "%s Ke?! %d?",
                     S_BROKE_TEMPER(shop),
                     S_BITVECTOR(shop),
-                    S_KEEPER(shop) == NOBODY ? -1 : mob_index[S_KEEPER(shop)].vnum
+                    S_KEEPER(shop) == NOBODY ? -1 : mob_index[S_KEEPER(shop)].vn
             );
             for (j = 0; j < SW_ARRAY_MAX; j++)
                 fprintf(shop_file, "%s%d", j ? " " : "", S_NOTRADE(shop)[j]);

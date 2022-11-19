@@ -77,7 +77,7 @@ void wld_log(room_data *room, const char *format, ...) {
     va_list args;
     char output[MAX_STRING_LENGTH];
 
-    snprintf(output, sizeof(output), "Room %d :: %s", room->number, format);
+    snprintf(output, sizeof(output), "Room %d :: %s", room->vn, format);
 
     va_start(args, format);
     script_vlog(output, args);
@@ -131,7 +131,7 @@ WCMD(do_weffect) {
             wld_log(room, "weffect setting out of bounds, 0 - 10000 only.");
             return;
         } else {
-            ROOM_GRAVITY(real_room(room->number)) = num;
+            ROOM_GRAVITY(real_room(room->vn)) = num;
         }
     } else if (!strcasecmp(arg, "light")) {
         if (target == NOWHERE) {
@@ -368,7 +368,7 @@ WCMD(do_wteleport) {
         wld_log(room, "wteleport target is an invalid room");
 
     else if (!strcasecmp(arg1, "all")) {
-        if (nr == room->number) {
+        if (nr == room->vn) {
             wld_log(room, "wteleport all target is itself");
             return;
         }
@@ -498,7 +498,7 @@ WCMD(do_wload) {
     if (is_abbrev(arg1, "mob")) {
         room_rnum rnum;
         if (!target || !*target) {
-            rnum = real_room(room->number);
+            rnum = real_room(room->vn);
         } else {
             if (!isdigit(*target) || (rnum = real_room(atoi(target))) == NOWHERE) {
                 wld_log(room, "wload: room target vnum doesn't exist (loading mob vnum %d to room %s)", number, target);
@@ -524,7 +524,7 @@ WCMD(do_wload) {
         /* special handling to make objects able to load on a person/in a container/worn etc. */
         if (!target || !*target) {
             add_unique_id(object);
-            obj_to_room(object, real_room(room->number));
+            obj_to_room(object, real_room(room->vn));
             if (SCRIPT(room)) { /* It _should_ have, but it might be detached. */
                 char buf[MAX_INPUT_LENGTH];
                 sprintf(buf, "%c%d", UID_CHAR, GET_ID(object));
@@ -557,7 +557,7 @@ WCMD(do_wload) {
         }
         /* neither char nor container found - just dump it in room */
         add_unique_id(object);
-        obj_to_room(object, real_room(room->number));
+        obj_to_room(object, real_room(room->vn));
         load_otrigger(object);
         return;
     } else

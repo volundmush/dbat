@@ -500,7 +500,7 @@ void show_board(obj_vnum board_vnum, struct char_data *ch) {
             if (GET_CLAN(ch) != nullptr) {
                 sprintf(clan, "%s", GET_CLAN(ch));
             }
-            if (!strstr(obj->action_description, clan)) {
+            if (!strstr(obj->look_description, clan)) {
                 send_to_char(ch, "You are incapable of reading this board!\r\n");
                 return;
             }
@@ -621,7 +621,7 @@ void board_display_msg(obj_vnum board_vnum, struct char_data *ch, int arg) {
             if (GET_CLAN(ch) != nullptr) {
                 sprintf(clan, "%s", GET_CLAN(ch));
             }
-            if (!strstr(obj->action_description, clan)) {
+            if (!strstr(obj->look_description, clan)) {
                 send_to_char(ch, "You are incapable of reading this board!\r\n");
                 return;
             }
@@ -1028,7 +1028,7 @@ void remove_board_msg(obj_vnum board_vnum, struct char_data *ch, int arg) {
             if (GET_CLAN(ch) != nullptr) {
                 sprintf(clan, "%s", GET_CLAN(ch));
             }
-            if (clanIsModerator(clan, ch) && strstr(obj->action_description, clan)) {
+            if (clanIsModerator(clan, ch) && strstr(obj->look_description, clan)) {
                 send_to_char(ch, "Exercising your clan leader powers....\r\n");
             } else if (GET_ADMLEVEL(ch) < REMOVE_LVL(thisboard) && strcmp(GET_NAME(ch), MESG_POSTER_NAME(cur))) {
                 send_to_char(ch, "You can't remove other people's messages.\r\n");

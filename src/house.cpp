@@ -68,7 +68,7 @@ int House_save(struct obj_data *obj, FILE *fp, int location) {
     }
     if (obj) {
         House_save(obj->next_content, fp, location);
-        House_save(obj->contains, fp, MIN(0, location) - 1);
+        House_save(obj->contents, fp, MIN(0, location) - 1);
         result = Obj_to_store(obj, fp, location);
         if (!result)
             return (0);
@@ -83,7 +83,7 @@ int House_save(struct obj_data *obj, FILE *fp, int location) {
 /* restore weight of containers after House_save has changed them for saving */
 void House_restore_weight(struct obj_data *obj) {
     if (obj) {
-        House_restore_weight(obj->contains);
+        House_restore_weight(obj->contents);
         House_restore_weight(obj->next_content);
         if (obj->in_obj)
             GET_OBJ_WEIGHT(obj->in_obj) += GET_OBJ_WEIGHT(obj);
@@ -141,7 +141,7 @@ int find_house(room_vnum vnum) {
     int i;
 
     for (i = 0; i < num_of_houses; i++)
-        if (house_control[i].vnum == vnum)
+        if (house_control[i].vn == vnum)
             return (i);
 
     return (NOWHERE);
@@ -188,16 +188,16 @@ void House_boot() {
         if (get_name_by_id(temp_house.owner) == nullptr)
             continue;            /* owner no longer exists -- skip */
 
-        if ((real_house = real_room(temp_house.vnum)) == NOWHERE)
+        if ((real_house = real_room(temp_house.vn)) == NOWHERE)
             continue;            /* this vnum doesn't exist -- skip */
 
-        if (find_house(temp_house.vnum) != NOWHERE)
+        if (find_house(temp_house.vn) != NOWHERE)
             continue;            /* this vnum is already a house -- skip */
 
         house_control[num_of_houses++] = temp_house;
 
         SET_BIT_AR(ROOM_FLAGS(real_house), ROOM_HOUSE);
-        House_load(temp_house.vnum);
+        House_load(temp_house.vn);
     }
 
     fclose(fl);
@@ -248,7 +248,7 @@ void hcontrol_list_houses(struct char_data *ch) {
         /* Now we need a copy of the owner's name to capitalize. -gg 6/21/98 */
         strcpy(own_name, temp);    /* strcpy: OK (names guaranteed <= MAX_NAME_LENGTH+1) */
         send_to_char(ch, "%7d %-10s    %2d    %-12s %s\r\n",
-                     house_control[i].vnum, built_on,
+                     house_control[i].vn, built_on,
                      house_control[i].num_of_guests, CAP(own_name), last_pay);
 
         House_list_guests(ch, i, true);
@@ -314,7 +314,7 @@ void hcontrol_build_house(struct char_data *ch, char *arg) {
     }
 
     temp_house.mode = HOUSE_PRIVATE;
-    temp_house.vnum = virt_house;
+    temp_house.vn = virt_house;
     temp_house.exit_num = exit_num;
     temp_house.built_on = time(nullptr);
     temp_house.last_payment = 0;
@@ -348,14 +348,14 @@ void hcontrol_destroy_house(struct char_data *ch, char *arg) {
     else
         REMOVE_BIT_AR(ROOM_FLAGS(real_atrium), ROOM_ATRIUM);
 
-    if ((real_house = real_room(house_control[i].vnum)) == NOWHERE)
-        log("SYSERR: House %d had invalid vnum %d!", atoi(arg), house_control[i].vnum);
+    if ((real_house = real_room(house_control[i].vn)) == NOWHERE)
+        log("SYSERR: House %d had invalid vnum %d!", atoi(arg), house_control[i].vn);
     else {
         REMOVE_BIT_AR(ROOM_FLAGS(real_house), ROOM_HOUSE);
         REMOVE_BIT_AR(ROOM_FLAGS(real_house), ROOM_HOUSE_CRASH);
     }
 
-    House_delete_file(house_control[i].vnum);
+    House_delete_file(house_control[i].vn);
 
     for (j = i; j < num_of_houses - 1; j++)
         house_control[j] = house_control[j + 1];
@@ -464,8 +464,8 @@ void House_save_all() {
     room_rnum real_house;
 
     for (i = 0; i < num_of_houses; i++)
-        if ((real_house = real_room(house_control[i].vnum)) != NOWHERE)
-            House_crashsave(house_control[i].vnum);
+        if ((real_house = real_room(house_control[i].vn)) != NOWHERE)
+            House_crashsave(house_control[i].vn);
 }
 
 
@@ -562,7 +562,7 @@ int House_load(room_vnum rvnum) {
             /* we have the number, check it, load obj. */
             if (nr == NOTHING) {   /* then it is unique */
                 temp = create_obj();
-                temp->item_number = NOTHING;
+                temp->vn = NOTHING;
             } else if (nr < 0) {
                 continue;
             } else {
@@ -615,12 +615,12 @@ int House_load(room_vnum rvnum) {
                     temp->short_description = "undefined";
                 }
 
-                if ((temp->description = fread_string(fl, buf2)) == nullptr) {
-                    temp->description = "undefined";
+                if ((temp->room_description = fread_string(fl, buf2)) == nullptr) {
+                    temp->room_description = "undefined";
                 }
 
-                if ((temp->action_description = fread_string(fl, buf2)) == nullptr) {
-                    temp->action_description = nullptr;
+                if ((temp->look_description = fread_string(fl, buf2)) == nullptr) {
+                    temp->look_description = nullptr;
                 }
 
 
@@ -741,7 +741,7 @@ int House_load(room_vnum rvnum) {
                 if (GET_OBJ_TYPE(temp) == ITEM_CONTAINER) {
                     /* take item ; fill ; give to char again */
                     obj_from_room(temp);
-                    temp->contains = nullptr;
+                    temp->contents = nullptr;
                     for (; cont_row[j]; cont_row[j] = obj1) {
                         obj1 = cont_row[j]->next_content;
                         obj_to_obj(cont_row[j], temp);

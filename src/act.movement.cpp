@@ -568,7 +568,7 @@ static int has_boat(struct char_data *ch) {
         return (1);
 
     /* non-wearable boats in inventory will do it */
-    for (obj = ch->carrying; obj; obj = obj->next_content)
+    for (obj = ch->contents; obj; obj = obj->next_content)
         if (GET_OBJ_TYPE(obj) == ITEM_BOAT && (find_eq_pos(ch, obj, nullptr) < 0))
             return (1);
 
@@ -608,7 +608,7 @@ static int has_flight(struct char_data *ch) {
     }
 
     /* non-wearable flying items in inventory will do it */
-    for (obj = ch->carrying; obj; obj = obj->next_content)
+    for (obj = ch->contents; obj; obj = obj->next_content)
         if (OBJAFF_FLAGGED(obj, AFF_FLYING) && (find_eq_pos(ch, obj, nullptr) < 0))
             return (1);
 
@@ -1461,7 +1461,7 @@ static int has_key(struct char_data *ch, obj_vnum key) {
         return (1);
     }
 
-    for (o = ch->carrying; o; o = o->next_content)
+    for (o = ch->contents; o; o = o->next_content)
         if (GET_OBJ_VNUM(o) == key)
             return (1);
 
@@ -1742,7 +1742,7 @@ static int ok_pick(struct char_data *ch, obj_vnum keynum, int pickproof, int dcl
     int skill_lvl, found = false;
     struct obj_data *obj, *next_obj;
 
-    for (obj = ch->carrying; obj; obj = next_obj) {
+    for (obj = ch->contents; obj; obj = next_obj) {
         next_obj = obj->next_content;
         if (GET_OBJ_VNUM(obj) == 18 && (!OBJ_FLAGGED(obj, ITEM_BROKEN) && !OBJ_FLAGGED(obj, ITEM_FORGED))) {
             found = true;
@@ -2067,7 +2067,7 @@ ACMD(do_enter) {
         obj = get_obj_in_list_vis(ch, buf, nullptr, world[IN_ROOM(ch)].contents);
         /* Is the object in the character's inventory? */
         if (!obj)
-            obj = get_obj_in_list_vis(ch, buf, nullptr, ch->carrying);
+            obj = get_obj_in_list_vis(ch, buf, nullptr, ch->contents);
         /* Is the character carrying the object? */
         if (!obj)
             obj = get_obj_in_equip_vis(ch, buf, nullptr, ch->equipment);
@@ -2241,7 +2241,7 @@ static int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_
     send_to_scouter(buf3, ch, 0, 0);
 
     if (ch->desc != nullptr) {
-        act(obj->action_description, true, ch, obj, nullptr, TO_CHAR);
+        act(obj->look_description, true, ch, obj, nullptr, TO_CHAR);
         look_at_room(IN_ROOM(ch), ch, 0);
     }
 

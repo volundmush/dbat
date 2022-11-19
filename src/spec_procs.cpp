@@ -172,7 +172,7 @@ int num_players_in_room(room_vnum room) {
             continue;
         if (!world.count(IN_ROOM(i->character)))
             continue;
-        if (world[IN_ROOM(i->character)].number != room)
+        if (world[IN_ROOM(i->character)].vn != room)
             continue;
         if ((GET_ADMLEVEL(i->character) >= ADMLVL_IMMORT) &&
             (PRF_FLAGGED(i->character, PRF_NOHASSLE))) /* Ignore Imms */
@@ -190,7 +190,7 @@ bool check_mob_in_room(mob_vnum mob, room_vnum room) {
 
     for (i = character_list; i; i = i->next)
         if (GET_MOB_VNUM(i) == mob)
-            if (world[i->in_room].number == room) found = true;
+            if (world[i->in_room].vn == room) found = true;
 
     return found;
 }
@@ -269,7 +269,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
 
     /* give player credit for making it this far */
     for (i = 0; gauntlet_info[i][0] != -1; i++) {
-        if ((!IS_NPC(ch)) && (world[IN_ROOM(ch)].number == gauntlet_info[i][1])) {
+        if ((!IS_NPC(ch)) && (world[IN_ROOM(ch)].vn == gauntlet_info[i][1])) {
             /* Check not overwriting gauntlet rank with lower value (Jamdog - 20th July 2006) */
             if (GET_GAUNTLET(ch) < (gauntlet_info[i][0])) {
                 //set player's gauntlet rank
@@ -326,7 +326,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
       }
     } */
     for (i = 0; gauntlet_info[i][0] != -1; i++) {
-        if (world[ch->in_room].number == gauntlet_info[i][1]) {
+        if (world[ch->in_room].vn == gauntlet_info[i][1]) {
             if (cmd == gauntlet_info[i][2]) {
                 //don't let him proceed if mob is still alive
                 for (tch = world[ch->in_room].people; tch; tch = tch->next_in_room) {
@@ -412,7 +412,7 @@ SPECIAL(gauntlet_end)  /* Jamdog - 20th Feb 2007 */
         return false;
 
     for (i = 0; gauntlet_info[i][0] != -1; i++) {
-        if (world[EXIT(ch, (cmd - 1))->to_room].number == gauntlet_info[i][1]) {
+        if (world[EXIT(ch, (cmd - 1))->to_room].vn == gauntlet_info[i][1]) {
             send_to_char(ch, "You have completed the gauntlet, you cannot go backwards!\r\n");
             return true;
         }
@@ -460,7 +460,7 @@ SPECIAL(gauntlet_rest)  /* Jamdog - 20th Feb 2007 */
             if (EXIT_FLAGGED(EXIT(ch, door), EX_CLOSED))
                 continue;
 
-            if ((world[EXIT(ch, door)->to_room].number == gauntlet_info[i][1]) && (door == (cmd - 1))) {
+            if ((world[EXIT(ch, door)->to_room].vn == gauntlet_info[i][1]) && (door == (cmd - 1))) {
                 nomob = true;
 
                 /* Check the next room for players and ensure mob is waiting */
@@ -693,7 +693,7 @@ SPECIAL(fido) {
             continue;
 
         act("$n savagely devours a corpse.", false, ch, nullptr, nullptr, TO_ROOM);
-        for (temp = i->contains; temp; temp = next_obj) {
+        for (temp = i->contents; temp; temp = next_obj) {
             next_obj = temp->next_content;
             obj_from_obj(temp);
             obj_to_room(temp, IN_ROOM(ch));
@@ -831,9 +831,9 @@ SPECIAL(pet_shops) {
             pet->name = strdup(buf);
 
             snprintf(buf, sizeof(buf), "%sA small sign on a chain around the neck says 'My name is %s'\r\n",
-                     pet->description, pet_name);
+                     pet->look_description, pet_name);
             /* free(pet->description); don't free the prototype! */
-            pet->description = strdup(buf);
+            pet->look_description = strdup(buf);
         }
         char_to_room(pet, IN_ROOM(ch));
         add_follower(pet, ch);
@@ -1008,7 +1008,7 @@ SPECIAL(auction) {
 
         value = atoi(arg2);
 
-        if (!(obj2 = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
+        if (!(obj2 = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
             send_to_char(ch, "You don't have that item to auction.\r\n");
             return (true);
         }

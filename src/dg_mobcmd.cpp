@@ -286,11 +286,11 @@ ACMD(do_mjunk) {
             extract_obj(unequip_char(ch, pos));
             return;
         }
-        if ((obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying)) != nullptr)
+        if ((obj = get_obj_in_list_vis(ch, arg, nullptr, ch->contents)) != nullptr)
             extract_obj(obj);
         return;
     } else {
-        for (obj = ch->carrying; obj != nullptr; obj = obj_next) {
+        for (obj = ch->contents; obj != nullptr; obj = obj_next) {
             obj_next = obj->next_content;
             if (arg[3] == '\0' || isname(arg + 4, obj->name)) {
                 extract_obj(obj);
@@ -1004,17 +1004,17 @@ ACMD(do_mtransform) {
             tmpmob.name = strdup(m->name);
         if (m->title)
             tmpmob.title = strdup(m->title);
-        if (m->short_descr)
-            tmpmob.short_descr = strdup(m->short_descr);
-        if (m->long_descr)
-            tmpmob.long_descr = strdup(m->long_descr);
-        if (m->description)
-            tmpmob.description = strdup(m->description);
+        if (m->short_description)
+            tmpmob.short_description = strdup(m->short_description);
+        if (m->room_description)
+            tmpmob.room_description = strdup(m->room_description);
+        if (m->look_description)
+            tmpmob.look_description = strdup(m->look_description);
 
 
         tmpmob.id = ch->id;
         tmpmob.affected = ch->affected;
-        tmpmob.carrying = ch->carrying;
+        tmpmob.contents = ch->contents;
         tmpmob.proto_script = ch->proto_script;
         tmpmob.script = ch->script;
         tmpmob.memory = ch->memory;
@@ -1037,7 +1037,7 @@ ACMD(do_mtransform) {
                 equip_char(ch, obj[pos], pos);
         }
 
-        ch->nr = this_rnum;
+        ch->vn = this_rnum;
         extract_char(m);
     }
 }

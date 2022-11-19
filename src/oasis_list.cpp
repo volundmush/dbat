@@ -144,7 +144,7 @@ ACMD(do_oasis_links) {
                         send_to_char(ch, "%3d %-30s at %5d (%-5s) ---> %5d\r\n",
                                      zone_table[world[to_room].zone].number,
                                      zone_table[world[to_room].zone].name,
-                                     GET_ROOM_VNUM(nr), dirs[j], world[to_room].number);
+                                     GET_ROOM_VNUM(nr), dirs[j], world[to_room].vn);
                 }
             }
         }
@@ -194,7 +194,7 @@ void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum 
                     continue;
 
                 if (world[W_EXIT(i, j)->to_room].zone != r.second.zone)
-                    send_to_char(ch, "(@y%d@n)", world[W_EXIT(i, j)->to_room].number);
+                    send_to_char(ch, "(@y%d@n)", world[W_EXIT(i, j)->to_room].vn);
 
             }
 
@@ -230,8 +230,8 @@ void list_mobiles(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnu
             counter++;
 
             send_to_char(ch, "@g%4d@n) [@g%-5d@n] @[3]%-*s @C%-9s @c%-9s @y[%4d]@n %s\r\n",
-                         counter, m.first, count_color_chars(m.second.short_descr) + 30,
-                         m.second.short_descr, TRUE_RACE(&m.second), m.second.chclass->getName().c_str(),
+                         counter, m.first, count_color_chars(m.second.short_description) + 30,
+                         m.second.short_description, TRUE_RACE(&m.second), m.second.chclass->getName().c_str(),
                          m.second.level + m.second.level_adj + m.second.race_level,
                          m.second.proto_script ? " [TRIG]" : "");
         }

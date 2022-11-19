@@ -630,7 +630,7 @@ int check_ruby(struct char_data *ch) {
     struct obj_data *obj, *next_obj = nullptr, *ruby = nullptr;
     int found = 0;
 
-    for (obj = ch->carrying; obj; obj = next_obj) {
+    for (obj = ch->contents; obj; obj = next_obj) {
         next_obj = obj->next_content;
         if (found == 0 && GET_OBJ_VNUM(obj) == 6600) {
             if (OBJ_FLAGGED(obj, ITEM_HOT)) {
@@ -4776,7 +4776,7 @@ hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, struct 
                 solo_gain(ch, vict);
                 struct obj_data *rew, *next_rew;
                 int founded = 0;
-                for (rew = vict->carrying; rew; rew = next_rew) {
+                for (rew = vict->contents; rew; rew = next_rew) {
                     next_rew = rew->next_content;
                     if (rew) {
                         obj_from_char(rew);

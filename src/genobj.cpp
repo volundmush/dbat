@@ -24,11 +24,11 @@ obj_rnum add_object(struct obj_data *newobj, obj_vnum ovnum) {
     /*
      * Write object to internal tables.
      */
-    if ((newobj->item_number = real_object(ovnum)) != NOTHING) {
-        copy_object(&obj_proto[newobj->item_number], newobj);
-        update_objects(&obj_proto[newobj->item_number]);
+    if ((newobj->vn = real_object(ovnum)) != NOTHING) {
+        copy_object(&obj_proto[newobj->vn], newobj);
+        update_objects(&obj_proto[newobj->vn]);
         add_to_save_list(zone_table[rznum].number, SL_OBJ);
-        return newobj->item_number;
+        return newobj->vn;
     }
 
     found = insert_object(newobj, ovnum);
@@ -51,7 +51,7 @@ int update_objects(struct obj_data *refobj) {
     int count = 0;
 
     for (obj = object_list; obj; obj = obj->next) {
-        if (obj->item_number != refobj->item_number)
+        if (obj->vn != refobj->vn)
             continue;
 
         count++;
@@ -66,7 +66,7 @@ int update_objects(struct obj_data *refobj) {
         obj->worn_by = swap.worn_by;
         obj->worn_on = swap.worn_on;
         obj->in_obj = swap.in_obj;
-        obj->contains = swap.contains;
+        obj->contents = swap.contents;
         obj->next_content = swap.next_content;
         obj->next = swap.next;
     }
@@ -98,8 +98,8 @@ obj_rnum index_object(struct obj_data *obj, obj_vnum ovnum, obj_rnum ornum) {
     if (!obj || ornum == NOTHING || !obj_proto.count(ornum))
         return NOWHERE;
 
-    obj->item_number = ornum;
-    obj_index[ornum].vnum = ovnum;
+    obj->vn = ornum;
+    obj_index[ornum].vn = ovnum;
     obj_index[ornum].number = 0;
     obj_index[ornum].func = nullptr;
 
@@ -139,8 +139,8 @@ int save_objects(zone_rnum zone_num) {
      */
     for (auto counter = z.bot; counter <= z.top; counter++) {
         if ((realcounter = real_object(counter)) != NOTHING) {
-            if ((obj = &obj_proto[realcounter])->action_description) {
-                strncpy(buf, obj->action_description, sizeof(buf) - 1);
+            if ((obj = &obj_proto[realcounter])->look_description) {
+                strncpy(buf, obj->look_description, sizeof(buf) - 1);
                 strip_cr(buf);
             } else
                 *buf = '\0';
@@ -155,7 +155,7 @@ int save_objects(zone_rnum zone_num) {
                     GET_OBJ_VNUM(obj),
                     (obj->name && *obj->name) ? obj->name : "undefined",
                     (obj->short_description && *obj->short_description) ? obj->short_description : "undefined",
-                    (obj->description && *obj->description) ? obj->description : "undefined",
+                    (obj->room_description && *obj->room_description) ? obj->room_description : "undefined",
                     buf);
 
             sprintascii(ebuf1, GET_OBJ_EXTRA(obj)[0]);
@@ -277,12 +277,12 @@ void free_object_strings(struct obj_data *obj) {
 
     if (obj->name)
         free(obj->name);
-    if (obj->description)
-        free(obj->description);
+    if (obj->room_description)
+        free(obj->room_description);
     if (obj->short_description)
         free(obj->short_description);
-    if (obj->action_description)
-        free(obj->action_description);
+    if (obj->look_description)
+        free(obj->look_description);
     if (obj->ex_description)
         free_ex_descriptions(obj->ex_description);
 }
@@ -295,12 +295,12 @@ void free_object_strings_proto(struct obj_data *obj) {
 
     if (obj->name && obj->name != obj_proto[robj_num].name)
         free(obj->name);
-    if (obj->description && obj->description != obj_proto[robj_num].description)
-        free(obj->description);
+    if (obj->room_description && obj->room_description != obj_proto[robj_num].room_description)
+        free(obj->room_description);
     if (obj->short_description && obj->short_description != obj_proto[robj_num].short_description)
         free(obj->short_description);
-    if (obj->action_description && obj->action_description != obj_proto[robj_num].action_description)
-        free(obj->action_description);
+    if (obj->look_description && obj->look_description != obj_proto[robj_num].look_description)
+        free(obj->look_description);
     if (obj->ex_description) {
         struct extra_descr_data *thised, *plist, *next_one; /* O(horrible) */
         int ok_key, ok_desc, ok_item;
@@ -326,9 +326,9 @@ void free_object_strings_proto(struct obj_data *obj) {
 
 void copy_object_strings(struct obj_data *to, struct obj_data *from) {
     to->name = from->name ? strdup(from->name) : nullptr;
-    to->description = from->description ? strdup(from->description) : nullptr;
+    to->room_description = from->room_description ? strdup(from->room_description) : nullptr;
     to->short_description = from->short_description ? strdup(from->short_description) : nullptr;
-    to->action_description = from->action_description ? strdup(from->action_description) : nullptr;
+    to->look_description = from->look_description ? strdup(from->look_description) : nullptr;
 
     if (from->ex_description)
         copy_ex_descriptions(&to->ex_description, from->ex_description);
@@ -368,13 +368,13 @@ int delete_object(obj_rnum rnum) {
     log("GenOLC: delete_object: Deleting object #%d (%s).", GET_OBJ_VNUM(obj), obj->short_description);
 
     for (tmp = object_list; tmp; tmp = tmp->next) {
-        if (tmp->item_number != obj->item_number)
+        if (tmp->vn != obj->vn)
             continue;
 
         /* extract_obj() will just axe contents. */
-        if (tmp->contains) {
+        if (tmp->contents) {
             struct obj_data *this_content, *next_content;
-            for (this_content = tmp->contains; this_content; this_content = next_content) {
+            for (this_content = tmp->contents; this_content; this_content = next_content) {
                 next_content = this_content->next_content;
                 if (IN_ROOM(tmp)) {
                     /* Transfer stuff from object to room. */

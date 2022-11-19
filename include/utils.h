@@ -455,7 +455,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define IS_LIGHT(room)  (!IS_DARK(room))
 
 #define VALID_ROOM_RNUM(rnum)    (world.count(rnum) > 0 && rnum != NOWHERE)
-#define GET_ROOM_VNUM(rnum) (VALID_ROOM_RNUM(rnum) ? world[(rnum)].number : NOWHERE)
+#define GET_ROOM_VNUM(rnum) (VALID_ROOM_RNUM(rnum) ? world[(rnum)].vn : NOWHERE)
 #define GET_ROOM_SPEC(room) \
     (VALID_ROOM_RNUM(room) ? world[(room)].func : nullptr)
 
@@ -711,7 +711,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define GET_EQ(ch, i)        ((ch)->equipment[i])
 
 #define GET_MOB_SPEC(ch)    (IS_MOB(ch) ? mob_index[(ch)->nr].func : 0)
-#define GET_MOB_RNUM(mob)    ((mob)->nr)
+#define GET_MOB_RNUM(mob)    ((mob)->vn)
 #define GET_MOB_VNUM(mob)    (IS_MOB(mob) ? (mob_index.count((mob)->nr) ? (mob)->nr : NOBODY) : NOBODY)
 
 #define GET_DEFAULT_POS(ch)    ((ch)->mob_specials.default_pos)
@@ -812,9 +812,9 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define HCHARGE(obj)            ((obj)->healcharge)
 #define GET_LAST_LOAD(obj)      ((obj)->lload)
 #define GET_OBJ_SIZE(obj)    ((obj)->size)
-#define GET_OBJ_RNUM(obj)    ((obj)->item_number)
+#define GET_OBJ_RNUM(obj)    ((obj)->vn)
 #define GET_OBJ_VNUM(obj)    (VALID_OBJ_RNUM(obj) ? \
-                obj_index[GET_OBJ_RNUM(obj)].vnum : NOTHING)
+                obj_index[GET_OBJ_RNUM(obj)].vn : NOTHING)
 #define GET_OBJ_SPEC(obj)    (VALID_OBJ_RNUM(obj) ? \
                 obj_index[GET_OBJ_RNUM(obj)].func : 0)
 #define GET_FUEL(obj)           (GET_OBJ_VAL((obj), 2))

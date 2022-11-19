@@ -557,8 +557,8 @@ void destroy_db() {
     for (auto &r : world) {
         if (r.second.name)
             free(r.second.name);
-        if (r.second.description)
-            free(r.second.description);
+        if (r.second.look_description)
+            free(r.second.look_description);
         free_extra_descriptions(r.second.ex_description);
 
         /* free any assigned scripts */
@@ -584,12 +584,12 @@ void destroy_db() {
     for (auto &o : obj_proto) {
         if (o.second.name)
             free(o.second.name);
-        if (o.second.description)
-            free(o.second.description);
+        if (o.second.room_description)
+            free(o.second.room_description);
         if (o.second.short_description)
             free(o.second.short_description);
-        if (o.second.action_description)
-            free(o.second.action_description);
+        if (o.second.look_description)
+            free(o.second.look_description);
         if (o.second.ex_description)
             free_extra_descriptions(o.second.ex_description);
         if (o.second.sbinfo) free(o.second.sbinfo);
@@ -606,12 +606,12 @@ void destroy_db() {
             free(m.second.name);
         if (m.second.title)
             free(m.second.title);
-        if (m.second.short_descr)
-            free(m.second.short_descr);
-        if (m.second.long_descr)
-            free(mob_proto[cnt].long_descr);
-        if (m.second.description)
-            free(m.second.description);
+        if (m.second.short_description)
+            free(m.second.short_description);
+        if (m.second.room_description)
+            free(mob_proto[cnt].room_description);
+        if (m.second.look_description)
+            free(m.second.look_description);
 
         /* free script proto list */
         free_proto_script(&m.second, MOB_TRIGGER);
@@ -1337,9 +1337,9 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
     z.rooms.insert(virtual_nr);
 
     r.zone = zone;
-    r.number = virtual_nr;
+    r.vn = virtual_nr;
     r.name = fread_string(fl, buf2);
-    r.description = fread_string(fl, buf2);
+    r.look_description = fread_string(fl, buf2);
 
     if (!get_line(fl, line)) {
         log("SYSERR: Expecting roomflags/sector type of room #%d but file ended!",
@@ -1403,28 +1403,28 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
     if (ROOM_FLAGGED(virtual_nr, ROOM_VEGETA) || ROOM_FLAGGED(virtual_nr, ROOM_GRAVITYX10)) {
         r.gravity = 10;
     }
-    if (r.number >= 19800 && r.number <= 19899) {
+    if (r.vn >= 19800 && r.vn <= 19899) {
         r.gravity = 1000;
     }
-    if (r.number >= 64000 && r.number <= 64006) {
+    if (r.vn >= 64000 && r.vn <= 64006) {
         r.gravity = 100;
     }
-    if (r.number >= 64007 && r.number <= 64016) {
+    if (r.vn >= 64007 && r.vn <= 64016) {
         r.gravity = 300;
     }
-    if (r.number >= 64017 && r.number <= 64030) {
+    if (r.vn >= 64017 && r.vn <= 64030) {
         r.gravity = 500;
     }
-    if (r.number >= 64031 && r.number <= 64048) {
+    if (r.vn >= 64031 && r.vn <= 64048) {
         r.gravity = 1000;
     }
-    if (r.number >= 64049 && r.number <= 64070) {
+    if (r.vn >= 64049 && r.vn <= 64070) {
         r.gravity = 5000;
     }
-    if (r.number >= 64071 && r.number <= 64096) {
+    if (r.vn >= 64071 && r.vn <= 64096) {
         r.gravity = 10000;
     }
-    if (r.number == 64097) {
+    if (r.vn == 64097) {
         r.gravity = 1000;
     }
     for (i = 0; i < NUM_OF_DIRS; i++)
@@ -1931,7 +1931,7 @@ int parse_mobile_from_file(FILE *mob_f, struct char_data *ch) {
     char line[READ_SIZE], *tmpptr, letter;
     char f1[128], f2[128], f3[128], f4[128], f5[128], f6[128];
     char f7[128], f8[128], buf2[128];
-    mob_vnum nr = ch->nr;
+    mob_vnum nr = ch->vn;
 
     /*
    * Mobiles should NEVER use anything in the 'player_specials' structure.
@@ -1943,13 +1943,13 @@ int parse_mobile_from_file(FILE *mob_f, struct char_data *ch) {
 
     /***** String data *****/
     ch->name = fread_string(mob_f, buf2);
-    tmpptr = ch->short_descr = fread_string(mob_f, buf2);
+    tmpptr = ch->short_description = fread_string(mob_f, buf2);
     if (tmpptr && *tmpptr)
         if (!strcasecmp(fname(tmpptr), "a") || !strcasecmp(fname(tmpptr), "an") ||
             !strcasecmp(fname(tmpptr), "the"))
             *tmpptr = LOWER(*tmpptr);
-    ch->long_descr = fread_string(mob_f, buf2);
-    ch->description = fread_string(mob_f, buf2);
+    ch->room_description = fread_string(mob_f, buf2);
+    ch->look_description = fread_string(mob_f, buf2);
 
     /* *** Numeric data *** */
     if (!get_line(mob_f, line)) {
@@ -2088,11 +2088,11 @@ int parse_mobile_from_file(FILE *mob_f, struct char_data *ch) {
 
 static void parse_mobile(FILE *mob_f, mob_vnum nr) {
     auto &idx = mob_index[nr];
-    idx.vnum = nr;
+    idx.vn = nr;
     
     auto &m = mob_proto[nr];
 
-    m.nr = nr;
+    m.vn = nr;
     m.desc = nullptr;
 
     if (parse_mobile_from_file(mob_f, &m)) {
@@ -2116,8 +2116,8 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
     auto &o = obj_proto[nr];
     auto &idx = obj_index[nr];
     
-    idx.vnum = nr;
-    o.item_number = nr;
+    idx.vn = nr;
+    o.vn = nr;
     
     sprintf(buf2, "object #%d", nr);    /* sprintf: OK (for 'buf2 >= 19') */
 
@@ -2132,10 +2132,10 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
             !strcasecmp(fname(tmpptr), "the"))
             *tmpptr = LOWER(*tmpptr);
 
-    tmpptr = o.description = fread_string(obj_f, buf2);
+    tmpptr = o.room_description = fread_string(obj_f, buf2);
     if (tmpptr && *tmpptr)
         CAP(tmpptr);
-    o.action_description = fread_string(obj_f, buf2);
+    o.look_description = fread_string(obj_f, buf2);
 
     /* *** numeric data *** */
     if (!get_line(obj_f, line)) {
@@ -2620,7 +2620,7 @@ int vnum_mobile(char *searchname, struct char_data *ch) {
     for (auto &m : mob_proto)
         if (isname(searchname, m.second.name))
             send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                         ++found, m.first, m.second.short_descr,
+                         ++found, m.first, m.second.short_description,
                          m.second.proto_script ? "[TRIG]" : "");
 
     return (found);
@@ -4072,12 +4072,12 @@ void free_char(struct char_data *ch) {
             free(GET_CLAN(ch));
         if (ch->title)
             free(ch->title);
-        if (ch->short_descr)
-            free(ch->short_descr);
-        if (ch->long_descr)
-            free(ch->long_descr);
-        if (ch->description)
-            free(ch->description);
+        if (ch->short_description)
+            free(ch->short_description);
+        if (ch->room_description)
+            free(ch->room_description);
+        if (ch->look_description)
+            free(ch->look_description);
         for (i = 0; i < NUM_HIST; i++)
             if (GET_HISTORY(ch, i))
                 free(GET_HISTORY(ch, i));
@@ -4093,12 +4093,12 @@ void free_char(struct char_data *ch) {
             free(ch->name);
         if (ch->title && ch->title != mob_proto[i].title)
             free(ch->title);
-        if (ch->short_descr && ch->short_descr != mob_proto[i].short_descr)
-            free(ch->short_descr);
-        if (ch->long_descr && ch->long_descr != mob_proto[i].long_descr)
-            free(ch->long_descr);
-        if (ch->description && ch->description != mob_proto[i].description)
-            free(ch->description);
+        if (ch->short_description && ch->short_description != mob_proto[i].short_description)
+            free(ch->short_description);
+        if (ch->room_description && ch->room_description != mob_proto[i].room_description)
+            free(ch->room_description);
+        if (ch->look_description && ch->look_description != mob_proto[i].look_description)
+            free(ch->look_description);
         /* free script proto list if it's not the prototype */
         if (ch->proto_script && ch->proto_script != mob_proto[i].proto_script)
             free_proto_script(ch, MOB_TRIGGER);
@@ -4271,7 +4271,7 @@ void reset_char(struct char_data *ch) {
     ch->followers = nullptr;
     ch->master = nullptr;
     IN_ROOM(ch) = NOWHERE;
-    ch->carrying = nullptr;
+    ch->contents = nullptr;
     ch->next = nullptr;
     ch->next_fighting = nullptr;
     ch->next_in_room = nullptr;
@@ -4307,7 +4307,7 @@ void clear_char(struct char_data *ch) {
 void clear_object(struct obj_data *obj) {
     memset((char *) obj, 0, sizeof(struct obj_data));
 
-    obj->item_number = NOTHING;
+    obj->vn = NOTHING;
     IN_ROOM(obj) = NOWHERE;
     obj->worn_on = NOWHERE;
 }
@@ -4348,9 +4348,9 @@ void init_char(struct char_data *ch) {
     }
 
     set_title(ch, nullptr);
-    ch->short_descr = nullptr;
-    ch->long_descr = nullptr;
-    ch->description = nullptr;
+    ch->short_description = nullptr;
+    ch->room_description = nullptr;
+    ch->look_description = nullptr;
 
     /*ch->time.birth = time(0) - birth_age(ch);*/
     ch->time.logon = ch->time.created = time(nullptr);
@@ -4558,8 +4558,8 @@ int my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate) {
     char ebuf2[MAX_STRING_LENGTH], ebuf3[MAX_STRING_LENGTH];
 
 
-    if (obj->action_description) {
-        strcpy(buf1, obj->action_description);
+    if (obj->look_description) {
+        strcpy(buf1, obj->look_description);
         strip_string(buf1);
     } else
         *buf1 = 0;
@@ -4592,7 +4592,7 @@ int my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate) {
             "%s~\n"
             "%d %d %d %d %d %" I64T " %d %d\n", obj->name ? obj->name : "undefined",
             obj->short_description ? obj->short_description : "undefined",
-            obj->description ? obj->description : "undefined",
+            obj->room_description ? obj->room_description : "undefined",
             buf1, GET_OBJ_TYPE(obj), GET_OBJ_WEAR(obj)[0],
             GET_OBJ_WEAR(obj)[1], GET_OBJ_WEAR(obj)[2], GET_OBJ_WEAR(obj)[3],
             GET_OBJ_WEIGHT(obj), GET_OBJ_COST(obj), GET_OBJ_RENT(obj));

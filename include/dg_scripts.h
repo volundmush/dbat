@@ -472,7 +472,7 @@ extern room_rnum obj_room(obj_data *obj);
 #define UID_CHAR   '}'
 #define GET_TRIG_NAME(t)          ((t)->name)
 #define GET_TRIG_RNUM(t)          ((t)->nr)
-#define GET_TRIG_VNUM(t)      (trig_index[(t)->nr].vnum)
+#define GET_TRIG_VNUM(t)      (trig_index[(t)->nr].vn)
 #define GET_TRIG_TYPE(t)          ((t)->trigger_type)
 #define GET_TRIG_DATA_TYPE(t)      ((t)->data_type)
 #define GET_TRIG_NARG(t)          ((t)->narg)
@@ -496,7 +496,7 @@ extern room_rnum obj_room(obj_data *obj);
 #define SCRIPT_TYPES(s)          ((s)->types)
 #define TRIGGERS(s)          ((s)->trig_list)
 
-#define GET_SHORT(ch)    ((ch)->short_descr)
+#define GET_SHORT(ch)    ((ch)->short_description)
 
 
 #define SCRIPT_CHECK(go, type)   (SCRIPT(go) && \
