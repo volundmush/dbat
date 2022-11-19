@@ -3071,7 +3071,7 @@ ACMD(do_majinize) {
         return;
     }
     int alignmentTotal = GET_ALIGNMENT(ch) - GET_ALIGNMENT(vict);
-    if (MAJINIZED(vict) > 0 && MAJINIZED(vict) != GET_ID(ch)) {
+    if (MAJINIZED(vict) > 0 && MAJINIZED(vict) != ((ch)->id)) {
         send_to_char(ch, "They are already majinized before by someone else.\r\n");
         return;
     } else if ((vict->master != ch)) {
@@ -3086,7 +3086,7 @@ ACMD(do_majinize) {
         return;
     }
         /* Rillao: transloc, add new transes here */
-    else if (MAJINIZED(vict) > 0 && MAJINIZED(vict) == GET_ID(ch)) {
+    else if (MAJINIZED(vict) > 0 && MAJINIZED(vict) == ((ch)->id)) {
         reveal_hiding(ch, 0);
         act("You remove $N's majinization, freeing them from your influence, but also weakening them.", true, ch,
             nullptr, vict, TO_CHAR);
@@ -3122,7 +3122,7 @@ ACMD(do_majinize) {
             true, ch, nullptr, vict, TO_VICT);
         act("$n focuses power into $N, influencing their mind and increasing their strength! After the struggle ends in $S mind a glowing purple M forms on $S forehead.",
             true, ch, nullptr, vict, TO_NOTVICT);
-        MAJINIZED(vict) = GET_ID(ch);
+        MAJINIZED(vict) = ((ch)->id);
         GET_BOOSTS(ch) -= 1;
 
         GET_MAJINIZED(vict) = (vict->getBasePL()) * .4;
@@ -9188,7 +9188,7 @@ ACMD(do_snet) {
     }
 
     if (!strcasecmp(arg, "check")) {
-        send_to_char(ch, "Your personal scouter number is: %d\r\n", GET_ID(ch));
+        send_to_char(ch, "Your personal scouter number is: %d\r\n", ((ch)->id));
         return;
     }
 
@@ -9288,13 +9288,13 @@ ACMD(do_snet) {
                         free(blah);
                     }
                     continue;
-                } else if (call > -1 && GET_ID(i->character) == call) {
+                } else if (call > -1 && ((i->character)->id) == call) {
                     send_to_char(i->character, "@C%s is heard @W(@c%s@W), @D[@R#@W%d @Ycalling YOU@D] @G%s@n\r\n",
                                  voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown",
-                                 GET_ID(ch), !*arg2 ? "" : CAP(arg2));
+                                 ((ch)->id), !*arg2 ? "" : CAP(arg2));
                     *hist = '\0';
                     sprintf(hist, "@C%s is heard @W(@c%s@W), @D[@R#@W%d @Ycalling YOU@D] @G%s@n\r\n", voice,
-                            readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", GET_ID(ch),
+                            readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", ((ch)->id),
                             !*arg2 ? "" : CAP(arg2));
                     add_history(i->character, hist, HIST_SNET);
                     if (has_scanner(i->character)) {

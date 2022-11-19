@@ -865,7 +865,7 @@ SPECIAL(auction) {
 
         for (obj = world[auct_room].contents; obj; obj = next_obj) {
             next_obj = obj->next_content;
-            if (obj && GET_AUCTER(obj) == GET_ID(ch)) {
+            if (obj && GET_AUCTER(obj) == ((ch)->id)) {
                 obj2 = obj;
                 found = true;
 
@@ -914,7 +914,7 @@ SPECIAL(auction) {
 
         for (obj = world[auct_room].contents; obj; obj = next_obj) {
             next_obj = obj->next_content;
-            if (obj && GET_CURBID(obj) == GET_ID(ch)) {
+            if (obj && GET_CURBID(obj) == ((ch)->id)) {
                 obj2 = obj;
                 found = true;
 
@@ -1036,7 +1036,7 @@ SPECIAL(auction) {
 
         GET_BID(obj2) = value;
         GET_STARTBID(obj2) = GET_BID(obj2);
-        GET_AUCTER(obj2) = GET_ID(ch);
+        GET_AUCTER(obj2) = ((ch)->id);
         GET_AUCTERN(obj2) = strdup(GET_NAME(ch));
         GET_AUCTIME(obj2) = time(nullptr);
         GET_CURBID(obj2) = -1;

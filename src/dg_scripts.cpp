@@ -157,7 +157,7 @@ obj_data *get_obj_in_list(char *name, obj_data *list) {
     if (*name == UID_CHAR) {
         id = atoi(name + 1);
         for (i = list; i; i = i->next_content)
-            if (id == GET_ID(i))
+            if (id == ((i)->id))
                 return i;
     } else {
         for (i = list; i; i = i->next_content)
@@ -180,7 +180,7 @@ obj_data *get_object_in_equip(char_data *ch, char *name) {
 
         for (j = 0; j < NUM_WEARS; j++)
             if ((obj = GET_EQ(ch, j)))
-                if (id == GET_ID(obj))
+                if (id == ((obj)->id))
                     return (obj);
     } else if (is_number(name)) {
         obj_vnum ovnum = atoi(name);
@@ -418,7 +418,7 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name) {
         if (*name == UID_CHAR) {
             id = atoi(name + 1);
 
-            if (id == GET_ID(obj->in_obj))
+            if (id == ((obj->in_obj)->id))
                 return obj->in_obj;
         } else if (isname(name, obj->in_obj->name))
             return obj->in_obj;
@@ -575,7 +575,7 @@ obj_data *get_obj_in_room(room_data *room, char *name) {
     if (*name == UID_CHAR) {
         id = atoi(name + 1);
         for (obj = room->contents; obj; obj = obj->next_content)
-            if (id == GET_ID(obj))
+            if (id == ((obj)->id))
                 return obj;
     } else {
         for (obj = room->contents; obj; obj = obj->next_content)
@@ -1936,7 +1936,7 @@ void makeuid_var(void *go, struct script_data *sc, trig_data *trig,
                     break;
             }
             if (c)
-                snprintf(uid, sizeof(uid), "%c%d", UID_CHAR, GET_ID(c));
+                snprintf(uid, sizeof(uid), "%c%d", UID_CHAR, ((c)->id));
         } else if (is_abbrev(arg, "obj")) {
             struct obj_data *o = nullptr;
             switch (type) {
@@ -1954,7 +1954,7 @@ void makeuid_var(void *go, struct script_data *sc, trig_data *trig,
                     break;
             }
             if (o)
-                snprintf(uid, sizeof(uid), "%c%d", UID_CHAR, GET_ID(o));
+                snprintf(uid, sizeof(uid), "%c%d", UID_CHAR, ((o)->id));
         } else if (is_abbrev(arg, "room")) {
             room_rnum r = NOWHERE;
             switch (type) {

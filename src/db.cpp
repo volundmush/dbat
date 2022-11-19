@@ -2695,9 +2695,9 @@ struct char_data *create_char() {
     character_list = ch;
     ch->next_affect = nullptr;
     ch->next_affectv = nullptr;
-    GET_ID(ch) = max_mob_id++;
+    ((ch)->id) = max_mob_id++;
     /* find_char helper */
-    add_to_lookup_table(GET_ID(ch), (void *) ch);
+    add_to_lookup_table(((ch)->id), (void *) ch);
 
     return (ch);
 }
@@ -3278,9 +3278,9 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
 
     mob_index[i].number++;
 
-    GET_ID(mob) = max_mob_id++;
+    ((mob)->id) = max_mob_id++;
     /* find_char helper */
-    add_to_lookup_table(GET_ID(mob), (void *) mob);
+    add_to_lookup_table(((mob)->id), (void *) mob);
 
     copy_proto_script(&mob_proto[i], mob, MOB_TRIGGER);
     assign_triggers(mob, MOB_TRIGGER);
@@ -3461,16 +3461,16 @@ struct obj_data *create_obj() {
     obj->next = object_list;
     object_list = obj;
 
-    GET_ID(obj) = max_obj_id++;
+    ((obj)->id) = max_obj_id++;
     /* find_obj helper */
-    add_to_lookup_table(GET_ID(obj), (void *) obj);
+    add_to_lookup_table(((obj)->id), (void *) obj);
 
     obj->generation = time(nullptr);
     obj->unique_id = -1;
 
     assign_triggers(obj, OBJ_TRIGGER);
     /* find_obj helper */
-    add_to_lookup_table(GET_ID(obj), (void *) obj);
+    add_to_lookup_table(((obj)->id), (void *) obj);
 
     return (obj);
 }
@@ -3495,9 +3495,9 @@ struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
 
     obj_index[i].number++;
 
-    GET_ID(obj) = max_obj_id++;
+    ((obj)->id) = max_obj_id++;
     /* find_obj helper */
-    add_to_lookup_table(GET_ID(obj), (void *) obj);
+    add_to_lookup_table(((obj)->id), (void *) obj);
 
     obj->generation = time(nullptr);
     obj->unique_id = -1;
@@ -4137,8 +4137,8 @@ void free_char(struct char_data *ch) {
   * when free_char is called with a blank character struct, ID is set
   * to 0, and has not yet been added to the lookup table.
   */
-    if (GET_ID(ch) != 0)
-        remove_from_lookup_table(GET_ID(ch));
+    if (((ch)->id) != 0)
+        remove_from_lookup_table(((ch)->id));
 
     free(ch);
 }
@@ -4168,7 +4168,7 @@ void free_obj(struct obj_data *obj) {
         extract_script(obj, OBJ_TRIGGER);
 
     /* find_obj helper */
-    remove_from_lookup_table(GET_ID(obj));
+    remove_from_lookup_table(((obj)->id));
 
     if (obj->sbinfo)
         free(obj->sbinfo);

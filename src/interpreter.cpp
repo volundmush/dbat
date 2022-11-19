@@ -2773,9 +2773,9 @@ int enter_player_game(struct descriptor_data *d) {
         d->character->player_specials->host = nullptr;
     }
     d->character->player_specials->host = strdup(d->host);
-    GET_ID(d->character) = GET_IDNUM(d->character);
+    ((d->character)->id) = GET_IDNUM(d->character);
     /* find_char helper */
-    add_to_lookup_table(GET_ID(d->character), (void *) d->character);
+    add_to_lookup_table(((d->character)->id), (void *) d->character);
     read_saved_vars(d->character);
     /*load_char_pets(d->character);*/
     for (check = character_list; check; check = check->next)

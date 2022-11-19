@@ -473,7 +473,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 
 #define GET_PC_NAME(ch)    ((ch)->name)
 #define GET_NAME(ch)    (IS_NPC(ch) ? \
-             (ch)->short_descr : GET_PC_NAME(ch))
+             (ch)->short_description : GET_PC_NAME(ch))
 #define GET_TITLE(ch)   ((ch)->desc ? ((ch)->desc->title ? (ch)->desc->title : "[Unset Title]") : "@D[@GNew User@D]")
 #define GET_USER_TITLE(d) ((d)->title)
 #define GET_PHASE(ch)   ((ch)->starphase)
@@ -640,7 +640,6 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define GET_INGESTLEARNED(ch) ((ch)->ingestLearned)
 #define GET_POS(ch)        ((ch)->position)
 #define GET_IDNUM(ch)        ((ch)->idnum)
-#define GET_ID(x)        ((x)->id)
 #define IS_CARRYING_W(ch)    ((ch)->carry_weight)
 #define IS_CARRYING_N(ch)    ((ch)->carry_items)
 #define FIGHTING(ch)        ((ch)->fighting)
@@ -710,9 +709,9 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 
 #define GET_EQ(ch, i)        ((ch)->equipment[i])
 
-#define GET_MOB_SPEC(ch)    (IS_MOB(ch) ? mob_index[(ch)->nr].func : 0)
+#define GET_MOB_SPEC(ch)    (IS_MOB(ch) ? mob_index[(ch)->vn].func : 0)
 #define GET_MOB_RNUM(mob)    ((mob)->vn)
-#define GET_MOB_VNUM(mob)    (IS_MOB(mob) ? (mob_index.count((mob)->nr) ? (mob)->nr : NOBODY) : NOBODY)
+#define GET_MOB_VNUM(mob)    (IS_MOB(mob) ? (mob_index.count((mob)->vn) ? (mob)->vn : NOBODY) : NOBODY)
 
 #define GET_DEFAULT_POS(ch)    ((ch)->mob_specials.default_pos)
 #define MEMORY(ch)        ((ch)->mob_specials.memory)

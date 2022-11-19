@@ -4049,14 +4049,14 @@ int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj,
         } else if (MOB_FLAGGED(vict, MOB_NOKILL)) {
             send_to_char(ch, "But they are not to be killed!\r\n");
             return 0;
-        } else if (MAJINIZED(ch) == GET_ID(vict)) {
+        } else if (MAJINIZED(ch) == ((vict)->id)) {
             send_to_char(ch, "You can not harm your master!\r\n");
             return 0;
         } else if (GET_BONUS(ch, BONUS_COWARD) > 0 && GET_MAX_HIT(vict) > GET_MAX_HIT(ch) + (GET_MAX_HIT(ch) * .5) &&
                    !FIGHTING(ch)) {
             send_to_char(ch, "You are too cowardly to start anything with someone so much stronger than yourself!\r\n");
             return 0;
-        } else if (MAJINIZED(vict) == GET_ID(ch)) {
+        } else if (MAJINIZED(vict) == ((ch)->id)) {
             send_to_char(ch, "You can not harm your servant.\r\n");
             return 0;
         } else if ((GRAPPLING(ch) && GRAPTYPE(ch) != 3) || (GRAPPLED(ch) && (GRAPTYPE(ch) == 1 || GRAPTYPE(ch) == 4))) {

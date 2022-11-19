@@ -1492,7 +1492,7 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j) {
 
     sprinttype(GET_OBJ_TYPE(j), item_types, buf, sizeof(buf));
     send_to_char(ch, "VNum: [@g%5d@n], RNum: [%5d], Idnum: [%5d], Type: %s, SpecProc: %s\r\n",
-                 vnum, GET_OBJ_RNUM(j), GET_ID(j), buf, GET_OBJ_SPEC(j) ? "Exists" : "None");
+                 vnum, GET_OBJ_RNUM(j), ((j)->id), buf, GET_OBJ_SPEC(j) ? "Exists" : "None");
 
     send_to_char(ch, "Generation time: @g%s@nUnique ID: @g%" I64T "@n\r\n",
                  ctime(&j->generation), j->unique_id);
@@ -1688,7 +1688,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
     sprinttype(GET_SEX(k), genders, buf, sizeof(buf));
     send_to_char(ch, "%s %s '%s'  IDNum: [%5d], In room [%5d], Loadroom : [%5d]\r\n",
                  buf, (!IS_NPC(k) ? "PC" : (!IS_MOB(k) ? "NPC" : "MOB")),
-                 GET_NAME(k), IS_NPC(k) ? GET_ID(k) : GET_IDNUM(k), GET_ROOM_VNUM(IN_ROOM(k)),
+                 GET_NAME(k), IS_NPC(k) ? ((k)->id) : GET_IDNUM(k), GET_ROOM_VNUM(IN_ROOM(k)),
                  IS_NPC(k) ? MOB_LOADROOM(k) : GET_LOADROOM(k));
 
     send_to_char(ch, "DROOM: [%5d]\r\n", GET_DROOM(k));

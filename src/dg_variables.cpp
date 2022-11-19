@@ -93,7 +93,7 @@ int item_in_list(char *item, obj_data *list) {
         long id = atol(item + 1);
 
         for (i = list; i; i = i->next_content) {
-            if (id == GET_ID(i))
+            if (id == ((i)->id))
                 count++;
             if (GET_OBJ_TYPE(i) == ITEM_CONTAINER)
                 count += item_in_list(item, i->contents);
@@ -264,10 +264,10 @@ find_replacement(void *go, struct script_data *sc, trig_data *trig, int type, ch
             if (!strcasecmp(var, "self")) {
                 switch (type) {
                     case MOB_TRIGGER:
-                        snprintf(str, slen, "%c%d", UID_CHAR, GET_ID((char_data *) go));
+                        snprintf(str, slen, "%c%d", UID_CHAR, (((char_data *) go)->id));
                         break;
                     case OBJ_TRIGGER:
-                        snprintf(str, slen, "%c%d", UID_CHAR, GET_ID((obj_data *) go));
+                        snprintf(str, slen, "%c%d", UID_CHAR, (((obj_data *) go)->id));
                         break;
                     case WLD_TRIGGER:
                         snprintf(str, slen, "%c%d", UID_CHAR, ((room_data *) go)->vn + ROOM_ID_BASE);
@@ -487,7 +487,7 @@ in the vault (vnum: 453) now and then. you can just use
                     }
 
                     if (rndm)
-                        snprintf(str, slen, "%c%d", UID_CHAR, GET_ID(rndm));
+                        snprintf(str, slen, "%c%d", UID_CHAR, ((rndm)->id));
                     else
                         *str = '\0';
                 } else if (!strcasecmp(field, "dir")) {
@@ -665,7 +665,7 @@ in the vault (vnum: 453) now and then. you can just use
                         } else if ((pos = find_eq_pos_script(subfield)) < 0 || !GET_EQ(c, pos))
                             *str = '\0';
                         else
-                            snprintf(str, slen, "%c%d", UID_CHAR, GET_ID(GET_EQ(c, pos)));
+                            snprintf(str, slen, "%c%d", UID_CHAR, ((((c)->equipment[pos]))->id));
                     }
                     if (!strcasecmp(field, "exp")) {
                         if (subfield && *subfield) {
@@ -679,7 +679,7 @@ in the vault (vnum: 453) now and then. you can just use
                 case 'f':
                     if (!strcasecmp(field, "fighting")) {
                         if (FIGHTING(c))
-                            snprintf(str, slen, "%c%d", UID_CHAR, GET_ID(FIGHTING(c)));
+                            snprintf(str, slen, "%c%d", UID_CHAR, ((((c)->fighting))->id));
                         else
                             *str = '\0';
                     } else if (!strcasecmp(field, "flying")) {
@@ -691,7 +691,7 @@ in the vault (vnum: 453) now and then. you can just use
                         if (!c->followers || !c->followers->follower)
                             *str = '\0';
                         else
-                            snprintf(str, slen, "%c%d", UID_CHAR, GET_ID(c->followers->follower));
+                            snprintf(str, slen, "%c%d", UID_CHAR, ((c->followers->follower)->id));
                     }
                     break;
                 case 'g':
@@ -740,7 +740,7 @@ in the vault (vnum: 453) now and then. you can just use
                     break;
                 case 'i':
                     if (!strcasecmp(field, "id"))
-                        snprintf(str, slen, "%d", GET_ID(c));
+                        snprintf(str, slen, "%d", ((c)->id));
 
                         /* new check for pc/npc status */
                     else if (!strcasecmp(field, "is_pc")) {
@@ -752,7 +752,7 @@ in the vault (vnum: 453) now and then. you can just use
                         if (subfield && *subfield) {
                             for (obj = c->contents; obj; obj = obj->next_content) {
                                 if (GET_OBJ_VNUM(obj) == atoi(subfield)) {
-                                    snprintf(str, slen, "%c%d", UID_CHAR, GET_ID(obj)); /* arg given, found */
+                                    snprintf(str, slen, "%c%d", UID_CHAR, ((obj)->id)); /* arg given, found */
                                     return;
                                 }
                             }
@@ -760,7 +760,7 @@ in the vault (vnum: 453) now and then. you can just use
                                 *str = '\0'; /* arg given, not found */
                         } else { /* no arg given */
                             if (c->contents) {
-                                snprintf(str, slen, "%c%d", UID_CHAR, GET_ID(c->contents));
+                                snprintf(str, slen, "%c%d", UID_CHAR, ((c->contents)->id));
                             } else {
                                 *str = '\0';
                             }
@@ -846,7 +846,7 @@ in the vault (vnum: 453) now and then. you can just use
                         if (!c->master)
                             *str = '\0';
                         else
-                            snprintf(str, slen, "%c%d", UID_CHAR, GET_ID(c->master));
+                            snprintf(str, slen, "%c%d", UID_CHAR, ((c->master)->id));
                     }
                     break;
                 case 'n':
@@ -854,7 +854,7 @@ in the vault (vnum: 453) now and then. you can just use
                         snprintf(str, slen, "%s", GET_NAME(c));
                     } else if (!strcasecmp(field, "next_in_room")) {
                         if (c->next_in_room)
-                            snprintf(str, slen, "%c%d", UID_CHAR, GET_ID(c->next_in_room));
+                            snprintf(str, slen, "%c%d", UID_CHAR, ((c->next_in_room)->id));
                         else
                             *str = '\0';
                     }
@@ -1103,12 +1103,12 @@ in the vault (vnum: 453) now and then. you can just use
                         snprintf(str, slen, "%d", GET_OBJ_RENT(o));
                     } else if (!strcasecmp(field, "carried_by")) {
                         if (o->carried_by)
-                            snprintf(str, slen, "%c%d", UID_CHAR, GET_ID(o->carried_by));
+                            snprintf(str, slen, "%c%d", UID_CHAR, ((o->carried_by)->id));
                         else
                             *str = '\0';
                     } else if (!strcasecmp(field, "contents")) {
                         if (o->contents)
-                            snprintf(str, slen, "%c%d", UID_CHAR, GET_ID(o->contents));
+                            snprintf(str, slen, "%c%d", UID_CHAR, ((o->contents)->id));
                         else
                             *str = '\0';
                     }
@@ -1153,7 +1153,7 @@ in the vault (vnum: 453) now and then. you can just use
                     break;
                 case 'i':
                     if (!strcasecmp(field, "id"))
-                        snprintf(str, slen, "%d", GET_ID(o));
+                        snprintf(str, slen, "%d", ((o)->id));
 
                     else if (!strcasecmp(field, "is_inroom")) {
                         if (IN_ROOM(o) != NOWHERE)
@@ -1189,7 +1189,7 @@ in the vault (vnum: 453) now and then. you can just use
                         }
                     } else if (!strcasecmp(field, "next_in_list")) {
                         if (o->next_content)
-                            snprintf(str, slen, "%c%d", UID_CHAR, GET_ID(o->next_content));
+                            snprintf(str, slen, "%c%d", UID_CHAR, ((o->next_content)->id));
                         else
                             *str = '\0';
                     }
@@ -1290,7 +1290,7 @@ in the vault (vnum: 453) now and then. you can just use
                         snprintf(str, slen, "%" I64T "", GET_OBJ_WEIGHT(o));
                     } else if (!strcasecmp(field, "worn_by")) {
                         if (o->worn_by)
-                            snprintf(str, slen, "%c%d", UID_CHAR, GET_ID(o->worn_by));
+                            snprintf(str, slen, "%c%d", UID_CHAR, ((o->worn_by)->id));
                         else
                             *str = '\0';
                     }
@@ -1361,7 +1361,7 @@ in the vault (vnum: 453) now and then. you can just use
                     for (obj = r->contents; obj; obj = obj->next_content) {
                         if (GET_OBJ_VNUM(obj) == atoi(subfield)) {
                             /* arg given, found */
-                            snprintf(str, slen, "%c%d", UID_CHAR, GET_ID(obj));
+                            snprintf(str, slen, "%c%d", UID_CHAR, ((obj)->id));
                             return;
                         }
                     }
@@ -1369,14 +1369,14 @@ in the vault (vnum: 453) now and then. you can just use
                         *str = '\0'; /* arg given, not found */
                 } else { /* no arg given */
                     if (r->contents) {
-                        snprintf(str, slen, "%c%d", UID_CHAR, GET_ID(r->contents));
+                        snprintf(str, slen, "%c%d", UID_CHAR, ((r->contents)->id));
                     } else {
                         *str = '\0';
                     }
                 }
             } else if (!strcasecmp(field, "people")) {
                 if (r->people)
-                    snprintf(str, slen, "%c%d", UID_CHAR, GET_ID(r->people));
+                    snprintf(str, slen, "%c%d", UID_CHAR, ((r->people)->id));
                 else
                     *str = '\0';
             } else if (!strcasecmp(field, "id")) {

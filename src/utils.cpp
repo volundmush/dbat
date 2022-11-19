@@ -1385,7 +1385,7 @@ int read_sense_memory(struct char_data *ch, struct char_data *vict) {
                 known = true;
             }
         } else {
-            if (idnums == GET_ID(vict)) {
+            if (idnums == ((vict)->id)) {
                 known = true;
             }
         }
@@ -1434,7 +1434,7 @@ void sense_memory_write(struct char_data *ch, struct char_data *vict) {
     while (x < count) {
         if (x == 0 || idnums[x - 1] != idnums[x]) {
             if (!IS_NPC(vict)) {
-                if (idnums[x] != GET_ID(vict)) {
+                if (idnums[x] != ((vict)->id)) {
                     fprintf(fl, "%d\n", idnums[x]);
                 }
             } else {
@@ -1447,7 +1447,7 @@ void sense_memory_write(struct char_data *ch, struct char_data *vict) {
     }
 
     if (!IS_NPC(vict)) {
-        fprintf(fl, "%d\n", GET_ID(vict));
+        fprintf(fl, "%d\n", ((vict)->id));
     } else {
         fprintf(fl, "%d\n", GET_MOB_VNUM(vict));
     }

@@ -38,9 +38,9 @@ struct unit_data {
     vnum vn{NOTHING}; /* Where in database */
     zone_vnum zone{NOTHING};
     char *name{};
-    char *room_description{};             /* When thing is listed in room */
+    char *room_description{};      /* When thing is listed in room */
     char *look_description{};      /* what to show when looked at */
-    char *short_description{};       /* when worn/carry/in cont. */
+    char *short_description{};     /* when displayed in list or action message. */
 
     struct extra_descr_data *ex_description{}; /* extra descriptions     */
 
@@ -49,7 +49,7 @@ struct unit_data {
 
     struct obj_data *contents{};     /* Contains objects  */
 
-    int32_t id{};            /* used by DG triggers			*/
+    int32_t id{}; /* used by DG triggers	*/
 };
 
 
@@ -60,7 +60,7 @@ struct obj_data : public unit_data {
 
     int value[NUM_OBJ_VAL_POSITIONS]{};   /* Values of the item (see list)    */
     int8_t type_flag{};      /* Type of item                        */
-    int level{};           /* Minimum level of object.            */
+    int level{}; /* Minimum level of object.            */
     bitvector_t wear_flags[TW_ARRAY_MAX]{}; /* Where you can wear it     */
     bitvector_t extra_flags[EF_ARRAY_MAX]{}; /* If it hums, glows, etc.  */
     int64_t weight{};         /* Weight what else                     */
@@ -74,10 +74,9 @@ struct obj_data : public unit_data {
 
     struct obj_data *in_obj{};       /* In what object nullptr when none    */
     struct char_data *carried_by{};  /* Carried by :nullptr in room/conta   */
-    struct char_data *worn_by{};      /* Worn by?			      */
+    struct char_data *worn_by{};      /* Worn by? */
     int16_t worn_on{};          /* Worn where?		      */
 
-    int32_t id{};                       /* used by DG triggers */
     time_t generation{};             /* creation time for dupe check     */
     int64_t unique_id{};  /* random bits for dupe check       */
 
@@ -448,7 +447,7 @@ struct char_data : public unit_data {
     int alignment{};        /* +-1000 for alignment good vs. evil	*/
     int alignment_ethic{};        /* +-1000 for alignment law vs. chaos	*/
     int32_t idnum{};            /* player's idnum; -1 for mobiles	*/
-    bitvector_t act[PM_ARRAY_MAX]{};    /* act flag for NPC's; player flag for PC's */
+    bitvector_t act[PM_ARRAY_MAX]{}; /* act flag for NPC's; player flag for PC's */
 
     bitvector_t affected_by[AF_ARRAY_MAX]{};/* Bitvector for current affects	*/
     int bodyparts[AF_ARRAY_MAX]{};  /* Bitvector for current bodyparts      */
