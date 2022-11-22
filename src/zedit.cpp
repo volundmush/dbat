@@ -414,85 +414,85 @@ void zedit_disp_menu(struct descriptor_data *d) {
     /*
      * Print the commands for this room into display buffer.
      */
-    while (MYCMD.command != 'S') {
+    for (auto &c : OLC_ZONE(d)->cmd) {
         /*
          * Translate what the command means.
          */
         write_to_output(d, "@n%d - @y", counter++);
-        switch (MYCMD.command) {
+        switch (c.command) {
             case 'M':
                 write_to_output(d, "%sLoad %s@y [@c%d@y], Max : %d, MaxR %d, Chance %d",
-                                MYCMD.if_flag ? " then " : "",
-                                mob_proto[MYCMD.arg1].short_description,
-                                mob_index[MYCMD.arg1].vn, MYCMD.arg2, MYCMD.arg4, MYCMD.arg5
+                                c.if_flag ? " then " : "",
+                                mob_proto[c.arg1].short_description,
+                                mob_index[c.arg1].vn, c.arg2, c.arg4, c.arg5
                 );
                 break;
             case 'G':
                 write_to_output(d, "%sGive it %s@y [@c%d@y], Max : %d, Chance %d",
-                                MYCMD.if_flag ? " then " : "",
-                                obj_proto[MYCMD.arg1].short_description,
-                                obj_index[MYCMD.arg1].vn,
-                                MYCMD.arg2, MYCMD.arg5
+                                c.if_flag ? " then " : "",
+                                obj_proto[c.arg1].short_description,
+                                obj_index[c.arg1].vn,
+                                c.arg2, c.arg5
                 );
                 break;
             case 'O':
                 write_to_output(d, "%sLoad %s@y [@c%d@y], Max : %d, MaxR %d, Chance %d",
-                                MYCMD.if_flag ? " then " : "",
-                                obj_proto[MYCMD.arg1].short_description,
-                                obj_index[MYCMD.arg1].vn,
-                                MYCMD.arg2, MYCMD.arg4, MYCMD.arg5
+                                c.if_flag ? " then " : "",
+                                obj_proto[c.arg1].short_description,
+                                obj_index[c.arg1].vn,
+                                c.arg2, c.arg4, c.arg5
                 );
                 break;
             case 'E':
                 write_to_output(d, "%sEquip with %s@y [@c%d@n], %s, Max : %d, Chance %d",
-                                MYCMD.if_flag ? " then " : "",
-                                obj_proto[MYCMD.arg1].short_description,
-                                obj_index[MYCMD.arg1].vn,
-                                equipment_types[MYCMD.arg3],
-                                MYCMD.arg2, MYCMD.arg5
+                                c.if_flag ? " then " : "",
+                                obj_proto[c.arg1].short_description,
+                                obj_index[c.arg1].vn,
+                                equipment_types[c.arg3],
+                                c.arg2, c.arg5
                 );
                 break;
             case 'P':
                 write_to_output(d, "%sPut %s@y [@c%d@n] in %s [@c%d@n], Max : %d, %% Chance %d",
-                                MYCMD.if_flag ? " then " : "",
-                                obj_proto[MYCMD.arg1].short_description,
-                                obj_index[MYCMD.arg1].vn,
-                                obj_proto[MYCMD.arg3].short_description,
-                                obj_index[MYCMD.arg3].vn,
-                                MYCMD.arg2, MYCMD.arg5
+                                c.if_flag ? " then " : "",
+                                obj_proto[c.arg1].short_description,
+                                obj_index[c.arg1].vn,
+                                obj_proto[c.arg3].short_description,
+                                obj_index[c.arg3].vn,
+                                c.arg2, c.arg5
                 );
                 break;
             case 'R':
                 write_to_output(d, "%sRemove %s@y [@c%d@n] from room.",
-                                MYCMD.if_flag ? " then " : "",
-                                obj_proto[MYCMD.arg2].short_description,
-                                obj_index[MYCMD.arg2].vn
+                                c.if_flag ? " then " : "",
+                                obj_proto[c.arg2].short_description,
+                                obj_index[c.arg2].vn
                 );
                 break;
             case 'D':
                 write_to_output(d, "%sSet door %s@y as %s.",
-                                MYCMD.if_flag ? " then " : "",
-                                dirs[MYCMD.arg2],
-                                MYCMD.arg3 ? ((MYCMD.arg3 == 1) ? "closed" : "locked") : "open"
+                                c.if_flag ? " then " : "",
+                                dirs[c.arg2],
+                                c.arg3 ? ((c.arg3 == 1) ? "closed" : "locked") : "open"
                 );
                 break;
             case 'T':
                 write_to_output(d, "%sAttach trigger @c%s@y [@c%d@y] to %s, %% Chance %d",
-                                MYCMD.if_flag ? " then " : "",
-                                trig_index[MYCMD.arg2].proto->name,
-                                trig_index[MYCMD.arg2].vn,
-                                ((MYCMD.arg1 == MOB_TRIGGER) ? "mobile" :
-                                 ((MYCMD.arg1 == OBJ_TRIGGER) ? "object" :
-                                  ((MYCMD.arg1 == WLD_TRIGGER) ? "room" : "????"))), MYCMD.arg5);
+                                c.if_flag ? " then " : "",
+                                trig_index[c.arg2].proto->name,
+                                trig_index[c.arg2].vn,
+                                ((c.arg1 == MOB_TRIGGER) ? "mobile" :
+                                 ((c.arg1 == OBJ_TRIGGER) ? "object" :
+                                  ((c.arg1 == WLD_TRIGGER) ? "room" : "????"))), c.arg5);
                 break;
             case 'V':
                 write_to_output(d, "%sAssign global %s:%d to %s = %s, %% Chance %d",
-                                MYCMD.if_flag ? " then " : "",
-                                MYCMD.sarg1, MYCMD.arg2,
-                                ((MYCMD.arg1 == MOB_TRIGGER) ? "mobile" :
-                                 ((MYCMD.arg1 == OBJ_TRIGGER) ? "object" :
-                                  ((MYCMD.arg1 == WLD_TRIGGER) ? "room" : "????"))),
-                                MYCMD.sarg2, MYCMD.arg5);
+                                c.if_flag ? " then " : "",
+                                c.sarg1, c.arg2,
+                                ((c.arg1 == MOB_TRIGGER) ? "mobile" :
+                                 ((c.arg1 == OBJ_TRIGGER) ? "object" :
+                                  ((c.arg1 == WLD_TRIGGER) ? "room" : "????"))),
+                                c.sarg2, c.arg5);
                 break;
             default:
                 write_to_output(d, "<Unknown Command>");

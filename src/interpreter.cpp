@@ -1087,6 +1087,7 @@ const struct command_info cmd_info[] = {
         {"gsay",          "gsay",         POS_SLEEPING, do_gsay,            0,  ADMLVL_NONE,    0},
         {"gtell",         "gt",           POS_SLEEPING, do_gsay,            0,  ADMLVL_NONE,    0},
 
+        {"hcontrol", "hcon", POS_DEAD, do_hcontrol, 0, ADMLVL_BUILDER, 0},
         {"hand",          "han",          POS_SITTING,  do_hand,            0,  ADMLVL_NONE,    0},
         {"handout",       "hand",         POS_STANDING, do_handout,         0,  ADMLVL_GOD,     0},
         {"hasshuken",     "hasshuke",     POS_STANDING, do_hass,            0,  ADMLVL_NONE,    0},
