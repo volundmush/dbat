@@ -62,6 +62,7 @@
 #include <chrono>
 #include <optional>
 #include <filesystem>
+#include <array>
 
 // non-standard libraries
 #include "fmt/core.h"

@@ -381,7 +381,7 @@ extern std::map<trig_vnum, struct index_data> trig_index;
 extern struct trig_data *trigger_list;
 
 extern int32_t max_mob_id;
-extern long max_obj_id;
+extern int32_t max_obj_id;
 extern int dg_owner_purged;
 extern int xap_objs;
 

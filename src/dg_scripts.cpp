@@ -21,9 +21,9 @@
 
 
 /* Local functions not used elsewhere */
-obj_data *find_obj(long n);
+obj_data *find_obj(int32_t n);
 
-room_data *find_room(long n);
+room_data *find_room(int32_t n);
 
 void do_stat_trigger(struct char_data *ch, trig_data *trig);
 
@@ -152,7 +152,7 @@ int trgvar_in_room(room_vnum vnum) {
 
 obj_data *get_obj_in_list(char *name, obj_data *list) {
     obj_data *i;
-    long id;
+    int32_t id;
 
     if (*name == UID_CHAR) {
         id = atoi(name + 1);
@@ -173,7 +173,7 @@ obj_data *get_object_in_equip(char_data *ch, char *name) {
     obj_data *obj;
     char tmpname[MAX_INPUT_LENGTH];
     char *tmp = tmpname;
-    long id;
+    int32_t id;
 
     if (*name == UID_CHAR) {
         id = atoi(name + 1);
@@ -203,40 +203,41 @@ obj_data *get_object_in_equip(char_data *ch, char *name) {
     return nullptr;
 }
 
+static struct eq_pos_list {
+    const char *pos;
+    int where;
+} eq_pos[] = {
+        {"hold",      WEAR_WIELD2},
+        {"held",      WEAR_WIELD2},
+        {"light",     WEAR_WIELD2},
+        {"wield",     WEAR_WIELD1},
+        {"rfinger",   WEAR_FINGER_R},
+        {"lfinger",   WEAR_FINGER_L},
+        {"neck1",     WEAR_NECK_1},
+        {"neck2",     WEAR_NECK_2},
+        {"body",      WEAR_BODY},
+        {"head",      WEAR_HEAD},
+        {"legs",      WEAR_LEGS},
+        {"feet",      WEAR_FEET},
+        {"hands",     WEAR_HANDS},
+        {"arms",      WEAR_ARMS},
+        {"shield",    WEAR_WIELD2},
+        {"about",     WEAR_ABOUT},
+        {"waist",     WEAR_WAIST},
+        {"rwrist",    WEAR_WRIST_R},
+        {"lwrist",    WEAR_WRIST_L},
+        {"backpack",  WEAR_BACKPACK},
+        {"rear",      WEAR_EAR_R},
+        {"lear",      WEAR_EAR_L},
+        {"shoulders", WEAR_SH},
+        {"scouter",   WEAR_EYE},
+        {"none", -1}
+};
+
 /* Handles 'held', 'light' and 'wield' positions - Welcor
    After idea from Byron Ellacott - bje@apnic.net */
 int find_eq_pos_script(char *arg) {
     int i;
-    struct eq_pos_list {
-        const char *pos;
-        int where;
-    } eq_pos[] = {
-            {"hold",      WEAR_WIELD2},
-            {"held",      WEAR_WIELD2},
-            {"light",     WEAR_WIELD2},
-            {"wield",     WEAR_WIELD1},
-            {"rfinger",   WEAR_FINGER_R},
-            {"lfinger",   WEAR_FINGER_L},
-            {"neck1",     WEAR_NECK_1},
-            {"neck2",     WEAR_NECK_2},
-            {"body",      WEAR_BODY},
-            {"head",      WEAR_HEAD},
-            {"legs",      WEAR_LEGS},
-            {"feet",      WEAR_FEET},
-            {"hands",     WEAR_HANDS},
-            {"arms",      WEAR_ARMS},
-            {"shield",    WEAR_WIELD2},
-            {"about",     WEAR_ABOUT},
-            {"waist",     WEAR_WAIST},
-            {"rwrist",    WEAR_WRIST_R},
-            {"lwrist",    WEAR_WRIST_L},
-            {"backpack",  WEAR_BACKPACK},
-            {"rear",      WEAR_EAR_R},
-            {"lear",      WEAR_EAR_L},
-            {"shoulders", WEAR_SH},
-            {"scouter",   WEAR_EYE},
-            {"none", -1}
-    };
 
     if (is_number(arg) && (i = atoi(arg)) >= 0 && i < NUM_WEARS)
         return i;
@@ -298,7 +299,7 @@ int can_wear_on_pos(struct obj_data *obj, int pos) {
  ************************************************************/
 
 /* return char with UID n */
-struct char_data *find_char(long n) {
+struct char_data *find_char(int32_t n) {
     if (n >= ROOM_ID_BASE) /* See note in dg_scripts.h */
         return nullptr;
 
@@ -307,7 +308,7 @@ struct char_data *find_char(long n) {
 
 
 /* return object with UID n */
-obj_data *find_obj(long n) {
+obj_data *find_obj(int32_t n) {
     if (n < OBJ_ID_BASE) /* see note in dg_scripts.h */
         return nullptr;
 
@@ -315,7 +316,7 @@ obj_data *find_obj(long n) {
 }
 
 /* return room with UID n */
-room_data *find_room(long n) {
+room_data *find_room(int32_t n) {
     room_rnum rnum;
 
     n -= ROOM_ID_BASE;
@@ -403,8 +404,8 @@ char_data *get_char_in_room(room_data *room, char *name) {
 obj_data *get_obj_near_obj(obj_data *obj, char *name) {
     obj_data *i = nullptr;
     char_data *ch;
-    int rm;
-    long id;
+    room_vnum rm;
+    int32_t id;
 
     if (!strcasecmp(name, "self") || !strcasecmp(name, "me"))
         return obj;
@@ -539,7 +540,7 @@ char_data *get_char_by_room(room_data *room, char *name) {
  */
 obj_data *get_obj_by_obj(obj_data *obj, char *name) {
     obj_data *i = nullptr;
-    int rm;
+    room_vnum rm;
 
     if (*name == UID_CHAR)
         return find_obj(atoi(name + 1));
@@ -570,7 +571,7 @@ obj_data *get_obj_by_obj(obj_data *obj, char *name) {
 /* only searches the room */
 obj_data *get_obj_in_room(room_data *room, char *name) {
     obj_data *obj;
-    long id;
+    int32_t id;
 
     if (*name == UID_CHAR) {
         id = atoi(name + 1);
@@ -853,36 +854,15 @@ void script_stat(char_data *ch, struct script_data *sc) {
     }
 }
 
-void do_sstat_room(struct char_data *ch, struct room_data *rm) {
+
+void do_sstat(struct char_data *ch, struct unit_data *ud) {
     send_to_char(ch, "Triggers:\r\n");
-    if (!SCRIPT(rm)) {
+    if (!SCRIPT(ud)) {
         send_to_char(ch, "  None.\r\n");
         return;
     }
 
-    script_stat(ch, SCRIPT(rm));
-}
-
-
-void do_sstat_object(char_data *ch, obj_data *j) {
-    send_to_char(ch, "Triggers:\r\n");
-    if (!SCRIPT(j)) {
-        send_to_char(ch, "  None.\r\n");
-        return;
-    }
-
-    script_stat(ch, SCRIPT(j));
-}
-
-
-void do_sstat_character(char_data *ch, char_data *k) {
-    send_to_char(ch, "Script information:\r\n");
-    if (!SCRIPT(k)) {
-        send_to_char(ch, "  None.\r\n");
-        return;
-    }
-
-    script_stat(ch, SCRIPT(k));
+    script_stat(ch, SCRIPT(ud));
 }
 
 

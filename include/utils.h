@@ -90,7 +90,9 @@ extern int wearable_obj(struct obj_data *obj);
 
 extern void randomize_eq(struct obj_data *obj);
 
-extern char *sense_location(struct char_data *ch);
+extern const char *sense_location(struct char_data *ch);
+
+extern const char* sense_location_name(room_vnum roomnum);
 
 extern void handle_evolution(struct char_data *ch, int64_t dmg);
 

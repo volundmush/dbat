@@ -363,8 +363,8 @@ ACMD(do_mimic) {
     int count = 0, x = 0;
 
     // generate a list of mimic'able races.
-    dbat::race::RaceMap r_map;
-    for (const auto &r: dbat::race::race_map) {
+    race::RaceMap r_map;
+    for (const auto &r: race::race_map) {
         if (r.second->raceCanBeMimiced() && r.second->isValidSex(GET_SEX(ch))) {
             r_map[r.first] = r.second;
         }
@@ -401,7 +401,7 @@ ACMD(do_mimic) {
         ch->mimic = nullptr;
     }
 
-    auto race = dbat::race::find_race_map(arg, r_map);
+    auto race = race::find_race_map(arg, r_map);
     if (!race) {
         send_to_char(ch,
                      "That is not a race you can change into. Enter mimic without arugments for the mimic menu.\r\n");
@@ -8352,9 +8352,8 @@ ACMD(do_whois) {
     if (!*argument) {
         send_to_char(ch, "Who?\r\n");
     } else {
-        CREATE(victim, struct char_data, 1);
-        clear_char(victim);
-        CREATE(victim->player_specials, struct player_special_data, 1);
+        victim = new char_data();
+        victim->player_specials = new player_special_data();
         if (load_char(argument, victim) >= 0) {
             if (GET_CLAN(victim) != nullptr) {
                 if (!strstr(GET_CLAN(victim), "None")) {

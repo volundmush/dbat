@@ -177,13 +177,7 @@ void medit_save_to_disk(zone_vnum foo) {
 }
 
 void medit_setup_new(struct descriptor_data *d) {
-    struct char_data *mob;
-
-    /*
-     * Allocate a scratch mobile structure.
-     */
-    CREATE(mob, struct char_data, 1);
-
+    struct char_data *mob = new char_data();
     init_mobile(mob);
 
     GET_MOB_RNUM(mob) = NOBODY;
@@ -194,7 +188,7 @@ void medit_setup_new(struct descriptor_data *d) {
     GET_SDESC(mob) = strdup("the unfinished mob");
     GET_LDESC(mob) = strdup("An unfinished mob stands here.\r\n");
     GET_DDESC(mob) = strdup("It looks unfinished.\r\n");
-    mob->race = dbat::race::race_map[dbat::race::human];
+    mob->race = race::race_map[race::human];
     SCRIPT(mob) = nullptr;
     mob->proto_script = OLC_SCRIPT(d) = nullptr;
 
@@ -241,7 +235,7 @@ void init_mobile(struct char_data *mob) {
     GET_NDD(mob) = 0;
     GET_SEX(mob) = SEX_MALE;
     GET_HITDICE(mob) = 0;
-    mob->chclass = dbat::sensei::sensei_map[dbat::sensei::commoner];
+    mob->chclass = sensei::sensei_map[sensei::commoner];
 
     GET_WEIGHT(mob) = rand_number(100, 200);
     GET_HEIGHT(mob) = rand_number(100, 200);
@@ -416,7 +410,7 @@ void medit_disp_class(struct descriptor_data *d) {
     char buf[MAX_INPUT_LENGTH];
     clear_screen(d);
 
-    for (const auto cl: dbat::sensei::sensei_map) {
+    for (const auto cl: sensei::sensei_map) {
         sprintf(buf, "@g%2d@n) %s\r\n", cl.first, cl.second->getName().c_str());
         write_to_output(d, buf);
     }
@@ -431,7 +425,7 @@ void medit_disp_race(struct descriptor_data *d) {
     char buf[MAX_INPUT_LENGTH];
 
     clear_screen(d);
-    for (const auto &r: dbat::race::race_map) {
+    for (const auto &r: race::race_map) {
         sprintf(buf, "@g%2d@n) %-20.20s  %s", r.first, r.second->getName().c_str(),
                 !(++columns % 2) ? "\r\n" : "");
         write_to_output(d, buf);
@@ -520,7 +514,7 @@ void medit_disp_menu(struct descriptor_data *d) {
 void medit_parse(struct descriptor_data *d, char *arg) {
     int i = -1;
     char *oldtext = nullptr;
-    dbat::race::Race *chosen_race;
+    race::Race *chosen_race;
 
     if (OLC_MODE(d) > MEDIT_NUMERICAL_RESPONSE) {
         i = atoi(arg);
@@ -906,7 +900,7 @@ void medit_parse(struct descriptor_data *d, char *arg) {
 
         case MEDIT_CLASS:
             if (!OLC_MOB(d)->chclass) {
-                OLC_MOB(d)->chclass = dbat::sensei::sensei_map[dbat::sensei::commoner];
+                OLC_MOB(d)->chclass = sensei::sensei_map[sensei::commoner];
             };
             /* Change size HP dice based on class choice. */
             //GET_MANA(OLC_MOB(d)) = class_hit_die_size[GET_CLASS(OLC_MOB(d))];
@@ -937,7 +931,7 @@ void medit_parse(struct descriptor_data *d, char *arg) {
             break;
 
         case MEDIT_RACE:
-            chosen_race = dbat::race::find_race_map_id(i, dbat::race::race_map);
+            chosen_race = race::find_race_map_id(i, race::race_map);
             if (!chosen_race) {
                 write_to_output(d, "That's not a race!");
                 break;

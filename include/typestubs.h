@@ -9,15 +9,12 @@ struct shop_buy_data;
 struct command_info;
 struct descriptor_data;
 
-namespace dbat {
+namespace race {
+    class Race;
 
-    namespace race {
-        class Race;
+    struct transform_bonus;
+}
 
-        struct transform_bonus;
-    }
-
-    namespace sensei {
-        class Sensei;
-    }
+namespace sensei {
+    class Sensei;
 }

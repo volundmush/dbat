@@ -1884,256 +1884,249 @@ void randomize_eq(struct obj_data *obj) {
     }
 }
 
-char *sense_location(struct char_data *ch) {
-
-    char *message = new char[MAX_INPUT_LENGTH];
-    int roomnum = GET_ROOM_VNUM(IN_ROOM(ch)), num = 0;
-    if ((num = real_zone_by_thing(roomnum)) != NOWHERE) {
-        num = real_zone_by_thing(roomnum);
-    }
-
+const char* sense_location_name(room_vnum roomnum) {
+    zone_vnum num = roomnum != NOWHERE ? real_zone_by_thing(roomnum) : 999999;
+    
     switch (num) {
         case 2:
-            sprintf(message, "East of Nexus City");
-            break;
+            return "East of Nexus City";
         case 3:
         case 4:
         case 5:
         case 6:
         case 7:
             if (roomnum < 795)
-                sprintf(message, "Nexus City");
+                return "Nexus City";
             else
-                sprintf(message, "South Ocean");
-            break;
+                return "South Ocean";
         case 8:
         case 9:
         case 10:
         case 11:
             if (roomnum < 1133)
-                sprintf(message, "South Ocean");
+                return "South Ocean";
             else if (roomnum < 1179)
-                sprintf(message, "Nexus Field");
+                return "Nexus Field";
             else
-                sprintf(message, "Cherry Blossom Mountain");
+                return "Cherry Blossom Mountain";
             break;
         case 12:
         case 13:
             if (roomnum < 1287)
-                sprintf(message, "Cherry Blossom Mountain");
+                return "Cherry Blossom Mountain";
             else
-                sprintf(message, "Sandy Desert");
+                return "Sandy Desert";
             break;
         case 14:
             if (roomnum < 1428)
-                sprintf(message, "Sandy Desert");
+                return "Sandy Desert";
             else if (roomnum < 1484)
-                sprintf(message, "Northern Plains");
+                return "Northern Plains";
             else if (roomnum < 1496)
-                sprintf(message, "Korin's Tower");
+                return "Korin's Tower";
             else
-                sprintf(message, "Kami's Lookout");
+                return "Kami's Lookout";
             break;
         case 15:
             if (roomnum < 1577)
-                sprintf(message, "Kami's Lookout");
+                return "Kami's Lookout";
             else if (roomnum < 1580)
-                sprintf(message, "Northern Plains");
+                return "Northern Plains";
             else if (roomnum < 1589)
-                sprintf(message, "Kami's Lookout");
+                return "Kami's Lookout";
             else
-                sprintf(message, "Shadow Forest");
+                return "Shadow Forest";
             break;
         case 16:
-            sprintf(message, "Shadow Forest");
+            return "Shadow Forest";
             break;
         case 17:
         case 18:
             if (roomnum < 1715)
-                sprintf(message, "Decrepit Area");
+                return "Decrepit Area";
             else
-                sprintf(message, "Inside Cherry Blossom Mountain");
+                return "Inside Cherry Blossom Mountain";
             break;
         case 19:
-            sprintf(message, "West City");
+            return "West City";
             break;
         case 20:
             if (roomnum < 2012)
-                sprintf(message, "West City");
+                return "West City";
             else if (roomnum > 2070)
-                sprintf(message, "West City");
+                return "West City";
             else
-                sprintf(message, "Silver Mine");
+                return "Silver Mine";
             break;
         case 21:
             if (roomnum < 2141)
-                sprintf(message, "West City");
+                return "West City";
             else
-                sprintf(message, "Hercule Beach");
+                return "Hercule Beach";
             break;
         case 22:
-            sprintf(message, "Vegetos City");
+            return "Vegetos City";
             break;
         case 23:
         case 24:
             if (roomnum < 2334)
-                sprintf(message, "Vegetos City");
+                return "Vegetos City";
             else if (roomnum > 2462)
-                sprintf(message, "Vegetos City");
+                return "Vegetos City";
             else
-                sprintf(message, "Vegetos Palace");
+                return "Vegetos Palace";
             break;
         case 25:
         case 26:
             if (roomnum < 2616)
-                sprintf(message, "Blood Dunes");
+                return "Blood Dunes";
             else
-                sprintf(message, "Ancestral Mountains");
+                return "Ancestral Mountains";
             break;
         case 27:
             if (roomnum < 2709)
-                sprintf(message, "Ancestral Mountains");
+                return "Ancestral Mountains";
             else if (roomnum < 2736)
-                sprintf(message, "Destopa Swamp");
+                return "Destopa Swamp";
             else
-                sprintf(message, "Swamp Base");
+                return "Swamp Base";
             break;
         case 28:
-            sprintf(message, "Pride Forest");
+            return "Pride Forest";
             break;
         case 29:
         case 30:
         case 31:
-            sprintf(message, "Pride Tower");
+            return "Pride Tower";
             break;
         case 32:
-            sprintf(message, "Ruby Cave");
+            return "Ruby Cave";
             break;
         case 34:
-            sprintf(message, "Utatlan City");
+            return "Utatlan City";
             break;
         case 35:
-            sprintf(message, "Zenith Jungle");
+            return "Zenith Jungle";
             break;
         case 40:
         case 41:
         case 42:
-            sprintf(message, "Ice Crown City");
+            return "Ice Crown City";
             break;
         case 43:
             if (roomnum < 4351)
-                sprintf(message, "Ice Highway");
+                return "Ice Highway";
             else
-                sprintf(message, "Topica Snowfield");
+                return "Topica Snowfield";
             break;
         case 44:
         case 45:
-            sprintf(message, "Glug's Volcano");
+            return "Glug's Volcano";
             break;
         case 46:
         case 47:
-            sprintf(message, "Platonic Sea");
+            return "Platonic Sea";
             break;
         case 48:
-            sprintf(message, "Slave City");
+            return "Slave City";
             break;
         case 49:
             if (roomnum < 4915)
-                sprintf(message, "Descent Down Icecrown");
+                return "Descent Down Icecrown";
             else if (roomnum != 4915 && roomnum < 4994)
-                sprintf(message, "Topica Snowfield");
+                return "Topica Snowfield";
             else
-                sprintf(message, "Ice Highway");
+                return "Ice Highway";
             break;
         case 50:
-            sprintf(message, "Mirror Shard Maze");
+            return "Mirror Shard Maze";
             break;
         case 51:
             if (roomnum < 5150)
-                sprintf(message, "Acturian Woods");
+                return "Acturian Woods";
             else if (roomnum < 5165)
-                sprintf(message, "Desolate Demesne");
+                return "Desolate Demesne";
             else
-                sprintf(message, "Chateau Ishran");
+                return "Chateau Ishran";
             break;
         case 52:
-            sprintf(message, "Wyrm Spine Mountain");
+            return "Wyrm Spine Mountain";
             break;
         case 53:
         case 54:
-            sprintf(message, "Aromina Hunting Preserve");
+            return "Aromina Hunting Preserve";
             break;
         case 55:
-            sprintf(message, "Cloud Ruler Temple");
+            return "Cloud Ruler Temple";
             break;
         case 56:
-            sprintf(message, "Koltoan Mine");
+            return "Koltoan Mine";
             break;
         case 78:
-            sprintf(message, "Orium Cave");
+            return "Orium Cave";
             break;
         case 79:
-            sprintf(message, "Crystalline Forest");
+            return "Crystalline Forest";
             break;
         case 80:
         case 81:
         case 82:
-            sprintf(message, "Tiranoc City");
+            return "Tiranoc City";
             break;
         case 83:
-            sprintf(message, "Great Oroist Temple");
+            return "Great Oroist Temple";
             break;
         case 84:
             if (roomnum < 8447)
-                sprintf(message, "Elsthuan Forest");
+                return "Elsthuan Forest";
             else
-                sprintf(message, "Mazori Farm");
+                return "Mazori Farm";
             break;
         case 85:
-            sprintf(message, "Dres");
+            return "Dres";
             break;
         case 86:
-            sprintf(message, "Colvian Farm");
+            return "Colvian Farm";
             break;
         case 87:
-            sprintf(message, "Saint Alucia");
+            return "Saint Alucia";
             break;
         case 88:
             if (roomnum < 8847)
-                sprintf(message, "Meridius Memorial");
+                return "Meridius Memorial";
             else
-                sprintf(message, "Battlefields");
+                return "Battlefields";
             break;
         case 89:
             if (roomnum < 8954)
-                sprintf(message, "Desert of Illusion");
+                return "Desert of Illusion";
             else
-                sprintf(message, "Plains of Confusion");
+                return "Plains of Confusion";
             break;
         case 90:
-            sprintf(message, "Shadowlas Temple");
+            return "Shadowlas Temple";
             break;
         case 92:
-            sprintf(message, "Turlon Fair");
+            return "Turlon Fair";
             break;
         case 97:
-            sprintf(message, "Wetlands");
+            return "Wetlands";
             break;
         case 98:
             if (roomnum < 9855)
-                sprintf(message, "Wetlands");
+                return "Wetlands";
             else if (roomnum < 9866)
-                sprintf(message, "Kerberos");
+                return "Kerberos";
             else
-                sprintf(message, "Shaeras Mansion");
+                return "Shaeras Mansion";
             break;
         case 99:
             if (roomnum < 9907)
-                sprintf(message, "Slavinos Ravine");
+                return "Slavinos Ravine";
             else if (roomnum < 9960)
-                sprintf(message, "Kerberos");
+                return "Kerberos";
             else
-                sprintf(message, "Furian Citadel");
+                return "Furian Citadel";
             break;
         case 100:
         case 101:
@@ -2151,136 +2144,140 @@ char *sense_location(struct char_data *ch) {
         case 113:
         case 114:
         case 115:
-            sprintf(message, "Namekian Wilderness");
+            return "Namekian Wilderness";
             break;
         case 116:
             if (roomnum < 11672)
-                sprintf(message, "Senzu Village");
+                return "Senzu Village";
             else if (roomnum > 11672 && roomnum < 11698)
-                sprintf(message, "Senzu Village");
+                return "Senzu Village";
             else
-                sprintf(message, "Guru's House");
+                return "Guru's House";
             break;
         case 117:
         case 118:
         case 119:
-            sprintf(message, "Crystalline Cave");
+            return "Crystalline Cave";
             break;
         case 120:
-            sprintf(message, "Haven City");
+            return "Haven City";
             break;
         case 121:
             if (roomnum < 12103)
-                sprintf(message, "Haven City");
+                return "Haven City";
             else
-                sprintf(message, "Serenity Lake");
+                return "Serenity Lake";
             break;
         case 122:
-            sprintf(message, "Serenity Lake");
+            return "Serenity Lake";
             break;
         case 123:
-            sprintf(message, "Kaiju Forest");
+            return "Kaiju Forest";
             break;
         case 124:
             if (roomnum < 12480)
-                sprintf(message, "Ortusian Temple");
+                return "Ortusian Temple";
             else
-                sprintf(message, "Silent Glade");
+                return "Silent Glade";
             break;
         case 125:
-            sprintf(message, "Near Serenity Lake");
+            return "Near Serenity Lake";
             break;
         case 130:
         case 131:
             if (roomnum < 13153)
-                sprintf(message, "Satan City");
+                return "Satan City";
             else if (roomnum == 13153)
-                sprintf(message, "West City");
+                return "West City";
             else if (roomnum == 13154)
-                sprintf(message, "Nexus City");
+                return "Nexus City";
             else
-                sprintf(message, "South Ocean");
+                return "South Ocean";
             break;
         case 132:
             if (roomnum < 13232)
-                sprintf(message, "Frieza's Ship");
+                return "Frieza's Ship";
             else
-                sprintf(message, "Namekian Wilderness");
+                return "Namekian Wilderness";
             break;
         case 133:
-            sprintf(message, "Elder Village");
+            return "Elder Village";
             break;
         case 134:
-            sprintf(message, "Satan City");
+            return "Satan City";
             break;
         case 140:
-            sprintf(message, "Yardra City");
+            return "Yardra City";
             break;
         case 141:
-            sprintf(message, "Jade Forest");
+            return "Jade Forest";
             break;
         case 142:
-            sprintf(message, "Jade Cliff");
+            return "Jade Cliff";
             break;
         case 143:
-            sprintf(message, "Mount Valaria");
+            return "Mount Valaria";
             break;
         case 149:
         case 150:
-            sprintf(message, "Aquis City");
+            return "Aquis City";
             break;
         case 151:
         case 152:
         case 153:
-            sprintf(message, "Kanassan Ocean");
+            return "Kanassan Ocean";
             break;
         case 154:
-            sprintf(message, "Kakureta Village");
+            return "Kakureta Village";
             break;
         case 155:
-            sprintf(message, "Captured Aether City");
+            return "Captured Aether City";
             break;
         case 156:
-            sprintf(message, "Yunkai Pirate Base");
+            return "Yunkai Pirate Base";
             break;
         case 160:
         case 161:
-            sprintf(message, "Janacre");
+            return "Janacre";
             break;
         case 165:
-            sprintf(message, "Arlian Wasteland");
+            return "Arlian Wasteland";
             break;
         case 166:
-            sprintf(message, "Arlian Mine");
+            return "Arlian Mine";
             break;
         case 167:
-            sprintf(message, "Kilnak Caverns");
+            return "Kilnak Caverns";
             break;
         case 168:
-            sprintf(message, "Kemabra Wastes");
+            return "Kemabra Wastes";
             break;
         case 169:
-            sprintf(message, "Dark of Arlia");
+            return "Dark of Arlia";
             break;
         case 174:
-            sprintf(message, "Fistarl Volcano");
+            return "Fistarl Volcano";
             break;
         case 175:
         case 176:
-            sprintf(message, "Cerria Colony");
+            return "Cerria Colony";
             break;
         case 182:
-            sprintf(message, "Below Tiranoc");
+            return "Below Tiranoc";
             break;
         case 196:
-            sprintf(message, "Ancient Castle");
+            return "Ancient Castle";
             break;
         default:
-            sprintf(message, "Unknown.");
+            return "Unknown.";
             break;
     }
+}
 
-    return (message);
+const char *sense_location(struct char_data *ch) {
+    
+    return sense_location_name(GET_ROOM_VNUM(IN_ROOM(ch)));
+
 }
 
 void reveal_hiding(struct char_data *ch, int type) {

@@ -219,12 +219,7 @@ void oedit_setup_new(struct descriptor_data *d) {
 /*------------------------------------------------------------------------*/
 
 void oedit_setup_existing(struct descriptor_data *d, int real_num) {
-    struct obj_data *obj;
-
-    /*
-     * Allocate object in memory.
-     */
-    CREATE(obj, struct obj_data, 1);
+    struct obj_data *obj = new obj_data();
     copy_object(obj, &obj_proto[real_num]);
 
     /*

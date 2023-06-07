@@ -1935,7 +1935,7 @@ char *class_desc_str(struct char_data *ch, int howlong, int wantthe) {
         rankorder[0] = GET_CLASS(ch); /* we always want primary class first */
         rankorder[GET_CLASS(ch)] = 0;
         qsort((void *) rankorder, NUM_CLASSES, sizeof(int), comp_rank);
-        for (const auto &sen: dbat::sensei::sensei_map) {
+        for (const auto &sen: sensei::sensei_map) {
             ptr += snprintf(ptr, sizeof(str) - (ptr - str), "%s%s%s%s%s%d", buf, buf2, buf,
                             (howlong == 2 ? sen.second->getName().c_str() : sen.second->getAbbr().c_str()), buf3,
                             cabbr_ranktable[rank]);
@@ -2165,7 +2165,7 @@ static const int *class_bonus_feats[NUM_CLASSES] = {
 };
 
 
-namespace dbat::sensei {
+namespace sensei {
 
     Sensei::Sensei(sensei_id sid, const std::string &name, std::string abbr, std::string style) {
         this->s_id = sid;
@@ -2330,7 +2330,7 @@ namespace dbat::sensei {
         sensei_map[kibito] = new Sensei(kibito, "Kibito", "Ki", "Gentle Fist");
         sensei_map[jinto] = new Sensei(jinto, "Jinto", "Ji", "Star's Radiance");
         sensei_map[tsuna] = new Sensei(tsuna, "Tsuna", "Ts", "Sacred Tsunami");
-        sensei_map[kurzak] = new Sensei(kurzak, "Kurzak", "Kurzak", "Adaptive Taijutsu");
+        sensei_map[kurzak] = new Sensei(kurzak, "Kurzak", "Ku", "Adaptive Taijutsu");
 
         sensei_map[commoner] = new Sensei(commoner, "Commoner", "--", "Like a Bum");
     }

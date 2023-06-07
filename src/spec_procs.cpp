@@ -965,12 +965,12 @@ SPECIAL(auction) {
                 }
 
                 if (founded == false) {
-                    struct char_data *vict = nullptr;
+                    struct char_data *vict = new char_data();
+                    vict->player_specials = new player_special_data();
                     int is_file = false, player_i = 0;
 
-                    CREATE(vict, struct char_data, 1);
                     clear_char(vict);
-                    CREATE(vict->player_specials, struct player_special_data, 1);
+
                     char blam[50];
                     sprintf(blam, "%s", GET_AUCTERN(obj2));
                     if ((player_i = load_char(blam, vict)) > -1) {

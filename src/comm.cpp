@@ -215,7 +215,6 @@ void init_game(uint16_t cmport) {
     signal_setup();
 
     log("Loading Space Map. ");
-
     //Load the map vnums from a file into an array
     mapfile = fopen("../lib/surface.map", "r");
 

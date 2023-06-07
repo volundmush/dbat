@@ -16,29 +16,29 @@ static std::string robot = "Robotic-Humanoid", robot_lower = "robotic-humanoid",
 const std::string &char_data::juggleRaceName(bool capitalized) const {
     if (!race) return unknown;
 
-    dbat::race::Race *apparent = race;
+    race::Race *apparent = race;
 
     switch (apparent->getID()) {
-        case dbat::race::hoshijin:
+        case race::hoshijin:
             if (mimic) apparent = mimic;
             break;
-        case dbat::race::halfbreed:
+        case race::halfbreed:
             switch (RACIAL_PREF(this)) {
                 case 1:
-                    apparent = dbat::race::race_map[dbat::race::human];
+                    apparent = race::race_map[race::human];
                     break;
                 case 2:
-                    apparent = dbat::race::race_map[dbat::race::saiyan];
+                    apparent = race::race_map[race::saiyan];
                     break;
             }
             break;
-        case dbat::race::android:
+        case race::android:
             switch (RACIAL_PREF(this)) {
                 case 1:
-                    apparent = dbat::race::race_map[dbat::race::android];
+                    apparent = race::race_map[race::android];
                     break;
                 case 2:
-                    apparent = dbat::race::race_map[dbat::race::human];
+                    apparent = race::race_map[race::human];
                     break;
                 case 3:
                     if (capitalized) {
@@ -48,9 +48,9 @@ const std::string &char_data::juggleRaceName(bool capitalized) const {
                     }
             }
             break;
-        case dbat::race::saiyan:
+        case race::saiyan:
             if (PLR_FLAGGED(this, PLR_TAILHIDE)) {
-                apparent = dbat::race::race_map[dbat::race::human];
+                apparent = race::race_map[race::human];
             }
             break;
     }
@@ -255,7 +255,7 @@ bool char_data::is_soft_cap(int64_t type, long double mult) const {
     int64_t against = 0;
 
     switch (race->getSoftType(this)) {
-        case dbat::race::Fixed:
+        case race::Fixed:
             switch (type) {
                 case 0:
                     against = (this->getBasePL());
@@ -268,7 +268,7 @@ bool char_data::is_soft_cap(int64_t type, long double mult) const {
                     break;
             }
             break;
-        case dbat::race::Variable:
+        case race::Variable:
             against = (this->getBasePL()) + (this->getBaseKI()) + (this->getBaseST());
             if (IS_ANDROID(this) && type > 0) {
                 cur_cap += type;

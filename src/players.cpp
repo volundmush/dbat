@@ -335,13 +335,13 @@ int load_char(const char *name, struct char_data *ch) {
         }
         GET_SEX(ch) = PFDEF_SEX;
         ch->size = PFDEF_SIZE;
-        ch->chclass = dbat::sensei::sensei_map[dbat::sensei::roshi];
+        ch->chclass = sensei::sensei_map[sensei::roshi];
         for (i = 0; i < NUM_CLASSES; i++) {
             GET_CLASS_NONEPIC(ch, i) = 0;
             GET_CLASS_EPIC(ch, i) = 0;
         }
         GET_LOG_USER(ch) = strdup("NOUSER");
-        ch->race = dbat::race::find_race_map_id(PFDEF_RACE, dbat::race::race_map);
+        ch->race = race::find_race_map_id(PFDEF_RACE, race::race_map);
         GET_ADMLEVEL(ch) = PFDEF_LEVEL;
         GET_CLASS_LEVEL(ch) = PFDEF_LEVEL;
         GET_HITDICE(ch) = PFDEF_LEVEL;
@@ -548,7 +548,7 @@ int load_char(const char *name, struct char_data *ch) {
                     else if (!strcmp(tag, "Clan")) GET_CLAN(ch) = strdup(line);
                     else if (!strcmp(tag, "Clar")) GET_CRANK(ch) = atoi(line);
                     else if (!strcmp(tag, "Clas"))
-                        ch->chclass = dbat::sensei::find_sensei_map_id(atoi(line), dbat::sensei::sensei_map);
+                        ch->chclass = sensei::find_sensei_map_id(atoi(line), sensei::sensei_map);
                     else if (!strcmp(tag, "Colr")) {
                         sscanf(line, "%d %s", &num, buf2);
                         ch->player_specials->color_choices[num] = strdup(buf2);
@@ -645,7 +645,7 @@ int load_char(const char *name, struct char_data *ch) {
                     } else if (!strcmp(tag, "Maji")) MAJINIZED(ch) = atoi(line);
                     else if (!strcmp(tag, "Majm")) load_majin(ch, line);
                     else if (!strcmp(tag, "Mimi"))
-                        ch->mimic = dbat::race::find_race_map_id(atoi(line), dbat::race::race_map);
+                        ch->mimic = race::find_race_map_id(atoi(line), race::race_map);
                     else if (!strcmp(tag, "MxAg")) ch->time.maxage = atol(line);
                     break;
 
@@ -679,7 +679,7 @@ int load_char(const char *name, struct char_data *ch) {
                     break;
 
                 case 'R':
-                    if (!strcmp(tag, "Race")) ch->race = dbat::race::find_race_map_id(atoi(line), dbat::race::race_map);
+                    if (!strcmp(tag, "Race")) ch->race = race::find_race_map_id(atoi(line), race::race_map);
                     else if (!strcmp(tag, "Raci")) RACIAL_PREF(ch) = atoi(line);
                     else if (!strcmp(tag, "RBan")) GET_RBANK(ch) = atoi(line);
                     else if (!strcmp(tag, "rDis")) GET_RDISPLAY(ch) = strdup(line);

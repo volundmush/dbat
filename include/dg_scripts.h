@@ -312,7 +312,7 @@ extern int find_eq_pos_script(char *arg);
 
 extern int can_wear_on_pos(struct obj_data *obj, int pos);
 
-struct char_data *find_char(long n);
+struct char_data *find_char(int32_t n);
 
 extern char_data *get_char(char *name);
 
@@ -348,11 +348,7 @@ extern void check_time_triggers();
 
 extern void find_uid_name(char *uid, char *name, size_t nlen);
 
-extern void do_sstat_room(struct char_data *ch, struct room_data *rm);
-
-extern void do_sstat_object(char_data *ch, obj_data *j);
-
-extern void do_sstat_character(char_data *ch, char_data *k);
+extern void do_sstat(struct char_data *ch, struct unit_data *ud);
 
 extern void add_trigger(struct script_data *sc, trig_data *t, int loc);
 

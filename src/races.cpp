@@ -362,7 +362,7 @@ void racial_body_parts(struct char_data *ch) {
     }
 }
 
-namespace dbat::race {
+namespace race {
 
     transform_bonus base_form = {0, 1, 0, 0};
     transform_bonus oozaru = {.bonus = 10000, .mult=2, .drain=0, .flag=PLR_OOZARU};
@@ -1749,7 +1749,7 @@ namespace dbat::race {
 
     RaceMap valid_for_sex(int sex) {
         RaceMap v_map;
-        std::copy_if(dbat::race::race_map.begin(), dbat::race::race_map.end(), std::inserter(v_map, begin(v_map)),
+        std::copy_if(race::race_map.begin(), race::race_map.end(), std::inserter(v_map, begin(v_map)),
                      [&](const auto &r) {
                          return r.second->isValidSex(sex);
                      });
@@ -1758,7 +1758,7 @@ namespace dbat::race {
 
     RaceMap valid_for_sex_pc(int sex) {
         RaceMap v_map;
-        std::copy_if(dbat::race::race_map.begin(), dbat::race::race_map.end(), std::inserter(v_map, begin(v_map)),
+        std::copy_if(race::race_map.begin(), race::race_map.end(), std::inserter(v_map, begin(v_map)),
                      [&](const auto &r) {
                          return r.second->isPcOk() && r.second->isValidSex(sex);
                      });

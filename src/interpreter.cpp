@@ -2339,8 +2339,8 @@ char *three_arguments(char *argument, char *first_arg, char *second_arg, char *t
     return (one_argument(one_argument(one_argument(argument, first_arg), second_arg), third_arg)); /* >.> */
 }
 
-static dbat::race::RaceMap valid_races(descriptor_data *d) {
-    return dbat::race::valid_for_sex_pc(GET_SEX(d->character));
+static race::RaceMap valid_races(descriptor_data *d) {
+    return race::valid_for_sex_pc(GET_SEX(d->character));
 }
 
 static void display_races_sub(descriptor_data *d) {
@@ -2360,8 +2360,8 @@ void display_races(struct descriptor_data *d) {
     send_to_char(d->character, "\n@WRace: @n");
 }
 
-static dbat::sensei::SenseiMap valid_classes(descriptor_data *d) {
-    return dbat::sensei::valid_for_race_pc(d->character);
+static sensei::SenseiMap valid_classes(descriptor_data *d) {
+    return sensei::valid_for_race_pc(d->character);
 }
 
 static void display_classes_sub(descriptor_data *d) {
@@ -3688,7 +3688,6 @@ void display_bonus_menu(struct char_data *ch, int type) {
 
 int parse_bonuses(const char *arg) {
     int value = -1, ident = -1;
-
     switch (*arg) {
         case 'b':
         case 'B':
@@ -3702,75 +3701,12 @@ int parse_bonuses(const char *arg) {
         case 'X':
             value = 55;
             break;
-    }
-
-    if (value < 52) {
-        ident = atoi(arg);
-    }
-
-    switch (ident) {
-        /* Valid Selections */
-        case 1:
-        case 2:
-        case 3:
-        case 4:
-        case 5:
-        case 6:
-        case 7:
-        case 8:
-        case 9:
-        case 10:
-        case 11:
-        case 12:
-        case 13:
-        case 14:
-        case 15:
-        case 16:
-        case 17:
-        case 18:
-        case 19:
-        case 20:
-        case 21:
-        case 22:
-        case 23:
-        case 24:
-        case 25:
-        case 26:
-        case 27:
-        case 28:
-        case 29:
-        case 30:
-        case 31:
-        case 32:
-        case 33:
-        case 34:
-        case 35:
-        case 36:
-        case 37:
-        case 38:
-        case 39:
-        case 40:
-        case 41:
-        case 42:
-        case 43:
-        case 44:
-        case 45:
-        case 46:
-        case 47:
-        case 48:
-        case 49:
-        case 50:
-        case 51:
-            value = ident - 1;
-            break;
-
-            /* Invalid Selections */
         default:
-            value = -1;
+            ident = atoi(arg);
+            if (ident < 1 || ident > 51) { value = -1; } else { value = ident - 1; }
             break;
     }
-
-    return (value);
+    return value;
 }
 
 /* List names of Bonus/Negative */
@@ -3889,7 +3825,7 @@ int opp_bonus(struct char_data *ch, int value, int type) {
     int give = true;
 
     switch (value) {
-        case 0:
+        case BONUS_THRIFTY:
             if (GET_BONUS(ch, BONUS_IMPULSE)) {
                 display_bonus_menu(ch, type);
                 send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[BONUS_IMPULSE],
@@ -3897,119 +3833,119 @@ int opp_bonus(struct char_data *ch, int value, int type) {
                 give = false;
             }
             break;
-        case 2:
-            if (GET_BONUS(ch, 40) > 0) {
+        case BONUS_QUICK_STUDY:
+            if (GET_BONUS(ch, BONUS_SLOW_LEARNER) > 0) {
                 display_bonus_menu(ch, type);
                 send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[40], list_bonus[value]);
                 give = false;
             }
             break;
-        case 3:
+        case BONUS_DIEHARD:
             if (IS_ANDROID(ch)) {
                 display_bonus_menu(ch, type);
                 send_to_char(ch, "You can not take %s as an android!@n\r\n", list_bonus[3]);
                 give = false;
             }
             break;
-        case 6:
-            if (GET_BONUS(ch, 39) > 0) {
+        case BONUS_HARDWORKER:
+            if (GET_BONUS(ch, BONUS_SLACKER) > 0) {
                 display_bonus_menu(ch, type);
-                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[39], list_bonus[value]);
+                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[BONUS_SLACKER], list_bonus[value]);
                 give = false;
             }
             break;
-        case 8:
-            if (GET_BONUS(ch, 50) > 0) {
+        case BONUS_LOYAL:
+            if (GET_BONUS(ch, BONUS_LONER) > 0) {
                 display_bonus_menu(ch, type);
-                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[50], list_bonus[value]);
+                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[BONUS_LONER], list_bonus[value]);
                 give = false;
             }
             break;
-        case 9:
-            if (GET_BONUS(ch, 43) > 0) {
+        case BONUS_BRAWNY:
+            if (GET_BONUS(ch, BONUS_WIMP) > 0) {
                 display_bonus_menu(ch, type);
-                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[43], list_bonus[value]);
+                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[BONUS_WIMP], list_bonus[value]);
                 give = false;
             }
             break;
-        case 10:
-            if (GET_BONUS(ch, 44) > 0) {
+        case BONUS_SCHOLARLY:
+            if (GET_BONUS(ch, BONUS_DULL) > 0) {
                 display_bonus_menu(ch, type);
-                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[44], list_bonus[value]);
+                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[BONUS_DULL], list_bonus[value]);
                 give = false;
             }
             break;
-        case 11:
-            if (GET_BONUS(ch, 45) > 0) {
+        case BONUS_SAGE:
+            if (GET_BONUS(ch, BONUS_FOOLISH) > 0) {
                 display_bonus_menu(ch, type);
-                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[45], list_bonus[value]);
+                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[BONUS_FOOLISH], list_bonus[value]);
                 give = false;
             }
             break;
-        case 12:
-            if (GET_BONUS(ch, 46) > 0) {
+        case BONUS_AGILE:
+            if (GET_BONUS(ch, BONUS_CLUMSY) > 0) {
                 display_bonus_menu(ch, type);
-                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[46], list_bonus[value]);
+                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[BONUS_CLUMSY], list_bonus[value]);
                 give = false;
             }
             break;
-        case 13:
-            if (GET_BONUS(ch, 47) > 0) {
+        case BONUS_QUICK:
+            if (GET_BONUS(ch, BONUS_SLOW) > 0) {
                 display_bonus_menu(ch, type);
-                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[47], list_bonus[value]);
+                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[BONUS_SLOW], list_bonus[value]);
                 give = false;
             }
             break;
-        case 14:
-            if (GET_BONUS(ch, 48) > 0) {
+        case BONUS_STURDY:
+            if (GET_BONUS(ch, BONUS_FRAIL) > 0) {
                 display_bonus_menu(ch, type);
-                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[48], list_bonus[value]);
+                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[BONUS_FRAIL], list_bonus[value]);
                 give = false;
             }
             break;
-        case 15:
-            if (GET_BONUS(ch, 33) > 0) {
+        case BONUS_THICKSKIN:
+            if (GET_BONUS(ch, BONUS_THINSKIN) > 0) {
                 display_bonus_menu(ch, type);
-                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[33], list_bonus[value]);
+                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[BONUS_THINSKIN], list_bonus[value]);
                 give = false;
             }
             break;
-        case 16:
+        case BONUS_RECIPE:
             if (IS_ANDROID(ch)) {
                 display_bonus_menu(ch, type);
                 send_to_char(ch, "You are an android and can not suppress anyway.\n\n");
                 give = false;
             }
             break;
-        case 17:
+        case BONUS_FIREPROOF:
             if (IS_DEMON(ch)) {
                 display_bonus_menu(ch, type);
                 send_to_char(ch, "As a demon you are already fireproof.\r\n");
                 give = false;
-            } else if (GET_BONUS(ch, 34) > 0) {
+            } else if (GET_BONUS(ch, BONUS_FIREPRONE) > 0) {
                 display_bonus_menu(ch, type);
-                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[34], list_bonus[value]);
+                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[BONUS_FIREPRONE], list_bonus[value]);
                 give = false;
             }
             break;
-        case 18:
-            if (GET_BONUS(ch, 26) > 0) {
+        case BONUS_POWERHIT:
+            if (GET_BONUS(ch, BONUS_SOFT) > 0) {
                 display_bonus_menu(ch, type);
-                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[26], list_bonus[value]);
+                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[BONUS_SOFT], list_bonus[value]);
                 give = false;
             }
             break;
-        case 19:
-            if (GET_BONUS(ch, 29) > 0) {
+        case BONUS_HEALTHY:
+            if (GET_BONUS(ch, BONUS_SICKLY) > 0) {
                 display_bonus_menu(ch, type);
-                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[29], list_bonus[value]);
+                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[BONUS_SICKLY], list_bonus[value]);
                 give = false;
             }
             break;
-        case 20:
-            if (GET_BONUS(ch, 27) > 0) {
+        case BONUS_INSOMNIAC:
+            if (GET_BONUS(ch, BONUS_LATE) > 0) {
                 display_bonus_menu(ch, type);
-                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[27], list_bonus[value]);
+                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[BONUS_LATE], list_bonus[value]);
                 give = false;
             } else if (IS_ANDROID(ch)) {
                 display_bonus_menu(ch, type);
@@ -4017,52 +3953,52 @@ int opp_bonus(struct char_data *ch, int value, int type) {
                 give = false;
             }
             break;
-        case 21:
-            if (GET_BONUS(ch, 30) > 0) {
+        case BONUS_EVASIVE:
+            if (GET_BONUS(ch, BONUS_PUNCHINGBAG) > 0) {
                 display_bonus_menu(ch, type);
-                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[30], list_bonus[value]);
+                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[BONUS_PUNCHINGBAG], list_bonus[value]);
                 give = false;
             }
             break;
-        case 22:
-            if (GET_BONUS(ch, 31) > 0) {
+        case BONUS_WALL:
+            if (GET_BONUS(ch, BONUS_PUSHOVER) > 0) {
                 display_bonus_menu(ch, type);
-                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[31], list_bonus[value]);
+                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[BONUS_PUSHOVER], list_bonus[value]);
                 give = false;
             }
             break;
-        case 23:
-            if (GET_BONUS(ch, 32) > 0) {
+        case BONUS_ACCURATE:
+            if (GET_BONUS(ch, BONUS_POORDEPTH) > 0) {
                 display_bonus_menu(ch, type);
-                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[32], list_bonus[value]);
+                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[BONUS_POORDEPTH], list_bonus[value]);
                 give = false;
             }
             break;
-        case 24:
-            if (GET_BONUS(ch, 35) > 0) {
+        case BONUS_LEECH:
+            if (GET_BONUS(ch, BONUS_INTOLERANT) > 0) {
                 display_bonus_menu(ch, type);
-                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[35], list_bonus[value]);
+                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[BONUS_INTOLERANT], list_bonus[value]);
                 give = false;
             }
             break;
-        case 25:
-            if (GET_BONUS(ch, 51) > 0) {
+        case BONUS_GMEMORY:
+            if (GET_BONUS(ch, BONUS_BMEMORY) > 0) {
                 display_bonus_menu(ch, type);
-                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[51], list_bonus[value]);
+                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[BONUS_BMEMORY], list_bonus[value]);
                 give = false;
             }
             break;
-        case 26:
-            if (GET_BONUS(ch, 18) > 0) {
+        case BONUS_SOFT:
+            if (GET_BONUS(ch, BONUS_POWERHIT) > 0) {
                 display_bonus_menu(ch, type);
-                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[18], list_bonus[value]);
+                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[BONUS_POWERHIT], list_bonus[value]);
                 give = false;
             }
             break;
-        case 27:
-            if (GET_BONUS(ch, 20) > 0) {
+        case BONUS_LATE:
+            if (GET_BONUS(ch, BONUS_INSOMNIAC) > 0) {
                 display_bonus_menu(ch, type);
-                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[27], list_bonus[value]);
+                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[BONUS_INSOMNIAC], list_bonus[value]);
                 give = false;
             } else if (IS_ANDROID(ch)) {
                 display_bonus_menu(ch, type);
@@ -4070,52 +4006,52 @@ int opp_bonus(struct char_data *ch, int value, int type) {
                 give = false;
             }
             break;
-        case 29:
-            if (GET_BONUS(ch, 19) > 0) {
+        case BONUS_SICKLY:
+            if (GET_BONUS(ch, BONUS_HEALTHY) > 0) {
                 display_bonus_menu(ch, type);
-                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[19], list_bonus[value]);
+                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[BONUS_HEALTHY], list_bonus[value]);
                 give = false;
             }
             break;
-        case 30:
-            if (GET_BONUS(ch, 21) > 0) {
+        case BONUS_PUNCHINGBAG:
+            if (GET_BONUS(ch, BONUS_EVASIVE) > 0) {
                 display_bonus_menu(ch, type);
-                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[21], list_bonus[value]);
+                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[BONUS_EVASIVE], list_bonus[value]);
                 give = false;
             }
             break;
-        case 31:
-            if (GET_BONUS(ch, 22) > 0) {
+        case BONUS_PUSHOVER:
+            if (GET_BONUS(ch, BONUS_WALL) > 0) {
                 display_bonus_menu(ch, type);
-                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[22], list_bonus[value]);
+                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[BONUS_WALL], list_bonus[value]);
                 give = false;
             }
             break;
-        case 32:
-            if (GET_BONUS(ch, 23) > 0) {
+        case BONUS_POORDEPTH:
+            if (GET_BONUS(ch, BONUS_ACCURATE) > 0) {
                 display_bonus_menu(ch, type);
-                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[23], list_bonus[value]);
+                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[BONUS_ACCURATE], list_bonus[value]);
                 give = false;
             }
             break;
-        case 33:
-            if (GET_BONUS(ch, 15) > 0) {
+        case BONUS_THINSKIN:
+            if (GET_BONUS(ch, BONUS_THICKSKIN) > 0) {
                 display_bonus_menu(ch, type);
-                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[15], list_bonus[value]);
+                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[BONUS_THICKSKIN], list_bonus[value]);
                 give = false;
             }
             break;
-        case 34:
-            if (GET_BONUS(ch, 17) > 0) {
+        case BONUS_FIREPRONE:
+            if (GET_BONUS(ch, BONUS_FIREPROOF) > 0) {
                 display_bonus_menu(ch, type);
-                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[17], list_bonus[value]);
+                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[BONUS_FIREPROOF], list_bonus[value]);
                 give = false;
             }
             break;
-        case 35:
-            if (GET_BONUS(ch, 24) > 0) {
+        case BONUS_INTOLERANT:
+            if (GET_BONUS(ch, BONUS_LEECH) > 0) {
                 display_bonus_menu(ch, type);
-                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[24], list_bonus[value]);
+                send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[BONUS_LEECH], list_bonus[value]);
                 give = false;
             }
             break;
@@ -4278,10 +4214,10 @@ void nanny(struct descriptor_data *d, char *arg) {
     int player_i;
     int value, roll = rand_number(1, 6); /* For parse_bonuses */
     struct descriptor_data *k;
-    dbat::race::Race *chosen_race;
-    dbat::race::RaceMap v_races;
-    dbat::sensei::Sensei *chosen_sensei;
-    dbat::sensei::SenseiMap v_sensei;
+    race::Race *chosen_race;
+    race::RaceMap v_races;
+    sensei::Sensei *chosen_sensei;
+    sensei::SenseiMap v_sensei;
 
     int count = 0, oldcount = HIGHPCOUNT;
     /* OasisOLC states */
@@ -5052,7 +4988,7 @@ void nanny(struct descriptor_data *d, char *arg) {
                     break;
                 default:
                     v_races = valid_races(d);
-                    chosen_race = dbat::race::find_race_map(arg, v_races);
+                    chosen_race = race::find_race_map(arg, v_races);
                     if (!chosen_race) {
                         write_to_output(d, "\r\nThat's not a race.\r\nRace: ");
                         return;
@@ -6770,7 +6706,7 @@ void nanny(struct descriptor_data *d, char *arg) {
                     }
                     break;
                 default:
-                    chosen_sensei = dbat::sensei::find_sensei(arg);
+                    chosen_sensei = sensei::find_sensei(arg);
                     if (!chosen_sensei) {
                         write_to_output(d, "\r\nThat's not a sensei.\r\nSensei: ");
                         return;
@@ -6782,14 +6718,14 @@ void nanny(struct descriptor_data *d, char *arg) {
                             chosen_sensei = nullptr;
                             return;
                         case CON_QCLASS:
-                            if (chosen_sensei->getID() == dbat::sensei::kibito && !IS_KAI(d->character) &&
+                            if (chosen_sensei->getID() == sensei::kibito && !IS_KAI(d->character) &&
                                 d->character->desc->rbank < 10 && d->character->rbank < 10) {
                                 write_to_output(d,
                                                 "\r\nIt costs 10 RPP to select Kibito unless you are a Kai.\r\nSensei: ");
                                 return;
                             } else {
                                 d->character->chclass = chosen_sensei;
-                                if (chosen_sensei->getID() == dbat::sensei::kibito && !IS_KAI(d->character)) {
+                                if (chosen_sensei->getID() == sensei::kibito && !IS_KAI(d->character)) {
                                     if (d->character->desc->rpp >= 10)
                                         d->character->desc->rpp -= 10;
                                     else

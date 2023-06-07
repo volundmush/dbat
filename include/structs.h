@@ -275,12 +275,12 @@ struct innate_node {
 
 /* Specials used by NPCs, not PCs */
 struct mob_special_data {
-    memory_rec *memory;        /* List of attackers to remember	       */
-    int8_t attack_type;        /* The Attack Type Bitvector for NPC's     */
-    int8_t default_pos;        /* Default position for NPC                */
-    int8_t damnodice;          /* The number of damage dice's	       */
-    int8_t damsizedice;        /* The size of the damage dice's           */
-    int newitem;             /* Check if mob has new inv item       */
+    memory_rec *memory{};        /* List of attackers to remember	       */
+    int8_t attack_type{};        /* The Attack Type Bitvector for NPC's     */
+    int8_t default_pos{POS_STANDING};        /* Default position for NPC                */
+    int8_t damnodice{};          /* The number of damage dice's	       */
+    int8_t damsizedice{};        /* The size of the damage dice's           */
+    bool newitem{};             /* Check if mob has new inv item       */
 };
 
 
@@ -350,15 +350,15 @@ enum ResurrectionMode : uint8_t {
 
 /* ================== Structure for player/non-player ===================== */
 struct char_data : public unit_data {
-    int pfilepos{};            /* playerfile pos			*/
-    room_vnum in_room{};        /* Location (real room number)		*/
-    room_vnum was_in_room{};    /* location for linkdead people		*/
+    int pfilepos{-1};            /* playerfile pos			*/
+    room_vnum in_room{NOWHERE};        /* Location (real room number)		*/
+    room_vnum was_in_room{NOWHERE};    /* location for linkdead people		*/
     int wait{};            /* wait for how many loops		*/
 
     char *title{};            /* PC / NPC's title                     */
-    int size{};            /* Size class of char                   */
+    int size{SIZE_UNDEFINED};            /* Size class of char                   */
     int8_t sex{};            /* PC / NPC's sex                       */
-    dbat::race::Race *race{};
+    race::Race *race{};
     //int8_t race;		/* PC / NPC's race                      */
     int8_t hairl{};               /* PC hair length                       */
     int8_t hairs{};               /* PC hair style                        */
@@ -368,7 +368,7 @@ struct char_data : public unit_data {
     int8_t distfea{};             /* PC's Distinguishing Feature          */
     int race_level{};        /* PC / NPC's racial level / hit dice   */
     int level_adj{};        /* PC level adjustment                  */
-    dbat::sensei::Sensei *chclass{};        /* Last class taken                     */
+    sensei::Sensei *chclass{};        /* Last class taken                     */
     int chclasses[NUM_CLASSES]{};    /* Ranks in all classes        */
     int epicclasses[NUM_CLASSES]{};    /* Ranks in all epic classes */
     struct levelup_data *level_info{};
@@ -420,7 +420,7 @@ struct char_data : public unit_data {
 
     struct char_data *fighting{};    /* Opponent				*/
 
-    int8_t position{};        /* Standing, fighting, sleeping, etc.	*/
+    int8_t position{POS_STANDING};        /* Standing, fighting, sleeping, etc.	*/
 
     int carry_weight{};        /* Carried weight			*/
     int8_t carry_items{};        /* Number of items carried		*/
@@ -466,7 +466,7 @@ struct char_data : public unit_data {
     int64_t ki{};
     int64_t max_ki{};/* Max ki for PC/NPC			*/
 
-    int armor{};        /* Internally stored *10		*/
+    int armor{0};        /* Internally stored *10		*/
     int16_t shield_bonus{};       /* Shield bonus for AC			*/
     int gold{};            /* Money carried			*/
     int bank_gold{};        /* Gold the char has in a bank account	*/
@@ -541,7 +541,7 @@ struct char_data : public unit_data {
     int combhits{};
     int ping{};
     int starphase{};
-    dbat::race::Race *mimic{};
+    race::Race *mimic{};
     int bonuses[MAX_BONUSES]{};
     int ccpoints{};
     int negcount{};
@@ -791,7 +791,7 @@ struct char_data : public unit_data {
 
     int64_t gainBaseST(int64_t amt, bool trans_mult = false);
 
-    void gainBaseAll(int64_t amt, bool trans_mult = false);
+    void gainBaseAll(int64_t amt, bool Ftrans_mult = false);
 
     int64_t loseBasePL(int64_t amt, bool trans_mult = false);
 
@@ -943,14 +943,14 @@ struct descriptor_data {
     int obj_weapon;
     struct obj_data *obj_point;
     /*---------------Ship Construction Editing Variables---------------------*/
-    int shipmenu;
-    int shipsize;
-    char *ship_name;
-    int shipextra[4];
-    int shields;
-    int armor;
-    int drive;
-    int shipweap;
+    //int shipmenu;
+    //int shipsize;
+    //char *ship_name;
+    //int shipextra[4];
+    //int shields;
+    //int armor;
+    //int drive;
+    //int shipweap;
     /*-----------------------------------------------------------------------*/
     int user_freed;
     int customfile;

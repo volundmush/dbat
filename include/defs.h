@@ -258,38 +258,6 @@
 #define ZONE_NOIMMORT        1
 #define ZONE_QUEST        2
 #define ZONE_DBALLS        3
-#define ZONE_SPARE2        4
-#define ZONE_SPARE3        5
-#define ZONE_SPARE4        6
-#define ZONE_SPARE5        7
-#define ZONE_SPARE6        8
-#define ZONE_SPARE7        9
-#define ZONE_SPARE8        10
-#define ZONE_SPARE9        11
-#define ZONE_SPARE10        12
-#define ZONE_SPARE11        13
-#define ZONE_SPARE12        14
-#define ZONE_SPARE13        15
-#define ZONE_SPARE14        16
-#define ZONE_SPARE15        17
-#define ZONE_SPARE16        18
-#define ZONE_SPARE17        19
-#define ZONE_SPARE18        20
-#define ZONE_SPARE19        21
-#define ZONE_SPARE20        22
-#define ZONE_SPARE21        23
-#define ZONE_SPARE22        24
-#define ZONE_SPARE23        25
-#define ZONE_SPARE24        26
-#define ZONE_SPARE25        27
-#define ZONE_SPARE26        28
-#define ZONE_SPARE27        29
-#define ZONE_SPARE28        30
-#define ZONE_SPARE29        31
-#define ZONE_SPARE30        32
-#define ZONE_SPARE31        33
-#define ZONE_SPARE32        34
-#define ZONE_SPARE33        35
 
 
 /* Exit info: used in room_data.dir_option.exit_info */

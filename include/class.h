@@ -37,7 +37,7 @@ extern time_t birth_age(struct char_data *ch);
 
 extern time_t max_age(struct char_data *ch);
 
-namespace dbat::sensei {
+namespace sensei {
     enum sensei_id : uint8_t {
         roshi = 0,
         piccolo = 1,

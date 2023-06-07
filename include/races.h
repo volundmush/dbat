@@ -14,7 +14,7 @@ extern int invalid_race(struct char_data *ch, struct obj_data *obj);
 
 // C++ conversion
 
-namespace dbat::race {
+namespace race {
 
     enum race_id : uint8_t {
         human = 0,
@@ -65,7 +65,6 @@ namespace dbat::race {
     class Race {
     public:
         Race(race_id rid, const std::string &name, std::string abbr, int size, bool pc);
-
         race_id getID() const;
 
         const std::string &getName() const;

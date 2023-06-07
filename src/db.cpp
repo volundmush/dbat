@@ -70,7 +70,7 @@ std::map<trig_vnum, struct index_data> trig_index; /* index table for triggers  
 struct trig_data *trigger_list = nullptr;  /* all attached triggers */
 
 int32_t max_mob_id = MOB_ID_BASE;  /* for unique mob id's       */
-long max_obj_id = OBJ_ID_BASE;  /* for unique obj id's       */
+int32_t max_obj_id = OBJ_ID_BASE;  /* for unique obj id's       */
 int dg_owner_purged;            /* For control of scripts */
 
 int no_mail = 0;        /* mail disabled?		 */
@@ -671,10 +671,10 @@ void destroy_db() {
     log("Freeing Assemblies.");
     free_assemblies();
 
-    for(auto &s : dbat::sensei::sensei_map) delete s.second;
-    dbat::sensei::sensei_map.clear();
-    for(auto &r : dbat::race::race_map) delete r.second;
-    dbat::race::race_map.clear();
+    for(auto &s : sensei::sensei_map) delete s.second;
+    sensei::sensei_map.clear();
+    for(auto &r : race::race_map) delete r.second;
+    race::race_map.clear();
 
 }
 
@@ -702,8 +702,8 @@ void init_obj_unique_hash() {
 /* body of the booting system */
 void boot_db() {
     zone_rnum i;
-    dbat::race::load_races();
-    dbat::sensei::load_sensei();
+    race::load_races();
+    sensei::load_sensei();
 
     log("Boot db -- BEGIN.");
 
@@ -1347,36 +1347,7 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
         exit(1);
     }
 
-    if (((retval = sscanf(line, " %d %s %s %s %s %d ", t, flags, flags2, flags3, flags4, t + 2)) == 3) &&
-        (bitwarning == true)) {
-        log("WARNING: Conventional worldfiles detected. Please read 128bit.readme.");
-        exit(1);
-    } else if ((retval == 3) && (bitwarning == false)) {
-        /*
-   * Looks like the implementor is ready, so let's load the worldfiles. We
-   * load the extra three flags as 0, since they won't be anything anyway. We
-   * will save the entire world later on, when every room, mobile, and object
-   * is converted.
-   */
-
-        log("Converting room #%d to 128bits..", virtual_nr);
-        r.room_flags[0] = asciiflag_conv(flags);
-        r.room_flags[1] = 0;
-        r.room_flags[2] = 0;
-        r.room_flags[3] = 0;
-
-        sprintf(flags, "room #%d", virtual_nr);    /* sprintf: OK (until 399-bit integers) */
-
-        /* No need to scan the other three sections; they're 0 anyway */
-        check_bitvector_names(r.room_flags[0], room_bits_count, flags, "room");
-
-        if (bitsavetodisk) { /* Maybe the implementor just wants to look at the 128bit files */
-            add_to_save_list(zone_table[real_zone_by_thing(virtual_nr)].number, 3);
-            converting = true;
-        }
-
-        log("   done.");
-    } else if (retval == 6) {
+    if ((retval = sscanf(line, " %d %s %s %s %s %d ", t, flags, flags2, flags3, flags4, t + 2)) == 6) {
         int taeller;
         r.room_flags[0] = asciiflag_conv(flags);
         r.room_flags[1] = asciiflag_conv(flags2);
@@ -1434,7 +1405,7 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
 
     snprintf(buf, sizeof(buf), "SYSERR: Format error in room #%d (expecting D/E/S)", virtual_nr);
 
-    for (;;) {
+    while(true) {
         if (!get_line(fl, line)) {
             log("%s", buf);
             exit(1);
@@ -1674,14 +1645,14 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
 
     GET_GOLD(ch) = t[0];
     GET_EXP(ch) = 0;
-    ch->race = dbat::race::find_race_map_id(t[2], dbat::race::race_map);
+    ch->race = race::find_race_map_id(t[2], race::race_map);
     if (!ch->race) {
-        ch->race = dbat::race::race_map[dbat::race::human];
+        ch->race = race::race_map[race::human];
     }
 
-    ch->chclass = dbat::sensei::find_sensei_map_id(t[3], dbat::sensei::sensei_map);
+    ch->chclass = sensei::find_sensei_map_id(t[3], sensei::sensei_map);
     if (!ch->chclass) {
-        ch->chclass = dbat::sensei::sensei_map[dbat::sensei::commoner];
+        ch->chclass = sensei::sensei_map[sensei::commoner];
     }
     GET_SAVE_BASE(ch, SAVING_FORTITUDE) = 0;
     GET_SAVE_BASE(ch, SAVING_REFLEX) = 0;
@@ -1958,56 +1929,7 @@ int parse_mobile_from_file(FILE *mob_f, struct char_data *ch) {
         return 0;
     }
 
-    if (((retval = sscanf(line, "%s %s %s %s %s %s %s %s %d %c", f1, f2, f3, f4, f5, f6, f7, f8, t + 2, &letter)) ==
-         10) && (bitwarning == true)) {
-/* Let's make the implementor read some, before converting his worldfiles */
-        log("WARNING: Conventional mobilefiles detected. Please read 128bit.readme.");
-        return 0;
-    } else if ((retval == 4) && (bitwarning == false)) {
-
-        log("Converting mobile #%d to 128bits..", nr);
-        MOB_FLAGS(ch)[0] = asciiflag_conv(f1);
-        MOB_FLAGS(ch)[1] = 0;
-        MOB_FLAGS(ch)[2] = 0;
-        MOB_FLAGS(ch)[3] = 0;
-        check_bitvector_names(MOB_FLAGS(ch)[0], action_bits_count, buf2, "mobile");
-
-        AFF_FLAGS(ch)[0] = asciiflag_conv_aff(f2);
-        AFF_FLAGS(ch)[1] = 0;
-        AFF_FLAGS(ch)[2] = 0;
-        AFF_FLAGS(ch)[3] = 0;
-
-        GET_ALIGNMENT(ch) = atoi(f3);
-
-        /* Make some basic checks. */
-        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_CHARM);
-        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_POISON);
-        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_GROUP);
-        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_SLEEP);
-        if (MOB_FLAGGED(ch, MOB_AGGRESSIVE) && MOB_FLAGGED(ch, MOB_AGGR_GOOD))
-            REMOVE_BIT_AR(MOB_FLAGS(ch), MOB_AGGR_GOOD);
-        if (MOB_FLAGGED(ch, MOB_AGGRESSIVE) && MOB_FLAGGED(ch, MOB_AGGR_NEUTRAL))
-            REMOVE_BIT_AR(MOB_FLAGS(ch), MOB_AGGR_NEUTRAL);
-        if (MOB_FLAGGED(ch, MOB_AGGRESSIVE) && MOB_FLAGGED(ch, MOB_AGGR_EVIL))
-            REMOVE_BIT_AR(MOB_FLAGS(ch), MOB_AGGR_EVIL);
-
-        check_bitvector_names(AFF_FLAGS(ch)[0], affected_bits_count, buf2, "mobile affect");
-
-        /*
-     * This is necessary, since if we have conventional worldfiles, &letter
-     * is loaded into f4 instead of the letter characters. So what we do, is
-     * copy f4 into letter. Disadvantage is that &letter cannot be longer
-     * then 128 characters, but this shouldn't occur anyway.
-     */
-        letter = *f4;
-
-        if (bitsavetodisk) {
-            add_to_save_list(zone_table[real_zone_by_thing(nr)].number, 0);
-            converting = true;
-        }
-
-        log("   done.");
-    } else if (retval == 10) {
+    if ((retval = sscanf(line, "%s %s %s %s %s %s %s %s %d %c", f1, f2, f3, f4, f5, f6, f7, f8, t + 2, &letter)) == 10) {
         int taeller;
 
         MOB_FLAGS(ch)[0] = asciiflag_conv(f1);
@@ -2142,40 +2064,8 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
         log("SYSERR: Expecting first numeric line of %s, but file ended!", buf2);
         exit(1);
     }
-
-    if (((retval = sscanf(line, " %d %s %s %s %s %s %s %s %s %s %s %s %s", t, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10,
-                          f11, f12)) == 4) && (bitwarning == true)) {
-        /* Let's make the implementor read some, before converting his worldfiles */
-        log("WARNING: Conventional objectfiles detected. Please read 128bit.readme.");
-        exit(1);
-    } else if (((retval == 4) || (retval == 3)) && (bitwarning == false)) {
-
-        if (retval == 3)
-            t[3] = 0;
-        else if (retval == 4)
-            t[3] = asciiflag_conv_aff(f3);
-
-        log("Converting object #%d to 128bits..", nr);
-        GET_OBJ_EXTRA(&o)[0] = asciiflag_conv(f1);
-        GET_OBJ_EXTRA(&o)[1] = 0;
-        GET_OBJ_EXTRA(&o)[2] = 0;
-        GET_OBJ_EXTRA(&o)[3] = 0;
-        GET_OBJ_WEAR(&o)[0] = asciiflag_conv(f2);
-        GET_OBJ_WEAR(&o)[1] = 0;
-        GET_OBJ_WEAR(&o)[2] = 0;
-        GET_OBJ_WEAR(&o)[3] = 0;
-        GET_OBJ_PERM(&o)[0] = asciiflag_conv_aff(f3);
-        GET_OBJ_PERM(&o)[1] = 0;
-        GET_OBJ_PERM(&o)[2] = 0;
-        GET_OBJ_PERM(&o)[3] = 0;
-
-        if (bitsavetodisk) {
-            add_to_save_list(zone_table[real_zone_by_thing(nr)].number, 1);
-            converting = true;
-        }
-
-        log("   done.");
-    } else if (retval == 13) {
+    if ((retval = sscanf(line, " %d %s %s %s %s %s %s %s %s %s %s %s %s", t, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10,
+                                f11, f12)) == 13) {
 
         GET_OBJ_EXTRA(&o)[0] = asciiflag_conv(f1);
         GET_OBJ_EXTRA(&o)[1] = asciiflag_conv(f2);
@@ -2405,7 +2295,7 @@ static void load_zones(FILE *fl, char *zonename) {
     zone_vnum v;
 
     if (sscanf(buf, "#%hd", &v) != 1) {
-        log("SYSERR: Format error in %s, line %d", zname, line_num);
+        log("SYSERR: FFFFFF Format error in %s, line %d", zname, line_num);
         exit(1);
     }
     snprintf(buf2, sizeof(buf2)-1, "beginning of zone #%d", v);
@@ -2687,9 +2577,7 @@ int vnum_armortype(char *searchname, struct char_data *ch) {
 
 /* create a character, and add it to the char list */
 struct char_data *create_char() {
-    struct char_data *ch;
-
-    CREATE(ch, struct char_data, 1);
+    struct char_data *ch = new char_data();
     clear_char(ch);
     ch->next = character_list;
     character_list = ch;
@@ -3454,9 +3342,7 @@ char *sprintuniques(int low, int high) {
 
 /* create an object, and add it to the object list */
 struct obj_data *create_obj() {
-    struct obj_data *obj;
-
-    CREATE(obj, struct obj_data, 1);
+    struct obj_data *obj = new obj_data();
     clear_object(obj);
     obj->next = object_list;
     object_list = obj;
@@ -4140,7 +4026,7 @@ void free_char(struct char_data *ch) {
     if (((ch)->id) != 0)
         remove_from_lookup_table(((ch)->id));
 
-    free(ch);
+    delete ch;
 }
 
 
@@ -4288,8 +4174,6 @@ void reset_char(struct char_data *ch) {
 
 /* clear ALL the working variables of a char; do NOT free any space alloc'ed */
 void clear_char(struct char_data *ch) {
-    memset((char *) ch, 0, sizeof(struct char_data));
-
     IN_ROOM(ch) = NOWHERE;
     GET_PFILEPOS(ch) = -1;
     GET_MOB_RNUM(ch) = NOBODY;
@@ -4305,8 +4189,6 @@ void clear_char(struct char_data *ch) {
 
 
 void clear_object(struct obj_data *obj) {
-    memset((char *) obj, 0, sizeof(struct obj_data));
-
     obj->vn = NOTHING;
     IN_ROOM(obj) = NOWHERE;
     obj->worn_on = NOWHERE;

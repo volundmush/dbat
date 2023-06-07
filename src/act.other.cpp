@@ -147,7 +147,7 @@ void bring_to_cap(struct char_data *ch) {
     auto cap = ch->calc_soft_cap();
 
     switch (ch->race->getSoftType(ch)) {
-        case dbat::race::Fixed:
+        case race::Fixed:
             if (ch->getBasePL() < cap)
                 ch->gainBasePL(cap - ch->getBasePL() - 1, p_trans);
             if (ch->getBaseKI() < cap)
@@ -11916,9 +11916,9 @@ ACMD(do_clan) {
         } else if (clanOpenJoin(arg3)) {
             send_to_char(ch, "You can't kick someone out of an open-join clan.\r\n");
         } else if (!(vict = get_char_vis(ch, name1, nullptr, FIND_CHAR_WORLD))) {
-            CREATE(vict, struct char_data, 1);
+            vict = new char_data();
+            vict->player_specials = new player_special_data();
             clear_char(vict);
-            CREATE(vict->player_specials, struct player_special_data, 1);
 
             sprintf(name, "%s", rIntro(ch, name1));
 
