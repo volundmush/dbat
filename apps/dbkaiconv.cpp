@@ -129,40 +129,48 @@ static std::string cleanString(const std::string &txt) {
 }
 
 static std::string sectorTypes[] = {
-        "Inside",
-        "City",
-        "Plain",
-        "Forest",
-        "Hills",
-        "Mountains",
-        "Shallows",
-        "Water",
-        "Sky",
-        "Underwater",
-        "Shop",
-        "Important",
-        "Desert",
-        "Space",
-        "Lava",
+        "inside",
+        "city",
+        "plain",
+        "forest",
+        "hills",
+        "mountains",
+        "shallows",
+        "water",
+        "sky",
+        "underwater",
+        "shop",
+        "important",
+        "desert",
+        "space",
+        "lava",
 };
 
 void dump_rooms() {
+    std::bitset<32> bits;
+    bits[0] = true;
+    bits[3] = true;
 
     for(auto& [id, room] : world) {
         if(!include_room(&room)) continue;
+
         auto [obj, err] = kaizer::createEntity(id);
         if(err) {
             std::cerr << "Error creating room object: " << err.value() << std::endl;
             exit(1);
         }
-        kaizer::addType(obj, "object");
-        kaizer::addType(obj, "room");
-        kaizer::setString(obj, "name", processColors(room.name, false, nullptr));
-        kaizer::setString(obj, "short_description", room.name);
+        nlohmann::json j, asp;
+        j["Types"] = bits.to_ulong();
+        j["Name"] = processColors(room.name, false, nullptr);
+        j["ShortDescription"] = std::string(room.name);
+        if(room.look_description && strlen(room.look_description)) {
+            j["LookDescription"] = cleanString(room.look_description);
+        }
+        asp["terrain"] = sectorTypes[room.sector_type];
+        j["aspects"] = asp;
 
-        kaizer::setAspect(obj, "terrain", sectorTypes[room.sector_type]);
+        kaizer::deserializeObject(obj, j);
 
-        if(room.look_description && strlen(room.look_description)) kaizer::setString(obj, "look_description", cleanString(room.look_description));
     }
     // TODO: Room Flags
 }
@@ -170,6 +178,10 @@ void dump_rooms() {
 
 
 void dump_exits() {
+    std::bitset<32> bits;
+    bits[0] = true;
+    bits[4] = true;
+
     for(const auto& [id, room] : world) {
         for(auto i = 0; i < NUM_OF_DIRS; i++) {
             auto ex = room.dir_option[i];
@@ -184,32 +196,40 @@ void dump_exits() {
                     std::cerr << "Error creating exit object: " << err.value() << std::endl;
                     exit(1);
                 }
-                kaizer::addType(obj, "object");
-                kaizer::addType(obj, "exit");
-                kaizer::setString(obj, "name", dirs[i]);
-                kaizer::setRelation(obj, "destination", destIT->second);
-                kaizer::setRelation(obj, "exit", exIT->second);
-                if(ex->general_description) kaizer::setString(obj, "look_description", ex->general_description);
-                if(ex->keyword) kaizer::setString(obj, "short_description", ex->keyword);
-                if(ex->key != NOTHING) kaizer::setInteger(obj, "key", ex->key);
+
+                nlohmann::json j, exdata;
+                j["Types"] = bits.to_ulong();
+                j["Name"] = dirs[i];
+                if(ex->general_description) {
+                    j["LookDescription"] = cleanString(ex->general_description);
+                }
+                if(ex->keyword) {
+                    j["ShortDescription"] = cleanString(ex->keyword);
+                }
+                exdata["destination"] = ex->to_room;
+                exdata["location"] = id;
+                j["Exit"] = exdata;
+                if(ex->key != NOTHING) j["integers"]["key"] = ex->key;
+
+                kaizer::deserializeObject(obj, j);
             }
         }
     }
 }
 
 nlohmann::json dump_item(obj_data *obj, bool asPrototype) {
+    std::bitset<32> bits;
+    bits[0] = true;
+    bits[1] = true;
 
     nlohmann::json j;
-    for (const auto &k: {"object", "item"}) {
-        j["types"].push_back(k);
-    }
+    j["Types"] = bits.to_ulong();
 
     nlohmann::json strings;
-    if (obj->name && strlen(obj->name)) strings["name"] = cleanString(obj->name);
-    if (obj->short_description && strlen(obj->short_description)) strings["short_description"] = cleanString(obj->short_description);
-    if (obj->look_description && strlen(obj->look_description)) strings["look_description"] = cleanString(obj->look_description);
-    if (obj->room_description && strlen(obj->room_description)) strings["room_description"] = cleanString(obj->room_description);
-    if (!strings.empty()) j["strings"] = strings;
+    if (obj->name && strlen(obj->name)) j["Name"] = cleanString(obj->name);
+    if (obj->short_description && strlen(obj->short_description)) j["ShortDescription"] = cleanString(obj->short_description);
+    if (obj->look_description && strlen(obj->look_description)) j["LookDescription"] = cleanString(obj->look_description);
+    if (obj->room_description && strlen(obj->room_description)) j["RoomDescription"] = cleanString(obj->room_description);
 
     nlohmann::json integers;
     integers["type_flag"] = obj->type_flag;
@@ -269,54 +289,45 @@ void dump_items() {
     }
 }
 
+
 nlohmann::json dump_character(char_data *ch, bool asPrototype) {
-    nlohmann::json j;
-    for (const auto &k: {"object", "character"}) {
-        j["types"].push_back(k);
-    }
+    std::bitset<32> bits;
+    bits[0] = true;
+    bits[2] = true;
     auto is_npc = IS_NPC(ch);
-    if(is_npc) {
-        j["types"].push_back("npc");
+    if(IS_NPC(ch)) {
+        bits[16] = true;
     } else {
-        j["types"].push_back("player");
+        bits[17] = true;
     }
 
-    nlohmann::json strings;
-    if (ch->name && strlen(ch->name)) strings["name"] = cleanString(ch->name);
-    if (ch->short_description && strlen(ch->short_description)) strings["short_description"] = cleanString(ch->short_description);
-    if (ch->look_description && strlen(ch->look_description)) strings["look_description"] = cleanString(ch->look_description);
-    if (ch->room_description && strlen(ch->room_description)) strings["room_description"] = cleanString(ch->room_description);
-    if (!strings.empty()) j["strings"] = strings;
+    nlohmann::json j;
+    j["Types"] = bits.to_ulong();
 
-    nlohmann::json aspects;
+    if (ch->name && strlen(ch->name)) j["Name"] = cleanString(ch->name);
+    if (ch->short_description && strlen(ch->short_description)) j["ShortDescription"] = cleanString(ch->short_description);
+    if (ch->look_description && strlen(ch->look_description)) j["LookDescription"] = cleanString(ch->look_description);
+    if (ch->room_description && strlen(ch->room_description)) j["RoomDescription"] = cleanString(ch->room_description);
+
+    nlohmann::json character;
     switch(ch->race->getID()) {
-        case race::halfbreed:
-            aspects["race"] = "halfsaiyan";
-            break;
-        case race::truffle:
-            aspects["race"] = "tuffle";
-            break;
-        case race::bio:
-            aspects["race"] = "bioandroid";
+        case race::spirit:
+            character["race"] = 0;
             break;
         default:
-            aspects["race"] = ch->race->getNameLower();
+            character["race"] = ch->race->getID() + 1;
             break;
     }
 
-    switch(ch->sex) {
-        case SEX_MALE:
-            aspects["sex"] = "male";
-            break;
-        case SEX_FEMALE:
-            aspects["sex"] = "female";
+    character["sex"] = ch->sex;
+    switch(ch->chclass->getID()) {
+        case sensei::commoner:
+            character["sensei"] = 0;
             break;
         default:
-            aspects["sex"] = "neutral";
+            character["sensei"] = ch->chclass->getID() + 1;
             break;
     }
-
-
 
     nlohmann::json integers;
     integers["level"] = ch->level;
@@ -328,7 +339,7 @@ nlohmann::json dump_character(char_data *ch, bool asPrototype) {
     integers["race_level"] = ch->race_level;
     integers["level_adj"] = ch->level_adj;
 
-    aspects["sensei"] = ch->chclass->getNameLower();
+
 
     nlohmann::json stats;
     stats["strength"] = ch->real_abils.str;
@@ -343,7 +354,7 @@ nlohmann::json dump_character(char_data *ch, bool asPrototype) {
 
     j["stats"] = stats;
     j["integers"] = integers;
-    j["aspects"] = aspects;
+    j["Character"] = character;
 
     for (auto t = ch->proto_script; t; t = t->next) {
         j["dgscripts"].push_back(t->vnum);
@@ -473,7 +484,6 @@ void dump_accounts() {
                 exit(1);
             }
             kaizer::deserializeObject(pc, player_data.value());
-            auto &aspects = kaizer::registry.get<kaizer::components::Aspects>(pc);
             acc.characters.insert(kaizer::getID(pc));
         }
     }
