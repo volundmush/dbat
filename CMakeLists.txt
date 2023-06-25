@@ -67,7 +67,7 @@ target_link_libraries(dbconv circlemud ${CIRCLE_LINK_LIBRARIES})
 target_include_directories(dbconv PUBLIC ${CIRCLE_INCLUDE_DIRS})
 
 add_executable(dbkaiconv apps/dbkaiconv.cpp)
-target_link_libraries(dbkaiconv circlemud dbatk kaizermud ${CIRCLE_LINK_LIBRARIES} ${DBATK_LINK_LIBRARIES})
+target_link_libraries(dbkaiconv circlemud dbatk ${CIRCLE_LINK_LIBRARIES} ${DBATK_LINK_LIBRARIES})
 target_include_directories(dbkaiconv PUBLIC ${CIRCLE_INCLUDE_DIRS} ${DBATK_INCLUDE_DIRS})
 
 

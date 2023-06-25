@@ -18,6 +18,7 @@
 #include "races.h"
 #include "players.h"
 #include "spells.h"
+#include "nlohmann/json.hpp"
 
 std::unique_ptr<SQLite::Database> db;
 
@@ -440,6 +441,19 @@ static std::vector<std::string> schema = {
         "CREATE TABLE IF NOT EXISTS skill_names ("
         "   id INTEGER PRIMARY KEY,"
         "   name TEXT"
+        ");",
+
+        "CREATE TABLE IF NOT EXISTS space ("
+        "   id INTEGER PRIMARY KEY,"
+        "   x INTEGER NOT NULL,"
+        "   y INTEGER NOT NULL,"
+        "   z INTEGER NOT NULL,"
+        "   tile TEXT NOT NULL,"
+        "   name TEXT NOT NULL,"
+        "   description TEXT NOT NULL,"
+        "   exits TEXT NOT NULL,"
+        "   doors TEXT NOT NULL,"
+        "   UNIQUE(x,y,z)"
         ");"
 
 };
@@ -450,7 +464,7 @@ void dump_assets() {
     }
 
     SQLite::Statement q1(*db, "INSERT INTO senseis (id, name, abbreviation, style_name) VALUES (?, ?, ?, ?);");
-    for(const auto& [s_id, sen] : dbat::sensei::sensei_map) {
+    for(const auto& [s_id, sen] : sensei::sensei_map) {
         q1.bind(1, sen->getID());
         q1.bind(2, sen->getName());
         q1.bind(3, sen->getAbbr());
@@ -461,7 +475,7 @@ void dump_assets() {
 
     SQLite::Statement q2(*db, "INSERT INTO races (id, name, abbreviation, size, playable) VALUES (?, ?, ?, ?, ?);");
 
-    for(const auto& [r_id, r] : dbat::race::race_map) {
+    for(const auto& [r_id, r] : race::race_map) {
         q2.bind(1, r->getID());
         q2.bind(2, r->getName());
         q2.bind(3, r->getAbbr());
@@ -939,8 +953,8 @@ void dump_accounts() {
         std::getline(f, email);
         std::getline(f, password);
         q1.bind(1, name);
-        q1.bind(2, email);
-        q1.bind(3, password);
+        q1.bind(2, password);
+        q1.bind(3, email);
         f >> character_slots;
         f >> rpp;
         q1.bind(4,rpp);
@@ -992,6 +1006,97 @@ void dump_skills() {
 
 }
 
+void dump_space() {
+    // for this we need to scan mapnums, both rows and columns, and check the old "space" rooms at those ids.
+    // Only if it's something particularly cool will we add it to the grid.
+    int curX = -100, curY = 100;
+    SQLite::Statement q1(*db, "INSERT INTO space (id, x, y, z, tile, name, description, exits, doors) VALUES (?,?,?,?,?,?,?,?,?)");
+    auto &base = world[20199];
+    for(auto &row : mapnums) {
+        for(auto &col : row) {
+            q1.bind(1, col);
+            q1.bind(2, curX);
+            q1.bind(3, curY);
+            q1.bind(4, 0);
+
+            auto &room = world[col];
+
+            std::string tile = "";
+            if(IS_SET_AR(room.room_flags, ROOM_EORBIT)) {
+                    tile = "@GE@n";
+                } else if(IS_SET_AR(room.room_flags, ROOM_NORBIT)) {
+                    tile = "@gN@n";
+                } else if(IS_SET_AR(room.room_flags, ROOM_KORBIT)) {
+                    tile = "@mK@n";
+                } else if(IS_SET_AR(room.room_flags, ROOM_VORBIT)) {
+                    tile = "@YV@n";
+                } else if(IS_SET_AR(room.room_flags, ROOM_AORBIT)) {
+                    tile = "@BA@n";
+                } else if(IS_SET_AR(room.room_flags, ROOM_YORBIT)) {
+                    tile = "@MY@n";
+                } else if(IS_SET_AR(room.room_flags, ROOM_KANORB)) {
+                    tile = "@CK@n";
+                } else if(IS_SET_AR(room.room_flags, ROOM_ARLORB)) {
+                    tile = "@mA@n";
+                } else if(IS_SET_AR(room.room_flags, ROOM_NEBULA)) {
+                    tile = "@m&@n";
+                } else if(IS_SET_AR(room.room_flags, ROOM_ASTERO)) {
+                    tile = "@yQ@n";
+                } else if(IS_SET_AR(room.room_flags, ROOM_WORMHO)) {
+                    tile = "@1 @n";
+                } else if(IS_SET_AR(room.room_flags, ROOM_STATION)) {
+                    tile = "@DS@n";
+                } else if(IS_SET_AR(room.room_flags, ROOM_STAR)) {
+                    tile = "@6 @n";
+                } else if(IS_SET_AR(room.room_flags, ROOM_CORBIT)) {
+                    tile = "@MC@n";
+                }
+            q1.bind(5, tile);
+            if(!strcasecmp(base.name, room.name)) {
+                q1.bind(6, "");
+            } else {
+                q1.bind(6, room.name);
+            }
+            if(!strcasecmp(base.look_description, room.look_description)) {
+                q1.bind(7, "");
+            } else {
+                q1.bind(7, room.look_description);
+            }
+
+            nlohmann::json exits, doors;
+            for(auto &dir : {UP, DOWN, INDIR, OUTDIR}) {
+                    if(room.dir_option[dir]) {
+                        auto &exit = room.dir_option[dir];
+                        nlohmann::json destination, door;
+                        destination["destination"] = exit->to_room;
+                        exits.push_back(std::make_pair(dir, destination));
+
+                        if(exit->keyword && strlen(exit->keyword)) door["keyword"] = exit->keyword;
+                        if(exit->general_description && strlen(exit->general_description)) door["description"] = exit->general_description;
+                        if(exit->dclock) door["dclock"] = exit->dclock;
+                        if(exit->key) door["legacyKey"] = exit->key;
+                        if(!door.empty()) doors.push_back(std::make_pair(dir, door));
+                    }
+                }
+            if(!exits.empty()) {
+                q1.bind(8, exits.dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+            } else {
+                q1.bind(8, "");
+            }
+            if(!doors.empty()) {
+                q1.bind(9, doors.dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+            } else {
+                q1.bind(9, "");
+            }
+            q1.exec();
+            q1.reset();
+            curX++;
+        }
+        curX = -100;
+        curY--;
+    }
+}
+
 
 void dump_db() {
     // Define the database file name
@@ -1025,6 +1130,9 @@ void dump_db() {
 
     log("Dumping rooms and exits...");
     dump_rooms();
+
+    log("Dumping space...");
+    dump_space();
 
     log("Dumping item prototypes...");
     dump_objects();

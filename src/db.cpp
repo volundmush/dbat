@@ -3741,9 +3741,10 @@ void reset_zone(zone_rnum zone) {
                     break;
 
                 case 'V':
-                    if (c.arg1 == MOB_TRIGGER && tmob) {
+                    if (c.arg1 == MOB_TRIGGER
+                    && tmob) {
                         if (!SCRIPT(tmob)) {
-                            ZONE_ERROR("Attempt to give variable to scriptless mobile");
+                            ZONE_ERROR("Attempt to give a variable to scriptless mobile");
                         } else
                             add_var(&(SCRIPT(tmob)->global_vars), c.sarg1, c.sarg2,
                                     c.arg3);
