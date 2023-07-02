@@ -23,8 +23,6 @@ find_package(ZLIB REQUIRED)
 find_package(SQLite3 REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system)
 
-add_subdirectory(../dbatk dbatk_build)
-
 set(CIRCLE_INCLUDE_DIRS
         include
         ${fmt_SOURCE_DIR}/include
@@ -65,12 +63,6 @@ target_include_directories(circle PUBLIC ${CIRCLE_INCLUDE_DIRS})
 add_executable(dbconv apps/dbconv.cpp)
 target_link_libraries(dbconv circlemud ${CIRCLE_LINK_LIBRARIES})
 target_include_directories(dbconv PUBLIC ${CIRCLE_INCLUDE_DIRS})
-
-add_executable(dbkaiconv apps/dbkaiconv.cpp)
-target_link_libraries(dbkaiconv circlemud dbatk ${CIRCLE_LINK_LIBRARIES} ${DBATK_LINK_LIBRARIES})
-target_include_directories(dbkaiconv PUBLIC ${CIRCLE_INCLUDE_DIRS} ${DBATK_INCLUDE_DIRS})
-
-
 
 
 SET(circle_link ${CMAKE_INSTALL_PREFIX}/bin/)

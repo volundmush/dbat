@@ -87,9 +87,9 @@ int enter_player_game(struct descriptor_data *d);
 /* first compression neg. string */
 const char compress_offer[4] =
         {
-                (char) IAC,
-                (char) WILL,
-                (char) COMPRESS2,
+                (char) 255,
+                (char) 251,
+                (char) 86,
                 (char) 0,
         };
 
@@ -782,9 +782,9 @@ void record_usage() {
 void echo_off(struct descriptor_data *d) {
     char off_string[] =
             {
-                    (char) IAC,
-                    (char) WILL,
-                    (char) TELOPT_ECHO,
+                    (char) 255,
+                    (char) 251,
+                    (char) 1,
                     (char) 0,
             };
 
@@ -798,9 +798,9 @@ void echo_off(struct descriptor_data *d) {
 void echo_on(struct descriptor_data *d) {
     char on_string[] =
             {
-                    (char) IAC,
-                    (char) WONT,
-                    (char) TELOPT_ECHO,
+                    (char) 255,
+                    (char) 252,
+                    (char) 1,
                     (char) 0
             };
 
@@ -2336,11 +2336,11 @@ int process_input(struct descriptor_data *t) {
 
     const char compress_start[] =
             {
-                    (char) IAC,
-                    (char) SB,
-                    (char) COMPRESS2,
-                    (char) IAC,
-                    (char) SE,
+                    (char) 255,
+                    (char) 250,
+                    (char) 86,
+                    (char) 255,
+                    (char) 240,
                     (char) 0
             };
 
@@ -2368,7 +2368,7 @@ int process_input(struct descriptor_data *t) {
         /* (ie. it assumes that read_point[0] will be IAC, etc.) */
         if (t->comp->state == 1) {
 
-            if (*read_point == (char) IAC && *(read_point + 1) == (char) DO && *(read_point + 2) == (char) COMPRESS2) {
+            if (*read_point == (char) 255 && *(read_point + 1) == (char) 253 && *(read_point + 2) == (char) 86) {
                 /* compression just turned on */
                 /* first send plaintext start of the compression stream */
                 write_to_descriptor(t->descriptor, compress_start, nullptr);
@@ -2394,8 +2394,8 @@ int process_input(struct descriptor_data *t) {
                 t->comp->state = 2;
 
                 bytes_read = 0; /* ignore the compression string - don't process it further */
-            } else if (*read_point == (char) IAC && *(read_point + 1) == (char) DONT &&
-                       *(read_point + 2) == (char) COMPRESS2) {
+            } else if (*read_point == (char) 255 && *(read_point + 1) == (char) 254 &&
+                       *(read_point + 2) == (char) 86) {
                 t->comp->state = 0;
 
                 bytes_read = 0; /* ignore the compression string - don't process it further */

@@ -37,7 +37,7 @@
 #include <sys/uio.h>
 #include <sys/stat.h>
 #include <cstddef>
-#include <arpa/telnet.h>
+//#include <arpa/telnet.h>
 #include <dirent.h>
 #include <linux/limits.h>
 

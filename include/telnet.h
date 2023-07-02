@@ -40,7 +40,7 @@
 #define    DONT    254        /* you are not to use option */
 #define    DO    253        /* please, you use option */
 #define    WONT    252        /* I won't use option */
-#define    WILL    251        /* I will use option */
+//#define    WILL    251        /* I will use option */
 #define    SB    250        /* interpret as subnegotiation */
 #define    GA    249        /* you may reverse the line */
 #define    EL    248        /* erase the current line */

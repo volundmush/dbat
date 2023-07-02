@@ -3563,7 +3563,7 @@ void reset_zone(zone_rnum zone) {
                             if (c.arg4 > 0) {
                                 for (k = object_list; k; k = k->next) {
                                     if (((OBJ_LOADROOM(k) == GET_ROOM_VNUM(c.arg3))
-                                         && (GET_OBJ_VNUM(k) == GET_OBJ_VNUM(obj))) ||
+                                                                                                                                                                                                           && (GET_OBJ_VNUM(k) == GET_OBJ_VNUM(obj))) ||
                                         (GET_OBJ_VNUM(k) == GET_OBJ_VNUM(obj) &&
                                          GET_ROOM_VNUM(c.arg3) == GET_ROOM_VNUM(IN_ROOM(k)))) {
                                         /*  For objects, lets not count them if they've been removed from the room */
