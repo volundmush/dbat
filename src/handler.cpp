@@ -1016,6 +1016,9 @@ void obj_to_room(struct obj_data *object, room_rnum room) {
             if (!(vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(object, VAL_HATCH_DEST)))) {
                 if (real_room(GET_OBJ_VAL(object, 3)) != NOWHERE) {
                     vehicle = read_object(GET_OBJ_VAL(object, 0), VIRTUAL);
+                    if(!vehicle) {
+                        log("SYSERR: Vehicle %d not found for hatch %d", GET_OBJ_VAL(object, 0), GET_OBJ_VNUM(object));
+                    }
                     obj_to_room(vehicle, real_room(GET_OBJ_VAL(object, 3)));
                     if (object->look_description) {
                         if (strlen(object->look_description)) {

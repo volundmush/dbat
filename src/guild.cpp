@@ -21,6 +21,7 @@
 #include "shop.h"
 #include "class.h"
 #include "constants.h"
+#include "genzon.h"
 
 /* Local variables */
 int spell_sort_info[SKILL_TABLE_SIZE + 1];
@@ -1569,11 +1570,13 @@ SPECIAL(guild) {
             {nullptr,    nullptr}
     };
 
-    for (guild_nr = 0; guild_nr <= top_guild; guild_nr++)
-        if (GM_TRAINER(guild_nr) == keeper->vn)
+    for (auto &[vn, g] : guild_index)
+        if (g.gm == keeper->vn) {
+            guild_nr = vn;
             break;
+        }
 
-    if (guild_nr > top_guild)
+    if (!guild_index.contains(guild_nr))
         return (false);
 
     if (GM_FUNC(guild_nr))
@@ -1628,6 +1631,8 @@ void boot_the_guilds(FILE *gm_f, char *filename, int rec_count) {
             free(buf);        /* Plug memory leak! */
             top_guild = temp;
             auto &g = guild_index[temp];
+            auto &z = zone_table[real_zone_by_thing(temp)];
+            z.guilds.insert(temp);
 
             GM_NUM(top_guild) = temp;
             
@@ -1749,14 +1754,15 @@ void list_all_guilds(struct char_data *ch) {
     const char *list_all_guilds_header =
             "Virtual   G.Master	Charge   Members\r\n"
             "----------------------------------------------------------------------\r\n";
-    int gm_nr, headerlen = strlen(list_all_guilds_header);
+    int headerlen = strlen(list_all_guilds_header);
     size_t len = 0;
     char buf[MAX_STRING_LENGTH], buf1[16];
 
     *buf = '\0';
-    for (gm_nr = 0; gm_nr <= top_guild && len < sizeof(buf); gm_nr++) {
+    int counter = 0;
+    for (auto &[gm_nr, g] : guild_index) {
         /* New page in page_string() mechanism, print the header again. */
-        if (!(gm_nr % (PAGE_LENGTH - 2))) {
+        if (!(counter++ % (PAGE_LENGTH - 2))) {
             /*
              * If we don't have enough room for the header, or all we have room left
              * for is the header, then don't add it and just quit now.
@@ -1767,13 +1773,13 @@ void list_all_guilds(struct char_data *ch) {
             len += headerlen;
         }
 
-        if (GM_TRAINER(gm_nr) == NOBODY)
+        if (g.gm == NOBODY)
             strcpy(buf1, "<NONE>");  /* strcpy: OK (for 'buf1 >= 7') */
         else
-            sprintf(buf1, "%6d", mob_index[GM_TRAINER(gm_nr)].vn);  /* sprintf: OK (for 'buf1 >= 11', 32-bit int) */
+            sprintf(buf1, "%6d", g.gm);  /* sprintf: OK (for 'buf1 >= 11', 32-bit int) */
 
         len += snprintf(buf + len, sizeof(buf) - len, "%6d	%s		%5.2f	%s\r\n",
-                        GM_NUM(gm_nr), buf1, GM_CHARGE(gm_nr), guild_customer_string(gm_nr, false));
+                        gm_nr, buf1, g.charge, guild_customer_string(gm_nr, false));
     }
 
     page_string(ch->desc, buf, true);
@@ -1813,28 +1819,20 @@ void list_detailed_guild(struct char_data *ch, int gm_nr) {
 
 
 void show_guild(struct char_data *ch, char *arg) {
-    int gm_nr, gm_num;
+    vnum gm_num = NOBODY;
 
     if (!*arg)
         list_all_guilds(ch);
     else {
         if (is_number(arg))
             gm_num = atoi(arg);
-        else
-            gm_num = -1;
 
-        if (gm_num > 0) {
-            for (gm_nr = 0; gm_nr <= top_guild; gm_nr++) {
-                if (gm_num == GM_NUM(gm_nr))
-                    break;
-            }
-
-            if (gm_num < 0 || gm_nr > top_guild) {
-                send_to_char(ch, "Illegal guild master number.\n\r");
-                return;
-            }
-            list_detailed_guild(ch, gm_nr);
+        auto g = guild_index.find(gm_num);
+        if(g == guild_index.end()) {
+            send_to_char(ch, "Illegal guild master number.\n\r");
+            return;
         }
+        list_detailed_guild(ch, g->first);
     }
 }
 
@@ -1844,41 +1842,39 @@ void show_guild(struct char_data *ch, char *arg) {
 void list_guilds(struct char_data *ch, zone_rnum rnum, guild_vnum vmin, guild_vnum vmax) {
     int i, bottom, top, counter = 0;
 
-    if (rnum != NOWHERE) {
-        bottom = zone_table[rnum].bot;
-        top = zone_table[rnum].top;
-    } else {
-        bottom = vmin;
-        top = vmax;
-    }
+    auto glist = [&](const guild_data& g) {
+        counter++;
 
-    /****************************************************************************/
-    /** Store the header for the guild listing.                                **/
-    /****************************************************************************/
+        send_to_char(ch, "@g%4d@n) [@c%-5d@n]", counter, GM_NUM(i));
+
+        /************************************************************************/
+        /** Retrieve the list of rooms for this guild.                         **/
+        /************************************************************************/
+
+        send_to_char(ch, " @c[@y%d@c]@y %s@n",
+                     (g.gm == NOBODY) ?
+                     -1 : g.gm,
+                     (g.gm == NOBODY) ?
+                     "" : mob_proto[g.gm].short_description);
+
+        send_to_char(ch, "\r\n");
+    };
+
     send_to_char(ch,
                  "Index VNum    Guild Master\r\n"
                  "----- ------- ---------------------------------------------\r\n");
 
-    if (!top_guild)
-        return;
-
-    for (i = 0; i <= top_guild; i++) {
-        if (GM_NUM(i) >= bottom && GM_NUM(i) <= top) {
-            counter++;
-
-            send_to_char(ch, "@g%4d@n) [@c%-5d@n]", counter, GM_NUM(i));
-
-            /************************************************************************/
-            /** Retrieve the list of rooms for this guild.                         **/
-            /************************************************************************/
-
-            send_to_char(ch, " @c[@y%d@c]@y %s@n",
-                         (GM_TRAINER(i) == NOBODY) ?
-                         -1 : mob_index[GM_TRAINER(i)].vn,
-                         (GM_TRAINER(i) == NOBODY) ?
-                         "" : mob_proto[GM_TRAINER(i)].short_description);
-
-            send_to_char(ch, "\r\n");
+    if (rnum != NOWHERE) {
+        auto &z = zone_table[rnum];
+        for(auto vn : z.guilds) {
+            auto &g = guild_index[vn];
+            glist(g);
+        }
+    } else {
+        for(auto &[vn, g] : guild_index) {
+            if(vn < vmin || vn > vmax)
+                continue;
+            glist(g);
         }
     }
 
@@ -1912,4 +1908,36 @@ void guild_data::toggle_feat(uint16_t skill_id) {
     } else {
         feats.insert(skill_id);
     }
+}
+
+nlohmann::json guild_data::serialize() {
+    nlohmann::json j;
+
+    j["vnum"] = vnum;
+    for(auto s : skills) j["skills"].push_back(s);
+    for(auto f : feats) j["feats"].push_back(f);
+    if(charge != 1.0) j["charge"] = charge;
+    if(no_such_skill && strlen(no_such_skill)) j["no_such_skill"] = no_such_skill;
+    if(not_enough_gold && strlen(not_enough_gold)) j["not_enough_gold"] = not_enough_gold;
+    if(minlvl) j["minlvl"] = minlvl;
+    if(gm != NOBODY) j["gm"] = gm;
+    for(auto i = 0; i < 79; i++) if(IS_SET_AR(with_who, i)) j["with_who"].push_back(i);
+    if(open) j["open"] = open;
+    if(close) j["close"] = close;
+
+    return j;
+}
+
+guild_data::guild_data(const nlohmann::json &j) : guild_data() {
+    if(j.contains("vnum")) vnum = j["vnum"];
+    if(j.contains("skills")) for(const auto& s : j["skills"]) skills.insert(s.get<int>());
+    if(j.contains("feats")) for(const auto& f : j["feats"]) feats.insert(f.get<int>());
+    if(j.count("charge")) charge = j["charge"];
+    if(j.count("no_such_skill")) no_such_skill = strdup(j["no_such_skill"].get<std::string>().c_str());
+    if(j.count("not_enough_gold")) not_enough_gold = strdup(j["not_enough_gold"].get<std::string>().c_str());
+    if(j.count("minlvl")) minlvl = j["minlvl"];
+    if(j.count("gm")) gm = j["gm"];
+    if(j.contains("with_who")) for(const auto& i : j["with_who"]) SET_BIT_AR(with_who, i.get<int>());
+    if(j.count("open")) open = j["open"];
+    if(j.count("close")) close = j["close"];
 }

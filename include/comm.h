@@ -70,7 +70,7 @@ extern void close_socket(struct descriptor_data *d);
 /* I/O functions */
 extern void write_to_q(const char *txt, struct txt_q *queue, int aliased);
 
-extern int write_to_descriptor(socklen_t desc, const char *txt, struct compr *comp);
+extern int write_to_descriptor(socklen_t desc, const char *txt);
 
 extern size_t write_to_output(struct descriptor_data *d, const char *txt, ...) __attribute__ ((format (printf, 2, 3)));
 
@@ -118,39 +118,19 @@ extern void hupsig(int sig);
 
 extern ssize_t perform_socket_read(socklen_t desc, char *read_point, size_t space_left);
 
-extern ssize_t perform_socket_write(socklen_t desc, const char *txt, size_t length, struct compr *comp);
+extern ssize_t perform_socket_write(socklen_t desc, const char *txt, size_t length);
 
 extern void echo_off(struct descriptor_data *d);
 
 extern void echo_on(struct descriptor_data *d);
 
-extern void circle_sleep(struct timeval *timeout);
-
-extern int get_from_q(struct txt_q *queue, char *dest, int *aliased);
-
 extern void init_game(uint16_t port);
-
-extern void signal_setup();
-
-extern void game_loop(socklen_t mother_desc);
-
-extern socklen_t init_socket(uint16_t port);
-
-extern int new_descriptor(socklen_t s);
 
 extern int get_max_players();
 
 extern int process_output(struct descriptor_data *t);
 
 extern int process_input(struct descriptor_data *t);
-
-extern void timediff(struct timeval *diff, struct timeval *a, struct timeval *b);
-
-extern void timeadd(struct timeval *sum, struct timeval *a, struct timeval *b);
-
-extern void flush_queues(struct descriptor_data *d);
-
-extern void nonblock(socklen_t s);
 
 extern int perform_subst(struct descriptor_data *t, char *orig, char *subst);
 
@@ -162,16 +142,8 @@ extern void check_idle_passwords();
 
 extern void check_idle_menu();
 
-extern void heartbeat(int heart_pulse);
-
-struct in_addr *get_bind_addr();
-
-extern int set_sendbuf(socklen_t s);
-
 extern void free_bufpool();
 
 extern void setup_log(const char *filename, int fd);
 
 extern int open_logfile(const char *filename, FILE *stderr_fp);
-
-void init_descriptor(struct descriptor_data *newd, int desc);

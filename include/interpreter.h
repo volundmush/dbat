@@ -20,7 +20,7 @@ extern const struct command_info cmd_info[];
 
 extern void userLoad(struct descriptor_data *d, char *name);
 
-extern int perform_alias(struct descriptor_data *d, char *orig, size_t maxlen);
+extern void perform_alias(struct descriptor_data *d, char *orig);
 
 extern void topLoad(void);
 

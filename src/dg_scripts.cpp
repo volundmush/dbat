@@ -3018,3 +3018,56 @@ int check_flags_by_name_ar(int *array, int numflags, char *search, const char *n
     return false;
 }
 
+nlohmann::json trig_var_data::serialize() {
+    nlohmann::json j;
+
+    if(name && strlen(name)) j["name"] = name;
+    if(value && strlen(value)) j["value"] = value;
+    if(context) j["context"] = context;
+
+    return j;
+}
+
+trig_var_data::trig_var_data(const nlohmann::json& j) : trig_var_data() {
+    if(j.contains("name")) name = strdup(j["name"].get<std::string>().c_str());
+    if(j.contains("value")) value = strdup(j["value"].get<std::string>().c_str());
+    if(j.contains("context")) context = j["context"].get<long>();
+}
+
+nlohmann::json trig_data::serialize() {
+    nlohmann::json j;
+
+    if(nr != NOTHING) j["nr"] = nr;
+    if (name && strlen(name)) j["name"] = name;
+    if(attach_type) j["attach_type"] = attach_type;
+    if(data_type) j["data_type"] = data_type;
+    if(trigger_type) j["trigger_type"] = trigger_type;
+    if(narg) j["narg"] = narg;
+    if(arglist && strlen(arglist)) j["arglist"] = arglist;
+
+    for(auto c = cmdlist; c; c = c->next) {
+        j["cmdlist"].push_back(c->cmd);
+    }
+
+    return j;
+}
+
+trig_data::trig_data(const nlohmann::json &j) : trig_data() {
+    if(j.contains("nr")) nr = j["nr"].get<int>();
+    if(j.contains("name")) name = strdup(j["name"].get<std::string>().c_str());
+    if(j.contains("attach_type")) attach_type = j["attach_type"].get<int>();
+    if(j.contains("data_type")) data_type = j["data_type"].get<int>();
+    if(j.contains("trigger_type")) trigger_type = j["trigger_type"].get<int>();
+    if(j.contains("narg")) narg = j["narg"].get<int>();
+    if(j.contains("arglist")) arglist = strdup(j["arglist"].get<std::string>().c_str());
+
+    if(j.contains("cmdlist")) {
+        auto &cl = j["cmdlist"];
+        for(auto c = cl.rbegin(); c != cl.rend(); c++) {
+            auto cle = new cmdlist_element();
+            cle->cmd = strdup(c->get<std::string>().c_str());
+            cle->next = cmdlist;
+            cmdlist = cle;
+        }
+    }
+}

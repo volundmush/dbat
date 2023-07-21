@@ -197,9 +197,8 @@ ACMD(do_oasis_oedit) {
 }
 
 void oedit_setup_new(struct descriptor_data *d) {
-    CREATE(OLC_OBJ(d), struct obj_data, 1);
+    OLC_OBJ(d) = new obj_data();
 
-    clear_object(OLC_OBJ(d));
     OLC_OBJ(d)->name = strdup("unfinished object");
     OLC_OBJ(d)->room_description = strdup("An unfinished object is lying here.");
     OLC_OBJ(d)->short_description = strdup("an unfinished object");

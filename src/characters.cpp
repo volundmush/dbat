@@ -297,7 +297,7 @@ int char_data::wearing_android_canister() const {
 int char_data::calcGravCost(int64_t num) {
     int cost = 0;
     if (!this->can_tolerate_gravity(ROOM_GRAVITY(IN_ROOM(this))))
-        cost = ROOM_GRAVITY(IN_ROOM(this)) ^ 2;
+        cost = (int)ROOM_GRAVITY(IN_ROOM(this)) ^ 2;
 
     if (!num) {
         if (cost) {
@@ -937,4 +937,12 @@ void char_data::remove_kaioken(int8_t announce) {
             send_to_char(this, "You lose focus and your kaioken disappears.\r\n");
             ::act("$n loses focus and $s kaioken aura disappears.", true, this, nullptr, nullptr, TO_ROOM);
     }
+}
+
+std::optional<vnum> char_data::getMatchingArea(std::function<bool(const area_data &)> f) {
+    if(in_room != NOWHERE) {
+        auto &r = world[in_room];
+        return r.getMatchingArea(f);
+    }
+    return std::nullopt;
 }

@@ -12,10 +12,6 @@ extern void copy_shop(struct shop_data *tshop, struct shop_data *fshop, int free
 
 extern void copy_list(vnum **tlist, vnum *flist);
 
-extern void copy_type_list(struct shop_buy_data **tlist, struct shop_buy_data *flist);
-
-extern void remove_from_type_list(struct shop_buy_data **list, int num);
-
 extern void remove_from_int_list(vnum **list, vnum num);
 
 extern void add_to_type_list(struct shop_buy_data **list, struct shop_buy_data *newl);
@@ -23,8 +19,6 @@ extern void add_to_type_list(struct shop_buy_data **list, struct shop_buy_data *
 extern void add_to_int_list(vnum **tlist, vnum newi);
 
 extern void free_shop_string(struct shop_data *shop);
-
-extern void free_type_list(struct shop_buy_data **list);
 
 extern void free_shop(struct shop_data *shop);
 

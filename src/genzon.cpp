@@ -4,11 +4,14 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
+#include <fstream>
 #include "genzon.h"
 #include "utils.h"
 
 #include "genolc.h"
 #include "dg_scripts.h"
+#include "shop.h"
+#include "guild.h"
 
 /* real zone of room/mobile/object/shop given */
 zone_rnum real_zone_by_thing(room_vnum vznum) {
@@ -294,7 +297,7 @@ void create_world_index(int znum, const char *type) {
 
 void remove_room_zone_commands(zone_rnum zone, room_rnum room_num) {
     auto &z = zone_table[zone];
-    std::remove_if(z.cmd.begin(), z.cmd.end(), [&](reset_com &c) {
+    z.cmd.erase(std::remove_if(z.cmd.begin(), z.cmd.end(), [&](reset_com &c) {
         switch(c.command) {
             case 'M':
             case 'O':
@@ -307,7 +310,7 @@ void remove_room_zone_commands(zone_rnum zone, room_rnum room_num) {
             default:
                 return false;
         }
-    });
+    }));
 }
 
 /*-------------------------------------------------------------------*/
@@ -318,170 +321,12 @@ void remove_room_zone_commands(zone_rnum zone, room_rnum room_num) {
  * header for each field is also there.
  */
 int save_zone(zone_rnum zone_num) {
-    int subcmd, arg1 = -1, arg2 = -1, arg3 = -1, arg4 = -1, arg5 = -1;
-    char fname[128], oldname[128];
-    const char *comment = nullptr;
-    FILE *zfile;
-    char zbuf1[MAX_STRING_LENGTH];
-    char zbuf2[MAX_STRING_LENGTH];
-    char zbuf3[MAX_STRING_LENGTH];
-    char zbuf4[MAX_STRING_LENGTH];
-
     if (!zone_table.count(zone_num)) {
         log("SYSERR: GenOLC: save_zone: Invalid real zone number %d.", zone_num);
         return false;
     }
     auto &z = zone_table[zone_num];
-    snprintf(fname, sizeof(fname), "%s%d.new", ZON_PREFIX, z.number);
-    if (!(zfile = fopen(fname, "w"))) {
-        mudlog(BRF, ADMLVL_BUILDER, true, "SYSERR: OLC: save_zones:  Can't write zone %d.",
-               z.number);
-        return false;
-    }
-
-    /*
-     * Print zone header to file
-     */
-    sprintascii(zbuf1, z.zone_flags[0]);
-    sprintascii(zbuf2, z.zone_flags[1]);
-    sprintascii(zbuf3, z.zone_flags[2]);
-    sprintascii(zbuf4, z.zone_flags[3]);
-
-    fprintf(zfile, "@Version: %d\n", CUR_ZONE_VERSION);
-    fprintf(zfile, "#%d\n"
-                   "%s~\n"
-                   "%s~\n"
-                   "%d %d %d %d %s %s %s %s %d %d\n",
-            z.number,
-            (z.builders && *z.builders)
-            ? z.builders : "None.",
-            (z.name && *z.name)
-            ? z.name : "undefined",
-            z.bot,
-            z.top,
-            z.lifespan,
-            z.reset_mode,
-            zbuf1, zbuf2, zbuf3, zbuf4,
-            z.min_level,
-            z.max_level
-    );
-
-    /*
-     * Handy Quick Reference Chart for Zone Values.
-     *
-     * Field #1    Field #3   Field #4  Field #5           Field #6		Field #7
-     * -----------------------------------------------------------------------------------------
-     * M (Mobile)  Mob-Vnum   Wld-Max   Room-Vnum          room_max		Percent load failure
-     * O (Object)  Obj-Vnum   Wld-Max   Room-Vnum          room_max		Percent load failure
-     * G (Give)    Obj-Vnum   Wld-Max   Unused             unused		Percent load failure
-     * E (Equip)   Obj-Vnum   Wld-Max   EQ-Position        unused		Percent load failure
-     * P (Put)     Obj-Vnum   Wld-Max   Target-Obj-Vnum    unused		Percent load failure
-     * D (Door)    Room-Vnum  Door-Dir  Door-State         unused		Percent load failure
-     * R (Remove)  Room-Vnum  Obj-Vnum  Unused             unused		Percent load failure
-         * T (Trigger) Trig-type  Trig-Vnum Room-Vnum          unused		Percent load failure
-         * V (var)     Trig-type  Context   Room-Vnum Varname  unused		Percent load failure
-     * -----------------------------------------------------------------------------------------
-     */
-
-    for (subcmd = 0; ZCMD(zone_num, subcmd).command != 'S'; subcmd++) {
-        switch (ZCMD(zone_num, subcmd).command) {
-            case 'M':
-                arg1 = mob_index[ZCMD(zone_num, subcmd).arg1].vn;
-                arg2 = ZCMD(zone_num, subcmd).arg2;
-                arg3 = world[ZCMD(zone_num, subcmd).arg3].vn;
-                arg4 = ZCMD(zone_num, subcmd).arg4;
-                arg5 = ZCMD(zone_num, subcmd).arg5;
-                comment = mob_proto[ZCMD(zone_num, subcmd).arg1].short_description;
-                break;
-            case 'O':
-                arg1 = obj_index[ZCMD(zone_num, subcmd).arg1].vn;
-                arg2 = ZCMD(zone_num, subcmd).arg2;
-                arg3 = world[ZCMD(zone_num, subcmd).arg3].vn;
-                arg4 = ZCMD(zone_num, subcmd).arg4;
-                arg5 = ZCMD(zone_num, subcmd).arg5;
-                comment = obj_proto[ZCMD(zone_num, subcmd).arg1].short_description;
-                break;
-            case 'G':
-                arg1 = obj_index[ZCMD(zone_num, subcmd).arg1].vn;
-                arg2 = ZCMD(zone_num, subcmd).arg2;
-                arg3 = -1;
-                arg4 = -1;
-                arg5 = ZCMD(zone_num, subcmd).arg5;
-                comment = obj_proto[ZCMD(zone_num, subcmd).arg1].short_description;
-                break;
-            case 'E':
-                arg1 = obj_index[ZCMD(zone_num, subcmd).arg1].vn;
-                arg2 = ZCMD(zone_num, subcmd).arg2;
-                arg3 = ZCMD(zone_num, subcmd).arg3;
-                arg4 = -1;
-                arg5 = ZCMD(zone_num, subcmd).arg5;
-                comment = obj_proto[ZCMD(zone_num, subcmd).arg1].short_description;
-                break;
-            case 'P':
-                arg1 = obj_index[ZCMD(zone_num, subcmd).arg1].vn;
-                arg2 = ZCMD(zone_num, subcmd).arg2;
-                arg3 = obj_index[ZCMD(zone_num, subcmd).arg3].vn;
-                arg4 = -1;
-                arg5 = ZCMD(zone_num, subcmd).arg5;
-                comment = obj_proto[ZCMD(zone_num, subcmd).arg1].short_description;
-                break;
-            case 'D':
-                arg1 = world[ZCMD(zone_num, subcmd).arg1].vn;
-                arg2 = ZCMD(zone_num, subcmd).arg2;
-                arg3 = ZCMD(zone_num, subcmd).arg3;
-                comment = world[ZCMD(zone_num, subcmd).arg1].name;
-                break;
-            case 'R':
-                arg1 = world[ZCMD(zone_num, subcmd).arg1].vn;
-                arg2 = obj_index[ZCMD(zone_num, subcmd).arg2].vn;
-                comment = obj_proto[ZCMD(zone_num, subcmd).arg2].short_description;
-                arg3 = -1;
-                break;
-            case 'T':
-                arg1 = ZCMD(zone_num, subcmd).arg1; /* trigger type */
-                arg2 = trig_index[ZCMD(zone_num, subcmd).arg2].vn; /* trigger vnum */
-                arg3 = world[ZCMD(zone_num, subcmd).arg3].vn; /* room num */
-                arg4 = -1;
-                arg5 = ZCMD(zone_num, subcmd).arg5;
-                comment = GET_TRIG_NAME(trig_index[real_trigger(arg2)].proto);
-                break;
-            case 'V':
-                arg1 = ZCMD(zone_num, subcmd).arg1; /* trigger type */
-                arg2 = ZCMD(zone_num, subcmd).arg2; /* context */
-                arg3 = world[ZCMD(zone_num, subcmd).arg3].vn;
-                arg4 = -1;
-                arg5 = ZCMD(zone_num, subcmd).arg5;
-                break;
-            case '*':
-                /*
-                 * Invalid commands are replaced with '*' - Ignore them.
-                 */
-                continue;
-            default:
-                mudlog(BRF, ADMLVL_BUILDER, true, "SYSERR: OLC: z_save_to_disk(): Unknown cmd '%c' - NOT saving",
-                       ZCMD(zone_num, subcmd).command);
-                continue;
-        }
-        if (ZCMD(zone_num, subcmd).command != 'V')
-            fprintf(zfile, "%c %d %d %d %d %d %d \t(%s)\n",
-                    ZCMD(zone_num, subcmd).command, ZCMD(zone_num, subcmd).if_flag, arg1, arg2, arg3, arg4, arg5,
-                    comment);
-        else
-            fprintf(zfile, "%c %d %d %d %d %d %d %s %s\n",
-                    ZCMD(zone_num, subcmd).command, ZCMD(zone_num, subcmd).if_flag, arg1, arg2, arg3, arg4, arg5,
-                    ZCMD(zone_num, subcmd).sarg1, ZCMD(zone_num, subcmd).sarg2);
-    }
-    fputs("S\n$\n", zfile);
-    fclose(zfile);
-    snprintf(oldname, sizeof(oldname), "%s%d.zon", ZON_PREFIX, z.number);
-    remove(oldname);
-    rename(fname, oldname);
-
-    if (in_save_list(z.number, SL_ZON)) {
-        remove_from_save_list(z.number, SL_ZON);
-        create_world_index(z.number, "zon");
-        log("GenOLC: save_zone: Saving zone '%s'", oldname);
-    }
+    z.save_zone();
     return true;
 }
 
@@ -539,3 +384,273 @@ void delete_zone_command(struct zone_data *zone, int pos) {
 }
 
 /*-------------------------------------------------------------------*/
+
+reset_com::reset_com(const nlohmann::json &j) {
+    if(j.contains("command")) command = j["command"].get<std::string>()[0];
+    if(j.contains("if_flag")) if_flag = j["if_flag"];
+    if(j.contains("arg1")) arg1 = j["arg1"];
+    if(j.contains("arg2")) arg2 = j["arg2"];
+    if(j.contains("arg3")) arg3 = j["arg3"];
+    if(j.contains("arg4")) arg4 = j["arg4"];
+    if(j.contains("arg5")) arg5 = j["arg5"];
+    if(j.contains("sarg1")) sarg1 = j["sarg1"];
+    if(j.contains("sarg2")) sarg2 = j["sarg2"];
+}
+
+nlohmann::json reset_com::serialize() {
+    nlohmann::json j;
+
+    std::string cmd;
+    cmd.push_back(command);
+    j["command"] = cmd;
+    if(if_flag) j["if_flag"] = if_flag;
+    if(arg1) j["arg1"] = arg1;
+    if(arg2) j["arg2"] = arg2;
+    if(arg3) j["arg3"] = arg3;
+    if(arg4) j["arg4"] = arg4;
+    if(arg5) j["arg5"] = arg5;
+    if(!sarg1.empty()) j["sarg1"] = sarg1;
+    if(!sarg2.empty()) j["sarg2"] = sarg2;
+
+    return j;
+}
+
+zone_data::~zone_data() {
+    if(name) free(name);
+    if(builders) free(builders);
+}
+
+nlohmann::json zone_data::serialize() {
+    nlohmann::json j;
+
+    j["number"] = number;
+    if(name && strlen(name)) j["name"] = name;
+    if(builders && strlen(builders)) j["builders"] = builders;
+    if(lifespan) j["lifespan"] = lifespan;
+    j["bot"] = bot;
+    j["top"] = top;
+    if(reset_mode) j["reset_mode"] = reset_mode;
+    if(min_level) j["min_level"] = min_level;
+    if(max_level) j["max_level"] = max_level;
+    for(auto i = 0; i < NUM_ZONE_FLAGS; i++) if(IS_SET_AR(zone_flags, i)) j["zone_flags"].push_back(i);
+
+    for(auto &c : cmd) j["cmd"].push_back(c.serialize());
+
+    return j;
+}
+
+zone_data::zone_data(const nlohmann::json &j) : zone_data() {
+    if(j.contains("number")) number = j["number"];
+    if(j.contains("name")) name = strdup(j["name"].get<std::string>().c_str());
+    if(j.contains("builders")) builders = strdup(j["builders"].get<std::string>().c_str());
+    if(j.contains("lifespan")) lifespan = j["lifespan"];
+    if(j.contains("bot")) bot = j["bot"];
+    if(j.contains("top")) top = j["top"];
+    if(j.contains("reset_mode")) reset_mode = j["reset_mode"];
+    if(j.contains("min_level")) min_level = j["min_level"];
+    if(j.contains("max_level")) max_level = j["max_level"];
+    if(j.contains("zone_flags")) {
+        for(auto &f : j["zone_flags"]) SET_BIT_AR(zone_flags, f.get<int>());
+    }
+
+    if(j.contains("cmd")) {
+        cmd.reserve(j["cmd"].size());
+        for(auto &c : j["cmd"]) cmd.emplace_back(c);
+    }
+}
+
+void zone_data::save_all() {
+    save_zone();
+    save_rooms();
+    save_mobiles();
+    save_objects();
+    save_shops();
+    save_triggers();
+    save_guilds();
+}
+
+void zone_data::save_zone_file(const nlohmann::json &j, const std::string &filename) {
+    // this one saves the provided j to:
+    // <cwd>/zones/<this.number>/<filename>
+
+    // first, create the directory if it doesn't exist
+    std::filesystem::path zone_dir = std::filesystem::current_path() / "zones" / std::to_string(number);
+    if(!std::filesystem::exists(zone_dir)) {
+        std::filesystem::create_directories(zone_dir);
+    }
+
+    // now, write the file
+    std::filesystem::path zone_file = zone_dir / filename;
+    std::ofstream zone_stream(zone_file);
+    zone_stream << j.dump(4, ' ', true, nlohmann::json::error_handler_t::ignore) << std::endl;
+    zone_stream.close();
+
+}
+
+std::optional<nlohmann::json> zone_data::load_zone_file(const std::string &filename) {
+    // this one loads the provided filename from:
+    // <cwd>/zones/<this.number>/<filename>
+
+    std::filesystem::path zone_file = std::filesystem::current_path() / "zones" / std::to_string(number) / filename;
+    if(!std::filesystem::exists(zone_file)) return std::nullopt;
+
+    std::ifstream zone_stream(zone_file);
+    nlohmann::json j;
+    zone_stream >> j;
+    zone_stream.close();
+
+    return j;
+}
+
+void zone_data::save_zone() {
+    save_zone_file(serialize(), "zone.json");
+}
+
+void zone_data::save_rooms() {
+    nlohmann::json j = nlohmann::json::array();
+
+    for(auto v : rooms) {
+        auto r = world.find(v);
+        if(r == world.end()) continue;
+        j.push_back(std::make_pair(v, r->second.serialize()));
+    }
+
+    if(j.empty()) return;
+    save_zone_file(j, "rooms.json");
+}
+
+void zone_data::save_mobiles() {
+    nlohmann::json j = nlohmann::json::array();
+
+    for(auto v : mobiles) {
+        auto r = mob_proto.find(v);
+        if(r == mob_proto.end()) continue;
+        j.push_back(std::make_pair(r->first, r->second.serializeProto()));
+    }
+
+    if(j.empty()) return;
+    save_zone_file(j, "mobiles.json");
+}
+
+void zone_data::save_objects() {
+    nlohmann::json j = nlohmann::json::array();
+
+    for(auto v : objects) {
+        auto r = obj_proto.find(v);
+        if(r == obj_proto.end()) continue;
+        j.push_back(std::make_pair(r->first, r->second.serializeProto()));
+    }
+
+    if(j.empty()) return;
+    save_zone_file(j, "objects.json");
+}
+
+void zone_data::save_shops() {
+	nlohmann::json j = nlohmann::json::array();
+
+    for(auto v : shops) {
+        auto r = shop_index.find(v);
+        if(r == shop_index.end()) continue;
+        j.push_back(std::make_pair(r->first, r->second.serialize()));
+    }
+
+    if(j.empty()) return;
+    save_zone_file(j, "shops.json");
+}
+
+void zone_data::save_triggers() {
+	nlohmann::json j = nlohmann::json::array();
+
+    for(auto v : triggers) {
+        auto r = trig_index.find(v);
+        if(r == trig_index.end()) continue;
+        j.push_back(std::make_pair(r->first, r->second.proto->serialize()));
+    }
+
+    if(j.empty()) return;
+    save_zone_file(j, "triggers.json");
+}
+
+void zone_data::save_guilds() {
+	nlohmann::json j = nlohmann::json::array();
+
+    for(auto v : guilds) {
+        auto r = guild_index.find(v);
+        if(r == guild_index.end()) continue;
+        j.push_back(std::make_pair(r->first, r->second.serialize()));
+    }
+
+    if(j.empty()) return;
+    save_zone_file(j, "guilds.json");
+}
+
+void zone_data::load_rooms() {
+    auto j = load_zone_file("rooms.json");
+    if(!j) return;
+
+    for(auto &v : *j) {
+        auto vnum = v[0].get<int>();
+        auto data = v[1];
+        std::string d = data.dump();
+        world.emplace(vnum, data);
+        rooms.insert(vnum);
+    }
+}
+
+void zone_data::load_mobiles() {
+    auto j = load_zone_file("mobiles.json");
+    if(!j) return;
+
+    for(auto &v : *j) {
+        auto vnum = v[0].get<int>();
+        mob_proto.emplace(vnum, v[1]);
+        mobiles.insert(vnum);
+        auto &idx = mob_index[vnum];
+        idx.vn = vnum;
+    }
+}
+
+void zone_data::load_objects() {
+    auto j = load_zone_file("objects.json");
+    if(!j) return;
+
+    for(auto &v : *j) {
+        auto vnum = v[0].get<int>();
+        obj_proto.emplace(vnum, v[1]);
+        objects.insert(vnum);
+        auto &idx = obj_index[vnum];
+        idx.vn = vnum;
+    }
+}
+
+void zone_data::load_shops() {
+    auto j = load_zone_file("shops.json");
+    if(!j) return;
+
+    for(auto &v : *j) {
+        shop_index.emplace(v[0], v[1]);
+        shops.insert(v[0].get<int>());
+    }
+}
+
+void zone_data::load_triggers() {
+    auto j = load_zone_file("triggers.json");
+    if(!j) return;
+
+    for(auto &v : *j) {
+        auto &idx = trig_index[v[0].get<int>()];
+        idx.proto = new trig_data(v[1]);
+        idx.vn = idx.proto->nr;
+        triggers.insert(idx.vn);
+    }
+}
+
+void zone_data::load_guilds() {
+    auto j = load_zone_file("guilds.json");
+    if(!j) return;
+
+    for(auto &v : *j) {
+        guild_index.emplace(v[0], v[1]);
+        guilds.insert(v[0].get<int>());
+    }
+}

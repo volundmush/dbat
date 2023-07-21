@@ -18,18 +18,30 @@ CPMAddPackage("gh:fmtlib/fmt#9.1.0")
 CPMAddPackage("gh:SRombauts/SQLiteCpp#3.3.0")
 CPMAddPackage("gh:nlohmann/json#v3.11.2")
 CPMAddPackage("gh:gabime/spdlog#v1.11.0")
+CPMAddPackage("gh:Roblox/luau#0.570")
+CPMAddPackage("gh:kunitoki/LuaBridge3#3.0-rc3")
+
+SET(LUABRIDGE_TESTING OFF)
+SET(LUAU_BUILD_CLI OFF)
+SET(LUAU_BUILD_TESTS OFF)
+SET(LUAU_BUILD_BENCHMARKS OFF)
 
 find_package(ZLIB REQUIRED)
 find_package(SQLite3 REQUIRED)
-find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost REQUIRED COMPONENTS system program_options regex)
 
 set(CIRCLE_INCLUDE_DIRS
         include
+        ${Boost_INCLUDE_DIRS}
         ${fmt_SOURCE_DIR}/include
         ${eff_random_SOURCE_DIR}/include
         ${SQLiteCpp_SOURCE_DIR}/include
         ${nlohmann_json_SOURCE_DIR}/single_include
         ${spdlog_SOURCE_DIR}/include
+        ${luau_SOURCE_DIR}/Common/include
+        ${luau_SOURCE_DIR}/VM/include
+        ${luau_SOURCE_DIR}/Compiler/include
+        ${LuaBridge_SOURCE_DIR}/Source
         )
 
 file(GLOB_RECURSE CIRCLE_INCLUDE include/*.h)
@@ -46,7 +58,11 @@ add_compile_definitions(HAVE_LIBBSD)
 
 set(BUILD_TESTING OFF)
 
-set(CIRCLE_LINK_LIBRARIES ZLIB::ZLIB fmt::fmt ${SQLite3_LIBRARIES} ${Boost_LIBRARIES} SQLiteCpp sqlite3 bsd)
+set(CIRCLE_LINK_LIBRARIES
+        ZLIB::ZLIB fmt::fmt ${SQLite3_LIBRARIES} ${Boost_LIBRARIES}
+        SQLiteCpp sqlite3 bsd
+        Luau.VM Luau.Common Luau.Compiler
+        )
 
 # this is the core library we're making.
 add_library(circlemud ${CIRCLE_INCLUDE} ${CIRCLE_SRC})
@@ -64,5 +80,8 @@ add_executable(dbconv apps/dbconv.cpp)
 target_link_libraries(dbconv circlemud ${CIRCLE_LINK_LIBRARIES})
 target_include_directories(dbconv PUBLIC ${CIRCLE_INCLUDE_DIRS})
 
+add_executable(migrate apps/migrate.cpp)
+target_link_libraries(migrate circlemud ${CIRCLE_LINK_LIBRARIES})
+target_include_directories(migrate PUBLIC ${CIRCLE_INCLUDE_DIRS})
 
 SET(circle_link ${CMAKE_INSTALL_PREFIX}/bin/)

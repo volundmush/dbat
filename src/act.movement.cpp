@@ -24,13 +24,14 @@
 #include "house.h"
 #include "constants.h"
 #include "class.h"
+#include <boost/algorithm/string.hpp>
 
 /* local functions */
 static void handle_fall(struct char_data *ch);
 
 static int check_swim(struct char_data *ch);
 
-static void disp_locations(struct char_data *ch);
+static void disp_locations(struct char_data *ch, vnum areaVnum, std::set<room_vnum>& rooms);
 
 static int has_boat(struct char_data *ch);
 
@@ -229,275 +230,104 @@ void carry_drop(struct char_data *ch, int type) {
     CARRIED_BY(vict) = nullptr;
 }
 
-int land_location(struct char_data *ch, char *arg) {
+std::optional<room_vnum> land_location(char *arg, std::set<room_vnum>& rooms) {
+    std::vector<std::pair<room_vnum, std::string>> names;
+    for(auto r : rooms) {
+        auto room = world.find(r);
+        if(room == world.end()) continue;
+        names.emplace_back(r, processColors(room->second.name, false, nullptr));
+    }
 
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) == 50) { // Above Earth
-        if (!strcasecmp(arg, "Nexus City")) {
-            return (300);
-        } else if (!strcasecmp(arg, "South Ocean")) {
-            return (800);
-        } else if (!strcasecmp(arg, "Nexus Field")) {
-            return (1150);
-        } else if (!strcasecmp(arg, "Cherry Blossom Mountain")) {
-            return (1180);
-        } else if (!strcasecmp(arg, "Sandy Desert")) {
-            return (1287);
-        } else if (!strcasecmp(arg, "Northern Plains")) {
-            return (1428);
-        } else if (!strcasecmp(arg, "Korin's Tower")) {
-            return (1456);
-        } else if (!strcasecmp(arg, "Kami's Lookout")) {
-            return (1506);
-        } else if (!strcasecmp(arg, "Shadow Forest")) {
-            return (1636);
-        } else if (!strcasecmp(arg, "Decrepit Area")) {
-            return (1710);
-        } else if (!strcasecmp(arg, "West City")) {
-            return (19510);
-        } else if (!strcasecmp(arg, "Hercule Beach")) {
-            return (2141);
-        } else if (!strcasecmp(arg, "Satan City")) {
-            return (13020);
-        } else {
-            send_to_char(ch, "You don't know where that made up place is, but decided to land anyway.");
-            return (300);
+    std::sort(names.begin(), names.end(), [](const std::pair<room_vnum, std::string>& a, const std::pair<room_vnum, std::string>& b) {
+        return a.second < b.second;
+    });
+
+    for(auto& name : names) {
+        if(boost::istarts_with(name.second, arg)) {
+            return name.first;
         }
-    } else if (GET_ROOM_VNUM(IN_ROOM(ch)) == 51) { // Above Frigid
-        if (!strcasecmp(arg, "Ice Crown City")) {
-            return (4264);
-        } else if (!strcasecmp(arg, "Ice Highway")) {
-            return (4300);
-        } else if (!strcasecmp(arg, "Topica Snowfield")) {
-            return (4351);
-        } else if (!strcasecmp(arg, "Glug's Volcano")) {
-            return (4400);
-        } else if (!strcasecmp(arg, "Platonic Sea")) {
-            return (4600);
-        } else if (!strcasecmp(arg, "Slave City")) {
-            return (4800);
-        } else if (!strcasecmp(arg, "Acturian Woods")) {
-            return (5100);
-        } else if (!strcasecmp(arg, "Desolate Demesne")) {
-            return (5150);
-        } else if (!strcasecmp(arg, "Chateau Ishran")) {
-            return (5165);
-        } else if (!strcasecmp(arg, "Wyrm Spine Mountain")) {
-            return (5200);
-        } else if (!strcasecmp(arg, "Cloud Ruler Temple")) {
-            return (5500);
-        } else if (!strcasecmp(arg, "Koltoan Mine")) {
-            return (4944);
-        } else {
-            send_to_char(ch, "You don't know where that made up place is, but decided to land anyway.");
-            return (4264);
+    }
+    return std::nullopt;
+
+}
+
+std::optional<vnum> governingAreaTypeFor(struct room_data *rd, std::function<bool(area_data&)>& func) {
+    if(!rd->area) return std::nullopt;
+    auto &a = areas[rd->area.value()];
+    while(true) {
+        if (func(a)) return a.vn;
+        if ((a.type == AreaType::Structure || a.type == AreaType::Vehicle) && a.objectVnum) {
+            // we need to find the a.objectVnum in the world by scanning object_list...
+            if (auto obj = get_obj_num(a.objectVnum.value()); obj) {
+                return governingAreaTypeFor(obj, func);
+            }
         }
-    } else if (GET_ROOM_VNUM(IN_ROOM(ch)) == 52) { // Above Konack
-        if (!strcasecmp(arg, "Tiranoc City")) {
-            return (8006);
-        } else if (!strcasecmp(arg, "Great Oroist Temple")) {
-            return (8300);
-        } else if (!strcasecmp(arg, "Elzthuan Forest")) {
-            return (8400);
-        } else if (!strcasecmp(arg, "Mazori Farm")) {
-            return (8447);
-        } else if (!strcasecmp(arg, "Dres")) {
-            return (8500);
-        } else if (!strcasecmp(arg, "Colvian Farm")) {
-            return (8600);
-        } else if (!strcasecmp(arg, "St Alucia")) {
-            return (8700);
-        } else if (!strcasecmp(arg, "Meridius Memorial")) {
-            return (8800);
-        } else if (!strcasecmp(arg, "Desert of Illusion")) {
-            return (8900);
-        } else if (!strcasecmp(arg, "Plains of Confusion")) {
-            return (8954);
-        } else if (!strcasecmp(arg, "Turlon Fair")) {
-            return (9200);
-        } else if (!strcasecmp(arg, "Wetlands")) {
-            return (9700);
-        } else if (!strcasecmp(arg, "Kerberos")) {
-            return (9855);
-        } else if (!strcasecmp(arg, "Shaeras Mansion")) {
-            return (9864);
-        } else if (!strcasecmp(arg, "Slavinus Ravine")) {
-            return (9900);
-        } else if (!strcasecmp(arg, "Furian Citadel")) {
-            return (9949);
-        } else {
-            send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
-            return (8006);
-        }
-    } else if (GET_ROOM_VNUM(IN_ROOM(ch)) == 53) { // Above Vegeta
-        if (!strcasecmp(arg, "Vegetos City")) {
-            return (2226);
-        } else if (!strcasecmp(arg, "Blood Dunes")) {
-            return (2600);
-        } else if (!strcasecmp(arg, "Ancestral Mountains")) {
-            return (2616);
-        } else if (!strcasecmp(arg, "Destopa Swamp")) {
-            return (2709);
-        } else if (!strcasecmp(arg, "Pride forest")) {
-            return (2800);
-        } else if (!strcasecmp(arg, "Pride Tower")) {
-            return (2899);
-        } else if (!strcasecmp(arg, "Ruby Cave")) {
-            return (2615);
-        } else {
-            send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
-            return (2226);
-        }
-    } else if (GET_ROOM_VNUM(IN_ROOM(ch)) == 54) { // Above Namek
-        if (!strcasecmp(arg, "Senzu Village")) {
-            return (11600);
-        } else if (!strcasecmp(arg, "Guru's House")) {
-            return (10182);
-        } else if (!strcasecmp(arg, "Crystalline Cave")) {
-            return (10474);
-        } else if (!strcasecmp(arg, "Elder Village")) {
-            return (13300);
-        } else if (!strcasecmp(arg, "Frieza's Ship")) {
-            return (10203);
-        } else if (!strcasecmp(arg, "Kakureta Village")) {
-            return (10922);
-        } else {
-            send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
-            return (11600);
-        }
-    } else if (GET_ROOM_VNUM(IN_ROOM(ch)) == 55) { // Above Aether
-        if (!strcasecmp(arg, "Haven City")) {
-            return (12010);
-        } else if (!strcasecmp(arg, "Serenity Lake")) {
-            return (12103);
-        } else if (!strcasecmp(arg, "Kaiju Forest")) {
-            return (12300);
-        } else if (!strcasecmp(arg, "Ortusian Temple")) {
-            return (12400);
-        } else if (!strcasecmp(arg, "Silent Glade")) {
-            return (12480);
-        } else {
-            send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
-            return (12010);
-        }
-    } else if (GET_ROOM_VNUM(IN_ROOM(ch)) == 56) { // Above Yardrat
-        if (!strcasecmp(arg, "Yardra City")) {
-            return (14008);
-        } else if (!strcasecmp(arg, "Jade Forest")) {
-            return (14100);
-        } else if (!strcasecmp(arg, "Jade Cliffs")) {
-            return (14200);
-        } else if (!strcasecmp(arg, "Mount Valaria")) {
-            return (14300);
-        } else {
-            send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
-            return (14008);
-        }
-    } else if (GET_ROOM_VNUM(IN_ROOM(ch)) == 198) { // Above Cerria
-        if (!strcasecmp(arg, "Cerria Colony")) {
-            return (17531);
-        } else if (!strcasecmp(arg, "Crystalline Forest")) {
-            return (7950);
-        } else if (!strcasecmp(arg, "Fistarl Volcano")) {
-            return (17420);
-        } else {
-            send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
-            return (17531);
-        }
-    } else if (GET_ROOM_VNUM(IN_ROOM(ch)) == 57) { // Above Zennith
-        if (!strcasecmp(arg, "Utatlan City")) {
-            return (3412);
-        } else if (!strcasecmp(arg, "Zenith Jungle")) {
-            return (3520);
-        } else if (!strcasecmp(arg, "Ancient Castle")) {
-            return (19600);
-        } else {
-            send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
-            return (3412);
-        }
-    } else if (GET_ROOM_VNUM(IN_ROOM(ch)) == 58) { // Above Kanassa
-        if (!strcasecmp(arg, "Aquis City")) {
-            return (14904);
-        } else if (!strcasecmp(arg, "Yunkai Pirate Base")) {
-            return (15655);
-        } else {
-            send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
-            return (14904);
-        }
-    } else if (GET_ROOM_VNUM(IN_ROOM(ch)) == 59) { // Above Arlia
-        if (!strcasecmp(arg, "Janacre")) {
-            return (16009);
-        } else if (!strcasecmp(arg, "Arlian Wasteland")) {
-            return (16544);
-        } else if (!strcasecmp(arg, "Arlia Mine")) {
-            return (16600);
-        } else {
-            send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
-            return (16009);
-        }
-    } else {
-        send_to_char(ch, "You are not above a planet!\r\n");
-        return (-1);
+        if (!a.parent) return std::nullopt;
+        a = areas[a.parent.value()];
     }
 }
 
-/* This shows the player what locations the planet has to land at. */
-static void disp_locations(struct char_data *ch) {
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) == 50) { // Above Earth
-        send_to_char(ch, "@D------------------[ @GEarth@D ]------------------@c\n");
-        send_to_char(ch, "Nexus City, South Ocean, Nexus field, Cherry Blossom Mountain,\n");
-        send_to_char(ch, "Sandy Desert, Northern Plains, Korin's Tower, Kami's Lookout,\n");
-        send_to_char(ch, "Shadow Forest, Decrepit Area, West City, Hercule Beach, Satan City.\n");
-        send_to_char(ch, "@D---------------------------------------------@n\n");
-    } else if (GET_ROOM_VNUM(IN_ROOM(ch)) == 51) { // Above Frigid
-        send_to_char(ch, "@D------------------[ @CFrigid@D ]------------------@c\n");
-        send_to_char(ch, "Ice Crown City, Ice Highway, Topica Snowfield, Glug's Volcano,\n");
-        send_to_char(ch, "Platonic Sea, Slave City, Acturian Woods, Desolate Demesne,\n");
-        send_to_char(ch, "Chateau Ishran, Wyrm Spine Mountain, Cloud Ruler Temple, Koltoan mine.\n");
-        send_to_char(ch, "@D---------------------------------------------@n\n");
-    } else if (GET_ROOM_VNUM(IN_ROOM(ch)) == 52) { // Above Konack
-        send_to_char(ch, "@D------------------[ @MKonack@D ]------------------@c\n");
-        send_to_char(ch, "Great Oroist Temple, Elzthuan Forest, Mazori Farm, Dres,\n");
-        send_to_char(ch, "Colvian Farm, St Alucia, Meridius Memorial, Desert of Illusion,\n");
-        send_to_char(ch, "Plains of Confusion, Turlon Fair, Wetlands, Kerberos,\n");
-        send_to_char(ch, "Shaeras Mansion, Slavinus Ravine, Furian Citadel.\n");
-        send_to_char(ch, "@D---------------------------------------------@n\n");
-    } else if (GET_ROOM_VNUM(IN_ROOM(ch)) == 53) { // Above Vegeta
-        send_to_char(ch, "@D------------------[ @YVegeta@D ]------------------@c\n");
-        send_to_char(ch, "Vegetos City, Blood Dunes, Ancestral Mountains, Destopa Swamp,\n");
-        send_to_char(ch, "Pride Forest, Pride tower, Ruby Cave.\n");
-        send_to_char(ch, "@D---------------------------------------------@n\n");
-    } else if (GET_ROOM_VNUM(IN_ROOM(ch)) == 198) { // Above Cerria
-        send_to_char(ch, "@D------------------[ @MCerria@D ]------------------@c\n");
-        send_to_char(ch, "Cerria Colony, Fistarl Volcano, Crystalline Forest.\n");
-        send_to_char(ch, "@D---------------------------------------------@n\n");
-    } else if (GET_ROOM_VNUM(IN_ROOM(ch)) == 54) { // Above Namek
-        send_to_char(ch, "@D------------------[ @gNamek@D ]------------------@c\n");
-        send_to_char(ch, "Senzu Village, Guru's House, Crystalline Cave, Elder Village,\n");
-        send_to_char(ch, "Frieza's Ship, Kakureta Village.\n");
-        send_to_char(ch, "@D---------------------------------------------@n\n");
-    } else if (GET_ROOM_VNUM(IN_ROOM(ch)) == 55) { // Above Aether
-        send_to_char(ch, "@D------------------[ @BAether@D ]-----------------@c\n");
-        send_to_char(ch, "Haven City, Serenity Lake, Kaiju Forest, Ortusian Temple,\n");
-        send_to_char(ch, "Silent Glade.\n");
-        send_to_char(ch, "@D--------------------------------------------@n\n");
-    } else if (GET_ROOM_VNUM(IN_ROOM(ch)) == 56) { // Above Yardrat
-        send_to_char(ch, "@D-----------------[ @mYardrat@D ]-----------------@c\n");
-        send_to_char(ch, "Yardra City, Jade Forest, Jade Cliffs, Mount Valaria.\n");
-        send_to_char(ch, "@D-------------------------------------------@n\n");
-    } else if (GET_ROOM_VNUM(IN_ROOM(ch)) == 57) { // Above Zennith
-        send_to_char(ch, "@D-----------------[ @CZennith@D ]-----------------@c\n");
-        send_to_char(ch, "Utatlan City, Zenith Jungle, Ancient Castle.\n");
-        send_to_char(ch, "@D-------------------------------------------@n\n");
-    } else if (GET_ROOM_VNUM(IN_ROOM(ch)) == 58) { // Above Kanassa
-        send_to_char(ch, "@D-----------------[ @CKanassa@D ]-----------------@c\n");
-        send_to_char(ch, "Aquis City, Yunkai Pirate Base.\n");
-        send_to_char(ch, "@D-------------------------------------------@n\n");
-    } else if (GET_ROOM_VNUM(IN_ROOM(ch)) == 59) { // Above Arlia
-        send_to_char(ch, "@D------------------[ @MArlia@D ]------------------@c\n");
-        send_to_char(ch, "Janacre, Arlian Wasteland, Arlia Mine.\n");
-        send_to_char(ch, "@D---------------------------------------------@n\n");
+std::optional<vnum> governingAreaTypeFor(struct char_data *ch, std::function<bool(area_data&)>& func) {
+    if(ch->in_room != NOWHERE) {
+        auto room = world.find(ch->in_room);
+        if(room == world.end()) return std::nullopt;
+        return governingAreaTypeFor(&room->second, func);
     } else {
-        send_to_char(ch, "You are not above a planet!\r\n");
+        return std::nullopt;
+    }
+}
+
+std::optional<vnum> governingAreaTypeFor(struct obj_data *obj, std::function<bool(area_data&)>& func) {
+	if(obj->in_room != NOWHERE) {
+        auto room = world.find(obj->in_room);
+        if(room == world.end()) return std::nullopt;
+        return governingAreaTypeFor(&room->second, func);
+    } else if(obj->in_obj) {
+        return governingAreaTypeFor(obj->in_obj, func);
+    } else if(obj->carried_by) {
+        return governingAreaTypeFor(obj->carried_by, func);
+    } else if(obj->worn_by) {
+        return governingAreaTypeFor(obj->worn_by, func);
+    } else {
+        return std::nullopt;
+    }
+}
+
+std::size_t recurseScanRooms(area_data &start, std::set<room_vnum>& fill, std::function<bool(room_data&)>& func) {
+    std::size_t count = 0;
+    for(auto r : start.rooms) {
+        auto room = world.find(r);
+        if(room == world.end()) continue;
+        if(func(room->second)) {
+            fill.insert(r);
+            count++;
+        }
+    }
+    for(auto &child : start.children) {
+        count += recurseScanRooms(areas[child], fill, func);
+    }
+    return count;
+}
+
+/* This shows the player what locations the planet has to land at. */
+static void disp_locations(struct char_data *ch, vnum areaVnum, std::set<room_vnum>& rooms) {
+	auto &a = areas[areaVnum];
+    if(rooms.empty()) {
+        send_to_char(ch, "There are no landing locations on this planet.\r\n");
+        return;
+    }
+
+    std::vector<std::string> names;
+    for(auto r : rooms) {
+        auto room = world.find(r);
+        if(room == world.end()) continue;
+        names.emplace_back(room->second.name);
+    }
+    // Sort the names vector...
+    std::sort(names.begin(), names.end());
+    send_to_char(ch, "@D------------------[ %s ]@D------------------\n", a.name.c_str());
+    for(auto &name : names) {
+        send_to_char(ch, "%s\n", name.c_str());
     }
 }
 
@@ -505,16 +335,29 @@ ACMD(do_land) {
 
     int above_planet = true, inroom = GET_ROOM_VNUM(IN_ROOM(ch));
     skip_spaces(&argument);
+    std::function<bool(area_data&)> governingCelestial = [&](area_data& area) {
+        return area.type == AreaType::CelestialBody;
+    };
+    auto onPlanet = governingAreaTypeFor(ch, governingCelestial);
 
-    if (inroom != 50 && inroom != 198 && inroom != 51 && inroom != 52 && inroom != 53 && inroom != 54 && inroom != 55 &&
-        inroom != 56 && inroom != 57 && inroom != 58 && inroom != 59) {
+    std::set<room_vnum> rooms;
+    std::function<bool(room_data&)> scan = [&](room_data &r) {
+        return IS_SET_AR(r.room_flags, ROOM_LANDING);
+    };
+    std::size_t count = 0;
+
+    if(onPlanet) {
+        auto &a = areas[onPlanet.value()];
+        count = recurseScanRooms(a, rooms, scan);
+        above_planet = (a.orbit && inroom == a.orbit.value());
+    } else {
         above_planet = false;
     }
 
     if (!*argument) {
         if (above_planet == true) {
             send_to_char(ch, "Land where?\n");
-            disp_locations(ch);
+            disp_locations(ch, onPlanet.value(), rooms);
             return;
         } else {
             send_to_char(ch, "You are not even in the lower atmosphere of a planet!\r\n");
@@ -522,26 +365,29 @@ ACMD(do_land) {
         }
     }
 
-    int landing = land_location(ch, argument);
+    auto checkLanding = land_location(argument, rooms);
+    if(!checkLanding) {
+        send_to_char(ch, "You can't land there.\r\n");
+        return;
+    }
+    auto landing = checkLanding.value();
 
-    if (landing != -1) {
-        int was_in = GET_ROOM_VNUM(IN_ROOM(ch));
+    if (landing != NOWHERE) {
+        auto was_in = GET_ROOM_VNUM(IN_ROOM(ch));
+        auto &r = world[landing];
         send_to_char(ch,
                      "You descend through the upper atmosphere, and coming down through the clouds you land quickly on the ground below.\r\n");
-        char_from_room(ch);
-        char_to_room(ch, real_room(landing));
-        char *blah = sense_location(ch);
+        std::string landName = "UNKNOWN";
+        if(r.area) {
+            auto &a = areas[r.area.value()];
+            landName = a.name;
+        }
         char sendback[MAX_INPUT_LENGTH];
-        char_from_room(ch);
-        char_to_room(ch, real_room(was_in));
-        sprintf(sendback, "@C$n@Y flies down through the atmosphere toward @G%s@Y!@n", blah);
+        sprintf(sendback, "@C$n@Y flies down through the atmosphere toward @G%s@Y!@n", landName.c_str());
         act(sendback, true, ch, nullptr, nullptr, TO_ROOM);
         char_from_room(ch);
         char_to_room(ch, real_room(landing));
-        int zone = 0;
-        if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
-            fly_zone(zone, "can be seen landing from space nearby!@n\r\n", ch);
-        }
+        fly_planet(landing, "can be seen landing from space nearby!@n\r\n", ch);
         send_to_sense(1, "landing on the planet", ch);
         send_to_scouter("A powerlevel signal has been detected landing on the planet", ch, 0, 1);
         act("$n comes down from high above in the sky and quickly lands on the ground.", true, ch, nullptr, nullptr,
@@ -1214,8 +1060,8 @@ ACMD(do_move) {
         }
     }
 
-    if (!IS_NPC(ch) && GET_LIMBCOND(ch, 1) <= 0 && GET_LIMBCOND(ch, 2) <= 0 && GET_LIMBCOND(ch, 3) <= 0 &&
-        GET_LIMBCOND(ch, 4) <= 0 && !AFF_FLAGGED(ch, AFF_FLYING)) {
+    if (!IS_NPC(ch) && GET_LIMBCOND(ch, 0) <= 0 && GET_LIMBCOND(ch, 1) <= 0 && GET_LIMBCOND(ch, 2) <= 0 &&
+        GET_LIMBCOND(ch, 3) <= 0 && !AFF_FLAGGED(ch, AFF_FLYING)) {
         send_to_char(ch, "Unless you fly, you can't get far with no limbs.\r\n");
         return;
     }
@@ -1312,71 +1158,71 @@ ACMD(do_move) {
         if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE) && GET_ADMLEVEL(ch) < 1) {
             send_to_char(ch, "You struggle to cross the vast distance.\r\n");
             WAIT_STATE(ch, PULSE_6SEC);
-        } else if ((GET_LIMBCOND(ch, 3) <= 0 && GET_LIMBCOND(ch, 4) <= 0) && GET_LIMBCOND(ch, 1) <= 0 &&
+        } else if ((GET_LIMBCOND(ch, 2) <= 0 && GET_LIMBCOND(ch, 3) <= 0) && GET_LIMBCOND(ch, 0) <= 0 &&
                    !AFF_FLAGGED(ch, AFF_FLYING)) {
             act("@wYou slowly pull yourself along with your arm...@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@C$n@w slowly pulls $mself along with one arm...@n", true, ch, nullptr, nullptr, TO_ROOM);
-            if (GET_LIMBCOND(ch, 2) < 50) {
+            if (GET_LIMBCOND(ch, 1) < 50) {
                 send_to_char(ch, "@RYour left arm is damaged by the forced use!@n\r\n");
-                GET_LIMBCOND(ch, 2) -= rand_number(1, 5);
-                if (GET_LIMBCOND(ch, 1) <= 0) {
+                GET_LIMBCOND(ch, 1) -= rand_number(1, 5);
+                if (GET_LIMBCOND(ch, 0) <= 0) {
                     act("@RYour left arm falls apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
                     act("@r$n's@R left arm falls apart!@n", true, ch, nullptr, nullptr, TO_ROOM);
                 }
             }
             WAIT_STATE(ch, PULSE_5SEC);
-        } else if ((GET_LIMBCOND(ch, 3) <= 0 && GET_LIMBCOND(ch, 4) <= 0) && GET_LIMBCOND(ch, 2) <= 0 &&
+        } else if ((GET_LIMBCOND(ch, 2) <= 0 && GET_LIMBCOND(ch, 3) <= 0) && GET_LIMBCOND(ch, 1) <= 0 &&
                    !AFF_FLAGGED(ch, AFF_FLYING)) {
             act("@wYou slowly pull yourself along with your arm...@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@C$n@w slowly pulls $mself along with one arm...@n", true, ch, nullptr, nullptr, TO_ROOM);
-            if (GET_LIMBCOND(ch, 1) < 50) {
+            if (GET_LIMBCOND(ch, 0) < 50) {
                 send_to_char(ch, "@RYour right arm is damaged by the forced use!@n\r\n");
-                GET_LIMBCOND(ch, 1) -= rand_number(1, 5);
-                if (GET_LIMBCOND(ch, 1) <= 0) {
+                GET_LIMBCOND(ch, 0) -= rand_number(1, 5);
+                if (GET_LIMBCOND(ch, 0) <= 0) {
                     act("@RYour right arm falls apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
                     act("@r$n's@R right arm falls apart!@n", true, ch, nullptr, nullptr, TO_ROOM);
                 }
             }
             WAIT_STATE(ch, PULSE_5SEC);
-        } else if ((GET_LIMBCOND(ch, 3) <= 0 && GET_LIMBCOND(ch, 4) <= 0) && !AFF_FLAGGED(ch, AFF_FLYING)) {
+        } else if ((GET_LIMBCOND(ch, 2) <= 0 && GET_LIMBCOND(ch, 3) <= 0) && !AFF_FLAGGED(ch, AFF_FLYING)) {
             act("@wYou slowly pull yourself along with your arms...@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@C$n@w slowly pulls $mself along with one arms...@n", true, ch, nullptr, nullptr, TO_ROOM);
-            if (GET_LIMBCOND(ch, 2) < 50) {
+            if (GET_LIMBCOND(ch, 1) < 50) {
                 send_to_char(ch, "@RYour left arm is damaged by the forced use!@n\r\n");
-                GET_LIMBCOND(ch, 2) -= rand_number(1, 5);
-                if (GET_LIMBCOND(ch, 2) <= 0) {
+                GET_LIMBCOND(ch, 1) -= rand_number(1, 5);
+                if (GET_LIMBCOND(ch, 1) <= 0) {
                     act("@RYour left arm falls apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
                     act("@r$n's@R left arm falls apart!@n", true, ch, nullptr, nullptr, TO_ROOM);
                 }
             }
-            if (GET_LIMBCOND(ch, 1) < 50) {
+            if (GET_LIMBCOND(ch, 0) < 50) {
                 send_to_char(ch, "@RYour right arm is damaged by the forced use!@n\r\n");
-                GET_LIMBCOND(ch, 1) -= rand_number(1, 5);
-                if (GET_LIMBCOND(ch, 1) <= 0) {
+                GET_LIMBCOND(ch, 0) -= rand_number(1, 5);
+                if (GET_LIMBCOND(ch, 0) <= 0) {
                     act("@RYour right arm falls apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
                     act("@r$n's@R right arm falls apart!@n", true, ch, nullptr, nullptr, TO_ROOM);
                 }
             }
             WAIT_STATE(ch, PULSE_3SEC);
-        } else if (GET_LIMBCOND(ch, 3) <= 0 && !AFF_FLAGGED(ch, AFF_FLYING)) {
+        } else if (GET_LIMBCOND(ch, 2) <= 0 && !AFF_FLAGGED(ch, AFF_FLYING)) {
             act("@wYou hop on one leg...@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@C$n@w hops on one leg...@n", true, ch, nullptr, nullptr, TO_ROOM);
-            if (GET_LIMBCOND(ch, 4) < 50) {
+            if (GET_LIMBCOND(ch, 3) < 50) {
                 send_to_char(ch, "@RYour left leg is damaged by the forced use!@n\r\n");
-                GET_LIMBCOND(ch, 4) -= rand_number(1, 5);
-                if (GET_LIMBCOND(ch, 4) <= 0) {
+                GET_LIMBCOND(ch, 3) -= rand_number(1, 5);
+                if (GET_LIMBCOND(ch, 3) <= 0) {
                     act("@RYour left leg falls apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
                     act("@r$n's@R left leg falls apart!@n", true, ch, nullptr, nullptr, TO_ROOM);
                 }
             }
             WAIT_STATE(ch, PULSE_2SEC);
-        } else if (GET_LIMBCOND(ch, 4) <= 0 && !AFF_FLAGGED(ch, AFF_FLYING)) {
+        } else if (GET_LIMBCOND(ch, 3) <= 0 && !AFF_FLAGGED(ch, AFF_FLYING)) {
             act("@wYou hop on one leg...@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@C$n@w hops on one leg...@n", true, ch, nullptr, nullptr, TO_ROOM);
-            if (GET_LIMBCOND(ch, 3) < 50) {
+            if (GET_LIMBCOND(ch, 2) < 50) {
                 send_to_char(ch, "@RYour right leg is damaged by the forced use!@n\r\n");
-                GET_LIMBCOND(ch, 3) -= rand_number(1, 5);
-                if (GET_LIMBCOND(ch, 3) <= 0) {
+                GET_LIMBCOND(ch, 2) -= rand_number(1, 5);
+                if (GET_LIMBCOND(ch, 2) <= 0) {
                     act("@RYour right leg falls apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
                     act("@r$n's@R right leg falls apart!@n", true, ch, nullptr, nullptr, TO_ROOM);
                 }
@@ -2376,6 +2222,10 @@ static int check_swim(struct char_data *ch) {
     }
 }
 
+static bool isPlanet(const area_data& a) {
+    return a.type == AreaType::CelestialBody;
+}
+
 ACMD(do_fly) {
     char arg[MAX_INPUT_LENGTH];
 
@@ -2482,335 +2332,44 @@ ACMD(do_fly) {
             send_to_char(ch, "You are too busy fighting!");
             return;
         }
-        if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH)) {
-            reveal_hiding(ch, 0);
-            GET_ALT(ch) = 2;
-            SET_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-            if (!block_calc(ch)) {
-                return;
-            }
-            GET_ALT(ch) = 0;
-            REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-            int zone = 0;
-            if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
-                fly_zone(zone, "can be seen blasting off into space!@n\r\n", ch);
-            }
-            send_to_sense(1, "leaving the planet", ch);
-            send_to_scouter("A powerlevel signal has left the planet", ch, 0, 2);
-            act("@CYou blast off from the ground and rocket through the air. Your speed increases until you manage to reach the brink of space!@n",
-                true, ch, nullptr, nullptr, TO_CHAR);
-            act("@C$n blasts off from the ground and rockets through the air. You quickly lose sight of $m as $e continues upward!@n",
-                true, ch, nullptr, nullptr, TO_ROOM);
-            char_from_room(ch);
-            char_to_room(ch, real_room(50));
-            act("@C$n blasts up from the atmosphere below and then comes to a stop.@n", true, ch, nullptr, nullptr,
-                TO_ROOM);
-            send_to_char(ch, "@mOOC: Use the command 'land' to return to the planet from here.@n\r\n");
-            if (!IS_ANDROID(ch)) {
-                ch->decCurKI(ch->getMaxKI() / 10);
-            }
-            WAIT_STATE(ch, PULSE_3SEC);
-            return;
-        } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_CERRIA)) {
-            reveal_hiding(ch, 0);
-            GET_ALT(ch) = 2;
-            SET_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-            if (!block_calc(ch)) {
-                return;
-            }
-            int zone = 0;
-            if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
-                fly_zone(zone, "can be seen blasting off into space!@n\r\n", ch);
-            }
-            send_to_sense(1, "leaving the planet", ch);
-            send_to_scouter("A powerlevel signal has left the planet", ch, 0, 2);
-            GET_ALT(ch) = 0;
-            REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-            GET_ALT(ch) = 2;
-            SET_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-            act("@CYou blast off from the ground and rocket through the air. Your speed increases until you manage to reach the brink of space!@n",
-                true, ch, nullptr, nullptr, TO_CHAR);
-            act("@C$n blasts off from the ground and rockets through the air. You quickly lose sight of $m as $e continues upward!@n",
-                true, ch, nullptr, nullptr, TO_ROOM);
-            char_from_room(ch);
-            char_to_room(ch, real_room(198));
-            act("@C$n blasts up from the atmosphere below and then comes to a stop.@n", true, ch, nullptr, nullptr,
-                TO_ROOM);
-            send_to_char(ch, "@mOOC: Use the command 'land' to return to the planet from here.@n\r\n");
-            if (!IS_ANDROID(ch)) {
-                ch->decCurKI(ch->getMaxKI() / 10);
-            }
-            WAIT_STATE(ch, PULSE_3SEC);
-            return;
-        } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_VEGETA)) {
-            reveal_hiding(ch, 0);
-            GET_ALT(ch) = 2;
-            SET_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-            if (!block_calc(ch)) {
-                return;
-            }
-            int zone = 0;
-            if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
-                fly_zone(zone, "can be seen blasting off into space!@n\r\n", ch);
-            }
-            send_to_sense(1, "leaving the planet", ch);
-            send_to_scouter("A powerlevel signal has left the planet", ch, 0, 2);
-            GET_ALT(ch) = 0;
-            REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-            act("@CYou blast off from the ground and rocket through the air. Your speed increases until you manage to reach the brink of space!@n",
-                true, ch, nullptr, nullptr, TO_CHAR);
-            act("@C$n blasts off from the ground and rockets through the air. You quickly lose sight of $m as $e continues upward!@n",
-                true, ch, nullptr, nullptr, TO_ROOM);
-            char_from_room(ch);
-            char_to_room(ch, real_room(53));
-            act("@C$n blasts up from the atmosphere below and then comes to a stop.@n", true, ch, nullptr, nullptr,
-                TO_ROOM);
-            send_to_char(ch, "@mOOC: Use the command 'land' to return to the planet from here.@n\r\n");
-            if (!IS_ANDROID(ch)) {
-                ch->decCurKI(ch->getMaxKI() / 10);
-            }
-            WAIT_STATE(ch, PULSE_3SEC);
-            return;
-        } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_KANASSA)) {
-            if (GET_ROOM_VNUM(IN_ROOM(ch)) == 14904) {
-                reveal_hiding(ch, 0);
-                GET_ALT(ch) = 2;
-                SET_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-                if (!block_calc(ch)) {
-                    return;
-                }
-                GET_ALT(ch) = 0;
-                REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-                int zone = 0;
-                if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
-                    fly_zone(zone, "can be seen blasting off into space!@n\r\n", ch);
-                }
-                send_to_sense(1, "leaving the planet", ch);
-                send_to_scouter("A powerlevel signal has left the planet", ch, 0, 2);
-                act("@CYou blast off from the ground and rocket through the air. Your speed increases until you manage to reach the brink of space!@n",
-                    true, ch, nullptr, nullptr, TO_CHAR);
-                act("@C$n blasts off from the ground and rockets through the air. You quickly lose sight of $m as $e continues upward!@n",
-                    true, ch, nullptr, nullptr, TO_ROOM);
-                char_from_room(ch);
-                char_to_room(ch, real_room(58));
-                act("@C$n blasts up from the atmosphere below and then comes to a stop.@n", true, ch, nullptr, nullptr,
-                    TO_ROOM);
-                send_to_char(ch, "@mOOC: Use the command 'land' to return to the planet from here.@n\r\n");
-                if (!IS_ANDROID(ch)) {
-                    ch->decCurKI(ch->getMaxKI() / 10);
-                }
-                WAIT_STATE(ch, PULSE_3SEC);
-            } else {
-                send_to_char(ch, "You can only fly off the planet from the launchpad of Aquis.\r\n");
-            }
-            return;
-        } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_FRIGID)) {
-            reveal_hiding(ch, 0);
-            GET_ALT(ch) = 2;
-            SET_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-            if (!block_calc(ch)) {
-                return;
-            }
-            GET_ALT(ch) = 0;
-            REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-            int zone = 0;
-            if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
-                fly_zone(zone, "can be seen blasting off into space!@n\r\n", ch);
-            }
-            send_to_sense(1, "leaving the planet", ch);
-            send_to_scouter("A powerlevel signal has left the planet", ch, 0, 2);
-            act("@CYou blast off from the ground and rocket through the air. Your speed increases until you manage to reach the brink of space!@n",
-                true, ch, nullptr, nullptr, TO_CHAR);
-            act("@C$n blasts off from the ground and rockets through the air. You quickly lose sight of $m as $e continues upward!@n",
-                true, ch, nullptr, nullptr, TO_ROOM);
-            char_from_room(ch);
-            char_to_room(ch, real_room(51));
-            act("@C$n blasts up from the atmosphere below and then comes to a stop.@n", true, ch, nullptr, nullptr,
-                TO_ROOM);
-            send_to_char(ch, "@mOOC: Use the command 'land' to return to the planet from here.@n\r\n");
-            if (!IS_ANDROID(ch)) {
-                ch->decCurKI(ch->getMaxKI() / 10);
-            }
-            WAIT_STATE(ch, PULSE_3SEC);
-            return;
-        } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_KONACK)) {
-            reveal_hiding(ch, 0);
-            GET_ALT(ch) = 2;
-            SET_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-            if (!block_calc(ch)) {
-                return;
-            }
-            GET_ALT(ch) = 0;
-            REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-            int zone = 0;
-            if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
-                fly_zone(zone, "can be seen blasting off into space!@n\r\n", ch);
-            }
-            send_to_sense(1, "leaving the planet", ch);
-            send_to_scouter("A powerlevel signal has left the planet", ch, 0, 2);
-            act("@CYou blast off from the ground and rocket through the air. Your speed increases until you manage to reach the brink of space!@n",
-                true, ch, nullptr, nullptr, TO_CHAR);
-            act("@C$n blasts off from the ground and rockets through the air. You quickly lose sight of $m as $e continues upward!@n",
-                true, ch, nullptr, nullptr, TO_ROOM);
-            char_from_room(ch);
-            char_to_room(ch, real_room(52));
-            act("@C$n blasts up from the atmosphere below and then comes to a stop.@n", true, ch, nullptr, nullptr,
-                TO_ROOM);
-            send_to_char(ch, "@mOOC: Use the command 'land' to return to the planet from here.@n\r\n");
-            if (!IS_ANDROID(ch)) {
-                ch->decCurKI(ch->getMaxKI() / 10);
-            }
-            WAIT_STATE(ch, PULSE_3SEC);
-            return;
-        } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_NAMEK)) {
-            reveal_hiding(ch, 0);
-            GET_ALT(ch) = 2;
-            SET_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-            if (!block_calc(ch)) {
-                return;
-            }
-            GET_ALT(ch) = 0;
-            REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-            int zone = 0;
-            if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
-                fly_zone(zone, "can be seen blasting off into space!@n\r\n", ch);
-            }
-            send_to_sense(1, "leaving the planet", ch);
-            send_to_scouter("A powerlevel signal has left the planet", ch, 0, 2);
-            act("@CYou blast off from the ground and rocket through the air. Your speed increases until you manage to reach the brink of space!@n",
-                true, ch, nullptr, nullptr, TO_CHAR);
-            act("@C$n blasts off from the ground and rockets through the air. You quickly lose sight of $m as $e continues upward!@n",
-                true, ch, nullptr, nullptr, TO_ROOM);
-            char_from_room(ch);
-            char_to_room(ch, real_room(54));
-            act("@C$n blasts up from the atmosphere below and then comes to a stop.@n", true, ch, nullptr, nullptr,
-                TO_ROOM);
-            send_to_char(ch, "@mOOC: Use the command 'land' to return to the planet from here.@n\r\n");
-            if (!IS_ANDROID(ch)) {
-                ch->decCurKI(ch->getMaxKI() / 10);
-            }
-            WAIT_STATE(ch, PULSE_3SEC);
-            return;
-        } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AETHER)) {
-            reveal_hiding(ch, 0);
-            GET_ALT(ch) = 2;
-            SET_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-            if (!block_calc(ch)) {
-                return;
-            }
-            GET_ALT(ch) = 0;
-            REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-            int zone = 0;
-            if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
-                fly_zone(zone, "can be seen blasting off into space!@n\r\n", ch);
-            }
-            send_to_sense(1, "leaving the planet", ch);
-            send_to_scouter("A powerlevel signal has left the planet", ch, 0, 2);
-            act("@CYou blast off from the ground and rocket through the air. Your speed increases until you manage to reach the brink of space!@n",
-                true, ch, nullptr, nullptr, TO_CHAR);
-            act("@C$n blasts off from the ground and rockets through the air. You quickly lose sight of $m as $e continues upward!@n",
-                true, ch, nullptr, nullptr, TO_ROOM);
-            char_from_room(ch);
-            char_to_room(ch, real_room(55));
-            act("@C$n blasts up from the atmosphere below and then comes to a stop.@n", true, ch, nullptr, nullptr,
-                TO_ROOM);
-            send_to_char(ch, "@mOOC: Use the command 'land' to return to the planet from here.@n\r\n");
-            if (!IS_ANDROID(ch)) {
-                ch->decCurKI(ch->getMaxKI() / 10);
-            }
-            WAIT_STATE(ch, PULSE_3SEC);
-            return;
-        } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_YARDRAT)) {
-            reveal_hiding(ch, 0);
-            GET_ALT(ch) = 2;
-            SET_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-            if (!block_calc(ch)) {
-                return;
-            }
-            GET_ALT(ch) = 0;
-            REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-            int zone = 0;
-            if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
-                fly_zone(zone, "can be seen blasting off into space!@n\r\n", ch);
-            }
-            send_to_sense(1, "leaving the planet", ch);
-            send_to_scouter("A powerlevel signal has left the planet", ch, 0, 2);
-            act("@CYou blast off from the ground and rocket through the air. Your speed increases until you manage to reach the brink of space!@n",
-                true, ch, nullptr, nullptr, TO_CHAR);
-            act("@C$n blasts off from the ground and rockets through the air. You quickly lose sight of $m as $e continues upward!@n",
-                true, ch, nullptr, nullptr, TO_ROOM);
-            char_from_room(ch);
-            char_to_room(ch, real_room(56));
-            act("@C$n blasts up from the atmosphere below and then comes to a stop.@n", true, ch, nullptr, nullptr,
-                TO_ROOM);
-            send_to_char(ch, "@mOOC: Use the command 'land' to return to the planet from here.@n\r\n");
-            if (!IS_ANDROID(ch)) {
-                ch->decCurKI(ch->getMaxKI() / 10);
-            }
-            WAIT_STATE(ch, PULSE_3SEC);
-            return;
-        } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_ARLIA)) {
-            reveal_hiding(ch, 0);
-            GET_ALT(ch) = 2;
-            SET_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-            if (!block_calc(ch)) {
-                return;
-            }
-            GET_ALT(ch) = 0;
-            REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-            int zone = 0;
-            if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
-                fly_zone(zone, "can be seen blasting off into space!@n\r\n", ch);
-            }
-            send_to_sense(1, "leaving the planet", ch);
-            send_to_scouter("A powerlevel signal has left the planet", ch, 0, 2);
-            act("@CYou blast off from the ground and rocket through the air. Your speed increases until you manage to reach the brink of space!@n",
-                true, ch, nullptr, nullptr, TO_CHAR);
-            act("@C$n blasts off from the ground and rockets through the air. You quickly lose sight of $m as $e continues upward!@n",
-                true, ch, nullptr, nullptr, TO_ROOM);
-            char_from_room(ch);
-            char_to_room(ch, real_room(59));
-            act("@C$n blasts up from the atmosphere below and then comes to a stop.@n", true, ch, nullptr, nullptr,
-                TO_ROOM);
-            send_to_char(ch, "@mOOC: Use the command 'land' to return to the planet from here.@n\r\n");
-            if (!IS_ANDROID(ch)) {
-                ch->decCurKI(ch->getMaxKI() / 10);
-            }
-            WAIT_STATE(ch, PULSE_3SEC);
-            return;
-        } else if (PLANET_ZENITH(IN_ROOM(ch))) {
-            reveal_hiding(ch, 0);
-            GET_ALT(ch) = 2;
-            SET_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-            if (!block_calc(ch)) {
-                return;
-            }
-            GET_ALT(ch) = 0;
-            REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-            int zone = 0;
-            if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
-                fly_zone(zone, "can be seen blasting off into space!@n\r\n", ch);
-            }
-            send_to_sense(1, "leaving the planet", ch);
-            send_to_scouter("A powerlevel signal has left the planet", ch, 0, 2);
-            act("@CYou blast off from the ground and rocket through the air. Your speed increases until you manage to reach the brink of space!@n",
-                true, ch, nullptr, nullptr, TO_CHAR);
-            act("@C$n blasts off from the ground and rockets through the air. You quickly lose sight of $m as $e continues upward!@n",
-                true, ch, nullptr, nullptr, TO_ROOM);
-            char_from_room(ch);
-            char_to_room(ch, real_room(57));
-            act("@C$n blasts up from the atmosphere below and then comes to a stop.@n", true, ch, nullptr, nullptr,
-                TO_ROOM);
-            send_to_char(ch, "@mOOC: Use the command 'land' to return to the planet from here.@n\r\n");
-            if (!IS_ANDROID(ch)) {
-                ch->decCurKI(ch->getMaxKI() / 10);
-            }
-            WAIT_STATE(ch, PULSE_3SEC);
-            return;
-        } else {
-            send_to_char(ch, "You are not on a planet.\r\n");
+
+        auto planet = ch->getMatchingArea(isPlanet);
+        if(!planet) {
+            send_to_char(ch, "You are not on a planet!");
             return;
         }
+
+        auto &a = areas[planet.value()];
+        if(!a.orbit) {
+            send_to_char(ch, "You are not on a planet!");
+            return;
+        }
+
+        reveal_hiding(ch, 0);
+        GET_ALT(ch) = 2;
+        SET_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
+        if (!block_calc(ch)) {
+            return;
+        }
+        GET_ALT(ch) = 0;
+        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
+        fly_planet(IN_ROOM(ch), "can be seen blasting off into space!@n\r\n", ch);
+        send_to_sense(1, "leaving the planet", ch);
+        send_to_scouter("A powerlevel signal has left the planet", ch, 0, 2);
+        act("@CYou blast off from the ground and rocket through the air. Your speed increases until you manage to reach the brink of space!@n",
+            true, ch, nullptr, nullptr, TO_CHAR);
+        act("@C$n blasts off from the ground and rockets through the air. You quickly lose sight of $m as $e continues upward!@n",
+            true, ch, nullptr, nullptr, TO_ROOM);
+        char_from_room(ch);
+        char_to_room(ch, a.orbit.value());
+        act("@C$n blasts up from the atmosphere below and then comes to a stop.@n", true, ch, nullptr, nullptr,
+            TO_ROOM);
+        send_to_char(ch, "@mOOC: Use the command 'land' to return to the planet from here.@n\r\n");
+        if (!IS_ANDROID(ch)) {
+            ch->decCurKI(ch->getMaxKI() / 10);
+        }
+        WAIT_STATE(ch, PULSE_3SEC);
+        return;
     }
 }
 
@@ -2820,7 +2379,7 @@ ACMD(do_stand) {
         send_to_char(ch, "You are knocked out cold for right now!\r\n");
         return;
     }
-    if (!IS_NPC(ch) && GET_LIMBCOND(ch, 3) <= 0 && GET_LIMBCOND(ch, 4) <= 0) {
+    if (!IS_NPC(ch) && GET_LIMBCOND(ch, 2) <= 0 && GET_LIMBCOND(ch, 3) <= 0) {
         send_to_char(ch, "With what legs will you be standing up on?\r\n");
         return;
     }

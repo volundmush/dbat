@@ -511,58 +511,11 @@ void trigedit_save(struct descriptor_data *d) {
     /* new trigger to an item, we will get SYSERR's upton reboot that */
     /* could make things hard to debug.                               */
 
-    zone = zone_table[OLC_ZNUM(d)].number;
-    top = zone_table[OLC_ZNUM(d)].top;
-
-    snprintf(fname, sizeof(fname), "%s/%i.new", TRG_PREFIX, zone);
-
-    if (!(trig_file = fopen(fname, "w"))) {
-        mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(d->character)), true,
-               "SYSERR: OLC: Can't open trig file \"%s\"", fname);
-        return;
-    }
-
     auto &z = zone_table[OLC_ZNUM(d)];
     z.triggers.insert(t.vn);
+    z.save_triggers();
 
-    for (auto i : z.triggers) {
-        if ((rnum = real_trigger(i)) != NOTHING) {
-            trig = trig_index[rnum].proto;
-
-            if (fprintf(trig_file, "#%d\n", i) < 0) {
-                mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(d->character)), true,
-                       "SYSERR: OLC: Can't write trig file!");
-                fclose(trig_file);
-                return;
-            }
-            sprintascii(bitBuf, GET_TRIG_TYPE(trig));
-            fprintf(trig_file, "%s%c\n"
-                               "%d %s %d\n"
-                               "%s%c\n",
-                    (GET_TRIG_NAME(trig)) ? (GET_TRIG_NAME(trig)) : "unknown trigger", STRING_TERMINATOR,
-                    trig->attach_type,
-                    *bitBuf ? bitBuf : "0", GET_TRIG_NARG(trig),
-                    GET_TRIG_ARG(trig) ? GET_TRIG_ARG(trig) : "", STRING_TERMINATOR);
-
-            /* Build the text for the script */
-            strcpy(buf, ""); /* strcpy OK for MAX_CMD_LENGTH > 0*/
-            for (cmd = trig->cmdlist; cmd; cmd = cmd->next) {
-                strcat(buf, cmd->cmd);
-                strcat(buf, "\n");
-            }
-
-            if (!buf[0])
-                strcpy(buf, "* Empty script");
-
-            fprintf(trig_file, "%s%c\n", buf, STRING_TERMINATOR);
-            *buf = '\0';
-        }
-    }
-
-    fprintf(trig_file, "$%c\n", STRING_TERMINATOR);
-    fclose(trig_file);
-
-    snprintf(buf, sizeof(buf), "%s%d.trg", TRG_PREFIX, zone);
+    snprintf(buf, sizeof(buf), "%s%d.trg", TRG_PREFIX, z.number);
 
     remove(buf);
     rename(fname, buf);

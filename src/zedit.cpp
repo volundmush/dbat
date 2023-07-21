@@ -207,13 +207,12 @@ ACMD(do_oasis_zedit) {
 }
 
 void zedit_setup(struct descriptor_data *d, int room_num) {
-    struct zone_data *zone;
     int subcmd = 0, count = 0, cmd_room = NOWHERE;
 
     /*
      * Allocate one scratch zone structure.
      */
-    CREATE(zone, struct zone_data, 1);
+    auto zone = new zone_data();
 
     /*
      * Copy all the zone header information over.
@@ -488,11 +487,11 @@ void zedit_disp_menu(struct descriptor_data *d) {
             case 'V':
                 write_to_output(d, "%sAssign global %s:%d to %s = %s, %% Chance %d",
                                 c.if_flag ? " then " : "",
-                                c.sarg1, c.arg2,
+                                c.sarg1.c_str(), c.arg2,
                                 ((c.arg1 == MOB_TRIGGER) ? "mobile" :
                                  ((c.arg1 == OBJ_TRIGGER) ? "object" :
                                   ((c.arg1 == WLD_TRIGGER) ? "room" : "????"))),
-                                c.sarg2, c.arg5);
+                                c.sarg2.c_str(), c.arg5);
                 break;
             default:
                 write_to_output(d, "<Unknown Command>");
@@ -1261,9 +1260,7 @@ void zedit_parse(struct descriptor_data *d, char *arg) {
 /*-------------------------------------------------------------------*/
         case ZEDIT_SARG1:
             if (strlen(arg)) {
-                if (OLC_CMD(d).sarg1)
-                    free(OLC_CMD(d).sarg1);
-                OLC_CMD(d).sarg1 = strdup(arg);
+                OLC_CMD(d).sarg1 = arg;
                 OLC_MODE(d) = ZEDIT_SARG2;
                 write_to_output(d, "Enter the global value : ");
             } else
@@ -1273,7 +1270,7 @@ void zedit_parse(struct descriptor_data *d, char *arg) {
 /*-------------------------------------------------------------------*/
         case ZEDIT_SARG2:
             if (strlen(arg)) {
-                OLC_CMD(d).sarg2 = strdup(arg);
+                OLC_CMD(d).sarg2 = arg;
                 zedit_disp_arg4(d);
             } else
                 write_to_output(d, "Must have some value to set it to :");

@@ -18,3 +18,7 @@ namespace race {
 namespace sensei {
     class Sensei;
 }
+
+namespace net {
+    struct connection_data;
+}

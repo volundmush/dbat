@@ -1735,7 +1735,7 @@ ACMD(do_alias) {
  */
 #define NUM_TOKENS       9
 
-void perform_complex_alias(struct txt_q *input_q, char *orig, struct alias_data *a) {
+static void perform_complex_alias(struct descriptor_data *d, char *orig, struct alias_data *a) {
     struct txt_q temp_queue;
     char *tokens[NUM_TOKENS], *temp, *write_point;
     char buf2[MAX_RAW_INPUT_LENGTH], buf[MAX_RAW_INPUT_LENGTH];    /* raw? */
@@ -1779,12 +1779,8 @@ void perform_complex_alias(struct txt_q *input_q, char *orig, struct alias_data 
     write_to_q(buf, &temp_queue, 1);
 
     /* push our temp_queue on to the _front_ of the input queue */
-    if (input_q->head == nullptr)
-        *input_q = temp_queue;
-    else {
-        temp_queue.tail->next = input_q->head;
-        input_q->head = temp_queue.head;
-    }
+    for(auto q = temp_queue.head; q; q = q->next)
+        d->input_queue.emplace_front(q->text);
 }
 
 
@@ -1796,35 +1792,47 @@ void perform_complex_alias(struct txt_q *input_q, char *orig, struct alias_data 
  *   1: String was _not_ modified in place; rather, the expanded aliases
  *      have been placed at the front of the character's input queue.
  */
-int perform_alias(struct descriptor_data *d, char *orig, size_t maxlen) {
+void perform_alias(struct descriptor_data *d, char *orig) {
     char first_arg[MAX_INPUT_LENGTH], *ptr;
     struct alias_data *a, *tmp;
 
+    if(!d->character) {
+        d->input_queue.emplace_back(orig);
+        return;
+    }
+
+
     /* Mobs don't have alaises. */
-    if (IS_NPC(d->character))
-        return (0);
+    if (IS_NPC(d->character)) {
+        d->input_queue.emplace_back(orig);
+        return;
+    }
 
     /* bail out immediately if the guy doesn't have any aliases */
-    if ((tmp = GET_ALIASES(d->character)) == nullptr)
-        return (0);
+    if ((tmp = GET_ALIASES(d->character)) == nullptr) {
+        d->input_queue.emplace_back(orig);
+        return;
+    }
 
     /* find the alias we're supposed to match */
     ptr = any_one_arg(orig, first_arg);
 
     /* bail out if it's null */
-    if (!*first_arg)
-        return (0);
+    if (!*first_arg) {
+        d->input_queue.emplace_back(orig);
+        return;
+    }
 
     /* if the first arg is not an alias, return without doing anything */
-    if ((a = find_alias(tmp, first_arg)) == nullptr)
-        return (0);
+    if ((a = find_alias(tmp, first_arg)) == nullptr) {
+        d->input_queue.emplace_back(orig);
+        return;
+    }
 
     if (a->type == ALIAS_SIMPLE) {
-        strlcpy(orig, a->replacement, maxlen);
-        return (0);
+        d->input_queue.emplace_back(a->replacement);
     } else {
-        perform_complex_alias(&d->input, ptr, a);
-        return (1);
+        perform_complex_alias(d, ptr, a);
     }
 }
 
@@ -2703,10 +2711,6 @@ int perform_dupe_check(struct descriptor_data *d) {
                                                "@cBank Interest@D: @Y%s@n\r\n", mult, add_commas(inc));
                 }
             }
-            if (CONFIG_ENABLE_COMPRESSION && !PRF_FLAGGED(d->character, PRF_NOCOMPRESS)) {
-                d->comp->state = 1;    /* waiting for response to offer */
-                write_to_output(d, "%s", compress_offer);
-            }
             break;
         case USURP:
             write_to_output(d, "You take over your own body, already in use!\r\n");
@@ -2716,10 +2720,6 @@ int perform_dupe_check(struct descriptor_data *d) {
             d->character->rp = d->rpp;
             mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(d->character)), true,
                    "%s has re-logged in ... disconnecting old socket.", GET_NAME(d->character));
-            if (CONFIG_ENABLE_COMPRESSION && !PRF_FLAGGED(d->character, PRF_NOCOMPRESS)) {
-                d->comp->state = 1;       /* waiting for response to offer */
-                write_to_output(d, "%s", compress_offer);
-            }
             break;
         case UNSWITCH:
             write_to_output(d, "Reconnecting to unswitched char.");
@@ -2792,19 +2792,19 @@ int enter_player_game(struct descriptor_data *d) {
 
 
     if (PLR_FLAGGED(d->character, PLR_RARM)) {
-        GET_LIMBCOND(d->character, 1) = 100;
+        GET_LIMBCOND(d->character, 0) = 100;
         REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_RARM);
     }
     if (PLR_FLAGGED(d->character, PLR_LARM)) {
-        GET_LIMBCOND(d->character, 2) = 100;
+        GET_LIMBCOND(d->character, 1) = 100;
         REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_LARM);
     }
     if (PLR_FLAGGED(d->character, PLR_LLEG)) {
-        GET_LIMBCOND(d->character, 4) = 100;
+        GET_LIMBCOND(d->character, 3) = 100;
         REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_LLEG);
     }
     if (PLR_FLAGGED(d->character, PLR_RLEG)) {
-        GET_LIMBCOND(d->character, 3) = 100;
+        GET_LIMBCOND(d->character, 2) = 100;
         REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_RLEG);
     }
     GET_COMBINE(d->character) = -1;
@@ -4247,9 +4247,8 @@ void nanny(struct descriptor_data *d, char *arg) {
     skip_spaces(&arg);
 
     if (d->character == nullptr) {
-        CREATE(d->character, struct char_data, 1);
-        clear_char(d->character);
-        CREATE(d->character->player_specials, struct player_special_data, 1);
+        d->character = new char_data();
+        d->character->player_specials = new player_special_data();
         d->character->desc = d;
     }
 
@@ -4271,9 +4270,8 @@ void nanny(struct descriptor_data *d, char *arg) {
                 free_char(d->character);
             }
             if (!d->character) {
-                CREATE(d->character, struct char_data, 1);
-                clear_char(d->character);
-                CREATE(d->character->player_specials, struct player_special_data, 1);
+                d->character = new char_data();
+                d->character->player_specials = new player_special_data();
                 d->character->desc = d;
                 SET_BIT_AR(PRF_FLAGS(d->character), PRF_COLOR);
             }
@@ -4324,9 +4322,8 @@ void nanny(struct descriptor_data *d, char *arg) {
                             write_to_output(d, "@YInvalid name@n, please try @Canother.@n\r\nName: ");
                             return;
                         }
-                        CREATE(d->character, struct char_data, 1);
-                        clear_char(d->character);
-                        CREATE(d->character->player_specials, struct player_special_data, 1);
+                        d->character = new char_data();
+                        d->character->player_specials = new player_special_data();
                         d->character->desc = d;
                         CREATE(d->character->name, char, strlen(tmp_name) + 1);
                         strcpy(d->character->name, CAP(tmp_name));    /* strcpy: OK (size checked above) */
@@ -6937,10 +6934,6 @@ void nanny(struct descriptor_data *d, char *arg) {
             break;
 
         case CON_RMOTD:        /* read CR after printing motd   */
-            if (CONFIG_ENABLE_COMPRESSION && !PRF_FLAGGED(d->character, PRF_NOCOMPRESS) && !d->comp->state) {
-                d->comp->state = 1;    /* waiting for response to offer */
-                write_to_output(d, "%s", compress_offer);
-            }
             write_to_output(d, "%s", CONFIG_MENU);
             STATE(d) = CON_MENU;
             break;

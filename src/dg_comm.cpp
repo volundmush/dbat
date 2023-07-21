@@ -204,6 +204,45 @@ void send_to_zone(char *messg, zone_rnum zone) {
             write_to_output(i, "%s", messg);
 }
 
+static bool isPlanet(const area_data& a) {
+    return a.type == AreaType::CelestialBody;
+}
+
+void fly_planet(room_vnum roomVnum, char *messg, struct char_data *ch) {
+    if (!messg || !*messg)
+        return;
+
+    vnum areaVnum = NOWHERE;
+    {
+        auto &r = world[roomVnum];
+        if(auto found = r.getMatchingArea(isPlanet); found) {
+            areaVnum = *found;
+        }
+    }
+
+    if(areaVnum == NOWHERE) {
+        return;
+    }
+
+    for(auto i = descriptor_list; i; i = i->next) {
+        if(!i->connected) continue;
+        if(!i->character) continue;
+        if(!AWAKE(i->character)) continue;
+        if(IN_ROOM(i->character) == NOWHERE) continue;
+        if(!OUTSIDE(i->character)) continue;
+
+        auto found = i->character->getMatchingArea(isPlanet);
+        if(!found) continue;
+        if(*found != areaVnum) continue;
+        if (PLR_FLAGGED(i->character, PLR_DISGUISED)) {
+            write_to_output(i, "A disguised figure %s", messg);
+        } else {
+            write_to_output(i, "%s%s %s", readIntro(i->character, ch) == 1 ? "" : "A ",
+                            get_i_name(i->character, ch), messg);
+        }
+    }
+}
+
 void fly_zone(zone_rnum zone, char *messg, struct char_data *ch) {
     struct descriptor_data *i;
 
@@ -224,30 +263,35 @@ void fly_zone(zone_rnum zone, char *messg, struct char_data *ch) {
 }
 
 void send_to_sense(int type, char *messg, struct char_data *ch) {
-    struct descriptor_data *i;
-    struct char_data *tch;
-    struct obj_data *obj;
-
     if (!messg || !*messg)
         return;
 
-    for (i = descriptor_list; i; i = i->next) {
+    auto planet = ch->getMatchingArea(isPlanet);
+    if(!planet && type == 0) {
+        return;
+    }
+
+    for (auto i = descriptor_list; i; i = i->next) {
         if (STATE(i) != CON_PLAYING) {
             continue;
         }
-        tch = i->character;
-        obj = GET_EQ(tch, WEAR_EYE);
+        auto tch = i->character;
         if (tch == ch) {
             continue;
         }
+        if (IN_ROOM(ch) == IN_ROOM(tch))
+            continue;
+        auto obj = GET_EQ(tch, WEAR_EYE);
         if (!GET_SKILL(tch, SKILL_SENSE)) {
             continue;
         }
-        if (((world[IN_ROOM(ch)].zone != world[IN_ROOM(tch)].zone && type == 0) || !AWAKE(tch))) {
-            continue;
-        }
-        if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SHIP)) {
-            continue;
+        if(auto p = tch->getMatchingArea(isPlanet); type == 0) {
+            if (!p) {
+                continue;
+            }
+            if (*p != *planet) {
+                continue;
+            }
         }
         if (obj && type == 0) {
             continue;
@@ -255,11 +299,11 @@ void send_to_sense(int type, char *messg, struct char_data *ch) {
         if (IS_ANDROID(ch)) {
             continue;
         }
-        if (IN_ROOM(ch) == IN_ROOM(tch)) {
+
+        if (GET_HIT(ch) < (GET_HIT(tch) * 0.001) + 1)
             continue;
-        } else if (GET_HIT(ch) < (GET_HIT(tch) * 0.001) + 1) {
-            continue;
-        } else if (type == 0) {
+
+        if (type == 0) {
             if (GET_MAX_HIT(ch) > GET_MAX_HIT(tch)) {
                 write_to_output(i, "%s who is stronger than you. They are nearby.\r\n", messg);
             } else if (GET_MAX_HIT(ch) >= GET_MAX_HIT(tch) * .9) {
@@ -268,8 +312,6 @@ void send_to_sense(int type, char *messg, struct char_data *ch) {
                 write_to_output(i, "%s who is a good bit weaker than you. They are nearby.\r\n", messg);
             } else if (GET_MAX_HIT(ch) >= GET_MAX_HIT(tch) * .4) {
                 write_to_output(i, "%s who is a lot weaker than you. They are nearby.\r\n", messg);
-            } else {
-                continue;
             }
             if (readIntro(tch, ch) == 1) {
                 write_to_output(i, "@YYou recognise this signal as @y%s@Y!@n\r\n", get_i_name(tch, ch));
@@ -277,7 +319,13 @@ void send_to_sense(int type, char *messg, struct char_data *ch) {
                 write_to_output(i, "@YYou recognise this signal, but don't seem to know their name.@n\r\n");
             }
         } else if (planet_check(ch, tch)) {
-            char *blah = sense_location(ch);
+            std::string blah = "UNKNOWN";
+            {
+                auto av = tch->getMatchingArea([&](auto &a) {return true;});
+                if(av) {
+                    blah = areas[av.value()].name;
+                }
+            }
             char power[MAX_INPUT_LENGTH];
             char align[MAX_INPUT_LENGTH];
             if (GET_HIT(ch) > GET_HIT(tch) * 10) {
@@ -318,7 +366,7 @@ void send_to_sense(int type, char *messg, struct char_data *ch) {
             }
             if (strstr(messg, "land"))
                 write_to_output(i, "@YYou sense %s%s%s %s! They appear to have landed at...@G%s@n\r\n",
-                                readIntro(tch, ch) == 1 ? get_i_name(tch, ch) : "someone", power, align, messg, blah);
+                                readIntro(tch, ch) == 1 ? get_i_name(tch, ch) : "someone", power, align, messg, blah.c_str());
             else
                 write_to_output(i, "@YYou sense %s%s%s %s!@n\r\n",
                                 readIntro(tch, ch) == 1 ? get_i_name(tch, ch) : "someone", power, align, messg);
@@ -327,114 +375,96 @@ void send_to_sense(int type, char *messg, struct char_data *ch) {
 }
 
 void send_to_scouter(char *messg, struct char_data *ch, int num, int type) {
-    struct descriptor_data *i;
-    struct char_data *tch;
-    struct obj_data *obj;
-
     if (!messg || !*messg)
         return;
 
-    for (i = descriptor_list; i; i = i->next) {
+    auto planet = ch->getMatchingArea(isPlanet);
+    if(!planet && type == 0) {
+        return;
+    }
+
+    for (auto i = descriptor_list; i; i = i->next) {
         if (STATE(i) != CON_PLAYING) {
             continue;
         }
-        tch = i->character;
-        obj = GET_EQ(tch, WEAR_EYE);
-        if (tch == ch) {
+        auto tch = i->character;
+        auto obj = GET_EQ(tch, WEAR_EYE);
+        if (tch == ch) continue;
+        if(!AWAKE(tch)) continue;
+
+        if(auto p = tch->getMatchingArea(isPlanet); type == 0) {
+            if (!p) {
+                continue;
+            }
+            if (*p != *planet) {
+                continue;
+            }
+        }
+
+        if (GET_INVIS_LEV(ch) > GET_ADMLEVEL(tch)) {
             continue;
-        } else {
-            if ((((world[IN_ROOM(ch)].zone != world[IN_ROOM(tch)].zone) && type == 0) || !AWAKE(tch))) {
-                continue;
-            }
-            if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SHIP)) {
-                continue;
-            }
-            if (GET_INVIS_LEV(ch) > GET_ADMLEVEL(tch)) {
-                continue;
-            }
-            if (IS_ANDROID(ch)) {
-                continue;
-            } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH) && !ROOM_FLAGGED(IN_ROOM(tch), ROOM_EARTH)) {
-                continue;
-            } else if (PLANET_ZENITH(IN_ROOM(ch)) && !PLANET_ZENITH(IN_ROOM(tch))) {
-                continue;
-            } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_FRIGID) && !ROOM_FLAGGED(IN_ROOM(tch), ROOM_FRIGID)) {
-                continue;
-            } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_NAMEK) && !ROOM_FLAGGED(IN_ROOM(tch), ROOM_NAMEK)) {
-                continue;
-            } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL) && !ROOM_FLAGGED(IN_ROOM(tch), ROOM_AL)) {
-                continue;
-            } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_VEGETA) && !ROOM_FLAGGED(IN_ROOM(tch), ROOM_VEGETA)) {
-                continue;
-            } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_KONACK) && !ROOM_FLAGGED(IN_ROOM(tch), ROOM_KONACK)) {
-                continue;
-            } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_NEO) && !ROOM_FLAGGED(IN_ROOM(tch), ROOM_NEO)) {
-                continue;
-            } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_YARDRAT) && !ROOM_FLAGGED(IN_ROOM(tch), ROOM_YARDRAT)) {
-                continue;
-            } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_KANASSA) && !ROOM_FLAGGED(IN_ROOM(tch), ROOM_KANASSA)) {
-                continue;
-            } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_ARLIA) && !ROOM_FLAGGED(IN_ROOM(tch), ROOM_ARLIA)) {
-                continue;
-            } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AETHER) && !ROOM_FLAGGED(IN_ROOM(tch), ROOM_AETHER)) {
-                continue;
-            }
-            if (!obj) {
-                continue;
-            } else if (IN_ROOM(ch) == IN_ROOM(tch)) {
-                continue;
-            } else if (type == 0) {
-                if (num == 1) {
-                    struct obj_data *obj = GET_EQ(tch, WEAR_EYE);
-                    if (OBJ_FLAGGED(obj, ITEM_BSCOUTER) && GET_HIT(ch) >= 150000) {
-                        write_to_output(i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
-                    } else if (OBJ_FLAGGED(obj, ITEM_MSCOUTER) && GET_HIT(ch) >= 5000000) {
-                        write_to_output(i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
-                    } else if (OBJ_FLAGGED(obj, ITEM_ASCOUTER) && GET_HIT(ch) >= 15000000) {
-                        write_to_output(i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
-                    } else {
-                        write_to_output(i, "%s@n", messg);
-                    }
-                } else {
-                    if (OBJ_FLAGGED(obj, ITEM_BSCOUTER) && GET_HIT(ch) >= 150000) {
-                        write_to_output(i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
-                    } else if (OBJ_FLAGGED(obj, ITEM_MSCOUTER) && GET_HIT(ch) >= 5000000) {
-                        write_to_output(i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
-                    } else if (OBJ_FLAGGED(obj, ITEM_ASCOUTER) && GET_HIT(ch) >= 15000000) {
-                        write_to_output(i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
-                    } else {
-                        write_to_output(i, "%s\r\n", messg);
-                    }
-                }
-            } else if (type == 1 && GET_SKILL(tch, SKILL_SENSE) < 20) {
+        }
+        if (IS_ANDROID(ch)) continue;
+
+        if (!obj) continue;
+        if (IN_ROOM(ch) == IN_ROOM(tch)) continue;
+
+        if (type == 0) {
+            if (num == 1) {
+                auto obj = GET_EQ(tch, WEAR_EYE);
                 if (OBJ_FLAGGED(obj, ITEM_BSCOUTER) && GET_HIT(ch) >= 150000) {
-                    write_to_output(i, "@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
+                    write_to_output(i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
                 } else if (OBJ_FLAGGED(obj, ITEM_MSCOUTER) && GET_HIT(ch) >= 5000000) {
-                    write_to_output(i, "@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
+                    write_to_output(i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
                 } else if (OBJ_FLAGGED(obj, ITEM_ASCOUTER) && GET_HIT(ch) >= 15000000) {
-                    write_to_output(i, "@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
+                    write_to_output(i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
                 } else {
-                    write_to_output(i, "@D[Blip@D]@w %s. @RPL@D:@Y %s@n\r\n\r\n", messg, add_commas(GET_HIT(ch)));
+                    write_to_output(i, "%s@n", messg);
                 }
-            } else if (type == 2 && GET_SKILL(tch, SKILL_SENSE) < 20) {
-                char *blah = sense_location(ch);
+            } else {
                 if (OBJ_FLAGGED(obj, ITEM_BSCOUTER) && GET_HIT(ch) >= 150000) {
-                    write_to_output(i, "@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, blah);
+                    write_to_output(i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
                 } else if (OBJ_FLAGGED(obj, ITEM_MSCOUTER) && GET_HIT(ch) >= 5000000) {
-                    write_to_output(i, "@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, blah);
+                    write_to_output(i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
                 } else if (OBJ_FLAGGED(obj, ITEM_ASCOUTER) && GET_HIT(ch) >= 15000000) {
-                    write_to_output(i, "@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, blah);
+                    write_to_output(i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
                 } else {
-                    write_to_output(i, "@D[Blip@D]@w %s at... @G%s. @RPL@D:@Y %s@n\r\n\r\n", messg, blah,
-                                    add_commas(GET_HIT(ch)));
+                    write_to_output(i, "%s\r\n", messg);
                 }
+            }
+        } else if (type == 1 && GET_SKILL(tch, SKILL_SENSE) < 20) {
+            if (OBJ_FLAGGED(obj, ITEM_BSCOUTER) && GET_HIT(ch) >= 150000) {
+                write_to_output(i, "@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
+            } else if (OBJ_FLAGGED(obj, ITEM_MSCOUTER) && GET_HIT(ch) >= 5000000) {
+                write_to_output(i, "@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
+            } else if (OBJ_FLAGGED(obj, ITEM_ASCOUTER) && GET_HIT(ch) >= 15000000) {
+                write_to_output(i, "@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
+            } else {
+                write_to_output(i, "@D[Blip@D]@w %s. @RPL@D:@Y %s@n\r\n\r\n", messg, add_commas(GET_HIT(ch)));
+            }
+        } else if (type == 2 && GET_SKILL(tch, SKILL_SENSE) < 20) {
+            std::string blah = "UNKNOWN";
+            {
+                auto av = tch->getMatchingArea([&](auto &a) {return true;});
+                if(av) {
+                    blah = areas[av.value()].name;
+                }
+            }
+            if (OBJ_FLAGGED(obj, ITEM_BSCOUTER) && GET_HIT(ch) >= 150000) {
+                write_to_output(i, "@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, blah.c_str());
+            } else if (OBJ_FLAGGED(obj, ITEM_MSCOUTER) && GET_HIT(ch) >= 5000000) {
+                write_to_output(i, "@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, blah.c_str());
+            } else if (OBJ_FLAGGED(obj, ITEM_ASCOUTER) && GET_HIT(ch) >= 15000000) {
+                write_to_output(i, "@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, blah.c_str());
+            } else {
+                write_to_output(i, "@D[Blip@D]@w %s at... @G%s. @RPL@D:@Y %s@n\r\n\r\n", messg, blah.c_str(),
+                                add_commas(GET_HIT(ch)));
             }
         }
     }
 }
 
 void send_to_worlds(struct char_data *ch) {
-    struct descriptor_data *i;
     char message[MAX_INPUT_LENGTH];
 
     if (GET_MAX_HIT(ch) > 2000000000) {
@@ -451,31 +481,17 @@ void send_to_worlds(struct char_data *ch) {
         return;
     }
 
-    for (i = descriptor_list; i; i = i->next) {
+    auto p = ch->getMatchingArea(isPlanet);
+    if(!p) return;
+
+    for (auto i = descriptor_list; i; i = i->next) {
         if (STATE(i) != CON_PLAYING) {
             continue;
         }
-        if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_EARTH) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH)) {
-            send_to_char(i->character, "%s", message);
-        } else if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_VEGETA) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_VEGETA)) {
-            send_to_char(i->character, "%s", message);
-        } else if (PLANET_ZENITH(IN_ROOM(i->character)) && PLANET_ZENITH(IN_ROOM(ch))) {
-            send_to_char(i->character, "%s", message);
-        } else if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_NAMEK) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_NAMEK)) {
-            send_to_char(i->character, "%s", message);
-        } else if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_KONACK) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_KONACK)) {
-            send_to_char(i->character, "%s", message);
-        } else if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_YARDRAT) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_YARDRAT)) {
-            send_to_char(i->character, "%s", message);
-        } else if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_FRIGID) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_FRIGID)) {
-            send_to_char(i->character, "%s", message);
-        } else if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_KANASSA) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_KANASSA)) {
-            send_to_char(i->character, "%s", message);
-        } else if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_ARLIA) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_ARLIA)) {
-            send_to_char(i->character, "%s", message);
-        } else if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_AETHER) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_AETHER)) {
-            send_to_char(i->character, "%s", message);
-        }
+        auto op = i->character->getMatchingArea(isPlanet);
+        if(!op) continue;
+        if(op.value() != p.value()) continue;
+        send_to_char(i->character, "%s", message);
     }
 }
 

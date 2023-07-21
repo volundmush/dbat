@@ -450,7 +450,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
                 world[(room)].sector_type : SECT_INSIDE)
 #define ROOM_DAMAGE(room)   (world[(room)].dmg)
 #define ROOM_EFFECT(room)   (world[(room)].geffect)
-#define ROOM_GRAVITY(room)  (world[(room)].gravity)
+#define ROOM_GRAVITY(room)  (world[(room)].getGravity())
 #define SUNKEN(room)    (ROOM_EFFECT(room) < 0 || SECT(room) == SECT_UNDERWATER)
 
 #define IS_DARK(room)    room_is_dark((room))
@@ -778,7 +778,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
  * If using unsigned types, the top array index will catch everything.
  * If using signed types, NOTHING will catch the majority of bad accesses.
  */
-#define VALID_OBJ_RNUM(obj)    (obj_proto.count(GET_OBJ_RNUM(obj)))
+#define VALID_OBJ_RNUM(obj)    (obj_proto.contains(GET_OBJ_RNUM(obj)))
 
 #define GET_OBJ_LEVEL(obj)      ((obj)->level)
 #define GET_OBJ_PERM(obj)       ((obj)->bitvector)
@@ -815,7 +815,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define GET_OBJ_SIZE(obj)    ((obj)->size)
 #define GET_OBJ_RNUM(obj)    ((obj)->vn)
 #define GET_OBJ_VNUM(obj)    (VALID_OBJ_RNUM(obj) ? \
-                obj_index[GET_OBJ_RNUM(obj)].vn : NOTHING)
+                GET_OBJ_RNUM(obj) : NOTHING)
 #define GET_OBJ_SPEC(obj)    (VALID_OBJ_RNUM(obj) ? \
                 obj_index[GET_OBJ_RNUM(obj)].func : 0)
 #define GET_FUEL(obj)           (GET_OBJ_VAL((obj), 2))
@@ -992,16 +992,16 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define HAS_MOON(ch)            (ROOM_FLAGGED(IN_ROOM(ch), ROOM_VEGETA) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH) ||\
                                  ROOM_FLAGGED(IN_ROOM(ch), ROOM_FRIGID) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_AETHER))
 #define HAS_ARMS(ch)            (((IS_NPC(ch) && (MOB_FLAGGED(ch, MOB_LARM) || \
-                                 MOB_FLAGGED(ch, MOB_RARM))) || GET_LIMBCOND(ch, 1) > 0 || \
-                                 GET_LIMBCOND(ch, 2) > 0 || \
+                                 MOB_FLAGGED(ch, MOB_RARM))) || GET_LIMBCOND(ch, 0) > 0 || \
+                                 GET_LIMBCOND(ch, 1) > 0 || \
                                  PLR_FLAGGED(ch, PLR_CRARM) || \
                                  PLR_FLAGGED(ch, PLR_CLARM)) && \
                                  ((!GRAPPLING(ch) && !GRAPPLED(ch)) || \
                                  (GRAPPLING(ch) && GRAPTYPE(ch) == 3) || \
                                  (GRAPPLED(ch) && GRAPTYPE(ch) != 1 && GRAPTYPE(ch) != 4)))
 #define HAS_LEGS(ch)            (((IS_NPC(ch) && (MOB_FLAGGED(ch, MOB_LLEG) || \
-                                 MOB_FLAGGED(ch, MOB_RLEG))) || GET_LIMBCOND(ch, 3) > 0 || \
-                                 GET_LIMBCOND(ch, 4) > 0 || \
+                                 MOB_FLAGGED(ch, MOB_RLEG))) || GET_LIMBCOND(ch, 2) > 0 || \
+                                 GET_LIMBCOND(ch, 3) > 0 || \
                                  PLR_FLAGGED(ch, PLR_CRLEG) || \
                                  PLR_FLAGGED(ch, PLR_CLLEG)) && \
                                  ((!GRAPPLING(ch) && !GRAPPLED(ch)) || \

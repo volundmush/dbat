@@ -39,6 +39,9 @@
 #include "mail.h"
 #include "constants.h"
 #include "screen.h"
+#include "area.h"
+#include <boost/algorithm/string.hpp>
+#include "net.h"
 
 /* externs */
 
@@ -94,6 +97,16 @@ const char compress_offer[4] =
         };
 
 
+boost::asio::awaitable<void> signal_watcher() {
+    while(true) {
+        try {
+            auto result = net::signals->async_wait(boost::asio::use_awaitable);
+        } catch(...) {
+            // TODO: improve this.
+        }
+    }
+}
+
 /* Reload players after a copyover */
 void copyover_recover() {
     struct descriptor_data *d;
@@ -124,15 +137,15 @@ void copyover_recover() {
             break;
 
         /* Write something, and check if it goes error-free */
-        if (write_to_descriptor(desc, "\n\rFolding initiated...\n\r", nullptr) < 0) {
+        if (write_to_descriptor(desc, "\n\rFolding initiated...\n\r") < 0) {
             close(desc); /* nope */
             continue;
         }
 
         /* create a new descriptor */
-        CREATE (d, struct descriptor_data, 1);
-        memset((char *) d, 0, sizeof(struct descriptor_data));
-        init_descriptor(d, desc); /* set up various stuff */
+        d = new descriptor_data();
+        d->descriptor = desc;
+
 
         strcpy(d->host, host);
         d->next = descriptor_list;
@@ -142,9 +155,8 @@ void copyover_recover() {
 
         /* Now, find the pfile */
 
-        CREATE(d->character, struct char_data, 1);
-        clear_char(d->character);
-        CREATE(d->character->player_specials, struct player_special_data, 1);
+        d->character = new char_data();
+        d->character->player_specials = new player_special_data();
         d->character->desc = d;
 
         if ((player_i = load_char(name, d->character)) >= 0) {
@@ -161,14 +173,10 @@ void copyover_recover() {
             fOld = false;
 
         if (!fOld) /* Player file not found?! */ {
-            write_to_descriptor(desc, "\n\rSomehow, your character was lost during the folding. Sorry.\n\r", nullptr);
+            write_to_descriptor(desc, "\n\rSomehow, your character was lost during the folding. Sorry.\n\r");
             close_socket(d);
         } else {
-            write_to_descriptor(desc, "\n\rFolding complete.\n\r", nullptr);
-            if (CONFIG_ENABLE_COMPRESSION && !PRF_FLAGGED(d->character, PRF_NOCOMPRESS)) {
-                d->comp->state = 1; /* indicates waiting for comp negotiation */
-                write_to_output(d, "%s", compress_offer);
-            }
+            write_to_descriptor(desc, "\n\rFolding complete.\n\r");
             set_loadroom = GET_LOADROOM(d->character);
             GET_LOADROOM(d->character) = saved_loadroom;
             enter_player_game(d);
@@ -183,137 +191,9 @@ void copyover_recover() {
     fclose(fp);
 }
 
-/* Init sockets, run game, and cleanup sockets */
-void init_game(uint16_t cmport) {
-    /* We don't want to restart if we crash before we get up. */
-    touch(KILLSCRIPT_FILE);
-
-    log("Finding player limit.");
-    max_players = get_max_players();
-
-    if (!fCopyOver) { /* If copyover mother_desc is already set up */
-        log("Opening mother connection.");
-        mother_desc = init_socket(cmport);
-    }
-    circle_srandom(time(nullptr));
-    event_init();
-
-    /* set up hash table for find_char() */
-    init_lookup_table();
-
-    boot_db();
-
-    if (CONFIG_IMC_ENABLED) {
-        imc_startup(false, -1, false); // FALSE arg, so the autoconnect setting can govern it.
-    }
-
-    FILE *mapfile;
-    int rowcounter, colcounter;
-    int vnum_read;
-
-    log("Signal trapping.");
-    signal_setup();
-
-    log("Loading Space Map. ");
-    //Load the map vnums from a file into an array
-    mapfile = fopen("../lib/surface.map", "r");
-
-    for (rowcounter = 0; rowcounter <= MAP_ROWS; rowcounter++) {
-        for (colcounter = 0; colcounter <= MAP_COLS; colcounter++) {
-            fscanf(mapfile, "%d", &vnum_read);
-            mapnums[rowcounter][colcounter] = real_room(vnum_read);
-        }
-    }
-
-    fclose(mapfile);
-
-    /* Load the toplist */
-    topLoad();
-
-    /* If we made it this far, we will be able to restart without problem. */
-    remove(KILLSCRIPT_FILE);
-
-    if (fCopyOver) /* reload players */
-        copyover_recover();
-
-    log("Entering game loop.");
-
-    game_loop(mother_desc);
-
-    Crash_save_all();
-
-    log("Closing all sockets.");
-    while (descriptor_list)
-        close_socket(descriptor_list);
-
-    close(mother_desc);
-
-    if (CONFIG_IMC_ENABLED) {
-        imc_shutdown(false);
-    }
-
-    if (circle_reboot != 2)
-        save_all();
-
-    log("Saving current MUD time.");
-    save_mud_time(&time_info);
 
 
-    if (circle_reboot) {
-        log("Rebooting.");
-        exit(52);            /* what's so great about HHGTTG, anyhow? */
-    }
-    log("Normal termination of game.");
-}
 
-
-/*
- * init_socket sets up the mother descriptor - creates the socket, sets
- * its options up, binds it, and listens.
- */
-socklen_t init_socket(uint16_t cmport) {
-    socklen_t s;
-    struct sockaddr_in sa{};
-    int opt;
-
-    if ((s = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
-        perror("SYSERR: Error creating socket");
-        exit(1);
-    }
-
-    opt = 1;
-    if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *) &opt, sizeof(opt)) < 0) {
-        perror("SYSERR: setsockopt REUSEADDR");
-        exit(1);
-    }
-
-    set_sendbuf(s);
-
-    {
-        struct linger ld{};
-
-        ld.l_onoff = 0;
-        ld.l_linger = 0;
-        if (setsockopt(s, SOL_SOCKET, SO_LINGER, (char *) &ld, sizeof(ld)) < 0)
-            perror("SYSERR: setsockopt SO_LINGER");    /* Not fatal I suppose. */
-    }
-
-    /* Clear the structure */
-    memset((char *) &sa, 0, sizeof(sa));
-
-    sa.sin_family = AF_INET;
-    sa.sin_port = htons(cmport);
-    sa.sin_addr = *(get_bind_addr());
-
-    if (bind(s, (struct sockaddr *) &sa, sizeof(sa)) < 0) {
-        perror("SYSERR: bind");
-        close(s);
-        exit(1);
-    }
-    nonblock(s);
-    listen(s, 5);
-    return (s);
-}
 
 
 int get_max_players() {
@@ -359,268 +239,7 @@ int get_max_players() {
     return (max_descs);
 }
 
-
-/*
- * game_loop contains the main loop which drives the entire MUD.  It
- * cycles once every 0.10 seconds and is responsible for accepting new
- * new connections, polling existing connections for input, dequeueing
- * output and sending it out to players, and calling "heartbeat" functions
- * such as mobile_activity().
- */
-void game_loop(socklen_t cmmother_desc) {
-    fd_set input_set, output_set, exc_set, null_set;
-    struct timeval last_time, opt_time, process_time, temp_time;
-    struct timeval before_sleep, now, timeout;
-    char comm[MAX_INPUT_LENGTH];
-    struct descriptor_data *d, *next_d;
-    int missed_pulses, maxdesc, aliased, top_desc;
-
-    /* initialize various time values */
-    null_time.tv_sec = 0;
-    null_time.tv_usec = 0;
-    opt_time.tv_usec = OPT_USEC;
-    opt_time.tv_sec = 0;
-    FD_ZERO(&null_set);
-
-    gettimeofday(&last_time, (struct timezone *) nullptr);
-
-    /* The Main Loop.  The Big Cheese.  The Top Dog.  The Head Honcho.  The.. */
-    while (!circle_shutdown) {
-
-        /* Sleep if we don't have any connections */
-        if (descriptor_list == nullptr) {
-            if (CONFIG_IMC_ENABLED) {
-                top_desc = this_imcmud != nullptr ? MAX(cmmother_desc, this_imcmud->desc) : cmmother_desc;
-            } else {
-                top_desc = cmmother_desc;
-            }
-            if (!CONFIG_IMC_ENABLED) {
-                log("No connections.  Going to sleep.");
-            }
-            FD_ZERO(&input_set);
-            FD_SET(cmmother_desc, &input_set);
-
-            if (CONFIG_IMC_ENABLED) {
-                if (this_imcmud != nullptr && this_imcmud->desc != -1)
-                    FD_SET(this_imcmud->desc, &input_set);
-            }
-            if (select(top_desc + 1, &input_set, (fd_set *) nullptr, (fd_set *) nullptr, nullptr) < 0) {
-                if (errno == EINTR)
-                    log("Waking up to process signal.");
-                else
-                    perror("SYSERR: Select coma");
-            } else if (!CONFIG_IMC_ENABLED) {
-                log("New connection.  Waking up.");
-            }
-            gettimeofday(&last_time, (struct timezone *) nullptr);
-        }
-        /* Set up the input, output, and exception sets for select(). */
-        FD_ZERO(&input_set);
-        FD_ZERO(&output_set);
-        FD_ZERO(&exc_set);
-        FD_SET(cmmother_desc, &input_set);
-
-        maxdesc = cmmother_desc;
-        for (d = descriptor_list; d; d = d->next) {
-            if (d->descriptor > maxdesc)
-                maxdesc = d->descriptor;
-            FD_SET(d->descriptor, &input_set);
-            FD_SET(d->descriptor, &output_set);
-            FD_SET(d->descriptor, &exc_set);
-        }
-
-        /*
-         * At this point, we have completed all input, output and heartbeat
-         * activity from the previous iteration, so we have to put ourselves
-         * to sleep until the next 0.1 second tick.  The first step is to
-         * calculate how long we took processing the previous iteration.
-         */
-
-        gettimeofday(&before_sleep, (struct timezone *) nullptr); /* current time */
-        timediff(&process_time, &before_sleep, &last_time);
-
-        /*
-         * If we were asleep for more than one pass, count missed pulses and sleep
-         * until we're resynchronized with the next upcoming pulse.
-         */
-        if (process_time.tv_sec == 0 && process_time.tv_usec < OPT_USEC) {
-            missed_pulses = 0;
-        } else {
-            missed_pulses = process_time.tv_sec * PASSES_PER_SEC;
-            missed_pulses += process_time.tv_usec / OPT_USEC;
-            process_time.tv_sec = 0;
-            process_time.tv_usec = process_time.tv_usec % OPT_USEC;
-        }
-
-        /* Calculate the time we should wake up */
-        timediff(&temp_time, &opt_time, &process_time);
-        timeadd(&last_time, &before_sleep, &temp_time);
-
-        /* Now keep sleeping until that time has come */
-        gettimeofday(&now, (struct timezone *) nullptr);
-        timediff(&timeout, &last_time, &now);
-
-        /* Go to sleep */
-        do {
-            circle_sleep(&timeout);
-            gettimeofday(&now, (struct timezone *) nullptr);
-            timediff(&timeout, &last_time, &now);
-        } while (timeout.tv_usec || timeout.tv_sec);
-
-        /* Poll (without blocking) for new input, output, and exceptions */
-        if (select(maxdesc + 1, &input_set, &output_set, &exc_set, &null_time) < 0) {
-            perror("SYSERR: Select poll");
-            return;
-        }
-        /* If there are new connections waiting, accept them. */
-        if (FD_ISSET(cmmother_desc, &input_set))
-            new_descriptor(cmmother_desc);
-
-        /* Kick out the freaky folks in the exception set and marked for close */
-        for (d = descriptor_list; d; d = next_d) {
-            next_d = d->next;
-            if (FD_ISSET(d->descriptor, &exc_set)) {
-                FD_CLR(d->descriptor, &input_set);
-                FD_CLR(d->descriptor, &output_set);
-                close_socket(d);
-            }
-        }
-
-        /* Process descriptors with input pending */
-        for (d = descriptor_list; d; d = next_d) {
-            next_d = d->next;
-            if (FD_ISSET(d->descriptor, &input_set))
-                if (process_input(d) < 0)
-                    close_socket(d);
-        }
-
-        /* Process commands we just read from process_input */
-        for (d = descriptor_list; d; d = next_d) {
-            next_d = d->next;
-
-            /*
-             * Not combined to retain --(d->wait) behavior. -gg 2/20/98
-             * If no wait state, no subtraction.  If there is a wait
-             * state then 1 is subtracted. Therefore we don't go less
-             * than 0 ever and don't require an 'if' bracket. -gg 2/27/99
-             */
-
-            if (d->character) {
-                GET_WAIT_STATE(d->character) -= (GET_WAIT_STATE(d->character) > 0);
-
-                if (GET_WAIT_STATE(d->character)) {
-                    continue;
-                }
-            }
-
-            if (!get_from_q(&d->input, comm, &aliased))
-                continue;
-
-            if (d->character) {
-                /* Reset the idle timer & pull char back from void if necessary */
-                d->character->timer = 0;
-                if (STATE(d) == CON_PLAYING && GET_WAS_IN(d->character) != NOWHERE) {
-                    if (IN_ROOM(d->character) != NOWHERE)
-                        char_from_room(d->character);
-                    char_to_room(d->character, GET_WAS_IN(d->character));
-                    GET_WAS_IN(d->character) = NOWHERE;
-                    act("$n has returned.", true, d->character, nullptr, nullptr, TO_ROOM);
-                }
-                GET_WAIT_STATE(d->character) = 1;
-            }
-            d->has_prompt = false;
-
-            if (d->showstr_count) /* Reading something w/ pager */
-                show_string(d, comm);
-            else if (d->str)        /* Writing boards, mail, etc. */
-                string_add(d, comm);
-            else if (STATE(d) != CON_PLAYING) /* In menus, etc. */
-                nanny(d, comm);
-            else {            /* else: we're playing normally. */
-                if (aliased)        /* To prevent recursive aliases. */
-                    d->has_prompt = true;    /* To get newline before next cmd output. */
-                else if (perform_alias(d, comm, sizeof(comm)))    /* Run it through aliasing system */
-                    get_from_q(&d->input, comm, &aliased);
-                command_interpreter(d->character, comm); /* Send it to interpreter */
-            }
-        }
-
-        /* Send queued output out to the operating system (ultimately to user). */
-        for (d = descriptor_list; d; d = next_d) {
-            next_d = d->next;
-            if (*(d->output) && FD_ISSET(d->descriptor, &output_set)) {
-                /* Output for this player is ready */
-                if (process_output(d) < 0) {
-                    close_socket(d);
-                    log("ERROR: Tried to send output to dead socket!");
-                } else
-                    d->has_prompt = 1;
-            }
-        }
-
-        /* Print prompts for other descriptors who had no other output */
-        for (d = descriptor_list; d; d = d->next) {
-            if (!d->has_prompt) {
-                write_to_output(d, "@n");
-                /*write_to_descriptor(d->descriptor, make_prompt(d), d->comp);*/
-                d->has_prompt = true;
-            }
-        }
-
-        /* Kick out folks in the CON_CLOSE or CON_DISCONNECT state */
-        for (d = descriptor_list; d; d = next_d) {
-            next_d = d->next;
-            if (STATE(d) == CON_CLOSE || STATE(d) == CON_DISCONNECT)
-                close_socket(d);
-        }
-
-        /*
-         * Now, we execute as many pulses as necessary--just one if we haven't
-         * missed any pulses, or make up for lost time if we missed a few
-         * pulses by sleeping for too long.
-         */
-        missed_pulses++;
-
-        if (missed_pulses <= 0) {
-            log("SYSERR: **BAD** MISSED_PULSES NONPOSITIVE (%d), TIME GOING BACKWARDS!!", missed_pulses);
-            missed_pulses = 1;
-        }
-
-        /* If we missed more than 30 seconds worth of pulses, just do 30 secs */
-        if (missed_pulses > 30 RL_SEC) {
-            log("SYSERR: Missed %d seconds worth of pulses.", missed_pulses / PASSES_PER_SEC);
-            missed_pulses = 30 RL_SEC;
-        }
-
-        if (CONFIG_IMC_ENABLED) {
-            imc_loop();
-        }
-
-        /* Now execute the heartbeat functions */
-        while (missed_pulses--)
-            heartbeat(++pulse);
-
-        /* Check for any signals we may have received. */
-        if (reread_wizlist) {
-            reread_wizlist = false;
-            mudlog(CMP, ADMLVL_IMMORT, true, "Signal received - rereading wizlists.");
-            reboot_wizlists();
-        }
-        if (emergency_unban) {
-            emergency_unban = false;
-            mudlog(BRF, ADMLVL_IMMORT, true, "Received SIGUSR2 - completely unrestricting game (emergent)");
-            ban_list = nullptr;
-            circle_restrict = 0;
-            num_invalid = 0;
-        }
-
-        /* Update tics for deadlock protection */
-        tics_passed++;
-    }
-}
-
-
-void heartbeat(int heart_pulse) {
+boost::asio::awaitable<void> heartbeat(int heart_pulse, double deltaTime) {
     static int mins_since_crashsave = 0;
 
     event_process();
@@ -708,8 +327,247 @@ void heartbeat(int heart_pulse) {
 
     /* Every pulse! Don't want them to stink the place up... */
     extract_pending_chars();
+    co_return;
 }
 
+boost::asio::awaitable<void> runOneLoop(double deltaTime) {
+    static bool sleeping = false;
+    struct descriptor_data* next_d;
+
+    if(sleeping && !net::new_descriptors.empty()) {
+        log("New connection.  Waking up.");
+        sleeping = false;
+    }
+
+    // welcome all net::new_descriptors...
+    if(!net::new_descriptors.empty()) {
+        for(auto &d : net::new_descriptors) {
+            d->next = descriptor_list;
+            descriptor_list = d;
+            d->start();
+        }
+        net::new_descriptors.clear();
+    }
+
+    if(!descriptor_list) {
+        if(!sleeping) {
+            log("No connections.  Going to sleep.");
+            sleeping = true;
+        }
+        co_return;
+    }
+
+    /* Process commands we just read from process_input */
+    for (auto d = descriptor_list; d; d = next_d) {
+        next_d = d->next;
+        d->handle_input();
+    }
+
+    bool gameActive = false;
+    // TODO: replace this with a smarter check...
+    // to determine if the game is active, we need to check if there are any players in the game.
+    // this will be the case if any descriptor has an attached character who's in a valid room.
+    for(auto d = descriptor_list; d; d = next_d) {
+        next_d = d->next;
+        if(d->character && IN_ROOM(d->character) != NOWHERE) {
+            gameActive = true;
+            break;
+        }
+    }
+
+    if(gameActive) {
+        co_await heartbeat(++pulse, deltaTime);
+    }
+
+    /* Send queued output out to the operating system (ultimately to user). */
+    for (auto d = descriptor_list; d; d = next_d) {
+        next_d = d->next;
+        if (!d->output.empty()) {
+            process_output(d);
+            d->has_prompt = true;
+        }
+    }
+
+    /* Print prompts for other descriptors who had no other output */
+    for (auto d = descriptor_list; d; d = d->next) {
+        if (!d->has_prompt) {
+            write_to_output(d, "@n");
+            process_output(d);
+            d->has_prompt = true;
+        }
+    }
+
+    /* Kick out folks in the CON_CLOSE or CON_DISCONNECT state */
+    for (auto d = descriptor_list; d; d = next_d) {
+        next_d = d->next;
+        if (STATE(d) == CON_CLOSE || STATE(d) == CON_DISCONNECT)
+            close_socket(d);
+    }
+
+    /* Check for any signals we may have received. */
+    if (reread_wizlist) {
+        reread_wizlist = false;
+        mudlog(CMP, ADMLVL_IMMORT, true, "Signal received - rereading wizlists.");
+        reboot_wizlists();
+    }
+    if (emergency_unban) {
+        emergency_unban = false;
+        mudlog(BRF, ADMLVL_IMMORT, true, "Received SIGUSR2 - completely unrestricting game (emergent)");
+        ban_list = nullptr;
+        circle_restrict = 0;
+        num_invalid = 0;
+    }
+
+    tics_passed++;
+	co_return;
+}
+
+
+/*
+ * game_loop contains the main loop which drives the entire MUD.  It
+ * cycles once every 0.10 seconds and is responsible for accepting new
+ * new connections, polling existing connections for input, dequeueing
+ * output and sending it out to players, and calling "heartbeat" functions
+ * such as mobile_activity().
+ */
+boost::asio::awaitable<void> game_loop() {
+    auto hb = std::chrono::milliseconds(100);
+    auto previousTime = boost::asio::steady_timer::clock_type::now();
+    boost::asio::steady_timer timer(co_await boost::asio::this_coro::executor, hb);
+
+    /* The Main Loop.  The Big Cheese.  The Top Dog.  The Head Honcho.  The.. */
+    while (!circle_shutdown) {
+
+        auto timeStart = boost::asio::steady_timer::clock_type::now();
+        co_await timer.async_wait(boost::asio::use_awaitable);
+        auto timeEnd = boost::asio::steady_timer::clock_type::now();
+
+        auto deltaTime = timeEnd - timeStart;
+        double deltaTimeInSeconds = std::chrono::duration<double>(deltaTime).count();
+
+        try {
+            co_await runOneLoop(deltaTimeInSeconds);
+        } catch(std::exception& e) {
+            log("Exception in runOneLoop(): %s", e.what());
+        }
+
+        auto timeAfterHeartbeat = boost::asio::steady_timer::clock_type::now();
+        auto elapsed = timeAfterHeartbeat - timeStart;
+        auto nextWait = hb - elapsed;
+
+        // If heartbeat takes more than 100ms, default to a very short wait
+        if(nextWait.count() < 0) {
+            nextWait = std::chrono::milliseconds(1);
+        }
+
+        timer.expires_from_now(nextWait);
+    }
+    co_return;
+}
+
+
+
+
+/* Init sockets, run game, and cleanup sockets */
+void init_game(uint16_t cmport) {
+    /* We don't want to restart if we crash before we get up. */
+    touch(KILLSCRIPT_FILE);
+
+    log("Finding player limit.");
+    max_players = get_max_players();
+
+    if(!net::io) net::io = std::make_unique<boost::asio::io_context>();
+
+    if (!fCopyOver) { /* If copyover mother_desc is already set up */
+        log("Opening mother connection.");
+        // open up net::acceptor on 0.0.0.0:<cmport>...
+        net::acceptor = std::make_unique<boost::asio::ip::tcp::acceptor>(*net::io, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), cmport));
+        mother_desc = net::acceptor->native_handle();
+    } else {
+        // a socket has already been created and needs to be re-used.
+        // use the one from mother_desc...
+        net::acceptor = std::make_unique<boost::asio::ip::tcp::acceptor>(*net::io, boost::asio::ip::tcp::v4(), mother_desc);
+    }
+
+    circle_srandom(time(nullptr));
+    event_init();
+
+    /* set up hash table for find_char() */
+    init_lookup_table();
+
+    boot_db();
+
+    if (CONFIG_IMC_ENABLED) {
+        imc_startup(false, -1, false); // FALSE arg, so the autoconnect setting can govern it.
+    }
+
+    FILE *mapfile;
+    int rowcounter, colcounter;
+    int vnum_read;
+
+    log("Signal trapping.");
+    net::signals = std::make_unique<boost::asio::signal_set>(*net::io);
+    for(auto s : {SIGUSR1, SIGUSR2, SIGVTALRM, SIGHUP, SIGCHLD, SIGINT, SIGTERM, SIGPIPE, SIGALRM})
+        net::signals->add(s);
+
+    //boost::asio::co_spawn(boost::asio::make_strand(*net::io), signal_watcher(), boost::asio::detached);
+
+    boost::asio::co_spawn(boost::asio::make_strand(*net::io), net::runAcceptor(), boost::asio::detached);
+
+    boost::asio::co_spawn(boost::asio::make_strand(*net::io), game_loop(), boost::asio::detached);
+
+    log("Loading Space Map. ");
+    //Load the map vnums from a file into an array
+    mapfile = fopen("../lib/surface.map", "r");
+
+    for (rowcounter = 0; rowcounter <= MAP_ROWS; rowcounter++) {
+        for (colcounter = 0; colcounter <= MAP_COLS; colcounter++) {
+            fscanf(mapfile, "%d", &vnum_read);
+            mapnums[rowcounter][colcounter] = real_room(vnum_read);
+        }
+    }
+
+    fclose(mapfile);
+
+    /* Load the toplist */
+    topLoad();
+
+    /* If we made it this far, we will be able to restart without problem. */
+    remove(KILLSCRIPT_FILE);
+
+    if (fCopyOver) /* reload players */
+        copyover_recover();
+
+    log("Entering game loop.");
+    net::io->run();
+
+    Crash_save_all();
+
+    log("Closing all sockets.");
+    while (descriptor_list)
+        close_socket(descriptor_list);
+
+    close(mother_desc);
+
+    if (CONFIG_IMC_ENABLED) {
+        imc_shutdown(false);
+    }
+
+    if (circle_reboot != 2)
+        save_all();
+
+    log("Saving current MUD time.");
+    save_mud_time(&time_info);
+
+    save_areas();
+
+
+    if (circle_reboot) {
+        log("Rebooting.");
+        exit(52);            /* what's so great about HHGTTG, anyhow? */
+    }
+    log("Normal termination of game.");
+}
 
 /* ******************************************************************
 *  general utility stuff (for local use)                            *
@@ -721,44 +579,6 @@ void heartbeat(int heart_pulse) {
  *  being < 0 fail).  Based on code submitted by ss@sirocco.cup.hp.com.
  */
 
-/*
- * code to return the time difference between a and b (a-b).
- * always returns a nonnegative value (floors at 0).
- */
-void timediff(struct timeval *rslt, struct timeval *a, struct timeval *b) {
-    if (a->tv_sec < b->tv_sec)
-        *rslt = null_time;
-    else if (a->tv_sec == b->tv_sec) {
-        if (a->tv_usec < b->tv_usec)
-            *rslt = null_time;
-        else {
-            rslt->tv_sec = 0;
-            rslt->tv_usec = a->tv_usec - b->tv_usec;
-        }
-    } else {            /* a->tv_sec > b->tv_sec */
-        rslt->tv_sec = a->tv_sec - b->tv_sec;
-        if (a->tv_usec < b->tv_usec) {
-            rslt->tv_usec = a->tv_usec + 1000000 - b->tv_usec;
-            rslt->tv_sec--;
-        } else
-            rslt->tv_usec = a->tv_usec - b->tv_usec;
-    }
-}
-
-/*
- * Add 2 time values.
- *
- * Patch sent by "d. hall" <dhall@OOI.NET> to fix 'static' usage.
- */
-void timeadd(struct timeval *rslt, struct timeval *a, struct timeval *b) {
-    rslt->tv_sec = a->tv_sec + b->tv_sec;
-    rslt->tv_usec = a->tv_usec + b->tv_usec;
-
-    while (rslt->tv_usec >= 1000000) {
-        rslt->tv_usec -= 1000000;
-        rslt->tv_sec++;
-    }
-}
 
 
 void record_usage() {
@@ -1554,42 +1374,6 @@ void write_to_q(const char *txt, struct txt_q *queue, int aliased) {
 }
 
 
-/*
- * NOTE: 'dest' must be at least MAX_INPUT_LENGTH big.
- */
-int get_from_q(struct txt_q *queue, char *dest, int *aliased) {
-    struct txt_block *tmp;
-
-    /* queue empty? */
-    if (!queue->head)
-        return (0);
-
-    strcpy(dest, queue->head->text);    /* strcpy: OK (mutual MAX_INPUT_LENGTH) */
-    *aliased = queue->head->aliased;
-
-    tmp = queue->head;
-    queue->head = queue->head->next;
-    free(tmp->text);
-    free(tmp);
-
-    return (1);
-}
-
-
-/* Empty the queues before closing connection */
-void flush_queues(struct descriptor_data *d) {
-    if (d->large_outbuf) {
-        d->large_outbuf->next = bufpool;
-        bufpool = d->large_outbuf;
-    }
-    while (d->input.head) {
-        struct txt_block *tmp = d->input.head;
-        d->input.head = d->input.head->next;
-        free(tmp->text);
-        free(tmp);
-    }
-}
-
 
 /* Add a new string to a player's output queue. For outside use. */
 size_t write_to_output(struct descriptor_data *t, const char *txt, ...) {
@@ -1771,70 +1555,28 @@ size_t proc_colors(char *txt, size_t maxlen, int parse, char **choices) {
 #undef NEW_STRING_LENGTH
 
 /* Add a new string to a player's output queue. */
+// It used to return how many bytes couldn't be written.
+// That's no longer a problem so it always returns 0.
 size_t vwrite_to_output(struct descriptor_data *t, const char *format, va_list args) {
-    static char txt[MAX_STRING_LENGTH];
-    size_t wantsize;
-    int size;
+    // Use a temporary buffer to get the required size
+    char temp;
+    va_list args_copy;
+    va_copy(args_copy, args);  // Make a copy of va_list, since vsnprintf will alter it
+    int required_size = std::vsnprintf(&temp, 1, format, args_copy) + 1; // +1 for null-terminator
+    va_end(args_copy);
 
-    /* if we're in the overflow state already, ignore this new output */
-    if (t->bufspace == 0)
-        return (0);
-
-    wantsize = size = vsnprintf(txt, sizeof(txt), format, args);
-    if (t->character)
-        wantsize = size = proc_colors(txt, sizeof(txt), COLOR_ON(t->character), COLOR_CHOICES(t->character));
-    /* If exceeding the size of the buffer, truncate it for the overflow message */
-    if (size < 0 || wantsize >= sizeof(txt)) {
-        size = sizeof(txt) - 1;
-        strcpy(txt + size - strlen(text_overflow), text_overflow);  /* strcpy: OK */
+    if (required_size <= 0) {
+        // Handle error here (print message, throw exception, etc)
     }
 
-    /*
-     * If the text is too big to fit into even a large buffer, truncate
-     * the new text to make it fit.  (This will switch to the overflow
-     * state automatically because t->bufspace will end up 0.)
-     */
-    if (size + t->bufptr + 1 > LARGE_BUFSIZE) {
-        size = LARGE_BUFSIZE - t->bufptr - 1;
-        txt[size] = '\0';
-        GET_OVERFLOW(t->character) = true;
-        buf_overflows++;
-    }
+    // Create a vector of the required size
+    std::vector<char> buffer(required_size);
+    std::vsnprintf(buffer.data(), buffer.size(), format, args);
 
-    /*
-     * If we have enough space, just write to buffer and that's it! If the
-     * text just barely fits, then it's switched to a large buffer instead.
-     */
-    if (t->bufspace > size) {
-        strcpy(t->output + t->bufptr, txt); /* strcpy: OK (size checked above) */
-        t->bufspace -= size;
-        t->bufptr += size;
-        return (t->bufspace);
-    }
+    // Append to the output
+    t->output += std::string(buffer.begin(), buffer.end() - 1); // -1 to ignore the null-terminator
 
-    buf_switches++;
-
-    /* if the pool has a buffer in it, grab it */
-    if (bufpool != nullptr) {
-        t->large_outbuf = bufpool;
-        bufpool = bufpool->next;
-    } else {                      /* else create a new one */
-        CREATE(t->large_outbuf, struct txt_block, 1);
-        CREATE(t->large_outbuf->text, char, LARGE_BUFSIZE);
-        buf_largecount++;
-    }
-
-    strcpy(t->large_outbuf->text, t->output);     /* strcpy: OK (size checked previously) */
-    t->output = t->large_outbuf->text;    /* make big buffer primary */
-    strcat(t->output, txt);       /* strcat: OK (size checked) */
-
-    /* set the pointer for the next write */
-    t->bufptr = strlen(t->output);
-
-    /* calculate how much space is left in the buffer */
-    t->bufspace = LARGE_BUFSIZE - 1 - t->bufptr;
-
-    return (t->bufspace);
+    return required_size - 1; // Return the size of the appended string (-1 to exclude the null-terminator)
 }
 
 void free_bufpool() {
@@ -1854,173 +1596,25 @@ void free_bufpool() {
 ****************************************************************** */
 
 
-/*
- * get_bind_addr: Return a struct in_addr that should be used in our
- * call to bind().  If the user has specified a desired binding
- * address, we try to bind to it; otherwise, we bind to INADDR_ANY.
- * Note that inet_aton() is preferred over inet_addr() so we use it if
- * we can.  If neither is available, we always bind to INADDR_ANY.
- */
-
-struct in_addr *get_bind_addr() {
-    static struct in_addr bind_addr;
-
-    /* Clear the structure */
-    memset((char *) &bind_addr, 0, sizeof(bind_addr));
-
-    /* If DLFT_IP is unspecified, use INADDR_ANY */
-    if (CONFIG_DFLT_IP == nullptr) {
-        bind_addr.s_addr = htonl(INADDR_ANY);
-    } else {
-        /* If the parsing fails, use INADDR_ANY */
-        if (!inet_aton(CONFIG_DFLT_IP, &bind_addr)) {
-            log("SYSERR: DFLT_IP of %s appears to be an invalid IP address",
-                CONFIG_DFLT_IP);
-            bind_addr.s_addr = htonl(INADDR_ANY);
-        }
-    }
-
-    /* Put the address that we've finally decided on into the logs */
-    if (bind_addr.s_addr == htonl(INADDR_ANY))
-        log("Binding to all IP interfaces on this host.");
-    else
-        log("Binding only to IP address %s", inet_ntoa(bind_addr));
-
-    return (&bind_addr);
-}
-
-/* Sets the kernel's send buffer size for the descriptor */
-int set_sendbuf(socklen_t s) {
-    int opt = MAX_SOCK_BUF;
-
-    if (setsockopt(s, SOL_SOCKET, SO_SNDBUF, (char *) &opt, sizeof(opt)) < 0) {
-        perror("SYSERR: setsockopt SNDBUF");
-        return (-1);
-    }
-
-    return (0);
-}
-
-/* Initialize a descriptor */
-void init_descriptor(struct descriptor_data *newd, int desc) {
-    static int last_desc = 0; /* last descriptor number */
-
-    newd->descriptor = desc;
-    newd->idle_tics = 0;
-    newd->output = newd->small_outbuf;
-    newd->bufspace = SMALL_BUFSIZE - 1;
-    newd->login_time = time(nullptr);
-    *newd->output = '\0';
-    newd->bufptr = 0;
-    newd->has_prompt = 1;  /* prompt is part of greetings */
-    STATE(newd) = CON_GET_USER;
-    CREATE(newd->history, char *, HISTORY_SIZE);
-    if (++last_desc == 1000)
-        last_desc = 1;
-    newd->desc_num = last_desc;
-
-    CREATE(newd->comp, struct compr, 1);
-    newd->comp->state = 0; /* we start in normal mode */
-    newd->comp->stream = nullptr;
-}
-
-void set_color(struct descriptor_data *d) {
-    if (d->character == nullptr) {
-        CREATE(d->character, struct char_data, 1);
-        clear_char(d->character);
-        CREATE(d->character->player_specials, struct player_special_data, 1);
-        d->character->desc = d;
-    }
-    SET_BIT_AR(PRF_FLAGS(d->character), PRF_COLOR);
-    write_to_output(d, GREETANSI);
-    write_to_output(d, "\r\n@w                  Welcome to Dragonball Advent Truth\r\n");
-    write_to_output(d, "@D                 ---(@CPeak Logon Count Today@W: @w%4d@D)---@n\r\n", PCOUNT);
-    write_to_output(d, "@D                 ---(@CHighest Logon Count   @W: @w%4d@D)---@n\r\n", HIGHPCOUNT);
-    write_to_output(d, "@D                 ---(@CTotal Era %d Characters@W: @w%4s@D)---@n\r\n", CURRENT_ERA,
+void descriptor_data::start() {
+    write_to_output(this, GREETANSI);
+    write_to_output(this, "\r\n@w                  Welcome to Dragonball Advent Truth\r\n");
+    write_to_output(this, "@D                 ---(@CPeak Logon Count Today@W: @w%4d@D)---@n\r\n", PCOUNT);
+    write_to_output(this, "@D                 ---(@CHighest Logon Count   @W: @w%4d@D)---@n\r\n", HIGHPCOUNT);
+    write_to_output(this, "@D                 ---(@CTotal Era %d Characters@W: @w%4s@D)---@n\r\n", CURRENT_ERA,
                     add_commas(ERAPLAYERS));
-    write_to_output(d,
+    write_to_output(this,
                     "\r\n@cEnter your desired username or the username you have already made.\n@CEnter Username:@n\r\n");
-    d->user = strdup("Empty");
-    d->pass = strdup("Empty");
-    d->email = strdup("Empty");
-    d->tmp1 = strdup("Empty");
-    d->tmp2 = strdup("Empty");
-    d->tmp3 = strdup("Empty");
-    d->tmp4 = strdup("Empty");
-    d->tmp5 = strdup("Empty");
-    return;
+    this->user = strdup("Empty");
+    this->pass = strdup("Empty");
+    this->email = strdup("Empty");
+    this->tmp1 = strdup("Empty");
+    this->tmp2 = strdup("Empty");
+    this->tmp3 = strdup("Empty");
+    this->tmp4 = strdup("Empty");
+    this->tmp5 = strdup("Empty");
 }
 
-int new_descriptor(socklen_t s) {
-    socklen_t desc;
-    int sockets_connected = 0;
-    socklen_t i;
-    struct descriptor_data *newd;
-    struct sockaddr_in peer;
-    struct hostent *from = nullptr;
-
-    /* accept the new connection */
-    i = sizeof(peer);
-    if ((desc = accept(s, (struct sockaddr *) &peer, &i)) == INVALID_SOCKET) {
-        perror("SYSERR: accept");
-        return (-1);
-    }
-    /* keep it from blocking */
-    nonblock(desc);
-
-    /* set the send buffer size */
-    if (set_sendbuf(desc) < 0) {
-        close(desc);
-        return (0);
-    }
-
-    /* make sure we have room for it */
-    for (newd = descriptor_list; newd; newd = newd->next)
-        sockets_connected++;
-
-    if (sockets_connected >= CONFIG_MAX_PLAYING) {
-        write_to_descriptor(desc, "Sorry, CircleMUD is full right now... please try again later!\r\n", nullptr);
-        close(desc);
-        return (0);
-    }
-    /* create a new descriptor */
-    CREATE(newd, struct descriptor_data, 1);
-
-    /* find the sitename */
-    if (CONFIG_NS_IS_SLOW ||
-        !(from = gethostbyaddr((char *) &peer.sin_addr,
-                               sizeof(peer.sin_addr), AF_INET))) {
-
-        /* resolution failed */
-
-        /* find the numeric site address */
-        strncpy(newd->host, (char *) inet_ntoa(peer.sin_addr),
-                HOST_LENGTH);    /* strncpy: OK (n->host:HOST_LENGTH+1) */
-        newd->host[HOST_LENGTH] = '\0';
-    } else {
-        strncpy(newd->host, from->h_name, HOST_LENGTH);    /* strncpy: OK (n->host:HOST_LENGTH+1) */
-        newd->host[HOST_LENGTH] = '\0';
-    }
-
-    /* determine if the site is banned */
-    if (isbanned(newd->host) == BAN_ALL) {
-        close(desc);
-        mudlog(CMP, ADMLVL_GOD, true, "Connection attempt denied from [%s]", newd->host);
-        free(newd);
-        return (0);
-    }
-
-    /* initialize descriptor data */
-    init_descriptor(newd, desc);
-
-    /* prepend to list */
-    newd->next = descriptor_list;
-    descriptor_list = newd;
-
-    set_color(newd);
-
-    return (0);
-}
 
 
 /*
@@ -2034,28 +1628,22 @@ int new_descriptor(socklen_t s) {
  *      14 bytes: unused
  */
 int process_output(struct descriptor_data *t) {
+    /* we may need this \r\n for later -- see below */
+    std::string out = "\r\n" + t->output, realout;
     char i[MAX_SOCK_BUF], *osb = i + 2;
     int result;
 
-    /* we may need this \r\n for later -- see below */
-    strcpy(i, "\r\n");    /* strcpy: OK (for 'MAX_SOCK_BUF >= 3') */
-
-    /* now, append the 'real' output */
-    strcpy(osb, t->output);       /* strcpy: OK (t->output:LARGE_BUFSIZE < osb:MAX_SOCK_BUF-2) */
-
-    /* if we're in the overflow state, notify the user */
-    if (t->bufspace == 0)
-        strcat(osb, "**OVERFLOW**\r\n");    /* strcpy: OK (osb:MAX_SOCK_BUF-2 reserves space) */
-
     /* add the extra CRLF if the person isn't in compact mode */
     if (STATE(t) == CON_PLAYING && t->character && !IS_NPC(t->character) && !PRF_FLAGGED(t->character, PRF_COMPACT))
-        strcat(osb, "\r\n");    /* strcpy: OK (osb:MAX_SOCK_BUF-2 reserves space) */
+        out.append("\r\n");    /* strcpy: OK (osb:MAX_SOCK_BUF-2 reserves space) */
 
     /* add a prompt */
 
-    strcat(i, make_prompt(t));    /* strcpy: OK (i:MAX_SOCK_BUF reserves space) */
+    out.append(make_prompt(t));    /* strcpy: OK (i:MAX_SOCK_BUF reserves space) */
     if (STATE(t) == CON_PLAYING) {
-        proc_colors(i, sizeof(i), COLOR_ON(t->character), COLOR_CHOICES(t->character));
+        realout = processColors(out, COLOR_ON(t->character), COLOR_CHOICES(t->character));
+    } else {
+        realout = processColors(out, true, nullptr);
     }
 
     /*
@@ -2064,59 +1652,17 @@ int process_output(struct descriptor_data *t) {
      */
     if (t->has_prompt) {
         t->has_prompt = false;
-        result = write_to_descriptor(t->descriptor, i, t->comp);
-        if (result >= 2)
-            result -= 2;
-    } else
-        result = write_to_descriptor(t->descriptor, osb, t->comp);
-
-    if (result < 0) {     /* Oops, fatal error. Bye! */
-        close_socket(t);
-        return (-1);
-    } else if (result == 0)       /* Socket buffer full. Try later. */
-        return (0);
+        t->conn->sendText(realout);
+    } else {
+        t->conn->sendText(realout.substr(2, realout.length() - 2));
+    }
 
     /* Handle snooping: prepend "% " and send to snooper. */
     if (t->snoop_by)
         write_to_output(t->snoop_by, "\nvvvvvvvvvvvvv[Snoop]vvvvvvvvvvvvv\n%s\n^^^^^^^^^^^^^[Snoop]^^^^^^^^^^^^^\n",
-                        t->output);
-    /* The common case: all saved output was handed off to the kernel buffer. */
-    if (result >= t->bufptr) {
-        /*
-         * if we were using a large buffer, put the large buffer on the buffer pool
-         * and switch back to the small one
-         */
-        if (t->large_outbuf) {
-            t->large_outbuf->next = bufpool;
-            bufpool = t->large_outbuf;
-            t->large_outbuf = nullptr;
-            t->output = t->small_outbuf;
-        }
-        /* reset total bufspace back to that of a small buffer */
-        t->bufspace = SMALL_BUFSIZE - 1;
-        t->bufptr = 0;
-        *(t->output) = '\0';
+                        t->output.c_str());
 
-        /*
-         * If the overflow message or prompt were partially written, try to save
-         * them. There will be enough space for them if this is true.  'result'
-         * is effectively unsigned here anyway.
-         */
-        if ((unsigned int) result < strlen(osb)) {
-            size_t savetextlen = strlen(osb + result);
-
-            strcat(t->output, osb + result);
-            t->bufptr -= savetextlen;
-            t->bufspace += savetextlen;
-        }
-
-    } else {
-        /* Not all data in buffer sent.  result < output buffersize. */
-
-        strcpy(t->output, t->output + result);      /* strcpy: OK (overlap) */
-        t->bufptr -= result;
-        t->bufspace += result;
-    }
+    t->output.clear();
 
     return (result);
 }
@@ -2140,104 +1686,7 @@ int process_output(struct descriptor_data *t) {
  */
 
 /* perform_socket_write for all Non-Windows platforms */
-ssize_t perform_socket_write(socklen_t desc, const char *txt, size_t length, struct compr *comp) {
-    ssize_t result = 0;
 
-    int compr_result, tmp, cnt, bytes_copied;
-
-    /* MCCP! this is where the zlib compression is handled */
-    if (comp && comp->state >= 2) { /* compress2 on */
-        /* copy data to input buffer */
-        /* first check that overflow won't happen */
-        /* if it will, we only copy over so much text */
-        if (comp->size_in + length > comp->total_in)
-            bytes_copied = comp->total_in - comp->size_in;
-        else
-            bytes_copied = length;
-
-        /* now copy what will fit into the buffer */
-        strncpy((char *) comp->buff_in + comp->size_in, txt, bytes_copied);
-        comp->size_in += bytes_copied;
-
-        /* set up stream input */
-        comp->stream->avail_in = comp->size_in;
-        comp->stream->next_in = comp->buff_in;
-
-        /* lets do it */
-        /* deflate all the input - this means flushing our output buffer when it fills */
-        do {
-            /* set up stream output - the size_out bit is somewhat unnecessary, but makes things safer */
-            comp->stream->avail_out = comp->total_out - comp->size_out;
-            comp->stream->next_out = comp->buff_out + comp->size_out;
-
-            compr_result = deflate(comp->stream, comp->state == 3 ? Z_FINISH : Z_SYNC_FLUSH);
-
-            if (compr_result == Z_STREAM_END)
-                compr_result = 0;
-            else if (compr_result == Z_OK && !(comp->stream->avail_out))
-                compr_result = 1;
-            else if (compr_result < 0) {  /* uh oh, fatal zlib error */
-                result = 0;
-                break;
-            } else
-                compr_result = 0;
-
-            /* adjust output state value */
-            comp->size_out = comp->total_out - comp->stream->avail_out;
-
-            /* write out compressed data - flush buff_out */
-            /* if problems encountered, resort to resending all data by breaking and returning < 1.. */
-            tmp = 0;
-            while (comp->size_out > 0) {
-                result = write(desc, comp->buff_out + tmp, comp->size_out);
-                if (result < 1) /* unsuccessful write or socket error */
-                    goto exitzlibdo; /* yummy, goto. faster than two breaks ! */
-                comp->size_out -= result;
-                tmp += result;
-            }
-        } while (compr_result);
-        exitzlibdo:
-
-        /* adjust buffers - is this necessary? not with Z_SYNC_FLUSH I think - but just to be safe */
-        /* input loses size_in - avail_in bytes */
-        tmp = comp->size_in - comp->stream->avail_in;
-        for (cnt = tmp; cnt < comp->size_in; cnt++)
-            *(comp->buff_in + (cnt - tmp)) = *(comp->buff_in + cnt);
-
-        /* adjust input state value - it is important that this is done after the previous step */
-        comp->size_in = comp->stream->avail_in;
-        /* the above as taken out because I don't think its necessary.. this is faster too */
-        /*comp->size_in = 0;*/
-
-        if (result > 0)
-            result = bytes_copied;
-    } else
-
-        result = write(desc, txt, length);
-
-    if (result > 0) {
-        /* Write was successful. */
-        return (result);
-    }
-
-    if (result == 0) {
-        /* This should never happen! */
-        log("SYSERR: Huh??  write() returned 0???  Please report this!");
-        return (-1);
-    }
-
-    /*
-     * result < 0, so an error was encountered - is it transient?
-     * Unfortunately, different systems use different constants to
-     * indicate this.
-     */
-
-    if (errno == EAGAIN)
-        return (0);
-
-    /* Looks like the error was fatal.  Too bad. */
-    return (-1);
-}
 
 
 /*
@@ -2250,12 +1699,12 @@ ssize_t perform_socket_write(socklen_t desc, const char *txt, size_t length, str
  * >=0  If all is well and good.
  *  -1  If an error was encountered, so that the player should be cut off.
  */
-int write_to_descriptor(socklen_t desc, const char *txt, struct compr *comp) {
+int write_to_descriptor(socklen_t desc, const char *txt) {
     ssize_t bytes_written;
     size_t total = strlen(txt), write_total = 0;
 
     while (total > 0) {
-        bytes_written = perform_socket_write(desc, txt, total, comp);
+        bytes_written = perform_socket_write(desc, txt, total);
 
         if (bytes_written < 0) {
             /* Fatal error.  Disconnect the player. */
@@ -2312,221 +1761,6 @@ ssize_t perform_socket_read(socklen_t desc, char *read_point, size_t space_left)
      */
     perror("SYSERR: perform_socket_read: about to lose connection");
     return (-1);
-}
-
-/*
- * ASSUMPTION: There will be no newlines in the raw input buffer when this
- * function is called.  We must maintain that before returning.
- *
- * Ever wonder why 'tmp' had '+8' on it?  The crusty old code could write
- * MAX_INPUT_LENGTH+1 bytes to 'tmp' if there was a '$' as the final
- * character in the input buffer.  This would also cause 'space_left' to
- * drop to -1, which wasn't very happy in an unsigned variable.  Argh.
- * So to fix the above, 'tmp' lost the '+8' since it doesn't need it
- * and the code has been changed to reserve space by accepting one less
- * character. (Do you really need 256 characters on a line?)
- * -gg 1/21/2000
- */
-int process_input(struct descriptor_data *t) {
-    int buf_length, failed_subst;
-    ssize_t bytes_read;
-    size_t space_left;
-    char *ptr, *read_point, *write_point, *nl_pos = nullptr;
-    char tmp[MAX_INPUT_LENGTH];
-
-    const char compress_start[] =
-            {
-                    (char) 255,
-                    (char) 250,
-                    (char) 86,
-                    (char) 255,
-                    (char) 240,
-                    (char) 0
-            };
-
-    /* first, find the point where we left off reading data */
-    buf_length = strlen(t->inbuf);
-    read_point = t->inbuf + buf_length;
-    space_left = MAX_RAW_INPUT_LENGTH - buf_length - 1;
-
-    do {
-        if (space_left <= 0) {
-            log("WARNING: process_input: about to close connection: input overflow");
-            return (-1);
-        }
-
-        bytes_read = perform_socket_read(t->descriptor, read_point, space_left);
-
-        if (bytes_read < 0)    /* Error, disconnect them. */
-            return (-1);
-        else if (bytes_read == 0)    /* Just blocking, no problems. */
-            return (0);
-
-        /* check for compression response, if still expecting something */
-        /* note: this will bork if the user is giving lots of input when he first connects */
-        /* he shouldn't be doing this, and for the sake of efficiency, the read buffer isn't searched */
-        /* (ie. it assumes that read_point[0] will be IAC, etc.) */
-        if (t->comp->state == 1) {
-
-            if (*read_point == (char) 255 && *(read_point + 1) == (char) 253 && *(read_point + 2) == (char) 86) {
-                /* compression just turned on */
-                /* first send plaintext start of the compression stream */
-                write_to_descriptor(t->descriptor, compress_start, nullptr);
-
-                /* init the compression stream */
-                CREATE(t->comp->stream, z_stream, 1);
-                t->comp->stream->zalloc = z_alloc;
-                t->comp->stream->zfree = z_free;
-                t->comp->stream->opaque = Z_NULL;
-                deflateInit(t->comp->stream, Z_DEFAULT_COMPRESSION);
-
-                /* init the state structure */
-                /* first the output component */
-                CREATE(t->comp->buff_out, Bytef, SMALL_BUFSIZE);
-                t->comp->total_out = SMALL_BUFSIZE;
-                t->comp->size_out = 0;
-                /* now the input component */
-                CREATE(t->comp->buff_in, Bytef, SMALL_BUFSIZE);
-                t->comp->total_in = SMALL_BUFSIZE;
-                t->comp->size_in = 0;
-
-                /* finally, turn compression on */
-                t->comp->state = 2;
-
-                bytes_read = 0; /* ignore the compression string - don't process it further */
-            } else if (*read_point == (char) 255 && *(read_point + 1) == (char) 254 &&
-                       *(read_point + 2) == (char) 86) {
-                t->comp->state = 0;
-
-                bytes_read = 0; /* ignore the compression string - don't process it further */
-            }
-        }
-        /* at this point, we know we got some data from the read */
-
-        *(read_point + bytes_read) = '\0';    /* terminate the string */
-
-        /* search for a newline in the data we just read */
-        for (ptr = read_point; *ptr && !nl_pos; ptr++)
-            if (ISNEWL(*ptr))
-                nl_pos = ptr;
-
-        read_point += bytes_read;
-        space_left -= bytes_read;
-
-/*
- * on some systems such as AIX, POSIX-standard nonblocking I/O is broken,
- * causing the MUD to hang when it encounters input not terminated by a
- * newline.  This was causing hangs at the Password: prompt, for example.
- * I attempt to compensate by always returning after the _first_ read, instead
- * of looping forever until a read returns -1.  This simulates non-blocking
- * I/O because the result is we never call read unless we know from select()
- * that data is ready (process_input is only called if select indicates that
- * this descriptor is in the read set).  JE 2/23/95.
- */
-    } while (nl_pos == nullptr);
-
-    /*
-     * okay, at this point we have at least one newline in the string; now we
-     * can copy the formatted data to a new array for further processing.
-     */
-
-    read_point = t->inbuf;
-
-    while (nl_pos != nullptr) {
-        write_point = tmp;
-        space_left = MAX_INPUT_LENGTH - 1;
-
-        /* The '> 1' reserves room for a '$ => $$' expansion. */
-        for (ptr = read_point; (space_left > 1) && (ptr < nl_pos); ptr++) {
-            if (*ptr == '\b' || *ptr == 127) { /* handle backspacing or delete key */
-                if (write_point > tmp) {
-                    if (*(--write_point) == '$') {
-                        write_point--;
-                        space_left += 2;
-                    } else
-                        space_left++;
-                }
-            } else if (isascii(*ptr) && isprint(*ptr)) {
-                if ((*(write_point++) = *ptr) == '$') {        /* copy one character */
-                    *(write_point++) = '$';    /* if it's a $, double it */
-                    space_left -= 2;
-                } else
-                    space_left--;
-            }
-        }
-
-        *write_point = '\0';
-
-        if ((space_left <= 0) && (ptr < nl_pos)) {
-            char buffer[MAX_INPUT_LENGTH + 64];
-
-            snprintf(buffer, sizeof(buffer), "Line too long.  Truncated to:\r\n%s\r\n", tmp);
-            if (write_to_descriptor(t->descriptor, buffer, t->comp) < 0)
-                return (-1);
-        }
-        if (t->snoop_by)
-            write_to_output(t->snoop_by, "%% %s\r\n", tmp);
-        failed_subst = 0;
-
-        if (*tmp == '!' && !(*(tmp + 1)))    /* Redo last command. */
-            strcpy(tmp, t->last_input);    /* strcpy: OK (by mutual MAX_INPUT_LENGTH) */
-        else if (*tmp == '!' && *(tmp + 1)) {
-            char *commandln = (tmp + 1);
-            int starting_pos = t->history_pos,
-                    cnt = (t->history_pos == 0 ? HISTORY_SIZE - 1 : t->history_pos - 1);
-
-            skip_spaces(&commandln);
-            for (; cnt != starting_pos; cnt--) {
-                if (t->history[cnt] && is_abbrev(commandln, t->history[cnt])) {
-                    strcpy(tmp, t->history[cnt]);    /* strcpy: OK (by mutual MAX_INPUT_LENGTH) */
-                    strcpy(t->last_input, tmp);    /* strcpy: OK (by mutual MAX_INPUT_LENGTH) */
-                    write_to_output(t, "%s\r\n", tmp);
-                    break;
-                }
-                if (cnt == 0)    /* At top, loop to bottom. */
-                    cnt = HISTORY_SIZE;
-            }
-        } else if (*tmp == '^') {
-            if (!(failed_subst = perform_subst(t, t->last_input, tmp)))
-                strcpy(t->last_input, tmp);    /* strcpy: OK (by mutual MAX_INPUT_LENGTH) */
-        } else {
-            strcpy(t->last_input, tmp);    /* strcpy: OK (by mutual MAX_INPUT_LENGTH) */
-            if (t->history[t->history_pos])
-                free(t->history[t->history_pos]);    /* Clear the old line. */
-            t->history[t->history_pos] = strdup(tmp);    /* Save the new. */
-            if (++t->history_pos >= HISTORY_SIZE)    /* Wrap to top. */
-                t->history_pos = 0;
-        }
-        /* the '--' command flushes the queue - Jamdog - 9th May 2007 */
-        if (masadv(tmp, t->character)) {
-            /* Unfinished color cycling code, do not touch. */
-        }
-        if ((*tmp == '-') && (*(tmp + 1) == '-') && !(*(tmp + 2))) {
-            write_to_output(t, "All queued commands cancelled.\r\n");
-            flush_queues(t);  /* Flush the command queue */
-            /* No need to process the -- command any further, so quit back out */
-        }
-        if (!failed_subst)
-            write_to_q(tmp, &t->input, 0);
-
-        /* find the end of this line */
-        while (ISNEWL(*nl_pos))
-            nl_pos++;
-
-        /* see if there's another newline in the input buffer */
-        read_point = ptr = nl_pos;
-        for (nl_pos = nullptr; *ptr && !nl_pos; ptr++)
-            if (ISNEWL(*ptr))
-                nl_pos = ptr;
-    }
-
-    /* now move the rest of the buffer up to the beginning for the next pass */
-    write_point = t->inbuf;
-    while (*read_point)
-        *(write_point++) = *(read_point++);
-    *write_point = '\0';
-
-    return (1);
 }
 
 
@@ -2628,7 +1862,6 @@ void close_socket(struct descriptor_data *d) {
 
     REMOVE_FROM_LIST(d, descriptor_list, next, temp);
     close(d->descriptor);
-    flush_queues(d);
 
     /* Forget snooping */
     if (d->snooping)
@@ -2671,15 +1904,6 @@ void close_socket(struct descriptor_data *d) {
     if (d->original && d->original->desc)
         d->original->desc = nullptr;
 
-    /* Clear the command history. */
-    if (d->history) {
-        int cnt;
-        for (cnt = 0; cnt < HISTORY_SIZE; cnt++)
-            if (d->history[cnt])
-                free(d->history[cnt]);
-        free(d->history);
-    }
-
     if (d->showstr_head)
         free(d->showstr_head);
     if (d->showstr_count)
@@ -2710,18 +1934,7 @@ void close_socket(struct descriptor_data *d) {
             break;
     }
 
-    /* free compression structures */
-    if (d->comp->stream) {
-        deflateEnd(d->comp->stream);
-        free(d->comp->stream);
-        free(d->comp->buff_out);
-        free(d->comp->buff_in);
-    }
-    /* d->comp was still created even if there is no zlib, for comp->state) */
-    if (d->comp)
-        free(d->comp);
-
-    free(d);
+    delete d;
 }
 
 void check_idle_passwords() {
@@ -2758,25 +1971,6 @@ void check_idle_menu() {
             write_to_output(d, "\r\nTimed out... goodbye.\r\n");
             STATE(d) = CON_CLOSE;
         }
-    }
-}
-
-/*
- * I tried to universally convert Circle over to POSIX compliance, but
- * alas, some systems are still straggling behind and don't have all the
- * appropriate defines.  In particular, NeXT 2.x defines O_NDELAY but not
- * O_NONBLOCK.  Krusty old NeXT machines!  (Thanks to Michael Jones for
- * this and various other NeXT fixes.)
- */
-
-void nonblock(socklen_t s) {
-    int flags;
-
-    flags = fcntl(s, F_GETFL, 0);
-    flags |= O_NONBLOCK;
-    if (fcntl(s, F_SETFL, flags) < 0) {
-        perror("SYSERR: Fatal error executing nonblock (comm.c)");
-        exit(1);
     }
 }
 
@@ -2834,38 +2028,34 @@ void hupsig(int sig) {
  * SunOS Release 4.0.2 (sun386) needs this too, according to Tim Aldric.
  */
 
-void signal_setup() {
-    struct itimerval itime{};
-    struct timeval interval{};
 
-    /* user signal 1: reread wizlists.  Used by autowiz system. */
-    signal(SIGUSR1, reread_wizlists);
+void signal_handle(const boost::system::error_code& error,
+                   int signal_number) {
+    if(error) {
+        // TODO: an error occured...
+        return;
+    }
 
-    /*
-     * user signal 2: unrestrict game.  Used for emergencies if you lock
-     * yourself out of the MUD somehow.  (Duh...)
-     */
-    signal(SIGUSR2, unrestrict_game);
-
-    /*
-     * set up the deadlock-protection so that the MUD aborts itself if it gets
-     * caught in an infinite loop for more than 3 minutes.
-     */
-    interval.tv_sec = 180;
-    interval.tv_usec = 0;
-    itime.it_interval = interval;
-    itime.it_value = interval;
-    setitimer(ITIMER_VIRTUAL, &itime, nullptr);
-    signal(SIGVTALRM, checkpointing);
-
-    /* just to be on the safe side: */
-    signal(SIGHUP, hupsig);
-    signal(SIGCHLD, reap);
-    signal(SIGINT, hupsig);
-    signal(SIGTERM, hupsig);
-    signal(SIGPIPE, SIG_IGN);
-    signal(SIGALRM, SIG_IGN);
+    switch(signal_number) {
+        case SIGUSR1:
+            reread_wizlists(signal_number);
+            break;
+        case SIGUSR2:
+            unrestrict_game(signal_number);
+            break;
+        case SIGVTALRM:
+            checkpointing(signal_number);
+            break;
+        case SIGHUP:
+        case SIGINT:
+        case SIGTERM:
+            hupsig(signal_number);
+            break;
+    }
 }
+
+
+
 
 /* ****************************************************************
 *       Public routines for system-to-player-communication        *
@@ -3375,15 +2565,6 @@ int open_logfile(const char *filename, FILE *stderr_fp) {
  */
 
 
-void circle_sleep(struct timeval *timeout) {
-    if (select(0, (fd_set *) nullptr, (fd_set *) nullptr, (fd_set *) nullptr, timeout) < 0) {
-        if (errno != EINTR) {
-            perror("SYSERR: Select sleep");
-            exit(1);
-        }
-    }
-}
-
 void show_help(struct descriptor_data *t, const char *entry) {
     int chk, bot, top, mid, minlen;
     char buf[MAX_STRING_LENGTH];
@@ -3476,6 +2657,95 @@ int passcomm(struct char_data *ch, char *comm) {
         return true;
     } else {
         return false;
+    }
+
+}
+
+ssize_t perform_socket_write(socklen_t desc, const char *txt, size_t length) {
+    ssize_t result = 0;
+
+    result = write(desc, txt, length);
+
+    if (result > 0) {
+        /* Write was successful. */
+        return (result);
+    }
+
+    if (result == 0) {
+        /* This should never happen! */
+        log("SYSERR: Huh??  write() returned 0???  Please report this!");
+        return (-1);
+    }
+
+    /*
+     * result < 0, so an error was encountered - is it transient?
+     * Unfortunately, different systems use different constants to
+     * indicate this.
+     */
+
+    if (errno == EAGAIN)
+        return (0);
+
+    /* Looks like the error was fatal.  Too bad. */
+    return (-1);
+}
+
+void descriptor_data::handle_input() {
+    // Now we need to process the raw_input_queue, watching for special characters and also aliases.
+    // Commands are processed first-come-first served...
+    while(!raw_input_queue.empty()) {
+        auto command = raw_input_queue.front();
+        raw_input_queue.pop_front();
+
+        if (snoop_by)
+            write_to_output(snoop_by, "%% %s\r\n", command.c_str());
+
+        if(command == "--") {
+            // this is a special command that clears out the processed input_queue.
+            input_queue.clear();
+            write_to_output(this, "All queued commands cancelled.\r\n");
+        } else {
+            perform_alias(this, (char*)command.c_str());
+        }
+
+    }
+
+    if (character) {
+        GET_WAIT_STATE(character) -= (GET_WAIT_STATE(character) > 0);
+
+        if (GET_WAIT_STATE(character)) {
+            return;
+        }
+    }
+
+    if(input_queue.empty()) return;
+    auto command = input_queue.front();
+    input_queue.pop_front();
+
+    if (character) {
+        /* Reset the idle timer & pull char back from void if necessary */
+        character->timer = 0;
+        if (STATE(this) == CON_PLAYING && GET_WAS_IN(character) != NOWHERE) {
+            if (IN_ROOM(character) != NOWHERE)
+                char_from_room(character);
+            char_to_room(character, GET_WAS_IN(character));
+            GET_WAS_IN(character) = NOWHERE;
+            act("$n has returned.", true, character, nullptr, nullptr, TO_ROOM);
+        }
+        GET_WAIT_STATE(character) = 1;
+    }
+    has_prompt = false;
+
+    auto comm = (char*)command.c_str();
+
+    if (showstr_count) /* Reading something w/ pager */
+        show_string(this, comm);
+    else if (str)        /* Writing boards, mail, etc. */
+        string_add(this, comm);
+    else if (STATE(this) != CON_PLAYING) /* In menus, etc. */
+        nanny(this, comm);
+    else {            /* else: we're playing normally. */
+        command_interpreter(character, comm); /* Send it to interpreter */
     }
 
 }

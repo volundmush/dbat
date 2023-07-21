@@ -59,7 +59,7 @@ extern void huge_update();
 
 extern int init_skill(struct char_data *ch, int snum);
 
-extern int can_grav(struct char_data *ch);
+extern bool can_grav(struct char_data *ch);
 
 extern int limb_ok(struct char_data *ch, int type);
 

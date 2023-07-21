@@ -206,7 +206,7 @@ void medit_setup_existing(struct descriptor_data *d, int rmob_num) {
     /*
      * Allocate a scratch mobile structure.
      */
-    CREATE(mob, struct char_data, 1);
+    mob = new char_data();
 
     copy_mobile(mob, &mob_proto[rmob_num]);
 
@@ -228,7 +228,6 @@ void medit_setup_existing(struct descriptor_data *d, int rmob_num) {
  * portability.
  */
 void init_mobile(struct char_data *mob) {
-    clear_char(mob);
 
     //GET_HIT(mob) = 0;
     //GET_MAX_MANA(mob) = 0;

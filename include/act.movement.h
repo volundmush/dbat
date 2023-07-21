@@ -8,7 +8,7 @@ extern const char *cmd_door[NUM_DOOR_CMD];
 // functions
 extern void handle_teleport(struct char_data *ch, struct char_data *tar, int location);
 
-extern int land_location(struct char_data *ch, char *arg);
+extern std::optional<room_vnum> land_location(char *arg, std::set<room_vnum>& rooms);
 
 extern void carry_drop(struct char_data *ch, int type);
 
@@ -17,6 +17,15 @@ extern int has_o2(struct char_data *ch);
 extern int do_simple_move(struct char_data *ch, int dir, int need_specials_check);
 
 extern int perform_move(struct char_data *ch, int dir, int need_specials_check);
+
+extern std::optional<vnum> governingAreaTypeFor(struct room_data *rd, std::function<bool(area_data&)>& func);
+
+extern std::optional<vnum> governingAreaTypeFor(struct char_data *ch, std::function<bool(area_data&)>& func);
+
+extern std::optional<vnum> governingAreaTypeFor(struct obj_data *obj, std::function<bool(area_data&)>& func);
+
+extern std::size_t recurseScanRooms(area_data &start, std::set<room_vnum>& fill, std::function<bool(room_data&)>& func);
+
 
 // commands
 extern ACMD(do_gen_door);

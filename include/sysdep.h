@@ -37,7 +37,7 @@
 #include <sys/uio.h>
 #include <sys/stat.h>
 #include <cstddef>
-//#include <arpa/telnet.h>
+
 #include <dirent.h>
 #include <linux/limits.h>
 
@@ -72,29 +72,21 @@
 #error "Cannot use GNU C library memory tracking without <mcheck.h>"
 #endif
 
-#if defined(__cplusplus)    /* C++ */
-#define cpp_extern    extern
-#else				/* C */
-#define cpp_extern	/* Nothing */
-#endif
-
 #define HAS_RLIMIT
 
-#define CIRCLE_UNSIGNED_INDEX 1    /* 0 = signed, 1 = unsigned */
+#define CIRCLE_UNSIGNED_INDEX 0    /* 0 = signed, 1 = unsigned */
 
 #if CIRCLE_UNSIGNED_INDEX
 #define IDXTYPE    uint32_t
 #define NOWHERE    ((IDXTYPE)~0)
-#define NOTHING    ((IDXTYPE)~0)
-#define NOBODY    ((IDXTYPE)~0)
-#define NOFLAG  ((IDXTYPE)~0)
 #else
-#define IDXTYPE	int16_t
+#define IDXTYPE	int
 #define NOWHERE	(-1)	/* nil reference for rooms	*/
-#define NOTHING	(-1)	/* nil reference for objects	*/
-#define NOBODY		(-1)	/* nil reference for mobiles	*/
-#define NOFLAG (-1)
 #endif
+
+#define NOTHING    NOWHERE
+#define NOBODY    NOWHERE
+#define NOFLAG  NOWHERE
 
 #define I64T "lld"
 #define SZT "lld"

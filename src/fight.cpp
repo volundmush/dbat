@@ -148,9 +148,20 @@ int group_bonus(struct char_data *ch, int type) {
 }
 
 void mutant_limb_regen(struct char_data *ch) {
-    if (GET_LIMBCOND(ch, 1) > 0 && GET_LIMBCOND(ch, 1) < 50) {
+    if (GET_LIMBCOND(ch, 0) > 0 && GET_LIMBCOND(ch, 0) < 50) {
         act("The bones in your right arm have mended them selves.", true, ch, nullptr, nullptr, TO_CHAR);
         act("$n starts moving $s right arm gingerly for a moment.", true, ch, nullptr, nullptr, TO_ROOM);
+        GET_LIMBCOND(ch, 0) = 100;
+    } else if (GET_LIMBCOND(ch, 0) <= 0) {
+        act("Your right arm begins to grow back very quickly. Within moments it is whole again!", true, ch, nullptr,
+            nullptr, TO_CHAR);
+        act("$n's right arm starts to regrow! Within moments the arm is whole again!.", true, ch, nullptr, nullptr,
+            TO_ROOM);
+        GET_LIMBCOND(ch, 0) = 100;
+    }
+    if (GET_LIMBCOND(ch, 1) > 0 && GET_LIMBCOND(ch, 1) < 50) {
+        act("The bones in your left arm have mended them selves.", true, ch, nullptr, nullptr, TO_CHAR);
+        act("$n starts moving $s left arm gingerly for a moment.", true, ch, nullptr, nullptr, TO_ROOM);
         GET_LIMBCOND(ch, 1) = 100;
     } else if (GET_LIMBCOND(ch, 1) <= 0) {
         act("Your right arm begins to grow back very quickly. Within moments it is whole again!", true, ch, nullptr,
@@ -160,8 +171,8 @@ void mutant_limb_regen(struct char_data *ch) {
         GET_LIMBCOND(ch, 1) = 100;
     }
     if (GET_LIMBCOND(ch, 2) > 0 && GET_LIMBCOND(ch, 2) < 50) {
-        act("The bones in your left arm have mended them selves.", true, ch, nullptr, nullptr, TO_CHAR);
-        act("$n starts moving $s left arm gingerly for a moment.", true, ch, nullptr, nullptr, TO_ROOM);
+        act("The bones in your right leg have mended them selves.", true, ch, nullptr, nullptr, TO_CHAR);
+        act("$n starts moving $s right leg gingerly for a moment.", true, ch, nullptr, nullptr, TO_ROOM);
         GET_LIMBCOND(ch, 2) = 100;
     } else if (GET_LIMBCOND(ch, 2) <= 0) {
         act("Your right arm begins to grow back very quickly. Within moments it is whole again!", true, ch, nullptr,
@@ -171,8 +182,8 @@ void mutant_limb_regen(struct char_data *ch) {
         GET_LIMBCOND(ch, 2) = 100;
     }
     if (GET_LIMBCOND(ch, 3) > 0 && GET_LIMBCOND(ch, 3) < 50) {
-        act("The bones in your right leg have mended them selves.", true, ch, nullptr, nullptr, TO_CHAR);
-        act("$n starts moving $s right leg gingerly for a moment.", true, ch, nullptr, nullptr, TO_ROOM);
+        act("The bones in your left leg have mended them selves.", true, ch, nullptr, nullptr, TO_CHAR);
+        act("$n starts moving $s left leg gingerly for a moment.", true, ch, nullptr, nullptr, TO_ROOM);
         GET_LIMBCOND(ch, 3) = 100;
     } else if (GET_LIMBCOND(ch, 3) <= 0) {
         act("Your right arm begins to grow back very quickly. Within moments it is whole again!", true, ch, nullptr,
@@ -180,17 +191,6 @@ void mutant_limb_regen(struct char_data *ch) {
         act("$n's right arm starts to regrow! Within moments the arm is whole again!.", true, ch, nullptr, nullptr,
             TO_ROOM);
         GET_LIMBCOND(ch, 3) = 100;
-    }
-    if (GET_LIMBCOND(ch, 4) > 0 && GET_LIMBCOND(ch, 4) < 50) {
-        act("The bones in your left leg have mended them selves.", true, ch, nullptr, nullptr, TO_CHAR);
-        act("$n starts moving $s left leg gingerly for a moment.", true, ch, nullptr, nullptr, TO_ROOM);
-        GET_LIMBCOND(ch, 4) = 100;
-    } else if (GET_LIMBCOND(ch, 4) <= 0) {
-        act("Your right arm begins to grow back very quickly. Within moments it is whole again!", true, ch, nullptr,
-            nullptr, TO_CHAR);
-        act("$n's right arm starts to regrow! Within moments the arm is whole again!.", true, ch, nullptr, nullptr,
-            TO_ROOM);
-        GET_LIMBCOND(ch, 4) = 100;
     }
 }
 
@@ -1682,24 +1682,24 @@ static void handle_corpse_condition(struct obj_data *corpse, struct char_data *c
     }
 
     if (!IS_NPC(ch)) { /* Let's set the corpse's limbs */
-        if (GET_LIMBCOND(ch, 1) <= 0) {
+        if (GET_LIMBCOND(ch, 0) <= 0) {
             GET_OBJ_VAL(corpse, VAL_CORPSE_RARM) = 0;
-        } else if (GET_LIMBCOND(ch, 1) > 0 && GET_LIMBCOND(ch, 1) < 50) {
+        } else if (GET_LIMBCOND(ch, 0) > 0 && GET_LIMBCOND(ch, 0) < 50) {
             GET_OBJ_VAL(corpse, VAL_CORPSE_RARM) = 2;
         }
-        if (GET_LIMBCOND(ch, 2) <= 0) {
+        if (GET_LIMBCOND(ch, 1) <= 0) {
             GET_OBJ_VAL(corpse, VAL_CORPSE_LARM) = 0;
-        } else if (GET_LIMBCOND(ch, 2) > 0 && GET_LIMBCOND(ch, 2) < 50) {
+        } else if (GET_LIMBCOND(ch, 1) > 0 && GET_LIMBCOND(ch, 1) < 50) {
             GET_OBJ_VAL(corpse, VAL_CORPSE_LARM) = 2;
         }
-        if (GET_LIMBCOND(ch, 3) <= 0) {
+        if (GET_LIMBCOND(ch, 2) <= 0) {
             GET_OBJ_VAL(corpse, VAL_CORPSE_RLEG) = 0;
-        } else if (GET_LIMBCOND(ch, 3) > 0 && GET_LIMBCOND(ch, 3) < 50) {
+        } else if (GET_LIMBCOND(ch, 2) > 0 && GET_LIMBCOND(ch, 2) < 50) {
             GET_OBJ_VAL(corpse, VAL_CORPSE_RLEG) = 2;
         }
-        if (GET_LIMBCOND(ch, 4) <= 0) {
+        if (GET_LIMBCOND(ch, 3) <= 0) {
             GET_OBJ_VAL(corpse, VAL_CORPSE_LLEG) = 0;
-        } else if (GET_LIMBCOND(ch, 4) > 0 && GET_LIMBCOND(ch, 4) < 50) {
+        } else if (GET_LIMBCOND(ch, 3) > 0 && GET_LIMBCOND(ch, 3) < 50) {
             GET_OBJ_VAL(corpse, VAL_CORPSE_LLEG) = 2;
         }
         return;

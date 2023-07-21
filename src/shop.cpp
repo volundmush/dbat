@@ -40,8 +40,6 @@ int cmd_say, cmd_tell, cmd_emote, cmd_slap, cmd_puke;
 /* local functions */
 static char *read_shop_message(int mnum, room_vnum shr, FILE *shop_f, const char *why);
 
-static int read_type_list(FILE *shop_f, struct shop_buy_data *list, int new_format, int max);
-
 static int read_list(FILE *shop_f, struct shop_buy_data *list, int new_format, int max, int type);
 
 static void shopping_list(char *arg, struct char_data *ch, struct char_data *keeper, vnum shop_nr);
@@ -435,7 +433,7 @@ static int trade_with(struct obj_data *item, vnum shop_nr) {
                 (GET_OBJ_TYPE(item) == ITEM_WAND ||
                  GET_OBJ_TYPE(item) == ITEM_STAFF))
                 return (OBJECT_DEAD);
-            else if (evaluate_expression(item, SHOP_BUYWORD(shop_nr, counter)))
+            else if (evaluate_expression(item, (char*)SHOP_BUYWORD(shop_nr, counter)))
                 return (OBJECT_OK);
         }
     return (OBJECT_NOTOK);
@@ -1257,20 +1255,18 @@ static void shopping_list(char *arg, struct char_data *ch, struct char_data *kee
 
 int ok_shop_room(vnum shop_nr, room_vnum room) {
     int mindex;
+    auto &sh = shop_index[shop_nr];
 
-    for (mindex = 0; SHOP_ROOM(shop_nr, mindex) != NOWHERE; mindex++)
-        if (SHOP_ROOM(shop_nr, mindex) == room)
-            return (true);
-    return (false);
+    return sh.in_room.contains(room);
 }
 
 SPECIAL(shop_keeper) {
     auto keeper = (struct char_data *) me;
     vnum shop_nr = NOTHING;
 
-    for (auto &sh : shop_index) {
-        if (sh.second.keeper == keeper->vn) {
-            shop_nr = sh.first;
+    for (auto &[nr, sh] : shop_index) {
+        if (sh.keeper == keeper->vn) {
+            shop_nr = nr;
             break;
         }
     }
@@ -1279,8 +1275,10 @@ SPECIAL(shop_keeper) {
     if (!shop_index.count(shop_nr))
         return false;
 
-    if (SHOP_FUNC(shop_nr))    /* Check secondary function */
-        if ((SHOP_FUNC(shop_nr))(ch, me, cmd, argument))
+    auto &sh = shop_index[shop_nr];
+
+    if (sh.func)    /* Check secondary function */
+        if (sh.func(ch, me, cmd, argument))
             return (true);
 
     if (keeper == ch) {
@@ -1363,7 +1361,6 @@ static int add_to_list(struct shop_buy_data *list, int type, int *len, int *val)
                 *val = real_object(*val);
             if (*val != NOTHING) {
                 BUY_TYPE(list[*len]) = *val;
-                BUY_WORD(list[(*len)++]) = nullptr;
             } else
                 *val = NOTHING;
             return (false);
@@ -1376,8 +1373,6 @@ static int add_to_list(struct shop_buy_data *list, int type, int *len, int *val)
 static int end_read_list(struct shop_buy_data *list, int len, int error) {
     if (error)
         log("SYSERR: Raise MAX_SHOP_OBJ constant in shop.h to %d", len + error);
-    BUY_WORD(list[len]) = nullptr;
-    BUY_TYPE(list[len++]) = NOTHING;
     return (len);
 }
 
@@ -1407,52 +1402,6 @@ static int read_list(FILE *shop_f, struct shop_buy_data *list, int new_format,
             read_line(shop_f, "%d", &temp);
             error += add_to_list(list, type, &len, &temp);
         }
-    return (end_read_list(list, len, error));
-}
-
-/* END_OF inefficient. */
-static int read_type_list(FILE *shop_f, struct shop_buy_data *list,
-                          int new_format, int max) {
-    int tindex, num, len = 0, error = 0;
-    char *ptr;
-    char buf[MAX_STRING_LENGTH];
-
-    if (!new_format)
-        return (read_list(shop_f, list, 0, max, LIST_TRADE));
-
-    do {
-        fgets(buf, sizeof(buf), shop_f);
-        if ((ptr = strchr(buf, ';')) != nullptr)
-            *ptr = '\0';
-        else
-            *(END_OF(buf) - 1) = '\0';
-
-        num = -1;
-
-        if (strncmp(buf, "-1", 2) != 0)
-            for (tindex = 0; *item_types[tindex] != '\n'; tindex++)
-                if (!strncasecmp(item_types[tindex], buf, strlen(item_types[tindex]))) {
-                    num = tindex;
-                    strcpy(buf, buf + strlen(item_types[tindex]));    /* strcpy: OK (always smaller) */
-                    break;
-                }
-
-        ptr = buf;
-        if (num == -1) {
-            sscanf(buf, "%d", &num);
-            while (!isdigit(*ptr))
-                ptr++;
-            while (isdigit(*ptr))
-                ptr++;
-        }
-        while (isspace(*ptr))
-            ptr++;
-        while (isspace(*(END_OF(ptr) - 1)))
-            *(END_OF(ptr) - 1) = '\0';
-        error += add_to_list(list, LIST_TRADE, &len, &num);
-        if (*ptr)
-            BUY_WORD(list[len - 1]) = strdup(ptr);
-    } while (num >= 0);
     return (end_read_list(list, len, error));
 }
 
@@ -1514,21 +1463,20 @@ void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
             z.shops.insert(sh.vnum);
             top_shop = temp;
             while(true) {
-                fscanf(shop_f, "%ld", &shop_temp);
-                if(shop_temp != -1) break;
+                read_line(shop_f, "%ld", &shop_temp);
+                if(shop_temp == -1) break;
                 temp = (shop_vnum)shop_temp;
                 if(obj_index.count(temp)) sh.producing.push_back(temp);
             }
-            sh.producing.reserve(temp);
 
             read_line(shop_f, "%f", &SHOP_BUYPROFIT(top_shop));
             read_line(shop_f, "%f", &SHOP_SELLPROFIT(top_shop));
 
-            temp = read_type_list(shop_f, list, new_format, MAX_TRADE);
-            CREATE(sh.type, struct shop_buy_data, temp);
-            for (count = 0; count < temp; count++) {
-                SHOP_BUYTYPE(top_shop, count) = BUY_TYPE(list[count]);
-                SHOP_BUYWORD(top_shop, count) = BUY_WORD(list[count]);
+            while(true) {
+                read_line(shop_f, "%ld", &shop_temp);
+                if(shop_temp == -1) break;
+                auto &t = sh.type.emplace_back();
+                t.type = temp;
             }
 
             sh.no_such_item1 = read_shop_message(0, SHOP_NUM(top_shop), shop_f, buf2);
@@ -1565,10 +1513,13 @@ void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
             while (temp < SW_ARRAY_MAX)
                 SHOP_TRADE_WITH(top_shop)[temp++] = 0;
 
-            temp = read_list(shop_f, list, new_format, 1, LIST_ROOM);
-            CREATE(sh.in_room, room_vnum, temp);
-            for (count = 0; count < temp; count++)
-                SHOP_ROOM(top_shop, count) = BUY_TYPE(list[count]);
+            while(true) {
+                read_line(shop_f, "%ld", &shop_temp);
+                if(shop_temp == -1) break;
+                if(world.contains(shop_temp)) sh.in_room.insert(shop_temp);
+
+            }
+
 
             read_line(shop_f, "%d", &SHOP_OPEN1(top_shop));
             read_line(shop_f, "%d", &SHOP_CLOSE1(top_shop));
@@ -1595,15 +1546,15 @@ void assign_the_shopkeepers() {
     cmd_slap = find_command("slap");
     cmd_puke = find_command("puke");
 
-    for (auto &sh : shop_index) {
-        if (sh.second.keeper == NOBODY)
+    for (auto &[vn, sh] : shop_index) {
+        if (sh.keeper == NOBODY)
             continue;
 
         /* Having SHOP_FUNC() as 'shop_keeper' will cause infinite recursion. */
-        if (mob_index[sh.second.keeper].func && mob_index[sh.second.keeper].func != shop_keeper)
-            sh.second.func = mob_index[sh.second.keeper].func;
+        if (mob_index[sh.keeper].func && mob_index[sh.keeper].func != shop_keeper)
+            sh.func = mob_index[sh.keeper].func;
 
-        mob_index[sh.second.keeper].func = shop_keeper;
+        mob_index[sh.keeper].func = shop_keeper;
     }
 }
 
@@ -1648,9 +1599,8 @@ static void list_all_shops(struct char_data *ch) {
     char buf[MAX_STRING_LENGTH], buf1[16];
 
     *buf = '\0';
-    for (auto &sh : shop_index) {
+    for (auto &[shop_nr, sh] : shop_index) {
         if(!(len < sizeof(buf))) break;
-        shop_nr = sh.first;
         /* New page in page_string() mechanism, print the header again. */
         if (!(shop_nr % (PAGE_LENGTH - 2))) {
             /*
@@ -1663,15 +1613,19 @@ static void list_all_shops(struct char_data *ch) {
             len += headerlen;
         }
 
-        if (SHOP_KEEPER(shop_nr) == NOBODY)
+        if (sh.keeper == NOBODY) {
             strcpy(buf1, "<NONE>");    /* strcpy: OK (for 'buf1 >= 7') */
-        else
-            sprintf(buf1, "%6d",
-                    mob_index[SHOP_KEEPER(shop_nr)].vn);    /* sprintf: OK (for 'buf1 >= 11', 32-bit int) */
+        } else {
+            sprintf(buf1, "%6d", sh.keeper);    /* sprintf: OK (for 'buf1 >= 11', 32-bit int) */
+        }
+
+        auto first = sh.in_room.begin();
+        auto in_room = NOWHERE;
+        if(first != sh.in_room.end()) in_room = *first;
 
         len += snprintf(buf + len, sizeof(buf) - len,
                         "%3d   %6d   %6d    %s   %3.2f   %3.2f    %s\r\n",
-                        shop_nr + 1, SHOP_NUM(shop_nr), SHOP_ROOM(shop_nr, 0), buf1,
+                        shop_nr + 1, SHOP_NUM(shop_nr), in_room, buf1,
                         SHOP_SELLPROFIT(shop_nr), SHOP_BUYPROFIT(shop_nr),
                         customer_string(shop_nr, false));
     }
@@ -1689,7 +1643,8 @@ static void list_detailed_shop(struct char_data *ch, vnum shop_nr) {
 
     send_to_char(ch, "Rooms:      ");
     column = 12;    /* ^^^ strlen ^^^ */
-    for (sindex = 0; SHOP_ROOM(shop_nr, sindex) != NOWHERE; sindex++) {
+    auto &sh = shop_index[shop_nr];
+	for(auto r : sh.in_room) {
         char buf1[128];
         int linelen, temp;
 
@@ -1697,12 +1652,11 @@ static void list_detailed_shop(struct char_data *ch, vnum shop_nr) {
             send_to_char(ch, ", ");
             column += 2;
         }
-
-        if ((temp = real_room(SHOP_ROOM(shop_nr, sindex))) != NOWHERE)
-            linelen = snprintf(buf1, sizeof(buf1), "%s (#%d)", world[temp].name, GET_ROOM_VNUM(temp));
-        else
-            linelen = snprintf(buf1, sizeof(buf1), "<UNKNOWN> (#%d)", SHOP_ROOM(shop_nr, sindex));
-
+        if(world.contains(r)) {
+            linelen = snprintf(buf1, sizeof(buf1), "%s (#%d)", world[r].name, r);
+        } else {
+            linelen = snprintf(buf1, sizeof(buf1), "<UNKNOWN> (#%d)", r);
+        }
         /* Implementing word-wrapping: assumes screen-size == 80 */
         if (linelen + column >= 78 && column >= 20) {
             send_to_char(ch, "\r\n            ");
@@ -1714,17 +1668,17 @@ static void list_detailed_shop(struct char_data *ch, vnum shop_nr) {
             return;
         column += linelen;
     }
-    if (!sindex)
+    if (sh.in_room.empty())
         send_to_char(ch, "Rooms:      None!");
 
     send_to_char(ch, "\r\nShopkeeper: ");
-    if (SHOP_KEEPER(shop_nr) != NOBODY) {
+    if (sh.keeper != NOBODY) {
         send_to_char(ch, "%s (#%d), Special Function: %s\r\n",
                      GET_NAME(&mob_proto[SHOP_KEEPER(shop_nr)]),
-                     mob_index[SHOP_KEEPER(shop_nr)].vn,
+                     sh.keeper,
                      YESNO(SHOP_FUNC(shop_nr)));
 
-        if ((k = get_char_num(SHOP_KEEPER(shop_nr))))
+        if ((k = get_char_num(sh.keeper)))
             send_to_char(ch, "Coins:      [%9d], Bank: [%9d] (Total: %d)\r\n",
                          GET_GOLD(k), SHOP_BANK(shop_nr), GET_GOLD(k) + SHOP_BANK(shop_nr));
     } else
@@ -1736,7 +1690,9 @@ static void list_detailed_shop(struct char_data *ch, vnum shop_nr) {
 
     send_to_char(ch, "Produces:   ");
     column = 12;    /* ^^^ strlen ^^^ */
-    for (sindex = 0; SHOP_PRODUCT(shop_nr, sindex) != NOTHING; sindex++) {
+    sindex = 0;
+    for (auto &p : sh.producing) {
+        if(!obj_proto.contains(p)) continue;
         char buf1[128];
         int linelen;
 
@@ -1745,8 +1701,8 @@ static void list_detailed_shop(struct char_data *ch, vnum shop_nr) {
             column += 2;
         }
         linelen = snprintf(buf1, sizeof(buf1), "%s (#%d)",
-                           obj_proto[SHOP_PRODUCT(shop_nr, sindex)].short_description,
-                           obj_index[SHOP_PRODUCT(shop_nr, sindex)].vn);
+                           obj_proto[p].short_description,
+                           p);
 
         /* Implementing word-wrapping: assumes screen-size == 80 */
         if (linelen + column >= 78 && column >= 20) {
@@ -1764,7 +1720,8 @@ static void list_detailed_shop(struct char_data *ch, vnum shop_nr) {
 
     send_to_char(ch, "\r\nBuys:       ");
     column = 12;    /* ^^^ strlen ^^^ */
-    for (sindex = 0; SHOP_BUYTYPE(shop_nr, sindex) != NOTHING; sindex++) {
+    sindex = 0;
+    for (auto &t : sh.type) {
         char buf1[128];
         size_t linelen;
 
@@ -1774,9 +1731,9 @@ static void list_detailed_shop(struct char_data *ch, vnum shop_nr) {
         }
 
         linelen = snprintf(buf1, sizeof(buf1), "%s (#%d) [%s]",
-                           item_types[SHOP_BUYTYPE(shop_nr, sindex)],
-                           SHOP_BUYTYPE(shop_nr, sindex),
-                           SHOP_BUYWORD(shop_nr, sindex) ? SHOP_BUYWORD(shop_nr, sindex) : "all");
+                           item_types[t.type],
+                           t.type,
+                           !t.keywords.empty() ? t.keywords.c_str() : "all");
 
         /* Implementing word-wrapping: assumes screen-size == 80 */
         if (linelen + column >= 78 && column >= 20) {
@@ -1788,6 +1745,7 @@ static void list_detailed_shop(struct char_data *ch, vnum shop_nr) {
         if (!send_to_char(ch, "%s", buf1))
             return;
         column += linelen;
+        sindex++;
     }
     if (!sindex)
         send_to_char(ch, "Buys:       Nothing!");
@@ -1840,21 +1798,9 @@ void destroy_shops() {
     shop_index.clear();
 }
 
-shop_buy_data::~shop_buy_data() {
-    if(keywords) free(keywords);
-}
 
 shop_data::~shop_data() {
     free_shop_strings(this);
-    if (in_room)
-        free(in_room);
-
-    if (type) {
-        for (auto itr = 0; type[itr].type != NOTHING; itr++)
-            if (type[itr].type)
-                free(type[itr].keywords);
-        free(type);
-    }
 }
 
 void shop_data::add_product(obj_vnum v) {
@@ -1863,4 +1809,74 @@ void shop_data::add_product(obj_vnum v) {
 
 void shop_data::remove_product(obj_vnum v) {
     std::remove_if(producing.begin(), producing.end(), [&](obj_vnum &o) {return o == v;});
+}
+
+nlohmann::json shop_buy_data::serialize() {
+    nlohmann::json j;
+
+    if(type) j["type"] = type;
+    if(!keywords.empty()) j["keywords"] = keywords;
+
+    return j;
+}
+
+shop_buy_data::shop_buy_data(const nlohmann::json &j) : shop_buy_data() {
+    if(j.count("type")) type = j["type"];
+    if(j.count("keywords")) keywords = j["keywords"];
+}
+
+nlohmann::json shop_data::serialize() {
+    nlohmann::json j;
+
+    j["vnum"] = vnum;
+    for(auto i : producing) j["producing"].push_back(i);
+    if(profit_buy) j["profit_buy"] = profit_buy;
+    if(profit_sell) j["profit_sell"] = profit_sell;
+    for(auto &t : type) j["type"].push_back(t.serialize());
+    if(no_such_item1 && strlen(no_such_item1)) j["no_such_item1"] = no_such_item1;
+    if(no_such_item2 && strlen(no_such_item2)) j["no_such_item2"] = no_such_item2;
+    if(missing_cash1 && strlen(missing_cash1)) j["missing_cash1"] = missing_cash1;
+    if(missing_cash2 && strlen(missing_cash2)) j["missing_cash2"] = missing_cash2;
+    if(do_not_buy && strlen(do_not_buy)) j["do_not_buy"] = do_not_buy;
+    if(message_buy && strlen(message_buy)) j["message_buy"] = message_buy;
+    if(message_sell && strlen(message_sell)) j["message_sell"] = message_sell;
+    if(temper1) j["temper1"] = temper1;
+    if(bitvector) j["bitvector"] = bitvector;
+    if(keeper != NOBODY) j["keeper"] = keeper;
+    for(auto i = 0; i < 79; i++) if(IS_SET_AR(with_who, i)) j["with_who"].push_back(i);
+    for(auto r : in_room) j["in_room"].push_back(r);
+    if(open1) j["open1"] = open1;
+    if(close1) j["close1"] = close1;
+    if(open2) j["open2"] = open2;
+    if(close2) j["close2"] = close2;
+    if(bankAccount) j["bankAccount"] = bankAccount;
+    if(lastsort) j["lastsort"] = lastsort;
+
+    return j;
+}
+
+shop_data::shop_data(const nlohmann::json &j) : shop_data() {
+    if(j.contains("vnum")) vnum = j["vnum"];
+    if(j.contains("producing")) for(const auto& i : j["producing"]) producing.emplace_back(i);
+    if(j.contains("profit_buy")) profit_buy = j["profit_buy"];
+    if(j.contains("profit_sell")) profit_sell = j["profit_sell"];
+    if(j.contains("type")) for(const auto& i : j["type"]) type.emplace_back(i);
+    if(j.contains("no_such_item1")) no_such_item1 = strdup(j["no_such_item1"].get<std::string>().c_str());
+    if(j.contains("no_such_item2")) no_such_item2 = strdup(j["no_such_item2"].get<std::string>().c_str());
+    if(j.contains("missing_cash1")) missing_cash1 = strdup(j["missing_cash1"].get<std::string>().c_str());
+    if(j.contains("missing_cash2")) missing_cash2 = strdup(j["missing_cash2"].get<std::string>().c_str());
+    if(j.contains("do_not_buy")) do_not_buy = strdup(j["do_not_buy"].get<std::string>().c_str());
+    if(j.contains("message_buy")) message_buy = strdup(j["message_buy"].get<std::string>().c_str());
+    if(j.contains("message_sell")) message_sell = strdup(j["message_sell"].get<std::string>().c_str());
+    if(j.contains("temper1")) temper1 = j["temper1"];
+    if(j.contains("bitvector")) bitvector = j["bitvector"];
+    if(j.contains("keeper")) keeper = j["keeper"];
+    if(j.contains("with_who")) for(const auto& i : j["with_who"]) SET_BIT_AR(with_who, i.get<int>());
+    if(j.contains("in_room")) for(const auto& i : j["in_room"]) in_room.insert(i.get<int>());
+    if(j.contains("open1")) open1 = j["open1"];
+    if(j.contains("close1")) close1 = j["close1"];
+    if(j.contains("open2")) open2 = j["open2"];
+    if(j.contains("close2")) close2 = j["close2"];
+    if(j.contains("bankAccount")) bankAccount = j["bankAccount"];
+    if(j.contains("lastsort")) lastsort = j["lastsort"];
 }

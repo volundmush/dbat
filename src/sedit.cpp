@@ -170,13 +170,7 @@ ACMD(do_oasis_sedit) {
 }
 
 void sedit_setup_new(struct descriptor_data *d) {
-    struct shop_data *shop;
-
-    /*
-     * Allocate a scratch shop structure.
-     */
-    CREATE(shop, struct shop_data, 1);
-
+    auto shop = new shop_data();
     /*
      * Fill in some default values.
      */
@@ -198,11 +192,6 @@ void sedit_setup_new(struct descriptor_data *d) {
      * Stir the lists lightly.
      */
 
-    CREATE(S_ROOMS(shop), room_rnum, 1);
-
-    S_ROOM(shop, 0) = NOWHERE;
-    CREATE(S_NAMELISTS(shop), struct shop_buy_data, 1);
-
     S_BUYTYPE(shop, 0) = NOTHING;
     SET_BIT_AR(S_NOTRADE(shop), TRADE_NOBROKEN);
 
@@ -218,7 +207,7 @@ void sedit_setup_existing(struct descriptor_data *d, vnum rshop_num) {
     /*
      * Create a scratch shop structure.
      */
-    CREATE(OLC_SHOP(d), struct shop_data, 1);
+    OLC_SHOP(d) = new shop_data();
 
     /* don't waste time trying to free nullptr strings -- Welcor */
     copy_shop(OLC_SHOP(d), &shop_index[rshop_num], false);
@@ -258,8 +247,8 @@ void sedit_compact_rooms_menu(struct descriptor_data *d) {
     shop = OLC_SHOP(d);
 
     clear_screen(d);
-    for (i = 0; S_ROOM(shop, i) != NOWHERE; i++) {
-        write_to_output(d, "%2d - [@c%5d@n]  | %s", i, S_ROOM(shop, i),
+    for (auto r : shop->in_room) {
+        write_to_output(d, "%2d - [@c%5d@n]  | %s", r, r,
                         !(++count % 5) ? "\r\n" : "");
     }
     write_to_output(d, "\r\n"
@@ -276,16 +265,16 @@ void sedit_compact_rooms_menu(struct descriptor_data *d) {
 
 void sedit_rooms_menu(struct descriptor_data *d) {
     struct shop_data *shop;
-    int i;
+    int i = 0;
 
     shop = OLC_SHOP(d);
 
     clear_screen(d);
     write_to_output(d, "##     VNUM     Room\r\n\r\n");
-    for (i = 0; S_ROOM(shop, i) != NOWHERE; i++) {
-        if (real_room(S_ROOM(shop, i)) != NOWHERE) {
-            write_to_output(d, "%2d - [@c%5d@n] - @y%s@n\r\n", i, S_ROOM(shop, i),
-                            world[real_room(S_ROOM(shop, i))].name);
+    for (auto r : shop->in_room) {
+        if (world.contains(r)) {
+            write_to_output(d, "%2d - [@c%5d@n] - @y%s@n\r\n", i++, r,
+                            world[r].name);
         } else {
             write_to_output(d, "%2d - [@R!Removed Room!@n]\r\n", i);
         }
@@ -679,11 +668,10 @@ void sedit_parse(struct descriptor_data *d, char *arg) {
             break;
         case SEDIT_NAMELIST:
             if (genolc_checkstring(d, arg)) {
-                struct shop_buy_data new_entry;
+                auto &new_entry = OLC_SHOP(d)->type.emplace_back();
 
                 BUY_TYPE(new_entry) = OLC_VAL(d);
-                BUY_WORD(new_entry) = strdup(arg);
-                add_to_type_list(&(S_NAMELISTS(OLC_SHOP(d))), &new_entry);
+                new_entry.keywords = arg;
             }
             sedit_namelist_menu(d);
             return;
@@ -732,7 +720,7 @@ void sedit_parse(struct descriptor_data *d, char *arg) {
             OLC_MODE(d) = SEDIT_NAMELIST;
             return;
         case SEDIT_DELETE_TYPE:
-            remove_from_type_list(&(S_NAMELISTS(OLC_SHOP(d))), atoi(arg));
+            OLC_SHOP(d)->type.erase(OLC_SHOP(d)->type.begin()+atoi(arg));
             sedit_namelist_menu(d);
             return;
         case SEDIT_NEW_PRODUCT:
@@ -756,11 +744,11 @@ void sedit_parse(struct descriptor_data *d, char *arg) {
                     return;
                 }
             if (i >= 0)
-                add_to_int_list(&(S_ROOMS(OLC_SHOP(d))), atoi(arg));
+                OLC_SHOP(d)->in_room.insert(atoi(arg));
             sedit_rooms_menu(d);
             return;
         case SEDIT_DELETE_ROOM:
-            remove_from_int_list(&(S_ROOMS(OLC_SHOP(d))), atoi(arg));
+            OLC_SHOP(d)->in_room.erase(atoi(arg));
             sedit_rooms_menu(d);
             return;
         case SEDIT_SHOP_FLAGS:

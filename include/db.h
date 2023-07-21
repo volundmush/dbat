@@ -199,8 +199,6 @@ struct char_data *read_mobile(mob_vnum nr, int type);
 
 extern int vnum_mobile(char *searchname, struct char_data *ch);
 
-extern void clear_char(struct char_data *ch);
-
 extern void reset_char(struct char_data *ch);
 
 extern void free_char(struct char_data *ch);
@@ -216,8 +214,6 @@ extern void write_level_data(struct char_data *ch, FILE *fl);
 extern int parse_mobile_from_file(FILE *mob_f, struct char_data *ch);
 
 struct obj_data *create_obj();
-
-extern void clear_object(struct obj_data *obj);
 
 extern void free_obj(struct obj_data *obj);
 
@@ -244,18 +240,21 @@ extern int vnum_armortype(char *searchname, struct char_data *ch);
 
 /* structure for the reset commands */
 struct reset_com {
-    ~reset_com();
-    char command;   /* current command                      */
+    reset_com() = default;
+    explicit reset_com(const nlohmann::json& j);
+    char command{};   /* current command                      */
 
-    bool if_flag;    /* if TRUE: exe only if preceding exe'd */
-    int arg1;        /*                                      */
-    int arg2;        /* Arguments to the command             */
-    int arg3;        /*                                      */
-    int arg4;        /* room_max  default 0			*/
-    int arg5;           /* percentages variable                 */
-    int line;        /* line number this command appears on  */
-    char *sarg1;        /* string argument                      */
-    char *sarg2;        /* string argument                      */
+    bool if_flag{};    /* if TRUE: exe only if preceding exe'd */
+    int arg1{};        /*                                      */
+    int arg2{};        /* Arguments to the command             */
+    int arg3{};        /*                                      */
+    int arg4{};        /* room_max  default 0			*/
+    int arg5{};           /* percentages variable                 */
+    int line{};        /* line number this command appears on  */
+    std::string sarg1;        /* string argument                      */
+    std::string sarg2;        /* string argument                      */
+
+    nlohmann::json serialize();
 
     /*
      *  Commands:              *
@@ -278,21 +277,25 @@ struct reset_com {
 #define CUR_ZONE_VERSION  2
 
 struct zone_data {
-    char *name;            /* name of this zone                  */
-    char *builders;          /* namelist of builders allowed to    */
+    zone_data() = default;
+    explicit zone_data(const nlohmann::json& j);
+    ~zone_data();
+    char *name{};            /* name of this zone                  */
+    char *builders{};          /* namelist of builders allowed to    */
     /* modify this zone.		  */
-    int lifespan;           /* how long between resets (minutes)  */
-    int age;                /* current age of this zone (minutes) */
-    vnum bot;           /* starting room number for this zone */
-    vnum top;           /* upper limit for rooms in this zone */
+    int lifespan{};           /* how long between resets (minutes)  */
+    int age{};                /* current age of this zone (minutes) */
+    vnum bot{};           /* starting room number for this zone */
+    vnum top{};           /* upper limit for rooms in this zone */
 
-    int reset_mode;         /* conditions for reset (see below)   */
-    zone_vnum number;        /* virtual number of this zone	  */
+    int reset_mode{};         /* conditions for reset (see below)   */
+    zone_vnum number{};        /* virtual number of this zone	  */
     std::vector<struct reset_com> cmd;   /* command table for reset	          */
-    int min_level;           /* Minimum level to enter zone        */
-    int max_level;           /* Max Mortal level to enter zone     */
-    bitvector_t zone_flags[ZF_ARRAY_MAX];          /* Flags for the zone.                */
+    int min_level{};           /* Minimum level to enter zone        */
+    int max_level{};           /* Max Mortal level to enter zone     */
+    bitvector_t zone_flags[ZF_ARRAY_MAX]{};          /* Flags for the zone.                */
 
+    nlohmann::json serialize();
 
     /*
      * Reset mode:
@@ -306,6 +309,26 @@ struct zone_data {
     std::set<shop_vnum> shops;
     std::set<trig_vnum> triggers;
     std::set<guild_vnum> guilds;
+
+    void save_all();
+    void save_zone();
+    void save_rooms();
+    void save_mobiles();
+    void save_objects();
+    void save_shops();
+    void save_triggers();
+    void save_guilds();
+    void save_zone_file(const nlohmann::json& j, const std::string& filename);
+
+    std::optional<nlohmann::json> load_zone_file(const std::string& filename);
+    void load_rooms();
+    void load_mobiles();
+    void load_objects();
+    void load_shops();
+    void load_triggers();
+    void load_guilds();
+
+
 };
 
 
@@ -359,6 +382,8 @@ extern struct config_data config_info;
 
 extern std::map<room_vnum, room_data> world;
 extern std::map<zone_vnum, struct zone_data> zone_table;
+
+extern std::map<vnum, area_data> areas;
 
 
 extern struct descriptor_data *descriptor_list;

@@ -83,7 +83,7 @@ void delete_inv_backup(struct char_data *ch) {
                name[0] == 'z' || name[0] == 'Z') {
         sprintf(alpha, "U-Z");
     }
-    sprintf(source_file, "" SLASH"home" SLASH"m053car2" SLASH"dbat" SLASH"lib" SLASH"plrobjs" SLASH"%s" SLASH"%s.copy",
+    sprintf(source_file, "plrobjs" SLASH"%s" SLASH"%s.copy",
             alpha, ch->name);
 
     if (!(source = fopen(source_file, "r"))) {
@@ -129,11 +129,11 @@ int load_inv_backup(struct char_data *ch) {
         sprintf(alpha, "U-Z");
     }
 
-    sprintf(source_file, "" SLASH"home" SLASH"m053car2" SLASH"dbat" SLASH"lib" SLASH"plrobjs" SLASH"%s" SLASH"%s.copy",
+    sprintf(source_file, "plrobjs" SLASH"%s" SLASH"%s.copy",
             alpha, ch->name);
     if (!get_filename(buf2, sizeof(buf2), NEW_OBJ_FILES, GET_NAME(ch)))
         return -1;
-    sprintf(target_file, "/home/m053car2/dbat/lib/%s", buf2);
+    sprintf(target_file, "%s", buf2);
 
     if (!(source = fopen(source_file, "r"))) {
         log("Source in load_inv_backup failed to load.");
@@ -183,7 +183,7 @@ static int inv_backup(struct char_data *ch) {
         sprintf(alpha, "U-Z");
     }
 
-    sprintf(buf, "" SLASH"home" SLASH"m053car2" SLASH"dbat" SLASH"lib" SLASH"plrobjs" SLASH"%s" SLASH"%s.copy", alpha,
+    sprintf(buf, "plrobjs" SLASH"%s" SLASH"%s.copy", alpha,
             ch->name);
 
     if (!(backup = fopen(buf, "r")))
@@ -219,11 +219,11 @@ int cp(struct char_data *ch) {
         sprintf(alpha, "U-Z");
     }
 
-    sprintf(target_file, "" SLASH"home" SLASH"m053car2" SLASH"dbat" SLASH"lib" SLASH"plrobjs" SLASH"%s" SLASH"%s.copy", alpha,
+    sprintf(target_file, "plrobjs" SLASH"%s" SLASH"%s.copy", alpha,
             ch->name);
     if (!get_filename(buf2, sizeof(buf2), NEW_OBJ_FILES, GET_NAME(ch)))
         return -1;
-    sprintf(source_file, "" SLASH"home" SLASH"m053car2" SLASH"dbat" SLASH"lib" SLASH"%s", buf2);
+    sprintf(source_file, "%s", buf2);
 
     if (!(source = fopen(source_file, "r"))) {
         log("Source failed to load.");

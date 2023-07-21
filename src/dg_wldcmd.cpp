@@ -131,7 +131,8 @@ WCMD(do_weffect) {
             wld_log(room, "weffect setting out of bounds, 0 - 10000 only.");
             return;
         } else {
-            ROOM_GRAVITY(real_room(room->vn)) = num;
+            if(num == 0) room->gravity.reset();
+            else room->gravity = num;
         }
     } else if (!strcasecmp(arg, "light")) {
         if (target == NOWHERE) {

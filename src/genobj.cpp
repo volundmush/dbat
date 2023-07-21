@@ -10,7 +10,6 @@
 #include "genzon.h"
 #include "utils.h"
 #include "handler.h"
-#include "htree.h"
 #include "dg_olc.h"
 #include "shop.h"
 
@@ -34,6 +33,8 @@ obj_rnum add_object(struct obj_data *newobj, obj_vnum ovnum) {
     found = insert_object(newobj, ovnum);
 
     add_to_save_list(zone_table[rznum].number, SL_OBJ);
+    auto &z = zone_table[rznum];
+    z.objects.insert(ovnum);
     return found;
 }
 
@@ -112,143 +113,12 @@ obj_rnum index_object(struct obj_data *obj, obj_vnum ovnum, obj_rnum ornum) {
 /* ------------------------------------------------------------------------------------------------------------------------------ */
 
 int save_objects(zone_rnum zone_num) {
-    char cmfname[128], buf[MAX_STRING_LENGTH];
-    char ebuf1[MAX_STRING_LENGTH], ebuf2[MAX_STRING_LENGTH];
-    char ebuf3[MAX_STRING_LENGTH], ebuf4[MAX_STRING_LENGTH];
-    char wbuf1[MAX_STRING_LENGTH], wbuf2[MAX_STRING_LENGTH];
-    char wbuf3[MAX_STRING_LENGTH], wbuf4[MAX_STRING_LENGTH];
-    char pbuf1[MAX_STRING_LENGTH], pbuf2[MAX_STRING_LENGTH];
-    char pbuf3[MAX_STRING_LENGTH], pbuf4[MAX_STRING_LENGTH];
-    int counter2, realcounter;
-    FILE *fp;
-    struct obj_data *obj;
-    struct extra_descr_data *ex_desc;
-
     if (!zone_table.count(zone_num)) {
         log("SYSERR: OasisOLC: save_objects: Invalid real zone number %d.", zone_num);
         return false;
     }
     auto &z = zone_table[zone_num];
-    snprintf(cmfname, sizeof(cmfname), "%s%d.new", OBJ_PREFIX, z.number);
-    if (!(fp = fopen(cmfname, "w+"))) {
-        mudlog(BRF, ADMLVL_IMMORT, true, "SYSERR: OLC: Cannot open objects file %s!", cmfname);
-        return false;
-    }
-    /*
-     * Start running through all objects in this zone.
-     */
-    for (auto counter = z.bot; counter <= z.top; counter++) {
-        if ((realcounter = real_object(counter)) != NOTHING) {
-            if ((obj = &obj_proto[realcounter])->look_description) {
-                strncpy(buf, obj->look_description, sizeof(buf) - 1);
-                strip_cr(buf);
-            } else
-                *buf = '\0';
-
-            fprintf(fp,
-                    "#%d\n"
-                    "%s~\n"
-                    "%s~\n"
-                    "%s~\n"
-                    "%s~\n",
-
-                    GET_OBJ_VNUM(obj),
-                    (obj->name && *obj->name) ? obj->name : "undefined",
-                    (obj->short_description && *obj->short_description) ? obj->short_description : "undefined",
-                    (obj->room_description && *obj->room_description) ? obj->room_description : "undefined",
-                    buf);
-
-            sprintascii(ebuf1, GET_OBJ_EXTRA(obj)[0]);
-            sprintascii(ebuf2, GET_OBJ_EXTRA(obj)[1]);
-            sprintascii(ebuf3, GET_OBJ_EXTRA(obj)[2]);
-            sprintascii(ebuf4, GET_OBJ_EXTRA(obj)[3]);
-            sprintascii(wbuf1, GET_OBJ_WEAR(obj)[0]);
-            sprintascii(wbuf2, GET_OBJ_WEAR(obj)[1]);
-            sprintascii(wbuf3, GET_OBJ_WEAR(obj)[2]);
-            sprintascii(wbuf4, GET_OBJ_WEAR(obj)[3]);
-            sprintascii(pbuf1, GET_OBJ_PERM(obj)[0]);
-            sprintascii(pbuf2, GET_OBJ_PERM(obj)[1]);
-            sprintascii(pbuf3, GET_OBJ_PERM(obj)[2]);
-            sprintascii(pbuf4, GET_OBJ_PERM(obj)[3]);
-
-            fprintf(fp,
-                    "%d %s %s %s %s %s %s %s %s %s %s %s %s\n"
-                    "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n"
-                    "%" I64T " %d %d %d\n",
-
-                    GET_OBJ_TYPE(obj),
-                    ebuf1, ebuf2, ebuf3, ebuf4,
-                    wbuf1, wbuf2, wbuf3, wbuf4,
-                    pbuf1, pbuf2, pbuf3, pbuf4,
-                    GET_OBJ_VAL(obj, 0), GET_OBJ_VAL(obj, 1), GET_OBJ_VAL(obj, 2),
-                    GET_OBJ_VAL(obj, 3), GET_OBJ_VAL(obj, 4), GET_OBJ_VAL(obj, 5),
-                    GET_OBJ_VAL(obj, 6), GET_OBJ_VAL(obj, 7), GET_OBJ_VAL(obj, 8),
-                    GET_OBJ_VAL(obj, 9), GET_OBJ_VAL(obj, 10), GET_OBJ_VAL(obj, 11),
-                    GET_OBJ_VAL(obj, 12), GET_OBJ_VAL(obj, 13), GET_OBJ_VAL(obj, 14),
-                    GET_OBJ_VAL(obj, 15),
-                    GET_OBJ_WEIGHT(obj), GET_OBJ_COST(obj), GET_OBJ_RENT(obj), GET_OBJ_LEVEL(obj)
-            );
-
-            /*
-             * Do we have script(s) attached ?
-             */
-            script_save_to_disk(fp, obj, OBJ_TRIGGER);
-
-            fprintf(fp, "Z\n%d\n", GET_OBJ_SIZE(obj));
-            /*
-             * Do we have extra descriptions?
-             */
-            if (obj->ex_description) {    /* Yes, save them too. */
-                for (ex_desc = obj->ex_description; ex_desc; ex_desc = ex_desc->next) {
-                    /*
-                     * Sanity check to prevent nasty protection faults.
-                     */
-                    if (!ex_desc->keyword || !ex_desc->description || !*ex_desc->keyword || !*ex_desc->description) {
-                        mudlog(BRF, ADMLVL_IMMORT, true, "SYSERR: OLC: oedit_save_to_disk: Corrupt ex_desc!");
-                        continue;
-                    }
-                    strncpy(buf, ex_desc->description, sizeof(buf) - 1);
-                    strip_cr(buf);
-                    fprintf(fp, "E\n"
-                                "%s~\n"
-                                "%s~\n", ex_desc->keyword, buf);
-                }
-            }
-            /*
-             * Do we have affects?
-             */
-            for (counter2 = 0; counter2 < MAX_OBJ_AFFECT; counter2++)
-                if (obj->affected[counter2].modifier)
-                    fprintf(fp, "A\n"
-                                "%d %d %d\n", obj->affected[counter2].location,
-                            obj->affected[counter2].modifier, obj->affected[counter2].specific);
-            /* Do we have spells? */
-            if (obj->sbinfo) {        /*. Yep, save them too . */
-                for (counter2 = 0; counter2 < SKILL_TABLE_SIZE; counter2++) {
-                    if (obj->sbinfo[counter2].spellname == 0) {
-                        break;
-                    }
-                    fprintf(fp, "S\n" "%d %d\n", obj->sbinfo[counter2].spellname, obj->sbinfo[counter2].pages);
-                    continue;
-                }
-            }
-        }
-    }
-
-    /*
-     * Write the final line, close the file.
-     */
-    fprintf(fp, "$~\n");
-    fclose(fp);
-    snprintf(buf, sizeof(buf), "%s%d.obj", OBJ_PREFIX, z.number);
-    remove(buf);
-    rename(cmfname, buf);
-
-    if (in_save_list(z.number, SL_OBJ)) {
-        remove_from_save_list(z.number, SL_OBJ);
-        create_world_index(z.number, "obj");
-        log("GenOLC: save_objects: Saving objects '%s'", buf);
-    }
+    z.save_objects();
     return true;
 }
 
@@ -404,3 +274,155 @@ int delete_object(obj_rnum rnum) {
     return rnum;
 }
 
+void obj_affected_type::deserialize(const nlohmann::json &j) {
+    if(j.count("location")) location = j["location"];
+    if(j.count("modifier")) modifier = j["modifier"];
+    if(j.count("specific")) specific = j["specific"];
+}
+
+obj_affected_type::obj_affected_type(const nlohmann::json &j) {
+    deserialize(j);
+}
+
+nlohmann::json obj_affected_type::serialize() {
+    nlohmann::json j;
+
+    if(location) j["location"] = location;
+    if(modifier) j["modifier"] = modifier;
+    if(specific) j["specific"] = specific;
+
+    return j;
+}
+
+nlohmann::json obj_data::serializeBase() {
+    auto j = serializeUnit();
+
+    for(auto i = 0; i < NUM_OBJ_VAL_POSITIONS; i++) {
+        if(value[i]) j["value"].push_back(std::make_pair(i, value[i]));
+    }
+
+    if(type_flag) j["type_flag"] = type_flag;
+    if(level) j["level"] = level;
+
+    for(auto i = 0; i < NUM_ITEM_WEARS; i++)
+        if(IS_SET_AR(wear_flags, i)) j["wear_flags"].push_back(i);
+
+    for(auto i = 0; i < NUM_ITEM_FLAGS; i++)
+        if(IS_SET_AR(extra_flags, i)) j["extra_flags"].push_back(i);
+
+    if(weight) j["weight"] = weight;
+    if(cost) j["cost"] = cost;
+    if(cost_per_day) j["cost_per_day"] = cost_per_day;
+
+    for(auto i = 0; i < NUM_AFF_FLAGS; i++)
+        if(IS_SET_AR(bitvector, i)) j["bitvector"].push_back(i);
+
+    for(auto & i : affected) {
+        if(i.location == APPLY_NONE) continue;
+        j["affected"].push_back(i.serialize());
+    }
+
+    return j;
+}
+
+nlohmann::json obj_data::serializeInstance() {
+    auto j = serializeBase();
+
+    if(generation) j["generation"] = generation;
+    if(unique_id) j["unique_id"] = unique_id;
+
+    return j;
+}
+
+nlohmann::json obj_data::serializeProto() {
+    auto j = serializeBase();
+
+    return j;
+}
+
+void obj_data::deserializeBase(const nlohmann::json &j) {
+    deserializeUnit(j);
+
+    if(j.contains("value")) {
+        for(auto & i : j["value"]) {
+            value[i[0].get<int>()] = i[1];
+        }
+    }
+
+    if(j.contains("type_flag")) type_flag = j["type_flag"];
+    if(j.contains("level")) level = j["level"];
+
+    if(j.contains("wear_flags")) {
+        for(auto & i : j["wear_flags"]) {
+            SET_BIT_AR(wear_flags, i.get<int>());
+        }
+    }
+
+    if(j.contains("extra_flags")) {
+        for(auto & i : j["extra_flags"]) {
+            SET_BIT_AR(extra_flags, i.get<int>());
+        }
+    }
+
+    if(j.contains("weight")) weight = j["weight"];
+    if(j.contains("cost")) cost = j["cost"];
+    if(j.contains("cost_per_day")) cost_per_day = j["cost_per_day"];
+
+    if(j.contains("bitvector")) {
+        for(auto & i : j["bitvector"]) {
+            SET_BIT_AR(bitvector, i.get<int>());
+        }
+    }
+
+    if(j.contains("affected")) {
+        int counter = 0;
+        for(auto & i : j["affected"]) {
+            affected[counter].deserialize(i);
+            counter++;
+        }
+    }
+
+}
+
+
+void obj_data::deserializeProto(const nlohmann::json& j) {
+    deserializeBase(j);
+}
+
+
+obj_data::obj_data(const nlohmann::json &j) : obj_data() {
+    deserializeProto(j);
+
+    if ((GET_OBJ_TYPE(this) == ITEM_PORTAL || \
+       GET_OBJ_TYPE(this) == ITEM_HATCH) && \
+       (!GET_OBJ_VAL(this, VAL_DOOR_DCLOCK) || \
+        !GET_OBJ_VAL(this, VAL_DOOR_DCHIDE))) {
+        GET_OBJ_VAL(this, VAL_DOOR_DCLOCK) = 20;
+        GET_OBJ_VAL(this, VAL_DOOR_DCHIDE) = 20;
+    }
+
+    GET_OBJ_SIZE(this) = SIZE_MEDIUM;
+
+/* check to make sure that weight of containers exceeds curr. quantity */
+    if (GET_OBJ_TYPE(this) == ITEM_DRINKCON ||
+        GET_OBJ_TYPE(this) == ITEM_FOUNTAIN) {
+        if (GET_OBJ_WEIGHT(this) < GET_OBJ_VAL(this, 1))
+            GET_OBJ_WEIGHT(this) = GET_OBJ_VAL(this, 1) + 5;
+    }
+    /* *** make sure portal objects have their timer set correctly *** */
+    if (GET_OBJ_TYPE(this) == ITEM_PORTAL) {
+        GET_OBJ_TIMER(this) = -1;
+    }
+    
+}
+
+std::optional<vnum> obj_data::getMatchingArea(std::function<bool(const area_data &)> f) {
+    if(in_room != NOWHERE) {
+        auto &r = world[in_room];
+        return r.getMatchingArea(f);
+    }
+    if(in_obj) return in_obj->getMatchingArea(f);
+    if(carried_by) return carried_by->getMatchingArea(f);
+    if(worn_by) return worn_by->getMatchingArea(f);
+    return std::nullopt;
+}

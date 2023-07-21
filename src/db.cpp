@@ -8,6 +8,7 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
+#include <fstream>
 #include "db.h"
 #include "utils.h"
 #include "feats.h"
@@ -26,7 +27,6 @@
 #include "comm.h"
 #include "dg_scripts.h"
 #include "interpreter.h"
-#include "htree.h"
 #include "genolc.h"
 #include "shop.h"
 #include "handler.h"
@@ -41,6 +41,7 @@
 #include "imc.h"
 #include "spell_parser.h"
 #include "genobj.h"
+#include "area.h"
 
 /**************************************************************************
 *  declarations of most of the 'global' variables                         *
@@ -49,6 +50,7 @@
 struct config_data config_info; /* Game configuration list.    */
 
 std::map<room_vnum, room_data> world;    /* array of rooms		 */
+std::map<vnum, area_data> areas;    /* area information		 */
 
 struct char_data *character_list = nullptr; /* global linked list of chars	 */
 struct char_data *affect_list = nullptr; /* global linked list of chars with affects */
@@ -63,8 +65,6 @@ std::map<obj_vnum, struct obj_data> obj_proto;    /* prototypes for objs		 */
 /* hash tree for fast obj lookup */
 
 std::map<zone_vnum, struct zone_data> zone_table;    /* zone table			 */
-
-struct message_list fight_messages[MAX_MESSAGES];    /* fighting messages	 */
 
 std::map<trig_vnum, struct index_data> trig_index; /* index table for triggers      */
 struct trig_data *trigger_list = nullptr;  /* all attached triggers */
@@ -164,8 +164,6 @@ static void get_one_line(FILE *fl, char *buf);
 
 static void check_start_rooms();
 
-static void renum_world();
-
 static void log_zone_error(zone_rnum zone, int cmd_no, const char *message);
 
 static void reset_time();
@@ -173,7 +171,6 @@ static void reset_time();
 static void free_obj_unique_hash();
 
 static void mob_autobalance(struct char_data *ch);
-
 /* external functions */
 
 void paginate_string(char *str, struct descriptor_data *d);
@@ -215,6 +212,8 @@ void sort_feats();
 void free_assemblies();
 
 /* external vars */
+
+
 
 static void dragon_level(struct char_data *ch) {
     struct descriptor_data *d;
@@ -469,46 +468,131 @@ ACMD(do_reboot) {
     send_to_char(ch, "%s", CONFIG_OK);
 }
 
+static bool load_new_zones() {
+    // first we must find out if the zones folder exists in <cwd>..
+    // We're gonna use C++ filesystem for it all.
+    // If it doesn't exist, we're gonna return false and load the old way.
+    // If it does exist, we're gonna load the new way.
+
+    // First, we need to get the current working directory.
+    // get zones path...
+    std::filesystem::path zones_dir = std::filesystem::current_path() / "zones";
+
+    // check if it exists...
+    if(!std::filesystem::exists(zones_dir)) {
+        // doesn't exist, return false.
+        return false;
+    }
+
+    // Now we must scan the directory for sub-directories where the names are integers.
+    // Those are zone folders. We want to iterate through all of them...
+    // Just start iterating over folders dammit.
+    log("Loading new-style zone table.");
+    for(auto& p: std::filesystem::directory_iterator(zones_dir)) {
+        // check if it's a directory...
+        if(p.is_directory()) {
+            // check if the name is an integer...
+            if(is_number(p.path().filename().string().c_str())) {
+                auto vnum = atoi(p.path().filename().string().c_str());
+
+                // find a zone.json file in the folder...
+                auto zj = p.path() / "zone.json";
+                if(std::filesystem::exists(zj)) {
+                    // Open the file and read it into a nlohmann::json...
+                    std::ifstream zj_file(zj);
+                    nlohmann::json zj_json;
+                    zj_file >> zj_json;
+                    zj_file.close();
+                    zone_table.emplace(vnum, zj_json);
+                }
+
+            }
+        }
+    }
+
+
+    return true;
+
+}
+
 
 void boot_world() {
     log("Loading level tables.");
     load_levels();
 
-    log("Loading zone table.");
-    index_boot(DB_BOOT_ZON);
+    bool newStyle = false;
 
-    log("Loading triggers and generating index.");
-    index_boot(DB_BOOT_TRG);
+    if((newStyle = load_new_zones())) {
+        log("Successfully loaded new format game data.");
+        log("Loading triggers and generating index.");
 
-    log("Loading rooms.");
-    index_boot(DB_BOOT_WLD);
+        for(auto &[vn, z] : zone_table) {
+            z.load_triggers();
+        }
 
-    log("Renumbering rooms.");
-    renum_world();
+        log("Loading rooms.");
+        for(auto &[vn, z] : zone_table) {
+            z.load_rooms();
+        }
+    } else {
+        log("Loading legacy world data...");
+        log("Loading zone table.");
+        index_boot(DB_BOOT_ZON);
+
+        log("Loading triggers and generating index.");
+        index_boot(DB_BOOT_TRG);
+
+        log("Loading rooms.");
+        index_boot(DB_BOOT_WLD);
+    }
 
     log("Checking start rooms.");
     check_start_rooms();
 
-    log("Loading mobs and generating index.");
-    index_boot(DB_BOOT_MOB);
+    log("Loading areas.");
+    load_areas();
 
-    log("Loading objs and generating index.");
-    index_boot(DB_BOOT_OBJ);
+    if(newStyle) {
+        log("Loading mobs and generating index.");
+        for(auto &[vn, z] : zone_table) {
+            z.load_mobiles();
+        }
+
+        log("Loading objs and generating index.");
+        for(auto &[vn, z] : zone_table) {
+            z.load_objects();
+        }
+
+    } else {
+        log("Loading mobs and generating index.");
+        index_boot(DB_BOOT_MOB);
+
+        log("Loading objs and generating index.");
+        index_boot(DB_BOOT_OBJ);
+    }
 
     log("Loading disabled commands list...");
     load_disabled();
 
-    if (converting) {
-        log("Saving converted worldfiles to disk.");
-        save_all();
-    }
-
     if (!no_specials) {
-        log("Loading shops.");
-        index_boot(DB_BOOT_SHP);
+        if(newStyle) {
+            log("Loading shops.");
+            for(auto &[vn, z] : zone_table) {
+                z.load_shops();
+            }
 
-        log("Loading guild masters.");
-        index_boot(DB_BOOT_GLD);
+            log("Loading guild masters.");
+            for(auto &[vn, z] : zone_table) {
+                z.load_guilds();
+            }
+        } else {
+            log("Loading shops.");
+            index_boot(DB_BOOT_SHP);
+
+            log("Loading guild masters.");
+            index_boot(DB_BOOT_GLD);
+        }
+
     }
     if (SELFISHMETER >= 10) {
         log("Loading Shadow Dragons.");
@@ -666,8 +750,6 @@ void destroy_db() {
 
     free_obj_unique_hash();
 
-    htree_shutdown();
-
     log("Freeing Assemblies.");
     free_assemblies();
 
@@ -735,9 +817,6 @@ void boot_db() {
     assign_feats();
 
     boot_world();
-    auto &z = zone_table[3];
-
-    htree_test();
 
     log("Loading help entries.");
     index_boot(DB_BOOT_HLP);
@@ -818,10 +897,10 @@ void boot_db() {
         House_boot();
     }
 
-    for (auto &z : zone_table) {
-        log("Resetting #%d: %s (rooms %d-%d).", z.first,
-            z.second.name, z.second.bot, z.second.top);
-        reset_zone(z.first);
+    for (auto &[vn, z] : zone_table) {
+        log("Resetting #%d: %s (rooms %d-%d).", vn,
+            z.name, z.bot, z.top);
+        reset_zone(vn);
     }
 
     boot_time = time(nullptr);
@@ -1369,35 +1448,7 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
     r.light = 0;    /* Zero light sources */
     r.timed = -1;
     r.dmg = 0;
-    r.gravity = 0;
 
-    if (ROOM_FLAGGED(virtual_nr, ROOM_VEGETA) || ROOM_FLAGGED(virtual_nr, ROOM_GRAVITYX10)) {
-        r.gravity = 10;
-    }
-    if (r.vn >= 19800 && r.vn <= 19899) {
-        r.gravity = 1000;
-    }
-    if (r.vn >= 64000 && r.vn <= 64006) {
-        r.gravity = 100;
-    }
-    if (r.vn >= 64007 && r.vn <= 64016) {
-        r.gravity = 300;
-    }
-    if (r.vn >= 64017 && r.vn <= 64030) {
-        r.gravity = 500;
-    }
-    if (r.vn >= 64031 && r.vn <= 64048) {
-        r.gravity = 1000;
-    }
-    if (r.vn >= 64049 && r.vn <= 64070) {
-        r.gravity = 5000;
-    }
-    if (r.vn >= 64071 && r.vn <= 64096) {
-        r.gravity = 10000;
-    }
-    if (r.vn == 64097) {
-        r.gravity = 1000;
-    }
     for (i = 0; i < NUM_OF_DIRS; i++)
         r.dir_option[i] = nullptr;
 
@@ -1556,12 +1607,6 @@ static void check_start_rooms() {
             log("SYSERR:  Warning: Frozen start room does not exist.  Change frozen_start_room in /lib/etc/config.");
         r_frozen_start_room = r_mortal_start_room;
     }
-}
-
-
-/* resolve all vnums into rnums in the world */
-static void renum_world() {
-
 }
 
 
@@ -1903,6 +1948,8 @@ int parse_mobile_from_file(FILE *mob_f, struct char_data *ch) {
     char f1[128], f2[128], f3[128], f4[128], f5[128], f6[128];
     char f7[128], f8[128], buf2[128];
     mob_vnum nr = ch->vn;
+    auto &z = zone_table[real_zone_by_thing(nr)];
+    z.mobiles.insert(nr);
 
     /*
    * Mobiles should NEVER use anything in the 'player_specials' structure.
@@ -2048,6 +2095,8 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
         log("SYSERR: Null obj name or format error at or near %s", buf2);
         exit(1);
     }
+    auto &z = zone_table[real_zone_by_thing(nr)];
+    z.objects.insert(nr);
     tmpptr = o.short_description = fread_string(obj_f, buf2);
     if (tmpptr && *tmpptr)
         if (!strcasecmp(fname(tmpptr), "a") || !strcasecmp(fname(tmpptr), "an") ||
@@ -2301,6 +2350,7 @@ static void load_zones(FILE *fl, char *zonename) {
     snprintf(buf2, sizeof(buf2)-1, "beginning of zone #%d", v);
 
     auto &z = zone_table[v];
+    z.number = v;
 
     line_num += get_line(fl, buf);
     if ((ptr = strchr(buf, '~')) != nullptr)    /* take off the '~' if it's there */
@@ -2370,8 +2420,8 @@ static void load_zones(FILE *fl, char *zonename) {
                        &zc.arg4, &zc.arg5, t1, t2) != 8)
                 error = 1;
             else {
-                zc.sarg1 = strdup(t1);
-                zc.sarg2 = strdup(t2);
+                zc.sarg1 = t1;
+                zc.sarg2 = t2;
             }
         } else {
             if ((arg_num = sscanf(&buf[1], " %d %d %d %d %d %d ", &tmp, &zc.arg1, &zc.arg2, &zc.arg3, &zc.arg4,
@@ -2577,8 +2627,7 @@ int vnum_armortype(char *searchname, struct char_data *ch) {
 
 /* create a character, and add it to the char list */
 struct char_data *create_char() {
-    struct char_data *ch = new char_data();
-    clear_char(ch);
+    auto ch = new char_data();
     ch->next = character_list;
     character_list = ch;
     ch->next_affect = nullptr;
@@ -2605,8 +2654,8 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     } else
         i = nr;
 
-    CREATE(mob, struct char_data, 1);
-    clear_char(mob);
+    mob = new char_data();
+
     *mob = mob_proto[i];
     mob->next = character_list;
     character_list = mob;
@@ -3342,8 +3391,7 @@ char *sprintuniques(int low, int high) {
 
 /* create an object, and add it to the object list */
 struct obj_data *create_obj() {
-    struct obj_data *obj = new obj_data();
-    clear_object(obj);
+    auto obj = new obj_data();
     obj->next = object_list;
     object_list = obj;
 
@@ -3365,16 +3413,18 @@ struct obj_data *create_obj() {
 /* create a new object from a prototype */
 struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
 {
-    obj_rnum i = type == VIRTUAL ? real_object(nr) : nr;
+    auto i = nr;
     int j;
 
-    if (!obj_proto.count(i)) {
+    auto proto = obj_proto.find(i);
+
+    if (proto == obj_proto.end()) {
         log("Object (%c) %d does not exist in database.", type == VIRTUAL ? 'V' : 'R', nr);
         return (nullptr);
     }
     
     auto obj = new obj_data();
-    *obj = obj_proto[i];
+    *obj = proto->second;
     obj->next = object_list;
     object_list = obj;
     OBJ_LOADROOM(obj) = NOWHERE;
@@ -3508,7 +3558,7 @@ void reset_zone(zone_rnum zone) {
 
                 case 'M':            /* read a mobile */
 
-                    if ((mob_index[c.arg1].number < c.arg2) &&
+                    if (mob_index.contains(c.arg1) && (mob_index[c.arg1].number < c.arg2) &&
                         (rand_number(1, 100) >= c.arg5)) {
                         int room_max = 0;
                         struct char_data *i;
@@ -3549,7 +3599,7 @@ void reset_zone(zone_rnum zone) {
                     break;
 
                 case 'O':            /* read an object */
-                    if ((obj_index[c.arg1].number < c.arg2) &&
+                    if (obj_index.contains(c.arg1) && (obj_index[c.arg1].number < c.arg2) &&
                         (rand_number(1, 100) >= c.arg5)) {
                         if (c.arg3 != NOWHERE) {
                             int room_max = 0;
@@ -3609,7 +3659,7 @@ void reset_zone(zone_rnum zone) {
                     break;
 
                 case 'P':            /* object to object */
-                    if ((obj_index[c.arg1].number < c.arg2) &&
+                    if (obj_index.contains(c.arg1) && (obj_index[c.arg1].number < c.arg2) &&
                         obj_load && (rand_number(1, 100) >= c.arg5)) {
                         obj = read_object(c.arg1, REAL);
                         if (!(obj_to = get_obj_num(c.arg3))) {
@@ -3633,7 +3683,7 @@ void reset_zone(zone_rnum zone) {
                         c.command = '*';
                         break;
                     }
-                    if ((obj_index[c.arg1].number < c.arg2) &&
+                    if (obj_index.contains(c.arg1) && (obj_index[c.arg1].number < c.arg2) &&
                         mob_load && (rand_number(1, 100) >= c.arg5)) {
                         obj = read_object(c.arg1, REAL);
                         add_unique_id(obj);
@@ -3655,7 +3705,7 @@ void reset_zone(zone_rnum zone) {
                         c.command = '*';
                         break;
                     }
-                    if ((obj_index[c.arg1].number < c.arg2) &&
+                    if (obj_index.contains(c.arg1) && (obj_index[c.arg1].number < c.arg2) &&
                         mob_load && (rand_number(1, 100) >= c.arg5)) {
                         if (c.arg3 < 0 || c.arg3 >= NUM_WEARS) {
                             ZONE_ERROR("invalid equipment pos number");
@@ -3746,14 +3796,14 @@ void reset_zone(zone_rnum zone) {
                         if (!SCRIPT(tmob)) {
                             ZONE_ERROR("Attempt to give a variable to scriptless mobile");
                         } else
-                            add_var(&(SCRIPT(tmob)->global_vars), c.sarg1, c.sarg2,
+                            add_var(&(SCRIPT(tmob)->global_vars), (char*)c.sarg1.c_str(), (char*)c.sarg2.c_str(),
                                     c.arg3);
                         last_cmd = 1;
                     } else if (c.arg1 == OBJ_TRIGGER && tobj) {
                         if (!SCRIPT(tobj)) {
                             ZONE_ERROR("Attempt to give variable to scriptless object");
                         } else
-                            add_var(&(SCRIPT(tobj)->global_vars), c.sarg1, c.sarg2,
+                            add_var(&(SCRIPT(tobj)->global_vars), (char*)c.sarg1.c_str(), (char*)c.sarg2.c_str(),
                                     c.arg3);
                         last_cmd = 1;
                     } else if (c.arg1 == WLD_TRIGGER) {
@@ -3764,7 +3814,7 @@ void reset_zone(zone_rnum zone) {
                                 ZONE_ERROR("Attempt to give variable to scriptless object");
                             } else
                                 add_var(&(world[c.arg3].script->global_vars),
-                                        c.sarg1, c.sarg2, c.arg2);
+                                        (char*)c.sarg1.c_str(), (char*)c.sarg2.c_str(), c.arg2);
                             last_cmd = 1;
                         }
                     }
@@ -4173,29 +4223,6 @@ void reset_char(struct char_data *ch) {
 }
 
 
-/* clear ALL the working variables of a char; do NOT free any space alloc'ed */
-void clear_char(struct char_data *ch) {
-    IN_ROOM(ch) = NOWHERE;
-    GET_PFILEPOS(ch) = -1;
-    GET_MOB_RNUM(ch) = NOBODY;
-    GET_WAS_IN(ch) = NOWHERE;
-    GET_POS(ch) = POS_STANDING;
-    ch->mob_specials.default_pos = POS_STANDING;
-
-    ch->size = SIZE_UNDEFINED;
-
-    GET_ARMOR(ch) = 0;        /* Basic Armor */
-
-}
-
-
-void clear_object(struct obj_data *obj) {
-    obj->vn = NOTHING;
-    IN_ROOM(obj) = NOWHERE;
-    obj->worn_on = NOWHERE;
-}
-
-
 /*
  * Called during character creation after picking character class
  * (and then never again for that character).
@@ -4205,8 +4232,7 @@ void init_char(struct char_data *ch) {
 
     /* create a player_special structure */
     if (ch->player_specials == nullptr) {
-        CREATE(ch->player_specials, struct player_special_data, 1);
-        memset((void *) ch->player_specials, 0, sizeof(struct player_special_data));
+        ch->player_specials = new player_special_data();
     }
 
     GET_ADMLEVEL(ch) = ADMLVL_NONE;
@@ -5049,9 +5075,4 @@ void write_level_data(struct char_data *ch, FILE *fl) {
         lev = lev->prev;
     }
     fprintf(fl, "end\n");
-}
-
-reset_com::~reset_com() {
-    delete sarg1;
-    delete sarg2;
 }

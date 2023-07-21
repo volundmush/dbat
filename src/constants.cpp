@@ -399,6 +399,7 @@ const char *room_bits[NUM_ROOM_FLAGS + 1] = {
         "FISHING",
         "FRESHWATFISH",
         "CANREMODEL",
+        "LANDING",
         "\n"
 };
 

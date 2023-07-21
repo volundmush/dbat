@@ -141,12 +141,15 @@
 
 /* one line of the trigger */
 struct cmdlist_element {
-    char *cmd;                /* one line of a trigger */
-    struct cmdlist_element *original;
-    struct cmdlist_element *next;
+    char *cmd{};                /* one line of a trigger */
+    struct cmdlist_element *original{};
+    struct cmdlist_element *next{};
 };
 
 struct trig_var_data {
+    trig_var_data() = default;
+    explicit trig_var_data(const nlohmann::json& j);
+    nlohmann::json serialize();
     char *name;                /* name of variable  */
     char *value;                /* value of variable */
     long context;                /* 0: global context */
@@ -156,35 +159,38 @@ struct trig_var_data {
 
 /* structure for triggers */
 struct trig_data {
-    IDXTYPE nr;                    /* trigger's rnum                  */
-    int8_t attach_type;            /* mob/obj/wld intentions          */
-    int8_t data_type;                /* type of game_data for trig      */
-    char *name;                    /* name of trigger                 */
-    long trigger_type;            /* type of trigger (for bitvector) */
-    struct cmdlist_element *cmdlist;    /* top of command list             */
-    struct cmdlist_element *curr_state;    /* ptr to current line of trigger  */
-    int narg;                /* numerical argument              */
-    char *arglist;            /* argument list                   */
-    int depth;                /* depth into nest ifs/whiles/etc  */
-    int loops;                /* loop iteration counter          */
-    struct event *wait_event;    /* event to pause the trigger      */
-    bool purged;            /* trigger is set to be purged     */
-    struct trig_var_data *var_list;    /* list of local vars for trigger  */
+    trig_data() = default;
+    explicit trig_data(const nlohmann::json& j);
+    nlohmann::json serialize();
+    trig_vnum nr{NOTHING};                    /* trigger's rnum                  */
+    int8_t attach_type{};            /* mob/obj/wld intentions          */
+    int8_t data_type{};                /* type of game_data for trig      */
+    char *name{};                    /* name of trigger                 */
+    long trigger_type{};            /* type of trigger (for bitvector) */
+    struct cmdlist_element *cmdlist{};    /* top of command list             */
+    struct cmdlist_element *curr_state{};    /* ptr to current line of trigger  */
+    int narg{};                /* numerical argument              */
+    char *arglist{};            /* argument list                   */
+    int depth{};                /* depth into nest ifs/whiles/etc  */
+    int loops{};                /* loop iteration counter          */
+    struct event *wait_event{};    /* event to pause the trigger      */
+    bool purged{};            /* trigger is set to be purged     */
+    struct trig_var_data *var_list{};    /* list of local vars for trigger  */
 
-    struct trig_data *next;
-    struct trig_data *next_in_world;    /* next in the global trigger list */
+    struct trig_data *next{};
+    struct trig_data *next_in_world{};    /* next in the global trigger list */
 };
 
 
 /* a complete script (composed of several triggers) */
 struct script_data {
     long types;                /* bitvector of trigger types */
-    struct trig_data *trig_list;            /* list of triggers           */
-    struct trig_var_data *global_vars;    /* list of global variables   */
+    struct trig_data *trig_list{};            /* list of triggers           */
+    struct trig_var_data *global_vars{};    /* list of global variables   */
     bool purged;                /* script is set to be purged */
     long context;                /* current context for statics */
 
-    struct script_data *next;        /* used for purged_scripts    */
+    struct script_data *next{};        /* used for purged_scripts    */
 };
 
 /* The event data for the wait command */

@@ -10,12 +10,13 @@
 #include "genolc.h"
 #include "shop.h"
 #include "genzon.h"
-#include "htree.h"
 #include "guild.h"
 #include "dg_scripts.h"
 #include "handler.h"
 #include "dg_olc.h"
 #include "class.h"
+#include "races.h"
+#include "spells.h"
 
 /* From db.c */
 void init_mobile_skills();
@@ -75,7 +76,11 @@ int add_mobile(struct char_data *mob, mob_vnum vnum) {
     }
 #endif
 
-    add_to_save_list(zone_table[real_zone_by_thing(vnum)].number, SL_MOB);
+    auto zvnum = real_zone_by_thing(vnum);
+    auto &z = zone_table[zvnum];
+    z.mobiles.insert(vnum);
+
+    add_to_save_list(z.number, SL_MOB);
     return found;
 }
 
@@ -118,13 +123,8 @@ int delete_mobile(mob_rnum refpt) {
         GET_MOB_RNUM(live_mob) -= (GET_MOB_RNUM(live_mob) >= refpt);
 
     /* Update zone table.  */
-    for (auto &z : zone_table) {
-        auto zone = z.first;
-        for (cmd_no = 0; ZCMD(zone, cmd_no).command != 'S'; cmd_no++)
-            if (ZCMD(zone, cmd_no).command == 'M' && ZCMD(zone, cmd_no).arg1 == refpt)
-                /* Should probably try to find dependant commands as well?
-                 * Should probably save the zone file too? */
-                delete_zone_command(&zone_table[zone], cmd_no);
+    for (auto &[zone, z] : zone_table) {
+        z.cmd.erase(std::remove_if(z.cmd.begin(), z.cmd.end(), [refpt](auto &cmd) { return cmd.command == 'M' && cmd.arg1 == refpt; }));
     }
 
     /* Update shop keepers.  */
@@ -235,44 +235,14 @@ int free_mobile(struct char_data *mob) {
 }
 
 int save_mobiles(zone_rnum zone_num) {
-    FILE *mobfd;
-    mob_rnum rmob;
-    int written;
-    char mobfname[64], usedfname[64];
-
     if (!zone_table.count(zone_num)) {
         log("SYSERR: GenOLC: save_mobiles: Invalid real zone number %d.", zone_num);
         return false;
     }
 
     auto &z = zone_table[zone_num];
-
-    snprintf(mobfname, sizeof(mobfname), "%s%d.new", MOB_PREFIX, z.number);
-    if ((mobfd = fopen(mobfname, "w")) == nullptr) {
-        mudlog(BRF, ADMLVL_GOD, true, "SYSERR: GenOLC: Cannot open mob file for writing.");
-        return false;
-    }
-
-    for (auto i = z.bot; i <= z.top; i++) {
-        if ((rmob = real_mobile(i)) == NOBODY)
-            continue;
-        check_mobile_strings(&mob_proto[rmob]);
-        if (write_mobile_record(i, &mob_proto[rmob], mobfd) < 0)
-            log("SYSERR: GenOLC: Error writing mobile #%d.", i);
-    }
-    fputs("$\n", mobfd);
-    written = ftell(mobfd);
-    fclose(mobfd);
-    snprintf(usedfname, sizeof(usedfname), "%s%d.mob", MOB_PREFIX, z.number);
-    remove(usedfname);
-    rename(mobfname, usedfname);
-
-    if (in_save_list(z.number, SL_MOB)) {
-        remove_from_save_list(z.number, SL_MOB);
-        create_world_index(z.number, "mob");
-        log("GenOLC: save_mobiles: Saving mobiles '%s'", usedfname);
-    }
-    return written;
+    z.save_mobiles();
+    return true;
 }
 
 #if CONFIG_GENOLC_MOBPROG
@@ -434,3 +404,291 @@ void check_mobile_string(mob_vnum i, char **string, const char *dscr) {
     }
 }
 
+nlohmann::json mob_special_data::serialize() {
+    nlohmann::json j;
+    if(attack_type) j["attack_type"] = attack_type;
+    if(default_pos != POS_STANDING) j["default_pos"] = default_pos;
+    if(damnodice) j["damnodice"] = damnodice;
+    if(damsizedice) j["damsizedice"] = damsizedice;
+
+    return j;
+}
+
+void mob_special_data::deserialize(const nlohmann::json &j) {
+    if(j.contains("attack_type")) attack_type = j["attack_type"];
+    if(j.contains("default_pos")) default_pos = j["default_pos"];
+    if(j.contains("damnodice")) damnodice = j["damnodice"];
+    if(j.contains("damsizedice")) damsizedice = j["damsizedice"];
+}
+
+mob_special_data::mob_special_data(const nlohmann::json &j) : mob_special_data() {
+    deserialize(j);
+}
+
+nlohmann::json abil_data::serialize() {
+    nlohmann::json j;
+
+    if(str) j["str"] = str;
+    if(intel) j["intel"] = intel;
+    if(wis) j["wis"] = wis;
+    if(dex) j["dex"] = dex;
+    if(con) j["con"] = con;
+    if(cha) j["cha"] = cha;
+
+    return j;
+}
+
+void abil_data::deserialize(const nlohmann::json &j) {
+    if(j.contains("str")) str = j["str"];
+    if(j.contains("intel")) intel = j["intel"];
+    if(j.contains("wis")) wis = j["wis"];
+    if(j.contains("dex")) dex = j["dex"];
+    if(j.contains("con")) con = j["con"];
+    if(j.contains("cha")) cha = j["cha"];
+}
+
+abil_data::abil_data(const nlohmann::json &j) : abil_data() {
+    deserialize(j);
+}
+
+nlohmann::json time_data::serialize() {
+    nlohmann::json j;
+
+    if(birth) j["birth"] = birth;
+    if(created) j["created"] = created;
+    if(maxage) j["maxage"] = maxage;
+    if(logon) j["logon"] = logon;
+    if(played) j["played"] = played;
+
+    return j;
+}
+
+void time_data::deserialize(const nlohmann::json &j) {
+    if(j.contains("birth")) birth = j["birth"];
+    if(j.contains("created")) created = j["created"];
+    if(j.contains("maxage")) maxage = j["maxage"];
+    if(j.contains("logon")) logon = j["logon"];
+    if(j.contains("played")) played = j["played"];
+}
+
+time_data::time_data(const nlohmann::json &j) : time_data() {
+    deserialize(j);
+}
+
+nlohmann::json char_data::serializeBase() {
+    auto j = serializeUnit();
+
+    if(title && strlen(title)) j["title"] = title;
+    if(size != SIZE_UNDEFINED) j["size"] = size;
+    if(sex) j["sex"] = sex;
+    if(race) j["race"] = race->getID();
+    if(hairl) j["hairl"] = hairl;
+    if(hairs) j["hairs"] = hairs;
+    if(hairc) j["hairc"] = hairc;
+    if(skin) j["skin"] = skin;
+    if(eye) j["eye"] = eye;
+    if(distfea) j["distfea"] = distfea;
+    if(race_level) j["race_level"] = race_level;
+    if(level_adj) j["level_adj"] = level_adj;
+    if(level) j["level"] = level;
+    if(admlevel) j["admlevel"] = admlevel;
+
+    for(auto i = 0; i < NUM_ADMFLAGS; i++)
+        if(IS_SET_AR(admflags, i)) j["admflags"].push_back(i);
+
+    if(chclass) j["chclass"] = chclass->getID();
+
+    if(weight) j["weight"] = weight;
+    if(height) j["height"] = height;
+
+    if(alignment) j["alignment"] = alignment;
+    if(alignment_ethic) j["alignment_ethic"] = alignment_ethic;
+
+    for(auto i = 0; i < NUM_AFF_FLAGS; i++)
+        if(IS_SET_AR(affected_by, i)) j["affected_by"].push_back(i);
+
+    if(basepl) j["basepl"] = basepl;
+    if(baseki) j["baseki"] = baseki;
+    if(basest) j["basest"] = basest;
+
+    if(health < 1.0) j["health"] = health;
+    if(energy < 1.0) j["energy"] = energy;
+    if(stamina < 1.0) j["stamina"] = stamina;
+    if(life < 1.0) j["life"] = life;
+
+    if(armor) j["armor"] = armor;
+    if(damage_mod) j["damage_mod"] = damage_mod;
+
+    if(gold) j["gold"] = gold;
+    if(bank_gold) j["bank_gold"] = bank_gold;
+
+    if(exp) j["exp"] = exp;
+
+    auto real = real_abils.serialize();
+    if(!real.empty()) j["real_abils"] = real;
+
+    return j;
+}
+
+void char_data::deserializeBase(const nlohmann::json &j) {
+    deserializeUnit(j);
+
+    if(j.contains("title")) title = strdup(j["title"].get<std::string>().c_str());
+    if(j.contains("size")) size = j["size"];
+    if(j.contains("sex")) sex = j["sex"];
+    ::race::race_id r = ::race::human;
+    if(j.contains("race")) r = j["race"].get<::race::race_id>();
+    race = ::race::race_map[r];
+    if(j.contains("hairl")) hairl = j["hairl"];
+    if(j.contains("hairs")) hairs = j["hairs"];
+    if(j.contains("hairc")) hairc = j["hairc"];
+    if(j.contains("skin")) skin = j["skin"];
+    if(j.contains("eye")) eye = j["eye"];
+    if(j.contains("distfea")) distfea = j["distfea"];
+    if(j.contains("race_level")) race_level = j["race_level"];
+    if(j.contains("level_adj")) level_adj = j["level_adj"];
+
+    ::sensei::sensei_id c = ::sensei::commoner;
+    if(j.contains("chclass")) c = j["chclass"].get<::sensei::sensei_id>();
+    chclass = ::sensei::sensei_map[c];
+
+    if(j.contains("level")) level = j["level"];
+    if(j.contains("admlevel")) admlevel = j["admlevel"];
+
+    if(j.contains("admflags"))
+        for(auto &i : j["admflags"])
+            SET_BIT_AR(admflags, i.get<int>());
+
+    if(hometown != NOWHERE) hometown = j["hometown"];
+
+    if(j.contains("time")) {
+        time.deserialize(j["time"]);
+    }
+
+    if(j.contains("weight")) weight = j["weight"];
+    if(j.contains("height")) height = j["height"];
+    if(j.contains("alignment")) alignment = j["alignment"];
+    if(j.contains("alignment_ethic")) alignment_ethic = j["alignment_ethic"];
+
+    if(j.contains("affected_by"))
+        for(auto &i : j["affected_by"])
+            SET_BIT_AR(affected_by, i.get<int>());
+
+    if(j.contains("basepl")) basepl = j["basepl"];
+    if(j.contains("baseki")) baseki = j["baseki"];
+    if(j.contains("basest")) basest = j["basest"];
+
+    if(j.contains("health")) health = j["health"];
+    if(j.contains("energy")) energy = j["energy"];
+    if(j.contains("stamina")) stamina = j["stamina"];
+    if(j.contains("life")) life = j["life"];
+
+    if(j.contains("mob_specials")) mob_specials.deserialize(j["mob_specials"]);
+    if(j.contains("real_abils")) real_abils.deserialize(j["real_abils"]);
+
+    if(j.contains("limb_condition")) {
+        for(auto &i : j["limb_condition"]) {
+            limb_condition[i[0].get<int>()] = i[1];
+        }
+    }
+
+    if(j.contains("armor")) armor = j["armor"];
+    if(j.contains("damage_mod")) damage_mod = j["damage_mod"];
+
+    if(j.contains("gold")) gold = j["gold"];
+    if(j.contains("bank_gold")) bank_gold = j["bank_gold"];
+    if(j.contains("exp")) exp = j["exp"];
+
+    if(j.contains("was_in_room")) was_in_room = j["was_in_room"];
+
+    if(j.contains("act")) for(auto &i : j["act"]) SET_BIT_AR(act, i.get<int>());
+
+
+}
+
+nlohmann::json char_data::serializeProto() {
+    auto j = serializeBase();
+
+    for(auto i = 0; i < NUM_MOB_FLAGS; i++)
+        if(IS_SET_AR(act, i)) j["act"].push_back(i);
+
+    auto ms = mob_specials.serialize();
+    if(!ms.empty()) j["mob_specials"] = ms;
+
+    return j;
+}
+
+nlohmann::json char_data::serializeInstance() {
+    auto j = serializeBase();
+
+    if(was_in_room != NOWHERE) j["was_in_room"] = was_in_room;
+    auto td = time.serialize();
+    if(!td.empty()) j["time"] = td;
+
+    for(auto i = 0; i < 4; i++) {
+        if(limb_condition[i]) j["limb_condition"].push_back(std::make_pair(i, limb_condition[i]));
+    }
+
+    return j;
+}
+
+nlohmann::json char_data::serializePlayer() {
+    auto j = serializeInstance();
+
+    if(pfilepos != -1) j["pfilepos"] = pfilepos;
+	if(idnum != -1) j["idnum"] = idnum;
+
+    for(auto i = 0; i < NUM_PLR_FLAGS; i++)
+        if(IS_SET_AR(act, i)) j["act"].push_back(i);
+
+    if(relax_count) j["relax_count"] = relax_count;
+    if(ingestLearned) j["ingestLearned"] = ingestLearned;
+
+    return j;
+}
+
+
+void char_data::deserializeInstance(const nlohmann::json &j) {
+    deserializeBase(j);
+
+}
+
+void char_data::deserializeProto(const nlohmann::json &j) {
+    deserializeBase(j);
+
+
+
+}
+
+void char_data::deserializePlayer(const nlohmann::json &j) {
+
+}
+
+void char_data::deserializeMobile(const nlohmann::json &j) {
+    deserializeBase(j);
+
+    if(proto_script) script = new script_data();
+    for(auto p = proto_script; p; p = p->next) {
+        add_trigger(script, read_trigger(p->vnum), -1);
+    }
+}
+
+char_data::char_data(const nlohmann::json &j) : char_data() {
+    player_specials = &dummy_mob;
+    deserializeProto(j);
+
+    if (!IS_HUMAN(this))
+        if (!AFF_FLAGGED(this, AFF_INFRAVISION))
+            SET_BIT_AR(AFF_FLAGS(this), AFF_INFRAVISION);
+
+    SPEAKING(this) = SKILL_LANG_COMMON;
+    set_height_and_weight_by_race(this);
+
+    SET_BIT_AR(act, MOB_ISNPC);
+    if(MOB_FLAGGED(this, MOB_NOTDEADYET)) {
+        REMOVE_BIT_AR(MOB_FLAGS(this), MOB_NOTDEADYET);
+    }
+
+    aff_abils = real_abils;
+
+}

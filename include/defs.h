@@ -250,8 +250,9 @@
 #define ROOM_FISHING            63
 #define ROOM_FISHFRESH          64
 #define ROOM_CANREMODEL         65
+#define ROOM_LANDING            66
 
-#define NUM_ROOM_FLAGS          66
+#define NUM_ROOM_FLAGS          67
 
 /* Zone info: Used in zone_data.zone_flags */
 #define ZONE_CLOSED        0

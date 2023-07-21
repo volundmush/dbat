@@ -12,7 +12,6 @@
 #include "genolc.h"
 #include "shop.h"
 #include "dg_olc.h"
-#include "htree.h"
 
 
 /*
@@ -99,7 +98,6 @@ int delete_room(room_rnum rnum) {
         char_to_room(ppl, 0);
     }
 
-    free_room_strings(room);
     if (SCRIPT(room))
         extract_script(room, WLD_TRIGGER);
     free_proto_script(room, WLD_TRIGGER);
@@ -134,156 +132,22 @@ int delete_room(room_rnum rnum) {
     /*
      * Remove this room from all shop lists.
      */
-    for (auto &sh : shop_index) {
-        i = sh.first;
-        for (j = 0; SHOP_ROOM(i, j) != NOWHERE; j++) {
-            if (SHOP_ROOM(i, j) == rnum)
-                SHOP_ROOM(i, j) = 0; /* set to the void */
-        }
+    for (auto &[i, sh] : shop_index) {
+        sh.in_room.erase(rnum);
     }
 
+    world.erase(rnum);
     return true;
 }
 
 
 int save_rooms(zone_rnum zone_num) {
-    int i;
-    struct room_data *room;
-    FILE *sf;
-    char filename[128];
-    char buf[MAX_STRING_LENGTH], buf1[MAX_STRING_LENGTH];
-    char rbuf1[MAX_STRING_LENGTH], rbuf2[MAX_STRING_LENGTH];
-    char rbuf3[MAX_STRING_LENGTH], rbuf4[MAX_STRING_LENGTH];
-
     if (!zone_table.count(zone_num)) {
         log("SYSERR: GenOLC: save_rooms: Invalid zone number %d passed!", zone_num);
         return false;
     }
     auto &z = zone_table[zone_num];
-    log("GenOLC: save_rooms: Saving rooms in zone #%d (%d-%d).",
-        z.number, z.bot, z.top);
-
-    snprintf(filename, sizeof(filename), "%s%d.new", WLD_PREFIX, z.number);
-    if (!(sf = fopen(filename, "w"))) {
-        perror("SYSERR: save_rooms");
-        return false;
-    }
-
-    for (auto &i : z.rooms) {
-        room_rnum rnum;
-
-        if ((rnum = real_room(i)) != NOWHERE) {
-            int j;
-
-            room = &world[rnum];
-
-            /*
-             * Copy the description and strip off trailing newlines.
-             */
-            strncpy(buf, room->look_description ? room->look_description : "Empty room.", sizeof(buf) - 1);
-            strip_cr(buf);
-
-            /*
-             * Save the numeric and string section of the file.
-             */
-            sprintascii(rbuf1, room->room_flags[0]);
-            sprintascii(rbuf2, room->room_flags[1]);
-            sprintascii(rbuf3, room->room_flags[2]);
-            sprintascii(rbuf4, room->room_flags[3]);
-            fprintf(sf, "#%d\n"
-                        "%s%c\n"
-                        "%s%c\n"
-                        "%d %s %s %s %s %d\n",
-                    room->vn,
-                    room->name ? room->name : "Untitled", STRING_TERMINATOR,
-                    buf, STRING_TERMINATOR,
-                    zone_table[room->zone].number,
-                    rbuf1, rbuf2, rbuf3, rbuf4, room->sector_type
-            );
-
-            /*
-             * Now you write out the exits for the room.
-             */
-            for (j = 0; j < NUM_OF_DIRS; j++) {
-                if (R_EXIT(room, j)) {
-                    int dflag;
-                    if (R_EXIT(room, j)->general_description) {
-                        strncpy(buf, R_EXIT(room, j)->general_description, sizeof(buf) - 1);
-                        strip_cr(buf);
-                    } else
-                        *buf = '\0';
-
-                    /*
-                     * Figure out door flag.
-                     */
-                    if (IS_SET(R_EXIT(room, j)->exit_info, EX_ISDOOR)) {
-                        if (IS_SET(R_EXIT(room, j)->exit_info, EX_SECRET) &&
-                            IS_SET(R_EXIT(room, j)->exit_info, EX_PICKPROOF))
-                            dflag = 4;
-                        else if (IS_SET(R_EXIT(room, j)->exit_info, EX_SECRET))
-                            dflag = 3;
-                        else if (IS_SET(R_EXIT(room, j)->exit_info, EX_PICKPROOF))
-                            dflag = 2;
-                        else
-                            dflag = 1;
-                    } else
-                        dflag = 0;
-
-                    if (R_EXIT(room, j)->keyword)
-                        strncpy(buf1, R_EXIT(room, j)->keyword, sizeof(buf1) - 1);
-                    else
-                        *buf1 = '\0';
-
-                    /*
-                     * Now write the exit to the file.
-                     */
-                    fprintf(sf, "D%d\n"
-                                "%s~\n"
-                                "%s~\n"
-                                "%d %d %d %d %d %d %d %d %d %d %d\n", j, buf, buf1, dflag,
-                            R_EXIT(room, j)->key != NOTHING ? R_EXIT(room, j)->key : -1,
-                            R_EXIT(room, j)->to_room != NOWHERE ? world[R_EXIT(room, j)->to_room].vn : -1,
-                            R_EXIT(room, j)->dclock, R_EXIT(room, j)->dchide,
-                            R_EXIT(room, j)->dcskill, R_EXIT(room, j)->dcmove,
-                            R_EXIT(room, j)->failsavetype, R_EXIT(room, j)->dcfailsave,
-                            R_EXIT(room, j)->failroom, R_EXIT(room, j)->totalfailroom);
-
-                }
-            }
-
-            if (room->ex_description) {
-                struct extra_descr_data *xdesc;
-
-                for (xdesc = room->ex_description; xdesc; xdesc = xdesc->next) {
-                    strncpy(buf, xdesc->description, sizeof(buf));
-                    strip_cr(buf);
-                    fprintf(sf, "E\n"
-                                "%s~\n"
-                                "%s~\n", xdesc->keyword, buf);
-                }
-            }
-            fprintf(sf, "S\n");
-            script_save_to_disk(sf, room, WLD_TRIGGER);
-        }
-    }
-
-    /*
-     * Write the final line and close it.
-     */
-    fprintf(sf, "$~\n");
-    fclose(sf);
-
-    /* Old file we're replacing. */
-    snprintf(buf, sizeof(buf), "%s%d.wld", WLD_PREFIX, z.number);
-
-    remove(buf);
-    rename(filename, buf);
-
-    if (in_save_list(z.number, SL_WLD)) {
-        remove_from_save_list(z.number, SL_WLD);
-        create_world_index(z.number, "wld");
-        log("GenOLC: save_rooms: Saving rooms '%s'", buf);
-    }
+    z.save_rooms();
     return true;
 }
 
@@ -361,4 +225,157 @@ int free_room_strings(struct room_data *room) {
     }
 
     return true;
+}
+
+room_direction_data::~room_direction_data() {
+    if (general_description)
+        free(general_description);
+    if (keyword)
+        free(keyword);
+}
+
+nlohmann::json room_direction_data::serialize() {
+    nlohmann::json j;
+
+    if(general_description && strlen(general_description)) j["general_description"] = general_description;
+    if(keyword && strlen(keyword)) j["keyword"] = keyword;
+    if(exit_info) j["exit_info"] = exit_info;
+    if(key != NOTHING) j["key"] = key;
+	if(to_room != NOWHERE) j["to_room"] = to_room;
+    if(dclock) j["dclock"] = dclock;
+    if(dchide) j["dchide"] = dchide;
+    if(dcskill) j["dcskill"] = dcskill;
+    if(dcmove) j["dcmove"] = dcmove;
+    if(failsavetype) j["failsavetype"] = failsavetype;
+    if(dcfailsave) j["dcfailsave"] = dcfailsave;
+    if(failroom != NOWHERE) j["failroom"] = failroom;
+    if(totalfailroom != NOWHERE) j["totalfailroom"] = totalfailroom;
+
+    return j;
+}
+
+room_direction_data::room_direction_data(const nlohmann::json &j) : room_direction_data() {
+    if(j.contains("general_description")) general_description = strdup(j["general_description"].get<std::string>().c_str());
+    if(j.contains("keyword")) keyword = strdup(j["keyword"].get<std::string>().c_str());
+    if(j.contains("exit_info")) exit_info = j["exit_info"].get<int16_t>();
+    if(j.contains("key")) key = j["key"];
+    if(j.contains("to_room")) to_room = j["to_room"];
+    if(j.contains("dclock")) dclock = j["dclock"];
+    if(j.contains("dchide")) dchide = j["dchide"];
+    if(j.contains("dcskill")) dcskill = j["dcskill"];
+    if(j.contains("dcmove")) dcmove = j["dcmove"];
+    if(j.contains("failsavetype")) failsavetype = j["failsavetype"];
+    if(j.contains("dcfailsave")) dcfailsave = j["dcfailsave"];
+    if(j.contains("failroom")) failroom = j["failroom"];
+    if(j.contains("totalfailroom")) totalfailroom = j["totalfailroom"];
+}
+
+nlohmann::json room_data::serialize() {
+    auto j = serializeUnit();
+
+    if(sector_type) j["sector_type"] = sector_type;
+
+    for(auto i = 0; i < NUM_OF_DIRS; i++) {
+        if(dir_option[i]) j["dir_option"].push_back(std::make_pair(i, dir_option[i]->serialize()));
+    }
+
+    for(auto i = 0; i < NUM_ROOM_FLAGS; i++) if(IS_SET_AR(room_flags, i)) j["room_flags"].push_back(i);
+
+    return j;
+}
+
+
+room_data::room_data(const nlohmann::json &j) {
+    deserializeUnit(j);
+
+    if(j.contains("sector_type")) sector_type = j["sector_type"];
+
+    if(j.contains("dir_option")) {
+        // this is an array of (<number>, <json>) pairs, with number matching the dir_option array index.
+        // Thankfully we can pass the json straight into the room_direction_data constructor...
+        for(auto &d : j["dir_option"]) {
+            dir_option[d[0]] = new room_direction_data(d[1]);
+        }
+    }
+
+    if(j.contains("room_flags")) {
+        for(auto &f : j["room_flags"]) {
+            SET_BIT_AR(room_flags, f.get<int>());
+        }
+    }
+
+    if(proto_script || vn == 0) script = new script_data();
+    for(auto p = proto_script; p; p = p->next) {
+        add_trigger(script, read_trigger(p->vnum), -1);
+    }
+
+}
+
+room_data::~room_data() {
+    // fields like name are handled by the base destructor...
+    // we just need to clean up exits.
+    for(auto d : dir_option) {
+        delete d;
+    }
+}
+
+std::optional<vnum> room_data::getMatchingArea(std::function<bool(const area_data &)> f) {
+    std::optional<vnum> parent = area;
+    while(parent) {
+        auto &a = areas[parent.value()];
+        if(f(a)) return parent;
+        if ((a.type == AreaType::Structure || a.type == AreaType::Vehicle) && a.objectVnum) {
+            // we need to find the a.objectVnum in the world by scanning object_list...
+            if (auto obj = get_obj_num(a.objectVnum.value()); obj) {
+                if(world.contains(obj->in_room)) {
+                    auto &r = world[obj->in_room];
+                    return r.getMatchingArea(f);
+                }
+            }
+        }
+        parent = a.parent;
+    }
+    return std::nullopt;
+}
+
+static bool checkGravity(const area_data &a) {
+    return a.gravity.has_value();
+}
+
+double room_data::getGravity() {
+    // check for a gravity generator...
+    for(auto c = contents; c; c = c->next_content) {
+        if(c->gravity) return c->gravity.value();
+    }
+
+    // what about area rules?
+    if(std::optional<vnum> gravArea = getMatchingArea(checkGravity); gravArea) {
+        auto &a = areas[gravArea.value()];
+        return a.gravity.value();
+    }
+
+    // special cases here..
+    if (vn >= 64000 && vn <= 64006) {
+        return 100.0;
+    }
+    if (vn >= 64007 && vn <= 64016) {
+        return 300.0;
+    }
+    if (vn >= 64017 && vn <= 64030) {
+        return 500.0;
+    }
+    if (vn >= 64031 && vn <= 64048) {
+        return 1000.0;
+    }
+    if (vn >= 64049 && vn <= 64070) {
+        return 5000.0;
+    }
+    if (vn >= 64071 && vn <= 64096) {
+        return 10000.0;
+    }
+    if (vn == 64097) {
+        return 1000.0;
+    }
+
+    return 1.0;
 }

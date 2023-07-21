@@ -11,6 +11,9 @@
 #define GW_ARRAY_MAX    4
 
 struct guild_data {
+    guild_data() = default;
+    explicit guild_data(const nlohmann::json& j);
+    nlohmann::json serialize();
     ~guild_data();
     room_vnum vnum{NOBODY};                /* number of the guild */
     void toggle_skill(uint16_t skill_id);
@@ -20,8 +23,8 @@ struct guild_data {
     char *no_such_skill{};           /* message when we don't teach that skill */
     char *not_enough_gold{};         /* message when the student doesn't have enough gold */
     int minlvl{0};                    /* Minumum level guildmaster will train */
-    mob_rnum gm{NOBODY};                   /* GM's vnum */
-    bitvector_t with_who[GW_ARRAY_MAX];    /* whom we dislike */
+    mob_vnum gm{NOBODY};                   /* GM's vnum */
+    bitvector_t with_who[GW_ARRAY_MAX]{};    /* whom we dislike */
     int open{0}, close{28};               /* when we will train */
     SpecialFunc func{};                /* secondary spec_proc for the GM */
     std::set<uint8_t> feats;  /* array to keep track of which feats things we'll train */

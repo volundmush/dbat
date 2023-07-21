@@ -276,7 +276,7 @@ ACMD(do_dig) {
         CREATE(d->olc, struct oasis_olc_data, 1);
         OLC_ZNUM(d) = zone;
         OLC_NUM(d) = rvnum;
-        CREATE(OLC_ROOM(d), struct room_data, 1);
+        OLC_ROOM(d) = new room_data();
 
 
         /* Copy the room's name. */

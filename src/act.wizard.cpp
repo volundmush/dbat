@@ -1355,11 +1355,11 @@ void list_zone_commands_room(struct char_data *ch, room_vnum rvnum) {
                 case 'V':
                     send_to_char(ch, "%sAssign global %s:%d to %s = %s\r\n",
                                  ZOCMD.if_flag ? " then " : "",
-                                 ZOCMD.sarg1, ZOCMD.arg2,
+                                 ZOCMD.sarg1.c_str(), ZOCMD.arg2,
                                  ((ZOCMD.arg1 == MOB_TRIGGER) ? "mobile" :
                                   ((ZOCMD.arg1 == OBJ_TRIGGER) ? "object" :
                                    ((ZOCMD.arg1 == WLD_TRIGGER) ? "room" : "????"))),
-                                 ZOCMD.sarg2);
+                                 ZOCMD.sarg2.c_str());
                     break;
                 default:
                     send_to_char(ch, "<Unknown Command>\r\n");
@@ -2007,7 +2007,6 @@ ACMD(do_stat) {
         else {
             victim = new char_data();
             victim->player_specials = new player_special_data();
-            clear_char(victim);
             if (load_char(buf2, victim) >= 0) {
                 char_to_room(victim, 0);
                 if (GET_ADMLEVEL(victim) > GET_ADMLEVEL(ch))
@@ -2507,7 +2506,7 @@ static void execute_copyover() {
         struct char_data *och = d->character;
         d_next = d->next; /* We delete from the list , so need to save this */
         if (!d->character || d->connected > CON_PLAYING) {
-            write_to_descriptor(d->descriptor, "\n\rSorry, we are rebooting. Come back in a few seconds.\n\r", d->comp);
+            write_to_descriptor(d->descriptor, "\n\rSorry, we are rebooting. Come back in a few seconds.\n\r");
             close_socket(d); /* throw'em out */
         } else {
             if (GET_ROOM_VNUM(IN_ROOM(och)) > 1) {
@@ -2523,17 +2522,7 @@ static void execute_copyover() {
             /* save och */
             Crash_rentsave(och, 0);
             save_char(och);
-            if (d->comp->state == 2) {
-                d->comp->state = 3; /* Code to use Z_FINISH for deflate */
-            }
-            write_to_descriptor(d->descriptor, buf, d->comp);
-            d->comp->state = 0;
-            if (d->comp->stream) {
-                deflateEnd(d->comp->stream);
-                free(d->comp->stream);
-                free(d->comp->buff_out);
-                free(d->comp->buff_in);
-            }
+            write_to_descriptor(d->descriptor, buf);
         }
     }
 
@@ -2965,16 +2954,15 @@ ACMD(do_date) {
 
 ACMD(do_last) {
     char arg[MAX_INPUT_LENGTH];
-    struct char_data *vict = nullptr;
 
     one_argument(argument, arg);
     if (!*arg) {
         send_to_char(ch, "For whom do you wish to search?\r\n");
         return;
     }
-    CREATE(vict, struct char_data, 1);
-    clear_char(vict);
-    CREATE(vict->player_specials, struct player_special_data, 1);
+    auto vict = new char_data();
+
+    vict->player_specials = new player_special_data();
     if (load_char(arg, vict) < 0) {
         send_to_char(ch, "There is no such player.\r\n");
         free_char(vict);
@@ -3439,7 +3427,6 @@ ACMD(do_show) {
             }
             vict = new char_data();
             vict->player_specials = new player_special_data();
-            clear_char(vict);
 
             if (load_char(value, vict) < 0) {
                 send_to_char(ch, "There is no such player.\r\n");
@@ -4423,9 +4410,8 @@ ACMD(do_set) {
         }
     } else if (is_file) {
         /* try to load the player off disk */
-        CREATE(cbuf, struct char_data, 1);
-        clear_char(cbuf);
-        CREATE(cbuf->player_specials, struct player_special_data, 1);
+        cbuf = new char_data();
+        cbuf->player_specials = new player_special_data();
         if ((player_i = load_char(name, cbuf)) > -1) {
             if (GET_ADMLEVEL(cbuf) >= GET_ADMLEVEL(ch)) {
                 free_char(cbuf);

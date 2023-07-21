@@ -954,8 +954,8 @@ void cut_limb(struct char_data *ch, struct char_data *vict, int wlvl, int hitspo
     } else { /* We've only succeeded in removing a limb. */
         if (!IS_NPC(vict)) {
             if (HAS_ARMS(vict) && rand_number(1, 2) == 2) {
-                if (GET_LIMBCOND(vict, 2) > 0) {
-                    GET_LIMBCOND(vict, 2) = 0;
+                if (GET_LIMBCOND(vict, 1) > 0) {
+                    GET_LIMBCOND(vict, 1) = 0;
                     if (PLR_FLAGGED(vict, PLR_CLARM)) {
                         REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_CLARM);
                     }
@@ -963,8 +963,8 @@ void cut_limb(struct char_data *ch, struct char_data *vict, int wlvl, int hitspo
                     act("@RYOU lose your left arm!@n", true, ch, nullptr, vict, TO_VICT);
                     act("@R$N@r loses $s left arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
                     remove_limb(vict, 2);
-                } else if (GET_LIMBCOND(vict, 1) > 0) {
-                    GET_LIMBCOND(vict, 1) = 100;
+                } else if (GET_LIMBCOND(vict, 0) > 0) {
+                    GET_LIMBCOND(vict, 0) = 100;
                     if (PLR_FLAGGED(vict, PLR_CRARM)) {
                         REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_CRARM);
                     }
@@ -974,8 +974,8 @@ void cut_limb(struct char_data *ch, struct char_data *vict, int wlvl, int hitspo
                     remove_limb(vict, 1);
                 }
             } else { /* It's a leg */
-                if (GET_LIMBCOND(vict, 4) > 0) {
-                    GET_LIMBCOND(vict, 4) = 100;
+                if (GET_LIMBCOND(vict, 3) > 0) {
+                    GET_LIMBCOND(vict, 3) = 100;
                     if (PLR_FLAGGED(vict, PLR_CLLEG)) {
                         REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_CLLEG);
                     }
@@ -983,8 +983,8 @@ void cut_limb(struct char_data *ch, struct char_data *vict, int wlvl, int hitspo
                     act("@RYOU lose your left leg!@n", true, ch, nullptr, vict, TO_VICT);
                     act("@R$N@r loses $s left leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
                     remove_limb(vict, 4);
-                } else if (GET_LIMBCOND(vict, 3) > 0) {
-                    GET_LIMBCOND(vict, 3) = 100;
+                } else if (GET_LIMBCOND(vict, 2) > 0) {
+                    GET_LIMBCOND(vict, 2) = 100;
                     if (PLR_FLAGGED(vict, PLR_CRLEG)) {
                         REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_CRLEG);
                     }
@@ -1251,15 +1251,15 @@ int roll_hitloc(struct char_data *ch, struct char_data *vict, int skill) {
     }
 
     if (!IS_NPC(vict)) {
-        if (location == 4 && GET_LIMBCOND(vict, 1) <= 0 && GET_LIMBCOND(vict, 2) <= 0) { /* No arms */
+        if (location == 4 && GET_LIMBCOND(vict, 0) <= 0 && GET_LIMBCOND(vict, 1) <= 0) { /* No arms */
             location = 5;
         }
 
-        if (location == 5 && GET_LIMBCOND(vict, 3) <= 0 && GET_LIMBCOND(vict, 4) <= 0) { /* No legs */
+        if (location == 5 && GET_LIMBCOND(vict, 2) <= 0 && GET_LIMBCOND(vict, 3) <= 0) { /* No legs */
             location = 4;
         }
 
-        if (location == 4 && GET_LIMBCOND(vict, 1) <= 0 && GET_LIMBCOND(vict, 2) <= 0) { /* Both failed, make body */
+        if (location == 4 && GET_LIMBCOND(vict, 0) <= 0 && GET_LIMBCOND(vict, 1) <= 0) { /* Both failed, make body */
             location = 1;
         }
     }
@@ -1471,11 +1471,11 @@ void hurt_limb(struct char_data *ch, struct char_data *vict, int chance, int are
 
     if (!is_sparring(ch)) {
         if (area == 0) { /* Arms */
-            if (GET_LIMBCOND(vict, 2) - dmg <= 0) {
+            if (GET_LIMBCOND(vict, 1) - dmg <= 0) {
                 act("@RYour attack @YDESTROYS @r$N's@R left arm!@n", true, ch, nullptr, vict, TO_CHAR);
                 act("@r$n's@R attack @YDESTROYS@R YOUR left arm!@n", true, ch, nullptr, vict, TO_VICT);
                 act("@r$n's@R attack @YDESTROYS @r$N's@R left arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
-                GET_LIMBCOND(vict, 2) = 0;
+                GET_LIMBCOND(vict, 1) = 0;
                 if (PLR_FLAGGED(vict, PLR_THANDW)) {
                     REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_THANDW);
                 }
@@ -1483,16 +1483,16 @@ void hurt_limb(struct char_data *ch, struct char_data *vict, int chance, int are
                     REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_CLARM);
                 }
                 remove_limb(vict, 2);
-            } else if (GET_LIMBCOND(vict, 2) > 0) {
-                GET_LIMBCOND(vict, 2) -= dmg;
+            } else if (GET_LIMBCOND(vict, 1) > 0) {
+                GET_LIMBCOND(vict, 1) -= dmg;
                 act("@RYour attack hurts @r$N's@R left arm!@n", true, ch, nullptr, vict, TO_CHAR);
                 act("@r$n's@R attack hurts YOUR left arm!@n", true, ch, nullptr, vict, TO_VICT);
                 act("@r$n's@R attack hurts @r$N's@R left arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
-            } else if (GET_LIMBCOND(vict, 1) - dmg <= 0) {
+            } else if (GET_LIMBCOND(vict, 0) - dmg <= 0) {
                 act("@RYour attack @YDESTROYS @r$N's@R right arm!@n", true, ch, nullptr, vict, TO_CHAR);
                 act("@r$n's@R attack @YDESTROYS@R YOUR right arm!@n", true, ch, nullptr, vict, TO_VICT);
                 act("@r$n's@R attack @YDESTROYS @r$N's@R right arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
-                GET_LIMBCOND(vict, 1) = 0;
+                GET_LIMBCOND(vict, 0) = 0;
                 if (PLR_FLAGGED(vict, PLR_THANDW)) {
                     REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_THANDW);
                 }
@@ -1500,34 +1500,17 @@ void hurt_limb(struct char_data *ch, struct char_data *vict, int chance, int are
                     REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_CRARM);
                 }
                 remove_limb(vict, 2);
-            } else if (GET_LIMBCOND(vict, 1) > 0) {
-                GET_LIMBCOND(vict, 1) -= dmg;
+            } else if (GET_LIMBCOND(vict, 0) > 0) {
+                GET_LIMBCOND(vict, 0) -= dmg;
                 act("@RYour attack hurts @r$N's@R right arm!@n", true, ch, nullptr, vict, TO_CHAR);
                 act("@r$n's@R attack hurts YOUR right arm!@n", true, ch, nullptr, vict, TO_VICT);
                 act("@r$n's@R attack hurts @r$N's@R right arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
             }
         } else if (area == 1) { /* Legs */
-            if (GET_LIMBCOND(vict, 4) - dmg <= 0) {
+            if (GET_LIMBCOND(vict, 3) - dmg <= 0) {
                 act("@RYour attack @YDESTROYS @r$N's@R left leg!@n", true, ch, nullptr, vict, TO_CHAR);
                 act("@r$n's@R attack @YDESTROYS@R YOUR left leg!@n", true, ch, nullptr, vict, TO_VICT);
                 act("@r$n's@R attack @YDESTROYS @r$N's@R left leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
-                GET_LIMBCOND(vict, 4) = 0;
-                if (PLR_FLAGGED(vict, PLR_THANDW)) {
-                    REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_THANDW);
-                }
-                if (PLR_FLAGGED(vict, PLR_CLLEG)) {
-                    REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_CLLEG);
-                }
-                remove_limb(vict, 2);
-            } else if (GET_LIMBCOND(vict, 4) > 0) {
-                GET_LIMBCOND(vict, 4) -= dmg;
-                act("@RYour attack hurts @r$N's@R left leg!@n", true, ch, nullptr, vict, TO_CHAR);
-                act("@r$n's@R attack hurts YOUR left leg!@n", true, ch, nullptr, vict, TO_VICT);
-                act("@r$n's@R attack hurts @r$N's@R left leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
-            } else if (GET_LIMBCOND(vict, 3) - dmg <= 0) {
-                act("@RYour attack @YDESTROYS @r$N's@R right leg!@n", true, ch, nullptr, vict, TO_CHAR);
-                act("@r$n's@R attack @YDESTROYS@R YOUR right leg!@n", true, ch, nullptr, vict, TO_VICT);
-                act("@r$n's@R attack @YDESTROYS @r$N's@R right leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
                 GET_LIMBCOND(vict, 3) = 0;
                 if (PLR_FLAGGED(vict, PLR_THANDW)) {
                     REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_THANDW);
@@ -1538,6 +1521,23 @@ void hurt_limb(struct char_data *ch, struct char_data *vict, int chance, int are
                 remove_limb(vict, 2);
             } else if (GET_LIMBCOND(vict, 3) > 0) {
                 GET_LIMBCOND(vict, 3) -= dmg;
+                act("@RYour attack hurts @r$N's@R left leg!@n", true, ch, nullptr, vict, TO_CHAR);
+                act("@r$n's@R attack hurts YOUR left leg!@n", true, ch, nullptr, vict, TO_VICT);
+                act("@r$n's@R attack hurts @r$N's@R left leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
+            } else if (GET_LIMBCOND(vict, 2) - dmg <= 0) {
+                act("@RYour attack @YDESTROYS @r$N's@R right leg!@n", true, ch, nullptr, vict, TO_CHAR);
+                act("@r$n's@R attack @YDESTROYS@R YOUR right leg!@n", true, ch, nullptr, vict, TO_VICT);
+                act("@r$n's@R attack @YDESTROYS @r$N's@R right leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
+                GET_LIMBCOND(vict, 2) = 0;
+                if (PLR_FLAGGED(vict, PLR_THANDW)) {
+                    REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_THANDW);
+                }
+                if (PLR_FLAGGED(vict, PLR_CLLEG)) {
+                    REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_CLLEG);
+                }
+                remove_limb(vict, 2);
+            } else if (GET_LIMBCOND(vict, 2) > 0) {
+                GET_LIMBCOND(vict, 2) -= dmg;
                 act("@RYour attack hurts @r$N's@R right leg!@n", true, ch, nullptr, vict, TO_CHAR);
                 act("@r$n's@R attack hurts YOUR right leg!@n", true, ch, nullptr, vict, TO_VICT);
                 act("@r$n's@R attack hurts @r$N's@R right leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
@@ -3967,50 +3967,45 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
     }
 }
 
-int can_grav(struct char_data *ch) {
-    /* Gravity Related */
-    if (ROOM_GRAVITY(IN_ROOM(ch)) == 10 && GET_MAX_HIT(ch) < 5000 && !IS_BARDOCK(ch) && !IS_NPC(ch)) {
-        send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
-        return 0;
-    } else if (ROOM_GRAVITY(IN_ROOM(ch)) == 20 && GET_MAX_HIT(ch) < 20000) {
-        send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
-        return 0;
-    } else if (ROOM_GRAVITY(IN_ROOM(ch)) == 30 && GET_MAX_HIT(ch) < 50000) {
-        send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
-        return 0;
-    } else if (ROOM_GRAVITY(IN_ROOM(ch)) == 40 && GET_MAX_HIT(ch) < 100000) {
-        send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
-        return 0;
-    } else if (ROOM_GRAVITY(IN_ROOM(ch)) == 50 && GET_MAX_HIT(ch) < 200000) {
-        send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
-        return 0;
-    } else if (ROOM_GRAVITY(IN_ROOM(ch)) == 100 && GET_MAX_HIT(ch) < 400000) {
-        send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
-        return 0;
-    } else if (ROOM_GRAVITY(IN_ROOM(ch)) == 200 && GET_MAX_HIT(ch) < 1000000) {
-        send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
-        return 0;
-    } else if (ROOM_GRAVITY(IN_ROOM(ch)) == 300 && GET_MAX_HIT(ch) < 5000000) {
-        send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
-        return 0;
-    } else if (ROOM_GRAVITY(IN_ROOM(ch)) == 400 && GET_MAX_HIT(ch) < 8000000) {
-        send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
-        return 0;
-    } else if (ROOM_GRAVITY(IN_ROOM(ch)) == 500 && GET_MAX_HIT(ch) < 15000000) {
-        send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
-        return 0;
-    } else if (ROOM_GRAVITY(IN_ROOM(ch)) == 1000 && GET_MAX_HIT(ch) < 25000000) {
-        send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
-        return 0;
-    } else if (ROOM_GRAVITY(IN_ROOM(ch)) == 5000 && GET_MAX_HIT(ch) < 100000000) {
-        send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
-        return 0;
-    } else if (ROOM_GRAVITY(IN_ROOM(ch)) == 10000 && GET_MAX_HIT(ch) < 200000000) {
-        send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
-        return 0;
-    } else {
-        return 1;
+static std::map<double, int64_t> gravTiers = {
+        {10, 5000},
+        {20, 20000},
+        {30, 50000},
+        {40, 100000},
+        {50, 200000},
+        {100, 400000},
+        {200, 1000000},
+        {300, 5000000},
+        {400, 8000000},
+        {500, 15000000},
+        {1000, 25000000},
+        {5000, 100000000},
+        {10000, 200000000}
+};
+
+static double gravTolerance(struct char_data *ch) {
+    auto pl = GET_MAX_HIT(ch);
+    double tolerance = 1.0;
+    for(auto &t : gravTiers) {
+        if(pl >= t.second) {
+            tolerance = t.first;
+        }
     }
+    if(tolerance <= 10.0 && IS_BARDOCK(ch) || IS_NPC(ch)) {
+        tolerance = 10.0;
+    }
+    return tolerance;
+}
+
+bool can_grav(struct char_data *ch) {
+    auto &r = world[ch->in_room];
+    auto grav = r.getGravity();
+
+    if(grav > gravTolerance(ch)) {
+        send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
+        return false;
+    }
+    return true;
 }
 
 /* If they can preform the attack or perform the attack on target. */

@@ -10,10 +10,36 @@
 #pragma once
 
 #include "defs.h"
+#include "nlohmann/json.hpp"
 
 /**********************************************************************
 * Structures                                                          *
 **********************************************************************/
+
+enum class AreaType {
+    Dimension = 0,
+    CelestialBody = 1,
+    Region = 2,
+    Structure = 3,
+    Vehicle = 4
+};
+
+struct area_data {
+    area_data() = default;
+    explicit area_data(const nlohmann::json &j);
+    vnum vn{NOTHING}; /* virtual number of this area		*/
+    std::string name; /* name of this area			*/
+    std::set<room_vnum> rooms; /* rooms in this area			*/
+    std::set<vnum> children; /* child areas				*/
+    std::optional<double> gravity; /* gravity in this area			*/
+    std::optional<vnum> parent; /* parent area				*/
+    AreaType type{AreaType::Dimension}; /* type of area				*/
+    std::optional<vnum> objectVnum; /* vehicle or house outer object vnum				*/
+    std::optional<vnum> orbit; /* orbit room vnum, for CelestialBody type */
+    bool ether{false}; /* is this area etheric?			*/
+    bool moon{false}; /* does this planet have a moon? */
+    nlohmann::json serialize();
+};
 
 /* Extra description: used in objects, mobiles, and rooms */
 struct extra_descr_data {
@@ -24,6 +50,10 @@ struct extra_descr_data {
 
 
 struct obj_affected_type {
+    obj_affected_type() = default;
+    explicit obj_affected_type(const nlohmann::json& j);
+    void deserialize(const nlohmann::json& j);
+    nlohmann::json serialize();
     int location;       /* Which ability to change (APPLY_XXX) */
     int specific;       /* Some locations have parameters      */
     int modifier;       /* How much it changes by              */
@@ -50,13 +80,31 @@ struct unit_data {
     struct obj_data *contents{};     /* Contains objects  */
 
     int32_t id{}; /* used by DG triggers	*/
+
+    nlohmann::json serializeUnit();
+    nlohmann::json serializeContents();
+    nlohmann::json serializeScript();
+
+    void deserializeUnit(const nlohmann::json& j);
+
 };
 
 
 /* ================== Memory Structure for Objects ================== */
 struct obj_data : public unit_data {
-    room_rnum in_room{};        /* In what room -1 when conta/carr	*/
-    room_vnum room_loaded{};    /* Room loaded in, for room_max checks	*/
+    obj_data() = default;
+    explicit obj_data(const nlohmann::json& j);
+
+    nlohmann::json serializeBase();
+    nlohmann::json serializeInstance();
+    nlohmann::json serializeProto();
+
+    void deserializeBase(const nlohmann::json& j);
+    void deserializeProto(const nlohmann::json& j);
+    void deserializeInstance(const nlohmann::json& j);
+
+    room_rnum in_room{NOWHERE};        /* In what room -1 when conta/carr	*/
+    room_vnum room_loaded{NOWHERE};    /* Room loaded in, for room_max checks	*/
 
     int value[NUM_OBJ_VAL_POSITIONS]{};   /* Values of the item (see list)    */
     int8_t type_flag{};      /* Type of item                        */
@@ -68,14 +116,14 @@ struct obj_data : public unit_data {
     int cost_per_day{};   /* Cost to keep pr. real day           */
     int timer{};          /* Timer for object                    */
     bitvector_t bitvector[AF_ARRAY_MAX]{}; /* To set chars bits          */
-    int size{};           /* Size class of object                */
+    int size{SIZE_MEDIUM};           /* Size class of object                */
 
     struct obj_affected_type affected[MAX_OBJ_AFFECT]{};  /* affects */
 
     struct obj_data *in_obj{};       /* In what object nullptr when none    */
     struct char_data *carried_by{};  /* Carried by :nullptr in room/conta   */
     struct char_data *worn_by{};      /* Worn by? */
-    int16_t worn_on{};          /* Worn where?		      */
+    int16_t worn_on{-1};          /* Worn where?		      */
 
     time_t generation{};             /* creation time for dupe check     */
     int64_t unique_id{};  /* random bits for dupe check       */
@@ -103,6 +151,10 @@ struct obj_data : public unit_data {
     int posttype{};
     struct obj_data *posted_to{};
     struct obj_data *fellow_wall{};
+
+    std::optional<double> gravity;
+
+    std::optional<vnum> getMatchingArea(std::function<bool(const area_data&)> f);
 };
 /* ======================================================================= */
 
@@ -110,27 +162,35 @@ struct obj_data : public unit_data {
 /* room-related structures ************************************************/
 
 
+
 struct room_direction_data {
-    char *general_description;       /* When look DIR.			*/
+    room_direction_data() = default;
+    explicit room_direction_data(const nlohmann::json &j);
+    ~room_direction_data();
+    char *general_description{};       /* When look DIR.			*/
+    char *keyword{};        /* for open/close			*/
 
-    char *keyword;        /* for open/close			*/
+    int16_t exit_info{};        /* Exit info			*/
+    obj_vnum key{NOTHING};        /* Key's number (-1 for no key)		*/
+    room_rnum to_room{NOWHERE};        /* Where direction leads (NOWHERE)	*/
+    int dclock{};            /* DC to pick the lock			*/
+    int dchide{};            /* DC to find hidden			*/
+    int dcskill{};            /* Skill req. to move through exit	*/
+    int dcmove{};            /* DC for skill to move through exit	*/
+    int failsavetype{};        /* Saving Throw type on skill fail	*/
+    int dcfailsave{};        /* DC to save against on fail		*/
+    room_vnum failroom{NOWHERE};        /* Room # to put char in when fail > 5  */
+    room_vnum totalfailroom{NOWHERE};        /* Room # if char fails save < 5	*/
 
-    int16_t exit_info;        /* Exit info			*/
-    obj_vnum key;        /* Key's number (-1 for no key)		*/
-    room_rnum to_room;        /* Where direction leads (NOWHERE)	*/
-    int dclock;            /* DC to pick the lock			*/
-    int dchide;            /* DC to find hidden			*/
-    int dcskill;            /* Skill req. to move through exit	*/
-    int dcmove;            /* DC for skill to move through exit	*/
-    int failsavetype;        /* Saving Throw type on skill fail	*/
-    int dcfailsave;        /* DC to save against on fail		*/
-    int failroom;        /* Room # to put char in when fail > 5  */
-    int totalfailroom;        /* Room # if char fails save < 5	*/
+    nlohmann::json serialize();
 };
 
 
 /* ================== Memory Structure for room ======================= */
 struct room_data : public unit_data {
+    room_data() = default;
+    ~room_data();
+    explicit room_data(const nlohmann::json &j);
     int sector_type{};            /* sector type (move/hide)            */
     std::array<room_direction_data*, NUM_OF_DIRS> dir_option{}; /* Directions */
     bitvector_t room_flags[RF_ARRAY_MAX]{};   /* DEATH,DARK ... etc */
@@ -141,8 +201,16 @@ struct room_data : public unit_data {
     struct char_data *people{};    /* List of NPC / PC in room */
     int timed{};                   /* For timed Dt's                     */
     int dmg{};                     /* How damaged the room is            */
-    int gravity{};                 /* What is the level of gravity?      */
     int geffect{};            /* Effect of ground destruction       */
+    std::optional<vnum> area;      /* Area number; empty for unassigned     */
+
+    std::optional<double> gravity;
+
+    double getGravity();
+
+    nlohmann::json serialize();
+
+    std::optional<vnum> getMatchingArea(std::function<bool(const area_data&)> f);
 
 };
 /* ====================================================================== */
@@ -170,11 +238,15 @@ struct time_info_data {
 
 /* These data contain information about a players time data */
 struct time_data {
+    time_data() = default;
+    explicit time_data(const nlohmann::json &j);
+    void deserialize(const nlohmann::json& j);
     time_t birth;    /* This represents the characters current age        */
     time_t created;    /* This does not change                              */
     time_t maxage;    /* This represents death by natural causes           */
     time_t logon;    /* Time of the last logon (used to calculate played) */
     time_t played;    /* This is the total accumulated time played in secs */
+    nlohmann::json serialize();
 };
 
 
@@ -190,6 +262,10 @@ struct pclean_criteria_data {
 
 /* Char's abilities. */
 struct abil_data {
+    abil_data() = default;
+    explicit abil_data(const nlohmann::json &j);
+    nlohmann::json serialize();
+    void deserialize(const nlohmann::json& j);
     int8_t str;            /* New stats can go over 18 freely, no more /xx */
     int8_t intel;
     int8_t wis;
@@ -275,6 +351,10 @@ struct innate_node {
 
 /* Specials used by NPCs, not PCs */
 struct mob_special_data {
+    mob_special_data() = default;
+    explicit mob_special_data(const nlohmann::json& j);
+    nlohmann::json serialize();
+    void deserialize(const nlohmann::json& j);
     memory_rec *memory{};        /* List of attackers to remember	       */
     int8_t attack_type{};        /* The Attack Type Bitvector for NPC's     */
     int8_t default_pos{POS_STANDING};        /* Default position for NPC                */
@@ -350,6 +430,23 @@ enum ResurrectionMode : uint8_t {
 
 /* ================== Structure for player/non-player ===================== */
 struct char_data : public unit_data {
+    char_data() = default;
+    // this constructor below is to be used only for the mob_proto map.
+    explicit char_data(const nlohmann::json& j);
+
+    nlohmann::json serializeBase();
+    nlohmann::json serializeInstance();
+    nlohmann::json serializeProto();
+    nlohmann::json serializePlayer();
+
+    void deserializeBase(const nlohmann::json& j);
+    void deserializeProto(const nlohmann::json& j);
+    void deserializeInstance(const nlohmann::json& j);
+    void deserializeMobile(const nlohmann::json& j);
+    void deserializePlayer(const nlohmann::json& j);
+
+    std::optional<vnum> getMatchingArea(std::function<bool(const area_data&)> f);
+
     int pfilepos{-1};            /* playerfile pos			*/
     room_vnum in_room{NOWHERE};        /* Location (real room number)		*/
     room_vnum was_in_room{NOWHERE};    /* location for linkdead people		*/
@@ -376,7 +473,7 @@ struct char_data : public unit_data {
     int level{};            /* PC / NPC's level                     */
     int admlevel{};            /* PC / NPC's admin level               */
     int admflags[AD_ARRAY_MAX]{};    /* Bitvector for admin privs		*/
-    room_vnum hometown{};        /* PC Hometown / NPC spawn room         */
+    room_vnum hometown{NOWHERE};        /* PC Hometown / NPC spawn room         */
     struct time_data time{};    /* PC's AGE in days			*/
     uint8_t weight{};        /* PC / NPC's weight                    */
     uint8_t height{};        /* PC / NPC's height                    */
@@ -446,7 +543,7 @@ struct char_data : public unit_data {
 
     int alignment{};        /* +-1000 for alignment good vs. evil	*/
     int alignment_ethic{};        /* +-1000 for alignment law vs. chaos	*/
-    int32_t idnum{};            /* player's idnum; -1 for mobiles	*/
+    int32_t idnum{-1};            /* player's idnum; -1 for mobiles	*/
     bitvector_t act[PM_ARRAY_MAX]{}; /* act flag for NPC's; player flag for PC's */
 
     bitvector_t affected_by[AF_ARRAY_MAX]{};/* Bitvector for current affects	*/
@@ -594,8 +691,7 @@ struct char_data : public unit_data {
     int rbank{};
     int con_sdcooldown{};
 
-    // This should be [4] but index access needs to be done to fix it.
-    int limb_condition[5]{};
+    int8_t limb_condition[4]{};
 
     char *rdisplay{};
 
@@ -870,118 +966,70 @@ struct txt_q {
     struct txt_block *tail;
 };
 
-struct compr {
-    int state; /* 0 - off. 1 - waiting for response. 2 - compress2 on */
-
-    Bytef *buff_out;
-    int total_out; /* size of input buffer */
-    int size_out; /* size of data in output buffer */
-
-    Bytef *buff_in;
-    int total_in; /* size of input buffer */
-    int size_in; /* size of data in input buffer */
-
-    z_streamp stream;
-};
 
 struct descriptor_data {
-    socklen_t descriptor;    /* file descriptor for socket		*/
+    net::connection_data* conn{nullptr};
+    socklen_t descriptor{};    /* file descriptor for socket		*/
     char host[HOST_LENGTH + 1];    /* hostname				*/
-    int8_t bad_pws;    /* number of bad pw attemps this login	*/
-    int8_t idle_tics;        /* tics idle at password prompt		*/
-    int connected;        /* mode of 'connectedness'		*/
-    int desc_num;        /* unique num assigned to desc		*/
-    time_t login_time;        /* when the person connected		*/
-    char *showstr_head;        /* for keeping track of an internal str	*/
-    char **showstr_vector;    /* for paging through texts		*/
-    int showstr_count;        /* number of pages to page through	*/
-    int showstr_page;        /* which page are we currently showing?	*/
-    char **str;            /* for the modify-str system		*/
-    char *backstr;        /* backup string for modify-str system	*/
-    size_t max_str;            /* maximum size of string in modify-str	*/
-    int32_t mail_to;        /* name for mail system			*/
-    int has_prompt;        /* is the user at a prompt?             */
-    char inbuf[MAX_RAW_INPUT_LENGTH];  /* buffer for raw input		*/
-    char last_input[MAX_INPUT_LENGTH]; /* the last input			*/
-    char small_outbuf[SMALL_BUFSIZE];  /* standard output buffer		*/
-    char *output;        /* ptr to the current output buffer	*/
-    char **history;        /* History of commands, for ! mostly.	*/
-    int history_pos;        /* Circular array position.		*/
-    int bufptr;            /* ptr to end of current output		*/
-    int bufspace;        /* space left in the output buffer	*/
-    struct txt_block *large_outbuf; /* ptr to large buffer, if we need it */
-    struct txt_q input;        /* q of unprocessed input		*/
-    struct char_data *character;    /* linked to char			*/
-    struct char_data *original;    /* original char if switched		*/
-    struct descriptor_data *snooping; /* Who is this char snooping	*/
-    struct descriptor_data *snoop_by; /* And who is snooping this char	*/
-    struct descriptor_data *next; /* link to next descriptor		*/
-    struct oasis_olc_data *olc;   /* OLC info                            */
-    struct compr *comp;                /* compression info */
-    char *user;                   /* What user am I?                     */
-    char *email;                  /* User Account Email.                 */
-    char *pass;                   /* User Account Password.              */
-    char *loadplay;               /* What character am I loading?        */
-    int writenew;                 /* What slot am I writing to?          */
-    int total;                    /* What Is My Total Character Limit?   */
-    int rpp;                      /* What is my total RPP?               */
-    char *tmp1;
-    char *tmp2;
-    char *tmp3;
-    char *tmp4;
-    char *tmp5;
-    int level;
-    char *newsbuf;
+    int8_t bad_pws{};    /* number of bad pw attemps this login	*/
+    int8_t idle_tics{0};        /* tics idle at password prompt		*/
+    int connected{CON_GET_USER};        /* mode of 'connectedness'		*/
+    int desc_num{};        /* unique num assigned to desc		*/
+    time_t login_time{time(nullptr)};        /* when the person connected		*/
+    char *showstr_head{};        /* for keeping track of an internal str	*/
+    char **showstr_vector{};    /* for paging through texts		*/
+    int showstr_count{};        /* number of pages to page through	*/
+    int showstr_page{};        /* which page are we currently showing?	*/
+    char **str{};            /* for the modify-str system		*/
+    char *backstr{};        /* backup string for modify-str system	*/
+    size_t max_str{};            /* maximum size of string in modify-str	*/
+    int32_t mail_to{};        /* name for mail system			*/
+    bool has_prompt{true};        /* is the user at a prompt?             */
+    std::string inbuf;        /* buffer for raw input			*/
+    std::string last_input;        /* the last input			*/
+    std::list<std::string> raw_input_queue;        /* queue of raw unprocessed input		*/
+    std::list<std::string> input_queue;
+    std::string output;        /* ptr to the current output buffer	*/
+    std::list<std::string> history;        /* History of commands, for ! mostly.	*/
+    struct char_data *character{};    /* linked to char			*/
+    struct char_data *original{};    /* original char if switched		*/
+    struct descriptor_data *snooping{}; /* Who is this char snooping	*/
+    struct descriptor_data *snoop_by{}; /* And who is snooping this char	*/
+    struct descriptor_data *next{}; /* link to next descriptor		*/
+    struct oasis_olc_data *olc{};   /* OLC info                            */
+    char *user{};                   /* What user am I?                     */
+    char *email{};                  /* User Account Email.                 */
+    char *pass{};                   /* User Account Password.              */
+    char *loadplay{};               /* What character am I loading?        */
+    int writenew{};                 /* What slot am I writing to?          */
+    int total{};                    /* What Is My Total Character Limit?   */
+    int rpp{};                      /* What is my total RPP?               */
+    char *tmp1{};
+    char *tmp2{};
+    char *tmp3{};
+    char *tmp4{};
+    char *tmp5{};
+    int level{};
+    char *newsbuf{};
     /*---------------Player Level Object Editing Variables-------------------*/
-    int obj_editval;
+    int obj_editval{};
     int obj_editflag;
-    char *obj_was;
-    char *obj_name;
-    char *obj_short;
-    char *obj_long;
-    int obj_type;
-    int obj_weapon;
-    struct obj_data *obj_point;
-    /*---------------Ship Construction Editing Variables---------------------*/
-    //int shipmenu;
-    //int shipsize;
-    //char *ship_name;
-    //int shipextra[4];
-    //int shields;
-    //int armor;
-    //int drive;
-    //int shipweap;
-    /*-----------------------------------------------------------------------*/
-    int user_freed;
-    int customfile;
-    char *title;
-    int rbank;
-};
+    char *obj_was{};
+    char *obj_name{};
+    char *obj_short{};
+    char *obj_long{};
+    int obj_type{};
+    int obj_weapon{};
+    struct obj_data *obj_point{};
 
+    int user_freed{};
+    int customfile{};
+    char *title{};
+    int rbank{};
 
-/* other miscellaneous structures ***************************************/
+    void handle_input();
+    void start();
 
-
-struct msg_type {
-    char *attacker_msg;  /* message to attacker */
-    char *victim_msg;    /* message to victim   */
-    char *room_msg;      /* message to room     */
-};
-
-
-struct message_type {
-    struct msg_type die_msg;    /* messages when death			*/
-    struct msg_type miss_msg;    /* messages when miss			*/
-    struct msg_type hit_msg;    /* messages when hit			*/
-    struct msg_type god_msg;    /* messages when hit on god		*/
-    struct message_type *next;    /* to next messages of this kind.	*/
-};
-
-
-struct message_list {
-    int a_type;            /* Attack type				*/
-    int number_of_attacks;    /* How many attack messages to chose from. */
-    struct message_type *msg;    /* List of messages.			*/
 };
 
 /* used in the socials */

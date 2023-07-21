@@ -506,26 +506,7 @@ void paginate_string(char *str, struct descriptor_data *d) {
 
 /* The call that gets the paging ball rolling... */
 void page_string(struct descriptor_data *d, char *str, int keep_internal) {
-    char actbuf[MAX_INPUT_LENGTH] = "";
-
-    if (!d)
-        return;
-
-    if (!str || !*str)
-        return;
-
-    if ((GET_PAGE_LENGTH(d->character) < 5 || GET_PAGE_LENGTH(d->character) > 50))
-        GET_PAGE_LENGTH(d->character) = PAGE_LENGTH;
-    d->showstr_count = count_pages(str, d->character);
-    CREATE(d->showstr_vector, char *, d->showstr_count);
-
-    if (keep_internal) {
-        d->showstr_head = strdup(str);
-        paginate_string(d->showstr_head, d);
-    } else
-        paginate_string(str, d);
-
-    show_string(d, actbuf);
+	write_to_output(d, str);
 }
 
 

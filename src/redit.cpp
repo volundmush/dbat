@@ -182,7 +182,7 @@ ACMD(do_oasis_redit) {
 }
 
 void redit_setup_new(struct descriptor_data *d) {
-    CREATE(OLC_ROOM(d), struct room_data, 1);
+    OLC_ROOM(d) = new room_data();
 
     OLC_ROOM(d)->name = strdup("An unfinished room");
     OLC_ROOM(d)->look_description = strdup("You are in an unfinished room.\r\n");
