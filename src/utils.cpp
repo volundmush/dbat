@@ -21,7 +21,7 @@
 #include "constants.h"
 #include "act.informative.h"
 #include "screen.h"
-
+#include <unordered_set>
 
 /* local functions */
 char commastring[MAX_STRING_LENGTH];
@@ -3110,17 +3110,18 @@ void purge_homing(struct char_data *ch) {
 
 }
 
-void improve_skill(struct char_data *ch, int skill, int num) {
-    int percent = GET_SKILL(ch, skill);
-    int newpercent, roll = 1200;
-    char skillbuf[MAX_STRING_LENGTH];
+static std::unordered_set<uint16_t> masoSkills = {
+        SKILL_PARRY,
+        SKILL_DODGE,
+        SKILL_BARRIER,
+        SKILL_BLOCK,
+        SKILL_ZANZOKEN,
+        SKILL_TSKIN
+};
 
+void improve_skill(struct char_data *ch, int skill, int num) {
     if (IS_NPC(ch))
         return;
-
-    if (!num) {
-        num = 2;
-    }
 
     if (AFF_FLAGGED(ch, AFF_SHOCKED))
         return;
@@ -3128,19 +3129,26 @@ void improve_skill(struct char_data *ch, int skill, int num) {
     if (GET_FORGETING(ch) == skill)
         return;
 
-    if (GET_SKILL_BASE(ch, skill) >= 90) {
+    int percent = GET_SKILL(ch, skill);
+    int newpercent, roll = 1200;
+    char skillbuf[MAX_STRING_LENGTH];
+
+    if (!num) {
+        num = 2;
+    }
+
+    auto base = GET_SKILL_BASE(ch, skill);
+
+    if (base >= 90) {
         roll += 800;
-    } else if (GET_SKILL_BASE(ch, skill) >= 75) {
+    } else if (base >= 75) {
         roll += 600;
-    } else if (GET_SKILL_BASE(ch, skill) >= 50) {
+    } else if (base >= 50) {
         roll += 400;
     }
 
-    if (skill == SKILL_PARRY || skill == SKILL_DODGE || skill == SKILL_BARRIER || skill == SKILL_BLOCK ||
-        skill == SKILL_ZANZOKEN || skill == SKILL_TSKIN) {
-        if (GET_BONUS(ch, BONUS_MASOCHISTIC) > 0) {
-            return;
-        }
+    if (GET_BONUS(ch, BONUS_MASOCHISTIC) > 0 && masoSkills.contains(skill)) {
+        return;
     }
 
     if (!SPAR_TRAIN(ch)) {
@@ -4366,4 +4374,47 @@ int get_flag_by_name(const char *flag_list[], char *flag_name) {
         if (!strcmp(flag_list[i], flag_name))
             return (i);
     return (NOFLAG);
+}
+
+int8_t GET_SKILL_BONUS(struct char_data *ch, uint16_t skill) {
+    auto found = ch->skill.find(skill);
+    if (found != ch->skill.end()) {
+        return found->second.mods;
+    }
+    return 0;
+}
+
+int8_t GET_SKILL_PERF(struct char_data *ch, uint16_t skill) {
+    auto found = ch->skill.find(skill);
+    if (found != ch->skill.end()) {
+        return found->second.perfs;
+    }
+    return 0;
+}
+
+int8_t GET_SKILL_BASE(struct char_data *ch, uint16_t skill) {
+    auto found = ch->skill.find(skill);
+    if (found != ch->skill.end()) {
+        return found->second.level;
+    }
+    return 0;
+}
+
+int8_t GET_SKILL(struct char_data *ch, uint16_t skill) {
+    return GET_SKILL_BASE(ch, skill) + GET_SKILL_BONUS(ch, skill);
+}
+
+void SET_SKILL(struct char_data *ch, uint16_t skill, int8_t val) {
+    auto &s = ch->skill[skill];
+    s.level = val;
+}
+
+void SET_SKILL_BONUS(struct char_data *ch, uint16_t skill, int8_t val) {
+    auto &s = ch->skill[skill];
+    s.mods = val;
+}
+
+void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int8_t val) {
+    auto &s = ch->skill[skill];
+    s.perfs = val;
 }

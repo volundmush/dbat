@@ -33,17 +33,6 @@ static void playing_string_cleanup(struct descriptor_data *d, int action);
 
 static void exdesc_string_cleanup(struct descriptor_data *d, int action);
 
-static const char *string_fields[] =
-        {
-                "name",
-                "short",
-                "long",
-                "description",
-                "title",
-                "delete-description",
-                "\n"
-        };
-
 
 /* maximum length for text field x+1 */
 static const int length[] =

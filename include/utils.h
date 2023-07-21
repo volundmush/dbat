@@ -700,13 +700,15 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define GET_HOST(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->host))
 #define GET_HISTORY(ch, i)      CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->comm_hist[i]))
 
-#define GET_SKILL_BONUS(ch, i)        ((ch)->skillmods[i])
-#define GET_SKILL_PERF(ch, i)           ((ch)->skillperfs[i])
-#define SET_SKILL_BONUS(ch, i, value)    do { (ch)->skillmods[i] = value; } while (0)
-#define SET_SKILL_PERF(ch, i, value)    do { (ch)->skillperfs[i] = value; } while (0)
-#define GET_SKILL_BASE(ch, i)        ((ch)->skills[i])
-#define GET_SKILL(ch, i)        ((ch)->skills[i] + GET_SKILL_BONUS(ch, i))
-#define SET_SKILL(ch, i, val)        do { (ch)->skills[i] = val; } while(0)
+int8_t GET_SKILL_BONUS(struct char_data *ch, uint16_t skill);
+int8_t GET_SKILL_PERF(struct char_data *ch, uint16_t skill);
+int8_t GET_SKILL_BASE(struct char_data *ch, uint16_t skill);
+int8_t GET_SKILL(struct char_data *ch, uint16_t skill);
+
+void SET_SKILL(struct char_data *ch, uint16_t skill, int8_t val);
+void SET_SKILL_BONUS(struct char_data *ch, uint16_t skill, int8_t val);
+void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int8_t val);
+
 #define BODY_PARTS(ch)  ((ch)->bodyparts)
 
 #define GET_EQ(ch, i)        ((ch)->equipment[i])

@@ -644,6 +644,11 @@ nlohmann::json char_data::serializePlayer() {
     if(relax_count) j["relax_count"] = relax_count;
     if(ingestLearned) j["ingestLearned"] = ingestLearned;
 
+    for(auto &[skill_id, s] : skill) {
+        auto sk = s.serialize();
+        if(!sk.empty()) j["skill"].push_back(std::make_pair(skill_id, sk));
+    }
+
     return j;
 }
 
@@ -656,11 +661,16 @@ void char_data::deserializeInstance(const nlohmann::json &j) {
 void char_data::deserializeProto(const nlohmann::json &j) {
     deserializeBase(j);
 
-
-
 }
 
 void char_data::deserializePlayer(const nlohmann::json &j) {
+
+    if(j.contains("skill")) {
+        for(auto &i : j["skill"]) {
+            auto id = i[0].get<uint16_t>();
+            skill.emplace(id, i[1]);
+        }
+    }
 
 }
 
@@ -691,4 +701,24 @@ char_data::char_data(const nlohmann::json &j) : char_data() {
 
     aff_abils = real_abils;
 
+}
+
+nlohmann::json skill_data::serialize() {
+    nlohmann::json j;
+
+    if(level) j["level"] = level;
+    if(mods) j["mods"] = mods;
+    if(perfs) j["perfs"] = perfs;
+
+    return j;
+}
+
+void skill_data::deserialize(const nlohmann::json &j) {
+    if(j.contains("level")) level = j["level"];
+    if(j.contains("mods")) mods = j["mods"];
+    if(j.contains("perfs")) perfs = j["perfs"];
+}
+
+skill_data::skill_data(const nlohmann::json &j) : skill_data() {
+    deserialize(j);
 }

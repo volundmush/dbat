@@ -5399,17 +5399,17 @@ ACMD(do_perf) {
             case 1:
                 send_to_char(ch, "You perfect the skill %s so that you can over charge it!\r\n",
                              spell_info[skill].name);
-                GET_SKILL_PERF(ch, skill) = 1;
+                SET_SKILL_PERF(ch, skill, 1);
                 break;
             case 2:
                 send_to_char(ch, "You perfect the skill %s so that you have supreme accuracy with it!\r\n",
                              spell_info[skill].name);
-                GET_SKILL_PERF(ch, skill) = 2;
+                SET_SKILL_PERF(ch, skill, 2);
                 break;
             case 3:
                 send_to_char(ch, "You perfect the skill %s so that you require a lower minimum charge for it!\r\n",
                              spell_info[skill].name);
-                GET_SKILL_PERF(ch, skill) = 3;
+                SET_SKILL_PERF(ch, skill, 3);
                 break;
         }
     }

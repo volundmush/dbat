@@ -635,11 +635,7 @@ char *make_prompt(struct descriptor_data *d) {
 
     /* Note, prompt is truncated at MAX_PROMPT_LENGTH chars (structs.h) */
 
-    if (d->showstr_count) {
-        snprintf(prompt, sizeof(prompt),
-                 "\r\n[ Return to continue, (q)uit, (r)efresh, (b)ack, or page number (%d/%d) ]",
-                 d->showstr_page, d->showstr_count);
-    } else if (d->str) {
+    if (d->str) {
         if (STATE(d) == CON_EXDESC) {
             strcpy(prompt, "Enter Description(/h for editor help)> ");
         } else if (PLR_FLAGGED(d->character, PLR_WRITING) && !PLR_FLAGGED(d->character, PLR_MAILING)) {
@@ -1904,10 +1900,6 @@ void close_socket(struct descriptor_data *d) {
     if (d->original && d->original->desc)
         d->original->desc = nullptr;
 
-    if (d->showstr_head)
-        free(d->showstr_head);
-    if (d->showstr_count)
-        free(d->showstr_vector);
     if (d->obj_name)
         free(d->obj_name);
     if (d->obj_short)

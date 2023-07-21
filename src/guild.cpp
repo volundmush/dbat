@@ -107,14 +107,10 @@ void handle_ingest_learn(struct char_data *ch, struct char_data *vict) {
 
         if (GET_SKILL_BASE(ch, i) > 0 && GET_SKILL_BASE(vict, i) > 0 && i != 141) {
             send_to_char(ch, "@YYou gained a lot of new knowledge about @y%s@Y!@n\r\n", spell_info[i].name);
-
-            if (GET_SKILL_BASE(ch, i) + 10 < 100) {
-                GET_SKILL_BASE(ch, i) += 10;
-            } else if (GET_SKILL_BASE(ch, i) > 0 && GET_SKILL_BASE(ch, i) < 100) {
-                GET_SKILL_BASE(ch, i) += 1;
-            } else {
-                GET_SKILL_BASE(ch, i) = 100;
-            }
+			auto &s = ch->skill[i];
+            if(s.level + 10 < 100) s.level += 10;
+            else if(s.level > 0 && s.level < 100) s.level += 1;
+            else s.level = 100;
 
         }
         if (((i >= 481 && i <= 489) || i == 517 || i == 535) &&

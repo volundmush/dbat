@@ -919,11 +919,9 @@ ACMD(do_preference) {
     if (!strcasecmp(arg, "throw")) {
         send_to_char(ch, "You will now favor throwing weapons as fighting specialization. You're sure to nail it.\r\n");
         GET_PREFERENCE(ch) = PREFERENCE_THROWING;
-        if (GET_SKILL_BASE(ch, SKILL_THROW) <= 90) {
-            GET_SKILL_BASE(ch, SKILL_THROW) += 10;
-        } else if (GET_SKILL_BASE(ch, SKILL_THROW) < 100) {
-            GET_SKILL_BASE(ch, SKILL_THROW) = 100;
-        }
+        auto &s = ch->skill[SKILL_THROW];
+        if(s.level <= 90) s.level += 10;
+        else if(s.level < 100) s.level = 100;
         return;
     } else if (!strcasecmp(arg, "hand")) {
         send_to_char(ch, "You will now favor your body as your fighting specialization. Your body is ready.\r\n");

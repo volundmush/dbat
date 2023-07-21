@@ -173,8 +173,6 @@ static void free_obj_unique_hash();
 static void mob_autobalance(struct char_data *ch);
 /* external functions */
 
-void paginate_string(char *str, struct descriptor_data *d);
-
 void free_alias(struct alias_data *a);
 
 void mag_assign_spells();
@@ -4157,17 +4155,6 @@ static char *next_page(char *str, struct char_data *ch) {
     }
 }
 
-static void paginate_string(char *str, struct descriptor_data *d) {
-    int i;
-
-    if (d->showstr_count)
-        *(d->showstr_vector) = str;
-
-    for (i = 1; i < d->showstr_count && str; i++)
-        str = d->showstr_vector[i] = next_page(str, d->character);
-
-    d->showstr_page = 0;
-}
 
 /*
  * Steps:
@@ -4190,25 +4177,10 @@ static void paginate_string(char *str, struct descriptor_data *d) {
 static int file_to_string_alloc(const char *name, char **buf) {
     int temppage;
     char temp[MAX_STRING_LENGTH];
-    struct descriptor_data *in_use;
-
-    for (in_use = descriptor_list; in_use; in_use = in_use->next)
-        if (in_use->showstr_vector && *in_use->showstr_vector == *buf)
-            return (-1);
 
     /* Lets not free() what used to be there unless we succeeded. */
     if (file_to_string(name, temp) < 0)
         return (-1);
-
-    for (in_use = descriptor_list; in_use; in_use = in_use->next) {
-        if (!in_use->showstr_count || *in_use->showstr_vector != *buf)
-            continue;
-
-        /* Let's be nice and leave them at the page they were on. */
-        temppage = in_use->showstr_page;
-        paginate_string((in_use->showstr_head = strdup(*in_use->showstr_vector)), in_use);
-        in_use->showstr_page = temppage;
-    }
 
     if (*buf)
         free(*buf);
