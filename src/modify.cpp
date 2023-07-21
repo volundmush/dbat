@@ -29,10 +29,6 @@
 
 static void smash_numb(char *str);
 
-static char *next_page(char *str, struct char_data *ch);
-
-static int count_pages(char *str, struct char_data *ch);
-
 static void playing_string_cleanup(struct descriptor_data *d, int action);
 
 static void exdesc_string_cleanup(struct descriptor_data *d, int action);
@@ -378,7 +374,7 @@ ACMD(do_skillset) {
         }
         if (i >= sizeof(help))
             strcpy(help + sizeof(help) - strlen("** OVERFLOW **") - 1, "** OVERFLOW **"); /* strcpy: OK */
-        page_string(ch->desc, help, true);
+        write_to_output(ch->desc, help);
         return;
     }
 
@@ -422,169 +418,4 @@ ACMD(do_skillset) {
     mudlog(BRF, ADMLVL_IMMORT, true, "skillset: %s changed %s's '%s' to %d.", GET_NAME(ch), GET_NAME(vict),
            spell_info[skill].name, value);
     send_to_char(ch, "You change %s's %s to %d.\r\n", GET_NAME(vict), spell_info[skill].name, value);
-}
-
-
-
-/*********************************************************************
-* New Pagination Code
-* Michael Buselli submitted the following code for an enhanced pager
-* for CircleMUD.  All functions below are his.  --JE 8 Mar 96
-*
-*********************************************************************/
-
-/* Traverse down the string until the begining of the next page has been
- * reached.  Return nullptr if this is the last page of the string.
- */
-static char *next_page(char *str, struct char_data *ch) {
-    int col = 1, line = 1;
-
-    for (;; str++) {
-        /* If end of string, return nullptr. */
-        if (*str == '\0')
-            return (nullptr);
-
-            /* If we're at the start of the next page, return this fact. */
-        else if (line > (GET_PAGE_LENGTH(ch) - (PRF_FLAGGED(ch, PRF_COMPACT) ? 1 : 2)))
-            return (str);
-
-            /* Check for the begining of an ANSI color code block. */
-        else if (*str == '\x1B')
-            str++;
-
-        else if (*str == '@') {
-            if (*(str + 1) != '@')
-                str++;
-        }
-
-            /* Check for everything else. */
-        else {
-            /* Carriage return puts us in column one. */
-            if (*str == '\r')
-                col = 1;
-                /* Newline puts us on the next line. */
-            else if (*str == '\n')
-                line++;
-
-                /* We need to check here and see if we are over the page width,
-                 * and if so, compensate by going to the begining of the next line.
-                 */
-            else if (col++ > PAGE_WIDTH) {
-                col = 1;
-                line++;
-            }
-        }
-    }
-}
-
-
-/* Function that returns the number of pages in the string. */
-static int count_pages(char *str, struct char_data *ch) {
-    int pages;
-
-    for (pages = 1; (str = next_page(str, ch)); pages++);
-    return (pages);
-}
-
-
-/* This function assigns all the pointers for showstr_vector for the
- * page_string function, after showstr_vector has been allocated and
- * showstr_count set.
- */
-void paginate_string(char *str, struct descriptor_data *d) {
-    int i;
-
-    if (d->showstr_count)
-        *(d->showstr_vector) = str;
-
-    for (i = 1; i < d->showstr_count && str; i++)
-        str = d->showstr_vector[i] = next_page(str, d->character);
-
-    d->showstr_page = 0;
-}
-
-
-/* The call that gets the paging ball rolling... */
-void page_string(struct descriptor_data *d, char *str, int keep_internal) {
-	write_to_output(d, str);
-}
-
-
-/* The call that displays the next page. */
-void show_string(struct descriptor_data *d, char *input) {
-    char buffer[MAX_STRING_LENGTH], buf[MAX_INPUT_LENGTH];
-    int diff;
-
-    any_one_arg(input, buf);
-
-    /* Q is for quit. :) */
-    if (LOWER(*buf) == 'q') {
-        free(d->showstr_vector);
-        d->showstr_vector = nullptr;
-        d->showstr_count = 0;
-        if (d->showstr_head) {
-            free(d->showstr_head);
-            d->showstr_head = nullptr;
-        }
-        return;
-    }
-        /* R is for refresh, so back up one page internally so we can display
-         * it again.
-         */
-    else if (LOWER(*buf) == 'r')
-        d->showstr_page = MAX(0, d->showstr_page - 1);
-
-        /* B is for back, so back up two pages internally so we can display the
-         * correct page here.
-         */
-    else if (LOWER(*buf) == 'b')
-        d->showstr_page = MAX(0, d->showstr_page - 2);
-
-        /* Feature to 'goto' a page.  Just type the number of the page and you
-         * are there!
-         */
-    else if (isdigit(*buf))
-        d->showstr_page = MAX(0, MIN(atoi(buf) - 1, d->showstr_count - 1));
-
-    else if (*buf) {
-        send_to_char(d->character, "Valid commands while paging are RETURN, Q, R, B, or a numeric value.\r\n");
-        return;
-    }
-    /* If we're displaying the last page, just send it to the character, and
-     * then free up the space we used.
-     */
-    if (d->showstr_page + 1 >= d->showstr_count) {
-        send_to_char(d->character, "%s", d->showstr_vector[d->showstr_page]);
-        free(d->showstr_vector);
-        d->showstr_vector = nullptr;
-        d->showstr_count = 0;
-        if (d->showstr_head) {
-            free(d->showstr_head);
-            d->showstr_head = nullptr;
-        }
-    }
-        /* Or if we have more to show.... */
-    else {
-        diff = d->showstr_vector[d->showstr_page + 1] - d->showstr_vector[d->showstr_page];
-        if (diff > MAX_STRING_LENGTH - 3) /* 3=\r\n\0 */
-            diff = MAX_STRING_LENGTH - 3;
-        strncpy(buffer, d->showstr_vector[d->showstr_page], diff);    /* strncpy: OK (size truncated above) */
-        /*
-         * Fix for prompt overwriting last line in compact mode submitted by
-         * Peter Ajamian <peter@pajamian.dhs.org> on 04/21/2001
-         */
-        if (buffer[diff - 2] == '\r' && buffer[diff - 1] == '\n')
-            buffer[diff] = '\0';
-        else if (buffer[diff - 2] == '\n' && buffer[diff - 1] == '\r')
-            /* This is backwards.  Fix it. */
-            strcpy(buffer + diff - 2, "\r\n");    /* strcpy: OK (size checked) */
-        else if (buffer[diff - 1] == '\r' || buffer[diff - 1] == '\n')
-            /* Just one of \r\n.  Overwrite it. */
-            strcpy(buffer + diff - 1, "\r\n");    /* strcpy: OK (size checked) */
-        else
-            /* Tack \r\n onto the end to fix bug with prompt overwriting last line. */
-            strcpy(buffer + diff, "\r\n");    /* strcpy: OK (size checked) */
-        send_to_char(d->character, "%s", buffer);
-        d->showstr_page++;
-    }
 }

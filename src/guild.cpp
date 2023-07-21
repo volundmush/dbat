@@ -436,7 +436,7 @@ void list_skills(struct char_data *ch, char *arg) {
     if (len >= sizeof(buf2))
         strcpy(buf2 + sizeof(buf2) - strlen(overflow) - 1, overflow); /* strcpy: OK */
 
-    page_string(ch->desc, buf2, true);
+    write_to_output(ch->desc, buf2);
 }
 
 
@@ -701,7 +701,7 @@ void what_does_guild_know(int guild_nr, struct char_data *ch) {
     if (len >= sizeof(buf2))
         strcpy(buf2 + sizeof(buf2) - strlen(overflow) - 1, overflow); /* strcpy: OK */
 
-    page_string(ch->desc, buf2, true);
+    write_to_output(ch->desc, buf2);
 }
 
 int prereq_pass(struct char_data *ch, int snum) {
@@ -1343,7 +1343,7 @@ void handle_learn(struct char_data *keeper, int guild_nr, struct char_data *ch, 
                         cptr = weapon_type[subval];
                     subfeat += snprintf(buf + subfeat, sizeof(buf) - subfeat, "  %s\r\n", cptr);
                 }
-                page_string(ch->desc, buf, true);
+                write_to_output(ch->desc, buf);
                 return;
             }
             if (*ptr == ':') ptr++;
@@ -1365,7 +1365,7 @@ void handle_learn(struct char_data *keeper, int guild_nr, struct char_data *ch, 
                         cptr = weapon_type[subval];
                     subfeat += snprintf(buf + subfeat, sizeof(buf) - subfeat, "  %s\r\n", cptr);
                 }
-                page_string(ch->desc, buf, true);
+                write_to_output(ch->desc, buf);
                 return;
             }
             subval = search_block(ptr, (sftype == 2) ? spell_schools : weapon_type, false);
@@ -1385,7 +1385,7 @@ void handle_learn(struct char_data *keeper, int guild_nr, struct char_data *ch, 
                         cptr = weapon_type[subval];
                     subfeat += snprintf(buf + subfeat, sizeof(buf) - subfeat, "  %s\r\n", cptr);
                 }
-                page_string(ch->desc, buf, true);
+                write_to_output(ch->desc, buf);
                 return;
             }
             if (!feat_is_available(ch, feat_num, subval, nullptr)) {
@@ -1782,7 +1782,7 @@ void list_all_guilds(struct char_data *ch) {
                         gm_nr, buf1, g.charge, guild_customer_string(gm_nr, false));
     }
 
-    page_string(ch->desc, buf, true);
+    write_to_output(ch->desc, buf);
 }
 
 
@@ -1814,7 +1814,7 @@ void list_detailed_guild(struct char_data *ch, int gm_nr) {
 
     strcat(buf, buf2);
 
-    page_string(ch->desc, buf, 1);
+    write_to_output(ch->desc, buf);
 }
 
 

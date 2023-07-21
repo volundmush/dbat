@@ -2385,7 +2385,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
 
                         snprintf(notebuf, sizeof(notebuf), "There is something written on it:\r\n\r\n%s",
                                  obj->look_description);
-                        page_string(ch->desc, notebuf, true);
+                        write_to_output(ch->desc, notebuf);
                     } else
                         send_to_char(ch, "There appears to be nothing written on it.\r\n");
                     return;
@@ -4914,7 +4914,7 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread) {
 
         /* Does the argument match an extra desc in the room? */
         if ((desc = find_exdesc(arg, world[IN_ROOM(ch)].ex_description)) != nullptr && ++i == fnum) {
-            page_string(ch->desc, desc, false);
+            write_to_output(ch->desc, desc);
             return;
         }
 
@@ -6807,10 +6807,12 @@ ACMD(do_help) {
     }
 
     if (!*argument) {
-        if (GET_ADMLEVEL(ch) < ADMLVL_IMMORT)
-            page_string(ch->desc, help, 0);
-        else
-            page_string(ch->desc, ihelp, 0);
+        if (GET_ADMLEVEL(ch) < ADMLVL_IMMORT) {
+            write_to_output(ch->desc, help);
+        }
+        else {
+            write_to_output(ch->desc, ihelp);
+        }
         return;
     }
 
@@ -6849,7 +6851,7 @@ ACMD(do_help) {
     if (GET_ADMLEVEL(ch) > 0) {
         sprintf(buf + strlen(buf), "@WHelp File Level@w: @D(@R%d@D)@n\n", help_table[mid].min_level);
     }
-    page_string(ch->desc, buf, 0);
+    write_to_output(ch->desc, buf);
 }
 
 #define WHO_FORMAT \
@@ -7234,34 +7236,42 @@ ACMD(do_gen_ps) {
     one_argument(argument, arg);
 
     switch (subcmd) {
-        case SCMD_CREDITS:
-            page_string(ch->desc, credits, 0);
+        case SCMD_CREDITS: {
+            write_to_output(ch->desc, credits);
+        }
             break;
-        case SCMD_NEWS:
-            page_string(ch->desc, news, 0);
+        case SCMD_NEWS: {
+            write_to_output(ch->desc, news);
+        }
             GET_LPLAY(ch) = time(nullptr);
             break;
-        case SCMD_INFO:
-            page_string(ch->desc, info, 0);
+        case SCMD_INFO: {
+            write_to_output(ch->desc, info);
+        }
             break;
-        case SCMD_WIZLIST:
-            page_string(ch->desc, wizlist, 0);
+        case SCMD_WIZLIST: {
+            write_to_output(ch->desc, wizlist);
+        }
             break;
-        case SCMD_IMMLIST:
-            page_string(ch->desc, immlist, 0);
+        case SCMD_IMMLIST: {
+            write_to_output(ch->desc, immlist);
+        }
             break;
-        case SCMD_HANDBOOK:
-            page_string(ch->desc, handbook, 0);
+        case SCMD_HANDBOOK: {
+            write_to_output(ch->desc, handbook);
+        }
             break;
         case SCMD_POLICIES:
             sprintf(bum, "--------------------\r\n%s\r\n--------------------\r\n", policies);
-            page_string(ch->desc, bum, 0);
+            write_to_output(ch->desc, bum);
             break;
-        case SCMD_MOTD:
-            page_string(ch->desc, motd, 0);
+        case SCMD_MOTD: {
+            write_to_output(ch->desc, motd);
+        }
             break;
-        case SCMD_IMOTD:
-            page_string(ch->desc, imotd, 0);
+        case SCMD_IMOTD: {
+            write_to_output(ch->desc, imotd);
+        }
             break;
         case SCMD_CLEAR:
             send_to_char(ch, "\033[H\033[J");
@@ -7473,7 +7483,7 @@ ACMD(do_levels) {
         len += nlen;
     }
 
-    page_string(ch->desc, buf, true);
+    write_to_output(ch->desc, buf);
 }
 
 ACMD(do_consider) {

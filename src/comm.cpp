@@ -2587,7 +2587,7 @@ void show_help(struct descriptor_data *t, const char *entry) {
             write_to_output(t, "\r\n");
             snprintf(buf, sizeof(buf), "%s\r\n[ PRESS RETURN TO CONTINUE ]",
                      help_table[mid].entry);
-            page_string(t, buf, 0);
+            write_to_output(t, buf);
             return;
         } else {
             if (chk > 0) bot = mid + 1;
@@ -2738,9 +2738,7 @@ void descriptor_data::handle_input() {
 
     auto comm = (char*)command.c_str();
 
-    if (showstr_count) /* Reading something w/ pager */
-        show_string(this, comm);
-    else if (str)        /* Writing boards, mail, etc. */
+    if (str)        /* Writing boards, mail, etc. */
         string_add(this, comm);
     else if (STATE(this) != CON_PLAYING) /* In menus, etc. */
         nanny(this, comm);

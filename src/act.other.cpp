@@ -11186,7 +11186,7 @@ ACMD(do_file) {
     }
     fclose(req_file);
 
-    page_string(ch->desc, buf, 1);
+    write_to_output(ch->desc, buf);
 
 }
 

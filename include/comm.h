@@ -83,8 +83,6 @@ extern void string_write(struct descriptor_data *d, char **txt, size_t len, long
 #define PAGE_LENGTH    22
 #define PAGE_WIDTH    79
 
-extern void page_string(struct descriptor_data *d, char *str, int keep_internal);
-
 
 extern void show_help(struct descriptor_data *t, const char *entry);
 
