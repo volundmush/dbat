@@ -1,6 +1,8 @@
 #include "telnet.h"
 #include <string_view>
 #include "structs.h"
+#include <boost/beast/core/detail/base64.hpp>
+#include "login.h"
 
 namespace net {
 
@@ -132,22 +134,22 @@ namespace net {
         bool enabled = false, negotiating = false, answered = false;
     };
 
-    telnet_data::telnet_data(boost::beast::tcp_stream conn)  : conn(std::move(conn)) {
+    telnet_data::telnet_data(boost::beast::tcp_stream conn) : connection_data(), conn(std::move(conn)) {
         capabilities.protocol = Protocol::Telnet;
+        socket = conn.socket().native_handle();
     }
 
     awaitable<void> telnet_data::startConnection() {
-        started = true;
-        createDescriptor();
+        state = ConnState::Running;
+        setParser(new LoginParser(this));
         if(appbuf.size()) co_await processAppData();
         co_return;
     }
 
-    awaitable<void> telnet_data::runTimer() {
-        auto timer = steady_timer(co_await boost::asio::this_coro::executor, std::chrono::milliseconds(100));
-
+    awaitable<void> telnet_data::runHandshake() {
         try {
-            co_await timer.async_wait(use_awaitable);
+            bool timedOut = false;
+            co_await runTimer(std::chrono::milliseconds(100), &timedOut);
             co_await startConnection();
         } catch(boost::system::error_code& ec) {
             if (ec == boost::asio::error::operation_aborted) {
@@ -163,9 +165,9 @@ namespace net {
 
     awaitable<void> telnet_data::run() {
         // start runTimer() first on the same executor/strand as conn...
-        co_spawn(conn.get_executor(), runTimer(), detached);
+        if(!desc) co_spawn(co_await boost::asio::this_coro::executor, runHandshake(), detached);
         try {
-            co_await (runReader() || runWriter());
+            co_await (runReader() || runWriter() || runInQueue());
         }
         catch(boost::system::error_code& ec) {
             if (ec == boost::asio::error::operation_aborted) {
@@ -175,6 +177,13 @@ namespace net {
                 // Some other error occurred.
             }
         }
+
+        if(state == ConnState::Shutdown) {
+
+        } else if(state == ConnState::Copyover) {
+
+        }
+
         co_return;
     }
 
@@ -193,7 +202,7 @@ namespace net {
             auto p = appbuf.prepare(msg.data.size());
             memcpy(p.data(), msg.data.data(), msg.data.size());
             appbuf.commit(msg.data.size());
-            if(started) co_await processAppData();
+            if(state == ConnState::Running) co_await processAppData();
         }
         co_return;
     }
@@ -206,7 +215,10 @@ namespace net {
         size_t pos = 0;
         while((pos = buffer_data.find("\r\n")) != std::string_view::npos) {
             // Found \r\n, so grab the line
-            desc->raw_input_queue.emplace_back(buffer_data.substr(0, pos));
+            Message msg;
+            msg.cmd = "text";
+            msg.args.push_back(buffer_data.substr(0, pos));
+            inMessages.try_send(boost::system::error_code{}, msg);
 
             // Advance past the \r\n
             buffer_data = buffer_data.substr(pos + 2);
@@ -272,8 +284,9 @@ namespace net {
         // We will be converting outgoing messages to bytes and shoving them into outbuf.
         // We will be doing this in a loop until there are no more messages to send.
 
-        if(outMessages.empty()) co_return;
-        for(auto &m : outMessages) {
+        while(outMessages.ready()) {
+            Message m;
+            if(!outMessages.try_receive(m)) continue;
             // for now let's only worry about text outMessages...
             if(m.cmd == "text") {
                 // iterate over m.args, all of which should be strings, and shove them into outbuf.
@@ -284,20 +297,20 @@ namespace net {
                 }
             }
         }
-        outMessages.clear();
         co_return;
     }
 
     awaitable<void> telnet_data::runWriter() {
         // Let's create a re-usable timer that we can await on for when there's no data in the outbuf or messages to
         // parse to bytes.
-        auto timer = steady_timer(co_await boost::asio::this_coro::executor, std::chrono::milliseconds(25));
+        auto ms = std::chrono::milliseconds(25);
+        auto timer = steady_timer(co_await boost::asio::this_coro::executor, ms);
         try {
             while(true) {
                 co_await flushMessages();
                 if(!outbuf.size()) {
                     // we have no data to send. Wait for 25ms and try again.
-                    timer.expires_after(std::chrono::milliseconds(25));
+                    timer.expires_after(ms);
                     co_await timer.async_wait(use_awaitable);
                     continue;
                 }
@@ -316,6 +329,64 @@ namespace net {
             }
         }
         co_return;
+    }
+
+    awaitable<void> telnet_data::halt(int mode) {
+        if (mode == 0) {
+            // close socket.
+            state = ConnState::Disconnecting;
+        }
+        else if(mode == 1) {
+            // copyover...
+            state = ConnState::Copyover;
+            auto s = conn.release_socket();
+            socket = s.release();
+        } else if(mode == 2) {
+            // shutdown...
+            state = ConnState::Shutdown;
+        }
+        conn.cancel();
+        co_return;
+    }
+
+    // Convert a flat_buffer to a base64-encoded string
+    static std::string toBase64(const boost::beast::flat_buffer& buffer)
+    {
+        auto const size = buffer.size();
+        std::string result(boost::beast::detail::base64::encoded_size(size), '\0');
+        boost::beast::detail::base64::encode(&result[0], static_cast<const char*>(buffer.data().data()), size);
+        return result;
+    }
+
+	// Convert a base64-encoded string to a flat_buffer
+    static void fromBase64(const std::string& str, boost::beast::flat_buffer& buffer)
+    {
+        auto const size = boost::beast::detail::base64::decoded_size(str.size());
+        auto p = buffer.prepare(size);
+        auto const result = boost::beast::detail::base64::decode(p.data(), str.data(), str.size());
+        buffer.commit(result.first);
+    }
+
+    nlohmann::json telnet_data::serialize() {
+        auto j = connection_data::serialize();
+
+        if(inbuf.size()) j["inbuf"] = toBase64(inbuf);
+        if(outbuf.size()) j["outbuf"] = toBase64(outbuf);
+        if(appbuf.size()) j["appbuf"] = toBase64(appbuf);
+
+        // TODO: serialize telnet-specific stuff
+
+        return j;
+    }
+
+    void telnet_data::deserialize(const nlohmann::json& j) {
+        connection_data::deserialize(j);
+
+        if(j.contains("inbuf")) fromBase64(j["inbuf"].get<std::string>(), inbuf);
+        if(j.contains("outbuf")) fromBase64(j["outbuf"].get<std::string>(), outbuf);
+        if(j.contains("appbuf")) fromBase64(j["appbuf"].get<std::string>(), appbuf);
+
+        // TODO: deserialize telnet-specific stuff
     }
 
 }

@@ -8,6 +8,7 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
+#include <fstream>
 #include "act.wizard.h"
 #include "interpreter.h"
 #include "utils.h"
@@ -523,7 +524,7 @@ ACMD(do_reward) {
             continue;
         if (STATE(k) != CON_PLAYING)
             continue;
-        if (!strcasecmp(k->user, arg))
+        if (!strcasecmp(k->account->name.c_str(), arg))
             vict = k->character;
     }
 
@@ -534,18 +535,11 @@ ACMD(do_reward) {
                          GET_NAME(ch));
             send_to_imm("ROLEPLAY: %s has been awarded %d RP points by %s.", arg, amt, GET_NAME(ch));
             log_imm_action("ROLEPLAY: %s has been awarded %d RP points by %s.", arg, amt, GET_NAME(ch));
-            vict->rp += amt;
-            GET_RP(vict) = vict->rp;
-            if (amt <= 29) {
-                GET_TRP(vict) += amt;
-            }
-            vict->desc->rpp += amt;
-            userWrite(vict->desc, 0, 0, 0, "index");
+            vict->modRPP(amt);
         } else {
             send_to_char(ch, "@WYou award user @C%s @D(@G%d@D)@W RP points.@n\r\n", arg, amt);
             send_to_imm("ROLEPLAY: User %s has been awarded %d RP points by %s.", arg, amt, GET_NAME(ch));
             log_imm_action("ROLEPLAY: %s has been awarded %d RP points by %s.", arg, amt, GET_NAME(ch));
-            userWrite(nullptr, 0, amt, 0, arg);
         }
     } else {
         if (vict != nullptr) {
@@ -554,97 +548,11 @@ ACMD(do_reward) {
                          amt);
             send_to_imm("ROLEPLAY: %s has had %d RP points deducted by %s.", GET_NAME(vict), amt, GET_NAME(ch));
             log_imm_action("ROLEPLAY: %s has had %d RP points deducted by %s.", GET_NAME(vict), amt, GET_NAME(ch));
-            vict->rp += amt;
-            GET_RP(vict) = vict->rp;
-            vict->desc->rpp += amt;
-            userWrite(vict->desc, 0, 0, 0, "index");
+            vict->modRPP(amt);
         } else {
             send_to_char(ch, "@WYou deduct @D(@G%d@D)@W RP points from user @C%s@W.@n\r\n", amt, arg);
             send_to_imm("ROLEPLAY: User %s has had %d RP points deducted by %s.", arg, amt, GET_NAME(ch));
             log_imm_action("ROLEPLAY: %s has been awarded %d RP points by %s.", arg, amt, GET_NAME(ch));
-            userWrite(nullptr, 0, amt, 0, arg);
-        }
-    }
-
-}
-
-ACMD(do_rbank) {
-    struct char_data *vict = nullptr;
-    struct descriptor_data *k;
-    int amt = 0;
-
-    char arg[MAX_INPUT_LENGTH];
-    char arg2[MAX_INPUT_LENGTH];
-
-    two_arguments(argument, arg, arg2);
-
-    if (!*arg || !*arg2) {
-        send_to_char(ch, "Syntax: rbank (target) (amount)\r\nThis is either a positive number or a negative.\r\n");
-        return;
-    }
-
-    if (!readUserIndex(arg)) {
-        send_to_char(ch, "That is not a recognised user file.\r\n");
-        return;
-    }
-
-    amt = atoi(arg2);
-
-    if (amt == 0) {
-        send_to_char(ch, "That is pointless don't you think? Try an amount higher than 0.\r\n");
-        return;
-    }
-
-    for (k = descriptor_list; k; k = k->next) {
-        if (IS_NPC(k->character))
-            continue;
-        if (STATE(k) != CON_PLAYING)
-            continue;
-        if (!strcasecmp(k->user, arg))
-            vict = k->character;
-    }
-
-    if (amt > 0) {
-        if (vict != nullptr) {
-            send_to_char(ch, "@WYou put @D(@G%d@D)@W RP points into @C%s@W's Bank.@n\r\n", amt, GET_NAME(vict));
-            send_to_char(vict,
-                         "@D[@YROLEPLAY@D] @WYou have had @D(@G%d@D)@W RP points added to your RPP Bank by @C%s@W.@n\r\n",
-                         amt, GET_NAME(ch));
-            send_to_imm("ROLEPLAY: %s has had %d RP points put into their RPP Bank by %s.", arg, amt, GET_NAME(ch));
-            log_imm_action("ROLEPLAY: %s has had %d RP points put into their RPP Bank by %s.", arg, amt, GET_NAME(ch));
-            vict->rbank += amt;
-            GET_RBANK(vict) = vict->rbank;
-            if (amt <= 29) {
-                GET_TRP(vict) += amt;
-            }
-            vict->desc->rbank += amt;
-            userWrite(vict->desc, 0, 0, 0, "index");
-        } else {
-            send_to_char(ch, "@WYou put @D(@G%d@D)@W RP points into @C%s@W's Bank.@n\r\n", amt, arg);
-            send_to_imm("ROLEPLAY: %s has had %d RP points put into their RPP Bank by %s.", arg, amt, GET_NAME(ch));
-            log_imm_action("ROLEPLAY: %s has had %d RP points put into their RPP Bank by %s.", arg, amt, GET_NAME(ch));
-            userWrite(nullptr, 0, 0, amt, arg);
-        }
-    } else {
-        if (vict != nullptr) {
-            send_to_char(ch, "@WYou deduct @D(@G%d@D)@W RP points from @C%s@W's Bank.@n\r\n", amt, GET_NAME(vict));
-            send_to_char(vict, "@D[@YROLEPLAY@D] @C%s@W deducts @D(@G%d@D)@W RP points from your RPP Bank.@n\r\n",
-                         GET_NAME(ch), amt);
-            send_to_imm("ROLEPLAY: %s has had %d RP points deducted from their RPP Bank by %s.", GET_NAME(vict), amt,
-                        GET_NAME(ch));
-            log_imm_action("ROLEPLAY: %s has had %d RP points deducted from their RPP Bank by %s.", GET_NAME(vict), amt,
-                           GET_NAME(ch));
-            vict->rbank += amt;
-            GET_RBANK(vict) = vict->rbank;
-            vict->desc->rbank += amt;
-            userWrite(vict->desc, 0, 0, 0, "index");
-        } else {
-            send_to_char(ch, "@WYou deduct @D(@G%d@D)@W RP points from @C%s@W's Bank.@n\r\n", amt, arg);
-            send_to_imm("ROLEPLAY: %s has had %d RP points deducted from their RPP Bank by %s.", arg, amt,
-                        GET_NAME(ch));
-            log_imm_action("ROLEPLAY: %s has had %d RP points put deducted from RPP Bank by %s.", arg, amt,
-                           GET_NAME(ch));
-            userWrite(nullptr, 0, 0, amt, arg);
         }
     }
 
@@ -969,7 +877,7 @@ ACMD(do_echo) {
         if (NoName == true) {
             char blom[MAX_INPUT_LENGTH];
             sprintf(blom, "@D(@GOOC@W: @gSmote by user %s@D)@n",
-                    IS_NPC(ch) ? GET_NAME(ch) : (ch->desc->user == nullptr ? "ERROR REPORT" : ch->desc->user));
+                    IS_NPC(ch) ? GET_NAME(ch) : (ch->desc->account == nullptr ? "ERROR REPORT" : ch->desc->account->name.c_str()));
             act(blom, false, ch, nullptr, nullptr, TO_ROOM);
         }
         if (found == false) {
@@ -1960,10 +1868,30 @@ ACMD(do_varstat) {
             /* not displayed here. in the future, this might change */
             for (tv = vict->script->global_vars; tv; tv = tv->next) {
                 if (*(tv->value) == UID_CHAR) {
-                    find_uid_name(tv->value, uname, sizeof(uname));
-                    send_to_char(ch, "    %10s:  [UID]: %s\r\n", tv->name, uname);
-                } else
+                    auto uidResult = parseDgUID(tv->value);
+                    if(uidResult) {
+                        auto idx = *uidResult.index();
+                        std::string n;
+                        if(idx == 0) {
+                            // Room.
+                            auto thing = std::get<0>(*uidResult);
+                            n = thing->name;
+                        } else if(idx == 1) {
+                            // object
+                            auto thing = std::get<1>(*uidResult);
+                            n = thing->name;
+                        } else if(idx == 2) {
+                            // character or player...
+                            auto thing = std::get<2>(*uidResult);
+                            n = thing->name;
+                        }
+                        send_to_char(ch, "    %10s:  [UID]: %s\r\n", tv->name, n.c_str());
+                    } else {
+                        send_to_char(ch, "   -BAD UID: %s", tv->value);
+                    }
+                } else {
                     send_to_char(ch, "    %10s:  %s\r\n", tv->name, tv->value);
+                }
             }
         }
     }
@@ -2436,7 +2364,6 @@ ACMD(do_syslog) {
     send_to_char(ch, "Your syslog is now %s.\r\n", logtypes[tp]);
 }
 
-#define EXE_FILE "bin/circle" /* maybe use argv[0] but it's not reliable */
 
 /* (c) 1996-97 Erwin S. Andreasen <erwin@pip.dknet.dk> */
 ACMD(do_copyover) {
@@ -2487,67 +2414,8 @@ ACMD(do_copyover) {
 }
 
 static void execute_copyover() {
-    FILE *fp;
-    struct descriptor_data *d, *d_next;
-    char buf[100], buf2[100];
-
-    fp = fopen(COPYOVER_FILE, "w");
-
-    if (!fp) {
-        send_to_imm("Copyover file not writeable, aborted.\n\r");
-        return;
-    }
-
-    /* Consider changing all saved areas here, if you use OLC */
-    save_all();
-    save_mud_time(&time_info);
-    sprintf(buf, "\t\x1B[1;31m \007\007\007The universe stops for a moment as space and time fold.\x1B[0;0m\r\n");
-    /* For each playing descriptor, save its state */
-    for (d = descriptor_list; d; d = d_next) {
-        struct char_data *och = d->character;
-        d_next = d->next; /* We delete from the list , so need to save this */
-        if (!d->character || d->connected > CON_PLAYING) {
-            write_to_descriptor(d->descriptor, "\n\rSorry, we are rebooting. Come back in a few seconds.\n\r");
-            close_socket(d); /* throw'em out */
-        } else {
-            if (GET_ROOM_VNUM(IN_ROOM(och)) > 1) {
-                fprintf(fp, "%d %s %s %d %s\n", d->descriptor, GET_NAME(och), d->host, GET_ROOM_VNUM(IN_ROOM(och)),
-                        d->user);
-            } else if (GET_ROOM_VNUM(IN_ROOM(och)) <= 1 && GET_ROOM_VNUM(GET_WAS_IN(och)) > 1) {
-                fprintf(fp, "%d %s %s %d %s\n", d->descriptor, GET_NAME(och), d->host, GET_ROOM_VNUM(GET_WAS_IN(och)),
-                        d->user);
-            } else {
-                fprintf(fp, "%d %s %s 300 %s\n", d->descriptor, GET_NAME(och), d->host, d->user);
-            }
-            log("printing descriptor name and host of connected players");
-            /* save och */
-            Crash_rentsave(och, 0);
-            save_char(och);
-            write_to_descriptor(d->descriptor, buf);
-        }
-    }
-
-    fprintf(fp, "-1\n");
-    fclose(fp);
-
-    /* Close reserve and other always-open files and release other resources
-     since we are now using ASCII pfiles, closing the player_fl would crash
-     the game, since it's no longer around, so I commented it out. I'll
-     leave the code here, for historical reasons -spl
-     fclose(player_fl); */
-
-    /* exec - descriptors are inherited */
-
-    sprintf(buf, "%d", port);
-    sprintf(buf2, "-C%d", mother_desc);
-    chdir("..");
-    execl(EXE_FILE, "circle", buf2, buf, (char *) nullptr);
-    /* Failed - sucessful exec will not return */
-
-    perror("do_copyover: execl");
-    send_to_imm("Copyover FAILED!\n\r");
-
-    exit(1); /* too much trouble to try to recover! */
+    circle_shutdown = 1;
+    circle_reboot = 1;
 }
 
 void copyover_check() {

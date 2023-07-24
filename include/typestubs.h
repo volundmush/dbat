@@ -8,6 +8,7 @@ struct obj_data;
 struct shop_buy_data;
 struct command_info;
 struct descriptor_data;
+struct account_data;
 
 namespace race {
     class Race;

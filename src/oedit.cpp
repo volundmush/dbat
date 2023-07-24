@@ -1059,7 +1059,6 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
                         *obj = *(OLC_OBJ(d));
                         ((obj)->id) = max_obj_id++;
                         /* find_obj helper */
-                        add_to_lookup_table(((obj)->id), (void *) obj);
                         if (GET_OBJ_VNUM(obj) != NOTHING) {
                             /* remove any old scripts */
                             if (SCRIPT(obj)) {
@@ -1742,8 +1741,6 @@ void iedit_setup_existing(struct descriptor_data *d, struct obj_data *real_num) 
     if (SCRIPT(obj))
         extract_script(obj, OBJ_TRIGGER);
     SCRIPT(obj) = nullptr;
-    /* find_obj helper */
-    remove_from_lookup_table(((obj)->id));
 
     OLC_OBJ(d) = obj;
     OLC_IOBJ(d) = real_num;

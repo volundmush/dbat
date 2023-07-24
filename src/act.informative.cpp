@@ -899,31 +899,7 @@ ACMD(do_showoff) {
     }
 }
 
-/* Used for checking if you know the character in question. */
-void introCreate(struct char_data *ch) {
-    char fname[40];
-    FILE *fl;
-    /* Write Introduction File */
-    if (!get_filename(fname, sizeof(fname), INTRO_FILE, GET_NAME(ch)))
-        return;
-
-    if (!(fl = fopen(fname, "w"))) {
-        log("ERROR: could not save user, %s, to filename, %s.", GET_NAME(ch), fname);
-        return;
-    }
-
-    fprintf(fl, "Gibbles Gibbles\n");
-
-    fclose(fl);
-    return;
-}
-
 int readIntro(struct char_data *ch, struct char_data *vict) {
-    char fname[40], filler[50], scrap[100], line[256];
-    int known = false;
-    FILE *fl;
-
-    /* Read Introduction File */
     if (vict == nullptr) {
         return 0;
     }
@@ -932,91 +908,13 @@ int readIntro(struct char_data *ch, struct char_data *vict) {
         return 1;
     }
 
-    if (!get_filename(fname, sizeof(fname), INTRO_FILE, GET_NAME(ch))) {
-        introCreate(ch);
-    }
-    if (!(fl = fopen(fname, "r"))) {
-        return 2;
-    }
-    if (vict == ch) {
-        fclose(fl);
-        return 0;
-    }
-
-    while (!feof(fl)) {
-        get_line(fl, line);
-        sscanf(line, "%s %s\n", filler, scrap);
-        if (!strcasecmp(GET_NAME(vict), filler)) {
-            known = true;
-        }
-    }
-    fclose(fl);
-
-    if (known == true)
-        return 1;
-    else
-        return 0;
+    return ch->player_specials->dubNames.contains(vict->idnum);
 }
 
 void introWrite(struct char_data *ch, struct char_data *vict, char *name) {
-    FILE *file;
-    char fname[40], filler[50], scrap[100], line[256];
-    char *names[500] = {""}, *alias[500] = {""};
-    FILE *fl;
-    int count = 0, x = 0;
-
-    /* Read Introduction File */
-    if (!get_filename(fname, sizeof(fname), INTRO_FILE, GET_NAME(ch))) {
-        introCreate(ch);
-    }
-    if (!(file = fopen(fname, "r"))) {
-        return;
-    }
-    while (!feof(file) || count < 498) {
-        get_line(file, line);
-        sscanf(line, "%s %s\n", filler, scrap);
-        names[count] = strdup(filler);
-        alias[count] = strdup(scrap);
-        count++;
-        *filler = '\0';
-        *scrap = '\0';
-    }
-    fclose(file);
-
-    /* Write Introduction File */
-
-    if (!get_filename(fname, sizeof(fname), INTRO_FILE, GET_NAME(ch)))
-        return;
-
-    if (!(fl = fopen(fname, "w"))) {
-        log("ERROR: could not save intro file, %s, to filename, %s.", GET_NAME(ch), fname);
-        return;
-    }
-
-    while (x < count) {
-        if (x == 0 || strcasecmp(names[x - 1], names[x])) {
-            if (strcasecmp(names[x], GET_NAME(vict))) {
-                fprintf(fl, "%s %s\n", names[x], alias[x]);
-            }
-        }
-        x++;
-    }
-
-    x = 0;
-    while (x < count) {
-        if (names[x] != nullptr) {
-            free(names[x]);
-        }
-        if (alias[x] != nullptr) {
-            free(alias[x]);
-        }
-        x++;
-    }
-
-    fprintf(fl, "%s %s\n", GET_NAME(vict), CAP(name));
-
-    fclose(fl);
-    return;
+    std::string n(name);
+    ch->player_specials->dubNames[vict->idnum] = n;
+    dirty_players.insert(ch->idnum);
 }
 
 ACMD(do_intro) {
@@ -5149,22 +5047,17 @@ ACMD(do_rptrans) {
             continue;
         if (STATE(k) != CON_PLAYING)
             continue;
-        if (!strcasecmp(k->user, arg))
+        if (!strcasecmp(k->account->name.c_str(), arg))
             vict = k->character;
     }
     if (vict == nullptr) {
         userWrite(nullptr, 0, amt, 0, arg);
     } else {
-        GET_RP(vict) += amt;
-        vict->desc->rpp += amt;
-        userWrite(vict->desc, 0, 0, 0, "index");
-        GET_TRP(vict) += amt;
+        vict->modRPP(amt);
         save_char(vict);
         send_to_char(vict, "@W%s gives @C%d@W of their RPP to you. How nice!\r\n", GET_NAME(ch), amt);
     }
-    GET_RP(ch) -= amt;
-    ch->desc->rpp -= amt;
-    userWrite(ch->desc, 0, 0, 0, "index");
+    ch->modRPP(-amt);
     send_to_char(ch, "@WYou exchange @C%d@W RPP to user @c%s@W for a warm fuzzy feeling.\r\n", amt, CAP(arg));
     mudlog(NRM, MAX(ADMLVL_IMPL, GET_INVIS_LEV(ch)), true, "EXCHANGE: %s gave %d RPP to user %s", GET_NAME(ch), amt,
            arg);
@@ -5196,73 +5089,13 @@ ACMD(do_rpbank) {
         return;
     }
 
-    GET_RP(ch) -= amt;
-    ch->desc->rpp -= amt;
-    GET_RBANK(ch) += amt;
-    ch->desc->rbank += amt;
+    ch->modRPP(-amt);
     send_to_char(ch, "You send %d to your RPP Bank. Your total is now %d.\r\n", amt, GET_RBANK(ch));
     mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), true, "RPP Bank: %s has put %d RPP into their bank",
            GET_NAME(ch), amt);
 
 }
 
-/* Rillao: An attempt was made. */
-ACMD(do_rbanktrans) {
-    struct char_data *vict = nullptr;
-    struct descriptor_data *k;
-    int amt = 0;
-    char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-
-    two_arguments(argument, arg, arg2);
-
-    if (!*arg || !*arg2) {
-        send_to_char(ch, "Syntax: bexchange (target) (amount)\r\n");
-        return;
-    }
-
-    amt = atoi(arg2);
-
-    if (amt <= 0) {
-        send_to_char(ch, "Are you being funny?\r\n");
-        return;
-    }
-
-    if (amt > GET_RBANK(ch)) {
-        send_to_char(ch, "@WYou only have @C%d@W Banked RPP!@n\r\n", GET_RBANK(ch));
-        return;
-    }
-
-    if (!readUserIndex(arg)) {
-        send_to_char(ch, "That is not a recognised user file.\r\n");
-        return;
-    }
-
-    for (k = descriptor_list; k; k = k->next) {
-        if (IS_NPC(k->character))
-            continue;
-        if (STATE(k) != CON_PLAYING)
-            continue;
-        if (!strcasecmp(k->user, arg))
-            vict = k->character;
-    }
-    if (vict == nullptr) {
-        userWrite(nullptr, 0, amt, 0, arg);
-    } else {
-        GET_RBANK(vict) += amt;
-        vict->desc->rbank += amt;
-        userWrite(vict->desc, 0, 0, 0, "index");
-        save_char(vict);
-        send_to_char(vict, "@W%s gives @C%d@W of their Banked RPP to you. How nice!\r\n", GET_NAME(ch), amt);
-    }
-    GET_RBANK(ch) -= amt;
-    ch->desc->rbank -= amt;
-    userWrite(ch->desc, 0, 0, 0, "index");
-    send_to_char(ch, "@wWELL @xGOLLY @xGEE @xWILLICKERS@x! @wYOU @RZ@YIM @RZ@YAMMED @C%d @wRIPROOZLES TO @C%s!@n\r\n",
-                 amt, CAP(arg));
-    mudlog(NRM, MAX(ADMLVL_IMPL, GET_INVIS_LEV(ch)), true, "EXCHANGE: %s gave %d Banked RPP to user %s", GET_NAME(ch),
-           amt, arg);
-    save_char(ch);
-}
 
 ACMD(do_rdisplay) {
     skip_spaces(&argument);
@@ -5413,7 +5246,6 @@ ACMD(do_perf) {
                 break;
         }
     }
-
 }
 
 ACMD(do_look) {
@@ -6987,7 +6819,7 @@ ACMD(do_who) {
                 num_can_see++;
 
                 char usr[100];
-                sprintf(usr, "@W(@R%s@W)%s", tch->desc->user,
+                sprintf(usr, "@W(@R%s@W)%s", tch->desc->account->name.c_str(),
                         PLR_FLAGGED(tch, PLR_BIOGR) ? "" : (SPOILED(tch) ? " @R*@n" : ""));
                 send_to_char(ch, "%s               @D<@C%-12s@D> %s@w%s", line_color,
                              GET_ADMLEVEL(ch) > 0 ? GET_NAME(tch) : (GET_ADMLEVEL(tch) > 0 ? GET_NAME(tch) : (GET_USER(
@@ -7205,15 +7037,15 @@ ACMD(do_users) {
         sprintf(line, "%3d %-20s %-20s %-14s %-3s %-8s %1s ", d->desc_num,
                 d->original && d->original->name ? d->original->name :
                 d->character && d->character->name ? d->character->name :
-                "UNDEFINED", d->user ? d->user : "UNKNOWN", state, idletime, timeptr,
+                "UNDEFINED", d->account ? d->account->name.c_str() : "UNKNOWN", state, idletime, timeptr,
                 "N");
 
         if (d->host && *d->host)
-            sprintf(line + strlen(line), "\n%3d [%s Site: %s]\r\n", d->desc_num, d->user ? d->user : "UNKNOWN",
+            sprintf(line + strlen(line), "\n%3d [%s Site: %s]\r\n", d->desc_num, d->account ? d->account->name.c_str() : "UNKNOWN",
                     d->host);
         else
             sprintf(line + strlen(line), "\n%3d [%s Site: Hostname unknown]\r\n", d->desc_num,
-                    d->user ? d->user : "UNKNOWN");
+                    d->account ? d->account->name.c_str() : "UNKNOWN");
 
         if (STATE(d) != CON_PLAYING) {
             sprintf(line2, "@g%s@n", line);

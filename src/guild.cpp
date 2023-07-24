@@ -1141,9 +1141,7 @@ void handle_gain(struct char_data *keeper, int guild_nr, struct char_data *ch, c
         if (GET_RP(ch) < rpp_cost) {
             send_to_char(ch, "You need at least %d RPP to gain the next level.\r\n", rpp_cost);
         } else if (rpp_cost <= GET_RP(ch)) {
-            GET_RP(ch) -= rpp_cost;
-            ch->desc->rpp = GET_RP(ch);
-            userWrite(ch->desc, 0, 0, 0, "index");
+            ch->modRPP(-rpp_cost);
             send_to_char(ch, "@D(@cRPP@W: @w-%d@D)@n\n\n", rpp_cost);
             gain_level(ch, whichclass);
         } else {

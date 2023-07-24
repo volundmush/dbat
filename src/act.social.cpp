@@ -429,7 +429,7 @@ ACMD(do_gmote) {
                 break;
 
     if ((act_nr = find_action(cmd)) < 0) {
-        snprintf(buf, sizeof(buf), "@D[@BOOC@D: @g%s %s@n@D]", GET_ADMLEVEL(ch) < 1 ? ch->desc->user : GET_NAME(ch),
+        snprintf(buf, sizeof(buf), "@D[@BOOC@D: @g%s %s@n@D]", GET_ADMLEVEL(ch) < 1 ? GET_USER(ch) : GET_NAME(ch),
                  argument);
         act(buf, false, ch, nullptr, vict, TO_GMOTE);
         return;

@@ -965,8 +965,9 @@
 #define CON_SKILLS       70
 #define CON_USER_TITLE   71
 #define CON_GENOME       72
+#define CON_COPYOVER     73
 
-#define NUM_CON_TYPES 73
+#define NUM_CON_TYPES 74
 
 /* Colors that the player can define */
 #define COLOR_NORMAL            0

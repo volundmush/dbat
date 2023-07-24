@@ -14,6 +14,15 @@
 #include "db.h"
 #include "genzon.h"
 #include "oasis.h"
+#include <variant>
+
+using DgUID = std::variant<struct room_data*, struct obj_data*, struct char_data*>;
+
+std::optional<DgUID> parseDgUID(const std::string& str);
+std::string toDgUID(const DgUID& uid);
+std::string toDgUID(struct char_data *ch);
+std::string toDgUID(struct obj_data *obj);
+std::string toDgUID(struct room_data *room);
 
 #define DG_SCRIPT_VERSION "DG Scripts 1.0.14"
 
@@ -379,8 +388,6 @@ extern void read_saved_vars(struct char_data *ch);
 
 extern void save_char_vars(struct char_data *ch);
 
-extern void init_lookup_table();
-
 extern void add_to_lookup_table(long uid, void *c);
 
 extern void remove_from_lookup_table(long uid);
@@ -506,6 +513,6 @@ extern room_rnum obj_room(obj_data *obj);
 #define TRIGGER_CHECK(t, type)   (IS_SET(GET_TRIG_TYPE(t), type) && \
                   !GET_TRIG_DEPTH(t))
 
-#define ADD_UID_VAR(buf, trig, go, name, context) do { \
-                 sprintf(buf, "%c%d", UID_CHAR, (go)->id); \
-                         add_var(&GET_TRIG_VARS(trig), name, buf, context); } while (0)
+void ADD_UID_VAR(char *buf, struct trig_data *trig, struct obj_data *obj, char *name, long context);
+void ADD_UID_VAR(char *buf, struct trig_data *trig, struct room_data *room, char *name, long context);
+void ADD_UID_VAR(char *buf, struct trig_data *trig, struct char_data *ch, char *name, long context);

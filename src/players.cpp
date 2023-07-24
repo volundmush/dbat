@@ -28,6 +28,8 @@
 #define LOAD_KI        3
 #define LOAD_LIFE       4
 
+std::map<vnum, player_data> players;
+
 /* local functions */
 void build_player_index();
 
@@ -934,8 +936,8 @@ void save_char(struct char_data *ch) {
     if (GET_TRP(ch) < GET_RP(ch)) {
         GET_TRP(ch) = GET_RP(ch);
     }
-    if (ch->desc != nullptr && ch->desc->user != nullptr) {
-        userWrite(ch->desc, 0, 0, 0, "index");
+    if (ch->desc && ch->desc->account) {
+        dirty_accounts.insert(ch->desc->account->vn);
     }
 
     for (i = 0; i < NUM_WEARS; i++) {
@@ -1599,4 +1601,19 @@ void clean_pfiles() {
      * After everything is done, we should rebuild player_index and
      * remove the entries of the players that were just deleted.
      */
+}
+
+int player_data::getNextID() {
+    int id = 0;
+    while(players.contains(id)) id++;
+    return id;
+}
+
+struct char_data *findPlayer(const std::string& name) {
+    for (auto& player : players) {
+        if (boost::algorithm::iequals(player.second->name, name) {
+            return player.second->character;
+        }
+    }
+    return nullptr;
 }

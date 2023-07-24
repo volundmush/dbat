@@ -1464,13 +1464,14 @@ SPECIAL(bank) {
                 send_to_char(ch, "That person doesn't exist.\r\n");
                 return (true);
             }
-            if (ch->desc->user == nullptr) {
-                send_to_char(ch, "There is an error. Report to Iovan.");
+            if (ch->desc->account == nullptr) {
+                send_to_char(ch, "There is an error. Report to staff.");
                 return (true);
             }
-            if (!strcasecmp(GET_NAME(vict), ch->desc->tmp1) || !strcasecmp(GET_NAME(vict), ch->desc->tmp2) ||
-                !strcasecmp(GET_NAME(vict), ch->desc->tmp3) || !strcasecmp(GET_NAME(vict), ch->desc->tmp4) ||
-                !strcasecmp(GET_NAME(vict), ch->desc->tmp5)) {
+            auto id = vict->idnum;
+            auto &c = ch->player_specials->account->characters;
+            auto found = std::find_if(c.begin(), c.end(), [&](auto i) {return i == id;});
+            if(found != c.end()) {
                 send_to_char(ch, "You can not transfer money to your own offline characters...");
                 if (is_file == true)
                     free_char(vict);

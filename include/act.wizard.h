@@ -115,8 +115,6 @@ extern ACMD(do_news);
 
 extern ACMD(do_lag);
 
-extern ACMD(do_rbank);
-
 extern ACMD(do_hell);
 
 extern ACMD(do_varstat);

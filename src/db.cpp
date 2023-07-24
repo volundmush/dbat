@@ -29,6 +29,7 @@
 #include "interpreter.h"
 #include "genolc.h"
 #include "shop.h"
+#include "guild.h"
 #include "handler.h"
 #include "mail.h"
 #include "clan.h"
@@ -47,6 +48,18 @@
 *  declarations of most of the 'global' variables                         *
 **************************************************************************/
 
+std::shared_ptr<SQLite::Database> db;
+std::set<room_vnum> dirty_rooms, dirty_save_rooms;
+std::set<obj_vnum> dirty_item_prototypes;
+std::set<mob_vnum> dirty_npc_prototypes;
+std::set<zone_vnum> dirty_zones;
+std::set<vnum> dirty_areas;
+std::set<trig_vnum> dirty_dgscripts;
+std::set<guild_vnum> dirty_guilds;
+std::set<shop_vnum> dirty_shops;
+std::set<vnum> dirty_players;
+
+
 struct config_data config_info; /* Game configuration list.    */
 
 std::map<room_vnum, room_data> world;    /* array of rooms		 */
@@ -63,6 +76,7 @@ std::map<obj_vnum, struct index_data> obj_index;    /* index table for object fi
 std::map<obj_vnum, struct obj_data> obj_proto;    /* prototypes for objs		 */
 
 /* hash tree for fast obj lookup */
+std::unordered_map<int64_t, std::pair<time_t, struct obj_data*>> uniqueObjects;
 
 std::map<zone_vnum, struct zone_data> zone_table;    /* zone table			 */
 
@@ -514,12 +528,14 @@ static bool load_new_zones() {
 }
 
 
-void boot_world() {
+boost::asio::awaitable<void> boot_world() {
     log("Loading level tables.");
     load_levels();
 
     bool newStyle = false;
 
+    broadcast("Your vision of the world expands across a vast expanse of numerous existences.\r\n");
+    co_await yield_for(std::chrono::milliseconds(10));
     if((newStyle = load_new_zones())) {
         log("Successfully loaded new format game data.");
         log("Loading triggers and generating index.");
@@ -530,6 +546,7 @@ void boot_world() {
 
         log("Loading rooms.");
         for(auto &[vn, z] : zone_table) {
+            co_await yield_for(std::chrono::milliseconds(10));
             z.load_rooms();
         }
     } else {
@@ -547,16 +564,21 @@ void boot_world() {
     log("Checking start rooms.");
     check_start_rooms();
 
+    broadcast("Names for these wondrous places race through your mind, but you cannot grasp most.\r\n");
     log("Loading areas.");
     load_areas();
+    co_await yield_for(std::chrono::milliseconds(10));
 
     if(newStyle) {
         log("Loading mobs and generating index.");
+        broadcast("You feel the presence of many beings around you in this strange journey, but cannot quite see them.\r\n");
         for(auto &[vn, z] : zone_table) {
             z.load_mobiles();
+            co_await yield_for(std::chrono::milliseconds(1));
         }
 
         log("Loading objs and generating index.");
+        broadcast("As the world rushes by, countless treasures flicker through your thoughts. Can they one day be yours?\r\n");
         for(auto &[vn, z] : zone_table) {
             z.load_objects();
         }
@@ -634,6 +656,8 @@ void destroy_db() {
         object_list = object_list->next;
         free_obj(objtmp);
     }
+
+    uniqueObjects.clear();
 
     /* Rooms */
     for (auto &r : world) {
@@ -769,18 +793,8 @@ void destroy_db() {
      - Elie Rosenblum Dec. 12 2003 */
 #define NUM_OBJ_UNIQUE_POOLS 5000
 
-struct obj_unique_hash_elem **obj_unique_hash_pools = nullptr;
-
-void init_obj_unique_hash() {
-    int i;
-    CREATE(obj_unique_hash_pools, struct obj_unique_hash_elem *, NUM_OBJ_UNIQUE_POOLS);
-    for (i = 0; i < NUM_OBJ_UNIQUE_POOLS; i++) {
-        obj_unique_hash_pools[i] = nullptr;
-    }
-}
-
 /* body of the booting system */
-void boot_db() {
+boost::asio::awaitable<void> boot_db() {
     zone_rnum i;
     race::load_races();
     sensei::load_sensei();
@@ -788,7 +802,9 @@ void boot_db() {
     log("Boot db -- BEGIN.");
 
     log("Resetting the game time:");
+    broadcast("Your sense of time accelerates and dilates paradoxically as the world unravels and reforms.\r\n");
     reset_time();
+    co_await yield_for(std::chrono::milliseconds(25));
 
     log("Reading news, credits, help, ihelp, bground, info & motds.");
     file_to_string_alloc(NEWS_FILE, &news);
@@ -814,7 +830,7 @@ void boot_db() {
     log("Loading feats.");
     assign_feats();
 
-    boot_world();
+    co_await boot_world();
 
     log("Loading help entries.");
     index_boot(DB_BOOT_HLP);
@@ -865,9 +881,6 @@ void boot_db() {
         assign_the_guilds();
     }
 
-    log("Init Object Unique Hash");
-    init_obj_unique_hash();
-
     log("Booting assembled objects.");
     assemblyBootAssemblies();
 
@@ -895,6 +908,7 @@ void boot_db() {
         House_boot();
     }
 
+    broadcast("The world seems to shimmer and waver as it comes into focus.\r\n");
     for (auto &[vn, z] : zone_table) {
         log("Resetting #%d: %s (rooms %d-%d).", vn,
             z.name, z.bot, z.top);
@@ -903,7 +917,8 @@ void boot_db() {
 
     boot_time = time(nullptr);
 
-    log("Boot db -- DONE.");
+    broadcast("Database load complete!\r\n");
+    co_return;
 }
 
 
@@ -2630,9 +2645,7 @@ struct char_data *create_char() {
     character_list = ch;
     ch->next_affect = nullptr;
     ch->next_affectv = nullptr;
-    ((ch)->id) = max_mob_id++;
-    /* find_char helper */
-    add_to_lookup_table(((ch)->id), (void *) ch);
+    ((ch)->id) = nextCharID();
 
     return (ch);
 }
@@ -3214,8 +3227,6 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     mob_index[i].number++;
 
     ((mob)->id) = max_mob_id++;
-    /* find_char helper */
-    add_to_lookup_table(((mob)->id), (void *) mob);
 
     copy_proto_script(&mob_proto[i], mob, MOB_TRIGGER);
     assign_triggers(mob, MOB_TRIGGER);
@@ -3228,79 +3239,14 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     return (mob);
 }
 
-
-struct obj_unique_hash_elem {
-    time_t generation;
-    int64_t unique_id;
-    struct obj_data *obj;
-    struct obj_unique_hash_elem *next_e;
-};
-
-static void free_obj_unique_hash() {
-    int i;
-    struct obj_unique_hash_elem *elem;
-    struct obj_unique_hash_elem *next_elem;
-    if (obj_unique_hash_pools) {
-        for (i = 0; i < NUM_OBJ_UNIQUE_POOLS; i++) {
-            elem = obj_unique_hash_pools[i];
-            while (elem) {
-                next_elem = elem->next_e;
-                free(elem);
-                elem = next_elem;
-            }
-        }
-        free(obj_unique_hash_pools);
-    }
-}
-
 void add_unique_id(struct obj_data *obj) {
-    struct obj_unique_hash_elem *elem;
-    int i;
-    if (!obj_unique_hash_pools)
-        init_obj_unique_hash();
-    if (obj->unique_id == -1) {
-        if (sizeof(long long) > sizeof(long))
-            obj->unique_id = (((long long) circle_random()) << (sizeof(long long) * 4)) +
-                             circle_random();
-        else
-            obj->unique_id = circle_random();
-    }
-    if (CONFIG_ALL_ITEMS_UNIQUE) {
-        if (!IS_SET_AR(GET_OBJ_EXTRA(obj), ITEM_UNIQUE_SAVE))
-            SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_UNIQUE_SAVE);
-    }
-    CREATE(elem, struct obj_unique_hash_elem, 1);
-    elem->generation = obj->generation;
-    elem->unique_id = obj->unique_id;
-    elem->obj = obj;
-    i = obj->unique_id % NUM_OBJ_UNIQUE_POOLS;
-    elem->next_e = obj_unique_hash_pools[i];
-    obj_unique_hash_pools[i] = elem;
+    auto &o = uniqueObjects[obj->unique_id];
+    o.first = obj->generation;
+    o.second = obj;
 }
 
 void remove_unique_id(struct obj_data *obj) {
-    struct obj_unique_hash_elem *elem, **ptr, *tmp;
-
-    if (obj == nullptr || obj->unique_id < 0)
-        return;
-
-    ptr = obj_unique_hash_pools + (obj->unique_id % NUM_OBJ_UNIQUE_POOLS);
-
-    if (!(ptr && *ptr))
-        return;
-
-    elem = *ptr;
-
-    while (elem) {
-        tmp = elem->next_e;
-        if (elem->obj == obj) {
-            free(elem);
-            *ptr = tmp;
-        } else {
-            ptr = &(elem->next_e);
-        }
-        elem = tmp;
-    }
+    uniqueObjects.erase(obj->unique_id);
 }
 
 void log_dupe_objects(struct obj_data *obj1, struct obj_data *obj2) {
@@ -3321,69 +3267,22 @@ void log_dupe_objects(struct obj_data *obj1, struct obj_data *obj2) {
            obj2->in_obj ? obj2->in_obj->short_description : "None",
            obj2->carried_by ? GET_NAME(obj2->carried_by) : "Nobody",
            obj2->worn_by ? GET_NAME(obj2->worn_by) : "Nobody");
+
+    // assign a new unique ID to obj2.
+    obj2->unique_id = nextObjID();
+    mudlog(BRF, ADMLVL_GOD, true, "Conflicting object assigned new id: %d", obj2->unique_id);
 }
 
 void check_unique_id(struct obj_data *obj) {
-    struct obj_unique_hash_elem *elem;
-    if (!obj || obj->unique_id == -1)
-        return;
-    elem = obj_unique_hash_pools[obj->unique_id % NUM_OBJ_UNIQUE_POOLS];
-    while (elem) {
-        if (elem->obj == obj) {
-            log("SYSERR: check_unique_id checking for existing object?!");
-        }
-        if (elem->generation == obj->generation && elem->unique_id == obj->unique_id) {
-            log_dupe_objects(elem->obj, obj);
-            SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_PURGE);
-        }
-        elem = elem->next_e;
+    auto find = uniqueObjects.find(obj->unique_id);
+
+    if(find != uniqueObjects.end() && find->generation == obj->generation) {
+        log_dupe_objects(find->second, obj);
     }
 }
 
 char *sprintuniques(int low, int high) {
-    int i, count = 0, remain, header;
-    struct obj_unique_hash_elem *q;
-    char *str, *ptr;
-    remain = 40;
-    for (i = 0; i < NUM_OBJ_UNIQUE_POOLS; i++) {
-        q = obj_unique_hash_pools[i];
-        remain += 40;
-        while (q) {
-            count++;
-            remain += 80 + (q->obj->short_description ? strlen(q->obj->short_description) : 20);
-            q = q->next_e;
-        }
-    }
-    if (count < 1) {
-        return strdup("No objects in unique hash.\r\n");
-    }
-    CREATE(str, char, remain + 1);
-    ptr = str;
-    count = snprintf(ptr, remain, "Unique object hashes (vnums %d - %d)\r\n",
-                     low, high);
-    ptr += count;
-    remain -= count;
-    for (i = 0; i < NUM_OBJ_UNIQUE_POOLS; i++) {
-        header = 0;
-        q = obj_unique_hash_pools[i];
-        while (q) {
-            if (GET_OBJ_VNUM(q->obj) >= low && GET_OBJ_VNUM(q->obj) <= high) {
-                if (!header) {
-                    header = 1;
-                    count = snprintf(ptr, remain, "|-Hash %d\r\n", i);
-                    ptr += count;
-                    remain -= count;
-                }
-                count = snprintf(ptr, remain, "| |- [@g%6d@n] - [@y%10" TMT ":%-19" I64T "@n] - %s\r\n",
-                                 GET_OBJ_VNUM(q->obj), q->generation, q->unique_id,
-                                 q->obj->short_description ? q->obj->short_description : "<Unknown>");
-                ptr += count;
-                remain -= count;
-            }
-            q = q->next_e;
-        }
-    }
-    return str;
+    return strdup("Temporarily disabled.");
 }
 
 
@@ -3393,16 +3292,10 @@ struct obj_data *create_obj() {
     obj->next = object_list;
     object_list = obj;
 
-    ((obj)->id) = max_obj_id++;
-    /* find_obj helper */
-    add_to_lookup_table(((obj)->id), (void *) obj);
-
+    obj->id = nextObjID();
     obj->generation = time(nullptr);
-    obj->unique_id = -1;
 
     assign_triggers(obj, OBJ_TRIGGER);
-    /* find_obj helper */
-    add_to_lookup_table(((obj)->id), (void *) obj);
 
     return (obj);
 }
@@ -3429,12 +3322,8 @@ struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
 
     obj_index[i].number++;
 
-    ((obj)->id) = max_obj_id++;
-    /* find_obj helper */
-    add_to_lookup_table(((obj)->id), (void *) obj);
-
+    obj->id = nextObjID();
     obj->generation = time(nullptr);
-    obj->unique_id = -1;
 
     if (obj_proto[i].sbinfo) {
         CREATE(obj->sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE);
@@ -4072,8 +3961,6 @@ void free_char(struct char_data *ch) {
   * when free_char is called with a blank character struct, ID is set
   * to 0, and has not yet been added to the lookup table.
   */
-    if (((ch)->id) != 0)
-        remove_from_lookup_table(((ch)->id));
 
     delete ch;
 }
@@ -4101,9 +3988,6 @@ void free_obj(struct obj_data *obj) {
     /* free any assigned scripts */
     if (SCRIPT(obj))
         extract_script(obj, OBJ_TRIGGER);
-
-    /* find_obj helper */
-    remove_from_lookup_table(((obj)->id));
 
     if (obj->sbinfo)
         free(obj->sbinfo);
@@ -5102,4 +4986,354 @@ void write_level_data(struct char_data *ch, FILE *fl) {
         lev = lev->prev;
     }
     fprintf(fl, "end\n");
+}
+
+static std::vector<std::string> schema = {
+        "CREATE TABLE IF NOT EXISTS accounts ("
+        "   id INTEGER PRIMARY KEY,"
+        "   username TEXT NOT NULL UNIQUE COLLATE NOCASE,"
+        "   password TEXT NOT NULL DEFAULT '',"
+        "   email TEXT NOT NULL DEFAULT '',"
+        "   created INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+        "   lastLogin INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+        "   lastLogout INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+        "   lastPasswordChanged INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+        "   totalPlayTime REAL NOT NULL DEFAULT 0,"
+        "   totalLoginTime REAL NOT NULL DEFAULT 0,"
+        "   disabledReason TEXT NOT NULL DEFAULT '',"
+        "   disabledUntil INTEGER NOT NULL DEFAULT 0,"
+        "   adminLevel INTEGER NOT NULL DEFAULT 0,"
+        "   rpp INTEGER NOT NULL DEFAULT 0"
+        ");",
+
+        "CREATE TABLE IF NOT EXISTS playerCharacters ("
+        "   id INTEGER NOT NULL PRIMARY KEY,"
+        "   name TEXT NOT NULL UNIQUE COLLATE NOCASE,"
+        "   account INTEGER NOT NULL,"
+        "   data TEXT NOT NULL,"
+        "   inventory TEXT NOT NULL DEFAULT '[]',"
+        "   equipment TEXT NOT NULL DEFAULT '[]',"
+        "   lastLogin INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+        "   lastLogout INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+        "   totalPlayTime REAL NOT NULL DEFAULT 0,"
+        "   FOREIGN KEY(account) REFERENCES accounts(id) ON UPDATE CASCADE ON DELETE CASCADE"
+        ");",
+
+        "CREATE TABLE IF NOT EXISTS zones ("
+        "	id INTEGER PRIMARY KEY,"
+        "	data TEXT NOT NULL"
+        ");",
+
+        "CREATE TABLE IF NOT EXISTS areas ("
+        "	id INTEGER PRIMARY KEY,"
+        "	data TEXT NOT NULL"
+        ");",
+
+        "CREATE TABLE IF NOT EXISTS itemPrototypes ("
+        "	id INTEGER PRIMARY KEY,"
+        "	data TEXT NOT NULL"
+        ");",
+
+        "CREATE TABLE IF NOT EXISTS npcPrototypes ("
+        "	id INTEGER PRIMARY KEY,"
+        "	data TEXT NOT NULL"
+        ");",
+
+        "CREATE TABLE IF NOT EXISTS shops ("
+        "	id INTEGER PRIMARY KEY,"
+        "	data TEXT NOT NULL"
+        ");",
+
+        "CREATE TABLE IF NOT EXISTS guilds ("
+        "	id INTEGER PRIMARY KEY,"
+        "	data TEXT NOT NULL"
+        ");",
+
+        "CREATE TABLE IF NOT EXISTS rooms ("
+        "	id INTEGER PRIMARY KEY,"
+        "	data TEXT NOT NULL,"
+        "   items TEXT NOT NULL DEFAULT '[]'"
+        ");",
+
+        "CREATE TABLE IF NOT EXISTS scripts ("
+        "	id INTEGER PRIMARY KEY,"
+        "	data TEXT NOT NULL"
+        ");"
+};
+
+static void runQuery(std::string_view query) {
+    try {
+        db->exec(query.data());
+    }
+    catch (const std::exception& e) {
+        log("Error executing query: %s", e.what());
+        log("For statement: %s", query.data());
+        exit(1);
+    }
+}
+
+void create_schema() {
+    SQLite::Transaction transaction(*db);
+    for (const auto& query: schema) {
+        runQuery(query);
+    }
+    transaction.commit();
+}
+
+
+static void process_dirty_rooms() {
+    SQLite::Statement q(*db, "INSERT OR REPLACE INTO rooms (id, data) VALUES (?, ?)");
+    SQLite::Statement q1(*db, "INSERT OR REPLACE INTO rooms (id, data, items) VALUES (?, ?, ?)");
+    SQLite::Statement q2(*db, "UPDATE rooms SET items = ? WHERE id = ?");
+    SQLite::Statement q3(*db, "DELETE FROM rooms WHERE id = ?");
+
+    for(auto v : dirty_rooms) {
+        auto r = world.find(v);
+        if(r == world.end()) {
+            // This room has been deleted.
+            q3.bind(1, v);
+            q3.exec();
+            q3.reset();
+            dirty_save_rooms.erase(v);
+            continue;
+        }
+        if(dirty_save_rooms.contains(v)) {
+            // we'll be using q1...
+            q1.bind(1, v);
+            q1.bind(2, r->second.serialize().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+            q1.bind(3, r->second.serializeItems().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+            q1.exec();
+            q1.reset();
+            dirty_save_rooms.erase(v);
+        } else {
+            // we'll be using q...
+            q.bind(1, v);
+            q.bind(2, r->second.serialize().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+            q.exec();
+            q.reset();
+        }
+    }
+
+    for(auto v : dirty_save_rooms) {
+        auto r = world.find(v);
+        if(r == world.end()) {
+            // This room has been deleted.
+            continue;
+        }
+        q2.bind(1, r->second.serializeItems().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+        q2.bind(2, v);
+        q2.exec();
+        q2.reset();
+    }
+
+    dirty_rooms.clear();
+    dirty_save_rooms.clear();
+}
+
+static void process_dirty_item_prototypes() {
+	SQLite::Statement q(*db, "INSERT OR REPLACE INTO itemPrototypes (id, data) VALUES (?,?)");
+    SQLite::Statement q1(*db, "DELETE FROM itemPrototypes WHERE id = ?");
+
+    for(auto v : dirty_item_prototypes) {
+        auto r = obj_proto.find(v);
+        if(r == obj_proto.end()) {
+            // This item prototype has been deleted.
+            q1.bind(1, v);
+            q1.exec();
+            q1.reset();
+            continue;
+        }
+        q.bind(1, v);
+        q.bind(2, r->second.serializeProto().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+        q.exec();
+        q.reset();
+    }
+    dirty_item_prototypes.clear();
+}
+
+static void process_dirty_npc_prototypes() {
+    SQLite::Statement q(*db, "INSERT OR REPLACE INTO npcPrototypes (id, data) VALUES (?, ?)");
+    SQLite::Statement q1(*db, "DELETE FROM npcPrototypes WHERE id = ?");
+
+    for(auto v : dirty_npc_prototypes) {
+        auto r = mob_proto.find(v);
+        if(r == mob_proto.end()) {
+            // This npc prototype has been deleted.
+            q1.bind(1, v);
+            q1.exec();
+            q1.reset();
+            continue;
+        }
+        q.bind(1, v);
+        q.bind(2, r->second.serializeProto().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+        q.exec();
+        q.reset();
+    }
+    dirty_npc_prototypes.clear();
+
+}
+
+static void process_dirty_shops() {
+    SQLite::Statement q(*db, "INSERT OR REPLACE INTO shops (id, data) VALUES (?,?)");
+    SQLite::Statement q1(*db, "DELETE FROM shops WHERE id = ?");
+
+    for(auto v : dirty_shops) {
+        auto r = shop_index.find(v);
+        if(r == shop_index.end()) {
+            // This shop has been deleted.
+            q1.bind(1, v);
+            q1.exec();
+            q1.reset();
+            continue;
+        }
+        q.bind(1, v);
+        q.bind(2, r->second.serialize().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+        q.exec();
+        q.reset();
+    }
+
+}
+
+static void process_dirty_guilds() {
+    SQLite::Statement q(*db, "INSERT OR REPLACE INTO guilds (id, data) VALUES (?, ?)");
+    SQLite::Statement q1(*db, "DELETE FROM guilds WHERE id = ?");
+
+    for(auto v : dirty_guilds) {
+        auto r = guild_index.find(v);
+        if(r == guild_index.end()) {
+            // This guild has been deleted.
+            q1.bind(1, v);
+            q1.exec();
+            q1.reset();
+            continue;
+        }
+        q.bind(1, v);
+        q.bind(2, r->second.serialize().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+        q.exec();
+        q.reset();
+    }
+
+}
+
+static void process_dirty_zones() {
+	SQLite::Statement q(*db, "INSERT OR REPLACE INTO zones (id, data) VALUES (?, ?)");
+    SQLite::Statement q1(*db, "DELETE FROM zones WHERE id = ?");
+
+    for(auto v : dirty_zones) {
+        auto r = zone_table.find(v);
+        if(r == zone_table.end()) {
+            // This zone has been deleted.
+            q1.bind(1, v);
+            q1.exec();
+            q1.reset();
+            continue;
+        }
+        q.bind(1, v);
+        q.bind(2, r->second.serialize().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+        q.exec();
+        q.reset();
+    }
+    dirty_zones.clear();
+}
+
+static void process_dirty_areas() {
+    SQLite::Statement q(*db, "INSERT OR REPLACE INTO areas (id, data) VALUES (?, ?)");
+    SQLite::Statement q1(*db, "DELETE FROM areas WHERE id = ?");
+
+    for(auto v : dirty_areas) {
+        auto r = areas.find(v);
+        if(r == areas.end()) {
+            // This area has been deleted.
+            q1.bind(1, v);
+            q1.exec();
+            q1.reset();
+            continue;
+        }
+        q.bind(1, v);
+        q.bind(2, r->second.serialize().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+        q.exec();
+        q.reset();
+    }
+
+}
+
+static void process_dirty_dgscripts() {
+    SQLite::Statement q(*db, "INSERT OR REPLACE INTO dgscripts (id, data) VALUES (?, ?)");
+    SQLite::Statement q1(*db, "DELETE FROM dgscripts WHERE id = ?");
+
+    for(auto v : dirty_dgscripts) {
+        auto r = trig_index.find(v);
+        if(r == trig_index.end()) {
+            // This dgscript has been deleted.
+            q1.bind(1, v);
+            q1.exec();
+            q1.reset();
+            continue;
+        }
+        q.bind(1, v);
+        q.bind(2, r->second.proto->serialize().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+        q.exec();
+        q.reset();
+    }
+
+}
+
+static void process_dirty_accounts() {
+
+}
+
+static void process_dirty_players() {
+
+}
+
+
+void process_dirty() {
+    if(!dirty_rooms.empty() || !dirty_save_rooms.empty()) {
+        process_dirty_rooms();
+    }
+
+    if(!dirty_item_prototypes.empty()) {
+        process_dirty_item_prototypes();
+    }
+
+    if(!dirty_npc_prototypes.empty()) {
+        process_dirty_npc_prototypes();
+    }
+
+    if(!dirty_shops.empty()) {
+        process_dirty_shops();
+    }
+
+    if(!dirty_guilds.empty()) {
+        process_dirty_guilds();
+    }
+
+    if(!dirty_zones.empty()) {
+        process_dirty_zones();
+    }
+
+    if(!dirty_areas.empty()) {
+        process_dirty_areas();
+    }
+
+    if(!dirty_dgscripts.empty()) {
+        process_dirty_dgscripts();
+    }
+
+    if(!dirty_players.empty()) {
+        process_dirty_players();
+    }
+
+}
+
+int64_t nextObjID() {
+    int64_t id = OBJ_ID_BASE;
+    while(uniqueObjects.contains(id)) id++;
+    return id;
+}
+
+int64_t nextCharID() {
+    int64_t id = MOB_ID_BASE;
+    while(uniqueCharacters.contains(id)) id++;
+    return id;
 }

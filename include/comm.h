@@ -10,6 +10,7 @@
 #pragma once
 
 #include "structs.h"
+#include <boost/asio.hpp>
 
 
 #if CIRCLE_GNU_LIBC_MEMORY_TRACK
@@ -32,6 +33,8 @@
 #define COPYOVER_FILE "copyover.dat"
 
 /* comm.c */
+int enter_player_game(struct descriptor_data *d);
+
 extern int arena_watch(struct char_data *ch);
 
 extern size_t send_to_char(struct char_data *ch, const char *messg, ...) __attribute__ ((format (printf, 2, 3)));
@@ -70,7 +73,7 @@ extern void close_socket(struct descriptor_data *d);
 /* I/O functions */
 extern void write_to_q(const char *txt, struct txt_q *queue, int aliased);
 
-extern int write_to_descriptor(socklen_t desc, const char *txt);
+extern std::function<boost::asio::awaitable<void>()> gameFunc;
 
 extern size_t write_to_output(struct descriptor_data *d, const char *txt, ...) __attribute__ ((format (printf, 2, 3)));
 
@@ -145,3 +148,7 @@ extern void free_bufpool();
 extern void setup_log(const char *filename, int fd);
 
 extern int open_logfile(const char *filename, FILE *stderr_fp);
+
+void broadcast(const std::string& txt);
+
+boost::asio::awaitable<void> yield_for(std::chrono::milliseconds ms);

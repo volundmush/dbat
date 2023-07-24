@@ -27,7 +27,7 @@ namespace net {
         boost::beast::tcp_stream conn;
 		awaitable<void> runReader();
         awaitable<void> runWriter();
-        awaitable<void> runTimer();
+        awaitable<void> runHandshake();
         awaitable<void> run() override;
         awaitable<void> processInbuf();
         awaitable<void> handleTelnetMessage(const TelnetMessage& msg);
@@ -37,9 +37,12 @@ namespace net {
         awaitable<void> processAppData();
         awaitable<void> startConnection() override;
         awaitable<void> flushMessages();
+        awaitable<void> halt(int mode) override;
+
+        nlohmann::json serialize() override;
+        void deserialize(const nlohmann::json& j) override;
 
         flat_buffer inbuf, outbuf, appbuf;
-        bool started = false;
     };
 
 }

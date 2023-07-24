@@ -55,13 +55,10 @@ SPECIAL(shop_keeper);
 
 /* For Getting An Intro Name */
 const char *get_i_name(struct char_data *ch, struct char_data *vict) {
-    char fname[40], filler[50], scrap[100], line[256];
     static char name[50];
-    int known = false;
-    FILE *fl;
 
     /* Read Introduction File */
-    if (vict == nullptr) {
+    if (!vict || vict == ch) {
         return ("");
     }
 
@@ -69,30 +66,12 @@ const char *get_i_name(struct char_data *ch, struct char_data *vict) {
         return (RACE(vict));
     }
 
-    if (vict == ch) {
-        return ("");
-    }
+    auto found = ch->player_specials->dubNames.find(vict->idnum);
+    if(found == ch->player_specials->dubNames.end()) return RACE(vict);
 
-    if (!get_filename(fname, sizeof(fname), INTRO_FILE, GET_NAME(ch))) {
-        return (RACE(vict));
-    } else if (!(fl = fopen(fname, "r"))) {
-        return (RACE(vict));
-    }
-
-    while (!feof(fl)) {
-        get_line(fl, line);
-        sscanf(line, "%s %s\n", filler, scrap);
-        if (!strcasecmp(GET_NAME(vict), filler)) {
-            sprintf(name, "%s", scrap);
-            known = true;
-        }
-    }
-    fclose(fl);
-
-    if (known == true)
-        return (name);
-    else
-        return (RACE(vict));
+    // print *found to name and return buf pointer.
+    sprintf(name, "%s", found->second.c_str());
+    return (name);
 }
 
 char *fname(const char *namelist) {

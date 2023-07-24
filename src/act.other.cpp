@@ -22,7 +22,6 @@
 #include "act.movement.h"
 #include "obj_edit.h"
 #include "graph.h"
-#include "alias.h"
 #include "spells.h"
 #include "interpreter.h"
 #include "fight.h"
@@ -612,9 +611,7 @@ ACMD(do_rpp) {
                 send_to_char(ch, "You now have an Excel House Capsule!\r\n");
                 struct obj_data *hobj = read_object(6, VIRTUAL);
                 obj_to_char(hobj, ch);
-                GET_RP(ch) -= pay;
-                ch->desc->rpp = GET_RP(ch);
-                userWrite(ch->desc, 0, 0, 0, "index");
+                ch->modRPP(-pay);
                 save_char(ch);
                 send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", pay);
                 send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), pay);
@@ -665,9 +662,7 @@ ACMD(do_rpp) {
             BOARDNEWCOD = time(nullptr);
             save_mud_time(&time_info);
         }
-        GET_RP(ch) -= pay;
-        ch->desc->rpp = GET_RP(ch);
-        userWrite(ch->desc, 0, 0, 0, "index");
+        ch->modRPP(-pay);
         save_char(ch);
         send_to_char(ch,
                      "@R%d@W RPP paid for your selection. An immortal will address the request soon enough. Be patient.@n\r\n",
@@ -678,18 +673,14 @@ ACMD(do_rpp) {
 
     /* Pay for purchases here */
     if (selection >= 4 && selection < 12 && pay > 0) {
-        GET_RP(ch) -= pay;
-        ch->desc->rpp = GET_RP(ch);
-        userWrite(ch->desc, 0, 0, 0, "index");
+        ch->modRPP(-pay);
         save_char(ch);
         send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", pay);
         send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), pay);
     }
 
     if (selection > 12 && pay > 0) {
-        GET_RP(ch) -= pay;
-        ch->desc->rpp = GET_RP(ch);
-        userWrite(ch->desc, 0, 0, 0, "index");
+        ch->modRPP(-pay);
         save_char(ch);
         send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", pay);
         send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), pay);
@@ -9721,7 +9712,6 @@ ACMD(do_save) {
      */
         if (CONFIG_AUTO_SAVE && GET_ADMLEVEL(ch) < 1) {
             send_to_char(ch, "Saving.\r\n");
-            write_aliases(ch);
             save_char(ch);
             Crash_crashsave(ch);
             if (GET_ROOM_VNUM(IN_ROOM(ch)) < 19800 || GET_ROOM_VNUM(IN_ROOM(ch)) > 19899) {
@@ -9736,7 +9726,7 @@ ACMD(do_save) {
         send_to_char(ch, "Saving.\r\n");
     }
 
-    write_aliases(ch);
+
     if (GET_ROOM_VNUM(IN_ROOM(ch)) < 19800 || GET_ROOM_VNUM(IN_ROOM(ch)) > 19899) {
         if (GET_ROOM_VNUM(IN_ROOM(ch)) != NOWHERE && GET_ROOM_VNUM(IN_ROOM(ch)) != 0 &&
             GET_ROOM_VNUM(IN_ROOM(ch)) != 1) {

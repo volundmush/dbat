@@ -90,10 +90,13 @@ int item_in_list(char *item, obj_data *list) {
         return 0;
 
     if (*item == UID_CHAR) {
-        long id = atol(item + 1);
+        auto uidResult = parseDgUID(name);
+        if(!uidResult) return nullptr;
+        if(*uidResult.index() != 1) return nullptr;
+        auto obj = std::get<1>(*uidResult);
 
         for (i = list; i; i = i->next_content) {
-            if (id == ((i)->id))
+            if (id == obj)
                 count++;
             if (GET_OBJ_TYPE(i) == ITEM_CONTAINER)
                 count += item_in_list(item, i->contents);
@@ -264,13 +267,13 @@ find_replacement(void *go, struct script_data *sc, trig_data *trig, int type, ch
             if (!strcasecmp(var, "self")) {
                 switch (type) {
                     case MOB_TRIGGER:
-                        snprintf(str, slen, "%c%d", UID_CHAR, (((char_data *) go)->id));
+                        snprintf(str, slen, "%cC%d", UID_CHAR, (((char_data *) go)->id));
                         break;
                     case OBJ_TRIGGER:
-                        snprintf(str, slen, "%c%d", UID_CHAR, (((obj_data *) go)->id));
+                        snprintf(str, slen, "%cO%d", UID_CHAR, (((obj_data *) go)->id));
                         break;
                     case WLD_TRIGGER:
-                        snprintf(str, slen, "%c%d", UID_CHAR, ((room_data *) go)->vn + ROOM_ID_BASE);
+                        snprintf(str, slen, "%cR%d", UID_CHAR, ((room_data *) go)->vn);
                         break;
                 }
             } else if (!strcasecmp(var, "global")) {
@@ -487,7 +490,7 @@ in the vault (vnum: 453) now and then. you can just use
                     }
 
                     if (rndm)
-                        snprintf(str, slen, "%c%d", UID_CHAR, ((rndm)->id));
+                        snprintf(str, slen, "%cC%d", UID_CHAR, ((rndm)->id));
                     else
                         *str = '\0';
                 } else if (!strcasecmp(field, "dir")) {
@@ -665,7 +668,7 @@ in the vault (vnum: 453) now and then. you can just use
                         } else if ((pos = find_eq_pos_script(subfield)) < 0 || !GET_EQ(c, pos))
                             *str = '\0';
                         else
-                            snprintf(str, slen, "%c%d", UID_CHAR, ((((c)->equipment[pos]))->id));
+                            snprintf(str, slen, "%cO%d", UID_CHAR, ((((c)->equipment[pos]))->id));
                     }
                     if (!strcasecmp(field, "exp")) {
                         if (subfield && *subfield) {
@@ -679,7 +682,7 @@ in the vault (vnum: 453) now and then. you can just use
                 case 'f':
                     if (!strcasecmp(field, "fighting")) {
                         if (FIGHTING(c))
-                            snprintf(str, slen, "%c%d", UID_CHAR, ((((c)->fighting))->id));
+                            snprintf(str, slen, "%cC%d", UID_CHAR, ((((c)->fighting))->id));
                         else
                             *str = '\0';
                     } else if (!strcasecmp(field, "flying")) {
@@ -691,7 +694,7 @@ in the vault (vnum: 453) now and then. you can just use
                         if (!c->followers || !c->followers->follower)
                             *str = '\0';
                         else
-                            snprintf(str, slen, "%c%d", UID_CHAR, ((c->followers->follower)->id));
+                            snprintf(str, slen, "%cC%d", UID_CHAR, ((c->followers->follower)->id));
                     }
                     break;
                 case 'g':
@@ -752,7 +755,7 @@ in the vault (vnum: 453) now and then. you can just use
                         if (subfield && *subfield) {
                             for (obj = c->contents; obj; obj = obj->next_content) {
                                 if (GET_OBJ_VNUM(obj) == atoi(subfield)) {
-                                    snprintf(str, slen, "%c%d", UID_CHAR, ((obj)->id)); /* arg given, found */
+                                    snprintf(str, slen, "%cO%d", UID_CHAR, ((obj)->id)); /* arg given, found */
                                     return;
                                 }
                             }
@@ -760,7 +763,7 @@ in the vault (vnum: 453) now and then. you can just use
                                 *str = '\0'; /* arg given, not found */
                         } else { /* no arg given */
                             if (c->contents) {
-                                snprintf(str, slen, "%c%d", UID_CHAR, ((c->contents)->id));
+                                snprintf(str, slen, "%cO%d", UID_CHAR, ((c->contents)->id));
                             } else {
                                 *str = '\0';
                             }
@@ -846,7 +849,7 @@ in the vault (vnum: 453) now and then. you can just use
                         if (!c->master)
                             *str = '\0';
                         else
-                            snprintf(str, slen, "%c%d", UID_CHAR, ((c->master)->id));
+                            snprintf(str, slen, "%cC%d", UID_CHAR, ((c->master)->id));
                     }
                     break;
                 case 'n':
@@ -854,7 +857,7 @@ in the vault (vnum: 453) now and then. you can just use
                         snprintf(str, slen, "%s", GET_NAME(c));
                     } else if (!strcasecmp(field, "next_in_room")) {
                         if (c->next_in_room)
-                            snprintf(str, slen, "%c%d", UID_CHAR, ((c->next_in_room)->id));
+                            snprintf(str, slen, "%cC%d", UID_CHAR, ((c->next_in_room)->id));
                         else
                             *str = '\0';
                     }
@@ -909,8 +912,9 @@ in the vault (vnum: 453) now and then. you can just use
                     if (!strcasecmp(field, "room")) {  /* in NOWHERE, return the void */
 /* see note in dg_scripts.h */
 #ifdef ACTOR_ROOM_IS_UID
-                        snprintf(str, slen, "%c%d", UID_CHAR,
-                                 (IN_ROOM(c) != NOWHERE) ? world[IN_ROOM(c)].vn + ROOM_ID_BASE : ROOM_ID_BASE);
+						if(world.contains(IN_ROOM(c))) {
+                            snprintf(str, slen, "%cR%d", UID_CHAR, IN_ROOM(c));
+                        }
 #else
                         snprintf(str, slen, "%d", (IN_ROOM(c)!= NOWHERE) ? world[IN_ROOM(c)].number : 0);
 #endif
@@ -1103,12 +1107,12 @@ in the vault (vnum: 453) now and then. you can just use
                         snprintf(str, slen, "%d", GET_OBJ_RENT(o));
                     } else if (!strcasecmp(field, "carried_by")) {
                         if (o->carried_by)
-                            snprintf(str, slen, "%c%d", UID_CHAR, ((o->carried_by)->id));
+                            snprintf(str, slen, "%cC%d", UID_CHAR, ((o->carried_by)->id));
                         else
                             *str = '\0';
                     } else if (!strcasecmp(field, "contents")) {
                         if (o->contents)
-                            snprintf(str, slen, "%c%d", UID_CHAR, ((o->contents)->id));
+                            snprintf(str, slen, "%cO%d", UID_CHAR, ((o->contents)->id));
                         else
                             *str = '\0';
                     }
@@ -1157,7 +1161,7 @@ in the vault (vnum: 453) now and then. you can just use
 
                     else if (!strcasecmp(field, "is_inroom")) {
                         if (IN_ROOM(o) != NOWHERE)
-                            snprintf(str, slen, "%c%d", UID_CHAR, world[IN_ROOM(o)].vn + ROOM_ID_BASE);
+                            snprintf(str, slen, "%cR%d", UID_CHAR, IN_ROOM(o));
                         else
                             *str = '\0';
                     } else if (!strcasecmp(field, "is_pc")) {
@@ -1189,7 +1193,7 @@ in the vault (vnum: 453) now and then. you can just use
                         }
                     } else if (!strcasecmp(field, "next_in_list")) {
                         if (o->next_content)
-                            snprintf(str, slen, "%c%d", UID_CHAR, ((o->next_content)->id));
+                            snprintf(str, slen, "%cO%d", UID_CHAR, ((o->next_content)->id));
                         else
                             *str = '\0';
                     }
@@ -1197,7 +1201,7 @@ in the vault (vnum: 453) now and then. you can just use
                 case 'r':
                     if (!strcasecmp(field, "room")) {
                         if (obj_room(o) != NOWHERE)
-                            snprintf(str, slen, "%c%d", UID_CHAR, world[obj_room(o)].vn + ROOM_ID_BASE);
+                            snprintf(str, slen, "%cR%d", UID_CHAR, obj_room(o));
                         else
                             *str = '\0';
                     }
@@ -1290,7 +1294,7 @@ in the vault (vnum: 453) now and then. you can just use
                         snprintf(str, slen, "%" I64T "", GET_OBJ_WEIGHT(o));
                     } else if (!strcasecmp(field, "worn_by")) {
                         if (o->worn_by)
-                            snprintf(str, slen, "%c%d", UID_CHAR, ((o->worn_by)->id));
+                            snprintf(str, slen, "%cC%d", UID_CHAR, ((o->worn_by)->id));
                         else
                             *str = '\0';
                     }
@@ -1361,7 +1365,7 @@ in the vault (vnum: 453) now and then. you can just use
                     for (obj = r->contents; obj; obj = obj->next_content) {
                         if (GET_OBJ_VNUM(obj) == atoi(subfield)) {
                             /* arg given, found */
-                            snprintf(str, slen, "%c%d", UID_CHAR, ((obj)->id));
+                            snprintf(str, slen, "%cO%d", UID_CHAR, ((obj)->id));
                             return;
                         }
                     }
@@ -1369,14 +1373,14 @@ in the vault (vnum: 453) now and then. you can just use
                         *str = '\0'; /* arg given, not found */
                 } else { /* no arg given */
                     if (r->contents) {
-                        snprintf(str, slen, "%c%d", UID_CHAR, ((r->contents)->id));
+                        snprintf(str, slen, "%cO%d", UID_CHAR, ((r->contents)->id));
                     } else {
                         *str = '\0';
                     }
                 }
             } else if (!strcasecmp(field, "people")) {
                 if (r->people)
-                    snprintf(str, slen, "%c%d", UID_CHAR, ((r->people)->id));
+                    snprintf(str, slen, "%cC%d", UID_CHAR, ((r->people)->id));
                 else
                     *str = '\0';
             } else if (!strcasecmp(field, "id")) {
@@ -1427,8 +1431,8 @@ in the vault (vnum: 453) now and then. you can just use
                             sprintbit(R_EXIT(r, NORTH)->exit_info, exit_bits, str, slen);
                         else if (!strcasecmp(subfield, "room")) {
                             if (R_EXIT(r, NORTH)->to_room != NOWHERE)
-                                snprintf(str, slen, "%c%d", UID_CHAR,
-                                         world[R_EXIT(r, NORTH)->to_room].vn + ROOM_ID_BASE);
+                                snprintf(str, slen, "%cR%d", UID_CHAR,
+                                         R_EXIT(r, NORTH)->to_room);
                             else
                                 *str = '\0';
                         }
@@ -1447,8 +1451,8 @@ in the vault (vnum: 453) now and then. you can just use
                             sprintbit(R_EXIT(r, EAST)->exit_info, exit_bits, str, slen);
                         else if (!strcasecmp(subfield, "room")) {
                             if (R_EXIT(r, EAST)->to_room != NOWHERE)
-                                snprintf(str, slen, "%c%d", UID_CHAR,
-                                         world[R_EXIT(r, EAST)->to_room].vn + ROOM_ID_BASE);
+                                snprintf(str, slen, "%cR%d", UID_CHAR,
+                                         R_EXIT(r, EAST)->to_room);
                             else
                                 *str = '\0';
                         }
@@ -1467,8 +1471,8 @@ in the vault (vnum: 453) now and then. you can just use
                             sprintbit(R_EXIT(r, SOUTH)->exit_info, exit_bits, str, slen);
                         else if (!strcasecmp(subfield, "room")) {
                             if (R_EXIT(r, SOUTH)->to_room != NOWHERE)
-                                snprintf(str, slen, "%c%d", UID_CHAR,
-                                         world[R_EXIT(r, SOUTH)->to_room].vn + ROOM_ID_BASE);
+                                snprintf(str, slen, "%cR%d", UID_CHAR,
+                                         R_EXIT(r, SOUTH)->to_room);
                             else
                                 *str = '\0';
                         }
@@ -1487,8 +1491,8 @@ in the vault (vnum: 453) now and then. you can just use
                             sprintbit(R_EXIT(r, WEST)->exit_info, exit_bits, str, slen);
                         else if (!strcasecmp(subfield, "room")) {
                             if (R_EXIT(r, WEST)->to_room != NOWHERE)
-                                snprintf(str, slen, "%c%d", UID_CHAR,
-                                         world[R_EXIT(r, WEST)->to_room].vn + ROOM_ID_BASE);
+                                snprintf(str, slen, "%cR%d", UID_CHAR,
+                                         R_EXIT(r, WEST)->to_room);
                             else
                                 *str = '\0';
                         }
@@ -1507,8 +1511,8 @@ in the vault (vnum: 453) now and then. you can just use
                             sprintbit(R_EXIT(r, UP)->exit_info, exit_bits, str, slen);
                         else if (!strcasecmp(subfield, "room")) {
                             if (R_EXIT(r, UP)->to_room != NOWHERE)
-                                snprintf(str, slen, "%c%d", UID_CHAR,
-                                         world[R_EXIT(r, UP)->to_room].vn + ROOM_ID_BASE);
+                                snprintf(str, slen, "%cR%d", UID_CHAR,
+                                         R_EXIT(r, UP)->to_room);
                             else
                                 *str = '\0';
                         }
@@ -1527,8 +1531,8 @@ in the vault (vnum: 453) now and then. you can just use
                             sprintbit(R_EXIT(r, DOWN)->exit_info, exit_bits, str, slen);
                         else if (!strcasecmp(subfield, "room")) {
                             if (R_EXIT(r, DOWN)->to_room != NOWHERE)
-                                snprintf(str, slen, "%c%d", UID_CHAR,
-                                         world[R_EXIT(r, DOWN)->to_room].vn + ROOM_ID_BASE);
+                                snprintf(str, slen, "%cR%d", UID_CHAR,
+                                         R_EXIT(r, DOWN)->to_room);
                             else
                                 *str = '\0';
                         }
@@ -1547,8 +1551,8 @@ in the vault (vnum: 453) now and then. you can just use
                             sprintbit(R_EXIT(r, NORTHWEST)->exit_info, exit_bits, str, slen);
                         else if (!strcasecmp(subfield, "room")) {
                             if (R_EXIT(r, NORTHWEST)->to_room != NOWHERE)
-                                snprintf(str, slen, "%c%d", UID_CHAR,
-                                         world[R_EXIT(r, NORTHWEST)->to_room].vn + ROOM_ID_BASE);
+                                snprintf(str, slen, "%cR%d", UID_CHAR,
+                                         R_EXIT(r, NORTHWEST)->to_room);
                             else
                                 *str = '\0';
                         }
@@ -1567,8 +1571,8 @@ in the vault (vnum: 453) now and then. you can just use
                             sprintbit(R_EXIT(r, NORTHEAST)->exit_info, exit_bits, str, slen);
                         else if (!strcasecmp(subfield, "room")) {
                             if (R_EXIT(r, NORTHEAST)->to_room != NOWHERE)
-                                snprintf(str, slen, "%c%d", UID_CHAR,
-                                         world[R_EXIT(r, NORTHEAST)->to_room].vn + ROOM_ID_BASE);
+                                snprintf(str, slen, "%cR%d", UID_CHAR,
+                                         R_EXIT(r, NORTHEAST)->to_room);
                             else
                                 *str = '\0';
                         }
@@ -1587,8 +1591,8 @@ in the vault (vnum: 453) now and then. you can just use
                             sprintbit(R_EXIT(r, SOUTHWEST)->exit_info, exit_bits, str, slen);
                         else if (!strcasecmp(subfield, "room")) {
                             if (R_EXIT(r, SOUTHWEST)->to_room != NOWHERE)
-                                snprintf(str, slen, "%c%d", UID_CHAR,
-                                         world[R_EXIT(r, SOUTHWEST)->to_room].vn + ROOM_ID_BASE);
+                                snprintf(str, slen, "%cR%d", UID_CHAR,
+                                         R_EXIT(r, SOUTHWEST)->to_room);
                             else
                                 *str = '\0';
                         }
@@ -1607,8 +1611,8 @@ in the vault (vnum: 453) now and then. you can just use
                             sprintbit(R_EXIT(r, SOUTHEAST)->exit_info, exit_bits, str, slen);
                         else if (!strcasecmp(subfield, "room")) {
                             if (R_EXIT(r, SOUTHEAST)->to_room != NOWHERE)
-                                snprintf(str, slen, "%c%d", UID_CHAR,
-                                         world[R_EXIT(r, SOUTHEAST)->to_room].vn + ROOM_ID_BASE);
+                                snprintf(str, slen, "%cR%d", UID_CHAR,
+                                         R_EXIT(r, SOUTHEAST)->to_room);
                             else
                                 *str = '\0';
                         }
@@ -1627,8 +1631,8 @@ in the vault (vnum: 453) now and then. you can just use
                             sprintbit(R_EXIT(r, INDIR)->exit_info, exit_bits, str, slen);
                         else if (!strcasecmp(subfield, "room")) {
                             if (R_EXIT(r, INDIR)->to_room != NOWHERE)
-                                snprintf(str, slen, "%c%d", UID_CHAR,
-                                         world[R_EXIT(r, INDIR)->to_room].vn + ROOM_ID_BASE);
+                                snprintf(str, slen, "%cR%d", UID_CHAR,
+                                         R_EXIT(r, INDIR)->to_room);
                             else
                                 *str = '\0';
                         }
@@ -1647,8 +1651,8 @@ in the vault (vnum: 453) now and then. you can just use
                             sprintbit(R_EXIT(r, OUTDIR)->exit_info, exit_bits, str, slen);
                         else if (!strcasecmp(subfield, "room")) {
                             if (R_EXIT(r, OUTDIR)->to_room != NOWHERE)
-                                snprintf(str, slen, "%c%d", UID_CHAR,
-                                         world[R_EXIT(r, OUTDIR)->to_room].vn + ROOM_ID_BASE);
+                                snprintf(str, slen, "%cR%d", UID_CHAR,
+                                         R_EXIT(r, OUTDIR)->to_room);
                             else
                                 *str = '\0';
                         }

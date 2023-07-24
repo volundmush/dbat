@@ -473,7 +473,7 @@ ACMD(do_mload) {
         char_to_room(mob, rnum);
         if (SCRIPT(ch)) { /* It _should_ have, but it might be detached. */
             char buf[MAX_INPUT_LENGTH];
-            sprintf(buf, "%c%d", UID_CHAR, ((mob)->id));
+            sprintf(buf, "%cC%d", UID_CHAR, ((mob)->id));
             add_var(&(SCRIPT(ch)->global_vars), "lastloaded", buf, 0);
         }
         load_mtrigger(mob);
@@ -484,7 +484,7 @@ ACMD(do_mload) {
         }
         if (SCRIPT(ch)) { /* It _should_ have, but it might be detached. */
             char buf[MAX_INPUT_LENGTH];
-            sprintf(buf, "%c%d", UID_CHAR, ((object)->id));
+            sprintf(buf, "%cO%d", UID_CHAR, ((object)->id));
             add_var(&(SCRIPT(ch)->global_vars), "lastloaded", buf, 0);
         }
         randomize_eq(object);

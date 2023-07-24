@@ -9,6 +9,11 @@
 #include "class.h"
 #include "fight.h"
 #include "act.movement.h"
+#include "config.h"
+#include "mail.h"
+#include "dg_comm.h"
+#include "dg_scripts.h"
+#include "interpreter.h"
 
 static std::string robot = "Robotic-Humanoid", robot_lower = "robotic-humanoid", unknown = "UNKNOWN";
 
@@ -632,11 +637,13 @@ int64_t char_data::getCurLF() const {
 }
 
 int64_t char_data::getMaxLF() const {
-    return (IS_DEMON(this) ? (((GET_MAX_MANA(this) * 0.5) + (GET_MAX_MOVE(this) * 0.5)) * 0.75) + GET_LIFEBONUSES(this)
+    auto lb = GET_LIFEBONUSES(this);
+
+    return (IS_DEMON(this) ? (((GET_MAX_MANA(this) * 0.5) + (GET_MAX_MOVE(this) * 0.5)) * 0.75) + lb
                            : (IS_KONATSU(this) ? (((GET_MAX_MANA(this) * 0.5) + (GET_MAX_MOVE(this) * 0.5)) * 0.85) +
-                                                 GET_LIFEBONUSES(this) : (GET_MAX_MANA(this) * 0.5) +
+                    lb : (GET_MAX_MANA(this) * 0.5) +
                                                                          (GET_MAX_MOVE(this) * 0.5) +
-                                                                         GET_LIFEBONUSES(this)));
+                    lb));
 }
 
 double char_data::getCurLFPercent() const {
@@ -945,4 +952,158 @@ std::optional<vnum> char_data::getMatchingArea(std::function<bool(const area_dat
         return r.getMatchingArea(f);
     }
     return std::nullopt;
+}
+
+int char_data::getRPP() {
+    if(IS_NPC(this)) {
+        return 0;
+    }
+
+    return player_specials->account->rpp;
+
+}
+
+void account_data::modRPP(int amt) {
+    rpp += amt;
+    if(rpp < 0) {
+        rpp = 0;
+    }
+    dirty_accounts.insert(vn);
+}
+
+void char_data::modRPP(int amt) {
+    if(IS_NPC(this)) {
+        return;
+    }
+
+    player_specials->account->modRPP(amt);
+}
+
+void char_data::login() {
+    auto load_result = enter_player_game(desc);
+    send_to_char(this, "%s", CONFIG_WELC_MESSG);
+    ::act("$n has entered the game.", true, this, nullptr, nullptr, TO_ROOM);
+
+    /*~~~ For PCOUNT and HIGHPCOUNT ~~~*/
+    auto count = 0;
+    auto oldcount = HIGHPCOUNT;
+    struct descriptor_data *k;
+
+    for (k = descriptor_list; k; k = k->next) {
+        if (!IS_NPC(k->character) && GET_LEVEL(k->character) > 3) {
+            count += 1;
+        }
+
+        if (count > PCOUNT) {
+            PCOUNT = count;
+        }
+
+        if (PCOUNT >= HIGHPCOUNT) {
+            oldcount = HIGHPCOUNT;
+            HIGHPCOUNT = PCOUNT;
+            PCOUNTDATE = ::time(nullptr);
+        }
+
+    }
+
+    time.logon = ::time(nullptr);
+    greet_mtrigger(this, -1);
+    greet_memory_mtrigger(this);
+
+    STATE(desc) = CON_PLAYING;
+    if (PCOUNT < HIGHPCOUNT && PCOUNT >= HIGHPCOUNT - 4) {
+        payout(0);
+    }
+    if (PCOUNT == HIGHPCOUNT) {
+        payout(1);
+    }
+    if (PCOUNT > oldcount) {
+        payout(2);
+    }
+
+    /*~~~ End PCOUNT and HIGHPCOUNT ~~~*/
+    if (GET_LEVEL(this) == 0) {
+        do_start(this);
+        send_to_char(this, "%s", CONFIG_START_MESSG);
+    }
+    if (GET_ROOM_VNUM(IN_ROOM(this)) <= 1 && GET_LOADROOM(this) != NOWHERE) {
+        char_from_room(this);
+        char_to_room(this, real_room(real_room(GET_LOADROOM(this))));
+    } else if (GET_ROOM_VNUM(IN_ROOM(this)) <= 1) {
+        char_from_room(this);
+        char_to_room(this, real_room(real_room(300)));
+    } else {
+        look_at_room(IN_ROOM(this), this, 0);
+    }
+    if (has_mail(GET_IDNUM(this)))
+        send_to_char(this, "\r\nYou have mail waiting.\r\n");
+    if (GET_ADMLEVEL(this) >= 1 && BOARDNEWIMM > GET_BOARD(this, 1))
+        send_to_char(this,
+                     "\r\n@GMake sure to check the immortal board, there is a new post there.@n\r\n");
+    if (GET_ADMLEVEL(this) >= 1 && BOARDNEWCOD > GET_BOARD(this, 2))
+        send_to_char(this,
+                     "\r\n@GMake sure to check the request file, it has been updated.@n\r\n");
+    if (GET_ADMLEVEL(this) >= 1 && BOARDNEWBUI > GET_BOARD(this, 4))
+        send_to_char(this,
+                     "\r\n@GMake sure to check the builder board, there is a new post there.@n\r\n");
+    if (GET_ADMLEVEL(this) >= 1 && BOARDNEWDUO > GET_BOARD(this, 3))
+        send_to_char(this,
+                     "\r\n@GMake sure to check punishment board, there is a new post there.@n\r\n");
+    if (BOARDNEWMORT > GET_BOARD(this, 0))
+        send_to_char(this, "\r\n@GThere is a new bulletin board post.@n\r\n");
+    if (NEWSUPDATE > GET_LPLAY(this))
+        send_to_char(this,
+                     "\r\n@GThe NEWS file has been updated, type 'news %d' to see the latest entry or 'news list' to see available entries.@n\r\n",
+                     LASTNEWS);
+
+    if (LASTINTEREST != 0 && LASTINTEREST > GET_LINTEREST(this)) {
+        int diff = (LASTINTEREST - GET_LINTEREST(this));
+        int mult = 0;
+        while (diff > 0) {
+            if ((diff - 86400) < 0 && mult == 0) {
+                mult = 1;
+            } else if ((diff - 86400) >= 0) {
+                diff -= 86400;
+                mult++;
+            } else {
+                diff = 0;
+            }
+        }
+        if (mult > 3) {
+            mult = 3;
+        }
+        GET_LINTEREST(this) = LASTINTEREST;
+        if (GET_BANK_GOLD(this) > 0) {
+            int inc = ((GET_BANK_GOLD(this) / 100) * 2);
+            if (inc >= 7500) {
+                inc = 7500;
+            }
+            inc *= mult;
+            GET_BANK_GOLD(this) += inc;
+            send_to_char(this, "Interest happened while you were away, %d times.\r\n"
+                                       "@cBank Interest@D: @Y%s@n\r\n", mult, add_commas(inc));
+        }
+    }
+
+    if (!IS_ANDROID(this)) {
+        char buf3[MAX_INPUT_LENGTH];
+        send_to_sense(0, "You sense someone appear suddenly", this);
+        sprintf(buf3,
+                "@D[@GBlip@D]@Y %s\r\n@RSomeone has suddenly entered your scouter detection range!@n.",
+                add_commas(GET_HIT(this)));
+        send_to_scouter(buf3, this, 0, 0);
+    }
+
+    if (load_result == 2) {    /* rented items lost */
+        send_to_char(this, "\r\n\007You could not afford your rent!\r\n"
+                                   "Your possesions have been donated to the Salvation Army!\r\n");
+    }
+
+    desc->has_prompt = 0;
+    /* We've updated to 3.1 - some bits might be set wrongly: */
+    REMOVE_BIT_AR(PRF_FLAGS(this), PRF_BUILDWALK);
+    if (!GET_EQ(this, WEAR_WIELD1) && PLR_FLAGGED(this, PLR_THANDW)) {
+        REMOVE_BIT_AR(PLR_FLAGS(this), PLR_THANDW);
+    }
+
 }

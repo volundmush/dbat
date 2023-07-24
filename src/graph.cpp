@@ -407,6 +407,57 @@ ACMD(do_radar) {
     }
 }
 
+static std::string sense_align(struct char_data *vict) {
+    auto align = GET_ALIGNMENT(vict);
+    if (align > 50 && align < 200) {
+        return "You sense slightly pure and good ki from them.\r\n";
+    } else if (align > 200 && align < 500) {
+        return "You sense a pure and good ki from them.\r\n";
+    } else if (align >= 500) {
+        return "You sense an extremely pure and good ki from them.\r\n";
+    } else if (align < -50 && align > -200) {
+        return "You sense slightly sour and evil ki from them.\r\n";
+    } else if (align < -200 && align > -500) {
+        return "You sense a sour and evil ki from them.\r\n";
+    } else if (align <= -500) {
+        return "You sense an extremely evil ki from them.\r\n";
+    } else if (align > -50 && align < 50) {
+        return "You sense slightly mild indefinable ki from them.\r\n";
+    }
+}
+
+static std::string sense_compare(struct char_data *ch, struct char_data *vict) {
+    auto hitv = GET_HIT(vict);
+    auto hitc = GET_HIT(ch);
+    if (hitv > hitc * 50) {
+        return "Their power is so huge it boggles your mind and crushes your spirit to fight!\n";
+    } else if (hitv > hitc * 25) {
+        return "Their power is so much larger than you that you would die like an insect.\n";
+    } else if (hitv > hitc * 10) {
+        return "Their power is many times larger than your own.\n";
+    } else if (hitv > hitc * 5) {
+        return "Their power is a great deal larger than your own.\n";
+    } else if (hitv > hitc * 2) {
+        return "Their power is more than twice as large as your own.\n";
+    } else if (hitv > hitc) {
+        return "Their power is about twice as large as your own.\n";
+    } else if (hitv == hitc) {
+        return "Their power is exactly as strong as you.\n";
+    } else if (hitv >= hitc * 0.75) {
+        return "Their power is about a quarter of your own or larger.\n";
+    } else if (hitv >= hitc * 0.5) {
+        return "Their power is about half of your own or larger.\n";
+    } else if (hitv >= hitc * 0.25) {
+        return "Their power is about a quarter of your own or larger.\n";
+    } else if (hitv >= hitc * 0.1) {
+        return "Their power is about a tenth of your own or larger.\n";
+    } else if (hitv >= hitc * 0.01) {
+        return "Their power is less than a tenth of your own.\n";
+    } else if (hitv < hitc * 0.01) {
+        return "Their power is less than 1 percent of your own. What a weakling...\n";
+    }
+}
+
 ACMD(do_track) {
     char arg[MAX_INPUT_LENGTH];
     struct char_data *vict;
@@ -418,6 +469,7 @@ ACMD(do_track) {
         send_to_char(ch, "You have no idea how.\r\n");
         return;
     }
+    
     if (GET_SUPPRESS(ch) <= 20 && GET_SUPPRESS(ch) > 0) {
         send_to_char(ch,
                      "You are concentrating too hard on suppressing your powerlevel at this level of suppression.\r\n");
@@ -443,48 +495,8 @@ ACMD(do_track) {
         act("$n looks at you intently for a moment.", true, ch, nullptr, vict, TO_VICT);
         act("$n looks at $N@n intently for a moment.", true, ch, nullptr, vict, TO_NOTVICT);
         if (!IS_ANDROID(vict)) {
-            if (GET_ALIGNMENT(vict) > 50 && GET_ALIGNMENT(vict) < 200) {
-                send_to_char(ch, "You sense slightly pure and good ki from them.\r\n");
-            } else if (GET_ALIGNMENT(vict) > 200 && GET_ALIGNMENT(vict) < 500) {
-                send_to_char(ch, "You sense a pure and good ki from them.\r\n");
-            } else if (GET_ALIGNMENT(vict) >= 500) {
-                send_to_char(ch, "You sense an extremely pure and good ki from them.\r\n");
-            } else if (GET_ALIGNMENT(vict) < -50 && GET_ALIGNMENT(vict) > -200) {
-                send_to_char(ch, "You sense slightly sour and evil ki from them.\r\n");
-            } else if (GET_ALIGNMENT(vict) < -200 && GET_ALIGNMENT(vict) > -500) {
-                send_to_char(ch, "You sense a sour and evil ki from them.\r\n");
-            } else if (GET_ALIGNMENT(vict) <= -500) {
-                send_to_char(ch, "You sense an extremely evil ki from them.\r\n");
-            } else if (GET_ALIGNMENT(vict) > -50 && GET_ALIGNMENT(vict) < 50) {
-                send_to_char(ch, "You sense slightly mild indefinable ki from them.\r\n");
-            }
-            if (GET_HIT(vict) > GET_HIT(ch) * 50) {
-                send_to_char(ch, "Their power is so huge it boggles your mind and crushes your spirit to fight!\n");
-            } else if (GET_HIT(vict) > GET_HIT(ch) * 25) {
-                send_to_char(ch, "Their power is so much larger than you that you would die like an insect.\n");
-            } else if (GET_HIT(vict) > GET_HIT(ch) * 10) {
-                send_to_char(ch, "Their power is many times larger than your own.\n");
-            } else if (GET_HIT(vict) > GET_HIT(ch) * 5) {
-                send_to_char(ch, "Their power is a great deal larger than your own.\n");
-            } else if (GET_HIT(vict) > GET_HIT(ch) * 2) {
-                send_to_char(ch, "Their power is more than twice as large as your own.\n");
-            } else if (GET_HIT(vict) > GET_HIT(ch)) {
-                send_to_char(ch, "Their power is about twice as large as your own.\n");
-            } else if (GET_HIT(vict) == GET_HIT(ch)) {
-                send_to_char(ch, "Their power is exactly as strong as you.\n");
-            } else if (GET_HIT(vict) >= GET_HIT(ch) * 0.75) {
-                send_to_char(ch, "Their power is about a quarter of your own or larger.\n");
-            } else if (GET_HIT(vict) >= GET_HIT(ch) * 0.5) {
-                send_to_char(ch, "Their power is about half of your own or larger.\n");
-            } else if (GET_HIT(vict) >= GET_HIT(ch) * 0.25) {
-                send_to_char(ch, "Their power is about a quarter of your own or larger.\n");
-            } else if (GET_HIT(vict) >= GET_HIT(ch) * 0.1) {
-                send_to_char(ch, "Their power is about a tenth of your own or larger.\n");
-            } else if (GET_HIT(vict) >= GET_HIT(ch) * 0.01) {
-                send_to_char(ch, "Their power is less than a tenth of your own.\n");
-            } else if (GET_HIT(vict) < GET_HIT(ch) * 0.01) {
-                send_to_char(ch, "Their power is less than 1 percent of your own. What a weakling...\n");
-            }
+            send_to_char(ch, sense_align(vict).c_str());
+            send_to_char(ch, sense_compare(ch, vict).c_str());
         } else {
             send_to_char(ch, "You can't sense their powerlevel as they are a machine.\r\n");
         }
@@ -504,56 +516,15 @@ ACMD(do_track) {
                 continue;
             } else if (planet_check(ch, i->character)) {
                 if (readIntro(ch, i->character) == 1) {
-                    send_to_char(ch, "@D[@Y%d@D] @CYou sense @c%s@C with ", (count + 1), get_i_name(ch, i->character));
+                    send_to_char(ch, "@D[@Y%d@D] @CYou sense @c%s@C.\r\n", (count + 1), get_i_name(ch, i->character));
                 } else {
-                    send_to_char(ch, "@D[@Y%d@D] @CYou sense ", (count + 1));
+                    send_to_char(ch, "@D[@Y%d@D] @CYou sense an unknown individual.\r\n", (count + 1));
                 }
                 /* How strong is the one we sense? */
-                if (GET_HIT(i->character) > GET_HIT(ch) * 50) {
-                    send_to_char(ch, "a power so huge it boggles your mind and crushes your spirit to fight!\n");
-                } else if (GET_HIT(i->character) > GET_HIT(ch) * 25) {
-                    send_to_char(ch, "a power so much larger than you that you would die like an insect.\n");
-                } else if (GET_HIT(i->character) > GET_HIT(ch) * 10) {
-                    send_to_char(ch, "a power that is many times larger than your own.\n");
-                } else if (GET_HIT(i->character) > GET_HIT(ch) * 5) {
-                    send_to_char(ch, "a power that is a great deal larger than your own.\n");
-                } else if (GET_HIT(i->character) > GET_HIT(ch) * 2) {
-                    send_to_char(ch, "a power that is more than twice as large as your own.\n");
-                } else if (GET_HIT(i->character) > GET_HIT(ch)) {
-                    send_to_char(ch, "a power that is about twice as large as your own.\n");
-                } else if (GET_HIT(i->character) == GET_HIT(ch)) {
-                    send_to_char(ch, "a power that is exactly as strong as you.\n");
-                } else if (GET_HIT(i->character) >= GET_HIT(ch) * 0.75) {
-                    send_to_char(ch, "a power that is about a quarter of your own or larger.\n");
-                } else if (GET_HIT(i->character) >= GET_HIT(ch) * 0.5) {
-                    send_to_char(ch, "a power that is about half of your own or larger.\n");
-                } else if (GET_HIT(i->character) >= GET_HIT(ch) * 0.25) {
-                    send_to_char(ch, "a power that is about a quarter of your own or larger.\n");
-                } else if (GET_HIT(i->character) >= GET_HIT(ch) * 0.1) {
-                    send_to_char(ch, "a power that is about a tenth of your own or larger.\n");
-                } else if (GET_HIT(i->character) >= GET_HIT(ch) * 0.01) {
-                    send_to_char(ch, "a power that is less than a tenth of your own.\n");
-                } else if (GET_HIT(i->character) < GET_HIT(ch) * 0.01) {
-                    send_to_char(ch, "a power that is less than 1 percent of your own. What a weakling...\n");
-                }
+                send_to_char(ch, sense_compare(ch, i->character).c_str());
 
                 /* What's their alignment? */
-
-                if (GET_ALIGNMENT(i->character) >= 500) {
-                    send_to_char(ch, "@wYou sense an extremely pure and good ki from them.@n\n");
-                } else if (GET_ALIGNMENT(i->character) > 200) {
-                    send_to_char(ch, "@wYou sense a pure and good ki from them.@n\n");
-                } else if (GET_ALIGNMENT(i->character) > 50) {
-                    send_to_char(ch, "@wYou sense slightly pure and good ki from them.@n\n");
-                } else if (GET_ALIGNMENT(i->character) > -50) {
-                    send_to_char(ch, "@wYou sense a slightly mild indefinable ki from them.@n\n");
-                } else if (GET_ALIGNMENT(i->character) > -200) {
-                    send_to_char(ch, "@wYou sense a slightly sour and evil ki from them.@n\n");
-                } else if (GET_ALIGNMENT(i->character) > -500) {
-                    send_to_char(ch, "@wYou sense a sour and evil ki from them.@n\n");
-                } else if (GET_ALIGNMENT(i->character) <= -500) {
-                    send_to_char(ch, "@wYou sense an extremely evil ki from them.@n\n");
-                }
+				send_to_char(ch, sense_align(i->character).c_str());
 
                 char *blah = sense_location(i->character);
                 send_to_char(ch, "@wLastly you sense that they are at... @C%s@n\n", blah);
@@ -677,7 +648,6 @@ ACMD(do_track) {
         }
     } else {
 
-
         if (GET_SKILL(ch, SKILL_SENSE) < rand_number(1, 101)) {
             int tries = 10;
             /* Find a random direction. :) */
@@ -703,55 +673,8 @@ ACMD(do_track) {
                 act("$n looks at you intently for a moment.", true, ch, nullptr, vict, TO_VICT);
                 act("$n looks at $N intently for a moment.", true, ch, nullptr, vict, TO_NOTVICT);
                 if (!IS_ANDROID(vict)) {
-                    if (GET_ALIGNMENT(vict) > 50 && GET_ALIGNMENT(vict) < 200) {
-                        send_to_char(ch, "You sense slightly pure and good ki from them.\r\n");
-                    } else if (GET_ALIGNMENT(vict) > 200 && GET_ALIGNMENT(vict) < 500) {
-                        send_to_char(ch, "You sense a pure and good ki from them.\r\n");
-                    } else if (GET_ALIGNMENT(vict) >= 500) {
-                        send_to_char(ch, "You sense an extremely pure and good ki from them.\r\n");
-                    } else if (GET_ALIGNMENT(vict) < -50 && GET_ALIGNMENT(vict) > -200) {
-                        send_to_char(ch, "You sense slightly sour and evil ki from them.\r\n");
-                    } else if (GET_ALIGNMENT(vict) < -200 && GET_ALIGNMENT(vict) > -500) {
-                        send_to_char(ch, "You sense a sour and evil ki from them.\r\n");
-                    } else if (GET_ALIGNMENT(vict) <= -500) {
-                        send_to_char(ch, "You sense an extremely evil ki from them.\r\n");
-                    } else if (GET_ALIGNMENT(vict) > -50 && GET_ALIGNMENT(vict) < 50) {
-                        send_to_char(ch, "You sense slightly mild indefinable ki from them.\r\n");
-                    }
-                }
-                if (!IS_ANDROID(vict)) {
-                    if (GET_HIT(vict) > GET_HIT(ch) * 50) {
-                        send_to_char(ch,
-                                     "Their power is so huge it boggles your mind and crushes your spirit to fight!\n");
-                    } else if (GET_HIT(vict) > GET_HIT(ch) * 25) {
-                        send_to_char(ch, "Their power is so much larger than you that you would die like an insect.\n");
-                    } else if (GET_HIT(vict) > GET_HIT(ch) * 10) {
-                        send_to_char(ch, "Their power is many times larger than your own.\n");
-                    } else if (GET_HIT(vict) > GET_HIT(ch) * 5) {
-                        send_to_char(ch, "Their power is a great deal larger than your own.\n");
-                    } else if (GET_HIT(vict) > GET_HIT(ch) * 2) {
-                        send_to_char(ch, "Their power is more than twice as large as your own.\n");
-                    } else if (GET_HIT(vict) > GET_HIT(ch)) {
-                        send_to_char(ch, "Their power is about twice as large as your own.\n");
-                    } else if (GET_HIT(vict) == GET_HIT(ch)) {
-                        send_to_char(ch, "Their power is exactly as strong as you.\n");
-                    } else if (GET_HIT(vict) >= GET_HIT(ch) * 0.75) {
-                        send_to_char(ch, "Their power is about a quarter of your own or larger.\n");
-                    } else if (GET_HIT(vict) >= GET_HIT(ch) * 0.5) {
-                        send_to_char(ch, "Their power is about half of your own or larger.\n");
-                    } else if (GET_HIT(vict) >= GET_HIT(ch) * 0.25) {
-                        send_to_char(ch, "Their power is about a quarter of your own or larger.\n");
-                    } else if (GET_HIT(vict) >= GET_HIT(ch) * 0.1) {
-                        send_to_char(ch, "Their power is about a tenth of your own or larger.\n");
-                    } else if (GET_HIT(vict) >= GET_HIT(ch) * 0.01) {
-                        send_to_char(ch, "Their power is less than a tenth of your own.\n");
-                    } else if (GET_HIT(vict) < GET_HIT(ch) * 0.01) {
-                        send_to_char(ch, "Their power is less than 1 percent of your own. What a weakling...\n");
-                    }
-                    if (!read_sense_memory(ch, vict)) {
-                        send_to_char(ch, "You will remember their ki signal from now on.\r\n");
-                        sense_memory_write(ch, vict);
-                    }
+                    send_to_char(ch, sense_align(vict).c_str());
+                    send_to_char(ch, sense_compare(ch, vict).c_str());
                 } else {
                     send_to_char(ch, "You can't sense their powerlevel as they are a machine.\r\n");
                 }

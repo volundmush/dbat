@@ -10,7 +10,8 @@
 #pragma once
 
 #include "structs.h"
-
+#include <boost/asio.hpp>
+#include "SQLiteCpp/SQLiteCpp.h"
 
 /* arbitrary constants used by index_boot() (must be unique) */
 #define DB_BOOT_WLD    0
@@ -117,6 +118,9 @@ extern struct weather_data weather_info;    /* the infomation about the weather 
 extern struct player_special_data dummy_mob;    /* dummy spec area for mobs	*/
 extern std::set<zone_vnum> zone_reset_queue;
 
+extern std::shared_ptr<SQLite::Database> db;
+
+
 extern struct char_data *EDRAGON;
 extern int WISH[2];
 extern int DRAGONR, DRAGONZ, DRAGONC, SHENRON;
@@ -133,13 +137,15 @@ extern room_rnum r_frozen_start_room;    /* rnum of frozen start room	 */
 /* public procedures in db.c */
 extern void auc_load(struct obj_data *obj);
 
-extern void boot_world();
+void create_schema();
+
+extern boost::asio::awaitable<void> boot_world();
 
 extern int is_empty(zone_rnum zone_nr);
 
 extern void index_boot(int mode);
 
-extern void boot_db();
+extern boost::asio::awaitable<void> boot_db();
 
 extern void destroy_db();
 
@@ -380,6 +386,24 @@ extern time_t boot_time;
 
 extern struct config_data config_info;
 
+// dirty sets...
+extern std::set<room_vnum> dirty_rooms, dirty_save_rooms;
+extern std::set<obj_vnum> dirty_item_prototypes;
+extern std::set<mob_vnum> dirty_npc_prototypes;
+extern std::set<zone_vnum> dirty_zones;
+extern std::set<vnum> dirty_areas;
+extern std::set<trig_vnum> dirty_dgscripts;
+extern std::set<guild_vnum> dirty_guilds;
+extern std::set<shop_vnum> dirty_shops;
+extern std::set<vnum> dirty_players;
+extern std::set<vnum> dirty_accounts;
+
+void process_dirty();
+// TODO: not yet sure how to handle accounts... working on it...
+
+// world data...
+
+
 extern std::map<room_vnum, room_data> world;
 extern std::map<zone_vnum, struct zone_data> zone_table;
 
@@ -394,10 +418,15 @@ extern struct char_data *affectv_list;
 extern std::map<mob_vnum, struct index_data> mob_index;
 extern std::map<mob_vnum, struct char_data> mob_proto;
 
+extern std::unordered_map<int64_t, std::pair<time_t, struct char_data*>> uniqueCharacters;
+int64_t nextCharID();
+
 extern std::map<obj_vnum, struct index_data> obj_index;
 extern struct obj_data *object_list;
 extern std::map<obj_vnum, struct obj_data> obj_proto;
 
+extern std::unordered_map<int64_t, std::pair<time_t, struct obj_data*>> uniqueObjects;
+int64_t nextObjID();
 
 extern struct social_messg *soc_mess_list;
 extern int top_of_socialt;

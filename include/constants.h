@@ -83,3 +83,5 @@ extern const char *skin_types[];
 extern const char *aura_types[];
 extern const char *npc_personality[MAX_PERSONALITIES + 1];
 extern const char *song_types[];
+extern const char *list_bonus[];
+extern const int list_bonus_cost[];

@@ -1697,3 +1697,113 @@ const char *admin_flags[NUM_ADMFLAGS + 1] = {
         "\n"
 };
 
+const char *list_bonus[] = {
+        "Thrifty", /* Bonus 0 */
+        "Prodigy", /* Bonus 1 */
+        "Quick Study", /* Bonus 2 */
+        "Die Hard", /* Bonus 3 */
+        "Brawler", /* Bonus 4 */
+        "Destroyer", /* Bonus 5 */
+        "Hard Worker", /* Bonus 6 */
+        "Healer", /* Bonus 7 */
+        "Loyal", /* Bonus 8 */
+        "Brawny", /* Bonus 9 */
+        "Scholarly", /* Bonus 10 */
+        "Sage", /* Bonus 11 */
+        "Agile", /* Bonus 12 */
+        "Quick", /* Bonus 13 */
+        "Sturdy", /* Bonus 14 */
+        "Thick Skin", /* Bonus 15 */
+        "Recipe Int", /* Bonus 16 */
+        "Fireproof", /* Bonus 17 */
+        "Powerhitter", /* Bonus 18 */
+        "Healthy", /* Bonus 19 */
+        "Insomniac", /* Bonus 20 */
+        "Evasive", /* Bonus 21 */
+        "The Wall", /* Bonus 22 */
+        "Accurate", /* Bonus 23 */
+        "Energy Leech", /* Bonus 24 */
+        "Good Memory", /* Bonus 25*/
+        "Soft Touch", /* Neg 26 */
+        "Late Sleeper", /* Neg 27 */
+        "Impulse Shop", /* Neg 28 */
+        "Sickly", /* Neg 29 */
+        "Punching Bag", /* Neg 30 */
+        "Pushover", /* Neg 31 */
+        "Poor Depth Perception", /* Neg 32 */
+        "Thin Skin", /* Neg 33 */
+        "Fireprone", /* Neg 34 */
+        "Energy Intollerant", /* Neg 35 */
+        "Coward", /* Neg 36 */
+        "Arrogant", /* Neg 37 */
+        "Unfocused", /* Neg 38 */
+        "Slacker", /* Neg 39 */
+        "Slow Learner", /* Neg 40 */
+        "Masochistic", /* Neg 41 */
+        "Mute", /* Neg 42 */
+        "Wimp", /* Neg 43 */
+        "Dull", /* Neg 44 */
+        "Foolish", /* Neg 45 */
+        "Clumsy", /* Neg 46 */
+        "Slow", /* Neg 47 */
+        "Frail", /* Neg 48 */
+        "Sadistic", /* Neg 49 */
+        "Loner", /* Neg 50 */
+        "Bad Memory" /* Neg 51 */
+};
+
+/* List cost of bonus/negative */
+const int list_bonus_cost[] = {
+        -2, /* Bonus 0 */
+        -5, /* Bonus 1 */
+        -3, /* Bonus 2 */
+        -6, /* Bonus 3 */
+        -4, /* Bonus 4 */
+        -3, /* Bonus 5 */
+        -3, /* Bonus 6 */
+        -3, /* Bonus 7 */
+        -2, /* Bonus 8 */
+        -5, /* Bonus 9 */
+        -5, /* Bonus 10 */
+        -5, /* Bonus 11 */
+        -4, /* Bonus 12 */
+        -6, /* Bonus 13 */
+        -5, /* Bonus 14 */
+        -5, /* Bonus 15 */
+        -2, /* Bonus 16 */
+        -4, /* Bonus 17 */
+        -4, /* Bonus 18 */
+        -3, /* Bonus 19 */
+        -2, /* Bonus 20 */
+        -3, /* Bonus 21 */
+        -3, /* Bonus 22 */
+        -4, /* Bonus 23 */
+        -5, /* Bonus 24 */
+        -6, /* Bonus 25*/
+        5, /* Negative 26 */
+        5, /* Negative 27 */
+        3, /* Negative 28 */
+        5, /* Negative 29 */
+        3, /* Negative 30 */
+        3, /* Negative 31 */
+        4, /* Negative 32 */
+        4, /* Negative 33 */
+        5, /* Negative 34 */
+        6, /* Negative 35 */
+        6, /* Negative 36 */
+        1, /* Negative 37 */
+        3, /* Negative 38 */
+        3, /* Negative 39 */
+        3, /* Negative 40 */
+        5, /* Negative 41 */
+        4, /* Negative 42 */
+        6, /* Negative 43 */
+        6, /* Negative 44 */
+        6, /* Negative 45 */
+        3, /* Negative 46 */
+        6, /* Negative 47 */
+        4, /* Negative 48 */
+        3, /* Negative 49 */
+        2, /* Negative 50 */
+        6, /* Negative 51 */
+};

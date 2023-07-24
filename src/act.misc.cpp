@@ -4188,9 +4188,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                             GET_OBJ_SIZE(obj) = get_size(ch);
                         }
                     }
-                    GET_RP(ch) -= cost;
-                    ch->desc->rpp = GET_RP(ch);
-                    userWrite(ch->desc, 0, 0, 0, "index");
+                    ch->modRPP(-cost);
                     save_char(ch);
                     send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
@@ -4207,8 +4205,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     obj = read_object(1120, VIRTUAL);
                     obj_to_char(obj, ch);
                     GET_OBJ_SIZE(obj) = get_size(ch);
-                    GET_RP(ch) -= cost;
-                    ch->desc->rpp = GET_RP(ch);
+                    ch->modRPP(-cost);
                     userWrite(ch->desc, 0, 0, 0, "index");
                     save_char(ch);
                     send_to_char(ch, "@R%d@W RPP from your Bank paid for your selection. Enjoy!@n\r\n", cost);
@@ -4226,9 +4223,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     obj = read_object(1121, VIRTUAL);
                     obj_to_char(obj, ch);
                     GET_OBJ_SIZE(obj) = get_size(ch);
-                    GET_RP(ch) -= cost;
-                    ch->desc->rpp = GET_RP(ch);
-                    userWrite(ch->desc, 0, 0, 0, "index");
+                    ch->modRPP(-cost);
                     save_char(ch);
                     send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
@@ -4245,9 +4240,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     obj = read_object(1122, VIRTUAL);
                     obj_to_char(obj, ch);
                     GET_OBJ_SIZE(obj) = get_size(ch);
-                    GET_RP(ch) -= cost;
-                    ch->desc->rpp = GET_RP(ch);
-                    userWrite(ch->desc, 0, 0, 0, "index");
+                    ch->modRPP(-cost);
                     save_char(ch);
                     send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
@@ -4264,9 +4257,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     obj = read_object(1123, VIRTUAL);
                     obj_to_char(obj, ch);
                     GET_OBJ_SIZE(obj) = get_size(ch);
-                    GET_RP(ch) -= cost;
-                    ch->desc->rpp = GET_RP(ch);
-                    userWrite(ch->desc, 0, 0, 0, "index");
+                    ch->modRPP(-cost);
                     save_char(ch);
                     send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
@@ -4283,9 +4274,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     obj = read_object(1124, VIRTUAL);
                     obj_to_char(obj, ch);
                     GET_OBJ_SIZE(obj) = get_size(ch);
-                    GET_RP(ch) -= cost;
-                    ch->desc->rpp = GET_RP(ch);
-                    userWrite(ch->desc, 0, 0, 0, "index");
+                    ch->modRPP(-cost);
                     save_char(ch);
                     send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
@@ -4302,9 +4291,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     obj = read_object(1125, VIRTUAL);
                     obj_to_char(obj, ch);
                     GET_OBJ_SIZE(obj) = get_size(ch);
-                    GET_RP(ch) -= cost;
-                    ch->desc->rpp = GET_RP(ch);
-                    userWrite(ch->desc, 0, 0, 0, "index");
+                    ch->modRPP(-cost);
                     save_char(ch);
                     send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
@@ -4320,9 +4307,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     GET_OBJ_WEIGHT(obj) = 10000000;
                     obj_to_char(obj, ch);
                     GET_OBJ_SIZE(obj) = get_size(ch);
-                    GET_RP(ch) -= cost;
-                    ch->desc->rpp = GET_RP(ch);
-                    userWrite(ch->desc, 0, 0, 0, "index");
+                    ch->modRPP(-cost);
                     save_char(ch);
                     send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
@@ -4337,9 +4322,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     obj = read_object(1127, VIRTUAL);
                     obj_to_char(obj, ch);
                     GET_OBJ_SIZE(obj) = get_size(ch);
-                    GET_RP(ch) -= cost;
-                    ch->desc->rpp = GET_RP(ch);
-                    userWrite(ch->desc, 0, 0, 0, "index");
+                    ch->modRPP(-cost);
                     save_char(ch);
                     send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);

@@ -21,6 +21,9 @@
 #include "nlohmann/json.hpp"
 #include "area.h"
 #include "genwld.h"
+#include "account.h"
+#include "players.h"
+#include "objsave.h"
 
 static std::string stripAnsi(const std::string& str) {
     return processColors(str, false, nullptr);
@@ -158,7 +161,7 @@ vnum assembleArea(const AreaDef &def) {
 }
 
 
-void migrate_db() {
+void migrate_grid() {
     AreaDef adef;
     adef.name = "Admin Land";
     adef.roomRanges.emplace_back(0, 16);
@@ -1322,6 +1325,307 @@ void migrate_db() {
     }
 }
 
+static std::vector<std::pair<std::string, vnum>> characterToAccount;
+
+void migrate_accounts() {
+	// user files are stored in <cwd>/user/<folder>/<file>.usr so we'll need to do recursive iteration using
+    // C++ std::filesystem...
+
+    auto path = std::filesystem::current_path() / "user";
+    if(!std::filesystem::exists(path)) {
+        log("No user directory found, skipping account migration.");
+        return;
+    }
+
+    for(auto &p : std::filesystem::recursive_directory_iterator(path)) {
+        if(p.path().extension() != ".usr") continue;
+        auto accFile = p.path().parent_path().filename().string();
+
+        // Open file for reading...
+        std::ifstream file(p.path());
+
+        // Step 1: create an ID for this account...
+        auto id = account_data::getNextID();
+
+        // Now let's get a new account_data...
+        auto &a = accounts[id];
+
+        // Moving forward, we assume that every account file is using the above structure and is valid.
+        // Don't second-guess it, just process.
+
+        // Line 1: Name (string)
+        std::getline(file, a.name);
+
+        // Line 2: Email Address (string)
+        std::getline(file, a.email);
+
+        // Line 3: password (clear text, will hash...)
+        std::string pass;
+        std::getline(file, pass);
+        if(!a.setPassword(pass)) {
+            log("Error hashing %s's password: %s", a.name.c_str(), pass.c_str());
+        }
+
+        // Line 4: slots (int)
+        std::string slots;
+        std::getline(file, slots);
+        a.slots = std::stoi(slots);
+
+        // Line 5: current RPP (int)
+        std::string rpp;
+        std::getline(file, rpp);
+        a.rpp = std::stoi(rpp);
+
+        // Now for the Character lines, they either contain a name, or they contain "Empty".
+        // "Empty" is not a character. It's a placeholder for an empty slot.
+        // For now, we will move through all five lines, and for any that do not contain "Empty",
+        // we insert the character name into the characterToAccount map.
+
+        for(int i = 0;i < 5; i++) {
+            std::string charName;
+            std::getline(file, charName);
+            if(charName != "Empty") {
+                characterToAccount.emplace_back(charName, id);
+            }
+        }
+
+        // Line 11: adminLevel (int)
+        std::string adminLevel;
+        std::getline(file, adminLevel);
+        a.adminLevel = std::stoi(adminLevel);
+
+        // Line 12: customFile present (bool)
+        std::string customFile;
+        std::getline(file, customFile);
+        bool custom = std::stoi(customFile);
+
+        // if custom, then we want to open a sister file that ends in .cus in the same directory and read every line
+        // beyond the first into a.customs.
+        if(custom) {
+            auto customPath = p.path().replace_extension(".cus");
+            std::ifstream customFile(customPath);
+            std::string line;
+            std::getline(customFile, line); // skip the first line
+            while(std::getline(customFile, line)) {
+                a.customs.emplace_back(line);
+            }
+            customFile.close();
+        }
+
+        // Line 13: RPP bank (unused)
+        std::string rppBank;
+        std::getline(file, rppBank);
+        auto bank = std::stoi(rppBank);
+        file.close();
+        a.vn = id;
+        accounts_dirty.insert(id);
+
+    }
+}
+
+void migrate_characters() {
+    // Unlike accounts, player files are indexed. However, unless their name showed up in an account,
+    // there's no point migrating them.
+
+    // The procedure we will use is: iterate through characterToAccount and attempt to load the character.
+    // if we can load them, we'll convert them and bind them to the appropriate account.
+
+    for(auto &[cname, accID] : characterToAccount) {
+        auto ch = new char_data();
+        ch->player_specials = new player_special_data();
+        auto result = load_char(cname.c_str(), ch);
+        if(result < 0) {
+            log("Error loading %s for account migration.", cname.c_str());
+            delete ch->player_specials;
+            delete ch;
+            continue;
+        }
+        auto id = ch->idnum;
+        auto &p = players[id];
+        p.vn = id;
+        p.character = ch;
+        auto &a = accounts[accID];
+        p.account = &a;
+        a.characters.emplace_back(id);
+
+        dirty_players.insert(id);
+    }
+
+    // migrate sense files...
+    auto path = std::filesystem::current_path() / "sense";
+    if(!std::filesystem::exists(path)) {
+        log("No sense directory found, skipping account migration.");
+        return;
+    }
+
+    for(auto &p : std::filesystem::recursive_directory_iterator(path)) {
+        if(p.path().extension() != ".sen") continue;
+
+        // use the file stem against findPlayer...
+        auto name = p.path().stem().string();
+        auto ch = findPlayer(name);
+        if(!ch) {
+            log("Error loading %s for sense migration.", name.c_str());
+            continue;
+        }
+
+        // The file contains a sequence of lines, with each line containing a number.
+		// The number is the vnum of a mobile the player's sensed.
+        // We will read each line and insert the vnum into the player's sensed list.
+        std::ifstream file(p.path());
+        std::string line;
+        while(std::getline(file, line)) {
+            auto vnum = std::stoi(line);
+            if(mob_proto.contains(vnum)) ch->player_specials->senseMemory.insert(vnum);
+        }
+        file.close();
+    }
+
+    path = std::filesystem::current_path() / "intro";
+    if(!std::filesystem::exists(path)) {
+        log("No intro directory found, skipping intro migration.");
+        return;
+    }
+
+    for(auto &p : std::filesystem::recursive_directory_iterator(path)) {
+        if(p.path().extension() != ".itr") continue;
+
+        // use the file stem against findPlayer...
+        auto name = p.path().stem().string();
+        auto ch = findPlayer(name);
+        if(!ch) {
+            log("Error loading %s for sense migration.", name.c_str());
+            continue;
+        }
+
+		// The file contains a series of lines.
+        // Each line looks like: <name> <dub>
+        // We will need to use findPlayer on name, and then save id->dub to ch->player_specials->dubNames.
+        // ignore if <name> == "Gibbles"
+
+        std::ifstream file(p.path());
+        std::string line;
+        while(std::getline(file, line)) {
+            auto pos = line.find(' ');
+            if(pos == std::string::npos) continue;
+            auto name = line.substr(0, pos);
+            auto dub = line.substr(pos + 1);
+            if(name == "Gibbles") continue;
+            auto pc = findPlayer(name);
+            if(!pc) continue;
+            ch->player_specials->dubNames[pc->idnum] = dub;
+        }
+    }
+
+    path = std::filesystem::current_path() / "plrvars";
+    if(!std::filesystem::exists(path)) {
+        log("No intro directory found, skipping intro migration.");
+        return;
+    }
+
+    for(auto &p : std::filesystem::recursive_directory_iterator(path)) {
+        if(p.path().extension() != ".mem") continue;
+
+        // use the file stem against findPlayer...
+        auto name = p.path().stem().string();
+        auto ch = findPlayer(name);
+        if(!ch) {
+            log("Error loading %s for variable migration.", name.c_str());
+            continue;
+        }
+
+        // The file contains a series of lines.
+        // each line looks like this: <varname> <context> <data>
+        // where varname is a single-word string, context is an integer, and data is a string - although it might be an
+        // empty string.
+        std::ifstream file(p.path());
+        std::string line;
+        while(std::getline(file, line)) {
+            auto pos = line.find(' ');
+            if(pos == std::string::npos) continue;
+            auto varname = line.substr(0, pos);
+            auto pos2 = line.find(' ', pos + 1);
+            if(pos2 == std::string::npos) continue;
+            auto context = line.substr(pos + 1, pos2 - pos - 1);
+            auto data = line.substr(pos2 + 1);
+
+            add_var(&ch->script->global_vars, varname.c_str(), data.c_str(), std::stoi(context));
+        }
+    }
+
+
+    path = std::filesystem::current_path() / "plralias";
+    if(!std::filesystem::exists(path)) {
+        log("No plralias directory found, skipping alias migration.");
+        return;
+    }
+
+    for(auto &p : std::filesystem::recursive_directory_iterator(path)) {
+        if(p.path().extension() != ".alias") continue;
+
+        // use the file stem against findPlayer...
+        auto name = p.path().stem().string();
+        auto ch = findPlayer(name);
+        if(!ch) {
+            log("Error loading %s for alias migration.", name.c_str());
+            continue;
+        }
+
+        std::ifstream file(p.path());
+        std::string line;
+
+        // Alias files are stored as sequences of this:
+        // "%d\n%s\n%d\n%s\n%d\n", in order: alias name string length (size_t), alias name string,
+        // replacement string length  (size_t), replacement string, alias type (a bool)
+
+        while(std::getline(file, line)) {
+            auto aliasNameLen = std::stoi(line);
+            std::string name, replacement;
+            std::getline(file, name);
+            std::getline(file, line);
+            auto aliasReplLen = std::stoi(line);
+            std::getline(file, replacement);
+            std::getline(file, line);
+            ch->player_specials->aliases.emplace_back(name, replacement, std::stoi(line));
+        }
+    }
+
+    path = std::filesystem::current_path() / "plrobjs";
+
+    for(auto &p : std::filesystem::recursive_directory_iterator(path)) {
+        if(p.path().extension() != ".new") continue;
+
+        // use the file stem against findPlayer...
+        auto name = p.path().stem().string();
+        auto ch = findPlayer(name);
+        if(!ch) {
+            log("Error loading %s for object migration.", name.c_str());
+            continue;
+        }
+
+        // we need to force players "into the game" even if they're really not...
+        //ch->desc = new descriptor_data();
+        //ch->desc->raw_input_queue = std::make_unique<net::Channel<std::string>>(*net::io);
+        //ch->desc->character = ch;
+
+		auto result = Crash_load(ch);
+
+    }
+}
+
+boost::asio::awaitable<void> migrate_db() {
+    migrate_grid();
+
+    migrate_accounts();
+
+    migrate_characters();
+
+    SQLite::Transaction transaction(*db);
+    process_dirty();
+    transaction.commit();
+
+
+}
 
 int main(int argc, char **argv)
 {
@@ -1475,37 +1779,11 @@ int main(int argc, char **argv)
     }
     log("Using %s as data directory.", dir);
 
-    init_lookup_table();
-    event_init();
-    boot_db();
-    log("Database fully booted!");
-
-    FILE *mapfile;
-    int rowcounter, colcounter;
-    int vnum_read;
-    log("Loading Space Map. ");
-    //Load the map vnums from a file into an array
-    mapfile = fopen("../lib/surface.map", "r");
-
-    for (rowcounter = 0; rowcounter <= MAP_ROWS; rowcounter++) {
-        for (colcounter = 0; colcounter <= MAP_COLS; colcounter++) {
-            fscanf(mapfile, "%d", &vnum_read);
-            mapnums[rowcounter][colcounter] = real_room(vnum_read);
-        }
-    }
-    fclose(mapfile);
-
-    /* Load the toplist */
-    topLoad();
-
     // BEGIN DUMP SEQUENCE
     log("Beginning migration!");
-    migrate_db();
-    save_areas();
+    gameFunc = migrate_db;
+    init_game(1280);
 
-    for(auto &[vn, zone] : zone_table) {
-        zone.save_all();
-    }
 
     return 0;
 }

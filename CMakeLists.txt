@@ -20,6 +20,7 @@ CPMAddPackage("gh:nlohmann/json#v3.11.2")
 CPMAddPackage("gh:gabime/spdlog#v1.11.0")
 CPMAddPackage("gh:Roblox/luau#0.570")
 CPMAddPackage("gh:kunitoki/LuaBridge3#3.0-rc3")
+CPMAddPackage("gh:robinlinden/libsodium-cmake#master")
 
 SET(LUABRIDGE_TESTING OFF)
 SET(LUAU_BUILD_CLI OFF)
@@ -42,6 +43,7 @@ set(CIRCLE_INCLUDE_DIRS
         ${luau_SOURCE_DIR}/VM/include
         ${luau_SOURCE_DIR}/Compiler/include
         ${LuaBridge_SOURCE_DIR}/Source
+        ${sodium_SOURCE_DIR}/libsodium/src/libsodium/include
         )
 
 file(GLOB_RECURSE CIRCLE_INCLUDE include/*.h)
@@ -62,6 +64,7 @@ set(CIRCLE_LINK_LIBRARIES
         ZLIB::ZLIB fmt::fmt ${SQLite3_LIBRARIES} ${Boost_LIBRARIES}
         SQLiteCpp sqlite3 bsd
         Luau.VM Luau.Common Luau.Compiler
+        sodium
         )
 
 # this is the core library we're making.

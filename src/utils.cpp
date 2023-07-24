@@ -1335,125 +1335,30 @@ const char *disp_align(struct char_data *ch) {
     return (alignments[align]);
 }
 
-
-/* This creates a player's sense memory file for the first time. */
-void senseCreate(struct char_data *ch) {
-    char fname[40];
-    FILE *fl;
-    /* Write Sense File */
-    if (!get_filename(fname, sizeof(fname), SENSE_FILE, GET_NAME(ch)))
-        return;
-
-    if (!(fl = fopen(fname, "w"))) {
-        log("ERROR: could not save sense memory of, %s, to filename, %s.", GET_NAME(ch), fname);
-        return;
-    }
-
-    fprintf(fl, "0\n");
-
-    fclose(fl);
-    return;
-}
-
 int read_sense_memory(struct char_data *ch, struct char_data *vict) {
-    char fname[40], line[256];
-    int known = false, idnums = -1337;
-    FILE *fl;
-
     /* Read Sense File */
-    if (vict == nullptr) {
-        log("Noone.");
+    if (!vict || vict == ch) {
         return 0;
     }
 
-    if (!get_filename(fname, sizeof(fname), SENSE_FILE, GET_NAME(ch))) {
-        senseCreate(ch);
+    if(IS_NPC(vict)) {
+        return ch->player_specials->senseMemory.contains(vict->vn);
+    } else {
+        return ch->player_specials->sensePlayer.contains(vict->idnum);
     }
-    if (!(fl = fopen(fname, "r"))) {
-        return 2;
-    }
-    if (vict == ch) {
-        fclose(fl);
-        return 0;
-    }
-
-    while (!feof(fl)) {
-        get_line(fl, line);
-        sscanf(line, "%d\n", &idnums);
-        if (IS_NPC(vict)) {
-            if (idnums == GET_MOB_VNUM(vict)) {
-                known = true;
-            }
-        } else {
-            if (idnums == ((vict)->id)) {
-                known = true;
-            }
-        }
-    }
-    fclose(fl);
-
-    if (known == true)
-        return 1;
-    else
-        return 0;
 }
 
 /* This writes a player's sense memory to file. */
 void sense_memory_write(struct char_data *ch, struct char_data *vict) {
-    FILE *file;
-    char fname[40], line[256];
-    int idnums[500] = {0};
-    FILE *fl;
-    int count = 0, x = 0, id_sample;
-
-    /* Read Sense File */
-    if (!get_filename(fname, sizeof(fname), SENSE_FILE, GET_NAME(ch))) {
-        senseCreate(ch);
-    }
-    if (!(file = fopen(fname, "r"))) {
-        return;
-    }
-    while (!feof(file) || count < 498) {
-        get_line(file, line);
-        sscanf(line, "%d\n", &id_sample);
-        idnums[count] = id_sample;
-        count++;
-    }
-    fclose(file);
-
-    /* Write Sense File */
-
-    if (!get_filename(fname, sizeof(fname), SENSE_FILE, GET_NAME(ch)))
-        return;
-
-    if (!(fl = fopen(fname, "w"))) {
-        log("ERROR: could not save sense memory file, %s, to filename, %s.", GET_NAME(ch), fname);
+    if (!vict || vict == ch) {
         return;
     }
 
-    while (x < count) {
-        if (x == 0 || idnums[x - 1] != idnums[x]) {
-            if (!IS_NPC(vict)) {
-                if (idnums[x] != ((vict)->id)) {
-                    fprintf(fl, "%d\n", idnums[x]);
-                }
-            } else {
-                if (idnums[x] != GET_MOB_VNUM(vict)) {
-                    fprintf(fl, "%d\n", idnums[x]);
-                }
-            }
-        }
-        x++;
-    }
-
-    if (!IS_NPC(vict)) {
-        fprintf(fl, "%d\n", ((vict)->id));
+    if(IS_NPC(vict)) {
+        ch->player_specials->senseMemory.insert(vict->vn);
     } else {
-        fprintf(fl, "%d\n", GET_MOB_VNUM(vict));
+        ch->player_specials->sensePlayer.insert(vict->idnum);
     }
-
-    fclose(fl);
-    return;
 }
 
 /* Will they manage to pursue a fleeing enemy? */

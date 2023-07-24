@@ -9,12 +9,52 @@
 ************************************************************************ */
 #pragma once
 
-#include "defs.h"
-#include "nlohmann/json.hpp"
+#include "net.h"
 
 /**********************************************************************
 * Structures                                                          *
 **********************************************************************/
+
+struct account_data {
+    account_data() = default;
+    explicit account_data(const nlohmann::json& j);
+    vnum vn{NOTHING};
+    std::string name;
+    std::string passHash;
+    std::string email;
+    time_t created{};
+    time_t lastLogin{};
+    time_t lastLogout{};
+    time_t lastPasswordChanged{};
+    double totalPlayTime{};
+    std::string disabledReason;
+    time_t disabledUntil{0};
+    int adminLevel{};
+    int rpp{};
+    int slots{3};
+    std::vector<std::string> customs;
+    std::vector<vnum> characters;
+    std::set<descriptor_data*> descriptors;
+
+    nlohmann::json serialize();
+    void deserialize(const nlohmann::json& j);
+
+    void modRPP(int amt);
+
+    bool checkPassword(const std::string& password);
+    bool setPassword(const std::string& password);
+
+    static int getNextID();
+
+};
+
+struct player_data {
+    vnum vn{NOTHING};
+    std::string name;
+    struct account_data *account{};
+    struct char_data* character{};
+    static int getNextID();
+};
 
 enum class AreaType {
     Dimension = 0,
@@ -209,6 +249,7 @@ struct room_data : public unit_data {
     double getGravity();
 
     nlohmann::json serialize();
+    nlohmann::json serializeItems();
 
     std::optional<vnum> getMatchingArea(std::function<bool(const area_data&)> f);
 
@@ -281,58 +322,67 @@ struct abil_data {
  * can be changed freely.
  */
 struct player_special_data {
-    char *poofin;            /* Description on arrival of a god.     */
-    char *poofout;        /* Description upon a god's exit.       */
-    struct alias_data *aliases;    /* Character's aliases                  */
-    int32_t last_tell;        /* idnum of last tell from              */
-    void *last_olc_targ;        /* olc control                          */
-    int last_olc_mode;        /* olc control                          */
-    char *host;            /* host of last logon                   */
-    struct imcchar_data *imcchardata;  /**< IMC2 Data */
-    int spell_level[MAX_SPELL_LEVEL];
+    player_special_data() = default;
+    explicit player_special_data(const nlohmann::json &j);
+    struct account_data *account{nullptr};
+    char *poofin{};            /* Description on arrival of a god.     */
+    char *poofout{};        /* Description upon a god's exit.       */
+    std::vector<struct alias_data> aliases;    /* Character's aliases                  */
+    int32_t last_tell{};        /* idnum of last tell from              */
+    void *last_olc_targ{};        /* olc control                          */
+    int last_olc_mode{};        /* olc control                          */
+    char *host{};            /* host of last logon                   */
+    struct imcchar_data *imcchardata{};  /**< IMC2 Data */
+    int spell_level[MAX_SPELL_LEVEL]{};
     /* bonus to number of spells memorized */
-    int memcursor;        /* points to the next free slot in spellmem */
-    int wimp_level;        /* Below this # of hit points, flee!	*/
-    int8_t freeze_level;        /* Level of god who froze char, if any	*/
-    int16_t invis_level;        /* level of invisibility		*/
-    room_vnum load_room;        /* Which room to place char in		*/
-    int pref[PR_ARRAY_MAX];    /* preference flags for PC's.		*/
-    uint8_t bad_pws;        /* number of bad password attemps	*/
-    int8_t conditions[NUM_CONDITIONS];        /* Drunk, full, thirsty			*/
-    int skill_points;        /* Skill points earned from race HD	*/
-    int class_skill_points[NUM_CLASSES];
+    int memcursor{};        /* points to the next free slot in spellmem */
+    int wimp_level{};        /* Below this # of hit points, flee!	*/
+    int8_t freeze_level{};        /* Level of god who froze char, if any	*/
+    int16_t invis_level{};        /* level of invisibility		*/
+    room_vnum load_room{};        /* Which room to place char in		*/
+    int pref[PR_ARRAY_MAX]{};    /* preference flags for PC's.		*/
+    uint8_t bad_pws{};        /* number of bad password attemps	*/
+    int8_t conditions[NUM_CONDITIONS]{};        /* Drunk, full, thirsty			*/
+    int skill_points{};        /* Skill points earned from race HD	*/
+    int class_skill_points[NUM_CLASSES]{};
     /* Skill points earned from a class	*/
-    struct txt_block *comm_hist[NUM_HIST]; /* Player's communcations history     */
-    int olc_zone;            /* Zone where OLC is permitted		*/
-    int gauntlet;                 /* Highest Gauntlet Position */
-    int speaking;            /* Language currently speaking		*/
-    int tlevel;            /* Turning level			*/
-    int ability_trains;        /* How many stat points can you train?	*/
-    int spellmem[MAX_MEM];    /* Spell slots				*/
-    int feat_points;        /* How many general feats you can take	*/
-    int epic_feat_points;        /* How many epic feats you can take	*/
-    int class_feat_points[NUM_CLASSES];
+    struct txt_block *comm_hist[NUM_HIST]{}; /* Player's communcations history     */
+    int olc_zone{};            /* Zone where OLC is permitted		*/
+    int gauntlet{};                 /* Highest Gauntlet Position */
+    int speaking{};            /* Language currently speaking		*/
+    int tlevel{};            /* Turning level			*/
+    int ability_trains{};        /* How many stat points can you train?	*/
+    int spellmem[MAX_MEM]{};    /* Spell slots				*/
+    int feat_points{};        /* How many general feats you can take	*/
+    int epic_feat_points{};        /* How many epic feats you can take	*/
+    int class_feat_points[NUM_CLASSES]{};
     /* How many class feats you can take	*/
-    int epic_class_feat_points[NUM_CLASSES];
+    int epic_class_feat_points[NUM_CLASSES]{};
     /* How many epic class feats 		*/
-    int domain[NUM_DOMAINS];
-    int school[NUM_SCHOOLS];
-    int deity;
-    int spell_mastery_points;
-    char *color_choices[NUM_COLOR]; /* Choices for custom colors		*/
-    uint8_t page_length;
-    int murder;                   /* Murder of PC's count                 */
-    int trainstr;
-    int trainint;
-    int traincon;
-    int trainwis;
-    int trainagl;
-    int trainspd;
+    int domain[NUM_DOMAINS]{};
+    int school[NUM_SCHOOLS]{};
+    int deity{};
+    int spell_mastery_points{};
+    char *color_choices[NUM_COLOR]{}; /* Choices for custom colors		*/
+    uint8_t page_length{};
+    int murder{};                   /* Murder of PC's count                 */
+    int trainstr{};
+    int trainint{};
+    int traincon{};
+    int trainwis{};
+    int trainagl{};
+    int trainspd{};
 
-    struct char_data *carrying;
-    struct char_data *carried_by;
+    struct char_data *carrying{};
+    struct char_data *carried_by{};
 
-    int racial_pref;
+    int racial_pref{};
+
+    std::set<vnum> sensePlayer;
+    std::set<mob_vnum> senseMemory;
+    std::map<vnum, std::string> dubNames;
+
+    nlohmann::json serialize();
 };
 
 
@@ -456,6 +506,8 @@ struct char_data : public unit_data {
     void deserializePlayer(const nlohmann::json& j);
 
     std::optional<vnum> getMatchingArea(std::function<bool(const area_data&)> f);
+
+    void login();
 
     int pfilepos{-1};            /* playerfile pos			*/
     room_vnum in_room{NOWHERE};        /* Location (real room number)		*/
@@ -950,6 +1002,10 @@ struct char_data : public unit_data {
     double energy = 1;
     double stamina = 1;
     double life = 1;
+
+    int getRPP();
+    void modRPP(int amt);
+
 };
 
 
@@ -973,12 +1029,13 @@ struct txt_q {
 
 
 struct descriptor_data {
-    net::connection_data* conn{nullptr};
-    socklen_t descriptor{};    /* file descriptor for socket		*/
+    std::set<net::connection_data*> connections;
+    std::mutex connection_mutex;
+
     char host[HOST_LENGTH + 1];    /* hostname				*/
     int8_t bad_pws{};    /* number of bad pw attemps this login	*/
     int8_t idle_tics{0};        /* tics idle at password prompt		*/
-    int connected{CON_GET_USER};        /* mode of 'connectedness'		*/
+    int connected{CON_PLAYING};        /* mode of 'connectedness'		*/
     int desc_num{};        /* unique num assigned to desc		*/
     time_t login_time{time(nullptr)};        /* when the person connected		*/
     char **str{};            /* for the modify-str system		*/
@@ -988,7 +1045,7 @@ struct descriptor_data {
     bool has_prompt{true};        /* is the user at a prompt?             */
     std::string inbuf;        /* buffer for raw input			*/
     std::string last_input;        /* the last input			*/
-    std::list<std::string> raw_input_queue;        /* queue of raw unprocessed input		*/
+    std::unique_ptr<net::Channel<std::string>> raw_input_queue;        /* queue of raw unprocessed input		*/
     std::list<std::string> input_queue;
     std::string output;        /* ptr to the current output buffer	*/
     std::list<std::string> history;        /* History of commands, for ! mostly.	*/
@@ -998,6 +1055,7 @@ struct descriptor_data {
     struct descriptor_data *snoop_by{}; /* And who is snooping this char	*/
     struct descriptor_data *next{}; /* link to next descriptor		*/
     struct oasis_olc_data *olc{};   /* OLC info                            */
+    struct account_data *account{}; /* Account info                        */
     char *user{};                   /* What user am I?                     */
     char *email{};                  /* User Account Email.                 */
     char *pass{};                   /* User Account Password.              */
@@ -1023,14 +1081,12 @@ struct descriptor_data {
     int obj_weapon{};
     struct obj_data *obj_point{};
 
-    int user_freed{};
     int customfile{};
     char *title{};
     int rbank{};
 
     void handle_input();
     void start();
-
 };
 
 /* used in the socials */

@@ -18,8 +18,6 @@ extern char *default_color_choices[NUM_COLOR + 1];
 // functions
 extern int readIntro(struct char_data *ch, struct char_data *vict);
 
-extern void introCreate(struct char_data *ch);
-
 extern int check_disabled(const struct command_info *command);
 
 extern void sort_commands();

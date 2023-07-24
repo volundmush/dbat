@@ -14,7 +14,6 @@
 #include "comm.h"
 #include "dg_comm.h"
 #include "act.other.h"
-#include "alias.h"
 #include "act.item.h"
 #include "vehicles.h"
 #include "act.movement.h"
@@ -850,7 +849,6 @@ void gain_level(struct char_data *ch, int whichclass) {
         send_to_char(ch, "You rise a level!\r\n");
         GET_EXP(ch) -= level_exp(ch, GET_LEVEL(ch));
         /*set_title(ch, nullptr);*/
-        write_aliases(ch);
         save_char(ch);
     }
 }

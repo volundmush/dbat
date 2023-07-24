@@ -93,9 +93,7 @@ ACMD(do_voice) {
             free(GET_VOICE(ch));
         }
         GET_VOICE(ch) = strdup(argument);
-        GET_RP(ch) -= 1;
-        ch->desc->rpp = GET_RP(ch);
-        userWrite(ch->desc, 0, 0, 0, "index");
+        ch->modRPP(-1);
         send_to_char(ch, "@D(@cRPP@W: @w-1@D)@n\n\n");
         return;
     } else {
@@ -177,7 +175,7 @@ ACMD(do_osay) {
 
         sprintf(buf, "@WYou @D[@mOSAY@D] @W'@w%s@W'@n", argument);
         if (!PRF_FLAGGED(ch, PRF_HIDE)) {
-            sprintf(buf2, "@W%s @D[@mOSAY@D] @W'@w%s@W'@n", GET_ADMLEVEL(ch) > 0 ? GET_NAME(ch) : ch->desc->user,
+            sprintf(buf2, "@W%s @D[@mOSAY@D] @W'@w%s@W'@n", GET_ADMLEVEL(ch) > 0 ? GET_NAME(ch) : GET_USER(ch),
                     argument);
         }
         if (PRF_FLAGGED(ch, PRF_HIDE)) {
@@ -880,11 +878,11 @@ static void perform_tell(struct char_data *ch, struct char_data *vict, char *arg
         add_history(vict, buf2, HIST_TELL);
     } else if (!IS_NPC(ch) && GET_ADMLEVEL(vict) < 1) {
         snprintf(buf2, sizeof(buf2), "@Y%s@Y tells you '%s'@n\r\n",
-                 GET_ADMLEVEL(ch) > 0 ? GET_NAME(ch) : ch->desc->user, buf);
+                 GET_ADMLEVEL(ch) > 0 ? GET_NAME(ch) : GET_USER(ch), buf);
         send_to_char(vict, "%s", buf2);
         add_history(vict, buf2, HIST_TELL);
     } else if (!IS_NPC(ch) && GET_ADMLEVEL(vict) >= 1) {
-        snprintf(buf2, sizeof(buf2), "@Y%s(%s)@Y tells you '%s'@n\r\n", ch->desc->user, GET_NAME(ch), buf);
+        snprintf(buf2, sizeof(buf2), "@Y%s(%s)@Y tells you '%s'@n\r\n", GET_USER(ch), GET_NAME(ch), buf);
         send_to_char(vict, "%s", buf2);
         add_history(vict, buf2, HIST_TELL);
     } else if (IS_NPC(ch)) {
@@ -897,7 +895,7 @@ static void perform_tell(struct char_data *ch, struct char_data *vict, char *arg
     } else {
         if (!IS_NPC(ch)) {
             snprintf(buf2, sizeof(buf2), "@YYou tell %s, '%s'@n\r\n",
-                     GET_ADMLEVEL(vict) > 0 ? GET_NAME(vict) : (vict->desc->user ? vict->desc->user : "ERROR"), arg);
+                     GET_ADMLEVEL(vict) > 0 ? GET_NAME(vict) : (vict->desc->account ? GET_USER(vict) : "ERROR"), arg);
             if (GET_ADMLEVEL(ch) < 5 && GET_ADMLEVEL(vict) < 5 && !IS_NPC(ch) && !IS_NPC(vict)) {
                 send_to_imm("@GTELL: @C%s@G tells @c%s, @W'@w%s@W'@n",
                             GET_ADMLEVEL(ch) > 0 ? GET_NAME(ch) : GET_USER(ch),
@@ -970,9 +968,9 @@ ACMD(do_tell) {
                 continue;
             if (STATE(k) != CON_PLAYING)
                 continue;
-            if (k->user == nullptr)
+            if (!k->account)
                 continue;
-            if (found == false && !IS_NPC(ch) && (!strcasecmp(k->user, buf) || strstr(k->user, buf))) {
+            if (found == false && !IS_NPC(ch) && (!strcasecmp(k->account->name.c_str(), buf) || strstr(k->account->name.c_str(), buf))) {
                 vict = k->character;
                 found = true;
             } else if (!IS_NPC(ch) && found == false &&
@@ -1571,7 +1569,7 @@ ACMD(do_gen_comm) {
             if (CONFIG_ENABLE_LANGUAGES) {
                 garble_text(argument, GET_SKILL(i->character, SPEAKING(ch)), SPEAKING(ch));
                 snprintf(buf1, sizeof(buf1), "%s%s %ss%s '%s@n'%s", color_on,
-                         GET_ADMLEVEL(ch) > 0 ? GET_NAME(ch) : ch->desc->user, com_msgs[subcmd][1],
+                         GET_ADMLEVEL(ch) > 0 ? GET_NAME(ch) : GET_USER(ch), com_msgs[subcmd][1],
                          GET_SKILL(i->character, SPEAKING(ch)) ? "," : ", in an unfamiliar tongue,", argument,
                          color_on);
             } else if (subcmd == SCMD_SHOUT && IN_ROOM(i->character) != IN_ROOM(ch)) {
@@ -1591,14 +1589,14 @@ ACMD(do_gen_comm) {
                 } else if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_HIDE) && GET_ADMLEVEL(i->character) >= ADMLVL_IMMORT &&
                            ch != i->character) {
                     snprintf(buf1, sizeof(buf1), "%s@W%s(H) %ss@W, '@w%s@W'@n%s", color_on,
-                             GET_ADMLEVEL(i->character) > 0 ? GET_NAME(ch) : ch->desc->user, com_msgs[subcmd][1],
+                             GET_ADMLEVEL(i->character) > 0 ? GET_NAME(ch) : GET_USER(ch), com_msgs[subcmd][1],
                              argument, color_on);
                 } else if (GET_ADMLEVEL(i->character) > 0) {
-                    snprintf(buf1, sizeof(buf1), "%s@W%s ($n) %ss@W, '@w%s@W'@n%s", color_on, ch->desc->user,
+                    snprintf(buf1, sizeof(buf1), "%s@W%s ($n) %ss@W, '@w%s@W'@n%s", color_on, GET_USER(ch),
                              com_msgs[subcmd][1], argument, color_on);
                 } else {
                     snprintf(buf1, sizeof(buf1), "%s@W%s %ss@W, '@w%s@W'@n%s", color_on,
-                             GET_ADMLEVEL(i->character) > 0 ? GET_NAME(ch) : ch->desc->user, com_msgs[subcmd][1],
+                             GET_ADMLEVEL(i->character) > 0 ? GET_NAME(ch) : GET_USER(ch), com_msgs[subcmd][1],
                              argument, color_on);
                 }
             }

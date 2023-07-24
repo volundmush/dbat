@@ -41,13 +41,10 @@
 #include "screen.h"
 #include "area.h"
 #include <boost/algorithm/string.hpp>
-#include "net.h"
-
-/* externs */
-
-
-int passcomm(struct char_data *ch, char *comm);
-
+#include <fstream>
+#include "telnet.h"
+#include "sodium.h"
+#include <thread>
 
 /* local globals */
 struct descriptor_data *descriptor_list = nullptr;        /* master desc list */
@@ -65,7 +62,6 @@ struct timeval null_time;    /* zero-valued time structure */
 int8_t reread_wizlist;        /* signal: SIGUSR1 */
 int8_t emergency_unban;        /* signal: SIGUSR2 */
 FILE *logfile = nullptr;        /* Where to send the log messages. */
-const char *text_overflow = "**OVERFLOW**\r\n";
 int dg_act_check;               /* toggle for act_trigger */
 unsigned long pulse = 0;        /* number of pulses since game start */
 bool fCopyOver;          /* Are we booting in copyover mode? */
@@ -73,29 +69,16 @@ uint16_t port;
 socklen_t mother_desc;
 char *last_act_message = nullptr;
 
-
-void *z_alloc(void *opaque, uInt items, uInt size) {
-    return calloc(items, size);
-}
-
-void z_free(void *opaque, void *address) {
-    return free(address);
-}
-
 /***********************************************************************
 *  main game loop and related stuff                                    *
 ***********************************************************************/
-int enter_player_game(struct descriptor_data *d);
 
-/* first compression neg. string */
-const char compress_offer[4] =
-        {
-                (char) 255,
-                (char) 251,
-                (char) 86,
-                (char) 0,
-        };
-
+void broadcast(const std::string& txt) {
+    log("Broadcasting: %s", txt.c_str());
+    for(auto &[cid, c] : net::connections) {
+        c.sendText(txt);
+    }
+}
 
 boost::asio::awaitable<void> signal_watcher() {
     while(true) {
@@ -107,94 +90,142 @@ boost::asio::awaitable<void> signal_watcher() {
     }
 }
 
+static boost::asio::awaitable<void> recoverTelnet(uint16_t socket, struct descriptor_data *d, const nlohmann::json& j) {
+    boost::beast::tcp_stream conn(*net::io, boost::asio::ip::tcp::v4(), socket);
+    auto tel = new net::telnet_data(std::move(conn));
+    tel->desc = d;
+    d->conn = tel;
+    d->conn->deserialize(j);
+    tel->state = net::ConnState::Running;
+    {
+        std::lock_guard<std::mutex> guard(net::connectionsMutex);
+        net::connections[socket] = d->conn;
+    }
+
+    co_await d->conn->run();
+
+    {
+        std::lock_guard<std::mutex> guard(net::connectionsMutex);
+        net::connections.erase(socket);
+    }
+
+    co_return;
+}
+
+static boost::asio::awaitable<void> recoverHttp(uint16_t socket, struct descriptor_data *d, const nlohmann::json& j) {
+    // TODO: Implement the rest of it...
+
+    co_return;
+}
+
+static boost::asio::awaitable<void> recoverConnection(const nlohmann::json j) {
+    auto d = new descriptor_data();
+    d->raw_input_queue = std::make_unique<Channel<std::string>>(*io, 200);
+
+    auto socket = j["socket"].get<uint16_t>();
+    auto protocol = j["protocol"].get<net::Protocol>();
+	d->obj_was = strdup(j["user"].get<std::string>().c_str());
+    d->obj_name = strdup(j["character"].get<std::string>().c_str());
+
+    d->connected = CON_COPYOVER;
+
+    /* Now, find the pfile */
+
+    d->obj_editval = NOWHERE;
+    if(j.contains("in_room")) d->obj_editval = j["in_room"].get<room_vnum>();
+
+    d->next = descriptor_list;
+    descriptor_list = d;
+
+    // We are committed. what happens next must not fail.
+	if(protocol == net::Protocol::Telnet) {
+        co_await recoverTelnet(socket, d, j["conn"]);
+    } else {
+        co_await recoverHttp(socket, d, j["conn"]);
+    }
+    co_return;
+}
+
+void copyover_recover_final() {
+    struct descriptor_data *next_d;
+    for(auto d = descriptor_list; d; d = next_d) {
+        next_d = d->next;
+        if(STATE(d) != CON_COPYOVER) continue;
+
+		std::string user = d->obj_was;
+        std::string character = d->obj_name;
+        room_vnum room = d->obj_editval;
+
+        free(d->obj_was);
+        d->obj_was = nullptr;
+        free(d->obj_name);
+        d->obj_name = nullptr;
+
+        userLoad(d, (char*)user.c_str());
+        if(!d->user) {
+            log("recoverConnection: user %s not found.", user.c_str());
+            close_socket(d);
+            continue;
+        }
+
+        auto c = new char_data();
+        c->player_specials = new player_special_data();
+        d->character = c;
+        auto player_i = load_char(character.c_str(), c);
+        if(player_i < 0 || PLR_FLAGGED(c, PLR_DELETED)) {
+            log("recoverConnection: character %s not found.", character.c_str());
+            close_socket(d);
+            continue;
+        }
+        c->desc = d;
+
+		GET_WAS_IN(c) = room;
+        GET_PFILEPOS(c) = player_i;
+        REMOVE_BIT_AR(PLR_FLAGS(c), PLR_WRITING);
+        REMOVE_BIT_AR(PLR_FLAGS(c), PLR_MAILING);
+        REMOVE_BIT_AR(PLR_FLAGS(c), PLR_CRYO);
+
+        write_to_output(d, "@rThe world comes back into focus... has something changed?@n\n\r");
+
+        enter_player_game(d);
+        d->connected = CON_PLAYING;
+        look_at_room(IN_ROOM(d->character), d->character, 0);
+        if (AFF_FLAGGED(d->character, AFF_HAYASA)) {
+            GET_SPEEDBOOST(d->character) = GET_SPEEDCALC(d->character) * 0.5;
+        }
+    }
+}
+
+boost::asio::awaitable<void> yield_for(std::chrono::milliseconds ms) {
+    boost::asio::steady_timer timer(co_await boost::asio::this_coro::executor, ms);
+    timer.expires_after(ms);
+    co_await timer.async_wait(boost::asio::use_awaitable);
+    co_return;
+}
+
 /* Reload players after a copyover */
 void copyover_recover() {
-    struct descriptor_data *d;
-    FILE *fp;
-    char host[1024];
-    int desc, player_i;
-    bool fOld;
-    char name[MAX_INPUT_LENGTH];
-    char username[100];
-    int saved_loadroom = NOWHERE;
-    int set_loadroom = NOWHERE;
-
     log("Copyover recovery initiated");
-    PCOUNTDAY = time(nullptr) + 60;
-    fp = fopen(COPYOVER_FILE, "r");
+    std::ifstream fp(COPYOVER_FILE);
 
-    if (!fp) {
-        perror("copyover_recover:fopen");
+    if(!fp.is_open()) {
         log("Copyover file not found. Exitting.\n\r");
         exit(1);
     }
 
-    unlink(COPYOVER_FILE); /* In case it crashes - doesn't prevent reading */
-    for (;;) {
-        fOld = true;
-        fscanf(fp, "%d %s %s %d %s\n", &desc, name, host, &saved_loadroom, username);
-        if (desc == -1)
-            break;
+    nlohmann::json j;
+    fp >> j;
 
-        /* Write something, and check if it goes error-free */
-        if (write_to_descriptor(desc, "\n\rFolding initiated...\n\r") < 0) {
-            close(desc); /* nope */
-            continue;
-        }
+    // erase the file.
+    unlink(COPYOVER_FILE);
+    fp.close();
 
-        /* create a new descriptor */
-        d = new descriptor_data();
-        d->descriptor = desc;
-
-
-        strcpy(d->host, host);
-        d->next = descriptor_list;
-        descriptor_list = d;
-
-        d->connected = CON_CLOSE;
-
-        /* Now, find the pfile */
-
-        d->character = new char_data();
-        d->character->player_specials = new player_special_data();
-        d->character->desc = d;
-
-        if ((player_i = load_char(name, d->character)) >= 0) {
-            GET_PFILEPOS(d->character) = player_i;
-            if (!PLR_FLAGGED(d->character, PLR_DELETED)) {
-                REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_WRITING);
-                REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_MAILING);
-                REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_CRYO);
-                userLoad(d, username);
-            }
-            /*else
-              fOld = FALSE;*/
-        } else
-            fOld = false;
-
-        if (!fOld) /* Player file not found?! */ {
-            write_to_descriptor(desc, "\n\rSomehow, your character was lost during the folding. Sorry.\n\r");
-            close_socket(d);
-        } else {
-            write_to_descriptor(desc, "\n\rFolding complete.\n\r");
-            set_loadroom = GET_LOADROOM(d->character);
-            GET_LOADROOM(d->character) = saved_loadroom;
-            enter_player_game(d);
-            GET_LOADROOM(d->character) = set_loadroom;
-            d->connected = CON_PLAYING;
-            look_at_room(IN_ROOM(d->character), d->character, 0);
-            if (AFF_FLAGGED(d->character, AFF_HAYASA)) {
-                GET_SPEEDBOOST(d->character) = GET_SPEEDCALC(d->character) * 0.5;
-            }
+    if(j.contains("connections")) {
+        for(const auto& c : j["connections"]) {
+            co_spawn(boost::asio::make_strand(*net::io), recoverConnection(c), boost::asio::detached);
         }
     }
-    fclose(fp);
 }
-
-
-
-
-
 
 int get_max_players() {
 
@@ -237,6 +268,80 @@ int get_max_players() {
     }
     log("   Setting player limit to %d using %s.", max_descs, method);
     return (max_descs);
+}
+
+static boost::asio::awaitable<void> performReboot(int mode) {
+    struct descriptor_data *d, *d_next;
+    char buf[100], buf2[100];
+
+    std::ofstream fp(COPYOVER_FILE);
+
+    if (!fp.is_open()) {
+        send_to_imm("Copyover file not writeable, aborted.\n\r");
+        circle_reboot = 0;
+        co_return;
+    }
+
+    if(mode != 2) {
+        save_all();
+    }
+
+    sprintf(buf, "\t\x1B[1;31m \007\007\007The universe stops for a moment as space and time fold.\x1B[0;0m\r\n");
+    save_mud_time(&time_info);
+
+    nlohmann::json j;
+
+    /* For each playing descriptor, save its state */
+    for (d = descriptor_list; d; d = d_next) {
+        auto och = d->character;
+        d_next = d->next; /* We delete from the list , so need to save this */
+        if (!och || STATE(d) > CON_PLAYING) {
+            d->conn->sendText("\n\rSorry, we are rebooting. Come back in a few seconds.\n\r");
+            close_socket(d); /* throw'em out */
+        }
+        d->conn->sendText(buf);
+        /* save och */
+        Crash_rentsave(och, 0);
+        save_char(och);
+    }
+
+    // wait 200 milliseconds... that should be enough time to push out all of the data.
+    auto hb = std::chrono::milliseconds(200);
+    boost::asio::steady_timer timer(co_await boost::asio::this_coro::executor, hb);
+    co_await timer.async_wait(boost::asio::use_awaitable);
+
+    /* For each descriptor/connection, halt them and save state. */
+    for (d = descriptor_list; d; d = d_next) {
+        co_await d->conn->halt(mode);
+        auto och = d->character;
+        nlohmann::json jd;
+
+        jd["socket"] = d->conn->socket;
+        jd["protocol"] = d->conn->capabilities.protocol;
+        jd["user"] = d->user;
+        jd["character"] = GET_NAME(och);
+
+        auto r = IN_ROOM(och);
+        auto w = GET_WAS_IN(och);
+        if(r > 1) {
+            jd["in_room"] = r;
+        } else if(r <= 1 && w > 1) {
+        	jd["in_room"] = w;
+        }
+
+        jd["conn"] = d->conn->serialize();
+
+        j["connections"].push_back(jd);
+
+    }
+    j["port"] = port;
+    j["mother_desc"] = mother_desc;
+
+    fp << j.dump(4, ' ', false, nlohmann::json::error_handler_t::replace) << std::endl;
+    fp.close();
+
+	co_return;
+
 }
 
 boost::asio::awaitable<void> heartbeat(int heart_pulse, double deltaTime) {
@@ -334,19 +439,17 @@ boost::asio::awaitable<void> runOneLoop(double deltaTime) {
     static bool sleeping = false;
     struct descriptor_data* next_d;
 
-    if(sleeping && !net::new_descriptors.empty()) {
-        log("New connection.  Waking up.");
-        sleeping = false;
+    while(net::pending_descriptors.ready()) {
+        struct descriptor_data* d;
+        if(!net::pending_descriptors.try_receive(d)) continue;
+        d->next = descriptor_list;
+        descriptor_list = d;
+        d->character->login();
     }
 
-    // welcome all net::new_descriptors...
-    if(!net::new_descriptors.empty()) {
-        for(auto &d : net::new_descriptors) {
-            d->next = descriptor_list;
-            descriptor_list = d;
-            d->start();
-        }
-        net::new_descriptors.clear();
+    if(sleeping && descriptor_list) {
+        log("Waking up.");
+        sleeping = false;
     }
 
     if(!descriptor_list) {
@@ -446,7 +549,10 @@ boost::asio::awaitable<void> game_loop() {
         double deltaTimeInSeconds = std::chrono::duration<double>(deltaTime).count();
 
         try {
+            SQLite::Transaction transaction(*db);
             co_await runOneLoop(deltaTimeInSeconds);
+            process_dirty();
+            transaction.commit();
         } catch(std::exception& e) {
             log("Exception in runOneLoop(): %s", e.what());
         }
@@ -462,72 +568,66 @@ boost::asio::awaitable<void> game_loop() {
 
         timer.expires_from_now(nextWait);
     }
+
+    if(circle_reboot > 0) {
+        // circle_reboot at 1 is copyover, 2 is a full reboot.
+        co_await performReboot(circle_reboot);
+    }
+	net::io->stop();
     co_return;
 }
 
+std::function<boost::asio::awaitable<void>()> gameFunc;
 
+static void finish_copyover() {
+    char buf[100], buf2[100];
+    sprintf(buf, "%d", port);
+    sprintf(buf2, "-C%d", mother_desc);
+    chdir("..");
+    execl("bin/circle", "circle", buf2, buf, (char *) nullptr);
+    /* Failed - sucessful exec will not return */
 
+    perror("do_copyover: execl");
+    log("Copyover FAILED!\n\r");
 
-/* Init sockets, run game, and cleanup sockets */
-void init_game(uint16_t cmport) {
-    /* We don't want to restart if we crash before we get up. */
-    touch(KILLSCRIPT_FILE);
+    exit(1); /* too much trouble to try to recover! */
+}
 
-    log("Finding player limit.");
-    max_players = get_max_players();
-
-    if(!net::io) net::io = std::make_unique<boost::asio::io_context>();
-
-    if (!fCopyOver) { /* If copyover mother_desc is already set up */
-        log("Opening mother connection.");
-        // open up net::acceptor on 0.0.0.0:<cmport>...
-        net::acceptor = std::make_unique<boost::asio::ip::tcp::acceptor>(*net::io, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), cmport));
-        mother_desc = net::acceptor->native_handle();
-    } else {
-        // a socket has already been created and needs to be re-used.
-        // use the one from mother_desc...
-        net::acceptor = std::make_unique<boost::asio::ip::tcp::acceptor>(*net::io, boost::asio::ip::tcp::v4(), mother_desc);
+static boost::asio::awaitable<void> runGame() {
+	// instantiate db with a shared_ptr, the filename is dbat.sqlite3
+    try {
+        db = std::make_shared<SQLite::Database>("dbat.sqlite3", SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+    } catch (std::exception &e) {
+        log("Exception in runGame(): %s", e.what());
+        exit(1);
     }
 
     circle_srandom(time(nullptr));
     event_init();
 
-    /* set up hash table for find_char() */
-    init_lookup_table();
+    if(fCopyOver) {
+        copyover_recover();
+    }
 
-    boot_db();
+    co_await boot_db();
 
     if (CONFIG_IMC_ENABLED) {
         imc_startup(false, -1, false); // FALSE arg, so the autoconnect setting can govern it.
     }
 
-    FILE *mapfile;
-    int rowcounter, colcounter;
-    int vnum_read;
-
-    log("Signal trapping.");
-    net::signals = std::make_unique<boost::asio::signal_set>(*net::io);
-    for(auto s : {SIGUSR1, SIGUSR2, SIGVTALRM, SIGHUP, SIGCHLD, SIGINT, SIGTERM, SIGPIPE, SIGALRM})
-        net::signals->add(s);
-
-    //boost::asio::co_spawn(boost::asio::make_strand(*net::io), signal_watcher(), boost::asio::detached);
-
-    boost::asio::co_spawn(boost::asio::make_strand(*net::io), net::runAcceptor(), boost::asio::detached);
-
-    boost::asio::co_spawn(boost::asio::make_strand(*net::io), game_loop(), boost::asio::detached);
-
-    log("Loading Space Map. ");
-    //Load the map vnums from a file into an array
-    mapfile = fopen("../lib/surface.map", "r");
-
-    for (rowcounter = 0; rowcounter <= MAP_ROWS; rowcounter++) {
-        for (colcounter = 0; colcounter <= MAP_COLS; colcounter++) {
-            fscanf(mapfile, "%d", &vnum_read);
-            mapnums[rowcounter][colcounter] = real_room(vnum_read);
+    {
+        broadcast("Loading Space Map. ");
+        FILE *mapfile = fopen("../lib/surface.map", "r");
+        int rowcounter, colcounter;
+        int vnum_read;
+        for (rowcounter = 0; rowcounter <= MAP_ROWS; rowcounter++) {
+            for (colcounter = 0; colcounter <= MAP_COLS; colcounter++) {
+                fscanf(mapfile, "%d", &vnum_read);
+                mapnums[rowcounter][colcounter] = real_room(vnum_read);
+            }
         }
+        fclose(mapfile);
     }
-
-    fclose(mapfile);
 
     /* Load the toplist */
     topLoad();
@@ -535,11 +635,88 @@ void init_game(uint16_t cmport) {
     /* If we made it this far, we will be able to restart without problem. */
     remove(KILLSCRIPT_FILE);
 
-    if (fCopyOver) /* reload players */
-        copyover_recover();
+    // bring anyone who's in the middle of a copyover back into the game.
+    if(fCopyOver) {
+        copyover_recover_final();
+    }
+
+    // Finally, let's get the game cracking.
+    if(gameFunc) co_await gameFunc();
+    else co_await game_loop();
+
+    co_return;
+}
+
+/* Init sockets, run game, and cleanup sockets */
+void init_game(uint16_t cmport) {
+    /* We don't want to restart if we crash before we get up. */
+    touch(KILLSCRIPT_FILE);
+
+    if (sodium_init() == -1) {
+        log("Could not initialize libsodium!");
+        exit(1);
+    }
+
+    if(!net::io) net::io = std::make_unique<boost::asio::io_context>();
+    if(!net::pending_descriptors) net::pending_descriptors = std::make_unique<net::Channel<descriptor_data*>>(*net::io, 200);
+
+    if(!gameFunc) {
+        if (!fCopyOver) { /* If copyover mother_desc is already set up */
+            log("Opening mother connection.");
+            // open up net::acceptor on 0.0.0.0:<cmport>...
+            net::acceptor = std::make_unique<boost::asio::ip::tcp::acceptor>(*net::io, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), cmport));
+            mother_desc = net::acceptor->native_handle();
+        } else {
+            // a socket has already been created and needs to be re-used.
+            // use the one from mother_desc...
+            net::acceptor = std::make_unique<boost::asio::ip::tcp::acceptor>(*net::io, boost::asio::ip::tcp::v4(), mother_desc);
+        }
+
+        log("Signal trapping.");
+        net::signals = std::make_unique<boost::asio::signal_set>(*net::io);
+        for(auto s : {SIGUSR1, SIGUSR2, SIGVTALRM, SIGHUP, SIGCHLD, SIGINT, SIGTERM, SIGPIPE, SIGALRM})
+            net::signals->add(s);
+
+        //boost::asio::co_spawn(boost::asio::make_strand(*net::io), signal_watcher(), boost::asio::detached);
+
+        boost::asio::co_spawn(boost::asio::make_strand(*net::io), net::runAcceptor(), boost::asio::detached);
+    }
+
+    boost::asio::co_spawn(boost::asio::make_strand(*net::io), runGame(), boost::asio::detached);
 
     log("Entering game loop.");
+    std::vector<std::thread> threads;
+    if(!gameFunc) {
+        auto max_threads = std::thread::hardware_concurrency() - 1;
+        if(max_threads > 0) {
+            for (int i = 0; i < max_threads; ++i) {
+                threads.emplace_back([&] () {
+                    net::io->run();
+                });
+            }
+        }
+    }
+
     net::io->run();
+
+    for(auto &t : threads) {
+        t.join();
+    }
+    threads.clear();
+
+    // Release the executor and acceptor.
+    // ASIO maintains its own socket polling fd and killing the executor is the
+    // only way to release it.
+    net::io.reset();
+
+    if(circle_reboot == 1) {
+        // release the mother_desc so that it doesn't get autoclosed...
+        mother_desc = net::acceptor->release();
+        finish_copyover();
+        // The above should never return if called thanks to execl()...
+    }
+
+    net::acceptor.reset();
 
     Crash_save_all();
 
@@ -1601,9 +1778,7 @@ void descriptor_data::start() {
                     add_commas(ERAPLAYERS));
     write_to_output(this,
                     "\r\n@cEnter your desired username or the username you have already made.\n@CEnter Username:@n\r\n");
-    this->user = strdup("Empty");
     this->pass = strdup("Empty");
-    this->email = strdup("Empty");
     this->tmp1 = strdup("Empty");
     this->tmp2 = strdup("Empty");
     this->tmp3 = strdup("Empty");
@@ -1636,11 +1811,6 @@ int process_output(struct descriptor_data *t) {
     /* add a prompt */
 
     out.append(make_prompt(t));    /* strcpy: OK (i:MAX_SOCK_BUF reserves space) */
-    if (STATE(t) == CON_PLAYING) {
-        realout = processColors(out, COLOR_ON(t->character), COLOR_CHOICES(t->character));
-    } else {
-        realout = processColors(out, true, nullptr);
-    }
 
     /*
      * now, send the output.  If this is an 'interruption', use the prepended
@@ -1648,9 +1818,9 @@ int process_output(struct descriptor_data *t) {
      */
     if (t->has_prompt) {
         t->has_prompt = false;
-        t->conn->sendText(realout);
+        t->conn->sendText(out);
     } else {
-        t->conn->sendText(realout.substr(2, realout.length() - 2));
+        t->conn->sendText(out.substr(2, out.length() - 2));
     }
 
     /* Handle snooping: prepend "% " and send to snooper. */
@@ -1811,53 +1981,17 @@ int perform_subst(struct descriptor_data *t, char *orig, char *subst) {
 }
 
 void free_user(struct descriptor_data *d) {
-    if (d->user_freed == 1) {
-        return;
-    }
-
-    if (d->user == nullptr) {
+    if (d->account == nullptr) {
         send_to_imm("ERROR: free_user called but no user to free!");
         return;
     }
-    d->user_freed = 1;
-
-    if (!strcasecmp(d->user, "Empty"))
-        return;
-
-    log("Freeing User: %s", d->user);
-
-    /* Free up all the user data as needed */
-    if (d->user) {
-        free(d->user);
-    }
-    if (d->pass) {
-        free(d->pass);
-    }
-    if (d->email) {
-        free(d->email);
-    }
-    if (d->tmp1) {
-        free(d->tmp1);
-    }
-    if (d->tmp2) {
-        free(d->tmp2);
-    }
-    if (d->tmp3) {
-        free(d->tmp3);
-    }
-    if (d->tmp4) {
-        free(d->tmp4);
-    }
-    if (d->tmp5) {
-        free(d->tmp5);
-    }
+    d->account = nullptr;
 }
 
 void close_socket(struct descriptor_data *d) {
     struct descriptor_data *temp;
 
     REMOVE_FROM_LIST(d, descriptor_list, next, temp);
-    close(d->descriptor);
 
     /* Forget snooping */
     if (d->snooping)
@@ -1925,7 +2059,9 @@ void close_socket(struct descriptor_data *d) {
         default:
             break;
     }
-
+	if(d->conn) {
+        d->conn->halt(0);
+    }
     delete d;
 }
 
@@ -2615,44 +2751,6 @@ void send_to_range(room_vnum start, room_vnum finish, const char *messg, ...) {
     }
 }
 
-int passcomm(struct char_data *ch, char *comm) {
-
-    if (!strcasecmp(comm, "score")) {
-        return true;
-    } else if (!strcasecmp(comm, "sco")) {
-        return true;
-    } else if (!strcasecmp(comm, "ooc")) {
-        return true;
-    } else if (!strcasecmp(comm, "newbie")) {
-        return true;
-    } else if (!strcasecmp(comm, "newb")) {
-        return true;
-    } else if (!strcasecmp(comm, "look")) {
-        return true;
-    } else if (!strcasecmp(comm, "lo")) {
-        return true;
-    } else if (!strcasecmp(comm, "l")) {
-        return true;
-    } else if (!strcasecmp(comm, "status")) {
-        return true;
-    } else if (!strcasecmp(comm, "stat")) {
-        return true;
-    } else if (!strcasecmp(comm, "sta")) {
-        return true;
-    } else if (!strcasecmp(comm, "tell")) {
-        return true;
-    } else if (!strcasecmp(comm, "reply")) {
-        return true;
-    } else if (!strcasecmp(comm, "say")) {
-        return true;
-    } else if (!strcasecmp(comm, "osay")) {
-        return true;
-    } else {
-        return false;
-    }
-
-}
-
 ssize_t perform_socket_write(socklen_t desc, const char *txt, size_t length) {
     ssize_t result = 0;
 
@@ -2685,9 +2783,9 @@ ssize_t perform_socket_write(socklen_t desc, const char *txt, size_t length) {
 void descriptor_data::handle_input() {
     // Now we need to process the raw_input_queue, watching for special characters and also aliases.
     // Commands are processed first-come-first served...
-    while(!raw_input_queue.empty()) {
-        auto command = raw_input_queue.front();
-        raw_input_queue.pop_front();
+    while(raw_input_queue->ready()) {
+        std::string command;
+        if(!raw_input_queue->try_receive(command)) continue;
 
         if (snoop_by)
             write_to_output(snoop_by, "%% %s\r\n", command.c_str());

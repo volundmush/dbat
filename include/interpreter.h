@@ -30,6 +30,8 @@ extern char *rIntro(struct char_data *ch, char *arg);
 
 extern int special(struct char_data *ch, int cmd, char *arg);
 
+void payout(int num);
+int lockRead(char *name);
 extern void fingerUser(struct char_data *ch, char *name);
 
 extern int readUserIndex(char *name);
@@ -100,10 +102,9 @@ extern struct command_info *complete_cmd_info;
  * named member.
  */
 struct alias_data {
-    char *alias;
-    char *replacement;
+    std::string name;
+    std::string replacement;
     int type;
-    struct alias_data *next;
 };
 
 #define ALIAS_SIMPLE    0

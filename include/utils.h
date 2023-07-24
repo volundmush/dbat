@@ -76,8 +76,6 @@ extern int axion_dice(int adjust);
 
 const char *disp_align(struct char_data *ch);
 
-extern void senseCreate(struct char_data *ch);
-
 extern void sense_memory_write(struct char_data *ch, struct char_data *vict);
 
 extern int read_sense_memory(struct char_data *ch, struct char_data *vict);
@@ -484,7 +482,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define GET_CLAN(ch)    ((ch)->clan)
 #define GET_TRANSCLASS(ch) ((ch)->transclass)
 #define GET_FEATURE(ch) ((ch)->feature)
-#define GET_USER(ch)    ((ch)->desc ? ((ch)->desc->user ? (ch)->desc->user : "NOUSER") : "NOUSER")
+#define GET_USER(ch)    ((ch)->desc ? ((ch)->desc->account ? (char*)((ch)->desc->account->name.c_str()) : "NOUSER") : "NOUSER")
 #define GET_LOG_USER(ch) ((ch)->loguser)
 #define GET_CRANK(ch)   ((ch)->crank)
 #define GET_ADMLEVEL(ch)    ((ch)->admlevel)
