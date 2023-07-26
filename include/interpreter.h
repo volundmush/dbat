@@ -101,11 +101,7 @@ extern struct command_info *complete_cmd_info;
  * because a Windows 95 compiler gives a warning about it having similiar
  * named member.
  */
-struct alias_data {
-    std::string name;
-    std::string replacement;
-    int type;
-};
+
 
 #define ALIAS_SIMPLE    0
 #define ALIAS_COMPLEX    1

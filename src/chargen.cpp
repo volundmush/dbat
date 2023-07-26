@@ -332,7 +332,6 @@ namespace net {
 
     ChargenParser::ChargenParser(struct connection_data *c, const std::string &na) : ConnectionParser(c) {
         ch = new char_data();
-        ch->player_specials = new player_special_data();
         ch->name = strdup(na.c_str());
         state = CON_QRACE;
     }
@@ -479,17 +478,17 @@ namespace net {
             case CON_RACIAL:
                 switch (arg[0]) {
                     case '1':
-                        ch->player_specials->racial_pref = 1;
+                        ch->racial_pref = 1;
                         break;
                     case '2':
-                        ch->player_specials->racial_pref = 2;
+                        ch->racial_pref = 2;
                         break;
                     case '3':
                         if (IS_HALFBREED(ch)) {
                             sendText("That is not an acceptable option.\r\n");
                             return;
                         } else {
-                            ch->player_specials->racial_pref = 3;
+                            ch->racial_pref = 3;
                         }
                         break;
                     default:
@@ -1830,14 +1829,14 @@ namespace net {
                     }
                 } else if (!strcasecmp(arg.c_str(), "forget")) {
                     if (!IS_BIO(ch) && !IS_MUTANT(ch)) {
-                        GET_PRACTICES(ch, GET_CLASS(ch)) += 200;
+                        GET_PRACTICES(ch) += 200;
                         SET_BIT_AR(PLR_FLAGS(ch), PLR_FORGET);
                         display_bonus_menu(0);
                         sendText("@CThis menu (and the Negatives menu) are for selecting various traits about your character.\n");
                         sendText("@wChoose: ");
                         state = CON_BONUS;
                     } else if (IS_MUTANT(ch)) {
-                        GET_PRACTICES(ch, GET_CLASS(ch)) += 200;
+                        GET_PRACTICES(ch) += 200;
                         SET_BIT_AR(PLR_FLAGS(ch), PLR_FORGET);
                         sendText("\n@RSelect a mutation. A second will be chosen automatically..\n");
                         sendText("@D--------------------------------------------------------@n\n");
@@ -1856,7 +1855,7 @@ namespace net {
                         ch->genome[1] = 0;
                         state = CON_GENOME;
                     } else {
-                        GET_PRACTICES(ch, GET_CLASS(ch)) += 200;
+                        GET_PRACTICES(ch) += 200;
                         SET_BIT_AR(PLR_FLAGS(ch), PLR_FORGET);
                         sendText("\n@RSelect two genomes to be your primary DNA strains.\n");
                         sendText("@D--------------------------------------------------------@n\n");
@@ -2061,7 +2060,7 @@ namespace net {
                     sendText("\r\n@wTo check the bonuses/negatives you have in game use the status command");
                     if (ccpoints > 0) {
                         sendText("\r\n@GYour left over points were spent on Practice Sessions@w");
-                        GET_PRACTICES(ch, GET_CLASS(ch)) += (100 * ccpoints);
+                        GET_PRACTICES(ch) += (100 * ccpoints);
                     }
                     sendText("\r\n*** PRESS RETURN: ");
                     state = CON_QSTATS;
@@ -2111,7 +2110,7 @@ namespace net {
                     sendText("\r\n@wTo check the bonuses/negatives you have in game use the status command");
                     if (ccpoints > 0) {
                         sendText("\r\n@GYour left over points were spent on Practice Sessions@w");
-                        GET_PRACTICES(ch, GET_CLASS(ch)) += (100 * ccpoints);
+                        GET_PRACTICES(ch) += (100 * ccpoints);
                     }
                     sendText("\r\n*** PRESS RETURN: ");
                     state = CON_QSTATS;
@@ -2265,12 +2264,9 @@ namespace net {
                 break;
 
             case CON_QSTATS:
-                if (GET_PFILEPOS(ch) < 0) {
-                    GET_PFILEPOS(ch) = create_entry(GET_PC_NAME(ch));
-                }
+                // TODO: CREATE PLAYER ENTRY
                 init_char(ch);
                 save_char(ch);
-                save_player_index();
                 // TODO: announce player creation.
                 conn->setParser(new CharacterMenu(conn, ch));
                 break;

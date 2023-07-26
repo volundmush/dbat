@@ -1,6 +1,4 @@
-#ifndef __SYSDEP_H__
-#define __SYSDEP_H__
-
+#pragma once
 //#include "conf.h"
 #include "typestubs.h"
 
@@ -123,4 +121,13 @@ typedef int(*SpecialFunc)(struct char_data *ch, void *me, int cmd, char *argumen
 #define ACMD(name) void (name)(struct char_data *ch, char *argument, int cmd, int subcmd)
 #define SPECIAL(name) int (name)(struct char_data *ch, void *me, int cmd, char *argument)
 
-#endif
+template <typename Key, typename T>
+class DebugMap : public std::map<Key, T> {
+public:
+    T& operator[](const Key& key) {
+        if (key == 0) {
+            throw std::runtime_error("Invalid key -1");
+        }
+        return std::map<Key, T>::operator[](key);
+    }
+};

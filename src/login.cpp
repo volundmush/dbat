@@ -135,7 +135,7 @@ namespace net {
             return;
         }
         if(txt == password) {
-            auto id = next_acc_id();
+            auto id = account_data::getNextID();
             auto &a = accounts[id];
             a.vn = id;
             a.name = name;

@@ -786,7 +786,7 @@ static int ki_gain(struct char_data *ch) {
         /* Neat and fast */
         gain = GET_LEVEL(ch);
     } else {
-        gain = GET_MAX_KI(ch) / 12;
+        gain = GET_MAX_MANA(ch) / 12;
 
         /* Class calculations */
 
@@ -1383,7 +1383,6 @@ static void check_idling(struct char_data *ch) {
                 ch->desc = nullptr;
             }
             Crash_rentsave(ch, 0);
-            cp(ch);
             mudlog(CMP, ADMLVL_GOD, true, "%s force-rented and extracted (idle).", GET_NAME(ch));
             extract_char(ch);
         }

@@ -15,9 +15,11 @@ namespace net {
             // The character already has a descriptor! Let's just join up with it.
             conn->account->descriptors.insert(ch->desc);
             conn->desc = ch->desc;
-            conn->desc->connection_mutex.lock();
+            {
+                std::lock_guard<std::mutex> guard(conn->desc->connection_mutex);
+                conn->desc->connections.insert(conn);
+            }
             conn->desc->connections.insert(conn);
-            conn->desc->connection_mutex.unlock();
             conn->sendText("Joining existing session...\r\n");
             return;
         }
@@ -26,13 +28,17 @@ namespace net {
         desc->raw_input_queue = std::make_unique<Channel<std::string>>(*io, 200);
         desc->character = ch;
         ch->desc = desc;
+        conn->desc = desc;
+        desc->account = conn->account;
         conn->account->descriptors.insert(desc);
-        desc->connection_mutex.lock();
-        desc->connections.insert(conn);
-        desc->connection_mutex.unlock();
+        {
+            std::lock_guard<std::mutex> guard(desc->connection_mutex);
+            desc->connections.insert(conn);
+        }
+        pending_descriptors->try_send(boost::system::error_code{}, desc);
     }
 
     void PuppetParser::parse(const std::string &txt) {
-        conn->desc->raw_input_queue.emplace_back(txt);
+        conn->desc->raw_input_queue->try_send(boost::system::error_code{}, txt);
     }
 }

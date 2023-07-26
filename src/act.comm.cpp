@@ -295,7 +295,7 @@ ACMD(do_say) {
                                 send_to_room(real_room(DRAGONR),
                                              "@wShenron says, '@CYour wish has been granted, %s now has more knowledge!%s@w'@n\r\n",
                                              GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
-                                GET_PRACTICES(wch, GET_CLASS(wch)) += rand_number(2000, 5000);
+                                GET_PRACTICES(wch) += rand_number(2000, 5000);
                                 granted = true;
                                 SELFISHMETER += 1;
                                 mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a knowledge wish on %s.",
@@ -447,47 +447,6 @@ ACMD(do_say) {
                             if (wch != nullptr) {
                                 send_to_room(real_room(DRAGONR),
                                              "@wShenron says, '@CYour wish cannot be granted, You might want to try something else instead, mortal!@w'@n\r\n");
-                                /* send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s now has grown stronger!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
-                                 double mult = 1;
-                                 if (IS_TRUFFLE(ch) && PLR_FLAGGED(ch, PLR_TRANS1)) {
-                                  mult = 3;
-                                 }
-                                 else if (IS_TRUFFLE(ch) && PLR_FLAGGED(ch, PLR_TRANS2)) {
-                                  mult = 4;
-                                 }
-                                 else if (IS_TRUFFLE(ch) && PLR_FLAGGED(ch, PLR_TRANS3)) {
-                                  mult = 5;
-                                 }
-                                 else if (IS_BIO(ch) && PLR_FLAGGED(ch, PLR_TRANS1)) {
-                                  mult = 2;
-                                 }
-                                 else if (IS_BIO(ch) && PLR_FLAGGED(ch, PLR_TRANS2)) {
-                                  mult = 3;
-                                 }
-                                 else if (IS_BIO(ch) && PLR_FLAGGED(ch, PLR_TRANS3)) {
-                                  mult = 3.5;
-                                 }
-                                 else if (IS_BIO(ch) && PLR_FLAGGED(ch, PLR_TRANS4)) {
-                                  mult = 4;
-                                 }
-                                 else if (IS_MAJIN(ch) && PLR_FLAGGED(ch, PLR_TRANS1)) {
-                                  mult = 2;
-                                 }
-                                 else if (IS_MAJIN(ch) && PLR_FLAGGED(ch, PLR_TRANS2)) {
-                                  mult = 3;
-                                 }
-                                 else if (IS_MAJIN(ch) && PLR_FLAGGED(ch, PLR_TRANS3)) {
-                                  mult = 4.5;
-                                 }
-                                 GET_MAX_HIT(wch) += (GET_BASE_PL(wch) * .15) * mult;
-                                 GET_MAX_MANA(wch) += (GET_BASE_KI(wch) * .15) * mult;
-                                 GET_MAX_MOVE(wch) += (GET_BASE_ST(wch) * .15) * mult;
-                                 GET_BASE_PL(wch) += GET_BASE_PL(wch) * .15;
-                                 GET_BASE_KI(wch) += GET_BASE_KI(wch) * .15;
-                                 GET_BASE_ST(wch) += GET_BASE_ST(wch) * .15;
-                                 granted = TRUE;
-                                 SELFISHMETER += 2;
-                                mudlog(NRM, ADMLVL_GOD, TRUE, "Shenron: %s has made a power wish on %s.", GET_NAME(ch), GET_NAME(wch)); */
                                 WAIT_STATE(ch, PULSE_4SEC);
                             } /* is there a target for the wish? */
                         } /* end power wish if */

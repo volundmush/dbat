@@ -90,13 +90,13 @@ int item_in_list(char *item, obj_data *list) {
         return 0;
 
     if (*item == UID_CHAR) {
-        auto uidResult = parseDgUID(name);
-        if(!uidResult) return nullptr;
-        if(*uidResult.index() != 1) return nullptr;
+        auto uidResult = parseDgUID(item);
+        if(!uidResult) return 0;
+        if(uidResult->index() != 1) return 0;
         auto obj = std::get<1>(*uidResult);
 
         for (i = list; i; i = i->next_content) {
-            if (id == obj)
+            if (i == obj)
                 count++;
             if (GET_OBJ_TYPE(i) == ITEM_CONTAINER)
                 count += item_in_list(item, i->contents);
@@ -743,7 +743,7 @@ in the vault (vnum: 453) now and then. you can just use
                     break;
                 case 'i':
                     if (!strcasecmp(field, "id"))
-                        snprintf(str, slen, "%d", ((c)->id));
+                        snprintf(str, slen, "}C%d", ((c)->id));
 
                         /* new check for pc/npc status */
                     else if (!strcasecmp(field, "is_pc")) {
@@ -885,9 +885,9 @@ in the vault (vnum: 453) now and then. you can just use
                         }
                         if (subfield && *subfield) {
                             int addition = atoi(subfield);
-                            GET_PRACTICES(c, GET_CLASS(c)) = MAX(0, GET_PRACTICES(c, GET_CLASS(c)) + addition);
+                            GET_PRACTICES(c) = MAX(0, GET_PRACTICES(c) + addition);
                         }
-                        snprintf(str, slen, "%d", GET_PRACTICES(c, GET_CLASS(c)));
+                        snprintf(str, slen, "%d", GET_PRACTICES(c));
                     } else if (!strcasecmp(field, "plr")) {
                         if (subfield && *subfield) {
                             int plr = get_flag_by_name(player_bits, subfield);
@@ -927,7 +927,7 @@ in the vault (vnum: 453) now and then. you can just use
                     else if (!strcasecmp(field, "rpp")) {
                         if (subfield && *subfield) {
                             int addition = atoi(subfield);
-                            GET_RP(c) += addition;
+                            c->modRPP(addition);
                         }
 
                         snprintf(str, slen, "%d", GET_RP(c));
@@ -1157,7 +1157,7 @@ in the vault (vnum: 453) now and then. you can just use
                     break;
                 case 'i':
                     if (!strcasecmp(field, "id"))
-                        snprintf(str, slen, "%d", ((o)->id));
+                        snprintf(str, slen, "}O%d", ((o)->id));
 
                     else if (!strcasecmp(field, "is_inroom")) {
                         if (IN_ROOM(o) != NOWHERE)
@@ -1384,9 +1384,8 @@ in the vault (vnum: 453) now and then. you can just use
                 else
                     *str = '\0';
             } else if (!strcasecmp(field, "id")) {
-                room_rnum rnum = real_room(r->vn);
-                if (rnum != NOWHERE)
-                    snprintf(str, slen, "%d", world[rnum].vn + ROOM_ID_BASE);
+                if (r->vn != NOWHERE)
+                    snprintf(str, slen, "}R%d", r->vn);
                 else
                     *str = '\0';
             } else if (!strcasecmp(field, "weather")) {

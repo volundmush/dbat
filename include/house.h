@@ -56,7 +56,7 @@ extern int num_of_houses;                                      /* house.c */
 
 extern void House_listrent(struct char_data *ch, room_vnum vnum);
 
-extern void House_boot();
+extern void House_boot(bool legacy);
 
 extern void House_save_all();
 

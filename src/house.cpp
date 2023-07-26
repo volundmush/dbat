@@ -165,7 +165,7 @@ void House_save_control() {
 
 /* call from boot_db - will load control recs, load objs, set atrium bits */
 /* should do sanity checks on vnums & remove invalid records */
-void House_boot() {
+void House_boot(bool legacy) {
     struct house_control_rec temp_house;
     room_rnum real_house;
     FILE *fl;
@@ -185,10 +185,7 @@ void House_boot() {
         if (feof(fl))
             break;
 
-        if (get_name_by_id(temp_house.owner) == nullptr)
-            continue;            /* owner no longer exists -- skip */
-
-        if ((real_house = real_room(temp_house.vn)) == NOWHERE)
+        if (!world.contains(temp_house.vn))
             continue;            /* this vnum doesn't exist -- skip */
 
         if (find_house(temp_house.vn) != NOWHERE)
@@ -196,8 +193,11 @@ void House_boot() {
 
         house_control[num_of_houses++] = temp_house;
 
-        SET_BIT_AR(ROOM_FLAGS(real_house), ROOM_HOUSE);
-        House_load(temp_house.vn);
+        auto &r = world[temp_house.vn];
+        SET_BIT_AR(r.room_flags, ROOM_HOUSE);
+        SET_BIT_AR(r.room_flags, ROOM_SAVE);
+
+        if(legacy) House_load(temp_house.vn);
     }
 
     fclose(fl);
@@ -531,9 +531,9 @@ int House_load(room_vnum rvnum) {
     struct obj_data *obj1;
     struct obj_data *cont_row[MAX_BAG_ROWS];
     struct extra_descr_data *new_descr;
-    room_rnum rrnum;
+    room_rnum rrnum = rvnum;
 
-    if ((rrnum = real_room(rvnum)) == NOWHERE)
+    if (!world.contains(rvnum))
         return 0;
 
     if (!House_get_filename(rvnum, cmfname, sizeof(cmfname)))
@@ -685,7 +685,7 @@ int House_load(room_vnum rvnum) {
                             break;
                         case 'U':
                             get_line(fl, line);
-                            sscanf(line, "%" I64T, &temp->unique_id);
+                            sscanf(line, "%" I64T, &temp->id);
                             get_line(fl, line);
                             break;
                         case 'S':

@@ -19,10 +19,10 @@ namespace net {
 
         sendText("@D=============================================@n\r\n\r\n");
         sendText("      @D[@y------@YAvailable Characters@y------@D]@n\n");
-        for(auto c : account->characters) {
+        for(auto c : conn->account->characters) {
             auto p = players.find(c);
             if(p == players.end()) continue;
-            sendText(fmt::format("                @b-- @C%s@n\r\n", p->character->name));
+            sendText(fmt::format("                @b-- @C{}@n\r\n", p->second.character->name));
         }
 
         sendText("      @D[@y---- @YSelect Another Option @y----@D]@n\r\n");
@@ -41,19 +41,19 @@ namespace net {
     }
 
     void AccountMenu::parse(const std::string &txt) {
-        if(boost::iequals(txt, "return")) {
+        if(boost::iequals(txt, "return") || boost::istarts_with(txt, "return ")) {
             start();
             return;
         }
 
-        if(boost::istarts_with(txt, "select ")) {
-            auto name = txt.substr(5, txt.size());
+        if(boost::iequals(txt, "select") || boost::istarts_with(txt, "select ")) {
+            auto name = boost::trim_copy(txt.substr(6));
             struct char_data *c = nullptr;
             for(auto v : conn->account->characters) {
                 auto p = players.find(v);
                 if(p == players.end()) continue;
-                if(boost::iequals(p->character->name, name)) {
-                    c = p->character;
+                if(boost::iequals(p->second.character->name, name)) {
+                    c = p->second.character;
                     break;
                 }
             }
@@ -62,8 +62,10 @@ namespace net {
                 return;
             }
             conn->setParser(new CharacterMenu(conn, c));
+            return;
+        }
 
-        } else if (boost::iequals(txt, "slot")) {
+        if (boost::iequals(txt, "slot") || boost::istarts_with(txt, "slot ")) {
             if(conn->account->rpp < 15) {
                 sendText("You need at least 15 RPP to purchase a new character slot.\r\n");
                 return;
@@ -74,8 +76,41 @@ namespace net {
             }
             conn->account->modRPP(-15);
             conn->account->slots++;
+            // no need to set account dirty since modRPP does that.
             sendText("New slot purchased, -15 RPP.\r\n");
             return;
         }
+
+        if(boost::iequals(txt, "retire") || boost::istarts_with(txt, "retire ")) {
+            // for retiring a character.
+            auto name = boost::trim_copy(txt.substr(7));
+            int64_t id = -1;
+            for(auto v : conn->account->characters) {
+                auto p = players.find(v);
+                if(p == players.end()) continue;
+                if(boost::iequals(p->second.character->name, name)) {
+                    id = p->second.id;
+                    break;
+                }
+            }
+            if(id == NOTHING) {
+                sendText("That is not a character!\r\n");
+                return;
+            }
+            // TODO: Retire character here.
+        }
+
+        if(boost::iequals(txt, "quit") || boost::istarts_with(txt, "quit ")) {
+            sendText("Goodbye!\r\n");
+            conn->halt(0);
+            return;
+        }
+
+        if(boost::iequals(txt, "delete") || boost::istarts_with(txt, "delete ")) {
+            // todo: implement...
+        }
+
+        sendText("Invalid option.\r\n");
+        start();
     }
 }

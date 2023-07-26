@@ -10983,6 +10983,7 @@ ACMD(do_bite) {
                     act("@R$N@r was poisoned by your bite!@n", true, ch, nullptr, vict, TO_CHAR);
                     act("@rYou were poisoned by the bite!@n", true, ch, nullptr, vict, TO_VICT);
                     vict->poisonby = ch;
+                    ch->poisoned.insert(vict);
                     int duration = (GET_INT(ch) / 50) + 1;
                     assign_affect(vict, AFF_POISON, SKILL_POISON, duration, 0, 0, 0, 0, 0, 0);
                 }

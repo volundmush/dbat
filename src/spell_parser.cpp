@@ -110,30 +110,7 @@ struct syllable syls[] = {
 const char *unused_spellname = "!UNUSED!"; /* So we can get &unused_spellname */
 
 int mag_manacost(struct char_data *ch, int spellnum) {
-    int whichclass, i, min, tval;
-    if (CONFIG_ALLOW_MULTICLASS) {
-        /* find the cheapest class to cast it */
-        min = MAX(SINFO.mana_max - (SINFO.mana_change *
-                                    (GET_LEVEL(ch) - SINFO.min_level[(int) GET_CLASS_RANKS(ch, GET_CLASS(ch))])),
-                  SINFO.mana_min);
-        whichclass = GET_CLASS(ch);
-        for (i = 0; i < NUM_CLASSES; i++) {
-            if (GET_CLASS_RANKS(ch, i) == 0)
-                continue;
-            tval = MAX(SINFO.mana_max - (SINFO.mana_change *
-                                         (GET_CLASS_RANKS(ch, i) - SINFO.min_level[i])),
-                       SINFO.mana_min);
-            if (tval < min) {
-                min = tval;
-                whichclass = i;
-            }
-        }
-        return min;
-    } else {
-        return MAX(SINFO.mana_max - (SINFO.mana_change *
-                                     (GET_LEVEL(ch) - SINFO.min_level[(int) GET_CLASS(ch)])),
-                   SINFO.mana_min);
-    }
+    return 0;
 }
 
 
@@ -142,14 +119,12 @@ int mag_kicost(struct char_data *ch, int spellnum) {
     if (CONFIG_ALLOW_MULTICLASS) {
         /* find the cheapest class to cast it */
         min = MAX(SINFO.ki_max - (SINFO.ki_change *
-                                  (GET_LEVEL(ch) - SINFO.min_level[(int) GET_CLASS_RANKS(ch, GET_CLASS(ch))])),
+                                  (GET_LEVEL(ch) - SINFO.min_level[(int) GET_LEVEL(ch)])),
                   SINFO.ki_min);
         whichclass = GET_CLASS(ch);
         for (i = 0; i < NUM_CLASSES; i++) {
-            if (GET_CLASS_RANKS(ch, i) == 0)
-                continue;
             tval = MAX(SINFO.ki_max - (SINFO.ki_change *
-                                       (GET_CLASS_RANKS(ch, i) - SINFO.min_level[i])),
+                                       (GET_LEVEL(ch) - SINFO.min_level[i])),
                        SINFO.ki_min);
             if (tval < min) {
                 min = tval;
@@ -222,15 +197,12 @@ void say_spell(struct char_data *ch, int spellnum, struct char_data *tch,
         if (i == ch || i == tch || !i->desc || !AWAKE(i))
             continue;
         /* This should really check spell type vs. target ranks */
-        if (GET_CLASS_RANKS(i, GET_CLASS(ch)) || GET_ADMLEVEL(i) >= ADMLVL_IMMORT)
-            perform_act(buf1, ch, tobj, tch, i);
-        else
-            perform_act(buf2, ch, tobj, tch, i);
+        perform_act(buf1, ch, tobj, tch, i);
     }
 
     if (tch != nullptr && tch != ch && IN_ROOM(tch) == IN_ROOM(ch)) {
         snprintf(buf1, sizeof(buf1), "$n stares at you and utters the words, '%s'.",
-                 GET_CLASS_RANKS(tch, GET_CLASS(ch)) ? skill_name(spellnum) : buf);
+                 GET_LEVEL(ch) ? skill_name(spellnum) : buf);
         act(buf1, false, ch, nullptr, tch, TO_VICT);
     }
 }
@@ -607,15 +579,15 @@ int cast_spell(struct char_data *ch, struct char_data *tch,
 
     if (IS_SET(SINFO.skilltype, SKTYPE_SPELL)) {
         for (i = 0; i < NUM_CLASSES; i++) {
-            j = GET_CLASS_RANKS(ch, i) - spell_info[spellnum].min_level[i];
+            j = GET_LEVEL(ch) - spell_info[spellnum].min_level[i];
             if (j > diff) {
                 whichclass = i;
                 diff = j;
-                lvl = GET_CLASS_RANKS(ch, i);
+                lvl = GET_LEVEL(ch);
             }
         }
     } else if (IS_SET(SINFO.skilltype, SKTYPE_ART))
-        lvl = GET_CLASS_RANKS(ch, CLASS_KABITO) / 2;
+        lvl = GET_LEVEL(ch) / 2;
     else
         lvl = GET_LEVEL(ch);
 
@@ -794,8 +766,6 @@ ACMD(do_cast) {
             SET_BIT_AR(AFF_FLAGS(ch), AFF_NEXTNOACTION);
         send_to_char(ch, "Your armor interferes with your casting, and you fail!\r\n");
     } else {
-        if (ki > 0)
-            GET_KI(ch) = MAX(0, MIN(GET_MAX_KI(ch), GET_KI(ch) - ki));
         if (cast_spell(ch, tch, tobj, spellnum, t) && GET_ADMLEVEL(ch) < ADMLVL_IMMORT) {
             if (IS_SET(SINFO.routines, MAG_ACTION_FULL | MAG_ACTION_PARTIAL))
                 SET_BIT_AR(AFF_FLAGS(ch), AFF_NEXTPARTIAL);

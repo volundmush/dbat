@@ -1555,7 +1555,7 @@ static void make_pcorpse(struct char_data *ch) {
     SET_BIT_AR(GET_OBJ_EXTRA(corpse), ITEM_NODONATE);
     GET_OBJ_VAL(corpse, VAL_CONTAINER_CAPACITY) = 0;      /* You can't store stuff in a corpse */
     GET_OBJ_VAL(corpse, VAL_CONTAINER_CORPSE) = 1;        /* corpse identifier */
-    GET_OBJ_VAL(corpse, VAL_CONTAINER_OWNER) = GET_PFILEPOS(ch);  /* corpse identifier */
+    GET_OBJ_VAL(corpse, VAL_CONTAINER_OWNER) = ch->id;  /* corpse identifier */
     GET_OBJ_WEIGHT(corpse) = GET_PC_WEIGHT(ch) + IS_CARRYING_W(ch);
     GET_OBJ_RENT(corpse) = 100000;
     GET_OBJ_TIMER(corpse) = CONFIG_MAX_PC_CORPSE_TIME;
@@ -1775,7 +1775,7 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
     SET_BIT_AR(GET_OBJ_EXTRA(corpse), ITEM_NODONATE);
     GET_OBJ_VAL(corpse, VAL_CONTAINER_CAPACITY) = 0;    /* You can't store stuff in a corpse */
     GET_OBJ_VAL(corpse, VAL_CONTAINER_CORPSE) = 1;    /* corpse identifier */
-    GET_OBJ_VAL(corpse, VAL_CONTAINER_OWNER) = GET_PFILEPOS(ch);    /* corpse identifier */
+    GET_OBJ_VAL(corpse, VAL_CONTAINER_OWNER) = -1;    /* corpse identifier */
     GET_OBJ_WEIGHT(corpse) = GET_PC_WEIGHT(ch) + IS_CARRYING_W(ch);
     GET_OBJ_RENT(corpse) = 100000;
     if (IS_NPC(ch))
@@ -1980,12 +1980,12 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
                 if (IS_HALFBREED(ch)) {
                     psreward -= psreward * 0.4;
                 }
-                if (IS_NPC(ch) && MOB_FLAGGED(ch, MOB_HUSK) && GET_PRACTICES(killer, GET_CLASS(killer)) > 50 &&
+                if (IS_NPC(ch) && MOB_FLAGGED(ch, MOB_HUSK) && GET_PRACTICES(killer) > 50 &&
                     IS_BIO(ch)) {
                     psreward = 0;
                     send_to_char(killer, "@D[@G+0 @BPS @cCapped at 50 for Absorb@D]@n\r\n");
                 } else {
-                    GET_PRACTICES(killer, GET_CLASS(killer)) += psreward;
+                    GET_PRACTICES(killer) += psreward;
                     send_to_char(killer, "@D[@G+%d @BPS@D]@n\r\n", psreward);
                 }
             }
@@ -2374,7 +2374,7 @@ static void perform_group_gain(struct char_data *ch, int base, struct char_data 
     }
     if (group_bonus(ch, 2) == 2) {
         send_to_char(ch, "You receive a bonus from your group's leader! @D[@G+2 PS!@D]@n\r\n");
-        GET_PRACTICES(ch, GET_CLASS(ch)) += 2;
+        GET_PRACTICES(ch) += 2;
     } else if (group_bonus(ch, 2) == 3) {
         send_to_char(ch, "You receive a bonus from your group's leader! @D[@G+5%s Exp!@D]@n\r\n", "%");
         share += share * 0.05;

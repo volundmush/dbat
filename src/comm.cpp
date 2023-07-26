@@ -27,7 +27,6 @@
 #include "dg_event.h"
 #include "mobact.h"
 #include "magic.h"
-#include "imc.h"
 #include "objsave.h"
 #include "genolc.h"
 #include "class.h"
@@ -45,6 +44,8 @@
 #include "telnet.h"
 #include "sodium.h"
 #include <thread>
+#include "players.h"
+#include "account.h"
 
 /* local globals */
 struct descriptor_data *descriptor_list = nullptr;        /* master desc list */
@@ -76,7 +77,7 @@ char *last_act_message = nullptr;
 void broadcast(const std::string& txt) {
     log("Broadcasting: %s", txt.c_str());
     for(auto &[cid, c] : net::connections) {
-        c.sendText(txt);
+        c->sendText(txt);
     }
 }
 
@@ -90,19 +91,20 @@ boost::asio::awaitable<void> signal_watcher() {
     }
 }
 
-static boost::asio::awaitable<void> recoverTelnet(uint16_t socket, struct descriptor_data *d, const nlohmann::json& j) {
+static boost::asio::awaitable<void> recoverTelnet(struct descriptor_data *d, nlohmann::json j) {
+    uint16_t socket = j["socket"];
     boost::beast::tcp_stream conn(*net::io, boost::asio::ip::tcp::v4(), socket);
     auto tel = new net::telnet_data(std::move(conn));
     tel->desc = d;
-    d->conn = tel;
-    d->conn->deserialize(j);
+    d->connections.insert(tel);
+    tel->deserialize(j);
     tel->state = net::ConnState::Running;
     {
         std::lock_guard<std::mutex> guard(net::connectionsMutex);
-        net::connections[socket] = d->conn;
+        net::connections[socket] = tel;
     }
 
-    co_await d->conn->run();
+    co_await tel->run();
 
     {
         std::lock_guard<std::mutex> guard(net::connectionsMutex);
@@ -112,39 +114,12 @@ static boost::asio::awaitable<void> recoverTelnet(uint16_t socket, struct descri
     co_return;
 }
 
-static boost::asio::awaitable<void> recoverHttp(uint16_t socket, struct descriptor_data *d, const nlohmann::json& j) {
+static boost::asio::awaitable<void> recoverHttp(struct descriptor_data *d, nlohmann::json j) {
     // TODO: Implement the rest of it...
 
     co_return;
 }
 
-static boost::asio::awaitable<void> recoverConnection(const nlohmann::json j) {
-    auto d = new descriptor_data();
-    d->raw_input_queue = std::make_unique<Channel<std::string>>(*io, 200);
-
-    auto socket = j["socket"].get<uint16_t>();
-    auto protocol = j["protocol"].get<net::Protocol>();
-	d->obj_was = strdup(j["user"].get<std::string>().c_str());
-    d->obj_name = strdup(j["character"].get<std::string>().c_str());
-
-    d->connected = CON_COPYOVER;
-
-    /* Now, find the pfile */
-
-    d->obj_editval = NOWHERE;
-    if(j.contains("in_room")) d->obj_editval = j["in_room"].get<room_vnum>();
-
-    d->next = descriptor_list;
-    descriptor_list = d;
-
-    // We are committed. what happens next must not fail.
-	if(protocol == net::Protocol::Telnet) {
-        co_await recoverTelnet(socket, d, j["conn"]);
-    } else {
-        co_await recoverHttp(socket, d, j["conn"]);
-    }
-    co_return;
-}
 
 void copyover_recover_final() {
     struct descriptor_data *next_d;
@@ -152,35 +127,33 @@ void copyover_recover_final() {
         next_d = d->next;
         if(STATE(d) != CON_COPYOVER) continue;
 
-		std::string user = d->obj_was;
-        std::string character = d->obj_name;
-        room_vnum room = d->obj_editval;
+		auto accID = d->obj_editval;
+        auto playerID = d->obj_editflag;
+        room_vnum room = d->obj_type;
 
-        free(d->obj_was);
-        d->obj_was = nullptr;
-        free(d->obj_name);
-        d->obj_name = nullptr;
+        d->obj_editval = 0;
+        d->obj_editflag = 0;
+        d->obj_type = 0;
 
-        userLoad(d, (char*)user.c_str());
-        if(!d->user) {
-            log("recoverConnection: user %s not found.", user.c_str());
+        auto accFind = accounts.find(accID);
+
+        if(accFind == accounts.end()) {
+            log("recoverConnection: user %d not found.", accID);
             close_socket(d);
             continue;
         }
+        d->account = &accFind->second;
+        for(auto &c : d->connections) c->account = d->account;
 
-        auto c = new char_data();
-        c->player_specials = new player_special_data();
-        d->character = c;
-        auto player_i = load_char(character.c_str(), c);
-        if(player_i < 0 || PLR_FLAGGED(c, PLR_DELETED)) {
-            log("recoverConnection: character %s not found.", character.c_str());
+        auto playFind = players.find(playerID);
+        if(playFind == players.end()) {
+            log("recoverConnection: character %d not found.", playerID);
             close_socket(d);
             continue;
         }
-        c->desc = d;
+        auto c = d->character = playFind->second.character;
 
-		GET_WAS_IN(c) = room;
-        GET_PFILEPOS(c) = player_i;
+		GET_LOADROOM(c) = room;
         REMOVE_BIT_AR(PLR_FLAGS(c), PLR_WRITING);
         REMOVE_BIT_AR(PLR_FLAGS(c), PLR_MAILING);
         REMOVE_BIT_AR(PLR_FLAGS(c), PLR_CRYO);
@@ -220,58 +193,58 @@ void copyover_recover() {
     unlink(COPYOVER_FILE);
     fp.close();
 
-    if(j.contains("connections")) {
-        for(const auto& c : j["connections"]) {
-            co_spawn(boost::asio::make_strand(*net::io), recoverConnection(c), boost::asio::detached);
+    std::unordered_map<struct descriptor_data*, nlohmann::json> descMap;
+
+    auto setupDesc = [&](const auto &jd) {
+        auto d = new descriptor_data();
+        d->raw_input_queue = std::make_unique<net::Channel<std::string>>(*net::io, 200);
+        d->obj_editval = j["user"];
+        d->obj_editflag = j["character"];
+        d->connected = CON_COPYOVER;
+        d->obj_type = NOWHERE;
+        if(j.contains("in_room")) d->obj_type = j["in_room"].get<room_vnum>();
+        if(j.contains("connections"))
+            descMap[d] = j["connections"];
+        else descMap[d] = nlohmann::json();
+        return d;
+    };
+
+
+    if(j.contains("pending_descriptors")) {
+        for(const auto &jd : j["pending_descriptors"]) {
+            auto d = setupDesc(jd);
+            net::pending_descriptors->try_send(boost::system::error_code{}, d);
         }
     }
+
+    if(j.contains("descriptors")) {
+        for(const auto &jd : j["descriptors"]) {
+            auto d = setupDesc(jd);
+            d->next = descriptor_list;
+            descriptor_list = d;
+        }
+    }
+
+    for(auto &[d, jconns] : descMap) {
+        if(jconns.empty()) {
+            STATE(d) = CON_CLOSE;
+            continue;
+        }
+
+        for(auto jc : jconns) {
+            auto protocol = j["protocol"].get<net::Protocol>();
+            if(protocol == net::Protocol::Telnet) {
+                boost::asio::co_spawn(boost::asio::make_strand(*net::io), recoverTelnet(d, jc), boost::asio::detached);
+            } else {
+                boost::asio::co_spawn(boost::asio::make_strand(*net::io), recoverHttp(d, jc), boost::asio::detached);
+            }
+        }
+    }
+
 }
 
-int get_max_players() {
-
-    int max_descs = 0;
-    const char *method;
-
-/*
- * First, we'll try using getrlimit/setrlimit.  This will probably work
- * on most systems.  HAS_RLIMIT is defined in sysdep.h.
- */
-    {
-        struct rlimit limit;
-
-        /* find the limit of file descs */
-        method = "rlimit";
-        if (getrlimit(RLIMIT_NOFILE, &limit) < 0) {
-            perror("SYSERR: calling getrlimit");
-            exit(1);
-        }
-
-        /* set the current to the maximum */
-        limit.rlim_cur = limit.rlim_max;
-        if (setrlimit(RLIMIT_NOFILE, &limit) < 0) {
-            perror("SYSERR: calling setrlimit");
-            exit(1);
-        }
-        if (limit.rlim_max == RLIM_INFINITY)
-            max_descs = CONFIG_MAX_PLAYING + NUM_RESERVED_DESCS;
-        else
-            max_descs = MIN(CONFIG_MAX_PLAYING + NUM_RESERVED_DESCS, limit.rlim_max);
-    }
-
-    /* now calculate max _players_ based on max descs */
-    max_descs = MIN(CONFIG_MAX_PLAYING, max_descs - NUM_RESERVED_DESCS);
-
-    if (max_descs <= 0) {
-        log("SYSERR: Non-positive max player limit!  (Set at %d using %s).",
-            max_descs, method);
-        exit(1);
-    }
-    log("   Setting player limit to %d using %s.", max_descs, method);
-    return (max_descs);
-}
 
 static boost::asio::awaitable<void> performReboot(int mode) {
-    struct descriptor_data *d, *d_next;
     char buf[100], buf2[100];
 
     std::ofstream fp(COPYOVER_FILE);
@@ -282,27 +255,16 @@ static boost::asio::awaitable<void> performReboot(int mode) {
         co_return;
     }
 
-    if(mode != 2) {
-        save_all();
-    }
-
     sprintf(buf, "\t\x1B[1;31m \007\007\007The universe stops for a moment as space and time fold.\x1B[0;0m\r\n");
     save_mud_time(&time_info);
 
     nlohmann::json j;
 
     /* For each playing descriptor, save its state */
-    for (d = descriptor_list; d; d = d_next) {
-        auto och = d->character;
-        d_next = d->next; /* We delete from the list , so need to save this */
-        if (!och || STATE(d) > CON_PLAYING) {
-            d->conn->sendText("\n\rSorry, we are rebooting. Come back in a few seconds.\n\r");
-            close_socket(d); /* throw'em out */
-        }
-        d->conn->sendText(buf);
-        /* save och */
-        Crash_rentsave(och, 0);
-        save_char(och);
+    for (auto &[cid, conn] : net::connections) {
+        if(conn->desc) continue;
+        conn->sendText("\n\rSorry, we are rebooting. Come back in a few seconds.\n\r");
+        conn->halt(0);
     }
 
     // wait 200 milliseconds... that should be enough time to push out all of the data.
@@ -311,15 +273,17 @@ static boost::asio::awaitable<void> performReboot(int mode) {
     co_await timer.async_wait(boost::asio::use_awaitable);
 
     /* For each descriptor/connection, halt them and save state. */
-    for (d = descriptor_list; d; d = d_next) {
-        co_await d->conn->halt(mode);
-        auto och = d->character;
+    for (auto d = descriptor_list; d; d = d->next) {
         nlohmann::json jd;
 
-        jd["socket"] = d->conn->socket;
-        jd["protocol"] = d->conn->capabilities.protocol;
-        jd["user"] = d->user;
-        jd["character"] = GET_NAME(och);
+        for(auto c : d->connections) {
+            jd["connections"].push_back(c->serialize());
+            co_await c->halt(mode);
+        }
+        auto och = d->character;
+
+        jd["user"] = d->account->vn;
+        jd["character"] = och->id;
 
         auto r = IN_ROOM(och);
         auto w = GET_WAS_IN(och);
@@ -329,11 +293,39 @@ static boost::asio::awaitable<void> performReboot(int mode) {
         	jd["in_room"] = w;
         }
 
-        jd["conn"] = d->conn->serialize();
-
-        j["connections"].push_back(jd);
-
+        j["descriptors"].push_back(jd);
     }
+
+    while(net::pending_descriptors->ready()) {
+        struct descriptor_data *d = nullptr;
+        if(!net::pending_descriptors->try_receive([&d](boost::system::error_code ec, struct descriptor_data *data) {
+            if(!ec) d = data;
+        })) continue;
+        if(!d) continue;
+        nlohmann::json jd;
+
+        for(auto c : d->connections) {
+            jd["connections"].push_back(c->serialize());
+            co_await c->halt(mode);
+        }
+
+        auto och = d->character;
+
+        jd["user"] = d->account->vn;
+        jd["character"] = och->id;
+
+        auto r = IN_ROOM(och);
+        auto w = GET_WAS_IN(och);
+        if(r > 1) {
+            jd["in_room"] = r;
+        } else if(r <= 1 && w > 1) {
+            jd["in_room"] = w;
+        }
+
+        j["pending_descriptors"].push_back(jd);
+    }
+
+
     j["port"] = port;
     j["mother_desc"] = mother_desc;
 
@@ -439,12 +431,14 @@ boost::asio::awaitable<void> runOneLoop(double deltaTime) {
     static bool sleeping = false;
     struct descriptor_data* next_d;
 
-    while(net::pending_descriptors.ready()) {
-        struct descriptor_data* d;
-        if(!net::pending_descriptors.try_receive(d)) continue;
-        d->next = descriptor_list;
-        descriptor_list = d;
-        d->character->login();
+    while(net::pending_descriptors->ready()) {
+        if(!net::pending_descriptors->try_receive([&](boost::system::error_code ec, struct descriptor_data *d) {
+            if(!ec) {
+                d->next = descriptor_list;
+                descriptor_list = d;
+                d->character->login();
+            }
+        })) continue;
     }
 
     if(sleeping && descriptor_list) {
@@ -534,6 +528,13 @@ boost::asio::awaitable<void> runOneLoop(double deltaTime) {
  * such as mobile_activity().
  */
 boost::asio::awaitable<void> game_loop() {
+    broadcast("The world seems to shimmer and waver as it comes into focus.\r\n");
+    for (auto &[vn, z] : zone_table) {
+        log("Resetting #%d: %s (rooms %d-%d).", vn,
+            z.name, z.bot, z.top);
+        reset_zone(vn);
+    }
+
     auto hb = std::chrono::milliseconds(100);
     auto previousTime = boost::asio::steady_timer::clock_type::now();
     boost::asio::steady_timer timer(co_await boost::asio::this_coro::executor, hb);
@@ -584,6 +585,7 @@ static void finish_copyover() {
     sprintf(buf, "%d", port);
     sprintf(buf2, "-C%d", mother_desc);
     chdir("..");
+    net::io.reset();
     execl("bin/circle", "circle", buf2, buf, (char *) nullptr);
     /* Failed - sucessful exec will not return */
 
@@ -601,6 +603,7 @@ static boost::asio::awaitable<void> runGame() {
         log("Exception in runGame(): %s", e.what());
         exit(1);
     }
+    create_schema();
 
     circle_srandom(time(nullptr));
     event_init();
@@ -608,12 +611,13 @@ static boost::asio::awaitable<void> runGame() {
     if(fCopyOver) {
         copyover_recover();
     }
-
-    co_await boot_db();
-
-    if (CONFIG_IMC_ENABLED) {
-        imc_startup(false, -1, false); // FALSE arg, so the autoconnect setting can govern it.
+    try {
+        co_await boot_db();
+    } catch(std::exception& e) {
+        log("Exception in boot_db(): %s", e.what());
+        exit(1);
     }
+
 
     {
         broadcast("Loading Space Map. ");
@@ -686,7 +690,7 @@ void init_game(uint16_t cmport) {
 
     log("Entering game loop.");
     std::vector<std::thread> threads;
-    if(!gameFunc) {
+    if(false) {
         auto max_threads = std::thread::hardware_concurrency() - 1;
         if(max_threads > 0) {
             for (int i = 0; i < max_threads; ++i) {
@@ -707,7 +711,9 @@ void init_game(uint16_t cmport) {
     // Release the executor and acceptor.
     // ASIO maintains its own socket polling fd and killing the executor is the
     // only way to release it.
-    net::io.reset();
+
+    net::pending_descriptors.reset();
+    net::signals.reset();
 
     if(circle_reboot == 1) {
         // release the mother_desc so that it doesn't get autoclosed...
@@ -717,6 +723,7 @@ void init_game(uint16_t cmport) {
     }
 
     net::acceptor.reset();
+    net::io.reset();
 
     Crash_save_all();
 
@@ -726,18 +733,11 @@ void init_game(uint16_t cmport) {
 
     close(mother_desc);
 
-    if (CONFIG_IMC_ENABLED) {
-        imc_shutdown(false);
-    }
-
     if (circle_reboot != 2)
         save_all();
 
     log("Saving current MUD time.");
     save_mud_time(&time_info);
-
-    save_areas();
-
 
     if (circle_reboot) {
         log("Rebooting.");
@@ -846,7 +846,7 @@ char *make_prompt(struct descriptor_data *d) {
                 if (count >= 0)
                     len += count;
             }
-            if (GET_KI(ch) << 2 < GET_MAX_KI(ch) && len < sizeof(prompt)) {
+            if (GET_KI(ch) << 2 < GET_MAX_MANA(ch) && len < sizeof(prompt)) {
                 count = snprintf(prompt + len, sizeof(prompt) - len, "KI: %" I64T " ", GET_KI(ch));
                 if (count >= 0)
                     len += count;
@@ -1451,7 +1451,7 @@ char *make_prompt(struct descriptor_data *d) {
             }
             if (PRF_FLAGGED(d->character, PRF_DISPRAC) && len < sizeof(prompt)) {
                 count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mPS@y: @W%s@D]@n",
-                                 add_commas(GET_PRACTICES(d->character, GET_CLASS(d->character))));
+                                 add_commas(GET_PRACTICES(d->character)));
                 if (count >= 0)
                     len += count;
             }
@@ -1818,9 +1818,10 @@ int process_output(struct descriptor_data *t) {
      */
     if (t->has_prompt) {
         t->has_prompt = false;
-        t->conn->sendText(out);
+        for(auto c : t->connections) c->sendText(out);
     } else {
-        t->conn->sendText(out.substr(2, out.length() - 2));
+        auto o = out.substr(2, out.length() - 2);
+        for(auto c : t->connections) c->sendText(o);
     }
 
     /* Handle snooping: prepend "% " and send to snooper. */
@@ -2059,9 +2060,7 @@ void close_socket(struct descriptor_data *d) {
         default:
             break;
     }
-	if(d->conn) {
-        d->conn->halt(0);
-    }
+	for(auto c : d->connections) c->halt(0);
     delete d;
 }
 
@@ -2693,7 +2692,7 @@ int open_logfile(const char *filename, FILE *stderr_fp) {
  */
 
 
-void show_help(struct descriptor_data *t, const char *entry) {
+void show_help(struct net::connection_data *t, const char *entry) {
     int chk, bot, top, mid, minlen;
     char buf[MAX_STRING_LENGTH];
 
@@ -2712,10 +2711,7 @@ void show_help(struct descriptor_data *t, const char *entry) {
             while ((mid > 0) &&
                    (!(chk = strncasecmp(entry, help_table[mid - 1].keywords, minlen))))
                 mid--;
-            write_to_output(t, "\r\n");
-            snprintf(buf, sizeof(buf), "%s\r\n[ PRESS RETURN TO CONTINUE ]",
-                     help_table[mid].entry);
-            write_to_output(t, buf);
+            t->sendText(help_table[mid].entry);
             return;
         } else {
             if (chk > 0) bot = mid + 1;
@@ -2784,19 +2780,20 @@ void descriptor_data::handle_input() {
     // Now we need to process the raw_input_queue, watching for special characters and also aliases.
     // Commands are processed first-come-first served...
     while(raw_input_queue->ready()) {
-        std::string command;
-        if(!raw_input_queue->try_receive(command)) continue;
+        if(!raw_input_queue->try_receive([&](boost::system::error_code ec, const std::string &command) {
+            if(!ec) {
+                if (snoop_by)
+                    write_to_output(snoop_by, "%% %s\r\n", command.c_str());
 
-        if (snoop_by)
-            write_to_output(snoop_by, "%% %s\r\n", command.c_str());
-
-        if(command == "--") {
-            // this is a special command that clears out the processed input_queue.
-            input_queue.clear();
-            write_to_output(this, "All queued commands cancelled.\r\n");
-        } else {
-            perform_alias(this, (char*)command.c_str());
-        }
+                if(command == "--") {
+                    // this is a special command that clears out the processed input_queue.
+                    input_queue.clear();
+                    write_to_output(this, "All queued commands cancelled.\r\n");
+                } else {
+                    perform_alias(this, (char*)command.c_str());
+                }
+            }
+        })) continue;
 
     }
 

@@ -3713,13 +3713,13 @@ ACMD(do_eat) {
             } else if (expbonus > GET_LEVEL(ch) * 1500 && GET_LEVEL(ch) < 100) {
                 expbonus = GET_LEVEL(ch) * 1000;
             }
-            if (GET_PRACTICES(ch, GET_CLASS(ch)) >= 500) {
+            if (GET_PRACTICES(ch) >= 500) {
                 psbonus = 0;
                 pscapped = true;
             }
             if (!AFF_FLAGGED(ch, AFF_PUKED)) {
                 gain_exp(ch, expbonus);
-                GET_PRACTICES(ch, GET_CLASS(ch)) += psbonus;
+                GET_PRACTICES(ch) += psbonus;
                 send_to_char(ch, "That was exceptionally delicious! @D[@mPS@D: @C+%d@D] [@gEXP@D: @G+%s@D]@n\r\n",
                              psbonus, add_commas(expbonus));
                 if (capped == true)

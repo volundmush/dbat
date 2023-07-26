@@ -218,7 +218,7 @@ typedef struct char_data char_data;
 
 /* used for actor memory triggers */
 struct script_memory {
-    long id;                /* id of who to remember */
+    int64_t id;                /* id of who to remember */
     char *cmd;                /* command, or nullptr for generic */
     struct script_memory *next;
 };
@@ -326,8 +326,6 @@ extern char *str_str(char *cs, char *ct);
 extern int find_eq_pos_script(char *arg);
 
 extern int can_wear_on_pos(struct obj_data *obj, int pos);
-
-struct char_data *find_char(int32_t n);
 
 extern char_data *get_char(char *name);
 

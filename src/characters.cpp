@@ -14,6 +14,7 @@
 #include "dg_comm.h"
 #include "dg_scripts.h"
 #include "interpreter.h"
+#include "players.h"
 
 static std::string robot = "Robotic-Humanoid", robot_lower = "robotic-humanoid", unknown = "UNKNOWN";
 
@@ -140,10 +141,10 @@ void char_data::resurrect(ResurrectionMode mode) {
         assign_affect(this, AFF_WEAKENED_STATE, SKILL_WARP, dur, str, con, intel, agl, wis, spd);
         if (losschance >= 100) {
             int psloss = rand_number(100, 300);
-            GET_PRACTICES(this, GET_CLASS(this)) -= psloss;
+            GET_PRACTICES(this) -= psloss;
             send_to_char(this, "@R...and a loss of @r%d@R PS!@n", psloss);
-            if (GET_PRACTICES(this, GET_CLASS(this)) < 0) {
-                GET_PRACTICES(this, GET_CLASS(this)) = 0;
+            if (GET_PRACTICES(this) < 0) {
+                GET_PRACTICES(this) = 0;
             }
         }
     }
@@ -346,13 +347,11 @@ bool char_data::isFullHealth() const {
 }
 
 int64_t char_data::setCurHealth(int64_t amt) {
-    hit = std::max(0L, std::abs(amt));
-    return hit;
+    return 0;
 }
 
 int64_t char_data::setCurHealthPercent(double amt) {
-    hit = std::max(0L, (int64_t) (getMaxHealth() * std::abs(amt)));
-    return hit;
+    return 0;
 }
 
 int64_t char_data::incCurHealth(int64_t amt, bool limit_max) {
@@ -493,13 +492,11 @@ bool char_data::isFullKI() const {
 }
 
 int64_t char_data::setCurKI(int64_t amt) {
-    mana = std::max(0L, std::abs(amt));
-    return mana;
+    return 0;
 }
 
 int64_t char_data::setCurKIPercent(double amt) {
-    mana = std::max(0L, (int64_t) (getMaxKI() * std::abs(amt)));
-    return mana;
+    return 0;
 }
 
 int64_t char_data::incCurKI(int64_t amt, bool limit_max) {
@@ -585,13 +582,11 @@ bool char_data::isFullST() const {
 }
 
 int64_t char_data::setCurST(int64_t amt) {
-    move = std::max(0L, std::abs(amt));
-    return move;
+    return 0;
 }
 
 int64_t char_data::setCurSTPercent(double amt) {
-    move = std::max(0L, (int64_t) (getMaxST() * std::abs(amt)));
-    return move;
+    return 0;
 }
 
 int64_t char_data::incCurST(int64_t amt, bool limit_max) {
@@ -959,7 +954,9 @@ int char_data::getRPP() {
         return 0;
     }
 
-    return player_specials->account->rpp;
+    auto &p = players[id];
+
+    return p.account->rpp;
 
 }
 
@@ -976,7 +973,9 @@ void char_data::modRPP(int amt) {
         return;
     }
 
-    player_specials->account->modRPP(amt);
+    auto &p = players[id];
+
+    p.account->modRPP(amt);
 }
 
 void char_data::login() {

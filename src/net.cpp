@@ -3,6 +3,7 @@
 #include "telnet.h"
 #include <regex>
 #include "screen.h"
+#include "players.h"
 
 #define COLOR_ON(ch) (COLOR_LEV(ch) > 0)
 
@@ -242,7 +243,8 @@ namespace net {
         Message msg;
         msg.cmd = "text";
         if(desc && desc->character) {
-            msg.args.push_back(processColors(text, COLOR_ON(desc->character), COLOR_CHOICES(desc->character)));
+            auto &p = players[desc->character->id];
+            msg.args.push_back(processColors(text, COLOR_ON(desc->character), p.color_choices));
         } else {
             msg.args.push_back(processColors(text, true, nullptr));
         }
@@ -270,7 +272,7 @@ namespace net {
         co_return;
     }
 
-    nlohmann::json Message::serialize() {
+    nlohmann::json Message::serialize() const {
         nlohmann::json j;
         if(!cmd.empty()) j["cmd"] = cmd;
         if(!args.empty()) j["args"] = args;
@@ -289,15 +291,16 @@ namespace net {
         nlohmann::json j;
 
         while(outMessages.ready()) {
-            Message m;
-            if(!outMessages.try_receive(m)) continue;
-            j["outMessages"].push_back(m.serialize());
+            if(!outMessages.try_receive([&j](boost::system::error_code ec, const Message& msg) {
+                if(!ec) j["outMessages"].push_back(msg.serialize());
+            })) continue;
         }
 
         while(inMessages.ready()) {
             Message m;
-            if(!inMessages.try_receive(m)) continue;
-            j["inMessages"].push_back(m.serialize());
+            if(!inMessages.try_receive([&j](boost::system::error_code ec, const Message& msg) {
+                if(!ec) j["inMessages"].push_back(msg.serialize());
+            })) continue;
         }
 
         j["capabilities"] = capabilities.serialize();

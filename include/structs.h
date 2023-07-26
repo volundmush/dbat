@@ -49,11 +49,20 @@ struct account_data {
 };
 
 struct player_data {
-    vnum vn{NOTHING};
+    player_data() = default;
+    explicit player_data(const nlohmann::json& j);
+    int64_t id{NOTHING};
     std::string name;
     struct account_data *account{};
     struct char_data* character{};
-    static int getNextID();
+    std::vector<struct alias_data> aliases;    /* Character's aliases                  */
+    std::set<int64_t> sensePlayer;
+    std::set<mob_vnum> senseMemory;
+    std::map<int64_t, std::string> dubNames;
+    char *color_choices[NUM_COLOR]{}; /* Choices for custom colors		*/
+    struct txt_block *comm_hist[NUM_HIST]{}; /* Player's communications history     */
+
+    nlohmann::json serialize();
 };
 
 enum class AreaType {
@@ -79,6 +88,7 @@ struct area_data {
     bool ether{false}; /* is this area etheric?			*/
     bool moon{false}; /* does this planet have a moon? */
     nlohmann::json serialize();
+    static vnum getNextID();
 };
 
 /* Extra description: used in objects, mobiles, and rooms */
@@ -119,11 +129,13 @@ struct unit_data {
 
     struct obj_data *contents{};     /* Contains objects  */
 
-    int32_t id{}; /* used by DG triggers	*/
+    int64_t id{}; /* used by DG triggers	*/
 
     nlohmann::json serializeUnit();
     nlohmann::json serializeContents();
-    nlohmann::json serializeScript();
+
+    void activateContents();
+    void deactivateContents();
 
     void deserializeUnit(const nlohmann::json& j);
 
@@ -141,7 +153,13 @@ struct obj_data : public unit_data {
 
     void deserializeBase(const nlohmann::json& j);
     void deserializeProto(const nlohmann::json& j);
-    void deserializeInstance(const nlohmann::json& j);
+    void deserializeInstance(const nlohmann::json& j, bool isActive);
+    void deserializeContents(const nlohmann::json& j, bool isActive);
+
+    void activate();
+
+    void deactivate();
+
 
     room_rnum in_room{NOWHERE};        /* In what room -1 when conta/carr	*/
     room_vnum room_loaded{NOWHERE};    /* Room loaded in, for room_max checks	*/
@@ -166,7 +184,6 @@ struct obj_data : public unit_data {
     int16_t worn_on{-1};          /* Worn where?		      */
 
     time_t generation{};             /* creation time for dupe check     */
-    int64_t unique_id{};  /* random bits for dupe check       */
 
     struct obj_data *next_content{}; /* For 'contains' lists             */
     struct obj_data *next{};         /* For the object list              */
@@ -194,7 +211,7 @@ struct obj_data : public unit_data {
 
     std::optional<double> gravity;
 
-    std::optional<vnum> getMatchingArea(std::function<bool(const area_data&)> f);
+    std::optional<vnum> getMatchingArea(const std::function<bool(const area_data&)>& f);
 };
 /* ======================================================================= */
 
@@ -249,7 +266,7 @@ struct room_data : public unit_data {
     double getGravity();
 
     nlohmann::json serialize();
-    nlohmann::json serializeItems();
+    void deserializeContents(const nlohmann::json& j, bool isActive);
 
     std::optional<vnum> getMatchingArea(std::function<bool(const area_data&)> f);
 
@@ -321,70 +338,14 @@ struct abil_data {
  * not allocated in memory for NPCs, but it is for PCs. This structure
  * can be changed freely.
  */
-struct player_special_data {
-    player_special_data() = default;
-    explicit player_special_data(const nlohmann::json &j);
-    struct account_data *account{nullptr};
-    char *poofin{};            /* Description on arrival of a god.     */
-    char *poofout{};        /* Description upon a god's exit.       */
-    std::vector<struct alias_data> aliases;    /* Character's aliases                  */
-    int32_t last_tell{};        /* idnum of last tell from              */
-    void *last_olc_targ{};        /* olc control                          */
-    int last_olc_mode{};        /* olc control                          */
-    char *host{};            /* host of last logon                   */
-    struct imcchar_data *imcchardata{};  /**< IMC2 Data */
-    int spell_level[MAX_SPELL_LEVEL]{};
-    /* bonus to number of spells memorized */
-    int memcursor{};        /* points to the next free slot in spellmem */
-    int wimp_level{};        /* Below this # of hit points, flee!	*/
-    int8_t freeze_level{};        /* Level of god who froze char, if any	*/
-    int16_t invis_level{};        /* level of invisibility		*/
-    room_vnum load_room{};        /* Which room to place char in		*/
-    int pref[PR_ARRAY_MAX]{};    /* preference flags for PC's.		*/
-    uint8_t bad_pws{};        /* number of bad password attemps	*/
-    int8_t conditions[NUM_CONDITIONS]{};        /* Drunk, full, thirsty			*/
-    int skill_points{};        /* Skill points earned from race HD	*/
-    int class_skill_points[NUM_CLASSES]{};
-    /* Skill points earned from a class	*/
-    struct txt_block *comm_hist[NUM_HIST]{}; /* Player's communcations history     */
-    int olc_zone{};            /* Zone where OLC is permitted		*/
-    int gauntlet{};                 /* Highest Gauntlet Position */
-    int speaking{};            /* Language currently speaking		*/
-    int tlevel{};            /* Turning level			*/
-    int ability_trains{};        /* How many stat points can you train?	*/
-    int spellmem[MAX_MEM]{};    /* Spell slots				*/
-    int feat_points{};        /* How many general feats you can take	*/
-    int epic_feat_points{};        /* How many epic feats you can take	*/
-    int class_feat_points[NUM_CLASSES]{};
-    /* How many class feats you can take	*/
-    int epic_class_feat_points[NUM_CLASSES]{};
-    /* How many epic class feats 		*/
-    int domain[NUM_DOMAINS]{};
-    int school[NUM_SCHOOLS]{};
-    int deity{};
-    int spell_mastery_points{};
-    char *color_choices[NUM_COLOR]{}; /* Choices for custom colors		*/
-    uint8_t page_length{};
-    int murder{};                   /* Murder of PC's count                 */
-    int trainstr{};
-    int trainint{};
-    int traincon{};
-    int trainwis{};
-    int trainagl{};
-    int trainspd{};
-
-    struct char_data *carrying{};
-    struct char_data *carried_by{};
-
-    int racial_pref{};
-
-    std::set<vnum> sensePlayer;
-    std::set<mob_vnum> senseMemory;
-    std::map<vnum, std::string> dubNames;
-
+struct alias_data {
+    alias_data() = default;
+    explicit alias_data(const nlohmann::json &j);
+    std::string name;
+    std::string replacement;
+    int type;
     nlohmann::json serialize();
 };
-
 
 /* this can be used for skills that can be used per-day */
 struct memorize_node {
@@ -416,13 +377,15 @@ struct mob_special_data {
 
 /* An affect structure. */
 struct affected_type {
+    affected_type() = default;
+    explicit affected_type(const nlohmann::json& j);
     int16_t type;          /* The type of spell that caused this      */
     int16_t duration;      /* For how long its effects will last      */
     int modifier;         /* This is added to apropriate ability     */
     int location;         /* Tells which ability to change(APPLY_XXX)*/
     int specific;         /* Some locations have parameters          */
     bitvector_t bitvector; /* Tells which bits to set (AFF_XXX) */
-
+    nlohmann::json serialize();
     struct affected_type *next;
 };
 
@@ -438,39 +401,6 @@ struct follow_type {
     struct follow_type *next;
 };
 
-struct level_learn_entry {
-    struct level_learn_entry *next;
-    int location;
-    int specific;
-    int8_t value;
-};
-
-struct levelup_data {
-    struct levelup_data *next;    /* Form a linked list			*/
-    struct levelup_data *prev;    /* Form a linked list			*/
-    int8_t type;        /* LEVELTYPE_ value			*/
-    int8_t spec;        /* Specific class or race		*/
-    int8_t level;        /* Level ir HD # for that class or race	*/
-
-    int8_t hp_roll;        /* Straight die-roll value with no mods	*/
-    int8_t mana_roll;        /* Straight die-roll value with no mods	*/
-    int8_t ki_roll;        /* Straight die-roll value with no mods	*/
-    int8_t move_roll;        /* Straight die-roll value with no mods	*/
-
-    int8_t accuracy;        /* Hit accuracy change			*/
-    int8_t fort;        /* Fortitude change			*/
-    int8_t reflex;        /* Reflex change			*/
-    int8_t will;        /* Will change				*/
-
-    int8_t add_skill;        /* Total added skill points		*/
-    int8_t add_gen_feats;    /* General feat points			*/
-    int8_t add_epic_feats;    /* General epic feat points		*/
-    int8_t add_class_feats;    /* Class feat points			*/
-    int8_t add_class_epic_feats;/* Epic class feat points		*/
-
-    struct level_learn_entry *skills;    /* Head of linked list		*/
-    struct level_learn_entry *feats;    /* Head of linked list		*/
-};
 
 enum ResurrectionMode : uint8_t {
     Costless = 0,
@@ -493,32 +423,28 @@ struct char_data : public unit_data {
     char_data() = default;
     // this constructor below is to be used only for the mob_proto map.
     explicit char_data(const nlohmann::json& j);
-
     nlohmann::json serializeBase();
     nlohmann::json serializeInstance();
     nlohmann::json serializeProto();
     nlohmann::json serializePlayer();
-
+    nlohmann::json serializeEquipment();
     void deserializeBase(const nlohmann::json& j);
     void deserializeProto(const nlohmann::json& j);
-    void deserializeInstance(const nlohmann::json& j);
+    void deserializeInstance(const nlohmann::json& j, bool isActive);
     void deserializeMobile(const nlohmann::json& j);
-    void deserializePlayer(const nlohmann::json& j);
-
+    void deserializePlayer(const nlohmann::json& j, bool isActive);
+    void deserializeContents(const nlohmann::json& j, bool isActive);
+    void deserializeEquipment(const nlohmann::json& j, bool isActive);
+    void activate();
+    void deactivate();
     std::optional<vnum> getMatchingArea(std::function<bool(const area_data&)> f);
-
     void login();
 
-    int pfilepos{-1};            /* playerfile pos			*/
-    room_vnum in_room{NOWHERE};        /* Location (real room number)		*/
-    room_vnum was_in_room{NOWHERE};    /* location for linkdead people		*/
-    int wait{};            /* wait for how many loops		*/
-
+    // Prototype-relevant fields below...
     char *title{};            /* PC / NPC's title                     */
     int size{SIZE_UNDEFINED};            /* Size class of char                   */
     int8_t sex{};            /* PC / NPC's sex                       */
     race::Race *race{};
-    //int8_t race;		/* PC / NPC's race                      */
     int8_t hairl{};               /* PC hair length                       */
     int8_t hairs{};               /* PC hair style                        */
     int8_t hairc{};               /* PC hair color                        */
@@ -528,25 +454,29 @@ struct char_data : public unit_data {
     int race_level{};        /* PC / NPC's racial level / hit dice   */
     int level_adj{};        /* PC level adjustment                  */
     sensei::Sensei *chclass{};        /* Last class taken                     */
-    int chclasses[NUM_CLASSES]{};    /* Ranks in all classes        */
-    int epicclasses[NUM_CLASSES]{};    /* Ranks in all epic classes */
-    struct levelup_data *level_info{};
-    /* Info on gained levels */
     int level{};            /* PC / NPC's level                     */
+    uint8_t weight{};        /* PC / NPC's weight                    */
+    uint8_t height{};        /* PC / NPC's height                    */
+    struct abil_data real_abils{};    /* Abilities without modifiers   */
+    struct mob_special_data mob_specials{};
+    int alignment{};        /* +-1000 for alignment good vs. evil	*/
+    int alignment_ethic{};        /* +-1000 for alignment law vs. chaos	*/
+    bitvector_t affected_by[AF_ARRAY_MAX]{};/* Bitvector for current affects	*/
+    int64_t basepl{};
+    int64_t baseki{};
+    int64_t basest{};
+
+
+    // Instance-relevant fields below...
+    time_t generation{};             /* creation time for dupe check     */
+    room_vnum in_room{NOWHERE};        /* Location (real room number)		*/
+    room_vnum was_in_room{NOWHERE};    /* location for linkdead people		*/
+    int wait{};            /* wait for how many loops		*/
     int admlevel{};            /* PC / NPC's admin level               */
     int admflags[AD_ARRAY_MAX]{};    /* Bitvector for admin privs		*/
     room_vnum hometown{NOWHERE};        /* PC Hometown / NPC spawn room         */
     struct time_data time{};    /* PC's AGE in days			*/
-    uint8_t weight{};        /* PC / NPC's weight                    */
-    uint8_t height{};        /* PC / NPC's height                    */
-
-    struct abil_data real_abils{};    /* Abilities without modifiers   */
     struct abil_data aff_abils{};    /* Abils with spells/stones/etc  */
-    struct player_special_data *player_specials{};
-    /* PC specials				*/
-    struct mob_special_data mob_specials{};
-    /* NPC specials				*/
-
     struct affected_type *affected{};
     /* affected by what spells		*/
     struct affected_type *affectedv{};
@@ -557,7 +487,6 @@ struct char_data : public unit_data {
     struct obj_data *equipment[NUM_WEARS]{};
 
     struct descriptor_data *desc{};    /* nullptr for mobiles			*/
-
 
     struct script_memory *memory{};    /* for mob memory triggers		*/
 
@@ -572,7 +501,7 @@ struct char_data : public unit_data {
 
     struct follow_type *followers{};/* List of chars followers		*/
     struct char_data *master{};    /* Who is char following?		*/
-    int32_t master_id{};
+    int64_t master_id{};
 
     struct memorize_node *memorized{};
     struct innate_node *innate{};
@@ -590,6 +519,9 @@ struct char_data : public unit_data {
     struct char_data *blocked{};   /* Who is blocking me?    */
     struct char_data *absorbing{}; /* Who am I absorbing */
     struct char_data *absorbby{};  /* Who is absorbing me */
+    struct char_data *carrying{};
+    struct char_data *carried_by{};
+    int racial_pref{};
 
     int8_t feats[MAX_FEATS + 1]{};    /* Feats (booleans and counters)	*/
     int combat_feats[CFEAT_MAX + 1][FT_ARRAY_MAX]{};
@@ -598,12 +530,9 @@ struct char_data : public unit_data {
 
     std::map<uint16_t, skill_data> skill;
 
-    int alignment{};        /* +-1000 for alignment good vs. evil	*/
-    int alignment_ethic{};        /* +-1000 for alignment law vs. chaos	*/
-    int32_t idnum{-1};            /* player's idnum; -1 for mobiles	*/
+
     bitvector_t act[PM_ARRAY_MAX]{}; /* act flag for NPC's; player flag for PC's */
 
-    bitvector_t affected_by[AF_ARRAY_MAX]{};/* Bitvector for current affects	*/
     int bodyparts[AF_ARRAY_MAX]{};  /* Bitvector for current bodyparts      */
     int16_t saving_throw[3]{};    /* Saving throw				*/
     int16_t apply_saving_throw[3]{};    /* Saving throw bonuses			*/
@@ -611,17 +540,8 @@ struct char_data : public unit_data {
     int powerattack{};        /* Setting for power attack level	*/
     int combatexpertise{};        /* Setting for Combat expertise level   */
 
-    int64_t mana{};
-    int64_t max_mana{};    /* Max mana for PC/NPC			*/
-    int64_t hit{};
-    int64_t max_hit{};    /* Max hit for PC/NPC			*/
-    int64_t move{};
-    int64_t max_move{};    /* Max move for PC/NPC			*/
-    int64_t ki{};
-    int64_t max_ki{};/* Max ki for PC/NPC			*/
-
     int armor{0};        /* Internally stored *10		*/
-    int16_t shield_bonus{};       /* Shield bonus for AC			*/
+
     int gold{};            /* Money carried			*/
     int bank_gold{};        /* Gold the char has in a bank account	*/
     int64_t exp{};            /* The experience of the player		*/
@@ -635,16 +555,10 @@ struct char_data : public unit_data {
     int16_t armorcheckall{};    /* Total armorcheck penalty regardless of proficiency */
 
     /* All below added by Iovan for sure o.o */
-
-    int64_t basepl{};
-    int64_t baseki{};
-    int64_t basest{};
     int64_t charge{};
     int64_t chargeto{};
     int64_t barrier{};
-
     char *clan{};
-
     room_vnum droom{};
     int choice{};
     int sleeptime{};
@@ -675,10 +589,8 @@ struct char_data : public unit_data {
     time_t deathtime{};
     int rp{};
     int64_t suppression{};
-    int64_t suppressed{};
     struct char_data *drag{};
     struct char_data *dragged{};
-    int trp{};
     struct char_data *mindlink{};
     int lasthit{};
     int dcount{};
@@ -696,7 +608,7 @@ struct char_data : public unit_data {
     int ping{};
     int starphase{};
     race::Race *mimic{};
-    int bonuses[MAX_BONUSES]{};
+    bool bonuses[MAX_BONUSES]{};
     int ccpoints{};
     int negcount{};
     int cooldown{};
@@ -737,6 +649,7 @@ struct char_data : public unit_data {
     int gooptime{};
     int blesslvl{};
     struct char_data *poisonby{};
+    std::set<struct char_data*> poisoned;
 
     int mobcharge{};
     int preference{};
@@ -757,6 +670,29 @@ struct char_data : public unit_data {
     short clones{};
     int relax_count{};
     int ingestLearned{};
+
+    int64_t last_tell{-1};        /* idnum of last tell from              */
+    void *last_olc_targ{};        /* olc control                          */
+    int last_olc_mode{};        /* olc control                          */
+    int olc_zone{};            /* Zone where OLC is permitted		*/
+    int gauntlet{};                 /* Highest Gauntlet Position */
+    char *poofin{};            /* Description on arrival of a god.     */
+    char *poofout{};        /* Description upon a god's exit.       */
+    int speaking{};            /* Language currently speaking		*/
+    int trainstr{};
+    int trainint{};
+    int traincon{};
+    int trainwis{};
+    int trainagl{};
+    int trainspd{};
+    int8_t conditions[NUM_CONDITIONS]{};        /* Drunk, full, thirsty			*/
+    int practice_points{};        /* Skill points earned from race HD	*/
+
+    int wimp_level{0};        /* Below this # of hit points, flee!	*/
+    int8_t freeze_level{};        /* Level of god who froze char, if any	*/
+    int16_t invis_level{};        /* level of invisibility		*/
+    room_vnum load_room{NOWHERE};        /* Which room to place char in		*/
+    bitvector_t pref[PR_ARRAY_MAX]{};    /* preference flags for PC's.		*/
 
     // C++ reworking
     const std::string &juggleRaceName(bool capitalized) const;

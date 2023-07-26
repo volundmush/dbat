@@ -11,7 +11,6 @@
 #include "db.h"
 #include "interpreter.h"
 #include "genolc.h"
-#include "imc.h"
 #include "improved-edit.h"
 #include "constants.h"
 #include "spec_assign.h"
@@ -303,13 +302,6 @@ void cedit_save_internally(struct descriptor_data *d) {
     /** Autowiz                                                                **/
     /****************************************************************************/
     /* IMC - if turning on or off, deal with IMC, and recommend a copyover */
-    if (CONFIG_IMC_ENABLED != OLC_CONFIG(d)->operation.imc_enabled) {
-        copyover_needed = true;
-        if (OLC_CONFIG(d)->operation.imc_enabled)  /* If turning on  */
-            imc_startup(false, -1, false);           /* FALSE arg, so the autoconnect setting can govern it. */
-        else                                       /* If turning off */
-            imc_shutdown(false);
-    }
     CONFIG_IMC_ENABLED = OLC_CONFIG(d)->operation.imc_enabled;
     CONFIG_USE_AUTOWIZ = OLC_CONFIG(d)->autowiz.use_autowiz;
     CONFIG_MIN_WIZLIST_LEV = OLC_CONFIG(d)->autowiz.min_wizlist_lev;

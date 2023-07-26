@@ -551,8 +551,8 @@ extern void skill_class(int skill, int chclass, int learntype);
 
 const char *skill_name(int num);
 
-extern int roll_skill(const struct char_data *ch, int snum);
+extern int roll_skill(struct char_data *ch, int snum);
 
-extern int roll_resisted(const struct char_data *actor, int sact, const struct char_data *resistor, int sres);
+extern int roll_resisted(struct char_data *actor, int sact, struct char_data *resistor, int sres);
 
 extern int skill_type(int skill);

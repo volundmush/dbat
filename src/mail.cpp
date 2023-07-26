@@ -70,13 +70,8 @@ void free_mail_index() {
 }
 
 int mail_recip_ok(const char *name) {
-    int player_i, ret = false;
-
-    if ((player_i = get_ptable_by_name(name)) >= 0) {
-        if (!IS_SET(player_table[player_i].flags, PINDEX_DELETED))
-            ret = true;
-    }
-    return ret;
+    auto find = findPlayer(name);
+    return find ? true : false;
 }
 
 /*

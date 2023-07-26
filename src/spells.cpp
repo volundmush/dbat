@@ -481,7 +481,6 @@ ASPELL(art_abundant_step) {
     steps = 0;
     r = IN_ROOM(ch);
     p = arg;
-    max = 10 + GET_CLASS_RANKS(ch, CLASS_KABITO) / 2;
 
     while (p && *p && !isdigit(*p) && !isalpha(*p)) p++;
 
@@ -542,7 +541,7 @@ ASPELL(art_abundant_step) {
 }
 
 
-int roll_skill(const struct char_data *ch, int snum) {
+int roll_skill(struct char_data *ch, int snum) {
     int roll, skval, i;
     if (!IS_NPC(ch)) {
         skval = GET_SKILL(ch, snum);
@@ -594,10 +593,7 @@ int roll_skill(const struct char_data *ch, int snum) {
          * higher than this roll to avoid it. Most spells should also have some
          * kind of save called after roll_skill.
          */
-        for (i = 0, roll = 0; i < NUM_CLASSES; i++)
-            if (GET_CLASS_RANKS(ch, i) &&
-                (spell_info[snum].min_level[i] < GET_CLASS_RANKS(ch, i)))
-                roll += GET_CLASS_RANKS(ch, i); /* Caster level for eligable classes */
+
         return roll + rand_number(1, 20);
     } else if (IS_SET(spell_info[snum].skilltype, SKTYPE_SKILL)) {
         if (!skval && IS_SET(spell_info[snum].flags, SKFLAG_NEEDTRAIN)) {
@@ -628,6 +624,6 @@ int roll_skill(const struct char_data *ch, int snum) {
     }
 }
 
-int roll_resisted(const struct char_data *actor, int sact, const struct char_data *resistor, int sres) {
+int roll_resisted(struct char_data *actor, int sact, struct char_data *resistor, int sres) {
     return roll_skill(actor, sact) >= roll_skill(resistor, sres);
 }

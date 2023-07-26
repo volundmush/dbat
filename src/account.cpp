@@ -15,7 +15,8 @@ struct account_data *findAccount(const std::string &name) {
 }
 
 bool account_data::checkPassword(const std::string &password) {
-	return crypto_pwhash_str_verify(passHash.data(), password.data(), password.size()) == 0;
+    auto result = crypto_pwhash_str_verify(passHash.data(), password.data(), password.size());
+    return result == 0;
 }
 
 bool account_data::setPassword(const std::string &password) {

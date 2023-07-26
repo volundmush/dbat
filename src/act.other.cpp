@@ -35,6 +35,7 @@
 #include "objsave.h"
 #include "mail.h"
 #include "clan.h"
+#include "players.h"
 
 /* local functions */
 static int has_scanner(struct char_data *ch);
@@ -371,7 +372,7 @@ ACMD(do_rpp) {
                 send_to_char(ch, "You do not have enough RPP for that selection.\r\n");
                 return;
             } else {
-                GET_PRACTICES(ch, GET_CLASS(ch)) += 750;
+                GET_PRACTICES(ch) += 750;
                 send_to_char(ch, "Your practices have been increased by 750\r\n");
             } /* Can pay for it */
         } /* End Simple Zenni Reward */
@@ -742,11 +743,11 @@ ACMD(do_willpower) {
         send_to_char(ch, "You are not majinized and have no need to reclaim full control of your own will.\r\n");
         return;
     } else {
-        if (GET_PRACTICES(ch, GET_CLASS(ch)) < 100 && GET_LEVEL(ch) < 100) {
+        if (GET_PRACTICES(ch) < 100 && GET_LEVEL(ch) < 100) {
             send_to_char(ch, "You do not have enough PS to focus your attempt to break free.\r\n");
             fail = true;
         }
-        if (GET_PRACTICES(ch, GET_CLASS(ch)) < 200 && GET_LEVEL(ch) >= 100) {
+        if (GET_PRACTICES(ch) < 200 && GET_LEVEL(ch) >= 100) {
             send_to_char(ch, "You do not have enough PS to focus your attempt to break free.\r\n");
             fail = true;
         }
@@ -758,9 +759,9 @@ ACMD(do_willpower) {
             return;
         } else {
             GET_EXP(ch) = 0;
-            GET_PRACTICES(ch, GET_CLASS(ch)) -= 100;
+            GET_PRACTICES(ch) -= 100;
             if (GET_LEVEL(ch) >= 100) {
-                GET_PRACTICES(ch, GET_CLASS(ch)) -= 100;
+                GET_PRACTICES(ch) -= 100;
             }
             if (rand_number(10, 100) - GET_INT(ch) > 60) {
                 reveal_hiding(ch, 0);
@@ -771,9 +772,9 @@ ACMD(do_willpower) {
                 return;
             } else {
                 GET_EXP(ch) = 0;
-                GET_PRACTICES(ch, GET_CLASS(ch)) -= 100;
+                GET_PRACTICES(ch) -= 100;
                 if (GET_LEVEL(ch) >= 100) {
-                    GET_PRACTICES(ch, GET_CLASS(ch)) -= 100;
+                    GET_PRACTICES(ch) -= 100;
                 }
                 reveal_hiding(ch, 0);
                 act("@WYou focus all your knowledge and will on breaking free. Dark purple energy swirls around your body and the M on your forehead burns brightly. After a few moments the ground splits beneath you and while letting out a piercing scream the M disappears from your forehead! You are free while still keeping the boost you had recieved from the majinization!@n",
@@ -1287,7 +1288,7 @@ ACMD(do_train) {
     int sensei = -1;
 
     if (GET_ROOM_VNUM(IN_ROOM(ch)) == ch->chclass->senseiLocationID()) {
-        if (!(GET_GOLD(ch) >= 8 && GET_PRACTICES(ch, GET_CLASS(ch)) >= 1)) {
+        if (!(GET_GOLD(ch) >= 8 && GET_PRACTICES(ch) >= 1)) {
             send_to_char(ch, "It costs 8 Zenni and 1 PS to train with your sensei.\r\n");
             return;
         }
@@ -1350,7 +1351,7 @@ ACMD(do_train) {
         stat_name = "strength";
         bonus_trait = BONUS_BRAWNY;
         nega_trait = BONUS_WIMP;
-        stat_train = &(ch->player_specials->trainstr);
+        stat_train = &(ch->trainstr);
         needed = strcap;
     } else if (!strcasecmp("spd", arg)) {
         stat_id = 2;
@@ -1358,7 +1359,7 @@ ACMD(do_train) {
         stat_name = "speed";
         bonus_trait = BONUS_QUICK;
         nega_trait = BONUS_SLOW;
-        stat_train = &(ch->player_specials->trainspd);
+        stat_train = &(ch->trainspd);
         needed = spdcap;
     } else if (!strcasecmp("con", arg)) {
         stat_id = 3;
@@ -1366,7 +1367,7 @@ ACMD(do_train) {
         stat_name = "constitution";
         bonus_trait = BONUS_STURDY;
         nega_trait = BONUS_FRAIL;
-        stat_train = &(ch->player_specials->traincon);
+        stat_train = &(ch->traincon);
         needed = concap;
     } else if (!strcasecmp("agl", arg)) {
         stat_id = 4;
@@ -1374,7 +1375,7 @@ ACMD(do_train) {
         stat_name = "agility";
         bonus_trait = BONUS_AGILE;
         nega_trait = BONUS_CLUMSY;
-        stat_train = &(ch->player_specials->trainagl);
+        stat_train = &(ch->trainagl);
         needed = aglcap;
     } else if (!strcasecmp("int", arg)) {
         stat_id = 5;
@@ -1382,7 +1383,7 @@ ACMD(do_train) {
         stat_name = "intelligence";
         bonus_trait = BONUS_SCHOLARLY;
         nega_trait = BONUS_DULL;
-        stat_train = &(ch->player_specials->trainint);
+        stat_train = &(ch->trainint);
         needed = intcap;
     } else if (!strcasecmp("wis", arg)) {
         stat_id = 6;
@@ -1390,7 +1391,7 @@ ACMD(do_train) {
         stat_name = "wisdom";
         bonus_trait = BONUS_SAGE;
         nega_trait = BONUS_FOOLISH;
-        stat_train = &(ch->player_specials->trainwis);
+        stat_train = &(ch->trainwis);
         needed = wiscap;
     } else {
         send_to_char(ch, "Syntax: train (str | spd | agl | wis | int | con)\r\n");
@@ -1641,7 +1642,7 @@ ACMD(do_train) {
 
     if (sensei > -1) {
         GET_GOLD(ch) -= 8;
-        GET_PRACTICES(ch, GET_CLASS(ch)) -= 1;
+        GET_PRACTICES(ch) -= 1;
     }
 
     if (*stat_train >= needed) {
@@ -2080,7 +2081,7 @@ ACMD(do_future) {
         return;
     }
 
-    if (GET_PRACTICES(ch, GET_CLASS(ch)) < 100) {
+    if (GET_PRACTICES(ch) < 100) {
         send_to_char(ch, "You do not have enough PS to activate or pass on this ability.\r\n");
         return;
     }
@@ -2095,7 +2096,7 @@ ACMD(do_future) {
             return;
         }
         ch->decCurKI(ch->getMaxKI() / 40);
-        GET_PRACTICES(ch, GET_CLASS(ch)) -= 100;
+        GET_PRACTICES(ch) -= 100;
         reveal_hiding(ch, 0);
         act("@CYou focus your energy into your fingers before stabbing your claws into $N and bestowing the power of Future Sight upon $M. Shortly after $E passes out.@n",
             true, ch, nullptr, vict, TO_CHAR);
@@ -2118,7 +2119,7 @@ ACMD(do_future) {
             return;
         }
         ch->decCurKI(ch->getMaxKI() / 40);
-        GET_PRACTICES(ch, GET_CLASS(ch)) -= 100;
+        GET_PRACTICES(ch) -= 100;
         reveal_hiding(ch, 0);
         act("@CYou focus your energy into your mind and awaken your latent Future Sight powers!@n", true, ch, nullptr,
             vict, TO_CHAR);
@@ -3894,7 +3895,7 @@ ACMD(do_form) {
         if (GET_HIT(ch) < GET_MAX_HIT(ch)) {
             send_to_char(ch, "You need to be at full powerlevel to create %s\r\n", arg);
             return;
-        } else if (GET_PRACTICES(ch, GET_CLASS(ch)) < 10) {
+        } else if (GET_PRACTICES(ch) < 10) {
             send_to_char(ch, "You do not have enough PS to create %s, you need at least 10.\r\n", arg);
             return;
         } else {
@@ -3908,7 +3909,7 @@ ACMD(do_form) {
             act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
             ch->decCurKI(cost);
             ch->decCurHealthPercent(1, 1);
-            GET_PRACTICES(ch, GET_CLASS(ch)) -= 10;
+            GET_PRACTICES(ch) -= 10;
             return;
         }
     } else if (!(strcmp(arg, "senzu"))) {
@@ -3928,7 +3929,7 @@ ACMD(do_form) {
         } else if ((ch->getCurST()) < GET_MAX_MOVE(ch)) {
             send_to_char(ch, "You do not have enough stamina to create %s, you need to be at full.\r\n", arg);
             return;
-        } else if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
+        } else if (GET_PRACTICES(ch) < 50) {
             send_to_char(ch, "You do not have enough PS to create %s, you need at least 50.\r\n", arg);
             return;
         } else {
@@ -3942,7 +3943,7 @@ ACMD(do_form) {
             ch->decCurKI(cost);
             ch->decCurHealth(cost2);
             ch->decCurSTPercent(1, 1);
-            GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
+            GET_PRACTICES(ch) -= 50;
             return;
         }
     } else {
@@ -5267,9 +5268,9 @@ ACMD(do_focus) {
                 act("You focus ki into your mind, awakening it to cosmic wisdom!", true, ch, nullptr, nullptr, TO_CHAR);
                 act("$n focuses ki into $s mind, awakening it to cosmic wisdom!", true, ch, nullptr, nullptr, TO_ROOM);
                 if (IS_JINTO(ch) && level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0 &&
-                    GET_PRACTICES(ch, GET_CLASS(ch)) >= 15 && rand_number(1, 4) >= 3) {
+                    GET_PRACTICES(ch) >= 15 && rand_number(1, 4) >= 3) {
                     int64_t gain = 0;
-                    GET_PRACTICES(ch, GET_CLASS(ch)) -= 15;
+                    GET_PRACTICES(ch) -= 15;
                     if (GET_SKILL(ch, SKILL_ENLIGHTEN) >= 100) {
                         gain = level_exp(ch, GET_LEVEL(ch) + 1) * 0.15;
                         GET_EXP(ch) += gain;
@@ -5338,9 +5339,9 @@ ACMD(do_focus) {
                     act("$n focuses ki into $N's mind, awakening it to cosmic wisdom!", true, ch, nullptr, vict,
                         TO_NOTVICT);
                     if (IS_JINTO(ch) && level_exp(vict, GET_LEVEL(vict) + 1) - GET_EXP(vict) > 0 &&
-                        GET_PRACTICES(ch, GET_CLASS(ch)) >= 15 && rand_number(1, 4) >= 3) {
+                        GET_PRACTICES(ch) >= 15 && rand_number(1, 4) >= 3) {
                         int64_t gain = 0;
-                        GET_PRACTICES(ch, GET_CLASS(ch)) -= 15;
+                        GET_PRACTICES(ch) -= 15;
                         if (GET_SKILL(ch, SKILL_ENLIGHTEN) >= 100) {
                             gain = level_exp(vict, GET_LEVEL(vict) + 1) * 0.15;
                             GET_EXP(vict) += gain;
@@ -6041,6 +6042,7 @@ ACMD(do_focus) {
                     act("However $N seems unaffected by the poison.", true, ch, nullptr, vict, TO_NOTVICT);
                 } else {
                     vict->poisonby = ch;
+                    ch->poisoned.insert(vict);
                     if (GET_CHARGE(ch) > 0) {
                         send_to_char(ch, "You lose your concentration and release your charged ki!\r\n");
                         do_charge(ch, "release", 0, 0);
@@ -8114,7 +8116,7 @@ ACMD(do_meditate) {
         if (IS_SAIYAN(ch)) {
             cost = 7000;
         }
-        if (GET_PRACTICES(ch, GET_CLASS(ch)) < cost) {
+        if (GET_PRACTICES(ch) < cost) {
             send_to_char(ch,
                          "You do not have enough practice sessions to expand your mind and ability to remember skills.\r\n");
             send_to_char(ch, "%s needed.\r\n", add_commas(cost));
@@ -8126,7 +8128,7 @@ ACMD(do_meditate) {
             send_to_char(ch,
                          "During your meditation you manage to expand your mind and get the feeling you could learn some new skills.\r\n");
             GET_SLOTS(ch) += 1;
-            GET_PRACTICES(ch, GET_CLASS(ch)) -= cost;
+            GET_PRACTICES(ch) -= cost;
             return;
         }
         return;
@@ -9685,7 +9687,6 @@ ACMD(do_quit) {
         }
 
         Crash_rentsave(ch, 0);
-        cp(ch);
 
         extract_char(ch);        /* Char is saved before extracting. */
     }
@@ -9734,9 +9735,6 @@ ACMD(do_save) {
         }
     }
     save_char(ch);
-    Crash_crashsave(ch);
-    cp(ch);
-
 }
 
 /* generic function for commands which are normally overridden by
@@ -11890,7 +11888,6 @@ ACMD(do_clan) {
             handle_clan_member_list(ch);
         }
     } else if (!(strcmp(arg1, "expel"))) {
-        int is_file = false, player_i = 0;
         struct char_data *vict;
         char arg3[100];
         char name[MAX_INPUT_LENGTH];
@@ -11906,13 +11903,11 @@ ACMD(do_clan) {
         } else if (clanOpenJoin(arg3)) {
             send_to_char(ch, "You can't kick someone out of an open-join clan.\r\n");
         } else if (!(vict = get_char_vis(ch, name1, nullptr, FIND_CHAR_WORLD))) {
-            vict = new char_data();
-            vict->player_specials = new player_special_data();
-
+            vict = findPlayer(name);
             sprintf(name, "%s", rIntro(ch, name1));
+            if(!vict) vict = findPlayer(name1);
 
-            if ((player_i = load_char(name, vict)) > -1) {
-                is_file = true;
+            if (vict) {
                 if (!clanIsMember(arg3, vict)) {
                     send_to_char(ch, "%s isn't even a member of %s.\r\n", GET_NAME(vict), arg3);
                 } else if (clanIsModerator(arg3, vict) && GET_ADMLEVEL(ch) < ADMLVL_IMPL) {
@@ -11921,23 +11916,10 @@ ACMD(do_clan) {
                     send_to_char(ch, "You expel %s from %s.\r\n", GET_NAME(vict), arg3);
                     clanExpel(arg3, vict);
                 }
-            } else if ((player_i = load_char(name1, vict)) > -1) {
-                is_file = true;
-                if (!clanIsMember(arg3, vict)) {
-                    send_to_char(ch, "%s isn't even a member of %s.\r\n", GET_NAME(vict), arg3);
-                } else if (clanIsModerator(arg3, vict) && GET_ADMLEVEL(ch) < ADMLVL_IMPL) {
-                    send_to_char(ch, "You do not have the power to kick a leader out of %s.\r\n", arg3);
-                } else {
-                    send_to_char(ch, "You expel %s from %s.\r\n", GET_NAME(vict), arg3);
-                    clanExpel(arg3, vict);
-                }
-            } else {
-                free_char(vict);
+            }
+            else {
                 send_to_char(ch, "%s does not seem to exist.\r\n", name1);
                 return;
-            }
-            if (is_file == true) {
-                free_char(vict);
             }
             return;
         } else if (!clanIsMember(arg3, vict)) {
@@ -11992,9 +11974,6 @@ ACMD(do_clan) {
             send_to_char(ch, "%s is not around at the moment.\r\n", name);
         else if (!clanIsApplicant(arg3, vict))
             send_to_char(ch, "%s isn't applying to join %s.\r\n", GET_NAME(vict), arg3);
-        else if (GET_TRP(vict) < 5)
-            send_to_char(ch, "%s needs to have at least earned 5 RPP at some point to join a clan.\r\n",
-                         GET_NAME(vict));
         else {
             send_to_char(ch, "You enroll %s into %s.\r\n", GET_NAME(vict), arg3);
             send_to_char(vict, "You have been enrolled into %s.\r\n", arg3);
@@ -12071,26 +12050,6 @@ ACMD(do_clan) {
     } else {
         show_clan_info(ch);
         send_to_char(ch, "These are viable options.\r\n");
-    }
-}
-
-ACMD(do_pagelength) {
-    char arg[MAX_INPUT_LENGTH];
-
-    if (IS_NPC(ch))
-        return;
-
-    one_argument(argument, arg);
-
-    if (!*arg) {
-        send_to_char(ch, "You current page length is set to %d lines.\r\n",
-                     GET_PAGE_LENGTH(ch));
-    } else if (is_number(arg)) {
-        GET_PAGE_LENGTH(ch) = MIN(MAX(atoi(arg), 5), 50);
-        send_to_char(ch, "Okay, your page length is now set to %d lines.\r\n",
-                     GET_PAGE_LENGTH(ch));
-    } else {
-        send_to_char(ch, "Please specify a number of lines (5 - 50).\r\n");
     }
 }
 

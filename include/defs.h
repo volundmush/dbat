@@ -251,8 +251,9 @@
 #define ROOM_FISHFRESH          64
 #define ROOM_CANREMODEL         65
 #define ROOM_LANDING            66
+#define ROOM_SAVE               67 /* room saves contents */
 
-#define NUM_ROOM_FLAGS          67
+#define NUM_ROOM_FLAGS          68
 
 /* Zone info: Used in zone_data.zone_flags */
 #define ZONE_CLOSED        0

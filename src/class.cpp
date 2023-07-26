@@ -199,9 +199,7 @@ const char *config_sect[NUM_CONFIG_SECTIONS + 1] = {
 #define CONFIG_LEVEL_BASEHIT    6
 
 static char level_version[READ_SIZE];
-static int level_vernum = 0;
-static int save_classes[SAVING_WILL + 1][NUM_CLASSES];
-static int basehit_classes[NUM_CLASSES];
+
 
 #define SAVE_MANUAL 0
 #define SAVE_LOW 1
@@ -372,7 +370,6 @@ void do_start(struct char_data *ch) {
     GET_CLASS_LEVEL(ch) = 1;
     GET_HITDICE(ch) = 0;
     GET_LEVEL_ADJ(ch) = 0;
-    GET_CLASS_NONEPIC(ch, GET_CLASS(ch)) = 1;
     GET_EXP(ch) = 1;
 
     if (IS_ANDROID(ch)) {
@@ -698,7 +695,7 @@ void do_start(struct char_data *ch) {
     }
     ch->restoreVitals();
 
-    ch->player_specials->olc_zone = NOWHERE;
+    GET_OLC_ZONE(ch) = NOWHERE;
     save_char(ch);
 }
 
@@ -836,7 +833,6 @@ static const int *free_start_feats[] = {
  */
 /* Rillao: transloc, add new transes here */
 void advance_level(struct char_data *ch, int whichclass) {
-    struct levelup_data *llog;
     int64_t add_hp = 0, add_move = 0, add_mana = 0, add_ki = 0;
     int add_prac = 1, add_train, i, j = 0, ranks;
     int add_gen_feats = 0, add_class_feats = 0;
@@ -850,48 +846,6 @@ void advance_level(struct char_data *ch, int whichclass) {
     if (!CONFIG_ALLOW_MULTICLASS && whichclass != GET_CLASS(ch)) {
         log("Attempt to gain a second class without multiclass enabled for %s", GET_NAME(ch));
         whichclass = GET_CLASS(ch);
-    }
-    ranks = GET_CLASS_RANKS(ch, whichclass);
-
-    CREATE(llog, struct levelup_data, 1);
-    llog->next = ch->level_info;
-    llog->prev = nullptr;
-    if (llog->next)
-        llog->next->prev = llog;
-    ch->level_info = llog;
-
-    llog->skills = llog->feats = nullptr;
-    llog->type = LEVELTYPE_CLASS;
-    llog->spec = whichclass;
-    llog->level = GET_LEVEL(ch);
-
-    /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-    switch (ranks) {
-        case 1:
-            for (i = 0; (j = free_start_feats[whichclass][i]); i++) {
-                HAS_FEAT(ch, j) = 1;
-            }
-            break;
-        case 2:
-            switch (whichclass) {
-                case CLASS_ROSHI:
-                    break;
-                case CLASS_PICCOLO:
-                    break;
-            }
-            break;
-        case 6:
-            switch (whichclass) {
-                case CLASS_ROSHI:
-                    break;
-            }
-            break;
-        case 9:
-            switch (whichclass) {
-                case CLASS_ROSHI:
-                    break;
-            }
-            break;
     }
 
     if (GET_CLASS_LEVEL(ch) == 1 && GET_HITDICE(ch) < 2) { /* Filled in below */
@@ -1193,15 +1147,8 @@ void advance_level(struct char_data *ch, int whichclass) {
             add_prac *= 2;
         }
     }
-    llog->hp_roll = j;
 
     /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-    if (rand_number(1, 8) == 2) {
-        add_train = 1;
-        if (add_train) {
-            GET_TRAINS(ch) += add_train;
-        }
-    }
     if (rand_number(1, 4) == 4) {
         send_to_char(ch, "@D[@mPractice Session Bonus!@D]@n\r\n");
         add_prac += rand_number(4, 12);
@@ -1226,11 +1173,7 @@ void advance_level(struct char_data *ch, int whichclass) {
         add_mana *= 1.25;
         add_move *= 1.25;
     }
-    llog->mana_roll = add_mana;
-    llog->move_roll = add_move;
-    llog->ki_roll = add_ki;
-    llog->add_skill = add_prac;
-    GET_PRACTICES(ch, whichclass) += add_prac;
+    GET_PRACTICES(ch) += add_prac;
     ch->gainBasePL(add_hp, true);
     ch->gainBaseKI(add_mana, true);
     ch->gainBaseST(add_move, true);
@@ -1240,17 +1183,6 @@ void advance_level(struct char_data *ch, int whichclass) {
     add_hp = nhp;
     add_mana = nma;
     add_move = nmo;
-    if (GET_CLASS_LEVEL(ch) >= LVL_EPICSTART) { /* Epic character */
-        GET_EPIC_FEAT_POINTS(ch) += add_gen_feats;
-        llog->add_epic_feats = add_gen_feats;
-        GET_EPIC_CLASS_FEATS(ch, whichclass) += add_class_feats;
-        llog->add_class_epic_feats = add_class_feats;
-    } else {
-        GET_FEAT_POINTS(ch) += add_gen_feats;
-        llog->add_gen_feats = add_gen_feats;
-        GET_CLASS_FEATS(ch, whichclass) += add_class_feats;
-        llog->add_class_feats = add_class_feats;
-    }
 
     if (GET_ADMLEVEL(ch) >= ADMLVL_IMMORT) {
         for (i = 0; i < 3; i++)
@@ -1515,39 +1447,6 @@ int invalid_class(struct char_data *ch, struct obj_data *obj) {
         return true;
 
     if (OBJ_FLAGGED(obj, ITEM_ANTI_ARCHMAGE) && IS_KURZAK(ch))
-        return true;
-
-    if (OBJ_FLAGGED(obj, ITEM_ANTI_BLACKGUARD) && IS_BLACKGUARD(ch))
-        return true;
-
-    if (OBJ_FLAGGED(obj, ITEM_ANTI_DRAGON_DISCIPLE) && IS_DRAGON_DISCIPLE(ch))
-        return true;
-
-    if (OBJ_FLAGGED(obj, ITEM_ANTI_DUELIST) && IS_DUELIST(ch))
-        return true;
-
-    if (OBJ_FLAGGED(obj, ITEM_ANTI_DWARVEN_DEFENDER) && IS_DWARVEN_DEFENDER(ch))
-        return true;
-
-    if (OBJ_FLAGGED(obj, ITEM_ANTI_ELDRITCH_KNIGHT) && IS_ELDRITCH_KNIGHT(ch))
-        return true;
-
-    if (OBJ_FLAGGED(obj, ITEM_ANTI_HIEROPHANT) && IS_HIEROPHANT(ch))
-        return true;
-
-    if (OBJ_FLAGGED(obj, ITEM_ANTI_HORIZON_WALKER) && IS_HORIZON_WALKER(ch))
-        return true;
-
-    if (OBJ_FLAGGED(obj, ITEM_ANTI_LOREMASTER) && IS_LOREMASTER(ch))
-        return true;
-
-    if (OBJ_FLAGGED(obj, ITEM_ANTI_MYSTIC_THEURGE) && IS_MYSTIC_THEURGE(ch))
-        return true;
-
-    if (OBJ_FLAGGED(obj, ITEM_ANTI_SHADOWDANCER) && IS_SHADOWDANCER(ch))
-        return true;
-
-    if (OBJ_FLAGGED(obj, ITEM_ANTI_THAUMATURGIST) && IS_THAUMATURGIST(ch))
         return true;
 
 
@@ -1928,10 +1827,6 @@ char *class_desc_str(struct char_data *ch, int howlong, int wantthe) {
             if (GET_CLASS_LEVEL(ch) >= LVL_EPICSTART)
                 ptr += sprintf(ptr, "Epic ");
         }
-        for (i = 0; i < NUM_CLASSES; i++) {
-            cabbr_ranktable[i] = GET_CLASS_RANKS(ch, i);
-            rankorder[i] = i;
-        }
         rankorder[0] = GET_CLASS(ch); /* we always want primary class first */
         rankorder[GET_CLASS(ch)] = 0;
         qsort((void *) rankorder, NUM_CLASSES, sizeof(int), comp_rank);
@@ -1945,122 +1840,11 @@ char *class_desc_str(struct char_data *ch, int howlong, int wantthe) {
         }
         return str;
     } else {
-        rank = GET_CLASS_RANKS(ch, GET_CLASS(ch));
-        j = GET_CLASS(ch);
-        for (i = 0; i < NUM_CLASSES; i++)
-            if (GET_CLASS_RANKS(ch, i) > rank) {
-                j = i;
-                rank = GET_CLASS_RANKS(ch, j);
-            }
-        rank = GET_CLASS_RANKS(ch, GET_CLASS(ch));
+        rank = 0;
         snprintf(ptr, sizeof(str) - (ptr - str), "%s%d%s", ch->chclass->getNameLower().c_str(),
                  rank, GET_LEVEL(ch) == rank ? "" : "+");
         return str;
     }
-}
-
-int total_skill_levels(struct char_data *ch, int skill) {
-    int i = 0, j, total = 0;
-    for (i = 0; i < NUM_CLASSES; i++) {
-        j = 1 + GET_CLASS_RANKS(ch, i) - spell_info[skill].min_level[i];
-        if (j > 0)
-            total += j;
-    }
-    return total;
-}
-
-int load_levels() {
-    FILE *fp;
-    char line[READ_SIZE], sect_name[READ_SIZE] = {'\0'}, *ptr;
-    int linenum = 0, tp, cls, sect_type = -1;
-
-    if (!(fp = fopen(LEVEL_CONFIG, "r"))) {
-        log("SYSERR: Could not open level configuration file, error: %s!",
-            strerror(errno));
-        return -1;
-    }
-
-    for (cls = 0; cls < NUM_CLASSES; cls++) {
-        for (tp = 0; tp <= SAVING_WILL; tp++) {
-            save_classes[tp][cls] = 0;
-        }
-        basehit_classes[cls] = 0;
-    }
-
-    for (;;) {
-        linenum++;
-        if (!fgets(line, READ_SIZE, fp)) {  /* eof check */
-            log("SYSERR: Unexpected EOF in file %s.", LEVEL_CONFIG);
-            return -1;
-        } else if (*line == '$') { /* end of file */
-            break;
-        } else if (*line == '*') { /* comment line */
-            continue;
-        } else if (*line == '#') { /* start of a section */
-            if ((tp = sscanf(line, "#%s", sect_name)) != 1) {
-                log("SYSERR: Format error in file %s, line number %d - text: %s.",
-                    LEVEL_CONFIG, linenum, line);
-                return -1;
-            } else if ((sect_type = search_block(sect_name, config_sect, false)) == -1) {
-                log("SYSERR: Invalid section in file %s, line number %d: %s.",
-                    LEVEL_CONFIG, linenum, sect_name);
-                return -1;
-            }
-        } else {
-            if (sect_type == CONFIG_LEVEL_VERSION) {
-                if (!strncmp(line, "Suntzu", 6)) {
-                    log("SYSERR: Suntzu %s config files are not compatible with rasputin", LEVEL_CONFIG);
-                    return -1;
-                } else {
-                    strcpy(level_version, line); /* OK - both are READ_SIZE */
-                }
-            } else if (sect_type == CONFIG_LEVEL_VERNUM) {
-                level_vernum = atoi(line);
-            } else if (sect_type == CONFIG_LEVEL_EXPERIENCE) {
-                tp = atoi(line);
-                exp_multiplier = tp;
-            } else if ((sect_type >= CONFIG_LEVEL_FORTITUDE && sect_type <= CONFIG_LEVEL_WILL) ||
-                       sect_type == CONFIG_LEVEL_BASEHIT) {
-                for (ptr = line; ptr && *ptr && !isdigit(*ptr); ptr++);
-                if (!ptr || !*ptr || !isdigit(*ptr)) {
-                    log("SYSERR: Cannot find class number in file %s, line number %d, section %s.",
-                        LEVEL_CONFIG, linenum, sect_name);
-                    return -1;
-                }
-                cls = atoi(ptr);
-                for (; ptr && *ptr && isdigit(*ptr); ptr++);
-                for (; ptr && *ptr && !isdigit(*ptr); ptr++);
-                if (ptr && *ptr && !isdigit(*ptr)) {
-                    log("SYSERR: Non-numeric entry in file %s, line number %d, section %s.",
-                        LEVEL_CONFIG, linenum, sect_name);
-                    return -1;
-                }
-                if (ptr && *ptr) /* There's a value */
-                    tp = atoi(ptr);
-                else {
-                    log("SYSERR: Need 1 value in %s, line number %d, section %s.",
-                        LEVEL_CONFIG, linenum, sect_name);
-                    return -1;
-                }
-                if (cls < 0 || cls >= NUM_CLASSES) {
-                    log("SYSERR: Invalid class number %d in file %s, line number %d.",
-                        cls, LEVEL_CONFIG, linenum);
-                    return -1;
-                } else {
-                    if (sect_type == CONFIG_LEVEL_BASEHIT) {
-                        basehit_classes[cls] = tp;
-                    } else {
-                        save_classes[SAVING_FORTITUDE + sect_type - CONFIG_LEVEL_FORTITUDE][cls] = tp;
-                    }
-                }
-            } else {
-                log("Unsupported level config option");
-            }
-        }
-    }
-    fclose(fp);
-
-    return 0;
 }
 
 

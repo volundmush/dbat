@@ -15,14 +15,10 @@
 #include <boost/algorithm/string.hpp>
 #include <fstream>
 #include "class.h"
-#include "races.h"
 #include "players.h"
-#include "spells.h"
 #include "nlohmann/json.hpp"
 #include "area.h"
-#include "genwld.h"
 #include "account.h"
-#include "players.h"
 #include "objsave.h"
 
 static std::string stripAnsi(const std::string& str) {
@@ -99,10 +95,8 @@ struct AreaDef {
     std::set<vnum> roomIDs{}, roomSkips{};
 };
 
-static std::set<vnum> unknowns, assigned;
-
 vnum assembleArea(const AreaDef &def) {
-    auto vn = getNextAreaVnum();
+    auto vn = area_data::getNextID();
     auto &a = areas[vn];
     a.vn = vn;
     a.name = def.name;
@@ -152,8 +146,6 @@ vnum assembleArea(const AreaDef &def) {
         if(room.area) continue;
         room.area = vn;
         a.rooms.insert(r);
-        assigned.insert(r);
-        unknowns.erase(r);
     }
 
     return vn;
@@ -298,11 +290,9 @@ void migrate_grid() {
     }
 
     for(auto &[rv, room] : world) {
-        if(assigned.count(rv)) continue;
+        if(room.area) continue;
         auto sense = sense_location_name(rv);
-        if(boost::equals(sense, "Unknown.")) {
-            unknowns.insert(rv);
-        } else {
+        if(!boost::equals(sense, "Unknown.")) {
             auto &area = areaDefs[sense];
             area.roomIDs.insert(rv);
         }
@@ -437,8 +427,8 @@ void migrate_grid() {
     bodef.parent = space;
     bodef.roomIDs.insert(19053);
     bodef.roomIDs.insert(19039);
-    for(auto &rv : unknowns) {
-        if(boost::icontains(stripAnsi(world[rv].name), "Black Omen")) bodef.roomIDs.insert(rv);
+    for(auto &[r, room] : world) {
+        if(boost::icontains(stripAnsi(room.name), "Black Omen")) bodef.roomIDs.insert(r);
     }
     bodef.type = AreaType::Vehicle;
     auto black_omen = assembleArea(bodef);
@@ -718,8 +708,8 @@ void migrate_grid() {
     celdef.parent = space;
     celdef.type = AreaType::Structure;
     celdef.roomRanges.emplace_back(16305, 16399);
-    for(auto &rv : unknowns) {
-        if(boost::icontains(stripAnsi(world[rv].name), "Celestial Corp")) celdef.roomIDs.insert(rv);
+    for(auto &[rv, room] : world) {
+        if(boost::icontains(stripAnsi(room.name), "Celestial Corp")) celdef.roomIDs.insert(rv);
     }
     auto celestial_corp = assembleArea(celdef);
 
@@ -735,8 +725,10 @@ void migrate_grid() {
     cooler.name = "Cooler's Ship";
     cooler.parent = space;
     cooler.type = AreaType::Structure;
-    for(auto &rv : unknowns) {
-        if(boost::icontains(stripAnsi(world[rv].name), "Cooler's Ship")) cooler.roomIDs.insert(rv);
+    for(auto &[rv, room] : world) {
+        if(boost::icontains(stripAnsi(room.name), "Cooler's Ship")) {
+            cooler.roomIDs.insert(rv);
+        }
     }
     auto cooler_ship = assembleArea(cooler);
 
@@ -744,8 +736,8 @@ void migrate_grid() {
     alph.name = "Alpharis";
     alph.type = AreaType::Structure;
     alph.parent = space;
-    for(auto &rv : unknowns) {
-        if(boost::icontains(stripAnsi(world[rv].name), "Alpharis")) alph.roomIDs.insert(rv);
+    for(auto &[rv, room] : world) {
+        if(boost::icontains(stripAnsi(room.name), "Alpharis")) alph.roomIDs.insert(rv);
     }
     auto alpharis = assembleArea(alph);
 
@@ -753,8 +745,8 @@ void migrate_grid() {
     dzone.name = "Dead Zone";
     dzone.parent = universe7;
     dzone.type = AreaType::Dimension;
-    for(auto &rv : unknowns) {
-        if(boost::icontains(stripAnsi(world[rv].name), "Dead Zone")) dzone.roomIDs.insert(rv);
+    for(auto &[rv, room] : world) {
+        if(boost::icontains(stripAnsi(room.name), "Dead Zone")) dzone.roomIDs.insert(rv);
     }
     auto dead_zone = assembleArea(dzone);
 
@@ -762,8 +754,8 @@ void migrate_grid() {
     bast.name = "Blasted Asteroid";
     bast.parent = space;
     bast.type = AreaType::CelestialBody;
-    for(auto &rv : unknowns) {
-        if(boost::icontains(stripAnsi(world[rv].name), "Blasted Asteroid")) bast.roomIDs.insert(rv);
+    for(auto &[rv, room] : world) {
+        if(boost::icontains(stripAnsi(room.name), "Blasted Asteroid")) bast.roomIDs.insert(rv);
     }
     auto blasted_asteroid = assembleArea(bast);
 
@@ -772,8 +764,8 @@ void migrate_grid() {
     listres.name = "Lister's Restaurant";
     listres.parent = xenoverse;
     listres.type = AreaType::Structure;
-    for(auto &rv : unknowns) {
-        if(boost::icontains(stripAnsi(world[rv].name), "Lister's Restaurant")) listres.roomIDs.insert(rv);
+    for(auto &[rv, room] : world) {
+        if(boost::icontains(stripAnsi(room.name), "Lister's Restaurant")) listres.roomIDs.insert(rv);
     }
     listres.roomIDs = {18640};
     auto listers_restaurant = assembleArea(listres);
@@ -782,8 +774,8 @@ void migrate_grid() {
     scasino.name = "Shooting Star Casino";
     scasino.type = AreaType::Structure;
     scasino.parent = xenoverse;
-    for(auto &rv : unknowns) {
-        if(boost::icontains(stripAnsi(world[rv].name), "Shooting Star Casino")) scasino.roomIDs.insert(rv);
+    for(auto &[rv, room] : world) {
+        if(boost::icontains(stripAnsi(room.name), "Shooting Star Casino")) scasino.roomIDs.insert(rv);
     }
     auto shooting_star_casino = assembleArea(scasino);
 
@@ -791,8 +783,8 @@ void migrate_grid() {
     outdef.name = "The Outpost";
     outdef.parent = celestial_plane;
 	outdef.type = AreaType::Structure;
-    for(auto &rv : unknowns) {
-        if(boost::icontains(stripAnsi(world[rv].name), "The Outpost")) outdef.roomIDs.insert(rv);
+    for(auto &[rv, room] : world) {
+        if(boost::icontains(stripAnsi(room.name), "The Outpost")) outdef.roomIDs.insert(rv);
     }
     auto outpost = assembleArea(outdef);
 
@@ -1305,7 +1297,9 @@ void migrate_grid() {
 
     AreaDef misc;
     misc.name = "Miscellaneous";
-    misc.roomIDs = unknowns;
+    for(auto &[rv, room] : world) {
+        if(!room.area) misc.roomIDs.insert(rv);
+    }
     auto misc_area = assembleArea(misc);
 
     for(auto r : {
@@ -1362,9 +1356,7 @@ void migrate_accounts() {
         // Line 3: password (clear text, will hash...)
         std::string pass;
         std::getline(file, pass);
-        if(!a.setPassword(pass)) {
-            log("Error hashing %s's password: %s", a.name.c_str(), pass.c_str());
-        }
+        if(!a.setPassword(pass)) log("Error hashing %s's password: %s", a.name.c_str(), pass.c_str());
 
         // Line 4: slots (int)
         std::string slots;
@@ -1402,7 +1394,8 @@ void migrate_accounts() {
         // if custom, then we want to open a sister file that ends in .cus in the same directory and read every line
         // beyond the first into a.customs.
         if(custom) {
-            auto customPath = p.path().replace_extension(".cus");
+            auto customPath = p.path();
+            customPath.replace_extension(".cus");
             std::ifstream customFile(customPath);
             std::string line;
             std::getline(customFile, line); // skip the first line
@@ -1418,7 +1411,6 @@ void migrate_accounts() {
         auto bank = std::stoi(rppBank);
         file.close();
         a.vn = id;
-        accounts_dirty.insert(id);
 
     }
 }
@@ -1432,23 +1424,21 @@ void migrate_characters() {
 
     for(auto &[cname, accID] : characterToAccount) {
         auto ch = new char_data();
-        ch->player_specials = new player_special_data();
         auto result = load_char(cname.c_str(), ch);
         if(result < 0) {
             log("Error loading %s for account migration.", cname.c_str());
-            delete ch->player_specials;
             delete ch;
             continue;
         }
-        auto id = ch->idnum;
+        auto id = ch->id;
         auto &p = players[id];
-        p.vn = id;
+        p.id = id;
         p.character = ch;
+        p.name = ch->name;
         auto &a = accounts[accID];
         p.account = &a;
         a.characters.emplace_back(id);
 
-        dirty_players.insert(id);
     }
 
     // migrate sense files...
@@ -1468,15 +1458,19 @@ void migrate_characters() {
             log("Error loading %s for sense migration.", name.c_str());
             continue;
         }
-
+        auto &pa = players[ch->id];
         // The file contains a sequence of lines, with each line containing a number.
 		// The number is the vnum of a mobile the player's sensed.
         // We will read each line and insert the vnum into the player's sensed list.
         std::ifstream file(p.path());
         std::string line;
         while(std::getline(file, line)) {
-            auto vnum = std::stoi(line);
-            if(mob_proto.contains(vnum)) ch->player_specials->senseMemory.insert(vnum);
+            try {
+                auto vnum = std::stoi(line);
+                if(mob_proto.contains(vnum)) pa.senseMemory.insert(vnum);
+            } catch(...) {
+                log("Error parsing %s for sense migration.", line.c_str());
+            }
         }
         file.close();
     }
@@ -1494,9 +1488,11 @@ void migrate_characters() {
         auto name = p.path().stem().string();
         auto ch = findPlayer(name);
         if(!ch) {
-            log("Error loading %s for sense migration.", name.c_str());
+            log("Error loading %s for dub migration.", name.c_str());
             continue;
         }
+
+        auto &pa = players[ch->id];
 
 		// The file contains a series of lines.
         // Each line looks like: <name> <dub>
@@ -1513,7 +1509,7 @@ void migrate_characters() {
             if(name == "Gibbles") continue;
             auto pc = findPlayer(name);
             if(!pc) continue;
-            ch->player_specials->dubNames[pc->idnum] = dub;
+            pa.dubNames[pc->id] = dub;
         }
     }
 
@@ -1548,11 +1544,18 @@ void migrate_characters() {
             if(pos2 == std::string::npos) continue;
             auto context = line.substr(pos + 1, pos2 - pos - 1);
             auto data = line.substr(pos2 + 1);
+            if(!ch->script) {
+                ch->script = new script_data();
+            }
 
-            add_var(&ch->script->global_vars, varname.c_str(), data.c_str(), std::stoi(context));
+            try {
+                auto ctx = std::stoi(context);
+                add_var(&ch->script->global_vars, (char*)varname.c_str(), data.c_str(), ctx);
+            } catch(...) {
+                log("Error parsing %s for variable migration.", line.c_str());
+            }
         }
     }
-
 
     path = std::filesystem::current_path() / "plralias";
     if(!std::filesystem::exists(path)) {
@@ -1570,6 +1573,12 @@ void migrate_characters() {
             log("Error loading %s for alias migration.", name.c_str());
             continue;
         }
+        auto pa = players.find(ch->id);
+        if(pa == players.end()) {
+            log("Error loading %s for alias migration.", name.c_str());
+            continue;
+        }
+
 
         std::ifstream file(p.path());
         std::string line;
@@ -1579,14 +1588,12 @@ void migrate_characters() {
         // replacement string length  (size_t), replacement string, alias type (a bool)
 
         while(std::getline(file, line)) {
-            auto aliasNameLen = std::stoi(line);
-            std::string name, replacement;
-            std::getline(file, name);
+            auto &a = pa->second.aliases.emplace_back();
+            std::getline(file, a.name);
             std::getline(file, line);
-            auto aliasReplLen = std::stoi(line);
-            std::getline(file, replacement);
+            std::getline(file, a.replacement);
             std::getline(file, line);
-            ch->player_specials->aliases.emplace_back(name, replacement, std::stoi(line));
+            a.type = atoi(line.c_str());
         }
     }
 
@@ -1603,28 +1610,29 @@ void migrate_characters() {
             continue;
         }
 
-        // we need to force players "into the game" even if they're really not...
-        //ch->desc = new descriptor_data();
-        //ch->desc->raw_input_queue = std::make_unique<net::Channel<std::string>>(*net::io);
-        //ch->desc->character = ch;
-
 		auto result = Crash_load(ch);
 
     }
 }
 
 boost::asio::awaitable<void> migrate_db() {
+
     migrate_grid();
 
     migrate_accounts();
 
-    migrate_characters();
+    try {
+        migrate_characters();
+    } catch(std::exception &e) {
+        log("Error migrating characters: %s", e.what());
+    }
+
+    dirty_all();
 
     SQLite::Transaction transaction(*db);
     process_dirty();
     transaction.commit();
-
-
+    co_return;
 }
 
 int main(int argc, char **argv)
@@ -1782,6 +1790,10 @@ int main(int argc, char **argv)
     // BEGIN DUMP SEQUENCE
     log("Beginning migration!");
     gameFunc = migrate_db;
+
+    log("Generating player index.");
+    build_player_index();
+
     init_game(1280);
 
 

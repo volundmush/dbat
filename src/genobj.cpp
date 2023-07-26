@@ -329,13 +329,16 @@ nlohmann::json obj_data::serializeInstance() {
     auto j = serializeBase();
 
     if(generation) j["generation"] = generation;
-    if(unique_id) j["unique_id"] = unique_id;
 
     return j;
 }
 
 nlohmann::json obj_data::serializeProto() {
     auto j = serializeBase();
+
+    for(auto s = proto_script; s; s = s->next) {
+        if(trig_index.contains(s->vnum)) j["proto_script"].push_back(s->vnum);
+    }
 
     return j;
 }
@@ -387,6 +390,16 @@ void obj_data::deserializeBase(const nlohmann::json &j) {
 
 void obj_data::deserializeProto(const nlohmann::json& j) {
     deserializeBase(j);
+
+    if(j.contains("proto_script")) {
+        auto &p = j["proto_script"];
+        for(auto s = p.rbegin(); s != p.rend(); s++) {
+            auto new_s = new trig_proto_list();
+            new_s->vnum = *s;
+            new_s->next = proto_script;
+            proto_script = new_s;
+        }
+    }
 }
 
 
@@ -416,7 +429,7 @@ obj_data::obj_data(const nlohmann::json &j) : obj_data() {
     
 }
 
-std::optional<vnum> obj_data::getMatchingArea(std::function<bool(const area_data &)> f) {
+std::optional<vnum> obj_data::getMatchingArea(const std::function<bool(const area_data &)>& f) {
     if(in_room != NOWHERE) {
         auto &r = world[in_room];
         return r.getMatchingArea(f);
@@ -425,4 +438,65 @@ std::optional<vnum> obj_data::getMatchingArea(std::function<bool(const area_data
     if(carried_by) return carried_by->getMatchingArea(f);
     if(worn_by) return worn_by->getMatchingArea(f);
     return std::nullopt;
+}
+
+void obj_data::activate() {
+    next = object_list;
+    object_list = this;
+    auto find = obj_index.find(vn);
+    if(find != obj_index.end()) {
+        find->second.number++;
+    }
+    auto ofind = obj_proto.find(vn);
+    if(ofind != obj_proto.end()) {
+        if(ofind->second.proto_script) {
+            if(!script) script = new script_data();
+            for(auto p = proto_script; p; p = p->next) {
+                auto t = read_trigger(p->vnum);
+                if(t) add_trigger(script, t, -1);
+            }
+        }
+    }
+    if(contents) activateContents();
+}
+
+void obj_data::deactivate() {
+    struct obj_data *temp;
+    REMOVE_FROM_LIST(this, object_list, next, temp);
+    auto find = obj_index.find(vn);
+    if(find != obj_index.end()) {
+        find->second.number--;
+    }
+    if(script && script->trig_list) {
+        struct trig_data *next_trig;
+        for (auto trig = TRIGGERS(script); trig; trig = next_trig) {
+            next_trig = trig->next;
+            extract_trigger(trig);
+        }
+        TRIGGERS(script) = nullptr;
+    }
+    if(contents) deactivateContents();
+}
+
+void obj_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
+    deserializeBase(j);
+
+    if(j.contains("generation")) generation = j["generation"];
+    check_unique_id(this);
+    add_unique_id(this);
+
+    if(j.contains("contents")) {
+        deserializeContents(j["contents"], false);
+    }
+
+    if(isActive) activate();
+
+}
+
+void obj_data::deserializeContents(const nlohmann::json &j, bool isActive) {
+    for(const auto& jo : j) {
+        auto obj = new obj_data();
+        obj->deserializeInstance(jo, isActive);
+        obj_to_obj(obj, this);
+    }
 }

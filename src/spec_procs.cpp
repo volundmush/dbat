@@ -23,6 +23,7 @@
 #include "races.h"
 #include "act.comm.h"
 #include "class.h"
+#include "players.h"
 
 /* local functions */
 
@@ -185,7 +186,7 @@ int num_players_in_room(room_vnum room) {
 }
 
 bool check_mob_in_room(mob_vnum mob, room_vnum room) {
-    register struct char_data *i;
+    struct char_data *i;
     bool found = false;
 
     for (i = character_list; i; i = i->next)
@@ -646,7 +647,7 @@ SPECIAL(guild_guard) {
             continue;
 
         /* Allow the people of the guild through. */
-        if (!IS_NPC(ch) && GET_CLASS_RANKS(ch, guild_info[i].pc_class) > 0)
+        if (!IS_NPC(ch) && ch->chclass->getID() != i)
             continue;
 
         send_to_char(ch, "%s", buf);
@@ -965,24 +966,12 @@ SPECIAL(auction) {
                 }
 
                 if (founded == false) {
-                    auto vict = new char_data();
-                    vict->player_specials = new player_special_data();
-                    int is_file = false, player_i = 0;
-
                     char blam[50];
                     sprintf(blam, "%s", GET_AUCTERN(obj2));
-                    if ((player_i = load_char(blam, vict)) > -1) {
-                        is_file = true;
-                    } else {
-                        free_char(vict);
-                        continue;
-                    }
-                    GET_BANK_GOLD(vict) += GET_BID(obj2);
+                    auto vict = findPlayer(blam);
+                    if(!vict) continue;
 
-                    GET_PFILEPOS(vict) = player_i;
-                    save_char(vict);
-                    if (is_file == true)
-                        free_char(vict);
+                    GET_BANK_GOLD(vict) += GET_BID(obj2);
                 }
 
             }
@@ -1451,40 +1440,32 @@ SPECIAL(bank) {
         if (!(vict = get_player_vis(ch, arg2, nullptr, FIND_CHAR_WORLD))) {
             int is_file = false, player_i = 0;
             char name[MAX_INPUT_LENGTH];
-
-            vict = new char_data();
-            vict->player_specials = new player_special_data();
-
             sprintf(name, "%s", rIntro(ch, arg2));
 
-            if ((player_i = load_char(name, vict)) > -1) {
-                is_file = true;
-            } else {
-                free_char(vict);
+            vict = findPlayer(name);
+
+            if(!vict) {
                 send_to_char(ch, "That person doesn't exist.\r\n");
                 return (true);
             }
+
             if (ch->desc->account == nullptr) {
                 send_to_char(ch, "There is an error. Report to staff.");
                 return (true);
             }
-            auto id = vict->idnum;
-            auto &c = ch->player_specials->account->characters;
+            auto id = vict->id;
+            auto &p = players[id];
+            auto &c = p.account->characters;
             auto found = std::find_if(c.begin(), c.end(), [&](auto i) {return i == id;});
             if(found != c.end()) {
                 send_to_char(ch, "You can not transfer money to your own offline characters...");
-                if (is_file == true)
-                    free_char(vict);
                 return (true);
             }
             GET_BANK_GOLD(vict) += amount;
             GET_BANK_GOLD(ch) -= amount + (amount / 100);
-            GET_PFILEPOS(vict) = player_i;
             mudlog(NRM, MAX(ADMLVL_IMPL, GET_INVIS_LEV(ch)), true, "EXCHANGE: %s gave %s zenni to user %s",
                    GET_NAME(ch), add_commas(amount), GET_NAME(vict));
             save_char(vict);
-            if (is_file == true)
-                free_char(vict);
         } else {
             GET_BANK_GOLD(vict) += amount;
             GET_BANK_GOLD(ch) -= amount + (amount / 100);

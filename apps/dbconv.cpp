@@ -872,22 +872,21 @@ std::optional<long> dump_player(const char *name) {
     SQLite::Statement q4(*db, "INSERT INTO player_bonus (character_id, bonus_id) VALUES (?,?)");
 
     char_data *ch = new char_data();
-    ch->player_specials = new player_special_data();
     if(load_char(name, ch) < 0) {
         log("Error loading player %s", name);
         free_char(ch);
         return {};
     }
-    if(player_ids.count(ch->idnum)) {
+    if(player_ids.count(ch->id)) {
         log("Duplicate player %s", name);
         free_char(ch);
         return {};
     }
-    player_ids.insert(ch->idnum);
-    log("Dumping player %d: %s", ch->idnum, ch->name);
-    auto id = ch->idnum;
+    player_ids.insert(ch->id);
+    log("Dumping player %d: %s", ch->id, ch->name);
+    auto id = ch->id;
     auto cid = dump_character(ch, false);
-    q1.bind(1, ch->idnum);
+    q1.bind(1, ch->id);
     q1.bind(2, cid);
     q1.bind(3, ch->name);
     q1.bind(4, ch->level);

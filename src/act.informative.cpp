@@ -27,6 +27,7 @@
 #include "mail.h"
 #include "guild.h"
 #include "clan.h"
+#include "players.h"
 
 /* local functions */
 static void gen_map(struct char_data *ch, int num);
@@ -86,8 +87,6 @@ static void display_spells(struct char_data *ch, struct obj_data *obj);
 static void display_scroll(struct char_data *ch, struct obj_data *obj);
 
 static void space_to_minus(char *str);
-
-static void free_history(struct char_data *ch, int type);
 
 static int yesrace(int num);
 
@@ -908,13 +907,16 @@ int readIntro(struct char_data *ch, struct char_data *vict) {
         return 1;
     }
 
-    return ch->player_specials->dubNames.contains(vict->idnum);
+    auto &p = players[ch->id];
+
+    return p.dubNames.contains(vict->id);
 }
 
 void introWrite(struct char_data *ch, struct char_data *vict, char *name) {
     std::string n(name);
-    ch->player_specials->dubNames[vict->idnum] = n;
-    dirty_players.insert(ch->idnum);
+    auto &p = players[ch->id];
+    p.dubNames[vict->id] = n;
+    dirty_players.insert(ch->id);
 }
 
 ACMD(do_intro) {
@@ -2681,12 +2683,7 @@ static void diag_char_to_char(struct char_data *i, struct char_data *ch) {
 
     int64_t hit = GET_HIT(i), max = (i->getEffMaxPL());
 
-    int64_t total = 0;
-    if (GET_SUPPRESS(i) > 0) {
-        total = max - GET_SUPP(i);
-    } else {
-        total = max;
-    }
+    int64_t total = max;
 
     if (hit == total) {
         percent = 100;
@@ -5064,38 +5061,6 @@ ACMD(do_rptrans) {
     save_char(ch);
 }
 
-/*By Andros*/
-ACMD(do_rpbank) {
-    int amt = 0;
-    char arg[MAX_INPUT_LENGTH];
-
-    one_argument(argument, arg);
-
-    if (!*arg) {
-        send_to_char(ch, "Syntax: rpbank <amount>\r\n");
-        send_to_char(ch, "Current RPP Bank: %d\r\n", GET_RBANK(ch));
-        return;
-    }
-
-    amt = atoi(arg);
-
-    if (amt <= 0) {
-        send_to_char(ch, "You cannot withdraw from the RPP Bank.\r\n");
-        return;
-    }
-
-    if (amt > GET_RP(ch)) {
-        send_to_char(ch, "You do not have that much RPP to send to the Bank!\r\n");
-        return;
-    }
-
-    ch->modRPP(-amt);
-    send_to_char(ch, "You send %d to your RPP Bank. Your total is now %d.\r\n", amt, GET_RBANK(ch));
-    mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), true, "RPP Bank: %s has put %d RPP into their bank",
-           GET_NAME(ch), amt);
-
-}
-
 
 ACMD(do_rdisplay) {
     skip_spaces(&argument);
@@ -5475,8 +5440,8 @@ ACMD(do_score) {
     if (view == full || view == stats) {
         send_to_char(ch,
                      "  @cO@D-----------------------------@D[ @cStatistics @D]-----------------------------@cO@n\n");
-        send_to_char(ch, "      @D<@wCharacter Level@D: @w%-3d@D> <@wRPP@D: @w%-3d@D> <@wRPP Bank@D: @w%-3d@D>@n\n",
-                     GET_LEVEL(ch), GET_RP(ch), GET_RBANK(ch));
+        send_to_char(ch, "      @D<@wCharacter Level@D: @w%-3d@D> <@wRPP@D: @w%-3d@D>@n\n",
+                     GET_LEVEL(ch), GET_RP(ch));
         send_to_char(ch, "      @D<@wSpeed Index@D: @w%-15s@D> <@wArmor Index@D: @w%-15s@D>@n\n",
                      add_commas(GET_SPEEDI(ch)), add_commas(GET_ARMOR(ch)));
         send_to_char(ch,
@@ -7862,23 +7827,15 @@ ACMD(do_commands) {
         send_to_char(ch, "\r\n");
 }
 
-static void free_history(struct char_data *ch, int type) {
-    struct txt_block *tmp = GET_HISTORY(ch, type), *ftmp;
-
-    while ((ftmp = tmp)) {
-        tmp = tmp->next;
-        if (ftmp->text)
-            free(ftmp->text);
-        free(ftmp);
-    }
-    GET_HISTORY(ch, type) = nullptr;
-}
 
 ACMD(do_history) {
     char arg[MAX_INPUT_LENGTH];
     int type;
 
     one_argument(argument, arg);
+    if(IS_NPC(ch)) return;
+
+    auto &p = players[ch->id];
 
     type = search_block(arg, history_types, false);
     if (!*arg || type < 0) {
@@ -7900,9 +7857,9 @@ ACMD(do_history) {
         return;
     }
 
-    if (GET_HISTORY(ch, type) && GET_HISTORY(ch, type)->text && *GET_HISTORY(ch, type)->text) {
+    if (p.comm_hist[type] && p.comm_hist[type]->text && *p.comm_hist[type]->text) {
         struct txt_block *tmp;
-        for (tmp = GET_HISTORY(ch, type); tmp; tmp = tmp->next)
+        for (tmp = p.comm_hist[type]; tmp; tmp = tmp->next)
             send_to_char(ch, "%s", tmp->text);
 /* Make this a 1 if you want history to cear after viewing */
 #if 0
@@ -7921,26 +7878,28 @@ void add_history(struct char_data *ch, char *str, int type) {
     if (IS_NPC(ch))
         return;
 
-    tmp = GET_HISTORY(ch, type);
+    auto &p = players[ch->id];
+
+    tmp = p.comm_hist[type];
     ct = time(nullptr);
     strftime(time_str, sizeof(time_str), "%H:%M ", localtime(&ct));
 
     sprintf(buf, "%s%s", time_str, str);
 
     if (!tmp) {
-        CREATE(GET_HISTORY(ch, type), struct txt_block, 1);
-        GET_HISTORY(ch, type)->text = strdup(buf);
+        CREATE(p.comm_hist[type], struct txt_block, 1);
+        p.comm_hist[type]->text = strdup(buf);
     } else {
         while (tmp->next)
             tmp = tmp->next;
         CREATE(tmp->next, struct txt_block, 1);
         tmp->next->text = strdup(buf);
 
-        for (tmp = GET_HISTORY(ch, type); tmp; tmp = tmp->next, i++);
+        for (tmp = p.comm_hist[type]; tmp; tmp = tmp->next, i++);
 
-        for (; i > HIST_LENGTH && GET_HISTORY(ch, type); i--) {
-            tmp = GET_HISTORY(ch, type);
-            GET_HISTORY(ch, type) = tmp->next;
+        for (; i > HIST_LENGTH && p.comm_hist[type]; i--) {
+            tmp = p.comm_hist[type];
+            p.comm_hist[type] = tmp->next;
             if (tmp->text)
                 free(tmp->text);
             free(tmp);
@@ -8192,50 +8151,49 @@ ACMD(do_whois) {
             "[Implementor]",
     };
 
-    struct char_data *victim = nullptr;
     skip_spaces(&argument);
 
     if (!*argument) {
         send_to_char(ch, "Who?\r\n");
-    } else {
-        victim = new char_data();
-        victim->player_specials = new player_special_data();
-        if (load_char(argument, victim) >= 0) {
-            if (GET_CLAN(victim) != nullptr) {
-                if (!strstr(GET_CLAN(victim), "None")) {
-                    sprintf(buf, "%s", GET_CLAN(victim));
-                    clan = true;
-                }
-                if (strstr(GET_CLAN(victim), "Applying")) {
-                    sprintf(buf, "%s", GET_CLAN(victim));
-                    clan = true;
-                }
-            }
-            if (GET_CLAN(victim) == nullptr || strstr(GET_CLAN(victim), "None")) {
-                clan = false;
-            }
-            send_to_char(ch, "@D~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\r\n");
-            if (GET_ADMLEVEL(victim) >= ADMLVL_IMMORT) {
-                send_to_char(ch, "@cName     @D: @G%s\r\n", GET_NAME(victim));
-                send_to_char(ch, "@cImm Level@D: @G%s\r\n", immlevels[GET_ADMLEVEL(victim)]);
-                send_to_char(ch, "@cTitle    @D: @G%s\r\n", GET_TITLE(victim));
-            } else {
-                send_to_char(ch,
-                             "@cName  @D: @w%s\r\n@cSensei@D: @w%s\r\n@cRace  @D: @w%s\r\n@cTitle @D: @w%s@n\r\n@cClan  @D: @w%s@n\r\n",
-                             GET_NAME(victim), victim->chclass->getName().c_str(), victim->race->getName().c_str(),
-                             GET_TITLE(victim), clan ? buf : "None.");
-                if (clan == true && !strstr(GET_CLAN(victim), "Applying")) {
-                    if (checkCLAN(victim) == true) {
-                        clanRANKD(GET_CLAN(victim), ch, victim);
-                    }
-                }
-            }
-            send_to_char(ch, "@D~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\r\n");
-        } else {
-            send_to_char(ch, "There is no such player.\r\n");
-        }
-        free(victim);
+        return;
     }
+
+    auto victim = findPlayer(argument);
+    if(!victim) {
+        send_to_char(ch, "There is no such player.\r\n");
+        return;
+    }
+
+    if (GET_CLAN(victim) != nullptr) {
+        if (!strstr(GET_CLAN(victim), "None")) {
+            sprintf(buf, "%s", GET_CLAN(victim));
+            clan = true;
+        }
+        if (strstr(GET_CLAN(victim), "Applying")) {
+            sprintf(buf, "%s", GET_CLAN(victim));
+            clan = true;
+        }
+    }
+    if (GET_CLAN(victim) == nullptr || strstr(GET_CLAN(victim), "None")) {
+        clan = false;
+    }
+    send_to_char(ch, "@D~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\r\n");
+    if (GET_ADMLEVEL(victim) >= ADMLVL_IMMORT) {
+        send_to_char(ch, "@cName     @D: @G%s\r\n", GET_NAME(victim));
+        send_to_char(ch, "@cImm Level@D: @G%s\r\n", immlevels[GET_ADMLEVEL(victim)]);
+        send_to_char(ch, "@cTitle    @D: @G%s\r\n", GET_TITLE(victim));
+    } else {
+        send_to_char(ch,
+                     "@cName  @D: @w%s\r\n@cSensei@D: @w%s\r\n@cRace  @D: @w%s\r\n@cTitle @D: @w%s@n\r\n@cClan  @D: @w%s@n\r\n",
+                     GET_NAME(victim), victim->chclass->getName().c_str(), victim->race->getName().c_str(),
+                     GET_TITLE(victim), clan ? buf : "None.");
+        if (clan == true && !strstr(GET_CLAN(victim), "Applying")) {
+            if (checkCLAN(victim) == true) {
+                clanRANKD(GET_CLAN(victim), ch, victim);
+            }
+        }
+    }
+    send_to_char(ch, "@D~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\r\n");
 }
 
 #define DOOR_DCHIDE(ch, door)           (EXIT(ch, door)->dchide)

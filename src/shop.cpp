@@ -246,19 +246,7 @@ static int is_ok_char(struct char_data *keeper, struct char_data *ch, vnum shop_
         (IS_NAIL(ch) && NOTRADE_FIGHTER(shop_nr)) ||
         (IS_JINTO(ch) && NOTRADE_ARCANE_ARCHER(shop_nr)) ||
         (IS_TSUNA(ch) && NOTRADE_ARCANE_TRICKSTER(shop_nr)) ||
-        (IS_KURZAK(ch) && NOTRADE_ARCHMAGE(shop_nr)) ||
-        (IS_ASSASSIN(ch) && NOTRADE_ASSASSIN(shop_nr)) ||
-        (IS_BLACKGUARD(ch) && NOTRADE_BLACKGUARD(shop_nr)) ||
-        (IS_DRAGON_DISCIPLE(ch) && NOTRADE_DRAGON_DISCIPLE(shop_nr)) ||
-        (IS_DUELIST(ch) && NOTRADE_DUELIST(shop_nr)) ||
-        (IS_DWARVEN_DEFENDER(ch) && NOTRADE_DWARVEN_DEFENDER(shop_nr)) ||
-        (IS_ELDRITCH_KNIGHT(ch) && NOTRADE_ELDRITCH_KNIGHT(shop_nr)) ||
-        (IS_HIEROPHANT(ch) && NOTRADE_HIEROPHANT(shop_nr)) ||
-        (IS_HORIZON_WALKER(ch) && NOTRADE_HORIZON_WALKER(shop_nr)) ||
-        (IS_LOREMASTER(ch) && NOTRADE_LOREMASTER(shop_nr)) ||
-        (IS_MYSTIC_THEURGE(ch) && NOTRADE_MYSTIC_THEURGE(shop_nr)) ||
-        (IS_SHADOWDANCER(ch) && NOTRADE_SHADOWDANCER(shop_nr)) ||
-        (IS_THAUMATURGIST(ch) && NOTRADE_THAUMATURGIST(shop_nr))) {
+        (IS_KURZAK(ch) && NOTRADE_ARCHMAGE(shop_nr))) {
 
         snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_NO_SELL_CLASS);
         do_tell(keeper, buf, cmd_tell, 0);

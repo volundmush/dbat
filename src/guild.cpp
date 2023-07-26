@@ -187,7 +187,7 @@ ACMD(do_teach) {
     } else if (GET_FORGETING(vict) == skill) {
         send_to_char(ch, "They are trying to forget that skill!\r\n");
         return;
-    } else if (GET_PRACTICES(vict, GET_CLASS(vict)) < cost) {
+    } else if (GET_PRACTICES(vict) < cost) {
         send_to_char(ch, "They do not have enough practice sessions for you to teach them.\r\n");
         return;
     } else if (GET_SKILL_BASE(vict, skill) >= 80) {
@@ -203,7 +203,7 @@ ACMD(do_teach) {
         act(toother, true, ch, nullptr, vict, TO_NOTVICT);
         SET_SKILL(vict, skill, GET_SKILL_BASE(vict, skill) + 1);
         if (free == false) {
-            GET_PRACTICES(vict, GET_CLASS(vict)) -= cost;
+            GET_PRACTICES(vict) -= cost;
         } else {
             send_to_char(ch, "@GYou teach your lesson so well that it cost them nothing to learn from you!@n\r\n");
             send_to_char(vict, "@GYour teacher taught you the lesson so well that it cost you nothing!@n\r\n");
@@ -268,10 +268,7 @@ int print_skills_by_type(struct char_data *ch, char *buf, int maxsz, int sktype,
             continue;
 
         if ((t & SKTYPE_SKILL) || (t & SKTYPE_SPELL)) {
-            for (nlen = 0, known = 0; nlen <= NUM_CLASSES; nlen++)
-                if (GET_CLASS_RANKS(ch, nlen) > 0 && (spell_info[i].can_learn_skill[nlen] > SKLEARN_CANT)) {
-                    known = spell_info[i].can_learn_skill[nlen];
-                }
+
         } else {
             known = 0;
         }
@@ -417,7 +414,7 @@ void list_skills(struct char_data *ch, char *arg) {
     char buf2[MAX_STRING_LENGTH];
 
     len = snprintf(buf2, sizeof(buf2), "You have %d practice session%s remaining.\r\n",
-                   GET_PRACTICES(ch, GET_CLASS(ch)), GET_PRACTICES(ch, GET_CLASS(ch)) == 1 ? "" : "s");
+                   GET_PRACTICES(ch), GET_PRACTICES(ch) == 1 ? "" : "s");
 
     len += snprintf(buf2 + len, sizeof(buf2) - len,
                     "\r\nYou know the following skills:     @CKnown@D/@cPrac. Max@n\r\n@w-------------------------------------------------------@n\r\n");
@@ -495,19 +492,7 @@ int is_guild_ok_char(struct char_data *keeper, struct char_data *ch, int guild_n
         (IS_KABITO(ch) && NOTRAIN_BARBARIAN(guild_nr)) ||
         (IS_JINTO(ch) && NOTRAIN_ARCANE_ARCHER(guild_nr)) ||
         (IS_TSUNA(ch) && NOTRAIN_ARCANE_TRICKSTER(guild_nr)) ||
-        (IS_KURZAK(ch) && NOTRAIN_ARCHMAGE(guild_nr)) ||
-        (IS_ASSASSIN(ch) && NOTRAIN_ASSASSIN(guild_nr)) ||
-        (IS_BLACKGUARD(ch) && NOTRAIN_BLACKGUARD(guild_nr)) ||
-        (IS_DRAGON_DISCIPLE(ch) && NOTRAIN_DRAGON_DISCIPLE(guild_nr)) ||
-        (IS_DUELIST(ch) && NOTRAIN_DUELIST(guild_nr)) ||
-        (IS_DWARVEN_DEFENDER(ch) && NOTRAIN_DWARVEN_DEFENDER(guild_nr)) ||
-        (IS_ELDRITCH_KNIGHT(ch) && NOTRAIN_ELDRITCH_KNIGHT(guild_nr)) ||
-        (IS_HIEROPHANT(ch) && NOTRAIN_HIEROPHANT(guild_nr)) ||
-        (IS_HORIZON_WALKER(ch) && NOTRAIN_HORIZON_WALKER(guild_nr)) ||
-        (IS_LOREMASTER(ch) && NOTRAIN_LOREMASTER(guild_nr)) ||
-        (IS_MYSTIC_THEURGE(ch) && NOTRAIN_MYSTIC_THEURGE(guild_nr)) ||
-        (IS_SHADOWDANCER(ch) && NOTRAIN_SHADOWDANCER(guild_nr)) ||
-        (IS_THAUMATURGIST(ch) && NOTRAIN_THAUMATURGIST(guild_nr))) {
+        (IS_KURZAK(ch) && NOTRAIN_ARCHMAGE(guild_nr))) {
 
         snprintf(buf, sizeof(buf), "%s %s",
                  GET_NAME(ch), MSG_TRAINER_DISLIKE_CLASS);
@@ -528,19 +513,7 @@ int is_guild_ok_char(struct char_data *keeper, struct char_data *ch, int guild_n
         (!IS_KABITO(ch) && TRAIN_BARBARIAN(guild_nr)) ||
         (!IS_JINTO(ch) && TRAIN_ARCANE_ARCHER(guild_nr)) ||
         (!IS_TSUNA(ch) && TRAIN_ARCANE_TRICKSTER(guild_nr)) ||
-        (!IS_KURZAK(ch) && TRAIN_ARCHMAGE(guild_nr)) ||
-        (!IS_ASSASSIN(ch) && TRAIN_ASSASSIN(guild_nr)) ||
-        (!IS_BLACKGUARD(ch) && TRAIN_BLACKGUARD(guild_nr)) ||
-        (!IS_DRAGON_DISCIPLE(ch) && TRAIN_DRAGON_DISCIPLE(guild_nr)) ||
-        (!IS_DUELIST(ch) && TRAIN_DUELIST(guild_nr)) ||
-        (!IS_DWARVEN_DEFENDER(ch) && TRAIN_DWARVEN_DEFENDER(guild_nr)) ||
-        (!IS_ELDRITCH_KNIGHT(ch) && TRAIN_ELDRITCH_KNIGHT(guild_nr)) ||
-        (!IS_HIEROPHANT(ch) && TRAIN_HIEROPHANT(guild_nr)) ||
-        (!IS_HORIZON_WALKER(ch) && TRAIN_HORIZON_WALKER(guild_nr)) ||
-        (!IS_LOREMASTER(ch) && TRAIN_LOREMASTER(guild_nr)) ||
-        (!IS_MYSTIC_THEURGE(ch) && TRAIN_MYSTIC_THEURGE(guild_nr)) ||
-        (!IS_SHADOWDANCER(ch) && TRAIN_SHADOWDANCER(guild_nr)) ||
-        (!IS_THAUMATURGIST(ch) && TRAIN_THAUMATURGIST(guild_nr))) {
+        (!IS_KURZAK(ch) && TRAIN_ARCHMAGE(guild_nr))) {
         snprintf(buf, sizeof(buf), "%s %s",
                  GET_NAME(ch), MSG_TRAINER_DISLIKE_CLASS);
         do_tell(keeper, buf, cmd_tell, 0);
@@ -614,7 +587,7 @@ void what_does_guild_know(int guild_nr, struct char_data *ch) {
     size_t nlen = 0, len = 0;
 
     len = snprintf(buf2, sizeof(buf2), "You have %d practice session%s remaining.\r\n",
-                   GET_PRACTICES(ch, GET_CLASS(ch)), GET_PRACTICES(ch, GET_CLASS(ch)) == 1 ? "" : "s"); // ???
+                   GET_PRACTICES(ch), GET_PRACTICES(ch) == 1 ? "" : "s"); // ???
 
     nlen = snprintf(buf2 + len, sizeof(buf2) - len,
                     "You can practice these skills:     @CKnown@D/@cPrac. Max    @GPS Cost@n\r\n@w-------------------------------------------------------------@n\r\n");
@@ -624,10 +597,6 @@ void what_does_guild_know(int guild_nr, struct char_data *ch) {
     for (sortpos = 0; sortpos < SKILL_TABLE_SIZE; sortpos++) {
         i = sortpos; /* spell_sort_info[sortpos]; */
         if (does_guild_know(guild_nr, i) && skill_type(i) == SKTYPE_SKILL) {
-            for (canknow = 0, k = 0, j = 0; j <= NUM_CLASSES; j++)
-                if (GET_CLASS_RANKS(ch, j) > 0 && (spell_info[i].can_learn_skill[j] > SKLEARN_CANT)) {
-                    k = spell_info[i].can_learn_skill[j];
-                }
             canknow = highest_skill_value(GET_LEVEL(ch), k);
             count++;
             cost = calculate_skill_cost(ch, i);
@@ -887,7 +856,7 @@ void handle_grand(struct char_data *keeper, int guild_nr, struct char_data *ch, 
         send_to_char(ch,
                      "You have already become a Grand Master in that skill and have progessed as far as possible in it.\r\n");
         return;
-    } else if (GET_PRACTICES(ch, GET_CLASS(ch)) < 1000) {
+    } else if (GET_PRACTICES(ch) < 1000) {
         send_to_char(ch, "You need at least 1,000 practice sessions to rank up beyond 100 in a skill.\r\n");
         return;
     } else {
@@ -899,7 +868,7 @@ void handle_grand(struct char_data *keeper, int guild_nr, struct char_data *ch, 
                          spell_info[skill_num].name);
         }
         SET_SKILL(ch, skill_num, GET_SKILL_BASE(ch, skill_num) + 1);
-        GET_PRACTICES(ch, GET_CLASS(ch)) -= 1000;
+        GET_PRACTICES(ch) -= 1000;
     }
 
 }
@@ -916,7 +885,7 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
         return;
     }
 
-    if (GET_PRACTICES(ch, GET_CLASS(ch)) <= 0) {
+    if (GET_PRACTICES(ch) <= 0) {
         send_to_char(ch, "You do not seem to be able to practice now.\r\n");
         return;
     }
@@ -964,7 +933,7 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
                 return;
         }
         pointcost = calculate_skill_cost(ch, skill_num);
-        if (GET_PRACTICES(ch, GET_CLASS(ch)) >= pointcost) {
+        if (GET_PRACTICES(ch) >= pointcost) {
             if (!prereq_pass(ch, skill_num)) {
                 return;
             }
@@ -1027,7 +996,7 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
                         else
                             send_to_char(ch, "You practice the basics of %s\r\n", sensei_style[GET_CLASS(ch)]);
                         SET_SKILL(ch, skill_num, GET_SKILL_BASE(ch, skill_num) + rand_number(10, 25));
-                        GET_PRACTICES(ch, GET_CLASS(ch)) -= pointcost;
+                        GET_PRACTICES(ch) -= pointcost;
                         if (GET_FORGETING(ch) != 0 && GET_SKILL_BASE(ch, GET_FORGETING(ch)) < 30) {
                             GET_FORGET_COUNT(ch) += 1;
                             if (GET_FORGET_COUNT(ch) >= 5) {
@@ -1054,7 +1023,7 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
                         send_to_char(ch, "You practice the basics of %s. (%d)\r\n", sensei_style[GET_CLASS(ch)],
                                      GET_SKILL_BASE(ch, skill_num) + 1);
                     SET_SKILL(ch, skill_num, GET_SKILL_BASE(ch, skill_num) + 1);
-                    GET_PRACTICES(ch, GET_CLASS(ch)) -= pointcost;
+                    GET_PRACTICES(ch) -= pointcost;
                     if (GET_SKILL_BASE(ch, skill_num) >= 100) {
                         send_to_char(ch, "You learned a lot by mastering that skill.\r\n");
                         if (IS_KONATSU(ch) && skill_num == SKILL_PARRY) {
@@ -1087,47 +1056,7 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
 
 
 void handle_train(struct char_data *keeper, int guild_nr, struct char_data *ch, char *argument) {
-    skip_spaces(&argument);
-    if (!argument || !*argument)
-        send_to_char(ch, "Training sessions remaining: %d\r\n"
-                         "Stats: strength constitution agility intelligence wisdom speed\r\n",
-                     GET_TRAINS(ch));
-    else if (!GET_TRAINS(ch))
-        send_to_char(ch, "You have no ability training sessions.\r\n");
-    else if (!strncasecmp("strength", argument, strlen(argument))) {
-        send_to_char(ch, CONFIG_OK);
-        ch->real_abils.str += 1;
-        GET_TRAINS(ch) -= 1;
-    } else if (!strncasecmp("constitution", argument, strlen(argument))) {
-        send_to_char(ch, CONFIG_OK);
-        ch->real_abils.con += 1;
-        /* Give them retroactive hit points for constitution */
-        if (!(ch->real_abils.con % 2))
-            //GET_MAX_HIT(ch) += GET_LEVEL(ch);
-            GET_TRAINS(ch) -= 1;
-    } else if (!strncasecmp("agility", argument, strlen(argument))) {
-        send_to_char(ch, CONFIG_OK);
-        ch->real_abils.dex += 1;
-        GET_TRAINS(ch) -= 1;
-    } else if (!strncasecmp("intelligence", argument, strlen(argument))) {
-        send_to_char(ch, CONFIG_OK);
-        ch->real_abils.intel += 1;
-        /* Give extra skill practice, but only for this level */
-        if (!(ch->real_abils.intel % 2))
-            GET_PRACTICES(ch, GET_CLASS(ch)) += 1;
-        GET_TRAINS(ch) -= 1;
-    } else if (!strncasecmp("wisdom", argument, strlen(argument))) {
-        send_to_char(ch, CONFIG_OK);
-        ch->real_abils.wis += 1;
-        GET_TRAINS(ch) -= 1;
-    } else if (!strncasecmp("speed", argument, strlen(argument))) {
-        send_to_char(ch, CONFIG_OK);
-        ch->real_abils.cha += 1;
-        GET_TRAINS(ch) -= 1;
-    } else
-        send_to_char(ch, "Stats: strength constitution agility intelligence wisdom speed\r\n");
-    affect_total(ch);
-    return;
+
 }
 
 
@@ -1176,7 +1105,7 @@ int rpp_to_level(struct char_data *ch) {
 }
 
 void handle_exp(struct char_data *keeper, int guild_nr, struct char_data *ch, char *argument) {
-    if (GET_PRACTICES(ch, GET_CLASS(ch)) < 25) {
+    if (GET_PRACTICES(ch) < 25) {
         send_to_char(ch, "You need at least 25 practice sessions to learn.\r\n");
         return;
     }
@@ -1191,7 +1120,7 @@ void handle_exp(struct char_data *keeper, int guild_nr, struct char_data *ch, ch
         act("@c$n@W spends time training you in $s fighting style.@n", true, keeper, nullptr, ch, TO_VICT);
         act("@c$n@W spends time training @C$N@W in $s fighting style.@n", true, keeper, nullptr, ch, TO_NOTVICT);
         send_to_char(ch, "@wExperience Gained: @C%s@n\r\n", add_commas(amt));
-        GET_PRACTICES(ch, GET_CLASS(ch)) -= 25;
+        GET_PRACTICES(ch) -= 25;
         if (IS_SAIYAN(ch) || IS_HALFBREED(ch)) {
             amt = amt + (amt * .30);
         }
@@ -1254,7 +1183,7 @@ void handle_study(struct char_data *keeper, int guild_nr, struct char_data *ch, 
 
     GET_EXP(ch) -= expcost;
     GET_GOLD(ch) -= goldcost;
-    GET_PRACTICES(ch, GET_CLASS(ch)) += 25;
+    GET_PRACTICES(ch) += 25;
 
     act("@c$N@W spends time lecturing you on various subjects.@n", true, ch, nullptr, keeper, TO_CHAR);
     act("@c$N@W spends time lecturing @C$n@W on various subjects.@n", true, ch, nullptr, keeper, TO_ROOM);
@@ -1262,290 +1191,6 @@ void handle_study(struct char_data *keeper, int guild_nr, struct char_data *ch, 
                  add_commas(expcost), add_commas(goldcost));
 
 }
-
-void handle_learn(struct char_data *keeper, int guild_nr, struct char_data *ch, char *argument) {
-    int feat_num, subval, sftype, subfeat;
-    char *ptr;
-    const char *cptr;
-    char buf[MAX_STRING_LENGTH];
-    int snum;
-    if (!*argument) {
-        send_to_char(ch, "Which feat would you like to learn?\r\n");
-        return;
-    }
-
-    if (GET_FEAT_POINTS(ch) < 1) {
-        send_to_char(ch, "You can't learn any new feats right now.\r\n");
-        return;
-    }
-
-    ptr = strchr(argument, ':');
-    if (ptr)
-        *ptr = 0;
-    feat_num = find_feat_num(argument);
-    if (ptr)
-        *ptr = ':';
-
-    if (!(does_guild_know_feat(guild_nr, feat_num))) {
-        snprintf(buf, sizeof(buf), guild_index[guild_nr].no_such_skill, GET_NAME(ch));
-        do_tell(keeper, buf, cmd_tell, 0);
-        return;
-    }
-
-    if (HAS_FEAT(ch, feat_num) && !feat_list[feat_num].can_stack) {
-        send_to_char(ch, "You already know the %s feat.\r\n", feat_list[feat_num].name);
-        return;
-    }
-
-    if (!feat_is_available(ch, feat_num, 0, nullptr) || !feat_list[feat_num].in_game ||
-        !feat_list[feat_num].can_learn) {
-        send_to_char(ch, "The %s feat is not available to you at this time.\r\n", argument);
-        return;
-    }
-
-    sftype = 2;
-    switch (feat_num) {
-        case FEAT_GREATER_WEAPON_SPECIALIZATION:
-        case FEAT_GREATER_WEAPON_FOCUS:
-        case FEAT_WEAPON_SPECIALIZATION:
-        case FEAT_WEAPON_FOCUS:
-        case FEAT_WEAPON_FINESSE:
-        case FEAT_IMPROVED_CRITICAL:
-            sftype = 1;
-        case FEAT_SPELL_FOCUS:
-        case FEAT_GREATER_SPELL_FOCUS:
-            subfeat = feat_to_subfeat(feat_num);
-            if (subfeat == -1) {
-                log("guild: Unconfigured subfeat '%s', check feat_to_subfeat()", feat_list[feat_num].name);
-                send_to_char(ch, "That feat is not yet ready for use.\r\n");
-                return;
-            }
-            if (ptr == nullptr || !*ptr) {
-                if (sftype == 2)
-                    cptr = "spell school";
-                else
-                    cptr = "weapon type";
-                subfeat = snprintf(buf, sizeof(buf),
-                                   "No ':' found. You must specify a %s to improve. Example:\r\n"
-                                   " learn %s: %s\r\nAvailable %s:\r\n", cptr,
-                                   feat_list[feat_num].name,
-                                   (sftype == 2) ? spell_schools[0] : weapon_type[0], cptr);
-                for (subval = 1; subval <= (sftype == 2 ? NUM_SCHOOLS : MAX_WEAPON_TYPES); subval++) {
-                    if (sftype == 2)
-                        cptr = spell_schools[subval];
-                    else
-                        cptr = weapon_type[subval];
-                    subfeat += snprintf(buf + subfeat, sizeof(buf) - subfeat, "  %s\r\n", cptr);
-                }
-                write_to_output(ch->desc, buf);
-                return;
-            }
-            if (*ptr == ':') ptr++;
-            skip_spaces(&ptr);
-            if (!ptr || !*ptr) {
-                if (sftype == 2)
-                    cptr = "spell school";
-                else
-                    cptr = "weapon type";
-                subfeat = snprintf(buf, sizeof(buf),
-                                   "No %s found. You must specify a %s to improve.\r\n\r\nExample:\r\n"
-                                   " learn %s: %s\r\n\r\nAvailable %s:\r\n", cptr, cptr,
-                                   feat_list[feat_num].name,
-                                   (sftype == 2) ? spell_schools[0] : weapon_type[0], cptr);
-                for (subval = 1; subval <= (sftype == 2 ? NUM_SCHOOLS : MAX_WEAPON_TYPES); subval++) {
-                    if (sftype == 2)
-                        cptr = spell_schools[subval];
-                    else
-                        cptr = weapon_type[subval];
-                    subfeat += snprintf(buf + subfeat, sizeof(buf) - subfeat, "  %s\r\n", cptr);
-                }
-                write_to_output(ch->desc, buf);
-                return;
-            }
-            subval = search_block(ptr, (sftype == 2) ? spell_schools : weapon_type, false);
-            if (subval == -1) {
-                log("bad subval: %s", ptr);
-                if (sftype == 2)
-                    ptr = "spell school";
-                else
-                    ptr = "weapon type";
-                subfeat = snprintf(buf, sizeof(buf),
-                                   "That is not a known %s. Available %s:\r\n",
-                                   ptr, ptr);
-                for (subval = 1; subval <= (sftype == 2 ? NUM_SCHOOLS : MAX_WEAPON_TYPES); subval++) {
-                    if (sftype == 2)
-                        cptr = spell_schools[subval];
-                    else
-                        cptr = weapon_type[subval];
-                    subfeat += snprintf(buf + subfeat, sizeof(buf) - subfeat, "  %s\r\n", cptr);
-                }
-                write_to_output(ch->desc, buf);
-                return;
-            }
-            if (!feat_is_available(ch, feat_num, subval, nullptr)) {
-                send_to_char(ch, "You do not satisfy the prerequisites for that feat.\r\n");
-                return;
-            }
-            if (sftype == 1) {
-                if (HAS_COMBAT_FEAT(ch, subfeat, subval)) {
-                    send_to_char(ch, "You already have that weapon feat.\r\n");
-                    return;
-                }
-                SET_COMBAT_FEAT(ch, subfeat, subval);
-            } else if (sftype == 2) {
-                if (HAS_SCHOOL_FEAT(ch, subfeat, subval)) {
-                    send_to_char(ch, "You already have that spell school feat.\r\n");
-                    return;
-                }
-                SET_SCHOOL_FEAT(ch, subfeat, subval);
-            } else {
-                log("unknown feat subtype %d in subfeat code", sftype);
-                send_to_char(ch, "That feat is not yet ready for use.\r\n");
-                return;
-            }
-            SET_FEAT(ch, feat_num, HAS_FEAT(ch, feat_num) + 1);
-            break;
-        case FEAT_GREAT_FORTITUDE:
-            SET_FEAT(ch, feat_num, 1);
-            GET_SAVE_MOD(ch, SAVING_FORTITUDE) += 2;
-            break;
-        case FEAT_IRON_WILL:
-            SET_FEAT(ch, feat_num, 1);
-            GET_SAVE_MOD(ch, SAVING_WILL) += 2;
-            break;
-        case FEAT_LIGHTNING_REFLEXES:
-            SET_FEAT(ch, feat_num, 1);
-            GET_SAVE_MOD(ch, SAVING_REFLEX) += 2;
-            break;
-        case FEAT_TOUGHNESS:
-            subval = HAS_FEAT(ch, feat_num) + 1;
-            SET_FEAT(ch, feat_num, subval);
-            //GET_MAX_HIT(ch) += 3;
-            break;
-        case FEAT_SKILL_FOCUS:
-            if (!ptr || !*ptr) {
-                send_to_char(ch, "You must specify a skill to improve. Syntax:\r\n  learn skill focus: skill\r\n");
-                return;
-            }
-            if (*ptr == ':') ptr++;
-            skip_spaces(&ptr);
-            if (!ptr || !*ptr) {
-                send_to_char(ch, "You must specify a skill to improve. Syntax:\r\n  learn skill focus: skill\r\n");
-                return;
-            }
-            if (GET_LEVEL(ch) <= 49) {
-                send_to_char(ch, "You must be at least level 50 to gain this feat on a skill.\r\n");
-                return;
-            }
-            subval = find_skill_num(ptr, SKTYPE_SKILL);
-            if (subval < 0) {
-                send_to_char(ch, "I don't recognize that skill.\r\n");
-                return;
-            }
-            snum = GET_SKILL(ch, subval);
-            if (snum > 100) {
-                send_to_char(ch, "You have already focused that skill as high as possible.\r\n");
-                return;
-            }
-            SET_SKILL_BONUS(ch, subval, GET_SKILL_BONUS(ch, subval) + 5);
-            SET_FEAT(ch, feat_num, HAS_FEAT(ch, feat_num) + 1);
-            break;
-        case FEAT_SPELL_MASTERY:
-            subval = HAS_FEAT(ch, feat_num) + 1;
-            SET_FEAT(ch, feat_num, subval);
-            GET_SPELL_MASTERY_POINTS(ch) += MAX(1, ability_mod_value(GET_INT(ch)));
-            break;
-        case FEAT_ACROBATIC:
-            subval = HAS_FEAT(ch, feat_num) + 1;
-            SET_FEAT(ch, feat_num, subval);
-            break;
-        case FEAT_AGILE:
-            subval = HAS_FEAT(ch, feat_num) + 1;
-            SET_FEAT(ch, feat_num, subval);
-            SET_SKILL_BONUS(ch, SKILL_BALANCE, GET_SKILL_BONUS(ch, SKILL_BALANCE) + 2);
-            SET_SKILL_BONUS(ch, SKILL_ESCAPE_ARTIST, GET_SKILL_BONUS(ch, SKILL_ESCAPE_ARTIST) + 2);
-            break;
-        case FEAT_ALERTNESS:
-            subval = HAS_FEAT(ch, feat_num) + 1;
-            SET_FEAT(ch, feat_num, subval);
-            SET_SKILL_BONUS(ch, SKILL_LISTEN, GET_SKILL_BONUS(ch, SKILL_LISTEN) + 2);
-            SET_SKILL_BONUS(ch, SKILL_SPOT, GET_SKILL_BONUS(ch, SKILL_SPOT) + 2);
-            break;
-        case FEAT_ANIMAL_AFFINITY:
-            subval = HAS_FEAT(ch, feat_num) + 1;
-            SET_FEAT(ch, feat_num, subval);
-            break;
-        case FEAT_ATHLETIC:
-            subval = HAS_FEAT(ch, feat_num) + 1;
-            SET_FEAT(ch, feat_num, subval);
-            break;
-        case FEAT_DECEITFUL:
-            subval = HAS_FEAT(ch, feat_num) + 1;
-            SET_FEAT(ch, feat_num, subval);
-            SET_SKILL_BONUS(ch, SKILL_DISGUISE, GET_SKILL_BONUS(ch, SKILL_DISGUISE) + 2);
-            SET_SKILL_BONUS(ch, SKILL_FORGERY, GET_SKILL_BONUS(ch, SKILL_FORGERY) + 2);
-            break;
-        case FEAT_DEFT_HANDS:
-            subval = HAS_FEAT(ch, feat_num) + 1;
-            SET_FEAT(ch, feat_num, subval);
-            SET_SKILL_BONUS(ch, SKILL_SLEIGHT_OF_HAND, GET_SKILL_BONUS(ch, SKILL_SLEIGHT_OF_HAND) + 2);
-            break;
-        case FEAT_DILIGENT:
-            subval = HAS_FEAT(ch, feat_num) + 1;
-            SET_FEAT(ch, feat_num, subval);
-            SET_SKILL_BONUS(ch, SKILL_APPRAISE, GET_SKILL_BONUS(ch, SKILL_APPRAISE) + 2);
-            break;
-        case FEAT_INVESTIGATOR:
-            subval = HAS_FEAT(ch, feat_num) + 1;
-            SET_FEAT(ch, feat_num, subval);
-            SET_SKILL_BONUS(ch, SKILL_EAVESDROP, GET_SKILL_BONUS(ch, SKILL_EAVESDROP) + 2);
-            SET_SKILL_BONUS(ch, SKILL_SEARCH, GET_SKILL_BONUS(ch, SKILL_SEARCH) + 2);
-            break;
-        case FEAT_MAGICAL_APTITUDE:
-            subval = HAS_FEAT(ch, feat_num) + 1;
-            SET_FEAT(ch, feat_num, subval);
-            break;
-        case FEAT_NEGOTIATOR:
-            subval = HAS_FEAT(ch, feat_num) + 1;
-            SET_FEAT(ch, feat_num, subval);
-            break;
-        case FEAT_NIMBLE_FINGERS:
-            subval = HAS_FEAT(ch, feat_num) + 1;
-            SET_FEAT(ch, feat_num, subval);
-            SET_SKILL_BONUS(ch, SKILL_OPEN_LOCK, GET_SKILL_BONUS(ch, SKILL_OPEN_LOCK) + 2);
-            break;
-        case FEAT_PERSUASIVE:
-            subval = HAS_FEAT(ch, feat_num) + 1;
-            SET_FEAT(ch, feat_num, subval);
-            break;
-        case FEAT_SELF_SUFFICIENT:
-            subval = HAS_FEAT(ch, feat_num) + 1;
-            SET_FEAT(ch, feat_num, subval);
-            SET_SKILL_BONUS(ch, SKILL_HEAL, GET_SKILL_BONUS(ch, SKILL_HEAL) + 2);
-            SET_SKILL_BONUS(ch, SKILL_SURVIVAL, GET_SKILL_BONUS(ch, SKILL_SURVIVAL) + 2);
-            break;
-        case FEAT_STEALTHY:
-            subval = HAS_FEAT(ch, feat_num) + 1;
-            SET_FEAT(ch, feat_num, subval);
-            SET_SKILL_BONUS(ch, SKILL_HIDE, GET_SKILL_BONUS(ch, SKILL_HIDE) + 2);
-            SET_SKILL_BONUS(ch, SKILL_MOVE_SILENTLY, GET_SKILL_BONUS(ch, SKILL_MOVE_SILENTLY) + 2);
-            break;
-        default:
-            do {
-                (*((((ch))->player_specials == &dummy_mob) ? (basic_mud_log(
-                        "OHNO: Mob using '" "(ch)->feats[feat_num]" "' at %s:%d.", "_file_name_",
-                        1501), &((ch)->feats[feat_num])) : &((ch)->feats[feat_num]))) = true;
-            } while (0);
-            break;
-    }
-    save_char(ch);
-
-    GET_FEAT_POINTS(ch)--;
-    send_to_char(ch, "Your training has given you the %s feat!\r\n", feat_list[feat_num].name);
-
-    return;
-}
-
 
 SPECIAL(guild) {
     char arg[MAX_INPUT_LENGTH];

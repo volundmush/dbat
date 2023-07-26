@@ -24,6 +24,7 @@
 #include "act.informative.h"
 #include "act.misc.h"
 #include "act.movement.h"
+#include "players.h"
 
 /* local vars */
 static int extractions_pending = 0;
@@ -66,8 +67,10 @@ const char *get_i_name(struct char_data *ch, struct char_data *vict) {
         return (RACE(vict));
     }
 
-    auto found = ch->player_specials->dubNames.find(vict->idnum);
-    if(found == ch->player_specials->dubNames.end()) return RACE(vict);
+    auto &p = players[ch->id];
+
+    auto found = p.dubNames.find(vict->id);
+    if(found == p.dubNames.end()) return RACE(vict);
 
     // print *found to name and return buf pointer.
     sprintf(name, "%s", found->second.c_str());
@@ -254,60 +257,6 @@ void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *ms
 
         case APPLY_RACE:
             /* ??? GET_RACE(ch) += mod; */
-            break;
-
-        case APPLY_TURN_LEVEL:
-            GET_TLEVEL(ch) += mod;
-            break;
-
-        case APPLY_SPELL_LVL_0:
-            if (!IS_NPC(ch))
-                GET_SPELL_LEVEL(ch, SPELL_LEVEL_0) += mod;
-            break;
-
-        case APPLY_SPELL_LVL_1:
-            if (!IS_NPC(ch))
-                GET_SPELL_LEVEL(ch, SPELL_LEVEL_1) += mod;
-            break;
-
-        case APPLY_SPELL_LVL_2:
-            if (!IS_NPC(ch))
-                GET_SPELL_LEVEL(ch, SPELL_LEVEL_2) += mod;
-            break;
-
-        case APPLY_SPELL_LVL_3:
-            if (!IS_NPC(ch))
-                GET_SPELL_LEVEL(ch, SPELL_LEVEL_3) += mod;
-            break;
-
-        case APPLY_SPELL_LVL_4:
-            if (!IS_NPC(ch))
-                GET_SPELL_LEVEL(ch, SPELL_LEVEL_4) += mod;
-            break;
-
-        case APPLY_SPELL_LVL_5:
-            if (!IS_NPC(ch))
-                GET_SPELL_LEVEL(ch, SPELL_LEVEL_5) += mod;
-            break;
-
-        case APPLY_SPELL_LVL_6:
-            if (!IS_NPC(ch))
-                GET_SPELL_LEVEL(ch, SPELL_LEVEL_6) += mod;
-            break;
-
-        case APPLY_SPELL_LVL_7:
-            if (!IS_NPC(ch))
-                GET_SPELL_LEVEL(ch, SPELL_LEVEL_7) += mod;
-            break;
-
-        case APPLY_SPELL_LVL_8:
-            if (!IS_NPC(ch))
-                GET_SPELL_LEVEL(ch, SPELL_LEVEL_8) += mod;
-            break;
-
-        case APPLY_SPELL_LVL_9:
-            if (!IS_NPC(ch))
-                GET_SPELL_LEVEL(ch, SPELL_LEVEL_9) += mod;
             break;
 
         case APPLY_FORTITUDE:
@@ -822,8 +771,7 @@ void equip_char(struct char_data *ch, struct obj_data *obj, int pos) {
         if (GET_OBJ_TYPE(obj) == ITEM_LIGHT)
             if (GET_OBJ_VAL(obj, VAL_LIGHT_HOURS))    /* if light is ON */
                 world[IN_ROOM(ch)].light++;
-    } else
-        log("SYSERR: IN_ROOM(ch) = NOWHERE when equipping char %s.", GET_NAME(ch));
+    }
 
     for (j = 0; j < MAX_OBJ_AFFECT; j++)
         affect_modify_ar(ch, obj->affected[j].location,
@@ -855,8 +803,7 @@ struct obj_data *unequip_char(struct char_data *ch, int pos) {
         if (GET_OBJ_TYPE(obj) == ITEM_LIGHT)
             if (GET_OBJ_VAL(obj, VAL_LIGHT_HOURS))    /* if light is ON */
                 world[IN_ROOM(ch)].light--;
-    } else
-        log("SYSERR: IN_ROOM(ch) = NOWHERE when unequipping char %s.", GET_NAME(ch));
+    }
 
     GET_EQ(ch, pos) = nullptr;
 
@@ -1047,8 +994,8 @@ void obj_to_room(struct obj_data *object, room_rnum room) {
                 object->level = GET_OBJ_VAL(object, 0);
             }
         }
-        if (ROOM_FLAGGED(room, ROOM_HOUSE))
-            SET_BIT_AR(ROOM_FLAGS(room), ROOM_HOUSE_CRASH);
+        if (ROOM_FLAGGED(room, ROOM_SAVE))
+            dirty_rooms.insert(room);
     }
 }
 
@@ -1080,8 +1027,8 @@ void obj_from_room(struct obj_data *object) {
 
     REMOVE_FROM_LIST(object, world[IN_ROOM(object)].contents, next_content, temp);
 
-    if (ROOM_FLAGGED(IN_ROOM(object), ROOM_HOUSE))
-        SET_BIT_AR(ROOM_FLAGS(IN_ROOM(object)), ROOM_HOUSE_CRASH);
+    if (ROOM_FLAGGED(IN_ROOM(object), ROOM_SAVE))
+        dirty_rooms.insert(IN_ROOM(object));
     IN_ROOM(object) = NOWHERE;
     object->next_content = nullptr;
 }
@@ -1113,8 +1060,8 @@ void obj_to_obj(struct obj_data *obj, struct obj_data *obj_to) {
         if (tmp_obj->carried_by)
             IS_CARRYING_W(tmp_obj->carried_by) += GET_OBJ_WEIGHT(obj);
     }
-    if (IN_ROOM(obj_to) != NOWHERE && ROOM_FLAGGED(IN_ROOM(obj_to), ROOM_HOUSE)) {
-        SET_BIT_AR(ROOM_FLAGS(IN_ROOM(obj_to)), ROOM_HOUSE_CRASH);
+    if (IN_ROOM(obj_to) != NOWHERE && ROOM_FLAGGED(IN_ROOM(obj_to), ROOM_SAVE)) {
+        dirty_rooms.insert(IN_ROOM(obj_to));;
     }
 }
 
@@ -1144,8 +1091,8 @@ void obj_from_obj(struct obj_data *obj) {
             IS_CARRYING_W(temp->carried_by) -= GET_OBJ_WEIGHT(obj);
     }
 
-    if (IN_ROOM(obj_from) != NOWHERE && ROOM_FLAGGED(IN_ROOM(obj_from), ROOM_HOUSE)) {
-        SET_BIT_AR(ROOM_FLAGS(IN_ROOM(obj_from)), ROOM_HOUSE_CRASH);
+    if (IN_ROOM(obj_from) != NOWHERE && ROOM_FLAGGED(IN_ROOM(obj_from), ROOM_SAVE)) {
+        dirty_rooms.insert(IN_ROOM(obj_from));
     }
 
     obj->in_obj = nullptr;
@@ -1207,7 +1154,7 @@ void extract_obj(struct obj_data *obj) {
     while (obj->contents)
         extract_obj(obj->contents);
 
-    REMOVE_FROM_LIST(obj, object_list, next, temp);
+    obj->deactivate();
 
     if (GET_OBJ_RNUM(obj) != NOTHING)
         (obj_index[GET_OBJ_RNUM(obj)].vn)--;
@@ -1263,7 +1210,6 @@ void update_char_objects(struct char_data *ch) {
     if (ch->contents)
         update_object(ch->contents, 1);
 }
-
 
 /* Extract a ch completely from the world, and leave his stuff behind */
 void extract_char_final(struct char_data *ch) {
@@ -1339,8 +1285,7 @@ void extract_char_final(struct char_data *ch) {
     }
 
     if (!IS_NPC(ch) && GET_CLONES(ch) > 0) {
-        struct char_data *clone = nullptr;
-        for (clone = character_list; clone; clone = clone->next) {
+        for (auto clone = character_list; clone; clone = clone->next) {
             if (IS_NPC(clone)) {
                 if (GET_MOB_VNUM(clone) == 25) {
                     if (GET_ORIGINAL(clone) == ch) {
@@ -1383,8 +1328,14 @@ void extract_char_final(struct char_data *ch) {
     }
 
     if (ch->poisonby) {
+        ch->poisonby->poisoned.erase(ch);
         ch->poisonby = nullptr;
     }
+
+    for(auto c : ch->poisoned) {
+        c->poisonby = nullptr;
+    }
+    ch->poisoned.clear();
 
     if (DRAGGING(ch)) {
         act("@WYou stop dragging @C$N@W!@n", true, ch, nullptr, DRAGGING(ch), TO_CHAR);
@@ -1426,6 +1377,7 @@ void extract_char_final(struct char_data *ch) {
         ABSORBBY(ch) = nullptr;
     }
 
+
     /* transfer objects to room, if any */
     while (ch->contents) {
         obj = ch->contents;
@@ -1459,12 +1411,12 @@ void extract_char_final(struct char_data *ch) {
             extract_script_mem(SCRIPT_MEM(ch));
     } else {
         save_char(ch);
-        Crash_delete_crashfile(ch);
     }
 
     /* If there's a descriptor, they're in the menu now. */
-    if (IS_NPC(ch) || !ch->desc)
+    if (IS_NPC(ch))
         free_char(ch);
+    else ch->deactivate();
 }
 
 

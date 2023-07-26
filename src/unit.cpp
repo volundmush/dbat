@@ -20,35 +20,16 @@ nlohmann::json unit_data::serializeUnit() {
         }
     }
 
-    for(auto s = proto_script; s; s = s->next) {
-        if(s->vnum != NOTHING) j["proto_script"].push_back(s->vnum);
-    }
-
     if(id) j["id"] = id;
 
     return j;
 }
 
 nlohmann::json unit_data::serializeContents() {
-    nlohmann::json j;
+    auto j = nlohmann::json::array();
 
     for(auto c = contents; c; c = c->next_content) {
-        j.push_back(c->serializeUnit());
-    }
-
-    return j;
-}
-
-nlohmann::json unit_data::serializeScript() {
-    nlohmann::json j;
-
-    if(!script) return j;
-
-    auto s = script;
-    if(s->global_vars) {
-        for(auto v = s->global_vars; v; v = v->next) {
-            j["global_vars"].push_back(v->serialize());
-        }
+        j.push_back(c->serializeInstance());
     }
 
     return j;
@@ -73,16 +54,18 @@ void unit_data::deserializeUnit(const nlohmann::json& j) {
         }
     }
 
-    if(j.contains("proto_script")) {
-        auto &p = j["proto_script"];
-        for(auto s = p.rbegin(); s != p.rend(); s++) {
-            auto new_s = new trig_proto_list();
-            new_s->vnum = *s;
-            new_s->next = proto_script;
-            proto_script = new_s;
-        }
-    }
-
     if(j.contains("id")) id = j["id"];
 
+}
+
+void unit_data::activateContents() {
+    for(auto obj = contents; obj; obj = obj->next_content) {
+        obj->activate();
+    }
+}
+
+void unit_data::deactivateContents() {
+    for(auto obj = contents; obj; obj = obj->next_content) {
+        obj->deactivate();
+    }
 }

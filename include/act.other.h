@@ -67,8 +67,6 @@ extern ACMD(do_file);
 
 extern ACMD(do_scribe);
 
-extern ACMD(do_pagelength);
-
 extern ACMD(do_scouter);
 
 extern ACMD(do_snet);

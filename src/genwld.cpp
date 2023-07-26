@@ -240,7 +240,7 @@ nlohmann::json room_direction_data::serialize() {
     if(general_description && strlen(general_description)) j["general_description"] = general_description;
     if(keyword && strlen(keyword)) j["keyword"] = keyword;
     if(exit_info) j["exit_info"] = exit_info;
-    if(key != NOTHING) j["key"] = key;
+    if(key > 0) j["key"] = key;
 	if(to_room != NOWHERE) j["to_room"] = to_room;
     if(dclock) j["dclock"] = dclock;
     if(dchide) j["dchide"] = dchide;
@@ -248,8 +248,8 @@ nlohmann::json room_direction_data::serialize() {
     if(dcmove) j["dcmove"] = dcmove;
     if(failsavetype) j["failsavetype"] = failsavetype;
     if(dcfailsave) j["dcfailsave"] = dcfailsave;
-    if(failroom != NOWHERE) j["failroom"] = failroom;
-    if(totalfailroom != NOWHERE) j["totalfailroom"] = totalfailroom;
+    if(failroom > 0) j["failroom"] = failroom;
+    if(totalfailroom > 0) j["totalfailroom"] = totalfailroom;
 
     return j;
 }
@@ -281,6 +281,10 @@ nlohmann::json room_data::serialize() {
 
     for(auto i = 0; i < NUM_ROOM_FLAGS; i++) if(IS_SET_AR(room_flags, i)) j["room_flags"].push_back(i);
 
+    for(auto s = proto_script; s; s = s->next) {
+        if(trig_index.contains(s->vnum)) j["proto_script"].push_back(s->vnum);
+    }
+
     return j;
 }
 
@@ -304,10 +308,24 @@ room_data::room_data(const nlohmann::json &j) {
         }
     }
 
-    if(proto_script || vn == 0) script = new script_data();
-    for(auto p = proto_script; p; p = p->next) {
-        add_trigger(script, read_trigger(p->vnum), -1);
+    if(j.contains("proto_script")) {
+        auto &p = j["proto_script"];
+        for(auto s = p.rbegin(); s != p.rend(); s++) {
+            auto new_s = new trig_proto_list();
+            new_s->vnum = *s;
+            new_s->next = proto_script;
+            proto_script = new_s;
+        }
     }
+
+    if((proto_script || vn == 0)) {
+        if(!script) script = new script_data();
+        if(proto_script) for(auto p = proto_script; p; p = p->next) {
+            auto t = read_trigger(p->vnum);
+            if(t) add_trigger(script, t, -1);
+        }
+    }
+
 
 }
 
@@ -378,4 +396,13 @@ double room_data::getGravity() {
     }
 
     return 1.0;
+}
+
+void room_data::deserializeContents(const nlohmann::json& j, bool isActive) {
+    for(const auto& jo : j) {
+        auto obj = new obj_data();
+        obj->deserializeInstance(jo, isActive);
+        // Since we're deserializing items in a room, we'll just add them straight to it.
+        obj_to_room(obj, vn);
+    }
 }

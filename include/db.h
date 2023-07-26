@@ -115,7 +115,6 @@
 // global variables
 extern struct time_info_data time_info;/* the infomation about the time    */
 extern struct weather_data weather_info;    /* the infomation about the weather */
-extern struct player_special_data dummy_mob;    /* dummy spec area for mobs	*/
 extern std::set<zone_vnum> zone_reset_queue;
 
 extern std::shared_ptr<SQLite::Database> db;
@@ -148,8 +147,6 @@ extern void index_boot(int mode);
 extern boost::asio::awaitable<void> boot_db();
 
 extern void destroy_db();
-
-extern int create_entry(char *name);
 
 extern void zone_update();
 
@@ -191,11 +188,8 @@ extern obj_rnum real_object(obj_vnum vnum);
 
 extern int load_char(const char *name, struct char_data *ch);
 
-extern void load_char_pets(struct char_data *ch);
-
 extern void save_char(struct char_data *ch);
 
-extern void save_char_pets(struct char_data *ch);
 
 extern void init_char(struct char_data *ch);
 
@@ -232,6 +226,10 @@ extern int my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate);
 extern void add_unique_id(struct obj_data *obj);
 
 extern void check_unique_id(struct obj_data *obj);
+
+extern void add_unique_id(struct char_data *ch);
+
+extern void check_unique_id(struct char_data *ch);
 
 extern char *sprintuniques(int low, int high);
 
@@ -387,7 +385,8 @@ extern time_t boot_time;
 extern struct config_data config_info;
 
 // dirty sets...
-extern std::set<room_vnum> dirty_rooms, dirty_save_rooms;
+void dirty_all();
+extern std::set<room_vnum> dirty_rooms;
 extern std::set<obj_vnum> dirty_item_prototypes;
 extern std::set<mob_vnum> dirty_npc_prototypes;
 extern std::set<zone_vnum> dirty_zones;
@@ -395,15 +394,13 @@ extern std::set<vnum> dirty_areas;
 extern std::set<trig_vnum> dirty_dgscripts;
 extern std::set<guild_vnum> dirty_guilds;
 extern std::set<shop_vnum> dirty_shops;
-extern std::set<vnum> dirty_players;
+extern std::set<int64_t> dirty_players;
 extern std::set<vnum> dirty_accounts;
 
 void process_dirty();
 // TODO: not yet sure how to handle accounts... working on it...
 
 // world data...
-
-
 extern std::map<room_vnum, room_data> world;
 extern std::map<zone_vnum, struct zone_data> zone_table;
 

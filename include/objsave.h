@@ -22,8 +22,6 @@ extern int Obj_to_store(struct obj_data *obj, FILE *fl, int location);
 
 extern void update_obj_file();
 
-extern int cp(struct char_data *ch);
-
 extern void delete_inv_backup(struct char_data *ch);
 
 extern int Crash_delete_file(char *name);
@@ -38,10 +36,8 @@ extern int Crash_load(struct char_data *ch);
 
 extern void Crash_crashsave(struct char_data *ch);
 
-extern void Crash_idlesave(struct char_data *ch);
-
 extern void Crash_save_all();
 
-extern int Crash_load_xapobjs(struct char_data *ch);
-
 extern SPECIAL(receptionist);
+
+void auto_equip(struct char_data *ch, struct obj_data *obj, int location);

@@ -244,7 +244,6 @@ void init_mobile(struct char_data *mob) {
     mob->aff_abils = mob->real_abils;
 
     SET_BIT_AR(MOB_FLAGS(mob), MOB_ISNPC);
-    mob->player_specials = &dummy_mob;
 }
 
 /*-------------------------------------------------------------------*/

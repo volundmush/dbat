@@ -1716,7 +1716,6 @@ void huge_update() {
         if (GET_AUCTER(k) > 0 && GET_AUCTIME(k) + 604800 <= time(nullptr)) {
             if (IN_ROOM(k) && GET_ROOM_VNUM(IN_ROOM(k)) == 80) {
                 room_vnum inroom = IN_ROOM(k);
-                REMOVE_BIT_AR(ROOM_FLAGS(inroom), ROOM_HOUSE_CRASH);
                 extract_obj(k);
                 continue;
             }
@@ -3805,11 +3804,11 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
                 }
                 if (!IS_NPC(vict)) {
                     if (PRF_FLAGGED(vict, PRF_INSTRUCT)) {
-                        if (GET_PRACTICES(vict, GET_CLASS(vict)) > 10) {
+                        if (GET_PRACTICES(vict) > 10) {
                             send_to_char(vict, "You instruct them in proper fighting techniques and strategies.\r\n");
                             act("You take $N's instruction to heart and gain more experience.\r\n", false, ch, nullptr,
                                 vict, TO_CHAR);
-                            GET_PRACTICES(vict, GET_CLASS(vict)) -= 10;
+                            GET_PRACTICES(vict) -= 10;
                             bonus = 2;
                         }
                     }
@@ -3833,8 +3832,8 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
                 }
             }
             gain = gear_exp(ch, gaincalc);
-            if (GET_PRACTICES(ch, GET_CLASS(ch)) >= pscost) {
-                GET_PRACTICES(ch, GET_CLASS(ch)) -= pscost;
+            if (GET_PRACTICES(ch) >= pscost) {
+                GET_PRACTICES(ch) -= pscost;
                 gain = gain * bonus;
                 gain_exp(ch, gain);
                 send_to_char(ch, "@D[@Y+ @G%s @mExp@D]@n ", add_commas(gain));
@@ -3947,8 +3946,8 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
                     gain *= 1.25;
                 }
             }
-            if (GET_PRACTICES(vict, GET_CLASS(vict)) >= pscost) {
-                GET_PRACTICES(vict, GET_CLASS(vict)) -= pscost;
+            if (GET_PRACTICES(vict) >= pscost) {
+                GET_PRACTICES(vict) -= pscost;
                 send_to_char(vict, "@D[@Y+ @G%s @mExp@D]@n ", add_commas(gain));
                 gain = gear_exp(vict, gain);
                 gain_exp(vict, gain);
@@ -4741,7 +4740,7 @@ hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, struct 
             do_stand(vict, nullptr, 0, 0);
         }
         int suppresso = false;
-        if (is_sparring(ch) && is_sparring(vict) && (GET_SUPP(vict) + vict->getCurHealth()) - dmg <= 0) {
+        if (is_sparring(ch) && is_sparring(vict) && (GET_SUPPRESS(vict) + vict->getCurHealth()) - dmg <= 0) {
             if (!IS_NPC(vict)) {
                 act("@c$N@w falls down unconscious, and you stop sparring with $M.@n", true, ch, nullptr, vict,
                     TO_CHAR);
@@ -4749,8 +4748,7 @@ hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, struct 
                 act("@c$N@w falls down unconscious, and @C$n@w stops sparring with $M.@n", true, ch, nullptr, vict,
                     TO_NOTVICT);
                 vict->setCurHealth(1);
-                if (GET_SUPP(vict) > 0) {
-                    GET_SUPP(vict) = 0;
+                if (GET_SUPPRESS(vict)) {
                     GET_SUPPRESS(vict) = 0;
                 }
                 if (FIGHTING(vict)) {
@@ -4786,7 +4784,7 @@ hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, struct 
                 extract_char(vict);
                 return;
             }
-        } else if (is_sparring(ch) && (GET_SUPP(vict) + GET_HIT(vict)) - dmg <= 0) {
+        } else if (is_sparring(ch) && (GET_SUPPRESS(vict) + GET_HIT(vict)) - dmg <= 0) {
             act("@c$N@w falls down unconscious, and you spare $S life.@n", true, ch, nullptr, vict, TO_CHAR);
             act("@C$n@w spares your life as you fall unconscious.@n", true, ch, nullptr, vict, TO_VICT);
             act("@c$N@w falls down unconscious, and @C$n@w spares $S life.@n", true, ch, nullptr, vict, TO_NOTVICT);
@@ -4808,18 +4806,6 @@ hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, struct 
             act("@w$n@w stops sparring!@n", true, ch, nullptr, vict, TO_ROOM);
             REMOVE_BIT_AR(MOB_FLAGS(vict), MOB_SPAR);
         }
-        if (GET_SUPP(vict) > 0 && GET_SUPPRESS(vict) > 0) {
-            if (GET_SUPP(vict) > dmg) {
-                GET_SUPP(vict) -= dmg;
-                suppresso = true;
-            } else if (GET_SUPP(vict) <= dmg) {
-                send_to_char(vict, "@GYou no longer have any reserve powerlevel suppressed.@n\r\n");
-                dmg -= GET_SUPP(vict);
-                GET_SUPP(vict) = 0;
-                GET_SUPPRESS(vict) = 0;
-            }
-        }
-
 
         if (PLR_FLAGGED(vict, PLR_IMMORTAL) && !is_sparring(ch) && vict->getCurHealth() - dmg <= 0) {
             if (IN_ARENA(vict)) {
@@ -5036,7 +5022,6 @@ hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, struct 
                 } else if (dmg > 1 && suppresso == true && !PRF_FLAGGED(ch, PRF_NODEC)) {
                     send_to_char(ch, "@D[@GDamage@W: @R%s@D]@n", add_commas(dmg));
                     send_to_char(vict, "@D[@rDamage@W: @R%s @c-Suppression-@D]@n\r\n", add_commas(dmg));
-                    send_to_char(vict, "@D[Suppression@W: @G%s@D]@n\r\n", add_commas(GET_SUPP(vict)));
                     //int64_t healhp = GET_HIT(vict) * 0.12;
                     if (GET_EQ(ch, WEAR_EYE) && vict && !PRF_FLAGGED(ch, PRF_NODEC)) {
                         if (IS_ANDROID(vict)) {
@@ -5055,8 +5040,6 @@ hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, struct 
                     }
                 } else if (dmg <= 1 && suppresso == true && !PRF_FLAGGED(ch, PRF_NODEC)) {
                     send_to_char(ch, "@D[@GDamage@W: @BPitiful...@D]@n");
-                    send_to_char(vict, "@D[@rDamage@W: @BPitiful... @c-Suppression-@D]@n\r\n");
-                    send_to_char(vict, "@D[Suppression@W: @G%s@D]@n\r\n", add_commas(GET_SUPP(vict)));
                     if (GET_EQ(ch, WEAR_EYE) && vict) {
                         if (IS_ANDROID(vict) && !PRF_FLAGGED(ch, PRF_NODEC)) {
                             send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");

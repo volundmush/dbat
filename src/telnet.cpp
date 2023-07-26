@@ -285,17 +285,19 @@ namespace net {
         // We will be doing this in a loop until there are no more messages to send.
 
         while(outMessages.ready()) {
-            Message m;
-            if(!outMessages.try_receive(m)) continue;
-            // for now let's only worry about text outMessages...
-            if(m.cmd == "text") {
-                // iterate over m.args, all of which should be strings, and shove them into outbuf.
-                for(std::string arg : m.args) {
-                    auto p = outbuf.prepare(arg.size());
-                    memcpy(p.data(), arg.data(), arg.size());
-                    outbuf.commit(arg.size());
+            if(!outMessages.try_receive([&](boost::system::error_code ec, const Message &m) {
+                if(!ec) {
+                    if(m.cmd == "text") {
+                        // iterate over m.args, all of which should be strings, and shove them into outbuf.
+                        for(std::string arg : m.args) {
+                            auto p = outbuf.prepare(arg.size());
+                            memcpy(p.data(), arg.data(), arg.size());
+                            outbuf.commit(arg.size());
+                        }
+                    }
                 }
-            }
+            })) continue;
+            // for now let's only worry about text outMessages...
         }
         co_return;
     }

@@ -755,7 +755,7 @@ namespace race {
                 default:
                     return base_form;
             }
-            if (ETHER_STREAM(ch))
+            if (IN_ROOM(ch) != NOWHERE && ETHER_STREAM(ch))
                 bon_mult += .5;
             hoshi_form.bonus = (ch->getBasePL() * .1) * bon_mult;
             return hoshi_form;
@@ -875,7 +875,7 @@ namespace race {
                     send_to_char(ch, "You need %i RPP in order to unlock this transformation.\r\n", rpp_cost);
                     return false;
                 } else {
-                    GET_RP(ch) -= rpp_cost;
+                    ch->modRPP(-rpp_cost);
                     GET_TRANSCOST(ch, tier) = true;
                     send_to_char(ch, "You pay %i RPP to permanently unlock this transformation!\r\n", rpp_cost);
                 }
@@ -895,13 +895,13 @@ namespace race {
 
         if (ps_cost) {
             if (GET_TRANSCOST(ch, tier) == false) {
-                if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
+                if (GET_PRACTICES(ch) < 50) {
                     send_to_char(ch,
                                  "You need %i practice points in order to obtain a transformation for the first time.\r\n",
                                  ps_cost);
                     return false;
                 } else {
-                    GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
+                    GET_PRACTICES(ch) -= 50;
                     GET_TRANSCOST(ch, tier) = true;
                     send_to_char(ch, "You pay %i PS to permanently unlock this transformation!\r\n", ps_cost);
                 }

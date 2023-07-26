@@ -3143,7 +3143,6 @@ ACMD(do_selfd) {
         dmg += (ch->getBasePL()) * 0.6;
         dmg += (ch->getBaseST());
         ch->decCurHealthPercent(1, 1);
-        GET_SUPP(ch) = 0;
         GET_SUPPRESS(ch) = 0;
         act("@RYou EXPLODE! The explosion concentrates on @r$N@R, engulfing $M in a sphere of deadly energy!@n", true,
             ch, nullptr, tch, TO_CHAR);
@@ -3178,7 +3177,6 @@ ACMD(do_selfd) {
         dmg += (ch->getBaseST());
         dmg *= 1.5;
         ch->decCurHealthPercent(1, 1);
-        GET_SUPP(ch) = 0;
         GET_SUPPRESS(ch) = 0;
         act("@RYou EXPLODE! The explosion expands outward burning up all surroundings for a large distance. The explosion takes on the shape of a large energy dome with you at its center!@n",
             true, ch, nullptr, nullptr, TO_CHAR);

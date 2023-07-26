@@ -2183,7 +2183,7 @@ ACMD(do_runic) {
             act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CGebo@D'@B rune on $s skin. The rune flashes out of existence immediately!@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
             send_to_char(ch, "@D[@B%d@b ink used.@D]@n\r\n", inkcost);
-            GET_PRACTICES(vict, GET_CLASS(vict)) += 125;
+            GET_PRACTICES(vict) += 125;
             send_to_char(vict,
                          "@GYou feel like you've just gained a lot of knowledge. Now if only you could apply it. @D[@m+125 PS@D]@n\r\n");
             GET_OBJ_VAL(bottle, 6) -= inkcost;
@@ -2201,7 +2201,7 @@ ACMD(do_runic) {
             act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CGebo@D'@B rune on @b$N's@B skin. The rune flashes out of existence immediately!@n",
                 true, ch, nullptr, vict, TO_NOTVICT);
             send_to_char(ch, "@D[@B%d@b ink used.@D]@n\r\n", inkcost);
-            GET_PRACTICES(vict, GET_CLASS(vict)) += 125;
+            GET_PRACTICES(vict) += 125;
             send_to_char(vict,
                          "@GYou feel like you've just gained a lot of knowledge. Now if only you could apply it. @D[@m+125 PS@D]@n\r\n");
             GET_OBJ_VAL(bottle, 6) -= inkcost;
@@ -2259,7 +2259,7 @@ ACMD(do_scry) {
 
     int cost = 2000;
 
-    if (GET_PRACTICES(ch, GET_CLASS(ch)) < cost) {
+    if (GET_PRACTICES(ch) < cost) {
         send_to_char(ch, "You do not have enough PS to Oracle Scry!\r\n");
         return;
     } else {
@@ -2280,7 +2280,7 @@ ACMD(do_scry) {
                      "Your Powerlevel, Ki, and Stamina have improved drastically! On top of that your Intelligence and Wisdom have improved permanantly!\r\n");
         vict->real_abils.intel += 2;
         vict->real_abils.wis += 2;
-        GET_PRACTICES(ch, GET_CLASS(ch)) -= 2000;
+        GET_PRACTICES(ch) -= 2000;
         if (GET_LEVEL(ch) < 100) {
             send_to_char(ch, "@D[@mPractice Sessions@D:@R -2000@D]@n\r\n");
             if (level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0) {
@@ -3202,14 +3202,14 @@ void rpp_feature(struct char_data *ch, const char *arg) {
         change = true;
     }
 
-    if (cost > GET_RBANK(ch)) {
+    if (cost > ch->getRPP()) {
         send_to_char(ch, "You do not have enough RPP in your Bank for that!\r\n");
         return;
     } else {
         char sex[128], buf8[MAX_INPUT_LENGTH];
         sprintf(sex, "%s", GET_SEX(ch) == SEX_FEMALE ? "She" : GET_SEX(ch) == SEX_MALE ? "He" : "It");
 
-        GET_RBANK(ch) -= cost;
+        ch->modRPP(-cost);
         sprintf(buf8, "...%s has %s.", sex, arg);
         send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
         send_to_char(ch,

@@ -22,7 +22,6 @@
 #include "dg_scripts.h"
 #include "shop.h"
 #include "guild.h"
-#include "imc.h"
 #include "clan.h"
 #include "class.h"
 #include "races.h"
@@ -38,6 +37,8 @@
 #include "ban.h"
 #include "assedit.h"
 #include "obj_edit.h"
+#include <boost/algorithm/string.hpp>
+#include "constants.h"
 
 /* local global variables */
 DISABLED_DATA *disabled_first = nullptr;
@@ -50,10 +51,6 @@ void userRead(struct descriptor_data *d);
 int opp_bonus(struct char_data *ch, int value, int type);
 
 int perform_dupe_check(struct descriptor_data *d);
-
-struct alias_data *find_alias(struct alias_data *alias_list, char *str);
-
-void free_alias(struct alias_data *a);
 
 void perform_complex_alias(struct txt_q *input_q, char *orig, struct alias_data *a);
 
@@ -328,8 +325,6 @@ ACMD(do_eat);
 ACMD(do_commune);
 
 ACMD(do_rptrans);
-
-ACMD(do_rpbank);
 
 ACMD(do_aura);
 
@@ -607,8 +602,6 @@ ACMD(do_regenerate);
 ACMD(do_uppercut);
 
 ACMD(do_upgrade);
-
-ACMD(do_pagelength);
 
 ACMD(do_peace);
 
@@ -1217,7 +1210,6 @@ const struct command_info cmd_info[] = {
         {"pack",          "pac",          POS_STANDING, do_pack,            0, 0,               0},
         {"page",          "pag",          POS_DEAD,     do_page,            0,  ADMLVL_BUILDER, 0},
         {"paralyze",      "paralyz",      POS_FIGHTING, do_paralyze,        0,  ADMLVL_NONE,    0},
-        {"pagelength",    "pagel",        POS_DEAD,     do_pagelength,      0, 0,               0},
         {"peace",         "pea",          POS_DEAD,     do_peace,           0,  ADMLVL_BUILDER, 0},
         {"perfect",       "perfec",       POS_DEAD,     do_perf,            0,  ADMLVL_NONE,    0},
         {"permission",    "permiss",      POS_DEAD,     do_permission,      0,  ADMLVL_IMMORT,  0},
@@ -1281,7 +1273,6 @@ const struct command_info cmd_info[] = {
         {"rogafufuken",   "rogafu",       POS_FIGHTING, do_rogafufuken,     0,  ADMLVL_NONE,    0},
         {"roomflags",     "roomf",        POS_DEAD,     do_gen_tog,         0,  ADMLVL_IMMORT,  SCMD_ROOMFLAGS},
         {"roundhouse",    "roundhou",     POS_FIGHTING, do_roundhouse,      0,  ADMLVL_NONE,    0},
-        {"rpbank",        "rpban",        POS_SLEEPING, do_rpbank,          0,  ADMLVL_NONE,    0},
         {"rpp",           "rpp",          POS_SLEEPING, do_rpp,             0,  ADMLVL_NONE,    0},
         {"runic",         "runi",         POS_STANDING, do_runic,           0,  ADMLVL_NONE,    0},
 
@@ -1585,17 +1576,11 @@ void command_interpreter(struct char_data *ch, char *argument) {
 
 
     if (*complete_cmd_info[cmd].command == '\n') {
-        if (CONFIG_IMC_ENABLED && !IS_NPC(ch)) {
-            if (!IS_NPC(ch) && !imc_command_hook(ch, arg, line)) {
-                send_to_char(ch, "Huh!?!\r\n");
-            } else {
-                skip_ld = 1;
-            }
-        } else {
-            send_to_char(ch, "Huh!?!\r\n");
-            return;
-        }
-    } else if (!command_pass(blah, ch) && GET_ADMLEVEL(ch) < 1)
+        send_to_char(ch, "Huh!?!\r\n");
+        return;
+    }
+
+    if (!command_pass(blah, ch) && GET_ADMLEVEL(ch) < 1)
         send_to_char(ch, "It's unfortunate...\r\n");
     else if (check_disabled(&complete_cmd_info[cmd]))    /* is it disabled? */
         send_to_char(ch, "This command has been temporarily disabled.\r\n");
@@ -1645,29 +1630,6 @@ void command_interpreter(struct char_data *ch, char *argument) {
  * Routines to handle aliasing                                             *
   **************************************************************************/
 
-
-struct alias_data *find_alias(struct alias_data *alias_list, char *str) {
-    while (alias_list != nullptr) {
-        if (*str == *alias_list->alias)    /* hey, every little bit counts :-) */
-            if (!strcmp(str, alias_list->alias))
-                return (alias_list);
-
-        alias_list = alias_list->next;
-    }
-
-    return (nullptr);
-}
-
-
-void free_alias(struct alias_data *a) {
-    if (a->alias)
-        free(a->alias);
-    if (a->replacement)
-        free(a->replacement);
-    free(a);
-}
-
-
 /* The interface to the outside world: do_alias */
 ACMD(do_alias) {
     char arg[MAX_INPUT_LENGTH];
@@ -1677,14 +1639,16 @@ ACMD(do_alias) {
     if (IS_NPC(ch))
         return;
 
+    auto &p = players[ch->id];
+
     repl = any_one_arg(argument, arg);
 
     if (!*arg) {            /* no argument specified -- list currently defined aliases */
         send_to_char(ch, "Currently defined aliases:\r\n");
         int count = 0;
-        for(auto &a : ch->player_specials->aliases) {
+        for(auto &a : p.aliases) {
             count++;
-            send_to_char(ch, "%-15s %s\r\n", a->alias.c_str(), a->replacement.c_str());
+            send_to_char(ch, "%-15s %s\r\n", a.name.c_str(), a.replacement.c_str());
         }
         if(!count) {
             send_to_char(ch, " None.\r\n");
@@ -1693,7 +1657,7 @@ ACMD(do_alias) {
     }
     /* otherwise, add or remove aliases */
     /* is this an alias we've already defined? */
-    auto &aliases = ch->player_specials->aliases;
+    auto &aliases = p.aliases;
     auto find = std::find_if(aliases.begin(), aliases.end(), [&](const auto &a) {
         return boost::iequals(a.name, arg);
     });
@@ -1705,7 +1669,7 @@ ACMD(do_alias) {
         else {
 			aliases.erase(find);
             send_to_char(ch, "Alias deleted.\r\n");
-            dirty_players.insert(ch->idnum);
+            dirty_players.insert(ch->id);
         }
         return;
     }
@@ -1732,7 +1696,7 @@ ACMD(do_alias) {
         a.type = type;
         send_to_char(ch, "Alias added.\r\n");
     }
-    dirty_players.insert(ch->idnum);
+    dirty_players.insert(ch->id);
 }
 
 /*
@@ -1762,7 +1726,7 @@ static void perform_complex_alias(struct descriptor_data *d, char *orig, struct 
     temp_queue.head = temp_queue.tail = nullptr;
 
     /* now parse the alias */
-    auto r = a->replacement.c_str();
+    auto r = (char*)a->replacement.c_str();
     for (temp = r; *temp; temp++) {
         if (*temp == ALIAS_SEP_CHAR) {
             *write_point = '\0';
@@ -1816,8 +1780,8 @@ void perform_alias(struct descriptor_data *d, char *orig) {
         d->input_queue.emplace_back(orig);
         return;
     }
-
-    auto &aliases = d->character->player_specials->aliases;
+    auto &p = players[d->character->id];
+    auto &aliases = p.aliases;
 
     /* bail out immediately if the guy doesn't have any aliases */
     if (aliases.empty()) {
@@ -2207,9 +2171,9 @@ void topWrite(struct char_data *ch) {
     for (x = start; x < finish; x++) { /* Save the new spots */
         if (placed == false) { /* They Haven't Placed */
             if (strcasecmp(topname[x], GET_USER(ch))) { /* Name doesn't match */
-                if (GET_TRP(ch) > toppoint[x]) {
+                if (ch->getRPP() > toppoint[x]) {
                     free(topname[x]);
-                    toppoint[x] = GET_TRP(ch);
+                    toppoint[x] = ch->getRPP();
                     topname[x] = strdup(GET_USER(ch));
                     placed = true;
                     writeEm = true;
@@ -2754,6 +2718,7 @@ int enter_player_game(struct descriptor_data *d) {
 
     reset_char(d->character);
 
+
     racial_body_parts(d->character);
 
     if (PLR_FLAGGED(d->character, PLR_INVSTART))
@@ -2778,15 +2743,10 @@ int enter_player_game(struct descriptor_data *d) {
     if (PLR_FLAGGED(d->character, PLR_FROZEN))
         load_room = real_room(CONFIG_FROZEN_START);
 
-    d->character->next = character_list;
-    character_list = d->character;
+    d->character->activate();
     char_to_room(d->character, load_room);
-    load_result = Crash_load(d->character);
-    if (d->character->player_specials->host) {
-        free(d->character->player_specials->host);
-        d->character->player_specials->host = nullptr;
-    }
-    d->character->player_specials->host = strdup(d->host);
+    // TODO: activate inventory/gear...
+
     ((d->character)->id) = GET_IDNUM(d->character);
 
     read_saved_vars(d->character);
@@ -2860,9 +2820,6 @@ int enter_player_game(struct descriptor_data *d) {
     } else {
         GET_SPEEDBOOST(d->character) = 0;
     }
-    if (GET_TRP(d->character) < GET_RP(d->character)) {
-        GET_TRP(d->character) = GET_RP(d->character);
-    }
 
     if (IS_NAMEK(d->character) && GET_COND(d->character, HUNGER) >= 0) {
         GET_COND(d->character, HUNGER) = -1;
@@ -2871,9 +2828,7 @@ int enter_player_game(struct descriptor_data *d) {
     if (PLR_FLAGGED(d->character, PLR_HEALT)) {
         REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_HEALT);
     }
-    if (CONFIG_IMC_ENABLED) {
-        load_imc_pfile(d->character);
-    }
+
     if (GET_ADMLEVEL(d->character) > 0) {
         d->level = 1;
     }
@@ -3133,42 +3088,6 @@ void userLoad(struct descriptor_data *d, char *name) {
     }
     fclose(fl);
     return;
-}
-
-
-/* Delete A User Account */
-void userDelete(struct descriptor_data *d) {
-    int player_i;
-
-    char fname[40];
-
-    if (get_filename(fname, sizeof(fname), USER_FILE, d->user)) {
-        if (!!strcasecmp(d->tmp1, "Empty")) {
-            if ((player_i = get_ptable_by_name(d->tmp1)) >= 0)
-                remove_player(player_i);
-        }
-        if (!!strcasecmp(d->tmp2, "Empty")) {
-            if ((player_i = get_ptable_by_name(d->tmp2)) >= 0)
-                remove_player(player_i);
-        }
-        if (!!strcasecmp(d->tmp3, "Empty")) {
-            if ((player_i = get_ptable_by_name(d->tmp3)) >= 0)
-                remove_player(player_i);
-        }
-        if (!!strcasecmp(d->tmp4, "Empty")) {
-            if ((player_i = get_ptable_by_name(d->tmp4)) >= 0)
-                remove_player(player_i);
-        }
-        if (!!strcasecmp(d->tmp5, "Empty")) {
-            if ((player_i = get_ptable_by_name(d->tmp5)) >= 0)
-                remove_player(player_i);
-        }
-        unlink(fname);
-        return;
-    } else {
-        write_to_output(d, "Error. Your user file doesn't even exist!\n");
-        return;
-    }
 }
 
 /* For transfering money or doing things with an offline player */
@@ -3634,118 +3553,6 @@ int parse_bonuses(const char *arg) {
     return value;
 }
 
-/* List names of Bonus/Negative */
-const char *list_bonus[] = {
-        "Thrifty", /* Bonus 0 */
-        "Prodigy", /* Bonus 1 */
-        "Quick Study", /* Bonus 2 */
-        "Die Hard", /* Bonus 3 */
-        "Brawler", /* Bonus 4 */
-        "Destroyer", /* Bonus 5 */
-        "Hard Worker", /* Bonus 6 */
-        "Healer", /* Bonus 7 */
-        "Loyal", /* Bonus 8 */
-        "Brawny", /* Bonus 9 */
-        "Scholarly", /* Bonus 10 */
-        "Sage", /* Bonus 11 */
-        "Agile", /* Bonus 12 */
-        "Quick", /* Bonus 13 */
-        "Sturdy", /* Bonus 14 */
-        "Thick Skin", /* Bonus 15 */
-        "Recipe Int", /* Bonus 16 */
-        "Fireproof", /* Bonus 17 */
-        "Powerhitter", /* Bonus 18 */
-        "Healthy", /* Bonus 19 */
-        "Insomniac", /* Bonus 20 */
-        "Evasive", /* Bonus 21 */
-        "The Wall", /* Bonus 22 */
-        "Accurate", /* Bonus 23 */
-        "Energy Leech", /* Bonus 24 */
-        "Good Memory", /* Bonus 25*/
-        "Soft Touch", /* Neg 26 */
-        "Late Sleeper", /* Neg 27 */
-        "Impulse Shop", /* Neg 28 */
-        "Sickly", /* Neg 29 */
-        "Punching Bag", /* Neg 30 */
-        "Pushover", /* Neg 31 */
-        "Poor Depth Perception", /* Neg 32 */
-        "Thin Skin", /* Neg 33 */
-        "Fireprone", /* Neg 34 */
-        "Energy Intollerant", /* Neg 35 */
-        "Coward", /* Neg 36 */
-        "Arrogant", /* Neg 37 */
-        "Unfocused", /* Neg 38 */
-        "Slacker", /* Neg 39 */
-        "Slow Learner", /* Neg 40 */
-        "Masochistic", /* Neg 41 */
-        "Mute", /* Neg 42 */
-        "Wimp", /* Neg 43 */
-        "Dull", /* Neg 44 */
-        "Foolish", /* Neg 45 */
-        "Clumsy", /* Neg 46 */
-        "Slow", /* Neg 47 */
-        "Frail", /* Neg 48 */
-        "Sadistic", /* Neg 49 */
-        "Loner", /* Neg 50 */
-        "Bad Memory" /* Neg 51 */
-};
-
-/* List cost of bonus/negative */
-const int list_bonus_cost[] = {
-        -2, /* Bonus 0 */
-        -5, /* Bonus 1 */
-        -3, /* Bonus 2 */
-        -6, /* Bonus 3 */
-        -4, /* Bonus 4 */
-        -3, /* Bonus 5 */
-        -3, /* Bonus 6 */
-        -3, /* Bonus 7 */
-        -2, /* Bonus 8 */
-        -5, /* Bonus 9 */
-        -5, /* Bonus 10 */
-        -5, /* Bonus 11 */
-        -4, /* Bonus 12 */
-        -6, /* Bonus 13 */
-        -5, /* Bonus 14 */
-        -5, /* Bonus 15 */
-        -2, /* Bonus 16 */
-        -4, /* Bonus 17 */
-        -4, /* Bonus 18 */
-        -3, /* Bonus 19 */
-        -2, /* Bonus 20 */
-        -3, /* Bonus 21 */
-        -3, /* Bonus 22 */
-        -4, /* Bonus 23 */
-        -5, /* Bonus 24 */
-        -6, /* Bonus 25*/
-        5, /* Negative 26 */
-        5, /* Negative 27 */
-        3, /* Negative 28 */
-        5, /* Negative 29 */
-        3, /* Negative 30 */
-        3, /* Negative 31 */
-        4, /* Negative 32 */
-        4, /* Negative 33 */
-        5, /* Negative 34 */
-        6, /* Negative 35 */
-        6, /* Negative 36 */
-        1, /* Negative 37 */
-        3, /* Negative 38 */
-        3, /* Negative 39 */
-        3, /* Negative 40 */
-        5, /* Negative 41 */
-        4, /* Negative 42 */
-        6, /* Negative 43 */
-        6, /* Negative 44 */
-        6, /* Negative 45 */
-        3, /* Negative 46 */
-        6, /* Negative 47 */
-        4, /* Negative 48 */
-        3, /* Negative 49 */
-        2, /* Negative 50 */
-        6, /* Negative 51 */
-};
-
 int opp_bonus(struct char_data *ch, int value, int type) {
     int give = true;
 
@@ -4173,7 +3980,6 @@ void nanny(struct descriptor_data *d, char *arg) {
 
     if (d->character == nullptr) {
         d->character = new char_data();
-        d->character->player_specials = new player_special_data();
         d->character->desc = d;
     }
 
@@ -4196,7 +4002,6 @@ void nanny(struct descriptor_data *d, char *arg) {
             }
             if (!d->character) {
                 d->character = new char_data();
-                d->character->player_specials = new player_special_data();
                 d->character->desc = d;
                 SET_BIT_AR(PRF_FLAGS(d->character), PRF_COLOR);
             }
@@ -4216,21 +4021,20 @@ void nanny(struct descriptor_data *d, char *arg) {
                 write_to_output(d, "Invalid name, please try another.\r\nName: ");
                 return;
             }
-            if (d->writenew > 0 && (player_i = load_char(tmp_name, d->character)) > -1) {
+            if (d->writenew > 0 && findPlayer(tmp_name)) {
                 userRead(d);
                 write_to_output(d, "That character is already taken.\r\n");
                 d->writenew = 0;
                 STATE(d) = CON_UMENU;
                 return;
             } else {
-                if ((player_i = load_char(tmp_name, d->character)) > -1) {
+                if (findPlayer(tmp_name)) {
                     if (d->writenew > 0) {
                         write_to_output(d, "That character is already taken.\r\n");
                         userRead(d);
                         STATE(d) = CON_UMENU;
                         return;
                     }
-                    GET_PFILEPOS(d->character) = player_i;
                     if (PLR_FLAGGED(d->character, PLR_DELETED)) {
 
                         /* make sure old files are removed so the new player doesn't get
@@ -4248,11 +4052,9 @@ void nanny(struct descriptor_data *d, char *arg) {
                             return;
                         }
                         d->character = new char_data();
-                        d->character->player_specials = new player_special_data();
                         d->character->desc = d;
                         CREATE(d->character->name, char, strlen(tmp_name) + 1);
                         strcpy(d->character->name, CAP(tmp_name));    /* strcpy: OK (size checked above) */
-                        GET_PFILEPOS(d->character) = player_i;
                         SET_BIT_AR(PRF_FLAGS(d->character), PRF_COLOR);
                         display_races(d);
                         STATE(d) = CON_QRACE;
@@ -4448,7 +4250,7 @@ void nanny(struct descriptor_data *d, char *arg) {
         case CON_DELCNF1:
             if (!strcmp(arg, "yes") || !strcmp(arg, "YES")) {
                 write_to_output(d, "Your user and character files have been deleted. Good bye.\n");
-                userDelete(d);
+                //userDelete(d);
                 STATE(d) = CON_CLOSE;
             } else if (!strcmp(arg, "no") || !strcmp(arg, "NO")) {
                 userRead(d);

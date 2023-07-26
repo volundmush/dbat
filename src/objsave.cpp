@@ -25,8 +25,6 @@
 
 /* local functions */
 
-static void auto_equip(struct char_data *ch, struct obj_data *obj, int location);
-
 static int Crash_offer_rent(struct char_data *ch, struct char_data *recep, int display, int factor);
 
 static int Crash_report_unrentables(struct char_data *ch, struct char_data *recep, struct obj_data *obj);
@@ -194,58 +192,6 @@ static int inv_backup(struct char_data *ch) {
     return 1;
 }
 
-int cp(struct char_data *ch) {
-    char chx;
-    FILE *source, *target;
-    char source_file[20480], target_file[20480], buf2[20480];
-    char alpha[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
-    sprintf(name, GET_NAME(ch));
-
-    if (name[0] == 'a' || name[0] == 'A' || name[0] == 'b' || name[0] == 'B' || name[0] == 'c' || name[0] == 'C' ||
-        name[0] == 'd' || name[0] == 'D' || name[0] == 'e' || name[0] == 'E') {
-        sprintf(alpha, "A-E");
-    } else if (name[0] == 'f' || name[0] == 'F' || name[0] == 'g' || name[0] == 'G' || name[0] == 'h' ||
-               name[0] == 'H' || name[0] == 'i' || name[0] == 'I' || name[0] == 'j' || name[0] == 'J') {
-        sprintf(alpha, "F-J");
-    } else if (name[0] == 'k' || name[0] == 'K' || name[0] == 'l' || name[0] == 'L' || name[0] == 'm' ||
-               name[0] == 'M' || name[0] == 'n' || name[0] == 'N' || name[0] == 'o' || name[0] == 'O') {
-        sprintf(alpha, "K-O");
-    } else if (name[0] == 'p' || name[0] == 'P' || name[0] == 'q' || name[0] == 'Q' || name[0] == 'r' ||
-               name[0] == 'R' || name[0] == 's' || name[0] == 'S' || name[0] == 't' || name[0] == 'T') {
-        sprintf(alpha, "P-T");
-    } else if (name[0] == 'u' || name[0] == 'U' || name[0] == 'v' || name[0] == 'V' || name[0] == 'w' ||
-               name[0] == 'W' || name[0] == 'x' || name[0] == 'X' || name[0] == 'y' || name[0] == 'Y' ||
-               name[0] == 'z' || name[0] == 'Z') {
-        sprintf(alpha, "U-Z");
-    }
-
-    sprintf(target_file, "plrobjs" SLASH"%s" SLASH"%s.copy", alpha,
-            ch->name);
-    if (!get_filename(buf2, sizeof(buf2), NEW_OBJ_FILES, GET_NAME(ch)))
-        return -1;
-    sprintf(source_file, "%s", buf2);
-
-    if (!(source = fopen(source_file, "r"))) {
-        log("Source failed to load.");
-        log(source_file);
-        return -1;
-    }
-
-    if (!(target = fopen(target_file, "w"))) {
-        log("Target failed to load.");
-        log(target_file);
-        return -1;
-    }
-
-    while ((chx = fgetc(source)) != EOF)
-        fputc(chx, target);
-
-    fclose(source);
-    fclose(target);
-
-    return 1;
-}
-
 int Obj_to_store(struct obj_data *obj, FILE *fl, int location) {
     my_obj_save_to_disk(fl, obj, location);
     return (1);
@@ -254,7 +200,7 @@ int Obj_to_store(struct obj_data *obj, FILE *fl, int location) {
 /*
  * AutoEQ by Burkhard Knopf <burkhard.knopf@informatik.tu-clausthal.de>
  */
-static void auto_equip(struct char_data *ch, struct obj_data *obj, int location) {
+void auto_equip(struct char_data *ch, struct obj_data *obj, int location) {
     int j;
 
     /* Lots of checks... */
@@ -359,8 +305,16 @@ static void auto_equip(struct char_data *ch, struct obj_data *obj, int location)
             }
         }
     }
+    if(world.contains(-1)) {
+        log("World contains -1");
+    }
+
     if (location <= 0)    /* Inventory */
         obj_to_char(obj, ch);
+
+    if(world.contains(-1)) {
+        log("World contains -1");
+    }
 }
 
 
@@ -477,9 +431,8 @@ int Crash_clean_file(char *name) {
 void update_obj_file() {
     int i;
 
-    for (i = 0; i <= top_of_p_table; i++)
-        if (*player_table[i].name)
-            Crash_clean_file(player_table[i].name);
+    for (auto &[id, p] : players)
+        Crash_clean_file((char*)p.name.c_str());
 }
 
 
@@ -666,17 +619,6 @@ static void Crash_extract_norents(struct obj_data *obj) {
 }
 
 
-static void Crash_extract_expensive(struct obj_data *obj) {
-    struct obj_data *tobj, *max;
-
-    max = obj;
-    for (tobj = obj; tobj; tobj = tobj->next_content)
-        if (GET_OBJ_RENT(tobj) > GET_OBJ_RENT(max))
-            max = tobj;
-    extract_obj(max);
-}
-
-
 static void Crash_calculate_rent(struct obj_data *obj, int *cost) {
     if (obj) {
         *cost += MAX(0, GET_OBJ_RENT(obj));
@@ -722,80 +664,6 @@ void Crash_crashsave(struct char_data *ch) {
     fclose(fp);
     REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CRASH);
 }
-
-
-void Crash_idlesave(struct char_data *ch) {
-    char buf[MAX_INPUT_LENGTH];
-    int j;
-    int cost, cost_eq;
-    FILE *fp;
-
-    if (IS_NPC(ch))
-        return;
-
-    if (!get_filename(buf, sizeof(buf), NEW_OBJ_FILES, GET_NAME(ch)))
-        return;
-
-    if (!(fp = fopen(buf, "wb")))
-        return;
-
-    Crash_extract_norent_eq(ch);
-    Crash_extract_norents(ch->contents);
-
-    cost = 0;
-    Crash_calculate_rent(ch->contents, &cost);
-
-    cost_eq = 0;
-    for (j = 0; j < NUM_WEARS; j++)
-        Crash_calculate_rent(GET_EQ(ch, j), &cost_eq);
-
-    cost += cost_eq;
-    cost *= 2;            /* forcerent cost is 2x normal rent */
-
-    if (cost > GET_GOLD(ch) + GET_BANK_GOLD(ch)) {
-        for (j = 0; j < NUM_WEARS; j++)    /* Unequip players with low gold. */
-            if (GET_EQ(ch, j))
-                obj_to_char(unequip_char(ch, j), ch);
-
-        while ((cost > GET_GOLD(ch) + GET_BANK_GOLD(ch)) && ch->contents) {
-            Crash_extract_expensive(ch->contents);
-            cost = 0;
-            Crash_calculate_rent(ch->contents, &cost);
-            cost *= 2;
-        }
-    }
-
-    if (ch->contents == nullptr) {
-        for (j = 0; j < NUM_WEARS && GET_EQ(ch, j) == nullptr; j++) /* Nothing */ ;
-        if (j == NUM_WEARS) {    /* No equipment or inventory. */
-            fclose(fp);
-            Crash_delete_file(GET_NAME(ch));
-            return;
-        }
-    }
-
-    fprintf(fp, "%d %d %d %d %d %d\r\n", RENT_TIMEDOUT, (int) time(nullptr), cost,
-            GET_GOLD(ch), GET_BANK_GOLD(ch), 0);
-
-    for (j = 0; j < NUM_WEARS; j++) {
-        if (GET_EQ(ch, j)) {
-            if (!Crash_save(GET_EQ(ch, j), fp, j + 1)) {
-                fclose(fp);
-                return;
-            }
-            Crash_restore_weight(GET_EQ(ch, j));
-            Crash_extract_objs(GET_EQ(ch, j));
-        }
-    }
-    if (!Crash_save(ch->contents, fp, 0)) {
-        fclose(fp);
-        return;
-    }
-    fclose(fp);
-
-    Crash_extract_objs(ch->contents);
-}
-
 
 void Crash_rentsave(struct char_data *ch, int cost) {
     char buf[MAX_INPUT_LENGTH];
@@ -1321,7 +1189,7 @@ int Crash_load(struct char_data *ch) {
                             break;
                         case 'U':
                             get_line(fl, line);
-                            sscanf(line, "%" I64T, &temp->unique_id);
+                            sscanf(line, "%" I64T, &temp->id);
                             get_line(fl, line);
                             break;
                         case 'S':

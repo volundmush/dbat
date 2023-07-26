@@ -46,7 +46,7 @@ namespace net {
         std::string cmd;
         nlohmann::json args;
         nlohmann::json kwargs;
-        nlohmann::json serialize();
+        nlohmann::json serialize() const;
     };
 
     struct ProtocolCapabilities {

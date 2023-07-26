@@ -17,10 +17,12 @@
 #include "class.h"
 #include "races.h"
 #include "spells.h"
+#include "objsave.h"
+#include "players.h"
+#include "account.h"
 
 /* From db.c */
 void init_mobile_skills();
-
 
 int update_mobile_strings(struct char_data *t, struct char_data *f);
 
@@ -311,12 +313,6 @@ int write_mobile_espec(mob_vnum mvnum, struct char_data *mob, FILE *fd) {
     for (i = 0; i <= NUM_FEATS_DEFINED; i++)
         if (GET_SKILL_BONUS(mob, i))
             fprintf(fd, "SkillMod: %d %d\n", i, HAS_FEAT(mob, i));
-    for (i = 0; i < NUM_CLASSES; i++) {
-        if (GET_CLASS_NONEPIC(mob, i))
-            fprintf(fd, "Class: %d %d\n", i, GET_CLASS_NONEPIC(mob, i));
-        if (GET_CLASS_EPIC(mob, i))
-            fprintf(fd, "EpicClass: %d %d\n", i, GET_CLASS_EPIC(mob, i));
-    }
     fputs("E\n", fd);
     return true;
 }
@@ -492,15 +488,9 @@ nlohmann::json char_data::serializeBase() {
     if(level_adj) j["level_adj"] = level_adj;
     if(level) j["level"] = level;
     if(admlevel) j["admlevel"] = admlevel;
-
-    for(auto i = 0; i < NUM_ADMFLAGS; i++)
-        if(IS_SET_AR(admflags, i)) j["admflags"].push_back(i);
-
     if(chclass) j["chclass"] = chclass->getID();
-
     if(weight) j["weight"] = weight;
     if(height) j["height"] = height;
-
     if(alignment) j["alignment"] = alignment;
     if(alignment_ethic) j["alignment_ethic"] = alignment_ethic;
 
@@ -511,18 +501,8 @@ nlohmann::json char_data::serializeBase() {
     if(baseki) j["baseki"] = baseki;
     if(basest) j["basest"] = basest;
 
-    if(health < 1.0) j["health"] = health;
-    if(energy < 1.0) j["energy"] = energy;
-    if(stamina < 1.0) j["stamina"] = stamina;
-    if(life < 1.0) j["life"] = life;
-
     if(armor) j["armor"] = armor;
     if(damage_mod) j["damage_mod"] = damage_mod;
-
-    if(gold) j["gold"] = gold;
-    if(bank_gold) j["bank_gold"] = bank_gold;
-
-    if(exp) j["exp"] = exp;
 
     auto real = real_abils.serialize();
     if(!real.empty()) j["real_abils"] = real;
@@ -553,17 +533,6 @@ void char_data::deserializeBase(const nlohmann::json &j) {
     chclass = ::sensei::sensei_map[c];
 
     if(j.contains("level")) level = j["level"];
-    if(j.contains("admlevel")) admlevel = j["admlevel"];
-
-    if(j.contains("admflags"))
-        for(auto &i : j["admflags"])
-            SET_BIT_AR(admflags, i.get<int>());
-
-    if(hometown != NOWHERE) hometown = j["hometown"];
-
-    if(j.contains("time")) {
-        time.deserialize(j["time"]);
-    }
 
     if(j.contains("weight")) weight = j["weight"];
     if(j.contains("height")) height = j["height"];
@@ -577,32 +546,11 @@ void char_data::deserializeBase(const nlohmann::json &j) {
     if(j.contains("basepl")) basepl = j["basepl"];
     if(j.contains("baseki")) baseki = j["baseki"];
     if(j.contains("basest")) basest = j["basest"];
-
-    if(j.contains("health")) health = j["health"];
-    if(j.contains("energy")) energy = j["energy"];
-    if(j.contains("stamina")) stamina = j["stamina"];
-    if(j.contains("life")) life = j["life"];
-
-    if(j.contains("mob_specials")) mob_specials.deserialize(j["mob_specials"]);
     if(j.contains("real_abils")) real_abils.deserialize(j["real_abils"]);
-
-    if(j.contains("limb_condition")) {
-        for(auto &i : j["limb_condition"]) {
-            limb_condition[i[0].get<int>()] = i[1];
-        }
-    }
-
     if(j.contains("armor")) armor = j["armor"];
     if(j.contains("damage_mod")) damage_mod = j["damage_mod"];
-
-    if(j.contains("gold")) gold = j["gold"];
-    if(j.contains("bank_gold")) bank_gold = j["bank_gold"];
-    if(j.contains("exp")) exp = j["exp"];
-
-    if(j.contains("was_in_room")) was_in_room = j["was_in_room"];
-
+    if(j.contains("mob_specials")) mob_specials.deserialize(j["mob_specials"]);
     if(j.contains("act")) for(auto &i : j["act"]) SET_BIT_AR(act, i.get<int>());
-
 
 }
 
@@ -615,18 +563,161 @@ nlohmann::json char_data::serializeProto() {
     auto ms = mob_specials.serialize();
     if(!ms.empty()) j["mob_specials"] = ms;
 
+    for(auto s = proto_script; s; s = s->next) {
+        if(trig_index.contains(s->vnum)) j["proto_script"].push_back(s->vnum);
+    }
+
     return j;
 }
 
 nlohmann::json char_data::serializeInstance() {
     auto j = serializeBase();
+    if(generation) j["generation"] = generation;
+
+    if(admlevel) j["admlevel"] = admlevel;
+    for(auto i = 0; i < NUM_ADMFLAGS; i++)
+        if(IS_SET_AR(admflags, i)) j["admflags"].push_back(i);
+
+    if(health < 1.0) j["health"] = health;
+    if(energy < 1.0) j["energy"] = energy;
+    if(stamina < 1.0) j["stamina"] = stamina;
+    if(life < 1.0) j["life"] = life;
+
+    if(gold) j["gold"] = gold;
+    if(bank_gold) j["bank_gold"] = bank_gold;
+
+    if(exp) j["exp"] = exp;
 
     if(was_in_room != NOWHERE) j["was_in_room"] = was_in_room;
     auto td = time.serialize();
     if(!td.empty()) j["time"] = td;
 
+
+
     for(auto i = 0; i < 4; i++) {
         if(limb_condition[i]) j["limb_condition"].push_back(std::make_pair(i, limb_condition[i]));
+    }
+
+    for(auto i = 0; i < NUM_CONDITIONS; i++) {
+        if(conditions[i]) j["conditions"].push_back(std::make_pair(i, conditions[i]));
+    }
+
+    if(freeze_level) j["freeze_level"] = freeze_level;
+    if(invis_level) j["invis_level"] = invis_level;
+    if(wimp_level) j["wimp_level"] = wimp_level;
+    if(world.contains(load_room)) j["load_room"] = load_room;
+    if(world.contains(hometown)) j["hometown"] = hometown;
+
+    if(contents) j["contents"] = serializeContents();
+
+    for(auto i = 0; i < NUM_WEARS; i++) {
+        if(GET_EQ(this, i)) j["equipment"].push_back(std::make_pair(i, equipment[i]->serializeInstance()));
+    }
+
+    if(IS_NPC(this)) {
+        // mob flags.
+        for(auto i = 0; i < NUM_MOB_FLAGS; i++) if(IS_SET_AR(act, i)) j["act"].push_back(i);
+    } else {
+        // player flags.
+        for(auto i = 0; i < NUM_PLR_FLAGS; i++) if(IS_SET_AR(act, i)) j["act"].push_back(i);
+        for(auto i = 0; i < NUM_PRF_FLAGS; i++) if(IS_SET_AR(pref, i)) j["pref"].push_back(i);
+    }
+
+    for(auto &[skill_id, s] : skill) {
+        auto sk = s.serialize();
+        if(!sk.empty()) j["skill"].push_back(std::make_pair(skill_id, sk));
+    }
+
+    if(speaking) j["speaking"] = speaking;
+    if(preference) j["preference"] = preference;
+
+    if(trainstr) j["trainstr"] = trainstr;
+    if(trainint) j["trainint"] = trainint;
+    if(traincon) j["traincon"] = traincon;
+    if(trainwis) j["trainwis"] = trainwis;
+    if(trainagl) j["trainagl"] = trainagl;
+    if(trainspd) j["trainspd"] = trainspd;
+
+    if(practice_points) j["practice_points"] = practice_points;
+
+    for(auto a = affected; a; a = a->next) {
+        if(a->type) j["affected"].push_back(a->serialize());
+    }
+
+    for(auto a = affectedv; a; a = a->next) {
+        if(a->type) j["affectedv"].push_back(a->serialize());
+    }
+
+    if(absorbs) j["absorbs"] = absorbs;
+    if(blesslvl) j["blesslvl"] = blesslvl;
+    for(auto i = 0; i < 5; i++) {
+        if(lboard[i]) j["lboard"].push_back(std::make_pair(i, lboard[i]));
+    }
+
+    for(auto i = 0; i < MAX_BONUSES; i++) {
+        if(bonuses[i]) j["bonuses"].push_back(i);
+    }
+
+    if(boosts) j["boosts"] = boosts;
+
+    if(clan && strlen(clan)) j["clan"] = clan;
+    if(crank) j["crank"] = crank;
+    if(con_cooldown) j["con_cooldown"] = con_cooldown;
+    if(deathtime) j["deathtime"] = deathtime;
+    if(dcount) j["dcount"] = dcount;
+    if(death_type) j["death_type"] = death_type;
+    if(damage_mod) j["damage_mod"] = damage_mod;
+    if(droom) j["droom"] = droom;
+    if(accuracy_mod) j["accuracy_mod"] = accuracy_mod;
+    for(auto i = 0; i < 2; i++) {
+        if(genome[i]) j["genome"].push_back(std::make_pair(i, genome[i]));
+    }
+    if(gauntlet) j["gauntlet"] = gauntlet;
+    if(ingestLearned) j["ingestLearned"] = ingestLearned;
+    if(kaioken) j["kaioken"] = kaioken;
+    if(lifeperc) j["lifeperc"] = lifeperc;
+    if(lastint) j["lastint"] = lastint;
+    if(lastpl) j["lastpl"] = lastpl;
+    if(moltexp) j["moltexp"] = moltexp;
+    if(moltlevel) j["moltlevel"] = moltlevel;
+    if(majinize) j["majinize"] = majinize;
+    if(majinizer) j["majinizer"] = majinizer;
+    if(mimic) j["mimic"] = mimic->getID();
+    if(olc_zone) j["olc_zone"] = olc_zone;
+    if(starphase) j["starphase"] = starphase;
+    if(accuracy) j["accuracy"] = accuracy;
+    if(position) j["position"] = position;
+    if(powerattack) j["powerattack"] = powerattack;
+    if(racial_pref) j["racial_pref"] = racial_pref;
+    if(rdisplay) j["rdisplay"] = rdisplay;
+    if(relax_count) j["relax_count"] = relax_count;
+    if(radar1) j["radar1"] = radar1;
+    if(radar2) j["radar2"] = radar2;
+    if(radar3) j["radar3"] = radar3;
+    if(feature) j["feature"] = feature;
+    if(ship) j["ship"] = ship;
+    if(con_sdcooldown) j["con_sdcooldown"] = con_sdcooldown;
+    if(shipr) j["shipr"] = shipr;
+    if(skill_slots) j["skill_slots"] = skill_slots;
+    if(stupidkiss) j["stupidkiss"] = stupidkiss;
+    if(suppression) j["suppression"] = suppression;
+    if(tail_growth) j["tail_growth"] = tail_growth;
+    for(auto i = 0; i < 6; i++) {
+        if(transcost[i]) j["transcost"].push_back(std::make_pair(i, transcost[i]));
+    }
+    for(auto i = 0; i < 3; i++) {
+        if(saving_throw[i]) j["saving_throw"].push_back(std::make_pair(i, saving_throw[i]));
+    }
+    for(auto i = 0; i < 3; i++) {
+        if(apply_saving_throw[i]) j["apply_saving_throw"].push_back(std::make_pair(i, apply_saving_throw[i]));
+    }
+    if(upgrade) j["upgrade"] = upgrade;
+    if(voice && strlen(voice)) j["voice"] = voice;
+
+    if(script && script->global_vars) {
+        for(auto v = script->global_vars; v; v = v->next) {
+            j["dgvariables"].push_back(v->serialize());
+        }
     }
 
     return j;
@@ -635,35 +726,52 @@ nlohmann::json char_data::serializeInstance() {
 nlohmann::json char_data::serializePlayer() {
     auto j = serializeInstance();
 
-    if(pfilepos != -1) j["pfilepos"] = pfilepos;
-	if(idnum != -1) j["idnum"] = idnum;
-
-    for(auto i = 0; i < NUM_PLR_FLAGS; i++)
-        if(IS_SET_AR(act, i)) j["act"].push_back(i);
-
     if(relax_count) j["relax_count"] = relax_count;
     if(ingestLearned) j["ingestLearned"] = ingestLearned;
 
-    for(auto &[skill_id, s] : skill) {
-        auto sk = s.serialize();
-        if(!sk.empty()) j["skill"].push_back(std::make_pair(skill_id, sk));
-    }
+    if (poofin && strlen(poofin)) j["poofin"] = poofin;
+    if (poofout && strlen(poofout)) j["poofout"] = poofout;
+    if(players.contains(last_tell)) j["last_tell"] = last_tell;
 
     return j;
 }
 
 
-void char_data::deserializeInstance(const nlohmann::json &j) {
+void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
     deserializeBase(j);
 
-}
+    if(j.contains("generation")) generation = j["generation"];
+    check_unique_id(this);
+    add_unique_id(this);
 
-void char_data::deserializeProto(const nlohmann::json &j) {
-    deserializeBase(j);
+    if(j.contains("admlevel")) admlevel = j["admlevel"];
 
-}
+    if(j.contains("admflags"))
+        for(auto &i : j["admflags"])
+            SET_BIT_AR(admflags, i.get<int>());
 
-void char_data::deserializePlayer(const nlohmann::json &j) {
+    if(j.contains("hometown")) hometown = j["hometown"];
+
+    if(j.contains("time")) {
+        time.deserialize(j["time"]);
+    }
+
+    if(j.contains("health")) health = j["health"];
+    if(j.contains("energy")) energy = j["energy"];
+    if(j.contains("stamina")) stamina = j["stamina"];
+    if(j.contains("life")) life = j["life"];
+
+    if(j.contains("limb_condition")) {
+        for(auto &i : j["limb_condition"]) {
+            limb_condition[i[0].get<int>()] = i[1];
+        }
+    }
+
+    if(j.contains("gold")) gold = j["gold"];
+    if(j.contains("bank_gold")) bank_gold = j["bank_gold"];
+    if(j.contains("exp")) exp = j["exp"];
+
+    if(j.contains("was_in_room")) was_in_room = j["was_in_room"];
 
     if(j.contains("skill")) {
         for(auto &i : j["skill"]) {
@@ -672,19 +780,180 @@ void char_data::deserializePlayer(const nlohmann::json &j) {
         }
     }
 
+    if(j.contains("contents")) {
+        deserializeContents(j["contents"], isActive);
+    }
+
+    if(j.contains("equipment")) {
+        deserializeEquipment(j["equipment"], isActive);
+    }
+
+    if(j.contains("affected")) {
+        auto ja = j["affected"];
+        // reverse iterate using .rbegin() and .rend() while filling out
+        // the linked list.
+        for(auto it = ja.rbegin(); it != ja.rend(); ++it) {
+            auto a = new affected_type(*it);
+            a->next = affected;
+            affected = a;
+        }
+    }
+
+    if(j.contains("affectedv")) {
+        auto ja = j["affectedv"];
+        // reverse iterate using .rbegin() and .rend() while filling out
+        // the linked list.
+        for(auto it = ja.rbegin(); it != ja.rend(); ++it) {
+            auto a = new affected_type(*it);
+            a->next = affectedv;
+            affectedv = a;
+        }
+    }
+
+    if(j.contains("absorbs")) absorbs = j["absorbs"];
+    if(j.contains("blesslvl")) blesslvl = j["blesslvl"];
+    if(j.contains("lboard")) {
+        for(auto &i : j["lboard"]) {
+            lboard[i[0].get<int>()] = i[1];
+        }
+    }
+
+    if(j.contains("bonuses")) {
+        for(auto &i : j["bonuses"]) {
+            bonuses[i.get<int>()] = true;
+        }
+    }
+
+    if(j.contains("boosts")) boosts = j["boosts"];
+
+    if(j.contains("clan")) clan = strdup(j["clan"].get<std::string>().c_str());
+    if(j.contains("crank")) crank = j["crank"];
+    if(j.contains("con_cooldown")) con_cooldown = j["con_cooldown"];
+    if(j.contains("deathtime")) deathtime = j["deathtime"];
+    if(j.contains("dcount")) dcount = j["dcount"];
+    if(j.contains("death_type")) death_type = j["death_type"];
+
+    if(j.contains("conditions")) {
+        for(auto &i : j["conditions"]) {
+            conditions[i[0].get<int>()] = i[1];
+        }
+    }
+
+    if(j.contains("damage_mod")) damage_mod = j["damage_mod"];
+    if(j.contains("droom")) droom = j["droom"];
+    if(j.contains("accuracy_mod")) accuracy_mod = j["accuracy_mod"];
+    if(j.contains("genome")) {
+        for(auto &i : j["genome"]) {
+            genome[i[0].get<int>()] = i[1];
+        }
+    }
+    if(j.contains("gauntlet")) gauntlet = j["gauntlet"];
+    if(j.contains("ingestLearned")) ingestLearned = j["ingestLearned"];
+    if(j.contains("kaioken")) kaioken = j["kaioken"];
+    if(j.contains("lifeperc")) lifeperc = j["lifeperc"];
+    if(j.contains("lastint")) lastint = j["lastint"];
+    if(j.contains("lastpl")) lastpl = j["lastpl"];
+    if(j.contains("moltexp")) moltexp = j["moltexp"];
+    if(j.contains("moltlevel")) moltlevel = j["moltlevel"];
+    if(j.contains("majinize")) majinize = j["majinize"];
+    if(j.contains("majinizer")) majinizer = j["majinizer"];
+    if(j.contains("mimic")) {
+        auto rid = j["mimic"].get<::race::race_id>();
+        mimic = ::race::race_map[rid];
+    }
+    if(j.contains("olc_zone")) olc_zone = j["olc_zone"];
+    if(j.contains("starphase")) starphase = j["starphase"];
+    if(j.contains("accuracy")) accuracy = j["accuracy"];
+    if(j.contains("position")) position = j["position"];
+    if(j.contains("powerattack")) powerattack = j["powerattack"];
+    if(j.contains("racial_pref")) racial_pref = j["racial_pref"];
+    if(j.contains("rdisplay")) rdisplay = strdup(j["rdisplay"].get<std::string>().c_str());
+    if(j.contains("relax_count")) relax_count = j["relax_count"];
+    if(j.contains("radar1")) radar1 = j["radar1"];
+    if(j.contains("radar2")) radar2 = j["radar2"];
+    if(j.contains("radar3")) radar3 = j["radar3"];
+    if(j.contains("feature")) feature = strdup(j["feature"].get<std::string>().c_str());
+    if(j.contains("ship")) ship = j["ship"];
+    if(j.contains("con_sdcooldown")) con_sdcooldown = j["con_sdcooldown"];
+    if(j.contains("shipr")) shipr = j["shipr"];
+    if(j.contains("skill_slots")) skill_slots = j["skill_slots"];
+    if(j.contains("stupidkiss")) stupidkiss = j["stupidkiss"];
+    if(j.contains("suppression")) suppression = j["suppression"];
+    if(j.contains("tail_growth")) tail_growth = j["tail_growth"];
+    if(j.contains("transcost")) {
+        for(auto t : j["transcost"]) {
+            transcost[t[0].get<int>()] = t[1];
+        }
+    }
+    if(j.contains("saving_throw")) {
+        for(auto t : j["saving_throw"]) {
+            saving_throw[t[0].get<int>()] = t[1];
+        }
+    }
+    if(j.contains("apply_saving_throw")) {
+        for(auto t : j["apply_saving_throw"]) {
+            apply_saving_throw[t[0].get<int>()] = t[1];
+        }
+    }
+    if(j.contains("upgrade")) upgrade = j["upgrade"];
+    if(j.contains("voice")) voice = strdup(j["voice"].get<std::string>().c_str());
+    if(j.contains("wimp_level")) wimp_level = j["wimp_level"];
+
+    if(proto_script) {
+        if(!script) script = new script_data();
+        for(auto p = proto_script; p; p = p->next) {
+            auto t = read_trigger(p->vnum);
+            if(t) add_trigger(script, t, -1);
+        }
+    }
+
+    if(j.contains("dgvariables")) {
+        if(!script) script = new script_data();
+        auto jv = j["dgvariables"];
+        // use reverse iteration to fill out script->global_vars
+        for(auto it = jv.rbegin(); it != jv.rend(); ++it) {
+            auto v = new trig_var_data(*it);
+            v->next = script->global_vars;
+            script->global_vars = v;
+        }
+    }
+
+    if(j.contains("pref")) {
+        for(auto &i : j["pref"]) {
+            SET_BIT_AR(pref, i.get<int>());
+        }
+    }
+
+}
+
+void char_data::deserializeProto(const nlohmann::json &j) {
+    deserializeBase(j);
+
+    if(j.contains("proto_script")) {
+        auto &p = j["proto_script"];
+        for(auto s = p.rbegin(); s != p.rend(); s++) {
+            auto new_s = new trig_proto_list();
+            new_s->vnum = *s;
+            new_s->next = proto_script;
+            proto_script = new_s;
+        }
+    }
+
+}
+
+void char_data::deserializePlayer(const nlohmann::json &j, bool isActive) {
+    deserializeInstance(j, isActive);
+
+
 }
 
 void char_data::deserializeMobile(const nlohmann::json &j) {
     deserializeBase(j);
 
-    if(proto_script) script = new script_data();
-    for(auto p = proto_script; p; p = p->next) {
-        add_trigger(script, read_trigger(p->vnum), -1);
-    }
+
 }
 
 char_data::char_data(const nlohmann::json &j) : char_data() {
-    player_specials = &dummy_mob;
     deserializeProto(j);
 
     if (!IS_HUMAN(this))
@@ -704,7 +973,7 @@ char_data::char_data(const nlohmann::json &j) : char_data() {
 }
 
 nlohmann::json skill_data::serialize() {
-    nlohmann::json j;
+    nlohmann::json j = nlohmann::json::object();
 
     if(level) j["level"] = level;
     if(mods) j["mods"] = mods;
@@ -721,4 +990,201 @@ void skill_data::deserialize(const nlohmann::json &j) {
 
 skill_data::skill_data(const nlohmann::json &j) : skill_data() {
     deserialize(j);
+}
+
+void char_data::deserializeContents(const nlohmann::json &j, bool isActive) {
+    for(const auto& jo : j) {
+        auto obj = new obj_data();
+        obj->deserializeInstance(jo, isActive);
+        obj_to_char(obj, this);
+    }
+}
+
+void char_data::deserializeEquipment(const nlohmann::json &j, bool isActive) {
+    for(const auto& jo : j) {
+        // each jo is a two-element array. the first element is the id number of the equip
+        // location, and the second is the item dump data.
+        int id = jo[0];
+        auto data = jo[1];
+        auto obj = new obj_data();
+        obj->deserializeInstance(data, isActive);
+        auto_equip(this, obj, id);
+    }
+}
+
+nlohmann::json char_data::serializeEquipment() {
+    nlohmann::json j = nlohmann::json::array();
+
+    for(auto i = 0; i < NUM_WEARS; i++) {
+        if(GET_EQ(this, i)) {
+            auto obj = GET_EQ(this, i);
+            j.push_back(std::make_pair(i, obj->serializeInstance()));
+        }
+    }
+
+    return j;
+}
+
+nlohmann::json alias_data::serialize() {
+    auto j = nlohmann::json::object();
+
+    if(!name.empty()) j["name"] = name;
+    if(!replacement.empty()) j["replacement"] = replacement;
+    if(type) j["type"] = type;
+
+    return j;
+}
+
+alias_data::alias_data(const nlohmann::json &j) {
+    if(j.contains("name")) name = j["name"].get<std::string>();
+    if(j.contains("replacement")) replacement = j["replacement"].get<std::string>();
+    if(j.contains("type")) type = j["type"];
+}
+
+nlohmann::json player_data::serialize() {
+    auto j = nlohmann::json::object();
+    j["id"] = id;
+    j["name"] = name;
+    if(account) j["account"] = account->vn;
+
+    for(auto &a : aliases) {
+        j["aliases"].push_back(a.serialize());
+    }
+
+    for(auto &i : sensePlayer) {
+        j["sensePlayer"].push_back(i);
+    }
+
+    for(auto &i : senseMemory) {
+        j["senseMemory"].push_back(i);
+    }
+
+    for(auto &i : dubNames) {
+        j["dubNames"].push_back(i);
+    }
+
+    for(auto i = 0; i < NUM_COLOR; i++) {
+        if(color_choices[i] && strlen(color_choices[i])) j["color_choices"].push_back(std::make_pair(i, color_choices[i]));
+    }
+
+    if(character) {
+        j["character"] = character->serializePlayer();
+    }
+
+    return j;
+}
+
+player_data::player_data(const nlohmann::json &j) {
+    id = j["id"];
+    name = j["name"].get<std::string>();
+    if(j.contains("account")) {
+        auto accID = j["account"].get<vnum>();
+        auto accFind = accounts.find(accID);
+        if(accFind != accounts.end()) account = &accFind->second;
+    }
+
+    if(j.contains("aliases")) {
+        for(auto ja : j["aliases"]) {
+            aliases.emplace_back(ja);
+        }
+    }
+
+    if(j.contains("sensePlayer")) {
+        for(auto &i : j["sensePlayer"]) {
+            sensePlayer.insert(i.get<int64_t>());
+        }
+    }
+
+    if(j.contains("senseMemory")) {
+        for(auto &i : j["senseMemory"]) {
+            senseMemory.insert(i.get<vnum>());
+        }
+    }
+
+    if(j.contains("dubNames")) {
+        for(auto &i : j["dubNames"]) {
+            dubNames.emplace(i[0].get<int64_t>(), i[1].get<std::string>());
+        }
+    }
+
+    if(j.contains("color_choices")) {
+        for(auto &i : j["color_choices"]) {
+            color_choices[i[0].get<int>()] = strdup(i[1].get<std::string>().c_str());
+        }
+    }
+
+    if(j.contains("character")) {
+        character = new char_data();
+        character->deserializePlayer(j["character"], false);
+    }
+
+}
+
+void char_data::activate() {
+    next = character_list;
+    character_list = this;
+    auto find = mob_index.find(vn);
+    if(find != mob_index.end()) {
+        find->second.number++;
+    }
+    if(contents) activateContents();
+    for(auto i = 0; i < NUM_WEARS; i++) {
+        if(GET_EQ(this, i)) {
+            auto obj = GET_EQ(this, i);
+            obj->activate();
+        }
+    }
+    if(affected) {
+        next_affect = affect_list;
+        affect_list = this;
+    }
+    if(affectedv) {
+        next_affectv = affectv_list;
+        affectv_list = this;
+    }
+}
+
+
+void char_data::deactivate() {
+    struct char_data *temp;
+    REMOVE_FROM_LIST(this, character_list, next, temp);
+    auto find = mob_index.find(vn);
+    if(find != mob_index.end()) {
+        find->second.number--;
+    }
+    if(affected) {
+        REMOVE_FROM_LIST(this, affect_list, next_affect, temp);
+    }
+    if(affectedv) {
+        REMOVE_FROM_LIST(this, affectv_list, next_affectv, temp);
+    }
+    if(contents) deactivateContents();
+    for(auto i = 0; i < NUM_WEARS; i++) {
+        if(GET_EQ(this, i)) {
+            auto obj = GET_EQ(this, i);
+            obj->deactivate();
+        }
+    }
+}
+
+nlohmann::json affected_type::serialize() {
+    auto j = nlohmann::json::object();
+
+    if(type) j["type"] = type;
+    if(duration) j["duration"] = duration;
+    if(modifier) j["modifier"] = modifier;
+    if(location) j["location"] = location;
+    if(specific) j["specific"] = specific;
+    if(bitvector) j["bitvector"] = bitvector;
+
+    return j;
+}
+
+affected_type::affected_type(const nlohmann::json &j) {
+    if(j.contains("type")) type = j["type"];
+    if(j.contains("duration")) duration = j["duration"];
+    if(j.contains("modifier")) modifier = j["modifier"];
+    if(j.contains("location")) location = j["location"];
+    if(j.contains("specific")) specific = j["specific"];
+    if(j.contains("bitvector")) bitvector = j["bitvector"];
 }

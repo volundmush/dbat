@@ -397,7 +397,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 
 #define MOB_FLAGS(ch)    ((ch)->act)
 #define PLR_FLAGS(ch)    ((ch)->act)
-#define PRF_FLAGS(ch) CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->pref))
+#define PRF_FLAGS(ch)    ((ch)->pref)
 #define AFF_FLAGS(ch)    ((ch)->affected_by)
 #define ADM_FLAGS(ch)    ((ch)->admflags)
 #define ROOM_FLAGS(loc)    (world[(loc)].room_flags)
@@ -406,7 +406,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define ZONE_MINLVL(rnum)      (zone_table[(rnum)].min_level)
 #define ZONE_MAXLVL(rnum)      (zone_table[(rnum)].max_level)
 /* Return the gauntlet highest room for ch */
-#define GET_GAUNTLET(ch)    CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->gauntlet))
+#define GET_GAUNTLET(ch)    ((ch)->gauntlet)
 
 /*
  * See http://www.circlemud.org/~greerga/todo/todo.009 to eliminate MOB_ISNPC.
@@ -490,13 +490,9 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define GET_LEVEL_ADJ(ch)    ((ch)->level_adj)
 #define GET_HITDICE(ch)        ((ch)->race_level)
 #define GET_LEVEL(ch)    (GET_CLASS_LEVEL(ch) + GET_LEVEL_ADJ(ch) + GET_HITDICE(ch))
-#define GET_PFILEPOS(ch)((ch)->pfilepos)
 
 #define GET_CLASS(ch)   ((ch)->chclass ? (ch)->chclass->getID() : 0)
-#define GET_CLASS_NONEPIC(ch, whichclass) ((ch)->chclasses[whichclass])
-#define GET_CLASS_EPIC(ch, whichclass) ((ch)->epicclasses[whichclass])
-#define GET_CLASS_RANKS(ch, whichclass) (GET_CLASS_NONEPIC(ch, whichclass) + \
-                                         GET_CLASS_EPIC(ch, whichclass))
+
 #define GET_RACE(ch)    ((ch)->race->getID())
 #define GET_HAIRL(ch)   ((ch)->hairl)
 #define GET_HAIRC(ch)   ((ch)->hairc)
@@ -510,15 +506,11 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define GET_PC_HEIGHT(ch)    (!IS_NPC(ch) ? age(ch)->year <= 10 ? (int)((ch)->height * 0.68) : age(ch)->year <= 12 ? (int)((ch)->height * 0.72) : age(ch)->year <= 14 ? (int)((ch)->height * 0.85) : age(ch)->year <= 16 ? (int)((ch)->height * 0.92) : (ch)->height : (ch)->height)
 #define GET_PC_WEIGHT(ch)    (!IS_NPC(ch) ? age(ch)->year <= 10 ? (int)((ch)->weight * 0.48) : age(ch)->year <= 12 ? (int)((ch)->weight * 0.55) : age(ch)->year <= 14 ? (int)((ch)->weight * 0.7) : age(ch)->year <= 16 ? (int)((ch)->weight * 0.85) : (ch)->weight : (ch)->weight)
 #define GET_SEX(ch)    ((ch)->sex)
-#define GET_TLEVEL(ch)    ((ch)->player_specials->tlevel)
-#define CARRYING(ch)    ((ch)->player_specials->carrying)
-#define CARRIED_BY(ch)  ((ch)->player_specials->carried_by)
-#define RACIAL_PREF(ch) ((ch)->player_specials->racial_pref)
-#define GET_RP(ch)      ((ch)->rp)
-#define GET_RBANK(ch)   ((ch)->rbank)
-#define GET_TRP(ch)     ((ch)->trp)
+#define CARRYING(ch)    ((ch)->carrying)
+#define CARRIED_BY(ch)  ((ch)->carried_by)
+#define RACIAL_PREF(ch) ((ch)->racial_pref)
+#define GET_RP(ch)      ((ch)->getRPP())
 #define GET_SUPPRESS(ch) ((ch)->suppression)
-#define GET_SUPP(ch)    ((ch)->suppressed)
 #define GET_RDISPLAY(ch) ((ch)->rdisplay)
 
 #define GET_STR(ch)     ((ch)->aff_abils.str)
@@ -567,8 +559,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define GET_MAX_HIT(ch)      ((ch)->getEffMaxPL())
 #define GET_MAX_MOVE(ch)  ((ch)->getMaxST())
 #define GET_MAX_MANA(ch)  ((ch)->getMaxKI())
-#define GET_KI(ch)      ((ch)->ki)
-#define GET_MAX_KI(ch)    ((ch)->max_ki)
+#define GET_KI(ch)      ((ch)->getCurKI())
 #define GET_DROOM(ch)     ((ch)->droom)
 #define GET_OVERFLOW(ch)  ((ch)->overf)
 #define GET_SPAM(ch)      ((ch)->spam)
@@ -639,7 +630,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define GET_SDCOOLDOWN(ch) ((ch)->con_sdcooldown)
 #define GET_INGESTLEARNED(ch) ((ch)->ingestLearned)
 #define GET_POS(ch)        ((ch)->position)
-#define GET_IDNUM(ch)        ((ch)->idnum)
+#define GET_IDNUM(ch)        ((ch)->id)
 #define IS_CARRYING_W(ch)    ((ch)->carry_weight)
 #define IS_CARRYING_N(ch)    ((ch)->carry_items)
 #define FIGHTING(ch)        ((ch)->fighting)
@@ -672,31 +663,24 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define GET_ABSORBS(ch)         ((ch)->absorbs)
 #define GET_LINTEREST(ch)       ((ch)->lastint)
 
-#define GET_COND(ch, i)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->conditions[(i)]))
-#define GET_LOADROOM(ch)    CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->load_room))
-#define GET_PRACTICES(ch, cl)    CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->class_skill_points[cl]))
-#define GET_RACE_PRACTICES(ch)    CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->skill_points))
-#define GET_TRAINS(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->ability_trains))
-#define GET_TRAINSTR(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->trainstr))
-#define GET_TRAININT(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->trainint))
-#define GET_TRAINCON(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->traincon))
-#define GET_TRAINWIS(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->trainwis))
-#define GET_TRAINAGL(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->trainagl))
-#define GET_TRAINSPD(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->trainspd))
-#define GET_INVIS_LEV(ch)    CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->invis_level))
-#define GET_WIMP_LEV(ch)    CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->wimp_level))
-#define GET_FREEZE_LEV(ch)    CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->freeze_level))
-#define GET_BAD_PWS(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->bad_pws))
-#define GET_TALK(ch, i)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->talks[i]))
-#define POOFIN(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->poofin))
-#define POOFOUT(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->poofout))
-#define GET_OLC_ZONE(ch)    CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->olc_zone))
-#define GET_LAST_OLC_TARG(ch)    CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->last_olc_targ))
-#define GET_LAST_OLC_MODE(ch)    CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->last_olc_mode))
-#define GET_ALIASES(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->aliases))
-#define GET_LAST_TELL(ch)    CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->last_tell))
-#define GET_HOST(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->host))
-#define GET_HISTORY(ch, i)      CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->comm_hist[i]))
+#define GET_COND(ch, i)        ((ch)->conditions[(i)])
+#define GET_LOADROOM(ch)    ((ch)->load_room)
+#define GET_PRACTICES(ch)    ((ch)->practice_points)
+#define GET_TRAINSTR(ch)        ((ch)->trainstr)
+#define GET_TRAININT(ch)        ((ch)->trainint)
+#define GET_TRAINCON(ch)        ((ch)->traincon)
+#define GET_TRAINWIS(ch)        ((ch)->trainwis)
+#define GET_TRAINAGL(ch)        ((ch)->trainagl)
+#define GET_TRAINSPD(ch)        ((ch)->trainspd)
+#define GET_INVIS_LEV(ch)    ((ch)->invis_level)
+#define GET_WIMP_LEV(ch)    ((ch)->wimp_level)
+#define GET_FREEZE_LEV(ch)    ((ch)->freeze_level)
+#define POOFIN(ch)        ((ch)->poofin)
+#define POOFOUT(ch)        ((ch)->poofout)
+#define GET_OLC_ZONE(ch)    ((ch)->olc_zone)
+#define GET_LAST_OLC_TARG(ch)    ((ch)->last_olc_targ)
+#define GET_LAST_OLC_MODE(ch)    ((ch)->last_olc_mode)
+#define GET_LAST_TELL(ch)    ((ch)->last_tell)
 
 int8_t GET_SKILL_BONUS(struct char_data *ch, uint16_t skill);
 int8_t GET_SKILL_PERF(struct char_data *ch, uint16_t skill);
@@ -942,20 +926,6 @@ void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int8_t val);
 #define IS_TSUNA(ch)            (GET_CLASS(ch) == CLASS_TSUNA)
 #define IS_KURZAK(ch)           (GET_CLASS(ch) == CLASS_KURZAK)
 
-#define IS_ASSASSIN(ch)         (GET_CLASS_RANKS(ch, CLASS_ASSASSIN) > 0)
-#define IS_BLACKGUARD(ch)       (GET_CLASS_RANKS(ch, CLASS_BLACKGUARD) > 0)
-#define IS_DRAGON_DISCIPLE(ch)  (GET_CLASS_RANKS(ch, CLASS_DRAGON_DISCIPLE) > 0)
-#define IS_DUELIST(ch)          (GET_CLASS_RANKS(ch, CLASS_DUELIST) > 0)
-#define IS_DWARVEN_DEFENDER(ch) (GET_CLASS_RANKS(ch, CLASS_DWARVEN_DEFENDER) > 0)
-#define IS_ELDRITCH_KNIGHT(ch)  (GET_CLASS_RANKS(ch, CLASS_ELDRITCH_KNIGHT) > 0)
-#define IS_HIEROPHANT(ch)       (GET_CLASS_RANKS(ch, CLASS_HIEROPHANT) > 0)
-#define IS_HORIZON_WALKER(ch)   (GET_CLASS_RANKS(ch, CLASS_HORIZON_WALKER) > 0)
-#define IS_LOREMASTER(ch)       (GET_CLASS_RANKS(ch, CLASS_LOREMASTER) > 0)
-#define IS_MYSTIC_THEURGE(ch)   (GET_CLASS_RANKS(ch, CLASS_MYSTIC_THEURGE) > 0)
-#define IS_SHADOWDANCER(ch)     (GET_CLASS_RANKS(ch, CLASS_SHADOWDANCER) > 0)
-#define IS_THAUMATURGIST(ch)    (GET_CLASS_RANKS(ch, CLASS_THAUMATURGIST) > 0)
-
-
 #define GOLD_CARRY(ch)        (GET_LEVEL(ch) < 100 ? (GET_LEVEL(ch) < 50 ? GET_LEVEL(ch) * 10000 : 500000) : 50000000)
 #define IS_SHADOW_DRAGON1(ch)   (IS_NPC(ch) && GET_MOB_VNUM(ch) == SHADOW_DRAGON1_VNUM)
 #define IS_SHADOW_DRAGON2(ch)   (IS_NPC(ch) && GET_MOB_VNUM(ch) == SHADOW_DRAGON2_VNUM)
@@ -1054,7 +1024,7 @@ void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int8_t val);
 #define DIRT_ROOM(ch) (OUTSIDE_SECTTYPE(ch) && ((SECT(IN_ROOM(ch)) != SECT_WATER_NOSWIM) && \
                        (SECT(IN_ROOM(ch)) != SECT_WATER_SWIM)))
 
-#define SPEAKING(ch)     ((ch)->player_specials->speaking)
+#define SPEAKING(ch)     ((ch)->speaking)
 
 /* OS compatibility ******************************************************/
 
@@ -1171,34 +1141,11 @@ void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int8_t val);
 /** Character Creation Method **/
 #define CONFIG_CREATION_METHOD    config_info.creation.method
 
-#define GET_SPELLMEM(ch, i)    ((ch)->player_specials->spellmem[i])
-#define GET_MEMCURSOR(ch)    ((ch)->player_specials->memcursor)
 /* returns the number of spells per slot */
-#define GET_SPELL_LEVEL(ch, i)    ((ch)->player_specials->spell_level[i])
-#define IS_ARCANE(ch)        (IS_WIZARD(ch))
-#define IS_DIVINE(ch)        (IS_CLERIC(ch))
 #define HAS_FEAT(ch, i)        ((ch)->feats[i])
 #define HAS_COMBAT_FEAT(ch, i, j)    IS_SET_AR((ch)->combat_feats[(i)], (j))
-#define SET_COMBAT_FEAT(ch, i, j)    SET_BIT_AR((ch)->combat_feats[(i)], (j))
 #define HAS_SCHOOL_FEAT(ch, i, j)    IS_SET((ch)->school_feats[(i)], (j))
-#define SET_SCHOOL_FEAT(ch, i, j)    SET_BIT((ch)->school_feats[(i)], (j))
 #define GET_BAB(ch)        GET_POLE_BONUS(ch)
-#define SET_FEAT(ch, i, value)    do { CHECK_PLAYER_SPECIAL((ch), (ch)->feats[i]) = value; } while(0)
-#define GET_SPELL_MASTERY_POINTS(ch) \
-                ((ch)->player_specials->spell_mastery_points)
-#define GET_FEAT_POINTS(ch)    ((ch)->player_specials->feat_points)
-#define GET_EPIC_FEAT_POINTS(ch) \
-                ((ch)->player_specials->epic_feat_points)
-#define GET_CLASS_FEATS(ch, cl)    ((ch)->player_specials->class_feat_points[cl])
-#define GET_EPIC_CLASS_FEATS(ch, cl) \
-                ((ch)->player_specials->epic_class_feat_points[cl])
-#define IS_EPIC_LEVEL(ch)    (GET_CLASS_LEVEL(ch) >= 20)
-#define HAS_CRAFT_SKILL(ch, i, j)    IS_SET_AR((ch)->craft_skill[(i)], (j))
-#define SET_CRAFT_SKILL(ch, i, j)    SET_BIT_AR((ch)->craft_skill[(i)], (j))
-#define HAS_KNOWLEDGE_SKILL(ch, i, j)    IS_SET_AR((ch)->knowledge_skill[(i)], (j))
-#define SET_KNOWLEDGE_SKILL(ch, i, j)    SET_BIT_AR((ch)->knowledge_skill[(i)], (j))
-#define HAS_PROFESSION_SKILL(ch, i, j)    IS_SET_AR((ch)->profession_skill[(i)], (j))
-#define SET_PROFESSION_SKILL(ch, i, j)    SET_BIT_AR((ch)->profession_skill[(i)], (j))
 
 /* General use directory functions & structures. Required due to */
 /* various differences between directory handling code on        */
@@ -1224,7 +1171,6 @@ extern int insure_directory(char *path, int isfile);
 
 extern void admin_set(struct char_data *ch, int value);
 
-#define GET_PAGE_LENGTH(ch)         CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->page_length))
 #define IS_COLOR_CHAR(c)  ((c) == 'n' || (c) == 'b' || (c) == 'B' || (c) == '(c)' || \
    (c) == '(c)' || (c) == 'g' || (c) == 'G' || (c) == 'm' || (c) == 'M' || (c) == 'r' || \
    (c) == 'R' || (c) == 'y' || (c) == 'Y' || (c) == 'w' || (c) == 'W' || (c) == 'k' || \
@@ -1234,5 +1180,3 @@ extern void admin_set(struct char_data *ch, int value);
 #define OBJ_LOADROOM(obj)     ((obj)->room_loaded)
 
 extern int levenshtein_distance(char *s1, char *s2);
-
-#define GET_MURDER(ch)          CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->murder))

@@ -21,6 +21,7 @@
 #include "constants.h"
 #include "act.informative.h"
 #include "screen.h"
+#include "players.h"
 #include <unordered_set>
 
 /* local functions */
@@ -491,6 +492,13 @@ void null_affect(struct char_data *ch, int aff_flag) {
         next_af = af->next;
         if (af->location == APPLY_NONE && af->bitvector == aff_flag)
             affect_remove(ch, af);
+    }
+
+    if(aff_flag == AFF_POISON) {
+        if(ch->poisonby) {
+            ch->poisonby->poisoned.erase(ch);
+            ch->poisonby = nullptr;
+        }
     }
 }
 
@@ -1341,10 +1349,14 @@ int read_sense_memory(struct char_data *ch, struct char_data *vict) {
         return 0;
     }
 
+    if(IS_NPC(ch)) return 0;
+
+    auto &p = players[ch->id];
+
     if(IS_NPC(vict)) {
-        return ch->player_specials->senseMemory.contains(vict->vn);
+        return p.senseMemory.contains(vict->vn);
     } else {
-        return ch->player_specials->sensePlayer.contains(vict->idnum);
+        return p.sensePlayer.contains(vict->id);
     }
 }
 
@@ -1354,10 +1366,13 @@ void sense_memory_write(struct char_data *ch, struct char_data *vict) {
         return;
     }
 
+    if(IS_NPC(ch)) return;
+    auto &p = players[ch->id];
+
     if(IS_NPC(vict)) {
-        ch->player_specials->senseMemory.insert(vict->vn);
+        p.senseMemory.insert(vict->vn);
     } else {
-        ch->player_specials->sensePlayer.insert(vict->idnum);
+        p.sensePlayer.insert(vict->id);
     }
 }
 

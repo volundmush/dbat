@@ -13,14 +13,9 @@
 #include "db.h"
 #include "handler.h"
 #include "pfdefaults.h"
-#include "feats.h"
 #include "dg_scripts.h"
-#include "comm.h"
-#include "genmob.h"
-#include "constants.h"
-#include "imc.h"
 #include "class.h"
-#include "config.h"
+#include <boost/algorithm/string.hpp>
 
 #define LOAD_HIT    0
 #define LOAD_MANA    1
@@ -28,12 +23,9 @@
 #define LOAD_KI        3
 #define LOAD_LIFE       4
 
-std::map<vnum, player_data> players;
+DebugMap<int64_t, player_data> players;
 
 /* local functions */
-void build_player_index();
-
-void save_etext(struct char_data *ch);
 
 int sprintascii(char *out, bitvector_t bits);
 
@@ -44,8 +36,6 @@ void load_affects(FILE *fl, struct char_data *ch, int violence);
 void load_bonuses(FILE *fl, struct char_data *ch, bool mods);
 
 void load_skills(FILE *fl, struct char_data *ch, bool mods);
-
-void load_feats(FILE *fl, struct char_data *ch);
 
 void load_HMVS(struct char_data *ch, const char *line, int mode);
 
@@ -74,55 +64,6 @@ long top_idnum = 0;        /* highest idnum in use		 */
 /*************************************************************************
 *  stuff related to the player index					 *
 *************************************************************************/
-
-void load_imc_pfile(struct char_data *ch);
-
-/*char *imc_fread_word( char *buf, size_t len, FILE *fp );*/
-void save_imc_pfile(struct char_data *ch);
-
-void save_imc_pfile(struct char_data *ch) {
-    FILE *fl;
-    char filename[PATH_MAX];
-
-    if (!CH_IMCDATA(ch))
-        return;
-
-    if (!get_filename(filename, sizeof(filename), IMC_FILE, GET_PC_NAME(ch)))
-        return;
-
-    if (!(fl = fopen(filename, "w"))) {
-        if (errno != ENOENT)
-            log("SYSERR: opening IMC2 file '%s' for writing: %s", filename, strerror(errno));
-        return;
-    }
-
-    imc_savechar(ch, fl);
-    fclose(fl);
-}
-
-void load_imc_pfile(struct char_data *ch) {
-    FILE *fl;
-    char filename[PATH_MAX];
-    char *word;
-
-    if (!get_filename(filename, sizeof(filename), IMC_FILE, GET_PC_NAME(ch)))
-        return;
-
-    if (!(fl = fopen(filename, "r"))) {
-        if (errno != ENOENT)
-            log("SYSERR: opening IMC2 file '%s' for reading: %s", filename, strerror(errno));
-        return;
-    }
-
-    for (;;) {
-        word = imcfread_word(fl);
-        /*imc_fread_word(word, sizeof(word), fl);*/
-        if (*word != 'I')
-            break;
-        imc_loadchar(ch, fl, word);
-    }
-    fclose(fl);
-}
 
 /* new version to build player index for ASCII Player Files */
 /* generate index table for the player file */
@@ -168,63 +109,6 @@ void build_player_index() {
 }
 
 
-/*
- * Create a new entry in the in-memory index table for the player file.
- * If the name already exists, by overwriting a deleted character, then
- * we re-use the old position.
- */
-int create_entry(char *name) {
-    int i, pos;
-
-    if (top_of_p_table == -1) {    /* no table */
-        CREATE(player_table, struct player_index_element, 1);
-        pos = top_of_p_table = 0;
-    } else if ((pos = get_ptable_by_name(name)) == -1) {    /* new name */
-        i = ++top_of_p_table + 1;
-
-        RECREATE(player_table, struct player_index_element, i);
-        pos = top_of_p_table;
-    }
-
-    CREATE(player_table[pos].name, char, strlen(name) + 1);
-
-    /* copy lowercase equivalent of name to table field */
-    for (i = 0; (player_table[pos].name[i] = LOWER(name[i])); i++)
-        /* Nothing */;
-
-    /* clear the bitflag in case we have garbage data */
-    player_table[pos].flags = 0;
-
-    return (pos);
-}
-
-
-/* This function necessary to save a seperate ASCII player index */
-void save_player_index() {
-    int i;
-    char index_name[50], bits[64];
-    FILE *index_file;
-
-    sprintf(index_name, "%s%s", LIB_PLRFILES, INDEX_FILE);
-    if (!(index_file = fopen(index_name, "w"))) {
-        log("SYSERR: Could not write player index file");
-        return;
-    }
-
-    for (i = 0; i <= top_of_p_table; i++)
-        if (*player_table[i].name) {
-            sprintascii(bits, player_table[i].flags);
-            fprintf(index_file, "%ld %s %d %s %ld %d %d %d %ld\n", player_table[i].id,
-                    player_table[i].name, player_table[i].level, *bits ? bits : "0",
-                    player_table[i].last, player_table[i].admlevel, player_table[i].ship, player_table[i].shiproom,
-                    player_table[i].played);
-        }
-    fprintf(index_file, "~\n");
-
-    fclose(index_file);
-}
-
-
 void free_player_index() {
     int tp;
 
@@ -254,24 +138,18 @@ long get_ptable_by_name(const char *name) {
 
 
 long get_id_by_name(const char *name) {
-    int i;
-
-    for (i = 0; i <= top_of_p_table; i++)
-        if (!strcasecmp(player_table[i].name, name))
-            return (player_table[i].id);
-
-    return (-1);
+    auto find = findPlayer(name);
+    if(!find) return -1;
+    return find->id;
 }
 
 
 char *get_name_by_id(long id) {
-    int i;
-
-    for (i = 0; i <= top_of_p_table; i++)
-        if (player_table[i].id == id)
-            return (player_table[i].name);
-
-    return (nullptr);
+    static char buf[128];
+    auto find = players.find(id);
+    if(find == players.end()) return nullptr;
+    sprintf(buf, "%s", find->second.name.c_str());
+    return buf;
 }
 
 
@@ -338,20 +216,12 @@ int load_char(const char *name, struct char_data *ch) {
         GET_SEX(ch) = PFDEF_SEX;
         ch->size = PFDEF_SIZE;
         ch->chclass = sensei::sensei_map[sensei::roshi];
-        for (i = 0; i < NUM_CLASSES; i++) {
-            GET_CLASS_NONEPIC(ch, i) = 0;
-            GET_CLASS_EPIC(ch, i) = 0;
-        }
         GET_LOG_USER(ch) = strdup("NOUSER");
         ch->race = race::find_race_map_id(PFDEF_RACE, race::race_map);
         GET_ADMLEVEL(ch) = PFDEF_LEVEL;
         GET_CLASS_LEVEL(ch) = PFDEF_LEVEL;
         GET_HITDICE(ch) = PFDEF_LEVEL;
-        GET_RBANK(ch) = PFDEF_SKIN;
-        GET_RP(ch) = PFDEF_SKIN;
-        GET_TRP(ch) = PFDEF_SKIN;
         GET_SUPPRESS(ch) = PFDEF_SKIN;
-        GET_SUPP(ch) = PFDEF_SKIN;
         GET_FURY(ch) = PFDEF_HAIRL;
         GET_CLAN(ch) = strdup("None.");
         GET_LEVEL_ADJ(ch) = PFDEF_LEVEL;
@@ -443,10 +313,7 @@ int load_char(const char *name, struct char_data *ch) {
         GET_COND(ch, HUNGER) = PFDEF_HUNGER;
         GET_COND(ch, THIRST) = PFDEF_THIRST;
         GET_COND(ch, DRUNK) = PFDEF_DRUNK;
-        GET_BAD_PWS(ch) = PFDEF_BADPWS;
-        GET_RACE_PRACTICES(ch) = PFDEF_PRACTICES;
-        for (i = 0; i < NUM_CLASSES; i++)
-            GET_PRACTICES(ch, i) = PFDEF_PRACTICES;
+        GET_PRACTICES(ch) = PFDEF_PRACTICES;
         GET_GOLD(ch) = PFDEF_GOLD;
         GET_BACKSTAB_COOL(ch) = 0;
         GET_COOLDOWN(ch) = 0;
@@ -480,21 +347,13 @@ int load_char(const char *name, struct char_data *ch) {
         //ch->max_mana = PFDEF_MAXMANA;
         //GET_MOVE(ch) = PFDEF_MOVE;
         //ch->max_move = PFDEF_MAXMOVE;
-        GET_KI(ch) = PFDEF_KI;
-        GET_MAX_KI(ch) = PFDEF_MAXKI;
         SPEAKING(ch) = PFDEF_SPEAKING;
         GET_OLC_ZONE(ch) = PFDEF_OLC;
-        GET_HOST(ch) = nullptr;
-        for (i = 1; i < MAX_MEM; i++)
-            GET_SPELLMEM(ch, i) = 0;
-        for (i = 0; i < MAX_SPELL_LEVEL; i++)
-            GET_SPELL_LEVEL(ch, i) = 0;
-        GET_MEMCURSOR(ch) = 0;
+
         ch->time.birth = ch->time.created = ch->time.maxage = 0;
         ch->followers = nullptr;
-        GET_PAGE_LENGTH(ch) = PFDEF_PAGELENGTH;
-        for (i = 0; i < NUM_COLOR; i++)
-            ch->player_specials->color_choices[i] = nullptr;
+
+        auto &p = players[player_table[id].id];
 
         while (get_line(fl, line)) {
             tag_argument(line, tag);
@@ -529,8 +388,7 @@ int load_char(const char *name, struct char_data *ch) {
                     break;
 
                 case 'B':
-                    if (!strcmp(tag, "Badp")) GET_BAD_PWS(ch) = atoi(line);
-                    else if (!strcmp(tag, "Bank")) GET_BANK_GOLD(ch) = atoi(line);
+                    if (!strcmp(tag, "Bank")) GET_BANK_GOLD(ch) = atoi(line);
                     else if (!strcmp(tag, "Bki ")) load_BASE(ch, line, LOAD_MANA);
                     else if (!strcmp(tag, "Blss")) GET_BLESSLVL(ch) = atoi(line);
                     else if (!strcmp(tag, "Boam")) GET_BOARD(ch, 0) = atoi(line);
@@ -553,7 +411,7 @@ int load_char(const char *name, struct char_data *ch) {
                         ch->chclass = sensei::find_sensei_map_id(atoi(line), sensei::sensei_map);
                     else if (!strcmp(tag, "Colr")) {
                         sscanf(line, "%d %s", &num, buf2);
-                        ch->player_specials->color_choices[num] = strdup(buf2);
+                        p.color_choices[num] = strdup(buf2);
                     } else if (!strcmp(tag, "Con ")) ch->real_abils.con = atoi(line);
                     else if (!strcmp(tag, "Cool")) GET_COOLDOWN(ch) = atoi(line);
                     else if (!strcmp(tag, "Crtd")) ch->time.created = atol(line);
@@ -573,8 +431,7 @@ int load_char(const char *name, struct char_data *ch) {
                     if (!strcmp(tag, "Exp ")) GET_EXP(ch) = atoi(line);
                     else if (!strcmp(tag, "Eali")) GET_ETHIC_ALIGNMENT(ch) = atoi(line);
                     else if (!strcmp(tag, "Ecls")) {
-                        sscanf(line, "%d=%d", &num, &num2);
-                        GET_CLASS_EPIC(ch, num) = num2;
+
                     } else if (!strcmp(tag, "Eye ")) GET_EYE(ch) = atoi(line);
                     break;
 
@@ -598,11 +455,8 @@ int load_char(const char *name, struct char_data *ch) {
                     else if (!strcmp(tag, "HitD")) GET_HITDICE(ch) = atoi(line);
                     else if (!strcmp(tag, "Hite")) GET_HEIGHT(ch) = atoi(line);
                     else if (!strcmp(tag, "Home")) GET_HOME(ch) = atoi(line);
-                    else if (!strcmp(tag, "Host")) {
-                        if (GET_HOST(ch))
-                            free(GET_HOST(ch));
-                        GET_HOST(ch) = strdup(line);
-                    } else if (!strcmp(tag, "Hrc ")) GET_HAIRC(ch) = atoi(line);
+                    else if (!strcmp(tag, "Host")) {}
+                    else if (!strcmp(tag, "Hrc ")) GET_HAIRC(ch) = atoi(line);
                     else if (!strcmp(tag, "Hrl ")) GET_HAIRL(ch) = atoi(line);
                     else if (!strcmp(tag, "Hrs ")) GET_HAIRS(ch) = atoi(line);
                     else if (!strcmp(tag, "Hung")) GET_COND(ch, HUNGER) = atoi(line);
@@ -622,7 +476,7 @@ int load_char(const char *name, struct char_data *ch) {
 
                 case 'L':
                     if (!strcmp(tag, "Last")) ch->time.logon = atol(line);
-                    else if (!strcmp(tag, "Lern")) GET_PRACTICES(ch, GET_CLASS(ch)) = atoi(line);
+                    else if (!strcmp(tag, "Lern")) GET_PRACTICES(ch) += atoi(line);
                     else if (!strcmp(tag, "Levl")) GET_CLASS_LEVEL(ch) = atoi(line);
                         /* else if (!strcmp(tag, "LevD"))  read_level_data(ch, fl);*/
                     else if (!strcmp(tag, "LF  ")) load_BASE(ch, line, LOAD_LIFE);
@@ -642,8 +496,7 @@ int load_char(const char *name, struct char_data *ch) {
                     else if (!strcmp(tag, "Mlvl")) GET_MOLT_LEVEL(ch) = atoi(line);
                     else if (!strcmp(tag, "Move")) load_HMVS(ch, line, LOAD_MOVE);
                     else if (!strcmp(tag, "Mcls")) {
-                        sscanf(line, "%d=%d", &num, &num2);
-                        GET_CLASS_NONEPIC(ch, num) = num2;
+
                     } else if (!strcmp(tag, "Maji")) MAJINIZED(ch) = atoi(line);
                     else if (!strcmp(tag, "Majm")) load_majin(ch, line);
                     else if (!strcmp(tag, "Mimi"))
@@ -660,8 +513,7 @@ int load_char(const char *name, struct char_data *ch) {
                     break;
 
                 case 'P':
-                    if (!strcmp(tag, "Page")) GET_PAGE_LENGTH(ch) = atoi(line);
-                    else if (!strcmp(tag, "Phas")) GET_DISTFEA(ch) = atoi(line);
+                    if (!strcmp(tag, "Phas")) GET_DISTFEA(ch) = atoi(line);
                     else if (!strcmp(tag, "Phse")) GET_PHASE(ch) = atoi(line);
                     else if (!strcmp(tag, "Plyd")) ch->time.played = atol(line);
 #ifdef ASCII_SAVE_POOFS
@@ -683,7 +535,6 @@ int load_char(const char *name, struct char_data *ch) {
                 case 'R':
                     if (!strcmp(tag, "Race")) ch->race = race::find_race_map_id(atoi(line), race::race_map);
                     else if (!strcmp(tag, "Raci")) RACIAL_PREF(ch) = atoi(line);
-                    else if (!strcmp(tag, "RBan")) GET_RBANK(ch) = atoi(line);
                     else if (!strcmp(tag, "rDis")) GET_RDISPLAY(ch) = strdup(line);
                     else if (!strcmp(tag, "Rela")) GET_RELAXCOUNT(ch) = atoi(line);
                     else if (!strcmp(tag, "Rtim")) GET_RTIME(ch) = atoi(line);
@@ -692,7 +543,6 @@ int load_char(const char *name, struct char_data *ch) {
                     else if (!strcmp(tag, "Rad3")) GET_RADAR3(ch) = atoi(line);
                     else if (!strcmp(tag, "Room")) GET_LOADROOM(ch) = atoi(line);
                     else if (!strcmp(tag, "RPfe")) GET_FEATURE(ch) = strdup(line);
-                    else if (!strcmp(tag, "RPP ")) GET_RP(ch) = atoi(line);
                     break;
 
                 case 'S':
@@ -704,16 +554,15 @@ int load_char(const char *name, struct char_data *ch) {
                     else if (!strcmp(tag, "Skn ")) GET_SKIN(ch) = atoi(line);
                     else if (!strcmp(tag, "Size")) ch->size = atoi(line);
                     else if (!strcmp(tag, "SklB")) load_skills(fl, ch, true);
-                    else if (!strcmp(tag, "SkRc")) GET_RACE_PRACTICES(ch) = atoi(line);
+                    else if (!strcmp(tag, "SkRc")) GET_PRACTICES(ch) += atoi(line);
                     else if (!strcmp(tag, "SkCl")) {
                         sscanf(line, "%d %d", &num2, &num3);
-                        GET_PRACTICES(ch, num2) = num3;
+                        GET_PRACTICES(ch) += num3;
                     } else if (!strcmp(tag, "Slot")) ch->skill_slots = atoi(line);
                     else if (!strcmp(tag, "Spek")) SPEAKING(ch) = atoi(line);
                     else if (!strcmp(tag, "Str ")) ch->real_abils.str = atoi(line);
                     else if (!strcmp(tag, "Stuk")) ch->stupidkiss = atoi(line);
                     else if (!strcmp(tag, "Supp")) GET_SUPPRESS(ch) = atoi(line);
-                    else if (!strcmp(tag, "Sups")) GET_SUPP(ch) = atoi(line);
                     break;
 
                 case 'T':
@@ -730,14 +579,12 @@ int load_char(const char *name, struct char_data *ch) {
                     else if (!strcmp(tag, "ThB1")) GET_SAVE_BASE(ch, 0) = atoi(line);
                     else if (!strcmp(tag, "ThB2")) GET_SAVE_BASE(ch, 1) = atoi(line);
                     else if (!strcmp(tag, "ThB3")) GET_SAVE_BASE(ch, 2) = atoi(line);
-                    else if (!strcmp(tag, "Trns")) GET_TRAINS(ch) = atoi(line);
                     else if (!strcmp(tag, "Trag")) GET_TRAINAGL(ch) = atoi(line);
                     else if (!strcmp(tag, "Trco")) GET_TRAINCON(ch) = atoi(line);
                     else if (!strcmp(tag, "Trin")) GET_TRAININT(ch) = atoi(line);
                     else if (!strcmp(tag, "Trsp")) GET_TRAINSPD(ch) = atoi(line);
                     else if (!strcmp(tag, "Trst")) GET_TRAINSTR(ch) = atoi(line);
                     else if (!strcmp(tag, "Trwi")) GET_TRAINWIS(ch) = atoi(line);
-                    else if (!strcmp(tag, "Trp ")) GET_TRP(ch) = atoi(line);
                     break;
                 case 'U':
                     if (!strcmp(tag, "Upgr")) GET_UP(ch) = atoi(line);
@@ -764,10 +611,14 @@ int load_char(const char *name, struct char_data *ch) {
         }
     }
 
+    ch->id = player_table[id].id;
+
     if (!ch->time.created) {
         log("No creation timestamp for user %s, using current time", GET_NAME(ch));
         ch->time.created = time(nullptr);
     }
+
+    ch->generation = ch->time.created;
 
     if (!ch->time.birth) {
         log("No birthday for user %s, using standard starting age determination", GET_NAME(ch));
@@ -790,10 +641,6 @@ int load_char(const char *name, struct char_data *ch) {
         GET_COND(ch, DRUNK) = -1;
     }
 
-    if (CONFIG_IMC_ENABLED) {
-        imc_initchar(ch);
-        load_imc_pfile(ch);
-    }
 
     if (IS_ANDROID(ch)) {
         GET_COND(ch, HUNGER) = -1;
@@ -827,60 +674,6 @@ void kill_ems(char *str) {
 }
 
 
-void save_char_pets(struct char_data *ch) {
-    struct follow_type *foll;
-    char fname[40];
-    FILE *fl;
-
-    if (IS_NPC(ch) || GET_PFILEPOS(ch) < 0)
-        return;
-
-    if (!get_filename(fname, sizeof(fname), PET_FILE, GET_NAME(ch)))
-        return;
-
-    if (!(fl = fopen(fname, "w"))) {
-        mudlog(NRM, ADMLVL_GOD, true, "SYSERR: Couldn't open pet file %s for write", fname);
-        return;
-    }
-
-    for (foll = ch->followers; foll; foll = foll->next) {
-        write_mobile_record(GET_MOB_VNUM(foll->follower), foll->follower, fl);
-    }
-
-    fclose(fl);
-}
-
-
-void load_char_pets(struct char_data *ch) {
-    char fname[40];
-    FILE *fl;
-    IDXTYPE load_room;
-    struct follow_type *foll;
-
-    if (IS_NPC(ch) || GET_PFILEPOS(ch) < 0)
-        return;
-
-    if (!get_filename(fname, sizeof(fname), PET_FILE, GET_NAME(ch)))
-        return;
-
-    if (!(fl = fopen(fname, "r")))
-        return;
-
-    while (!feof(fl))
-        load_follower_from_file(fl, ch);
-    /*load_room = IN_ROOM(ch);*/
-
-    for (foll = ch->followers; foll; foll = foll->next) {
-        load_room = real_room(1);
-        if (load_room == NOWHERE) {
-            load_room = real_room(IN_ROOM(ch));
-        }
-        char_to_room(foll->follower, load_room);
-        act("You are joined by $N.", false, ch, nullptr, foll->follower, TO_CHAR);
-    }
-}
-
-
 /*
  * write the vital data of a player to the player file
  *
@@ -888,6 +681,12 @@ void load_char_pets(struct char_data *ch) {
  */
 /* This is the ASCII Player Files save routine */
 void save_char(struct char_data *ch) {
+    if(IS_NPC(ch)) return;
+    dirty_players.insert(ch->id);
+    return;
+    // Below is the old code. For now.
+
+
     FILE *fl;
     char fname[40], buf[MAX_STRING_LENGTH];
     int i, id, save_index = false;
@@ -896,7 +695,7 @@ void save_char(struct char_data *ch) {
     char fbuf1[MAX_STRING_LENGTH], fbuf2[MAX_STRING_LENGTH];
     char fbuf3[MAX_STRING_LENGTH], fbuf4[MAX_STRING_LENGTH];
 
-    if (IS_NPC(ch) || GET_PFILEPOS(ch) < 0)
+    if (IS_NPC(ch))
         return;
 
     /*
@@ -904,14 +703,6 @@ void save_char(struct char_data *ch) {
      * before saving.
      */
     if (ch->desc) {
-        if (ch->desc->host && *ch->desc->host) {
-            if (!GET_HOST(ch))
-                GET_HOST(ch) = strdup(ch->desc->host);
-            else if (GET_HOST(ch) && !strcmp(GET_HOST(ch), ch->desc->host)) {
-                free(GET_HOST(ch));
-                GET_HOST(ch) = strdup(ch->desc->host);
-            }
-        }
 
         /*
          * We only update the time.played and time.logon if the character
@@ -933,9 +724,6 @@ void save_char(struct char_data *ch) {
     /* remove affects from eq and spells (from char_to_store) */
     /* Unaffect everything a character can be affected by */
 
-    if (GET_TRP(ch) < GET_RP(ch)) {
-        GET_TRP(ch) = GET_RP(ch);
-    }
     if (ch->desc && ch->desc->account) {
         dirty_accounts.insert(ch->desc->account->vn);
     }
@@ -1007,7 +795,6 @@ void save_char(struct char_data *ch) {
     if (GET_VOICE(ch)) fprintf(fl, "Voic: %s\n", GET_VOICE(ch));
     if (GET_CLAN(ch)) fprintf(fl, "Clan: %s\n", GET_CLAN(ch));
     if (GET_FEATURE(ch)) fprintf(fl, "RPfe: %s\n", GET_FEATURE(ch));
-    if (GET_TRAINS(ch)) fprintf(fl, "Trns: %d\n", GET_TRAINS(ch));
     if (ch->look_description && *ch->look_description) {
         strcpy(buf, ch->look_description);
         kill_ems(buf);
@@ -1027,10 +814,7 @@ void save_char(struct char_data *ch) {
     if (GET_HITDICE(ch) != PFDEF_LEVEL) fprintf(fl, "HitD: %d\n", GET_HITDICE(ch));
     if (GET_LEVEL_ADJ(ch) != PFDEF_LEVEL) fprintf(fl, "LvlA: %d\n", GET_LEVEL_ADJ(ch));
     if (GET_HOME(ch) != PFDEF_HOMETOWN) fprintf(fl, "Home: %d\n", GET_HOME(ch));
-    for (i = 0; i < NUM_CLASSES; i++) {
-        if (GET_CLASS_RANKS(ch, i)) fprintf(fl, "Mcls: %d=%d\n", i, GET_CLASS_NONEPIC(ch, i));
-        if (GET_CLASS_EPIC(ch, i)) fprintf(fl, "Ecls: %d=%d\n", i, GET_CLASS_EPIC(ch, i));
-    }
+
     fprintf(fl, "Id  : %d\n", GET_IDNUM(ch));
     fprintf(fl, "Brth: %ld\n", ch->time.birth);
     fprintf(fl, "Crtd: %ld\n", ch->time.created);
@@ -1038,7 +822,6 @@ void save_char(struct char_data *ch) {
     fprintf(fl, "Plyd: %ld\n", ch->time.played);
     fprintf(fl, "Last: %ld\n", ch->time.logon);
 
-    if (GET_HOST(ch)) fprintf(fl, "Host: %s\n", GET_HOST(ch));
     if (GET_HEIGHT(ch) != PFDEF_HEIGHT) fprintf(fl, "Hite: %d\n", GET_HEIGHT(ch));
     if (GET_WEIGHT(ch) != PFDEF_HEIGHT) fprintf(fl, "Wate: %d\n", GET_WEIGHT(ch));
     if (GET_ALIGNMENT(ch) != PFDEF_ALIGNMENT) fprintf(fl, "Alin: %d\n", GET_ALIGNMENT(ch));
@@ -1079,16 +862,13 @@ void save_char(struct char_data *ch) {
     if (GET_INVIS_LEV(ch) != PFDEF_INVISLEV) fprintf(fl, "Invs: %d\n", GET_INVIS_LEV(ch));
     if (GET_LOADROOM(ch) != PFDEF_LOADROOM) fprintf(fl, "Room: %d\n", GET_LOADROOM(ch));
 
-    if (GET_BAD_PWS(ch) != PFDEF_BADPWS) fprintf(fl, "Badp: %d\n", GET_BAD_PWS(ch));
-
-    if (GET_RACE_PRACTICES(ch) != PFDEF_PRACTICES) fprintf(fl, "SkRc: %d\n", GET_RACE_PRACTICES(ch));
+    if (GET_PRACTICES(ch) != PFDEF_PRACTICES) fprintf(fl, "SkRc: %d\n", GET_PRACTICES(ch));
     for (i = 0; i < 6; i++)
         if (GET_TRANSCOST(ch, i) != false)
             fprintf(fl, "Tcos: %d %d\n", i, GET_TRANSCOST(ch, i));
 
-    for (i = 0; i < NUM_CLASSES; i++)
-        if (GET_PRACTICES(ch, i) != PFDEF_PRACTICES)
-            fprintf(fl, "SkCl: %d %d\n", i, GET_PRACTICES(ch, i));
+    if(GET_PRACTICES(ch))
+        fprintf(fl, "SkCl: %d %d\n", i, GET_PRACTICES(ch));
 
     if (GET_COND(ch, HUNGER) != PFDEF_HUNGER && GET_ADMLEVEL(ch) < ADMLVL_IMMORT)
         fprintf(fl, "Hung: %d\n", GET_COND(ch, HUNGER));
@@ -1136,7 +916,6 @@ void save_char(struct char_data *ch) {
     if (GET_DAMAGE_MOD(ch) != PFDEF_DAMAGE) fprintf(fl, "Damg: %d\n", GET_DAMAGE_MOD(ch));
     if (SPEAKING(ch) != PFDEF_SPEAKING) fprintf(fl, "Spek: %d\n", SPEAKING(ch));
     if (GET_OLC_ZONE(ch) != PFDEF_OLC) fprintf(fl, "Olc : %d\n", GET_OLC_ZONE(ch));
-    if (GET_PAGE_LENGTH(ch) != PFDEF_PAGELENGTH) fprintf(fl, "Page: %d\n", GET_PAGE_LENGTH(ch));
     if (GET_GAUNTLET(ch) != PFDEF_GAUNTLET) fprintf(fl, "Gaun: %d\n", GET_GAUNTLET(ch));
     if (GET_GENOME(ch, 0) != PFDEF_EYE) fprintf(fl, "Geno: %d\n", GET_GENOME(ch, 0));
     if (GET_GENOME(ch, 1) != PFDEF_EYE) fprintf(fl, "Gen1: %d\n", GET_GENOME(ch, 1));
@@ -1176,11 +955,7 @@ void save_char(struct char_data *ch) {
     if (GET_LIMBCOND(ch, 2) != PFDEF_BOARD) fprintf(fl, "Lirl: %d\n", GET_LIMBCOND(ch, 2));
     if (GET_LIMBCOND(ch, 3) != PFDEF_BOARD) fprintf(fl, "Lill: %d\n", GET_LIMBCOND(ch, 3));
     if (GET_CRANK(ch) != PFDEF_CRANK) fprintf(fl, "Clar: %d\n", GET_CRANK(ch));
-    if (GET_RP(ch) != PFDEF_SKIN) fprintf(fl, "RPP : %d\n", GET_RP(ch));
-    if (GET_RBANK(ch) != PFDEF_SKIN) fprintf(fl, "RBan: %d\n", GET_RBANK(ch));
     if (GET_SUPPRESS(ch) != PFDEF_SKIN) fprintf(fl, "Supp: %" I64T "\n", GET_SUPPRESS(ch));
-    if (GET_SUPP(ch) != PFDEF_SKIN) fprintf(fl, "Sups: %" I64T "\n", GET_SUPP(ch));
-    if (GET_TRP(ch) != PFDEF_SKIN) fprintf(fl, "Trp : %d\n", GET_TRP(ch));
     if (GET_DCOUNT(ch) != PFDEF_EYE) fprintf(fl, "Deac: %d\n", GET_DCOUNT(ch));
     if (GET_TRAINAGL(ch) != PFDEF_EYE) fprintf(fl, "Trag: %d\n", GET_TRAINAGL(ch));
     if (GET_TRAINCON(ch) != PFDEF_EYE) fprintf(fl, "Trco: %d\n", GET_TRAINCON(ch));
@@ -1261,11 +1036,6 @@ void save_char(struct char_data *ch) {
     /*fprintf(fl, "LevD:\n");
     write_level_data(ch, fl);*/
 
-    for (i = 0; i < NUM_COLOR; i++)
-        if (ch->player_specials->color_choices[i]) {
-            fprintf(fl, "Colr: %d %s\r\n", i, ch->player_specials->color_choices[i]);
-        }
-
     fclose(fl);
 
     /* more char_to_store code to restore affects */
@@ -1274,9 +1044,6 @@ void save_char(struct char_data *ch) {
     for (i = 0; i < MAX_AFFECT; i++) {
         if (tmp_aff[i].type)
             affect_to_char(ch, &tmp_aff[i]);
-    }
-    if (CONFIG_IMC_ENABLED) {
-        save_imc_pfile(ch);
     }
 
     for (i = 0; i < MAX_AFFECT; i++) {
@@ -1349,19 +1116,7 @@ void save_char(struct char_data *ch) {
     else
         REMOVE_BIT(player_table[id].flags, PINDEX_NOWIZLIST);
 
-    if (player_table[id].flags != i || save_index)
-        save_player_index();
 }
-
-/*
- * Grab one word, ignoring preceding whitespace. Will
- * eat a single whitespace immediately after the word.
- */
-
-void save_etext(struct char_data *ch) {
-/* this will be really cool soon */
-}
-
 
 /* Separate a 4-character id tag from the data it precedes */
 void tag_argument(char *argument, char *tag) {
@@ -1445,18 +1200,6 @@ void load_bonuses(FILE *fl, struct char_data *ch, bool mods) {
     }
 }
 
-void load_feats(FILE *fl, struct char_data *ch) {
-    int num = 0, num2 = 0;
-    char line[MAX_INPUT_LENGTH + 1];
-
-    do {
-        get_line(fl, line);
-        sscanf(line, "%d %d", &num, &num2);
-        if (num != 0)
-            HAS_FEAT(ch, num) = num2;
-    } while (num != 0);
-}
-
 void load_HMVS(struct char_data *ch, const char *line, int mode) {
     int64_t num = 0, num2 = 0;
 
@@ -1465,22 +1208,18 @@ void load_HMVS(struct char_data *ch, const char *line, int mode) {
     switch (mode) {
         case LOAD_HIT:
             //GET_HIT(ch) = num;
-            ch->max_hit = num2;
             break;
 
         case LOAD_MANA:
             //GET_MANA(ch) = num;
-            ch->max_mana = num2;
             break;
 
         case LOAD_MOVE:
             //GET_MOVE(ch) = num;
-            ch->max_move = num2;
             break;
 
         case LOAD_KI:
             //GET_KI(ch) = num;
-            ch->max_ki = num2;
             break;
     }
 }
@@ -1555,64 +1294,12 @@ void remove_player(int pfilepos) {
         player_table[pfilepos].name, player_table[pfilepos].level,
         asctime(localtime(&player_table[pfilepos].last)));
     player_table[pfilepos].name[0] = '\0';
-    save_player_index();
-}
-
-
-void clean_pfiles() {
-    int i, ci;
-
-    for (i = 0; i <= top_of_p_table; i++) {
-        /*
-         * We only want to go further if the player isn't protected
-         * from deletion and hasn't already been deleted.
-         */
-        if (!IS_SET(player_table[i].flags, PINDEX_NODELETE) &&
-            *player_table[i].name) {
-            /*
-             * If the player is already flagged for deletion, then go
-             * ahead and get rid of him.
-             */
-            if (IS_SET(player_table[i].flags, PINDEX_DELETED)) {
-                remove_player(i);
-            } else {
-                /*
-                 * Now we check to see if the player has overstayed his
-                 * welcome based on level.
-                 */
-                for (ci = 0; pclean_criteria[ci].level > -1; ci++) {
-                    if (player_table[i].admlevel > 1)
-                        continue;
-                    else if (player_table[i].level <= pclean_criteria[ci].level &&
-                             ((time(nullptr) - player_table[i].last) >=
-                              (pclean_criteria[ci].days * SECS_PER_REAL_DAY))) {
-                        remove_player(i);
-                        break;
-                    }
-                }
-                /*
-                     * If we got this far and the players hasn't been kicked out,
-                     * then he can stay a little while longer.
-                     */
-            }
-        }
-    }
-    /*
-     * After everything is done, we should rebuild player_index and
-     * remove the entries of the players that were just deleted.
-     */
-}
-
-int player_data::getNextID() {
-    int id = 0;
-    while(players.contains(id)) id++;
-    return id;
 }
 
 struct char_data *findPlayer(const std::string& name) {
     for (auto& player : players) {
-        if (boost::algorithm::iequals(player.second->name, name) {
-            return player.second->character;
+        if (boost::iequals(player.second.name, name)) {
+            return player.second.character;
         }
     }
     return nullptr;

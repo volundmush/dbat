@@ -87,7 +87,7 @@ extern void string_write(struct descriptor_data *d, char **txt, size_t len, long
 #define PAGE_WIDTH    79
 
 
-extern void show_help(struct descriptor_data *t, const char *entry);
+extern void show_help(struct net::connection_data *t, const char *entry);
 
 /* variables */
 extern unsigned long pulse;

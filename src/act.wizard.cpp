@@ -1404,7 +1404,7 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j) {
                  vnum, GET_OBJ_RNUM(j), ((j)->id), buf, GET_OBJ_SPEC(j) ? "Exists" : "None");
 
     send_to_char(ch, "Generation time: @g%s@nUnique ID: @g%" I64T "@n\r\n",
-                 ctime(&j->generation), j->unique_id);
+                 ctime(&j->generation), j->id);
 
     send_to_char(ch, "Object Hit Points: [ @g%3d@n/@g%3d@n]\r\n",
                  GET_OBJ_VAL(j, VAL_ALL_HEALTH), GET_OBJ_VAL(j, VAL_ALL_MAXHEALTH));
@@ -1806,14 +1806,11 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
             struct script_memory *mem = SCRIPT_MEM(k);
             send_to_char(ch, "Script memory:\r\n  Remember             Command\r\n");
             while (mem) {
-                struct char_data *mc = find_char(mem->id);
-                if (!mc)
+                auto find = uniqueCharacters.find(mem->id);
+                if(find == uniqueCharacters.end()) {
                     send_to_char(ch, "  ** Corrupted!\r\n");
-                else {
-                    if (mem->cmd)
-                        send_to_char(ch, "  %-20.20s%s\r\n", GET_NAME(mc), mem->cmd);
-                    else
-                        send_to_char(ch, "  %-20.20s <default>\r\n", GET_NAME(mc));
+                } else {
+                    send_to_char(ch, "  %-20.20s <default>\r\n", GET_NAME(find->second.second));
                 }
                 mem = mem->next;
             }
@@ -1870,7 +1867,7 @@ ACMD(do_varstat) {
                 if (*(tv->value) == UID_CHAR) {
                     auto uidResult = parseDgUID(tv->value);
                     if(uidResult) {
-                        auto idx = *uidResult.index();
+                        auto idx = (*uidResult).index();
                         std::string n;
                         if(idx == 0) {
                             // Room.
@@ -1934,19 +1931,15 @@ ACMD(do_stat) {
         else if ((victim = get_player_vis(ch, buf2, nullptr, FIND_CHAR_WORLD)) != nullptr)
             do_stat_character(ch, victim);
         else {
-            victim = new char_data();
-            victim->player_specials = new player_special_data();
-            if (load_char(buf2, victim) >= 0) {
-                char_to_room(victim, 0);
-                if (GET_ADMLEVEL(victim) > GET_ADMLEVEL(ch))
-                    send_to_char(ch, "Sorry, you can't do that.\r\n");
-                else
-                    do_stat_character(ch, victim);
-                extract_char_final(victim);
-            } else {
+            victim = findPlayer(buf2);
+            if(!victim) {
                 send_to_char(ch, "There is no such player.\r\n");
-                free_char(victim);
+                return;
             }
+            if (GET_ADMLEVEL(victim) > GET_ADMLEVEL(ch))
+                send_to_char(ch, "Sorry, you can't do that.\r\n");
+            else
+                do_stat_character(ch, victim);
         }
     } else if (is_abbrev(buf1, "object")) {
         if (!*buf2)
@@ -2527,7 +2520,7 @@ ACMD(do_handout) {
         if (IS_NPC(j->character))
             continue;
         else {
-            GET_PRACTICES(j->character, GET_CLASS(j->character)) += 10;
+            GET_PRACTICES(j->character) += 10;
         }
     }
 
@@ -2829,12 +2822,10 @@ ACMD(do_last) {
         send_to_char(ch, "For whom do you wish to search?\r\n");
         return;
     }
-    auto vict = new char_data();
+    auto vict = findPlayer(arg);
 
-    vict->player_specials = new player_special_data();
-    if (load_char(arg, vict) < 0) {
+    if (!vict) {
         send_to_char(ch, "There is no such player.\r\n");
-        free_char(vict);
         return;
     }
     if ((GET_ADMLEVEL(vict) > GET_ADMLEVEL(ch)) && (GET_ADMLEVEL(ch) < ADMLVL_IMPL)) {
@@ -2845,10 +2836,8 @@ ACMD(do_last) {
     send_to_char(ch, "[%5d] [%2d %s %s] %-12s : %-18s : %-20s\r\n",
                  GET_IDNUM(vict), (int) GET_LEVEL(vict),
                  vict->race->getAbbr().c_str(), CLASS_ABBR(vict),
-                 GET_NAME(vict), vict->player_specials->host && *vict->player_specials->host
-                                 ? vict->player_specials->host : "(NOHOST)",
+                 GET_NAME(vict), "(FIXHOSTPLZ)",
                  ctime(&vict->time.logon));
-    free_char(vict);
 }
 
 ACMD(do_force) {
@@ -3294,10 +3283,8 @@ ACMD(do_show) {
                 send_to_char(ch, "A name would help.\r\n");
                 return;
             }
-            vict = new char_data();
-            vict->player_specials = new player_special_data();
-
-            if (load_char(value, vict) < 0) {
+            vict = findPlayer(value);
+            if (!vict) {
                 send_to_char(ch, "There is no such player.\r\n");
                 free_char(vict);
                 return;
@@ -3317,7 +3304,6 @@ ACMD(do_show) {
                          ctime(&vict->time.logon),
                          (int) (vict->time.played / 3600),
                          (int) (vict->time.played / 60 % 60));
-            free_char(vict);
             break;
 
             /* show rent */
@@ -3361,7 +3347,7 @@ ACMD(do_show) {
                          "  @Y%5s@W Asssassins Generated@n\r\n"
                          "  @Y%5d@W Wish Selfishness Meter@n\r\n",
                          i, con,
-                         top_of_p_table + 1,
+                         players.size(),
                          j, mob_proto.size(),
                          k, obj_proto.size(),
                          world.size(), zone_table.size(),
@@ -3732,38 +3718,32 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             send_to_char(ch, "Nosummon %s for %s.\r\n", ONOFF(!on), GET_NAME(vict));
             break;
         case 4:
-            vict->max_hit = value;
             mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set maxpl for %s.", GET_NAME(ch),
                    GET_NAME(vict));
             log_imm_action("SET: %s has set maxpl for %s.", GET_NAME(ch), GET_NAME(vict));
             break;
         case 5:
-            vict->max_mana = value;
             mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set maxki for %s.", GET_NAME(ch),
                    GET_NAME(vict));
             log_imm_action("SET: %s has set maxki for %s.", GET_NAME(ch), GET_NAME(vict));
             break;
         case 6:
-            vict->max_move = value;
             mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set maxsta for %s.", GET_NAME(ch),
                    GET_NAME(vict));
             log_imm_action("SET: %s has set maxsta for %s.", GET_NAME(ch), GET_NAME(vict));
             break;
         case 7:
-            vict->hit = value;
             mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set pl for %s.", GET_NAME(ch),
                    GET_NAME(vict));
             log_imm_action("SET: %s has set pl for %s.", GET_NAME(ch), GET_NAME(vict));
             break;
         case 8:
-            vict->mana = value;
             affect_total(vict);
             mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set ki for %s.", GET_NAME(ch),
                    GET_NAME(vict));
             log_imm_action("SET: %s has set ki for %s.", GET_NAME(ch), GET_NAME(vict));
             break;
         case 9:
-            vict->move = value;
             mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set st for %s.", GET_NAME(ch),
                    GET_NAME(vict));
             log_imm_action("SET: %s has set st for %s.", GET_NAME(ch), GET_NAME(vict));
@@ -3886,12 +3866,12 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
         case 27:
         case 28:
             if (GET_CLASS_LEVEL(vict)) {
-                GET_PRACTICES(vict, GET_CLASS(vict)) = RANGE(0, 10000);
+                GET_PRACTICES(vict) = RANGE(0, 10000);
                 mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set PS for %s.", GET_NAME(ch),
                        GET_NAME(vict));
                 log_imm_action("SET: %s has set PS for %s.", GET_NAME(ch), GET_NAME(vict));
             } else {
-                GET_RACE_PRACTICES(vict) = RANGE(0, 10000);
+                GET_PRACTICES(vict) = RANGE(0, 10000);
                 mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set PS for %s.", GET_NAME(ch),
                        GET_NAME(vict));
                 log_imm_action("SET: %s has set PS for %s.", GET_NAME(ch), GET_NAME(vict));
@@ -3945,7 +3925,6 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
                 send_to_char(ch, "That is not a class.\r\n");
                 return (0);
             }
-            value = GET_CLASS_RANKS(vict, GET_CLASS(vict));
             vict->chclass = chosen_sensei;
             break;
         case 40: SET_OR_REMOVE(PLR_FLAGS(vict), PLR_NOWIZLIST);
@@ -4049,11 +4028,9 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             break;
 
         case 53:
-            GET_TRAINS(vict) = RANGE(0, 500);
             break;
 
         case 54:
-            GET_FEAT_POINTS(vict) = RANGE(0, 500);
             break;
 
         case 55:
@@ -4062,12 +4039,10 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             break;
 
         case 56:
-            vict->max_ki = RANGE(1, 5000);
             affect_total(vict);
             break;
 
         case 57:
-            vict->ki = RANGE(0, vict->max_ki);
             affect_total(vict);
             break;
 
@@ -4248,10 +4223,7 @@ ACMD(do_set) {
 
     half_chop(argument, name, buf);
 
-    if (!strcmp(name, "file")) {
-        is_file = 1;
-        half_chop(buf, name, buf);
-    } else if (!strcasecmp(name, "player")) {
+    if (!strcasecmp(name, "player")) {
         is_player = 1;
         half_chop(buf, name, buf);
     } else if (!strcasecmp(name, "mob"))
@@ -4265,32 +4237,15 @@ ACMD(do_set) {
     }
 
     /* find the target */
-    if (!is_file) {
-        if (is_player) {
-            if (!(vict = get_player_vis(ch, name, nullptr, FIND_CHAR_WORLD))) {
-                send_to_char(ch, "There is no such player.\r\n");
-                return;
-            }
-        } else { /* is_mob */
-            if (!(vict = get_char_vis(ch, name, nullptr, FIND_CHAR_WORLD))) {
-                send_to_char(ch, "There is no such creature.\r\n");
-                return;
-            }
-        }
-    } else if (is_file) {
-        /* try to load the player off disk */
-        cbuf = new char_data();
-        cbuf->player_specials = new player_special_data();
-        if ((player_i = load_char(name, cbuf)) > -1) {
-            if (GET_ADMLEVEL(cbuf) >= GET_ADMLEVEL(ch)) {
-                free_char(cbuf);
-                send_to_char(ch, "Sorry, you can't do that.\r\n");
-                return;
-            }
-            vict = cbuf;
-        } else {
-            free_char(cbuf);
+    if (is_player) {
+        vict = findPlayer(name);
+        if (!vict) {
             send_to_char(ch, "There is no such player.\r\n");
+            return;
+        }
+    } else { /* is_mob */
+        if (!(vict = get_char_vis(ch, name, nullptr, FIND_CHAR_WORLD))) {
+            send_to_char(ch, "There is no such creature.\r\n");
             return;
         }
     }
@@ -4309,19 +4264,9 @@ ACMD(do_set) {
     retval = perform_set(ch, vict, mode, buf);
 
     /* save the character if a change was made */
-    if (retval) {
-        if (!is_file && !IS_NPC(vict))
-            save_char(vict);
-        if (is_file) {
-            GET_PFILEPOS(cbuf) = player_i;
-            save_char(cbuf);
-            send_to_char(ch, "Saved in file.\r\n");
-        }
+    if (retval && !IS_NPC(ch)) {
+        save_char(vict);
     }
-
-    /* free the memory if we allocated it earlier */
-    if (is_file)
-        free_char(cbuf);
 }
 
 ACMD(do_saveall) {
@@ -4338,7 +4283,7 @@ ACMD(do_saveall) {
   "players [minlev[-maxlev]] [-n name] [-d days] [-h hours] [-m]"
 
 ACMD(do_plist) {
-    int i, len = 0, count = 0;
+    int i, len = 0;
     char mode, buf[MAX_STRING_LENGTH], name_search[MAX_NAME_LENGTH], time_str[MAX_STRING_LENGTH];
     struct time_info_data time_away;
     int low = 0, high = 100, low_day = 0, high_day = 10000, low_hr = 0, high_hr = 24;
@@ -4399,36 +4344,19 @@ ACMD(do_plist) {
                     CCCYN(ch, C_NRM),
                     CCNRM(ch, C_NRM));
 
-    for (i = 0; i <= top_of_p_table; i++) {
-        if (IS_SET(player_table[i].flags, PINDEX_DELETED)) {
-            len += snprintf(buf + len, sizeof(buf) - len, "[%3ld] <DELETED> --Will be removed next boot.\r\n",
-                            player_table[i].id);
-            continue;
-        }
+    for (auto &[id, p] : players) {
 
-        if (player_table[i].level < low || player_table[i].level > high)
-            continue;
+        time_away = *real_time_passed(time(nullptr), p.character->time.logon);
 
-        time_away = *real_time_passed(time(nullptr), player_table[i].last);
 
-        if (*name_search && strcasecmp(name_search, player_table[i].name))
-            continue;
-
-        if (time_away.day > high_day || time_away.day < low_day)
-            continue;
-        if (time_away.hours > high_hr || time_away.hours < low_hr)
-            continue;
-
-        strcpy(time_str, asctime(localtime(&player_table[i].last)));
+        strcpy(time_str, asctime(localtime(&p.character->time.logon)));
         time_str[strlen(time_str) - 1] = '\0';
 
         len += snprintf(buf + len, sizeof(buf) - len, "[%3ld] (%2d) %-12s %s\r\n",
-                        player_table[i].id, player_table[i].level,
-                        CAP(strdup(player_table[i].name)), time_str);
-        count++;
+                        id, p.character->level, p.name.c_str(), time_str);
     }
     snprintf(buf + len, sizeof(buf) - len, "%s-----------------------------------------------%s\r\n"
-                                           "%d players listed.\r\n", CCCYN(ch, C_NRM), CCNRM(ch, C_NRM), count);
+                                           "%d players listed.\r\n", CCCYN(ch, C_NRM), CCNRM(ch, C_NRM), players.size());
     write_to_output(ch->desc, buf);
 }
 

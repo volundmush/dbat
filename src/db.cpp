@@ -39,17 +39,17 @@
 #include "genmob.h"
 #include "spells.h"
 #include "races.h"
-#include "imc.h"
 #include "spell_parser.h"
 #include "genobj.h"
 #include "area.h"
+#include "account.h"
 
 /**************************************************************************
 *  declarations of most of the 'global' variables                         *
 **************************************************************************/
 
 std::shared_ptr<SQLite::Database> db;
-std::set<room_vnum> dirty_rooms, dirty_save_rooms;
+std::set<room_vnum> dirty_rooms;
 std::set<obj_vnum> dirty_item_prototypes;
 std::set<mob_vnum> dirty_npc_prototypes;
 std::set<zone_vnum> dirty_zones;
@@ -57,7 +57,8 @@ std::set<vnum> dirty_areas;
 std::set<trig_vnum> dirty_dgscripts;
 std::set<guild_vnum> dirty_guilds;
 std::set<shop_vnum> dirty_shops;
-std::set<vnum> dirty_players;
+std::set<int64_t> dirty_players;
+std::set<vnum> dirty_accounts;
 
 
 struct config_data config_info; /* Game configuration list.    */
@@ -75,6 +76,7 @@ struct obj_data *object_list = nullptr;    /* global linked list of objs	 */
 std::map<obj_vnum, struct index_data> obj_index;    /* index table for object file	 */
 std::map<obj_vnum, struct obj_data> obj_proto;    /* prototypes for objs		 */
 
+std::unordered_map<int64_t, std::pair<time_t, struct char_data*>> uniqueCharacters;
 /* hash tree for fast obj lookup */
 std::unordered_map<int64_t, std::pair<time_t, struct obj_data*>> uniqueObjects;
 
@@ -128,7 +130,6 @@ int top_of_socialt = -1;                        /* number of socials */
 
 struct time_info_data time_info;/* the infomation about the time    */
 struct weather_data weather_info;    /* the infomation about the weather */
-struct player_special_data dummy_mob;    /* dummy spec area for mobs	*/
 std::set<zone_vnum> zone_reset_queue;
 
 /* local functions */
@@ -187,8 +188,6 @@ static void free_obj_unique_hash();
 static void mob_autobalance(struct char_data *ch);
 /* external functions */
 
-void free_alias(struct alias_data *a);
-
 void mag_assign_spells();
 
 void create_command_list();
@@ -202,10 +201,6 @@ void Read_Invalid_List();
 int hsort(const void *a, const void *b);
 
 void prune_crlf(char *txt);
-
-void build_player_index();
-
-void clean_pfiles();
 
 void boot_the_guilds(FILE *gm_f, char *filename, int rec_count);
 
@@ -388,8 +383,6 @@ ACMD(do_reboot) {
     one_argument(argument, arg);
 
     if (!strcasecmp(arg, "all") || *arg == '*') {
-        if (load_levels() < 0)
-            send_to_char(ch, "Cannot read level configurations\r\n");
         if (file_to_string_alloc(GREETINGS_FILE, &GREETINGS) == 0)
             prune_crlf(GREETINGS);
         if (file_to_string_alloc(GREETANSI_FILE, &GREETANSI) == 0)
@@ -419,9 +412,6 @@ ACMD(do_reboot) {
         if (help_table)
             free_help_table();
         index_boot(DB_BOOT_HLP);
-    } else if (!strcasecmp(arg, "levels")) {
-        if (load_levels() < 0)
-            send_to_char(ch, "Cannot read level configurations\r\n");
     } else if (!strcasecmp(arg, "wizlist")) {
         if (file_to_string_alloc(WIZLIST_FILE, &wizlist) < 0)
             send_to_char(ch, "Cannot read wizlist\r\n");
@@ -480,75 +470,228 @@ ACMD(do_reboot) {
     send_to_char(ch, "%s", CONFIG_OK);
 }
 
-static bool load_new_zones() {
-    // first we must find out if the zones folder exists in <cwd>..
-    // We're gonna use C++ filesystem for it all.
-    // If it doesn't exist, we're gonna return false and load the old way.
-    // If it does exist, we're gonna load the new way.
-
-    // First, we need to get the current working directory.
-    // get zones path...
-    std::filesystem::path zones_dir = std::filesystem::current_path() / "zones";
-
-    // check if it exists...
-    if(!std::filesystem::exists(zones_dir)) {
-        // doesn't exist, return false.
-        return false;
-    }
-
-    // Now we must scan the directory for sub-directories where the names are integers.
-    // Those are zone folders. We want to iterate through all of them...
-    // Just start iterating over folders dammit.
-    log("Loading new-style zone table.");
-    for(auto& p: std::filesystem::directory_iterator(zones_dir)) {
-        // check if it's a directory...
-        if(p.is_directory()) {
-            // check if the name is an integer...
-            if(is_number(p.path().filename().string().c_str())) {
-                auto vnum = atoi(p.path().filename().string().c_str());
-
-                // find a zone.json file in the folder...
-                auto zj = p.path() / "zone.json";
-                if(std::filesystem::exists(zj)) {
-                    // Open the file and read it into a nlohmann::json...
-                    std::ifstream zj_file(zj);
-                    nlohmann::json zj_json;
-                    zj_file >> zj_json;
-                    zj_file.close();
-                    zone_table.emplace(vnum, zj_json);
-                }
-
-            }
+static void db_load_accounts() {
+    SQLite::Statement q(*db, "SELECT id,data FROM accounts");
+    while(q.executeStep()) {
+        auto id = q.getColumn(0).getInt64();
+        auto data = q.getColumn(1).getString();
+        try {
+            auto j = nlohmann::json::parse(data);
+            accounts.emplace(id, j);
+        } catch(std::exception& e) {
+            log("Error parsing account %ld: %s", id, e.what());
+            continue;
         }
+
     }
-
-
-    return true;
 
 }
 
+static void db_load_players() {
+    SQLite::Statement q(*db, "SELECT id,data FROM playerCharacters");
+    while(q.executeStep()) {
+        auto id = q.getColumn(0).getInt64();
+        auto data = q.getColumn(1).getString();
+        try {
+            auto j = nlohmann::json::parse(data);
+            players.emplace(id, j);
+        } catch(std::exception& e) {
+            log("Error parsing player %ld: %s", id, e.what());
+            continue;
+        }
+    }
+}
+
+static void db_load_zones() {
+    SQLite::Statement q(*db, "SELECT id,data FROM zones");
+    while(q.executeStep()) {
+        auto id = q.getColumn(0).getInt64();
+        auto data = q.getColumn(1).getString();
+        try {
+            auto j = nlohmann::json::parse(data);
+            zone_table.emplace(id, j);
+        } catch(std::exception& e) {
+            log("Error parsing zone %ld: %s", id, e.what());
+            continue;
+        }
+    }
+}
+
+static void db_load_dgscripts() {
+    SQLite::Statement q(*db, "SELECT id,data FROM dgscripts");
+    while(q.executeStep()) {
+        auto id = q.getColumn(0).getInt64();
+        auto data = q.getColumn(1).getString();
+        try {
+            auto j = nlohmann::json::parse(data);
+            auto trig = new trig_data(j);
+            auto &t = trig_index[id];
+            t.number = id;
+            t.vn = id;
+            t.proto = trig;
+        } catch(std::exception& e) {
+            log("Error parsing dgscript %ld: %s", id, e.what());
+            continue;
+        }
+    }
+}
+
+static void db_load_rooms() {
+    SQLite::Statement q(*db, "SELECT id,data FROM rooms");
+    while(q.executeStep()) {
+        auto id = q.getColumn(0).getInt64();
+        auto data = q.getColumn(1).getString();
+        try {
+            auto j = nlohmann::json::parse(data);
+            world.emplace(id, j);
+        } catch(std::exception& e) {
+            log("Error parsing room %ld: %s", id, e.what());
+            continue;
+        }
+    }
+}
+
+static void db_load_save_rooms() {
+    SQLite::Statement q(*db, "SELECT id,items FROM rooms WHERE items IS NOT NULL");
+    while(q.executeStep()) {
+        auto id = q.getColumn(0).getInt64();
+        auto items = q.getColumn(1).getString();
+        try {
+            auto j = nlohmann::json::parse(items);
+            auto room = world.find(id);
+            if(room != world.end()) {
+                room->second.deserializeContents(j, false);
+            }
+        } catch(std::exception& e) {
+            log("Error parsing room %ld: %s", id, e.what());
+            continue;
+        }
+    }
+}
+
+static void db_load_shops() {
+    SQLite::Statement q(*db, "SELECT id,data FROM shops");
+    while(q.executeStep()) {
+        auto id = q.getColumn(0).getInt64();
+        auto data = q.getColumn(1).getString();
+        try {
+            auto j = nlohmann::json::parse(data);
+            shop_index.emplace(id, j);
+        } catch(std::exception& e) {
+            log("Error parsing shop %ld: %s", id, e.what());
+            continue;
+        }
+    }
+}
+
+static void db_load_guilds() {
+    SQLite::Statement q(*db, "SELECT id,data FROM guilds");
+    while(q.executeStep()) {
+        auto id = q.getColumn(0).getInt64();
+        auto data = q.getColumn(1).getString();
+        try {
+            auto j = nlohmann::json::parse(data);
+            guild_index.emplace(id, j);
+        } catch(std::exception& e) {
+            log("Error parsing guild %ld: %s", id, e.what());
+            continue;
+        }
+    }
+}
+
+static void db_load_item_prototypes() {
+    SQLite::Statement q(*db, "SELECT id,data FROM itemPrototypes");
+    while(q.executeStep()) {
+        auto id = q.getColumn(0).getInt64();
+        auto data = q.getColumn(1).getString();
+        try {
+            auto j = nlohmann::json::parse(data);
+            obj_proto.emplace(id, j);
+            auto &i = obj_index[id];
+            i.vn = id;
+        } catch(std::exception& e) {
+            log("Error parsing item prototype %ld: %s", id, e.what());
+            continue;
+        }
+    }
+}
+
+static void db_load_npc_prototypes() {
+    SQLite::Statement q(*db, "SELECT id,data FROM npcPrototypes");
+    while(q.executeStep()) {
+        auto id = q.getColumn(0).getInt64();
+        auto data = q.getColumn(1).getString();
+        try {
+            auto j = nlohmann::json::parse(data);
+            mob_proto.emplace(id, j);
+            auto &i = mob_index[id];
+            i.vn = id;
+        } catch(std::exception& e) {
+            log("Error parsing npc prototype %ld: %s", id, e.what());
+            continue;
+        }
+    }
+}
+
+static void db_load_areas() {
+    SQLite::Statement q(*db, "SELECT id,data FROM areas");
+    while(q.executeStep()) {
+        auto id = q.getColumn(0).getInt64();
+        auto data = q.getColumn(1).getString();
+        try {
+            auto j = nlohmann::json::parse(data);
+            auto a = areas.emplace(id, j);
+            auto &area = a.first->second;
+            for(auto &r : area.rooms) {
+                auto room = world.find(r);
+                if(room != world.end()) {
+                    room->second.area = id;
+                }
+            }
+        } catch(std::exception& e) {
+            log("Error parsing area %ld: %s", id, e.what());
+            continue;
+        }
+    }
+}
+
+static bool newStyle = false;
 
 boost::asio::awaitable<void> boot_world() {
-    log("Loading level tables.");
-    load_levels();
-
-    bool newStyle = false;
 
     broadcast("Your vision of the world expands across a vast expanse of numerous existences.\r\n");
     co_await yield_for(std::chrono::milliseconds(10));
-    if((newStyle = load_new_zones())) {
-        log("Successfully loaded new format game data.");
-        log("Loading triggers and generating index.");
 
-        for(auto &[vn, z] : zone_table) {
-            z.load_triggers();
-        }
+    log("Loading Zones...");
+    db_load_zones();
+
+    newStyle = !zone_table.empty();
+
+    if(newStyle) {
+        log("Loading DgScripts and generating index.");
+        db_load_dgscripts();
+
+        log("Loading mobs and generating index.");
+        broadcast("You feel the presence of many beings around you in this strange journey, but cannot quite see them.\r\n");
+        db_load_npc_prototypes();
+
+        log("Loading objs and generating index.");
+        broadcast("As the world rushes by, countless treasures flicker through your thoughts. Can they one day be yours?\r\n");
+        db_load_item_prototypes();
 
         log("Loading rooms.");
-        for(auto &[vn, z] : zone_table) {
-            co_await yield_for(std::chrono::milliseconds(10));
-            z.load_rooms();
-        }
+        db_load_rooms();
+
+        broadcast("Names for these wondrous places race through your mind, but you cannot grasp most.\r\n");
+        log("Loading areas.");
+        db_load_areas();
+
+        log("Loading accounts.");
+        db_load_accounts();
+
+        log("Loading players.");
+        db_load_players();
+
     } else {
         log("Loading legacy world data...");
         log("Loading zone table.");
@@ -564,24 +707,11 @@ boost::asio::awaitable<void> boot_world() {
     log("Checking start rooms.");
     check_start_rooms();
 
-    broadcast("Names for these wondrous places race through your mind, but you cannot grasp most.\r\n");
-    log("Loading areas.");
-    load_areas();
+
     co_await yield_for(std::chrono::milliseconds(10));
 
     if(newStyle) {
-        log("Loading mobs and generating index.");
-        broadcast("You feel the presence of many beings around you in this strange journey, but cannot quite see them.\r\n");
-        for(auto &[vn, z] : zone_table) {
-            z.load_mobiles();
-            co_await yield_for(std::chrono::milliseconds(1));
-        }
 
-        log("Loading objs and generating index.");
-        broadcast("As the world rushes by, countless treasures flicker through your thoughts. Can they one day be yours?\r\n");
-        for(auto &[vn, z] : zone_table) {
-            z.load_objects();
-        }
 
     } else {
         log("Loading mobs and generating index.");
@@ -597,14 +727,10 @@ boost::asio::awaitable<void> boot_world() {
     if (!no_specials) {
         if(newStyle) {
             log("Loading shops.");
-            for(auto &[vn, z] : zone_table) {
-                z.load_shops();
-            }
+            db_load_shops();
 
             log("Loading guild masters.");
-            for(auto &[vn, z] : zone_table) {
-                z.load_guilds();
-            }
+            db_load_guilds();
         } else {
             log("Loading shops.");
             index_boot(DB_BOOT_SHP);
@@ -770,8 +896,6 @@ void destroy_db() {
 
     free_feats();
 
-    free_obj_unique_hash();
-
     log("Freeing Assemblies.");
     free_assemblies();
 
@@ -838,11 +962,8 @@ boost::asio::awaitable<void> boot_db() {
     log("Setting up context sensitive help system for OLC");
     boot_context_help();
 
-    log("Generating player index.");
-    build_player_index();
-
     if (ERAPLAYERS <= 0)
-        ERAPLAYERS = top_of_p_table + 1;
+        ERAPLAYERS = players.size();
 
     insure_directory(LIB_PLROBJS "CRASH", 0);
 
@@ -850,11 +971,6 @@ boost::asio::awaitable<void> boot_db() {
     if (!scan_file()) {
         log("    Mail boot failed -- Mail system disabled");
         no_mail = 1;
-    }
-
-    if (auto_pwipe) {
-        log("Cleaning out inactive players.");
-        clean_pfiles();
     }
 
     log("Loading social messages.");
@@ -905,14 +1021,10 @@ boost::asio::awaitable<void> boot_db() {
     /* Moved here so the object limit code works. -gg 6/24/98 */
     if (!mini_mud) {
         log("Booting houses.");
-        House_boot();
-    }
-
-    broadcast("The world seems to shimmer and waver as it comes into focus.\r\n");
-    for (auto &[vn, z] : zone_table) {
-        log("Resetting #%d: %s (rooms %d-%d).", vn,
-            z.name, z.bot, z.top);
-        reset_zone(vn);
+        House_boot(!newStyle);
+        if(newStyle) {
+            db_load_save_rooms();
+        }
     }
 
     boot_time = time(nullptr);
@@ -934,7 +1046,7 @@ void auc_save() {
         for (obj = world[real_room(80)].contents; obj; obj = next_obj) {
             next_obj = obj->next_content;
             if (obj) {
-                fprintf(fl, "%" I64T " %s %d %d %d %d %ld\n", obj->unique_id, GET_AUCTERN(obj), GET_AUCTER(obj),
+                fprintf(fl, "%" I64T " %s %d %d %d %d %ld\n", obj->id, GET_AUCTERN(obj), GET_AUCTER(obj),
                         GET_CURBID(obj), GET_STARTBID(obj), GET_BID(obj), GET_AUCTIME(obj));
             }
         }
@@ -957,7 +1069,7 @@ void auc_load(struct obj_data *obj) {
         while (!feof(fl)) {
             get_line(fl, line);
             sscanf(line, "%" I64T " %s %d %d %d %d %ld\n", &oID, filler, &aID, &bID, &startc, &cost, &timer);
-            if (obj->unique_id == oID) {
+            if (obj->id == oID) {
                 GET_AUCTERN(obj) = strdup(filler);
                 GET_AUCTER(obj) = aID;
                 GET_CURBID(obj) = bID;
@@ -1835,29 +1947,14 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
         //GET_HIT(ch) = num_arg;
     }
 
-    CASE("MaxHit") {
-        RANGE(0, 99999);
-        ch->max_hit = num_arg;
-    }
-
     CASE("Mana") {
         RANGE(0, 99999);
         //GET_MANA(ch) = num_arg;
     }
 
-    CASE("MaxMana") {
-        RANGE(0, 99999);
-        ch->max_mana = num_arg;
-    }
-
     CASE("Moves") {
         RANGE(0, 99999);
         //GET_MOVE(ch) = num_arg;
-    }
-
-    CASE("MaxMoves") {
-        RANGE(0, 99999);
-        ch->max_move = num_arg;
     }
 
     CASE("Affect") {
@@ -1901,18 +1998,6 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
     CASE("SkillMod") {
         sscanf(value, "%d %d", &num, &num2);
         SET_SKILL_BONUS(ch, num, num2);
-    }
-
-    CASE("Class") {
-        sscanf(value, "%d %d", &num, &num2);
-        GET_CLASS_NONEPIC(ch, num) = num2;
-        GET_CLASS_LEVEL(ch) += num2;
-    }
-
-    CASE("EpicClass") {
-        sscanf(value, "%d %d", &num, &num2);
-        GET_CLASS_EPIC(ch, num) = num2;
-        GET_CLASS_LEVEL(ch) += num2;
     }
 
     if (!matched) {
@@ -1969,7 +2054,7 @@ int parse_mobile_from_file(FILE *mob_f, struct char_data *ch) {
    * The only reason we have every mob in the game share this copy of the
    * structure is to save newbie coders from themselves. -gg 2/25/98
    */
-    ch->player_specials = &dummy_mob;
+
     sprintf(buf2, "mob vnum %d", nr);   /* sprintf: OK (for 'buf2 >= 19') */
 
     /***** String data *****/
@@ -2645,9 +2730,9 @@ struct char_data *create_char() {
     character_list = ch;
     ch->next_affect = nullptr;
     ch->next_affectv = nullptr;
-    ((ch)->id) = nextCharID();
 
-    return (ch);
+
+    return ch;
 }
 
 
@@ -2668,10 +2753,11 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     mob = new char_data();
 
     *mob = mob_proto[i];
-    mob->next = character_list;
-    character_list = mob;
-    mob->next_affect = nullptr;
-    mob->next_affectv = nullptr;
+    mob->id = nextCharID();
+    mob->generation = time(nullptr);
+    check_unique_id(mob);
+    add_unique_id(mob);
+    mob->activate();
 
     if (IS_HOSHIJIN(mob) && GET_SEX(mob) == SEX_MALE) {
         mob->hairl = 0;
@@ -3240,19 +3326,19 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
 }
 
 void add_unique_id(struct obj_data *obj) {
-    auto &o = uniqueObjects[obj->unique_id];
+    auto &o = uniqueObjects[obj->id];
     o.first = obj->generation;
     o.second = obj;
 }
 
 void remove_unique_id(struct obj_data *obj) {
-    uniqueObjects.erase(obj->unique_id);
+    uniqueObjects.erase(obj->id);
 }
 
 void log_dupe_objects(struct obj_data *obj1, struct obj_data *obj2) {
     mudlog(BRF, ADMLVL_GOD, true, "DUPE: Dupe object found: %s [%d] [%" TMT ":%" I64T "]",
            obj1->short_description ? obj1->short_description : "<No name>",
-           GET_OBJ_VNUM(obj1), obj1->generation, obj1->unique_id);
+           GET_OBJ_VNUM(obj1), obj1->generation, obj1->id);
     mudlog(BRF, ADMLVL_GOD, true, "DUPE: First: In room: %d (%s), "
                                   "In object: %s, Carried by: %s, Worn by: %s",
            GET_ROOM_VNUM(IN_ROOM(obj1)),
@@ -3269,16 +3355,40 @@ void log_dupe_objects(struct obj_data *obj1, struct obj_data *obj2) {
            obj2->worn_by ? GET_NAME(obj2->worn_by) : "Nobody");
 
     // assign a new unique ID to obj2.
-    obj2->unique_id = nextObjID();
-    mudlog(BRF, ADMLVL_GOD, true, "Conflicting object assigned new id: %d", obj2->unique_id);
+    obj2->id = nextObjID();
+    mudlog(BRF, ADMLVL_GOD, true, "Conflicting object assigned new id: %d", obj2->id);
 }
 
 void check_unique_id(struct obj_data *obj) {
-    auto find = uniqueObjects.find(obj->unique_id);
+    auto find = uniqueObjects.find(obj->id);
 
-    if(find != uniqueObjects.end() && find->generation == obj->generation) {
-        log_dupe_objects(find->second, obj);
+    if(find != uniqueObjects.end() && find->second.first == obj->generation) {
+        log_dupe_objects(find->second.second, obj);
     }
+}
+
+static void log_dupe_characters(struct char_data *ch1, struct char_data *ch2) {
+    mudlog(BRF, ADMLVL_GOD, true, "DUPE: Dupe character found: %s [%d] [%" TMT ":%" I64T "]",
+           ch1->short_description ? ch1->short_description : "<No name>",
+           ch1->vn, ch1->generation, ch1->id);
+
+    // assign a new unique ID to obj2.
+    ch2->id = nextCharID();
+    mudlog(BRF, ADMLVL_GOD, true, "Conflicting character assigned new id: %d", ch2->id);
+}
+
+void check_unique_id(struct char_data *ch) {
+    auto find = uniqueCharacters.find(ch->id);
+
+    if(find != uniqueCharacters.end() && find->second.first == ch->generation) {
+        log_dupe_characters(find->second.second, ch);
+    }
+}
+
+void add_unique_id(struct char_data *ch) {
+    auto &o = uniqueCharacters[ch->id];
+    o.first = ch->generation;
+    o.second = ch;
 }
 
 char *sprintuniques(int low, int high) {
@@ -3316,8 +3426,7 @@ struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
     
     auto obj = new obj_data();
     *obj = proto->second;
-    obj->next = object_list;
-    object_list = obj;
+    obj->activate();
     OBJ_LOADROOM(obj) = NOWHERE;
 
     obj_index[i].number++;
@@ -3857,37 +3966,13 @@ void free_followers(struct follow_type *k) {
     free(k);
 }
 
+
 /* release memory allocated for a char struct */
 void free_char(struct char_data *ch) {
     int i;
-    struct alias_data *a;
-    struct levelup_data *data, *next_data;
-    struct level_learn_entry *learn, *next_learn;
+    uniqueCharacters.erase(ch->id);
 
-    if (ch->player_specials != nullptr && ch->player_specials != &dummy_mob) {
-
-        if (CONFIG_IMC_ENABLED) {
-            imc_freechardata(ch);
-        }
-
-        while ((a = GET_ALIASES(ch)) != nullptr) {
-            GET_ALIASES(ch) = (GET_ALIASES(ch))->next;
-            free_alias(a);
-        }
-        if (ch->player_specials->poofin)
-            free(ch->player_specials->poofin);
-        if (ch->player_specials->poofout)
-            free(ch->player_specials->poofout);
-        if (ch->player_specials->host)
-            free(ch->player_specials->host);
-        for (i = 0; i < NUM_COLOR; i++)
-            if (ch->player_specials->color_choices[i])
-                free(ch->player_specials->color_choices[i]);
-        if (IS_NPC(ch))
-            log("SYSERR: Mob %s (#%d) had player_specials allocated!", GET_NAME(ch), GET_MOB_VNUM(ch));
-    }
-    if (!IS_NPC(ch) || (IS_NPC(ch) && GET_MOB_RNUM(ch) == NOBODY)) {
-        /* if this is a player, or a non-prototyped non-player, free all */
+    if(ch->vn == NOBODY) {
         if (GET_NAME(ch))
             free(GET_NAME(ch));
         if (GET_VOICE(ch))
@@ -3902,31 +3987,25 @@ void free_char(struct char_data *ch) {
             free(ch->room_description);
         if (ch->look_description)
             free(ch->look_description);
-        for (i = 0; i < NUM_HIST; i++)
-            if (GET_HISTORY(ch, i))
-                free(GET_HISTORY(ch, i));
-        if (ch->player_specials)
-            free(ch->player_specials);
-
         /* free script proto list */
         free_proto_script(ch, MOB_TRIGGER);
-
-    } else if ((i = GET_MOB_RNUM(ch)) != NOBODY) {
-        /* otherwise, free strings only if the string is not pointing at proto */
-        if (ch->name && ch->name != mob_proto[i].name)
+    } else {
+        auto &m = mob_proto[ch->vn];
+        if (ch->name && ch->name != m.name)
             free(ch->name);
-        if (ch->title && ch->title != mob_proto[i].title)
+        if (ch->title && ch->title != m.title)
             free(ch->title);
-        if (ch->short_description && ch->short_description != mob_proto[i].short_description)
+        if (ch->short_description && ch->short_description != m.short_description)
             free(ch->short_description);
-        if (ch->room_description && ch->room_description != mob_proto[i].room_description)
+        if (ch->room_description && ch->room_description != m.room_description)
             free(ch->room_description);
-        if (ch->look_description && ch->look_description != mob_proto[i].look_description)
+        if (ch->look_description && ch->look_description != m.look_description)
             free(ch->look_description);
         /* free script proto list if it's not the prototype */
-        if (ch->proto_script && ch->proto_script != mob_proto[i].proto_script)
+        if (ch->proto_script && ch->proto_script != m.proto_script)
             free_proto_script(ch, MOB_TRIGGER);
     }
+
     while (ch->affected)
         affect_remove(ch, ch->affected);
 
@@ -3939,22 +4018,6 @@ void free_char(struct char_data *ch) {
 
     if (ch->desc)
         ch->desc->character = nullptr;
-
-    if (ch->level_info) {
-        for (data = ch->level_info; data; data = next_data) {
-            next_data = data->next;
-            for (learn = data->skills; learn; learn = next_learn) {
-                next_learn = learn->next;
-                free(learn);
-            }
-            for (learn = data->feats; learn; learn = next_learn) {
-                next_learn = learn->next;
-                free(learn);
-            }
-            free(data);
-        }
-    }
-    ch->level_info = nullptr;
 
     /* find_char helper */
     /*
@@ -3994,51 +4057,6 @@ void free_obj(struct obj_data *obj) {
 
     delete obj;
 }
-
-/* Traverse down the string until the begining of the next page has been
- * reached.  Return nullptr if this is the last page of the string.
- */
-static char *next_page(char *str, struct char_data *ch) {
-    int col = 1, line = 1;
-
-    for (;; str++) {
-        /* If end of string, return nullptr. */
-        if (*str == '\0')
-            return (nullptr);
-
-            /* If we're at the start of the next page, return this fact. */
-        else if (line > (GET_PAGE_LENGTH(ch) - (PRF_FLAGGED(ch, PRF_COMPACT) ? 1 : 2)))
-            return (str);
-
-            /* Check for the begining of an ANSI color code block. */
-        else if (*str == '\x1B')
-            str++;
-
-        else if (*str == '@') {
-            if (*(str + 1) != '@')
-                str++;
-        }
-
-            /* Check for everything else. */
-        else {
-            /* Carriage return puts us in column one. */
-            if (*str == '\r')
-                col = 1;
-                /* Newline puts us on the next line. */
-            else if (*str == '\n')
-                line++;
-
-                /* We need to check here and see if we are over the page width,
-                 * and if so, compensate by going to the begining of the next line.
-                 */
-            else if (col++ > PAGE_WIDTH) {
-                col = 1;
-                line++;
-            }
-        }
-    }
-}
-
 
 /*
  * Steps:
@@ -4113,9 +4131,6 @@ static int file_to_string(const char *name, char *buf) {
 void reset_char(struct char_data *ch) {
     int i;
 
-    for (i = 0; i < NUM_WEARS; i++)
-        GET_EQ(ch, i) = nullptr;
-
     ch->followers = nullptr;
     ch->master = nullptr;
     IN_ROOM(ch) = NOWHERE;
@@ -4141,11 +4156,6 @@ void reset_char(struct char_data *ch) {
 void init_char(struct char_data *ch) {
     int i;
 
-    /* create a player_special structure */
-    if (ch->player_specials == nullptr) {
-        ch->player_specials = new player_special_data();
-    }
-
     GET_ADMLEVEL(ch) = ADMLVL_NONE;
     GET_CRANK(ch) = 0;
     GET_CLAN(ch) = strdup("None.");
@@ -4157,9 +4167,8 @@ void init_char(struct char_data *ch) {
     BLOCKS(ch) = nullptr;
 
     /* If this is our first player make him LVL_IMPL. */
-    if (top_of_p_table == 0) {
+    if (players.size() == 0) {
         admin_set(ch, ADMLVL_IMPL);
-        GET_CLASS_NONEPIC(ch, GET_CLASS(ch)) = GET_LEVEL(ch);
 
         /* The implementor never goes through do_start(). */
         ch->baseki = 1000;
@@ -4182,11 +4191,6 @@ void init_char(struct char_data *ch) {
 
     set_height_and_weight_by_race(ch);
 
-    if ((i = get_ptable_by_name(GET_NAME(ch))) != -1)
-        player_table[i].id = GET_IDNUM(ch) = ++top_idnum;
-    else
-        log("SYSERR: init_char: Character '%s' not found in player table.", GET_NAME(ch));
-
     for (i = 1; i < SKILL_TABLE_SIZE; i++) {
         if (GET_ADMLEVEL(ch) < ADMLVL_IMPL)
             SET_SKILL(ch, i, 0);
@@ -4206,7 +4210,6 @@ void init_char(struct char_data *ch) {
 
     GET_LOADROOM(ch) = NOWHERE;
     SPEAKING(ch) = SKILL_LANG_COMMON;
-    GET_FEAT_POINTS(ch) = 1;
 }
 
 /* returns the real number of the room with given virtual number */
@@ -4417,16 +4420,14 @@ int my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate) {
             GET_OBJ_WEAR(obj)[1], GET_OBJ_WEAR(obj)[2], GET_OBJ_WEAR(obj)[3],
             GET_OBJ_WEIGHT(obj), GET_OBJ_COST(obj), GET_OBJ_RENT(obj));
 
-    if (obj->generation)
-        fprintf(fp, "G\n%ld\n", obj->generation);
-    if (obj->unique_id)
-        fprintf(fp, "U\n%" I64T "\n", obj->unique_id);
+    fprintf(fp, "G\n%ld\n", obj->generation);
+    fprintf(fp, "U\n%" I64T "\n", obj->id);
 
     fprintf(fp, "Z\n%d\n", GET_OBJ_SIZE(obj));
 
     /* Do we have affects? */
     for (counter2 = 0; counter2 < MAX_OBJ_AFFECT; counter2++)
-        if (obj->affected[counter2].modifier)
+        if (obj->affected[counter2].location != APPLY_NONE)
             fprintf(fp, "A\n"
                         "%d %d %d\n",
                     obj->affected[counter2].location, obj->affected[counter2].modifier,
@@ -4456,7 +4457,6 @@ int my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate) {
                 break;
             }
             fprintf(fp, "S\n" "%d %d\n", obj->sbinfo[i].spellname, obj->sbinfo[i].pages);
-            continue;
         }
     }
     return 1;
@@ -4886,137 +4886,15 @@ void load_config() {
     fclose(fl);
 }
 
-
-void read_level_data(struct char_data *ch, FILE *fl) {
-    char buf[READ_SIZE], *p;
-    int i = 1;
-    int t[16];
-    struct levelup_data *curr = nullptr;
-    struct level_learn_entry *learn;
-
-    ch->level_info = nullptr;
-    while (!feof(fl)) {
-        i++;
-        if (!get_line(fl, buf)) {
-            log("read_level_data: get_line() failed reading level data line %d for %s", i, GET_NAME(ch));
-            return;
-        }
-        for (p = buf; *p && *p != ' '; p++);
-        if (!strcmp(buf, "end")) {
-            return;
-        }
-        if (!*p) {
-            log("read_level_data: malformed line reading level data line %d for %s: %s", i, GET_NAME(ch), buf);
-            return;
-        }
-        *(p++) = 0;
-        if (!strcmp(buf, "level")) {
-            if (sscanf(p, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d", t, t + 1, t + 2, t + 3,
-                       t + 4, t + 5, t + 6, t + 7, t + 8, t + 9, t + 10, t + 11, t + 12, t + 13, t + 14, t + 15) !=
-                16) {
-                log("read_level_data: missing fields on level_data line %d for %s", i, GET_NAME(ch));
-                curr = nullptr;
-                continue;
-            }
-            CREATE(curr, struct levelup_data, 1);
-            curr->prev = nullptr;
-            curr->next = ch->level_info;
-            if ((curr->next = ch->level_info)) {
-                curr->next->prev = curr;
-            }
-            ch->level_info = curr;
-            curr->type = t[0];
-            curr->spec = t[1];
-            curr->level = t[2];
-            curr->hp_roll = t[3];
-            curr->mana_roll = t[4];
-            curr->ki_roll = t[5];
-            curr->move_roll = t[6];
-            curr->fort = t[8];
-            curr->reflex = t[9];
-            curr->will = t[10];
-            curr->add_skill = t[11];
-            curr->add_gen_feats = t[12];
-            curr->add_epic_feats = t[13];
-            curr->add_class_feats = t[14];
-            curr->add_class_epic_feats = t[15];
-            curr->skills = curr->feats = nullptr;
-            continue;
-        }
-        if (!curr) {
-            log("read_level_data: found continuation entry without current level for %s", GET_NAME(ch));
-            continue;
-        }
-        if (sscanf(p, "%d %d %d", t, t + 1, t + 2) != 3) {
-            log("read_level_data: missing fields on level_data %s line %d for %s", buf, i, GET_NAME(ch));
-            continue;
-        }
-        CREATE(learn, struct level_learn_entry, 1);
-        learn->location = t[0];
-        learn->specific = t[1];
-        learn->value = t[2];
-        if (!strcmp(buf, "skill")) {
-            learn->next = curr->skills;
-            curr->skills = learn;
-        } else if (!strcmp(buf, "feat")) {
-            learn->next = curr->feats;
-            curr->feats = learn;
-        }
-    }
-    log("read_level_data: EOF reached reading level_data for %s", GET_NAME(ch));
-    return;
-}
-
-void write_level_data(struct char_data *ch, FILE *fl) {
-    struct levelup_data *lev;
-    struct level_learn_entry *learn;
-
-    for (lev = ch->level_info; lev && lev->next; lev = lev->next);
-
-    while (lev) {
-        fprintf(fl, "level %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",
-                lev->type, lev->spec, lev->level, lev->hp_roll, lev->mana_roll,
-                lev->ki_roll, lev->move_roll, lev->accuracy, lev->fort,
-                lev->reflex, lev->will, lev->add_skill, lev->add_gen_feats,
-                lev->add_epic_feats, lev->add_class_feats, lev->add_class_epic_feats);
-        for (learn = lev->skills; learn; learn = learn->next)
-            fprintf(fl, "skill %d %d %d", learn->location, learn->specific, learn->value);
-        for (learn = lev->feats; learn; learn = learn->next)
-            fprintf(fl, "feat %d %d %d", learn->location, learn->specific, learn->value);
-        lev = lev->prev;
-    }
-    fprintf(fl, "end\n");
-}
-
 static std::vector<std::string> schema = {
         "CREATE TABLE IF NOT EXISTS accounts ("
         "   id INTEGER PRIMARY KEY,"
-        "   username TEXT NOT NULL UNIQUE COLLATE NOCASE,"
-        "   password TEXT NOT NULL DEFAULT '',"
-        "   email TEXT NOT NULL DEFAULT '',"
-        "   created INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
-        "   lastLogin INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
-        "   lastLogout INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
-        "   lastPasswordChanged INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
-        "   totalPlayTime REAL NOT NULL DEFAULT 0,"
-        "   totalLoginTime REAL NOT NULL DEFAULT 0,"
-        "   disabledReason TEXT NOT NULL DEFAULT '',"
-        "   disabledUntil INTEGER NOT NULL DEFAULT 0,"
-        "   adminLevel INTEGER NOT NULL DEFAULT 0,"
-        "   rpp INTEGER NOT NULL DEFAULT 0"
+        "	data TEXT NOT NULL"
         ");",
 
         "CREATE TABLE IF NOT EXISTS playerCharacters ("
         "   id INTEGER NOT NULL PRIMARY KEY,"
-        "   name TEXT NOT NULL UNIQUE COLLATE NOCASE,"
-        "   account INTEGER NOT NULL,"
-        "   data TEXT NOT NULL,"
-        "   inventory TEXT NOT NULL DEFAULT '[]',"
-        "   equipment TEXT NOT NULL DEFAULT '[]',"
-        "   lastLogin INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
-        "   lastLogout INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
-        "   totalPlayTime REAL NOT NULL DEFAULT 0,"
-        "   FOREIGN KEY(account) REFERENCES accounts(id) ON UPDATE CASCADE ON DELETE CASCADE"
+        "   data TEXT NOT NULL"
         ");",
 
         "CREATE TABLE IF NOT EXISTS zones ("
@@ -5052,10 +4930,10 @@ static std::vector<std::string> schema = {
         "CREATE TABLE IF NOT EXISTS rooms ("
         "	id INTEGER PRIMARY KEY,"
         "	data TEXT NOT NULL,"
-        "   items TEXT NOT NULL DEFAULT '[]'"
+        "   items TEXT"
         ");",
 
-        "CREATE TABLE IF NOT EXISTS scripts ("
+        "CREATE TABLE IF NOT EXISTS dgscripts ("
         "	id INTEGER PRIMARY KEY,"
         "	data TEXT NOT NULL"
         ");"
@@ -5080,11 +4958,50 @@ void create_schema() {
     transaction.commit();
 }
 
+void dirty_all() {
+    for(auto &[vn, r] : world) {
+        dirty_rooms.insert(vn);
+    }
+
+    for(auto &[vn, obj] : obj_proto) {
+        dirty_item_prototypes.insert(vn);
+    }
+
+    for(auto &[vn, npc] : mob_proto) {
+        dirty_npc_prototypes.insert(vn);
+    }
+
+    for(auto &[vn, zone] : zone_table) {
+        dirty_zones.insert(vn);
+    }
+
+    for(auto &[vn, area] : areas) {
+        dirty_areas.insert(vn);
+    }
+
+    for(auto &[vn, dg] : trig_index) {
+        dirty_dgscripts.insert(vn);
+    }
+
+    for(auto &[vn, guild] : guild_index) {
+        dirty_guilds.insert(vn);
+    }
+
+    for(auto &[vn, shop] : shop_index) {
+        dirty_shops.insert(vn);
+    }
+
+    for(auto &[vn, player] : players) {
+        dirty_players.insert(vn);
+    }
+
+    for(auto &[vn, acc] : accounts) {
+        dirty_accounts.insert(vn);
+    }
+}
 
 static void process_dirty_rooms() {
-    SQLite::Statement q(*db, "INSERT OR REPLACE INTO rooms (id, data) VALUES (?, ?)");
     SQLite::Statement q1(*db, "INSERT OR REPLACE INTO rooms (id, data, items) VALUES (?, ?, ?)");
-    SQLite::Statement q2(*db, "UPDATE rooms SET items = ? WHERE id = ?");
     SQLite::Statement q3(*db, "DELETE FROM rooms WHERE id = ?");
 
     for(auto v : dirty_rooms) {
@@ -5094,40 +5011,27 @@ static void process_dirty_rooms() {
             q3.bind(1, v);
             q3.exec();
             q3.reset();
-            dirty_save_rooms.erase(v);
             continue;
         }
-        if(dirty_save_rooms.contains(v)) {
+        else {
             // we'll be using q1...
             q1.bind(1, v);
             q1.bind(2, r->second.serialize().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
-            q1.bind(3, r->second.serializeItems().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+            if(r->second.contents && IS_SET_AR(r->second.room_flags, ROOM_SAVE)) {
+                auto con = r->second.serializeContents();
+                if(!con.empty())
+                    q1.bind(3, con.dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+                else
+                    q1.bind(3);
+            } else {
+                q1.bind(3);
+            }
             q1.exec();
             q1.reset();
-            dirty_save_rooms.erase(v);
-        } else {
-            // we'll be using q...
-            q.bind(1, v);
-            q.bind(2, r->second.serialize().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
-            q.exec();
-            q.reset();
         }
-    }
-
-    for(auto v : dirty_save_rooms) {
-        auto r = world.find(v);
-        if(r == world.end()) {
-            // This room has been deleted.
-            continue;
-        }
-        q2.bind(1, r->second.serializeItems().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
-        q2.bind(2, v);
-        q2.exec();
-        q2.reset();
     }
 
     dirty_rooms.clear();
-    dirty_save_rooms.clear();
 }
 
 static void process_dirty_item_prototypes() {
@@ -5279,16 +5183,51 @@ static void process_dirty_dgscripts() {
 }
 
 static void process_dirty_accounts() {
+    SQLite::Statement q(*db, "INSERT OR REPLACE INTO accounts (id, data) VALUES (?, ?)");
+    SQLite::Statement q1(*db, "DELETE FROM accounts WHERE id = ?");
+
+    for(auto v : dirty_accounts) {
+        auto r = accounts.find(v);
+        if(r == accounts.end()) {
+            // This account has been deleted.
+            q1.bind(1, v);
+            q1.exec();
+            q1.reset();
+            continue;
+        } else {
+            q.bind(1, v);
+            q.bind(2, r->second.serialize().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+            q.exec();
+            q.reset();
+        }
+    }
 
 }
 
 static void process_dirty_players() {
+    SQLite::Statement q(*db, "INSERT OR REPLACE INTO playerCharacters (id, data) VALUES (?, ?)");
+    SQLite::Statement q1(*db, "DELETE FROM playerCharacters WHERE id = ?");
 
+    for(auto v : dirty_players) {
+        auto r = players.find(v);
+        if(r == players.end()) {
+            // This player has been deleted.
+            q1.bind(1, v);
+            q1.exec();
+            q1.reset();
+            continue;
+        } else {
+            q.bind(1, v);
+            q.bind(2, r->second.serialize().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+            q.exec();
+            q.reset();
+        }
+    }
 }
 
 
 void process_dirty() {
-    if(!dirty_rooms.empty() || !dirty_save_rooms.empty()) {
+    if(!dirty_rooms.empty()) {
         process_dirty_rooms();
     }
 
@@ -5318,6 +5257,10 @@ void process_dirty() {
 
     if(!dirty_dgscripts.empty()) {
         process_dirty_dgscripts();
+    }
+
+    if(!dirty_accounts.empty()) {
+        process_dirty_accounts();
     }
 
     if(!dirty_players.empty()) {

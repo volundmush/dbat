@@ -108,13 +108,9 @@ extern ACMD(do_kyodaika);
 
 extern ACMD(do_mimic);
 
-extern ACMD(do_rpbank);
-
 extern ACMD(do_rdisplay);
 
 extern ACMD(do_evolve);
-
-extern ACMD(do_rpbanktrans);
 
 extern ACMD(do_showoff);
 
