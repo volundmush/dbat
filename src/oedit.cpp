@@ -1057,7 +1057,7 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
                         send_to_char(d->character, "\r\nCommitting iedit changes.\r\n");
                         obj = OLC_IOBJ(d);
                         *obj = *(OLC_OBJ(d));
-                        ((obj)->id) = max_obj_id++;
+                        ((obj)->id) = nextObjID();
                         /* find_obj helper */
                         if (GET_OBJ_VNUM(obj) != NOTHING) {
                             /* remove any old scripts */

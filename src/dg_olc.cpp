@@ -132,7 +132,7 @@ void trigedit_setup_new(struct descriptor_data *d) {
      */
     CREATE(trig, struct trig_data, 1);
 
-    trig->nr = NOWHERE;
+    trig->vn = NOWHERE;
 
     /*
      * Set up some defaults

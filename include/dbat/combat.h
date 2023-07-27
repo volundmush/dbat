@@ -44,7 +44,7 @@ extern void remove_limb(struct char_data *vict, int num);
 
 extern int check_skill(struct char_data *ch, int skill);
 
-extern int check_points(struct char_data *ch, int64_t ki, int64_t st);
+extern bool check_points(struct char_data *ch, int64_t ki, int64_t st);
 
 extern void pcost(struct char_data *ch, double ki, int64_t st);
 

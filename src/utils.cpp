@@ -3231,7 +3231,7 @@ int rand_number(int from, int to) {
         from = to;
         to = tmp;
     }
-    return randomNumber<int>(from, to);
+    return Random::get<int>(from, to);
 }
 
 /* Axion engine dice function */

@@ -718,7 +718,7 @@ EVENTFUNC(trig_wait_event) {
         if (!found) {
             basic_mud_log("Trigger restarted on unknown entity. Vnum: %d", GET_TRIG_VNUM(trig));
             basic_mud_log("Type: %s trigger", type == MOB_TRIGGER ? "Mob" : type == OBJ_TRIGGER ? "Obj" : "Room");
-            basic_mud_log("attached %d places", trig_index[trig->nr].triggers.size());
+            basic_mud_log("attached %d places", trig_index[trig->vn].triggers.size());
             script_log("Trigger restart attempt on unknown entity.");
             return 0;
         }
@@ -1097,7 +1097,7 @@ int remove_trigger(struct script_data *sc, char *name) {
             /* is found. originally the number was position-only */
         else if (++n >= num)
             break;
-        else if (trig_index[i->nr].vn == num)
+        else if (trig_index[i->vn].vn == num)
             break;
     }
 
@@ -2867,10 +2867,10 @@ trig_var_data::trig_var_data(const nlohmann::json& j) : trig_var_data() {
     if(j.contains("context")) context = j["context"].get<long>();
 }
 
-nlohmann::json trig_data::serialize() {
+nlohmann::json trig_data::serializeProto() {
     nlohmann::json j;
 
-    if(nr != NOTHING) j["nr"] = nr;
+    if(vn != NOTHING) j["vn"] = vn;
     if (name && strlen(name)) j["name"] = name;
     if(attach_type) j["attach_type"] = attach_type;
     if(data_type) j["data_type"] = data_type;
@@ -2886,7 +2886,7 @@ nlohmann::json trig_data::serialize() {
 }
 
 trig_data::trig_data(const nlohmann::json &j) : trig_data() {
-    if(j.contains("nr")) nr = j["nr"].get<int>();
+    if(j.contains("vn")) vn = j["vn"].get<int>();
     if(j.contains("name")) name = strdup(j["name"].get<std::string>().c_str());
     if(j.contains("attach_type")) attach_type = j["attach_type"].get<int>();
     if(j.contains("data_type")) data_type = j["data_type"].get<int>();

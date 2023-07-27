@@ -564,7 +564,7 @@ void zone_data::save_triggers() {
     for(auto v : triggers) {
         auto r = trig_index.find(v);
         if(r == trig_index.end()) continue;
-        j.push_back(std::make_pair(r->first, r->second.proto->serialize()));
+        j.push_back(std::make_pair(r->first, r->second.proto->serializeProto()));
     }
 
     if(j.empty()) return;
@@ -640,7 +640,7 @@ void zone_data::load_triggers() {
     for(auto &v : *j) {
         auto &idx = trig_index[v[0].get<int>()];
         idx.proto = new trig_data(v[1]);
-        idx.vn = idx.proto->nr;
+        idx.vn = idx.proto->vn;
         triggers.insert(idx.vn);
     }
 }

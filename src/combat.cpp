@@ -2279,6 +2279,7 @@ void homing_update() {
 }
 
 /* For checking if they have enough free limbs to preform the technique. */
+// type 0 is arms, type 1 is legs. 2 is both. 3 is tail.
 int limb_ok(struct char_data *ch, int type) {
     if (IS_NPC(ch)) {
         if (AFF_FLAGGED(ch, AFF_ENSNARED) && rand_number(1, 100) <= 90) {
@@ -2298,7 +2299,9 @@ int limb_ok(struct char_data *ch, int type) {
         send_to_char(ch, "You are currently playing a song! Enter the song command in order to stop!\r\n");
         return false;
     }
-    if (type == 0) {
+
+    // Arms
+    if (type == 0 || type == 2) {
         if (!HAS_ARMS(ch)) {
             send_to_char(ch, "You have no available arms!\r\n");
             return false;
@@ -2316,13 +2319,24 @@ int limb_ok(struct char_data *ch, int type) {
             send_to_char(ch, "Your hands are full!\r\n");
             return false;
         }
-    } // Arms
-    else if (type > 0) {
+    }
+
+    // Legs
+    if (type == 1 || type == 2) {
         if (!HAS_LEGS(ch)) {
             send_to_char(ch, "You have no working legs!\r\n");
             return false;
         }
-    } // Legs
+    }
+
+    // tail
+    if(type == 3) {
+        if(!(PLR_FLAGGED(ch, PLR_TAIL) || PLR_FLAGGED(ch, PLR_STAIL))) {
+            send_to_char(ch, "You have no tail!\r\n");
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -2342,29 +2356,29 @@ int init_skill(struct char_data *ch, int snum) {
         return (skill);
     }
 
-    if (IS_NPC(ch) && GET_LEVEL(ch) <= 10) {
-        skill = rand_number(30, 50);
-    } else if (IS_NPC(ch) && GET_LEVEL(ch) <= 20) {
-        skill = rand_number(45, 65);
-    } else if (IS_NPC(ch) && GET_LEVEL(ch) <= 30) {
-        skill = rand_number(55, 70);
-    } else if (IS_NPC(ch) && GET_LEVEL(ch) <= 50) {
-        skill = rand_number(65, 80);
-    } else if (IS_NPC(ch) && GET_LEVEL(ch) <= 70) {
-        skill = rand_number(75, 90);
-    } else if (IS_NPC(ch) && GET_LEVEL(ch) <= 80) {
-        skill = rand_number(85, 100);
-    } else if (IS_NPC(ch) && GET_LEVEL(ch) <= 90) {
-        skill = rand_number(90, 100);
-    } else if (IS_NPC(ch) && GET_LEVEL(ch) <= 100) {
-        skill = rand_number(95, 100);
-    } else if (IS_NPC(ch) && GET_LEVEL(ch) <= 110) {
-        skill = rand_number(95, 105);
+    auto l = GET_LEVEL(ch);
+    
+    if (l <= 10) {
+        return rand_number(30, 50);
+    } else if (l <= 20) {
+        return rand_number(45, 65);
+    } else if (l <= 30) {
+        return rand_number(55, 70);
+    } else if (l <= 50) {
+        return rand_number(65, 80);
+    } else if (l <= 70) {
+        return rand_number(75, 90);
+    } else if (l <= 80) {
+        return rand_number(85, 100);
+    } else if (l <= 90) {
+        return rand_number(90, 100);
+    } else if (l <= 100) {
+        return rand_number(95, 100);
+    } else if (l <= 110) {
+        return rand_number(95, 105);
     } else {
-        skill = rand_number(100, 110);
+        return rand_number(100, 110);
     }
-
-    return (skill);
 }
 
 int handle_block(struct char_data *ch) {
@@ -2517,13 +2531,13 @@ int check_def(struct char_data *vict) {
 
 void handle_defense(struct char_data *vict, int *pry, int *blk, int *dge) {
 
+    *pry = handle_parry(vict);
+
+    *blk = handle_block(vict);
+
+    *dge = handle_dodge(vict);
+
     if (!IS_NPC(vict)) {
-        *pry = handle_parry(vict);
-
-        *blk = handle_block(vict);
-
-        *dge = handle_dodge(vict);
-
         if (GET_BONUS(vict, BONUS_WALL)) {
             *blk += GET_SKILL(vict, SKILL_BLOCK) * 0.20;
         }
@@ -2560,12 +2574,6 @@ void handle_defense(struct char_data *vict, int *pry, int *blk, int *dge) {
             *blk += 100;
             *pry += 100;
         }
-    } else {
-        *pry = handle_parry(vict);
-
-        *blk = handle_block(vict);
-
-        *dge = handle_dodge(vict);
     }
 
     return;
@@ -4148,7 +4156,7 @@ int check_skill(struct char_data *ch, int skill) {
 }
 
 /* Whether they have enough stamina or charged ki to preform the skill */
-int check_points(struct char_data *ch, int64_t ki, int64_t st) {
+bool check_points(struct char_data *ch, int64_t ki, int64_t st) {
 
     if (GET_PREFERENCE(ch) == PREFERENCE_H2H && GET_CHARGE(ch) >= GET_MAX_MANA(ch) * 0.1) {
         st -= st * 0.5;
@@ -4289,8 +4297,7 @@ void pcost(struct char_data *ch, double ki, int64_t st) {
 }
 
 /* Main damage function for RDBS 'Real Dragonball Battle System' */
-void
-hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, struct obj_data *obj, int64_t dmg, int type) {
+void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, struct obj_data *obj, int64_t dmg, int type) {
     int64_t index = 0;
     int64_t maindmg = dmg, beforered = dmg;
     int dead = false;

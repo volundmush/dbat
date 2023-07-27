@@ -37,7 +37,7 @@ void parse_trigger(FILE *trig_f, trig_vnum nr) {
     auto trig = new trig_data();
 
     idx.proto = trig;
-    trig->nr = nr;
+    trig->vn = nr;
     auto &z = zone_table[real_zone_by_thing(nr)];
     z.triggers.insert(nr);
 
@@ -88,7 +88,7 @@ trig_data *read_trigger(int nr) {
 
 
 void trig_data_init(trig_data *this_data) {
-    this_data->nr = NOTHING;
+    this_data->vn = NOTHING;
     this_data->data_type = 0;
     this_data->name = nullptr;
     this_data->trigger_type = 0;
@@ -108,14 +108,14 @@ void trig_data_init(trig_data *this_data) {
 void trig_data_copy(trig_data *this_data, const trig_data *trg) {
     trig_data_init(this_data);
 
-    this_data->nr = trg->nr;
+    this_data->vn = trg->vn;
     this_data->attach_type = trg->attach_type;
     this_data->data_type = trg->data_type;
     if (trg->name)
         this_data->name = strdup(trg->name);
     else {
         this_data->name = strdup("unnamed trigger");
-        basic_mud_log("Trigger with no name! (%d)", trg->nr);
+        basic_mud_log("Trigger with no name! (%d)", trg->vn);
     }
     this_data->trigger_type = trg->trigger_type;
     this_data->cmdlist = trg->cmdlist;

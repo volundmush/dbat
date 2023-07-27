@@ -99,7 +99,7 @@ void extract_trigger(struct trig_data *trig) {
         GET_TRIG_WAIT(trig) = nullptr;
     }
 
-    trig_index[trig->nr].triggers.erase(trig);
+    trig_index[trig->vn].triggers.erase(trig);
 
     /* walk the trigger list and remove this one */
     REMOVE_FROM_LIST(trig, trigger_list, next_in_world, temp);

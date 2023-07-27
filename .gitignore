@@ -58,7 +58,7 @@ cmake-build-*
 # DBAT
 libs
 lib
-libs
+logs
 src/Makefile
 config.log
 config.status

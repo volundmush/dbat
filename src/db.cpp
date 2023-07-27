@@ -84,9 +84,8 @@ std::map<zone_vnum, struct zone_data> zone_table;    /* zone table			 */
 
 std::map<trig_vnum, struct index_data> trig_index; /* index table for triggers      */
 struct trig_data *trigger_list = nullptr;  /* all attached triggers */
+std::map<int64_t, std::pair<time_t, struct trig_data*>> uniqueTriggers;
 
-int32_t max_mob_id = MOB_ID_BASE;  /* for unique mob id's       */
-int32_t max_obj_id = OBJ_ID_BASE;  /* for unique obj id's       */
 int dg_owner_purged;            /* For control of scripts */
 
 int no_mail = 0;        /* mail disabled?		 */
@@ -104,7 +103,6 @@ struct char_data *EDRAGON = nullptr;      /* This is Shenron when he is loaded *
 room_rnum r_mortal_start_room;    /* rnum of mortal start room	 */
 room_rnum r_immort_start_room;    /* rnum of immort start room	 */
 room_rnum r_frozen_start_room;    /* rnum of frozen start room	 */
-int xap_objs = 0;               /* Xap objs                      */
 int converting = false;
 
 char *credits = nullptr;        /* game credits			 */
@@ -5164,7 +5162,7 @@ static void process_dirty_dgscripts() {
             continue;
         }
         q.bind(1, v);
-        q.bind(2, r->second.proto->serialize().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+        q.bind(2, r->second.proto->serializeProto().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
         q.exec();
         q.reset();
     }
@@ -5259,13 +5257,13 @@ void process_dirty() {
 }
 
 int64_t nextObjID() {
-    int64_t id = OBJ_ID_BASE;
+    int64_t id = 0;
     while(uniqueObjects.contains(id)) id++;
     return id;
 }
 
 int64_t nextCharID() {
-    int64_t id = MOB_ID_BASE;
+    int64_t id = 0;
     while(uniqueCharacters.contains(id)) id++;
     return id;
 }

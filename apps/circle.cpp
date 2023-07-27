@@ -108,7 +108,6 @@ int main(int argc, char **argv)
                 puts("Suppressing assignment of special routines.");
                 break;
             case 'x':
-                xap_objs = 1;
                 basic_mud_log("Loading player objects from secondary (ascii) files.");
                 break;
             case 'h':
@@ -165,7 +164,6 @@ int main(int argc, char **argv)
     basic_mud_log("%s", DG_SCRIPT_VERSION);
     basic_mud_log("%s", ascii_pfiles_version);
     basic_mud_log("%s", CWG_VERSION);
-    xap_objs = 1;
     if (chdir(dir) < 0) {
         perror("SYSERR: Fatal error changing to data directory");
         exit(1);

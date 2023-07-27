@@ -170,8 +170,9 @@ struct trig_var_data {
 struct trig_data {
     trig_data() = default;
     explicit trig_data(const nlohmann::json& j);
-    nlohmann::json serialize();
-    trig_vnum nr{NOTHING};                    /* trigger's rnum                  */
+    nlohmann::json serializeProto();
+    nlohmann::json serializeInstance();
+    trig_vnum vn{NOTHING};                    /* trigger's rnum                  */
     int8_t attach_type{};            /* mob/obj/wld intentions          */
     int8_t data_type{};                /* type of game_data for trig      */
     char *name{};                    /* name of trigger                 */
@@ -482,8 +483,8 @@ extern room_rnum obj_room(obj_data *obj);
 
 #define UID_CHAR   '}'
 #define GET_TRIG_NAME(t)          ((t)->name)
-#define GET_TRIG_RNUM(t)          ((t)->nr)
-#define GET_TRIG_VNUM(t)      (trig_index[(t)->nr].vn)
+#define GET_TRIG_RNUM(t)          ((t)->vn)
+#define GET_TRIG_VNUM(t)      (trig_index[(t)->vn].vn)
 #define GET_TRIG_TYPE(t)          ((t)->trigger_type)
 #define GET_TRIG_DATA_TYPE(t)      ((t)->data_type)
 #define GET_TRIG_NARG(t)          ((t)->narg)

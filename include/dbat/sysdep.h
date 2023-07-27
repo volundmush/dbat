@@ -68,6 +68,8 @@
 // non-standard libraries
 #include "fmt/core.h"
 #include <spdlog/spdlog.h>
+#include "effolkronium/random.hpp"
+using Random = effolkronium::random_static;
 
 /* Basic system dependencies *******************************************/
 #if CIRCLE_GNU_LIBC_MEMORY_TRACK && !defined(HAVE_MCHECK_H)

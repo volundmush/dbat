@@ -408,20 +408,22 @@ extern std::map<vnum, area_data> areas;
 
 extern struct descriptor_data *descriptor_list;
 extern std::map<int64_t, struct descriptor_data*> sessions;
-extern struct char_data *character_list;
+
 extern struct char_data *affect_list;
 extern struct char_data *affectv_list;
 
 extern std::map<mob_vnum, struct index_data> mob_index;
 extern std::map<mob_vnum, struct char_data> mob_proto;
 
+extern struct char_data *character_list;
 extern std::unordered_map<int64_t, std::pair<time_t, struct char_data*>> uniqueCharacters;
 int64_t nextCharID();
 
 extern std::map<obj_vnum, struct index_data> obj_index;
-extern struct obj_data *object_list;
+
 extern std::map<obj_vnum, struct obj_data> obj_proto;
 
+extern struct obj_data *object_list;
 extern std::unordered_map<int64_t, std::pair<time_t, struct obj_data*>> uniqueObjects;
 int64_t nextObjID();
 
@@ -430,15 +432,11 @@ extern int top_of_socialt;
 extern std::map<trig_vnum, struct index_data> trig_index;
 
 extern struct trig_data *trigger_list;
+extern std::map<int64_t, std::pair<time_t, struct trig_data*>> uniqueTriggers;
 
-extern int32_t max_mob_id;
-extern int32_t max_obj_id;
 extern int dg_owner_purged;
-extern int xap_objs;
 
 extern void strip_string(char *buffer);
-
-extern int read_xap_objects(FILE *fl, struct char_data *ch);
 
 extern bitvector_t asciiflag_conv(char *flag);
 
