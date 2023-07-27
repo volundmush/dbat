@@ -9,16 +9,16 @@
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
 
-#include "structs.h"
-#include "screen.h"
-#include "dg_scripts.h"
-#include "utils.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "db.h"
-#include "constants.h"
-#include "act.wizard.h"
+#include "dbat/structs.h"
+#include "dbat/screen.h"
+#include "dbat/dg_scripts.h"
+#include "dbat/utils.h"
+#include "dbat/comm.h"
+#include "dbat/interpreter.h"
+#include "dbat/handler.h"
+#include "dbat/db.h"
+#include "dbat/constants.h"
+#include "dbat/act.wizard.h"
 
 /*
  * Local functions
@@ -86,7 +86,7 @@ void obj_log(obj_data *obj, const char *format, ...) {
     va_list args;
     char output[MAX_STRING_LENGTH];
 
-    snprintf(output, sizeof(output), "Obj (%s, VNum %d):: %s", obj->short_description, GET_OBJ_VNUM(obj), format);
+    snprintf(output, sizeof(output), "Obj (%s [%d], VNum %d):: %s", obj->short_description, obj->id, GET_OBJ_VNUM(obj), format);
 
     va_start(args, format);
     script_vlog(output, args);
@@ -521,7 +521,6 @@ OCMD(do_dgoload) {
 
         /* special handling to make objects able to load on a person/in a container/worn etc. */
         if (!target || !*target) {
-            add_unique_id(object);
             obj_to_room(object, room);
             load_otrigger(object);
             return;
@@ -548,7 +547,6 @@ OCMD(do_dgoload) {
             return;
         }
         /* neither char nor container found - just dump it in room */
-        add_unique_id(object);
         obj_to_room(object, room);
         load_otrigger(object);
         return;
@@ -753,7 +751,6 @@ OCMD(do_oat) {
     if (!(object = read_object(GET_OBJ_VNUM(obj), VIRTUAL)))
         return;
 
-    add_unique_id(object);
     obj_to_room(object, loc);
     obj_command_interpreter(object, command);
 

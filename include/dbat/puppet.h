@@ -3,7 +3,7 @@
 namespace net {
     class PuppetParser : public ConnectionParser {
     public:
-        PuppetParser(struct connection_data *co, char_data *c);
+        PuppetParser(std::shared_ptr<Connection>& co, char_data *c);
         void parse(const std::string &txt) override;
         void start() override;
     protected:

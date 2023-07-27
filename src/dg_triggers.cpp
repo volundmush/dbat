@@ -13,18 +13,18 @@
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
 
-#include "structs.h"
-#include "dg_scripts.h"
-#include "utils.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "db.h"
-#include "oasis.h"
-#include "constants.h"
-#include "spell_parser.h"
-#include "act.movement.h"
-#include "spells.h"
+#include "dbat/structs.h"
+#include "dbat/dg_scripts.h"
+#include "dbat/utils.h"
+#include "dbat/comm.h"
+#include "dbat/interpreter.h"
+#include "dbat/handler.h"
+#include "dbat/db.h"
+#include "dbat/oasis.h"
+#include "dbat/constants.h"
+#include "dbat/spell_parser.h"
+#include "dbat/act.movement.h"
+#include "dbat/spells.h"
 
 /*
  *  General functions used by several triggers

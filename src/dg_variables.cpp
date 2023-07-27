@@ -8,20 +8,20 @@
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
 
-#include "structs.h"
-#include "dg_scripts.h"
-#include "utils.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "dg_event.h"
-#include "db.h"
-#include "screen.h"
-#include "constants.h"
-#include "spells.h"
-#include "oasis.h"
-#include "class.h"
-#include "races.h"
+#include "dbat/structs.h"
+#include "dbat/dg_scripts.h"
+#include "dbat/utils.h"
+#include "dbat/comm.h"
+#include "dbat/interpreter.h"
+#include "dbat/handler.h"
+#include "dbat/dg_event.h"
+#include "dbat/db.h"
+#include "dbat/screen.h"
+#include "dbat/constants.h"
+#include "dbat/spells.h"
+#include "dbat/oasis.h"
+#include "dbat/class.h"
+#include "dbat/races.h"
 
 /* Utility functions */
 
@@ -34,7 +34,7 @@ void add_var(struct trig_var_data **var_list, char *name, const char *value, lon
     struct trig_var_data *vd;
 
     if (strchr(name, '.')) {
-        log("add_var() : Attempt to add illegal var: %s", name);
+        basic_mud_log("add_var() : Attempt to add illegal var: %s", name);
         return;
     }
 
@@ -55,8 +55,8 @@ void add_var(struct trig_var_data **var_list, char *name, const char *value, lon
         vd->context = id;
         *var_list = vd;
     }
-
-    strcpy(vd->value, value);                            /* strcpy: ok*/
+    if(vd->value) free(vd->value);
+    vd->value = strdup(value);
 }
 
 

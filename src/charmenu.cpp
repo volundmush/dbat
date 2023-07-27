@@ -1,11 +1,11 @@
-#include "charmenu.h"
-#include "utils.h"
-#include "config.h"
-#include "interpreter.h"
-#include "puppet.h"
+#include "dbat/charmenu.h"
+#include "dbat/utils.h"
+#include "dbat/config.h"
+#include "dbat/interpreter.h"
+#include "dbat/puppet.h"
 
 namespace net {
-    CharacterMenu::CharacterMenu(struct connection_data *co, char_data *c) : ConnectionParser(co) {
+    CharacterMenu::CharacterMenu(std::shared_ptr<Connection>& co, char_data *c) : ConnectionParser(co) {
         ch = c;
     }
 
@@ -20,7 +20,7 @@ namespace net {
         switch (arg) {
             case 0:
                 sendText("Goodbye.\r\n");
-                conn->halt(0);
+                conn->close();
                 return;
                 break;
 

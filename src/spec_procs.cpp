@@ -7,23 +7,23 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include "spec_procs.h"
-#include "utils.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "db.h"
-#include "spells.h"
-#include "constants.h"
-#include "mail.h"
-#include "act.movement.h"
-#include "act.item.h"
-#include "act.social.h"
-#include "guild.h"
-#include "races.h"
-#include "act.comm.h"
-#include "class.h"
-#include "players.h"
+#include "dbat/spec_procs.h"
+#include "dbat/utils.h"
+#include "dbat/comm.h"
+#include "dbat/interpreter.h"
+#include "dbat/handler.h"
+#include "dbat/db.h"
+#include "dbat/spells.h"
+#include "dbat/constants.h"
+#include "dbat/mail.h"
+#include "dbat/act.movement.h"
+#include "dbat/act.item.h"
+#include "dbat/act.social.h"
+#include "dbat/guild.h"
+#include "dbat/races.h"
+#include "dbat/act.comm.h"
+#include "dbat/class.h"
+#include "dbat/players.h"
 
 /* local functions */
 
@@ -1032,7 +1032,7 @@ SPECIAL(auction) {
         auc_save();
         send_to_char(ch, "You place %s on auction for %s zenni.\r\n", obj2->short_description,
                      add_commas(GET_BID(obj2)));
-        log("AUCTION: %s places %s on auction for %s", GET_NAME(ch), obj2->short_description,
+        basic_mud_log("AUCTION: %s places %s on auction for %s", GET_NAME(ch), obj2->short_description,
             add_commas(GET_BID(obj2)));
 
         for (d = descriptor_list; d; d = d->next) {

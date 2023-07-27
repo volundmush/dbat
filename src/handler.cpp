@@ -7,24 +7,24 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include "handler.h"
-#include "utils.h"
-#include "comm.h"
-#include "db.h"
-#include "handler.h"
-#include "interpreter.h"
-#include "spells.h"
-#include "dg_scripts.h"
-#include "feats.h"
-#include "races.h"
-#include "class.h"
-#include "objsave.h"
-#include "fight.h"
-#include "races.h"
-#include "act.informative.h"
-#include "act.misc.h"
-#include "act.movement.h"
-#include "players.h"
+#include "dbat/handler.h"
+#include "dbat/utils.h"
+#include "dbat/comm.h"
+#include "dbat/db.h"
+#include "dbat/handler.h"
+#include "dbat/interpreter.h"
+#include "dbat/spells.h"
+#include "dbat/dg_scripts.h"
+#include "dbat/feats.h"
+#include "dbat/races.h"
+#include "dbat/class.h"
+#include "dbat/objsave.h"
+#include "dbat/fight.h"
+#include "dbat/races.h"
+#include "dbat/act.informative.h"
+#include "dbat/act.misc.h"
+#include "dbat/act.movement.h"
+#include "dbat/players.h"
 
 /* local vars */
 static int extractions_pending = 0;
@@ -298,7 +298,7 @@ void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *ms
             break;
 
         default:
-            log("SYSERR: Unknown apply adjust %d attempt (%s, affect_modify).", loc, __FILE__);
+            basic_mud_log("SYSERR: Unknown apply adjust %d attempt (%s, affect_modify).", loc, __FILE__);
             break;
 
     } /* switch */
@@ -565,7 +565,7 @@ void char_from_room(struct char_data *ch) {
     int i;
 
     if (ch == nullptr || IN_ROOM(ch) == NOWHERE) {
-        log("SYSERR: nullptr character or NOWHERE in %s, char_from_room", __FILE__);
+        basic_mud_log("SYSERR: nullptr character or NOWHERE in %s, char_from_room", __FILE__);
         return;
     }
 
@@ -594,7 +594,7 @@ void char_to_room(struct char_data *ch, room_rnum room) {
     int i;
 
     if (!ch || !world.count(room))
-        log("SYSERR: Illegal value(s) passed to char_to_room. (Room: %d, Ch: %p",
+        basic_mud_log("SYSERR: Illegal value(s) passed to char_to_room. (Room: %d, Ch: %p",
             room, ch);
     else {
         ch->next_in_room = world[room].people;
@@ -653,7 +653,7 @@ void obj_to_char(struct obj_data *object, struct char_data *ch) {
         if (!IS_NPC(ch))
             SET_BIT_AR(PLR_FLAGS(ch), PLR_CRASH);
     } else
-        log("SYSERR: nullptr obj (%p) or char (%p) passed to obj_to_char.", object, ch);
+        basic_mud_log("SYSERR: nullptr obj (%p) or char (%p) passed to obj_to_char.", object, ch);
 }
 
 
@@ -662,7 +662,7 @@ void obj_from_char(struct obj_data *object) {
     struct obj_data *temp;
 
     if (object == nullptr) {
-        log("SYSERR: nullptr object passed to obj_from_char.");
+        basic_mud_log("SYSERR: nullptr object passed to obj_from_char.");
         return;
     }
     REMOVE_FROM_LIST(object, object->carried_by->contents, next_content, temp);
@@ -740,16 +740,16 @@ void equip_char(struct char_data *ch, struct obj_data *obj, int pos) {
     }
 
     if (GET_EQ(ch, pos)) {
-        log("SYSERR: Char is already equipped: %s, %s", GET_NAME(ch),
+        basic_mud_log("SYSERR: Char is already equipped: %s, %s", GET_NAME(ch),
             obj->short_description);
         return;
     }
     if (obj->carried_by) {
-        log("SYSERR: EQUIP: Obj is carried_by when equip.");
+        basic_mud_log("SYSERR: EQUIP: Obj is carried_by when equip.");
         return;
     }
     if (IN_ROOM(obj) != NOWHERE) {
-        log("SYSERR: EQUIP: Obj is in_room when equip.");
+        basic_mud_log("SYSERR: EQUIP: Obj is in_room when equip.");
         return;
     }
     if (invalid_align(ch, obj) || invalid_class(ch, obj) || invalid_race(ch, obj)) {
@@ -904,7 +904,7 @@ void obj_to_room(struct obj_data *object, room_rnum room) {
     struct obj_data *vehicle = nullptr;
 
     if (!object || !world.count(room))
-        log("SYSERR: Illegal value(s) passed to obj_to_room. (Room #%d, obj %p)",
+        basic_mud_log("SYSERR: Illegal value(s) passed to obj_to_room. (Room #%d, obj %p)",
             room, object);
     else {
         if (ROOM_FLAGGED(room, ROOM_GARDEN1) || ROOM_FLAGGED(room, ROOM_GARDEN2)) {
@@ -943,7 +943,7 @@ void obj_to_room(struct obj_data *object, room_rnum room) {
                 if (real_room(GET_OBJ_VAL(object, 3)) != NOWHERE) {
                     vehicle = read_object(GET_OBJ_VAL(object, 0), VIRTUAL);
                     if(!vehicle) {
-                        log("SYSERR: Vehicle %d not found for hatch %d", GET_OBJ_VAL(object, 0), GET_OBJ_VNUM(object));
+                        basic_mud_log("SYSERR: Vehicle %d not found for hatch %d", GET_OBJ_VAL(object, 0), GET_OBJ_VNUM(object));
                     }
                     obj_to_room(vehicle, real_room(GET_OBJ_VAL(object, 3)));
                     if (object->look_description) {
@@ -968,7 +968,7 @@ void obj_to_room(struct obj_data *object, room_rnum room) {
                     SET_BIT(GET_OBJ_VAL(object, VAL_CONTAINER_FLAGS), CONT_CLOSED);
                     SET_BIT(GET_OBJ_VAL(object, VAL_CONTAINER_FLAGS), CONT_LOCKED);
                 } else {
-                    log("Hatch load: Hatch with no vehicle load room: #%d!", GET_OBJ_VNUM(object));
+                    basic_mud_log("Hatch load: Hatch with no vehicle load room: #%d!", GET_OBJ_VNUM(object));
                 }
             }
         }
@@ -1005,7 +1005,7 @@ void obj_from_room(struct obj_data *object) {
     struct obj_data *temp;
 
     if (!object || IN_ROOM(object) == NOWHERE) {
-        log("SYSERR: nullptr object (%p) or obj not in a room (%d) passed to obj_from_room",
+        basic_mud_log("SYSERR: nullptr object (%p) or obj not in a room (%d) passed to obj_from_room",
             object, IN_ROOM(object));
         return;
     }
@@ -1039,7 +1039,7 @@ void obj_to_obj(struct obj_data *obj, struct obj_data *obj_to) {
     struct obj_data *tmp_obj;
 
     if (!obj || !obj_to || obj == obj_to) {
-        log("SYSERR: nullptr object (%p) or same source (%p) and target (%p VNUM: %d) obj passed to obj_to_obj.",
+        basic_mud_log("SYSERR: nullptr object (%p) or same source (%p) and target (%p VNUM: %d) obj passed to obj_to_obj.",
             obj, obj, obj_to, obj_to ? GET_OBJ_VNUM(obj_to) : -1);
         return;
     }
@@ -1071,7 +1071,7 @@ void obj_from_obj(struct obj_data *obj) {
     struct obj_data *temp, *obj_from;
 
     if (obj->in_obj == nullptr) {
-        log("SYSERR: (%s): trying to illegally extract obj from obj.", __FILE__);
+        basic_mud_log("SYSERR: (%s): trying to illegally extract obj from obj.", __FILE__);
         return;
     }
     obj_from = obj->in_obj;
@@ -1117,7 +1117,7 @@ void extract_obj(struct obj_data *obj) {
 
     if (obj->worn_by != nullptr)
         if (unequip_char(obj->worn_by, obj->worn_on) != obj)
-            log("SYSERR: Inconsistent worn_by and worn_on pointers!!");
+            basic_mud_log("SYSERR: Inconsistent worn_by and worn_on pointers!!");
     if (IN_ROOM(obj) != NOWHERE)
         obj_from_room(obj);
     else if (obj->carried_by)
@@ -1220,7 +1220,7 @@ void extract_char_final(struct char_data *ch) {
     int i;
 
     if (IN_ROOM(ch) == NOWHERE) {
-        log("SYSERR: NOWHERE extracting char %s. (%s, extract_char_final)",
+        basic_mud_log("SYSERR: NOWHERE extracting char %s. (%s, extract_char_final)",
             GET_NAME(ch), __FILE__);
         exit(1);
     }
@@ -1403,7 +1403,7 @@ void extract_char_final(struct char_data *ch) {
 
     if (IS_NPC(ch)) {
         if (GET_MOB_RNUM(ch) != NOTHING)    /* prototyped */
-            mob_index[GET_MOB_RNUM(ch)].number--;
+            mob_index[GET_MOB_RNUM(ch)].mobs.erase(ch);
         clearMemory(ch);
         if (SCRIPT(ch))
             extract_script(ch, MOB_TRIGGER);
@@ -1491,7 +1491,7 @@ void extract_pending_chars() {
     struct char_data *vict, *next_vict, *prev_vict, *temp;
 
     if (extractions_pending < 0)
-        log("SYSERR: Negative (%d) extractions pending.", extractions_pending);
+        basic_mud_log("SYSERR: Negative (%d) extractions pending.", extractions_pending);
 
     for (vict = character_list, prev_vict = nullptr; vict && extractions_pending; vict = next_vict) {
         next_vict = vict->next;
@@ -1518,7 +1518,7 @@ void extract_pending_chars() {
     }
 
     if (extractions_pending > 0)
-        log("SYSERR: Couldn't find %d extractions as counted.", extractions_pending);
+        basic_mud_log("SYSERR: Couldn't find %d extractions as counted.", extractions_pending);
 
     extractions_pending = 0;
 }
@@ -1821,7 +1821,7 @@ const char *money_desc(int amount) {
     };
 
     if (amount <= 0) {
-        log("SYSERR: Try to create negative or 0 money (%d).", amount);
+        basic_mud_log("SYSERR: Try to create negative or 0 money (%d).", amount);
         return (nullptr);
     }
 
@@ -1840,7 +1840,7 @@ struct obj_data *create_money(int amount) {
     int y;
 
     if (amount <= 0) {
-        log("SYSERR: Try to create negative or 0 money. (%d)", amount);
+        basic_mud_log("SYSERR: Try to create negative or 0 money. (%d)", amount);
         return (nullptr);
     }
     obj = create_obj();

@@ -6,19 +6,19 @@
  *  Made for Oasis OLC                                                   *
  *  Copyright 1996 Harvey Gilpin.                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#include "gedit.h"
-#include "genzon.h"
-#include "act.informative.h"
-#include "oasis.h"
-#include "gengld.h"
-#include "utils.h"
-#include "comm.h"
-#include "handler.h"
-#include "interpreter.h"
-#include "spells.h"
-#include "feats.h"
-#include "genolc.h"
-#include "shop.h"
+#include "dbat/gedit.h"
+#include "dbat/genzon.h"
+#include "dbat/act.informative.h"
+#include "dbat/oasis.h"
+#include "dbat/gengld.h"
+#include "dbat/utils.h"
+#include "dbat/comm.h"
+#include "dbat/handler.h"
+#include "dbat/interpreter.h"
+#include "dbat/spells.h"
+#include "dbat/feats.h"
+#include "dbat/genolc.h"
+#include "dbat/shop.h"
 
 /*
  * Should check more things.

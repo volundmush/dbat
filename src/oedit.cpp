@@ -5,27 +5,27 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
-#include "structs.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "spells.h"
-#include "utils.h"
-#include "db.h"
-#include "handler.h"
-#include "boards.h"
-#include "constants.h"
-#include "shop.h"
-#include "genolc.h"
-#include "genobj.h"
-#include "genzon.h"
-#include "oasis.h"
-#include "improved-edit.h"
-#include "dg_olc.h"
-#include "feats.h"
-#include "act.informative.h"
-#include "act.wizard.h"
-#include "races.h"
-#include "fight.h"
+#include "dbat/structs.h"
+#include "dbat/comm.h"
+#include "dbat/interpreter.h"
+#include "dbat/spells.h"
+#include "dbat/utils.h"
+#include "dbat/db.h"
+#include "dbat/handler.h"
+#include "dbat/boards.h"
+#include "dbat/constants.h"
+#include "dbat/shop.h"
+#include "dbat/genolc.h"
+#include "dbat/genobj.h"
+#include "dbat/genzon.h"
+#include "dbat/oasis.h"
+#include "dbat/improved-edit.h"
+#include "dbat/dg_olc.h"
+#include "dbat/feats.h"
+#include "dbat/act.informative.h"
+#include "dbat/act.wizard.h"
+#include "dbat/races.h"
+#include "dbat/fight.h"
 
 /*------------------------------------------------------------------------*/
 
@@ -247,7 +247,7 @@ void oedit_save_internally(struct descriptor_data *d) {
     i = (real_object(OLC_NUM(d)) == NOTHING);
 
     if ((robj_num = add_object(OLC_OBJ(d), OLC_NUM(d))) == NOTHING) {
-        log("oedit_save_internally: add_object failed.");
+        basic_mud_log("oedit_save_internally: add_object failed.");
         return;
     }
 

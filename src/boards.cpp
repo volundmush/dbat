@@ -45,17 +45,17 @@ it.
 
 */
 
-#include "boards.h"
-#include "utils.h"
-#include "comm.h"
-#include "db.h"
-#include "boards.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "improved-edit.h"
-#include "clan.h"
-#include "dg_comm.h"
-#include "config.h"
+#include "dbat/boards.h"
+#include "dbat/utils.h"
+#include "dbat/comm.h"
+#include "dbat/db.h"
+#include "dbat/boards.h"
+#include "dbat/interpreter.h"
+#include "dbat/handler.h"
+#include "dbat/improved-edit.h"
+#include "dbat/clan.h"
+#include "dbat/dg_comm.h"
+#include "dbat/config.h"
 
 struct board_info *bboards = nullptr;  /* our global board structure */
 
@@ -67,7 +67,7 @@ void init_boards() {
     char dir_name[128];
 
     if (!insure_directory(BOARD_DIRECTORY, 0)) {
-        log("Unable to open/create directory '%s' - Exiting", BOARD_DIRECTORY);
+        basic_mud_log("Unable to open/create directory '%s' - Exiting", BOARD_DIRECTORY);
         exit(1);
     }
 
@@ -78,7 +78,7 @@ void init_boards() {
 #endif
 
     if ((i = xdir_scan(dir_name, &xd)) <= 0) {
-        log("Funny, no board files found.\n");
+        basic_mud_log("Funny, no board files found.\n");
         return;
     }
 
@@ -108,7 +108,7 @@ struct board_info *create_new_board(obj_vnum board_vnum) {
 
     if ((fl = fopen(buf, "r"))) {
         fclose(fl);
-        log("Preexisting board file when attempting to create new board [vnum: %d]. Attempting to correct.",
+        basic_mud_log("Preexisting board file when attempting to create new board [vnum: %d]. Attempting to correct.",
             board_vnum);
 
         /* unlink file, clear existing board */
@@ -126,7 +126,7 @@ struct board_info *create_new_board(obj_vnum board_vnum) {
     }
     CREATE(temp, struct board_info, 1);
     if (real_object(board_vnum) == NOTHING) {
-        log("Creating board [vnum: %d] though no associated object with that vnum can be found. Using defaults.",
+        basic_mud_log("Creating board [vnum: %d] though no associated object with that vnum can be found. Using defaults.",
             board_vnum);
         READ_LVL(temp) = CONFIG_LEVEL_CAP;
         WRITE_LVL(temp) = CONFIG_LEVEL_CAP;
@@ -144,7 +144,7 @@ struct board_info *create_new_board(obj_vnum board_vnum) {
     BOARD_MESSAGES(temp) = nullptr;
 
     if (!save_board(temp)) {
-        log("Hm. Error while creating new board file [vnum: %d]. Unable to create new file.", board_vnum);
+        basic_mud_log("Hm. Error while creating new board file [vnum: %d]. Unable to create new file.", board_vnum);
         free(temp);
         return nullptr;
     }
@@ -161,7 +161,7 @@ int save_board(struct board_info *ts) {
     sprintf(buf, "%s%d", BOARD_DIRECTORY, BOARD_VNUM(ts));
 
     if (!(fl = fopen(buf, "wb"))) {
-        log("Hm. Error while creating attempting to save board [vnum: %d].  Unable to create file '%s'", BOARD_VNUM(ts),
+        basic_mud_log("Hm. Error while creating attempting to save board [vnum: %d].  Unable to create file '%s'", BOARD_VNUM(ts),
             buf);
         return 0;
     }
@@ -210,13 +210,13 @@ struct board_info *load_board(obj_vnum board_vnum) {
 
     sprintf(filebuf, "%s%d", BOARD_DIRECTORY, board_vnum);
     if (!(fl = fopen(filebuf, "r"))) {
-        log("Request to open board [vnum %d] failed - unable to open file '%s'.", board_vnum, filebuf);
+        basic_mud_log("Request to open board [vnum %d] failed - unable to open file '%s'.", board_vnum, filebuf);
         return nullptr;
     }
     /* this won't be the most graceful thing you've ever seen .. */
     get_line(fl, buf);
     if (strcmp("Board File", buf)) {
-        log("Invalid board file '%s' [vnum: %d] - failed to load.", filebuf, board_vnum);
+        basic_mud_log("Invalid board file '%s' [vnum: %d] - failed to load.", filebuf, board_vnum);
         return nullptr;
     }
 
@@ -228,11 +228,11 @@ struct board_info *load_board(obj_vnum board_vnum) {
 
     if ((retval = sscanf(buf, "%d %d %d %d %d", t, t + 1, t + 2, t + 3, t + 4)) != 5) {
         if (retval == 4) {
-            log("Parse error on board [vnum: %d], file '%s' - attempting to correct [4] args expecting 5.", board_vnum,
+            basic_mud_log("Parse error on board [vnum: %d], file '%s' - attempting to correct [4] args expecting 5.", board_vnum,
                 filebuf);
             t[4] = 1;
         } else if (retval != 4) {
-            log("Parse error on board [vnum: %d], file '%s' - attempting to correct [< 4] args expecting 5.",
+            basic_mud_log("Parse error on board [vnum: %d], file '%s' - attempting to correct [< 4] args expecting 5.",
                 board_vnum, filebuf);
             t[0] = t[1] = t[2] = CONFIG_LEVEL_CAP;
             t[3] = -1;
@@ -242,14 +242,14 @@ struct board_info *load_board(obj_vnum board_vnum) {
     /* if the objcet exists, the object trumps the board file settings */
 
     if (real_object(board_vnum) == NOTHING) {
-        log("No associated object exists when attempting to create a board [vnum %d].", board_vnum);
+        basic_mud_log("No associated object exists when attempting to create a board [vnum %d].", board_vnum);
         /* previously we just erased it, but lets do a tiny bit of checking, just in case           */
         /* auto delete only if the file has hasn't been modified in the last 7 days */
 
 
         stat(filebuf, &st);
         if (time(nullptr) - st.st_mtime > (60 * 60 * 24 * 7)) {
-            log("Deleting old board file '%s' [vnum %d].  7 days without modification & no associated object.", filebuf,
+            basic_mud_log("Deleting old board file '%s' [vnum %d].  7 days without modification & no associated object.", filebuf,
                 board_vnum);
             unlink(filebuf);
             free(temp_board);
@@ -260,14 +260,14 @@ struct board_info *load_board(obj_vnum board_vnum) {
         REMOVE_LVL(temp_board) = t[2];
         BOARD_MNUM(temp_board) = t[3];
         BOARD_VERSION(temp_board) = t[4];
-        log("Board vnum %d, Version %d", BOARD_VNUM(temp_board), BOARD_VERSION(temp_board));
+        basic_mud_log("Board vnum %d, Version %d", BOARD_VNUM(temp_board), BOARD_VERSION(temp_board));
     } else {
         obj = &(obj_proto[real_object(board_vnum)]);
         /* double check one or two things */
         if (t[0] != GET_OBJ_VAL(obj, VAL_BOARD_READ) ||
             t[1] != GET_OBJ_VAL(obj, VAL_BOARD_WRITE) ||
             t[2] != GET_OBJ_VAL(obj, VAL_BOARD_ERASE)) {
-            log("Mismatch in board <-> object read/write/remove settings for board [vnum: %d]. Correcting.",
+            basic_mud_log("Mismatch in board <-> object read/write/remove settings for board [vnum: %d]. Correcting.",
                 board_vnum);
         }
         READ_LVL(temp_board) = GET_OBJ_VAL(obj, VAL_BOARD_READ);
@@ -345,7 +345,7 @@ struct board_info *load_board(obj_vnum board_vnum) {
     /* now we've completely parsed our file */
     fclose(fl);
     if (msg_num != BOARD_MNUM(temp_board)) {
-        log("Board [vnum: %d] message count (%d) not equal to actual message count (%d). Correcting.",
+        basic_mud_log("Board [vnum: %d] message count (%d) not equal to actual message count (%d). Correcting.",
             BOARD_VNUM(temp_board), BOARD_MNUM(temp_board), msg_num);
         BOARD_MNUM(temp_board) = msg_num;
     }
@@ -366,14 +366,14 @@ int parse_message(FILE *fl, struct board_info *temp_board) {
     if (BOARD_VERSION(temp_board) != CURRENT_BOARD_VER) {
         if (fscanf(fl, "%ld\n", &(MESG_POSTER(tmsg))) != 1 ||
             fscanf(fl, "%ld\n", &(MESG_TIMESTAMP(tmsg))) != 1) {
-            log("Parse error in message for board [vnum: %d].  Skipping.", BOARD_VNUM(temp_board));
+            basic_mud_log("Parse error in message for board [vnum: %d].  Skipping.", BOARD_VNUM(temp_board));
             free(tmsg);
             return 0;
         }
     } else {
         if (fscanf(fl, "%s\n", poster) != 1 ||
             fscanf(fl, "%ld\n", &(MESG_TIMESTAMP(tmsg))) != 1) {
-            log("Parse error in message for board [vnum: %d].  Skipping.", BOARD_VNUM(temp_board));
+            basic_mud_log("Parse error in message for board [vnum: %d].  Skipping.", BOARD_VNUM(temp_board));
             free(tmsg);
             return 0;
         }
@@ -414,7 +414,7 @@ void look_at_boards() {
         }
         tboard = BOARD_NEXT(tboard);
     }
-    log("There are %d boards located; %d messages", counter, messages);
+    basic_mud_log("There are %d boards located; %d messages", counter, messages);
 }
 
 void clear_boards() {
@@ -472,7 +472,7 @@ void show_board(obj_vnum board_vnum, struct char_data *ch) {
     }
     thisboard = locate_board(board_vnum);
     if (!thisboard) {
-        log("Creating new board - board #%d", board_vnum);
+        basic_mud_log("Creating new board - board #%d", board_vnum);
         thisboard = create_new_board(board_vnum);
         thisboard->next = bboards;
         bboards = thisboard;
@@ -486,7 +486,7 @@ void show_board(obj_vnum board_vnum, struct char_data *ch) {
     struct obj_data *obj;
     int num = board_vnum;
     if ((board_vnum = real_object(num)) == NOTHING) {
-        log("SYSERR: DEFUNCT BOARD VNUM.\r\n");
+        basic_mud_log("SYSERR: DEFUNCT BOARD VNUM.\r\n");
         send_to_char(ch, "@W                  This is a bulletin board.\r\n");
         send_to_char(ch, "@rO@b============================================================================@rO@n\n");
         send_to_char(ch, "     @D[@GX@D] means you have read the message, @D[@RX@D] means you have not.\r\n"
@@ -594,7 +594,7 @@ void board_display_msg(obj_vnum board_vnum, struct char_data *ch, int arg) {
     /* guess we'll have to locate the board now in the list */
     thisboard = locate_board(board_vnum);
     if (!thisboard) {
-        log("Creating new board - board #%d", board_vnum);
+        basic_mud_log("Creating new board - board #%d", board_vnum);
         thisboard = create_new_board(board_vnum);
     }
 
@@ -789,7 +789,7 @@ void write_board_message(obj_vnum board_vnum, struct char_data *ch, char *arg) {
 
     if (!thisboard) {
         send_to_char(ch, "Error: Your board could not be found. Please report.\n");
-        log("Error in write_board_msg - board #%d", board_vnum);
+        basic_mud_log("Error in write_board_msg - board #%d", board_vnum);
         return;
     }
 
@@ -875,7 +875,7 @@ void board_respond(long board_vnum, struct char_data *ch, int mnum) {
 
     if (!thisboard) {
         send_to_char(ch, "Error: Your board could not be found. Please report.\n");
-        log("Error in board_respond - board #%ld", board_vnum);
+        basic_mud_log("Error in board_respond - board #%ld", board_vnum);
         return;
     }
     if (GET_ADMLEVEL(ch) < WRITE_LVL(thisboard)) {
@@ -994,7 +994,7 @@ void remove_board_msg(obj_vnum board_vnum, struct char_data *ch, int arg) {
 
     if (!thisboard) {
         send_to_char(ch, "Error: Your board could not be found. Please report.\n");
-        log("Error in Board_remove_msg - board #%d", board_vnum);
+        basic_mud_log("Error in Board_remove_msg - board #%d", board_vnum);
         return;
     }
 
@@ -1019,7 +1019,7 @@ void remove_board_msg(obj_vnum board_vnum, struct char_data *ch, int arg) {
     /* perform check for mesg in creation */
     int num = board_vnum;
     if ((board_vnum = real_object(num)) == NOTHING) {
-        log("Board doesn't exists! Weird.");
+        basic_mud_log("Board doesn't exists! Weird.");
         return;
     } else {
         char clan[120];

@@ -8,22 +8,22 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include "mobact.h"
-#include "utils.h"
-#include "db.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "spells.h"
-#include "shop.h"
-#include "combat.h"
-#include "act.offensive.h"
-#include "act.movement.h"
-#include "act.other.h"
-#include "act.item.h"
-#include "act.social.h"
-#include "spec_procs.h"
-#include "class.h"
+#include "dbat/mobact.h"
+#include "dbat/utils.h"
+#include "dbat/db.h"
+#include "dbat/comm.h"
+#include "dbat/interpreter.h"
+#include "dbat/handler.h"
+#include "dbat/spells.h"
+#include "dbat/shop.h"
+#include "dbat/combat.h"
+#include "dbat/act.offensive.h"
+#include "dbat/act.movement.h"
+#include "dbat/act.other.h"
+#include "dbat/act.item.h"
+#include "dbat/act.social.h"
+#include "dbat/spec_procs.h"
+#include "dbat/class.h"
 
 
 /* local functions */
@@ -137,7 +137,7 @@ void mobile_activity() {
         /* Examine call for special procedure */
         if (MOB_FLAGGED(ch, MOB_SPEC) && !no_specials) {
             if (mob_index[GET_MOB_RNUM(ch)].func == nullptr) {
-                log("SYSERR: %s (#%d): Attempting to call non-existing mob function.",
+                basic_mud_log("SYSERR: %s (#%d): Attempting to call non-existing mob function.",
                     GET_NAME(ch), GET_MOB_VNUM(ch));
                 REMOVE_BIT_AR(MOB_FLAGS(ch), MOB_SPEC);
             } else {

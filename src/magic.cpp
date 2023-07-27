@@ -9,18 +9,18 @@
 ************************************************************************ */
 
 
-#include "magic.h"
-#include "utils.h"
-#include "comm.h"
-#include "spells.h"
-#include "handler.h"
-#include "db.h"
-#include "interpreter.h"
-#include "constants.h"
-#include "dg_scripts.h"
-#include "feats.h"
-#include "mobact.h"
-#include "fight.h"
+#include "dbat/magic.h"
+#include "dbat/utils.h"
+#include "dbat/comm.h"
+#include "dbat/spells.h"
+#include "dbat/handler.h"
+#include "dbat/db.h"
+#include "dbat/interpreter.h"
+#include "dbat/constants.h"
+#include "dbat/dg_scripts.h"
+#include "dbat/feats.h"
+#include "dbat/mobact.h"
+#include "dbat/fight.h"
 
 /* local functions */
 int mag_materials(struct char_data *ch, int item0, int item1, int item2, int extract, int verbose);
@@ -918,7 +918,7 @@ void mag_summons(int level, struct char_data *ch, struct obj_data *obj, int spel
                 if (mob_num == NOBODY) {
                     send_to_char(ch, "That's not a name for a monster you can summon. Summoning something else.\r\n");
                 } else {
-                    log("lev=%d, i=%d, ngen=%d", lev, i, lev - i);
+                    basic_mud_log("lev=%d, i=%d, ngen=%d", lev, i, lev - i);
                     switch (lev - i) {
                         case 1:
                             num = 1;
@@ -936,7 +936,7 @@ void mag_summons(int level, struct char_data *ch, struct obj_data *obj, int spel
                 num = 1;
                 for (count = 0; monsum_list[lev - 1][j][count] != NOBODY; count++);
                 if (!count) {
-                    log("No monsums for spell level %d align %s", lev, alignments[j]);
+                    basic_mud_log("No monsums for spell level %d align %s", lev, alignments[j]);
                     return;
                 }
                 count--;
@@ -1159,11 +1159,10 @@ void mag_creations(int level, struct char_data *ch, int spellnum) {
 
     if (!(tobj = read_object(z, VIRTUAL))) {
         send_to_char(ch, "I seem to have goofed.\r\n");
-        log("SYSERR: spell_creations, spell %d, obj %d: obj not found",
+        basic_mud_log("SYSERR: spell_creations, spell %d, obj %d: obj not found",
             spellnum, z);
         return;
     }
-    add_unique_id(tobj);
     obj_to_char(tobj, ch);
     act("$n creates $p.", false, ch, tobj, nullptr, TO_ROOM);
     act("You create $p.", false, ch, tobj, nullptr, TO_CHAR);
@@ -1205,7 +1204,7 @@ void affect_update_violence() {
                     dam = GET_MAX_HIT(i) * 3 / 4;
                     dam = MIN(dam, maxdam);
                     dam = MAX(0, dam);
-                    log("Creeping death strike doing %d dam", dam);
+                    basic_mud_log("Creeping death strike doing %d dam", dam);
                 }
                 affectv_remove(i, af);
             }

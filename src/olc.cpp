@@ -14,13 +14,13 @@
  *  NOT DONE!!
  */
 
-#include "olc.h"
-#include "utils.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "db.h"
-#include "olc.h"
+#include "dbat/olc.h"
+#include "dbat/utils.h"
+#include "dbat/comm.h"
+#include "dbat/interpreter.h"
+#include "dbat/handler.h"
+#include "dbat/db.h"
+#include "dbat/olc.h"
 
 /* OLC command format:
  *
@@ -194,7 +194,7 @@ void olc_interpreter(void *targ, int mode, char *arg) {
             olc_obj = (struct obj_data *) targ;
             break;
         default:
-            log("SYSERR: Invalid OLC mode %d passed to interp.", mode);
+            basic_mud_log("SYSERR: Invalid OLC mode %d passed to interp.", mode);
             return;
     }
 

@@ -8,11 +8,11 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include "act.social.h"
-#include "comm.h"
-#include "utils.h"
-#include "interpreter.h"
-#include "handler.h"
+#include "dbat/act.social.h"
+#include "dbat/comm.h"
+#include "dbat/utils.h"
+#include "dbat/interpreter.h"
+#include "dbat/handler.h"
 
 /* local functions */
 char *fread_action(FILE *fl, int nr);
@@ -150,7 +150,7 @@ void boot_social_messages() {
     if (CONFIG_NEW_SOCIALS == true) {
         /* open social file */
         if (!(fl = fopen(SOCMESS_FILE_NEW, "r"))) {
-            log("SYSERR: can't open socials file '%s': %s", SOCMESS_FILE_NEW, strerror(errno));
+            basic_mud_log("SYSERR: can't open socials file '%s': %s", SOCMESS_FILE_NEW, strerror(errno));
             /*  SYSERR_DESC:
              *  This error, from boot_social_messages(), occurs when the server
              *  fails to open the file containing the social messages.  The error
@@ -168,7 +168,7 @@ void boot_social_messages() {
 
         /* open social file */
         if (!(fl = fopen(SOCMESS_FILE, "r"))) {
-            log("SYSERR: can't open socials file '%s': %s", SOCMESS_FILE, strerror(errno));
+            basic_mud_log("SYSERR: can't open socials file '%s': %s", SOCMESS_FILE, strerror(errno));
             exit(1);
         }
         /* count socials */
@@ -178,7 +178,7 @@ void boot_social_messages() {
         }
     }
 
-    log("Social table contains %d socials.", top_of_socialt);
+    basic_mud_log("Social table contains %d socials.", top_of_socialt);
     rewind(fl);
 
     CREATE(soc_mess_list, struct social_messg, top_of_socialt + 1);
@@ -191,7 +191,7 @@ void boot_social_messages() {
         if (CONFIG_NEW_SOCIALS == true) {
             if (fscanf(fl, " %s %d %d %d %d \n",
                        sorted, &hide, &min_char_pos, &min_pos, &min_lvl) != 5) {
-                log("SYSERR: format error in social file near social '%s'", next_soc);
+                basic_mud_log("SYSERR: format error in social file near social '%s'", next_soc);
                 /*  SYSERR_DESC:
                  *  From boot_social_messages(), this error is output when the
                  *  server is expecting to find the remainder of the first line of the
@@ -211,7 +211,7 @@ void boot_social_messages() {
             soc_mess_list[curr_soc].min_level_char = min_lvl;
         } else {  /* old style */
             if (fscanf(fl, " %d %d \n", &hide, &min_pos) != 2) {
-                log("SYSERR: format error in social file near social '%s'", next_soc);
+                basic_mud_log("SYSERR: format error in social file near social '%s'", next_soc);
                 exit(1);
             }
             curr_soc++;
@@ -320,7 +320,7 @@ void create_command_list() {
     complete_cmd_info[k].minimum_level = 0;
     complete_cmd_info[k].minimum_admlevel = 0;
     complete_cmd_info[k].subcmd = 0;
-    log("Command info rebuilt, %d total commands.", k);
+    basic_mud_log("Command info rebuilt, %d total commands.", k);
 }
 
 void free_command_list() {
@@ -333,7 +333,7 @@ char *fread_action(FILE *fl, int nr) {
 
     fgets(buf, MAX_STRING_LENGTH, fl);
     if (feof(fl)) {
-        log("SYSERR: fread_action: unexpected EOF near action #%d", nr);
+        basic_mud_log("SYSERR: fread_action: unexpected EOF near action #%d", nr);
         /*  SYSERR_DESC:
          *  fread_action() will fail if it discovers an end of file marker
          *  before it is able to read in the expected string.  This can be

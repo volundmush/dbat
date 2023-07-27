@@ -8,15 +8,16 @@
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
 
-#include "dg_scripts.h"
-#include "act.wizard.h"
-#include "dg_event.h"
-#include "utils.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "constants.h"
-#include "comm.h"
-#include "players.h"
+#include <boost/algorithm/string/predicate.hpp>
+#include "dbat/dg_scripts.h"
+#include "dbat/act.wizard.h"
+#include "dbat/dg_event.h"
+#include "dbat/utils.h"
+#include "dbat/interpreter.h"
+#include "dbat/handler.h"
+#include "dbat/constants.h"
+#include "dbat/comm.h"
+#include "dbat/players.h"
 
 #define PULSES_PER_MUD_HOUR     (SECS_PER_MUD_HOUR*PASSES_PER_SEC)
 
@@ -715,9 +716,9 @@ EVENTFUNC(trig_wait_event) {
                     found = true;
         }
         if (!found) {
-            log("Trigger restarted on unknown entity. Vnum: %d", GET_TRIG_VNUM(trig));
-            log("Type: %s trigger", type == MOB_TRIGGER ? "Mob" : type == OBJ_TRIGGER ? "Obj" : "Room");
-            log("attached %d places", trig_index[trig->nr].number);
+            basic_mud_log("Trigger restarted on unknown entity. Vnum: %d", GET_TRIG_VNUM(trig));
+            basic_mud_log("Type: %s trigger", type == MOB_TRIGGER ? "Mob" : type == OBJ_TRIGGER ? "Obj" : "Room");
+            basic_mud_log("attached %d places", trig_index[trig->nr].triggers.size());
             script_log("Trigger restart attempt on unknown entity.");
             return 0;
         }
@@ -737,7 +738,7 @@ void do_stat_trigger(struct char_data *ch, trig_data *trig) {
     int len = 0;
 
     if (!trig) {
-        log("SYSERR: nullptr trigger passed to do_stat_trigger.");
+        basic_mud_log("SYSERR: nullptr trigger passed to do_stat_trigger.");
         return;
     }
 
@@ -925,6 +926,7 @@ void add_trigger(struct script_data *sc, trig_data *t, int loc) {
 
     t->next_in_world = trigger_list;
     trigger_list = t;
+    t->owner = sc->owner;
 }
 
 
@@ -977,8 +979,7 @@ ACMD(do_attach) {
             return;
         }
 
-        if (!SCRIPT(victim))
-            CREATE(SCRIPT(victim), struct script_data, 1);
+        if (!SCRIPT(victim)) victim->script = new script_data(victim);
         add_trigger(SCRIPT(victim), trig, loc);
 
         send_to_char(ch, "Trigger %d (%s) attached to %s [%d].\r\n",
@@ -1013,8 +1014,7 @@ ACMD(do_attach) {
             return;
         }
 
-        if (!SCRIPT(object))
-            CREATE(SCRIPT(object), struct script_data, 1);
+        if (!SCRIPT(object)) object->script = new script_data(object);
         add_trigger(SCRIPT(object), trig, loc);
 
         send_to_char(ch, "Trigger %d (%s) attached to %s [%d].\r\n",
@@ -1048,8 +1048,7 @@ ACMD(do_attach) {
 
         room = &world[rnum];
 
-        if (!SCRIPT(room))
-            CREATE(SCRIPT(room), struct script_data, 1);
+        if (!SCRIPT(room)) room->script = new script_data(room);
         add_trigger(SCRIPT(room), trig, loc);
 
         send_to_char(ch, "Trigger %d (%s) attached to room %d.\r\n",
@@ -1744,12 +1743,6 @@ void process_attach(void *go, struct script_data *sc, trig_data *trig,
         return;
     }
 
-    if (!id_p || !*id_p || atoi(id_p) == 0) {
-        script_log("Trigger: %s, VNum %d. attach invalid id arg: '%s'",
-                   GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), cmd);
-        return;
-    }
-
     /* parse and locate the id specified */
     eval_expr(id_p, result, go, sc, trig, type);
     auto uidResult = parseDgUID(result);
@@ -1785,22 +1778,19 @@ void process_attach(void *go, struct script_data *sc, trig_data *trig,
                        GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), GET_NAME(c));
             return;
         }
-        if (!SCRIPT(c))
-            CREATE(SCRIPT(c), struct script_data, 1);
+        if (!SCRIPT(c)) c->script = new script_data(c);
         add_trigger(SCRIPT(c), newtrig, -1);
         return;
     }
 
     if (o) {
-        if (!SCRIPT(o))
-            CREATE(SCRIPT(o), struct script_data, 1);
+        if (!SCRIPT(o)) o->script = new script_data(o);
         add_trigger(SCRIPT(o), newtrig, -1);
         return;
     }
 
     if (r) {
-        if (!SCRIPT(r))
-            CREATE(SCRIPT(r), struct script_data, 1);
+        if (!SCRIPT(r)) r->script = new script_data(r);
         add_trigger(SCRIPT(r), newtrig, -1);
         return;
     }
@@ -1827,11 +1817,6 @@ void process_detach(void *go, struct script_data *sc, trig_data *trig,
         return;
     }
 
-    if (!id_p || !*id_p || atoi(id_p) == 0) {
-        script_log("Trigger: %s, VNum %d. detach invalid id arg: '%s'",
-                   GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), cmd);
-        return;
-    }
 
     /* parse and locate the id specified */
     eval_expr(id_p, result, go, sc, trig, type);
@@ -2122,8 +2107,7 @@ int perform_set_dg_var(struct char_data *ch, struct char_data *vict, char *val_a
         send_to_char(ch, "Usage: set <char> <varname> <value>\r\n");
         return 0;
     }
-    if (!SCRIPT(vict))
-        CREATE(SCRIPT(vict), struct script_data, 1);
+    if (!SCRIPT(vict)) vict->script = new script_data(vict);
 
     add_var(&(SCRIPT(vict)->global_vars), var_name, var_value, 0);
     return 1;
@@ -2712,7 +2696,7 @@ void read_saved_vars(struct char_data *ch) {
     /* create the space for the script structure which holds the vars */
     /* We need to do this first, because later calls to 'remote' will need */
     /* a script already assigned. */
-    CREATE(SCRIPT(ch), struct script_data, 1);
+    ch->script = new script_data(ch);
 
     /* find the file that holds the saved variables and open it*/
     get_filename(fn, sizeof(fn), SCRIPT_VARS_FILE, GET_NAME(ch));
@@ -2720,7 +2704,7 @@ void read_saved_vars(struct char_data *ch) {
 
     /* if we failed to open the file, return */
     if (!file) {
-        log("%s had no variable file", GET_NAME(ch));
+        basic_mud_log("%s had no variable file", GET_NAME(ch));
         return;
     }
     /* walk through each line in the file parsing variables */
@@ -2797,7 +2781,7 @@ void read_saved_vars_ascii(FILE *file, struct char_data *ch, int count) {
     /* create the space for the script structure which holds the vars */
     /* We need to do this first, because later calls to 'remote' will need */
     /* a script already assigned. */
-    CREATE(SCRIPT(ch), struct script_data, 1);
+    ch->script = new script_data(ch);
 
     /* walk through each line in the file parsing variables */
     for (i = 0; i < count; i++) {

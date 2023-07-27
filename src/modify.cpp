@@ -8,22 +8,22 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include "modify.h"
-#include "utils.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "db.h"
-#include "comm.h"
-#include "spells.h"
-#include "mail.h"
-#include "boards.h"
-#include "improved-edit.h"
-#include "oasis.h"
-#include "tedit.h"
-#include "shop.h"
-#include "guild.h"
-#include "spell_parser.h"
-#include "dg_olc.h"
+#include "dbat/modify.h"
+#include "dbat/utils.h"
+#include "dbat/interpreter.h"
+#include "dbat/handler.h"
+#include "dbat/db.h"
+#include "dbat/comm.h"
+#include "dbat/spells.h"
+#include "dbat/mail.h"
+#include "dbat/boards.h"
+#include "dbat/improved-edit.h"
+#include "dbat/oasis.h"
+#include "dbat/tedit.h"
+#include "dbat/shop.h"
+#include "dbat/guild.h"
+#include "dbat/spell_parser.h"
+#include "dbat/dg_olc.h"
 
 /* local functions */
 
@@ -195,7 +195,7 @@ void string_add(struct descriptor_data *d, char *str) {
                     break;
 
                 default:
-                    log("SYSERR: string_add: Aborting write from unknown origin.");
+                    basic_mud_log("SYSERR: string_add: Aborting write from unknown origin.");
                     break;
             }
             break;

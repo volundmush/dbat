@@ -4,22 +4,22 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
-#include "genmob.h"
-#include "utils.h"
-#include "db.h"
-#include "genolc.h"
-#include "shop.h"
-#include "genzon.h"
-#include "guild.h"
-#include "dg_scripts.h"
-#include "handler.h"
-#include "dg_olc.h"
-#include "class.h"
-#include "races.h"
-#include "spells.h"
-#include "objsave.h"
-#include "players.h"
-#include "account.h"
+#include "dbat/genmob.h"
+#include "dbat/utils.h"
+#include "dbat/db.h"
+#include "dbat/genolc.h"
+#include "dbat/shop.h"
+#include "dbat/genzon.h"
+#include "dbat/guild.h"
+#include "dbat/dg_scripts.h"
+#include "dbat/handler.h"
+#include "dbat/dg_olc.h"
+#include "dbat/class.h"
+#include "dbat/races.h"
+#include "dbat/spells.h"
+#include "dbat/objsave.h"
+#include "dbat/players.h"
+#include "dbat/account.h"
 
 /* From db.c */
 void init_mobile_skills();
@@ -55,7 +55,7 @@ int add_mobile(struct char_data *mob, mob_vnum vnum) {
                 update_mobile_strings(live_mob, &mob_proto[rnum]);
 
         add_to_save_list(zone_table[real_zone_by_thing(vnum)].number, SL_MOB);
-        log("GenOLC: add_mobile: Updated existing mobile #%d.", vnum);
+        basic_mud_log("GenOLC: add_mobile: Updated existing mobile #%d.", vnum);
         return rnum;
     }
 
@@ -67,7 +67,7 @@ int add_mobile(struct char_data *mob, mob_vnum vnum) {
     auto &ix = mob_index[vnum];
     ix.vn = vnum;
 
-    log("GenOLC: add_mobile: Added mobile %d.", vnum);
+    basic_mud_log("GenOLC: add_mobile: Added mobile %d.", vnum);
 
 #if CONFIG_GENOLC_MOBPROG
     GET_MPROG(OLC_MOB(d)) = OLC_MPROGL(d);
@@ -111,7 +111,7 @@ int delete_mobile(mob_rnum refpt) {
     zone_rnum zone;
 
     if (!mob_proto.count(refpt)) {
-        log("SYSERR: GenOLC: delete_mobile: Invalid rnum %d.", refpt);
+        basic_mud_log("SYSERR: GenOLC: delete_mobile: Invalid rnum %d.", refpt);
         return NOBODY;
     }
 
@@ -238,7 +238,7 @@ int free_mobile(struct char_data *mob) {
 
 int save_mobiles(zone_rnum zone_num) {
     if (!zone_table.count(zone_num)) {
-        log("SYSERR: GenOLC: save_mobiles: Invalid real zone number %d.", zone_num);
+        basic_mud_log("SYSERR: GenOLC: save_mobiles: Invalid real zone number %d.", zone_num);
         return false;
     }
 
@@ -368,7 +368,7 @@ int write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd) {
     );
 
     if (write_mobile_espec(mvnum, mob, fd) < 0)
-        log("SYSERR: GenOLC: Error writing E-specs for mobile #%d.", mvnum);
+        basic_mud_log("SYSERR: GenOLC: Error writing E-specs for mobile #%d.", mvnum);
 
     script_save_to_disk(fd, mob, MOB_TRIGGER);
 
@@ -900,7 +900,8 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
     if(j.contains("wimp_level")) wimp_level = j["wimp_level"];
 
     if(proto_script) {
-        if(!script) script = new script_data();
+        if(!script) script = new script_data(this);
+
         for(auto p = proto_script; p; p = p->next) {
             auto t = read_trigger(p->vnum);
             if(t) add_trigger(script, t, -1);
@@ -908,7 +909,7 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
     }
 
     if(j.contains("dgvariables")) {
-        if(!script) script = new script_data();
+        if(!script) script = new script_data(this);
         auto jv = j["dgvariables"];
         // use reverse iteration to fill out script->global_vars
         for(auto it = jv.rbegin(); it != jv.rend(); ++it) {
@@ -1125,7 +1126,7 @@ void char_data::activate() {
     character_list = this;
     auto find = mob_index.find(vn);
     if(find != mob_index.end()) {
-        find->second.number++;
+        find->second.mobs.insert(this);
     }
     if(contents) activateContents();
     for(auto i = 0; i < NUM_WEARS; i++) {
@@ -1150,7 +1151,7 @@ void char_data::deactivate() {
     REMOVE_FROM_LIST(this, character_list, next, temp);
     auto find = mob_index.find(vn);
     if(find != mob_index.end()) {
-        find->second.number--;
+        find->second.mobs.erase(this);
     }
     if(affected) {
         REMOVE_FROM_LIST(this, affect_list, next_affect, temp);

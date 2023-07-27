@@ -1,12 +1,12 @@
-#include "login.h"
-#include "db.h"
-#include "config.h"
-#include "dg_comm.h"
-#include "utils.h"
-#include "ban.h"
+#include "dbat/login.h"
+#include "dbat/db.h"
+#include "dbat/config.h"
+#include "dbat/dg_comm.h"
+#include "dbat/utils.h"
+#include "dbat/ban.h"
 #include "fmt/format.h"
-#include "account.h"
-#include "accmenu.h"
+#include "dbat/account.h"
+#include "dbat/accmenu.h"
 #include <boost/algorithm/string.hpp>
 
 namespace net {
@@ -118,7 +118,7 @@ namespace net {
                 sendText("Password is wrong. Password or Return?\r\n");
                 sendText("(Return will ask for a different username)\r\n");
                 send_to_imm("Username, %s, password failure!", (char*)account->name.c_str());
-                log("%s BAD PASSWORD", (char*)account->name.c_str());
+                basic_mud_log("%s BAD PASSWORD", (char*)account->name.c_str());
                 return;
             }
         } else {

@@ -1,20 +1,20 @@
 //
 // Created by basti on 10/24/2021.
 //
-#include "structs.h"
-#include "races.h"
-#include "utils.h"
-#include "spells.h"
-#include "comm.h"
-#include "class.h"
-#include "fight.h"
-#include "act.movement.h"
-#include "config.h"
-#include "mail.h"
-#include "dg_comm.h"
-#include "dg_scripts.h"
-#include "interpreter.h"
-#include "players.h"
+#include "dbat/structs.h"
+#include "dbat/races.h"
+#include "dbat/utils.h"
+#include "dbat/spells.h"
+#include "dbat/comm.h"
+#include "dbat/class.h"
+#include "dbat/fight.h"
+#include "dbat/act.movement.h"
+#include "dbat/config.h"
+#include "dbat/mail.h"
+#include "dbat/dg_comm.h"
+#include "dbat/dg_scripts.h"
+#include "dbat/interpreter.h"
+#include "dbat/players.h"
 
 static std::string robot = "Robotic-Humanoid", robot_lower = "robotic-humanoid", unknown = "UNKNOWN";
 

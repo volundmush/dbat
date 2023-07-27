@@ -8,17 +8,17 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include "graph.h"
-#include "utils.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "db.h"
-#include "spells.h"
-#include "constants.h"
-#include "maputils.h"
-#include "vehicles.h"
-#include "act.informative.h"
+#include "dbat/graph.h"
+#include "dbat/utils.h"
+#include "dbat/comm.h"
+#include "dbat/interpreter.h"
+#include "dbat/handler.h"
+#include "dbat/db.h"
+#include "dbat/spells.h"
+#include "dbat/constants.h"
+#include "dbat/maputils.h"
+#include "dbat/vehicles.h"
+#include "dbat/act.informative.h"
 
 /* local functions */
 int VALID_EDGE(room_rnum x, int y);
@@ -100,7 +100,7 @@ int find_first_step(room_rnum src, room_rnum target) {
     room_rnum curr_room;
 
     if (!world.count(src) || !world.count(target)) {
-        log("SYSERR: Illegal value %d or %d passed to find_first_step. (%s)", src, target, __FILE__);
+        basic_mud_log("SYSERR: Illegal value %d or %d passed to find_first_step. (%s)", src, target, __FILE__);
         return (BFS_ERROR);
     }
     if (src == target)

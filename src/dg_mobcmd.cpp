@@ -35,16 +35,16 @@
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
 
-#include "structs.h"
-#include "dg_scripts.h"
-#include "db.h"
-#include "utils.h"
-#include "handler.h"
-#include "interpreter.h"
-#include "comm.h"
-#include "constants.h"
-#include "act.wizard.h"
-#include "fight.h"
+#include "dbat/structs.h"
+#include "dbat/dg_scripts.h"
+#include "dbat/db.h"
+#include "dbat/utils.h"
+#include "dbat/handler.h"
+#include "dbat/interpreter.h"
+#include "dbat/comm.h"
+#include "dbat/constants.h"
+#include "dbat/act.wizard.h"
+#include "dbat/fight.h"
 
 /*
  * Local functions.
@@ -98,8 +98,8 @@ void mob_log(char_data *mob, const char *format, ...) {
     va_list args;
     char output[MAX_STRING_LENGTH];
 
-    snprintf(output, sizeof(output), "Mob (%s, VNum %d):: %s",
-             GET_SHORT(mob), GET_MOB_VNUM(mob), format);
+    snprintf(output, sizeof(output), "Mob (%s [%d], VNum %d):: %s",
+             GET_SHORT(mob), mob->id, GET_MOB_VNUM(mob), format);
 
     va_start(args, format);
     script_vlog(output, args);
@@ -490,7 +490,6 @@ ACMD(do_mload) {
         randomize_eq(object);
         /* special handling to make objects able to load on a person/in a container/worn etc. */
         if (!target || !*target) {
-            add_unique_id(object);
             if (CAN_WEAR(object, ITEM_WEAR_TAKE)) {
                 obj_to_char(object, ch);
             } else {
@@ -521,7 +520,6 @@ ACMD(do_mload) {
             return;
         }
         /* neither char nor container found - just dump it in room */
-        add_unique_id(object);
         obj_to_room(object, IN_ROOM(ch));
         load_otrigger(object);
         return;

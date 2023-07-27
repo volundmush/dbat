@@ -1,10 +1,10 @@
-#include "comm.h"
-#include "utils.h"
-#include "dg_scripts.h"
-#include "constants.h"
-#include "genolc.h"
-#include "dg_event.h"
-#include "maputils.h"
+#include "dbat/comm.h"
+#include "dbat/utils.h"
+#include "dbat/dg_scripts.h"
+#include "dbat/constants.h"
+#include "dbat/genolc.h"
+#include "dbat/dg_event.h"
+#include "dbat/maputils.h"
 #include <filesystem>
 #include <memory>
 #include <iostream>
@@ -14,12 +14,12 @@
 #include "SQLiteCpp/SQLiteCpp.h"
 #include <boost/algorithm/string.hpp>
 #include <fstream>
-#include "class.h"
-#include "players.h"
+#include "dbat/class.h"
+#include "dbat/players.h"
 #include "nlohmann/json.hpp"
-#include "area.h"
-#include "account.h"
-#include "objsave.h"
+#include "dbat/area.h"
+#include "dbat/account.h"
+#include "dbat/objsave.h"
 
 static std::string stripAnsi(const std::string& str) {
     return processColors(str, false, nullptr);
@@ -137,7 +137,7 @@ vnum assembleArea(const AreaDef &def) {
         }
     }
 
-    log("Assembling Area: %s, Rooms: %d", def.name.c_str(), rooms.size());
+    basic_mud_log("Assembling Area: %s, Rooms: %d", def.name.c_str(), rooms.size());
 
     for(auto r : rooms) {
         auto found = world.find(r);
@@ -677,7 +677,7 @@ void migrate_grid() {
             {ROOM_CERRIA, planet_cerria},
     };
 
-    log("Attempting to deduce Areas to Planets...");
+    basic_mud_log("Attempting to deduce Areas to Planets...");
     for(auto &[vnum, room] : world) {
         // check for planetMap flags and, if found, bind the area this room belongs to, to the respective planet.
 
@@ -693,7 +693,7 @@ void migrate_grid() {
             }
         }
     }
-    log("Done deducing Areas to Planets.");
+    basic_mud_log("Done deducing Areas to Planets.");
 
 
     AreaDef nodef;
@@ -1327,7 +1327,7 @@ void migrate_accounts() {
 
     auto path = std::filesystem::current_path() / "user";
     if(!std::filesystem::exists(path)) {
-        log("No user directory found, skipping account migration.");
+        basic_mud_log("No user directory found, skipping account migration.");
         return;
     }
 
@@ -1356,7 +1356,7 @@ void migrate_accounts() {
         // Line 3: password (clear text, will hash...)
         std::string pass;
         std::getline(file, pass);
-        if(!a.setPassword(pass)) log("Error hashing %s's password: %s", a.name.c_str(), pass.c_str());
+        if(!a.setPassword(pass)) basic_mud_log("Error hashing %s's password: %s", a.name.c_str(), pass.c_str());
 
         // Line 4: slots (int)
         std::string slots;
@@ -1426,7 +1426,7 @@ void migrate_characters() {
         auto ch = new char_data();
         auto result = load_char(cname.c_str(), ch);
         if(result < 0) {
-            log("Error loading %s for account migration.", cname.c_str());
+            basic_mud_log("Error loading %s for account migration.", cname.c_str());
             delete ch;
             continue;
         }
@@ -1444,7 +1444,7 @@ void migrate_characters() {
     // migrate sense files...
     auto path = std::filesystem::current_path() / "sense";
     if(!std::filesystem::exists(path)) {
-        log("No sense directory found, skipping account migration.");
+        basic_mud_log("No sense directory found, skipping account migration.");
         return;
     }
 
@@ -1455,7 +1455,7 @@ void migrate_characters() {
         auto name = p.path().stem().string();
         auto ch = findPlayer(name);
         if(!ch) {
-            log("Error loading %s for sense migration.", name.c_str());
+            basic_mud_log("Error loading %s for sense migration.", name.c_str());
             continue;
         }
         auto &pa = players[ch->id];
@@ -1469,7 +1469,7 @@ void migrate_characters() {
                 auto vnum = std::stoi(line);
                 if(mob_proto.contains(vnum)) pa.senseMemory.insert(vnum);
             } catch(...) {
-                log("Error parsing %s for sense migration.", line.c_str());
+                basic_mud_log("Error parsing %s for sense migration.", line.c_str());
             }
         }
         file.close();
@@ -1477,7 +1477,7 @@ void migrate_characters() {
 
     path = std::filesystem::current_path() / "intro";
     if(!std::filesystem::exists(path)) {
-        log("No intro directory found, skipping intro migration.");
+        basic_mud_log("No intro directory found, skipping intro migration.");
         return;
     }
 
@@ -1488,7 +1488,7 @@ void migrate_characters() {
         auto name = p.path().stem().string();
         auto ch = findPlayer(name);
         if(!ch) {
-            log("Error loading %s for dub migration.", name.c_str());
+            basic_mud_log("Error loading %s for dub migration.", name.c_str());
             continue;
         }
 
@@ -1515,7 +1515,7 @@ void migrate_characters() {
 
     path = std::filesystem::current_path() / "plrvars";
     if(!std::filesystem::exists(path)) {
-        log("No intro directory found, skipping intro migration.");
+        basic_mud_log("No intro directory found, skipping intro migration.");
         return;
     }
 
@@ -1526,7 +1526,7 @@ void migrate_characters() {
         auto name = p.path().stem().string();
         auto ch = findPlayer(name);
         if(!ch) {
-            log("Error loading %s for variable migration.", name.c_str());
+            basic_mud_log("Error loading %s for variable migration.", name.c_str());
             continue;
         }
 
@@ -1552,14 +1552,14 @@ void migrate_characters() {
                 auto ctx = std::stoi(context);
                 add_var(&ch->script->global_vars, (char*)varname.c_str(), data.c_str(), ctx);
             } catch(...) {
-                log("Error parsing %s for variable migration.", line.c_str());
+                basic_mud_log("Error parsing %s for variable migration.", line.c_str());
             }
         }
     }
 
     path = std::filesystem::current_path() / "plralias";
     if(!std::filesystem::exists(path)) {
-        log("No plralias directory found, skipping alias migration.");
+        basic_mud_log("No plralias directory found, skipping alias migration.");
         return;
     }
 
@@ -1570,12 +1570,12 @@ void migrate_characters() {
         auto name = p.path().stem().string();
         auto ch = findPlayer(name);
         if(!ch) {
-            log("Error loading %s for alias migration.", name.c_str());
+            basic_mud_log("Error loading %s for alias migration.", name.c_str());
             continue;
         }
         auto pa = players.find(ch->id);
         if(pa == players.end()) {
-            log("Error loading %s for alias migration.", name.c_str());
+            basic_mud_log("Error loading %s for alias migration.", name.c_str());
             continue;
         }
 
@@ -1606,7 +1606,7 @@ void migrate_characters() {
         auto name = p.path().stem().string();
         auto ch = findPlayer(name);
         if(!ch) {
-            log("Error loading %s for object migration.", name.c_str());
+            basic_mud_log("Error loading %s for object migration.", name.c_str());
             continue;
         }
 
@@ -1624,7 +1624,7 @@ boost::asio::awaitable<void> migrate_db() {
     try {
         migrate_characters();
     } catch(std::exception &e) {
-        log("Error migrating characters: %s", e.what());
+        basic_mud_log("Error migrating characters: %s", e.what());
     }
 
     dirty_all();
@@ -1731,7 +1731,7 @@ int main(int argc, char **argv)
                 break;
             case 'x':
                 xap_objs = 1;
-                log("Loading player objects from secondary (ascii) files.");
+                basic_mud_log("Loading player objects from secondary (ascii) files.");
                 break;
             case 'h':
                 /* From: Anil Mahajan <amahajan@proxicom.com> */
@@ -1767,34 +1767,40 @@ int main(int argc, char **argv)
         }
     }
 
-    /* All arguments have been parsed, try to open log file. */
-    setup_log(CONFIG_LOGNAME, STDERR_FILENO);
+    try {
+        /* All arguments have been parsed, try to open log file. */
+        setup_log();
+    }
+    catch(std::exception& e) {
+        std::cerr << "Cannot start logger: " << e.what() << std::endl;
+        exit(1);
+    }
 
     /*
      * Moved here to distinguish command line options and to show up
      * in the log if stderr is redirected to a file.
      */
-    log("Using %s for configuration.", CONFIG_CONFFILE);
-    log("%s", circlemud_version);
-    log("%s", oasisolc_version);
-    log("%s", DG_SCRIPT_VERSION);
-    log("%s", ascii_pfiles_version);
-    log("%s", CWG_VERSION);
+    basic_mud_log("Using %s for configuration.", CONFIG_CONFFILE);
+    basic_mud_log("%s", circlemud_version);
+    basic_mud_log("%s", oasisolc_version);
+    basic_mud_log("%s", DG_SCRIPT_VERSION);
+    basic_mud_log("%s", ascii_pfiles_version);
+    basic_mud_log("%s", CWG_VERSION);
     xap_objs = 1;
     if (chdir(dir) < 0) {
         perror("SYSERR: Fatal error changing to data directory");
         exit(1);
     }
-    log("Using %s as data directory.", dir);
+    basic_mud_log("Using %s as data directory.", dir);
 
     // BEGIN DUMP SEQUENCE
-    log("Beginning migration!");
+    basic_mud_log("Beginning migration!");
     gameFunc = migrate_db;
 
-    log("Generating player index.");
+    basic_mud_log("Generating player index.");
     build_player_index();
 
-    init_game(1280);
+    init_game();
 
 
     return 0;

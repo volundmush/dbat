@@ -17,7 +17,7 @@ project(circle)
 CPMAddPackage("gh:fmtlib/fmt#9.1.0")
 CPMAddPackage("gh:SRombauts/SQLiteCpp#3.3.0")
 CPMAddPackage("gh:nlohmann/json#v3.11.2")
-CPMAddPackage("gh:gabime/spdlog#v1.11.0")
+CPMAddPackage("gh:gabime/spdlog#v1.12.0")
 CPMAddPackage("gh:Roblox/luau#0.570")
 CPMAddPackage("gh:kunitoki/LuaBridge3#3.0-rc3")
 CPMAddPackage("gh:robinlinden/libsodium-cmake#master")
@@ -68,7 +68,7 @@ set(CIRCLE_LINK_LIBRARIES
         )
 
 # this is the core library we're making.
-add_library(circlemud ${CIRCLE_INCLUDE} ${CIRCLE_SRC})
+add_library(circlemud ${CIRCLE_INCLUDE} ${CIRCLE_SRC} src/sysdep.cpp)
 # everything we make will link to it.
 target_link_libraries(circlemud ${CIRCLE_LINK_LIBRARIES})
 target_compile_definitions(circlemud PUBLIC USING_CMAKE=1 CIRCLE_UNIX=1 POSIX=1)

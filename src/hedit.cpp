@@ -10,20 +10,20 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 **************************************************************************/
 
-#include "hedit.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "utils.h"
-#include "db.h"
-#include "boards.h"
-#include "oasis.h"
-#include "genolc.h"
-#include "genzon.h"
-#include "handler.h"
-#include "improved-edit.h"
-#include "config.h"
-#include "dg_comm.h"
-#include "act.informative.h"
+#include "dbat/hedit.h"
+#include "dbat/comm.h"
+#include "dbat/interpreter.h"
+#include "dbat/utils.h"
+#include "dbat/db.h"
+#include "dbat/boards.h"
+#include "dbat/oasis.h"
+#include "dbat/genolc.h"
+#include "dbat/genzon.h"
+#include "dbat/handler.h"
+#include "dbat/improved-edit.h"
+#include "dbat/config.h"
+#include "dbat/dg_comm.h"
+#include "dbat/act.informative.h"
 
 /* external functions */
 
@@ -148,7 +148,7 @@ static void hedit_save_to_disk(struct descriptor_data *d) {
 
     snprintf(index_name, sizeof(index_name), "%s%s", HLP_PREFIX, HELP_FILE);
     if (!(fp = fopen(index_name, "w"))) {
-        log("SYSERR: Could not write help index file");
+        basic_mud_log("SYSERR: Could not write help index file");
         return;
     }
 

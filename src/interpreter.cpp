@@ -9,36 +9,36 @@
 ************************************************************************ */
 #define __INTERPRETER_C__
 
-#include "interpreter.h"
-#include "comm.h"
-#include "db.h"
-#include "utils.h"
-#include "spells.h"
-#include "handler.h"
-#include "mail.h"
-#include "oasis.h"
-#include "tedit.h"
-#include "improved-edit.h"
-#include "dg_scripts.h"
-#include "shop.h"
-#include "guild.h"
-#include "clan.h"
-#include "class.h"
-#include "races.h"
-#include "act.movement.h"
-#include "config.h"
-#include "objsave.h"
-#include "statedit.h"
-#include "weather.h"
-#include "act.informative.h"
-#include "players.h"
-#include "act.wizard.h"
-#include "dg_comm.h"
-#include "ban.h"
-#include "assedit.h"
-#include "obj_edit.h"
+#include "dbat/interpreter.h"
+#include "dbat/comm.h"
+#include "dbat/db.h"
+#include "dbat/utils.h"
+#include "dbat/spells.h"
+#include "dbat/handler.h"
+#include "dbat/mail.h"
+#include "dbat/oasis.h"
+#include "dbat/tedit.h"
+#include "dbat/improved-edit.h"
+#include "dbat/dg_scripts.h"
+#include "dbat/shop.h"
+#include "dbat/guild.h"
+#include "dbat/clan.h"
+#include "dbat/class.h"
+#include "dbat/races.h"
+#include "dbat/act.movement.h"
+#include "dbat/config.h"
+#include "dbat/objsave.h"
+#include "dbat/statedit.h"
+#include "dbat/weather.h"
+#include "dbat/act.informative.h"
+#include "dbat/players.h"
+#include "dbat/act.wizard.h"
+#include "dbat/dg_comm.h"
+#include "dbat/ban.h"
+#include "dbat/assedit.h"
+#include "dbat/obj_edit.h"
 #include <boost/algorithm/string.hpp>
-#include "constants.h"
+#include "dbat/constants.h"
 
 /* local global variables */
 DISABLED_DATA *disabled_first = nullptr;
@@ -1919,10 +1919,10 @@ void topLoad() {
 
     /* Read Toplist File */
     if (!get_filename(fname, sizeof(fname), INTRO_FILE, "toplist")) {
-        log("ERROR: Toplist file does not exist.");
+        basic_mud_log("ERROR: Toplist file does not exist.");
         return;
     } else if (!(file = fopen(fname, "r"))) {
-        log("ERROR: Toplist file does not exist.");
+        basic_mud_log("ERROR: Toplist file does not exist.");
         return;
     }
 
@@ -2221,7 +2221,7 @@ void topWrite(struct char_data *ch) {
             return;
 
         if (!(fl = fopen(fname, "w"))) {
-            log("ERROR: could not save Toplist File, %s.", fname);
+            basic_mud_log("ERROR: could not save Toplist File, %s.", fname);
             return;
         }
         x = 0;
@@ -2996,7 +2996,7 @@ void userLoad(struct descriptor_data *d, char *name) {
     if (!get_filename(fname, sizeof(fname), USER_FILE, name)) {
         return;
     } else if (!(fl = fopen(fname, "r"))) {
-        log("ERROR: could not load user, %s, from filename, %s.", name, fname);
+        basic_mud_log("ERROR: could not load user, %s, from filename, %s.", name, fname);
         return;
     }
     int count = 0;
@@ -3140,7 +3140,7 @@ void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, 
             return;
 
         if (!(fl = fopen(fname, "w"))) {
-            log("ERROR: could not save user, %s, to filename, %s.", d->user, fname);
+            basic_mud_log("ERROR: could not save user, %s, to filename, %s.", d->user, fname);
             return;
         }
 
@@ -3219,7 +3219,7 @@ void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, 
         if (!get_filename(filename, sizeof(filename), USER_FILE, name)) {
             return;
         } else if (!(file = fopen(filename, "r"))) {
-            log("ERROR: could not load user, %s, from filename, %s.", name, filename);
+            basic_mud_log("ERROR: could not load user, %s, from filename, %s.", name, filename);
             return;
         }
 
@@ -3275,7 +3275,7 @@ void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, 
             return;
 
         if (!(fl = fopen(fname, "w"))) {
-            log("ERROR: could not save user, %s, to filename, %s.", name, fname);
+            basic_mud_log("ERROR: could not save user, %s, to filename, %s.", name, fname);
             return;
         }
         /* User's Account Name */
@@ -4374,7 +4374,7 @@ void nanny(struct descriptor_data *d, char *arg) {
             break;
 
         default:
-            log("SYSERR: Nanny: illegal state of con'ness (%d) for '%s'; closing connection.",
+            basic_mud_log("SYSERR: Nanny: illegal state of con'ness (%d) for '%s'; closing connection.",
                 STATE(d), d->character ? GET_NAME(d->character) : "<unknown>");
             STATE(d) = CON_DISCONNECT;    /* Safest to do. */
             break;
@@ -4508,7 +4508,7 @@ void load_disabled() {
             if (!strcasecmp(cmd_info[i].command, name))
                 break;
         if (*cmd_info[i].command == '\n') { /* command does not exist? */
-            log("WARNING: load_disabled(): Skipping unknown disabled command - '%s'!", name);
+            basic_mud_log("WARNING: load_disabled(): Skipping unknown disabled command - '%s'!", name);
             free(p);
         } else { /* add new disabled command */
             p->disabled_by = strdup(temp);
@@ -4532,7 +4532,7 @@ void save_disabled() {
     }
 
     if ((fp = fopen(DISABLED_FILE, "w")) == nullptr) {
-        log("SYSERR: Could not open " DISABLED_FILE " for writing");
+        basic_mud_log("SYSERR: Could not open " DISABLED_FILE " for writing");
         return;
     }
 

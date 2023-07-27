@@ -11,19 +11,19 @@
 *  original credits maintained where relevant for act.other.c as this is  *
 *  practically an act.other.c part two - Iovan 3/20/2011                  *
 ************************************************************************ */
-#include "act.misc.h"
-#include "dg_comm.h"
-#include "act.wizard.h"
-#include "act.movement.h"
-#include "utils.h"
-#include "spells.h"
-#include "comm.h"
-#include "handler.h"
-#include "combat.h"
-#include "constants.h"
-#include "obj_edit.h"
-#include "fight.h"
-#include "class.h"
+#include "dbat/act.misc.h"
+#include "dbat/dg_comm.h"
+#include "dbat/act.wizard.h"
+#include "dbat/act.movement.h"
+#include "dbat/utils.h"
+#include "dbat/spells.h"
+#include "dbat/comm.h"
+#include "dbat/handler.h"
+#include "dbat/combat.h"
+#include "dbat/constants.h"
+#include "dbat/obj_edit.h"
+#include "dbat/fight.h"
+#include "dbat/class.h"
 
 /* local functions  */
 static void generate_multiform(struct char_data *ch, int count);
@@ -3223,7 +3223,7 @@ void rpp_feature(struct char_data *ch, const char *arg) {
             send_to_char(ch,
                          "The immortals have been notified about this change. It had better have been for a good reason.\r\n");
         }
-        log("%s RPP Feature: '%s' Check for rule compliance.", GET_USER(ch), buf8);
+        basic_mud_log("%s RPP Feature: '%s' Check for rule compliance.", GET_USER(ch), buf8);
         return;
     }
 
@@ -5766,7 +5766,6 @@ ACMD(do_spoil) {
     GET_OBJ_VAL(body_part, 5) = 1;
     GET_OBJ_WEIGHT(body_part) = rand_number(4, 10);
     GET_OBJ_RENT(body_part) = 0;
-    add_unique_id(body_part);
     obj_to_room(body_part, IN_ROOM(ch));
     obj_from_room(body_part);
     obj_to_char(body_part, ch);

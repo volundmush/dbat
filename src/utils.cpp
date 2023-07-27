@@ -8,20 +8,20 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include "utils.h"
-#include "comm.h"
-#include "handler.h"
-#include "random.h"
-#include "spells.h"
-#include "db.h"
-#include "fight.h"
-#include "class.h"
-#include "feats.h"
-#include "genzon.h"
-#include "constants.h"
-#include "act.informative.h"
-#include "screen.h"
-#include "players.h"
+#include "dbat/utils.h"
+#include "dbat/comm.h"
+#include "dbat/handler.h"
+#include "dbat/random.h"
+#include "dbat/spells.h"
+#include "dbat/db.h"
+#include "dbat/fight.h"
+#include "dbat/class.h"
+#include "dbat/feats.h"
+#include "dbat/genzon.h"
+#include "dbat/constants.h"
+#include "dbat/act.informative.h"
+#include "dbat/screen.h"
+#include "dbat/players.h"
 #include <unordered_set>
 
 /* local functions */
@@ -1195,12 +1195,12 @@ void customWrite(struct char_data *ch, struct obj_data *obj) {
     FILE *fl, *file;
 
     if (!get_filename(fname, sizeof(fname), CUSTOME_FILE, ch->desc->user)) {
-        log("ERROR: Custom unable to be saved to user file!");
+        basic_mud_log("ERROR: Custom unable to be saved to user file!");
         return;
     }
 
     if (!(file = fopen(fname, "r"))) {
-        log("ERROR: Custom unable to be saved to user file!");
+        basic_mud_log("ERROR: Custom unable to be saved to user file!");
         return;
     }
 
@@ -1215,12 +1215,12 @@ void customWrite(struct char_data *ch, struct obj_data *obj) {
     fclose(file);
 
     if (!get_filename(fname, sizeof(fname), CUSTOME_FILE, ch->desc->user)) {
-        log("ERROR: Custom unable to be saved to user file!");
+        basic_mud_log("ERROR: Custom unable to be saved to user file!");
         return;
     }
 
     if (!(fl = fopen(fname, "w"))) {
-        log("ERROR: Custom unable to be saved to user file!");
+        basic_mud_log("ERROR: Custom unable to be saved to user file!");
         return;
     }
 
@@ -1240,12 +1240,12 @@ void customRead(struct descriptor_data *d, int type, char *name) {
     if (type == 1) {
 
         if (!get_filename(fname, sizeof(fname), CUSTOME_FILE, name)) {
-            log("ERROR: Custom unable to be read from user file!");
+            basic_mud_log("ERROR: Custom unable to be read from user file!");
             return;
         }
 
         if (!(fl = fopen(fname, "r"))) {
-            log("ERROR: Custom file unable to be read!");
+            basic_mud_log("ERROR: Custom file unable to be read!");
             return;
         }
 
@@ -1267,12 +1267,12 @@ void customRead(struct descriptor_data *d, int type, char *name) {
     } else {
 
         if (!get_filename(fname, sizeof(fname), CUSTOME_FILE, d->user)) {
-            log("ERROR: Custom unable to be read from user file!");
+            basic_mud_log("ERROR: Custom unable to be read from user file!");
             return;
         }
 
         if (!(fl = fopen(fname, "r"))) {
-            log("ERROR: Custom file unable to be read!");
+            basic_mud_log("ERROR: Custom file unable to be read!");
             return;
         }
 
@@ -1307,7 +1307,7 @@ void customCreate(struct descriptor_data *d) {
         return;
 
     if (!(fl = fopen(fname, "w"))) {
-        log("ERROR: could not create custom file.");
+        basic_mud_log("ERROR: could not create custom file.");
         return;
     }
 
@@ -2972,10 +2972,10 @@ int64_t gear_exp(struct char_data *ch, int64_t exp) {
 int planet_check(struct char_data *ch, struct char_data *vict) {
 
     if (ch == nullptr) {
-        log("ERROR: planet_check called without ch!");
+        basic_mud_log("ERROR: planet_check called without ch!");
         return 0;
     } else if (vict == nullptr) {
-        log("ERROR: planet_check called without vict!");
+        basic_mud_log("ERROR: planet_check called without vict!");
         return 0;
     } else {
         int success = 0;
@@ -3231,10 +3231,7 @@ int rand_number(int from, int to) {
         from = to;
         to = tmp;
     }
-    std::random_device device;
-    std::mt19937 generator(device());
-    std::uniform_int_distribution<int> distribution(from,to);
-    return distribution(generator);
+    return randomNumber<int>(from, to);
 }
 
 /* Axion engine dice function */
@@ -3318,20 +3315,24 @@ void basic_mud_vlog(const char *format, va_list args) {
     time_t ct = time(nullptr);
     char *time_s = asctime(localtime(&ct));
 
-    if (logfile == nullptr) {
+    if (!logger) {
         puts("SYSERR: Using log() before stream was initialized!");
         return;
     }
 
+    // do a copy of the args to find out their total formatted byte size...
+    va_list args_copy;
+    va_copy(args_copy, args);
+    int size = vsnprintf(nullptr, 0, format, args_copy);
+    va_end(args_copy);
+
     if (format == nullptr)
         format = "SYSERR: log() received a nullptr format.";
 
-    time_s[strlen(time_s) - 1] = '\0';
-
-    fprintf(logfile, "%-15.15s :: ", time_s + 4);
-    vfprintf(logfile, format, args);
-    fputc('\n', logfile);
-    fflush(logfile);
+    char buf[size + 1];
+    vsnprintf(buf, size + 1, format, args);
+    std::string out(buf);
+    logger->info(out);
 }
 
 
@@ -3350,7 +3351,7 @@ int touch(const char *path) {
     FILE *fl;
 
     if (!(fl = fopen(path, "a"))) {
-        log("SYSERR: %s: %s", path, strerror(errno));
+        basic_mud_log("SYSERR: %s: %s", path, strerror(errno));
         return (-1);
     } else {
         fclose(fl);
@@ -3682,7 +3683,7 @@ int get_filename(char *filename, size_t fbufsize, int mode, const char *orig_nam
     char name[PATH_MAX], *ptr;
 
     if (orig_name == nullptr || *orig_name == '\0' || filename == nullptr) {
-        log("SYSERR: nullptr pointer or empty string passed to get_filename(), %p or %p.",
+        basic_mud_log("SYSERR: nullptr pointer or empty string passed to get_filename(), %p or %p.",
             orig_name, filename);
         return (0);
     }
@@ -3943,7 +3944,7 @@ std::string processColors(const std::string &txt, int parse, char **choices) {
  * Outside rooms are dark at sunset and night.  */
 int room_is_dark(room_rnum room) {
     if (!VALID_ROOM_RNUM(room)) {
-        log("room_is_dark: Invalid room rnum %d.", room);
+        basic_mud_log("room_is_dark: Invalid room rnum %d.", room);
         return (false);
     }
 

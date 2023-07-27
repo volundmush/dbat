@@ -4,23 +4,23 @@
  * Copyright 1997-2001 George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
-#include "medit.h"
-#include "interpreter.h"
-#include "comm.h"
-#include "utils.h"
-#include "db.h"
-#include "genolc.h"
-#include "genmob.h"
-#include "genzon.h"
-#include "genshp.h"
-#include "oasis.h"
-#include "constants.h"
-#include "improved-edit.h"
-#include "dg_olc.h"
-#include "races.h"
-#include "class.h"
-#include "act.wizard.h"
-#include "modify.h"
+#include "dbat/medit.h"
+#include "dbat/interpreter.h"
+#include "dbat/comm.h"
+#include "dbat/utils.h"
+#include "dbat/db.h"
+#include "dbat/genolc.h"
+#include "dbat/genmob.h"
+#include "dbat/genzon.h"
+#include "dbat/genshp.h"
+#include "dbat/oasis.h"
+#include "dbat/constants.h"
+#include "dbat/improved-edit.h"
+#include "dbat/dg_olc.h"
+#include "dbat/races.h"
+#include "dbat/class.h"
+#include "dbat/act.wizard.h"
+#include "dbat/modify.h"
 /*-------------------------------------------------------------------*/
 
 /*
@@ -260,7 +260,7 @@ void medit_save_internally(struct descriptor_data *d) {
     i = (real_mobile(OLC_NUM(d)) == NOBODY);
 
     if ((new_rnum = add_mobile(OLC_MOB(d), OLC_NUM(d))) == NOBODY) {
-        log("medit_save_internally: add_mobile failed.");
+        basic_mud_log("medit_save_internally: add_mobile failed.");
         return;
     }
 

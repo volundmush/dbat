@@ -121,7 +121,7 @@ struct unit_data {
     char *room_description{};      /* When thing is listed in room */
     char *look_description{};      /* what to show when looked at */
     char *short_description{};     /* when displayed in list or action message. */
-
+    bool exists{true}; // used for deleted objects. invalid ones are !exists
     struct extra_descr_data *ex_description{}; /* extra descriptions     */
 
     struct trig_proto_list *proto_script{}; /* list of default triggers  */
@@ -965,8 +965,7 @@ struct txt_q {
 
 
 struct descriptor_data {
-    std::set<net::connection_data*> connections;
-    std::mutex connection_mutex;
+    std::set<std::shared_ptr<net::Connection>> connections;
 
     char host[HOST_LENGTH + 1];    /* hostname				*/
     int8_t bad_pws{};    /* number of bad pw attemps this login	*/
@@ -1077,12 +1076,15 @@ struct weather_data {
  * NOTE: Assumes sizeof(mob_vnum) >= sizeof(obj_vnum)
  */
 struct index_data {
-    mob_vnum vn;    /* virtual number of this mob/obj		*/
-    int number;    /* number of existing units of this mob/obj	*/
+    mob_vnum vn{NOTHING};    /* virtual number of this mob/obj		*/
+    int number{0};    /* number of existing units of this mob/obj	*/
     SpecialFunc func;
 
     char *farg;         /* string argument for special function     */
     struct trig_data *proto;     /* for triggers... the trigger     */
+    std::set<struct char_data*> mobs;
+    std::set<struct obj_data*> objects;
+    std::set<struct trig_data*> triggers;
 };
 
 /* linked list for mob/object prototype trigger lists */

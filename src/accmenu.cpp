@@ -1,8 +1,8 @@
 #pragma once
-#include "accmenu.h"
-#include "charmenu.h"
-#include "db.h"
-#include "players.h"
+#include "dbat/accmenu.h"
+#include "dbat/charmenu.h"
+#include "dbat/db.h"
+#include "dbat/players.h"
 #include "fmt/format.h"
 #include <boost/algorithm/string.hpp>
 
@@ -102,7 +102,7 @@ namespace net {
 
         if(boost::iequals(txt, "quit") || boost::istarts_with(txt, "quit ")) {
             sendText("Goodbye!\r\n");
-            conn->halt(0);
+            conn->close();
             return;
         }
 

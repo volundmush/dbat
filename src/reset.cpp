@@ -9,12 +9,12 @@
 *  To see this in action, check out AderonMUD                            * 
 ************************************************************************ */
 
-#include "structs.h"
-#include "utils.h"
-#include "db.h"
-#include "handler.h"
-#include "reset.h"
-#include "spec_procs.h"
+#include "dbat/structs.h"
+#include "dbat/utils.h"
+#include "dbat/db.h"
+#include "dbat/handler.h"
+#include "dbat/reset.h"
+#include "dbat/spec_procs.h"
 
 
 /* pre_reset is called before a zone is reset - returns TRUE to prevent a normal reset of the zone */
@@ -72,7 +72,7 @@ bool prereset_gauntlet_zone() {
             {2441, 2419}
     };
 
-    log("Special Reset: zone %d: Resetting Gauntlet", RESET_GAUNTLET);
+    basic_mud_log("Special Reset: zone %d: Resetting Gauntlet", RESET_GAUNTLET);
 
     /* Count the number of players currently in the gauntlet */
     for (i = 0; i < NUM_GAUNTLET_ROOMS; i++) {
@@ -81,11 +81,11 @@ bool prereset_gauntlet_zone() {
 
     /* No players in the gauntlet - normal reset will do */
     if (gauntlet_players == 0) {
-        log("Special Reset: zone %d: No players in Gauntlet - executing normal reset", RESET_GAUNTLET);
+        basic_mud_log("Special Reset: zone %d: No players in Gauntlet - executing normal reset", RESET_GAUNTLET);
         return PERFORM_NORMAL_RESET;
     }
 
-    log("Special Reset: zone %d: %d players in Gauntlet - special reset only", RESET_GAUNTLET, gauntlet_players);
+    basic_mud_log("Special Reset: zone %d: %d players in Gauntlet - special reset only", RESET_GAUNTLET, gauntlet_players);
 
     for (i = 0; i < NUM_GAUNTLET_ROOMS; i++) {
         if (check_mob_in_room(gauntlet_mobs[i].vmob, gauntlet_mobs[i].vroom) == false) {
@@ -97,7 +97,7 @@ bool prereset_gauntlet_zone() {
                     if ((mob = read_mobile(gauntlet_mobs[i].vmob, VIRTUAL)) != nullptr) {
                         /* And put it in the room */
                         char_to_room(mob, real_room(gauntlet_mobs[i].vroom));
-                        log("Special Reset: zone %d: Gauntlet mob reset (%d, %s)", RESET_GAUNTLET,
+                        basic_mud_log("Special Reset: zone %d: Gauntlet mob reset (%d, %s)", RESET_GAUNTLET,
                             gauntlet_mobs[i].vmob, GET_NAME(mob));
 
                     }

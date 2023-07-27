@@ -3,11 +3,11 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-#include "gengld.h"
-#include "shop.h"
-#include "genolc.h"
-#include "genzon.h"
-#include "utils.h"
+#include "dbat/gengld.h"
+#include "dbat/shop.h"
+#include "dbat/genolc.h"
+#include "dbat/genzon.h"
+#include "dbat/utils.h"
 
 /*
  * NOTE (gg): Didn't modify sedit much. Don't consider it as 'recent'
@@ -128,7 +128,7 @@ int add_guild(struct guild_data *ngld) {
 int save_guilds(zone_rnum zone_num) {
     if (!zone_table.count(zone_num))
     {
-        log("SYSERR: GenOLC: save_guilds: Invalid real zone number %d.", zone_num);
+        basic_mud_log("SYSERR: GenOLC: save_guilds: Invalid real zone number %d.", zone_num);
         return false;
     }
 

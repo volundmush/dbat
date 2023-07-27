@@ -7,27 +7,27 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include "act.item.h"
-#include "vehicles.h"
-#include "dg_comm.h"
-#include "act.wizard.h"
-#include "act.other.h"
-#include "act.comm.h"
-#include "act.informative.h"
-#include "config.h"
-#include "assemblies.h"
-#include "utils.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "spells.h"
-#include "handler.h"
-#include "class.h"
-#include "feats.h"
-#include "guild.h"
-#include "constants.h"
-#include "genzon.h"
-#include "dg_scripts.h"
-#include "boards.h"
+#include "dbat/act.item.h"
+#include "dbat/vehicles.h"
+#include "dbat/dg_comm.h"
+#include "dbat/act.wizard.h"
+#include "dbat/act.other.h"
+#include "dbat/act.comm.h"
+#include "dbat/act.informative.h"
+#include "dbat/config.h"
+#include "dbat/assemblies.h"
+#include "dbat/utils.h"
+#include "dbat/comm.h"
+#include "dbat/interpreter.h"
+#include "dbat/spells.h"
+#include "dbat/handler.h"
+#include "dbat/class.h"
+#include "dbat/feats.h"
+#include "dbat/guild.h"
+#include "dbat/constants.h"
+#include "dbat/genzon.h"
+#include "dbat/dg_scripts.h"
+#include "dbat/boards.h"
 
 /* global variables */
 struct obj_data *obj_selling = nullptr;    /* current object for sale */
@@ -1934,7 +1934,7 @@ ACMD(do_bid) {
             auc_save();
             struct descriptor_data *d;
             int bid = atoi(arg2);
-            log("AUCTION: %s has bid %s on %s", GET_NAME(ch), obj2->short_description, add_commas(bid));
+            basic_mud_log("AUCTION: %s has bid %s on %s", GET_NAME(ch), obj2->short_description, add_commas(bid));
             for (d = descriptor_list; d; d = d->next) {
                 if (STATE(d) != CON_PLAYING || IS_NPC(d->character))
                     continue;
@@ -2200,7 +2200,6 @@ ACMD(do_assemble) {
         send_to_char(ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(argument), argument);
         return;
     }
-    add_unique_id(pObject);
 
     /* Now give the object to the character. */
     if (GET_OBJ_VNUM(pObject) != 1611) {
@@ -2944,7 +2943,7 @@ static int perform_drop(struct char_data *ch, struct obj_data *obj,
             extract_obj(obj);
             return (value);
         default:
-            log("SYSERR: Incorrect argument %d passed to perform_drop.", mode);
+            basic_mud_log("SYSERR: Incorrect argument %d passed to perform_drop.", mode);
             /*  SYSERR_DESC:
      *  This error comes from perform_drop() and is output when perform_drop()
      *  is called with an illegal 'mode' argument.
@@ -3340,7 +3339,7 @@ void weight_change_object(struct obj_data *obj, int weight) {
         GET_OBJ_WEIGHT(obj) += weight;
         obj_to_obj(obj, tmp_obj);
     } else {
-        log("SYSERR: Unknown attempt to subtract weight from an object.");
+        basic_mud_log("SYSERR: Unknown attempt to subtract weight from an object.");
         /*  SYSERR_DESC:
      *  weight_change_object() outputs this error when weight is attempted to
      *  be removed from an object that is not carried or in another object.
@@ -4467,7 +4466,7 @@ void perform_remove(struct char_data *ch, int pos) {
     int64_t previous = GET_HIT(ch);
 
     if (!(obj = GET_EQ(ch, pos)))
-        log("SYSERR: perform_remove: bad pos %d passed.", pos);
+        basic_mud_log("SYSERR: perform_remove: bad pos %d passed.", pos);
         /*  SYSERR_DESC:
      *  This error occurs when perform_remove() is passed a bad 'pos'
      *  (location) to remove an object from.

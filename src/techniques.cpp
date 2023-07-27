@@ -2,12 +2,12 @@
 // Created by volund on 11/4/21.
 //
 
-#include "techniques.h"
-#include "structs.h"
-#include "utils.h"
-#include "combat.h"
-#include "comm.h"
-#include "spells.h"
+#include "dbat/techniques.h"
+#include "dbat/structs.h"
+#include "dbat/utils.h"
+#include "dbat/combat.h"
+#include "dbat/comm.h"
+#include "dbat/spells.h"
 
 bool tech_handle_zanzoken(char_data *ch, char_data *vict, const std::string &name) {
     if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&

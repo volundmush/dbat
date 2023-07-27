@@ -159,9 +159,9 @@ struct trig_var_data {
     trig_var_data() = default;
     explicit trig_var_data(const nlohmann::json& j);
     nlohmann::json serialize();
-    char *name;                /* name of variable  */
-    char *value;                /* value of variable */
-    long context;                /* 0: global context */
+    char *name{};                /* name of variable  */
+    char *value{};                /* value of variable */
+    long context{};                /* 0: global context */
 
     struct trig_var_data *next;
 };
@@ -185,6 +185,7 @@ struct trig_data {
     struct event *wait_event{};    /* event to pause the trigger      */
     bool purged{};            /* trigger is set to be purged     */
     struct trig_var_data *var_list{};    /* list of local vars for trigger  */
+    DgUID owner{};
 
     struct trig_data *next{};
     struct trig_data *next_in_world{};    /* next in the global trigger list */
@@ -193,20 +194,23 @@ struct trig_data {
 
 /* a complete script (composed of several triggers) */
 struct script_data {
-    long types;                /* bitvector of trigger types */
+    script_data() = default;
+    explicit script_data(DgUID uid) : owner(uid) {};
+    long types{};                /* bitvector of trigger types */
     struct trig_data *trig_list{};            /* list of triggers           */
     struct trig_var_data *global_vars{};    /* list of global variables   */
-    bool purged;                /* script is set to be purged */
-    long context;                /* current context for statics */
+    bool purged{};                /* script is set to be purged */
+    long context{};                /* current context for statics */
+    DgUID owner{};
 
     struct script_data *next{};        /* used for purged_scripts    */
 };
 
 /* The event data for the wait command */
 struct wait_event_data {
-    struct trig_data *trigger;
-    void *go;
-    int type;
+    struct trig_data *trigger{};
+    void *go{};
+    int type{};
 };
 
 /* typedefs that the dg functions rely on */
@@ -218,9 +222,9 @@ typedef struct char_data char_data;
 
 /* used for actor memory triggers */
 struct script_memory {
-    int64_t id;                /* id of who to remember */
-    char *cmd;                /* command, or nullptr for generic */
-    struct script_memory *next;
+    int64_t id{};                /* id of who to remember */
+    char *cmd{};                /* command, or nullptr for generic */
+    struct script_memory *next{};
 };
 
 

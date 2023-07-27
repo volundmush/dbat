@@ -9,13 +9,13 @@
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
 
-#include "structs.h"
-#include "dg_scripts.h"
-#include "utils.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "db.h"
+#include "dbat/structs.h"
+#include "dbat/dg_scripts.h"
+#include "dbat/utils.h"
+#include "dbat/comm.h"
+#include "dbat/interpreter.h"
+#include "dbat/handler.h"
+#include "dbat/db.h"
 
 /*
  * Local functions
@@ -524,7 +524,6 @@ WCMD(do_wload) {
         }
         /* special handling to make objects able to load on a person/in a container/worn etc. */
         if (!target || !*target) {
-            add_unique_id(object);
             obj_to_room(object, real_room(room->vn));
             if (SCRIPT(room)) { /* It _should_ have, but it might be detached. */
                 char buf[MAX_INPUT_LENGTH];
@@ -557,7 +556,6 @@ WCMD(do_wload) {
             return;
         }
         /* neither char nor container found - just dump it in room */
-        add_unique_id(object);
         obj_to_room(object, real_room(room->vn));
         load_otrigger(object);
         return;

@@ -1,5 +1,5 @@
-#include "structs.h"
-#include "dg_scripts.h"
+#include "dbat/structs.h"
+#include "dbat/dg_scripts.h"
 
 nlohmann::json unit_data::serializeUnit() {
     nlohmann::json j;

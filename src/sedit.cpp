@@ -3,18 +3,18 @@
  * Copyright 1996 Harvey Gilpin						*
  * Copyright 1997-2001 George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-#include "sedit.h"
-#include "utils.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "db.h"
-#include "shop.h"
-#include "genolc.h"
-#include "genshp.h"
-#include "genzon.h"
-#include "oasis.h"
-#include "constants.h"
-#include "act.informative.h"
+#include "dbat/sedit.h"
+#include "dbat/utils.h"
+#include "dbat/comm.h"
+#include "dbat/interpreter.h"
+#include "dbat/db.h"
+#include "dbat/shop.h"
+#include "dbat/genolc.h"
+#include "dbat/genshp.h"
+#include "dbat/genzon.h"
+#include "dbat/oasis.h"
+#include "dbat/constants.h"
+#include "dbat/act.informative.h"
 
 /*
  * Should check more things.

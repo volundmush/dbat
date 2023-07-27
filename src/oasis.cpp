@@ -5,20 +5,20 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
-#include "structs.h"
-#include "utils.h"
-#include "interpreter.h"
-#include "comm.h"
-#include "db.h"
-#include "shop.h"
-#include "genmob.h"
-#include "genshp.h"
-#include "genzon.h"
-#include "genobj.h"
-#include "oasis.h"
-#include "dg_olc.h"
-#include "handler.h"
-#include "guild.h"
+#include "dbat/structs.h"
+#include "dbat/utils.h"
+#include "dbat/interpreter.h"
+#include "dbat/comm.h"
+#include "dbat/db.h"
+#include "dbat/shop.h"
+#include "dbat/genmob.h"
+#include "dbat/genshp.h"
+#include "dbat/genzon.h"
+#include "dbat/genobj.h"
+#include "dbat/oasis.h"
+#include "dbat/dg_olc.h"
+#include "dbat/handler.h"
+#include "dbat/guild.h"
 
 
 /******************************************************************************/
@@ -155,7 +155,7 @@ ACMD(do_oasis) {
             break;
 
         default:
-            log("SYSERR: (OLC) Invalid subcmd passed to do_oasis, subcmd - (%d)", subcmd);
+            basic_mud_log("SYSERR: (OLC) Invalid subcmd passed to do_oasis, subcmd - (%d)", subcmd);
             return;
     }
 
@@ -196,7 +196,7 @@ void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type) {
                 free_config(OLC_CONFIG(d));
                 break;
             default: /* The caller has screwed up. */
-                log("SYSERR: cleanup_olc: Unknown type!");
+                basic_mud_log("SYSERR: cleanup_olc: Unknown type!");
                 break;
         }
     }

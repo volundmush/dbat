@@ -8,17 +8,17 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include "spell_parser.h"
-#include "utils.h"
-#include "interpreter.h"
-#include "spells.h"
-#include "handler.h"
-#include "comm.h"
-#include "db.h"
-#include "dg_scripts.h"
-#include "fight.h"
-#include "act.other.h"
-#include "class.h"
+#include "dbat/spell_parser.h"
+#include "dbat/utils.h"
+#include "dbat/interpreter.h"
+#include "dbat/spells.h"
+#include "dbat/handler.h"
+#include "dbat/comm.h"
+#include "dbat/db.h"
+#include "dbat/dg_scripts.h"
+#include "dbat/fight.h"
+#include "dbat/act.other.h"
+#include "dbat/class.h"
 
 /* extern globals */
 
@@ -174,7 +174,7 @@ void say_spell(struct char_data *ch, int spellnum, struct char_data *tch,
         }
         /* i.e., we didn't find a match in syls[] */
         if (!*syls[j].org) {
-            log("No entry in syllable table for substring of '%s'", lbuf);
+            basic_mud_log("No entry in syllable table for substring of '%s'", lbuf);
             ofs++;
         }
     }
@@ -509,7 +509,7 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
                 extract_obj(obj);
             break;
         default:
-            log("SYSERR: Unknown object_type %d in mag_objectmagic.",
+            basic_mud_log("SYSERR: Unknown object_type %d in mag_objectmagic.",
                 GET_OBJ_TYPE(obj));
             break;
     }
@@ -529,13 +529,13 @@ int cast_spell(struct char_data *ch, struct char_data *tch,
     int whichclass = -1, i, j, diff = -1, lvl = 1;
 
     if (spellnum < 0 || spellnum >= SKILL_TABLE_SIZE) {
-        log("SYSERR: cast_spell trying to call out of range spellnum %d/%d.", spellnum,
+        basic_mud_log("SYSERR: cast_spell trying to call out of range spellnum %d/%d.", spellnum,
             SKILL_TABLE_SIZE);
         return (0);
     }
 
     if (!IS_SET(SINFO.skilltype, SKTYPE_SPELL | SKTYPE_ART)) {
-        log("SYSERR: cast_spell trying to call nonspell spellnum %d/%d.", spellnum,
+        basic_mud_log("SYSERR: cast_spell trying to call nonspell spellnum %d/%d.", spellnum,
             SKILL_TABLE_SIZE);
         return (0);
     }
@@ -785,12 +785,12 @@ void skill_race_class(int spell, int race, int learntype) {
     int bad = 0;
 
     if (spell < 0 || spell >= SKILL_TABLE_SIZE) {
-        log("SYSERR: attempting assign to illegal spellnum %d/%d", spell, SKILL_TABLE_SIZE);
+        basic_mud_log("SYSERR: attempting assign to illegal spellnum %d/%d", spell, SKILL_TABLE_SIZE);
         return;
     }
 
     if (race < 0 || race >= NUM_RACES) {
-        log("SYSERR: assigning '%s' to illegal race %d/%d.", skill_name(spell),
+        basic_mud_log("SYSERR: assigning '%s' to illegal race %d/%d.", skill_name(spell),
             race, NUM_RACES - 1);
         bad = 1;
     }
@@ -803,18 +803,18 @@ void spell_level(int spell, int chclass, int level) {
     int bad = 0;
 
     if (spell < 0 || spell > SKILL_TABLE_SIZE) {
-        log("SYSERR: attempting assign to illegal spellnum %d/%d", spell, SKILL_TABLE_SIZE);
+        basic_mud_log("SYSERR: attempting assign to illegal spellnum %d/%d", spell, SKILL_TABLE_SIZE);
         return;
     }
 
     if (chclass < 0 || chclass >= NUM_CLASSES) {
-        log("SYSERR: assigning '%s' to illegal class %d/%d.", skill_name(spell),
+        basic_mud_log("SYSERR: assigning '%s' to illegal class %d/%d.", skill_name(spell),
             chclass, NUM_CLASSES - 1);
         bad = 1;
     }
 
     if (level < 1) {
-        log("SYSERR: assigning '%s' to illegal level %d.", skill_name(spell),
+        basic_mud_log("SYSERR: assigning '%s' to illegal level %d.", skill_name(spell),
             level);
         bad = 1;
     }
@@ -827,18 +827,18 @@ void skill_class(int skill, int chclass, int learntype) {
     int bad = 0;
 
     if (skill < 0 || skill > SKILL_TABLE_SIZE) {
-        log("SYSERR: attempting assign to illegal skillnum %d/%d", skill, SKILL_TABLE_SIZE);
+        basic_mud_log("SYSERR: attempting assign to illegal skillnum %d/%d", skill, SKILL_TABLE_SIZE);
         return;
     }
 
     if (chclass < 0 || chclass >= NUM_CLASSES) {
-        log("SYSERR: assigning '%s' to illegal class %d/%d.", skill_name(skill),
+        basic_mud_log("SYSERR: assigning '%s' to illegal class %d/%d.", skill_name(skill),
             chclass, NUM_CLASSES - 1);
         bad = 1;
     }
 
     if (learntype < 0 || learntype > SKLEARN_CLASS) {
-        log("SYSERR: assigning skill '%s' illegal learn type %d for class %d.", skill_name(skill),
+        basic_mud_log("SYSERR: assigning skill '%s' illegal learn type %d for class %d.", skill_name(skill),
             learntype, chclass);
         bad = 1;
     }

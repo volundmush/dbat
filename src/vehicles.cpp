@@ -8,15 +8,15 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.              *
 *  Vehicle.c written by Chris Jacobson <fear@athenet.net>		 *
 *************************************************************************/
-#include "vehicles.h"
-#include "utils.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "db.h"
-#include "constants.h"
-#include "class.h"
-#include "races.h"
+#include "dbat/vehicles.h"
+#include "dbat/utils.h"
+#include "dbat/comm.h"
+#include "dbat/interpreter.h"
+#include "dbat/handler.h"
+#include "dbat/db.h"
+#include "dbat/constants.h"
+#include "dbat/class.h"
+#include "dbat/races.h"
 
 #ifndef EXITN
 #  define EXITN(room, door)        (world[room].dir_option[door])
@@ -727,7 +727,7 @@ ACMD(do_warp) {
                              vehicle->short_description);
             }
         } else {
-            log("ERROR: Ship Instant Warp Failure! Unknown argument!");
+            basic_mud_log("ERROR: Ship Instant Warp Failure! Unknown argument!");
             send_to_char(ch, "ERROR\r\n");
             return;
         }

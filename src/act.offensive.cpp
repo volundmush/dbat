@@ -8,18 +8,18 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include "act.offensive.h"
-#include "interpreter.h"
-#include "combat.h"
-#include "comm.h"
-#include "spells.h"
-#include "utils.h"
-#include "handler.h"
-#include "constants.h"
-#include "fight.h"
-#include "guild.h"
-#include "class.h"
-#include "techniques.h"
+#include "dbat/act.offensive.h"
+#include "dbat/interpreter.h"
+#include "dbat/combat.h"
+#include "dbat/comm.h"
+#include "dbat/spells.h"
+#include "dbat/utils.h"
+#include "dbat/handler.h"
+#include "dbat/constants.h"
+#include "dbat/fight.h"
+#include "dbat/guild.h"
+#include "dbat/class.h"
+#include "dbat/techniques.h"
 
 /* Combat commands below this line */
 

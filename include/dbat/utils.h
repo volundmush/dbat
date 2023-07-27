@@ -8,13 +8,9 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 #pragma once
-
-#include "structs.h"
 #include "db.h"
 #include "races.h"
 #include "handler.h"
-
-#define log            basic_mud_log
 
 #define READ_SIZE    256
 
@@ -317,7 +313,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 
 #define CREATE(result, type, number)  do {\
     if ((number) * sizeof(type) <= 0)    \
-        log("SYSERR: Zero bytes or less requested at %s:%d.", __FILE__, __LINE__);    \
+        basic_mud_log("SYSERR: Zero bytes or less requested at %s:%d.", __FILE__, __LINE__);    \
     if (!((result) = (type *) calloc ((number), sizeof(type))))    \
         { perror("SYSERR: malloc failure"); abort(); } } while(0)
 
@@ -390,7 +386,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #if 1
 /* Subtle bug in the '#var', but works well for now. */
 #define CHECK_PLAYER_SPECIAL(ch, var) \
-    (*(((ch)->player_specials == &dummy_mob) ? (log("OHNO: Mob using '"#var"' at %s:%d.", __FILE__, __LINE__), &(var)) : &(var)))
+    (*(((ch)->player_specials == &dummy_mob) ? (basic_mud_log("OHNO: Mob using '"#var"' at %s:%d.", __FILE__, __LINE__), &(var)) : &(var)))
 #else
 #define CHECK_PLAYER_SPECIAL(ch, var)	(var)
 #endif

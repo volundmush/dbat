@@ -6,12 +6,12 @@
 *				     		     * 
 * Paolo Libardi - pinkpallin@libero.it		     * 
 *****************************************************/
-#include "maputils.h"
-#include "utils.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "db.h"
-#include "vehicles.h"
+#include "dbat/maputils.h"
+#include "dbat/utils.h"
+#include "dbat/comm.h"
+#include "dbat/interpreter.h"
+#include "dbat/db.h"
+#include "dbat/vehicles.h"
 
 
 int mapnums[MAP_ROWS + 1][MAP_COLS + 1];
@@ -272,7 +272,7 @@ MapStruct findcoord(int rnum) {
         }
     }
 
-    log("SYSERR: findcoord for non-map rnum");
+    basic_mud_log("SYSERR: findcoord for non-map rnum");
     return coords;
 }
 

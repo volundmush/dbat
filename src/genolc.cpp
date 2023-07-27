@@ -6,18 +6,18 @@
  ************************************************************************/
 #define __GENOLC_C__
 
-#include "genolc.h"
-#include "gengld.h"
-#include "cedit.h"
-#include "genmob.h"
-#include "genobj.h"
-#include "genshp.h"
-#include "genwld.h"
-#include "modify.h"
-#include "genzon.h"
-#include "oasis.h"
-#include "utils.h"
-#include "comm.h"
+#include "dbat/genolc.h"
+#include "dbat/gengld.h"
+#include "dbat/cedit.h"
+#include "dbat/genmob.h"
+#include "dbat/genobj.h"
+#include "dbat/genshp.h"
+#include "dbat/genwld.h"
+#include "dbat/modify.h"
+#include "dbat/genzon.h"
+#include "dbat/oasis.h"
+#include "dbat/utils.h"
+#include "dbat/comm.h"
 
 /* List of zones to be saved.  */
 std::list<struct save_list_data> save_list;
@@ -57,13 +57,13 @@ int save_all() {
         if (s.type < 0 || s.type > SL_MAX) {
             switch (s.type) {
                 case SL_ACT:
-                    log("Actions not saved - can not autosave. Use 'aedit save'.");
+                    basic_mud_log("Actions not saved - can not autosave. Use 'aedit save'.");
                     break;
                 case SL_HLP:
-                    log("Help not saved - can not autosave. Use 'hedit save'.");
+                    basic_mud_log("Help not saved - can not autosave. Use 'hedit save'.");
                     break;
                 default:
-                    log("SYSERR: GenOLC: Invalid save type %d in save list.\n", s.type);
+                    basic_mud_log("SYSERR: GenOLC: Invalid save type %d in save list.\n", s.type);
                     break;
             }
         } else if ((*save_types[s.type].func)(real_zone(s.zone)) < 0) {}
@@ -104,7 +104,7 @@ void free_ex_descriptions(struct extra_descr_data *head) {
     struct extra_descr_data *thised, *next_one;
 
     if (!head) {
-        log("free_ex_descriptions: nullptr pointer or nullptr data.");
+        basic_mud_log("free_ex_descriptions: nullptr pointer or nullptr data.");
         return;
     }
 
@@ -132,7 +132,7 @@ int add_to_save_list(zone_vnum zone, int type) {
 
     if (!zone_table.count(zone)) {
         if (zone != AEDIT_PERMISSION && zone != HEDIT_PERMISSION) {
-            log("SYSERR: add_to_save_list: Invalid zone number passed. (%d)", zone);
+            basic_mud_log("SYSERR: add_to_save_list: Invalid zone number passed. (%d)", zone);
             return false;
         }
     }

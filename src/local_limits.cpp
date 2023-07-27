@@ -8,21 +8,21 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include "local_limits.h"
-#include "utils.h"
-#include "spells.h"
-#include "comm.h"
-#include "dg_comm.h"
-#include "act.other.h"
-#include "act.item.h"
-#include "vehicles.h"
-#include "act.movement.h"
-#include "constants.h"
-#include "class.h"
-#include "fight.h"
-#include "objsave.h"
-#include "handler.h"
-#include "dg_scripts.h"
+#include "dbat/local_limits.h"
+#include "dbat/utils.h"
+#include "dbat/spells.h"
+#include "dbat/comm.h"
+#include "dbat/dg_comm.h"
+#include "dbat/act.other.h"
+#include "dbat/act.item.h"
+#include "dbat/vehicles.h"
+#include "dbat/act.movement.h"
+#include "dbat/constants.h"
+#include "dbat/class.h"
+#include "dbat/fight.h"
+#include "dbat/objsave.h"
+#include "dbat/handler.h"
+#include "dbat/dg_scripts.h"
 
 /* local defines */
 #define sick_fail       2
@@ -873,7 +873,7 @@ void run_autowiz() {
             system(buf);
             reboot_wizlists();
         } else
-            log("Cannot run autowiz: command-line doesn't fit in buffer.");
+            basic_mud_log("Cannot run autowiz: command-line doesn't fit in buffer.");
     }
 #endif /* CIRCLE_UNIX || CIRCLE_WINDOWS */
 }
@@ -1786,7 +1786,7 @@ void point_update() {
 
             diff = time(nullptr) - GET_LAST_LOAD(j);
             if (diff > 240 && GET_LAST_LOAD(j) > 0) {
-                log("No rent object (%s) extracted from room (%d)", j->short_description, GET_ROOM_VNUM(IN_ROOM(j)));
+                basic_mud_log("No rent object (%s) extracted from room (%d)", j->short_description, GET_ROOM_VNUM(IN_ROOM(j)));
                 extract_obj(j);
             }
         }

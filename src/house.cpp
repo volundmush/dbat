@@ -7,14 +7,14 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include "house.h"
-#include "comm.h"
-#include "handler.h"
-#include "db.h"
-#include "interpreter.h"
-#include "utils.h"
-#include "constants.h"
-#include "objsave.h"
+#include "dbat/house.h"
+#include "dbat/comm.h"
+#include "dbat/handler.h"
+#include "dbat/db.h"
+#include "dbat/interpreter.h"
+#include "dbat/utils.h"
+#include "dbat/constants.h"
+#include "dbat/objsave.h"
 
 /* local globals */
 struct house_control_rec house_control[MAX_HOUSES];
@@ -124,12 +124,12 @@ void House_delete_file(room_vnum vnum) {
         return;
     if (!(fl = fopen(filename, "rb"))) {
         if (errno != ENOENT)
-            log("SYSERR: Error deleting house file #%d. (1): %s", vnum, strerror(errno));
+            basic_mud_log("SYSERR: Error deleting house file #%d. (1): %s", vnum, strerror(errno));
         return;
     }
     fclose(fl);
     if (remove(filename) < 0)
-        log("SYSERR: Error deleting house file #%d. (2): %s", vnum, strerror(errno));
+        basic_mud_log("SYSERR: Error deleting house file #%d. (2): %s", vnum, strerror(errno));
 }
 
 
@@ -174,7 +174,7 @@ void House_boot(bool legacy) {
 
     if (!(fl = fopen(HCONTROL_FILE, "rb"))) {
         if (errno == ENOENT)
-            log("   No houses to load. File '%s' does not exist.", HCONTROL_FILE);
+            basic_mud_log("   No houses to load. File '%s' does not exist.", HCONTROL_FILE);
         else
             perror("SYSERR: " HCONTROL_FILE);
         return;
@@ -344,12 +344,12 @@ void hcontrol_destroy_house(struct char_data *ch, char *arg) {
         return;
     }
     if ((real_atrium = real_room(house_control[i].atrium)) == NOWHERE)
-        log("SYSERR: House %d had invalid atrium %d!", atoi(arg), house_control[i].atrium);
+        basic_mud_log("SYSERR: House %d had invalid atrium %d!", atoi(arg), house_control[i].atrium);
     else
         REMOVE_BIT_AR(ROOM_FLAGS(real_atrium), ROOM_ATRIUM);
 
     if ((real_house = real_room(house_control[i].vn)) == NOWHERE)
-        log("SYSERR: House %d had invalid vnum %d!", atoi(arg), house_control[i].vn);
+        basic_mud_log("SYSERR: House %d had invalid vnum %d!", atoi(arg), house_control[i].vn);
     else {
         REMOVE_BIT_AR(ROOM_FLAGS(real_house), ROOM_HOUSE);
         REMOVE_BIT_AR(ROOM_FLAGS(real_house), ROOM_HOUSE_CRASH);
@@ -561,7 +561,7 @@ int House_load(room_vnum rvnum) {
             }
             /* we have the number, check it, load obj. */
             if (nr == NOTHING) {   /* then it is unique */
-                temp = create_obj();
+                temp = create_obj(false);
                 temp->vn = NOTHING;
             } else if (nr < 0) {
                 continue;
@@ -666,7 +666,7 @@ int House_load(room_vnum rvnum) {
                             break;
                         case 'A':
                             if (j >= MAX_OBJ_AFFECT) {
-                                log("SYSERR: Too many object affectations in loading house file");
+                                basic_mud_log("SYSERR: Too many object affectations in loading house file");
                                 danger = 1;
                             }
                             get_line(fl, line);
@@ -690,7 +690,7 @@ int House_load(room_vnum rvnum) {
                             break;
                         case 'S':
                             if (j >= SPELLBOOK_SIZE) {
-                                log("SYSERR: Too many spells in spellbook loading rent file");
+                                basic_mud_log("SYSERR: Too many spells in spellbook loading rent file");
                                 danger = 1;
                             }
                             get_line(fl, line);
@@ -721,6 +721,11 @@ int House_load(room_vnum rvnum) {
                 }      /* exit our for loop */
             }   /* exit our xap loop */
             if (temp != nullptr) {
+                if(temp->vn == NOTHING) {
+                    temp->activate();
+                    check_unique_id(temp);
+                    add_unique_id(temp);
+                }
                 num_objs++;
                 obj_to_room(temp, rrnum);
             } else {

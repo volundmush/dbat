@@ -7,12 +7,12 @@
 *****************************************************************************/
 
 
-#include "feats.h"
-#include "utils.h"
-#include "comm.h"
-#include "handler.h"
-#include "constants.h"
-#include "interpreter.h"
+#include "dbat/feats.h"
+#include "dbat/utils.h"
+#include "dbat/comm.h"
+#include "dbat/handler.h"
+#include "dbat/constants.h"
+#include "dbat/interpreter.h"
 
 /* Local Functions */
 

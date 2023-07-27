@@ -7,35 +7,35 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 **************************************************************************/
-#include "act.other.h"
-#include "utils.h"
-#include "comm.h"
-#include "handler.h"
-#include "dg_comm.h"
-#include "combat.h"
-#include "config.h"
-#include "act.misc.h"
-#include "weather.h"
-#include "act.item.h"
-#include "act.wizard.h"
-#include "act.informative.h"
-#include "act.movement.h"
-#include "obj_edit.h"
-#include "graph.h"
-#include "spells.h"
-#include "interpreter.h"
-#include "fight.h"
-#include "races.h"
-#include "class.h"
-#include "constants.h"
-#include "shop.h"
-#include "feats.h"
-#include "guild.h"
-#include "dg_scripts.h"
-#include "objsave.h"
-#include "mail.h"
-#include "clan.h"
-#include "players.h"
+#include "dbat/act.other.h"
+#include "dbat/utils.h"
+#include "dbat/comm.h"
+#include "dbat/handler.h"
+#include "dbat/dg_comm.h"
+#include "dbat/combat.h"
+#include "dbat/config.h"
+#include "dbat/act.misc.h"
+#include "dbat/weather.h"
+#include "dbat/act.item.h"
+#include "dbat/act.wizard.h"
+#include "dbat/act.informative.h"
+#include "dbat/act.movement.h"
+#include "dbat/obj_edit.h"
+#include "dbat/graph.h"
+#include "dbat/spells.h"
+#include "dbat/interpreter.h"
+#include "dbat/fight.h"
+#include "dbat/races.h"
+#include "dbat/class.h"
+#include "dbat/constants.h"
+#include "dbat/shop.h"
+#include "dbat/feats.h"
+#include "dbat/guild.h"
+#include "dbat/dg_scripts.h"
+#include "dbat/objsave.h"
+#include "dbat/mail.h"
+#include "dbat/clan.h"
+#include "dbat/players.h"
 
 /* local functions */
 static int has_scanner(struct char_data *ch);
@@ -3412,16 +3412,12 @@ ACMD(do_form) {
             }
             if (level == 4) {
                 obj = read_object(1512, VIRTUAL);
-                add_unique_id(obj);
             } else if (level == 3) {
                 obj = read_object(1511, VIRTUAL);
-                add_unique_id(obj);
             } else if (level == 2) {
                 obj = read_object(1510, VIRTUAL);
-                add_unique_id(obj);
             } else {
                 obj = read_object(70, VIRTUAL);
-                add_unique_id(obj);
             }
             obj_to_char(obj, ch);
             reveal_hiding(ch, 0);
@@ -3457,16 +3453,12 @@ ACMD(do_form) {
             }
             if (level == 4) {
                 obj = read_object(1515, VIRTUAL);
-                add_unique_id(obj);
             } else if (level == 3) {
                 obj = read_object(1514, VIRTUAL);
-                add_unique_id(obj);
             } else if (level == 2) {
                 obj = read_object(1513, VIRTUAL);
-                add_unique_id(obj);
             } else {
                 obj = read_object(71, VIRTUAL);
-                add_unique_id(obj);
             }
             obj_to_char(obj, ch);
             reveal_hiding(ch, 0);
@@ -3489,7 +3481,6 @@ ACMD(do_form) {
             return;
         } else {
             obj = read_object(319, VIRTUAL);
-            add_unique_id(obj);
             obj_to_char(obj, ch);
             reveal_hiding(ch, 0);
             GET_COOLDOWN(ch) = 10;
@@ -3511,7 +3502,6 @@ ACMD(do_form) {
             return;
         } else {
             obj = read_object(16, VIRTUAL);
-            add_unique_id(obj);
             obj_to_char(obj, ch);  // cooldown removed on 10/24/2021
             reveal_hiding(ch, 0);  //GET_COOLDOWN(ch) = 10;
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
@@ -3557,87 +3547,62 @@ ACMD(do_form) {
             if (!strcasecmp(arg2, "sword")) {
                 if (level == 5) {
                     obj = read_object(1519, VIRTUAL);
-                    add_unique_id(obj);
                 } else if (level == 4) {
                     obj = read_object(1518, VIRTUAL);
-                    add_unique_id(obj);
                 } else if (level == 3) {
                     obj = read_object(1517, VIRTUAL);
-                    add_unique_id(obj);
                 } else if (level == 2) {
                     obj = read_object(1516, VIRTUAL);
-                    add_unique_id(obj);
                 } else {
                     obj = read_object(90, VIRTUAL);
-                    add_unique_id(obj);
                 }
             } else if (!strcasecmp(arg2, "dagger")) {
                 if (level == 5) {
                     obj = read_object(1540, VIRTUAL);
-                    add_unique_id(obj);
                 } else if (level == 4) {
                     obj = read_object(1539, VIRTUAL);
-                    add_unique_id(obj);
                 } else if (level == 3) {
                     obj = read_object(1538, VIRTUAL);
-                    add_unique_id(obj);
                 } else if (level == 2) {
                     obj = read_object(1537, VIRTUAL);
-                    add_unique_id(obj);
                 } else {
                     obj = read_object(1536, VIRTUAL);
-                    add_unique_id(obj);
                 }
             } else if (!strcasecmp(arg2, "club")) {
                 if (level == 5) {
                     obj = read_object(1545, VIRTUAL);
-                    add_unique_id(obj);
                 } else if (level == 4) {
                     obj = read_object(1544, VIRTUAL);
-                    add_unique_id(obj);
                 } else if (level == 3) {
                     obj = read_object(1543, VIRTUAL);
-                    add_unique_id(obj);
                 } else if (level == 2) {
                     obj = read_object(1542, VIRTUAL);
-                    add_unique_id(obj);
                 } else {
                     obj = read_object(1541, VIRTUAL);
-                    add_unique_id(obj);
                 }
             } else if (!strcasecmp(arg2, "spear")) {
                 if (level == 5) {
                     obj = read_object(1550, VIRTUAL);
-                    add_unique_id(obj);
                 } else if (level == 4) {
                     obj = read_object(1549, VIRTUAL);
-                    add_unique_id(obj);
                 } else if (level == 3) {
                     obj = read_object(1548, VIRTUAL);
-                    add_unique_id(obj);
                 } else if (level == 2) {
                     obj = read_object(1547, VIRTUAL);
-                    add_unique_id(obj);
                 } else {
                     obj = read_object(1546, VIRTUAL);
-                    add_unique_id(obj);
                 }
             } else if (!strcasecmp(arg2, "gun")) {
                 if (level == 5) {
                     obj = read_object(1555, VIRTUAL);
-                    add_unique_id(obj);
                 } else if (level == 4) {
                     obj = read_object(1554, VIRTUAL);
-                    add_unique_id(obj);
                 } else if (level == 3) {
                     obj = read_object(1553, VIRTUAL);
-                    add_unique_id(obj);
                 } else if (level == 2) {
                     obj = read_object(1552, VIRTUAL);
-                    add_unique_id(obj);
                 } else {
                     obj = read_object(1551, VIRTUAL);
-                    add_unique_id(obj);
                 }
             } else {
                 send_to_char(ch,
@@ -3682,27 +3647,22 @@ ACMD(do_form) {
             return;
         } else {
             obj = read_object(92, VIRTUAL); /* gi */
-            add_unique_id(obj);
             boost_obj(obj, ch, 0);
             obj_to_char(obj, vict);
             GET_OBJ_SIZE(obj) = get_size(vict);
             obj = read_object(91, VIRTUAL); /* pants */
-            add_unique_id(obj);
             boost_obj(obj, ch, 0);
             obj_to_char(obj, vict);
             GET_OBJ_SIZE(obj) = get_size(vict);
             obj = read_object(1528, VIRTUAL); /* wrist */
-            add_unique_id(obj);
             boost_obj(obj, ch, 0);
             obj_to_char(obj, vict);
             GET_OBJ_SIZE(obj) = get_size(vict);
             obj = read_object(1528, VIRTUAL); /* wrist */
-            add_unique_id(obj);
             boost_obj(obj, ch, 0);
             obj_to_char(obj, vict);
             GET_OBJ_SIZE(obj) = get_size(vict);
             obj = read_object(1532, VIRTUAL); /* boots */
-            add_unique_id(obj);
             boost_obj(obj, ch, 0);
             obj_to_char(obj, vict);
             GET_OBJ_SIZE(obj) = get_size(vict);
@@ -3726,7 +3686,6 @@ ACMD(do_form) {
             return;
         } else {
             obj = read_object(92, VIRTUAL);
-            add_unique_id(obj);
             boost_obj(obj, ch, 0);
             obj_to_char(obj, ch);
             GET_OBJ_SIZE(obj) = get_size(ch);
@@ -3750,7 +3709,6 @@ ACMD(do_form) {
             return;
         } else {
             obj = read_object(19053, VIRTUAL);
-            add_unique_id(obj);
             obj_to_char(obj, ch);
             SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_NORENT);
             SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_NOSELL);
@@ -3775,7 +3733,6 @@ ACMD(do_form) {
             return;
         } else {
             obj = read_object(91, VIRTUAL);
-            add_unique_id(obj);
             boost_obj(obj, ch, 0);
             obj_to_char(obj, ch);
             GET_OBJ_SIZE(obj) = get_size(ch);
@@ -3799,7 +3756,6 @@ ACMD(do_form) {
             return;
         } else {
             obj = read_object(1528, VIRTUAL);
-            add_unique_id(obj);
             boost_obj(obj, ch, 0);
             obj_to_char(obj, ch);
             GET_OBJ_SIZE(obj) = get_size(ch);
@@ -3823,7 +3779,6 @@ ACMD(do_form) {
             return;
         } else {
             obj = read_object(1532, VIRTUAL);
-            add_unique_id(obj);
             boost_obj(obj, ch, 0);
             obj_to_char(obj, ch);
             GET_OBJ_SIZE(obj) = get_size(ch);
@@ -3847,7 +3802,6 @@ ACMD(do_form) {
             return;
         } else {
             obj = read_object(72, VIRTUAL);
-            add_unique_id(obj);
             obj_to_char(obj, ch);
             GET_OBJ_SIZE(obj) = get_size(ch);
             reveal_hiding(ch, 0);
@@ -3870,7 +3824,6 @@ ACMD(do_form) {
             return;
         } else {
             obj = read_object(87, VIRTUAL);
-            add_unique_id(obj);
             obj_to_room(obj, IN_ROOM(ch));
             GET_OBJ_SIZE(obj) = get_size(ch);
             reveal_hiding(ch, 0);
@@ -3900,7 +3853,6 @@ ACMD(do_form) {
             return;
         } else {
             obj = read_object(86, VIRTUAL);
-            add_unique_id(obj);
             obj_to_room(obj, IN_ROOM(ch));
             GET_OBJ_SIZE(obj) = get_size(ch);
             reveal_hiding(ch, 0);
@@ -3934,7 +3886,6 @@ ACMD(do_form) {
             return;
         } else {
             obj = read_object(1, VIRTUAL);
-            add_unique_id(obj);
             obj_to_char(obj, ch);
             reveal_hiding(ch, 0);
             GET_COOLDOWN(ch) = 10;
@@ -6367,7 +6318,6 @@ ACMD(do_forgery) {
     int loadn = GET_OBJ_VNUM(obj2);
 
     obj3 = read_object(loadn, VIRTUAL);
-    add_unique_id(obj3);
     obj_to_char(obj3, ch);
 
     /* Set Object Variables */
@@ -10452,7 +10402,7 @@ ACMD(do_use) {
                 }
                 break;
             default:
-                log("SYSERR: Unknown subcmd %d passed to do_use.", subcmd);
+                basic_mud_log("SYSERR: Unknown subcmd %d passed to do_use.", subcmd);
                 /*  SYSERR_DESC:
        *  This is the same as the unhandled case in do_gen_ps(), but in the
        *  function which handles 'quaff', 'recite', and 'use'.
@@ -10613,7 +10563,7 @@ ACMD(do_value) {
                 }
                 break;
             default:
-                log("Unknown subcmd to do_value %d called by %s", subcmd, GET_NAME(ch));
+                basic_mud_log("Unknown subcmd to do_value %d called by %s", subcmd, GET_NAME(ch));
                 break;
         }
     } else
@@ -11059,7 +11009,7 @@ ACMD(do_gen_tog) {
             result = PRF_TOG_CHK(ch, PRF_IHEALTH);
             break;
         default:
-            log("SYSERR: Unknown subcmd %d in do_gen_toggle.", subcmd);
+            basic_mud_log("SYSERR: Unknown subcmd %d in do_gen_toggle.", subcmd);
             /*  SYSERR_DESC:
      *  This is the same as the unhandled case in do_gen_ps(), but in the
      *  function which handles 'compact', 'brief', and so forth.
@@ -12178,7 +12128,6 @@ ACMD(do_aid) {
                 act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A moment later $e holds up a completed Adrenex Adreneline Injector!@n",
                     true, ch, nullptr, nullptr, TO_ROOM);
                 aid_prod = read_object(num2, VIRTUAL);
-                add_unique_id(aid_prod);
                 obj_to_char(aid_prod, ch);
                 extract_obj(aid_obj);
                 improve_skill(ch, SKILL_FIRST_AID, 1);
@@ -12201,7 +12150,6 @@ ACMD(do_aid) {
                 act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A moment later $e holds up a jar of burn salve!@n",
                     true, ch, nullptr, nullptr, TO_ROOM);
                 aid_prod = read_object(num2, VIRTUAL);
-                add_unique_id(aid_prod);
                 obj_to_char(aid_prod, ch);
                 extract_obj(aid_obj);
                 improve_skill(ch, SKILL_FIRST_AID, 1);
@@ -12224,7 +12172,6 @@ ACMD(do_aid) {
                 act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A moment later $e holds up a completed Antitoxin Injector!@n",
                     true, ch, nullptr, nullptr, TO_ROOM);
                 aid_prod = read_object(num2, VIRTUAL);
-                add_unique_id(aid_prod);
                 obj_to_char(aid_prod, ch);
                 extract_obj(aid_obj);
                 improve_skill(ch, SKILL_FIRST_AID, 1);
@@ -12247,7 +12194,6 @@ ACMD(do_aid) {
                 act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A moment later $e holds up a completed Vial of Formula 82!@n",
                     true, ch, nullptr, nullptr, TO_ROOM);
                 aid_prod = read_object(num2, VIRTUAL);
-                add_unique_id(aid_prod);
                 obj_to_char(aid_prod, ch);
                 extract_obj(aid_obj);
                 improve_skill(ch, SKILL_FIRST_AID, 1);

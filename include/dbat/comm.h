@@ -87,7 +87,7 @@ extern void string_write(struct descriptor_data *d, char **txt, size_t len, long
 #define PAGE_WIDTH    79
 
 
-extern void show_help(struct net::connection_data *t, const char *entry);
+extern void show_help(std::shared_ptr<net::Connection>& co, const char *entry);
 
 /* variables */
 extern unsigned long pulse;
@@ -97,7 +97,6 @@ extern socklen_t mother_desc;
 extern uint16_t port;
 extern int buf_switches, buf_largecount, buf_overflows;
 extern int no_specials, scheck;
-extern const char compress_offer[4];
 extern bool fCopyOver;
 extern char *last_act_message;
 extern const char RANDOM_COLORS[];
@@ -117,23 +116,9 @@ extern void checkpointing(int sig);
 
 extern void hupsig(int sig);
 
-extern ssize_t perform_socket_read(socklen_t desc, char *read_point, size_t space_left);
-
-extern ssize_t perform_socket_write(socklen_t desc, const char *txt, size_t length);
-
-extern void echo_off(struct descriptor_data *d);
-
-extern void echo_on(struct descriptor_data *d);
-
-extern void init_game(uint16_t port);
-
-extern int get_max_players();
+extern void init_game();
 
 extern int process_output(struct descriptor_data *t);
-
-extern int process_input(struct descriptor_data *t);
-
-extern int perform_subst(struct descriptor_data *t, char *orig, char *subst);
 
 extern void record_usage();
 
@@ -145,10 +130,10 @@ extern void check_idle_menu();
 
 extern void free_bufpool();
 
-extern void setup_log(const char *filename, int fd);
-
-extern int open_logfile(const char *filename, FILE *stderr_fp);
+extern void setup_log();
 
 void broadcast(const std::string& txt);
 
 boost::asio::awaitable<void> yield_for(std::chrono::milliseconds ms);
+
+void shutdown_game(int code);

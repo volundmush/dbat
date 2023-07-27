@@ -8,7 +8,7 @@ namespace net {
 
     class ChargenParser : public ConnectionParser {
     public:
-        ChargenParser(struct connection_data *conn, const std::string &na);
+        ChargenParser(std::shared_ptr<Connection>& co, const std::string &na);
         void parse(const std::string &txt) override;
         void start() override;
 

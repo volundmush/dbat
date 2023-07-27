@@ -21,5 +21,5 @@ namespace sensei {
 }
 
 namespace net {
-    struct connection_data;
+    class Connection;
 }

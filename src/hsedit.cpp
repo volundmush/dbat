@@ -6,18 +6,18 @@
 *  Copyright 2007 Stefan Cole (aka Jamdog)                               * 
 *  Used at AderonMUD (aderonmud.genesismuds.com 3200)                    * 
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#include "hsedit.h"
-#include "comm.h"
-#include "utils.h"
-#include "handler.h"
-#include "interpreter.h"
-#include "db.h"
-#include "oasis.h"
-#include "genolc.h"
-#include "genzon.h"
-#include "house.h"
-#include "act.informative.h"
-#include "constants.h"
+#include "dbat/hsedit.h"
+#include "dbat/comm.h"
+#include "dbat/utils.h"
+#include "dbat/handler.h"
+#include "dbat/interpreter.h"
+#include "dbat/db.h"
+#include "dbat/oasis.h"
+#include "dbat/genolc.h"
+#include "dbat/genzon.h"
+#include "dbat/house.h"
+#include "dbat/act.informative.h"
+#include "dbat/constants.h"
 
 /*------------------------------------------------------------------------*/
 /* internal globals */
@@ -158,7 +158,7 @@ void hedit_delete_house(struct descriptor_data *d, int house_vnum) {
     }
 
     if ((real_house = real_room(house_control[i].vn)) == NOWHERE)
-        log("SYSERR: House %d had invalid vnum %d!", house_vnum, house_control[i].vn);
+        basic_mud_log("SYSERR: House %d had invalid vnum %d!", house_vnum, house_control[i].vn);
     else
         REMOVE_BIT_AR(ROOM_FLAGS(real_house), ROOM_HOUSE | ROOM_HOUSE_CRASH);
 

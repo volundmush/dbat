@@ -4,13 +4,13 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
-#include "genshp.h"
-#include "utils.h"
-#include "db.h"
+#include "dbat/genshp.h"
+#include "dbat/utils.h"
+#include "dbat/db.h"
 
-#include "genolc.h"
-#include "genshp.h"
-#include "genzon.h"
+#include "dbat/genolc.h"
+#include "dbat/genshp.h"
+#include "dbat/genzon.h"
 
 /*
  * NOTE (gg): Didn't modify sedit much. Don't consider it as 'recent'

@@ -3,7 +3,7 @@
 *  Usage: pseudo-random number generator                                  *
 ************************************************************************ */
 
-#include "random.h"
+#include "dbat/random.h"
 
 /*
  * I am bothered by the non-portablility of 'rand' and 'random' -- rand

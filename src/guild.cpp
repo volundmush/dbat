@@ -7,21 +7,21 @@
  * Written by Jason Goodwin.   jgoodwin@expert.cc.purdue.edu               *
  ************************************************************************ */
 
-#include "guild.h"
-#include "utils.h"
-#include "spells.h"
-#include "comm.h"
-#include "db.h"
-#include "interpreter.h"
-#include "gengld.h"
-#include "local_limits.h"
-#include "feats.h"
-#include "act.comm.h"
-#include "handler.h"
-#include "shop.h"
-#include "class.h"
-#include "constants.h"
-#include "genzon.h"
+#include "dbat/guild.h"
+#include "dbat/utils.h"
+#include "dbat/spells.h"
+#include "dbat/comm.h"
+#include "dbat/db.h"
+#include "dbat/interpreter.h"
+#include "dbat/gengld.h"
+#include "dbat/local_limits.h"
+#include "dbat/feats.h"
+#include "dbat/act.comm.h"
+#include "dbat/handler.h"
+#include "dbat/shop.h"
+#include "dbat/class.h"
+#include "dbat/constants.h"
+#include "dbat/genzon.h"
 
 /* Local variables */
 int spell_sort_info[SKILL_TABLE_SIZE + 1];
@@ -928,7 +928,7 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
                 highest = highest_skill_value(GET_LEVEL(ch), learntype);
                 break;
             default:
-                log("Unknown SKLEARN type for skill %d in practice", skill_num);
+                basic_mud_log("Unknown SKLEARN type for skill %d in practice", skill_num);
                 send_to_char(ch, "You can't learn that.\r\n");
                 return;
         }
@@ -1286,11 +1286,11 @@ void boot_the_guilds(FILE *gm_f, char *filename, int rec_count) {
                     } else if (t2 == 2) {
                         g.feats.insert(t1);
                     } else {
-                        log("SYSERR: Invalid 2nd arg in guild file!");
+                        basic_mud_log("SYSERR: Invalid 2nd arg in guild file!");
                         exit(1);
                     }
                 } else {
-                    log("SYSERR: Invalid format in guild file. Expecting 2 args but got %d!", rv);
+                    basic_mud_log("SYSERR: Invalid format in guild file. Expecting 2 args but got %d!", rv);
                     exit(1);
                 }
                 get_line(gm_f, buf3);
@@ -1317,7 +1317,7 @@ void boot_the_guilds(FILE *gm_f, char *filename, int rec_count) {
                     if (!p || !*p)
                         break;
                     if (sscanf(p, "%d", &val) != 1) {
-                        log("SYSERR: Can't parse GM_WITH_WHO line in %s: '%s'", buf2, buf);
+                        basic_mud_log("SYSERR: Can't parse GM_WITH_WHO line in %s: '%s'", buf2, buf);
                         break;
                     }
                     g.with_who[temp] = val;

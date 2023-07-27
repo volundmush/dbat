@@ -3,10 +3,10 @@
 improved-edit.c		Routines specific to the improved editor.
 
 */
-#include "improved-edit.h"
-#include "utils.h"
-#include "comm.h"
-#include "interpreter.h"
+#include "dbat/improved-edit.h"
+#include "dbat/utils.h"
+#include "dbat/comm.h"
+#include "dbat/interpreter.h"
 
 int format_script(struct descriptor_data *d);
 
@@ -529,7 +529,7 @@ int format_text(char **ptr_string, int mode, struct descriptor_data *d, unsigned
 
     /* Fix memory overrun. */
     if (d->max_str > MAX_STRING_LENGTH) {
-        log("SYSERR: format_text: max_str is greater than buffer size.");
+        basic_mud_log("SYSERR: format_text: max_str is greater than buffer size.");
         return 0;
     }
 

@@ -5,13 +5,13 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
-#include "genwld.h"
-#include "utils.h"
-#include "db.h"
-#include "handler.h"
-#include "genolc.h"
-#include "shop.h"
-#include "dg_olc.h"
+#include "dbat/genwld.h"
+#include "dbat/utils.h"
+#include "dbat/db.h"
+#include "dbat/handler.h"
+#include "dbat/genolc.h"
+#include "dbat/shop.h"
+#include "dbat/dg_olc.h"
 
 
 /*
@@ -36,13 +36,13 @@ room_rnum add_room(struct room_data *room) {
         world[i].people = tch;
         world[i].contents = tobj;
         add_to_save_list(zone_table[room->zone].number, SL_WLD);
-        log("GenOLC: add_room: Updated existing room #%d.", room->vn);
+        basic_mud_log("GenOLC: add_room: Updated existing room #%d.", room->vn);
         return i;
     }
 
     auto &r = world[room->vn];
     r = *room;
-    log("GenOLC: add_room: Added room %d.", room->vn);
+    basic_mud_log("GenOLC: add_room: Added room %d.", room->vn);
     add_to_save_list(zone_table[room->zone].number, SL_WLD);
 
     /*
@@ -68,18 +68,18 @@ int delete_room(room_rnum rnum) {
     add_to_save_list(zone_table[room->zone].number, SL_WLD);
 
     /* This is something you might want to read about in the logs. */
-    log("GenOLC: delete_room: Deleting room #%d (%s).", room->vn, room->name);
+    basic_mud_log("GenOLC: delete_room: Deleting room #%d (%s).", room->vn, room->name);
 
     if (r_mortal_start_room == rnum) {
-        log("WARNING: GenOLC: delete_room: Deleting mortal start room!");
+        basic_mud_log("WARNING: GenOLC: delete_room: Deleting mortal start room!");
         r_mortal_start_room = 0;    /* The Void */
     }
     if (r_immort_start_room == rnum) {
-        log("WARNING: GenOLC: delete_room: Deleting immortal start room!");
+        basic_mud_log("WARNING: GenOLC: delete_room: Deleting immortal start room!");
         r_immort_start_room = 0;    /* The Void */
     }
     if (r_frozen_start_room == rnum) {
-        log("WARNING: GenOLC: delete_room: Deleting frozen start room!");
+        basic_mud_log("WARNING: GenOLC: delete_room: Deleting frozen start room!");
         r_frozen_start_room = 0;    /* The Void */
     }
 
@@ -143,7 +143,7 @@ int delete_room(room_rnum rnum) {
 
 int save_rooms(zone_rnum zone_num) {
     if (!zone_table.count(zone_num)) {
-        log("SYSERR: GenOLC: save_rooms: Invalid zone number %d passed!", zone_num);
+        basic_mud_log("SYSERR: GenOLC: save_rooms: Invalid zone number %d passed!", zone_num);
         return false;
     }
     auto &z = zone_table[zone_num];
@@ -176,7 +176,7 @@ int copy_room_strings(struct room_data *dest, struct room_data *source) {
     int i;
 
     if (dest == nullptr || source == nullptr) {
-        log("SYSERR: GenOLC: copy_room_strings: nullptr values passed.");
+        basic_mud_log("SYSERR: GenOLC: copy_room_strings: nullptr values passed.");
         return false;
     }
 
@@ -319,7 +319,7 @@ room_data::room_data(const nlohmann::json &j) {
     }
 
     if((proto_script || vn == 0)) {
-        if(!script) script = new script_data();
+        if(!script) script = new script_data(this);
         if(proto_script) for(auto p = proto_script; p; p = p->next) {
             auto t = read_trigger(p->vnum);
             if(t) add_trigger(script, t, -1);

@@ -6,18 +6,18 @@
 /** Copyright 2002 Kip Potter [Mythran] (kip_potter@hotmail.com)             **/
 /******************************************************************************/
 
-#include "structs.h"
-#include "utils.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "db.h"
-#include "oasis.h"
-#include "shop.h"
-#include "constants.h"
-#include "dg_scripts.h"
-#include "guild.h"
-#include "races.h"
-#include "class.h"
+#include "dbat/structs.h"
+#include "dbat/utils.h"
+#include "dbat/comm.h"
+#include "dbat/interpreter.h"
+#include "dbat/db.h"
+#include "dbat/oasis.h"
+#include "dbat/shop.h"
+#include "dbat/constants.h"
+#include "dbat/dg_scripts.h"
+#include "dbat/guild.h"
+#include "dbat/races.h"
+#include "dbat/class.h"
 
 
 /******************************************************************************/

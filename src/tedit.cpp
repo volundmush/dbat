@@ -5,16 +5,16 @@
  * XXX: This needs Oasis-ifying.
  */
 
-#include "structs.h"
-#include "utils.h"
-#include "interpreter.h"
-#include "comm.h"
-#include "db.h"
-#include "genolc.h"
-#include "oasis.h"
-#include "improved-edit.h"
-#include "tedit.h"
-#include "config.h"
+#include "dbat/structs.h"
+#include "dbat/utils.h"
+#include "dbat/interpreter.h"
+#include "dbat/comm.h"
+#include "dbat/db.h"
+#include "dbat/genolc.h"
+#include "dbat/oasis.h"
+#include "dbat/improved-edit.h"
+#include "dbat/tedit.h"
+#include "dbat/config.h"
 
 void news_string_cleanup(struct descriptor_data *d, int terminator) {
     FILE *fl;
@@ -66,7 +66,7 @@ void news_string_cleanup(struct descriptor_data *d, int terminator) {
             act("$n stops editing the news.", true, d->character, nullptr, nullptr, TO_ROOM);
             break;
         default:
-            log("SYSERR: news_string_cleanup: Unknown terminator status.");
+            basic_mud_log("SYSERR: news_string_cleanup: Unknown terminator status.");
             break;
     }
 
@@ -127,7 +127,7 @@ void tedit_string_cleanup(struct descriptor_data *d, int terminator) {
             act("$n stops editing some scrolls.", true, d->character, nullptr, nullptr, TO_ROOM);
             break;
         default:
-            log("SYSERR: tedit_string_cleanup: Unknown terminator status.");
+            basic_mud_log("SYSERR: tedit_string_cleanup: Unknown terminator status.");
             break;
     }
 

@@ -10,22 +10,22 @@
 *  System (RDBS) of the MUD Dragonball Advent Truth.                      *
 ************************************************************************ */
 
-#include "combat.h"
-#include "act.movement.h"
-#include "act.item.h"
-#include "mobact.h"
-#include "fight.h"
-#include "act.attack.h"
-#include "dg_comm.h"
-#include "utils.h"
-#include "comm.h"
-#include "act.item.h"
-#include "handler.h"
-#include "constants.h"
-#include "genzon.h"
-#include "dg_scripts.h"
-#include "class.h"
-#include "techniques.h"
+#include "dbat/combat.h"
+#include "dbat/act.movement.h"
+#include "dbat/act.item.h"
+#include "dbat/mobact.h"
+#include "dbat/fight.h"
+#include "dbat/act.attack.h"
+#include "dbat/dg_comm.h"
+#include "dbat/utils.h"
+#include "dbat/comm.h"
+#include "dbat/act.item.h"
+#include "dbat/handler.h"
+#include "dbat/constants.h"
+#include "dbat/genzon.h"
+#include "dbat/dg_scripts.h"
+#include "dbat/class.h"
+#include "dbat/techniques.h"
 
 /* local functions */
 void damage_weapon(struct char_data *ch, struct obj_data *obj, struct char_data *vict) {
@@ -5180,7 +5180,7 @@ hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, struct 
             }
         }
     } else {
-        log("Log: Error with hurt.\n");
+        basic_mud_log("Log: Error with hurt.\n");
     }
 }
 

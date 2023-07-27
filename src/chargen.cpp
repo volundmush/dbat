@@ -1,13 +1,13 @@
-#include "chargen.h"
-#include "structs.h"
-#include "utils.h"
-#include "class.h"
-#include "races.h"
-#include "spells.h"
-#include "comm.h"
-#include "constants.h"
-#include "oasis.h"
-#include "charmenu.h"
+#include "dbat/chargen.h"
+#include "dbat/structs.h"
+#include "dbat/utils.h"
+#include "dbat/class.h"
+#include "dbat/races.h"
+#include "dbat/spells.h"
+#include "dbat/comm.h"
+#include "dbat/constants.h"
+#include "dbat/oasis.h"
+#include "dbat/charmenu.h"
 
 namespace net {
 
@@ -330,7 +330,7 @@ namespace net {
 
 
 
-    ChargenParser::ChargenParser(struct connection_data *c, const std::string &na) : ConnectionParser(c) {
+    ChargenParser::ChargenParser(std::shared_ptr<Connection>& co, const std::string &na) : ConnectionParser(co) {
         ch = new char_data();
         ch->name = strdup(na.c_str());
         state = CON_QRACE;

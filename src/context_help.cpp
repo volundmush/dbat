@@ -3,13 +3,13 @@
  * If you add more olc options, be sure to add a case for it here. - Welcor
  */
 
-#include "context_help.h"
-#include "act.informative.h"
-#include "oasis.h"
-#include "utils.h"
-#include "dg_olc.h"
-#include "interpreter.h"
-#include "comm.h"
+#include "dbat/context_help.h"
+#include "dbat/act.informative.h"
+#include "dbat/oasis.h"
+#include "dbat/utils.h"
+#include "dbat/dg_olc.h"
+#include "dbat/interpreter.h"
+#include "dbat/comm.h"
 
 /* local global */
 char *context_help_list[NUM_CONTEXTS];
@@ -417,7 +417,7 @@ void boot_context_help() {
         context_help_list[i] = NO_HELP;
 
     if (!fl) {
-        log("No context help found : %s", strerror(errno));
+        basic_mud_log("No context help found : %s", strerror(errno));
         return;
     }
     while (get_line(fl, line)) {

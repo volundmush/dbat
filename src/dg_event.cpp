@@ -27,10 +27,10 @@
  * Thomas Arp - Welcor - 2002
  *
  */
-#include "dg_event.h"
-#include "utils.h"
+#include "dbat/dg_event.h"
+#include "dbat/utils.h"
 #include <limits.h>
-#include "comm.h"
+#include "dbat/comm.h"
 
 static struct queue *event_q;          /* the event queue */
 
@@ -62,12 +62,12 @@ struct event *event_create(EVENTFUNC(*func), void *event_obj, long when) {
 /* removes the event from the system */
 void event_cancel(struct event *event) {
     if (!event) {
-        log("SYSERR:  Attempted to cancel a nullptr event");
+        basic_mud_log("SYSERR:  Attempted to cancel a nullptr event");
         return;
     }
 
     if (!event->q_el) {
-        log("SYSERR:  Attempted to cancel a non-nullptr unqueued event, freeing anyway");
+        basic_mud_log("SYSERR:  Attempted to cancel a non-nullptr unqueued event, freeing anyway");
     } else
         queue_deq(event_q, event->q_el);
 
@@ -84,7 +84,7 @@ void event_process() {
 
     while ((long) pulse >= queue_key(event_q)) {
         if (!(the_event = (struct event *) queue_head(event_q))) {
-            log("SYSERR: Attempt to get a nullptr event");
+            basic_mud_log("SYSERR: Attempt to get a nullptr event");
             return;
         }
 

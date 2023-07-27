@@ -5,24 +5,24 @@
  *  Copyright 1997-2001 George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
-#include "structs.h"
-#include "utils.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "db.h"
-#include "boards.h"
-#include "genolc.h"
-#include "genwld.h"
-#include "genzon.h"
-#include "oasis.h"
-#include "improved-edit.h"
-#include "dg_olc.h"
-#include "constants.h"
-#include "spells.h"
-#include "handler.h"
-#include "races.h"
-#include "act.wizard.h"
-#include "act.informative.h"
+#include "dbat/structs.h"
+#include "dbat/utils.h"
+#include "dbat/comm.h"
+#include "dbat/interpreter.h"
+#include "dbat/db.h"
+#include "dbat/boards.h"
+#include "dbat/genolc.h"
+#include "dbat/genwld.h"
+#include "dbat/genzon.h"
+#include "dbat/oasis.h"
+#include "dbat/improved-edit.h"
+#include "dbat/dg_olc.h"
+#include "dbat/constants.h"
+#include "dbat/spells.h"
+#include "dbat/handler.h"
+#include "dbat/races.h"
+#include "dbat/act.wizard.h"
+#include "dbat/act.informative.h"
 
 /*------------------------------------------------------------------------*/
 
@@ -279,7 +279,7 @@ void redit_save_internally(struct descriptor_data *d) {
 
     if ((room_num = add_room(OLC_ROOM(d))) == NOWHERE) {
         write_to_output(d, "Something went wrong...\r\n");
-        log("SYSERR: redit_save_internally: Something failed! (%d)", room_num);
+        basic_mud_log("SYSERR: redit_save_internally: Something failed! (%d)", room_num);
         return;
     }
 

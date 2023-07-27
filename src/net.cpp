@@ -1,22 +1,197 @@
-#include "net.h"
-#include "utils.h"
-#include "telnet.h"
+#include "dbat/net.h"
+#include "dbat/utils.h"
 #include <regex>
-#include "screen.h"
-#include "players.h"
+#include "dbat/screen.h"
+#include "dbat/players.h"
+#include "dbat/login.h"
+#include "dbat/config.h"
+#include <boost/asio/experimental/awaitable_operators.hpp>
+#include <boost/beast/core/buffers_to_string.hpp>
 
 #define COLOR_ON(ch) (COLOR_LEV(ch) > 0)
 
 namespace net {
+    using namespace boost::asio::experimental::awaitable_operators;
     std::unique_ptr<io_context> io;
-    std::unique_ptr<ip::tcp::acceptor> acceptor;
     std::unique_ptr<signal_set> signals;
 
-    std::unique_ptr<Channel<descriptor_data*>> pending_descriptors;
+    std::mutex connectionsMutex, pendingConnectionsMutex;
+    std::unique_ptr<Link> link;
+    std::unique_ptr<Channel<nlohmann::json>> linkChannel;
+    boost::asio::ip::tcp::endpoint thermiteEndpoint;
 
-    std::mutex connectionsMutex;
+    std::map<int64_t, std::shared_ptr<Connection>> connections;
+    std::set<int64_t> pendingConnections, deadConnections;
 
-    std::map<int, connection_data*> connections;
+    Link::Link(boost::beast::websocket::stream<boost::beast::tcp_stream> ws)
+            : conn(std::move(ws)), is_stopped(false) {}
+
+    awaitable<void> Link::run() {
+        try {
+            co_await (runReader() || runWriter() || runPinger());
+        } catch (const boost::system::system_error& e) {
+            logger->error("Error in Link::run(): {}", e.what());
+            // Handle exceptions here if necessary
+        } catch(...) {
+            logger->error("Unknown error in Link::run()");
+        }
+        if(conn.is_open()) {
+            try {
+                conn.close(boost::beast::websocket::close_code::normal);
+            } catch(...) {
+                logger->error("Error closing WebSocket gracefully...");
+            }
+        }
+        co_return;
+    }
+
+    awaitable<void> Link::runPinger() {
+        boost::asio::steady_timer timer(co_await boost::asio::this_coro::executor);
+        while(!is_stopped) {
+            timer.expires_after(100ms);
+            co_await timer.async_wait(boost::asio::use_awaitable);
+            if(!is_stopped) {
+                // use async_ping to send a ping...
+                co_await conn.async_ping(boost::beast::websocket::ping_data{}, boost::asio::use_awaitable);
+            }
+        }
+        co_return;
+    }
+
+    void Link::stop() {
+        is_stopped = true;
+    }
+
+    awaitable<void> Link::createUpdateClient(const nlohmann::json &j) {
+        auto id = j["id"].get<int64_t>();
+        auto addr = j["addr"].get<std::string>();
+        const auto& capabilities = j["capabilities"];
+
+        // Do something with id, addr, and capabilities
+        auto it = connections.find(id);
+        if (it == connections.end()) {
+            // Create a new ClientConnection
+            auto cc = std::make_shared<Connection>(id);
+            cc->capabilities.deserialize(capabilities);
+            if(config::usingMultithreading) {
+                std::lock_guard<std::mutex> lock(connectionsMutex);
+                connections[id] = cc;
+            } else connections[id] = cc;
+
+            if(config::usingMultithreading) {
+                std::lock_guard<std::mutex> lock(pendingConnectionsMutex);
+                pendingConnections.insert(id);
+            } else pendingConnections.insert(id);
+        } else {
+            // Update the existing ClientConnection
+            auto& client_connection = it->second;
+            client_connection->capabilities.deserialize(capabilities);
+        }
+        co_return;
+    }
+
+    awaitable<void> Link::runReader() {
+        while (true) {
+            try {
+                // Read a message from the WebSocket
+                boost::beast::flat_buffer buffer;
+                co_await conn.async_read(buffer, boost::asio::use_awaitable);
+
+                // Deserialize the JSON string
+                auto ws_str = boost::beast::buffers_to_string(buffer.data());
+                //std::cout << "Received: " << ws_str << std::endl;
+                auto j = nlohmann::json::parse(ws_str);
+
+
+                // Access the "kind" field in the JSON object
+                std::string kind = j["kind"];
+
+                // Implement your routing logic here
+
+                if (kind == "client_list") {
+                    // This message is sent by Thermite when the game establishes a fresh connection with it.
+                    // It should be the first thing a Link sees.
+                    //logger->info("Link: Received client_list message");
+                    // Get the "data" object
+                    auto &data = j["data"];
+
+                    // Iterate over the contents of the "data" object
+                    for (const auto &entry : data) {
+                        co_await createUpdateClient(entry);
+                    }
+
+                } else if (kind == "client_ready") {
+                    // This message is sent by Thermite when a new client has connected.
+                    auto &data = j["protocol"];
+                    co_await createUpdateClient(data);
+
+                } else {
+                    // Extract the "id" field from the JSON object
+                    int64_t id = j["id"];
+
+                    // Look up the specific ClientConnection in the std::map
+                    auto it = connections.find(id);
+                    if(it == connections.end()) {
+                        logger->info("Link: Received message for unknown client: {}", id);
+                        continue;
+                    }
+
+                    // Found the client connection
+                    auto &client_connection = it->second;
+
+                    if (kind == "client_capabilities") {
+                        auto &capabilities = j["capabilities"];
+                        client_connection->capabilities.deserialize(capabilities);
+
+                    } else if (kind == "client_data") {
+                        try {
+                            co_await client_connection->fromLink.async_send(boost::system::error_code{}, j, boost::asio::use_awaitable);
+                        } catch (const boost::system::system_error &e) {
+                            // Handle exceptions (e.g., WebSocket close or error)
+                        }
+
+                    } else if (kind == "client_disconnected") {
+                        logger->info("Link: Received client_disconnected message for client: {}", id);
+                        deadConnections.insert(id);
+                    }
+                }
+            } catch (const boost::system::system_error &e) {
+                logger->error("Link RunReader flopped at: {}", e.what());
+                // Handle exceptions (e.g., WebSocket close or error)
+            } catch (...) {
+                logger->error("Unknown error in Link RunReader");
+            }
+        }
+        co_return;
+    }
+
+    awaitable<void> Link::runWriter() {
+        while (true) {
+            try {
+                // Receive a message from the channel asynchronously
+                auto message = co_await linkChannel->async_receive(boost::asio::use_awaitable);
+
+                try {
+                    // Serialize the JSON message to text
+                    std::string serialized_msg = message.dump(-1, ' ', false, nlohmann::json::error_handler_t::ignore);
+
+                    // Send the message across the WebSocket
+                    co_await conn.async_write(boost::asio::buffer(serialized_msg), boost::asio::use_awaitable);
+                } catch (const boost::system::system_error& e) {
+                    logger->error("Link runWriter flopped 1: {}", e.what());
+                    // Handle exceptions (e.g., WebSocket close or error) when sending the message
+                } catch (...) {
+                    logger->error("Unknown error in Link runWriter 1");
+                }
+            } catch (const boost::system::system_error& e) {
+                logger->error("Link runWriter flopped 2: {}", e.what());
+                // Handle exceptions (e.g., error receiving the message from the channel)
+            } catch (...) {
+                logger->error("Unknown error in Link runWriter 2");
+            }
+        }
+        co_return;
+    }
 
     void ProtocolCapabilities::deserialize(const nlohmann::json& j) {
 
@@ -103,142 +278,64 @@ namespace net {
         kwargs = nlohmann::json::object();
     }
 
-    // Regular expression pattern for HTTP request line: METHOD URL HTTP/VERSION
-    static std::regex http_request_line_regex(
-            R"(^(OPTIONS|GET|HEAD|POST|PUT|DELETE|TRACE|CONNECT)\s+\S+\s+HTTP/\d\.\d$)",
-            std::regex::ECMAScript | std::regex::icase
-    );
-
-    static bool isValidHttpRequestLine(const std::string& line) {
-        // Check if the line matches the HTTP request line format
-        return std::regex_match(line, http_request_line_regex);
-    }
-
-    static awaitable<void> runTelnet(boost::beast::tcp_stream conn, const boost::beast::flat_buffer& oldbuf) {
-        boost::asio::ip::tcp::resolver resolver(co_await this_coro::executor);
-
-        // Do asynchronous name resolution for the remote endpoint
-        auto results = co_await resolver.async_resolve(conn.socket().remote_endpoint(), use_awaitable);
-
-        auto tel = new telnet_data(std::move(conn));
-        tel->inbuf = oldbuf;
-
-        for(auto &r : results) {
-            tel->capabilities.hostNames.emplace_back(r.endpoint().address().to_string());
-        }
-
-        {
-            std::lock_guard<std::mutex> guard(connectionsMutex);
-            connections[tel->socket] = tel;
-        }
-
-        co_await tel->run();
-
-        {
-            std::lock_guard<std::mutex> guard(connectionsMutex);
-            connections.erase(tel->socket);
-        }
-
-        co_return;
-    }
-
-    static awaitable<void> runHttp(boost::beast::tcp_stream conn, const boost::beast::flat_buffer& oldbuf) {
-		// TODO: handle HTTP...
-        co_return;
-    }
-
-
-    // define a function that takes a milliseconds duration...
-    awaitable<void> runTimer(std::chrono::milliseconds duration, bool *timedOut) {
-        // create a timer that expires after the given duration...
-        boost::asio::steady_timer timer(co_await this_coro::executor, duration);
-        // wait for the timer to expire...
-        co_await timer.async_wait(use_awaitable);
-        // the timer has expired...
-        *timedOut = true;
-        co_return;
-    }
-
-    static awaitable<void> acceptConnection(boost::beast::tcp_stream conn) {
-
-        // Each connection gets 100ms with which to submit its opening handshake... or nothing at all.
-        // We are going to accept both MUD telnet and HTTP 1.1/2.x connections (which might be upgraded to websocket).
-        // If the client opens up with a valid beginning of an HTTP request then we'll assume it's HTTP.
-        // If it doesn't match, or the timeout occurs (using tcp_stream's expires_after), then we'll assume it's telnet.
-
-        // We'll use a timeout of 100ms for the initial handshake.
-        boost::beast::flat_buffer buffer;
-        boost::beast::http::request<boost::beast::http::string_body> req;
-
-        bool is_http = false;
-
-        try {
-            // Attempt to read the first line of the HTTP request
-
-            // Use a composable OR awaitable operation combining async_read_until an "\n" and a lambda waiter that
-            // sets timedOut to true.
-            bool timedOut = false;
-
-            co_await (async_read_until(conn, buffer, "\n", use_awaitable) || runTimer(std::chrono::milliseconds(100), &timedOut));
-
-            if(!timedOut) {
-                // Parse the first line of the HTTP request
-                std::string first_line = boost::beast::buffers_to_string(buffer.data());
-
-                // Check if the first line is a valid HTTP request line
-                if (isValidHttpRequestLine(first_line)) {
-                    is_http = true;
-                }
+    awaitable<void> runLinkManager() {
+        bool do_standoff = false;
+        boost::asio::steady_timer standoff(co_await boost::asio::this_coro::executor);
+        while (true) {
+            if(do_standoff) {
+                standoff.expires_after(5s);
+                co_await standoff.async_wait(boost::asio::use_awaitable);
+                do_standoff = false;
             }
-        }
-        catch (boost::system::error_code& ec) {
-            // An error occurred during async_read_until (e.g., the connection was closed or the read timed out)
-            if (ec == boost::asio::error::operation_aborted) {
-                // TODO: Handle error
-                log("net.acceptConnection: %s", ec.message().c_str());
-                co_return;
-            } else {
-                log("net.acceptConnection: %s", ec.message().c_str());
-                // Some other error occurred
-                // TODO: Handle error
-                co_return;
-            }
-        }
 
-        if(is_http) {
-            co_await runHttp(std::move(conn), buffer);
-        } else {
-            co_await runTelnet(std::move(conn), buffer);
-        }
+            auto &endpoint = thermiteEndpoint;
 
-        co_return;
-    }
-
-    awaitable<void> runAcceptor() {
-        while(true) {
             try {
-                // Construct a stream with the io_context of the acceptor
-                boost::beast::tcp_stream stream(acceptor->get_executor());
+                logger->info("LinkManager: Connecting to {}:{}...", endpoint.address().to_string(), endpoint.port());
+                // Create a new TCP socket
+                boost::beast::websocket::stream<boost::beast::tcp_stream> ws(co_await boost::asio::this_coro::executor);
 
-                // Perform the async_accept operation on the stream
-                co_await acceptor->async_accept(stream.socket(), use_awaitable);
+                // Connect to the endpoint
+                co_await boost::beast::get_lowest_layer(ws).async_connect(endpoint, boost::asio::use_awaitable);
+                // Initialize a WebSocket using the connected socket
 
-                // At this point, the stream is connected and can be used for read/write operations
-                // spawn acceptConnection on a new strand...
-                co_spawn(make_strand(acceptor->get_executor()), [stream = std::move(stream)]() mutable {
-                    return acceptConnection(std::move(stream));
-                }, detached);
+                // Perform the WebSocket handshake
+                co_await ws.async_handshake(endpoint.address().to_string() + ":" + std::to_string(endpoint.port()), "/", boost::asio::use_awaitable);
 
-            } catch (boost::system::error_code &e) {
-                log("net.runAcceptor: %s", e.what().c_str());
+                // Construct a Link using the WebSocket
+                link = std::make_unique<Link>(std::move(ws));
+
+                // Run the Link
+                logger->info("LinkManager: Link established! Running Link...");
+                co_await link->run();
+                link.reset();
+
+            } catch (const boost::system::system_error& error) {
+                // If there was an error, handle it (e.g., log the error message)
+                logger->error("Error in LinkManager::run(): {}", error.what());
+
+                // You might want to add a delay before attempting to reconnect, e.g.,
+                do_standoff = true;
             }
         }
         co_return;
     }
 
-    connection_data::connection_data() : inMessages(*io, 200), outMessages(*io, 200) {}
+    void Connection::sendMessage(const Message &msg) {
+        nlohmann::json j, d;
+        j["kind"] = "client_data";
+        j["id"] = this->connId;
 
-    void connection_data::sendText(const std::string &text) {
+        d["cmd"] = msg.cmd;
+        d["args"] = msg.args;
+        d["kwargs"] = msg.kwargs;
+
+        j["data"].push_back(d);
+
+        linkChannel->try_send(boost::system::error_code{}, j);
+    }
+
+    void Connection::sendText(const std::string &text) {
         if(text.empty()) return;
         Message msg;
         msg.cmd = "text";
@@ -248,29 +345,27 @@ namespace net {
         } else {
             msg.args.push_back(processColors(text, true, nullptr));
         }
-        outMessages.try_send(boost::system::error_code{}, msg);
+        sendMessage(msg);
     }
 
-    awaitable<void> connection_data::handleInMessage(const Message &m) {
-
+    void Connection::handleMessage(const Message &m) {
+        if(parser) parser->handleMessage(m);
     }
 
-    awaitable<void> connection_data::runInQueue() {
-        while(true) {
-            try {
-                auto result = co_await inMessages.async_receive(use_awaitable);
-                parser->handleMessage(result);
-            } catch(boost::system::error_code& ec) {
-                if(ec == boost::asio::error::operation_aborted) {
-                    break;
-                } else {
-                    log("net.connection_data::runInQueue: %s", ec.message().c_str());
-                }
-            }
-        }
-
-        co_return;
+    void Connection::onWelcome() {
+        account = nullptr;
+        desc = nullptr;
+        setParser(new LoginParser(shared_from_this()));
     }
+
+    void Connection::close() {
+        // TODO: make this do something.
+    }
+
+    void Connection::onNetworkDisconnected() {
+        // TODO: make this do something.
+    }
+
 
     nlohmann::json Message::serialize() const {
         nlohmann::json j;
@@ -287,46 +382,45 @@ namespace net {
         if(j.contains("kwargs")) kwargs = j["kwargs"];
     }
 
-    nlohmann::json connection_data::serialize() {
-        nlohmann::json j;
+    Connection::Connection(int64_t connId) : connId(connId), fromLink(*io, 200) {
 
-        while(outMessages.ready()) {
-            if(!outMessages.try_receive([&j](boost::system::error_code ec, const Message& msg) {
-                if(!ec) j["outMessages"].push_back(msg.serialize());
-            })) continue;
-        }
-
-        while(inMessages.ready()) {
-            Message m;
-            if(!inMessages.try_receive([&j](boost::system::error_code ec, const Message& msg) {
-                if(!ec) j["inMessages"].push_back(msg.serialize());
-            })) continue;
-        }
-
-        j["capabilities"] = capabilities.serialize();
-
-        return j;
     }
 
-    void connection_data::deserialize(const nlohmann::json& j) {
-        if(j.contains("outMessages")) {
-            for(auto &m : j["outMessages"]) {
-                Message msg(m);
-                outMessages.try_send(boost::system::error_code{}, msg);
-            }
-        }
+    void Connection::onHeartbeat(double deltaTime) {
+        // Every time the heartbeat runs, we want to pull everything out of fromLink
+        // first of all.
 
-        if(j.contains("inMessages")) {
-            for(auto &m : j["inMessages"]) {
-                Message msg(m);
-                inMessages.try_send(boost::system::error_code{}, msg);
-            }
-        }
+        // We need to do this in a loop, because we may have multiple messages in the
+        // channel.
 
-        if(j.contains("capabilities")) {
-            capabilities.deserialize(j["capabilities"]);
+        std::error_code ec;
+        nlohmann::json value;
+        while (fromLink.ready()) {
+            if(!fromLink.try_receive([&](std::error_code ec2, nlohmann::json value2) {
+                ec = ec2;
+                value = value2;
+            })) {
+                break;
+            }
+            if (ec) {
+                // TODO: Handle any errors..
+            } else {
+                // If we got a json value, it should look like this.
+                // {"kind": "client_data", "id": 123, "data": [{"cmd": "text", "args": ["hello world!"], "kwargs": {}}]}
+                // We're only interested in iterating over the contents of the "data" array.
+                // Now we must for-each over the contents of jarr, extract the cmd, args, and kwargs data, and call
+                // the appropriate handle routine.
+                //logger->info("Received data from link: {}", value.dump());
+                lastActivity = std::chrono::steady_clock::now();
+                for (auto &jval : value["data"]) {
+                    //logger->info("Processing data from link: {}", jval.dump());
+                    Message m(jval);
+                    handleMessage(m);
+                }
+            }
         }
     }
+
 
     void ConnectionParser::handleMessage(const Message &m) {
         if(m.cmd == "text") {
@@ -338,6 +432,10 @@ namespace net {
         }
     }
 
+    void ConnectionParser::close() {
+
+    }
+
 	void ConnectionParser::sendText(const std::string &txt) {
         conn->sendText(txt);
     }
@@ -346,9 +444,9 @@ namespace net {
 
     }
 
-    void connection_data::setParser(ConnectionParser *p) {
-        delete parser;
-        parser = p;
+    void Connection::setParser(ConnectionParser *p) {
+        if(parser) parser->close();
+        parser.reset(p);
         p->start();
     }
 

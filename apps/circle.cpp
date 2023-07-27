@@ -2,16 +2,16 @@
 // Created by basti on 10/22/2021.
 //
 
-#include "comm.h"
-#include "utils.h"
-#include "mail.h"
-#include "boards.h"
-#include "act.informative.h"
-#include "act.social.h"
-#include "dg_scripts.h"
-#include "constants.h"
-#include "ban.h"
-#include "genolc.h"
+#include "dbat/comm.h"
+#include "dbat/utils.h"
+#include "dbat/mail.h"
+#include "dbat/boards.h"
+#include "dbat/act.informative.h"
+#include "dbat/act.social.h"
+#include "dbat/dg_scripts.h"
+#include "dbat/constants.h"
+#include "dbat/ban.h"
+#include "dbat/genolc.h"
 
 int main(int argc, char **argv)
 {
@@ -109,7 +109,7 @@ int main(int argc, char **argv)
                 break;
             case 'x':
                 xap_objs = 1;
-                log("Loading player objects from secondary (ascii) files.");
+                basic_mud_log("Loading player objects from secondary (ascii) files.");
                 break;
             case 'h':
                 /* From: Anil Mahajan <amahajan@proxicom.com> */
@@ -145,38 +145,45 @@ int main(int argc, char **argv)
         }
     }
 
-    /* All arguments have been parsed, try to open log file. */
-    setup_log(CONFIG_LOGNAME, STDERR_FILENO);
+    try {
+        /* All arguments have been parsed, try to open log file. */
+        setup_log();
+    }
+    catch(std::exception& e) {
+        std::cerr << "Cannot start logger: " << e.what() << std::endl;
+        exit(1);
+    }
+
 
     /*
      * Moved here to distinguish command line options and to show up
      * in the log if stderr is redirected to a file.
      */
-    log("Using %s for configuration.", CONFIG_CONFFILE);
-    log("%s", circlemud_version);
-    log("%s", oasisolc_version);
-    log("%s", DG_SCRIPT_VERSION);
-    log("%s", ascii_pfiles_version);
-    log("%s", CWG_VERSION);
+    basic_mud_log("Using %s for configuration.", CONFIG_CONFFILE);
+    basic_mud_log("%s", circlemud_version);
+    basic_mud_log("%s", oasisolc_version);
+    basic_mud_log("%s", DG_SCRIPT_VERSION);
+    basic_mud_log("%s", ascii_pfiles_version);
+    basic_mud_log("%s", CWG_VERSION);
     xap_objs = 1;
     if (chdir(dir) < 0) {
         perror("SYSERR: Fatal error changing to data directory");
         exit(1);
     }
-    log("Using %s as data directory.", dir);
+    basic_mud_log("Using %s as data directory.", dir);
 
     if (scheck)
         boot_world();
     else {
-        log("Running game on port %d.", port);
-        init_game(port);
+        basic_mud_log("Running game.");
+        init_game();
     }
 
-    log("Clearing game world.");
+    basic_mud_log("Clearing game world.");
     destroy_db();
 
     if (!scheck) {
-        log("Clearing other memory.");
+        basic_mud_log("Clearing other memory.");
         free_bufpool();             /* comm.c */
         free_player_index();	/* players.c */
         clear_free_list();		/* mail.c */
@@ -199,7 +206,7 @@ int main(int argc, char **argv)
     /* probably should free the entire config here.. */
     free(CONFIG_CONFFILE);
 
-    log("Done.");
+    basic_mud_log("Done.");
 
 #ifdef MEMORY_DEBUG
     zmalloc_check();

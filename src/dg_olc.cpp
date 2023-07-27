@@ -12,17 +12,17 @@
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
 
-#include "dg_olc.h"
-#include "utils.h"
-#include "comm.h"
-#include "db.h"
-#include "genolc.h"
-#include "interpreter.h"
-#include "oasis.h"
-#include "dg_event.h"
-#include "constants.h"
-#include "act.wizard.h"
-#include "modify.h"
+#include "dbat/dg_olc.h"
+#include "dbat/utils.h"
+#include "dbat/comm.h"
+#include "dbat/db.h"
+#include "dbat/genolc.h"
+#include "dbat/interpreter.h"
+#include "dbat/oasis.h"
+#include "dbat/dg_event.h"
+#include "dbat/constants.h"
+#include "dbat/act.wizard.h"
+#include "dbat/modify.h"
 
 /* local functions */
 static void trigedit_disp_menu(struct descriptor_data *d);
@@ -127,7 +127,7 @@ void script_save_to_disk(FILE *fp, void *item, int type) {
     else if (type == WLD_TRIGGER)
         t = ((struct room_data *) item)->proto_script;
     else {
-        log("SYSERR: Invalid type passed to script_save_to_disk()");
+        basic_mud_log("SYSERR: Invalid type passed to script_save_to_disk()");
         return;
     }
 

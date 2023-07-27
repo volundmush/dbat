@@ -8,20 +8,20 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include "objsave.h"
+#include "dbat/objsave.h"
 #include "unistd.h"
 #include "errno.h"
-#include "structs.h"
-#include "comm.h"
-#include "handler.h"
-#include "db.h"
-#include "interpreter.h"
-#include "utils.h"
-#include "spells.h"
-#include "players.h"
-#include "class.h"
-#include "act.social.h"
-#include "act.item.h"
+#include "dbat/structs.h"
+#include "dbat/comm.h"
+#include "dbat/handler.h"
+#include "dbat/db.h"
+#include "dbat/interpreter.h"
+#include "dbat/utils.h"
+#include "dbat/spells.h"
+#include "dbat/players.h"
+#include "dbat/class.h"
+#include "dbat/act.social.h"
+#include "dbat/act.item.h"
 
 /* local functions */
 
@@ -90,7 +90,7 @@ void delete_inv_backup(struct char_data *ch) {
     fclose(source);
 
     if (remove(source_file) < 0 && errno != ENOENT)
-        log("ERROR: Couldn't delete backup inv.");
+        basic_mud_log("ERROR: Couldn't delete backup inv.");
     /*  SYSERR_DESC:
      *  When an alias file cannot be removed, this error will occur,
      *  and the reason why will be the tail end of the error.
@@ -134,21 +134,21 @@ int load_inv_backup(struct char_data *ch) {
     sprintf(target_file, "%s", buf2);
 
     if (!(source = fopen(source_file, "r"))) {
-        log("Source in load_inv_backup failed to load.");
-        log(source_file);
+        basic_mud_log("Source in load_inv_backup failed to load.");
+        basic_mud_log(source_file);
         return -1;
     }
 
     if (!(target = fopen(target_file, "w"))) {
-        log("Target in load_inv_backup failed to load.");
-        log(target_file);
+        basic_mud_log("Target in load_inv_backup failed to load.");
+        basic_mud_log(target_file);
         return -1;
     }
 
     while ((chx = fgetc(source)) != EOF)
         fputc(chx, target);
 
-    log("Inventory backup restore successful.");
+    basic_mud_log("Inventory backup restore successful.");
 
     fclose(source);
     fclose(target);
@@ -306,14 +306,14 @@ void auto_equip(struct char_data *ch, struct obj_data *obj, int location) {
         }
     }
     if(world.contains(-1)) {
-        log("World contains -1");
+        basic_mud_log("World contains -1");
     }
 
     if (location <= 0)    /* Inventory */
         obj_to_char(obj, ch);
 
     if(world.contains(-1)) {
-        log("World contains -1");
+        basic_mud_log("World contains -1");
     }
 }
 
@@ -332,14 +332,14 @@ int Crash_delete_file(char *name) {
 
     if (!(fl = fopen(filename, "rb"))) {
         if (errno != ENOENT)    /* if it fails but NOT because of no file */
-            log("SYSERR: deleting crash file %s (1): %s", filename, strerror(errno));
+            basic_mud_log("SYSERR: deleting crash file %s (1): %s", filename, strerror(errno));
         return (0);
     }
     fclose(fl);
 
     /* if it fails, NOT because of no file */
     if (remove(filename) < 0 && errno != ENOENT)
-        log("SYSERR: deleting crash file %s (2): %s", filename, strerror(errno));
+        basic_mud_log("SYSERR: deleting crash file %s (2): %s", filename, strerror(errno));
 
     return (1);
 }
@@ -356,7 +356,7 @@ int Crash_delete_crashfile(struct char_data *ch) {
 
     if (!(fl = fopen(filename, "rb"))) {
         if (errno != ENOENT)    /* if it fails, NOT because of no file */
-            log("SYSERR: checking for crash file %s (3): %s", filename, strerror(errno));
+            basic_mud_log("SYSERR: checking for crash file %s (3): %s", filename, strerror(errno));
         return (0);
     }
 
@@ -383,7 +383,7 @@ int Crash_clean_file(char *name) {
 
     if (!(fl = fopen(filename, "r+b"))) {
         if (errno != ENOENT)    /* if it fails, NOT because of no file */
-            log("SYSERR: OPENING OBJECT FILE %s (4): %s", filename, strerror(errno));
+            basic_mud_log("SYSERR: OPENING OBJECT FILE %s (4): %s", filename, strerror(errno));
         return (0);
     }
 
@@ -413,14 +413,14 @@ int Crash_clean_file(char *name) {
                         filetype = "UNKNOWN!";
                         break;
                 }
-                log("    Deleting %s's %s file.", name, filetype);
+                basic_mud_log("    Deleting %s's %s file.", name, filetype);
                 return (1);
             }
             /* Must retrieve rented items w/in 30 days */
         } else if (rentcode == RENT_RENTED)
             if (timed < time(nullptr) - (CONFIG_RENT_TIMEOUT * SECS_PER_REAL_DAY)) {
                 Crash_delete_file(name);
-                log("    Deleting %s's rent file.", name);
+                basic_mud_log("    Deleting %s's rent file.", name);
                 return (1);
             }
     }
@@ -1170,7 +1170,7 @@ int Crash_load(struct char_data *ch) {
                             break;
                         case 'A':
                             if (j >= MAX_OBJ_AFFECT) {
-                                log("SYSERR: Too many object affectations in loading rent file");
+                                basic_mud_log("SYSERR: Too many object affectations in loading rent file");
                                 danger = 1;
                             }
                             get_line(fl, line);
@@ -1194,7 +1194,7 @@ int Crash_load(struct char_data *ch) {
                             break;
                         case 'S':
                             if (j >= SPELLBOOK_SIZE) {
-                                log("SYSERR: Too many spells in spellbook loading rent file");
+                                basic_mud_log("SYSERR: Too many spells in spellbook loading rent file");
                                 danger = 1;
                             }
                             get_line(fl, line);
@@ -1226,8 +1226,11 @@ int Crash_load(struct char_data *ch) {
             }   /* exit our xap loop */
             if (temp != nullptr) {
                 num_objs++;
-                check_unique_id(temp);
-                add_unique_id(temp);
+                if(temp->vn == NOTHING) {
+                    check_unique_id(temp);
+                    add_unique_id(temp);
+                }
+
                 if (GET_OBJ_TYPE(temp) == ITEM_DRINKCON) {
                     name_from_drinkcon(temp);
                     if (GET_OBJ_VAL(temp, 1) != 0)

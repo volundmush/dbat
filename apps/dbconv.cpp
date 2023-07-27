@@ -1,10 +1,10 @@
-#include "comm.h"
-#include "utils.h"
-#include "dg_scripts.h"
-#include "constants.h"
-#include "genolc.h"
-#include "dg_event.h"
-#include "maputils.h"
+#include "dbat/comm.h"
+#include "dbat/utils.h"
+#include "dbat/dg_scripts.h"
+#include "dbat/constants.h"
+#include "dbat/genolc.h"
+#include "dbat/dg_event.h"
+#include "dbat/maputils.h"
 #include <filesystem>
 #include <memory>
 #include <iostream>
@@ -14,10 +14,10 @@
 #include "SQLiteCpp/SQLiteCpp.h"
 #include <boost/algorithm/string.hpp>
 #include <fstream>
-#include "class.h"
-#include "races.h"
-#include "players.h"
-#include "spells.h"
+#include "dbat/class.h"
+#include "dbat/races.h"
+#include "dbat/players.h"
+#include "dbat/spells.h"
 #include "nlohmann/json.hpp"
 
 std::unique_ptr<SQLite::Database> db;
@@ -873,17 +873,17 @@ std::optional<long> dump_player(const char *name) {
 
     char_data *ch = new char_data();
     if(load_char(name, ch) < 0) {
-        log("Error loading player %s", name);
+        basic_mud_log("Error loading player %s", name);
         free_char(ch);
         return {};
     }
     if(player_ids.count(ch->id)) {
-        log("Duplicate player %s", name);
+        basic_mud_log("Duplicate player %s", name);
         free_char(ch);
         return {};
     }
     player_ids.insert(ch->id);
-    log("Dumping player %d: %s", ch->id, ch->name);
+    basic_mud_log("Dumping player %d: %s", ch->id, ch->name);
     auto id = ch->id;
     auto cid = dump_character(ch, false);
     q1.bind(1, ch->id);
@@ -980,7 +980,7 @@ void dump_accounts() {
         for(auto &c : characters) {
             auto player_character_id = dump_player(c.c_str());
             if(!player_character_id.has_value()) {
-                log("Error dumping player %s", c.c_str());
+                basic_mud_log("Error dumping player %s", c.c_str());
                 continue;
             }
             q2.bind(1, id);
@@ -1116,38 +1116,38 @@ void dump_db() {
     }
 
     SQLite::Transaction transaction(*db);
-    log("Dumping basic tables...");
+    basic_mud_log("Dumping basic tables...");
     create_basic_tables();
 
-    log("Dumping senseis and races...");
+    basic_mud_log("Dumping senseis and races...");
     dump_assets();
-    log("Dumping zones...");
+    basic_mud_log("Dumping zones...");
     dump_zones();
 
-    log("Dumping scripts...");
+    basic_mud_log("Dumping scripts...");
     dump_scripts();
 
-    log("Dumping rooms and exits...");
+    basic_mud_log("Dumping rooms and exits...");
     dump_rooms();
 
-    log("Dumping space...");
+    basic_mud_log("Dumping space...");
     dump_space();
 
-    log("Dumping item prototypes...");
+    basic_mud_log("Dumping item prototypes...");
     dump_objects();
 
-    log("Dumping npc prototypes...");
+    basic_mud_log("Dumping npc prototypes...");
     dump_npc();
 
-    log("Dumping accounts...");
+    basic_mud_log("Dumping accounts...");
     dump_accounts();
 
-    log("Dumping skill names...");
+    basic_mud_log("Dumping skill names...");
     dump_skills();
 
     // Commit transaction
     transaction.commit();
-    log("Dumping complete!");
+    basic_mud_log("Dumping complete!");
 
 }
 
@@ -1247,7 +1247,7 @@ int main(int argc, char **argv)
                 break;
             case 'x':
                 xap_objs = 1;
-                log("Loading player objects from secondary (ascii) files.");
+                basic_mud_log("Loading player objects from secondary (ascii) files.");
                 break;
             case 'h':
                 /* From: Anil Mahajan <amahajan@proxicom.com> */
@@ -1283,35 +1283,41 @@ int main(int argc, char **argv)
         }
     }
 
-    /* All arguments have been parsed, try to open log file. */
-    setup_log(CONFIG_LOGNAME, STDERR_FILENO);
+    try {
+        /* All arguments have been parsed, try to open log file. */
+        setup_log();
+    }
+    catch(std::exception& e) {
+        std::cerr << "Cannot start logger: " << e.what() << std::endl;
+        exit(1);
+    }
 
     /*
      * Moved here to distinguish command line options and to show up
      * in the log if stderr is redirected to a file.
      */
-    log("Using %s for configuration.", CONFIG_CONFFILE);
-    log("%s", circlemud_version);
-    log("%s", oasisolc_version);
-    log("%s", DG_SCRIPT_VERSION);
-    log("%s", ascii_pfiles_version);
-    log("%s", CWG_VERSION);
+    basic_mud_log("Using %s for configuration.", CONFIG_CONFFILE);
+    basic_mud_log("%s", circlemud_version);
+    basic_mud_log("%s", oasisolc_version);
+    basic_mud_log("%s", DG_SCRIPT_VERSION);
+    basic_mud_log("%s", ascii_pfiles_version);
+    basic_mud_log("%s", CWG_VERSION);
     xap_objs = 1;
     if (chdir(dir) < 0) {
         perror("SYSERR: Fatal error changing to data directory");
         exit(1);
     }
-    log("Using %s as data directory.", dir);
+    basic_mud_log("Using %s as data directory.", dir);
 
     init_lookup_table();
     event_init();
     boot_db();
-    log("Database fully booted!");
+    basic_mud_log("Database fully booted!");
 
     FILE *mapfile;
     int rowcounter, colcounter;
     int vnum_read;
-    log("Loading Space Map. ");
+    basic_mud_log("Loading Space Map. ");
     //Load the map vnums from a file into an array
     mapfile = fopen("../lib/surface.map", "r");
 
@@ -1327,7 +1333,7 @@ int main(int argc, char **argv)
     topLoad();
 
     // BEGIN DUMP SEQUENCE
-    log("Dumping db!");
+    basic_mud_log("Dumping db!");
     dump_db();
 
 

@@ -8,23 +8,23 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include "fight.h"
-#include "dg_comm.h"
-#include "act.attack.h"
-#include "act.other.h"
-#include "act.misc.h"
-#include "act.movement.h"
-#include "utils.h"
-#include "spells.h"
-#include "comm.h"
-#include "db.h"
-#include "config.h"
-#include "races.h"
-#include "handler.h"
-#include "combat.h"
-#include "class.h"
-#include "dg_scripts.h"
-#include "objsave.h"
+#include "dbat/fight.h"
+#include "dbat/dg_comm.h"
+#include "dbat/act.attack.h"
+#include "dbat/act.other.h"
+#include "dbat/act.misc.h"
+#include "dbat/act.movement.h"
+#include "dbat/utils.h"
+#include "dbat/spells.h"
+#include "dbat/comm.h"
+#include "dbat/db.h"
+#include "dbat/config.h"
+#include "dbat/races.h"
+#include "dbat/handler.h"
+#include "dbat/combat.h"
+#include "dbat/class.h"
+#include "dbat/dg_scripts.h"
+#include "dbat/objsave.h"
 
 /* Structures */
 struct char_data *combat_list = nullptr;    /* head of l-list of fighting chars */
@@ -761,7 +761,6 @@ void remove_limb(struct char_data *vict, int num) {
     GET_OBJ_VAL(body_part, 5) = 1;
     GET_OBJ_WEIGHT(body_part) = rand_number(4, 10);
     GET_OBJ_RENT(body_part) = 0;
-    add_unique_id(body_part);
     obj_to_room(body_part, IN_ROOM(vict));
 }
 

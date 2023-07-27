@@ -5,13 +5,13 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
-#include "genobj.h"
-#include "genolc.h"
-#include "genzon.h"
-#include "utils.h"
-#include "handler.h"
-#include "dg_olc.h"
-#include "shop.h"
+#include "dbat/genobj.h"
+#include "dbat/genolc.h"
+#include "dbat/genzon.h"
+#include "dbat/utils.h"
+#include "dbat/handler.h"
+#include "dbat/dg_olc.h"
+#include "dbat/shop.h"
 
 static int copy_object_main(struct obj_data *to, struct obj_data *from, int free_object);
 
@@ -93,28 +93,12 @@ obj_rnum insert_object(struct obj_data *obj, obj_vnum ovnum) {
     return false;
 }
 
-/* ------------------------------------------------------------------------------------------------------------------------------ */
-
-obj_rnum index_object(struct obj_data *obj, obj_vnum ovnum, obj_rnum ornum) {
-    if (!obj || ornum == NOTHING || !obj_proto.count(ornum))
-        return NOWHERE;
-
-    obj->vn = ornum;
-    obj_index[ornum].vn = ovnum;
-    obj_index[ornum].number = 0;
-    obj_index[ornum].func = nullptr;
-
-    copy_object_preserve(&obj_proto[ornum], obj);
-    obj_proto[ornum].in_room = NOWHERE;
-
-    return ornum;
-}
 
 /* ------------------------------------------------------------------------------------------------------------------------------ */
 
 int save_objects(zone_rnum zone_num) {
     if (!zone_table.count(zone_num)) {
-        log("SYSERR: OasisOLC: save_objects: Invalid real zone number %d.", zone_num);
+        basic_mud_log("SYSERR: OasisOLC: save_objects: Invalid real zone number %d.", zone_num);
         return false;
     }
     auto &z = zone_table[zone_num];
@@ -235,7 +219,7 @@ int delete_object(obj_rnum rnum) {
     zrnum = real_zone_by_thing(rnum);
 
     /* This is something you might want to read about in the logs. */
-    log("GenOLC: delete_object: Deleting object #%d (%s).", GET_OBJ_VNUM(obj), obj->short_description);
+    basic_mud_log("GenOLC: delete_object: Deleting object #%d (%s).", GET_OBJ_VNUM(obj), obj->short_description);
 
     for (tmp = object_list; tmp; tmp = tmp->next) {
         if (tmp->vn != obj->vn)
@@ -266,7 +250,7 @@ int delete_object(obj_rnum rnum) {
     }
 
     /* Make sure all are removed. */
-    assert(obj_index[rnum].number == 0);
+    assert(obj_index[rnum].objects.empty());
     obj_proto.erase(rnum);
     obj_index.erase(rnum);
     save_objects(zrnum);
@@ -327,6 +311,12 @@ nlohmann::json obj_data::serializeBase() {
 
 nlohmann::json obj_data::serializeInstance() {
     auto j = serializeBase();
+    if(id == -1) {
+        id = nextObjID();
+        generation = time(nullptr);
+        check_unique_id(this);
+        add_unique_id(this);
+    }
 
     if(generation) j["generation"] = generation;
 
@@ -445,12 +435,12 @@ void obj_data::activate() {
     object_list = this;
     auto find = obj_index.find(vn);
     if(find != obj_index.end()) {
-        find->second.number++;
+        find->second.objects.insert(this);
     }
     auto ofind = obj_proto.find(vn);
     if(ofind != obj_proto.end()) {
         if(ofind->second.proto_script) {
-            if(!script) script = new script_data();
+            if(!script) script = new script_data(this);
             for(auto p = proto_script; p; p = p->next) {
                 auto t = read_trigger(p->vnum);
                 if(t) add_trigger(script, t, -1);
@@ -465,7 +455,7 @@ void obj_data::deactivate() {
     REMOVE_FROM_LIST(this, object_list, next, temp);
     auto find = obj_index.find(vn);
     if(find != obj_index.end()) {
-        find->second.number--;
+        find->second.objects.erase(this);
     }
     if(script && script->trig_list) {
         struct trig_data *next_trig;

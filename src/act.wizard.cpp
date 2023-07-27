@@ -9,36 +9,36 @@
 ************************************************************************ */
 
 #include <fstream>
-#include "act.wizard.h"
-#include "interpreter.h"
-#include "utils.h"
-#include "config.h"
-#include "act.other.h"
-#include "maputils.h"
-#include "dg_comm.h"
-#include "handler.h"
-#include "act.item.h"
-#include "act.informative.h"
-#include "players.h"
-#include "weather.h"
-#include "assemblies.h"
-#include "house.h"
-#include "comm.h"
-#include "constants.h"
-#include "dg_scripts.h"
-#include "races.h"
-#include "class.h"
-#include "spells.h"
-#include "improved-edit.h"
-#include "objsave.h"
-#include "feats.h"
-#include "fight.h"
-#include "genolc.h"
-#include "screen.h"
-#include "local_limits.h"
-#include "shop.h"
-#include "guild.h"
-#include "spell_parser.h"
+#include "dbat/act.wizard.h"
+#include "dbat/interpreter.h"
+#include "dbat/utils.h"
+#include "dbat/config.h"
+#include "dbat/act.other.h"
+#include "dbat/maputils.h"
+#include "dbat/dg_comm.h"
+#include "dbat/handler.h"
+#include "dbat/act.item.h"
+#include "dbat/act.informative.h"
+#include "dbat/players.h"
+#include "dbat/weather.h"
+#include "dbat/assemblies.h"
+#include "dbat/house.h"
+#include "dbat/comm.h"
+#include "dbat/constants.h"
+#include "dbat/dg_scripts.h"
+#include "dbat/races.h"
+#include "dbat/class.h"
+#include "dbat/spells.h"
+#include "dbat/improved-edit.h"
+#include "dbat/objsave.h"
+#include "dbat/feats.h"
+#include "dbat/fight.h"
+#include "dbat/genolc.h"
+#include "dbat/screen.h"
+#include "dbat/local_limits.h"
+#include "dbat/shop.h"
+#include "dbat/guild.h"
+#include "dbat/spell_parser.h"
 
 /* local variables */
 static int copyover_timer = 0; /* for timed copyovers */
@@ -130,7 +130,7 @@ void update_space() {
     int rowcounter, colcounter;
     int vnum_read;
 
-    log("Updated Space Map. ");
+    basic_mud_log("Updated Space Map. ");
 
     //Load the map vnums from a file into an array
     mapfile = fopen("../lib/surface.map", "r");
@@ -171,7 +171,7 @@ ACMD(do_news) {
     lookup = atoi(arg);
 
     if (!(fl = fopen(filename, "r"))) {
-        log("SYSERR: opening news file for reading");
+        basic_mud_log("SYSERR: opening news file for reading");
         return;
     }
 
@@ -296,7 +296,7 @@ ACMD(do_newsedit) {
     /* Check the file for the entry so we may edit it if need be*/
 
     if (!(fl = fopen(filename, "r"))) {
-        log("SYSERR: Couldn't open news file for reading");
+        basic_mud_log("SYSERR: Couldn't open news file for reading");
         return;
     }
 
@@ -461,7 +461,7 @@ static void lockWrite(struct char_data *ch, char *name) {
         return;
 
     if (!(fl = fopen(fname, "w"))) {
-        log("ERROR: could not save Lockout File, %s.", fname);
+        basic_mud_log("ERROR: could not save Lockout File, %s.", fname);
         return;
     }
 
@@ -479,12 +479,12 @@ static void lockWrite(struct char_data *ch, char *name) {
         fprintf(fl, "%s\n", CAP(name));
         send_to_all("@rLOCKOUT@D: @WThe character, @C%s@W, was locked out of the MUD by @c%s@W.@n\r\n", CAP(name),
                     GET_NAME(ch));
-        log("LOCKOUT: %s sentenced by %s.", CAP(name), GET_NAME(ch));
+        basic_mud_log("LOCKOUT: %s sentenced by %s.", CAP(name), GET_NAME(ch));
         log_imm_action("LOCKOUT: %s sentenced by %s.", CAP(name), GET_NAME(ch));
     } else {
         send_to_all("@rLOCKOUT@D: @WThe character, @C%s@W, has had lockout removed by @c%s@W.@n\r\n", CAP(name),
                     GET_NAME(ch));
-        log("LOCKOUT: %s sentenced by %s.", CAP(name), GET_NAME(ch));
+        basic_mud_log("LOCKOUT: %s sentenced by %s.", CAP(name), GET_NAME(ch));
         log_imm_action("LOCKOUT: %s sentenced by %s.", CAP(name), GET_NAME(ch));
     }
 
@@ -1920,7 +1920,7 @@ ACMD(do_stat) {
         if (!*buf2) {
             send_to_char(ch, "Stats on which player?\r\n");
         } else {
-            if ((victim = get_player_vis(ch, buf2, nullptr, FIND_CHAR_WORLD)) != nullptr)
+            if ((victim = findPlayer(buf2)) != nullptr)
                 do_stat_character(ch, victim);
             else
                 send_to_char(ch, "No such player around.\r\n");
@@ -1989,26 +1989,26 @@ ACMD(do_shutdown) {
     one_argument(argument, arg);
 
     if (!*arg) {
-        log("(GC) Shutdown by %s.", GET_NAME(ch));
+        basic_mud_log("(GC) Shutdown by %s.", GET_NAME(ch));
         send_to_all("Shutting down.\r\n");
         circle_shutdown = 1;
     } else if (!strcasecmp(arg, "reboot")) {
-        log("(GC) Reboot by %s.", GET_NAME(ch));
+        basic_mud_log("(GC) Reboot by %s.", GET_NAME(ch));
         send_to_all("Rebooting.. come back in a minute or two.\r\n");
         touch(FASTBOOT_FILE);
         circle_shutdown = circle_reboot = 1;
     } else if (!strcasecmp(arg, "die")) {
-        log("(GC) Shutdown by %s.", GET_NAME(ch));
+        basic_mud_log("(GC) Shutdown by %s.", GET_NAME(ch));
         send_to_all("Shutting down for maintenance.\r\n");
         touch(KILLSCRIPT_FILE);
         circle_shutdown = 1;
     } else if (!strcasecmp(arg, "now")) {
-        log("(GC) Shutdown NOW by %s.", GET_NAME(ch));
+        basic_mud_log("(GC) Shutdown NOW by %s.", GET_NAME(ch));
         send_to_all("Rebooting.. come back in a minute or two.\r\n");
         circle_shutdown = 1;
         circle_reboot = 2; /* do not autosave olc */
     } else if (!strcasecmp(arg, "pause")) {
-        log("(GC) Shutdown by %s.", GET_NAME(ch));
+        basic_mud_log("(GC) Shutdown by %s.", GET_NAME(ch));
         send_to_all("Shutting down for maintenance.\r\n");
         touch(PAUSE_FILE);
         circle_shutdown = 1;
@@ -2199,7 +2199,6 @@ ACMD(do_load) {
         }
         for (i = 0; i < n; i++) {
             obj = read_object(r_num, REAL);
-            add_unique_id(obj);
             if (GET_ADMLEVEL(ch) > 0) {
                 send_to_imm("LOAD: %s has loaded a %s", GET_NAME(ch), obj->short_description);
                 log_imm_action("LOAD: %s has loaded a %s", GET_NAME(ch), obj->short_description);
@@ -2389,7 +2388,7 @@ ACMD(do_copyover) {
             send_to_char(ch, "Type @ycopyover help@n for usage info.");
         } else {
             copyover_timer = secs;
-            log("-- Timed Copyover started by %s - %d seconds until copyover --", GET_NAME(ch), secs);
+            basic_mud_log("-- Timed Copyover started by %s - %d seconds until copyover --", GET_NAME(ch), secs);
             if (secs >= 60) {
                 if (secs % 60) {
                     game_info("A copyover will be performed in %d minutes and %d seconds.", (copyover_timer / 60),
@@ -2495,10 +2494,10 @@ ACMD(do_advance) {
     send_to_char(ch, "%s", CONFIG_OK);
 
     if (newlevel < oldlevel)
-        log("(GC) %s demoted %s from level %d to %d.",
+        basic_mud_log("(GC) %s demoted %s from level %d to %d.",
             GET_NAME(ch), GET_NAME(victim), oldlevel, newlevel);
     else
-        log("(GC) %s has advanced %s to level %d (from %d)",
+        basic_mud_log("(GC) %s has advanced %s to level %d (from %d)",
             GET_NAME(ch), GET_NAME(victim), newlevel, oldlevel);
 
     gain_exp_regardless(victim,
@@ -2525,7 +2524,7 @@ ACMD(do_handout) {
     }
 
     send_to_all("@g%s@G hands out 10 practice sessions to everyone!@n\r\n", GET_NAME(ch));
-    log("%s gave a handout of 10 PS to everyone.", GET_NAME(ch));
+    basic_mud_log("%s gave a handout of 10 PS to everyone.", GET_NAME(ch));
     log_imm_action("HANDOUT: %s has handed out 10 PS to everyone.", GET_NAME(ch));
 }
 
@@ -2727,7 +2726,7 @@ ACMD(do_dc) {
             STATE(d) = CON_CLOSE;
 
         send_to_char(ch, "Connection #%d closed.\r\n", num_to_dc);
-        log("(GC) Connection closed by %s.", GET_NAME(ch));
+        basic_mud_log("(GC) Connection closed by %s.", GET_NAME(ch));
     }
 }
 
@@ -2753,23 +2752,23 @@ ACMD(do_wizlock) {
             case 0:
                 send_to_char(ch, "The game is %s completely open.\r\n", when);
                 send_to_all("@RWIZLOCK@D: @WThe game has been completely opened by @C%s@W.@n", GET_NAME(ch));
-                log("WIZLOCK: The game has been completely opened by %s.", GET_NAME(ch));
+                basic_mud_log("WIZLOCK: The game has been completely opened by %s.", GET_NAME(ch));
                 break;
             case 1:
                 send_to_char(ch, "The game is %s closed to new players.\r\n", when);
                 send_to_all("@RWIZLOCK@D: @WThe game is %s closed to new players by @C%s@W.@n", when, GET_NAME(ch));
-                log("WIZLOCK: The game is %s closed to new players by %s.", when, GET_NAME(ch));
+                basic_mud_log("WIZLOCK: The game is %s closed to new players by %s.", when, GET_NAME(ch));
                 break;
             case 101:
                 send_to_char(ch, "The game is %s closed to non-imms.\r\n", when);
                 send_to_all("@RWIZLOCK@D: @WThe game is %s closed to non-imms by @C%s@W.@n", when, GET_NAME(ch));
-                log("WIZLOCK: The game is %s closed to non-imms by %s.", when, GET_NAME(ch));
+                basic_mud_log("WIZLOCK: The game is %s closed to non-imms by %s.", when, GET_NAME(ch));
                 break;
             default:
                 send_to_char(ch, "Only level %d+ may enter the game %s.\r\n", circle_restrict, when);
                 send_to_all("@RWIZLOCK@D: @WLevel %d+ only can enter the game %s, thanks to @C%s@W.@n", circle_restrict,
                             when, GET_NAME(ch));
-                log("WIZLOCK: Level %d+ only can enter the game %s, thanks to %s.", circle_restrict, when,
+                basic_mud_log("WIZLOCK: Level %d+ only can enter the game %s, thanks to %s.", circle_restrict, when,
                     GET_NAME(ch));
                 break;
         }
@@ -3045,7 +3044,7 @@ ACMD(do_wizutil) {
         switch (subcmd) {
             case SCMD_REROLL:
                 send_to_char(ch, "Rerolling is not possible at this time, bug Iovan about it...\r\n");
-                log("(GC) %s has rerolled %s.", GET_NAME(ch), GET_NAME(vict));
+                basic_mud_log("(GC) %s has rerolled %s.", GET_NAME(ch), GET_NAME(vict));
                 send_to_char(ch, "New stats: Str %d, Int %d, Wis %d, Dex %d, Con %d, Cha %d\r\n",
                              GET_STR(vict), GET_INT(vict), GET_WIS(vict),
                              GET_DEX(vict), GET_CON(vict), GET_CHA(vict));
@@ -3134,7 +3133,7 @@ ACMD(do_wizutil) {
                 }
                 break;
             default:
-                log("SYSERR: Unknown subcmd %d passed to do_wizutil (%s)", subcmd, __FILE__);
+                basic_mud_log("SYSERR: Unknown subcmd %d passed to do_wizutil (%s)", subcmd, __FILE__);
                 /*  SYSERR_DESC:
        *  This is the same as the unhandled case in do_gen_ps(), but this
        *  function handles 'reroll', 'pardon', 'freeze', etc.

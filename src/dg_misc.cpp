@@ -7,17 +7,17 @@
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
 
-#include "structs.h"
-#include "dg_scripts.h"
-#include "utils.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "dg_event.h"
-#include "db.h"
-#include "spells.h"
-#include "constants.h"
-#include "fight.h"
+#include "dbat/structs.h"
+#include "dbat/dg_scripts.h"
+#include "dbat/utils.h"
+#include "dbat/comm.h"
+#include "dbat/interpreter.h"
+#include "dbat/handler.h"
+#include "dbat/dg_event.h"
+#include "dbat/db.h"
+#include "dbat/spells.h"
+#include "dbat/constants.h"
+#include "dbat/fight.h"
 
 /* copied from spell_parser.c: */
 #define SINFO spell_info[spellnum]

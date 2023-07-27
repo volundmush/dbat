@@ -8,7 +8,7 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include "constants.h"
+#include "dbat/constants.h"
 
 const char *circlemud_version = "CircleMUD, version 3.1";
 

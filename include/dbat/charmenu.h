@@ -5,7 +5,7 @@
 namespace net {
     class CharacterMenu : public ConnectionParser {
     public:
-        CharacterMenu(struct connection_data *co, char_data *c);
+        CharacterMenu(std::shared_ptr<Connection>& co, char_data *c);
         void parse(const std::string &txt) override;
         void start() override;
     protected:

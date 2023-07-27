@@ -7,27 +7,27 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include "act.informative.h"
-#include "act.wizard.h"
-#include "vehicles.h"
-#include "act.item.h"
-#include "act.social.h"
-#include "maputils.h"
-#include "config.h"
-#include "utils.h"
-#include "comm.h"
-#include "spells.h"
-#include "races.h"
-#include "handler.h"
-#include "constants.h"
-#include "dg_scripts.h"
-#include "class.h"
-#include "boards.h"
-#include "screen.h"
-#include "mail.h"
-#include "guild.h"
-#include "clan.h"
-#include "players.h"
+#include "dbat/act.informative.h"
+#include "dbat/act.wizard.h"
+#include "dbat/vehicles.h"
+#include "dbat/act.item.h"
+#include "dbat/act.social.h"
+#include "dbat/maputils.h"
+#include "dbat/config.h"
+#include "dbat/utils.h"
+#include "dbat/comm.h"
+#include "dbat/spells.h"
+#include "dbat/races.h"
+#include "dbat/handler.h"
+#include "dbat/constants.h"
+#include "dbat/dg_scripts.h"
+#include "dbat/class.h"
+#include "dbat/boards.h"
+#include "dbat/screen.h"
+#include "dbat/mail.h"
+#include "dbat/guild.h"
+#include "dbat/clan.h"
+#include "dbat/players.h"
 
 /* local functions */
 static void gen_map(struct char_data *ch, int num);
@@ -2047,7 +2047,7 @@ static void display_scroll(struct char_data *ch, struct obj_data *obj) {
 
 static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mode) {
     if (!obj || !ch) {
-        log("SYSERR: nullptr pointer in show_obj_to_char(): obj=%p ch=%p", obj, ch);
+        basic_mud_log("SYSERR: nullptr pointer in show_obj_to_char(): obj=%p ch=%p", obj, ch);
         /*  SYSERR_DESC:
      *  Somehow a nullptr pointer was sent to show_obj_to_char() in either the
      *  'obj' or the 'ch' variable.  The error will indicate which was nullptr
@@ -2455,7 +2455,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
             break;
 
         default:
-            log("SYSERR: Bad display mode (%d) in show_obj_to_char().", mode);
+            basic_mud_log("SYSERR: Bad display mode (%d) in show_obj_to_char().", mode);
             /*  SYSERR_DESC:
      *  show_obj_to_char() has some predefined 'mode's (argument #3) to tell
      *  it what to display to the character when it is called.  If the mode
@@ -3621,7 +3621,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                             char argh[100];
                             if (fname(W_EXIT(target_room, door)->keyword) == nullptr) {
                                 send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION NORTHWEST@n\r\n");
-                                log("ERROR: %s found error direction NORTHWEST at room %d", GET_NAME(ch),
+                                basic_mud_log("ERROR: %s found error direction NORTHWEST at room %d", GET_NAME(ch),
                                     GET_ROOM_VNUM(IN_ROOM(ch)));
                                 return;
                             }
@@ -3652,7 +3652,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                             /* This exit has a door - tell all about it */
                             if (fname(W_EXIT(target_room, door)->keyword) == nullptr) {
                                 send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION NORTH@n\r\n");
-                                log("ERROR: %s found error direction NORTH at room %d", GET_NAME(ch),
+                                basic_mud_log("ERROR: %s found error direction NORTH at room %d", GET_NAME(ch),
                                     GET_ROOM_VNUM(IN_ROOM(ch)));
                                 return;
                             }
@@ -3684,7 +3684,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                             /* This exit has a door - tell all about it */
                             if (fname(W_EXIT(target_room, door)->keyword) == nullptr) {
                                 send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION NORTHEAST@n\r\n");
-                                log("ERROR: %s found error direction NORTHEAST at room %d", GET_NAME(ch),
+                                basic_mud_log("ERROR: %s found error direction NORTHEAST at room %d", GET_NAME(ch),
                                     GET_ROOM_VNUM(IN_ROOM(ch)));
                                 return;
                             }
@@ -3716,7 +3716,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                             /* This exit has a door - tell all about it */
                             if (fname(W_EXIT(target_room, door)->keyword) == nullptr) {
                                 send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION EAST@n\r\n");
-                                log("ERROR: %s found error direction EAST at room %d", GET_NAME(ch),
+                                basic_mud_log("ERROR: %s found error direction EAST at room %d", GET_NAME(ch),
                                     GET_ROOM_VNUM(IN_ROOM(ch)));
                                 return;
                             }
@@ -3748,7 +3748,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                             /* This exit has a door - tell all about it */
                             if (fname(W_EXIT(target_room, door)->keyword) == nullptr) {
                                 send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION SOUTHEAST@n\r\n");
-                                log("ERROR: %s found error direction SOUTHEAST at room %d", GET_NAME(ch),
+                                basic_mud_log("ERROR: %s found error direction SOUTHEAST at room %d", GET_NAME(ch),
                                     GET_ROOM_VNUM(IN_ROOM(ch)));
                                 return;
                             }
@@ -3780,7 +3780,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                             /* This exit has a door - tell all about it */
                             if (fname(W_EXIT(target_room, door)->keyword) == nullptr) {
                                 send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION SOUTH@n\r\n");
-                                log("ERROR: %s found error direction SOUTH at room %d", GET_NAME(ch),
+                                basic_mud_log("ERROR: %s found error direction SOUTH at room %d", GET_NAME(ch),
                                     GET_ROOM_VNUM(IN_ROOM(ch)));
                                 return;
                             }
@@ -3812,7 +3812,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                             /* This exit has a door - tell all about it */
                             if (fname(W_EXIT(target_room, door)->keyword) == nullptr) {
                                 send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION SOUTHWEST@n\r\n");
-                                log("ERROR: %s found error direction SOUTHWEST at room %d", GET_NAME(ch),
+                                basic_mud_log("ERROR: %s found error direction SOUTHWEST at room %d", GET_NAME(ch),
                                     GET_ROOM_VNUM(IN_ROOM(ch)));
                                 return;
                             }
@@ -3844,7 +3844,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                             /* This exit has a door - tell all about it */
                             if (fname(W_EXIT(target_room, door)->keyword) == nullptr) {
                                 send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION WEST@n\r\n");
-                                log("ERROR: %s found error direction WEST at room %d", GET_NAME(ch),
+                                basic_mud_log("ERROR: %s found error direction WEST at room %d", GET_NAME(ch),
                                     GET_ROOM_VNUM(IN_ROOM(ch)));
                                 return;
                             }
@@ -3876,7 +3876,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                             /* This exit has a door - tell all about it */
                             if (fname(W_EXIT(target_room, door)->keyword) == nullptr) {
                                 send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION UP@n\r\n");
-                                log("ERROR: %s found error direction UP at room %d", GET_NAME(ch),
+                                basic_mud_log("ERROR: %s found error direction UP at room %d", GET_NAME(ch),
                                     GET_ROOM_VNUM(IN_ROOM(ch)));
                                 return;
                             }
@@ -3908,7 +3908,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                             /* This exit has a door - tell all about it */
                             if (fname(W_EXIT(target_room, door)->keyword) == nullptr) {
                                 send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION DOWN@n\r\n");
-                                log("ERROR: %s found error direction DOWN at room %d", GET_NAME(ch),
+                                basic_mud_log("ERROR: %s found error direction DOWN at room %d", GET_NAME(ch),
                                     GET_ROOM_VNUM(IN_ROOM(ch)));
                                 return;
                             }
@@ -3940,7 +3940,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                             /* This exit has a door - tell all about it */
                             if (fname(W_EXIT(target_room, door)->keyword) == nullptr) {
                                 send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION INSIDE@n\r\n");
-                                log("ERROR: %s found error direction INSIDE at room %d", GET_NAME(ch),
+                                basic_mud_log("ERROR: %s found error direction INSIDE at room %d", GET_NAME(ch),
                                     GET_ROOM_VNUM(IN_ROOM(ch)));
                                 return;
                             }
@@ -3972,7 +3972,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                             /* This exit has a door - tell all about it */
                             if (fname(W_EXIT(target_room, door)->keyword) == nullptr) {
                                 send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION OUTSIDE@n\r\n");
-                                log("ERROR: %s found error direction OUTSIDE at room %d", GET_NAME(ch),
+                                basic_mud_log("ERROR: %s found error direction OUTSIDE at room %d", GET_NAME(ch),
                                     GET_ROOM_VNUM(IN_ROOM(ch)));
                                 return;
                             }
@@ -7084,7 +7084,7 @@ ACMD(do_gen_ps) {
             send_to_char(ch, "%s\r\n", GET_NAME(ch));
             break;
         default:
-            log("SYSERR: Unhandled case in do_gen_ps. (%d)", subcmd);
+            basic_mud_log("SYSERR: Unhandled case in do_gen_ps. (%d)", subcmd);
             /*  SYSERR_DESC:
      *  General page string function for such things as 'credits', 'news',
      *  'wizlist', 'clear', 'version'.  This occurs when a call is made to

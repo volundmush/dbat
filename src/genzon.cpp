@@ -5,13 +5,13 @@
  ************************************************************************/
 
 #include <fstream>
-#include "genzon.h"
-#include "utils.h"
+#include "dbat/genzon.h"
+#include "dbat/utils.h"
 
-#include "genolc.h"
-#include "dg_scripts.h"
-#include "shop.h"
-#include "guild.h"
+#include "dbat/genolc.h"
+#include "dbat/dg_scripts.h"
+#include "dbat/shop.h"
+#include "dbat/guild.h"
 
 /* real zone of room/mobile/object/shop given */
 zone_rnum real_zone_by_thing(room_vnum vznum) {
@@ -322,7 +322,7 @@ void remove_room_zone_commands(zone_rnum zone, room_rnum room_num) {
  */
 int save_zone(zone_rnum zone_num) {
     if (!zone_table.count(zone_num)) {
-        log("SYSERR: GenOLC: save_zone: Invalid real zone number %d.", zone_num);
+        basic_mud_log("SYSERR: GenOLC: save_zone: Invalid real zone number %d.", zone_num);
         return false;
     }
     auto &z = zone_table[zone_num];

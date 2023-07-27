@@ -29,12 +29,12 @@
 //********************************************************************************
 
 
-#include "clan.h"        // the interface we need to impleme
-#include "db.h"             // for LIB_ETC
-#include "comm.h"           // for send_to_char
-#include "interpreter.h"    // for ACMD()
-#include "utils.h"          // for CREATE() and IDNUM()
-#include "improved-edit.h"
+#include "dbat/clan.h"        // the interface we need to impleme
+#include "dbat/db.h"             // for LIB_ETC
+#include "dbat/comm.h"           // for send_to_char
+#include "dbat/interpreter.h"    // for ACMD()
+#include "dbat/utils.h"          // for CREATE() and IDNUM()
+#include "dbat/improved-edit.h"
 
 /* Local variables */
 int num_clans = 0;
@@ -125,7 +125,7 @@ void writeClanMasterlist() {
     char buf[MAX_STRING_LENGTH];
 
     if (!(fl = fopen(CLAN_LIST, "w"))) {
-        log("ERROR: could not open clan masterlist for writing.");
+        basic_mud_log("ERROR: could not open clan masterlist for writing.");
         return;
     }
 
@@ -196,12 +196,12 @@ struct clan_data *clanLoad(const char *filename) {
     struct clan_data *S;
 
     if (filename == nullptr) {
-        log("ERROR: passed null pointer to clanLoad");
+        basic_mud_log("ERROR: passed null pointer to clanLoad");
         return nullptr;
     }
 
     if (!(fl = fopen(filename, "r"))) {
-        log("ERROR: could not open file, %s, in clanLoad.", filename);
+        basic_mud_log("ERROR: could not open file, %s, in clanLoad.", filename);
         return nullptr;
     }
 
@@ -333,12 +333,12 @@ bool clanSave(const struct clan_data *S, const char *filename) {
     struct clan_member *list;
 
     if (filename == nullptr) {
-        log("ERROR: passed null pointer to clanSave when saving %s", S->name);
+        basic_mud_log("ERROR: passed null pointer to clanSave when saving %s", S->name);
         return false;
     }
 
     if (!(fl = fopen(filename, "w"))) {
-        log("ERROR: could not save clan, %s, to filename, %s.", S->name, filename);
+        basic_mud_log("ERROR: could not save clan, %s, to filename, %s.", S->name, filename);
         return false;
     }
 
@@ -416,7 +416,7 @@ void clanRemove(struct clan_data *S) {
 
 
     if (i == num_clans) {
-        log("ERROR: tried to remove clan, %s, which did not formally exist.", S->name);
+        basic_mud_log("ERROR: tried to remove clan, %s, which did not formally exist.", S->name);
         clanDelete(S);
         return;
     }
@@ -506,19 +506,19 @@ void clanBoot() {
     char line[MAX_STRING_LENGTH];
 
     if (!(fl = fopen(CLAN_LIST, "r"))) {
-        log("  Could not open clan masterlist. Aborting.");
+        basic_mud_log("  Could not open clan masterlist. Aborting.");
         return;
     }
 
     if (feof(fl)) {
-        log("  Clan masterlist contained no data! Aborting.");
+        basic_mud_log("  Clan masterlist contained no data! Aborting.");
         return;
     }
 
     len = fgetlinetomax(fl, line, MAX_STRING_LENGTH);
     sscanf(line, "%d", &num_clans);
     if (num_clans <= 0) {
-        log("  No clans have formed yet.");
+        basic_mud_log("  No clans have formed yet.");
         clan = nullptr;
         return;
     }
@@ -527,10 +527,10 @@ void clanBoot() {
 
     for (i = 0; i < num_clans; i++) {
         if ((len = fgetlinetomax(fl, line, MAX_STRING_LENGTH)) > 0) {
-            log("  Loading clan: %s", line);
+            basic_mud_log("  Loading clan: %s", line);
             clan[i] = clanLoad(line);
         } else {
-            log("  Found blank line while looking for clan names. Aborting.");
+            basic_mud_log("  Found blank line while looking for clan names. Aborting.");
             for (i--; i >= 0; i--)
                 clanDelete(clan[i]);
             free(clan);  // ...it would be nice, wouldn't it?

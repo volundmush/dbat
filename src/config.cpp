@@ -14,8 +14,8 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include "config.h"
-#include "interpreter.h"    /* alias_data definition for structs.h */
+#include "dbat/config.h"
+#include "dbat/interpreter.h"    /* alias_data definition for structs.h */
 
 /*
  * Update:  The following constants and variables are now the default values
@@ -43,7 +43,21 @@
 
 /****************************************************************************/
 /****************************************************************************/
+namespace config {
+    using namespace std::chrono_literals;
 
+    bool enableMultithreading{true};
+    int threadsCount{2};
+    bool usingMultithreading{false};
+    std::chrono::milliseconds heartbeatInterval{100ms};
+    std::string thermiteAddress{"127.0.0.1"};
+    uint16_t thermitePort{7000};
+    std::string logFile = "logs/dbat.log";
+
+    std::string dbName = "dbat.sqlite3";
+    bool testMode{false};
+
+}
 
 /*
  * pk_allowed sets the tone of the entire game.  If pk_allowed is set to

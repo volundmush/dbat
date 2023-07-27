@@ -1,12 +1,12 @@
-#include "puppet.h"
-#include "structs.h"
-#include "utils.h"
-#include "constants.h"
-#include "dg_scripts.h"
-#include "class.h"
+#include "dbat/puppet.h"
+#include "dbat/structs.h"
+#include "dbat/utils.h"
+#include "dbat/constants.h"
+#include "dbat/dg_scripts.h"
+#include "dbat/class.h"
 
 namespace net {
-    PuppetParser::PuppetParser(struct connection_data *co, char_data *c) : ConnectionParser(co) {
+    PuppetParser::PuppetParser(std::shared_ptr<Connection>& co, char_data *c) : ConnectionParser(co) {
         ch = c;
     }
 
@@ -15,27 +15,23 @@ namespace net {
             // The character already has a descriptor! Let's just join up with it.
             conn->account->descriptors.insert(ch->desc);
             conn->desc = ch->desc;
-            {
-                std::lock_guard<std::mutex> guard(conn->desc->connection_mutex);
-                conn->desc->connections.insert(conn);
-            }
             conn->desc->connections.insert(conn);
             conn->sendText("Joining existing session...\r\n");
             return;
         }
 
         auto desc = new descriptor_data();
+        STATE(desc) = CON_LOGIN;
         desc->raw_input_queue = std::make_unique<Channel<std::string>>(*io, 200);
         desc->character = ch;
         ch->desc = desc;
         conn->desc = desc;
         desc->account = conn->account;
         conn->account->descriptors.insert(desc);
-        {
-            std::lock_guard<std::mutex> guard(desc->connection_mutex);
-            desc->connections.insert(conn);
-        }
-        pending_descriptors->try_send(boost::system::error_code{}, desc);
+        desc->connections.insert(conn);
+
+        desc->next = descriptor_list;
+        descriptor_list = desc;
     }
 
     void PuppetParser::parse(const std::string &txt) {

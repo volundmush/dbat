@@ -7,18 +7,18 @@
 ************************************************************************ */
 #define __OBJ_EDIT_C__
 
-#include "obj_edit.h"
-#include "utils.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "db.h"
-#include "spells.h"
-#include "screen.h"
-#include "constants.h"
-#include "obj_edit.h"
-#include "dg_comm.h"
-#include "act.other.h"
+#include "dbat/obj_edit.h"
+#include "dbat/utils.h"
+#include "dbat/comm.h"
+#include "dbat/interpreter.h"
+#include "dbat/handler.h"
+#include "dbat/db.h"
+#include "dbat/spells.h"
+#include "dbat/screen.h"
+#include "dbat/constants.h"
+#include "dbat/obj_edit.h"
+#include "dbat/dg_comm.h"
+#include "dbat/act.other.h"
 
 /* local functions  */
 void disp_custom_menu(struct descriptor_data *d);

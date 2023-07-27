@@ -1,5 +1,5 @@
-#include "structs.h"
-#include "db.h"
+#include "dbat/structs.h"
+#include "dbat/db.h"
 
 vnum area_data::getNextID() {
     vnum vn = 0;

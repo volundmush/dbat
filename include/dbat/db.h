@@ -213,7 +213,7 @@ extern void write_level_data(struct char_data *ch, FILE *fl);
 
 extern int parse_mobile_from_file(FILE *mob_f, struct char_data *ch);
 
-struct obj_data *create_obj();
+struct obj_data *create_obj(bool activate = true);
 
 extern void free_obj(struct obj_data *obj);
 
@@ -406,8 +406,8 @@ extern std::map<zone_vnum, struct zone_data> zone_table;
 
 extern std::map<vnum, area_data> areas;
 
-
 extern struct descriptor_data *descriptor_list;
+extern std::map<int64_t, struct descriptor_data*> sessions;
 extern struct char_data *character_list;
 extern struct char_data *affect_list;
 extern struct char_data *affectv_list;

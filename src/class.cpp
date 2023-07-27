@@ -15,22 +15,22 @@
  * the appropriate new special cases for your new class.
  */
 
-#include "class.h"
+#include "dbat/class.h"
 
 #include <utility>
-#include "db.h"
-#include "utils.h"
-#include "comm.h"
-#include "spells.h"
-#include "interpreter.h"
-#include "constants.h"
-#include "handler.h"
-#include "feats.h"
-#include "oasis.h"
-#include "act.wizard.h"
-#include "dg_comm.h"
-#include "config.h"
-#include "act.other.h"
+#include "dbat/db.h"
+#include "dbat/utils.h"
+#include "dbat/comm.h"
+#include "dbat/spells.h"
+#include "dbat/interpreter.h"
+#include "dbat/constants.h"
+#include "dbat/handler.h"
+#include "dbat/feats.h"
+#include "dbat/oasis.h"
+#include "dbat/act.wizard.h"
+#include "dbat/dg_comm.h"
+#include "dbat/config.h"
+#include "dbat/act.other.h"
 
 /* Names first */
 
@@ -544,7 +544,7 @@ void do_start(struct char_data *ch) {
     }
 
     if (GET_CLASS(ch) < 0 || GET_CLASS(ch) > NUM_CLASSES) {
-        log("Unknown character class %d in do_start, resetting.", GET_CLASS(ch));
+        basic_mud_log("Unknown character class %d in do_start, resetting.", GET_CLASS(ch));
         //GET_CLASS(ch) = 0;
     }
     if (GET_ALIGNMENT(ch) < 51 && GET_ALIGNMENT(ch) > -51) {
@@ -839,12 +839,12 @@ void advance_level(struct char_data *ch, int whichclass) {
     char buf[MAX_STRING_LENGTH];
 
     if (whichclass < 0 || whichclass >= NUM_CLASSES) {
-        log("Invalid class %d passed to advance_level, resetting.", whichclass);
+        basic_mud_log("Invalid class %d passed to advance_level, resetting.", whichclass);
         whichclass = 0;
     }
 
     if (!CONFIG_ALLOW_MULTICLASS && whichclass != GET_CLASS(ch)) {
-        log("Attempt to gain a second class without multiclass enabled for %s", GET_NAME(ch));
+        basic_mud_log("Attempt to gain a second class without multiclass enabled for %s", GET_NAME(ch));
         whichclass = GET_CLASS(ch);
     }
 

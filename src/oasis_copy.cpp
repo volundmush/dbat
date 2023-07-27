@@ -6,19 +6,19 @@
 /** Copyright 2002 Kip Potter [Mythran] (kip_potter@hotmail.com)             **/
 /******************************************************************************/
 
-#include "oasis_copy.h"
-#include "dg_comm.h"
-#include "dg_olc.h"
-#include "act.wizard.h"
-#include "utils.h"
-#include "interpreter.h"
-#include "comm.h"
-#include "db.h"
-#include "config.h"
-#include "genolc.h"
-#include "genwld.h"
-#include "genshp.h"
-#include "constants.h"
+#include "dbat/oasis_copy.h"
+#include "dbat/dg_comm.h"
+#include "dbat/dg_olc.h"
+#include "dbat/act.wizard.h"
+#include "dbat/utils.h"
+#include "dbat/interpreter.h"
+#include "dbat/comm.h"
+#include "dbat/db.h"
+#include "dbat/config.h"
+#include "dbat/genolc.h"
+#include "dbat/genwld.h"
+#include "dbat/genshp.h"
+#include "dbat/constants.h"
 
 /******************************************************************************/
 /** Internal Functions                                                       **/

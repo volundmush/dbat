@@ -8,22 +8,22 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include "structs.h"
-#include "utils.h"
-#include "comm.h"
-#include "spells.h"
-#include "handler.h"
-#include "db.h"
-#include "constants.h"
-#include "interpreter.h"
-#include "dg_scripts.h"
-#include "feats.h"
-#include "oasis.h"
-#include "config.h"
-#include "act.item.h"
-#include "act.movement.h"
-#include "races.h"
-#include "act.informative.h"
+#include "dbat/structs.h"
+#include "dbat/utils.h"
+#include "dbat/comm.h"
+#include "dbat/spells.h"
+#include "dbat/handler.h"
+#include "dbat/db.h"
+#include "dbat/constants.h"
+#include "dbat/interpreter.h"
+#include "dbat/dg_scripts.h"
+#include "dbat/feats.h"
+#include "dbat/oasis.h"
+#include "dbat/config.h"
+#include "dbat/act.item.h"
+#include "dbat/act.movement.h"
+#include "dbat/races.h"
+#include "dbat/act.informative.h"
 
 /* external variables */
 
@@ -451,7 +451,6 @@ ASPELL(spell_portal) {
     GET_OBJ_VAL(portal, VAL_PORTAL_HEALTH) = 100;
     GET_OBJ_VAL(portal, VAL_PORTAL_MAXHEALTH) = 100;
     GET_OBJ_TIMER(portal) = (int) (level / 10);
-    add_unique_id(portal);
     obj_to_room(portal, IN_ROOM(ch));
     act("$n opens a portal in thin air.",
         true, ch, nullptr, nullptr, TO_ROOM);
@@ -463,7 +462,6 @@ ASPELL(spell_portal) {
     GET_OBJ_VAL(tportal, VAL_PORTAL_HEALTH) = 100;
     GET_OBJ_VAL(tportal, VAL_PORTAL_MAXHEALTH) = 100;
     GET_OBJ_TIMER(tportal) = (int) (level / 10);
-    add_unique_id(portal);
     obj_to_room(tportal, IN_ROOM(victim));
     act("A shimmering portal appears out of thin air.",
         true, victim, nullptr, nullptr, TO_ROOM);
@@ -619,7 +617,7 @@ int roll_skill(struct char_data *ch, int snum) {
             return roll + rand_number(1, 20);
         }
     } else {
-        log("Trying to roll uncategorized skill/spell #%d for %s", snum, GET_NAME(ch));
+        basic_mud_log("Trying to roll uncategorized skill/spell #%d for %s", snum, GET_NAME(ch));
         return 0;
     }
 }

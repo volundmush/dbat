@@ -7,48 +7,48 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include "comm.h"
-#include "utils.h"
-#include "config.h"
-#include "maputils.h"
-#include "ban.h"
-#include "weather.h"
-#include "act.wizard.h"
-#include "act.misc.h"
-#include "house.h"
-#include "act.other.h"
-#include "dg_comm.h"
-#include "handler.h"
-#include "dg_scripts.h"
-#include "act.item.h"
-#include "interpreter.h"
-#include "random.h"
-#include "act.informative.h"
-#include "dg_event.h"
-#include "mobact.h"
-#include "magic.h"
-#include "objsave.h"
-#include "genolc.h"
-#include "class.h"
-#include "combat.h"
-#include "modify.h"
-#include "fight.h"
-#include "local_limits.h"
-#include "clan.h"
-#include "mail.h"
-#include "constants.h"
-#include "screen.h"
-#include "area.h"
-#include <boost/algorithm/string.hpp>
+#include "dbat/comm.h"
+#include "dbat/utils.h"
+#include "dbat/config.h"
+#include "dbat/maputils.h"
+#include "dbat/ban.h"
+#include "dbat/weather.h"
+#include "dbat/act.wizard.h"
+#include "dbat/act.misc.h"
+#include "dbat/house.h"
+#include "dbat/act.other.h"
+#include "dbat/dg_comm.h"
+#include "dbat/handler.h"
+#include "dbat/dg_scripts.h"
+#include "dbat/act.item.h"
+#include "dbat/interpreter.h"
+#include "dbat/random.h"
+#include "dbat/act.informative.h"
+#include "dbat/dg_event.h"
+#include "dbat/mobact.h"
+#include "dbat/magic.h"
+#include "dbat/objsave.h"
+#include "dbat/genolc.h"
+#include "dbat/class.h"
+#include "dbat/combat.h"
+#include "dbat/fight.h"
+#include "dbat/local_limits.h"
+#include "dbat/clan.h"
+#include "dbat/mail.h"
+#include "dbat/constants.h"
+#include "dbat/screen.h"
 #include <fstream>
-#include "telnet.h"
 #include "sodium.h"
 #include <thread>
-#include "players.h"
-#include "account.h"
+#include "dbat/players.h"
+#include "dbat/account.h"
+#include <mutex>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/sinks/rotating_file_sink.h>
 
 /* local globals */
 struct descriptor_data *descriptor_list = nullptr;        /* master desc list */
+std::map<int64_t, struct descriptor_data*> sessions;
 struct txt_block *bufpool = nullptr;    /* pool of large output buffers */
 int buf_largecount = 0;        /* # of large buffers which exist */
 int buf_overflows = 0;        /* # of overflows of output */
@@ -56,7 +56,6 @@ int buf_switches = 0;        /* # of switches from small to large buf */
 int circle_shutdown = 0;    /* clean shutdown */
 int circle_reboot = 0;        /* reboot the game after a shutdown */
 int no_specials = 0;        /* Suppress ass. of special routines */
-int max_players = 0;        /* max descriptors available */
 int tics_passed = 0;        /* for extern checkpointing */
 int scheck = 0;            /* for syntax checking mode */
 struct timeval null_time;    /* zero-valued time structure */
@@ -75,7 +74,7 @@ char *last_act_message = nullptr;
 ***********************************************************************/
 
 void broadcast(const std::string& txt) {
-    log("Broadcasting: %s", txt.c_str());
+    basic_mud_log("Broadcasting: %s", txt.c_str());
     for(auto &[cid, c] : net::connections) {
         c->sendText(txt);
     }
@@ -89,35 +88,6 @@ boost::asio::awaitable<void> signal_watcher() {
             // TODO: improve this.
         }
     }
-}
-
-static boost::asio::awaitable<void> recoverTelnet(struct descriptor_data *d, nlohmann::json j) {
-    uint16_t socket = j["socket"];
-    boost::beast::tcp_stream conn(*net::io, boost::asio::ip::tcp::v4(), socket);
-    auto tel = new net::telnet_data(std::move(conn));
-    tel->desc = d;
-    d->connections.insert(tel);
-    tel->deserialize(j);
-    tel->state = net::ConnState::Running;
-    {
-        std::lock_guard<std::mutex> guard(net::connectionsMutex);
-        net::connections[socket] = tel;
-    }
-
-    co_await tel->run();
-
-    {
-        std::lock_guard<std::mutex> guard(net::connectionsMutex);
-        net::connections.erase(socket);
-    }
-
-    co_return;
-}
-
-static boost::asio::awaitable<void> recoverHttp(struct descriptor_data *d, nlohmann::json j) {
-    // TODO: Implement the rest of it...
-
-    co_return;
 }
 
 
@@ -138,7 +108,7 @@ void copyover_recover_final() {
         auto accFind = accounts.find(accID);
 
         if(accFind == accounts.end()) {
-            log("recoverConnection: user %d not found.", accID);
+            basic_mud_log("recoverConnection: user %d not found.", accID);
             close_socket(d);
             continue;
         }
@@ -147,7 +117,7 @@ void copyover_recover_final() {
 
         auto playFind = players.find(playerID);
         if(playFind == players.end()) {
-            log("recoverConnection: character %d not found.", playerID);
+            basic_mud_log("recoverConnection: character %d not found.", playerID);
             close_socket(d);
             continue;
         }
@@ -178,11 +148,11 @@ boost::asio::awaitable<void> yield_for(std::chrono::milliseconds ms) {
 
 /* Reload players after a copyover */
 void copyover_recover() {
-    log("Copyover recovery initiated");
+    basic_mud_log("Copyover recovery initiated");
     std::ifstream fp(COPYOVER_FILE);
 
     if(!fp.is_open()) {
-        log("Copyover file not found. Exitting.\n\r");
+        basic_mud_log("Copyover file not found. Exitting.\n\r");
         exit(1);
     }
 
@@ -209,38 +179,31 @@ void copyover_recover() {
         return d;
     };
 
-
-    if(j.contains("pending_descriptors")) {
-        for(const auto &jd : j["pending_descriptors"]) {
-            auto d = setupDesc(jd);
-            net::pending_descriptors->try_send(boost::system::error_code{}, d);
-        }
-    }
-
     if(j.contains("descriptors")) {
         for(const auto &jd : j["descriptors"]) {
-            auto d = setupDesc(jd);
+            auto d = new descriptor_data();
+            d->raw_input_queue = std::make_unique<net::Channel<std::string>>(*net::io, 200);
+            d->obj_editval = j["user"];
+            d->obj_editflag = j["character"];
+            d->connected = CON_COPYOVER;
+            d->obj_type = NOWHERE;
+            if(j.contains("in_room")) d->obj_type = j["in_room"].get<room_vnum>();
+            if(j.contains("connections")) {
+                {
+                    std::lock_guard<std::mutex> guard(net::connectionsMutex);
+                    for(const auto& jc : j["connections"]) {
+                        auto c = std::make_shared<net::Connection>(jc.get<int64_t>());
+                        c->desc = d;
+                        d->connections.insert(c);
+                    }
+                }
+            }
+            sessions[d->obj_editval] = d;
+
             d->next = descriptor_list;
             descriptor_list = d;
         }
     }
-
-    for(auto &[d, jconns] : descMap) {
-        if(jconns.empty()) {
-            STATE(d) = CON_CLOSE;
-            continue;
-        }
-
-        for(auto jc : jconns) {
-            auto protocol = j["protocol"].get<net::Protocol>();
-            if(protocol == net::Protocol::Telnet) {
-                boost::asio::co_spawn(boost::asio::make_strand(*net::io), recoverTelnet(d, jc), boost::asio::detached);
-            } else {
-                boost::asio::co_spawn(boost::asio::make_strand(*net::io), recoverHttp(d, jc), boost::asio::detached);
-            }
-        }
-    }
-
 }
 
 
@@ -255,7 +218,7 @@ static boost::asio::awaitable<void> performReboot(int mode) {
         co_return;
     }
 
-    sprintf(buf, "\t\x1B[1;31m \007\007\007The universe stops for a moment as space and time fold.\x1B[0;0m\r\n");
+    broadcast("\t\x1B[1;31m \007\007\007The universe stops for a moment as space and time fold.\x1B[0;0m\r\n");
     save_mud_time(&time_info);
 
     nlohmann::json j;
@@ -263,8 +226,7 @@ static boost::asio::awaitable<void> performReboot(int mode) {
     /* For each playing descriptor, save its state */
     for (auto &[cid, conn] : net::connections) {
         if(conn->desc) continue;
-        conn->sendText("\n\rSorry, we are rebooting. Come back in a few seconds.\n\r");
-        conn->halt(0);
+        conn->sendText("\n\rSorry, we are rebooting. Please wait warmly for a few seconds.\n\r");
     }
 
     // wait 200 milliseconds... that should be enough time to push out all of the data.
@@ -273,12 +235,11 @@ static boost::asio::awaitable<void> performReboot(int mode) {
     co_await timer.async_wait(boost::asio::use_awaitable);
 
     /* For each descriptor/connection, halt them and save state. */
-    for (auto d = descriptor_list; d; d = d->next) {
+    for (auto &[cid, d] : sessions) {
         nlohmann::json jd;
 
         for(auto c : d->connections) {
-            jd["connections"].push_back(c->serialize());
-            co_await c->halt(mode);
+            jd["connections"].push_back(c->connId);
         }
         auto och = d->character;
 
@@ -296,40 +257,7 @@ static boost::asio::awaitable<void> performReboot(int mode) {
         j["descriptors"].push_back(jd);
     }
 
-    while(net::pending_descriptors->ready()) {
-        struct descriptor_data *d = nullptr;
-        if(!net::pending_descriptors->try_receive([&d](boost::system::error_code ec, struct descriptor_data *data) {
-            if(!ec) d = data;
-        })) continue;
-        if(!d) continue;
-        nlohmann::json jd;
-
-        for(auto c : d->connections) {
-            jd["connections"].push_back(c->serialize());
-            co_await c->halt(mode);
-        }
-
-        auto och = d->character;
-
-        jd["user"] = d->account->vn;
-        jd["character"] = och->id;
-
-        auto r = IN_ROOM(och);
-        auto w = GET_WAS_IN(och);
-        if(r > 1) {
-            jd["in_room"] = r;
-        } else if(r <= 1 && w > 1) {
-            jd["in_room"] = w;
-        }
-
-        j["pending_descriptors"].push_back(jd);
-    }
-
-
-    j["port"] = port;
-    j["mother_desc"] = mother_desc;
-
-    fp << j.dump(4, ' ', false, nlohmann::json::error_handler_t::replace) << std::endl;
+    fp << j.dump(4, ' ', false, nlohmann::json::error_handler_t::ignore) << std::endl;
     fp.close();
 
 	co_return;
@@ -427,31 +355,62 @@ boost::asio::awaitable<void> heartbeat(int heart_pulse, double deltaTime) {
     co_return;
 }
 
+boost::asio::awaitable<void> processConnections(double deltaTime) {
+    // First, handle any disconnected connections.
+    auto disconnected = net::deadConnections;
+    for (const auto &id : disconnected) {
+        auto it = net::connections.find(id);
+        if (it != net::connections.end()) {
+            auto conn = it->second;
+            conn->onNetworkDisconnected();
+            net::connections.erase(it);
+            net::deadConnections.erase(id);
+        }
+    }
+
+    // Second, welcome any new connections!
+    auto pending = net::pendingConnections;
+    for(const auto& id : pending) {
+        auto it = net::connections.find(id);
+        if (it != net::connections.end()) {
+            auto conn = it->second;
+            // Need a proper welcoming later....
+            conn->onWelcome();
+            net::pendingConnections.erase(id);
+        }
+    }
+
+    // Next, we must handle the heartbeat routine for each connection.
+    for(auto& [id, c] : net::connections) {
+        c->onHeartbeat(deltaTime);
+    }
+
+    co_return;
+}
+
 boost::asio::awaitable<void> runOneLoop(double deltaTime) {
     static bool sleeping = false;
     struct descriptor_data* next_d;
 
-    while(net::pending_descriptors->ready()) {
-        if(!net::pending_descriptors->try_receive([&](boost::system::error_code ec, struct descriptor_data *d) {
-            if(!ec) {
-                d->next = descriptor_list;
-                descriptor_list = d;
-                d->character->login();
-            }
-        })) continue;
-    }
+    co_await processConnections(deltaTime);
 
     if(sleeping && descriptor_list) {
-        log("Waking up.");
+        basic_mud_log("Waking up.");
         sleeping = false;
     }
 
     if(!descriptor_list) {
         if(!sleeping) {
-            log("No connections.  Going to sleep.");
+            basic_mud_log("No connections.  Going to sleep.");
             sleeping = true;
         }
         co_return;
+    }
+
+    for(auto d = descriptor_list; d; d = next_d) {
+        next_d = d->next;
+        if(STATE(d) != CON_LOGIN) continue;
+        d->character->login();
     }
 
     /* Process commands we just read from process_input */
@@ -530,14 +489,13 @@ boost::asio::awaitable<void> runOneLoop(double deltaTime) {
 boost::asio::awaitable<void> game_loop() {
     broadcast("The world seems to shimmer and waver as it comes into focus.\r\n");
     for (auto &[vn, z] : zone_table) {
-        log("Resetting #%d: %s (rooms %d-%d).", vn,
+        basic_mud_log("Resetting #%d: %s (rooms %d-%d).", vn,
             z.name, z.bot, z.top);
         reset_zone(vn);
     }
 
-    auto hb = std::chrono::milliseconds(100);
     auto previousTime = boost::asio::steady_timer::clock_type::now();
-    boost::asio::steady_timer timer(co_await boost::asio::this_coro::executor, hb);
+    boost::asio::steady_timer timer(co_await boost::asio::this_coro::executor, config::heartbeatInterval);
 
     /* The Main Loop.  The Big Cheese.  The Top Dog.  The Head Honcho.  The.. */
     while (!circle_shutdown) {
@@ -555,12 +513,13 @@ boost::asio::awaitable<void> game_loop() {
             process_dirty();
             transaction.commit();
         } catch(std::exception& e) {
-            log("Exception in runOneLoop(): %s", e.what());
+            basic_mud_log("Exception in runOneLoop(): %s", e.what());
+            exit(1);
         }
 
         auto timeAfterHeartbeat = boost::asio::steady_timer::clock_type::now();
         auto elapsed = timeAfterHeartbeat - timeStart;
-        auto nextWait = hb - elapsed;
+        auto nextWait = config::heartbeatInterval - elapsed;
 
         // If heartbeat takes more than 100ms, default to a very short wait
         if(nextWait.count() < 0) {
@@ -590,7 +549,7 @@ static void finish_copyover() {
     /* Failed - sucessful exec will not return */
 
     perror("do_copyover: execl");
-    log("Copyover FAILED!\n\r");
+    basic_mud_log("Copyover FAILED!\n\r");
 
     exit(1); /* too much trouble to try to recover! */
 }
@@ -598,9 +557,9 @@ static void finish_copyover() {
 static boost::asio::awaitable<void> runGame() {
 	// instantiate db with a shared_ptr, the filename is dbat.sqlite3
     try {
-        db = std::make_shared<SQLite::Database>("dbat.sqlite3", SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+        db = std::make_shared<SQLite::Database>(config::dbName, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
     } catch (std::exception &e) {
-        log("Exception in runGame(): %s", e.what());
+        basic_mud_log("Exception in runGame(): %s", e.what());
         exit(1);
     }
     create_schema();
@@ -614,7 +573,7 @@ static boost::asio::awaitable<void> runGame() {
     try {
         co_await boot_db();
     } catch(std::exception& e) {
-        log("Exception in boot_db(): %s", e.what());
+        basic_mud_log("Exception in boot_db(): %s", e.what());
         exit(1);
     }
 
@@ -652,98 +611,113 @@ static boost::asio::awaitable<void> runGame() {
 }
 
 /* Init sockets, run game, and cleanup sockets */
-void init_game(uint16_t cmport) {
+void init_game() {
     /* We don't want to restart if we crash before we get up. */
     touch(KILLSCRIPT_FILE);
 
-    if (sodium_init() == -1) {
-        log("Could not initialize libsodium!");
-        exit(1);
+    if (sodium_init() != 0) {
+        basic_mud_log("Could not initialize libsodium!");
+        shutdown_game(EXIT_FAILURE);
     }
 
+    logger->info("Setting up executor...");
     if(!net::io) net::io = std::make_unique<boost::asio::io_context>();
-    if(!net::pending_descriptors) net::pending_descriptors = std::make_unique<net::Channel<descriptor_data*>>(*net::io, 200);
+    if(!net::linkChannel) net::linkChannel = std::make_unique<net::JsonChannel>(*net::io, 200);
+
+    // Next, we need to create the config::thermiteEndpoint from config::thermiteAddress and config::thermitePort
+    logger->info("Setting up thermite endpoint...");
+    try {
+        net::thermiteEndpoint = boost::asio::ip::tcp::endpoint(boost::asio::ip::make_address(config::thermiteAddress), config::thermitePort);
+    } catch (const boost::system::system_error& ex) {
+        logger->critical("Failed to create thermite endpoint: {}", ex.what());
+        shutdown_game(EXIT_FAILURE);
+    } catch(...) {
+        logger->critical("Failed to create thermite endpoint: Unknown exception");
+        shutdown_game(EXIT_FAILURE);
+    }
 
     if(!gameFunc) {
-        if (!fCopyOver) { /* If copyover mother_desc is already set up */
-            log("Opening mother connection.");
-            // open up net::acceptor on 0.0.0.0:<cmport>...
-            net::acceptor = std::make_unique<boost::asio::ip::tcp::acceptor>(*net::io, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), cmport));
-            mother_desc = net::acceptor->native_handle();
-        } else {
-            // a socket has already been created and needs to be re-used.
-            // use the one from mother_desc...
-            net::acceptor = std::make_unique<boost::asio::ip::tcp::acceptor>(*net::io, boost::asio::ip::tcp::v4(), mother_desc);
-        }
-
-        log("Signal trapping.");
+        basic_mud_log("Signal trapping.");
         net::signals = std::make_unique<boost::asio::signal_set>(*net::io);
         for(auto s : {SIGUSR1, SIGUSR2, SIGVTALRM, SIGHUP, SIGCHLD, SIGINT, SIGTERM, SIGPIPE, SIGALRM})
             net::signals->add(s);
 
         //boost::asio::co_spawn(boost::asio::make_strand(*net::io), signal_watcher(), boost::asio::detached);
 
-        boost::asio::co_spawn(boost::asio::make_strand(*net::io), net::runAcceptor(), boost::asio::detached);
+        boost::asio::co_spawn(boost::asio::make_strand(*net::io), net::runLinkManager(), boost::asio::detached);
     }
 
     boost::asio::co_spawn(boost::asio::make_strand(*net::io), runGame(), boost::asio::detached);
 
-    log("Entering game loop.");
-    std::vector<std::thread> threads;
-    if(false) {
-        auto max_threads = std::thread::hardware_concurrency() - 1;
-        if(max_threads > 0) {
-            for (int i = 0; i < max_threads; ++i) {
-                threads.emplace_back([&] () {
-                    net::io->run();
-                });
-            }
+    // Run the io_context
+    logger->info("Entering main loop...");
+    // This part is a little tricky. if config::enableMultithreading is true, want to
+    // run the io_context on multiple threads. Otherwise, we want to run it on a single thread.
+    // Additionally, if it's true, we need to check config::threadsCount to see how many threads
+    // to run on. If it's <1, we want to run on the number of cores on the machine.
+    // The current thread should, of course, be considered one of those threads, so we subtract 1.
+    // The best way to do this is to simply create a vector of threads, decide how many it should contain,
+    // and start them. Then, we run the io_context on the current thread.
+
+    unsigned int threadCount = 0;
+    if(config::enableMultithreading) {
+        logger->info("Multithreading is enabled.");
+        if(config::threadsCount < 1) {
+            threadCount = std::thread::hardware_concurrency() - 1;
+            logger->info("Using {} threads. (Automatic detection)", threadCount+1);
+        } else {
+            threadCount = config::threadsCount - 1;
+            logger->info("Using {} threads. (Manual override)", threadCount+1);
         }
+    } else {
+        threadCount = 0;
     }
 
+    std::vector<std::thread> threads;
+    if(threadCount) {
+        logger->info("Starting {} helper threads...", threadCount);
+        config::usingMultithreading = true;
+    }
+    for (int i = 0; i < threadCount; ++i) {
+        threads.emplace_back([&]() {
+            net::io->run();
+        });
+    }
+    logger->info("Main thread entering executor...");
     net::io->run();
+    logger->info("Executor has shut down. Running cleanup.");
 
-    for(auto &t : threads) {
-        t.join();
+    if(threadCount) {
+        // Join all threads.
+        // This should happen without any incident, since the only thing they're doing is
+        // the io_executor which has been stopped.
+        logger->info("Joining threads...");
+        for (auto &thread: threads) {
+            thread.join();
+        }
+        logger->info("All threads joined.");
+        threads.clear();
     }
-    threads.clear();
 
     // Release the executor and acceptor.
     // ASIO maintains its own socket polling fd and killing the executor is the
     // only way to release it.
 
-    net::pending_descriptors.reset();
+    net::linkChannel.reset();
     net::signals.reset();
+    net::link.reset();
 
-    if(circle_reboot == 1) {
-        // release the mother_desc so that it doesn't get autoclosed...
-        mother_desc = net::acceptor->release();
-        finish_copyover();
-        // The above should never return if called thanks to execl()...
-    }
-
-    net::acceptor.reset();
     net::io.reset();
 
-    Crash_save_all();
-
-    log("Closing all sockets.");
-    while (descriptor_list)
-        close_socket(descriptor_list);
-
-    close(mother_desc);
-
-    if (circle_reboot != 2)
-        save_all();
-
-    log("Saving current MUD time.");
+    basic_mud_log("Saving current MUD time.");
     save_mud_time(&time_info);
 
     if (circle_reboot) {
-        log("Rebooting.");
-        exit(52);            /* what's so great about HHGTTG, anyhow? */
+        basic_mud_log("Rebooting.");
+        shutdown_game(52);            /* what's so great about HHGTTG, anyhow? */
     }
-    log("Normal termination of game.");
+    basic_mud_log("Normal termination of game.");
+    shutdown_game(0);
 }
 
 /* ******************************************************************
@@ -768,41 +742,11 @@ void record_usage() {
             sockets_playing++;
     }
 
-    log("nusage: %-3d sockets connected, %-3d sockets playing",
+    basic_mud_log("nusage: %-3d sockets connected, %-3d sockets playing",
         sockets_connected, sockets_playing);
 }
 
 
-/*
- * Turn off echoing (specific to telnet client)
- */
-void echo_off(struct descriptor_data *d) {
-    char off_string[] =
-            {
-                    (char) 255,
-                    (char) 251,
-                    (char) 1,
-                    (char) 0,
-            };
-
-    write_to_output(d, "%s", off_string);
-}
-
-
-/*
- * Turn on echoing (specific to telnet client)
- */
-void echo_on(struct descriptor_data *d) {
-    char on_string[] =
-            {
-                    (char) 255,
-                    (char) 252,
-                    (char) 1,
-                    (char) 0
-            };
-
-    write_to_output(d, "%s", on_string);
-}
 
 
 char *make_prompt(struct descriptor_data *d) {
@@ -1856,131 +1800,6 @@ int process_output(struct descriptor_data *t) {
 
 
 
-/*
- * write_to_descriptor takes a descriptor, and text to write to the
- * descriptor.  It keeps calling the system-level write() until all
- * the text has been delivered to the OS, or until an error is
- * encountered.
- *
- * Returns:
- * >=0  If all is well and good.
- *  -1  If an error was encountered, so that the player should be cut off.
- */
-int write_to_descriptor(socklen_t desc, const char *txt) {
-    ssize_t bytes_written;
-    size_t total = strlen(txt), write_total = 0;
-
-    while (total > 0) {
-        bytes_written = perform_socket_write(desc, txt, total);
-
-        if (bytes_written < 0) {
-            /* Fatal error.  Disconnect the player. */
-            perror("SYSERR: Write to socket");
-            return (-1);
-        } else if (bytes_written == 0) {
-            /* Temporary failure -- socket buffer full. */
-            return (write_total);
-        } else {
-            txt += bytes_written;
-            total -= bytes_written;
-            write_total += bytes_written;
-        }
-    }
-
-    return (write_total);
-}
-
-
-/*
- * Same information about perform_socket_write applies here. I like
- * standards, there are so many of them. -gg 6/30/98
- */
-ssize_t perform_socket_read(socklen_t desc, char *read_point, size_t space_left) {
-    ssize_t ret;
-
-    ret = read(desc, read_point, space_left);
-
-    /* Read was successful. */
-    if (ret > 0)
-        return (ret);
-
-    /* read() returned 0, meaning we got an EOF. */
-    if (ret == 0) {
-        log("WARNING: EOF on socket read (connection broken by peer)");
-        return (-1);
-    }
-
-    /*
-     * read returned a value < 0: there was an error
-     */
-
-    if (errno == EINTR)
-        return (0);
-
-    if (errno == EAGAIN)
-        return (0);
-
-    if (errno == ECONNRESET)
-        return (-1);
-    /*
-     * We don't know what happened, cut them off. This qualifies for
-     * a SYSERR because we have no idea what happened at this point.
-     */
-    perror("SYSERR: perform_socket_read: about to lose connection");
-    return (-1);
-}
-
-
-/* perform substitution for the '^..^' csh-esque syntax orig is the
- * orig string, i.e. the one being modified.  subst contains the
- * substition string, i.e. "^telm^tell"
- */
-int perform_subst(struct descriptor_data *t, char *orig, char *subst) {
-    char newsub[MAX_INPUT_LENGTH + 5];
-
-    char *first, *second, *strpos;
-
-    /*
-     * first is the position of the beginning of the first string (the one
-     * to be replaced
-     */
-    first = subst + 1;
-
-    /* now find the second '^' */
-    if (!(second = strchr(first, '^'))) {
-        write_to_output(t, "Invalid substitution.\r\n");
-        return (1);
-    }
-    /* terminate "first" at the position of the '^' and make 'second' point
-     * to the beginning of the second string */
-    *(second++) = '\0';
-
-    /* now, see if the contents of the first string appear in the original */
-    if (!(strpos = strstr(orig, first))) {
-        write_to_output(t, "Invalid substitution.\r\n");
-        return (1);
-    }
-    /* now, we construct the new string for output. */
-
-    /* first, everything in the original, up to the string to be replaced */
-    strncpy(newsub, orig, strpos - orig);    /* strncpy: OK (newsub:MAX_INPUT_LENGTH+5 > orig:MAX_INPUT_LENGTH) */
-    newsub[strpos - orig] = '\0';
-
-    /* now, the replacement string */
-    strncat(newsub, second, MAX_INPUT_LENGTH - strlen(newsub) - 1);    /* strncpy: OK */
-
-    /* now, if there's anything left in the original after the string to
-     * replaced, copy that too. */
-    if (((strpos - orig) + strlen(first)) < strlen(orig))
-        strncat(newsub, strpos + strlen(first), MAX_INPUT_LENGTH - strlen(newsub) - 1);    /* strncpy: OK */
-
-    /* terminate the string in case of an overflow from strncat */
-    newsub[MAX_INPUT_LENGTH - 1] = '\0';
-    strcpy(subst, newsub);    /* strcpy: OK (by mutual MAX_INPUT_LENGTH) */
-
-    return (0);
-}
-
 void free_user(struct descriptor_data *d) {
     if (d->account == nullptr) {
         send_to_imm("ERROR: free_user called but no user to free!");
@@ -2060,7 +1879,7 @@ void close_socket(struct descriptor_data *d) {
         default:
             break;
     }
-	for(auto c : d->connections) c->halt(0);
+	for(auto c : d->connections) c->onWelcome();
     delete d;
 }
 
@@ -2075,7 +1894,6 @@ void check_idle_passwords() {
             d->idle_tics++;
             continue;
         } else {
-            echo_on(d);
             write_to_output(d, "\r\nTimed out... goodbye.\r\n");
             STATE(d) = CON_CLOSE;
         }
@@ -2094,7 +1912,6 @@ void check_idle_menu() {
             write_to_output(d, "\r\nYou are about to be disconnected due to inactivity in 60 seconds.\r\n");
             continue;
         } else {
-            echo_on(d);
             write_to_output(d, "\r\nTimed out... goodbye.\r\n");
             STATE(d) = CON_CLOSE;
         }
@@ -2126,7 +1943,7 @@ void reap(int sig) {
 void checkpointing(int sig) {
 #ifndef MEMORY_DEBUG
     if (!tics_passed) {
-        log("SYSERR: CHECKPOINT shutdown: tics not updated. (Infinite loop suspected)");
+        basic_mud_log("SYSERR: CHECKPOINT shutdown: tics not updated. (Infinite loop suspected)");
         abort();
     } else
         tics_passed = 0;
@@ -2136,7 +1953,7 @@ void checkpointing(int sig) {
 
 /* Dying anyway... */
 void hupsig(int sig) {
-    log("SYSERR: Received SIGHUP, SIGINT, or SIGTERM.  Shutting down...");
+    basic_mud_log("SYSERR: Received SIGHUP, SIGINT, or SIGTERM.  Shutting down...");
     exit(1);            /* perhaps something more elegant should
 				 * substituted */
 }
@@ -2642,33 +2459,19 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
 
 
 /* Prefer the file over the descriptor. */
-void setup_log(const char *filename, int fd) {
-    FILE *s_fp;
+void setup_log() {
+    auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+    console_sink->set_level(spdlog::level::info); // Set the console to output info level and above messages
+    console_sink->set_pattern("[%^%l%$] %v"); // Example pattern: [INFO] some message
 
-    s_fp = stderr;
+    auto file_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(config::logFile, 1024 * 1024 * 5, 3);
+    file_sink->set_level(spdlog::level::trace); // Set the file to output all levels of messages
 
-    if (filename == nullptr || *filename == '\0') {
-        /* No filename, set us up with the descriptor we just opened. */
-        logfile = s_fp;
-        puts("Using file descriptor for logging.");
-        return;
-    }
+    std::vector<spdlog::sink_ptr> sinks {console_sink, file_sink};
 
-    /* We honor the default filename first. */
-    if (open_logfile(filename, s_fp))
-        return;
-
-    /* Well, that failed but we want it logged to a file so try a default. */
-    if (open_logfile("log/syslog", s_fp))
-        return;
-
-    /* Ok, one last shot at a file. */
-    if (open_logfile("syslog", s_fp))
-        return;
-
-    /* Erp, that didn't work either, just die. */
-    puts("SYSERR: Couldn't open anything to log to, giving up.");
-    exit(1);
+    logger = std::make_shared<spdlog::logger>("logger", begin(sinks), end(sinks));
+    logger->set_level(spdlog::level::trace); // Set the logger to trace level
+    spdlog::register_logger(logger);
 }
 
 int open_logfile(const char *filename, FILE *stderr_fp) {
@@ -2692,7 +2495,7 @@ int open_logfile(const char *filename, FILE *stderr_fp) {
  */
 
 
-void show_help(struct net::connection_data *t, const char *entry) {
+void show_help(std::shared_ptr<net::Connection>& co, const char *entry) {
     int chk, bot, top, mid, minlen;
     char buf[MAX_STRING_LENGTH];
 
@@ -2711,7 +2514,7 @@ void show_help(struct net::connection_data *t, const char *entry) {
             while ((mid > 0) &&
                    (!(chk = strncasecmp(entry, help_table[mid - 1].keywords, minlen))))
                 mid--;
-            t->sendText(help_table[mid].entry);
+            co->sendText(help_table[mid].entry);
             return;
         } else {
             if (chk > 0) bot = mid + 1;
@@ -2727,7 +2530,7 @@ void send_to_range(room_vnum start, room_vnum finish, const char *messg, ...) {
     int j;
 
     if (start > finish) {
-        log("send_to_range passed start room value greater then finish.");
+        basic_mud_log("send_to_range passed start room value greater then finish.");
         return;
     }
     if (messg == nullptr)
@@ -2747,34 +2550,6 @@ void send_to_range(room_vnum start, room_vnum finish, const char *messg, ...) {
     }
 }
 
-ssize_t perform_socket_write(socklen_t desc, const char *txt, size_t length) {
-    ssize_t result = 0;
-
-    result = write(desc, txt, length);
-
-    if (result > 0) {
-        /* Write was successful. */
-        return (result);
-    }
-
-    if (result == 0) {
-        /* This should never happen! */
-        log("SYSERR: Huh??  write() returned 0???  Please report this!");
-        return (-1);
-    }
-
-    /*
-     * result < 0, so an error was encountered - is it transient?
-     * Unfortunately, different systems use different constants to
-     * indicate this.
-     */
-
-    if (errno == EAGAIN)
-        return (0);
-
-    /* Looks like the error was fatal.  Too bad. */
-    return (-1);
-}
 
 void descriptor_data::handle_input() {
     // Now we need to process the raw_input_queue, watching for special characters and also aliases.
@@ -2833,4 +2608,13 @@ void descriptor_data::handle_input() {
         command_interpreter(character, comm); /* Send it to interpreter */
     }
 
+}
+
+void shutdown_game(int exitCode) {
+    if(logger) {
+        logger->info("Process exiting with exit code {}", exitCode);
+    } else {
+        std::cout << "Process exiting with exit code " << exitCode << std::endl;
+    }
+    std::exit(exitCode);
 }

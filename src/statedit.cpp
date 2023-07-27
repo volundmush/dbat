@@ -9,12 +9,12 @@
 
 /* --relistan 2/22/99 - 2/24/99 */
 
-#include "statedit.h"
-#include "interpreter.h"
-#include "comm.h"
-#include "utils.h"
-#include "db.h"
-#include "oasis.h"
+#include "dbat/statedit.h"
+#include "dbat/interpreter.h"
+#include "dbat/comm.h"
+#include "dbat/utils.h"
+#include "dbat/db.h"
+#include "dbat/oasis.h"
 
 int parse_stat_menu(struct descriptor_data *d, char *arg);
 

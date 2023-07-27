@@ -6,15 +6,15 @@
  * 1999 July 25 caminturn@earthlink.net                                *
  * ******************************************************************** */
 
-#include "assedit.h"
-#include "utils.h"
-#include "db.h"
-#include "comm.h"
-#include "handler.h"
-#include "interpreter.h"
-#include "oasis.h"
-#include "assemblies.h"
-#include "constants.h"
+#include "dbat/assedit.h"
+#include "dbat/utils.h"
+#include "dbat/db.h"
+#include "dbat/comm.h"
+#include "dbat/handler.h"
+#include "dbat/interpreter.h"
+#include "dbat/oasis.h"
+#include "dbat/assemblies.h"
+#include "dbat/constants.h"
 
 
 /*-------------------------------------------------------------------*

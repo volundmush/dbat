@@ -8,13 +8,13 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include "spec_assign.h"
-#include "db.h"
-#include "interpreter.h"
-#include "utils.h"
-#include "spec_procs.h"
-#include "objsave.h"
-#include "mail.h"
+#include "dbat/spec_assign.h"
+#include "dbat/db.h"
+#include "dbat/interpreter.h"
+#include "dbat/utils.h"
+#include "dbat/spec_procs.h"
+#include "dbat/objsave.h"
+#include "dbat/mail.h"
 
 /* local functions */
 void ASSIGNROOM(room_vnum room, SPECIAL(fname));
@@ -31,7 +31,7 @@ void ASSIGNMOB(mob_vnum mob, SPECIAL(fname)) {
     if ((rnum = real_mobile(mob)) != NOBODY)
         mob_index[rnum].func = fname;
     else if (!mini_mud)
-        log("SYSERR: Attempt to assign spec to non-existant mob #%d", mob);
+        basic_mud_log("SYSERR: Attempt to assign spec to non-existant mob #%d", mob);
 }
 
 void ASSIGNOBJ(obj_vnum obj, SPECIAL(fname)) {
@@ -40,7 +40,7 @@ void ASSIGNOBJ(obj_vnum obj, SPECIAL(fname)) {
     if ((rnum = real_object(obj)) != NOTHING)
         obj_index[rnum].func = fname;
     else if (!mini_mud)
-        log("SYSERR: Attempt to assign spec to non-existant obj #%d", obj);
+        basic_mud_log("SYSERR: Attempt to assign spec to non-existant obj #%d", obj);
 }
 
 void ASSIGNROOM(room_vnum room, SPECIAL(fname)) {
@@ -49,7 +49,7 @@ void ASSIGNROOM(room_vnum room, SPECIAL(fname)) {
     if ((rnum = real_room(room)) != NOWHERE)
         world[rnum].func = fname;
     else if (!mini_mud)
-        log("SYSERR: Attempt to assign spec to non-existant room #%d", room);
+        basic_mud_log("SYSERR: Attempt to assign spec to non-existant room #%d", room);
 }
 
 

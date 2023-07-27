@@ -8,12 +8,12 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include "ban.h"
-#include "utils.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "db.h"
+#include "dbat/ban.h"
+#include "dbat/utils.h"
+#include "dbat/comm.h"
+#include "dbat/interpreter.h"
+#include "dbat/handler.h"
+#include "dbat/db.h"
 
 /* local globals */
 struct ban_list_element *ban_list = nullptr;
@@ -44,9 +44,9 @@ void load_banned() {
 
     if (!(fl = fopen(BAN_FILE, "r"))) {
         if (errno != ENOENT) {
-            log("SYSERR: Unable to open banfile '%s': %s", BAN_FILE, strerror(errno));
+            basic_mud_log("SYSERR: Unable to open banfile '%s': %s", BAN_FILE, strerror(errno));
         } else
-            log("   Ban file '%s' doesn't exist.", BAN_FILE);
+            basic_mud_log("   Ban file '%s' doesn't exist.", BAN_FILE);
         return;
     }
     while (fscanf(fl, " %s %s %d %s ", ban_type, site_name, &date, name) == 4) {
@@ -303,7 +303,7 @@ void Read_Invalid_List() {
         invalid_list[num_invalid++] = strdup(temp);
 
     if (num_invalid >= MAX_INVALID_NAMES) {
-        log("SYSERR: Too many invalid names; change MAX_INVALID_NAMES in ban.c");
+        basic_mud_log("SYSERR: Too many invalid names; change MAX_INVALID_NAMES in ban.c");
         exit(1);
     }
 

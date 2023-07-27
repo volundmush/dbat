@@ -13,12 +13,12 @@
 *  $Revision: 1.0.14 $                                                    *
 ***************************************************************************/
 
-#include "structs.h"
-#include "dg_scripts.h"
-#include "utils.h"
-#include "db.h"
-#include "handler.h"
-#include "dg_event.h"
+#include "dbat/structs.h"
+#include "dbat/dg_scripts.h"
+#include "dbat/utils.h"
+#include "dbat/db.h"
+#include "dbat/handler.h"
+#include "dbat/dg_event.h"
 
 
 /* frees memory associated with var */
@@ -99,7 +99,7 @@ void extract_trigger(struct trig_data *trig) {
         GET_TRIG_WAIT(trig) = nullptr;
     }
 
-    trig_index[trig->nr].number--;
+    trig_index[trig->nr].triggers.erase(trig);
 
     /* walk the trigger list and remove this one */
     REMOVE_FROM_LIST(trig, trigger_list, next_in_world, temp);
@@ -266,7 +266,7 @@ void delete_variables(const char *charname) {
         return;
 
     if (remove(filename) < 0 && errno != ENOENT)
-        log("SYSERR: deleting variable file %s: %s", filename, strerror(errno));
+        basic_mud_log("SYSERR: deleting variable file %s: %s", filename, strerror(errno));
 }
 
 void update_wait_events(struct room_data *to, struct room_data *from) {
