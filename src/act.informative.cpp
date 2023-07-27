@@ -2129,12 +2129,12 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
                     if (GET_OBJ_POSTED(obj) == nullptr) {
                         send_to_char(ch, "@D[@G%d@D]@w ", GET_OBJ_VNUM(obj));
                         if (SCRIPT(obj))
-                            send_to_char(ch, "@D[@wT%d@D]@w ", obj->proto_script->vnum);
+                            send_to_char(ch, "%s ", obj->scriptString().c_str());
                     } else {
                         if (GET_OBJ_POSTTYPE(obj) <= 0) {
                             send_to_char(ch, "@D[@G%d@D]@w ", GET_OBJ_VNUM(obj));
                             if (SCRIPT(obj))
-                                send_to_char(ch, "@D[@wT%d@D]@w ", obj->proto_script->vnum);
+                                send_to_char(ch, "%s ", obj->scriptString().c_str());
                         }
                     }
                 }
@@ -2185,7 +2185,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
             if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_ROOMFLAGS)) {
                 send_to_char(ch, "[%d] ", GET_OBJ_VNUM(obj));
                 if (SCRIPT(obj))
-                    send_to_char(ch, "[T%d] ", obj->proto_script->vnum);
+                    send_to_char(ch, "[T%d] ", obj->scriptString().c_str());
             }
 
             if (PRF_FLAGGED(ch, PRF_IHEALTH)) {
@@ -7137,7 +7137,7 @@ static void print_object_location(int num, struct obj_data *obj, struct char_dat
         send_to_char(ch, "%33s", " - ");
 
     if (SCRIPT(obj))
-        send_to_char(ch, "[T%d]", obj->proto_script->vnum);
+        send_to_char(ch, "%s", obj->scriptString().c_str());
 
     if (IN_ROOM(obj) != NOWHERE)
         send_to_char(ch, "[%5d] %s\r\n", GET_ROOM_VNUM(IN_ROOM(obj)), world[IN_ROOM(obj)].name);

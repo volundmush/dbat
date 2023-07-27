@@ -185,7 +185,7 @@ void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum 
 
             send_to_char(ch, "%4d) [@g%-5d@n] @[1]%-*s@n %s",
                          counter, r.first, count_color_chars(r.second.name) + 44,
-                         r.second.name, r.second.proto_script ? "[TRIG] " : "");
+                         r.second.name, !r.second.proto_script.empty() ? "[TRIG] " : "");
             i = r.first;
             for (j = 0; j < NUM_OF_DIRS; j++) {
                 if (W_EXIT(i, j) == nullptr)
@@ -233,7 +233,7 @@ void list_mobiles(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnu
                          counter, m.first, count_color_chars(m.second.short_description) + 30,
                          m.second.short_description, TRUE_RACE(&m.second), m.second.chclass->getName().c_str(),
                          m.second.level + m.second.level_adj + m.second.race_level,
-                         m.second.proto_script ? " [TRIG]" : "");
+                         !m.second.proto_script.empty() ? " [TRIG]" : "");
         }
     }
 
@@ -267,7 +267,7 @@ void list_objects(struct char_data *ch, zone_rnum rnum, room_vnum vmin, room_vnu
             send_to_char(ch, "@g%4d@n) [@g%-5d@n] @[2]%-*s @y[%s]@n%s\r\n",
                          counter, o.first, count_color_chars(o.second.short_description) + 44,
                          o.second.short_description, item_types[o.second.type_flag],
-                         o.second.proto_script ? " [TRIG]" : "");
+                         !o.second.proto_script.empty() ? " [TRIG]" : "");
         }
     }
 

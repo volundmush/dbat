@@ -281,8 +281,8 @@ nlohmann::json room_data::serialize() {
 
     for(auto i = 0; i < NUM_ROOM_FLAGS; i++) if(IS_SET_AR(room_flags, i)) j["room_flags"].push_back(i);
 
-    for(auto s = proto_script; s; s = s->next) {
-        if(trig_index.contains(s->vnum)) j["proto_script"].push_back(s->vnum);
+    for(auto p :proto_script) {
+        if(trig_index.contains(p)) j["proto_script"].push_back(p);
     }
 
     return j;
@@ -309,21 +309,12 @@ room_data::room_data(const nlohmann::json &j) {
     }
 
     if(j.contains("proto_script")) {
-        auto &p = j["proto_script"];
-        for(auto s = p.rbegin(); s != p.rend(); s++) {
-            auto new_s = new trig_proto_list();
-            new_s->vnum = *s;
-            new_s->next = proto_script;
-            proto_script = new_s;
-        }
+        for(auto p : j["proto_script"]) proto_script.emplace_back(p.get<trig_vnum>());
     }
 
-    if((proto_script || vn == 0)) {
+    if(!proto_script.empty() || vn == 0) {
         if(!script) script = new script_data(this);
-        if(proto_script) for(auto p = proto_script; p; p = p->next) {
-            auto t = read_trigger(p->vnum);
-            if(t) add_trigger(script, t, -1);
-        }
+        assign_triggers(this, WLD_TRIGGER);
     }
 
 

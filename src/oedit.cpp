@@ -212,7 +212,8 @@ void oedit_setup_new(struct descriptor_data *d) {
     GET_OBJ_SIZE(OLC_OBJ(d)) = SIZE_MEDIUM;
 
     SCRIPT(OLC_OBJ(d)) = nullptr;
-    OLC_OBJ(d)->proto_script = OLC_SCRIPT(d) = nullptr;
+    OLC_OBJ(d)->proto_script.clear();
+    OLC_SCRIPT(d).clear();
 }
 
 /*------------------------------------------------------------------------*/
@@ -233,7 +234,7 @@ void oedit_setup_existing(struct descriptor_data *d, int real_num) {
      * It will be assigned to the updated obj later, after editing.
      */
     SCRIPT(obj) = nullptr;
-    OLC_OBJ(d)->proto_script = nullptr;
+    OLC_OBJ(d)->proto_script.clear();
 }
 
 /*------------------------------------------------------------------------*/
@@ -253,8 +254,7 @@ void oedit_save_internally(struct descriptor_data *d) {
 
     /* Update triggers : */
     /* Free old proto list  */
-    if (obj_proto[robj_num].proto_script &&
-        obj_proto[robj_num].proto_script != OLC_SCRIPT(d))
+    if (obj_proto[robj_num].proto_script != OLC_SCRIPT(d))
         free_proto_script(&obj_proto[robj_num], OBJ_TRIGGER);
     /* this will handle new instances of the object: */
     obj_proto[robj_num].proto_script = OLC_SCRIPT(d);
@@ -959,7 +959,7 @@ void oedit_disp_menu(struct descriptor_data *d) {
                     GET_OBJ_VAL(obj, 11), GET_OBJ_VAL(obj, 12), GET_OBJ_VAL(obj, 13),
                     GET_OBJ_VAL(obj, 14), GET_OBJ_VAL(obj, 15), GET_OBJ_EXTRA(obj) ? "Set." : "Not Set.",
                     GET_OBJ_LEVEL(obj), material_names[(int) GET_OBJ_MATERIAL(obj)],
-                    ebitbuf, OLC_SCRIPT(d) ? "Set." : "Not Set.",
+                    ebitbuf, !OLC_SCRIPT(d).empty() ? "Set." : "Not Set.",
                     size_names[GET_OBJ_SIZE(obj)]
     );
     OLC_MODE(d) = OEDIT_MAIN_MENU;

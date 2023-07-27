@@ -1162,11 +1162,6 @@ void extract_obj(struct obj_data *obj) {
     if (SCRIPT(obj))
         extract_script(obj, OBJ_TRIGGER);
 
-    if (GET_OBJ_VNUM(obj) != 80 && GET_OBJ_VNUM(obj) != 81) {
-        if (GET_OBJ_RNUM(obj) == NOTHING || obj->proto_script != obj_proto[GET_OBJ_RNUM(obj)].proto_script)
-            free_proto_script(obj, OBJ_TRIGGER);
-    }
-
     free_obj(obj);
 }
 

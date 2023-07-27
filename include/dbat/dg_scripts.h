@@ -401,11 +401,11 @@ extern trig_data *read_trigger(int nr);
 
 extern void trig_data_copy(trig_data *this_data, const trig_data *trg);
 
-extern void dg_read_trigger(FILE *fp, void *proto, int type);
+extern void dg_read_trigger(FILE *fp, struct unit_data *proto, int type);
 
 extern void dg_obj_trigger(char *line, struct obj_data *obj);
 
-extern void assign_triggers(void *i, int type);
+extern void assign_triggers(struct unit_data *i, int type);
 
 
 /* From dg_variables.c */
@@ -442,9 +442,9 @@ extern void extract_script(void *thing, int type);
 
 extern void extract_script_mem(struct script_memory *sc);
 
-extern void free_proto_script(void *thing, int type);
+extern void free_proto_script(struct unit_data *thing, int type);
 
-extern void copy_proto_script(void *source, void *dest, int type);
+extern void copy_proto_script(struct unit_data *source, struct unit_data *dest, int type);
 
 extern void delete_variables(const char *charname);
 

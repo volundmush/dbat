@@ -190,7 +190,8 @@ void medit_setup_new(struct descriptor_data *d) {
     GET_DDESC(mob) = strdup("It looks unfinished.\r\n");
     mob->race = race::race_map[race::human];
     SCRIPT(mob) = nullptr;
-    mob->proto_script = OLC_SCRIPT(d) = nullptr;
+    mob->proto_script.clear();
+    OLC_SCRIPT(d).clear();
 
     OLC_MOB(d) = mob;
     /* Has changed flag. (It hasn't so far, we just made it.) */
@@ -218,7 +219,7 @@ void medit_setup_existing(struct descriptor_data *d, int rmob_num) {
      * It will be assigned to the updated mob later, after editing.
      */
     SCRIPT(mob) = nullptr;
-    OLC_MOB(d)->proto_script = nullptr;
+    OLC_MOB(d)->proto_script.clear();
 }
 
 /*-------------------------------------------------------------------*/
@@ -268,8 +269,7 @@ void medit_save_internally(struct descriptor_data *d) {
 
     /* Update triggers */
     /* Free old proto list  */
-    if (mob_proto[new_rnum].proto_script &&
-        mob_proto[new_rnum].proto_script != OLC_SCRIPT(d))
+    if (mob_proto[new_rnum].proto_script != OLC_SCRIPT(d))
         free_proto_script(&mob_proto[new_rnum], MOB_TRIGGER);
 
     mob_proto[new_rnum].proto_script = OLC_SCRIPT(d);
@@ -499,7 +499,7 @@ void medit_disp_menu(struct descriptor_data *d) {
                     npc_personality[GET_PERSONALITY(mob)],
                     flags, flag2, mob->chclass->getName().c_str(),
                     TRUE_RACE(mob),
-                    OLC_SCRIPT(d) ? "Set." : "Not Set.", size_names[get_size(mob)]
+                    !OLC_SCRIPT(d).empty() ? "Set." : "Not Set.", size_names[get_size(mob)]
     );
 
     OLC_MODE(d) = MEDIT_MAIN_MENU;

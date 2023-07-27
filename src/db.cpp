@@ -795,8 +795,6 @@ void destroy_db() {
         /* free any assigned scripts */
         if (SCRIPT(&r.second))
             extract_script(&r.second, WLD_TRIGGER);
-        /* free script proto list */
-        free_proto_script(&r.second, WLD_TRIGGER);
 
         for (itr = 0; itr < NUM_OF_DIRS; itr++) {
             if (!r.second.dir_option[itr])
@@ -824,9 +822,6 @@ void destroy_db() {
         if (o.second.ex_description)
             free_extra_descriptions(o.second.ex_description);
         if (o.second.sbinfo) free(o.second.sbinfo);
-
-        /* free script proto list */
-        free_proto_script(&o.second, OBJ_TRIGGER);
     }
     obj_proto.clear();
     obj_index.clear();
@@ -843,9 +838,6 @@ void destroy_db() {
             free(mob_proto[cnt].room_description);
         if (m.second.look_description)
             free(m.second.look_description);
-
-        /* free script proto list */
-        free_proto_script(&m.second, MOB_TRIGGER);
 
         while (m.second.affected)
             affect_remove(&m.second, m.second.affected);
@@ -2658,7 +2650,7 @@ int vnum_mobile(char *searchname, struct char_data *ch) {
         if (isname(searchname, m.second.name))
             send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
                          ++found, m.first, m.second.short_description,
-                         m.second.proto_script ? "[TRIG]" : "");
+                         !m.second.proto_script.empty() ? "[TRIG]" : "");
 
     return (found);
 }
@@ -2671,7 +2663,7 @@ int vnum_object(char *searchname, struct char_data *ch) {
         if (isname(searchname, o.second.name))
             send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
                          ++found, o.first, o.second.short_description,
-                         o.second.proto_script ? "[TRIG]" : "");
+                         !o.second.proto_script.empty() ? "[TRIG]" : "");
 
     return (found);
 }
@@ -2684,7 +2676,7 @@ int vnum_material(char *searchname, struct char_data *ch) {
         if (isname(searchname, material_names[o.second.value[VAL_ALL_MATERIAL]])) {
             send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
                          ++found, o.first, o.second.short_description,
-                         o.second.proto_script ? "[TRIG]" : "");
+                         !o.second.proto_script.empty() ? "[TRIG]" : "");
         }
 
     return (found);
@@ -2699,7 +2691,7 @@ int vnum_weapontype(char *searchname, struct char_data *ch) {
             if (isname(searchname, weapon_type[o.second.value[VAL_WEAPON_SKILL]])) {
                 send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
                              ++found, o.first, o.second.short_description,
-                             o.second.proto_script ? "[TRIG]" : "");
+                             !o.second.proto_script.empty() ? "[TRIG]" : "");
             }
         }
 
@@ -2715,7 +2707,7 @@ int vnum_armortype(char *searchname, struct char_data *ch) {
             if (isname(searchname, armor_type[o.second.value[VAL_ARMOR_SKILL]])) {
                 send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
                              ++found, o.first, o.second.short_description,
-                             o.second.proto_script ? "[TRIG]" : "");
+                             !o.second.proto_script.empty() ? "[TRIG]" : "");
             }
         }
 
@@ -3992,8 +3984,7 @@ void free_char(struct char_data *ch) {
             free(ch->room_description);
         if (ch->look_description)
             free(ch->look_description);
-        /* free script proto list */
-        free_proto_script(ch, MOB_TRIGGER);
+
     } else {
         auto &m = mob_proto[ch->vn];
         if (ch->name && ch->name != m.name)
@@ -4006,9 +3997,6 @@ void free_char(struct char_data *ch) {
             free(ch->room_description);
         if (ch->look_description && ch->look_description != m.look_description)
             free(ch->look_description);
-        /* free script proto list if it's not the prototype */
-        if (ch->proto_script && ch->proto_script != m.proto_script)
-            free_proto_script(ch, MOB_TRIGGER);
     }
 
     while (ch->affected)
@@ -4039,12 +4027,8 @@ void free_obj(struct obj_data *obj) {
     remove_unique_id(obj);
     if (GET_OBJ_RNUM(obj) == NOWHERE) {
         free_object_strings(obj);
-        /* free script proto list */
-        free_proto_script(obj, OBJ_TRIGGER);
     } else {
         free_object_strings_proto(obj);
-        if (obj->proto_script != obj_proto[GET_OBJ_RNUM(obj)].proto_script)
-            free_proto_script(obj, OBJ_TRIGGER);
 
     }
 

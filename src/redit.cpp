@@ -188,7 +188,7 @@ void redit_setup_new(struct descriptor_data *d) {
     OLC_ROOM(d)->look_description = strdup("You are in an unfinished room.\r\n");
     OLC_ROOM(d)->vn = NOWHERE;
     OLC_ITEM_TYPE(d) = WLD_TRIGGER;
-    OLC_ROOM(d)->proto_script = OLC_SCRIPT(d) = nullptr;
+    OLC_SCRIPT(d).clear();
 
     OLC_VAL(d) = 0;
 }
@@ -196,13 +196,12 @@ void redit_setup_new(struct descriptor_data *d) {
 /*------------------------------------------------------------------------*/
 
 void redit_setup_existing(struct descriptor_data *d, int real_num) {
-    struct room_data *room;
     int counter;
 
     /*
      * Build a copy of the room for editing.
      */
-    CREATE(room, struct room_data, 1);
+    auto room = new room_data();
 
     *room = world[real_num];
     /*
@@ -260,7 +259,7 @@ void redit_setup_existing(struct descriptor_data *d, int real_num) {
     OLC_ITEM_TYPE(d) = WLD_TRIGGER;
 
     dg_olc_script_copy(d);
-    room->proto_script = nullptr;
+    room->proto_script.clear();
     SCRIPT(room) = nullptr;
 }
 
@@ -285,8 +284,7 @@ void redit_save_internally(struct descriptor_data *d) {
 
     /* Update triggers */
     /* Free old proto list */
-    if (world[room_num].proto_script &&
-        world[room_num].proto_script != OLC_SCRIPT(d))
+    if (world[room_num].proto_script != OLC_SCRIPT(d))
         free_proto_script(&world[room_num], WLD_TRIGGER);
 
     world[room_num].proto_script = OLC_SCRIPT(d);
@@ -532,7 +530,7 @@ void redit_disp_menu(struct descriptor_data *d) {
                         world[room->dir_option[DOWN]->to_room].vn : -1,
                         room->dir_option[OUTDIR] && room->dir_option[OUTDIR]->to_room != NOWHERE ?
                         world[room->dir_option[OUTDIR]->to_room].vn : -1,
-                        OLC_SCRIPT(d) ? "Set." : "Not Set."
+                        !OLC_SCRIPT(d).empty() ? "Set." : "Not Set."
         );
     } else {
         write_to_output(d,

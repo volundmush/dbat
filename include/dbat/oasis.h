@@ -114,7 +114,7 @@ struct oasis_olc_data {
     int script_mode;
     int trigger_position;
     int item_type;
-    struct trig_proto_list *script; /* for assigning triggers in [r|o|m]edit*/
+    std::vector<trig_vnum> script; /* for assigning triggers in [r|o|m]edit*/
     struct assembly_data *OlcAssembly; /* used for 'assedit'         */
     struct guild_data *guild; /* used for 'gedit'         */
     struct help_index_element *help;   /* Hedit uses this */

@@ -124,7 +124,7 @@ struct unit_data {
     bool exists{true}; // used for deleted objects. invalid ones are !exists
     struct extra_descr_data *ex_description{}; /* extra descriptions     */
 
-    struct trig_proto_list *proto_script{}; /* list of default triggers  */
+    std::vector<trig_vnum> proto_script; /* list of default triggers  */
     struct script_data *script{};  /* script info for the object */
 
     struct obj_data *contents{};     /* Contains objects  */
@@ -138,6 +138,7 @@ struct unit_data {
     void deactivateContents();
 
     void deserializeUnit(const nlohmann::json& j);
+    std::string scriptString() const;
 
 };
 

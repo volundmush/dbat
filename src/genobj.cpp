@@ -326,8 +326,8 @@ nlohmann::json obj_data::serializeInstance() {
 nlohmann::json obj_data::serializeProto() {
     auto j = serializeBase();
 
-    for(auto s = proto_script; s; s = s->next) {
-        if(trig_index.contains(s->vnum)) j["proto_script"].push_back(s->vnum);
+    for(auto p : proto_script) {
+        if(trig_index.contains(p)) j["proto_script"].push_back(p);
     }
 
     return j;
@@ -382,13 +382,7 @@ void obj_data::deserializeProto(const nlohmann::json& j) {
     deserializeBase(j);
 
     if(j.contains("proto_script")) {
-        auto &p = j["proto_script"];
-        for(auto s = p.rbegin(); s != p.rend(); s++) {
-            auto new_s = new trig_proto_list();
-            new_s->vnum = *s;
-            new_s->next = proto_script;
-            proto_script = new_s;
-        }
+        for(auto p : j["proto_script"]) proto_script.emplace_back(p.get<trig_vnum>());
     }
 }
 
@@ -439,13 +433,7 @@ void obj_data::activate() {
     }
     auto ofind = obj_proto.find(vn);
     if(ofind != obj_proto.end()) {
-        if(ofind->second.proto_script) {
-            if(!script) script = new script_data(this);
-            for(auto p = proto_script; p; p = p->next) {
-                auto t = read_trigger(p->vnum);
-                if(t) add_trigger(script, t, -1);
-            }
-        }
+        assign_triggers(this, OBJ_TRIGGER);
     }
     if(contents) activateContents();
 }

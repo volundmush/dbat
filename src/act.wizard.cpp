@@ -5150,44 +5150,33 @@ static void trg_checkload(struct char_data *ch, trig_vnum tvnum) {
     }  /*for zone...*/
 
     for (auto &m : mob_proto) {
-        if (!m.second.proto_script)
+        auto find = std::find(m.second.proto_script.begin(), m.second.proto_script.end(), tvnum);
+        if (find == m.second.proto_script.end())
             continue;
-
-        for (tpl = m.second.proto_script; tpl; tpl = tpl->next)
-            if (tpl->vnum == tvnum) {
-                send_to_char(ch, "mob [%5d] %s\r\n",
-                             m.first,
-                             m.second.short_description);
-                found = 1;
-            }
-
+        send_to_char(ch, "mob [%5d] %s\r\n",
+                     m.first,
+                     m.second.short_description);
+        found = 1;
     }
 
     for (auto &o : obj_proto) {
-        if (!o.second.proto_script)
+        auto find = std::find(o.second.proto_script.begin(), o.second.proto_script.end(), tvnum);
+        if (find == o.second.proto_script.end())
             continue;
-
-        for (tpl = o.second.proto_script; tpl; tpl = tpl->next)
-            if (tpl->vnum == tvnum) {
-                send_to_char(ch, "obj [%5d] %s\r\n",
-                             o.first,
-                             o.second.short_description);
-                found = 1;
-            }
-
+        send_to_char(ch, "obj [%5d] %s\r\n",
+                     o.first,
+                     o.second.short_description);
+        found = 1;
     }
 
     for (auto &r : world) {
-        if (!r.second.proto_script)
+        auto find = std::find(r.second.proto_script.begin(), r.second.proto_script.end(), tvnum);
+        if (find == r.second.proto_script.end())
             continue;
-
-        for (tpl = r.second.proto_script; tpl; tpl = tpl->next)
-            if (tpl->vnum == tvnum) {
-                send_to_char(ch, "room[%5d] %s\r\n",
-                             r.first,
-                             r.second.name);
-                found = 1;
-            }
+        send_to_char(ch, "room[%5d] %s\r\n",
+                     r.first,
+                     r.second.name);
+        found = 1;
     }
 
     if (!found)

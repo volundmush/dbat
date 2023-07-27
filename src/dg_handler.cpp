@@ -173,90 +173,12 @@ void extract_script_mem(struct script_memory *sc) {
     }
 }
 
-void free_proto_script(void *thing, int type) {
-    struct trig_proto_list *proto = nullptr, *fproto;
-    char_data *mob;
-    obj_data *obj;
-    room_data *room;
-
-    switch (type) {
-        case MOB_TRIGGER:
-            mob = (struct char_data *) thing;
-            proto = mob->proto_script;
-            mob->proto_script = nullptr;
-            break;
-        case OBJ_TRIGGER:
-            obj = (struct obj_data *) thing;
-            proto = obj->proto_script;
-            obj->proto_script = nullptr;
-            break;
-        case WLD_TRIGGER:
-            room = (struct room_data *) thing;
-            proto = room->proto_script;
-            room->proto_script = nullptr;
-            break;
-    }
-#if 1 /* debugging */
-    {
-        struct char_data *i = character_list;
-        struct obj_data *j = object_list;
-        room_rnum k;
-        if (proto) {
-            for (; i; i = i->next)
-                assert(proto != i->proto_script);
-
-            for (; j; j = j->next)
-                assert(proto != j->proto_script);
-
-            for (auto &r : world)
-                assert(proto != r.second.proto_script);
-        }
-    }
-#endif
-    while (proto) {
-        fproto = proto;
-        proto = proto->next;
-        free(fproto);
-    }
+void free_proto_script(struct unit_data *thing, int type) {
+    thing->proto_script.clear();
 }
 
-void copy_proto_script(void *source, void *dest, int type) {
-    struct trig_proto_list *tp_src = nullptr, *tp_dst = nullptr;
-
-    switch (type) {
-        case MOB_TRIGGER:
-            tp_src = ((char_data *) source)->proto_script;
-            break;
-        case OBJ_TRIGGER:
-            tp_src = ((obj_data *) source)->proto_script;
-            break;
-        case WLD_TRIGGER:
-            tp_src = ((room_data *) source)->proto_script;
-            break;
-    }
-
-    if (tp_src) {
-        CREATE(tp_dst, struct trig_proto_list, 1);
-        switch (type) {
-            case MOB_TRIGGER:
-                ((char_data *) dest)->proto_script = tp_dst;
-                break;
-            case OBJ_TRIGGER:
-                ((obj_data *) dest)->proto_script = tp_dst;
-                break;
-            case WLD_TRIGGER:
-                ((room_data *) dest)->proto_script = tp_dst;
-                break;
-        }
-
-        while (tp_src) {
-            tp_dst->vnum = tp_src->vnum;
-            tp_src = tp_src->next;
-            if (tp_src)
-                CREATE(tp_dst->next, struct trig_proto_list, 1);
-            tp_dst = tp_dst->next;
-        }
-    }
+void copy_proto_script(struct unit_data *source, struct unit_data *dest, int type) {
+    dest->proto_script = source->proto_script;
 }
 
 void delete_variables(const char *charname) {

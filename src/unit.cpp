@@ -69,3 +69,11 @@ void unit_data::deactivateContents() {
         obj->deactivate();
     }
 }
+
+std::string unit_data::scriptString() const {
+    if(!script) return "";
+    std::vector<std::string> vnums;
+    for(auto p : proto_script) vnums.emplace_back(std::move(std::to_string(p)));
+
+    return fmt::format("@D[@wT{}@D]@n", fmt::join(vnums, ","));
+}

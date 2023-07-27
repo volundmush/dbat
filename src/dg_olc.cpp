@@ -117,26 +117,12 @@ ACMD(do_oasis_trigedit) {
 
 /* called when a mob or object is being saved to disk, so its script can */
 /* be saved */
-void script_save_to_disk(FILE *fp, void *item, int type) {
-    struct trig_proto_list *t;
+void script_save_to_disk(FILE *fp, struct unit_data *item, int type) {
 
-    if (type == MOB_TRIGGER)
-        t = ((struct char_data *) item)->proto_script;
-    else if (type == OBJ_TRIGGER)
-        t = ((struct obj_data *) item)->proto_script;
-    else if (type == WLD_TRIGGER)
-        t = ((struct room_data *) item)->proto_script;
-    else {
-        basic_mud_log("SYSERR: Invalid type passed to script_save_to_disk()");
-        return;
-    }
-
-    while (t) {
-        fprintf(fp, "T %d\n", t->vnum);
-        t = t->next;
+    for (auto p : item->proto_script) {
+        fprintf(fp, "T %d\n", p);
     }
 }
-
 
 void trigedit_setup_new(struct descriptor_data *d) {
     struct trig_data *trig;
@@ -525,31 +511,14 @@ void trigedit_save(struct descriptor_data *d) {
 }
 
 void dg_olc_script_copy(struct descriptor_data *d) {
-    struct trig_proto_list *origscript, *editscript;
-
     if (OLC_ITEM_TYPE(d) == MOB_TRIGGER)
-        origscript = OLC_MOB(d)->proto_script;
+        OLC_SCRIPT(d) = OLC_MOB(d)->proto_script;
     else if (OLC_ITEM_TYPE(d) == OBJ_TRIGGER)
-        origscript = OLC_OBJ(d)->proto_script;
-    else origscript = OLC_ROOM(d)->proto_script;
-
-    if (origscript) {
-        CREATE(editscript, struct trig_proto_list, 1);
-        OLC_SCRIPT(d) = editscript;
-
-        while (origscript) {
-            editscript->vnum = origscript->vnum;
-            origscript = origscript->next;
-            if (origscript)
-                CREATE(editscript->next, struct trig_proto_list, 1);
-            editscript = editscript->next;
-        }
-    } else
-        OLC_SCRIPT(d) = nullptr;
+        OLC_SCRIPT(d) = OLC_OBJ(d)->proto_script;
+    else OLC_SCRIPT(d) = OLC_ROOM(d)->proto_script;
 }
 
 void dg_script_menu(struct descriptor_data *d) {
-    struct trig_proto_list *editscript;
     int i = 0;
 
     /* make sure our input parser gets used */
@@ -559,17 +528,17 @@ void dg_script_menu(struct descriptor_data *d) {
     clear_screen(d);
     write_to_output(d, "     Script Editor\r\n\r\n     Trigger List:\r\n");
 
-    editscript = OLC_SCRIPT(d);
+    auto editscript = OLC_SCRIPT(d);
 
-    while (editscript) {
-        write_to_output(d, "     %2d) [@c%d@n] @c%s@n", ++i, editscript->vnum,
-                        trig_index[real_trigger(editscript->vnum)].proto->name);
-        if (trig_index[real_trigger(editscript->vnum)].proto->attach_type != OLC_ITEM_TYPE(d))
+    for (auto p : OLC_SCRIPT(d)) {
+        auto t = trig_index.find(p);
+        if(t == trig_index.end()) continue;
+        write_to_output(d, "     %2d) [@c%d@n] @c%s@n", ++i, p,
+                        t->second.proto->name);
+        if (t->second.proto->attach_type != OLC_ITEM_TYPE(d))
             write_to_output(d, "   @g** Mis-matched Trigger Type **@n\r\n");
         else
             write_to_output(d, "\r\n");
-
-        editscript = editscript->next;
     }
     if (i == 0)
         write_to_output(d, "     <none>\r\n");
@@ -584,6 +553,8 @@ void dg_script_menu(struct descriptor_data *d) {
 int dg_script_edit_parse(struct descriptor_data *d, char *arg) {
     struct trig_proto_list *trig, *currtrig;
     int count, pos, vnum;
+
+    auto tfind = std::find(OLC_SCRIPT(d).begin(), OLC_SCRIPT(d).end(), -1);
 
     switch (OLC_SCRIPT_EDIT_MODE(d)) {
         case SCRIPT_MAIN_MENU:
@@ -650,45 +621,14 @@ int dg_script_edit_parse(struct descriptor_data *d, char *arg) {
             }
 
             /* add the new info in position */
-            currtrig = OLC_SCRIPT(d);
-            CREATE(trig, struct trig_proto_list, 1);
-            trig->vnum = vnum;
-
-            if (pos == 1 || !currtrig) {
-                trig->next = OLC_SCRIPT(d);
-                OLC_SCRIPT(d) = trig;
-            } else {
-                while (currtrig->next && --pos) {
-                    currtrig = currtrig->next;
-                }
-                trig->next = currtrig->next;
-                currtrig->next = trig;
-            }
-            OLC_VAL(d)++;
+            OLC_SCRIPT(d).emplace_back(vnum);
             break;
 
         case SCRIPT_DEL_TRIGGER:
             pos = atoi(arg);
             if (pos <= 0) break;
-
-            if (pos == 1 && OLC_SCRIPT(d)) {
-                OLC_VAL(d)++;
-                currtrig = OLC_SCRIPT(d);
-                OLC_SCRIPT(d) = currtrig->next;
-                free(currtrig);
-                break;
-            }
-
-            pos--;
-            currtrig = OLC_SCRIPT(d);
-            while (--pos && currtrig) currtrig = currtrig->next;
-            /* now curtrig points one before the target */
-            if (currtrig && currtrig->next) {
-                OLC_VAL(d)++;
-                trig = currtrig->next;
-                currtrig->next = trig->next;
-                free(trig);
-            }
+            tfind = OLC_SCRIPT(d).begin() + pos;
+            if(tfind != OLC_SCRIPT(d).end()) OLC_SCRIPT(d).erase(tfind);
             break;
     }
 

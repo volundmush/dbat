@@ -221,9 +221,6 @@ int free_mobile(struct char_data *mob) {
             free(mob->room_description);
         if (mob->look_description && mob->look_description != mob_proto[i].look_description)
             free(mob->look_description);
-        /* free script proto list if it's not the prototype */
-        if (mob->proto_script && mob->proto_script != mob_proto[i].proto_script)
-            free_proto_script(mob, MOB_TRIGGER);
     }
     while (mob->affected)
         affect_remove(mob, mob->affected);
@@ -563,8 +560,8 @@ nlohmann::json char_data::serializeProto() {
     auto ms = mob_specials.serialize();
     if(!ms.empty()) j["mob_specials"] = ms;
 
-    for(auto s = proto_script; s; s = s->next) {
-        if(trig_index.contains(s->vnum)) j["proto_script"].push_back(s->vnum);
+    for(auto p : proto_script) {
+        if(trig_index.contains(p)) j["proto_script"].push_back(p);
     }
 
     return j;
@@ -899,13 +896,8 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
     if(j.contains("voice")) voice = strdup(j["voice"].get<std::string>().c_str());
     if(j.contains("wimp_level")) wimp_level = j["wimp_level"];
 
-    if(proto_script) {
-        if(!script) script = new script_data(this);
-
-        for(auto p = proto_script; p; p = p->next) {
-            auto t = read_trigger(p->vnum);
-            if(t) add_trigger(script, t, -1);
-        }
+    if(!proto_script.empty()) {
+        assign_triggers(this, OBJ_TRIGGER);
     }
 
     if(j.contains("dgvariables")) {
@@ -931,13 +923,7 @@ void char_data::deserializeProto(const nlohmann::json &j) {
     deserializeBase(j);
 
     if(j.contains("proto_script")) {
-        auto &p = j["proto_script"];
-        for(auto s = p.rbegin(); s != p.rend(); s++) {
-            auto new_s = new trig_proto_list();
-            new_s->vnum = *s;
-            new_s->next = proto_script;
-            proto_script = new_s;
-        }
+        for(auto p : j["proto_script"]) proto_script.emplace_back(p.get<trig_vnum>());
     }
 
 }
