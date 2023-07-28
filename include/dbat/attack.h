@@ -65,6 +65,7 @@ namespace atk {
         virtual int64_t calculateKiCost();
         virtual std::optional<int> hasCooldown();
         virtual int canKillType();
+        virtual int limbhurtChance() {return 0;};
 
         virtual void doTrain(const std::vector<std::pair<int, int>>& skills);
 
@@ -129,6 +130,7 @@ namespace atk {
         Result handleParry() override;
         Result handleDodge() override;
         Result handleBlock() override;
+        void handleHitspot() override;
     };
 
     struct RangedAttack : Attack {
@@ -169,39 +171,80 @@ namespace atk {
         void announceMiss() override;
         void announceObject() override;
         void announceHitspot() override;
-        void handleHitspot() override;
     };
 
-    struct Kick : MeleeAttack {
+    struct Kick : LegAttack {
+        using LegAttack::LegAttack;
         int getSkillID() override { return SKILL_KICK; }
         int getAtkID() override {return 1;};
         std::string getName() override { return "kick"; };
         std::string getBodyPart() override {return "foot";};
         std::optional<int> hasCooldown() override {return 5;};
+
+        void announceParry() override;
+        void announceBlock() override;
+        void announceDodge() override;
+        void announceMiss() override;
+        void announceObject() override;
+        void announceHitspot() override;
     };
 
-    struct Elbow : MeleeAttack {
+    struct Elbow : HandAttack {
+        using HandAttack::HandAttack;
         int getSkillID() override { return SKILL_ELBOW; }
         int getAtkID() override {return 2;};
         std::string getName() override { return "elbow"; }
+        std::string getBodyPart() override {return "elbow";};
+        std::optional<int> hasCooldown() override {return 6;};
+
+        void announceParry() override;
+        void announceBlock() override;
+        void announceDodge() override;
+        void announceMiss() override;
+        void announceObject() override;
+        void announceHitspot() override;
     };
 
-    struct Knee : MeleeAttack {
+    struct Knee : LegAttack {
+        using LegAttack::LegAttack;
         int getSkillID() override { return SKILL_KNEE; }
         int getAtkID() override {return 3;};
         std::string getName() override { return "knee"; }
+        std::string getBodyPart() override {return "knee";};
+        std::optional<int> hasCooldown() override {return 6;};
+
+        void announceParry() override;
+        void announceBlock() override;
+        void announceDodge() override;
+        void announceMiss() override;
+        void announceObject() override;
+        void announceHitspot() override;
     };
 
-    struct Roundhouse : MeleeAttack {
+    struct Roundhouse : LegAttack {
+        using LegAttack::LegAttack;
         int getSkillID() override { return SKILL_ROUNDHOUSE; }
         int getAtkID() override {return 4;};
         std::string getName() override { return "roundhouse"; }
+        std::string getBodyPart() override {return "foot";};
+        std::optional<int> hasCooldown() override;
+
+        int limbhurtChance() override;
+        void handleHitspot() override;
+        void announceParry() override;
+        void announceBlock() override;
+        void announceDodge() override;
+        void announceMiss() override;
+        void announceObject() override;
+        void announceHitspot() override;
     };
 
-    struct Uppercut : MeleeAttack {
+    struct Uppercut : HandAttack {
+        using HandAttack::HandAttack;
         int getSkillID() override { return SKILL_UPPERCUT; }
         int getAtkID() override {return 5;};
-        std::string getName() override { return "roundhouse"; }
+        std::string getName() override { return "uppercut"; }
+        std::string getBodyPart() override {return "hand";};
     };
 
     struct Slam : MeleeAttack {

@@ -20,6 +20,7 @@ namespace atk {
 
     Attack::Attack(struct char_data *ch, char *arg) : user(ch) {
         if(arg && strlen(arg)) input = arg;
+        boost::trim(input);
         args = boost::split(args, input, boost::is_space(), boost::token_compress_on);
     }
 
@@ -284,7 +285,7 @@ namespace atk {
                 break;
         }
         if(calcDamage < 1) calcDamage = 1;
-        hurt(0, 0, user, victim, obj, calcDamage, isKiAttack());
+        hurt(0, limbhurtChance(), user, victim, obj, calcDamage, isKiAttack());
         if(isPhysical()) tech_handle_fireshield(user, victim, getBodyPart().c_str());
         if(canCombo()) handle_multihit(user, victim);
     }
@@ -453,6 +454,24 @@ namespace atk {
         return physical_cost(user, getSkillID());
     }
 
+    void MeleeAttack::handleHitspot() {
+        switch(hitspot) {
+            case 1:
+            case 3:
+                if (GET_BONUS(user, BONUS_SOFT)) {
+                    calcDamage *= calc_critical(user, 2);
+                }
+                break;
+            case 2:
+                calcDamage *= calc_critical(user, 0);
+                break;
+            case 4:
+            case 5:
+                calcDamage *= calc_critical(user, 1);
+                break;
+        }
+    }
+
     // RangedAttack
     int RangedAttack::canKillType() {
         return 1;
@@ -482,24 +501,6 @@ namespace atk {
         actUser("@WYou can't believe it but your punch misses!@n");
         actVictim("@C$n@W throws a punch at you but somehow misses!@n");
         actOthers("@c$n@W throws a punch at @C$N@W but somehow misses!@n");
-    }
-
-    void Punch::handleHitspot() {
-        switch(hitspot) {
-            case 1:
-            case 3:
-                if (GET_BONUS(user, BONUS_SOFT)) {
-                    calcDamage *= calc_critical(user, 2);
-                }
-                break;
-            case 2:
-                calcDamage *= calc_critical(user, 0);
-                break;
-            case 4:
-            case 5:
-                calcDamage *= calc_critical(user, 1);
-                break;
-        }
     }
 
     void Punch::announceHitspot() {
@@ -538,6 +539,265 @@ namespace atk {
     }
 
     // KICK
+    void Kick::announceParry() {
+        actUser("@C$N@W parries your kick with a kick of $S own!@n");
+        actVictim("@WYou parry @C$n's@W kick with a kick of your own!@n");
+        actOthers("@C$N@W parries @c$n's@W kick with a kick of $S own!@n");
+    }
 
+    void Kick::announceBlock() {
+        actUser("@C$N@W moves quickly and blocks your kick!@n");
+        actVictim("@WYou move quickly and block @C$n's@W kick!@n");
+        actOthers("@C$N@W moves quickly and blocks @c$n's@W kick!@n");
+    }
+
+    void Kick::announceDodge() {
+        actUser("@C$N@W manages to dodge your kick!@n");
+        actVictim("@WYou dodge @C$n's@W kick!@n");
+        actOthers("@C$N@W manages to dodge @c$n's@W kick!@n");
+    }
+
+    void Kick::announceMiss() {
+        actUser("@WYou can't believe it, your kick misses!@n");
+        actVictim("@C$n@W throws a kick at you, but thankfully misses!@n");
+        actOthers("@c$n@W throws a kick at @C$N@W, but misses!@n");
+    }
+
+    void Kick::announceObject() {
+        actUser("@WYou kick $p@W as hard as you can!@n");
+        actRoom("@C$n@W kicks $p@W extremely hard!@n");
+    }
+
+    void Kick::announceHitspot() {
+        switch (hitspot) {
+            case 1:
+                actUser("@WYou slam your foot into @C$N's@W body!@n");
+                actVictim("@C$n@W slams $s foot into your body!@n");
+                actOthers("@c$n@W slams $s foot into @C$N's@W body!@n");
+                break;
+            case 2: /* Critical */
+                actUser("@WYou slam your foot into @C$N's@W face!@n");
+                actVictim("@C$n@W slams $s foot into your face!@n");
+                actOthers("@c$n@W slams $s foot into @C$N's@W face!@n");
+                break;
+            case 3:
+                actUser("@WYou land your foot against @C$N's@W gut!@n");
+                actVictim("@C$n@W lands $s foot against your gut!@n");
+                actOthers("@C$n@W lands $s foot against @C$N's@W gut!@n");
+                break;
+            case 4: /* Weak */
+                actUser("@WYou land your foot against @C$N's@W leg!@n");
+                actVictim("@C$n@W lands $s foot against your leg!@n");
+                actOthers("@C$n@W lands $s foot against @C$N's@W leg!@n");
+                break;
+            case 5: /* Weak */
+                actUser("@WYou land your foot against @C$N's@W arm!@n");
+                actVictim("@C$n@W lands $s foot against your arm!@n");
+                actOthers("@C$n@W lands $s foot against @C$N's@W arm!@n");
+                break;
+        }
+    }
+
+    // ELBOW
+    void Elbow::announceParry() {
+        actUser("@C$N@W parries your elbow with an elbow of $S own!@n");
+        actVictim("@WYou parry @C$n's@W elbow with an elbow of your own!@n");
+        actOthers("@C$N@W parries @c$n's@W elbow with an elbow of $S own!@n");
+    }
+
+    void Elbow::announceBlock() {
+        actUser("@C$N@W blocks your elbow strike!@n");
+        actVictim("@WYou block @C$n's@W elbow strike!@n");
+        actOthers("@C$N@W blocks @c$n's@W elbow strike!@n");
+    }
+
+    void Elbow::announceDodge() {
+        actUser("@C$N@W dodges your elbow strike!@n");
+        actVictim("@WYou dodge @C$n's@W elbow strike!@n");
+        actOthers("@C$N@W dodges @c$n's@W elbow strike!@n");
+    }
+
+    void Elbow::announceMiss() {
+        actUser("@WYou can't believe it, your elbow misses!@n");
+        actVictim("@C$n@W throws an elbow at you, but thankfully misses!@n");
+        actOthers("@c$n@W throws an elbow at @C$N@W, but misses!@n");
+    }
+
+    void Elbow::announceObject() {
+        actUser("@WYou elbow $p@W as hard as you can!@n");
+        actRoom("@C$n@W elbows $p@W extremely hard!@n");
+    }
+
+    void Elbow::announceHitspot() {
+        switch (hitspot) {
+            case 1:
+                actUser("@WYou slam your elbow into @C$N's@W body!@n");
+                actVictim("@C$n@W slams $s elbow into your body!@n");
+                actOthers("@c$n@W slams $s elbow into @C$N's@W body!@n");
+                break;
+            case 2: /* Critical */
+                actUser("@WYou slam your elbow into @C$N's@W face!@n");
+                actVictim("@C$n@W slams $s elbow into your face!@n");
+                actOthers("@c$n@W slams $s elbow into @C$N's@W face!@n");
+                break;
+            case 3:
+                actUser("@WYou land your elbow against @C$N's@W gut!@n");
+                actVictim("@C$n@W lands $s elbow against your gut!@n");
+                actOthers("@C$n@W lands $s elbow against @C$N's@W gut!@n");
+                break;
+            case 4: /* Weak */
+                actUser("@WYou land your elbow against @C$N's@W leg!@n");
+                actVictim("@C$n@W lands $s elbow against your leg!@n");
+                actOthers("@C$n@W lands $s elbow against @C$N's@W leg!@n");
+                break;
+            case 5: /* Weak */
+                actUser("@WYou land your elbow against @C$N's@W arm!@n");
+                actVictim("@C$n@W lands $s elbow against your arm!@n");
+                actOthers("@C$n@W lands $s elbow against @C$N's@W arm!@n");
+                break;
+        }
+    }
+
+
+    // KNEE
+    void Knee::announceParry() {
+        actUser("@C$N@W parries your knee with a knee of $S own!@n");
+        actVictim("@WYou parry @C$n's@W knee with a knee of your own!@n");
+        actOthers("@C$N@W parries @c$n's@W knee with a knee of $S own!@n");
+    }
+
+    void Knee::announceBlock() {
+        actUser("@C$N@W blocks your knee strike!@n");
+        actVictim("@WYou block @C$n's@W knee strike!@n");
+        actOthers("@C$N@W blocks @c$n's@W knee strike!@n");
+    }
+
+    void Knee::announceDodge() {
+        actUser("@C$N@W dodges your knee strike!@n");
+        actVictim("@WYou dodge @C$n's@W knee strike!@n");
+        actOthers("@C$N@W dodges @c$n's@W knee strike!@n");
+    }
+
+    void Knee::announceMiss() {
+        actUser("@WYou can't believe it, your knee strike misses!@n");
+        actVictim("@C$n@W throws a knee strike at you, but thankfully misses!@n");
+        actOthers("@c$n@W throws a knee strike at @C$N@W, but misses!@n");
+    }
+
+    void Knee::announceObject() {
+        actUser("@WYou knee $p@W as hard as you can!@n");
+        actRoom("@C$n@W knees $p@W extremely hard!@n");
+    }
+
+    void Knee::announceHitspot() {
+        switch (hitspot) {
+            case 1:
+                actUser("@WYou slam your knee into @C$N's@W body!@n");
+                actVictim("@C$n@W slams $s knee into your body!@n");
+                actOthers("@c$n@W slams $s knee into @C$N's@W body!@n");
+                break;
+            case 2: /* Critical */
+                actUser("@WYou slam your knee into @C$N's@W face!@n");
+                actVictim("@C$n@W slams $s knee into your face!@n");
+                actOthers("@c$n@W slams $s knee into @C$N's@W face!@n");
+                break;
+            case 3:
+                actUser("@WYou land your knee against @C$N's@W gut!@n");
+                actVictim("@C$n@W lands $s knee against your gut!@n");
+                actOthers("@C$n@W lands $s knee against @C$N's@W gut!@n");
+                break;
+            case 4: /* Weak */
+                actUser("@WYou land your knee against @C$N's@W leg!@n");
+                actVictim("@C$n@W lands $s knee against your leg!@n");
+                actOthers("@C$n@W lands $s knee against @C$N's@W leg!@n");
+                break;
+            case 5: /* Weak */
+                actUser("@WYou land your knee against @C$N's@W arm!@n");
+                actVictim("@C$n@W lands $s knee against your arm!@n");
+                actOthers("@C$n@W lands $s knee against @C$N's@W arm!@n");
+                break;
+        }
+    }
+
+    // ROUNDHOUSE
+    std::optional<int> Roundhouse::hasCooldown() {
+        if(IS_NAIL(user) && GET_SKILL_BASE(user, SKILL_STYLE) >= 75) return 5;
+        return 7;
+    }
+
+    void Roundhouse::announceParry() {
+        actUser("@C$N@W parries your roundhouse with a roundhouse of $S own!@n");
+        actVictim("@WYou parry @C$n's@W roundhouse with a roundhouse of your own!@n");
+        actOthers("@C$N@W parries @c$n's@W roundhouse with a roundhouse of $S own!@n");
+    }
+
+    void Roundhouse::announceBlock() {
+        actUser("@C$N@W moves quickly and blocks your roundhouse!@n");
+        actVictim("@WYou move quickly and block @C$n's@W roundhouse!@n");
+        actOthers("@C$N@W moves quickly and blocks @c$n's@W roundhouse!@n");
+    }
+
+    void Roundhouse::announceDodge() {
+        actUser("@C$N@W manages to dodge your roundhouse!@n");
+        actVictim("@WYou dodge @C$n's@W roundhouse!@n");
+        actOthers("@C$N@W manages to dodge @c$n's@W roundhouse!@n");
+    }
+
+    void Roundhouse::announceMiss() {
+        actUser("@WYou can't believe it but your roundhouse misses!@n");
+        actVictim("@C$n@W throws a roundhouse at you but somehow misses!@n");
+        actOthers("@c$n@W throws a roundhouse at @C$N@W but somehow misses!@n");
+    }
+
+    void Roundhouse::announceObject() {
+        actUser("@WYou roundhouse $p@W as hard as you can!@n");
+        actRoom("@C$n@W roundhouses $p@W extremely hard!@n");
+    }
+
+    void Roundhouse::handleHitspot() {
+        LegAttack::handleHitspot();
+        if (hitspot == 2 && !AFF_FLAGGED(victim, AFF_FLYING) && GET_POS(victim) == POS_STANDING && rand_number(1, 8) >= 7) {
+            handle_knockdown(victim);
+        }
+    }
+
+    void Roundhouse::announceHitspot() {
+        switch (hitspot) {
+            case 1:
+                actUser("@WYou spin in mid air and land a kick into @C$N's@W body!@n");
+                actVictim("@C$n@W spins in mid air and lands a kick into your body!@n");
+                actOthers("@c$n@W spins in mid air and lands a kick into @C$N's@W body!@n");
+                break;
+            case 2: /* Critical */
+                actUser("@WYou spin a fierce roundhouse into @C$N's@W gut!@n");
+                actVictim("@C$n@W spins a fierce roundhouse into your gut!@n");
+                actOthers("@c$n@W spins a fierce roundhouse into @C$N's@W gut!@n");
+                break;
+            case 3:
+                actUser("@WYou throw a roundhouse at @C$N@W, hitting $M directly in the neck!@n");
+                actVictim("@C$n@W throws a roundhouse at you, hitting YOU directly in the neck!@n");
+                actOthers("@c$n@W throws a roundhouse at @C$N@W, hitting $M directly in the face!@n");
+                break;
+            case 4: /* Weak */
+                actUser("@WYour poorly aimed roundhouse hits @C$N@W in the arm!@n");
+                actVictim("@C$n@W poorly aims a roundhouse and hits you in the arm!@n");
+                actOthers("@c$n@W poorly aims a roundhouse and hits @C$N@W in the arm!@n");
+                break;
+            case 5: /* Weak 2 */
+                actUser("@WYou slam a roundhouse into @C$N's@W leg!@n");
+                actVictim("@C$n@W slams a roundhouse into your leg!@n");
+                actOthers("@c$n@W slams a roundhouse into @C$N's@W leg!@n");
+                break;
+        }
+    }
+
+    int Roundhouse::limbhurtChance() {
+        switch(hitspot) {
+            case 4:
+            case 5:
+                return 195;
+        }
+        return 0;
+    }
 
 }
