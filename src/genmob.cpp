@@ -54,7 +54,7 @@ int add_mobile(struct char_data *mob, mob_vnum vnum) {
             if (rnum == live_mob->vn)
                 update_mobile_strings(live_mob, &mob_proto[rnum]);
 
-        add_to_save_list(zone_table[real_zone_by_thing(vnum)].number, SL_MOB);
+        dirty_npc_prototypes.insert(rnum);
         basic_mud_log("GenOLC: add_mobile: Updated existing mobile #%d.", vnum);
         return rnum;
     }
@@ -81,8 +81,7 @@ int add_mobile(struct char_data *mob, mob_vnum vnum) {
     auto zvnum = real_zone_by_thing(vnum);
     auto &z = zone_table[zvnum];
     z.mobiles.insert(vnum);
-
-    add_to_save_list(z.number, SL_MOB);
+    dirty_npc_prototypes.insert(vnum);
     return found;
 }
 
@@ -607,9 +606,8 @@ nlohmann::json char_data::serializeInstance() {
 
     if(contents) j["contents"] = serializeContents();
 
-    for(auto i = 0; i < NUM_WEARS; i++) {
-        if(GET_EQ(this, i)) j["equipment"].push_back(std::make_pair(i, equipment[i]->serializeInstance()));
-    }
+    auto eq = serializeEquipment();
+    if(!eq.empty()) j["equipment"] = eq;
 
     if(IS_NPC(this)) {
         // mob flags.
@@ -917,6 +915,8 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
         }
     }
 
+    if(j.contains("load_room")) load_room = j["load_room"];
+
 }
 
 void char_data::deserializeProto(const nlohmann::json &j) {
@@ -995,16 +995,15 @@ void char_data::deserializeEquipment(const nlohmann::json &j, bool isActive) {
         auto data = jo[1];
         auto obj = new obj_data();
         obj->deserializeInstance(data, isActive);
-        auto_equip(this, obj, id);
+        // autoequip has a decrementer for some reason, so we'll increment.
+        auto_equip(this, obj, id+1);
     }
 }
 
 nlohmann::json char_data::serializeEquipment() {
-    nlohmann::json j = nlohmann::json::array();
-
-    for(auto i = 0; i < NUM_WEARS; i++) {
-        if(GET_EQ(this, i)) {
-            auto obj = GET_EQ(this, i);
+    auto j = nlohmann::json::array();
+    for(auto i = 1; i < NUM_WEARS; i++) {
+        if(auto obj = GET_EQ(this, i); obj) {
             j.push_back(std::make_pair(i, obj->serializeInstance()));
         }
     }

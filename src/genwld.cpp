@@ -35,7 +35,7 @@ room_rnum add_room(struct room_data *room) {
         copy_room(&world[i], room);
         world[i].people = tch;
         world[i].contents = tobj;
-        add_to_save_list(zone_table[room->zone].number, SL_WLD);
+        dirty_rooms.insert(i);
         basic_mud_log("GenOLC: add_room: Updated existing room #%d.", room->vn);
         return i;
     }
@@ -43,7 +43,7 @@ room_rnum add_room(struct room_data *room) {
     auto &r = world[room->vn];
     r = *room;
     basic_mud_log("GenOLC: add_room: Added room %d.", room->vn);
-    add_to_save_list(zone_table[room->zone].number, SL_WLD);
+    dirty_rooms.insert(room->vn);
 
     /*
      * Return what array entry we placed the new room in.
@@ -64,8 +64,7 @@ int delete_room(room_rnum rnum) {
         return false;
 
     room = &world[rnum];
-
-    add_to_save_list(zone_table[room->zone].number, SL_WLD);
+    dirty_rooms.insert(rnum);
 
     /* This is something you might want to read about in the logs. */
     basic_mud_log("GenOLC: delete_room: Deleting room #%d (%s).", room->vn, room->name);

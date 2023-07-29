@@ -8,6 +8,8 @@
 #include "dbat/constants.h"
 #include "dbat/oasis.h"
 #include "dbat/charmenu.h"
+#include "dbat/players.h"
+#include "dbat/dg_comm.h"
 
 namespace net {
 
@@ -151,7 +153,7 @@ namespace net {
         }
     }
 
-    static         const char *bonus[] = {
+    static const char *bonus[] = {
             "Thrifty     - -10% Shop Buy Cost and +10% Shop Sell Cost             @D[@G-2pts @D]", /* Bonus 0 */
             "Prodigy     - +25% Experience Gained Until Level 80                  @D[@G-5pts @D]", /* Bonus 1 */
             "Quick Study - Character auto-trains skills faster                    @D[@G-3pts @D]", /* Bonus 2 */
@@ -329,11 +331,22 @@ namespace net {
     }
 
 
-
-    ChargenParser::ChargenParser(std::shared_ptr<Connection>& co, const std::string &na) : ConnectionParser(co) {
+    ChargenParser::ChargenParser(std::shared_ptr<Connection>& co) : ConnectionParser(co) {
         ch = new char_data();
-        ch->name = strdup(na.c_str());
-        state = CON_QRACE;
+    }
+
+    void ChargenParser::start() {
+        parse("");
+    }
+
+    ChargenParser::~ChargenParser() {
+        // Completing chargen should set our state to -1.
+        // That will prevent the character from being freed.
+        // Because in all other cases, we don't want this char_data to be laying around if
+        // chargen is canceled somehow.
+        if(state != -1 && ch) {
+            free_char(ch);
+        }
     }
 
 
@@ -366,7 +379,7 @@ namespace net {
         auto v_classes = valid_classes();
         int i = 0;
         for (const auto &s: v_classes)
-            sendText(fmt::format("@C%s@n%s", s.second->getName().c_str(), !(++i % 2) ? "\r\n" : "	"));
+            sendText(fmt::format("@C{}@n{}", s.second->getName().c_str(), !(++i % 2) ? "\r\n" : "	"));
     }
 
     void ChargenParser::display_classes() {
@@ -403,7 +416,49 @@ namespace net {
         int roll = rand_number(1, 6);
         int value;
 
+        struct char_data *found;
+
         switch(state) {
+            case CON_GET_NAME:
+                if(arg.empty()) {
+                    sendText("\r\nPick a good name for this character.\r\nName: ");
+                    return;
+                } else {
+                    maybeName = boost::trim_copy(arg);
+                    if(findPlayer(maybeName)) {
+                        sendText("\r\nUnfortunately that name's already taken.");
+                        sendText("\r\nPick a good name for this character.\r\nName: ");
+                        return;
+                    }
+                    auto result = validate_pc_name(maybeName);
+                    if(!result.first) {
+                        sendText("\r\n" + result.second.value() + "\r\n");
+                        maybeName.clear();
+                        sendText("\r\nPick a good name for this character.\r\nName: ");
+                        return;
+                    }
+                    maybeName = result.second.value();
+                    sendText(fmt::format("\r\n{}, huh? Are you sure?\r\n(Y/N): ", maybeName));
+                    state = CON_NAME_CNFRM;
+                    break;
+                }
+            case CON_NAME_CNFRM:
+                if(boost::iequals(arg, "Y")) {
+                    ch->name = strdup(maybeName.c_str());
+                    state = CON_QRACE;
+                    display_races();
+                    break;
+                } else if(boost::iequals(arg, "N")) {
+                    maybeName.clear();
+                    state = CON_GET_NAME;
+                    sendText("\r\nOkay, let's try that again then.");
+                    sendText("\r\nPick a good name for this character.\r\nName: ");
+                    return;
+                } else {
+                    sendText(fmt::format("\r\n{}, huh? Are you sure?\r\n(Y/N): ", maybeName));
+                    return;
+                }
+                break;
             case CON_QRACE:
             case CON_RACE_HELP:
                 switch (arg.size()) {
@@ -2062,8 +2117,8 @@ namespace net {
                         sendText("\r\n@GYour left over points were spent on Practice Sessions@w");
                         GET_PRACTICES(ch) += (100 * ccpoints);
                     }
-                    sendText("\r\n*** PRESS RETURN: ");
-                    state = CON_QSTATS;
+                    finish();
+                    return;
                 } else if ((value = parse_bonuses(arg)) != 1337) {
                     if (value == -1) {
                         display_bonus_menu(0);
@@ -2112,8 +2167,7 @@ namespace net {
                         sendText("\r\n@GYour left over points were spent on Practice Sessions@w");
                         GET_PRACTICES(ch) += (100 * ccpoints);
                     }
-                    sendText("\r\n*** PRESS RETURN: ");
-                    state = CON_QSTATS;
+                    finish();
                 } else if ((value = parse_bonuses(arg)) != 1337) {
                     if (value == -1) {
                         display_bonus_menu(1);
@@ -2262,14 +2316,25 @@ namespace net {
                         return;
                 }
                 break;
-
-            case CON_QSTATS:
-                // TODO: CREATE PLAYER ENTRY
-                init_char(ch);
-                save_char(ch);
-                // TODO: announce player creation.
-                conn->setParser(new CharacterMenu(conn, ch));
-                break;
         }
+    }
+
+    void ChargenParser::finish() {
+        // CREATE PLAYER ENTRY
+        ch->id = nextCharID();
+        ch->generation = time(nullptr);
+        check_unique_id(ch);
+        add_unique_id(ch);
+        auto &p = players[ch->id];
+        p.name = ch->name;
+        p.id = ch->id;
+        p.account = conn->account;
+        p.character = ch;
+        init_char(ch);
+        save_char(ch);
+        // set state to -1 to prevent accidental freeing of ch...
+        state = -1;
+        send_to_imm("New Character '%s' created by Account: %s", ch->name, p.account->name.c_str());
+        conn->setParser(new CharacterMenu(conn, ch));
     }
 }

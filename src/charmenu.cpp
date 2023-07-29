@@ -3,6 +3,7 @@
 #include "dbat/config.h"
 #include "dbat/interpreter.h"
 #include "dbat/puppet.h"
+#include "dbat/accmenu.h"
 
 namespace net {
     CharacterMenu::CharacterMenu(std::shared_ptr<Connection>& co, char_data *c) : ConnectionParser(co) {
@@ -21,7 +22,6 @@ namespace net {
             case 0:
                 sendText("Goodbye.\r\n");
                 conn->close();
-                return;
                 break;
 
             case 1:
@@ -34,11 +34,16 @@ namespace net {
                     return;
                 }
                 conn->setParser(new PuppetParser(conn, ch));
-                return;
+                break;
 
             case 2:
+                sendText("Temporarily disabled, sorry.\r\n");
+                break;
             case 3:
+                conn->setParser(new AccountMenu(conn));
+                break;
             case 4:
+                sendText("Temporarily disabled, sorry.\r\n");
                 break;
 
             default:

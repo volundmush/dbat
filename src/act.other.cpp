@@ -9561,7 +9561,6 @@ ACMD(do_quit) {
     if (IS_NPC(ch) || !ch->desc)
         return;
 
-
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PAST)) {
         send_to_char(ch, "This is the past, you can't quit here!\r\n");
         return;
@@ -9635,9 +9634,6 @@ ACMD(do_quit) {
                 GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(1561));
             }
         }
-
-        Crash_rentsave(ch, 0);
-
         extract_char(ch);        /* Char is saved before extracting. */
     }
     /* Remove any snoopers */

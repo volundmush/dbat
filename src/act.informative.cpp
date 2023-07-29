@@ -28,6 +28,7 @@
 #include "dbat/guild.h"
 #include "dbat/clan.h"
 #include "dbat/players.h"
+#include "dbat/account.h"
 
 /* local functions */
 static void gen_map(struct char_data *ch, int num);
@@ -4286,7 +4287,7 @@ ACMD(do_autoexit) {
 }
 
 void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief) {
-    struct room_data *rm = &world[IN_ROOM(ch)];
+    struct room_data *rm = &world[target_room];
     trig_data *t;
 
     if (!ch->desc)
@@ -4313,7 +4314,7 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
             send_to_char(ch, "\r\n@wO----------------------------------------------------------------------O@n\r\n");
         }
 
-        send_to_char(ch, "@wLocation: @G%-70s@w\r\n", world[target_room].name);
+        send_to_char(ch, "@wLocation: @G%-70s@w\r\n", rm->name);
         if (SCRIPT(rm)) {
             send_to_char(ch, "@D[@GTriggers");
             for (t = TRIGGERS(SCRIPT(rm)); t; t = t->next)
@@ -4331,7 +4332,7 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
         if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC)) {
             send_to_char(ch, "@wO----------------------------------------------------------------------O@n\r\n");
         }
-        send_to_char(ch, "@wLocation: %-70s@n\r\n", world[target_room].name);
+        send_to_char(ch, "@wLocation: %-70s@n\r\n", rm->name);
         if (ROOM_FLAGGED(target_room, ROOM_EARTH)) {
             send_to_char(ch, "@wPlanet: @GEarth@n\r\n");
         } else if (ROOM_FLAGGED(target_room, ROOM_CERRIA)) {
@@ -4367,34 +4368,11 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
         } else {
             send_to_char(ch, "@wPlanet: @WUNKNOWN@n\r\n");
         }
-        if (ROOM_GRAVITY(target_room) <= 0) {
+        int grav = rm->getGravity();
+        if(grav <= 1.0) {
             send_to_char(ch, "@wGravity: @WNormal@n\r\n");
-        } else if (ROOM_GRAVITY(target_room) == 10) {
-            send_to_char(ch, "@wGravity: @W10x@n\r\n");
-        } else if (ROOM_GRAVITY(target_room) == 20) {
-            send_to_char(ch, "@wGravity: @W20x@n\r\n");
-        } else if (ROOM_GRAVITY(target_room) == 30) {
-            send_to_char(ch, "@wGravity: @W30x@n\r\n");
-        } else if (ROOM_GRAVITY(target_room) == 40) {
-            send_to_char(ch, "@wGravity: @W40x@n\r\n");
-        } else if (ROOM_GRAVITY(target_room) == 50) {
-            send_to_char(ch, "@wGravity: @W50x@n\r\n");
-        } else if (ROOM_GRAVITY(target_room) == 100) {
-            send_to_char(ch, "@wGravity: @W100x@n\r\n");
-        } else if (ROOM_GRAVITY(target_room) == 200) {
-            send_to_char(ch, "@wGravity: @W200x@n\r\n");
-        } else if (ROOM_GRAVITY(target_room) == 300) {
-            send_to_char(ch, "@wGravity: @W300x@n\r\n");
-        } else if (ROOM_GRAVITY(target_room) == 400) {
-            send_to_char(ch, "@wGravity: @W400x@n\r\n");
-        } else if (ROOM_GRAVITY(target_room) == 500) {
-            send_to_char(ch, "@wGravity: @W500x@n\r\n");
-        } else if (ROOM_GRAVITY(target_room) == 1000) {
-            send_to_char(ch, "@wGravity: @W1,000x@n\r\n");
-        } else if (ROOM_GRAVITY(target_room) == 5000) {
-            send_to_char(ch, "@wGravity: @W5,000x@n\r\n");
-        } else if (ROOM_GRAVITY(target_room) == 10000) {
-            send_to_char(ch, "@wGravity: @W10,000x@n\r\n");
+        } else {
+            send_to_char(ch, "@wGravity: @W%dx@n\r\n", grav);
         }
         if (ROOM_FLAGGED(target_room, ROOM_REGEN)) {
             send_to_char(ch, "@CA feeling of calm and relaxation fills this room.@n\r\n");
@@ -5000,13 +4978,13 @@ ACMD(do_finger) {
         send_to_char(ch, "What user are you wanting to look at?\r\n");
         return;
     }
-    if (!readUserIndex(arg)) {
+
+    auto account = findAccount(arg);
+    if (!account) {
         send_to_char(ch, "That user does not exist\r\n");
         return;
-    } else {
-        fingerUser(ch, arg);
-        return;
     }
+    fingerUser(ch, account);
 }
 
 ACMD(do_rptrans) {
@@ -5048,7 +5026,7 @@ ACMD(do_rptrans) {
             vict = k->character;
     }
     if (vict == nullptr) {
-        userWrite(nullptr, 0, amt, 0, arg);
+
     } else {
         vict->modRPP(amt);
         save_char(vict);
@@ -6999,17 +6977,17 @@ ACMD(do_users) {
         else
             strcpy(idletime, "");
 
-        sprintf(line, "%3d %-20s %-20s %-14s %-3s %-8s %1s ", d->desc_num,
+        sprintf(line, "%3d %-20s %-20s %-14s %-3s %-8s %1s ", -1,
                 d->original && d->original->name ? d->original->name :
                 d->character && d->character->name ? d->character->name :
                 "UNDEFINED", d->account ? d->account->name.c_str() : "UNKNOWN", state, idletime, timeptr,
                 "N");
 
         if (d->host && *d->host)
-            sprintf(line + strlen(line), "\n%3d [%s Site: %s]\r\n", d->desc_num, d->account ? d->account->name.c_str() : "UNKNOWN",
+            sprintf(line + strlen(line), "\n%3d [%s Site: %s]\r\n", -1, d->account ? d->account->name.c_str() : "UNKNOWN",
                     d->host);
         else
-            sprintf(line + strlen(line), "\n%3d [%s Site: Hostname unknown]\r\n", d->desc_num,
+            sprintf(line + strlen(line), "\n%3d [%s Site: Hostname unknown]\r\n", -1,
                     d->account ? d->account->name.c_str() : "UNKNOWN");
 
         if (STATE(d) != CON_PLAYING) {

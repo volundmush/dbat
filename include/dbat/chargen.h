@@ -8,16 +8,18 @@ namespace net {
 
     class ChargenParser : public ConnectionParser {
     public:
-        ChargenParser(std::shared_ptr<Connection>& co, const std::string &na);
+        ChargenParser(std::shared_ptr<Connection>& co);
+        ~ChargenParser();
         void parse(const std::string &txt) override;
         void start() override;
 
     protected:
-        char_data *ch;
-        int state;
-        int total;
-        int ccpoints;
-        int negcount;
+        char_data *ch{};
+        int state{CON_GET_NAME};
+        int total{};
+        int ccpoints{};
+        int negcount{};
+        std::string maybeName;
         int roll_stats(int type, int bonus);
         void display_bonus_menu(int type);
         race::RaceMap valid_races();
@@ -31,6 +33,7 @@ namespace net {
         void exchange_ccpoints(int value);
         int opp_bonus(int value, int type);
         bool bonus_exclusive(int type, int value, int exc);
+        void finish();
     };
 
 }

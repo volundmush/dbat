@@ -1374,15 +1374,11 @@ static void check_idling(struct char_data *ch) {
             }
             if (ch->desc) {
                 send_to_char(ch, "You are idle and are extracted safely from the game.\r\n");
-                STATE(ch->desc) = CON_DISCONNECT;
                 /*
                  * For the 'if (d->character)' test in close().
                  * -gg 3/1/98 (Happy anniversary.)
                  */
-                ch->desc->character = nullptr;
-                ch->desc = nullptr;
             }
-            Crash_rentsave(ch, 0);
             mudlog(CMP, ADMLVL_GOD, true, "%s force-rented and extracted (idle).", GET_NAME(ch));
             extract_char(ch);
         }

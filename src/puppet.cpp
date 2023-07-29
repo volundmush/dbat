@@ -12,10 +12,12 @@ namespace net {
 
     void PuppetParser::start() {
         if(ch->desc) {
+            if(STATE(ch->desc) == CON_COPYOVER) return;
+
             // The character already has a descriptor! Let's just join up with it.
             conn->account->descriptors.insert(ch->desc);
             conn->desc = ch->desc;
-            conn->desc->connections.insert(conn);
+            conn->desc->conns[conn->connId] = conn;
             conn->sendText("Joining existing session...\r\n");
             return;
         }
@@ -28,7 +30,8 @@ namespace net {
         conn->desc = desc;
         desc->account = conn->account;
         conn->account->descriptors.insert(desc);
-        desc->connections.insert(conn);
+        desc->conns[conn->connId] = conn;
+        sessions[ch->id] = desc;
 
         desc->next = descriptor_list;
         descriptor_list = desc;

@@ -950,6 +950,7 @@ std::optional<vnum> char_data::getMatchingArea(std::function<bool(const area_dat
 }
 
 int char_data::getRPP() {
+    return 999999;
     if(IS_NPC(this)) {
         return 0;
     }
@@ -961,6 +962,7 @@ int char_data::getRPP() {
 }
 
 void account_data::modRPP(int amt) {
+    return;
     rpp += amt;
     if(rpp < 0) {
         rpp = 0;
@@ -982,7 +984,7 @@ void char_data::login() {
     auto load_result = enter_player_game(desc);
     send_to_char(this, "%s", CONFIG_WELC_MESSG);
     ::act("$n has entered the game.", true, this, nullptr, nullptr, TO_ROOM);
-
+    mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(this)), true, "%s has entered the game.", GET_NAME(this));
     /*~~~ For PCOUNT and HIGHPCOUNT ~~~*/
     auto count = 0;
     auto oldcount = HIGHPCOUNT;
@@ -1105,4 +1107,44 @@ void char_data::login() {
         REMOVE_BIT_AR(PLR_FLAGS(this), PLR_THANDW);
     }
 
+}
+
+int char_data::getAffectModifier(int location, int specific) {
+    int total = 0;
+    for(auto a = affected; a; a = a->next) {
+        if(location != a->location) continue;
+        if(specific != -1 && specific != a->specific) continue;
+        total += a->modifier;
+    }
+    return total;
+}
+
+int char_data::getStrength(bool base) {
+    if(base) return real_abils.str;
+    return real_abils.str + getAffectModifier(APPLY_STR) + getAffectModifier(APPLY_ALL_STATS);
+}
+
+int char_data::getIntelligence(bool base) {
+    if(base) return real_abils.intel;
+    return real_abils.intel + getAffectModifier(APPLY_INT) + getAffectModifier(APPLY_ALL_STATS);
+}
+
+int char_data::getConstitution(bool base) {
+    if(base) return real_abils.con;
+    return real_abils.con + getAffectModifier(APPLY_CON) + getAffectModifier(APPLY_ALL_STATS);
+}
+
+int char_data::getWisdom(bool base) {
+    if(base) return real_abils.wis;
+    return real_abils.wis + getAffectModifier(APPLY_WIS) + getAffectModifier(APPLY_ALL_STATS);
+}
+
+int char_data::getAgility(bool base) {
+    if(base) return real_abils.dex;
+    return real_abils.dex + getAffectModifier(APPLY_DEX) + getAffectModifier(APPLY_ALL_STATS);
+}
+
+int char_data::getSpeed(bool base) {
+    if(base) return real_abils.cha;
+    return real_abils.cha + getAffectModifier(APPLY_CHA) + getAffectModifier(APPLY_ALL_STATS);
 }

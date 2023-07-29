@@ -256,12 +256,12 @@ int compare_spells(const void *x, const void *y) {
 int print_skills_by_type(struct char_data *ch, char *buf, int maxsz, int sktype, char *argument) {
     char arg[1000];
     size_t len = 0;
-    int i, t, known, nlen = 0, count = 0, canknow = 0;
+    int t, known, nlen = 0, count = 0, canknow = 0;
     char buf2[READ_SIZE];
 
     one_argument(argument, arg);
 
-    for (i = 1; i <= SKILL_TABLE_SIZE; i++) {
+    for (auto &[i, sk] : ch->skill) {
         t = spell_info[i].skilltype;
 
         if (t != sktype)
@@ -270,52 +270,52 @@ int print_skills_by_type(struct char_data *ch, char *buf, int maxsz, int sktype,
         if ((t & SKTYPE_SKILL) || (t & SKTYPE_SPELL)) {
 
         } else {
-            known = 0;
+            continue;
         }
-        if (GET_SKILL(ch, i) <= 0) {
-            known = 0;
+        if (sk.level + sk.mods <= 0) {
+            continue;
         }
         if (*arg) {
             if (atoi(arg) <= 0 && !strstr(spell_info[i].name, arg)) {
-                known = 0;
+                continue;
             } else if (atoi(arg) > GET_SKILL(ch, i)) {
-                known = 0;
+                continue;
             }
         }
-        if (known) {
-            if (t & SKTYPE_LANG) {
-                nlen = snprintf(buf + len, maxsz - len, "%-20s  (%s)\r\n",
-                                spell_info[i].name, GET_SKILL_BASE(ch, i) ? "known" : "unknown");
-            } else if (t & SKTYPE_SKILL) {
-                if (GET_SKILL_BONUS(ch, i))
-                    snprintf(buf2, sizeof(buf2), " (base %d + bonus %d)", GET_SKILL_BASE(ch, i),
-                             GET_SKILL_BONUS(ch, i));
-                else
-                    buf2[0] = 0;
-                if (known == SKLEARN_CROSSCLASS) {
-                    count++;
-                    canknow = highest_skill_value(GET_LEVEL(ch), GET_SKILL(ch, i));
-                    nlen = snprintf(buf + len, maxsz - len,
-                                    "@y(@Y%2d@y) @W%-30s  @y(@Y%2d@y) @C%3d@D/@c%3d   %s@n%s%s\r\n", count,
-                                    spell_info[i].name, count, GET_SKILL(ch, i), canknow,
-                                    GET_SKILL_PERF(ch, i) > 0 ? (GET_SKILL_PERF(ch, i) == 1 ? "@ROver Charge" : (
-                                            GET_SKILL_PERF(ch, i) == 2 ? "@BAccurate" : "@GEfficient")) : "",
-                                    GET_SKILL_BASE(ch, i) > 100 ? " @D(@YGrand Master@D)@n" : "", buf2);
-                } else {
-                    count++;
-                    canknow = highest_skill_value(GET_LEVEL(ch), GET_SKILL(ch, i));
-                    nlen = snprintf(buf + len, maxsz - len,
-                                    "@y(@Y%2d@y) @W%-30s  @y(@Y%2d@y) @C%3d@D/@c%d3   %s@n%s%s\r\n", count,
-                                    spell_info[i].name, count, GET_SKILL(ch, i), canknow,
-                                    GET_SKILL_PERF(ch, i) > 0 ? (GET_SKILL_PERF(ch, i) == 1 ? "@ROver Charge" : (
-                                            GET_SKILL_PERF(ch, i) == 2 ? "@BAccurate" : "@GEfficient")) : "",
-                                    GET_SKILL_BASE(ch, i) > 100 ? " @D(@YGrand Master@D)@n" : "", buf2);
-                }
+
+        auto sklevel = GET_SKILL(ch, i);
+        if (t & SKTYPE_LANG) {
+            nlen = snprintf(buf + len, maxsz - len, "%-20s  (%s)\r\n",
+                            spell_info[i].name, sk.level ? "known" : "unknown");
+        } else if (t & SKTYPE_SKILL) {
+            if (sk.mods)
+                snprintf(buf2, sizeof(buf2), " (base %d + bonus %d)", sk.level,
+                         sk.mods);
+            else
+                buf2[0] = 0;
+            if (known == SKLEARN_CROSSCLASS) {
+                count++;
+                canknow = highest_skill_value(GET_LEVEL(ch), sklevel);
+                nlen = snprintf(buf + len, maxsz - len,
+                                "@y(@Y%2d@y) @W%-30s  @y(@Y%2d@y) @C%3d@D/@c%3d   %s@n%s%s\r\n", count,
+                                spell_info[i].name, count, sklevel, canknow,
+                                sk.perfs > 0 ? (sk.perfs == 1 ? "@ROver Charge" : (
+                                        sk.perfs == 2 ? "@BAccurate" : "@GEfficient")) : "",
+                                sk.level > 100 ? " @D(@YGrand Master@D)@n" : "", buf2);
+            } else {
+                count++;
+                canknow = highest_skill_value(GET_LEVEL(ch), sklevel);
+                nlen = snprintf(buf + len, maxsz - len,
+                                "@y(@Y%2d@y) @W%-30s  @y(@Y%2d@y) @C%3d@D/@c%d3   %s@n%s%s\r\n", count,
+                                spell_info[i].name, count, sklevel, canknow,
+                                sk.perfs > 0 ? (sk.perfs == 1 ? "@ROver Charge" : (
+                                        sk.perfs == 2 ? "@BAccurate" : "@GEfficient")) : "",
+                                sk.level > 100 ? " @D(@YGrand Master@D)@n" : "", buf2);
             }
-            if (len + nlen >= maxsz || nlen < 0)
-                break;
-            len += nlen;
         }
+        if (len + nlen >= maxsz || nlen < 0)
+            break;
+        len += nlen;
     }
 
     return len;
@@ -840,7 +840,7 @@ void handle_grand(struct char_data *keeper, int guild_nr, struct char_data *ch, 
     char buf[MAX_STRING_LENGTH];
 
     if (!(does_guild_know(guild_nr, skill_num))) {
-        snprintf(buf, sizeof(buf), guild_index[guild_nr].no_such_skill, GET_NAME(ch));
+        snprintf(buf, sizeof(buf), guild_index[guild_nr].no_such_skill.c_str(), GET_NAME(ch));
         do_tell(keeper, buf, cmd_tell, 0);
         return;
     }
@@ -908,7 +908,7 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
 
     /****  Does the GM know the skill the player wants to learn?  ****/
     if (!(does_guild_know(guild_nr, skill_num))) {
-        snprintf(buf, sizeof(buf), guild_index[guild_nr].no_such_skill, GET_NAME(ch));
+        snprintf(buf, sizeof(buf), guild_index[guild_nr].no_such_skill.c_str(), GET_NAME(ch));
         do_tell(keeper, buf, cmd_tell, 0);
         return;
     }
@@ -920,7 +920,7 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
                 learntype = spell_info[skill_num].can_learn_skill[i];
         switch (learntype) {
             case SKLEARN_CANT:
-                snprintf(buf, sizeof(buf), guild_index[guild_nr].no_such_skill, GET_NAME(ch));
+                snprintf(buf, sizeof(buf), guild_index[guild_nr].no_such_skill.c_str(), GET_NAME(ch));
                 do_tell(keeper, buf, cmd_tell, 0);
                 return;
             case SKLEARN_CROSSCLASS:
@@ -1049,7 +1049,7 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
                          pointcost, (pointcost == 1) ? "" : "s");
         }
     } else {
-        snprintf(buf, sizeof(buf), guild_index[guild_nr].no_such_skill, GET_NAME(ch));
+        snprintf(buf, sizeof(buf), guild_index[guild_nr].no_such_skill.c_str(), GET_NAME(ch));
         do_tell(keeper, buf, cmd_tell, 0);
     }
 }
@@ -1529,9 +1529,6 @@ void destroy_guilds() {
 void levelup_parse(struct descriptor_data *d, char *arg) {
 }
 
-guild_data::~guild_data() {
-    free_guild_strings(this);
-}
 
 void guild_data::toggle_skill(uint16_t skill_id) {
     if(skills.count(skill_id)) {
@@ -1556,8 +1553,8 @@ nlohmann::json guild_data::serialize() {
     for(auto s : skills) j["skills"].push_back(s);
     for(auto f : feats) j["feats"].push_back(f);
     if(charge != 1.0) j["charge"] = charge;
-    if(no_such_skill && strlen(no_such_skill)) j["no_such_skill"] = no_such_skill;
-    if(not_enough_gold && strlen(not_enough_gold)) j["not_enough_gold"] = not_enough_gold;
+    if(!no_such_skill.empty()) j["no_such_skill"] = no_such_skill;
+    if(!not_enough_gold.empty()) j["not_enough_gold"] = not_enough_gold;
     if(minlvl) j["minlvl"] = minlvl;
     if(gm != NOBODY) j["gm"] = gm;
     for(auto i = 0; i < 79; i++) if(IS_SET_AR(with_who, i)) j["with_who"].push_back(i);

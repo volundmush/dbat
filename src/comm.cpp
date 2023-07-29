@@ -42,6 +42,8 @@
 #include <thread>
 #include "dbat/players.h"
 #include "dbat/account.h"
+#include "dbat/charmenu.h"
+#include "dbat/puppet.h"
 #include <mutex>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/rotating_file_sink.h>
@@ -113,7 +115,7 @@ void copyover_recover_final() {
             continue;
         }
         d->account = &accFind->second;
-        for(auto &c : d->connections) c->account = d->account;
+        for(auto &[cid, c] : d->conns) c->account = d->account;
 
         auto playFind = players.find(playerID);
         if(playFind == players.end()) {
@@ -122,11 +124,16 @@ void copyover_recover_final() {
             continue;
         }
         auto c = d->character = playFind->second.character;
+        c->desc = d;
 
 		GET_LOADROOM(c) = room;
         REMOVE_BIT_AR(PLR_FLAGS(c), PLR_WRITING);
         REMOVE_BIT_AR(PLR_FLAGS(c), PLR_MAILING);
         REMOVE_BIT_AR(PLR_FLAGS(c), PLR_CRYO);
+        auto conns = d->conns;
+        for(auto &[cid, con] : conns) {
+            con->setParser(new net::PuppetParser(con, c));
+        }
 
         write_to_output(d, "@rThe world comes back into focus... has something changed?@n\n\r");
 
@@ -163,38 +170,23 @@ void copyover_recover() {
     unlink(COPYOVER_FILE);
     fp.close();
 
-    std::unordered_map<struct descriptor_data*, nlohmann::json> descMap;
-
-    auto setupDesc = [&](const auto &jd) {
-        auto d = new descriptor_data();
-        d->raw_input_queue = std::make_unique<net::Channel<std::string>>(*net::io, 200);
-        d->obj_editval = j["user"];
-        d->obj_editflag = j["character"];
-        d->connected = CON_COPYOVER;
-        d->obj_type = NOWHERE;
-        if(j.contains("in_room")) d->obj_type = j["in_room"].get<room_vnum>();
-        if(j.contains("connections"))
-            descMap[d] = j["connections"];
-        else descMap[d] = nlohmann::json();
-        return d;
-    };
-
     if(j.contains("descriptors")) {
         for(const auto &jd : j["descriptors"]) {
             auto d = new descriptor_data();
             d->raw_input_queue = std::make_unique<net::Channel<std::string>>(*net::io, 200);
-            d->obj_editval = j["user"];
-            d->obj_editflag = j["character"];
+            d->obj_editval = jd["user"];
+            d->obj_editflag = jd["character"];
             d->connected = CON_COPYOVER;
             d->obj_type = NOWHERE;
-            if(j.contains("in_room")) d->obj_type = j["in_room"].get<room_vnum>();
-            if(j.contains("connections")) {
+            if(jd.contains("in_room")) d->obj_type = jd["in_room"].get<room_vnum>();
+            if(jd.contains("connections")) {
                 {
                     std::lock_guard<std::mutex> guard(net::connectionsMutex);
-                    for(const auto& jc : j["connections"]) {
+                    for(const auto& jc : jd["connections"]) {
                         auto c = std::make_shared<net::Connection>(jc.get<int64_t>());
                         c->desc = d;
-                        d->connections.insert(c);
+                        d->conns[c->connId] = c;
+                        net::connections[c->connId] = c;
                     }
                 }
             }
@@ -238,7 +230,7 @@ static boost::asio::awaitable<void> performReboot(int mode) {
     for (auto &[cid, d] : sessions) {
         nlohmann::json jd;
 
-        for(auto c : d->connections) {
+        for(auto &[cid, c] : d->conns) {
             jd["connections"].push_back(c->connId);
         }
         auto och = d->character;
@@ -456,7 +448,13 @@ boost::asio::awaitable<void> runOneLoop(double deltaTime) {
     /* Kick out folks in the CON_CLOSE or CON_DISCONNECT state */
     for (auto d = descriptor_list; d; d = next_d) {
         next_d = d->next;
-        if (STATE(d) == CON_CLOSE || STATE(d) == CON_DISCONNECT)
+        if(d->conns.empty()) {
+            d->timeoutCounter += deltaTime;
+            if(d->timeoutCounter > 300) {
+                STATE(d) = CON_CLOSE;
+            }
+        }
+        if (STATE(d) == CON_CLOSE || STATE(d) == CON_DISCONNECT || STATE(d) == CON_QUITGAME)
             close_socket(d);
     }
 
@@ -471,7 +469,6 @@ boost::asio::awaitable<void> runOneLoop(double deltaTime) {
         mudlog(BRF, ADMLVL_IMMORT, true, "Received SIGUSR2 - completely unrestricting game (emergent)");
         ban_list = nullptr;
         circle_restrict = 0;
-        num_invalid = 0;
     }
 
     tics_passed++;
@@ -494,39 +491,41 @@ boost::asio::awaitable<void> game_loop() {
         reset_zone(vn);
     }
 
-    auto previousTime = boost::asio::steady_timer::clock_type::now();
+
     boost::asio::steady_timer timer(co_await boost::asio::this_coro::executor, config::heartbeatInterval);
+    double saveTimer = 60.0 * 5.0;
+    double deltaTimeInSeconds = 0.1;
 
     /* The Main Loop.  The Big Cheese.  The Top Dog.  The Head Honcho.  The.. */
     while (!circle_shutdown) {
 
-        auto timeStart = boost::asio::steady_timer::clock_type::now();
-        co_await timer.async_wait(boost::asio::use_awaitable);
-        auto timeEnd = boost::asio::steady_timer::clock_type::now();
-
-        auto deltaTime = timeEnd - timeStart;
-        double deltaTimeInSeconds = std::chrono::duration<double>(deltaTime).count();
-
+        auto loopStart = boost::asio::steady_timer::clock_type::now();
         try {
             SQLite::Transaction transaction(*db);
             co_await runOneLoop(deltaTimeInSeconds);
+            if(circle_shutdown) {
+                dirty_all();
+            }
             process_dirty();
             transaction.commit();
         } catch(std::exception& e) {
             basic_mud_log("Exception in runOneLoop(): %s", e.what());
             exit(1);
         }
+        auto loopEnd = boost::asio::steady_timer::clock_type::now();
 
-        auto timeAfterHeartbeat = boost::asio::steady_timer::clock_type::now();
-        auto elapsed = timeAfterHeartbeat - timeStart;
-        auto nextWait = config::heartbeatInterval - elapsed;
+        auto loopDuration = loopEnd - loopStart;
+        auto nextWait = config::heartbeatInterval - loopDuration;
 
         // If heartbeat takes more than 100ms, default to a very short wait
         if(nextWait.count() < 0) {
+            logger->warn("Heartbeat took {}, defaulting to short wait\n", std::chrono::duration<double>(nextWait).count());
             nextWait = std::chrono::milliseconds(1);
         }
 
         timer.expires_from_now(nextWait);
+        co_await timer.async_wait(boost::asio::use_awaitable);
+        deltaTimeInSeconds = std::chrono::duration<double>(boost::asio::steady_timer::clock_type::now() - loopStart).count();
     }
 
     if(circle_reboot > 0) {
@@ -601,6 +600,7 @@ static boost::asio::awaitable<void> runGame() {
     // bring anyone who's in the middle of a copyover back into the game.
     if(fCopyOver) {
         copyover_recover_final();
+        logger->info("Copyover recover complete.");
     }
 
     // Finally, let's get the game cracking.
@@ -714,7 +714,9 @@ void init_game() {
 
     if (circle_reboot) {
         basic_mud_log("Rebooting.");
-        shutdown_game(52);            /* what's so great about HHGTTG, anyhow? */
+        //shutdown_game(52);            /* what's so great about HHGTTG, anyhow? */
+        chdir("..");
+        execl ("bin/circle", "circle", "-C%d", "1280", (char *) NULL);
     }
     basic_mud_log("Normal termination of game.");
     shutdown_game(0);
@@ -1722,12 +1724,6 @@ void descriptor_data::start() {
                     add_commas(ERAPLAYERS));
     write_to_output(this,
                     "\r\n@cEnter your desired username or the username you have already made.\n@CEnter Username:@n\r\n");
-    this->pass = strdup("Empty");
-    this->tmp1 = strdup("Empty");
-    this->tmp2 = strdup("Empty");
-    this->tmp3 = strdup("Empty");
-    this->tmp4 = strdup("Empty");
-    this->tmp5 = strdup("Empty");
 }
 
 
@@ -1762,10 +1758,10 @@ int process_output(struct descriptor_data *t) {
      */
     if (t->has_prompt) {
         t->has_prompt = false;
-        for(auto c : t->connections) c->sendText(out);
+        for(auto &[cid, c] : t->conns) c->sendText(out);
     } else {
         auto o = out.substr(2, out.length() - 2);
-        for(auto c : t->connections) c->sendText(o);
+        for(auto &[cid, c] : t->conns) c->sendText(o);
     }
 
     /* Handle snooping: prepend "% " and send to snooper. */
@@ -1822,33 +1818,7 @@ void close_socket(struct descriptor_data *d) {
         d->snoop_by->snooping = nullptr;
     }
 
-    if (d->character) {
-        /* If we're switched, this resets the mobile taken. */
-        d->character->desc = nullptr;
-
-        /* Plug memory leak, from Eric Green. */
-        if (!IS_NPC(d->character) && PLR_FLAGGED(d->character, PLR_MAILING) && d->str) {
-            if (*(d->str))
-                free(*(d->str));
-            free(d->str);
-            d->str = nullptr;
-        } else if (d->backstr && !IS_NPC(d->character) && !PLR_FLAGGED(d->character, PLR_WRITING)) {
-            free(d->backstr);      /* editing description ... not olc */
-            d->backstr = nullptr;
-        }
-        if (IS_PLAYING(d) || STATE(d) == CON_DISCONNECT) {
-            struct char_data *link_challenged = d->original ? d->original : d->character;
-
-            /* We are guaranteed to have a person. */
-            act("$n has lost $s link.", true, link_challenged, nullptr, nullptr, TO_ROOM);
-            save_char(link_challenged);
-            mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(link_challenged)), true, "Closing link to: %s.",
-                   GET_NAME(link_challenged));
-        } else {
-            free_char(d->character);
-        }
-    } else
-        mudlog(CMP, ADMLVL_IMMORT, true, "Losing descriptor without char.");
+    auto c = d->character;
 
     /* JE 2/22/95 -- part of my unending quest to make switch stable */
     if (d->original && d->original->desc)
@@ -1860,8 +1830,6 @@ void close_socket(struct descriptor_data *d) {
         free(d->obj_short);
     if (d->obj_long)
         free(d->obj_long);
-
-    free_user(d);
 
     /*. Kill any OLC stuff .*/
     switch (d->connected) {
@@ -1879,43 +1847,30 @@ void close_socket(struct descriptor_data *d) {
         default:
             break;
     }
-	for(auto c : d->connections) c->onWelcome();
+
+    if(c) c->desc = nullptr;
+    for(auto &[cid, conn] : d->conns) {
+        conn->desc = nullptr;
+        if(d->connected == CON_QUITGAME) {
+            conn->setParser(new net::CharacterMenu(conn, c));
+        } else {
+            conn->close();
+        }
+    }
+    if(c && d->connected == CON_DISCONNECT) {
+        act("$n has lost $s link.", true, c, nullptr, nullptr, TO_ROOM);
+    }
+
+    sessions.erase(d->character->id);
     delete d;
 }
 
 void check_idle_passwords() {
-    struct descriptor_data *d, *next_d;
 
-    for (d = descriptor_list; d; d = next_d) {
-        next_d = d->next;
-        if (STATE(d) != CON_PASSWORD && STATE(d) != CON_GET_EMAIL && STATE(d) != CON_NEWPASSWD)
-            continue;
-        if (!d->idle_tics) {
-            d->idle_tics++;
-            continue;
-        } else {
-            write_to_output(d, "\r\nTimed out... goodbye.\r\n");
-            STATE(d) = CON_CLOSE;
-        }
-    }
 }
 
 void check_idle_menu() {
-    struct descriptor_data *d, *next_d;
 
-    for (d = descriptor_list; d; d = next_d) {
-        next_d = d->next;
-        if (STATE(d) != CON_MENU && STATE(d) != CON_GET_USER && STATE(d) != CON_UMENU)
-            continue;
-        if (!d->idle_tics) {
-            d->idle_tics++;
-            write_to_output(d, "\r\nYou are about to be disconnected due to inactivity in 60 seconds.\r\n");
-            continue;
-        } else {
-            write_to_output(d, "\r\nTimed out... goodbye.\r\n");
-            STATE(d) = CON_CLOSE;
-        }
-    }
 }
 
 
@@ -2572,12 +2527,10 @@ void descriptor_data::handle_input() {
 
     }
 
-    if (character) {
-        GET_WAIT_STATE(character) -= (GET_WAIT_STATE(character) > 0);
-
-        if (GET_WAIT_STATE(character)) {
-            return;
-        }
+    if (character && GET_WAIT_STATE(character)) {
+        GET_WAIT_STATE(character) -= 1;
+        if(GET_WAIT_STATE(character) < 0) GET_WAIT_STATE(character) = 0;
+        if (GET_WAIT_STATE(character)) return;
     }
 
     if(input_queue.empty()) return;
@@ -2617,4 +2570,22 @@ void shutdown_game(int exitCode) {
         std::cout << "Process exiting with exit code " << exitCode << std::endl;
     }
     std::exit(exitCode);
+}
+
+void descriptor_data::onConnectionClosed(int64_t connId) {
+    conns.erase(connId);
+    if(conns.empty()) {
+        handleLostLastConnection();
+    }
+}
+
+void descriptor_data::onConnectionLost(int64_t connId) {
+    conns.erase(connId);
+    if(conns.empty()) {
+        handleLostLastConnection();
+    }
+}
+
+void descriptor_data::handleLostLastConnection() {
+    timeoutCounter = 0;
 }

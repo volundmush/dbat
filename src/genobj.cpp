@@ -26,13 +26,13 @@ obj_rnum add_object(struct obj_data *newobj, obj_vnum ovnum) {
     if ((newobj->vn = real_object(ovnum)) != NOTHING) {
         copy_object(&obj_proto[newobj->vn], newobj);
         update_objects(&obj_proto[newobj->vn]);
-        add_to_save_list(zone_table[rznum].number, SL_OBJ);
+        dirty_item_prototypes.insert(ovnum);
         return newobj->vn;
     }
 
     found = insert_object(newobj, ovnum);
 
-    add_to_save_list(zone_table[rznum].number, SL_OBJ);
+    dirty_item_prototypes.insert(ovnum);
     auto &z = zone_table[rznum];
     z.objects.insert(ovnum);
     return found;

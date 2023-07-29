@@ -18,7 +18,6 @@
 extern const char *list_bonus[];
 extern const struct command_info cmd_info[];
 
-extern void userLoad(struct descriptor_data *d, char *name);
 
 extern void perform_alias(struct descriptor_data *d, char *orig);
 
@@ -32,11 +31,9 @@ extern int special(struct char_data *ch, int cmd, char *arg);
 
 void payout(int num);
 int lockRead(char *name);
-extern void fingerUser(struct char_data *ch, char *name);
+extern void fingerUser(struct char_data *ch, struct account_data *acc);
 
 extern int readUserIndex(char *name);
-
-extern void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, char *name);
 
 extern void command_interpreter(struct char_data *ch, char *argument);
 

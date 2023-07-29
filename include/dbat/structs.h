@@ -531,7 +531,6 @@ struct char_data : public unit_data {
 
     std::map<uint16_t, skill_data> skill;
 
-
     bitvector_t act[PM_ARRAY_MAX]{}; /* act flag for NPC's; player flag for PC's */
 
     int bodyparts[AF_ARRAY_MAX]{};  /* Bitvector for current bodyparts      */
@@ -694,6 +693,14 @@ struct char_data : public unit_data {
     int16_t invis_level{};        /* level of invisibility		*/
     room_vnum load_room{NOWHERE};        /* Which room to place char in		*/
     bitvector_t pref[PR_ARRAY_MAX]{};    /* preference flags for PC's.		*/
+
+    int getAffectModifier(int location, int specific = -1);
+    int getStrength(bool base = false);
+    int getIntelligence(bool base = false);
+    int getConstitution(bool base = false);
+    int getWisdom(bool base = false);
+    int getAgility(bool base = false);
+    int getSpeed(bool base = false);
 
     // C++ reworking
     const std::string &juggleRaceName(bool capitalized) const;
@@ -966,20 +973,19 @@ struct txt_q {
 
 
 struct descriptor_data {
-    std::set<std::shared_ptr<net::Connection>> connections;
+    std::map<int64_t, std::shared_ptr<net::Connection>> conns;
+    void onConnectionLost(int64_t);
+    void onConnectionClosed(int64_t);
 
     char host[HOST_LENGTH + 1];    /* hostname				*/
-    int8_t bad_pws{};    /* number of bad pw attemps this login	*/
-    int8_t idle_tics{0};        /* tics idle at password prompt		*/
     int connected{CON_PLAYING};        /* mode of 'connectedness'		*/
-    int desc_num{};        /* unique num assigned to desc		*/
+
     time_t login_time{time(nullptr)};        /* when the person connected		*/
     char **str{};            /* for the modify-str system		*/
     char *backstr{};        /* backup string for modify-str system	*/
     size_t max_str{};            /* maximum size of string in modify-str	*/
     int32_t mail_to{};        /* name for mail system			*/
     bool has_prompt{true};        /* is the user at a prompt?             */
-    std::string inbuf;        /* buffer for raw input			*/
     std::string last_input;        /* the last input			*/
     std::unique_ptr<net::Channel<std::string>> raw_input_queue;        /* queue of raw unprocessed input		*/
     std::list<std::string> input_queue;
@@ -992,18 +998,6 @@ struct descriptor_data {
     struct descriptor_data *next{}; /* link to next descriptor		*/
     struct oasis_olc_data *olc{};   /* OLC info                            */
     struct account_data *account{}; /* Account info                        */
-    char *user{};                   /* What user am I?                     */
-    char *email{};                  /* User Account Email.                 */
-    char *pass{};                   /* User Account Password.              */
-    char *loadplay{};               /* What character am I loading?        */
-    int writenew{};                 /* What slot am I writing to?          */
-    int total{};                    /* What Is My Total Character Limit?   */
-    int rpp{};                      /* What is my total RPP?               */
-    char *tmp1{};
-    char *tmp2{};
-    char *tmp3{};
-    char *tmp4{};
-    char *tmp5{};
     int level{};
     char *newsbuf{};
     /*---------------Player Level Object Editing Variables-------------------*/
@@ -1016,13 +1010,11 @@ struct descriptor_data {
     int obj_type{};
     int obj_weapon{};
     struct obj_data *obj_point{};
-
-    int customfile{};
     char *title{};
-    int rbank{};
-
+    double timeoutCounter{0};
     void handle_input();
     void start();
+    void handleLostLastConnection();
 };
 
 /* used in the socials */

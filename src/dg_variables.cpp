@@ -604,18 +604,20 @@ in the vault (vnum: 453) now and then. you can just use
                         if (subfield && *subfield) {
                             int addition = atoi(subfield);
                             int max = 100;
-                            GET_CON(c) += addition;
-                            if (GET_CON(c) > max) GET_CON(c) = max;
-                            if (GET_CON(c) < 3) GET_CON(c) = 3;
+                            auto &con = c->real_abils.con;
+                            con += addition;
+                            if (con > max) con = max;
+                            if (con< 3) con = 3;
                         }
                         snprintf(str, slen, "%d", GET_CON(c));
                     } else if (!strcasecmp(field, "cha")) {
                         if (subfield && *subfield) {
                             int addition = atoi(subfield);
                             int max = 100;
-                            GET_CHA(c) += addition;
-                            if (GET_CHA(c) > max) GET_CHA(c) = max;
-                            if (GET_CHA(c) < 3) GET_CHA(c) = 3;
+                            auto &cha = c->real_abils.cha;
+                            cha += addition;
+                            if (cha > max) cha = max;
+                            if (cha < 3) cha = 3;
                         }
                         snprintf(str, slen, "%d", GET_CHA(c));
                     }
@@ -632,9 +634,10 @@ in the vault (vnum: 453) now and then. you can just use
                         if (subfield && *subfield) {
                             int addition = atoi(subfield);
                             int max = 100;
-                            GET_DEX(c) += addition;
-                            if (GET_DEX(c) > max) GET_DEX(c) = max;
-                            if (GET_DEX(c) < 3) GET_DEX(c) = 3;
+                            auto &dex = c->real_abils.dex;
+                            dex += addition;
+                            if (dex > max) dex = max;
+                            if (dex < 3) dex = 3;
                         }
                         snprintf(str, slen, "%d", GET_DEX(c));
                     } else if (!strcasecmp(field, "drag")) {
@@ -794,9 +797,10 @@ in the vault (vnum: 453) now and then. you can just use
                         if (subfield && *subfield) {
                             int addition = atoi(subfield);
                             int max = 100;
-                            GET_INT(c) += addition;
-                            if (GET_INT(c) > max) GET_INT(c) = max;
-                            if (GET_INT(c) < 3) GET_INT(c) = 3;
+                            auto &intel = c->real_abils.intel;
+                            intel += addition;
+                            if (intel > max) intel = max;
+                            if (intel < 3) intel = 3;
                         }
                         snprintf(str, slen, "%d", GET_INT(c));
                     }
@@ -942,9 +946,10 @@ in the vault (vnum: 453) now and then. you can just use
                         if (subfield && *subfield) {
                             int addition = atoi(subfield);
                             int max = 100;
-                            GET_STR(c) += addition;
-                            if (GET_STR(c) > max) GET_STR(c) = max;
-                            if (GET_STR(c) < 3) GET_STR(c) = 3;
+                            auto &str = c->real_abils.str;
+                            str += addition;
+                            if (str > max) str = max;
+                            if (str < 3) str = 3;
                         }
                         snprintf(str, slen, "%d", GET_STR(c));
                     } else if (!strcasecmp(field, "size")) {
@@ -1038,9 +1043,10 @@ in the vault (vnum: 453) now and then. you can just use
                         if (subfield && *subfield) {
                             int addition = atoi(subfield);
                             int max = 100;
-                            GET_WIS(c) += addition;
-                            if (GET_WIS(c) > max) GET_WIS(c) = max;
-                            if (GET_WIS(c) < 3) GET_WIS(c) = 3;
+                            auto &wis = c->real_abils.wis;
+                            wis += addition;
+                            if (wis > max) wis = max;
+                            if (wis < 3) wis = 3;
                         }
                         snprintf(str, slen, "%d", GET_WIS(c));
                     }

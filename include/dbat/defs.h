@@ -968,8 +968,9 @@
 #define CON_GENOME       72
 #define CON_COPYOVER     73
 #define CON_LOGIN        74
+#define CON_QUITGAME     75
 
-#define NUM_CON_TYPES 75
+#define NUM_CON_TYPES 76
 
 /* Colors that the player can define */
 #define COLOR_NORMAL            0

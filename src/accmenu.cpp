@@ -4,6 +4,7 @@
 #include "dbat/db.h"
 #include "dbat/players.h"
 #include "fmt/format.h"
+#include "dbat/chargen.h"
 #include <boost/algorithm/string.hpp>
 
 namespace net {
@@ -16,16 +17,20 @@ namespace net {
         sendText(fmt::format("@D|@gMax Characters@D: @w{:>27}@D|@n\n", conn->account->slots));
         sendText(fmt::format("@D|@gRP Points     @D: @w{:>27}@D|@n\n", conn->account->rpp));
 
-
         sendText("@D=============================================@n\r\n\r\n");
         sendText("      @D[@y------@YAvailable Characters@y------@D]@n\n");
+        int counter = 0;
         for(auto c : conn->account->characters) {
             auto p = players.find(c);
             if(p == players.end()) continue;
-            sendText(fmt::format("                @b-- @C{}@n\r\n", p->second.character->name));
+            sendText(fmt::format("                @B(@W{}@B) @C{}@n\r\n", ++counter, p->second.character->name));
+        }
+        while(counter < conn->account->slots) {
+            sendText(fmt::format("                @B(@W{}@B) @C{}@n\r\n", ++counter, "<empty>"));
         }
 
         sendText("      @D[@y---- @YSelect Another Option @y----@D]@n\r\n");
+        sendText("                @B(@WA@B) @CCreate New Character@n\r\n");
         sendText("                @B(@WB@B) @CBuy New C. Slot @D(@R15 RPP@D)@n\r\n");
         sendText("                @B(@WC@B) @CUser's Customs\r\n");
         sendText("                @B(@WD@B) @RDelete User@n\r\n");
@@ -46,26 +51,34 @@ namespace net {
             return;
         }
 
-        if(boost::iequals(txt, "select") || boost::istarts_with(txt, "select ")) {
-            auto name = boost::trim_copy(txt.substr(6));
-            struct char_data *c = nullptr;
-            for(auto v : conn->account->characters) {
-                auto p = players.find(v);
-                if(p == players.end()) continue;
-                if(boost::iequals(p->second.character->name, name)) {
-                    c = p->second.character;
-                    break;
-                }
-            }
-            if(!c) {
-                sendText("That is not a character!\r\n");
+        if(boost::all(txt, boost::is_digit())) {
+            auto num = std::stoi(txt);
+            auto slot = num - 1;
+
+            if(num < 0 || num > conn->account->characters.size()) {
+                sendText("No such slot.\r\n");
                 return;
             }
-            conn->setParser(new CharacterMenu(conn, c));
+
+            auto id = conn->account->characters[slot];
+            auto p = players.find(id);
+            if(p == players.end()) {
+                sendText(fmt::format("ERROR: Player ID {} not found. Please alert staff.\r\n", id));
+                return;
+            }
+
+            conn->setParser(new CharacterMenu(conn, p->second.character));
             return;
         }
 
-        if (boost::iequals(txt, "slot") || boost::istarts_with(txt, "slot ")) {
+        if(boost::iequals(txt, "A") || boost::istarts_with(txt, "A ")) {
+            // Start chargen...
+            conn->setParser(new ChargenParser(conn));
+            return;
+        }
+
+        if (boost::iequals(txt, "B") || boost::istarts_with(txt, "B ")) {
+            // Buying a slot.
             if(conn->account->rpp < 15) {
                 sendText("You need at least 15 RPP to purchase a new character slot.\r\n");
                 return;
@@ -77,37 +90,18 @@ namespace net {
             conn->account->modRPP(-15);
             conn->account->slots++;
             // no need to set account dirty since modRPP does that.
-            sendText("New slot purchased, -15 RPP.\r\n");
+            sendText("New slot purchased. [-15 RPP].\r\n");
             return;
         }
 
-        if(boost::iequals(txt, "retire") || boost::istarts_with(txt, "retire ")) {
-            // for retiring a character.
-            auto name = boost::trim_copy(txt.substr(7));
-            int64_t id = -1;
-            for(auto v : conn->account->characters) {
-                auto p = players.find(v);
-                if(p == players.end()) continue;
-                if(boost::iequals(p->second.character->name, name)) {
-                    id = p->second.id;
-                    break;
-                }
-            }
-            if(id == NOTHING) {
-                sendText("That is not a character!\r\n");
-                return;
-            }
-            // TODO: Retire character here.
+        if(boost::iequals(txt, "D") || boost::istarts_with(txt, "D ")) {
+            // todo: implement...
         }
 
-        if(boost::iequals(txt, "quit") || boost::istarts_with(txt, "quit ")) {
+        if(boost::iequals(txt, "Q") || boost::istarts_with(txt, "Q ")) {
             sendText("Goodbye!\r\n");
             conn->close();
             return;
-        }
-
-        if(boost::iequals(txt, "delete") || boost::istarts_with(txt, "delete ")) {
-            // todo: implement...
         }
 
         sendText("Invalid option.\r\n");

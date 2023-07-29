@@ -15,7 +15,9 @@
 #include "dbat/pfdefaults.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/class.h"
+#include "dbat/ban.h"
 #include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 
 #define LOAD_HIT    0
 #define LOAD_MANA    1
@@ -1303,4 +1305,26 @@ struct char_data *findPlayer(const std::string& name) {
         }
     }
     return nullptr;
+}
+
+OpResult<> validate_pc_name(const std::string& name) {
+    auto n = boost::trim_copy(name);
+    // Cannot be empty.
+    if(n.empty()) return {false, "Player names cannot be empty."};
+
+    if(n.size() > 15) return {false, "Name is too long. 15 characters or less please."};
+
+    // No whitespace allowed...
+    if(std::any_of(n.begin(), n.end(), [](auto c) { return std::isspace(c); }))
+        return {false, "Whitespace is not allowed in player names."};
+
+    if(!boost::algorithm::all(n, boost::algorithm::is_alpha())) return {false, "No special symbols or numbers in names, please."};
+    // And nothing from our badnames list...
+    for(auto &badname : invalid_list) {
+        if(boost::iequals(n, badname)) {
+            return {false, "That name is disallowed. Nothing profane, lame, or conflicting with an official character please."};
+        }
+    }
+
+    return {true, n};
 }

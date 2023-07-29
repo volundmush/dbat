@@ -460,12 +460,9 @@ ACMD(do_house) {
 
 /* crash-save all the houses */
 void House_save_all() {
-    int i;
-    room_rnum real_house;
-
-    for (i = 0; i < num_of_houses; i++)
-        if ((real_house = real_room(house_control[i].vn)) != NOWHERE)
-            House_crashsave(house_control[i].vn);
+    for(auto &[vn, room] : world) {
+        if(IS_SET_AR(room.room_flags, ROOM_SAVE)) dirty_rooms.insert(vn);
+    }
 }
 
 

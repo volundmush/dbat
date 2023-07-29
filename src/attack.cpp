@@ -286,8 +286,10 @@ namespace atk {
         }
         if(calcDamage < 1) calcDamage = 1;
         hurt(0, limbhurtChance(), user, victim, obj, calcDamage, isKiAttack());
-        if(isPhysical()) tech_handle_fireshield(user, victim, getBodyPart().c_str());
-        if(canCombo()) handle_multihit(user, victim);
+        if(victim) {
+            if(isPhysical()) tech_handle_fireshield(user, victim, getBodyPart().c_str());
+            if(canCombo()) handle_multihit(user, victim);
+        }
     }
 
     void Attack::onMissed() {

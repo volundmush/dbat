@@ -1830,8 +1830,6 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
     }
     obj_to_room(corpse, IN_ROOM(ch));
 
-    if (!IS_NPC(ch))
-        Crash_rentsave(ch, 0);
 }
 
 

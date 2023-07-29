@@ -60,6 +60,7 @@ std::set<shop_vnum> dirty_shops;
 std::set<int64_t> dirty_players;
 std::set<vnum> dirty_accounts;
 
+bool forceSave = false;
 
 struct config_data config_info; /* Game configuration list.    */
 
@@ -1662,7 +1663,7 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
             world[room].dir_option[dir]->failroom = NOWHERE;
             world[room].dir_option[dir]->totalfailroom = NOWHERE;
             if (bitsavetodisk) {
-                add_to_save_list(zone_table[world[room].zone].number, 3);
+                dirty_rooms.insert(room);
                 converting = true;
             }
         } else if (retval == 5) {
@@ -1675,7 +1676,7 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
             world[room].dir_option[dir]->failroom = NOWHERE;
             world[room].dir_option[dir]->totalfailroom = NOWHERE;
             if (bitsavetodisk) {
-                add_to_save_list(zone_table[world[room].zone].number, 3);
+                dirty_rooms.insert(room);
                 converting = true;
             }
         } else if (retval == 7) {
@@ -1688,7 +1689,7 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
             world[room].dir_option[dir]->failroom = NOWHERE;
             world[room].dir_option[dir]->totalfailroom = NOWHERE;
             if (bitsavetodisk) {
-                add_to_save_list(zone_table[world[room].zone].number, 3);
+                dirty_rooms.insert(room);
                 converting = true;
             }
         } else if (retval == 11) {
@@ -2252,7 +2253,7 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
         GET_OBJ_VAL(&o, VAL_DOOR_DCLOCK) = 20;
         GET_OBJ_VAL(&o, VAL_DOOR_DCHIDE) = 20;
         if (bitsavetodisk) {
-            add_to_save_list(zone_table[real_zone_by_thing(nr)].number, 1);
+            dirty_item_prototypes.insert(nr);
             converting = true;
         }
     }
@@ -3424,10 +3425,6 @@ struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
     auto i = nr;
     int j;
 
-    if(nr == 45052) {
-        logger->info("it happened!");
-    }
-
     auto proto = obj_proto.find(i);
 
     if (proto == obj_proto.end()) {
@@ -3586,6 +3583,9 @@ void reset_zone(zone_rnum zone) {
                                         break;
                                     }
                                 }
+                                if (room_max >= c.arg4) {
+                                    break;
+                                }
                             }
                             /* Break out if room_max has been met, ignore room_max if zero */
                             if (room_max >= c.arg4) {
@@ -3632,6 +3632,10 @@ void reset_zone(zone_rnum zone) {
                                     /* Get rid of it if room_max has been met. */
                                     break;
                                 }
+                            }
+                            if (room_max >= c.arg4) {
+                                /* Get rid of it if room_max has been met. */
+                                break;
                             }
                         }
 
@@ -4121,15 +4125,12 @@ void reset_char(struct char_data *ch) {
     ch->followers = nullptr;
     ch->master = nullptr;
     IN_ROOM(ch) = NOWHERE;
-    ch->contents = nullptr;
     ch->next = nullptr;
     ch->next_fighting = nullptr;
     ch->next_in_room = nullptr;
     FIGHTING(ch) = nullptr;
     ch->position = POS_STANDING;
     ch->mob_specials.default_pos = POS_STANDING;
-    ch->carry_weight = 0;
-    ch->carry_items = 0;
     ch->time.logon = time(nullptr);
 
     GET_LAST_TELL(ch) = NOBODY;
@@ -5082,6 +5083,7 @@ static void process_dirty_shops() {
         q.exec();
         q.reset();
     }
+    dirty_shops.clear();
 
 }
 
@@ -5103,6 +5105,7 @@ static void process_dirty_guilds() {
         q.exec();
         q.reset();
     }
+    dirty_guilds.clear();
 
 }
 
@@ -5145,6 +5148,7 @@ static void process_dirty_areas() {
         q.exec();
         q.reset();
     }
+    dirty_areas.clear();
 
 }
 
@@ -5166,6 +5170,7 @@ static void process_dirty_dgscripts() {
         q.exec();
         q.reset();
     }
+    dirty_dgscripts.clear();
 
 }
 
@@ -5188,6 +5193,7 @@ static void process_dirty_accounts() {
             q.reset();
         }
     }
+    dirty_accounts.clear();
 
 }
 
@@ -5210,6 +5216,7 @@ static void process_dirty_players() {
             q.reset();
         }
     }
+    dirty_players.clear();
 }
 
 
@@ -5253,7 +5260,6 @@ void process_dirty() {
     if(!dirty_players.empty()) {
         process_dirty_players();
     }
-
 }
 
 int64_t nextObjID() {

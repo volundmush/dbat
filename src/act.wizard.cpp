@@ -794,7 +794,6 @@ ACMD(do_hell) {
         return;
     } else {
         struct descriptor_data *d = vict->desc;
-        Crash_rentsave(vict, 0);
         extract_char(vict);
         lockWrite(ch, GET_NAME(vict));
         if (d && STATE(d) != CON_PLAYING) {
@@ -2674,60 +2673,8 @@ ACMD(do_poofset) {
 }
 
 ACMD(do_dc) {
-    char arg[MAX_INPUT_LENGTH];
-    struct descriptor_data *d;
-    int num_to_dc;
-
-    one_argument(argument, arg);
-    if (!(num_to_dc = atoi(arg))) {
-        send_to_char(ch, "Usage: DC <user number> (type USERS for a list)\r\n");
-        return;
-    }
-    for (d = descriptor_list; d && d->desc_num != num_to_dc; d = d->next);
-
-    if (!d) {
-        send_to_char(ch, "No such connection.\r\n");
-        return;
-    }
-    if (d->character && GET_ADMLEVEL(d->character) >= GET_ADMLEVEL(ch)) {
-        if (!CAN_SEE(ch, d->character))
-            send_to_char(ch, "No such connection.\r\n");
-        else
-            send_to_char(ch, "Umm.. maybe that's not such a good idea...\r\n");
-        return;
-    }
-
-    /* We used to just close the socket here using close(), but
-   * various people pointed out this could cause a crash if you're
-   * closing the person below you on the descriptor list.  Just setting
-   * to CON_CLOSE leaves things in a massively inconsistent state so I
-   * had to add this new flag to the descriptor. -je
-   *
-   * It is a much more logical extension for a CON_DISCONNECT to be used
-   * for in-game socket closes and CON_CLOSE for out of game closings.
-   * This will retain the stability of the close_me hack while being
-   * neater in appearance. -gg 12/1/97
-   *
-   * For those unlucky souls who actually manage to get disconnected
-   * by two different immortals in the same 1/10th of a second, we have
-   * the below 'if' check. -gg 12/17/99
-   */
-    if (STATE(d) == CON_DISCONNECT || STATE(d) == CON_CLOSE)
-        send_to_char(ch, "They're already being disconnected.\r\n");
-    else {
-        /*
-     * Remember that we can disconnect people not in the game and
-     * that rather confuses the code when it expected there to be
-     * a character context.
-     */
-        if (STATE(d) == CON_PLAYING)
-            STATE(d) = CON_DISCONNECT;
-        else
-            STATE(d) = CON_CLOSE;
-
-        send_to_char(ch, "Connection #%d closed.\r\n", num_to_dc);
-        basic_mud_log("(GC) Connection closed by %s.", GET_NAME(ch));
-    }
+    send_to_char(ch, "temporarily disabled.");
+    return;
 }
 
 ACMD(do_wizlock) {
@@ -3005,7 +2952,7 @@ ACMD(do_zreset) {
             return;
         }
     } else if (*arg == '.' || !*arg)
-        i = world[IN_ROOM(ch)].zone;
+        i = real_zone_by_thing(ch->in_room);
     else {
         i = atol(arg);
     }
@@ -4273,7 +4220,6 @@ ACMD(do_saveall) {
         send_to_char(ch, "You are not holy enough to use this privelege.\n\r");
     else {
         save_all();
-        House_save_all();
         send_to_char(ch, "World and house files saved.\n\r");
     }
 }

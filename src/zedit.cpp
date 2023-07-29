@@ -212,32 +212,55 @@ void zedit_setup(struct descriptor_data *d, int room_num) {
     /*
      * Allocate one scratch zone structure.
      */
-    auto zone = new zone_data();
 
+    auto &z = zone_table[OLC_ZNUM(d)];
+    auto zd = OLC_ZONE(d) = new zone_data();
     /*
      * Copy all the zone header information over.
      */
-    zone->name = strdup(zone_table[OLC_ZNUM(d)].name);
-    if (zone_table[OLC_ZNUM(d)].builders)
-        zone->builders = strdup(zone_table[OLC_ZNUM(d)].builders);
-    zone->lifespan = zone_table[OLC_ZNUM(d)].lifespan;
-    zone->bot = zone_table[OLC_ZNUM(d)].bot;
-    zone->top = zone_table[OLC_ZNUM(d)].top;
-    zone->reset_mode = zone_table[OLC_ZNUM(d)].reset_mode;
-    zone->zone_flags[0] = zone_table[OLC_ZNUM(d)].zone_flags[0];
-    zone->zone_flags[1] = zone_table[OLC_ZNUM(d)].zone_flags[1];
-    zone->zone_flags[2] = zone_table[OLC_ZNUM(d)].zone_flags[2];
-    zone->zone_flags[3] = zone_table[OLC_ZNUM(d)].zone_flags[3];
-    zone->min_level = zone_table[OLC_ZNUM(d)].min_level;
-    zone->max_level = zone_table[OLC_ZNUM(d)].max_level;
+    zd->name = strdup(z.name);
+    if (z.builders)
+        zd->builders = strdup(z.builders);
+    zd->lifespan = z.lifespan;
+    zd->bot = z.bot;
+    zd->top = z.top;
+    zd->reset_mode = z.reset_mode;
+    zd->zone_flags[0] = z.zone_flags[0];
+    zd->zone_flags[1] = z.zone_flags[1];
+    zd->zone_flags[2] = z.zone_flags[2];
+    zd->zone_flags[3] = z.zone_flags[3];
+    zd->min_level = z.min_level;
+    zd->max_level = z.max_level;
     /*
      * The remaining fields are used as a 'has been modified' flag
      */
-    zone->number = 0;    /* Header information has changed.	*/
-    zone->age = 0;    /* The commands have changed.		*/
+    zd->number = 0;    /* Header information has changed.	*/
+    zd->age = 0;    /* The commands have changed.		*/
 
-    zone->cmd = zone_table[OLC_ZNUM(d)].cmd;
-    OLC_ZONE(d) = zone;
+    /*
+   * Add all entries in zone_table that relate to this room.
+   */
+    
+    auto filterFunc = [&](struct reset_com& c) {
+        switch(c.command) {
+            case 'M':
+            case 'O':
+            case 'T':
+            case 'V':
+                return room_num == c.arg3;
+            case 'D':
+            case 'R':
+                return room_num == c.arg1;
+            default:
+                return false;
+        }
+    };
+    
+    // Copy all elements of z.cmd that pass filterFunc to zd->cmd.
+    std::copy_if(z.cmd.begin(), z.cmd.end(), std::back_inserter(zd->cmd), filterFunc);
+    
+
+    
     /*
      * Display main menu.
      */
@@ -316,32 +339,67 @@ void zedit_save_internally(struct descriptor_data *d) {
         basic_mud_log("SYSERR: zedit_save_internally: OLC_NUM(d) room %d not found.", OLC_NUM(d));
         return;
     }
+    
+    auto zd = OLC_ZONE(d);
 
     remove_room_zone_commands(OLC_ZNUM(d), room_num);
     auto &z = zone_table[OLC_ZNUM(d)];
-    z.cmd = OLC_ZONE(d)->cmd;
+
+    auto it = std::remove_if(zd->cmd.begin(), zd->cmd.end(), [&](auto &c) {
+        switch (c.command) {
+            /* Possible fail cases. */
+            case 'G':
+            case 'E':
+                if (mobloaded)
+                    break;
+                write_to_output(d, "Equip/Give command not saved since no mob was loaded first.\r\n");
+                return true;
+            case 'P':
+                if (objloaded)
+                    break;
+                write_to_output(d, "Put command not saved since another object was not loaded first.\r\n");
+                return true;
+                /* Pass cases. */
+            case 'M':
+                mobloaded = true;
+                break;
+            case 'O':
+                objloaded = true;
+                break;
+            default:
+                mobloaded = objloaded = false;
+                break;
+        }
+        return false;
+    });
+
+    z.cmd.insert(z.cmd.begin(), zd->cmd.begin(), it);
+    int line = 1;
+    // reorder the lines.
+    for(auto c : z.cmd) c.line = line++;
+
 
     /*
      * Finally, if zone headers have been changed, copy over
      */
-    if (OLC_ZONE(d)->number) {
-        free(zone_table[OLC_ZNUM(d)].name);
-        free(zone_table[OLC_ZNUM(d)].builders);
+    if (zd->number) {
+        free(z.name);
+        free(z.builders);
 
-        zone_table[OLC_ZNUM(d)].name = strdup(OLC_ZONE(d)->name);
-        zone_table[OLC_ZNUM(d)].builders = strdup(OLC_ZONE(d)->builders);
-        zone_table[OLC_ZNUM(d)].bot = OLC_ZONE(d)->bot;
-        zone_table[OLC_ZNUM(d)].top = OLC_ZONE(d)->top;
-        zone_table[OLC_ZNUM(d)].reset_mode = OLC_ZONE(d)->reset_mode;
-        zone_table[OLC_ZNUM(d)].lifespan = OLC_ZONE(d)->lifespan;
-        zone_table[OLC_ZNUM(d)].zone_flags[0] = OLC_ZONE(d)->zone_flags[0];
-        zone_table[OLC_ZNUM(d)].zone_flags[1] = OLC_ZONE(d)->zone_flags[1];
-        zone_table[OLC_ZNUM(d)].zone_flags[2] = OLC_ZONE(d)->zone_flags[2];
-        zone_table[OLC_ZNUM(d)].zone_flags[3] = OLC_ZONE(d)->zone_flags[3];
-        zone_table[OLC_ZNUM(d)].min_level = OLC_ZONE(d)->min_level;
-        zone_table[OLC_ZNUM(d)].max_level = OLC_ZONE(d)->max_level;
+        z.name = strdup(zd->name);
+        z.builders = strdup(zd->builders);
+        z.bot = zd->bot;
+        z.top = zd->top;
+        z.reset_mode = zd->reset_mode;
+        z.lifespan = zd->lifespan;
+        z.zone_flags[0] = zd->zone_flags[0];
+        z.zone_flags[1] = zd->zone_flags[1];
+        z.zone_flags[2] = zd->zone_flags[2];
+        z.zone_flags[3] = zd->zone_flags[3];
+        z.min_level = zd->min_level;
+        z.max_level = zd->max_level;
     }
-    add_to_save_list(zone_table[OLC_ZNUM(d)].number, SL_ZON);
+    dirty_zones.insert(z.number);
 }
 
 /*-------------------------------------------------------------------*/
@@ -380,7 +438,7 @@ void zedit_disp_menu(struct descriptor_data *d) {
     clear_screen(d);
     room = real_room(OLC_NUM(d));
     sprintbitarray(OLC_ZONE(d)->zone_flags, zone_bits, ZF_ARRAY_MAX, buf1);
-
+    auto &z = zone_table[OLC_ZNUM(d)];
     /*
      * Menu header
      */
@@ -399,7 +457,7 @@ void zedit_disp_menu(struct descriptor_data *d) {
                  "[Command list]\r\n",
 
                  OLC_NUM(d),
-                 zone_table[OLC_ZNUM(d)].number,
+                 z.number,
                  OLC_ZONE(d)->builders ? OLC_ZONE(d)->builders : "None.",
                  OLC_ZONE(d)->name ? OLC_ZONE(d)->name : "<NONE!>",
                  OLC_ZONE(d)->lifespan,

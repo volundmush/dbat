@@ -62,12 +62,6 @@ extern int trans_cost(struct char_data *ch, int trans);
 
 extern int trans_req(struct char_data *ch, int trans);
 
-extern void customRead(struct descriptor_data *d, int type, char *name);
-
-extern void customWrite(struct char_data *ch, struct obj_data *obj);
-
-extern void customCreate(struct descriptor_data *d);
-
 extern int axion_dice(int adjust);
 
 const char *disp_align(struct char_data *ch);
@@ -509,7 +503,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define GET_SUPPRESS(ch) ((ch)->suppression)
 #define GET_RDISPLAY(ch) ((ch)->rdisplay)
 
-#define GET_STR(ch)     ((ch)->aff_abils.str)
+#define GET_STR(ch)     ((ch)->getStrength())
 /*
  * We could define GET_ADD to be ((GET_STR(ch) > 18) ?
  *                                ((GET_STR(ch) - 18) * 10) : 0)
@@ -519,11 +513,11 @@ extern int wield_type(int chsize, const struct obj_data *weap);
  */
 /* The old define: */
 /* #define GET_ADD(ch)     ((ch)->aff_abils.str_add) */
-#define GET_DEX(ch)     ((ch)->aff_abils.dex)
-#define GET_INT(ch)     ((ch)->aff_abils.intel)
-#define GET_WIS(ch)     ((ch)->aff_abils.wis)
-#define GET_CON(ch)     ((ch)->aff_abils.con)
-#define GET_CHA(ch)     ((ch)->aff_abils.cha)
+#define GET_DEX(ch)     ((ch)->getAgility())
+#define GET_INT(ch)     ((ch)->getIntelligence())
+#define GET_WIS(ch)     ((ch)->getWisdom())
+#define GET_CON(ch)     ((ch)->getConstitution())
+#define GET_CHA(ch)     ((ch)->getSpeed())
 #define GET_MUTBOOST(ch) (IS_MUTANT(ch) ? ((GET_GENOME(ch, 0) == 1 || GET_GENOME(ch, 1) == 1) ? (GET_SPEEDCALC(ch) + GET_SPEEDBONUS(ch) + GET_SPEEDBOOST(ch)) * 0.3 : 0) : 0)
 #define GET_SPEEDI(ch)  (GET_SPEEDCALC(ch) + GET_SPEEDBONUS(ch) + GET_SPEEDBOOST(ch) + GET_MUTBOOST(ch))
 #define GET_SPEEDCALC(ch) (IS_GRAP(ch) ? GET_CHA(ch) : (IS_INFERIOR(ch) ? (AFF_FLAGGED(ch, AFF_FLYING) ? (GET_SPEEDVAR(ch) * 1.25) : GET_SPEEDVAR(ch)) : GET_SPEEDVAR(ch)))

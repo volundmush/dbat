@@ -4206,7 +4206,6 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     obj_to_char(obj, ch);
                     GET_OBJ_SIZE(obj) = get_size(ch);
                     ch->modRPP(-cost);
-                    userWrite(ch->desc, 0, 0, 0, "index");
                     save_char(ch);
                     send_to_char(ch, "@R%d@W RPP from your Bank paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);

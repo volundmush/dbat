@@ -234,7 +234,7 @@ ACMD(do_dig) {
                 free(W_EXIT(IN_ROOM(ch), dir)->keyword);
             free(W_EXIT(IN_ROOM(ch), dir));
             W_EXIT(IN_ROOM(ch), dir) = nullptr;
-            add_to_save_list(zone_table[world[IN_ROOM(ch)].zone].number, SL_WLD);
+            dirty_rooms.insert(IN_ROOM(ch));
             send_to_char(ch, "You remove the exit to the %s.\r\n", dirs[dir]);
             return;
         }
@@ -313,8 +313,7 @@ ACMD(do_dig) {
     W_EXIT(IN_ROOM(ch), dir)->general_description = nullptr;
     W_EXIT(IN_ROOM(ch), dir)->keyword = nullptr;
     W_EXIT(IN_ROOM(ch), dir)->to_room = rrnum;
-    add_to_save_list(zone_table[world[IN_ROOM(ch)].zone].number, SL_WLD);
-    save_rooms(zone_table[world[rrnum].zone].number);
+    dirty_rooms.insert(IN_ROOM(ch));
     send_to_char(ch, "You make an exit %s to room %d (%s).\r\n",
                  dirs[dir], rvnum, world[rrnum].name);
 
@@ -329,8 +328,7 @@ ACMD(do_dig) {
         W_EXIT(rrnum, rev_dir[dir])->general_description = nullptr;
         W_EXIT(rrnum, rev_dir[dir])->keyword = nullptr;
         W_EXIT(rrnum, rev_dir[dir])->to_room = IN_ROOM(ch);
-        add_to_save_list(zone_table[world[rrnum].zone].number, SL_WLD);
-        save_rooms(zone_table[world[rrnum].zone].number);
+        dirty_rooms.insert(rrnum);
     }
 }
 
@@ -413,8 +411,7 @@ ACMD(do_rcopy) {
         world[rrnum].room_flags[i] = world[trnum].room_flags[i];
     }
     send_to_imm("Log: %s has copied room [%d] to room [%d].", GET_NAME(ch), tvnum, rvnum);
-    add_to_save_list(zone_table[world[rrnum].zone].number, SL_WLD);
-    save_rooms(zone_table[world[rrnum].zone].number);
+    dirty_rooms.insert(rrnum);
     send_to_char(ch, "Room [%d] copied to room [%d].\r\n", tvnum, rvnum);
 }
 

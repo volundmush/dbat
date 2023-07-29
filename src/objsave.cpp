@@ -908,7 +908,6 @@ static int gen_receptionist(struct char_data *ch, struct char_data *recep,
         if (mode == RENT_FACTOR) {
             act("$n stores your belongings and helps you into your private chamber.", false, recep, nullptr, ch,
                 TO_VICT);
-            Crash_rentsave(ch, cost);
             mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), true, "%s has rented (%d/day, %d tot.)",
                    GET_NAME(ch), cost, GET_GOLD(ch) + GET_BANK_GOLD(ch));
         } else {            /* cryo */

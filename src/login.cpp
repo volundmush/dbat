@@ -7,6 +7,7 @@
 #include "fmt/format.h"
 #include "dbat/account.h"
 #include "dbat/accmenu.h"
+#include "dbat/players.h"
 #include <boost/algorithm/string.hpp>
 
 namespace net {
@@ -51,28 +52,16 @@ namespace net {
             sendText("\r\n@cEnter your desired username or the username you have already made.\r\n@CEnter Username:@n\r\n");
             return;
         }
-        if(!Valid_Name((char*)txt.c_str())) {
-            sendText("Invalid name. Username?\r\n");
+        auto result = validate_pc_name(txt);
+        if(!result.first) {
+            sendText(result.second.value());
             return;
         }
-        if (boost::contains(txt, " ")) {
-            sendText("No spaces. Username?\r\n");
-            return;
-        }
-        if(!boost::algorithm::all(txt, boost::algorithm::is_alpha())) {
-            sendText("No special symbols or number. Username?\r\n");
-            return;
-        }
-        if (txt.size() < 3) {
-            sendText("Name must at least be 3 characters long, username?\r\n");
-            return;
-        }
-        if (txt.size() > 10) {
-            sendText("Name must be at most 10 characters long, username?\r\n");
-            return;
-        }
-        account = findAccount(txt);
-        name = txt;
+
+        auto sanitized = result.second.value();
+
+        account = findAccount(sanitized);
+        name = sanitized;
         if(account) {
             state = LoginState::GetPassword;
             parse("");

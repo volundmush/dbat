@@ -206,7 +206,7 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
     auto &c = z.cmd.emplace_back();
     c.command = 'S';
 
-    add_to_save_list(zone->number, SL_ZON);
+    dirty_zones.insert(zone->number);
     return rznum;
 }
 
@@ -310,7 +310,7 @@ void remove_room_zone_commands(zone_rnum zone, room_rnum room_num) {
             default:
                 return false;
         }
-    }));
+    }), z.cmd.end());
 }
 
 /*-------------------------------------------------------------------*/
@@ -454,8 +454,12 @@ zone_data::zone_data(const nlohmann::json &j) : zone_data() {
     }
 
     if(j.contains("cmd")) {
+        int line = 1;
         cmd.reserve(j["cmd"].size());
-        for(auto &c : j["cmd"]) cmd.emplace_back(c);
+        for(auto &c : j["cmd"]) {
+           auto cm = cmd.emplace_back(c);
+           cm.line = line++;
+        }
     }
 }
 

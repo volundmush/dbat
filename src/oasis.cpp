@@ -253,10 +253,8 @@ void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type) {
     if (OLC_GUILD(d)) {
         switch (cleanup_type) {
             case CLEANUP_ALL:
-                free_guild(OLC_GUILD(d));
-                break;
             case CLEANUP_STRUCTS:
-                free(OLC_GUILD(d));
+                delete OLC_GUILD(d);
                 break;
             default:
                 break;

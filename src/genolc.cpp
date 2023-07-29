@@ -53,22 +53,7 @@ char *str_udup(const char *txt) {
 
 /* Original use: to be called at shutdown time.  */
 int save_all() {
-    for (auto &s : save_list) {
-        if (s.type < 0 || s.type > SL_MAX) {
-            switch (s.type) {
-                case SL_ACT:
-                    basic_mud_log("Actions not saved - can not autosave. Use 'aedit save'.");
-                    break;
-                case SL_HLP:
-                    basic_mud_log("Help not saved - can not autosave. Use 'hedit save'.");
-                    break;
-                default:
-                    basic_mud_log("SYSERR: GenOLC: Invalid save type %d in save list.\n", s.type);
-                    break;
-            }
-        } else if ((*save_types[s.type].func)(real_zone(s.zone)) < 0) {}
-    }
-    save_list.clear();
+    dirty_all();
     return true;
 }
 
@@ -122,24 +107,15 @@ int remove_from_save_list(zone_vnum zone, int type) {
     int counter = 0;
     auto check = [&](save_list_data &d) {if(d.zone == zone && d.type == type) {counter++; return true;}};
 
-    std::remove_if(save_list.begin(), save_list.end(), check);
+    save_list.erase(std::remove_if(save_list.begin(), save_list.end(), check), save_list.end());
     return counter;
 }
 
 int add_to_save_list(zone_vnum zone, int type) {
-    if (type == SL_CFG)
-        return false;
-
-    if (!zone_table.count(zone)) {
-        if (zone != AEDIT_PERMISSION && zone != HEDIT_PERMISSION) {
-            basic_mud_log("SYSERR: add_to_save_list: Invalid zone number passed. (%d)", zone);
-            return false;
-        }
+    if(zone == HEDIT_PERMISSION || zone == NOWHERE || zone == AEDIT_PERMISSION) {
+        return true;
     }
-
-    auto &l = save_list.emplace_back();
-    l.zone = zone;
-    l.type = type;
+    dirty_zones.insert(zone);
     return true;
 }
 

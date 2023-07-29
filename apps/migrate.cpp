@@ -137,6 +137,8 @@ vnum assembleArea(const AreaDef &def) {
         }
     }
 
+    for(auto r: def.roomSkips) rooms.erase(r);
+
     basic_mud_log("Assembling Area: %s, Rooms: %d", def.name.c_str(), rooms.size());
 
     for(auto r : rooms) {
@@ -163,8 +165,7 @@ void migrate_grid() {
 
     AreaDef mudschooldef;
     mudschooldef.name = "MUD School";
-    mudschooldef.roomRanges.emplace_back(100, 155);
-    mudschooldef.roomSkips = {155};
+    mudschooldef.roomRanges.emplace_back(100, 154);
     mudschooldef.type = AreaType::Dimension;
     auto mud_school = assembleArea(mudschooldef);
 

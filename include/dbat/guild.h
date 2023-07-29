@@ -14,14 +14,13 @@ struct guild_data {
     guild_data() = default;
     explicit guild_data(const nlohmann::json& j);
     nlohmann::json serialize();
-    ~guild_data();
     room_vnum vnum{NOBODY};                /* number of the guild */
     void toggle_skill(uint16_t skill_id);
     void toggle_feat(uint16_t skill_id);
     std::set<uint16_t> skills;  /* array to keep track of which feats things we'll train */
     float charge{1.0};                  /* charge * skill level = how much we'll charge */
-    char *no_such_skill{};           /* message when we don't teach that skill */
-    char *not_enough_gold{};         /* message when the student doesn't have enough gold */
+    std::string no_such_skill{};           /* message when we don't teach that skill */
+    std::string not_enough_gold{};         /* message when the student doesn't have enough gold */
     int minlvl{0};                    /* Minumum level guildmaster will train */
     mob_vnum gm{NOBODY};                   /* GM's vnum */
     bitvector_t with_who[GW_ARRAY_MAX]{};    /* whom we dislike */

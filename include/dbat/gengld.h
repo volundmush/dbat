@@ -16,11 +16,7 @@ extern void remove_from_int_list(vnum **list, vnum num);
 
 extern void add_to_int_list(vnum **tlist, vnum newi);
 
-extern void free_guild_string(struct guild_data *guild);
-
 extern void free_guild(struct guild_data *guild);
-
-extern void free_guild_strings(struct guild_data *guild);
 
 extern void modify_string(char **str, char *newstr);
 

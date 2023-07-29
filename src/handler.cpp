@@ -156,41 +156,25 @@ int isname(const char *str, const char *namelist) {
 void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *msg) {
     switch (loc) {
         case APPLY_NONE:
-            break;
-
         case APPLY_STR:
-            GET_STR(ch) += mod;
-            break;
         case APPLY_DEX:
-            GET_DEX(ch) += mod;
-            break;
         case APPLY_INT:
-            GET_INT(ch) += mod;
-            break;
         case APPLY_WIS:
-            GET_WIS(ch) += mod;
-            break;
         case APPLY_CON:
-            GET_CON(ch) += mod;
-            break;
         case APPLY_CHA:
-            GET_CHA(ch) += mod;
-            break;
-
         case APPLY_CLASS:
-            /* ??? GET_CLASS(ch) += mod; */
-            break;
-
-            /*
-             * My personal thoughts on these two would be to set the person to the
-             * value of the apply.  That way you won't have to worry about people
-             * making +1 level things to be imp (you restrict anything that gives
-             * immortal level of course).  It also makes more sense to set someone
-             * to a class rather than adding to the class number. -gg
-             */
-
         case APPLY_LEVEL:
-            /* ??? GET_LEVEL(ch) += mod; */
+        case APPLY_MANA:
+        case APPLY_HIT:
+        case APPLY_MOVE:
+        case APPLY_KI:
+        case APPLY_GOLD:
+        case APPLY_EXP:
+        case APPLY_UNUSED3:
+        case APPLY_UNUSED4:
+        case APPLY_RACE:
+        case APPLY_ALL_STATS:
+        case APPLY_RESISTANCE:
             break;
 
         case APPLY_AGE:
@@ -203,28 +187,6 @@ void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *ms
 
         case APPLY_CHAR_HEIGHT:
             GET_HEIGHT(ch) += mod;
-            break;
-
-        case APPLY_MANA:
-            //GET_MAX_MANA(ch) += mod;
-            break;
-
-        case APPLY_HIT:
-            //GET_MAX_HIT(ch) += mod;
-            break;
-
-        case APPLY_MOVE:
-            //GET_MAX_MOVE(ch) += mod;
-            break;
-
-        case APPLY_KI:
-            //GET_MAX_KI(ch) += mod;
-            break;
-
-        case APPLY_GOLD:
-            break;
-
-        case APPLY_EXP:
             break;
 
         case APPLY_AC:
@@ -250,14 +212,7 @@ void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *ms
         case APPLY_LIFEMAX:
             ch->lifebonus += mod;
             break;
-        case APPLY_UNUSED3:
-        case APPLY_UNUSED4:
-            /* Don't exist anymore */
-            break;
 
-        case APPLY_RACE:
-            /* ??? GET_RACE(ch) += mod; */
-            break;
 
         case APPLY_FORTITUDE:
             GET_SAVE_MOD(ch, SAVING_FORTITUDE) += mod;
@@ -283,18 +238,6 @@ void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *ms
             GET_SAVE_MOD(ch, SAVING_FORTITUDE) += mod;
             GET_SAVE_MOD(ch, SAVING_REFLEX) += mod;
             GET_SAVE_MOD(ch, SAVING_WILL) += mod;
-            break;
-
-        case APPLY_ALL_STATS:
-            GET_STR(ch) += mod;
-            GET_INT(ch) += mod;
-            GET_WIS(ch) += mod;
-            GET_DEX(ch) += mod;
-            GET_CON(ch) += mod;
-            GET_CHA(ch) += mod;
-            break;
-
-        case APPLY_RESISTANCE:
             break;
 
         default:
@@ -393,39 +336,6 @@ void affect_total(struct char_data *ch) {
 
     for (af = ch->affected; af; af = af->next)
         affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, true);
-
-    /* Make certain values are between 0..100, not < 0 and not > 100! */
-
-    if (GET_BONUS(ch, BONUS_WIMP) > 0) {
-        GET_STR(ch) = MAX(0, MIN(GET_STR(ch), 45));
-    } else {
-        GET_STR(ch) = MAX(0, MIN(GET_STR(ch), 100));
-    }
-    if (GET_BONUS(ch, BONUS_DULL) > 0) {
-        GET_INT(ch) = MAX(0, MIN(GET_INT(ch), 45));
-    } else {
-        GET_INT(ch) = MAX(0, MIN(GET_INT(ch), 100));
-    }
-    if (GET_BONUS(ch, BONUS_FOOLISH) > 0) {
-        GET_WIS(ch) = MAX(0, MIN(GET_WIS(ch), 45));
-    } else {
-        GET_WIS(ch) = MAX(0, MIN(GET_WIS(ch), 100));
-    }
-    if (GET_BONUS(ch, BONUS_SLOW) > 0) {
-        GET_CHA(ch) = MAX(0, MIN(GET_CHA(ch), 45));
-    } else {
-        GET_CHA(ch) = MAX(0, MIN(GET_CHA(ch), 100));
-    }
-    if (GET_BONUS(ch, BONUS_CLUMSY) > 0) {
-        GET_DEX(ch) = MAX(0, MIN(GET_DEX(ch), 45));
-    } else {
-        GET_DEX(ch) = MAX(0, MIN(GET_DEX(ch), 100));
-    }
-    if (GET_BONUS(ch, BONUS_FRAIL) > 0) {
-        GET_CON(ch) = MAX(0, MIN(GET_CON(ch), 45));
-    } else {
-        GET_CON(ch) = MAX(0, MIN(GET_CON(ch), 100));
-    }
 
 
 }
@@ -1220,6 +1130,11 @@ void extract_char_final(struct char_data *ch) {
         exit(1);
     }
 
+    if(!IS_NPC(ch)) {
+        if(ch->was_in_room != NOWHERE) ch->load_room = ch->was_in_room;
+        else ch->load_room = ch->in_room;
+    }
+
     /*
      * We're booting the character of someone who has switched so first we
      * need to stuff them back into their own body.  This will set ch->desc
@@ -1234,33 +1149,8 @@ void extract_char_final(struct char_data *ch) {
     }
 
     if (ch->desc) {
-        /*
-         * This time we're extracting the body someone has switched into
-         * (not the body of someone switching as above) so we need to put
-         * the switcher back to their own body.
-         *
-         * If this body is not possessed, the owner won't have a
-         * body after the removal so dump them to the main menu.
-         */
         if (ch->desc->original)
             do_return(ch, nullptr, 0, 0);
-        else {
-            /*
-             * Now we boot anybody trying to log in with the same character, to
-             * help guard against duping.  CON_DISCONNECT is used to close a
-             * descriptor without extracting the d->character associated with it,
-             * for being link-dead, so we want CON_CLOSE to clean everything up.
-             * If we're here, we know it's a player so no IS_NPC check required.
-             */
-            for (d = descriptor_list; d; d = d->next) {
-                if (d == ch->desc)
-                    continue;
-                if (d->character && GET_IDNUM(ch) == GET_IDNUM(d->character))
-                    STATE(d) = CON_CLOSE;
-            }
-            STATE(ch->desc) = CON_MENU;
-            write_to_output(ch->desc, "%s", CONFIG_MENU);
-        }
     }
     /* On with the character's assets... */
 
@@ -1372,18 +1262,19 @@ void extract_char_final(struct char_data *ch) {
         ABSORBBY(ch) = nullptr;
     }
 
-
     /* transfer objects to room, if any */
-    while (ch->contents) {
-        obj = ch->contents;
-        obj_from_char(obj);
-        obj_to_room(obj, IN_ROOM(ch));
-    }
+    if(IS_NPC(ch)) {
+        while (ch->contents) {
+            obj = ch->contents;
+            obj_from_char(obj);
+            obj_to_room(obj, IN_ROOM(ch));
+        }
 
-    /* transfer equipment to room, if any */
-    for (i = 0; i < NUM_WEARS; i++)
-        if (GET_EQ(ch, i))
-            obj_to_room(unequip_char(ch, i), IN_ROOM(ch));
+        /* transfer equipment to room, if any */
+        for (i = 0; i < NUM_WEARS; i++)
+            if (GET_EQ(ch, i))
+                obj_to_room(unequip_char(ch, i), IN_ROOM(ch));
+    }
 
     if (FIGHTING(ch))
         stop_fighting(ch);
@@ -1409,9 +1300,14 @@ void extract_char_final(struct char_data *ch) {
     }
 
     /* If there's a descriptor, they're in the menu now. */
+    if(ch->desc) {
+        ch->desc->connected = CON_QUITGAME;
+    }
+
     if (IS_NPC(ch))
         free_char(ch);
-    else ch->deactivate();
+    else
+        ch->deactivate();
 }
 
 

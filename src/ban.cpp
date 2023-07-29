@@ -8,6 +8,7 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
+#include <fstream>
 #include "dbat/ban.h"
 #include "dbat/utils.h"
 #include "dbat/comm.h"
@@ -223,89 +224,43 @@ ACMD(do_unban) {
  *  Written by Sharon P. Goza						  *
  **************************************************************************/
 
-#define MAX_INVALID_NAMES    200
-
-char *invalid_list[MAX_INVALID_NAMES];
-int num_invalid = 0;
-
-int Valid_Name(char *newname) {
-    int i, wovels = 0;
-    struct descriptor_data *dt;
-    char tempname[MAX_INPUT_LENGTH];
-
-    /*
-     * Make sure someone isn't trying to create this same name.  We want to
-     * do a 'strcasecmp' so people can't do 'Bob' and 'BoB'.  The creating login
-     * will not have a character name yet and other people sitting at the
-     * prompt won't have characters yet.
-     *
-     * New, unindexed characters (i.e., characters who are in the process of creating)
-     * will have an idnum of -1, set by clear_char() in db.c.  If someone is creating a
-     *character by the same name as the one we are checking, then the name is invalid,
-     * to prevent character duping.
-     * THIS SHOULD FIX THE 'invalid name' if disconnected from OLC-bug - WELCOR 9/00
-     */
-    for (dt = descriptor_list; dt; dt = dt->next)
-        if (dt->character && GET_NAME(dt->character) && !strcasecmp(GET_NAME(dt->character), newname))
-            if (GET_IDNUM(dt->character) == -1)
-                return (IS_PLAYING(dt));
-
-    /* count wovels */
-    for (i = 0; newname[i]; i++) {
-        if (strchr("aeiouyAEIOUY", newname[i]))
-            wovels++;
-    }
-
-    /* return invalid if no wovels */
-    if (!wovels)
-        return (0);
-
-    /* return valid if list doesn't exist */
-    if (invalid_list == nullptr || num_invalid < 1)
-        return (1);
-
-    /* change to lowercase */
-    strlcpy(tempname, newname, sizeof(tempname));
-    for (i = 0; tempname[i]; i++)
-        tempname[i] = LOWER(tempname[i]);
-
-    /* Does the desired name contain a string in the invalid list? */
-    for (i = 0; i < num_invalid; i++)
-        if (strstr(tempname, invalid_list[i]))
-            return (0);
-
-    return (1);
-}
-
+std::set<std::string> invalid_list;
 
 /* What's with the wacky capitalization in here? */
 void Free_Invalid_List() {
-    int invl;
-
-    for (invl = 0; invl < num_invalid; invl++)
-        free(invalid_list[invl]);
-
-    num_invalid = 0;
+    invalid_list.clear();
 }
 
-
 void Read_Invalid_List() {
-    FILE *fp;
-    char temp[256];
+    // this function will attempt to open the "misc/xnames" file from cwd and read each
+    // non-empty line into invalid_list (a std::set<std::string>)
+    // use std::filesystem!
+    std::filesystem::path path = "misc/xnames";
 
-    if (!(fp = fopen(XNAME_FILE, "r"))) {
-        perror("SYSERR: Unable to open '" XNAME_FILE "' for reading");
+    // Check if the file exists
+    if (!std::filesystem::exists(path))
+    {
+        logger->error("SYSERR: Unable to open '" XNAME_FILE "' for reading");
         return;
     }
 
-    num_invalid = 0;
-    while (get_line(fp, temp) && num_invalid < MAX_INVALID_NAMES)
-        invalid_list[num_invalid++] = strdup(temp);
+    std::ifstream file(path);
 
-    if (num_invalid >= MAX_INVALID_NAMES) {
-        basic_mud_log("SYSERR: Too many invalid names; change MAX_INVALID_NAMES in ban.c");
-        exit(1);
+    // Check if the file was opened successfully
+    if (!file)
+    {
+        logger->error("SYSERR: Unable to open '" XNAME_FILE "' for reading");
+        return;
     }
 
-    fclose(fp);
+    std::string line;
+    while(std::getline(file, line))
+    {
+        boost::trim(line);
+        if(!line.empty())
+        {
+            invalid_list.insert(line);
+        }
+    }
+
 }

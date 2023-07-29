@@ -119,6 +119,7 @@ extern std::set<zone_vnum> zone_reset_queue;
 
 extern std::shared_ptr<SQLite::Database> db;
 
+extern bool forceSave;
 
 extern struct char_data *EDRAGON;
 extern int WISH[2];

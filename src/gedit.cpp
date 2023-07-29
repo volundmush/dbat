@@ -388,8 +388,8 @@ void gedit_disp_menu(struct descriptor_data *d) {
                     OLC_NUM(d),
                     G_TRAINER(guilddata) == NOBODY ? -1 : mob_index[G_TRAINER(guilddata)].vn,
                     G_TRAINER(guilddata) == NOBODY ? "None" : mob_proto[G_TRAINER(guilddata)].short_description,
-                    G_NO_SKILL(guilddata),
-                    G_NO_GOLD(guilddata),
+                    G_NO_SKILL(guilddata).c_str(),
+                    G_NO_GOLD(guilddata).c_str(),
                     G_OPEN(guilddata),
                     G_CLOSE(guilddata),
                     G_CHARGE(guilddata),
@@ -521,10 +521,10 @@ void gedit_parse(struct descriptor_data *d, char *arg) {
 /*-------------------------------------------------------------------*/
             /*. String edits . */
         case GEDIT_NO_SKILL:
-            gedit_modify_string(&G_NO_SKILL(OLC_GUILD(d)), arg);
+            gedit_modify_string(G_NO_SKILL(OLC_GUILD(d)), arg);
             break;
         case GEDIT_NO_CASH:
-            gedit_modify_string(&G_NO_GOLD(OLC_GUILD(d)), arg);
+            gedit_modify_string(G_NO_GOLD(OLC_GUILD(d)), arg);
             break;
 
 /*-------------------------------------------------------------------*/

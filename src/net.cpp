@@ -359,13 +359,24 @@ namespace net {
     }
 
     void Connection::close() {
-        // TODO: make this do something.
+        nlohmann::json j;
+        j["kind"] = "client_disconnected";
+        j["id"] = this->connId;
+        j["reason"] = "";
+        linkChannel->try_send(boost::system::error_code{}, j);
+        deadConnections.insert(this->connId);
+        if(desc) {
+            desc->onConnectionClosed(this->connId);
+            desc = nullptr;
+        }
     }
 
     void Connection::onNetworkDisconnected() {
-        // TODO: make this do something.
+        deadConnections.insert(this->connId);
+        if(desc) {
+            desc->onConnectionLost(this->connId);
+        }
     }
-
 
     nlohmann::json Message::serialize() const {
         nlohmann::json j;

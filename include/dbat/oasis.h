@@ -679,11 +679,7 @@ extern void gedit_save_to_disk(int num);
 
 extern void copy_guild(struct guild_data *tgm, struct guild_data *fgm);
 
-extern void free_guild_strings(struct guild_data *guild);
-
-extern void free_guild(struct guild_data *guild);
-
-extern void gedit_modify_string(char **str, char *new_g);
+extern void gedit_modify_string(std::string &str, char *new_g);
 
 extern ACMD(do_oasis_gedit);
 

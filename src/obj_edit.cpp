@@ -527,7 +527,8 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
                     GET_OBJ_SIZE(obj) = get_size(d->character);
                     SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_CUSTOM);
                     send_to_imm("Custom Eq: %s has bought: %s.", GET_NAME(d->character), obj->short_description);
-                    customWrite(d->character, obj);
+                    d->account->customs.emplace_back(obj->short_description);
+                    dirty_accounts.insert(d->account->vn);
                     log_custom(d, obj);
                 } else if (!strcasecmp(arg, "n") || !strcasecmp(arg, "N")) {
                     write_to_output(d, "Canceling purchase at no cost.\r\n");
