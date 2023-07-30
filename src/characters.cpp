@@ -981,7 +981,7 @@ void char_data::modRPP(int amt) {
 }
 
 void char_data::login() {
-    auto load_result = enter_player_game(desc);
+    enter_player_game(desc);
     send_to_char(this, "%s", CONFIG_WELC_MESSG);
     ::act("$n has entered the game.", true, this, nullptr, nullptr, TO_ROOM);
     mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(this)), true, "%s has entered the game.", GET_NAME(this));
@@ -1093,11 +1093,6 @@ void char_data::login() {
                 "@D[@GBlip@D]@Y %s\r\n@RSomeone has suddenly entered your scouter detection range!@n.",
                 add_commas(GET_HIT(this)));
         send_to_scouter(buf3, this, 0, 0);
-    }
-
-    if (load_result == 2) {    /* rented items lost */
-        send_to_char(this, "\r\n\007You could not afford your rent!\r\n"
-                                   "Your possesions have been donated to the Salvation Army!\r\n");
     }
 
     desc->has_prompt = 0;

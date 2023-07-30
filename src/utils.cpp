@@ -2848,33 +2848,14 @@ int planet_check(struct char_data *ch, struct char_data *vict) {
     } else {
         int success = 0;
         if (GET_ADMLEVEL(vict) <= 0) {
-            if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_EARTH)) {
-                success = 1;
-            } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_FRIGID) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_FRIGID)) {
-                success = 1;
-            } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_NAMEK) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_NAMEK)) {
-                success = 1;
-            } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_VEGETA) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_VEGETA)) {
-                success = 1;
-            } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AETHER) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_AETHER)) {
-                success = 1;
-            } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_KONACK) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_KONACK)) {
-                success = 1;
-            } else if (PLANET_ZENITH(IN_ROOM(ch)) && PLANET_ZENITH(IN_ROOM(vict))) {
-                success = 1;
-            } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_KANASSA) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_KANASSA)) {
-                success = 1;
-            } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_YARDRAT) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_YARDRAT)) {
-                success = 1;
-            } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_AL)) {
+            auto chPlanet = ch->getMatchingArea(area_data::isPlanet);
+            auto victPlanet = vict->getMatchingArea(area_data::isPlanet);
+            if(chPlanet && chPlanet == victPlanet) success = 1;
+            else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_AL)) {
                 success = 1;
             } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HELL) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_HELL)) {
                 success = 1;
-            } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_ARLIA) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_ARLIA)) {
-                success = 1;
             } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_NEO) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_NEO)) {
-                success = 1;
-            } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_CERRIA) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_CERRIA)) {
                 success = 1;
             }
         }
@@ -3805,6 +3786,10 @@ std::string processColors(const std::string &txt, int parse, char **choices) {
     return out;
 }
 
+size_t countColors(const std::string &txt) {
+    auto stripped = processColors(txt, false, nullptr);
+    return txt.size() - stripped.size();
+}
 
 /* Rules (unless overridden by ROOM_DARK):
  *

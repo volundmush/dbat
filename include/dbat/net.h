@@ -123,10 +123,10 @@ namespace net {
 
         void setParser(ConnectionParser *p);
 
-        int64_t connId;
-        account_data *account;
+        int64_t connId{};
+        account_data *account{};
         int64_t adminLevel{0};
-        struct descriptor_data *desc;
+        struct descriptor_data *desc{};
 
         // Some time structs to handle when we received connections.
         // These probably need some updating on this and Thermite side...
@@ -135,7 +135,7 @@ namespace net {
 
         // This is embedded for ease of segmentation but this struct isn't
         // actually used anywhere else.
-        ProtocolCapabilities capabilities;
+        ProtocolCapabilities capabilities{};
 
         JsonChannel fromLink;
         std::unique_ptr<ConnectionParser> parser;

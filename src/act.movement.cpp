@@ -256,9 +256,9 @@ std::optional<vnum> governingAreaTypeFor(struct room_data *rd, std::function<boo
     auto &a = areas[rd->area.value()];
     while(true) {
         if (func(a)) return a.vn;
-        if ((a.type == AreaType::Structure || a.type == AreaType::Vehicle) && a.objectVnum) {
+        if ((a.type == AreaType::Structure || a.type == AreaType::Vehicle) && a.extraVn) {
             // we need to find the a.objectVnum in the world by scanning object_list...
-            if (auto obj = get_obj_num(a.objectVnum.value()); obj) {
+            if (auto obj = get_obj_num(a.extraVn.value()); obj) {
                 return governingAreaTypeFor(obj, func);
             }
         }
@@ -349,7 +349,7 @@ ACMD(do_land) {
     if(onPlanet) {
         auto &a = areas[onPlanet.value()];
         count = recurseScanRooms(a, rooms, scan);
-        above_planet = (a.orbit && inroom == a.orbit.value());
+        above_planet = (a.extraVn && inroom == a.extraVn.value());
     } else {
         above_planet = false;
     }
@@ -2333,14 +2333,14 @@ ACMD(do_fly) {
             return;
         }
 
-        auto planet = ch->getMatchingArea(isPlanet);
+        auto planet = ch->getMatchingArea(area_data::isPlanet);
         if(!planet) {
             send_to_char(ch, "You are not on a planet!");
             return;
         }
 
         auto &a = areas[planet.value()];
-        if(!a.orbit) {
+        if(!a.extraVn) {
             send_to_char(ch, "You are not on a planet!");
             return;
         }
@@ -2361,7 +2361,7 @@ ACMD(do_fly) {
         act("@C$n blasts off from the ground and rockets through the air. You quickly lose sight of $m as $e continues upward!@n",
             true, ch, nullptr, nullptr, TO_ROOM);
         char_from_room(ch);
-        char_to_room(ch, a.orbit.value());
+        char_to_room(ch, a.extraVn.value());
         act("@C$n blasts up from the atmosphere below and then comes to a stop.@n", true, ch, nullptr, nullptr,
             TO_ROOM);
         send_to_char(ch, "@mOOC: Use the command 'land' to return to the planet from here.@n\r\n");

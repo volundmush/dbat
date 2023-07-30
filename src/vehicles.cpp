@@ -1282,29 +1282,12 @@ ACMD(do_drive) {
             } else if (!strcasecmp(arg, "launch")) {
                 int lnum = 0;
                 int rnum = 0;
-                if (ROOM_FLAGGED(IN_ROOM(vehicle), ROOM_EARTH)) {
-                    lnum = 1;
-                } else if (ROOM_FLAGGED(IN_ROOM(vehicle), ROOM_FRIGID)) {
-                    lnum = 2;
-                } else if (ROOM_FLAGGED(IN_ROOM(vehicle), ROOM_KONACK)) {
-                    lnum = 3;
-                } else if (ROOM_FLAGGED(IN_ROOM(vehicle), ROOM_VEGETA)) {
-                    lnum = 4;
-                } else if (ROOM_FLAGGED(IN_ROOM(vehicle), ROOM_NAMEK)) {
-                    lnum = 5;
-                } else if (ROOM_FLAGGED(IN_ROOM(vehicle), ROOM_AETHER)) {
-                    lnum = 6;
-                } else if (ROOM_FLAGGED(IN_ROOM(vehicle), ROOM_YARDRAT)) {
-                    lnum = 7;
-                } else if (PLANET_ZENITH(IN_ROOM(vehicle))) {
-                    lnum = 8;
-                } else if (ROOM_FLAGGED(IN_ROOM(vehicle), ROOM_CERRIA)) {
-                    lnum = 11;
-                } else if (ROOM_FLAGGED(IN_ROOM(vehicle), ROOM_KANASSA)) {
-                    lnum = 9;
-                } else if (ROOM_FLAGGED(IN_ROOM(vehicle), ROOM_ARLIA)) {
-                    lnum = 10;
-                } else {
+                auto planet = vehicle->getMatchingArea(area_data::isPlanet);
+                if(planet) {
+                    auto &a = areas[planet.value()];
+                    rnum = a.extraVn.value_or(NOWHERE);
+                }
+                if(rnum == NOWHERE) {
                     send_to_char(ch, "@wYou are not on a planet.@n\r\n");
                     return;
                 }
@@ -1316,39 +1299,6 @@ ACMD(do_drive) {
                 act("@wThe ship has reached low orbit.@n", false, ch, nullptr, nullptr, TO_ROOM);
                 send_to_room(IN_ROOM(vehicle), "@R%s @Rshudders before blasting off into the sky!@n",
                              vehicle->short_description);
-                if (lnum == 1) {
-                    rnum = real_room(50);
-                }
-                if (lnum == 2) {
-                    rnum = real_room(51);
-                }
-                if (lnum == 3) {
-                    rnum = real_room(52);
-                }
-                if (lnum == 4) {
-                    rnum = real_room(53);
-                }
-                if (lnum == 5) {
-                    rnum = real_room(54);
-                }
-                if (lnum == 6) {
-                    rnum = real_room(55);
-                }
-                if (lnum == 7) {
-                    rnum = real_room(56);
-                }
-                if (lnum == 8) {
-                    rnum = real_room(57);
-                }
-                if (lnum == 9) {
-                    rnum = real_room(58);
-                }
-                if (lnum == 10) {
-                    rnum = real_room(59);
-                }
-                if (lnum == 11) {
-                    rnum = real_room(198);
-                }
                 if (GET_FUELCOUNT(controls) < 5) {
                     GET_FUELCOUNT(controls) += 1;
                 } else {

@@ -523,10 +523,9 @@ static void db_load_dgscripts() {
         auto data = q.getColumn(1).getString();
         try {
             auto j = nlohmann::json::parse(data);
-            auto trig = new trig_data(j);
             auto &t = trig_index[id];
             t.vn = id;
-            t.proto = trig;
+            t.proto = new trig_data(j);;
         } catch(std::exception& e) {
             basic_mud_log("Error parsing dgscript %ld: %s", id, e.what());
             continue;
@@ -649,6 +648,15 @@ static void db_load_areas() {
         } catch(std::exception& e) {
             basic_mud_log("Error parsing area %ld: %s", id, e.what());
             continue;
+        }
+    }
+
+    for(auto &[vn, a] : areas) {
+        if(a.parent) {
+            auto parent = areas.find(a.parent.value());
+            if(parent != areas.end()) {
+                parent->second.children.insert(vn);
+            }
         }
     }
 }

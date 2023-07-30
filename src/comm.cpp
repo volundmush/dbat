@@ -256,94 +256,226 @@ static boost::asio::awaitable<void> performReboot(int mode) {
 
 }
 
+static std::vector<std::pair<std::string, double>> timings;
+
 boost::asio::awaitable<void> heartbeat(int heart_pulse, double deltaTime) {
     static int mins_since_crashsave = 0;
+    timings.clear();
 
-    event_process();
+    {
+        auto start = std::chrono::high_resolution_clock::now();
+        event_process();
+        auto end = std::chrono::high_resolution_clock::now();
+        timings.emplace_back("event_process", std::chrono::duration<double>(end - start).count());
+    }
 
-    if (!(heart_pulse % PULSE_DG_SCRIPT))
+    if (!(heart_pulse % PULSE_DG_SCRIPT)) {
+        auto start = std::chrono::high_resolution_clock::now();
         script_trigger_check();
+        auto end = std::chrono::high_resolution_clock::now();
+        timings.emplace_back("script_trigger_check", std::chrono::duration<double>(end - start).count());
+    }
 
-    if (!(heart_pulse % PULSE_ZONE))
+    if (!(heart_pulse % PULSE_ZONE)) {
+        auto start = std::chrono::high_resolution_clock::now();
         zone_update();
+        auto end = std::chrono::high_resolution_clock::now();
+        timings.emplace_back("zone_update", std::chrono::duration<double>(end - start).count());
+    }
+
 
     if (!(heart_pulse % PULSE_IDLEPWD))        /* 15 seconds */
+    {
+        auto start = std::chrono::high_resolution_clock::now();
         check_idle_passwords();
+        auto end = std::chrono::high_resolution_clock::now();
+        timings.emplace_back("check_idle_passwords", std::chrono::duration<double>(end - start).count());
+    }
 
     if (!(heart_pulse % (PULSE_1SEC * 60)))           /* 15 seconds */
+    {
+        auto start = std::chrono::high_resolution_clock::now();
         check_idle_menu();
+        auto end = std::chrono::high_resolution_clock::now();
+        timings.emplace_back("check_idle_menu", std::chrono::duration<double>(end - start).count());
+    }
 
     if (!(heart_pulse % (PULSE_IDLEPWD / 15))) {           /* 1 second */
+        auto start = std::chrono::high_resolution_clock::now();
         dball_load();
+        auto end = std::chrono::high_resolution_clock::now();
+        timings.emplace_back("dball_load", std::chrono::duration<double>(end - start).count());
     }
+
     if (!(heart_pulse % (PULSE_2SEC))) {
-        base_update();
-        fish_update();
+        {
+            auto start = std::chrono::high_resolution_clock::now();
+            base_update();
+            auto end = std::chrono::high_resolution_clock::now();
+            timings.emplace_back("base_update", std::chrono::duration<double>(end - start).count());
+        }
+        {
+            auto start = std::chrono::high_resolution_clock::now();
+            fish_update();
+            auto end = std::chrono::high_resolution_clock::now();
+            timings.emplace_back("fish_update", std::chrono::duration<double>(end - start).count());
+        }
     }
 
     if (!(heart_pulse % (PULSE_1SEC * 15))) {
+        auto start = std::chrono::high_resolution_clock::now();
         handle_songs();
+        auto end = std::chrono::high_resolution_clock::now();
+        timings.emplace_back("handle_songs", std::chrono::duration<double>(end - start).count());
     }
 
     if (!(heart_pulse % (PULSE_1SEC)))
+    {
+        auto start = std::chrono::high_resolution_clock::now();
         wishSYS();
+        auto end = std::chrono::high_resolution_clock::now();
+        timings.emplace_back("wishSYS", std::chrono::duration<double>(end - start).count());
+    }
 
     if (!(heart_pulse % PULSE_MOBILE))
+    {
+        auto start = std::chrono::high_resolution_clock::now();
         mobile_activity();
+        auto end = std::chrono::high_resolution_clock::now();
+        timings.emplace_back("mobile_activity", std::chrono::duration<double>(end - start).count());
+    }
 
     if (!(heart_pulse % PULSE_AUCTION))
+    {
+        auto start = std::chrono::high_resolution_clock::now();
         check_auction();
+        auto end = std::chrono::high_resolution_clock::now();
+        timings.emplace_back("check_auction", std::chrono::duration<double>(end - start).count());
+    }
 
     if (!(heart_pulse % (PULSE_IDLEPWD / 15))) {
+        auto start = std::chrono::high_resolution_clock::now();
         fight_stack();
+        auto end = std::chrono::high_resolution_clock::now();
+        timings.emplace_back("fight_stack", std::chrono::duration<double>(end - start).count());
     }
     if (!(heart_pulse % ((PULSE_IDLEPWD / 15) * 2))) {
         if (rand_number(1, 2) == 2) {
+            auto start = std::chrono::high_resolution_clock::now();
             homing_update();
+            auto end = std::chrono::high_resolution_clock::now();
+            timings.emplace_back("homing_update", std::chrono::duration<double>(end - start).count());
         }
-        huge_update();
-        broken_update();
+        {
+            auto start = std::chrono::high_resolution_clock::now();
+            huge_update();
+            auto end = std::chrono::high_resolution_clock::now();
+            timings.emplace_back("huge_update", std::chrono::duration<double>(end - start).count());
+        }
+        {
+            auto start = std::chrono::high_resolution_clock::now();
+            broken_update();
+            auto end = std::chrono::high_resolution_clock::now();
+            timings.emplace_back("broken_update", std::chrono::duration<double>(end - start).count());
+        }
         /*update_mob_absorb();*/
     }
 
     if (!(heart_pulse % (1 * PASSES_PER_SEC))) { /* EVERY second */
+        auto start = std::chrono::high_resolution_clock::now();
         copyover_check();
+        auto end = std::chrono::high_resolution_clock::now();
+        timings.emplace_back("copyover_check", std::chrono::duration<double>(end - start).count());
     }
 
     if (!(heart_pulse % PULSE_VIOLENCE)) {
+        auto start = std::chrono::high_resolution_clock::now();
         affect_update_violence();
+        auto end = std::chrono::high_resolution_clock::now();
     }
 
     if (!(heart_pulse % (SECS_PER_MUD_HOUR * PASSES_PER_SEC))) {
-        weather_and_time(1);
-        check_time_triggers();
-        affect_update();
+        {
+            auto start = std::chrono::high_resolution_clock::now();
+            weather_and_time(1);
+            auto end = std::chrono::high_resolution_clock::now();
+            timings.emplace_back("weather_and_time", std::chrono::duration<double>(end - start).count());
+        }
+        {
+            auto start = std::chrono::high_resolution_clock::now();
+            check_time_triggers();
+            auto end = std::chrono::high_resolution_clock::now();
+            timings.emplace_back("check_time_triggers", std::chrono::duration<double>(end - start).count());
+        }
+        {
+            auto start = std::chrono::high_resolution_clock::now();
+            affect_update();
+            auto end = std::chrono::high_resolution_clock::now();
+            timings.emplace_back("affect_update", std::chrono::duration<double>(end - start).count());
+        }
     }
+
     if (!(heart_pulse % ((SECS_PER_MUD_HOUR / 3) * PASSES_PER_SEC))) {
+        auto start = std::chrono::high_resolution_clock::now();
         point_update();
+        auto end = std::chrono::high_resolution_clock::now();
+        timings.emplace_back("point_update", std::chrono::duration<double>(end - start).count());
     }
 
     if (CONFIG_AUTO_SAVE && !(heart_pulse % PULSE_AUTOSAVE)) {    /* 1 minute */
-        clan_update();
+        {
+            auto start = std::chrono::high_resolution_clock::now();
+            clan_update();
+            auto end = std::chrono::high_resolution_clock::now();
+            timings.emplace_back("clan_update", std::chrono::duration<double>(end - start).count());
+        }
         if (++mins_since_crashsave >= CONFIG_AUTOSAVE_TIME) {
             mins_since_crashsave = 0;
-            Crash_save_all();
-            House_save_all();
+            {
+                auto start = std::chrono::high_resolution_clock::now();
+                Crash_save_all();
+                auto end = std::chrono::high_resolution_clock::now();
+                timings.emplace_back("Crash_save_all", std::chrono::duration<double>(end - start).count());
+            }
+            {
+                auto start = std::chrono::high_resolution_clock::now();
+                House_save_all();
+                auto end = std::chrono::high_resolution_clock::now();
+                timings.emplace_back("House_save_all", std::chrono::duration<double>(end - start).count());
+            }
         }
     }
 
     if (!(heart_pulse % PULSE_USAGE))
+    {
+        auto start = std::chrono::high_resolution_clock::now();
         record_usage();
+        auto end = std::chrono::high_resolution_clock::now();
+        timings.emplace_back("record_usage", std::chrono::duration<double>(end - start).count());
+    }
 
     if (!(heart_pulse % PULSE_TIMESAVE))
+    {
+        auto start = std::chrono::high_resolution_clock::now();
         save_mud_time(&time_info);
+        auto end = std::chrono::high_resolution_clock::now();
+        timings.emplace_back("save_mud_time", std::chrono::duration<double>(end - start).count());
+    }
 
     if (!(heart_pulse % (30 * PASSES_PER_SEC))) {
+        auto start = std::chrono::high_resolution_clock::now();
         timed_dt(nullptr);
+        auto end = std::chrono::high_resolution_clock::now();
+        timings.emplace_back("timed_dt", std::chrono::duration<double>(end - start).count());
     }
 
     /* Every pulse! Don't want them to stink the place up... */
-    extract_pending_chars();
+    {
+        auto start = std::chrono::high_resolution_clock::now();
+        extract_pending_chars();
+        auto end = std::chrono::high_resolution_clock::now();
+        timings.emplace_back("extract_pending_chars", std::chrono::duration<double>(end - start).count());
+    }
     co_return;
 }
 
@@ -399,16 +531,27 @@ boost::asio::awaitable<void> runOneLoop(double deltaTime) {
         co_return;
     }
 
-    for(auto d = descriptor_list; d; d = next_d) {
-        next_d = d->next;
-        if(STATE(d) != CON_LOGIN) continue;
-        d->character->login();
+    {
+        auto start = std::chrono::high_resolution_clock::now();
+        for(auto d = descriptor_list; d; d = next_d) {
+            next_d = d->next;
+            if(STATE(d) != CON_LOGIN) continue;
+            d->character->login();
+        }
+        auto end = std::chrono::high_resolution_clock::now();
+        timings.emplace_back("handle logins", std::chrono::duration<double>(end - start).count());
     }
 
+
     /* Process commands we just read from process_input */
-    for (auto d = descriptor_list; d; d = next_d) {
-        next_d = d->next;
-        d->handle_input();
+    {
+        auto start = std::chrono::high_resolution_clock::now();
+        for (auto d = descriptor_list; d; d = next_d) {
+            next_d = d->next;
+            d->handle_input();
+        }
+        auto end = std::chrono::high_resolution_clock::now();
+        timings.emplace_back("handle input", std::chrono::duration<double>(end - start).count());
     }
 
     bool gameActive = false;
@@ -424,38 +567,56 @@ boost::asio::awaitable<void> runOneLoop(double deltaTime) {
     }
 
     if(gameActive) {
+        auto start = std::chrono::high_resolution_clock::now();
         co_await heartbeat(++pulse, deltaTime);
+        auto end = std::chrono::high_resolution_clock::now();
+        timings.emplace_back("heartbeat total", std::chrono::duration<double>(end - start).count());
     }
 
     /* Send queued output out to the operating system (ultimately to user). */
-    for (auto d = descriptor_list; d; d = next_d) {
-        next_d = d->next;
-        if (!d->output.empty()) {
-            process_output(d);
-            d->has_prompt = true;
+    {
+        auto start = std::chrono::high_resolution_clock::now();
+        for (auto d = descriptor_list; d; d = next_d) {
+            next_d = d->next;
+            if (!d->output.empty()) {
+                process_output(d);
+                d->has_prompt = true;
+            }
         }
+        auto end = std::chrono::high_resolution_clock::now();
+        timings.emplace_back("process output", std::chrono::duration<double>(end - start).count());
     }
 
     /* Print prompts for other descriptors who had no other output */
-    for (auto d = descriptor_list; d; d = d->next) {
-        if (!d->has_prompt) {
-            write_to_output(d, "@n");
-            process_output(d);
-            d->has_prompt = true;
+    {
+        auto start = std::chrono::high_resolution_clock::now();
+        for (auto d = descriptor_list; d; d = d->next) {
+            if (!d->has_prompt) {
+                write_to_output(d, "@n");
+                process_output(d);
+                d->has_prompt = true;
+            }
         }
+        auto end = std::chrono::high_resolution_clock::now();
+        timings.emplace_back("print prompts", std::chrono::duration<double>(end - start).count());
     }
 
     /* Kick out folks in the CON_CLOSE or CON_DISCONNECT state */
-    for (auto d = descriptor_list; d; d = next_d) {
-        next_d = d->next;
-        if(d->conns.empty()) {
-            d->timeoutCounter += deltaTime;
-            if(d->timeoutCounter > 300) {
-                STATE(d) = CON_CLOSE;
+    {
+        auto start = std::chrono::high_resolution_clock::now();
+        for (auto d = descriptor_list; d; d = next_d) {
+            next_d = d->next;
+            if(d->conns.empty()) {
+                d->timeoutCounter += deltaTime;
+                if(d->timeoutCounter > 300) {
+                    STATE(d) = CON_CLOSE;
+                }
             }
+            if (STATE(d) == CON_CLOSE || STATE(d) == CON_DISCONNECT || STATE(d) == CON_QUITGAME)
+                close_socket(d);
         }
-        if (STATE(d) == CON_CLOSE || STATE(d) == CON_DISCONNECT || STATE(d) == CON_QUITGAME)
-            close_socket(d);
+        auto end = std::chrono::high_resolution_clock::now();
+        timings.emplace_back("close sockets", std::chrono::duration<double>(end - start).count());
     }
 
     /* Check for any signals we may have received. */
@@ -506,8 +667,20 @@ boost::asio::awaitable<void> game_loop() {
             if(circle_shutdown) {
                 dirty_all();
             }
-            process_dirty();
-            transaction.commit();
+            {
+                auto start = boost::asio::steady_timer::clock_type::now();
+                process_dirty();
+                auto end = boost::asio::steady_timer::clock_type::now();
+                timings.emplace_back("process_dirty", std::chrono::duration<double>(end - start).count());
+            }
+
+            {
+                auto start = boost::asio::steady_timer::clock_type::now();
+                transaction.commit();
+                auto end = boost::asio::steady_timer::clock_type::now();
+                timings.emplace_back("transaction.commit", std::chrono::duration<double>(end - start).count());
+            }
+
         } catch(std::exception& e) {
             basic_mud_log("Exception in runOneLoop(): %s", e.what());
             exit(1);
@@ -519,7 +692,13 @@ boost::asio::awaitable<void> game_loop() {
 
         // If heartbeat takes more than 100ms, default to a very short wait
         if(nextWait.count() < 0) {
-            logger->warn("Heartbeat took {}, defaulting to short wait\n", std::chrono::duration<double>(nextWait).count());
+            if(config::logEgregiousTimings) {
+                logger->warn("Heartbeat took {} too long, defaulting to short wait", abs(std::chrono::duration<double>(nextWait).count()));
+                for(auto &t : timings) {
+                    logger->warn("Timing {}: {}", t.first, std::chrono::duration<double>(t.second).count());
+                }
+            }
+            timings.clear();
             nextWait = std::chrono::milliseconds(1);
         }
 

@@ -113,9 +113,9 @@ vnum assembleArea(const AreaDef &def) {
     }
 
     std::set<vnum> rooms = def.roomIDs;
-    a.orbit = def.orbit;
-    if(a.orbit) {
-        rooms.insert(a.orbit.value());
+    a.extraVn = def.orbit;
+    if(a.type == AreaType::CelestialBody && a.extraVn) {
+        rooms.insert(a.extraVn.value());
     }
 
     for(auto &[start, end] : def.roomRanges) {
@@ -309,14 +309,14 @@ void migrate_grid() {
     }
 
     AreaDef pearth;
-    pearth.name = "Earth";
+    pearth.name = "@GEarth@n";
     pearth.type = AreaType::CelestialBody;
     pearth.parent = space;
     pearth.orbit = 50;
     auto planet_earth = assembleArea(pearth);
 
     AreaDef pvegeta;
-    pvegeta.name = "Vegeta";
+    pvegeta.name = "@YVegeta@n";
     pvegeta.type = AreaType::CelestialBody;
     pvegeta.parent = space;
     pvegeta.gravity = 10.0;
@@ -324,63 +324,63 @@ void migrate_grid() {
     auto planet_vegeta = assembleArea(pvegeta);
 
     AreaDef pfrigid;
-    pfrigid.name = "Frigid";
+    pfrigid.name = "@CFrigid@n";
     pfrigid.type = AreaType::CelestialBody;
     pfrigid.parent = space;
     pfrigid.orbit = 51;
     auto planet_frigid = assembleArea(pfrigid);
 
     AreaDef pnamek;
-    pnamek.name = "Namek";
+    pnamek.name = "@gNamek@n";
     pnamek.type = AreaType::CelestialBody;
     pnamek.parent = space;
     pnamek.orbit = 54;
     auto planet_namek = assembleArea(pnamek);
 
     AreaDef pkonack;
-    pkonack.name = "Konack";
+    pkonack.name = "@MKonack@n";
     pkonack.type = AreaType::CelestialBody;
     pkonack.parent = space;
     pkonack.orbit = 52;
     auto planet_konack = assembleArea(pkonack);
 
     AreaDef paether;
-    paether.name = "Aether";
+    paether.name = "@MAether@n";
     paether.type = AreaType::CelestialBody;
     paether.parent = space;
     paether.orbit = 55;
     auto planet_aether = assembleArea(paether);
 
     AreaDef pyardrat;
-    pyardrat.name = "Yardrat";
+    pyardrat.name = "@mYardrat@n";
     pyardrat.type = AreaType::CelestialBody;
     pyardrat.parent = space;
     pyardrat.orbit = 56;
     auto planet_yardrat = assembleArea(pyardrat);
 
     AreaDef pkanassa;
-    pkanassa.name = "Kanassa";
+    pkanassa.name = "@BKanassa@n";
     pkanassa.type = AreaType::CelestialBody;
     pkanassa.parent = space;
     pkanassa.orbit = 58;
     auto planet_kanassa = assembleArea(pkanassa);
 
     AreaDef pcerria;
-    pcerria.name = "Cerria";
+    pcerria.name = "@RCerria@n";
     pcerria.type = AreaType::CelestialBody;
     pcerria.parent = space;
     pcerria.orbit = 198;
     auto planet_cerria = assembleArea(pcerria);
 
     AreaDef parlia;
-    parlia.name = "Arlia";
+    parlia.name = "@GArlia@n";
     parlia.type = AreaType::CelestialBody;
     parlia.parent = space;
     parlia.orbit = 59;
     auto planet_arlia = assembleArea(parlia);
 
     AreaDef pzenith;
-    pzenith.name = "Zenith";
+    pzenith.name = "@BZenith@n";
     pzenith.type = AreaType::CelestialBody;
     pzenith.parent = space;
     pzenith.orbit = 57;
@@ -1224,7 +1224,7 @@ void migrate_grid() {
         sdata.parent = spaceships;
         auto ship = assembleArea(sdata);
         auto &s = areas[ship];
-        if(data.ship_obj) s.objectVnum = data.ship_obj.value();
+        if(data.ship_obj) s.extraVn = data.ship_obj.value();
 
         return ship;
     };

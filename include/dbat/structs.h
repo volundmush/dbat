@@ -83,12 +83,12 @@ struct area_data {
     std::optional<double> gravity; /* gravity in this area			*/
     std::optional<vnum> parent; /* parent area				*/
     AreaType type{AreaType::Dimension}; /* type of area				*/
-    std::optional<vnum> objectVnum; /* vehicle or house outer object vnum				*/
-    std::optional<vnum> orbit; /* orbit room vnum, for CelestialBody type */
+    std::optional<vnum> extraVn; /* vehicle or house outer object vnum, orbit for CelBody */
     bool ether{false}; /* is this area etheric?			*/
     bool moon{false}; /* does this planet have a moon? */
     nlohmann::json serialize();
     static vnum getNextID();
+    static bool isPlanet(const area_data &area);
 };
 
 /* Extra description: used in objects, mobiles, and rooms */
@@ -344,7 +344,7 @@ struct alias_data {
     explicit alias_data(const nlohmann::json &j);
     std::string name;
     std::string replacement;
-    int type;
+    int type{};
     nlohmann::json serialize();
 };
 
@@ -380,14 +380,14 @@ struct mob_special_data {
 struct affected_type {
     affected_type() = default;
     explicit affected_type(const nlohmann::json& j);
-    int16_t type;          /* The type of spell that caused this      */
-    int16_t duration;      /* For how long its effects will last      */
-    int modifier;         /* This is added to apropriate ability     */
-    int location;         /* Tells which ability to change(APPLY_XXX)*/
-    int specific;         /* Some locations have parameters          */
-    bitvector_t bitvector; /* Tells which bits to set (AFF_XXX) */
+    int16_t type{};          /* The type of spell that caused this      */
+    int16_t duration{};      /* For how long its effects will last      */
+    int modifier{};         /* This is added to apropriate ability     */
+    int location{};         /* Tells which ability to change(APPLY_XXX)*/
+    int specific{};         /* Some locations have parameters          */
+    bitvector_t bitvector{}; /* Tells which bits to set (AFF_XXX) */
     nlohmann::json serialize();
-    struct affected_type *next;
+    struct affected_type *next{};
 };
 
 /* Queued spell entry */

@@ -159,7 +159,7 @@ void extract_script(void *thing, int type) {
     /* Thanks to James Long for tracking down this memory leak */
     free_varlist(sc->global_vars);
 
-    free(sc);
+    delete sc;
 }
 
 /* erase the script memory of a mob */

@@ -27,18 +27,13 @@
 #include "dbat/races.h"
 #include "dbat/act.movement.h"
 #include "dbat/config.h"
-#include "dbat/objsave.h"
-#include "dbat/statedit.h"
 #include "dbat/weather.h"
 #include "dbat/act.informative.h"
 #include "dbat/players.h"
-#include "dbat/act.wizard.h"
-#include "dbat/dg_comm.h"
-#include "dbat/ban.h"
 #include "dbat/assedit.h"
 #include "dbat/obj_edit.h"
+#include "dbat/area.h"
 #include <boost/algorithm/string.hpp>
-#include "dbat/constants.h"
 
 /* local global variables */
 DISABLED_DATA *disabled_first = nullptr;
@@ -912,6 +907,7 @@ const struct command_info cmd_info[] = {
         {"appraise",      "apprais",      POS_STANDING, do_appraise,        0,  ADMLVL_NONE,    0},
         {"approve",       "approve",      POS_STANDING, do_approve,         0,  ADMLVL_IMMORT,  0},
         {"arena",         "aren",         POS_RESTING,  do_arena,           0,  ADMLVL_NONE,    0},
+        {"arlist",         "arl",         POS_DEAD,     do_arlist,          0,  ADMLVL_BUILDER, 0},
         {"ashcloud",      "ashclou",      POS_RESTING,  do_ashcloud,        0,  ADMLVL_NONE,    0},
         {"assedit",       "assed",        POS_STANDING, do_assedit,         0,  ADMLVL_GOD,     0},
         {"assist",        "assis",        POS_STANDING, do_assist,          0,  ADMLVL_NONE,    0},
@@ -2678,8 +2674,7 @@ int perform_dupe_check(struct descriptor_data *d) {
 }
 
 /* load the player, put them in the right room - used by copyover_recover too */
-int enter_player_game(struct descriptor_data *d) {
-    int load_result;
+void enter_player_game(struct descriptor_data *d) {
     IDXTYPE load_room;
     struct char_data *check;
 
@@ -2837,7 +2832,6 @@ int enter_player_game(struct descriptor_data *d) {
     }
 
     COMBO(d->character) = -1;
-    return load_result;
 }
 
 int readUserIndex(char *name) {

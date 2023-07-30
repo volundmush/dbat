@@ -4321,6 +4321,19 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
                 send_to_char(ch, " %d", GET_TRIG_VNUM(t));
             send_to_char(ch, "@D] ");
         }
+        if(rm->area) {
+            std::vector<std::string> ancestors;
+            auto parent = rm->area;
+            while(parent) {
+                auto &a = areas[parent.value()];
+                ancestors.emplace_back(fmt::format("[{}] {}@n", a.vn, a.name));
+                parent = a.parent;
+            }
+            // Reverse areas.
+            std::reverse(ancestors.begin(), ancestors.end());
+            auto joined = boost::join(ancestors, " -> ");
+            send_to_char(ch, "@wArea: @D[@n %s @D]@n\r\n", joined.c_str());
+        }
         int grav = rm->getGravity();
         sprintf(buf3, "@D[ @G%s@D] @wSector: @D[ @G%s @D] @wVnum: @D[@G%5d@D]@n Gravity: @D[@G%dx@D]@n", buf, buf2,
                 GET_ROOM_VNUM(target_room), grav);
@@ -4333,24 +4346,9 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
             send_to_char(ch, "@wO----------------------------------------------------------------------O@n\r\n");
         }
         send_to_char(ch, "@wLocation: %-70s@n\r\n", rm->name);
-        if (ROOM_FLAGGED(target_room, ROOM_EARTH)) {
-            send_to_char(ch, "@wPlanet: @GEarth@n\r\n");
-        } else if (ROOM_FLAGGED(target_room, ROOM_CERRIA)) {
-            send_to_char(ch, "@wPlanet: @RCerria@n\r\n");
-        } else if (PLANET_ZENITH(target_room)) {
-            send_to_char(ch, "@wPlanet: @BZenith@n\r\n");
-        } else if (ROOM_FLAGGED(target_room, ROOM_AETHER)) {
-            send_to_char(ch, "@wPlanet: @MAether@n\r\n");
-        } else if (ROOM_FLAGGED(target_room, ROOM_FRIGID)) {
-            send_to_char(ch, "@wPlanet: @CFrigid@n\r\n");
-        } else if (ROOM_FLAGGED(target_room, ROOM_SPACE)) {
-            send_to_char(ch, "@wPlanet: @DNone@n\r\n");
-        } else if (ROOM_FLAGGED(target_room, ROOM_VEGETA)) {
-            send_to_char(ch, "@wPlanet: @YVegeta@n\r\n");
-        } else if (ROOM_FLAGGED(target_room, ROOM_NAMEK)) {
-            send_to_char(ch, "@wPlanet: @gNamek@n\r\n");
-        } else if (ROOM_FLAGGED(target_room, ROOM_KONACK)) {
-            send_to_char(ch, "@wPlanet: @MKonack@n\r\n");
+        if(auto planet = ch->getMatchingArea(area_data::isPlanet); planet) {
+            auto &a = areas[planet.value()];
+            send_to_char(ch, "@wPlanet: @G%s@n\r\n", a.name.c_str());
         } else if (ROOM_FLAGGED(target_room, ROOM_NEO)) {
             send_to_char(ch, "@wPlanet: @WNeo Nirvana@n\r\n");
         } else if (ROOM_FLAGGED(target_room, ROOM_AL)) {
@@ -4359,15 +4357,8 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
             send_to_char(ch, "@wDimension: @RPunishment Hell@n\r\n");
         } else if (ROOM_FLAGGED(target_room, ROOM_RHELL)) {
             send_to_char(ch, "@wDimension: @RH@re@Dl@Rl@n\r\n");
-        } else if (ROOM_FLAGGED(target_room, ROOM_YARDRAT)) {
-            send_to_char(ch, "@wPlanet: @mYardrat@n\r\n");
-        } else if (ROOM_FLAGGED(target_room, ROOM_KANASSA)) {
-            send_to_char(ch, "@wPlanet: @BKanassa@n\r\n");
-        } else if (ROOM_FLAGGED(target_room, ROOM_ARLIA)) {
-            send_to_char(ch, "@wPlanet: @GArlia@n\r\n");
-        } else {
-            send_to_char(ch, "@wPlanet: @WUNKNOWN@n\r\n");
         }
+
         int grav = rm->getGravity();
         if(grav <= 1.0) {
             send_to_char(ch, "@wGravity: @WNormal@n\r\n");
@@ -7137,20 +7128,7 @@ static void perform_immort_where(struct char_data *ch, char *arg) {
     struct obj_data *k;
     struct descriptor_data *d;
     int num = 0, num2 = 0, found = 0;
-
-    const char *planet[11] = {"@GEarth@n",
-                              "@CFrigid@n",
-                              "@YVegeta@n",
-                              "@MKonack@n",
-                              "@gNamek@n",
-                              "@mAether@n",
-                              "@mArlia@n",
-                              "@CZenith@n",
-                              "@YYardrat@n",
-                              "@cKanassa@n",
-                              "@RUNKOWN@n"
-    };
-
+    std::optional<vnum> planet;
 
     if (!*arg) {
         mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true,
@@ -7160,29 +7138,9 @@ static void perform_immort_where(struct char_data *ch, char *arg) {
         for (d = descriptor_list; d; d = d->next)
             if (IS_PLAYING(d)) {
                 if (IN_ROOM(d->character) != NOWHERE) {
-                    if (ROOM_FLAGGED(IN_ROOM(d->character), ROOM_EARTH)) {
-                        num2 = 0;
-                    } else if (ROOM_FLAGGED(IN_ROOM(d->character), ROOM_FRIGID)) {
-                        num2 = 1;
-                    } else if (ROOM_FLAGGED(IN_ROOM(d->character), ROOM_VEGETA)) {
-                        num2 = 2;
-                    } else if (ROOM_FLAGGED(IN_ROOM(d->character), ROOM_KONACK)) {
-                        num2 = 3;
-                    } else if (ROOM_FLAGGED(IN_ROOM(d->character), ROOM_NAMEK)) {
-                        num2 = 4;
-                    } else if (ROOM_FLAGGED(IN_ROOM(d->character), ROOM_AETHER)) {
-                        num2 = 5;
-                    } else if (ROOM_FLAGGED(IN_ROOM(d->character), ROOM_ARLIA)) {
-                        num2 = 6;
-                    } else if (PLANET_ZENITH(IN_ROOM(d->character))) {
-                        num2 = 7;
-                    } else if (ROOM_FLAGGED(IN_ROOM(d->character), ROOM_YARDRAT)) {
-                        num2 = 8;
-                    } else if (ROOM_FLAGGED(IN_ROOM(d->character), ROOM_KANASSA)) {
-                        num2 = 9;
-                    } else {
-                        num2 = 10;
-                    }
+                    planet = d->character->getMatchingArea(area_data::isPlanet);
+                } else {
+                    planet.reset();
                 }
                 i = (d->original ? d->original : d->character);
                 if (i && CAN_SEE(ch, i) && (IN_ROOM(i) != NOWHERE)) {
@@ -7191,8 +7149,13 @@ static void perform_immort_where(struct char_data *ch, char *arg) {
                                      GET_NAME(i), GET_ROOM_VNUM(IN_ROOM(d->character)),
                                      world[IN_ROOM(d->character)].name, GET_NAME(d->character));
                     else {
+                        std::string locName = "UNKNOWN";
+                        if(planet) {
+                            auto &a = areas[planet.value()];
+                            locName = a.name;
+                        }
                         send_to_char(ch, "%-20s - [%5d]   %-14s %s\r\n", GET_NAME(i), GET_ROOM_VNUM(IN_ROOM(i)),
-                                     planet[num2], world[IN_ROOM(i)].name);
+                                     locName.c_str(), world[IN_ROOM(i)].name);
                     }
 
                 }

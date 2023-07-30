@@ -74,8 +74,8 @@ ACMD(do_oasis_list) {
         vmin = atoi(smin);
         vmax = atoi(smax);
 
-        if (vmin + 500 < vmax) {
-            send_to_char(ch, "Really? Over 500?! You need to view that many at once? Come on...\r\n");
+        if (vmin + 1500 < vmax) {
+            send_to_char(ch, "Really? Over 1500?! You need to view that many at once? Come on...\r\n");
             return;
         }
         if (vmin > vmax) {
@@ -174,27 +174,26 @@ void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum 
     }
 
     send_to_char(ch,
-                 "@nIndex VNum    Room Name                                Exits\r\n"
-                 "----- ------- ---------------------------------------- -----@n\r\n");
+                 "@nVNum    Room Name                                Exits\r\n"
+                 "------- ---------------------------------------- -----@n\r\n");
 
-    for (auto &r : world) {
+    for (auto &[vn, r] : world) {
 
         /** Check to see if this room is one of the ones needed to be listed.    **/
-        if ((r.first >= bottom) && (r.first <= top)) {
+        if ((vn >= bottom) && (vn <= top)) {
             counter++;
 
-            send_to_char(ch, "%4d) [@g%-5d@n] @[1]%-*s@n %s",
-                         counter, r.first, count_color_chars(r.second.name) + 44,
-                         r.second.name, !r.second.proto_script.empty() ? "[TRIG] " : "");
-            i = r.first;
+            send_to_char(ch, "[@g%-5d@n] @[1]%-*s@n %s",
+                         vn, count_color_chars(r.name) + 44,
+                         r.name, !r.proto_script.empty() ? "[TRIG] " : "");
             for (j = 0; j < NUM_OF_DIRS; j++) {
-                if (W_EXIT(i, j) == nullptr)
+                if (W_EXIT(vn, j) == nullptr)
                     continue;
-                if (W_EXIT(i, j)->to_room == NOWHERE)
+                if (W_EXIT(vn, j)->to_room == NOWHERE)
                     continue;
 
-                if (world[W_EXIT(i, j)->to_room].zone != r.second.zone)
-                    send_to_char(ch, "(@y%d@n)", world[W_EXIT(i, j)->to_room].vn);
+                if (world[W_EXIT(vn, j)->to_room].zone != r.zone)
+                    send_to_char(ch, "(@y%d@n)", world[W_EXIT(vn, j)->to_room].vn);
 
             }
 
@@ -222,18 +221,18 @@ void list_mobiles(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnu
     }
 
     send_to_char(ch,
-                 "@nIndex VNum    Mobile Name                    Race      Class     Level\r\n"
-                 "----- ------- -------------------------      --------- --------- -----\r\n");
+                 "@nVnum    Cnt    Mobile Name                    Race      Class     Level\r\n"
+                   "------- ----- -------------------------      --------- --------- -----\r\n");
 
-    for (auto &m : mob_proto) {
-        if (m.first >= bottom && m.first <= top) {
+    for (auto &[vn, m] : mob_proto) {
+        if (vn >= bottom && vn <= top) {
             counter++;
-
+            auto &mi = mob_index[vn];
             send_to_char(ch, "@g%4d@n) [@g%-5d@n] @[3]%-*s @C%-9s @c%-9s @y[%4d]@n %s\r\n",
-                         counter, m.first, count_color_chars(m.second.short_description) + 30,
-                         m.second.short_description, TRUE_RACE(&m.second), m.second.chclass->getName().c_str(),
-                         m.second.level + m.second.level_adj + m.second.race_level,
-                         !m.second.proto_script.empty() ? " [TRIG]" : "");
+                         vn, mi.mobs.size(), count_color_chars(m.short_description) + 30,
+                         m.short_description, TRUE_RACE(&m), m.chclass->getName().c_str(),
+                         m.level + m.level_adj + m.race_level,
+                         !m.proto_script.empty() ? " [TRIG]" : "");
         }
     }
 
@@ -257,17 +256,17 @@ void list_objects(struct char_data *ch, zone_rnum rnum, room_vnum vmin, room_vnu
     }
 
     send_to_char(ch,
-                 "@nIndex VNum    Object Name                                  Object Type\r\n"
-                 "----- ------- -------------------------------------------- ----------------\r\n");
+                 "@VNum   Cnt   Object Name                                  Object Type\r\n"
+                 "------- ----- -------------------------------------------- ----------------\r\n");
 
-    for (auto &o : obj_proto) {
-        if (o.first >= bottom && o.first <= top) {
+    for (auto &[vn, o] : obj_proto) {
+        if (vn >= bottom && vn <= top) {
             counter++;
-
+            auto &oi = obj_index[vn];
             send_to_char(ch, "@g%4d@n) [@g%-5d@n] @[2]%-*s @y[%s]@n%s\r\n",
-                         counter, o.first, count_color_chars(o.second.short_description) + 44,
-                         o.second.short_description, item_types[o.second.type_flag],
-                         !o.second.proto_script.empty() ? " [TRIG]" : "");
+                         vn, oi.objects.size(), count_color_chars(o.short_description) + 44,
+                         o.short_description, item_types[o.type_flag],
+                         !o.proto_script.empty() ? " [TRIG]" : "");
         }
     }
 
@@ -385,12 +384,12 @@ void print_zone(struct char_data *ch, zone_vnum vnum) {
                  "@g   Shops       = @c%d\r\n"
                  "@g   Triggers    = @c%d\r\n"
                  "@g   Guilds      = @c%d@n\r\n",
-                 zone_table[rnum].number, zone_table[rnum].name,
-                 zone_table[rnum].builders, zone_table[rnum].lifespan,
-                 zone_table[rnum].age, zone_table[rnum].bot, zone_table[rnum].top,
-                 zone_table[rnum].reset_mode ? ((zone_table[rnum].reset_mode == 1) ?
+                 z.number, z.name,
+                 z.builders, z.lifespan,
+                 z.age, z.bot, z.top,
+                 z.reset_mode ? ((z.reset_mode == 1) ?
                                                 "Reset when no players are in zone." : "Normal reset.") : "Never reset",
-                 zone_table[rnum].min_level, zone_table[rnum].max_level, bits,
+                 z.min_level, z.max_level, bits,
                  size_rooms, size_objects, size_mobiles, size_shops, size_triggers, size_guilds);
 }
 

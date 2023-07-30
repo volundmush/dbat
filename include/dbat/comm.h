@@ -33,7 +33,7 @@
 #define COPYOVER_FILE "copyover.dat"
 
 /* comm.c */
-int enter_player_game(struct descriptor_data *d);
+void enter_player_game(struct descriptor_data *d);
 
 extern int arena_watch(struct char_data *ch);
 

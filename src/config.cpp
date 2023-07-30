@@ -56,6 +56,7 @@ namespace config {
 
     std::string dbName = "dbat.sqlite3";
     bool testMode{false};
+    bool logEgregiousTimings{false};
 
 }
 

@@ -332,9 +332,9 @@ std::optional<vnum> room_data::getMatchingArea(std::function<bool(const area_dat
     while(parent) {
         auto &a = areas[parent.value()];
         if(f(a)) return parent;
-        if ((a.type == AreaType::Structure || a.type == AreaType::Vehicle) && a.objectVnum) {
+        if ((a.type == AreaType::Structure || a.type == AreaType::Vehicle) && a.extraVn) {
             // we need to find the a.objectVnum in the world by scanning object_list...
-            if (auto obj = get_obj_num(a.objectVnum.value()); obj) {
+            if (auto obj = get_obj_num(a.extraVn.value()); obj) {
                 if(world.contains(obj->in_room)) {
                     auto &r = world[obj->in_room];
                     return r.getMatchingArea(f);

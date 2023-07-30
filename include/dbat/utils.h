@@ -155,6 +155,7 @@ extern int block_calc(struct char_data *ch);
 extern void reveal_hiding(struct char_data *ch, int type);
 
 std::string processColors(const std::string &txt, int parse, char **choices);
+size_t countColors(const std::string &txt);
 
 #define core_dump()        core_dump_real(__FILE__, __LINE__)
 

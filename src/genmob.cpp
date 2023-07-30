@@ -1021,7 +1021,7 @@ nlohmann::json alias_data::serialize() {
     return j;
 }
 
-alias_data::alias_data(const nlohmann::json &j) {
+alias_data::alias_data(const nlohmann::json &j) : alias_data() {
     if(j.contains("name")) name = j["name"].get<std::string>();
     if(j.contains("replacement")) replacement = j["replacement"].get<std::string>();
     if(j.contains("type")) type = j["type"];
