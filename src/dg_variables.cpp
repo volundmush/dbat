@@ -278,7 +278,7 @@ find_replacement(void *go, struct script_data *sc, trig_data *trig, int type, ch
                 }
             } else if (!strcasecmp(var, "global")) {
                 /* so "remote varname %global%" will work */
-                snprintf(str, slen, "%d", ROOM_ID_BASE);
+                snprintf(str, slen, "%d", 0);
                 return;
             } else if (!strcasecmp(var, "ctime"))
                 snprintf(str, slen, "%ld", time(nullptr));

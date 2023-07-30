@@ -412,9 +412,9 @@ enum ResurrectionMode : uint8_t {
 struct skill_data {
     skill_data() = default;
     explicit skill_data(const nlohmann::json& j);
-    int8_t level{0};
-    int8_t mods{0};
-    int8_t perfs{0};
+    int16_t level{0};
+    int16_t mods{0};
+    int16_t perfs{0};
     nlohmann::json serialize();
     void deserialize(const nlohmann::json& j);
 };

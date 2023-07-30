@@ -83,8 +83,7 @@ void free_trigger(struct trig_data *trig) {
         free_varlist(trig->var_list);
         trig->var_list = nullptr;
     }
-    if (GET_TRIG_WAIT(trig))
-        event_cancel(GET_TRIG_WAIT(trig));
+    triggers_waiting.erase(trig);
 
     delete trig;
 }
@@ -94,10 +93,7 @@ void free_trigger(struct trig_data *trig) {
 void extract_trigger(struct trig_data *trig) {
     struct trig_data *temp;
 
-    if (GET_TRIG_WAIT(trig)) {
-        event_cancel(GET_TRIG_WAIT(trig));
-        GET_TRIG_WAIT(trig) = nullptr;
-    }
+    triggers_waiting.erase(trig);
 
     trig_index[trig->vn].triggers.erase(trig);
 
@@ -181,26 +177,3 @@ void copy_proto_script(struct unit_data *source, struct unit_data *dest, int typ
     dest->proto_script = source->proto_script;
 }
 
-void delete_variables(const char *charname) {
-    char filename[PATH_MAX];
-
-    if (!get_filename(filename, sizeof(filename), SCRIPT_VARS_FILE, charname))
-        return;
-
-    if (remove(filename) < 0 && errno != ENOENT)
-        basic_mud_log("SYSERR: deleting variable file %s: %s", filename, strerror(errno));
-}
-
-void update_wait_events(struct room_data *to, struct room_data *from) {
-    struct trig_data *trig;
-
-    if (!SCRIPT(from))
-        return;
-
-    for (trig = TRIGGERS(SCRIPT(from)); trig; trig = trig->next) {
-        if (!GET_TRIG_WAIT(trig))
-            continue;
-
-        ((struct wait_event_data *) GET_TRIG_WAIT(trig)->event_obj)->go = to;
-    }
-}

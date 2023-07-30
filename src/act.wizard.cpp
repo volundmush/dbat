@@ -1297,7 +1297,7 @@ static void do_stat_room(struct char_data *ch) {
     sprinttype(rm->sector_type, sector_types, buf2, sizeof(buf2));
     send_to_char(ch, "Zone: [%3d], VNum: [@g%5d@n], RNum: [%5d], IDNum: [%5ld], Type: %s\r\n",
                  zone_table[rm->zone].number, rm->vn, IN_ROOM(ch),
-                 (long) rm->vn + ROOM_ID_BASE, buf2);
+                 (long) rm->vn, buf2);
 
     sprintbitarray(rm->room_flags, room_bits, RF_ARRAY_MAX, buf2);
     send_to_char(ch, "Room Damage: %d, Room Effect: %d\r\n", rm->dmg, rm->geffect);

@@ -1716,7 +1716,7 @@ static void perform_complex_alias(struct descriptor_data *d, char *orig, struct 
 
     /* push our temp_queue on to the _front_ of the input queue */
     for(auto q = temp_queue.head; q; q = q->next)
-        d->input_queue.emplace_front(q->text);
+        d->input_queue.emplace_back(q->text);
 }
 
 

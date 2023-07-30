@@ -293,25 +293,14 @@ int print_skills_by_type(struct char_data *ch, char *buf, int maxsz, int sktype,
                          sk.mods);
             else
                 buf2[0] = 0;
-            if (known == SKLEARN_CROSSCLASS) {
-                count++;
-                canknow = highest_skill_value(GET_LEVEL(ch), sklevel);
-                nlen = snprintf(buf + len, maxsz - len,
-                                "@y(@Y%2d@y) @W%-30s  @y(@Y%2d@y) @C%3d@D/@c%3d   %s@n%s%s\r\n", count,
-                                spell_info[i].name, count, sklevel, canknow,
-                                sk.perfs > 0 ? (sk.perfs == 1 ? "@ROver Charge" : (
-                                        sk.perfs == 2 ? "@BAccurate" : "@GEfficient")) : "",
-                                sk.level > 100 ? " @D(@YGrand Master@D)@n" : "", buf2);
-            } else {
-                count++;
-                canknow = highest_skill_value(GET_LEVEL(ch), sklevel);
-                nlen = snprintf(buf + len, maxsz - len,
-                                "@y(@Y%2d@y) @W%-30s  @y(@Y%2d@y) @C%3d@D/@c%d3   %s@n%s%s\r\n", count,
-                                spell_info[i].name, count, sklevel, canknow,
-                                sk.perfs > 0 ? (sk.perfs == 1 ? "@ROver Charge" : (
-                                        sk.perfs == 2 ? "@BAccurate" : "@GEfficient")) : "",
-                                sk.level > 100 ? " @D(@YGrand Master@D)@n" : "", buf2);
-            }
+
+            count++;
+            canknow = highest_skill_value(GET_LEVEL(ch), sklevel);
+            nlen = snprintf(buf + len, maxsz - len, "@y(@Y%3d@y) @W%-30s  @C%3d@D/@c%3d   %s@n%s%s\r\n",
+                            count, spell_info[i].name, sklevel, canknow,
+                            sk.perfs > 0 ? (sk.perfs == 1 ? "@ROver Charge" : (sk.perfs == 2 ? "@BAccurate" : "@GEfficient")) : "",
+                            sk.level > 100 ? " @D(@YGrand Master@D)@n" : "",
+                            buf2);
         }
         if (len + nlen >= maxsz || nlen < 0)
             break;
@@ -417,7 +406,7 @@ void list_skills(struct char_data *ch, char *arg) {
                    GET_PRACTICES(ch), GET_PRACTICES(ch) == 1 ? "" : "s");
 
     len += snprintf(buf2 + len, sizeof(buf2) - len,
-                    "\r\nYou know the following skills:     @CKnown@D/@cPrac. Max@n\r\n@w-------------------------------------------------------@n\r\n");
+                    "\r\nYou know the following skills:      @CKnown@D/@cPrac. Max@n\r\n@w-------------------------------------------------------@n\r\n");
 
     len += print_skills_by_type(ch, buf2 + len, sizeof(buf2) - len, SKTYPE_SKILL, arg);
 

@@ -183,7 +183,7 @@ struct trig_data {
     char *arglist{};            /* argument list                   */
     int depth{};                /* depth into nest ifs/whiles/etc  */
     int loops{};                /* loop iteration counter          */
-    struct event *wait_event{};    /* event to pause the trigger      */
+    double waiting{0.0};    /* event to pause the trigger      */
     bool purged{};            /* trigger is set to be purged     */
     struct trig_var_data *var_list{};    /* list of local vars for trigger  */
     DgUID owner{};
@@ -447,10 +447,6 @@ extern void free_proto_script(struct unit_data *thing, int type);
 
 extern void copy_proto_script(struct unit_data *source, struct unit_data *dest, int type);
 
-extern void delete_variables(const char *charname);
-
-extern void update_wait_events(struct room_data *to, struct room_data *from);
-
 /* from dg_comm.c */
 extern char *any_one_name(char *argument, char *first_arg);
 
@@ -486,11 +482,10 @@ extern room_rnum obj_room(obj_data *obj);
 #define GET_TRIG_RNUM(t)          ((t)->vn)
 #define GET_TRIG_VNUM(t)      (trig_index[(t)->vn].vn)
 #define GET_TRIG_TYPE(t)          ((t)->trigger_type)
-#define GET_TRIG_DATA_TYPE(t)      ((t)->data_type)
 #define GET_TRIG_NARG(t)          ((t)->narg)
 #define GET_TRIG_ARG(t)           ((t)->arglist)
 #define GET_TRIG_VARS(t)      ((t)->var_list)
-#define GET_TRIG_WAIT(t)      ((t)->wait_event)
+
 #define GET_TRIG_DEPTH(t)         ((t)->depth)
 #define GET_TRIG_LOOPS(t)         ((t)->loops)
 

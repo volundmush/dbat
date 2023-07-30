@@ -461,10 +461,8 @@ void trigedit_save(struct descriptor_data *d) {
                     live_trig->name = strdup(proto->name);
 
                 /* anything could have happened so we don't want to keep these */
-                if (GET_TRIG_WAIT(live_trig)) {
-                    event_cancel(GET_TRIG_WAIT(live_trig));
-                    GET_TRIG_WAIT(live_trig) = nullptr;
-                }
+                triggers_waiting.erase(live_trig);
+
                 if (live_trig->var_list) {
                     free_varlist(live_trig->var_list);
                     live_trig->var_list = nullptr;

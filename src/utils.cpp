@@ -4150,7 +4150,7 @@ int get_flag_by_name(const char *flag_list[], char *flag_name) {
     return (NOFLAG);
 }
 
-int8_t GET_SKILL_BONUS(struct char_data *ch, uint16_t skill) {
+int16_t GET_SKILL_BONUS(struct char_data *ch, uint16_t skill) {
     auto found = ch->skill.find(skill);
     if (found != ch->skill.end()) {
         return found->second.mods;
@@ -4158,7 +4158,7 @@ int8_t GET_SKILL_BONUS(struct char_data *ch, uint16_t skill) {
     return 0;
 }
 
-int8_t GET_SKILL_PERF(struct char_data *ch, uint16_t skill) {
+int16_t GET_SKILL_PERF(struct char_data *ch, uint16_t skill) {
     auto found = ch->skill.find(skill);
     if (found != ch->skill.end()) {
         return found->second.perfs;
@@ -4166,7 +4166,7 @@ int8_t GET_SKILL_PERF(struct char_data *ch, uint16_t skill) {
     return 0;
 }
 
-int8_t GET_SKILL_BASE(struct char_data *ch, uint16_t skill) {
+int16_t GET_SKILL_BASE(struct char_data *ch, uint16_t skill) {
     auto found = ch->skill.find(skill);
     if (found != ch->skill.end()) {
         return found->second.level;
@@ -4174,21 +4174,21 @@ int8_t GET_SKILL_BASE(struct char_data *ch, uint16_t skill) {
     return 0;
 }
 
-int8_t GET_SKILL(struct char_data *ch, uint16_t skill) {
+int16_t GET_SKILL(struct char_data *ch, uint16_t skill) {
     return GET_SKILL_BASE(ch, skill) + GET_SKILL_BONUS(ch, skill);
 }
 
-void SET_SKILL(struct char_data *ch, uint16_t skill, int8_t val) {
+void SET_SKILL(struct char_data *ch, uint16_t skill, int16_t val) {
     auto &s = ch->skill[skill];
     s.level = val;
 }
 
-void SET_SKILL_BONUS(struct char_data *ch, uint16_t skill, int8_t val) {
+void SET_SKILL_BONUS(struct char_data *ch, uint16_t skill, int16_t val) {
     auto &s = ch->skill[skill];
     s.mods = val;
 }
 
-void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int8_t val) {
+void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val) {
     auto &s = ch->skill[skill];
     s.perfs = val;
 }

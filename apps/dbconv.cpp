@@ -1310,7 +1310,6 @@ int main(int argc, char **argv)
     basic_mud_log("Using %s as data directory.", dir);
 
     init_lookup_table();
-    event_init();
     boot_db();
     basic_mud_log("Database fully booted!");
 

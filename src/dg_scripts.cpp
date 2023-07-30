@@ -86,8 +86,6 @@ struct cmdlist_element *find_done(struct cmdlist_element *cl);
 
 int fgetline(FILE *file, char *p);
 
-EVENTFUNC(trig_wait_event);
-
 ACMD(do_attach);
 
 ACMD(do_detach);
@@ -683,55 +681,6 @@ void check_time_triggers() {
 }
 
 
-EVENTFUNC(trig_wait_event) {
-    struct wait_event_data *wait_event_obj = (struct wait_event_data *) event_obj;
-    trig_data *trig;
-    void *go;
-    int type;
-
-    trig = wait_event_obj->trigger;
-    go = wait_event_obj->go;
-    type = wait_event_obj->type;
-
-    free(wait_event_obj);
-    GET_TRIG_WAIT(trig) = nullptr;
-
-#if 1  /* debugging */
-    {
-        int found = false;
-        if (type == MOB_TRIGGER) {
-            struct char_data *tch;
-            for (tch = character_list; tch && !found; tch = tch->next)
-                if (tch == (struct char_data *) go)
-                    found = true;
-        } else if (type == OBJ_TRIGGER) {
-            struct obj_data *obj;
-            for (obj = object_list; obj && !found; obj = obj->next)
-                if (obj == (struct obj_data *) go)
-                    found = true;
-        } else {
-            room_rnum i;
-            for (auto &r : world)
-                if (&r.second == (struct room_data *) go)
-                    found = true;
-        }
-        if (!found) {
-            basic_mud_log("Trigger restarted on unknown entity. Vnum: %d", GET_TRIG_VNUM(trig));
-            basic_mud_log("Type: %s trigger", type == MOB_TRIGGER ? "Mob" : type == OBJ_TRIGGER ? "Obj" : "Room");
-            basic_mud_log("attached %d places", trig_index[trig->vn].triggers.size());
-            script_log("Trigger restart attempt on unknown entity.");
-            return 0;
-        }
-    }
-#endif
-
-    script_driver(&go, trig, type, TRIG_RESTART);
-
-    /* Do not reenqueue*/
-    return 0;
-}
-
-
 void do_stat_trigger(struct char_data *ch, trig_data *trig) {
     struct cmdlist_element *cmd_list;
     char sb[MAX_STRING_LENGTH], buf[MAX_STRING_LENGTH];
@@ -852,9 +801,9 @@ void script_stat(char_data *ch, struct script_data *sc) {
                      ((GET_TRIG_ARG(t) && *GET_TRIG_ARG(t)) ? GET_TRIG_ARG(t) :
                       "None"));
 
-        if (GET_TRIG_WAIT(t)) {
-            send_to_char(ch, "    Wait: %ld, Current line: %s\r\n",
-                         event_time(GET_TRIG_WAIT(t)),
+        if (t->waiting != 0.0) {
+            send_to_char(ch, "    Wait: %f seconds, Current line: %s\r\n",
+                         t->waiting,
                          t->curr_state ? t->curr_state->cmd : "End of Script");
             send_to_char(ch, "  Variables: %s\r\n", GET_TRIG_VARS(t) ? "" : "None");
 
@@ -1673,12 +1622,11 @@ void process_wait(void *go, trig_data *trig, int type, char *cmd,
         }
     }
 
-    CREATE(wait_event_obj, struct wait_event_data, 1);
-    wait_event_obj->trigger = trig;
-    wait_event_obj->go = go;
-    wait_event_obj->type = type;
+    // we're replacing the old wait_event_obj.
+    // We need to convert 'when' into a double of seconds-to-wait by dividing by PASSES_PER_SEC.
+    trig->waiting = (double) when / (double) PASSES_PER_SEC;
+    triggers_waiting.insert(trig);
 
-    GET_TRIG_WAIT(trig) = event_create(trig_wait_event, wait_event_obj, when);
     trig->curr_state = cl->next;
 }
 

@@ -673,14 +673,14 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define GET_LAST_OLC_MODE(ch)    ((ch)->last_olc_mode)
 #define GET_LAST_TELL(ch)    ((ch)->last_tell)
 
-int8_t GET_SKILL_BONUS(struct char_data *ch, uint16_t skill);
-int8_t GET_SKILL_PERF(struct char_data *ch, uint16_t skill);
-int8_t GET_SKILL_BASE(struct char_data *ch, uint16_t skill);
-int8_t GET_SKILL(struct char_data *ch, uint16_t skill);
+int16_t GET_SKILL_BONUS(struct char_data *ch, uint16_t skill);
+int16_t GET_SKILL_PERF(struct char_data *ch, uint16_t skill);
+int16_t GET_SKILL_BASE(struct char_data *ch, uint16_t skill);
+int16_t GET_SKILL(struct char_data *ch, uint16_t skill);
 
-void SET_SKILL(struct char_data *ch, uint16_t skill, int8_t val);
-void SET_SKILL_BONUS(struct char_data *ch, uint16_t skill, int8_t val);
-void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int8_t val);
+void SET_SKILL(struct char_data *ch, uint16_t skill, int16_t val);
+void SET_SKILL_BONUS(struct char_data *ch, uint16_t skill, int16_t val);
+void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val);
 
 #define BODY_PARTS(ch)  ((ch)->bodyparts)
 

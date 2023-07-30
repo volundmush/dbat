@@ -264,7 +264,7 @@ boost::asio::awaitable<void> heartbeat(int heart_pulse, double deltaTime) {
 
     {
         auto start = std::chrono::high_resolution_clock::now();
-        event_process();
+        event_process(deltaTime);
         auto end = std::chrono::high_resolution_clock::now();
         timings.emplace_back("event_process", std::chrono::duration<double>(end - start).count());
     }
@@ -743,7 +743,6 @@ static boost::asio::awaitable<void> runGame() {
     create_schema();
 
     circle_srandom(time(nullptr));
-    event_init();
 
     if(fCopyOver) {
         copyover_recover();

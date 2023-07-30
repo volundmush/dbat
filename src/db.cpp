@@ -886,8 +886,6 @@ void destroy_db() {
     }
     trig_index.clear();
 
-    /* Events */
-    event_free_all();
 
     /* context sensitive help system */
     free_context_help();
