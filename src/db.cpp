@@ -60,6 +60,7 @@ std::set<shop_vnum> dirty_shops;
 std::set<int64_t> dirty_players;
 std::set<vnum> dirty_accounts;
 
+std::shared_ptr<spdlog::logger> logger;
 bool forceSave = false;
 
 struct config_data config_info; /* Game configuration list.    */

@@ -106,7 +106,7 @@ struct obj_affected_type {
     nlohmann::json serialize();
     int location;       /* Which ability to change (APPLY_XXX) */
     int specific;       /* Some locations have parameters      */
-    int modifier;       /* How much it changes by              */
+    int64_t modifier;       /* How much it changes by              */
 };
 
 struct obj_spellbook_spell {
@@ -128,6 +128,8 @@ struct unit_data {
     struct script_data *script{};  /* script info for the object */
 
     struct obj_data *contents{};     /* Contains objects  */
+    weight_t getInventoryWeight();
+    int64_t getInventoryCount();
 
     int64_t id{}; /* used by DG triggers	*/
 
@@ -138,7 +140,7 @@ struct unit_data {
     void deactivateContents();
 
     void deserializeUnit(const nlohmann::json& j);
-    std::string scriptString() const;
+    std::string scriptString();
 
 };
 
@@ -161,16 +163,20 @@ struct obj_data : public unit_data {
 
     void deactivate();
 
+    int getAffectModifier(int location, int specific);
+
 
     room_rnum in_room{NOWHERE};        /* In what room -1 when conta/carr	*/
     room_vnum room_loaded{NOWHERE};    /* Room loaded in, for room_max checks	*/
 
-    int value[NUM_OBJ_VAL_POSITIONS]{};   /* Values of the item (see list)    */
+    int64_t value[NUM_OBJ_VAL_POSITIONS]{};   /* Values of the item (see list)    */
     int8_t type_flag{};      /* Type of item                        */
     int level{}; /* Minimum level of object.            */
     bitvector_t wear_flags[TW_ARRAY_MAX]{}; /* Where you can wear it     */
     bitvector_t extra_flags[EF_ARRAY_MAX]{}; /* If it hums, glows, etc.  */
-    int64_t weight{};         /* Weight what else                     */
+    weight_t weight{};         /* Weight what else                     */
+    weight_t getWeight();
+    weight_t getTotalWeight();
     int cost{};           /* Value when sold (gp.)               */
     int cost_per_day{};   /* Cost to keep pr. real day           */
     int timer{};          /* Timer for object                    */
@@ -382,7 +388,7 @@ struct affected_type {
     explicit affected_type(const nlohmann::json& j);
     int16_t type{};          /* The type of spell that caused this      */
     int16_t duration{};      /* For how long its effects will last      */
-    int modifier{};         /* This is added to apropriate ability     */
+    int64_t modifier{};         /* This is added to apropriate ability     */
     int location{};         /* Tells which ability to change(APPLY_XXX)*/
     int specific{};         /* Some locations have parameters          */
     bitvector_t bitvector{}; /* Tells which bits to set (AFF_XXX) */
@@ -413,7 +419,6 @@ struct skill_data {
     skill_data() = default;
     explicit skill_data(const nlohmann::json& j);
     int16_t level{0};
-    int16_t mods{0};
     int16_t perfs{0};
     nlohmann::json serialize();
     void deserialize(const nlohmann::json& j);
@@ -456,8 +461,16 @@ struct char_data : public unit_data {
     int level_adj{};        /* PC level adjustment                  */
     sensei::Sensei *chclass{};        /* Last class taken                     */
     int level{};            /* PC / NPC's level                     */
-    uint8_t weight{};        /* PC / NPC's weight                    */
-    uint8_t height{};        /* PC / NPC's height                    */
+    double weight{};        /* PC / NPC's weight                    */
+    weight_t getWeight(bool base = false);
+    weight_t getTotalWeight();
+    weight_t getCurrentBurden();
+    double getBurdenRatio();
+    bool canCarryWeight(struct obj_data *obj);
+    bool canCarryWeight(struct char_data *obj);
+    bool canCarryWeight(weight_t val);
+
+    int height{};        /* PC / NPC's height                    */
     struct abil_data real_abils{};    /* Abilities without modifiers   */
     struct mob_special_data mob_specials{};
     int alignment{};        /* +-1000 for alignment good vs. evil	*/
@@ -511,8 +524,6 @@ struct char_data : public unit_data {
 
     int8_t position{POS_STANDING};        /* Standing, fighting, sleeping, etc.	*/
 
-    int carry_weight{};        /* Carried weight			*/
-    int8_t carry_items{};        /* Number of items carried		*/
     int timer{};            /* Timer for update			*/
 
     struct obj_data *sits{};      /* What am I sitting on? */
@@ -703,7 +714,7 @@ struct char_data : public unit_data {
     int getSpeed(bool base = false);
 
     // C++ reworking
-    const std::string &juggleRaceName(bool capitalized) const;
+    const std::string &juggleRaceName(bool capitalized);
 
     void restore(bool announce);
 
@@ -715,41 +726,41 @@ struct char_data : public unit_data {
 
     void teleport_to(IDXTYPE rnum);
 
-    bool in_room_range(IDXTYPE low_rnum, IDXTYPE high_rnum) const;
+    bool in_room_range(IDXTYPE low_rnum, IDXTYPE high_rnum);
 
-    bool in_past() const;
+    bool in_past();
 
-    bool is_newbie() const;
+    bool is_newbie();
 
-    bool in_northran() const;
+    bool in_northran();
 
-    bool can_tolerate_gravity(int grav) const;
+    bool can_tolerate_gravity(int grav);
 
-    int calcTier() const;
+    int calcTier();
 
-    int64_t calc_soft_cap() const;
+    int64_t calc_soft_cap();
 
-    bool is_soft_cap(int64_t type, long double mult) const;
+    bool is_soft_cap(int64_t type, long double mult);
 
-    bool is_soft_cap(int64_t type) const;
+    bool is_soft_cap(int64_t type);
 
-    int wearing_android_canister() const;
+    int wearing_android_canister();
 
-    int calcGravCost(int64_t num);
+    int64_t calcGravCost(int64_t num);
 
     // Stats stuff
 
-    int64_t getCurHealth() const;
+    int64_t getCurHealth();
 
-    int64_t getMaxHealth() const;
+    int64_t getMaxHealth();
 
-    double getCurHealthPercent() const;
+    double getCurHealthPercent();
 
-    int64_t getPercentOfCurHealth(double amt) const;
+    int64_t getPercentOfCurHealth(double amt);
 
-    int64_t getPercentOfMaxHealth(double amt) const;
+    int64_t getPercentOfMaxHealth(double amt);
 
-    bool isFullHealth() const;
+    bool isFullHealth();
 
     int64_t setCurHealth(int64_t amt);
 
@@ -769,39 +780,39 @@ struct char_data : public unit_data {
 
     int64_t harmCurHealth(int64_t amt);
 
-    int64_t getMaxPL() const;
+    int64_t getMaxPL();
 
-    int64_t getMaxPLTrans() const;
+    int64_t getMaxPLTrans();
 
-    int64_t getCurPL() const;
+    int64_t getCurPL();
 
-    int64_t getBasePL() const;
+    int64_t getBasePL();
 
-    int64_t getEffBasePL() const;
+    int64_t getEffBasePL();
 
-    double getCurPLPercent() const;
+    double getCurPLPercent();
 
-    int64_t getPercentOfCurPL(double amt) const;
+    int64_t getPercentOfCurPL(double amt);
 
-    int64_t getPercentOfMaxPL(double amt) const;
+    int64_t getPercentOfMaxPL(double amt);
 
-    bool isFullPL() const;
+    bool isFullPL();
 
-    int64_t getCurKI() const;
+    int64_t getCurKI();
 
-    int64_t getMaxKI() const;
+    int64_t getMaxKI();
 
-    int64_t getBaseKI() const;
+    int64_t getBaseKI();
 
-    int64_t getEffBaseKI() const;
+    int64_t getEffBaseKI();
 
-    double getCurKIPercent() const;
+    double getCurKIPercent();
 
-    int64_t getPercentOfCurKI(double amt) const;
+    int64_t getPercentOfCurKI(double amt);
 
-    int64_t getPercentOfMaxKI(double amt) const;
+    int64_t getPercentOfMaxKI(double amt);
 
-    bool isFullKI() const;
+    bool isFullKI();
 
     int64_t setCurKI(int64_t amt);
 
@@ -817,21 +828,21 @@ struct char_data : public unit_data {
 
     void restoreKI(bool announce = true);
 
-    int64_t getCurST() const;
+    int64_t getCurST();
 
-    int64_t getMaxST() const;
+    int64_t getMaxST();
 
-    int64_t getBaseST() const;
+    int64_t getBaseST();
 
-    int64_t getEffBaseST() const;
+    int64_t getEffBaseST();
 
-    double getCurSTPercent() const;
+    double getCurSTPercent();
 
-    int64_t getPercentOfCurST(double amt) const;
+    int64_t getPercentOfCurST(double amt);
 
-    int64_t getPercentOfMaxST(double amt) const;
+    int64_t getPercentOfMaxST(double amt);
 
-    bool isFullST() const;
+    bool isFullST();
 
     int64_t setCurST(int64_t amt);
 
@@ -847,17 +858,17 @@ struct char_data : public unit_data {
 
     void restoreST(bool announce = true);
 
-    int64_t getCurLF() const;
+    int64_t getCurLF();
 
-    int64_t getMaxLF() const;
+    int64_t getMaxLF();
 
-    double getCurLFPercent() const;
+    double getCurLFPercent();
 
-    int64_t getPercentOfCurLF(double amt) const;
+    int64_t getPercentOfCurLF(double amt);
 
-    int64_t getPercentOfMaxLF(double amt) const;
+    int64_t getPercentOfMaxLF(double amt);
 
-    bool isFullLF() const;
+    bool isFullLF();
 
     int64_t setCurLF(int64_t amt);
 
@@ -874,7 +885,7 @@ struct char_data : public unit_data {
     void restoreLF(bool announce = true);
 
 
-    bool isFullVitals() const;
+    bool isFullVitals();
 
     void restoreVitals(bool announce = true);
 
@@ -924,19 +935,19 @@ struct char_data : public unit_data {
     void setStatusKnockedOut();
 
     // stats refactor stuff
-    int64_t getMaxCarryWeight() const;
+    weight_t getMaxCarryWeight();
 
-    int64_t getCurGearWeight() const;
+    weight_t getEquippedWeight();
 
-    int64_t getCurCarriedWeight() const;
+    weight_t getCarriedWeight();
 
-    int64_t getAvailableCarryWeight() const;
+    weight_t getAvailableCarryWeight();
 
-    double speednar() const;
+    double speednar();
 
-    int64_t getEffMaxPL() const;
+    int64_t getEffMaxPL();
 
-    bool isWeightedPL() const;
+    bool isWeightedPL();
 
     void apply_kaioken(int times, bool announce);
 

@@ -840,10 +840,6 @@ SPECIAL(pet_shops) {
         add_follower(pet, ch);
         pet->master_id = GET_IDNUM(ch);
 
-        /* Be certain that pets can't get/carry/use/wield/wear items */
-        IS_CARRYING_W(pet) = 1000;
-        IS_CARRYING_N(pet) = 100;
-
         send_to_char(ch, "May you enjoy your pet.\r\n");
         act("$n buys $N as a pet.", false, ch, nullptr, pet, TO_ROOM);
 
@@ -1325,8 +1321,7 @@ SPECIAL(gravity) {
 
         if (!*arg) {
             send_to_char(ch, "@WGravity Commands:@n\r\n");
-            send_to_char(ch, "@Wgravity [ 0 | N | 10 | 20 | 30 | 40 | 50 | 100 | 200 ]\r\n"
-                             "          [  300 | 400 | 500 | 1,000 | 5,000 | 10,000  ]@n\r\n");
+            send_to_char(ch, "@Wgravity [ N | <num> ]\r\n");
             return (true);
         }
 
@@ -1338,17 +1333,16 @@ SPECIAL(gravity) {
         std::string a = arg;
         // remove all commas from a.
         a.erase(std::remove(a.begin(), a.end(), ','), a.end());
-
-        auto targetGrav = gravMap.find(a);
-        if (targetGrav == gravMap.end()) {
-            send_to_char(ch, "That is not a proper command for this device.\r\n");
-            send_to_char(ch, "@WGravity Commands:@n\r\n");
-            send_to_char(ch, "@Wgravity [ 0 | N | 10 | 20 | 30 | 40 | 50 | 100 | 200 ]\r\n"
-                             "          [  300 | 400 | 500 | 1,000 | 5,000 | 10,000  ]@n\r\n");
-            return (true);
+        double grav = 0.0;
+        if(!boost::iequals(a, "N")) {
+            try {
+                grav = std::clamp<double>(std::stod(a), 0, 20000.0);
+            } catch (std::exception &e) {
+                send_to_char(ch, "That is not an acceptable gravity setting.\r\n");
+                return (true);
+            }
         }
 
-		auto grav = targetGrav->second;
         bool doChange = false;
 
         if(obj->gravity) {

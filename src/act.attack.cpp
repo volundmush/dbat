@@ -2659,6 +2659,8 @@ ACMD(do_throw) {
         vict = def;
     }
 
+    auto gravity = ROOM_GRAVITY(IN_ROOM(ch));
+
     /* We are throwing an object. */
     if (obj) {
         if (ch->throws == -1) {
@@ -2674,7 +2676,7 @@ ACMD(do_throw) {
             send_to_char(ch, "That is broken and useless to throw!\r\n");
             return;
         }
-        if (GET_OBJ_WEIGHT(obj) + ROOM_GRAVITY(IN_ROOM(ch)) > CAN_CARRY_W(ch)) {
+        if (!ch->canCarryWeight(obj)) {
             send_to_char(ch, "The gravity has made that too heavy for you to throw!\r\n");
             return;
         } else {
@@ -2682,7 +2684,7 @@ ACMD(do_throw) {
             handle_cooldown(ch, 5);
             improve_skill(ch, SKILL_THROW, 0);
             damage = ((GET_OBJ_WEIGHT(obj) / 3) * (GET_STR(ch)) * (GET_CHA(ch) / 3)) + (GET_MAX_HIT(ch) * 0.01);
-            damage += (damage * 0.01) * (ROOM_GRAVITY(IN_ROOM(ch)) / 4);
+            damage += (damage * 0.01) * (gravity / 4);
 
             if (GET_PREFERENCE(ch) == PREFERENCE_THROWING) {
                 chance -= chance * 0.25;
@@ -2716,7 +2718,7 @@ ACMD(do_throw) {
                 } else if (GET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT) {
                     wtype = 5;
                     damage = ((GET_OBJ_WEIGHT(obj) * GET_STR(ch)) * (GET_CHA(ch) / 3)) + (GET_MAX_HIT(ch) * 0.01);
-                    damage += ROOM_GRAVITY(IN_ROOM(ch)) * (ROOM_GRAVITY(IN_ROOM(ch)) / 2);
+                    damage += gravity * (gravity / 2);
                 } else {
                     wtype = 6;
                 }
@@ -2977,11 +2979,11 @@ ACMD(do_throw) {
             grab = true;
         }
 
-        if ((ch->getCurST()) < ((GET_MAX_HIT(ch) / 100) + GET_PC_WEIGHT(tch))) {
+        if ((ch->getCurST()) < ((GET_MAX_HIT(ch) / 100) + tch->getTotalWeight())) {
             send_to_char(ch, "You do not have enough stamina to do it...\r\n");
             return;
         }
-        if (GET_PC_WEIGHT(tch) + ROOM_GRAVITY(IN_ROOM(ch)) > CAN_CARRY_W(ch)) {
+        if (!ch->canCarryWeight(tch)) {
             send_to_char(ch, "The gravity has made them too heavy for you to throw!\r\n");
             return;
         }
@@ -2994,13 +2996,13 @@ ACMD(do_throw) {
                 nullptr, tch, TO_NOTVICT);
             hurt(0, 0, ch, tch, nullptr, 0, 0);
             handle_cooldown(ch, 5);
-            ch->decCurST((GET_MAX_HIT(ch) / 200) + GET_PC_WEIGHT(tch));
+            ch->decCurST((GET_MAX_HIT(ch) / 200) + tch->getWeight());
             return;
         } else {
             handle_cooldown(ch, 5);
             improve_skill(ch, SKILL_THROW, 0);
-            damage = ((GET_PC_WEIGHT(tch) * GET_STR(ch)) * (GET_CHA(ch) / 3)) + (GET_MAX_HIT(ch) / 100);
-            damage += ROOM_GRAVITY(IN_ROOM(ch)) * (ROOM_GRAVITY(IN_ROOM(ch)) / 2);
+            damage = ((tch->getWeight() * GET_STR(ch)) * (GET_CHA(ch) / 3)) + (GET_MAX_HIT(ch) / 100);
+            damage += gravity * (gravity / 2);
             perc = init_skill(ch, SKILL_THROW);
             perc2 = init_skill(vict, SKILL_DODGE);
             prob = rand_number(1, 106);
@@ -3032,7 +3034,7 @@ ACMD(do_throw) {
                     act("@WThrown through the air, @C$n@W flies at @c$N@W, but the throw is a miss! @C$n@W recovers $s bearingsa moment later!@n",
                         true, tch, nullptr, vict, TO_NOTVICT);
                 }
-                ch->decCurST(((GET_MAX_HIT(ch) / 100) + GET_PC_WEIGHT(tch)));
+                ch->decCurST(((GET_MAX_HIT(ch) / 100) + tch->getWeight()));
                 act("@W--@R$N@W--@n", true, ch, nullptr, vict, TO_CHAR);
                 act("@W--@R$N@W--@n", true, tch, nullptr, vict, TO_CHAR);
                 act("@W--@RYOU@W--@n", true, vict, nullptr, nullptr, TO_CHAR);
@@ -3067,7 +3069,7 @@ ACMD(do_throw) {
                 act("@W--@RYOU@W--@n", true, tch, nullptr, nullptr, TO_CHAR);
                 hurt(0, 0, ch, tch, nullptr, damage, 0);
             }
-            ch->decCurST(((GET_MAX_HIT(ch) / 200) + GET_PC_WEIGHT(tch)));
+            ch->decCurST(((GET_MAX_HIT(ch) / 200) + tch->getWeight()));
             WAIT_STATE(ch, PULSE_3SEC);
         }
     } /* End throwing character. */

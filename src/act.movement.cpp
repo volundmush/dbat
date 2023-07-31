@@ -53,6 +53,16 @@ static int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_
 
 static int perform_leave_obj(struct char_data *ch, struct obj_data *obj, int need_specials_check);
 
+static int64_t calcNeedMovementGravity(struct char_data *ch) {
+    if(IS_NPC(ch)) return 0.0;
+    double gravity = 1.0;
+    auto room = world.find(ch->in_room);
+    if(room != world.end()) {
+        gravity = room->second.getGravity();
+    }
+    return (gravity * gravity) * ch->getBurdenRatio();
+}
+
 /* This handles teleporting players with instant transmission or skills like it. */
 void handle_teleport(struct char_data *ch, struct char_data *tar, int location) {
     int success = false;
@@ -172,7 +182,7 @@ ACMD(do_carry) {
             return;
         }
 
-        if (GET_PC_WEIGHT(vict) + IS_CARRYING_W(vict) > CAN_CARRY_W(ch)) {
+        if (vict->getTotalWeight() > CAN_CARRY_W(ch)) {
             act("@WYou try to pick up @C$N@W but have to put them down. They are too heavy for you at the moment.@n",
                 true, ch, nullptr, vict, TO_CHAR);
             act("@C$n@W tries to pick up @c$N@W. After struggling for a moment $e has to put $M down.@n", true, ch,
@@ -484,6 +494,7 @@ int has_o2(struct char_data *ch) {
  *   1 : If succes.
  *   0 : If fail
  */
+
 int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
     char throwaway[MAX_INPUT_LENGTH] = ""; /* Functions assume writable. */
     char buf2[MAX_STRING_LENGTH];
@@ -591,12 +602,15 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
     }
 
     /* move points needed is avg. move loss for src and destination sect type */
-    need_movement = 1;
-    if (ROOM_GRAVITY(IN_ROOM(ch)) > 10) {
-        need_movement = (need_movement + ROOM_GRAVITY(IN_ROOM(ch))) * ROOM_GRAVITY(IN_ROOM(ch));
-    } else if (ROOM_GRAVITY(IN_ROOM(ch)) == 10 && !IS_BARDOCK(ch) && !IS_NPC(ch)) {
-        need_movement = (need_movement + ROOM_GRAVITY(IN_ROOM(ch))) * ROOM_GRAVITY(IN_ROOM(ch));
+    if(!IS_NPC(ch)) {
+        auto room = world.find(IN_ROOM(ch));
+        double gravity = 1.0;
+        if(room != world.end()) {
+            gravity = room->second.getGravity();
+        }
+        need_movement = (gravity * gravity) * ch->getBurdenRatio();
     }
+
     if (GET_LEVEL(ch) <= 1) {
         need_movement = 0;
     }
@@ -1103,58 +1117,12 @@ ACMD(do_move) {
             GET_ROOM_VNUM(IN_ROOM(ch)) != 1) {
             GET_LOADROOM(ch) = GET_ROOM_VNUM(IN_ROOM(ch));
         }
-        if (ROOM_GRAVITY(IN_ROOM(ch)) == 10 && GET_MAX_HIT(ch) <= 10000 && !IS_BARDOCK(ch) && !IS_NPC(ch)) {
-            send_to_char(ch, "The gravity slows you down some.\r\n");
-            WAIT_STATE(ch, PULSE_1SEC);
+        auto ratio = ch->getBurdenRatio();
+        if(ratio >= 0.7) {
+            send_to_char(ch, "Your immense burden hinders your speed.\r\n");
+            WAIT_STATE(ch, std::min<int>(PULSE_3SEC * ratio, PULSE_5SEC));
         }
-        if (ROOM_GRAVITY(IN_ROOM(ch)) == 20 && GET_MAX_HIT(ch) <= 30000) {
-            send_to_char(ch, "The gravity slows you down some.\r\n");
-            WAIT_STATE(ch, PULSE_2SEC);
-        }
-        if (ROOM_GRAVITY(IN_ROOM(ch)) == 30 && GET_MAX_HIT(ch) <= 100000) {
-            send_to_char(ch, "The gravity slows you down some.\r\n");
-            WAIT_STATE(ch, PULSE_3SEC);
-        }
-        if (ROOM_GRAVITY(IN_ROOM(ch)) == 40 && GET_MAX_HIT(ch) <= 200000) {
-            send_to_char(ch, "The gravity slows you down some.\r\n");
-            WAIT_STATE(ch, PULSE_3SEC);
-        }
-        if (ROOM_GRAVITY(IN_ROOM(ch)) == 50 && GET_MAX_HIT(ch) <= 300000) {
-            send_to_char(ch, "The gravity slows you down some.\r\n");
-            WAIT_STATE(ch, PULSE_3SEC);
-        }
-        if (ROOM_GRAVITY(IN_ROOM(ch)) == 100 && GET_MAX_HIT(ch) <= 500000) {
-            send_to_char(ch, "The gravity slows you down some.\r\n");
-            WAIT_STATE(ch, PULSE_3SEC);
-        }
-        if (ROOM_GRAVITY(IN_ROOM(ch)) == 200 && GET_MAX_HIT(ch) <= 1000000) {
-            send_to_char(ch, "The gravity slows you down some.\r\n");
-            WAIT_STATE(ch, PULSE_3SEC);
-        }
-        if (ROOM_GRAVITY(IN_ROOM(ch)) == 300 && GET_MAX_HIT(ch) <= 8000000) {
-            send_to_char(ch, "The gravity slows you down some.\r\n");
-            WAIT_STATE(ch, PULSE_3SEC);
-        }
-        if (ROOM_GRAVITY(IN_ROOM(ch)) == 400 && GET_MAX_HIT(ch) <= 15000000) {
-            send_to_char(ch, "The gravity slows you down some.\r\n");
-            WAIT_STATE(ch, PULSE_3SEC);
-        }
-        if (ROOM_GRAVITY(IN_ROOM(ch)) == 500 && GET_MAX_HIT(ch) <= 25000000) {
-            send_to_char(ch, "The gravity slows you down some.\r\n");
-            WAIT_STATE(ch, PULSE_4SEC);
-        }
-        if (ROOM_GRAVITY(IN_ROOM(ch)) == 1000 && GET_MAX_HIT(ch) <= 35000000) {
-            send_to_char(ch, "The gravity slows you down some.\r\n");
-            WAIT_STATE(ch, PULSE_5SEC);
-        }
-        if (ROOM_GRAVITY(IN_ROOM(ch)) == 5000 && GET_MAX_HIT(ch) <= 100000000) {
-            send_to_char(ch, "The gravity slows you down some.\r\n");
-            WAIT_STATE(ch, PULSE_5SEC);
-        }
-        if (ROOM_GRAVITY(IN_ROOM(ch)) == 10000 && GET_MAX_HIT(ch) <= 200000000) {
-            send_to_char(ch, "The gravity slows you down some.\r\n");
-            WAIT_STATE(ch, PULSE_5SEC);
-        }
+
         if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE) && GET_ADMLEVEL(ch) < 1) {
             send_to_char(ch, "You struggle to cross the vast distance.\r\n");
             WAIT_STATE(ch, PULSE_6SEC);
@@ -1744,12 +1712,8 @@ static int do_simple_enter(struct char_data *ch, struct obj_data *obj, int need_
     }
 
     /* move points needed is avg. move loss for src and destination sect type */
-    need_movement = 1;
-    if (ROOM_GRAVITY(IN_ROOM(ch)) > 10) {
-        need_movement = (need_movement + ROOM_GRAVITY(IN_ROOM(ch))) * ROOM_GRAVITY(IN_ROOM(ch));
-    } else if (ROOM_GRAVITY(IN_ROOM(ch)) == 10 && !IS_BARDOCK(ch) && !IS_NPC(ch)) {
-        need_movement = (need_movement + ROOM_GRAVITY(IN_ROOM(ch))) * ROOM_GRAVITY(IN_ROOM(ch));
-    }
+    need_movement = calcNeedMovementGravity(ch);
+
     if (GET_LEVEL(ch) <= 1) {
         need_movement = 0;
     }
@@ -1991,12 +1955,7 @@ static int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_
     }
 
     /* move points needed is avg. move loss for src and destination sect type */
-    need_movement = 1;
-    if (ROOM_GRAVITY(IN_ROOM(ch)) > 10) {
-        need_movement = (need_movement + ROOM_GRAVITY(IN_ROOM(ch))) * ROOM_GRAVITY(IN_ROOM(ch));
-    } else if (ROOM_GRAVITY(IN_ROOM(ch)) == 10 && !IS_BARDOCK(ch) && !IS_NPC(ch)) {
-        need_movement = (need_movement + ROOM_GRAVITY(IN_ROOM(ch))) * ROOM_GRAVITY(IN_ROOM(ch));
-    }
+    need_movement = calcNeedMovementGravity(ch);
     if (GET_LEVEL(ch) <= 1) {
         need_movement = 0;
     }
@@ -2182,10 +2141,10 @@ static void handle_fall(struct char_data *ch) {
         }
     }
     if (SECT(IN_ROOM(ch)) == SECT_WATER_NOSWIM && !CARRIED_BY(ch) && !IS_KANASSAN(ch)) {
-        if ((ch->getCurST()) >= (ch->getCurCarriedWeight())) {
+        if ((ch->getCurST()) >= (ch->getCarriedWeight())) {
             act("@bYou swim in place.@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@C$n@b swims in place.@n", true, ch, nullptr, nullptr, TO_ROOM);
-            ch->decCurST(ch->getCurCarriedWeight());
+            ch->decCurST(ch->getCarriedWeight());
             act("@RYou are drowning!@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@C$n@b gulps water as $e struggles to stay above the water line.@n", true, ch, nullptr, nullptr,
                 TO_ROOM);
@@ -2206,14 +2165,14 @@ static int check_swim(struct char_data *ch) {
     auto can = false;
 
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE)) {
-        auto space_cost = (GET_MAX_MANA(ch) / 1000) + ((ch->getCurCarriedWeight()) / 2);
+        auto space_cost = (GET_MAX_MANA(ch) / 1000) + ((ch->getCarriedWeight()) / 2);
         if (ch->getCurKI() >= space_cost)
             can = true;
         ch->decCurKI(space_cost);
         if (!can) send_to_char(ch, "You do not have enough ki to fly through space. You are drifting helplessly.\r\n");
         return can;
     } else {
-        auto swim_cost = (ch->getCurCarriedWeight()) - 1;
+        auto swim_cost = (ch->getCarriedWeight()) - 1;
         if (ch->getCurST() >= swim_cost)
             can = true;
         ch->decCurST(swim_cost);
@@ -2373,8 +2332,20 @@ ACMD(do_fly) {
     }
 }
 
+static void autochair(struct char_data *ch, struct obj_data *chair) {
+    // TODO: Make this configurable.
+    SITTING(chair) = nullptr;
+    SITS(ch) = nullptr;
+    if (CAN_WEAR(chair, ITEM_WEAR_TAKE) && GET_OBJ_TYPE(chair) != ITEM_CHAIR && ch->canCarryWeight(chair)) {
+        obj_from_room(chair);
+        obj_to_char(chair, ch);
+        act("You pick up $p.", true, ch, SITS(ch), nullptr, TO_CHAR);
+        act("$n picks up $p.", true, ch, SITS(ch), nullptr, TO_ROOM);
+    }
+}
+
 ACMD(do_stand) {
-    struct obj_data *chair;
+    auto chair = SITS(ch);
     if (AFF_FLAGGED(ch, AFF_KNOCKED)) {
         send_to_char(ch, "You are knocked out cold for right now!\r\n");
         return;
@@ -2387,6 +2358,7 @@ ACMD(do_stand) {
         send_to_char(ch, "You are busy piloting a ship!\r\n");
         return;
     }
+
     switch (GET_POS(ch)) {
         case POS_STANDING:
             send_to_char(ch, "You are already standing.\r\n");
@@ -2395,36 +2367,14 @@ ACMD(do_stand) {
             reveal_hiding(ch, 0);
             send_to_char(ch, "You stand up.\r\n");
             act("$n clambers to $s feet.", true, ch, nullptr, nullptr, TO_ROOM);
-            if (SITS(ch)) {
-                if (CAN_WEAR(SITS(ch), ITEM_WEAR_TAKE) && GET_OBJ_TYPE(SITS(ch)) != ITEM_CHAIR &&
-                    IS_CARRYING_W(ch) + GET_OBJ_WEIGHT(SITS(ch)) <= CAN_CARRY_W(ch)) {
-                    obj_from_room(SITS(ch));
-                    obj_to_char(SITS(ch), ch);
-                    act("You pick up $p.", true, ch, SITS(ch), nullptr, TO_CHAR);
-                    act("$n picks up $p.", true, ch, SITS(ch), nullptr, TO_ROOM);
-                }
-                chair = SITS(ch);
-                SITTING(chair) = nullptr;
-                SITS(ch) = nullptr;
-            }
+            if (chair) autochair(ch, chair);
             /* May be sitting for some reason and may still be fighting. */
             GET_POS(ch) = FIGHTING(ch) ? POS_FIGHTING : POS_STANDING;
             break;
         case POS_RESTING:
             send_to_char(ch, "You stop resting, and stand up.\r\n");
             act("$n stops resting, and clambers to $s feet.", true, ch, nullptr, nullptr, TO_ROOM);
-            if (SITS(ch)) {
-                if (CAN_WEAR(SITS(ch), ITEM_WEAR_TAKE) &&
-                    IS_CARRYING_W(ch) + GET_OBJ_WEIGHT(SITS(ch)) <= CAN_CARRY_W(ch)) {
-                    obj_from_room(SITS(ch));
-                    obj_to_char(SITS(ch), ch);
-                    act("You pick up $p.", true, ch, SITS(ch), nullptr, TO_CHAR);
-                    act("$n picks up $p.", true, ch, SITS(ch), nullptr, TO_ROOM);
-                }
-                chair = SITS(ch);
-                SITTING(chair) = nullptr;
-                SITS(ch) = nullptr;
-            }
+            if (chair) autochair(ch, chair);
             GET_POS(ch) = POS_STANDING;
             break;
         case POS_SLEEPING:

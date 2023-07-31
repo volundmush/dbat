@@ -2113,11 +2113,10 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
             }
             if (GET_OBJ_VNUM(obj) == 11) {
                 if(obj->gravity) {
-                    send_to_char(ch, "@wA gravity generator, set to %sx gravity, is built here",
-                                 add_commas(obj->gravity.value()));
+                    auto msg = fmt::format("@wA gravity generator, set to {}x gravity, is built here", obj->gravity.value());
+                    send_to_char(ch, msg.c_str());
                 } else {
-                    send_to_char(ch, "@wA gravity generator, set to %sx gravity, is built here",
-                                 add_commas(0));
+                    send_to_char(ch, "@wA gravity generator, currently on standby, is built here");
                 }
 
             } else if (GET_OBJ_VNUM(obj) == 79) {
@@ -2842,28 +2841,29 @@ static void look_at_char(struct char_data *i, struct char_data *ch) {
         send_to_char(ch, "is %s sized, and\r\n", size_names[get_size(i)]);
     }
     if (!IS_NPC(i)) {
+        auto w = i->getWeight();
         if (!PLR_FLAGGED(i, PLR_OOZARU) && (!IS_ICER(i) || !IS_TRANSFORMED(i)) && GET_GENOME(i, 0) < 11) {
             send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)],
-                         GET_PC_HEIGHT(i), GET_PC_WEIGHT(i));
+                         GET_PC_HEIGHT(i), w);
         } else if (IS_ICER(i) && PLR_FLAGGED(i, PLR_TRANS1)) {
             int num1 = GET_PC_HEIGHT(i) * 3;
-            int num2 = GET_PC_WEIGHT(i) * 4;
+            int num2 = w * 4;
             send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], num1, num2);
         } else if (IS_ICER(i) && PLR_FLAGGED(i, PLR_TRANS2)) {
             int num1 = GET_PC_HEIGHT(i) * 3;
-            int num2 = GET_PC_WEIGHT(i) * 4;
+            int num2 = w * 4;
             send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], num1, num2);
         } else if (IS_ICER(i) && PLR_FLAGGED(i, PLR_TRANS3)) {
             int num1 = GET_PC_HEIGHT(i) * 1.5;
-            int num2 = GET_PC_WEIGHT(i) * 2;
+            int num2 = w * 2;
             send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], num1, num2);
         } else if (IS_ICER(i) && PLR_FLAGGED(i, PLR_TRANS4)) {
             int num1 = GET_PC_HEIGHT(i) * 2;
-            int num2 = GET_PC_WEIGHT(i) * 3;
+            int num2 = w * 3;
             send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], num1, num2);
         } else if (PLR_FLAGGED(i, PLR_OOZARU) || GET_GENOME(i, 0) == 11) {
             int num1 = GET_PC_HEIGHT(i) * 10;
-            int num2 = GET_PC_WEIGHT(i) * 50;
+            int num2 = w * 50;
             send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], num1, num2);
         }
         if (i == ch) {
@@ -3165,36 +3165,37 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
                 }
             } else if (GET_DISTFEA(i) == DISTFEA_WEIGHT) {
                 char *height;
+                auto w = i->getWeight();
                 if (IS_TRUFFLE(i)) {
-                    if (GET_PC_WEIGHT(i) > 35) {
+                    if (w > 35) {
                         height = strdup("very heavy");
-                    } else if (GET_PC_WEIGHT(i) > 25) {
+                    } else if (w > 25) {
                         height = strdup("heavy");
-                    } else if (GET_PC_WEIGHT(i) > 15) {
+                    } else if (w > 15) {
                         height = strdup("average weight");
                     } else {
                         height = strdup("welterweight");
                     }
                 } else if (PLR_FLAGGED(i, PLR_OOZARU) || GET_GENOME(i, 0) == 11) {
-                    if (GET_PC_WEIGHT(i) * 50 > 6000) {
+                    if (w * 50 > 6000) {
                         height = strdup("very heavy");
-                    } else if (GET_PC_WEIGHT(i) * 50 > 5000) {
+                    } else if (w * 50 > 5000) {
                         height = strdup("heavy");
-                    } else if (GET_PC_WEIGHT(i) * 50 > 4000) {
+                    } else if (w * 50 > 4000) {
                         height = strdup("average weight");
-                    } else if (GET_PC_WEIGHT(i) * 50 > 3000) {
+                    } else if (w * 50 > 3000) {
                         height = strdup("lightweight");
                     } else {
                         height = strdup("welterweight");
                     }
                 } else {
-                    if (GET_PC_WEIGHT(i) > 120) {
+                    if (w > 120) {
                         height = strdup("very heavy");
-                    } else if (GET_PC_WEIGHT(i) > 100) {
+                    } else if (w > 100) {
                         height = strdup("heavy");
-                    } else if (GET_PC_WEIGHT(i) > 80) {
+                    } else if (w > 80) {
                         height = strdup("average weight");
-                    } else if (GET_PC_WEIGHT(i) > 60) {
+                    } else if (w > 60) {
                         height = strdup("lightweight");
                     } else {
                         height = strdup("welterweight");
@@ -4334,9 +4335,10 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
             auto joined = boost::join(ancestors, " -> ");
             send_to_char(ch, "@wArea: @D[@n %s @D]@n\r\n", joined.c_str());
         }
-        int grav = rm->getGravity();
-        sprintf(buf3, "@D[ @G%s@D] @wSector: @D[ @G%s @D] @wVnum: @D[@G%5d@D]@n Gravity: @D[@G%dx@D]@n", buf, buf2,
-                GET_ROOM_VNUM(target_room), grav);
+        double grav = rm->getGravity();
+        auto g = fmt::format("{}", grav);
+        sprintf(buf3, "@D[ @G%s@D] @wSector: @D[ @G%s @D] @wVnum: @D[@G%5d@D]@n Gravity: @D[@G%sx@D]@n", buf, buf2,
+                GET_ROOM_VNUM(target_room), g.c_str());
         send_to_char(ch, "@wFlags: %-70s@w\r\n", buf3);
         if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC)) {
             send_to_char(ch, "@wO----------------------------------------------------------------------O@n\r\n");
@@ -4359,11 +4361,12 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
             send_to_char(ch, "@wDimension: @RH@re@Dl@Rl@n\r\n");
         }
 
-        int grav = rm->getGravity();
+        double grav = rm->getGravity();
         if(grav <= 1.0) {
             send_to_char(ch, "@wGravity: @WNormal@n\r\n");
         } else {
-            send_to_char(ch, "@wGravity: @W%dx@n\r\n", grav);
+            auto g = fmt::format("{}", grav);
+            send_to_char(ch, "@wGravity: @W%sx@n\r\n", g.c_str());
         }
         if (ROOM_FLAGGED(target_room, ROOM_REGEN)) {
             send_to_char(ch, "@CA feeling of calm and relaxation fills this room.@n\r\n");
@@ -5379,7 +5382,7 @@ ACMD(do_score) {
                      ch->chclass->getName().c_str(), ch->chclass->getStyleName().c_str());
         char hei[300], wei[300];
         sprintf(hei, "%dcm", get_measure(ch, GET_PC_HEIGHT(ch), 0));
-        sprintf(wei, "%dkg", get_measure(ch, 0, GET_PC_WEIGHT(ch)));
+        sprintf(wei, "%dkg", get_measure(ch, 0, ch->getWeight()));
         send_to_char(ch, "  @D|   @CAge@D: @W%10s@D,  @CHeight@D: @W%15s@D,  @CWeight@D: @W%-17s@D|@n\n",
                      add_commas(GET_AGE(ch)), hei, wei);
         send_to_char(ch, "  @D|@CGender@D: @W%10s@D,  @C  Size@D: @W%15s@D,  @C Align@D: @W%-17s@D|@n\n",
@@ -5427,10 +5430,18 @@ ACMD(do_score) {
         send_to_char(ch, "                @D<@YZenni@D>                 <@rInventory Weight@D>@n\n");
         send_to_char(ch, "      @D[   @CCarried@D| @W%-15s@D] [   @CCarried@D| @W%-15s@D]@n\n",
                      add_commas(GET_GOLD(ch)), add_commas(
-                        (ch->getCurCarriedWeight())));
-        send_to_char(ch, "      @D[      @CBank@D| @W%-15s@D] [ @CMax Carry@D| @W%-15s@D]@n\n",
-                     add_commas(GET_BANK_GOLD(ch)), add_commas(CAN_CARRY_W(ch)));
-        send_to_char(ch, "      @D[ @CMax Carry@D| @W%-15s@D]@n\n", add_commas(GOLD_CARRY(ch)));
+                        (ch->getCarriedWeight())));
+        double gravity = 1.0;
+        auto room = world.find(ch->in_room);
+        if(room != world.end()) {
+            gravity = room->second.getGravity();
+        }
+        std::string grav = gravity > 1.0 ? fmt::format("(Gravity:", gravity) : "";
+        send_to_char(ch, "      @D[      @CBank@D| @W%-15s@D] [ @CMax Carry@D| @W%-15s@D]@n %s\n",
+                     add_commas(GET_BANK_GOLD(ch)), add_commas(CAN_CARRY_W(ch)), grav.c_str());
+
+        grav = gravity > 1.0 ? fmt::format("{}x)", gravity) : "";
+        send_to_char(ch, "      @D[ @CMax Carry@D| @W%-15s@D] [    @CBurden@D| @W%-15s@D]@n %s\n", add_commas(GOLD_CARRY(ch)), add_commas(ch->getCurrentBurden()), grav.c_str());
         int numb = 0;
         if (GET_BANK_GOLD(ch) > 99) {
             numb = (GET_BANK_GOLD(ch) / 100) * 2;
@@ -5442,7 +5453,8 @@ ACMD(do_score) {
         if (numb >= 7500) {
             numb = 7500;
         }
-        send_to_char(ch, "      @D[  @CInterest@D| @W%-15s@D]\n", add_commas(numb));
+        auto ratio = std::to_string(ch->getBurdenRatio() * 100.0) + "%";
+        send_to_char(ch, "      @D[  @CInterest@D| @W%-15s@D] [     @CRatio@D| @W%-15s@D]@n\n", add_commas(numb), ratio.c_str());
         if (IS_ARLIAN(ch)) {
             send_to_char(ch, "                             @D<@GEvolution @D>@n\n");
             send_to_char(ch, "      @D[ @CEvo Level@D| @W%-15d@D] [   @CEvo Exp@D| @W%-15s@D]\n", GET_MOLT_LEVEL(ch),

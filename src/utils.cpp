@@ -2775,91 +2775,43 @@ void game_info(const char *format, ...) {
 }
 
 double speednar(struct char_data *ch) {
-
-    double result = 0;
-
-    if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch)) {
-        result = 1.0;
-    } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.95) {
-        result = 0.95;
-    } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.9) {
-        result = 0.90;
-    } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.85) {
-        result = 0.85;
-    } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.80) {
-        result = 0.80;
-    } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.75) {
-        result = 0.75;
-    } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.70) {
-        result = 0.70;
-    } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.65) {
-        result = 0.65;
-    } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.60) {
-        result = 0.60;
-    } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.55) {
-        result = 0.55;
-    } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.50) {
-        result = 0.50;
-    } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.45) {
-        result = 0.45;
-    } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.40) {
-        result = 0.40;
-    } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.35) {
-        result = 0.35;
-    } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.30) {
-        result = 0.30;
-    } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.25) {
-        result = 0.25;
-    } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.20) {
-        result = 0.20;
-    } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.15) {
-        result = 0.15;
-    } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.10) {
-        result = 0.10;
-    } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.05) {
-        result = 0.05;
-    } else if ((ch->getCurCarriedWeight()) >= CAN_CARRY_W(ch) * 0.01) {
-        result = 0.01;
-    }
-
-    return (result);
-
+    auto ratio = 1.0 - ch->getBurdenRatio();
+    return std::clamp<double>(ratio, 0.01, 1.0);
 }
 
 int64_t gear_exp(struct char_data *ch, int64_t exp) {
 
     if (IS_NPC(ch)) {
-        return 0;
+        return exp;
     }
 
-    double ratio = 2 * (1 - ch->speednar());
-    ratio += 1.0;
-    return exp * ratio;
+    auto ratio = ch->getBurdenRatio();
+    exp += exp * ratio;
+    return exp;
 }
 
 int planet_check(struct char_data *ch, struct char_data *vict) {
 
     if (ch == nullptr) {
         basic_mud_log("ERROR: planet_check called without ch!");
-        return 0;
+        return false;
     } else if (vict == nullptr) {
         basic_mud_log("ERROR: planet_check called without vict!");
-        return 0;
+        return false;
     } else {
-        int success = 0;
         if (GET_ADMLEVEL(vict) <= 0) {
             auto chPlanet = ch->getMatchingArea(area_data::isPlanet);
             auto victPlanet = vict->getMatchingArea(area_data::isPlanet);
-            if(chPlanet && chPlanet == victPlanet) success = 1;
+            if(chPlanet && chPlanet == victPlanet) return true;
             else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_AL)) {
-                success = 1;
+                return true;
             } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HELL) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_HELL)) {
-                success = 1;
+                return true;
             } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_NEO) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_NEO)) {
-                success = 1;
+                return true;
             }
         }
-        return (success);
+        return false;
     }
 }
 
@@ -4151,11 +4103,7 @@ int get_flag_by_name(const char *flag_list[], char *flag_name) {
 }
 
 int16_t GET_SKILL_BONUS(struct char_data *ch, uint16_t skill) {
-    auto found = ch->skill.find(skill);
-    if (found != ch->skill.end()) {
-        return found->second.mods;
-    }
-    return 0;
+    return ch->getAffectModifier(APPLY_SKILL, skill);
 }
 
 int16_t GET_SKILL_PERF(struct char_data *ch, uint16_t skill) {
@@ -4184,8 +4132,7 @@ void SET_SKILL(struct char_data *ch, uint16_t skill, int16_t val) {
 }
 
 void SET_SKILL_BONUS(struct char_data *ch, uint16_t skill, int16_t val) {
-    auto &s = ch->skill[skill];
-    s.mods = val;
+
 }
 
 void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val) {

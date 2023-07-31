@@ -19,7 +19,7 @@
 static std::string robot = "Robotic-Humanoid", robot_lower = "robotic-humanoid", unknown = "UNKNOWN";
 
 
-const std::string &char_data::juggleRaceName(bool capitalized) const {
+const std::string &char_data::juggleRaceName(bool capitalized) {
     if (!race) return unknown;
 
     race::Race *apparent = race;
@@ -121,7 +121,7 @@ void char_data::resurrect(ResurrectionMode mode) {
     if (GET_LEVEL(this) > 9) {
         int losschance = axion_dice(0);
         send_to_char(this,
-                     "@RThe the strain of this type of revival has caused you to be in a weakened state for 100 hours (Game time)! Strength, constitution, wisdom, intelligence, speed, and agility have been reduced by 8 points for the duration.@n\r\n");
+                     "@RThe the strain of this type of revival has caused you to be in a weakened state for 100 hours (Game time)! Strength,itution, wisdom, intelligence, speed, and agility have been reduced by 8 points for the duration.@n\r\n");
         int str = -8, intel = -8, wis = -8, spd = -8, con = -8, agl = -8;
         if (this->real_abils.intel <= 16) {
             intel = -4;
@@ -187,19 +187,19 @@ void char_data::teleport_to(IDXTYPE rnum) {
     update_pos(this);
 }
 
-bool char_data::in_room_range(IDXTYPE low_rnum, IDXTYPE high_rnum) const {
+bool char_data::in_room_range(IDXTYPE low_rnum, IDXTYPE high_rnum) {
     return GET_ROOM_VNUM(IN_ROOM(this)) >= low_rnum && GET_ROOM_VNUM(IN_ROOM(this)) <= high_rnum;
 }
 
-bool char_data::in_past() const {
+bool char_data::in_past() {
     return ROOM_FLAGGED(IN_ROOM(this), ROOM_PAST);
 }
 
-bool char_data::is_newbie() const {
+bool char_data::is_newbie() {
     return GET_LEVEL(this) < 9;
 }
 
-bool char_data::in_northran() const {
+bool char_data::in_northran() {
     return in_room_range(17900, 17999);
 }
 
@@ -219,7 +219,7 @@ static std::map<int, uint16_t> grav_threshold = {
         {10000, 200000000}
 };
 
-bool char_data::can_tolerate_gravity(int grav) const {
+bool char_data::can_tolerate_gravity(int grav) {
     if (IS_NPC(this)) return true;
     int tolerance = 0;
     tolerance = std::max(tolerance, this->chclass->getGravTolerance());
@@ -229,7 +229,7 @@ bool char_data::can_tolerate_gravity(int grav) const {
 }
 
 
-int char_data::calcTier() const {
+int char_data::calcTier() {
     int tier = level / 10;
     if ((level % 10) == 0)
         tier--;
@@ -238,17 +238,17 @@ int char_data::calcTier() const {
     return tier;
 }
 
-int64_t char_data::calc_soft_cap() const {
+int64_t char_data::calc_soft_cap() {
     auto tier = calcTier();
     auto softmap = race->getSoftMap(this);
     return level * softmap[tier];
 }
 
-bool char_data::is_soft_cap(int64_t type) const {
+bool char_data::is_soft_cap(int64_t type) {
     return is_soft_cap(type, 1.0);
 }
 
-bool char_data::is_soft_cap(int64_t type, long double mult) const {
+bool char_data::is_soft_cap(int64_t type, long double mult) {
     if (IS_NPC(this))
         return true;
 
@@ -284,7 +284,7 @@ bool char_data::is_soft_cap(int64_t type, long double mult) const {
     return against >= cur_cap;
 }
 
-int char_data::wearing_android_canister() const {
+int char_data::wearing_android_canister() {
     if (!IS_ANDROID(this))
         return 0;
     auto obj = GET_EQ(this, WEAR_BACKPACK);
@@ -300,14 +300,17 @@ int char_data::wearing_android_canister() const {
     }
 }
 
-int char_data::calcGravCost(int64_t num) {
-    int cost = 0;
-    if (!this->can_tolerate_gravity(ROOM_GRAVITY(IN_ROOM(this))))
-        cost = (int)ROOM_GRAVITY(IN_ROOM(this)) ^ 2;
+int64_t char_data::calcGravCost(int64_t num) {
+    double gravity = 1.0;
+    auto room = world.find(in_room);
+    if (room != world.end()) {
+        gravity = room->second.getGravity();
+    }
+    int64_t cost = (gravity * gravity);
 
     if (!num) {
         if (cost) {
-            send_to_char(this, "You sweat bullets straining against the current gravity.\r\n");
+            send_to_char(this, "You sweat bullets struggling against a mighty burden.\r\n");
         }
         if ((this->getCurST()) > cost) {
             this->decCurST(cost);
@@ -322,27 +325,27 @@ int char_data::calcGravCost(int64_t num) {
 }
 
 
-int64_t char_data::getCurHealth() const {
+int64_t char_data::getCurHealth() {
     return getCurPL();
 }
 
-int64_t char_data::getMaxHealth() const {
+int64_t char_data::getMaxHealth() {
     return getMaxPL();
 }
 
-double char_data::getCurHealthPercent() const {
+double char_data::getCurHealthPercent() {
     return getCurPLPercent();
 }
 
-int64_t char_data::getPercentOfCurHealth(double amt) const {
+int64_t char_data::getPercentOfCurHealth(double amt) {
     return getPercentOfCurPL(amt);
 }
 
-int64_t char_data::getPercentOfMaxHealth(double amt) const {
+int64_t char_data::getPercentOfMaxHealth(double amt) {
     return getPercentOfMaxPL(amt);
 }
 
-bool char_data::isFullHealth() const {
+bool char_data::isFullHealth() {
     return isFullPL();
 }
 
@@ -390,7 +393,7 @@ void char_data::restoreHealth(bool announce) {
     if (!isFullHealth()) health = 1;
 }
 
-int64_t char_data::getMaxPLTrans() const {
+int64_t char_data::getMaxPLTrans() {
     auto form = race->getCurForm(this);
     int64_t total = 0;
     if (form.flag) {
@@ -401,7 +404,7 @@ int64_t char_data::getMaxPLTrans() const {
     return total;
 }
 
-int64_t char_data::getMaxPL() const {
+int64_t char_data::getMaxPL() {
     auto total = getMaxPLTrans();
     if (GET_KAIOKEN(this) > 0) {
         total += (total / 10) * GET_KAIOKEN(this);
@@ -412,7 +415,7 @@ int64_t char_data::getMaxPL() const {
     return total;
 }
 
-int64_t char_data::getCurPL() const {
+int64_t char_data::getCurPL() {
     if (suppression > 0) {
         return getEffMaxPL() * std::min(health, (double) suppression / 100);
     } else {
@@ -420,7 +423,7 @@ int64_t char_data::getCurPL() const {
     }
 }
 
-int64_t char_data::getEffBasePL() const {
+int64_t char_data::getEffBasePL() {
     if (original) return original->getEffBasePL();
     if (clones) {
         return getBasePL() / (clones + 1);
@@ -429,31 +432,31 @@ int64_t char_data::getEffBasePL() const {
     }
 }
 
-int64_t char_data::getBasePL() const {
+int64_t char_data::getBasePL() {
     return basepl;
 }
 
-double char_data::getCurPLPercent() const {
+double char_data::getCurPLPercent() {
     return (double) getCurPL() / (double) getMaxPL();
 }
 
-int64_t char_data::getPercentOfCurPL(double amt) const {
+int64_t char_data::getPercentOfCurPL(double amt) {
     return getCurPL() * std::abs(amt);
 }
 
-int64_t char_data::getPercentOfMaxPL(double amt) const {
+int64_t char_data::getPercentOfMaxPL(double amt) {
     return getMaxPL() * std::abs(amt);
 }
 
-bool char_data::isFullPL() const {
+bool char_data::isFullPL() {
     return health >= 1.0;
 }
 
-int64_t char_data::getCurKI() const {
+int64_t char_data::getCurKI() {
     return getMaxKI() * energy;
 }
 
-int64_t char_data::getMaxKI() const {
+int64_t char_data::getMaxKI() {
     auto form = race->getCurForm(this);
     if (form.flag) {
         return (form.bonus + getEffBaseKI()) * form.mult;
@@ -462,7 +465,7 @@ int64_t char_data::getMaxKI() const {
     }
 }
 
-int64_t char_data::getEffBaseKI() const {
+int64_t char_data::getEffBaseKI() {
     if (original) return original->getEffBaseKI();
     if (clones) {
         return getBaseKI() / (clones + 1);
@@ -471,23 +474,23 @@ int64_t char_data::getEffBaseKI() const {
     }
 }
 
-int64_t char_data::getBaseKI() const {
+int64_t char_data::getBaseKI() {
     return baseki;
 }
 
-double char_data::getCurKIPercent() const {
+double char_data::getCurKIPercent() {
     return (double) getCurKI() / (double) getMaxKI();
 }
 
-int64_t char_data::getPercentOfCurKI(double amt) const {
+int64_t char_data::getPercentOfCurKI(double amt) {
     return getCurKI() * std::abs(amt);
 }
 
-int64_t char_data::getPercentOfMaxKI(double amt) const {
+int64_t char_data::getPercentOfMaxKI(double amt) {
     return getMaxKI() * std::abs(amt);
 }
 
-bool char_data::isFullKI() const {
+bool char_data::isFullKI() {
     return energy >= 1.0;
 }
 
@@ -539,11 +542,11 @@ void char_data::restoreKI(bool announce) {
     if (!isFullKI()) energy = 1;
 }
 
-int64_t char_data::getCurST() const {
+int64_t char_data::getCurST() {
     return getMaxST() * stamina;
 }
 
-int64_t char_data::getMaxST() const {
+int64_t char_data::getMaxST() {
     auto form = race->getCurForm(this);
     if (form.flag) {
         return (form.bonus + getEffBaseST()) * form.mult;
@@ -552,7 +555,7 @@ int64_t char_data::getMaxST() const {
     }
 }
 
-int64_t char_data::getEffBaseST() const {
+int64_t char_data::getEffBaseST() {
     if (original) return original->getEffBaseST();
     if (clones) {
         return getBaseST() / (clones + 1);
@@ -561,23 +564,23 @@ int64_t char_data::getEffBaseST() const {
     }
 }
 
-int64_t char_data::getBaseST() const {
+int64_t char_data::getBaseST() {
     return basest;
 }
 
-double char_data::getCurSTPercent() const {
+double char_data::getCurSTPercent() {
     return (double) getCurST() / (double) getMaxST();
 }
 
-int64_t char_data::getPercentOfCurST(double amt) const {
+int64_t char_data::getPercentOfCurST(double amt) {
     return getCurST() * std::abs(amt);
 }
 
-int64_t char_data::getPercentOfMaxST(double amt) const {
+int64_t char_data::getPercentOfMaxST(double amt) {
     return getMaxST() * std::abs(amt);
 }
 
-bool char_data::isFullST() const {
+bool char_data::isFullST() {
     return stamina >= 1;
 }
 
@@ -627,11 +630,11 @@ void char_data::restoreST(bool announce) {
 }
 
 
-int64_t char_data::getCurLF() const {
+int64_t char_data::getCurLF() {
     return getMaxLF() * life;
 }
 
-int64_t char_data::getMaxLF() const {
+int64_t char_data::getMaxLF() {
     auto lb = GET_LIFEBONUSES(this);
 
     return (IS_DEMON(this) ? (((GET_MAX_MANA(this) * 0.5) + (GET_MAX_MOVE(this) * 0.5)) * 0.75) + lb
@@ -641,19 +644,19 @@ int64_t char_data::getMaxLF() const {
                     lb));
 }
 
-double char_data::getCurLFPercent() const {
+double char_data::getCurLFPercent() {
     return life;
 }
 
-int64_t char_data::getPercentOfCurLF(double amt) const {
+int64_t char_data::getPercentOfCurLF(double amt) {
     return getCurLF() * std::abs(amt);
 }
 
-int64_t char_data::getPercentOfMaxLF(double amt) const {
+int64_t char_data::getPercentOfMaxLF(double amt) {
     return getMaxLF() * std::abs(amt);
 }
 
-bool char_data::isFullLF() const {
+bool char_data::isFullLF() {
     return life >= 1.0;
 }
 
@@ -705,7 +708,7 @@ void char_data::restoreLF(bool announce) {
 }
 
 
-bool char_data::isFullVitals() const {
+bool char_data::isFullVitals() {
     return isFullHealth() && isFullKI() && isFullST();
 }
 
@@ -765,11 +768,11 @@ void char_data::cureStatusPoison(bool announce) {
     affect_from_char(this, SPELL_POISON);
 }
 
-static const std::map<int, std::string> limb_names = {
-        {1, "right arm"},
-        {2, "left arm"},
-        {3, "right leg"},
-        {4, "left leg"}
+static std::map<int, std::string> limb_names = {
+        {0, "right arm"},
+        {1, "left arm"},
+        {2, "right leg"},
+        {3, "left leg"}
 };
 
 void char_data::restoreLimbs(bool announce) {
@@ -870,12 +873,12 @@ void char_data::loseBaseAllPercent(double amt, bool trans_mult) {
 }
 
 
-int64_t char_data::getMaxCarryWeight() const {
-    return std::max(1L, (getMaxPL() / 200) + (GET_STR(this) * 50));
+double char_data::getMaxCarryWeight() {
+    return std::max<double>(getWeight() + 40.0, (getMaxPL() / 200.0) + (GET_STR(this) * 50));
 }
 
-int64_t char_data::getCurGearWeight() const {
-    int64_t total_weight = 0;
+double char_data::getEquippedWeight() {
+    double total_weight = 0;
 
     for (int i = 0; i < NUM_WEARS; i++) {
         if (GET_EQ(this, i)) {
@@ -885,29 +888,29 @@ int64_t char_data::getCurGearWeight() const {
     return total_weight;
 }
 
-int64_t char_data::getCurCarriedWeight() const {
-    return getCurGearWeight() + carry_weight;
+double char_data::getCarriedWeight() {
+    return getEquippedWeight() + getInventoryWeight() + (carrying ? carrying->getTotalWeight() : 0);
 }
 
-int64_t char_data::getAvailableCarryWeight() const {
-    return getMaxCarryWeight() - getCurCarriedWeight();
+double char_data::getAvailableCarryWeight() {
+    return getMaxCarryWeight() - getCarriedWeight();
 }
 
-double char_data::speednar() const {
-    auto ratio = (double) getCurCarriedWeight() / (double) getMaxCarryWeight();
+double char_data::speednar() {
+    auto ratio = (double) getCarriedWeight() / (double) getMaxCarryWeight();
     if (ratio >= .05)
         return std::max(0.01, std::min(1.0, 1.0 - ratio));
     return 1.0;
 }
 
-int64_t char_data::getEffMaxPL() const {
+int64_t char_data::getEffMaxPL() {
     if (IS_NPC(this)) {
         return getMaxPL();
     }
     return getMaxPL() * speednar();
 }
 
-bool char_data::isWeightedPL() const {
+bool char_data::isWeightedPL() {
     return getMaxPL() > getEffMaxPL();
 }
 
@@ -1111,35 +1114,78 @@ int char_data::getAffectModifier(int location, int specific) {
         if(specific != -1 && specific != a->specific) continue;
         total += a->modifier;
     }
+    for(auto i = 0; i < NUM_WEARS; i++) {
+        if(!GET_EQ(this, i)) continue;
+        total += GET_EQ(this, i)->getAffectModifier(location, specific);
+    }
     return total;
 }
 
 int char_data::getStrength(bool base) {
     if(base) return real_abils.str;
-    return real_abils.str + getAffectModifier(APPLY_STR) + getAffectModifier(APPLY_ALL_STATS);
+    return std::clamp<int>(real_abils.str + getAffectModifier(APPLY_STR) + getAffectModifier(APPLY_ALL_STATS),
+                           0, 100);
 }
 
 int char_data::getIntelligence(bool base) {
     if(base) return real_abils.intel;
-    return real_abils.intel + getAffectModifier(APPLY_INT) + getAffectModifier(APPLY_ALL_STATS);
+    return std::clamp<int>(real_abils.intel + getAffectModifier(APPLY_INT) + getAffectModifier(APPLY_ALL_STATS),
+                           0, 100);
 }
 
 int char_data::getConstitution(bool base) {
     if(base) return real_abils.con;
-    return real_abils.con + getAffectModifier(APPLY_CON) + getAffectModifier(APPLY_ALL_STATS);
+    return std::clamp<int>(real_abils.con + getAffectModifier(APPLY_CON) + getAffectModifier(APPLY_ALL_STATS),
+                           0, 100);
 }
 
 int char_data::getWisdom(bool base) {
     if(base) return real_abils.wis;
-    return real_abils.wis + getAffectModifier(APPLY_WIS) + getAffectModifier(APPLY_ALL_STATS);
+    return std::clamp<int>(real_abils.wis + getAffectModifier(APPLY_WIS) + getAffectModifier(APPLY_ALL_STATS),
+                           0, 100);
 }
 
 int char_data::getAgility(bool base) {
     if(base) return real_abils.dex;
-    return real_abils.dex + getAffectModifier(APPLY_DEX) + getAffectModifier(APPLY_ALL_STATS);
+    return std::clamp<int>(real_abils.dex + getAffectModifier(APPLY_DEX) + getAffectModifier(APPLY_ALL_STATS),
+                           0, 100);
 }
 
 int char_data::getSpeed(bool base) {
     if(base) return real_abils.cha;
-    return real_abils.cha + getAffectModifier(APPLY_CHA) + getAffectModifier(APPLY_ALL_STATS);
+    return std::clamp<int>(real_abils.cha + getAffectModifier(APPLY_CHA) + getAffectModifier(APPLY_ALL_STATS),
+                            0, 100);
+}
+
+bool char_data::canCarryWeight(weight_t val) {
+    double gravity = 1.0;
+    auto room = world.find(in_room);
+    if(room != world.end()) {
+        gravity = room->second.getGravity();
+    }
+    return getAvailableCarryWeight() >= (val * gravity);
+}
+
+bool char_data::canCarryWeight(struct obj_data *obj) {
+    return canCarryWeight(obj->getTotalWeight());
+}
+
+bool char_data::canCarryWeight(struct char_data *obj) {
+    return canCarryWeight(obj->getTotalWeight());
+}
+
+weight_t char_data::getCurrentBurden() {
+    auto total = getTotalWeight();
+    auto room = world.find(in_room);
+    if(room != world.end()) {
+        total *= room->second.getGravity();
+    }
+    return total;
+}
+
+double char_data::getBurdenRatio() {
+    auto total = getCurrentBurden();
+    auto max = getMaxCarryWeight();
+    if(max == 0) return 0;
+    return total / max;
 }

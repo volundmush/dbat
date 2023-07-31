@@ -635,11 +635,6 @@ static int64_t move_gain(struct char_data *ch) {
     if (AFF_FLAGGED(ch, AFF_POISON))
         gain /= 4;
 
-    if (!ch->calcGravCost(0)) {
-        send_to_char(ch, "This gravity is wearing you out!\r\n");
-        gain /= 4;
-    }
-
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
         gain = GET_MAX_MOVE(ch) - (ch->getCurST());
     }
@@ -1613,13 +1608,13 @@ void point_update() {
             }
 
             if (SECT(IN_ROOM(i)) == SECT_WATER_NOSWIM && !CARRIED_BY(i) && !IS_KANASSAN(i)) {
-                if ((i->getCurST()) >= (i->getCurCarriedWeight())) {
+                if ((i->getCurST()) >= (i->getCarriedWeight())) {
                     act("@bYou swim in place.@n", true, i, nullptr, nullptr, TO_CHAR);
                     act("@C$n@b swims in place.@n", true, i, nullptr, nullptr, TO_ROOM);
-                    i->decCurST(i->getCurCarriedWeight());
+                    i->decCurST(i->getCarriedWeight());
 
                 } else {
-                    i->decCurST(i->getCurCarriedWeight());
+                    i->decCurST(i->getCarriedWeight());
                     act("@RYou are drowning!@n", true, i, nullptr, nullptr, TO_CHAR);
                     act("@C$n@b gulps water as $e struggles to stay above the water line.@n", true, i, nullptr, nullptr,
                         TO_ROOM);
@@ -1927,11 +1922,9 @@ void point_update() {
                     if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.02)) > 0) {
                         GET_OBJ_WEIGHT(j) -= melt;
                         send_to_char(j->carried_by, "%s @wmelts a little.\r\n", j->short_description);
-                        IS_CARRYING_W(j->carried_by) -= melt;
                     } else {
                         send_to_char(j->carried_by, "%s @wmelts completely away.\r\n", j->short_description);
                         int remainder = melt - GET_OBJ_WEIGHT(j);
-                        IS_CARRYING_W(j->carried_by) -= (melt - remainder);
                         extract_obj(j);
                     }
                 } else if (IN_ROOM(j) != NOWHERE) {

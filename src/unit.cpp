@@ -70,10 +70,26 @@ void unit_data::deactivateContents() {
     }
 }
 
-std::string unit_data::scriptString() const {
+std::string unit_data::scriptString() {
     if(!script) return "";
     std::vector<std::string> vnums;
     for(auto p : proto_script) vnums.emplace_back(std::move(std::to_string(p)));
 
     return fmt::format("@D[@wT{}@D]@n", fmt::join(vnums, ","));
+}
+
+double unit_data::getInventoryWeight() {
+    double weight = 0;
+    for(auto obj = contents; obj; obj = obj->next_content) {
+        weight += obj->getTotalWeight();
+    }
+    return weight;
+}
+
+int64_t unit_data::getInventoryCount() {
+    int64_t total = 0;
+    for(auto obj = contents; obj; obj = obj->next_content) {
+        total++;
+    }
+    return total;
 }

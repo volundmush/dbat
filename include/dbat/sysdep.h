@@ -142,15 +142,7 @@ template<typename T = bool>
 using OpResult = std::pair<T, std::optional<std::string>>;
 
 extern std::shared_ptr<spdlog::logger> logger;
-
-extern std::random_device randomDevice;
-extern std::default_random_engine randomEngine;
-
-template<typename T>
-T randomNumber(T min, T max) {
-    std::uniform_int_distribution<T> dist(min, max);
-    return dist(randomEngine);
-}
+using weight_t = double;
 
 template <typename Iterator, typename Key = std::function<std::string(typename std::iterator_traits<Iterator>::value_type)>>
 Iterator partialMatch(

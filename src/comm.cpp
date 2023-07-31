@@ -137,9 +137,6 @@ void copyover_recover_final() {
 
         write_to_output(d, "@rThe world comes back into focus... has something changed?@n\n\r");
 
-        enter_player_game(d);
-        d->connected = CON_PLAYING;
-        look_at_room(IN_ROOM(d->character), d->character, 0);
         if (AFF_FLAGGED(d->character, AFF_HAYASA)) {
             GET_SPEEDBOOST(d->character) = GET_SPEEDCALC(d->character) * 0.5;
         }
@@ -190,7 +187,7 @@ void copyover_recover() {
                     }
                 }
             }
-            sessions[d->obj_editval] = d;
+            sessions[d->obj_editflag] = d;
 
             d->next = descriptor_list;
             descriptor_list = d;
@@ -229,6 +226,7 @@ static boost::asio::awaitable<void> performReboot(int mode) {
     /* For each descriptor/connection, halt them and save state. */
     for (auto &[cid, d] : sessions) {
         nlohmann::json jd;
+        if(d->conns.empty()) continue;
 
         for(auto &[cid, c] : d->conns) {
             jd["connections"].push_back(c->connId);
@@ -532,12 +530,24 @@ boost::asio::awaitable<void> runOneLoop(double deltaTime) {
     }
 
     {
+        std::set<struct descriptor_data*> toLook;
         auto start = std::chrono::high_resolution_clock::now();
         for(auto d = descriptor_list; d; d = next_d) {
             next_d = d->next;
-            if(STATE(d) != CON_LOGIN) continue;
-            d->character->login();
+            switch(STATE(d)) {
+                case CON_LOGIN:
+                    d->character->login();
+                    break;
+                case CON_COPYOVER:
+                    enter_player_game(d);
+                    d->connected = CON_PLAYING;
+                    toLook.insert(d);
+                    break;
+                default:
+                    break;
+            }
         }
+        for(auto d : toLook) look_at_room(IN_ROOM(d->character), d->character, 0);
         auto end = std::chrono::high_resolution_clock::now();
         timings.emplace_back("handle logins", std::chrono::duration<double>(end - start).count());
     }
@@ -683,7 +693,10 @@ boost::asio::awaitable<void> game_loop() {
 
         } catch(std::exception& e) {
             basic_mud_log("Exception in runOneLoop(): %s", e.what());
-            exit(1);
+            shutdown_game(1);
+        } catch(...) {
+             basic_mud_log("Unknown exception in runOneLoop()");
+            shutdown_game(1);
         }
         auto loopEnd = boost::asio::steady_timer::clock_type::now();
 

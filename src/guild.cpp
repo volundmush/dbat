@@ -272,7 +272,9 @@ int print_skills_by_type(struct char_data *ch, char *buf, int maxsz, int sktype,
         } else {
             continue;
         }
-        if (sk.level + sk.mods <= 0) {
+        auto sklevel = GET_SKILL(ch, i);
+        auto bonus = GET_SKILL_BONUS(ch, i);
+        if (sklevel <= 0) {
             continue;
         }
         if (*arg) {
@@ -283,14 +285,13 @@ int print_skills_by_type(struct char_data *ch, char *buf, int maxsz, int sktype,
             }
         }
 
-        auto sklevel = GET_SKILL(ch, i);
         if (t & SKTYPE_LANG) {
             nlen = snprintf(buf + len, maxsz - len, "%-20s  (%s)\r\n",
                             spell_info[i].name, sk.level ? "known" : "unknown");
         } else if (t & SKTYPE_SKILL) {
-            if (sk.mods)
+            if (bonus)
                 snprintf(buf2, sizeof(buf2), " (base %d + bonus %d)", sk.level,
-                         sk.mods);
+                         bonus);
             else
                 buf2[0] = 0;
 

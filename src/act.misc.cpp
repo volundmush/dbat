@@ -2986,7 +2986,7 @@ ACMD(do_hydromancy) {
             true, ch, obj, nullptr, TO_CHAR);
         act("@c$n@C presses $s palms together in front of $s body and water begins to flow up $s body and pools between $s palms. Slowly pulling them apart reveals a @c$p@C as it forms between them!@n",
             true, ch, obj, nullptr, TO_VICT);
-        if (GET_OBJ_WEIGHT(obj) + (ch->getCurCarriedWeight()) <= CAN_CARRY_W(ch))
+        if (GET_OBJ_WEIGHT(obj) + (ch->getCarriedWeight()) <= CAN_CARRY_W(ch))
             obj_to_char(obj, ch);
         else {
             send_to_char(ch, "You are unable to hold it and so let it go at your feet.\r\n");
@@ -4165,7 +4165,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
     } else { /* They can afford it. */
         switch (choice) {
             case 1:
-                if (IS_CARRYING_W(ch) + 26 > CAN_CARRY_W(ch)) {
+                if (!ch->canCarryWeight(26)) {
                     send_to_char(ch, "You can not carry that much weight at this moment.\r\n");
                 } else if (IS_CARRYING_N(ch) + 13 > CAN_CARRY_N(ch)) {
                     send_to_char(ch, "You have too many items on you to carry anymore at this moment.\r\n");
@@ -4195,7 +4195,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                 }
                 break;
             case 2:
-                if (IS_CARRYING_W(ch) + 2 > CAN_CARRY_W(ch)) {
+                if (!ch->canCarryWeight(2)) {
                     send_to_char(ch, "You can not carry that much weight at this moment.\r\n");
                 } else if (IS_CARRYING_N(ch) + 1 > CAN_CARRY_N(ch)) {
                     send_to_char(ch, "You have too many items on you to carry anymore at this moment.\r\n");
@@ -4212,7 +4212,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                 }
                 break;
             case 3:
-                if (IS_CARRYING_W(ch) + 2 > CAN_CARRY_W(ch)) {
+                if (!ch->canCarryWeight(2)) {
                     send_to_char(ch, "You can not carry that much weight at this moment.\r\n");
                 } else if (IS_CARRYING_N(ch) + 1 > CAN_CARRY_N(ch)) {
                     send_to_char(ch, "You have too many items on you to carry anymore at this moment.\r\n");
@@ -4229,7 +4229,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                 }
                 break;
             case 4:
-                if (IS_CARRYING_W(ch) + 2 > CAN_CARRY_W(ch)) {
+                if (!ch->canCarryWeight(2)) {
                     send_to_char(ch, "You can not carry that much weight at this moment.\r\n");
                 } else if (IS_CARRYING_N(ch) + 1 > CAN_CARRY_N(ch)) {
                     send_to_char(ch, "You have too many items on you to carry anymore at this moment.\r\n");
@@ -4246,7 +4246,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                 }
                 break;
             case 5:
-                if (IS_CARRYING_W(ch) + 2 > CAN_CARRY_W(ch)) {
+                if (!ch->canCarryWeight(2)) {
                     send_to_char(ch, "You can not carry that much weight at this moment.\r\n");
                 } else if (IS_CARRYING_N(ch) + 1 > CAN_CARRY_N(ch)) {
                     send_to_char(ch, "@R%d@W RPP from your Bank paid for your selection. Enjoy!@n\r\n", cost);
@@ -4263,7 +4263,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                 }
                 break;
             case 6:
-                if (IS_CARRYING_W(ch) + 2 > CAN_CARRY_W(ch)) {
+                if (!ch->canCarryWeight(2)) {
                     send_to_char(ch, "You can not carry that much weight at this moment.\r\n");
                 } else if (IS_CARRYING_N(ch) + 1 > CAN_CARRY_N(ch)) {
                     send_to_char(ch, "You have too many items on you to carry anymore at this moment.\r\n");
@@ -4280,7 +4280,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                 }
                 break;
             case 7:
-                if (IS_CARRYING_W(ch) + 2 > CAN_CARRY_W(ch)) {
+                if (!ch->canCarryWeight(2)) {
                     send_to_char(ch, "You can not carry that much weight at this moment.\r\n");
                 } else if (IS_CARRYING_N(ch) + 1 > CAN_CARRY_N(ch)) {
                     send_to_char(ch, "You have too many items on you to carry anymore at this moment.\r\n");
@@ -4297,7 +4297,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                 }
                 break;
             case 8:
-                if (IS_CARRYING_W(ch) + 10000000 > CAN_CARRY_W(ch)) {
+                if (!ch->canCarryWeight(10000000)) {
                     send_to_char(ch, "You can not carry that much weight at this moment.\r\n");
                 } else if (IS_CARRYING_N(ch) + 1 > CAN_CARRY_N(ch)) {
                     send_to_char(ch, "You have too many items on you to carry anymore at this moment.\r\n");
@@ -4313,7 +4313,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                 }
                 break;
             case 9:
-                if (IS_CARRYING_W(ch) + 2 > CAN_CARRY_W(ch)) {
+                if (!ch->canCarryWeight(2)) {
                     send_to_char(ch, "You can not carry that much weight at this moment.\r\n");
                 } else if (IS_CARRYING_N(ch) + 1 > CAN_CARRY_N(ch)) {
                     send_to_char(ch, "You have too many items on you to carry anymore at this moment.\r\n");

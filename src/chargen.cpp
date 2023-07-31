@@ -2329,6 +2329,8 @@ namespace net {
         p.name = ch->name;
         p.id = ch->id;
         p.account = conn->account;
+        conn->account->characters.push_back(p.id);
+        dirty_accounts.insert(conn->account->vn);
         p.character = ch;
         init_char(ch);
         save_char(ch);

@@ -962,8 +962,6 @@ void mag_summons(int level, struct char_data *ch, struct obj_data *obj, int spel
             mag_affects(level, ch, mob, spellnum);
         if (affvs)
             mag_affectsv(level, ch, mob, spellnum);
-        IS_CARRYING_W(mob) = 0;
-        IS_CARRYING_N(mob) = 0;
         SET_BIT_AR(AFF_FLAGS(mob), AFF_CHARM);
         act(mag_summon_msgs[msg], false, ch, nullptr, mob, TO_ROOM);
         load_mtrigger(mob);

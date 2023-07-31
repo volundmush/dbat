@@ -54,7 +54,7 @@ extern std::list<struct save_list_data> save_list;
 
 #define ZCMD(zon, cmds)    zone_table[(zon)].cmd[(cmds)]
 
-#define LIMIT(var, low, high)    MIN(high, MAX(var, low))
+#define LIMIT(var, low, high)    std::clamp<int64_t>(var, low, high)
 
 extern room_vnum genolc_zone_bottom(zone_rnum rznum);
 

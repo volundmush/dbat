@@ -3658,361 +3658,224 @@ void saiyan_gain(struct char_data *ch, struct char_data *vict) {
         gain += rand_number(GET_LEVEL(ch) * 8, GET_LEVEL(ch) * 10);
     } else if (GET_LEVEL(ch) > 30) {
         gain += rand_number(GET_LEVEL(ch) * 5, GET_LEVEL(ch) * 8);
-    } else {
     }
 
     if (IS_BIO(ch) && (GET_GENOME(ch, 0) == 2 || GET_GENOME(ch, 1) == 2)) {
         gain /= 2;
     }
-    if (rand_number(1, 22) >= 18 && (GET_LEVEL(ch) == 100 || level_exp(ch, GET_LEVEL(ch) + 1) - (GET_EXP(ch)) > 0)) {
-        if (weak) {
-            send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WThey are too weak to inspire your saiyan soul!@n\r\n");
-        } else {
-            std::vector<int64_t> stats;
-            for (const auto stat: {0, 1, 2}) {
-                if (!ch->is_soft_cap(stat, 1.5))
-                    stats.push_back(stat);
-            }
-            if (stats.empty()) {
-                send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel you have reached your current limits.@n\r\n");
-                return;
-            }
-            std::random_shuffle(stats.begin(), stats.end());
+    if (!(rand_number(1, 22) >= 18 && (GET_LEVEL(ch) == 100 || level_exp(ch, GET_LEVEL(ch) + 1) - (GET_EXP(ch)) > 0))) {
+        return;
+    }
+    if (weak) {
+        send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WThey are too weak to inspire your saiyan soul!@n\r\n");
+        return;
+    }
 
-            switch (stats[0]) {
-                case 0:
-                    ch->gainBasePL(gain);
-                    send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel slightly stronger. @D[@G+%s@D]@n\r\n",
-                                 add_commas(gain));
-                    break;
-                case 1:
-                    ch->gainBaseKI(gain);
-                    send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel your spirit grow. @D[@G+%s@D]@n\r\n",
-                                 add_commas(gain));
-                    break;
-                case 2:
-                    ch->gainBaseST(gain);
-                    send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel slightly more vigorous. @D[@G+%s@D]@n\r\n",
-                                 add_commas(gain));
-                    break;
-            }
-        }
+    std::vector<int64_t> stats;
+    for (const auto stat: {0, 1, 2}) {
+        if (!ch->is_soft_cap(stat, 1.5))
+            stats.push_back(stat);
+    }
+
+    if (stats.empty()) {
+        send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel you have reached your current limits.@n\r\n");
+        return;
+    }
+
+    auto itr = Random::get(stats);
+
+    switch (*itr) {
+        case 0:
+            ch->gainBasePL(gain);
+            send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel slightly stronger. @D[@G+%s@D]@n\r\n",
+                         add_commas(gain));
+            break;
+        case 1:
+            ch->gainBaseKI(gain);
+            send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel your spirit grow. @D[@G+%s@D]@n\r\n",
+                         add_commas(gain));
+            break;
+        case 2:
+            ch->gainBaseST(gain);
+            send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel slightly more vigorous. @D[@G+%s@D]@n\r\n",
+                         add_commas(gain));
+            break;
     }
 
 }
 
-void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t dmg) {
+
+static void spar_helper(struct char_data *ch, struct char_data *vict, int type, int64_t dmg) {
     int chance = 0, gmult, gravity, bonus = 1, pscost = 2, difference = 0;
     int64_t gain = 0, pl = 0, ki = 0, st = 0, gaincalc = 0;
 
-    if (ch != nullptr && !IS_NPC(ch)) {
-        if (dmg > GET_MAX_HIT(vict) / 10) {
-            chance = rand_number(20, 100);
-        } else if (dmg <= GET_MAX_HIT(vict) / 10) {
-            chance = rand_number(1, 75);
-        }
+    if (dmg > GET_MAX_HIT(vict) / 10) {
+        chance = rand_number(20, 100);
+    } else if (dmg <= GET_MAX_HIT(vict) / 10) {
+        chance = rand_number(1, 75);
+    }
 
-        if (GET_RELAXCOUNT(ch) >= 464) {
-            chance = 0;
-        } else if (GET_RELAXCOUNT(ch) >= 232) {
-            chance -= chance * 0.5;
-        } else if (GET_RELAXCOUNT(ch) >= 116) {
-            chance -= chance * 0.2;
-        }
+    if (GET_RELAXCOUNT(ch) >= 464) {
+        chance = 0;
+    } else if (GET_RELAXCOUNT(ch) >= 232) {
+        chance -= chance * 0.5;
+    } else if (GET_RELAXCOUNT(ch) >= 116) {
+        chance -= chance * 0.2;
+    }
 
-        gravity = ROOM_GRAVITY(IN_ROOM(ch));
-        gmult = GET_LEVEL(ch) * ((gravity / 5) + 6);
+    auto ratio = ch->getBurdenRatio();
+    gmult = (GET_LEVEL(ch) * 6);
+    gmult += gmult * ratio;
 
-        if (GET_EQ(ch, WEAR_SH)) {
-            struct obj_data *obj = GET_EQ(ch, WEAR_SH);
-            if (GET_OBJ_VNUM(obj) == 1127) {
-                gmult *= 4;
-            }
-        }
-
-
-        if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT) || (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC))) {
-            if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
-                gmult *= 1.75;
-                pscost += 2;
-            } else {
-                gmult *= 1.25;
-                pscost += 1;
-            }
-            pl = large_rand(gmult * .8, gmult * 1.2);
-            ki = large_rand(gmult * .8, gmult * 1.2);
-        } else {
-            pl = large_rand(gmult * .4, gmult * .8);
-            ki = large_rand(gmult * .4, gmult * .8);
-        }
-        if (level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) < 0 && GET_LEVEL(ch) < 100) {
-            pl = 0;
-        }
-        if (level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) < 0 && GET_LEVEL(ch) < 100) {
-            ki = 0;
-        }
-
-        if (chance >= rand_number(60, 75)) {
-            int64_t num = 0, maxnum = 500000;
-            if (GET_LEVEL(ch) >= 70) {
-                num += GET_LEVEL(ch) * 10000;
-            } else if (GET_LEVEL(ch) >= 60) {
-                num += GET_LEVEL(ch) * 6000;
-            } else if (GET_LEVEL(ch) >= 50) {
-                num += GET_LEVEL(ch) * 5000;
-            } else if (GET_LEVEL(ch) >= 45) {
-                num += GET_LEVEL(ch) * 2500;
-            } else if (GET_LEVEL(ch) >= 40) {
-                num += GET_LEVEL(ch) * 2200;
-            } else if (GET_LEVEL(ch) >= 35) {
-                num += GET_LEVEL(ch) * 1500;
-            } else if (GET_LEVEL(ch) >= 30) {
-                num += GET_LEVEL(ch) * 1200;
-            } else if (GET_LEVEL(ch) >= 25) {
-                num += GET_LEVEL(ch) * 550;
-            } else if (GET_LEVEL(ch) >= 20) {
-                num += GET_LEVEL(ch) * 400;
-            } else if (GET_LEVEL(ch) >= 15) {
-                num += GET_LEVEL(ch) * 250;
-            } else if (GET_LEVEL(ch) >= 10) {
-                num += GET_LEVEL(ch) * 100;
-            } else if (GET_LEVEL(ch) >= 5) {
-                num += GET_LEVEL(ch) * 50;
-            } else {
-                num += GET_LEVEL(ch) * 30;
-            }
-            if (num > maxnum) {
-                num = maxnum;
-            }
-            if (vict != nullptr && IS_NPC(vict)) {
-                num = num * 0.7;
-                gaincalc = num * 1.5;
-                type = 3;
-            } else if (vict != nullptr && !IS_NPC(vict)) {
-                gaincalc = large_rand(num * .7, num);
-                if (GET_LEVEL(ch) > GET_LEVEL(vict))
-                    difference = GET_LEVEL(ch) - GET_LEVEL(vict);
-                else if (GET_LEVEL(ch) < GET_LEVEL(vict))
-                    difference = GET_LEVEL(vict) - GET_LEVEL(ch);
-            } else {
-                gaincalc = 0;
-            }
-            if (vict != nullptr) {
-                if (difference >= 51) {
-                    send_to_char(ch, "The difference in your levels is too great for you to gain anything.\r\n");
-                    return;
-                } else if (difference >= 40) {
-                    gaincalc = gaincalc * 0.05;
-                } else if (difference >= 30) {
-                    gaincalc = gaincalc * 0.10;
-                } else if (difference >= 20) {
-                    gaincalc = gaincalc * 0.25;
-                } else if (difference >= 10) {
-                    gaincalc = gaincalc * 0.50;
-                }
-                if (!IS_NPC(vict)) {
-                    if (PRF_FLAGGED(vict, PRF_INSTRUCT)) {
-                        if (GET_PRACTICES(vict) > 10) {
-                            send_to_char(vict, "You instruct them in proper fighting techniques and strategies.\r\n");
-                            act("You take $N's instruction to heart and gain more experience.\r\n", false, ch, nullptr,
-                                vict, TO_CHAR);
-                            GET_PRACTICES(vict) -= 10;
-                            bonus = 2;
-                        }
-                    }
-                }
-            }
-
-            if (IS_SAIYAN(ch)) {
-                gaincalc = gaincalc + (gaincalc * .50);
-            }
-            if (IS_HALFBREED(ch)) {
-                gaincalc = gaincalc + (gaincalc * .40);
-            }
-            if (IS_ICER(ch) || (IS_BIO(ch) && (GET_GENOME(ch, 0) == 4 || GET_GENOME(ch, 1) == 4))) {
-                gaincalc = gaincalc - (gaincalc * .20);
-            }
-            if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT) || (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC))) {
-                if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
-                    gaincalc *= 1.5;
-                } else {
-                    gaincalc *= 1.25;
-                }
-            }
-            gain = gear_exp(ch, gaincalc);
-            if (GET_PRACTICES(ch) >= pscost) {
-                GET_PRACTICES(ch) -= pscost;
-                gain = gain * bonus;
-                gain_exp(ch, gain);
-                send_to_char(ch, "@D[@Y+ @G%s @mExp@D]@n ", add_commas(gain));
-                if (type == 0 && rand_number(1, 5) >= 4) {
-                    send_to_char(ch, "@D[@Y+ @R%s @rPL@D]@n ", pl > 0 ? add_commas(pl) : "SOFT-CAP");
-                    ch->gainBasePL(pl);
-                } else if (type == 1 && rand_number(1, 5) >= 4) {
-                    send_to_char(ch, "@D[@Y+ @C%s @cKi@D]@n ", ki > 0 ? add_commas(ki) : "SOFT-CAP");
-                    ch->gainBaseKI(ki);
-                }
-                send_to_char(ch, "@D[@R- @M%d @mPS@D]@n ", pscost);
-                send_to_char(ch, "\r\n");
-            } else {
-                send_to_char(ch, "@RYou need at least %d Practice Sessions in order to gain while sparring here.@n\r\n",
-                             pscost);
-            }
+    if (GET_EQ(ch, WEAR_SH)) {
+        struct obj_data *obj = GET_EQ(ch, WEAR_SH);
+        if (GET_OBJ_VNUM(obj) == 1127) {
+            gmult *= 4;
         }
     }
 
-    if (vict != nullptr && !IS_NPC(vict) && !IS_NPC(ch)) {
-        if (dmg > GET_MAX_HIT(vict) / 4) {
-            chance = rand_number(1, 100);
-        } else if (dmg <= GET_MAX_HIT(vict) / 4) {
-            chance = rand_number(1, 70);
-        }
 
-        if (GET_RELAXCOUNT(vict) >= 464) {
-            chance = 0;
-        } else if (GET_RELAXCOUNT(vict) >= 232) {
-            chance -= chance * 0.5;
-        } else if (GET_RELAXCOUNT(vict) >= 116) {
-            chance -= chance * 0.2;
-        }
-
-        gravity = ROOM_GRAVITY(IN_ROOM(ch));
-        gmult = GET_LEVEL(vict) * ((gravity / 5) + 6);
-        if (ROOM_FLAGGED(IN_ROOM(vict), ROOM_WORKOUT) || (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC))) {
-            if (GET_ROOM_VNUM(IN_ROOM(vict)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(vict)) <= 19199) {
-                gmult *= 1.75;
-            } else {
-                gmult *= 1.25;
-            }
-            st = large_rand(gmult * .8, gmult * 1.2);
+    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT) || (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC))) {
+        if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
+            gmult *= 1.75;
+            pscost += 2;
         } else {
-            st = large_rand(gmult * .4, gmult * .8);
+            gmult *= 1.25;
+            pscost += 1;
         }
+        pl = large_rand(gmult * .8, gmult * 1.2);
+        ki = large_rand(gmult * .8, gmult * 1.2);
+    } else {
+        pl = large_rand(gmult * .4, gmult * .8);
+        ki = large_rand(gmult * .4, gmult * .8);
+    }
+    if (level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) < 0 && GET_LEVEL(ch) < 100) {
+        pl = 0;
+    }
+    if (level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) < 0 && GET_LEVEL(ch) < 100) {
+        ki = 0;
+    }
 
-        if (level_exp(vict, GET_LEVEL(vict) + 1) - GET_EXP(vict) < 0 && GET_LEVEL(vict) < 100) {
-            st = 0;
+    if (chance >= rand_number(60, 75)) {
+        int64_t num = 0, maxnum = 500000;
+        if (GET_LEVEL(ch) >= 70) {
+            num += GET_LEVEL(ch) * 10000;
+        } else if (GET_LEVEL(ch) >= 60) {
+            num += GET_LEVEL(ch) * 6000;
+        } else if (GET_LEVEL(ch) >= 50) {
+            num += GET_LEVEL(ch) * 5000;
+        } else if (GET_LEVEL(ch) >= 45) {
+            num += GET_LEVEL(ch) * 2500;
+        } else if (GET_LEVEL(ch) >= 40) {
+            num += GET_LEVEL(ch) * 2200;
+        } else if (GET_LEVEL(ch) >= 35) {
+            num += GET_LEVEL(ch) * 1500;
+        } else if (GET_LEVEL(ch) >= 30) {
+            num += GET_LEVEL(ch) * 1200;
+        } else if (GET_LEVEL(ch) >= 25) {
+            num += GET_LEVEL(ch) * 550;
+        } else if (GET_LEVEL(ch) >= 20) {
+            num += GET_LEVEL(ch) * 400;
+        } else if (GET_LEVEL(ch) >= 15) {
+            num += GET_LEVEL(ch) * 250;
+        } else if (GET_LEVEL(ch) >= 10) {
+            num += GET_LEVEL(ch) * 100;
+        } else if (GET_LEVEL(ch) >= 5) {
+            num += GET_LEVEL(ch) * 50;
+        } else {
+            num += GET_LEVEL(ch) * 30;
         }
-
-        if (chance >= rand_number(60, 75)) {
-            int64_t num = 0, maxnum = 500000;
-
-            if (GET_LEVEL(vict) >= 70) {
-                num += GET_LEVEL(vict) * 10000;
-            } else if (GET_LEVEL(vict) >= 60) {
-                num += GET_LEVEL(vict) * 6000;
-            } else if (GET_LEVEL(vict) >= 50) {
-                num += GET_LEVEL(vict) * 5000;
-            } else if (GET_LEVEL(vict) >= 45) {
-                num += GET_LEVEL(vict) * 2500;
-            } else if (GET_LEVEL(vict) >= 40) {
-                num += GET_LEVEL(vict) * 2200;
-            } else if (GET_LEVEL(vict) >= 35) {
-                num += GET_LEVEL(vict) * 1500;
-            } else if (GET_LEVEL(vict) >= 30) {
-                num += GET_LEVEL(vict) * 1200;
-            } else if (GET_LEVEL(vict) >= 25) {
-                num += GET_LEVEL(vict) * 550;
-            } else if (GET_LEVEL(vict) >= 20) {
-                num += GET_LEVEL(vict) * 400;
-            } else if (GET_LEVEL(vict) >= 15) {
-                num += GET_LEVEL(vict) * 250;
-            } else if (GET_LEVEL(vict) >= 10) {
-                num += GET_LEVEL(vict) * 100;
-            } else if (GET_LEVEL(vict) >= 5) {
-                num += GET_LEVEL(vict) * 50;
-            } else {
-                num += GET_LEVEL(vict) * 30;
-            }
-            if (num > maxnum) {
-                num = maxnum;
-            }
-            gain = large_rand(num * .7, num);
-
-            if (difference > 50) {
+        if (num > maxnum) {
+            num = maxnum;
+        }
+        if (vict != nullptr && IS_NPC(vict)) {
+            num = num * 0.7;
+            gaincalc = num * 1.5;
+            type = 3;
+        } else if (vict != nullptr && !IS_NPC(vict)) {
+            gaincalc = large_rand(num * .7, num);
+            if (GET_LEVEL(ch) > GET_LEVEL(vict))
+                difference = GET_LEVEL(ch) - GET_LEVEL(vict);
+            else if (GET_LEVEL(ch) < GET_LEVEL(vict))
+                difference = GET_LEVEL(vict) - GET_LEVEL(ch);
+        } else {
+            gaincalc = 0;
+        }
+        if (vict != nullptr) {
+            if (difference >= 51) {
                 send_to_char(ch, "The difference in your levels is too great for you to gain anything.\r\n");
                 return;
             } else if (difference >= 40) {
-                gain = gain * 0.05;
+                gaincalc = gaincalc * 0.05;
             } else if (difference >= 30) {
-                gain = gain * 0.10;
+                gaincalc = gaincalc * 0.10;
             } else if (difference >= 20) {
-                gain = gain * 0.25;
+                gaincalc = gaincalc * 0.25;
             } else if (difference >= 10) {
-                gain = gain * 0.50;
+                gaincalc = gaincalc * 0.50;
             }
+            if (!IS_NPC(vict) && !IS_NPC(ch)) {
+                if (PRF_FLAGGED(vict, PRF_INSTRUCT)) {
+                    if (GET_PRACTICES(vict) > 10) {
+                        send_to_char(vict, "You instruct them in proper fighting techniques and strategies.\r\n");
+                        act("You take $N's instruction to heart and gain more experience.\r\n", false, ch, nullptr,
+                            vict, TO_CHAR);
+                        GET_PRACTICES(vict) -= 10;
+                        bonus = 2;
+                    }
+                }
+            }
+        }
 
-            if (IS_SAIYAN(vict) || IS_HALFBREED(vict)) {
-                gain = gain + (gain * .30);
-            }
-            if (IS_ICER(vict)) {
-                gain = gain - (gain * .10);
-            }
-            if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT) || (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC))) {
-                if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
-                    gain *= 1.5;
-                } else {
-                    gain *= 1.25;
-                }
-            }
-            if (GET_PRACTICES(vict) >= pscost) {
-                GET_PRACTICES(vict) -= pscost;
-                send_to_char(vict, "@D[@Y+ @G%s @mExp@D]@n ", add_commas(gain));
-                gain = gear_exp(vict, gain);
-                gain_exp(vict, gain);
-                if (rand_number(1, 5) >= 4) {
-                    send_to_char(vict, "@D[@Y+ @G%s @gSt@D]@n ", st > 0 ? add_commas(st) : "SOFT-CAP");
-                    vict->gainBaseST(st);
-                }
-                send_to_char(vict, "@D[@R- @M%d @mPS@D]@n ", pscost);
-                send_to_char(vict, "\r\n");
+        if (IS_SAIYAN(ch)) {
+            gaincalc = gaincalc + (gaincalc * .50);
+        }
+        if (IS_HALFBREED(ch)) {
+            gaincalc = gaincalc + (gaincalc * .40);
+        }
+        if (IS_ICER(ch) || (IS_BIO(ch) && (GET_GENOME(ch, 0) == 4 || GET_GENOME(ch, 1) == 4))) {
+            gaincalc = gaincalc - (gaincalc * .20);
+        }
+        if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT) || (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC))) {
+            if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
+                gaincalc *= 1.5;
             } else {
-                send_to_char(vict,
-                             "@RYou need at least %d Practice Sessions in order to gain while sparring here.@n\r\n",
-                             pscost);
+                gaincalc *= 1.25;
             }
+        }
+        gain = gear_exp(ch, gaincalc);
+        if (GET_PRACTICES(ch) >= pscost) {
+            GET_PRACTICES(ch) -= pscost;
+            gain = gain * bonus;
+            gain_exp(ch, gain);
+            send_to_char(ch, "@D[@Y+ @G%s @mExp@D]@n ", add_commas(gain));
+            if (type == 0 && rand_number(1, 5) >= 4) {
+                send_to_char(ch, "@D[@Y+ @R%s @rPL@D]@n ", pl > 0 ? add_commas(pl) : "SOFT-CAP");
+                ch->gainBasePL(pl);
+            } else if (type == 1 && rand_number(1, 5) >= 4) {
+                send_to_char(ch, "@D[@Y+ @C%s @cKi@D]@n ", ki > 0 ? add_commas(ki) : "SOFT-CAP");
+                ch->gainBaseKI(ki);
+            }
+            send_to_char(ch, "@D[@R- @M%d @mPS@D]@n ", pscost);
+            send_to_char(ch, "\r\n");
+        } else {
+            send_to_char(ch, "@RYou need at least %d Practice Sessions in order to gain while sparring here.@n\r\n",
+                         pscost);
         }
     }
 }
 
-static std::map<double, int64_t> gravTiers = {
-        {10, 5000},
-        {20, 20000},
-        {30, 50000},
-        {40, 100000},
-        {50, 200000},
-        {100, 400000},
-        {200, 1000000},
-        {300, 5000000},
-        {400, 8000000},
-        {500, 15000000},
-        {1000, 25000000},
-        {5000, 100000000},
-        {10000, 200000000}
-};
-
-static double gravTolerance(struct char_data *ch) {
-    auto pl = GET_MAX_HIT(ch);
-    double tolerance = 1.0;
-    for(auto &t : gravTiers) {
-        if(pl >= t.second) {
-            tolerance = t.first;
-        }
-    }
-    if(tolerance <= 10.0 && IS_BARDOCK(ch) || IS_NPC(ch)) {
-        tolerance = 10.0;
-    }
-    return tolerance;
+void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t dmg) {
+    spar_helper(ch, vict, type, dmg);
+    spar_helper(vict, ch, type, dmg);
 }
 
 bool can_grav(struct char_data *ch) {
-    auto &r = world[ch->in_room];
-    auto grav = r.getGravity();
-
-    if(grav > gravTolerance(ch)) {
-        send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
-        return false;
+    auto result = ch->getBurdenRatio() <= 1.0;
+    if(!result) {
+        send_to_char(ch, "You are too burdened to even think about it!\r\n");
     }
-    return true;
+    return result;
 }
 
 /* If they can preform the attack or perform the attack on target. */
@@ -4166,79 +4029,78 @@ bool check_points(struct char_data *ch, int64_t ki, int64_t st) {
     if (IS_NPC(ch)) {
         if ((ch->getCurKI()) < ki) {
             send_to_char(ch, "You do not have enough ki!\r\n");
-            fail = true;
+            return false;
         }
         if ((ch->getCurST()) < st) {
             send_to_char(ch, "You do not have enough stamina!\r\n");
-            fail = true;
-        }
-    } else {
-        if (!ch->calcGravCost(st) && ki <= 0) {
-            send_to_char(ch, "You do not have enough stamina to perform it in this gravity!\r\n");
-            return 0;
-        }
-        if (GET_CHARGE(ch) < ki) {
-            send_to_char(ch, "You do not have enough ki charged.\r\n");
-            int64_t perc = GET_MAX_MANA(ch) * 0.01;
-            if (ki >= perc * 49) {
-                send_to_char(ch, "You need at least 50 percent charged.\r\n");
-            } else if (ki >= perc * 44) {
-                send_to_char(ch, "You need at least 45 percent charged.\r\n");
-            } else if (ki >= perc * 39) {
-                send_to_char(ch, "You need at least 40 percent charged.\r\n");
-            } else if (ki >= perc * 34) {
-                send_to_char(ch, "You need at least 35 percent charged.\r\n");
-            } else if (ki >= perc * 29) {
-                send_to_char(ch, "You need at least 30 percent charged.\r\n");
-            } else if (ki >= perc * 24) {
-                send_to_char(ch, "You need at least 25 percent charged.\r\n");
-            } else if (ki >= perc * 19) {
-                send_to_char(ch, "You need at least 20 percent charged.\r\n");
-            } else if (ki >= perc * 14) {
-                send_to_char(ch, "You need at least 15 percent charged.\r\n");
-            } else if (ki >= perc * 9) {
-                send_to_char(ch, "You need at least 10 percent charged.\r\n");
-            } else if (ki >= perc * 4) {
-                send_to_char(ch, "You need at least 5 percent charged.\r\n");
-            } else if (ki >= 1) {
-                send_to_char(ch, "You need at least 1 percent charged.\r\n");
-            }
-            fail = true;
-        }
-        if (IS_NONPTRANS(ch)) {
-            if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-                st -= st * 0.2;
-            } else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-                st -= st * 0.4;
-            } else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-                st -= st * 0.6;
-            } else if (PLR_FLAGGED(ch, PLR_TRANS4)) {
-                st -= st * 0.8;
-            }
-        }
-        if ((ch->getCurST()) < st) {
-            send_to_char(ch, "You do not have enough stamina.\r\n@C%s@n needed.\r\n", add_commas(st));
-            fail = true;
+            return false;
         }
     }
-    if (fail == true) {
-        return 0;
-    } else {
-        return 1;
+
+    if (GET_CHARGE(ch) < ki) {
+        send_to_char(ch, "You do not have enough ki charged.\r\n");
+        int64_t perc = GET_MAX_MANA(ch) * 0.01;
+        if (ki >= perc * 49) {
+            send_to_char(ch, "You need at least 50 percent charged.\r\n");
+        } else if (ki >= perc * 44) {
+            send_to_char(ch, "You need at least 45 percent charged.\r\n");
+        } else if (ki >= perc * 39) {
+            send_to_char(ch, "You need at least 40 percent charged.\r\n");
+        } else if (ki >= perc * 34) {
+            send_to_char(ch, "You need at least 35 percent charged.\r\n");
+        } else if (ki >= perc * 29) {
+            send_to_char(ch, "You need at least 30 percent charged.\r\n");
+        } else if (ki >= perc * 24) {
+            send_to_char(ch, "You need at least 25 percent charged.\r\n");
+        } else if (ki >= perc * 19) {
+            send_to_char(ch, "You need at least 20 percent charged.\r\n");
+        } else if (ki >= perc * 14) {
+            send_to_char(ch, "You need at least 15 percent charged.\r\n");
+        } else if (ki >= perc * 9) {
+            send_to_char(ch, "You need at least 10 percent charged.\r\n");
+        } else if (ki >= perc * 4) {
+            send_to_char(ch, "You need at least 5 percent charged.\r\n");
+        } else if (ki >= 1) {
+            send_to_char(ch, "You need at least 1 percent charged.\r\n");
+        }
+        fail = true;
     }
+    if (IS_NONPTRANS(ch)) {
+        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+            st -= st * 0.2;
+        } else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+            st -= st * 0.4;
+        } else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+            st -= st * 0.6;
+        } else if (PLR_FLAGGED(ch, PLR_TRANS4)) {
+            st -= st * 0.8;
+        }
+    }
+    auto ratio = ch->getBurdenRatio();
+    // increase the stamina costs by ratio. Ratio can be 0.0 to 1.0 or more.
+    // If ratio is 0, then no change. If ratio is 1.0, then double the cost.
+    st += st * ratio;
+
+    if ((ch->getCurST()) < st) {
+        send_to_char(ch, "You do not have enough stamina.\r\n@C%s@n needed.\r\n", add_commas(st));
+        fail = true;
+    }
+
+    return !fail;
 }
 
 /* Subtract the stamina or ki required */
 void pcost(struct char_data *ch, double ki, int64_t st) {
+    if (IS_NPC(ch)) {
+        if(ki) ch->decCurKI(ki);
+        if(st) ch->decCurST(st);
+        return;
+    }
+
     int before = 0;
     if (GET_LEVEL(ch) > 1 && !IS_NPC(ch)) {
         if (ki == 0) {
             before = (ch->getCurST());
-            if (ch->calcGravCost(0)) {
-                if (before > (ch->getCurST())) {
-                    send_to_char(ch, "You exert more stamina in this gravity.\r\n");
-                }
-            }
         }
         if (GET_CHARGE(ch) <= (GET_MAX_MANA(ch) * ki)) {
             GET_CHARGE(ch) = 0;
@@ -4288,10 +4150,8 @@ void pcost(struct char_data *ch, double ki, int64_t st) {
                 st -= st * 0.8;
             }
         }
-        ch->decCurST(st);
-    }
-    if (IS_NPC(ch)) {
-        ch->decCurKI(ki);
+        auto ratio = ch->getBurdenRatio();
+        st += st * ratio;
         ch->decCurST(st);
     }
 }

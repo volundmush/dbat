@@ -963,7 +963,6 @@ nlohmann::json skill_data::serialize() {
     nlohmann::json j = nlohmann::json::object();
 
     if(level) j["level"] = level;
-    if(mods) j["mods"] = mods;
     if(perfs) j["perfs"] = perfs;
 
     return j;
@@ -971,7 +970,6 @@ nlohmann::json skill_data::serialize() {
 
 void skill_data::deserialize(const nlohmann::json &j) {
     if(j.contains("level")) level = j["level"];
-    if(j.contains("mods")) mods = j["mods"];
     if(j.contains("perfs")) perfs = j["perfs"];
 }
 
@@ -1173,4 +1171,19 @@ affected_type::affected_type(const nlohmann::json &j) {
     if(j.contains("location")) location = j["location"];
     if(j.contains("specific")) specific = j["specific"];
     if(j.contains("bitvector")) bitvector = j["bitvector"];
+}
+
+double char_data::getWeight(bool base) {
+    double total = 0;
+    if(!IS_NPC(this)) {
+        total += GET_PC_WEIGHT(this);
+    } else {
+        total += weight;
+    }
+    if(!base) total += getAffectModifier(APPLY_CHAR_WEIGHT);
+    return total;
+}
+
+double char_data::getTotalWeight() {
+    return getWeight() + getCarriedWeight();
 }

@@ -175,6 +175,7 @@ void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *ms
         case APPLY_RACE:
         case APPLY_ALL_STATS:
         case APPLY_RESISTANCE:
+        case APPLY_SKILL:
             break;
 
         case APPLY_AGE:
@@ -224,10 +225,6 @@ void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *ms
 
         case APPLY_WILL:
             GET_SAVE_MOD(ch, SAVING_WILL) += mod;
-            break;
-
-        case APPLY_SKILL:
-            SET_SKILL_BONUS(ch, spec, GET_SKILL_BONUS(ch, spec) + mod);
             break;
 
         case APPLY_FEAT:
@@ -542,8 +539,6 @@ void obj_to_char(struct obj_data *object, struct char_data *ch) {
         ch->contents = object;
         object->carried_by = ch;
         IN_ROOM(object) = NOWHERE;
-        IS_CARRYING_W(ch) += GET_OBJ_WEIGHT(object);
-        IS_CARRYING_N(ch)++;
         if ((GET_KAIOKEN(ch) <= 0 && !AFF_FLAGGED(ch, AFF_METAMORPH)) && !OBJ_FLAGGED(object, ITEM_THROW)) {
 
         } else if (GET_HIT(ch) > (ch->getEffMaxPL())) {
@@ -582,9 +577,6 @@ void obj_from_char(struct obj_data *object) {
         SET_BIT_AR(PLR_FLAGS(object->carried_by), PLR_CRASH);
 
     int64_t previous = (object->carried_by->getEffMaxPL());
-
-    IS_CARRYING_W(object->carried_by) -= GET_OBJ_WEIGHT(object);
-    IS_CARRYING_N(object->carried_by)--;
 
     if (GET_OBJ_VAL(object, 0) != 0) {
         if (GET_OBJ_VNUM(object) == 16705 || GET_OBJ_VNUM(object) == 16706 || GET_OBJ_VNUM(object) == 16707) {
@@ -967,8 +959,6 @@ void obj_to_obj(struct obj_data *obj, struct obj_data *obj_to) {
 
         /* top level object.  Subtract weight from inventory if necessary. */
         GET_OBJ_WEIGHT(tmp_obj) += GET_OBJ_WEIGHT(obj);
-        if (tmp_obj->carried_by)
-            IS_CARRYING_W(tmp_obj->carried_by) += GET_OBJ_WEIGHT(obj);
     }
     if (IN_ROOM(obj_to) != NOWHERE && ROOM_FLAGGED(IN_ROOM(obj_to), ROOM_SAVE)) {
         dirty_rooms.insert(IN_ROOM(obj_to));;
@@ -997,8 +987,6 @@ void obj_from_obj(struct obj_data *obj) {
 
         /* Subtract weight from char that carries the object */
         GET_OBJ_WEIGHT(temp) -= GET_OBJ_WEIGHT(obj);
-        if (temp->carried_by)
-            IS_CARRYING_W(temp->carried_by) -= GET_OBJ_WEIGHT(obj);
     }
 
     if (IN_ROOM(obj_from) != NOWHERE && ROOM_FLAGGED(IN_ROOM(obj_from), ROOM_SAVE)) {

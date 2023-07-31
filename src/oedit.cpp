@@ -1292,7 +1292,7 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
             }
 
         case OEDIT_WEIGHT:
-            GET_OBJ_WEIGHT(OLC_OBJ(d)) = LIMIT(atoi(arg), 0, MAX_OBJ_WEIGHT);
+            GET_OBJ_WEIGHT(OLC_OBJ(d)) = std::clamp(atoll(arg), 0LL, MAX_OBJ_WEIGHT);
             break;
 
         case OEDIT_COST:
@@ -1350,7 +1350,7 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
                     GET_OBJ_VAL(OLC_OBJ(d), 0) = LIMIT(atoi(arg), WEAPON_TYPE_UNARMED, MAX_WEAPON_TYPES);
                     break;
                 case ITEM_CONTAINER:
-                    GET_OBJ_VAL(OLC_OBJ(d), 0) = LIMIT(atoi(arg), -1, MAX_CONTAINER_SIZE);
+                    GET_OBJ_VAL(OLC_OBJ(d), 0) = std::clamp<int64_t>(atoll(arg), -1, MAX_CONTAINER_SIZE);
                     break;
                 default:
                     GET_OBJ_VAL(OLC_OBJ(d), 0) = atoi(arg);

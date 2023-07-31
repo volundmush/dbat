@@ -204,7 +204,7 @@ static int pick_n_throw(struct char_data *ch, char *buf) {
 
 
     for (cont = world[IN_ROOM(ch)].contents; cont; cont = cont->next_content) {
-        if (GET_OBJ_WEIGHT(cont) <= CAN_CARRY_W(ch) + IS_CARRYING_W(ch)) {
+        if (ch->canCarryWeight(cont)) {
             sprintf(buf2, "%s", cont->name);
             do_get(ch, buf2, 0, 0);
             sprintf(buf3, "%s %s", buf2, buf);
@@ -1555,7 +1555,7 @@ static void make_pcorpse(struct char_data *ch) {
     GET_OBJ_VAL(corpse, VAL_CONTAINER_CAPACITY) = 0;      /* You can't store stuff in a corpse */
     GET_OBJ_VAL(corpse, VAL_CONTAINER_CORPSE) = 1;        /* corpse identifier */
     GET_OBJ_VAL(corpse, VAL_CONTAINER_OWNER) = ch->id;  /* corpse identifier */
-    GET_OBJ_WEIGHT(corpse) = GET_PC_WEIGHT(ch) + IS_CARRYING_W(ch);
+    GET_OBJ_WEIGHT(corpse) = ch->getTotalWeight();
     GET_OBJ_RENT(corpse) = 100000;
     GET_OBJ_TIMER(corpse) = CONFIG_MAX_PC_CORPSE_TIME;
     SET_BIT_AR(GET_OBJ_EXTRA(corpse), ITEM_UNIQUE_SAVE);
@@ -1775,7 +1775,7 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
     GET_OBJ_VAL(corpse, VAL_CONTAINER_CAPACITY) = 0;    /* You can't store stuff in a corpse */
     GET_OBJ_VAL(corpse, VAL_CONTAINER_CORPSE) = 1;    /* corpse identifier */
     GET_OBJ_VAL(corpse, VAL_CONTAINER_OWNER) = -1;    /* corpse identifier */
-    GET_OBJ_WEIGHT(corpse) = GET_PC_WEIGHT(ch) + IS_CARRYING_W(ch);
+    GET_OBJ_WEIGHT(corpse) = ch->getTotalWeight();
     GET_OBJ_RENT(corpse) = 100000;
     if (IS_NPC(ch))
         GET_OBJ_TIMER(corpse) = CONFIG_MAX_NPC_CORPSE_TIME;
@@ -1825,8 +1825,6 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
     }
     if (!MOB_FLAGGED(ch, MOB_HUSK)) {
         ch->contents = nullptr;
-        IS_CARRYING_N(ch) = 0;
-        IS_CARRYING_W(ch) = 0;
     }
     obj_to_room(corpse, IN_ROOM(ch));
 
@@ -2510,9 +2508,8 @@ void solo_gain(struct char_data *ch, struct char_data *victim) {
             ch = GET_ORIGINAL(ch);
         }
     }
-    int64_t exp;
+    int64_t exp = MIN(2000000, GET_EXP(victim));
 
-    exp = MIN(2000000, GET_EXP(victim));
 
     /* Calculate level-difference penalty */
     if (!IS_NPC(ch)) {

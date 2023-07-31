@@ -844,13 +844,13 @@ static void shopping_buy(char *arg, struct char_data *ch, struct char_data *keep
         send_to_char(ch, "%s: You can't carry any more items.\r\n", fname(obj->name));
         return;
     }
-    if (IS_CARRYING_W(ch) + GET_OBJ_WEIGHT(obj) > CAN_CARRY_W(ch)) {
+    if (!ch->canCarryWeight(obj)) {
         send_to_char(ch, "%s: You can't carry that much weight.\r\n", fname(obj->name));
         return;
     }
     while (obj && (GET_GOLD(ch) >= buy_price(obj, shop_nr, keeper, ch) || ADM_FLAGGED(ch, ADM_MONEY))
            && IS_CARRYING_N(ch) < CAN_CARRY_N(ch) && bought < buynum
-           && IS_CARRYING_W(ch) + GET_OBJ_WEIGHT(obj) <= CAN_CARRY_W(ch)) {
+           && ch->canCarryWeight(obj)) {
         int charged;
 
         bought++;
@@ -890,7 +890,7 @@ static void shopping_buy(char *arg, struct char_data *ch, struct char_data *keep
             snprintf(buf, sizeof(buf), "%s You can only afford %d.", GET_NAME(ch), bought);
         else if (IS_CARRYING_N(ch) >= CAN_CARRY_N(ch))
             snprintf(buf, sizeof(buf), "%s You can only hold %d.", GET_NAME(ch), bought);
-        else if (IS_CARRYING_W(ch) + GET_OBJ_WEIGHT(obj) > CAN_CARRY_W(ch))
+        else if (!ch->canCarryWeight(obj))
             snprintf(buf, sizeof(buf), "%s You can only carry %d.", GET_NAME(ch), bought);
         else
             snprintf(buf, sizeof(buf), "%s Something screwy only gave you %d.", GET_NAME(ch), bought);

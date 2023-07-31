@@ -2462,11 +2462,8 @@ static int can_take_obj(struct char_data *ch, struct obj_data *obj) {
     } else if (IS_CARRYING_N(ch) >= CAN_CARRY_N(ch)) {
         act("$p: your arms are full!", false, ch, obj, nullptr, TO_CHAR);
         return (0);
-    } else if (((ch->getCurCarriedWeight()) + GET_OBJ_WEIGHT(obj)) > CAN_CARRY_W(ch)) {
+    } else if (!ch->canCarryWeight(obj)) {
         act("$p: you can't carry that much weight.", false, ch, obj, nullptr, TO_CHAR);
-        return (0);
-    } else if ((GET_OBJ_WEIGHT(obj) + ROOM_GRAVITY(IN_ROOM(ch))) + (ch->getCurCarriedWeight()) > CAN_CARRY_W(ch)) {
-        act("$p: you can't carry that much weight because of the gravity.", false, ch, obj, nullptr, TO_CHAR);
         return (0);
     }
     return (1);
@@ -3128,7 +3125,7 @@ static void perform_give(struct char_data *ch, struct char_data *vict,
         do_say(vict, "I don't want that piece of junk.", 0, 0);
         return;
     }
-    if (GET_OBJ_WEIGHT(obj) + (vict->getCurCarriedWeight()) > CAN_CARRY_W(vict)) {
+    if (!vict->canCarryWeight(obj)) {
         act("$E can't carry that much weight.", false, ch, nullptr, vict, TO_CHAR);
         if (IS_NPC(ch)) {
             act("$n@n drops $p because you can't carry anymore.", true, ch, obj, vict, TO_VICT);
@@ -3138,7 +3135,7 @@ static void perform_give(struct char_data *ch, struct char_data *vict,
         }
         return;
     }
-    if ((GET_OBJ_WEIGHT(obj) + ROOM_GRAVITY(IN_ROOM(vict))) + (vict->getCurCarriedWeight()) > CAN_CARRY_W(vict)) {
+    if (!vict->canCarryWeight(obj)) {
         act("$E can't carry that much weight because of the gravity.", false, ch, nullptr, vict, TO_CHAR);
         if (IS_NPC(ch)) {
             act("$n@n drops $p because you can't carry anymore.", true, ch, obj, vict, TO_VICT);

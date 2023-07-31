@@ -478,3 +478,21 @@ void obj_data::deserializeContents(const nlohmann::json &j, bool isActive) {
         obj_to_obj(obj, this);
     }
 }
+
+int obj_data::getAffectModifier(int location, int specific) {
+    int modifier = 0;
+    for(auto &aff : affected) {
+        if(aff.location == location && (specific == -1 || aff.specific == specific)) {
+            modifier += aff.modifier;
+        }
+    }
+    return modifier;
+}
+
+weight_t obj_data::getWeight() {
+    return weight;
+}
+
+weight_t obj_data::getTotalWeight() {
+    return getWeight() + getInventoryWeight() + (sitting ? sitting->getTotalWeight() : 0);
+}

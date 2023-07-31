@@ -2,18 +2,18 @@
 
 process_running() {
   if ps -p $(cat $1.pid) > /dev/null; then
-    return 1
-  else
     return 0
+  else
+    return 1
   fi
 }
 
 start_thermite() {
-  nohup thermite/release/thermite &> thermite.log < /dev/null & echo $! > thermite.pid
+  nohup ./thermite/release/thermite &> thermite.log < /dev/null & echo $! > thermite.pid
 }
 
 start_server() {
-  nohup bin/circle &> server.log < /dev/null & echo $! > server.pid
+  nohup ./dbat &
 }
 
 start_game() {
@@ -59,6 +59,7 @@ restart_game() {
       fi
 
     if(process_running "server"); then
+        echo "Restarting server..."
         kill -HUP $(cat server.pid)
     else
         echo "Starting server..."

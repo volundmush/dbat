@@ -622,8 +622,8 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define GET_INGESTLEARNED(ch) ((ch)->ingestLearned)
 #define GET_POS(ch)        ((ch)->position)
 #define GET_IDNUM(ch)        ((ch)->id)
-#define IS_CARRYING_W(ch)    ((ch)->carry_weight)
-#define IS_CARRYING_N(ch)    ((ch)->carry_items)
+#define IS_CARRYING_W(ch)    ((ch)->getCarriedWeight())
+#define IS_CARRYING_N(ch)    ((ch)->getInventoryCount())
 #define FIGHTING(ch)        ((ch)->fighting)
 #define GET_POWERATTACK(ch)    ((ch)->powerattack)
 #define GET_GROUPKILLS(ch)    ((ch)->combatexpertise)
@@ -859,9 +859,7 @@ void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val);
 #define CAN_SEE_OBJ(sub, obj) \
    (MORT_CAN_SEE_OBJ(sub, obj) || (!IS_NPC(sub) && PRF_FLAGGED((sub), PRF_HOLYLIGHT)))
 
-#define CAN_CARRY_OBJ(ch, obj)  \
-   (((IS_CARRYING_W(ch) + GET_OBJ_WEIGHT(obj)) <= CAN_CARRY_W(ch)) &&   \
-    ((IS_CARRYING_N(ch) + 1) <= CAN_CARRY_N(ch)))
+#define CAN_CARRY_OBJ(ch, obj) ((ch)->canCarryWeight((obj)) && ((IS_CARRYING_N(ch) + 1) <= CAN_CARRY_N(ch)))
 
 #define CAN_GET_OBJ(ch, obj)   \
    (CAN_WEAR((obj), ITEM_WEAR_TAKE) && !SITTING(obj) && CAN_CARRY_OBJ((ch),(obj)) && \
