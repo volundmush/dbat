@@ -1187,3 +1187,24 @@ double char_data::getWeight(bool base) {
 double char_data::getTotalWeight() {
     return getWeight() + getCarriedWeight();
 }
+
+std::string char_data::getUID() {
+    return fmt::format("#C{}:{}", id, generation);
+}
+
+bool char_data::isActive() {
+    if(IS_NPC(this)) {
+        return id != NOTHING;
+    }
+    return desc != nullptr;
+}
+
+nlohmann::json char_data::serializeLocation() {
+    auto j = nlohmann::json::object();
+    j["in_room"] = in_room;
+    if(!IS_NPC(this)) {
+        if(was_in_room != NOWHERE) j["was_in_room"] = was_in_room;
+    }
+
+    return j;
+}

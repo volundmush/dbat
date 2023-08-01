@@ -2185,7 +2185,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
             if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_ROOMFLAGS)) {
                 send_to_char(ch, "[%d] ", GET_OBJ_VNUM(obj));
                 if (SCRIPT(obj))
-                    send_to_char(ch, "[T%d] ", obj->scriptString().c_str());
+                    send_to_char(ch, "%s ", obj->scriptString().c_str());
             }
 
             if (PRF_FLAGGED(ch, PRF_IHEALTH)) {
@@ -8186,4 +8186,49 @@ static void search_in_direction(struct char_data *ch, int dir) {
             send_to_char(ch, "There is no exit there.\r\n");
     } else
         send_to_char(ch, "There is no exit there.\r\n");
+}
+
+ACMD(do_oaffects) {
+    char arg[MAX_INPUT_LENGTH];
+    one_argument(argument, arg);
+
+    if(!*arg) {
+        send_to_char(ch, "You must specify a target location.\r\n");
+        return;
+    }
+
+    int location = -1;
+    int i = 0;
+    while(strcasecmp(apply_types[i], "\n")) {
+        if(!strcasecmp(apply_types[i], arg)) {
+            location = i;
+            break;
+        }
+        i++;
+    }
+
+    if(location == -1) {
+        send_to_char(ch, "That is not a valid apply location.\r\n");
+        return;
+    }
+
+    send_to_char(ch, "Affects for %s:\r\n", apply_types[location]);
+    int counter = 0;
+    for(auto &[vn, o] : obj_proto) {
+        bool found = false;
+        for(auto &aff : o.affected) {
+            if(aff.location == location) {
+                found = true;
+                break;
+            }
+        }
+        if(!found) continue;
+        send_to_char(ch, "[%d] %s\r\n", vn, o.short_description);
+        counter++;
+
+    }
+    if(!counter) {
+        send_to_char(ch, "None.\r\n");
+    }
+
 }

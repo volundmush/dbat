@@ -12,6 +12,7 @@
 #include "dbat/handler.h"
 #include "dbat/dg_olc.h"
 #include "dbat/shop.h"
+#include "dbat/objsave.h"
 
 static int copy_object_main(struct obj_data *to, struct obj_data *from, int free_object);
 
@@ -495,4 +496,69 @@ weight_t obj_data::getWeight() {
 
 weight_t obj_data::getTotalWeight() {
     return getWeight() + getInventoryWeight() + (sitting ? sitting->getTotalWeight() : 0);
+}
+
+std::string obj_data::getUID() {
+    return fmt::format("#O{}:{}", id, generation);
+}
+
+bool obj_data::isActive() {
+    if(id == NOTHING) return false;
+    if(in_obj) return in_obj->isActive();
+    if(carried_by) return carried_by->isActive();
+    if(worn_by) return worn_by->isActive();
+    return world.contains(in_room);
+}
+
+nlohmann::json obj_data::serializeLocation() {
+    auto j = nlohmann::json::array();
+    if(in_obj) {
+        j.push_back(in_obj->getUID());
+    } else if(carried_by) {
+        j.push_back(carried_by->getUID());
+    } else if(worn_by) {
+        j.push_back(worn_by->getUID());
+    } else if(world.contains(in_room)) {
+        j.push_back(world[in_room].getUID());
+    }
+    j.push_back(worn_on);
+    return j;
+}
+
+nlohmann::json obj_data::serializeRelations() {
+    auto j = nlohmann::json::object();
+
+    if(posted_to) j["posted_to"] = posted_to->getUID();
+    if(fellow_wall) j["fellow_wall"] = fellow_wall->getUID();
+
+    return j;
+}
+
+void obj_data::deserializeLocation(const nlohmann::json& j) {
+    if(j.size() == 2) {
+        auto check = resolveUID(j[0]);
+        if(!check) return;
+        auto idx = check->index();
+        if(idx == 0) {
+            auto &r = std::get<0>(*check);
+            obj_to_room(this, r->vn);
+        } else if(idx == 1) {
+            obj_to_obj(this, std::get<1>(*check));
+        } else if(idx == 2) {
+            auto &c = std::get<2>(*check);
+            auto loc = j[1].get<int>();
+            auto_equip(c, this, loc);
+        }
+    }
+}
+
+void obj_data::deserializeRelations(const nlohmann::json& j) {
+    if(j.contains("posted_to")) {
+        auto check = resolveUID(j["posted_to"]);
+        if(check) posted_to = std::get<1>(*check);
+    }
+    if(j.contains("fellow_wall")) {
+        auto check = resolveUID(j["fellow_wall"]);
+        if(check) fellow_wall = std::get<1>(*check);
+    }
 }

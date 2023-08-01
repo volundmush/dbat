@@ -4,9 +4,10 @@
 # If circle exits and returns anything except a straight 0, then the process is restarted.
 
 while true; do
-    ./bin/circle > server.log < /dev/null
-    exit_status=$?
+    nohup ./bin/circle > server.log < /dev/null &
     echo $! > server.pid
+    wait $!
+    exit_status=$?
     if [ $exit_status -eq 0 ]; then
         exit 0
     fi

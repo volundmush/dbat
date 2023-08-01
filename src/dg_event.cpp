@@ -5,7 +5,7 @@
 std::set<struct trig_data*> triggers_waiting;
 
 /* Process any events whose time has come. */
-void event_process(double deltaTime) {
+void event_process(uint64_t heart_pulse, double deltaTime) {
     // copy the queue to avoid any issues with the queue being modified while we're processing it
     auto queued = triggers_waiting;
 

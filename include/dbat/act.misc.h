@@ -4,9 +4,9 @@
 
 extern void handle_multi_merge(struct char_data *form);
 
-extern void handle_songs(void);
+extern void handle_songs(uint64_t heartPulse, double deltaTime);
 
-extern void fish_update(void);
+extern void fish_update(uint64_t heartPulse, double deltaTime);
 
 extern void disp_rpp_store(struct char_data *ch);
 

@@ -121,3 +121,5 @@ extern ACMD(do_scan);
 extern ACMD(do_toplist);
 
 extern ACMD(do_whois);
+
+extern ACMD(do_oaffects);

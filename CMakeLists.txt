@@ -71,14 +71,16 @@ set(CIRCLE_LINK_LIBRARIES
         )
 
 # this is the core library we're making.
-add_library(circlemud ${CIRCLE_INCLUDE} ${CIRCLE_SRC})
+add_library(circlemud ${CIRCLE_INCLUDE} ${CIRCLE_SRC}
+        src/transformation.cpp)
 # everything we make will link to it.
 target_link_libraries(circlemud ${CIRCLE_LINK_LIBRARIES})
 target_compile_definitions(circlemud PUBLIC USING_CMAKE=1 CIRCLE_UNIX=1 POSIX=1)
 target_include_directories(circlemud PUBLIC ${CIRCLE_INCLUDE_DIRS})
 
 # the various binaries
-add_executable(circle apps/circle.cpp)
+add_executable(circle apps/circle.cpp
+        include/dbat/transformation.h)
 target_link_libraries(circle circlemud ${CIRCLE_LINK_LIBRARIES})
 target_include_directories(circle PUBLIC ${CIRCLE_INCLUDE_DIRS})
 

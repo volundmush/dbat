@@ -1074,7 +1074,7 @@ const char *apply_types[NUM_APPLIES + 1] = {
         "WIS",
         "CON",
         "SPD",
-        "CLASS",
+        "SPIRIT",
         "LEVEL",
         "AGE",
         "CHAR_WEIGHT",

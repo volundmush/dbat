@@ -1181,7 +1181,7 @@ const struct command_info cmd_info[] = {
         {"notitle",       "notitle",      POS_DEAD,     do_wizutil,         0,  ADMLVL_GOD,     SCMD_NOTITLE},
         {"nova",          "nov",          POS_STANDING, do_nova,            0,  ADMLVL_NONE,    0},
         {"nowiz",         "nowiz",        POS_DEAD,     do_gen_tog,         0,  ADMLVL_IMMORT,  SCMD_NOWIZ},
-
+        {"oaffects",          "oaf",          POS_DEAD,     do_oaffects,            0,  ADMLVL_BUILDER, 0},
         /*{ "ocopy"    , "ocopy"	, POS_DEAD    , do_oasis_copy, 0, ADMLVL_GOD	, SCMD_OEDIT },*/
         {"ooc",           "ooc",          POS_SLEEPING, do_gen_comm,        0,  ADMLVL_NONE,    SCMD_GOSSIP},
         {"offer",         "off",          POS_STANDING, do_not_here,        1,  ADMLVL_NONE,    0},

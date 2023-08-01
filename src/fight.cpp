@@ -787,7 +787,7 @@ struct attack_hit_type attack_hit_text[NUM_ATTACK_TYPES] =
 #define IS_WEAPON(type) (((type) >= TYPE_HIT) && ((type) < TYPE_SUFFERING))
 
 /* The Fight related routines */
-void fight_stack() {
+void fight_stack(uint64_t heartPulse, double deltaTime) {
     int perc = 0;
     struct char_data *ch;
     struct char_data *tch;

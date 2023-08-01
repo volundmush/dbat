@@ -14,7 +14,7 @@
 #include "structs.h"
 
 /* combat.c functions */
-extern void homing_update();
+extern void homing_update(uint64_t heartPulse, double deltaTime);
 
 extern void damage_weapon(struct char_data *ch, struct obj_data *obj, struct char_data *vict);
 
@@ -55,7 +55,7 @@ extern int64_t damtype(struct char_data *ch, int type, int skill, double percent
 
 extern int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj, int num);
 
-extern void huge_update();
+extern void huge_update(uint64_t heartPulse, double deltaTime);
 
 extern int init_skill(struct char_data *ch, int snum);
 

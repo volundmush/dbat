@@ -587,7 +587,7 @@ void clanINFOW(char *name, struct char_data *ch) {
     }
 }
 
-void clan_update() {
+void clan_update(uint64_t heartPulse, double deltaTime) {
     int i;
 
     if (num_clans < 1) {

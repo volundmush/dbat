@@ -941,7 +941,7 @@ SPECIAL(cryogenicist) {
 }
 
 
-void Crash_save_all() {
+void Crash_save_all(uint64_t heartPulse, double deltaTime) {
     struct descriptor_data *d;
     for (d = descriptor_list; d; d = d->next) {
         if ((STATE(d) == CON_PLAYING) && !IS_NPC(d->character)) {

@@ -58,7 +58,7 @@ extern void House_listrent(struct char_data *ch, room_vnum vnum);
 
 extern void House_boot(bool legacy);
 
-extern void House_save_all();
+extern void House_save_all(uint64_t heartPulse, double deltaTime);
 
 extern int House_can_enter(struct char_data *ch, room_vnum house);
 

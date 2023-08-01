@@ -14,11 +14,11 @@ extern int dball_count(struct char_data *ch);
 
 extern void log_custom(struct descriptor_data *d, struct obj_data *obj);
 
-extern void wishSYS();
+extern void wishSYS(uint64_t heartPulse, double deltaTime);
 
 extern void bring_to_cap(struct char_data *ch);
 
-extern void base_update();
+extern void base_update(uint64_t heartPulse, double deltaTime);
 
 extern void load_shadow_dragons();
 

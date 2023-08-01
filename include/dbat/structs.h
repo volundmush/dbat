@@ -104,9 +104,9 @@ struct obj_affected_type {
     explicit obj_affected_type(const nlohmann::json& j);
     void deserialize(const nlohmann::json& j);
     nlohmann::json serialize();
-    int location;       /* Which ability to change (APPLY_XXX) */
-    int specific;       /* Some locations have parameters      */
-    int64_t modifier;       /* How much it changes by              */
+    int location{};       /* Which ability to change (APPLY_XXX) */
+    int specific{};       /* Some locations have parameters      */
+    double modifier{};       /* How much it changes by              */
 };
 
 struct obj_spellbook_spell {
@@ -131,7 +131,8 @@ struct unit_data {
     weight_t getInventoryWeight();
     int64_t getInventoryCount();
 
-    int64_t id{}; /* used by DG triggers	*/
+    int64_t id{NOTHING}; /* used by DG triggers	*/
+    time_t generation{};             /* creation time for dupe check     */
 
     nlohmann::json serializeUnit();
     nlohmann::json serializeContents();
@@ -141,6 +142,12 @@ struct unit_data {
 
     void deserializeUnit(const nlohmann::json& j);
     std::string scriptString();
+
+    virtual std::string getUID() = 0;
+    virtual bool isActive() = 0;
+
+    nlohmann::json serializeScripts();
+    void deserializeScripts();
 
 };
 
@@ -154,6 +161,12 @@ struct obj_data : public unit_data {
     nlohmann::json serializeInstance();
     nlohmann::json serializeProto();
 
+    nlohmann::json serializeLocation();
+    nlohmann::json serializeRelations();
+
+    void deserializeLocation(const nlohmann::json& j);
+    void deserializeRelations(const nlohmann::json& j);
+
     void deserializeBase(const nlohmann::json& j);
     void deserializeProto(const nlohmann::json& j);
     void deserializeInstance(const nlohmann::json& j, bool isActive);
@@ -164,6 +177,9 @@ struct obj_data : public unit_data {
     void deactivate();
 
     int getAffectModifier(int location, int specific);
+
+    std::string getUID() override;
+    bool isActive() override;
 
 
     room_rnum in_room{NOWHERE};        /* In what room -1 when conta/carr	*/
@@ -190,8 +206,6 @@ struct obj_data : public unit_data {
     struct char_data *worn_by{};      /* Worn by? */
     int16_t worn_on{-1};          /* Worn where?		      */
 
-    time_t generation{};             /* creation time for dupe check     */
-
     struct obj_data *next_content{}; /* For 'contains' lists             */
     struct obj_data *next{};         /* For the object list              */
 
@@ -206,8 +220,8 @@ struct obj_data : public unit_data {
     struct char_data *target{};
     int distance{};
     int foob{};
-    int32_t aucter{};
-    int32_t curBidder{};
+    int64_t aucter{};
+    int64_t curBidder{};
     time_t aucTime{};
     int bid{};
     int startbid{};
@@ -276,7 +290,8 @@ struct room_data : public unit_data {
     void deserializeContents(const nlohmann::json& j, bool isActive);
 
     std::optional<vnum> getMatchingArea(std::function<bool(const area_data&)> f);
-
+    std::string getUID() override;
+    bool isActive() override;
 };
 /* ====================================================================== */
 
@@ -388,7 +403,7 @@ struct affected_type {
     explicit affected_type(const nlohmann::json& j);
     int16_t type{};          /* The type of spell that caused this      */
     int16_t duration{};      /* For how long its effects will last      */
-    int64_t modifier{};         /* This is added to apropriate ability     */
+    double modifier{};         /* This is added to apropriate ability     */
     int location{};         /* Tells which ability to change(APPLY_XXX)*/
     int specific{};         /* Some locations have parameters          */
     bitvector_t bitvector{}; /* Tells which bits to set (AFF_XXX) */
@@ -446,6 +461,16 @@ struct char_data : public unit_data {
     std::optional<vnum> getMatchingArea(std::function<bool(const area_data&)> f);
     void login();
 
+    nlohmann::json serializeLocation();
+    nlohmann::json serializeRelations();
+
+    void deserializeLocation(const nlohmann::json& j);
+    void deserializeRelations(const nlohmann::json& j);
+
+    std::string getUID() override;
+
+    bool isActive() override;
+
     // Prototype-relevant fields below...
     char *title{};            /* PC / NPC's title                     */
     int size{SIZE_UNDEFINED};            /* Size class of char                   */
@@ -482,7 +507,6 @@ struct char_data : public unit_data {
 
 
     // Instance-relevant fields below...
-    time_t generation{};             /* creation time for dupe check     */
     room_vnum in_room{NOWHERE};        /* Location (real room number)		*/
     room_vnum was_in_room{NOWHERE};    /* location for linkdead people		*/
     int wait{};            /* wait for how many loops		*/
@@ -1262,3 +1286,4 @@ struct aging_data {
 #ifdef MEMORY_DEBUG
 #include "zmalloc.h"
 #endif
+

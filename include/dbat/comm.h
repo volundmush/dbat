@@ -90,7 +90,7 @@ extern void string_write(struct descriptor_data *d, char **txt, size_t len, long
 extern void show_help(std::shared_ptr<net::Connection>& co, const char *entry);
 
 /* variables */
-extern unsigned long pulse;
+extern uint64_t pulse;
 extern FILE *logfile;
 extern int circle_shutdown, circle_reboot;
 extern socklen_t mother_desc;
@@ -106,21 +106,11 @@ extern char *ANSI[];
 // functions
 extern void free_user(struct descriptor_data *d);
 
-extern void reread_wizlists(int sig);
-
-extern void unrestrict_game(int sig);
-
-extern void reap(int sig);
-
-extern void checkpointing(int sig);
-
-extern void hupsig(int sig);
-
 extern void init_game();
 
 extern int process_output(struct descriptor_data *t);
 
-extern void record_usage();
+extern void record_usage(uint64_t heartPulse, double deltaTime);
 
 extern char *make_prompt(struct descriptor_data *point);
 

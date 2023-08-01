@@ -36,7 +36,7 @@ extern int Crash_load(struct char_data *ch);
 
 extern void Crash_crashsave(struct char_data *ch);
 
-extern void Crash_save_all();
+extern void Crash_save_all(uint64_t heartPulse, double deltaTime);
 
 extern SPECIAL(receptionist);
 

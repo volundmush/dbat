@@ -19,4 +19,4 @@ extern std::set<struct trig_data*> triggers_waiting;
 
 /********** Event related section *********/
 /* - events - function protos need by other modules */
-extern void event_process(double deltaTime);
+extern void event_process(uint64_t heart_pulse, double deltaTime);

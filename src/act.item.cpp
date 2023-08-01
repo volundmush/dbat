@@ -1095,7 +1095,7 @@ static void start_auction(struct char_data *ch, struct obj_data *obj, int bid) {
     aucstat = AUC_OFFERING;
 }
 
-void check_auction() {
+void check_auction(uint64_t heartPulse, double deltaTime) {
     switch (aucstat) {
         case AUC_NULL_STATE:
             return;
@@ -1222,7 +1222,7 @@ void check_auction() {
     }
 }
 
-void dball_load() {
+void dball_load(uint64_t heartPulse, double deltaTime) {
     int found1 = false, found2 = false, found3 = false;
     int found4 = false, found5 = false, load = false, num = -1;
     int found6 = false, found7 = false, room = 0, loaded = false;

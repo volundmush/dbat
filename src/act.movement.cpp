@@ -578,11 +578,10 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
             ((group_bonus(ch, 2) != 10 && (ch->getCurKI()) < GET_MAX_MANA(ch) / 200) || (group_bonus(ch, 2) == 10 &&
                                                                                          (ch->getCurKI()) <
                                                                                          GET_MAX_MANA(ch) / 800))) {
-            if (GET_HIT(ch) >= GET_MAX_HIT(ch) / 20) {
+            if (ch->decCurHealthPercent(0.05) > 0) {
                 send_to_char(ch, "@RYou struggle to breath!@n\r\n");
-                ch->decCurHealth(ch->getMaxPL() / 20);
             }
-            if (GET_HIT(ch) < GET_MAX_HIT(ch) / 20) {
+            else {
                 send_to_char(ch, "@rYou drown!@n\r\n");
                 die(ch, nullptr);
                 return (0);
@@ -2339,8 +2338,8 @@ static void autochair(struct char_data *ch, struct obj_data *chair) {
     if (CAN_WEAR(chair, ITEM_WEAR_TAKE) && GET_OBJ_TYPE(chair) != ITEM_CHAIR && ch->canCarryWeight(chair)) {
         obj_from_room(chair);
         obj_to_char(chair, ch);
-        act("You pick up $p.", true, ch, SITS(ch), nullptr, TO_CHAR);
-        act("$n picks up $p.", true, ch, SITS(ch), nullptr, TO_ROOM);
+        act("You pick up $p.", true, ch, chair, nullptr, TO_CHAR);
+        act("$n picks up $p.", true, ch, chair, nullptr, TO_ROOM);
     }
 }
 

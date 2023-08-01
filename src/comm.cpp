@@ -65,7 +65,7 @@ int8_t reread_wizlist;        /* signal: SIGUSR1 */
 int8_t emergency_unban;        /* signal: SIGUSR2 */
 FILE *logfile = nullptr;        /* Where to send the log messages. */
 int dg_act_check;               /* toggle for act_trigger */
-unsigned long pulse = 0;        /* number of pulses since game start */
+uint64_t pulse = 0;        /* number of pulses since game start */
 bool fCopyOver;          /* Are we booting in copyover mode? */
 uint16_t port;
 socklen_t mother_desc;
@@ -83,11 +83,27 @@ void broadcast(const std::string& txt) {
 }
 
 boost::asio::awaitable<void> signal_watcher() {
-    while(true) {
+    while (!circle_shutdown) {
         try {
-            auto result = net::signals->async_wait(boost::asio::use_awaitable);
-        } catch(...) {
-            // TODO: improve this.
+            // Wait for a signal to be received
+            int signal_number = co_await net::signals->async_wait(boost::asio::use_awaitable);
+
+            // Process the signal
+            switch(signal_number) {
+                case SIGUSR1:
+                    circle_shutdown = 1;
+                    circle_reboot = 1;
+                    break;
+                case SIGUSR2:
+                    circle_shutdown = 1;
+                    circle_reboot = 2;
+                    break;
+                default:
+                    basic_mud_log("Unexpected signal: %d", signal_number);
+            }
+
+        } catch(const std::exception& e) {
+            std::cerr << "Error in signal watcher: " << e.what() << '\n';
         }
     }
 }
@@ -256,223 +272,68 @@ static boost::asio::awaitable<void> performReboot(int mode) {
 
 static std::vector<std::pair<std::string, double>> timings;
 
-boost::asio::awaitable<void> heartbeat(int heart_pulse, double deltaTime) {
+struct GameSystem {
+    // In seconds.
+    GameSystem(std::string name, double interval, std::function<void(uint64_t, double)> func) : name(std::move(name)), interval(interval), func(std::move(func)) {
+        countdown = interval;
+    }
+    std::string name;
+    double interval{0.0};
+    std::function<void(uint64_t, double)> func;
+    double countdown{0.0};
+};
+
+static void saveMudTimeWrapper(uint64_t heartBeat, double deltaTime) {
+    save_mud_time(&time_info);
+}
+
+static void deathTrapWrapper(uint64_t heartBeat, double deltaTime) {
+    timed_dt(nullptr);
+}
+
+static std::vector<GameSystem> gameSystems = {
+        GameSystem("event_process", 0.0, event_process),
+        GameSystem("script_trigger_check", 13.0, script_trigger_check),
+        GameSystem("zone_update", 10.0, zone_update),
+        GameSystem("dball_load", 1.0, dball_load),
+        GameSystem("base_update", 2.0, base_update),
+        GameSystem("fish_update", 2.0, fish_update),
+        GameSystem("handle_songs", 15.0, handle_songs),
+        GameSystem("wishSYS", 1.0, wishSYS),
+        GameSystem("mobile_activity", 10.0, mobile_activity),
+        GameSystem("check_auction", 15.0, check_auction),
+        GameSystem("fight_stack", 15.0, fight_stack),
+        GameSystem("homing_update", 2.0, homing_update),
+        GameSystem("huge_update", 2.0, huge_update),
+        GameSystem("broken_update", 2.0, broken_update),
+        GameSystem("copyover_check", 1.0, copyover_check),
+        GameSystem("affect_update_violence", 5.0, affect_update_violence),
+        GameSystem("weather_and_time", 300.0, weather_and_time),
+        GameSystem("check_time_triggers", 300.0, check_time_triggers),
+        GameSystem("affect_update", 300.0, affect_update),
+        GameSystem("point_update", 100.0, point_update),
+        GameSystem("clan_update", 60.0, clan_update),
+        GameSystem("Crash_save_all", 60.0, Crash_save_all),
+        GameSystem("House_save_all", 60.0, House_save_all),
+        GameSystem("record_usage", 5.0, record_usage),
+        GameSystem("save_mud_time", 30.0, saveMudTimeWrapper),
+        GameSystem("timed_dt", 30.0, deathTrapWrapper),
+        GameSystem("extract_pending_chars", 0.0, extract_pending_chars),
+};
+
+boost::asio::awaitable<void> heartbeat(uint64_t heart_pulse, double deltaTime) {
     static int mins_since_crashsave = 0;
     timings.clear();
 
-    {
-        auto start = std::chrono::high_resolution_clock::now();
-        event_process(deltaTime);
-        auto end = std::chrono::high_resolution_clock::now();
-        timings.emplace_back("event_process", std::chrono::duration<double>(end - start).count());
-    }
-
-    if (!(heart_pulse % PULSE_DG_SCRIPT)) {
-        auto start = std::chrono::high_resolution_clock::now();
-        script_trigger_check();
-        auto end = std::chrono::high_resolution_clock::now();
-        timings.emplace_back("script_trigger_check", std::chrono::duration<double>(end - start).count());
-    }
-
-    if (!(heart_pulse % PULSE_ZONE)) {
-        auto start = std::chrono::high_resolution_clock::now();
-        zone_update();
-        auto end = std::chrono::high_resolution_clock::now();
-        timings.emplace_back("zone_update", std::chrono::duration<double>(end - start).count());
-    }
-
-
-    if (!(heart_pulse % PULSE_IDLEPWD))        /* 15 seconds */
-    {
-        auto start = std::chrono::high_resolution_clock::now();
-        check_idle_passwords();
-        auto end = std::chrono::high_resolution_clock::now();
-        timings.emplace_back("check_idle_passwords", std::chrono::duration<double>(end - start).count());
-    }
-
-    if (!(heart_pulse % (PULSE_1SEC * 60)))           /* 15 seconds */
-    {
-        auto start = std::chrono::high_resolution_clock::now();
-        check_idle_menu();
-        auto end = std::chrono::high_resolution_clock::now();
-        timings.emplace_back("check_idle_menu", std::chrono::duration<double>(end - start).count());
-    }
-
-    if (!(heart_pulse % (PULSE_IDLEPWD / 15))) {           /* 1 second */
-        auto start = std::chrono::high_resolution_clock::now();
-        dball_load();
-        auto end = std::chrono::high_resolution_clock::now();
-        timings.emplace_back("dball_load", std::chrono::duration<double>(end - start).count());
-    }
-
-    if (!(heart_pulse % (PULSE_2SEC))) {
-        {
+    for(auto &s : gameSystems) {
+        s.countdown -= deltaTime;
+        if(s.countdown <= 0.0) {
             auto start = std::chrono::high_resolution_clock::now();
-            base_update();
+            s.func(heart_pulse, deltaTime);
             auto end = std::chrono::high_resolution_clock::now();
-            timings.emplace_back("base_update", std::chrono::duration<double>(end - start).count());
+            timings.emplace_back(s.name, std::chrono::duration<double>(end - start).count());
+            s.countdown += s.interval;
         }
-        {
-            auto start = std::chrono::high_resolution_clock::now();
-            fish_update();
-            auto end = std::chrono::high_resolution_clock::now();
-            timings.emplace_back("fish_update", std::chrono::duration<double>(end - start).count());
-        }
-    }
-
-    if (!(heart_pulse % (PULSE_1SEC * 15))) {
-        auto start = std::chrono::high_resolution_clock::now();
-        handle_songs();
-        auto end = std::chrono::high_resolution_clock::now();
-        timings.emplace_back("handle_songs", std::chrono::duration<double>(end - start).count());
-    }
-
-    if (!(heart_pulse % (PULSE_1SEC)))
-    {
-        auto start = std::chrono::high_resolution_clock::now();
-        wishSYS();
-        auto end = std::chrono::high_resolution_clock::now();
-        timings.emplace_back("wishSYS", std::chrono::duration<double>(end - start).count());
-    }
-
-    if (!(heart_pulse % PULSE_MOBILE))
-    {
-        auto start = std::chrono::high_resolution_clock::now();
-        mobile_activity();
-        auto end = std::chrono::high_resolution_clock::now();
-        timings.emplace_back("mobile_activity", std::chrono::duration<double>(end - start).count());
-    }
-
-    if (!(heart_pulse % PULSE_AUCTION))
-    {
-        auto start = std::chrono::high_resolution_clock::now();
-        check_auction();
-        auto end = std::chrono::high_resolution_clock::now();
-        timings.emplace_back("check_auction", std::chrono::duration<double>(end - start).count());
-    }
-
-    if (!(heart_pulse % (PULSE_IDLEPWD / 15))) {
-        auto start = std::chrono::high_resolution_clock::now();
-        fight_stack();
-        auto end = std::chrono::high_resolution_clock::now();
-        timings.emplace_back("fight_stack", std::chrono::duration<double>(end - start).count());
-    }
-    if (!(heart_pulse % ((PULSE_IDLEPWD / 15) * 2))) {
-        if (rand_number(1, 2) == 2) {
-            auto start = std::chrono::high_resolution_clock::now();
-            homing_update();
-            auto end = std::chrono::high_resolution_clock::now();
-            timings.emplace_back("homing_update", std::chrono::duration<double>(end - start).count());
-        }
-        {
-            auto start = std::chrono::high_resolution_clock::now();
-            huge_update();
-            auto end = std::chrono::high_resolution_clock::now();
-            timings.emplace_back("huge_update", std::chrono::duration<double>(end - start).count());
-        }
-        {
-            auto start = std::chrono::high_resolution_clock::now();
-            broken_update();
-            auto end = std::chrono::high_resolution_clock::now();
-            timings.emplace_back("broken_update", std::chrono::duration<double>(end - start).count());
-        }
-        /*update_mob_absorb();*/
-    }
-
-    if (!(heart_pulse % (1 * PASSES_PER_SEC))) { /* EVERY second */
-        auto start = std::chrono::high_resolution_clock::now();
-        copyover_check();
-        auto end = std::chrono::high_resolution_clock::now();
-        timings.emplace_back("copyover_check", std::chrono::duration<double>(end - start).count());
-    }
-
-    if (!(heart_pulse % PULSE_VIOLENCE)) {
-        auto start = std::chrono::high_resolution_clock::now();
-        affect_update_violence();
-        auto end = std::chrono::high_resolution_clock::now();
-    }
-
-    if (!(heart_pulse % (SECS_PER_MUD_HOUR * PASSES_PER_SEC))) {
-        {
-            auto start = std::chrono::high_resolution_clock::now();
-            weather_and_time(1);
-            auto end = std::chrono::high_resolution_clock::now();
-            timings.emplace_back("weather_and_time", std::chrono::duration<double>(end - start).count());
-        }
-        {
-            auto start = std::chrono::high_resolution_clock::now();
-            check_time_triggers();
-            auto end = std::chrono::high_resolution_clock::now();
-            timings.emplace_back("check_time_triggers", std::chrono::duration<double>(end - start).count());
-        }
-        {
-            auto start = std::chrono::high_resolution_clock::now();
-            affect_update();
-            auto end = std::chrono::high_resolution_clock::now();
-            timings.emplace_back("affect_update", std::chrono::duration<double>(end - start).count());
-        }
-    }
-
-    if (!(heart_pulse % ((SECS_PER_MUD_HOUR / 3) * PASSES_PER_SEC))) {
-        auto start = std::chrono::high_resolution_clock::now();
-        point_update();
-        auto end = std::chrono::high_resolution_clock::now();
-        timings.emplace_back("point_update", std::chrono::duration<double>(end - start).count());
-    }
-
-    if (CONFIG_AUTO_SAVE && !(heart_pulse % PULSE_AUTOSAVE)) {    /* 1 minute */
-        {
-            auto start = std::chrono::high_resolution_clock::now();
-            clan_update();
-            auto end = std::chrono::high_resolution_clock::now();
-            timings.emplace_back("clan_update", std::chrono::duration<double>(end - start).count());
-        }
-        if (++mins_since_crashsave >= CONFIG_AUTOSAVE_TIME) {
-            mins_since_crashsave = 0;
-            {
-                auto start = std::chrono::high_resolution_clock::now();
-                Crash_save_all();
-                auto end = std::chrono::high_resolution_clock::now();
-                timings.emplace_back("Crash_save_all", std::chrono::duration<double>(end - start).count());
-            }
-            {
-                auto start = std::chrono::high_resolution_clock::now();
-                House_save_all();
-                auto end = std::chrono::high_resolution_clock::now();
-                timings.emplace_back("House_save_all", std::chrono::duration<double>(end - start).count());
-            }
-        }
-    }
-
-    if (!(heart_pulse % PULSE_USAGE))
-    {
-        auto start = std::chrono::high_resolution_clock::now();
-        record_usage();
-        auto end = std::chrono::high_resolution_clock::now();
-        timings.emplace_back("record_usage", std::chrono::duration<double>(end - start).count());
-    }
-
-    if (!(heart_pulse % PULSE_TIMESAVE))
-    {
-        auto start = std::chrono::high_resolution_clock::now();
-        save_mud_time(&time_info);
-        auto end = std::chrono::high_resolution_clock::now();
-        timings.emplace_back("save_mud_time", std::chrono::duration<double>(end - start).count());
-    }
-
-    if (!(heart_pulse % (30 * PASSES_PER_SEC))) {
-        auto start = std::chrono::high_resolution_clock::now();
-        timed_dt(nullptr);
-        auto end = std::chrono::high_resolution_clock::now();
-        timings.emplace_back("timed_dt", std::chrono::duration<double>(end - start).count());
-    }
-
-    /* Every pulse! Don't want them to stink the place up... */
-    {
-        auto start = std::chrono::high_resolution_clock::now();
-        extract_pending_chars();
-        auto end = std::chrono::high_resolution_clock::now();
-        timings.emplace_back("extract_pending_chars", std::chrono::duration<double>(end - start).count());
     }
     co_return;
 }
@@ -829,11 +690,9 @@ void init_game() {
 
     if(!gameFunc) {
         basic_mud_log("Signal trapping.");
-        net::signals = std::make_unique<boost::asio::signal_set>(*net::io);
-        for(auto s : {SIGUSR1, SIGUSR2, SIGVTALRM, SIGHUP, SIGCHLD, SIGINT, SIGTERM, SIGPIPE, SIGALRM})
-            net::signals->add(s);
+        net::signals = std::make_unique<boost::asio::signal_set>(*net::io, SIGUSR1, SIGUSR2);
 
-        //boost::asio::co_spawn(boost::asio::make_strand(*net::io), signal_watcher(), boost::asio::detached);
+        boost::asio::co_spawn(boost::asio::make_strand(*net::io), signal_watcher(), boost::asio::detached);
 
         boost::asio::co_spawn(boost::asio::make_strand(*net::io), net::runLinkManager(), boost::asio::detached);
     }
@@ -925,7 +784,7 @@ void init_game() {
 
 
 
-void record_usage() {
+void record_usage(uint64_t heartPulse, double deltaTime) {
     int sockets_connected = 0, sockets_playing = 0;
     struct descriptor_data *d;
 
@@ -2063,89 +1922,6 @@ void check_idle_passwords() {
 void check_idle_menu() {
 
 }
-
-
-/* ******************************************************************
-*  signal-handling functions (formerly signals.c).  UNIX only.      *
-****************************************************************** */
-
-void reread_wizlists(int sig) {
-    reread_wizlist = true;
-}
-
-
-void unrestrict_game(int sig) {
-    emergency_unban = true;
-}
-
-/* clean up our zombie kids to avoid defunct processes */
-void reap(int sig) {
-    while (waitpid(-1, nullptr, WNOHANG) > 0);
-
-    signal(SIGCHLD, reap);
-}
-
-/* Dying anyway... */
-void checkpointing(int sig) {
-#ifndef MEMORY_DEBUG
-    if (!tics_passed) {
-        basic_mud_log("SYSERR: CHECKPOINT shutdown: tics not updated. (Infinite loop suspected)");
-        abort();
-    } else
-        tics_passed = 0;
-#endif
-}
-
-
-/* Dying anyway... */
-void hupsig(int sig) {
-    basic_mud_log("SYSERR: Received SIGHUP, SIGINT, or SIGTERM.  Shutting down...");
-    exit(1);            /* perhaps something more elegant should
-				 * substituted */
-}
-
-/*
- * This is an implementation of signal() using sigaction() for portability.
- * (sigaction() is POSIX; signal() is not.)  Taken from Stevens' _Advanced
- * Programming in the UNIX Environment_.  We are specifying that all system
- * calls _not_ be automatically restarted for uniformity, because BSD systems
- * do not restart select(), even if SA_RESTART is used.
- *
- * Note that NeXT 2.x is not POSIX and does not have sigaction; therefore,
- * I just define it to be the old signal.  If your system doesn't have
- * sigaction either, you can use the same fix.
- *
- * SunOS Release 4.0.2 (sun386) needs this too, according to Tim Aldric.
- */
-
-
-void signal_handle(const boost::system::error_code& error,
-                   int signal_number) {
-    if(error) {
-        // TODO: an error occured...
-        return;
-    }
-
-    switch(signal_number) {
-        case SIGUSR1:
-            reread_wizlists(signal_number);
-            break;
-        case SIGUSR2:
-            unrestrict_game(signal_number);
-            break;
-        case SIGVTALRM:
-            checkpointing(signal_number);
-            break;
-        case SIGHUP:
-        case SIGINT:
-        case SIGTERM:
-            hupsig(signal_number);
-            break;
-    }
-}
-
-
-
 
 /* ****************************************************************
 *       Public routines for system-to-player-communication        *

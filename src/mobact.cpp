@@ -122,7 +122,7 @@ int player_present(struct char_data *ch) {
     return (found);
 }
 
-void mobile_activity() {
+void mobile_activity(uint64_t heartPulse, double deltaTime) {
     struct char_data *ch, *next_ch, *vict;
     struct obj_data *obj, *best_obj;
     int door, found, max;

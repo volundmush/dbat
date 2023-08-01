@@ -472,9 +472,7 @@ ACMD(do_mload) {
         }
         char_to_room(mob, rnum);
         if (SCRIPT(ch)) { /* It _should_ have, but it might be detached. */
-            char buf[MAX_INPUT_LENGTH];
-            sprintf(buf, "%cC%d", UID_CHAR, ((mob)->id));
-            add_var(&(SCRIPT(ch)->global_vars), "lastloaded", buf, 0);
+            add_var(&(SCRIPT(ch)->global_vars), "lastloaded", mob->getUID().c_str(), 0);
         }
         load_mtrigger(mob);
     } else if (is_abbrev(arg1, "obj")) {
@@ -483,9 +481,7 @@ ACMD(do_mload) {
             return;
         }
         if (SCRIPT(ch)) { /* It _should_ have, but it might be detached. */
-            char buf[MAX_INPUT_LENGTH];
-            sprintf(buf, "%cO%d", UID_CHAR, ((object)->id));
-            add_var(&(SCRIPT(ch)->global_vars), "lastloaded", buf, 0);
+            add_var(&(SCRIPT(ch)->global_vars), "lastloaded", object->getUID().c_str(), 0);
         }
         randomize_eq(object);
         /* special handling to make objects able to load on a person/in a container/worn etc. */

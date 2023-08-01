@@ -1281,7 +1281,7 @@
 #define APPLY_WIS               4    /* Apply to wisdom		*/
 #define APPLY_CON               5    /* Apply to constitution	*/
 #define APPLY_CHA        6    /* Apply to charisma		*/
-#define APPLY_CLASS             7    /* Reserved			*/
+#define APPLY_SPI             7    /* Reserved			*/
 #define APPLY_LEVEL             8    /* Reserved			*/
 #define APPLY_AGE               9    /* Apply to age			*/
 #define APPLY_CHAR_WEIGHT      10    /* Apply to weight		*/

@@ -61,10 +61,10 @@ static void grow_plants() {
 
 }
 
-void weather_and_time(int mode) {
-    another_hour(mode);
+void weather_and_time(uint64_t heartPulse, double deltaTime) {
+    another_hour(1);
     grow_plants();
-    if (mode)
+    if (1)
         weather_change();
 }
 

@@ -1507,7 +1507,7 @@ static void heal_limb(struct char_data *ch) {
 }
 
 /* Update PCs, NPCs, and objects */
-void point_update() {
+void point_update(uint64_t heartPulse, double deltaTime) {
     struct char_data *i, *next_char;
     struct obj_data *j, *next_thing, *jj, *next_thing2, *vehicle = nullptr;
     int change = false;
@@ -1618,12 +1618,10 @@ void point_update() {
                     act("@RYou are drowning!@n", true, i, nullptr, nullptr, TO_CHAR);
                     act("@C$n@b gulps water as $e struggles to stay above the water line.@n", true, i, nullptr, nullptr,
                         TO_ROOM);
-                    if (GET_HIT(i) - ((i->getEffMaxPL()) / 3) <= 0) {
+                    if (i->decCurHealthPercent(0.33) <= 0) {
                         act("@rYou drown!@n", true, i, nullptr, nullptr, TO_CHAR);
                         act("@R$n@r drowns!@n", true, i, nullptr, nullptr, TO_ROOM);
                         die(i, nullptr);
-                    } else {
-                        i->decCurHealth((i->getEffMaxPL()) / 3);
                     }
                 }
             }

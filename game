@@ -9,7 +9,8 @@ process_running() {
 }
 
 start_thermite() {
-  nohup ./thermite/release/thermite &> thermite.log < /dev/null & echo $! > thermite.pid
+  nohup ./thermite/release/thermite &> thermite.log < /dev/null &
+  echo $! > thermite.pid
 }
 
 start_server() {
@@ -60,7 +61,24 @@ restart_game() {
 
     if(process_running "server"); then
         echo "Restarting server..."
-        kill -HUP $(cat server.pid)
+        kill -SIGUSR1 $(cat server.pid)
+    else
+        echo "Starting server..."
+        start_server
+    fi
+}
+
+reload_game() {
+  if(process_running "thermite"); then
+          echo "Thermite is already running!"
+      else
+          echo "Starting Thermite..."
+          start_thermite
+      fi
+
+    if(process_running "server"); then
+        echo "Reloading server..."
+        kill -SIGUSR2 $(cat server.pid)
     else
         echo "Starting server..."
         start_server
@@ -91,11 +109,14 @@ case "$1" in
   restart)
     restart_game
     ;;
+  reload)
+    reload_game
+    ;;
   status)
     show_status
     ;;
   *)
-    echo "Usage: $0 {start|stop|restart|status}"
+    echo "Usage: $0 {start|stop|restart|reload|status}"
     exit 1
 esac
 

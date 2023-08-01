@@ -16,13 +16,9 @@
 #include "oasis.h"
 #include <variant>
 
-using DgUID = std::variant<struct room_data*, struct obj_data*, struct char_data*>;
+using DgUID = UID;
 
-std::optional<DgUID> parseDgUID(const std::string& str);
 std::string toDgUID(const DgUID& uid);
-std::string toDgUID(struct char_data *ch);
-std::string toDgUID(struct obj_data *obj);
-std::string toDgUID(struct room_data *room);
 
 #define DG_SCRIPT_VERSION "DG Scripts 1.0.14"
 
@@ -236,8 +232,8 @@ extern int is_substring(char *sub, char *string);
 
 extern int word_check(char *str, char *wordlist);
 
-extern void act_mtrigger(const char_data *ch, char *str, char_data *actor, const char_data *victim, obj_data *object,
-                         const obj_data *target, const char *arg);
+extern void act_mtrigger(char_data *ch, char *str, char_data *actor, char_data *victim, obj_data *object,
+                         obj_data *target, char *arg);
 
 extern void speech_mtrigger(char_data *actor, char *str);
 
@@ -360,9 +356,9 @@ extern obj_data *get_obj_in_list(char *name, obj_data *list);
 
 extern obj_data *get_object_in_equip(char_data *ch, char *name);
 
-extern void script_trigger_check();
+extern void script_trigger_check(uint64_t heartPulse, double deltaTime);
 
-extern void check_time_triggers();
+extern void check_time_triggers(uint64_t heartPulse, double deltaTime);
 
 extern void find_uid_name(char *uid, char *name, size_t nlen);
 
@@ -477,7 +473,7 @@ extern room_rnum obj_room(obj_data *obj);
 
 /* Macros for scripts */
 
-#define UID_CHAR   '}'
+#define UID_CHAR   '#'
 #define GET_TRIG_NAME(t)          ((t)->name)
 #define GET_TRIG_RNUM(t)          ((t)->vn)
 #define GET_TRIG_VNUM(t)      (trig_index[(t)->vn].vn)
@@ -511,6 +507,4 @@ extern room_rnum obj_room(obj_data *obj);
 #define TRIGGER_CHECK(t, type)   (IS_SET(GET_TRIG_TYPE(t), type) && \
                   !GET_TRIG_DEPTH(t))
 
-void ADD_UID_VAR(char *buf, struct trig_data *trig, struct obj_data *obj, char *name, long context);
-void ADD_UID_VAR(char *buf, struct trig_data *trig, struct room_data *room, char *name, long context);
-void ADD_UID_VAR(char *buf, struct trig_data *trig, struct char_data *ch, char *name, long context);
+void ADD_UID_VAR(char *buf, struct trig_data *trig, struct unit_data *thing, char *name, long context);

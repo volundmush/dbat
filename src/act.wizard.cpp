@@ -1556,9 +1556,10 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j) {
     found = false;
     send_to_char(ch, "Affections:");
     for (i = 0; i < MAX_OBJ_AFFECT; i++)
-        if (j->affected[i].modifier) {
+        if (j->affected[i].location != APPLY_NONE) {
             sprinttype(j->affected[i].location, apply_types, buf, sizeof(buf));
-            send_to_char(ch, "%s %+d to %s", found++ ? "," : "", j->affected[i].modifier, buf);
+            auto m = fmt::format("{}", j->affected[i].modifier);
+            send_to_char(ch, "%s %s to %s", found++ ? "," : "", m.c_str(), buf);
             switch (j->affected[i].location) {
                 case APPLY_FEAT:
                     send_to_char(ch, " (%s)", feat_list[j->affected[i].specific].name);
@@ -1864,7 +1865,9 @@ ACMD(do_varstat) {
             /* not displayed here. in the future, this might change */
             for (tv = vict->script->global_vars; tv; tv = tv->next) {
                 if (*(tv->value) == UID_CHAR) {
-                    auto uidResult = parseDgUID(tv->value);
+                    std::optional<DgUID> result;
+                    result = resolveUID(tv->value);
+                    auto uidResult = result;
                     if(uidResult) {
                         auto idx = (*uidResult).index();
                         std::string n;
@@ -2409,7 +2412,7 @@ static void execute_copyover() {
     circle_reboot = 1;
 }
 
-void copyover_check() {
+void copyover_check(uint64_t heartPulse, double deltaTime) {
     if (!copyover_timer) return;
     copyover_timer--;
     if (!copyover_timer) {
@@ -4517,7 +4520,7 @@ static const struct zcheck_affs {
         {APPLY_WIS,         -6,  6,   "wisdom"},
         {APPLY_CON,         -6,  6,   "constitution"},
         {APPLY_CHA,         -6,  6,   "charisma"},
-        {APPLY_CLASS,       0,   0,   "class"},
+        {APPLY_SPI,         0,   0,   "spirit"},
         {APPLY_LEVEL,       0,   0,   "level"},
         {APPLY_AGE,         -10, 10,  "age"},
         {APPLY_CHAR_WEIGHT, -50, 50,  "character weight"},

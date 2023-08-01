@@ -501,9 +501,7 @@ OCMD(do_dgoload) {
         char_to_room(mob, rnum);
 
         if (SCRIPT(obj)) { /* It _should_ have, but it might be detached. */
-            char buf[MAX_INPUT_LENGTH];
-            sprintf(buf, "%cC%d", UID_CHAR, ((mob)->id));
-            add_var(&(SCRIPT(obj)->global_vars), "lastloaded", buf, 0);
+            add_var(&(SCRIPT(obj)->global_vars), "lastloaded", mob->getUID().c_str(), 0);
         }
 
         load_mtrigger(mob);
@@ -514,9 +512,7 @@ OCMD(do_dgoload) {
         }
 
         if (SCRIPT(obj)) { /* It _should_ have, but it might be detached. */
-            char buf[MAX_INPUT_LENGTH];
-            sprintf(buf, "%cO%d", UID_CHAR, ((object)->id));
-            add_var(&(SCRIPT(obj)->global_vars), "lastloaded", buf, 0);
+            add_var(&(SCRIPT(obj)->global_vars), "lastloaded", object->getUID().c_str(), 0);
         }
 
         /* special handling to make objects able to load on a person/in a container/worn etc. */

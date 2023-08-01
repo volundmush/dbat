@@ -1705,7 +1705,7 @@ void damage_eq(struct char_data *vict, int location) {
 }
 
 /* This is for huge attacks that are slowly descending on a room */
-void huge_update() {
+void huge_update(uint64_t heartPulse, double deltaTime) {
     int dge = 0, skill = 0, bonus = 1, count = 0;
     int64_t dmg = 0;
     struct obj_data *k;
@@ -2097,7 +2097,7 @@ void huge_update() {
 /* End huge ki attack update */
 
 /* For handling homing attacks */
-void homing_update() {
+void homing_update(uint64_t heartPulse, double deltaTime) {
     struct obj_data *k;
 
     for (k = object_list; k; k = k->next) {

@@ -72,9 +72,9 @@ extern int read_sense_memory(struct char_data *ch, struct char_data *vict);
 
 extern int roll_pursue(struct char_data *ch, struct char_data *vict);
 
-extern void broken_update();
+extern void broken_update(uint64_t heartPulse, double deltaTime);
 
-extern int wearable_obj(struct obj_data *obj);
+extern bool wearable_obj(struct obj_data *obj);
 
 extern void randomize_eq(struct obj_data *obj);
 
@@ -215,7 +215,7 @@ extern void gain_exp_regardless(struct char_data *ch, int gain);
 
 extern void gain_condition(struct char_data *ch, int condition, int value);
 
-extern void point_update();
+extern void point_update(uint64_t heartPulse, double deltaTime);
 
 extern void update_pos(struct char_data *victim);
 

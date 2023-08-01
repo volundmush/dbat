@@ -7240,7 +7240,7 @@ void load_shadow_dragons() {
     save_mud_time(&time_info);
 }
 
-void wishSYS() {
+void wishSYS(uint64_t heartPulse, double deltaTime) {
     if (SHENRON == true) {
         if (SELFISHMETER < 10) {
             switch (DRAGONC) {
@@ -8306,7 +8306,7 @@ static void check_eq(struct char_data *ch) {
 }
 
 /* This handles many player specific routines. It may be a bit too bloated though. */
-void base_update() {
+void base_update(uint64_t heartPulse, double deltaTime) {
     struct descriptor_data *d;
     int cash = false, inc = 0;
     int countch = false, pcoun = 0;

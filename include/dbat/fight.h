@@ -21,7 +21,7 @@ extern void remove_limb(struct char_data *vict, int num);
 
 extern void impact_sound(struct char_data *ch, char *mssg);
 
-extern void fight_stack();
+extern void fight_stack(uint64_t heartPulse, double deltaTime);
 
 extern void appear(struct char_data *ch);
 

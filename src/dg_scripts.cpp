@@ -144,7 +144,9 @@ obj_data *get_obj_in_list(char *name, obj_data *list) {
     int32_t id;
 
     if (*name == UID_CHAR) {
-        auto uidResult = parseDgUID(name);
+        std::optional<DgUID> result;
+        result = resolveUID(name);
+        auto uidResult = result;
         if(!uidResult) return nullptr;
         if(uidResult->index() != 1) return nullptr;
         auto obj = std::get<1>(*uidResult);
@@ -168,7 +170,9 @@ obj_data *get_object_in_equip(char_data *ch, char *name) {
     int32_t id;
 
     if (*name == UID_CHAR) {
-        auto uidResult = parseDgUID(name);
+        std::optional<DgUID> result;
+        result = resolveUID(name);
+        auto uidResult = result;
         if(!uidResult) return nullptr;
         if(uidResult->index() != 1) return nullptr;
         auto o = std::get<1>(*uidResult);
@@ -297,7 +301,9 @@ char_data *get_char(char *name) {
     char_data *i;
 
     if (*name == UID_CHAR) {
-        auto uidResult = parseDgUID(name);
+        std::optional<DgUID> result;
+        result = resolveUID(name);
+        auto uidResult = result;
         if(!uidResult) return nullptr;
         if(uidResult->index() != 2) return nullptr;
         i = std::get<2>(*uidResult);
@@ -321,7 +327,9 @@ char_data *get_char_near_obj(obj_data *obj, char *name) {
     char_data *ch;
 
     if (*name == UID_CHAR) {
-        auto uidResult = parseDgUID(name);
+        std::optional<DgUID> result;
+        result = resolveUID(name);
+        auto uidResult = result;
         if(!uidResult) return nullptr;
         if(uidResult->index() != 2) return nullptr;
         ch = std::get<2>(*uidResult);
@@ -349,7 +357,9 @@ char_data *get_char_in_room(room_data *room, char *name) {
     char_data *ch;
 
     if (*name == UID_CHAR) {
-        auto uidResult = parseDgUID(name);
+        std::optional<DgUID> result;
+        result = resolveUID(name);
+        auto uidResult = result;
         if(!uidResult) return nullptr;
         if(uidResult->index() != 2) return nullptr;
         ch = std::get<2>(*uidResult);
@@ -384,7 +394,9 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name) {
     /* or outside ? */
     if (obj->in_obj) {
         if (*name == UID_CHAR) {
-            auto uidResult = parseDgUID(name);
+            std::optional<DgUID> result;
+            result = resolveUID(name);
+            auto uidResult = result;
             if(!uidResult) return nullptr;
             if(uidResult->index() != 1) return nullptr;
             auto o = std::get<1>(*uidResult);
@@ -417,7 +429,9 @@ obj_data *get_obj(char *name) {
     obj_data *obj;
 
     if (*name == UID_CHAR) {
-        auto uidResult = parseDgUID(name);
+        std::optional<DgUID> result;
+        result = resolveUID(name);
+        auto uidResult = result;
         if(!uidResult) return nullptr;
         if(uidResult->index() != 1) return nullptr;
         return std::get<1>(*uidResult);
@@ -437,7 +451,9 @@ room_data *get_room(char *name) {
     room_rnum nr;
 
     if (*name == UID_CHAR) {
-        auto uidResult = parseDgUID(name);
+        std::optional<DgUID> result;
+        result = resolveUID(name);
+        auto uidResult = result;
         if(!uidResult) return nullptr;
         if(uidResult->index() != 0) return nullptr;
         auto r = std::get<0>(*uidResult);
@@ -458,7 +474,9 @@ char_data *get_char_by_obj(obj_data *obj, char *name) {
     char_data *ch;
 
     if (*name == UID_CHAR) {
-        auto uidResult = parseDgUID(name);
+        std::optional<DgUID> result;
+        result = resolveUID(name);
+        auto uidResult = result;
         if(!uidResult) return nullptr;
         if(uidResult->index() != 2) return nullptr;
         ch = std::get<2>(*uidResult);
@@ -494,7 +512,9 @@ char_data *get_char_by_room(room_data *room, char *name) {
     char_data *ch;
 
     if (*name == UID_CHAR) {
-        auto uidResult = parseDgUID(name);
+        std::optional<DgUID> result;
+        result = resolveUID(name);
+        auto uidResult = result;
         if(!uidResult) return nullptr;
         if(uidResult->index() != 2) return nullptr;
         ch = std::get<2>(*uidResult);
@@ -526,7 +546,9 @@ obj_data *get_obj_by_obj(obj_data *obj, char *name) {
     room_vnum rm;
 
     if (*name == UID_CHAR) {
-        auto uidResult = parseDgUID(name);
+        std::optional<DgUID> result;
+        result = resolveUID(name);
+        auto uidResult = result;
         if(!uidResult) return nullptr;
         if(uidResult->index() != 1) return nullptr;
         return std::get<1>(*uidResult);
@@ -561,7 +583,9 @@ obj_data *get_obj_in_room(room_data *room, char *name) {
     int32_t id;
 
     if (*name == UID_CHAR) {
-        auto uidResult = parseDgUID(name);
+        std::optional<DgUID> result;
+        result = resolveUID(name);
+        auto uidResult = result;
         if(!uidResult) return nullptr;
         if(uidResult->index() != 1) return nullptr;
         auto o = std::get<1>(*uidResult);
@@ -582,7 +606,9 @@ obj_data *get_obj_by_room(room_data *room, char *name) {
     obj_data *obj;
 
     if (*name == UID_CHAR) {
-        auto uidResult = parseDgUID(name);
+        std::optional<DgUID> result;
+        result = resolveUID(name);
+        auto uidResult = result;
         if(!uidResult) return nullptr;
         if(uidResult->index() != 1) return nullptr;
         return std::get<1>(*uidResult);
@@ -600,7 +626,7 @@ obj_data *get_obj_by_room(room_data *room, char *name) {
 }
 
 /* checks every PULSE_SCRIPT for random triggers */
-void script_trigger_check() {
+void script_trigger_check(uint64_t heartPulse, double deltaTime) {
     char_data *ch;
     obj_data *obj;
     struct room_data *room = nullptr;
@@ -640,7 +666,7 @@ void script_trigger_check() {
     }
 }
 
-void check_time_triggers() {
+void check_time_triggers(uint64_t heartPulse, double deltaTime) {
     char_data *ch;
     obj_data *obj;
     struct room_data *room = nullptr;
@@ -756,7 +782,9 @@ void script_stat(char_data *ch, struct script_data *sc) {
     for (tv = sc->global_vars; tv; tv = tv->next) {
         snprintf(namebuf, sizeof(namebuf), "%s:%ld", tv->name, tv->context);
         if (*(tv->value) == UID_CHAR) {
-            auto uidResult = parseDgUID(tv->value);
+            std::optional<DgUID> result;
+            result = resolveUID(tv->value);
+            auto uidResult = result;
             if(uidResult) {
 				auto idx = uidResult->index();
                 std::string n;
@@ -809,7 +837,9 @@ void script_stat(char_data *ch, struct script_data *sc) {
 
             for (tv = GET_TRIG_VARS(t); tv; tv = tv->next) {
                 if (*(tv->value) == UID_CHAR) {
-                    auto uidResult = parseDgUID(tv->value);
+                    std::optional<DgUID> result;
+                    result = resolveUID(tv->value);
+                    auto uidResult = result;
                     if(uidResult) {
                         auto idx = uidResult->index();
                         std::string n;
@@ -1693,7 +1723,9 @@ void process_attach(void *go, struct script_data *sc, trig_data *trig,
 
     /* parse and locate the id specified */
     eval_expr(id_p, result, go, sc, trig, type);
-    auto uidResult = parseDgUID(result);
+    std::optional<DgUID> result1;
+    result1 = resolveUID(result);
+    auto uidResult = result1;
     if(!uidResult) {
         script_log("Trigger: %s, VNum %d. attach invalid id arg: '%s'",
                    GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), cmd);
@@ -1768,7 +1800,9 @@ void process_detach(void *go, struct script_data *sc, trig_data *trig,
 
     /* parse and locate the id specified */
     eval_expr(id_p, result, go, sc, trig, type);
-    auto uidResult = parseDgUID(result);
+    std::optional<DgUID> result1;
+    result1 = resolveUID(result);
+    auto uidResult = result1;
     if(!uidResult) {
         script_log("Trigger: %s, VNum %d. detach invalid id arg: '%s'",
                    GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), cmd);
@@ -1924,7 +1958,9 @@ void process_remote(struct script_data *sc, trig_data *trig, char *cmd) {
         return;
     }
     /* find the target script from the uid number */
-    auto uidResult = parseDgUID(buf2);
+    std::optional<DgUID> result;
+    result = resolveUID(buf2);
+    auto uidResult = result;
     if(!uidResult) {
         script_log("Trigger: %s, VNum %d. remote: illegal uid '%s'",
                    GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), buf2);
@@ -1980,7 +2016,9 @@ ACMD(do_vdelete) {
         return;
     }
 
-    auto uidResult = parseDgUID(buf2);
+    std::optional<DgUID> result;
+    result = resolveUID(buf2);
+    auto uidResult = result;
     if(!uidResult) {
         send_to_char(ch, "vdelete: illegal id specified.\r\n");
         return;
@@ -2089,7 +2127,9 @@ void process_rdelete(struct script_data *sc, trig_data *trig, char *cmd) {
         return;
     }
 
-    auto uidResult = parseDgUID(buf2);
+    std::optional<DgUID> result;
+    result = resolveUID(buf2);
+    auto uidResult = result;
     if(!uidResult) {
         script_log("Trigger: %s, VNum %d. rdelete: illegal uid '%s'",
                    GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), buf2);
@@ -2853,55 +2893,7 @@ trig_data::trig_data(const nlohmann::json &j) : trig_data() {
     }
 }
 
-std::optional<DgUID> parseDgUID(const std::string& str) {
-    if(str.empty()) return std::nullopt;
-	// A DgUID string looks like this:
-    // }R<number> for rooms
-    // }O<uniqueID> for objects
-    // }C<character> for mobiles...
-
-    // We need at least 3 characters for this to work...
-    if(str.length() < 3) return std::nullopt;
-    if(str[0] != '}') return std::nullopt;
-    char type = toupper(str[1]);
-    auto id = std::stoi(str.substr(2));
-
-    if(type == 'R') {
-        if(world.contains(id)) return &world[id];
-    } else if(type == 'O') {
-        auto find = uniqueObjects.find(id);
-        if(find != uniqueObjects.end()) return find->second.second;
-    } else if(type == 'C') {
-        auto find = uniqueCharacters.find(id);
-        if(find != uniqueCharacters.end()) return find->second.second;
-    }
-
-    return std::nullopt;
-}
-
-std::string toDgUID(struct char_data *ch) {
-    return "}" + fmt::format("C{}", ch->id);
-}
-
-std::string toDgUID(struct obj_data *obj) {
-    return "}" + fmt::format("O{}", obj->id);
-}
-
-std::string toDgUID(struct room_data *room) {
-    return "}" + fmt::format("R{}", room->vn);
-}
-
-void ADD_UID_VAR(char *buf, struct trig_data *trig, struct obj_data *obj, char *name, long context) {
-    auto dg = toDgUID(obj);
-	add_var(&GET_TRIG_VARS(trig), name, (char*)dg.c_str(), context);
-}
-
-void ADD_UID_VAR(char *buf, struct trig_data *trig, struct room_data *room, char *name, long context) {
-	auto dg = toDgUID(room);
-	add_var(&GET_TRIG_VARS(trig), name, (char*)dg.c_str(), context);
-}
-
-void ADD_UID_VAR(char *buf, struct trig_data *trig, struct char_data *ch, char *name, long context) {
-	auto dg = toDgUID(ch);
-	add_var(&GET_TRIG_VARS(trig), name, (char*)dg.c_str(), context);
+void ADD_UID_VAR(char *buf, struct trig_data *trig, struct unit_data *thing, char *name, long context) {
+	auto uid = thing->getUID();
+    add_var(&GET_TRIG_VARS(trig), name, (char*)uid.c_str(), context);
 }

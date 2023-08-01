@@ -16,7 +16,7 @@ extern void perform_immort_vis(struct char_data *ch);
 
 extern void snoop_check(struct char_data *ch);
 
-extern void copyover_check(void);
+extern void copyover_check(uint64_t heartPulse, double deltaTime);
 
 // commands
 extern ACMD(do_echo);

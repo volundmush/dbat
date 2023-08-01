@@ -314,7 +314,7 @@ void handle_multi_merge(struct char_data *form) {
     extract_char(form);
 }
 
-void handle_songs() {
+void handle_songs(uint64_t heartPulse, double deltaTime) {
     struct descriptor_data *d;
 
     for (d = descriptor_list; d; d = d->next) {
@@ -1434,7 +1434,7 @@ static int has_pole(struct char_data *ch) {
     return (false);
 }
 
-void fish_update() {
+void fish_update(uint64_t heartPulse, double deltaTime) {
 
     struct char_data *i, *next_char, *ch = nullptr;
     int quality = 0;

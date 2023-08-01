@@ -43,6 +43,7 @@
 #include "dbat/genobj.h"
 #include "dbat/area.h"
 #include "dbat/account.h"
+#include <boost/regex.hpp>
 
 /**************************************************************************
 *  declarations of most of the 'global' variables                         *
@@ -558,7 +559,7 @@ static void db_load_save_rooms() {
             auto j = nlohmann::json::parse(items);
             auto room = world.find(id);
             if(room != world.end()) {
-                room->second.deserializeContents(j, false);
+                room->second.deserializeContents(j, true);
             }
         } catch(std::exception& e) {
             basic_mud_log("Error parsing room %ld: %s", id, e.what());
@@ -3472,7 +3473,7 @@ struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
 #define ZO_DEAD  999
 
 /* update zone ages, queue for reset if necessary, and dequeue when possible */
-void zone_update() {
+void zone_update(uint64_t heartPulse, double deltaTime) {
     int i;
     struct reset_q_element *update_u, *temp;
     static int timer = 0;
@@ -4928,10 +4929,38 @@ static std::vector<std::string> schema = {
         "   items TEXT"
         ");",
 
-        "CREATE TABLE IF NOT EXISTS dgscripts ("
+        "CREATE TABLE IF NOT EXISTS dgScriptPrototypes ("
         "	id INTEGER PRIMARY KEY,"
         "	data TEXT NOT NULL"
-        ");"
+        ");",
+
+        "CREATE TABLE IF NOT EXISTS characters ("
+        "   id INTEGER PRIMARY KEY,"
+        "   generation INTEGER NOT NULL,"
+        "   name TEXT,"
+        "   shortDesc TEXT,"
+        "   data TEXT NOT NULL,"
+        "   location TEXT NOT NULL DEFAULT '{}',"
+        "   relations TEXT NOT NULL DEFAULT '{}'"
+        ");",
+
+        "CREATE TABLE IF NOT EXISTS objects ("
+        "   id INTEGER PRIMARY KEY,"
+        "   generation INTEGER NOT NULL,"
+        "   name TEXT,"
+        "   shortDesc TEXT,"
+        "   data TEXT NOT NULL,"
+        "   location TEXT NOT NULL DEFAULT '{}',"
+        "   relations TEXT NOT NULL DEFAULT '{}'"
+        ");",
+
+        "CREATE TABLE IF NOT EXISTS dgScripts ("
+        "	id INTEGER PRIMARY KEY,"
+        "   generation INTEGER NOT NULL,"
+        "   name TEXT,"
+        "	data TEXT NOT NULL,"
+        "   location TEXT NOT NULL"
+        ");",
 };
 
 static void runQuery(std::string_view query) {
@@ -5279,4 +5308,38 @@ int64_t nextCharID() {
     int64_t id = 0;
     while(uniqueCharacters.contains(id)) id++;
     return id;
+}
+// ^#(?<type>R|O|C)(?P<id>\d+):(?P<generation>\d+)
+static boost::regex uid_regex(R"(^#(?<type>R|O|C)(?P<id>\d+):(?P<generation>\d+))");
+
+std::optional<UID> resolveUID(const std::string& uid) {
+    // First we need to check if it matches or not.
+    boost::smatch match;
+
+    if(!boost::regex_search(uid, match, uid_regex)) {
+        return std::nullopt;
+    }
+    // extract the type as a char, id and generation as int64_t and time_t respectively.
+    char type = match["type"].str()[0];
+    int64_t id = std::stoll(match["id"].str());
+    time_t generation = std::stoll(match["generation"].str());
+
+    if(type == 'R') {
+        if(world.contains(id)) return &world[id];
+    } else if(type == 'O') {
+        auto find = uniqueObjects.find(id);
+        if(find != uniqueObjects.end()) {
+            if(find->second.first == generation) {
+                return find->second.second;
+            }
+        }
+    } else if(type == 'C') {
+        auto find = uniqueCharacters.find(id);
+        if(find != uniqueCharacters.end()) {
+            if(find->second.first == generation) {
+                return find->second.second;
+            }
+        }
+    }
+    return std::nullopt;
 }

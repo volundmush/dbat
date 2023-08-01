@@ -17,4 +17,4 @@ extern void oozaru_transform(struct char_data *ch);
 
 extern void oozaru_revert(struct char_data *ch);
 
-extern void weather_and_time(int mode);
+extern void weather_and_time(uint64_t heartPulse, double deltaTime);

@@ -24,5 +24,5 @@ extern void gain_exp_regardless(struct char_data *ch, int gain);
 
 extern void gain_condition(struct char_data *ch, int condition, int value);
 
-extern void point_update();
+extern void point_update(uint64_t heartPulse, double deltaTime);
 

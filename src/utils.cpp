@@ -1309,7 +1309,7 @@ int roll_pursue(struct char_data *ch, struct char_data *vict) {
 }
 
 /* This updates the malfunctioning of certain objects that are damaged. */
-void broken_update() {
+void broken_update(uint64_t heartPulse, double deltaTime) {
     struct obj_data *k, *money;
 
     int rand_gravity[14] = {0, 10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000, 5000, 10000};
@@ -1366,48 +1366,13 @@ void broken_update() {
 }
 
 
-int wearable_obj(struct obj_data *obj) {
-    int pass = false;
-
-    if (CAN_WEAR(obj, ITEM_WEAR_FINGER))
-        pass = true;
-    if (CAN_WEAR(obj, ITEM_WEAR_NECK))
-        pass = true;
-    if (CAN_WEAR(obj, ITEM_WEAR_BODY))
-        pass = true;
-    if (CAN_WEAR(obj, ITEM_WEAR_HEAD))
-        pass = true;
-    if (CAN_WEAR(obj, ITEM_WEAR_LEGS))
-        pass = true;
-    if (CAN_WEAR(obj, ITEM_WEAR_FEET))
-        pass = true;
-    if (CAN_WEAR(obj, ITEM_WEAR_HANDS))
-        pass = true;
-    if (CAN_WEAR(obj, ITEM_WEAR_ARMS))
-        pass = true;
-    if (CAN_WEAR(obj, ITEM_WEAR_SHIELD))
-        pass = true;
-    if (CAN_WEAR(obj, ITEM_WEAR_ABOUT))
-        pass = true;
-    if (CAN_WEAR(obj, ITEM_WEAR_WAIST))
-        pass = true;
-    if (CAN_WEAR(obj, ITEM_WEAR_WRIST))
-        pass = true;
-    if (CAN_WEAR(obj, ITEM_WEAR_WIELD))
-        pass = true;
-    if (CAN_WEAR(obj, ITEM_WEAR_EYE))
-        pass = true;
-    if (CAN_WEAR(obj, ITEM_WEAR_PACK))
-        pass = true;
-    if (CAN_WEAR(obj, ITEM_WEAR_SH))
-        pass = true;
-    if (CAN_WEAR(obj, ITEM_WEAR_EAR))
-        pass = true;
-
-    if (pass == true)
-        return (1);
-    else
-        return (0);
+bool wearable_obj(struct obj_data *obj) {
+    for(auto i = 1; i < NUM_ITEM_WEARS; i++) {
+        if(CAN_WEAR(obj, i)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void randomize_eq(struct obj_data *obj) {

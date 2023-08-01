@@ -162,7 +162,7 @@ void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *ms
         case APPLY_WIS:
         case APPLY_CON:
         case APPLY_CHA:
-        case APPLY_CLASS:
+        case APPLY_SPI:
         case APPLY_LEVEL:
         case APPLY_MANA:
         case APPLY_HIT:
@@ -1366,7 +1366,7 @@ void extract_char(struct char_data *ch) {
  *
  * NOTE: This doesn't handle recursive extractions.
  */
-void extract_pending_chars() {
+void extract_pending_chars(uint64_t heartBeat, double deltaTime) {
     struct char_data *vict, *next_vict, *prev_vict, *temp;
 
     if (extractions_pending < 0)

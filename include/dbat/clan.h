@@ -65,7 +65,7 @@ extern void clanINFOW(char *name, struct char_data *ch);
 
 extern void clanSAFE(char *name);
 
-extern void clan_update();
+extern void clan_update(uint64_t heartPulse, double deltaTime);
 
 //
 // Remove the clan with the given name from the list

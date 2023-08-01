@@ -113,6 +113,10 @@
 
 
 // global variables
+using UID = std::variant<struct room_data*, struct obj_data*, struct char_data*>;
+
+std::optional<UID> resolveUID(const std::string& uid);
+
 extern struct time_info_data time_info;/* the infomation about the time    */
 extern struct weather_data weather_info;    /* the infomation about the weather */
 extern std::set<zone_vnum> zone_reset_queue;
@@ -149,7 +153,7 @@ extern boost::asio::awaitable<void> boot_db();
 
 extern void destroy_db();
 
-extern void zone_update();
+extern void zone_update(uint64_t heartPulse, double deltaTime);
 
 extern char *fread_string(FILE *fl, const char *error);
 

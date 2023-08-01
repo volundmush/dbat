@@ -396,3 +396,11 @@ void room_data::deserializeContents(const nlohmann::json& j, bool isActive) {
         obj_to_room(obj, vn);
     }
 }
+
+std::string room_data::getUID() {
+    return fmt::format("#R{}:{}", id, generation);
+}
+
+bool room_data::isActive() {
+    return world.contains(vn);
+}

@@ -95,7 +95,7 @@ extern void extract_char(struct char_data *ch);
 
 extern void extract_char_final(struct char_data *ch);
 
-extern void extract_pending_chars();
+extern void extract_pending_chars(uint64_t heartBeat, double deltaTime);
 
 /* find if character can see */
 struct char_data *get_player_vis(struct char_data *ch, char *name, int *number, int inroom);

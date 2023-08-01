@@ -9,7 +9,7 @@
 // functions
 extern void remember(struct char_data *ch, struct char_data *victim);
 
-extern void mobile_activity();
+extern void mobile_activity(uint64_t heartPulse, double deltaTime);
 
 extern void forget(struct char_data *ch, struct char_data *victim);
 
