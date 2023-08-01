@@ -145,6 +145,7 @@ struct unit_data {
 
     virtual std::string getUID() = 0;
     virtual bool isActive() = 0;
+    virtual void save() = 0;
 
     nlohmann::json serializeScripts();
     void deserializeScripts();
@@ -180,6 +181,10 @@ struct obj_data : public unit_data {
 
     std::string getUID() override;
     bool isActive() override;
+    void save() override;
+
+    struct room_data* getAbsoluteRoom();
+    struct room_data* getRoom();
 
 
     room_rnum in_room{NOWHERE};        /* In what room -1 when conta/carr	*/
@@ -233,6 +238,8 @@ struct obj_data : public unit_data {
     std::optional<double> gravity;
 
     std::optional<vnum> getMatchingArea(const std::function<bool(const area_data&)>& f);
+
+    bool isProvidingLight();
 };
 /* ======================================================================= */
 
@@ -272,9 +279,6 @@ struct room_data : public unit_data {
     int sector_type{};            /* sector type (move/hide)            */
     std::array<room_direction_data*, NUM_OF_DIRS> dir_option{}; /* Directions */
     bitvector_t room_flags[RF_ARRAY_MAX]{};   /* DEATH,DARK ... etc */
-
-    int8_t light{};                  /* Number of lightsources in room     */
-
     SpecialFunc func{};
     struct char_data *people{};    /* List of NPC / PC in room */
     int timed{};                   /* For timed Dt's                     */
@@ -284,6 +288,10 @@ struct room_data : public unit_data {
 
     std::optional<double> gravity;
 
+    int getDamage();
+    int setDamage(int amount);
+    int modDamage(int amount);
+
     double getGravity();
 
     nlohmann::json serialize();
@@ -292,6 +300,7 @@ struct room_data : public unit_data {
     std::optional<vnum> getMatchingArea(std::function<bool(const area_data&)> f);
     std::string getUID() override;
     bool isActive() override;
+    void save() override;
 };
 /* ====================================================================== */
 
@@ -470,6 +479,9 @@ struct char_data : public unit_data {
     std::string getUID() override;
 
     bool isActive() override;
+    void save() override;
+
+    struct room_data* getRoom();
 
     // Prototype-relevant fields below...
     char *title{};            /* PC / NPC's title                     */
@@ -984,6 +996,8 @@ struct char_data : public unit_data {
 
     int getRPP();
     void modRPP(int amt);
+
+    bool isProvidingLight();
 
 };
 

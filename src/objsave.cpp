@@ -947,7 +947,7 @@ void Crash_save_all(uint64_t heartPulse, double deltaTime) {
         if ((STATE(d) == CON_PLAYING) && !IS_NPC(d->character)) {
             if (PLR_FLAGGED(d->character, PLR_CRASH)) {
                 Crash_crashsave(d->character);
-                save_char(d->character);
+                d->character->save();
                 REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_CRASH);
             }
         }
@@ -1013,7 +1013,7 @@ int Crash_load(struct char_data *ch) {
     if (rentcode == RENT_RENTED || rentcode == RENT_TIMEDOUT) {
         num_of_days = (float) (time(nullptr) - timed) / SECS_PER_REAL_DAY;
         cost = 0;
-        save_char(ch);
+        ch->save();
     }
     switch (orig_rent_code = rentcode) {
         case RENT_RENTED:

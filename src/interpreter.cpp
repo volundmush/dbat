@@ -2715,7 +2715,7 @@ void enter_player_game(struct descriptor_data *d) {
         if (!check->master && IS_NPC(check) && check->master_id == GET_IDNUM(d->character) &&
             AFF_FLAGGED(check, AFF_CHARM) && !circle_follow(check, d->character))
             add_follower(check, d->character);
-    save_char(d->character);
+    d->character->save();
 
     if (PLR_FLAGGED(d->character, PLR_RARM)) {
         GET_LIMBCOND(d->character, 0) = 100;

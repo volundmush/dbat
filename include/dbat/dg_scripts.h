@@ -168,6 +168,7 @@ struct trig_data {
     explicit trig_data(const nlohmann::json& j);
     nlohmann::json serializeProto();
     nlohmann::json serializeInstance();
+    std::string serializeLocation();
     trig_vnum vn{NOTHING};                    /* trigger's rnum                  */
     int8_t attach_type{};            /* mob/obj/wld intentions          */
     int8_t data_type{};                /* type of game_data for trig      */
@@ -183,6 +184,11 @@ struct trig_data {
     bool purged{};            /* trigger is set to be purged     */
     struct trig_var_data *var_list{};    /* list of local vars for trigger  */
     DgUID owner{};
+    int order{0};
+    int countLine(struct cmdlist_element *c);
+
+    int64_t id{};
+    time_t generation{};
 
     struct trig_data *next{};
     struct trig_data *next_in_world{};    /* next in the global trigger list */

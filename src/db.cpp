@@ -55,14 +55,18 @@ std::set<obj_vnum> dirty_item_prototypes;
 std::set<mob_vnum> dirty_npc_prototypes;
 std::set<zone_vnum> dirty_zones;
 std::set<vnum> dirty_areas;
-std::set<trig_vnum> dirty_dgscripts;
+std::set<trig_vnum> dirty_dgscript_prototypes;
 std::set<guild_vnum> dirty_guilds;
 std::set<shop_vnum> dirty_shops;
 std::set<int64_t> dirty_players;
 std::set<vnum> dirty_accounts;
 
+std::set<int64_t> dirty_characters;
+std::set<int64_t> dirty_items;
+std::set<int64_t> dirty_dgscripts;
+
 std::shared_ptr<spdlog::logger> logger;
-bool forceSave = false;
+bool gameIsLoading = true;
 
 struct config_data config_info; /* Game configuration list.    */
 
@@ -87,7 +91,8 @@ std::map<zone_vnum, struct zone_data> zone_table;    /* zone table			 */
 
 std::map<trig_vnum, struct index_data> trig_index; /* index table for triggers      */
 struct trig_data *trigger_list = nullptr;  /* all attached triggers */
-std::map<int64_t, std::pair<time_t, struct trig_data*>> uniqueTriggers;
+std::map<int64_t, std::pair<time_t, struct trig_data*>> uniqueScripts;
+
 
 int dg_owner_purged;            /* For control of scripts */
 
@@ -542,7 +547,8 @@ static void db_load_rooms() {
         auto data = q.getColumn(1).getString();
         try {
             auto j = nlohmann::json::parse(data);
-            world.emplace(id, j);
+            auto r = world.emplace(id, j);
+            r.first->second.zone = real_zone_by_thing(id);
         } catch(std::exception& e) {
             basic_mud_log("Error parsing room %ld: %s", id, e.what());
             continue;
@@ -605,7 +611,8 @@ static void db_load_item_prototypes() {
         auto data = q.getColumn(1).getString();
         try {
             auto j = nlohmann::json::parse(data);
-            obj_proto.emplace(id, j);
+            auto p = obj_proto.emplace(id, j);
+            p.first->second.zone = real_zone_by_thing(id);
             auto &i = obj_index[id];
             i.vn = id;
         } catch(std::exception& e) {
@@ -622,7 +629,8 @@ static void db_load_npc_prototypes() {
         auto data = q.getColumn(1).getString();
         try {
             auto j = nlohmann::json::parse(data);
-            mob_proto.emplace(id, j);
+            auto p = mob_proto.emplace(id, j);
+            p.first->second.zone = real_zone_by_thing(id);
             auto &i = mob_index[id];
             i.vn = id;
         } catch(std::exception& e) {
@@ -1568,9 +1576,7 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
     r.func = nullptr;
     r.contents = nullptr;
     r.people = nullptr;
-    r.light = 0;    /* Zero light sources */
     r.timed = -1;
-    r.dmg = 0;
 
     for (i = 0; i < NUM_OF_DIRS; i++)
         r.dir_option[i] = nullptr;
@@ -1631,10 +1637,15 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
     char line[READ_SIZE], buf2[128];
 
     snprintf(buf2, sizeof(buf2), "room #%d, direction D%d", room, dir);
+    
+    auto &r = world[room];
 
-    CREATE(world[room].dir_option[dir], struct room_direction_data, 1);
-    world[room].dir_option[dir]->general_description = fread_string(fl, buf2);
-    world[room].dir_option[dir]->keyword = fread_string(fl, buf2);
+    CREATE(r.dir_option[dir], struct room_direction_data, 1);
+    
+    auto d = r.dir_option[dir];
+    
+    d->general_description = fread_string(fl, buf2);
+    d->keyword = fread_string(fl, buf2);
 
     if (!get_line(fl, line)) {
         basic_mud_log("SYSERR: Format error, %s", buf2);
@@ -1647,68 +1658,68 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
     } else if (bitwarning == false) {
 
         if (t[0] == 1)
-            world[room].dir_option[dir]->exit_info = EX_ISDOOR;
+            d->exit_info = EX_ISDOOR;
         else if (t[0] == 2)
-            world[room].dir_option[dir]->exit_info = EX_ISDOOR | EX_PICKPROOF;
+            d->exit_info = EX_ISDOOR | EX_PICKPROOF;
         else if (t[0] == 3)
-            world[room].dir_option[dir]->exit_info = EX_ISDOOR | EX_SECRET;
+            d->exit_info = EX_ISDOOR | EX_SECRET;
         else if (t[0] == 4)
-            world[room].dir_option[dir]->exit_info = EX_ISDOOR | EX_PICKPROOF | EX_SECRET;
+            d->exit_info = EX_ISDOOR | EX_PICKPROOF | EX_SECRET;
         else
-            world[room].dir_option[dir]->exit_info = 0;
+            d->exit_info = 0;
 
-        world[room].dir_option[dir]->key = ((t[1] == -1 || t[1] == 65535) ? NOTHING : t[1]);
-        world[room].dir_option[dir]->to_room = ((t[2] == -1 || t[2] == 65535) ? NOWHERE : t[2]);
+        d->key = ((t[1] == -1 || t[1] == 65535) ? NOTHING : t[1]);
+        d->to_room = ((t[2] == -1 || t[2] == 65535) ? NOWHERE : t[2]);
 
         if (retval == 3) {
             basic_mud_log("Converting world files to include DC add ons.");
-            world[room].dir_option[dir]->dclock = 20;
-            world[room].dir_option[dir]->dchide = 20;
-            world[room].dir_option[dir]->dcskill = 0;
-            world[room].dir_option[dir]->dcmove = 0;
-            world[room].dir_option[dir]->failsavetype = 0;
-            world[room].dir_option[dir]->dcfailsave = 0;
-            world[room].dir_option[dir]->failroom = NOWHERE;
-            world[room].dir_option[dir]->totalfailroom = NOWHERE;
+            d->dclock = 20;
+            d->dchide = 20;
+            d->dcskill = 0;
+            d->dcmove = 0;
+            d->failsavetype = 0;
+            d->dcfailsave = 0;
+            d->failroom = NOWHERE;
+            d->totalfailroom = NOWHERE;
             if (bitsavetodisk) {
-                dirty_rooms.insert(room);
+                r.save();
                 converting = true;
             }
         } else if (retval == 5) {
-            world[room].dir_option[dir]->dclock = t[3];
-            world[room].dir_option[dir]->dchide = t[4];
-            world[room].dir_option[dir]->dcskill = 0;
-            world[room].dir_option[dir]->dcmove = 0;
-            world[room].dir_option[dir]->failsavetype = 0;
-            world[room].dir_option[dir]->dcfailsave = 0;
-            world[room].dir_option[dir]->failroom = NOWHERE;
-            world[room].dir_option[dir]->totalfailroom = NOWHERE;
+            d->dclock = t[3];
+            d->dchide = t[4];
+            d->dcskill = 0;
+            d->dcmove = 0;
+            d->failsavetype = 0;
+            d->dcfailsave = 0;
+            d->failroom = NOWHERE;
+            d->totalfailroom = NOWHERE;
             if (bitsavetodisk) {
-                dirty_rooms.insert(room);
+                r.save();
                 converting = true;
             }
         } else if (retval == 7) {
-            world[room].dir_option[dir]->dclock = t[3];
-            world[room].dir_option[dir]->dchide = t[4];
-            world[room].dir_option[dir]->dcskill = t[5];
-            world[room].dir_option[dir]->dcmove = t[6];
-            world[room].dir_option[dir]->failsavetype = 0;
-            world[room].dir_option[dir]->dcfailsave = 0;
-            world[room].dir_option[dir]->failroom = NOWHERE;
-            world[room].dir_option[dir]->totalfailroom = NOWHERE;
+            d->dclock = t[3];
+            d->dchide = t[4];
+            d->dcskill = t[5];
+            d->dcmove = t[6];
+            d->failsavetype = 0;
+            d->dcfailsave = 0;
+            d->failroom = NOWHERE;
+            d->totalfailroom = NOWHERE;
             if (bitsavetodisk) {
-                dirty_rooms.insert(room);
+                r.save();
                 converting = true;
             }
         } else if (retval == 11) {
-            world[room].dir_option[dir]->dclock = t[3];
-            world[room].dir_option[dir]->dchide = t[4];
-            world[room].dir_option[dir]->dcskill = t[5];
-            world[room].dir_option[dir]->dcmove = t[6];
-            world[room].dir_option[dir]->failsavetype = t[7];
-            world[room].dir_option[dir]->dcfailsave = t[8];
-            world[room].dir_option[dir]->failroom = t[9];
-            world[room].dir_option[dir]->totalfailroom = t[10];
+            d->dclock = t[3];
+            d->dchide = t[4];
+            d->dcskill = t[5];
+            d->dcmove = t[6];
+            d->failsavetype = t[7];
+            d->dcfailsave = t[8];
+            d->failroom = t[9];
+            d->totalfailroom = t[10];
         }
     }
 }
@@ -3853,22 +3864,18 @@ void reset_zone(zone_rnum zone) {
                 send_to_room(rrnum, "The area loses the last of the water flooding it in one large rush.\r\n");
                 ROOM_EFFECT(rrnum) = 0;
             }
-            if (ROOM_DAMAGE(rrnum) >= 100) {
+
+            if(auto dmg = room->second.getDamage(); dmg > 0) {
+                int toRepair = 0;
+                if(dmg >= 100) toRepair = rand_number(5, 10);
+                else if(dmg >= 10) toRepair = rand_number(1, 10);
+                else if(dmg > 1) toRepair = rand_number(1, dmg);
+                else toRepair = 1;
+                room->second.modDamage(-toRepair);
                 send_to_room(rrnum, "The area gets rebuilt a little.\r\n");
-                ROOM_DAMAGE(rrnum) -= rand_number(5, 10);
-            } else if (ROOM_DAMAGE(rrnum) >= 50) {
-                send_to_room(rrnum, "The area gets rebuilt a little.\r\n");
-                ROOM_DAMAGE(rrnum) -= rand_number(1, 10);
-            } else if (ROOM_DAMAGE(rrnum) >= 10) {
-                send_to_room(rrnum, "The area gets rebuilt a little.\r\n");
-                ROOM_DAMAGE(rrnum) -= rand_number(1, 10);
-            } else if (ROOM_DAMAGE(rrnum) > 1) {
-                send_to_room(rrnum, "The area gets rebuilt a little.\r\n");
-                ROOM_DAMAGE(rrnum) -= rand_number(1, ROOM_DAMAGE(rrnum));
-            } else if (ROOM_DAMAGE(rrnum) > 0) {
-                send_to_room(rrnum, "The area gets rebuilt a little.\r\n");
-                ROOM_DAMAGE(rrnum)--;
             }
+
+
             if (ROOM_EFFECT(rrnum) >= 1 && rand_number(1, 4) == 4 && !SUNKEN(rrnum) && SECT(rrnum) != SECT_LAVA) {
                 send_to_room(rrnum, "The lava has cooled and become solid rock.\r\n");
                 ROOM_EFFECT(rrnum) = 0;
@@ -4944,7 +4951,7 @@ static std::vector<std::string> schema = {
         "   relations TEXT NOT NULL DEFAULT '{}'"
         ");",
 
-        "CREATE TABLE IF NOT EXISTS objects ("
+        "CREATE TABLE IF NOT EXISTS items ("
         "   id INTEGER PRIMARY KEY,"
         "   generation INTEGER NOT NULL,"
         "   name TEXT,"
@@ -4959,7 +4966,8 @@ static std::vector<std::string> schema = {
         "   generation INTEGER NOT NULL,"
         "   name TEXT,"
         "	data TEXT NOT NULL,"
-        "   location TEXT NOT NULL"
+        "   location TEXT NOT NULL,"
+        "   order INTEGER NOT NULL"
         ");",
 };
 
@@ -4984,7 +4992,7 @@ void create_schema() {
 
 void dirty_all() {
     for(auto &[vn, r] : world) {
-        dirty_rooms.insert(vn);
+        r.save();
     }
 
     for(auto &[vn, obj] : obj_proto) {
@@ -5004,7 +5012,7 @@ void dirty_all() {
     }
 
     for(auto &[vn, dg] : trig_index) {
-        dirty_dgscripts.insert(vn);
+        dirty_dgscript_prototypes.insert(vn);
     }
 
     for(auto &[vn, guild] : guild_index) {
@@ -5188,11 +5196,11 @@ static void process_dirty_areas() {
 
 }
 
-static void process_dirty_dgscripts() {
+static void process_dirty_dgscript_prototypes() {
     SQLite::Statement q(*db, "INSERT OR REPLACE INTO dgscripts (id, data) VALUES (?, ?)");
     SQLite::Statement q1(*db, "DELETE FROM dgscripts WHERE id = ?");
 
-    for(auto v : dirty_dgscripts) {
+    for(auto v : dirty_dgscript_prototypes) {
         auto r = trig_index.find(v);
         if(r == trig_index.end()) {
             // This dgscript has been deleted.
@@ -5206,7 +5214,7 @@ static void process_dirty_dgscripts() {
         q.exec();
         q.reset();
     }
-    dirty_dgscripts.clear();
+    dirty_dgscript_prototypes.clear();
 
 }
 
@@ -5255,6 +5263,86 @@ static void process_dirty_players() {
     dirty_players.clear();
 }
 
+static void process_dirty_characters() {
+    SQLite::Statement q(*db, "INSERT OR REPLACE INTO characters (id, generation, name, shortDesc, data, location, relations) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    SQLite::Statement q1(*db, "DELETE FROM characters WHERE id = ?");
+
+    for(auto v : dirty_characters) {
+        auto r = uniqueCharacters.find(v);
+        if(r == uniqueCharacters.end()) {
+            // This character has been deleted.
+            q1.bind(1, v);
+            q1.exec();
+            q1.reset();
+            continue;
+        } else {
+            q.bind(1, v);
+            q.bind(2, r->second.first);
+            q.bind(3, r->second.second->name);
+            q.bind(4, r->second.second->short_description);
+            q.bind(5, r->second.second->serializeInstance().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+            q.bind(6, r->second.second->serializeLocation().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+            q.bind(7, r->second.second->serializeRelations().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+            q.exec();
+            q.reset();
+        }
+    }
+    dirty_characters.clear();
+
+}
+
+static void process_dirty_items() {
+    SQLite::Statement q(*db, "INSERT OR REPLACE INTO items (id, generation, name, shortDesc, data, location, relations) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    SQLite::Statement q1(*db, "DELETE FROM items WHERE id = ?");
+
+    for(auto v : dirty_items) {
+        auto r = uniqueObjects.find(v);
+        if(r == uniqueObjects.end()) {
+            // This character has been deleted.
+            q1.bind(1, v);
+            q1.exec();
+            q1.reset();
+            continue;
+        } else {
+            q.bind(1, v);
+            q.bind(2, r->second.first);
+            q.bind(3, r->second.second->name);
+            q.bind(4, r->second.second->short_description);
+            q.bind(5, r->second.second->serializeInstance().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+            q.bind(6, r->second.second->serializeLocation().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+            q.bind(7, r->second.second->serializeRelations().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+            q.exec();
+            q.reset();
+        }
+    }
+    dirty_items.clear();
+}
+
+static void process_dirty_dgscripts() {
+    SQLite::Statement q(*db, "INSERT OR REPLACE INTO dgscripts (id, generation, name, data, location, order) VALUES (?, ?, ?, ?, ?, ?)");
+    SQLite::Statement q1(*db, "DELETE FROM dgscripts WHERE id = ?");
+
+    for(auto v : dirty_dgscripts) {
+        auto r = uniqueScripts.find(v);
+        if(r == uniqueScripts.end()) {
+            // This dgscript has been deleted.
+            q1.bind(1, v);
+            q1.exec();
+            q1.reset();
+            continue;
+        }
+        q.bind(1, v);
+        q.bind(2, r->second.first);
+        q.bind(3, r->second.second->name);
+        q.bind(4, r->second.second->serializeInstance().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+        q.bind(5, r->second.second->serializeLocation());
+        q.bind(6, r->second.second->order);
+        q.exec();
+        q.reset();
+    }
+    dirty_dgscripts.clear();
+}
+
 
 void process_dirty() {
     if(!dirty_rooms.empty()) {
@@ -5285,12 +5373,24 @@ void process_dirty() {
         process_dirty_areas();
     }
 
-    if(!dirty_dgscripts.empty()) {
-        process_dirty_dgscripts();
+    if(!dirty_dgscript_prototypes.empty()) {
+        process_dirty_dgscript_prototypes();
     }
 
     if(!dirty_accounts.empty()) {
         process_dirty_accounts();
+    }
+
+    if(!dirty_characters.empty()) {
+        // process_dirty_characters();
+    }
+
+    if(!dirty_items.empty()) {
+        // process_dirty_items();
+    }
+
+    if(!dirty_dgscripts.empty()) {
+        // process_dirty_dgscripts();
     }
 
     if(!dirty_players.empty()) {

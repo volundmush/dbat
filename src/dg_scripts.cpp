@@ -2312,7 +2312,10 @@ void dg_letter_value(struct script_data *sc, trig_data *trig, char *cmd) {
       TRIG_NEW     just started from dg_triggers.c
       TRIG_RESTART restarted after a 'wait'
 */
-int script_driver(void *go_adress, trig_data *trig, int type, int mode) {
+
+
+
+static int true_script_driver(void *go_adress, trig_data *trig, int type, int mode) {
     static int depth = 0;
     int ret_val = 1;
     struct cmdlist_element *cl;
@@ -2559,6 +2562,12 @@ int script_driver(void *go_adress, trig_data *trig, int type, int mode) {
 
     depth--;
     return ret_val;
+}
+
+int script_driver(void *go_adress, trig_data *trig, int type, int mode) {
+    auto result = true_script_driver(go_adress, trig, type, mode);
+    dirty_dgscripts.insert(trig->id);
+    return result;
 }
 
 /* returns the real number of the trigger with given virtual number */
@@ -2856,10 +2865,10 @@ trig_var_data::trig_var_data(const nlohmann::json& j) : trig_var_data() {
 }
 
 nlohmann::json trig_data::serializeProto() {
-    nlohmann::json j;
+    auto j = nlohmann::json::object();
 
     if(vn != NOTHING) j["vn"] = vn;
-    if (name && strlen(name)) j["name"] = name;
+    if(name && strlen(name)) j["name"] = name;
     if(attach_type) j["attach_type"] = attach_type;
     if(data_type) j["data_type"] = data_type;
     if(trigger_type) j["trigger_type"] = trigger_type;
@@ -2871,6 +2880,56 @@ nlohmann::json trig_data::serializeProto() {
     }
 
     return j;
+}
+
+int trig_data::countLine(struct cmdlist_element *c) {
+    int count = 0;
+    for(auto cl = cmdlist; cl; cl = cl->next) {
+        if(cl == c) return count;
+        count++;
+    }
+    // This should never, EVER happen...
+    return -1;
+}
+
+nlohmann::json trig_data::serializeInstance() {
+    auto j = nlohmann::json::object();
+
+    j["vn"] = vn;
+
+    j["id"] = id;
+    j["generation"] = generation;
+
+    if(depth) j["depth"] = depth;
+    if(loops) j["loops"] = loops;
+
+    if(curr_state == cmdlist) {
+        // the script is on the first line.
+        j["curr_state"] = 0;
+    } else {
+        j["curr_state"] = countLine(curr_state);
+        if(curr_state->original) j["curr_state_original"] = countLine(curr_state->original);
+    }
+
+    for(auto v = var_list; v; v = v->next) {
+        j["var_list"].push_back(v->serialize());
+    }
+
+    return j;
+}
+
+std::string trig_data::serializeLocation() {
+    switch(owner.index()) {
+        case 0:
+            return std::get<0>(owner)->getUID();
+            break;
+        case 1:
+            return std::get<1>(owner)->getUID();
+            break;
+        case 2:
+            return std::get<2>(owner)->getUID();
+            break;
+    }
 }
 
 trig_data::trig_data(const nlohmann::json &j) : trig_data() {

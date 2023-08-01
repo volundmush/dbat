@@ -471,28 +471,23 @@ void char_from_room(struct char_data *ch) {
     struct char_data *temp;
     int i;
 
-    if (ch == nullptr || IN_ROOM(ch) == NOWHERE) {
+    if (ch == nullptr || !world.contains(IN_ROOM(ch))) {
         basic_mud_log("SYSERR: nullptr character or NOWHERE in %s, char_from_room", __FILE__);
         return;
     }
+
+    auto &r = world[IN_ROOM(ch)];
 
     if (FIGHTING(ch) != nullptr && !AFF_FLAGGED(ch, AFF_PURSUIT))
         stop_fighting(ch);
     if (AFF_FLAGGED(ch, AFF_PURSUIT) && FIGHTING(ch) == nullptr)
         REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_PURSUIT);
 
-    for (i = 0; i < NUM_WEARS; i++)
-        if (GET_EQ(ch, i) != nullptr)
-            if (GET_OBJ_TYPE(GET_EQ(ch, i)) == ITEM_LIGHT)
-                if (GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_HOURS))
-                    world[IN_ROOM(ch)].light--;
-
-    if (PLR_FLAGGED(ch, PLR_AURALIGHT))
-        world[IN_ROOM(ch)].light--;
-
-    REMOVE_FROM_LIST(ch, world[IN_ROOM(ch)].people, next_in_room, temp);
+    REMOVE_FROM_LIST(ch, r.people, next_in_room, temp);
     IN_ROOM(ch) = NOWHERE;
     ch->next_in_room = nullptr;
+    
+    if(!gameIsLoading) ch->save();
 }
 
 
@@ -500,35 +495,30 @@ void char_from_room(struct char_data *ch) {
 void char_to_room(struct char_data *ch, room_rnum room) {
     int i;
 
-    if (!ch || !world.count(room))
+    if (!ch || !world.count(room)) {
         basic_mud_log("SYSERR: Illegal value(s) passed to char_to_room. (Room: %d, Ch: %p",
-            room, ch);
-    else {
-        ch->next_in_room = world[room].people;
-        world[room].people = ch;
-        IN_ROOM(ch) = room;
+                      room, ch);
+        return;
+    }
+    
+    auto &r = world[room];
+    
+    ch->next_in_room = r.people;
+    r.people = ch;
+    IN_ROOM(ch) = room;
 
-        for (i = 0; i < NUM_WEARS; i++)
-            if (GET_EQ(ch, i))
-                if (GET_OBJ_TYPE(GET_EQ(ch, i)) == ITEM_LIGHT)
-                    if (GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_HOURS))
-                        world[room].light++;
-
-        if (PLR_FLAGGED(ch, PLR_AURALIGHT))
-            world[room].light++;
-
-        /* Stop fighting now, if we left. */
-        if (FIGHTING(ch) && IN_ROOM(ch) != IN_ROOM(FIGHTING(ch)) && !AFF_FLAGGED(ch, AFF_PURSUIT)) {
-            stop_fighting(FIGHTING(ch));
-            stop_fighting(ch);
-        }
-        if (!IS_NPC(ch)) {
-            if (PRF_FLAGGED(ch, PRF_ARENAWATCH)) {
-                REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_ARENAWATCH);
-                ARENA_IDNUM(ch) = -1;
-            }
+    /* Stop fighting now, if we left. */
+    if (FIGHTING(ch) && IN_ROOM(ch) != IN_ROOM(FIGHTING(ch)) && !AFF_FLAGGED(ch, AFF_PURSUIT)) {
+        stop_fighting(FIGHTING(ch));
+        stop_fighting(ch);
+    }
+    if (!IS_NPC(ch)) {
+        if (PRF_FLAGGED(ch, PRF_ARENAWATCH)) {
+            REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_ARENAWATCH);
+            ARENA_IDNUM(ch) = -1;
         }
     }
+    
 }
 
 
@@ -669,12 +659,6 @@ void equip_char(struct char_data *ch, struct obj_data *obj, int pos) {
     if (GET_OBJ_TYPE(obj) == ITEM_ARMOR)
         GET_ARMOR(ch) += apply_ac(ch, pos);
 
-    if (IN_ROOM(ch) != NOWHERE) {
-        if (GET_OBJ_TYPE(obj) == ITEM_LIGHT)
-            if (GET_OBJ_VAL(obj, VAL_LIGHT_HOURS))    /* if light is ON */
-                world[IN_ROOM(ch)].light++;
-    }
-
     for (j = 0; j < MAX_OBJ_AFFECT; j++)
         affect_modify_ar(ch, obj->affected[j].location,
                          obj->affected[j].modifier,
@@ -700,12 +684,6 @@ struct obj_data *unequip_char(struct char_data *ch, int pos) {
 
     if (GET_OBJ_TYPE(obj) == ITEM_ARMOR)
         GET_ARMOR(ch) -= apply_ac(ch, pos);
-
-    if (IN_ROOM(ch) != NOWHERE) {
-        if (GET_OBJ_TYPE(obj) == ITEM_LIGHT)
-            if (GET_OBJ_VAL(obj, VAL_LIGHT_HOURS))    /* if light is ON */
-                world[IN_ROOM(ch)].light--;
-    }
 
     GET_EQ(ch, pos) = nullptr;
 
@@ -805,100 +783,99 @@ struct char_data *get_char_num(mob_rnum nr) {
 void obj_to_room(struct obj_data *object, room_rnum room) {
     struct obj_data *vehicle = nullptr;
 
-    if (!object || !world.count(room))
+    if (!object || !world.count(room)) {
         basic_mud_log("SYSERR: Illegal value(s) passed to obj_to_room. (Room #%d, obj %p)",
             room, object);
-    else {
-        if (ROOM_FLAGGED(room, ROOM_GARDEN1) || ROOM_FLAGGED(room, ROOM_GARDEN2)) {
-            if (GET_OBJ_TYPE(object) != ITEM_PLANT) {
-                send_to_room(room,
-                             "%s @wDisappears in a puff of smoke! It seems the room was designed to vaporize anything not plant related. Strange...@n\r\n",
-                             object->short_description);
-                extract_obj(object);
-                return;
-            }
+    return;
+    }
+    if (ROOM_FLAGGED(room, ROOM_GARDEN1) || ROOM_FLAGGED(room, ROOM_GARDEN2)) {
+        if (GET_OBJ_TYPE(object) != ITEM_PLANT) {
+            send_to_room(room,
+                         "%s @wDisappears in a puff of smoke! It seems the room was designed to vaporize anything not plant related. Strange...@n\r\n",
+                         object->short_description);
+            extract_obj(object);
+            return;
         }
-        if (room == real_room(80)) {
-            auc_load(object);
+    }
+    if (room == real_room(80)) {
+        auc_load(object);
+    }
+    object->next_content = world[room].contents;
+    world[room].contents = object;
+    IN_ROOM(object) = room;
+    object->carried_by = nullptr;
+    GET_LAST_LOAD(object) = time(nullptr);
+    if (GET_OBJ_TYPE(object) == ITEM_VEHICLE && !OBJ_FLAGGED(object, ITEM_UNBREAKABLE) &&
+        GET_OBJ_VNUM(object) > 19199) {
+        SET_BIT_AR(GET_OBJ_EXTRA(object), ITEM_UNBREAKABLE);
+    }
+    if (GET_OBJ_TYPE(object) == ITEM_HATCH && GET_OBJ_VNUM(object) <= 19199) {
+        if ((GET_OBJ_VNUM(object) <= 18999 && GET_OBJ_VNUM(object) >= 18800) ||
+            (GET_OBJ_VNUM(object) <= 19199 && GET_OBJ_VNUM(object) >= 19100)) {
+            int hnum = GET_OBJ_VAL(object, 0);
+            struct obj_data *house = read_object(hnum, VIRTUAL);
+            obj_to_room(house, real_room(GET_OBJ_VAL(object, 6)));
+            SET_BIT(GET_OBJ_VAL(object, VAL_CONTAINER_FLAGS), CONT_CLOSED);
+            SET_BIT(GET_OBJ_VAL(object, VAL_CONTAINER_FLAGS), CONT_LOCKED);
         }
-        object->next_content = world[room].contents;
-        world[room].contents = object;
-        IN_ROOM(object) = room;
-        object->carried_by = nullptr;
-        GET_LAST_LOAD(object) = time(nullptr);
-        if (GET_OBJ_TYPE(object) == ITEM_VEHICLE && !OBJ_FLAGGED(object, ITEM_UNBREAKABLE) &&
-            GET_OBJ_VNUM(object) > 19199) {
-            SET_BIT_AR(GET_OBJ_EXTRA(object), ITEM_UNBREAKABLE);
-        }
-        if (GET_OBJ_TYPE(object) == ITEM_HATCH && GET_OBJ_VNUM(object) <= 19199) {
-            if ((GET_OBJ_VNUM(object) <= 18999 && GET_OBJ_VNUM(object) >= 18800) ||
-                (GET_OBJ_VNUM(object) <= 19199 && GET_OBJ_VNUM(object) >= 19100)) {
-                int hnum = GET_OBJ_VAL(object, 0);
-                struct obj_data *house = read_object(hnum, VIRTUAL);
-                obj_to_room(house, real_room(GET_OBJ_VAL(object, 6)));
+    }
+    if (GET_OBJ_TYPE(object) == ITEM_HATCH && GET_OBJ_VAL(object, 0) > 1 && GET_OBJ_VNUM(object) > 19199) {
+        if (!(vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(object, VAL_HATCH_DEST)))) {
+            if (real_room(GET_OBJ_VAL(object, 3)) != NOWHERE) {
+                vehicle = read_object(GET_OBJ_VAL(object, 0), VIRTUAL);
+                if(!vehicle) {
+                    basic_mud_log("SYSERR: Vehicle %d not found for hatch %d", GET_OBJ_VAL(object, 0), GET_OBJ_VNUM(object));
+                }
+                obj_to_room(vehicle, real_room(GET_OBJ_VAL(object, 3)));
+                if (object->look_description) {
+                    if (strlen(object->look_description)) {
+                        char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH], nick3[MAX_INPUT_LENGTH];
+                        if (GET_OBJ_VNUM(vehicle) <= 46099 && GET_OBJ_VNUM(vehicle) >= 46000) {
+                            sprintf(nick, "Saiyan Pod %s", object->look_description);
+                            sprintf(nick2, "@wA @Ys@ya@Yi@yy@Ya@yn @Dp@Wo@Dd@w named @D(@C%s@D)@w",
+                                    object->look_description);
+                        } else if (GET_OBJ_VNUM(vehicle) >= 46100 && GET_OBJ_VNUM(vehicle) <= 46199) {
+                            sprintf(nick, "EDI Xenofighter MK. II %s", object->look_description);
+                            sprintf(nick2,
+                                    "@wAn @YE@yD@YI @CX@ce@Wn@Do@Cf@ci@Wg@Dh@Wt@ce@Cr @RMK. II @wnamed @D(@C%s@D)@w",
+                                    object->look_description);
+                        }
+                        sprintf(nick3, "%s is resting here@w", nick2);
+                        vehicle->name = strdup(nick);
+                        vehicle->short_description = strdup(nick2);
+                        vehicle->room_description = strdup(nick3);
+                    }
+                }
                 SET_BIT(GET_OBJ_VAL(object, VAL_CONTAINER_FLAGS), CONT_CLOSED);
                 SET_BIT(GET_OBJ_VAL(object, VAL_CONTAINER_FLAGS), CONT_LOCKED);
+            } else {
+                basic_mud_log("Hatch load: Hatch with no vehicle load room: #%d!", GET_OBJ_VNUM(object));
             }
         }
-        if (GET_OBJ_TYPE(object) == ITEM_HATCH && GET_OBJ_VAL(object, 0) > 1 && GET_OBJ_VNUM(object) > 19199) {
-            if (!(vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(object, VAL_HATCH_DEST)))) {
-                if (real_room(GET_OBJ_VAL(object, 3)) != NOWHERE) {
-                    vehicle = read_object(GET_OBJ_VAL(object, 0), VIRTUAL);
-                    if(!vehicle) {
-                        basic_mud_log("SYSERR: Vehicle %d not found for hatch %d", GET_OBJ_VAL(object, 0), GET_OBJ_VNUM(object));
-                    }
-                    obj_to_room(vehicle, real_room(GET_OBJ_VAL(object, 3)));
-                    if (object->look_description) {
-                        if (strlen(object->look_description)) {
-                            char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH], nick3[MAX_INPUT_LENGTH];
-                            if (GET_OBJ_VNUM(vehicle) <= 46099 && GET_OBJ_VNUM(vehicle) >= 46000) {
-                                sprintf(nick, "Saiyan Pod %s", object->look_description);
-                                sprintf(nick2, "@wA @Ys@ya@Yi@yy@Ya@yn @Dp@Wo@Dd@w named @D(@C%s@D)@w",
-                                        object->look_description);
-                            } else if (GET_OBJ_VNUM(vehicle) >= 46100 && GET_OBJ_VNUM(vehicle) <= 46199) {
-                                sprintf(nick, "EDI Xenofighter MK. II %s", object->look_description);
-                                sprintf(nick2,
-                                        "@wAn @YE@yD@YI @CX@ce@Wn@Do@Cf@ci@Wg@Dh@Wt@ce@Cr @RMK. II @wnamed @D(@C%s@D)@w",
-                                        object->look_description);
-                            }
-                            sprintf(nick3, "%s is resting here@w", nick2);
-                            vehicle->name = strdup(nick);
-                            vehicle->short_description = strdup(nick2);
-                            vehicle->room_description = strdup(nick3);
-                        }
-                    }
-                    SET_BIT(GET_OBJ_VAL(object, VAL_CONTAINER_FLAGS), CONT_CLOSED);
-                    SET_BIT(GET_OBJ_VAL(object, VAL_CONTAINER_FLAGS), CONT_LOCKED);
-                } else {
-                    basic_mud_log("Hatch load: Hatch with no vehicle load room: #%d!", GET_OBJ_VNUM(object));
-                }
-            }
-        }
-        if (EXIT(object, 5) &&
-            (SECT(IN_ROOM(object)) == SECT_UNDERWATER || SECT(IN_ROOM(object)) == SECT_WATER_NOSWIM)) {
-            act("$p @Bsinks to deeper waters.@n", true, nullptr, object, nullptr, TO_ROOM);
-            int numb = GET_ROOM_VNUM(EXIT(object, 5)->to_room);
-            obj_from_room(object);
-            obj_to_room(object, real_room(numb));
-        }
-        if (EXIT(object, 5) && SECT(IN_ROOM(object)) == SECT_FLYING &&
-            (GET_OBJ_VNUM(object) < 80 || GET_OBJ_VNUM(object) > 83)) {
-            act("$p @Cfalls down.@n", true, nullptr, object, nullptr, TO_ROOM);
-            int numb = GET_ROOM_VNUM(EXIT(object, 5)->to_room);
-            obj_from_room(object);
-            obj_to_room(object, real_room(numb));
-            if (SECT(IN_ROOM(object)) != SECT_FLYING) {
-                act("$p @Cfalls down and smacks the ground.@n", true, nullptr, object, nullptr, TO_ROOM);
-            }
-        }
-        if (GET_OBJ_VAL(object, 0) != 0) {
-            if (GET_OBJ_VNUM(object) == 16705 || GET_OBJ_VNUM(object) == 16706 || GET_OBJ_VNUM(object) == 16707) {
-                object->level = GET_OBJ_VAL(object, 0);
-            }
-        }
-        if (ROOM_FLAGGED(room, ROOM_SAVE))
-            dirty_rooms.insert(room);
     }
+    if (EXIT(object, 5) &&
+        (SECT(IN_ROOM(object)) == SECT_UNDERWATER || SECT(IN_ROOM(object)) == SECT_WATER_NOSWIM)) {
+        act("$p @Bsinks to deeper waters.@n", true, nullptr, object, nullptr, TO_ROOM);
+        int numb = GET_ROOM_VNUM(EXIT(object, 5)->to_room);
+        obj_from_room(object);
+        obj_to_room(object, real_room(numb));
+    }
+    if (EXIT(object, 5) && SECT(IN_ROOM(object)) == SECT_FLYING &&
+        (GET_OBJ_VNUM(object) < 80 || GET_OBJ_VNUM(object) > 83)) {
+        act("$p @Cfalls down.@n", true, nullptr, object, nullptr, TO_ROOM);
+        int numb = GET_ROOM_VNUM(EXIT(object, 5)->to_room);
+        obj_from_room(object);
+        obj_to_room(object, real_room(numb));
+        if (SECT(IN_ROOM(object)) != SECT_FLYING) {
+            act("$p @Cfalls down and smacks the ground.@n", true, nullptr, object, nullptr, TO_ROOM);
+        }
+    }
+    if (GET_OBJ_VAL(object, 0) != 0) {
+        if (GET_OBJ_VNUM(object) == 16705 || GET_OBJ_VNUM(object) == 16706 || GET_OBJ_VNUM(object) == 16707) {
+            object->level = GET_OBJ_VAL(object, 0);
+        }
+    }
+    if(!gameIsLoading) object->save();
 }
 
 
@@ -929,10 +906,11 @@ void obj_from_room(struct obj_data *object) {
 
     REMOVE_FROM_LIST(object, world[IN_ROOM(object)].contents, next_content, temp);
 
-    if (ROOM_FLAGGED(IN_ROOM(object), ROOM_SAVE))
-        dirty_rooms.insert(IN_ROOM(object));
     IN_ROOM(object) = NOWHERE;
     object->next_content = nullptr;
+
+    if(!gameIsLoading) object->save();
+
 }
 
 
@@ -951,18 +929,7 @@ void obj_to_obj(struct obj_data *obj, struct obj_data *obj_to) {
     obj->in_obj = obj_to;
     tmp_obj = obj->in_obj;
 
-    /* Only add weight to container, or back to carrier for non-eternal
-       containers.  Eternal means max capacity < 0 */
-    if (GET_OBJ_VAL(obj->in_obj, VAL_CONTAINER_CAPACITY) > 0) {
-        for (tmp_obj = obj->in_obj; tmp_obj->in_obj; tmp_obj = tmp_obj->in_obj)
-            GET_OBJ_WEIGHT(tmp_obj) += GET_OBJ_WEIGHT(obj);
-
-        /* top level object.  Subtract weight from inventory if necessary. */
-        GET_OBJ_WEIGHT(tmp_obj) += GET_OBJ_WEIGHT(obj);
-    }
-    if (IN_ROOM(obj_to) != NOWHERE && ROOM_FLAGGED(IN_ROOM(obj_to), ROOM_SAVE)) {
-        dirty_rooms.insert(IN_ROOM(obj_to));;
-    }
+    if(!gameIsLoading) obj->save();
 }
 
 
@@ -977,21 +944,8 @@ void obj_from_obj(struct obj_data *obj) {
     obj_from = obj->in_obj;
     temp = obj->in_obj;
     REMOVE_FROM_LIST(obj, obj_from->contents, next_content, temp);
-
-    /* Subtract weight from containers container */
-    /* Only worry about weight for non-eternal containers
-       Eternal means max capacity < 0 */
-    if (GET_OBJ_VAL(obj->in_obj, VAL_CONTAINER_CAPACITY) > 0) {
-        for (temp = obj->in_obj; temp->in_obj; temp = temp->in_obj)
-            GET_OBJ_WEIGHT(temp) -= GET_OBJ_WEIGHT(obj);
-
-        /* Subtract weight from char that carries the object */
-        GET_OBJ_WEIGHT(temp) -= GET_OBJ_WEIGHT(obj);
-    }
-
-    if (IN_ROOM(obj_from) != NOWHERE && ROOM_FLAGGED(IN_ROOM(obj_from), ROOM_SAVE)) {
-        dirty_rooms.insert(IN_ROOM(obj_from));
-    }
+    
+    if(!gameIsLoading) obj->save();
 
     obj->in_obj = nullptr;
     obj->next_content = nullptr;
@@ -1092,7 +1046,6 @@ void update_char_objects(struct char_data *ch) {
                 } else if (j == 0) {
                     send_to_char(ch, "Your light sputters out and dies.\r\n");
                     act("$n's light sputters out and dies.", false, ch, nullptr, nullptr, TO_ROOM);
-                    world[IN_ROOM(ch)].light--;
                 }
             } else if (GET_OBJ_TYPE(GET_EQ(ch, i)) == ITEM_LIGHT && GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_HOURS) > 0) {
                 GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_TIME) -= 1;
@@ -1284,7 +1237,7 @@ void extract_char_final(struct char_data *ch) {
         if (SCRIPT_MEM(ch))
             extract_script_mem(SCRIPT_MEM(ch));
     } else {
-        save_char(ch);
+        ch->save();
     }
 
     /* If there's a descriptor, they're in the menu now. */

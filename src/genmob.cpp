@@ -1208,3 +1208,27 @@ nlohmann::json char_data::serializeLocation() {
 
     return j;
 }
+
+nlohmann::json char_data::serializeRelations() {
+    auto j = nlohmann::json::object();
+
+    return j;
+}
+
+void char_data::save() {
+    if(id == NOTHING) return;
+    // dirty_characters.insert(id);
+    if(!IS_NPC(this)) dirty_players.insert(id);
+}
+
+bool char_data::isProvidingLight() {
+    if(!IS_NPC(this) && PLR_FLAGGED(this, PLR_AURALIGHT)) return true;
+    for(auto i = 0; i < NUM_WEARS; i++) if(auto e = GET_EQ(this, i); e) if(e->isProvidingLight()) return true;
+    return false;
+}
+
+struct room_data* char_data::getRoom() {
+    auto roomFound = world.find(in_room);
+    if(roomFound != world.end()) return &roomFound->second;
+    return nullptr;
+}

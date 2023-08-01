@@ -127,7 +127,7 @@ static void healthy_check(struct char_data *ch) {
     if (AFF_FLAGGED(ch, AFF_WITHER) && roll >= chance) {
         ch->real_abils.str += 3;
         ch->real_abils.cha += 3;
-        save_char(ch);
+        ch->save();
         REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_WITHER);
         change = true;
     }
@@ -155,7 +155,7 @@ static void healthy_check(struct char_data *ch) {
         ch->real_abils.dex += 4;
         ch->real_abils.con += 4;
         REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_HYDROZAP);
-        save_char(ch);
+        ch->save();
         change = true;
     }
     if (AFF_FLAGGED(ch, AFF_KNOCKED) && roll >= chance) {
@@ -329,13 +329,13 @@ static int64_t mana_gain(struct char_data *ch) {
         send_to_char(ch, "You feel slightly less confident now.\r\n");
         ch->real_abils.str -= 8;
         ch->real_abils.dex -= 8;
-        save_char(ch);
+        ch->save();
     }
     if (AFF_FLAGGED(ch, AFF_HYDROZAP) && rand_number(1, 4) >= 4) {
         ch->real_abils.dex += 4;
         ch->real_abils.con += 4;
         REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_HYDROZAP);
-        save_char(ch);
+        ch->save();
     }
 
     if (GET_SKILL(ch, SKILL_CONCENTRATION) >= 100) {
@@ -763,7 +763,7 @@ static void update_flags(struct char_data *ch) {
         act("$n@W's looks more fit now.", true, ch, nullptr, nullptr, TO_ROOM);
         ch->real_abils.str += 3;
         ch->real_abils.cha += 3;
-        save_char(ch);
+        ch->save();
         REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_WITHER);
     }
     if (wearing_stardust(ch) == 1) {
@@ -844,7 +844,7 @@ void gain_level(struct char_data *ch, int whichclass) {
         send_to_char(ch, "You rise a level!\r\n");
         GET_EXP(ch) -= level_exp(ch, GET_LEVEL(ch));
         /*set_title(ch, nullptr);*/
-        save_char(ch);
+        ch->save();
     }
 }
 
@@ -1359,7 +1359,7 @@ static void check_idling(struct char_data *ch) {
             }
             act("$n disappears into the void.", true, ch, nullptr, nullptr, TO_ROOM);
             send_to_char(ch, "You have been idle, and are pulled into a void.\r\n");
-            save_char(ch);
+            ch->save();
             char_from_room(ch);
             char_to_room(ch, 1);
         } else if (ch->timer > CONFIG_IDLE_RENT_TIME) {
@@ -1494,7 +1494,7 @@ static void heal_limb(struct char_data *ch) {
                 if (ch->real_abils.cha < 4) {
                     ch->real_abils.cha = 4;
                 }
-                save_char(ch);
+                ch->save();
             }
         }
     }
@@ -1566,7 +1566,6 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                     send_to_char(i, "You don't have enough energy to keep the aura active.\r\n");
                     act("$n's aura slowly stops shining and fades.\r\n", true, i, nullptr, nullptr, TO_ROOM);
                     REMOVE_BIT_AR(PLR_FLAGS(i), PLR_AURALIGHT);
-                    world[IN_ROOM(i)].light--;
                 }
             }
             if (IS_MUTANT(i) && (GET_GENOME(i, 0) == 6 || GET_GENOME(i, 1) == 6)) {

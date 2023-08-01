@@ -1300,7 +1300,7 @@ static void do_stat_room(struct char_data *ch) {
                  (long) rm->vn, buf2);
 
     sprintbitarray(rm->room_flags, room_bits, RF_ARRAY_MAX, buf2);
-    send_to_char(ch, "Room Damage: %d, Room Effect: %d\r\n", rm->dmg, rm->geffect);
+    send_to_char(ch, "Room Damage: %d, Room Effect: %d\r\n", rm->getDamage(), rm->geffect);
     send_to_char(ch, "SpecProc: %s, Flags: %s\r\n", rm->func == nullptr ? "None" : "Exists", buf2);
 
     send_to_char(ch, "Description:\r\n%s", rm->look_description ? rm->look_description : "  None.\r\n");
@@ -2504,7 +2504,7 @@ ACMD(do_advance) {
 
     gain_exp_regardless(victim,
                         level_exp(victim, newlevel) - GET_EXP(victim));
-    save_char(victim);
+    victim->save();
 }
 
 ACMD(do_handout) {
@@ -3090,7 +3090,7 @@ ACMD(do_wizutil) {
        */
                 break;
         }
-        save_char(vict);
+        vict->save();
     }
 }
 
@@ -4214,7 +4214,7 @@ ACMD(do_set) {
 
     /* save the character if a change was made */
     if (retval && !IS_NPC(ch)) {
-        save_char(vict);
+        vict->save();
     }
 }
 
@@ -4409,8 +4409,8 @@ ACMD(do_chown) {
 
         obj_from_char(obj);
         obj_to_char(obj, ch);
-        save_char(ch);
-        save_char(victim);
+        ch->save();
+        victim->save();
     }
 }
 

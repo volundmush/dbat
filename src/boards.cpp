@@ -573,7 +573,7 @@ void show_board(obj_vnum board_vnum, struct char_data *ch) {
         GET_BOARD(ch, 4) = time(nullptr);
         /* Builder board */
     }
-    save_char(ch);
+    ch->save();
     return;
 
 }

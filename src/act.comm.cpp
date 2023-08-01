@@ -313,7 +313,7 @@ ACMD(do_say) {
                                 if (wch->real_abils.cha > 100) {
                                     wch->real_abils.cha = 100;
                                 }
-                                save_char(wch);
+                                wch->save();
                                 granted = true;
                                 SELFISHMETER += 1;
                                 mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a speed wish on %s.", GET_NAME(ch),
@@ -345,7 +345,7 @@ ACMD(do_say) {
                                 if (wch->real_abils.str > 100) {
                                     wch->real_abils.str = 100;
                                 }
-                                save_char(wch);
+                                wch->save();
                                 granted = true;
                                 SELFISHMETER += 1;
                                 mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a strength wish on %s.",
@@ -363,7 +363,7 @@ ACMD(do_say) {
                                 if (wch->real_abils.intel > 100) {
                                     wch->real_abils.intel = 100;
                                 }
-                                save_char(wch);
+                                wch->save();
                                 granted = true;
                                 SELFISHMETER += 1;
                                 mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a intelligence wish on %s.",
@@ -398,7 +398,7 @@ ACMD(do_say) {
                                 if (wch->real_abils.dex > 100) {
                                     wch->real_abils.dex = 100;
                                 }
-                                save_char(wch);
+                                wch->save();
                                 granted = true;
                                 SELFISHMETER += 1;
                                 mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a agility wish on %s.",
@@ -416,7 +416,7 @@ ACMD(do_say) {
                                 if (wch->real_abils.con > 100) {
                                     wch->real_abils.con = 100;
                                 }
-                                save_char(wch);
+                                wch->save();
                                 granted = true;
                                 SELFISHMETER += 1;
                                 mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a constitutionwish on %s.",
@@ -434,7 +434,7 @@ ACMD(do_say) {
                                 send_to_char(wch, "@GYou suddenly feel like you could learn %d more skills!@n\r\n",
                                              roll);
                                 GET_SLOTS(wch) += roll;
-                                save_char(wch);
+                                wch->save();
                                 granted = true;
                                 SELFISHMETER += 1;
                                 mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a skill wish on %s.", GET_NAME(ch),
@@ -733,13 +733,13 @@ ACMD(do_say) {
                                 WISH[0] = 1;
                             } /*end WISH if */
                             if (wch != nullptr) {
-                                save_char(wch);
+                                wch->save();
                             }
                             if (wch2 != nullptr) {
-                                save_char(wch);
+                                wch->save();
                             }
                             if (wch3 != nullptr) {
-                                save_char(wch);
+                                wch->save();
                             }
                             save_mud_time(&time_info);
                         } else if (wch == nullptr) {

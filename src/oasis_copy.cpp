@@ -203,7 +203,9 @@ ACMD(do_dig) {
     rrnum = real_room(rvnum);
     if ((dir = search_block(sdir, abbr_dirs, false)) < 0)
         dir = search_block(sdir, dirs, false);
-    zone = world[IN_ROOM(ch)].zone;
+    
+    auto &r = world[IN_ROOM(ch)];
+    zone = r.zone;
 
     if (dir < 0) {
         send_to_char(ch, "Cannot create an exit to the '%s'.\r\n", sdir);
@@ -222,19 +224,22 @@ ACMD(do_dig) {
         send_to_char(ch, "The target exists, but you can't dig to limbo!\r\n");
         return;
     }
+    
+    auto e = W_EXIT(IN_ROOM(ch), dir);
+    
     /*
      * target room == -1 removes the exit
      */
     if (rvnum == NOTHING) {
-        if (W_EXIT(IN_ROOM(ch), dir)) {
+        if (e) {
             /* free the old pointers, if any */
-            if (W_EXIT(IN_ROOM(ch), dir)->general_description)
-                free(W_EXIT(IN_ROOM(ch), dir)->general_description);
-            if (W_EXIT(IN_ROOM(ch), dir)->keyword)
-                free(W_EXIT(IN_ROOM(ch), dir)->keyword);
-            free(W_EXIT(IN_ROOM(ch), dir));
-            W_EXIT(IN_ROOM(ch), dir) = nullptr;
-            dirty_rooms.insert(IN_ROOM(ch));
+            if (e->general_description)
+                free(e->general_description);
+            if (e->keyword)
+                free(e->keyword);
+            free(e);
+            e = nullptr;
+            r.save();
             send_to_char(ch, "You remove the exit to the %s.\r\n", dirs[dir]);
             return;
         }
@@ -245,7 +250,7 @@ ACMD(do_dig) {
     /*
      * Can't dig in a direction, if it's already a door.
      */
-    if (W_EXIT(IN_ROOM(ch), dir)) {
+    if (e) {
         send_to_char(ch, "There already is an exit to the %s.\r\n", dirs[dir]);
         return;
     }
@@ -309,26 +314,31 @@ ACMD(do_dig) {
     /*
      * Now dig.
      */
-    CREATE(W_EXIT(IN_ROOM(ch), dir), struct room_direction_data, 1);
-    W_EXIT(IN_ROOM(ch), dir)->general_description = nullptr;
-    W_EXIT(IN_ROOM(ch), dir)->keyword = nullptr;
-    W_EXIT(IN_ROOM(ch), dir)->to_room = rrnum;
-    dirty_rooms.insert(IN_ROOM(ch));
+    CREATE(r.dir_option[dir], struct room_direction_data, 1);
+    e = r.dir_option[dir];
+    e->general_description = nullptr;
+    e->keyword = nullptr;
+    e->to_room = rrnum;
+    r.save();
     send_to_char(ch, "You make an exit %s to room %d (%s).\r\n",
                  dirs[dir], rvnum, world[rrnum].name);
 
     /*
      * check if we can dig from there to here.
      */
-    if (W_EXIT(rrnum, rev_dir[dir]))
+    auto &r2 = world[rrnum];
+    auto e2 = r2.dir_option[rev_dir[dir]];
+
+    if (e2)
         send_to_char(ch, "You cannot dig from %d to here. The target room already has an exit to the %s.\r\n",
                      rvnum, dirs[rev_dir[dir]]);
     else {
         CREATE(W_EXIT(rrnum, rev_dir[dir]), struct room_direction_data, 1);
-        W_EXIT(rrnum, rev_dir[dir])->general_description = nullptr;
-        W_EXIT(rrnum, rev_dir[dir])->keyword = nullptr;
-        W_EXIT(rrnum, rev_dir[dir])->to_room = IN_ROOM(ch);
-        dirty_rooms.insert(rrnum);
+        e2 =r2.dir_option[rev_dir[dir]];
+        e2->general_description = nullptr;
+        e2->keyword = nullptr;
+        e2->to_room = IN_ROOM(ch);
+        r2.save();
     }
 }
 

@@ -3718,8 +3718,9 @@ int room_is_dark(room_rnum room) {
         return (false);
     }
 
-    if (world[room].light)
-        return (false);
+    for(auto c = world[room].people; c; c = c->next_in_room) {
+        if(c->isProvidingLight()) return false;
+    }
 
     if (cook_element(room))
         return (false);

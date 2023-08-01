@@ -1303,9 +1303,7 @@ ACMD(do_zen) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-                        ROOM_DAMAGE(IN_ROOM(ch)) += 5;
-                    }
+                    world[IN_ROOM(ch)].modDamage(5);
                     improve_skill(vict, SKILL_DODGE, 0);
 
                     if (GET_SKILL_PERF(ch, SKILL_ZEN) == 3 && attperc > minimum) {
@@ -1641,9 +1639,8 @@ ACMD(do_malice) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    if (ROOM_DAMAGE(IN_ROOM(ch)) <= 80) {
-                        ROOM_DAMAGE(IN_ROOM(ch)) += 20;
-                    }
+                    world[IN_ROOM(ch)].modDamage(20);
+
                     improve_skill(vict, SKILL_DODGE, 0);
 
                     pcost(ch, attperc, 0);
@@ -3557,9 +3554,7 @@ ACMD(do_spike) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-                        ROOM_DAMAGE(IN_ROOM(ch)) += 5;
-                    }
+                    world[IN_ROOM(ch)].modDamage(5);
                     if (GET_SKILL_PERF(ch, SKILL_WSPIKE) == 3 && attperc > minimum) {
                         pcost(ch, attperc - 0.05, 0);
                     } else {
@@ -4343,9 +4338,7 @@ ACMD(do_breaker) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-                        ROOM_DAMAGE(IN_ROOM(ch)) += 5;
-                    }
+                    world[IN_ROOM(ch)].modDamage(5);
 
                     pcost(ch, attperc, 0);
                     hurt(0, 0, ch, vict, nullptr, 0, 1);

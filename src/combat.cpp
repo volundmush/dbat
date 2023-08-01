@@ -1672,8 +1672,9 @@ void damage_eq(struct char_data *vict, int location) {
             act("@WYour $p@W completely breaks!@n", false, nullptr, eq, vict, TO_VICT);
             act("@C$N's@W $p@W completely breaks!@n", false, nullptr, eq, vict, TO_NOTVICT);
             perform_remove(vict, location);
-            if (!IS_NPC(vict))
-                save_char(vict);
+            if (!IS_NPC(vict)) {
+                vict->save();
+            }
         } else if (GET_OBJ_VAL(eq, VAL_ALL_MATERIAL) == MATERIAL_LEATHER ||
                    GET_OBJ_VAL(eq, VAL_ALL_MATERIAL) == MATERIAL_COTTON ||
                    GET_OBJ_VAL(eq, VAL_ALL_MATERIAL) == MATERIAL_SILK) {
@@ -5953,9 +5954,7 @@ void handle_spiral(struct char_data *ch, struct char_data *vict, int skill, int 
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-                        ROOM_DAMAGE(IN_ROOM(ch)) += 5;
-                    }
+                    world[IN_ROOM(ch)].modDamage(5);
 
                     pcost(ch, amount, 0);
                     hurt(0, 0, ch, vict, nullptr, 0, 1);

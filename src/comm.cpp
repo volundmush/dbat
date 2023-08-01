@@ -523,10 +523,10 @@ boost::asio::awaitable<void> game_loop() {
         reset_zone(vn);
     }
 
-
     boost::asio::steady_timer timer(co_await boost::asio::this_coro::executor, config::heartbeatInterval);
     double saveTimer = 60.0 * 5.0;
     double deltaTimeInSeconds = 0.1;
+    gameIsLoading = false;
 
     /* The Main Loop.  The Big Cheese.  The Top Dog.  The Head Honcho.  The.. */
     while (!circle_shutdown) {

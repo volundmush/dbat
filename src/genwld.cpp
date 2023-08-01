@@ -27,15 +27,16 @@ room_rnum add_room(struct room_data *room) {
     if (!room)
         return NOWHERE;
 
-    if ((i = real_room(room->vn)) != NOWHERE) {
-        if (SCRIPT(&world[i]))
-            extract_script(&world[i], WLD_TRIGGER);
-        tch = world[i].people;
-        tobj = world[i].contents;
-        copy_room(&world[i], room);
-        world[i].people = tch;
-        world[i].contents = tobj;
-        dirty_rooms.insert(i);
+    if (world.contains(room->vn)) {
+        auto &ro = world[room->vn];
+        if (SCRIPT(&ro))
+            extract_script(&ro, WLD_TRIGGER);
+        tch = ro.people;
+        tobj = ro.contents;
+        copy_room(&ro, room);
+        ro.people = tch;
+        ro.contents = tobj;
+        ro.save();
         basic_mud_log("GenOLC: add_room: Updated existing room #%d.", room->vn);
         return i;
     }
@@ -43,7 +44,7 @@ room_rnum add_room(struct room_data *room) {
     auto &r = world[room->vn];
     r = *room;
     basic_mud_log("GenOLC: add_room: Added room %d.", room->vn);
-    dirty_rooms.insert(room->vn);
+    r.save();
 
     /*
      * Return what array entry we placed the new room in.
@@ -64,7 +65,7 @@ int delete_room(room_rnum rnum) {
         return false;
 
     room = &world[rnum];
-    dirty_rooms.insert(rnum);
+    room->save();
 
     /* This is something you might want to read about in the logs. */
     basic_mud_log("GenOLC: delete_room: Deleting room #%d (%s).", room->vn, room->name);
@@ -403,4 +404,24 @@ std::string room_data::getUID() {
 
 bool room_data::isActive() {
     return world.contains(vn);
+}
+
+
+void room_data::save() {
+    dirty_rooms.insert(vn);
+}
+
+int room_data::getDamage() {
+    return dmg;
+}
+
+int room_data::setDamage(int amount) {
+    auto before = dmg;
+    dmg = std::clamp<int>(amount, 0, 100);
+    // if(dmg != before) save();
+    return dmg;
+}
+
+int room_data::modDamage(int amount) {
+    return setDamage(dmg + amount);
 }

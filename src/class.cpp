@@ -696,7 +696,7 @@ void do_start(struct char_data *ch) {
     ch->restoreVitals();
 
     GET_OLC_ZONE(ch) = NOWHERE;
-    save_char(ch);
+    ch->save();
 }
 
 
@@ -1372,7 +1372,7 @@ void advance_level(struct char_data *ch, int whichclass) {
         ERAPLAYERS += 1;
     }
     snoop_check(ch);
-    save_char(ch);
+    ch->save();
 }
 
 /*

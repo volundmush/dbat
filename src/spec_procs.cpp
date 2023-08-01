@@ -1202,7 +1202,7 @@ SPECIAL(augmenter) {
                     nullptr, nullptr, TO_ROOM);
                 ch->real_abils.str += 1;
                 GET_GOLD(ch) -= strcost;
-                save_char(ch);
+                ch->save();
             }
         } else if (!strcasecmp("intelligence", arg) || !strcasecmp("int", arg)) {
             if (intel >= 100)
@@ -1216,7 +1216,7 @@ SPECIAL(augmenter) {
                     nullptr, nullptr, TO_ROOM);
                 ch->real_abils.intel += 1;
                 GET_GOLD(ch) -= intcost;
-                save_char(ch);
+                ch->save();
             }
         } else if (!strcasecmp("constitution", arg) || !strcasecmp("con", arg)) {
             if (consti >= 100)
@@ -1230,7 +1230,7 @@ SPECIAL(augmenter) {
                     nullptr, nullptr, TO_ROOM);
                 ch->real_abils.con += 1;
                 GET_GOLD(ch) -= concost;
-                save_char(ch);
+                ch->save();
             }
         } else if (!strcasecmp("speed", arg) || !strcasecmp("spe", arg)) {
             if (speed >= 100)
@@ -1244,7 +1244,7 @@ SPECIAL(augmenter) {
                     nullptr, nullptr, TO_ROOM);
                 ch->real_abils.cha += 1;
                 GET_GOLD(ch) -= specost;
-                save_char(ch);
+                ch->save();
             }
         } else if (!strcasecmp("agility", arg) || !strcasecmp("agi", arg)) {
             if (agility >= 100)
@@ -1258,7 +1258,7 @@ SPECIAL(augmenter) {
                     nullptr, nullptr, TO_ROOM);
                 ch->real_abils.dex += 1;
                 GET_GOLD(ch) -= agicost;
-                save_char(ch);
+                ch->save();
             }
         } else if (!strcasecmp("wisdom", arg) || !strcasecmp("wis", arg)) {
             if (wisdom >= 100)
@@ -1272,7 +1272,7 @@ SPECIAL(augmenter) {
                     nullptr, nullptr, TO_ROOM);
                 ch->real_abils.wis += 1;
                 GET_GOLD(ch) -= wiscost;
-                save_char(ch);
+                ch->save();
             }
         } else {
             send_to_char(ch, "Syntax: augment [str | con | int | wis | agi | spe]\r\n");
@@ -1459,7 +1459,7 @@ SPECIAL(bank) {
             GET_BANK_GOLD(ch) -= amount + (amount / 100);
             mudlog(NRM, MAX(ADMLVL_IMPL, GET_INVIS_LEV(ch)), true, "EXCHANGE: %s gave %s zenni to user %s",
                    GET_NAME(ch), add_commas(amount), GET_NAME(vict));
-            save_char(vict);
+            vict->save();
         } else {
             GET_BANK_GOLD(vict) += amount;
             GET_BANK_GOLD(ch) -= amount + (amount / 100);

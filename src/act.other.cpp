@@ -613,7 +613,7 @@ ACMD(do_rpp) {
                 struct obj_data *hobj = read_object(6, VIRTUAL);
                 obj_to_char(hobj, ch);
                 ch->modRPP(-pay);
-                save_char(ch);
+                ch->save();
                 send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", pay);
                 send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), pay);
                 return;
@@ -664,7 +664,7 @@ ACMD(do_rpp) {
             save_mud_time(&time_info);
         }
         ch->modRPP(-pay);
-        save_char(ch);
+        ch->save();
         send_to_char(ch,
                      "@R%d@W RPP paid for your selection. An immortal will address the request soon enough. Be patient.@n\r\n",
                      pay);
@@ -675,14 +675,14 @@ ACMD(do_rpp) {
     /* Pay for purchases here */
     if (selection >= 4 && selection < 12 && pay > 0) {
         ch->modRPP(-pay);
-        save_char(ch);
+        ch->save();
         send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", pay);
         send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), pay);
     }
 
     if (selection > 12 && pay > 0) {
         ch->modRPP(-pay);
-        save_char(ch);
+        ch->save();
         send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", pay);
         send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), pay);
     }
@@ -1637,7 +1637,7 @@ ACMD(do_train) {
             GET_EXP(ch) += level_exp(ch, GET_LEVEL(ch) + 1) * 0.25;
             send_to_char(ch, "You gained quite a bit of experience from that!\r\n");
         }
-        save_char(ch);
+        ch->save();
     }
 }
 
@@ -2092,7 +2092,7 @@ ACMD(do_future) {
         vict->real_abils.cha += 5;
         vict->real_abils.intel += 2;
         GET_POS(vict) = POS_SLEEPING;
-        save_char(vict);
+        vict->save();
     } else {
         if (ch->real_abils.cha + 5 > 25 && GET_BONUS(ch, BONUS_SLOW) > 0) {
             send_to_char(ch, "You can't handle having your speed increased beyond 25.\r\n");
@@ -2113,7 +2113,7 @@ ACMD(do_future) {
         ch->real_abils.cha += 5;
         ch->real_abils.intel += 2;
         GET_POS(vict) = POS_SLEEPING;
-        save_char(ch);
+        ch->save();
     }
 
 
@@ -2575,7 +2575,7 @@ ACMD(do_pose) {
         send_to_char(ch, "@WYou feel your confidence increase! @G+3 Str @Wand@G +3 Agl!@n\r\n");
         ch->real_abils.str += 8;
         ch->real_abils.dex += 8;
-        save_char(ch);
+        ch->save();
         int64_t before = (ch->getMaxLF());
         SET_BIT_AR(PLR_FLAGS(ch), PLR_POSE);
         ch->incCurLF((ch->getMaxLF()) - before);
@@ -5165,7 +5165,7 @@ ACMD(do_focus) {
             ch->decCurKI(ch->getMaxKI() / 20);
             vict->real_abils.str -= 3;
             vict->real_abils.cha -= 3;
-            save_char(vict);
+            vict->save();
             reveal_hiding(ch, 0);
             act("You focus ki into $N's body, and succeed in withering it!", true, ch, nullptr, vict, TO_CHAR);
             act("$n focuses ki into your body, and succeeds in withering it!", true, ch, nullptr, vict, TO_VICT);
@@ -9133,7 +9133,7 @@ ACMD(do_scouter) {
                 send_to_char(ch, "Your scouter overloads and explodes!\r\n");
                 act("$n's scouter explodes!", false, ch, nullptr, nullptr, TO_ROOM);
                 extract_obj(obj);
-                save_char(ch);
+                ch->save();
                 return;
             } else if (OBJ_FLAGGED(obj, ITEM_MSCOUTER) && GET_HIT(vict) >= 5000000) {
                 act("$n points $s scouter at you.", false, ch, nullptr, vict, TO_VICT);
@@ -9142,7 +9142,7 @@ ACMD(do_scouter) {
                 send_to_char(ch, "Your scouter overloads and explodes!\r\n");
                 act("$n's scouter explodes!", false, ch, nullptr, nullptr, TO_ROOM);
                 extract_obj(obj);
-                save_char(ch);
+                ch->save();
                 return;
             } else if (OBJ_FLAGGED(obj, ITEM_ASCOUTER) && GET_HIT(vict) >= 15000000) {
                 act("$n points $s scouter at you.", false, ch, nullptr, vict, TO_VICT);
@@ -9151,7 +9151,7 @@ ACMD(do_scouter) {
                 send_to_char(ch, "Your scouter overloads and explodes!\r\n");
                 act("$n's scouter explodes!", false, ch, nullptr, nullptr, TO_ROOM);
                 extract_obj(obj);
-                save_char(ch);
+                ch->save();
                 return;
             } else {
                 long double percent = 0.0, cur = 0.0, max = 0.0;
@@ -9380,7 +9380,7 @@ ACMD(do_save) {
      */
         if (CONFIG_AUTO_SAVE && GET_ADMLEVEL(ch) < 1) {
             send_to_char(ch, "Saving.\r\n");
-            save_char(ch);
+            ch->save();
             Crash_crashsave(ch);
             if (GET_ROOM_VNUM(IN_ROOM(ch)) < 19800 || GET_ROOM_VNUM(IN_ROOM(ch)) > 19899) {
                 if (GET_ROOM_VNUM(IN_ROOM(ch)) != NOWHERE && GET_ROOM_VNUM(IN_ROOM(ch)) != 0 &&
@@ -9401,7 +9401,7 @@ ACMD(do_save) {
             GET_LOADROOM(ch) = GET_ROOM_VNUM(IN_ROOM(ch));
         }
     }
-    save_char(ch);
+    ch->save();
 }
 
 /* generic function for commands which are normally overridden by
@@ -11950,12 +11950,8 @@ ACMD(do_aura) {
                 send_to_char(ch, "Your aura fades as you stop shining light.\r\n");
                 act("$n's aura fades as they stop shining light on the area.", true, ch, nullptr, nullptr, TO_ROOM);
                 REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_AURALIGHT);
-                world[IN_ROOM(ch)].light--;
 
             } else if ((ch->getCurKI()) > GET_MAX_MANA(ch) * 0.12) {
-                if (IN_ROOM(ch) != NOWHERE) {
-                    world[IN_ROOM(ch)].light++;
-                }
                 reveal_hiding(ch, 0);
                 ch->decCurKIPercent(.12);
                 send_to_char(ch,

@@ -463,7 +463,7 @@ ACMD(do_kyodaika) {
         ch->real_abils.str += 5;
         ch->real_abils.cha -= 2;
         GET_GENOME(ch, 0) = 11;
-        save_char(ch);
+        ch->save();
         return;
     } else {
         act("@GYou growl as your body shrinks to its normal size!@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -472,7 +472,7 @@ ACMD(do_kyodaika) {
         ch->real_abils.str -= 5;
         ch->real_abils.cha += 2;
         GET_GENOME(ch, 0) = 0;
-        save_char(ch);
+        ch->save();
         return;
     }
 
@@ -5023,14 +5023,14 @@ ACMD(do_rptrans) {
 
     } else {
         vict->modRPP(amt);
-        save_char(vict);
+        vict->save();
         send_to_char(vict, "@W%s gives @C%d@W of their RPP to you. How nice!\r\n", GET_NAME(ch), amt);
     }
     ch->modRPP(-amt);
     send_to_char(ch, "@WYou exchange @C%d@W RPP to user @c%s@W for a warm fuzzy feeling.\r\n", amt, CAP(arg));
     mudlog(NRM, MAX(ADMLVL_IMPL, GET_INVIS_LEV(ch)), true, "EXCHANGE: %s gave %d RPP to user %s", GET_NAME(ch), amt,
            arg);
-    save_char(ch);
+    ch->save();
 }
 
 

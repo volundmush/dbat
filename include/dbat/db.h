@@ -123,7 +123,7 @@ extern std::set<zone_vnum> zone_reset_queue;
 
 extern std::shared_ptr<SQLite::Database> db;
 
-extern bool forceSave;
+extern bool gameIsLoading;
 
 extern struct char_data *EDRAGON;
 extern int WISH[2];
@@ -192,8 +192,6 @@ extern mob_rnum real_mobile(mob_vnum vnum);
 extern obj_rnum real_object(obj_vnum vnum);
 
 extern int load_char(const char *name, struct char_data *ch);
-
-extern void save_char(struct char_data *ch);
 
 
 extern void init_char(struct char_data *ch);
@@ -396,11 +394,15 @@ extern std::set<obj_vnum> dirty_item_prototypes;
 extern std::set<mob_vnum> dirty_npc_prototypes;
 extern std::set<zone_vnum> dirty_zones;
 extern std::set<vnum> dirty_areas;
-extern std::set<trig_vnum> dirty_dgscripts;
+extern std::set<trig_vnum> dirty_dgscript_prototypes;
 extern std::set<guild_vnum> dirty_guilds;
 extern std::set<shop_vnum> dirty_shops;
 extern std::set<int64_t> dirty_players;
 extern std::set<vnum> dirty_accounts;
+
+extern std::set<int64_t> dirty_characters;
+extern std::set<int64_t> dirty_items;
+extern std::set<int64_t> dirty_dgscripts;
 
 void process_dirty();
 // TODO: not yet sure how to handle accounts... working on it...
@@ -437,7 +439,7 @@ extern int top_of_socialt;
 extern std::map<trig_vnum, struct index_data> trig_index;
 
 extern struct trig_data *trigger_list;
-extern std::map<int64_t, std::pair<time_t, struct trig_data*>> uniqueTriggers;
+extern std::map<int64_t, std::pair<time_t, struct trig_data*>> uniqueScripts;
 
 extern int dg_owner_purged;
 

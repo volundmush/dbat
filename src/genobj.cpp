@@ -415,13 +415,9 @@ obj_data::obj_data(const nlohmann::json &j) : obj_data() {
 }
 
 std::optional<vnum> obj_data::getMatchingArea(const std::function<bool(const area_data &)>& f) {
-    if(in_room != NOWHERE) {
-        auto &r = world[in_room];
-        return r.getMatchingArea(f);
+    if(auto room = getAbsoluteRoom(); room) {
+        return room->getMatchingArea(f);
     }
-    if(in_obj) return in_obj->getMatchingArea(f);
-    if(carried_by) return carried_by->getMatchingArea(f);
-    if(worn_by) return worn_by->getMatchingArea(f);
     return std::nullopt;
 }
 
@@ -561,4 +557,29 @@ void obj_data::deserializeRelations(const nlohmann::json& j) {
         auto check = resolveUID(j["fellow_wall"]);
         if(check) fellow_wall = std::get<1>(*check);
     }
+}
+
+void obj_data::save() {
+    if(id == NOTHING) return;
+    dirty_items.insert(id);
+}
+
+bool obj_data::isProvidingLight() {
+    return GET_OBJ_TYPE(this) == ITEM_LIGHT && GET_OBJ_VAL(this, VAL_LIGHT_HOURS);
+}
+
+struct room_data* obj_data::getRoom() {
+    auto roomFound = world.find(in_room);
+    if(roomFound != world.end()) return &roomFound->second;
+    return nullptr;
+}
+
+struct room_data* obj_data::getAbsoluteRoom() {
+    if(auto room = getRoom(); room) {
+        return room;
+    }
+    if(in_obj) return in_obj->getAbsoluteRoom();
+    else if(carried_by) return carried_by->getRoom();
+    else if(worn_by) return worn_by->getRoom();
+    return nullptr;
 }

@@ -2175,7 +2175,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
                 send_to_char(ch, "@rYou lose @R%s@r upgrade points!@n\r\n", add_commas(loss));
             }
             Crash_delete_crashfile(ch);
-            save_char(ch);
+            ch->save();
         }
         WAIT_STATE(ch, PULSE_VIOLENCE);
     }

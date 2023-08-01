@@ -21,6 +21,7 @@ nlohmann::json unit_data::serializeUnit() {
     }
 
     if(id) j["id"] = id;
+    if(zone != NOTHING) j["zone"] = zone;
 
     return j;
 }
@@ -55,6 +56,7 @@ void unit_data::deserializeUnit(const nlohmann::json& j) {
     }
 
     if(j.contains("id")) id = j["id"];
+    if(j.contains("zone")) zone = j["zone"];
 
 }
 
