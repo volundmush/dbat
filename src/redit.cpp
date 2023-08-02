@@ -841,7 +841,7 @@ void redit_parse(struct descriptor_data *d, char *arg) {
                 /*
                  * Toggle the bit.
                  */
-                TOGGLE_BIT_AR(OLC_ROOM(d)->room_flags, number - 1);
+                OLC_ROOM(d)->room_flags.flip(number-1);
                 redit_disp_flag_menu(d);
             }
             return;

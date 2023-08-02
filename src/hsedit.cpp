@@ -122,10 +122,10 @@ void hsedit_save_internally(struct descriptor_data *d) {
     }
     /* The new house is stored - now to ensure the roomsflags are correct */
     if (real_room(OLC_HOUSE(d)->vn) != NOWHERE)
-        SET_BIT_AR(ROOM_FLAGS(real_room(OLC_HOUSE(d)->vn)), ROOM_HOUSE);
+        ROOM_FLAGS(real_room(OLC_HOUSE(d)->vn)).set(ROOM_HOUSE);
 
     if (real_room(OLC_HOUSE(d)->atrium) != NOWHERE)
-        SET_BIT_AR(ROOM_FLAGS(real_room(OLC_HOUSE(d)->atrium)), ROOM_ATRIUM);
+        ROOM_FLAGS(real_room(OLC_HOUSE(d)->atrium)).set(ROOM_ATRIUM);
 
 //  olc_add_to_save_list(zone_table[OLC_ZNUM(d)].number, OLC_SAVE_HOUSE); 
 }
@@ -160,7 +160,7 @@ void hedit_delete_house(struct descriptor_data *d, int house_vnum) {
     if ((real_house = real_room(house_control[i].vn)) == NOWHERE)
         basic_mud_log("SYSERR: House %d had invalid vnum %d!", house_vnum, house_control[i].vn);
     else
-        REMOVE_BIT_AR(ROOM_FLAGS(real_house), ROOM_HOUSE | ROOM_HOUSE_CRASH);
+        for(auto i : {ROOM_HOUSE, ROOM_HOUSE_CRASH}) ROOM_FLAGS(real_house).reset(i);
 
     House_delete_file(house_control[i].vn);
 

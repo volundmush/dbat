@@ -32,36 +32,18 @@ void dispel_ash(struct char_data *ch) {
     struct obj_data *obj, *next_obj, *ash = nullptr;
     int there = false;
 
-    for (obj = world[IN_ROOM(ch)].contents; obj; obj = next_obj) {
-        next_obj = obj->next_content;
-        if (GET_OBJ_VNUM(obj) == 1306) {
-            there = true;
-            ash = obj;
-        }
-    }
+    ash = ch->getRoom()->findObjectVnum(1306);
+    if(!ash) return;
 
-    if (ash) {
-        int roll = axion_dice(0);
-        if (GET_OBJ_COST(ash) == 3) {
-            if (GET_INT(ch) > roll) {
-                act("@GYou clear the air with the shockwaves of your power!@n", true, ch, ash, nullptr, TO_CHAR);
-                act("@C$n@G clears the air with the shockwaves of $s power!@n", true, ch, ash, nullptr, TO_ROOM);
-                extract_obj(ash);
-            }
-        } else if (GET_OBJ_COST(ash) == 2) {
-            if (GET_INT(ch) + 10 > roll) {
-                act("@GYou clear the air with the shockwaves of your power!@n", true, ch, ash, nullptr, TO_CHAR);
-                act("@C$n@G clears the air with the shockwaves of $s power!@n", true, ch, ash, nullptr, TO_ROOM);
-                extract_obj(ash);
-            }
-        } else if (GET_OBJ_COST(ash) == 1) {
-            if (GET_INT(ch) + 20 > roll) {
-                act("@GYou clear the air with the shockwaves of your power!@n", true, ch, ash, nullptr, TO_CHAR);
-                act("@C$n@G clears the air with the shockwaves of $s power!@n", true, ch, ash, nullptr, TO_ROOM);
-                extract_obj(ash);
-            }
-        }
-    }
+    int roll = axion_dice(0);
+    bool success = false;
+    if (GET_OBJ_COST(ash) == 3) success = GET_INT(ch) > roll;
+    else if (GET_OBJ_COST(ash) == 2) success = GET_INT(ch) + 10 > roll;
+    else if (GET_OBJ_COST(ash) == 1) success = GET_INT(ch) + 20 > roll;
+    if(!success) return;
+    act("@GYou clear the air with the shockwaves of your power!@n", true, ch, ash, nullptr, TO_CHAR);
+    act("@C$n@G clears the air with the shockwaves of $s power!@n", true, ch, ash, nullptr, TO_ROOM);
+    extract_obj(ash);
 
 }
 
@@ -2307,7 +2289,7 @@ void handle_evolution(struct char_data *ch, int64_t dmg) {
 void demon_refill_lf(struct char_data *ch, int64_t num) {
     struct char_data *tch = nullptr;
 
-    for (tch = world[IN_ROOM(ch)].people; tch; tch = tch->next_in_room) {
+    for (tch = ch->getRoom()->people; tch; tch = tch->next_in_room) {
         if (!IS_DEMON(tch))
             continue;
         if ((tch->getCurLF()) >= (tch->getMaxLF()))
@@ -2330,7 +2312,7 @@ void mob_talk(struct char_data *ch, const char *speech) {
         return;
     }
 
-    for (tch = world[IN_ROOM(ch)].people; tch; tch = tch->next_in_room) {
+    for (tch = ch->getRoom()->people; tch; tch = tch->next_in_room) {
         if (!IS_NPC(tch))
             continue;
         if (!IS_HUMANOID(tch))
@@ -2782,18 +2764,12 @@ int planet_check(struct char_data *ch, struct char_data *vict) {
 
 void purge_homing(struct char_data *ch) {
 
-    struct obj_data *obj = nullptr, *next_obj = nullptr;
-    for (obj = world[IN_ROOM(ch)].contents; obj; obj = next_obj) {
-        next_obj = obj->next_content;
-        if (GET_OBJ_VNUM(obj) == 80 || GET_OBJ_VNUM(obj) == 81) {
-            if (TARGET(obj) == ch || USER(obj) == ch) {
-                act("$p @wloses its target and flies off into the distance.@n", true, nullptr, obj, nullptr, TO_ROOM);
-                extract_obj(obj);
-                continue;
-            }
-        }
+    auto isHoming = [&](const auto& o) {return (o->vn == 80 || o->vn == 81) && (TARGET(o) == ch || USER(o) == ch);};
+    auto gather = ch->getRoom()->gatherObjects(isHoming);
+    for(auto obj : gather) {
+        act("$p @wloses its target and flies off into the distance.@n", true, nullptr, obj, nullptr, TO_ROOM);
+        extract_obj(obj);
     }
-
 }
 
 static std::unordered_set<uint16_t> masoSkills = {
@@ -3071,7 +3047,7 @@ void prune_crlf(char *txt) {
 /* log a death trap hit */
 void log_death_trap(struct char_data *ch) {
     mudlog(BRF, ADMLVL_IMMORT, true, "%s hit death trap #%d (%s)", GET_NAME(ch), GET_ROOM_VNUM(IN_ROOM(ch)),
-           world[IN_ROOM(ch)].name);
+           ch->getRoom()->name);
 }
 
 
@@ -3589,18 +3565,14 @@ void core_dump_real(const char *who, int line) {
 
 /* Is there a campfire in the room? */
 int cook_element(room_rnum room) {
-    struct obj_data *obj, *next_obj;
-    int found = false;
-
-    for (obj = world[room].contents; obj; obj = next_obj) {
-        next_obj = obj->next_content;
-        if (GET_OBJ_TYPE(obj) == ITEM_CAMPFIRE) {
+    int found = 0;
+    for(auto obj = world[room].contents; obj; obj = obj->next_content) {
+        if(GET_OBJ_TYPE(obj) == ITEM_CAMPFIRE) {
             found = 1;
-        } else if (GET_OBJ_VNUM(obj) == 19093) {
-            found = 2;
-        }
+        } else if(obj->vn == 19093) return 2;
     }
-    return (found);
+
+    return found;
 }
 
 // A C++ version of proc_color from comm.c. it returns the colored string.
@@ -4104,4 +4076,12 @@ void SET_SKILL_BONUS(struct char_data *ch, uint16_t skill, int16_t val) {
 void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val) {
     auto &s = ch->skill[skill];
     s.perfs = val;
+}
+
+bool ROOM_FLAGGED(room_vnum loc, int flag) {
+    auto room = world.find(loc);
+    if (room != world.end()) {
+        return room->second.room_flags.test(flag);
+    }
+    return false;
 }

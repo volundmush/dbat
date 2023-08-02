@@ -1288,7 +1288,7 @@ void gain_condition(struct char_data *ch, int condition, int value) {
 }
 
 static void check_idling(struct char_data *ch) {
-    if (dball_count(ch)) {
+    if (!dball_count(ch).empty()) {
         return;
     }
     if (++(ch->timer) > CONFIG_IDLE_VOID) {
@@ -1792,34 +1792,34 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                 GET_OBJ_TIMER(j)--;
             if (!strstr(j->name, "android") && !strstr(j->name, "Android") && !OBJ_FLAGGED(j, ITEM_BURIED)) {
                 if (GET_OBJ_TIMER(j) == 5) {
-                    if ((IN_ROOM(j) != NOWHERE) && (world[IN_ROOM(j)].people)) {
-                        act("@DFlies start to gather around $p@D.@n", true, world[IN_ROOM(j)].people, j, nullptr,
+                    if ((IN_ROOM(j) != NOWHERE) && (j->getRoom()->people)) {
+                        act("@DFlies start to gather around $p@D.@n", true, j->getRoom()->people, j, nullptr,
                             TO_CHAR);
-                        act("@DFlies start to gather around $p@D.@n", true, world[IN_ROOM(j)].people, j, nullptr,
+                        act("@DFlies start to gather around $p@D.@n", true, j->getRoom()->people, j, nullptr,
                             TO_ROOM);
                     }
                 }
                 if (GET_OBJ_TIMER(j) == 3) {
-                    if ((IN_ROOM(j) != NOWHERE) && (world[IN_ROOM(j)].people)) {
-                        act("@DA cloud of flies has formed over $p@D.@n", true, world[IN_ROOM(j)].people, j, nullptr,
+                    if ((IN_ROOM(j) != NOWHERE) && (j->getRoom()->people)) {
+                        act("@DA cloud of flies has formed over $p@D.@n", true, j->getRoom()->people, j, nullptr,
                             TO_CHAR);
-                        act("@DA cloud of flies has formed over $p@D.@n", true, world[IN_ROOM(j)].people, j, nullptr,
+                        act("@DA cloud of flies has formed over $p@D.@n", true, j->getRoom()->people, j, nullptr,
                             TO_ROOM);
                     }
                 }
                 if (GET_OBJ_TIMER(j) == 2) {
-                    if ((IN_ROOM(j) != NOWHERE) && (world[IN_ROOM(j)].people)) {
-                        act("@DMaggots can be seen crawling all over $p@D.@n", true, world[IN_ROOM(j)].people, j,
+                    if ((IN_ROOM(j) != NOWHERE) && (j->getRoom()->people)) {
+                        act("@DMaggots can be seen crawling all over $p@D.@n", true, j->getRoom()->people, j,
                             nullptr, TO_CHAR);
-                        act("@DMaggots can be seen crawling all over $p@D.@n", true, world[IN_ROOM(j)].people, j,
+                        act("@DMaggots can be seen crawling all over $p@D.@n", true, j->getRoom()->people, j,
                             nullptr, TO_ROOM);
                     }
                 }
                 if (GET_OBJ_TIMER(j) == 1) {
-                    if ((IN_ROOM(j) != NOWHERE) && (world[IN_ROOM(j)].people)) {
-                        act("@DMaggots have nearly stripped $p of all its flesh@D.@n", true, world[IN_ROOM(j)].people,
+                    if ((IN_ROOM(j) != NOWHERE) && (j->getRoom()->people)) {
+                        act("@DMaggots have nearly stripped $p of all its flesh@D.@n", true, j->getRoom()->people,
                             j, nullptr, TO_CHAR);
-                        act("@DMaggots have nearly stripped $p of all its flesh@D.@n", true, world[IN_ROOM(j)].people,
+                        act("@DMaggots have nearly stripped $p of all its flesh@D.@n", true, j->getRoom()->people,
                             j, nullptr, TO_ROOM);
                     }
                 }
@@ -1829,19 +1829,19 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                 if (j->carried_by) {
                     if (!strstr(j->name, "android")) {
                         act("$p decays in your hands.", false, j->carried_by, j, nullptr, TO_CHAR);
-                        if ((IN_ROOM(j) != NOWHERE) && (world[IN_ROOM(j)].people)) {
+                        if ((IN_ROOM(j) != NOWHERE) && (j->getRoom()->people)) {
                             act("A quivering horde of maggots consumes $p.",
-                                true, world[IN_ROOM(j)].people, j, nullptr, TO_ROOM);
+                                true, j->getRoom()->people, j, nullptr, TO_ROOM);
                             act("A quivering horde of maggots consumes $p.",
-                                true, world[IN_ROOM(j)].people, j, nullptr, TO_CHAR);
+                                true, j->getRoom()->people, j, nullptr, TO_CHAR);
                         }
                     } else {
                         act("$p decays in your hands.", false, j->carried_by, j, nullptr, TO_CHAR);
-                        if ((IN_ROOM(j) != NOWHERE) && (world[IN_ROOM(j)].people)) {
+                        if ((IN_ROOM(j) != NOWHERE) && (j->getRoom()->people)) {
                             act("$p breaks down completely into a pile of junk.",
-                                true, world[IN_ROOM(j)].people, j, nullptr, TO_ROOM);
+                                true, j->getRoom()->people, j, nullptr, TO_ROOM);
                             act("$p breaks down completely into a pile of junk.",
-                                true, world[IN_ROOM(j)].people, j, nullptr, TO_CHAR);
+                                true, j->getRoom()->people, j, nullptr, TO_CHAR);
                         }
                     }
                 }
@@ -1873,9 +1873,9 @@ void point_update(uint64_t heartPulse, double deltaTime) {
 
             if (GET_OBJ_TIMER(j) == 0) {
                 act("A glowing portal fades from existence.",
-                    true, world[IN_ROOM(j)].people, j, nullptr, TO_ROOM);
+                    true, j->getRoom()->people, j, nullptr, TO_ROOM);
                 act("A glowing portal fades from existence.",
-                    true, world[IN_ROOM(j)].people, j, nullptr, TO_CHAR);
+                    true, j->getRoom()->people, j, nullptr, TO_CHAR);
                 extract_obj(j);
             }
         } else if (GET_OBJ_VNUM(j) == 1306) {
@@ -1884,9 +1884,9 @@ void point_update(uint64_t heartPulse, double deltaTime) {
 
             if (GET_OBJ_TIMER(j) == 0) {
                 act("The $p@n settles to the ground and goes out.",
-                    true, world[IN_ROOM(j)].people, j, nullptr, TO_ROOM);
+                    true, j->getRoom()->people, j, nullptr, TO_ROOM);
                 act("A $p@n settles to the ground and goes out.",
-                    true, world[IN_ROOM(j)].people, j, nullptr, TO_CHAR);
+                    true, j->getRoom()->people, j, nullptr, TO_CHAR);
                 extract_obj(j);
             }
         } else if (OBJ_FLAGGED(j, ITEM_ICE)) {
@@ -1980,16 +1980,16 @@ void timed_dt(struct char_data *ch) {
       and return again.
     */
 
-    if (world[IN_ROOM(ch)].timed < 0) {
-        world[IN_ROOM(ch)].timed = rand_number(2, 5);
+    if (ch->getRoom()->timed < 0) {
+        ch->getRoom()->timed = rand_number(2, 5);
         return;
     }
 
     /* We know ch is in a dt room with timed >= 0 - see if its the end.
     *
     */
-    if (world[IN_ROOM(ch)].timed == 0) {
-        for (vict = world[IN_ROOM(ch)].people; vict; vict = vict->next_in_room) {
+    if (ch->getRoom()->timed == 0) {
+        for (vict = ch->getRoom()->people; vict; vict = vict->next_in_room) {
             if (IS_NPC(vict))
                 continue;
             if (GET_ADMLEVEL(vict) >= ADMLVL_IMMORT)

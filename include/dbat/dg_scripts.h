@@ -469,7 +469,7 @@ extern int valid_dg_target(char_data *ch, int bitvector);
 
 extern void script_damage(char_data *vict, int dam);
 
-extern int check_flags_by_name_ar(int *array, int numflags, char *search, const char *namelist[]);
+extern int check_flags_by_name_ar(bitvector_t *array, int numflags, char *search, const char *namelist[]);
 
 /* from dg_objcmd.c */
 extern room_rnum obj_room(obj_data *obj);

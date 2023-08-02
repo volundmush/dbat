@@ -129,7 +129,7 @@ vnum assembleArea(const AreaDef &def) {
     if(!def.roomFlags.empty()) {
         for(auto &[vn, room] : world) {
             for(auto &f : def.roomFlags) {
-                if(IS_SET_AR(room.room_flags, f)) {
+                if(room.room_flags.test(f)) {
                     rooms.insert(vn);
                     break;
                 }
@@ -560,7 +560,7 @@ void migrate_grid() {
     for(auto child : areas[moon].children) {
         auto &a = areas[child];
         for(auto r : a.rooms) {
-            REMOVE_BIT_AR(ROOM_FLAGS(r), ROOM_EARTH);
+            ROOM_FLAGS(r).reset(ROOM_EARTH);
         }
     }
 
@@ -684,7 +684,7 @@ void migrate_grid() {
 
         for(auto &p : planetMap) {
             if(!room.area) continue;
-            if(IS_SET_AR(room.room_flags, p.first)) {
+            if(room.room_flags.test(p.first)) {
                 auto avn = room.area.value();
                 auto &a = areas[avn];
                 auto &pl = areas[p.second];
@@ -1316,7 +1316,7 @@ void migrate_grid() {
         14904, 15655, // kanassa
         16009, 16544, 16600 // Arlia
     }) {
-        SET_BIT_AR(ROOM_FLAGS(r), ROOM_LANDING);
+        ROOM_FLAGS(r).set(ROOM_LANDING);
     }
 }
 

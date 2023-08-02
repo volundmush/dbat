@@ -21,70 +21,29 @@
 #include "dbat/act.informative.h"
 
 /* local functions */
-int VALID_EDGE(room_rnum x, int y);
+static std::list<std::pair<struct room_data*, char>> bfs_queue;
 
-void bfs_enqueue(room_rnum room, int dir);
-
-void bfs_dequeue();
-
-void bfs_clear_queue();
-
-struct bfs_queue_struct {
-    room_rnum room;
-    char dir;
-    struct bfs_queue_struct *next;
-};
-
-static struct bfs_queue_struct *bfs_queue_head = nullptr, *bfs_queue_tail = nullptr;
-
-/* Utility macros */
-#define MARK(room)    (SET_BIT_AR(ROOM_FLAGS(room), ROOM_BFS_MARK))
-#define UNMARK(room)    (REMOVE_BIT_AR(ROOM_FLAGS(room), ROOM_BFS_MARK))
-#define IS_MARKED(room)    (ROOM_FLAGGED(room, ROOM_BFS_MARK))
-#define TOROOM(x, y)    (world[(x)].dir_option[(y)]->to_room)
-#define IS_CLOSED(x, y)    (EXIT_FLAGGED(world[(x)].dir_option[(y)], EX_CLOSED))
-
-int VALID_EDGE(room_rnum x, int y) {
-    if (world[x].dir_option[y] == nullptr || TOROOM(x, y) == NOWHERE)
-        return 0;
-    if (CONFIG_TRACK_T_DOORS == false && IS_CLOSED(x, y))
-        return 0;
-    if (ROOM_FLAGGED(TOROOM(x, y), ROOM_NOTRACK) || IS_MARKED(TOROOM(x, y)))
-        return 0;
-
-    return 1;
+static int VALID_EDGE(struct room_data *x, int y) {
+    auto d = x->dir_option[y];
+    if(!d) return false;
+    auto dest = d->getDestination();
+    if(!dest) return false;
+    if(CONFIG_TRACK_T_DOORS == false && IS_SET(d->exit_info, EX_CLOSED)) return false;
+    if(dest->room_flags.test(ROOM_NOTRACK) || dest->room_flags.test(ROOM_BFS_MARK)) return false;
+    return true;
 }
 
-void bfs_enqueue(room_rnum room, int dir) {
-    struct bfs_queue_struct *curr;
-
-    CREATE(curr, struct bfs_queue_struct, 1);
-    curr->room = room;
-    curr->dir = dir;
-    curr->next = nullptr;
-
-    if (bfs_queue_tail) {
-        bfs_queue_tail->next = curr;
-        bfs_queue_tail = curr;
-    } else
-        bfs_queue_head = bfs_queue_tail = curr;
+static void bfs_enqueue(struct room_data *r, int dir) {
+    bfs_queue.emplace_back(r, dir);
 }
 
 
-void bfs_dequeue() {
-    struct bfs_queue_struct *curr;
-
-    curr = bfs_queue_head;
-
-    if (!(bfs_queue_head = bfs_queue_head->next))
-        bfs_queue_tail = nullptr;
-    free(curr);
+static void bfs_dequeue() {
+    if(!bfs_queue.empty()) bfs_queue.pop_front();
 }
 
-
-void bfs_clear_queue() {
-    while (bfs_queue_head)
-        bfs_dequeue();
+static void bfs_clear_queue() {
+    bfs_queue.empty();
 }
 
 
@@ -95,40 +54,39 @@ void bfs_clear_queue() {
  * Intended usage: in mobile_activity, give a mob a dir to go if they're
  * tracking another mob or a PC.  Or, a 'track' skill for PCs.
  */
-int find_first_step(room_rnum src, room_rnum target) {
+int find_first_step(struct room_data *src, struct room_data *target) {
     int curr_dir;
-    room_rnum curr_room;
 
-    if (!world.count(src) || !world.count(target)) {
-        basic_mud_log("SYSERR: Illegal value %d or %d passed to find_first_step. (%s)", src, target, __FILE__);
-        return (BFS_ERROR);
-    }
     if (src == target)
         return (BFS_ALREADY_THERE);
 
     /* clear marks first, some OLC systems will save the mark. */
-    for (auto &r : world) {
-        UNMARK(r.first);
+    for (auto &[vn, r] : world) {
+        r.room_flags.reset(ROOM_BFS_MARK);
     }
-    MARK(src);
+    src->room_flags.set(ROOM_BFS_MARK);
+
     /* first, enqueue the first steps, saving which direction we're going. */
     for (curr_dir = 0; curr_dir < NUM_OF_DIRS; curr_dir++) {
         if (VALID_EDGE(src, curr_dir)) {
-            MARK(TOROOM(src, curr_dir));
-            bfs_enqueue(TOROOM(src, curr_dir), curr_dir);
+            auto dest = src->dir_option[curr_dir]->getDestination();
+            dest->room_flags.set(ROOM_BFS_MARK);
+            bfs_enqueue(dest, curr_dir);
         }
     }
     /* now, do the classic BFS. */
-    while (bfs_queue_head) {
-        if (bfs_queue_head->room == target) {
-            curr_dir = bfs_queue_head->dir;
+    while (!bfs_queue.empty()) {
+        auto f = bfs_queue.front();
+        if (f.first == target) {
+            curr_dir = f.second;
             bfs_clear_queue();
             return (curr_dir);
         } else {
             for (curr_dir = 0; curr_dir < NUM_OF_DIRS; curr_dir++)
-                if (VALID_EDGE(bfs_queue_head->room, curr_dir)) {
-                    MARK(TOROOM(bfs_queue_head->room, curr_dir));
-                    bfs_enqueue(TOROOM(bfs_queue_head->room, curr_dir), bfs_queue_head->dir);
+                if (VALID_EDGE(f.first, curr_dir)) {
+                    auto dest = f.first->dir_option[curr_dir]->getDestination();
+                    dest->room_flags.set(ROOM_BFS_MARK);
+                    bfs_enqueue(dest, f.second);
                 }
             bfs_dequeue();
         }
@@ -140,7 +98,14 @@ int find_first_step(room_rnum src, room_rnum target) {
 /********************************************************
 * Functions and Commands which use the above functions. *
 ********************************************************/
-
+static std::map<std::string, room_vnum> planetLocations = {
+        {"earth", 40979},
+        {"frigid", 30889},
+        {"konack", 27065},
+        {"vegeta", 32365},
+        {"aether", 41959},
+        {"namek", 42880}
+};
 
 ACMD(do_sradar) {
     struct obj_data *vehicle = nullptr, *controls = nullptr;
@@ -197,95 +162,47 @@ ACMD(do_sradar) {
         send_to_char(ch, "@wYou need to wait a few more seconds before pinging a destination again.\r\n");
         return;
     }
+    std::string argstr(arg);
+    boost::to_lower(argstr);
 
+    struct room_data *startRoom;
     if (noship == false) {
-        if (!strcasecmp(arg, "earth") || !strcasecmp(arg, "Earth")) {
-            dir = find_first_step(IN_ROOM(vehicle), real_room(40979));
-            sprintf(planet, "Earth");
-        } else if (!strcasecmp(arg, "frigid") || !strcasecmp(arg, "Frigid")) {
-            dir = find_first_step(IN_ROOM(vehicle), real_room(30889));
-            sprintf(planet, "Frigid");
-        } else if (!strcasecmp(arg, "konack") || !strcasecmp(arg, "Konack")) {
-            dir = find_first_step(IN_ROOM(vehicle), real_room(27065));
-            sprintf(planet, "Konack");
-        } else if (!strcasecmp(arg, "vegeta") || !strcasecmp(arg, "Vegeta")) {
-            dir = find_first_step(IN_ROOM(vehicle), real_room(32365));
-            sprintf(planet, "Vegeta");
-        } else if (!strcasecmp(arg, "aether") || !strcasecmp(arg, "Aether")) {
-            dir = find_first_step(IN_ROOM(vehicle), real_room(41959));
-            sprintf(planet, "Aether");
-        } else if (!strcasecmp(arg, "namek") || !strcasecmp(arg, "Namek")) {
-            dir = find_first_step(IN_ROOM(vehicle), real_room(42880));
-            sprintf(planet, "Namek");
-        } else if (!strcasecmp(arg, "buoy1") && GET_RADAR1(ch) <= 0) {
-            send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
-            return;
-        } else if (!strcasecmp(arg, "buoy2") && GET_RADAR2(ch) <= 0) {
-            send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
-            return;
-        } else if (!strcasecmp(arg, "buoy3") && GET_RADAR3(ch) <= 0) {
-            send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
-            return;
-        } else if (!strcasecmp(arg, "buoy1") && GET_RADAR1(ch) > 0) {
-            int rad = GET_RADAR1(ch);
-            dir = find_first_step(IN_ROOM(vehicle), real_room(rad));
-            sprintf(planet, "Buoy One");
-        } else if (!strcasecmp(arg, "buoy2") && GET_RADAR2(ch) > 0) {
-            int rad = GET_RADAR2(ch);
-            dir = find_first_step(IN_ROOM(vehicle), real_room(rad));
-            sprintf(planet, "Buoy Two");
-        } else if (!strcasecmp(arg, "buoy3") && GET_RADAR3(ch) > 0) {
-            int rad = GET_RADAR3(ch);
-            dir = find_first_step(IN_ROOM(vehicle), real_room(rad));
-            sprintf(planet, "Buoy Three");
-        } else {
-            send_to_char(ch, "@wThat is not an existing planet.@n\r\n");
-            return;
-        }
+        startRoom = vehicle->getRoom();
+    } else {
+        startRoom = ch->getRoom();
     }
 
-    if (noship == true) {
-        if (!strcasecmp(arg, "earth") || !strcasecmp(arg, "Earth")) {
-            dir = find_first_step(IN_ROOM(ch), real_room(40979));
-            sprintf(planet, "Earth");
-        } else if (!strcasecmp(arg, "frigid") || !strcasecmp(arg, "Frigid")) {
-            dir = find_first_step(IN_ROOM(ch), real_room(30889));
-            sprintf(planet, "Frigid");
-        } else if (!strcasecmp(arg, "konack") || !strcasecmp(arg, "Konack")) {
-            dir = find_first_step(IN_ROOM(ch), real_room(27065));
-            sprintf(planet, "Konack");
-        } else if (!strcasecmp(arg, "vegeta") || !strcasecmp(arg, "Vegeta")) {
-            dir = find_first_step(IN_ROOM(ch), real_room(32365));
-            sprintf(planet, "Vegeta");
-        } else if (!strcasecmp(arg, "aether") || !strcasecmp(arg, "Aether")) {
-            dir = find_first_step(IN_ROOM(ch), real_room(41959));
-            sprintf(planet, "Aether");
-        } else if (!strcasecmp(arg, "namek") || !strcasecmp(arg, "Namek")) {
-            dir = find_first_step(IN_ROOM(ch), real_room(42880));
-            sprintf(planet, "Namek");
-        } else if (!strcasecmp(arg, "buoy1") && GET_RADAR1(ch) <= 0) {
-            send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
-            return;
-        } else if (!strcasecmp(arg, "buoy2") && GET_RADAR2(ch) <= 0) {
-            send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
-            return;
-        } else if (!strcasecmp(arg, "buoy3") && GET_RADAR3(ch) <= 0) {
-            send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
-            return;
-        } else if (!strcasecmp(arg, "buoy1") && GET_RADAR1(ch) > 0) {
-            int rad = GET_RADAR1(ch);
-            dir = find_first_step(IN_ROOM(ch), real_room(rad));
-            sprintf(planet, "Buoy One");
-        } else if (!strcasecmp(arg, "buoy2") && GET_RADAR2(ch) > 0) {
-            int rad = GET_RADAR2(ch);
-            dir = find_first_step(IN_ROOM(ch), real_room(rad));
-            sprintf(planet, "Buoy Two");
-        } else if (!strcasecmp(arg, "buoy3") && GET_RADAR3(ch) > 0) {
-            int rad = GET_RADAR3(ch);
-            dir = find_first_step(IN_ROOM(ch), real_room(rad));
-            sprintf(planet, "Buoy Three");
+    auto find = planetLocations.find(argstr);
+    if(find != planetLocations.end()) {
+        dir = find_first_step(startRoom, &world[find->second]);
+        sprintf(planet, "%s", argstr.c_str());
+    } else {
+        if(!strcasecmp(arg, "buoy1")) {
+            auto room = world.find(GET_RADAR1(ch));
+            if(room != world.end()) {
+                dir = find_first_step(startRoom, &room->second);
+            } else {
+                send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
+                return;
+            }
+        } else if(!strcasecmp(arg, "buoy2")) {
+            auto room = world.find(GET_RADAR2(ch));
+            if(room != world.end()) {
+                dir = find_first_step(startRoom, &room->second);
+            } else {
+                send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
+                return;
+            }
+        } else if(!strcasecmp(arg, "buoy3")) {
+            auto room = world.find(GET_RADAR3(ch));
+            if(room != world.end()) {
+                dir = find_first_step(startRoom, &room->second);
+            } else {
+                send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
+                return;
+            }
         } else {
-            send_to_char(ch, "@wThat is not an existing planet.@n\r\n");
+            send_to_char(ch, "@wThat is not a valid planet.\r\n");
             return;
         }
     }
@@ -308,18 +225,12 @@ ACMD(do_sradar) {
 
 }
 
-ACMD(do_radar) {
-    int room = 0, dir, num = 0, found = false, found2 = false, fcount = 0;
-    struct char_data *tch;
-    struct obj_data *obj, *obj2, *next_obj;
 
-    for (obj2 = ch->contents; obj2; obj2 = next_obj) {
-        next_obj = obj2->next_content;
-        if (GET_OBJ_VNUM(obj2) == 12 && (!OBJ_FLAGGED(obj2, ITEM_BROKEN)) && (!OBJ_FLAGGED(obj2, ITEM_FORGED))) {
-            found2 = true;
-        }
-    }
-    if (found2 == false) {
+ACMD(do_radar) {
+    int dir, found = false, fcount = 0;
+
+    auto dradar = ch->findObjectVnum(12);
+    if (!dradar) {
         send_to_char(ch, "You do not even have a dragon radar!\r\n");
         return;
     }
@@ -327,83 +238,44 @@ ACMD(do_radar) {
     if (IS_NPC(ch)) {
         send_to_char(ch, "You are a freaking mob!\r\n");
         return;
-    } else {
-        WAIT_STATE(ch, PULSE_2SEC);
-        act("$n holds up a dragon radar and pushes its button.", false, ch, nullptr, nullptr, TO_ROOM);
-        while (num < 20000) {
-            if (real_room(room) != NOWHERE) {
-                for (obj = world[real_room(room)].contents; obj; obj = next_obj) {
-                    next_obj = obj->next_content;
-                    if (OBJ_FLAGGED(obj, ITEM_FORGED)) {
-                        continue;
-                    } else if (GET_OBJ_VNUM(obj) == 20 || GET_OBJ_VNUM(obj) == 21 || GET_OBJ_VNUM(obj) == 22 ||
-                               GET_OBJ_VNUM(obj) == 23 || GET_OBJ_VNUM(obj) == 24 || GET_OBJ_VNUM(obj) == 25 ||
-                               GET_OBJ_VNUM(obj) == 26) {
-                        dir = find_first_step(IN_ROOM(ch), IN_ROOM(obj));
-                        fcount += 1;
-                        switch (dir) {
-                            case BFS_ERROR:
-                                send_to_char(ch, "Hmm.. something seems to be wrong.\r\n");
-                                break;
-                            case BFS_ALREADY_THERE:
-                                send_to_char(ch, "@D<@G%d@D>@w The radar detects a dragonball right here!\r\n", fcount);
-                                break;
-                            case BFS_NO_PATH:
-                                send_to_char(ch,
-                                             "@D<@G%d@D>@w The radar detects a faint dragonball signal, but can not direct you further.\r\n",
-                                             fcount);
-                                break;
-                            default:
-                                send_to_char(ch, "@D<@G%d@D>@w The radar detects a dragonball %s of here.\r\n", fcount,
-                                             dirs[dir]);
-                                break;
-                        }
-                        found = true;
-                    }
-                }
-                for (tch = world[real_room(room)].people; tch; tch = tch->next_in_room) {
-                    if (tch == ch) {
-                        continue;
-                    }
-                    for (obj = tch->contents; obj; obj = next_obj) {
-                        next_obj = obj->next_content;
-                        if (OBJ_FLAGGED(obj, ITEM_FORGED)) {
-                            continue;
-                        } else if (GET_OBJ_VNUM(obj) == 20 || GET_OBJ_VNUM(obj) == 21 || GET_OBJ_VNUM(obj) == 22 ||
-                                   GET_OBJ_VNUM(obj) == 23 || GET_OBJ_VNUM(obj) == 24 || GET_OBJ_VNUM(obj) == 25 ||
-                                   GET_OBJ_VNUM(obj) == 26) {
-                            dir = find_first_step(IN_ROOM(ch), IN_ROOM(tch));
-                            fcount += 1;
-                            switch (dir) {
-                                case BFS_ERROR:
-                                    send_to_char(ch, "Hmm.. something seems to be wrong.\r\n");
-                                    break;
-                                case BFS_ALREADY_THERE:
-                                    send_to_char(ch, "@D<@G%d@D>@w The radar detects a dragonball right here!\r\n",
-                                                 fcount);
-                                    break;
-                                case BFS_NO_PATH:
-                                    send_to_char(ch,
-                                                 "@D<@G%d@D>@w The radar detects a faint dragonball signal, but can not direct you further.\r\n",
-                                                 fcount);
-                                    break;
-                                default:
-                                    send_to_char(ch, "@D<@G%d@D>@w The radar detects a dragonball %s of here.\r\n",
-                                                 fcount, dirs[dir]);
-                                    break;
-                            }
-                            found = true;
-                        }
-                    }
-                }
+    }
+
+    auto cr = ch->getRoom();
+
+    WAIT_STATE(ch, PULSE_2SEC);
+    act("$n holds up a dragon radar and pushes its button.", false, ch, nullptr, nullptr, TO_ROOM);
+    for(auto vn : dbVnums) {
+        auto &oi = obj_index[vn];
+        auto o = oi.objects.begin();
+        if(o != oi.objects.end()) {
+            auto r = (*o)->getAbsoluteRoom();
+            if(!r) continue;
+            dir = find_first_step(cr, r);
+            switch (dir) {
+                case BFS_ERROR:
+                    send_to_char(ch, "Hmm.. something seems to be wrong.\r\n");
+                    break;
+                case BFS_ALREADY_THERE:
+                    send_to_char(ch, "@D<@G%d@D>@w The radar detects a dragonball right here!\r\n", fcount);
+                    break;
+                case BFS_NO_PATH:
+                    send_to_char(ch,
+                                 "@D<@G%d@D>@w The radar detects a faint dragonball signal, but can not direct you further.\r\n",
+                                 fcount);
+                    break;
+                default:
+                    send_to_char(ch, "@D<@G%d@D>@w The radar detects a dragonball %s of here.\r\n", fcount,
+                                 dirs[dir]);
+                    break;
             }
-            num += 1;
-            room += 1;
+            found = true;
+            break;
         }
-        if (found == false) {
-            send_to_char(ch, "The radar didn't detect any dragonballs on the planet.\r\n");
-            return;
-        }
+    }
+
+    if (found == false) {
+        send_to_char(ch, "The radar didn't detect any dragonballs on the planet.\r\n");
+        return;
     }
 }
 
@@ -589,7 +461,7 @@ ACMD(do_track) {
         }
 
         /* They passed the skill check. */
-        dir = find_first_step(IN_ROOM(ch), IN_ROOM(vict));
+        dir = find_first_step(ch->getRoom(), vict->getRoom());
 
         switch (dir) {
             case BFS_ERROR:

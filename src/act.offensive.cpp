@@ -150,7 +150,7 @@ ACMD(do_galikgun) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    world[IN_ROOM(ch)].modDamage(5);
+                    ch->getRoom()->modDamage(5);
                     improve_skill(vict, SKILL_DODGE, 0);
 
                     if (GET_SKILL_PERF(ch, SKILL_GALIKGUN) == 3 && attperc > minimum) {
@@ -424,7 +424,7 @@ ACMD(do_honoo) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    world[IN_ROOM(ch)].modDamage(5);
+                    ch->getRoom()->modDamage(5);
                     improve_skill(vict, SKILL_DODGE, 0);
 
                     if (GET_SKILL_PERF(ch, SKILL_HONOO) == 3 && attperc > minimum) {
@@ -743,7 +743,7 @@ ACMD(do_psyblast) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    world[IN_ROOM(ch)].modDamage(5);
+                    ch->getRoom()->modDamage(5);
                     improve_skill(vict, SKILL_DODGE, 0);
 
                     if (GET_SKILL_PERF(ch, SKILL_PSYBLAST) == 3 && attperc > minimum) {
@@ -1059,7 +1059,7 @@ ACMD(do_tslash) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    world[IN_ROOM(ch)].modDamage(5);
+                    ch->getRoom()->modDamage(5);
                     improve_skill(vict, SKILL_DODGE, 0);
 
                     if (GET_SKILL_PERF(ch, SKILL_TSLASH) == 3 && attperc > minimum) {
@@ -1412,7 +1412,7 @@ ACMD(do_eraser) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    world[IN_ROOM(ch)].modDamage(5);
+                    ch->getRoom()->modDamage(5);
                     improve_skill(vict, SKILL_DODGE, 0);
 
                     pcost(ch, attperc, 0);
@@ -1665,7 +1665,7 @@ ACMD(do_pbarrage) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    world[IN_ROOM(ch)].modDamage(5);
+                    ch->getRoom()->modDamage(5);
                     improve_skill(vict, SKILL_DODGE, 0);
 
                     pcost(ch, attperc, 0);
@@ -1974,7 +1974,7 @@ ACMD(do_genki) {
         return;
     }
 
-    for (friend_char = world[IN_ROOM(ch)].people; friend_char; friend_char = next_v) {
+    for (friend_char = ch->getRoom()->people; friend_char; friend_char = next_v) {
         next_v = friend_char->next_in_room;
         if (friend_char == ch) {
             continue;
@@ -2361,7 +2361,7 @@ ACMD(do_deathball) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    world[IN_ROOM(ch)].modDamage(20);
+                    ch->getRoom()->modDamage(20);
                     improve_skill(vict, SKILL_DODGE, 0);
 
                     pcost(ch, attperc, 0);
@@ -2861,7 +2861,7 @@ ACMD(do_bigbang) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    world[IN_ROOM(ch)].modDamage(20);
+                    ch->getRoom()->modDamage(20);
                     improve_skill(vict, SKILL_DODGE, 0);
 
                     pcost(ch, attperc, 0);
@@ -3109,7 +3109,7 @@ ACMD(do_scatter) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    world[IN_ROOM(ch)].modDamage(20);
+                    ch->getRoom()->modDamage(20);
                     improve_skill(vict, SKILL_DODGE, 0);
 
                     pcost(ch, attperc, 0);
@@ -3364,7 +3364,7 @@ ACMD(do_balefire) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    world[IN_ROOM(ch)].modDamage(20);
+                    ch->getRoom()->modDamage(20);
                     improve_skill(vict, SKILL_DODGE, 0);
 
                     pcost(ch, attperc, 0);
@@ -3528,7 +3528,7 @@ ACMD(do_kakusanha) {
 
     skill = init_skill(ch, SKILL_KAKUSANHA); /* Set skill value */
 
-    for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+    for (vict = ch->getRoom()->people; vict; vict = next_v) {
         next_v = vict->next_in_room;
         if (vict == ch) {
             continue;
@@ -3589,7 +3589,7 @@ ACMD(do_kakusanha) {
             dmg = (dmg / 100) * 60;
         }
 
-        for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+        for (vict = ch->getRoom()->people; vict; vict = next_v) {
             next_v = vict->next_in_room;
             if (vict == ch) {
                 continue;
@@ -3775,7 +3775,7 @@ ACMD(do_kakusanha) {
                 }
             }
 
-            world[IN_ROOM(ch)].modDamage((5 - count) * 5);
+            ch->getRoom()->modDamage((5 - count) * 5);
         }
 
         pcost(ch, attperc, 0);
@@ -3829,7 +3829,7 @@ ACMD(do_hellspear) {
 
     skill = init_skill(ch, SKILL_HELLSPEAR); /* Set skill value */
 
-    for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+    for (vict = ch->getRoom()->people; vict; vict = next_v) {
         next_v = vict->next_in_room;
         if (vict == ch) {
             continue;
@@ -3871,7 +3871,7 @@ ACMD(do_hellspear) {
 
         dmg = damtype(ch, 33, skill, attperc);
 
-        for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+        for (vict = ch->getRoom()->people; vict; vict = next_v) {
             next_v = vict->next_in_room;
             if (vict == ch) {
                 continue;
@@ -4053,7 +4053,7 @@ ACMD(do_hellflash) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    world[IN_ROOM(ch)].modDamage(5);
+                    ch->getRoom()->modDamage(5);
                     improve_skill(vict, SKILL_DODGE, 0);
                     if (GET_SKILL_PERF(ch, SKILL_HELLFLASH) == 3 && attperc > minimum) {
                         pcost(ch, attperc - 0.05, 0);
@@ -4587,7 +4587,7 @@ ACMD(do_crusher) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    world[IN_ROOM(ch)].modDamage(10);
+                    ch->getRoom()->modDamage(10);
                     improve_skill(vict, SKILL_DODGE, 0);
                     if (GET_SKILL_PERF(ch, SKILL_CRUSHER) == 3 && attperc > minimum) {
                         pcost(ch, attperc - 0.05, 0);
@@ -4835,7 +4835,7 @@ ACMD(do_final) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    world[IN_ROOM(ch)].modDamage(10);
+                    ch->getRoom()->modDamage(10);
                     improve_skill(vict, SKILL_DODGE, 0);
 
                     pcost(ch, attperc, 0);
@@ -5056,7 +5056,7 @@ ACMD(do_sbc) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    world[IN_ROOM(ch)].modDamage(10);
+                    ch->getRoom()->modDamage(10);
                     improve_skill(vict, SKILL_DODGE, 0);
 
                     pcost(ch, attperc, 0);
@@ -5287,7 +5287,7 @@ ACMD(do_tribeam) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    world[IN_ROOM(ch)].modDamage(10);
+                    ch->getRoom()->modDamage(10);
                     improve_skill(vict, SKILL_DODGE, 0);
 
                     pcost(ch, attperc, 0);
@@ -5516,7 +5516,7 @@ ACMD(do_kienzan) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    world[IN_ROOM(ch)].modDamage(5);
+                    ch->getRoom()->modDamage(5);
                     improve_skill(vict, SKILL_DODGE, 0);
 
                     pcost(ch, attperc, 0);
@@ -5829,7 +5829,7 @@ ACMD(do_baku) {
 
     skill = init_skill(ch, SKILL_BAKUHATSUHA); /* Set skill value */
 
-    for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+    for (vict = ch->getRoom()->people; vict; vict = next_v) {
         next_v = vict->next_in_room;
         if (vict == ch) {
             continue;
@@ -5896,7 +5896,7 @@ ACMD(do_baku) {
                 dmg = (dmg / 100) * 25;
                 break;
         }
-        for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+        for (vict = ch->getRoom()->people; vict; vict = next_v) {
             next_v = vict->next_in_room;
             if (vict == ch) {
                 continue;
@@ -6307,7 +6307,7 @@ ACMD(do_dualbeam) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                        world[IN_ROOM(ch)].modDamage(5);
+                        ch->getRoom()->modDamage(5);
                         improve_skill(vict, SKILL_DODGE, 0);
                         if (hits == 1) {
                             pcost(ch, attperc, 0);
@@ -6564,7 +6564,7 @@ ACMD(do_blessedhammer) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    world[IN_ROOM(ch)].modDamage(5);
+                    ch->getRoom()->modDamage(5);
                     improve_skill(vict, SKILL_DODGE, 0);
 
                     pcost(ch, attperc, 0);
@@ -6808,7 +6808,7 @@ ACMD(do_kousengan) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    world[IN_ROOM(ch)].modDamage(5);
+                    ch->getRoom()->modDamage(5);
                     improve_skill(vict, SKILL_DODGE, 0);
 
                     pcost(ch, attperc, 0);
@@ -7077,7 +7077,7 @@ ACMD(do_deathbeam) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    world[IN_ROOM(ch)].modDamage(5);
+                    ch->getRoom()->modDamage(5);
                     improve_skill(vict, SKILL_DODGE, 0);
                     if (GET_SKILL_PERF(ch, SKILL_DEATHBEAM) == 3 && attperc > minimum) {
                         pcost(ch, attperc - 0.05, 0);
@@ -7375,7 +7375,7 @@ ACMD(do_dodonpa) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    world[IN_ROOM(ch)].modDamage(5);
+                    ch->getRoom()->modDamage(5);
                     improve_skill(vict, SKILL_DODGE, 0);
                     if (GET_SKILL_PERF(ch, SKILL_DODONPA) == 3 && attperc > minimum) {
                         pcost(ch, attperc - 0.05, 0);
@@ -7648,7 +7648,7 @@ ACMD(do_masenko) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    world[IN_ROOM(ch)].modDamage(5);
+                    ch->getRoom()->modDamage(5);
                     improve_skill(vict, SKILL_DODGE, 0);
                     if (GET_SKILL_PERF(ch, SKILL_MASENKO) == 3 && attperc > minimum) {
                         pcost(ch, attperc - 0.05, 0);
@@ -7957,7 +7957,7 @@ ACMD(do_kamehameha) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    world[IN_ROOM(ch)].modDamage(5);
+                    ch->getRoom()->modDamage(5);
                     if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 3 && attperc > minimum) {
                         pcost(ch, attperc - 0.05, 0);
                     } else {
@@ -10783,13 +10783,7 @@ ACMD(do_bite) {
 
     vict = nullptr;
     obj = nullptr;
-    if (!*arg || !(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
-        if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-            vict = FIGHTING(ch);
-        } else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, world[IN_ROOM(ch)].contents))) {
-            return;
-        }
-    }
+    if (!tech_handle_targeting(ch, arg, &vict, &obj)) return;
     handle_cooldown(ch, 4);
     if (vict) {
         if (!can_kill(ch, vict, nullptr, 0)) {
@@ -11091,7 +11085,7 @@ ACMD(do_kiball) {
                     /*      User/target/skill name/skill/hurt type */
                     pcost(ch, attperc, 0);
 
-                    world[IN_ROOM(ch)].modDamage(2);
+                    ch->getRoom()->modDamage(2);
 
                     return;
                 } else if (blk > axion_dice(10)) {
@@ -11120,7 +11114,7 @@ ACMD(do_kiball) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    world[IN_ROOM(ch)].modDamage(2);
+                    ch->getRoom()->modDamage(2);
                     improve_skill(vict, SKILL_DODGE, 0);
                     pcost(ch, attperc, 0);
                     hurt(0, 0, ch, vict, nullptr, 0, 1);
@@ -11346,7 +11340,7 @@ ACMD(do_beam) {
                     /*      User/target/skill name/skill/hurt type */
                     pcost(ch, attperc, 0);
 
-                    world[IN_ROOM(ch)].modDamage(5);
+                    ch->getRoom()->modDamage(5);
 
                     return;
                 } else if (blk > axion_dice(10)) {
@@ -11375,7 +11369,7 @@ ACMD(do_beam) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    world[IN_ROOM(ch)].modDamage(5);
+                    ch->getRoom()->modDamage(5);
                     improve_skill(vict, SKILL_DODGE, 0);
                     pcost(ch, attperc, 0);
                     hurt(0, 0, ch, vict, nullptr, 0, 1);
@@ -11651,7 +11645,7 @@ ACMD(do_kiblast) {
                     /*      User/target/skill name/skill/hurt type */
                     pcost(ch, attperc, 0);
 
-                    world[IN_ROOM(ch)].modDamage(5);
+                    ch->getRoom()->modDamage(5);
 
                     return;
                 } else if (blk > axion_dice(10)) {
@@ -11680,7 +11674,7 @@ ACMD(do_kiblast) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    world[IN_ROOM(ch)].modDamage(5);
+                    ch->getRoom()->modDamage(5);
                     improve_skill(vict, SKILL_DODGE, 0);
                     pcost(ch, attperc, 0);
                     hurt(0, 0, ch, vict, nullptr, 0, 1);
@@ -12156,7 +12150,7 @@ ACMD(do_slam) {
                                     break;
                             }
                         }
-                        world[IN_ROOM(vict)].modDamage(5);
+                        vict->getRoom()->modDamage(5);
                     }
                     hurt(0, 0, ch, vict, nullptr, dmg, 0);
                     dam_eq_loc(vict, 3);
@@ -13039,7 +13033,7 @@ ACMD(do_assist) {
         if (FIGHTING(helpee))
             opponent = FIGHTING(helpee);
         else
-            for (opponent = world[IN_ROOM(ch)].people;
+            for (opponent = ch->getRoom()->people;
                  opponent && (FIGHTING(opponent) != helpee);
                  opponent = opponent->next_in_room);
 
@@ -13122,14 +13116,8 @@ ACMD(do_flee) {
 
     if (!IS_NPC(ch)) {
         int fail = false;
-        struct obj_data *obj, *next_obj;
-        for (obj = world[IN_ROOM(ch)].contents; obj; obj = next_obj) {
-            next_obj = obj->next_content;
-            if (KICHARGE(obj) > 0 && USER(obj) == ch) {
-                fail = true;
-            }
-        }
-        if (fail == true) {
+        auto isMyAttack = [&](const auto&o) {return KICHARGE(o) > 0 && USER(o) == ch;};
+        if (auto obj = ch->getRoom()->findObject(isMyAttack); obj) {
             send_to_char(ch, "You are too busy controlling your attack!\r\n");
             return;
         }
@@ -13156,14 +13144,10 @@ ACMD(do_flee) {
             }
             was_fighting = FIGHTING(ch);
 
-            struct obj_data *wall;
-            for (wall = world[IN_ROOM(ch)].contents; wall; wall = wall->next_content) {
-                if (GET_OBJ_VNUM(wall) == 79) {
-                    if (GET_OBJ_COST(wall) == attempt) {
-                        send_to_char(ch, "That direction has a glacial wall blocking it.\r\n");
-                        return;
-                    }
-                }
+            auto isWall = [&](const auto&o) {return o->vn == 79 && GET_OBJ_COST(o) == attempt;};
+            if(auto wall = ch->getRoom()->findObject(isWall); wall) {
+                send_to_char(ch, "That direction has a glacial wall blocking it.\r\n");
+                return;
             }
 
             if (!block_calc(ch)) {

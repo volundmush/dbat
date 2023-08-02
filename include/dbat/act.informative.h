@@ -28,6 +28,7 @@ extern void add_history(struct char_data *ch, char *str, int type);
 
 extern void introWrite(struct char_data *ch, struct char_data *vict, char *name);
 
+extern void look_at_room(struct room_data *rm, struct char_data *ch, int ignore_brief);
 extern void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief);
 
 extern int perf_skill(int skill);

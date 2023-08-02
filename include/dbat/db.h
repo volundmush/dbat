@@ -407,6 +407,8 @@ extern std::set<int64_t> dirty_dgscripts;
 void process_dirty();
 // TODO: not yet sure how to handle accounts... working on it...
 
+extern std::vector<obj_vnum> dbVnums;
+
 // world data...
 extern std::map<room_vnum, room_data> world;
 extern std::map<zone_vnum, struct zone_data> zone_table;

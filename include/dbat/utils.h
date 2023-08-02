@@ -192,8 +192,6 @@ extern void stop_follower(struct char_data *ch);
 extern bool circle_follow(struct char_data *ch, struct char_data *victim);
 
 /* in act.informative.c */
-extern void look_at_room(room_rnum target_room, struct char_data *ch, int mode);
-
 extern void add_history(struct char_data *ch, char *msg, int type);
 
 /* in act.movement.c */
@@ -411,7 +409,8 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define AFF_FLAGGED(ch, flag) (IS_SET_AR(AFF_FLAGS(ch), (flag)))
 #define PRF_FLAGGED(ch, flag) (IS_SET_AR(PRF_FLAGS(ch), (flag)))
 #define ADM_FLAGGED(ch, flag) (IS_SET_AR(ADM_FLAGS(ch), (flag)))
-#define ROOM_FLAGGED(loc, flag) (IS_SET_AR(ROOM_FLAGS(loc), (flag)))
+bool ROOM_FLAGGED(room_vnum loc, int flag);
+
 #define EXIT_FLAGGED(exit, flag) (IS_SET((exit)->exit_info, (flag)))
 #define OBJAFF_FLAGGED(obj, flag) (IS_SET_AR(GET_OBJ_PERM(obj), (flag)))
 #define OBJVAL_FLAGGED(obj, flag) (IS_SET(GET_OBJ_VAL((obj), VAL_CONTAINER_FLAGS), (flag)))
@@ -1169,3 +1168,47 @@ extern void admin_set(struct char_data *ch, int value);
 #define OBJ_LOADROOM(obj)     ((obj)->room_loaded)
 
 extern int levenshtein_distance(char *s1, char *s2);
+
+template<size_t N>
+void sprintbitarray(const std::bitset<N>& bitvector, const char *names[], int maxar, char *result) {
+    *result = '\0';
+
+    for (auto i = 0; i < bitvector.size(); i++) {
+        if(!bitvector[i]) continue;
+        if(*names[i] == '\n') break;
+
+        if(*names[i] == '\0') {
+            strcat(result, "UNDEFINED ");
+        } else {
+            strcat(result, names[i]);
+
+            strcat(result, " ");
+        }
+
+    }
+
+    if (!*result)
+        strcpy(result, "None ");
+}
+
+template<size_t N>
+int check_flags_by_name_ar(const std::bitset<N>& bitvector, int numflags, char *search, const char *namelist[]) {
+    int i, item = -1;
+
+    for (i = 0; i < bitvector.size() && item < 0; i++)
+        if (!strcmp(search, namelist[i]))
+            item = i;
+
+    if (item < 0)
+        return false;
+
+    if (bitvector.test(item))
+        return item;
+
+    return false;
+}
+
+template<size_t N>
+int check_bitvector_names(const std::bitset<N>& bitvector, size_t namecount, const char *whatami, const char *whatbits) {
+
+}

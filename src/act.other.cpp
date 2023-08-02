@@ -1833,12 +1833,14 @@ ACMD(do_taisha) {
         return;
     }
 
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
+    auto room = ch->getRoom();
+
+    if (room->room_flags.test(ROOM_AURA)) {
         send_to_char(ch, "This area already has an aura of regeneration around it.\r\n");
         return;
     }
 
-    if (ROOM_GRAVITY(IN_ROOM(ch)) > 0) {
+    if (ch->currentGravity() > 1.0) {
         send_to_char(ch, "This area's gravity is too hostile to an aura.\r\n");
         return;
     }
@@ -1866,7 +1868,7 @@ ACMD(do_taisha) {
         act("@g$n holds up $s hands while channeling ki. Suddenly a @wburst@W of calming @Cblue@W light covers the surrounding area!@n",
             true, ch, nullptr, nullptr, TO_ROOM);
         improve_skill(ch, SKILL_TAISHA, 1);
-        SET_BIT_AR(ROOM_FLAGS(IN_ROOM(ch)), ROOM_AURA);
+        room->room_flags.set(ROOM_AURA);
         return;
     }
 }
@@ -2359,15 +2361,8 @@ ACMD(do_implant) {
         return;
     }
 
-    for (obj = ch->contents; obj; obj = next_obj) {
-        next_obj = obj->next_content;
-        if (found == false && GET_OBJ_VNUM(obj) == 66 &&
-            (!OBJ_FLAGGED(obj, ITEM_BROKEN) && !OBJ_FLAGGED(obj, ITEM_FORGED))) {
-            found = true;
-            limb = obj;
-        }
-    }
-    if (found == false) {
+    limb = ch->findObjectVnum(66);
+    if (!limb) {
         send_to_char(ch, "You do not have a cybernetic limb to implant.\r\n");
         return;
     }
@@ -6227,16 +6222,9 @@ ACMD(do_forgery) {
         return;
     }
 
-    for (obj = ch->contents; obj; obj = next_obj) {
-        next_obj = obj->next_content;
-        if (found == false && GET_OBJ_VNUM(obj) == 19 &&
-            (!OBJ_FLAGGED(obj, ITEM_BROKEN) && !OBJ_FLAGGED(obj, ITEM_FORGED))) {
-            found = true;
-            obj4 = obj;
-        }
-    }
+    obj4 = ch->findObjectVnum(19);
 
-    if (found == false || obj4 == nullptr) {
+    if (!obj4) {
         send_to_char(ch, "You need a forgery kit.\r\n");
         return;
     }
@@ -6714,7 +6702,7 @@ ACMD(do_solar) {
     act("@C$n@W raises both $s hands to either side of $s face, while closing $s eyes, and shouts '@YSolar Flare@W' as a blinding light fills the area!@n",
         true, ch, nullptr, nullptr, TO_ROOM);
 
-    for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+    for (vict = ch->getRoom()->people; vict; vict = next_v) {
         next_v = vict->next_in_room;
 
         if (vict == ch)
@@ -7496,143 +7484,53 @@ void wishSYS(uint64_t heartPulse, double deltaTime) {
 }
 
 ACMD(do_summon) {
+    auto room = ch->getRoom();
 
-    int summoned = false, count = 0;
-    int dball[7] = {20, 21, 22, 23, 24, 25, 26};
-    int dball2[7] = {20, 21, 22, 23, 24, 25, 26};
-    struct obj_data *obj, *next_obj;
-    struct char_data *mob = nullptr;
-    mob_rnum r_num;
-
-
-    if (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH)) {
+    if (!room->room_flags.test(ROOM_EARTH)) {
         send_to_char(ch, "@wYou can not summon Shenron when you are not on earth.@n\r\n");
         return;
-    } // are they on earth?
+    }
 
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_NOINSTANT) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_PEACEFUL)) {
+    if (room->room_flags.test(ROOM_NOINSTANT) || room->room_flags.test(ROOM_PEACEFUL)) {
         send_to_char(ch, "You can not summon shenron in this protected area!\r\n");
         return;
     }
-    if (SECT(IN_ROOM(ch)) == SECT_INSIDE) {
-        send_to_char(ch, "Go outside to summon Shenron!\r\n");
+    if (room->sector_type == SECT_INSIDE) {
+        send_to_char(ch, "Go outside to summon Shenron! He won't fit in here!\r\n");
         return;
     }
 
-    for (obj = ch->contents; obj; obj = next_obj) {
-        next_obj = obj->next_content;
-        if (OBJ_FLAGGED(obj, ITEM_FORGED)) {
-            continue;
-        }
-        if (GET_OBJ_VNUM(obj) == dball[0]) {
-            dball[0] = -1;
-            count++;
-            continue;
-        } else if (GET_OBJ_VNUM(obj) == dball[1]) {
-            dball[1] = -1;
-            count++;
-            continue;
-        } else if (GET_OBJ_VNUM(obj) == dball[2]) {
-            dball[2] = -1;
-            count++;
-            continue;
-        } else if (GET_OBJ_VNUM(obj) == dball[3]) {
-            dball[3] = -1;
-            count++;
-            continue;
-        } else if (GET_OBJ_VNUM(obj) == dball[4]) {
-            dball[4] = -1;
-            count++;
-            continue;
-        } else if (GET_OBJ_VNUM(obj) == dball[5]) {
-            dball[5] = -1;
-            count++;
-            continue;
-        } else if (GET_OBJ_VNUM(obj) == dball[6]) {
-            dball[6] = -1;
-            count++;
-            continue;
-        } else {
-            continue;
-        } // end if
-    } // end repeat for
-
-    if (count == 7) {
-        summoned = true;
-    }
-
-    if (summoned == true) {
-        reveal_hiding(ch, 0);
-        act("@WYou place the dragon balls on the ground and with both hands outstretched towards them you say '@CArise Eternal Dragon Shenron!@W'@n",
-            true, ch, nullptr, nullptr, TO_CHAR);
-        act("@W$n places the dragon balls on the ground and with both hands outstretched towards them $e says '@CArise Eternal Dragon Shenron!@W'@n",
-            true, ch, nullptr, nullptr, TO_ROOM);
-        SHENRON = true;
-        DRAGONC = 300;
-        DRAGONR = GET_ROOM_VNUM(IN_ROOM(ch));
-        if (real_room(DRAGONR) == NOWHERE) {
-            DRAGONR = GET_ROOM_VNUM(IN_ROOM(ch));
-        }
-        send_to_imm("Shenron summoned to room: %d\r\n", DRAGONR);
-
-        if ((DRAGONZ = real_zone_by_thing(DRAGONR)) != NOWHERE) {
-            DRAGONZ = real_zone_by_thing(DRAGONR);
-        }
-
-        for (obj = ch->contents; obj; obj = next_obj) {
-            next_obj = obj->next_content;
-
-            if (GET_OBJ_VNUM(obj) == dball2[0]) {
-                obj_from_char(obj);
-                extract_obj(obj);
-                dball2[0] = -1;
-                continue;
-            } else if (GET_OBJ_VNUM(obj) == dball2[1]) {
-                obj_from_char(obj);
-                extract_obj(obj);
-                dball2[1] = -1;
-                continue;
-            } else if (GET_OBJ_VNUM(obj) == dball2[2]) {
-                obj_from_char(obj);
-                extract_obj(obj);
-                dball2[2] = -1;
-                continue;
-            } else if (GET_OBJ_VNUM(obj) == dball2[3]) {
-                obj_from_char(obj);
-                extract_obj(obj);
-                dball2[3] = -1;
-                continue;
-            } else if (GET_OBJ_VNUM(obj) == dball2[4]) {
-                obj_from_char(obj);
-                extract_obj(obj);
-                dball2[4] = -1;
-                continue;
-            } else if (GET_OBJ_VNUM(obj) == dball2[5]) {
-                obj_from_char(obj);
-                extract_obj(obj);
-                dball2[5] = -1;
-                continue;
-            } else if (GET_OBJ_VNUM(obj) == dball2[6]) {
-                obj_from_char(obj);
-                extract_obj(obj);
-                dball2[6] = -1;
-                continue;
-            } else {
-                continue;
-            }
-        }
-        if ((r_num = real_mobile(21)) == NOBODY) {
-            send_to_imm("Shenron doesn't exist!");
-            return;
-        }
-        mob = read_mobile(r_num, REAL);
-        char_to_room(mob, 0);
-        EDRAGON = mob;
-        return;
-    } else {
-        send_to_char(ch, "@wYou do not have all the dragon balls and can not summon the dragon!@n\r\n");
+    auto dragonBalls = dball_count(ch);
+    if (dragonBalls.size() < 7) {
+        send_to_char(ch, "You need all 7 Dragon Balls to summon Shenron!\r\n");
         return;
     }
+
+    auto dragon = read_mobile(21, REAL);
+    if(!dragon) {
+        send_to_char(ch, "The Dragon Balls aren't responding. Please contact an immortal.\r\n");
+        send_to_imm("Shenron doesn't exist!");
+        return;
+    }
+    char_to_room(dragon, 0);
+
+    reveal_hiding(ch, 0);
+    act("@WYou place the dragon balls on the ground and with both hands outstretched towards them you say '@CArise Eternal Dragon Shenron!@W'@n",
+        true, ch, nullptr, nullptr, TO_CHAR);
+    act("@W$n places the dragon balls on the ground and with both hands outstretched towards them $e says '@CArise Eternal Dragon Shenron!@W'@n",
+        true, ch, nullptr, nullptr, TO_ROOM);
+    SHENRON = true;
+    DRAGONC = 300;
+    DRAGONR = room->vn;
+    DRAGONZ = room->zone;
+    send_to_imm("Shenron summoned to room: %d\r\n", DRAGONR);
+
+    for(auto dball : dragonBalls) {
+        dball->clearLocation();
+        extract_obj(dball);
+    }
+
+    EDRAGON = dragon;
 }
 
 
@@ -8003,7 +7901,7 @@ ACMD(do_meditate) {
             ch->decCurKI(GET_MAX_MANA(MINDLINK(ch)) * .05);
             return;
         }
-    } else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, world[IN_ROOM(ch)].contents))) {
+    } else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getRoom()->contents))) {
         send_to_char(ch, "Syntax: meditate (object)\nSyntax: meditate expand\nSyntax: meditate break\r\n");
         return;
     }
@@ -8782,18 +8680,7 @@ void base_update(uint64_t heartPulse, double deltaTime) {
 }
 
 static int has_scanner(struct char_data *ch) {
-    struct obj_data *obj, *next_obj;
-    int success = 0;
-
-
-    for (obj = ch->contents; obj; obj = next_obj) {
-        next_obj = obj->next_content;
-        if (obj && GET_OBJ_VNUM(obj) == 13600) {
-            success = 1;
-        }
-    }
-
-    return (success);
+    return ch->findObjectVnum(13600) != nullptr;
 }
 
 ACMD(do_snet) {
@@ -9057,7 +8944,7 @@ ACMD(do_scouter) {
                 } else if (IS_ANDROID(i->character)) {
                     continue;
                 } else if (planet_check(ch, i->character)) {
-                    int dir = find_first_step(IN_ROOM(ch), IN_ROOM(i->character));
+                    int dir = find_first_step(ch->getRoom(), i->character->getRoom());
                     int same = false;
                     char pathway[MAX_STRING_LENGTH];
 
@@ -9230,52 +9117,19 @@ ACMD(do_scouter) {
     }
 }
 
-int dball_count(struct char_data *ch) {
+std::set<struct obj_data*> dball_count(struct char_data *ch) {
+    std::set<obj_vnum> dbVn;
+    dbVn.insert(dbVnums.begin(), dbVnums.end());
 
-    int dball[7] = {20, 21, 22, 23, 24, 25, 26};
-    int count = 0;
-    struct obj_data *obj = nullptr, *next_obj = nullptr;
+    auto isDragonBall = [&](struct obj_data *obj) {
+        if(dbVn.contains(GET_OBJ_VNUM(obj))) {
+            dbVn.erase(GET_OBJ_VNUM(obj));
+            return true;
+        }
+        return false;
+    };
 
-    for (obj = ch->contents; obj; obj = next_obj) {
-        next_obj = obj->next_content;
-        if (GET_OBJ_VNUM(obj) == dball[0]) {
-            dball[0] = -1;
-            count++;
-            continue;
-        } else if (GET_OBJ_VNUM(obj) == dball[1]) {
-            dball[1] = -1;
-            count++;
-            continue;
-        } else if (GET_OBJ_VNUM(obj) == dball[2]) {
-            dball[2] = -1;
-            count++;
-            continue;
-        } else if (GET_OBJ_VNUM(obj) == dball[3]) {
-            dball[3] = -1;
-            count++;
-            continue;
-        } else if (GET_OBJ_VNUM(obj) == dball[4]) {
-            dball[4] = -1;
-            count++;
-            continue;
-        } else if (GET_OBJ_VNUM(obj) == dball[5]) {
-            dball[5] = -1;
-            count++;
-            continue;
-        } else if (GET_OBJ_VNUM(obj) == dball[6]) {
-            dball[6] = -1;
-            count++;
-            continue;
-        } else {
-            continue;
-        } // end if
-    } // end repeat for
-
-    if (count >= 1) {
-        return 1;
-    } else {
-        return 0;
-    }
+    return ch->gatherObjects(isDragonBall);
 }
 
 ACMD(do_quit) {
@@ -9314,7 +9168,7 @@ ACMD(do_quit) {
         send_to_char(ch, "You can't quit here!\r\n");
         return;
     }
-    if (dball_count(ch)) {
+    if (!dball_count(ch).empty()) {
         send_to_char(ch, "You can not quit while you have dragon balls! Place them somewhere first.");
         return;
     }
@@ -10990,30 +10844,16 @@ ACMD(do_fix) {
         }
     }
 
+    obj4 = ch->findObjectVnum(custom ? 13593 : 48);
 
-    for (rep = ch->contents; rep; rep = next_obj) {
-        next_obj = rep->next_content;
-        if (custom == false) {
-            if (found == false && GET_OBJ_VNUM(rep) == 48 &&
-                (!OBJ_FLAGGED(rep, ITEM_BROKEN) && !OBJ_FLAGGED(rep, ITEM_FORGED))) {
-                found = true;
-                obj4 = rep;
-            }
+    if(!obj4) {
+        if(custom) {
+            send_to_char(ch, "You do not even have a Nano-tech Repair Orb.\r\n");
+            return;
         } else {
-            if (found == false && GET_OBJ_VNUM(rep) == 13593 &&
-                (!OBJ_FLAGGED(rep, ITEM_BROKEN) && !OBJ_FLAGGED(rep, ITEM_FORGED))) {
-                found = true;
-                obj4 = rep;
-            }
+            send_to_char(ch, "You do not even have a repair kit.\r\n");
+            return;
         }
-    }
-
-    if (found == false && custom == false) {
-        send_to_char(ch, "You do not even have a repair kit.\r\n");
-        return;
-    } else if (found == false && custom == true) {
-        send_to_char(ch, "You do not even have a Nano-tech Repair Orb.\r\n");
-        return;
     }
 
     if (self == false) {
@@ -11758,16 +11598,10 @@ ACMD(do_aid) {
         num2 = 385;
     }
 
-    for (obj = ch->contents; obj; obj = next_obj) {
-        next_obj = obj->next_content;
-        if (found == false && GET_OBJ_VNUM(obj) == num &&
-            (!OBJ_FLAGGED(obj, ITEM_BROKEN) && !OBJ_FLAGGED(obj, ITEM_FORGED))) {
-            found = true;
-            aid_obj = obj;
-        }
-    }
+    aid_obj = ch->findObjectVnum(num);
 
-    if (found == false || aid_obj == nullptr) {
+
+    if (!aid_obj) {
         if (num == 47) {
             send_to_char(ch, "You need bandages to be able to use first aid.\r\n");
         } else {
@@ -11775,6 +11609,7 @@ ACMD(do_aid) {
         }
         return;
     }
+
     if (num == 47) {
         if (!(vict = get_char_vis(ch, arg2, nullptr, FIND_CHAR_ROOM))) {
             send_to_char(ch, "Apply first aid to who?\r\n");

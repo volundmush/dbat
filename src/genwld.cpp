@@ -279,7 +279,11 @@ nlohmann::json room_data::serialize() {
         if(dir_option[i]) j["dir_option"].push_back(std::make_pair(i, dir_option[i]->serialize()));
     }
 
-    for(auto i = 0; i < NUM_ROOM_FLAGS; i++) if(IS_SET_AR(room_flags, i)) j["room_flags"].push_back(i);
+    for (size_t i = 0; i < room_flags.size(); ++i) {
+        if (room_flags[i]) {
+            j["room_flags"].push_back(i);
+        }
+    }
 
     for(auto p :proto_script) {
         if(trig_index.contains(p)) j["proto_script"].push_back(p);
@@ -304,7 +308,7 @@ room_data::room_data(const nlohmann::json &j) {
 
     if(j.contains("room_flags")) {
         for(auto &f : j["room_flags"]) {
-            SET_BIT_AR(room_flags, f.get<int>());
+            room_flags.set(f.get<int>());
         }
     }
 
@@ -424,4 +428,15 @@ int room_data::setDamage(int amount) {
 
 int room_data::modDamage(int amount) {
     return setDamage(dmg + amount);
+}
+
+struct room_data* room_direction_data::getDestination() {
+    auto found = world.find(to_room);
+    if(found != world.end()) return &found->second;
+    return nullptr;
+}
+
+
+bool room_data::isSunken() {
+    return sector_type == SECT_UNDERWATER || geffect < 0;
 }

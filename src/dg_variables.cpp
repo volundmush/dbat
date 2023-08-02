@@ -247,6 +247,8 @@ find_replacement(void *go, struct script_data *sc, trig_data *trig, int type, ch
     char *transform[] = {"mtransform ", "otransform ", "wecho "};
     char *recho[] = {"mrecho ", "orecho ", "wrecho "};
 
+    auto unit = (unit_data*)go;
+
     *str = '\0';
 
     /* X.global() will have a nullptr trig */
@@ -267,7 +269,8 @@ find_replacement(void *go, struct script_data *sc, trig_data *trig, int type, ch
             snprintf(str, slen, "%s", vd->value);
         else {
             if (!strcasecmp(var, "self")) {
-                snprintf(str, slen, "%s", (((unit_data *) go)->getUID().c_str()));
+                auto uid = unit->getUID();
+                snprintf(str, slen, "%s", uid.c_str());
             } else if (!strcasecmp(var, "global")) {
                 /* so "remote varname %global%" will work */
                 snprintf(str, slen, "%d", 0);
@@ -317,8 +320,8 @@ find_replacement(void *go, struct script_data *sc, trig_data *trig, int type, ch
 
                     if ((o = get_object_in_equip(ch, name)));
                     else if ((o = get_obj_in_list(name, ch->contents)));
-                    else if (IN_ROOM(ch) != NOWHERE && (c = get_char_in_room(&world[IN_ROOM(ch)], name)));
-                    else if ((o = get_obj_in_list(name, world[IN_ROOM(ch)].contents)));
+                    else if (IN_ROOM(ch) != NOWHERE && (c = get_char_in_room(ch->getRoom(), name)));
+                    else if ((o = get_obj_in_list(name, ch->getRoom()->contents)));
                     else if ((c = get_char(name)));
                     else if ((o = get_obj(name)));
                     else if ((r = get_room(name))) {}
@@ -455,7 +458,7 @@ in the vault (vnum: 453) now and then. you can just use
 
                     if (type == MOB_TRIGGER) {
                         ch = (char_data *) go;
-                        for (c = world[IN_ROOM(ch)].people; c; c = c->next_in_room)
+                        for (c = ch->getRoom()->people; c; c = c->next_in_room)
                             if ((c != ch) && valid_dg_target(c, DG_ALLOW_GODS) &&
                                 CAN_SEE(ch, c)) {
                                 if (!rand_number(0, count))
@@ -912,7 +915,7 @@ in the vault (vnum: 453) now and then. you can just use
                             snprintf(str, slen, "%s", roomFound->second.getUID().c_str());
                         }
 #else
-                        snprintf(str, slen, "%d", (IN_ROOM(c)!= NOWHERE) ? world[IN_ROOM(c)].number : 0);
+                        snprintf(str, slen, "%d", (IN_ROOM(c)!= NOWHERE) ? c->getRoom()->number : 0);
 #endif
                     }
 #ifdef GET_RACE
@@ -1394,7 +1397,7 @@ in the vault (vnum: 453) now and then. you can just use
                         "lightning"
                 };
 
-                if (!IS_SET_AR(r->room_flags, ROOM_INDOORS))
+                if (!r->room_flags.test(ROOM_INDOORS))
                     snprintf(str, slen, "%s", sky_look[weather_info.sky]);
                 else
                     *str = '\0';
@@ -1411,7 +1414,7 @@ in the vault (vnum: 453) now and then. you can just use
             else if (!strcasecmp(field, "roomflag")) {
                 if (subfield && *subfield) {
                     room_rnum thisroom = real_room(r->vn);
-                    if (check_flags_by_name_ar(ROOM_FLAGS(thisroom), NUM_ROOM_FLAGS, subfield, room_bits) > 0)
+                    if (check_flags_by_name_ar(r->room_flags, NUM_ROOM_FLAGS, subfield, room_bits) > 0)
                         snprintf(str, slen, "1");
                     else
                         snprintf(str, slen, "0");

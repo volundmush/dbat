@@ -64,6 +64,7 @@
 #include <boost/algorithm/string.hpp>
 #include <iostream>
 #include <mutex>
+#include <bitset>
 
 // non-standard libraries
 #include "fmt/core.h"

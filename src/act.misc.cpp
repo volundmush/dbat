@@ -24,6 +24,7 @@
 #include "dbat/obj_edit.h"
 #include "dbat/fight.h"
 #include "dbat/class.h"
+#include "dbat/act.informative.h"
 
 /* local functions  */
 static void generate_multiform(struct char_data *ch, int count);
@@ -159,7 +160,7 @@ ACMD(do_multiform) {
     std::vector<char_data *> multis;
     struct char_data *tch = nullptr, *next_v = nullptr;
 
-    for (tch = world[IN_ROOM(ch)].people; tch; tch = next_v) {
+    for (tch = ch->getRoom()->people; tch; tch = next_v) {
         next_v = tch->next_in_room;
         if (tch == ch || !IS_NPC(tch)) {
             continue;
@@ -373,7 +374,7 @@ static void resolve_song(struct char_data *ch) {
         return;
     }
 
-    for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+    for (vict = ch->getRoom()->people; vict; vict = next_v) {
         next_v = vict->next_in_room;
         switch (GET_SONG(ch)) {
             case SONG_SAFETY:
@@ -992,7 +993,7 @@ ACMD(do_moondust) {
 
     struct char_data *vict = nullptr, *next_v = nullptr;
 
-    for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+    for (vict = ch->getRoom()->people; vict; vict = next_v) {
         next_v = vict->next_in_room;
         if (vict == ch) {
             continue;
@@ -2298,35 +2299,34 @@ ACMD(do_scry) {
 }
 
 void ash_burn(struct char_data *ch) {
-    struct obj_data *obj, *next_obj;
 
-    if (ch && IN_ROOM(ch) != NOWHERE) {
-        for (obj = world[IN_ROOM(ch)].contents; obj; obj = next_obj) {
-            next_obj = obj->next_content;
-            if (GET_OBJ_VNUM(obj) == 1306) {
-                if (axion_dice(0) > GET_CON(ch)) {
-                    if (!IS_ANDROID(ch) && !IS_DEMON(ch) && !IS_ICER(ch)) {
-                        reveal_hiding(ch, 0);
-                        ch->decCurST(((GET_MAX_MOVE(ch) * 0.005) + 20) * GET_OBJ_COST(obj));
-                        act("@RYou choke on the the burning hot @Da@Ws@wh@Dc@Wl@wo@Du@Wd@R!@n", true, ch, nullptr,
-                            nullptr, TO_CHAR);
-                        act("@r$n@R chokes on the burning hot @Da@Ws@wh@Dc@Wl@wo@Du@Wd@R!@n", true, ch, nullptr,
-                            nullptr, TO_ROOM);
-                    }
-                    if (!IS_ANDROID(ch) && !IS_DEMON(ch) && !IS_NPC(ch)) {
-                        if (!PLR_FLAGGED(ch, PLR_EYEC) && !AFF_FLAGGED(ch, AFF_BLIND)) {
-                            reveal_hiding(ch, 0);
-                            act("@DYour eyes sting from the hot ash! You can't see!@n", true, ch, nullptr, nullptr,
-                                TO_CHAR);
-                            act("@r$n@D eyes appear to have been hurt by the ash!@n", true, ch, nullptr, nullptr,
-                                TO_ROOM);
-                            int duration = 1;
-                            assign_affect(ch, AFF_BLIND, SKILL_SOLARF, duration, 0, 0, 0, 0, 0, 0);
-                        }
-                    }
-                }
-            }
-        }
+    if(!ch) return;
+    if(IS_DEMON(ch) || IS_ANDROID(ch)) return;
+    auto room = ch->getRoom();
+    if(!room) return;
+
+    auto ash = room->findObjectVnum(1306);
+    if(!ash) return;
+
+    if(!(axion_dice(0) > GET_CON(ch))) return;
+
+    if(!IS_ICER(ch)) {
+        reveal_hiding(ch, 0);
+        ch->decCurST(((GET_MAX_MOVE(ch) * 0.005) + 20) * GET_OBJ_COST(ash));
+        act("@RYou choke on the the burning hot @Da@Ws@wh@Dc@Wl@wo@Du@Wd@R!@n", true, ch, nullptr,
+            nullptr, TO_CHAR);
+        act("@r$n@R chokes on the burning hot @Da@Ws@wh@Dc@Wl@wo@Du@Wd@R!@n", true, ch, nullptr,
+            nullptr, TO_ROOM);
+    }
+
+    if(!IS_NPC(ch) && !PLR_FLAGGED(ch, PLR_EYEC) && !AFF_FLAGGED(ch, AFF_BLIND)) {
+        reveal_hiding(ch, 0);
+        act("@DYour eyes sting from the hot ash! You can't see!@n", true, ch, nullptr, nullptr,
+            TO_CHAR);
+        act("@r$n@D eyes appear to have been hurt by the ash!@n", true, ch, nullptr, nullptr,
+            TO_ROOM);
+        int duration = 1;
+        assign_affect(ch, AFF_BLIND, SKILL_SOLARF, duration, 0, 0, 0, 0, 0, 0);
     }
 
 }
@@ -2351,27 +2351,16 @@ ACMD(do_ashcloud) {
     struct obj_data *ash = nullptr, *obj, *next_obj;
     int there = false;
 
-    for (obj = ch->contents; obj; obj = next_obj) {
-        next_obj = obj->next_content;
-        if (GET_OBJ_VNUM(obj) == 1305) {
-            ash = obj;
-        }
-    }
-
-    for (obj = world[IN_ROOM(ch)].contents; obj; obj = next_obj) {
-        next_obj = obj->next_content;
-        if (GET_OBJ_VNUM(obj) == 1306) {
-            there = true;
-        }
-    }
-
-    if (there == true) {
-        send_to_char(ch, "You can not pile more ash into the air without causing it to clump together and settle.\r\n");
+    ash = ch->findObjectVnum(1305);
+    if (!ash) {
+        send_to_char(ch, "You do not have any ash!\r\n");
         return;
     }
 
-    if (!ash) {
-        send_to_char(ch, "You do not have any ash!\r\n");
+    auto room = ch->getRoom();
+
+    if (room->findObjectVnum(1306)) {
+        send_to_char(ch, "You can not pile more ash into the air without causing it to clump together and settle.\r\n");
         return;
     }
 
@@ -2380,16 +2369,25 @@ ACMD(do_ashcloud) {
     int64_t mult = 5;
     double initial = 0.0;
 
+    int otimer = 0;
+    int ocost = 0;
+
     switch (level) {
         case 1:
+            otimer = 1;
+            ocost = 1;
             mult = 20;
             initial = 0.25;
             break;
         case 2:
+            otimer = 2;
+            ocost = 2;
             mult = 10;
             initial = 0.10;
             break;
         case 3:
+            otimer = 4;
+            ocost = 3;
             mult = 5;
             initial = 0.05;
             break;
@@ -2403,13 +2401,19 @@ ACMD(do_ashcloud) {
     if ((ch->getCurKI()) < cost) {
         send_to_char(ch, "You do not have enough ki!\r\n");
         return;
-    } else if (SUNKEN(IN_ROOM(ch))) {
+    }
+
+    if (room->isSunken()) {
         send_to_char(ch, "You can not create an ashcloud here, because it is too wet.\r\n");
         return;
-    } else if (SECT(IN_ROOM(ch)) == SECT_SPACE) {
+    }
+
+    if (room->sector_type == SECT_SPACE) {
         send_to_char(ch, "You can not create an ashcloud in space.\r\n");
         return;
-    } else if (GET_INT(ch) < axion_dice(-10)) {
+    }
+
+    if (GET_INT(ch) < axion_dice(-10)) {
         reveal_hiding(ch, 0);
         act("@RYou take a handful of ashes, and when you go to blow flames at it you lose focus. The ashes are blown from your hands by your huge gust of breath.@n",
             true, ch, nullptr, nullptr, TO_CHAR);
@@ -2418,49 +2422,35 @@ ACMD(do_ashcloud) {
         extract_obj(ash);
         ch->decCurKI(cost);
         return;
-    } else {
-        struct obj_data *ashcloud;
-        reveal_hiding(ch, 0);
-        if (level == 3) {
-            ch->decCurKI(cost);
-            act("@RYou take a handful of ashes and you create a fierce heat within your lungs. With the heat ready you breathe ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n",
-                true, ch, nullptr, nullptr, TO_CHAR);
-            act("@r$n@R takes a handful of ashes and $e breathes ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n",
-                true, ch, nullptr, nullptr, TO_ROOM);
-            send_to_room(IN_ROOM(ch), "@WThe ashes ripple with an intense aftershock of power.@n\r\n");
-            ashcloud = read_object(1306, VIRTUAL);
-            obj_to_room(ashcloud, IN_ROOM(ch));
-            extract_obj(ash);
-            GET_OBJ_TIMER(ashcloud) = 4;
-            GET_OBJ_COST(ashcloud) = 3;
-            ash_burn(ch);
-        } else if (level == 2) {
-            ch->decCurKI(cost);
-            act("@RYou take a handful of ashes and you create a fierce heat within your lungs. With the heat ready you breathe ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n",
-                true, ch, nullptr, nullptr, TO_CHAR);
-            act("@r$n@R takes a handful of ashes and $e breathes ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n",
-                true, ch, nullptr, nullptr, TO_ROOM);
-            send_to_room(IN_ROOM(ch), "@WThe ashes ripple with a strong aftershock of power.@n\r\n");
-            ashcloud = read_object(1306, VIRTUAL);
-            obj_to_room(ashcloud, IN_ROOM(ch));
-            GET_OBJ_TIMER(ashcloud) = 2;
-            GET_OBJ_COST(ashcloud) = 2;
-            extract_obj(ash);
-            ash_burn(ch);
-        } else {
-            ch->decCurKI(cost);
-            act("@RYou take a handful of ashes and you create a fierce heat within your lungs. With the heat ready you breathe ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n",
-                true, ch, nullptr, nullptr, TO_CHAR);
-            act("@r$n@R takes a handful of ashes and $e breathes ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n",
-                true, ch, nullptr, nullptr, TO_ROOM);
-            ashcloud = read_object(1306, VIRTUAL);
-            obj_to_room(ashcloud, IN_ROOM(ch));
-            extract_obj(ash);
-            GET_OBJ_TIMER(ashcloud) = 1;
-            GET_OBJ_COST(ashcloud) = 1;
-            ash_burn(ch);
-        }
     }
+
+    struct obj_data *ashcloud;
+    reveal_hiding(ch, 0);
+
+    ch->decCurKI(cost);
+    act("@RYou take a handful of ashes and you create a fierce heat within your lungs. With the heat ready you breathe ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n",
+        true, ch, nullptr, nullptr, TO_CHAR);
+    act("@r$n@R takes a handful of ashes and $e breathes ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n",
+        true, ch, nullptr, nullptr, TO_ROOM);
+    ashcloud = read_object(1306, VIRTUAL);
+    obj_to_room(ashcloud, IN_ROOM(ch));
+    extract_obj(ash);
+    GET_OBJ_TIMER(ashcloud) = otimer;
+    GET_OBJ_COST(ashcloud) = ocost;
+
+    switch(level) {
+        case 3:
+            send_to_room(IN_ROOM(ch), "@WThe ashes ripple with an intense aftershock of power.@n\r\n");
+            break;
+        case 2:
+            send_to_room(IN_ROOM(ch), "@WThe ashes ripple with a strong aftershock of power.@n\r\n");
+            break;
+        default:
+            break;
+    }
+
+    ash_burn(ch);
+
 }
 
 ACMD(do_resize) {
@@ -3028,7 +3018,7 @@ ACMD(do_hydromancy) {
                 act(bun, true, ch, nullptr, nullptr, TO_CHAR);
                 act(bunn, true, ch, nullptr, nullptr, TO_ROOM);
 
-                for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+                for (vict = ch->getRoom()->people; vict; vict = next_v) {
                     next_v = vict->next_in_room;
                     if (vict == ch)
                         continue;
@@ -3437,7 +3427,7 @@ ACMD(do_bury) {
 
     struct obj_data *obj = nullptr, *buried = nullptr, *fobj = nullptr, *next_obj;
 
-    for (buried = world[IN_ROOM(ch)].contents; buried; buried = next_obj) {
+    for (buried = ch->getRoom()->contents; buried; buried = next_obj) {
         next_obj = buried->next_content;
         if (OBJ_FLAGGED(buried, ITEM_BURIED)) {
             fobj = buried;
@@ -5682,7 +5672,7 @@ ACMD(do_spoil) {
         return;
     }
 
-    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, world[IN_ROOM(ch)].contents))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getRoom()->contents))) {
         send_to_char(ch, "No corpse around here by that name.\r\n");
         return;
     }

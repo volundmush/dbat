@@ -138,6 +138,8 @@ struct time_info_data time_info;/* the infomation about the time    */
 struct weather_data weather_info;    /* the infomation about the weather */
 std::set<zone_vnum> zone_reset_queue;
 
+std::vector<obj_vnum> dbVnums = {20, 21, 22, 23, 24, 25, 26};
+
 /* local functions */
 static void mob_stats(struct char_data *mob);
 
@@ -1526,6 +1528,7 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
     int t[10], i, retval;
     char line[READ_SIZE], flags[128], flags2[128], flags3[128];
     char flags4[128], buf2[MAX_STRING_LENGTH], buf[128];
+    bitvector_t roomFlagsHolder[4];
     struct extra_descr_data *new_descr;
     char letter;
 
@@ -1559,15 +1562,16 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
 
     if ((retval = sscanf(line, " %d %s %s %s %s %d ", t, flags, flags2, flags3, flags4, t + 2)) == 6) {
         int taeller;
-        r.room_flags[0] = asciiflag_conv(flags);
-        r.room_flags[1] = asciiflag_conv(flags2);
-        r.room_flags[2] = asciiflag_conv(flags3);
-        r.room_flags[3] = asciiflag_conv(flags4);
+        roomFlagsHolder[0] = asciiflag_conv(flags);
+        roomFlagsHolder[1] = asciiflag_conv(flags2);
+        roomFlagsHolder[2] = asciiflag_conv(flags3);
+        roomFlagsHolder[3] = asciiflag_conv(flags4);
+
+        for(auto i = 0; i < NUM_ROOM_FLAGS; i++) if(IS_SET_AR(roomFlagsHolder, i)) r.room_flags.set(i);
 
         r.sector_type = t[2];
         sprintf(flags, "object #%d", virtual_nr);    /* sprintf: OK (until 399-bit integers) */
-        for (taeller = 0; taeller < AF_ARRAY_MAX; taeller++)
-            check_bitvector_names(r.room_flags[taeller], room_bits_count, flags, "room");
+        check_bitvector_names(r.room_flags, room_bits_count, flags, "room");
     } else {
         basic_mud_log("SYSERR: Format error in roomflags/sector type of room #%d", virtual_nr);
         exit(1);
@@ -3351,14 +3355,14 @@ void log_dupe_objects(struct obj_data *obj1, struct obj_data *obj2) {
     mudlog(BRF, ADMLVL_GOD, true, "DUPE: First: In room: %d (%s), "
                                   "In object: %s, Carried by: %s, Worn by: %s",
            GET_ROOM_VNUM(IN_ROOM(obj1)),
-           IN_ROOM(obj1) == NOWHERE ? "Nowhere" : world[IN_ROOM(obj1)].name,
+           IN_ROOM(obj1) == NOWHERE ? "Nowhere" : obj1->getRoom()->name,
            obj1->in_obj ? obj1->in_obj->short_description : "None",
            obj1->carried_by ? GET_NAME(obj1->carried_by) : "Nobody",
            obj1->worn_by ? GET_NAME(obj1->worn_by) : "Nobody");
     mudlog(BRF, ADMLVL_GOD, true, "DUPE: Newer: In room: %d (%s), "
                                   "In object: %s, Carried by: %s, Worn by: %s",
            GET_ROOM_VNUM(IN_ROOM(obj2)),
-           IN_ROOM(obj2) == NOWHERE ? "Nowhere" : world[IN_ROOM(obj2)].name,
+           IN_ROOM(obj2) == NOWHERE ? "Nowhere" : obj2->getRoom()->name,
            obj2->in_obj ? obj2->in_obj->short_description : "None",
            obj2->carried_by ? GET_NAME(obj2->carried_by) : "Nobody",
            obj2->worn_by ? GET_NAME(obj2->worn_by) : "Nobody");
@@ -3850,19 +3854,19 @@ void reset_zone(zone_rnum zone) {
             rrnum = rvnum;
 
             reset_wtrigger(&room->second);
-            if (ROOM_FLAGGED(rrnum, ROOM_AURA) && rand_number(1, 5) >= 4) {
+            if (room->second.room_flags.test(ROOM_AURA) && rand_number(1, 5) >= 4) {
                 send_to_room(rrnum, "The aura of regeneration covering the surrounding area disappears.\r\n");
-                REMOVE_BIT_AR(ROOM_FLAGS(rrnum), ROOM_AURA);
+                room->second.room_flags.reset(ROOM_AURA);
             }
-            if (SECT(rrnum) == SECT_LAVA) {
-                ROOM_EFFECT(rrnum) = 5;
+            if (room->second.sector_type == SECT_LAVA) {
+                room->second.geffect = 5;
             }
-            if (ROOM_EFFECT(rrnum) < -1) {
+            if (room->second.geffect < -1) {
                 send_to_room(rrnum, "The area loses some of the water flooding it.\r\n");
-                ROOM_EFFECT(rrnum) += 1;
-            } else if (ROOM_EFFECT(rrnum) == -1) {
+                room->second.geffect += 1;
+            } else if (room->second.geffect == -1) {
                 send_to_room(rrnum, "The area loses the last of the water flooding it in one large rush.\r\n");
-                ROOM_EFFECT(rrnum) = 0;
+                room->second.geffect = 0;
             }
 
             if(auto dmg = room->second.getDamage(); dmg > 0) {
@@ -3876,13 +3880,13 @@ void reset_zone(zone_rnum zone) {
             }
 
 
-            if (ROOM_EFFECT(rrnum) >= 1 && rand_number(1, 4) == 4 && !SUNKEN(rrnum) && SECT(rrnum) != SECT_LAVA) {
+            if (room->second.geffect >= 1 && rand_number(1, 4) == 4 && !room->second.isSunken() && room->second.sector_type != SECT_LAVA) {
                 send_to_room(rrnum, "The lava has cooled and become solid rock.\r\n");
-                ROOM_EFFECT(rrnum) = 0;
-            } else if (ROOM_EFFECT(rrnum) >= 1 && rand_number(1, 2) == 2 && SUNKEN(rrnum) &&
-                       SECT(rrnum) != SECT_LAVA) {
+                room->second.geffect = 0;
+            } else if (room->second.geffect >= 1 && rand_number(1, 2) == 2 && room->second.isSunken() &&
+                    room->second.sector_type != SECT_LAVA) {
                 send_to_room(rrnum, "The water has cooled the lava and it has become solid rock.\r\n");
-                ROOM_EFFECT(rrnum) = 0;
+                room->second.geffect = 0;
             }
         }
     } else {
@@ -3902,7 +3906,7 @@ int is_empty(zone_rnum zone_nr) {
             continue;
         if (IN_ROOM(i->character) == NOWHERE)
             continue;
-        if (world[IN_ROOM(i->character)].zone != zone_nr)
+        if (i->character->getRoom()->zone != zone_nr)
             continue;
         /*
      * if an immortal has nohassle off, he counts as present
@@ -4967,8 +4971,8 @@ static std::vector<std::string> schema = {
         "   name TEXT,"
         "	data TEXT NOT NULL,"
         "   location TEXT NOT NULL,"
-        "   order INTEGER NOT NULL"
-        ");",
+        "   num INTEGER NOT NULL"
+        ");"
 };
 
 static void runQuery(std::string_view query) {
@@ -5049,7 +5053,7 @@ static void process_dirty_rooms() {
             // we'll be using q1...
             q1.bind(1, v);
             q1.bind(2, r->second.serialize().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
-            if(r->second.contents && IS_SET_AR(r->second.room_flags, ROOM_SAVE)) {
+            if(r->second.contents && r->second.room_flags.test(ROOM_SAVE)) {
                 auto con = r->second.serializeContents();
                 if(!con.empty())
                     q1.bind(3, con.dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
@@ -5410,7 +5414,7 @@ int64_t nextCharID() {
     return id;
 }
 // ^#(?<type>R|O|C)(?P<id>\d+):(?P<generation>\d+)
-static boost::regex uid_regex(R"(^#(?<type>R|O|C)(?P<id>\d+):(?P<generation>\d+))");
+static boost::regex uid_regex(R"(^#(?<type>[ROC])(?<id>\d+):(?<generation>\d+))", boost::regex::icase);
 
 std::optional<UID> resolveUID(const std::string& uid) {
     // First we need to check if it matches or not.
@@ -5420,7 +5424,7 @@ std::optional<UID> resolveUID(const std::string& uid) {
         return std::nullopt;
     }
     // extract the type as a char, id and generation as int64_t and time_t respectively.
-    char type = match["type"].str()[0];
+    char type = toupper(match["type"].str()[0]);
     int64_t id = std::stoll(match["id"].str());
     time_t generation = std::stoll(match["generation"].str());
 

@@ -1763,7 +1763,7 @@ ACMD(do_iedit) {
         found = 1;
     } else if ((k = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
         found = 1;
-    } else if ((k = get_obj_in_list_vis(ch, arg, nullptr, world[IN_ROOM(ch)].contents))) {
+    } else if ((k = get_obj_in_list_vis(ch, arg, nullptr, ch->getRoom()->contents))) {
         found = 1;
     } else if ((k = get_obj_vis(ch, arg, nullptr))) {
         found = 1;

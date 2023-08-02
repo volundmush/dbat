@@ -89,7 +89,7 @@ static void auc_stat(struct char_data *ch, struct obj_data *obj);
 
 static void auc_send_to_all(char *messg, bool buyer);
 
-static int has_housekey(struct char_data *ch, struct obj_data *obj);
+static bool has_housekey(struct char_data *ch, struct obj_data *obj);
 
 static void harvest_plant(struct char_data *ch, struct obj_data *plant);
 
@@ -112,15 +112,9 @@ ACMD(do_refuel) {
     }
 
     struct obj_data *rep = nullptr, *next_obj = nullptr, *fuel = nullptr;
+    fuel = ch->findObjectVnum(17290);
 
-    for (rep = ch->contents; rep; rep = next_obj) {
-        next_obj = rep->next_content;
-        if (GET_OBJ_VNUM(rep) == 17290) {
-            fuel = rep;
-        }
-    }
-
-    if (fuel == nullptr) {
+    if (!fuel) {
         send_to_char(ch, "You do not have any fuel canisters on you.\r\n");
         return;
     }
@@ -391,15 +385,8 @@ ACMD(do_garden) {
         if (!strcasecmp(arg, "collect")) {
             struct obj_data *obj2, *shovel = nullptr, *next_obj;
             int found = false;
-
-            for (obj2 = ch->contents; obj2; obj2 = next_obj) {
-                next_obj = obj2->next_content;
-                if (GET_OBJ_VNUM(obj2) == 254 && !OBJ_FLAGGED(obj2, ITEM_BROKEN) && !OBJ_FLAGGED(obj2, ITEM_FORGED)) {
-                    found = true;
-                    shovel = obj2;
-                }
-            }
-            if (found == false) {
+            shovel = ch->findObjectVnum(254);
+            if (!shovel) {
                 send_to_char(ch, "You need a shovel in order to collect soil.\r\n");
                 return;
             }
@@ -460,7 +447,7 @@ ACMD(do_garden) {
             return;
         }
     } else {
-        if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, world[IN_ROOM(ch)].contents))) {
+        if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getRoom()->contents))) {
             send_to_char(ch, "That plant doesn't seem to be here.\r\n");
             return;
         }
@@ -481,15 +468,8 @@ ACMD(do_garden) {
         if (!strcasecmp(arg2, "water")) {
             struct obj_data *obj2, *water = nullptr, *next_obj;
             int found = false;
-
-            for (obj2 = ch->contents; obj2; obj2 = next_obj) {
-                next_obj = obj2->next_content;
-                if (GET_OBJ_VNUM(obj2) == 251 && !OBJ_FLAGGED(obj2, ITEM_FORGED)) {
-                    found = true;
-                    water = obj2;
-                }
-            }
-            if (found == false) {
+            water = ch->findObjectVnum(251);
+            if (!water) {
                 send_to_char(ch, "You do not have any grow water!\r\n");
                 return;
             } else if (GET_OBJ_VAL(obj, VAL_WATERLEVEL) >= 500) {
@@ -531,15 +511,8 @@ ACMD(do_garden) {
         } else if (!strcasecmp(arg2, "harvest")) {
             struct obj_data *obj2, *clippers = nullptr, *next_obj;
             int found = false;
-
-            for (obj2 = ch->contents; obj2; obj2 = next_obj) {
-                next_obj = obj2->next_content;
-                if (GET_OBJ_VNUM(obj2) == 253 && !OBJ_FLAGGED(obj2, ITEM_BROKEN) && !OBJ_FLAGGED(obj2, ITEM_FORGED)) {
-                    found = true;
-                    clippers = obj2;
-                }
-            }
-            if (found == false) {
+            clippers = ch->findObjectVnum(253);
+            if (!clippers) {
                 send_to_char(ch, "You do not have any working gardening clippers!\r\n");
                 return;
             } else if (can_harvest(obj) == false) {
@@ -578,15 +551,8 @@ ACMD(do_garden) {
         } else if (!strcasecmp(arg2, "dig")) {
             struct obj_data *obj2, *shovel = nullptr, *next_obj;
             int found = false;
-
-            for (obj2 = ch->contents; obj2; obj2 = next_obj) {
-                next_obj = obj2->next_content;
-                if (GET_OBJ_VNUM(obj2) == 254 && !OBJ_FLAGGED(obj2, ITEM_BROKEN) && !OBJ_FLAGGED(obj2, ITEM_FORGED)) {
-                    found = true;
-                    shovel = obj2;
-                }
-            }
-            if (found == false) {
+            shovel = ch->findObjectVnum(254);
+            if (!shovel) {
                 send_to_char(ch, "You do not have any working gardening shovels!\r\n");
                 return;
             } else {
@@ -603,28 +569,16 @@ ACMD(do_garden) {
         } else if (!strcasecmp(arg2, "plant")) {
             struct obj_data *obj2, *shovel, *next_obj;
             int found = false;
+            shovel = ch->findObjectVnum(254);
 
-            for (obj2 = ch->contents; obj2; obj2 = next_obj) {
-                next_obj = obj2->next_content;
-                if (GET_OBJ_VNUM(obj2) == 254 && !OBJ_FLAGGED(obj2, ITEM_BROKEN) && !OBJ_FLAGGED(obj2, ITEM_FORGED)) {
-                    found = true;
-                    shovel = obj2;
-                }
-            }
             if (found == false) {
                 send_to_char(ch, "You do not have any working gardening shovels!\r\n");
                 return;
             }
             found = false;
             struct obj_data *soil = nullptr;
+            soil = ch->findObjectVnum(255);
 
-            for (obj2 = ch->contents; obj2; obj2 = next_obj) {
-                next_obj = obj2->next_content;
-                if (GET_OBJ_VNUM(obj2) == 255 && !OBJ_FLAGGED(obj2, ITEM_FORGED)) {
-                    found = true;
-                    soil = obj2;
-                }
-            }
             if (found == false) {
                 send_to_char(ch, "You don't have any real soil.\r\n");
             } else if (check_saveroom_count(ch, nullptr) > 7 && ROOM_FLAGGED(IN_ROOM(ch), ROOM_GARDEN1)) {
@@ -715,25 +669,18 @@ ACMD(do_garden) {
     }
 }
 
-static int has_housekey(struct char_data *ch, struct obj_data *obj) {
+static bool has_housekey(struct char_data *ch, struct obj_data *obj) {
 
-    struct obj_data *obj2 = nullptr, *next_obj;
-    for (obj2 = ch->contents; obj2; obj2 = next_obj) {
-        next_obj = obj2->next_content;
-        if (OBJ_FLAGGED(obj, ITEM_DUPLICATE))
-            continue;
-        if (GET_OBJ_VNUM(obj) == 18802) {
-            if (GET_OBJ_VNUM(obj2) == 18800) {
-                return 1;
-            }
-        } else {
-            if (GET_OBJ_VNUM(obj2) == GET_OBJ_VNUM(obj) - 1) {
-                return 1;
-            }
-        }
-    }
+    if(OBJ_FLAGGED(obj, ITEM_DUPLICATE)) return false;
 
-    return (0);
+    auto isHouseKey = [&](struct obj_data *obj2) -> bool {
+        if(obj2->vn == 18800 && obj->vn == 18802) return true;
+        if(obj2->vn == obj->vn -1) return true;
+        return false;
+    };
+
+    return ch->findObject(isHouseKey) != nullptr;
+
 }
 
 ACMD(do_pack) {
@@ -748,7 +695,7 @@ ACMD(do_pack) {
         return;
     }
 
-    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, world[IN_ROOM(ch)].contents))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getRoom()->contents))) {
         send_to_char(ch, "That house item doesn't seem to be around.\r\n");
         return;
     } else {
@@ -877,7 +824,7 @@ int check_saveroom_count(struct char_data *ch, struct obj_data *cont) {
     else if (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_HOUSE))
         return 0;
 
-    for (obj = world[IN_ROOM(ch)].contents; obj; obj = next_obj) {
+    for (obj = ch->getRoom()->contents; obj; obj = next_obj) {
         next_obj = obj->next_content;
         count++;
         if (!OBJ_FLAGGED(obj, ITEM_CARDCASE)) {
@@ -2653,7 +2600,7 @@ static void get_from_room(struct char_data *ch, char *arg, int howmany) {
     char *descword;
 
     /* Are they trying to take something in a room extra description? */
-    if (find_exdesc(arg, world[IN_ROOM(ch)].ex_description) != nullptr) {
+    if (find_exdesc(arg, ch->getRoom()->ex_description) != nullptr) {
         send_to_char(ch, "You can't take %s %s.\r\n", AN(arg), arg);
         return;
     }
@@ -2661,9 +2608,9 @@ static void get_from_room(struct char_data *ch, char *arg, int howmany) {
     dotmode = find_all_dots(arg);
 
     if (dotmode == FIND_INDIV) {
-        if ((descword = find_exdesc_keywords(arg, world[IN_ROOM(ch)].ex_description)) != nullptr)
+        if ((descword = find_exdesc_keywords(arg, ch->getRoom()->ex_description)) != nullptr)
             send_to_char(ch, "%s: you can't take that!\r\n", fname(descword));
-        else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, world[IN_ROOM(ch)].contents)))
+        else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getRoom()->contents)))
             send_to_char(ch, "You don't see %s %s here.\r\n", AN(arg), arg);
         else {
             struct obj_data *obj_next;
@@ -2678,7 +2625,7 @@ static void get_from_room(struct char_data *ch, char *arg, int howmany) {
             send_to_char(ch, "Get all of what?\r\n");
             return;
         }
-        for (obj = world[IN_ROOM(ch)].contents; obj; obj = next_obj) {
+        for (obj = ch->getRoom()->contents; obj; obj = next_obj) {
             next_obj = obj->next_content;
             if (CAN_SEE_OBJ(ch, obj) &&
                 (dotmode == FIND_ALL || isname(arg, obj->name))) {
@@ -2752,7 +2699,7 @@ ACMD(do_get) {
                         act("$p is not a container.", false, ch, cont, nullptr, TO_CHAR);
                     }
                 }
-            for (cont = world[IN_ROOM(ch)].contents; cont; cont = cont->next_content)
+            for (cont = ch->getRoom()->contents; cont; cont = cont->next_content)
                 if (CAN_SEE_OBJ(ch, cont) &&
                     (cont_dotmode == FIND_ALL || isname(arg2, cont->name))) {
                     if (GET_OBJ_TYPE(cont) == ITEM_CONTAINER) {
@@ -3473,7 +3420,7 @@ ACMD(do_drink) {
         }
     }
     if (!(temp = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
-        if (!(temp = get_obj_in_list_vis(ch, arg, nullptr, world[IN_ROOM(ch)].contents))) {
+        if (!(temp = get_obj_in_list_vis(ch, arg, nullptr, ch->getRoom()->contents))) {
             send_to_char(ch, "You can't find it!\r\n");
             return;
         } else
@@ -3937,7 +3884,7 @@ ACMD(do_pour) {
             act("What do you want to fill $p from?", false, ch, to_obj, nullptr, TO_CHAR);
             return;
         }
-        if (!(from_obj = get_obj_in_list_vis(ch, arg2, nullptr, world[IN_ROOM(ch)].contents))) {
+        if (!(from_obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->getRoom()->contents))) {
             send_to_char(ch, "There doesn't seem to be %s %s here.\r\n", AN(arg2), arg2);
             return;
         }
@@ -4502,65 +4449,56 @@ ACMD(do_remove) {
         send_to_char(ch, "Remove what?\r\n");
         return;
     }
-    /* lemme check for a board FIRST */
-    for (obj = ch->contents; obj; obj = obj->next_content) {
-        if (GET_OBJ_TYPE (obj) == ITEM_BOARD) {
-            found = 1;
-            break;
-        }
-    }
-    if (!obj) {
-        for (obj = world[IN_ROOM(ch)].contents; obj; obj = obj->next_content) {
-            if (GET_OBJ_TYPE (obj) == ITEM_BOARD) {
-                found = 1;
-                break;
-            }
-        }
-    }
 
-    if (found) {
+    auto isBoard = [&](const auto &o) {return GET_OBJ_TYPE(obj) == ITEM_BOARD;};
+
+    obj = ch->findObject(isBoard);
+    /* lemme check for a board FIRST */
+    if (!obj) ch->getRoom()->findObject(isBoard);
+
+    if (obj) {
         if (!isdigit(*arg) || (!(msg = atoi(arg)))) {
             found = 0;
         } else {
             remove_board_msg(GET_OBJ_VNUM (obj), ch, msg);
         }
     }
-    if (!found) {
-        dotmode = find_all_dots(arg);
+    if(found) return;
 
-        if (dotmode == FIND_ALL) {
+    dotmode = find_all_dots(arg);
+
+    if (dotmode == FIND_ALL) {
+        found = 0;
+        for (i = 0; i < NUM_WEARS; i++) {
+            if (GET_EQ(ch, i)) {
+                perform_remove(ch, i);
+                found = 1;
+            }
+        }
+        if (!found) {
+            send_to_char(ch, "You're not using anything.\r\n");
+        }
+    } else if (dotmode == FIND_ALLDOT) {
+        if (!*arg) {
+            send_to_char(ch, "Remove all of what?\r\n");
+        } else {
             found = 0;
             for (i = 0; i < NUM_WEARS; i++) {
-                if (GET_EQ(ch, i)) {
+                if (GET_EQ(ch, i) && CAN_SEE_OBJ(ch, GET_EQ(ch, i)) &&
+                    isname(arg, GET_EQ(ch, i)->name)) {
                     perform_remove(ch, i);
                     found = 1;
                 }
             }
             if (!found) {
-                send_to_char(ch, "You're not using anything.\r\n");
+                send_to_char(ch, "You don't seem to be using any %ss.\r\n", arg);
             }
-        } else if (dotmode == FIND_ALLDOT) {
-            if (!*arg) {
-                send_to_char(ch, "Remove all of what?\r\n");
-            } else {
-                found = 0;
-                for (i = 0; i < NUM_WEARS; i++) {
-                    if (GET_EQ(ch, i) && CAN_SEE_OBJ(ch, GET_EQ(ch, i)) &&
-                        isname(arg, GET_EQ(ch, i)->name)) {
-                        perform_remove(ch, i);
-                        found = 1;
-                    }
-                }
-                if (!found) {
-                    send_to_char(ch, "You don't seem to be using any %ss.\r\n", arg);
-                }
-            }
+        }
+    } else {
+        if ((i = get_obj_pos_in_equip_vis(ch, arg, nullptr, ch->equipment)) < 0) {
+            send_to_char(ch, "You don't seem to be using %s %s.\r\n", AN(arg), arg);
         } else {
-            if ((i = get_obj_pos_in_equip_vis(ch, arg, nullptr, ch->equipment)) < 0) {
-                send_to_char(ch, "You don't seem to be using %s %s.\r\n", AN(arg), arg);
-            } else {
-                perform_remove(ch, i);
-            }
+            perform_remove(ch, i);
         }
     }
 }
@@ -4576,7 +4514,7 @@ ACMD(do_sac) {
         return;
     }
 
-    if (!(j = get_obj_in_list_vis(ch, arg, nullptr, world[IN_ROOM(ch)].contents)) &&
+    if (!(j = get_obj_in_list_vis(ch, arg, nullptr, ch->getRoom()->contents)) &&
         (!(j = get_obj_in_list_vis(ch, arg, nullptr, ch->contents)))) {
         send_to_char(ch, "It doesn't seem to be here.\n\r");
         return;

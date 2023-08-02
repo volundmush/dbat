@@ -583,3 +583,21 @@ struct room_data* obj_data::getAbsoluteRoom() {
     else if(worn_by) return worn_by->getRoom();
     return nullptr;
 }
+
+double obj_data::currentGravity() {
+    if(auto room = getAbsoluteRoom(); room) {
+        return room->getGravity();
+    }
+    return 1.0;
+}
+
+bool obj_data::isWorking() {
+    return !(OBJ_FLAGGED(this, ITEM_BROKEN) || OBJ_FLAGGED(this, ITEM_FORGED));
+}
+
+void obj_data::clearLocation() {
+    if(in_obj) obj_from_obj(this);
+    else if(carried_by) obj_from_char(this);
+    else if(worn_by) unequip_char(worn_by, worn_on);
+    else if(world.contains(in_room)) obj_from_room(this);
+}

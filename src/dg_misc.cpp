@@ -305,7 +305,7 @@ void script_damage(struct char_data *vict, int dam) {
     if (GET_POS(vict) == POS_DEAD) {
         if (!IS_NPC(vict))
             mudlog(BRF, 0, true, "%s killed by script at %s",
-                   GET_NAME(vict), world[IN_ROOM(vict)].name);
+                   GET_NAME(vict), vict->getRoom()->name);
         die(vict, nullptr);
     }
 }

@@ -552,13 +552,13 @@ ACMD(do_mpurge) {
         char_data *vnext;
         obj_data *obj_next;
 
-        for (victim = world[IN_ROOM(ch)].people; victim; victim = vnext) {
+        for (victim = ch->getRoom()->people; victim; victim = vnext) {
             vnext = victim->next_in_room;
             if (IS_NPC(victim) && victim != ch)
                 extract_char(victim);
         }
 
-        for (obj = world[IN_ROOM(ch)].contents; obj; obj = obj_next) {
+        for (obj = ch->getRoom()->contents; obj; obj = obj_next) {
             obj_next = obj->next_content;
             extract_obj(obj);
         }
@@ -628,7 +628,7 @@ ACMD(do_mgoto) {
 
     char_from_room(ch);
     char_to_room(ch, location);
-    enter_wtrigger(&world[IN_ROOM(ch)], ch, -1);
+    enter_wtrigger(ch->getRoom(), ch, -1);
 }
 
 
@@ -707,13 +707,13 @@ ACMD(do_mteleport) {
             return;
         }
 
-        for (vict = world[IN_ROOM(ch)].people; vict; vict = next_ch) {
+        for (vict = ch->getRoom()->people; vict; vict = next_ch) {
             next_ch = vict->next_in_room;
 
             if (valid_dg_target(vict, DG_ALLOW_GODS)) {
                 char_from_room(vict);
                 char_to_room(vict, target);
-                enter_wtrigger(&world[IN_ROOM(ch)], ch, -1);
+                enter_wtrigger(ch->getRoom(), ch, -1);
             }
         }
     } else {
@@ -730,7 +730,7 @@ ACMD(do_mteleport) {
         if (valid_dg_target(ch, DG_ALLOW_GODS)) {
             char_from_room(vict);
             char_to_room(vict, target);
-            enter_wtrigger(&world[IN_ROOM(ch)], ch, -1);
+            enter_wtrigger(ch->getRoom(), ch, -1);
         }
     }
 }

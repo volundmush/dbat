@@ -824,7 +824,7 @@ ACMD(do_echo) {
             sprintf(argument, "%s\n@D(@gMessage truncated to 1000 characters@D)@n\n", argument);
         }
 
-        for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+        for (vict = ch->getRoom()->people; vict; vict = next_v) {
             next_v = vict->next_in_room;
             if (vict == ch)
                 continue;
@@ -1040,7 +1040,7 @@ ACMD(do_goto) {
     act(buf, true, ch, nullptr, nullptr, TO_ROOM);
 
     look_at_room(IN_ROOM(ch), ch, 0);
-    enter_wtrigger(&world[IN_ROOM(ch)], ch, -1);
+    enter_wtrigger(ch->getRoom(), ch, -1);
 }
 
 ACMD(do_trans) {
@@ -1071,7 +1071,7 @@ ACMD(do_trans) {
             act("$n arrives from a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
             act("$n has transferred you!", false, ch, nullptr, victim, TO_VICT);
             look_at_room(IN_ROOM(victim), victim, 0);
-            enter_wtrigger(&world[IN_ROOM(victim)], victim, -1);
+            enter_wtrigger(victim->getRoom(), victim, -1);
         }
     } else {            /* Trans All */
         if (!ADM_FLAGGED(ch, ADM_TRANSALL)) {
@@ -1090,7 +1090,7 @@ ACMD(do_trans) {
                 act("$n arrives from a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
                 act("$n has transferred you!", false, ch, nullptr, victim, TO_VICT);
                 look_at_room(IN_ROOM(victim), victim, 0);
-                enter_wtrigger(&world[IN_ROOM(victim)], victim, -1);
+                enter_wtrigger(victim->getRoom(), victim, -1);
             }
         send_to_char(ch, "%s", CONFIG_OK);
     }
@@ -1125,7 +1125,7 @@ ACMD(do_teleport) {
         act("$n arrives from a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
         act("$n has teleported you!", false, ch, nullptr, (char *) victim, TO_VICT);
         look_at_room(IN_ROOM(victim), victim, 0);
-        enter_wtrigger(&world[IN_ROOM(victim)], victim, -1);
+        enter_wtrigger(victim->getRoom(), victim, -1);
     }
 }
 
@@ -1287,7 +1287,7 @@ void list_zone_commands_room(struct char_data *ch, room_vnum rvnum) {
 static void do_stat_room(struct char_data *ch) {
     char buf2[MAX_STRING_LENGTH];
     struct extra_descr_data *desc;
-    struct room_data *rm = &world[IN_ROOM(ch)];
+    struct room_data *rm = ch->getRoom();
     int i, found, column;
     struct obj_data *j;
     struct char_data *k;
@@ -1439,7 +1439,7 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j) {
                  GET_OBJ_WEIGHT(j), GET_OBJ_COST(j), GET_OBJ_RENT(j), GET_OBJ_TIMER(j), GET_OBJ_LEVEL(j));
 
     send_to_char(ch, "In room: %d (%s), ", GET_ROOM_VNUM(IN_ROOM(j)),
-                 IN_ROOM(j) == NOWHERE ? "Nowhere" : world[IN_ROOM(j)].name);
+                 IN_ROOM(j) == NOWHERE ? "Nowhere" : j->getRoom()->name);
 
     /*
    * NOTE: In order to make it this far, we must already be able to see the
@@ -1970,7 +1970,7 @@ ACMD(do_stat) {
             do_stat_object(ch, object);
         else if ((victim = get_char_vis(ch, name, &number, FIND_CHAR_ROOM)) != nullptr)
             do_stat_character(ch, victim);
-        else if ((object = get_obj_in_list_vis(ch, name, &number, world[IN_ROOM(ch)].contents)) != nullptr)
+        else if ((object = get_obj_in_list_vis(ch, name, &number, ch->getRoom()->contents)) != nullptr)
             do_stat_object(ch, object);
         else if ((victim = get_char_vis(ch, name, &number, FIND_CHAR_WORLD)) != nullptr)
             do_stat_character(ch, victim);
@@ -2291,7 +2291,7 @@ ACMD(do_purge) {
                 }
             }
             extract_char(vict);
-        } else if ((obj = get_obj_in_list_vis(ch, buf, nullptr, world[IN_ROOM(ch)].contents)) != nullptr) {
+        } else if ((obj = get_obj_in_list_vis(ch, buf, nullptr, ch->getRoom()->contents)) != nullptr) {
             act("$n destroys $p.", false, ch, obj, nullptr, TO_ROOM);
             extract_obj(obj);
         } else {
@@ -2307,7 +2307,7 @@ ACMD(do_purge) {
             false, ch, nullptr, nullptr, TO_ROOM);
         send_to_room(IN_ROOM(ch), "The world seems a little cleaner.\r\n");
 
-        for (vict = world[IN_ROOM(ch)].people; vict; vict = vict->next_in_room) {
+        for (vict = ch->getRoom()->people; vict; vict = vict->next_in_room) {
             if (!IS_NPC(vict))
                 continue;
 
@@ -2327,8 +2327,8 @@ ACMD(do_purge) {
         }
 
         /* Clear the ground. */
-        while (world[IN_ROOM(ch)].contents)
-            extract_obj(world[IN_ROOM(ch)].contents);
+        while (ch->getRoom()->contents)
+            extract_obj(ch->getRoom()->contents);
     }
 }
 
@@ -2567,7 +2567,7 @@ void perform_immort_vis(struct char_data *ch) {
 static void perform_immort_invis(struct char_data *ch, int level) {
     struct char_data *tch;
 
-    for (tch = world[IN_ROOM(ch)].people; tch; tch = tch->next_in_room) {
+    for (tch = ch->getRoom()->people; tch; tch = tch->next_in_room) {
         if (tch == ch)
             continue;
         if (GET_ADMLEVEL(tch) >= GET_INVIS_LEV(ch) && GET_ADMLEVEL(tch) < level)
@@ -2817,7 +2817,7 @@ ACMD(do_force) {
         mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s forced room %d to %s",
                GET_NAME(ch), GET_ROOM_VNUM(IN_ROOM(ch)), to_force);
 
-        for (vict = world[IN_ROOM(ch)].people; vict; vict = next_force) {
+        for (vict = ch->getRoom()->people; vict; vict = next_force) {
             next_force = vict->next_in_room;
             if (!IS_NPC(vict) && GET_ADMLEVEL(vict) >= GET_ADMLEVEL(ch))
                 continue;
@@ -3206,7 +3206,7 @@ ACMD(do_show) {
         case 1:
             /* tightened up by JE 4/6/93 */
             if (self)
-                print_zone_to_buf(buf, sizeof(buf), world[IN_ROOM(ch)].zone, 1);
+                print_zone_to_buf(buf, sizeof(buf), ch->getRoom()->zone, 1);
             else if (*value && is_number(value)) {
                 zvn = real_zone(atoi(value));
                 if (zvn == NOBODY) {
@@ -4312,7 +4312,7 @@ ACMD(do_peace) {
     struct char_data *vict, *next_v;
     send_to_room(IN_ROOM(ch), "Everything is quite peaceful now.\r\n");
 
-    for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+    for (vict = ch->getRoom()->people; vict; vict = next_v) {
         next_v = vict->next_in_room;
         if (GET_ADMLEVEL(vict) > GET_ADMLEVEL(ch))
             continue;
@@ -4422,7 +4422,7 @@ ACMD(do_zpurge) {
 
     one_argument(argument, arg);
 
-    zone = !*arg ? zone_table[world[IN_ROOM(ch)].zone].number : atol(arg);
+    zone = !*arg ? zone_table[ch->getRoom()->zone].number : atol(arg);
 
     if (!zone_table.count(zone) || !can_edit_zone(ch, zone)) {
         send_to_char(ch, "You cannot purge that zone. Try %d.\r\n", GET_OLC_ZONE(ch));
@@ -4586,7 +4586,7 @@ ACMD (do_zcheck) {
     one_argument(argument, buf);
 
     if (buf == nullptr || !*buf || !strcmp(buf, "."))
-        zrnum = world[IN_ROOM(ch)].zone;
+        zrnum = ch->getRoom()->zone;
     else
         zrnum = real_zone(atoi(buf));
 

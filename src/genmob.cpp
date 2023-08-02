@@ -1232,3 +1232,40 @@ struct room_data* char_data::getRoom() {
     if(roomFound != world.end()) return &roomFound->second;
     return nullptr;
 }
+
+double char_data::currentGravity() {
+    if(auto room = getRoom(); room) {
+        return room->getGravity();
+    }
+    return 1.0;
+}
+
+struct obj_data* char_data::findObject(const std::function<bool(struct obj_data*)> &func, bool working) {
+    auto o = unit_data::findObject(func, working);
+    if(o) return o;
+
+    for(auto i = 0; i < NUM_WEARS; i++) {
+        auto obj = equipment[i];
+        if(!obj) continue;
+        if(working && !obj->isWorking()) continue;
+        if(func(obj)) return obj;
+        auto p = obj->findObject(func, working);
+        if(p) return p;
+    }
+
+    return nullptr;
+}
+
+std::set<struct obj_data*> char_data::gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working) {
+    auto out = unit_data::gatherObjects(func, working);
+
+    for(auto i = 0; i < NUM_WEARS; i++) {
+        auto obj = equipment[i];
+        if(!obj) continue;
+        if(working && !obj->isWorking()) continue;
+        if(func(obj)) out.insert(obj);
+        auto contents = obj->gatherObjects(func, working);
+        out.insert(contents.begin(), contents.end());
+    }
+    return out;
+}

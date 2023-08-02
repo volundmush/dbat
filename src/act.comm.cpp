@@ -218,7 +218,7 @@ ACMD(do_say) {
             strcpy(verb, "say");
         }
 
-        for (tch = world[IN_ROOM(ch)].people; tch; tch = tch->next_in_room) {
+        for (tch = ch->getRoom()->people; tch; tch = tch->next_in_room) {
             if (tch != ch && tch->desc) {
                 char sayto[100];
                 sprintf(sayto, "to %s ", GET_NAME(tch));
@@ -1066,7 +1066,7 @@ ACMD(do_spec_comm) {
 static void handle_whisper(char *buf, struct char_data *ch, struct char_data *vict) {
     struct char_data *tch;
 
-    for (tch = world[IN_ROOM(ch)].people; tch; tch = tch->next_in_room) {
+    for (tch = ch->getRoom()->people; tch; tch = tch->next_in_room) {
         if (IS_NPC(tch)) {
             continue;
         }
@@ -1253,24 +1253,17 @@ static char *overhear(char *buf, int type) {
  *	(if it existed)
  */
 ACMD(do_write) {
-    struct obj_data *paper, *pen = nullptr, *obj;
+    struct obj_data *paper, *pen = nullptr;
     char *papername, *penname;
     char buf1[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
 
-    /* before we do anything, lets see if there's a board involved. */
-    for (obj = ch->contents; obj; obj = obj->next_content) {
-        if (GET_OBJ_TYPE(obj) == ITEM_BOARD) {
-            break;
-        }
-    }
+    auto isBoard = [](const auto obj) {
+        return GET_OBJ_TYPE(obj) == ITEM_BOARD;
+    };
 
-    if (!obj) {
-        for (obj = world[IN_ROOM(ch)].contents; obj; obj = obj->next_content) {
-            if (GET_OBJ_TYPE(obj) == ITEM_BOARD) {
-                break;
-            }
-        }
-    }
+    auto obj = ch->findObject(isBoard);
+    if(!obj) ch->getRoom()->findObject(isBoard);
+
 
     if (obj) {                /* then there IS a board! */
         write_board_message(GET_OBJ_VNUM(obj), ch, argument);
@@ -1521,7 +1514,7 @@ ACMD(do_gen_comm) {
             !ROOM_FLAGGED(IN_ROOM(i->character), ROOM_SOUNDPROOF)) {
 
             if (subcmd == SCMD_SHOUT &&
-                ((world[IN_ROOM(ch)].zone != world[IN_ROOM(i->character)].zone) ||
+                ((ch->getRoom()->zone != i->character->getRoom()->zone) ||
                  !AWAKE(i->character)))
                 continue;
 
@@ -1608,8 +1601,7 @@ ACMD(do_qcomm) {
 }
 
 ACMD(do_respond) {
-    int found = 0, mnum = 0;
-    struct obj_data *obj;
+    int mnum = 0;
     char number[MAX_STRING_LENGTH];
 
     if (IS_NPC(ch)) {
@@ -1617,35 +1609,25 @@ ACMD(do_respond) {
         return;
     }
 
-    for (obj = ch->contents; obj; obj = obj->next_content) {
-        if (GET_OBJ_TYPE(obj) == ITEM_BOARD) {
-            found = 1;
-            break;
-        }
-    }
-    if (!obj) {
-        for (obj = world[IN_ROOM(ch)].contents; obj; obj = obj->next_content) {
-            if (GET_OBJ_TYPE(obj) == ITEM_BOARD) {
-                found = 1;
-                break;
-            }
-        }
-    }
-    if (obj) {
-        argument = one_argument(argument, number);
-        if (!*number) {
-            send_to_char(ch, "Respond to what?\r\n");
-            return;
-        }
-        if (!isdigit(*number) || (!(mnum = atoi(number)))) {
-            send_to_char(ch, "You must type the number of the message you wish to reply to.\r\n");
-            return;
-        }
-        board_respond(GET_OBJ_VNUM(obj), ch, mnum);
-    }
+    auto isBoard = [](auto obj) { return GET_OBJ_TYPE(obj) == ITEM_BOARD; };
+
+    auto obj = ch->findObject(isBoard);
+    if(!obj) obj = ch->getRoom()->findObject(isBoard);
 
     /* No board in the room? Send generic message -spl */
-    if (found == 0) {
+    if (!obj) {
         send_to_char(ch, "Sorry, you may only reply to messages posted on a board.\r\n");
+        return;
     }
+
+    argument = one_argument(argument, number);
+    if (!*number) {
+        send_to_char(ch, "Respond to what?\r\n");
+        return;
+    }
+    if (!isdigit(*number) || (!(mnum = atoi(number)))) {
+        send_to_char(ch, "You must type the number of the message you wish to reply to.\r\n");
+        return;
+    }
+    board_respond(GET_OBJ_VNUM(obj), ch, mnum);
 }

@@ -193,7 +193,7 @@ void say_spell(struct char_data *ch, int spellnum, struct char_data *tch,
     snprintf(buf1, sizeof(buf1), format, skill_name(spellnum));
     snprintf(buf2, sizeof(buf2), format, buf);
 
-    for (i = world[IN_ROOM(ch)].people; i; i = i->next_in_room) {
+    for (i = ch->getRoom()->people; i; i = i->next_in_room) {
         if (i == ch || i == tch || !i->desc || !AWAKE(i))
             continue;
         /* This should really check spell type vs. target ranks */
@@ -408,12 +408,12 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
                  * Solution: We special case the area/mass spells here.
                  */
                 if (HAS_SPELL_ROUTINE(GET_OBJ_VAL(obj, VAL_STAFF_SPELL), MAG_MASSES | MAG_AREAS)) {
-                    for (i = 0, tch = world[IN_ROOM(ch)].people; tch; tch = tch->next_in_room)
+                    for (i = 0, tch = ch->getRoom()->people; tch; tch = tch->next_in_room)
                         i++;
                     while (i-- > 0)
                         call_magic(ch, nullptr, nullptr, GET_OBJ_VAL(obj, VAL_STAFF_SPELL), k, CAST_STAFF, nullptr);
                 } else {
-                    for (tch = world[IN_ROOM(ch)].people; tch; tch = next_tch) {
+                    for (tch = ch->getRoom()->people; tch; tch = next_tch) {
                         next_tch = tch->next_in_room;
                         if (ch != tch)
                             call_magic(ch, tch, nullptr, GET_OBJ_VAL(obj, VAL_STAFF_SPELL), k, CAST_STAFF, nullptr);
@@ -709,7 +709,7 @@ ACMD(do_cast) {
                 }
         }
         if (!target && IS_SET(SINFO.targets, TAR_OBJ_ROOM))
-            if ((tobj = get_obj_in_list_vis(ch, t, nullptr, world[IN_ROOM(ch)].contents)) != nullptr)
+            if ((tobj = get_obj_in_list_vis(ch, t, nullptr, ch->getRoom()->contents)) != nullptr)
                 target = true;
 
         if (!target && IS_SET(SINFO.targets, TAR_OBJ_WORLD))

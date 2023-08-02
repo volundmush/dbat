@@ -204,8 +204,8 @@ ACMD(do_dig) {
     if ((dir = search_block(sdir, abbr_dirs, false)) < 0)
         dir = search_block(sdir, dirs, false);
     
-    auto &r = world[IN_ROOM(ch)];
-    zone = r.zone;
+    auto r = ch->getRoom();
+    zone = r->zone;
 
     if (dir < 0) {
         send_to_char(ch, "Cannot create an exit to the '%s'.\r\n", sdir);
@@ -239,7 +239,7 @@ ACMD(do_dig) {
                 free(e->keyword);
             free(e);
             e = nullptr;
-            r.save();
+            r->save();
             send_to_char(ch, "You remove the exit to the %s.\r\n", dirs[dir]);
             return;
         }
@@ -314,12 +314,12 @@ ACMD(do_dig) {
     /*
      * Now dig.
      */
-    CREATE(r.dir_option[dir], struct room_direction_data, 1);
-    e = r.dir_option[dir];
+    CREATE(r->dir_option[dir], struct room_direction_data, 1);
+    e = r->dir_option[dir];
     e->general_description = nullptr;
     e->keyword = nullptr;
     e->to_room = rrnum;
-    r.save();
+    r->save();
     send_to_char(ch, "You make an exit %s to room %d (%s).\r\n",
                  dirs[dir], rvnum, world[rrnum].name);
 
@@ -334,7 +334,7 @@ ACMD(do_dig) {
                      rvnum, dirs[rev_dir[dir]]);
     else {
         CREATE(W_EXIT(rrnum, rev_dir[dir]), struct room_direction_data, 1);
-        e2 =r2.dir_option[rev_dir[dir]];
+        e2 = r2.dir_option[rev_dir[dir]];
         e2->general_description = nullptr;
         e2->keyword = nullptr;
         e2->to_room = IN_ROOM(ch);
@@ -417,9 +417,7 @@ ACMD(do_rcopy) {
         world[rrnum].ex_description = nullptr;
 
     /* Finally copy over room flags */
-    for (i = 0; i < AF_ARRAY_MAX; i++) {
-        world[rrnum].room_flags[i] = world[trnum].room_flags[i];
-    }
+    world[rrnum].room_flags = world[trnum].room_flags;
     send_to_imm("Log: %s has copied room [%d] to room [%d].", GET_NAME(ch), tvnum, rvnum);
     dirty_rooms.insert(rrnum);
     send_to_char(ch, "Room [%d] copied to room [%d].\r\n", tvnum, rvnum);
@@ -446,9 +444,9 @@ int buildwalk(struct char_data *ch, int dir) {
     if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_BUILDWALK) &&
         GET_ADMLEVEL(ch) >= ADMLVL_IMMORT) {
 
-        if (!can_edit_zone(ch, world[IN_ROOM(ch)].zone)) {
-            send_cannot_edit(ch, world[IN_ROOM(ch)].zone);
-        } else if ((vnum = redit_find_new_vnum(world[IN_ROOM(ch)].zone)) == NOWHERE)
+        if (!can_edit_zone(ch, ch->getRoom()->zone)) {
+            send_cannot_edit(ch, ch->getRoom()->zone);
+        } else if ((vnum = redit_find_new_vnum(ch->getRoom()->zone)) == NOWHERE)
             send_to_char(ch, "No free vnums are available in this zone!\r\n");
         else {
             struct descriptor_data *d = ch->desc;
@@ -461,7 +459,7 @@ int buildwalk(struct char_data *ch, int dir) {
                 free(d->olc);
             }
             CREATE(d->olc, struct oasis_olc_data, 1);
-            OLC_ZNUM(d) = world[IN_ROOM(ch)].zone;
+            OLC_ZNUM(d) = ch->getRoom()->zone;
             OLC_NUM(d) = vnum;
             CREATE(OLC_ROOM(d), struct room_data, 1);
 

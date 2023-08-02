@@ -10,7 +10,7 @@ extern void log_imm_action(char *messg, ...);
 
 extern void hint_system(struct char_data *ch, int num);
 
-extern int dball_count(struct char_data *ch);
+extern std::set<struct obj_data*> dball_count(struct char_data *ch);
 
 extern void log_custom(struct descriptor_data *d, struct obj_data *obj);
 

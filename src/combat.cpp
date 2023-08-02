@@ -26,6 +26,7 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/class.h"
 #include "dbat/techniques.h"
+#include "dbat/act.informative.h"
 
 /* local functions */
 void damage_weapon(struct char_data *ch, struct obj_data *obj, struct char_data *vict) {
@@ -627,20 +628,10 @@ void combine_attacks(struct char_data *ch, struct char_data *vict) {
 
 int check_ruby(struct char_data *ch) {
 
-    struct obj_data *obj, *next_obj = nullptr, *ruby = nullptr;
-    int found = 0;
+    auto isHotRuby = [](const auto&o) {return o->vn == 6600 && OBJ_FLAGGED(o, ITEM_HOT);};
+    auto ruby = ch->findObject(isHotRuby);
 
-    for (obj = ch->contents; obj; obj = next_obj) {
-        next_obj = obj->next_content;
-        if (found == 0 && GET_OBJ_VNUM(obj) == 6600) {
-            if (OBJ_FLAGGED(obj, ITEM_HOT)) {
-                found = 1;
-                ruby = obj;
-            }
-        }
-    }
-
-    if (found > 0) {
+    if (ruby) {
         act("@RYour $p@R flares up and disappears. Your fire attack has been aided!@n", true, ch, ruby, nullptr,
             TO_CHAR);
         act("@R$n's@R $p@R flares up and disappears!@n", true, ch, ruby, nullptr, TO_ROOM);
@@ -1752,7 +1743,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                         dmg /= 2;
 
                         /* Hit those in the current room. */
-                        for (vict = world[IN_ROOM(k)].people; vict; vict = next_v) {
+                        for (vict = k->getRoom()->people; vict; vict = next_v) {
                             next_v = vict->next_in_room;
 
                             if (vict == ch) {
@@ -1854,7 +1845,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                     dmg /= 2;
 
                     /* Hit those in the current room. */
-                    for (vict = world[IN_ROOM(k)].people; vict; vict = next_v) {
+                    for (vict = k->getRoom()->people; vict; vict = next_v) {
                         next_v = vict->next_in_room;
 
                         if (vict == ch) {
@@ -1933,7 +1924,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                         dmg /= 2;
 
                         /* Hit those in the current room. */
-                        for (vict = world[IN_ROOM(k)].people; vict; vict = next_v) {
+                        for (vict = k->getRoom()->people; vict; vict = next_v) {
                             next_v = vict->next_in_room;
 
                             if (vict == ch) {
@@ -2033,7 +2024,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                     dmg /= 2;
 
                     /* Hit those in the current room. */
-                    for (vict = world[IN_ROOM(k)].people; vict; vict = next_v) {
+                    for (vict = k->getRoom()->people; vict; vict = next_v) {
                         next_v = vict->next_in_room;
 
                         if (vict == ch) {
@@ -2591,7 +2582,7 @@ parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char snam
     struct obj_data *tob, *next_obj;
     struct char_data *tch, *next_v;
 
-    for (tch = world[IN_ROOM(ch)].people; tch; tch = next_v) {
+    for (tch = ch->getRoom()->people; tch; tch = next_v) {
         next_v = tch->next_in_room;
 
         if (tch == ch)
@@ -2631,7 +2622,7 @@ parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char snam
         }
     }
 
-    for (tob = world[IN_ROOM(ch)].contents; tob; tob = next_obj) {
+    for (tob = ch->getRoom()->contents; tob; tob = next_obj) {
         next_obj = tob->next_content;
         if (OBJ_FLAGGED(tob, ITEM_UNBREAKABLE))
             continue;
@@ -5954,7 +5945,7 @@ void handle_spiral(struct char_data *ch, struct char_data *vict, int skill, int 
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    world[IN_ROOM(ch)].modDamage(5);
+                    ch->getRoom()->modDamage(5);
 
                     pcost(ch, amount, 0);
                     hurt(0, 0, ch, vict, nullptr, 0, 1);

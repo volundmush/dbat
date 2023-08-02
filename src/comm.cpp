@@ -785,17 +785,7 @@ void init_game() {
 
 
 void record_usage(uint64_t heartPulse, double deltaTime) {
-    int sockets_connected = 0, sockets_playing = 0;
-    struct descriptor_data *d;
 
-    for (d = descriptor_list; d; d = d->next) {
-        sockets_connected++;
-        if (IS_PLAYING(d))
-            sockets_playing++;
-    }
-
-    basic_mud_log("nusage: %-3d sockets connected, %-3d sockets playing",
-        sockets_connected, sockets_playing);
 }
 
 
@@ -2318,9 +2308,9 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
     /* ASSUMPTION: at this point we know type must be TO_NOTVICT or TO_ROOM */
 
     if (ch && IN_ROOM(ch) != NOWHERE)
-        to = world[IN_ROOM(ch)].people;
+        to = ch->getRoom()->people;
     else if (obj && IN_ROOM(obj) != NOWHERE)
-        to = world[IN_ROOM(obj)].people;
+        to = obj->getRoom()->people;
     else {
         return nullptr;
     }

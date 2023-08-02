@@ -147,7 +147,7 @@ void sub_write(char *arg, struct char_data *ch, int8_t find_invis, int targets) 
                 *s = '\0';
                 p = any_one_name(++p, name);
                 otokens[i] =
-                        find_invis ? (void *) get_char_in_room(&world[IN_ROOM(ch)], name) : (void *) get_char_room_vis(
+                        find_invis ? (void *) get_char_in_room(ch->getRoom(), name) : (void *) get_char_room_vis(
                                 ch, name, nullptr);
                 tokens[++i] = ++s;
                 break;
@@ -158,8 +158,8 @@ void sub_write(char *arg, struct char_data *ch, int8_t find_invis, int targets) 
                 *s = '\0';
                 p = any_one_name(++p, name);
 
-                if (find_invis) obj = get_obj_in_room(&world[IN_ROOM(ch)], name);
-                else if (!(obj = get_obj_in_list_vis(ch, name, nullptr, world[IN_ROOM(ch)].contents)));
+                if (find_invis) obj = get_obj_in_room(ch->getRoom(), name);
+                else if (!(obj = get_obj_in_list_vis(ch, name, nullptr, ch->getRoom()->contents)));
                 else if (!(obj = get_obj_in_equip_vis(ch, name, &tmp, ch->equipment)));
                 else obj = get_obj_in_list_vis(ch, name, nullptr, ch->contents);
 
@@ -184,7 +184,7 @@ void sub_write(char *arg, struct char_data *ch, int8_t find_invis, int targets) 
         sub_write_to_char(ch, tokens, otokens, type);
 
     if (IS_SET(targets, TO_ROOM))
-        for (to = world[IN_ROOM(ch)].people;
+        for (to = ch->getRoom()->people;
              to; to = to->next_in_room)
             if (to != ch && SENDOK(to))
                 sub_write_to_char(to, tokens, otokens, type);
@@ -200,7 +200,7 @@ void send_to_zone(char *messg, zone_rnum zone) {
     for (i = descriptor_list; i; i = i->next)
         if (!i->connected && i->character && AWAKE(i->character) &&
             (IN_ROOM(i->character) != NOWHERE) &&
-            (world[IN_ROOM(i->character)].zone == zone))
+            (i->character->getRoom()->zone == zone))
             write_to_output(i, "%s", messg);
 }
 
@@ -251,7 +251,7 @@ void fly_zone(zone_rnum zone, char *messg, struct char_data *ch) {
 
     for (i = descriptor_list; i; i = i->next) {
         if (!i->connected && i->character && AWAKE(i->character) && OUTSIDE(i->character) &&
-            (IN_ROOM(i->character) != NOWHERE) && (world[IN_ROOM(i->character)].zone == zone) && i->character != ch) {
+            (IN_ROOM(i->character) != NOWHERE) && (i->character->getRoom()->zone == zone) && i->character != ch) {
             if (PLR_FLAGGED(i->character, PLR_DISGUISED)) {
                 write_to_output(i, "A disguised figure %s", messg);
             } else {

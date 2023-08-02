@@ -102,7 +102,7 @@ ACMD(do_lightgrenade) {
 
     dmg = damtype(ch, 57, skill, attperc);
 
-    for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+    for (vict = ch->getRoom()->people; vict; vict = next_v) {
         next_v = vict->next_in_room;
         if (vict == ch) {
             continue;
@@ -250,13 +250,7 @@ ACMD(do_breath) {
 
     vict = nullptr;
     obj = nullptr;
-    if (!*arg || !(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
-        if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-            vict = FIGHTING(ch);
-        } else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, world[IN_ROOM(ch)].contents))) {
-            return;
-        }
-    }
+    if (!tech_handle_targeting(ch, arg, &vict, &obj)) return;
     handle_cooldown(ch, 10);
     if (vict) {
         if (!can_kill(ch, vict, nullptr, 1)) {
@@ -465,13 +459,7 @@ ACMD(do_ram) {
 
     vict = nullptr;
     obj = nullptr;
-    if (!*arg || !(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
-        if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-            vict = FIGHTING(ch);
-        } else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, world[IN_ROOM(ch)].contents))) {
-            return;
-        }
-    }
+    if (!tech_handle_targeting(ch, arg, &vict, &obj)) return;
     handle_cooldown(ch, 4);
     if (vict) {
         if (!can_kill(ch, vict, nullptr, 0)) {
@@ -644,13 +632,7 @@ ACMD(do_strike) {
 
     vict = nullptr;
     obj = nullptr;
-    if (!*arg || !(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
-        if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-            vict = FIGHTING(ch);
-        } else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, world[IN_ROOM(ch)].contents))) {
-            return;
-        }
-    }
+    if (!tech_handle_targeting(ch, arg, &vict, &obj)) return;
     handle_cooldown(ch, 4);
     if (vict) {
         if (!can_kill(ch, vict, nullptr, 0)) {
@@ -1303,7 +1285,7 @@ ACMD(do_zen) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    world[IN_ROOM(ch)].modDamage(5);
+                    ch->getRoom()->modDamage(5);
                     improve_skill(vict, SKILL_DODGE, 0);
 
                     if (GET_SKILL_PERF(ch, SKILL_ZEN) == 3 && attperc > minimum) {
@@ -1639,7 +1621,7 @@ ACMD(do_malice) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    world[IN_ROOM(ch)].modDamage(20);
+                    ch->getRoom()->modDamage(20);
 
                     improve_skill(vict, SKILL_DODGE, 0);
 
@@ -1823,7 +1805,7 @@ ACMD(do_nova) {
         skill += 5;
     }
 
-    for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+    for (vict = ch->getRoom()->people; vict; vict = next_v) {
         next_v = vict->next_in_room;
         if (vict == ch) {
             continue;
@@ -1881,7 +1863,7 @@ ACMD(do_nova) {
             dmg *= 1.4;
         }
 
-        for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+        for (vict = ch->getRoom()->people; vict; vict = next_v) {
             next_v = vict->next_in_room;
             if (vict == ch) {
                 continue;
@@ -2656,7 +2638,7 @@ ACMD(do_throw) {
         vict = def;
     }
 
-    auto gravity = ROOM_GRAVITY(IN_ROOM(ch));
+    auto gravity = ch->currentGravity();
 
     /* We are throwing an object. */
     if (obj) {
@@ -3181,7 +3163,7 @@ ACMD(do_selfd) {
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@R$n EXPLODES! The explosion expands outward burning up all surroundings for a large distance. The explosion takes on the shape of a large energy dome with $n at its center!@n",
             true, ch, nullptr, nullptr, TO_ROOM);
-        for (tch = world[IN_ROOM(ch)].people; tch; tch = next_v) {
+        for (tch = ch->getRoom()->people; tch; tch = next_v) {
             next_v = tch->next_in_room;
             if (tch == ch) {
                 continue;
@@ -3554,7 +3536,7 @@ ACMD(do_spike) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    world[IN_ROOM(ch)].modDamage(5);
+                    ch->getRoom()->modDamage(5);
                     if (GET_SKILL_PERF(ch, SKILL_WSPIKE) == 3 && attperc > minimum) {
                         pcost(ch, attperc - 0.05, 0);
                     } else {
@@ -4338,7 +4320,7 @@ ACMD(do_breaker) {
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-                    world[IN_ROOM(ch)].modDamage(5);
+                    ch->getRoom()->modDamage(5);
 
                     pcost(ch, attperc, 0);
                     hurt(0, 0, ch, vict, nullptr, 0, 1);

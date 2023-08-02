@@ -1,5 +1,6 @@
 #include "dbat/structs.h"
 #include "dbat/dg_scripts.h"
+#include "dbat/utils.h"
 
 nlohmann::json unit_data::serializeUnit() {
     nlohmann::json j;
@@ -94,4 +95,29 @@ int64_t unit_data::getInventoryCount() {
         total++;
     }
     return total;
+}
+
+struct obj_data* unit_data::findObject(const std::function<bool(struct obj_data*)> &func, bool working) {
+    for(auto obj = contents; obj; obj = obj->next_content) {
+        if(working && !obj->isWorking()) continue;
+        if(func(obj)) return obj;
+        auto p = obj->findObject(func, working);
+        if(p) return p;
+    }
+    return nullptr;
+}
+
+struct obj_data* unit_data::findObjectVnum(obj_vnum objVnum, bool working) {
+    return findObject([objVnum](auto o) {return o->vn == objVnum;}, working);
+}
+
+std::set<struct obj_data*> unit_data::gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working) {
+    std::set<struct obj_data*> out;
+    for(auto obj = contents; obj; obj = obj->next_content) {
+        if(working && !obj->isWorking()) continue;
+        if(func(obj)) out.insert(obj);
+        auto contents = obj->gatherObjects(func, working);
+        out.insert(contents.begin(), contents.end());
+    }
+    return out;
 }

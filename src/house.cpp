@@ -96,22 +96,24 @@ void House_crashsave(room_vnum vnum) {
     int rnum;
     char buf[MAX_STRING_LENGTH];
     FILE *fp;
-
-    if ((rnum = real_room(vnum)) == NOWHERE)
+    auto find = world.find(vnum);
+    if (find == world.end())
         return;
+
     if (!House_get_filename(vnum, buf, sizeof(buf)))
         return;
+
     if (!(fp = fopen(buf, "wb"))) {
         perror("SYSERR: Error saving house file");
         return;
     }
-    if (!House_save(world[rnum].contents, fp, 0)) {
+    if (!House_save(find->second.contents, fp, 0)) {
         fclose(fp);
         return;
     }
     fclose(fp);
-    House_restore_weight(world[rnum].contents);
-    REMOVE_BIT_AR(ROOM_FLAGS(rnum), ROOM_HOUSE_CRASH);
+    House_restore_weight(find->second.contents);
+    find->second.room_flags.reset(ROOM_HOUSE_CRASH);
 }
 
 
@@ -194,8 +196,8 @@ void House_boot(bool legacy) {
         house_control[num_of_houses++] = temp_house;
 
         auto &r = world[temp_house.vn];
-        SET_BIT_AR(r.room_flags, ROOM_HOUSE);
-        SET_BIT_AR(r.room_flags, ROOM_SAVE);
+        r.room_flags.set(ROOM_HOUSE);
+        r.room_flags.set(ROOM_SAVE);
 
         if(legacy) House_load(temp_house.vn);
     }
@@ -276,14 +278,18 @@ void hcontrol_build_house(struct char_data *ch, char *arg) {
         return;
     }
     virt_house = atoi(arg1);
-    if ((real_house = real_room(virt_house)) == NOWHERE) {
+    auto room = world.find(virt_house);
+    if (room == world.end()) {
         send_to_char(ch, "No such room exists.\r\n");
         return;
     }
+
     if ((find_house(virt_house)) != NOWHERE) {
         send_to_char(ch, "House already exists.\r\n");
         return;
     }
+
+    auto &r = world[virt_house];
 
     /* second arg: direction of house's exit */
     arg = one_argument(arg, arg1);
@@ -296,7 +302,7 @@ void hcontrol_build_house(struct char_data *ch, char *arg) {
         send_to_char(ch, "'%s' is not a valid direction.\r\n", arg1);
         return;
     }
-    if (TOROOM(real_house, exit_num) == NOWHERE) {
+    if (r.dir_option[exit_num]->to_room == NOWHERE) {
         send_to_char(ch, "There is no exit %s from room %d.\r\n", dirs[exit_num], virt_house);
         return;
     }
@@ -323,7 +329,8 @@ void hcontrol_build_house(struct char_data *ch, char *arg) {
 
     house_control[num_of_houses++] = temp_house;
 
-    SET_BIT_AR(ROOM_FLAGS(real_house), ROOM_HOUSE);
+    r.room_flags.set(ROOM_HOUSE);
+    r.room_flags.set(ROOM_SAVE);
     House_crashsave(virt_house);
 
     send_to_char(ch, "House built.  Mazel tov!\r\n");
@@ -346,13 +353,13 @@ void hcontrol_destroy_house(struct char_data *ch, char *arg) {
     if ((real_atrium = real_room(house_control[i].atrium)) == NOWHERE)
         basic_mud_log("SYSERR: House %d had invalid atrium %d!", atoi(arg), house_control[i].atrium);
     else
-        REMOVE_BIT_AR(ROOM_FLAGS(real_atrium), ROOM_ATRIUM);
+        ROOM_FLAGS(real_atrium).reset(ROOM_ATRIUM);
 
     if ((real_house = real_room(house_control[i].vn)) == NOWHERE)
         basic_mud_log("SYSERR: House %d had invalid vnum %d!", atoi(arg), house_control[i].vn);
     else {
-        REMOVE_BIT_AR(ROOM_FLAGS(real_house), ROOM_HOUSE);
-        REMOVE_BIT_AR(ROOM_FLAGS(real_house), ROOM_HOUSE_CRASH);
+        ROOM_FLAGS(real_house).reset(ROOM_HOUSE);
+        ROOM_FLAGS(real_house).reset(ROOM_HOUSE_CRASH);
     }
 
     House_delete_file(house_control[i].vn);
@@ -372,7 +379,7 @@ void hcontrol_destroy_house(struct char_data *ch, char *arg) {
      */
     for (i = 0; i < num_of_houses; i++)
         if ((real_atrium = real_room(house_control[i].atrium)) != NOWHERE)
-            SET_BIT_AR(ROOM_FLAGS(real_atrium), ROOM_ATRIUM);
+            ROOM_FLAGS(real_atrium).set(ROOM_ATRIUM);
 }
 
 
@@ -461,7 +468,7 @@ ACMD(do_house) {
 /* crash-save all the houses */
 void House_save_all(uint64_t heartPulse, double deltaTime) {
     for(auto &[vn, room] : world) {
-        if(IS_SET_AR(room.room_flags, ROOM_SAVE)) room.save();
+        if(room.room_flags.test(ROOM_SAVE)) room.save();
     }
 }
 

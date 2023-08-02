@@ -2400,7 +2400,7 @@ int special(struct char_data *ch, int cmd, char *arg) {
 
     /* special in room? */
     if (GET_ROOM_SPEC(IN_ROOM(ch)) != nullptr)
-        if (GET_ROOM_SPEC(IN_ROOM(ch))(ch, &world[IN_ROOM(ch)], cmd, arg))
+        if (GET_ROOM_SPEC(IN_ROOM(ch))(ch, ch->getRoom(), cmd, arg))
             return (1);
 
     /* special in equipment list? */
@@ -2416,13 +2416,13 @@ int special(struct char_data *ch, int cmd, char *arg) {
                 return (1);
 
     /* special in mobile present? */
-    for (k = world[IN_ROOM(ch)].people; k; k = k->next_in_room)
+    for (k = ch->getRoom()->people; k; k = k->next_in_room)
         if (!MOB_FLAGGED(k, MOB_NOTDEADYET))
             if (GET_MOB_SPEC(k) && GET_MOB_SPEC(k)(ch, k, cmd, arg))
                 return (1);
 
     /* special in object present? */
-    for (i = world[IN_ROOM(ch)].contents; i; i = i->next_content)
+    for (i = ch->getRoom()->contents; i; i = i->next_content)
         if (GET_OBJ_SPEC(i) != nullptr)
             if (GET_OBJ_SPEC(i)(ch, i, cmd, arg))
                 return (1);

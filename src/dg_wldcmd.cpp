@@ -139,19 +139,15 @@ WCMD(do_weffect) {
             wld_log(room, "weffect target is NOWHERE.");
             return;
         } else {
-            if (!ROOM_FLAGGED(target, ROOM_INDOORS)) {
-                SET_BIT_AR(ROOM_FLAGS(target), ROOM_INDOORS);
-            } else {
-                REMOVE_BIT_AR(ROOM_FLAGS(target), ROOM_INDOORS);
-            }
+            room->room_flags.flip(ROOM_INDOORS);
         }
     } else if (!strcasecmp(arg, "lava")) {
         if (target == NOWHERE) {
             wld_log(room, "weffect target is NOWHERE.");
             return;
         } else {
-            if (ROOM_EFFECT(target) != 0) {
-                ROOM_EFFECT(target) = 5;
+            if (room->geffect != 0) {
+                room->geffect = 5;
             } else {
                 wld_log(room, "weffect target already has lava.");
                 return;
@@ -380,14 +376,14 @@ WCMD(do_wteleport) {
                 continue;
             char_from_room(ch);
             char_to_room(ch, target);
-            enter_wtrigger(&world[IN_ROOM(ch)], ch, -1);
+            enter_wtrigger(ch->getRoom(), ch, -1);
         }
     } else {
         if ((ch = get_char_by_room(room, arg1))) {
             if (valid_dg_target(ch, DG_ALLOW_GODS)) {
                 char_from_room(ch);
                 char_to_room(ch, target);
-                enter_wtrigger(&world[IN_ROOM(ch)], ch, -1);
+                enter_wtrigger(ch->getRoom(), ch, -1);
             }
         } else
             wld_log(room, "wteleport: no target found");

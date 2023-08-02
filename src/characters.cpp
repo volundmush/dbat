@@ -9,6 +9,7 @@
 #include "dbat/class.h"
 #include "dbat/fight.h"
 #include "dbat/act.movement.h"
+#include "dbat/act.informative.h"
 #include "dbat/config.h"
 #include "dbat/mail.h"
 #include "dbat/dg_comm.h"
@@ -94,7 +95,7 @@ void char_data::resurrect(ResurrectionMode mode) {
     } else {
         char_to_room(this, real_room(this->chclass->senseiStartRoom()));
     }
-    look_at_room(IN_ROOM(this), this, 0);
+    look_at_room(in_room, this, 0);
 
     // If Costless, there's not going to be any penalties.
     int dur = 100;
@@ -945,9 +946,8 @@ void char_data::remove_kaioken(int8_t announce) {
 }
 
 std::optional<vnum> char_data::getMatchingArea(std::function<bool(const area_data &)> f) {
-    if(in_room != NOWHERE) {
-        auto &r = world[in_room];
-        return r.getMatchingArea(f);
+    if(auto room = getRoom(); room) {
+        return room->getMatchingArea(f);
     }
     return std::nullopt;
 }

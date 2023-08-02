@@ -150,6 +150,10 @@ struct unit_data {
     nlohmann::json serializeScripts();
     void deserializeScripts();
 
+    struct obj_data* findObjectVnum(obj_vnum objVnum, bool working = true);
+    virtual struct obj_data* findObject(const std::function<bool(struct obj_data*)> &func, bool working = true);
+    virtual std::set<struct obj_data*> gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working = true);
+
 };
 
 
@@ -185,6 +189,8 @@ struct obj_data : public unit_data {
 
     struct room_data* getAbsoluteRoom();
     struct room_data* getRoom();
+    bool isWorking();
+    void clearLocation();
 
 
     room_rnum in_room{NOWHERE};        /* In what room -1 when conta/carr	*/
@@ -240,6 +246,7 @@ struct obj_data : public unit_data {
     std::optional<vnum> getMatchingArea(const std::function<bool(const area_data&)>& f);
 
     bool isProvidingLight();
+    double currentGravity();
 };
 /* ======================================================================= */
 
@@ -267,6 +274,9 @@ struct room_direction_data {
     room_vnum failroom{NOWHERE};        /* Room # to put char in when fail > 5  */
     room_vnum totalfailroom{NOWHERE};        /* Room # if char fails save < 5	*/
 
+    struct room_data* getDestination();
+
+
     nlohmann::json serialize();
 };
 
@@ -278,7 +288,7 @@ struct room_data : public unit_data {
     explicit room_data(const nlohmann::json &j);
     int sector_type{};            /* sector type (move/hide)            */
     std::array<room_direction_data*, NUM_OF_DIRS> dir_option{}; /* Directions */
-    bitvector_t room_flags[RF_ARRAY_MAX]{};   /* DEATH,DARK ... etc */
+    std::bitset<NUM_ROOM_FLAGS> room_flags{};   /* DEATH,DARK ... etc */
     SpecialFunc func{};
     struct char_data *people{};    /* List of NPC / PC in room */
     int timed{};                   /* For timed Dt's                     */
@@ -287,6 +297,8 @@ struct room_data : public unit_data {
     std::optional<vnum> area;      /* Area number; empty for unassigned     */
 
     std::optional<double> gravity;
+
+    bool isSunken();
 
     int getDamage();
     int setDamage(int amount);
@@ -301,6 +313,7 @@ struct room_data : public unit_data {
     std::string getUID() override;
     bool isActive() override;
     void save() override;
+
 };
 /* ====================================================================== */
 
@@ -482,6 +495,9 @@ struct char_data : public unit_data {
     void save() override;
 
     struct room_data* getRoom();
+
+    struct obj_data* findObject(const std::function<bool(struct obj_data*)> &func, bool working = true) override;
+    std::set<struct obj_data*> gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working = true) override;
 
     // Prototype-relevant fields below...
     char *title{};            /* PC / NPC's title                     */
@@ -998,6 +1014,7 @@ struct char_data : public unit_data {
     void modRPP(int amt);
 
     bool isProvidingLight();
+    double currentGravity();
 
 };
 

@@ -470,20 +470,19 @@ void affect_join(struct char_data *ch, struct affected_type *af,
 void char_from_room(struct char_data *ch) {
     struct char_data *temp;
     int i;
+    struct room_data *r;
 
-    if (ch == nullptr || !world.contains(IN_ROOM(ch))) {
+    if (ch == nullptr || !(r = ch->getRoom())) {
         basic_mud_log("SYSERR: nullptr character or NOWHERE in %s, char_from_room", __FILE__);
         return;
     }
-
-    auto &r = world[IN_ROOM(ch)];
 
     if (FIGHTING(ch) != nullptr && !AFF_FLAGGED(ch, AFF_PURSUIT))
         stop_fighting(ch);
     if (AFF_FLAGGED(ch, AFF_PURSUIT) && FIGHTING(ch) == nullptr)
         REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_PURSUIT);
 
-    REMOVE_FROM_LIST(ch, r.people, next_in_room, temp);
+    REMOVE_FROM_LIST(ch, r->people, next_in_room, temp);
     IN_ROOM(ch) = NOWHERE;
     ch->next_in_room = nullptr;
     
@@ -904,7 +903,7 @@ void obj_from_room(struct obj_data *object) {
         GET_OBJ_POSTTYPE(object) = 0;
     }
 
-    REMOVE_FROM_LIST(object, world[IN_ROOM(object)].contents, next_content, temp);
+    REMOVE_FROM_LIST(object, object->getRoom()->contents, next_content, temp);
 
     IN_ROOM(object) = NOWHERE;
     object->next_content = nullptr;
@@ -966,16 +965,7 @@ void object_list_new_owner(struct obj_data *list, struct char_data *ch) {
 void extract_obj(struct obj_data *obj) {
     struct obj_data *temp;
     struct char_data *ch;
-
-    if (obj->worn_by != nullptr)
-        if (unequip_char(obj->worn_by, obj->worn_on) != obj)
-            basic_mud_log("SYSERR: Inconsistent worn_by and worn_on pointers!!");
-    if (IN_ROOM(obj) != NOWHERE)
-        obj_from_room(obj);
-    else if (obj->carried_by)
-        obj_from_char(obj);
-    else if (obj->in_obj)
-        obj_from_obj(obj);
+    obj->clearLocation();
 
     /* Get rid of the contents of the object, as well. */
     if (GET_FELLOW_WALL(obj) && GET_OBJ_VNUM(obj) == 79) {
@@ -1428,7 +1418,7 @@ struct char_data *get_char_room_vis(struct char_data *ch, char *name, int *numbe
     if (*number == 0)
         return (get_player_vis(ch, name, nullptr, FIND_CHAR_ROOM));
 
-    for (i = world[IN_ROOM(ch)].people; i && *number; i = i->next_in_room) {
+    for (i = ch->getRoom()->people; i && *number; i = i->next_in_room) {
         if (!strcasecmp(name, "last") && LASTHIT(i) != 0 && LASTHIT(i) == GET_IDNUM(ch)) {
             if (CAN_SEE(ch, i))
                 if (--(*number) == 0)
@@ -1575,7 +1565,7 @@ struct obj_data *get_obj_vis(struct char_data *ch, char *name, int *number) {
         return (i);
 
     /* scan room */
-    if ((i = get_obj_in_list_vis(ch, name, number, world[IN_ROOM(ch)].contents)) != nullptr)
+    if ((i = get_obj_in_list_vis(ch, name, number, ch->getRoom()->contents)) != nullptr)
         return (i);
 
     /* ok.. no luck yet. scan the entire obj list   */
@@ -1781,7 +1771,7 @@ int generic_find(char *arg, bitvector_t bitvector, struct char_data *ch,
     }
 
     if (IS_SET(bitvector, FIND_OBJ_ROOM)) {
-        if ((*tar_obj = get_obj_in_list_vis(ch, name, &number, world[IN_ROOM(ch)].contents)) != nullptr)
+        if ((*tar_obj = get_obj_in_list_vis(ch, name, &number, ch->getRoom()->contents)) != nullptr)
             return (FIND_OBJ_ROOM);
     }
 
