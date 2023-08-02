@@ -51,7 +51,7 @@ namespace net {
             return;
         }
 
-        if(boost::all(txt, boost::is_digit())) {
+        if(!txt.empty() && boost::all(txt, boost::is_digit())) {
             auto num = std::stoi(txt);
             auto slot = num - 1;
 

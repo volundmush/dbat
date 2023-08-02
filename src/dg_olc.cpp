@@ -390,7 +390,7 @@ void trigedit_parse(struct descriptor_data *d, char *arg) {
 /* save the zone's triggers to internal memory and to disk */
 void trigedit_save(struct descriptor_data *d) {
     int i;
-    trig_rnum rnum;
+    trig_rnum rnum = OLC_NUM(d);
     int found = 0;
     char *s;
     trig_data *proto;
@@ -443,41 +443,37 @@ void trigedit_save(struct descriptor_data *d) {
         trig_data_copy(proto, trig);
 
         /* go through the mud and replace existing triggers         */
-        live_trig = trigger_list;
-        while (live_trig) {
-            if (GET_TRIG_RNUM(live_trig) == rnum) {
-                if (live_trig->arglist) {
-                    free(live_trig->arglist);
-                    live_trig->arglist = nullptr;
-                }
-                if (live_trig->name) {
-                    free(live_trig->name);
-                    live_trig->name = nullptr;
-                }
-
-                if (proto->arglist)
-                    live_trig->arglist = strdup(proto->arglist);
-                if (proto->name)
-                    live_trig->name = strdup(proto->name);
-
-                /* anything could have happened so we don't want to keep these */
-                triggers_waiting.erase(live_trig);
-
-                if (live_trig->var_list) {
-                    free_varlist(live_trig->var_list);
-                    live_trig->var_list = nullptr;
-                }
-
-                live_trig->cmdlist = proto->cmdlist;
-                live_trig->curr_state = live_trig->cmdlist;
-                live_trig->trigger_type = proto->trigger_type;
-                live_trig->attach_type = proto->attach_type;
-                live_trig->narg = proto->narg;
-                live_trig->data_type = proto->data_type;
-                live_trig->depth = 0;
+        for (live_trig = trigger_list; live_trig; live_trig = live_trig->next_in_world) {
+            if(live_trig->vn != rnum) continue;
+            if (live_trig->arglist) {
+                free(live_trig->arglist);
+                live_trig->arglist = nullptr;
+            }
+            if (live_trig->name) {
+                free(live_trig->name);
+                live_trig->name = nullptr;
             }
 
-            live_trig = live_trig->next_in_world;
+            if (proto->arglist)
+                live_trig->arglist = strdup(proto->arglist);
+            if (proto->name)
+                live_trig->name = strdup(proto->name);
+
+            /* anything could have happened so we don't want to keep these */
+            triggers_waiting.erase(live_trig);
+
+            if (live_trig->var_list) {
+                free_varlist(live_trig->var_list);
+                live_trig->var_list = nullptr;
+            }
+
+            live_trig->cmdlist = proto->cmdlist;
+            live_trig->curr_state = live_trig->cmdlist;
+            live_trig->trigger_type = proto->trigger_type;
+            live_trig->attach_type = proto->attach_type;
+            live_trig->narg = proto->narg;
+            live_trig->data_type = proto->data_type;
+            live_trig->depth = 0;
         }
     } else {
         {

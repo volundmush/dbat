@@ -313,7 +313,7 @@ void parse_edit_action(int command, char *string, struct descriptor_data *d) {
              * This is kind of annoying...but some people like it.
              */
             sprintf(buf + strlen(buf), "\r\n%d line%sshown.\r\n", total_len, (total_len != 1) ? "s " : " ");
-            write_to_output(d, buf);
+            d->sendText(buf);
             break;
         case PARSE_LIST_NUM:
             /*
@@ -378,7 +378,7 @@ void parse_edit_action(int command, char *string, struct descriptor_data *d) {
             } else if (t)
                 strcat(buf, t);
 
-            write_to_output(d, buf);
+            d->sendText(buf);
             break;
 
         case PARSE_INSERT:

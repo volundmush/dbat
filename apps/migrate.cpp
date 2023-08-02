@@ -93,6 +93,7 @@ struct AreaDef {
     std::set<std::size_t> roomFlags{};
     std::vector<std::pair<std::size_t, std::size_t>> roomRanges;
     std::set<vnum> roomIDs{}, roomSkips{};
+    std::bitset<NUM_AREA_FLAGS> flags;
 };
 
 vnum assembleArea(const AreaDef &def) {
@@ -101,6 +102,7 @@ vnum assembleArea(const AreaDef &def) {
     a.vn = vn;
     a.name = def.name;
     a.type = def.type;
+    a.flags = def.flags;
 
     if(def.gravity) {
         a.gravity = def.gravity.value();
@@ -402,12 +404,12 @@ void migrate_grid() {
 
     for(auto &p : {planet_earth, planet_aether, planet_namek, moon_zenith}) {
 		auto &planet = areas[p];
-        planet.ether = true;
+        planet.flags.set(AREA_ETHER);
     }
 
     for(auto &p : {planet_earth, planet_aether, planet_vegeta, planet_frigid}) {
         auto &planet = areas[p];
-        planet.moon = true;
+        planet.flags.set(AREA_MOON);
     }
 
     AreaDef zelakinfarm;

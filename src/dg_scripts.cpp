@@ -750,7 +750,7 @@ void do_stat_trigger(struct char_data *ch, trig_data *trig) {
         cmd_list = cmd_list->next;
     }
 
-    write_to_output(ch->desc, sb);
+    ch->desc->sendText(sb);
 }
 
 

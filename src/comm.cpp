@@ -1718,10 +1718,10 @@ size_t proc_colors(char *txt, size_t maxlen, int parse, char **choices) {
 // That's no longer a problem so it always returns 0.
 size_t vwrite_to_output(struct descriptor_data *t, const char *format, va_list args) {
     // Use a temporary buffer to get the required size
-    char temp;
     va_list args_copy;
     va_copy(args_copy, args);  // Make a copy of va_list, since vsnprintf will alter it
-    int required_size = std::vsnprintf(&temp, 1, format, args_copy) + 1; // +1 for null-terminator
+    auto len = strlen(format);
+    int required_size = std::vsnprintf(nullptr, 0, format, args_copy) + 1; // +1 for null-terminator
     va_end(args_copy);
 
     if (required_size <= 0) {
@@ -1736,6 +1736,10 @@ size_t vwrite_to_output(struct descriptor_data *t, const char *format, va_list a
     t->output += std::string(buffer.begin(), buffer.end() - 1); // -1 to ignore the null-terminator
 
     return required_size - 1; // Return the size of the appended string (-1 to exclude the null-terminator)
+}
+
+void descriptor_data::sendText(const std::string& txt) {
+    output += txt;
 }
 
 void free_bufpool() {

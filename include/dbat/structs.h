@@ -86,6 +86,7 @@ struct area_data {
     std::optional<vnum> extraVn; /* vehicle or house outer object vnum, orbit for CelBody */
     bool ether{false}; /* is this area etheric?			*/
     bool moon{false}; /* does this planet have a moon? */
+    std::bitset<NUM_AREA_FLAGS> flags; /* area flags				*/
     nlohmann::json serialize();
     static vnum getNextID();
     static bool isPlanet(const area_data &area);
@@ -1081,6 +1082,7 @@ struct descriptor_data {
     void handle_input();
     void start();
     void handleLostLastConnection();
+    void sendText(const std::string &txt);
 };
 
 /* used in the socials */

@@ -808,3 +808,73 @@ void obj_command_interpreter(obj_data *obj, char *argument) {
         ((*obj_cmd_info[cmd].command_pointer)
                 (obj, line, cmd, obj_cmd_info[cmd].subcmd));
 }
+
+/*
+
+eval rrt %random.900%
+eval rsn %random.5%
+
+switch %rsn%
+case 1
+  eval prt 20
+  break
+case 2
+  eval prt 21
+  break
+case 3
+  eval prt 24
+  break
+case 4
+  eval prt 30
+  break
+case 5
+  eval prt 29
+  break
+done
+
+if(%prt% == 20)
+    if(%rrt <= 99)
+        eval rrt 200%random.99%
+    else
+        eval rrt 20%rrt%
+    end
+elseif(%prt% == 21)
+	if(%rrt <= 99)
+		eval rrt 210%random.99%
+	else
+		eval rrt 21%rrt%
+	end
+elseif(%prt% == 24)
+	if(%rrt <= 99)
+		eval rrt 240%random.99%
+	else
+		eval rrt 21%rrt%
+	end
+elseif(%prt% == 30)
+	if(%rrt <= 99)
+		eval rrt 300%random.99%
+	else
+		eval rrt 21%rrt%
+	end
+elseif(%prt% == 29)
+	if(%rrt <= 99)
+		eval rrt 290%random.99%
+	else
+		eval rrt 29%rrt%
+	end
+else
+	halt
+end
+
+%echo% A bright light begins to cover the ship.
+wait 2 s
+%echo% The light suddenly crashes inwards, with no trace of the ship remaining.
+wait 1
+ogoto 62500
+wait 1
+wait 1
+ogoto %rrt%
+%echo% The Black Omen appears with a sudden flash of light!
+
+
+ */

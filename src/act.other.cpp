@@ -7526,7 +7526,6 @@ ACMD(do_summon) {
     send_to_imm("Shenron summoned to room: %d\r\n", DRAGONR);
 
     for(auto dball : dragonBalls) {
-        dball->clearLocation();
         extract_obj(dball);
     }
 

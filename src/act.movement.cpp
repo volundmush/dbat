@@ -277,13 +277,13 @@ std::optional<vnum> governingAreaTypeFor(struct room_data *rd, std::function<boo
 std::optional<vnum> governingAreaTypeFor(struct char_data *ch, std::function<bool(area_data&)>& func) {
     auto room = ch->getRoom();
     if(!room) return std::nullopt;
-    return governingAreaTypeFor(&room->second, func);
+    return governingAreaTypeFor(room, func);
 }
 
 std::optional<vnum> governingAreaTypeFor(struct obj_data *obj, std::function<bool(area_data&)>& func) {
 	auto room = obj->getAbsoluteRoom();
     if(!room) return std::nullopt;
-    return governingAreaTypeFor(&room->second, func);
+    return governingAreaTypeFor(room, func);
 }
 
 std::size_t recurseScanRooms(area_data &start, std::set<room_vnum>& fill, std::function<bool(room_data&)>& func) {

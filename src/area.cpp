@@ -68,7 +68,7 @@ static void render_area_line(struct char_data *ch, const area_data &a) {
     auto format = "%-5d %-"+std::to_string(20+colorcount)+"s %-5d %-7d %-6d %-5s %-6d %-5d %-5d\r\n";
     send_to_char(ch, format.c_str(),
                  a.vn, a.name.c_str(), a.rooms.size(), a.children.size(), a.parent.value_or(NOTHING),
-                 atype.c_str(), a.extraVn.value_or(NOTHING), a.moon, a.ether);
+                 atype.c_str(), a.extraVn.value_or(NOTHING), a.flags.test(AREA_MOON), a.flags.test(AREA_ETHER));
 }
 
 static void list_areas(struct char_data *ch, std::optional<vnum> parent) {
