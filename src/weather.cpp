@@ -17,10 +17,6 @@
 #include "dbat/config.h"
 #include "dbat/races.h"
 
-static void another_hour(int mode);
-
-static void weather_change();
-
 static void phase_powerup(struct char_data *ch, int type, int phase);
 
 static void grow_plants();
@@ -61,79 +57,46 @@ static void grow_plants() {
 
 }
 
-void weather_and_time(uint64_t heartPulse, double deltaTime) {
-    another_hour(1);
-    grow_plants();
-    if (1)
-        weather_change();
+nlohmann::json weather_data::serialize() {
+    auto j = nlohmann::json::object();
+    j["pressure"] = pressure;
+    j["change"] = change;
+    j["sky"] = sky;
+    j["sunlight"] = sunlight;
+    return j;
+}
+
+void weather_data::deserialize(const nlohmann::json &j) {
+    if(j.contains("pressure")) pressure = j["pressure"];
+    if(j.contains("change")) change = j["change"];
+    if(j.contains("sky")) sky = j["sky"];
+    if(j.contains("sunlight")) sunlight = j["sunlight"];
+}
+
+void time_info_data::deserialize(const nlohmann::json &j) {
+    if(j.contains("remainder")) remainder = j["remainder"];
+    if(j.contains("seconds")) seconds = j["seconds"];
+    if(j.contains("minutes")) minutes = j["minutes"];
+    if(j.contains("hours")) hours = j["hours"];
+    if(j.contains("day")) day = j["day"];
+    if(j.contains("month")) month = j["month"];
+    if(j.contains("year")) year = j["year"];
+}
+
+nlohmann::json time_info_data::serialize() {
+    auto j = nlohmann::json::object();
+    j["remainder"] = remainder;
+    j["seconds"] = seconds;
+    j["minutes"] = minutes;
+    j["hours"] = hours;
+    j["day"] = day;
+    j["month"] = month;
+    j["year"] = year;
+    return j;
 }
 
 
-static void another_hour(int mode) {
-    time_info.hours++;
 
-    if (mode) {
-        switch (time_info.hours) {
-            case 4:
-                if (MOON_DATE) {
-                    send_to_moon("The full moon disappears.\r\n");
-                    MOON_UP = false;
-                    oozaru_drop();
-                } else if (time_info.day == 22) {
-                    send_to_moon("The full moon disappears.\r\n");
-                    MOON_UP = false;
-                    oozaru_drop();
-                }
-                break;
-            case 5:
-                weather_info.sunlight = SUN_RISE;
-                send_to_outdoor("The sun rises in the east.\r\n");
-                if (time_info.day <= 14) {
-                    star_phase(nullptr, 1);
-                } else if (time_info.day <= 21) {
-                    star_phase(nullptr, 2);
-                } else {
-                    star_phase(nullptr, 0);
-                }
-                break;
-            case 6:
-                weather_info.sunlight = SUN_LIGHT;
-                send_to_outdoor("The day has begun.\r\n");
-                break;
-            case 19:
-                weather_info.sunlight = SUN_SET;
-                send_to_outdoor("The sun slowly disappears in the west.\r\n");
-                break;
-            case 20:
-                weather_info.sunlight = SUN_DARK;
-                send_to_outdoor("The night has begun.\r\n");
-                break;
-            case 21:
-                if (MOON_DATE) {
-                    send_to_moon("The full moon has risen.\r\n");
-                    MOON_UP = true;
-                    oozaru_add();
-                }
-                break;
-            default:
-                break;
-        }
-    }
-    if (time_info.hours > 23) {    /* Changed by HHS due to bug ??? */
-        time_info.hours -= 24;
-        time_info.day++;
-
-        if (time_info.day > 29) {
-            time_info.day = 0;
-            time_info.month++;
-
-            if (time_info.month > 11) {
-                time_info.month = 0;
-                time_info.year++;
-            }
-        }
-    }
-}
 
 
 static void weather_change() {
@@ -428,4 +391,116 @@ static void phase_powerup(struct char_data *ch, int type, int phase) {
         GET_PHASE(ch) = phase;
     }
     ch->save();
+}
+
+static void secondChanged() {
+
+}
+
+static void minuteChanged() {
+
+}
+
+static void hourChanged() {
+    grow_plants();
+    weather_change();
+
+    switch (time_info.hours) {
+        case 4:
+            if (MOON_DATE) {
+                send_to_moon("The full moon disappears.\r\n");
+                MOON_UP = false;
+                oozaru_drop();
+            } else if (time_info.day == 22) {
+                send_to_moon("The full moon disappears.\r\n");
+                MOON_UP = false;
+                oozaru_drop();
+            }
+            break;
+        case 5:
+            weather_info.sunlight = SUN_RISE;
+            send_to_outdoor("The sun rises in the east.\r\n");
+            if (time_info.day <= 14) {
+                star_phase(nullptr, 1);
+            } else if (time_info.day <= 21) {
+                star_phase(nullptr, 2);
+            } else {
+                star_phase(nullptr, 0);
+            }
+            break;
+        case 6:
+            weather_info.sunlight = SUN_LIGHT;
+            send_to_outdoor("The day has begun.\r\n");
+            break;
+        case 19:
+            weather_info.sunlight = SUN_SET;
+            send_to_outdoor("The sun slowly disappears in the west.\r\n");
+            break;
+        case 20:
+            weather_info.sunlight = SUN_DARK;
+            send_to_outdoor("The night has begun.\r\n");
+            break;
+        case 21:
+            if (MOON_DATE) {
+                send_to_moon("The full moon has risen.\r\n");
+                MOON_UP = true;
+                oozaru_add();
+            }
+            break;
+        default:
+            break;
+    }
+}
+
+static void dayChanged() {
+
+}
+
+static void monthChanged() {
+
+}
+
+static void yearChanged() {
+
+}
+
+
+void advanceClock(uint64_t heartPulse, double deltaTime) {
+    time_info.remainder += deltaTime * MUD_TIME_ACCELERATION;
+
+    while(time_info.remainder >= 1.0) {
+        time_info.remainder -= 1.0;
+        time_info.seconds++;
+        secondChanged();
+
+        if(time_info.seconds >= SECONDS_PER_MINUTE) {
+            time_info.seconds -= SECONDS_PER_MINUTE;
+            time_info.minutes++;
+            minuteChanged();
+
+            if (time_info.minutes >= MINUTES_PER_HOUR) {
+                time_info.minutes -= MINUTES_PER_HOUR;
+                time_info.hours++;
+                hourChanged();
+
+                if (time_info.hours >= HOURS_PER_DAY) {
+                    time_info.hours -= HOURS_PER_DAY;
+                    time_info.day++;
+                    dayChanged();
+
+                    if (time_info.day >= DAYS_PER_MONTH) {
+                        time_info.day -= DAYS_PER_MONTH;
+                        time_info.month++;
+                        monthChanged();
+
+                        if (time_info.month >= MONTHS_PER_YEAR) {
+                            time_info.month -= MONTHS_PER_YEAR;
+                            time_info.year++;
+                            yearChanged();
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

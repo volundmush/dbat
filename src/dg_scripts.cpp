@@ -880,6 +880,11 @@ void do_sstat(struct char_data *ch, struct unit_data *ud) {
     script_stat(ch, SCRIPT(ud));
 }
 
+int64_t nextTrigID() {
+    int64_t id = 0;
+    while(uniqueScripts.contains(id)) id++;
+    return id;
+}
 
 /*
  * adds the trigger t to script sc in in location loc.  loc = -1 means
@@ -906,6 +911,17 @@ void add_trigger(struct script_data *sc, trig_data *t, int loc) {
     t->next_in_world = trigger_list;
     trigger_list = t;
     t->owner = sc->owner;
+
+    t->id = nextTrigID();
+    t->generation = time(nullptr);
+
+    uniqueScripts[t->id] = std::make_pair(t->generation, t);
+
+    int order = 0;
+    for(auto t = TRIGGERS(sc); t; t = t->next) {
+        t->order = order++;
+    }
+
 }
 
 
@@ -1632,17 +1648,27 @@ void process_wait(void *go, trig_data *trig, int type, char *cmd,
         else
             min = (hr % 100) + ((hr / 100) * 60);
 
-        /* calculate the pulse of the day of "until" time */
-        ntime = (min * SECS_PER_MUD_HOUR * PASSES_PER_SEC) / 60;
+        // Convert current MUD time to seconds since midnight
+        double current_mud_seconds = time_info.seconds * MUD_TIME_ACCELERATION +
+                                     time_info.minutes * SECS_PER_MUD_MINUTE +
+                                     time_info.hours * SECS_PER_MUD_HOUR;
 
-        /* calculate pulse of day of current time */
-        when = (pulse % (SECS_PER_MUD_HOUR * PASSES_PER_SEC)) +
-               (time_info.hours * SECS_PER_MUD_HOUR * PASSES_PER_SEC);
+        // Convert target MUD time to seconds since midnight
+        double target_mud_seconds = min * SECS_PER_MUD_MINUTE;
 
-        if (when >= ntime) /* adjust for next day */
-            when = (SECS_PER_MUD_DAY * PASSES_PER_SEC) - when + ntime;
-        else
-            when = ntime - when;
+        // Determine waiting time in MUD seconds
+        double waiting_mud_seconds;
+        if (current_mud_seconds >= target_mud_seconds) {
+            // If the target time has already passed, wait until the next day
+            waiting_mud_seconds = (SECS_PER_MUD_DAY - current_mud_seconds) + target_mud_seconds;
+        } else {
+            // If the target time is in the future, wait until that time
+            waiting_mud_seconds = target_mud_seconds - current_mud_seconds;
+        }
+
+        // Convert waiting time to real seconds
+        trig->waiting = waiting_mud_seconds / MUD_TIME_ACCELERATION;
+
     } else {
         if (sscanf(arg, "%ld %c", &when, &c) == 2) {
             if (c == 't')
@@ -1696,8 +1722,12 @@ void process_eval(void *go, struct script_data *sc, trig_data *trig,
         return;
     }
 
-    eval_expr(expr, result, go, sc, trig, type);
-    add_var(&GET_TRIG_VARS(trig), name, result, sc ? sc->context : 0);
+    if(isUID(expr)) {
+        add_var(&GET_TRIG_VARS(trig), name, expr, sc ? sc->context : 0);
+    } else {
+        eval_expr(expr, result, go, sc, trig, type);
+        add_var(&GET_TRIG_VARS(trig), name, result, sc ? sc->context : 0);
+    }
 }
 
 
@@ -1721,10 +1751,15 @@ void process_attach(void *go, struct script_data *sc, trig_data *trig,
         return;
     }
 
+    if(isUID(id_p)) {
+        snprintf(result, sizeof(result), "%s", id_p);
+    } else {
+        /* parse and locate the id specified */
+        eval_expr(id_p, result, go, sc, trig, type);
+    }
+
     /* parse and locate the id specified */
-    eval_expr(id_p, result, go, sc, trig, type);
-    std::optional<DgUID> result1;
-    result1 = resolveUID(result);
+    std::optional<DgUID> result1 = resolveUID(result);
     auto uidResult = result1;
     if(!uidResult) {
         script_log("Trigger: %s, VNum %d. attach invalid id arg: '%s'",
@@ -1797,11 +1832,16 @@ void process_detach(void *go, struct script_data *sc, trig_data *trig,
         return;
     }
 
+    if(isUID(id_p)) {
+        snprintf(result, sizeof(result), "%s", id_p);
+    } else {
+        /* parse and locate the id specified */
+        eval_expr(id_p, result, go, sc, trig, type);
+    }
 
     /* parse and locate the id specified */
-    eval_expr(id_p, result, go, sc, trig, type);
-    std::optional<DgUID> result1;
-    result1 = resolveUID(result);
+    std::optional<DgUID> result1 = resolveUID(result);
+
     auto uidResult = result1;
     if(!uidResult) {
         script_log("Trigger: %s, VNum %d. detach invalid id arg: '%s'",
@@ -2895,23 +2935,66 @@ nlohmann::json trig_data::serializeInstance() {
 
     j["id"] = id;
     j["generation"] = generation;
+    j["order"] = order;
 
     if(depth) j["depth"] = depth;
     if(loops) j["loops"] = loops;
+    if(waiting != 0.0) j["waiting"] = waiting;
 
-    if(curr_state == cmdlist) {
-        // the script is on the first line.
-        j["curr_state"] = 0;
-    } else {
+    if(!(curr_state == cmdlist || !curr_state)) {
         j["curr_state"] = countLine(curr_state);
         if(curr_state->original) j["curr_state_original"] = countLine(curr_state->original);
     }
 
-    for(auto v = var_list; v; v = v->next) {
-        j["var_list"].push_back(v->serialize());
-    }
+    if(var_list) j["var_list"] = serializeVars(var_list);
 
     return j;
+}
+
+void trig_data::deserializeInstance(const nlohmann::json &j) {
+    if(j.contains("vn")) vn = j["vn"].get<int>();
+    auto &t = trig_index[vn];
+    auto p = t.proto;
+    if(p->name && strlen(p->name)) name = strdup(p->name);
+    attach_type = p->attach_type;
+    data_type = p->data_type;
+    trigger_type = p->trigger_type;
+    narg = p->narg;
+    if(p->arglist && strlen(p->arglist)) arglist = strdup(p->arglist);
+
+    cmdlist = p->cmdlist;
+    curr_state = p->cmdlist;
+
+    if(j.contains("id")) id = j["id"].get<long>();
+    if(j.contains("generation")) generation = j["generation"].get<long>();
+    if(j.contains("order")) order = j["order"].get<long>();
+
+    if(j.contains("waiting")) waiting = j["waiting"].get<double>();
+    if(j.contains("depth")) depth = j["depth"].get<int>();
+    if(j.contains("loops")) loops = j["loops"].get<int>();
+
+    if(j.contains("curr_state")) {
+        int curr_state_num = j["curr_state"].get<int>();
+        if(curr_state_num > 0) {
+            for(int i = 0; i < curr_state_num; i++) {
+                curr_state = curr_state->next;
+            }
+        }
+    }
+
+    if(j.contains("curr_state_original")) {
+        int curr_state_num = j["curr_state_original"].get<int>();
+        curr_state->original = cmdlist;
+        if(curr_state_num > 0) {
+            for(int i = 0; i < curr_state_num; i++) {
+                curr_state->original = curr_state->original->next;
+            }
+        }
+    }
+
+    if(j.contains("var_list")) {
+        deserializeVars(&var_list, j["var_list"]);
+    }
 }
 
 std::string trig_data::serializeLocation() {
@@ -2924,6 +3007,29 @@ std::string trig_data::serializeLocation() {
             break;
         case 2:
             return std::get<2>(owner)->getUID();
+            break;
+    }
+}
+
+void trig_data::deserializeLocation(const std::string &txt) {
+    auto uid = resolveUID(txt);
+    if(!uid) return;
+    owner = *uid;
+    struct room_data *r;
+    struct obj_data *o;
+    struct char_data *c;
+    switch(owner.index()) {
+        case 0:
+            r = std::get<0>(owner);
+            if(!SCRIPT(r)) r->script = new script_data(r);
+            break;
+        case 1:
+            o = std::get<1>(owner);
+            if(!SCRIPT(o)) o->script = new script_data(o);
+            break;
+        case 2:
+            c = std::get<2>(owner);
+            if(!SCRIPT(c)) c->script = new script_data(c);
             break;
     }
 }
@@ -2949,6 +3055,36 @@ trig_data::trig_data(const nlohmann::json &j) : trig_data() {
 }
 
 void ADD_UID_VAR(char *buf, struct trig_data *trig, struct unit_data *thing, char *name, long context) {
-	auto uid = thing->getUID();
+	auto uid = thing->getUID(false);
     add_var(&GET_TRIG_VARS(trig), name, (char*)uid.c_str(), context);
+}
+
+// Note: Trigger instances are meant to be set all active or inactive on a per room/character/item basis,
+// not individually.
+void trig_data::activate() {
+    next_in_world = trigger_list;
+    trigger_list = this;
+    if(waiting != 0.0) triggers_waiting.insert(this);
+}
+
+void trig_data::deactivate() {
+    struct trig_data *temp;
+    triggers_waiting.erase(this);
+    REMOVE_FROM_LIST(this, trigger_list, next_in_world, temp);
+}
+
+nlohmann::json serializeVars(struct trig_var_data *vd) {
+    auto j = nlohmann::json::array();;
+    for(auto v = vd; v; v = v->next) {
+        j.push_back(v->serialize());
+    }
+    return j;
+}
+
+void deserializeVars(struct trig_var_data **vd, const nlohmann::json &j) {
+    for(auto it = j.rbegin(); it != j.rend(); ++it) {
+        auto v = new trig_var_data(*it);
+        v->next = *vd;
+        *vd = v;
+    }
 }

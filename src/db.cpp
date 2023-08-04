@@ -49,7 +49,7 @@
 *  declarations of most of the 'global' variables                         *
 **************************************************************************/
 
-std::shared_ptr<SQLite::Database> db;
+std::shared_ptr<SQLite::Database> assetDb, stateDb, logDb;
 std::set<room_vnum> dirty_rooms;
 std::set<obj_vnum> dirty_item_prototypes;
 std::set<mob_vnum> dirty_npc_prototypes;
@@ -67,6 +67,7 @@ std::set<int64_t> dirty_dgscripts;
 
 std::shared_ptr<spdlog::logger> logger;
 bool gameIsLoading = true;
+bool saveAll = false;
 
 struct config_data config_info; /* Game configuration list.    */
 
@@ -78,6 +79,10 @@ struct char_data *affect_list = nullptr; /* global linked list of chars with aff
 struct char_data *affectv_list = nullptr; /* global linked list of chars with round-based affects */
 std::map<mob_vnum, struct index_data> mob_index;    /* index table for mobile file	 */
 std::map<mob_vnum, struct char_data> mob_proto;    /* prototypes for mobs		 */
+
+VnumIndex<obj_data> objectVnumIndex;
+VnumIndex<char_data> characterVnumIndex;
+VnumIndex<trig_data> scriptVnumIndex;
 
 struct obj_data *object_list = nullptr;    /* global linked list of objs	 */
 std::map<obj_vnum, struct index_data> obj_index;    /* index table for object file	 */
@@ -479,7 +484,7 @@ ACMD(do_reboot) {
 }
 
 static void db_load_accounts() {
-    SQLite::Statement q(*db, "SELECT id,data FROM accounts");
+    SQLite::Statement q(*stateDb, "SELECT id,data FROM accounts");
     while(q.executeStep()) {
         auto id = q.getColumn(0).getInt64();
         auto data = q.getColumn(1).getString();
@@ -496,7 +501,7 @@ static void db_load_accounts() {
 }
 
 static void db_load_players() {
-    SQLite::Statement q(*db, "SELECT id,data FROM playerCharacters");
+    SQLite::Statement q(*stateDb, "SELECT id,data FROM playerCharacters");
     while(q.executeStep()) {
         auto id = q.getColumn(0).getInt64();
         auto data = q.getColumn(1).getString();
@@ -510,8 +515,236 @@ static void db_load_players() {
     }
 }
 
+static void db_load_characters_initial() {
+    SQLite::Statement q(*stateDb, "SELECT id,generation,isPlayer,data FROM characters");
+
+    while(q.executeStep()) {
+        auto id = q.getColumn(0).getInt64();
+        auto generation = q.getColumn(1).getInt();
+        bool isPlayer = q.getColumn(2).getInt();
+        auto data = q.getColumn(3).getString();
+        try {
+            auto j = nlohmann::json::parse(data);
+            auto c = new char_data();
+            if(isPlayer) {
+                c->deserializePlayer(j, false);
+                auto p = players.find(id);
+                if(p != players.end()) {
+                    p->second.character = c;
+                }
+            } else {
+                c->deserializeInstance(j, true);
+            }
+            uniqueCharacters[id] = std::make_pair(generation, c);
+        } catch(std::exception& e) {
+            basic_mud_log("Error parsing character %ld: %s", id, e.what());
+            continue;
+        }
+    }
+
+}
+
+static void db_load_characters_finish() {
+    SQLite::Statement q(*stateDb, "SELECT id,generation,isPlayer,location,relations FROM characters");
+
+    while(q.executeStep()) {
+        auto id = q.getColumn(0).getInt64();
+        auto generation = q.getColumn(1).getInt();
+        bool isPlayer = q.getColumn(2).getInt();
+        auto location = q.getColumn(3).getString();
+        auto relations = q.getColumn(4).getString();
+        try {
+            auto cf = uniqueCharacters.find(id);
+            if(cf == uniqueCharacters.end()) {
+                basic_mud_log("Error finishing character %ld: not found", id);
+                continue;
+            }
+            if(cf->second.first != generation) {
+                basic_mud_log("Error finishing character %ld: generation mismatch", id);
+                continue;
+            }
+            auto c = cf->second.second;
+
+            auto j = nlohmann::json::parse(relations);
+            auto j2 = nlohmann::json::parse(location);
+
+            if(c) {
+                c->deserializeRelations(j);
+                c->deserializeLocation(j2);
+                if(IS_NPC(c)) {
+                    c->activate();
+                }
+            }
+        } catch(std::exception& e) {
+            basic_mud_log("Error finishing character %ld: %s", id, e.what());
+            continue;
+        }
+    }
+}
+
+static void db_load_items_initial() {
+    SQLite::Statement q(*stateDb, "SELECT id,generation,data FROM items");
+
+    while(q.executeStep()) {
+        auto id = q.getColumn(0).getInt64();
+        auto generation = q.getColumn(1).getInt();
+        auto data = q.getColumn(2).getString();
+        try {
+            auto j = nlohmann::json::parse(data);
+            auto i = new obj_data();
+            i->deserializeInstance(j, false);
+            uniqueObjects[id] = std::make_pair(generation, i);
+        } catch(std::exception& e) {
+            basic_mud_log("Error parsing item %ld: %s", id, e.what());
+            continue;
+        }
+    }
+}
+
+static void db_load_items_finish() {
+    SQLite::Statement q(*stateDb, "SELECT id,generation,location,slot,relations FROM items");
+
+    while(q.executeStep()) {
+        auto id = q.getColumn(0).getInt64();
+        auto generation = q.getColumn(1).getInt();
+        auto location = q.getColumn(2).getString();
+        auto slot = q.getColumn(3).getInt();
+        auto relations = q.getColumn(4).getString();
+        try {
+            auto cf = uniqueObjects.find(id);
+            if(cf == uniqueObjects.end()) {
+                basic_mud_log("Error finishing item %ld: not found", id);
+                continue;
+            }
+            if(cf->second.first != generation) {
+                basic_mud_log("Error finishing item %ld: generation mismatch", id);
+                continue;
+            }
+            auto i = cf->second.second;
+
+            auto j = nlohmann::json::parse(relations);
+
+            if(i) {
+                i->deserializeRelations(j);
+                i->deserializeLocation(location, slot);
+                if(i->isActive()) i->activate();
+            }
+        } catch(std::exception& e) {
+            basic_mud_log("Error finishing item %ld: %s", id, e.what());
+            continue;
+        }
+    }
+}
+
+static void db_load_dgscripts_initial() {
+    SQLite::Statement q(*stateDb, "SELECT id,generation,data FROM dgScripts");
+
+    while(q.executeStep()) {
+        auto id = q.getColumn(0).getInt64();
+        auto generation = q.getColumn(1).getInt();
+        auto data = q.getColumn(2).getString();
+        try {
+            auto j = nlohmann::json::parse(data);
+            auto t = new trig_data();
+            t->deserializeInstance(j);
+            uniqueScripts[id] = std::make_pair(generation, t);
+            t->activate();
+        } catch(std::exception& e) {
+            basic_mud_log("Error parsing dgscript %ld: %s", id, e.what());
+            continue;
+        }
+    }
+}
+
+static void db_load_dgscripts_finish() {
+    SQLite::Statement q(*stateDb, "SELECT id,generation,location FROM dgScripts ORDER BY num DESC");
+
+    while(q.executeStep()) {
+        auto id = q.getColumn(0).getInt64();
+        auto generation = q.getColumn(1).getInt();
+        auto location = q.getColumn(2).getString();
+        try {
+            auto cf = uniqueScripts.find(id);
+            if(cf == uniqueScripts.end()) {
+                basic_mud_log("Error finishing dgscript %ld: not found", id);
+                continue;
+            }
+            if(cf->second.first != generation) {
+                basic_mud_log("Error finishing dgscript %ld: generation mismatch", id);
+                continue;
+            }
+            auto t = cf->second.second;
+
+            if(t) {
+                t->deserializeLocation(location);
+                struct room_data *r;
+                struct obj_data *o;
+                struct char_data *c;
+                switch(t->owner.index()) {
+                    case 0:
+                        r = std::get<0>(t->owner);
+                        t->activate();
+                        t->next = r->script->trig_list;
+                        r->script->trig_list = t;
+                        break;
+                    case 1:
+                        o = std::get<1>(t->owner);
+                        if(o->isActive()) {
+                            t->activate();
+                            t->next = o->script->trig_list;
+                            o->script->trig_list = t;
+                        }
+                        break;
+                    case 2:
+                        c = std::get<2>(t->owner);
+                        if(c->isActive()) {
+                            t->activate();
+                            t->next = c->script->trig_list;
+                            c->script->trig_list = t;
+                        }
+                        break;
+                }
+            }
+        } catch(std::exception& e) {
+            basic_mud_log("Error finishing dgscript %ld: %s", id, e.what());
+            continue;
+        }
+    }
+}
+
+static void db_load_globaldata() {
+    SQLite::Statement q(*stateDb, "SELECT name,data FROM globalData");
+
+    while(q.executeStep()) {
+        auto name = q.getColumn(0).getString();
+        auto data = q.getColumn(1).getString();
+
+        try {
+            auto j = nlohmann::json::parse(data);
+            if(boost::iequals(name, "time")) {
+                time_info.deserialize(j);
+            } else if(boost::iequals(name, "weather")) {
+                weather_info.deserialize(j);
+            } else if(boost::iequals(name, "dgGlobals")) {
+                auto room = world.find(0);
+                if(room != world.end()) {
+                    if(!room->second.script) room->second.script = new script_data(&(room->second));
+                    deserializeVars(&(room->second.script->global_vars), j);
+                }
+            } else {
+                basic_mud_log("Unknown global data %s", name.c_str());
+            }
+
+        } catch(std::exception& e) {
+            basic_mud_log("Error parsing global data %s: %s", name.c_str(), e.what());
+            continue;
+        }
+    }
+}
+
+
 static void db_load_zones() {
-    SQLite::Statement q(*db, "SELECT id,data FROM zones");
+    SQLite::Statement q(*assetDb, "SELECT id,data FROM zones");
     while(q.executeStep()) {
         auto id = q.getColumn(0).getInt64();
         auto data = q.getColumn(1).getString();
@@ -525,8 +758,8 @@ static void db_load_zones() {
     }
 }
 
-static void db_load_dgscripts() {
-    SQLite::Statement q(*db, "SELECT id,data FROM dgscripts");
+static void db_load_dgscript_prototypes() {
+    SQLite::Statement q(*assetDb, "SELECT id,data FROM dgScriptPrototypes");
     while(q.executeStep()) {
         auto id = q.getColumn(0).getInt64();
         auto data = q.getColumn(1).getString();
@@ -543,7 +776,7 @@ static void db_load_dgscripts() {
 }
 
 static void db_load_rooms() {
-    SQLite::Statement q(*db, "SELECT id,data FROM rooms");
+    SQLite::Statement q(*assetDb, "SELECT id,data FROM rooms");
     while(q.executeStep()) {
         auto id = q.getColumn(0).getInt64();
         auto data = q.getColumn(1).getString();
@@ -558,26 +791,8 @@ static void db_load_rooms() {
     }
 }
 
-static void db_load_save_rooms() {
-    SQLite::Statement q(*db, "SELECT id,items FROM rooms WHERE items IS NOT NULL");
-    while(q.executeStep()) {
-        auto id = q.getColumn(0).getInt64();
-        auto items = q.getColumn(1).getString();
-        try {
-            auto j = nlohmann::json::parse(items);
-            auto room = world.find(id);
-            if(room != world.end()) {
-                room->second.deserializeContents(j, true);
-            }
-        } catch(std::exception& e) {
-            basic_mud_log("Error parsing room %ld: %s", id, e.what());
-            continue;
-        }
-    }
-}
-
 static void db_load_shops() {
-    SQLite::Statement q(*db, "SELECT id,data FROM shops");
+    SQLite::Statement q(*assetDb, "SELECT id,data FROM shops");
     while(q.executeStep()) {
         auto id = q.getColumn(0).getInt64();
         auto data = q.getColumn(1).getString();
@@ -592,7 +807,7 @@ static void db_load_shops() {
 }
 
 static void db_load_guilds() {
-    SQLite::Statement q(*db, "SELECT id,data FROM guilds");
+    SQLite::Statement q(*assetDb, "SELECT id,data FROM guilds");
     while(q.executeStep()) {
         auto id = q.getColumn(0).getInt64();
         auto data = q.getColumn(1).getString();
@@ -607,7 +822,7 @@ static void db_load_guilds() {
 }
 
 static void db_load_item_prototypes() {
-    SQLite::Statement q(*db, "SELECT id,data FROM itemPrototypes");
+    SQLite::Statement q(*assetDb, "SELECT id,data FROM itemPrototypes");
     while(q.executeStep()) {
         auto id = q.getColumn(0).getInt64();
         auto data = q.getColumn(1).getString();
@@ -625,7 +840,7 @@ static void db_load_item_prototypes() {
 }
 
 static void db_load_npc_prototypes() {
-    SQLite::Statement q(*db, "SELECT id,data FROM npcPrototypes");
+    SQLite::Statement q(*assetDb, "SELECT id,data FROM npcPrototypes");
     while(q.executeStep()) {
         auto id = q.getColumn(0).getInt64();
         auto data = q.getColumn(1).getString();
@@ -643,7 +858,7 @@ static void db_load_npc_prototypes() {
 }
 
 static void db_load_areas() {
-    SQLite::Statement q(*db, "SELECT id,data FROM areas");
+    SQLite::Statement q(*assetDb, "SELECT id,data FROM areas");
     while(q.executeStep()) {
         auto id = q.getColumn(0).getInt64();
         auto data = q.getColumn(1).getString();
@@ -673,12 +888,69 @@ static void db_load_areas() {
     }
 }
 
+static void load_new_database() {
+
+    std::filesystem::path dir = "state"; // Change to your directory
+    std::vector<std::filesystem::path> files;
+
+    auto pattern = fmt::format("{}-", config::stateDbName);
+    for (const auto& entry : std::filesystem::directory_iterator(dir)) {
+        if (entry.is_regular_file() && entry.path().filename().string().starts_with(pattern)) {
+            files.push_back(entry.path());
+        }
+    }
+
+    if (!files.empty()) {
+        std::sort(files.begin(), files.end(), std::greater<>());
+        std::cout << "Newest state file: " << files.front() << '\n';
+    } else {
+        std::cout << "No matching state files found.\n";
+        return;
+    }
+
+    try {
+        stateDb = std::make_shared<SQLite::Database>(files.front().string(), SQLite::OPEN_READONLY);
+    } catch(std::exception& e) {
+        logger->critical("Error opening state database: {}", e.what());
+        shutdown_game(1);
+    }
+
+    basic_mud_log("Loading global data...");
+    db_load_globaldata();
+
+    basic_mud_log("Loading accounts.");
+    db_load_accounts();
+
+    basic_mud_log("Loading players.");
+    db_load_players();
+
+    basic_mud_log("Loading characters initial...");
+    db_load_characters_initial();
+
+    basic_mud_log("Loading items initial...");
+    db_load_items_initial();
+
+    basic_mud_log("Loading dgscript initial...");
+    db_load_dgscripts_initial();
+
+    // Now that all of the game entities have been spawned, we can finish loading
+    // relations between them.
+
+    basic_mud_log("Loading characters finish...");
+    db_load_characters_finish();
+
+    basic_mud_log("Loading items finish...");
+    db_load_items_finish();
+
+    basic_mud_log("Loading dgscript finish...");
+    db_load_dgscripts_finish();
+}
+
 static bool newStyle = false;
 
 boost::asio::awaitable<void> boot_world() {
 
     broadcast("Your vision of the world expands across a vast expanse of numerous existences.\r\n");
-    co_await yield_for(std::chrono::milliseconds(10));
 
     basic_mud_log("Loading Zones...");
     db_load_zones();
@@ -687,7 +959,7 @@ boost::asio::awaitable<void> boot_world() {
 
     if(newStyle) {
         basic_mud_log("Loading DgScripts and generating index.");
-        db_load_dgscripts();
+        db_load_dgscript_prototypes();
 
         basic_mud_log("Loading mobs and generating index.");
         broadcast("You feel the presence of many beings around you in this strange journey, but cannot quite see them.\r\n");
@@ -704,11 +976,8 @@ boost::asio::awaitable<void> boot_world() {
         basic_mud_log("Loading areas.");
         db_load_areas();
 
-        basic_mud_log("Loading accounts.");
-        db_load_accounts();
+        load_new_database();
 
-        basic_mud_log("Loading players.");
-        db_load_players();
 
     } else {
         basic_mud_log("Loading legacy world data...");
@@ -725,13 +994,7 @@ boost::asio::awaitable<void> boot_world() {
     basic_mud_log("Checking start rooms.");
     check_start_rooms();
 
-
-    co_await yield_for(std::chrono::milliseconds(10));
-
-    if(newStyle) {
-
-
-    } else {
+    if(!newStyle) {
         basic_mud_log("Loading mobs and generating index.");
         index_boot(DB_BOOT_MOB);
 
@@ -762,6 +1025,8 @@ boost::asio::awaitable<void> boot_world() {
         basic_mud_log("Loading Shadow Dragons.");
         load_shadow_dragons();
     }
+
+    co_return;
 
 }
 
@@ -970,8 +1235,7 @@ boost::asio::awaitable<void> boot_db() {
     basic_mud_log("Setting up context sensitive help system for OLC");
     boot_context_help();
 
-    if (ERAPLAYERS <= 0)
-        ERAPLAYERS = players.size();
+    ERAPLAYERS = players.size();
 
     insure_directory(LIB_PLROBJS "CRASH", 0);
 
@@ -1030,9 +1294,6 @@ boost::asio::awaitable<void> boot_db() {
     if (!mini_mud) {
         basic_mud_log("Booting houses.");
         House_boot(!newStyle);
-        if(newStyle) {
-            db_load_save_rooms();
-        }
     }
 
     boot_time = time(nullptr);
@@ -1133,7 +1394,7 @@ static void reset_time() {
     if (beginning_of_time == 0)
         beginning_of_time = 650336715;
 
-    time_info = *mud_time_passed(time(nullptr), beginning_of_time);
+    //time_info = *mud_time_passed(time(nullptr), beginning_of_time);
 
     if (time_info.hours <= 4)
         weather_info.sunlight = SUN_DARK;
@@ -2737,12 +2998,16 @@ int vnum_armortype(char *searchname, struct char_data *ch) {
 }
 
 /* create a character, and add it to the char list */
-struct char_data *create_char() {
+struct char_data *create_char(bool activate) {
     auto ch = new char_data();
-    ch->next = character_list;
-    character_list = ch;
-    ch->next_affect = nullptr;
-    ch->next_affectv = nullptr;
+
+    if(activate) {
+        ch->id = nextCharID();
+        ch->generation = time(nullptr);
+        check_unique_id(ch);
+        add_unique_id(ch);
+        ch->activate();
+    }
 
 
     return ch;
@@ -3443,7 +3708,7 @@ struct obj_data *create_obj(bool activate) {
 
 
 /* create a new object from a prototype */
-struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
+struct obj_data *read_object(obj_vnum nr, int type, bool activate) /* and obj_rnum */
 {
     auto i = nr;
     int j;
@@ -3457,11 +3722,14 @@ struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
     
     auto obj = new obj_data();
     *obj = proto->second;
-    obj->id = nextObjID();
-    obj->generation = time(nullptr);
     OBJ_LOADROOM(obj) = NOWHERE;
-
-    obj->activate();
+    if(activate) {
+        obj->id = nextObjID();
+        obj->generation = time(nullptr);
+        check_unique_id(obj);
+        add_unique_id(obj);
+        obj->activate();
+    }
 
     if (proto->second.sbinfo) {
         CREATE(obj->sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE);
@@ -3556,9 +3824,7 @@ void reset_zone(zone_rnum zone) {
     struct obj_data *tobj = nullptr;  /* for trigger assignment */
     int mob_load = false; /* ### */
     int obj_load = false; /* ### */
-    auto oindex = obj_index.find(-1);
     auto oproto = obj_proto.find(-1);
-    auto mindex = mob_index.find(-1);
     auto mproto = mob_proto.find(-1);
     auto room = world.find(-1);
 
@@ -3587,9 +3853,8 @@ void reset_zone(zone_rnum zone) {
                     break;
 
                 case 'M':            /* read a mobile */
-                    mindex = mob_index.find(c.arg1);
                     room = world.find(c.arg3);
-                    if (mindex != mob_index.end() && (mindex->second.mobs.size() < c.arg2) && room != world.end() &&
+                    if (mob_proto.contains(c.arg1) && (get_vnum_count(characterVnumIndex, c.arg1) < c.arg2) && room != world.end() &&
                         (rand_number(1, 100) >= c.arg5)) {
                         int room_max = 0;
                         struct char_data *i;
@@ -3599,7 +3864,7 @@ void reset_zone(zone_rnum zone) {
                         /* Let's only count if room_max is in use.  If left at zero, max_in_mud will handle*/
 
                         if (c.arg4 > 0) {
-                            for (auto i : mindex->second.mobs) {
+                            for (auto i : get_vnum_list(characterVnumIndex, c.arg1)) {
                                 if (MOB_LOADROOM(i) == c.arg3) {
                                     if(++room_max >= c.arg4) {
                                         // no need to keep counting more at this point...
@@ -3612,6 +3877,7 @@ void reset_zone(zone_rnum zone) {
                             }
                             /* Break out if room_max has been met, ignore room_max if zero */
                             if (room_max >= c.arg4) {
+                                last_cmd = 0;
                                 break;
                             }
                         }
@@ -3631,9 +3897,17 @@ void reset_zone(zone_rnum zone) {
                     break;
 
                 case 'O':            /* read an object */
-                    oindex = obj_index.find(c.arg1);
                     room = world.find(c.arg3);
-                    if (oindex != obj_index.end() && oindex->second.objects.size() < c.arg2 &&
+                    oproto = obj_proto.find(c.arg1);
+                    if(oproto != obj_proto.end()) {
+                        if(oproto->second.type_flag == ITEM_HATCH || oproto->second.type_flag == ITEM_CONTROL
+                        || oproto->second.type_flag == ITEM_WINDOW || oproto->second.type_flag == ITEM_VEHICLE) {
+                            c.arg2 = 1;
+                            c.arg4 = 1;
+                        }
+                    }
+
+                    if (obj_proto.contains(c.arg1) && get_vnum_count(objectVnumIndex, c.arg1) < c.arg2 &&
                         room != world.end() && (rand_number(1, 100) >= c.arg5)) {
                         int room_max = 0;
                         struct obj_data *k;
@@ -3644,7 +3918,7 @@ void reset_zone(zone_rnum zone) {
                         /* Let's only count if room_max is in use.  If left at zero, max_in_mud will handle*/
 
                         if (c.arg4 > 0) {
-                            for (auto k : oindex->second.objects) {
+                            for (auto k : get_vnum_list(objectVnumIndex, c.arg1)) {
                                 if (OBJ_LOADROOM(k) == c.arg3 && (IN_ROOM(k) == c.arg3)) {
                                     if(++room_max >= c.arg4) {
                                         // no need to keep counting more at this point...
@@ -3658,6 +3932,7 @@ void reset_zone(zone_rnum zone) {
                             }
                             if (room_max >= c.arg4) {
                                 /* Get rid of it if room_max has been met. */
+                                last_cmd = 0;
                                 break;
                             }
                         }
@@ -3677,8 +3952,7 @@ void reset_zone(zone_rnum zone) {
                     break;
 
                 case 'P':            /* object to object */
-                    oindex = obj_index.find(c.arg1);
-                    if(oindex != obj_index.end() && (oindex->second.objects.size() < c.arg2) &&
+                    if(obj_proto.contains(c.arg1) && (get_vnum_count(objectVnumIndex, c.arg1) < c.arg2) &&
                         obj_load && (rand_number(1, 100) >= c.arg5)) {
 
                         if (!(obj_to = get_obj_num(c.arg3))) {
@@ -3702,8 +3976,7 @@ void reset_zone(zone_rnum zone) {
                         c.command = '*';
                         break;
                     }
-                    oindex = obj_index.find(c.arg1);
-                    if (oindex != obj_index.end() && (oindex->second.objects.size() < c.arg2) &&
+                    if (obj_proto.contains(c.arg1) && (get_vnum_count(objectVnumIndex, c.arg1) < c.arg2) &&
                         mob_load && (rand_number(1, 100) >= c.arg5)) {
                         obj = read_object(c.arg1, REAL);
                         obj_to_char(obj, mob);
@@ -3724,8 +3997,7 @@ void reset_zone(zone_rnum zone) {
                         c.command = '*';
                         break;
                     }
-                    oindex = obj_index.find(c.arg1);
-                    if (oindex != obj_index.end() && (oindex->second.objects.size() < c.arg2) &&
+                    if (obj_proto.contains(c.arg1) && (get_vnum_count(objectVnumIndex, c.arg1) < c.arg2) &&
                         mob_load && (rand_number(1, 100) >= c.arg5)) {
                         if (c.arg3 < 0 || c.arg3 >= NUM_WEARS) {
                             ZONE_ERROR("invalid equipment pos number");
@@ -4893,17 +5165,7 @@ void load_config() {
     fclose(fl);
 }
 
-static std::vector<std::string> schema = {
-        "CREATE TABLE IF NOT EXISTS accounts ("
-        "   id INTEGER PRIMARY KEY,"
-        "	data TEXT NOT NULL"
-        ");",
-
-        "CREATE TABLE IF NOT EXISTS playerCharacters ("
-        "   id INTEGER NOT NULL PRIMARY KEY,"
-        "   data TEXT NOT NULL"
-        ");",
-
+static std::vector<std::string> assetSchema = {
         "CREATE TABLE IF NOT EXISTS zones ("
         "	id INTEGER PRIMARY KEY,"
         "	data TEXT NOT NULL"
@@ -4936,20 +5198,33 @@ static std::vector<std::string> schema = {
 
         "CREATE TABLE IF NOT EXISTS rooms ("
         "	id INTEGER PRIMARY KEY,"
-        "	data TEXT NOT NULL,"
-        "   items TEXT"
+        "	data TEXT NOT NULL"
         ");",
 
         "CREATE TABLE IF NOT EXISTS dgScriptPrototypes ("
         "	id INTEGER PRIMARY KEY,"
         "	data TEXT NOT NULL"
+        ");"
+};
+
+static std::vector<std::string> stateSchema = {
+        "CREATE TABLE IF NOT EXISTS accounts ("
+        "   id INTEGER PRIMARY KEY,"
+        "	data TEXT NOT NULL"
+        ");",
+
+        "CREATE TABLE IF NOT EXISTS playerCharacters ("
+        "   id INTEGER NOT NULL PRIMARY KEY,"
+        "   data TEXT NOT NULL"
         ");",
 
         "CREATE TABLE IF NOT EXISTS characters ("
         "   id INTEGER PRIMARY KEY,"
         "   generation INTEGER NOT NULL,"
+        "   vnum INTEGER NOT NULL DEFAULT -1,"
         "   name TEXT,"
         "   shortDesc TEXT,"
+        "   isPlayer INTEGER NOT NULL,"
         "   data TEXT NOT NULL,"
         "   location TEXT NOT NULL DEFAULT '{}',"
         "   relations TEXT NOT NULL DEFAULT '{}'"
@@ -4958,24 +5233,32 @@ static std::vector<std::string> schema = {
         "CREATE TABLE IF NOT EXISTS items ("
         "   id INTEGER PRIMARY KEY,"
         "   generation INTEGER NOT NULL,"
+        "   vnum INTEGER NOT NULL DEFAULT -1,"
         "   name TEXT,"
         "   shortDesc TEXT,"
         "   data TEXT NOT NULL,"
-        "   location TEXT NOT NULL DEFAULT '{}',"
+        "   location TEXT NOT NULL DEFAULT '',"
+        "   slot INTEGER NOT NULL DEFAULT 0,"
         "   relations TEXT NOT NULL DEFAULT '{}'"
         ");",
 
         "CREATE TABLE IF NOT EXISTS dgScripts ("
         "	id INTEGER PRIMARY KEY,"
         "   generation INTEGER NOT NULL,"
+        "   vnum INTEGER NOT NULL DEFAULT -1,"
         "   name TEXT,"
         "	data TEXT NOT NULL,"
         "   location TEXT NOT NULL,"
         "   num INTEGER NOT NULL"
+        ");",
+
+        "CREATE TABLE IF NOT EXISTS globalData ("
+        "   name TEXT PRIMARY KEY,"
+        "   data TEXT NOT NULL"
         ");"
 };
 
-static void runQuery(std::string_view query) {
+static void runQuery(std::string_view query, const std::shared_ptr<SQLite::Database>& db) {
     try {
         db->exec(query.data());
     }
@@ -4987,11 +5270,17 @@ static void runQuery(std::string_view query) {
 }
 
 void create_schema() {
-    SQLite::Transaction transaction(*db);
-    for (const auto& query: schema) {
-        runQuery(query);
+    SQLite::Transaction transaction(*assetDb);
+    for (const auto& query: assetSchema) {
+        runQuery(query, assetDb);
     }
     transaction.commit();
+}
+
+static void create_state_schema() {
+    for (const auto& query: stateSchema) {
+        runQuery(query, stateDb);
+    }
 }
 
 void dirty_all() {
@@ -5037,8 +5326,8 @@ void dirty_all() {
 }
 
 static void process_dirty_rooms() {
-    SQLite::Statement q1(*db, "INSERT OR REPLACE INTO rooms (id, data, items) VALUES (?, ?, ?)");
-    SQLite::Statement q3(*db, "DELETE FROM rooms WHERE id = ?");
+    SQLite::Statement q1(*assetDb, "INSERT OR REPLACE INTO rooms (id, data) VALUES (?, ?)");
+    SQLite::Statement q3(*assetDb, "DELETE FROM rooms WHERE id = ?");
 
     for(auto v : dirty_rooms) {
         auto r = world.find(v);
@@ -5053,15 +5342,6 @@ static void process_dirty_rooms() {
             // we'll be using q1...
             q1.bind(1, v);
             q1.bind(2, r->second.serialize().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
-            if(r->second.contents && r->second.room_flags.test(ROOM_SAVE)) {
-                auto con = r->second.serializeContents();
-                if(!con.empty())
-                    q1.bind(3, con.dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
-                else
-                    q1.bind(3);
-            } else {
-                q1.bind(3);
-            }
             q1.exec();
             q1.reset();
         }
@@ -5071,8 +5351,8 @@ static void process_dirty_rooms() {
 }
 
 static void process_dirty_item_prototypes() {
-	SQLite::Statement q(*db, "INSERT OR REPLACE INTO itemPrototypes (id, data) VALUES (?,?)");
-    SQLite::Statement q1(*db, "DELETE FROM itemPrototypes WHERE id = ?");
+	SQLite::Statement q(*assetDb, "INSERT OR REPLACE INTO itemPrototypes (id, data) VALUES (?,?)");
+    SQLite::Statement q1(*assetDb, "DELETE FROM itemPrototypes WHERE id = ?");
 
     for(auto v : dirty_item_prototypes) {
         auto r = obj_proto.find(v);
@@ -5092,8 +5372,8 @@ static void process_dirty_item_prototypes() {
 }
 
 static void process_dirty_npc_prototypes() {
-    SQLite::Statement q(*db, "INSERT OR REPLACE INTO npcPrototypes (id, data) VALUES (?, ?)");
-    SQLite::Statement q1(*db, "DELETE FROM npcPrototypes WHERE id = ?");
+    SQLite::Statement q(*assetDb, "INSERT OR REPLACE INTO npcPrototypes (id, data) VALUES (?, ?)");
+    SQLite::Statement q1(*assetDb, "DELETE FROM npcPrototypes WHERE id = ?");
 
     for(auto v : dirty_npc_prototypes) {
         auto r = mob_proto.find(v);
@@ -5114,8 +5394,8 @@ static void process_dirty_npc_prototypes() {
 }
 
 static void process_dirty_shops() {
-    SQLite::Statement q(*db, "INSERT OR REPLACE INTO shops (id, data) VALUES (?,?)");
-    SQLite::Statement q1(*db, "DELETE FROM shops WHERE id = ?");
+    SQLite::Statement q(*assetDb, "INSERT OR REPLACE INTO shops (id, data) VALUES (?,?)");
+    SQLite::Statement q1(*assetDb, "DELETE FROM shops WHERE id = ?");
 
     for(auto v : dirty_shops) {
         auto r = shop_index.find(v);
@@ -5136,8 +5416,8 @@ static void process_dirty_shops() {
 }
 
 static void process_dirty_guilds() {
-    SQLite::Statement q(*db, "INSERT OR REPLACE INTO guilds (id, data) VALUES (?, ?)");
-    SQLite::Statement q1(*db, "DELETE FROM guilds WHERE id = ?");
+    SQLite::Statement q(*assetDb, "INSERT OR REPLACE INTO guilds (id, data) VALUES (?, ?)");
+    SQLite::Statement q1(*assetDb, "DELETE FROM guilds WHERE id = ?");
 
     for(auto v : dirty_guilds) {
         auto r = guild_index.find(v);
@@ -5158,8 +5438,8 @@ static void process_dirty_guilds() {
 }
 
 static void process_dirty_zones() {
-	SQLite::Statement q(*db, "INSERT OR REPLACE INTO zones (id, data) VALUES (?, ?)");
-    SQLite::Statement q1(*db, "DELETE FROM zones WHERE id = ?");
+	SQLite::Statement q(*assetDb, "INSERT OR REPLACE INTO zones (id, data) VALUES (?, ?)");
+    SQLite::Statement q1(*assetDb, "DELETE FROM zones WHERE id = ?");
 
     for(auto v : dirty_zones) {
         auto r = zone_table.find(v);
@@ -5179,8 +5459,8 @@ static void process_dirty_zones() {
 }
 
 static void process_dirty_areas() {
-    SQLite::Statement q(*db, "INSERT OR REPLACE INTO areas (id, data) VALUES (?, ?)");
-    SQLite::Statement q1(*db, "DELETE FROM areas WHERE id = ?");
+    SQLite::Statement q(*assetDb, "INSERT OR REPLACE INTO areas (id, data) VALUES (?, ?)");
+    SQLite::Statement q1(*assetDb, "DELETE FROM areas WHERE id = ?");
 
     for(auto v : dirty_areas) {
         auto r = areas.find(v);
@@ -5201,8 +5481,8 @@ static void process_dirty_areas() {
 }
 
 static void process_dirty_dgscript_prototypes() {
-    SQLite::Statement q(*db, "INSERT OR REPLACE INTO dgscripts (id, data) VALUES (?, ?)");
-    SQLite::Statement q1(*db, "DELETE FROM dgscripts WHERE id = ?");
+    SQLite::Statement q(*assetDb, "INSERT OR REPLACE INTO dgScriptPrototypes (id, data) VALUES (?, ?)");
+    SQLite::Statement q1(*assetDb, "DELETE FROM dgScriptPrototypes WHERE id = ?");
 
     for(auto v : dirty_dgscript_prototypes) {
         auto r = trig_index.find(v);
@@ -5222,125 +5502,84 @@ static void process_dirty_dgscript_prototypes() {
 
 }
 
-static void process_dirty_accounts() {
-    SQLite::Statement q(*db, "INSERT OR REPLACE INTO accounts (id, data) VALUES (?, ?)");
-    SQLite::Statement q1(*db, "DELETE FROM accounts WHERE id = ?");
+static void dump_state_accounts() {
+    SQLite::Statement q(*stateDb, "INSERT OR REPLACE INTO accounts (id, data) VALUES (?, ?)");
+    SQLite::Statement q1(*stateDb, "DELETE FROM accounts WHERE id = ?");
 
-    for(auto v : dirty_accounts) {
-        auto r = accounts.find(v);
-        if(r == accounts.end()) {
-            // This account has been deleted.
-            q1.bind(1, v);
-            q1.exec();
-            q1.reset();
-            continue;
-        } else {
-            q.bind(1, v);
-            q.bind(2, r->second.serialize().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
-            q.exec();
-            q.reset();
-        }
-    }
-    dirty_accounts.clear();
-
-}
-
-static void process_dirty_players() {
-    SQLite::Statement q(*db, "INSERT OR REPLACE INTO playerCharacters (id, data) VALUES (?, ?)");
-    SQLite::Statement q1(*db, "DELETE FROM playerCharacters WHERE id = ?");
-
-    for(auto v : dirty_players) {
-        auto r = players.find(v);
-        if(r == players.end()) {
-            // This player has been deleted.
-            q1.bind(1, v);
-            q1.exec();
-            q1.reset();
-            continue;
-        } else {
-            q.bind(1, v);
-            q.bind(2, r->second.serialize().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
-            q.exec();
-            q.reset();
-        }
-    }
-    dirty_players.clear();
-}
-
-static void process_dirty_characters() {
-    SQLite::Statement q(*db, "INSERT OR REPLACE INTO characters (id, generation, name, shortDesc, data, location, relations) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    SQLite::Statement q1(*db, "DELETE FROM characters WHERE id = ?");
-
-    for(auto v : dirty_characters) {
-        auto r = uniqueCharacters.find(v);
-        if(r == uniqueCharacters.end()) {
-            // This character has been deleted.
-            q1.bind(1, v);
-            q1.exec();
-            q1.reset();
-            continue;
-        } else {
-            q.bind(1, v);
-            q.bind(2, r->second.first);
-            q.bind(3, r->second.second->name);
-            q.bind(4, r->second.second->short_description);
-            q.bind(5, r->second.second->serializeInstance().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
-            q.bind(6, r->second.second->serializeLocation().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
-            q.bind(7, r->second.second->serializeRelations().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
-            q.exec();
-            q.reset();
-        }
-    }
-    dirty_characters.clear();
-
-}
-
-static void process_dirty_items() {
-    SQLite::Statement q(*db, "INSERT OR REPLACE INTO items (id, generation, name, shortDesc, data, location, relations) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    SQLite::Statement q1(*db, "DELETE FROM items WHERE id = ?");
-
-    for(auto v : dirty_items) {
-        auto r = uniqueObjects.find(v);
-        if(r == uniqueObjects.end()) {
-            // This character has been deleted.
-            q1.bind(1, v);
-            q1.exec();
-            q1.reset();
-            continue;
-        } else {
-            q.bind(1, v);
-            q.bind(2, r->second.first);
-            q.bind(3, r->second.second->name);
-            q.bind(4, r->second.second->short_description);
-            q.bind(5, r->second.second->serializeInstance().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
-            q.bind(6, r->second.second->serializeLocation().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
-            q.bind(7, r->second.second->serializeRelations().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
-            q.exec();
-            q.reset();
-        }
-    }
-    dirty_items.clear();
-}
-
-static void process_dirty_dgscripts() {
-    SQLite::Statement q(*db, "INSERT OR REPLACE INTO dgscripts (id, generation, name, data, location, order) VALUES (?, ?, ?, ?, ?, ?)");
-    SQLite::Statement q1(*db, "DELETE FROM dgscripts WHERE id = ?");
-
-    for(auto v : dirty_dgscripts) {
-        auto r = uniqueScripts.find(v);
-        if(r == uniqueScripts.end()) {
-            // This dgscript has been deleted.
-            q1.bind(1, v);
-            q1.exec();
-            q1.reset();
-            continue;
-        }
+    for(auto &[v, r] : accounts) {
         q.bind(1, v);
-        q.bind(2, r->second.first);
-        q.bind(3, r->second.second->name);
-        q.bind(4, r->second.second->serializeInstance().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
-        q.bind(5, r->second.second->serializeLocation());
-        q.bind(6, r->second.second->order);
+        q.bind(2, r.serialize().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+        q.exec();
+        q.reset();
+    }
+}
+
+static void dump_state_players() {
+    SQLite::Statement q(*stateDb, "INSERT OR REPLACE INTO playerCharacters (id, data) VALUES (?, ?)");
+    SQLite::Statement q1(*stateDb, "DELETE FROM playerCharacters WHERE id = ?");
+
+    for(auto &[v, r] : players) {
+        q.bind(1, v);
+        q.bind(2, r.serialize().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+        q.exec();
+        q.reset();
+    }
+}
+
+static void dump_state_characters() {
+    SQLite::Statement q(*stateDb, "INSERT OR REPLACE INTO characters (id, generation, vnum, name, shortDesc, isPlayer, data, location, relations) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    SQLite::Statement q1(*stateDb, "DELETE FROM characters WHERE id = ?");
+
+    for(auto &[v, r] : uniqueCharacters) {
+        if(v != r.second->id) r.second->id = v;
+        q.bind(1, v);
+        q.bind(2, r.first);
+        q.bind(3, r.second->vn);
+        q.bind(4, r.second->name);
+        q.bind(5, r.second->short_description);
+        q.bind(6, !IS_NPC(r.second));
+        q.bind(7, r.second->serializeInstance().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+        q.bind(8, r.second->serializeLocation().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+        q.bind(9, r.second->serializeRelations().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+        q.exec();
+        q.reset();
+    }
+
+}
+
+static void dump_state_items() {
+    SQLite::Statement q(*stateDb, "INSERT OR REPLACE INTO items (id, generation, vnum, name, shortDesc, data, location, slot, relations) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    SQLite::Statement q1(*stateDb, "DELETE FROM items WHERE id = ?");
+
+    for(auto &[v, r] : uniqueObjects) {
+        if(v != r.second->id) r.second->id = v;
+        q.bind(1, v);
+        q.bind(2, r.first);
+        q.bind(3, r.second->vn);
+        q.bind(4, r.second->name);
+        q.bind(5, r.second->short_description);
+        q.bind(6, r.second->serializeInstance().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+        q.bind(7, r.second->serializeLocation());
+        q.bind(8, r.second->worn_on);
+        q.bind(9, r.second->serializeRelations().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+        q.exec();
+        q.reset();
+    }
+}
+
+static void dump_state_dgscripts() {
+    SQLite::Statement q(*stateDb, "INSERT OR REPLACE INTO dgscripts (id, generation, vnum, name, data, location, num) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    SQLite::Statement q1(*stateDb, "DELETE FROM dgscripts WHERE id = ?");
+
+    for(auto &[v, r] : uniqueScripts) {
+        if(v != r.second->id) r.second->id = v;
+        q.bind(1, v);
+        q.bind(2, r.first);
+        q.bind(3, r.second->vn);
+        q.bind(4, r.second->name);
+        q.bind(5, r.second->serializeInstance().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+        q.bind(6, r.second->serializeLocation());
+        q.bind(7, r.second->order);
         q.exec();
         q.reset();
     }
@@ -5349,6 +5588,12 @@ static void process_dirty_dgscripts() {
 
 
 void process_dirty() {
+    if(saveAll) {
+        logger->info("Performing full save of all game assets.");
+        send_to_all("Saving all game assets, please wait...\r\n");
+    }
+    auto startTime = std::chrono::high_resolution_clock::now();
+
     if(!dirty_rooms.empty()) {
         process_dirty_rooms();
     }
@@ -5381,24 +5626,97 @@ void process_dirty() {
         process_dirty_dgscript_prototypes();
     }
 
-    if(!dirty_accounts.empty()) {
-        process_dirty_accounts();
+    auto endTime = std::chrono::high_resolution_clock::now();
+    // time ins econds as a double...
+    auto duration = std::chrono::duration<double>(endTime - startTime).count();
+
+    if(saveAll) {
+        logger->info("Full save of all game assets completed in {} seconds.", duration);
+        send_to_all("Saving all game assets completed in %f seconds.\r\n", duration);
+    }
+}
+
+void dump_state_globalData() {
+    SQLite::Statement q(*stateDb, "INSERT OR REPLACE INTO globalData (name, data) VALUES (?, ?)");
+    SQLite::Statement q1(*stateDb, "DELETE FROM globalData WHERE name = ?");
+
+    std::map<std::string, nlohmann::json> globalData;
+
+    globalData["time"] = time_info.serialize();
+    globalData["weather"] = weather_info.serialize();
+    auto gRoom = world.find(0);
+    if(gRoom != world.end()) {
+        if(gRoom->second.script && gRoom->second.script->global_vars) {
+            globalData["dgGlobals"] = serializeVars(gRoom->second.script->global_vars);
+        }
     }
 
-    if(!dirty_characters.empty()) {
-        // process_dirty_characters();
+    for(auto &[v, r] : globalData) {
+        q.bind(1, v);
+        q.bind(2, r.dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+        q.exec();
+        q.reset();
+    }
+}
+
+
+void dump_state() {
+
+    send_to_all("Saving game...\r\n");
+    logger->info("Beginning dump of state to disk.");
+
+    // Open up a new database file as <cwd>/state/<timestamp>.sqlite3 and dump the state into it.
+    auto path = std::filesystem::current_path() / "state";
+    std::filesystem::create_directories(path);
+    auto now = std::chrono::system_clock::now();
+    auto time_t_now = std::chrono::system_clock::to_time_t(now);
+    std::tm tm_now;
+    localtime_r(&time_t_now, &tm_now);
+
+    auto tempPath = path / fmt::format("{}.sqlite3", config::stateDbName);
+    auto journalPath = path / fmt::format("{}.sqlite3-journal", config::stateDbName);
+    std::filesystem::remove(tempPath);
+    std::filesystem::remove(journalPath);
+
+    auto newPath = path / fmt::format("{}-{:04}{:02}{:02}{:02}{:02}{:02}.sqlite3",
+                                      config::stateDbName,
+                                      tm_now.tm_year + 1900,
+                                      tm_now.tm_mon + 1,
+                                      tm_now.tm_mday,
+                                      tm_now.tm_hour,
+                                      tm_now.tm_min,
+                                      tm_now.tm_sec);
+
+    bool success = false;
+    double duration;
+
+    try {
+        stateDb = std::make_shared<SQLite::Database>(tempPath.string(), SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+        auto startTime = std::chrono::high_resolution_clock::now();
+        SQLite::Transaction trans(*stateDb);
+        create_state_schema();
+        dump_state_accounts();
+        dump_state_characters();
+        dump_state_players();
+        dump_state_dgscripts();
+        dump_state_items();
+        dump_state_globalData();
+        trans.commit();
+        auto endTime = std::chrono::high_resolution_clock::now();
+        duration = std::chrono::duration<double>(endTime - startTime).count();
+        success = true;
+    } catch (std::exception &e) {
+        logger->critical("(GAME HAS NOT BEEN SAVED!) Exception in dump_state(): {}", e.what());
+        send_to_all("Warning, a critical error occurred during save! Please alert staff!\r\n");
+        return;
     }
 
-    if(!dirty_items.empty()) {
-        // process_dirty_items();
-    }
+    stateDb.reset();
 
-    if(!dirty_dgscripts.empty()) {
-        // process_dirty_dgscripts();
-    }
-
-    if(!dirty_players.empty()) {
-        process_dirty_players();
+    if(success) {
+        std::filesystem::rename(tempPath, newPath);
+        logger->info("Finished dumping state to {} in {} seconds.", newPath.string(), duration);
+        send_to_all("Game saved in %f seconds.\r\n", duration);
     }
 }
 
@@ -5413,8 +5731,12 @@ int64_t nextCharID() {
     while(uniqueCharacters.contains(id)) id++;
     return id;
 }
-// ^#(?<type>R|O|C)(?P<id>\d+):(?P<generation>\d+)
-static boost::regex uid_regex(R"(^#(?<type>[ROC])(?<id>\d+):(?<generation>\d+))", boost::regex::icase);
+// ^#(?<type>[ROC])(?<id>\d+)(?::(?<generation>\d+)?)?
+static boost::regex uid_regex(R"(^#(?<type>[ROC])(?<id>\d+)(?::(?<generation>\d+)?)?(?<active>!)?)", boost::regex::icase);
+
+bool isUID(const std::string& uid) {
+    return boost::regex_match(uid, uid_regex);
+}
 
 std::optional<UID> resolveUID(const std::string& uid) {
     // First we need to check if it matches or not.
@@ -5426,21 +5748,29 @@ std::optional<UID> resolveUID(const std::string& uid) {
     // extract the type as a char, id and generation as int64_t and time_t respectively.
     char type = toupper(match["type"].str()[0]);
     int64_t id = std::stoll(match["id"].str());
-    time_t generation = std::stoll(match["generation"].str());
+    bool active = match["active"].matched;
+    time_t generation = 0;
+    if(match["generation"].matched) {
+        generation = std::stoll(match["generation"].str());
+    }
 
     if(type == 'R') {
         if(world.contains(id)) return &world[id];
     } else if(type == 'O') {
         auto find = uniqueObjects.find(id);
         if(find != uniqueObjects.end()) {
-            if(find->second.first == generation) {
+            if(!generation || (find->second.first == generation)) {
+                if(active && !find->second.second->isActive())
+                    return std::nullopt;
                 return find->second.second;
             }
         }
     } else if(type == 'C') {
         auto find = uniqueCharacters.find(id);
         if(find != uniqueCharacters.end()) {
-            if(find->second.first == generation) {
+            if(!generation || (find->second.first == generation)) {
+                if(active && !find->second.second->isActive())
+                    return std::nullopt;
                 return find->second.second;
             }
         }

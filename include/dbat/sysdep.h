@@ -173,3 +173,47 @@ Iterator partialMatch(
     }
     return end;
 }
+
+template<typename T>
+using VnumIndex = std::map<vnum, std::list<T*>>;
+
+template <typename T>
+void insert_vnum(VnumIndex<T>& index, T* item) {
+    auto &idx = index[item->vn];
+    idx.push_back(item);
+}
+
+template <typename T>
+void erase_vnum(VnumIndex<T>& index, T* item) {
+    auto find = index.find(item->vn);
+    if(find == index.end()) return;
+    find->second.remove(item);
+    if(find->second.empty()) index.erase(find);
+}
+
+template <typename T>
+T* get_last_inserted(const VnumIndex<T>& index, vnum vn) {
+    auto it = index.find(vn);
+    if (it != index.end() && !it->second.empty()) {
+        return it->second.back();
+    }
+    return nullptr;
+}
+
+template <typename T>
+std::size_t get_vnum_count(const VnumIndex<T>& index, vnum vn) {
+    auto it = index.find(vn);
+    if (it != index.end()) {
+        return it->second.size();
+    }
+    return 0;
+}
+
+template <typename T>
+std::list<T*> get_vnum_list(const VnumIndex<T>& index, vnum vn) {
+    auto it = index.find(vn);
+    if (it != index.end()) {
+        return it->second;
+    }
+    return {};
+}

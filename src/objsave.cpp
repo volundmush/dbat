@@ -954,7 +954,13 @@ void Crash_save_all(uint64_t heartPulse, double deltaTime) {
     }
 }
 
+static std::set<struct char_data*> crashLoaded;
+
 int Crash_load(struct char_data *ch) {
+    if(crashLoaded.contains(ch)) {
+        logger->critical("OOPS!");
+    }
+    crashLoaded.insert(ch);
     FILE *fl;
     char cmfname[MAX_STRING_LENGTH];
     char buf1[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
@@ -1052,7 +1058,7 @@ int Crash_load(struct char_data *ch) {
             }
             /* we have the number, check it, load obj. */
             if (nr == NOTHING) {   /* then it is unique */
-                temp = create_obj();
+                temp = create_obj(false);
                 temp->vn = NOTHING;
                 GET_OBJ_SIZE(temp) = SIZE_MEDIUM;
             } else if (nr < 0) {
@@ -1060,7 +1066,7 @@ int Crash_load(struct char_data *ch) {
             } else {
                 if (nr >= 999999)
                     continue;
-                temp = read_object(nr, VIRTUAL);
+                temp = read_object(nr, VIRTUAL, false);
                 if (!temp) {
                     get_line(fl, line);
                     continue;
@@ -1225,10 +1231,9 @@ int Crash_load(struct char_data *ch) {
             }   /* exit our xap loop */
             if (temp != nullptr) {
                 num_objs++;
-                if(temp->vn == NOTHING) {
-                    check_unique_id(temp);
-                    add_unique_id(temp);
-                }
+                check_unique_id(temp);
+                add_unique_id(temp);
+                temp->activate();
 
                 if (GET_OBJ_TYPE(temp) == ITEM_DRINKCON) {
                     name_from_drinkcon(temp);

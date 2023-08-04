@@ -146,6 +146,7 @@ int delete_mobile(mob_rnum refpt) {
         }
     }
 
+    dirty_npc_prototypes.insert(vnum);
     mob_proto.erase(vnum);
     mob_index.erase(vnum);
     save_mobiles(real_zone_by_thing(vnum));
@@ -233,13 +234,15 @@ int free_mobile(struct char_data *mob) {
 }
 
 int save_mobiles(zone_rnum zone_num) {
-    if (!zone_table.count(zone_num)) {
+    auto z = zone_table.find(zone_num);
+
+    if (z == zone_table.end()) {
         basic_mud_log("SYSERR: GenOLC: save_mobiles: Invalid real zone number %d.", zone_num);
         return false;
     }
 
-    auto &z = zone_table[zone_num];
-    z.save_mobiles();
+    dirty_npc_prototypes.insert(z->second.mobiles.begin(), z->second.mobiles.end());
+    z->second.save_mobiles();
     return true;
 }
 
@@ -604,11 +607,6 @@ nlohmann::json char_data::serializeInstance() {
     if(world.contains(load_room)) j["load_room"] = load_room;
     if(world.contains(hometown)) j["hometown"] = hometown;
 
-    if(contents) j["contents"] = serializeContents();
-
-    auto eq = serializeEquipment();
-    if(!eq.empty()) j["equipment"] = eq;
-
     if(IS_NPC(this)) {
         // mob flags.
         for(auto i = 0; i < NUM_MOB_FLAGS; i++) if(IS_SET_AR(act, i)) j["act"].push_back(i);
@@ -710,16 +708,8 @@ nlohmann::json char_data::serializeInstance() {
     if(voice && strlen(voice)) j["voice"] = voice;
 
     if(script && script->global_vars) {
-        for(auto v = script->global_vars; v; v = v->next) {
-            j["dgvariables"].push_back(v->serialize());
-        }
+        j["dgvariables"] = serializeVars(script->global_vars);
     }
-
-    return j;
-}
-
-nlohmann::json char_data::serializePlayer() {
-    auto j = serializeInstance();
 
     if(relax_count) j["relax_count"] = relax_count;
     if(ingestLearned) j["ingestLearned"] = ingestLearned;
@@ -727,6 +717,14 @@ nlohmann::json char_data::serializePlayer() {
     if (poofin && strlen(poofin)) j["poofin"] = poofin;
     if (poofout && strlen(poofout)) j["poofout"] = poofout;
     if(players.contains(last_tell)) j["last_tell"] = last_tell;
+
+    return j;
+}
+
+nlohmann::json char_data::serializePlayer() {
+    auto j = serializeInstance();
+
+
 
     return j;
 }
@@ -773,14 +771,6 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
             auto id = i[0].get<uint16_t>();
             skill.emplace(id, i[1]);
         }
-    }
-
-    if(j.contains("contents")) {
-        deserializeContents(j["contents"], isActive);
-    }
-
-    if(j.contains("equipment")) {
-        deserializeEquipment(j["equipment"], isActive);
     }
 
     if(j.contains("affected")) {
@@ -900,13 +890,7 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
 
     if(j.contains("dgvariables")) {
         if(!script) script = new script_data(this);
-        auto jv = j["dgvariables"];
-        // use reverse iteration to fill out script->global_vars
-        for(auto it = jv.rbegin(); it != jv.rend(); ++it) {
-            auto v = new trig_var_data(*it);
-            v->next = script->global_vars;
-            script->global_vars = v;
-        }
+        deserializeVars(&script->global_vars, j["dgvariables"]);
     }
 
     if(j.contains("pref")) {
@@ -923,7 +907,7 @@ void char_data::deserializeProto(const nlohmann::json &j) {
     deserializeBase(j);
 
     if(j.contains("proto_script")) {
-        for(auto p : j["proto_script"]) proto_script.emplace_back(p.get<trig_vnum>());
+        for(const auto& p : j["proto_script"]) proto_script.emplace_back(p.get<trig_vnum>());
     }
 
 }
@@ -935,7 +919,7 @@ void char_data::deserializePlayer(const nlohmann::json &j, bool isActive) {
 }
 
 void char_data::deserializeMobile(const nlohmann::json &j) {
-    deserializeBase(j);
+    deserializeInstance(j, true);
 
 
 }
@@ -1051,10 +1035,6 @@ nlohmann::json player_data::serialize() {
         if(color_choices[i] && strlen(color_choices[i])) j["color_choices"].push_back(std::make_pair(i, color_choices[i]));
     }
 
-    if(character) {
-        j["character"] = character->serializePlayer();
-    }
-
     return j;
 }
 
@@ -1097,20 +1077,16 @@ player_data::player_data(const nlohmann::json &j) {
         }
     }
 
-    if(j.contains("character")) {
-        character = new char_data();
-        character->deserializePlayer(j["character"], false);
-    }
-
 }
 
 void char_data::activate() {
     next = character_list;
     character_list = this;
-    auto find = mob_index.find(vn);
-    if(find != mob_index.end()) {
-        find->second.mobs.insert(this);
+
+    if(vn != NOTHING) {
+        insert_vnum(characterVnumIndex, this);
     }
+
     if(contents) activateContents();
     for(auto i = 0; i < NUM_WEARS; i++) {
         if(GET_EQ(this, i)) {
@@ -1132,10 +1108,11 @@ void char_data::activate() {
 void char_data::deactivate() {
     struct char_data *temp;
     REMOVE_FROM_LIST(this, character_list, next, temp);
-    auto find = mob_index.find(vn);
-    if(find != mob_index.end()) {
-        find->second.mobs.erase(this);
+
+    if(vn != NOTHING) {
+        erase_vnum(characterVnumIndex, this);
     }
+
     if(affected) {
         REMOVE_FROM_LIST(this, affect_list, next_affect, temp);
     }
@@ -1188,8 +1165,8 @@ double char_data::getTotalWeight() {
     return getWeight() + getCarriedWeight();
 }
 
-std::string char_data::getUID() {
-    return fmt::format("#C{}:{}", id, generation);
+std::string char_data::getUID(bool active) {
+    return fmt::format("#C{}:{}{}", id, generation, active ? "" : "!");
 }
 
 bool char_data::isActive() {
@@ -1213,6 +1190,27 @@ nlohmann::json char_data::serializeRelations() {
     auto j = nlohmann::json::object();
 
     return j;
+}
+
+void char_data::deserializeLocation(const nlohmann::json &j) {
+    if(j.contains("in_room")) {
+        auto vn = j["in_room"].get<room_vnum>();
+        if (IS_NPC(this)) {
+            if (world.contains(vn)) {
+                char_to_room(this, vn);
+            } else {
+                // TODO: log error and send object to some failsafe location?
+            }
+        } else {
+            if(world.contains(vn)) {
+                load_room = vn;
+            }
+        }
+    }
+}
+
+void char_data::deserializeRelations(const nlohmann::json &j) {
+
 }
 
 void char_data::save() {

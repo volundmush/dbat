@@ -53,8 +53,7 @@ char *str_udup(const char *txt) {
 
 /* Original use: to be called at shutdown time.  */
 int save_all() {
-    dirty_all();
-    return true;
+    saveAll = true;
 }
 
 /* NOTE: This changes the buffer passed in.  */

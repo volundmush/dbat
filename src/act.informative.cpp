@@ -6037,9 +6037,10 @@ ACMD(do_time) {
     /* 30 days in a month, 6 days a week */
     weekday = day % 6;
 
-    send_to_char(ch, "It is %d o'clock %s, on %s.\r\n",
-                 (time_info.hours % 12 == 0) ? 12 : (time_info.hours % 12),
-                 time_info.hours >= 12 ? "PM" : "AM", weekdays[weekday]);
+    send_to_char(ch, "It is %d:%d:%d o'clock %s, on %s.\r\n",
+                 (time_info.hours % 12 == 0) ? 12 : (time_info.hours % 12), time_info.minutes, time_info.seconds,
+                 time_info.hours >= 12 ? "PM" : "AM",
+                 weekdays[weekday]);
 
     /*
    * Peter Ajamian <peter@PAJAMIAN.DHS.ORG> supplied the following as a fix

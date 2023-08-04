@@ -142,12 +142,15 @@ int delete_room(room_rnum rnum) {
 
 
 int save_rooms(zone_rnum zone_num) {
-    if (!zone_table.count(zone_num)) {
+    auto z = zone_table.find(zone_num);
+
+    if (z == zone_table.end()) {
         basic_mud_log("SYSERR: GenOLC: save_rooms: Invalid zone number %d passed!", zone_num);
         return false;
     }
-    auto &z = zone_table[zone_num];
-    z.save_rooms();
+
+    dirty_rooms.insert(z->second.rooms.begin(), z->second.rooms.end());
+    z->second.save_rooms();
     return true;
 }
 
@@ -402,8 +405,8 @@ void room_data::deserializeContents(const nlohmann::json& j, bool isActive) {
     }
 }
 
-std::string room_data::getUID() {
-    return fmt::format("#R{}:{}", id, generation);
+std::string room_data::getUID(bool active) {
+    return fmt::format("#R{}:{}{}", vn, generation, active ? "" : "!");
 }
 
 bool room_data::isActive() {

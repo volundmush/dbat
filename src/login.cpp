@@ -17,7 +17,7 @@ namespace net {
         sendText(fmt::format("@D                 ---(@CPeak Logon Count Today@W: @w{:>4}@D)---@n\r\n", PCOUNT));
         sendText(fmt::format("@D                 ---(@CHighest Logon Count   @W: @w{:>4}@D)---@n\r\n", HIGHPCOUNT));
         sendText(fmt::format("@D                 ---(@CTotal Era {} Characters@W: @w{:>4}@D)---@n\r\n", CURRENT_ERA,
-                  add_commas(ERAPLAYERS)));
+                  add_commas(players.size())));
         parse("");
     }
 

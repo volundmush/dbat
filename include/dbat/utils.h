@@ -18,10 +18,6 @@
 extern FILE *player_fl;
 
 /* public functions in utils.c */
-struct time_info_data *real_time_passed(time_t t2, time_t t1);
-
-struct time_info_data *mud_time_passed(time_t t2, time_t t1);
-
 extern int masadv(char *tmp, struct char_data *ch);
 
 extern void demon_refill_lf(struct char_data *ch, int64_t num);
@@ -133,8 +129,6 @@ extern int get_line(FILE *fl, char *buf);
 extern int get_filename(char *filename, size_t fbufsize, int mode, const char *orig_name);
 
 extern time_t mud_time_to_secs(struct time_info_data *now);
-
-struct time_info_data *age(struct char_data *ch);
 
 extern int num_pc_in_room(struct room_data *room);
 
@@ -274,16 +268,36 @@ extern int wield_type(int chsize, const struct obj_data *weap);
  *	and utils.c for other places to change.
  */
 /* mud-life time */
-#define SECS_PER_MUD_HOUR    300
-#define SECS_PER_MUD_DAY    (24*SECS_PER_MUD_HOUR)
-#define SECS_PER_MUD_MONTH    (30*SECS_PER_MUD_DAY)
-#define SECS_PER_MUD_YEAR    (12*SECS_PER_MUD_MONTH)
+
+#define MUD_TIME_ACCELERATION  12.0  // 12 MUD seconds pass per real second.
+
+#define SECONDS_PER_MINUTE 60.0
+#define MINUTES_PER_HOUR   60.0
+#define HOURS_PER_DAY      24.0
+#define DAYS_PER_WEEK      7.0
+#define DAYS_PER_MONTH     30.0
+#define MONTHS_PER_YEAR    12.0
+#define DAYS_PER_YEAR      365.0
+
+#define SECS_PER_HOUR   (SECONDS_PER_MINUTE*MINUTES_PER_HOUR)
+#define SECS_PER_DAY    (SECS_PER_HOUR*HOURS_PER_DAY)
+#define SECS_PER_WEEK   (SECS_PER_DAY*DAYS_PER_WEEK)
+#define SECS_PER_MONTH  (SECS_PER_DAY*DAYS_PER_MONTH)
+#define SECS_PER_YEAR   (SECS_PER_DAY*DAYS_PER_YEAR)
+
+#define SECS_PER_MUD_SECOND (1.0*MUD_TIME_ACCELERATION)
+#define SECS_PER_MUD_MINUTE (SECONDS_PER_MINUTE*SECS_PER_MUD_SECOND)
+#define SECS_PER_MUD_HOUR  (MINUTES_PER_HOUR*SECS_PER_MUD_MINUTE)
+#define SECS_PER_MUD_DAY   (HOURS_PER_DAY*SECS_PER_MUD_HOUR)
+#define SECS_PER_MUD_MONTH (DAYS_PER_MONTH*SECS_PER_MUD_DAY)
+#define SECS_PER_MUD_YEAR    (MONTHS_PER_YEAR*SECS_PER_MUD_MONTH)
 
 /* real-life time (remember Real Life?) */
-#define SECS_PER_REAL_MIN    60
-#define SECS_PER_REAL_HOUR    (60*SECS_PER_REAL_MIN)
-#define SECS_PER_REAL_DAY    (24*SECS_PER_REAL_HOUR)
-#define SECS_PER_REAL_YEAR    (365*SECS_PER_REAL_DAY)
+// just keeping these 'cuz some things still use them...
+#define SECS_PER_REAL_MIN    SECONDS_PER_MINUTE
+#define SECS_PER_REAL_HOUR   SECS_PER_HOUR
+#define SECS_PER_REAL_DAY    SECS_PER_DAY
+#define SECS_PER_REAL_YEAR   SECS_PER_YEAR
 
 
 /* string utils **********************************************************/
@@ -459,7 +473,7 @@ bool ROOM_FLAGGED(room_vnum loc, int flag);
 #define IN_ROOM(ch)    ((ch)->in_room)
 #define IN_ZONE(ch)   (zone_table[(world[(IN_ROOM(ch))].zone)].number)
 #define GET_WAS_IN(ch)    ((ch)->was_in_room)
-#define GET_AGE(ch)     (age(ch)->year)
+#define GET_AGE(ch)     0
 
 #define GET_PC_NAME(ch)    ((ch)->name)
 #define GET_NAME(ch)    (IS_NPC(ch) ? \
@@ -493,8 +507,8 @@ bool ROOM_FLAGGED(room_vnum loc, int flag);
 #define GET_HOME(ch)    ((ch)->hometown)
 #define GET_WEIGHT(ch)  ((ch)->weight)
 #define GET_HEIGHT(ch)  ((ch)->height)
-#define GET_PC_HEIGHT(ch)    (!IS_NPC(ch) ? age(ch)->year <= 10 ? (int)((ch)->height * 0.68) : age(ch)->year <= 12 ? (int)((ch)->height * 0.72) : age(ch)->year <= 14 ? (int)((ch)->height * 0.85) : age(ch)->year <= 16 ? (int)((ch)->height * 0.92) : (ch)->height : (ch)->height)
-#define GET_PC_WEIGHT(ch)    (!IS_NPC(ch) ? age(ch)->year <= 10 ? (int)((ch)->weight * 0.48) : age(ch)->year <= 12 ? (int)((ch)->weight * 0.55) : age(ch)->year <= 14 ? (int)((ch)->weight * 0.7) : age(ch)->year <= 16 ? (int)((ch)->weight * 0.85) : (ch)->weight : (ch)->weight)
+#define GET_PC_HEIGHT(ch)    ((ch)->height)
+#define GET_PC_WEIGHT(ch)    ((ch)->weight)
 #define GET_SEX(ch)    ((ch)->sex)
 #define CARRYING(ch)    ((ch)->carrying)
 #define CARRIED_BY(ch)  ((ch)->carried_by)

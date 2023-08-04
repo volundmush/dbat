@@ -1632,7 +1632,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
 
         send_to_char(ch, "Created: [%s], Last Logon: [%s], Played [%dh %dm], Age [%d]\r\n",
                      buf1, cmbuf2, (int) k->time.played / 3600,
-                     (int) ((k->time.played % 3600) / 60), age(k)->year);
+                     (int) ((k->time.played % 3600) / 60), 0);
 
         if (k->desc != nullptr) {
             send_to_char(ch, "@YOwned by User@D: [@C%s@D]@n\r\n", GET_USER(k));
@@ -4231,81 +4231,7 @@ ACMD(do_saveall) {
   "players [minlev[-maxlev]] [-n name] [-d days] [-h hours] [-m]"
 
 ACMD(do_plist) {
-    int i, len = 0;
-    char mode, buf[MAX_STRING_LENGTH], name_search[MAX_NAME_LENGTH], time_str[MAX_STRING_LENGTH];
-    struct time_info_data time_away;
-    int low = 0, high = 100, low_day = 0, high_day = 10000, low_hr = 0, high_hr = 24;
 
-    skip_spaces(&argument);
-    strcpy(buf, argument);        /* strcpy: OK (sizeof: argument == buf) */
-    name_search[0] = '\0';
-
-    while (*buf) {
-        char arg[MAX_INPUT_LENGTH], buf1[MAX_INPUT_LENGTH];
-
-        half_chop(buf, arg, buf1);
-        if (isdigit(*arg)) {
-            if (sscanf(arg, "%d-%d", &low, &high) == 1)
-                high = low;
-            strcpy(buf, buf1);        /* strcpy: OK (sizeof: buf1 == buf) */
-        } else if (*arg == '-') {
-            mode = *(arg + 1);        /* just in case; we destroy arg in the switch */
-            switch (mode) {
-                case 'l':
-                    half_chop(buf1, arg, buf);
-                    sscanf(arg, "%d-%d", &low, &high);
-                    break;
-                case 'n':
-                    half_chop(buf1, name_search, buf);
-                    break;
-                case 'i':
-                    strcpy(buf, buf1);
-                    low = 1;
-                    break;
-                case 'm':
-                    strcpy(buf, buf1);
-                    high = 100;
-                    break;
-                case 'd':
-                    half_chop(buf1, arg, buf);
-                    if (sscanf(arg, "%d-%d", &low_day, &high_day) == 1)
-                        high_day = low_day;
-                    break;
-                case 'h':
-                    half_chop(buf1, arg, buf);
-                    if (sscanf(arg, "%d-%d", &low_hr, &high_hr) == 1)
-                        high_hr = low_hr;
-                    break;
-                default:
-                    send_to_char(ch, "%s\r\n", PLIST_FORMAT);
-                    return;
-            }
-        } else {
-            send_to_char(ch, "%s\r\n", PLIST_FORMAT);
-            return;
-        }
-    }
-
-    len = 0;
-    len += snprintf(buf + len, sizeof(buf) - len, "@W[ Id] (Lv) Name         Last@n\r\n"
-                                                  "%s-----------------------------------------------%s\r\n",
-                    CCCYN(ch, C_NRM),
-                    CCNRM(ch, C_NRM));
-
-    for (auto &[id, p] : players) {
-
-        time_away = *real_time_passed(time(nullptr), p.character->time.logon);
-
-
-        strcpy(time_str, asctime(localtime(&p.character->time.logon)));
-        time_str[strlen(time_str) - 1] = '\0';
-
-        len += snprintf(buf + len, sizeof(buf) - len, "[%3ld] (%2d) %-12s %s\r\n",
-                        id, p.character->level, p.name.c_str(), time_str);
-    }
-    snprintf(buf + len, sizeof(buf) - len, "%s-----------------------------------------------%s\r\n"
-                                           "%d players listed.\r\n", CCCYN(ch, C_NRM), CCNRM(ch, C_NRM), players.size());
-    write_to_output(ch->desc, buf);
 }
 
 ACMD(do_peace) {
@@ -4913,30 +4839,35 @@ ACMD (do_zcheck) {
 /**********************************************************************************/
 
 static void mob_checkload(struct char_data *ch, mob_vnum mvnum) {
-    int cmd_no, count = 0;
-    mob_rnum mrnum = real_mobile(mvnum);
+    int count = 0;
 
-    if (mrnum == NOBODY) {
+    auto find = mob_proto.find(mvnum);
+    if (find == mob_proto.end()) {
         send_to_char(ch, "That mob does not exist.\r\n");
         return;
     }
 
     send_to_char(ch, "Checking load info for the mob [%d] %s...\r\n",
-                 mvnum, mob_proto[mrnum].short_description);
+                 mvnum, find->second.short_description);
 
-    for (auto &z : zone_table) {
-        for (cmd_no = 0; z.second.cmd[cmd_no].command != 'S'; cmd_no++) {
-            if (z.second.cmd[cmd_no].command != 'M')
-                continue;
+    for (auto &[zvn, z] : zone_table) {
+        for (auto &c : z.cmd) {
+            if (c.command != 'M') continue;
+            if(c.arg1 != mvnum) continue;
 
             /* read a mobile */
-            if (z.second.cmd[cmd_no].arg1 == mrnum) {
-                send_to_char(ch, "  [%5d] %s (%d MAX)\r\n",
-                             world[z.second.cmd[cmd_no].arg3].vn,
-                             world[z.second.cmd[cmd_no].arg3].name,
-                             z.second.cmd[cmd_no].arg2);
-                count += 1;
+            auto room = world.find(c.arg3);
+            if(room == world.end()) {
+                send_to_char(ch, "  [%5d] %s (room does not exist)\r\n",
+                             c.arg3,
+                             "ERROR");
+            } else {
+                send_to_char(ch, "  [%5d] %s (%d MaxW, %d MaxW)\r\n",
+                             room->second.vn,
+                             room->second.name,
+                             c.arg2, c.arg4);
             }
+            count += 1;
         }
     }
     if (count > 0)
@@ -4944,77 +4875,139 @@ static void mob_checkload(struct char_data *ch, mob_vnum mvnum) {
 }
 
 static void obj_checkload(struct char_data *ch, obj_vnum ovnum) {
-    int cmd_no, count = 0;
-    obj_rnum ornum = real_object(ovnum);
-    room_vnum lastroom_v = 0;
-    room_rnum lastroom_r = 0;
-    mob_rnum lastmob_r = 0;
+    int count = 0;
 
-    if (ornum == NOTHING) {
+    mob_vnum lastmob_v = NOTHING;
+    auto lastmob = mob_proto.end();
+
+    obj_vnum lastobj_v = NOTHING;
+    auto lastobj = obj_proto.end();
+
+    room_vnum lastroom_v = NOWHERE;
+    auto lastroom = world.end();
+
+    auto obj = obj_proto.find(ovnum);
+    if (obj == obj_proto.end()) {
         send_to_char(ch, "That object does not exist.\r\n");
         return;
     }
 
     send_to_char(ch, "Checking load info for the obj [%d] %s...\r\n",
-                 ovnum, obj_proto[ornum].short_description);
+                 ovnum, obj->second.short_description);
 
-    for (auto &z : zone_table) {
-        for (cmd_no = 0; z.second.cmd[cmd_no].command != 'S'; cmd_no++) {
-            switch (z.second.cmd[cmd_no].command) {
+    for (auto &[zvn, z] : zone_table) {
+        for (auto &c : z.cmd) {
+            switch (c.command) {
                 case 'M':
-                    lastroom_v = world[z.second.cmd[cmd_no].arg3].vn;
-                    lastroom_r = z.second.cmd[cmd_no].arg3;
-                    lastmob_r = z.second.cmd[cmd_no].arg1;
+                    lastroom_v = c.arg3;
+                    lastroom = world.find(lastroom_v);
+                    lastmob_v = c.arg1;
+                    lastmob = mob_proto.find(lastmob_v);
                     break;
                 case 'O':                   /* read an object */
-                    lastroom_v = world[z.second.cmd[cmd_no].arg3].vn;
-                    lastroom_r = z.second.cmd[cmd_no].arg3;
-                    if (z.second.cmd[cmd_no].arg1 == ornum) {
-                        send_to_char(ch, "  [%5d] %s (%d Max)\r\n",
-                                     lastroom_v,
-                                     world[lastroom_r].name,
-                                     z.second.cmd[cmd_no].arg2);
+                    lastroom_v = c.arg3;
+                    lastroom = world.find(lastroom_v);
+                    lastobj_v = c.arg1;
+                    lastobj = obj_proto.find(lastobj_v);
+                    if (c.arg1 == ovnum) {
+                        if(lastroom != world.end()) {
+                            send_to_char(ch, "  [%5d] %s (%d MaxR, %d MaxW)\r\n",
+                                         lastroom->first,
+                                         lastroom->second.name,
+                                         c.arg2, c.arg4);
+                        } else {
+                            send_to_char(ch, "  [%5d] %s (room does not exist)\r\n",
+                                         c.arg3,
+                                         "ERROR");
+                        }
+
                         count += 1;
                     }
                     break;
                 case 'P':                   /* object to object */
-                    if (z.second.cmd[cmd_no].arg1 == ornum) {
-                        send_to_char(ch, "  [%5d] %s (Put in another object [%d Max])\r\n",
-                                     lastroom_v,
-                                     world[lastroom_r].name,
-                                     z.second.cmd[cmd_no].arg2);
+                    if (c.arg1 == ovnum) {
+                        if(lastroom != world.end() && lastobj != obj_proto.end()) {
+                            send_to_char(ch, "  [%5d] %s (Put in another object [%d Max])\r\n",
+                                         lastroom->first,
+                                         lastroom->second.name,
+                                         c.arg2);
+                        } else {
+                            if(lastroom == world.end() && lastobj == obj_proto.end()) {
+                                send_to_char(ch, "  [%5d] %s (room does not exist) (object does not exist)\r\n",
+                                             c.arg3,
+                                             "ERROR", c.arg3);
+                            }
+                            else if(lastroom == world.end()) {
+                                send_to_char(ch, "  [%5d] %s (room does not exist)\r\n",
+                                             c.arg3,
+                                             "ERROR");
+                            } else if(lastobj == obj_proto.end()) {
+                                send_to_char(ch, "  [%5d] %s (object does not exist)\r\n",
+                                             c.arg3,
+                                             "ERROR");
+                            }
+                        }
                         count += 1;
                     }
                     break;
                 case 'G':                   /* obj_to_char */
-                    if (z.second.cmd[cmd_no].arg1 == ornum) {
-                        send_to_char(ch, "  [%5d] %s (Given to %s [%d][%d Max])\r\n",
-                                     lastroom_v,
-                                     world[lastroom_r].name,
-                                     mob_proto[lastmob_r].short_description,
-                                     mob_index[lastmob_r].vn,
-                                     z.second.cmd[cmd_no].arg2);
+                    if (c.arg1 == ovnum) {
+                        if(lastroom != world.end() && lastmob != mob_proto.end()) {
+                            send_to_char(ch, "  [%5d] %s (Given to %s [%d][%d Max])\r\n",
+                                         lastroom_v,
+                                         lastroom->second.name,
+                                         lastmob->second.short_description,
+                                         lastmob->first,
+                                         c.arg2);
+                        } else {
+                            if(lastroom == world.end()) {
+                                send_to_char(ch, "  [%5d] %s (room does not exist)\r\n",
+                                             c.arg3,
+                                             "ERROR");
+                            } else if(lastmob == mob_proto.end()) {
+                                send_to_char(ch, "  [%5d] %s (mob does not exist)\r\n",
+                                             c.arg3,
+                                             "ERROR");
+                            }
+                        }
                         count += 1;
                     }
                     break;
                 case 'E':                   /* object to equipment list */
-                    if (z.second.cmd[cmd_no].arg1 == ornum) {
-                        send_to_char(ch, "  [%5d] %s (Equipped to %s [%d][%d Max])\r\n",
-                                     lastroom_v,
-                                     world[lastroom_r].name,
-                                     mob_proto[lastmob_r].short_description,
-                                     mob_index[lastmob_r].vn,
-                                     z.second.cmd[cmd_no].arg2);
+                    if (c.arg1 == ovnum) {
+                        if(lastmob != mob_proto.end()) {
+                            send_to_char(ch, "  [%5d] %s (Equipped to %s [%d] at %s [%d Max])\r\n",
+                                         lastroom_v,
+                                         lastroom->second.name,
+                                         lastmob->second.short_description,
+                                         lastmob->first,
+                                         equipment_types[c.arg3],
+                                         c.arg2);
+                        } else {
+                            send_to_char(ch, "  [%5d] %s (Equipped to ??? [%d] at %s [%d Max])\r\n",
+                                         lastroom_v,
+                                         lastroom->second.name,
+                                         c.arg1,
+                                         equipment_types[c.arg3],
+                                         c.arg2);
+                        }
+
                         count += 1;
                     }
                     break;
                 case 'R': /* rem obj from room */
-                    lastroom_v = world[z.second.cmd[cmd_no].arg1].vn;
-                    lastroom_r = z.second.cmd[cmd_no].arg1;
-                    if (z.second.cmd[cmd_no].arg2 == ornum) {
-                        send_to_char(ch, "  [%5d] %s (Removed from room)\r\n",
-                                     lastroom_v,
-                                     world[lastroom_r].name);
+                    lastroom_v = c.arg1;
+                    lastroom = world.find(lastroom_v);
+                    if (c.arg2 == ovnum) {
+                        if(lastroom != world.end()) {
+                            send_to_char(ch, "  [%5d] %s (Removed from room)\r\n",
+                                         lastroom_v,
+                                         lastroom->second.name);
+                        } else {
+                            send_to_char(ch, "  [%5d] %s (room does not exist)\r\n",
+                                         c.arg1,
+                                         "ERROR");
+                        }
                         count += 1;
                     }
                     break;
@@ -5027,70 +5020,97 @@ static void obj_checkload(struct char_data *ch, obj_vnum ovnum) {
 }
 
 static void trg_checkload(struct char_data *ch, trig_vnum tvnum) {
-    int cmd_no, found = 0;
-    trig_rnum trnum = real_trigger(tvnum);
-    room_vnum lastroom_v = 0;
-    room_rnum lastroom_r = 0, k;
-    mob_rnum lastmob_r = 0, i;
-    obj_rnum lastobj_r = 0, j;
-    struct trig_proto_list *tpl;
+    int found = 0;
+    room_vnum lastroom_v = NOWHERE;
+    mob_rnum lastmob_v = NOTHING;
+    obj_rnum lastobj_v = NOTHING;
 
-    if (trnum == NOTHING) {
+    auto lastmob = mob_proto.end();
+    auto lastobj = obj_proto.end();
+    auto lastroom = world.end();
+
+    struct trig_proto_list *tpl = nullptr;
+
+    auto trg = trig_index.find(tvnum);
+    if (trg == trig_index.end()) {
         send_to_char(ch, "That trigger does not exist.\r\n");
         return;
     }
 
     send_to_char(ch, "Checking load info for the %s trigger [%d] '%s':\r\n",
-                 trig_index[trnum].proto->attach_type == MOB_TRIGGER ? "mobile" :
-                 (trig_index[trnum].proto->attach_type == OBJ_TRIGGER ? "object" : "room"),
-                 tvnum, trig_index[trnum].proto->name);
+                 trg->second.proto->attach_type == MOB_TRIGGER ? "mobile" :
+                 (trg->second.proto->attach_type == OBJ_TRIGGER ? "object" : "room"),
+                 tvnum, trg->second.proto->name);
 
-    for (auto &z : zone_table) {
-        for (cmd_no = 0; z.second.cmd[cmd_no].command != 'S'; cmd_no++) {
-            switch (z.second.cmd[cmd_no].command) {
+    for (auto &[zvn, z] : zone_table) {
+        for (auto &c : z.cmd) {
+            switch (c.command) {
                 case 'M':
-                    lastroom_v = world[z.second.cmd[cmd_no].arg3].vn;
-                    lastroom_r = z.second.cmd[cmd_no].arg3;
-                    lastmob_r = z.second.cmd[cmd_no].arg1;
+                    lastroom_v = c.arg3;
+                    lastroom_v = c.arg3;
+                    lastmob_v = c.arg1;
                     break;
                 case 'O':                   /* read an object */
-                    lastroom_v = world[z.second.cmd[cmd_no].arg3].vn;
-                    lastroom_r = z.second.cmd[cmd_no].arg3;
-                    lastobj_r = z.second.cmd[cmd_no].arg1;
+                    lastroom_v = c.arg3;
+                    lastroom_v = c.arg3;
+                    lastobj_v = c.arg1;
                     break;
                 case 'P':                   /* object to object */
-                    lastobj_r = z.second.cmd[cmd_no].arg1;
+                    lastobj_v = c.arg1;
                     break;
                 case 'G':                   /* obj_to_char */
-                    lastobj_r = z.second.cmd[cmd_no].arg1;
+                    lastobj_v = c.arg1;
                     break;
                 case 'E':                   /* object to equipment list */
-                    lastobj_r = z.second.cmd[cmd_no].arg1;
+                    lastobj_v = c.arg1;
                     break;
                 case 'R':                   /* rem obj from room */
                     lastroom_v = 0;
-                    lastroom_r = 0;
-                    lastobj_r = 0;
-                    lastmob_r = 0;
+                    lastobj_v = 0;
+                    lastmob_v = 0;
                 case 'T':                   /* trigger to something */
-                    if (z.second.cmd[cmd_no].arg2 != trnum)
+                    if (c.arg2 != tvnum)
                         break;
-                    if (z.second.cmd[cmd_no].arg1 == MOB_TRIGGER) {
-                        send_to_char(ch, "mob [%5d] %-60s (zedit room %5d)\r\n",
-                                     mob_index[lastmob_r].vn,
-                                     mob_proto[lastmob_r].short_description,
-                                     lastroom_v);
+                    if (c.arg1 == MOB_TRIGGER) {
+                        lastmob = mob_proto.find(lastmob_v);
+                        if(lastmob != mob_proto.end()) {
+                            send_to_char(ch, "mob [%5d] %-60s (zedit room %5d)\r\n",
+                                         lastmob->first,
+                                         lastmob->second.short_description,
+                                         lastroom_v);
+                        } else {
+                            send_to_char(ch, "mob [%5d] %-60s (zedit room %5d)\r\n",
+                                         lastmob_v,
+                                         "ERROR NOTEXIST",
+                                         lastroom_v);
+                        }
+
                         found = 1;
-                    } else if (z.second.cmd[cmd_no].arg1 == OBJ_TRIGGER) {
-                        send_to_char(ch, "obj [%5d] %-60s  (zedit room %d)\r\n",
-                                     obj_index[lastobj_r].vn,
-                                     obj_proto[lastobj_r].short_description,
-                                     lastroom_v);
+                    } else if (c.arg1 == OBJ_TRIGGER) {
+                        lastobj = obj_proto.find(lastobj_v);
+                        if(lastobj != obj_proto.end()) {
+                            send_to_char(ch, "obj [%5d] %-60s  (zedit room %d)\r\n",
+                                         lastobj_v,
+                                         lastobj->second.short_description,
+                                         lastroom_v);
+                        } else {
+                            send_to_char(ch, "obj [%5d] %-60s  (zedit room %d)\r\n",
+                                         lastobj_v,
+                                         "ERROR NOTEXIST",
+                                         lastroom_v);
+                        }
                         found = 1;
-                    } else if (z.second.cmd[cmd_no].arg1 == WLD_TRIGGER) {
-                        send_to_char(ch, "room [%5d] %-60s (zedit)\r\n",
-                                     lastroom_v,
-                                     world[lastroom_r].name);
+                    } else if (c.arg1 == WLD_TRIGGER) {
+                        lastroom = world.find(lastroom_v);
+                        if(lastroom != world.end()) {
+                            send_to_char(ch, "room [%5d] %-60s (zedit)\r\n",
+                                         lastroom_v,
+                                         lastroom->second.name);
+                        } else {
+                            send_to_char(ch, "room [%5d] %-60s (zedit)\r\n",
+                                         lastroom_v,
+                                         "ERROR NOTEXIST");
+                        }
                         found = 1;
                     }
                     break;
@@ -5098,33 +5118,27 @@ static void trg_checkload(struct char_data *ch, trig_vnum tvnum) {
         } /*for cmd_no......*/
     }  /*for zone...*/
 
-    for (auto &m : mob_proto) {
-        auto find = std::find(m.second.proto_script.begin(), m.second.proto_script.end(), tvnum);
-        if (find == m.second.proto_script.end())
+    for (auto &[vn, m] : mob_proto) {
+        auto find = std::find(m.proto_script.begin(), m.proto_script.end(), tvnum);
+        if (find == m.proto_script.end())
             continue;
-        send_to_char(ch, "mob [%5d] %s\r\n",
-                     m.first,
-                     m.second.short_description);
+        send_to_char(ch, "mob [%5d] %s\r\n", vn, m.short_description);
         found = 1;
     }
 
-    for (auto &o : obj_proto) {
-        auto find = std::find(o.second.proto_script.begin(), o.second.proto_script.end(), tvnum);
-        if (find == o.second.proto_script.end())
+    for (auto &[vn, o] : obj_proto) {
+        auto find = std::find(o.proto_script.begin(), o.proto_script.end(), tvnum);
+        if (find == o.proto_script.end())
             continue;
-        send_to_char(ch, "obj [%5d] %s\r\n",
-                     o.first,
-                     o.second.short_description);
+        send_to_char(ch, "obj [%5d] %s\r\n", vn, o.short_description);
         found = 1;
     }
 
-    for (auto &r : world) {
-        auto find = std::find(r.second.proto_script.begin(), r.second.proto_script.end(), tvnum);
-        if (find == r.second.proto_script.end())
+    for (auto &[vn, r] : world) {
+        auto find = std::find(r.proto_script.begin(), r.proto_script.end(), tvnum);
+        if (find == r.proto_script.end())
             continue;
-        send_to_char(ch, "room[%5d] %s\r\n",
-                     r.first,
-                     r.second.name);
+        send_to_char(ch, "room[%5d] %s\r\n", vn, r.name);
         found = 1;
     }
 

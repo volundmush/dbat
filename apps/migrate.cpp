@@ -20,6 +20,7 @@
 #include "dbat/area.h"
 #include "dbat/account.h"
 #include "dbat/objsave.h"
+#include "dbat/house.h"
 
 static std::string stripAnsi(const std::string& str) {
     return processColors(str, false, nullptr);
@@ -1436,12 +1437,13 @@ void migrate_characters() {
         auto id = ch->id;
         auto &p = players[id];
         p.id = id;
+        if(!ch->generation) ch->generation = time(nullptr);
         p.character = ch;
         p.name = ch->name;
         auto &a = accounts[accID];
         p.account = &a;
         a.characters.emplace_back(id);
-
+        uniqueCharacters[id] = std::make_pair(ch->generation, ch);
     }
 
     // migrate sense files...
@@ -1548,7 +1550,7 @@ void migrate_characters() {
             auto context = line.substr(pos + 1, pos2 - pos - 1);
             auto data = line.substr(pos2 + 1);
             if(!ch->script) {
-                ch->script = new script_data();
+                ch->script = new script_data(ch);
             }
 
             try {
@@ -1630,11 +1632,33 @@ boost::asio::awaitable<void> migrate_db() {
         basic_mud_log("Error migrating characters: %s", e.what());
     }
 
+    logger->info("Dirtying assets...");
+
     dirty_all();
 
-    SQLite::Transaction transaction(*db);
-    process_dirty();
-    transaction.commit();
+    logger->info("Committing assets...");
+
+    try {
+        SQLite::Transaction transaction(*assetDb);
+        process_dirty();
+        transaction.commit();
+        logger->info("Assets committed.");
+    } catch(std::exception &e) {
+        logger->error("Error committing assets: {}", e.what());
+        shutdown_game(1);
+    }
+
+    try {
+        logger->info("dumping state...");
+        auto startTime = boost::asio::steady_timer::clock_type::now();
+        dump_state();
+        auto endTime = boost::asio::steady_timer::clock_type::now();
+        logger->info("state dumped. It took: {}", std::chrono::duration<double>(endTime - startTime).count());
+    } catch(std::exception &e) {
+        logger->error("Error dumping state: {}", e.what());
+        shutdown_game(1);
+    }
+
     co_return;
 }
 

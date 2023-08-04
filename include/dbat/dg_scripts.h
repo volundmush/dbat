@@ -187,11 +187,16 @@ struct trig_data {
     int order{0};
     int countLine(struct cmdlist_element *c);
 
+    void activate();
+    void deactivate();
+
     int64_t id{};
     time_t generation{};
 
     struct trig_data *next{};
     struct trig_data *next_in_world{};    /* next in the global trigger list */
+    void deserializeInstance(const nlohmann::json& j);
+    void deserializeLocation(const std::string& txt);
 };
 
 
@@ -514,3 +519,7 @@ extern room_rnum obj_room(obj_data *obj);
                   !GET_TRIG_DEPTH(t))
 
 void ADD_UID_VAR(char *buf, struct trig_data *trig, struct unit_data *thing, char *name, long context);
+
+nlohmann::json serializeVars(struct trig_var_data *vd);
+
+void deserializeVars(struct trig_var_data **vd, const nlohmann::json& j);

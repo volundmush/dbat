@@ -227,9 +227,8 @@ void list_mobiles(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnu
     for (auto &[vn, m] : mob_proto) {
         if (vn >= bottom && vn <= top) {
             counter++;
-            auto &mi = mob_index[vn];
             send_to_char(ch, "@g%4d@n) [@g%-5d@n] @[3]%-*s @C%-9s @c%-9s @y[%4d]@n %s\r\n",
-                         vn, mi.mobs.size(), count_color_chars(m.short_description) + 30,
+                         vn, get_vnum_count(characterVnumIndex, vn), count_color_chars(m.short_description) + 30,
                          m.short_description, TRUE_RACE(&m), m.chclass->getName().c_str(),
                          m.level + m.level_adj + m.race_level,
                          !m.proto_script.empty() ? " [TRIG]" : "");
@@ -262,9 +261,8 @@ void list_objects(struct char_data *ch, zone_rnum rnum, room_vnum vmin, room_vnu
     for (auto &[vn, o] : obj_proto) {
         if (vn >= bottom && vn <= top) {
             counter++;
-            auto &oi = obj_index[vn];
             send_to_char(ch, "@g%4d@n) [@g%-5d@n] @[2]%-*s @y[%s]@n%s\r\n",
-                         vn, oi.objects.size(), count_color_chars(o.short_description) + 44,
+                         vn, get_vnum_count(objectVnumIndex, vn), count_color_chars(o.short_description) + 44,
                          o.short_description, item_types[o.type_flag],
                          !o.proto_script.empty() ? " [TRIG]" : "");
         }

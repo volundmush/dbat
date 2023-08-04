@@ -734,13 +734,7 @@ struct obj_data *get_obj_in_list_num(int num, struct obj_data *list) {
 
 /* search the entire world for an object number, and return a pointer  */
 struct obj_data *get_obj_num(obj_rnum nr) {
-    struct obj_data *i;
-
-    for (i = object_list; i; i = i->next)
-        if (GET_OBJ_RNUM(i) == nr)
-            return (i);
-
-    return (nullptr);
+    return get_last_inserted(objectVnumIndex, nr);
 }
 
 
@@ -781,6 +775,10 @@ struct char_data *get_char_num(mob_rnum nr) {
 /* put an object in a room */
 void obj_to_room(struct obj_data *object, room_rnum room) {
     struct obj_data *vehicle = nullptr;
+
+    if(room == 45000) {
+        logger->info("testing!");
+    }
 
     if (!object || !world.count(room)) {
         basic_mud_log("SYSERR: Illegal value(s) passed to obj_to_room. (Room #%d, obj %p)",
@@ -1004,6 +1002,11 @@ void extract_obj(struct obj_data *obj) {
     if (SCRIPT(obj))
         extract_script(obj, OBJ_TRIGGER);
 
+    auto found = uniqueObjects.find(obj->id);
+    if (found != uniqueObjects.end()) {
+        uniqueObjects.erase(found);
+    }
+
     free_obj(obj);
 }
 
@@ -1220,7 +1223,7 @@ void extract_char_final(struct char_data *ch) {
 
     if (IS_NPC(ch)) {
         if (GET_MOB_RNUM(ch) != NOTHING)    /* prototyped */
-            mob_index[GET_MOB_RNUM(ch)].mobs.erase(ch);
+            erase_vnum(characterVnumIndex, ch);
         clearMemory(ch);
         if (SCRIPT(ch))
             extract_script(ch, MOB_TRIGGER);
@@ -1235,8 +1238,13 @@ void extract_char_final(struct char_data *ch) {
         ch->desc->connected = CON_QUITGAME;
     }
 
-    if (IS_NPC(ch))
+    if (IS_NPC(ch)) {
+        auto found = uniqueCharacters.find(ch->id);
+        if (found != uniqueCharacters.end()) {
+            uniqueCharacters.erase(found);
+        }
         free_char(ch);
+    }
     else
         ch->deactivate();
 }

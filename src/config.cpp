@@ -54,7 +54,8 @@ namespace config {
     uint16_t thermitePort{7000};
     std::string logFile = "logs/dbat.log";
 
-    std::string dbName = "dbat.sqlite3";
+    std::string assetDbName = "assets";
+    std::string stateDbName = "state";
     bool testMode{false};
     bool logEgregiousTimings{false};
 

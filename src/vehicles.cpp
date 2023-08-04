@@ -327,24 +327,14 @@ static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, ch
 }
 
 struct obj_data *find_vehicle_by_vnum(int vnum) {
-    struct obj_data *i;
-
-    for (i = object_list; i; i = i->next)
-        if (GET_OBJ_TYPE(i) == ITEM_VEHICLE)
-            if (GET_OBJ_VNUM(i) == vnum)
-                return i;
-
+    auto o = get_last_inserted(objectVnumIndex, vnum);
+    if(o && GET_OBJ_TYPE(o) == ITEM_VEHICLE) return o;
     return nullptr;
 }
 
 struct obj_data *find_hatch_by_vnum(int vnum) {
-    struct obj_data *i;
-
-    for (i = object_list; i; i = i->next)
-        if (GET_OBJ_TYPE(i) == ITEM_HATCH)
-            if (GET_OBJ_VNUM(i) == vnum)
-                return i;
-
+    auto o = get_last_inserted(objectVnumIndex, vnum);
+    if(o && GET_OBJ_TYPE(o) == ITEM_HATCH) return o;
     return nullptr;
 }
 

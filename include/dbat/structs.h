@@ -144,7 +144,7 @@ struct unit_data {
     void deserializeUnit(const nlohmann::json& j);
     std::string scriptString();
 
-    virtual std::string getUID() = 0;
+    virtual std::string getUID(bool active = true) = 0;
     virtual bool isActive() = 0;
     virtual void save() = 0;
 
@@ -167,10 +167,10 @@ struct obj_data : public unit_data {
     nlohmann::json serializeInstance();
     nlohmann::json serializeProto();
 
-    nlohmann::json serializeLocation();
+    std::string serializeLocation();
     nlohmann::json serializeRelations();
 
-    void deserializeLocation(const nlohmann::json& j);
+    void deserializeLocation(const std::string& txt, int16_t slot);
     void deserializeRelations(const nlohmann::json& j);
 
     void deserializeBase(const nlohmann::json& j);
@@ -184,7 +184,7 @@ struct obj_data : public unit_data {
 
     int getAffectModifier(int location, int specific);
 
-    std::string getUID() override;
+    std::string getUID(bool active = true) override;
     bool isActive() override;
     void save() override;
 
@@ -311,7 +311,7 @@ struct room_data : public unit_data {
     void deserializeContents(const nlohmann::json& j, bool isActive);
 
     std::optional<vnum> getMatchingArea(std::function<bool(const area_data&)> f);
-    std::string getUID() override;
+    std::string getUID(bool active = true) override;
     bool isActive() override;
     void save() override;
 
@@ -334,8 +334,11 @@ typedef struct memory_rec_struct memory_rec;
 /* This structure is purely intended to be an easy way to transfer */
 /* and return information about time (real or mudwise).            */
 struct time_info_data {
-    int hours, day, month;
-    int16_t year;
+    double remainder{};
+    int seconds{}, minutes{}, hours{}, day{}, month{};
+    int16_t year{};
+    void deserialize(const nlohmann::json& j);
+    nlohmann::json serialize();
 };
 
 
@@ -344,11 +347,11 @@ struct time_data {
     time_data() = default;
     explicit time_data(const nlohmann::json &j);
     void deserialize(const nlohmann::json& j);
-    time_t birth;    /* This represents the characters current age        */
-    time_t created;    /* This does not change                              */
-    time_t maxage;    /* This represents death by natural causes           */
-    time_t logon;    /* Time of the last logon (used to calculate played) */
-    time_t played;    /* This is the total accumulated time played in secs */
+    time_t birth{};    /* This represents the characters current age        */
+    time_t created{};    /* This does not change                              */
+    time_t maxage{};    /* This represents death by natural causes           */
+    time_t logon{};    /* Time of the last logon (used to calculate played) */
+    time_t played{};    /* This is the total accumulated time played in secs */
     nlohmann::json serialize();
 };
 
@@ -490,7 +493,7 @@ struct char_data : public unit_data {
     void deserializeLocation(const nlohmann::json& j);
     void deserializeRelations(const nlohmann::json& j);
 
-    std::string getUID() override;
+    std::string getUID(bool active = true) override;
 
     bool isActive() override;
     void save() override;
@@ -1124,10 +1127,12 @@ struct social_messg {
 
 
 struct weather_data {
-    int pressure;    /* How is the pressure ( Mb ) */
-    int change;    /* How fast and what way does it change. */
-    int sky;    /* How is the sky. */
-    int sunlight;    /* And how much sun. */
+    int pressure{};    /* How is the pressure ( Mb ) */
+    int change{};    /* How fast and what way does it change. */
+    int sky{};    /* How is the sky. */
+    int sunlight{};    /* And how much sun. */
+    nlohmann::json serialize();
+    void deserialize(const nlohmann::json &j);
 };
 
 
@@ -1138,14 +1143,10 @@ struct weather_data {
  */
 struct index_data {
     mob_vnum vn{NOTHING};    /* virtual number of this mob/obj		*/
-    int number{0};    /* number of existing units of this mob/obj	*/
     SpecialFunc func;
 
     char *farg;         /* string argument for special function     */
     struct trig_data *proto;     /* for triggers... the trigger     */
-    std::set<struct char_data*> mobs;
-    std::set<struct obj_data*> objects;
-    std::set<struct trig_data*> triggers;
 };
 
 /* linked list for mob/object prototype trigger lists */

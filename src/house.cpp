@@ -572,7 +572,7 @@ int House_load(room_vnum rvnum) {
             } else {
                 if (nr >= 999999)
                     continue;
-                temp = read_object(nr, VIRTUAL);
+                temp = read_object(nr, VIRTUAL, false);
                 if (!temp) {
                     get_line(fl, line);
                     continue;
@@ -725,15 +725,11 @@ int House_load(room_vnum rvnum) {
                 }      /* exit our for loop */
             }   /* exit our xap loop */
             if (temp != nullptr) {
-                if(temp->vn == NOTHING) {
-                    temp->activate();
-                    check_unique_id(temp);
-                    add_unique_id(temp);
-                }
+                check_unique_id(temp);
+                add_unique_id(temp);
+                temp->activate();
                 num_objs++;
                 obj_to_room(temp, rrnum);
-            } else {
-                continue;
             }
 
 /*No need to check if its equipped since rooms can't equip things --firebird_223*/

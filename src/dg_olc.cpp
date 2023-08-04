@@ -483,23 +483,7 @@ void trigedit_save(struct descriptor_data *d) {
         }
 
     }
-
-    /* now write the trigger out to disk, along with the rest of the  */
-    /* triggers for this zone, of course                              */
-    /* note: we write this to disk NOW instead of letting the builder */
-    /* have control because if we lose this after having assigned a   */
-    /* new trigger to an item, we will get SYSERR's upton reboot that */
-    /* could make things hard to debug.                               */
-
-    auto &z = zone_table[OLC_ZNUM(d)];
-    z.triggers.insert(t.vn);
-    z.save_triggers();
-
-    snprintf(buf, sizeof(buf), "%s%d.trg", TRG_PREFIX, z.number);
-
-    remove(buf);
-    rename(fname, buf);
-
+    dirty_dgscript_prototypes.insert(t.vn);
     write_to_output(d, "Trigger saved to disk.\r\n");
     create_world_index(zone, "trg");
 }

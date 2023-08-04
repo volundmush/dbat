@@ -22,7 +22,8 @@ namespace config {
 
     extern std::string logFile;
     // the filename for the game save database.
-    extern std::string dbName;
+    extern std::string assetDbName;
+    extern std::string stateDbName;
     extern bool logEgregiousTimings;
 
     extern bool testMode;

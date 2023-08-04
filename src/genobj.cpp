@@ -98,12 +98,15 @@ obj_rnum insert_object(struct obj_data *obj, obj_vnum ovnum) {
 /* ------------------------------------------------------------------------------------------------------------------------------ */
 
 int save_objects(zone_rnum zone_num) {
-    if (!zone_table.count(zone_num)) {
+    auto z = zone_table.find(zone_num);
+
+    if (z == zone_table.end()) {
         basic_mud_log("SYSERR: OasisOLC: save_objects: Invalid real zone number %d.", zone_num);
         return false;
     }
-    auto &z = zone_table[zone_num];
-    z.save_objects();
+
+    dirty_item_prototypes.insert(z->second.objects.begin(), z->second.objects.end());
+    z->second.save_objects();
     return true;
 }
 
@@ -251,7 +254,8 @@ int delete_object(obj_rnum rnum) {
     }
 
     /* Make sure all are removed. */
-    assert(obj_index[rnum].objects.empty());
+
+    assert(get_vnum_count(objectVnumIndex, rnum) == 0);
     obj_proto.erase(rnum);
     obj_index.erase(rnum);
     save_objects(zrnum);
@@ -320,6 +324,10 @@ nlohmann::json obj_data::serializeInstance() {
     }
 
     if(generation) j["generation"] = generation;
+
+    if(script && script->global_vars) {
+        j["dgvariables"] = serializeVars(script->global_vars);
+    }
 
     return j;
 }
@@ -424,12 +432,9 @@ std::optional<vnum> obj_data::getMatchingArea(const std::function<bool(const are
 void obj_data::activate() {
     next = object_list;
     object_list = this;
-    auto find = obj_index.find(vn);
-    if(find != obj_index.end()) {
-        find->second.objects.insert(this);
-    }
-    auto ofind = obj_proto.find(vn);
-    if(ofind != obj_proto.end()) {
+
+    if(obj_proto.contains(vn)) {
+        insert_vnum(objectVnumIndex, this);
         assign_triggers(this, OBJ_TRIGGER);
     }
     if(contents) activateContents();
@@ -438,10 +443,11 @@ void obj_data::activate() {
 void obj_data::deactivate() {
     struct obj_data *temp;
     REMOVE_FROM_LIST(this, object_list, next, temp);
-    auto find = obj_index.find(vn);
-    if(find != obj_index.end()) {
-        find->second.objects.erase(this);
+
+    if(obj_proto.contains(vn)) {
+        erase_vnum(objectVnumIndex, this);
     }
+
     if(script && script->trig_list) {
         struct trig_data *next_trig;
         for (auto trig = TRIGGERS(script); trig; trig = next_trig) {
@@ -460,8 +466,9 @@ void obj_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
     check_unique_id(this);
     add_unique_id(this);
 
-    if(j.contains("contents")) {
-        deserializeContents(j["contents"], false);
+    if(j.contains("dgvariables")) {
+        if(!script) script = new script_data(this);
+        deserializeVars(&script->global_vars, j["dgvariables"]);
     }
 
     if(isActive) activate();
@@ -494,8 +501,8 @@ weight_t obj_data::getTotalWeight() {
     return getWeight() + getInventoryWeight() + (sitting ? sitting->getTotalWeight() : 0);
 }
 
-std::string obj_data::getUID() {
-    return fmt::format("#O{}:{}", id, generation);
+std::string obj_data::getUID(bool active) {
+    return fmt::format("#O{}:{}{}", id, generation, active ? "" : "!");
 }
 
 bool obj_data::isActive() {
@@ -506,19 +513,18 @@ bool obj_data::isActive() {
     return world.contains(in_room);
 }
 
-nlohmann::json obj_data::serializeLocation() {
-    auto j = nlohmann::json::array();
+std::string obj_data::serializeLocation() {
     if(in_obj) {
-        j.push_back(in_obj->getUID());
+        return in_obj->getUID();
     } else if(carried_by) {
-        j.push_back(carried_by->getUID());
+        return carried_by->getUID();
     } else if(worn_by) {
-        j.push_back(worn_by->getUID());
+        return worn_by->getUID();
     } else if(world.contains(in_room)) {
-        j.push_back(world[in_room].getUID());
+        return world[in_room].getUID();
+    } else {
+        return ""; // this should NEVER happen!
     }
-    j.push_back(worn_on);
-    return j;
 }
 
 nlohmann::json obj_data::serializeRelations() {
@@ -530,21 +536,18 @@ nlohmann::json obj_data::serializeRelations() {
     return j;
 }
 
-void obj_data::deserializeLocation(const nlohmann::json& j) {
-    if(j.size() == 2) {
-        auto check = resolveUID(j[0]);
-        if(!check) return;
-        auto idx = check->index();
-        if(idx == 0) {
-            auto &r = std::get<0>(*check);
-            obj_to_room(this, r->vn);
-        } else if(idx == 1) {
-            obj_to_obj(this, std::get<1>(*check));
-        } else if(idx == 2) {
-            auto &c = std::get<2>(*check);
-            auto loc = j[1].get<int>();
-            auto_equip(c, this, loc);
-        }
+void obj_data::deserializeLocation(const std::string& txt, int16_t slot) {
+    auto check = resolveUID(txt);
+    if(!check) return;
+    auto idx = check->index();
+    if(idx == 0) {
+        auto &r = std::get<0>(*check);
+        obj_to_room(this, r->vn);
+    } else if(idx == 1) {
+        obj_to_obj(this, std::get<1>(*check));
+    } else if(idx == 2) {
+        auto &c = std::get<2>(*check);
+        auto_equip(c, this, slot);
     }
 }
 

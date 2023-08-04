@@ -21,7 +21,7 @@ nlohmann::json unit_data::serializeUnit() {
         }
     }
 
-    if(id) j["id"] = id;
+    if(id != NOTHING) j["id"] = id;
     if(zone != NOTHING) j["zone"] = zone;
 
     return j;

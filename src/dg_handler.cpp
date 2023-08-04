@@ -94,11 +94,15 @@ void extract_trigger(struct trig_data *trig) {
     struct trig_data *temp;
 
     triggers_waiting.erase(trig);
-
-    trig_index[trig->vn].triggers.erase(trig);
+    erase_vnum(scriptVnumIndex, trig);
 
     /* walk the trigger list and remove this one */
     REMOVE_FROM_LIST(trig, trigger_list, next_in_world, temp);
+
+    auto found = uniqueScripts.find(trig->id);
+    if (found != uniqueScripts.end()) {
+        uniqueScripts.erase(found);
+    }
 
     free_trigger(trig);
 }

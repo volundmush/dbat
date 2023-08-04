@@ -245,32 +245,30 @@ ACMD(do_radar) {
     WAIT_STATE(ch, PULSE_2SEC);
     act("$n holds up a dragon radar and pushes its button.", false, ch, nullptr, nullptr, TO_ROOM);
     for(auto vn : dbVnums) {
-        auto &oi = obj_index[vn];
-        auto o = oi.objects.begin();
-        if(o != oi.objects.end()) {
-            auto r = (*o)->getAbsoluteRoom();
-            if(!r) continue;
-            dir = find_first_step(cr, r);
-            switch (dir) {
-                case BFS_ERROR:
-                    send_to_char(ch, "Hmm.. something seems to be wrong.\r\n");
-                    break;
-                case BFS_ALREADY_THERE:
-                    send_to_char(ch, "@D<@G%d@D>@w The radar detects a dragonball right here!\r\n", fcount);
-                    break;
-                case BFS_NO_PATH:
-                    send_to_char(ch,
-                                 "@D<@G%d@D>@w The radar detects a faint dragonball signal, but can not direct you further.\r\n",
-                                 fcount);
-                    break;
-                default:
-                    send_to_char(ch, "@D<@G%d@D>@w The radar detects a dragonball %s of here.\r\n", fcount,
-                                 dirs[dir]);
-                    break;
-            }
-            found = true;
-            break;
+        auto o = get_last_inserted(objectVnumIndex, vn);
+        if(!o) continue;
+        auto r = o->getAbsoluteRoom();
+        if(!r) continue;
+        dir = find_first_step(cr, r);
+        switch (dir) {
+            case BFS_ERROR:
+                send_to_char(ch, "Hmm.. something seems to be wrong.\r\n");
+                break;
+            case BFS_ALREADY_THERE:
+                send_to_char(ch, "@D<@G%d@D>@w The radar detects a dragonball right here!\r\n", fcount);
+                break;
+            case BFS_NO_PATH:
+                send_to_char(ch,
+                             "@D<@G%d@D>@w The radar detects a faint dragonball signal, but can not direct you further.\r\n",
+                             fcount);
+                break;
+            default:
+                send_to_char(ch, "@D<@G%d@D>@w The radar detects a dragonball %s of here.\r\n", fcount,
+                             dirs[dir]);
+                break;
         }
+        found = true;
+        break;
     }
 
     if (found == false) {

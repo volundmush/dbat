@@ -75,13 +75,13 @@ void parse_trigger(FILE *trig_f, trig_vnum nr) {
  */
 trig_data *read_trigger(int nr) {
 
-    if (!trig_index.count(nr)) return nullptr;
-    auto &idx = trig_index[nr];
+    auto idx = trig_index.find(nr);
+    if(idx == trig_index.end()) return nullptr;
 
     auto trig = new trig_data();
 
-    trig_data_copy(trig, idx.proto);
-    idx.triggers.insert(trig);
+    trig_data_copy(trig, idx->second.proto);
+    insert_vnum(scriptVnumIndex, trig);
 
     return trig;
 }
@@ -205,10 +205,56 @@ void assign_triggers(struct unit_data *i, int type) {
             default:
                 mudlog(BRF, ADMLVL_BUILDER, true,
                        "SYSERR: unknown type for assign_triggers()");
-                break;
+                return;
         }
     }
+
     for(auto p : i->proto_script) {
-        add_trigger(SCRIPT(i), read_trigger(p), -1);
+        // only add if they don't already have one...
+        bool found = false;
+        for(auto t = SCRIPT(i)->trig_list; t; t = t->next) {
+            if(t->vn == p) {
+                found = true;
+                break;
+            }
+        }
+        if(!found) add_trigger(SCRIPT(i), read_trigger(p), -1);
     }
+
+    std::vector<trig_vnum> exists;
+    std::vector<std::pair<int, trig_data*>> foundTrigs;
+    for(auto t = SCRIPT(i)->trig_list; t; t = t->next) {
+        exists.emplace_back(t->vn);
+        foundTrigs.emplace_back(t->order, t);
+    }
+
+    if(exists == i->proto_script) return;
+
+    // They don't match... which means the scripts are not in the same order.
+    // This can only happen if the script was added to a prototype after the thing was created.
+    // In this case, we need to reorder SCRIPT(i)->trig_list to match i->proto_script... this is tricky.
+
+    // First, we need to sort foundTrigs in the order that they SHOULD be in according to i->proto_script.
+    int counter = 0;
+    for(auto p : i->proto_script) {
+        auto find = std::find_if(foundTrigs.begin(), foundTrigs.end(), [p](const std::pair<int, trig_data*>& t) { return t.second->vn == p; });
+        if(find == foundTrigs.end()) continue;
+        find->first = counter++;
+    }
+
+    // sort foundTrigs.
+    std::sort(foundTrigs.begin(), foundTrigs.end(), [](const std::pair<int, trig_data*>& a, const std::pair<int, trig_data*>& b) { return a.first < b.first; });
+
+
+    // Now that we have the trig list saved, we clear SCRIPT(i)->trig_list...
+    SCRIPT(i)->trig_list = nullptr;
+    // and the ->next on all triggers...
+    for(auto& t : foundTrigs) t.second->next = nullptr;
+
+    // reverse iterate through foundTrigs to add them back in the correct order.
+    for(auto t = foundTrigs.rbegin(); t != foundTrigs.rend(); ++t) {
+        if(SCRIPT(i)->trig_list) t->second->next = SCRIPT(i)->trig_list;
+        SCRIPT(i)->trig_list = t->second;
+    }
+
 }

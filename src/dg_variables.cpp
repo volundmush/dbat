@@ -269,11 +269,11 @@ find_replacement(void *go, struct script_data *sc, trig_data *trig, int type, ch
             snprintf(str, slen, "%s", vd->value);
         else {
             if (!strcasecmp(var, "self")) {
-                auto uid = unit->getUID();
+                auto uid = unit->getUID(false);
                 snprintf(str, slen, "%s", uid.c_str());
             } else if (!strcasecmp(var, "global")) {
                 /* so "remote varname %global%" will work */
-                snprintf(str, slen, "%d", 0);
+                snprintf(str, slen, "%d", world[0].getUID(false).c_str());
                 return;
             } else if (!strcasecmp(var, "ctime"))
                 snprintf(str, slen, "%ld", time(nullptr));
@@ -485,7 +485,7 @@ in the vault (vnum: 453) now and then. you can just use
                     }
 
                     if (rndm)
-                        snprintf(str, slen, "%s", ((rndm)->getUID().c_str()));
+                        snprintf(str, slen, "%s", ((rndm)->getUID(false).c_str()));
                     else
                         *str = '\0';
                 } else if (!strcasecmp(field, "dir")) {
@@ -666,7 +666,7 @@ in the vault (vnum: 453) now and then. you can just use
                         } else if ((pos = find_eq_pos_script(subfield)) < 0 || !GET_EQ(c, pos))
                             *str = '\0';
                         else
-                            snprintf(str, slen, "%s", ((((c)->equipment[pos]))->getUID().c_str()));
+                            snprintf(str, slen, "%s", ((((c)->equipment[pos]))->getUID(false).c_str()));
                     }
                     if (!strcasecmp(field, "exp")) {
                         if (subfield && *subfield) {
@@ -680,7 +680,7 @@ in the vault (vnum: 453) now and then. you can just use
                 case 'f':
                     if (!strcasecmp(field, "fighting")) {
                         if (FIGHTING(c))
-                            snprintf(str, slen, "%s", ((((c)->fighting))->getUID().c_str()));
+                            snprintf(str, slen, "%s", ((((c)->fighting))->getUID(false).c_str()));
                         else
                             *str = '\0';
                     } else if (!strcasecmp(field, "flying")) {
@@ -692,7 +692,7 @@ in the vault (vnum: 453) now and then. you can just use
                         if (!c->followers || !c->followers->follower)
                             *str = '\0';
                         else
-                            snprintf(str, slen, "%s", ((c->followers->follower)->getUID().c_str()));
+                            snprintf(str, slen, "%s", ((c->followers->follower)->getUID(false).c_str()));
                     }
                     break;
                 case 'g':
@@ -741,7 +741,7 @@ in the vault (vnum: 453) now and then. you can just use
                     break;
                 case 'i':
                     if (!strcasecmp(field, "id"))
-                        snprintf(str, slen, "%s", c->getUID().c_str());
+                        snprintf(str, slen, "%s", c->getUID(false).c_str());
 
                         /* new check for pc/npc status */
                     else if (!strcasecmp(field, "is_pc")) {
@@ -753,7 +753,7 @@ in the vault (vnum: 453) now and then. you can just use
                         if (subfield && *subfield) {
                             for (obj = c->contents; obj; obj = obj->next_content) {
                                 if (GET_OBJ_VNUM(obj) == atoi(subfield)) {
-                                    snprintf(str, slen, "%s", ((obj)->getUID().c_str())); /* arg given, found */
+                                    snprintf(str, slen, "%s", ((obj)->getUID(false).c_str())); /* arg given, found */
                                     return;
                                 }
                             }
@@ -761,7 +761,7 @@ in the vault (vnum: 453) now and then. you can just use
                                 *str = '\0'; /* arg given, not found */
                         } else { /* no arg given */
                             if (c->contents) {
-                                snprintf(str, slen, "%s", ((c->contents)->getUID().c_str()));
+                                snprintf(str, slen, "%s", ((c->contents)->getUID(false).c_str()));
                             } else {
                                 *str = '\0';
                             }
@@ -848,7 +848,7 @@ in the vault (vnum: 453) now and then. you can just use
                         if (!c->master)
                             *str = '\0';
                         else
-                            snprintf(str, slen, "%s", ((c->master)->getUID().c_str()));
+                            snprintf(str, slen, "%s", ((c->master)->getUID(false).c_str()));
                     }
                     break;
                 case 'n':
@@ -856,7 +856,7 @@ in the vault (vnum: 453) now and then. you can just use
                         snprintf(str, slen, "%s", GET_NAME(c));
                     } else if (!strcasecmp(field, "next_in_room")) {
                         if (c->next_in_room)
-                            snprintf(str, slen, "%s", ((c->next_in_room)->getUID().c_str()));
+                            snprintf(str, slen, "%s", ((c->next_in_room)->getUID(false).c_str()));
                         else
                             *str = '\0';
                     }
@@ -912,7 +912,7 @@ in the vault (vnum: 453) now and then. you can just use
 /* see note in dg_scripts.h */
 #ifdef ACTOR_ROOM_IS_UID
 						if(auto roomFound = world.find(IN_ROOM(c)); roomFound != world.end()) {
-                            snprintf(str, slen, "%s", roomFound->second.getUID().c_str());
+                            snprintf(str, slen, "%s", roomFound->second.getUID(false).c_str());
                         }
 #else
                         snprintf(str, slen, "%d", (IN_ROOM(c)!= NOWHERE) ? c->getRoom()->number : 0);
@@ -1108,12 +1108,12 @@ in the vault (vnum: 453) now and then. you can just use
                         snprintf(str, slen, "%d", GET_OBJ_RENT(o));
                     } else if (!strcasecmp(field, "carried_by")) {
                         if (o->carried_by)
-                            snprintf(str, slen, "%s", ((o->carried_by)->getUID().c_str()));
+                            snprintf(str, slen, "%s", ((o->carried_by)->getUID(false).c_str()));
                         else
                             *str = '\0';
                     } else if (!strcasecmp(field, "contents")) {
                         if (o->contents)
-                            snprintf(str, slen, "%s", ((o->contents)->getUID().c_str()));
+                            snprintf(str, slen, "%s", ((o->contents)->getUID(false).c_str()));
                         else
                             *str = '\0';
                     }
@@ -1158,11 +1158,11 @@ in the vault (vnum: 453) now and then. you can just use
                     break;
                 case 'i':
                     if (!strcasecmp(field, "id"))
-                        snprintf(str, slen, "%s", o->getUID().c_str());
+                        snprintf(str, slen, "%s", o->getUID(false).c_str());
 
                     else if (!strcasecmp(field, "is_inroom")) {
                         if (auto roomFound = world.find(IN_ROOM(o)); roomFound != world.end())
-                            snprintf(str, slen, "%s", roomFound->second.getUID().c_str());
+                            snprintf(str, slen, "%s", roomFound->second.getUID(false).c_str());
                         else
                             *str = '\0';
                     } else if (!strcasecmp(field, "is_pc")) {
@@ -1194,7 +1194,7 @@ in the vault (vnum: 453) now and then. you can just use
                         }
                     } else if (!strcasecmp(field, "next_in_list")) {
                         if (o->next_content)
-                            snprintf(str, slen, "%s", ((o->next_content)->getUID().c_str()));
+                            snprintf(str, slen, "%s", ((o->next_content)->getUID(false).c_str()));
                         else
                             *str = '\0';
                     }
@@ -1202,7 +1202,7 @@ in the vault (vnum: 453) now and then. you can just use
                 case 'r':
                     if (!strcasecmp(field, "room")) {
                         if (auto roomFound = world.find(obj_room(o)); roomFound != world.end())
-                            snprintf(str, slen, "%s", roomFound->second.getUID().c_str());
+                            snprintf(str, slen, "%s", roomFound->second.getUID(false).c_str());
                         else
                             *str = '\0';
                     }
@@ -1295,7 +1295,7 @@ in the vault (vnum: 453) now and then. you can just use
                         snprintf(str, slen, "%" I64T "", GET_OBJ_WEIGHT(o));
                     } else if (!strcasecmp(field, "worn_by")) {
                         if (o->worn_by)
-                            snprintf(str, slen, "%s", ((o->worn_by)->getUID().c_str()));
+                            snprintf(str, slen, "%s", ((o->worn_by)->getUID(false).c_str()));
                         else
                             *str = '\0';
                     }
@@ -1366,7 +1366,7 @@ in the vault (vnum: 453) now and then. you can just use
                     for (obj = r->contents; obj; obj = obj->next_content) {
                         if (GET_OBJ_VNUM(obj) == atoi(subfield)) {
                             /* arg given, found */
-                            snprintf(str, slen, "%s", ((obj)->getUID().c_str()));
+                            snprintf(str, slen, "%s", ((obj)->getUID(false).c_str()));
                             return;
                         }
                     }
@@ -1374,19 +1374,19 @@ in the vault (vnum: 453) now and then. you can just use
                         *str = '\0'; /* arg given, not found */
                 } else { /* no arg given */
                     if (r->contents) {
-                        snprintf(str, slen, "%s", ((r->contents)->getUID().c_str()));
+                        snprintf(str, slen, "%s", ((r->contents)->getUID(false).c_str()));
                     } else {
                         *str = '\0';
                     }
                 }
             } else if (!strcasecmp(field, "people")) {
                 if (r->people)
-                    snprintf(str, slen, "%s", ((r->people)->getUID().c_str()));
+                    snprintf(str, slen, "%s", ((r->people)->getUID(false).c_str()));
                 else
                     *str = '\0';
             } else if (!strcasecmp(field, "id")) {
                 if (r->vn != NOWHERE)
-                    snprintf(str, slen, "%s", r->getUID().c_str());
+                    snprintf(str, slen, "%s", r->getUID(false).c_str());
                 else
                     *str = '\0';
             } else if (!strcasecmp(field, "weather")) {
@@ -1432,7 +1432,7 @@ in the vault (vnum: 453) now and then. you can just use
                         else if (!strcasecmp(subfield, "room")) {
                             if (auto roomFound = world.find(R_EXIT(r, NORTH)->to_room); roomFound != world.end())
                                 snprintf(str, slen, "%s",
-                                         roomFound->second.getUID().c_str());
+                                         roomFound->second.getUID(false).c_str());
                             else
                                 *str = '\0';
                         }
@@ -1452,7 +1452,7 @@ in the vault (vnum: 453) now and then. you can just use
                         else if (!strcasecmp(subfield, "room")) {
                             if (auto roomFound = world.find(R_EXIT(r, EAST)->to_room) ; roomFound != world.end())
                                 snprintf(str, slen, "s",
-                                         roomFound->second.getUID().c_str());
+                                         roomFound->second.getUID(false).c_str());
                             else
                                 *str = '\0';
                         }
@@ -1471,7 +1471,7 @@ in the vault (vnum: 453) now and then. you can just use
                             sprintbit(R_EXIT(r, SOUTH)->exit_info, exit_bits, str, slen);
                         else if (!strcasecmp(subfield, "room")) {
                             if (auto roomFound = world.find(R_EXIT(r, SOUTH)->to_room); roomFound != world.end())
-                                snprintf(str, slen, "%s", roomFound->second.getUID().c_str());
+                                snprintf(str, slen, "%s", roomFound->second.getUID(false).c_str());
                             else
                                 *str = '\0';
                         }
@@ -1490,7 +1490,7 @@ in the vault (vnum: 453) now and then. you can just use
                             sprintbit(R_EXIT(r, WEST)->exit_info, exit_bits, str, slen);
                         else if (!strcasecmp(subfield, "room")) {
                             if (auto roomFound = world.find(R_EXIT(r, WEST)->to_room); roomFound != world.end())
-                                snprintf(str, slen, "%s", roomFound->second.getUID().c_str());
+                                snprintf(str, slen, "%s", roomFound->second.getUID(false).c_str());
                             else
                                 *str = '\0';
                         }
@@ -1509,7 +1509,7 @@ in the vault (vnum: 453) now and then. you can just use
                             sprintbit(R_EXIT(r, UP)->exit_info, exit_bits, str, slen);
                         else if (!strcasecmp(subfield, "room")) {
                             if (auto roomFound = world.find(R_EXIT(r, UP)->to_room); roomFound != world.end())
-                                snprintf(str, slen, "%s", roomFound->second.getUID().c_str());
+                                snprintf(str, slen, "%s", roomFound->second.getUID(false).c_str());
                             else
                                 *str = '\0';
                         }
@@ -1528,7 +1528,7 @@ in the vault (vnum: 453) now and then. you can just use
                             sprintbit(R_EXIT(r, DOWN)->exit_info, exit_bits, str, slen);
                         else if (!strcasecmp(subfield, "room")) {
                             if (auto roomFound = world.find(R_EXIT(r, DOWN)->to_room); roomFound != world.end())
-                                snprintf(str, slen, "%s", roomFound->second.getUID().c_str());
+                                snprintf(str, slen, "%s", roomFound->second.getUID(false).c_str());
                             else
                                 *str = '\0';
                         }
@@ -1547,7 +1547,7 @@ in the vault (vnum: 453) now and then. you can just use
                             sprintbit(R_EXIT(r, NORTHWEST)->exit_info, exit_bits, str, slen);
                         else if (!strcasecmp(subfield, "room")) {
                             if (auto roomFound = world.find(R_EXIT(r, NORTHWEST)->to_room); roomFound != world.end())
-                                snprintf(str, slen, "%s", roomFound->second.getUID().c_str());
+                                snprintf(str, slen, "%s", roomFound->second.getUID(false).c_str());
                             else
                                 *str = '\0';
                         }
@@ -1566,7 +1566,7 @@ in the vault (vnum: 453) now and then. you can just use
                             sprintbit(R_EXIT(r, NORTHEAST)->exit_info, exit_bits, str, slen);
                         else if (!strcasecmp(subfield, "room")) {
                             if (auto roomFound = world.find(R_EXIT(r, NORTHEAST)->to_room); roomFound != world.end())
-                                snprintf(str, slen, "%s", roomFound->second.getUID().c_str());
+                                snprintf(str, slen, "%s", roomFound->second.getUID(false).c_str());
                             else
                                 *str = '\0';
                         }
@@ -1585,7 +1585,7 @@ in the vault (vnum: 453) now and then. you can just use
                             sprintbit(R_EXIT(r, SOUTHWEST)->exit_info, exit_bits, str, slen);
                         else if (!strcasecmp(subfield, "room")) {
                             if (auto roomFound = world.find(R_EXIT(r, SOUTHWEST)->to_room); roomFound != world.end())
-                                snprintf(str, slen, "%s", roomFound->second.getUID().c_str());
+                                snprintf(str, slen, "%s", roomFound->second.getUID(false).c_str());
                             else
                                 *str = '\0';
                         }
@@ -1604,7 +1604,7 @@ in the vault (vnum: 453) now and then. you can just use
                             sprintbit(R_EXIT(r, SOUTHEAST)->exit_info, exit_bits, str, slen);
                         else if (!strcasecmp(subfield, "room")) {
                             if (auto roomFound = world.find(R_EXIT(r, SOUTHEAST)->to_room); roomFound != world.end())
-                                snprintf(str, slen, "%s", roomFound->second.getUID().c_str());
+                                snprintf(str, slen, "%s", roomFound->second.getUID(false).c_str());
                             else
                                 *str = '\0';
                         }
@@ -1623,7 +1623,7 @@ in the vault (vnum: 453) now and then. you can just use
                             sprintbit(R_EXIT(r, INDIR)->exit_info, exit_bits, str, slen);
                         else if (!strcasecmp(subfield, "room")) {
                             if (auto roomFound = world.find(R_EXIT(r, INDIR)->to_room); roomFound != world.end())
-                                snprintf(str, slen, "%s", roomFound->second.getUID().c_str());
+                                snprintf(str, slen, "%s", roomFound->second.getUID(false).c_str());
                             else
                                 *str = '\0';
                         }
@@ -1642,7 +1642,7 @@ in the vault (vnum: 453) now and then. you can just use
                             sprintbit(R_EXIT(r, OUTDIR)->exit_info, exit_bits, str, slen);
                         else if (!strcasecmp(subfield, "room")) {
                             if (auto roomFound = world.find(R_EXIT(r, OUTDIR)->to_room); roomFound != world.end())
-                                snprintf(str, slen, "%s", roomFound->second.getUID().c_str());
+                                snprintf(str, slen, "%s", roomFound->second.getUID(false).c_str());
                             else
                                 *str = '\0';
                         }

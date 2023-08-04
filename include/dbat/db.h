@@ -114,16 +114,17 @@
 
 // global variables
 using UID = std::variant<struct room_data*, struct obj_data*, struct char_data*>;
-
+bool isUID(const std::string& uid);
 std::optional<UID> resolveUID(const std::string& uid);
 
 extern struct time_info_data time_info;/* the infomation about the time    */
 extern struct weather_data weather_info;    /* the infomation about the weather */
 extern std::set<zone_vnum> zone_reset_queue;
 
-extern std::shared_ptr<SQLite::Database> db;
+extern std::shared_ptr<SQLite::Database> assetDb, stateDb, logDb;
 
 extern bool gameIsLoading;
+extern bool saveAll;
 
 extern struct char_data *EDRAGON;
 extern int WISH[2];
@@ -142,6 +143,8 @@ extern room_rnum r_frozen_start_room;    /* rnum of frozen start room	 */
 extern void auc_load(struct obj_data *obj);
 
 void create_schema();
+
+void dump_state();
 
 extern boost::asio::awaitable<void> boot_world();
 
@@ -196,7 +199,7 @@ extern int load_char(const char *name, struct char_data *ch);
 
 extern void init_char(struct char_data *ch);
 
-struct char_data *create_char();
+struct char_data *create_char(bool activate = true);
 
 struct char_data *read_mobile(mob_vnum nr, int type);
 
@@ -220,7 +223,7 @@ struct obj_data *create_obj(bool activate = true);
 
 extern void free_obj(struct obj_data *obj);
 
-struct obj_data *read_object(obj_vnum nr, int type);
+struct obj_data *read_object(obj_vnum nr, int type, bool activate = true);
 
 extern int vnum_object(char *searchname, struct char_data *ch);
 
@@ -428,8 +431,11 @@ extern struct char_data *character_list;
 extern std::unordered_map<int64_t, std::pair<time_t, struct char_data*>> uniqueCharacters;
 int64_t nextCharID();
 
-extern std::map<obj_vnum, struct index_data> obj_index;
+extern VnumIndex<obj_data> objectVnumIndex;
+extern VnumIndex<char_data> characterVnumIndex;
+extern VnumIndex<trig_data> scriptVnumIndex;
 
+extern std::map<obj_vnum, struct index_data> obj_index;
 extern std::map<obj_vnum, struct obj_data> obj_proto;
 
 extern struct obj_data *object_list;

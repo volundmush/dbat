@@ -308,7 +308,7 @@ static std::vector<GameSystem> gameSystems = {
         GameSystem("broken_update", 2.0, broken_update),
         GameSystem("copyover_check", 1.0, copyover_check),
         GameSystem("affect_update_violence", 5.0, affect_update_violence),
-        GameSystem("weather_and_time", 300.0, weather_and_time),
+        GameSystem("advanceClock", 0.0, advanceClock),
         GameSystem("check_time_triggers", 300.0, check_time_triggers),
         GameSystem("affect_update", 300.0, affect_update),
         GameSystem("point_update", 100.0, point_update),
@@ -533,9 +533,10 @@ boost::asio::awaitable<void> game_loop() {
 
         auto loopStart = boost::asio::steady_timer::clock_type::now();
         try {
-            SQLite::Transaction transaction(*db);
+            SQLite::Transaction transaction(*assetDb);
             co_await runOneLoop(deltaTimeInSeconds);
-            if(circle_shutdown) {
+            if(circle_shutdown) saveAll = true;
+            if(saveAll) {
                 dirty_all();
             }
             {
@@ -551,6 +552,13 @@ boost::asio::awaitable<void> game_loop() {
                 auto end = boost::asio::steady_timer::clock_type::now();
                 timings.emplace_back("transaction.commit", std::chrono::duration<double>(end - start).count());
             }
+
+            saveTimer -= deltaTimeInSeconds;
+            if(saveTimer <= 0 || saveAll) {
+                saveTimer = 60.0 * 5.0;
+                dump_state();
+            }
+            if(saveAll) saveAll = false;
 
         } catch(std::exception& e) {
             basic_mud_log("Exception in runOneLoop(): %s", e.what());
@@ -609,10 +617,10 @@ static void finish_copyover() {
 static boost::asio::awaitable<void> runGame() {
 	// instantiate db with a shared_ptr, the filename is dbat.sqlite3
     try {
-        db = std::make_shared<SQLite::Database>(config::dbName, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+        assetDb = std::make_shared<SQLite::Database>(fmt::format("{}.sqlite3", config::assetDbName), SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
     } catch (std::exception &e) {
-        basic_mud_log("Exception in runGame(): %s", e.what());
-        exit(1);
+        basic_mud_log("Exception Opening Asset Database: %s", e.what());
+        shutdown_game(1);
     }
     create_schema();
 
@@ -656,8 +664,13 @@ static boost::asio::awaitable<void> runGame() {
     }
 
     // Finally, let's get the game cracking.
-    if(gameFunc) co_await gameFunc();
-    else co_await game_loop();
+    try {
+        if(gameFunc) co_await gameFunc();
+        else co_await game_loop();
+    } catch(std::exception& e) {
+        basic_mud_log("Exception in game_loop(): %s", e.what());
+        shutdown_game(1);
+    }
 
     co_return;
 }
@@ -1765,7 +1778,7 @@ void descriptor_data::start() {
     write_to_output(this, "@D                 ---(@CPeak Logon Count Today@W: @w%4d@D)---@n\r\n", PCOUNT);
     write_to_output(this, "@D                 ---(@CHighest Logon Count   @W: @w%4d@D)---@n\r\n", HIGHPCOUNT);
     write_to_output(this, "@D                 ---(@CTotal Era %d Characters@W: @w%4s@D)---@n\r\n", CURRENT_ERA,
-                    add_commas(ERAPLAYERS));
+                    add_commas(players.size()));
     write_to_output(this,
                     "\r\n@cEnter your desired username or the username you have already made.\n@CEnter Username:@n\r\n");
 }
@@ -2103,14 +2116,13 @@ const char *ACTNULL = "<nullptr>";
 
 
 /* higher-level communication: the act() function */
-void
-perform_act(const char *orig, struct char_data *ch, struct obj_data *obj, const void *vict_obj, struct char_data *to) {
+void perform_act(const char *orig, struct char_data *ch, struct obj_data *obj, const void *vict_obj, struct char_data *to) {
     const char *i = nullptr;
     char lbuf[MAX_STRING_LENGTH], *buf, *j;
     bool uppercasenext = false;
-    const struct char_data *dg_victim = nullptr;
-    const struct obj_data *dg_target = nullptr;
-    const char *dg_arg = nullptr;
+    struct char_data *dg_victim = nullptr;
+    struct obj_data *dg_target = nullptr;
+    char *dg_arg = nullptr;
 
     buf = lbuf;
 
@@ -2122,53 +2134,53 @@ perform_act(const char *orig, struct char_data *ch, struct obj_data *obj, const 
                     break;
                 case 'N':
                     CHECK_NULL(vict_obj, PERS((struct char_data *) vict_obj, to));
-                    dg_victim = (const struct char_data *) vict_obj;
+                    dg_victim = (struct char_data *) vict_obj;
                     break;
                 case 'm':
                     i = HMHR(ch);
                     break;
                 case 'M':
-                    CHECK_NULL(vict_obj, HMHR((const struct char_data *) vict_obj));
-                    dg_victim = (const struct char_data *) vict_obj;
+                    CHECK_NULL(vict_obj, HMHR((struct char_data *) vict_obj));
+                    dg_victim = (struct char_data *) vict_obj;
                     break;
                 case 's':
                     i = HSHR(ch);
                     break;
                 case 'S':
                     CHECK_NULL(vict_obj, HSHR((const struct char_data *) vict_obj));
-                    dg_victim = (const struct char_data *) vict_obj;
+                    dg_victim = (struct char_data *) vict_obj;
                     break;
                 case 'e':
                     i = HSSH(ch);
                     break;
                 case 'E':
-                    CHECK_NULL(vict_obj, HSSH((const struct char_data *) vict_obj));
-                    dg_victim = (const struct char_data *) vict_obj;
+                    CHECK_NULL(vict_obj, HSSH((struct char_data *) vict_obj));
+                    dg_victim = (struct char_data *) vict_obj;
                     break;
                 case 'o':
                     CHECK_NULL(obj, OBJN(obj, to));
                     break;
                 case 'O':
-                    CHECK_NULL(vict_obj, OBJN((const struct obj_data *) vict_obj, to));
-                    dg_target = (const struct obj_data *) vict_obj;
+                    CHECK_NULL(vict_obj, OBJN((struct obj_data *) vict_obj, to));
+                    dg_target = (struct obj_data *) vict_obj;
                     break;
                 case 'p':
                     CHECK_NULL(obj, OBJS(obj, to));
                     break;
                 case 'P':
-                    CHECK_NULL(vict_obj, OBJS((const struct obj_data *) vict_obj, to));
-                    dg_target = (const struct obj_data *) vict_obj;
+                    CHECK_NULL(vict_obj, OBJS((struct obj_data *) vict_obj, to));
+                    dg_target = (struct obj_data *) vict_obj;
                     break;
                 case 'a':
                     CHECK_NULL(obj, SANA(obj));
                     break;
                 case 'A':
-                    CHECK_NULL(vict_obj, SANA((const struct obj_data *) vict_obj));
-                    dg_target = (const struct obj_data *) vict_obj;
+                    CHECK_NULL(vict_obj, SANA((struct obj_data *) vict_obj));
+                    dg_target = (struct obj_data *) vict_obj;
                     break;
                 case 'T':
-                    CHECK_NULL(vict_obj, (const char *) vict_obj);
-                    dg_arg = (const char *) vict_obj;
+                    CHECK_NULL(vict_obj, (char *) vict_obj);
+                    dg_arg = (char *) vict_obj;
                     break;
                 case 't':
                     CHECK_NULL(obj, (char *) obj);
