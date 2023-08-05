@@ -64,7 +64,6 @@ namespace net {
 
     awaitable<void> Link::createUpdateClient(const nlohmann::json &j) {
         auto id = j["id"].get<int64_t>();
-        auto addr = j["addr"].get<std::string>();
         const auto& capabilities = j["capabilities"];
 
         // Do something with id, addr, and capabilities
@@ -91,7 +90,7 @@ namespace net {
     }
 
     awaitable<void> Link::runReader() {
-        while (true) {
+        while (!is_stopped) {
             try {
                 // Read a message from the WebSocket
                 boost::beast::flat_buffer buffer;
@@ -157,16 +156,18 @@ namespace net {
                 }
             } catch (const boost::system::system_error &e) {
                 logger->error("Link RunReader flopped at: {}", e.what());
+                break;
                 // Handle exceptions (e.g., WebSocket close or error)
             } catch (...) {
                 logger->error("Unknown error in Link RunReader");
+                break;
             }
         }
         co_return;
     }
 
     awaitable<void> Link::runWriter() {
-        while (true) {
+        while (!is_stopped) {
             try {
                 // Receive a message from the channel asynchronously
                 auto message = co_await linkChannel->async_receive(boost::asio::use_awaitable);
@@ -186,8 +187,10 @@ namespace net {
             } catch (const boost::system::system_error& e) {
                 logger->error("Link runWriter flopped 2: {}", e.what());
                 // Handle exceptions (e.g., error receiving the message from the channel)
+                break;
             } catch (...) {
                 logger->error("Unknown error in Link runWriter 2");
+                break;
             }
         }
         co_return;
@@ -349,7 +352,16 @@ namespace net {
     }
 
     void Connection::handleMessage(const Message &m) {
-        if(parser) parser->handleMessage(m);
+        if(m.cmd == "text") {
+            for(auto &arg : m.args) {
+                if(arg.is_string()) {
+                    auto t = arg.get<std::string>();
+                    if(parser) parser->parse(t);
+                }
+            }
+        } else {
+            if(parser) parser->handleMessage(m);
+        }
     }
 
     void Connection::onWelcome() {
@@ -434,13 +446,7 @@ namespace net {
 
 
     void ConnectionParser::handleMessage(const Message &m) {
-        if(m.cmd == "text") {
-            for(auto &arg : m.args) {
-                if(arg.is_string()) {
-                    parse(arg.get<std::string>());
-                }
-            }
-        }
+        // The default does nothing, but later it will handle API stuff.
     }
 
     void ConnectionParser::close() {

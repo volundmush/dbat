@@ -3106,10 +3106,10 @@ static size_t print_zone_to_buf(char *bufptr, size_t left, zone_rnum zone, int l
 
         tmp = snprintf(bufptr, left,
                        "%3d %-30.30s By: %-10.10s Age: %3d; Reset: %3d (%1d); Range: %5d-%5d\r\n",
-                       zone_table[zone].number, zone_table[zone].name, zone_table[zone].builders,
-                       zone_table[zone].age, zone_table[zone].lifespan,
-                       zone_table[zone].reset_mode,
-                       zone_table[zone].bot, zone_table[zone].top);
+                       z.number, z.name, z.builders,
+                       z.age, z.lifespan,
+                       z.reset_mode,
+                       z.bot, z.top);
 
         auto j = z.rooms.size();
         auto k = z.objects.size();
@@ -3133,9 +3133,9 @@ static size_t print_zone_to_buf(char *bufptr, size_t left, zone_rnum zone, int l
     }
 
     return snprintf(bufptr, left,
-                    "%3d %-*s By: %-10.10s Range: %5d-%5d\r\n", zone_table[zone].number,
-                    count_color_chars(zone_table[zone].name) + 30, zone_table[zone].name,
-                    zone_table[zone].builders, zone_table[zone].bot, zone_table[zone].top);
+                    "%3d %-*s By: %-10.10s Range: %5d-%5d\r\n", z.number,
+                    count_color_chars(z.name) + 30, z.name,
+                    z.builders, z.bot, z.top);
 }
 
 ACMD(do_show) {

@@ -4103,27 +4103,40 @@ void look_at_room(struct room_data *rm, struct char_data *ch, int ignore_brief) 
 }
 
 static void look_in_direction(struct char_data *ch, int dir) {
-    if (EXIT(ch, dir)) {
-        if (EXIT(ch, dir)->general_description)
-            send_to_char(ch, "%s", EXIT(ch, dir)->general_description);
-        else {
-            auto obj = ch->findObjectVnum(17, false);
-            if (!obj) {
-                send_to_char(ch, "You were unable to discern anything about that direction. Try looking again...\r\n");
-                obj = read_object(17, VIRTUAL);
-                obj_to_char(obj, ch);
-            }
-        }
-
-        if (EXIT_FLAGGED(EXIT(ch, dir), EX_ISDOOR) && EXIT(ch, dir)->keyword) {
-            if (!EXIT_FLAGGED(EXIT(ch, dir), EX_SECRET) &&
-                EXIT_FLAGGED(EXIT(ch, dir), EX_CLOSED))
-                send_to_char(ch, "The %s is closed.\r\n", fname(EXIT(ch, dir)->keyword));
-            else if (!EXIT_FLAGGED(EXIT(ch, dir), EX_CLOSED))
-                send_to_char(ch, "The %s is open.\r\n", fname(EXIT(ch, dir)->keyword));
-        }
-    } else
+    auto r = ch->getRoom();
+    if(!r) {
         send_to_char(ch, "Nothing special there...\r\n");
+        return;
+    }
+    auto d = r->dir_option[dir];
+    if(!d) {
+        send_to_char(ch, "Nothing special there...\r\n");
+        return;
+    }
+    auto dest = d->getDestination();
+    if(!dest) {
+        send_to_char(ch, "Nothing special there...\r\n");
+        return;
+    }
+
+    if (d->general_description)
+        send_to_char(ch, "%s", d->general_description);
+    else {
+        auto obj = ch->findObjectVnum(17, false);
+        if (!obj) {
+            send_to_char(ch, "You were unable to discern anything about that direction. Try looking again...\r\n");
+            obj = read_object(17, VIRTUAL);
+            obj_to_char(obj, ch);
+        }
+    }
+
+    if (EXIT_FLAGGED(d, EX_ISDOOR) && d->keyword) {
+        if (!EXIT_FLAGGED(d, EX_SECRET) &&
+            EXIT_FLAGGED(d, EX_CLOSED))
+            send_to_char(ch, "The %s is closed.\r\n", fname(d->keyword));
+        else if (!EXIT_FLAGGED(d, EX_CLOSED))
+            send_to_char(ch, "The %s is open.\r\n", fname(d->keyword));
+    }
 }
 
 static void look_in_obj(struct char_data *ch, char *arg) {
@@ -4599,51 +4612,22 @@ ACMD(do_rdisplay) {
 }
 
 int perf_skill(int skill) {
-
-    if (!skill) {
-        return 0;
-    }
-
     switch (skill) {
         case 464:
-            return 1;
-            break;
         case 441:
-            return 1;
-            break;
         case 444:
-            return 1;
-            break;
         case 475:
-            return 1;
-            break;
         case 474:
-            return 1;
-            break;
         case 476:
-            return 1;
-            break;
         case 488:
-            return 1;
-            break;
         case 472:
-            return 1;
-            break;
         case 485:
-            return 1;
-            break;
         case 442:
-            return 1;
-            break;
         case 510:
-            return 1;
-            break;
         case 533:
             return 1;
-            break;
         default:
             return 0;
-            break;
     }
 }
 
@@ -5344,7 +5328,7 @@ ACMD(do_status) {
         if (PLR_FLAGGED(ch, PLR_NOSHOUT)) {
             send_to_char(ch, "         You have been @rmuted@n on public channels.\r\n");
         }
-        if (IN_ROOM(ch) == real_room(9)) {
+        if (IN_ROOM(ch) == 9) {
             send_to_char(ch, "         You are in punishment hell, so sad....\r\n");
         }
         if (!PRF_FLAGGED(ch, PRF_HINTS)) {
@@ -5365,6 +5349,7 @@ ACMD(do_status) {
         if (GET_DISTFEA(ch) == DISTFEA_EYE) {
             send_to_char(ch, "         Your eyes are your most distinctive feature.\r\n");
         }
+
         if (GET_PREFERENCE(ch) == 0) {
             send_to_char(ch, "         You preferred a balanced form of fighting.\r\n");
         } else if (GET_PREFERENCE(ch) == PREFERENCE_KI) {
@@ -5376,6 +5361,7 @@ ACMD(do_status) {
         } else if (GET_PREFERENCE(ch) == PREFERENCE_THROWING) {
             send_to_char(ch, "         You preferred a throwing dominate form of fighting.\r\n");
         }
+
         if (GET_DISTFEA(ch) == DISTFEA_HAIR && !IS_DEMON(ch) && !IS_MAJIN(ch) && !IS_ICER(ch) && !IS_NAMEK(ch)) {
             send_to_char(ch, "         Your hair is your most distinctive feature.\r\n");
         } else if (GET_DISTFEA(ch) == DISTFEA_HAIR && IS_DEMON(ch)) {
@@ -5397,6 +5383,7 @@ ACMD(do_status) {
         if (GET_DISTFEA(ch) == DISTFEA_WEIGHT) {
             send_to_char(ch, "         Your weight is your most distinctive feature.\r\n");
         }
+
         if (GET_EQ(ch, WEAR_EYE)) {
             struct obj_data *obj = GET_EQ(ch, WEAR_EYE);
             if (SFREQ(obj) == 0) {
@@ -5562,53 +5549,38 @@ ACMD(do_status) {
         }
         if (IS_BIO(ch)) {
             send_to_char(ch, "Your genes carry:\r\n");
-            if (GET_GENOME(ch, 0) == 1) {
-                send_to_char(ch, "  Human DNA.\r\n");
-            }
-            if (GET_GENOME(ch, 0) == 2) {
-                send_to_char(ch, "  Saiyan DNA.\r\n");
-            }
-            if (GET_GENOME(ch, 0) == 3) {
-                send_to_char(ch, "  Namek DNA.\r\n");
-            }
-            if (GET_GENOME(ch, 0) == 4) {
-                send_to_char(ch, "  Icer DNA.\r\n");
-            }
-            if (GET_GENOME(ch, 0) == 5) {
-                send_to_char(ch, "  Truffle DNA.\r\n");
-            }
-            if (GET_GENOME(ch, 0) == 6) {
-                send_to_char(ch, "  Arlian DNA.\r\n");
-            }
-            if (GET_GENOME(ch, 0) == 7) {
-                send_to_char(ch, "  Kai DNA.\r\n");
-            }
-            if (GET_GENOME(ch, 0) == 8) {
-                send_to_char(ch, "  Konatsu DNA.\r\n");
-            }
-            if (GET_GENOME(ch, 1) == 1) {
-                send_to_char(ch, "  Human DNA.\r\n");
-            }
-            if (GET_GENOME(ch, 1) == 2) {
-                send_to_char(ch, "  Saiyan DNA.\r\n");
-            }
-            if (GET_GENOME(ch, 1) == 3) {
-                send_to_char(ch, "  Namek DNA.\r\n");
-            }
-            if (GET_GENOME(ch, 1) == 4) {
-                send_to_char(ch, "  Icer DNA.\r\n");
-            }
-            if (GET_GENOME(ch, 1) == 5) {
-                send_to_char(ch, "  Truffle DNA.\r\n");
-            }
-            if (GET_GENOME(ch, 1) == 6) {
-                send_to_char(ch, "  Arlian DNA.\r\n");
-            }
-            if (GET_GENOME(ch, 1) == 7) {
-                send_to_char(ch, "  Kai DNA.\r\n");
-            }
-            if (GET_GENOME(ch, 1) == 8) {
-                send_to_char(ch, "  Konatsu DNA.\r\n");
+            for(auto i = 0; i < 2; i++) {
+                std::string race;
+                switch(GET_GENOME(ch, i)) {
+                    case 1:
+                        race = "Human";
+                        break;
+                    case 2:
+                        race = "Saiyan";
+                        break;
+                    case 3:
+                        race = "Namek";
+                        break;
+                    case 4:
+                        race = "Icer";
+                        break;
+                    case 5:
+                        race = "Truffle";
+                        break;
+                    case 6:
+                        race = "Arlian";
+                        break;
+                    case 7:
+                        race = "Kai";
+                        break;
+                    case 8:
+                        race = "Konatsu";
+                        break;
+                    default:
+                        race = "???";
+                        break;
+                }
+                send_to_char(ch, "  %s DNA.\r\n", race.c_str());
             }
         }
         if (GET_GENOME(ch, 0) == 11) {

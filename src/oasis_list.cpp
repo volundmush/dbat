@@ -113,7 +113,7 @@ ACMD(do_oasis_list) {
 ACMD(do_oasis_links) {
     zone_rnum zrnum;
     zone_vnum zvnum;
-    room_rnum nr, to_room;
+    room_rnum nr;
     int first, last, j;
     char arg[MAX_INPUT_LENGTH];
 
@@ -126,27 +126,37 @@ ACMD(do_oasis_links) {
         zvnum = atol(arg);
     }
 
-    if (!zone_table.count(zvnum)) {
+    auto z = zone_table.find(zvnum);
+    if (z == zone_table.end()) {
         send_to_char(ch, "No zone was found with that number.\n\r");
         return;
     }
-    auto &z = zone_table[zvnum];
 
-    send_to_char(ch, "Zone %d is linked to the following zones:\r\n", z.number);
-    for (auto nr : z.rooms) {
-        if (world.count(nr)) {
-            auto &r = world[nr];
-            for (j = 0; j < NUM_OF_DIRS; j++) {
-                if (r.dir_option[j]) {
-                    auto &e = r.dir_option[j];
-                    to_room = e->to_room;
-                    if (to_room != NOWHERE && (zrnum != world[to_room].zone))
-                        send_to_char(ch, "%3d %-30s at %5d (%-5s) ---> %5d\r\n",
-                                     zone_table[world[to_room].zone].number,
-                                     zone_table[world[to_room].zone].name,
-                                     GET_ROOM_VNUM(nr), dirs[j], world[to_room].vn);
-                }
+
+    send_to_char(ch, "Zone %d is linked to the following zones:\r\n", z->second.number);
+    for (auto nr : z->second.rooms) {
+        auto r = world.find(nr);
+        if (r == world.end()) {
+            send_to_char(ch, "Room %d is not in the world.\r\n", nr);
+            continue;
+        }
+
+        for (j = 0; j < NUM_OF_DIRS; j++) {
+            auto d = r->second.dir_option[j];
+            if(!d) continue;
+            if(d->to_room == NOWHERE) continue;
+            auto dest = d->getDestination();
+            if(!dest) continue;
+            if(dest->zone == zvnum) continue;
+
+            auto z2 = zone_table.find(dest->zone);
+            if (z2 == zone_table.end()) {
+                send_to_char(ch, "Room %d has an invalid zone.\r\n", nr);
+                continue;
             }
+
+            send_to_char(ch, "%3d %-30s at %5d (%-5s) ---> %5d\r\n",
+                         z2->first,z2->second.name,GET_ROOM_VNUM(nr), dirs[j], dest->vn);
         }
     }
 }
@@ -187,13 +197,13 @@ void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum 
                          vn, count_color_chars(r.name) + 44,
                          r.name, !r.proto_script.empty() ? "[TRIG] " : "");
             for (j = 0; j < NUM_OF_DIRS; j++) {
-                if (W_EXIT(vn, j) == nullptr)
-                    continue;
-                if (W_EXIT(vn, j)->to_room == NOWHERE)
-                    continue;
+                auto d = r.dir_option[j];
+                if(!d) continue;
+                auto dest = d->getDestination();
+                if(!dest) continue;
 
-                if (world[W_EXIT(vn, j)->to_room].zone != r.zone)
-                    send_to_char(ch, "(@y%d@n)", world[W_EXIT(vn, j)->to_room].vn);
+                if (dest->zone != r.zone)
+                    send_to_char(ch, "(@y%d@n)", dest->vn);
 
             }
 

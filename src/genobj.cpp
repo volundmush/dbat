@@ -329,6 +329,8 @@ nlohmann::json obj_data::serializeInstance() {
         j["dgvariables"] = serializeVars(script->global_vars);
     }
 
+    if(world.contains(room_loaded)) j["room_loaded"] = room_loaded;
+
     return j;
 }
 
@@ -470,6 +472,8 @@ void obj_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
         if(!script) script = new script_data(this);
         deserializeVars(&script->global_vars, j["dgvariables"]);
     }
+
+    if(j.contains("room_loaded")) room_loaded = j["room_loaded"];
 
     if(isActive) activate();
 

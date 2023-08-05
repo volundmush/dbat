@@ -888,8 +888,7 @@ static void db_load_areas() {
     }
 }
 
-static void load_new_database() {
-
+static std::vector<std::filesystem::path> getStateFiles() {
     std::filesystem::path dir = "state"; // Change to your directory
     std::vector<std::filesystem::path> files;
 
@@ -900,8 +899,15 @@ static void load_new_database() {
         }
     }
 
+    std::sort(files.begin(), files.end(), std::greater<>());
+    return files;
+}
+
+static void load_new_database() {
+
+    auto files = getStateFiles();
+
     if (!files.empty()) {
-        std::sort(files.begin(), files.end(), std::greater<>());
         std::cout << "Newest state file: " << files.front() << '\n';
     } else {
         std::cout << "No matching state files found.\n";
@@ -5659,6 +5665,16 @@ void dump_state_globalData() {
     }
 }
 
+static void cleanup_state() {
+    auto vecFiles = getStateFiles();
+    std::list<std::filesystem::path> files(vecFiles.begin(), vecFiles.end());
+
+    // If we have more than 20 state files, we want to purge the oldest one(s) until we have just 20.
+    while(files.size() > 20) {
+        std::filesystem::remove(files.back());
+        files.pop_back();
+    }
+}
 
 void dump_state() {
 
@@ -5718,6 +5734,9 @@ void dump_state() {
         logger->info("Finished dumping state to {} in {} seconds.", newPath.string(), duration);
         send_to_all("Game saved in %f seconds.\r\n", duration);
     }
+
+    cleanup_state();
+
 }
 
 int64_t nextObjID() {
