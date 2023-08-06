@@ -432,6 +432,11 @@ std::optional<vnum> obj_data::getMatchingArea(const std::function<bool(const are
 }
 
 void obj_data::activate() {
+    if(active) {
+        logger->warn("Attempted to activate an already active item.");
+        return;
+    }
+    active = true;
     next = object_list;
     object_list = this;
 
@@ -443,6 +448,8 @@ void obj_data::activate() {
 }
 
 void obj_data::deactivate() {
+    if(!active) return;
+    active = false;
     struct obj_data *temp;
     REMOVE_FROM_LIST(this, object_list, next, temp);
 
@@ -510,11 +517,7 @@ std::string obj_data::getUID(bool active) {
 }
 
 bool obj_data::isActive() {
-    if(id == NOTHING) return false;
-    if(in_obj) return in_obj->isActive();
-    if(carried_by) return carried_by->isActive();
-    if(worn_by) return worn_by->isActive();
-    return world.contains(in_room);
+    return active;
 }
 
 std::string obj_data::serializeLocation() {

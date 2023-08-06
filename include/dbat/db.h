@@ -369,6 +369,8 @@ struct help_index_element {
 };
 
 
+
+
 /* don't change these */
 #define BAN_NOT    0
 #define BAN_NEW    1

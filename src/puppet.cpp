@@ -26,6 +26,7 @@ namespace net {
         STATE(desc) = CON_LOGIN;
         desc->raw_input_queue = std::make_unique<Channel<std::string>>(*io, 200);
         desc->character = ch;
+        desc->id = ch->id;
         ch->desc = desc;
         conn->desc = desc;
         desc->account = conn->account;

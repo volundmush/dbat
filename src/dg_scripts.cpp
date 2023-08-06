@@ -907,9 +907,8 @@ void add_trigger(struct script_data *sc, trig_data *t, int loc) {
     }
 
     SCRIPT_TYPES(sc) |= GET_TRIG_TYPE(t);
+    t->activate();
 
-    t->next_in_world = trigger_list;
-    trigger_list = t;
     t->owner = sc->owner;
 
     t->id = nextTrigID();
@@ -3062,12 +3061,22 @@ void ADD_UID_VAR(char *buf, struct trig_data *trig, struct unit_data *thing, cha
 // Note: Trigger instances are meant to be set all active or inactive on a per room/character/item basis,
 // not individually.
 void trig_data::activate() {
+    if(active) {
+        basic_mud_log("SYSERR: Attempt to activate already-active trigger %ld", id);
+        return;
+    }
+    active = true;
     next_in_world = trigger_list;
     trigger_list = this;
     if(waiting != 0.0) triggers_waiting.insert(this);
 }
 
 void trig_data::deactivate() {
+    if(!active) {
+        basic_mud_log("SYSERR: Attempt to deactivate already-inactive trigger %ld", id);
+        return;
+    }
+    active = false;
     struct trig_data *temp;
     triggers_waiting.erase(this);
     REMOVE_FROM_LIST(this, trigger_list, next_in_world, temp);

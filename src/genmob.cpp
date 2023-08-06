@@ -1080,6 +1080,11 @@ player_data::player_data(const nlohmann::json &j) {
 }
 
 void char_data::activate() {
+    if(active) {
+        logger->warn("Attempted to activate an already active character.");
+        return;
+    }
+    active = true;
     next = character_list;
     character_list = this;
 
@@ -1106,6 +1111,8 @@ void char_data::activate() {
 
 
 void char_data::deactivate() {
+    if(!active) return;
+    active = false;
     struct char_data *temp;
     REMOVE_FROM_LIST(this, character_list, next, temp);
 
@@ -1170,10 +1177,7 @@ std::string char_data::getUID(bool active) {
 }
 
 bool char_data::isActive() {
-    if(IS_NPC(this)) {
-        return id != NOTHING;
-    }
-    return desc != nullptr;
+    return active;
 }
 
 nlohmann::json char_data::serializeLocation() {

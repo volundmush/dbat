@@ -116,10 +116,9 @@ void copyover_recover_final() {
         if(STATE(d) != CON_COPYOVER) continue;
 
 		auto accID = d->obj_editval;
-        auto playerID = d->obj_editflag;
+        auto playerID = d->id;
         room_vnum room = d->obj_type;
 
-        d->obj_editval = 0;
         d->obj_editflag = 0;
         d->obj_type = 0;
 
@@ -188,7 +187,7 @@ void copyover_recover() {
             auto d = new descriptor_data();
             d->raw_input_queue = std::make_unique<net::Channel<std::string>>(*net::io, 200);
             d->obj_editval = jd["user"];
-            d->obj_editflag = jd["character"];
+            d->id = jd["character"];
             d->connected = CON_COPYOVER;
             d->obj_type = NOWHERE;
             if(jd.contains("in_room")) d->obj_type = jd["in_room"].get<room_vnum>();
@@ -1918,7 +1917,7 @@ void close_socket(struct descriptor_data *d) {
         act("$n has lost $s link.", true, c, nullptr, nullptr, TO_ROOM);
     }
 
-    sessions.erase(d->character->id);
+    sessions.erase(d->id);
     delete d;
 }
 

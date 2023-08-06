@@ -115,6 +115,24 @@ struct obj_spellbook_spell {
     int pages;        /* How many pages does it take up */
 };
 
+struct obj_ref {
+    int64_t id{NOTHING};
+    time_t generation;
+    struct obj_data *get(bool checkActive);
+};
+
+struct char_ref {
+    int64_t id{NOTHING};
+    time_t generation;
+    struct char_data *get(bool checkActive);
+};
+
+struct room_ref {
+    int64_t id{NOTHING};
+    time_t generation;
+    struct room_data *get(bool checkActive);
+};
+
 struct unit_data {
     vnum vn{NOTHING}; /* Where in database */
     zone_vnum zone{NOTHING};
@@ -185,6 +203,7 @@ struct obj_data : public unit_data {
     int getAffectModifier(int location, int specific);
 
     std::string getUID(bool active = true) override;
+    bool active{false};
     bool isActive() override;
     void save() override;
 
@@ -495,6 +514,7 @@ struct char_data : public unit_data {
 
     std::string getUID(bool active = true) override;
 
+    bool active{false};
     bool isActive() override;
     void save() override;
 
@@ -1043,6 +1063,7 @@ struct txt_q {
 
 
 struct descriptor_data {
+    int64_t id{NOTHING};
     std::map<int64_t, std::shared_ptr<net::Connection>> conns;
     void onConnectionLost(int64_t);
     void onConnectionClosed(int64_t);

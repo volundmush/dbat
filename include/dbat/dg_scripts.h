@@ -187,6 +187,7 @@ struct trig_data {
     int order{0};
     int countLine(struct cmdlist_element *c);
 
+    bool active{false};
     void activate();
     void deactivate();
 

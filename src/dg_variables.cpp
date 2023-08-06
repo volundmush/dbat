@@ -929,7 +929,7 @@ in the vault (vnum: 453) now and then. you can just use
                             c->modRPP(addition);
                         }
 
-                        snprintf(str, slen, "%d", GET_RP(c));
+                        snprintf(str, slen, "%d", c->getRPP());
                     }
 
                     break;

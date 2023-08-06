@@ -342,6 +342,9 @@ namespace net {
         if(text.empty()) return;
         Message msg;
         msg.cmd = "text";
+        if(boost::icontains(text, "\r\r\n")) {
+            logger->info("WHAT THE HELL?");
+        }
         if(desc && desc->character) {
             auto &p = players[desc->character->id];
             msg.args.push_back(processColors(text, COLOR_ON(desc->character), p.color_choices));

@@ -686,22 +686,25 @@ static void db_load_dgscripts_finish() {
                         t->activate();
                         t->next = r->script->trig_list;
                         r->script->trig_list = t;
+                        r->script->types |= GET_TRIG_TYPE(t);
                         break;
                     case 1:
                         o = std::get<1>(t->owner);
                         if(o->isActive()) {
                             t->activate();
-                            t->next = o->script->trig_list;
-                            o->script->trig_list = t;
                         }
+                        t->next = o->script->trig_list;
+                        o->script->trig_list = t;
+                        o->script->types |= GET_TRIG_TYPE(t);
                         break;
                     case 2:
                         c = std::get<2>(t->owner);
                         if(c->isActive()) {
                             t->activate();
-                            t->next = c->script->trig_list;
-                            c->script->trig_list = t;
                         }
+                        t->next = c->script->trig_list;
+                        c->script->trig_list = t;
+                        c->script->types |= GET_TRIG_TYPE(t);
                         break;
                 }
             }
@@ -1222,10 +1225,8 @@ boost::asio::awaitable<void> boot_db() {
     file_to_string_alloc(HANDBOOK_FILE, &handbook);
     file_to_string_alloc(BACKGROUND_FILE, &background);
     file_to_string_alloc(IHELP_PAGE_FILE, &ihelp);
-    if (file_to_string_alloc(GREETINGS_FILE, &GREETINGS) == 0)
-        prune_crlf(GREETINGS);
-    if (file_to_string_alloc(GREETANSI_FILE, &GREETANSI) == 0)
-        prune_crlf(GREETANSI);
+    file_to_string_alloc(GREETINGS_FILE, &GREETINGS);
+    file_to_string_alloc(GREETANSI_FILE, &GREETANSI);
 
     basic_mud_log("Loading spell definitions.");
     mag_assign_spells();
@@ -4382,36 +4383,17 @@ static int file_to_string_alloc(const char *name, char **buf) {
 
 /* read contents of a text file, and place in buf */
 static int file_to_string(const char *name, char *buf) {
-    FILE *fl;
-    char tmp[READ_SIZE + 3];
-    int len;
-
-    *buf = '\0';
-
-    if (!(fl = fopen(name, "r"))) {
-        basic_mud_log("SYSERR: reading %s: %s", name, strerror(errno));
-        return (-1);
+    try {
+        std::ifstream f(name);
+        std::string out;
+        // read all of f to out.
+        std::getline(f, out, '\0');
+        boost::trim_right(out);
+        strcpy(buf, out.c_str());
+        return 0;
+    } catch (std::exception &e) {
+        return -1;
     }
-
-    for (;;) {
-        if (!fgets(tmp, READ_SIZE, fl))    /* EOF check */
-            break;
-        if ((len = strlen(tmp)) > 0)
-            tmp[len - 1] = '\0'; /* take off the trailing \n */
-        strcat(tmp, "\r\n");    /* strcat: OK (tmp:READ_SIZE+3) */
-
-        if (strlen(buf) + strlen(tmp) + 1 > MAX_STRING_LENGTH) {
-            basic_mud_log("SYSERR: %s: string too big (%d max)", name, MAX_STRING_LENGTH);
-            *buf = '\0';
-            fclose(fl);
-            return (-1);
-        }
-        strcat(buf, tmp);    /* strcat: OK (size checked above) */
-    }
-
-    fclose(fl);
-
-    return (0);
 }
 
 
@@ -5678,7 +5660,7 @@ static void cleanup_state() {
 
 void dump_state() {
 
-    send_to_all("Saving game...\r\n");
+    //send_to_all("Saving game...\r\n");
     logger->info("Beginning dump of state to disk.");
 
     // Open up a new database file as <cwd>/state/<timestamp>.sqlite3 and dump the state into it.
@@ -5732,7 +5714,7 @@ void dump_state() {
     if(success) {
         std::filesystem::rename(tempPath, newPath);
         logger->info("Finished dumping state to {} in {} seconds.", newPath.string(), duration);
-        send_to_all("Game saved in %f seconds.\r\n", duration);
+        //send_to_all("Game saved in %f seconds.\r\n", duration);
     }
 
     cleanup_state();
@@ -5795,4 +5777,36 @@ std::optional<UID> resolveUID(const std::string& uid) {
         }
     }
     return std::nullopt;
+}
+
+struct obj_data* obj_ref::get(bool checkActive) {
+    auto find = uniqueObjects.find(id);
+    if(find != uniqueObjects.end()) {
+        if(find->second.first == generation) {
+            if(checkActive && !find->second.second->isActive())
+                return nullptr;
+            return find->second.second;
+        }
+    }
+    return nullptr;
+}
+
+struct char_data* char_ref::get(bool checkActive) {
+    auto find = uniqueCharacters.find(id);
+    if(find != uniqueCharacters.end()) {
+        if(find->second.first == generation) {
+            if(checkActive && !find->second.second->isActive())
+                return nullptr;
+            return find->second.second;
+        }
+    }
+    return nullptr;
+}
+
+struct room_data* room_ref::get(bool checkActive) {
+    auto find = world.find(id);
+    if(find != world.end()) {
+        return &find->second;
+    }
+    return nullptr;
 }
