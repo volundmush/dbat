@@ -374,6 +374,7 @@ namespace net {
             for(auto &arg : m.args) {
                 if(arg.is_string()) {
                     auto t = arg.get<std::string>();
+                    if(boost::iequals(t, "idle")) continue;
                     if(parser) parser->parse(t);
                 }
             }
