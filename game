@@ -1,7 +1,11 @@
 #!/bin/bash
 
 process_running() {
-  if ps -p $(cat $1.pid) > /dev/null; then
+  if [ ! -f "$1.pid" ]; then
+    return 1
+  fi
+
+  if ps -p $(cat "$1.pid") > /dev/null 2>&1; then
     return 0
   else
     return 1
