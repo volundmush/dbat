@@ -101,6 +101,7 @@ namespace net {
             if(account->checkPassword(txt)) {
                 // successful login!
                 conn->account = account;
+                account->connections.insert(conn.get());
                 conn->setParser(new AccountMenu(conn));
                 return;
             } else {
@@ -133,7 +134,8 @@ namespace net {
             a.lastLogin = time(nullptr);
             // Create a new user!
             conn->account = &a;
-            dirty_accounts.insert(a.vn);
+            conn->account->connections.insert(conn.get());
+
             conn->setParser(new AccountMenu(conn));
             return;
         }

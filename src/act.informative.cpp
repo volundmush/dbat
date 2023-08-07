@@ -4558,8 +4558,10 @@ ACMD(do_rptrans) {
         return;
     }
 
-    if (amt > GET_RP(ch)) {
-        send_to_char(ch, "@WYou only have @C%d@W RPP!@n\r\n", GET_RP(ch));
+    auto haveRP = GET_RP(ch);
+
+    if (amt > haveRP) {
+        send_to_char(ch, "@WYou only have @C%d@W RPP!@n\r\n", haveRP);
         return;
     }
 
@@ -4580,14 +4582,12 @@ ACMD(do_rptrans) {
 
     } else {
         vict->modRPP(amt);
-        vict->save();
         send_to_char(vict, "@W%s gives @C%d@W of their RPP to you. How nice!\r\n", GET_NAME(ch), amt);
     }
     ch->modRPP(-amt);
     send_to_char(ch, "@WYou exchange @C%d@W RPP to user @c%s@W for a warm fuzzy feeling.\r\n", amt, CAP(arg));
     mudlog(NRM, MAX(ADMLVL_IMPL, GET_INVIS_LEV(ch)), true, "EXCHANGE: %s gave %d RPP to user %s", GET_NAME(ch), amt,
            arg);
-    ch->save();
 }
 
 

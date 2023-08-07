@@ -35,6 +35,7 @@ struct account_data {
     std::vector<std::string> customs;
     std::vector<vnum> characters;
     std::set<descriptor_data*> descriptors;
+    std::set<net::Connection*> connections;
 
     nlohmann::json serialize();
     void deserialize(const nlohmann::json& j);
@@ -117,20 +118,20 @@ struct obj_spellbook_spell {
 
 struct obj_ref {
     int64_t id{NOTHING};
-    time_t generation;
-    struct obj_data *get(bool checkActive);
+    time_t generation{};
+    struct obj_data* get(bool checkActive);
 };
 
 struct char_ref {
     int64_t id{NOTHING};
-    time_t generation;
-    struct char_data *get(bool checkActive);
+    time_t generation{};
+    struct char_data* get(bool checkActive);
 };
 
 struct room_ref {
     int64_t id{NOTHING};
-    time_t generation;
-    struct room_data *get(bool checkActive);
+    time_t generation{};
+    struct room_data* get(bool checkActive);
 };
 
 struct unit_data {
@@ -211,6 +212,8 @@ struct obj_data : public unit_data {
     struct room_data* getRoom();
     bool isWorking();
     void clearLocation();
+
+    obj_ref ref() { return obj_ref{id, generation}; }
 
 
     room_rnum in_room{NOWHERE};        /* In what room -1 when conta/carr	*/
@@ -333,6 +336,8 @@ struct room_data : public unit_data {
     std::string getUID(bool active = true) override;
     bool isActive() override;
     void save() override;
+
+    room_ref ref() { return room_ref{id, generation}; }
 
 };
 /* ====================================================================== */
@@ -523,6 +528,8 @@ struct char_data : public unit_data {
     struct obj_data* findObject(const std::function<bool(struct obj_data*)> &func, bool working = true) override;
     std::set<struct obj_data*> gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working = true) override;
 
+    char_ref ref() { return char_ref{id, generation}; }
+
     // Prototype-relevant fields below...
     char *title{};            /* PC / NPC's title                     */
     int size{SIZE_UNDEFINED};            /* Size class of char                   */
@@ -556,7 +563,6 @@ struct char_data : public unit_data {
     int64_t basepl{};
     int64_t baseki{};
     int64_t basest{};
-
 
     // Instance-relevant fields below...
     room_vnum in_room{NOWHERE};        /* Location (real room number)		*/
@@ -1105,7 +1111,7 @@ struct descriptor_data {
     double timeoutCounter{0};
     void handle_input();
     void start();
-    void handleLostLastConnection();
+    void handleLostLastConnection(bool graceful);
     void sendText(const std::string &txt);
 };
 

@@ -21,7 +21,9 @@ namespace net {
     boost::asio::ip::tcp::endpoint thermiteEndpoint;
 
     std::map<int64_t, std::shared_ptr<Connection>> connections;
-    std::set<int64_t> pendingConnections, deadConnections;
+    std::set<int64_t> pendingConnections;
+
+    std::unordered_map<int64_t, DisconnectReason> deadConnections;
 
     Link::Link(boost::beast::websocket::stream<boost::beast::tcp_stream> ws)
             : conn(std::move(ws)), is_stopped(false) {}
@@ -151,7 +153,7 @@ namespace net {
 
                     } else if (kind == "client_disconnected") {
                         logger->info("Link: Received client_disconnected message for client: {}", id);
-                        deadConnections.insert(id);
+                        deadConnections[id] = DisconnectReason::ConnectionClosed;
                     }
                 }
             } catch (const boost::system::system_error &e) {
@@ -197,7 +199,11 @@ namespace net {
     }
 
     void ProtocolCapabilities::deserialize(const nlohmann::json& j) {
-
+        if(j.contains("protocol")) {
+            auto s = j["protocol"].get<std::string>();
+            if(boost::iequals(s, "Telnet")) protocol = Protocol::Telnet;
+            else if(boost::iequals(s, "WebSocket")) protocol = Protocol::WebSocket;
+        }
         if(j.contains("encryption")) encryption = j["encryption"];
         if(j.contains("client_name")) clientName = j["client_name"];
         if(j.contains("client_version")) clientVersion = j["client_version"];
@@ -273,6 +279,15 @@ namespace net {
         if(mnes) j["mnes"] = mnes;
 
         return j;
+    }
+
+    std::string ProtocolCapabilities::protocolName() {
+        switch(protocol) {
+            case Protocol::Telnet: return "telnet";
+            case Protocol::WebSocket: return "websocket";
+            default:
+                return "unknown";
+        }
     }
 
     Message::Message() {
@@ -374,23 +389,11 @@ namespace net {
     }
 
     void Connection::close() {
-        nlohmann::json j;
-        j["kind"] = "client_disconnected";
-        j["id"] = this->connId;
-        j["reason"] = "";
-        linkChannel->try_send(boost::system::error_code{}, j);
-        deadConnections.insert(this->connId);
-        if(desc) {
-            desc->onConnectionClosed(this->connId);
-            desc = nullptr;
-        }
+        deadConnections[this->connId] = DisconnectReason::GameLogoff;
     }
 
     void Connection::onNetworkDisconnected() {
-        deadConnections.insert(this->connId);
-        if(desc) {
-            desc->onConnectionLost(this->connId);
-        }
+        deadConnections[this->connId] = DisconnectReason::ConnectionLost;
     }
 
     nlohmann::json Message::serialize() const {
@@ -409,6 +412,51 @@ namespace net {
     }
 
     Connection::Connection(int64_t connId) : connId(connId), fromLink(*io, 200) {
+
+    }
+
+    void Connection::cleanup(DisconnectReason reason) {
+        if(account) {
+            // Remove ourselves from the account's connections list.
+            account->connections.erase(this);
+            account = nullptr;
+        }
+        switch(reason) {
+            case DisconnectReason::ConnectionLost:
+                // The connection to remote host was lost for unknown reasons.
+                // The portal is aware of this and already cleaned them up.
+                if(desc) {
+                    // If we have a desc then we inform it of the unexpected disconnect.
+                    // It can handle this as it sees fit.
+                    // onConnectionLost must remove the connection from the descriptor.
+                    desc->onConnectionLost(connId);
+                    desc = nullptr;
+                }
+                break;
+            case DisconnectReason::ConnectionClosed:
+                // The remote socket gracefully/voluntarily closed by the remote host.
+                // The portal is aware of this and already cleaned them up.
+                if(desc) {
+                    // If we have a desc then we can attempt a 'quit' on the
+                    // connected character. OR however else it wants to handle it.
+                    // onConnectionClosed must remove the connection from the descriptor.
+                    desc->onConnectionClosed(connId);
+                    desc = nullptr;
+                }
+                break;
+            case DisconnectReason::GameLogoff: {
+                // The game server is initiating disconnection for some reason or another.
+                // The portal must be informed so it can boot the remote host.
+                nlohmann::json j;
+                j["kind"] = "client_disconnected";
+                j["id"] = connId;
+                j["reason"] = "logoff";
+                linkChannel->try_send(boost::system::error_code{}, j);
+                }
+                break;
+        }
+
+        // We do not remove ourselves from net::connections; that's done by the main loop.
 
     }
 

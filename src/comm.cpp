@@ -130,6 +130,7 @@ void copyover_recover_final() {
             continue;
         }
         d->account = &accFind->second;
+        d->account->descriptors.insert(d);
         for(auto &[cid, c] : d->conns) c->account = d->account;
 
         auto playFind = players.find(playerID);
@@ -147,6 +148,7 @@ void copyover_recover_final() {
         REMOVE_BIT_AR(PLR_FLAGS(c), PLR_CRYO);
         auto conns = d->conns;
         for(auto &[cid, con] : conns) {
+            d->account->connections.insert(con.get());
             con->setParser(new net::PuppetParser(con, c));
         }
 
@@ -171,8 +173,8 @@ void copyover_recover() {
     std::ifstream fp(COPYOVER_FILE);
 
     if(!fp.is_open()) {
-        basic_mud_log("Copyover file not found. Exitting.\n\r");
-        exit(1);
+        basic_mud_log("Copyover file not found. Exiting.\n\r");
+        shutdown_game(1);
     }
 
     nlohmann::json j;
@@ -339,16 +341,16 @@ boost::asio::awaitable<void> heartbeat(uint64_t heart_pulse, double deltaTime) {
 
 boost::asio::awaitable<void> processConnections(double deltaTime) {
     // First, handle any disconnected connections.
-    auto disconnected = net::deadConnections;
-    for (const auto &id : disconnected) {
+    for(auto &[id, reason] : net::deadConnections) {
         auto it = net::connections.find(id);
-        if (it != net::connections.end()) {
-            auto conn = it->second;
-            conn->onNetworkDisconnected();
-            net::connections.erase(it);
-            net::deadConnections.erase(id);
-        }
+        // This shouldn't happen, but whatever.
+        if(it == net::connections.end()) continue;
+        it->second->cleanup(reason);
     }
+    for(auto &[id, reason] : net::deadConnections) {
+        net::connections.erase(id);
+    }
+    net::deadConnections.clear();
 
     // Second, welcome any new connections!
     auto pending = net::pendingConnections;
@@ -1850,16 +1852,6 @@ int process_output(struct descriptor_data *t) {
 
 /* perform_socket_write for all Non-Windows platforms */
 
-
-
-void free_user(struct descriptor_data *d) {
-    if (d->account == nullptr) {
-        send_to_imm("ERROR: free_user called but no user to free!");
-        return;
-    }
-    d->account = nullptr;
-}
-
 void close_socket(struct descriptor_data *d) {
     struct descriptor_data *temp;
 
@@ -1904,6 +1896,11 @@ void close_socket(struct descriptor_data *d) {
             break;
     }
 
+    if(d->account) {
+        d->account->descriptors.erase(d);
+        d->account = nullptr;
+    }
+
     if(c) c->desc = nullptr;
     for(auto &[cid, conn] : d->conns) {
         conn->desc = nullptr;
@@ -1913,21 +1910,11 @@ void close_socket(struct descriptor_data *d) {
             conn->close();
         }
     }
-    if(c && d->connected == CON_DISCONNECT) {
-        act("$n has lost $s link.", true, c, nullptr, nullptr, TO_ROOM);
-    }
 
     sessions.erase(d->id);
     delete d;
 }
 
-void check_idle_passwords() {
-
-}
-
-void check_idle_menu() {
-
-}
 
 /* ****************************************************************
 *       Public routines for system-to-player-communication        *
@@ -2547,17 +2534,23 @@ void shutdown_game(int exitCode) {
 void descriptor_data::onConnectionClosed(int64_t connId) {
     conns.erase(connId);
     if(conns.empty()) {
-        handleLostLastConnection();
+        handleLostLastConnection(true);
     }
 }
 
 void descriptor_data::onConnectionLost(int64_t connId) {
     conns.erase(connId);
     if(conns.empty()) {
-        handleLostLastConnection();
+        handleLostLastConnection(false);
     }
 }
 
-void descriptor_data::handleLostLastConnection() {
-    timeoutCounter = 0;
+void descriptor_data::handleLostLastConnection(bool graceful) {
+    // At the moment, it doesn't really matter if the disconnect was graceful or not.
+    // If they didn't use 'quit', then we have a problem.
+    // We need to set the timeout for this character...
+    timeoutCounter = 5.0 * SECONDS_PER_MINUTE;
+    if(character) {
+        act("$n has lost $s link.", true, character, nullptr, nullptr, TO_ROOM);
+    }
 }

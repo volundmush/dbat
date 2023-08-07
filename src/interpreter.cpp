@@ -2707,15 +2707,11 @@ void enter_player_game(struct descriptor_data *d) {
     d->character->activate();
     char_to_room(d->character, load_room);
 
-    ((d->character)->id) = GET_IDNUM(d->character);
-
-    read_saved_vars(d->character);
     /*load_char_pets(d->character);*/
     for (check = character_list; check; check = check->next)
         if (!check->master && IS_NPC(check) && check->master_id == GET_IDNUM(d->character) &&
             AFF_FLAGGED(check, AFF_CHARM) && !circle_follow(check, d->character))
             add_follower(check, d->character);
-    d->character->save();
 
     if (PLR_FLAGGED(d->character, PLR_RARM)) {
         GET_LIMBCOND(d->character, 0) = 100;

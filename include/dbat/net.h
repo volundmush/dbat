@@ -46,9 +46,20 @@ namespace net {
 
     extern std::unique_ptr<Link> link;
 
+    enum class DisconnectReason {
+        // In these first two examples, the connection is dead on the portal and we have been informed of such.
+        ConnectionLost = 0,
+        ConnectionClosed = 1,
+        // In the remaining enums, the connection is still alive on the portal, but we are disconnecting for some reason.
+        // We must inform the portal.
+        GameLogoff = 2,
+    };
+
     extern std::mutex connectionsMutex, pendingConnectionsMutex;
     extern std::map<int64_t, std::shared_ptr<Connection>> connections;
-    extern std::set<int64_t> pendingConnections, deadConnections;
+    extern std::set<int64_t> pendingConnections;
+
+    extern std::unordered_map<int64_t, DisconnectReason> deadConnections;
 
     awaitable<void> runLinkManager();
 
@@ -93,6 +104,7 @@ namespace net {
 
         void deserialize(const nlohmann::json& j);
         nlohmann::json serialize();
+        std::string protocolName();
     };
 
     class Connection;
@@ -120,6 +132,8 @@ namespace net {
         void onNetworkDisconnected();
         void onWelcome();
         void close();
+
+        void cleanup(DisconnectReason reason);
 
         void setParser(ConnectionParser *p);
 

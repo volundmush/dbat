@@ -104,8 +104,6 @@ extern const char CCODE[];
 extern char *ANSI[];
 
 // functions
-extern void free_user(struct descriptor_data *d);
-
 extern void init_game();
 
 extern int process_output(struct descriptor_data *t);
@@ -113,10 +111,6 @@ extern int process_output(struct descriptor_data *t);
 extern void record_usage(uint64_t heartPulse, double deltaTime);
 
 extern char *make_prompt(struct descriptor_data *point);
-
-extern void check_idle_passwords();
-
-extern void check_idle_menu();
 
 extern void free_bufpool();
 

@@ -28,7 +28,7 @@
 
 /* CWG Version String */
 #define CWG_VERSION "CWG Rasputin - 3.5.31"
-#define DBAT_VERSION "DBAT - version 2.4"
+#define DBAT_VERSION "DBAT - 3.0"
 
 /* preamble *************************************************************/
 

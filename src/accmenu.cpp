@@ -10,20 +10,42 @@
 namespace net {
 
     void AccountMenu::displayMenu() {
+        auto a = conn->account;
         sendText("                 @RUser Menu@n\n");
         sendText("@D=============================================@n\r\n");
-        sendText(fmt::format("@D|@gUser Account  @D: @w{:>27}@D|@n\n", conn->account->name));
-        sendText(fmt::format("@D|@gEmail Address @D: @w{:>27}@D|@n\n", conn->account->email));
-        sendText(fmt::format("@D|@gMax Characters@D: @w{:>27}@D|@n\n", conn->account->slots));
-        sendText(fmt::format("@D|@gRP Points     @D: @w{:>27}@D|@n\n", conn->account->rpp));
+        sendText(fmt::format("@D|@gUser Account  @D: @w{:>27}@D|@n\n", a->name));
+        sendText(fmt::format("@D|@gEmail Address @D: @w{:>27}@D|@n\n", a->email));
+        sendText(fmt::format("@D|@gMax Characters@D: @w{:>27}@D|@n\n", a->slots));
+        sendText(fmt::format("@D|@gRP Points     @D: @w{:>27}@D|@n\n", a->rpp));
+
+        sendText("@D=============================================@n\r\n\r\n");
+        sendText("      @D[@y------@YActive Connections@y------@D]@n\n");
+        for(const auto &c : a->connections) {
+            auto &cap = c->capabilities;
+            std::string line = fmt::format("[{}] {} over ({}) {} version {}", c->connId, cap.hostAddress, cap.protocolName(), cap.clientName, cap.clientVersion);
+            if(c->desc) {
+                line += fmt::format(" as {}@n\r\n", c->desc->character->name);
+            } else {
+                line += "@n\r\n";
+            }
+            sendText(line);
+        }
 
         sendText("@D=============================================@n\r\n\r\n");
         sendText("      @D[@y------@YAvailable Characters@y------@D]@n\n");
         int counter = 0;
-        for(auto c : conn->account->characters) {
-            auto p = players.find(c);
+        for(auto cid : a->characters) {
+            auto p = players.find(cid);
             if(p == players.end()) continue;
-            sendText(fmt::format("                @B(@W{}@B) @C{}@n\r\n", ++counter, p->second.character->name));
+            auto c = p->second.character;
+            std::string line = fmt::format("                @B(@W{}@B) @C{}@n", ++counter, c->name);
+            if(c->desc) {
+                line += fmt::format(" @D[@y{} Connections@D]@n\r\n", c->desc->conns.size());
+            } else {
+                line += "\r\n";
+            }
+            sendText(line);
+
         }
         while(counter < conn->account->slots) {
             sendText(fmt::format("                @B(@W{}@B) @C{}@n\r\n", ++counter, "<empty>"));
