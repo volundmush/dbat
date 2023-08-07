@@ -13,7 +13,7 @@ process_running() {
 }
 
 start_thermite() {
-  nohup ./thermite/release/thermite &> thermite.log < /dev/null &
+  nohup ./thermite/target/debug/thermite &> thermite.log < /dev/null &
   echo $! > thermite.pid
 }
 
