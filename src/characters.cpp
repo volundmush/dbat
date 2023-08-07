@@ -953,7 +953,6 @@ std::optional<vnum> char_data::getMatchingArea(std::function<bool(const area_dat
 }
 
 int char_data::getRPP() {
-    return 999999;
     if(IS_NPC(this)) {
         return 0;
     }
@@ -965,7 +964,6 @@ int char_data::getRPP() {
 }
 
 void account_data::modRPP(int amt) {
-    return;
     rpp += amt;
     if(rpp < 0) {
         rpp = 0;
