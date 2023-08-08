@@ -1632,7 +1632,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
 
         send_to_char(ch, "Created: [%s], Last Logon: [%s], Played [%dh %dm], Age [%d]\r\n",
                      buf1, cmbuf2, (int) k->time.played / 3600,
-                     (int) ((k->time.played % 3600) / 60), 0);
+                     (int) (((int64_t)k->time.played % 3600) / 60), 0);
 
         if (k->desc != nullptr) {
             send_to_char(ch, "@YOwned by User@D: [@C%s@D]@n\r\n", GET_USER(k));
@@ -3251,8 +3251,8 @@ ACMD(do_show) {
             send_to_char(ch, "Started: %-20.16s  ", ctime(&vict->time.created));
             send_to_char(ch, "Last: %-20.16s  Played: %3dh %2dm\r\n",
                          ctime(&vict->time.logon),
-                         (int) (vict->time.played / 3600),
-                         (int) (vict->time.played / 60 % 60));
+                         (int) ((int64_t)vict->time.played / 3600),
+                         (int) ((int64_t)vict->time.played / 60 % 60));
             break;
 
             /* show rent */

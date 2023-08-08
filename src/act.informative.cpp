@@ -451,8 +451,8 @@ ACMD(do_kyodaika) {
         return;
     }
 
-    if (ch->real_abils.str + 5 > 25 && GET_BONUS(ch, BONUS_WIMP) > 0 && GET_GENOME(ch, 0) == 0) {
-        send_to_char(ch, "You can't handle having your strength increased beyond 25.\r\n");
+    if (ch->real_abils.str + 5 > 45 && GET_BONUS(ch, BONUS_WIMP) > 0 && GET_GENOME(ch, 0) == 0) {
+        send_to_char(ch, "You can't handle having your strength increased beyond 45.\r\n");
         return;
     }
 
@@ -463,7 +463,6 @@ ACMD(do_kyodaika) {
         ch->real_abils.str += 5;
         ch->real_abils.cha -= 2;
         GET_GENOME(ch, 0) = 11;
-        ch->save();
         return;
     } else {
         act("@GYou growl as your body shrinks to its normal size!@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -472,7 +471,6 @@ ACMD(do_kyodaika) {
         ch->real_abils.str -= 5;
         ch->real_abils.cha += 2;
         GET_GENOME(ch, 0) = 0;
-        ch->save();
         return;
     }
 
@@ -4289,8 +4287,8 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread) {
         return;
     }
 
-     auto isBoard = [](const auto &obj) {
-        return GET_OBJ_TYPE(obj) == ITEM_BOARD;};
+     auto isBoard = [](const auto &o) {
+        return GET_OBJ_TYPE(o) == ITEM_BOARD;};
 
     if (cmread) {
 
@@ -5016,9 +5014,9 @@ ACMD(do_score) {
 
         send_to_char(ch,
                      "\n     @D<@wPlayed@D: @yYears @D(@W%2d@D) @yWeeks @D(@W%2d@D) @yDays @D(@W%2d@D) @yHours @D(@W%2d@D) @yMinutes @D(@W%2d@D)>@n\n",
-                     (int) ch->time.played / 31536000, (int) ((ch->time.played % 31536000) / 604800),
-                     (int) ((ch->time.played % 604800) / 86400), (int) ((ch->time.played % 86400) / 3600),
-                     (int) ((ch->time.played % 3600) / 60));
+                     (int64_t) ch->time.played / 31536000, (int) (((int64_t)ch->time.played % 31536000) / 604800),
+                     (int) (((int64_t)ch->time.played % 604800) / 86400), (int) (((int64_t)ch->time.played % 86400) / 3600),
+                     (int) (((int64_t)ch->time.played % 3600) / 60));
     }
     send_to_char(ch, "  @cO@D------------------------------------------------------------------------@cO@n\n");
 
@@ -6009,7 +6007,7 @@ ACMD(do_time) {
     /* 30 days in a month, 6 days a week */
     weekday = day % 6;
 
-    send_to_char(ch, "It is %d:%d:%d o'clock %s, on %s.\r\n",
+    send_to_char(ch, "It is %02d:%02d:%02d o'clock %s, on %s.\r\n",
                  (time_info.hours % 12 == 0) ? 12 : (time_info.hours % 12), time_info.minutes, time_info.seconds,
                  time_info.hours >= 12 ? "PM" : "AM",
                  weekdays[weekday]);

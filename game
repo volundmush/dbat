@@ -1,4 +1,5 @@
 #!/bin/bash
+ulimit -c unlimited
 
 process_running() {
   if [ ! -f "$1.pid" ]; then

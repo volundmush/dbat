@@ -473,7 +473,7 @@ bool ROOM_FLAGGED(room_vnum loc, int flag);
 #define IN_ROOM(ch)    ((ch)->in_room)
 #define IN_ZONE(ch)   (zone_table[(world[(IN_ROOM(ch))].zone)].number)
 #define GET_WAS_IN(ch)    ((ch)->was_in_room)
-#define GET_AGE(ch)     0
+#define GET_AGE(ch)     ((ch)->time.currentAge())
 
 #define GET_PC_NAME(ch)    ((ch)->name)
 #define GET_NAME(ch)    (IS_NPC(ch) ? \

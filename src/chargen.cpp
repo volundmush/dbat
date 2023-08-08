@@ -1586,87 +1586,80 @@ namespace net {
                 state = CON_QX;
                 break;
 
-            case CON_QX:
-                switch(arg[0]) {
+            case CON_QX: {
+                int64_t years = 0;
+                switch(toupper(arg[0])) {
                     case '1':
-                        ch->time.birth = time(nullptr) - (8 * SECS_PER_MUD_YEAR);
+                        years = 8;
                         break;
                     case '2':
-                        ch->time.birth = time(nullptr) - (10 * SECS_PER_MUD_YEAR);
+                        years = 10;
                         break;
                     case '3':
-                        ch->time.birth = time(nullptr) - (12 * SECS_PER_MUD_YEAR);
+                        years = 12;
                         break;
                     case '4':
-                        ch->time.birth = time(nullptr) - (14 * SECS_PER_MUD_YEAR);
+                        years = 14;
                         break;
                     case '5':
-                        ch->time.birth = time(nullptr) - (16 * SECS_PER_MUD_YEAR);
+                        years = 16;
                         break;
                     case '6':
-                        ch->time.birth = time(nullptr) - (18 * SECS_PER_MUD_YEAR);
+                        years = 18;
                         break;
                     case '7':
-                        ch->time.birth = time(nullptr) - (20 * SECS_PER_MUD_YEAR);
+                        years = 20;
                         break;
                     case '8':
-                        ch->time.birth = time(nullptr) - (22 * SECS_PER_MUD_YEAR);
+                        years = 22;
                         break;
                     case '9':
-                        ch->time.birth = time(nullptr) - (24 * SECS_PER_MUD_YEAR);
+                        years = 24;
                         break;
                     case 'A':
-                    case 'a':
-                        ch->time.birth = time(nullptr) - (26 * SECS_PER_MUD_YEAR);
+                        years = 26;
                         break;
                     case 'B':
-                    case 'b':
-                        ch->time.birth = time(nullptr) - (28 * SECS_PER_MUD_YEAR);
+                        years = 28;
                         break;
                     case 'C':
-                    case 'c':
-                        ch->time.birth = time(nullptr) - (30 * SECS_PER_MUD_YEAR);
+                        years = 30;
                         break;
                     case 'D':
-                    case 'd':
-                        ch->time.birth = time(nullptr) - (40 * SECS_PER_MUD_YEAR);
+                        years = 40;
                         break;
                     case 'E':
-                    case 'e':
-                        ch->time.birth = time(nullptr) - (50 * SECS_PER_MUD_YEAR);
+                        years = 50;
                         break;
                     case 'F':
-                    case 'f':
-                        ch->time.birth = time(nullptr) - (60 * SECS_PER_MUD_YEAR);
+                        years = 60;
                         break;
                     case 'G':
-                    case 'g':
-                        ch->time.birth = time(nullptr) - (65 * SECS_PER_MUD_YEAR);
+                        years = 65;
                         break;
                     case 'H':
-                    case 'h':
                         if (IS_KAI(ch) || IS_DEMON(ch) || IS_MAJIN(ch)) {
-                            ch->time.birth = time(nullptr) - (500 * SECS_PER_MUD_YEAR);
+                            years = 500;
                         } else if (IS_NAMEK(ch)) {
-                            ch->time.birth = time(nullptr) - (250 * SECS_PER_MUD_YEAR);
+                            years = 250;
                         } else {
-                            ch->time.birth = time(nullptr) - (70 * SECS_PER_MUD_YEAR);
+                            years = 70;
                         }
                         break;
                     case 'I':
-                    case 'i':
                         if (IS_KAI(ch) || IS_DEMON(ch) || IS_MAJIN(ch)) {
-                            ch->time.birth = time(nullptr) - (800 * SECS_PER_MUD_YEAR);
+                            years = 800;
                         } else if (IS_NAMEK(ch)) {
-                            ch->time.birth = time(nullptr) - (400 * SECS_PER_MUD_YEAR);
+                            years = 400;
                         } else {
-                            ch->time.birth = time(nullptr) - (75 * SECS_PER_MUD_YEAR);
+                            years = 75;
                         }
                         break;
                     default:
                         sendText("That is not an acceptable option.\r\n");
                         return;
                 }
+                ch->time.birth = time_info.current() - (years * (int64_t)(SECS_PER_DAY * DAYS_PER_MONTH * MONTHS_PER_YEAR));
 
                 if (!IS_HOSHIJIN(ch)) {
                     ccpoints = 5;
@@ -1678,8 +1671,8 @@ namespace net {
                 sendText("@C             Alignment Menu@n\r\n");
                 sendText("@D---------------------------------------@n\r\n");
                 sendText(fmt::format("@cCurrent Alignment@D: {}{}@n\r\n",
-                          GET_ALIGNMENT(ch) < -50 ? "@R" : (GET_ALIGNMENT(ch) > 50 ? "@C" : "@G"),
-                          disp_align(ch)));
+                                     GET_ALIGNMENT(ch) < -50 ? "@R" : (GET_ALIGNMENT(ch) > 50 ? "@C" : "@G"),
+                                     disp_align(ch)));
                 sendText("@YThis is the alignment your character has based on your choices.\r\n");
                 sendText("Choose to keep this alignment with no penalty, or choose new\r\n");
                 sendText("alignment and suffer a -5%s PL and -1 stat (random) penalty.\r\n@n");
@@ -1698,6 +1691,7 @@ namespace net {
 
                 state = CON_ALIGN;
                 break;
+            }
 
             case CON_ALIGN:
                 sendText("Choose: \r\n");

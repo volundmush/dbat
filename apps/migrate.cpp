@@ -3,13 +3,11 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/constants.h"
 #include "dbat/genolc.h"
-#include "dbat/dg_event.h"
 #include "dbat/maputils.h"
 #include <filesystem>
 #include <memory>
 #include <iostream>
 #include <vector>
-#include <fmt/format.h>
 #include <tuple>
 #include "SQLiteCpp/SQLiteCpp.h"
 #include <boost/algorithm/string.hpp>
@@ -17,7 +15,6 @@
 #include "dbat/class.h"
 #include "dbat/players.h"
 #include "nlohmann/json.hpp"
-#include "dbat/area.h"
 #include "dbat/account.h"
 #include "dbat/objsave.h"
 #include "dbat/house.h"

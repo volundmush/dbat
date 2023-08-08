@@ -1257,8 +1257,8 @@ ACMD(do_write) {
     char *papername, *penname;
     char buf1[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
 
-    auto isBoard = [](const auto obj) {
-        return GET_OBJ_TYPE(obj) == ITEM_BOARD;
+    auto isBoard = [](const auto& o) {
+        return GET_OBJ_TYPE(o) == ITEM_BOARD;
     };
 
     auto obj = ch->findObject(isBoard);
@@ -1609,7 +1609,7 @@ ACMD(do_respond) {
         return;
     }
 
-    auto isBoard = [](auto obj) { return GET_OBJ_TYPE(obj) == ITEM_BOARD; };
+    auto isBoard = [](const auto& o) { return GET_OBJ_TYPE(o) == ITEM_BOARD; };
 
     auto obj = ch->findObject(isBoard);
     if(!obj) obj = ch->getRoom()->findObject(isBoard);

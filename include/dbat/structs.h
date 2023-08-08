@@ -358,11 +358,15 @@ typedef struct memory_rec_struct memory_rec;
 /* This structure is purely intended to be an easy way to transfer */
 /* and return information about time (real or mudwise).            */
 struct time_info_data {
+    time_info_data() = default;
+    time_info_data(int64_t timestamp);
     double remainder{};
     int seconds{}, minutes{}, hours{}, day{}, month{};
-    int16_t year{};
+    int64_t year{};
     void deserialize(const nlohmann::json& j);
     nlohmann::json serialize();
+    // The number of seconds since year 0. Can be negative.
+    int64_t current();
 };
 
 
@@ -371,11 +375,12 @@ struct time_data {
     time_data() = default;
     explicit time_data(const nlohmann::json &j);
     void deserialize(const nlohmann::json& j);
-    time_t birth{};    /* This represents the characters current age        */
+    int64_t birth{};    /* This represents the characters current IC age        */
     time_t created{};    /* This does not change                              */
-    time_t maxage{};    /* This represents death by natural causes           */
+    int64_t maxage{};    /* This represents death by natural causes (UNUSED) */
     time_t logon{};    /* Time of the last logon (used to calculate played) */
-    time_t played{};    /* This is the total accumulated time played in secs */
+    double played{};    /* This is the total accumulated time played in secs */
+    int currentAge();
     nlohmann::json serialize();
 };
 

@@ -420,6 +420,7 @@ boost::asio::awaitable<void> runOneLoop(double deltaTime) {
         auto start = std::chrono::high_resolution_clock::now();
         for (auto d = descriptor_list; d; d = next_d) {
             next_d = d->next;
+            if(d->character) d->character->time.played += deltaTime;
             d->handle_input();
         }
         auto end = std::chrono::high_resolution_clock::now();

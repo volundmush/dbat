@@ -3579,10 +3579,10 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
         }
     }
 
-    mob->time.birth = time(nullptr) - birth_age(mob);
+    mob->time.birth = time_info.current() - (birth_age(mob) * (int64_t)(SECS_PER_DAY * DAYS_PER_MONTH * MONTHS_PER_YEAR));
     mob->time.created = mob->time.logon = time(nullptr); /* why not */
     mob->time.maxage = mob->time.birth + max_age(mob);
-    mob->time.played = 0;
+    mob->time.played = 0.0;
     mob->time.logon = time(nullptr);
     MOB_LOADROOM(mob) = NOWHERE;
 
@@ -4451,7 +4451,7 @@ void init_char(struct char_data *ch) {
     /*ch->time.birth = time(0) - birth_age(ch);*/
     ch->time.logon = ch->time.created = time(nullptr);
     ch->time.maxage = ch->time.birth + max_age(ch);
-    ch->time.played = 0;
+    ch->time.played = 0.0;
 
     GET_HOME(ch) = 1;
     GET_ARMOR(ch) = 0;

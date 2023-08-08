@@ -504,3 +504,41 @@ void advanceClock(uint64_t heartPulse, double deltaTime) {
         }
     }
 }
+
+int64_t time_info_data::current() {
+    int64_t s = 0;
+
+    s += year * (int64_t)(SECS_PER_DAY * DAYS_PER_MONTH * MONTHS_PER_YEAR);
+    s += month * (int64_t)(SECS_PER_DAY * DAYS_PER_MONTH);
+    s += day * (int64_t)SECS_PER_DAY;
+    s += hours * (int64_t)SECS_PER_HOUR;
+    s += minutes * (int64_t)SECONDS_PER_MINUTE;
+    s += seconds;
+
+    return s;
+}
+
+time_info_data::time_info_data(int64_t timestamp) {
+    // We have been given a number of seconds since year 0.
+    // We must convert this to a year, month, day, hour, minute, second format.
+    year = timestamp / (SECS_PER_DAY * DAYS_PER_MONTH * MONTHS_PER_YEAR);
+    timestamp -= year * (SECS_PER_DAY * DAYS_PER_MONTH * MONTHS_PER_YEAR);
+    month = timestamp / (SECS_PER_DAY * DAYS_PER_MONTH);
+    timestamp -= month * (SECS_PER_DAY * DAYS_PER_MONTH);
+    day = timestamp / SECS_PER_DAY;
+    timestamp -= day * SECS_PER_DAY;
+    hours = timestamp / SECS_PER_HOUR;
+    timestamp -= hours * SECS_PER_HOUR;
+    minutes = timestamp / SECONDS_PER_MINUTE;
+    timestamp -= minutes * SECONDS_PER_MINUTE;
+    seconds = timestamp;
+}
+
+int time_data::currentAge() {
+    auto cur = time_info.current();
+
+    // If birth is negative (indicating a birth date before the epoch),
+    // we add the absolute value of birth to cur to get the correct difference.
+    int64_t diff = (birth < 0 ? cur + (-birth) : cur - birth);
+    return diff / (SECS_PER_DAY * DAYS_PER_MONTH * MONTHS_PER_YEAR);
+}

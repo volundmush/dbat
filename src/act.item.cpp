@@ -4450,7 +4450,7 @@ ACMD(do_remove) {
         return;
     }
 
-    auto isBoard = [&](const auto &o) {return GET_OBJ_TYPE(obj) == ITEM_BOARD;};
+    auto isBoard = [&](const auto &o) {return GET_OBJ_TYPE(o) == ITEM_BOARD;};
 
     obj = ch->findObject(isBoard);
     /* lemme check for a board FIRST */

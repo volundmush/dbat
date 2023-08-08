@@ -554,7 +554,7 @@ void obj_data::deserializeLocation(const std::string& txt, int16_t slot) {
         obj_to_obj(this, std::get<1>(*check));
     } else if(idx == 2) {
         auto &c = std::get<2>(*check);
-        auto_equip(c, this, slot);
+        auto_equip(c, this, slot+1);
     }
 }
 
