@@ -51,8 +51,6 @@ static void Crash_extract_expensive(struct obj_data *obj);
 
 static void Crash_calculate_rent(struct obj_data *obj, int *cost);
 
-static void Crash_cryosave(struct char_data *ch, int cost);
-
 static int inv_backup(struct char_data *ch);
 
 static int load_inv_backup(struct char_data *ch);
@@ -514,7 +512,7 @@ void Crash_listrent(struct char_data *ch, char *name) {
                 fread_string(fl, ", listrent reading desc"); /* screw the long desc */
                 fread_string(fl, ", listrent reading adesc"); /* screw the action desc. */
                 get_line(fl, line);    /* this is an important line.rent..*/
-                sscanf(line, "%d %d %d %d %d", t, t + 1, t + 2, t + 3, t + 4);
+                sscanf(line, "%ld %ld %ld %ld %ld", t, t + 1, t + 2, t + 3, t + 4);
                 /* great we got it all, make the buf */
                 if (len + 255 < sizeof(buf)) {
                     len += snprintf(buf + len, sizeof(buf) - len,
@@ -536,31 +534,12 @@ void Crash_listrent(struct char_data *ch, char *name) {
 
 
 static int Crash_save(struct obj_data *obj, FILE *fp, int location) {
-    struct obj_data *tmp;
-    int result;
-
-    if (obj) {
-        Crash_save(obj->next_content, fp, location);
-        Crash_save(obj->contents, fp, MIN(0, location) - 1);
-        result = Obj_to_store(obj, fp, location);
-
-        for (tmp = obj->in_obj; tmp; tmp = tmp->in_obj)
-            GET_OBJ_WEIGHT(tmp) -= GET_OBJ_WEIGHT(obj);
-
-        if (!result)
-            return (false);
-    }
-    return (true);
+    return 0;
 }
 
 
 static void Crash_restore_weight(struct obj_data *obj) {
-    if (obj) {
-        Crash_restore_weight(obj->contents);
-        Crash_restore_weight(obj->next_content);
-        if (obj->in_obj)
-            GET_OBJ_WEIGHT(obj->in_obj) += GET_OBJ_WEIGHT(obj);
-    }
+
 }
 
 /*
@@ -629,119 +608,7 @@ static void Crash_calculate_rent(struct obj_data *obj, int *cost) {
 
 
 void Crash_crashsave(struct char_data *ch) {
-    char buf[MAX_INPUT_LENGTH];
-    int j;
-    FILE *fp;
-
-    if (IS_NPC(ch))
-        return;
-
-    if (!get_filename(buf, sizeof(buf), NEW_OBJ_FILES, GET_NAME(ch)))
-        return;
-
-    if (!(fp = fopen(buf, "wb")))
-        return;
-
-    fprintf(fp, "%d %d %d %d %d %d\r\n", RENT_CRASH, (int) time(nullptr), 0, GET_GOLD(ch),
-            GET_BANK_GOLD(ch), 0);
-
-    for (j = 0; j < NUM_WEARS; j++)
-        if (GET_EQ(ch, j)) {
-            if (!Crash_save(GET_EQ(ch, j), fp, j + 1)) {
-                fclose(fp);
-                return;
-            }
-            Crash_restore_weight(GET_EQ(ch, j));
-        }
-
-    if (!Crash_save(ch->contents, fp, 0)) {
-        fclose(fp);
-        return;
-    }
-
-    Crash_restore_weight(ch->contents);
-
-    fclose(fp);
-    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CRASH);
-}
-
-void Crash_rentsave(struct char_data *ch, int cost) {
-    char buf[MAX_INPUT_LENGTH];
-    int j;
-    FILE *fp;
-
-    if (IS_NPC(ch))
-        return;
-
-    if (!get_filename(buf, sizeof(buf), NEW_OBJ_FILES, GET_NAME(ch)))
-        return;
-
-    if (!(fp = fopen(buf, "wb")))
-        return;
-
-    Crash_extract_norent_eq(ch);
-    Crash_extract_norents(ch->contents);
-
-    fprintf(fp, "%d %d %d %d %d %d\r\n", RENT_RENTED, (int) time(nullptr), cost,
-            GET_GOLD(ch), GET_BANK_GOLD(ch), 0);
-
-    for (j = 0; j < NUM_WEARS; j++)
-        if (GET_EQ(ch, j)) {
-            if (!Crash_save(GET_EQ(ch, j), fp, j + 1)) {
-                fclose(fp);
-                return;
-            }
-            Crash_restore_weight(GET_EQ(ch, j));
-            Crash_extract_objs(GET_EQ(ch, j));
-        }
-    if (!Crash_save(ch->contents, fp, 0)) {
-        fclose(fp);
-        return;
-    }
-    fclose(fp);
-
-    Crash_extract_objs(ch->contents);
-}
-
-
-static void Crash_cryosave(struct char_data *ch, int cost) {
-    char buf[MAX_INPUT_LENGTH];
-    int j;
-    FILE *fp;
-
-    if (IS_NPC(ch))
-        return;
-
-    if (!get_filename(buf, sizeof(buf), CRASH_FILE, GET_NAME(ch)))
-        return;
-    if (!(fp = fopen(buf, "wb")))
-        return;
-
-    Crash_extract_norent_eq(ch);
-    Crash_extract_norents(ch->contents);
-
-    GET_GOLD(ch) = MAX(0, GET_GOLD(ch) - cost);
-
-    fprintf(fp, "%d %d %d %d %d %d\r\n", RENT_CRYO, (int) time(nullptr), 0, GET_GOLD(ch),
-            GET_BANK_GOLD(ch), 0);
-
-    for (j = 0; j < NUM_WEARS; j++)
-        if (GET_EQ(ch, j)) {
-            if (!Crash_save(GET_EQ(ch, j), fp, j + 1)) {
-                fclose(fp);
-                return;
-            }
-            Crash_restore_weight(GET_EQ(ch, j));
-            Crash_extract_objs(GET_EQ(ch, j));
-        }
-    if (!Crash_save(ch->contents, fp, 0)) {
-        fclose(fp);
-        return;
-    }
-    fclose(fp);
-
-    Crash_extract_objs(ch->contents);
-    SET_BIT_AR(PLR_FLAGS(ch), PLR_CRYO);
+    return;
 }
 
 
@@ -915,7 +782,7 @@ static int gen_receptionist(struct char_data *ch, struct char_data *recep,
                 "A white mist appears in the room, chilling you to the bone...\r\n"
                 "You begin to lose consciousness...",
                 false, recep, nullptr, ch, TO_VICT);
-            Crash_cryosave(ch, cost);
+            //Crash_cryosave(ch, cost);
             mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), true, "%s has cryo-rented.", GET_NAME(ch));
             SET_BIT_AR(PLR_FLAGS(ch), PLR_CRYO);
         }
@@ -965,7 +832,7 @@ int Crash_load(struct char_data *ch) {
     char cmfname[MAX_STRING_LENGTH];
     char buf1[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
     char line[256];
-    int t[30], danger, zwei = 0, num_of_days;
+    int64_t t[30], danger, zwei = 0, num_of_days;
     int orig_rent_code;
     struct obj_data *temp;
     int locate = 0, j, nr, k, cost, num_objs = 0;
@@ -1075,7 +942,7 @@ int Crash_load(struct char_data *ch) {
 
             get_line(fl, line);
 
-            sscanf(line, "%d %d %d %d %d %d %d %d %d %s %s %s %s %d %d %d %d %d %d %d %d", t, t + 1, t + 2, t + 3,
+            sscanf(line, "%ld %ld %ld %ld %ld %ld %ld %ld %ld %s %s %s %s %ld %ld %ld %ld %ld %ld %ld %ld", t, t + 1, t + 2, t + 3,
                    t + 4, t + 5, t + 6, t + 7, t + 8, f1, f2, f3, f4, t + 13, t + 14, t + 15, t + 16, t + 17, t + 18,
                    t + 19, t + 20);
 
@@ -1122,7 +989,7 @@ int Crash_load(struct char_data *ch) {
                 }
 
                 if (!get_line(fl, line) ||
-                    (sscanf(line, "%d %d %d %d %d %d %d %d", t, t + 1, t + 2, t + 3, t + 4, t + 5, t + 6, t + 7) !=
+                    (sscanf(line, "%ld %ld %ld %ld %ld %ld %ld %ld", t, t + 1, t + 2, t + 3, t + 4, t + 5, t + 6, t + 7) !=
                      8)) {
                     fprintf(stderr, "Format error in first numeric line (expecting _x_ args)");
                     return 0;
@@ -1179,7 +1046,7 @@ int Crash_load(struct char_data *ch) {
                                 danger = 1;
                             }
                             get_line(fl, line);
-                            sscanf(line, "%d %d %d", t, t + 1, t + 2);
+                            sscanf(line, "%ld %ld %ld", t, t + 1, t + 2);
 
                             temp->affected[j].location = t[0];
                             temp->affected[j].modifier = t[1];

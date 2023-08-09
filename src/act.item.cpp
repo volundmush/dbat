@@ -462,7 +462,7 @@ ACMD(do_garden) {
     int skill = GET_SKILL(ch, SKILL_GARDENING);
 
     if ((ch->getCurST()) < cost) {
-        send_to_char(ch, "@WYou need at least @G%s@W stamina to garden.\r\n", add_commas(cost));
+        send_to_char(ch, "@WYou need at least @G%s@W stamina to garden.\r\n", add_commas(cost).c_str());
         return;
     } else {
         if (!strcasecmp(arg2, "water")) {
@@ -1693,7 +1693,7 @@ ACMD(do_bid) {
                                  list, get_name_by_id(GET_AUCTER(obj)) != nullptr ? CAP(get_name_by_id(GET_AUCTER(obj)))
                                                                                   : "Nobody",
                                  count_color_chars(obj->short_description) + 30, obj->short_description,
-                                 add_commas(GET_BID(obj)));
+                                 add_commas(GET_BID(obj)).c_str());
                 } else if (GET_AUCTIME(obj) + 86400 > time(nullptr) && GET_CURBID(obj) > -1) {
                     send_to_char(ch,
                                  "@D[@R#@W%3d@D][@mOwner@W: @w%10s@D][@GItem Name@W: @w%-*s@D][@RTop Bid@W: %s @Y%s@D]@n\r\n",
@@ -1701,7 +1701,7 @@ ACMD(do_bid) {
                                                                                   : "Nobody",
                                  count_color_chars(obj->short_description) + 30, obj->short_description,
                                  get_name_by_id(GET_CURBID(obj)) != nullptr ? CAP(get_name_by_id(GET_CURBID(obj)))
-                                                                            : "Nobody", add_commas(GET_BID(obj)));
+                                                                            : "Nobody", add_commas(GET_BID(obj)).c_str());
                 } else if (GET_AUCTIME(obj) + 86400 < time(nullptr) && GET_CURBID(obj) > -1) {
                     send_to_char(ch,
                                  "@D[@R#@W%3d@D][@mOwner@W: @w%10s@D][@GItem Name@W: @w%-*s@D][@RBid Winner@W: %s @Y%s@D]@n\r\n",
@@ -1709,7 +1709,7 @@ ACMD(do_bid) {
                                                                                   : "Nobody",
                                  count_color_chars(obj->short_description) + 30, obj->short_description,
                                  get_name_by_id(GET_CURBID(obj)) != nullptr ? CAP(get_name_by_id(GET_CURBID(obj)))
-                                                                            : "Nobody", add_commas(GET_BID(obj)));
+                                                                            : "Nobody", add_commas(GET_BID(obj)).c_str());
                 } else {
                     send_to_char(ch, "@D[@R#@W%3d@D][@mOwner@W: @w%10s@D][@GItem Name@W: @w%-*s@D][@RClosed@D]@n\r\n",
                                  list, get_name_by_id(GET_AUCTER(obj)) != nullptr ? CAP(get_name_by_id(GET_AUCTER(obj)))
@@ -1770,8 +1770,8 @@ ACMD(do_bid) {
                              get_name_by_id(GET_AUCTER(obj2)) != nullptr ? CAP(get_name_by_id(GET_AUCTER(obj2)))
                                                                          : "Nobody");
                 send_to_char(ch, "@GItem Name   @W: @w%s@n\n", obj2->short_description);
-                send_to_char(ch, "@GCurrent Bid @W: @Y%s@n\n", add_commas(GET_BID(obj2)));
-                send_to_char(ch, "@GStore Value @W: @Y%s@n\n", add_commas(GET_OBJ_COST(obj2)));
+                send_to_char(ch, "@GCurrent Bid @W: @Y%s@n\n", add_commas(GET_BID(obj2)).c_str());
+                send_to_char(ch, "@GStore Value @W: @Y%s@n\n", add_commas(GET_OBJ_COST(obj2)).c_str());
                 send_to_char(ch, "@GItem Min LVL@W: @w%d@n\n", GET_OBJ_LEVEL(obj2));
                 if (GET_OBJ_VAL(obj2, VAL_ALL_HEALTH) >= 100) {
                     send_to_char(ch, "@GCondition   @W: @C%d%s@n\n", GET_OBJ_VAL(obj2, VAL_ALL_HEALTH), "%");
@@ -1782,7 +1782,7 @@ ACMD(do_bid) {
                 } else {
                     send_to_char(ch, "@GCondition   @W: @D%d%s@n\n", GET_OBJ_VAL(obj2, VAL_ALL_HEALTH), "%");
                 }
-                send_to_char(ch, "@GItem Weight @W: @w%s@n\n", add_commas(GET_OBJ_WEIGHT(obj2)));
+                send_to_char(ch, "@GItem Weight @W: @w%s@n\n", add_commas(GET_OBJ_WEIGHT(obj2)).c_str());
                 char bits[MAX_STRING_LENGTH];
                 sprintbitarray(GET_OBJ_WEAR(obj2), wear_bits, TW_ARRAY_MAX, bits);
                 search_replace(bits, "TAKE", "");
@@ -1881,21 +1881,21 @@ ACMD(do_bid) {
             auc_save();
             struct descriptor_data *d;
             int bid = atoi(arg2);
-            basic_mud_log("AUCTION: %s has bid %s on %s", GET_NAME(ch), obj2->short_description, add_commas(bid));
+            basic_mud_log("AUCTION: %s has bid %s on %s", GET_NAME(ch), obj2->short_description, add_commas(bid).c_str());
             for (d = descriptor_list; d; d = d->next) {
                 if (STATE(d) != CON_PLAYING || IS_NPC(d->character))
                     continue;
                 if (d->character == ch) {
                     if (GET_EQ(d->character, WEAR_EYE)) {
                         send_to_char(d->character, "@RScouter Auction News@D: @GYou have bid @Y%s@G on @w%s@G@n\r\n",
-                                     add_commas(GET_BID(obj2)), obj2->short_description);
+                                     add_commas(GET_BID(obj2)).c_str(), obj2->short_description);
                     }
                     continue;
                 }
                 if (GET_EQ(d->character, WEAR_EYE)) {
                     send_to_char(d->character,
                                  "@RScouter Auction News@D: @GThe bid on, @w%s@G, has been raised to @Y%s@n\r\n",
-                                 obj2->short_description, add_commas(GET_BID(obj2)));
+                                 obj2->short_description, add_commas(GET_BID(obj2)).c_str());
                 }
             }
         }
@@ -2215,11 +2215,11 @@ ACMD(do_assemble) {
     if (IS_TRUFFLE(ch) && rand_number(1, 5) >= 4 && GET_OBJ_COST(pObject) >= 500) {
         if (GET_LEVEL(ch) < 100 && level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0) {
             int64_t gain = level_exp(ch, GET_LEVEL(ch) + 1) * 0.011;
-            send_to_char(ch, "@RExp Bonus@D: @G%s@n\r\n", add_commas(gain));
+            send_to_char(ch, "@RExp Bonus@D: @G%s@n\r\n", add_commas(gain).c_str());
             gain_exp(ch, gain);
         } else {
             gain_exp(ch, 1375000);
-            send_to_char(ch, "@RExp Bonus@D: @G%s@n\r\n", add_commas(1375000));
+            send_to_char(ch, "@RExp Bonus@D: @G%s@n\r\n", add_commas(1375000).c_str());
         }
     }
 }
@@ -2424,7 +2424,7 @@ static void get_check_money(struct char_data *ch, struct obj_data *obj) {
 
     if (GET_GOLD(ch) + value > GOLD_CARRY(ch)) {
         send_to_char(ch, "You can only carry %s zenni at your current level, and leave the rest.\r\n",
-                     add_commas(GOLD_CARRY(ch)));
+                     add_commas(GOLD_CARRY(ch)).c_str());
         act("@w$n @wdrops some onto the ground.@n", false, ch, nullptr, nullptr, TO_ROOM);
         extract_obj(obj);
         int diff = 0;
@@ -3198,9 +3198,9 @@ ACMD(do_give) {
             if ((vict = give_find_vict(ch, arg)) != nullptr) {
                 perform_give_gold(ch, vict, amount);
                 if (GET_ADMLEVEL(ch) > 0 && !IS_NPC(vict)) {
-                    send_to_imm("IMM GIVE: %s has given %s zenni to %s.", GET_NAME(ch), add_commas(amount),
+                    send_to_imm("IMM GIVE: %s has given %s zenni to %s.", GET_NAME(ch), add_commas(amount).c_str(),
                                 GET_NAME(vict));
-                    log_imm_action("IMM GIVE: %s has given %s zenni to %s.", GET_NAME(ch), add_commas(amount),
+                    log_imm_action("IMM GIVE: %s has given %s zenni to %s.", GET_NAME(ch), add_commas(amount).c_str(),
                                    GET_NAME(vict));
                 }
             }
@@ -3664,7 +3664,7 @@ ACMD(do_eat) {
                 gain_exp(ch, expbonus);
                 GET_PRACTICES(ch) += psbonus;
                 send_to_char(ch, "That was exceptionally delicious! @D[@mPS@D: @C+%d@D] [@gEXP@D: @G+%s@D]@n\r\n",
-                             psbonus, add_commas(expbonus));
+                             psbonus, add_commas(expbonus).c_str());
                 if (capped == true)
                     send_to_char(ch, "Experience capped due to negative TNL.\r\n");
                 if (pscapped == true)
@@ -3843,7 +3843,7 @@ static void majin_gain(struct char_data *ch, int type) {
 
     send_to_char(ch,
                  "@mYou feel stronger after consuming the candy @D[@RPL@W: @r%s @CKi@D: @c%s @GSt@D: @g%s@D]@m!@n\r\n",
-                 add_commas(pl), add_commas(ki), add_commas(st));
+                 add_commas(pl).c_str(), add_commas(ki).c_str(), add_commas(st).c_str());
 }
 
 ACMD(do_pour) {
@@ -4432,7 +4432,7 @@ void perform_remove(struct char_data *ch, int pos) {
         if (previous > GET_HIT(ch)) {
             char drop[MAX_INPUT_LENGTH];
             sprintf(drop, "@RYour powerlevel has dropped from removing $p@R! @D[@r-%s@D]\r\n",
-                    add_commas(previous - GET_HIT(ch)));
+                    add_commas(previous - GET_HIT(ch)).c_str());
             act(drop, false, ch, obj, nullptr, TO_CHAR);
         }
     }

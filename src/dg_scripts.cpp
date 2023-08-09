@@ -18,6 +18,7 @@
 #include "dbat/constants.h"
 #include "dbat/comm.h"
 #include "dbat/players.h"
+#include <boost/regex.hpp>
 
 #define PULSES_PER_MUD_HOUR     (SECS_PER_MUD_HOUR*PASSES_PER_SEC)
 
@@ -29,7 +30,7 @@ void script_stat(char_data *ch, struct script_data *sc);
 
 int remove_trigger(struct script_data *sc, char *name);
 
-int is_num(char *arg);
+bool is_num(char *arg);
 
 void eval_op(char *op, char *lhs, char *rhs, char *result, void *go,
              struct script_data *sc, trig_data *trig);
@@ -1296,21 +1297,13 @@ void script_log(const char *format, ...) {
     va_end(args);
 }
 
-/* returns 1 if string is all digits, else 0 */
-/* bugfixed - would have returned true on num="------" */
-int is_num(char *arg) {
-    if (*arg == '\0')
+bool is_num(char *arg) {
+    try {
+        std::stod(arg);
+        return true;
+    } catch (const std::exception&) {
         return false;
-
-    if (*arg == '+' || *arg == '-')
-        arg++;
-
-    for (; *arg != '\0'; arg++) {
-        if (!isdigit(*arg))
-            return false;
     }
-
-    return true;
 }
 
 
@@ -1345,52 +1338,52 @@ void eval_op(char *op, char *lhs, char *rhs, char *result, void *go,
             strcpy(result, "1");
     } else if (!strcmp("==", op)) {
         if (is_num(lhs) && is_num(rhs))
-            sprintf(result, "%lld", atoll(lhs) == atoll(rhs));
+            sprintf(result, "%lld", atof(lhs) == atof(rhs));
         else
             sprintf(result, "%d", !strcasecmp(lhs, rhs));
     } else if (!strcmp("!=", op)) {
         if (is_num(lhs) && is_num(rhs))
-            sprintf(result, "%lld", atoll(lhs) != atoll(rhs));
+            sprintf(result, "%lld", atof(lhs) != atof(rhs));
         else
             sprintf(result, "%d", strcasecmp(lhs, rhs));
     } else if (!strcmp("<=", op)) {
         if (is_num(lhs) && is_num(rhs))
-            sprintf(result, "%lld", atoll(lhs) <= atoll(rhs));
+            sprintf(result, "%lld", atof(lhs) <= atof(rhs));
         else
             sprintf(result, "%lld", strcasecmp(lhs, rhs) <= 0);
     } else if (!strcmp(">=", op)) {
         if (is_num(lhs) && is_num(rhs))
-            sprintf(result, "%lld", atoll(lhs) >= atoll(rhs));
+            sprintf(result, "%lld", atof(lhs) >= atof(rhs));
         else
             sprintf(result, "%lld", strcasecmp(lhs, rhs) <= 0);
     } else if (!strcmp("<", op)) {
         if (is_num(lhs) && is_num(rhs))
-            sprintf(result, "%lld", atoll(lhs) < atoll(rhs));
+            sprintf(result, "%lld", atof(lhs) < atof(rhs));
         else
             sprintf(result, "%d", strcasecmp(lhs, rhs) < 0);
     } else if (!strcmp(">", op)) {
         if (is_num(lhs) && is_num(rhs))
-            sprintf(result, "%lld", atoll(lhs) > atoll(rhs));
+            sprintf(result, "%lld", atof(lhs) > atof(rhs));
         else
             sprintf(result, "%d", strcasecmp(lhs, rhs) > 0);
     } else if (!strcmp("/=", op))
         sprintf(result, "%c", str_str(lhs, rhs) ? '1' : '0');
 
     else if (!strcmp("*", op))
-        sprintf(result, "%lld", atoll(lhs) * atoll(rhs));
+        sprintf(result, "%lld", atof(lhs) * atof(rhs));
 
     else if (!strcmp("/", op))
-        sprintf(result, "%lld", (n = atoll(rhs)) ? (atoll(lhs) / n) : 0);
+        sprintf(result, "%lld", (n = atof(rhs)) ? (atof(lhs) / n) : 0);
 
     else if (!strcmp("+", op))
-        sprintf(result, "%lld", atoll(lhs) + atoll(rhs));
+        sprintf(result, "%lld", atof(lhs) + atof(rhs));
 
     else if (!strcmp("-", op))
-        sprintf(result, "%lld", atoll(lhs) - atoll(rhs));
+        sprintf(result, "%lld", atof(lhs) - atof(rhs));
 
     else if (!strcmp("!", op)) {
         if (is_num(rhs))
-            sprintf(result, "%d", !atoll(rhs));
+            sprintf(result, "%d", !atof(rhs));
         else
             sprintf(result, "%d", !*rhs);
     }
@@ -3095,5 +3088,17 @@ void deserializeVars(struct trig_var_data **vd, const nlohmann::json &j) {
         auto v = new trig_var_data(*it);
         v->next = *vd;
         *vd = v;
+    }
+}
+
+void script_data::activate() {
+    for(auto t = trig_list; t; t = t->next) {
+        t->activate();
+    }
+}
+
+void script_data::deactivate() {
+    for(auto t = trig_list; t; t = t->next) {
+        t->deactivate();
     }
 }

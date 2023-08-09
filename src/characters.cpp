@@ -1083,7 +1083,7 @@ void char_data::login() {
             inc *= mult;
             GET_BANK_GOLD(this) += inc;
             send_to_char(this, "Interest happened while you were away, %d times.\r\n"
-                                       "@cBank Interest@D: @Y%s@n\r\n", mult, add_commas(inc));
+                                       "@cBank Interest@D: @Y%s@n\r\n", mult, add_commas(inc).c_str());
         }
     }
 
@@ -1092,7 +1092,7 @@ void char_data::login() {
         send_to_sense(0, "You sense someone appear suddenly", this);
         sprintf(buf3,
                 "@D[@GBlip@D]@Y %s\r\n@RSomeone has suddenly entered your scouter detection range!@n.",
-                add_commas(GET_HIT(this)));
+                add_commas(GET_HIT(this)).c_str());
         send_to_scouter(buf3, this, 0, 0);
     }
 

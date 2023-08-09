@@ -530,7 +530,7 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
     if (controls) {
         send_to_char(ch, "@RFUEL@D: %s%s@n\r\n",
                      GET_FUEL(controls) >= 200 ? "@G" : GET_FUEL(controls) >= 100 ? "@Y" : "@r",
-                     add_commas(GET_FUEL(controls)));
+                     add_commas(GET_FUEL(controls)).c_str());
     }
     int door;
     room = vehicle->getRoom();
@@ -1341,7 +1341,7 @@ ACMD(do_drive) {
                 look_at_room(IN_ROOM(vehicle), ch, 0);
                 send_to_char(ch, "@RFUEL@D: %s%s@n\r\n",
                              GET_FUEL(controls) >= 200 ? "@G" : GET_FUEL(controls) >= 100 ? "@Y" : "@r",
-                             add_commas(GET_FUEL(controls)));
+                             add_commas(GET_FUEL(controls)).c_str());
             } else if (!strcasecmp(arg, "mark")) {
                 int rnum = 0;
                 if (!*arg2) {

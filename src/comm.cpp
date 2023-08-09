@@ -47,6 +47,7 @@
 #include <mutex>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/rotating_file_sink.h>
+#include <locale>
 
 /* local globals */
 struct descriptor_data *descriptor_list = nullptr;        /* master desc list */
@@ -601,21 +602,6 @@ boost::asio::awaitable<void> game_loop() {
 
 std::function<boost::asio::awaitable<void>()> gameFunc;
 
-static void finish_copyover() {
-    char buf[100], buf2[100];
-    sprintf(buf, "%d", port);
-    sprintf(buf2, "-C%d", mother_desc);
-    chdir("..");
-    net::io.reset();
-    execl("bin/circle", "circle", buf2, buf, (char *) nullptr);
-    /* Failed - sucessful exec will not return */
-
-    perror("do_copyover: execl");
-    basic_mud_log("Copyover FAILED!\n\r");
-
-    exit(1); /* too much trouble to try to recover! */
-}
-
 static boost::asio::awaitable<void> runGame() {
 	// instantiate db with a shared_ptr, the filename is dbat.sqlite3
     try {
@@ -681,6 +667,8 @@ static boost::asio::awaitable<void> runGame() {
 void init_game() {
     /* We don't want to restart if we crash before we get up. */
     touch(KILLSCRIPT_FILE);
+
+    std::locale::global(std::locale("en_US.UTF-8"));
 
     if (sodium_init() != 0) {
         basic_mud_log("Could not initialize libsodium!");
@@ -1304,7 +1292,7 @@ char *make_prompt(struct descriptor_data *d) {
                         col = "r";
 
                     if ((count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RPL@n@Y: @%s%s@D]@n", col,
-                                          add_commas(ch->getCurPL()))) > 0)
+                                          add_commas(ch->getCurPL()).c_str())) > 0)
                         len += count;
                 }
             } else if (PRF_FLAGGED(d->character, PRF_DISPHP)) {
@@ -1331,19 +1319,19 @@ char *make_prompt(struct descriptor_data *d) {
                 if (PRF_FLAGGED(d->character, PRF_DISPKI) && len < sizeof(prompt) &&
                     (d->character->getCurKI()) > GET_MAX_MANA(d->character) / 2) {
                     count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@CKI@Y: @c%s@D]@n", add_commas(
-                            (d->character->getCurKI())));
+                            (d->character->getCurKI())).c_str());
                     if (count >= 0)
                         len += count;
                 } else if (PRF_FLAGGED(d->character, PRF_DISPKI) && len < sizeof(prompt) &&
                            (d->character->getCurKI()) > GET_MAX_MANA(d->character) / 10) {
                     count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@CKI@Y: @y%s@D]@n", add_commas(
-                            (d->character->getCurKI())));
+                            (d->character->getCurKI())).c_str());
                     if (count >= 0)
                         len += count;
                 } else if (PRF_FLAGGED(d->character, PRF_DISPKI) && len < sizeof(prompt) &&
                            (d->character->getCurKI()) <= GET_MAX_MANA(d->character) / 10) {
                     count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@CKI@Y: @r%s@D]@n", add_commas(
-                            (d->character->getCurKI())));
+                            (d->character->getCurKI())).c_str());
                     if (count >= 0)
                         len += count;
                 }
@@ -1383,19 +1371,19 @@ char *make_prompt(struct descriptor_data *d) {
                 if (PRF_FLAGGED(d->character, PRF_DISPMOVE) && len < sizeof(prompt) &&
                     (d->character->getCurST()) > GET_MAX_MOVE(d->character) / 2) {
                     count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GSTA@Y: @c%s@D]@n", add_commas(
-                            (d->character->getCurST())));
+                            (d->character->getCurST())).c_str());
                     if (count >= 0)
                         len += count;
                 } else if (PRF_FLAGGED(d->character, PRF_DISPMOVE) && len < sizeof(prompt) &&
                            (d->character->getCurST()) > GET_MAX_MOVE(d->character) / 10) {
                     count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GSTA@Y: @y%s@D]@n", add_commas(
-                            (d->character->getCurST())));
+                            (d->character->getCurST())).c_str());
                     if (count >= 0)
                         len += count;
                 } else if (PRF_FLAGGED(d->character, PRF_DISPMOVE) && len < sizeof(prompt) &&
                            (d->character->getCurST()) <= GET_MAX_MOVE(d->character) / 10) {
                     count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GSTA@Y: @r%s@D]@n", add_commas(
-                            (d->character->getCurST())));
+                            (d->character->getCurST())).c_str());
                     if (count >= 0)
                         len += count;
                 }
@@ -1446,13 +1434,13 @@ char *make_prompt(struct descriptor_data *d) {
             }
             if (PRF_FLAGGED(d->character, PRF_DISGOLD) && len < sizeof(prompt)) {
                 count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@YZen@y: @W%s@D]@n",
-                                 add_commas(GET_GOLD(d->character)));
+                                 add_commas(GET_GOLD(d->character)).c_str());
                 if (count >= 0)
                     len += count;
             }
             if (PRF_FLAGGED(d->character, PRF_DISPRAC) && len < sizeof(prompt)) {
                 count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mPS@y: @W%s@D]@n",
-                                 add_commas(GET_PRACTICES(d->character)));
+                                 add_commas(GET_PRACTICES(d->character)).c_str());
                 if (count >= 0)
                     len += count;
             }
@@ -1780,7 +1768,7 @@ void descriptor_data::start() {
     write_to_output(this, "@D                 ---(@CPeak Logon Count Today@W: @w%4d@D)---@n\r\n", PCOUNT);
     write_to_output(this, "@D                 ---(@CHighest Logon Count   @W: @w%4d@D)---@n\r\n", HIGHPCOUNT);
     write_to_output(this, "@D                 ---(@CTotal Era %d Characters@W: @w%4s@D)---@n\r\n", CURRENT_ERA,
-                    add_commas(players.size()));
+                    add_commas(players.size()).c_str());
     write_to_output(this,
                     "\r\n@cEnter your desired username or the username you have already made.\n@CEnter Username:@n\r\n");
 }

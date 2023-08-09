@@ -22,15 +22,11 @@
 #include "dbat/account.h"
 
 /* From db.c */
-void init_mobile_skills();
-
 int update_mobile_strings(struct char_data *t, struct char_data *f);
 
 void check_mobile_strings(struct char_data *mob);
 
 void check_mobile_string(mob_vnum i, char **string, const char *dscr);
-
-int write_mobile_espec(mob_vnum mvnum, struct char_data *mob, FILE *fd);
 
 int copy_mobile_strings(struct char_data *t, struct char_data *f);
 
@@ -269,116 +265,6 @@ int write_mobile_mobprog(mob_vnum mvnum, struct char_data *mob, FILE *fd)
 }
 #endif
 
-int write_mobile_espec(mob_vnum mvnum, struct char_data *mob, FILE *fd) {
-    struct affected_type *aff;
-    int i;
-
-    if (get_size(mob) != mob->race->getSize())
-        fprintf(fd, "Size: %d\n", get_size(mob));
-    if (GET_ATTACK(mob) != 0)
-        fprintf(fd, "BareHandAttack: %d\n", GET_ATTACK(mob));
-    if (GET_STR(mob) != 0)
-        fprintf(fd, "Str: %d\n", GET_STR(mob));
-    if (GET_DEX(mob) != 0)
-        fprintf(fd, "Dex: %d\n", GET_DEX(mob));
-    if (GET_INT(mob) != 0)
-        fprintf(fd, "Int: %d\n", GET_INT(mob));
-    if (GET_WIS(mob) != 0)
-        fprintf(fd, "Wis: %d\n", GET_WIS(mob));
-    if (GET_CON(mob) != 0)
-        fprintf(fd, "Con: %d\n", GET_CON(mob));
-    if (GET_CHA(mob) != 0)
-        fprintf(fd, "Cha: %d\n", GET_CHA(mob));
-    if (&mob_proto[real_mobile(mvnum)] != mob) { /* Not saving a prototype */
-        fprintf(fd,
-                "Hit: %" I64T "\nMaxHit: %" I64T "\nMana: %" I64T "\nMaxMana: %" I64T "\nMoves: %" I64T "\nMaxMoves: %" I64T "\n",
-                GET_HIT(mob), GET_MAX_HIT(mob), (mob->getCurKI()), GET_MAX_MANA(mob),
-                (mob->getCurST()), GET_MAX_MOVE(mob));
-        for (aff = mob->affected; aff; aff = aff->next)
-            if (aff->type)
-                fprintf(fd, "Affect: %d %d %d %d %d %d\n", aff->type, aff->duration,
-                        aff->modifier, aff->location, (int) aff->bitvector, aff->specific);
-        for (aff = mob->affectedv; aff; aff = aff->next)
-            if (aff->type)
-                fprintf(fd, "AffectV: %d %d %d %d %d %d\n", aff->type, aff->duration,
-                        aff->modifier, aff->location, (int) aff->bitvector, aff->specific);
-    }
-    for (i = 0; i <= NUM_FEATS_DEFINED; i++)
-        if (HAS_FEAT(mob, i))
-            fprintf(fd, "Feat: %d %d\n", i, HAS_FEAT(mob, i));
-    for (i = 0; i < SKILL_TABLE_SIZE; i++)
-        if (GET_SKILL_BASE(mob, i))
-            fprintf(fd, "Skill: %d %d\n", i, HAS_FEAT(mob, i));
-    for (i = 0; i <= NUM_FEATS_DEFINED; i++)
-        if (GET_SKILL_BONUS(mob, i))
-            fprintf(fd, "SkillMod: %d %d\n", i, HAS_FEAT(mob, i));
-    fputs("E\n", fd);
-    return true;
-}
-
-
-int write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd) {
-
-    char ldesc[MAX_STRING_LENGTH], ddesc[MAX_STRING_LENGTH];
-    char fbuf1[MAX_STRING_LENGTH], fbuf2[MAX_STRING_LENGTH];
-    char fbuf3[MAX_STRING_LENGTH], fbuf4[MAX_STRING_LENGTH];
-    char abuf1[MAX_STRING_LENGTH], abuf2[MAX_STRING_LENGTH];
-    char abuf3[MAX_STRING_LENGTH], abuf4[MAX_STRING_LENGTH];
-
-    ldesc[MAX_STRING_LENGTH - 1] = '\0';
-    ddesc[MAX_STRING_LENGTH - 1] = '\0';
-    strip_cr(strncpy(ldesc, GET_LDESC(mob), MAX_STRING_LENGTH - 1));
-    strip_cr(strncpy(ddesc, GET_DDESC(mob), MAX_STRING_LENGTH - 1));
-
-    fprintf(fd, "#%d\n"
-                "%s%c\n"
-                "%s%c\n"
-                "%s%c\n"
-                "%s%c\n",
-            mvnum,
-            GET_ALIAS(mob), STRING_TERMINATOR,
-            GET_SDESC(mob), STRING_TERMINATOR,
-            ldesc, STRING_TERMINATOR,
-            ddesc, STRING_TERMINATOR
-    );
-
-    sprintascii(fbuf1, MOB_FLAGS(mob)[0]);
-    sprintascii(fbuf2, MOB_FLAGS(mob)[1]);
-    sprintascii(fbuf3, MOB_FLAGS(mob)[2]);
-    sprintascii(fbuf4, MOB_FLAGS(mob)[3]);
-    sprintascii(abuf1, AFF_FLAGS(mob)[0]);
-    sprintascii(abuf2, AFF_FLAGS(mob)[1]);
-    sprintascii(abuf3, AFF_FLAGS(mob)[2]);
-    sprintascii(abuf4, AFF_FLAGS(mob)[3]);
-
-    fprintf(fd, "%s %s %s %s %s %s %s %s %d E\n"
-                "%d %d %d %" I64T "d%" I64T "+%" I64T " %dd%d+%d\n",
-            fbuf1, fbuf2, fbuf3, fbuf4,
-            abuf1, abuf2, abuf3, abuf4,
-            GET_ALIGNMENT(mob),
-            GET_HITDICE(mob), GET_FISHD(mob), 10 - (GET_ARMOR(mob) / 10),
-            GET_HIT(mob), (mob->getCurKI()), (mob->getCurST()), GET_NDD(mob), GET_SDD(mob),
-            GET_DAMAGE_MOD(mob)
-    );
-    fprintf(fd, "%d 0 %d %d\n"
-                "%d %d %d\n",
-            GET_GOLD(mob), GET_RACE(mob), GET_CLASS(mob),
-            GET_POS(mob), GET_DEFAULT_POS(mob), GET_SEX(mob)
-    );
-
-    if (write_mobile_espec(mvnum, mob, fd) < 0)
-        basic_mud_log("SYSERR: GenOLC: Error writing E-specs for mobile #%d.", mvnum);
-
-    script_save_to_disk(fd, mob, MOB_TRIGGER);
-
-
-#if CONFIG_GENOLC_MOBPROG
-    if (write_mobile_mobprog(mvnum, mob, fd) < 0)
-      log("SYSERR: GenOLC: Error writing MobProgs for mobile #%d.", mvnum);
-#endif
-
-    return true;
-}
 
 void check_mobile_strings(struct char_data *mob) {
     mob_vnum mvnum = mob_index[mob->vn].vn;
@@ -453,7 +339,7 @@ nlohmann::json time_data::serialize() {
     if(created) j["created"] = created;
     if(maxage) j["maxage"] = maxage;
     if(logon) j["logon"] = logon;
-    if(played) j["played"] = played;
+    if(played != 0.0) j["played"] = played;
 
     return j;
 }
@@ -488,7 +374,7 @@ nlohmann::json char_data::serializeBase() {
     if(level) j["level"] = level;
     if(admlevel) j["admlevel"] = admlevel;
     if(chclass) j["chclass"] = chclass->getID();
-    if(weight) j["weight"] = weight;
+    if(weight != 0.0) j["weight"] = weight;
     if(height) j["height"] = height;
     if(alignment) j["alignment"] = alignment;
     if(alignment_ethic) j["alignment_ethic"] = alignment_ethic;
@@ -899,6 +785,11 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
         }
     }
 
+    auto proto = mob_proto.find(vn);
+    if(proto != mob_proto.end()) {
+        proto_script = proto->second.proto_script;
+    }
+
     if(j.contains("load_room")) load_room = j["load_room"];
 
 }
@@ -1088,8 +979,11 @@ void char_data::activate() {
     next = character_list;
     character_list = this;
 
-    if(vn != NOTHING) {
+    if(script) script->activate();
+
+    if(mob_proto.contains(vn)) {
         insert_vnum(characterVnumIndex, this);
+        assign_triggers(this, MOB_TRIGGER);
     }
 
     if(contents) activateContents();
@@ -1157,14 +1051,57 @@ affected_type::affected_type(const nlohmann::json &j) {
     if(j.contains("bitvector")) bitvector = j["bitvector"];
 }
 
-double char_data::getWeight(bool base) {
-    double total = 0;
+weight_t char_data::getWeight(bool base) {
+    weight_t total = 0;
     if(!IS_NPC(this)) {
         total += GET_PC_WEIGHT(this);
+
     } else {
         total += weight;
     }
-    if(!base) total += getAffectModifier(APPLY_CHAR_WEIGHT);
+
+    if(!base) {
+        total += getAffectModifier(APPLY_CHAR_WEIGHT);
+        if(!IS_NPC(this)) {
+            if(PLR_FLAGGED(this, PLR_OOZARU) || GET_GENOME(this, 0) == 1) total *= 50;
+            if(IS_ICER(this)) {
+                if(PLR_FLAGGED(this, PLR_TRANS1) || PLR_FLAGGED(this, PLR_TRANS2)) {
+                    total *= 4;
+                } else if(PLR_FLAGGED(this, PLR_TRANS3)) {
+                    total *= 2;
+                } else if(PLR_FLAGGED(this, PLR_TRANS4)) {
+                    total *= 3;
+                }
+            }
+        }
+    }
+
+    return total;
+}
+
+int char_data::getHeight(bool base) {
+    int total = 0;
+    if(!IS_NPC(this)) {
+        total += GET_PC_HEIGHT(this);
+    } else {
+        total += height;
+    }
+    if(!base) {
+        total += getAffectModifier(APPLY_CHAR_HEIGHT);
+        if(!IS_NPC(this)) {
+            if(PLR_FLAGGED(this, PLR_OOZARU) || GET_GENOME(this, 0) == 1) total *= 10;
+            if(IS_ICER(this)) {
+                if(PLR_FLAGGED(this, PLR_TRANS1) || PLR_FLAGGED(this, PLR_TRANS2)) {
+                    total *= 3;
+                } else if(PLR_FLAGGED(this, PLR_TRANS3)) {
+                    total *= 1.5;
+                } else if(PLR_FLAGGED(this, PLR_TRANS4)) {
+                    total *= 2;
+                }
+            }
+        }
+    }
+
     return total;
 }
 

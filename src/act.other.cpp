@@ -1246,20 +1246,20 @@ ACMD(do_train) {
 
     if (!*arg) {
         send_to_char(ch, "@D-------------[ @GTraining Status @D]-------------@n\r\n");
-        send_to_char(ch, "  @mStrength Progress    @D: @R%6s/%6s@n\r\n", add_commas(GET_TRAINSTR(ch)),
-                     ch->real_abils.str >= 80 ? "@rCAPPED" : add_commas(strcap));
-        send_to_char(ch, "  @mSpeed Progress       @D: @R%6s/%6s@n\r\n", add_commas(GET_TRAINSPD(ch)),
-                     ch->real_abils.cha >= 80 ? "@rCAPPED" : add_commas(spdcap));
-        send_to_char(ch, "  @mConstitution Progress@D: @R%6s/%6s@n\r\n", add_commas(GET_TRAINCON(ch)),
-                     ch->real_abils.con >= 80 ? "@rCAPPED" : add_commas(concap));
-        send_to_char(ch, "  @mIntelligence Progress@D: @R%6s/%6s@n\r\n", add_commas(GET_TRAININT(ch)),
-                     ch->real_abils.intel >= 80 ? "@rCAPPED" : add_commas(intcap));
-        send_to_char(ch, "  @mWisdom Progress      @D: @R%6s/%6s@n\r\n", add_commas(GET_TRAINWIS(ch)),
-                     ch->real_abils.wis >= 80 ? "@rCAPPED" : add_commas(wiscap));
-        send_to_char(ch, "  @mAgility Progress     @D: @R%6s/%6s@n\r\n", add_commas(GET_TRAINAGL(ch)),
-                     ch->real_abils.dex >= 80 ? "@rCAPPED" : add_commas(aglcap));
+        send_to_char(ch, "  @mStrength Progress    @D: @R%6s/%6s@n\r\n", add_commas(GET_TRAINSTR(ch)).c_str(),
+                     ch->real_abils.str >= 80 ? "@rCAPPED" : add_commas(strcap).c_str());
+        send_to_char(ch, "  @mSpeed Progress       @D: @R%6s/%6s@n\r\n", add_commas(GET_TRAINSPD(ch)).c_str(),
+                     ch->real_abils.cha >= 80 ? "@rCAPPED" : add_commas(spdcap).c_str());
+        send_to_char(ch, "  @mConstitution Progress@D: @R%6s/%6s@n\r\n", add_commas(GET_TRAINCON(ch)).c_str(),
+                     ch->real_abils.con >= 80 ? "@rCAPPED" : add_commas(concap).c_str());
+        send_to_char(ch, "  @mIntelligence Progress@D: @R%6s/%6s@n\r\n", add_commas(GET_TRAININT(ch)).c_str(),
+                     ch->real_abils.intel >= 80 ? "@rCAPPED" : add_commas(intcap).c_str());
+        send_to_char(ch, "  @mWisdom Progress      @D: @R%6s/%6s@n\r\n", add_commas(GET_TRAINWIS(ch)).c_str(),
+                     ch->real_abils.wis >= 80 ? "@rCAPPED" : add_commas(wiscap).c_str());
+        send_to_char(ch, "  @mAgility Progress     @D: @R%6s/%6s@n\r\n", add_commas(GET_TRAINAGL(ch)).c_str(),
+                     ch->real_abils.dex >= 80 ? "@rCAPPED" : add_commas(aglcap).c_str());
         send_to_char(ch, "@D  -----------------------------------------  @n\r\n");
-        send_to_char(ch, "  @CCurrent Weight Held  @D: @c%s@n\r\n", add_commas(weight));
+        send_to_char(ch, "  @CCurrent Weight Held  @D: @c%s@n\r\n", add_commas(weight).c_str());
         send_to_char(ch, "@D---------------------------------------------@n\r\n");
         send_to_char(ch, "Syntax: train (str | spd | agl | wis | int | con)\r\n");
         return;
@@ -2861,8 +2861,8 @@ ACMD(do_telepathy) {
                 send_to_char(ch, "@GWis       @D: @W%d@n\r\n", GET_WIS(vict));
                 send_to_char(ch, "@GSpd       @D: @W%d@n\r\n", GET_CHA(vict));
                 send_to_char(ch, "@GAgi       @D: @W%d@n\r\n", GET_DEX(vict));
-                send_to_char(ch, "@GZenni     @D: @W%s@n\r\n", add_commas(GET_GOLD(vict)));
-                send_to_char(ch, "@GBank Zenni@D: @W%s@n\r\n", add_commas(GET_BANK_GOLD(vict)));
+                send_to_char(ch, "@GZenni     @D: @W%s@n\r\n", add_commas(GET_GOLD(vict)).c_str());
+                send_to_char(ch, "@GBank Zenni@D: @W%s@n\r\n", add_commas(GET_BANK_GOLD(vict)).c_str());
                 if (GET_ALIGNMENT(vict) >= 1000) {
                     send_to_char(ch, "@GAlignment @D: @wSaint         @n\r\n");
                 } else if (GET_ALIGNMENT(vict) > 750) {
@@ -4026,7 +4026,7 @@ ACMD(do_upgrade) {
         send_to_char(ch, "@cAugment @RPowerlevel\r\n"
                          "@cAugment @CKi\r\n"
                          "@cAugment @GStamina\r\n"
-                         "@WCurrent Upgrade Points @D[@y%s@D]@n\r\n", add_commas(GET_UP(ch)));
+                         "@WCurrent Upgrade Points @D[@y%s@D]@n\r\n", add_commas(GET_UP(ch)).c_str());
         return;
     }
 
@@ -4082,7 +4082,7 @@ ACMD(do_upgrade) {
                     TO_CHAR);
                 act("@C$n@W installs some circuits and upgrades $s systems.@n", true, ch, nullptr, nullptr, TO_ROOM);
                 ch->gainBasePL(gain, true);
-                send_to_char(ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain));
+                send_to_char(ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain).c_str());
                 return;
             } else if (!strcasecmp("ki", arg2)) {
                 obj_from_char(obj);
@@ -4090,7 +4090,7 @@ ACMD(do_upgrade) {
                 act("@WYou install the circuits and upgrade your maximum ki.@n", true, ch, nullptr, nullptr, TO_CHAR);
                 act("@C$n@W installs some circuits and upgrades $s systems.@n", true, ch, nullptr, nullptr, TO_ROOM);
                 ch->gainBaseKI(gain, true);
-                send_to_char(ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain));
+                send_to_char(ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain).c_str());
                 return;
             } else if (!strcasecmp("stamina", arg2)) {
                 obj_from_char(obj);
@@ -4099,7 +4099,7 @@ ACMD(do_upgrade) {
                     TO_CHAR);
                 act("@C$n@W installs some circuits and upgrades $s systems.@n", true, ch, nullptr, nullptr, TO_ROOM);
                 ch->gainBaseST(gain, true);
-                send_to_char(ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain));
+                send_to_char(ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain).c_str());
                 return;
             } else {
                 send_to_char(ch, "What do you want to augment? Powerlevel, ki, or stamina?\r\n");
@@ -4158,15 +4158,15 @@ ACMD(do_upgrade) {
             count--;
         }
         if (cost > GET_UP(ch)) {
-            send_to_char(ch, "You need %s upgrade points, and only have %s.\r\n", add_commas(cost),
-                         add_commas(GET_UP(ch)));
+            send_to_char(ch, "You need %s upgrade points, and only have %s.\r\n", add_commas(cost).c_str(),
+                         add_commas(GET_UP(ch)).c_str());
             return;
         } else if (ch->is_soft_cap(bonus)) {
             send_to_char(ch, "@mYou can't spend that much UGP on it as it will go over your softcap.@n\r\n");
             return;
         } else {
             GET_UP(ch) -= cost;
-            send_to_char(ch, "You upgrade your system and gain %s %s!", add_commas(bonus), arg);
+            send_to_char(ch, "You upgrade your system and gain %s %s!", add_commas(bonus).c_str(), arg);
             ch->gainBasePL(bonus, true);
         }
     } else if (!strcasecmp("ki", arg)) {
@@ -4193,15 +4193,15 @@ ACMD(do_upgrade) {
             count--;
         }
         if (cost > GET_UP(ch)) {
-            send_to_char(ch, "You need %s upgrade points, and only have %s.\r\n", add_commas(cost),
-                         add_commas(GET_UP(ch)));
+            send_to_char(ch, "You need %s upgrade points, and only have %s.\r\n", add_commas(cost).c_str(),
+                         add_commas(GET_UP(ch)).c_str());
             return;
         } else if (ch->is_soft_cap(bonus)) {
             send_to_char(ch, "@mYou can't spend that much UGP on it as it will go over your softcap.@n\r\n");
             return;
         } else {
             GET_UP(ch) -= cost;
-            send_to_char(ch, "You upgrade your system and gain %s %s!", add_commas(bonus), arg);
+            send_to_char(ch, "You upgrade your system and gain %s %s!", add_commas(bonus).c_str(), arg);
             ch->gainBaseKI(bonus, true);
         }
     } else if (!strcasecmp("stamina", arg)) {
@@ -4228,15 +4228,15 @@ ACMD(do_upgrade) {
             count--;
         }
         if (cost > GET_UP(ch)) {
-            send_to_char(ch, "You need %s upgrade points, and only have %s.\r\n", add_commas(cost),
-                         add_commas(GET_UP(ch)));
+            send_to_char(ch, "You need %s upgrade points, and only have %s.\r\n", add_commas(cost).c_str(),
+                         add_commas(GET_UP(ch)).c_str());
             return;
         } else if (ch->is_soft_cap(bonus)) {
             send_to_char(ch, "@mYou can't spend that much UGP on it as it will go over your softcap.@n\r\n");
             return;
         } else {
             GET_UP(ch) -= cost;
-            send_to_char(ch, "You upgrade your system and gain %s %s!", add_commas(bonus), arg);
+            send_to_char(ch, "You upgrade your system and gain %s %s!", add_commas(bonus).c_str(), arg);
             ch->gainBaseST(bonus, true);
         }
     } else {
@@ -4339,7 +4339,7 @@ ACMD(do_ingest) {
                 SET_BIT_AR(PLR_FLAGS(vict), PLR_ABSORBED);
             }
             send_to_char(ch, "@D[@mINGEST@D] @rPL@W: @D(@y%s@D) @cKi@W: @D(@y%s@D) @gSt@W: @D(@y%s@D)@n\r\n",
-                         add_commas(pl), add_commas(ki), add_commas(stam));
+                         add_commas(pl).c_str(), add_commas(ki).c_str(), add_commas(stam).c_str());
             if (rand_number(1, 3) == 3) {
                 send_to_char(ch, "You get %s's eye color.\r\n", GET_NAME(vict));
                 GET_EYE(ch) = GET_EYE(vict);
@@ -4574,7 +4574,7 @@ ACMD(do_absorb) {
             }
 
             send_to_char(ch, "@D[@gABSORB@D] @rPL@W: @D(@y%s@D) @cKi@W: @D(@y%s@D) @gSt@W: @D(@y%s@D)@n\r\n",
-                         add_commas(pl), add_commas(ki), add_commas(stam));
+                         add_commas(pl).c_str(), add_commas(ki).c_str(), add_commas(stam).c_str());
             improve_skill(ch, SKILL_ABSORB, 1);
             die(vict, nullptr);
         }
@@ -4644,7 +4644,7 @@ ACMD(do_absorb) {
             ch->gainBaseKI(ki, true);
             ch->incCurLFPercent(.05);
             send_to_char(ch, "@D[@gABSORB@D] @rPL@W: @D(@y%s@D) @cKi@W: @D(@y%s@D) @gSt@W: @D(@y%s@D)@n\r\n",
-                         add_commas(pl), add_commas(ki), add_commas(stam));
+                         add_commas(pl).c_str(), add_commas(ki).c_str(), add_commas(stam).c_str());
             improve_skill(ch, SKILL_ABSORB, 0);
             WAIT_STATE(ch, PULSE_4SEC);
             SET_BIT_AR(MOB_FLAGS(vict), MOB_HUSK);
@@ -4857,8 +4857,8 @@ ACMD(do_regenerate) {
 
     if ((life <= 0 || energy <= 0) && !IS_NPC(ch)) {
         send_to_char(ch, "Your life force or ki are too low to regenerate that much.\r\n");
-        send_to_char(ch, "@YLF Needed@D: @C%s@w, @YKi Needed@D: @C%s@w.@n\r\n", add_commas(amt * 0.8),
-                     add_commas(amt * 0.2));
+        send_to_char(ch, "@YLF Needed@D: @C%s@w, @YKi Needed@D: @C%s@w.@n\r\n", add_commas(amt * 0.8).c_str(),
+                     add_commas(amt * 0.2).c_str());
         return;
     } else if (IS_NPC(ch) && energy <= 0) {
         return;
@@ -5207,17 +5207,17 @@ ACMD(do_focus) {
                         gain = level_exp(ch, GET_LEVEL(ch) + 1) * 0.15;
                         GET_EXP(ch) += gain;
                         send_to_char(ch, "@GYou gain @g%s@G experience due to your excellence with this skill.@n\r\n",
-                                     add_commas(gain));
+                                     add_commas(gain).c_str());
                     } else if (GET_SKILL(ch, SKILL_ENLIGHTEN) >= 60) {
                         gain = level_exp(ch, GET_LEVEL(ch) + 1) * 0.10;
                         GET_EXP(ch) += gain;
                         send_to_char(ch, "@GYou gain @g%s@G experience due to your excellence with this skill.@n\r\n",
-                                     add_commas(gain));
+                                     add_commas(gain).c_str());
                     } else if (GET_SKILL(ch, SKILL_ENLIGHTEN) >= 40) {
                         gain = level_exp(ch, GET_LEVEL(ch) + 1) * 0.05;
                         GET_EXP(ch) += gain;
                         send_to_char(ch, "@GYou gain @g%s@G experience due to your excellence with this skill.@n\r\n",
-                                     add_commas(gain));
+                                     add_commas(gain).c_str());
                     }
                 }
                 return;
@@ -5279,19 +5279,19 @@ ACMD(do_focus) {
                             GET_EXP(vict) += gain;
                             send_to_char(vict,
                                          "@GYou gain @g%s@G experience due to the level of enlightenment you have received!@n\r\n",
-                                         add_commas(gain));
+                                         add_commas(gain).c_str());
                         } else if (GET_SKILL(ch, SKILL_ENLIGHTEN) >= 60) {
                             gain = level_exp(vict, GET_LEVEL(vict) + 1) * 0.10;
                             GET_EXP(vict) += gain;
                             send_to_char(vict,
                                          "@GYou gain @g%s@G experience due to the level of enlightenment you have received!@n\r\n",
-                                         add_commas(gain));
+                                         add_commas(gain).c_str());
                         } else if (GET_SKILL(ch, SKILL_ENLIGHTEN) >= 40) {
                             gain = level_exp(vict, GET_LEVEL(vict) + 1) * 0.05;
                             GET_EXP(vict) += gain;
                             send_to_char(vict,
                                          "@GYou gain @g%s@G experience due to the level of enlightenment you have received!@n\r\n",
-                                         add_commas(gain));
+                                         add_commas(gain).c_str());
                         }
                     }
                     return;
@@ -6360,7 +6360,7 @@ ACMD(do_appraise) {
     if (GET_OBJ_TYPE(obj) == ITEM_WEAPON && OBJ_FLAGGED(obj, ITEM_CUSTOM))
         displevel = 20;
 
-    send_to_char(ch, "%s is worth: %s\r\nMin Lvl: %d\r\n", obj->short_description, add_commas(GET_OBJ_COST(obj)),
+    send_to_char(ch, "%s is worth: %s\r\nMin Lvl: %d\r\n", obj->short_description, add_commas(GET_OBJ_COST(obj)).c_str(),
                  displevel);
     if (GET_OBJ_TYPE(obj) == ITEM_WEAPON) {
         if (OBJ_FLAGGED(obj, ITEM_WEAPLVL1)) {
@@ -7650,7 +7650,7 @@ ACMD(do_transform) {
     }
 
     send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-    sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+    sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(GET_HIT(ch)).c_str());
     send_to_scouter(buf3, ch, 1, 0);
 
 }
@@ -7779,7 +7779,7 @@ ACMD(do_situp) {
         bonus += bonus * 0.1;
     }
     if(bonus <= 0) bonus = 1;
-    send_to_char(ch, "You feel slightly more vigorous @D[@G+%s@D]@n.\r\n", add_commas(bonus));
+    send_to_char(ch, "You feel slightly more vigorous @D[@G+%s@D]@n.\r\n", add_commas(bonus).c_str());
     ch->gainBaseST(bonus, true);
     WAIT_STATE(ch, std::min<int>(PULSE_7SEC,PULSE_7SEC * ratio));
     ch->decCurST(cost);
@@ -7851,7 +7851,7 @@ ACMD(do_meditate) {
         if (GET_PRACTICES(ch) < cost) {
             send_to_char(ch,
                          "You do not have enough practice sessions to expand your mind and ability to remember skills.\r\n");
-            send_to_char(ch, "%s needed.\r\n", add_commas(cost));
+            send_to_char(ch, "%s needed.\r\n", add_commas(cost).c_str());
         } else if (GET_SLOTS(ch) >= 60 && GET_BONUS(ch, BONUS_GMEMORY) == 0) {
             send_to_char(ch, "You can not have any more slots through this process.\r\n");
         } else if (GET_SLOTS(ch) >= 65 && GET_BONUS(ch, BONUS_GMEMORY) == 1) {
@@ -8007,7 +8007,7 @@ ACMD(do_meditate) {
         }
         if (bonus > 0 && IS_DEMON(ch) && rand_number(1, 100) >= 80) {
             send_to_char(ch, "Your spirit magnifies the strength of your body! @D[@G+%s@D]@n\r\n",
-                         add_commas(bonus / 2));
+                         add_commas(bonus / 2).c_str());
             ch->gainBasePL(bonus / 2);
         }
 
@@ -8020,7 +8020,7 @@ ACMD(do_meditate) {
         }
         if(bonus <= 0) bonus = 0;
         /* Rillao: transloc, add new transes here */
-        send_to_char(ch, "You feel your spirit grow stronger @D[@G+%s@D]@n.\r\n", add_commas(bonus));
+        send_to_char(ch, "You feel your spirit grow stronger @D[@G+%s@D]@n.\r\n", add_commas(bonus).c_str());
         ch->gainBaseKI(bonus, true);
         WAIT_STATE(ch, std::min<int>(PULSE_7SEC,PULSE_7SEC * ratio));
         ch->decCurKI(cost);
@@ -8147,7 +8147,7 @@ ACMD(do_pushup) {
         bonus += bonus * 0.1;
     }
     /* Rillao: transloc, add new transes here */
-    send_to_char(ch, "You feel slightly stronger @D[@G+%s@D]@n.\r\n", add_commas(bonus));
+    send_to_char(ch, "You feel slightly stronger @D[@G+%s@D]@n.\r\n", add_commas(bonus).c_str());
 
     if (IS_HUMAN(ch)) {
         bonus = bonus * 0.8;
@@ -8332,7 +8332,7 @@ void base_update(uint64_t heartPulse, double deltaTime) {
                     send_to_char(d->character,
                                  "@D[@YZ@ye@wn@Wk@Ya@yi @YB@yo@wo@Ws@Yt@D] @WYou feel much stronger!\r\n");
                     send_to_char(d->character, "@D[@RPL@Y:@n+%s@D] @D[@CKI@Y:@n+%s@D] @D[@GSTA@Y:@n+%s@D]@n\r\n",
-                                 add_commas(zenkaiPL), add_commas(zenkaiKi), add_commas(zenkaiSt));
+                                 add_commas(zenkaiPL).c_str(), add_commas(zenkaiKi).c_str(), add_commas(zenkaiSt).c_str());
                 }
                 act("@RYou collapse to the ground, body pushed beyond the typical limits of exhaustion. The passage of time distorts and an indescribable amount of time passes as raw emotions pass through your very being. Your eyes open and focus with a newfound clarity as your unadulterated emotions and feelings revive you for a second wind!@n",
                     true, d->character, nullptr, nullptr, TO_CHAR);
@@ -8424,7 +8424,7 @@ void base_update(uint64_t heartPulse, double deltaTime) {
                 inc = 25000;
             }
             GET_BANK_GOLD(d->character) += inc;
-            send_to_char(d->character, "@cBank Interest@D: @Y%s@n\r\n", add_commas(inc));
+            send_to_char(d->character, "@cBank Interest@D: @Y%s@n\r\n", add_commas(inc).c_str());
         }
         if (!IS_NPC(d->character)) {
             check_eq(d->character);
@@ -8558,7 +8558,7 @@ void base_update(uint64_t heartPulse, double deltaTime) {
                                 gain += gbonus;
                                 send_to_char(d->character,
                                              "The leader of your group conveys an extra bonus! @D[@G+%s@D]@n \r\n",
-                                             add_commas(gbonus));
+                                             add_commas(gbonus).c_str());
                             }
                         }
                         d->character->gainBasePL(gain);
@@ -8588,7 +8588,7 @@ void base_update(uint64_t heartPulse, double deltaTime) {
                                 gain += gbonus;
                                 send_to_char(d->character,
                                              "The leader of your group conveys an extra bonus! @D[@G+%s@D]@n \r\n",
-                                             add_commas(gbonus));
+                                             add_commas(gbonus).c_str());
                             }
                         }
                         d->character->gainBaseST(gain);
@@ -8618,7 +8618,7 @@ void base_update(uint64_t heartPulse, double deltaTime) {
                                 gain += gbonus;
                                 send_to_char(d->character,
                                              "The leader of your group conveys an extra bonus! @D[@G+%s@D]@n \r\n",
-                                             add_commas(gbonus));
+                                             add_commas(gbonus).c_str());
                             }
                         }
                         d->character->gainBaseKI(gain);
@@ -8977,7 +8977,7 @@ ACMD(do_scouter) {
                                      same == true ? pathway : blah);
                     } else {
                         send_to_char(ch, "@D<@GPowerlevel Detected@D: [@Y%s@D]@w ---> @C%s@n\r\n",
-                                     add_commas(GET_HIT(i->character)), same ==
+                                     add_commas(GET_HIT(i->character)).c_str(), same ==
                                                                         true ? pathway : blah);
                     }
                     ++count;
@@ -9058,13 +9058,13 @@ ACMD(do_scouter) {
                 send_to_char(ch, "@D|@1@RReading target...                 @n@D|@n\r\n");
                 send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
                 send_to_char(ch, "@D|@1@RP@r@1o@Rw@r@1e@1@Rr L@r@1e@Rv@r@1e@1@Rl@1@D: @Y%21s@n@D|@n\r\n",
-                             add_commas(GET_HIT(vict)));
+                             add_commas(GET_HIT(vict)).c_str());
                 if (!IS_NPC(vict)) {
                     send_to_char(ch, "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D: @Y%21s@n@D|@n\r\n",
-                                 add_commas(GET_CHARGE(vict)));
+                                 add_commas(GET_CHARGE(vict)).c_str());
                 } else if (IS_NPC(vict)) {
                     send_to_char(ch, "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D: @Y%21s@n@D|@n\r\n",
-                                 add_commas(vict->mobcharge * rand_number(GET_LEVEL(ch) * 50, GET_LEVEL(ch) * 200)));
+                                 add_commas(vict->mobcharge * rand_number(GET_LEVEL(ch) * 50, GET_LEVEL(ch) * 200)).c_str());
                 }
                 if (percent < 10)
                     send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Exhausted");
@@ -9368,7 +9368,7 @@ ACMD(do_steal) {
                     if (!IS_NPC(vict)) {
                         SET_BIT_AR(PLR_FLAGS(vict), PLR_STOLEN);
                         mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true,
-                               "THEFT: %s has stolen %s zenni@n from %s", GET_NAME(ch), add_commas(gold),
+                               "THEFT: %s has stolen %s zenni@n from %s", GET_NAME(ch), add_commas(gold).c_str(),
                                GET_NAME(vict));
                     }
                     if (gold > 1)
@@ -9663,13 +9663,13 @@ static void print_group(struct char_data *ch) {
             if (GET_HIT(k) > GET_MAX_HIT(k) / 10) {
                 snprintf(buf, sizeof(buf),
                          "@gL@D: @w$N @W- @D[@RPL@Y: @c%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]@n",
-                         add_commas(GET_HIT(k)), add_commas((k->getCurKI())), add_commas((k->getCurST())), GET_LEVEL(k),
+                         add_commas(GET_HIT(k)).c_str(), add_commas((k->getCurKI())).c_str(), add_commas((k->getCurST())).c_str(), GET_LEVEL(k),
                          CLASS_ABBR(k), RACE_ABBR(k));
             }
             if (GET_HIT(k) <= (GET_MAX_HIT(k) - (k->getCarriedWeight())) / 10) {
                 snprintf(buf, sizeof(buf),
                          "@gL@D: @w$N @W- @D[@RPL@Y: @r%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]@n",
-                         add_commas(GET_HIT(k)), add_commas((k->getCurKI())), add_commas((k->getCurST())), GET_LEVEL(k),
+                         add_commas(GET_HIT(k)).c_str(), add_commas((k->getCurKI())).c_str(), add_commas((k->getCurST())).c_str(), GET_LEVEL(k),
                          CLASS_ABBR(k), RACE_ABBR(k));
             }
             act(buf, false, ch, nullptr, k, TO_CHAR);
@@ -9682,15 +9682,15 @@ static void print_group(struct char_data *ch) {
             if (GET_HIT(f->follower) > (GET_MAX_HIT(f->follower) - (f->follower->getCarriedWeight())) / 10) {
                 snprintf(buf, sizeof(buf),
                          "@gF@D: @w$N @W- @D[@RPL@Y: @c%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]",
-                         add_commas(GET_HIT(f->follower)), add_commas((f->follower->getCurKI())), add_commas(
-                                (f->follower->getCurST())),
+                         add_commas(GET_HIT(f->follower)).c_str(), add_commas((f->follower->getCurKI())).c_str(), add_commas(
+                                (f->follower->getCurST())).c_str(),
                          GET_LEVEL(f->follower), CLASS_ABBR(f->follower), RACE_ABBR(f->follower));
             }
             if (GET_HIT(f->follower) <= (GET_MAX_HIT(f->follower) - (f->follower->getCarriedWeight())) / 10) {
                 snprintf(buf, sizeof(buf),
                          "@gF@D: @w$N @W- @D[@RPL@Y: @r%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]",
-                         add_commas(GET_HIT(f->follower)), add_commas((f->follower->getCurKI())), add_commas(
-                                (f->follower->getCurST())),
+                         add_commas(GET_HIT(f->follower)).c_str(), add_commas((f->follower->getCurKI())).c_str(), add_commas(
+                                (f->follower->getCurST())).c_str(),
                          GET_LEVEL(f->follower), CLASS_ABBR(f->follower), RACE_ABBR(f->follower));
             }
             act(buf, false, ch, nullptr, f->follower, TO_CHAR);
@@ -10880,7 +10880,7 @@ ACMD(do_fix) {
         if (obj->carried_by == nullptr && !PLR_FLAGGED(ch, PLR_REPLEARN) &&
             (level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0 || GET_LEVEL(ch) >= 100)) {
             int64_t gain = (level_exp(ch, GET_LEVEL(ch) + 1) * 0.0003) * GET_SKILL(ch, SKILL_REPAIR);
-            send_to_char(ch, "@mYou've learned a bit from repairing it. @D[@gEXP@W: @G+%s@D]@n\r\n", add_commas(gain));
+            send_to_char(ch, "@mYou've learned a bit from repairing it. @D[@gEXP@W: @G+%s@D]@n\r\n", add_commas(gain).c_str());
             SET_BIT_AR(PLR_FLAGS(ch), PLR_REPLEARN);
             gain_exp(ch, gain);
         } else if (rand_number(2, 12) >= 10 && PLR_FLAGGED(ch, PLR_REPLEARN)) {
@@ -11218,7 +11218,7 @@ ACMD(do_clan) {
                 bank = atoi(arg2);
                 GET_GOLD(ch) -= bank;
                 clanBANKADD(GET_CLAN(ch), ch, bank);
-                send_to_char(ch, "You have deposited %s into the clan bank.\r\n", add_commas(bank));
+                send_to_char(ch, "You have deposited %s into the clan bank.\r\n", add_commas(bank).c_str());
             }
         }
         return;
@@ -11363,7 +11363,7 @@ ACMD(do_clan) {
             } else {
                 bank = atoi(arg2);
                 if (clanBANKSUB(GET_CLAN(ch), ch, bank)) {
-                    send_to_char(ch, "You have withdrawn %s from the clan bank.\r\n", add_commas(bank));
+                    send_to_char(ch, "You have withdrawn %s from the clan bank.\r\n", add_commas(bank).c_str());
                     GET_GOLD(ch) += bank;
                 } else {
                     send_to_char(ch, "There isn't that much in the clan's bank!\r\n");
@@ -11383,7 +11383,7 @@ ACMD(do_clan) {
             }
             bank = clanBANK(GET_CLAN(ch), ch);
             send_to_char(ch, "@W[ @C%-20s @W]@w has @D(@Y%s@D)@w zenni in its clan bank.\r\n", GET_CLAN(ch),
-                         add_commas(bank));
+                         add_commas(bank).c_str());
         }
         return;
     } else if (!(strcmp(arg1, "members"))) {

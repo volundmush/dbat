@@ -1136,7 +1136,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 act("@RYou have reached your maximum!@n", true, ch, nullptr, nullptr, TO_CHAR);
                 act("@R$n stops powering up in a flash of light!@n", true, ch, nullptr, nullptr, TO_ROOM);
                 send_to_sense(0, "You sense someone stop powering up", ch);
-                sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+                sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(GET_HIT(ch)).c_str());
                 send_to_scouter(buf3, ch, 1, 0);
                 REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_POWERUP);
             } else if (GET_HIT(ch) >= (ch->getEffMaxPL()) && (ch->getCurKI()) >= (GET_MAX_MANA(ch) * 0.0375) + 1 &&
@@ -1151,7 +1151,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 act("@RYou have reached your maximum!@n", true, ch, nullptr, nullptr, TO_CHAR);
                 act("@R$n stops powering up in a flash of light!@n", true, ch, nullptr, nullptr, TO_ROOM);
                 send_to_sense(0, "You sense someone stop powering up", ch);
-                sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+                sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(GET_HIT(ch)).c_str());
                 send_to_scouter(buf3, ch, 1, 0);
                 REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_POWERUP);
             }
@@ -1160,7 +1160,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 act("@RYou have run out of ki.@n", true, ch, nullptr, nullptr, TO_CHAR);
                 act("@R$n stops powering up in a flash of light!@n", true, ch, nullptr, nullptr, TO_ROOM);
                 send_to_sense(0, "You sense someone stop powering up", ch);
-                sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+                sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(GET_HIT(ch)).c_str());
                 send_to_scouter(buf3, ch, 1, 0);
                 REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_POWERUP);
             } else if ((ch->getCurKI()) < (GET_MAX_MANA(ch) * 0.0375) + 1 && GET_PREFERENCE(ch) == PREFERENCE_KI) {
@@ -1168,7 +1168,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 act("@RYou have run out of ki.@n", true, ch, nullptr, nullptr, TO_CHAR);
                 act("@R$n stops powering up in a flash of light!@n", true, ch, nullptr, nullptr, TO_ROOM);
                 send_to_sense(0, "You sense someone stop powering up", ch);
-                sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+                sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(GET_HIT(ch)).c_str());
                 send_to_scouter(buf3, ch, 1, 0);
                 REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_POWERUP);
             }
@@ -1224,7 +1224,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 }
                 send_to_sense(0, "You sense someone powering up", ch);
                 send_to_worlds(ch);
-                sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Detected@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
+                sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Detected@D: [@Y%s@D]", add_commas(GET_HIT(ch)).c_str());
                 send_to_scouter(buf3, ch, 1, 0);
                 dispel_ash(ch);
             }
@@ -2173,7 +2173,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
             if (IS_ANDROID(ch) && !PLR_FLAGGED(ch, PLR_ABSORB) && android_lose && GET_UP(ch) > 5) {
                 int loss = GET_UP(ch) / 5;
                 GET_UP(ch) -= loss;
-                send_to_char(ch, "@rYou lose @R%s@r upgrade points!@n\r\n", add_commas(loss));
+                send_to_char(ch, "@rYou lose @R%s@r upgrade points!@n\r\n", add_commas(loss).c_str());
             }
             Crash_delete_crashfile(ch);
             ch->save();
@@ -2415,7 +2415,7 @@ static void perform_group_gain(struct char_data *ch, int base, struct char_data 
     }
     share = gear_exp(ch, share);
     if (share > 1)
-        send_to_char(ch, "You receive your share of experience -- %s points.\r\n", add_commas(share));
+        send_to_char(ch, "You receive your share of experience -- %s points.\r\n", add_commas(share).c_str());
     else
         send_to_char(ch, "You receive your share of experience -- one measly little point!\r\n");
 
@@ -2556,7 +2556,7 @@ void solo_gain(struct char_data *ch, struct char_data *victim) {
     exp = MAX(exp, 1);
 
     if (exp > 1)
-        send_to_char(ch, "You receive %s experience points.\r\n", add_commas(exp));
+        send_to_char(ch, "You receive %s experience points.\r\n", add_commas(exp).c_str());
     else {
         send_to_char(ch, "You receive one lousy experience point. That fight was hardly worth it...\r\n");
     }

@@ -939,7 +939,7 @@ SPECIAL(auction) {
                 GET_GOLD(ch) -= GET_BID(obj2);
                 obj_from_room(obj2);
                 obj_to_char(obj2, ch);
-                send_to_char(ch, "You pay %s zenni and receive the item.\r\n", add_commas(GET_BID(obj2)));
+                send_to_char(ch, "You pay %s zenni and receive the item.\r\n", add_commas(GET_BID(obj2)).c_str());
                 auc_save();
 
                 for (d = descriptor_list; d; d = d->next) {
@@ -1028,9 +1028,9 @@ SPECIAL(auction) {
         obj_to_room(obj2, auct_room);
         auc_save();
         send_to_char(ch, "You place %s on auction for %s zenni.\r\n", obj2->short_description,
-                     add_commas(GET_BID(obj2)));
+                     add_commas(GET_BID(obj2)).c_str());
         basic_mud_log("AUCTION: %s places %s on auction for %s", GET_NAME(ch), obj2->short_description,
-            add_commas(GET_BID(obj2)));
+            add_commas(GET_BID(obj2)).c_str());
 
         for (d = descriptor_list; d; d = d->next) {
             if (STATE(d) != CON_PLAYING || IS_NPC(d->character))
@@ -1040,7 +1040,7 @@ SPECIAL(auction) {
             if (GET_EQ(d->character, WEAR_EYE)) {
                 send_to_char(d->character,
                              "@RScouter Auction News@D: @GThe item, @w%s@G, has been placed on auction for @Y%s@G zenni.@n\r\n",
-                             obj2->short_description, add_commas(GET_BID(obj2)));
+                             obj2->short_description, add_commas(GET_BID(obj2)).c_str());
             }
         }
         return (true);
@@ -1178,17 +1178,17 @@ SPECIAL(augmenter) {
         if (!*arg) {
             send_to_char(ch, "@D                        -----@WBody Augmentations@D-----@n\r\n");
             send_to_char(ch, "@RStrength    @y: @WCurrently measured at @w%d@W, cost to augment @Y%s@W.@n\r\n",
-                         strength, add_commas(strcost));
+                         strength, add_commas(strcost).c_str());
             send_to_char(ch, "@BIntelligence@y: @WCurrently measured at @w%d@W, cost to augment @Y%s@W.@n\r\n", intel,
-                         add_commas(intcost));
+                         add_commas(intcost).c_str());
             send_to_char(ch, "@CWisdom      @y: @WCurrently measured at @w%d@W, cost to augment @Y%s@W.@n\r\n", wisdom,
-                         add_commas(wiscost));
+                         add_commas(wiscost).c_str());
             send_to_char(ch, "@GConstitution@y: @WCurrently measured at @w%d@W, cost to augment @Y%s@W.@n\r\n", consti,
-                         add_commas(concost));
+                         add_commas(concost).c_str());
             send_to_char(ch, "@mAgility     @y: @WCurrently measured at @w%d@W, cost to augment @Y%s@W.@n\r\n", agility,
-                         add_commas(agicost));
+                         add_commas(agicost).c_str());
             send_to_char(ch, "@YSpeed       @y: @WCurrently measured at @w%d@W, cost to augment @Y%s@W.@n\r\n", speed,
-                         add_commas(specost));
+                         add_commas(specost).c_str());
             send_to_char(ch, "\r\n");
             return (true);
         } else if (!strcasecmp("strength", arg) || !strcasecmp("str", arg)) {
@@ -1460,15 +1460,15 @@ SPECIAL(bank) {
             GET_BANK_GOLD(vict) += amount;
             GET_BANK_GOLD(ch) -= amount + (amount / 100);
             mudlog(NRM, MAX(ADMLVL_IMPL, GET_INVIS_LEV(ch)), true, "EXCHANGE: %s gave %s zenni to user %s",
-                   GET_NAME(ch), add_commas(amount), GET_NAME(vict));
+                   GET_NAME(ch), add_commas(amount).c_str(), GET_NAME(vict));
             vict->save();
         } else {
             GET_BANK_GOLD(vict) += amount;
             GET_BANK_GOLD(ch) -= amount + (amount / 100);
             send_to_char(vict, "@WYou have just had @Y%s@W zenni wired into your bank account.@n\r\n",
-                         add_commas(amount));
+                         add_commas(amount).c_str());
         }
-        send_to_char(ch, "You transfer %s zenni to them.\r\n", add_commas(amount));
+        send_to_char(ch, "You transfer %s zenni to them.\r\n", add_commas(amount).c_str());
         act("$n makes a bank transaction.", true, ch, nullptr, nullptr, TO_ROOM);
         return (true);
     } else if (CMD_IS("deposit")) {
@@ -1513,11 +1513,11 @@ SPECIAL(bank) {
                 amount = amount + 1;
             }
             send_to_char(ch, "You need at least %s in the bank with the 1 percent withdraw fee.\r\n",
-                         add_commas(amount));
+                         add_commas(amount).c_str());
             return (true);
         }
         if (GET_GOLD(ch) + amount > GOLD_CARRY(ch)) {
-            send_to_char(ch, "You can only carry %s zenni, you left the rest.\r\n", add_commas(GOLD_CARRY(ch)));
+            send_to_char(ch, "You can only carry %s zenni, you left the rest.\r\n", add_commas(GOLD_CARRY(ch)).c_str());
             int diff = (GET_GOLD(ch) + amount) - GOLD_CARRY(ch);
             GET_GOLD(ch) = GOLD_CARRY(ch);
             amount -= diff;
@@ -1527,8 +1527,8 @@ SPECIAL(bank) {
             } else if (amount < 100) {
                 GET_BANK_GOLD(ch) -= amount + 1;
             }
-            send_to_char(ch, "You withdraw %s zenni,  and pay %s in withdraw fees.\r\n.\r\n", add_commas(amount),
-                         add_commas(num));
+            send_to_char(ch, "You withdraw %s zenni,  and pay %s in withdraw fees.\r\n.\r\n", add_commas(amount).c_str(),
+                         add_commas(num).c_str());
             act("$n makes a bank transaction.", true, ch, nullptr, nullptr, TO_ROOM);
             return (true);
         }
@@ -1539,8 +1539,8 @@ SPECIAL(bank) {
         } else if (amount < 100) {
             GET_BANK_GOLD(ch) -= amount + 1;
         }
-        send_to_char(ch, "You withdraw %s zenni, and pay %s in withdraw fees.\r\n", add_commas(amount),
-                     add_commas(num));
+        send_to_char(ch, "You withdraw %s zenni, and pay %s in withdraw fees.\r\n", add_commas(amount).c_str(),
+                     add_commas(num).c_str());
         act("$n makes a bank transaction.", true, ch, nullptr, nullptr, TO_ROOM);
         return (true);
     } else

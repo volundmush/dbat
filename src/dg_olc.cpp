@@ -125,12 +125,7 @@ void script_save_to_disk(FILE *fp, struct unit_data *item, int type) {
 }
 
 void trigedit_setup_new(struct descriptor_data *d) {
-    struct trig_data *trig;
-
-    /*
-     * Allocate a scratch trigger structure
-     */
-    CREATE(trig, struct trig_data, 1);
+    auto trig = new trig_data();
 
     trig->vn = NOWHERE;
 

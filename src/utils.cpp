@@ -253,7 +253,7 @@ const char *report_party_health(struct char_data *ch) {
         }
         sprintf(result1,
                 "@D[@BG@D]-------@mF@D------- -------@mF@D------- -------@mF@D------- -------@mF@D-------[@BG@D] <@RV@Y%s@R>@n\n",
-                add_commas(GET_GROUPKILLS(ch)));
+                add_commas(GET_GROUPKILLS(ch)).c_str());
         sprintf(result2, "@D[@BR@D]@C%-15s %-15s %-15s %-15s@D[@BR@D]@n\n", party1 ? get_i_name(ch, party1) : "Empty",
                 party2 ? get_i_name(ch, party2) : "Empty", party3 ? get_i_name(ch, party3) : "Empty",
                 party4 ? get_i_name(ch, party4) : "Empty");
@@ -2276,8 +2276,8 @@ void handle_evolution(struct char_data *ch, int64_t dmg) {
             act("@G$n's@g @De@Wx@wo@Ds@Wk@we@Dl@We@wt@Do@Wn@g begins to crack. Suddenly $e sheds the damaged @De@Wx@wo@Ds@Wk@we@Dl@We@wt@Do@Wn and reveals a stronger version that had been growing underneath!@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
             send_to_char(ch, "@D[@RPL@W: @G+%s@D] [@gStamina@W: @G+%s@D] [@wArmor Index@W: @G+%s@D]@n\r\n",
-                         add_commas(plgain), add_commas(stamgain),
-                         GET_ARMOR(ch) >= 50000 ? "50k CAP" : add_commas(armorgain));
+                         add_commas(plgain).c_str(), add_commas(stamgain).c_str(),
+                         GET_ARMOR(ch) >= 50000 ? "50k CAP" : add_commas(armorgain).c_str());
         } else {
             send_to_char(ch,
                          "@gYou are unable to evolve while your evolution level is higher than twice your character level.@n\r\n");
@@ -3951,34 +3951,8 @@ void trim(char *s) {
 }
 
 /* Turns number into string and adds commas to it. */
-char *add_commas(int64_t num) {
-#define DIGITS_PER_GROUP      3
-#define BUFFER_COUNT         19
-#define DIGITS_PER_BUFFER    25
-
-    int64_t i, j, len, negative = (num < 0);
-    char num_string[DIGITS_PER_BUFFER];
-    static char comma_string[BUFFER_COUNT][DIGITS_PER_BUFFER];
-    static int64_t which = 0;
-
-    sprintf(num_string, "%" I64T "", num);
-    len = strlen(num_string);
-
-    for (i = j = 0; num_string[i]; ++i) {
-        if ((len - i) % DIGITS_PER_GROUP == 0 && i && i - negative)
-            comma_string[which][j++] = ',';
-        comma_string[which][j++] = num_string[i];
-    }
-    comma_string[which][j] = '\0';
-
-    i = which;
-    which = (which + 1) % BUFFER_COUNT;
-
-    return comma_string[i];
-
-#undef DIGITS_PER_GROUP
-#undef BUFFER_COUNT
-#undef DIGITS_PER_BUFFER
+std::string add_commas(double X) {
+    return fmt::format("{:L}", X);
 }
 
 int get_flag_by_name(const char *flag_list[], char *flag_name) {

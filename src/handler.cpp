@@ -776,14 +776,10 @@ struct char_data *get_char_num(mob_rnum nr) {
 void obj_to_room(struct obj_data *object, room_rnum room) {
     struct obj_data *vehicle = nullptr;
 
-    if(room == 45000) {
-        logger->info("testing!");
-    }
-
     if (!object || !world.count(room)) {
         basic_mud_log("SYSERR: Illegal value(s) passed to obj_to_room. (Room #%d, obj %p)",
             room, object);
-    return;
+        return;
     }
     if (ROOM_FLAGGED(room, ROOM_GARDEN1) || ROOM_FLAGGED(room, ROOM_GARDEN2)) {
         if (GET_OBJ_TYPE(object) != ITEM_PLANT) {
@@ -797,59 +793,69 @@ void obj_to_room(struct obj_data *object, room_rnum room) {
     if (room == real_room(80)) {
         auc_load(object);
     }
-    object->next_content = world[room].contents;
-    world[room].contents = object;
+
+    auto &r = world[room];
+
+    object->next_content = r.contents;
+    r.contents = object;
     IN_ROOM(object) = room;
     object->carried_by = nullptr;
     GET_LAST_LOAD(object) = time(nullptr);
+
     if (GET_OBJ_TYPE(object) == ITEM_VEHICLE && !OBJ_FLAGGED(object, ITEM_UNBREAKABLE) &&
         GET_OBJ_VNUM(object) > 19199) {
         SET_BIT_AR(GET_OBJ_EXTRA(object), ITEM_UNBREAKABLE);
     }
-    if (GET_OBJ_TYPE(object) == ITEM_HATCH && GET_OBJ_VNUM(object) <= 19199) {
-        if ((GET_OBJ_VNUM(object) <= 18999 && GET_OBJ_VNUM(object) >= 18800) ||
-            (GET_OBJ_VNUM(object) <= 19199 && GET_OBJ_VNUM(object) >= 19100)) {
-            int hnum = GET_OBJ_VAL(object, 0);
-            struct obj_data *house = read_object(hnum, VIRTUAL);
-            obj_to_room(house, real_room(GET_OBJ_VAL(object, 6)));
-            SET_BIT(GET_OBJ_VAL(object, VAL_CONTAINER_FLAGS), CONT_CLOSED);
-            SET_BIT(GET_OBJ_VAL(object, VAL_CONTAINER_FLAGS), CONT_LOCKED);
-        }
-    }
-    if (GET_OBJ_TYPE(object) == ITEM_HATCH && GET_OBJ_VAL(object, 0) > 1 && GET_OBJ_VNUM(object) > 19199) {
-        if (!(vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(object, VAL_HATCH_DEST)))) {
-            if (real_room(GET_OBJ_VAL(object, 3)) != NOWHERE) {
-                vehicle = read_object(GET_OBJ_VAL(object, 0), VIRTUAL);
-                if(!vehicle) {
-                    basic_mud_log("SYSERR: Vehicle %d not found for hatch %d", GET_OBJ_VAL(object, 0), GET_OBJ_VNUM(object));
-                }
-                obj_to_room(vehicle, real_room(GET_OBJ_VAL(object, 3)));
-                if (object->look_description) {
-                    if (strlen(object->look_description)) {
-                        char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH], nick3[MAX_INPUT_LENGTH];
-                        if (GET_OBJ_VNUM(vehicle) <= 46099 && GET_OBJ_VNUM(vehicle) >= 46000) {
-                            sprintf(nick, "Saiyan Pod %s", object->look_description);
-                            sprintf(nick2, "@wA @Ys@ya@Yi@yy@Ya@yn @Dp@Wo@Dd@w named @D(@C%s@D)@w",
-                                    object->look_description);
-                        } else if (GET_OBJ_VNUM(vehicle) >= 46100 && GET_OBJ_VNUM(vehicle) <= 46199) {
-                            sprintf(nick, "EDI Xenofighter MK. II %s", object->look_description);
-                            sprintf(nick2,
-                                    "@wAn @YE@yD@YI @CX@ce@Wn@Do@Cf@ci@Wg@Dh@Wt@ce@Cr @RMK. II @wnamed @D(@C%s@D)@w",
-                                    object->look_description);
-                        }
-                        sprintf(nick3, "%s is resting here@w", nick2);
-                        vehicle->name = strdup(nick);
-                        vehicle->short_description = strdup(nick2);
-                        vehicle->room_description = strdup(nick3);
-                    }
-                }
+
+    // This section is now only going to be called during migrations.
+    if(gameFunc) {
+        if (GET_OBJ_TYPE(object) == ITEM_HATCH && GET_OBJ_VNUM(object) <= 19199) {
+            if ((GET_OBJ_VNUM(object) <= 18999 && GET_OBJ_VNUM(object) >= 18800) ||
+                (GET_OBJ_VNUM(object) <= 19199 && GET_OBJ_VNUM(object) >= 19100)) {
+                int hnum = GET_OBJ_VAL(object, 0);
+                struct obj_data *house = read_object(hnum, VIRTUAL);
+                obj_to_room(house, real_room(GET_OBJ_VAL(object, 6)));
                 SET_BIT(GET_OBJ_VAL(object, VAL_CONTAINER_FLAGS), CONT_CLOSED);
                 SET_BIT(GET_OBJ_VAL(object, VAL_CONTAINER_FLAGS), CONT_LOCKED);
-            } else {
-                basic_mud_log("Hatch load: Hatch with no vehicle load room: #%d!", GET_OBJ_VNUM(object));
+            }
+        }
+
+        if (GET_OBJ_TYPE(object) == ITEM_HATCH && GET_OBJ_VAL(object, 0) > 1 && GET_OBJ_VNUM(object) > 19199) {
+            if (!(vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(object, VAL_HATCH_DEST)))) {
+                if (real_room(GET_OBJ_VAL(object, 3)) != NOWHERE) {
+                    vehicle = read_object(GET_OBJ_VAL(object, 0), VIRTUAL);
+                    if(!vehicle) {
+                        basic_mud_log("SYSERR: Vehicle %d not found for hatch %d", GET_OBJ_VAL(object, 0), GET_OBJ_VNUM(object));
+                    }
+                    obj_to_room(vehicle, real_room(GET_OBJ_VAL(object, 3)));
+                    if (object->look_description) {
+                        if (strlen(object->look_description)) {
+                            char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH], nick3[MAX_INPUT_LENGTH];
+                            if (GET_OBJ_VNUM(vehicle) <= 46099 && GET_OBJ_VNUM(vehicle) >= 46000) {
+                                sprintf(nick, "Saiyan Pod %s", object->look_description);
+                                sprintf(nick2, "@wA @Ys@ya@Yi@yy@Ya@yn @Dp@Wo@Dd@w named @D(@C%s@D)@w",
+                                        object->look_description);
+                            } else if (GET_OBJ_VNUM(vehicle) >= 46100 && GET_OBJ_VNUM(vehicle) <= 46199) {
+                                sprintf(nick, "EDI Xenofighter MK. II %s", object->look_description);
+                                sprintf(nick2,
+                                        "@wAn @YE@yD@YI @CX@ce@Wn@Do@Cf@ci@Wg@Dh@Wt@ce@Cr @RMK. II @wnamed @D(@C%s@D)@w",
+                                        object->look_description);
+                            }
+                            sprintf(nick3, "%s is resting here@w", nick2);
+                            vehicle->name = strdup(nick);
+                            vehicle->short_description = strdup(nick2);
+                            vehicle->room_description = strdup(nick3);
+                        }
+                    }
+                    SET_BIT(GET_OBJ_VAL(object, VAL_CONTAINER_FLAGS), CONT_CLOSED);
+                    SET_BIT(GET_OBJ_VAL(object, VAL_CONTAINER_FLAGS), CONT_LOCKED);
+                } else {
+                    basic_mud_log("Hatch load: Hatch with no vehicle load room: #%d!", GET_OBJ_VNUM(object));
+                }
             }
         }
     }
+
     if (EXIT(object, 5) &&
         (SECT(IN_ROOM(object)) == SECT_UNDERWATER || SECT(IN_ROOM(object)) == SECT_WATER_NOSWIM)) {
         act("$p @Bsinks to deeper waters.@n", true, nullptr, object, nullptr, TO_ROOM);
@@ -872,7 +878,6 @@ void obj_to_room(struct obj_data *object, room_rnum room) {
             object->level = GET_OBJ_VAL(object, 0);
         }
     }
-    if(!gameIsLoading) object->save();
 }
 
 

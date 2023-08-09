@@ -113,10 +113,10 @@ ACMD(do_evolve) {
     if (!*arg) {
         send_to_char(ch, "@D-=@YConvert Evolution Points To What?@D=-@n\r\n");
         send_to_char(ch, "@D-------------------------------------@n\r\n");
-        send_to_char(ch, "@CPowerlevel  @D: @Y%s @Wpts\r\n", add_commas(plcost));
-        send_to_char(ch, "@CKi          @D: @Y%s @Wpts\r\n", add_commas(kicost));
-        send_to_char(ch, "@CStamina     @D: @Y%s @Wpts\r\n", add_commas(stcost));
-        send_to_char(ch, "@D[@Y%s @Wpts currently@D]@n\r\n", add_commas(GET_MOLT_EXP(ch)));
+        send_to_char(ch, "@CPowerlevel  @D: @Y%s @Wpts\r\n", add_commas(plcost).c_str());
+        send_to_char(ch, "@CKi          @D: @Y%s @Wpts\r\n", add_commas(kicost).c_str());
+        send_to_char(ch, "@CStamina     @D: @Y%s @Wpts\r\n", add_commas(stcost).c_str());
+        send_to_char(ch, "@D[@Y%s @Wpts currently@D]@n\r\n", add_commas(GET_MOLT_EXP(ch)).c_str());
         return;
     } else if (!strcasecmp(arg, "powerlevel") || !strcasecmp(arg, "pl")) {
         if (plcost > molt_threshold(ch)) {
@@ -137,7 +137,7 @@ ACMD(do_evolve) {
             GET_MOLT_EXP(ch) -= plcost;
             send_to_char(ch,
                          "Your body evolves to make better use of the way it is now, and you feel that your body has strengthened. @D[@RPL@D: @Y+%s@D]@n\r\n",
-                         add_commas(plgain));
+                         add_commas(plgain).c_str());
         }
     } else if (!strcasecmp(arg, "ki")) {
         if (kicost > molt_threshold(ch)) {
@@ -158,7 +158,7 @@ ACMD(do_evolve) {
             GET_MOLT_EXP(ch) -= kicost;
             send_to_char(ch,
                          "Your body evolves to make better use of the way it is now, and you feel that your spirit has strengthened. @D[@CKi@D: @Y+%s@D]@n\r\n",
-                         add_commas(kigain));
+                         add_commas(kigain).c_str());
         }
     } else if (!strcasecmp(arg, "stamina") || !strcasecmp(arg, "st")) {
         if (stcost > molt_threshold(ch)) {
@@ -179,7 +179,7 @@ ACMD(do_evolve) {
             GET_MOLT_EXP(ch) -= stcost;
             send_to_char(ch,
                          "Your body evolves to make better use of the way it is now, and you feel that your body has more stamina. @D[@GST@D: @Y+%s@D]@n\r\n",
-                         add_commas(stgain));
+                         add_commas(stgain).c_str());
         }
     }
 }
@@ -2118,18 +2118,18 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
             } else if (GET_OBJ_VNUM(obj) == 79) {
                 send_to_char(ch,
                              "@wA @cG@Cl@wa@cc@Ci@wa@cl @wW@ca@Cl@wl @D[@C%s@D]@w is blocking access to the @G%s@w direction",
-                             add_commas(GET_OBJ_WEIGHT(obj)), dirs[GET_OBJ_COST(obj)]);
+                             add_commas(GET_OBJ_WEIGHT(obj)).c_str(), dirs[GET_OBJ_COST(obj)]);
             } else {
                 send_to_char(ch, "@w");
                 if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_ROOMFLAGS)) {
                     if (GET_OBJ_POSTED(obj) == nullptr) {
                         send_to_char(ch, "@D[@G%d@D]@w ", GET_OBJ_VNUM(obj));
-                        if (SCRIPT(obj))
+                        if (!obj->proto_script.empty())
                             send_to_char(ch, "%s ", obj->scriptString().c_str());
                     } else {
                         if (GET_OBJ_POSTTYPE(obj) <= 0) {
                             send_to_char(ch, "@D[@G%d@D]@w ", GET_OBJ_VNUM(obj));
-                            if (SCRIPT(obj))
+                            if (!obj->proto_script.empty())
                                 send_to_char(ch, "%s ", obj->scriptString().c_str());
                         }
                     }
@@ -2180,7 +2180,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
         case SHOW_OBJ_SHORT:
             if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_ROOMFLAGS)) {
                 send_to_char(ch, "[%d] ", GET_OBJ_VNUM(obj));
-                if (SCRIPT(obj))
+                if (!obj->proto_script.empty())
                     send_to_char(ch, "%s ", obj->scriptString().c_str());
             }
 
@@ -2293,7 +2293,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
                 case ITEM_CONTROL:
                     send_to_char(ch, "@RFUEL@D: %s%s@n\r\n",
                                  GET_FUEL(obj) >= 200 ? "@G" : GET_FUEL(obj) >= 100 ? "@Y" : "@r",
-                                 add_commas(GET_FUEL(obj)));
+                                 add_commas(GET_FUEL(obj)).c_str());
                     break;
 
                 case ITEM_DRINKCON:
@@ -2447,7 +2447,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
             }
             diag_obj_to_char(obj, ch);
             send_to_char(ch, "It appears to be made of %s, and weighs %s", material_names[GET_OBJ_MATERIAL(obj)],
-                         add_commas(GET_OBJ_WEIGHT(obj)));
+                         add_commas(GET_OBJ_WEIGHT(obj)).c_str());
             break;
 
         default:
@@ -2838,30 +2838,11 @@ static void look_at_char(struct char_data *i, struct char_data *ch) {
     }
     if (!IS_NPC(i)) {
         auto w = i->getWeight();
-        if (!PLR_FLAGGED(i, PLR_OOZARU) && (!IS_ICER(i) || !IS_TRANSFORMED(i)) && GET_GENOME(i, 0) < 11) {
-            send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)],
-                         GET_PC_HEIGHT(i), w);
-        } else if (IS_ICER(i) && PLR_FLAGGED(i, PLR_TRANS1)) {
-            int num1 = GET_PC_HEIGHT(i) * 3;
-            int num2 = w * 4;
-            send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], num1, num2);
-        } else if (IS_ICER(i) && PLR_FLAGGED(i, PLR_TRANS2)) {
-            int num1 = GET_PC_HEIGHT(i) * 3;
-            int num2 = w * 4;
-            send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], num1, num2);
-        } else if (IS_ICER(i) && PLR_FLAGGED(i, PLR_TRANS3)) {
-            int num1 = GET_PC_HEIGHT(i) * 1.5;
-            int num2 = w * 2;
-            send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], num1, num2);
-        } else if (IS_ICER(i) && PLR_FLAGGED(i, PLR_TRANS4)) {
-            int num1 = GET_PC_HEIGHT(i) * 2;
-            int num2 = w * 3;
-            send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], num1, num2);
-        } else if (PLR_FLAGGED(i, PLR_OOZARU) || GET_GENOME(i, 0) == 11) {
-            int num1 = GET_PC_HEIGHT(i) * 10;
-            int num2 = w * 50;
-            send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], num1, num2);
-        }
+        int h = i->getHeight();
+        auto wString = fmt::format("{}kg", w);
+        send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %s heavy,", size_names[get_size(i)],
+                     h, wString.c_str());
+
         if (i == ch) {
             send_to_char(ch, " and ");
         } else if (GET_AGE(ch) >= GET_AGE(i) + 30) {
@@ -2990,8 +2971,10 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
             " is standing here"
     };
 
-    if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_ROOMFLAGS) && IS_NPC(i))
-        send_to_char(ch, "@D[@G%d@D]@w %s", GET_MOB_VNUM(i), SCRIPT(i) ? "[TRIG] " : "");
+    if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_ROOMFLAGS) && IS_NPC(i)) {
+        auto sString = !i->proto_script.empty() ? fmt::format("{} ", i->scriptString()) : "";
+        send_to_char(ch, "@D[@G%d@D]@w %s", GET_MOB_VNUM(i), sString.c_str());
+    }
 
     if (IS_NPC(i) && i->room_description && GET_POS(i) == GET_DEFAULT_POS(i) && !FIGHTING(i)) {
         send_to_char(ch, "%s", i->room_description);
@@ -4391,7 +4374,7 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread) {
                             }
                             diag_obj_to_char(obj, ch);
                             send_to_char(ch, "It appears to be made of %s, and weights %s",
-                                         material_names[GET_OBJ_MATERIAL(obj)], add_commas(GET_OBJ_WEIGHT(obj)));
+                                         material_names[GET_OBJ_MATERIAL(obj)], add_commas(GET_OBJ_WEIGHT(obj)).c_str());
                         }
                     }
                     found = true;
@@ -4425,7 +4408,7 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread) {
                         if (GET_OBJ_TYPE(obj) == ITEM_CONTROL) {
                             send_to_char(ch, "@RFUEL@D: %s%s@n\r\n",
                                          GET_FUEL(obj) >= 200 ? "@G" : GET_FUEL(obj) >= 100 ? "@Y" : "@r",
-                                         add_commas(GET_FUEL(obj)));
+                                         add_commas(GET_FUEL(obj)).c_str());
                         }
                         if (GET_OBJ_TYPE(obj) == ITEM_WEAPON) {
                             send_to_char(ch, "The weapon type of %s is a %s.\r\n", GET_OBJ_SHORT(obj),
@@ -4433,7 +4416,7 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread) {
                         }
                         diag_obj_to_char(obj, ch);
                         send_to_char(ch, "It appears to be made of %s, and weights %s",
-                                     material_names[GET_OBJ_MATERIAL(obj)], add_commas(GET_OBJ_WEIGHT(obj)));
+                                     material_names[GET_OBJ_MATERIAL(obj)], add_commas(GET_OBJ_WEIGHT(obj)).c_str());
                     }
                     found = true;
                 }
@@ -4915,7 +4898,7 @@ ACMD(do_score) {
                 sprintf(version, "Alpha 0.5");
             }
             send_to_char(ch, "  @D| @CModel@D: %15s@D,    @CUGP@D: @G%15s@D,  @CVersion@D: @r%-12s@D|@n\n", model,
-                         absorb > 0 ? "@RN/A" : add_commas(GET_UP(ch)), version);
+                         absorb > 0 ? "@RN/A" : add_commas(GET_UP(ch)).c_str(), version);
         }
         if (GET_CLAN(ch) != nullptr) {
             send_to_char(ch, "  @D|  @CClan@D: @W%-64s@D|@n\n", GET_CLAN(ch));
@@ -4926,7 +4909,7 @@ ACMD(do_score) {
         sprintf(hei, "%dcm", get_measure(ch, GET_PC_HEIGHT(ch), 0));
         sprintf(wei, "%dkg", get_measure(ch, 0, ch->getWeight()));
         send_to_char(ch, "  @D|   @CAge@D: @W%10s@D,  @CHeight@D: @W%15s@D,  @CWeight@D: @W%-17s@D|@n\n",
-                     add_commas(GET_AGE(ch)), hei, wei);
+                     add_commas(GET_AGE(ch)).c_str(), hei, wei);
         send_to_char(ch, "  @D|@CGender@D: @W%10s@D,  @C  Size@D: @W%15s@D,  @C Align@D: @W%-17s@D|@n\n",
                      genders[(int) GET_SEX(ch)], size_names[get_size(ch)], disp_align(ch));
     }
@@ -4934,21 +4917,21 @@ ACMD(do_score) {
         send_to_char(ch,
                      "  @cO@D-----------------------------@D[   @cHealth   @D]-----------------------------@cO@n\n");
         send_to_char(ch, "                 @D<@rPowerlevel@D>          <@BKi@D>             <@GStamina@D>@n\n");
-        send_to_char(ch, "    @wCurrent   @D-[@R%-16s@D]-[@R%-16s@D]-[@R%-16s@D]@n\n", add_commas(ch->getCurPL()),
+        send_to_char(ch, "    @wCurrent   @D-[@R%-16s@D]-[@R%-16s@D]-[@R%-16s@D]@n\n", add_commas(ch->getCurPL()).c_str(),
                      add_commas(
-                             (ch->getCurKI())), add_commas((ch->getCurST())));
-        send_to_char(ch, "    @wMaximum   @D-[@r%-16s@D]-[@r%-16s@D]-[@r%-16s@D]@n\n", add_commas(ch->getEffMaxPL()),
-                     add_commas(GET_MAX_MANA(ch)), add_commas(GET_MAX_MOVE(ch)));
-        send_to_char(ch, "    @wBase      @D-[@m%-16s@D]-[@m%-16s@D]-[@m%-16s@D]@n\n", add_commas((ch->getEffBasePL())),
+                             (ch->getCurKI())).c_str(), add_commas((ch->getCurST())).c_str());
+        send_to_char(ch, "    @wMaximum   @D-[@r%-16s@D]-[@r%-16s@D]-[@r%-16s@D]@n\n", add_commas(ch->getEffMaxPL()).c_str(),
+                     add_commas(GET_MAX_MANA(ch)).c_str(), add_commas(GET_MAX_MOVE(ch)).c_str());
+        send_to_char(ch, "    @wBase      @D-[@m%-16s@D]-[@m%-16s@D]-[@m%-16s@D]@n\n", add_commas((ch->getEffBasePL())).c_str(),
                      add_commas(
-                             (ch->getEffBaseKI())), add_commas((ch->getEffBaseST())));
+                             (ch->getEffBaseKI())).c_str(), add_commas((ch->getEffBaseST())).c_str());
         if (!IS_ANDROID(ch) && (ch->getCurLF()) > 0) {
             send_to_char(ch, "    @wLife Force@D-[@C%16s@D%s@c%16s@D]- @wLife Percent@D-[@Y%3d%s@D]@n\n", add_commas(
-                    (ch->getCurLF())), "/", add_commas((ch->getMaxLF())), GET_LIFEPERC(ch), "%");
+                    (ch->getCurLF())).c_str(), "/", add_commas((ch->getMaxLF())).c_str(), GET_LIFEPERC(ch), "%");
         } else if (!IS_ANDROID(ch)) {
-            send_to_char(ch, "    @wLife Force@D-[@C%16s@D%s@c%16s@D]- @wLife Percent@D-[@Y%3d%s@D]@n\n", add_commas(0),
+            send_to_char(ch, "    @wLife Force@D-[@C%16s@D%s@c%16s@D]- @wLife Percent@D-[@Y%3d%s@D]@n\n", add_commas(0).c_str(),
                          "/", add_commas(
-                            (ch->getMaxLF())), GET_LIFEPERC(ch), "%");
+                            (ch->getMaxLF())).c_str(), GET_LIFEPERC(ch), "%");
         }
     }
     if (view == full || view == stats) {
@@ -4957,7 +4940,7 @@ ACMD(do_score) {
         send_to_char(ch, "      @D<@wCharacter Level@D: @w%-3d@D> <@wRPP@D: @w%-3d@D>@n\n",
                      GET_LEVEL(ch), GET_RP(ch));
         send_to_char(ch, "      @D<@wSpeed Index@D: @w%-15s@D> <@wArmor Index@D: @w%-15s@D>@n\n",
-                     add_commas(GET_SPEEDI(ch)), add_commas(GET_ARMOR(ch)));
+                     add_commas(GET_SPEEDI(ch)).c_str(), add_commas(GET_ARMOR(ch)).c_str());
         send_to_char(ch,
                      "    @D[    @RStrength@D|@G%2d (%3d)@D] [     @YAgility@D|@G%2d (%3d)@D] [      @BSpeed@D|@G%2d (%3d)@D]@n\n",
                      ch->real_abils.str, GET_STR(ch), ch->real_abils.dex, GET_DEX(ch), ch->real_abils.cha, GET_CHA(ch));
@@ -4971,8 +4954,8 @@ ACMD(do_score) {
                      "  @cO@D-----------------------------@D[   @cOther    @D]-----------------------------@cO@n\n");
         send_to_char(ch, "                @D<@YZenni@D>                 <@rInventory Weight@D>@n\n");
         send_to_char(ch, "      @D[   @CCarried@D| @W%-15s@D] [   @CCarried@D| @W%-15s@D]@n\n",
-                     add_commas(GET_GOLD(ch)), add_commas(
-                        (ch->getCarriedWeight())));
+                     add_commas(GET_GOLD(ch)).c_str(), add_commas(
+                        (ch->getCarriedWeight())).c_str());
         double gravity = 1.0;
         auto room = world.find(ch->in_room);
         if(room != world.end()) {
@@ -4980,10 +4963,10 @@ ACMD(do_score) {
         }
         std::string grav = gravity > 1.0 ? fmt::format("(Gravity:", gravity) : "";
         send_to_char(ch, "      @D[      @CBank@D| @W%-15s@D] [ @CMax Carry@D| @W%-15s@D]@n %s\n",
-                     add_commas(GET_BANK_GOLD(ch)), add_commas(CAN_CARRY_W(ch)), grav.c_str());
+                     add_commas(GET_BANK_GOLD(ch)).c_str(), add_commas(CAN_CARRY_W(ch)).c_str(), grav.c_str());
 
-        grav = gravity > 1.0 ? fmt::format("{}x)", gravity) : "";
-        send_to_char(ch, "      @D[ @CMax Carry@D| @W%-15s@D] [    @CBurden@D| @W%-15s@D]@n %s\n", add_commas(GOLD_CARRY(ch)), add_commas(ch->getCurrentBurden()), grav.c_str());
+        grav = gravity > 1.0 ? fmt::format("{}x)", add_commas(gravity)) : "";
+        send_to_char(ch, "      @D[ @CMax Carry@D| @W%-15s@D] [    @CBurden@D| @W%-15s@D]@n %s\n", add_commas(GOLD_CARRY(ch)).c_str(), add_commas(ch->getCurrentBurden()).c_str(), grav.c_str());
         int numb = 0;
         if (GET_BANK_GOLD(ch) > 99) {
             numb = (GET_BANK_GOLD(ch) / 100) * 2;
@@ -4996,19 +4979,19 @@ ACMD(do_score) {
             numb = 7500;
         }
         auto ratio = std::to_string(ch->getBurdenRatio() * 100.0) + "%";
-        send_to_char(ch, "      @D[  @CInterest@D| @W%-15s@D] [     @CRatio@D| @W%-15s@D]@n\n", add_commas(numb), ratio.c_str());
+        send_to_char(ch, "      @D[  @CInterest@D| @W%-15s@D] [     @CRatio@D| @W%-15s@D]@n\n", add_commas(numb).c_str(), ratio.c_str());
         if (IS_ARLIAN(ch)) {
             send_to_char(ch, "                             @D<@GEvolution @D>@n\n");
             send_to_char(ch, "      @D[ @CEvo Level@D| @W%-15d@D] [   @CEvo Exp@D| @W%-15s@D]\n", GET_MOLT_LEVEL(ch),
-                         add_commas(GET_MOLT_EXP(ch)));
-            send_to_char(ch, "      @D[ @CThreshold@D| @W%-15s@D]@n\n", add_commas(molt_threshold(ch)));
+                         add_commas(GET_MOLT_EXP(ch)).c_str());
+            send_to_char(ch, "      @D[ @CThreshold@D| @W%-15s@D]@n\n", add_commas(molt_threshold(ch)).c_str());
         }
         if (GET_LEVEL(ch) < 100) {
             send_to_char(ch, "                             @D<@gAdvancement@D>@n\n");
         }
         if (GET_LEVEL(ch) < 100) {
             send_to_char(ch, "      @D[@CExperience@D| @W%-15s@D] [@CNext Level@D| @W%-15s@D]@n\n",
-                         add_commas(GET_EXP(ch)), add_commas(level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch)));
+                         add_commas(GET_EXP(ch)).c_str(), add_commas(level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch)).c_str());
             send_to_char(ch, "      @D[  @CRpp Cost@D| @W%-15d@D]@n\n", rpp_to_level(ch));
         }
 
@@ -5391,13 +5374,13 @@ ACMD(do_status) {
             obj = nullptr;
         }
         if (GET_CHARGE(ch) > 0) {
-            send_to_char(ch, "         You have @C%s@n ki charged.\r\n", add_commas(GET_CHARGE(ch)));
+            send_to_char(ch, "         You have @C%s@n ki charged.\r\n", add_commas(GET_CHARGE(ch)).c_str());
         }
         if (GET_KAIOKEN(ch) > 0) {
             send_to_char(ch, "         You are focusing Kaioken x %d.\r\n", GET_KAIOKEN(ch));
         }
         if (AFF_FLAGGED(ch, AFF_SANCTUARY)) {
-            send_to_char(ch, "         You are surrounded by a barrier @D(@Y%s@D)@n\r\n", add_commas(GET_BARRIER(ch)));
+            send_to_char(ch, "         You are surrounded by a barrier @D(@Y%s@D)@n\r\n", add_commas(GET_BARRIER(ch)).c_str());
         }
         if (AFF_FLAGGED(ch, AFF_FIRESHIELD)) {
             send_to_char(ch, "         You are surrounded by flames!@n\r\n");
@@ -5415,10 +5398,10 @@ ACMD(do_status) {
 
         if (GET_LEVEL(ch) < 100) {
             if ((IS_ANDROID(ch) && PLR_FLAGGED(ch, PLR_ABSORB)) || (!IS_ANDROID(ch) && !IS_BIO(ch) && !IS_MAJIN(ch))) {
-                send_to_char(ch, "         @R%s@n to SC a stat this level.\r\n", add_commas(ch->calc_soft_cap()));
+                send_to_char(ch, "         @R%s@n to SC a stat this level.\r\n", add_commas(ch->calc_soft_cap()).c_str());
             } else {
                 send_to_char(ch, "         @R%s@n in PL/KI/ST combined to SC this level.\r\n",
-                             add_commas(ch->calc_soft_cap()));
+                             add_commas(ch->calc_soft_cap()).c_str());
             }
         } else {
             send_to_char(ch, "         Your strengths are potentially limitless.\r\n");
@@ -5621,7 +5604,7 @@ ACMD(do_status) {
         }
 
         if (has_group(ch)) {
-            send_to_char(ch, "@GGroup Victories@D: @w%s@n\r\n", add_commas(GET_GROUPKILLS(ch)));
+            send_to_char(ch, "@GGroup Victories@D: @w%s@n\r\n", add_commas(GET_GROUPKILLS(ch)).c_str());
         }
 
         if (PLR_FLAGGED(ch, PLR_EYEC)) {
@@ -6644,7 +6627,7 @@ static void print_object_location(int num, struct obj_data *obj, struct char_dat
     else
         send_to_char(ch, "%33s", " - ");
 
-    if (SCRIPT(obj))
+    if (!obj->proto_script.empty())
         send_to_char(ch, "%s", obj->scriptString().c_str());
 
     if (IN_ROOM(obj) != NOWHERE)
@@ -6751,10 +6734,10 @@ ACMD(do_levels) {
 
     for (i = 1; i < 101; i++) {
         if (i == 100)
-            nlen = snprintf(buf + len, sizeof(buf) - len, "[100] %8s          : \r\n", add_commas(level_exp(ch, 100)));
+            nlen = snprintf(buf + len, sizeof(buf) - len, "[100] %8s          : \r\n", add_commas(level_exp(ch, 100)).c_str());
         else
             nlen = snprintf(buf + len, sizeof(buf) - len, "[%2" SZT "] %8s-%-8s : \r\n", i,
-                            add_commas(level_exp(ch, i)), add_commas(level_exp(ch, i + 1) - 1));
+                            add_commas(level_exp(ch, i)).c_str(), add_commas(level_exp(ch, i + 1) - 1).c_str());
         if (len + nlen >= sizeof(buf) || nlen < 0)
             break;
         len += nlen;

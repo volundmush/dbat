@@ -571,9 +571,6 @@ static void db_load_characters_finish() {
             if(c) {
                 c->deserializeRelations(j);
                 c->deserializeLocation(j2);
-                if(IS_NPC(c)) {
-                    c->activate();
-                }
             }
         } catch(std::exception& e) {
             basic_mud_log("Error finishing character %ld: %s", id, e.what());
@@ -627,11 +624,24 @@ static void db_load_items_finish() {
             if(i) {
                 i->deserializeRelations(j);
                 i->deserializeLocation(location, slot);
-                if(i->isActive()) i->activate();
             }
         } catch(std::exception& e) {
             basic_mud_log("Error finishing item %ld: %s", id, e.what());
             continue;
+        }
+    }
+}
+
+static void db_load_activate_entities() {
+    // activate all items which ended up "in the world".
+    for(auto &[id, r] : world) {
+        if(r.script) r.script->activate();
+        assign_triggers(&r, WLD_TRIGGER);
+        r.activateContents();
+        for(auto c = r.people; c; c = c->next_in_room) {
+            if(IS_NPC(c)) {
+                c->activate();
+            }
         }
     }
 }
@@ -648,7 +658,6 @@ static void db_load_dgscripts_initial() {
             auto t = new trig_data();
             t->deserializeInstance(j);
             uniqueScripts[id] = std::make_pair(generation, t);
-            t->activate();
         } catch(std::exception& e) {
             basic_mud_log("Error parsing dgscript %ld: %s", id, e.what());
             continue;
@@ -666,7 +675,7 @@ static void db_load_dgscripts_finish() {
         try {
             auto cf = uniqueScripts.find(id);
             if(cf == uniqueScripts.end()) {
-                basic_mud_log("Error finishing dgscript %ld: not found", id);
+                basic_mud_log("Error finishing dgscript %l: not found", id);
                 continue;
             }
             if(cf->second.first != generation) {
@@ -683,25 +692,18 @@ static void db_load_dgscripts_finish() {
                 switch(t->owner.index()) {
                     case 0:
                         r = std::get<0>(t->owner);
-                        t->activate();
                         t->next = r->script->trig_list;
                         r->script->trig_list = t;
                         r->script->types |= GET_TRIG_TYPE(t);
                         break;
                     case 1:
                         o = std::get<1>(t->owner);
-                        if(o->isActive()) {
-                            t->activate();
-                        }
                         t->next = o->script->trig_list;
                         o->script->trig_list = t;
                         o->script->types |= GET_TRIG_TYPE(t);
                         break;
                     case 2:
                         c = std::get<2>(t->owner);
-                        if(c->isActive()) {
-                            t->activate();
-                        }
                         t->next = c->script->trig_list;
                         c->script->trig_list = t;
                         c->script->types |= GET_TRIG_TYPE(t);
@@ -953,6 +955,9 @@ static void load_new_database() {
 
     basic_mud_log("Loading dgscript finish...");
     db_load_dgscripts_finish();
+
+    basic_mud_log("Running activation of entities...");
+    db_load_activate_entities();
 }
 
 static bool newStyle = false;
@@ -1923,7 +1928,7 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
         basic_mud_log("SYSERR: Format error, %s", buf2);
         exit(1);
     }
-    if (((retval = sscanf(line, " %d %d %d %d %d %d %d %d %d %d %d", t, t + 1, t + 2, t + 3, t + 4, t + 5, t + 6, t + 7,
+    if (((retval = sscanf(line, " %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld", t, t + 1, t + 2, t + 3, t + 4, t + 5, t + 6, t + 7,
                           t + 8, t + 9, t + 10)) == 3) && (bitwarning == true)) {
         basic_mud_log("SYSERR: Format error, %s", buf2);
         exit(1);
@@ -2058,7 +2063,7 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
         return 0;
     }
 
-    if (sscanf(line, " %d %d %d %dd%d+%d %dd%d+%d ",
+    if (sscanf(line, " %ld %ld %ld %ldd%ld+%ld %ldd%ld+%ld ",
                t, t + 1, t + 2, t + 3, t + 4, t + 5, t + 6, t + 7, t + 8) != 9) {
         basic_mud_log("SYSERR: Format error in mob #%d, first line after S flag\n"
             "...expecting line of form '# # # #d#+# #d#+#'", nr);
@@ -2088,7 +2093,7 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
         return 0;
     }
 
-    if (sscanf(line, " %d %d %d %d", t, t + 1, t + 2, t + 3) != 4) {
+    if (sscanf(line, " %ld %ld %ld %ld", t, t + 1, t + 2, t + 3) != 4) {
         basic_mud_log("SYSERR: Format error in mob #%d, second line after S flag\n"
             "...expecting line of form '# # # #'", nr);
         return 0;
@@ -2123,7 +2128,7 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
         return 0;
     }
 
-    if (sscanf(line, " %d %d %d ", t, t + 1, t + 2) != 3) {
+    if (sscanf(line, " %ld %ld %ld ", t, t + 1, t + 2) != 3) {
         basic_mud_log("SYSERR: Format error in last line of mob #%d\n"
             "...expecting line of form '# # #'", nr);
         return 0;
@@ -2454,7 +2459,7 @@ static void parse_mobile(FILE *mob_f, mob_vnum nr) {
 /* read all objects from obj file; generate index and prototypes */
 static char *parse_object(FILE *obj_f, obj_vnum nr) {
     static char line[READ_SIZE];
-    int t[NUM_OBJ_VAL_POSITIONS + 2], j, retval;
+    int64_t t[NUM_OBJ_VAL_POSITIONS + 2], j, retval;
     char *tmpptr, buf2[128];
     char f1[READ_SIZE], f2[READ_SIZE], f3[READ_SIZE], f4[READ_SIZE];
     char f5[READ_SIZE], f6[READ_SIZE], f7[READ_SIZE], f8[READ_SIZE];
@@ -2526,7 +2531,7 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
     for (j = 0; j < NUM_OBJ_VAL_POSITIONS; j++)
         t[j] = 0;
 
-    if ((retval = sscanf(line, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d", t, t + 1, t + 2, t + 3, t + 4, t + 5,
+    if ((retval = sscanf(line, "%ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld", t, t + 1, t + 2, t + 3, t + 4, t + 5,
                          t + 6, t + 7, t + 8, t + 9, t + 10, t + 11, t + 12, t + 13, t + 14, t + 15)) >
         NUM_OBJ_VAL_POSITIONS) {
         basic_mud_log("SYSERR: Format error in second numeric line (expecting <=%d args, got %d), %s", NUM_OBJ_VAL_POSITIONS,
@@ -2563,7 +2568,7 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
         basic_mud_log("SYSERR: Expecting third numeric line of %s, but file ended!", buf2);
         exit(1);
     }
-    if ((retval = sscanf(line, "%d %d %d %d", t, t + 1, t + 2, t + 3)) != 4) {
+    if ((retval = sscanf(line, "%ld %ld %ld %ld", t, t + 1, t + 2, t + 3)) != 4) {
         if (retval == 3)
             t[3] = 0;
         else {
@@ -2625,7 +2630,7 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
                 }
 
                 t[1] = 0;
-                if ((retval = sscanf(line, " %d %d %d ", t, t + 1, t + 2)) != 3) {
+                if ((retval = sscanf(line, " %ld %ld %ld ", t, t + 1, t + 2)) != 3) {
                     if (retval != 2) {
                         basic_mud_log("SYSERR: Format error in 'A' field, %s\n"
                             "...expecting 2 numeric arguments, got %d\n"
@@ -2940,7 +2945,7 @@ int vnum_mobile(char *searchname, struct char_data *ch) {
         if (isname(searchname, m.second.name))
             send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
                          ++found, m.first, m.second.short_description,
-                         !m.second.proto_script.empty() ? "[TRIG]" : "");
+                         !m.second.proto_script.empty() ? m.second.scriptString().c_str() : "");
 
     return (found);
 }
@@ -2953,7 +2958,7 @@ int vnum_object(char *searchname, struct char_data *ch) {
         if (isname(searchname, o.second.name))
             send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
                          ++found, o.first, o.second.short_description,
-                         !o.second.proto_script.empty() ? "[TRIG]" : "");
+                         !o.second.proto_script.empty() ? o.second.scriptString().c_str() : "");
 
     return (found);
 }
@@ -2966,7 +2971,7 @@ int vnum_material(char *searchname, struct char_data *ch) {
         if (isname(searchname, material_names[o.second.value[VAL_ALL_MATERIAL]])) {
             send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
                          ++found, o.first, o.second.short_description,
-                         !o.second.proto_script.empty() ? "[TRIG]" : "");
+                         !o.second.proto_script.empty() ? o.second.scriptString().c_str() : "");
         }
 
     return (found);
@@ -2981,7 +2986,7 @@ int vnum_weapontype(char *searchname, struct char_data *ch) {
             if (isname(searchname, weapon_type[o.second.value[VAL_WEAPON_SKILL]])) {
                 send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
                              ++found, o.first, o.second.short_description,
-                             !o.second.proto_script.empty() ? "[TRIG]" : "");
+                             !o.second.proto_script.empty() ? o.second.scriptString().c_str() : "");
             }
         }
 
@@ -2997,7 +3002,7 @@ int vnum_armortype(char *searchname, struct char_data *ch) {
             if (isname(searchname, armor_type[o.second.value[VAL_ARMOR_SKILL]])) {
                 send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
                              ++found, o.first, o.second.short_description,
-                             !o.second.proto_script.empty() ? "[TRIG]" : "");
+                             !o.second.proto_script.empty() ? o.second.scriptString().c_str() : "");
             }
         }
 
@@ -4661,7 +4666,7 @@ int my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate) {
 
     fprintf(fp,
             "#%d\n"
-            "%d %d %d %d %d %d %d %d %d %s %s %s %s %d %d %d %d %d %d %d %d\n",
+            "%ld %ld %ld %ld %ld %ld %ld %ld %ld %s %s %s %s %ld %ld %ld %ld %ld %ld %d %d\n",
             GET_OBJ_VNUM(obj), locate, GET_OBJ_VAL(obj, 0), GET_OBJ_VAL(obj, 1),
             GET_OBJ_VAL(obj, 2), GET_OBJ_VAL(obj, 3), GET_OBJ_VAL(obj, 4),
             GET_OBJ_VAL(obj, 5), GET_OBJ_VAL(obj, 6), GET_OBJ_VAL(obj, 7),

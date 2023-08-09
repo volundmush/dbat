@@ -1190,8 +1190,8 @@ void advance_level(struct char_data *ch, int whichclass) {
         SET_BIT_AR(PRF_FLAGS(ch), PRF_HOLYLIGHT);
     }
 
-    sprintf(buf, "@D[@YGain@D: @RPl@D(@G%s@D) @gSt@D(@G%s@D) @CKi@D(@G%s@D) @bPS@D(@G%s@D)]", add_commas(add_hp),
-            add_commas(add_move), add_commas(add_mana), add_commas(add_prac));
+    sprintf(buf, "@D[@YGain@D: @RPl@D(@G%s@D) @gSt@D(@G%s@D) @CKi@D(@G%s@D) @bPS@D(@G%s@D)]", add_commas(add_hp).c_str(),
+            add_commas(add_move).c_str(), add_commas(add_mana).c_str(), add_commas(add_prac).c_str());
     if (GET_BONUS(ch, BONUS_GMEMORY) &&
         (GET_LEVEL(ch) == 20 || GET_LEVEL(ch) == 40 || GET_LEVEL(ch) == 60 || GET_LEVEL(ch) == 80 ||
          GET_LEVEL(ch) == 100)) {

@@ -277,7 +277,7 @@ nlohmann::json obj_affected_type::serialize() {
     nlohmann::json j;
 
     if(location) j["location"] = location;
-    if(modifier) j["modifier"] = modifier;
+    if(modifier != 0.0) j["modifier"] = modifier;
     if(specific) j["specific"] = specific;
 
     return j;
@@ -299,7 +299,7 @@ nlohmann::json obj_data::serializeBase() {
     for(auto i = 0; i < NUM_ITEM_FLAGS; i++)
         if(IS_SET_AR(extra_flags, i)) j["extra_flags"].push_back(i);
 
-    if(weight) j["weight"] = weight;
+    if(weight != 0.0) j["weight"] = weight;
     if(cost) j["cost"] = cost;
     if(cost_per_day) j["cost_per_day"] = cost_per_day;
 
@@ -440,10 +440,13 @@ void obj_data::activate() {
     next = object_list;
     object_list = this;
 
+    if(script) script->activate();
+
     if(obj_proto.contains(vn)) {
         insert_vnum(objectVnumIndex, this);
         assign_triggers(this, OBJ_TRIGGER);
     }
+
     if(contents) activateContents();
 }
 
@@ -481,6 +484,11 @@ void obj_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
     }
 
     if(j.contains("room_loaded")) room_loaded = j["room_loaded"];
+
+    auto proto = obj_proto.find(vn);
+    if(proto != obj_proto.end()) {
+        proto_script = proto->second.proto_script;
+    }
 
     if(isActive) activate();
 

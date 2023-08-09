@@ -190,7 +190,7 @@ void dg_obj_trigger(char *line, struct obj_data *obj) {
 }
 
 void assign_triggers(struct unit_data *i, int type) {
-    if(i->proto_script.empty()) return;
+
     if(!SCRIPT(i)) {
         switch (type) {
             case MOB_TRIGGER:
@@ -207,6 +207,27 @@ void assign_triggers(struct unit_data *i, int type) {
                        "SYSERR: unknown type for assign_triggers()");
                 return;
         }
+    }
+
+    // remove all duplicates from i->proto_script but do not change its order otherwise.
+    std::set<trig_vnum> alreadySeen;
+    auto it = i->proto_script.begin();
+    while(it != i->proto_script.end()) {
+        if(alreadySeen.contains(*it)) {
+            it = i->proto_script.erase(it);
+        } else {
+            alreadySeen.insert(*it);
+            ++it;
+        }
+    }
+
+    struct trig_data *next;
+    std::set<trig_vnum> shouldHave(i->proto_script.begin(), i->proto_script.end());
+
+    // Extract every trigger they have which is not in i->proto_script...
+    for(auto t = SCRIPT(i)->trig_list; t; t = next) {
+        next = t->next;
+        if(!shouldHave.contains(t->vn)) extract_trigger(t);
     }
 
     for(auto p : i->proto_script) {

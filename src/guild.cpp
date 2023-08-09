@@ -1109,7 +1109,7 @@ void handle_exp(struct char_data *keeper, int guild_nr, struct char_data *ch, ch
         }
         act("@c$n@W spends time training you in $s fighting style.@n", true, keeper, nullptr, ch, TO_VICT);
         act("@c$n@W spends time training @C$N@W in $s fighting style.@n", true, keeper, nullptr, ch, TO_NOTVICT);
-        send_to_char(ch, "@wExperience Gained: @C%s@n\r\n", add_commas(amt));
+        send_to_char(ch, "@wExperience Gained: @C%s@n\r\n", add_commas(amt).c_str());
         GET_PRACTICES(ch) -= 25;
         if (IS_SAIYAN(ch) || IS_HALFBREED(ch)) {
             amt = amt + (amt * .30);
@@ -1159,12 +1159,12 @@ void handle_study(struct char_data *keeper, int guild_nr, struct char_data *ch, 
     expcost += expadjust;
 
     if (GET_EXP(ch) < expcost) {
-        send_to_char(ch, "You do not have enough experience to study. @D[@wCost@W: @G%s@D]@n\r\n", add_commas(expcost));
+        send_to_char(ch, "You do not have enough experience to study. @D[@wCost@W: @G%s@D]@n\r\n", add_commas(expcost).c_str());
         fail = true;
     }
 
     if (GET_GOLD(ch) < goldcost) {
-        send_to_char(ch, "You do not have enough zenni to study. @D[@wCost@W: @Y%s@D]@n\r\n", add_commas(goldcost));
+        send_to_char(ch, "You do not have enough zenni to study. @D[@wCost@W: @Y%s@D]@n\r\n", add_commas(goldcost).c_str());
         fail = true;
     }
 
@@ -1178,7 +1178,7 @@ void handle_study(struct char_data *keeper, int guild_nr, struct char_data *ch, 
     act("@c$N@W spends time lecturing you on various subjects.@n", true, ch, nullptr, keeper, TO_CHAR);
     act("@c$N@W spends time lecturing @C$n@W on various subjects.@n", true, ch, nullptr, keeper, TO_ROOM);
     send_to_char(ch, "@wYou have gained %d practice sessions in exchange for %s EXP and %s zenni.\r\n", reward,
-                 add_commas(expcost), add_commas(goldcost));
+                 add_commas(expcost).c_str(), add_commas(goldcost).c_str());
 
 }
 

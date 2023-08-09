@@ -989,7 +989,7 @@ ACMD(do_moondust) {
         true, ch, nullptr, nullptr, TO_CHAR);
     act("@g$n@G spreads $s wings and seems to concentrate for a moment. Suddenly $s wings begin to glow a soft sea green color. This soft glow grows brighter and as $e flexes $s wings to their full extent a shockwave of energy explodes outward. Carried on this shockwave is a cloud of glowing dust! You notice some of the dust being breathed in by $s!@n",
         true, ch, nullptr, nullptr, TO_ROOM);
-    send_to_char(ch, "@RHeal@Y: @C%s@n\r\n", add_commas(heal));
+    send_to_char(ch, "@RHeal@Y: @C%s@n\r\n", add_commas(heal).c_str());
 
     struct char_data *vict = nullptr, *next_v = nullptr;
 
@@ -1004,7 +1004,7 @@ ACMD(do_moondust) {
                 act("@CYou breathe in the dust and are healed by it somewhat!@n", true, vict, nullptr, nullptr,
                     TO_CHAR);
                 act("@c$n@C breathes in the dust and is healed somewhat!@n", true, vict, nullptr, nullptr, TO_ROOM);
-                send_to_char(vict, "@RHeal@Y: @C%s@n\r\n", add_commas(heal));
+                send_to_char(vict, "@RHeal@Y: @C%s@n\r\n", add_commas(heal).c_str());
             }
         }
     }
@@ -1221,7 +1221,7 @@ ACMD(do_lifeforce) {
     setting = atoi(arg);
 
     if (setting > 99) {
-        send_to_char(ch, "Syntax: life (1 - 99)\n%s isn't an acceptable percent.\r\n", add_commas(setting));
+        send_to_char(ch, "Syntax: life (1 - 99)\n%s isn't an acceptable percent.\r\n", add_commas(setting).c_str());
         return;
     } else if (setting <= 0) {
         send_to_char(ch,
@@ -1773,7 +1773,7 @@ ACMD(do_extract) {
             cost += extra;
 
             if ((ch->getCurKI()) < cost) {
-                send_to_char(ch, "You do not have enough ki! @D[@rNeeded@D: @R%s@D]@n\r\n", add_commas(cost));
+                send_to_char(ch, "You do not have enough ki! @D[@rNeeded@D: @R%s@D]@n\r\n", add_commas(cost).c_str());
                 return;
             } else if (skill < chance) {
                 ch->decCurKI(cost);
@@ -2662,7 +2662,7 @@ ACMD(do_metamorph) {
     }
 
     if ((ch->getCurKI()) < cost) {
-        send_to_char(ch, "You do not have enough ki. You need %s.\r\n", add_commas(cost));
+        send_to_char(ch, "You do not have enough ki. You need %s.\r\n", add_commas(cost).c_str());
         return;
     }
 

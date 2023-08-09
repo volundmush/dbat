@@ -96,7 +96,7 @@ static void barrier_shed(struct char_data *ch) {
         act("@c$n@c's barrier disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
     } else {
         act("@cYour barrier loses some energy.@n", true, ch, nullptr, nullptr, TO_CHAR);
-        send_to_char(ch, "@D[@C%s@D]@n\r\n", add_commas(loss));
+        send_to_char(ch, "@D[@C%s@D]@n\r\n", add_commas(loss).c_str());
         act("@c$n@c's barrier sends some sparks into the air as it seems to get a bit weaker.@n", true, ch, nullptr,
             nullptr, TO_ROOM);
     }
@@ -909,7 +909,7 @@ void gain_exp(struct char_data *ch, int64_t gain) {
                 int64_t spar = gain;
                 gain += gain * 0.25;
                 spar = gain - spar;
-                send_to_char(ch, "@D[@BBooster EXP@W: @G+%s@D]\r\n", add_commas(spar));
+                send_to_char(ch, "@D[@BBooster EXP@W: @G+%s@D]\r\n", add_commas(spar).c_str());
             }
         }
         if (GET_LEVEL(ch) < 100) {
@@ -972,7 +972,7 @@ void gain_exp(struct char_data *ch, int64_t gain) {
                 } else {
                     ch->gainBasePL(diff);
                 }
-                send_to_char(ch, "@D[@G+@Y%s @RPL@D]@n ", add_commas(diff));
+                send_to_char(ch, "@D[@G+@Y%s @RPL@D]@n ", add_commas(diff).c_str());
             }
             if (rand_number(1, 5) >= 2) {
                 if (IS_HALFBREED(ch)) {
@@ -980,11 +980,11 @@ void gain_exp(struct char_data *ch, int64_t gain) {
                 } else {
                     ch->gainBaseST(diff);
                 }
-                send_to_char(ch, "@D[@G+@Y%s @gSTA@D]@n ", add_commas(diff));
+                send_to_char(ch, "@D[@G+@Y%s @gSTA@D]@n ", add_commas(diff).c_str());
             }
             if (rand_number(1, 5) >= 2) {
                 ch->gainBaseKI(diff);
-                send_to_char(ch, "@D[@G+@Y%s @CKi@D]@n", add_commas(diff));
+                send_to_char(ch, "@D[@G+@Y%s @CKi@D]@n", add_commas(diff).c_str());
             }
         }
     } else if (gain < 0) {

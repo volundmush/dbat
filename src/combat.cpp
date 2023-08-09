@@ -816,8 +816,8 @@ void club_stamina(struct char_data *ch, struct char_data *vict, int wlvl, int64_
     drained = dmg * drain;
     vict->decCurST(drained);
 
-    send_to_char(ch, "@D[@YVictim's @GStamina @cLoss@W: @g%s@D]@n\r\n", add_commas(drained));
-    send_to_char(vict, "@D[@rYour @GStamina @cLoss@W: @g%s@D]@n\r\n", add_commas(drained));
+    send_to_char(ch, "@D[@YVictim's @GStamina @cLoss@W: @g%s@D]@n\r\n", add_commas(drained).c_str());
+    send_to_char(vict, "@D[@rYour @GStamina @cLoss@W: @g%s@D]@n\r\n", add_commas(drained).c_str());
 
 }
 
@@ -3680,17 +3680,17 @@ void saiyan_gain(struct char_data *ch, struct char_data *vict) {
         case 0:
             ch->gainBasePL(gain);
             send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel slightly stronger. @D[@G+%s@D]@n\r\n",
-                         add_commas(gain));
+                         add_commas(gain).c_str());
             break;
         case 1:
             ch->gainBaseKI(gain);
             send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel your spirit grow. @D[@G+%s@D]@n\r\n",
-                         add_commas(gain));
+                         add_commas(gain).c_str());
             break;
         case 2:
             ch->gainBaseST(gain);
             send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel slightly more vigorous. @D[@G+%s@D]@n\r\n",
-                         add_commas(gain));
+                         add_commas(gain).c_str());
             break;
     }
 
@@ -3840,12 +3840,12 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
             GET_PRACTICES(ch) -= pscost;
             gain = gain * bonus;
             gain_exp(ch, gain);
-            send_to_char(ch, "@D[@Y+ @G%s @mExp@D]@n ", add_commas(gain));
+            send_to_char(ch, "@D[@Y+ @G%s @mExp@D]@n ", add_commas(gain).c_str());
             if (type == 0 && rand_number(1, 5) >= 4) {
-                send_to_char(ch, "@D[@Y+ @R%s @rPL@D]@n ", pl > 0 ? add_commas(pl) : "SOFT-CAP");
+                send_to_char(ch, "@D[@Y+ @R%s @rPL@D]@n ", pl > 0 ? add_commas(pl).c_str() : "SOFT-CAP");
                 ch->gainBasePL(pl);
             } else if (type == 1 && rand_number(1, 5) >= 4) {
-                send_to_char(ch, "@D[@Y+ @C%s @cKi@D]@n ", ki > 0 ? add_commas(ki) : "SOFT-CAP");
+                send_to_char(ch, "@D[@Y+ @C%s @cKi@D]@n ", ki > 0 ? add_commas(ki).c_str() : "SOFT-CAP");
                 ch->gainBaseKI(ki);
             }
             send_to_char(ch, "@D[@R- @M%d @mPS@D]@n ", pscost);
@@ -4074,7 +4074,7 @@ bool check_points(struct char_data *ch, int64_t ki, int64_t st) {
     st += st * ratio;
 
     if ((ch->getCurST()) < st) {
-        send_to_char(ch, "You do not have enough stamina.\r\n@C%s@n needed.\r\n", add_commas(st));
+        send_to_char(ch, "You do not have enough stamina.\r\n@C%s@n needed.\r\n", add_commas(st).c_str());
         fail = true;
     }
 
@@ -4260,7 +4260,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                                 gain += gain * 0.1;
                             }
                             gain_exp(ch, gain);
-                            send_to_char(ch, "@D[@mExp@W: @G%s@D]@n\r\n", add_commas(gain));
+                            send_to_char(ch, "@D[@mExp@W: @G%s@D]@n\r\n", add_commas(gain).c_str());
                         }
                     } else {
                         dmg += combo_damage(ch, dmg, 1);
@@ -4279,7 +4279,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                                 gain += gain * 0.1;
                             }
                             gain_exp(ch, gain);
-                            send_to_char(ch, "@D[@mExp@W: @G%s@D]@n\r\n", add_commas(gain));
+                            send_to_char(ch, "@D[@mExp@W: @G%s@D]@n\r\n", add_commas(gain).c_str());
                         }
                         COMBO(ch) = -1;
                         COMBHITS(ch) = 0;
@@ -4311,7 +4311,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
             if (GET_BARRIER(vict) - dmg > 0) {
                 act("@c$N's@C barrier absorbs the damage!@n", true, ch, nullptr, vict, TO_CHAR);
                 char barr[MAX_INPUT_LENGTH];
-                sprintf(barr, "@CYour barrier absorbs the damage! @D[@B%s@D]@n", add_commas(dmg));
+                sprintf(barr, "@CYour barrier absorbs the damage! @D[@B%s@D]@n", add_commas(dmg).c_str());
                 act(barr, true, ch, nullptr, vict, TO_VICT);
                 act("@c$N's@C barrier absorbs the damage!@n", true, ch, nullptr, vict, TO_NOTVICT);
                 GET_BARRIER(vict) -= dmg;
@@ -4732,7 +4732,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     act("@c$N@w barely clings to life!@n.", true, ch, nullptr, vict, TO_NOTVICT);
                     int64_t lifeloss = dmg - GET_HIT(vict);
                     vict->decCurLF(lifeloss);
-                    send_to_char(vict, "@D[@CLifeforce@D: @R-%s@D]\n", add_commas(lifeloss));
+                    send_to_char(vict, "@D[@CLifeforce@D: @R-%s@D]\n", add_commas(lifeloss).c_str());
                     if ((vict->getCurLF()) >= (vict->getMaxLF()) * 0.05) {
                         send_to_char(vict, "@YYou recover a bit thanks to your strong life force.@n\r\n");
                         vict->incCurHealth((vict->getMaxLF()) * .05);
@@ -4758,8 +4758,8 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                         int64_t raise = (GET_MAX_MANA(ch) * 0.005) + 1;
                         ch->incCurKI(raise);
                     }
-                    send_to_char(ch, "@D[@GDamage@W: @R%s@D]@n\r\n", add_commas(dmg));
-                    send_to_char(vict, "@D[@rDamage@W: @R%s@D]@n\r\n", add_commas(dmg));
+                    send_to_char(ch, "@D[@GDamage@W: @R%s@D]@n\r\n", add_commas(dmg).c_str());
+                    send_to_char(vict, "@D[@rDamage@W: @R%s@D]@n\r\n", add_commas(dmg).c_str());
                     int64_t healhp = (long double) (GET_MAX_HIT(vict)) * 0.12;
                     if (AFF_FLAGGED(ch, AFF_METAMORPH) && GET_HIT(ch) <= GET_MAX_HIT(ch)) {
                         act("@RYour dark aura saps some of @r$N's@R life energy!@n", true, ch, nullptr, vict, TO_CHAR);
@@ -4841,8 +4841,8 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                 if (IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 10 || GET_GENOME(ch, 1) == 10)) {
                     ch->incCurKI(dmg * .05);
                 }
-                send_to_char(ch, "@D[@GDamage@W: @R%s@D]@n", add_commas(dmg));
-                send_to_char(vict, "@D[@rDamage@W: @R%s@D]@n\r\n", add_commas(dmg));
+                send_to_char(ch, "@D[@GDamage@W: @R%s@D]@n", add_commas(dmg).c_str());
+                send_to_char(vict, "@D[@rDamage@W: @R%s@D]@n\r\n", add_commas(dmg).c_str());
                 //int64_t healhp = GET_HIT(vict) * 0.12;
                 if (GET_EQ(ch, WEAR_EYE) && vict && !PRF_FLAGGED(ch, PRF_NODEC)) {
                     if (IS_ANDROID(vict)) {
@@ -4854,7 +4854,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_ASCOUTER) && GET_HIT(vict) >= 15000000) {
                         send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                     } else {
-                        send_to_char(ch, " @D<@YProcessing@D: @c%s@D>@n\r\n", add_commas(GET_HIT(vict)));
+                        send_to_char(ch, " @D<@YProcessing@D: @c%s@D>@n\r\n", add_commas(GET_HIT(vict)).c_str());
                     }
                 } else {
                     send_to_char(ch, "\r\n");
@@ -4873,14 +4873,14 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                         } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_ASCOUTER) && GET_HIT(vict) >= 15000000) {
                             send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                         } else {
-                            send_to_char(ch, " @D<@YProcessing@D: @c%s@D>@n\r\n", add_commas(GET_HIT(vict)));
+                            send_to_char(ch, " @D<@YProcessing@D: @c%s@D>@n\r\n", add_commas(GET_HIT(vict)).c_str());
                         }
                     } else {
                         send_to_char(ch, "\r\n");
                     }
                 } else if (dmg > 1 && suppresso == true && !PRF_FLAGGED(ch, PRF_NODEC)) {
-                    send_to_char(ch, "@D[@GDamage@W: @R%s@D]@n", add_commas(dmg));
-                    send_to_char(vict, "@D[@rDamage@W: @R%s @c-Suppression-@D]@n\r\n", add_commas(dmg));
+                    send_to_char(ch, "@D[@GDamage@W: @R%s@D]@n", add_commas(dmg).c_str());
+                    send_to_char(vict, "@D[@rDamage@W: @R%s @c-Suppression-@D]@n\r\n", add_commas(dmg).c_str());
                     //int64_t healhp = GET_HIT(vict) * 0.12;
                     if (GET_EQ(ch, WEAR_EYE) && vict && !PRF_FLAGGED(ch, PRF_NODEC)) {
                         if (IS_ANDROID(vict)) {
@@ -4892,7 +4892,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                         } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_ASCOUTER) && GET_HIT(vict) >= 15000000) {
                             send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                         } else {
-                            send_to_char(ch, " @D<@YProcessing@D: @c%s@D>@n\r\n", add_commas(GET_HIT(vict)));
+                            send_to_char(ch, " @D<@YProcessing@D: @c%s@D>@n\r\n", add_commas(GET_HIT(vict)).c_str());
                         }
                     } else {
                         send_to_char(ch, "\r\n");
@@ -4909,7 +4909,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                         } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_ASCOUTER) && GET_HIT(vict) >= 15000000) {
                             send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                         } else {
-                            send_to_char(ch, " @D<@YProcessing@D: @c%s@D>@n\r\n", add_commas(GET_HIT(vict)));
+                            send_to_char(ch, " @D<@YProcessing@D: @c%s@D>@n\r\n", add_commas(GET_HIT(vict)).c_str());
                         }
                     } else {
                         send_to_char(ch, "\r\n");

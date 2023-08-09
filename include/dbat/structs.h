@@ -559,6 +559,8 @@ struct char_data : public unit_data {
     bool canCarryWeight(struct char_data *obj);
     bool canCarryWeight(weight_t val);
 
+    int getHeight(bool base = false);
+
     int height{};        /* PC / NPC's height                    */
     struct abil_data real_abils{};    /* Abilities without modifiers   */
     struct mob_special_data mob_specials{};

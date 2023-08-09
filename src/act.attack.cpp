@@ -4436,7 +4436,7 @@ ACMD(do_breaker) {
 
             if (level_exp(ch, GET_LEVEL(ch) + 1) - (GET_EXP(ch)) > 0 || GET_LEVEL(ch) >= 100) {
                 send_to_char(ch, "The returning Eldritch energy blesses you with some experience. @D[@G%s@D]@n\r\n",
-                             add_commas(theft));
+                             add_commas(theft).c_str());
                 GET_EXP(ch) += theft * 2;
             }
 

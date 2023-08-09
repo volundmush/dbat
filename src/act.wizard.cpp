@@ -1435,8 +1435,9 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j) {
     sprintbitarray(GET_OBJ_EXTRA(j), extra_bits, EF_ARRAY_MAX, buf);
     send_to_char(ch, "Extra flags   : %s\r\n", buf);
 
-    send_to_char(ch, "Weight: %" I64T ", Value: %d, Cost/day: %d, Timer: %d, Min Level: %d\r\n",
-                 GET_OBJ_WEIGHT(j), GET_OBJ_COST(j), GET_OBJ_RENT(j), GET_OBJ_TIMER(j), GET_OBJ_LEVEL(j));
+    auto wString = fmt::format("{}", GET_OBJ_WEIGHT(j));
+    send_to_char(ch, "Weight: %s, Value: %d, Cost/day: %d, Timer: %d, Min Level: %d\r\n",
+                 wString.c_str(), GET_OBJ_COST(j), GET_OBJ_RENT(j), GET_OBJ_TIMER(j), GET_OBJ_LEVEL(j));
 
     send_to_char(ch, "In room: %d (%s), ", GET_ROOM_VNUM(IN_ROOM(j)),
                  IN_ROOM(j) == NOWHERE ? "Nowhere" : j->getRoom()->name);
@@ -1664,13 +1665,13 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
                  GET_STR(k), GET_INT(k), GET_WIS(k), GET_DEX(k), GET_CON(k), GET_CHA(k));
 
     send_to_char(ch, "PL :[@g%12s@n]  KI :[@g%12s@n]  ST :[@g%12s@n]\r\n",
-                 add_commas(GET_HIT(k)), add_commas((k->getCurKI())), add_commas((k->getCurST())));
+                 add_commas(GET_HIT(k)).c_str(), add_commas((k->getCurKI())).c_str(), add_commas((k->getCurST())).c_str());
     send_to_char(ch, "MPL:[@g%12s@n]  MKI:[@g%12s@n]  MST:[@g%12s@n]\r\n",
-                 add_commas(GET_MAX_HIT(k)), add_commas(GET_MAX_MANA(k)), add_commas(GET_MAX_MOVE(k)));
+                 add_commas(GET_MAX_HIT(k)).c_str(), add_commas(GET_MAX_MANA(k)).c_str(), add_commas(GET_MAX_MOVE(k)).c_str());
     send_to_char(ch, "BPL:[@g%12s@n]  BKI:[@g%12s@n]  BST:[@g%12s@n]\r\n",
-                 add_commas((k->getBasePL())), add_commas((k->getBaseKI())), add_commas((k->getBaseST())));
+                 add_commas((k->getBasePL())).c_str(), add_commas((k->getBaseKI())).c_str(), add_commas((k->getBaseST())).c_str());
     send_to_char(ch, "LF :[@g%12s@n]  MLF:[@g%12s@n]  LFP:[@g%3d@n]\r\n",
-                 add_commas((k->getCurLF())), add_commas((k->getMaxLF())), GET_LIFEPERC(k));
+                 add_commas((k->getCurLF())).c_str(), add_commas((k->getMaxLF())).c_str(), GET_LIFEPERC(k));
 
     if (GET_ADMLEVEL(k))
         send_to_char(ch, "Admin Level: [@y%d - %s@n]\r\n", GET_ADMLEVEL(k), admin_level_names[GET_ADMLEVEL(k)]);
@@ -3303,8 +3304,8 @@ ACMD(do_show) {
                          trig_index.size(),
                          buf_largecount,
                          buf_switches, buf_overflows,
-                         add_commas(mob_specials_used),
-                         add_commas(number_of_assassins),
+                         add_commas(mob_specials_used).c_str(),
+                         add_commas(number_of_assassins).c_str(),
                          SELFISHMETER
             );
             break;
@@ -4871,7 +4872,7 @@ static void mob_checkload(struct char_data *ch, mob_vnum mvnum) {
         }
     }
     if (count > 0)
-        send_to_char(ch, "@D[@nTotal counted: %s.@D]@n\r\n", add_commas(count));
+        send_to_char(ch, "@D[@nTotal counted: %s.@D]@n\r\n", add_commas(count).c_str());
 }
 
 static void obj_checkload(struct char_data *ch, obj_vnum ovnum) {
@@ -5016,7 +5017,7 @@ static void obj_checkload(struct char_data *ch, obj_vnum ovnum) {
     }  /*for zone...*/
 
     if (count > 0)
-        send_to_char(ch, "@D[@nTotal counted: %s.@D]@n\r\n", add_commas(count));
+        send_to_char(ch, "@D[@nTotal counted: %s.@D]@n\r\n", add_commas(count).c_str());
 }
 
 static void trg_checkload(struct char_data *ch, trig_vnum tvnum) {

@@ -159,7 +159,7 @@ struct trig_var_data {
     char *value{};                /* value of variable */
     long context{};                /* 0: global context */
 
-    struct trig_var_data *next;
+    struct trig_var_data *next{};
 };
 
 /* structure for triggers */
@@ -213,6 +213,8 @@ struct script_data {
     DgUID owner{};
 
     struct script_data *next{};        /* used for purged_scripts    */
+    void activate();
+    void deactivate();
 };
 
 /* The event data for the wait command */

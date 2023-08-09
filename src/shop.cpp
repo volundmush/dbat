@@ -724,7 +724,7 @@ static void shopping_app(char *arg, struct char_data *ch, struct char_data *keep
 
         send_to_char(ch, "@c---------------------------------------------------------------@n\n");
         send_to_char(ch, "@GItem Name   @W: @w%s@n\n", obj->short_description);
-        send_to_char(ch, "@GTrue Value  @W: @Y%s@n\n", add_commas(GET_OBJ_COST(obj)));
+        send_to_char(ch, "@GTrue Value  @W: @Y%s@n\n", add_commas(GET_OBJ_COST(obj)).c_str());
         send_to_char(ch, "@GItem Min LVL@W: @w%d@n\n", displevel);
         if (GET_OBJ_VAL(obj, VAL_ALL_HEALTH) >= 100) {
             send_to_char(ch, "@GCondition   @W: @C%d%s@n\n", GET_OBJ_VAL(obj, VAL_ALL_HEALTH), "%");
@@ -736,7 +736,7 @@ static void shopping_app(char *arg, struct char_data *ch, struct char_data *keep
             send_to_char(ch, "@GCondition   @W: @D%d%s@n\n", GET_OBJ_VAL(obj, VAL_ALL_HEALTH), "%");
         }
         send_to_char(ch, "@GItem Size   @W:@w %s@n\n", size_names[GET_OBJ_SIZE(obj)]);
-        send_to_char(ch, "@GItem Weight @W: @w%s@n\n", add_commas(GET_OBJ_WEIGHT(obj)));
+        send_to_char(ch, "@GItem Weight @W: @w%s@n\n", add_commas(GET_OBJ_WEIGHT(obj)).c_str());
         if (OBJ_FLAGGED(obj, ITEM_SLOT1) && !OBJ_FLAGGED(obj, ITEM_SLOTS_FILLED)) {
             send_to_char(ch, "GToken Slots  @W: @m0/1@n\n");
         } else if (OBJ_FLAGGED(obj, ITEM_SLOT1) && OBJ_FLAGGED(obj, ITEM_SLOTS_FILLED)) {
@@ -1092,7 +1092,7 @@ static void shopping_sell(char *arg, struct char_data *ch, struct char_data *kee
     snprintf(tempbuf, sizeof(tempbuf), shop_index[shop_nr].message_sell, GET_NAME(ch), goldamt);
     do_tell(keeper, tempbuf, cmd_tell, 0);
 
-    send_to_char(ch, "The shopkeeper gives you %s zenni.\r\n", add_commas(goldamt));
+    send_to_char(ch, "The shopkeeper gives you %s zenni.\r\n", add_commas(goldamt).c_str());
     if (GET_GOLD(ch) + goldamt > GOLD_CARRY(ch)) {
         goldamt = (GET_GOLD(ch) + goldamt) - GOLD_CARRY(ch);
         GET_GOLD(ch) = GOLD_CARRY(ch);
@@ -1177,7 +1177,7 @@ list_object(struct obj_data *obj, int cnt, int aindex, vnum shop_nr, struct char
         displevel = 20;
 
     snprintf(result, sizeof(result), " %2d)  %9s %-*s %3d %13s\r\n", aindex, quantity,
-             count_color_chars(itemname) + 36, itemname, displevel, add_commas(buy_price(obj, shop_nr, keeper, ch)));
+             count_color_chars(itemname) + 36, itemname, displevel, add_commas(buy_price(obj, shop_nr, keeper, ch)).c_str());
     return (result);
 }
 
@@ -1233,7 +1233,7 @@ static void shopping_list(char *arg, struct char_data *ch, struct char_data *kee
                         sizeof(buf) - len - 1);    /* strncat: OK */
             }
         if (len < sizeof(buf)) {
-            sprintf(zen, "@W[@wYour Zenni@D: @Y%s@W]", add_commas(GET_GOLD(ch)));
+            sprintf(zen, "@W[@wYour Zenni@D: @Y%s@W]", add_commas(GET_GOLD(ch)).c_str());
             strncat(buf, zen, sizeof(buf) - len - 1);
         }
         write_to_output(ch->desc, buf);

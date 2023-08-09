@@ -529,7 +529,7 @@ int House_load(room_vnum rvnum) {
     char buf1[MAX_STRING_LENGTH];
     char buf2[MAX_STRING_LENGTH];
     char line[256];
-    int t[21], danger, zwei = 0;
+    int64_t t[21], danger, zwei = 0;
     struct obj_data *temp;
     int locate = 0, j, nr, k, num_objs = 0;
     struct obj_data *obj1;
@@ -580,7 +580,7 @@ int House_load(room_vnum rvnum) {
             }
 
             get_line(fl, line);
-            sscanf(line, "%d %d %d %d %d %d %d %d %d %s %s %s %s %d %d %d %d %d %d %d %d", t, t + 1, t + 2, t + 3,
+            sscanf(line, "%ld %ld %ld %ld %ld %ld %ld %ld %ld %s %s %s %s %ld %ld %ld %ld %ld %ld %ld %ld", t, t + 1, t + 2, t + 3,
                    t + 4, t + 5, t + 6, t + 7, t + 8, f1, f2, f3, f4, t + 13, t + 14, t + 15, t + 16, t + 17, t + 18,
                    t + 19, t + 20);
             locate = t[0];
@@ -629,7 +629,7 @@ int House_load(room_vnum rvnum) {
 
 
                 if (!get_line(fl, line) ||
-                    (sscanf(line, "%d %d %d %d %d %d %d %d", t, t + 1, t + 2, t + 3, t + 4, t + 5, t + 6, t + 7) !=
+                    (sscanf(line, "%ld %ld %ld %ld %ld %ld %ld %ld", t, t + 1, t + 2, t + 3, t + 4, t + 5, t + 6, t + 7) !=
                      8)) {
                     fprintf(stderr, "Format error in first numeric line (expecting _x_ args)");
                     return 0;
@@ -674,7 +674,7 @@ int House_load(room_vnum rvnum) {
                                 danger = 1;
                             }
                             get_line(fl, line);
-                            sscanf(line, "%d %d %d", t, t + 1, t + 2);
+                            sscanf(line, "%ld %ld %ld", t, t + 1, t + 2);
                             temp->affected[j].location = t[0];
                             temp->affected[j].modifier = t[1];
                             temp->affected[j].specific = t[2];

@@ -321,7 +321,6 @@ room_data::room_data(const nlohmann::json &j) {
 
     if(!proto_script.empty() || vn == 0) {
         if(!script) script = new script_data(this);
-        assign_triggers(this, WLD_TRIGGER);
     }
 
 

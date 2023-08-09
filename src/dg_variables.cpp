@@ -1033,7 +1033,7 @@ in the vault (vnum: 453) now and then. you can just use
                     break;
                 case 'w':
                     if (!strcasecmp(field, "weight"))
-                        snprintf(str, slen, "%d", GET_WEIGHT(c));
+                        snprintf(str, slen, "%f", GET_WEIGHT(c));
                     else if (!strcasecmp(field, "wis")) {
                         if (subfield && *subfield) {
                             int addition = atoi(subfield);
@@ -1285,14 +1285,14 @@ in the vault (vnum: 453) now and then. you can just use
                 case 'w':
                     if (!strcasecmp(field, "weight")) {
                         if (subfield && *subfield) {
-                            int addition = atoi(subfield);
+                            auto addition = atof(subfield);
                             if (addition < 0 || addition > 0) {
-                                GET_OBJ_WEIGHT(o) = MAX(0, addition + GET_OBJ_WEIGHT(o));
+                                GET_OBJ_WEIGHT(o) = std::max<double>(0, addition + GET_OBJ_WEIGHT(o));
                             } else {
                                 GET_OBJ_WEIGHT(o) = 0;
                             }
                         }
-                        snprintf(str, slen, "%" I64T "", GET_OBJ_WEIGHT(o));
+                        snprintf(str, slen, "%f", GET_OBJ_WEIGHT(o));
                     } else if (!strcasecmp(field, "worn_by")) {
                         if (o->worn_by)
                             snprintf(str, slen, "%s", ((o->worn_by)->getUID(false).c_str()));

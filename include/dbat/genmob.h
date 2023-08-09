@@ -22,8 +22,6 @@ extern int free_mobile(struct char_data *mob);
 
 extern int save_mobiles(zone_rnum rznum);
 
-extern int write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd);
-
 /* Handy macros. */
 #define GET_NDD(mob)    ((mob)->mob_specials.damnodice)
 #define GET_SDD(mob)    ((mob)->mob_specials.damsizedice)

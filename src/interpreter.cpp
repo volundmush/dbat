@@ -2650,7 +2650,7 @@ int perform_dupe_check(struct descriptor_data *d) {
                     inc *= mult;
                     GET_BANK_GOLD(d->character) += inc;
                     send_to_char(d->character, "Interest happened while you were away, %d times.\r\n"
-                                               "@cBank Interest@D: @Y%s@n\r\n", mult, add_commas(inc));
+                                               "@cBank Interest@D: @Y%s@n\r\n", mult, add_commas(inc).c_str());
                 }
             }
             break;

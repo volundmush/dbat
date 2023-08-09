@@ -96,7 +96,7 @@ extern int64_t gear_exp(struct char_data *ch, int64_t exp);
 
 extern int get_flag_by_name(const char *flag_list[], char *flag_name);
 
-char *add_commas(int64_t X);
+std::string add_commas(double X);
 
 extern void trim(char *s);
 
