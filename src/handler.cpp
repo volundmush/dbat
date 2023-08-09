@@ -124,6 +124,27 @@ int is_name(const char *str, const char *namelist) {
 /* allow abbreviations */
 #define WHITESPACE " \t"
 
+
+static char* mystrsep(char** stringp, const char* delim)
+{
+    char* start = *stringp;
+    char* p;
+
+    p = (start != NULL) ? strpbrk(start, delim) : NULL;
+
+    if (p == NULL)
+    {
+        *stringp = NULL;
+    }
+    else
+    {
+        *p = '\0';
+        *stringp = p + 1;
+    }
+
+    return start;
+}
+
 int isname(const char *str, const char *namelist) {
     char *newlist;
     char *curtok;
@@ -139,7 +160,7 @@ int isname(const char *str, const char *namelist) {
 
     strlcpy(newlistbuf, namelist, sizeof(newlistbuf));
     newlist = newlistbuf;
-    for (curtok = strsep(&newlist, WHITESPACE); curtok; curtok = strsep(&newlist, WHITESPACE)) {
+    for (curtok = mystrsep(&newlist, WHITESPACE); curtok; curtok = mystrsep(&newlist, WHITESPACE)) {
         if (curtok && is_abbrev(str, curtok)) {
             /* Don't allow abbreviated numbers, only alpha names need abbreviation */
             /* This, I just consider a bug fix, because abbreviating numbers is just*/

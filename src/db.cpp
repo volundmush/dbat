@@ -5673,8 +5673,7 @@ void dump_state() {
     std::filesystem::create_directories(path);
     auto now = std::chrono::system_clock::now();
     auto time_t_now = std::chrono::system_clock::to_time_t(now);
-    std::tm tm_now;
-    localtime_r(&time_t_now, &tm_now);
+    std::tm tm_now = *std::localtime(&time_t_now);
 
     auto tempPath = path / fmt::format("{}.sqlite3", config::stateDbName);
     auto journalPath = path / fmt::format("{}.sqlite3-journal", config::stateDbName);

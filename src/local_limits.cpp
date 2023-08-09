@@ -849,28 +849,7 @@ void gain_level(struct char_data *ch, int whichclass) {
 }
 
 void run_autowiz() {
-#if defined(CIRCLE_UNIX) || defined(CIRCLE_WINDOWS)
-    if (CONFIG_USE_AUTOWIZ) {
-        size_t res;
-        char buf[256];
 
-#if defined(CIRCLE_UNIX)
-        res = snprintf(buf, sizeof(buf), "nice ../bin/autowiz %d %s %d %s %d &",
-                       CONFIG_MIN_WIZLIST_LEV, WIZLIST_FILE, ADMLVL_IMMORT, IMMLIST_FILE, (int) getpid());
-#elif defined(CIRCLE_WINDOWS)
-        res = snprintf(buf, sizeof(buf), "autowiz %d %s %d %s",
-            CONFIG_MIN_WIZLIST_LEV, WIZLIST_FILE, ADMLVL_IMMORT, IMMLIST_FILE);
-#endif /* CIRCLE_WINDOWS */
-
-        /* Abusing signed -> unsigned conversion to avoid '-1' check. */
-        if (res < sizeof(buf)) {
-            mudlog(CMP, ADMLVL_IMMORT, false, "Initiating autowiz.");
-            system(buf);
-            reboot_wizlists();
-        } else
-            basic_mud_log("Cannot run autowiz: command-line doesn't fit in buffer.");
-    }
-#endif /* CIRCLE_UNIX || CIRCLE_WINDOWS */
 }
 
 void gain_exp(struct char_data *ch, int64_t gain) {

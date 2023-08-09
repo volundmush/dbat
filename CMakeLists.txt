@@ -18,8 +18,6 @@ CPMAddPackage("gh:fmtlib/fmt#9.1.0")
 CPMAddPackage("gh:SRombauts/SQLiteCpp#3.3.0")
 CPMAddPackage("gh:nlohmann/json#v3.11.2")
 CPMAddPackage("gh:gabime/spdlog#v1.12.0")
-CPMAddPackage("gh:Roblox/luau#0.570")
-CPMAddPackage("gh:kunitoki/LuaBridge3#3.0-rc3")
 CPMAddPackage("gh:robinlinden/libsodium-cmake#master")
 CPMAddPackage("gh:effolkronium/random#v1.5.0")
 
@@ -39,10 +37,6 @@ set(CIRCLE_INCLUDE_DIRS
         ${SQLiteCpp_SOURCE_DIR}/include
         ${nlohmann_json_SOURCE_DIR}/single_include
         ${spdlog_SOURCE_DIR}/include
-        ${luau_SOURCE_DIR}/Common/include
-        ${luau_SOURCE_DIR}/VM/include
-        ${luau_SOURCE_DIR}/Compiler/include
-        ${LuaBridge_SOURCE_DIR}/Source
         ${sodium_SOURCE_DIR}/libsodium/src/libsodium/include
         ${effolkronium_random_SOURCE_DIR}/include
         )
@@ -59,7 +53,7 @@ set(CMAKE_CXX_FLAGS "-fpermissive -w")
 set(BUILD_TESTING OFF)
 
 set(CIRCLE_LINK_LIBRARIES
-        ZLIB::ZLIB fmt::fmt ${SQLite3_LIBRARIES} ${Boost_LIBRARIES}
+        fmt::fmt ${SQLite3_LIBRARIES} ${Boost_LIBRARIES}
         SQLiteCpp sqlite3 bsd
         Luau.VM Luau.Common Luau.Compiler
         sodium
@@ -71,7 +65,6 @@ add_library(circlemud ${CIRCLE_INCLUDE} ${CIRCLE_SRC}
         src/transformation.cpp)
 # everything we make will link to it.
 target_link_libraries(circlemud ${CIRCLE_LINK_LIBRARIES})
-target_compile_definitions(circlemud PUBLIC USING_CMAKE=1 CIRCLE_UNIX=1 POSIX=1)
 target_include_directories(circlemud PUBLIC ${CIRCLE_INCLUDE_DIRS})
 
 # the various binaries

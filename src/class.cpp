@@ -636,9 +636,9 @@ void do_start(struct char_data *ch) {
     advance_level(ch, GET_CLASS(ch));
     /*mudlog(BRF, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s advanced to level %d", GET_NAME(ch), GET_LEVEL(ch));*/
 
-    ch->basepl = std::max(ch->basepl, 100L);
-    ch->baseki = std::max(ch->baseki, 100L);
-    ch->basest = std::max(ch->basest, 100L);
+    ch->basepl = std::max<int64_t>(ch->basepl, 100L);
+    ch->baseki = std::max<int64_t>(ch->baseki, 100L);
+    ch->basest = std::max<int64_t>(ch->basest, 100L);
 
     if (IS_ANDROID(ch) && PLR_FLAGGED(ch, PLR_SENSEM)) {
         SET_SKILL(ch, SKILL_SENSE, 100);
@@ -1135,9 +1135,9 @@ void advance_level(struct char_data *ch, int whichclass) {
         /* blah */
     } else {
         ch->gainBasePL(rand_number(1, 20));
-        ch->basepl = std::max(ch->basepl, 250L);
-        ch->baseki = std::max(ch->baseki, 250L);
-        ch->basest = std::max(ch->basest, 250L);
+        ch->basepl = std::max<int64_t>(ch->basepl, 250L);
+        ch->baseki = std::max<int64_t>(ch->baseki, 250L);
+        ch->basest = std::max<int64_t>(ch->basest, 250L);
 
         add_prac = 5;
         if (PLR_FLAGGED(ch, PLR_SKILLP)) {

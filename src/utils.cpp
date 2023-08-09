@@ -3702,59 +3702,11 @@ int count_metamagic_feats(struct char_data *ch) {
 }
 
 int insure_directory(char *path, int isfile) {
-    char *chopsuey = strdup(path);
-    char *p;
-    char *temp;
-    struct stat st;
-
-    /* if it's a file, remove that, we're only checking dirs; */
-    if (isfile) {
-        if (!(p = strrchr(path, '/'))) {
-            free(chopsuey);
-            return 1;
-        }
-        *p = '\0';
+    auto p = std::string(path);
+    if(isfile && p.ends_with("/")) {
+        p = p.substr(0, p.size() - 1);
     }
-
-
-    /* remove any trailing /'s */
-
-    while (chopsuey[strlen(chopsuey) - 1] == '/') {
-        chopsuey[strlen(chopsuey) - 1] = '\0';
-    }
-
-    /* check and see if it's already a dir */
-
-
-    if (!stat(chopsuey, &st) && S_ISDIR(st.st_mode)) {
-        free(chopsuey);
-        return 1;
-    }
-
-    temp = strdup(chopsuey);
-    if ((p = strrchr(temp, '/')) != nullptr) {
-        *p = '\0';
-    }
-    if (insure_directory(temp, 0) &&
-
-        !mkdir(chopsuey, S_IRUSR | S_IWRITE | S_IEXEC | S_IRGRP | S_IXGRP |
-                         S_IROTH | S_IXOTH)) {
-        free(temp);
-        free(chopsuey);
-        return 1;
-    }
-
-    if (errno == EEXIST &&
-        !stat(temp, &st)
-        && S_ISDIR(st.st_mode)) {
-        free(temp);
-        free(chopsuey);
-        return 1;
-    } else {
-        free(temp);
-        free(chopsuey);
-        return 1;
-    }
+    std::filesystem::create_directories(p);
 }
 
 

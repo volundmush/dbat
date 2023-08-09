@@ -30,7 +30,7 @@
 #define TIME_WITH_SYS_TIME 1
 
 /* Define if we're compiling CircleMUD under any type of UNIX system.  */
-#define CIRCLE_UNIX 1
+#define CIRCLE_UNIX 0
 
 /* Define if the system is capable of using crypt() to encrypt.  */
 #define CIRCLE_CRYPT 1

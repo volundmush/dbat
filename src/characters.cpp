@@ -662,12 +662,12 @@ bool char_data::isFullLF() {
 }
 
 int64_t char_data::setCurLF(int64_t amt) {
-    life = std::max(0L, std::abs(amt));
+    life = std::max<int64_t>(0L, std::abs(amt));
     return getCurLF();
 }
 
 int64_t char_data::setCurLFPercent(double amt) {
-    life = std::max(0L, (int64_t) (getMaxLF() * std::abs(amt)));
+    life = std::max<int64_t>(0L, (int64_t) (getMaxLF() * std::abs(amt)));
     return getCurLF();
 }
 
@@ -817,17 +817,17 @@ void char_data::gainBaseAll(int64_t amt, bool trans_mult) {
 }
 
 int64_t char_data::loseBasePL(int64_t amt, bool trans_mult) {
-    basepl = std::max(1L, basepl - amt);
+    basepl = std::max<int64_t>(1L, basepl - amt);
     return basepl;
 }
 
 int64_t char_data::loseBaseST(int64_t amt, bool trans_mult) {
-    basest = std::max(1L, basest - amt);
+    basest = std::max<int64_t>(1L, basest - amt);
     return basest;
 }
 
 int64_t char_data::loseBaseKI(int64_t amt, bool trans_mult) {
-    baseki = std::max(1L, baseki - amt);
+    baseki = std::max<int64_t>(1L, baseki - amt);
     return baseki;
 }
 

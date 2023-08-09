@@ -4635,9 +4635,9 @@ ACMD(do_absorb) {
             stam += rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
             pl += rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
             ki += rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
-            stam = std::min(stam, 1500000L);
-            ki = std::min(ki, 1500000L);
-            pl = std::min(pl, 1500000L);
+            stam = std::min<int64_t>(stam, 1500000L);
+            ki = std::min<int64_t>(ki, 1500000L);
+            pl = std::min<int64_t>(pl, 1500000L);
 
             ch->gainBasePL(pl, true);
             ch->gainBaseST(stam, true);
