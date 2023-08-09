@@ -12,40 +12,11 @@
 #include <cstring>
 #include <strings.h>
 #include <cstdlib>
-#include <sys/types.h>
-#include <bsd/string.h>
-#include <unistd.h>
-#include <climits>
 #include <cerrno>
-#include <crypt.h>
-#include <sys/time.h>
 #include <ctime>
-#include <cassert>
-#include <zlib.h>
-#include <sys/select.h>
-#include <fcntl.h>
-#include <sys/fcntl.h>
-#include <sys/socket.h>
-#include <sys/resource.h>
-#include <sys/wait.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <csignal>
-#include <sys/uio.h>
-#include <sys/stat.h>
 #include <cstddef>
 
-#include <dirent.h>
-#include <linux/limits.h>
-
-#ifdef HAVE_LIBBSD
-
-#include <bsd/string.h>
-
-#else
 #include "stringutils.h"
-#endif
 
 // C++ STD libraries
 #include <string>

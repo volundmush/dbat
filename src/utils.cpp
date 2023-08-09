@@ -3701,45 +3701,6 @@ int count_metamagic_feats(struct char_data *ch) {
     return count;
 }
 
-/* General use directory functions & structures. Required due to */
-/* various differences between directory handling code on        */
-/* different OS'es.  Needs solid testing though.                 */
-/* Added by Dynamic Boards v2.4 - PjD (dughi@imaxx.net)          */
-
-
-int xdir_scan(char *dir_name, struct xap_dir *xapdirp) {
-    xapdirp->total = scandir(dir_name, &(xapdirp->namelist), nullptr, alphasort);
-    xapdirp->current = 0;
-
-    return (xapdirp->total);
-}
-
-char *xdir_get_name(struct xap_dir *xd, int i) {
-    return xd->namelist[i]->d_name;
-}
-
-char *xdir_get_next(struct xap_dir *xd) {
-    if (++(xd->current) >= xd->total) {
-        return nullptr;
-    }
-    return xd->namelist[xd->current - 1]->d_name;
-}
-
-
-void xdir_close(struct xap_dir *xd) {
-    int i;
-    for (i = 0; i < xd->total; i++) {
-        free(xd->namelist[i]);
-    }
-    free(xd->namelist);
-    xd->namelist = nullptr;
-    xd->current = xd->total = -1;
-}
-
-int xdir_get_total(struct xap_dir *xd) {
-    return xd->total;
-}
-
 int insure_directory(char *path, int isfile) {
     char *chopsuey = strdup(path);
     char *p;

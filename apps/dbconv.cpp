@@ -1303,10 +1303,7 @@ int main(int argc, char **argv)
     basic_mud_log("%s", ascii_pfiles_version);
     basic_mud_log("%s", CWG_VERSION);
     xap_objs = 1;
-    if (chdir(dir) < 0) {
-        perror("SYSERR: Fatal error changing to data directory");
-        exit(1);
-    }
+    std::filesystem::current_path(dir);
     basic_mud_log("Using %s as data directory.", dir);
 
     init_lookup_table();

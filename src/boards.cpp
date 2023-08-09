@@ -61,39 +61,30 @@ struct board_info *bboards = nullptr;  /* our global board structure */
 
 void init_boards() {
     int i, j;
-    long board_vnum;
+    vnum board_vnum;
     struct xap_dir xd;
     struct board_info *tmp_board;
     char dir_name[128];
 
-    if (!insure_directory(BOARD_DIRECTORY, 0)) {
-        basic_mud_log("Unable to open/create directory '%s' - Exiting", BOARD_DIRECTORY);
-        exit(1);
-    }
+    auto path = std::filesystem::current_path() / "etc" / "boards";
+    std::filesystem::create_directory(path);
 
-#if defined(CIRCLE_WINDOWS)
-    strcpy(dir_name, "etc/boards/*");
-#else
-    strcpy(dir_name, "etc/boards");
-#endif
+    // Iterate over all files within path that have integer filenames.
+    for(auto &p: std::filesystem::directory_iterator(path)) {
+        if(p.is_regular_file()) {
+            try {
+                board_vnum = std::stoi(p.path().filename().string());
+            } catch(std::invalid_argument &e) {
+                continue;
+            }
 
-    if ((i = xdir_scan(dir_name, &xd)) <= 0) {
-        basic_mud_log("Funny, no board files found.\n");
-        return;
-    }
-
-    /* otherwise they do exist */
-    for (j = 0; j < i; j++) {
-        if (strcmp("..", xdir_get_name(&xd, j)) &&
-            strcmp(".", xdir_get_name(&xd, j)) &&
-            strcmp(".cvsignore", xdir_get_name(&xd, j))) {
-            sscanf(xdir_get_name(&xd, j), "%ld", &board_vnum);
             if ((tmp_board = load_board(board_vnum)) != nullptr) {
                 tmp_board->next = bboards;
                 bboards = tmp_board;
             }
         }
     }
+
     /* just logs some summary data about the boards */
     look_at_boards();
 }
@@ -112,7 +103,7 @@ struct board_info *create_new_board(obj_vnum board_vnum) {
             board_vnum);
 
         /* unlink file, clear existing board */
-        unlink(buf);
+        std::filesystem::remove(buf);
 
         for (temp = bboards, backup = nullptr; temp && !backup; temp = temp->next) {
             if (BOARD_VNUM(temp) == board_vnum) {
@@ -251,7 +242,7 @@ struct board_info *load_board(obj_vnum board_vnum) {
         if (time(nullptr) - st.st_mtime > (60 * 60 * 24 * 7)) {
             basic_mud_log("Deleting old board file '%s' [vnum %d].  7 days without modification & no associated object.", filebuf,
                 board_vnum);
-            unlink(filebuf);
+            std::filesystem::remove(filebuf);
             free(temp_board);
             return nullptr;
         }

@@ -843,9 +843,9 @@ void remove_player(int pfilepos) {
     /* Unlink all player-owned files */
     for (i = 0; i < MAX_FILES; i++) {
         if (get_filename(fname, sizeof(fname), i, player_table[pfilepos].name))
-            unlink(fname);
+            std::filesystem::remove(fname);
         if (get_filename(fname, sizeof(fname), i, CAP(player_table[pfilepos].name)))
-            unlink(fname);
+            std::filesystem::remove(fname);
     }
 
     basic_mud_log("PCLEAN: %s Lev: %d Last: %s",

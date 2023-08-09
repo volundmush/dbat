@@ -3211,7 +3211,7 @@ void save_disabled() {
 
     if (!disabled_first) {
         /* delete file if no commands are disabled */
-        unlink(DISABLED_FILE);
+        std::filesystem::remove(DISABLED_FILE);
         return;
     }
 

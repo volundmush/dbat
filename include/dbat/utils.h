@@ -1159,15 +1159,6 @@ struct xap_dir {
     struct dirent **namelist;
 };
 
-extern int xdir_scan(char *dir_name, struct xap_dir *xapdirp);
-
-extern int xdir_get_total(struct xap_dir *xd);
-
-extern char *xdir_get_name(struct xap_dir *xd, int num);
-
-extern char *xdir_next(struct xap_dir *xd);
-
-extern void xdir_close(struct xap_dir *xd);
 
 extern int insure_directory(char *path, int isfile);
 

@@ -182,7 +182,7 @@ void copyover_recover() {
     fp >> j;
 
     // erase the file.
-    unlink(COPYOVER_FILE);
+    std::filesystem::remove(COPYOVER_FILE);
     fp.close();
 
     if(j.contains("descriptors")) {
@@ -768,7 +768,7 @@ void init_game() {
     if (circle_reboot) {
         basic_mud_log("Rebooting.");
         //shutdown_game(52);            /* what's so great about HHGTTG, anyhow? */
-        chdir("..");
+        std::filesystem::current_path("..");
         execl ("bin/circle", "circle", "-C%d", "1280", (char *) NULL);
     }
     basic_mud_log("Normal termination of game.");

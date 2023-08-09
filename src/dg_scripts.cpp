@@ -2764,7 +2764,7 @@ void save_char_vars(struct char_data *ch) {
     if (IS_NPC(ch)) return;
 
     get_filename(fn, sizeof(fn), SCRIPT_VARS_FILE, GET_NAME(ch));
-    unlink(fn);
+    std::filesystem::remove(fn);
 
     /* make sure this char has global variables to save */
     if (ch->script->global_vars == nullptr) return;
