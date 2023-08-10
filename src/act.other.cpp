@@ -1946,7 +1946,7 @@ ACMD(do_candy) {
     one_argument(argument, arg);
 
     if (!IS_MAJIN(ch)) {
-        send_to_char(ch, "You are not a majin, how can you do that?\r\n");
+        send_to_char(ch, "You are not a Majin, how can you do that?\r\n");
         return;
     }
     //if (FIGHTING(ch)) {
@@ -1958,6 +1958,7 @@ ACMD(do_candy) {
         send_to_char(ch, "Turn who into candy?\r\n");
         return;
     }
+
     if (!can_kill(ch, vict, nullptr, 0)) {
         return;
     }
@@ -1969,18 +1970,22 @@ ACMD(do_candy) {
         send_to_char(ch, "You can't turn them into candy.\r\n");
         return;
     }
+
     if (vict_max > ch_max * 2) {
         send_to_char(ch, "They are too powerful.\r\n");
         return;
     }
+
     if (vict_max < ch_max * .25 && GET_LEVEL(ch) < 100) {
         send_to_char(ch, "They are too weak.\r\n");
         return;
     }
+
     if (vict_max < ch_max * .09 && GET_LEVEL(ch) == 100) {
         send_to_char(ch, "They are too weak.\r\n");
         return;
     }
+
     if ((ch->getCurKI()) < ch_max / 15) {
         send_to_char(ch, "You do not have enough ki.\r\n");
         return;
@@ -2000,35 +2005,30 @@ ACMD(do_candy) {
         }
         WAIT_STATE(ch, PULSE_3SEC);
         return;
-    } else {
-        ch->decCurKI(ch->getMaxKI() / 15);
-        reveal_hiding(ch, 0);
-        act("@cYou aim your forelock at @R$N@c and fire a beam of energy that envelopes $S entire body and changes $M into candy!@n",
-            true, ch, nullptr, vict, TO_CHAR);
-        act("@C$n@c aims $s forelock at @R$N@c and fires a beam of energy that envelopes $S entire body and changes $M into candy!@n ",
-            true, ch, nullptr, vict, TO_NOTVICT);
-        if (vict_max >= ch_max * 1.5) {
-            send_to_char(ch, "You grab the candy as it falls.\r\n");
-            obj = read_object(95, VIRTUAL);
-            obj_to_char(obj, ch);
-        } else if (vict_max >= ch_max) {
-            send_to_char(ch, "You grab the candy as it falls.\r\n");
-            obj = read_object(94, VIRTUAL);
-            obj_to_char(obj, ch);
-        } else if (vict_max < ch_max && (((vict_max >= ch_max * .5) && GET_LEVEL(ch) < 100) ||
-                                         ((vict_max >= ch_max * .1) && GET_LEVEL(ch) >= 100))) {
-            send_to_char(ch, "You grab the candy as it falls.\r\n");
-            obj = read_object(93, VIRTUAL);
-            obj_to_char(obj, ch);
-        } else if (vict_max < ch_max && (((vict_max < ch_max * .5) && GET_LEVEL(ch) < 100) ||
-                                         ((vict_max < ch_max * .1) && GET_LEVEL(ch) >= 100))) {
-            send_to_char(ch, "You grab the candy as it falls.\r\n");
-            obj = read_object(53, VIRTUAL);
-            obj_to_char(obj, ch);
-        }
-        SET_BIT_AR(MOB_FLAGS(vict), MOB_HUSK);
-        die(vict, ch);
     }
+    ch->decCurKI(ch->getMaxKI() / 15);
+    reveal_hiding(ch, 0);
+    act("@cYou aim your forelock at @R$N@c and fire a beam of energy that envelopes $S entire body and changes $M into candy!@n",
+        true, ch, nullptr, vict, TO_CHAR);
+    act("@C$n@c aims $s forelock at @R$N@c and fires a beam of energy that envelopes $S entire body and changes $M into candy!@n ",
+        true, ch, nullptr, vict, TO_NOTVICT);
+
+    std::vector<obj_vnum> candies = {53, 93, 94, 95};
+    auto randomCandy = Random::get(candies);
+
+    send_to_char(ch, "You grab the candy as it falls.\r\n");
+    obj = read_object(*randomCandy, VIRTUAL);
+    auto sh = obj->short_description;
+    char newsh[MAX_STRING_LENGTH];
+    snprintf(newsh, MAX_STRING_LENGTH, "%s@n (of %s@n)", obj->short_description, vict->short_description);
+    obj->short_description = strdup(newsh);
+    obj_to_char(obj, ch);
+    obj->value[VAL_FOOD_CANDY_PL] = vict->basepl;
+    obj->value[VAL_FOOD_CANDY_KI] = vict->baseki;
+    obj->value[VAL_FOOD_CANDY_ST] = vict->basest;
+
+    SET_BIT_AR(MOB_FLAGS(vict), MOB_HUSK);
+    die(vict, ch);
 
 }
 

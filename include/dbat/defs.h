@@ -1787,6 +1787,9 @@ input */
 #define VAL_FOOD_MAXHEALTH            5
 #define VAL_FOOD_UNUSED7              6
 #define VAL_FOOD_MATERIAL             7
+#define VAL_FOOD_CANDY_PL             8
+#define VAL_FOOD_CANDY_KI             9
+#define VAL_FOOD_CANDY_ST            10
 #define VAL_MONEY_SIZE                0
 #define VAL_MONEY_UNUSED2             1
 #define VAL_MONEY_UNUSED3             2

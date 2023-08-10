@@ -54,7 +54,7 @@ static const char *auctioneer[AUC_BID + 1] = {
 };
 
 /* local functions */
-static void majin_gain(struct char_data *ch, int type);
+static void majin_gain(struct char_data *ch, struct obj_data *food, int foob);
 
 static int can_take_obj(struct char_data *ch, struct obj_data *obj);
 
@@ -3704,95 +3704,20 @@ ACMD(do_eat) {
         af.bitvector = AFF_POISON;
         affect_join(ch, &af, false, false, false, false);
     }
+
+    std::set<obj_vnum> candies = {53, 93, 94, 95};
+
     if (subcmd == SCMD_EAT) {
         if (foob >= GET_OBJ_VAL(food, VAL_FOOD_FOODVAL)) {
             send_to_char(ch, "You finish the last bite.\r\n");
-            if (GET_OBJ_VNUM(food) == 53) {
-                ch->incCurST(ch->getMaxST() / 30);
-                ch->incCurLFPercent(.01);
-                if (OBJ_FLAGGED(food, ITEM_FORGED)) {
-                    send_to_char(ch, "This is a forgery. You gain nothing!\r\n");
-                } else {
-                    send_to_char(ch, "You feel more energetic!\r\n");
-                    majin_gain(ch, -1);
-                }
-            }
-            if (GET_OBJ_VNUM(food) == 93) {
-                ch->incCurST(ch->getMaxST() / 20);
-                ch->incCurLFPercent(.01);
-                if (OBJ_FLAGGED(food, ITEM_FORGED)) {
-                    send_to_char(ch, "This is a forgery. You gain nothing!\r\n");
-                } else {
-                    send_to_char(ch, "You feel more energetic!\r\n");
-                    majin_gain(ch, 0);
-                }
-            }
-            if (GET_OBJ_VNUM(food) == 94) {
-                ch->incCurST(ch->getMaxST() / 10);
-                ch->incCurLFPercent(.01);
-                if (OBJ_FLAGGED(food, ITEM_FORGED)) {
-                    send_to_char(ch, "This is a forgery. You gain nothing!\r\n");
-                } else {
-                    send_to_char(ch, "You feel more energetic!\r\n");
-                    majin_gain(ch, 1);
-                }
-            }
-            if (GET_OBJ_VNUM(food) == 95) {
-                ch->incCurST(ch->getMaxST() / 10);
-                ch->incCurLFPercent(.02);
-                if (OBJ_FLAGGED(food, ITEM_FORGED)) {
-                    send_to_char(ch, "This is a forgery. You gain nothing!\r\n");
-                } else {
-                    send_to_char(ch, "You feel more energetic!\r\n");
-                    majin_gain(ch, 2);
-                }
+            if(candies.contains(food->vn)) {
+                majin_gain(ch, food, foob);
             }
             extract_obj(food);
         } else {
             GET_OBJ_VAL(food, VAL_FOOD_FOODVAL) -= foob;
-            if (GET_OBJ_VNUM(food) == 53) {
-                ch->incCurST(ch->getMaxST() / 30);
-                ch->incCurLFPercent(.01);
-                if (OBJ_FLAGGED(food, ITEM_FORGED)) {
-                    send_to_char(ch, "This is a forgery. You gain nothing!\r\n");
-                } else {
-                    send_to_char(ch, "You feel more energetic!\r\n");
-                    majin_gain(ch, -1);
-                    extract_obj(food);
-                }
-            }
-            if (GET_OBJ_VNUM(food) == 93) {
-                ch->incCurST(ch->getMaxST() / 20);
-                ch->incCurLFPercent(.01);
-                if (OBJ_FLAGGED(food, ITEM_FORGED)) {
-                    send_to_char(ch, "This is a forgery. You gain nothing!\r\n");
-                } else {
-                    send_to_char(ch, "You feel more energetic!\r\n");
-                    majin_gain(ch, 0);
-                    extract_obj(food);
-                }
-            }
-            if (GET_OBJ_VNUM(food) == 94) {
-                ch->incCurST(ch->getMaxST() / 10);
-                ch->incCurLFPercent(.02);
-                if (OBJ_FLAGGED(food, ITEM_FORGED)) {
-                    send_to_char(ch, "This is a forgery. You gain nothing!\r\n");
-                } else {
-                    send_to_char(ch, "You feel more energetic!\r\n");
-                    majin_gain(ch, 1);
-                    extract_obj(food);
-                }
-            }
-            if (GET_OBJ_VNUM(food) == 95) {
-                ch->incCurST(ch->getMaxST() / 10);
-                ch->incCurLFPercent(.03);
-                if (OBJ_FLAGGED(food, ITEM_FORGED)) {
-                    send_to_char(ch, "This is a forgery. You gain nothing!\r\n");
-                } else {
-                    send_to_char(ch, "You feel more energetic!\r\n");
-                    majin_gain(ch, 2);
-                    extract_obj(food);
-                }
+            if(candies.contains(food->vn)) {
+                majin_gain(ch, food, foob);
             }
         }
     } else {
@@ -3803,47 +3728,80 @@ ACMD(do_eat) {
     }
 }
 
-static void majin_gain(struct char_data *ch, int type) {
+static void majin_gain(struct char_data *ch, struct obj_data *food, int foob) {
     if (!IS_MAJIN(ch) || IS_NPC(ch)) {
         return;
     }
-/* Rillao: transloc, add new transes here */
-    if (ch->is_soft_cap(0)) {
+
+    auto amountLeft = food->value[VAL_FOOD_FOODVAL];
+    auto amountMax = FOOB(food);
+
+    // For uneaten food, this should be 1.0. otherwise it might be 0.4, 0.2, 0.7, whatever...
+    auto percentAvailableStart = (double)amountLeft / (double)amountMax;
+
+    auto leftAfter = amountLeft - foob;
+    if(leftAfter <= 0) leftAfter = 0;
+    auto percentAvailableAfter = (double)leftAfter / (double)amountMax;
+
+    auto percentConsumed = percentAvailableStart - percentAvailableAfter;
+
+
+    auto soft_cap = ch->calc_soft_cap();
+    auto current = (ch->getBasePL() + ch->getBaseKI() + ch->getBaseST());
+
+    auto available = soft_cap - current;
+
+    if (available <= 0.0) {
         send_to_char(ch, "You can not gain anymore from candy consumption at your current level.\r\n");
         return;
     }
 
-    int64_t st = 0, ki = 0, pl = 0;
+    int64_t st = food->value[VAL_FOOD_CANDY_ST], ki = food->value[VAL_FOOD_CANDY_KI], pl = food->value[VAL_FOOD_CANDY_PL];
 
-    switch (type) {
-        case -1:
-            st = std::min<int64_t>(300000L, ((ch->getBaseST()) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
-            pl = std::min<int64_t>(300000L, ((ch->getBasePL()) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
-            ki = std::min<int64_t>(300000L, ((ch->getBaseKI()) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
-            break;
-        case 0:
-            st = std::min<int64_t>(500000L, ((ch->getBaseST()) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
-            pl = std::min<int64_t>(500000L, ((ch->getBasePL()) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
-            ki = std::min<int64_t>(500000L, ((ch->getBaseKI()) / 1200) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
-            break;
-        case 1:
-            st = std::min<int64_t>(1200000L, ((ch->getBaseST()) / 1000) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
-            pl = std::min<int64_t>(1200000L, ((ch->getBasePL()) / 1000) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
-            ki = std::min<int64_t>(1200000L, ((ch->getBaseKI()) / 1000) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
-            break;
-        case 2:
-            st = std::min<int64_t>(1500000L, ((ch->getBaseST()) / 900) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
-            pl = std::min<int64_t>(1500000L, ((ch->getBasePL()) / 900) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
-            ki = std::min<int64_t>(1500000L, ((ch->getBaseKI()) / 900) + rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2));
-            break;
+    st *= 0.05;
+    ki *= 0.05;
+    pl *= 0.05;
+
+    pl *= percentConsumed;
+    ki *= percentConsumed;
+    st *= percentConsumed;
+
+    std::vector<int> toAdd = {0, 1, 2};
+    Random::shuffle(toAdd);
+
+    // 0: pl, 1: ki, 2: stamina.
+
+    int64_t addPL = 0;
+    int64_t addKI = 0;
+    int64_t addST = 0;
+
+    for(auto &t : toAdd) {
+        switch(t) {
+            case 0:
+                addPL = std::min(pl, available);
+                available -= addPL;
+                if(addPL <= 0) addPL = 1;
+                break;
+            case 1:
+                addKI = std::min(ki, available);
+                available -= addKI;
+                if(addKI <= 0) addKI = 1;
+                break;
+            case 2:
+                addST = std::min(st, available);
+                available -= addST;
+                if(addST <= 0) addST = 1;
+                break;
+        }
     }
-    ch->gainBasePL(pl, true);
-    ch->gainBaseKI(ki, true);
-    ch->gainBaseST(st, true);
+
+    ch->gainBasePL(addPL, true);
+    ch->gainBaseKI(addKI, true);
+    ch->gainBaseST(addST, true);
 
     send_to_char(ch,
                  "@mYou feel stronger after consuming the candy @D[@RPL@W: @r%s @CKi@D: @c%s @GSt@D: @g%s@D]@m!@n\r\n",
-                 add_commas(pl).c_str(), add_commas(ki).c_str(), add_commas(st).c_str());
+                 add_commas(addPL).c_str(), add_commas(addKI).c_str(), add_commas(addST).c_str());
 }
 
 ACMD(do_pour) {

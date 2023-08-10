@@ -244,14 +244,12 @@ namespace net {
         nlohmann::json j;
 
         if(encryption) j["encryption"] = encryption;
-        if(clientName != "UNKNOWN") j["client_name"] = clientName;
-        if(clientVersion != "UNKNOWN") j["client_version"] = clientVersion;
-        if(hostAddress != "UNKNOWN") j["host_address"] = hostAddress;
+        j["client_name"] = clientName;
+        j["client_version"] = clientVersion;
+        j["host_address"] = hostAddress;
         if(hostPort) j["host_port"] = hostPort;
-        if(!hostNames.empty()) {
-            for(auto &hn : hostNames) {
-                j["host_names"].push_back(hn);
-            }
+        for(auto &hn : hostNames) {
+            j["host_names"].push_back(hn);
         }
         if(!encoding.empty()) j["encoding"] = encoding;
         if(utf8) j["utf8"] = utf8;

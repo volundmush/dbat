@@ -180,10 +180,10 @@ void copyover_recover() {
 
     nlohmann::json j;
     fp >> j;
+    fp.close();
 
     // erase the file.
     std::filesystem::remove(COPYOVER_FILE);
-    fp.close();
 
     if(j.contains("descriptors")) {
         for(const auto &jd : j["descriptors"]) {
@@ -205,7 +205,7 @@ void copyover_recover() {
                     }
                 }
             }
-            sessions[d->obj_editflag] = d;
+            sessions[d->id] = d;
 
             d->next = descriptor_list;
             descriptor_list = d;

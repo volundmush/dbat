@@ -507,7 +507,6 @@ namespace net {
                                 return;
                         }
                 }
-
                 if (IS_HALFBREED(ch)) {
                     sendText("@YWhat race do you prefer to by identified with?\r\n");
                     sendText("@cThis controls how others first view you and whether you start with\na tail and how fast it regrows when missing.\r\n");
@@ -581,7 +580,11 @@ namespace net {
                             sendText("That is not an acceptable option.\r\n");
                             return;
                     }
-                    if (ch->hairl == HAIRL_BALD) {
+                    if(IS_SAIYAN(ch)) {
+                        ch->hairc = HAIRC_BLACK;
+                        sendText("Saiyans always have black hair, if not bald.\r\n");
+                    }
+                    if (ch->hairl == HAIRL_BALD || IS_SAIYAN(ch)) {
                         sendText("@YSkin color SELECTION menu:\r\n");
                         sendText("@D---------------------------------------@n\r\n");
                         sendText("@B1@W)@C White  @B2@W)@C Black  @B3@W)@C Green\r\n");

@@ -507,8 +507,10 @@ ACMD(do_reward) {
         return;
     }
 
-    if (!readUserIndex(arg)) {
-        send_to_char(ch, "That is not a recognised user file.\r\n");
+    auto target = findPlayer(arg);
+
+    if (!target) {
+        send_to_char(ch, "That is not a recognised player character.\r\n");
         return;
     }
 
@@ -519,41 +521,20 @@ ACMD(do_reward) {
         return;
     }
 
-    for (k = descriptor_list; k; k = k->next) {
-        if (IS_NPC(k->character))
-            continue;
-        if (STATE(k) != CON_PLAYING)
-            continue;
-        if (!strcasecmp(k->account->name.c_str(), arg))
-            vict = k->character;
-    }
-
     if (amt > 0) {
-        if (vict != nullptr) {
-            send_to_char(ch, "@WYou award @C%s @D(@G%d@D)@W RP points.@n\r\n", GET_NAME(vict), amt);
-            send_to_char(vict, "@D[@YROLEPLAY@D] @WYou have been awarded @D(@G%d@D)@W RP points by @C%s@W.@n\r\n", amt,
-                         GET_NAME(ch));
-            send_to_imm("ROLEPLAY: %s has been awarded %d RP points by %s.", arg, amt, GET_NAME(ch));
-            log_imm_action("ROLEPLAY: %s has been awarded %d RP points by %s.", arg, amt, GET_NAME(ch));
-            vict->modRPP(amt);
-        } else {
-            send_to_char(ch, "@WYou award user @C%s @D(@G%d@D)@W RP points.@n\r\n", arg, amt);
-            send_to_imm("ROLEPLAY: User %s has been awarded %d RP points by %s.", arg, amt, GET_NAME(ch));
-            log_imm_action("ROLEPLAY: %s has been awarded %d RP points by %s.", arg, amt, GET_NAME(ch));
-        }
+        send_to_char(ch, "@WYou award @C%s @D(@G%d@D)@W RP points.@n\r\n", GET_NAME(vict), amt);
+        send_to_char(vict, "@D[@YROLEPLAY@D] @WYou have been awarded @D(@G%d@D)@W RP points by @C%s@W.@n\r\n", amt,
+                     GET_NAME(ch));
+        send_to_imm("ROLEPLAY: %s has been awarded %d RP points by %s.", arg, amt, GET_NAME(ch));
+        log_imm_action("ROLEPLAY: %s has been awarded %d RP points by %s.", arg, amt, GET_NAME(ch));
+        vict->modRPP(amt);
     } else {
-        if (vict != nullptr) {
-            send_to_char(ch, "@WYou deduct @D(@G%d@D)@W RP points from @C%s@W.@n\r\n", amt, GET_NAME(vict));
-            send_to_char(vict, "@D[@YROLEPLAY@D] @C%s@W deducts @D(@G%d@D)@W RP points from you.@n\r\n", GET_NAME(ch),
-                         amt);
-            send_to_imm("ROLEPLAY: %s has had %d RP points deducted by %s.", GET_NAME(vict), amt, GET_NAME(ch));
-            log_imm_action("ROLEPLAY: %s has had %d RP points deducted by %s.", GET_NAME(vict), amt, GET_NAME(ch));
-            vict->modRPP(amt);
-        } else {
-            send_to_char(ch, "@WYou deduct @D(@G%d@D)@W RP points from user @C%s@W.@n\r\n", amt, arg);
-            send_to_imm("ROLEPLAY: User %s has had %d RP points deducted by %s.", arg, amt, GET_NAME(ch));
-            log_imm_action("ROLEPLAY: %s has been awarded %d RP points by %s.", arg, amt, GET_NAME(ch));
-        }
+        send_to_char(ch, "@WYou deduct @D(@G%d@D)@W RP points from @C%s@W.@n\r\n", amt, GET_NAME(vict));
+        send_to_char(vict, "@D[@YROLEPLAY@D] @C%s@W deducts @D(@G%d@D)@W RP points from you.@n\r\n", GET_NAME(ch),
+                     amt);
+        send_to_imm("ROLEPLAY: %s has had %d RP points deducted by %s.", GET_NAME(vict), amt, GET_NAME(ch));
+        log_imm_action("ROLEPLAY: %s has had %d RP points deducted by %s.", GET_NAME(vict), amt, GET_NAME(ch));
+        vict->modRPP(amt);
     }
 
 }

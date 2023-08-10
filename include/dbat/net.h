@@ -86,18 +86,20 @@ namespace net {
 
     struct ProtocolCapabilities {
         Protocol protocol{Protocol::Telnet};
-        bool encryption = false;
+
         std::string clientName = "UNKNOWN", clientVersion = "UNKNOWN";
         std::string hostAddress = "UNKNOWN";
-        int16_t hostPort{0};
-        std::vector<std::string> hostNames{};
         std::string encoding;
-        bool utf8 = false;
+        std::vector<std::string> hostNames{};
         ColorType colorType = ColorType::NoColor;
+        int16_t hostPort{0};
+
+        bool encryption = false;
+        bool utf8 = false;
         int width = 80, height = 52;
         bool gmcp = false, msdp = false, mssp = false, mxp = false;
         bool mccp2 = false, mccp2_active = false, mccp3 = false, mccp3_active = false;
-        bool ttype = false, naws = true, sga = true, linemode = false;
+        bool ttype = false, naws = false, sga = false, linemode = false;
         bool force_endline = false, oob = false, tls = false;
         bool screen_reader = false, mouse_tracking = false, vt100 = false;
         bool osc_color_palette = false, proxy = false, mnes = false;
