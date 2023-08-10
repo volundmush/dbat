@@ -1154,14 +1154,6 @@ void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val);
 /* different OS'es.  Needs solid testing though.                 */
 /* Added by Dynamic Boards v2.4 - PjD (dughi@imaxx.net)          */
 
-struct xap_dir {
-    int total, current;
-    struct dirent **namelist;
-};
-
-
-extern int insure_directory(char *path, int isfile);
-
 extern void admin_set(struct char_data *ch, int value);
 
 #define IS_COLOR_CHAR(c)  ((c) == 'n' || (c) == 'b' || (c) == 'B' || (c) == '(c)' || \

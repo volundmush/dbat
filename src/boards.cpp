@@ -62,7 +62,6 @@ struct board_info *bboards = nullptr;  /* our global board structure */
 void init_boards() {
     int i, j;
     vnum board_vnum;
-    struct xap_dir xd;
     struct board_info *tmp_board;
     char dir_name[128];
 

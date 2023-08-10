@@ -3701,14 +3701,6 @@ int count_metamagic_feats(struct char_data *ch) {
     return count;
 }
 
-int insure_directory(char *path, int isfile) {
-    auto p = std::string(path);
-    if(isfile && p.ends_with("/")) {
-        p = p.substr(0, p.size() - 1);
-    }
-    std::filesystem::create_directories(p);
-}
-
 
 int default_admin_flags_mortal[] =
         {-1};

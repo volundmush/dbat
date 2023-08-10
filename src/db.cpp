@@ -1249,7 +1249,7 @@ boost::asio::awaitable<void> boot_db() {
 
     ERAPLAYERS = players.size();
 
-    insure_directory(LIB_PLROBJS "CRASH", 0);
+    //insure_directory(LIB_PLROBJS "CRASH", 0);
 
     basic_mud_log("Booting mail system.");
     if (!scan_file()) {
@@ -1844,7 +1844,7 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
 
         r.sector_type = t[2];
         sprintf(flags, "object #%d", virtual_nr);    /* sprintf: OK (until 399-bit integers) */
-        check_bitvector_names(r.room_flags, room_bits_count, flags, "room");
+        //check_bitvector_names(r.room_flags, room_bits_count, flags, "room");
     } else {
         basic_mud_log("SYSERR: Format error in roomflags/sector type of room #%d", virtual_nr);
         exit(1);

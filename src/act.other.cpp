@@ -7711,7 +7711,7 @@ ACMD(do_situp) {
         return;
     }
 
-    cost = ch->getPercentOfMaxST(0.07) * Random::get<double>(0.8, 1.2);
+    cost = ch->getPercentOfMaxST(0.04) * Random::get<double>(0.8, 1.2);
     cost *= (1.0 + ratio);
 
     if (GET_BONUS(ch, BONUS_HARDWORKER) > 0) {
@@ -7748,10 +7748,12 @@ ACMD(do_situp) {
         act("@g$n does a situp, while sweating profusely.@n", true, ch, nullptr, nullptr, TO_ROOM);
     }
 
-    double start_bonus = (ch->getBaseST() * 0.05) * Random::get<double>(0.8, 1.2);
-    double ratio_bonus = 1.0 + ratio;
-    double scaling_factor = ch->calc_soft_cap();
-    double diminishing_returns = std::log(ch->getBaseST() / scaling_factor) / std::log(1.0 / scaling_factor);
+    double base = (double)ch->getBaseST();
+    double start_bonus = (base * 0.035) * Random::get<double>(0.8, 1.2);
+    double ratio_bonus = 1.0 + (3.0 * ratio);
+    double soft_cap = (double)ch->calc_soft_cap();
+    double diminishing_returns = (soft_cap - base) / soft_cap;
+    if(diminishing_returns > 0.0) diminishing_returns = std::max<double>(diminishing_returns, 0.05);
     bonus = (start_bonus * ratio_bonus) * diminishing_returns;
     if(bonus <= 0) bonus = 0;
 
@@ -7794,10 +7796,9 @@ ACMD(do_situp) {
 ACMD(do_meditate) {
 
     int64_t bonus = 0, cost = 1;
-    struct obj_data *obj;
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
-    two_arguments(argument, arg, arg2);
+    one_argument(argument, arg);
 
 
     if (IS_NPC(ch)) {
@@ -7840,12 +7841,6 @@ ACMD(do_meditate) {
 
     if (GET_POS(ch) != POS_SITTING) {
         send_to_char(ch, "You need to be sitting to meditate.\r\n");
-        return;
-    }
-
-
-    if (!*arg) {
-        send_to_char(ch, "Syntax: meditate (object)\nSyntax: meditate expand\nSyntax: meditate break\r\n");
         return;
     }
 
@@ -7906,25 +7901,17 @@ ACMD(do_meditate) {
             ch->decCurKI(GET_MAX_MANA(MINDLINK(ch)) * .05);
             return;
         }
-    } else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getRoom()->contents))) {
-        send_to_char(ch, "Syntax: meditate (object)\nSyntax: meditate expand\nSyntax: meditate break\r\n");
+    }
+
+    auto ratio = ch->getBurdenRatio();
+
+    if(ratio <= 0.1) {
+        send_to_char(ch, "It would simply be too easy like this. Increase your weight or the gravity!\r\n");
         return;
     }
 
-    if (GET_OBJ_VNUM(obj) == 79) {
-        send_to_char(ch, "It's frozen to the surface.\r\n");
-        return;
-    }
-
-    double gravity = 1.0;
-    auto room = world.find(IN_ROOM(ch));
-    if (room != world.end()) {
-        gravity = room->second.getGravity();
-    }
-
-    auto weight = obj->getTotalWeight() * gravity;
-
-    cost += weight / 3;
+    cost = ch->getPercentOfMaxKI(0.04) * Random::get<double>(0.8, 1.2);
+    cost *= (1.0 + ratio);
 
     if (GET_BONUS(ch, BONUS_HARDWORKER) > 0) {
         cost -= cost * .25;
@@ -7943,94 +7930,80 @@ ACMD(do_meditate) {
     if ((ch->getCurKI()) < cost) {
         send_to_char(ch, "You don't have enough ki!\r\n");
         return;
-    } else {
-        /* Meditate Message */
-        act("@cYou close your eyes and concentrate, lifting $p@c with your ki.@n", true, ch, obj, nullptr, TO_CHAR);
-        act("@c$n closes $s eyes and lifts $p@c with $s ki.@n", true, ch, obj, nullptr, TO_ROOM);
-
-        auto ratio = ch->getBurdenRatio();
-        bonus += ((weight + 1) / 150) + 1;
-        auto maxKi = GET_MAX_MANA(ch);
-
-        if (cost >= maxKi / 2) {
-            send_to_char(ch, "The object weight and gravity are a great challenge for you!\r\n");
-            bonus *= 10;
-        } else if (cost >= maxKi / 4) {
-            send_to_char(ch, "The object weight and gravity are an awesome challenge for you!\r\n");
-            bonus *= 8;
-        } else if (cost >= maxKi / 10) {
-            send_to_char(ch, "The object weight and gravity are a good challenge for you!\r\n");
-            bonus *= 6;
-        } else if (cost < maxKi / 1000) {
-            send_to_char(ch, "The object weight and gravity are so easy to you, you could do it in your sleep....\r\n");
-            bonus /= 8;
-        } else if (cost < maxKi / 100) {
-            send_to_char(ch, "The object weight and gravity are the opposite of a challenge for you....\r\n");
-            bonus /= 5;
-        } else if (cost < maxKi / 50) {
-            send_to_char(ch, "The object weight and gravity are definitely not a challenge for you....\r\n");
-            bonus /= 4;
-        } else if (cost < maxKi / 30) {
-            send_to_char(ch, "The object weight and gravity are barely a challenge for you....\r\n");
-            bonus /= 3;
-        } else if (cost < maxKi / 20) {
-            send_to_char(ch, "The object weight and gravity are hardly a challenge for you....\r\n");
-            bonus /= 2;
-        } else {
-            send_to_char(ch, "This gravity is just perfect for you....\r\n");
-            bonus *= 4;
-        }
-        if (ch->is_soft_cap(1)) {
-            bonus = 0;
-        }
-        if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
-            if(bonus <= 0) bonus = 15;
-            send_to_char(ch, "@rThis place feels like it operates on a different time frame, it feels great...@n\r\n");
-            bonus *= 10;
-        } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT)) {
-            if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
-                if(bonus <= 0) bonus = 12;
-                bonus *= 10;
-            } else {
-                if(bonus <= 0) bonus = 6;
-                bonus *= 5;
-            }
-        } else if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19800 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19899) {
-            send_to_char(ch, "@rThis place feels like... Magic.@n\r\n");
-            bonus *= 20;
-        } else {
-            if(bonus <= 0) bonus = 1;
-        }
-        if (bonus <= 0 && !ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
-            bonus = 1;
-        }
-        if (bonus <= 1 && ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT)) {
-            if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
-                bonus = 12;
-            } else {
-                bonus = 6;
-            }
-        }
-        if (bonus > 0 && IS_DEMON(ch) && rand_number(1, 100) >= 80) {
-            send_to_char(ch, "Your spirit magnifies the strength of your body! @D[@G+%s@D]@n\r\n",
-                         add_commas(bonus / 2).c_str());
-            ch->gainBasePL(bonus / 2);
-        }
-
-        bonus += GET_LEVEL(ch) / 20;
-        if (IS_NAMEK(ch)) {
-            bonus += bonus / 2;
-        }
-        if (GET_BONUS(ch, BONUS_LONER)) {
-            bonus += bonus * 0.1;
-        }
-        if(bonus <= 0) bonus = 0;
-        /* Rillao: transloc, add new transes here */
-        send_to_char(ch, "You feel your spirit grow stronger @D[@G+%s@D]@n.\r\n", add_commas(bonus).c_str());
-        ch->gainBaseKI(bonus, true);
-        WAIT_STATE(ch, std::min<int>(PULSE_7SEC,PULSE_7SEC * ratio));
-        ch->decCurKI(cost);
     }
+
+    if(ratio <= 0.1) {
+        act("@gYou close your eyes and focus on circulating your vital energies throughout your body.@n", true, ch, nullptr, nullptr, TO_CHAR);
+        act("@g$n meditates calmly.@n", true, ch, nullptr, nullptr, TO_ROOM);
+    } else if (ratio <= 0.3) {
+        act("@gYou close your eyes and focus on circulating your vital energies throughout your body, against a solid burden.@n", true, ch, nullptr, nullptr, TO_CHAR);
+        act("@g$n meditates calmly, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
+    } else if (ratio <= 0.65) {
+        act("@gYou close your eyes and focus on circulating your vital energies throughout your body, struggling to maintain focus against an intense burden.@n", true, ch, nullptr, nullptr, TO_CHAR);
+        act("@g$n meditates calmly, while sweating.@n", true, ch, nullptr, nullptr, TO_ROOM);
+    } else {
+        act("@gYou close your eyes and focus on circulating your vital energies throughout your body, concentration strained to the limit by immense outward pressures.@n", true, ch, nullptr, nullptr, TO_CHAR);
+        act("@g$n meditates calmly, while sweating profusely.@n", true, ch, nullptr, nullptr, TO_ROOM);
+    }
+
+    double base = (double)ch->getBaseKI();
+    double start_bonus = (base * 0.035) * Random::get<double>(0.8, 1.2);
+    double ratio_bonus = 1.0 + (3.0 * ratio);
+    double soft_cap = (double)ch->calc_soft_cap();
+    double diminishing_returns = (soft_cap - base) / soft_cap;
+    if(diminishing_returns > 0.0) diminishing_returns = std::max<double>(diminishing_returns, 0.05);
+    bonus = (start_bonus * ratio_bonus) * diminishing_returns;
+    if(bonus <= 0) bonus = 0;
+
+
+    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
+        if(bonus <= 0) bonus = 15;
+        send_to_char(ch, "@rThis place feels like it operates on a different time frame, it feels great...@n\r\n");
+        bonus *= 10;
+    } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT)) {
+        if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
+            if(bonus <= 0) bonus = 12;
+            bonus *= 10;
+        } else {
+            if(bonus <= 0) bonus = 6;
+            bonus *= 5;
+        }
+    } else if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19800 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19899) {
+        send_to_char(ch, "@rThis place feels like... Magic.@n\r\n");
+        bonus *= 20;
+    } else {
+        if(bonus <= 0) bonus = 1;
+    }
+    if (bonus <= 0 && !ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
+        bonus = 1;
+    }
+    if (bonus <= 1 && ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT)) {
+        if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
+            bonus = 12;
+        } else {
+            bonus = 6;
+        }
+    }
+    if (bonus > 0 && IS_DEMON(ch) && rand_number(1, 100) >= 80) {
+        send_to_char(ch, "Your spirit magnifies the strength of your body! @D[@G+%s@D]@n\r\n",
+                     add_commas(bonus / 2).c_str());
+        ch->gainBasePL(bonus / 2);
+    }
+
+    bonus += GET_LEVEL(ch) / 20;
+    if (IS_NAMEK(ch)) {
+        bonus += bonus / 2;
+    }
+    if (GET_BONUS(ch, BONUS_LONER)) {
+        bonus += bonus * 0.1;
+    }
+    if(bonus <= 0) bonus = 0;
+    /* Rillao: transloc, add new transes here */
+    send_to_char(ch, "You feel your spirit grow stronger @D[@G+%s@D]@n.\r\n", add_commas(bonus).c_str());
+    ch->gainBaseKI(bonus, true);
+    WAIT_STATE(ch, std::min<int>(PULSE_7SEC,PULSE_7SEC * ratio));
+    ch->decCurKI(cost);
+
 }
 
 ACMD(do_pushup) {
@@ -8086,7 +8059,7 @@ ACMD(do_pushup) {
         return;
     }
 
-    cost = ch->getPercentOfMaxST(0.07) * Random::get<double>(0.8, 1.2);
+    cost = ch->getPercentOfMaxST(0.04) * Random::get<double>(0.8, 1.2);
     cost *= (1.0 + ratio);
 
     if (GET_BONUS(ch, BONUS_HARDWORKER) > 0) {
@@ -8122,10 +8095,12 @@ ACMD(do_pushup) {
         act("@g$n does a pushup, while sweating profusely.@n", true, ch, nullptr, nullptr, TO_ROOM);
     }
 
-    double start_bonus = (ch->getBasePL() * 0.05) * Random::get<double>(0.8, 1.2);
-    double ratio_bonus = 1.0 + ratio;
-    double scaling_factor = ch->calc_soft_cap();
-    double diminishing_returns = std::log(ch->getBasePL() / scaling_factor) / std::log(1.0 / scaling_factor);
+    double base = (double)ch->getBasePL();
+    double start_bonus = (base * 0.035) * Random::get<double>(0.8, 1.2);
+    double ratio_bonus = 1.0 + (3.0 * ratio);
+    double soft_cap = (double)ch->calc_soft_cap();
+    double diminishing_returns = (soft_cap - base) / soft_cap;
+    if(diminishing_returns > 0.0) diminishing_returns = std::max<double>(diminishing_returns, 0.05);
     bonus = (start_bonus * ratio_bonus) * diminishing_returns;
     if(bonus <= 0) bonus = 0;
 
