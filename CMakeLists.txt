@@ -55,7 +55,7 @@ set(BUILD_TESTING OFF)
 set(CIRCLE_LINK_LIBRARIES
         fmt::fmt ${SQLite3_LIBRARIES} ${Boost_LIBRARIES}
         SQLiteCpp sqlite3 bsd
-        Luau.VM Luau.Common Luau.Compiler
+        #Luau.VM Luau.Common Luau.Compiler
         sodium
         effolkronium_random
         )

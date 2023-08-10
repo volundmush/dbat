@@ -1033,7 +1033,7 @@ in the vault (vnum: 453) now and then. you can just use
                     break;
                 case 'w':
                     if (!strcasecmp(field, "weight"))
-                        snprintf(str, slen, "%f", GET_WEIGHT(c));
+                        snprintf(str, slen, "%s", fmt::format("{}", GET_WEIGHT(c)).c_str());
                     else if (!strcasecmp(field, "wis")) {
                         if (subfield && *subfield) {
                             int addition = atoi(subfield);
@@ -1292,7 +1292,7 @@ in the vault (vnum: 453) now and then. you can just use
                                 GET_OBJ_WEIGHT(o) = 0;
                             }
                         }
-                        snprintf(str, slen, "%f", GET_OBJ_WEIGHT(o));
+                        snprintf(str, slen, "%s", fmt::format("{}", GET_OBJ_WEIGHT(o)).c_str());
                     } else if (!strcasecmp(field, "worn_by")) {
                         if (o->worn_by)
                             snprintf(str, slen, "%s", ((o->worn_by)->getUID(false).c_str()));

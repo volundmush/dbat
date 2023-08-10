@@ -240,6 +240,7 @@ int char_data::calcTier() {
 }
 
 int64_t char_data::calc_soft_cap() {
+    if(level >= 100) return 1e9;
     auto tier = calcTier();
     auto softmap = race->getSoftMap(this);
     return level * softmap[tier];

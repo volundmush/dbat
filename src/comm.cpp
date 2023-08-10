@@ -1421,7 +1421,7 @@ char *make_prompt(struct descriptor_data *d) {
             }
             if (PRF_FLAGGED(d->character, PRF_DISPTNL) && len < sizeof(prompt) && GET_LEVEL(d->character) < 100) {
                 count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@yTNL@Y: @W%s@D]@n", add_commas(
-                        level_exp(d->character, GET_LEVEL(d->character) + 1) - GET_EXP(d->character)));
+                        level_exp(d->character, GET_LEVEL(d->character) + 1) - GET_EXP(d->character)).c_str());
                 if (count >= 0)
                     len += count;
             }

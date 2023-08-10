@@ -7706,8 +7706,13 @@ ACMD(do_situp) {
 
     auto ratio = ch->getBurdenRatio();
 
+    if(ratio <= 0.1) {
+        send_to_char(ch, "It would simply be too easy like this. Increase your weight or the gravity!\r\n");
+        return;
+    }
+
     cost = ch->getPercentOfMaxST(0.07) * Random::get<double>(0.8, 1.2);
-    cost += (cost * (ratio * 3.0));
+    cost *= (1.0 + ratio);
 
     if (GET_BONUS(ch, BONUS_HARDWORKER) > 0) {
         cost -= cost * .25;
@@ -7743,12 +7748,13 @@ ACMD(do_situp) {
         act("@g$n does a situp, while sweating profusely.@n", true, ch, nullptr, nullptr, TO_ROOM);
     }
 
-    bonus = (ch->getBaseST() * 0.005) * Random::get<double>(0.8, 1.2);
-    bonus += (bonus * (ratio * 3.0));
+    double start_bonus = (ch->getBaseST() * 0.05) * Random::get<double>(0.8, 1.2);
+    double ratio_bonus = 1.0 + ratio;
+    double scaling_factor = ch->calc_soft_cap();
+    double diminishing_returns = std::log(ch->getBaseST() / scaling_factor) / std::log(1.0 / scaling_factor);
+    bonus = (start_bonus * ratio_bonus) * diminishing_returns;
+    if(bonus <= 0) bonus = 0;
 
-    if (ch->is_soft_cap(2)) {
-        bonus = 0;
-    }
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
         send_to_char(ch, "@rThis place feels like it operates on a different time frame, it feels great...@n\r\n");
         bonus *= 10;
@@ -8075,8 +8081,13 @@ ACMD(do_pushup) {
 
     auto ratio = ch->getBurdenRatio();
 
+    if(ratio <= 0.1) {
+        send_to_char(ch, "It would simply be too easy like this. Increase your weight or the gravity!\r\n");
+        return;
+    }
+
     cost = ch->getPercentOfMaxST(0.07) * Random::get<double>(0.8, 1.2);
-    cost += (cost * (ratio * 3.0));
+    cost *= (1.0 + ratio);
 
     if (GET_BONUS(ch, BONUS_HARDWORKER) > 0) {
         cost -= cost * .25;
@@ -8111,13 +8122,13 @@ ACMD(do_pushup) {
         act("@g$n does a pushup, while sweating profusely.@n", true, ch, nullptr, nullptr, TO_ROOM);
     }
 
-    bonus = (ch->getBasePL() * 0.005) * Random::get<double>(0.8, 1.2);
-    auto extra = (bonus * (ratio * 3.0));
-    bonus += extra;
+    double start_bonus = (ch->getBasePL() * 0.05) * Random::get<double>(0.8, 1.2);
+    double ratio_bonus = 1.0 + ratio;
+    double scaling_factor = ch->calc_soft_cap();
+    double diminishing_returns = std::log(ch->getBasePL() / scaling_factor) / std::log(1.0 / scaling_factor);
+    bonus = (start_bonus * ratio_bonus) * diminishing_returns;
+    if(bonus <= 0) bonus = 0;
 
-    if (ch->is_soft_cap(0)) {
-        bonus = 0;
-    }
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
         send_to_char(ch, "@rThis place feels like it operates on a different time frame, it feels great...@n\r\n");
         bonus *= 10;
