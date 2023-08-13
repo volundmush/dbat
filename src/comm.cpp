@@ -656,7 +656,10 @@ static boost::asio::awaitable<void> runGame() {
         if(gameFunc) co_await gameFunc();
         else co_await game_loop();
     } catch(std::exception& e) {
-        basic_mud_log("Exception in game_loop(): %s", e.what());
+        logger->critical("Exception in game_loop(): %s", e.what());
+        shutdown_game(1);
+    } catch(...) {
+        logger->critical("Unknown exception in game_loop()");
         shutdown_game(1);
     }
 
@@ -1902,6 +1905,7 @@ void close_socket(struct descriptor_data *d) {
 
     sessions.erase(d->id);
     delete d;
+    if(c && c->active) extract_char(c);
 }
 
 
@@ -2538,7 +2542,6 @@ void descriptor_data::handleLostLastConnection(bool graceful) {
     // At the moment, it doesn't really matter if the disconnect was graceful or not.
     // If they didn't use 'quit', then we have a problem.
     // We need to set the timeout for this character...
-    timeoutCounter = 5.0 * SECONDS_PER_MINUTE;
     if(character) {
         act("$n has lost $s link.", true, character, nullptr, nullptr, TO_ROOM);
     }

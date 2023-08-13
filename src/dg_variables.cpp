@@ -104,7 +104,7 @@ int item_in_list(char *item, obj_data *list) {
                 count += item_in_list(item, i->contents);
         }
     } else if (is_number(item) > -1) { /* check for vnum */
-        obj_vnum ovnum = atoi(item);
+        obj_vnum ovnum = atof(item);
 
         for (i = list; i; i = i->next_content) {
             if (GET_OBJ_VNUM(i) == ovnum)
@@ -420,11 +420,11 @@ in the vault (vnum: 453) now and then. you can just use
                     script_log("findmob.vnum(mvnum) - illegal syntax");
                     strcpy(str, "0");
                 } else {
-                    room_rnum rrnum = real_room(atoi(field));
-                    mob_vnum mvnum = atoi(subfield);
+                    room_rnum rrnum = real_room(atof(field));
+                    mob_vnum mvnum = atof(subfield);
 
                     if (rrnum == NOWHERE) {
-                        script_log("findmob.vnum(ovnum): No room with vnum %d", atoi(field));
+                        script_log("findmob.vnum(ovnum): No room with vnum %d", atof(field));
                         strcpy(str, "0");
                     } else {
                         for (i = 0, ch = world[rrnum].people; ch; ch = ch->next_in_room)
@@ -441,10 +441,10 @@ in the vault (vnum: 453) now and then. you can just use
                     script_log("findobj.vnum(ovnum) - illegal syntax");
                     strcpy(str, "0");
                 } else {
-                    room_rnum rrnum = real_room(atoi(field));
+                    room_rnum rrnum = real_room(atof(field));
 
                     if (rrnum == NOWHERE) {
-                        script_log("findobj.vnum(ovnum): No room with vnum %d", atoi(field));
+                        script_log("findobj.vnum(ovnum): No room with vnum %d", atof(field));
                         strcpy(str, "0");
                     } else {
                         /* item_in_list looks within containers as well. */
@@ -559,8 +559,8 @@ in the vault (vnum: 453) now and then. you can just use
 
                     else if (!strcasecmp(field, "align")) {
                         if (subfield && *subfield) {
-                            int addition = atoi(subfield);
-                            GET_ALIGNMENT(c) = MAX(-1000, MIN(addition, 1000));
+                            int addition = atof(subfield);
+                            GET_ALIGNMENT(c) = std::clamp<int>(addition, -1000, 1000);
                         }
                         snprintf(str, slen, "%d", GET_ALIGNMENT(c));
                     }
@@ -568,10 +568,10 @@ in the vault (vnum: 453) now and then. you can just use
                 case 'b':
                     if (!strcasecmp(field, "bank")) {
                         if (subfield && *subfield) {
-                            int addition = atoi(subfield);
+                            int addition = atof(subfield);
                             GET_BANK_GOLD(c) += addition;
                         }
-                        snprintf(str, slen, "%d", GET_GOLD(c));
+                        snprintf(str, slen, "%ld", GET_BANK_GOLD(c));
                     }
                     break;
                 case 'c':
@@ -597,22 +597,14 @@ in the vault (vnum: 453) now and then. you can just use
                             snprintf(str, slen, "blank");
                     } else if (!strcasecmp(field, "con")) {
                         if (subfield && *subfield) {
-                            int addition = atoi(subfield);
-                            int max = 100;
-                            auto &con = c->real_abils.con;
-                            con += addition;
-                            if (con > max) con = max;
-                            if (con< 3) con = 3;
+                            int addition = atof(subfield);
+                            c->modConstitution(addition);
                         }
                         snprintf(str, slen, "%d", GET_CON(c));
                     } else if (!strcasecmp(field, "cha")) {
                         if (subfield && *subfield) {
-                            int addition = atoi(subfield);
-                            int max = 100;
-                            auto &cha = c->real_abils.cha;
-                            cha += addition;
-                            if (cha > max) cha = max;
-                            if (cha < 3) cha = 3;
+                            int addition = atof(subfield);
+                            c->modSpeed(addition);
                         }
                         snprintf(str, slen, "%d", GET_CHA(c));
                     }
@@ -627,12 +619,8 @@ in the vault (vnum: 453) now and then. you can just use
                         snprintf(str, slen, "%ld", GET_DTIME(c));
                     } else if (!strcasecmp(field, "dex")) {
                         if (subfield && *subfield) {
-                            int addition = atoi(subfield);
-                            int max = 100;
-                            auto &dex = c->real_abils.dex;
-                            dex += addition;
-                            if (dex > max) dex = max;
-                            if (dex < 3) dex = 3;
+                            int addition = atof(subfield);
+                            ch->modAgility(addition);
                         }
                         snprintf(str, slen, "%d", GET_DEX(c));
                     } else if (!strcasecmp(field, "drag")) {
@@ -642,8 +630,8 @@ in the vault (vnum: 453) now and then. you can just use
                             strcpy(str, "0");
                     } else if (!strcasecmp(field, "drunk")) {
                         if (subfield && *subfield) {
-                            int addition = atoi(subfield);
-                            GET_COND(c, DRUNK) = MAX(-1, MIN(addition, 24));
+                            int addition = atof(subfield);
+                            GET_COND(c, DRUNK) = std::clamp<int>(addition, -1, 24);
                         }
                         snprintf(str, slen, "%d", GET_COND(c, DRUNK));
                     }
@@ -670,7 +658,7 @@ in the vault (vnum: 453) now and then. you can just use
                     }
                     if (!strcasecmp(field, "exp")) {
                         if (subfield && *subfield) {
-                            int64_t addition = MIN(atoll(subfield), 2100000000);
+                            int64_t addition = std::max<int64_t>(0, atof(subfield));
 
                             gain_exp(c, addition);
                         }
@@ -698,10 +686,10 @@ in the vault (vnum: 453) now and then. you can just use
                 case 'g':
                     if (!strcasecmp(field, "gold")) {
                         if (subfield && *subfield) {
-                            int addition = atoi(subfield);
+                            int64_t addition = atof(subfield);
                             GET_GOLD(c) += addition;
                         }
-                        snprintf(str, slen, "%d", GET_GOLD(c));
+                        snprintf(str, slen, "%ld", GET_GOLD(c));
                     }
                     break;
                 case 'h':
@@ -721,7 +709,7 @@ in the vault (vnum: 453) now and then. you can just use
 
                     else if (!strcasecmp(field, "hitp")) {
                         if (subfield && *subfield) {
-                            int64_t addition = atoll(subfield);
+                            int64_t addition = atof(subfield);
                             if (addition > 0) {
                                 c->incCurHealth(addition);
                             } else {
@@ -733,8 +721,8 @@ in the vault (vnum: 453) now and then. you can just use
                         snprintf(str, slen, "%" I64T "", GET_HIT(c));
                     } else if (!strcasecmp(field, "hunger")) {
                         if (subfield && *subfield) {
-                            int addition = atoi(subfield);
-                            GET_COND(c, HUNGER) = MAX(-1, MIN(addition, 24));
+                            int addition = atof(subfield);
+                            GET_COND(c, HUNGER) = std::clamp<int>(addition, -1, 24);
                         }
                         snprintf(str, slen, "%d", GET_COND(c, HUNGER));
                     }
@@ -752,7 +740,7 @@ in the vault (vnum: 453) now and then. you can just use
                     } else if (!strcasecmp(field, "inventory")) {
                         if (subfield && *subfield) {
                             for (obj = c->contents; obj; obj = obj->next_content) {
-                                if (GET_OBJ_VNUM(obj) == atoi(subfield)) {
+                                if (GET_OBJ_VNUM(obj) == atof(subfield)) {
                                     snprintf(str, slen, "%s", ((obj)->getUID(false).c_str())); /* arg given, found */
                                     return;
                                 }
@@ -790,12 +778,8 @@ in the vault (vnum: 453) now and then. you can just use
                             strcpy(str, "0");
                     } else if (!strcasecmp(field, "int")) {
                         if (subfield && *subfield) {
-                            int addition = atoi(subfield);
-                            int max = 100;
-                            auto &intel = c->real_abils.intel;
-                            intel += addition;
-                            if (intel > max) intel = max;
-                            if (intel < 3) intel = 3;
+                            int addition = atof(subfield);
+                            c->modIntelligence(addition);
                         }
                         snprintf(str, slen, "%d", GET_INT(c));
                     }
@@ -807,13 +791,13 @@ in the vault (vnum: 453) now and then. you can just use
                 case 'm':
                     if (!strcasecmp(field, "maxhitp")) {
                         if (subfield && *subfield) {
-                            int64_t addition = atoll(subfield);
+                            int64_t addition = atof(subfield);
                             //GET_MAX_HIT(c) = MAX(GET_MAX_HIT(c) + addition, 1);
                         }
                         snprintf(str, slen, "%" I64T "", GET_MAX_HIT(c));
                     } else if (!strcasecmp(field, "mana")) {
                         if (subfield && *subfield) {
-                            int64_t addition = atoll(subfield);
+                            int64_t addition = atof(subfield);
                             if (addition > 0) {
                                 c->incCurKI(addition);
                             } else {
@@ -823,13 +807,13 @@ in the vault (vnum: 453) now and then. you can just use
                         snprintf(str, slen, "%" I64T "", (c->getCurKI()));
                     } else if (!strcasecmp(field, "maxmana")) {
                         if (subfield && *subfield) {
-                            int64_t addition = atoll(subfield);
+                            int64_t addition = atof(subfield);
                             //GET_MAX_MANA(c) = MAX(GET_MAX_MANA(c) + addition, 1);
                         }
                         snprintf(str, slen, "%" I64T "", GET_MAX_MANA(c));
                     } else if (!strcasecmp(field, "move")) {
                         if (subfield && *subfield) {
-                            int64_t addition = atoll(subfield);
+                            int64_t addition = atof(subfield);
                             if (addition > 0) {
                                 c->incCurST(addition);
                             } else {
@@ -840,7 +824,7 @@ in the vault (vnum: 453) now and then. you can just use
                         snprintf(str, slen, "%" I64T "", (c->getCurST()));
                     } else if (!strcasecmp(field, "maxmove")) {
                         if (subfield && *subfield) {
-                            int64_t addition = atoll(subfield);
+                            int64_t addition = atof(subfield);
                             //GET_MAX_MOVE(c) = MAX(GET_MAX_MOVE(c) + addition, 1);
                         }
                         snprintf(str, slen, "%" I64T "", GET_MAX_MOVE(c));
@@ -883,7 +867,7 @@ in the vault (vnum: 453) now and then. you can just use
                             }
                         }
                         if (subfield && *subfield) {
-                            int addition = atoi(subfield);
+                            int addition = atof(subfield);
                             GET_PRACTICES(c) = MAX(0, GET_PRACTICES(c) + addition);
                         }
                         snprintf(str, slen, "%d", GET_PRACTICES(c));
@@ -925,7 +909,7 @@ in the vault (vnum: 453) now and then. you can just use
 #endif
                     else if (!strcasecmp(field, "rpp")) {
                         if (subfield && *subfield) {
-                            int addition = atoi(subfield);
+                            int addition = atof(subfield);
                             c->modRPP(addition);
                         }
 
@@ -939,7 +923,7 @@ in the vault (vnum: 453) now and then. you can just use
 
                     else if (!strcasecmp(field, "str")) {
                         if (subfield && *subfield) {
-                            int addition = atoi(subfield);
+                            int addition = atof(subfield);
                             int max = 100;
                             auto &str = c->real_abils.str;
                             str += addition;
@@ -966,7 +950,7 @@ in the vault (vnum: 453) now and then. you can just use
                             if (amount && *amount && is_number(amount)) {
                                 int skillnum = find_skill_num(skillname, SKTYPE_SKILL);
                                 if (skillnum > 0) {
-                                    int new_value = MAX(0, MIN(100, atoi(amount)));
+                                    int new_value = std::clamp<double>(atof(amount), 0, 100);
                                     SET_SKILL(c, skillnum, new_value);
                                 }
                             }
@@ -974,19 +958,19 @@ in the vault (vnum: 453) now and then. you can just use
                         *str = '\0'; /* so the parser know we recognize 'skillset' as a field */
                     } else if (!strcasecmp(field, "saving_fortitude")) {
                         if (subfield && *subfield) {
-                            int addition = atoi(subfield);
+                            int addition = atof(subfield);
                             GET_SAVE_MOD(c, SAVING_FORTITUDE) += addition;
                         }
                         snprintf(str, slen, "%d", GET_SAVE_MOD(c, SAVING_FORTITUDE));
                     } else if (!strcasecmp(field, "saving_reflex")) {
                         if (subfield && *subfield) {
-                            int addition = atoi(subfield);
+                            int addition = atof(subfield);
                             GET_SAVE_MOD(c, SAVING_REFLEX) += addition;
                         }
                         snprintf(str, slen, "%d", GET_SAVE_MOD(c, SAVING_REFLEX));
                     } else if (!strcasecmp(field, "saving_will")) {
                         if (subfield && *subfield) {
-                            int addition = atoi(subfield);
+                            int addition = atof(subfield);
                             GET_SAVE_MOD(c, SAVING_WILL) += addition;
                         }
                         snprintf(str, slen, "%d", GET_SAVE_MOD(c, SAVING_WILL));
@@ -996,7 +980,7 @@ in the vault (vnum: 453) now and then. you can just use
                 case 't':
                     if (!strcasecmp(field, "thirst")) {
                         if (subfield && *subfield) {
-                            int addition = atoi(subfield);
+                            int addition = atof(subfield);
                             GET_COND(c, THIRST) = MAX(-1, MIN(addition, 24));
                         }
                         snprintf(str, slen, "%d", GET_COND(c, THIRST));
@@ -1007,7 +991,7 @@ in the vault (vnum: 453) now and then. you can just use
                 case 'v':
                     if (!strcasecmp(field, "vnum")) {
                         if (subfield && *subfield) {
-                            snprintf(str, slen, "%d", IS_NPC(c) ? (int) (GET_MOB_VNUM(c) == atoi(subfield)) : -1);
+                            snprintf(str, slen, "%d", IS_NPC(c) ? (int) (GET_MOB_VNUM(c) == atof(subfield)) : -1);
                         } else {
                             if (IS_NPC(c))
                                 snprintf(str, slen, "%d", GET_MOB_VNUM(c));
@@ -1021,13 +1005,16 @@ in the vault (vnum: 453) now and then. you can just use
                         }
                     } else if (!strcasecmp(field, "varexists")) {
                         struct trig_var_data *remote_vd;
-                        strcpy(str, "0");
+                        int found = 0;
                         if (SCRIPT(c)) {
                             for (remote_vd = SCRIPT(c)->global_vars; remote_vd; remote_vd = remote_vd->next) {
-                                if (!strcasecmp(remote_vd->name, subfield)) break;
+                                if (!strcasecmp(remote_vd->name, subfield)) {
+                                    found = 1;
+                                    break;
+                                }
                             }
-                            if (remote_vd) strcpy(str, "1");
                         }
+                        snprintf(str, slen, "%d", found);
                     }
 
                     break;
@@ -1036,7 +1023,7 @@ in the vault (vnum: 453) now and then. you can just use
                         snprintf(str, slen, "%s", fmt::format("{}", GET_WEIGHT(c)).c_str());
                     else if (!strcasecmp(field, "wis")) {
                         if (subfield && *subfield) {
-                            int addition = atoi(subfield);
+                            int addition = atof(subfield);
                             int max = 100;
                             auto &wis = c->real_abils.wis;
                             wis += addition;
@@ -1049,10 +1036,10 @@ in the vault (vnum: 453) now and then. you can just use
                 case 'z':
                     if (!strcasecmp(field, "zenni")) {
                         if (subfield && *subfield) {
-                            int addition = atoi(subfield);
+                            int64_t addition = atof(subfield);
                             GET_GOLD(c) += addition;
                         }
-                        snprintf(str, slen, "%d", GET_GOLD(c));
+                        snprintf(str, slen, "%ld", GET_GOLD(c));
                     }
                     break;
             } /* switch *field */
@@ -1096,14 +1083,14 @@ in the vault (vnum: 453) now and then. you can just use
                 case 'c':
                     if (!strcasecmp(field, "cost")) {
                         if (subfield && *subfield) {
-                            int addition = atoi(subfield);
-                            GET_OBJ_COST(o) = MAX(0, addition + GET_OBJ_COST(o));
+                            int addition = atof(subfield);
+                            GET_OBJ_COST(o) = std::max<int>(0, addition + GET_OBJ_COST(o));
                         }
                         snprintf(str, slen, "%d", GET_OBJ_COST(o));
                     } else if (!strcasecmp(field, "cost_per_day")) {
                         if (subfield && *subfield) {
-                            int addition = atoi(subfield);
-                            GET_OBJ_RENT(o) = MAX(0, addition + GET_OBJ_RENT(o));
+                            int addition = atof(subfield);
+                            GET_OBJ_RENT(o) = std::max<int>(0, addition + GET_OBJ_RENT(o));
                         }
                         snprintf(str, slen, "%d", GET_OBJ_RENT(o));
                     } else if (!strcasecmp(field, "carried_by")) {
@@ -1148,8 +1135,8 @@ in the vault (vnum: 453) now and then. you can just use
                     }
                     if (!strcasecmp(field, "health")) {
                         if (subfield && *subfield) {
-                            int addition = atoi(subfield);
-                            GET_OBJ_VAL(o, VAL_ALL_HEALTH) = MAX(1, addition + GET_OBJ_VAL(o, VAL_ALL_HEALTH));
+                            int addition = atof(subfield);
+                            GET_OBJ_VAL(o, VAL_ALL_HEALTH) = std::max<int>(1, addition + GET_OBJ_VAL(o, VAL_ALL_HEALTH));
                             if (OBJ_FLAGGED(o, ITEM_BROKEN) && GET_OBJ_VAL(o, VAL_ALL_HEALTH) >= 100)
                                 REMOVE_BIT_AR(GET_OBJ_EXTRA(o), ITEM_BROKEN);
                         }
@@ -1254,7 +1241,7 @@ in the vault (vnum: 453) now and then. you can just use
                 case 'v':
                     if (!strcasecmp(field, "vnum"))
                         if (subfield && *subfield) {
-                            snprintf(str, slen, "%d", (int) (GET_OBJ_VNUM(o) == atoi(subfield)));
+                            snprintf(str, slen, "%d", (int) (GET_OBJ_VNUM(o) == atof(subfield)));
                         } else {
                             snprintf(str, slen, "%d", GET_OBJ_VNUM(o));
                         }
@@ -1357,14 +1344,14 @@ in the vault (vnum: 453) now and then. you can just use
 
             else if (!strcasecmp(field, "vnum")) {
                 if (subfield && *subfield) {
-                    snprintf(str, slen, "%d", (int) (r->vn == atoi(subfield)));
+                    snprintf(str, slen, "%d", (int) (r->vn == atof(subfield)));
                 } else {
                     snprintf(str, slen, "%d", r->vn);
                 }
             } else if (!strcasecmp(field, "contents")) {
                 if (subfield && *subfield) {
                     for (obj = r->contents; obj; obj = obj->next_content) {
-                        if (GET_OBJ_VNUM(obj) == atoi(subfield)) {
+                        if (GET_OBJ_VNUM(obj) == atof(subfield)) {
                             /* arg given, found */
                             snprintf(str, slen, "%s", ((obj)->getUID(false).c_str()));
                             return;

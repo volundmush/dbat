@@ -2679,6 +2679,7 @@ void enter_player_game(struct descriptor_data *d) {
     struct char_data *check;
 
     reset_char(d->character);
+    if(!d->character->script) d->character->script = new script_data(d->character);
 
     racial_body_parts(d->character);
 

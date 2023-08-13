@@ -1,7 +1,6 @@
 #include "dbat/puppet.h"
 #include "dbat/structs.h"
 #include "dbat/utils.h"
-#include "dbat/constants.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/class.h"
 
@@ -11,10 +10,17 @@ namespace net {
     }
 
     void PuppetParser::start() {
+        if(PLR_FLAGGED(ch, PLR_NOTDEADYET)) {
+            REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_NOTDEADYET);
+        }
         if(ch->desc) {
             if(STATE(ch->desc) == CON_COPYOVER) return;
 
             // The character already has a descriptor! Let's just join up with it.
+            if(ch->desc->conns.empty()) {
+                // We are reviving a session that was in timeout.
+                ch->desc->timeoutCounter = 0.0;
+            }
             conn->account->descriptors.insert(ch->desc);
             conn->desc = ch->desc;
             conn->desc->conns[conn->connId] = conn;

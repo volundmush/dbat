@@ -2319,6 +2319,7 @@ namespace net {
     void ChargenParser::finish() {
         // CREATE PLAYER ENTRY
         ch->id = nextCharID();
+        SET_BIT_AR(PRF_FLAGS(ch), PRF_COLOR);
         ch->generation = time(nullptr);
         check_unique_id(ch);
         add_unique_id(ch);

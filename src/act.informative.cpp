@@ -4440,6 +4440,8 @@ static void look_out_window(struct char_data *ch, char *arg) {
     room_rnum target_room = NOWHERE;
     int bits, door;
 
+    auto r = ch->getRoom();
+
     /* First, lets find something to look out of or through. */
     if (*arg) {
         /* Find this object and see if it is a window */
@@ -4472,13 +4474,16 @@ static void look_out_window(struct char_data *ch, char *arg) {
             /* We are looking out of the room */
             if (GET_OBJ_VAL(viewport, VAL_WINDOW_UNUSED4) < 0) {
                 /* Look for the default "outside" room */
-                for (door = 0; door < NUM_OF_DIRS; door++)
-                    if (EXIT(ch, door))
-                        if (EXIT(ch, door)->to_room != NOWHERE)
-                            if (!ROOM_FLAGGED(EXIT(ch, door)->to_room, ROOM_INDOORS)) {
-                                target_room = EXIT(ch, door)->to_room;
-                                continue;
-                            }
+                for (door = 0; door < NUM_OF_DIRS; door++) {
+                    auto e = r->dir_option[door];
+                    if(!e) continue;
+                    auto dest = e->getDestination();
+                    if(!dest) continue;
+                    if(!dest->room_flags.test(ROOM_INDOORS)) {
+                        target_room = dest->vn;
+                        break;
+                    }
+                }
             } else {
                 target_room = real_room(GET_OBJ_VAL(viewport, VAL_WINDOW_UNUSED4));
             }
@@ -6690,11 +6695,9 @@ static void perform_immort_where(struct char_data *ch, char *arg) {
                 found = 1;
                 send_to_char(ch, "M%3d. %-25s - [%5d] %-25s", ++num, GET_NAME(i),
                              GET_ROOM_VNUM(IN_ROOM(i)), i->getRoom()->name);
-                if (IS_NPC(i) && SCRIPT(i)) {
-                    if (!TRIGGERS(SCRIPT(i))->next)
-                        send_to_char(ch, "[T%5d] ", GET_TRIG_VNUM(TRIGGERS(SCRIPT(i))));
-                    else
-                        send_to_char(ch, "[TRIGS] ");
+                if (IS_NPC(i) && SCRIPT(i) && SCRIPT(i)->trig_list) {
+                    auto t = i->scriptString();
+                    send_to_char(ch, "%s ", t.c_str());
                 }
                 send_to_char(ch, "\r\n");
             }
@@ -7673,13 +7676,24 @@ ACMD(do_whois) {
     send_to_char(ch, "@D~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\r\n");
 }
 
-#define DOOR_DCHIDE(ch, door)           (EXIT(ch, door)->dchide)
-
 static void search_in_direction(struct char_data *ch, int dir) {
     int check = false, skill_lvl, dchide = 20;
 
     send_to_char(ch, "You search for secret doors.\r\n");
     act("$n searches the area intently.", true, ch, nullptr, nullptr, TO_ROOM);
+
+    auto r = ch->getRoom();
+    auto e = r->dir_option[dir];
+
+    if(!e) {
+        send_to_char(ch, "There is no exit there.\r\n");
+        return;
+    }
+    auto dest = e->getDestination();
+    if(!dest) {
+        send_to_char(ch, "That leads nowhere.\r\n");
+        return;
+    }
 
     /* SEARCHING is allowed untrained */
     skill_lvl = GET_SKILL(ch, SKILL_SEARCH);
@@ -7688,28 +7702,25 @@ static void search_in_direction(struct char_data *ch, int dir) {
     if (IS_HALFBREED(ch))
         skill_lvl = skill_lvl + 1;
 
-    if (EXIT(ch, dir))
-        dchide = DOOR_DCHIDE(ch, dir);
+    dchide = e->dchide;
 
     if (skill_lvl > dchide)
         check = true;
 
-    if (EXIT(ch, dir)) {
-        if (EXIT(ch, dir)->general_description &&
-            !EXIT_FLAGGED(EXIT(ch, dir), EX_SECRET))
-            send_to_char(ch, EXIT(ch, dir)->general_description);
-        else if (!EXIT_FLAGGED(EXIT(ch, dir), EX_SECRET))
-            send_to_char(ch, "There is a normal exit there.\r\n");
-        else if (EXIT_FLAGGED(EXIT(ch, dir), EX_ISDOOR) &&
-                 EXIT_FLAGGED(EXIT(ch, dir), EX_SECRET) &&
-                 EXIT(ch, dir)->keyword && (check == true))
-            send_to_char(ch, "There is a hidden door keyword: '%s' %sthere.\r\n",
-                         fname(EXIT(ch, dir)->keyword),
-                         (EXIT_FLAGGED(EXIT(ch, dir), EX_CLOSED)) ? "" : "open ");
-        else
-            send_to_char(ch, "There is no exit there.\r\n");
-    } else
+    if (e->general_description &&
+        !EXIT_FLAGGED(e, EX_SECRET))
+        send_to_char(ch, e->general_description);
+    else if (!EXIT_FLAGGED(e, EX_SECRET))
+        send_to_char(ch, "There is a normal exit there.\r\n");
+    else if (EXIT_FLAGGED(e, EX_ISDOOR) &&
+             EXIT_FLAGGED(e, EX_SECRET) &&
+             e->keyword && (check == true))
+        send_to_char(ch, "There is a hidden door keyword: '%s' %sthere.\r\n",
+                     fname(e->keyword),
+                     (EXIT_FLAGGED(e, EX_CLOSED)) ? "" : "open ");
+    else
         send_to_char(ch, "There is no exit there.\r\n");
+
 }
 
 ACMD(do_oaffects) {

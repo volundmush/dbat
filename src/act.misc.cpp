@@ -2899,15 +2899,15 @@ ACMD(do_hydromancy) {
         send_to_char(ch, "You know nothing about hydromancy!\r\n");
         return;
     }
-
+    auto r = ch->getRoom();
     int skill = GET_SKILL_BASE(ch, SKILL_STYLE), chance = axion_dice(0);
     int64_t cost = 0;
 
     cost = (GET_MAX_MANA(ch) / 12) - (GET_INT(ch) * GET_LEVEL(ch));
 
-    if (ROOM_EFFECT(IN_ROOM(ch)) >= 0 && SECT(IN_ROOM(ch)) != SECT_WATER_SWIM &&
-        SECT(IN_ROOM(ch)) != SECT_WATER_NOSWIM) {
-        if (SECT(IN_ROOM(ch)) != SECT_UNDERWATER) {
+    if (r->geffect >= 0 && r->sector_type != SECT_WATER_SWIM &&
+            r->sector_type != SECT_WATER_NOSWIM) {
+        if (r->sector_type != SECT_UNDERWATER) {
             send_to_char(ch, "There is not sufficient water here.\r\n");
             return;
         } else {
@@ -2994,67 +2994,76 @@ ACMD(do_hydromancy) {
         }
 
         attempt = search_block(arg2, dirs, false);
-
-        if (CAN_GO(ch, attempt)) {
-            struct char_data *vict, *next_v;
-
-            int last = LASTATK(ch);
-            LASTATK(ch) = 500;
-            char bun[MAX_STRING_LENGTH], bunn[MAX_STRING_LENGTH];
-
-            if (skill < chance) {
-                act("@BUsing your ki you attempt to create a rush of water! @RYou fail!@n", true, ch, nullptr, nullptr,
-                    TO_CHAR);
-                act("@b$n@B seems to attempt to create water with $s ki! @RHowever, $e fails!@n", true, ch, nullptr,
-                    nullptr, TO_ROOM);
-                ch->decCurKI(cost);
-                WAIT_STATE(ch, PULSE_2SEC);
-            } else {
-                ch->decCurKI(cost);
-                sprintf(bun, "@BUsing your ki you create a rush of water flooding away toward the @C%s@B!@n",
-                        dirs[attempt]);
-                sprintf(bunn, "@B$n@B uses $s ki to create a rush of water flooding away toward the @C%s@B!@n",
-                        dirs[attempt]);
-                act(bun, true, ch, nullptr, nullptr, TO_CHAR);
-                act(bunn, true, ch, nullptr, nullptr, TO_ROOM);
-
-                for (vict = ch->getRoom()->people; vict; vict = next_v) {
-                    next_v = vict->next_in_room;
-                    if (vict == ch)
-                        continue;
-                    if (!can_kill(ch, vict, nullptr, 1)) {
-                        act("@CYou are protected from the water!@n", true, vict, nullptr, nullptr, TO_VICT);
-                        act("@C$n@C is protected from the water!@n", true, vict, nullptr, nullptr, TO_ROOM);
-                    } else if (IS_KANASSAN(vict)) {
-                        act("@CYou effortlessly swim against the current.@n", true, vict, nullptr, nullptr, TO_CHAR);
-                        act("@C$n@C effortlessly swims against the current.@n", true, vict, nullptr, nullptr, TO_ROOM);
-                    } else if (GET_SKILL_BASE(vict, SKILL_BALANCE) >= axion_dice(-10)) {
-                        act("@CYou manage to keep your balance and are not swept away!@n", true, vict, nullptr, nullptr,
-                            TO_CHAR);
-                        act("@C$n@C manages to keep $s balance and is not swept away!@n", true, vict, nullptr, nullptr,
-                            TO_ROOM);
-                    } else if (AFF_FLAGGED(ch, AFF_FLYING)) {
-                        act("@CYou fly above the rushing waters and are untouched.@n", true, vict, nullptr, nullptr,
-                            TO_CHAR);
-                        act("@C$n@C flies above the rushing waters and is untouched.@n", true, vict, nullptr, nullptr,
-                            TO_ROOM);
-                    } else {
-                        act("@cYou are caught by the rushing waters and sent tumbling away!@n", true, vict, nullptr,
-                            nullptr, TO_CHAR);
-                        act("@c$n@c is caught by the rushing waters and sent tumbling away!@n", true, vict, nullptr,
-                            nullptr, TO_ROOM);
-                        do_simple_move(vict, attempt, true);
-                        hurt(0, 0, ch, vict, nullptr, cost * 4, 1);
-                    }
-                }
-                ROOM_EFFECT(EXIT(ch, attempt)->to_room) = -3;
-                LASTATK(ch) = last;
-                WAIT_STATE(ch, PULSE_2SEC);
-                GET_COOLDOWN(ch) = 15;
-            }
-        } else {
+        auto e = r->dir_option[attempt];
+        if(!e) {
             send_to_char(ch, "You can not flood the water that direction!\r\n");
             return;
+        }
+        auto dest = e->getDestination();
+        if(!dest) {
+            send_to_char(ch, "You can not flood the water that direction!\r\n");
+            return;
+        }
+        if(EXIT_FLAGGED(e, EX_CLOSED)) {
+            send_to_char(ch, "You can not flood the water that direction!\r\n");
+            return;
+        }
+
+        struct char_data *vict, *next_v;
+
+        int last = LASTATK(ch);
+        LASTATK(ch) = 500;
+        char bun[MAX_STRING_LENGTH], bunn[MAX_STRING_LENGTH];
+
+        if (skill < chance) {
+            act("@BUsing your ki you attempt to create a rush of water! @RYou fail!@n", true, ch, nullptr, nullptr,
+                TO_CHAR);
+            act("@b$n@B seems to attempt to create water with $s ki! @RHowever, $e fails!@n", true, ch, nullptr,
+                nullptr, TO_ROOM);
+            ch->decCurKI(cost);
+            WAIT_STATE(ch, PULSE_2SEC);
+        } else {
+            ch->decCurKI(cost);
+            sprintf(bun, "@BUsing your ki you create a rush of water flooding away toward the @C%s@B!@n",
+                    dirs[attempt]);
+            sprintf(bunn, "@B$n@B uses $s ki to create a rush of water flooding away toward the @C%s@B!@n",
+                    dirs[attempt]);
+            act(bun, true, ch, nullptr, nullptr, TO_CHAR);
+            act(bunn, true, ch, nullptr, nullptr, TO_ROOM);
+
+            for (vict = r->people; vict; vict = next_v) {
+                next_v = vict->next_in_room;
+                if (vict == ch)
+                    continue;
+                if (!can_kill(ch, vict, nullptr, 1)) {
+                    act("@CYou are protected from the water!@n", true, vict, nullptr, nullptr, TO_VICT);
+                    act("@C$n@C is protected from the water!@n", true, vict, nullptr, nullptr, TO_ROOM);
+                } else if (IS_KANASSAN(vict)) {
+                    act("@CYou effortlessly swim against the current.@n", true, vict, nullptr, nullptr, TO_CHAR);
+                    act("@C$n@C effortlessly swims against the current.@n", true, vict, nullptr, nullptr, TO_ROOM);
+                } else if (GET_SKILL_BASE(vict, SKILL_BALANCE) >= axion_dice(-10)) {
+                    act("@CYou manage to keep your balance and are not swept away!@n", true, vict, nullptr, nullptr,
+                        TO_CHAR);
+                    act("@C$n@C manages to keep $s balance and is not swept away!@n", true, vict, nullptr, nullptr,
+                        TO_ROOM);
+                } else if (AFF_FLAGGED(ch, AFF_FLYING)) {
+                    act("@CYou fly above the rushing waters and are untouched.@n", true, vict, nullptr, nullptr,
+                        TO_CHAR);
+                    act("@C$n@C flies above the rushing waters and is untouched.@n", true, vict, nullptr, nullptr,
+                        TO_ROOM);
+                } else {
+                    act("@cYou are caught by the rushing waters and sent tumbling away!@n", true, vict, nullptr,
+                        nullptr, TO_CHAR);
+                    act("@c$n@c is caught by the rushing waters and sent tumbling away!@n", true, vict, nullptr,
+                        nullptr, TO_ROOM);
+                    do_simple_move(vict, attempt, true);
+                    hurt(0, 0, ch, vict, nullptr, cost * 4, 1);
+                }
+            }
+            dest->geffect = -3;
+            LASTATK(ch) = last;
+            WAIT_STATE(ch, PULSE_2SEC);
+            GET_COOLDOWN(ch) = 15;
         }
     } else {
         send_to_char(ch, "Syntax 1: hydromancy (flood) (direction)\r\n");
@@ -5358,17 +5367,19 @@ ACMD(do_obstruct) {
         return;
     }
 
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PEACEFUL)) {
+    auto r = ch->getRoom();
+
+    if (r->room_flags.test(ROOM_PEACEFUL)) {
         send_to_char(ch, "You can not use this in such a peaceful area.\r\n");
         return;
     }
 
-    if (SECT(IN_ROOM(ch)) == SECT_SPACE || ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE)) {
+    if (r->sector_type == SECT_SPACE || r->room_flags.test(ROOM_SPACE)) {
         send_to_char(ch, "You can not wall off the vastness of space.\r\n");
         return;
     }
 
-    if (SECT(IN_ROOM(ch)) == SECT_FLYING) {
+    if (r->sector_type == SECT_FLYING) {
         send_to_char(ch, "You can not create gravity defying glacial walls.\r\n");
         return;
     }
@@ -5390,54 +5401,26 @@ ACMD(do_obstruct) {
         return;
     }
 
-    int dir = -1, dir2 = -1;
-
-    if (!strcasecmp("n", arg) || !strcasecmp("N", arg)) {
-        dir = 0;
-        dir2 = 2;
-    } else if (!strcasecmp("e", arg) || !strcasecmp("E", arg)) {
-        dir = 1;
-        dir2 = 3;
-    } else if (!strcasecmp("s", arg) || !strcasecmp("S", arg)) {
-        dir = 2;
-        dir2 = 0;
-    } else if (!strcasecmp("w", arg) || !strcasecmp("W", arg)) {
-        dir = 3;
-        dir2 = 1;
-    } else if (!strcasecmp("u", arg) || !strcasecmp("U", arg)) {
-        dir = 4;
-        dir2 = 5;
-    } else if (!strcasecmp("d", arg) || !strcasecmp("D", arg)) {
-        dir = 5;
-        dir2 = 4;
-    } else if (!strcasecmp("i", arg) || !strcasecmp("I", arg)) {
-        dir = 10;
-        dir2 = 11;
-    } else if (!strcasecmp("o", arg) || !strcasecmp("O", arg)) {
-        dir = 11;
-        dir2 = 10;
-    } else if (!strcasecmp("nw", arg) || !strcasecmp("NW", arg)) {
-        dir = 6;
-        dir2 = 8;
-    } else if (!strcasecmp("ne", arg) || !strcasecmp("NE", arg)) {
-        dir = 7;
-        dir2 = 9;
-    } else if (!strcasecmp("se", arg) || !strcasecmp("SE", arg)) {
-        dir = 8;
-        dir2 = 6;
-    } else if (!strcasecmp("sw", arg) || !strcasecmp("SW", arg)) {
-        dir = 9;
-        dir2 = 7;
-    } else {
+    int dir = search_block(arg, dirs, false);
+    if(dir < 0) {
         send_to_char(ch,
                      "That is not an acceptable direction.\n[ N | E | S | W | NE | NW | SE | SW | U | D | I | O ]\r\n");
         return;
     }
+    int dir2 = rev_dir[dir];
 
-    if (!EXIT(ch, dir)) {
+    auto e = r->dir_option[dir];
+    if(!e) {
         send_to_char(ch, "That direction does not exist here.\r\n");
         return;
-    } else if (skill < prob) {
+    }
+    auto dest = e->getDestination();
+    if(!dest) {
+        send_to_char(ch, "That leads nowhere.\r\n");
+        return;
+    }
+
+    if (skill < prob) {
         act("@CYou channel your ki and start to create a wall of water, but lose your concentration and the water promptly disappears.@n",
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@c$n@C channels $s ki and starts to create a wall of water, but loses $s concentration and the water promptly disappears.@n",
@@ -5445,75 +5428,73 @@ ACMD(do_obstruct) {
         ch->decCurKI(cost);
         improve_skill(ch, SKILL_HYOGA_KABE, 0);
         return;
-    } else {
-        struct obj_data *obj;
-        int newroom = world[ch->in_room].dir_option[dir]->to_room;
+    }
+    struct obj_data *obj;
+    int newroom = dest->vn;
 
-        if (ROOM_FLAGGED(newroom, ROOM_PEACEFUL)) {
-            send_to_char(ch, "You can not block off a peaceful area.\r\n");
-            return;
-        }
-
-        for (obj = world[newroom].contents; obj; obj = obj->next_content) {
-            if (GET_OBJ_VNUM(obj) == 79) {
-                if (GET_OBJ_COST(obj) == dir2) {
-                    if (skill < prob) {
-                        act("@CYou place your hands on the glacial wall and concentrate. You fail to undo the composition of the wall!@n",
-                            true, ch, nullptr, nullptr, TO_CHAR);
-                        act("@c$n@C places $s hands on the glacial wall and concentrates. Nothing happens...@n", true,
-                            ch, nullptr, nullptr, TO_ROOM);
-                        ch->decCurKI(cost / 2);
-                    } else {
-                        act("@CYou place your hands on the glacial wall and concentrate. You unfreeze the wall and evaporate the water effortlessly.@n",
-                            true, ch, nullptr, nullptr, TO_CHAR);
-                        act("@c$n@C places $s hands on the glacial wall and concentrates. Suddenly the wall melts and then evaporates!@n",
-                            true, ch, nullptr, nullptr, TO_ROOM);
-                        ch->decCurKI(cost / 2);
-                        extract_obj(obj);
-                    }
-                    return;
-                }
-            }
-        }
-
-        struct obj_data *obj2, *obj3;
-
-        obj2 = read_object(79, VIRTUAL);
-        obj_to_room(obj2, newroom);
-        obj3 = read_object(79, VIRTUAL);
-        obj_to_room(obj3, IN_ROOM(ch));
-
-        int64_t strength = (((GET_INT(ch) * skill) * GET_WIS(ch)) * 20) + (GET_MAX_MANA(ch) * 0.001);
-
-        if (strength > GET_MAX_HIT(ch) * 20) {
-            strength = GET_MAX_HIT(ch) + (strength / 20);
-        } else if (strength > GET_MAX_HIT(ch) * 15) {
-            strength = GET_MAX_HIT(ch) + (strength / 15);
-        } else if (strength > GET_MAX_HIT(ch) * 10) {
-            strength = GET_MAX_HIT(ch) + (strength / 10);
-        } else if (strength > GET_MAX_HIT(ch) * 5) {
-            strength = GET_MAX_HIT(ch) + (strength / 5);
-        } else if (strength > GET_MAX_HIT(ch) * 2) {
-            strength = GET_MAX_HIT(ch) + (strength / 2);
-        }
-
-        GET_OBJ_COST(obj2) = dir2;
-        GET_OBJ_WEIGHT(obj2) = strength;
-        GET_OBJ_COST(obj3) = dir;
-        GET_OBJ_WEIGHT(obj3) = strength;
-        GET_FELLOW_WALL(obj2) = obj3;
-        GET_FELLOW_WALL(obj3) = obj2;
-        act("@CYou concentrate and channel your ki. A wall of water starts to form in such a way to block off the direction of your choice. As the wall becomes complete it freezes solid by your will!@n",
-            true, ch, nullptr, nullptr, TO_CHAR);
-        act("@c$n@C concentrates and channels $s ki. A wall of water starts to form in such a way to block off one of the directions of this area. As the wall becomes complete it freezes solid by @c$n's@C will!@n",
-            true, ch, nullptr, nullptr, TO_ROOM);
-        send_to_room(newroom,
-                     "@cA wall of water forms slowly upward blocking off the %s direction. This wall of water then freezes instantly once it stops growing.@n\r\n",
-                     dirs[dir2]);
-        improve_skill(ch, SKILL_HYOGA_KABE, 0);
-        ch->decCurKI(cost);
+    if (ROOM_FLAGGED(newroom, ROOM_PEACEFUL)) {
+        send_to_char(ch, "You can not block off a peaceful area.\r\n");
         return;
     }
+
+    for (obj = dest->contents; obj; obj = obj->next_content) {
+        if (GET_OBJ_VNUM(obj) == 79) {
+            if (GET_OBJ_COST(obj) == dir2) {
+                if (skill < prob) {
+                    act("@CYou place your hands on the glacial wall and concentrate. You fail to undo the composition of the wall!@n",
+                        true, ch, nullptr, nullptr, TO_CHAR);
+                    act("@c$n@C places $s hands on the glacial wall and concentrates. Nothing happens...@n", true,
+                        ch, nullptr, nullptr, TO_ROOM);
+                    ch->decCurKI(cost / 2);
+                } else {
+                    act("@CYou place your hands on the glacial wall and concentrate. You unfreeze the wall and evaporate the water effortlessly.@n",
+                        true, ch, nullptr, nullptr, TO_CHAR);
+                    act("@c$n@C places $s hands on the glacial wall and concentrates. Suddenly the wall melts and then evaporates!@n",
+                        true, ch, nullptr, nullptr, TO_ROOM);
+                    ch->decCurKI(cost / 2);
+                    extract_obj(obj);
+                }
+                return;
+            }
+        }
+    }
+
+    struct obj_data *obj2, *obj3;
+
+    obj2 = read_object(79, VIRTUAL);
+    obj_to_room(obj2, newroom);
+    obj3 = read_object(79, VIRTUAL);
+    obj_to_room(obj3, IN_ROOM(ch));
+
+    int64_t strength = (((GET_INT(ch) * skill) * GET_WIS(ch)) * 20) + (GET_MAX_MANA(ch) * 0.001);
+
+    if (strength > GET_MAX_HIT(ch) * 20) {
+        strength = GET_MAX_HIT(ch) + (strength / 20);
+    } else if (strength > GET_MAX_HIT(ch) * 15) {
+        strength = GET_MAX_HIT(ch) + (strength / 15);
+    } else if (strength > GET_MAX_HIT(ch) * 10) {
+        strength = GET_MAX_HIT(ch) + (strength / 10);
+    } else if (strength > GET_MAX_HIT(ch) * 5) {
+        strength = GET_MAX_HIT(ch) + (strength / 5);
+    } else if (strength > GET_MAX_HIT(ch) * 2) {
+        strength = GET_MAX_HIT(ch) + (strength / 2);
+    }
+
+    GET_OBJ_COST(obj2) = dir2;
+    GET_OBJ_WEIGHT(obj2) = strength;
+    GET_OBJ_COST(obj3) = dir;
+    GET_OBJ_WEIGHT(obj3) = strength;
+    GET_FELLOW_WALL(obj2) = obj3;
+    GET_FELLOW_WALL(obj3) = obj2;
+    act("@CYou concentrate and channel your ki. A wall of water starts to form in such a way to block off the direction of your choice. As the wall becomes complete it freezes solid by your will!@n",
+        true, ch, nullptr, nullptr, TO_CHAR);
+    act("@c$n@C concentrates and channels $s ki. A wall of water starts to form in such a way to block off one of the directions of this area. As the wall becomes complete it freezes solid by @c$n's@C will!@n",
+        true, ch, nullptr, nullptr, TO_ROOM);
+    send_to_room(newroom,
+                 "@cA wall of water forms slowly upward blocking off the %s direction. This wall of water then freezes instantly once it stops growing.@n\r\n",
+                 dirs[dir2]);
+    improve_skill(ch, SKILL_HYOGA_KABE, 0);
+    ch->decCurKI(cost);
 }
 
 /* This allows a player to flood a room. */

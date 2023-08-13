@@ -3707,18 +3707,17 @@ ACMD(do_eat) {
 
     std::set<obj_vnum> candies = {53, 93, 94, 95};
 
+    if(candies.contains(food->vn)) {
+        if(IS_MAJIN(ch)) foob = GET_OBJ_VAL(food, VAL_FOOD_FOODVAL);
+        majin_gain(ch, food, foob);
+    }
+
     if (subcmd == SCMD_EAT) {
         if (foob >= GET_OBJ_VAL(food, VAL_FOOD_FOODVAL)) {
             send_to_char(ch, "You finish the last bite.\r\n");
-            if(candies.contains(food->vn)) {
-                majin_gain(ch, food, foob);
-            }
             extract_obj(food);
         } else {
             GET_OBJ_VAL(food, VAL_FOOD_FOODVAL) -= foob;
-            if(candies.contains(food->vn)) {
-                majin_gain(ch, food, foob);
-            }
         }
     } else {
         if (!(--GET_OBJ_VAL(food, VAL_FOOD_FOODVAL))) {
@@ -3732,19 +3731,6 @@ static void majin_gain(struct char_data *ch, struct obj_data *food, int foob) {
     if (!IS_MAJIN(ch) || IS_NPC(ch)) {
         return;
     }
-
-    auto amountLeft = food->value[VAL_FOOD_FOODVAL];
-    auto amountMax = FOOB(food);
-
-    // For uneaten food, this should be 1.0. otherwise it might be 0.4, 0.2, 0.7, whatever...
-    auto percentAvailableStart = (double)amountLeft / (double)amountMax;
-
-    auto leftAfter = amountLeft - foob;
-    if(leftAfter <= 0) leftAfter = 0;
-    auto percentAvailableAfter = (double)leftAfter / (double)amountMax;
-
-    auto percentConsumed = percentAvailableStart - percentAvailableAfter;
-
 
     auto soft_cap = ch->calc_soft_cap();
     auto current = (ch->getBasePL() + ch->getBaseKI() + ch->getBaseST());
@@ -3761,10 +3747,6 @@ static void majin_gain(struct char_data *ch, struct obj_data *food, int foob) {
     st *= 0.05;
     ki *= 0.05;
     pl *= 0.05;
-
-    pl *= percentConsumed;
-    ki *= percentConsumed;
-    st *= percentConsumed;
 
     std::vector<int> toAdd = {0, 1, 2};
     Random::shuffle(toAdd);

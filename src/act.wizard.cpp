@@ -493,8 +493,6 @@ static void lockWrite(struct char_data *ch, char *name) {
 }
 
 ACMD(do_reward) {
-    struct char_data *vict = nullptr;
-    struct descriptor_data *k;
     int amt = 0;
 
     char arg[MAX_INPUT_LENGTH];
@@ -507,9 +505,9 @@ ACMD(do_reward) {
         return;
     }
 
-    auto target = findPlayer(arg);
+    auto vict = findPlayer(arg);
 
-    if (!target) {
+    if (!vict) {
         send_to_char(ch, "That is not a recognised player character.\r\n");
         return;
     }
@@ -1846,7 +1844,7 @@ ACMD(do_varstat) {
             /* currently, variable context for players is always 0, so it is */
             /* not displayed here. in the future, this might change */
             for (tv = vict->script->global_vars; tv; tv = tv->next) {
-                if (*(tv->value) == UID_CHAR) {
+                if (tv->value && *(tv->value) == UID_CHAR) {
                     std::optional<DgUID> result;
                     result = resolveUID(tv->value);
                     auto uidResult = result;

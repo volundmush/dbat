@@ -307,7 +307,7 @@ ACMD(do_rpp) {
                         return;
                     }
                     send_to_char(ch, "You increase your strength by 2.\r\n");
-                    ch->real_abils.str += 2;
+                    ch->modStrength(2);
                 } else if (!strcasecmp(arg2, "con")) {
                     if (GET_BONUS(ch, BONUS_FRAIL) > 0 && ch->real_abils.con >= 45) {
                         send_to_char(ch, "You can't because that stat maxes at 45 due to a trait negative.\r\n");
@@ -317,7 +317,7 @@ ACMD(do_rpp) {
                         return;
                     }
                     send_to_char(ch, "You increase your constitution by 2.\r\n");
-                    ch->real_abils.con += 2;
+                    ch->modStrength(2);
                 } else if (!strcasecmp(arg2, "int")) {
                     if (GET_BONUS(ch, BONUS_DULL) > 0 && ch->real_abils.intel >= 45) {
                         send_to_char(ch, "You can't because that stat maxes at 45 due to a trait negative.\r\n");
@@ -327,7 +327,7 @@ ACMD(do_rpp) {
                         return;
                     }
                     send_to_char(ch, "You increase your intelligence by 2.\r\n");
-                    ch->real_abils.intel += 2;
+                    ch->modIntelligence(2);
                 } else if (!strcasecmp(arg2, "wis")) {
                     if (GET_BONUS(ch, BONUS_FOOLISH) > 0 && ch->real_abils.wis >= 45) {
                         send_to_char(ch, "You can't because that stat maxes at 45 due to a trait negative.\r\n");
@@ -337,7 +337,7 @@ ACMD(do_rpp) {
                         return;
                     }
                     send_to_char(ch, "You increase your wisdom by 2.\r\n");
-                    ch->real_abils.wis += 2;
+                    ch->modWisdom(2);
                 } else if (!strcasecmp(arg2, "spd")) {
                     if (GET_BONUS(ch, BONUS_SLOW) > 0 && ch->real_abils.cha >= 45) {
                         send_to_char(ch, "You can't because that stat maxes at 45 due to a trait negative.\r\n");
@@ -347,7 +347,7 @@ ACMD(do_rpp) {
                         return;
                     }
                     send_to_char(ch, "You increase your speed by 2.\r\n");
-                    ch->real_abils.cha += 2;
+                    ch->modSpeed(2);
                 } else if (!strcasecmp(arg2, "agl")) {
                     if (GET_BONUS(ch, BONUS_CLUMSY) > 0 && ch->real_abils.dex >= 45) {
                         send_to_char(ch, "You can't because that stat maxes at 45 due to a trait negative.\r\n");
@@ -357,7 +357,7 @@ ACMD(do_rpp) {
                         return;
                     }
                     send_to_char(ch, "You increase your speed by 2.\r\n");
-                    ch->real_abils.dex += 2;
+                    ch->modAgility(2);
                 } else {
                     send_to_char(ch, "That is not an acceptable option for changing alignment.\r\n");
                     return;
@@ -1976,20 +1976,11 @@ ACMD(do_candy) {
         return;
     }
 
-    if (vict_max < ch_max * .25 && GET_LEVEL(ch) < 100) {
-        send_to_char(ch, "They are too weak.\r\n");
-        return;
-    }
-
-    if (vict_max < ch_max * .09 && GET_LEVEL(ch) == 100) {
-        send_to_char(ch, "They are too weak.\r\n");
-        return;
-    }
-
     if ((ch->getCurKI()) < ch_max / 15) {
         send_to_char(ch, "You do not have enough ki.\r\n");
         return;
     }
+
     if (rand_number(1, 6) == 6) {
         ch->decCurKI(ch->getMaxKI() / 15);
         reveal_hiding(ch, 0);
@@ -6393,13 +6384,14 @@ ACMD(do_appraise) {
     act("@c$n@w looks at $p and nods, a satisfied look on $s face.@n", true, ch, obj, nullptr, TO_ROOM);
     int percent = false;
     for (i = 0; i < MAX_OBJ_AFFECT; i++) {
-        if (obj->affected[i].modifier) {
+        if (obj->affected[i].location != APPLY_NONE) {
             if (obj->affected[i].location == APPLY_REGEN || obj->affected[i].location == APPLY_TRAIN ||
                 obj->affected[i].location == APPLY_LIFEMAX) {
                 percent = true;
             }
             sprinttype(obj->affected[i].location, apply_types, buf, sizeof(buf));
-            send_to_char(ch, "%s %+d%s to %s", found++ ? "," : "", obj->affected[i].modifier,
+            auto m = fmt::format("{}", obj->affected[i].modifier);
+            send_to_char(ch, "%s %s%s to %s", found++ ? "," : "", m.c_str(),
                          percent == true ? "%" : "", buf);
             percent = false;
             switch (obj->affected[i].location) {
@@ -7531,6 +7523,7 @@ ACMD(do_summon) {
 
     EDRAGON = dragon;
 }
+
 
 
 ACMD(do_transform) {

@@ -1715,34 +1715,13 @@ namespace race {
             case demon:
             case kanassan:
                 return soft_cap_demon;
-            case android:
-                if (PLR_FLAGGED(ch, PLR_ABSORB)) {
-                    return soft_cap_fixed;
-                } else {
-                    return soft_cap_variable;
-                }
-            case bio:
-            case majin:
-                return soft_cap_variable;
             default:
                 return soft_cap_fixed;
         }
     }
 
     SoftCapType Race::getSoftType(const char_data *ch) const {
-        switch (r_id) {
-            case bio:
-            case majin:
-                return Variable;
-            case android:
-                if (PLR_FLAGGED(ch, PLR_ABSORB)) {
-                    return Fixed;
-                } else {
-                    return Variable;
-                }
-            default:
-                return Fixed;
-        }
+        return Fixed;
     }
 
     RaceMap race_map;

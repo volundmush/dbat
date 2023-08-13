@@ -946,8 +946,8 @@ void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val);
 #define IS_NONPTRANS(ch)        (IS_HUMAN(ch) || ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && !IS_FULLPSSJ(ch) && !PLR_FLAGGED(ch, PLR_LSSJ) && !PLR_FLAGGED(ch, PLR_OOZARU)) ||\
                                  IS_NAMEK(ch) || IS_MUTANT(ch) || IS_ICER(ch) ||\
                                  IS_KAI(ch) || IS_KONATSU(ch) || IS_DEMON(ch) || IS_KANASSAN(ch))
-#define IS_FULLPSSJ(ch)             ((IS_SAIYAN(ch) && PLR_FLAGGED(ch, PLR_FPSSJ) && PLR_FLAGGED(ch, PLR_TRANS1)) ||\
-                                 (IS_HALFBREED(ch) && PLR_FLAGGED(ch, PLR_FPSSJ) && PLR_FLAGGED(ch, PLR_TRANS1)))
+#define OOZARU_RACE(ch)         (IS_SAIYAN(ch) || IS_HALFBREED(ch))
+#define IS_FULLPSSJ(ch)         (OOZARU_RACE(ch) && PLR_FLAGGED(ch, PLR_FPSSJ) && PLR_FLAGGED(ch, PLR_TRANS1))
 #define IS_TRANSFORMED(ch)      (PLR_FLAGGED(ch, PLR_TRANS1) || PLR_FLAGGED(ch, PLR_TRANS2) ||\
                                  PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4) ||\
                                  PLR_FLAGGED(ch, PLR_TRANS5) || PLR_FLAGGED(ch, PLR_TRANS6) ||\
@@ -960,9 +960,9 @@ void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val);
 #define OOZARU_RACE(ch)         (IS_SAIYAN(ch) || IS_HALFBREED(ch))
 #define MOON_TIME               (time_info.hours >= 21 || time_info.hours <= 4)
 #define MOON_DATE               (time_info.day == 19 || time_info.day == 20 || time_info.day == 21)
-#define ETHER_STREAM(ch)        (ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_AETHER) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_NAMEK) || PLANET_ZENITH(IN_ROOM(ch)))
-#define HAS_MOON(ch)            (ROOM_FLAGGED(IN_ROOM(ch), ROOM_VEGETA) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH) ||\
-                                 ROOM_FLAGGED(IN_ROOM(ch), ROOM_FRIGID) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_AETHER))
+bool PLANET_FLAGGED(struct char_data *ch, int flag);
+bool ETHER_STREAM(struct char_data *ch);
+bool HAS_MOON(struct char_data *ch);
 #define HAS_ARMS(ch)            (((IS_NPC(ch) && (MOB_FLAGGED(ch, MOB_LARM) || \
                                  MOB_FLAGGED(ch, MOB_RARM))) || GET_LIMBCOND(ch, 0) > 0 || \
                                  GET_LIMBCOND(ch, 1) > 0 || \

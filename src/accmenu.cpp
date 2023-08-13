@@ -95,6 +95,10 @@ namespace net {
 
         if(boost::iequals(txt, "A") || boost::istarts_with(txt, "A ")) {
             // Start chargen...
+            if(conn->account->slots <= conn->account->characters.size()) {
+                sendText("Sorry, your slots are all full.\r\n");
+                return;
+            }
             conn->setParser(new ChargenParser(conn));
             return;
         }

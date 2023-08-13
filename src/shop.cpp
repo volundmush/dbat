@@ -825,7 +825,9 @@ static void shopping_buy(char *arg, struct char_data *ch, struct char_data *keep
     if (buy_price(obj, shop_nr, keeper, ch) > GET_GOLD(ch) && !ADM_FLAGGED(ch, ADM_MONEY)) {
         char actbuf[MAX_INPUT_LENGTH];
 
-        snprintf(actbuf, sizeof(actbuf), shop_index[shop_nr].missing_cash2, GET_NAME(ch));
+        auto &sh = shop_index[shop_nr];
+
+        snprintf(actbuf, sizeof(actbuf), sh.missing_cash2 ? sh.missing_cash2 : "You can't afford that!", GET_NAME(ch));
         do_tell(keeper, actbuf, cmd_tell, 0);
 
         switch (SHOP_BROKE_TEMPER(shop_nr)) {

@@ -1306,6 +1306,45 @@ bool is_num(char *arg) {
     }
 }
 
+static void eval_numeric_op(char *op, char *lhs, char *rhs, char *result) {
+    auto l = atof(lhs);
+    auto r = atof(rhs);
+
+    std::string res;
+
+    /* find the op, and figure out the value */
+    if (!strcmp("||", op)) {
+        res = fmt::format("{}", (l || r) ? 1 : 0);
+    } else if (!strcmp("&&", op)) {
+        res = fmt::format("{}", (l && r) ? 1 : 0);
+    } else if (!strcmp("==", op)) {
+        res = fmt::format("{}", (l == r) ? 1 : 0);
+    } else if (!strcmp("!=", op)) {
+        res = fmt::format("{}", (l != r) ? 1 : 0);
+    } else if (!strcmp("<=", op)) {
+        res = fmt::format("{}", (l <= r) ? 1 : 0);
+    } else if (!strcmp(">=", op)) {
+        res = fmt::format("{}", (l >= r) ? 1 : 0);
+    } else if (!strcmp("<", op)) {
+        res = fmt::format("{}", (l < r) ? 1 : 0);
+    } else if (!strcmp(">", op)) {
+        res = fmt::format("{}", (l > r) ? 1 : 0);
+    }else if (!strcmp("*", op))
+        res = fmt::format("{}", l * r);
+    else if (!strcmp("/", op))
+        res = fmt::format("{}", (int64_t)l / (int64_t)r);
+    else if (!strcmp("+", op))
+        res = fmt::format("{}", l + r);
+    else if (!strcmp("-", op))
+        res = fmt::format("{}", l - r);
+    else if (!strcmp("!", op)) {
+        res = fmt::format("{}", (r != 0.0) ? 0 : 1);
+    }
+
+    if(!res.empty()) strcpy(result, res.c_str());
+
+}
+
 
 /* evaluates 'lhs op rhs', and copies to result */
 void eval_op(char *op, char *lhs, char *rhs, char *result, void *go,
@@ -1325,6 +1364,11 @@ void eval_op(char *op, char *lhs, char *rhs, char *result, void *go,
     for (--p; isspace(*p) && ((char *) p > rhs); *p-- = '\0');
 
 
+    if(is_num(lhs) && is_num(rhs)) {
+        eval_numeric_op(op, lhs, rhs, result);
+        return;
+    }
+
     /* find the op, and figure out the value */
     if (!strcmp("||", op)) {
         if ((!*lhs || (*lhs == '0')) && (!*rhs || (*rhs == '0')))
@@ -1337,55 +1381,21 @@ void eval_op(char *op, char *lhs, char *rhs, char *result, void *go,
         else
             strcpy(result, "1");
     } else if (!strcmp("==", op)) {
-        if (is_num(lhs) && is_num(rhs))
-            sprintf(result, "%lld", atof(lhs) == atof(rhs));
-        else
-            sprintf(result, "%d", !strcasecmp(lhs, rhs));
+        sprintf(result, "%d", !strcasecmp(lhs, rhs));
     } else if (!strcmp("!=", op)) {
-        if (is_num(lhs) && is_num(rhs))
-            sprintf(result, "%lld", atof(lhs) != atof(rhs));
-        else
-            sprintf(result, "%d", strcasecmp(lhs, rhs));
+        sprintf(result, "%d", strcasecmp(lhs, rhs));
     } else if (!strcmp("<=", op)) {
-        if (is_num(lhs) && is_num(rhs))
-            sprintf(result, "%lld", atof(lhs) <= atof(rhs));
-        else
-            sprintf(result, "%lld", strcasecmp(lhs, rhs) <= 0);
+        sprintf(result, "%lld", strcasecmp(lhs, rhs) <= 0);
     } else if (!strcmp(">=", op)) {
-        if (is_num(lhs) && is_num(rhs))
-            sprintf(result, "%lld", atof(lhs) >= atof(rhs));
-        else
-            sprintf(result, "%lld", strcasecmp(lhs, rhs) <= 0);
+        sprintf(result, "%lld", strcasecmp(lhs, rhs) <= 0);
     } else if (!strcmp("<", op)) {
-        if (is_num(lhs) && is_num(rhs))
-            sprintf(result, "%lld", atof(lhs) < atof(rhs));
-        else
-            sprintf(result, "%d", strcasecmp(lhs, rhs) < 0);
+        sprintf(result, "%d", strcasecmp(lhs, rhs) < 0);
     } else if (!strcmp(">", op)) {
-        if (is_num(lhs) && is_num(rhs))
-            sprintf(result, "%lld", atof(lhs) > atof(rhs));
-        else
-            sprintf(result, "%d", strcasecmp(lhs, rhs) > 0);
+        sprintf(result, "%d", strcasecmp(lhs, rhs) > 0);
     } else if (!strcmp("/=", op))
         sprintf(result, "%c", str_str(lhs, rhs) ? '1' : '0');
-
-    else if (!strcmp("*", op))
-        sprintf(result, "%lld", atof(lhs) * atof(rhs));
-
-    else if (!strcmp("/", op))
-        sprintf(result, "%lld", (n = atof(rhs)) ? (atof(lhs) / n) : 0);
-
-    else if (!strcmp("+", op))
-        sprintf(result, "%lld", atof(lhs) + atof(rhs));
-
-    else if (!strcmp("-", op))
-        sprintf(result, "%lld", atof(lhs) - atof(rhs));
-
     else if (!strcmp("!", op)) {
-        if (is_num(rhs))
-            sprintf(result, "%d", !atof(rhs));
-        else
-            sprintf(result, "%d", !*rhs);
+        sprintf(result, "%d", !*rhs);
     }
 }
 
@@ -1434,16 +1444,18 @@ void eval_expr(char *line, char *result, void *go, struct script_data *sc,
     while (*line && isspace(*line))
         line++;
 
-    if (eval_lhs_op_rhs(line, result, go, sc, trig, type));
-
-    else if (*line == '(') {
+    if (*line == '(') {
         p = strcpy(expr, line);
         p = matching_paren(expr);
         *p = '\0';
         eval_expr(expr + 1, result, go, sc, trig, type);
+    } else if (eval_lhs_op_rhs(line, result, go, sc, trig, type)) {
+
     } else
         var_subst(go, sc, trig, type, line, result);
 }
+
+static boost::regex ops(R"(^(?<lhs>.+?)?(?<op>\|\||&&|==|!=|<=|>=|<|>|\/=|-|\+|\/|\*|!)(?<rhs>.+))");
 
 
 /*
@@ -1452,69 +1464,27 @@ void eval_expr(char *line, char *result, void *go, struct script_data *sc,
  */
 int eval_lhs_op_rhs(char *expr, char *result, void *go, struct script_data *sc,
                     trig_data *trig, int type) {
-    char *p = nullptr, *tokens[MAX_INPUT_LENGTH];
-    char line[MAX_INPUT_LENGTH], lhr[MAX_INPUT_LENGTH], rhr[MAX_INPUT_LENGTH];
-    int i, j;
+    char lhr[MAX_INPUT_LENGTH], rhr[MAX_INPUT_LENGTH];
 
-    /*
-     * valid operands, in order of priority
-     * each must also be defined in eval_op()
-     */
-    static char *ops[] = {
-            "||",
-            "&&",
-            "==",
-            "!=",
-            "<=",
-            ">=",
-            "<",
-            ">",
-            "/=",
-            "-",
-            "+",
-            "/",
-            "*",
-            "!",
-            "\n"
-    };
+    auto line = std::string(expr);
+    boost::trim(line);
 
-    p = strcpy(line, expr);
-
-    /*
-     * initialize tokens, an array of pointers to locations
-     * in line where the ops could possibly occur.
-     */
-
-    /* Might be game breaking - Iovan
-    *lhr = '\0'; */
-
-    for (j = 0; *p; j++) {
-        tokens[j] = p;
-        if (*p == '(')
-            p = matching_paren(p) + 1;
-        else if (*p == '"')
-            p = matching_quote(p) + 1;
-        else if (isalnum(*p))
-            for (p++; *p && (isalnum(*p) || isspace(*p)); p++);
-        else
-            p++;
+    // First we need to check if it matches or not.
+    boost::smatch match;
+    if(!boost::regex_search(line, match, ops)) {
+        return 0;
     }
-    tokens[j] = nullptr;
 
-    for (i = 0; *ops[i] != '\n'; i++)
-        for (j = 0; tokens[j]; j++)
-            if (!strncasecmp(ops[i], tokens[j], strlen(ops[i]))) {
-                *tokens[j] = '\0';
-                p = tokens[j] + strlen(ops[i]);
+    auto op = match["op"].str();
+    auto lhs = match["lhs"].matched ? match["lhs"].str() : "0";
+    boost::trim(lhs);
+    auto rhs = match["rhs"].str();
+    boost::trim(rhs);
 
-                eval_expr(line, lhr, go, sc, trig, type);
-                eval_expr(p, rhr, go, sc, trig, type);
-                eval_op(ops[i], lhr, rhr, result, go, sc, trig);
-
-                return 1;
-            }
-
-    return 0;
+    if(!lhs.empty()) eval_expr((char*)lhs.c_str(), lhr, go, sc, trig, type);
+    if(!rhs.empty()) eval_expr((char*)rhs.c_str(), rhr, go, sc, trig, type);
+    eval_op((char*)op.c_str(), lhr, rhr, result, go, sc, trig);
+    return 1;
 }
 
 

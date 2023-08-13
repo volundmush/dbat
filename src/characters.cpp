@@ -240,7 +240,7 @@ int char_data::calcTier() {
 }
 
 int64_t char_data::calc_soft_cap() {
-    if(level >= 100) return 1e9;
+    if(level >= 100) return 50e9;
     auto tier = calcTier();
     auto softmap = race->getSoftMap(this);
     return level * softmap[tier];
@@ -1154,6 +1154,61 @@ int char_data::getSpeed(bool base) {
     if(base) return real_abils.cha;
     return std::clamp<int>(real_abils.cha + getAffectModifier(APPLY_CHA) + getAffectModifier(APPLY_ALL_STATS),
                             0, 100);
+}
+
+
+int char_data::setStrength(int val) {
+    real_abils.str = std::clamp<int>(val, 1, 100);
+    return real_abils.str;
+}
+
+int char_data::modStrength(int val) {
+    return setStrength(real_abils.str + val);
+}
+
+int char_data::setIntelligence(int val) {
+    real_abils.intel = std::clamp<int>(val, 1, 100);
+    return real_abils.intel;
+}
+
+int char_data::modIntelligence(int val) {
+    return setIntelligence(real_abils.intel + val);
+}
+
+int char_data::setConstitution(int val) {
+    real_abils.con = std::clamp<int>(val, 1, 100);
+    return real_abils.con;
+}
+
+int char_data::modConstitution(int val) {
+    return setConstitution(real_abils.con + val);
+}
+
+int char_data::setWisdom(int val) {
+    real_abils.wis = std::clamp<int>(val, 1, 100);
+    return real_abils.wis;
+}
+
+int char_data::modWisdom(int val) {
+    return setWisdom(real_abils.wis + val);
+}
+
+int char_data::setAgility(int val) {
+    real_abils.dex = std::clamp<int>(val, 1, 100);
+    return real_abils.dex;
+}
+
+int char_data::modAgility(int val) {
+    return setAgility(real_abils.dex + val);
+}
+
+int char_data::setSpeed(int val) {
+    real_abils.cha = std::clamp<int>(val, 1, 100);
+    return real_abils.cha;
+}
+
+int char_data::modSpeed(int val) {
+    return setSpeed(real_abils.cha + val);
 }
 
 bool char_data::canCarryWeight(weight_t val) {

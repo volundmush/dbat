@@ -21,7 +21,7 @@
 #include "dbat/act.informative.h"
 
 /* local functions */
-static std::list<std::pair<struct room_data*, char>> bfs_queue;
+static std::list<std::pair<struct room_data*, int>> bfs_queue;
 
 static int VALID_EDGE(struct room_data *x, int y) {
     auto d = x->dir_option[y];
@@ -43,7 +43,7 @@ static void bfs_dequeue() {
 }
 
 static void bfs_clear_queue() {
-    bfs_queue.empty();
+    bfs_queue.clear();
 }
 
 

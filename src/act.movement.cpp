@@ -497,9 +497,13 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
         return (0);
     }
 
+    auto r = ch->getRoom();
+    auto e = r->dir_option[dir];
+    auto dest = e->getDestination();
+
     int willfall = false;
     /* if this room or the one we're going to needs flight, check for it */
-    if ((SECT(IN_ROOM(ch)) == SECT_FLYING) || (SECT(EXIT(ch, dir)->to_room) == SECT_FLYING)) {
+    if ((r->sector_type == SECT_FLYING) || (dest->sector_type == SECT_FLYING)) {
         if (!has_flight(ch)) {
             if (dir != 4) {
                 willfall = true;
@@ -510,7 +514,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
         }
     }
 
-    if (((SECT(IN_ROOM(ch)) == SECT_WATER_NOSWIM) || (SECT(EXIT(ch, dir)->to_room) == SECT_WATER_NOSWIM)) &&
+    if (((r->sector_type == SECT_WATER_NOSWIM) || (dest->sector_type == SECT_WATER_NOSWIM)) &&
         IS_HUMANOID(ch)) {
         if (IS_KANASSAN(ch) && !has_flight(ch)) {
             act("@CYou swim swiftly.@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -529,7 +533,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
         }
     }
 
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE)) {
+    if (r->room_flags.test(ROOM_SPACE)) {
         if (!IS_ANDROID(ch)) {
             if (!check_swim(ch)) {
                 return (0);
@@ -537,16 +541,15 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
         }
     }
 
-    if (ROOM_EFFECT(EXIT(ch, dir)->to_room) == 6 && !IS_HUMANOID(ch) && IS_NPC(ch)) {
+    if (dest->geffect == 6 && !IS_HUMANOID(ch) && IS_NPC(ch)) {
         return (0);
     }
 
-    if (IS_NPC(ch) && ROOM_FLAGGED(EXIT(ch, dir)->to_room, ROOM_NOMOB) && !ch->master) {
+    if (IS_NPC(ch) && dest->room_flags.test(ROOM_NOMOB) && !ch->master) {
         return (0);
     }
 
-    if (SUNKEN(IN_ROOM(ch)) ||
-        SUNKEN(EXIT(ch, dir)->to_room)) {
+    if (r->isSunken() || dest->isSunken()) {
         if (!has_o2(ch) &&
             ((group_bonus(ch, 2) != 10 && (ch->getCurKI()) < GET_MAX_MANA(ch) / 200) || (group_bonus(ch, 2) == 10 &&
                                                                                          (ch->getCurKI()) <
@@ -575,11 +578,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
 
     /* move points needed is avg. move loss for src and destination sect type */
     if(!IS_NPC(ch)) {
-        auto room = world.find(IN_ROOM(ch));
-        double gravity = 1.0;
-        if(room != world.end()) {
-            gravity = room->second.getGravity();
-        }
+        auto gravity = r->getGravity();
         need_movement = (gravity * gravity) * ch->getBurdenRatio();
     }
 
@@ -628,27 +627,26 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
     }
 
     /* Check if the character needs a skill check to go that way. */
-    if (EXIT(ch, dir)->dcskill != 0) {
-        if (EXIT(ch, dir)->dcmove > roll_skill(ch, EXIT(ch, dir)->dcskill)) {
+    if (e->dcskill != 0) {
+        if (e->dcmove > roll_skill(ch, e->dcskill)) {
             send_to_char(ch, "Your skill in %s isn't enough to move that way!\r\n",
-                         spell_info[EXIT(ch, dir)->dcskill].name);
+                         spell_info[e->dcskill].name);
             /* A failed skill check still spends the movement points! */
             if (!ADM_FLAGGED(ch, ADM_WALKANYWHERE) && !IS_NPC(ch) && !AFF_FLAGGED(ch, AFF_FLYING))
                 ch->decCurST(need_movement);
             return (0);
         } else {
-            send_to_char(ch, "Your skill in %s aids in your movement.\r\n", spell_info[EXIT(ch, dir)->dcskill].name);
+            send_to_char(ch, "Your skill in %s aids in your movement.\r\n", spell_info[e->dcskill].name);
         }
     }
 
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_ATRIUM)) {
-        if (!House_can_enter(ch, GET_ROOM_VNUM(EXIT(ch, dir)->to_room))) {
+    if (r->room_flags.test(ROOM_ATRIUM)) {
+        if (!House_can_enter(ch, GET_ROOM_VNUM(e->to_room))) {
             send_to_char(ch, "That's private property -- no trespassing!\r\n");
             return (0);
         }
     }
-    if (ROOM_FLAGGED(EXIT(ch, dir)->to_room, ROOM_TUNNEL) &&
-        (num_pc_in_room(&(world[EXIT(ch, dir)->to_room])) >= CONFIG_TUNNEL_SIZE)) {
+    if (dest->room_flags.test(ROOM_TUNNEL) && (num_pc_in_room(dest) >= CONFIG_TUNNEL_SIZE)) {
         if (CONFIG_TUNNEL_SIZE > 1)
             send_to_char(ch, "There isn't enough room for you to go there!\r\n");
         else
@@ -656,7 +654,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
         return (0);
     }
     /* Mortals and low level gods cannot enter greater god rooms. */
-    if (ROOM_FLAGGED(EXIT(ch, dir)->to_room, ROOM_GODROOM) &&
+    if (dest->room_flags.test(ROOM_GODROOM) &&
         GET_ADMLEVEL(ch) < ADMLVL_GRGOD) {
         send_to_char(ch, "You aren't godly enough to use that room!\r\n");
         return (0);
@@ -664,7 +662,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
 
     /******* Zone flag checks *******/
 
-    rm = &world[EXIT(ch, dir)->to_room];
+    rm = dest;
 
     if (!IS_NPC(ch) && (GET_ADMLEVEL(ch) < ADMLVL_IMMORT) &&
         (GET_LEVEL(ch) < ZONE_MINLVL(rm->zone)) && (ZONE_MINLVL(rm->zone) > 0)) {
@@ -736,7 +734,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
     }
     SET_BIT_AR(AFF_FLAGS(ch), AFF_PURSUIT);
     char_from_room(ch);
-    char_to_room(ch, world[was_in].dir_option[dir]->to_room);
+    char_to_room(ch, dest->vn);
     if ((ch->getRoom()->zone != world[was_in].zone) && !IS_NPC(ch) && !IS_ANDROID(ch)) {
         send_to_sense(0, "You sense someone", ch);
         sprintf(buf3, "@D[@GBlip@D]@Y %s\r\n@RSomeone has entered your scouter detection range@n.",
@@ -1300,7 +1298,7 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
             char_from_room(ch);
             char_to_room(ch, real_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST)));
         }
-        for (obj2 = ch->getRoom()->contents; obj2; obj2 = next_obj) {
+        for (obj2 = world[IN_ROOM(ch)].contents; obj2; obj2 = next_obj) {
             next_obj = obj2->next_content;
             if (GET_OBJ_TYPE(obj2) == ITEM_HATCH) {
                 hatch = obj2;
@@ -1336,8 +1334,8 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
                                          "@wA great vortex forms as air begins to get sucked out into the void!\r\n");
                         }
                     } else {
-                        act("@wYou open @c$p@w.", true, ch, obj, nullptr, TO_CHAR);
-                        act("@C$n@w opens @c$p@w.", true, ch, obj, nullptr, TO_ROOM);
+                        act("@wYou open @c$p@w.", true, ch, obj, 0, TO_CHAR);
+                        act("@C$n@w opens @c$p@w.", true, ch, obj, 0, TO_ROOM);
                         send_to_room(IN_ROOM(vehicle), "@wThe door to %s@w is opened from the other side.\r\n",
                                      vehicle->short_description);
                     }
@@ -1354,8 +1352,8 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
                             send_to_room(num, "@wThe air starts getting sucked out into space as the hatch opens!\r\n");
                         }
                     } else {
-                        act("@wYou open @c$p@w.", true, ch, obj, nullptr, TO_CHAR);
-                        act("@C$n@w opens @c$p@w.", true, ch, obj, nullptr, TO_ROOM);
+                        act("@wYou open @c$p@w.", true, ch, obj, 0, TO_CHAR);
+                        act("@C$n@w opens @c$p@w.", true, ch, obj, 0, TO_ROOM);
                         send_to_room(IN_ROOM(hatch), "@wThe door is opened from the other side.\r\n");
                     }
                     hatch = nullptr;
@@ -1386,12 +1384,12 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
                                          "@wThe air stops getting sucked out into space as the hatch seals!\r\n");
                         }
                     } else {
-                        act("@wYou close @c$p@w.", true, ch, obj, nullptr, TO_CHAR);
-                        act("@C$n@w closes @c$p@w.", true, ch, obj, nullptr, TO_ROOM);
+                        act("@wYou close @c$p@w.", true, ch, obj, 0, TO_CHAR);
+                        act("@C$n@w closes @c$p@w.", true, ch, obj, 0, TO_ROOM);
                         send_to_room(IN_ROOM(vehicle), "@wThe door to %s@w is closed from the other side.\r\n",
                                      vehicle->short_description);
                     }
-                    vehicle = nullptr;
+                    vehicle = NULL;
                 }
                 if ((obj) && GET_OBJ_TYPE(obj) == ITEM_VEHICLE && (hatch)) {
                     CLOSE_DOOR(IN_ROOM(ch), hatch, door);
@@ -1405,12 +1403,12 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
                             send_to_room(num, "@wAir stops getting sucked out into space as the hatch seals!\r\n");
                         }
                     } else {
-                        act("@wYou close @c$p@w.", true, ch, obj, nullptr, TO_CHAR);
-                        act("@C$n@w closes @c$p@w.", true, ch, obj, nullptr, TO_ROOM);
+                        act("@wYou close @c$p@w.", true, ch, obj, 0, TO_CHAR);
+                        act("@C$n@w closes @c$p@w.", true, ch, obj, 0, TO_ROOM);
                         send_to_room(IN_ROOM(hatch), "@wThe door to %s@w is closed from the other side.\r\n",
                                      hatch->short_description);
                     }
-                    hatch = nullptr;
+                    hatch = NULL;
                 }
             }
             CLOSE_DOOR(IN_ROOM(ch), obj, door);
@@ -1429,13 +1427,13 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
             if (obj) {
                 if ((obj) && GET_OBJ_TYPE(obj) == ITEM_HATCH && (vehicle)) {
                     LOCK_DOOR(IN_ROOM(ch), vehicle, door);
-                    vehicle = nullptr;
+                    vehicle = NULL;
                 }
                 if ((obj) && GET_OBJ_TYPE(obj) == ITEM_VEHICLE && (hatch)) {
                     LOCK_DOOR(IN_ROOM(ch), hatch, door);
                     char_from_room(ch);
                     char_to_room(ch, num);
-                    hatch = nullptr;
+                    hatch = NULL;
                 }
             }
             LOCK_DOOR(IN_ROOM(ch), obj, door);
@@ -1454,13 +1452,13 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
             if (obj) {
                 if ((obj) && GET_OBJ_TYPE(obj) == ITEM_HATCH && (vehicle)) {
                     UNLOCK_DOOR(IN_ROOM(ch), vehicle, door);
-                    vehicle = nullptr;
+                    vehicle = NULL;
                 }
                 if ((obj) && GET_OBJ_TYPE(obj) == ITEM_VEHICLE && (hatch)) {
                     UNLOCK_DOOR(IN_ROOM(ch), hatch, door);
                     char_from_room(ch);
                     char_to_room(ch, num);
-                    hatch = nullptr;
+                    hatch = NULL;
                 }
             }
             UNLOCK_DOOR(IN_ROOM(ch), obj, door);
@@ -1494,7 +1492,7 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
                  obj ? "" : "the ", obj ? "$p" : EXIT(ch, door)->keyword ? "$F" : "door", obj ? "" : " that leads ",
                  obj ? "" : dbuf);
     if (!obj || IN_ROOM(obj) != NOWHERE)
-        act(buf, false, ch, obj, obj ? nullptr : EXIT(ch, door)->keyword, TO_ROOM);
+        act(buf, false, ch, obj, obj ? 0 : EXIT(ch, door)->keyword, TO_ROOM);
 
     /* Notify the other room */
     if (back && (scmd == SCMD_OPEN || scmd == SCMD_CLOSE)) {
@@ -1607,6 +1605,8 @@ ACMD(do_gen_door) {
     if (!generic_find(type, FIND_OBJ_INV | FIND_OBJ_ROOM, ch, &victim, &obj))
         door = find_door(ch, type, dir, cmd_door[subcmd]);
 
+    auto r = ch->getRoom();
+
     if ((obj) &&
         (GET_OBJ_TYPE(obj) != ITEM_CONTAINER && GET_OBJ_TYPE(obj) != ITEM_VEHICLE && GET_OBJ_TYPE(obj) != ITEM_HATCH)) {
         obj = nullptr;
@@ -1619,7 +1619,7 @@ ACMD(do_gen_door) {
             if (obj) {
                 GET_OBJ_VAL(obj, VAL_DOOR_DCLOCK) = 20;
             } else {
-                EXIT(ch, door)->dclock = 20;
+                r->dir_option[door]->dclock = 20;
             }
         }
         if (!(DOOR_IS_OPENABLE(ch, obj, door)))
@@ -1820,6 +1820,7 @@ ACMD(do_enter) {
     int door, move_dir = -1;
 
     one_argument(argument, buf);
+    auto r = ch->getRoom();
 
     if (*buf) { /* an argument was supplied, search for door keyword */
         /* Is the object in the room? */
@@ -1836,9 +1837,9 @@ ACMD(do_enter) {
             /* Is there a door to enter? */
         else {
             for (door = 0; door < NUM_OF_DIRS; door++)
-                if (EXIT(ch, door))
-                    if (EXIT(ch, door)->keyword)
-                        if (isname(buf, EXIT(ch, door)->keyword))
+                if (r->dir_option[door])
+                    if (r->dir_option[door]->keyword)
+                        if (isname(buf, r->dir_option[door]->keyword))
                             move_dir = door;
             /* Did we find what they wanted to enter. */
             if (move_dir > -1)
@@ -1851,10 +1852,10 @@ ACMD(do_enter) {
     } else {
         /* try to locate an entrance */
         for (door = 0; door < NUM_OF_DIRS; door++)
-            if (EXIT(ch, door))
-                if (EXIT(ch, door)->to_room != NOWHERE)
-                    if (!EXIT_FLAGGED(EXIT(ch, door), EX_CLOSED) &&
-                        ROOM_FLAGGED(EXIT(ch, door)->to_room, ROOM_INDOORS))
+            if (r->dir_option[door])
+                if (r->dir_option[door]->to_room != NOWHERE)
+                    if (!EXIT_FLAGGED(r->dir_option[door], EX_CLOSED) &&
+                        ROOM_FLAGGED(r->dir_option[door]->to_room, ROOM_INDOORS))
                         move_dir = door;
         if (move_dir > -1)
             perform_move(ch, move_dir, 1);
@@ -2047,26 +2048,32 @@ ACMD(do_leave) {
         return;
     }
 
-    for (obj = ch->getRoom()->contents; obj; obj = obj->next_content)
+    auto r = ch->getRoom();
+
+    for (obj = r->contents; obj; obj = obj->next_content)
         if (CAN_SEE_OBJ(ch, obj))
             if (GET_OBJ_TYPE(obj) == ITEM_HATCH || GET_OBJ_TYPE(obj) == ITEM_PORTAL) {
                 perform_leave_obj(ch, obj, 0);
                 return;
             }
 
-    if (OUTSIDE(ch))
+    if (OUTSIDE(ch)) {
         send_to_char(ch, "You are outside.. where do you want to go?\r\n");
-    else {
-        for (door = 0; door < NUM_OF_DIRS; door++)
-            if (EXIT(ch, door))
-                if (EXIT(ch, door)->to_room != NOWHERE)
-                    if (!EXIT_FLAGGED(EXIT(ch, door), EX_CLOSED) &&
-                        !ROOM_FLAGGED(EXIT(ch, door)->to_room, ROOM_INDOORS)) {
-                        perform_move(ch, door, 1);
-                        return;
-                    }
-        send_to_char(ch, "I see no obvious exits to the outside.\r\n");
+        return;
     }
+
+    for (door = 0; door < NUM_OF_DIRS; door++) {
+        auto e = r->dir_option[door];
+        if(!e) continue;
+        auto dest = e->getDestination();
+        if(!dest) continue;
+        if (!EXIT_FLAGGED(e, EX_CLOSED) && !dest->room_flags.test(ROOM_INDOORS)) {
+            perform_move(ch, door, 1);
+            return;
+        }
+    }
+
+    send_to_char(ch, "I see no obvious exits to the outside.\r\n");
 }
 
 static void handle_fall(struct char_data *ch) {

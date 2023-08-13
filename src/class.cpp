@@ -696,7 +696,6 @@ void do_start(struct char_data *ch) {
     ch->restoreVitals();
 
     GET_OLC_ZONE(ch) = NOWHERE;
-    ch->save();
 }
 
 

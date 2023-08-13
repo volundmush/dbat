@@ -604,6 +604,8 @@ nlohmann::json char_data::serializeInstance() {
     if (poofout && strlen(poofout)) j["poofout"] = poofout;
     if(players.contains(last_tell)) j["last_tell"] = last_tell;
 
+    if(transclass) j["transclass"] = transclass;
+
     return j;
 }
 
@@ -792,6 +794,8 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
 
     if(j.contains("load_room")) load_room = j["load_room"];
 
+    if(j.contains("transclass")) transclass = j["transclass"];
+
 }
 
 void char_data::deserializeProto(const nlohmann::json &j) {
@@ -828,6 +832,9 @@ char_data::char_data(const nlohmann::json &j) : char_data() {
     SET_BIT_AR(act, MOB_ISNPC);
     if(MOB_FLAGGED(this, MOB_NOTDEADYET)) {
         REMOVE_BIT_AR(MOB_FLAGS(this), MOB_NOTDEADYET);
+    }
+    if(PLR_FLAGGED(this, PLR_NOTDEADYET)) {
+        REMOVE_BIT_AR(PLR_FLAGS(this), PLR_NOTDEADYET);
     }
 
     aff_abils = real_abils;

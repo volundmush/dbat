@@ -309,10 +309,7 @@ ACMD(do_say) {
                                 send_to_room(real_room(DRAGONR),
                                              "@wShenron says, '@CYour wish has been granted, %s is now faster!%s@w'@n\r\n",
                                              GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
-                                wch->real_abils.cha += 10;
-                                if (wch->real_abils.cha > 100) {
-                                    wch->real_abils.cha = 100;
-                                }
+                                wch->modSpeed(10);
                                 wch->save();
                                 granted = true;
                                 SELFISHMETER += 1;
@@ -341,11 +338,7 @@ ACMD(do_say) {
                                 send_to_room(real_room(DRAGONR),
                                              "@wShenron says, '@CYour wish has been granted, %s has more strength!%s@w'@n\r\n",
                                              GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
-                                wch->real_abils.str += 10;
-                                if (wch->real_abils.str > 100) {
-                                    wch->real_abils.str = 100;
-                                }
-                                wch->save();
+                                wch->modStrength(10);
                                 granted = true;
                                 SELFISHMETER += 1;
                                 mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a strength wish on %s.",
@@ -359,10 +352,7 @@ ACMD(do_say) {
                                 send_to_room(real_room(DRAGONR),
                                              "@wShenron says, '@CYour wish has been granted, %s is now smarter!%s@w'@n\r\n",
                                              GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
-                                wch->real_abils.intel += 10;
-                                if (wch->real_abils.intel > 100) {
-                                    wch->real_abils.intel = 100;
-                                }
+                                wch->modIntelligence(10);
                                 wch->save();
                                 granted = true;
                                 SELFISHMETER += 1;
@@ -377,10 +367,7 @@ ACMD(do_say) {
                                 send_to_room(real_room(DRAGONR),
                                              "@wShenron says, '@CYour wish has been granted, %s is now wiser!%s@w'@n\r\n",
                                              GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
-                                wch->real_abils.wis += 10;
-                                if (wch->real_abils.wis > 100) {
-                                    wch->real_abils.wis = 100;
-                                }
+                                wch->modWisdom(10);
                                 granted = true;
                                 SELFISHMETER += 1;
                                 mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a wisdom wish on %s.", GET_NAME(ch),
@@ -394,11 +381,7 @@ ACMD(do_say) {
                                 send_to_room(real_room(DRAGONR),
                                              "@wShenron says, '@CYour wish has been granted, %s is now more agile!%s@w'@n\r\n",
                                              GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
-                                wch->real_abils.dex += 10;
-                                if (wch->real_abils.dex > 100) {
-                                    wch->real_abils.dex = 100;
-                                }
-                                wch->save();
+                                wch->modAgility(10);
                                 granted = true;
                                 SELFISHMETER += 1;
                                 mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a agility wish on %s.",
@@ -412,11 +395,7 @@ ACMD(do_say) {
                                 send_to_room(real_room(DRAGONR),
                                              "@wShenron says, '@CYour wish has been granted, %s has more guts!%s@w'@n\r\n",
                                              GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
-                                wch->real_abils.con += 10;
-                                if (wch->real_abils.con > 100) {
-                                    wch->real_abils.con = 100;
-                                }
-                                wch->save();
+                                wch->modConstitution(10);
                                 granted = true;
                                 SELFISHMETER += 1;
                                 mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a constitutionwish on %s.",

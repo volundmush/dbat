@@ -1363,6 +1363,8 @@ void auc_load(struct obj_data *obj) {
     }
 }
 
+time_t old_beginning_of_time;
+
 /* reset the time in the game from file */
 static void reset_time() {
     time_t beginning_of_time = 0;
@@ -1405,39 +1407,8 @@ static void reset_time() {
 
     if (beginning_of_time == 0)
         beginning_of_time = 650336715;
+    old_beginning_of_time = beginning_of_time;
 
-    //time_info = *mud_time_passed(time(nullptr), beginning_of_time);
-
-    if (time_info.hours <= 4)
-        weather_info.sunlight = SUN_DARK;
-    else if (time_info.hours == 5)
-        weather_info.sunlight = SUN_RISE;
-    else if (time_info.hours <= 20)
-        weather_info.sunlight = SUN_LIGHT;
-    else if (time_info.hours == 21)
-        weather_info.sunlight = SUN_SET;
-    else
-        weather_info.sunlight = SUN_DARK;
-
-    basic_mud_log("   Current Gametime: %dH %dD %dM %dY.", time_info.hours,
-        time_info.day, time_info.month, time_info.year);
-
-    weather_info.pressure = 960;
-    if ((time_info.month >= 7) && (time_info.month <= 12))
-        weather_info.pressure += dice(1, 50);
-    else
-        weather_info.pressure += dice(1, 80);
-
-    weather_info.change = 0;
-
-    if (weather_info.pressure <= 980)
-        weather_info.sky = SKY_LIGHTNING;
-    else if (weather_info.pressure <= 1000)
-        weather_info.sky = SKY_RAINING;
-    else if (weather_info.pressure <= 1020)
-        weather_info.sky = SKY_CLOUDY;
-    else
-        weather_info.sky = SKY_CLOUDLESS;
 }
 
 

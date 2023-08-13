@@ -27,7 +27,7 @@
 #include "dbat/players.h"
 
 /* local vars */
-static int extractions_pending = 0;
+static std::set<struct char_data*> extractions_pending;
 
 /* external vars */
 
@@ -1087,7 +1087,7 @@ void extract_char_final(struct char_data *ch) {
     if (IN_ROOM(ch) == NOWHERE) {
         basic_mud_log("SYSERR: NOWHERE extracting char %s. (%s, extract_char_final)",
             GET_NAME(ch), __FILE__);
-        exit(1);
+        shutdown_game(1);
     }
 
     if(!IS_NPC(ch)) {
@@ -1264,6 +1264,7 @@ void extract_char_final(struct char_data *ch) {
         ch->desc->connected = CON_QUITGAME;
     }
 
+    ch->deactivate();
     if (IS_NPC(ch)) {
         auto found = uniqueCharacters.find(ch->id);
         if (found != uniqueCharacters.end()) {
@@ -1271,8 +1272,6 @@ void extract_char_final(struct char_data *ch) {
         }
         free_char(ch);
     }
-    else
-        ch->deactivate();
 }
 
 
@@ -1294,19 +1293,7 @@ void extract_char(struct char_data *ch) {
     int i;
     struct obj_data *obj;
 
-    if (IS_NPC(ch)) {
-        if (!IS_SET_AR(MOB_FLAGS(ch), MOB_NOTDEADYET))
-            SET_BIT_AR(MOB_FLAGS(ch), MOB_NOTDEADYET);
-        else
-            return;
-    } else {
-        if (!IS_SET_AR(PLR_FLAGS(ch), PLR_NOTDEADYET))
-            SET_BIT_AR(PLR_FLAGS(ch), PLR_NOTDEADYET);
-        else
-            return;
-    }
-
-    /*save_char_pets(ch);*/
+    extractions_pending.insert(ch);
 
     for (foll = ch->followers; foll; foll = foll->next) {
         if (IS_NPC(foll->follower) && AFF_FLAGGED(foll->follower, AFF_CHARM) &&
@@ -1328,8 +1315,6 @@ void extract_char(struct char_data *ch) {
             extract_char(foll->follower);
         }
     }
-
-    extractions_pending++;
 }
 
 
@@ -1344,39 +1329,12 @@ void extract_char(struct char_data *ch) {
  * NOTE: This doesn't handle recursive extractions.
  */
 void extract_pending_chars(uint64_t heartBeat, double deltaTime) {
-    struct char_data *vict, *next_vict, *prev_vict, *temp;
+    auto pending = extractions_pending;
 
-    if (extractions_pending < 0)
-        basic_mud_log("SYSERR: Negative (%d) extractions pending.", extractions_pending);
-
-    for (vict = character_list, prev_vict = nullptr; vict && extractions_pending; vict = next_vict) {
-        next_vict = vict->next;
-
-        if (MOB_FLAGGED(vict, MOB_NOTDEADYET))
-            REMOVE_BIT_AR(MOB_FLAGS(vict), MOB_NOTDEADYET);
-        else if (PLR_FLAGGED(vict, PLR_NOTDEADYET))
-            REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_NOTDEADYET);
-        else {
-            /* Last non-free'd character to continue chain from. */
-            prev_vict = vict;
-            continue;
-        }
-
-        REMOVE_FROM_LIST(vict, affect_list, next_affect, temp);
-        REMOVE_FROM_LIST(vict, affectv_list, next_affectv, temp);
-        extract_char_final(vict);
-        extractions_pending--;
-
-        if (prev_vict)
-            prev_vict->next = next_vict;
-        else
-            character_list = next_vict;
+    for(auto ch : pending) {
+        extractions_pending.erase(ch);
+        extract_char_final(ch);
     }
-
-    if (extractions_pending > 0)
-        basic_mud_log("SYSERR: Couldn't find %d extractions as counted.", extractions_pending);
-
-    extractions_pending = 0;
 }
 
 

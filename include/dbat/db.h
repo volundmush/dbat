@@ -139,6 +139,8 @@ extern room_rnum r_mortal_start_room;    /* rnum of mortal start room	 */
 extern room_rnum r_immort_start_room;    /* rnum of immort start room	 */
 extern room_rnum r_frozen_start_room;    /* rnum of frozen start room	 */
 
+extern time_t old_beginning_of_time;
+
 /* public procedures in db.c */
 extern void auc_load(struct obj_data *obj);
 

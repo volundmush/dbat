@@ -25,12 +25,8 @@ namespace net {
                 break;
 
             case 1:
-                if(!ch->desc && conn->account->descriptors.size() > 1 && conn->account->adminLevel < 1) {
+                if(!ch->desc && !conn->account->descriptors.empty() && conn->account->adminLevel < 1) {
                     sendText("You have reached the maximum number of active characters.\r\n");
-                    return;
-                }
-                if (lockRead(GET_NAME(ch)) && conn->account->adminLevel <= 0) {
-                    sendText("That character has been locked out for rule violations. Play another character.\n");
                     return;
                 }
                 conn->setParser(new PuppetParser(conn, ch));

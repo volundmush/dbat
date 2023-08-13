@@ -494,6 +494,18 @@ struct skill_data {
     void deserialize(const nlohmann::json& j);
 };
 
+struct trans_data {
+    trans_data() = default;
+    explicit trans_data(const nlohmann::json& j);
+
+    double timeSpentInForm{0.0};
+    std::map<int, int> overrideAppearance{};
+
+    nlohmann::json serialize();
+    void deserialize(const nlohmann::json& j);
+};
+
+
 /* ================== Structure for player/non-player ===================== */
 struct char_data : public unit_data {
     char_data() = default;
@@ -570,6 +582,9 @@ struct char_data : public unit_data {
     int64_t basepl{};
     int64_t baseki{};
     int64_t basest{};
+
+    std::array<int, 3> transformations{};
+    std::map<int, trans_data> transInfo{};
 
     // Instance-relevant fields below...
     room_vnum in_room{NOWHERE};        /* Location (real room number)		*/
@@ -801,6 +816,24 @@ struct char_data : public unit_data {
     int getWisdom(bool base = false);
     int getAgility(bool base = false);
     int getSpeed(bool base = false);
+
+    int setStrength(int val);
+    int modStrength(int val);
+
+    int setIntelligence(int val);
+    int modIntelligence(int val);
+
+    int setConstitution(int val);
+    int modConstitution(int val);
+
+    int setWisdom(int val);
+    int modWisdom(int val);
+
+    int setAgility(int val);
+    int modAgility(int val);
+
+    int setSpeed(int val);
+    int modSpeed(int val);
 
     // C++ reworking
     const std::string &juggleRaceName(bool capitalized);

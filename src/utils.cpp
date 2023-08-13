@@ -3913,3 +3913,18 @@ bool ROOM_FLAGGED(room_vnum loc, int flag) {
     }
     return false;
 }
+
+bool PLANET_FLAGGED(struct char_data *ch, int flag) {
+    auto planet = ch->getMatchingArea(area_data::isPlanet);
+    if(!planet) return false;
+    auto &a = areas[*planet];
+    return a.flags.test(flag);
+}
+
+bool ETHER_STREAM(struct char_data *ch) {
+    return PLANET_FLAGGED(ch, AREA_ETHER);
+}
+
+bool HAS_MOON(struct char_data *ch) {
+    return PLANET_FLAGGED(ch, AREA_MOON);
+}
