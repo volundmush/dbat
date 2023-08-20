@@ -763,7 +763,6 @@ static void update_flags(struct char_data *ch) {
         act("$n@W's looks more fit now.", true, ch, nullptr, nullptr, TO_ROOM);
         ch->real_abils.str += 3;
         ch->real_abils.cha += 3;
-        ch->save();
         REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_WITHER);
     }
     if (wearing_stardust(ch) == 1) {
@@ -773,43 +772,6 @@ static void update_flags(struct char_data *ch) {
 
 }
 
-/* ki gain pr. game hour */
-static int ki_gain(struct char_data *ch) {
-    int gain = 0;
-
-    if (IS_NPC(ch)) {
-        /* Neat and fast */
-        gain = GET_LEVEL(ch);
-    } else {
-        gain = GET_MAX_MANA(ch) / 12;
-
-        /* Class calculations */
-
-        /* Skill/Spell calculations */
-
-        /* Position calculations    */
-        switch (GET_POS(ch)) {
-            case POS_SLEEPING:
-                gain *= 2;
-                break;
-            case POS_RESTING:
-                gain += (gain / 2);       /* Divide by 2 */
-                break;
-            case POS_SITTING:
-                gain += (gain / 4);       /* Divide by 4 */
-                break;
-        }
-    }
-
-    if (AFF_FLAGGED(ch, AFF_POISON))
-        gain /= 4;
-
-    if (GET_REGEN(ch) > 0) {
-        gain += (gain * 0.01) * GET_REGEN(ch);
-    }
-
-    return (gain);
-}
 
 void set_title(struct char_data *ch, char *title) {
     if (ch) {
@@ -1270,89 +1232,20 @@ static void check_idling(struct char_data *ch) {
     if (!dball_count(ch).empty()) {
         return;
     }
-    if (++(ch->timer) > CONFIG_IDLE_VOID) {
+    if (++(ch->timer) > CONFIG_IDLE_VOID && IN_ROOM(ch) != 1) {
         if (GET_WAS_IN(ch) == NOWHERE && IN_ROOM(ch) != NOWHERE) {
             GET_WAS_IN(ch) = IN_ROOM(ch);
             if (FIGHTING(ch)) {
                 stop_fighting(FIGHTING(ch));
                 stop_fighting(ch);
             }
-            if (IN_ROOM(ch) == 0 || IN_ROOM(ch) == 1) {
-                GET_LOADROOM(ch) = GET_LOADROOM(ch);
-            }
-            if (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_PAST) &&
-                (GET_ROOM_VNUM(IN_ROOM(ch)) < 19800 || GET_ROOM_VNUM(IN_ROOM(ch)) > 19899)) {
-                GET_LOADROOM(ch) = GET_ROOM_VNUM(IN_ROOM(ch));
-            }
-            if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PAST)) {
-                GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(1561));
-            }
-            if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 2002 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 2011) {
-                GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(1960));
-            }
-            if (GET_ROOM_VNUM(IN_ROOM(ch)) == 2069) {
-                GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(2017));
-            }
-            if (GET_ROOM_VNUM(IN_ROOM(ch)) == 2070) {
-                GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(2046));
-            }
-            if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 101 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 139) {
-                if (GET_LEVEL(ch) == 1) {
-                    GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(100));
-                    GET_EXP(ch) = 0;
-                } else {
-                    if (IS_ROSHI(ch)) {
-                        GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(1130));
-                    }
-                    if (IS_KABITO(ch)) {
-                        GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(12098));
-                    }
-                    if (IS_NAIL(ch)) {
-                        GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(11683));
-                    }
-                    if (IS_BARDOCK(ch)) {
-                        GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(2268));
-                    }
-                    if (IS_KRANE(ch)) {
-                        GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(13009));
-                    }
-                    if (IS_TAPION(ch)) {
-                        GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(8231));
-                    }
-                    if (IS_PICCOLO(ch)) {
-                        GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(1659));
-                    }
-                    if (IS_ANDSIX(ch)) {
-                        GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(1713));
-                    }
-                    if (IS_DABURA(ch)) {
-                        GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(6486));
-                    }
-                    if (IS_FRIEZA(ch)) {
-                        GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(4282));
-                    }
-                    if (IS_GINYU(ch)) {
-                        GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(4289));
-                    }
-                }
-            }
+
             act("$n disappears into the void.", true, ch, nullptr, nullptr, TO_ROOM);
             send_to_char(ch, "You have been idle, and are pulled into a void.\r\n");
-            ch->save();
             char_from_room(ch);
             char_to_room(ch, 1);
-        } else if (ch->timer > CONFIG_IDLE_RENT_TIME) {
-            if (IN_ROOM(ch) != NOWHERE) {
-                char_from_room(ch);
-                char_to_room(ch, 3);
-            }
-            if (ch->desc) {
-                send_to_char(ch, "You are idle and are extracted safely from the game.\r\n");
-                /*
-                 * For the 'if (d->character)' test in close().
-                 * -gg 3/1/98 (Happy anniversary.)
-                 */
-            }
+        } else if (ch->timer > CONFIG_IDLE_RENT_TIME && IN_ROOM(ch) == 1) {
+            send_to_char(ch, "You are idle and are extracted safely from the game.\r\n");
             mudlog(CMP, ADMLVL_GOD, true, "%s force-rented and extracted (idle).", GET_NAME(ch));
             extract_char(ch);
         }

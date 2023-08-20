@@ -1243,3 +1243,59 @@ double char_data::getBurdenRatio() {
     if(max == 0) return 0;
     return total / max;
 }
+
+room_vnum char_data::normalizeLoadRoom(room_vnum in) {
+    // If they were in the void, then we need to use their last good room.
+    room_vnum room = NOWHERE;
+    room_vnum lroom = NOWHERE;
+    // Handle the void issue...
+    if (in == 0 || in == 1) {
+        room = GET_WAS_IN(this);
+    } else {
+        room = in;
+    }
+
+    // Personal Pocket Dimensions
+    //if (room >= 19800 && room <= 19899) {
+        //lroom = room;
+    //}
+        // those stuck in the pendulum room past get returned to Kami's Lookout.
+    if (ROOM_FLAGGED(room, ROOM_PAST)) {
+        lroom = 1561;
+    }
+        // the WMAT arena also is not a good place to log off.
+    else if (room >= 2002 && room <= 2011) {
+        lroom = 1960;
+    }
+        // The two Minecarts are possible trap zones.
+    else if (room == 2069) {
+        lroom = 2017;
+    }
+    else if (room == 2070) {
+        lroom = 2046;
+    }
+        // The higher plane is a problem...
+    else if(room == 6030) {
+        // Stick them on the side of King Yemma's, in case they're broke/weak.
+        lroom = 6029;
+    }
+        // This is the MUD School. If they're not done then put them
+        // back at the start. Otherwise, send them to their Sensei.
+    else if (room >= 101 && room <= 139) {
+        if (GET_LEVEL(this) == 1) {
+            lroom = 100;
+            GET_EXP(this) = 0;
+        } else {
+            lroom = chclass->senseiStartRoom();
+        }
+    }
+    else {
+        // looks like room might be okay.
+        lroom = room;
+    }
+
+    // if lroom is valid, save it... else... emergency fallback to mud school.
+    if(world.contains(lroom)) return lroom;
+    return CONFIG_MORTAL_START;
+
+}

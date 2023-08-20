@@ -1126,9 +1126,11 @@ bool char_data::isActive() {
 
 nlohmann::json char_data::serializeLocation() {
     auto j = nlohmann::json::object();
-    j["in_room"] = in_room;
-    if(!IS_NPC(this)) {
-        if(was_in_room != NOWHERE) j["was_in_room"] = was_in_room;
+
+    if(IS_NPC(this)) {
+        j["in_room"] = in_room;
+    } else {
+        j["load_room"] = normalizeLoadRoom(in_room);
     }
 
     return j;
@@ -1143,17 +1145,9 @@ nlohmann::json char_data::serializeRelations() {
 void char_data::deserializeLocation(const nlohmann::json &j) {
     if(j.contains("in_room")) {
         auto vn = j["in_room"].get<room_vnum>();
-        if (IS_NPC(this)) {
-            if (world.contains(vn)) {
-                char_to_room(this, vn);
-            } else {
-                // TODO: log error and send object to some failsafe location?
-            }
-        } else {
-            if(world.contains(vn)) {
-                load_room = vn;
-            }
-        }
+        char_to_room(this, vn);
+    } else if(j.contains("load_room")) {
+        load_room = j["load_room"].get<room_vnum>();
     }
 }
 
@@ -1162,9 +1156,7 @@ void char_data::deserializeRelations(const nlohmann::json &j) {
 }
 
 void char_data::save() {
-    if(id == NOTHING) return;
-    // dirty_characters.insert(id);
-    if(!IS_NPC(this)) dirty_players.insert(id);
+
 }
 
 bool char_data::isProvidingLight() {

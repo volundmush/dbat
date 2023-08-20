@@ -809,6 +809,8 @@ struct char_data : public unit_data {
     room_vnum load_room{NOWHERE};        /* Which room to place char in		*/
     bitvector_t pref[PR_ARRAY_MAX]{};    /* preference flags for PC's.		*/
 
+    room_vnum normalizeLoadRoom(room_vnum in);
+
     int getAffectModifier(int location, int specific = -1);
     int getStrength(bool base = false);
     int getIntelligence(bool base = false);

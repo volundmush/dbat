@@ -2678,6 +2678,7 @@ void enter_player_game(struct descriptor_data *d) {
     IDXTYPE load_room;
     struct char_data *check;
 
+    d->character->timer = 0;
     reset_char(d->character);
     if(!d->character->script) d->character->script = new script_data(d->character);
 

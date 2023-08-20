@@ -1076,6 +1076,8 @@ void update_char_objects(struct char_data *ch) {
         update_object(ch->contents, 1);
 }
 
+
+
 /* Extract a ch completely from the world, and leave his stuff behind */
 void extract_char_final(struct char_data *ch) {
     struct char_data *k, *temp;
@@ -1091,8 +1093,9 @@ void extract_char_final(struct char_data *ch) {
     }
 
     if(!IS_NPC(ch)) {
-        if(ch->was_in_room != NOWHERE) ch->load_room = ch->was_in_room;
-        else ch->load_room = ch->in_room;
+        // PCs have a very complicated set of places they're not allowed to log off from.
+        // If they do, somehow, then this function will ensure they show up somewhere sane.
+        ch->load_room = ch->normalizeLoadRoom(IN_ROOM(ch));
     }
 
     /*
@@ -1289,26 +1292,27 @@ void extract_char_final(struct char_data *ch) {
  *    get really confused otherwise.
  */
 void extract_char(struct char_data *ch) {
-    struct follow_type *foll;
-    int i;
-    struct obj_data *obj;
+    if(!ch->active) {
+        logger->warn("Attempt to extract an inactive character.");
+        return;
+    }
 
     extractions_pending.insert(ch);
 
-    for (foll = ch->followers; foll; foll = foll->next) {
+    for (auto foll = ch->followers; foll; foll = foll->next) {
         if (IS_NPC(foll->follower) && AFF_FLAGGED(foll->follower, AFF_CHARM) &&
             (IN_ROOM(foll->follower) == IN_ROOM(ch) || IN_ROOM(ch) == 1)) {
             /* transfer objects to char, if any */
             while (foll->follower->contents) {
-                obj = foll->follower->contents;
+                auto obj = foll->follower->contents;
                 obj_from_char(obj);
                 obj_to_char(obj, ch);
             }
 
             /* transfer equipment to char, if any */
-            for (i = 0; i < NUM_WEARS; i++)
+            for (auto i = 0; i < NUM_WEARS; i++)
                 if (GET_EQ(foll->follower, i)) {
-                    obj = unequip_char(foll->follower, i);
+                    auto obj = unequip_char(foll->follower, i);
                     obj_to_char(obj, ch);
                 }
 

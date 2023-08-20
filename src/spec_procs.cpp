@@ -1203,7 +1203,6 @@ SPECIAL(augmenter) {
                     nullptr, nullptr, TO_ROOM);
                 ch->real_abils.str += 1;
                 GET_GOLD(ch) -= strcost;
-                ch->save();
             }
         } else if (!strcasecmp("intelligence", arg) || !strcasecmp("int", arg)) {
             if (intel >= 100)
@@ -1217,7 +1216,6 @@ SPECIAL(augmenter) {
                     nullptr, nullptr, TO_ROOM);
                 ch->real_abils.intel += 1;
                 GET_GOLD(ch) -= intcost;
-                ch->save();
             }
         } else if (!strcasecmp("constitution", arg) || !strcasecmp("con", arg)) {
             if (consti >= 100)
@@ -1231,7 +1229,6 @@ SPECIAL(augmenter) {
                     nullptr, nullptr, TO_ROOM);
                 ch->real_abils.con += 1;
                 GET_GOLD(ch) -= concost;
-                ch->save();
             }
         } else if (!strcasecmp("speed", arg) || !strcasecmp("spe", arg)) {
             if (speed >= 100)

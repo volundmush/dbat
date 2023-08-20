@@ -390,7 +390,6 @@ static void phase_powerup(struct char_data *ch, int type, int phase) {
 
         GET_PHASE(ch) = phase;
     }
-    ch->save();
 }
 
 static void secondChanged() {
