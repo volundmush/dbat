@@ -13,6 +13,7 @@
 #include "dbat/comm.h"
 #include "dbat/spells.h"
 #include "dbat/interpreter.h"
+#include "dbat/commands.h"
 #include "dbat/db.h"
 #include "dbat/config.h"
 #include "dbat/act.wizard.h"

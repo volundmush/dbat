@@ -22,14 +22,13 @@
 #include "dbat/utils.h"
 #include "dbat/comm.h"
 #include "dbat/spells.h"
-#include "dbat/interpreter.h"
+#include "dbat/commands.h"
 #include "dbat/constants.h"
 #include "dbat/handler.h"
 #include "dbat/feats.h"
 #include "dbat/oasis.h"
 #include "dbat/act.wizard.h"
 #include "dbat/dg_comm.h"
-#include "dbat/config.h"
 #include "dbat/act.other.h"
 
 /* Names first */
