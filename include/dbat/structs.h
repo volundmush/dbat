@@ -135,6 +135,7 @@ struct room_ref {
 };
 
 struct unit_data {
+    virtual ~unit_data() = default;
     vnum vn{NOTHING}; /* Where in database */
     zone_vnum zone{NOTHING};
     char *name{};
@@ -307,7 +308,7 @@ struct room_direction_data {
 /* ================== Memory Structure for room ======================= */
 struct room_data : public unit_data {
     room_data() = default;
-    ~room_data();
+    ~room_data() override;
     explicit room_data(const nlohmann::json &j);
     int sector_type{};            /* sector type (move/hide)            */
     std::array<room_direction_data*, NUM_OF_DIRS> dir_option{}; /* Directions */

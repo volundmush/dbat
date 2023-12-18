@@ -23,7 +23,7 @@ extern int in_save_list(zone_vnum, int type);
 
 extern void strip_cr(char *);
 
-extern int save_all();
+extern void save_all();
 
 extern char *str_udup(const char *);
 

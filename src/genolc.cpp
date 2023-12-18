@@ -52,7 +52,7 @@ char *str_udup(const char *txt) {
 }
 
 /* Original use: to be called at shutdown time.  */
-int save_all() {
+void save_all() {
     saveAll = true;
 }
 

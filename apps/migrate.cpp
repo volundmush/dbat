@@ -1425,8 +1425,7 @@ void migrate_characters() {
 
     for(auto &[cname, accID] : characterToAccount) {
         auto ch = new char_data();
-        auto result = load_char(cname.c_str(), ch);
-        if(result < 0) {
+        if(load_char(cname.c_str(), ch) < 0) {
             basic_mud_log("Error loading %s for account migration.", cname.c_str());
             delete ch;
             continue;
@@ -1440,6 +1439,7 @@ void migrate_characters() {
         auto &a = accounts[accID];
         p.account = &a;
         a.characters.emplace_back(id);
+        ch->in_room = ch->load_room;
         uniqueCharacters[id] = std::make_pair(ch->generation, ch);
     }
 
