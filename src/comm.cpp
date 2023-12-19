@@ -153,7 +153,7 @@ void copyover_recover_final() {
             con->setParser(new net::PuppetParser(con, c));
         }
 
-        write_to_output(d, "@rThe world comes back into focus... has something changed?@n\n\r");
+        write_to_output(d, "@rThe world comes back into focus... has something changed?@n\r\n");
 
         if (AFF_FLAGGED(d->character, AFF_HAYASA)) {
             GET_SPEEDBOOST(d->character) = GET_SPEEDCALC(d->character) * 0.5;
@@ -174,7 +174,7 @@ void copyover_recover() {
     std::ifstream fp(COPYOVER_FILE);
 
     if(!fp.is_open()) {
-        basic_mud_log("Copyover file not found. Exiting.\n\r");
+        basic_mud_log("Copyover file not found. Exiting.\r\n");
         shutdown_game(1);
     }
 
@@ -220,7 +220,7 @@ static boost::asio::awaitable<void> performReboot(int mode) {
     std::ofstream fp(COPYOVER_FILE);
 
     if (!fp.is_open()) {
-        send_to_imm("Copyover file not writeable, aborted.\n\r");
+        send_to_imm("Copyover file not writeable, aborted.\r\n");
         circle_reboot = 0;
         co_return;
     }
@@ -233,7 +233,7 @@ static boost::asio::awaitable<void> performReboot(int mode) {
     /* For each playing descriptor, save its state */
     for (auto &[cid, conn] : net::connections) {
         if(conn->desc) continue;
-        conn->sendText("\n\rSorry, we are rebooting. Please wait warmly for a few seconds.\n\r");
+        conn->sendText("\r\nSorry, we are rebooting. Please wait warmly for a few seconds.\r\n");
     }
 
     // wait 200 milliseconds... that should be enough time to push out all of the data.
@@ -740,7 +740,18 @@ void init_game() {
         });
     }
     logger->info("Main thread entering executor...");
-    net::io->run();
+    try {
+        net::io->run();
+    }
+    catch (const std::exception& e) {
+        logger->critical("Exception in main thread: {}", e.what());
+        shutdown_game(EXIT_FAILURE);
+    }
+    catch (...) {
+        logger->critical("Unknown exception in main thread.");
+        shutdown_game(EXIT_FAILURE);
+    }
+
     logger->info("Executor has shut down. Running cleanup.");
 
     if(threadCount) {

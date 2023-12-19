@@ -135,6 +135,7 @@ struct room_ref {
 };
 
 struct unit_data {
+    unit_data() = default;
     virtual ~unit_data() = default;
     vnum vn{NOTHING}; /* Where in database */
     zone_vnum zone{NOTHING};
@@ -360,7 +361,7 @@ typedef struct memory_rec_struct memory_rec;
 /* and return information about time (real or mudwise).            */
 struct time_info_data {
     time_info_data() = default;
-    time_info_data(int64_t timestamp);
+    explicit time_info_data(int64_t timestamp);
     double remainder{};
     int seconds{}, minutes{}, hours{}, day{}, month{};
     int64_t year{};

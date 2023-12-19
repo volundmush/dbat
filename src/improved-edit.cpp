@@ -560,7 +560,7 @@ int format_text(char **ptr_string, int mode, struct descriptor_data *d, unsigned
     }
 
     while (*flow && i < high) {
-        while (*flow && strchr("\n\r\f\t\v ", *flow)) {
+        while (*flow && strchr("\r\n\f\t\v ", *flow)) {
             if (*flow == '\n' && !pass_line)
                 if (i++ >= high) {
                     pass_line = 1;
@@ -571,7 +571,7 @@ int format_text(char **ptr_string, int mode, struct descriptor_data *d, unsigned
 
         if (*flow) {
             start = flow;
-            while (*flow && !strchr("\n\r\f\t\v .?!", *flow)) {
+            while (*flow && !strchr("\r\n\f\t\v .?!", *flow)) {
                 if (*flow == '@') {
                     if (*(flow + 1) == '@')
                         color_chars++;
@@ -606,13 +606,13 @@ int format_text(char **ptr_string, int mode, struct descriptor_data *d, unsigned
              * Welcor 04/04
              */
 
-            if (strchr("\n\r", *flow)) {
+            if (strchr("\r\n", *flow)) {
                 *flow = '\0';  /* terminate 'start' string */
                 flow++;        /* we know this is safe     */
                 if (*flow == '\n' && i++ >= high)
                     pass_line = 1;
 
-                while (*flow && strchr("\n\r", *flow) && !pass_line) {
+                while (*flow && strchr("\r\n", *flow) && !pass_line) {
                     flow++;      /* skip to next non-delimiter */
                     if (*flow == '\n' && i++ >= high)
                         pass_line = 1;

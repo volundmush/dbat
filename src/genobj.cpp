@@ -444,7 +444,6 @@ void obj_data::activate() {
 
     if(obj_proto.contains(vn)) {
         insert_vnum(objectVnumIndex, this);
-        assign_triggers(this, OBJ_TRIGGER);
     }
 
     if(contents) activateContents();

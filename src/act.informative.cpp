@@ -7383,15 +7383,15 @@ ACMD(do_scan) {
             "Inside", "Outside"};
 
     if (GET_POS(ch) < POS_SLEEPING) {
-        send_to_char(ch, "You can't see anything but stars!\n\r");
+        send_to_char(ch, "You can't see anything but stars!\r\n");
         return;
     }
     if (!AWAKE(ch)) {
-        send_to_char(ch, "You must be dreaming.\n\r");
+        send_to_char(ch, "You must be dreaming.\r\n");
         return;
     }
     if (AFF_FLAGGED(ch, AFF_BLIND)) {
-        send_to_char(ch, "You can't see a damn thing, you're blind!\n\r");
+        send_to_char(ch, "You can't see a damn thing, you're blind!\r\n");
         return;
     }
     if (PLR_FLAGGED(ch, PLR_EYEC)) {
@@ -7413,7 +7413,7 @@ ACMD(do_scan) {
 
         if (darkHere && (GET_ADMLEVEL(ch) < ADMLVL_IMMORT) &&
             (!AFF_FLAGGED(ch, AFF_INFRAVISION))) {
-            send_to_char(ch, "%s: DARK\n\r", dirnames[i]);
+            send_to_char(ch, "%s: DARK\r\n", dirnames[i]);
             continue;
         }
 
@@ -7422,7 +7422,7 @@ ACMD(do_scan) {
         if(IS_SET(d->exit_info, EX_CLOSED)) continue;
 
         send_to_char(ch, "@w-----------------------------------------@n\r\n");
-        send_to_char(ch, "          %s%s: %s %s\n\r", CCCYN(ch, C_NRM), dirnames[i],
+        send_to_char(ch, "          %s%s: %s %s\r\n", CCCYN(ch, C_NRM), dirnames[i],
                      dest->name ? dest->name : "You don't think you saw what you just saw.",
                      CCNRM(ch, C_NRM));
         send_to_char(ch, "@W          -----------------          @n\r\n");
@@ -7445,7 +7445,7 @@ ACMD(do_scan) {
 
         if (!IS_DARK(dest2->vn)) {
             send_to_char(ch, "@w-----------------------------------------@n\r\n");
-            send_to_char(ch, "          %sFar %s: %s %s\n\r", CCCYN(ch, C_NRM), dirnames[i],
+            send_to_char(ch, "          %sFar %s: %s %s\r\n", CCCYN(ch, C_NRM), dirnames[i],
                          dest2->name ? dest2->name
                                              : "You don't think you saw what you just saw.",
                          CCNRM(ch, C_NRM));

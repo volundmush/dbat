@@ -204,7 +204,9 @@ struct trig_data {
 /* a complete script (composed of several triggers) */
 struct script_data {
     script_data() = default;
-    explicit script_data(DgUID uid) : owner(uid) {};
+    explicit script_data(DgUID uid) : script_data() {
+        owner = uid;
+    };
     long types{};                /* bitvector of trigger types */
     struct trig_data *trig_list{};            /* list of triggers           */
     struct trig_var_data *global_vars{};    /* list of global variables   */

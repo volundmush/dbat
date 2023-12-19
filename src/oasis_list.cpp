@@ -128,7 +128,7 @@ ACMD(do_oasis_links) {
 
     auto z = zone_table.find(zvnum);
     if (z == zone_table.end()) {
-        send_to_char(ch, "No zone was found with that number.\n\r");
+        send_to_char(ch, "No zone was found with that number.\r\n");
         return;
     }
 

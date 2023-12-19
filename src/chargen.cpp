@@ -2208,7 +2208,7 @@ namespace net {
                         }
                         break;
                     default:
-                        chosen_sensei = sensei::find_sensei(arg);
+                        chosen_sensei = sensei::find_sensei_map(arg, valid_classes());
                         if (!chosen_sensei) {
                             sendText("\r\nThat's not a sensei.\r\nSensei: ");
                             return;

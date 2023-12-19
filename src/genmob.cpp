@@ -990,7 +990,6 @@ void char_data::activate() {
 
     if(mob_proto.contains(vn)) {
         insert_vnum(characterVnumIndex, this);
-        assign_triggers(this, MOB_TRIGGER);
     }
 
     if(contents) activateContents();

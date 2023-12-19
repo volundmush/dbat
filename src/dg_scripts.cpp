@@ -892,34 +892,43 @@ int64_t nextTrigID() {
  * add to the end, loc = 0 means add before all other triggers.
  */
 void add_trigger(struct script_data *sc, trig_data *t, int loc) {
-    trig_data *i;
-    int n;
 
-    for (n = loc, i = TRIGGERS(sc); i && i->next && (n != 0); n--, i = i->next);
+    // Gather up all existing triggers from the manual linked list...
+    std::list<trig_data*> triggers;
+    for(auto t2 = TRIGGERS(sc); t2; t2 = t2->next) {
+        triggers.push_back(t2);
+    }
 
-    if (!loc) {
-        t->next = TRIGGERS(sc);
-        TRIGGERS(sc) = t;
-    } else if (!i)
-        TRIGGERS(sc) = t;
-    else {
-        t->next = i->next;
-        i->next = t;
+    // Now insert t in the right spot...
+    if(loc == -1) {
+        triggers.push_back(t);
+    } else if(loc == 0) {
+        triggers.push_front(t);
+    } else {
+        auto it = triggers.begin();
+        std::advance(it, loc);
+        triggers.insert(it, t);
+    }
+
+    sc->trig_list = nullptr;
+    // Reverse iterate through triggers to rebuild sc->trig_list...
+    for(auto it = triggers.rbegin(); it != triggers.rend(); it++) {
+        auto t2 = *it;
+        t2->next = sc->trig_list;
+        sc->trig_list = t2;
     }
 
     SCRIPT_TYPES(sc) |= GET_TRIG_TYPE(t);
     t->activate();
-
     t->owner = sc->owner;
-
     t->id = nextTrigID();
     t->generation = time(nullptr);
 
     uniqueScripts[t->id] = std::make_pair(t->generation, t);
 
     int order = 0;
-    for(auto t = TRIGGERS(sc); t; t = t->next) {
-        t->order = order++;
+    for(auto t2 = TRIGGERS(sc); t2; t2 = t2->next) {
+        t2->order = order++;
     }
 
 }

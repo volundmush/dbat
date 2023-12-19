@@ -114,7 +114,7 @@ void sub_write_to_char(struct char_data *ch, char *tokens[],
     }
 
     strcat(sb, tokens[i]);
-    strcat(sb, "\n\r");
+    strcat(sb, "\r\n");
     sb[0] = toupper(sb[0]);
     send_to_char(ch, "%s", sb);
 }

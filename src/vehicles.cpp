@@ -398,7 +398,7 @@ static void drive_into_vehicle(struct char_data *ch, struct obj_data *vehicle, c
         return;
     }
 
-    sprintf(buf, "%s @wenters %s.\n\r", vehicle->short_description,
+    sprintf(buf, "%s @wenters %s.\r\n", vehicle->short_description,
             vehicle_in_out->short_description);
     send_to_room(IN_ROOM(vehicle), buf);
 
@@ -494,7 +494,7 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
 
     int was_in, is_in;
 
-    sprintf(buf, "%s @wflies %s.\n\r", vehicle->short_description, dirs[dir]);
+    sprintf(buf, "%s @wflies %s.\r\n", vehicle->short_description, dirs[dir]);
     send_to_room(IN_ROOM(vehicle), buf);
 
     obj_from_room(vehicle);

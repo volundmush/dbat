@@ -4200,10 +4200,10 @@ ACMD(do_set) {
 
 ACMD(do_saveall) {
     if (GET_ADMLEVEL(ch) < ADMLVL_BUILDER)
-        send_to_char(ch, "You are not holy enough to use this privelege.\n\r");
+        send_to_char(ch, "You are not holy enough to use this privelege.\r\n");
     else {
         save_all();
-        send_to_char(ch, "World and house files saved.\n\r");
+        send_to_char(ch, "World and house files saved.\r\n");
     }
 }
 
@@ -4231,7 +4231,7 @@ ACMD(do_peace) {
 
 ACMD(do_wizupdate) {
     run_autowiz();
-    send_to_char(ch, "Wizlists updated.\n\r");
+    send_to_char(ch, "Wizlists updated.\r\n");
 }
 
 ACMD(do_raise) {

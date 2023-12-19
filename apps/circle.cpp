@@ -171,7 +171,14 @@ int main(int argc, char **argv)
         boot_world();
     else {
         basic_mud_log("Running game.");
-        init_game();
+        try {
+            init_game();
+        }
+        catch(std::exception& e) {
+            std::cerr << "Uncaught exception: " << e.what() << std::endl;
+            exit(1);
+        }
+
     }
 
     basic_mud_log("Clearing game world.");

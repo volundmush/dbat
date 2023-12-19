@@ -2771,7 +2771,7 @@ static void load_zones(FILE *fl, char *zonename) {
         zc.command = buf[0];
 
         if(zc.command == 'V') { /* a string-arg command */
-            if (sscanf(&buf[1], " %d %d %d %d %d %d %79s %79[^\f\n\r\t\v]", &tmp,&zc.arg1, &zc.arg2, &zc.arg3,
+            if (sscanf(&buf[1], " %d %d %d %d %d %d %79s %79[^\f\r\n\t\v]", &tmp,&zc.arg1, &zc.arg2, &zc.arg3,
                        &zc.arg4, &zc.arg5, t1, t2) != 8)
                 error = 1;
             else {

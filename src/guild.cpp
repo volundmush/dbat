@@ -1458,7 +1458,7 @@ void show_guild(struct char_data *ch, char *arg) {
 
         auto g = guild_index.find(gm_num);
         if(g == guild_index.end()) {
-            send_to_char(ch, "Illegal guild master number.\n\r");
+            send_to_char(ch, "Illegal guild master number.\r\n");
             return;
         }
         list_detailed_guild(ch, g->first);

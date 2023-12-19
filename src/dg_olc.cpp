@@ -419,14 +419,14 @@ void trigedit_save(struct descriptor_data *d) {
 
         CREATE(trig->cmdlist, struct cmdlist_element, 1);
         if (s) {
-            char *t = strtok(s, "\n\r"); /* strtok returns nullptr if s is "\r\n" */
+            char *t = strtok(s, "\r\n"); /* strtok returns nullptr if s is "\r\n" */
             if (t)
                 trig->cmdlist->cmd = strdup(t);
             else
                 trig->cmdlist->cmd = strdup("* No script");
 
             cmd = trig->cmdlist;
-            while ((s = strtok(nullptr, "\n\r"))) {
+            while ((s = strtok(nullptr, "\r\n"))) {
                 CREATE(cmd->next, struct cmdlist_element, 1);
                 cmd = cmd->next;
                 cmd->cmd = strdup(s);
@@ -645,7 +645,7 @@ int format_script(struct descriptor_data *d) {
         return false;
 
     sc = strdup(*d->str); /* we work on a copy, because of strtok() */
-    t = strtok(sc, "\n\r");
+    t = strtok(sc, "\r\n");
     *nsc = '\0';
 
     while (t) {
@@ -712,7 +712,7 @@ int format_script(struct descriptor_data *d) {
             indent++;
             indent_next = false;
         }
-        t = strtok(nullptr, "\n\r");
+        t = strtok(nullptr, "\r\n");
     }
 
     if (indent)

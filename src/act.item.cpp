@@ -4450,18 +4450,18 @@ ACMD(do_sac) {
     one_argument(argument, arg);
 
     if (!*arg) {
-        send_to_char(ch, "Sacrifice what?\n\r");
+        send_to_char(ch, "Sacrifice what?\r\n");
         return;
     }
 
     if (!(j = get_obj_in_list_vis(ch, arg, nullptr, ch->getRoom()->contents)) &&
         (!(j = get_obj_in_list_vis(ch, arg, nullptr, ch->contents)))) {
-        send_to_char(ch, "It doesn't seem to be here.\n\r");
+        send_to_char(ch, "It doesn't seem to be here.\r\n");
         return;
     }
 
     if (!CAN_WEAR(j, ITEM_WEAR_TAKE)) {
-        send_to_char(ch, "You can't sacrifice that!\n\r");
+        send_to_char(ch, "You can't sacrifice that!\r\n");
         return;
     }
 

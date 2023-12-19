@@ -10688,7 +10688,7 @@ ACMD(do_compare) {
     two_arguments(argument, arg1, arg2);
 
     if (!*arg1 || !*arg2) {
-        send_to_char(ch, "Compare what to what?\n\r");
+        send_to_char(ch, "Compare what to what?\r\n");
         return;
     }
 

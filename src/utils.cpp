@@ -3928,3 +3928,7 @@ bool ETHER_STREAM(struct char_data *ch) {
 bool HAS_MOON(struct char_data *ch) {
     return PLANET_FLAGGED(ch, AREA_MOON);
 }
+
+int GET_SPEEDI(struct char_data *ch) {
+    return (GET_SPEEDCALC(ch) + GET_SPEEDBONUS(ch) + GET_SPEEDBOOST(ch) + GET_MUTBOOST(ch)) * ch->getBurdenRatio();
+}
