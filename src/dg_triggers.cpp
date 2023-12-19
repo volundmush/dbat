@@ -609,9 +609,6 @@ int door_mtrigger(char_data *actor, int subcmd, int dir) {
 }
 
 void time_mtrigger(char_data *ch) {
-    trig_data *t;
-    char buf[MAX_INPUT_LENGTH];
-
     /*
      * This trigger is called if the hour is the same as specified in Narg.
      */
@@ -619,14 +616,28 @@ void time_mtrigger(char_data *ch) {
     if (!SCRIPT_CHECK(ch, MTRIG_TIME) || AFF_FLAGGED(ch, AFF_CHARM))
         return;
 
-    for (t = TRIGGERS(SCRIPT(ch)); t; t = t->next) {
+    for (auto t = TRIGGERS(SCRIPT(ch)); t; t = t->next) {
         if (TRIGGER_CHECK(t, MTRIG_TIME) &&
             (time_info.hours == GET_TRIG_NARG(t))) {
-            sprintf(buf, "%d", time_info.hours);
-            add_var(&GET_TRIG_VARS(t), "time", buf, 0);
             script_driver(&ch, t, MOB_TRIGGER, TRIG_NEW);
             break;
         }
+    }
+}
+
+void interval_mtrigger(char_data *ch, int trigFlag) {
+    /*
+     * This trigger is called if the hour is the same as specified in Narg.
+     */
+
+    if (!SCRIPT_CHECK(ch, trigFlag) || AFF_FLAGGED(ch, AFF_CHARM))
+        return;
+
+    for (auto t = TRIGGERS(SCRIPT(ch)); t; t = t->next) {
+        if (TRIGGER_CHECK(t, trigFlag)) {
+            script_driver(&ch, t, MOB_TRIGGER, TRIG_NEW);
+            break;
+            }
     }
 }
 
@@ -996,6 +1007,18 @@ void time_otrigger(obj_data *obj) {
     }
 }
 
+void interval_otrigger(obj_data *obj, int trigFlag) {
+    if (!SCRIPT_CHECK(obj, trigFlag))
+        return;
+
+    for (auto t = TRIGGERS(SCRIPT(obj)); t; t = t->next) {
+        if (TRIGGER_CHECK(t, trigFlag)) {
+            script_driver(&obj, t, OBJ_TRIGGER, TRIG_NEW);
+            break;
+            }
+    }
+}
+
 /*
  *  world triggers
  */
@@ -1243,5 +1266,17 @@ void time_wtrigger(struct room_data *room) {
             script_driver(&room, t, WLD_TRIGGER, TRIG_NEW);
             break;
         }
+    }
+}
+
+void interval_wtrigger(struct room_data *room, int trigFlag) {
+    if (!SCRIPT_CHECK(room, WTRIG_TIME))
+        return;
+
+    for (auto t = TRIGGERS(SCRIPT(room)); t; t = t->next) {
+        if (TRIGGER_CHECK(t, WTRIG_TIME)) {
+            script_driver(&room, t, WLD_TRIGGER, TRIG_NEW);
+            break;
+            }
     }
 }

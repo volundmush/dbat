@@ -384,6 +384,10 @@ find_replacement(void *go, struct script_data *sc, trig_data *trig, int type, ch
             } else if (!strcasecmp(var, "time")) {
                 if (!strcasecmp(field, "hour"))
                     snprintf(str, slen, "%d", time_info.hours);
+                else if(!strcasecmp(field, "minute"))
+                    snprintf(str, slen, "%d", time_info.minutes);
+                else if(!strcasecmp(field, "second"))
+                    snprintf(str, slen, "%d", time_info.seconds);
                 else if (!strcasecmp(field, "day"))
                     snprintf(str, slen, "%d", time_info.day + 1);
                 else if (!strcasecmp(field, "month"))

@@ -16,6 +16,7 @@
 #include "dbat/dg_comm.h"
 #include "dbat/config.h"
 #include "dbat/races.h"
+#include "dbat/dg_scripts.h"
 
 static void phase_powerup(struct char_data *ch, int type, int phase);
 
@@ -397,12 +398,22 @@ static void secondChanged() {
 }
 
 static void minuteChanged() {
+    switch(time_info.minutes) {
+        case 0:
+        case 15:
+        case 30:
+        case 45:
+            check_interval_triggers(MTRIG_QUARTER);
+        break;
 
+    }
 }
 
 static void hourChanged() {
     grow_plants();
     weather_change();
+    check_time_triggers();
+    check_interval_triggers(MTRIG_HOURLY);
 
     switch (time_info.hours) {
         case 4:
@@ -468,39 +479,54 @@ void advanceClock(uint64_t heartPulse, double deltaTime) {
     time_info.remainder += deltaTime * MUD_TIME_ACCELERATION;
 
     while(time_info.remainder >= 1.0) {
+        bool secondChangedCheck = false;
+        bool minuteChangedCheck = false;
+        bool hourChangedCheck = false;
+        bool dayChangedCheck = false;
+        bool monthChangedCheck = false;
+        bool yearChangedCheck = false;
+
         time_info.remainder -= 1.0;
         time_info.seconds++;
-        secondChanged();
+        secondChangedCheck = true;
 
         if(time_info.seconds >= SECONDS_PER_MINUTE) {
             time_info.seconds -= SECONDS_PER_MINUTE;
             time_info.minutes++;
-            minuteChanged();
+            minuteChangedCheck = true;
 
             if (time_info.minutes >= MINUTES_PER_HOUR) {
                 time_info.minutes -= MINUTES_PER_HOUR;
                 time_info.hours++;
-                hourChanged();
+                hourChangedCheck = true;
 
                 if (time_info.hours >= HOURS_PER_DAY) {
                     time_info.hours -= HOURS_PER_DAY;
                     time_info.day++;
-                    dayChanged();
+                    dayChangedCheck = true;
 
                     if (time_info.day >= DAYS_PER_MONTH) {
                         time_info.day -= DAYS_PER_MONTH;
                         time_info.month++;
-                        monthChanged();
+                        monthChangedCheck = true;
 
                         if (time_info.month >= MONTHS_PER_YEAR) {
                             time_info.month -= MONTHS_PER_YEAR;
                             time_info.year++;
-                            yearChanged();
+                            yearChangedCheck = true;
                         }
                     }
                 }
             }
         }
+
+        if(secondChangedCheck) secondChanged();
+        if(minuteChangedCheck) minuteChanged();
+        if(hourChangedCheck) hourChanged();
+        if(dayChangedCheck) dayChanged();
+        if(monthChangedCheck) monthChanged();
+        if(yearChangedCheck) yearChanged();
+
     }
 }
 

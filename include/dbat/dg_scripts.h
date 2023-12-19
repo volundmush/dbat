@@ -80,7 +80,9 @@ std::string toDgUID(const DgUID& uid);
 #define MTRIG_LEAVE            (1 << 16)     /* someone leaves room seen   */
 #define MTRIG_DOOR             (1 << 17)     /* door manipulated in room   */
 
-#define MTRIG_TIME             (1 << 19)     /* trigger based on game hour */
+#define MTRIG_TIME             (1 << 19)     /* trigger based on specific game hour */
+#define MTRIG_HOURLY             (1 << 20)     /* triggered every game hour */
+#define MTRIG_QUARTER             (1 << 21)     /* triggered every 15 game minutes */
 
 /* obj trigger types */
 #define OTRIG_GLOBAL           (1 << 0)         /* unused                     */
@@ -100,7 +102,9 @@ std::string toDgUID(const DgUID& uid);
 #define OTRIG_LEAVE            (1 << 16)    /* someone leaves room seen    */
 
 #define OTRIG_CONSUME          (1 << 18)    /* char tries to eat/drink obj */
-#define OTRIG_TIME             (1 << 19)     /* trigger based on game hour */
+#define OTRIG_TIME             (1 << 19)     /* trigger based on specific game hour */
+#define OTRIG_HOURLY             (1 << 20)     /* triggered every game hour */
+#define OTRIG_QUARTER             (1 << 21)     /* triggered every 15 game minutes */
 
 /* wld trigger types */
 #define WTRIG_GLOBAL           (1 << 0)      /* check even if zone empty   */
@@ -116,7 +120,9 @@ std::string toDgUID(const DgUID& uid);
 #define WTRIG_LEAVE            (1 << 16)     /* character leaves the room */
 #define WTRIG_DOOR             (1 << 17)     /* door manipulated in room  */
 
-#define WTRIG_TIME             (1 << 19)     /* trigger based on game hour */
+#define WTRIG_TIME             (1 << 19)     /* trigger based on specific game hour */
+#define WTRIG_HOURLY             (1 << 20)     /* triggered every game hour */
+#define WTRIG_QUARTER             (1 << 21)     /* triggered every 15 game minutes */
 
 /* obj command trigger types */
 #define OCMD_EQUIP             (1 << 0)         /* obj must be in char's equip */
@@ -332,10 +338,13 @@ extern int door_wtrigger(char_data *actor, int subcmd, int dir);
 extern int consume_otrigger(obj_data *obj, char_data *actor, int cmd);
 
 extern void time_mtrigger(char_data *ch);
+extern void interval_mtrigger(char_data *ch, int trigFlag);
 
 extern void time_otrigger(obj_data *obj);
+extern void interval_otrigger(obj_data *obj, int trigFlag);
 
 extern void time_wtrigger(room_data *room);
+extern void interval_wtrigger(room_data *room, int trigFlag);
 
 /* function prototypes from dg_scripts.c */
 extern char *str_str(char *cs, char *ct);
@@ -374,7 +383,9 @@ extern obj_data *get_object_in_equip(char_data *ch, char *name);
 
 extern void script_trigger_check(uint64_t heartPulse, double deltaTime);
 
-extern void check_time_triggers(uint64_t heartPulse, double deltaTime);
+extern void check_time_triggers();
+
+extern void check_interval_triggers(int trigFlag);
 
 extern void find_uid_name(char *uid, char *name, size_t nlen);
 

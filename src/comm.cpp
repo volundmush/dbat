@@ -311,7 +311,6 @@ static std::vector<GameSystem> gameSystems = {
         GameSystem("copyover_check", 1.0, copyover_check),
         GameSystem("affect_update_violence", 5.0, affect_update_violence),
         GameSystem("advanceClock", 0.0, advanceClock),
-        GameSystem("check_time_triggers", 300.0, check_time_triggers),
         GameSystem("affect_update", 300.0, affect_update),
         GameSystem("point_update", 100.0, point_update),
         GameSystem("clan_update", 60.0, clan_update),

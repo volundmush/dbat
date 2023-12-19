@@ -1595,9 +1595,9 @@ input */
 #define NUM_CONFIG_SECTIONS     7
 #define NUM_CREATION_METHODS    5
 #define NUM_ATTACK_TYPES        15
-#define NUM_MTRIG_TYPES         20
-#define NUM_OTRIG_TYPES         20
-#define NUM_WTRIG_TYPES         20
+#define NUM_MTRIG_TYPES         22
+#define NUM_OTRIG_TYPES         22
+#define NUM_WTRIG_TYPES         22
 #define NUM_ZONE_FLAGS          36
 #define NUM_TRADERS             78
 #define NUM_SHOP_FLAGS          3

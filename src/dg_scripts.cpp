@@ -30,7 +30,7 @@ void script_stat(char_data *ch, struct script_data *sc);
 
 int remove_trigger(struct script_data *sc, char *name);
 
-bool is_num(char *arg);
+bool is_num(const std::string &arg);
 
 void eval_op(char *op, char *lhs, char *rhs, char *result, void *go,
              struct script_data *sc, trig_data *trig);
@@ -667,7 +667,7 @@ void script_trigger_check(uint64_t heartPulse, double deltaTime) {
     }
 }
 
-void check_time_triggers(uint64_t heartPulse, double deltaTime) {
+void check_time_triggers() {
     char_data *ch;
     obj_data *obj;
     struct room_data *room = nullptr;
@@ -678,9 +678,9 @@ void check_time_triggers(uint64_t heartPulse, double deltaTime) {
         if (SCRIPT(ch)) {
             sc = SCRIPT(ch);
 
-            if (IS_SET(SCRIPT_TYPES(sc), WTRIG_TIME) &&
+            if (IS_SET(SCRIPT_TYPES(sc), MTRIG_TIME) &&
                 (!is_empty(ch->getRoom()->zone) ||
-                 IS_SET(SCRIPT_TYPES(sc), WTRIG_GLOBAL)))
+                 IS_SET(SCRIPT_TYPES(sc), MTRIG_GLOBAL)))
                 time_mtrigger(ch);
         }
     }
@@ -703,6 +703,40 @@ void check_time_triggers(uint64_t heartPulse, double deltaTime) {
                 (!is_empty(room->zone) ||
                  IS_SET(SCRIPT_TYPES(sc), WTRIG_GLOBAL)))
                 time_wtrigger(room);
+        }
+    }
+}
+
+void check_interval_triggers(int trigFlag) {
+
+    for (auto ch = character_list; ch; ch = ch->next) {
+        if (SCRIPT(ch)) {
+            auto sc = SCRIPT(ch);
+
+            if (IS_SET(SCRIPT_TYPES(sc), trigFlag) &&
+                (!is_empty(ch->getRoom()->zone) ||
+                 IS_SET(SCRIPT_TYPES(sc), MTRIG_GLOBAL)))
+                interval_mtrigger(ch, trigFlag);
+        }
+    }
+
+    for (auto obj = object_list; obj; obj = obj->next) {
+        if (SCRIPT(obj)) {
+            auto sc = SCRIPT(obj);
+
+            if (IS_SET(SCRIPT_TYPES(sc), trigFlag))
+                interval_otrigger(obj, trigFlag);
+        }
+    }
+
+    for (auto &[vn, r] : world) {
+        if (SCRIPT(&r)) {
+            auto sc = SCRIPT(&r);
+
+            if (IS_SET(SCRIPT_TYPES(sc), trigFlag) &&
+                (!is_empty(r.zone) ||
+                 IS_SET(SCRIPT_TYPES(sc), WTRIG_GLOBAL)))
+                interval_wtrigger(&r, trigFlag);
         }
     }
 }
@@ -1306,13 +1340,23 @@ void script_log(const char *format, ...) {
     va_end(args);
 }
 
-bool is_num(char *arg) {
-    try {
-        std::stod(arg);
-        return true;
-    } catch (const std::exception&) {
-        return false;
+bool is_num(const std::string& arg) {
+    if (arg.empty()) return false;
+
+    bool decimal_point_found = false;
+    for (char c : arg) {
+        if (c == '.') {
+            if (decimal_point_found) {
+                // More than one decimal point found, not a number
+                return false;
+            }
+            decimal_point_found = true;
+        } else if (!std::isdigit(c)) {
+            // Non-digit character found, not a number
+            return false;
+        }
     }
+    return true;
 }
 
 static void eval_numeric_op(char *op, char *lhs, char *rhs, char *result) {
@@ -1674,25 +1718,25 @@ void process_wait(void *go, trig_data *trig, int type, char *cmd,
             min = (hr % 100) + ((hr / 100) * 60);
 
         // Convert current MUD time to seconds since midnight
-        double current_mud_seconds = time_info.seconds * MUD_TIME_ACCELERATION +
-                                     time_info.minutes * SECS_PER_MUD_MINUTE +
-                                     time_info.hours * SECS_PER_MUD_HOUR;
+        double current_mud_seconds = time_info.seconds +
+                                     (time_info.minutes * SECS_PER_MINUTE) +
+                                     (time_info.hours * SECS_PER_HOUR);
 
         // Convert target MUD time to seconds since midnight
-        double target_mud_seconds = min * SECS_PER_MUD_MINUTE;
+        double target_mud_seconds = min * SECS_PER_MINUTE;
 
         // Determine waiting time in MUD seconds
         double waiting_mud_seconds;
         if (current_mud_seconds >= target_mud_seconds) {
             // If the target time has already passed, wait until the next day
-            waiting_mud_seconds = (SECS_PER_MUD_DAY - current_mud_seconds) + target_mud_seconds;
+            waiting_mud_seconds = (SECS_PER_DAY - current_mud_seconds) + target_mud_seconds;
         } else {
             // If the target time is in the future, wait until that time
             waiting_mud_seconds = target_mud_seconds - current_mud_seconds;
         }
 
         // Convert waiting time to real seconds
-        trig->waiting = waiting_mud_seconds / MUD_TIME_ACCELERATION;
+        trig->waiting = waiting_mud_seconds * SECS_PER_MUD_SECOND;
 
     } else {
         if (sscanf(arg, "%ld %c", &when, &c) == 2) {
@@ -1701,11 +1745,12 @@ void process_wait(void *go, trig_data *trig, int type, char *cmd,
             else if (c == 's')
                 when *= PASSES_PER_SEC;
         }
+        // We need to convert 'when' into a double of seconds-to-wait by dividing by PASSES_PER_SEC.
+        trig->waiting = (double) when / (double) PASSES_PER_SEC;
     }
 
     // we're replacing the old wait_event_obj.
-    // We need to convert 'when' into a double of seconds-to-wait by dividing by PASSES_PER_SEC.
-    trig->waiting = (double) when / (double) PASSES_PER_SEC;
+
     triggers_waiting.insert(trig);
 
     trig->curr_state = cl->next;

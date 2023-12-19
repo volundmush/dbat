@@ -1384,6 +1384,8 @@ const char *trig_types[NUM_MTRIG_TYPES + 1] = {
         "Door",
         "UNUSED",
         "Time",
+        "EveryHour",
+        "Every15Min",
         "\n"
 };
 
@@ -1410,6 +1412,8 @@ const char *otrig_types[NUM_OTRIG_TYPES + 1] = {
         "UNUSED",
         "Consume",
         "Time",
+        "EveryHour",
+        "Every15Min",
         "\n"
 };
 
@@ -1436,6 +1440,8 @@ const char *wtrig_types[NUM_WTRIG_TYPES + 1] = {
         "Door",
         "UNUSED",
         "Time",
+        "EveryHour",
+        "Every15Min",
         "\n"
 };
 
