@@ -1570,99 +1570,26 @@ namespace net {
                 sendText("\r\n@YAnswer the following question:\r\n");
                 sendText("@wWhat do you wish your starting age to be?@n\r\n");
                 sendText("@D---------------------------------------@n\r\n");
-                sendText("@B1@W)@C  8@n    @B2@W)@C 10@n\r\n");
-                sendText("@B3@W)@C 12@n    @B4@W)@C 14@n\r\n");
-                sendText("@B5@W)@C 16@n    @B6@W)@C 18@n\r\n");
-                sendText("@B7@W)@C 20@n    @B8@W)@C 22@n\r\n");
-                sendText("@B9@W)@C 24@n    @BA@W)@C 26@n\r\n");
-                sendText("@BB@W)@C 28@n    @BC@W)@C 30@n\r\n");
-                sendText("@BD@W)@C 40@n    @BE@W)@C 50@n\r\n");
-                sendText("@BF@W)@C 60@n    @BG@W)@C 65@n\r\n");
-                if (IS_KAI(ch) || IS_DEMON(ch) || IS_MAJIN(ch)) {
-                    sendText("@BH@W)@C 500@n   @BI@W)@C 800@n\r\n");
-                } else if (IS_NAMEK(ch)) {
-                    sendText("@BH@W)@C 250@n   @BI@W)@C 400@n\r\n");
-                } else {
-                    sendText("@BH@W)@C 70@n    @BI@W)@C 75@n\r\n");
-                }
-                sendText("@w\r\nMake a selection:@n\r\n");
+                sendText("@wPlease enter something reasonable for your\r\n");
+                sendText("@wrace and backstory. Don't fret too much, as\r\n");
+                sendText("@wadmin can alter it later.\r\n");
+                sendText("@w\r\nEnter Age in Years (decimals are supported):@n\r\n");
                 state = CON_QX;
                 break;
 
             case CON_QX: {
-                int64_t years = 0;
-                switch(toupper(arg[0])) {
-                    case '1':
-                        years = 8;
-                        break;
-                    case '2':
-                        years = 10;
-                        break;
-                    case '3':
-                        years = 12;
-                        break;
-                    case '4':
-                        years = 14;
-                        break;
-                    case '5':
-                        years = 16;
-                        break;
-                    case '6':
-                        years = 18;
-                        break;
-                    case '7':
-                        years = 20;
-                        break;
-                    case '8':
-                        years = 22;
-                        break;
-                    case '9':
-                        years = 24;
-                        break;
-                    case 'A':
-                        years = 26;
-                        break;
-                    case 'B':
-                        years = 28;
-                        break;
-                    case 'C':
-                        years = 30;
-                        break;
-                    case 'D':
-                        years = 40;
-                        break;
-                    case 'E':
-                        years = 50;
-                        break;
-                    case 'F':
-                        years = 60;
-                        break;
-                    case 'G':
-                        years = 65;
-                        break;
-                    case 'H':
-                        if (IS_KAI(ch) || IS_DEMON(ch) || IS_MAJIN(ch)) {
-                            years = 500;
-                        } else if (IS_NAMEK(ch)) {
-                            years = 250;
-                        } else {
-                            years = 70;
-                        }
-                        break;
-                    case 'I':
-                        if (IS_KAI(ch) || IS_DEMON(ch) || IS_MAJIN(ch)) {
-                            years = 800;
-                        } else if (IS_NAMEK(ch)) {
-                            years = 400;
-                        } else {
-                            years = 75;
-                        }
-                        break;
-                    default:
-                        sendText("That is not an acceptable option.\r\n");
+                try {
+                    auto years = std::stod(arg);
+                    if(years <= 0.0) {
+                        sendText("Yeah... time doesn't work like that, sorry.\r\n");
                         return;
+                    }
+                    ch->setAge(years);
                 }
-                ch->time.birth = time_info.current() - (years * (int64_t)(SECS_PER_DAY * DAYS_PER_MONTH * MONTHS_PER_YEAR));
+                catch(const std::invalid_argument& ia) {
+                    sendText("That is not an acceptable option.\r\n");
+                    return;
+                }
 
                 if (!IS_HOSHIJIN(ch)) {
                     ccpoints = 5;

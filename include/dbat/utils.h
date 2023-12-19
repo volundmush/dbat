@@ -285,6 +285,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define SECS_PER_WEEK   (SECS_PER_DAY*DAYS_PER_WEEK)
 #define SECS_PER_MONTH  (SECS_PER_DAY*DAYS_PER_MONTH)
 #define SECS_PER_YEAR   (SECS_PER_DAY*DAYS_PER_YEAR)
+#define SECS_PER_GAME_YEAR (SECS_PER_MONTH*MONTHS_PER_YEAR)
 
 #define SECS_PER_MUD_SECOND (1.0 / MUD_TIME_ACCELERATION)
 #define SECS_PER_MUD_MINUTE (SECONDS_PER_MINUTE*SECS_PER_MUD_SECOND)
@@ -292,6 +293,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define SECS_PER_MUD_DAY   (HOURS_PER_DAY*SECS_PER_MUD_HOUR)
 #define SECS_PER_MUD_MONTH (DAYS_PER_MONTH*SECS_PER_MUD_DAY)
 #define SECS_PER_MUD_YEAR    (MONTHS_PER_YEAR*SECS_PER_MUD_MONTH)
+
 
 /* real-life time (remember Real Life?) */
 // just keeping these 'cuz some things still use them...

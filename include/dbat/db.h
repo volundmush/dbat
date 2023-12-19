@@ -117,6 +117,7 @@ using UID = std::variant<struct room_data*, struct obj_data*, struct char_data*>
 bool isUID(const std::string& uid);
 std::optional<UID> resolveUID(const std::string& uid);
 
+extern struct time_info_data old_time_info; /* UNUSED (to be removed) the infomation about the time    */
 extern struct time_info_data time_info;/* the infomation about the time    */
 extern struct weather_data weather_info;    /* the infomation about the weather */
 extern std::set<zone_vnum> zone_reset_queue;

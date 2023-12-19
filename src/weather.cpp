@@ -474,9 +474,16 @@ static void yearChanged() {
 
 }
 
+static void ageAllCharacters(double addedTime) {
+    for(const auto &[id, p] : uniqueCharacters) {
+        p.second->ageBy(addedTime);
+    }
+}
+
 
 void advanceClock(uint64_t heartPulse, double deltaTime) {
-    time_info.remainder += deltaTime * MUD_TIME_ACCELERATION;
+    const auto addedTime = deltaTime * MUD_TIME_ACCELERATION;
+    time_info.remainder += addedTime;
 
     while(time_info.remainder >= 1.0) {
         bool secondChangedCheck = false;
@@ -528,6 +535,9 @@ void advanceClock(uint64_t heartPulse, double deltaTime) {
         if(yearChangedCheck) yearChanged();
 
     }
+
+    ageAllCharacters(addedTime);
+
 }
 
 int64_t time_info_data::current() {
@@ -560,10 +570,5 @@ time_info_data::time_info_data(int64_t timestamp) {
 }
 
 int time_data::currentAge() {
-    auto cur = time_info.current();
-
-    // If birth is negative (indicating a birth date before the epoch),
-    // we add the absolute value of birth to cur to get the correct difference.
-    int64_t diff = (birth < 0 ? cur + (-birth) : cur - birth);
-    return diff / (SECS_PER_DAY * DAYS_PER_MONTH * MONTHS_PER_YEAR);
+    return secondsAged / SECS_PER_GAME_YEAR;
 }

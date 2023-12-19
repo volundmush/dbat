@@ -377,11 +377,12 @@ struct time_data {
     time_data() = default;
     explicit time_data(const nlohmann::json &j);
     void deserialize(const nlohmann::json& j);
-    int64_t birth{};    /* This represents the characters current IC age        */
+    int64_t birth{};    /* NO LONGER USED This represents the characters current IC age        */
     time_t created{};    /* This does not change                              */
     int64_t maxage{};    /* This represents death by natural causes (UNUSED) */
     time_t logon{};    /* Time of the last logon (used to calculate played) */
     double played{};    /* This is the total accumulated time played in secs */
+    double secondsAged{}; // The player's current IC age, in seconds.
     int currentAge();
     nlohmann::json serialize();
 };
@@ -541,6 +542,9 @@ struct char_data : public unit_data {
     bool active{false};
     bool isActive() override;
     void save() override;
+
+    void ageBy(double addedTime);
+    void setAge(double newAge);
 
     struct room_data* getRoom();
 

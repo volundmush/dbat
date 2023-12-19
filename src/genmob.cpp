@@ -340,6 +340,7 @@ nlohmann::json time_data::serialize() {
     if(maxage) j["maxage"] = maxage;
     if(logon) j["logon"] = logon;
     if(played != 0.0) j["played"] = played;
+    if(secondsAged != 0.0) j["secondsAged"] = secondsAged;
 
     return j;
 }
@@ -350,6 +351,7 @@ void time_data::deserialize(const nlohmann::json &j) {
     if(j.contains("maxage")) maxage = j["maxage"];
     if(j.contains("logon")) logon = j["logon"];
     if(j.contains("played")) played = j["played"];
+    if(j.contains("secondsAged")) secondsAged = j["secondsAged"];
 }
 
 time_data::time_data(const nlohmann::json &j) : time_data() {
@@ -1205,4 +1207,12 @@ std::set<struct obj_data*> char_data::gatherObjects(const std::function<bool(str
         out.insert(contents.begin(), contents.end());
     }
     return out;
+}
+
+void char_data::ageBy(double addedTime) {
+    this->time.secondsAged += addedTime;
+}
+
+void char_data::setAge(double newAge) {
+    this->time.secondsAged = newAge / SECS_PER_GAME_YEAR;
 }

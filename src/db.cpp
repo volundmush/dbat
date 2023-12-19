@@ -139,6 +139,7 @@ int top_of_helpt = 0;
 struct social_messg *soc_mess_list = nullptr;      /* list of socials */
 int top_of_socialt = -1;                        /* number of socials */
 
+struct time_info_data old_time_info;/* the infomation about the time    */
 struct time_info_data time_info;/* the infomation about the time    */
 struct weather_data weather_info;    /* the infomation about the weather */
 std::set<zone_vnum> zone_reset_queue;
@@ -3555,9 +3556,9 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
         }
     }
 
-    mob->time.birth = time_info.current() - (birth_age(mob) * (int64_t)(SECS_PER_DAY * DAYS_PER_MONTH * MONTHS_PER_YEAR));
+    mob->setAge(birth_age(mob));
     mob->time.created = mob->time.logon = time(nullptr); /* why not */
-    mob->time.maxage = mob->time.birth + max_age(mob);
+    mob->time.maxage = max_age(mob);
     mob->time.played = 0.0;
     mob->time.logon = time(nullptr);
     MOB_LOADROOM(mob) = NOWHERE;

@@ -3906,8 +3906,8 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             GET_SEX(vict) = i;
             break;
         case 48:    /* set age */
-            if (value < 2 || value > 20000) {    /* Arbitrary limits. */
-                send_to_char(ch, "Ages 2 to 20000 accepted.\r\n");
+            if (value <= 0) {    /* Arbitrary limits. */
+                send_to_char(ch, "Ages must be positive.\r\n");
                 return (0);
             }
             /*
@@ -3915,7 +3915,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
      * division used elsewhere in the code.  Seems to only happen for
      * some values below the starting age (17) anyway. -gg 5/27/98
      */
-            vict->time.birth = time(nullptr) - (value * SECS_PER_MUD_YEAR);
+            vict->setAge(value);
             break;
 
         case 49:    /* Blame/Thank Rick Glover. :) */
