@@ -29,6 +29,7 @@
 #include "dbat/clan.h"
 #include "dbat/players.h"
 #include "dbat/account.h"
+#include "dbat/improved-edit.h"
 
 /* local functions */
 static void gen_map(struct char_data *ch, int num);
@@ -7766,4 +7767,16 @@ ACMD(do_oaffects) {
         send_to_char(ch, "None.\r\n");
     }
 
+}
+
+ACMD(do_desc) {
+    auto d = ch->desc;
+    if(!d) {
+        return;
+    }
+    write_to_output(d, "Current description:\r\n%s", ch->look_description);
+    write_to_output(d, "Enter the new text you'd like others to see when they look at you.\r\n");
+    string_write(d, &ch->look_description, EXDSCR_LENGTH, 0, nullptr);
+    STATE(d) = CON_EXDESC;
+    return;
 }

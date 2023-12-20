@@ -923,6 +923,7 @@ const struct command_info cmd_info[] = {
         {"decapitate",    "decapit",      POS_STANDING, do_spoil,           0,  ADMLVL_NONE,    0},
         {"defend",        "defen",        POS_STANDING, do_defend,          0,  ADMLVL_NONE,    0},
         {"deploy",        "deplo",        POS_STANDING, do_deploy,          0,  ADMLVL_NONE,    0},
+        {"describe",      "desc",         POS_DEAD,     do_desc,            0,  ADMLVL_NONE,    0},
         {"dualbeam",      "dualbea",      POS_FIGHTING, do_dualbeam,        0,  ADMLVL_NONE,    0},
         {"deposit",       "depo",         POS_STANDING, do_not_here,        1,  ADMLVL_NONE,    0},
         {"diagnose",      "diagnos",      POS_RESTING,  do_diagnose,        0,  ADMLVL_NONE,    0},

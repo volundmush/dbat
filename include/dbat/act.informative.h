@@ -37,6 +37,8 @@ extern int search_help(const char *argument, int level);
 
 
 // commands
+extern ACMD(do_desc);
+
 extern ACMD(do_look);
 
 extern ACMD(do_examine);

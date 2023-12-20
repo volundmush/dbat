@@ -33,7 +33,7 @@ namespace net {
                 break;
 
             case 2:
-                sendText("Temporarily disabled, sorry.\r\n");
+                sendText("Use the desc command in-game for this now.\r\n");
                 break;
             case 3:
                 conn->setParser(new AccountMenu(conn));
