@@ -16,6 +16,8 @@
 #include <ctime>
 #include <cstddef>
 
+#include <bsd/string.h>
+
 #ifndef SIGUSR1
 #define SIGUSR1 10
 #endif
