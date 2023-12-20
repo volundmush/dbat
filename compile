@@ -19,5 +19,5 @@ OUTFOLDER=cmake-build-${MODE}
 
 mkdir -p $OUTFOLDER
 cmake -S . -B $OUTFOLDER -D CMAKE_BUILD_TYPE=$MODE
-cmake --build $OUTFOLDER
+cmake --build $OUTFOLDER -- -j $(nproc)
 

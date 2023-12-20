@@ -564,9 +564,11 @@ boost::asio::awaitable<void> game_loop() {
 
         } catch(std::exception& e) {
             basic_mud_log("Exception in runOneLoop(): %s", e.what());
+            printStackTrace();
             shutdown_game(1);
         } catch(...) {
              basic_mud_log("Unknown exception in runOneLoop()");
+            printStackTrace();
             shutdown_game(1);
         }
         auto loopEnd = boost::asio::steady_timer::clock_type::now();
@@ -656,9 +658,11 @@ static boost::asio::awaitable<void> runGame() {
         else co_await game_loop();
     } catch(std::exception& e) {
         logger->critical("Exception in game_loop(): %s", e.what());
+        printStackTrace();
         shutdown_game(1);
     } catch(...) {
         logger->critical("Unknown exception in game_loop()");
+        printStackTrace();
         shutdown_game(1);
     }
 
@@ -744,10 +748,12 @@ void init_game() {
     }
     catch (const std::exception& e) {
         logger->critical("Exception in main thread: {}", e.what());
+        printStackTrace();
         shutdown_game(EXIT_FAILURE);
     }
     catch (...) {
         logger->critical("Unknown exception in main thread.");
+        printStackTrace();
         shutdown_game(EXIT_FAILURE);
     }
 

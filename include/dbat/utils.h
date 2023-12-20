@@ -1212,3 +1212,5 @@ template<size_t N>
 int check_bitvector_names(const std::bitset<N>& bitvector, size_t namecount, const char *whatami, const char *whatbits) {
 
 }
+
+extern void printStackTrace();

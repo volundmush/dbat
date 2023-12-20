@@ -8,6 +8,11 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
+#include <unordered_set>
+#include <execinfo.h>
+#include <cxxabi.h>
+#include <exception>
+#include <iostream>
 #include "dbat/utils.h"
 #include "dbat/comm.h"
 #include "dbat/handler.h"
@@ -22,7 +27,6 @@
 #include "dbat/act.informative.h"
 #include "dbat/screen.h"
 #include "dbat/players.h"
-#include <unordered_set>
 
 /* local functions */
 char commastring[MAX_STRING_LENGTH];
@@ -3931,4 +3935,42 @@ bool HAS_MOON(struct char_data *ch) {
 
 int GET_SPEEDI(struct char_data *ch) {
     return (GET_SPEEDCALC(ch) + GET_SPEEDBONUS(ch) + GET_SPEEDBOOST(ch) + GET_MUTBOOST(ch)) * ch->getBurdenRatio();
+}
+
+void printStackTrace() {
+    void *array[10];
+    size_t size;
+    char **strings;
+    size = backtrace(array, 10);
+    strings = backtrace_symbols(array, size);
+    for (size_t i = 0; i < size; i++) {
+        // Demangle the name if possible
+        char *mangled_name = nullptr, *offset_begin = nullptr, *offset_end = nullptr;
+        for (char *p = strings[i]; *p; ++p) {
+            if (*p == '(') {
+                mangled_name = p;
+            } else if (*p == '+') {
+                offset_begin = p;
+            } else if (*p == ')' && offset_begin) {
+                offset_end = p;
+                break;
+            }
+        }
+        if (mangled_name && offset_begin && offset_end && mangled_name < offset_begin) {
+            *mangled_name++ = '\0';
+            *offset_begin++ = '\0';
+            *offset_end = '\0';
+            int status;
+            char *real_name = abi::__cxa_demangle(mangled_name, nullptr, nullptr, &status);
+            if (status == 0) {
+                std::cerr << "[bt]: (" << i << ") " << strings[i] << " : " << real_name << "+" << offset_begin << offset_end << std::endl;
+            } else {
+                std::cerr << "[bt]: (" << i << ") " << strings[i] << " : " << mangled_name << "+" << offset_begin << offset_end << std::endl;
+            }
+            free(real_name);
+        } else {
+            std::cerr << "[bt]: (" << i << ") " << strings[i] << std::endl;
+        }
+    }
+    free(strings);
 }
