@@ -1555,19 +1555,6 @@ void write_to_q(const char *txt, struct txt_q *queue, int aliased) {
 }
 
 
-
-/* Add a new string to a player's output queue. For outside use. */
-size_t write_to_output(struct descriptor_data *t, const char *txt, ...) {
-    va_list args;
-    size_t left;
-
-    va_start(args, txt);
-    left = vwrite_to_output(t, txt, args);
-    va_end(args);
-
-    return left;
-}
-
 #define COLOR_ON(ch) (COLOR_LEV(ch) > 0)
 
 /* Color replacement arrays. Orig. Renx -- 011100, now modified */
@@ -1735,30 +1722,7 @@ size_t proc_colors(char *txt, size_t maxlen, int parse, char **choices) {
 
 #undef NEW_STRING_LENGTH
 
-/* Add a new string to a player's output queue. */
-// It used to return how many bytes couldn't be written.
-// That's no longer a problem so it always returns 0.
-size_t vwrite_to_output(struct descriptor_data *t, const char *format, va_list args) {
-    // Use a temporary buffer to get the required size
-    va_list args_copy;
-    va_copy(args_copy, args);  // Make a copy of va_list, since vsnprintf will alter it
-    auto len = strlen(format);
-    int required_size = std::vsnprintf(nullptr, 0, format, args_copy) + 1; // +1 for null-terminator
-    va_end(args_copy);
 
-    if (required_size <= 0) {
-        // Handle error here (print message, throw exception, etc)
-    }
-
-    // Create a vector of the required size
-    std::vector<char> buffer(required_size);
-    std::vsnprintf(buffer.data(), buffer.size(), format, args);
-
-    // Append to the output
-    t->output += std::string(buffer.begin(), buffer.end() - 1); // -1 to ignore the null-terminator
-
-    return required_size - 1; // Return the size of the appended string (-1 to exclude the null-terminator)
-}
 
 void descriptor_data::sendText(const std::string& txt) {
     output += txt;
@@ -1929,18 +1893,6 @@ void close_socket(struct descriptor_data *d) {
 *       Public routines for system-to-player-communication        *
 **************************************************************** */
 
-size_t send_to_char(struct char_data *ch, const char *messg, ...) {
-    if (ch->desc && messg && *messg) {
-        size_t left;
-        va_list args;
-
-        va_start(args, messg);
-        left = vwrite_to_output(ch->desc, messg, args);
-        va_end(args);
-        return left;
-    }
-    return 0;
-}
 
 int arena_watch(struct char_data *ch) {
 
@@ -1966,141 +1918,6 @@ int arena_watch(struct char_data *ch) {
     } else {
         return (room);
     }
-}
-
-
-void send_to_all(const char *messg, ...) {
-    struct descriptor_data *i;
-    va_list args;
-
-    if (messg == nullptr)
-        return;
-
-    for (i = descriptor_list; i; i = i->next) {
-        if (STATE(i) != CON_PLAYING)
-            continue;
-
-        va_start(args, messg);
-        vwrite_to_output(i, messg, args);
-        va_end(args);
-    }
-}
-
-
-void send_to_outdoor(const char *messg, ...) {
-    struct descriptor_data *i;
-
-    if (!messg || !*messg)
-        return;
-
-    for (i = descriptor_list; i; i = i->next) {
-        va_list args;
-
-        if (STATE(i) != CON_PLAYING || i->character == nullptr)
-            continue;
-        if (!AWAKE(i->character) || !OUTSIDE(i->character))
-            continue;
-
-        va_start(args, messg);
-        vwrite_to_output(i, messg, args);
-        va_end(args);
-    }
-}
-
-void send_to_moon(const char *messg, ...) {
-    struct descriptor_data *i;
-
-    if (!messg || !*messg)
-        return;
-
-    for (i = descriptor_list; i; i = i->next) {
-        va_list args;
-
-        if (STATE(i) != CON_PLAYING || i->character == nullptr)
-            continue;
-        if (!AWAKE(i->character) || !HAS_MOON(i->character))
-            continue;
-
-        va_start(args, messg);
-        vwrite_to_output(i, messg, args);
-        va_end(args);
-    }
-}
-
-void send_to_planet(int type, int planet, const char *messg, ...) {
-    struct descriptor_data *i;
-
-    if (!messg || !*messg)
-        return;
-
-    for (i = descriptor_list; i; i = i->next) {
-        va_list args;
-
-        if (STATE(i) != CON_PLAYING || i->character == nullptr)
-            continue;
-        if (!AWAKE(i->character) || !ROOM_FLAGGED(IN_ROOM(i->character), planet))
-            continue;
-        else {
-            if (type == 0) {
-                va_start(args, messg);
-                vwrite_to_output(i, messg, args);
-                va_end(args);
-            } else if (OUTSIDE(i->character) && GET_SKILL(i->character, SKILL_SPOT) >= axion_dice(-5)) {
-                va_start(args, messg);
-                vwrite_to_output(i, messg, args);
-                va_end(args);
-            }
-        }
-    }
-}
-
-
-void send_to_room(room_rnum room, const char *messg, ...) {
-    struct char_data *i;
-    va_list args;
-
-    if (messg == nullptr)
-        return;
-
-    for (i = world[room].people; i; i = i->next_in_room) {
-        if (!i->desc)
-            continue;
-
-        va_start(args, messg);
-        vwrite_to_output(i->desc, messg, args);
-        va_end(args);
-    }
-
-    struct descriptor_data *d;
-
-    for (d = descriptor_list; d; d = d->next) {
-        if (STATE(d) != CON_PLAYING)
-            continue;
-
-        if (PRF_FLAGGED(d->character, PRF_ARENAWATCH)) {
-            if (arena_watch(d->character) == room) {
-                char buf[2000];
-                *buf = '\0';
-                sprintf(buf, "@c-----@CArena@c-----@n\r\n%s\r\n@c-----@CArena@c-----@n\r\n", messg);
-                va_start(args, messg);
-                vwrite_to_output(d, buf, args);
-                va_end(args);
-            }
-        }
-        if (GET_EAVESDROP(d->character) > 0) {
-            int roll = rand_number(1, 101);
-            if (GET_EAVESDROP(d->character) == room && GET_SKILL(d->character, SKILL_EAVESDROP) > roll) {
-                char buf[1000];
-                *buf = '\0';
-                sprintf(buf, "-----Eavesdrop-----\r\n%s\r\n-----Eavesdrop-----\r\n", messg);
-                va_start(args, messg);
-                vwrite_to_output(d, buf, args);
-                va_end(args);
-            }
-        }
-
-    }
-
 }
 
 
@@ -2442,33 +2259,6 @@ void show_help(std::shared_ptr<net::Connection>& co, const char *entry) {
         } else {
             if (chk > 0) bot = mid + 1;
             else top = mid - 1;
-        }
-    }
-}
-
-/* Thx to Jamie Nelson of 4D for this contribution */
-void send_to_range(room_vnum start, room_vnum finish, const char *messg, ...) {
-    struct char_data *i;
-    va_list args;
-    int j;
-
-    if (start > finish) {
-        basic_mud_log("send_to_range passed start room value greater then finish.");
-        return;
-    }
-    if (messg == nullptr)
-        return;
-
-    for (auto &r : world) {
-        if (r.first >= start && r.first <= finish) {
-            for (i = r.second.people; i; i = i->next_in_room) {
-                if (!i->desc)
-                    continue;
-
-                va_start(args, messg);
-                vwrite_to_output(i->desc, messg, args);
-                va_end(args);
-            }
         }
     }
 }

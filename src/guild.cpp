@@ -274,7 +274,7 @@ int print_skills_by_type(struct char_data *ch, char *buf, int maxsz, int sktype,
         }
         auto sklevel = GET_SKILL(ch, i);
         auto bonus = GET_SKILL_BONUS(ch, i);
-        if (sklevel <= 0) {
+        if (!(sklevel >= 0 || bonus >= 0)) {
             continue;
         }
         if (*arg) {
@@ -419,7 +419,7 @@ void list_skills(struct char_data *ch, char *arg) {
     if (len >= sizeof(buf2))
         strcpy(buf2 + sizeof(buf2) - strlen(overflow) - 1, overflow); /* strcpy: OK */
 
-    write_to_output(ch->desc, buf2);
+    write_to_output(ch->desc, "%s", buf2);
 }
 
 

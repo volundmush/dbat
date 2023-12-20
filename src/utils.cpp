@@ -2701,30 +2701,6 @@ char *introd_calc(struct char_data *ch) {
     return (intro);
 }
 
-void game_info(const char *format, ...) {
-    struct descriptor_data *i;
-    va_list args;
-    char messg[MAX_STRING_LENGTH];
-
-    if (format == nullptr)
-        return;
-
-    sprintf(messg, "@r-@R=@D<@GCOPYOVER@D>@R=@r- @W");
-
-    for (i = descriptor_list; i; i = i->next) {
-        if (STATE(i) != CON_PLAYING && (STATE(i) != CON_REDIT && STATE(i) != CON_OEDIT && STATE(i) != CON_MEDIT))
-            continue;
-        if (!(i->character))
-            continue;
-
-        write_to_output(i, messg);
-        va_start(args, format);
-        vwrite_to_output(i, format, args);
-        va_end(args);
-        write_to_output(i, "@n\r\n@R>>>@GMake sure to pick up your bed items and save.@n\r\n");
-    }
-}
-
 double speednar(struct char_data *ch) {
     auto ratio = 1.0 - ch->getBurdenRatio();
     return std::clamp<double>(ratio, 0.01, 1.0);

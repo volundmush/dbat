@@ -798,6 +798,17 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
 
     if(j.contains("transclass")) transclass = j["transclass"];
 
+    if(j.contains("preference")) preference = j["preference"];
+    if(j.contains("freeze_level")) freeze_level = j["freeze_level"];
+    if(j.contains("practice_points")) practice_points = j["practice_points"];
+    if(j.contains("speaking")) speaking = j["speaking"];
+    if(j.contains("trainagl")) trainagl = j["trainagl"];
+    if(j.contains("traincon")) traincon = j["traincon"];
+    if(j.contains("trainint")) trainint = j["trainint"];
+    if(j.contains("trainstr")) trainstr = j["trainstr"];
+    if(j.contains("trainwis")) trainwis = j["trainwis"];
+    if(j.contains("trainspd")) trainspd = j["trainspd"];
+
 }
 
 void char_data::deserializeProto(const nlohmann::json &j) {

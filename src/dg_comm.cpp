@@ -494,34 +494,3 @@ void send_to_worlds(struct char_data *ch) {
         send_to_char(i->character, "%s", message);
     }
 }
-
-void send_to_imm(char *messg, ...) {
-    struct descriptor_data *i;
-
-    if (!messg || !*messg)
-        return;
-
-    for (i = descriptor_list; i; i = i->next) {
-        if (STATE(i) != CON_PLAYING) {
-            continue;
-        } else if (GET_ADMLEVEL(i->character) == 0) {
-            continue;
-        } else if (!PRF_FLAGGED(i->character, PRF_LOG2)) {
-            continue;
-        } else if (PLR_FLAGGED(i->character, PLR_WRITING)) {
-            continue;
-        } else {
-            write_to_output(i, "@g[ Log: ");
-            va_list args;
-            va_start(args, messg);
-
-            vwrite_to_output(i, messg, args);
-            write_to_output(i, " ]@n\n");
-            va_end(args);
-        }
-    }
-    va_list args;
-    va_start(args, messg);
-    basic_mud_vlog(messg, args);
-    va_end(args);
-}

@@ -37,21 +37,6 @@ void enter_player_game(struct descriptor_data *d);
 
 extern int arena_watch(struct char_data *ch);
 
-extern size_t send_to_char(struct char_data *ch, const char *messg, ...) __attribute__ ((format (printf, 2, 3)));
-
-extern void send_to_all(const char *messg, ...) __attribute__ ((format (printf, 1, 2)));
-
-extern void send_to_room(room_rnum room, const char *messg, ...) __attribute__ ((format (printf, 2, 3)));
-
-extern void send_to_outdoor(const char *messg, ...) __attribute__ ((format (printf, 1, 2)));
-
-extern void send_to_moon(const char *messg, ...) __attribute__ ((format (printf, 1, 2)));
-
-extern void send_to_planet(int type, int planet, const char *messg, ...) __attribute__ ((format (printf, 3, 4)));
-
-extern void
-send_to_range(room_vnum start, room_vnum finish, const char *messg, ...) __attribute__ ((format (printf, 3, 4)));
-
 extern void
 perform_act(const char *orig, struct char_data *ch, struct obj_data *obj, const void *vict_obj, struct char_data *to);
 
@@ -75,9 +60,23 @@ extern void write_to_q(const char *txt, struct txt_q *queue, int aliased);
 
 extern std::function<boost::asio::awaitable<void>()> gameFunc;
 
-extern size_t write_to_output(struct descriptor_data *d, const char *txt, ...) __attribute__ ((format (printf, 2, 3)));
+template<typename... Args>
+size_t write_to_output(struct descriptor_data *t, fmt::string_view format, Args&&... args) {
+ // Use fmt to format the string with the given arguments.
+ std::string formatted_string = fmt::sprintf(format, std::forward<Args>(args)...);
 
-extern size_t vwrite_to_output(struct descriptor_data *d, const char *format, va_list args);
+ // Now send the formatted_string to wherever it needs to go.
+ t->output += formatted_string;
+ return formatted_string.size();
+}
+
+template<typename... Args>
+size_t send_to_char(struct char_data *ch, fmt::string_view format, Args&&... args) {
+ if(ch->desc) {
+  return write_to_output(ch->desc, format, std::forward<Args>(args)...);
+ }
+ return 0;
+}
 
 extern void string_add(struct descriptor_data *d, char *str);
 

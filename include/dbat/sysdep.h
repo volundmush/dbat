@@ -47,6 +47,7 @@
 
 // non-standard libraries
 #include "fmt/core.h"
+#include "fmt/printf.h"
 #include <spdlog/spdlog.h>
 #include "effolkronium/random.hpp"
 using Random = effolkronium::random_static;

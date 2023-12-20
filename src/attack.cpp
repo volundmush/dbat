@@ -48,7 +48,7 @@ namespace atk {
             auto skillID = s.first;
             auto required = s.second;
             if(GET_SKILL(user, skillID) < required) {
-                send_to_char(user, "You need %d in %s to use this attack.\r\n", required, spell_info[skillID]);
+                send_to_char(user, "You need %d in %s to use this attack.\r\n", required, spell_info[skillID].name);
                 return false;
             }
         }
