@@ -141,7 +141,7 @@ bool tech_handle_android_absorb(char_data *ch, char_data *vict) {
     return false;
 }
 
-bool tech_handle_crashdown(char_data *ch, char_data *vict) {
+void tech_handle_crashdown(char_data *ch, char_data *vict) {
     if (AFF_FLAGGED(vict, AFF_FLYING)) {
         act("@w$N@w is knocked out of the air!@n", true, ch, nullptr, vict, TO_CHAR);
         act("@wYou are knocked out of the air!@n", true, ch, nullptr, vict, TO_VICT);

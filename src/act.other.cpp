@@ -317,7 +317,7 @@ ACMD(do_rpp) {
                         return;
                     }
                     send_to_char(ch, "You increase your constitution by 2.\r\n");
-                    ch->modStrength(2);
+                    ch->modConstitution(2);
                 } else if (!strcasecmp(arg2, "int")) {
                     if (GET_BONUS(ch, BONUS_DULL) > 0 && ch->real_abils.intel >= 45) {
                         send_to_char(ch, "You can't because that stat maxes at 45 due to a trait negative.\r\n");

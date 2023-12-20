@@ -330,7 +330,19 @@ boost::asio::awaitable<void> heartbeat(uint64_t heart_pulse, double deltaTime) {
         s.countdown -= deltaTime;
         if(s.countdown <= 0.0) {
             auto start = std::chrono::high_resolution_clock::now();
-            s.func(heart_pulse, deltaTime);
+            try {
+                s.func(heart_pulse, deltaTime);
+            }
+            catch(const std::exception &e) {
+                basic_mud_log("Exception while running GameService '%s': %s", s.name.c_str(), e.what());
+                printStackTrace();
+                shutdown_game(1);
+            }
+            catch(...) {
+                basic_mud_log("Unknown exception while running GameService '%s'", s.name.c_str());
+                printStackTrace();
+                shutdown_game(1);
+            }
             auto end = std::chrono::high_resolution_clock::now();
             timings.emplace_back(s.name, std::chrono::duration<double>(end - start).count());
             s.countdown += s.interval;

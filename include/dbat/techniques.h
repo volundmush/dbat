@@ -15,4 +15,4 @@ extern bool tech_handle_targeting(char_data *ch, char *arg, char_data **vict, ob
 
 extern bool tech_handle_charge(char_data *ch, char *arg, double minimum, double *attperc);
 
-extern bool tech_handle_crashdown(char_data *ch, char_data *vict);
+extern void tech_handle_crashdown(char_data *ch, char_data *vict);
