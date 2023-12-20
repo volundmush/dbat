@@ -1126,22 +1126,13 @@ void extract_char_final(struct char_data *ch) {
         SITS(ch) = nullptr;
     }
 
-    if (IS_NPC(ch) && GET_MOB_VNUM(ch) == 25) {
-        if (GET_ORIGINAL(ch)) {
-            handle_multi_merge(ch);
-        }
+    if (auto original = GET_ORIGINAL(ch); original) {
+        original->clones.erase(ch);
     }
 
-    if (!IS_NPC(ch) && GET_CLONES(ch) > 0) {
-        for (auto clone = character_list; clone; clone = clone->next) {
-            if (IS_NPC(clone)) {
-                if (GET_MOB_VNUM(clone) == 25) {
-                    if (GET_ORIGINAL(clone) == ch) {
-                        handle_multi_merge(clone);
-                    }
-                }
-            }
-        }
+    if (!ch->clones.empty()) {
+        auto clones = ch->clones;
+        for(auto &c : clones) handle_multi_merge(c);
     }
 
     purge_homing(ch);

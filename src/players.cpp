@@ -315,7 +315,6 @@ int load_char(const char *name, struct char_data *ch) {
         GET_COND(ch, HUNGER) = PFDEF_HUNGER;
         GET_COND(ch, THIRST) = PFDEF_THIRST;
         GET_COND(ch, DRUNK) = PFDEF_DRUNK;
-        GET_PRACTICES(ch) = PFDEF_PRACTICES;
         GET_GOLD(ch) = PFDEF_GOLD;
         GET_BACKSTAB_COOL(ch) = 0;
         GET_COOLDOWN(ch) = 0;
@@ -478,7 +477,7 @@ int load_char(const char *name, struct char_data *ch) {
 
                 case 'L':
                     if (!strcmp(tag, "Last")) ch->time.logon = atol(line);
-                    else if (!strcmp(tag, "Lern")) GET_PRACTICES(ch) += atoi(line);
+                    else if (!strcmp(tag, "Lern")) ch->modPractices(atoi(line));
                     else if (!strcmp(tag, "Levl")) GET_CLASS_LEVEL(ch) = atoi(line);
                         /* else if (!strcmp(tag, "LevD"))  read_level_data(ch, fl);*/
                     else if (!strcmp(tag, "LF  ")) load_BASE(ch, line, LOAD_LIFE);
@@ -556,10 +555,10 @@ int load_char(const char *name, struct char_data *ch) {
                     else if (!strcmp(tag, "Skn ")) GET_SKIN(ch) = atoi(line);
                     else if (!strcmp(tag, "Size")) ch->size = atoi(line);
                     else if (!strcmp(tag, "SklB")) load_skills(fl, ch, true);
-                    else if (!strcmp(tag, "SkRc")) GET_PRACTICES(ch) += atoi(line);
+                    else if (!strcmp(tag, "SkRc")) ch->modPractices(atoi(line));
                     else if (!strcmp(tag, "SkCl")) {
                         sscanf(line, "%d %d", &num2, &num3);
-                        GET_PRACTICES(ch) += num3;
+                        ch->modPractices(num3);
                     } else if (!strcmp(tag, "Slot")) ch->skill_slots = atoi(line);
                     else if (!strcmp(tag, "Spek")) SPEAKING(ch) = atoi(line);
                     else if (!strcmp(tag, "Str ")) ch->real_abils.str = atoi(line);

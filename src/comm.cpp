@@ -304,7 +304,7 @@ static std::vector<GameSystem> gameSystems = {
         GameSystem("wishSYS", 1.0, wishSYS),
         GameSystem("mobile_activity", 10.0, mobile_activity),
         GameSystem("check_auction", 15.0, check_auction),
-        GameSystem("fight_stack", 15.0, fight_stack),
+        GameSystem("fight_stack", 4.0, fight_stack),
         GameSystem("homing_update", 2.0, homing_update),
         GameSystem("huge_update", 2.0, huge_update),
         GameSystem("broken_update", 2.0, broken_update),

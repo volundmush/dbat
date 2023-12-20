@@ -3812,7 +3812,7 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
                         send_to_char(vict, "You instruct them in proper fighting techniques and strategies.\r\n");
                         act("You take $N's instruction to heart and gain more experience.\r\n", false, ch, nullptr,
                             vict, TO_CHAR);
-                        GET_PRACTICES(vict) -= 10;
+                        vict->modPractices(-10);
                         bonus = 2;
                     }
                 }
@@ -3837,7 +3837,7 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
         }
         gain = gear_exp(ch, gaincalc);
         if (GET_PRACTICES(ch) >= pscost) {
-            GET_PRACTICES(ch) -= pscost;
+            ch->modPractices(-pscost);
             gain = gain * bonus;
             gain_exp(ch, gain);
             send_to_char(ch, "@D[@Y+ @G%s @mExp@D]@n ", add_commas(gain).c_str());

@@ -3662,7 +3662,7 @@ ACMD(do_eat) {
             }
             if (!AFF_FLAGGED(ch, AFF_PUKED)) {
                 gain_exp(ch, expbonus);
-                GET_PRACTICES(ch) += psbonus;
+                ch->modPractices(psbonus);
                 send_to_char(ch, "That was exceptionally delicious! @D[@mPS@D: @C+%d@D] [@gEXP@D: @G+%s@D]@n\r\n",
                              psbonus, add_commas(expbonus).c_str());
                 if (capped == true)

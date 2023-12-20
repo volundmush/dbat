@@ -872,7 +872,7 @@ in the vault (vnum: 453) now and then. you can just use
                         }
                         if (subfield && *subfield) {
                             int addition = atof(subfield);
-                            GET_PRACTICES(c) = MAX(0, GET_PRACTICES(c) + addition);
+                            c->modPractices(addition);
                         }
                         snprintf(str, slen, "%d", GET_PRACTICES(c));
                     } else if (!strcasecmp(field, "plr")) {

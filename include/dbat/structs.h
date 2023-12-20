@@ -788,7 +788,8 @@ struct char_data : public unit_data {
 
     short song{};
     struct char_data *original{};
-    short clones{};
+
+    std::set<struct char_data*> clones{};
     int relax_count{};
     int ingestLearned{};
 
@@ -1090,6 +1091,8 @@ struct char_data : public unit_data {
 
     int getRPP();
     void modRPP(int amt);
+    int getPractices();
+    void modPractices(int amt);
 
     bool isProvidingLight();
     double currentGravity();

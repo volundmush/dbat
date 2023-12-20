@@ -372,7 +372,7 @@ ACMD(do_rpp) {
                 send_to_char(ch, "You do not have enough RPP for that selection.\r\n");
                 return;
             } else {
-                GET_PRACTICES(ch) += 750;
+                ch->modPractices(750);
                 send_to_char(ch, "Your practices have been increased by 750\r\n");
             } /* Can pay for it */
         } /* End Simple Zenni Reward */
@@ -759,10 +759,7 @@ ACMD(do_willpower) {
             return;
         } else {
             GET_EXP(ch) = 0;
-            GET_PRACTICES(ch) -= 100;
-            if (GET_LEVEL(ch) >= 100) {
-                GET_PRACTICES(ch) -= 100;
-            }
+            ch->modPractices(-100);
             if (rand_number(10, 100) - GET_INT(ch) > 60) {
                 reveal_hiding(ch, 0);
                 act("@WYou focus all your knowledge and will on breaking free. Dark purple energy swirls around your body and the M on your forehead burns brightly. After a few moments you give up, having failed to overcome the majinization!@n",
@@ -772,10 +769,7 @@ ACMD(do_willpower) {
                 return;
             } else {
                 GET_EXP(ch) = 0;
-                GET_PRACTICES(ch) -= 100;
-                if (GET_LEVEL(ch) >= 100) {
-                    GET_PRACTICES(ch) -= 100;
-                }
+                ch->modPractices(-100);
                 reveal_hiding(ch, 0);
                 act("@WYou focus all your knowledge and will on breaking free. Dark purple energy swirls around your body and the M on your forehead burns brightly. After a few moments the ground splits beneath you and while letting out a piercing scream the M disappears from your forehead! You are free while still keeping the boost you had recieved from the majinization!@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
@@ -1626,7 +1620,7 @@ ACMD(do_train) {
 
     if (sensei > -1) {
         GET_GOLD(ch) -= 8;
-        GET_PRACTICES(ch) -= 1;
+        ch->modPractices(-1);
     }
 
     if (*stat_train >= needed) {
@@ -2073,7 +2067,7 @@ ACMD(do_future) {
             return;
         }
         ch->decCurKI(ch->getMaxKI() / 40);
-        GET_PRACTICES(ch) -= 100;
+        ch->modPractices(-100);
         reveal_hiding(ch, 0);
         act("@CYou focus your energy into your fingers before stabbing your claws into $N and bestowing the power of Future Sight upon $M. Shortly after $E passes out.@n",
             true, ch, nullptr, vict, TO_CHAR);
@@ -2096,7 +2090,7 @@ ACMD(do_future) {
             return;
         }
         ch->decCurKI(ch->getMaxKI() / 40);
-        GET_PRACTICES(ch) -= 100;
+        ch->modPractices(-100);
         reveal_hiding(ch, 0);
         act("@CYou focus your energy into your mind and awaken your latent Future Sight powers!@n", true, ch, nullptr,
             vict, TO_CHAR);
@@ -3831,7 +3825,7 @@ ACMD(do_form) {
             act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
             ch->decCurKI(cost);
             ch->decCurHealthPercent(1, 1);
-            GET_PRACTICES(ch) -= 10;
+            ch->modPractices(-10);
             return;
         }
     } else if (!(strcmp(arg, "senzu"))) {
@@ -3864,7 +3858,7 @@ ACMD(do_form) {
             ch->decCurKI(cost);
             ch->decCurHealth(cost2);
             ch->decCurSTPercent(1, 1);
-            GET_PRACTICES(ch) -= 50;
+            ch->modPractices(-50);
             return;
         }
     } else {
@@ -5193,7 +5187,7 @@ ACMD(do_focus) {
                 if (IS_JINTO(ch) && level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0 &&
                     GET_PRACTICES(ch) >= 15 && rand_number(1, 4) >= 3) {
                     int64_t gain = 0;
-                    GET_PRACTICES(ch) -= 15;
+                    ch->modPractices(-15);
                     if (GET_SKILL(ch, SKILL_ENLIGHTEN) >= 100) {
                         gain = level_exp(ch, GET_LEVEL(ch) + 1) * 0.15;
                         GET_EXP(ch) += gain;
@@ -5264,7 +5258,7 @@ ACMD(do_focus) {
                     if (IS_JINTO(ch) && level_exp(vict, GET_LEVEL(vict) + 1) - GET_EXP(vict) > 0 &&
                         GET_PRACTICES(ch) >= 15 && rand_number(1, 4) >= 3) {
                         int64_t gain = 0;
-                        GET_PRACTICES(ch) -= 15;
+                        ch->modPractices(-15);
                         if (GET_SKILL(ch, SKILL_ENLIGHTEN) >= 100) {
                             gain = level_exp(vict, GET_LEVEL(vict) + 1) * 0.15;
                             GET_EXP(vict) += gain;
@@ -7854,7 +7848,7 @@ ACMD(do_meditate) {
             send_to_char(ch,
                          "During your meditation you manage to expand your mind and get the feeling you could learn some new skills.\r\n");
             GET_SLOTS(ch) += 1;
-            GET_PRACTICES(ch) -= cost;
+            ch->modPractices(-cost);
             return;
         }
         return;

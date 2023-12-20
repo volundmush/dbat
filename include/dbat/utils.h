@@ -658,7 +658,7 @@ extern int GET_SPEEDI(struct char_data *ch);
 #define GRAPPLED(ch)            ((ch)->grappled)
 #define GRAPTYPE(ch)            ((ch)->grap)
 #define GET_ORIGINAL(ch)        ((ch)->original)
-#define GET_CLONES(ch)          ((ch)->clones)
+#define GET_CLONES(ch)          ((ch)->clones.size())
 #define GET_DEFENDER(ch)        ((ch)->defender)
 #define GET_DEFENDING(ch)       ((ch)->defending)
 #define BLOCKS(ch)              ((ch)->blocks)
@@ -672,7 +672,7 @@ extern int GET_SPEEDI(struct char_data *ch);
 
 #define GET_COND(ch, i)        ((ch)->conditions[(i)])
 #define GET_LOADROOM(ch)    ((ch)->load_room)
-#define GET_PRACTICES(ch)    ((ch)->practice_points)
+#define GET_PRACTICES(ch)    ((ch)->getPractices())
 #define GET_TRAINSTR(ch)        ((ch)->trainstr)
 #define GET_TRAININT(ch)        ((ch)->trainint)
 #define GET_TRAINCON(ch)        ((ch)->traincon)

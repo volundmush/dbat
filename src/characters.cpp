@@ -142,11 +142,8 @@ void char_data::resurrect(ResurrectionMode mode) {
         assign_affect(this, AFF_WEAKENED_STATE, SKILL_WARP, dur, str, con, intel, agl, wis, spd);
         if (losschance >= 100) {
             int psloss = rand_number(100, 300);
-            GET_PRACTICES(this) -= psloss;
+            modPractices(-psloss);
             send_to_char(this, "@R...and a loss of @r%d@R PS!@n", psloss);
-            if (GET_PRACTICES(this) < 0) {
-                GET_PRACTICES(this) = 0;
-            }
         }
     }
     GET_DTIME(this) = 0;
@@ -427,8 +424,8 @@ int64_t char_data::getCurPL() {
 
 int64_t char_data::getEffBasePL() {
     if (original) return original->getEffBasePL();
-    if (clones) {
-        return getBasePL() / (clones + 1);
+    if (!clones.empty()) {
+        return getBasePL() / (clones.size() + 1);
     } else {
         return getBasePL();
     }
@@ -469,8 +466,8 @@ int64_t char_data::getMaxKI() {
 
 int64_t char_data::getEffBaseKI() {
     if (original) return original->getEffBaseKI();
-    if (clones) {
-        return getBaseKI() / (clones + 1);
+    if (!clones.empty()) {
+        return getBaseKI() / (clones.size() + 1);
     } else {
         return getBaseKI();
     }
@@ -559,8 +556,8 @@ int64_t char_data::getMaxST() {
 
 int64_t char_data::getEffBaseST() {
     if (original) return original->getEffBaseST();
-    if (clones) {
-        return getBaseST() / (clones + 1);
+    if (!clones.empty()) {
+        return getBaseST() / (clones.size() + 1);
     } else {
         return getBaseST();
     }
@@ -981,6 +978,18 @@ void char_data::modRPP(int amt) {
 
     p.account->modRPP(amt);
 }
+
+int char_data::getPractices() {
+    return practice_points;
+}
+
+void char_data::modPractices(int amt) {
+    practice_points += amt;
+    if(practice_points < 0) {
+        practice_points = 0;
+    }
+}
+
 
 void char_data::login() {
     enter_player_game(desc);

@@ -1875,16 +1875,10 @@ static void final_combat_resolve(struct char_data *ch) {
         SITS(ch) = nullptr;
         SITTING(chair) = nullptr;
     }
-    if (!IS_NPC(ch) && GET_CLONES(ch) > 0) {
-        struct char_data *clone = nullptr;
-        for (clone = character_list; clone; clone = clone->next) {
-            if (IS_NPC(clone)) {
-                if (GET_MOB_VNUM(clone) == 25) {
-                    if (GET_ORIGINAL(clone) == ch) {
-                        handle_multi_merge(clone);
-                    }
-                }
-            }
+    if (!IS_NPC(ch) && !ch->clones.empty()) {
+        auto clones = ch->clones;
+        for(auto &c : clones) {
+            handle_multi_merge(c);
         }
     }
     if (CARRYING(ch)) {
@@ -1981,7 +1975,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
                     psreward = 0;
                     send_to_char(killer, "@D[@G+0 @BPS @cCapped at 50 for Absorb@D]@n\r\n");
                 } else {
-                    GET_PRACTICES(killer) += psreward;
+                    killer->modPractices(psreward);
                     send_to_char(killer, "@D[@G+%d @BPS@D]@n\r\n", psreward);
                 }
             }
@@ -2370,7 +2364,7 @@ static void perform_group_gain(struct char_data *ch, int base, struct char_data 
     }
     if (group_bonus(ch, 2) == 2) {
         send_to_char(ch, "You receive a bonus from your group's leader! @D[@G+2 PS!@D]@n\r\n");
-        GET_PRACTICES(ch) += 2;
+        ch->modPractices(2);
     } else if (group_bonus(ch, 2) == 3) {
         send_to_char(ch, "You receive a bonus from your group's leader! @D[@G+5%s Exp!@D]@n\r\n", "%");
         share += share * 0.05;

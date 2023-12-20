@@ -165,7 +165,7 @@ ACMD(do_multiform) {
         if (tch == ch || !IS_NPC(tch)) {
             continue;
         }
-        if (GET_MOB_VNUM(tch) == 25 && GET_ORIGINAL(tch) == ch) {
+        if (GET_ORIGINAL(tch) == ch) {
             multis.push_back(tch);
         }
     }
@@ -179,7 +179,7 @@ ACMD(do_multiform) {
             return;
         }
         for (const auto &m: multis) {
-            extract_char(m);
+            handle_multi_merge(m);
         }
         return;
     }
@@ -294,7 +294,7 @@ static void generate_multiform(struct char_data *ch, int count) {
         }
 
         GET_CLASS_LEVEL(clone) = GET_CLASS_LEVEL(ch);
-        GET_CLONES(ch) += 1;
+        ch->clones.insert(clone);
 
         GET_ORIGINAL(clone) = ch;
         char_to_room(clone, IN_ROOM(ch));
@@ -305,13 +305,14 @@ static void generate_multiform(struct char_data *ch, int count) {
 void handle_multi_merge(struct char_data *form) {
     struct char_data *ch = GET_ORIGINAL(form);
 
-    if (ch == nullptr)
+    if (!ch) {
+        extract_char(form);
         return;
+    }
 
     send_to_char(ch, "@YYou merge with one of your forms!@n\r\n");
     act("@y$n@Y merges with one of his multiforms!@n\r\n", true, ch, nullptr, nullptr, TO_ROOM);
 
-    ch->clones = std::max(0, ch->clones - 1);
     extract_char(form);
 }
 
@@ -2184,7 +2185,7 @@ ACMD(do_runic) {
             act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CGebo@D'@B rune on $s skin. The rune flashes out of existence immediately!@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
             send_to_char(ch, "@D[@B%d@b ink used.@D]@n\r\n", inkcost);
-            GET_PRACTICES(vict) += 125;
+            vict->modPractices(125);
             send_to_char(vict,
                          "@GYou feel like you've just gained a lot of knowledge. Now if only you could apply it. @D[@m+125 PS@D]@n\r\n");
             GET_OBJ_VAL(bottle, 6) -= inkcost;
@@ -2202,7 +2203,7 @@ ACMD(do_runic) {
             act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CGebo@D'@B rune on @b$N's@B skin. The rune flashes out of existence immediately!@n",
                 true, ch, nullptr, vict, TO_NOTVICT);
             send_to_char(ch, "@D[@B%d@b ink used.@D]@n\r\n", inkcost);
-            GET_PRACTICES(vict) += 125;
+            vict->modPractices(125);
             send_to_char(vict,
                          "@GYou feel like you've just gained a lot of knowledge. Now if only you could apply it. @D[@m+125 PS@D]@n\r\n");
             GET_OBJ_VAL(bottle, 6) -= inkcost;
@@ -2281,7 +2282,7 @@ ACMD(do_scry) {
                      "Your Powerlevel, Ki, and Stamina have improved drastically! On top of that your Intelligence and Wisdom have improved permanantly!\r\n");
         vict->real_abils.intel += 2;
         vict->real_abils.wis += 2;
-        GET_PRACTICES(ch) -= 2000;
+        ch->modPractices(-2000);
         if (GET_LEVEL(ch) < 100) {
             send_to_char(ch, "@D[@mPractice Sessions@D:@R -2000@D]@n\r\n");
             if (level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0) {

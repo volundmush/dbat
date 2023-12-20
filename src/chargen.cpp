@@ -1808,14 +1808,14 @@ namespace net {
                     }
                 } else if (!strcasecmp(arg.c_str(), "forget")) {
                     if (!IS_BIO(ch) && !IS_MUTANT(ch)) {
-                        GET_PRACTICES(ch) += 200;
+                        ch->modPractices(200);
                         SET_BIT_AR(PLR_FLAGS(ch), PLR_FORGET);
                         display_bonus_menu(0);
                         sendText("@CThis menu (and the Negatives menu) are for selecting various traits about your character.\n");
                         sendText("@wChoose: ");
                         state = CON_BONUS;
                     } else if (IS_MUTANT(ch)) {
-                        GET_PRACTICES(ch) += 200;
+                        ch->modPractices(200);
                         SET_BIT_AR(PLR_FLAGS(ch), PLR_FORGET);
                         sendText("\n@RSelect a mutation. A second will be chosen automatically..\n");
                         sendText("@D--------------------------------------------------------@n\n");
@@ -1834,7 +1834,8 @@ namespace net {
                         ch->genome[1] = 0;
                         state = CON_GENOME;
                     } else {
-                        GET_PRACTICES(ch) += 200;
+
+                        ch->modPractices(200);
                         SET_BIT_AR(PLR_FLAGS(ch), PLR_FORGET);
                         sendText("\n@RSelect two genomes to be your primary DNA strains.\n");
                         sendText("@D--------------------------------------------------------@n\n");
@@ -2039,7 +2040,7 @@ namespace net {
                     sendText("\r\n@wTo check the bonuses/negatives you have in game use the status command");
                     if (ccpoints > 0) {
                         sendText("\r\n@GYour left over points were spent on Practice Sessions@w");
-                        GET_PRACTICES(ch) += (100 * ccpoints);
+                        ch->modPractices(100 * ccpoints);
                     }
                     finish();
                     return;
@@ -2089,7 +2090,7 @@ namespace net {
                     sendText("\r\n@wTo check the bonuses/negatives you have in game use the status command");
                     if (ccpoints > 0) {
                         sendText("\r\n@GYour left over points were spent on Practice Sessions@w");
-                        GET_PRACTICES(ch) += (100 * ccpoints);
+                        ch->modPractices(100 * ccpoints);
                     }
                     finish();
                 } else if ((value = parse_bonuses(arg)) != 1337) {

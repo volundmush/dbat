@@ -2501,7 +2501,7 @@ ACMD(do_handout) {
         if (IS_NPC(j->character))
             continue;
         else {
-            GET_PRACTICES(j->character) += 10;
+            j->character->modPractices(10);
         }
     }
 
@@ -3795,12 +3795,12 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
         case 27:
         case 28:
             if (GET_CLASS_LEVEL(vict)) {
-                GET_PRACTICES(vict) = RANGE(0, 10000);
+                vict->modPractices(RANGE(0, 10000));
                 mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set PS for %s.", GET_NAME(ch),
                        GET_NAME(vict));
                 log_imm_action("SET: %s has set PS for %s.", GET_NAME(ch), GET_NAME(vict));
             } else {
-                GET_PRACTICES(vict) = RANGE(0, 10000);
+                vict->modPractices(RANGE(0, 10000));
                 mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set PS for %s.", GET_NAME(ch),
                        GET_NAME(vict));
                 log_imm_action("SET: %s has set PS for %s.", GET_NAME(ch), GET_NAME(vict));
@@ -4126,7 +4126,6 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             break;
 
         case 81:
-            GET_CLONES(vict) = RANGE(1, 3);
             send_to_char(ch, "Done.\r\n");
             break;
 

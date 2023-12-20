@@ -901,7 +901,7 @@ namespace race {
                                  ps_cost);
                     return false;
                 } else {
-                    GET_PRACTICES(ch) -= 50;
+                    ch->modPractices(-50);
                     GET_TRANSCOST(ch, tier) = true;
                     send_to_char(ch, "You pay %i PS to permanently unlock this transformation!\r\n", ps_cost);
                 }

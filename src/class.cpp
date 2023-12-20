@@ -1171,7 +1171,7 @@ void advance_level(struct char_data *ch, int whichclass) {
         add_mana *= 1.25;
         add_move *= 1.25;
     }
-    GET_PRACTICES(ch) += add_prac;
+    ch->modPractices(add_prac);
     ch->gainBasePL(add_hp, true);
     ch->gainBaseKI(add_mana, true);
     ch->gainBaseST(add_move, true);
