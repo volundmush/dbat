@@ -7778,5 +7778,4 @@ ACMD(do_desc) {
     write_to_output(d, "Enter the new text you'd like others to see when they look at you.\r\n");
     string_write(d, &ch->look_description, EXDSCR_LENGTH, 0, nullptr);
     STATE(d) = CON_EXDESC;
-    return;
 }

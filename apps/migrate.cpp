@@ -1440,6 +1440,7 @@ void migrate_characters() {
         p.account = &a;
         a.characters.emplace_back(id);
         ch->in_room = ch->load_room;
+        ch->was_in_room = ch->load_room;
         uniqueCharacters[id] = std::make_pair(ch->generation, ch);
     }
 
