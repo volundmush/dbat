@@ -6145,7 +6145,7 @@ ACMD(do_help) {
     if (GET_ADMLEVEL(ch) > 0) {
         sprintf(buf + strlen(buf), "@WHelp File Level@w: @D(@R%d@D)@n\n", help_table[mid].min_level);
     }
-    write_to_output(ch->desc, buf);
+    write_to_output(ch->desc, "%s", buf);
 }
 
 #define WHO_FORMAT \
