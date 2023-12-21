@@ -4277,7 +4277,7 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread) {
     if (cmread) {
 
         obj = ch->findObject(isBoard);
-        if(!obj) ch->getRoom()->findObject(isBoard);
+        if(!obj) obj = ch->getRoom()->findObject(isBoard);
 
         if (obj) {
             arg = one_argument(arg, number);
