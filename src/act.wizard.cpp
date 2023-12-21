@@ -1708,7 +1708,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
             i2++;
             total += check_insidebag(GET_EQ(k, i), 0.5) + 1;
         }
-    send_to_char(ch, "Carried: weight: %d, Total Items (includes bagged items): %d, EQ: %d\r\n", IS_CARRYING_W(k),
+    send_to_char(ch, "Carried: weight: %d, Total Items (includes bagged items): %d, EQ: %d\r\n", (int64_t)IS_CARRYING_W(k),
                  total, i2);
 
 

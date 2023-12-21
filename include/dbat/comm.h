@@ -58,25 +58,9 @@ extern void close_socket(struct descriptor_data *d);
 /* I/O functions */
 extern void write_to_q(const char *txt, struct txt_q *queue, int aliased);
 
-extern std::function<boost::asio::awaitable<void>()> gameFunc;
+extern std::function<void()> gameFunc;
 
-template<typename... Args>
-size_t write_to_output(struct descriptor_data *t, fmt::string_view format, Args&&... args) {
- // Use fmt to format the string with the given arguments.
- std::string formatted_string = fmt::sprintf(format, std::forward<Args>(args)...);
 
- // Now send the formatted_string to wherever it needs to go.
- t->output += formatted_string;
- return formatted_string.size();
-}
-
-template<typename... Args>
-size_t send_to_char(struct char_data *ch, fmt::string_view format, Args&&... args) {
- if(ch->desc) {
-  return write_to_output(ch->desc, format, std::forward<Args>(args)...);
- }
- return 0;
-}
 
 extern void string_add(struct descriptor_data *d, char *str);
 

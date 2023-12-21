@@ -91,6 +91,7 @@ struct area_data {
     nlohmann::json serialize();
     static vnum getNextID();
     static bool isPlanet(const area_data &area);
+    std::optional<room_vnum> getLaunchDestination();
 };
 
 /* Extra description: used in objects, mobiles, and rooms */
@@ -340,6 +341,8 @@ struct room_data : public unit_data {
     void save() override;
 
     room_ref ref() { return room_ref{id, generation}; }
+
+    std::optional<room_vnum> getLaunchDestination();
 
 };
 /* ====================================================================== */

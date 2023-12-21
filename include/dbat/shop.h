@@ -16,7 +16,7 @@ struct shop_buy_data {
     explicit shop_buy_data(const nlohmann::json& j);
     nlohmann::json serialize();
     int type{};
-    std::string keywords;
+    std::string keywords{};
 };
 
 #define BUY_TYPE(i)        ((i).type)
@@ -32,10 +32,10 @@ struct shop_data {
     void add_product(obj_vnum v);
     void remove_product(obj_vnum v);
     shop_vnum vnum{};        /* Virtual number of this shop		*/
-    std::vector<obj_vnum> producing;        /* Which item to produce (virtual)	*/
+    std::vector<obj_vnum> producing{};        /* Which item to produce (virtual)	*/
     float profit_buy{};        /* Factor to multiply cost with		*/
     float profit_sell{};        /* Factor to multiply cost with		*/
-    std::vector<shop_buy_data> type;    /* Which items to trade			*/
+    std::vector<shop_buy_data> type{};    /* Which items to trade			*/
     char *no_such_item1{};        /* Message if keeper hasn't got an item	*/
     char *no_such_item2{};        /* Message if player hasn't got an item	*/
     char *missing_cash1{};        /* Message if keeper hasn't got cash	*/

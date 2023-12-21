@@ -1310,15 +1310,13 @@ ACMD(do_drive) {
             } else if (!strcasecmp(arg, "launch")) {
                 int lnum = 0;
                 int rnum = 0;
-                auto planet = vehicle->getMatchingArea(area_data::isPlanet);
-                if(planet) {
-                    auto &a = areas[planet.value()];
-                    rnum = a.extraVn.value_or(NOWHERE);
-                }
-                if(rnum == NOWHERE) {
+                auto room = vehicle->getRoom();
+                auto dest = room->getLaunchDestination();
+                if(!dest) {
                     send_to_char(ch, "@wYou are not on a planet.@n\r\n");
                     return;
                 }
+                rnum = dest.value();
                 act("@wYou set the controls to launch.@n", false, ch, nullptr, nullptr, TO_CHAR);
                 act("@C$n @wmanipulates the ship controls.@n", false, ch, nullptr, nullptr, TO_ROOM);
                 act("@RThe ship shudders as it launches up into the sky!@n", false, ch, nullptr, nullptr, TO_CHAR);

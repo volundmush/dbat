@@ -409,14 +409,16 @@ static int evaluate_expression(struct obj_data *obj, char *expr) {
 static int trade_with(struct obj_data *item, vnum shop_nr) {
     int counter;
 
+
     if (GET_OBJ_COST(item) < 1)
         return (OBJECT_NOVAL);
 
     if (OBJ_FLAGGED(item, ITEM_NOSELL))
         return (OBJECT_NOTOK);
+    auto &shop = shop_index[shop_nr];
 
-    for (counter = 0; SHOP_BUYTYPE(shop_nr, counter) != NOTHING; counter++)
-        if (SHOP_BUYTYPE(shop_nr, counter) == GET_OBJ_TYPE(item)) {
+    for (const auto &product : shop.type)
+        if (product.type == GET_OBJ_TYPE(item)) {
             if (GET_OBJ_VAL(item, VAL_WAND_CHARGES) == 0 &&
                 (GET_OBJ_TYPE(item) == ITEM_WAND ||
                  GET_OBJ_TYPE(item) == ITEM_STAFF))
@@ -464,9 +466,10 @@ int shop_producing(struct obj_data *item, vnum shop_nr) {
 
     if (GET_OBJ_RNUM(item) == NOTHING)
         return (false);
+    auto &shop = shop_index[shop_nr];
 
-    for (counter = 0; SHOP_PRODUCT(shop_nr, counter) != NOTHING; counter++)
-        if (same_obj(item, &obj_proto[SHOP_PRODUCT(shop_nr, counter)]))
+    for (auto &product : shop.type)
+        if (same_obj(item, &obj_proto[product.type]))
             return (true);
     return (false);
 }
@@ -1465,7 +1468,7 @@ void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
                 read_line(shop_f, "%ld", &shop_temp);
                 if(shop_temp == -1) break;
                 auto &t = sh.type.emplace_back();
-                t.type = temp;
+                t.type = shop_temp;
             }
 
             sh.no_such_item1 = read_shop_message(0, SHOP_NUM(top_shop), shop_f, buf2);
@@ -1810,8 +1813,8 @@ nlohmann::json shop_buy_data::serialize() {
 }
 
 shop_buy_data::shop_buy_data(const nlohmann::json &j) : shop_buy_data() {
-    if(j.count("type")) type = j["type"];
-    if(j.count("keywords")) keywords = j["keywords"];
+    if(j.contains("type")) type = j["type"];
+    if(j.contains("keywords")) keywords = j["keywords"];
 }
 
 nlohmann::json shop_data::serialize() {

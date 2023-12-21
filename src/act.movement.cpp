@@ -2248,15 +2248,12 @@ ACMD(do_fly) {
             return;
         }
 
-        auto planet = ch->getMatchingArea(area_data::isPlanet);
-        if(!planet) {
-            send_to_char(ch, "You are not on a planet!");
-            return;
-        }
+        auto r = ch->getRoom();
+        auto dest = r->getLaunchDestination();
 
-        auto &a = areas[planet.value()];
-        if(!a.extraVn) {
-            send_to_char(ch, "You are not on a planet!");
+        auto planet = ch->getMatchingArea(area_data::isPlanet);
+        if(!dest) {
+            send_to_char(ch, "You can't fly to space from here!");
             return;
         }
 
@@ -2268,18 +2265,26 @@ ACMD(do_fly) {
         }
         GET_ALT(ch) = 0;
         REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-        fly_planet(IN_ROOM(ch), "can be seen blasting off into space!@n\r\n", ch);
-        send_to_sense(1, "leaving the planet", ch);
-        send_to_scouter("A powerlevel signal has left the planet", ch, 0, 2);
+
+        if(planet) {
+            fly_planet(IN_ROOM(ch), "can be seen blasting off into space!@n\r\n", ch);
+            send_to_sense(1, "leaving the planet", ch);
+            send_to_scouter("A powerlevel signal has left the planet", ch, 0, 2);
+        }
+
+
         act("@CYou blast off from the ground and rocket through the air. Your speed increases until you manage to reach the brink of space!@n",
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@C$n blasts off from the ground and rockets through the air. You quickly lose sight of $m as $e continues upward!@n",
             true, ch, nullptr, nullptr, TO_ROOM);
         char_from_room(ch);
-        char_to_room(ch, a.extraVn.value());
-        act("@C$n blasts up from the atmosphere below and then comes to a stop.@n", true, ch, nullptr, nullptr,
+        char_to_room(ch, dest.value());
+        if(planet) {
+            act("@C$n blasts up from the atmosphere below and then comes to a stop.@n", true, ch, nullptr, nullptr,
             TO_ROOM);
-        send_to_char(ch, "@mOOC: Use the command 'land' to return to the planet from here.@n\r\n");
+            send_to_char(ch, "@mOOC: Use the command 'land' to return to the planet from here.@n\r\n");
+        }
+
         if (!IS_ANDROID(ch)) {
             ch->decCurKI(ch->getMaxKI() / 10);
         }

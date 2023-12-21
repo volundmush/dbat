@@ -149,13 +149,13 @@ void create_schema();
 
 void dump_state();
 
-extern boost::asio::awaitable<void> boot_world();
+extern void boot_world();
 
 extern int is_empty(zone_rnum zone_nr);
 
 extern void index_boot(int mode);
 
-extern boost::asio::awaitable<void> boot_db();
+extern void boot_db();
 
 extern void destroy_db();
 

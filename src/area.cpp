@@ -61,6 +61,33 @@ static std::string areaTypeName(AreaType a) {
     }
 }
 
+std::optional<room_vnum> area_data::getLaunchDestination() {
+    switch(type) {
+        case AreaType::Dimension:
+            return {};
+        case AreaType::CelestialBody:
+            return extraVn;
+        case AreaType::Region:
+            if(parent && areas.contains(parent.value())) {
+                auto& p = areas[parent.value()];
+                return p.getLaunchDestination();
+            }
+            return {};
+        case AreaType::Structure:
+        case AreaType::Vehicle: {
+            if(extraVn ) {
+                if(auto obj = get_last_inserted(objectVnumIndex, extraVn.value()); obj) {
+                    auto r = obj->getRoom();
+                    if(r) return r->vn;
+                }
+            }
+        }
+        return {};
+    }
+    return {};
+}
+
+
 static void render_area_line(struct char_data *ch, const area_data &a) {
     auto atype = areaTypeName(a.type);
     auto colorcount = countColors(a.name);

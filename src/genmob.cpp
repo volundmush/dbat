@@ -1142,7 +1142,11 @@ nlohmann::json char_data::serializeLocation() {
     if(IS_NPC(this)) {
         j["in_room"] = in_room;
     } else {
-        j["load_room"] = normalizeLoadRoom(in_room);
+        auto room = in_room != NOWHERE ? in_room : was_in_room;
+        if(!desc) {
+            room = load_room;
+        }
+        j["load_room"] = normalizeLoadRoom(room);
     }
 
     return j;

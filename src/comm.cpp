@@ -214,7 +214,7 @@ void copyover_recover() {
 }
 
 
-static boost::asio::awaitable<void> performReboot(int mode) {
+static void performReboot(int mode) {
     char buf[100], buf2[100];
 
     std::ofstream fp(COPYOVER_FILE);
@@ -222,7 +222,7 @@ static boost::asio::awaitable<void> performReboot(int mode) {
     if (!fp.is_open()) {
         send_to_imm("Copyover file not writeable, aborted.\r\n");
         circle_reboot = 0;
-        co_return;
+        return;
     }
 
     broadcast("\t\x1B[1;31m \007\007\007The universe stops for a moment as space and time fold.\x1B[0;0m\r\n");
@@ -236,10 +236,6 @@ static boost::asio::awaitable<void> performReboot(int mode) {
         conn->sendText("\r\nSorry, we are rebooting. Please wait warmly for a few seconds.\r\n");
     }
 
-    // wait 200 milliseconds... that should be enough time to push out all of the data.
-    auto hb = std::chrono::milliseconds(200);
-    boost::asio::steady_timer timer(co_await boost::asio::this_coro::executor, hb);
-    co_await timer.async_wait(boost::asio::use_awaitable);
 
     /* For each descriptor/connection, halt them and save state. */
     for (auto &[cid, d] : sessions) {
@@ -267,9 +263,6 @@ static boost::asio::awaitable<void> performReboot(int mode) {
 
     fp << j.dump(4, ' ', false, nlohmann::json::error_handler_t::ignore) << std::endl;
     fp.close();
-
-	co_return;
-
 }
 
 static std::vector<std::pair<std::string, double>> timings;
@@ -322,7 +315,7 @@ static std::vector<GameSystem> gameSystems = {
         GameSystem("extract_pending_chars", 0.0, extract_pending_chars),
 };
 
-boost::asio::awaitable<void> heartbeat(uint64_t heart_pulse, double deltaTime) {
+void heartbeat(uint64_t heart_pulse, double deltaTime) {
     static int mins_since_crashsave = 0;
     timings.clear();
 
@@ -348,10 +341,9 @@ boost::asio::awaitable<void> heartbeat(uint64_t heart_pulse, double deltaTime) {
             s.countdown += s.interval;
         }
     }
-    co_return;
 }
 
-boost::asio::awaitable<void> processConnections(double deltaTime) {
+void processConnections(double deltaTime) {
     // First, handle any disconnected connections.
     for(auto &[id, reason] : net::deadConnections) {
         auto it = net::connections.find(id);
@@ -380,15 +372,13 @@ boost::asio::awaitable<void> processConnections(double deltaTime) {
     for(auto& [id, c] : net::connections) {
         c->onHeartbeat(deltaTime);
     }
-
-    co_return;
 }
 
-boost::asio::awaitable<void> runOneLoop(double deltaTime) {
+void runOneLoop(double deltaTime) {
     static bool sleeping = false;
     struct descriptor_data* next_d;
 
-    co_await processConnections(deltaTime);
+    processConnections(deltaTime);
 
     if(sleeping && descriptor_list) {
         basic_mud_log("Waking up.");
@@ -400,7 +390,7 @@ boost::asio::awaitable<void> runOneLoop(double deltaTime) {
             basic_mud_log("No connections.  Going to sleep.");
             sleeping = true;
         }
-        co_return;
+        return;
     }
 
     {
@@ -428,7 +418,7 @@ boost::asio::awaitable<void> runOneLoop(double deltaTime) {
 
 
     /* Process commands we just read from process_input */
-    {
+    try {
         auto start = std::chrono::high_resolution_clock::now();
         for (auto d = descriptor_list; d; d = next_d) {
             next_d = d->next;
@@ -437,6 +427,15 @@ boost::asio::awaitable<void> runOneLoop(double deltaTime) {
         }
         auto end = std::chrono::high_resolution_clock::now();
         timings.emplace_back("handle input", std::chrono::duration<double>(end - start).count());
+    }
+    catch(const std::exception& e) {
+        basic_mud_log("Exception while processing input: %s", e.what());
+        printStackTrace();
+        shutdown_game(1);
+    } catch(...) {
+        basic_mud_log("Unknown exception while processing input!");
+        printStackTrace();
+        shutdown_game(1);
     }
 
     bool gameActive = false;
@@ -453,7 +452,7 @@ boost::asio::awaitable<void> runOneLoop(double deltaTime) {
 
     if(gameActive) {
         auto start = std::chrono::high_resolution_clock::now();
-        co_await heartbeat(++pulse, deltaTime);
+        heartbeat(++pulse, deltaTime);
         auto end = std::chrono::high_resolution_clock::now();
         timings.emplace_back("heartbeat total", std::chrono::duration<double>(end - start).count());
     }
@@ -518,7 +517,6 @@ boost::asio::awaitable<void> runOneLoop(double deltaTime) {
     }
 
     tics_passed++;
-	co_return;
 }
 
 
@@ -529,7 +527,7 @@ boost::asio::awaitable<void> runOneLoop(double deltaTime) {
  * output and sending it out to players, and calling "heartbeat" functions
  * such as mobile_activity().
  */
-boost::asio::awaitable<void> game_loop() {
+void game_loop() {
     broadcast("The world seems to shimmer and waver as it comes into focus.\r\n");
     for (auto &[vn, z] : zone_table) {
         basic_mud_log("Resetting #%d: %s (rooms %d-%d).", vn,
@@ -537,7 +535,6 @@ boost::asio::awaitable<void> game_loop() {
         reset_zone(vn);
     }
 
-    boost::asio::steady_timer timer(co_await boost::asio::this_coro::executor, config::heartbeatInterval);
     double saveTimer = 60.0 * 5.0;
     double deltaTimeInSeconds = 0.1;
     gameIsLoading = false;
@@ -545,25 +542,25 @@ boost::asio::awaitable<void> game_loop() {
     /* The Main Loop.  The Big Cheese.  The Top Dog.  The Head Honcho.  The.. */
     while (!circle_shutdown) {
 
-        auto loopStart = boost::asio::steady_timer::clock_type::now();
+        auto loopStart = std::chrono::steady_clock::now();
         try {
             SQLite::Transaction transaction(*assetDb);
-            co_await runOneLoop(deltaTimeInSeconds);
+            runOneLoop(deltaTimeInSeconds);
             if(circle_shutdown) saveAll = true;
             if(saveAll) {
                 dirty_all();
             }
             {
-                auto start = boost::asio::steady_timer::clock_type::now();
+                auto start = std::chrono::steady_clock::now();
                 process_dirty();
-                auto end = boost::asio::steady_timer::clock_type::now();
+                auto end = std::chrono::steady_clock::now();
                 timings.emplace_back("process_dirty", std::chrono::duration<double>(end - start).count());
             }
 
             {
-                auto start = boost::asio::steady_timer::clock_type::now();
+                auto start = std::chrono::steady_clock::now();
                 transaction.commit();
-                auto end = boost::asio::steady_timer::clock_type::now();
+                auto end = std::chrono::steady_clock::now();
                 timings.emplace_back("transaction.commit", std::chrono::duration<double>(end - start).count());
             }
 
@@ -583,7 +580,7 @@ boost::asio::awaitable<void> game_loop() {
             printStackTrace();
             shutdown_game(1);
         }
-        auto loopEnd = boost::asio::steady_timer::clock_type::now();
+        auto loopEnd = std::chrono::steady_clock::now();
 
         auto loopDuration = loopEnd - loopStart;
         auto nextWait = config::heartbeatInterval - loopDuration;
@@ -600,22 +597,19 @@ boost::asio::awaitable<void> game_loop() {
             nextWait = std::chrono::milliseconds(1);
         }
 
-        timer.expires_from_now(nextWait);
-        co_await timer.async_wait(boost::asio::use_awaitable);
-        deltaTimeInSeconds = std::chrono::duration<double>(boost::asio::steady_timer::clock_type::now() - loopStart).count();
+        std::this_thread::sleep_for(nextWait);
+        deltaTimeInSeconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - loopStart).count();
     }
 
     if(circle_reboot > 0) {
         // circle_reboot at 1 is copyover, 2 is a full reboot.
-        co_await performReboot(circle_reboot);
+        performReboot(circle_reboot);
     }
-	net::io->stop();
-    co_return;
 }
 
-std::function<boost::asio::awaitable<void>()> gameFunc;
+std::function<void()> gameFunc;
 
-static boost::asio::awaitable<void> runGame() {
+static void runGame() {
 	// instantiate db with a shared_ptr, the filename is dbat.sqlite3
     try {
         assetDb = std::make_shared<SQLite::Database>(fmt::format("{}.sqlite3", config::assetDbName), SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
@@ -631,7 +625,7 @@ static boost::asio::awaitable<void> runGame() {
         copyover_recover();
     }
     try {
-        co_await boot_db();
+        boot_db();
     } catch(std::exception& e) {
         basic_mud_log("Exception in boot_db(): %s", e.what());
         exit(1);
@@ -666,8 +660,8 @@ static boost::asio::awaitable<void> runGame() {
 
     // Finally, let's get the game cracking.
     try {
-        if(gameFunc) co_await gameFunc();
-        else co_await game_loop();
+        if(gameFunc) gameFunc();
+        else game_loop();
     } catch(std::exception& e) {
         logger->critical("Exception in game_loop(): %s", e.what());
         printStackTrace();
@@ -677,8 +671,6 @@ static boost::asio::awaitable<void> runGame() {
         printStackTrace();
         shutdown_game(1);
     }
-
-    co_return;
 }
 
 /* Init sockets, run game, and cleanup sockets */
@@ -718,8 +710,6 @@ void init_game() {
         boost::asio::co_spawn(boost::asio::make_strand(*net::io), net::runLinkManager(), boost::asio::detached);
     }
 
-    boost::asio::co_spawn(boost::asio::make_strand(*net::io), runGame(), boost::asio::detached);
-
     // Run the io_context
     logger->info("Entering main loop...");
     // This part is a little tricky. if config::enableMultithreading is true, want to
@@ -744,6 +734,8 @@ void init_game() {
         threadCount = 0;
     }
 
+    if(threadCount < 1) threadCount = 1;
+
     std::vector<std::thread> threads;
     if(threadCount) {
         logger->info("Starting {} helper threads...", threadCount);
@@ -754,9 +746,9 @@ void init_game() {
             net::io->run();
         });
     }
-    logger->info("Main thread entering executor...");
+    logger->info("Main thread entering runGame()...");
     try {
-        net::io->run();
+        runGame();
     }
     catch (const std::exception& e) {
         logger->critical("Exception in main thread: {}", e.what());
@@ -769,19 +761,15 @@ void init_game() {
         shutdown_game(EXIT_FAILURE);
     }
 
-    logger->info("Executor has shut down. Running cleanup.");
-
-    if(threadCount) {
-        // Join all threads.
-        // This should happen without any incident, since the only thing they're doing is
-        // the io_executor which has been stopped.
-        logger->info("Joining threads...");
-        for (auto &thread: threads) {
-            thread.join();
-        }
-        logger->info("All threads joined.");
-        threads.clear();
+    logger->info("runGame() has finished. Stopping ASIO...");
+    net::io->stop();
+    logger->info("Joining ASIO threads...");
+    for (auto &thread: threads) {
+        thread.join();
     }
+    logger->info("Executor has shut down. Running cleanup.");
+    logger->info("All threads joined.");
+    threads.clear();
 
     // Release the executor and acceptor.
     // ASIO maintains its own socket polling fd and killing the executor is the
@@ -2328,7 +2316,19 @@ void descriptor_data::handle_input() {
     else if (STATE(this) != CON_PLAYING) /* In menus, etc. */
         nanny(this, comm);
     else {            /* else: we're playing normally. */
-        command_interpreter(character, comm); /* Send it to interpreter */
+        try {
+            command_interpreter(character, comm); /* Send it to interpreter */
+        }
+        catch(const std::exception & err) {
+            basic_mud_log("Exception when running Command Interpreter for %s: %s", GET_NAME(character), err.what());
+            basic_mud_log("Command was: %s", comm);
+            shutdown_game(EXIT_FAILURE);
+        }
+        catch(...) {
+            basic_mud_log("Unknown exception when running Command Interpreter for %s", GET_NAME(character));
+            basic_mud_log("Command was: %s", comm);
+            shutdown_game(EXIT_FAILURE);
+        }
     }
 
 }

@@ -963,7 +963,7 @@ static void load_new_database() {
 
 static bool newStyle = false;
 
-boost::asio::awaitable<void> boot_world() {
+void boot_world() {
 
     broadcast("Your vision of the world expands across a vast expanse of numerous existences.\r\n");
 
@@ -1040,9 +1040,6 @@ boost::asio::awaitable<void> boot_world() {
         basic_mud_log("Loading Shadow Dragons.");
         load_shadow_dragons();
     }
-
-    co_return;
-
 }
 
 
@@ -1206,7 +1203,7 @@ void destroy_db() {
 #define NUM_OBJ_UNIQUE_POOLS 5000
 
 /* body of the booting system */
-boost::asio::awaitable<void> boot_db() {
+void boot_db() {
     zone_rnum i;
     race::load_races();
     sensei::load_sensei();
@@ -1216,7 +1213,6 @@ boost::asio::awaitable<void> boot_db() {
     basic_mud_log("Resetting the game time:");
     broadcast("Your sense of time accelerates and dilates paradoxically as the world unravels and reforms.\r\n");
     reset_time();
-    co_await yield_for(std::chrono::milliseconds(25));
 
     basic_mud_log("Reading news, credits, help, ihelp, bground, info & motds.");
     file_to_string_alloc(NEWS_FILE, &news);
@@ -1240,7 +1236,7 @@ boost::asio::awaitable<void> boot_db() {
     basic_mud_log("Loading feats.");
     assign_feats();
 
-    co_await boot_world();
+    boot_world();
 
     basic_mud_log("Loading help entries.");
     index_boot(DB_BOOT_HLP);
@@ -1312,7 +1308,6 @@ boost::asio::awaitable<void> boot_db() {
     boot_time = time(nullptr);
 
     broadcast("Database load complete!\r\n");
-    co_return;
 }
 
 

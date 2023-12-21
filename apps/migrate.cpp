@@ -1618,7 +1618,7 @@ void migrate_characters() {
     }
 }
 
-boost::asio::awaitable<void> migrate_db() {
+void migrate_db() {
 
     migrate_grid();
 
@@ -1656,8 +1656,6 @@ boost::asio::awaitable<void> migrate_db() {
         logger->error("Error dumping state: {}", e.what());
         shutdown_game(1);
     }
-
-    co_return;
 }
 
 int main(int argc, char **argv)

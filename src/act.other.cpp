@@ -8938,7 +8938,7 @@ ACMD(do_scouter) {
                             break;
                     }
 
-                    char *blah = sense_location(i->character);
+                    auto blah = sense_location(i->character);
                     if (OBJ_FLAGGED(obj, ITEM_BSCOUTER) && GET_HIT(i->character) >= 150000) {
                         send_to_char(ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C%s@n\r\n",
                                      same == true ? pathway : blah);
@@ -8954,7 +8954,6 @@ ACMD(do_scouter) {
                                                                         true ? pathway : blah);
                     }
                     ++count;
-                    free(blah);
                 }
             }
             if (count == 0) {

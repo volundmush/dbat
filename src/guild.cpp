@@ -316,7 +316,7 @@ int slot_count(struct char_data *ch) {
     int punch = false, kick = false, knee = false, elbow = false, kiball = false, kiblast = false, beam = false, renzo = false, shogekiha = false;
 
     for (i = 1; i <= SKILL_TABLE_SIZE; i++) {
-        if (GET_SKILL(ch, i) > 0) {
+        if (GET_SKILL_BASE(ch, i) > 0) {
             switch (i) {
                 case SKILL_PUNCH:
                     fail = true;

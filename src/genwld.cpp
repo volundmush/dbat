@@ -442,3 +442,10 @@ struct room_data* room_direction_data::getDestination() {
 bool room_data::isSunken() {
     return sector_type == SECT_UNDERWATER || geffect < 0;
 }
+
+std::optional<room_vnum> room_data::getLaunchDestination() {
+    if(!area) return NOWHERE;
+    if(!areas.contains(area.value())) return NOWHERE;
+    auto &a = areas[area.value()];
+    return a.getLaunchDestination();
+}
