@@ -873,7 +873,7 @@ void char_data::loseBaseAllPercent(double amt, bool trans_mult) {
 
 
 double char_data::getMaxCarryWeight() {
-    return std::max<double>(getWeight() + 40.0, (getMaxPL() / 200.0) + (GET_STR(this) * 50));
+    return (getWeight() + 100.0) + (getMaxPL() / 200.0) + (GET_STR(this) * 50) + IS_BARDOCK(this) ? 10000.0 : 0.0;
 }
 
 double char_data::getEquippedWeight() {

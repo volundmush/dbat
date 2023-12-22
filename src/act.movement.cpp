@@ -1087,9 +1087,10 @@ ACMD(do_move) {
             GET_ROOM_VNUM(IN_ROOM(ch)) != 1) {
             GET_LOADROOM(ch) = GET_ROOM_VNUM(IN_ROOM(ch));
         }
+
         auto ratio = ch->getBurdenRatio();
-        if(ratio >= 0.7) {
-            send_to_char(ch, "Your immense burden hinders your speed.\r\n");
+        if(ratio >= 1.0) {
+            send_to_char(ch, "Your immense burden hinders your progress.\r\n");
             WAIT_STATE(ch, std::min<int>(PULSE_3SEC * ratio, PULSE_5SEC));
         }
 
