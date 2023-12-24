@@ -3910,7 +3910,7 @@ bool HAS_MOON(struct char_data *ch) {
 }
 
 int GET_SPEEDI(struct char_data *ch) {
-    return (GET_SPEEDCALC(ch) + GET_SPEEDBONUS(ch) + GET_SPEEDBOOST(ch) + GET_MUTBOOST(ch)) * ch->getBurdenRatio();
+    return (GET_SPEEDCALC(ch) + GET_SPEEDBONUS(ch) + GET_SPEEDBOOST(ch) + GET_MUTBOOST(ch));
 }
 
 void printStackTrace() {
