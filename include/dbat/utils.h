@@ -520,7 +520,7 @@ bool ROOM_FLAGGED(room_vnum loc, int flag);
 #define GET_SUPPRESS(ch) ((ch)->suppression)
 #define GET_RDISPLAY(ch) ((ch)->rdisplay)
 
-#define GET_STR(ch)     ((ch)->getStrength())
+#define GET_STR(ch)     ((ch)->getAttribute(CharAttribute::Strength))
 /*
  * We could define GET_ADD to be ((GET_STR(ch) > 18) ?
  *                                ((GET_STR(ch) - 18) * 10) : 0)
@@ -530,11 +530,11 @@ bool ROOM_FLAGGED(room_vnum loc, int flag);
  */
 /* The old define: */
 /* #define GET_ADD(ch)     ((ch)->aff_abils.str_add) */
-#define GET_DEX(ch)     ((ch)->getAgility())
-#define GET_INT(ch)     ((ch)->getIntelligence())
-#define GET_WIS(ch)     ((ch)->getWisdom())
-#define GET_CON(ch)     ((ch)->getConstitution())
-#define GET_CHA(ch)     ((ch)->getSpeed())
+#define GET_DEX(ch)     ((ch)->getAttribute(CharAttribute::Agility))
+#define GET_INT(ch)     ((ch)->getAttribute(CharAttribute::Intelligence))
+#define GET_WIS(ch)     ((ch)->getAttribute(CharAttribute::Wisdom))
+#define GET_CON(ch)     ((ch)->getAttribute(CharAttribute::Constitution))
+#define GET_CHA(ch)     ((ch)->getAttribute(CharAttribute::Speed))
 #define GET_MUTBOOST(ch) (IS_MUTANT(ch) ? ((GET_GENOME(ch, 0) == 1 || GET_GENOME(ch, 1) == 1) ? (GET_SPEEDCALC(ch) + GET_SPEEDBONUS(ch) + GET_SPEEDBOOST(ch)) * 0.3 : 0) : 0)
 extern int GET_SPEEDI(struct char_data *ch);
 #define GET_SPEEDCALC(ch) (IS_GRAP(ch) ? GET_CHA(ch) : (IS_INFERIOR(ch) ? (AFF_FLAGGED(ch, AFF_FLYING) ? (GET_SPEEDVAR(ch) * 1.25) : GET_SPEEDVAR(ch)) : GET_SPEEDVAR(ch)))
@@ -673,12 +673,12 @@ extern int GET_SPEEDI(struct char_data *ch);
 #define GET_COND(ch, i)        ((ch)->conditions[(i)])
 #define GET_LOADROOM(ch)    ((ch)->load_room)
 #define GET_PRACTICES(ch)    ((ch)->getPractices())
-#define GET_TRAINSTR(ch)        ((ch)->trainstr)
-#define GET_TRAININT(ch)        ((ch)->trainint)
-#define GET_TRAINCON(ch)        ((ch)->traincon)
-#define GET_TRAINWIS(ch)        ((ch)->trainwis)
-#define GET_TRAINAGL(ch)        ((ch)->trainagl)
-#define GET_TRAINSPD(ch)        ((ch)->trainspd)
+#define GET_TRAINSTR(ch)        ((ch)->getTrain(CharAttribute::Strength))
+#define GET_TRAININT(ch)        ((ch)->getTrain(CharAttribute::Intelligence))
+#define GET_TRAINCON(ch)        ((ch)->getTrain(CharAttribute::Constitution))
+#define GET_TRAINWIS(ch)        ((ch)->getTrain(CharAttribute::Wisdom))
+#define GET_TRAINAGL(ch)        ((ch)->getTrain(CharAttribute::Agility))
+#define GET_TRAINSPD(ch)        ((ch)->getTrain(CharAttribute::Speed))
 #define GET_INVIS_LEV(ch)    ((ch)->invis_level)
 #define GET_WIMP_LEV(ch)    ((ch)->wimp_level)
 #define GET_FREEZE_LEV(ch)    ((ch)->freeze_level)
@@ -1208,10 +1208,6 @@ int check_flags_by_name_ar(const std::bitset<N>& bitvector, int numflags, char *
     return false;
 }
 
-template<size_t N>
-int check_bitvector_names(const std::bitset<N>& bitvector, size_t namecount, const char *whatami, const char *whatbits) {
-
-}
 
 extern void printStackTrace();
 

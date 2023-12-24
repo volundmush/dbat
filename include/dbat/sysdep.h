@@ -197,3 +197,5 @@ std::list<T*> get_vnum_list(const VnumIndex<T>& index, vnum vn) {
     }
     return {};
 }
+
+using StatValue = std::variant<int64_t, double, std::string>;

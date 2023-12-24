@@ -8,6 +8,8 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 #include "dbat/spec_procs.h"
+
+#include "../cmake-build-debug/_deps/random-src/test/catch.hpp"
 #include "dbat/utils.h"
 #include "dbat/comm.h"
 #include "dbat/interpreter.h"
@@ -1161,12 +1163,12 @@ SPECIAL(augmenter) {
     one_argument(argument, arg);
 
     if (CMD_IS("augment")) {
-        int strength = ch->real_abils.str;
-        int intel = ch->real_abils.intel;
-        int wisdom = ch->real_abils.wis;
-        int speed = ch->real_abils.cha;
-        int consti = ch->real_abils.con;
-        int agility = ch->real_abils.dex;
+        int strength = ch->getAttribute(CharAttribute::Strength, true);
+        int intel = ch->getAttribute(CharAttribute::Intelligence, true);
+        int wisdom = ch->getAttribute(CharAttribute::Wisdom, true);
+        int speed = ch->getAttribute(CharAttribute::Speed, true);
+        int consti = ch->getAttribute(CharAttribute::Constitution, true);
+        int agility = ch->getAttribute(CharAttribute::Agility, true);
 
         int strcost = strength * 1200;
         int intcost = intel * 1200;
@@ -1201,7 +1203,7 @@ SPECIAL(augmenter) {
                     true, ch, nullptr, nullptr, TO_CHAR);
                 act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch,
                     nullptr, nullptr, TO_ROOM);
-                ch->real_abils.str += 1;
+                ch->modAttribute(CharAttribute::Strength, 1);
                 GET_GOLD(ch) -= strcost;
             }
         } else if (!strcasecmp("intelligence", arg) || !strcasecmp("int", arg)) {
@@ -1214,7 +1216,7 @@ SPECIAL(augmenter) {
                     true, ch, nullptr, nullptr, TO_CHAR);
                 act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch,
                     nullptr, nullptr, TO_ROOM);
-                ch->real_abils.intel += 1;
+                ch->modAttribute(CharAttribute::Intelligence, 1);
                 GET_GOLD(ch) -= intcost;
             }
         } else if (!strcasecmp("constitution", arg) || !strcasecmp("con", arg)) {
@@ -1227,7 +1229,7 @@ SPECIAL(augmenter) {
                     true, ch, nullptr, nullptr, TO_CHAR);
                 act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch,
                     nullptr, nullptr, TO_ROOM);
-                ch->real_abils.con += 1;
+                ch->modAttribute(CharAttribute::Constitution, 1);
                 GET_GOLD(ch) -= concost;
             }
         } else if (!strcasecmp("speed", arg) || !strcasecmp("spe", arg)) {
@@ -1240,7 +1242,7 @@ SPECIAL(augmenter) {
                     true, ch, nullptr, nullptr, TO_CHAR);
                 act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch,
                     nullptr, nullptr, TO_ROOM);
-                ch->real_abils.cha += 1;
+                ch->modAttribute(CharAttribute::Speed, 1);
                 GET_GOLD(ch) -= specost;
                 ch->save();
             }
@@ -1254,7 +1256,7 @@ SPECIAL(augmenter) {
                     true, ch, nullptr, nullptr, TO_CHAR);
                 act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch,
                     nullptr, nullptr, TO_ROOM);
-                ch->real_abils.dex += 1;
+                ch->modAttribute(CharAttribute::Agility, 1);
                 GET_GOLD(ch) -= agicost;
                 ch->save();
             }
@@ -1268,7 +1270,7 @@ SPECIAL(augmenter) {
                     true, ch, nullptr, nullptr, TO_CHAR);
                 act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch,
                     nullptr, nullptr, TO_ROOM);
-                ch->real_abils.wis += 1;
+                ch->modAttribute(CharAttribute::Wisdom, 1);
                 GET_GOLD(ch) -= wiscost;
                 ch->save();
             }

@@ -443,17 +443,8 @@ ACMD(do_mimic) {
 
 ACMD(do_kyodaika) {
 
-    if (IS_NPC(ch)) {
-        return;
-    }
-
     if (!IS_NAMEK(ch)) {
         send_to_char(ch, "You are not a namek!\r\n");
-        return;
-    }
-
-    if (ch->real_abils.str + 5 > 45 && GET_BONUS(ch, BONUS_WIMP) > 0 && GET_GENOME(ch, 0) == 0) {
-        send_to_char(ch, "You can't handle having your strength increased beyond 45.\r\n");
         return;
     }
 
@@ -461,18 +452,12 @@ ACMD(do_kyodaika) {
         act("@GYou growl as your body grows to ten times its normal size!@n", true, ch, nullptr, nullptr, TO_CHAR);
         act("@g$n@G growls as $s body grows to ten times its normal size!@n", true, ch, nullptr, nullptr, TO_ROOM);
         send_to_char(ch, "@cStrength@D: @C+5\r\n@cSpeed@D: @c-2@n\r\n");
-        ch->real_abils.str += 5;
-        ch->real_abils.cha -= 2;
-        GET_GENOME(ch, 0) = 11;
-        return;
+        assign_affect(ch, AFF_KYODAIKA, 0, -1, 5, 0, 0, 0, 0, -2);
     } else {
         act("@GYou growl as your body shrinks to its normal size!@n", true, ch, nullptr, nullptr, TO_CHAR);
         act("@g$n@G growls as $s body shrinks to its normal size!@n", true, ch, nullptr, nullptr, TO_ROOM);
         send_to_char(ch, "@cStrength@D: @C-5\r\n@cSpeed@D: @c+2@n\r\n");
-        ch->real_abils.str -= 5;
-        ch->real_abils.cha += 2;
-        GET_GENOME(ch, 0) = 0;
-        return;
+        null_affect(ch, AFF_KYODAIKA);
     }
 
 }
@@ -4949,10 +4934,10 @@ ACMD(do_score) {
                      add_commas(GET_SPEEDI(ch)).c_str(), add_commas(GET_ARMOR(ch)).c_str());
         send_to_char(ch,
                      "    @D[    @RStrength@D|@G%2d (%3d)@D] [     @YAgility@D|@G%2d (%3d)@D] [      @BSpeed@D|@G%2d (%3d)@D]@n\n",
-                     ch->real_abils.str, GET_STR(ch), ch->real_abils.dex, GET_DEX(ch), ch->real_abils.cha, GET_CHA(ch));
+                     ch->getAttribute(CharAttribute::Strength), GET_STR(ch), ch->getAttribute(CharAttribute::Agility), GET_DEX(ch), ch->getAttribute(CharAttribute::Speed), GET_CHA(ch));
         send_to_char(ch,
                      "    @D[@gConstitution@D|@G%2d (%3d)@D] [@CIntelligence@D|@G%2d (%3d)@D] [     @MWisdom@D|@G%2d (%3d)@D]@n\n",
-                     ch->real_abils.con, GET_CON(ch), ch->real_abils.intel, GET_INT(ch), ch->real_abils.wis,
+                     ch->getAttribute(CharAttribute::Constitution), GET_CON(ch), ch->getAttribute(CharAttribute::Intelligence), GET_INT(ch), ch->getAttribute(CharAttribute::Wisdom),
                      GET_WIS(ch));
     }
     if (view == full || view == other) {

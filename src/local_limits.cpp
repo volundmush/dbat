@@ -9,6 +9,8 @@
 ************************************************************************ */
 
 #include "dbat/local_limits.h"
+
+#include "../cmake-build-debug/_deps/random-src/test/catch.hpp"
 #include "dbat/utils.h"
 #include "dbat/spells.h"
 #include "dbat/comm.h"
@@ -125,10 +127,7 @@ static void healthy_check(struct char_data *ch) {
         change = true;
     }
     if (AFF_FLAGGED(ch, AFF_WITHER) && roll >= chance) {
-        ch->real_abils.str += 3;
-        ch->real_abils.cha += 3;
-        ch->save();
-        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_WITHER);
+        null_affect(ch, AFF_WITHER);
         change = true;
     }
     if (AFF_FLAGGED(ch, AFF_CURSE) && roll >= chance) {
@@ -152,10 +151,7 @@ static void healthy_check(struct char_data *ch) {
         change = true;
     }
     if (AFF_FLAGGED(ch, AFF_HYDROZAP) && roll >= chance) {
-        ch->real_abils.dex += 4;
-        ch->real_abils.con += 4;
-        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_HYDROZAP);
-        ch->save();
+        null_affect(ch, AFF_HYDROZAP);
         change = true;
     }
     if (AFF_FLAGGED(ch, AFF_KNOCKED) && roll >= chance) {
@@ -324,18 +320,12 @@ static int64_t mana_gain(struct char_data *ch) {
     if (PLR_FLAGGED(ch, PLR_HEALT) && SITS(ch) != nullptr) {
         gain *= 20;
     }
-    if (PLR_FLAGGED(ch, PLR_POSE) && axion_dice(0) > GET_SKILL(ch, SKILL_POSE)) {
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_POSE);
+    if (AFF_FLAGGED(ch, AFF_POSE) && axion_dice(0) > GET_SKILL(ch, SKILL_POSE)) {
+        null_affect(ch, AFF_POSE);
         send_to_char(ch, "You feel slightly less confident now.\r\n");
-        ch->real_abils.str -= 8;
-        ch->real_abils.dex -= 8;
-        ch->save();
     }
     if (AFF_FLAGGED(ch, AFF_HYDROZAP) && rand_number(1, 4) >= 4) {
-        ch->real_abils.dex += 4;
-        ch->real_abils.con += 4;
-        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_HYDROZAP);
-        ch->save();
+        null_affect(ch, AFF_HYDROZAP);
     }
 
     if (GET_SKILL(ch, SKILL_CONCENTRATION) >= 100) {
@@ -719,22 +709,14 @@ static void update_flags(struct char_data *ch) {
     if (AFF_FLAGGED(ch, AFF_MBREAK) && rand_number(1, 3 + sick_fail) == 2) {
         send_to_char(ch, "@wYour mind is no longer in turmoil, you can charge ki again.@n\r\n");
         REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_MBREAK);
-        if (GET_SKILL(ch, SKILL_TELEPATHY) <= 0 && rand_number(1, 2) == 2) {
-            ch->real_abils.intel -= 1;
-            ch->real_abils.wis -= 1;
-            send_to_char(ch, "@RDue to the stress you've lost 1 Intelligence and Wisdom!@n\r\n");
-            if (ch->real_abils.wis < 4)
-                ch->real_abils.wis = 4;
-            if (ch->real_abils.intel < 4)
-                ch->real_abils.intel = 4;
-        } else if (GET_SKILL(ch, SKILL_TELEPATHY) <= 0 && rand_number(1, 20) == 1) {
-            ch->real_abils.intel -= 1;
-            ch->real_abils.wis -= 1;
-            send_to_char(ch, "@RDue to the stress you've lost 1 Intelligence and Wisdom!@n\r\n");
-            if (ch->real_abils.wis < 4)
-                ch->real_abils.wis = 4;
-            if (ch->real_abils.intel < 4)
-                ch->real_abils.intel = 4;
+        if (GET_SKILL(ch, SKILL_TELEPATHY) <= 0) {
+            bool condition1 = rand_number(1, 2) == 2;
+            bool condition2 = rand_number(1, 20) == 1;
+            if (condition1 || condition2) {
+                ch->modAttribute(CharAttribute::Intelligence, -1);
+                ch->modAttribute(CharAttribute::Wisdom, -1);
+                send_to_char(ch, "@RDue to the stress you've lost 1 Intelligence and Wisdom!@n\r\n");
+            }
         }
     }
     if (AFF_FLAGGED(ch, AFF_SHOCKED) && rand_number(1, 4) == 4) {
@@ -761,9 +743,7 @@ static void update_flags(struct char_data *ch) {
     if (AFF_FLAGGED(ch, AFF_WITHER) && rand_number(1, 6 + sick_fail) == 2) {
         send_to_char(ch, "@wYour body returns to normal and you beat the withering that plagued you.\r\n");
         act("$n@W's looks more fit now.", true, ch, nullptr, nullptr, TO_ROOM);
-        ch->real_abils.str += 3;
-        ch->real_abils.cha += 3;
-        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_WITHER);
+        null_affect(ch, AFF_WITHER);
     }
     if (wearing_stardust(ch) == 1) {
         SET_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
@@ -1350,22 +1330,10 @@ static void heal_limb(struct char_data *ch) {
 
         if (!PLR_FLAGGED(ch, PLR_BANDAGED) && recovered == true) {
             if (axion_dice(-10) > GET_CON(ch)) {
-                ch->real_abils.str -= 1;
-                ch->real_abils.dex -= 1;
-                ch->real_abils.cha -= 1;
+                ch->modAttribute(CharAttribute::Strength, -1);
+                ch->modAttribute(CharAttribute::Speed, -1);
+                ch->modAttribute(CharAttribute::Agility, -1);
                 send_to_char(ch, "@RYou lose 1 Strength, Agility, and Speed!\r\n");
-                if (ch->real_abils.str < 4) {
-                    ch->real_abils.str = 4;
-                }
-                if (ch->real_abils.con < 4) {
-                    ch->real_abils.con = 4;
-                }
-                if (ch->real_abils.dex < 4) {
-                    ch->real_abils.dex = 4;
-                }
-                if (ch->real_abils.cha < 4) {
-                    ch->real_abils.cha = 4;
-                }
                 ch->save();
             }
         }

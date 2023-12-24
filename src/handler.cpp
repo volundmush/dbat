@@ -329,7 +329,6 @@ void affect_total(struct char_data *ch) {
     for (af = ch->affected; af; af = af->next)
         affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, false);
 
-    ch->aff_abils = ch->real_abils;
 
     GET_SAVE_MOD(ch, SAVING_FORTITUDE) = HAS_FEAT(ch, FEAT_GREAT_FORTITUDE) * 3;
     GET_SAVE_MOD(ch, SAVING_REFLEX) = HAS_FEAT(ch, FEAT_LIGHTNING_REFLEXES) * 3;

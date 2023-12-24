@@ -4783,20 +4783,14 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                         }
                     }
                     if (AFF_FLAGGED(vict, AFF_ECHAINS)) {
-                        if (IS_NPC(ch) && type == 0) {
-                            ch->real_abils.cha -= 2;
-                            if (ch->real_abils.cha < 5)
-                                ch->real_abils.cha = 5;
-                            else {
-                                act("@CEthereal chains burn into existence! They quickly latch onto @RYOUR@C body and begin temporarily hampering $s actions!@n",
-                                    true, ch, nullptr, vict, TO_CHAR);
-                                act("@CEthereal chains burn into existence! They quickly latch onto @c$n's@C body and begin temporarily hampering $s actions!@n",
-                                    true, ch, nullptr, vict, TO_ROOM);
+                        if(type == 0) {
+                            if(IS_NPC(ch)) {
+                                assign_affect(ch, AFF_ECHAINS_DEBUFF, SKILL_RUNIC, -1, 0, 0, 0, 0, 0, -2);
+                            } else {
+                                WAIT_STATE(ch, PULSE_3SEC);
                             }
-                        } else if (type == 0) {
-                            WAIT_STATE(ch, PULSE_3SEC);
                             act("@CEthereal chains burn into existence! They quickly latch onto @RYOUR@C body and begin temporarily hampering $s actions!@n",
-                                true, ch, nullptr, vict, TO_CHAR);
+                                    true, ch, nullptr, vict, TO_CHAR);
                             act("@CEthereal chains burn into existence! They quickly latch onto @c$n's@C body and begin temporarily hampering $s actions!@n",
                                 true, ch, nullptr, vict, TO_ROOM);
                         }

@@ -298,68 +298,33 @@ ACMD(do_rpp) {
                     send_to_char(ch, "What stat? (str, con, int, wis, spd, agl)");
                     return;
                 }
-                if (!strcasecmp(arg2, "str")) {
-                    if (GET_BONUS(ch, BONUS_WIMP) > 0 && ch->real_abils.str >= 45) {
+
+                const std::map<std::string, std::tuple<CharAttribute, std::string, int>> stat_map = {
+                        {"str", {CharAttribute::Strength, "strength", BONUS_WIMP}},
+                        {"con", {CharAttribute::Constitution, "constitution", BONUS_FRAIL}},
+                        {"int", {CharAttribute::Intelligence, "intelligence", BONUS_DULL}},
+                        {"wis", {CharAttribute::Wisdom, "wisdom", BONUS_FOOLISH}},
+                        {"spd", {CharAttribute::Speed, "speed", BONUS_SLOW}},
+                        {"agl", {CharAttribute::Agility, "agility", BONUS_CLUMSY}}
+                };
+
+                boost::to_lower(arg2);
+                if(auto stat_found = stat_map.find(arg2); stat_found != stat_map.end()) {
+                    auto [attribute, name, flaw] = stat_found->second;
+
+                    auto base = ch->getAttribute(attribute, true);
+
+                    if (GET_BONUS(ch, flaw) > 0 && base >= 45) {
                         send_to_char(ch, "You can't because that stat maxes at 45 due to a trait negative.\r\n");
                         return;
-                    } else if (GET_STR(ch) >= 100) {
-                        send_to_char(ch, "100 is the maximum for any stat.\r\n");
+                    }
+                    if (base >= 100) {
+                        send_to_char(ch, "100 is the maximum base for any stat.\r\n");
                         return;
                     }
-                    send_to_char(ch, "You increase your strength by 2.\r\n");
-                    ch->modStrength(2);
-                } else if (!strcasecmp(arg2, "con")) {
-                    if (GET_BONUS(ch, BONUS_FRAIL) > 0 && ch->real_abils.con >= 45) {
-                        send_to_char(ch, "You can't because that stat maxes at 45 due to a trait negative.\r\n");
-                        return;
-                    } else if (GET_CON(ch) >= 100) {
-                        send_to_char(ch, "100 is the maximum for any stat.\r\n");
-                        return;
-                    }
-                    send_to_char(ch, "You increase your constitution by 2.\r\n");
-                    ch->modConstitution(2);
-                } else if (!strcasecmp(arg2, "int")) {
-                    if (GET_BONUS(ch, BONUS_DULL) > 0 && ch->real_abils.intel >= 45) {
-                        send_to_char(ch, "You can't because that stat maxes at 45 due to a trait negative.\r\n");
-                        return;
-                    } else if (GET_INT(ch) >= 100) {
-                        send_to_char(ch, "100 is the maximum for any stat.\r\n");
-                        return;
-                    }
-                    send_to_char(ch, "You increase your intelligence by 2.\r\n");
-                    ch->modIntelligence(2);
-                } else if (!strcasecmp(arg2, "wis")) {
-                    if (GET_BONUS(ch, BONUS_FOOLISH) > 0 && ch->real_abils.wis >= 45) {
-                        send_to_char(ch, "You can't because that stat maxes at 45 due to a trait negative.\r\n");
-                        return;
-                    } else if (GET_WIS(ch) >= 100) {
-                        send_to_char(ch, "100 is the maximum for any stat.\r\n");
-                        return;
-                    }
-                    send_to_char(ch, "You increase your wisdom by 2.\r\n");
-                    ch->modWisdom(2);
-                } else if (!strcasecmp(arg2, "spd")) {
-                    if (GET_BONUS(ch, BONUS_SLOW) > 0 && ch->real_abils.cha >= 45) {
-                        send_to_char(ch, "You can't because that stat maxes at 45 due to a trait negative.\r\n");
-                        return;
-                    } else if (GET_CHA(ch) >= 100) {
-                        send_to_char(ch, "100 is the maximum for any stat.\r\n");
-                        return;
-                    }
-                    send_to_char(ch, "You increase your speed by 2.\r\n");
-                    ch->modSpeed(2);
-                } else if (!strcasecmp(arg2, "agl")) {
-                    if (GET_BONUS(ch, BONUS_CLUMSY) > 0 && ch->real_abils.dex >= 45) {
-                        send_to_char(ch, "You can't because that stat maxes at 45 due to a trait negative.\r\n");
-                        return;
-                    } else if (GET_DEX(ch) >= 100) {
-                        send_to_char(ch, "100 is the maximum for any stat.\r\n");
-                        return;
-                    }
-                    send_to_char(ch, "You increase your speed by 2.\r\n");
-                    ch->modAgility(2);
+
                 } else {
-                    send_to_char(ch, "That is not an acceptable option for changing alignment.\r\n");
+                    send_to_char(ch, "Invalid stat.\r\n");
                     return;
                 }
 
@@ -1216,12 +1181,12 @@ ACMD(do_train) {
 
     int strcap = 5000, spdcap = 5000, intcap = 5000, wiscap = 5000, concap = 5000, aglcap = 5000;
 
-    strcap += 500 * ch->real_abils.str;
-    intcap += 500 * ch->real_abils.intel;
-    wiscap += 500 * ch->real_abils.wis;
-    spdcap += 500 * ch->real_abils.cha;
-    concap += 500 * ch->real_abils.con;
-    aglcap += 500 * ch->real_abils.dex;
+    strcap += 500 * ch->getAttribute(CharAttribute::Strength, true);
+    intcap += 500 * ch->getAttribute(CharAttribute::Intelligence, true);
+    wiscap += 500 * ch->getAttribute(CharAttribute::Wisdom, true);
+    spdcap += 500 * ch->getAttribute(CharAttribute::Speed, true);
+    concap += 500 * ch->getAttribute(CharAttribute::Constitution, true);
+    aglcap += 500 * ch->getAttribute(CharAttribute::Agility, true);
 
     if (IS_HUMAN(ch)) {
         intcap = intcap * 0.75;
@@ -1241,17 +1206,17 @@ ACMD(do_train) {
     if (!*arg) {
         send_to_char(ch, "@D-------------[ @GTraining Status @D]-------------@n\r\n");
         send_to_char(ch, "  @mStrength Progress    @D: @R%6s/%6s@n\r\n", add_commas(GET_TRAINSTR(ch)).c_str(),
-                     ch->real_abils.str >= 80 ? "@rCAPPED" : add_commas(strcap).c_str());
+                     ch->getAttribute(CharAttribute::Strength, true) >= 80 ? "@rCAPPED" : add_commas(strcap).c_str());
         send_to_char(ch, "  @mSpeed Progress       @D: @R%6s/%6s@n\r\n", add_commas(GET_TRAINSPD(ch)).c_str(),
-                     ch->real_abils.cha >= 80 ? "@rCAPPED" : add_commas(spdcap).c_str());
+                     ch->getAttribute(CharAttribute::Speed, true) >= 80 ? "@rCAPPED" : add_commas(spdcap).c_str());
         send_to_char(ch, "  @mConstitution Progress@D: @R%6s/%6s@n\r\n", add_commas(GET_TRAINCON(ch)).c_str(),
-                     ch->real_abils.con >= 80 ? "@rCAPPED" : add_commas(concap).c_str());
+                     ch->getAttribute(CharAttribute::Constitution, true) >= 80 ? "@rCAPPED" : add_commas(concap).c_str());
         send_to_char(ch, "  @mIntelligence Progress@D: @R%6s/%6s@n\r\n", add_commas(GET_TRAININT(ch)).c_str(),
-                     ch->real_abils.intel >= 80 ? "@rCAPPED" : add_commas(intcap).c_str());
+                     ch->getAttribute(CharAttribute::Intelligence, true) >= 80 ? "@rCAPPED" : add_commas(intcap).c_str());
         send_to_char(ch, "  @mWisdom Progress      @D: @R%6s/%6s@n\r\n", add_commas(GET_TRAINWIS(ch)).c_str(),
-                     ch->real_abils.wis >= 80 ? "@rCAPPED" : add_commas(wiscap).c_str());
+                     ch->getAttribute(CharAttribute::Wisdom, true) >= 80 ? "@rCAPPED" : add_commas(wiscap).c_str());
         send_to_char(ch, "  @mAgility Progress     @D: @R%6s/%6s@n\r\n", add_commas(GET_TRAINAGL(ch)).c_str(),
-                     ch->real_abils.dex >= 80 ? "@rCAPPED" : add_commas(aglcap).c_str());
+                     ch->getAttribute(CharAttribute::Agility, true) >= 80 ? "@rCAPPED" : add_commas(aglcap).c_str());
         send_to_char(ch, "@D  -----------------------------------------  @n\r\n");
         send_to_char(ch, "  @CCurrent Weight Held  @D: @c%s@n\r\n", add_commas(weight).c_str());
         send_to_char(ch, "@D---------------------------------------------@n\r\n");
@@ -1322,73 +1287,61 @@ ACMD(do_train) {
         cost *= 2;
     }
 
-    int stat_id = 0;
-    int8_t *stat_val = nullptr;
+    CharAttribute attr;
     char *stat_name = nullptr;
     int bonus_trait = -1;
     int nega_trait = -1;
-    int *stat_train = nullptr;
     int needed = 0;
 
     if (!strcasecmp("str", arg)) {
-        stat_id = 1;
-        stat_val = &(ch->real_abils.str);
+        attr = CharAttribute::Strength;
         stat_name = "strength";
         bonus_trait = BONUS_BRAWNY;
         nega_trait = BONUS_WIMP;
-        stat_train = &(ch->trainstr);
         needed = strcap;
     } else if (!strcasecmp("spd", arg)) {
-        stat_id = 2;
-        stat_val = &(ch->real_abils.cha);
+        attr = CharAttribute::Speed;
         stat_name = "speed";
         bonus_trait = BONUS_QUICK;
         nega_trait = BONUS_SLOW;
-        stat_train = &(ch->trainspd);
         needed = spdcap;
     } else if (!strcasecmp("con", arg)) {
-        stat_id = 3;
-        stat_val = &(ch->real_abils.con);
+        attr = CharAttribute::Constitution;
         stat_name = "constitution";
         bonus_trait = BONUS_STURDY;
         nega_trait = BONUS_FRAIL;
-        stat_train = &(ch->traincon);
         needed = concap;
     } else if (!strcasecmp("agl", arg)) {
-        stat_id = 4;
-        stat_val = &(ch->real_abils.dex);
+        attr = CharAttribute::Agility;
         stat_name = "agility";
         bonus_trait = BONUS_AGILE;
         nega_trait = BONUS_CLUMSY;
-        stat_train = &(ch->trainagl);
         needed = aglcap;
     } else if (!strcasecmp("int", arg)) {
-        stat_id = 5;
-        stat_val = &(ch->real_abils.intel);
+        attr = CharAttribute::Intelligence;
         stat_name = "intelligence";
         bonus_trait = BONUS_SCHOLARLY;
         nega_trait = BONUS_DULL;
-        stat_train = &(ch->trainint);
         needed = intcap;
     } else if (!strcasecmp("wis", arg)) {
-        stat_id = 6;
-        stat_val = &(ch->real_abils.wis);
+        attr = CharAttribute::Wisdom;
         stat_name = "wisdom";
         bonus_trait = BONUS_SAGE;
         nega_trait = BONUS_FOOLISH;
-        stat_train = &(ch->trainwis);
         needed = wiscap;
     } else {
         send_to_char(ch, "Syntax: train (str | spd | agl | wis | int | con)\r\n");
         return;
     }
 
-    if (*stat_val == 80) {
+    auto stat_val = ch->getAttribute(attr, true);
+
+    if (stat_val == 80) {
         send_to_char(ch, "Your base %s is maxed!\r\n", stat_name);
         return;
     }
 
-    if (*stat_val >= 45 && GET_BONUS(ch, nega_trait) > 0) {
+    if (stat_val >= 45 && GET_BONUS(ch, nega_trait) > 0) {
         send_to_char(ch, "You're not able to withstand increasing your %s beyond 45.\r\n", stat_name);
         return;
     }
@@ -1401,16 +1354,16 @@ ACMD(do_train) {
     else if (GET_LEVEL(ch) > 20)
         stat_cap = 40;
 
-    if (*stat_val >= stat_cap) {
+    if (stat_val >= stat_cap) {
         send_to_char(ch, "You have reached the stat cap for your level.\r\n");
         return;
     }
 
-    switch (stat_id) {
-        case 1:
-        case 2:
-        case 3:
-        case 4:
+    switch (attr) {
+        case CharAttribute::Strength:
+        case CharAttribute::Agility:
+        case CharAttribute::Constitution:
+        case CharAttribute::Speed:
             if ((ch->getCurST()) < cost) {
                 send_to_char(ch, "You do not have enough stamina with the current weight worn and gravity!\r\n");
                 return;
@@ -1418,8 +1371,8 @@ ACMD(do_train) {
             plus = (((total / 20) + (GET_MAX_MOVE(ch) / 50)) * 100) / GET_MAX_MOVE(ch);
             ch->decCurST(cost);
             break;
-        case 5:
-        case 6:
+        case CharAttribute::Intelligence:
+        case CharAttribute::Wisdom:
             if ((ch->getCurKI()) < cost) {
                 send_to_char(ch, "You do not have enough ki with the current weight worn and gravity!\r\n");
                 return;
@@ -1434,8 +1387,8 @@ ACMD(do_train) {
 
     auto msg_case = rand_number(1, 3);
 
-    switch (stat_id) {
-        case 1:
+    switch (attr) {
+        case CharAttribute::Strength:
             switch (msg_case) {
                 case 1:
                     act("@WYou throw a flurry of punches into the air at an invisible opponent.@n", true, ch, nullptr,
@@ -1456,7 +1409,7 @@ ACMD(do_train) {
                     break;
             }
             break;
-        case 2:
+        case CharAttribute::Agility:
             switch (msg_case) {
                 case 1:
                     act("@WYou dash quickly around the surrounding area as fast as you can!@n", true, ch, nullptr,
@@ -1474,7 +1427,7 @@ ACMD(do_train) {
                     break;
             }
             break;
-        case 3:
+        case CharAttribute::Constitution:
             switch (msg_case) {
                 case 1:
                     act("@WYou leap into the air and then slam into the ground with your feet outstretched!@n", true,
@@ -1496,7 +1449,7 @@ ACMD(do_train) {
                     break;
             }
             break;
-        case 4:
+        case CharAttribute::Speed:
             switch (msg_case) {
                 case 1:
                     act("@WYou do a series of backflips through the air, landing gracefully on one foot a moment later.@n",
@@ -1518,7 +1471,7 @@ ACMD(do_train) {
                     break;
             }
             break;
-        case 5:
+        case CharAttribute::Intelligence:
             switch (msg_case) {
                 case 1:
                     act("@WConcentrating you fly high into the air as fast as you can before settling slowly back to the ground.@n",
@@ -1540,7 +1493,7 @@ ACMD(do_train) {
                     break;
             }
             break;
-        case 6:
+        case CharAttribute::Wisdom:
             switch (msg_case) {
                 case 1:
                     act("@WYou close your eyes and wage a mental battle against an imaginary opponent.@n", true, ch,
@@ -1585,34 +1538,36 @@ ACMD(do_train) {
         plus += plus * 0.2;
     }
 
+    int stat_train = 0;
+
     switch (bonus) {
         case 1:
-            *stat_train += 5 + plus;
+            stat_train += 5 + plus;
             send_to_char(ch, "You feel slight improvement. @D[@G+%d@D]@n\r\n", (plus + 5));
             WAIT_STATE(ch, PULSE_3SEC);
             break;
         case 2:
-            *stat_train += 10 + plus;
+            stat_train += 10 + plus;
             send_to_char(ch, "You feel some improvement. @D[@G+%d@D]@n\r\n", (plus + 10));
             WAIT_STATE(ch, PULSE_3SEC);
             break;
         case 3:
-            *stat_train += 25 + plus;
+            stat_train += 25 + plus;
             send_to_char(ch, "You feel good improvement. @D[@G+%d@D]@n\r\n", (plus + 25));
             WAIT_STATE(ch, PULSE_3SEC);
             break;
         case 4:
-            *stat_train += 50 + plus;
+            stat_train += 50 + plus;
             send_to_char(ch, "You feel great improvement! @D[@G+%d@D]@n\r\n", (plus + 50));
             WAIT_STATE(ch, PULSE_5SEC);
             break;
         case 5:
-            *stat_train += 100 + plus;
+            stat_train += 100 + plus;
             send_to_char(ch, "You feel awesome improvement! @D[@G+%d@D]@n\r\n", (plus + 100));
             WAIT_STATE(ch, PULSE_5SEC);
             break;
         default:
-            *stat_train += 1;
+            stat_train += 1;
             send_to_char(ch, "You barely feel any improvement. @D[@G+1@D]@n\r\n");
             WAIT_STATE(ch, PULSE_3SEC);
             break;
@@ -1623,10 +1578,12 @@ ACMD(do_train) {
         ch->modPractices(-1);
     }
 
-    if (*stat_train >= needed) {
-        *stat_train -= needed;
+    auto results = ch->modTrain(attr, stat_train);
+
+    if (results >= needed) {
+        ch->modTrain(attr, -needed);
         send_to_char(ch, "You feel your %s improve!@n\r\n", stat_name);
-        *stat_val += 1;
+        ch->modAttribute(attr, 1);
         if (IS_PICCOLO(ch) && IS_NAMEK(ch) && level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0) {
             GET_EXP(ch) += level_exp(ch, GET_LEVEL(ch) + 1) * 0.25;
             send_to_char(ch, "You gained quite a bit of experience from that!\r\n");
@@ -2057,52 +2014,28 @@ ACMD(do_future) {
         return;
     }
 
+    ch->decCurKI(ch->getMaxKI() / 40);
+    ch->modPractices(-100);
+    reveal_hiding(ch, 0);
+
     if (vict != ch) {
-        if (vict->real_abils.cha + 5 > 25 && GET_BONUS(vict, BONUS_SLOW) > 0) {
-            send_to_char(ch, "They can't handle having their speed increased beyond 25.\r\n");
-            return;
-        }
-        if (vict->real_abils.intel + 2 > 25 && GET_BONUS(vict, BONUS_DULL) > 0) {
-            send_to_char(ch, "They can't handle having their intelligence increased beyond 25.\r\n");
-            return;
-        }
-        ch->decCurKI(ch->getMaxKI() / 40);
-        ch->modPractices(-100);
-        reveal_hiding(ch, 0);
         act("@CYou focus your energy into your fingers before stabbing your claws into $N and bestowing the power of Future Sight upon $M. Shortly after $E passes out.@n",
             true, ch, nullptr, vict, TO_CHAR);
         act("@C$n focuses $s energy into $s fingers before stabbing $s claws into YOUR neck and bestowing the power of Future Sight upon you! Soon after you pass out!@n",
             true, ch, nullptr, vict, TO_VICT);
         act("@C$n focuses $s energy into $s fingers before stabbing $s claws into $N's neck and bestowing the power of Future Sight upon $M! Soon after $E passes out!@n",
             true, ch, nullptr, vict, TO_NOTVICT);
-        SET_BIT_AR(AFF_FLAGS(vict), AFF_FUTURE);
-        vict->real_abils.cha += 5;
-        vict->real_abils.intel += 2;
-        GET_POS(vict) = POS_SLEEPING;
-        vict->save();
     } else {
-        if (ch->real_abils.cha + 5 > 25 && GET_BONUS(ch, BONUS_SLOW) > 0) {
-            send_to_char(ch, "You can't handle having your speed increased beyond 25.\r\n");
-            return;
-        }
-        if (ch->real_abils.intel + 2 > 25 && GET_BONUS(ch, BONUS_DULL) > 0) {
-            send_to_char(ch, "You can't handle having your intelligence increased beyond 25.\r\n");
-            return;
-        }
-        ch->decCurKI(ch->getMaxKI() / 40);
-        ch->modPractices(-100);
-        reveal_hiding(ch, 0);
+
         act("@CYou focus your energy into your mind and awaken your latent Future Sight powers!@n", true, ch, nullptr,
             vict, TO_CHAR);
         act("@C$n focuses $s energy while closing $s eyes for a moment.@n", true, ch, nullptr, vict, TO_VICT);
         act("@C$n focuses $s energy while closing $s eyes for a moment.@n", true, ch, nullptr, vict, TO_NOTVICT);
-        SET_BIT_AR(AFF_FLAGS(ch), AFF_FUTURE);
-        ch->real_abils.cha += 5;
-        ch->real_abils.intel += 2;
-        GET_POS(vict) = POS_SLEEPING;
-        ch->save();
+
     }
 
+    assign_affect(vict, AFF_FUTURE, 0, -1, 0, 0, 2, 0, 0, 5);
+    GET_POS(vict) = POS_SLEEPING;
 
 }
 
@@ -2506,12 +2439,8 @@ ACMD(do_pose) {
     int prob = GET_SKILL(ch, SKILL_POSE);
     int perc = rand_number(1, 70);
 
-    if (ch->real_abils.str + 8 > 25 && GET_BONUS(ch, BONUS_WIMP) > 0) {
-        send_to_char(ch, "You can't handle having your strength increased beyond 25.\r\n");
-        return;
-    }
-    if (ch->real_abils.dex + 8 > 25 && GET_BONUS(ch, BONUS_CLUMSY) > 0) {
-        send_to_char(ch, "You can't handle having your agility increased beyond 25.\r\n");
+    if(AFF_FLAGGED(ch, AFF_POSE)) {
+        send_to_char(ch, "You're already fighting stylishly!\r\n");
         return;
     }
 
@@ -2524,8 +2453,9 @@ ACMD(do_pose) {
         ch->decCurST(ch->getMaxST() / 40);
         improve_skill(ch, SKILL_POSE, 0);
         return;
-    } else {
-        reveal_hiding(ch, 0);
+    }
+
+    reveal_hiding(ch, 0);
         switch (rand_number(1, 4)) {
             case 1:
                 act("@WYou turn around with your back to everyone. You bend forward dramatically and put your head between your legs!@n",
@@ -2553,16 +2483,13 @@ ACMD(do_pose) {
                 break;
         }
         send_to_char(ch, "@WYou feel your confidence increase! @G+3 Str @Wand@G +3 Agl!@n\r\n");
-        ch->real_abils.str += 8;
-        ch->real_abils.dex += 8;
-        ch->save();
+        assign_affect(ch, AFF_POSE, SKILL_POSE, -1, 8, 0, 0, 8, 0, 0);
         int64_t before = (ch->getMaxLF());
         SET_BIT_AR(PLR_FLAGS(ch), PLR_POSE);
         ch->incCurLF((ch->getMaxLF()) - before);
         ch->decCurST(ch->getMaxST() / 40);
         improve_skill(ch, SKILL_POSE, 0);
         return;
-    }
 
 }
 
@@ -5130,10 +5057,14 @@ ACMD(do_focus) {
         if (AFF_FLAGGED(vict, AFF_WITHER)) {
             send_to_char(ch, "They already have been withered!\r\n");
             return;
-        } else if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 20) {
+        }
+
+        if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 20) {
             send_to_char(ch, "You do not have enough ki to wither them.\r\n");
             return;
-        } else if (GET_SKILL(ch, SKILL_WITHER) < axion_dice(0)) {
+        }
+
+        if (GET_SKILL(ch, SKILL_WITHER) < axion_dice(0)) {
             ch->decCurKI(ch->getMaxKI() / 20);
             reveal_hiding(ch, 0);
             act("You focus ki into $N's body, but fail in withering it!", true, ch, nullptr, vict, TO_CHAR);
@@ -5141,11 +5072,8 @@ ACMD(do_focus) {
             act("$n focuses ki into $N's body, but fails in withering it!", true, ch, nullptr, vict, TO_NOTVICT);
             return;
         } else {
-            SET_BIT_AR(AFF_FLAGS(vict), AFF_WITHER);
             ch->decCurKI(ch->getMaxKI() / 20);
-            vict->real_abils.str -= 3;
-            vict->real_abils.cha -= 3;
-            vict->save();
+            assign_affect(vict, AFF_WITHER, SKILL_WITHER, -1, -3, 0, 0, 0, 0, -3);
             reveal_hiding(ch, 0);
             act("You focus ki into $N's body, and succeed in withering it!", true, ch, nullptr, vict, TO_CHAR);
             act("$n focuses ki into your body, and succeeds in withering it!", true, ch, nullptr, vict, TO_VICT);
@@ -6845,7 +6773,7 @@ ACMD(do_heal) {
         if (AFF_FLAGGED(vict, AFF_HYDROZAP)) {
             send_to_char(vict, "You no longer feel a great thirst.\r\n");
             act("$n@w no longer looks as if they could drink an ocean.@n", true, vict, nullptr, nullptr, TO_ROOM);
-            REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_HYDROZAP);
+            null_affect(vict, AFF_HYDROZAP);
         }
         GET_LIMBCOND(vict, 0) = 100;
         GET_LIMBCOND(vict, 1) = 100;
@@ -8789,9 +8717,7 @@ ACMD(do_snet) {
                             CAP(arg), !*arg2 ? "" : arg2);
                     add_history(i->character, hist, HIST_SNET);
                     if (has_scanner(i->character)) {
-                        char *blah = sense_location(ch);
-                        send_to_char(i->character, "@WScanner@D: @Y%s@n\r\n", blah);
-                        free(blah);
+                        send_to_char(i->character, "@WScanner@D: @Y%s@n\r\n", sense_location(ch));
                     }
                     continue;
                 } /* It is the right freq */
@@ -8806,9 +8732,7 @@ ACMD(do_snet) {
                             CAP(arg2));
                     add_history(i->character, hist, HIST_SNET);
                     if (has_scanner(i->character)) {
-                        char *blah = sense_location(ch);
-                        send_to_char(i->character, "@WScanner@D: @Y%s@n\r\n", blah);
-                        free(blah);
+                        send_to_char(i->character, "@WScanner@D: @Y%s@n\r\n", sense_location(ch));
                     }
                     continue;
                 } else if (call > -1 && ((i->character)->id) == call) {
@@ -8821,9 +8745,7 @@ ACMD(do_snet) {
                             !*arg2 ? "" : CAP(arg2));
                     add_history(i->character, hist, HIST_SNET);
                     if (has_scanner(i->character)) {
-                        char *blah = sense_location(ch);
-                        send_to_char(i->character, "@WScanner@D: @Y%s@n\r\n", blah);
-                        free(blah);
+                        send_to_char(i->character, "@WScanner@D: @Y%s@n\r\n", sense_location(ch));
                     }
                     reached = true;
                 }

@@ -372,23 +372,10 @@ static void phase_powerup(struct char_data *ch, int type, int phase) {
     }
 
     if (type == 0) { // Drop their stats
-
-        if (GET_BONUS(ch, BONUS_WIMP) > 0 && GET_STR(ch) < 25) {
-            ch->real_abils.str -= bonus;
-        }
-        if (GET_BONUS(ch, BONUS_SLOW) > 0 && GET_CHA(ch) < 25) {
-            ch->real_abils.cha -= bonus;
-        }
+        null_affect(ch, AFF_STARPHASE);
         GET_PHASE(ch) = 0;
     } else { // Raise their stats
-
-        if (GET_BONUS(ch, BONUS_WIMP) > 0 && GET_STR(ch) + bonus <= 25) {
-            ch->real_abils.str += bonus;
-        }
-        if (GET_BONUS(ch, BONUS_SLOW) > 0 && GET_CHA(ch) + bonus <= 25) {
-            ch->real_abils.cha += bonus;
-        }
-
+        assign_affect(ch, AFF_STARPHASE, 0, -1, bonus, 0, 0, 0, 0, bonus);
         GET_PHASE(ch) = phase;
     }
 }

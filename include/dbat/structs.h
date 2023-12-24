@@ -14,7 +14,6 @@
 /**********************************************************************
 * Structures                                                          *
 **********************************************************************/
-
 struct account_data {
     account_data() = default;
     explicit account_data(const nlohmann::json& j);
@@ -512,6 +511,16 @@ struct trans_data {
 };
 
 
+struct AttributeData {
+    AttributeData() = default;
+    explicit AttributeData(const nlohmann::json& j);
+    int8_t base{10};
+    int train{0};
+    nlohmann::json serialize();
+    void deserialize(const nlohmann::json& j);
+};
+
+
 /* ================== Structure for player/non-player ===================== */
 struct char_data : public unit_data {
     char_data() = default;
@@ -583,7 +592,6 @@ struct char_data : public unit_data {
     int getHeight(bool base = false);
 
     int height{};        /* PC / NPC's height                    */
-    struct abil_data real_abils{};    /* Abilities without modifiers   */
     struct mob_special_data mob_specials{};
     int alignment{};        /* +-1000 for alignment good vs. evil	*/
     int alignment_ethic{};        /* +-1000 for alignment law vs. chaos	*/
@@ -603,7 +611,6 @@ struct char_data : public unit_data {
     int admflags[AD_ARRAY_MAX]{};    /* Bitvector for admin privs		*/
     room_vnum hometown{NOWHERE};        /* PC Hometown / NPC spawn room         */
     struct time_data time{};    /* PC's AGE in days			*/
-    struct abil_data aff_abils{};    /* Abils with spells/stones/etc  */
     struct affected_type *affected{};
     /* affected by what spells		*/
     struct affected_type *affectedv{};
@@ -822,30 +829,13 @@ struct char_data : public unit_data {
     room_vnum normalizeLoadRoom(room_vnum in);
 
     int getAffectModifier(int location, int specific = -1);
-    int getStrength(bool base = false);
-    int getIntelligence(bool base = false);
-    int getConstitution(bool base = false);
-    int getWisdom(bool base = false);
-    int getAgility(bool base = false);
-    int getSpeed(bool base = false);
 
-    int setStrength(int val);
-    int modStrength(int val);
-
-    int setIntelligence(int val);
-    int modIntelligence(int val);
-
-    int setConstitution(int val);
-    int modConstitution(int val);
-
-    int setWisdom(int val);
-    int modWisdom(int val);
-
-    int setAgility(int val);
-    int modAgility(int val);
-
-    int setSpeed(int val);
-    int modSpeed(int val);
+    int getAttribute(CharAttribute attr, bool base = false);
+    int setAttribute(CharAttribute attr, int val);
+    int modAttribute(CharAttribute attr, int val);
+    int getTrain(CharAttribute attr);
+    int setTrain(CharAttribute attr, int val);
+    int modTrain(CharAttribute attr, int val);
 
     // C++ reworking
     const std::string &juggleRaceName(bool capitalized);
@@ -1099,6 +1089,8 @@ struct char_data : public unit_data {
 
     bool isProvidingLight();
     double currentGravity();
+
+    std::unordered_map<CharAttribute, AttributeData> attributes;
 
 };
 
@@ -1401,4 +1393,3 @@ struct aging_data {
 #ifdef MEMORY_DEBUG
 #include "zmalloc.h"
 #endif
-

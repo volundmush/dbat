@@ -440,28 +440,29 @@ static void resolve_song(struct char_data *ch) {
                     return;
                 }
                 break;
-            case SONG_SHADOW_STITCH:
+            case SONG_SHADOW_STITCH: {
+                auto applyShadow = [skill](struct char_data *user, struct char_data *target) {
+                    user->decCurKI(user->getPercentOfMaxKI(.001) + skill);
+                    if (!IS_NPC(target)) {
+                        WAIT_STATE(target, PULSE_2SEC);
+                    } else {
+                        assign_affect(target, AFF_SHADOWSTITCH, 0, -1, 0, 0, 0, 0, 0, -2);
+                    }
+                };
                 if (ch->master && vict->master) {
                     if (AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(vict, AFF_GROUP)) {
                         if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
                             continue;
-                        } else if (skill > diceroll + 10) {
+                        }
+
+                        if (skill > diceroll + 10) {
                             act("@CYour forboding music has caused @c$N's@C shadows to stitch into $S body, slowing $S actions!@n",
                                 true, ch, nullptr, vict, TO_CHAR);
                             act("@c$n's@C forboding music has caused YOUR shadows to stitch into YOUR body, slow YOUR actions down!@n",
                                 true, ch, nullptr, vict, TO_VICT);
                             act("@c$n's@C forboding music has caused @c$N's@C shadows to stitch into $S body, slowing $S actions!@n",
                                 true, ch, nullptr, vict, TO_NOTVICT);
-                            if (!IS_NPC(vict)) {
-                                WAIT_STATE(vict, PULSE_2SEC);
-                                ch->decCurKI(ch->getPercentOfMaxKI(.001) + skill);
-                            } else {
-                                vict->real_abils.cha -= 2;
-                                ch->decCurKI(ch->getPercentOfMaxKI(.001) + skill);
-                                if (vict->real_abils.cha < 3) {
-                                    vict->real_abils.cha = 3;
-                                }
-                            }
+                            applyShadow(ch, vict);
                         }
                     } else if (skill > diceroll + 10) {
                         act("@CYour forboding music has caused @c$N's@C shadows to stitch into $S body, slowing $S actions!@n",
@@ -470,16 +471,7 @@ static void resolve_song(struct char_data *ch) {
                             true, ch, nullptr, vict, TO_VICT);
                         act("@c$n's@C forboding music has caused @c$N's@C shadows to stitch into $S body, slowing $S actions!@n",
                             true, ch, nullptr, vict, TO_NOTVICT);
-                        if (!IS_NPC(vict)) {
-                            WAIT_STATE(vict, PULSE_2SEC);
-                            ch->decCurKI(ch->getPercentOfMaxKI(.001) + skill);
-                        } else {
-                            ch->decCurKI(ch->getPercentOfMaxKI(.001) + skill);
-                            vict->real_abils.cha -= 2;
-                            if (vict->real_abils.cha < 3) {
-                                vict->real_abils.cha = 3;
-                            }
-                        }
+                        applyShadow(ch, vict);
                     }
                 } else if (skill > diceroll + 10) {
                     act("@CYour forboding music has caused @c$N's@C shadows to stitch into $S body, slowing $S actions!@n",
@@ -488,16 +480,7 @@ static void resolve_song(struct char_data *ch) {
                         true, ch, nullptr, vict, TO_VICT);
                     act("@c$n's@C forboding music has caused @c$N's@C shadows to stitch into $S body, slowing $S actions!@n",
                         true, ch, nullptr, vict, TO_NOTVICT);
-                    if (!IS_NPC(vict)) {
-                        WAIT_STATE(vict, PULSE_2SEC);
-                        ch->decCurKI(ch->getPercentOfMaxKI(.001) + skill);
-                    } else {
-                        vict->real_abils.cha -= 2;
-                        ch->decCurKI(ch->getPercentOfMaxKI(.001) + skill);
-                        if (vict->real_abils.cha < 3) {
-                            vict->real_abils.cha = 3;
-                        }
-                    }
+                    applyShadow(ch, vict);
                 }
                 if ((ch->getCurKI()) <= 0) {
                     send_to_char(ch, "You no longer have the ki necessary to play your song.\r\n");
@@ -505,6 +488,8 @@ static void resolve_song(struct char_data *ch) {
                     GET_SONG(ch) = 0;
                     return;
                 }
+            }
+
                 break;
             case SONG_TELEPORT_EARTH:
                 if (vict == ch)
@@ -2280,8 +2265,8 @@ ACMD(do_scry) {
 
         send_to_char(vict,
                      "Your Powerlevel, Ki, and Stamina have improved drastically! On top of that your Intelligence and Wisdom have improved permanantly!\r\n");
-        vict->real_abils.intel += 2;
-        vict->real_abils.wis += 2;
+        vict->modAttribute(CharAttribute::Intelligence, 2);
+        vict->modAttribute(CharAttribute::Wisdom, 2);
         ch->modPractices(-2000);
         if (GET_LEVEL(ch) < 100) {
             send_to_char(ch, "@D[@mPractice Sessions@D:@R -2000@D]@n\r\n");
@@ -3157,10 +3142,7 @@ ACMD(do_kanso) {
 
         if (!AFF_FLAGGED(vict, AFF_HYDROZAP)) { /* Drop their AGL/CON if not already lowered */
             send_to_char(vict, "@RYou feel less agile and your muscles ache!@n\r\n");
-            SET_BIT_AR(AFF_FLAGS(vict), AFF_HYDROZAP);
-            vict->real_abils.dex -= 4;
-            vict->real_abils.con -= 4;
-            vict->save();
+            assign_affect(vict, AFF_HYDROZAP, 0, -1, 0, -4, 0, -4, 0, 0);
         }
 
         if (skill > pdice && !AFF_FLAGGED(vict, AFF_PARA)) { /* Paralyze them too */

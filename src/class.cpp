@@ -316,7 +316,6 @@ void cedit_creation(struct char_data *ch) {
             break;
     }
     racial_body_parts(ch);
-    ch->aff_abils = ch->real_abils;
 }
 
 /*
@@ -646,41 +645,10 @@ void do_start(struct char_data *ch) {
         ch->gainBaseKI(rand_number(400, 500));
     }
 
-    if (ch->real_abils.str > 20) {
-        ch->real_abils.str = 20;
-    }
-    if (ch->real_abils.str < 8) {
-        ch->real_abils.str = 8;
-    }
-    if (ch->real_abils.con > 20) {
-        ch->real_abils.con = 20;
-    }
-    if (ch->real_abils.con < 8) {
-        ch->real_abils.con = 8;
-    }
-    if (ch->real_abils.intel > 20) {
-        ch->real_abils.intel = 20;
-    }
-    if (ch->real_abils.intel < 8) {
-        ch->real_abils.intel = 8;
-    }
-    if (ch->real_abils.cha > 20) {
-        ch->real_abils.cha = 20;
-    }
-    if (ch->real_abils.cha < 8) {
-        ch->real_abils.cha = 8;
-    }
-    if (ch->real_abils.dex > 20) {
-        ch->real_abils.dex = 20;
-    }
-    if (ch->real_abils.dex < 8) {
-        ch->real_abils.dex = 8;
-    }
-    if (ch->real_abils.wis > 20) {
-        ch->real_abils.wis = 20;
-    }
-    if (ch->real_abils.wis < 8) {
-        ch->real_abils.wis = 8;
+    for(auto attr : {CharAttribute::Strength, CharAttribute::Agility, CharAttribute::Constitution,
+        CharAttribute::Intelligence, CharAttribute::Wisdom, CharAttribute::Speed}) {
+        auto val = ch->getAttribute(attr);
+        ch->setAttribute(attr, std::clamp(val, 8, 20));
     }
 
     GET_TRANSCLASS(ch) = rand_number(1, 3);
@@ -1226,17 +1194,17 @@ void advance_level(struct char_data *ch, int whichclass) {
         int raise = false, stat_fail = 0;
         if (IS_KONATSU(ch)) {
             while (raise == false) {
-                if (ch->real_abils.dex < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
-                    if (ch->real_abils.dex < 45 || GET_BONUS(ch, BONUS_CLUMSY) <= 0) {
-                        ch->real_abils.dex += 1;
+                if (auto agi = ch->getAttribute(CharAttribute::Agility, true); agi < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
+                    if (agi < 45 || GET_BONUS(ch, BONUS_CLUMSY) <= 0) {
+                        ch->modAttribute(CharAttribute::Agility, 1);
                         send_to_char(ch, "@GYou feel your agility increase!@n\r\n");
                         raise = true;
                     } else {
                         stat_fail += 1;
                     }
-                } else if (ch->real_abils.cha < 100 && raise == false && stat_fail < 2) {
-                    if (ch->real_abils.cha < 45 || GET_BONUS(ch, BONUS_SLOW) > 0) {
-                        ch->real_abils.cha += 1;
+                } else if (auto speed = ch->getAttribute(CharAttribute::Speed, true); speed < 100 && raise == false && stat_fail < 2) {
+                    if (speed < 45 || GET_BONUS(ch, BONUS_SLOW) > 0) {
+                        ch->modAttribute(CharAttribute::Speed, 1);
                         send_to_char(ch, "@GYou feel your speed increase!@n\r\n");
                         raise = true;
                     } else {
@@ -1251,17 +1219,17 @@ void advance_level(struct char_data *ch, int whichclass) {
 
         else if (IS_MUTANT(ch)) {
             while (raise == false) {
-                if (ch->real_abils.con < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
-                    if (ch->real_abils.con < 45 || GET_BONUS(ch, BONUS_FRAIL) <= 0) {
-                        ch->real_abils.con += 1;
+                if (auto con = ch->getAttribute(CharAttribute::Constitution, true); con < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
+                    if (con < 45 || GET_BONUS(ch, BONUS_FRAIL) <= 0) {
+                        ch->modAttribute(CharAttribute::Constitution, 1);
                         send_to_char(ch, "@GYou feel your constitution increase!@n\r\n");
                         raise = true;
                     } else {
                         stat_fail += 1;
                     }
-                } else if (ch->real_abils.cha < 100 && raise == false && stat_fail < 2) {
-                    if (ch->real_abils.cha < 45 || GET_BONUS(ch, BONUS_SLOW) > 0) {
-                        ch->real_abils.cha += 1;
+                } else if (auto speed = ch->getAttribute(CharAttribute::Speed, true); speed < 100 && raise == false && stat_fail < 2) {
+                    if (speed < 45 || GET_BONUS(ch, BONUS_SLOW) > 0) {
+                        ch->modAttribute(CharAttribute::Speed, 1);
                         send_to_char(ch, "@GYou feel your speed increase!@n\r\n");
                         raise = true;
                     } else {
@@ -1276,17 +1244,17 @@ void advance_level(struct char_data *ch, int whichclass) {
 
         else if (IS_HOSHIJIN(ch)) {
             while (raise == false) {
-                if (ch->real_abils.str < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
-                    if (ch->real_abils.str < 45 || GET_BONUS(ch, BONUS_WIMP) <= 0) {
-                        ch->real_abils.str += 1;
+                if (auto str = ch->getAttribute(CharAttribute::Strength, true) ; str < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
+                    if (str < 45 || GET_BONUS(ch, BONUS_WIMP) <= 0) {
+                        ch->modAttribute(CharAttribute::Strength, 1);
                         send_to_char(ch, "@GYou feel your strength increase!@n\r\n");
                         raise = true;
                     } else {
                         stat_fail += 1;
                     }
-                } else if (ch->real_abils.dex < 100 && raise == false && stat_fail < 2) {
-                    if (ch->real_abils.dex < 45 || GET_BONUS(ch, BONUS_SLOW) > 0) {
-                        ch->real_abils.dex += 1;
+                } else if (auto agi = ch->getAttribute(CharAttribute::Agility, true) ; agi < 100 && raise == false && stat_fail < 2) {
+                    if (agi < 45 || GET_BONUS(ch, BONUS_SLOW) > 0) {
+                        ch->modAttribute(CharAttribute::Agility, 1);
                         send_to_char(ch, "@GYou feel your agility increase!@n\r\n");
                         raise = true;
                     } else {
@@ -1308,59 +1276,27 @@ void advance_level(struct char_data *ch, int whichclass) {
         send_to_char(ch, "You can now perform another Potential Release.\r\n");
         GET_BOOSTS(ch) += 1;
     }
-    if (IS_MAJIN(ch) && GET_LEVEL(ch) == 25) {
-        send_to_char(ch, "You can now perform another Majinization.\r\n");
-        GET_BOOSTS(ch) += 1;
-    }
-    if (IS_MAJIN(ch) && GET_LEVEL(ch) == 50) {
-        send_to_char(ch, "You can now perform another Majinization.\r\n");
-        GET_BOOSTS(ch) += 1;
-    }
-    if (IS_MAJIN(ch) && GET_LEVEL(ch) == 75) {
-        send_to_char(ch, "You can now perform another Majinization.\r\n");
-        GET_BOOSTS(ch) += 1;
-    }
-    if (IS_MAJIN(ch) && GET_LEVEL(ch) == 100) {
+    if (IS_MAJIN(ch) && ((GET_LEVEL(ch) % 25) == 0)) {
         send_to_char(ch, "You can now perform another Majinization.\r\n");
         GET_BOOSTS(ch) += 1;
     }
 
-    switch (GET_LEVEL(ch)) {
-        case 10:
-        case 20:
-        case 30:
-        case 40:
-        case 50:
-        case 60:
-        case 70:
-        case 80:
-        case 90:
-        case 100:
-            if (GET_BONUS(ch, BONUS_BRAWNY) > 0) {
-                ch->real_abils.str += 2;
-                send_to_char(ch, "@GYour muscles have grown stronger!@n\r\n");
+    if ((GET_LEVEL(ch) % 10) == 0) {
+        // every 10 levels...
+        const std::map<int, std::pair<CharAttribute, std::string>> checks = {
+            {BONUS_BRAWNY, {CharAttribute::Strength, "@GYour muscles have grown stronger!@n"}},
+            {BONUS_SCHOLARLY, {CharAttribute::Intelligence, "@GYour mind has grown sharper!@n"}},
+            {BONUS_SAGE, {CharAttribute::Wisdom, "@GYour understanding about life has improved!@n"}},
+            {BONUS_AGILE, {CharAttribute::Agility, "@GYour body has grown more agile!@n"}},
+            {BONUS_QUICK, {CharAttribute::Speed, "@GYou feel like your speed has improved!@n"}},
+            {BONUS_STURDY, {CharAttribute::Constitution, "@GYour body feels tougher now!@n"}},
+        };
+        for (auto& [trait, res]: checks) {
+            if (GET_BONUS(ch, trait)) {
+                ch->modAttribute(res.first, 2);
+                send_to_char(ch, "%s\r\n", res.second.c_str());
             }
-            if (GET_BONUS(ch, BONUS_SCHOLARLY) > 0) {
-                ch->real_abils.intel += 2;
-                send_to_char(ch, "@GYour mind has grown sharper!@n\r\n");
-            }
-            if (GET_BONUS(ch, BONUS_SAGE) > 0) {
-                ch->real_abils.wis += 2;
-                send_to_char(ch, "@GYour understanding about life has improved!@n\r\n");
-            }
-            if (GET_BONUS(ch, BONUS_AGILE) > 0) {
-                ch->real_abils.dex += 2;
-                send_to_char(ch, "@GYour body has grown more agile!@n\r\n");
-            }
-            if (GET_BONUS(ch, BONUS_QUICK) > 0) {
-                ch->real_abils.cha += 2;
-                send_to_char(ch, "@GYou feel like your speed has improved!@n\r\n");
-            }
-            if (GET_BONUS(ch, BONUS_STURDY) > 0) {
-                ch->real_abils.con += 2;
-                send_to_char(ch, "@GYour body feels tougher now!@n\r\n");
-            }
-            break;
+        }
     }
 
     if (GET_LEVEL(ch) == 1) {

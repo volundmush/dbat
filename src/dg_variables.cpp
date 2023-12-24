@@ -602,13 +602,13 @@ in the vault (vnum: 453) now and then. you can just use
                     } else if (!strcasecmp(field, "con")) {
                         if (subfield && *subfield) {
                             int addition = atof(subfield);
-                            c->modConstitution(addition);
+                            c->modAttribute(CharAttribute::Constitution, addition);
                         }
                         snprintf(str, slen, "%d", GET_CON(c));
                     } else if (!strcasecmp(field, "cha")) {
                         if (subfield && *subfield) {
                             int addition = atof(subfield);
-                            c->modSpeed(addition);
+                            c->modAttribute(CharAttribute::Speed, addition);
                         }
                         snprintf(str, slen, "%d", GET_CHA(c));
                     }
@@ -623,8 +623,8 @@ in the vault (vnum: 453) now and then. you can just use
                         snprintf(str, slen, "%ld", GET_DTIME(c));
                     } else if (!strcasecmp(field, "dex")) {
                         if (subfield && *subfield) {
-                            int addition = atof(subfield);
-                            ch->modAgility(addition);
+                            int addition = atoi(subfield);
+                            ch->modAttribute(CharAttribute::Agility, addition);
                         }
                         snprintf(str, slen, "%d", GET_DEX(c));
                     } else if (!strcasecmp(field, "drag")) {
@@ -783,7 +783,7 @@ in the vault (vnum: 453) now and then. you can just use
                     } else if (!strcasecmp(field, "int")) {
                         if (subfield && *subfield) {
                             int addition = atof(subfield);
-                            c->modIntelligence(addition);
+                            c->modAttribute(CharAttribute::Intelligence, addition);
                         }
                         snprintf(str, slen, "%d", GET_INT(c));
                     }
@@ -928,11 +928,7 @@ in the vault (vnum: 453) now and then. you can just use
                     else if (!strcasecmp(field, "str")) {
                         if (subfield && *subfield) {
                             int addition = atof(subfield);
-                            int max = 100;
-                            auto &str = c->real_abils.str;
-                            str += addition;
-                            if (str > max) str = max;
-                            if (str < 3) str = 3;
+                            c->modAttribute(CharAttribute::Strength, addition);
                         }
                         snprintf(str, slen, "%d", GET_STR(c));
                     } else if (!strcasecmp(field, "size")) {
@@ -1028,11 +1024,7 @@ in the vault (vnum: 453) now and then. you can just use
                     else if (!strcasecmp(field, "wis")) {
                         if (subfield && *subfield) {
                             int addition = atof(subfield);
-                            int max = 100;
-                            auto &wis = c->real_abils.wis;
-                            wis += addition;
-                            if (wis > max) wis = max;
-                            if (wis < 3) wis = 3;
+                            c->modAttribute(CharAttribute::Wisdom, addition);
                         }
                         snprintf(str, slen, "%d", GET_WIS(c));
                     }

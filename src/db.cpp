@@ -267,95 +267,76 @@ static void mob_stats(struct char_data *mob) {
     if (finish < 20)
         finish = 20;
 
+    std::unordered_map<CharAttribute, int> setTo;
+
     if (!IS_HUMANOID(mob)) {
-        mob->real_abils.str = rand_number(start, finish);
-        mob->real_abils.intel = rand_number(start, finish) - 30;
-        mob->real_abils.wis = rand_number(start, finish) - 30;
-        mob->real_abils.dex = rand_number(start + 5, finish);
-        mob->real_abils.con = rand_number(start + 5, finish);
-        mob->real_abils.cha = rand_number(start, finish);
+        setTo[CharAttribute::Strength] = rand_number(start, finish);
+        setTo[CharAttribute::Intelligence] = rand_number(start, finish) - 30;
+        setTo[CharAttribute::Wisdom] = rand_number(start, finish) - 30;
+        setTo[CharAttribute::Agility] = rand_number(start + 5, finish);
+        setTo[CharAttribute::Constitution] = rand_number(start + 5, finish);
+        setTo[CharAttribute::Speed] = rand_number(start, finish);
     } else {
         if (IS_SAIYAN(mob)) {
-            mob->real_abils.str = rand_number(start + 10, finish);
-            mob->real_abils.intel = rand_number(start, finish - 10);
-            mob->real_abils.wis = rand_number(start, finish - 5);
-            mob->real_abils.dex = rand_number(start, finish);
-            mob->real_abils.con = rand_number(start + 5, finish);
-            mob->real_abils.cha = rand_number(start + 5, finish);
+            setTo[CharAttribute::Strength] = rand_number(start + 10, finish);
+            setTo[CharAttribute::Intelligence] = rand_number(start, finish - 10);
+            setTo[CharAttribute::Wisdom] = rand_number(start, finish - 5);
+            setTo[CharAttribute::Agility] = rand_number(start, finish);
+            setTo[CharAttribute::Constitution] = rand_number(start + 5, finish);
+            setTo[CharAttribute::Speed] = rand_number(start + 5, finish);
         } else if (IS_KONATSU(mob)) {
-            mob->real_abils.str = rand_number(start, finish - 10);
-            mob->real_abils.intel = rand_number(start, finish);
-            mob->real_abils.wis = rand_number(start, finish);
-            mob->real_abils.dex = rand_number(start + 10, finish);
-            mob->real_abils.con = rand_number(start, finish);
-            mob->real_abils.cha = rand_number(start, finish);
+            setTo[CharAttribute::Strength] = rand_number(start, finish - 10);
+            setTo[CharAttribute::Intelligence] = rand_number(start, finish);
+            setTo[CharAttribute::Wisdom] = rand_number(start, finish);
+            setTo[CharAttribute::Agility] = rand_number(start + 10, finish);
+            setTo[CharAttribute::Constitution] = rand_number(start, finish);
+            setTo[CharAttribute::Speed] = rand_number(start, finish);
         } else if (IS_ANDROID(mob)) {
-            mob->real_abils.str = rand_number(start, finish);
-            mob->real_abils.intel = rand_number(start, finish);
-            mob->real_abils.wis = rand_number(start, finish - 10);
-            mob->real_abils.dex = rand_number(start, finish);
-            mob->real_abils.con = rand_number(start, finish);
-            mob->real_abils.cha = rand_number(start, finish);
+            setTo[CharAttribute::Strength] = rand_number(start, finish);
+            setTo[CharAttribute::Intelligence] = rand_number(start, finish);
+            setTo[CharAttribute::Wisdom] = rand_number(start, finish - 10);
+            setTo[CharAttribute::Agility] = rand_number(start, finish);
+            setTo[CharAttribute::Constitution] = rand_number(start, finish);
+            setTo[CharAttribute::Speed] = rand_number(start, finish);
         } else if (IS_MAJIN(mob)) {
-            mob->real_abils.str = rand_number(start, finish);
-            mob->real_abils.intel = rand_number(start, finish - 10);
-            mob->real_abils.wis = rand_number(start, finish - 5);
-            mob->real_abils.dex = rand_number(start, finish);
-            mob->real_abils.con = rand_number(start + 15, finish);
-            mob->real_abils.cha = rand_number(start, finish);
+            setTo[CharAttribute::Strength] = rand_number(start, finish);
+            setTo[CharAttribute::Intelligence] = rand_number(start, finish - 10);
+            setTo[CharAttribute::Wisdom] = rand_number(start, finish - 5);
+            setTo[CharAttribute::Agility] = rand_number(start, finish);
+            setTo[CharAttribute::Constitution] = rand_number(start + 15, finish);
+            setTo[CharAttribute::Speed] = rand_number(start, finish);
         } else if (IS_TRUFFLE(mob)) {
-            mob->real_abils.str = rand_number(start, finish - 10);
-            mob->real_abils.intel = rand_number(start + 15, finish);
-            mob->real_abils.wis = rand_number(start, finish);
-            mob->real_abils.dex = rand_number(start, finish);
-            mob->real_abils.con = rand_number(start, finish);
-            mob->real_abils.cha = rand_number(start, finish);
+            setTo[CharAttribute::Strength] = rand_number(start, finish - 10);
+            setTo[CharAttribute::Intelligence] = rand_number(start + 15, finish);
+            setTo[CharAttribute::Wisdom] = rand_number(start, finish);
+            setTo[CharAttribute::Agility] = rand_number(start, finish);
+            setTo[CharAttribute::Constitution] = rand_number(start, finish);
+            setTo[CharAttribute::Speed] = rand_number(start, finish);
         } else if (IS_ICER(mob)) {
-            mob->real_abils.str = rand_number(start + 5, finish);
-            mob->real_abils.intel = rand_number(start, finish);
-            mob->real_abils.wis = rand_number(start, finish);
-            mob->real_abils.dex = rand_number(start, finish);
-            mob->real_abils.con = rand_number(start, finish);
-            mob->real_abils.cha = rand_number(start + 10, finish);
+            setTo[CharAttribute::Strength] = rand_number(start + 5, finish);
+            setTo[CharAttribute::Intelligence] = rand_number(start, finish);
+            setTo[CharAttribute::Wisdom] = rand_number(start, finish);
+            setTo[CharAttribute::Agility] = rand_number(start, finish);
+            setTo[CharAttribute::Constitution] = rand_number(start, finish);
+            setTo[CharAttribute::Speed] = rand_number(start + 10, finish);
         } else {
-            mob->real_abils.str = rand_number(start, finish);
-            mob->real_abils.intel = rand_number(start, finish);
-            mob->real_abils.wis = rand_number(start, finish);
-            mob->real_abils.dex = rand_number(start, finish);
-            mob->real_abils.con = rand_number(start, finish);
-            mob->real_abils.cha = rand_number(start, finish);
+            setTo[CharAttribute::Strength] = rand_number(start, finish);
+            setTo[CharAttribute::Intelligence] = rand_number(start, finish);
+            setTo[CharAttribute::Wisdom] = rand_number(start, finish);
+            setTo[CharAttribute::Agility] = rand_number(start, finish);
+            setTo[CharAttribute::Constitution] = rand_number(start, finish);
+            setTo[CharAttribute::Speed] = rand_number(start, finish);
         }
     }
 
-    if (mob->real_abils.str > 100)
-        mob->real_abils.str = 100;
-    else if (mob->real_abils.str < 5)
-        mob->real_abils.str = rand_number(5, 8);
-
-    if (mob->real_abils.intel > 100)
-        mob->real_abils.intel = 100;
-    else if (mob->real_abils.intel < 5)
-        mob->real_abils.intel = rand_number(5, 8);
-
-    if (mob->real_abils.wis > 100)
-        mob->real_abils.wis = 100;
-    else if (mob->real_abils.wis < 5)
-        mob->real_abils.wis = rand_number(5, 8);
-
-    if (mob->real_abils.con > 100)
-        mob->real_abils.con = 100;
-    else if (mob->real_abils.con < 5)
-        mob->real_abils.con = rand_number(5, 8);
-
-    if (mob->real_abils.cha > 100)
-        mob->real_abils.cha = 100;
-    else if (mob->real_abils.cha < 5)
-        mob->real_abils.cha = rand_number(5, 8);
-
-    if (mob->real_abils.dex > 100)
-        mob->real_abils.dex = 100;
-    else if (mob->real_abils.dex < 5)
-        mob->real_abils.dex = rand_number(5, 8);
+    for(auto &[attr, val] : setTo) {
+        if(val > 100) {
+            val = 100;
+        } else if(val < 5) {
+            val = rand_number(5, 8);
+        }
+        mob->setAttribute(attr, val);
+    }
 }
 
 
@@ -2018,13 +1999,6 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
     int j, t[10];
     char line[READ_SIZE];
 
-    ch->real_abils.str = 0;
-    ch->real_abils.intel = 0;
-    ch->real_abils.wis = 0;
-    ch->real_abils.dex = 0;
-    ch->real_abils.con = 0;
-    ch->real_abils.cha = 0;
-
     if (!get_line(mob_f, line)) {
         basic_mud_log("SYSERR: Format error in mob #%d, file ended after S flag!", nr);
         return 0;
@@ -2162,7 +2136,7 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
 
     CASE("Str") {
         RANGE(0, 200);
-        ch->real_abils.str = num_arg;
+        ch->setAttribute(CharAttribute::Strength, num_arg);
     }
 
     CASE("StrAdd") {
@@ -2172,27 +2146,27 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
 
     CASE("Int") {
         RANGE(0, 200);
-        ch->real_abils.intel = num_arg;
+        ch->setAttribute(CharAttribute::Intelligence, num_arg);
     }
 
     CASE("Wis") {
         RANGE(0, 200);
-        ch->real_abils.wis = num_arg;
+        ch->setAttribute(CharAttribute::Wisdom, num_arg);
     }
 
     CASE("Dex") {
         RANGE(0, 200);
-        ch->real_abils.dex = num_arg;
+        ch->setAttribute(CharAttribute::Agility, num_arg);
     }
 
     CASE("Con") {
         RANGE(0, 200);
-        ch->real_abils.con = num_arg;
+        ch->setAttribute(CharAttribute::Constitution, num_arg);
     }
 
     CASE("Cha") {
         RANGE(0, 200);
-        ch->real_abils.cha = num_arg;
+        ch->setAttribute(CharAttribute::Speed, num_arg);
     }
 
     CASE("Hit") {
@@ -2390,8 +2364,6 @@ int parse_mobile_from_file(FILE *mob_f, struct char_data *ch) {
         letter = fread_letter(mob_f);
         ungetc(letter, mob_f);
     }
-
-    ch->aff_abils = ch->real_abils;
 
     for (j = 0; j < NUM_WEARS; j++)
         ch->equipment[j] = nullptr;

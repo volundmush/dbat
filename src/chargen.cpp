@@ -11,6 +11,169 @@
 #include "dbat/players.h"
 #include "dbat/dg_comm.h"
 
+static     const std::map<race::race_id, std::map<CharAttribute, std::pair<int, int>>> startAttrRanges = {
+        {
+            race::race_id::saiyan, {
+                {CharAttribute::Strength, {12, 18}},
+                {CharAttribute::Constitution, {12, 18}},
+                {CharAttribute::Wisdom, {8, 16}},
+                {CharAttribute::Intelligence, {8, 14}},
+                {CharAttribute::Speed, {8, 18}},
+                {CharAttribute::Agility, {8, 16}},
+            }
+        },
+        {
+            race::race_id::halfbreed, {
+                {CharAttribute::Strength, {10, 18}},
+                {CharAttribute::Constitution, {10, 18}},
+                {CharAttribute::Wisdom, {8, 18}},
+                {CharAttribute::Intelligence, {8, 18}},
+                {CharAttribute::Speed, {8, 18}},
+                {CharAttribute::Agility, {8, 18}},
+            }
+        },
+        {
+            race::race_id::human, {
+                {CharAttribute::Strength, {8, 18}},
+                {CharAttribute::Constitution, {8, 18}},
+                {CharAttribute::Wisdom, {10, 18}},
+                {CharAttribute::Intelligence, {12, 18}},
+                {CharAttribute::Speed, {8, 18}},
+                {CharAttribute::Agility, {8, 18}},
+            }
+        },
+        {
+            race::race_id::hoshijin, {
+                {CharAttribute::Strength, {10, 18}},
+                {CharAttribute::Constitution, {9, 18}},
+                {CharAttribute::Wisdom, {9, 18}},
+                {CharAttribute::Intelligence, {9, 18}},
+                {CharAttribute::Speed, {10, 18}},
+                {CharAttribute::Agility, {9, 18}},
+            }
+        },
+        {
+            race::race_id::namekian, {
+                {CharAttribute::Strength, {9, 18}},
+                {CharAttribute::Constitution, {9, 18}},
+                {CharAttribute::Wisdom, {12, 18}},
+                {CharAttribute::Intelligence, {8, 18}},
+                {CharAttribute::Speed, {8, 18}},
+                {CharAttribute::Agility, {8, 18}},
+            }
+        },
+        {
+            race::race_id::arlian, {
+                {CharAttribute::Strength, {15, 20}},
+                {CharAttribute::Constitution, {15, 20}},
+                {CharAttribute::Wisdom, {8, 16}},
+                {CharAttribute::Intelligence, {8, 16}},
+                {CharAttribute::Speed, {8, 18}},
+                {CharAttribute::Agility, {8, 18}},
+            }
+        },
+        {
+            race::race_id::android, {
+                {CharAttribute::Strength, {12, 18}},
+                {CharAttribute::Constitution, {8, 18}},
+                {CharAttribute::Wisdom, {8, 16}},
+                {CharAttribute::Intelligence, {8, 16}},
+                {CharAttribute::Speed, {8, 18}},
+                {CharAttribute::Agility, {8, 18}},
+            }
+        },
+        {
+            race::race_id::bio, {
+                {CharAttribute::Strength, {14, 18}},
+                {CharAttribute::Constitution, {8, 18}},
+                {CharAttribute::Wisdom, {8, 18}},
+                {CharAttribute::Intelligence, {8, 18}},
+                {CharAttribute::Speed, {8, 18}},
+                {CharAttribute::Agility, {8, 14}},
+            }
+        },
+        {
+            race::race_id::majin, {
+                {CharAttribute::Strength, {11, 18}},
+                {CharAttribute::Constitution, {14, 18}},
+                {CharAttribute::Wisdom, {8, 14}},
+                {CharAttribute::Intelligence, {8, 14}},
+                {CharAttribute::Speed, {8, 18}},
+                {CharAttribute::Agility, {8, 17}},
+            }
+        },
+        {
+            race::race_id::truffle, {
+                {CharAttribute::Strength, {8, 14}},
+                {CharAttribute::Constitution, {8, 14}},
+                {CharAttribute::Wisdom, {8, 18}},
+                {CharAttribute::Intelligence, {14, 18}},
+                {CharAttribute::Speed, {8, 18}},
+                {CharAttribute::Agility, {8, 18}},
+            }
+        },
+        {
+            race::race_id::kai, {
+                {CharAttribute::Strength, {9, 18}},
+                {CharAttribute::Constitution, {8, 18}},
+                {CharAttribute::Wisdom, {14, 18}},
+                {CharAttribute::Intelligence, {10, 18}},
+                {CharAttribute::Speed, {8, 18}},
+                {CharAttribute::Agility, {8, 18}},
+            }
+        },
+        {
+            race::race_id::icer, {
+                {CharAttribute::Strength, {10, 18}},
+                {CharAttribute::Constitution, {12, 18}},
+                {CharAttribute::Wisdom, {8, 18}},
+                {CharAttribute::Intelligence, {8, 18}},
+                {CharAttribute::Speed, {8, 15}},
+                {CharAttribute::Agility, {8, 18}},
+            }
+        },
+        {
+            race::race_id::mutant, {
+                {CharAttribute::Strength, {9, 18}},
+                {CharAttribute::Constitution, {9, 18}},
+                {CharAttribute::Wisdom, {9, 18}},
+                {CharAttribute::Intelligence, {9, 18}},
+                {CharAttribute::Speed, {9, 18}},
+                {CharAttribute::Agility, {9, 18}},
+            }
+        },
+        {
+            race::race_id::kanassan, {
+                {CharAttribute::Strength, {8, 16}},
+                {CharAttribute::Constitution, {8, 16}},
+                {CharAttribute::Wisdom, {12, 18}},
+                {CharAttribute::Intelligence, {12, 18}},
+                {CharAttribute::Speed, {8, 18}},
+                {CharAttribute::Agility, {8, 18}},
+            }
+        },
+        {
+            race::race_id::demon, {
+                {CharAttribute::Strength, {11, 18}},
+                {CharAttribute::Constitution, {8, 18}},
+                {CharAttribute::Wisdom, {10, 18}},
+                {CharAttribute::Intelligence, {10, 18}},
+                {CharAttribute::Speed, {8, 18}},
+                {CharAttribute::Agility, {8, 18}},
+            }
+        },
+        {
+            race::race_id::konatsu, {
+                {CharAttribute::Strength, {10, 14}},
+                {CharAttribute::Constitution, {10, 14}},
+                {CharAttribute::Wisdom, {10, 16}},
+                {CharAttribute::Intelligence, {10, 14}},
+                {CharAttribute::Speed, {12, 18}},
+                {CharAttribute::Agility, {14, 18}},
+            }
+        }
+    };
+
 namespace net {
 
     int ChargenParser::roll_stats(int type, int bonus) {
@@ -19,14 +182,17 @@ namespace net {
         int powerlevel = 0, ki = 1, stamina = 2;
 
         if (type == powerlevel) {
-            base_num = ch->real_abils.str * 3;
-            max_num = ch->real_abils.str * 5;
+            auto base = ch->getAttribute(CharAttribute::Strength, true);
+            base_num = base * 3;
+            max_num = base * 5;
         } else if (type == ki) {
-            base_num = ch->real_abils.intel * 3;
-            max_num = ch->real_abils.intel * 5;
+            auto base = ch->getAttribute(CharAttribute::Intelligence, true);
+            base_num = base * 3;
+            max_num = base * 5;
         } else if (type == stamina) {
-            base_num = ch->real_abils.con * 3;
-            max_num = ch->real_abils.con * 5;
+            auto base = ch->getAttribute(CharAttribute::Constitution, true);
+            base_num = base * 3;
+            max_num = base * 5;
         }
 
         pool = rand_number(base_num, max_num) + bonus;
@@ -1134,118 +1300,11 @@ namespace net {
                 ch->basepl = rand_number(30, 50);
                 ch->basest = rand_number(30, 50);
                 ch->baseki = rand_number(30, 50);
-                if (IS_SAIYAN(ch)) {
-                    ch->real_abils.str = rand_number(12, 18);
-                    ch->real_abils.con = rand_number(12, 18);
-                    ch->real_abils.wis = rand_number(8, 16);
-                    ch->real_abils.intel = rand_number(8, 14);
-                    ch->real_abils.cha = rand_number(8, 18);
-                    ch->real_abils.dex = rand_number(8, 16);
-                } else if (IS_HALFBREED(ch)) {
-                    ch->real_abils.str = rand_number(10, 18);
-                    ch->real_abils.con = rand_number(10, 18);
-                    ch->real_abils.wis = rand_number(8, 18);
-                    ch->real_abils.intel = rand_number(8, 18);
-                    ch->real_abils.cha = rand_number(8, 18);
-                    ch->real_abils.dex = rand_number(8, 18);
-                } else if (IS_HUMAN(ch)) {
-                    ch->real_abils.str = rand_number(8, 18);
-                    ch->real_abils.con = rand_number(8, 18);
-                    ch->real_abils.wis = rand_number(10, 18);
-                    ch->real_abils.intel = rand_number(12, 18);
-                    ch->real_abils.cha = rand_number(8, 18);
-                    ch->real_abils.dex = rand_number(8, 18);
-                } else if (IS_HOSHIJIN(ch)) {
-                    ch->real_abils.str = rand_number(10, 18);
-                    ch->real_abils.con = rand_number(9, 18);
-                    ch->real_abils.wis = rand_number(9, 18);
-                    ch->real_abils.intel = rand_number(9, 18);
-                    ch->real_abils.cha = rand_number(10, 18);
-                    ch->real_abils.dex = rand_number(9, 18);
-                } else if (IS_NAMEK(ch)) {
-                    ch->real_abils.str = rand_number(9, 18);
-                    ch->real_abils.con = rand_number(9, 18);
-                    ch->real_abils.wis = rand_number(12, 18);
-                    ch->real_abils.intel = rand_number(8, 18);
-                    ch->real_abils.cha = rand_number(8, 18);
-                    ch->real_abils.dex = rand_number(8, 18);
-                } else if (IS_ARLIAN(ch)) {
-                    ch->real_abils.str = rand_number(15, 20);
-                    ch->real_abils.con = rand_number(15, 20);
-                    ch->real_abils.wis = rand_number(8, 16);
-                    ch->real_abils.intel = rand_number(8, 16);
-                    ch->real_abils.cha = rand_number(8, 18);
-                    ch->real_abils.dex = rand_number(8, 18);
-                } else if (IS_ANDROID(ch)) {
-                    ch->real_abils.str = rand_number(12, 18);
-                    ch->real_abils.con = rand_number(8, 18);
-                    ch->real_abils.wis = rand_number(8, 16);
-                    ch->real_abils.intel = rand_number(8, 16);
-                    ch->real_abils.cha = rand_number(8, 18);
-                    ch->real_abils.dex = rand_number(8, 18);
-                } else if (IS_BIO(ch)) {
-                    ch->real_abils.str = rand_number(14, 18);
-                    ch->real_abils.con = rand_number(8, 18);
-                    ch->real_abils.wis = rand_number(8, 18);
-                    ch->real_abils.intel = rand_number(8, 18);
-                    ch->real_abils.cha = rand_number(8, 18);
-                    ch->real_abils.dex = rand_number(8, 14);
-                } else if (IS_MAJIN(ch)) {
-                    ch->real_abils.str = rand_number(11, 18);
-                    ch->real_abils.con = rand_number(14, 18);
-                    ch->real_abils.wis = rand_number(8, 14);
-                    ch->real_abils.intel = rand_number(8, 14);
-                    ch->real_abils.cha = rand_number(8, 18);
-                    ch->real_abils.dex = rand_number(8, 17);
-                } else if (IS_TRUFFLE(ch)) {
-                    ch->real_abils.str = rand_number(8, 14);
-                    ch->real_abils.con = rand_number(8, 14);
-                    ch->real_abils.wis = rand_number(8, 18);
-                    ch->real_abils.intel = rand_number(14, 18);
-                    ch->real_abils.cha = rand_number(8, 18);
-                    ch->real_abils.dex = rand_number(8, 18);
-                } else if (IS_KAI(ch)) {
-                    ch->real_abils.str = rand_number(9, 18);
-                    ch->real_abils.con = rand_number(8, 18);
-                    ch->real_abils.wis = rand_number(14, 18);
-                    ch->real_abils.intel = rand_number(10, 18);
-                    ch->real_abils.cha = rand_number(8, 18);
-                    ch->real_abils.dex = rand_number(8, 18);
-                } else if (IS_ICER(ch)) {
-                    ch->real_abils.str = rand_number(10, 18);
-                    ch->real_abils.con = rand_number(12, 18);
-                    ch->real_abils.wis = rand_number(8, 18);
-                    ch->real_abils.intel = rand_number(8, 18);
-                    ch->real_abils.cha = rand_number(8, 15);
-                    ch->real_abils.dex = rand_number(8, 18);
-                } else if (IS_MUTANT(ch)) {
-                    ch->real_abils.str = rand_number(9, 18);
-                    ch->real_abils.con = rand_number(9, 18);
-                    ch->real_abils.wis = rand_number(9, 18);
-                    ch->real_abils.intel = rand_number(9, 18);
-                    ch->real_abils.cha = rand_number(9, 18);
-                    ch->real_abils.dex = rand_number(9, 18);
-                } else if (IS_KANASSAN(ch)) {
-                    ch->real_abils.str = rand_number(8, 16);
-                    ch->real_abils.con = rand_number(8, 16);
-                    ch->real_abils.wis = rand_number(12, 18);
-                    ch->real_abils.intel = rand_number(12, 18);
-                    ch->real_abils.cha = rand_number(8, 18);
-                    ch->real_abils.dex = rand_number(8, 18);
-                } else if (IS_DEMON(ch)) {
-                    ch->real_abils.str = rand_number(11, 18);
-                    ch->real_abils.con = rand_number(8, 18);
-                    ch->real_abils.wis = rand_number(10, 18);
-                    ch->real_abils.intel = rand_number(10, 18);
-                    ch->real_abils.cha = rand_number(8, 18);
-                    ch->real_abils.dex = rand_number(8, 18);
-                } else if (IS_KONATSU(ch)) {
-                    ch->real_abils.str = rand_number(10, 14);
-                    ch->real_abils.con = rand_number(10, 14);
-                    ch->real_abils.wis = rand_number(10, 16);
-                    ch->real_abils.intel = rand_number(10, 14);
-                    ch->real_abils.cha = rand_number(12, 18);
-                    ch->real_abils.dex = rand_number(14, 18);
+                {
+                    auto defStats = startAttrRanges.at(ch->race->getID());
+                    for(auto &[attr, range] : defStats) {
+                        ch->setAttribute(attr, rand_number(range.first, range.second));
+                    }
                 }
 
                 switch(arg[0]) {
@@ -1483,17 +1542,17 @@ namespace net {
                 switch(arg[0]) {
                     case '1':
                         ch->alignment += -10;
-                        ch->real_abils.str += 1;
+                        ch->modAttribute(CharAttribute::Strength, 1);
                         break;
                     case '2':
                         ch->alignment += +10;
-                        ch->real_abils.cha += 1;
+                        ch->modAttribute(CharAttribute::Speed, 1);
                         break;
                     case '3':
-                        ch->real_abils.wis += 1;
+                        ch->modAttribute(CharAttribute::Wisdom, 1);
                         break;
                     case '4':
-                        ch->real_abils.intel += 1;
+                        ch->modAttribute(CharAttribute::Intelligence, 1);
                         break;
                     default:
                         sendText("That is not an acceptable option.\r\n");
@@ -1515,19 +1574,19 @@ namespace net {
                 switch(arg[0]) {
                     case '1':
                         ch->alignment += +10;
-                        ch->real_abils.cha += 1;
+                        ch->modAttribute(CharAttribute::Speed, 1);
                         break;
                     case '2':
                         ch->alignment += +20;
-                        ch->real_abils.wis += 1;
+                        ch->modAttribute(CharAttribute::Wisdom, 1);
                         break;
                     case '3':
                         ch->alignment += -10;
-                        ch->real_abils.str += 1;
+                        ch->modAttribute(CharAttribute::Strength, 1);
                         break;
                     case '4':
                         ch->alignment += -20;
-                        ch->real_abils.dex += 1;
+                        ch->modAttribute(CharAttribute::Agility, 1);
                         break;
                     default:
                         sendText("That is not an acceptable option.\r\n");
@@ -1548,19 +1607,19 @@ namespace net {
             case CON_Q9:
                 switch(arg[0]) {
                     case '1':
-                        ch->real_abils.str += 1;
+                        ch->modAttribute(CharAttribute::Strength, 1);
                         break;
                     case '2':
                         ch->alignment += -30;
-                        ch->real_abils.wis += 1;
+                        ch->modAttribute(CharAttribute::Wisdom, 1);
                         break;
                     case '3':
                         ch->alignment += -10;
-                        ch->real_abils.cha += 1;
+                        ch->modAttribute(CharAttribute::Speed, 1);
                         break;
                     case '4':
                         ch->alignment += -5;
-                        ch->real_abils.intel += 1;
+                        ch->modAttribute(CharAttribute::Intelligence, 1);
                         break;
                     default:
                         sendText("That is not an acceptable option.\r\n");
@@ -1678,17 +1737,17 @@ namespace net {
 
                     switch (roll) {
                         case 1:
-                            ch->real_abils.str -= 1;
+                            ch->modAttribute(CharAttribute::Strength, -1);
                         case 2:
-                            ch->real_abils.con -= 1;
+                            ch->modAttribute(CharAttribute::Constitution, -1);
                         case 3:
-                            ch->real_abils.wis -= 1;
+                            ch->modAttribute(CharAttribute::Wisdom, -1);
                         case 4:
-                            ch->real_abils.intel -= 1;
+                            ch->modAttribute(CharAttribute::Intelligence, -1);
                         case 5:
-                            ch->real_abils.cha -= 1;
+                            ch->modAttribute(CharAttribute::Speed, -1);
                         case 6:
-                            ch->real_abils.dex -= 1;
+                            ch->modAttribute(CharAttribute::Agility, -1);
                             break;
                     }
                     sendText("@CWould you like to keep skills gained from your sensei/race combo (skills, not abilities)\r\nor would you prefer to keep those skill slots empty? If you choose\r\nto forget then you get 200 PS in exchange.@n\r\n");
@@ -1896,7 +1955,7 @@ namespace net {
                             }
                         }
                         if (num == 3) {
-                            ch->real_abils.dex += 10;
+                            ch->modAttribute(CharAttribute::Agility, 10);
                         }
                         sendText(fmt::format("@CRolling second mutation... Your second mutation is @D[@Y{}@D]@n\r\n",
                                   display_genome[num]));
@@ -1920,7 +1979,7 @@ namespace net {
                             sendText(fmt::format("@CYou have chosen the mutation @D[@Y{}@D]@n\r\n", display_genome[choice]));
                             ch->genome[0] = choice;
                             if (choice == 3) {
-                                ch->real_abils.dex += 10;
+                                ch->modAttribute(CharAttribute::Agility, 10);
                             } else if (choice == 9) {
                                 SET_SKILL(ch, SKILL_TELEPATHY, 50);
                             }

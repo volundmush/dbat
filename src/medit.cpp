@@ -240,9 +240,15 @@ void init_mobile(struct char_data *mob) {
     GET_WEIGHT(mob) = rand_number(100, 200);
     GET_HEIGHT(mob) = rand_number(100, 200);
 
-    mob->real_abils.str = mob->real_abils.intel = mob->real_abils.wis = rand_number(8, 16);
-    mob->real_abils.dex = mob->real_abils.con = mob->real_abils.cha = rand_number(8, 16);
-    mob->aff_abils = mob->real_abils;
+    auto base1 = rand_number(8, 16);
+    auto base2 = rand_number(8, 16);
+    for(auto attr : {CharAttribute::Strength, CharAttribute::Intelligence, CharAttribute::Wisdom}) {
+        mob->setAttribute(attr, base1);
+    }
+
+    for(auto attr : {CharAttribute::Agility, CharAttribute::Constitution, CharAttribute::Speed}) {
+        mob->setAttribute(attr, base2);
+    }
 
     SET_BIT_AR(MOB_FLAGS(mob), MOB_ISNPC);
 }

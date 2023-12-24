@@ -262,12 +262,6 @@ int load_char(const char *name, struct char_data *ch) {
         ch->mimic = nullptr;
         GET_SLOTS(ch) = 0;
         GET_TGROWTH(ch) = 0;
-        GET_TRAINSTR(ch) = PFDEF_EYE;
-        GET_TRAINSPD(ch) = PFDEF_EYE;
-        GET_TRAINWIS(ch) = PFDEF_EYE;
-        GET_TRAINAGL(ch) = PFDEF_EYE;
-        GET_TRAINCON(ch) = PFDEF_EYE;
-        GET_TRAININT(ch) = PFDEF_EYE;
         GET_RTIME(ch) = PFDEF_LPLAY;
         GET_DCOUNT(ch) = PFDEF_EYE;
         GET_GENOME(ch, 0) = PFDEF_EYE;
@@ -336,18 +330,6 @@ int load_char(const char *name, struct char_data *ch) {
         GET_POLE_BONUS(ch) = PFDEF_ACCURACY;
         GET_DAMAGE_MOD(ch) = PFDEF_DAMAGE;
         GET_ARMOR(ch) = PFDEF_AC;
-        ch->real_abils.str = PFDEF_STR;
-        ch->real_abils.dex = PFDEF_DEX;
-        ch->real_abils.intel = PFDEF_INT;
-        ch->real_abils.wis = PFDEF_WIS;
-        ch->real_abils.con = PFDEF_CON;
-        ch->real_abils.cha = PFDEF_CHA;
-        //GET_HIT(ch) = PFDEF_HIT;
-        //ch->max_hit = PFDEF_MAXHIT;
-        //GET_MANA(ch) = PFDEF_MANA;
-        //ch->max_mana = PFDEF_MAXMANA;
-        //GET_MOVE(ch) = PFDEF_MOVE;
-        //ch->max_move = PFDEF_MAXMOVE;
         SPEAKING(ch) = PFDEF_SPEAKING;
         GET_OLC_ZONE(ch) = PFDEF_OLC;
 
@@ -405,7 +387,7 @@ int load_char(const char *name, struct char_data *ch) {
                     break;
 
                 case 'C':
-                    if (!strcmp(tag, "Cha ")) ch->real_abils.cha = atoi(line);
+                    if (!strcmp(tag, "Cha ")) ch->setAttribute(CharAttribute::Speed, atoi(line));
                     else if (!strcmp(tag, "Clan")) GET_CLAN(ch) = strdup(line);
                     else if (!strcmp(tag, "Clar")) GET_CRANK(ch) = atoi(line);
                     else if (!strcmp(tag, "Clas"))
@@ -413,7 +395,7 @@ int load_char(const char *name, struct char_data *ch) {
                     else if (!strcmp(tag, "Colr")) {
                         sscanf(line, "%d %s", &num, buf2);
                         p.color_choices[num] = strdup(buf2);
-                    } else if (!strcmp(tag, "Con ")) ch->real_abils.con = atoi(line);
+                    } else if (!strcmp(tag, "Con ")) ch->setAttribute(CharAttribute::Constitution, atoi(line));
                     else if (!strcmp(tag, "Cool")) GET_COOLDOWN(ch) = atoi(line);
                     else if (!strcmp(tag, "Crtd")) ch->time.created = atol(line);
                     break;
@@ -422,7 +404,7 @@ int load_char(const char *name, struct char_data *ch) {
                     if (!strcmp(tag, "Deat")) GET_DTIME(ch) = atoi(line);
                     else if (!strcmp(tag, "Deac")) GET_DCOUNT(ch) = atoi(line);
                     else if (!strcmp(tag, "Desc")) ch->look_description = fread_string(fl, buf2);
-                    else if (!strcmp(tag, "Dex ")) ch->real_abils.dex = atoi(line);
+                    else if (!strcmp(tag, "Dex ")) ch->setAttribute(CharAttribute::Agility, atoi(line));
                     else if (!strcmp(tag, "Drnk")) GET_COND(ch, DRUNK) = atoi(line);
                     else if (!strcmp(tag, "Damg")) GET_DAMAGE_MOD(ch) = atoi(line);
                     else if (!strcmp(tag, "Droo")) GET_DROOM(ch) = atoi(line);
@@ -466,7 +448,7 @@ int load_char(const char *name, struct char_data *ch) {
                 case 'I':
                     if (!strcmp(tag, "Id  ")) GET_IDNUM(ch) = atol(line);
                     else if (!strcmp(tag, "INGl")) GET_INGESTLEARNED(ch) = atoi(line);
-                    else if (!strcmp(tag, "Int ")) ch->real_abils.intel = atoi(line);
+                    else if (!strcmp(tag, "Int ")) ch->setAttribute(CharAttribute::Intelligence, atoi(line));
                     else if (!strcmp(tag, "Invs")) GET_INVIS_LEV(ch) = atoi(line);
                     break;
 
@@ -561,7 +543,7 @@ int load_char(const char *name, struct char_data *ch) {
                         ch->modPractices(num3);
                     } else if (!strcmp(tag, "Slot")) ch->skill_slots = atoi(line);
                     else if (!strcmp(tag, "Spek")) SPEAKING(ch) = atoi(line);
-                    else if (!strcmp(tag, "Str ")) ch->real_abils.str = atoi(line);
+                    else if (!strcmp(tag, "Str ")) ch->setAttribute(CharAttribute::Strength, atoi(line));
                     else if (!strcmp(tag, "Stuk")) ch->stupidkiss = atoi(line);
                     else if (!strcmp(tag, "Supp")) GET_SUPPRESS(ch) = atoi(line);
                     break;
@@ -580,12 +562,12 @@ int load_char(const char *name, struct char_data *ch) {
                     else if (!strcmp(tag, "ThB1")) GET_SAVE_BASE(ch, 0) = atoi(line);
                     else if (!strcmp(tag, "ThB2")) GET_SAVE_BASE(ch, 1) = atoi(line);
                     else if (!strcmp(tag, "ThB3")) GET_SAVE_BASE(ch, 2) = atoi(line);
-                    else if (!strcmp(tag, "Trag")) GET_TRAINAGL(ch) = atoi(line);
-                    else if (!strcmp(tag, "Trco")) GET_TRAINCON(ch) = atoi(line);
-                    else if (!strcmp(tag, "Trin")) GET_TRAININT(ch) = atoi(line);
-                    else if (!strcmp(tag, "Trsp")) GET_TRAINSPD(ch) = atoi(line);
-                    else if (!strcmp(tag, "Trst")) GET_TRAINSTR(ch) = atoi(line);
-                    else if (!strcmp(tag, "Trwi")) GET_TRAINWIS(ch) = atoi(line);
+                    else if (!strcmp(tag, "Trag")) ch->setTrain(CharAttribute::Agility, atoi(line));
+                    else if (!strcmp(tag, "Trco")) ch->setTrain(CharAttribute::Constitution, atoi(line));
+                    else if (!strcmp(tag, "Trin")) ch->setTrain(CharAttribute::Intelligence, atoi(line));
+                    else if (!strcmp(tag, "Trsp")) ch->setTrain(CharAttribute::Speed, atoi(line));
+                    else if (!strcmp(tag, "Trst")) ch->setTrain(CharAttribute::Strength, atoi(line));
+                    else if (!strcmp(tag, "Trwi")) ch->setTrain(CharAttribute::Wisdom, atoi(line));
                     break;
                 case 'U':
                     if (!strcmp(tag, "Upgr")) GET_UP(ch) = atoi(line);
@@ -603,7 +585,7 @@ int load_char(const char *name, struct char_data *ch) {
                 case 'W':
                     if (!strcmp(tag, "Wate")) GET_WEIGHT(ch) = atoi(line);
                     else if (!strcmp(tag, "Wimp")) GET_WIMP_LEV(ch) = atoi(line);
-                    else if (!strcmp(tag, "Wis ")) ch->real_abils.wis = atoi(line);
+                    else if (!strcmp(tag, "Wis ")) ch->setAttribute(CharAttribute::Wisdom, atoi(line));
                     break;
 
                 default:

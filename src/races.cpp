@@ -1808,4 +1808,7 @@ namespace race {
         race_map[race_id::spirit] = new Race(race_id::spirit, "Spirit", "Spi", SIZE_TINY, false);
 
     }
+
+
+
 }

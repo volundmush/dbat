@@ -897,8 +897,13 @@
 #define AFF_SHELL             72
 #define AFF_IMMUNITY          73
 #define AFF_SPIRITCONTROL     74
+#define AFF_POSE              75
+#define AFF_KYODAIKA          76
+#define AFF_SHADOWSTITCH       77
+#define AFF_ECHAINS_DEBUFF     78
+#define AFF_STARPHASE          79
 
-#define NUM_AFF_FLAGS 75
+#define NUM_AFF_FLAGS 80
 
 /* Modes of connectedness: used by descriptor_data.state */
 #define CON_PLAYING     0    /* Playing - Nominal state		*/
@@ -1891,3 +1896,15 @@ input */
 
 #define LEVELTYPE_CLASS    1
 #define LEVELTYPE_RACE    2
+
+
+// The IDs in this enum are designed to correlate with the APPLY_<STAT> defines.
+// Each ID is APPLY_<STAT> - 1
+enum class CharAttribute : uint8_t {
+ Strength = 0,
+ Agility = 1, // lots of code references this as Dexterity. dex
+ Intelligence = 2,
+ Wisdom = 3,
+ Constitution = 4,
+ Speed = 5 // this is actually Charisma in the code. cha
+};

@@ -471,6 +471,7 @@ int roll_aff_duration(int num, int add) {
 }
 
 void null_affect(struct char_data *ch, int aff_flag) {
+    ch->save();
 
     struct affected_type *af, *next_af;
 
@@ -496,6 +497,8 @@ assign_affect(struct char_data *ch, int aff_flag, int skill, int dur, int str, i
 
     if (dur <= 0)
         dur = 1;
+
+    ch->save();
 
     if (str == 0 && con == 0 && wis == 0 && intel == 0 && agl == 0 && spd == 0) {
         af[num].type = skill;

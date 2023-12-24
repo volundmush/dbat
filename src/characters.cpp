@@ -123,23 +123,29 @@ void char_data::resurrect(ResurrectionMode mode) {
         int losschance = axion_dice(0);
         send_to_char(this,
                      "@RThe the strain of this type of revival has caused you to be in a weakened state for 100 hours (Game time)! Strength,itution, wisdom, intelligence, speed, and agility have been reduced by 8 points for the duration.@n\r\n");
-        int str = -8, intel = -8, wis = -8, spd = -8, con = -8, agl = -8;
-        if (this->real_abils.intel <= 16) {
-            intel = -4;
+        std::map<CharAttribute, int> statReductions = {
+            {CharAttribute::Strength, -8},
+            {CharAttribute::Constitution, -8},
+            {CharAttribute::Intelligence, -8},
+            {CharAttribute::Wisdom, -8},
+            {CharAttribute::Speed, -8},
+            {CharAttribute::Agility, -8}
+        };
+
+        for (auto& [attr, reduction] : statReductions) {
+            int baseStat = this->getAttribute(attr, true);
+            int effectiveReduction = std::max(reduction, 15 - baseStat);
+            statReductions[attr] = effectiveReduction;
         }
-        if (this->real_abils.cha <= 16) {
-            spd = -4;
-        }
-        if (this->real_abils.dex <= 16) {
-            agl = -4;
-        }
-        if (this->real_abils.wis <= 16) {
-            wis = -4;
-        }
-        if (this->real_abils.con <= 16) {
-            con = -4;
-        }
-        assign_affect(this, AFF_WEAKENED_STATE, SKILL_WARP, dur, str, con, intel, agl, wis, spd);
+
+        assign_affect(this, AFF_WEAKENED_STATE, SKILL_WARP, dur,
+                      statReductions[CharAttribute::Strength],
+                      statReductions[CharAttribute::Constitution],
+                      statReductions[CharAttribute::Intelligence],
+                      statReductions[CharAttribute::Agility],
+                      statReductions[CharAttribute::Wisdom],
+                      statReductions[CharAttribute::Speed]);
+
         if (losschance >= 100) {
             int psloss = rand_number(100, 300);
             modPractices(-psloss);
@@ -1129,96 +1135,42 @@ int char_data::getAffectModifier(int location, int specific) {
     return total;
 }
 
-int char_data::getStrength(bool base) {
-    if(base) return real_abils.str;
-    return std::clamp<int>(real_abils.str + getAffectModifier(APPLY_STR) + getAffectModifier(APPLY_ALL_STATS),
-                           0, 100);
+int char_data::getAttribute(CharAttribute attr, bool base) {
+    auto &stat = attributes[attr];
+    if(base) return stat.base;
+    return std::clamp<int>(stat.base + getAffectModifier((int)attr+1) + getAffectModifier(APPLY_ALL_STATS),
+                           0, 120);
 }
 
-int char_data::getIntelligence(bool base) {
-    if(base) return real_abils.intel;
-    return std::clamp<int>(real_abils.intel + getAffectModifier(APPLY_INT) + getAffectModifier(APPLY_ALL_STATS),
-                           0, 100);
+int char_data::setAttribute(CharAttribute attr, int val) {
+    auto &stat = attributes[attr];
+    stat.base = std::clamp<int>(val, 5, 100);
+    return stat.base;
 }
 
-int char_data::getConstitution(bool base) {
-    if(base) return real_abils.con;
-    return std::clamp<int>(real_abils.con + getAffectModifier(APPLY_CON) + getAffectModifier(APPLY_ALL_STATS),
-                           0, 100);
+int char_data::modAttribute(CharAttribute attr, int val) {
+    auto &stat = attributes[attr];
+    return setAttribute(attr, stat.base + val);
 }
 
-int char_data::getWisdom(bool base) {
-    if(base) return real_abils.wis;
-    return std::clamp<int>(real_abils.wis + getAffectModifier(APPLY_WIS) + getAffectModifier(APPLY_ALL_STATS),
-                           0, 100);
+int char_data::getTrain(CharAttribute attr) {
+    auto &stat = attributes[attr];
+    return stat.train;
 }
 
-int char_data::getAgility(bool base) {
-    if(base) return real_abils.dex;
-    return std::clamp<int>(real_abils.dex + getAffectModifier(APPLY_DEX) + getAffectModifier(APPLY_ALL_STATS),
-                           0, 100);
+int char_data::setTrain(CharAttribute attr, int val) {
+    auto &stat = attributes[attr];
+    stat.train = std::max(0, val);
+    return stat.train;
 }
 
-int char_data::getSpeed(bool base) {
-    if(base) return real_abils.cha;
-    return std::clamp<int>(real_abils.cha + getAffectModifier(APPLY_CHA) + getAffectModifier(APPLY_ALL_STATS),
-                            0, 100);
+int char_data::modTrain(CharAttribute attr, int val) {
+    auto &stat = attributes[attr];
+    return setTrain(attr, stat.train + val);
 }
 
 
-int char_data::setStrength(int val) {
-    real_abils.str = std::clamp<int>(val, 1, 100);
-    return real_abils.str;
-}
 
-int char_data::modStrength(int val) {
-    return setStrength(real_abils.str + val);
-}
-
-int char_data::setIntelligence(int val) {
-    real_abils.intel = std::clamp<int>(val, 1, 100);
-    return real_abils.intel;
-}
-
-int char_data::modIntelligence(int val) {
-    return setIntelligence(real_abils.intel + val);
-}
-
-int char_data::setConstitution(int val) {
-    real_abils.con = std::clamp<int>(val, 1, 100);
-    return real_abils.con;
-}
-
-int char_data::modConstitution(int val) {
-    return setConstitution(real_abils.con + val);
-}
-
-int char_data::setWisdom(int val) {
-    real_abils.wis = std::clamp<int>(val, 1, 100);
-    return real_abils.wis;
-}
-
-int char_data::modWisdom(int val) {
-    return setWisdom(real_abils.wis + val);
-}
-
-int char_data::setAgility(int val) {
-    real_abils.dex = std::clamp<int>(val, 1, 100);
-    return real_abils.dex;
-}
-
-int char_data::modAgility(int val) {
-    return setAgility(real_abils.dex + val);
-}
-
-int char_data::setSpeed(int val) {
-    real_abils.cha = std::clamp<int>(val, 1, 100);
-    return real_abils.cha;
-}
-
-int char_data::modSpeed(int val) {
-    return setSpeed(real_abils.cha + val);
-}
 
 bool char_data::canCarryWeight(weight_t val) {
     double gravity = 1.0;

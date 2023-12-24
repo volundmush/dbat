@@ -358,6 +358,24 @@ time_data::time_data(const nlohmann::json &j) : time_data() {
     deserialize(j);
 }
 
+nlohmann::json AttributeData::serialize() {
+    nlohmann::json j;
+    if(base != 10) j["base"] = base;
+    if(train) j["train"] = train;
+
+    return j;
+}
+
+void AttributeData::deserialize(const nlohmann::json &j) {
+    if(j.contains("base")) base = j["base"];
+    if(j.contains("train")) train = j["train"];
+}
+
+AttributeData::AttributeData(const nlohmann::json& j) : AttributeData() {
+    deserialize(j);
+}
+
+
 nlohmann::json char_data::serializeBase() {
     auto j = serializeUnit();
 
@@ -391,8 +409,9 @@ nlohmann::json char_data::serializeBase() {
     if(armor) j["armor"] = armor;
     if(damage_mod) j["damage_mod"] = damage_mod;
 
-    auto real = real_abils.serialize();
-    if(!real.empty()) j["real_abils"] = real;
+    for(auto &[cid, attr] : attributes) {
+        j["attributes"].push_back(std::make_pair(cid, attr.serialize()));
+    }
 
     return j;
 }
@@ -433,7 +452,17 @@ void char_data::deserializeBase(const nlohmann::json &j) {
     if(j.contains("basepl")) basepl = j["basepl"];
     if(j.contains("baseki")) baseki = j["baseki"];
     if(j.contains("basest")) basest = j["basest"];
-    if(j.contains("real_abils")) real_abils.deserialize(j["real_abils"]);
+
+    if(j.contains("attributes")) {
+        for(auto attr : j["attributes"]) {
+            // Each attr should be a tuple of (attr_id, json).
+            // We will feed it into this->attributes.emplace().
+            auto attr_id = attr[0].get<CharAttribute>();
+            auto attr_json = attr[1];
+            attributes.emplace(attr_id, attr_json);
+        }
+    }
+
     if(j.contains("armor")) armor = j["armor"];
     if(j.contains("damage_mod")) damage_mod = j["damage_mod"];
     if(j.contains("mob_specials")) mob_specials.deserialize(j["mob_specials"]);
@@ -511,13 +540,6 @@ nlohmann::json char_data::serializeInstance() {
 
     if(speaking) j["speaking"] = speaking;
     if(preference) j["preference"] = preference;
-
-    if(trainstr) j["trainstr"] = trainstr;
-    if(trainint) j["trainint"] = trainint;
-    if(traincon) j["traincon"] = traincon;
-    if(trainwis) j["trainwis"] = trainwis;
-    if(trainagl) j["trainagl"] = trainagl;
-    if(trainspd) j["trainspd"] = trainspd;
 
     if(practice_points) j["practice_points"] = practice_points;
 
@@ -802,12 +824,6 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
     if(j.contains("freeze_level")) freeze_level = j["freeze_level"];
     if(j.contains("practice_points")) practice_points = j["practice_points"];
     if(j.contains("speaking")) speaking = j["speaking"];
-    if(j.contains("trainagl")) trainagl = j["trainagl"];
-    if(j.contains("traincon")) traincon = j["traincon"];
-    if(j.contains("trainint")) trainint = j["trainint"];
-    if(j.contains("trainstr")) trainstr = j["trainstr"];
-    if(j.contains("trainwis")) trainwis = j["trainwis"];
-    if(j.contains("trainspd")) trainspd = j["trainspd"];
 
 }
 
@@ -849,8 +865,6 @@ char_data::char_data(const nlohmann::json &j) : char_data() {
     if(PLR_FLAGGED(this, PLR_NOTDEADYET)) {
         REMOVE_BIT_AR(PLR_FLAGS(this), PLR_NOTDEADYET);
     }
-
-    aff_abils = real_abils;
 
 }
 

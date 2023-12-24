@@ -3686,7 +3686,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             break;
         case 11:
             RANGE(0, 100);
-            vict->real_abils.str = value;
+            vict->setAttribute(CharAttribute::Strength, value);
             mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set str for %s.", GET_NAME(ch),
                    GET_NAME(vict));
             log_imm_action("SET: %s has set str for %s.", GET_NAME(ch), GET_NAME(vict));
@@ -3701,7 +3701,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
        break; */
         case 13:
             RANGE(0, 100);
-            vict->real_abils.intel = value;
+            vict->setAttribute(CharAttribute::Intelligence, value);
             mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set intel for %s.", GET_NAME(ch),
                    GET_NAME(vict));
             log_imm_action("SET: %s has set intel for %s.", GET_NAME(ch), GET_NAME(vict));
@@ -3709,7 +3709,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             break;
         case 14:
             RANGE(0, 100);
-            vict->real_abils.wis = value;
+            vict->setAttribute(CharAttribute::Wisdom, value);
             mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set wis for %s.", GET_NAME(ch),
                    GET_NAME(vict));
             log_imm_action("SET: %s has set wis for %s.", GET_NAME(ch), GET_NAME(vict));
@@ -3717,7 +3717,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             break;
         case 15:
             RANGE(0, 100);
-            vict->real_abils.dex = value;
+            vict->setAttribute(CharAttribute::Agility, value);
             mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set dex for %s.", GET_NAME(ch),
                    GET_NAME(vict));
             log_imm_action("SET: %s has set dex for %s.", GET_NAME(ch), GET_NAME(vict));
@@ -3725,7 +3725,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             break;
         case 16:
             RANGE(0, 100);
-            vict->real_abils.con = value;
+            vict->setAttribute(CharAttribute::Constitution, value);
             mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set con for %s.", GET_NAME(ch),
                    GET_NAME(vict));
             log_imm_action("SET: %s has set con for %s.", GET_NAME(ch), GET_NAME(vict));
@@ -3733,7 +3733,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             break;
         case 17:
             RANGE(0, 100);
-            vict->real_abils.cha = value;
+            vict->setAttribute(CharAttribute::Speed, value);
             mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set speed for %s.", GET_NAME(ch),
                    GET_NAME(vict));
             log_imm_action("SET: %s has set speed for %s.", GET_NAME(ch), GET_NAME(vict));
