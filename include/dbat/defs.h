@@ -1908,3 +1908,20 @@ enum class CharAttribute : uint8_t {
  Constitution = 4,
  Speed = 5 // this is actually Charisma in the code. cha
 };
+
+enum class CharInt : uint8_t {
+ Size = 0,
+ Sex = 1,
+ HairLength = 2,
+ HairStyle = 3,
+ HairColor = 4,
+ SkinColor = 5,
+ EyeColor = 6,
+ DistinguishingFeature = 7,
+ Height = 8,
+ AlignGoodEvil = 9,
+ AlignLawChaos = 10,
+ RacialPref = 11,
+ MysticMelody = 12,
+ GroupKills = 13
+};

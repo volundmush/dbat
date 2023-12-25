@@ -3236,7 +3236,7 @@ void stop_follower(struct char_data *ch) {
         act("$n stops following you.", true, ch, nullptr, ch->master, TO_VICT);
 
     if (has_group(ch))
-        GET_GROUPKILLS(ch) = 0;
+        ch->setInt(CharInt::GroupKills, 0);
 
     if (ch->master->followers->follower == ch) {  /* Head of follower-list? */
         k = ch->master->followers;

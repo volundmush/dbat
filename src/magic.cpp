@@ -1276,8 +1276,6 @@ void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
             to_room = "$n glows briefly with a silvery light.";
             break;
         case SPELL_DAZE:
-            if (GET_HITDICE(victim) < 5)
-                af[0].bitvector = AFF_NEXTNOACTION;
             accum_duration = false;
             to_vict = "You are struck dumb by a flash of bright light!";
             to_room = "$n is struck dumb by a flash of bright light!";

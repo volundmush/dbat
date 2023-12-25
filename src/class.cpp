@@ -365,9 +365,7 @@ void do_start(struct char_data *ch) {
     int punch;
     struct obj_data *obj;
 
-    GET_CLASS_LEVEL(ch) = 1;
-    GET_HITDICE(ch) = 0;
-    GET_LEVEL_ADJ(ch) = 0;
+
     GET_EXP(ch) = 1;
 
     if (IS_ANDROID(ch)) {
@@ -814,12 +812,6 @@ void advance_level(struct char_data *ch, int whichclass) {
         whichclass = GET_CLASS(ch);
     }
 
-    if (GET_CLASS_LEVEL(ch) == 1 && GET_HITDICE(ch) < 2) { /* Filled in below */
-        GET_HITDICE(ch) = 0;
-        GET_SAVE_BASE(ch, SAVING_FORTITUDE) = 0;
-        GET_SAVE_BASE(ch, SAVING_REFLEX) = 0;
-        GET_SAVE_BASE(ch, SAVING_WILL) = 0;
-    }
 
     /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
     if (ranks >= LVL_EPICSTART * 20) { /* Epic class */
@@ -1756,8 +1748,6 @@ char *class_desc_str(struct char_data *ch, int howlong, int wantthe) {
         buf2 = buf = buf3 = "";
         if (howlong == 2) {
             buf3 = " ";
-            if (GET_CLASS_LEVEL(ch) >= LVL_EPICSTART)
-                ptr += sprintf(ptr, "Epic ");
         }
         rankorder[0] = GET_CLASS(ch); /* we always want primary class first */
         rankorder[GET_CLASS(ch)] = 0;

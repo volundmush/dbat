@@ -256,19 +256,19 @@ ACMD(do_rpp) {
                 }
                 if (!strcasecmp(arg2, "evil")) {
                     send_to_char(ch, "You change your alignment to Evil.\r\n");
-                    GET_ALIGNMENT(ch) = -750;
+                    ch->setInt(CharInt::AlignGoodEvil, -750);
                 } else if (!strcasecmp(arg2, "sorta-evil")) {
                     send_to_char(ch, "You change your alignment to Sorta Evil.\r\n");
-                    GET_ALIGNMENT(ch) = -50;
+                    ch->modInt(CharInt::AlignGoodEvil, -50);
                 } else if (!strcasecmp(arg2, "neutral")) {
                     send_to_char(ch, "You change your alignment to Neutral.\r\n");
-                    GET_ALIGNMENT(ch) = 0;
+                    ch->modInt(CharInt::AlignGoodEvil, 0);
                 } else if (!strcasecmp(arg2, "sorta-good")) {
                     send_to_char(ch, "You change your alignment to Sorta Good.\r\n");
-                    GET_ALIGNMENT(ch) = 51;
+                    ch->modInt(CharInt::AlignGoodEvil, 51);
                 } else if (!strcasecmp(arg2, "good")) {
                     send_to_char(ch, "You change your alignment to Good.\r\n");
-                    GET_ALIGNMENT(ch) = 300;
+                    ch->modInt(CharInt::AlignGoodEvil, 300);
                 } else {
                     send_to_char(ch, "That is not an acceptable option for changing alignment.\r\n");
                     return;
@@ -4254,15 +4254,15 @@ ACMD(do_ingest) {
                          add_commas(pl).c_str(), add_commas(ki).c_str(), add_commas(stam).c_str());
             if (rand_number(1, 3) == 3) {
                 send_to_char(ch, "You get %s's eye color.\r\n", GET_NAME(vict));
-                GET_EYE(ch) = GET_EYE(vict);
+                ch->setInt(CharInt::EyeColor, GET_EYE(vict));
             } else if (rand_number(1, 3) == 3) {
                 send_to_char(ch, "%s changes your height.\r\n", GET_NAME(vict));
                 if (GET_PC_HEIGHT(ch) > GET_PC_HEIGHT(vict)) {
-                    GET_HEIGHT(ch) -= ((GET_PC_HEIGHT(ch) - GET_PC_HEIGHT(vict)) / 2);
+                    ch->modInt(CharInt::Height, -((GET_PC_HEIGHT(ch) - GET_PC_HEIGHT(vict)) / 2));
                 } else if (GET_PC_HEIGHT(ch) < GET_PC_HEIGHT(vict)) {
-                    GET_HEIGHT(ch) += ((GET_PC_HEIGHT(vict) - GET_PC_HEIGHT(ch)) / 2);
+                    ch->modInt(CharInt::Height, ((GET_PC_HEIGHT(vict) - GET_PC_HEIGHT(ch)) / 2));
                 } else {
-                    GET_HEIGHT(ch) = GET_PC_HEIGHT(vict);
+                    ch->setInt(CharInt::Height, GET_PC_HEIGHT(vict));
                 }
             } else if (rand_number(1, 3) == 3) {
                 send_to_char(ch, "%s changes your weight.\r\n", GET_NAME(vict));
@@ -4277,7 +4277,7 @@ ACMD(do_ingest) {
                 }
             } else {
                 send_to_char(ch, "Your forelock length changes because of %s.\r\n", GET_NAME(vict));
-                GET_HAIRL(ch) = GET_HAIRL(vict);
+                ch->setInt(CharInt::HairLength, GET_HAIRL(vict));
             }
             handle_ingest_learn(ch, vict);
             die(vict, nullptr);
@@ -9693,14 +9693,14 @@ ACMD(do_ungroup) {
             if (AFF_FLAGGED(f->follower, AFF_GROUP)) {
                 REMOVE_BIT_AR(AFF_FLAGS(f->follower), AFF_GROUP);
                 act("$N has disbanded the group.", true, f->follower, nullptr, ch, TO_CHAR);
-                GET_GROUPKILLS(f->follower) = 0;
+                f->follower->setInt(CharInt::GroupKills, 0);
                 if (!AFF_FLAGGED(f->follower, AFF_CHARM))
                     stop_follower(f->follower);
             }
         }
 
         REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_GROUP);
-        GET_GROUPKILLS(ch) = 0;
+        ch->setInt(CharInt::GroupKills, 0);
         send_to_char(ch, "You disband the group.\r\n");
         return;
     }
@@ -9719,7 +9719,7 @@ ACMD(do_ungroup) {
     }
 
     REMOVE_BIT_AR(AFF_FLAGS(tch), AFF_GROUP);
-    GET_GROUPKILLS(tch) = 0;
+    tch->setInt(CharInt::GroupKills, 0);
 
     act("$N is no longer a member of your group.", false, ch, nullptr, tch, TO_CHAR);
     act("You have been kicked out of $n's group!", false, ch, nullptr, tch, TO_VICT);
@@ -11673,28 +11673,27 @@ ACMD(do_aura) {
         if (GET_SKILL(ch, SKILL_FOCUS) < 75 || GET_SKILL(ch, SKILL_CONCENTRATION) < 75) {
             send_to_char(ch, "You need at least a skill level of 75 in Focus and Concentration to use this.\r\n");
             return;
+        }
+        if (PLR_FLAGGED(ch, PLR_AURALIGHT)) {
+            send_to_char(ch, "Your aura fades as you stop shining light.\r\n");
+            act("$n's aura fades as they stop shining light on the area.", true, ch, nullptr, nullptr, TO_ROOM);
+            REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_AURALIGHT);
+
+        } else if ((ch->getCurKI()) > GET_MAX_MANA(ch) * 0.12) {
+            reveal_hiding(ch, 0);
+            ch->decCurKIPercent(.12);
+            send_to_char(ch,
+                         "A bright %s aura begins to burn around you as you provide light to the surrounding area!\r\n",
+                         aura_types[GET_AURA(ch)]);
+            char bloom[MAX_INPUT_LENGTH];
+            sprintf(bloom, "@wA %s aura flashes up brightly around $n@w as they provide light to the area.@n",
+                    aura_types[GET_AURA(ch)]);
+            act(bloom, true, ch, nullptr, nullptr, TO_ROOM);
+            SET_BIT_AR(PLR_FLAGS(ch), PLR_AURALIGHT);
+
         } else {
-            if (PLR_FLAGGED(ch, PLR_AURALIGHT)) {
-                send_to_char(ch, "Your aura fades as you stop shining light.\r\n");
-                act("$n's aura fades as they stop shining light on the area.", true, ch, nullptr, nullptr, TO_ROOM);
-                REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_AURALIGHT);
-
-            } else if ((ch->getCurKI()) > GET_MAX_MANA(ch) * 0.12) {
-                reveal_hiding(ch, 0);
-                ch->decCurKIPercent(.12);
-                send_to_char(ch,
-                             "A bright %s aura begins to burn around you as you provide light to the surrounding area!\r\n",
-                             aura_types[GET_AURA(ch)]);
-                char bloom[MAX_INPUT_LENGTH];
-                sprintf(bloom, "@wA %s aura flashes up brightly around $n@w as they provide light to the area.@n",
-                        aura_types[GET_AURA(ch)]);
-                act(bloom, true, ch, nullptr, nullptr, TO_ROOM);
-                SET_BIT_AR(PLR_FLAGS(ch), PLR_AURALIGHT);
-
-            } else {
-                send_to_char(ch, "You don't have enough KI to do that.\r\n");
-                return;
-            }
+            send_to_char(ch, "You don't have enough KI to do that.\r\n");
+            return;
         }
     }
 }

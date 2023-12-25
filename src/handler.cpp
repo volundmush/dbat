@@ -200,7 +200,7 @@ void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *ms
             break;
 
         case APPLY_AGE:
-            ch->time.birth -= (mod * SECS_PER_MUD_YEAR);
+            ch->ageBy((mod * SECS_PER_GAME_YEAR));
             break;
 
         case APPLY_CHAR_WEIGHT:
@@ -208,7 +208,7 @@ void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *ms
             break;
 
         case APPLY_CHAR_HEIGHT:
-            GET_HEIGHT(ch) += mod;
+            ch->modInt(CharInt::Height, mod);
             break;
 
         case APPLY_AC:

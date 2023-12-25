@@ -213,7 +213,7 @@ void set_height_and_weight_by_race(struct char_data *ch) {
     }
 
     mod = dice(2, hw_info[race].heightdie);
-    GET_HEIGHT(ch) = hw_info[race].height[sex] + mod;
+    ch->setInt(CharInt::Height,  hw_info[race].height[sex] + mod);
     mod *= hw_info[race].weightfac;
     mod /= 100;
     GET_WEIGHT(ch) = hw_info[race].weight[sex] + mod;
@@ -253,10 +253,10 @@ int invalid_race(struct char_data *ch, struct obj_data *obj) {
 
 
 int get_size(struct char_data *ch) {
-    if (ch->size == SIZE_UNDEFINED) {
-        ch->size = ch->race->getSize();
+    if(auto sz = ch->charInts.find(CharInt::Size); sz != ch->charInts.end()) {
+        return sz->second;
     }
-    return ch->size;
+    return ch->setInt(CharInt::Size, ch->race->getSize());
 }
 
 

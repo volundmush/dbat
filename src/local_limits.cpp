@@ -778,7 +778,7 @@ void gain_level(struct char_data *ch, int whichclass) {
     if (whichclass < 0)
         whichclass = GET_CLASS(ch);
     if (GET_LEVEL(ch) < 100 && GET_EXP(ch) >= level_exp(ch, GET_LEVEL(ch) + 1)) {
-        GET_CLASS_LEVEL(ch) += 1;
+        GET_LEVEL(ch) += 1;
         //GET_CLASS(ch) = whichclass; /* Now tracks latest class instead of highest */
         advance_level(ch, whichclass);
         mudlog(BRF, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), true, "%s advanced level to level %d.",
@@ -928,7 +928,7 @@ void gain_exp_regardless(struct char_data *ch, int gain) {
 
     if (!IS_NPC(ch)) {
         while (GET_LEVEL(ch) < CONFIG_LEVEL_CAP - 1 && GET_EXP(ch) >= level_exp(ch, GET_LEVEL(ch) + 1)) {
-            GET_CLASS_LEVEL(ch) += 1;
+            GET_LEVEL(ch) += 1;
             num_levels++;
             advance_level(ch, GET_CLASS(ch));
             is_altered = true;

@@ -215,20 +215,15 @@ int load_char(const char *name, struct char_data *ch) {
             SET_SKILL_BONUS(ch, i, 0);
             SET_SKILL_PERF(ch, i, 0);
         }
-        GET_SEX(ch) = PFDEF_SEX;
-        ch->size = PFDEF_SIZE;
+
         ch->chclass = sensei::sensei_map[sensei::roshi];
         GET_LOG_USER(ch) = strdup("NOUSER");
         ch->race = race::find_race_map_id(PFDEF_RACE, race::race_map);
         GET_ADMLEVEL(ch) = PFDEF_LEVEL;
-        GET_CLASS_LEVEL(ch) = PFDEF_LEVEL;
-        GET_HITDICE(ch) = PFDEF_LEVEL;
         GET_SUPPRESS(ch) = PFDEF_SKIN;
         GET_FURY(ch) = PFDEF_HAIRL;
         GET_CLAN(ch) = strdup("None.");
-        GET_LEVEL_ADJ(ch) = PFDEF_LEVEL;
         GET_HOME(ch) = PFDEF_HOMETOWN;
-        GET_HEIGHT(ch) = PFDEF_HEIGHT;
         GET_WEIGHT(ch) = PFDEF_WEIGHT;
         ch->basepl = PFDEF_BASEPL;
         ch->health = 1.0;
@@ -245,12 +240,7 @@ int load_char(const char *name, struct char_data *ch) {
         ch->energy = 1.0;
         ch->basest = PFDEF_BASEST;
         ch->stamina = 1.0;
-        GET_HAIRL(ch) = PFDEF_HAIRL;
-        GET_HAIRC(ch) = PFDEF_HAIRC;
-        GET_SKIN(ch) = PFDEF_SKIN;
-        GET_EYE(ch) = PFDEF_EYE;
-        GET_HAIRS(ch) = PFDEF_HAIRS;
-        GET_DISTFEA(ch) = PFDEF_DISTFEA;
+
         GET_RADAR1(ch) = PFDEF_RADAR1;
         GET_SHIP(ch) = PFDEF_SHIP;
         GET_LPLAY(ch) = PFDEF_LPLAY;
@@ -271,8 +261,7 @@ int load_char(const char *name, struct char_data *ch) {
         for (i = 0; i < 52; i++) {
             GET_BONUS(ch, i) = PFDEF_BOARD;
         }
-        GET_GROUPKILLS(ch) = 0;
-        GET_SONG(ch) = 0;
+
         GET_LIMBCOND(ch, 0) = 0;
         GET_LIMBCOND(ch, 1) = 0;
         GET_LIMBCOND(ch, 2) = 0;
@@ -287,8 +276,6 @@ int load_char(const char *name, struct char_data *ch) {
         GET_RADAR3(ch) = PFDEF_RADAR3;
         GET_DROOM(ch) = PFDEF_DROOM;
         GET_CRANK(ch) = PFDEF_CRANK;
-        GET_ALIGNMENT(ch) = PFDEF_ALIGNMENT;
-        GET_ETHIC_ALIGNMENT(ch) = PFDEF_ETHIC_ALIGNMENT;
         for (i = 0; i < AF_ARRAY_MAX; i++)
             AFF_FLAGS(ch)[i] = PFDEF_AFFFLAGS;
         for (i = 0; i < PM_ARRAY_MAX; i++)
@@ -305,7 +292,6 @@ int load_char(const char *name, struct char_data *ch) {
         GET_INVIS_LEV(ch) = PFDEF_INVISLEV;
         GET_FREEZE_LEV(ch) = PFDEF_FREEZELEV;
         GET_WIMP_LEV(ch) = PFDEF_WIMPLEV;
-        GET_POWERATTACK(ch) = PFDEF_POWERATT;
         GET_COND(ch, HUNGER) = PFDEF_HUNGER;
         GET_COND(ch, THIRST) = PFDEF_THIRST;
         GET_COND(ch, DRUNK) = PFDEF_DRUNK;
@@ -316,7 +302,6 @@ int load_char(const char *name, struct char_data *ch) {
         GET_BANK_GOLD(ch) = PFDEF_BANK;
         GET_ABSORBS(ch) = PFDEF_BANK;
         GET_INGESTLEARNED(ch) = PFDEF_BANK;
-        RACIAL_PREF(ch) = PFDEF_BANK;
         GET_UP(ch) = PFDEF_BANK;
         GET_FORGETING(ch) = PFDEF_BANK;
         GET_FORGET_COUNT(ch) = PFDEF_BANK;
@@ -366,7 +351,7 @@ int load_char(const char *name, struct char_data *ch) {
                         ADM_FLAGS(ch)[1] = asciiflag_conv(f2);
                         ADM_FLAGS(ch)[2] = asciiflag_conv(f3);
                         ADM_FLAGS(ch)[3] = asciiflag_conv(f4);
-                    } else if (!strcmp(tag, "Alin")) GET_ALIGNMENT(ch) = atoi(line);
+                    } else if (!strcmp(tag, "Alin")) ch->setInt(CharInt::AlignGoodEvil, atoi(line));
                     else if (!strcmp(tag, "Aura")) GET_AURA(ch) = atoi(line);
                     break;
 
@@ -412,10 +397,10 @@ int load_char(const char *name, struct char_data *ch) {
 
                 case 'E':
                     if (!strcmp(tag, "Exp ")) GET_EXP(ch) = atoi(line);
-                    else if (!strcmp(tag, "Eali")) GET_ETHIC_ALIGNMENT(ch) = atoi(line);
+                    else if (!strcmp(tag, "Eali")) ch->setInt(CharInt::AlignLawChaos, atoi(line));
                     else if (!strcmp(tag, "Ecls")) {
 
-                    } else if (!strcmp(tag, "Eye ")) GET_EYE(ch) = atoi(line);
+                    } else if (!strcmp(tag, "Eye ")) ch->setInt(CharInt::EyeColor, atoi(line));
                     break;
 
                 case 'F':
@@ -435,13 +420,12 @@ int load_char(const char *name, struct char_data *ch) {
 
                 case 'H':
                     if (!strcmp(tag, "Hit ")) load_HMVS(ch, line, LOAD_HIT);
-                    else if (!strcmp(tag, "HitD")) GET_HITDICE(ch) = atoi(line);
-                    else if (!strcmp(tag, "Hite")) GET_HEIGHT(ch) = atoi(line);
+                    else if (!strcmp(tag, "Hite")) ch->setInt(CharInt::Height, atoi(line));
                     else if (!strcmp(tag, "Home")) GET_HOME(ch) = atoi(line);
                     else if (!strcmp(tag, "Host")) {}
-                    else if (!strcmp(tag, "Hrc ")) GET_HAIRC(ch) = atoi(line);
-                    else if (!strcmp(tag, "Hrl ")) GET_HAIRL(ch) = atoi(line);
-                    else if (!strcmp(tag, "Hrs ")) GET_HAIRS(ch) = atoi(line);
+                    else if (!strcmp(tag, "Hrc ")) ch->setInt(CharInt::HairColor, atoi(line));
+                    else if (!strcmp(tag, "Hrl ")) ch->setInt(CharInt::HairLength, atoi(line));
+                    else if (!strcmp(tag, "Hrs ")) ch->setInt(CharInt::HairStyle, atoi(line));
                     else if (!strcmp(tag, "Hung")) GET_COND(ch, HUNGER) = atoi(line);
                     break;
 
@@ -460,7 +444,6 @@ int load_char(const char *name, struct char_data *ch) {
                 case 'L':
                     if (!strcmp(tag, "Last")) ch->time.logon = atol(line);
                     else if (!strcmp(tag, "Lern")) ch->modPractices(atoi(line));
-                    else if (!strcmp(tag, "Levl")) GET_CLASS_LEVEL(ch) = atoi(line);
                         /* else if (!strcmp(tag, "LevD"))  read_level_data(ch, fl);*/
                     else if (!strcmp(tag, "LF  ")) load_BASE(ch, line, LOAD_LIFE);
                     else if (!strcmp(tag, "LFPC")) GET_LIFEPERC(ch) = atoi(line);
@@ -470,7 +453,6 @@ int load_char(const char *name, struct char_data *ch) {
                     else if (!strcmp(tag, "Lirl")) GET_LIMBCOND(ch, 2) = atoi(line);
                     else if (!strcmp(tag, "Lint")) GET_LINTEREST(ch) = atoi(line);
                     else if (!strcmp(tag, "Lpla")) GET_LPLAY(ch) = atoi(line);
-                    else if (!strcmp(tag, "LvlA")) GET_LEVEL_ADJ(ch) = atoi(line);
                     break;
 
                 case 'M':
@@ -496,7 +478,7 @@ int load_char(const char *name, struct char_data *ch) {
                     break;
 
                 case 'P':
-                    if (!strcmp(tag, "Phas")) GET_DISTFEA(ch) = atoi(line);
+                    if (!strcmp(tag, "Phas")) ch->setInt(CharInt::DistinguishingFeature, atoi(line));
                     else if (!strcmp(tag, "Phse")) GET_PHASE(ch) = atoi(line);
                     else if (!strcmp(tag, "Plyd")) ch->time.played = atol(line);
 #ifdef ASCII_SAVE_POOFS
@@ -505,7 +487,6 @@ int load_char(const char *name, struct char_data *ch) {
 #endif
                     else if (!strcmp(tag, "Pole")) GET_POLE_BONUS(ch) = atoi(line);
                     else if (!strcmp(tag, "Posi")) GET_POS(ch) = atoi(line);
-                    else if (!strcmp(tag, "PwrA")) GET_POWERATTACK(ch) = atoi(line);
                     else if (!strcmp(tag, "Pref")) {
                         sscanf(line, "%s %s %s %s", f1, f2, f3, f4);
                         PRF_FLAGS(ch)[0] = asciiflag_conv(f1);
@@ -517,7 +498,7 @@ int load_char(const char *name, struct char_data *ch) {
 
                 case 'R':
                     if (!strcmp(tag, "Race")) ch->race = race::find_race_map_id(atoi(line), race::race_map);
-                    else if (!strcmp(tag, "Raci")) RACIAL_PREF(ch) = atoi(line);
+                    else if (!strcmp(tag, "Raci")) ch->setInt(CharInt::RacialPref, atoi(line));
                     else if (!strcmp(tag, "rDis")) GET_RDISPLAY(ch) = strdup(line);
                     else if (!strcmp(tag, "Rela")) GET_RELAXCOUNT(ch) = atoi(line);
                     else if (!strcmp(tag, "Rtim")) GET_RTIME(ch) = atoi(line);
@@ -529,13 +510,13 @@ int load_char(const char *name, struct char_data *ch) {
                     break;
 
                 case 'S':
-                    if (!strcmp(tag, "Sex ")) GET_SEX(ch) = atoi(line);
+                    if (!strcmp(tag, "Sex ")) ch->setInt(CharInt::Sex, atoi(line));
                     else if (!strcmp(tag, "Ship")) GET_SHIP(ch) = atoi(line);
                     else if (!strcmp(tag, "Scoo")) GET_SDCOOLDOWN(ch) = atoi(line);
                     else if (!strcmp(tag, "Shpr")) GET_SHIPROOM(ch) = atoi(line);
                     else if (!strcmp(tag, "Skil")) load_skills(fl, ch, false);
-                    else if (!strcmp(tag, "Skn ")) GET_SKIN(ch) = atoi(line);
-                    else if (!strcmp(tag, "Size")) ch->size = atoi(line);
+                    else if (!strcmp(tag, "Skn ")) ch->setInt(CharInt::SkinColor, atoi(line));
+                    else if (!strcmp(tag, "Size")) ch->setInt(CharInt::Size, atoi(line));
                     else if (!strcmp(tag, "SklB")) load_skills(fl, ch, true);
                     else if (!strcmp(tag, "SkRc")) ch->modPractices(atoi(line));
                     else if (!strcmp(tag, "SkCl")) {

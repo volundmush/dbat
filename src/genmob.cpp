@@ -379,25 +379,14 @@ AttributeData::AttributeData(const nlohmann::json& j) : AttributeData() {
 nlohmann::json char_data::serializeBase() {
     auto j = serializeUnit();
 
+    for(auto cint : charInts) j["charInts"].push_back(cint);
+
     if(title && strlen(title)) j["title"] = title;
-    if(size != SIZE_UNDEFINED) j["size"] = size;
-    if(sex) j["sex"] = sex;
     if(race) j["race"] = race->getID();
-    if(hairl) j["hairl"] = hairl;
-    if(hairs) j["hairs"] = hairs;
-    if(hairc) j["hairc"] = hairc;
-    if(skin) j["skin"] = skin;
-    if(eye) j["eye"] = eye;
-    if(distfea) j["distfea"] = distfea;
-    if(race_level) j["race_level"] = race_level;
-    if(level_adj) j["level_adj"] = level_adj;
     if(level) j["level"] = level;
     if(admlevel) j["admlevel"] = admlevel;
     if(chclass) j["chclass"] = chclass->getID();
     if(weight != 0.0) j["weight"] = weight;
-    if(height) j["height"] = height;
-    if(alignment) j["alignment"] = alignment;
-    if(alignment_ethic) j["alignment_ethic"] = alignment_ethic;
 
     for(auto i = 0; i < NUM_AFF_FLAGS; i++)
         if(IS_SET_AR(affected_by, i)) j["affected_by"].push_back(i);
@@ -419,20 +408,19 @@ nlohmann::json char_data::serializeBase() {
 void char_data::deserializeBase(const nlohmann::json &j) {
     deserializeUnit(j);
 
+    if(j.contains("charInts")) {
+        // this is a list of pairs. the first element is a CharInt enum, the second is an int.
+        for(auto j2 : j["charInts"]) {
+            auto cint = j2[0].get<CharInt>();
+            auto val = j2[1].get<int>();
+            charInts[cint] = val;
+        }
+    }
+
     if(j.contains("title")) title = strdup(j["title"].get<std::string>().c_str());
-    if(j.contains("size")) size = j["size"];
-    if(j.contains("sex")) sex = j["sex"];
     ::race::race_id r = ::race::human;
     if(j.contains("race")) r = j["race"].get<::race::race_id>();
     race = ::race::race_map[r];
-    if(j.contains("hairl")) hairl = j["hairl"];
-    if(j.contains("hairs")) hairs = j["hairs"];
-    if(j.contains("hairc")) hairc = j["hairc"];
-    if(j.contains("skin")) skin = j["skin"];
-    if(j.contains("eye")) eye = j["eye"];
-    if(j.contains("distfea")) distfea = j["distfea"];
-    if(j.contains("race_level")) race_level = j["race_level"];
-    if(j.contains("level_adj")) level_adj = j["level_adj"];
 
     ::sensei::sensei_id c = ::sensei::commoner;
     if(j.contains("chclass")) c = j["chclass"].get<::sensei::sensei_id>();
@@ -441,9 +429,6 @@ void char_data::deserializeBase(const nlohmann::json &j) {
     if(j.contains("level")) level = j["level"];
 
     if(j.contains("weight")) weight = j["weight"];
-    if(j.contains("height")) height = j["height"];
-    if(j.contains("alignment")) alignment = j["alignment"];
-    if(j.contains("alignment_ethic")) alignment_ethic = j["alignment_ethic"];
 
     if(j.contains("affected_by"))
         for(auto &i : j["affected_by"])
@@ -590,8 +575,7 @@ nlohmann::json char_data::serializeInstance() {
     if(starphase) j["starphase"] = starphase;
     if(accuracy) j["accuracy"] = accuracy;
     if(position) j["position"] = position;
-    if(powerattack) j["powerattack"] = powerattack;
-    if(racial_pref) j["racial_pref"] = racial_pref;
+
     if(rdisplay) j["rdisplay"] = rdisplay;
     if(relax_count) j["relax_count"] = relax_count;
     if(radar1) j["radar1"] = radar1;
@@ -762,8 +746,7 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
     if(j.contains("starphase")) starphase = j["starphase"];
     if(j.contains("accuracy")) accuracy = j["accuracy"];
     if(j.contains("position")) position = j["position"];
-    if(j.contains("powerattack")) powerattack = j["powerattack"];
-    if(j.contains("racial_pref")) racial_pref = j["racial_pref"];
+
     if(j.contains("rdisplay")) rdisplay = strdup(j["rdisplay"].get<std::string>().c_str());
     if(j.contains("relax_count")) relax_count = j["relax_count"];
     if(j.contains("radar1")) radar1 = j["radar1"];
@@ -1113,12 +1096,8 @@ weight_t char_data::getWeight(bool base) {
 }
 
 int char_data::getHeight(bool base) {
-    int total = 0;
-    if(!IS_NPC(this)) {
-        total += GET_PC_HEIGHT(this);
-    } else {
-        total += height;
-    }
+    int total = GET_HEIGHT(this);
+
     if(!base) {
         total += getAffectModifier(APPLY_CHAR_HEIGHT);
         if(!IS_NPC(this)) {

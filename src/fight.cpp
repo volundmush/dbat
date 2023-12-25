@@ -2356,7 +2356,7 @@ static void perform_group_gain(struct char_data *ch, int base, struct char_data 
     if (MOB_FLAGGED(victim, MOB_KNOWKAIO)) {
         share += share * .25;
     }
-    GET_GROUPKILLS(ch) += 1;
+    ch->modInt(CharInt::GroupKills, 1);
     if ((GET_GROUPKILLS(ch) + 1) / 20 > share * 0.16) {
         share += share * 0.16;
     } else {

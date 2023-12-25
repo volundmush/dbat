@@ -687,7 +687,7 @@ namespace net {
                     sendText("@w\r\nMake a selection:@n\r\n");
                     state = CON_RACIAL;
                 } else if (IS_NAMEK(ch)) {
-                    GET_SEX(ch) = SEX_NEUTRAL;
+                    ch->setInt(CharInt::Sex, SEX_NEUTRAL);
                     state = CON_QSEX;
                 } else {
                     sendText("\r\n@wWhat is your sex @W(@BM@W/@MF@W/@GN@W)@w?@n");
@@ -698,17 +698,17 @@ namespace net {
             case CON_RACIAL:
                 switch (arg[0]) {
                     case '1':
-                        ch->racial_pref = 1;
+                        ch->setInt(CharInt::RacialPref, 1);
                         break;
                     case '2':
-                        ch->racial_pref = 2;
+                        ch->setInt(CharInt::RacialPref, 2);
                         break;
                     case '3':
                         if (IS_HALFBREED(ch)) {
                             sendText("That is not an acceptable option.\r\n");
                             return;
                         } else {
-                            ch->racial_pref = 3;
+                            ch->setInt(CharInt::RacialPref, 3);
                         }
                         break;
                     default:
@@ -726,31 +726,31 @@ namespace net {
                     (IS_HOSHIJIN(ch) && IS_FEMALE(ch))) {
                     switch(arg[0]) {
                         case '1':
-                            ch->hairl = HAIRL_BALD;
-                            ch->hairc = HAIRC_NONE;
-                            ch->hairs = HAIRS_NONE;
+                            ch->setInt(CharInt::HairLength, HAIRL_BALD);
+                            ch->setInt(CharInt::HairColor, HAIRC_NONE);
+                            ch->setInt(CharInt::HairStyle, HAIRS_NONE);
                             break;
                         case '2':
-                            ch->hairl = HAIRL_SHORT;
+                            ch->setInt(CharInt::HairLength, HAIRL_SHORT);
                             break;
                         case '3':
-                            ch->hairl = HAIRL_MEDIUM;
+                            ch->setInt(CharInt::HairLength, HAIRL_MEDIUM);
                             break;
                         case '4':
-                            ch->hairl = HAIRL_LONG;
+                            ch->setInt(CharInt::HairLength, HAIRL_LONG);
                             break;
                         case '5':
-                            ch->hairl = HAIRL_RLONG;
+                            ch->setInt(CharInt::HairLength, HAIRL_RLONG);
                             break;
                         default:
                             sendText("That is not an acceptable option.\r\n");
                             return;
                     }
                     if(IS_SAIYAN(ch)) {
-                        ch->hairc = HAIRC_BLACK;
+                        ch->setInt(CharInt::HairColor, HAIRC_BLACK);
                         sendText("Saiyans always have black hair, if not bald.\r\n");
                     }
-                    if (ch->hairl == HAIRL_BALD || IS_SAIYAN(ch)) {
+                    if (ch->getInt(CharInt::HairLength) == HAIRL_BALD || IS_SAIYAN(ch)) {
                         sendText("@YSkin color SELECTION menu:\r\n");
                         sendText("@D---------------------------------------@n\r\n");
                         sendText("@B1@W)@C White  @B2@W)@C Black  @B3@W)@C Green\r\n");
@@ -772,28 +772,28 @@ namespace net {
                     }
                 } else {
                     if (IS_DEMON(ch) || IS_ICER(ch)) {
+                        int hairTo;
                         switch(arg[0]) {
                             case '1':
-                                ch->hairl = HAIRL_BALD;
+                                hairTo = HAIRL_BALD;
                                 break;
                             case '2':
-                                ch->hairl = HAIRL_SHORT;
+                                hairTo = HAIRL_SHORT;
                                 break;
                             case '3':
-                                ch->hairl = HAIRL_MEDIUM;
+                                hairTo = HAIRL_MEDIUM;
                                 break;
                             case '4':
-                                ch->hairl = HAIRL_LONG;
+                                hairTo = HAIRL_LONG;
                                 break;
                             case '5':
-                                ch->hairl = HAIRL_RLONG;
+                                hairTo = HAIRL_RLONG;
                                 break;
                             default:
                                 sendText("That is not an acceptable option.\r\n");
                                 return;
                         }
-                        ch->hairc = HAIRC_NONE;
-                        ch->hairs = HAIRS_NONE;
+                        ch->setInt(CharInt::HairLength, hairTo);
                         sendText("@YSkin color SELECTION menu:\r\n");
                         sendText("@D---------------------------------------@n\r\n");
                         sendText("@B1@W)@C White  @B2@W)@C Black  @B3@W)@C Green\r\n");
@@ -804,26 +804,28 @@ namespace net {
                         state = CON_SKIN;
                     }
                     if (IS_MAJIN(ch) || IS_NAMEK(ch) || IS_ARLIAN(ch)) {
+                        int hairTo;
                         switch(arg[0]) {
                             case '1':
-                                ch->hairl = HAIRL_BALD;
+                                hairTo = HAIRL_BALD;
                                 break;
                             case '2':
-                                ch->hairl = HAIRL_SHORT;
+                                hairTo = HAIRL_SHORT;
                                 break;
                             case '3':
-                                ch->hairl = HAIRL_MEDIUM;
+                                hairTo = HAIRL_MEDIUM;
                                 break;
                             case '4':
-                                ch->hairl = HAIRL_LONG;
+                                hairTo = HAIRL_LONG;
                                 break;
                             case '5':
-                                ch->hairl = HAIRL_RLONG;
+                                hairTo = HAIRL_RLONG;
                                 break;
                             default:
                                 sendText("That is not an acceptable option.\r\n");
                                 return;
                         }
+                        ch->setInt(CharInt::HairLength, hairTo);
                         if (IS_ARLIAN(ch) && IS_FEMALE(ch)) {
                             sendText("@YWing color SELECTION menu:\r\n");
                             sendText("@D---------------------------------------@n\r\n");
@@ -835,8 +837,6 @@ namespace net {
                             sendText("@w\r\nMake a selection:@n\r\n");
                             state = CON_HAIRC;
                         } else {
-                            ch->hairc = HAIRC_NONE;
-                            ch->hairs = HAIRS_NONE;
                             sendText("@YSkin color SELECTION menu:\r\n");
                             sendText("@D---------------------------------------@n\r\n");
                             sendText("@B1@W)@C White  @B2@W)@C Black  @B3@W)@C Green\r\n");
@@ -847,72 +847,72 @@ namespace net {
                             state = CON_SKIN;
                         }
                     } else {
-                        ch->hairc = HAIRC_NONE;
-                        ch->hairs = HAIRS_NONE;
                         state = CON_SKIN;
                     }
                 }
                 break;
 
-            case CON_HAIRC:     /* query hair color */
-                switch(arg[0]) {
+            case CON_HAIRC:     /* query hair color */ {
+                int hairTo;
+                 switch(arg[0]) {
                     case '1':
-                        ch->hairc = HAIRC_BLACK;
+                        hairTo = HAIRC_BLACK;
                         break;
                     case '2':
-                        ch->hairc = HAIRC_BROWN;
+                        hairTo = HAIRC_BROWN;
                         break;
                     case '3':
-                        ch->hairc = HAIRC_BLONDE;
+                        hairTo = HAIRC_BLONDE;
                         break;
                     case '4':
-                        ch->hairc = HAIRC_GREY;
+                        hairTo = HAIRC_GREY;
                         break;
                     case '5':
-                        ch->hairc = HAIRC_RED;
+                        hairTo = HAIRC_RED;
                         break;
                     case '6':
-                        ch->hairc = HAIRC_ORANGE;
+                        hairTo = HAIRC_ORANGE;
                         break;
                     case '7':
-                        ch->hairc = HAIRC_GREEN;
+                        hairTo = HAIRC_GREEN;
                         break;
                     case '8':
-                        ch->hairc = HAIRC_BLUE;
+                        hairTo = HAIRC_BLUE;
                         break;
                     case '9':
-                        ch->hairc = HAIRC_PINK;
+                        hairTo = HAIRC_PINK;
                         break;
                     case 'A':
-                        ch->hairc = HAIRC_PURPLE;
+                        hairTo = HAIRC_PURPLE;
                         break;
                     case 'a':
-                        ch->hairc = HAIRC_PURPLE;
+                        hairTo = HAIRC_PURPLE;
                         break;
                     case 'B':
-                        ch->hairc = HAIRC_SILVER;
+                        hairTo = HAIRC_SILVER;
                         break;
                     case 'b':
-                        ch->hairc = HAIRC_SILVER;
+                        hairTo = HAIRC_SILVER;
                         break;
                     case 'C':
-                        ch->hairc = HAIRC_CRIMSON;
+                        hairTo = HAIRC_CRIMSON;
                         break;
                     case 'c':
-                        ch->hairc = HAIRC_CRIMSON;
+                        hairTo = HAIRC_CRIMSON;
                         break;
                     case 'D':
-                        ch->hairc = HAIRC_WHITE;
+                        hairTo = HAIRC_WHITE;
                         break;
                     case 'd':
-                        ch->hairc = HAIRC_WHITE;
+                        hairTo = HAIRC_WHITE;
                         break;
                     default:
                         sendText("That is not an acceptable option.\r\n");
                         return;
                 }
+                ch->setInt(CharInt::HairColor, hairTo);
+            }
                 if (IS_ARLIAN(ch)) {
-                    ch->hairs = HAIRS_NONE;
                     sendText("@YSkin color SELECTION menu:\r\n");
                     sendText("@D---------------------------------------@n\r\n");
                     sendText("@B1@W)@C White  @B2@W)@C Black  @B3@W)@C Green\r\n");
@@ -933,51 +933,55 @@ namespace net {
                 }
                 break;
 
-            case CON_HAIRS:
+            case CON_HAIRS: {
+                int hairTo;
                 switch(arg[0]) {
                     case '1':
-                        ch->hairs = HAIRS_PLAIN;
-                        break;
+                        hairTo = HAIRS_PLAIN;
+                    break;
                     case '2':
-                        ch->hairs = HAIRS_MOHAWK;
-                        break;
+                        hairTo = HAIRS_MOHAWK;
+                    break;
                     case '3':
-                        ch->hairs = HAIRS_SPIKY;
-                        break;
+                        hairTo = HAIRS_SPIKY;
+                    break;
                     case '4':
-                        ch->hairs = HAIRS_CURLY;
-                        break;
+                        hairTo = HAIRS_CURLY;
+                    break;
                     case '5':
-                        ch->hairs = HAIRS_UNEVEN;
-                        break;
+                        hairTo = HAIRS_UNEVEN;
+                    break;
                     case '6':
-                        ch->hairs = HAIRS_PONYTAIL;
-                        break;
+                        hairTo = HAIRS_PONYTAIL;
+                    break;
                     case '7':
-                        ch->hairs = HAIRS_AFRO;
-                        break;
+                        hairTo = HAIRS_AFRO;
+                    break;
                     case '8':
-                        ch->hairs = HAIRS_FADE;
-                        break;
+                        hairTo = HAIRS_FADE;
+                    break;
                     case '9':
-                        ch->hairs = HAIRS_CREW;
-                        break;
+                        hairTo = HAIRS_CREW;
+                    break;
                     case 'A':
-                        ch->hairs = HAIRS_FEATHERED;
-                        break;
+                        hairTo = HAIRS_FEATHERED;
+                    break;
                     case 'a':
-                        ch->hairs = HAIRS_FEATHERED;
-                        break;
+                        hairTo = HAIRS_FEATHERED;
+                    break;
                     case 'B':
-                        ch->hairs = HAIRS_DRED;
-                        break;
+                        hairTo = HAIRS_DRED;
+                    break;
                     case 'b':
-                        ch->hairs = HAIRS_DRED;
-                        break;
+                        hairTo = HAIRS_DRED;
+                    break;
                     default:
                         sendText("That is not an acceptable option.\r\n");
-                        return;
+                    return;
                 }
+                ch->setInt(CharInt::HairStyle, hairTo);
+            }
+
                 sendText("@YSkin color SELECTION menu:\r\n");
                 sendText("@D---------------------------------------@n\r\n");
                 sendText("@B1@W)@C White  @B2@W)@C Black  @B3@W)@C Green\r\n");
@@ -988,57 +992,52 @@ namespace net {
                 state = CON_SKIN;
                 break;
 
-            case CON_SKIN:
-                switch(arg[0]) {
+            case CON_SKIN: {
+                int skinTo;
+                switch(std::toupper(arg[0])) {
                     case '1':
-                        ch->skin = SKIN_WHITE;
-                        break;
+                        skinTo = SKIN_WHITE;
+                    break;
                     case '2':
-                        ch->skin = SKIN_BLACK;
-                        break;
+                        skinTo = SKIN_BLACK;
+                    break;
                     case '3':
-                        ch->skin = SKIN_GREEN;
-                        break;
+                        skinTo = SKIN_GREEN;
+                    break;
                     case '4':
-                        ch->skin = SKIN_ORANGE;
-                        break;
+                        skinTo = SKIN_ORANGE;
+                    break;
                     case '5':
-                        ch->skin = SKIN_YELLOW;
-                        break;
+                        skinTo = SKIN_YELLOW;
+                    break;
                     case '6':
-                        ch->skin = SKIN_RED;
-                        break;
+                        skinTo = SKIN_RED;
+                    break;
                     case '7':
-                        ch->skin = SKIN_GREY;
-                        break;
+                        skinTo = SKIN_GREY;
+                    break;
                     case '8':
-                        ch->skin = SKIN_BLUE;
-                        break;
+                        skinTo = SKIN_BLUE;
+                    break;
                     case '9':
-                        ch->skin = SKIN_AQUA;
-                        break;
+                        skinTo = SKIN_AQUA;
+                    break;
                     case 'A':
-                        ch->skin = SKIN_PINK;
-                        break;
-                    case 'a':
-                        ch->skin = SKIN_PINK;
-                        break;
+                        skinTo = SKIN_PINK;
+                    break;
                     case 'B':
-                        ch->skin = SKIN_PURPLE;
-                        break;
-                    case 'b':
-                        ch->skin = SKIN_PURPLE;
-                        break;
+                        skinTo = SKIN_PURPLE;
+                    break;
                     case 'C':
-                        ch->skin = SKIN_TAN;
-                        break;
-                    case 'c':
-                        ch->skin = SKIN_TAN;
-                        break;
+                        skinTo = SKIN_TAN;
+                    break;
                     default:
                         sendText("That is not an acceptable option.\r\n");
-                        return;
+                    return;
                 }
+                ch->setInt(CharInt::SkinColor, skinTo);
+            }
+
                 sendText("@YEye color SELECTION menu:\r\n");
                 sendText("@D---------------------------------------@n\r\n");
                 sendText("@B1@W)@C Blue  @B2@W)@C Black  @B3@W)@C Green\r\n");
@@ -1049,59 +1048,52 @@ namespace net {
                 state = CON_EYE;
                 break;
 
-            case CON_EYE:
-
-                switch(arg[0]) {
+            case CON_EYE: {
+                int eyeTo;
+                switch(std::toupper(arg[0])) {
                     case '1':
-                        ch->eye = EYE_BLUE;
-                        break;
+                        eyeTo = EYE_BLUE;
+                    break;
                     case '2':
-                        ch->eye = EYE_BLACK;
-                        break;
+                        eyeTo = EYE_BLACK;
+                    break;
                     case '3':
-                        ch->eye = EYE_GREEN;
-                        break;
+                        eyeTo = EYE_GREEN;
+                    break;
                     case '4':
-                        ch->eye = EYE_BROWN;
-                        break;
+                        eyeTo = EYE_BROWN;
+                    break;
                     case '5':
-                        ch->eye = EYE_RED;
-                        break;
+                        eyeTo = EYE_RED;
+                    break;
                     case '6':
-                        ch->eye = EYE_AQUA;
-                        break;
+                        eyeTo = EYE_AQUA;
+                    break;
                     case '7':
-                        ch->eye = EYE_PINK;
-                        break;
+                        eyeTo = EYE_PINK;
+                    break;
                     case '8':
-                        ch->eye = EYE_PURPLE;
-                        break;
+                        eyeTo = EYE_PURPLE;
+                    break;
                     case '9':
-                        ch->eye = EYE_CRIMSON;
-                        break;
+                        eyeTo = EYE_CRIMSON;
+                    break;
                     case 'A':
-                        ch->eye = EYE_GOLD;
-                        break;
-                    case 'a':
-                        ch->eye = EYE_GOLD;
-                        break;
+                        eyeTo = EYE_GOLD;
+                    break;
                     case 'B':
-                        ch->eye = EYE_AMBER;
-                        break;
-                    case 'b':
-                        ch->eye = EYE_AMBER;
-                        break;
+                        eyeTo = EYE_AMBER;
+                    break;
                     case 'C':
-                        ch->eye = EYE_EMERALD;
-                        break;
-                    case 'c':
-                        ch->eye = EYE_EMERALD;
-                        break;
+                        eyeTo = EYE_EMERALD;
+                    break;
                     default:
                         sendText("That is not an acceptable option.\r\n");
-                        return;
-                        break;
+                    return;
+                    break;
                 }
+                ch->setInt(CharInt::EyeColor, eyeTo);
+            }
                 sendText("@YWhat do you want to be your most distinguishing feature:\r\n");
                 sendText("@D---------------------------------------@n\r\n");
                 sendText("@B1@W)@C My Eyes@n\r\n");
@@ -1124,28 +1116,32 @@ namespace net {
                 state = CON_DISTFEA;
                 break;
 
-            case CON_DISTFEA:
+            case CON_DISTFEA: {
+                int dist;
                 switch(arg[0]) {
                     case '1':
-                        ch->distfea = 0;
-                        break;
+                        dist = 0;
+                    break;
                     case '2':
-                        ch->distfea = 1;
-                        break;
+                        dist = 1;
+                    break;
                     case '3':
-                        ch->distfea = 2;
-                        break;
+                        dist = 2;
+                    break;
                     case '4':
-                        ch->distfea = 3;
-                        break;
+                        dist = 3;
+                    break;
                     case '5':
-                        ch->distfea = 4;
-                        break;
+                        dist = 4;
+                    break;
                     default:
                         sendText("That is not an acceptable option.\r\n");
-                        return;
-                        break;
+                    return;
+                    break;
                 }
+                ch->setInt(CharInt::DistinguishingFeature, dist);
+            }
+
                 sendText("@YWhat Height/Weight Range do you prefer:\r\n");
                 sendText("@D---------------------------------------@n\r\n");
                 if (!IS_TRUFFLE(ch) && !IS_ICER(ch)) {
@@ -1170,72 +1166,73 @@ namespace net {
                 state = CON_HW;
                 break;
 
-            case CON_HW:
+            case CON_HW: {
+                int height, weight;
                 switch(arg[0]) {
                     case '1':
                         if (!IS_TRUFFLE(ch) && !IS_ICER(ch)) {
-                            ch->height = rand_number(100, 120);
-                            ch->weight = rand_number(25, 30);
+                            height = rand_number(100, 120);
+                            weight = rand_number(25, 30);
                         } else if (IS_ICER(ch)) {
-                            ch->height = rand_number(100, 120);
-                            ch->weight = rand_number(25, 30);
+                            height = rand_number(100, 120);
+                            weight = rand_number(25, 30);
                         } else {
-                            ch->height = rand_number(20, 35);
-                            ch->weight = rand_number(5, 8);
+                            height = rand_number(20, 35);
+                            weight = rand_number(5, 8);
                         }
                         break;
                     case '2':
                         if (!IS_TRUFFLE(ch) && !IS_ICER(ch)) {
-                            ch->height = rand_number(120, 140);
-                            ch->weight = rand_number(30, 35);
+                            height = rand_number(120, 140);
+                            weight = rand_number(30, 35);
                         } else if (IS_ICER(ch)) {
-                            ch->height = rand_number(120, 140);
-                            ch->weight = rand_number(30, 35);
+                            height = rand_number(120, 140);
+                            weight = rand_number(30, 35);
                         } else {
-                            ch->height = rand_number(35, 40);
-                            ch->weight = rand_number(8, 10);
+                            height = rand_number(35, 40);
+                            weight = rand_number(8, 10);
                         }
                         break;
                     case '3':
                         if (!IS_TRUFFLE(ch) && !IS_ICER(ch)) {
-                            ch->height = rand_number(140, 160);
-                            ch->weight = rand_number(35, 45);
+                            height = rand_number(140, 160);
+                            weight = rand_number(35, 45);
                         } else if (IS_ICER(ch)) {
-                            ch->height = rand_number(140, 160);
-                            ch->weight = rand_number(35, 45);
+                            height = rand_number(140, 160);
+                            weight = rand_number(35, 45);
                         } else {
-                            ch->height = rand_number(40, 50);
-                            ch->weight = rand_number(10, 12);
+                            height = rand_number(40, 50);
+                            weight = rand_number(10, 12);
                         }
                         break;
                     case '4':
                         if (!IS_TRUFFLE(ch) && !IS_ICER(ch)) {
-                            ch->height = rand_number(160, 180);
-                            ch->weight = rand_number(45, 60);
+                            height = rand_number(160, 180);
+                            weight = rand_number(45, 60);
                         } else if (IS_ICER(ch)) {
                             sendText("That is not an acceptable option.\r\n");
                             return;
                         } else {
-                            ch->height = rand_number(50, 60);
-                            ch->weight = rand_number(12, 15);
+                            height = rand_number(50, 60);
+                            weight = rand_number(12, 15);
                         }
                         break;
                     case '5':
                         if (!IS_TRUFFLE(ch) && !IS_ICER(ch)) {
-                            ch->height = rand_number(180, 200);
-                            ch->weight = rand_number(60, 80);
+                            height = rand_number(180, 200);
+                            weight = rand_number(60, 80);
                         } else if (IS_ICER(ch)) {
                             sendText("That is not an acceptable option.\r\n");
                             return;
                         } else {
-                            ch->height = rand_number(60, 70);
-                            ch->weight = rand_number(15, 18);
+                            height = rand_number(60, 70);
+                            weight = rand_number(15, 18);
                         }
                         break;
                     case '6':
                         if (!IS_TRUFFLE(ch) && !IS_ICER(ch)) {
-                            ch->height = rand_number(200, 220);
-                            ch->weight = rand_number(80, 100);
+                            height = rand_number(200, 220);
+                            weight = rand_number(80, 100);
                         } else {
                             sendText("That is not an acceptable option.\r\n");
                             return;
@@ -1246,6 +1243,9 @@ namespace net {
                         return;
                         break;
                 }
+                ch->setInt(CharInt::Height, height);
+                ch->weight = weight;
+            }
                 sendText("@YAura color SELECTION menu:\r\n");
                 sendText("@D---------------------------------------@n\r\n");
                 sendText("@B1@W)@C White  @B2@W)@C Blue@n\r\n");
@@ -1351,27 +1351,31 @@ namespace net {
                 state = CON_Q2;
                 break;
 
-            case CON_Q2:
+            case CON_Q2: {
+                int align;
                 switch(arg[0]) {
                     case '1':
-                        ch->alignment += -200;
-                        break;
+                        align += -200;
+                    break;
                     case '2':
-                        ch->alignment += 100;
-                        break;
+                        align += 100;
+                    break;
                     case '3':
-                        ch->alignment += 10;
-                        break;
+                        align += 10;
+                    break;
                     case '4':
-                        ch->alignment += 0;
-                        break;
+                        align += 0;
+                    break;
                     case '5':
-                        ch->alignment += -400;
-                        break;
+                        align += -400;
+                    break;
                     default:
                         sendText("That is not an acceptable option.\r\n");
-                        return;
+                    return;
                 }
+                ch->modInt(CharInt::AlignGoodEvil, align);
+            }
+
                 sendText("\r\n@WQuestion (@G3@W out of @g10@W)\r\n");
                 sendText("@YAnswer the following question:\r\n");
                 sendText("@wYou are one day offered a means to gain incredible strength\r\nby some extraordinary means. The only problem is it requires\r\nthe lives of innocents to obtain. What do you do?\r\n");
@@ -1383,36 +1387,40 @@ namespace net {
                 sendText("@w\r\nMake a selection:@n\r\n");
                 state = CON_Q3;
                 break;
-            case CON_Q3:
+            case CON_Q3: {
+                int align;
                 switch(arg[0]) {
                     case '1':
-                        ch->alignment += -100;
-                        ch->basepl += 100;
-                        ch->basest += 80;
-                        ch->baseki += 10;
-                        break;
+                        align += -100;
+                    ch->basepl += 100;
+                    ch->basest += 80;
+                    ch->baseki += 10;
+                    break;
                     case '2':
-                        ch->alignment += 10;
-                        ch->basepl += 25;
-                        ch->basest += 25;
-                        ch->baseki += 25;
-                        break;
+                        align += 10;
+                    ch->basepl += 25;
+                    ch->basest += 25;
+                    ch->baseki += 25;
+                    break;
                     case '3':
-                        ch->alignment += 50;
-                        ch->basepl += 20;
-                        ch->basest += 20;
-                        ch->baseki += 20;
-                        break;
+                        align += 50;
+                    ch->basepl += 20;
+                    ch->basest += 20;
+                    ch->baseki += 20;
+                    break;
                     case '4':
-                        ch->alignment += -200;
-                        ch->basepl += 100;
-                        ch->basest += 100;
-                        ch->baseki += 100;
-                        break;
+                        align += -200;
+                    ch->basepl += 100;
+                    ch->basest += 100;
+                    ch->baseki += 100;
+                    break;
                     default:
                         sendText("That is not an acceptable option.\r\n");
-                        return;
+                    return;
                 }
+                ch->modInt(CharInt::AlignGoodEvil, align);
+            }
+
                 sendText("\r\n@WQuestion (@G4@W out of @g10@W)\r\n");
                 sendText("@YAnswer the following question:\r\n");
                 sendText("@wOne day you are offered a way to make a lot of money, but in order\r\nto do so you will need to stop training for a whole month to\r\nhandle business. What do you do?\r\n");
@@ -1538,26 +1546,29 @@ namespace net {
                 state = CON_Q7;
                 break;
 
-            case CON_Q7:
+            case CON_Q7: {
+                int align;
                 switch(arg[0]) {
                     case '1':
-                        ch->alignment += -10;
-                        ch->modAttribute(CharAttribute::Strength, 1);
-                        break;
+                        align += -10;
+                    ch->modAttribute(CharAttribute::Strength, 1);
+                    break;
                     case '2':
-                        ch->alignment += +10;
-                        ch->modAttribute(CharAttribute::Speed, 1);
-                        break;
+                        align += +10;
+                    ch->modAttribute(CharAttribute::Speed, 1);
+                    break;
                     case '3':
                         ch->modAttribute(CharAttribute::Wisdom, 1);
-                        break;
+                    break;
                     case '4':
                         ch->modAttribute(CharAttribute::Intelligence, 1);
-                        break;
+                    break;
                     default:
                         sendText("That is not an acceptable option.\r\n");
-                        return;
+                    return;
                 }
+                ch->modInt(CharInt::AlignGoodEvil, align);
+            }
                 sendText("\r\n@WQuestion (@G8@W out of @g10@W)\r\n");
                 sendText("\r\n@YAnswer the following question:\r\n");
                 sendText("@wOne day, you are on the way home. You happen to walk past two\r\nof your best friends about to lock horns. Do you@n\r\n");
@@ -1570,28 +1581,32 @@ namespace net {
                 state = CON_Q8;
                 break;
 
-            case CON_Q8:
+            case CON_Q8: {
+                int align;
                 switch(arg[0]) {
                     case '1':
-                        ch->alignment += +10;
-                        ch->modAttribute(CharAttribute::Speed, 1);
-                        break;
+                        align += +10;
+                    ch->modAttribute(CharAttribute::Speed, 1);
+                    break;
                     case '2':
-                        ch->alignment += +20;
-                        ch->modAttribute(CharAttribute::Wisdom, 1);
-                        break;
+                        align += +20;
+                    ch->modAttribute(CharAttribute::Wisdom, 1);
+                    break;
                     case '3':
-                        ch->alignment += -10;
-                        ch->modAttribute(CharAttribute::Strength, 1);
-                        break;
+                        align += -10;
+                    ch->modAttribute(CharAttribute::Strength, 1);
+                    break;
                     case '4':
-                        ch->alignment += -20;
-                        ch->modAttribute(CharAttribute::Agility, 1);
-                        break;
+                        align += -20;
+                    ch->modAttribute(CharAttribute::Agility, 1);
+                    break;
                     default:
                         sendText("That is not an acceptable option.\r\n");
-                        return;
+                    return;
                 }
+                ch->modInt(CharInt::AlignGoodEvil, align);
+            }
+
                 sendText("\r\n@WQuestion (@G9@W out of @g10@W)\r\n");
                 sendText("\r\n@YAnswer the following question:\r\n");
                 sendText("@wAs a kid you were confronted with this. On the way from the bakery,\r\na group of kids corner you in an alley and the leader demands that\r\nyou surrender your jam donut to him. Do you...@n\r\n");
@@ -1604,27 +1619,30 @@ namespace net {
                 state = CON_Q9;
                 break;
 
-            case CON_Q9:
+            case CON_Q9: {
+                int align;
                 switch(arg[0]) {
                     case '1':
                         ch->modAttribute(CharAttribute::Strength, 1);
-                        break;
+                    break;
                     case '2':
-                        ch->alignment += -30;
-                        ch->modAttribute(CharAttribute::Wisdom, 1);
-                        break;
+                        align += -30;
+                    ch->modAttribute(CharAttribute::Wisdom, 1);
+                    break;
                     case '3':
-                        ch->alignment += -10;
-                        ch->modAttribute(CharAttribute::Speed, 1);
-                        break;
+                        align += -10;
+                    ch->modAttribute(CharAttribute::Speed, 1);
+                    break;
                     case '4':
-                        ch->alignment += -5;
-                        ch->modAttribute(CharAttribute::Intelligence, 1);
-                        break;
+                        align += -5;
+                    ch->modAttribute(CharAttribute::Intelligence, 1);
+                    break;
                     default:
                         sendText("That is not an acceptable option.\r\n");
-                        return;
+                    return;
                 }
+                ch->modInt(CharInt::AlignGoodEvil, align);
+            }
                 sendText("\r\n@WQuestion (@G10@W out of @g10@W)\r\n");
                 sendText("\r\n@YAnswer the following question:\r\n");
                 sendText("@wWhat do you wish your starting age to be?@n\r\n");
@@ -1684,50 +1702,55 @@ namespace net {
 
             case CON_ALIGN:
                 sendText("Choose: \r\n");
+            {
+                int align = -1;
                 switch(toupper(arg[0])) {
                     case 'K':
                         moveon = true;
-                        break;
+                    break;
                     case '1':
-                        GET_ALIGNMENT(ch) = 1000;
-                        penalty = true;
-                        break;
+                        align = 1000;
+                    penalty = true;
+                    break;
                     case '2':
-                        GET_ALIGNMENT(ch) = 799;
-                        penalty = true;
-                        break;
+                        align = 799;
+                    penalty = true;
+                    break;
                     case '3':
-                        GET_ALIGNMENT(ch) = 599;
-                        penalty = true;
-                        break;
+                        align = 599;
+                    penalty = true;
+                    break;
                     case '4':
-                        GET_ALIGNMENT(ch) = 299;
-                        penalty = true;
-                        break;
+                        align = 299;
+                    penalty = true;
+                    break;
                     case '5':
-                        GET_ALIGNMENT(ch) = 0;
-                        penalty = true;
-                        break;
+                        align = 0;
+                    penalty = true;
+                    break;
                     case '6':
-                        GET_ALIGNMENT(ch) = -299;
-                        penalty = true;
-                        break;
+                        align = -299;
+                    penalty = true;
+                    break;
                     case '7':
-                        GET_ALIGNMENT(ch) = -599;
-                        penalty = true;
-                        break;
+                        align = -599;
+                    penalty = true;
+                    break;
                     case '8':
-                        GET_ALIGNMENT(ch) = -799;
-                        penalty = true;
-                        break;
+                        align = -799;
+                    penalty = true;
+                    break;
                     case '9':
-                        GET_ALIGNMENT(ch) = -1000;
-                        penalty = true;
-                        break;
+                        align = -1000;
+                    penalty = true;
+                    break;
                     default:
                         sendText("That is not an acceptable option! Choose again...\r\n");
-                        return;
+                    return;
                 }
+                if(align != -1) ch->setInt(CharInt::AlignGoodEvil, align);
+            }
+
                 if (moveon == true) {
                     sendText("@CWould you like to keep skills gained from your sensei/race combo (skills, not abilities)\r\nor would you prefer to keep those skill slots empty? If you choose\r\nto forget then you will receive 200 PS in exchange.@n\r\n");
                     sendText("keep or forget: \r\n");
@@ -1760,24 +1783,23 @@ namespace net {
 
             case CON_QSEX:        /* query sex of new user         */
                 if (!IS_NAMEK(ch)) {
-                    switch(arg[0]) {
+                    int setSex;
+                    switch(std::tolower(arg[0])) {
                         case 'm':
-                        case 'M':
-                            ch->sex = SEX_MALE;
+                            setSex = SEX_MALE;
                             break;
                         case 'f':
-                        case 'F':
-                            ch->sex = SEX_FEMALE;
+                            setSex = SEX_FEMALE;
                             break;
                         case 'n':
-                        case 'N':
-                            ch->sex = SEX_NEUTRAL;
+                            setSex = SEX_NEUTRAL;
                             break;
                         default:
                             sendText("That is not a sex..\r\n"
                                       "What IS your sex? ");
                             return;
                     }
+                    ch->setInt(CharInt::Sex, setSex);
                 }
                 if (IS_HUMAN(ch) || IS_SAIYAN(ch) || IS_KONATSU(ch) ||
                     IS_MUTANT(ch) || IS_ANDROID(ch) || IS_KAI(ch) ||

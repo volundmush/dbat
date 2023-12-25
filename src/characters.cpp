@@ -1170,6 +1170,22 @@ int char_data::modTrain(CharAttribute attr, int val) {
 }
 
 
+int char_data::getInt(CharInt stat) {
+    if(auto st = charInts.find(stat); st != charInts.end()) {
+        return st->second;
+    }
+    return 0;
+}
+
+int char_data::setInt(CharInt stat, int val) {
+    charInts[stat] = val;
+    return val;
+}
+
+int char_data::modInt(CharInt stat, int val) {
+    return setInt(stat, getInt(stat) + val);
+}
+
 
 
 bool char_data::canCarryWeight(weight_t val) {

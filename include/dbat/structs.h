@@ -567,17 +567,8 @@ struct char_data : public unit_data {
 
     // Prototype-relevant fields below...
     char *title{};            /* PC / NPC's title                     */
-    int size{SIZE_UNDEFINED};            /* Size class of char                   */
-    int8_t sex{};            /* PC / NPC's sex                       */
     race::Race *race{};
-    int8_t hairl{};               /* PC hair length                       */
-    int8_t hairs{};               /* PC hair style                        */
-    int8_t hairc{};               /* PC hair color                        */
-    int8_t skin{};                /* PC skin color                        */
-    int8_t eye{};                 /* PC eye color                         */
-    int8_t distfea{};             /* PC's Distinguishing Feature          */
-    int race_level{};        /* PC / NPC's racial level / hit dice   */
-    int level_adj{};        /* PC level adjustment                  */
+
     sensei::Sensei *chclass{};        /* Last class taken                     */
     int level{};            /* PC / NPC's level                     */
     double weight{};        /* PC / NPC's weight                    */
@@ -591,10 +582,14 @@ struct char_data : public unit_data {
 
     int getHeight(bool base = false);
 
-    int height{};        /* PC / NPC's height                    */
+    std::unordered_map<CharInt, int> charInts{};
+
+    int getInt(CharInt stat);
+    int setInt(CharInt stat, int val);
+    int modInt(CharInt stat, int val);
+
     struct mob_special_data mob_specials{};
-    int alignment{};        /* +-1000 for alignment good vs. evil	*/
-    int alignment_ethic{};        /* +-1000 for alignment law vs. chaos	*/
+
     bitvector_t affected_by[AF_ARRAY_MAX]{};/* Bitvector for current affects	*/
     int64_t basepl{};
     int64_t baseki{};
@@ -653,7 +648,6 @@ struct char_data : public unit_data {
     struct char_data *absorbby{};  /* Who is absorbing me */
     struct char_data *carrying{};
     struct char_data *carried_by{};
-    int racial_pref{};
 
     int8_t feats[MAX_FEATS + 1]{};    /* Feats (booleans and counters)	*/
     int combat_feats[CFEAT_MAX + 1][FT_ARRAY_MAX]{};
@@ -667,9 +661,6 @@ struct char_data : public unit_data {
     int bodyparts[AF_ARRAY_MAX]{};  /* Bitvector for current bodyparts      */
     int16_t saving_throw[3]{};    /* Saving throw				*/
     int16_t apply_saving_throw[3]{};    /* Saving throw bonuses			*/
-
-    int powerattack{};        /* Setting for power attack level	*/
-    int combatexpertise{};        /* Setting for Combat expertise level   */
 
     int armor{0};        /* Internally stored *10		*/
 
@@ -740,8 +731,7 @@ struct char_data : public unit_data {
     int starphase{};
     race::Race *mimic{};
     bool bonuses[MAX_BONUSES]{};
-    int ccpoints{};
-    int negcount{};
+
     int cooldown{};
     int death_type{};
 
@@ -811,12 +801,7 @@ struct char_data : public unit_data {
     char *poofin{};            /* Description on arrival of a god.     */
     char *poofout{};        /* Description upon a god's exit.       */
     int speaking{};            /* Language currently speaking		*/
-    int trainstr{};
-    int trainint{};
-    int traincon{};
-    int trainwis{};
-    int trainagl{};
-    int trainspd{};
+
     int8_t conditions[NUM_CONDITIONS]{};        /* Drunk, full, thirsty			*/
     int practice_points{};        /* Skill points earned from race HD	*/
 

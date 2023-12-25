@@ -257,8 +257,7 @@ static void dragon_level(struct char_data *ch) {
         level = rand_number(40, 60);
     }
 
-    ch->race_level = 0;
-    ch->race_level = level + rand_number(5, 20);
+    ch->level = level + rand_number(5, 20);
 }
 
 static void mob_stats(struct char_data *mob) {
@@ -2011,9 +2010,6 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
         return 0;
     }
 
-    GET_HITDICE(ch) = t[0];
-    GET_LEVEL_ADJ(ch) = 0;
-    GET_CLASS_LEVEL(ch) = 0;
     GET_ARMOR(ch) = 10 * (10 - t[2]);
 
     /* max hit = 0 is a flag that H, M, V is xdy+z */
@@ -2077,7 +2073,7 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
 
     GET_POS(ch) = t[0];
     GET_DEFAULT_POS(ch) = t[1];
-    GET_SEX(ch) = t[2];
+    ch->setInt(CharInt::Sex, t[2]);
 
     SPEAKING(ch) = MIN_LANGUAGES;
     set_height_and_weight_by_race(ch);
@@ -2131,7 +2127,7 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
 
     CASE("Size") {
         RANGE(SIZE_UNDEFINED, NUM_SIZES - 1);
-        ch->size = num_arg;
+        ch->setInt(CharInt::Size, num_arg);
     }
 
     CASE("Str") {
@@ -2316,7 +2312,7 @@ int parse_mobile_from_file(FILE *mob_f, struct char_data *ch) {
         AFF_FLAGS(ch)[2] = asciiflag_conv(f7);
         AFF_FLAGS(ch)[3] = asciiflag_conv(f8);
 
-        GET_ALIGNMENT(ch) = t[2];
+        ch->setInt(CharInt::AlignGoodEvil, t[2]);
 
         for (taeller = 0; taeller < AF_ARRAY_MAX; taeller++)
             check_bitvector_names(AFF_FLAGS(ch)[taeller], affected_bits_count, buf2, "mobile affect");
@@ -2986,17 +2982,15 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     add_unique_id(mob);
     mob->activate();
 
-    if (IS_HOSHIJIN(mob) && GET_SEX(mob) == SEX_MALE) {
-        mob->hairl = 0;
-        mob->hairc = 0;
-        mob->hairs = 0;
-    } else {
-        mob->hairl = rand_number(0, 4);
-        mob->hairc = rand_number(1, 13);
-        mob->hairs = rand_number(1, 11);
+    std::map<CharInt, int> setIntsTo;
+
+    if (!(IS_HOSHIJIN(mob) && GET_SEX(mob) == SEX_MALE)) {
+        setIntsTo[CharInt::HairLength] = rand_number(0, 4);
+        setIntsTo[CharInt::HairColor] = rand_number(1, 13);
+        setIntsTo[CharInt::HairStyle] = rand_number(1, 11);
     }
 
-    mob->eye = rand_number(0, 11);
+    setIntsTo[CharInt::EyeColor] = rand_number(0, 11);
 
     GET_ABSORBS(mob) = 0;
     ABSORBING(mob) = nullptr;
@@ -3006,23 +3000,27 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     BLOCKS(mob) = nullptr;
 
     if (!IS_HUMAN(mob) && !IS_SAIYAN(mob) && !IS_HALFBREED(mob) && !IS_NAMEK(mob)) {
-        mob->skin = rand_number(0, 11);
+        setIntsTo[CharInt::SkinColor] = rand_number(0, 11);
     }
     if (IS_NAMEK(mob)) {
-        mob->skin = 2;
+        setIntsTo[CharInt::SkinColor] = 2;
     }
     if (IS_HUMAN(mob) || IS_SAIYAN(mob) || IS_HALFBREED(mob)) {
         if (rand_number(1, 5) <= 2) {
-            mob->skin = rand_number(0, 1);
+            setIntsTo[CharInt::SkinColor] = rand_number(0, 1);
         } else if (rand_number(1, 5) <= 4) {
-            mob->skin = rand_number(4, 5);
+            setIntsTo[CharInt::SkinColor] = rand_number(4, 5);
         } else if (rand_number(1, 5) <= 5) {
-            mob->skin = rand_number(9, 10);
+            setIntsTo[CharInt::SkinColor] = rand_number(9, 10);
         }
     }
     if (IS_SAIYAN(mob)) {
-        mob->hairc = rand_number(1, 2);
-        mob->eye = 1;
+        setIntsTo[CharInt::HairColor] = rand_number(1, 2);
+        setIntsTo[CharInt::EyeColor] = 1;
+    }
+
+    for(auto &[cint, val] : setIntsTo) {
+        mob->setInt(cint, val);
     }
 
     if (GET_MOB_VNUM(mob) >= 81 && GET_MOB_VNUM(mob) <= 87) {

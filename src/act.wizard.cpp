@@ -1599,9 +1599,8 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
         snprintf(buf, sizeof(buf), "%s", k->chclass->getName().c_str());
     }
     snprintf(buf2, sizeof(buf2), "%s", k->race->getName().c_str());
-    send_to_char(ch, "Class: %s, Race: %s, Lev: [@y%2d(%dHD+%dcl+%d)@n], XP: [@y%" I64T "@n]\r\n",
-                 buf, buf2, GET_LEVEL(k), GET_HITDICE(k),
-                 GET_CLASS_LEVEL(k), GET_LEVEL_ADJ(k), GET_EXP(k));
+    send_to_char(ch, "Class: %s, Race: %s, Lev: [@y%2d@n], XP: [@y%" I64T "@n]\r\n",
+                 buf, buf2, GET_LEVEL(k), GET_EXP(k));
 
     if (!IS_NPC(k)) {
         char buf1[64], cmbuf2[64];
@@ -3678,7 +3677,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             log_imm_action("SET: %s has set st for %s.", GET_NAME(ch), GET_NAME(vict));
             break;
         case 10:
-            GET_ALIGNMENT(vict) = RANGE(-1000, 1000);
+            vict->setInt(CharInt::AlignGoodEvil, RANGE(-1000, 1000));
             mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set align for %s.", GET_NAME(ch),
                    GET_NAME(vict));
             log_imm_action("SET: %s has set align for %s.", GET_NAME(ch), GET_NAME(vict));
@@ -3794,17 +3793,10 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             break;
         case 27:
         case 28:
-            if (GET_CLASS_LEVEL(vict)) {
-                vict->modPractices(RANGE(0, 10000));
-                mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set PS for %s.", GET_NAME(ch),
-                       GET_NAME(vict));
-                log_imm_action("SET: %s has set PS for %s.", GET_NAME(ch), GET_NAME(vict));
-            } else {
-                vict->modPractices(RANGE(0, 10000));
-                mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set PS for %s.", GET_NAME(ch),
-                       GET_NAME(vict));
-                log_imm_action("SET: %s has set PS for %s.", GET_NAME(ch), GET_NAME(vict));
-            }
+            vict->modPractices(RANGE(0, 10000));
+            mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set PS for %s.", GET_NAME(ch),
+                   GET_NAME(vict));
+            log_imm_action("SET: %s has set PS for %s.", GET_NAME(ch), GET_NAME(vict));
             break;
         case 29:
         case 30:
@@ -3903,7 +3895,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
                 send_to_char(ch, "Must be 'male', 'female', or 'neutral'.\r\n");
                 return (0);
             }
-            GET_SEX(vict) = i;
+            vict->setInt(CharInt::Sex, i);
             break;
         case 48:    /* set age */
             if (value <= 0) {    /* Arbitrary limits. */
@@ -3919,7 +3911,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             break;
 
         case 49:    /* Blame/Thank Rick Glover. :) */
-            GET_HEIGHT(vict) = value;
+            vict->setInt(CharInt::Height, value);
             affect_total(vict);
             break;
 
@@ -3963,7 +3955,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             break;
 
         case 55:
-            GET_ETHIC_ALIGNMENT(vict) = RANGE(-1000, 1000);
+            vict->setInt(CharInt::AlignLawChaos, RANGE(-1000, 1000));
             affect_total(vict);
             break;
 
@@ -3994,7 +3986,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
                 send_to_char(ch, "You can't set it to that.\r\n");
                 return (0);
             }
-            GET_HAIRL(vict) = value;
+            vict->setInt(CharInt::HairLength, value);
             return (1);
             break;
 
@@ -4003,7 +3995,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
                 send_to_char(ch, "You can't set it to that.\r\n");
                 return (0);
             }
-            GET_HAIRS(vict) = value;
+            vict->setInt(CharInt::HairStyle, value);
             return (1);
             break;
 
@@ -4012,7 +4004,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
                 send_to_char(ch, "You can't set it to that.\r\n");
                 return (0);
             }
-            GET_HAIRC(vict) = value;
+            vict->setInt(CharInt::HairColor, value);
             return (1);
             break;
 
@@ -4021,7 +4013,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
                 send_to_char(ch, "You can't set it to that.\r\n");
                 return (0);
             }
-            GET_SKIN(vict) = value;
+            vict->setInt(CharInt::SkinColor, value);
             return (1);
             break;
 
@@ -4030,7 +4022,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
                 send_to_char(ch, "You can't set it to that.\r\n");
                 return (0);
             }
-            GET_EYE(vict) = value;
+            vict->setInt(CharInt::EyeColor, value);
             return (1);
             break;
 
@@ -4104,7 +4096,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             }
             break;
         case 77:
-            RACIAL_PREF(vict) = RANGE(1, 3);
+            vict->setInt(CharInt::RacialPref, RANGE(1, 3));
             break;
 
         case 78:

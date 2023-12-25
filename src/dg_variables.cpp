@@ -564,7 +564,7 @@ in the vault (vnum: 453) now and then. you can just use
                     else if (!strcasecmp(field, "align")) {
                         if (subfield && *subfield) {
                             int addition = atof(subfield);
-                            GET_ALIGNMENT(c) = std::clamp<int>(addition, -1000, 1000);
+                            c->setInt(CharInt::AlignGoodEvil, std::clamp<int>(addition, -1000, 1000));
                         }
                         snprintf(str, slen, "%d", GET_ALIGNMENT(c));
                     }
@@ -935,7 +935,7 @@ in the vault (vnum: 453) now and then. you can just use
                         if (subfield && *subfield) {
                             int ns;
                             if ((ns = search_block(subfield, size_names, false)) > -1) {
-                                (c)->size = ns;
+                                (c)->setInt(CharInt::Size, ns);
                             }
                         }
                         sprinttype(get_size(c), size_names, str, slen);
