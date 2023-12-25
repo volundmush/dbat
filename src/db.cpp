@@ -2036,7 +2036,7 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
         return 0;
     }
 
-    GET_GOLD(ch) = t[0];
+    ch->setInt(CharInt::Zeni, t[0]);
     GET_EXP(ch) = 0;
     ch->race = race::find_race_map_id(t[2], race::race_map);
     if (!ch->race) {

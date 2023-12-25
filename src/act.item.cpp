@@ -1151,10 +1151,10 @@ void check_auction(uint64_t heartPulse, double deltaTime) {
                                  "You couldn't hold all the zenni, so some of it was deposited for you.\r\n");
                     int diff = 0;
                     diff = (GET_GOLD(ch_selling) + curbid) - GOLD_CARRY(ch_selling);
-                    GET_GOLD(ch_selling) = GOLD_CARRY(ch_selling);
-                    GET_BANK_GOLD(ch_selling) += diff;
+                    ch_selling->setInt(CharInt::Zeni, GOLD_CARRY(ch_selling));
+                    ch_selling->modInt(CharInt::Bank, diff);
                 } else if (GET_GOLD(ch_selling) + curbid <= GOLD_CARRY(ch_selling)) {
-                    GET_GOLD(ch_selling) += curbid;
+                    ch_selling->modInt(CharInt::Zeni, curbid);
                 }
                 /* Reset auctioning values */
                 obj_selling = nullptr;
@@ -1955,7 +1955,7 @@ void stop_auction(int type, struct char_data *ch) {
 
 
     if (!(ch_buying == nullptr))
-        GET_GOLD(ch_buying) += curbid;
+        ch_buying->modInt(CharInt::Zeni, curbid);
 
     obj_selling = nullptr;
     ch_selling = nullptr;
@@ -2431,7 +2431,7 @@ static void get_check_money(struct char_data *ch, struct obj_data *obj) {
         diff = (GET_GOLD(ch) + value) - GOLD_CARRY(ch);
         obj = create_money(diff);
         obj_to_room(obj, IN_ROOM(ch));
-        GET_GOLD(ch) = GOLD_CARRY(ch);
+        ch->setInt(CharInt::Zeni, GOLD_CARRY(ch));
         return;
     }
 

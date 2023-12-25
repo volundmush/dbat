@@ -295,11 +295,9 @@ int load_char(const char *name, struct char_data *ch) {
         GET_COND(ch, HUNGER) = PFDEF_HUNGER;
         GET_COND(ch, THIRST) = PFDEF_THIRST;
         GET_COND(ch, DRUNK) = PFDEF_DRUNK;
-        GET_GOLD(ch) = PFDEF_GOLD;
         GET_BACKSTAB_COOL(ch) = 0;
         GET_COOLDOWN(ch) = 0;
         GET_SDCOOLDOWN(ch) = 0;
-        GET_BANK_GOLD(ch) = PFDEF_BANK;
         GET_ABSORBS(ch) = PFDEF_BANK;
         GET_INGESTLEARNED(ch) = PFDEF_BANK;
         GET_UP(ch) = PFDEF_BANK;
@@ -356,7 +354,7 @@ int load_char(const char *name, struct char_data *ch) {
                     break;
 
                 case 'B':
-                    if (!strcmp(tag, "Bank")) GET_BANK_GOLD(ch) = atoi(line);
+                    if (!strcmp(tag, "Bank")) ch->setInt(CharInt::Bank, atoi(line));
                     else if (!strcmp(tag, "Bki ")) load_BASE(ch, line, LOAD_MANA);
                     else if (!strcmp(tag, "Blss")) GET_BLESSLVL(ch) = atoi(line);
                     else if (!strcmp(tag, "Boam")) GET_BOARD(ch, 0) = atoi(line);
@@ -412,7 +410,7 @@ int load_char(const char *name, struct char_data *ch) {
                     break;
 
                 case 'G':
-                    if (!strcmp(tag, "Gold")) GET_GOLD(ch) = atoi(line);
+                    if (!strcmp(tag, "Gold")) ch->setInt(CharInt::Zeni, atoi(line));
                     else if (!strcmp(tag, "Gaun")) GET_GAUNTLET(ch) = atoi(line);
                     else if (!strcmp(tag, "Geno")) GET_GENOME(ch, 0) = atoi(line);
                     else if (!strcmp(tag, "Gen1")) GET_GENOME(ch, 1) = atoi(line);

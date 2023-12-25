@@ -1923,5 +1923,7 @@ enum class CharInt : uint8_t {
  AlignLawChaos = 10,
  RacialPref = 11,
  MysticMelody = 12,
- GroupKills = 13
+ GroupKills = 13,
+ Zeni = 14,
+ Bank = 15
 };

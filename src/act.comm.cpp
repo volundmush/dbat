@@ -436,7 +436,7 @@ ACMD(do_say) {
                                 send_to_room(real_room(DRAGONR),
                                              "@wShenron says, '@CYour wish has been granted, %s now has become richer!%s@w'@n\r\n",
                                              GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
-                                GET_BANK_GOLD(wch) += 1000000;
+                                wch->modInt(CharInt::Zeni, 1000000);
                                 granted = true;
                                 SELFISHMETER += 1;
                                 mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a money wish on %s.", GET_NAME(ch),

@@ -573,7 +573,7 @@ in the vault (vnum: 453) now and then. you can just use
                     if (!strcasecmp(field, "bank")) {
                         if (subfield && *subfield) {
                             int addition = atof(subfield);
-                            GET_BANK_GOLD(c) += addition;
+                            c->modInt(CharInt::Bank, addition);
                         }
                         snprintf(str, slen, "%ld", GET_BANK_GOLD(c));
                     }
@@ -691,7 +691,7 @@ in the vault (vnum: 453) now and then. you can just use
                     if (!strcasecmp(field, "gold")) {
                         if (subfield && *subfield) {
                             int64_t addition = atof(subfield);
-                            GET_GOLD(c) += addition;
+                            c->modInt(CharInt::Zeni, addition);
                         }
                         snprintf(str, slen, "%ld", GET_GOLD(c));
                     }
@@ -1033,7 +1033,7 @@ in the vault (vnum: 453) now and then. you can just use
                     if (!strcasecmp(field, "zenni")) {
                         if (subfield && *subfield) {
                             int64_t addition = atof(subfield);
-                            GET_GOLD(c) += addition;
+                            c->modInt(CharInt::Zeni, addition);
                         }
                         snprintf(str, slen, "%ld", GET_GOLD(c));
                     }

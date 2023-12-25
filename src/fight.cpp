@@ -1594,7 +1594,7 @@ static void make_pcorpse(struct char_data *ch) {
             money = create_money(GET_GOLD(ch));
             obj_to_obj(money, corpse);
         }
-        GET_GOLD(ch) = 0;
+        ch->setInt(CharInt::Zeni, 0);
     }
 
     obj_to_room(corpse, IN_ROOM(ch));
@@ -1822,7 +1822,7 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
             money = create_money(GET_GOLD(ch));
             obj_to_obj(money, corpse);
         }
-        GET_GOLD(ch) = 0;
+        ch->setInt(CharInt::Zeni, 0);
     }
     if (!MOB_FLAGGED(ch, MOB_HUSK)) {
         ch->contents = nullptr;

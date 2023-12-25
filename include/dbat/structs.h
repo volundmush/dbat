@@ -664,8 +664,7 @@ struct char_data : public unit_data {
 
     int armor{0};        /* Internally stored *10		*/
 
-    int gold{};            /* Money carried			*/
-    int bank_gold{};        /* Gold the char has in a bank account	*/
+
     int64_t exp{};            /* The experience of the player		*/
 
     int accuracy{};            /* Base hit accuracy			*/
@@ -779,14 +778,12 @@ struct char_data : public unit_data {
     int lifebonus{};
     int asb{};
     int regen{};
-    int rbank{};
     int con_sdcooldown{};
 
     int8_t limb_condition[4]{};
 
     char *rdisplay{};
 
-    short song{};
     struct char_data *original{};
 
     std::set<struct char_data*> clones{};

@@ -1518,7 +1518,7 @@ SPECIAL(bank) {
         if (GET_GOLD(ch) + amount > GOLD_CARRY(ch)) {
             send_to_char(ch, "You can only carry %s zenni, you left the rest.\r\n", add_commas(GOLD_CARRY(ch)).c_str());
             int diff = (GET_GOLD(ch) + amount) - GOLD_CARRY(ch);
-            GET_GOLD(ch) = GOLD_CARRY(ch);
+            ch->setInt(CharInt::Zeni, GOLD_CARRY(ch));
             amount -= diff;
             if (amount >= 100) {
                 num = amount / 100;

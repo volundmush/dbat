@@ -1100,7 +1100,7 @@ static void shopping_sell(char *arg, struct char_data *ch, struct char_data *kee
     send_to_char(ch, "The shopkeeper gives you %s zenni.\r\n", add_commas(goldamt).c_str());
     if (GET_GOLD(ch) + goldamt > GOLD_CARRY(ch)) {
         goldamt = (GET_GOLD(ch) + goldamt) - GOLD_CARRY(ch);
-        GET_GOLD(ch) = GOLD_CARRY(ch);
+        ch->setInt(CharInt::Zeni, GOLD_CARRY(ch));
         GET_BANK_GOLD(ch) += goldamt;
         send_to_char(ch, "You couldn't hold all of the money. The rest was deposited for you.\r\n");
     } else {

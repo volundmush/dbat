@@ -554,7 +554,7 @@ void do_start(struct char_data *ch) {
     }
     /* roll_real_abils(ch); */
     if (GET_GOLD(ch) <= 0) {
-        GET_GOLD(ch) = dice(3, 6) * 10;
+        ch->setInt(CharInt::Zeni, dice(3, 6) * 10);
     }
 
     /* Derived from the SRD under OGL, see ../doc/srd.txt for information */

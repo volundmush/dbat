@@ -1433,36 +1433,39 @@ namespace net {
                 state = CON_Q4;
                 break;
 
-            case CON_Q4:
+            case CON_Q4: {
+                int gold = 0;
                 switch(arg[0]) {
                     case '1':
-                        ch->gold += 1000;
-                        ch->basepl -= rand_number(10, 30);
-                        ch->basest -= rand_number(10, 30);
-                        ch->baseki -= rand_number(10, 30);
-                        break;
+                        gold += 1000;
+                    ch->basepl -= rand_number(10, 30);
+                    ch->basest -= rand_number(10, 30);
+                    ch->baseki -= rand_number(10, 30);
+                    break;
                     case '2':
-                        ch->gold = 0;
-                        ch->basepl += rand_number(50, 165);
-                        ch->basest += rand_number(50, 165);
-                        ch->baseki += rand_number(50, 165);
-                        break;
+                        gold = 0;
+                    ch->basepl += rand_number(50, 165);
+                    ch->basest += rand_number(50, 165);
+                    ch->baseki += rand_number(50, 165);
+                    break;
                     case '3':
-                        ch->gold = 2500;
-                        ch->basepl -= rand_number(15, 25);
-                        ch->basest -= rand_number(15, 25);
-                        ch->baseki -= rand_number(15, 25);
-                        break;
+                        gold = 2500;
+                    ch->basepl -= rand_number(15, 25);
+                    ch->basest -= rand_number(15, 25);
+                    ch->baseki -= rand_number(15, 25);
+                    break;
                     case '4':
-                        ch->gold = 150;
-                        ch->basepl += rand_number(25, 80);
-                        ch->basest += rand_number(25, 80);
-                        ch->baseki += rand_number(25, 80);
-                        break;
+                        gold = 150;
+                    ch->basepl += rand_number(25, 80);
+                    ch->basest += rand_number(25, 80);
+                    ch->baseki += rand_number(25, 80);
+                    break;
                     default:
                         sendText("That is not an acceptable option.\r\n");
-                        return;
+                    return;
                 }
+                if(gold) ch->modInt(CharInt::Zeni, gold);
+            }
                 sendText("\r\n@WQuestion (@G5@W out of @g10@W)\r\n");
                 sendText("@YAnswer the following question:\r\n");
                 sendText("@wYou are introduced to a new way of training one day, what do you do?\r\n");
@@ -2230,7 +2233,7 @@ namespace net {
                                 return;
                             case CON_QCLASS:
                                 if (chosen_sensei->getID() == sensei::kibito && !IS_KAI(ch) &&
-                                    conn->account->rpp < 10 && ch->rbank < 10) {
+                                    conn->account->rpp < 10) {
                                     sendText("\r\nIt costs 10 RPP to select Kibito unless you are a Kai.\r\nSensei: ");
                                     return;
                                 } else {

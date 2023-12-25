@@ -656,8 +656,6 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
         }
     }
 
-    if(j.contains("gold")) gold = j["gold"];
-    if(j.contains("bank_gold")) bank_gold = j["bank_gold"];
     if(j.contains("exp")) exp = j["exp"];
 
     if(j.contains("was_in_room")) was_in_room = j["was_in_room"];

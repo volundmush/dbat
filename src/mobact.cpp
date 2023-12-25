@@ -418,7 +418,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
                 for (sobj = ch->contents; sobj; sobj = next_obj) {
                     next_obj = sobj->next_content;
                     if (sobj != nullptr && !shop_producing(sobj, shopnr)) {
-                        GET_GOLD(ch) += GET_OBJ_COST(sobj);
+                        ch->modInt(CharInt::Zeni, GET_OBJ_COST(sobj));
                         extract_obj(sobj);
                     }
                 }
