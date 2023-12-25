@@ -561,7 +561,7 @@ void postmaster_send_mail(struct char_data *ch, struct char_data *mailman,
 
     act(buf, false, mailman, nullptr, ch, TO_VICT);
     act("@C$n@w starts writing a letter.@n", true, ch, nullptr, nullptr, TO_ROOM);
-    GET_GOLD(ch) -= STAMP_PRICE;
+    ch->mod(CharMoney::Carried, -STAMP_PRICE);
     SET_BIT_AR(PLR_FLAGS(ch), PLR_MAILING);    /* string_write() sets writing. */
 
     /* Start writing! */

@@ -4934,10 +4934,10 @@ ACMD(do_score) {
                      add_commas(GET_SPEEDI(ch)).c_str(), add_commas(GET_ARMOR(ch)).c_str());
         send_to_char(ch,
                      "    @D[    @RStrength@D|@G%2d (%3d)@D] [     @YAgility@D|@G%2d (%3d)@D] [      @BSpeed@D|@G%2d (%3d)@D]@n\n",
-                     ch->getAttribute(CharAttribute::Strength), GET_STR(ch), ch->getAttribute(CharAttribute::Agility), GET_DEX(ch), ch->getAttribute(CharAttribute::Speed), GET_CHA(ch));
+                     ch->get(CharAttribute::Strength), GET_STR(ch), ch->get(CharAttribute::Agility), GET_DEX(ch), ch->get(CharAttribute::Speed), GET_CHA(ch));
         send_to_char(ch,
                      "    @D[@gConstitution@D|@G%2d (%3d)@D] [@CIntelligence@D|@G%2d (%3d)@D] [     @MWisdom@D|@G%2d (%3d)@D]@n\n",
-                     ch->getAttribute(CharAttribute::Constitution), GET_CON(ch), ch->getAttribute(CharAttribute::Intelligence), GET_INT(ch), ch->getAttribute(CharAttribute::Wisdom),
+                     ch->get(CharAttribute::Constitution), GET_CON(ch), ch->get(CharAttribute::Intelligence), GET_INT(ch), ch->get(CharAttribute::Wisdom),
                      GET_WIS(ch));
     }
     if (view == full || view == other) {

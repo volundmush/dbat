@@ -1151,10 +1151,10 @@ void check_auction(uint64_t heartPulse, double deltaTime) {
                                  "You couldn't hold all the zenni, so some of it was deposited for you.\r\n");
                     int diff = 0;
                     diff = (GET_GOLD(ch_selling) + curbid) - GOLD_CARRY(ch_selling);
-                    ch_selling->setInt(CharInt::Zeni, GOLD_CARRY(ch_selling));
-                    ch_selling->modInt(CharInt::Bank, diff);
+                    ch_selling->set(CharMoney::Carried, GOLD_CARRY(ch_selling));
+                    ch_selling->mod(CharMoney::Bank, diff);
                 } else if (GET_GOLD(ch_selling) + curbid <= GOLD_CARRY(ch_selling)) {
-                    ch_selling->modInt(CharInt::Zeni, curbid);
+                    ch_selling->mod(CharMoney::Carried, curbid);
                 }
                 /* Reset auctioning values */
                 obj_selling = nullptr;
@@ -1955,7 +1955,7 @@ void stop_auction(int type, struct char_data *ch) {
 
 
     if (!(ch_buying == nullptr))
-        ch_buying->modInt(CharInt::Zeni, curbid);
+        ch_buying->mod(CharMoney::Carried, curbid);
 
     obj_selling = nullptr;
     ch_selling = nullptr;
@@ -1981,7 +1981,7 @@ static void auc_stat(struct char_data *ch, struct obj_data *obj) {
         /* auctioneer tells the character the auction details */
         sprintf(buf, auctioneer[AUC_STAT], curbid);
         act(buf, true, ch_selling, obj, ch, TO_VICT | TO_SLEEP);
-        GET_GOLD(ch) -= 500;
+        ch->mod(CharMoney::Carried, -500);
 
         /*call_magic(ch, nullptr, obj_selling, SPELL_IDENTIFY, 30, CAST_SPELL);*/
     }
@@ -2431,12 +2431,12 @@ static void get_check_money(struct char_data *ch, struct obj_data *obj) {
         diff = (GET_GOLD(ch) + value) - GOLD_CARRY(ch);
         obj = create_money(diff);
         obj_to_room(obj, IN_ROOM(ch));
-        ch->setInt(CharInt::Zeni, GOLD_CARRY(ch));
+        ch->set(CharMoney::Carried, GOLD_CARRY(ch));
         return;
     }
 
 
-    GET_GOLD(ch) += value;
+    ch->mod(CharMoney::Carried, value);
     extract_obj(obj);
 
     if (value == 1) {
@@ -2775,7 +2775,7 @@ static void perform_drop_gold(struct char_data *ch, int amount,
 
             send_to_char(ch, "You drop some zenni which disappears in a puff of smoke!\r\n");
         }
-        GET_GOLD(ch) -= amount;
+        ch->mod(CharMoney::Carried, -amount);
     }
 }
 
@@ -3166,8 +3166,8 @@ static void perform_give_gold(struct char_data *ch, struct char_data *vict,
     act(buf, true, ch, nullptr, vict, TO_NOTVICT);
 
     if (IS_NPC(ch) || !ADM_FLAGGED(ch, ADM_MONEY))
-        GET_GOLD(ch) -= amount;
-    GET_GOLD(vict) += amount;
+        ch->mod(CharMoney::Carried, -amount);
+    vict->mod(CharMoney::Carried, amount);
 
     bribe_mtrigger(vict, ch, amount);
 }
@@ -4477,7 +4477,7 @@ ACMD(do_sac) {
             case 0:
                 send_to_char(ch, "You sacrifice %s to the Gods.\r\nYou receive one zenni for your humility.\r\n",
                              GET_OBJ_SHORT(j));
-                GET_GOLD(ch) += 1;
+                ch->mod(CharMoney::Carried, 1);
                 break;
             case 1:
                 send_to_char(ch, "You sacrifice %s to the Gods.\r\nThe Gods ignore your sacrifice.\r\n",
@@ -4495,16 +4495,16 @@ ACMD(do_sac) {
                 break;
             case 4:
                 send_to_char(ch, "Your sacrifice to the Gods is rewarded with %d zenni.\r\n", GET_OBJ_COST(j));
-                GET_GOLD(ch) += GET_OBJ_COST(j);
+                ch->mod(CharMoney::Carried, GET_OBJ_COST(j));
                 break;
             case 5:
                 send_to_char(ch, "Your sacrifice to the Gods is rewarded with %d zenni\r\n", (2 * GET_OBJ_COST(j)));
-                GET_GOLD(ch) += (2 * GET_OBJ_COST(j));
+                ch->mod(CharMoney::Carried, (2 * GET_OBJ_COST(j)));
                 break;
             default:
                 send_to_char(ch, "You sacrifice %s to the Gods.\r\nYou receive one zenni for your humility.\r\n",
                              GET_OBJ_SHORT(j));
-                GET_GOLD(ch) += 1;
+                ch->mod(CharMoney::Carried, 1);
                 break;
         }
     } else {

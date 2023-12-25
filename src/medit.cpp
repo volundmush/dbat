@@ -233,20 +233,20 @@ void init_mobile(struct char_data *mob) {
     //GET_HIT(mob) = 0;
     //GET_MAX_MANA(mob) = 0;
     GET_NDD(mob) = 0;
-    mob->setInt(CharInt::Sex, SEX_MALE);
+    mob->set(CharAppearance::Sex, SEX_MALE);
     mob->chclass = sensei::sensei_map[sensei::commoner];
 
     GET_WEIGHT(mob) = rand_number(100, 200);
-    mob->setInt(CharInt::Height, rand_number(100, 200));
+    mob->set(CharNum::Height, rand_number(100, 200));
 
     auto base1 = rand_number(8, 16);
     auto base2 = rand_number(8, 16);
     for(auto attr : {CharAttribute::Strength, CharAttribute::Intelligence, CharAttribute::Wisdom}) {
-        mob->setAttribute(attr, base1);
+        mob->set(attr, base1);
     }
 
     for(auto attr : {CharAttribute::Agility, CharAttribute::Constitution, CharAttribute::Speed}) {
-        mob->setAttribute(attr, base2);
+        mob->set(attr, base2);
     }
 
     SET_BIT_AR(MOB_FLAGS(mob), MOB_ISNPC);
@@ -810,7 +810,7 @@ void medit_parse(struct descriptor_data *d, char *arg) {
  */
 
         case MEDIT_SEX:
-            OLC_MOB(d)->setInt(CharInt::Sex, LIMIT(i, 0, NUM_GENDERS - 1));
+            OLC_MOB(d)->set(CharAppearance::Sex, LIMIT(i, 0, NUM_GENDERS - 1));
             break;
 
         case MEDIT_ACCURACY:
@@ -877,7 +877,7 @@ void medit_parse(struct descriptor_data *d, char *arg) {
             break;
 
         case MEDIT_GOLD:
-            GET_GOLD(OLC_MOB(d)) = LIMIT(i, 0, MAX_MOB_GOLD);
+            OLC_MOB(d)->set(CharMoney::Carried, i);
             break;
 
         case MEDIT_POS:
@@ -893,12 +893,12 @@ void medit_parse(struct descriptor_data *d, char *arg) {
             break;
 
         case MEDIT_LEVEL:
-            GET_LEVEL(OLC_MOB(d)) = LIMIT(i, 1, 150);
+            OLC_MOB(d)->set(CharNum::Level, i);
             /* Try to add some baseline defaults based on level choice. */
             break;
 
         case MEDIT_ALIGNMENT:
-            OLC_MOB(d)->setInt(CharInt::AlignGoodEvil, LIMIT(i, -1000, 1000));
+            OLC_MOB(d)->set(CharAlign::GoodEvil, LIMIT(i, -1000, 1000));
             break;
 
         case MEDIT_CLASS:
@@ -941,11 +941,11 @@ void medit_parse(struct descriptor_data *d, char *arg) {
             }
             OLC_MOB(d)->race = chosen_race;
             /*  Change racial size based on race choice. */
-            OLC_MOB(d)->setInt(CharInt::Size, OLC_MOB(d)->race->getSize());
+            OLC_MOB(d)->setSize(OLC_MOB(d)->race->getSize());
             break;
 
         case MEDIT_SIZE:
-            OLC_MOB(d)->setInt(CharInt::Size, LIMIT(i, -1, NUM_SIZES - 1));
+            OLC_MOB(d)->setSize(LIMIT(i, -1, NUM_SIZES - 1));
             break;
 
 /*-------------------------------------------------------------------*/

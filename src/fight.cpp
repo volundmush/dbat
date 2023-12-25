@@ -1594,7 +1594,7 @@ static void make_pcorpse(struct char_data *ch) {
             money = create_money(GET_GOLD(ch));
             obj_to_obj(money, corpse);
         }
-        ch->setInt(CharInt::Zeni, 0);
+        ch->set(CharMoney::Carried, 0);
     }
 
     obj_to_room(corpse, IN_ROOM(ch));
@@ -1822,7 +1822,7 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
             money = create_money(GET_GOLD(ch));
             obj_to_obj(money, corpse);
         }
-        ch->setInt(CharInt::Zeni, 0);
+        ch->set(CharMoney::Carried, 0);
     }
     if (!MOB_FLAGGED(ch, MOB_HUSK)) {
         ch->contents = nullptr;
@@ -2356,7 +2356,7 @@ static void perform_group_gain(struct char_data *ch, int base, struct char_data 
     if (MOB_FLAGGED(victim, MOB_KNOWKAIO)) {
         share += share * .25;
     }
-    ch->modInt(CharInt::GroupKills, 1);
+    ch->mod(CharNum::GroupKills, 1);
     if ((GET_GROUPKILLS(ch) + 1) / 20 > share * 0.16) {
         share += share * 0.16;
     } else {

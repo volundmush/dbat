@@ -3236,7 +3236,7 @@ void stop_follower(struct char_data *ch) {
         act("$n stops following you.", true, ch, nullptr, ch->master, TO_VICT);
 
     if (has_group(ch))
-        ch->setInt(CharInt::GroupKills, 0);
+        ch->set(CharNum::GroupKills, 0);
 
     if (ch->master->followers->follower == ch) {  /* Head of follower-list? */
         k = ch->master->followers;
@@ -3726,7 +3726,7 @@ void admin_set(struct char_data *ch, int value) {
                "%s promoted from %s to %s", GET_NAME(ch), admin_level_names[GET_ADMLEVEL(ch)],
                admin_level_names[value]);
         while (GET_ADMLEVEL(ch) < value) {
-            GET_ADMLEVEL(ch)++;
+            ch->mod(CharNum::AdmLevel, 1);
             for (i = 0; default_admin_flags[GET_ADMLEVEL(ch)][i] != -1; i++)
                 SET_BIT_AR(ADM_FLAGS(ch), default_admin_flags[GET_ADMLEVEL(ch)][i]);
         }
@@ -3751,7 +3751,7 @@ void admin_set(struct char_data *ch, int value) {
         while (GET_ADMLEVEL(ch) > value) {
             for (i = 0; default_admin_flags[GET_ADMLEVEL(ch)][i] != -1; i++)
                 REMOVE_BIT_AR(ADM_FLAGS(ch), default_admin_flags[GET_ADMLEVEL(ch)][i]);
-            GET_ADMLEVEL(ch)--;
+            ch->mod(CharNum::AdmLevel, -1);
         }
         run_autowiz();
         if (orig >= ADMLVL_IMMORT && value < ADMLVL_IMMORT) {

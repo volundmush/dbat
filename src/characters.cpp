@@ -30,7 +30,7 @@ const std::string &char_data::juggleRaceName(bool capitalized) {
             if (mimic) apparent = mimic;
             break;
         case race::halfbreed:
-            switch (RACIAL_PREF(this)) {
+            switch ((int)RACIAL_PREF(this)) {
                 case 1:
                     apparent = race::race_map[race::human];
                     break;
@@ -40,7 +40,7 @@ const std::string &char_data::juggleRaceName(bool capitalized) {
             }
             break;
         case race::android:
-            switch (RACIAL_PREF(this)) {
+            switch ((int)RACIAL_PREF(this)) {
                 case 1:
                     apparent = race::race_map[race::android];
                     break;
@@ -133,7 +133,7 @@ void char_data::resurrect(ResurrectionMode mode) {
         };
 
         for (auto& [attr, reduction] : statReductions) {
-            int baseStat = this->getAttribute(attr, true);
+            int baseStat = this->get(attr, true);
             int effectiveReduction = std::max(reduction, 15 - baseStat);
             statReductions[attr] = effectiveReduction;
         }
@@ -234,6 +234,7 @@ bool char_data::can_tolerate_gravity(int grav) {
 
 
 int char_data::calcTier() {
+    auto level = get(CharNum::Level);
     int tier = level / 10;
     if ((level % 10) == 0)
         tier--;
@@ -243,6 +244,7 @@ int char_data::calcTier() {
 }
 
 int64_t char_data::calc_soft_cap() {
+    auto level = get(CharNum::Level);
     if(level >= 100) return 50e9;
     auto tier = calcTier();
     auto softmap = race->getSoftMap(this);
@@ -258,7 +260,7 @@ bool char_data::is_soft_cap(int64_t type, long double mult) {
         return true;
 
     // Level 100 characters are never softcapped.
-    if (level >= 100) {
+    if (get(CharNum::Level) >= 100) {
         return false;
     }
     auto cur_cap = calc_soft_cap() * mult;
@@ -438,7 +440,7 @@ int64_t char_data::getEffBasePL() {
 }
 
 int64_t char_data::getBasePL() {
-    return basepl;
+    return get(CharStat::PowerLevel);
 }
 
 double char_data::getCurPLPercent() {
@@ -480,7 +482,7 @@ int64_t char_data::getEffBaseKI() {
 }
 
 int64_t char_data::getBaseKI() {
-    return baseki;
+    return get(CharStat::Ki);
 }
 
 double char_data::getCurKIPercent() {
@@ -570,7 +572,7 @@ int64_t char_data::getEffBaseST() {
 }
 
 int64_t char_data::getBaseST() {
-    return basest;
+    return get(CharStat::Stamina);
 }
 
 double char_data::getCurSTPercent() {
@@ -800,18 +802,15 @@ void char_data::restoreLimbs(bool announce) {
 }
 
 int64_t char_data::gainBasePL(int64_t amt, bool trans_mult) {
-    basepl += amt;
-    return basepl;
+    return mod(CharStat::PowerLevel, amt);
 }
 
 int64_t char_data::gainBaseST(int64_t amt, bool trans_mult) {
-    basest += amt;
-    return basest;
+    return mod(CharStat::Stamina, amt);
 }
 
 int64_t char_data::gainBaseKI(int64_t amt, bool trans_mult) {
-    baseki += amt;
-    return baseki;
+    return mod(CharStat::Ki, amt);
 }
 
 void char_data::gainBaseAll(int64_t amt, bool trans_mult) {
@@ -821,18 +820,15 @@ void char_data::gainBaseAll(int64_t amt, bool trans_mult) {
 }
 
 int64_t char_data::loseBasePL(int64_t amt, bool trans_mult) {
-    basepl = std::max<int64_t>(1L, basepl - amt);
-    return basepl;
+    return mod(CharStat::PowerLevel, -amt);
 }
 
 int64_t char_data::loseBaseST(int64_t amt, bool trans_mult) {
-    basest = std::max<int64_t>(1L, basest - amt);
-    return basest;
+    return mod(CharStat::Stamina, -amt);
 }
 
 int64_t char_data::loseBaseKI(int64_t amt, bool trans_mult) {
-    baseki = std::max<int64_t>(1L, baseki - amt);
-    return baseki;
+    return mod(CharStat::Ki, -amt);
 }
 
 void char_data::loseBaseAll(int64_t amt, bool trans_mult) {
@@ -842,27 +838,27 @@ void char_data::loseBaseAll(int64_t amt, bool trans_mult) {
 }
 
 int64_t char_data::gainBasePLPercent(double amt, bool trans_mult) {
-    return gainBasePL(basepl * amt, trans_mult);
+    return gainBasePL(get(CharStat::PowerLevel) * amt, trans_mult);
 }
 
 int64_t char_data::gainBaseKIPercent(double amt, bool trans_mult) {
-    return gainBaseKI(baseki * amt, trans_mult);
+    return gainBaseKI(get(CharStat::Ki) * amt, trans_mult);
 }
 
 int64_t char_data::gainBaseSTPercent(double amt, bool trans_mult) {
-    return gainBaseST(basest * amt, trans_mult);
+    return gainBaseST(get(CharStat::Stamina) * amt, trans_mult);
 }
 
 int64_t char_data::loseBasePLPercent(double amt, bool trans_mult) {
-    return loseBasePL(basepl * amt, trans_mult);
+    return loseBasePL(get(CharStat::PowerLevel) * amt, trans_mult);
 }
 
 int64_t char_data::loseBaseKIPercent(double amt, bool trans_mult) {
-    return loseBaseKI(baseki * amt, trans_mult);
+    return loseBaseKI(get(CharStat::Ki) * amt, trans_mult);
 }
 
 int64_t char_data::loseBaseSTPercent(double amt, bool trans_mult) {
-    return loseBaseST(basest * amt, trans_mult);
+    return loseBaseST(get(CharStat::Stamina) * amt, trans_mult);
 }
 
 void char_data::gainBaseAllPercent(double amt, bool trans_mult) {
@@ -1097,7 +1093,7 @@ void char_data::login() {
                 inc = 7500;
             }
             inc *= mult;
-            GET_BANK_GOLD(this) += inc;
+            set(CharMoney::Bank, inc);
             send_to_char(this, "Interest happened while you were away, %d times.\r\n"
                                        "@cBank Interest@D: @Y%s@n\r\n", mult, add_commas(inc).c_str());
         }
@@ -1135,57 +1131,126 @@ int char_data::getAffectModifier(int location, int specific) {
     return total;
 }
 
-int char_data::getAttribute(CharAttribute attr, bool base) {
-    auto &stat = attributes[attr];
-    if(base) return stat.base;
-    return std::clamp<int>(stat.base + getAffectModifier((int)attr+1) + getAffectModifier(APPLY_ALL_STATS),
-                           0, 120);
+align_t char_data::get(CharAlign type) {
+    if(auto find = aligns.find(type); find != aligns.end()) {
+        return find->second;
+    }
+    return 0;
 }
 
-int char_data::setAttribute(CharAttribute attr, int val) {
-    auto &stat = attributes[attr];
-    stat.base = std::clamp<int>(val, 5, 100);
-    return stat.base;
+align_t char_data::set(CharAlign type, align_t val) {
+    return aligns[type] = std::clamp<align_t>(val, -1000, 1000);
 }
 
-int char_data::modAttribute(CharAttribute attr, int val) {
-    auto &stat = attributes[attr];
-    return setAttribute(attr, stat.base + val);
+align_t char_data::mod(CharAlign type, align_t val) {
+    return set(type, get(type) + val);
 }
 
-int char_data::getTrain(CharAttribute attr) {
-    auto &stat = attributes[attr];
-    return stat.train;
+appearance_t char_data::get(CharAppearance type) {
+    if(auto find = appearances.find(type); find != appearances.end()) {
+        return find->second;
+    }
+    return 0;
 }
 
-int char_data::setTrain(CharAttribute attr, int val) {
-    auto &stat = attributes[attr];
-    stat.train = std::max(0, val);
-    return stat.train;
+appearance_t char_data::set(CharAppearance type, appearance_t val) {
+    return appearances[type] = std::clamp<appearance_t>(val, 0, 100);
 }
 
-int char_data::modTrain(CharAttribute attr, int val) {
-    auto &stat = attributes[attr];
-    return setTrain(attr, stat.train + val);
+appearance_t char_data::mod(CharAppearance type, appearance_t val) {
+    return set(type, get(type) + val);
+}
+
+int char_data::setSize(int val) {
+    this->size = val;
+    return this->size;
+}
+
+int char_data::getSize() {
+    return get_size(this);
 }
 
 
-int char_data::getInt(CharInt stat) {
-    if(auto st = charInts.find(stat); st != charInts.end()) {
+money_t char_data::get(CharMoney mon) {
+    if(auto find = moneys.find(mon); find != moneys.end()) {
+        return find->second;
+    }
+    return 0;
+}
+
+money_t char_data::set(CharMoney mon, money_t val) {
+    return moneys[mon] = std::min<money_t>(val, 999999999999);
+}
+
+money_t char_data::mod(CharMoney mon, money_t val) {
+    return set(mon, get(mon) + val);
+}
+
+
+attribute_t char_data::get(CharAttribute attr, bool base) {
+    attribute_t val = 0;
+    if(auto stat = attributes.find(attr); stat != attributes.end()) {
+        val = stat->second;
+    }
+    if(!base) {
+        val += getAffectModifier((int)attr+1) + getAffectModifier(APPLY_ALL_STATS);
+    }
+    return std::clamp<attribute_t>(val, 5, 120);
+}
+
+attribute_t char_data::set(CharAttribute attr, attribute_t val) {
+    return attributes[attr] = std::clamp<attribute_t>(val, 0, 100);
+}
+
+attribute_t char_data::mod(CharAttribute attr, attribute_t val) {
+    return set(attr, get(attr) + val);
+}
+
+attribute_train_t char_data::get(CharTrain attr) {
+    if(auto t = trains.find(attr); t != trains.end()) {
+        return t->second;
+    }
+    return 0;
+}
+
+attribute_train_t char_data::set(CharTrain attr, attribute_train_t val) {
+    return trains[attr] = std::max<attribute_train_t>(0, val);
+}
+
+attribute_train_t char_data::mod(CharTrain attr, attribute_train_t val) {
+    return set(attr, get(attr) + val);
+}
+
+
+num_t char_data::get(CharNum stat) {
+    if(auto st = nums.find(stat); st != nums.end()) {
         return st->second;
     }
     return 0;
 }
 
-int char_data::setInt(CharInt stat, int val) {
-    charInts[stat] = val;
-    return val;
+num_t char_data::set(CharNum stat, num_t val) {
+    return nums[stat] = val;
 }
 
-int char_data::modInt(CharInt stat, int val) {
-    return setInt(stat, getInt(stat) + val);
+num_t char_data::mod(CharNum stat, num_t val) {
+    return set(stat, get(stat) + val);
 }
 
+stat_t char_data::set(CharStat type, stat_t val) {
+    return stats[type] = std::max<stat_t>(0, val);
+}
+
+stat_t char_data::mod(CharStat type, stat_t val) {
+    return set(type, get(type) + val);
+}
+
+stat_t char_data::get(CharStat type) {
+    if(auto st = stats.find(type); st != stats.end()) {
+        return st->second;
+    }
+    return 0;
+}
 
 
 bool char_data::canCarryWeight(weight_t val) {

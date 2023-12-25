@@ -511,16 +511,6 @@ struct trans_data {
 };
 
 
-struct AttributeData {
-    AttributeData() = default;
-    explicit AttributeData(const nlohmann::json& j);
-    int8_t base{10};
-    int train{0};
-    nlohmann::json serialize();
-    void deserialize(const nlohmann::json& j);
-};
-
-
 /* ================== Structure for player/non-player ===================== */
 struct char_data : public unit_data {
     char_data() = default;
@@ -570,7 +560,6 @@ struct char_data : public unit_data {
     race::Race *race{};
 
     sensei::Sensei *chclass{};        /* Last class taken                     */
-    int level{};            /* PC / NPC's level                     */
     double weight{};        /* PC / NPC's weight                    */
     weight_t getWeight(bool base = false);
     weight_t getTotalWeight();
@@ -582,27 +571,44 @@ struct char_data : public unit_data {
 
     int getHeight(bool base = false);
 
-    std::unordered_map<CharInt, int> charInts{};
+    std::unordered_map<CharNum, num_t> nums{};
 
-    int getInt(CharInt stat);
-    int setInt(CharInt stat, int val);
-    int modInt(CharInt stat, int val);
+    num_t get(CharNum stat);
+    num_t set(CharNum stat, num_t val);
+    num_t mod(CharNum stat, num_t val);
 
     struct mob_special_data mob_specials{};
 
-    bitvector_t affected_by[AF_ARRAY_MAX]{};/* Bitvector for current affects	*/
-    int64_t basepl{};
-    int64_t baseki{};
-    int64_t basest{};
+    int size{SIZE_UNDEFINED};
+    int getSize();
+    int setSize(int val);
 
-    std::array<int, 3> transformations{};
-    std::map<int, trans_data> transInfo{};
+    std::unordered_map<CharMoney, money_t> moneys;
+    money_t get(CharMoney type);
+    money_t set(CharMoney type, money_t val);
+    money_t mod(CharMoney type, money_t val);
+
+    std::unordered_map<CharAlign, align_t> aligns;
+    align_t get(CharAlign type);
+    align_t set(CharAlign type, align_t val);
+    align_t mod(CharAlign type, align_t val);
+
+    std::unordered_map<CharAppearance, appearance_t> appearances;
+    appearance_t get(CharAppearance type);
+    appearance_t set(CharAppearance type, appearance_t val);
+    appearance_t mod(CharAppearance type, appearance_t val);
+
+    bitvector_t affected_by[AF_ARRAY_MAX]{};/* Bitvector for current affects	*/
+
+    std::unordered_map<CharStat, stat_t> stats;
+    stat_t get(CharStat type);
+    stat_t set(CharStat type, stat_t val);
+    stat_t mod(CharStat type, stat_t val);
 
     // Instance-relevant fields below...
     room_vnum in_room{NOWHERE};        /* Location (real room number)		*/
     room_vnum was_in_room{NOWHERE};    /* location for linkdead people		*/
-    int wait{};            /* wait for how many loops		*/
-    int admlevel{};            /* PC / NPC's admin level               */
+
     int admflags[AD_ARRAY_MAX]{};    /* Bitvector for admin privs		*/
     room_vnum hometown{NOWHERE};        /* PC Hometown / NPC spawn room         */
     struct time_data time{};    /* PC's AGE in days			*/
@@ -812,12 +818,15 @@ struct char_data : public unit_data {
 
     int getAffectModifier(int location, int specific = -1);
 
-    int getAttribute(CharAttribute attr, bool base = false);
-    int setAttribute(CharAttribute attr, int val);
-    int modAttribute(CharAttribute attr, int val);
-    int getTrain(CharAttribute attr);
-    int setTrain(CharAttribute attr, int val);
-    int modTrain(CharAttribute attr, int val);
+    std::unordered_map<CharAttribute, attribute_t> attributes;
+    attribute_t get(CharAttribute attr, bool base = false);
+    attribute_t set(CharAttribute attr, attribute_t val);
+    attribute_t mod(CharAttribute attr, attribute_t val);
+
+    std::unordered_map<CharTrain, attribute_train_t> trains;
+    attribute_train_t get(CharTrain attr);
+    attribute_train_t set(CharTrain attr, attribute_train_t val);
+    attribute_train_t mod(CharTrain attr, attribute_train_t val);
 
     // C++ reworking
     const std::string &juggleRaceName(bool capitalized);
@@ -1072,7 +1081,7 @@ struct char_data : public unit_data {
     bool isProvidingLight();
     double currentGravity();
 
-    std::unordered_map<CharAttribute, AttributeData> attributes;
+
 
 };
 

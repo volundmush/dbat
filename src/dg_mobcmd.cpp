@@ -1019,7 +1019,7 @@ ACMD(do_mtransform) {
         tmpmob.master = ch->master;
 
         GET_WAS_IN(&tmpmob) = GET_WAS_IN(ch);
-        GET_GOLD(&tmpmob) = GET_GOLD(ch);
+        tmpmob.set(CharMoney::Carried, GET_GOLD(ch));
         GET_POS(&tmpmob) = GET_POS(ch);
         FIGHTING(&tmpmob) = FIGHTING(ch);
         memcpy(ch, &tmpmob, sizeof(*ch));

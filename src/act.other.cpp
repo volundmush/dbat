@@ -256,19 +256,19 @@ ACMD(do_rpp) {
                 }
                 if (!strcasecmp(arg2, "evil")) {
                     send_to_char(ch, "You change your alignment to Evil.\r\n");
-                    ch->setInt(CharInt::AlignGoodEvil, -750);
+                    ch->set(CharAlign::GoodEvil, -750);
                 } else if (!strcasecmp(arg2, "sorta-evil")) {
                     send_to_char(ch, "You change your alignment to Sorta Evil.\r\n");
-                    ch->modInt(CharInt::AlignGoodEvil, -50);
+                    ch->set(CharAlign::GoodEvil, -50);
                 } else if (!strcasecmp(arg2, "neutral")) {
                     send_to_char(ch, "You change your alignment to Neutral.\r\n");
-                    ch->modInt(CharInt::AlignGoodEvil, 0);
+                    ch->set(CharAlign::GoodEvil, 0);
                 } else if (!strcasecmp(arg2, "sorta-good")) {
                     send_to_char(ch, "You change your alignment to Sorta Good.\r\n");
-                    ch->modInt(CharInt::AlignGoodEvil, 51);
+                    ch->set(CharAlign::GoodEvil, 51);
                 } else if (!strcasecmp(arg2, "good")) {
                     send_to_char(ch, "You change your alignment to Good.\r\n");
-                    ch->modInt(CharInt::AlignGoodEvil, 300);
+                    ch->set(CharAlign::GoodEvil, 300);
                 } else {
                     send_to_char(ch, "That is not an acceptable option for changing alignment.\r\n");
                     return;
@@ -283,7 +283,7 @@ ACMD(do_rpp) {
                 send_to_char(ch, "You do not have enough RPP for that selection.\r\n");
                 return;
             } else {
-                GET_BANK_GOLD(ch) += 7500;
+                ch->mod(CharMoney::Bank, 7500);
                 send_to_char(ch, "Your bank zenni has been increased by 7,500\r\n");
             } /* Can pay for it */
         } /* End Simple Zenni Reward */
@@ -312,7 +312,7 @@ ACMD(do_rpp) {
                 if(auto stat_found = stat_map.find(arg2); stat_found != stat_map.end()) {
                     auto [attribute, name, flaw] = stat_found->second;
 
-                    auto base = ch->getAttribute(attribute, true);
+                    auto base = ch->get(attribute, true);
 
                     if (GET_BONUS(ch, flaw) > 0 && base >= 45) {
                         send_to_char(ch, "You can't because that stat maxes at 45 due to a trait negative.\r\n");
@@ -1181,12 +1181,12 @@ ACMD(do_train) {
 
     int strcap = 5000, spdcap = 5000, intcap = 5000, wiscap = 5000, concap = 5000, aglcap = 5000;
 
-    strcap += 500 * ch->getAttribute(CharAttribute::Strength, true);
-    intcap += 500 * ch->getAttribute(CharAttribute::Intelligence, true);
-    wiscap += 500 * ch->getAttribute(CharAttribute::Wisdom, true);
-    spdcap += 500 * ch->getAttribute(CharAttribute::Speed, true);
-    concap += 500 * ch->getAttribute(CharAttribute::Constitution, true);
-    aglcap += 500 * ch->getAttribute(CharAttribute::Agility, true);
+    strcap += 500 * ch->get(CharAttribute::Strength, true);
+    intcap += 500 * ch->get(CharAttribute::Intelligence, true);
+    wiscap += 500 * ch->get(CharAttribute::Wisdom, true);
+    spdcap += 500 * ch->get(CharAttribute::Speed, true);
+    concap += 500 * ch->get(CharAttribute::Constitution, true);
+    aglcap += 500 * ch->get(CharAttribute::Agility, true);
 
     if (IS_HUMAN(ch)) {
         intcap = intcap * 0.75;
@@ -1206,17 +1206,17 @@ ACMD(do_train) {
     if (!*arg) {
         send_to_char(ch, "@D-------------[ @GTraining Status @D]-------------@n\r\n");
         send_to_char(ch, "  @mStrength Progress    @D: @R%6s/%6s@n\r\n", add_commas(GET_TRAINSTR(ch)).c_str(),
-                     ch->getAttribute(CharAttribute::Strength, true) >= 80 ? "@rCAPPED" : add_commas(strcap).c_str());
+                     ch->get(CharAttribute::Strength, true) >= 80 ? "@rCAPPED" : add_commas(strcap).c_str());
         send_to_char(ch, "  @mSpeed Progress       @D: @R%6s/%6s@n\r\n", add_commas(GET_TRAINSPD(ch)).c_str(),
-                     ch->getAttribute(CharAttribute::Speed, true) >= 80 ? "@rCAPPED" : add_commas(spdcap).c_str());
+                     ch->get(CharAttribute::Speed, true) >= 80 ? "@rCAPPED" : add_commas(spdcap).c_str());
         send_to_char(ch, "  @mConstitution Progress@D: @R%6s/%6s@n\r\n", add_commas(GET_TRAINCON(ch)).c_str(),
-                     ch->getAttribute(CharAttribute::Constitution, true) >= 80 ? "@rCAPPED" : add_commas(concap).c_str());
+                     ch->get(CharAttribute::Constitution, true) >= 80 ? "@rCAPPED" : add_commas(concap).c_str());
         send_to_char(ch, "  @mIntelligence Progress@D: @R%6s/%6s@n\r\n", add_commas(GET_TRAININT(ch)).c_str(),
-                     ch->getAttribute(CharAttribute::Intelligence, true) >= 80 ? "@rCAPPED" : add_commas(intcap).c_str());
+                     ch->get(CharAttribute::Intelligence, true) >= 80 ? "@rCAPPED" : add_commas(intcap).c_str());
         send_to_char(ch, "  @mWisdom Progress      @D: @R%6s/%6s@n\r\n", add_commas(GET_TRAINWIS(ch)).c_str(),
-                     ch->getAttribute(CharAttribute::Wisdom, true) >= 80 ? "@rCAPPED" : add_commas(wiscap).c_str());
+                     ch->get(CharAttribute::Wisdom, true) >= 80 ? "@rCAPPED" : add_commas(wiscap).c_str());
         send_to_char(ch, "  @mAgility Progress     @D: @R%6s/%6s@n\r\n", add_commas(GET_TRAINAGL(ch)).c_str(),
-                     ch->getAttribute(CharAttribute::Agility, true) >= 80 ? "@rCAPPED" : add_commas(aglcap).c_str());
+                     ch->get(CharAttribute::Agility, true) >= 80 ? "@rCAPPED" : add_commas(aglcap).c_str());
         send_to_char(ch, "@D  -----------------------------------------  @n\r\n");
         send_to_char(ch, "  @CCurrent Weight Held  @D: @c%s@n\r\n", add_commas(weight).c_str());
         send_to_char(ch, "@D---------------------------------------------@n\r\n");
@@ -1288,6 +1288,7 @@ ACMD(do_train) {
     }
 
     CharAttribute attr;
+    CharTrain train;
     char *stat_name = nullptr;
     int bonus_trait = -1;
     int nega_trait = -1;
@@ -1295,36 +1296,42 @@ ACMD(do_train) {
 
     if (!strcasecmp("str", arg)) {
         attr = CharAttribute::Strength;
+        train = CharTrain::Strength;
         stat_name = "strength";
         bonus_trait = BONUS_BRAWNY;
         nega_trait = BONUS_WIMP;
         needed = strcap;
     } else if (!strcasecmp("spd", arg)) {
         attr = CharAttribute::Speed;
+        train = CharTrain::Speed;
         stat_name = "speed";
         bonus_trait = BONUS_QUICK;
         nega_trait = BONUS_SLOW;
         needed = spdcap;
     } else if (!strcasecmp("con", arg)) {
         attr = CharAttribute::Constitution;
+        train = CharTrain::Constitution;
         stat_name = "constitution";
         bonus_trait = BONUS_STURDY;
         nega_trait = BONUS_FRAIL;
         needed = concap;
     } else if (!strcasecmp("agl", arg)) {
         attr = CharAttribute::Agility;
+        train = CharTrain::Agility;
         stat_name = "agility";
         bonus_trait = BONUS_AGILE;
         nega_trait = BONUS_CLUMSY;
         needed = aglcap;
     } else if (!strcasecmp("int", arg)) {
         attr = CharAttribute::Intelligence;
+        train = CharTrain::Intelligence;
         stat_name = "intelligence";
         bonus_trait = BONUS_SCHOLARLY;
         nega_trait = BONUS_DULL;
         needed = intcap;
     } else if (!strcasecmp("wis", arg)) {
         attr = CharAttribute::Wisdom;
+        train = CharTrain::Wisdom;
         stat_name = "wisdom";
         bonus_trait = BONUS_SAGE;
         nega_trait = BONUS_FOOLISH;
@@ -1334,7 +1341,7 @@ ACMD(do_train) {
         return;
     }
 
-    auto stat_val = ch->getAttribute(attr, true);
+    auto stat_val = ch->get(attr, true);
 
     if (stat_val == 80) {
         send_to_char(ch, "Your base %s is maxed!\r\n", stat_name);
@@ -1574,16 +1581,16 @@ ACMD(do_train) {
     }
 
     if (sensei > -1) {
-        GET_GOLD(ch) -= 8;
+        ch->mod(CharMoney::Carried, -8);
         ch->modPractices(-1);
     }
 
-    auto results = ch->modTrain(attr, stat_train);
+    auto results = ch->mod(train, stat_train);
 
     if (results >= needed) {
-        ch->modTrain(attr, -needed);
+        ch->mod(train, -needed);
         send_to_char(ch, "You feel your %s improve!@n\r\n", stat_name);
-        ch->modAttribute(attr, 1);
+        ch->mod(attr, 1);
         if (IS_PICCOLO(ch) && IS_NAMEK(ch) && level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0) {
             GET_EXP(ch) += level_exp(ch, GET_LEVEL(ch) + 1) * 0.25;
             send_to_char(ch, "You gained quite a bit of experience from that!\r\n");
@@ -1965,9 +1972,9 @@ ACMD(do_candy) {
     snprintf(newsh, MAX_STRING_LENGTH, "%s@n (of %s@n)", obj->short_description, vict->short_description);
     obj->short_description = strdup(newsh);
     obj_to_char(obj, ch);
-    obj->value[VAL_FOOD_CANDY_PL] = vict->basepl;
-    obj->value[VAL_FOOD_CANDY_KI] = vict->baseki;
-    obj->value[VAL_FOOD_CANDY_ST] = vict->basest;
+    obj->value[VAL_FOOD_CANDY_PL] = vict->get(CharStat::PowerLevel);
+    obj->value[VAL_FOOD_CANDY_KI] = vict->get(CharStat::Ki);
+    obj->value[VAL_FOOD_CANDY_ST] = vict->get(CharStat::Stamina);
 
     SET_BIT_AR(MOB_FLAGS(vict), MOB_HUSK);
     die(vict, ch);
@@ -4254,15 +4261,15 @@ ACMD(do_ingest) {
                          add_commas(pl).c_str(), add_commas(ki).c_str(), add_commas(stam).c_str());
             if (rand_number(1, 3) == 3) {
                 send_to_char(ch, "You get %s's eye color.\r\n", GET_NAME(vict));
-                ch->setInt(CharInt::EyeColor, GET_EYE(vict));
+                ch->set(CharAppearance::EyeColor, GET_EYE(vict));
             } else if (rand_number(1, 3) == 3) {
                 send_to_char(ch, "%s changes your height.\r\n", GET_NAME(vict));
                 if (GET_PC_HEIGHT(ch) > GET_PC_HEIGHT(vict)) {
-                    ch->modInt(CharInt::Height, -((GET_PC_HEIGHT(ch) - GET_PC_HEIGHT(vict)) / 2));
+                    ch->mod(CharNum::Height, -((GET_PC_HEIGHT(ch) - GET_PC_HEIGHT(vict)) / 2));
                 } else if (GET_PC_HEIGHT(ch) < GET_PC_HEIGHT(vict)) {
-                    ch->modInt(CharInt::Height, ((GET_PC_HEIGHT(vict) - GET_PC_HEIGHT(ch)) / 2));
+                    ch->mod(CharNum::Height, ((GET_PC_HEIGHT(vict) - GET_PC_HEIGHT(ch)) / 2));
                 } else {
-                    ch->setInt(CharInt::Height, GET_PC_HEIGHT(vict));
+                    ch->set(CharNum::Height, GET_PC_HEIGHT(vict));
                 }
             } else if (rand_number(1, 3) == 3) {
                 send_to_char(ch, "%s changes your weight.\r\n", GET_NAME(vict));
@@ -4277,7 +4284,7 @@ ACMD(do_ingest) {
                 }
             } else {
                 send_to_char(ch, "Your forelock length changes because of %s.\r\n", GET_NAME(vict));
-                ch->setInt(CharInt::HairLength, GET_HAIRL(vict));
+                ch->set(CharAppearance::HairLength, GET_HAIRL(vict));
             }
             handle_ingest_learn(ch, vict);
             die(vict, nullptr);
@@ -8324,7 +8331,7 @@ void base_update(uint64_t heartPulse, double deltaTime) {
             if (inc >= 25000) {
                 inc = 25000;
             }
-            GET_BANK_GOLD(d->character) += inc;
+            d->character->mod(CharMoney::Bank, inc);
             send_to_char(d->character, "@cBank Interest@D: @Y%s@n\r\n", add_commas(inc).c_str());
         }
         if (!IS_NPC(d->character)) {
@@ -9257,8 +9264,8 @@ ACMD(do_steal) {
                         send_to_char(ch, "You can't hold that much more zenni on your person!\r\n");
                         return;
                     }
-                    GET_GOLD(vict) -= gold;
-                    GET_GOLD(ch) += gold;
+                    vict->mod(CharMoney::Carried, -gold);
+                    ch->mod(CharMoney::Carried, gold);
                     if (!IS_NPC(vict)) {
                         SET_BIT_AR(PLR_FLAGS(vict), PLR_STOLEN);
                         mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true,
@@ -9693,14 +9700,14 @@ ACMD(do_ungroup) {
             if (AFF_FLAGGED(f->follower, AFF_GROUP)) {
                 REMOVE_BIT_AR(AFF_FLAGS(f->follower), AFF_GROUP);
                 act("$N has disbanded the group.", true, f->follower, nullptr, ch, TO_CHAR);
-                f->follower->setInt(CharInt::GroupKills, 0);
+                f->follower->set(CharNum::GroupKills, 0);
                 if (!AFF_FLAGGED(f->follower, AFF_CHARM))
                     stop_follower(f->follower);
             }
         }
 
         REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_GROUP);
-        ch->setInt(CharInt::GroupKills, 0);
+        ch->set(CharNum::GroupKills, 0);
         send_to_char(ch, "You disband the group.\r\n");
         return;
     }
@@ -9719,7 +9726,7 @@ ACMD(do_ungroup) {
     }
 
     REMOVE_BIT_AR(AFF_FLAGS(tch), AFF_GROUP);
-    tch->setInt(CharInt::GroupKills, 0);
+    tch->set(CharNum::GroupKills, 0);
 
     act("$N is no longer a member of your group.", false, ch, nullptr, tch, TO_CHAR);
     act("You have been kicked out of $n's group!", false, ch, nullptr, tch, TO_VICT);
@@ -9778,7 +9785,7 @@ ACMD(do_split) {
             send_to_char(ch, "You don't seem to have that much gold to split.\r\n");
             return;
         }
-        GET_GOLD(ch) -= amount;
+        ch->mod(CharMoney::Carried, -amount);
         k = (ch->master ? ch->master : ch);
 
         if (AFF_FLAGGED(k, AFF_GROUP) && (IN_ROOM(k) == IN_ROOM(ch)))
@@ -9800,7 +9807,7 @@ ACMD(do_split) {
             return;
         }
 
-        GET_GOLD(ch) += share;
+        ch->mod(CharMoney::Carried, share);
 
         /* Abusing signed/unsigned to make sizeof work. */
         len = snprintf(buf, sizeof(buf), "%s splits %d zenni; you receive %d.\r\n",
@@ -9812,7 +9819,7 @@ ACMD(do_split) {
         }
         if (AFF_FLAGGED(k, AFF_GROUP) && IN_ROOM(k) == IN_ROOM(ch) &&
             !IS_NPC(k) && k != ch) {
-            GET_GOLD(k) += share;
+            k->mod(CharMoney::Carried, share);
             send_to_char(k, "%s", buf);
         }
 
@@ -9822,7 +9829,7 @@ ACMD(do_split) {
                 (IN_ROOM(f->follower) == IN_ROOM(ch)) &&
                 f->follower != ch) {
 
-                GET_GOLD(f->follower) += share;
+                f->follower->mod(CharMoney::Carried, share);
                 send_to_char(f->follower, "%s", buf);
             }
         }
@@ -9832,7 +9839,7 @@ ACMD(do_split) {
         if (rest) {
             send_to_char(ch, "%d zenni %s not splitable, so you keep the money.\r\n",
                          rest, (rest == 1) ? "was" : "were");
-            GET_GOLD(ch) += rest;
+            ch->mod(CharMoney::Carried, rest);
         }
     } else {
         send_to_char(ch, "How much zenni do you wish to split with your group?\r\n");
@@ -11110,7 +11117,7 @@ ACMD(do_clan) {
                 return;
             } else {
                 bank = atoi(arg2);
-                GET_GOLD(ch) -= bank;
+                ch->mod(CharMoney::Carried, -bank);
                 clanBANKADD(GET_CLAN(ch), ch, bank);
                 send_to_char(ch, "You have deposited %s into the clan bank.\r\n", add_commas(bank).c_str());
             }
@@ -11258,7 +11265,7 @@ ACMD(do_clan) {
                 bank = atoi(arg2);
                 if (clanBANKSUB(GET_CLAN(ch), ch, bank)) {
                     send_to_char(ch, "You have withdrawn %s from the clan bank.\r\n", add_commas(bank).c_str());
-                    GET_GOLD(ch) += bank;
+                    ch->mod(CharMoney::Carried, bank);
                 } else {
                     send_to_char(ch, "There isn't that much in the clan's bank!\r\n");
                 }

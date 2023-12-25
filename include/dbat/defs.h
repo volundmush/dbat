@@ -1900,6 +1900,7 @@ input */
 
 // The IDs in this enum are designed to correlate with the APPLY_<STAT> defines.
 // Each ID is APPLY_<STAT> - 1
+using attribute_t = uint8_t;
 enum class CharAttribute : uint8_t {
  Strength = 0,
  Agility = 1, // lots of code references this as Dexterity. dex
@@ -1909,21 +1910,54 @@ enum class CharAttribute : uint8_t {
  Speed = 5 // this is actually Charisma in the code. cha
 };
 
-enum class CharInt : uint8_t {
- Size = 0,
- Sex = 1,
- HairLength = 2,
- HairStyle = 3,
- HairColor = 4,
- SkinColor = 5,
- EyeColor = 6,
- DistinguishingFeature = 7,
- Height = 8,
- AlignGoodEvil = 9,
- AlignLawChaos = 10,
- RacialPref = 11,
- MysticMelody = 12,
- GroupKills = 13,
- Zeni = 14,
- Bank = 15
+using attribute_train_t = uint32_t;
+enum class CharTrain : uint8_t {
+ Strength = 0,
+ Agility = 1, // lots of code references this as Dexterity. dex
+ Intelligence = 2,
+ Wisdom = 3,
+ Constitution = 4,
+ Speed = 5 // this is actually Charisma in the code. cha
+};
+
+using appearance_t = uint8_t;
+enum class CharAppearance : uint8_t {
+ Sex = 0,
+ HairLength = 1,
+ HairStyle = 2,
+ HairColor = 3,
+ SkinColor = 4,
+ EyeColor = 5,
+ DistinguishingFeature = 6,
+};
+
+using align_t = int16_t;
+enum class CharAlign : uint8_t {
+ GoodEvil = 0,
+ LawChaos = 1,
+};
+
+using money_t = uint64_t;
+enum class CharMoney : uint8_t {
+ Carried = 0,
+ Bank = 1
+};
+
+using stat_t = int64_t;
+enum class CharStat : uint8_t {
+ PowerLevel = 0,
+ Ki = 1,
+ Stamina = 2
+};
+
+using num_t = int;
+enum class CharNum : uint8_t {
+ Level = 0,
+ Wait = 1,
+ AdmLevel = 2,
+ Height = 3,
+ RacialPref = 4,
+ MysticMelody = 5,
+ GroupKills = 6,
+
 };

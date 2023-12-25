@@ -713,8 +713,8 @@ static void update_flags(struct char_data *ch) {
             bool condition1 = rand_number(1, 2) == 2;
             bool condition2 = rand_number(1, 20) == 1;
             if (condition1 || condition2) {
-                ch->modAttribute(CharAttribute::Intelligence, -1);
-                ch->modAttribute(CharAttribute::Wisdom, -1);
+                ch->mod(CharAttribute::Intelligence, -1);
+                ch->mod(CharAttribute::Wisdom, -1);
                 send_to_char(ch, "@RDue to the stress you've lost 1 Intelligence and Wisdom!@n\r\n");
             }
         }
@@ -778,7 +778,7 @@ void gain_level(struct char_data *ch, int whichclass) {
     if (whichclass < 0)
         whichclass = GET_CLASS(ch);
     if (GET_LEVEL(ch) < 100 && GET_EXP(ch) >= level_exp(ch, GET_LEVEL(ch) + 1)) {
-        GET_LEVEL(ch) += 1;
+        ch->mod(CharNum::Level, 1);
         //GET_CLASS(ch) = whichclass; /* Now tracks latest class instead of highest */
         advance_level(ch, whichclass);
         mudlog(BRF, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), true, "%s advanced level to level %d.",
@@ -928,7 +928,7 @@ void gain_exp_regardless(struct char_data *ch, int gain) {
 
     if (!IS_NPC(ch)) {
         while (GET_LEVEL(ch) < CONFIG_LEVEL_CAP - 1 && GET_EXP(ch) >= level_exp(ch, GET_LEVEL(ch) + 1)) {
-            GET_LEVEL(ch) += 1;
+            ch->mod(CharNum::Level, 1);
             num_levels++;
             advance_level(ch, GET_CLASS(ch));
             is_altered = true;
@@ -1330,9 +1330,9 @@ static void heal_limb(struct char_data *ch) {
 
         if (!PLR_FLAGGED(ch, PLR_BANDAGED) && recovered == true) {
             if (axion_dice(-10) > GET_CON(ch)) {
-                ch->modAttribute(CharAttribute::Strength, -1);
-                ch->modAttribute(CharAttribute::Speed, -1);
-                ch->modAttribute(CharAttribute::Agility, -1);
+                ch->mod(CharAttribute::Strength, -1);
+                ch->mod(CharAttribute::Speed, -1);
+                ch->mod(CharAttribute::Agility, -1);
                 send_to_char(ch, "@RYou lose 1 Strength, Agility, and Speed!\r\n");
                 ch->save();
             }

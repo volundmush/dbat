@@ -1263,7 +1263,7 @@ int perform_dupe_check(struct descriptor_data *d) {
                         inc = 7500;
                     }
                     inc *= mult;
-                    GET_BANK_GOLD(d->character) += inc;
+                    d->character->mod(CharMoney::Bank, inc);
                     send_to_char(d->character, "Interest happened while you were away, %d times.\r\n"
                                                "@cBank Interest@D: @Y%s@n\r\n", mult, add_commas(inc).c_str());
                 }

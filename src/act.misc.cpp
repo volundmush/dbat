@@ -254,26 +254,23 @@ static void generate_multiform(struct char_data *ch, int count) {
             clone->look_description = strdup(ch->look_description);
         clone->race = ch->race;
         clone->chclass = ch->chclass;
+        clone->stats = ch->stats;
+        clone->nums = ch->nums;
 
-        // Make the physical appearance match!
-        for(auto cint : {CharInt::Size, CharInt::Sex, CharInt::HairLength, CharInt::HairStyle,
-            CharInt::HairColor, CharInt::SkinColor, CharInt::EyeColor, CharInt::DistinguishingFeature, CharInt::Height,
-        CharInt::AlignGoodEvil, CharInt::AlignLawChaos}) {
-            clone->setInt(cint, ch->getInt(cint));
-        }
-
+        clone->appearances = ch->appearances;
+        clone->aligns = ch->aligns;
+        clone->size = ch->size;
+        clone->attributes = ch->attributes;
+        clone->trains = ch->trains;
 
         clone->weight = ch->weight;
-        clone->level = ch->level;
         clone->time = ch->time;
 
         clone->tail_growth = ch->tail_growth;
         ch->transclass = ch->transclass;
 
         // Copying these values, but it shouldn't matter because clones no longer work this way.
-        clone->basepl = ch->basepl;
-        clone->baseki = ch->baseki;
-        clone->basest = ch->basest;
+
 
         // Bioandroid Genome copy...
         clone->genome[0] = ch->genome[0];
@@ -347,7 +344,7 @@ static void resolve_song(struct char_data *ch) {
     if (instrument == 0) {
         send_to_char(ch, "You do not have an instrument.\r\n");
         act("@c$n@C stops playing $s song.@n", true, ch, nullptr, nullptr, TO_ROOM);
-        ch->setInt(CharInt::MysticMelody, 0);
+        ch->set(CharNum::MysticMelody, 0);
         return;
     }
 
@@ -368,7 +365,7 @@ static void resolve_song(struct char_data *ch) {
 
     for (vict = ch->getRoom()->people; vict; vict = next_v) {
         next_v = vict->next_in_room;
-        switch (GET_SONG(ch)) {
+        switch ((int)GET_SONG(ch)) {
             case SONG_SAFETY:
                 if ((ch->master == vict->master || ch == vict->master || vict == ch->master) || vict == ch) {
                     if ((AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(vict, AFF_GROUP)) || vict == ch) {
@@ -427,7 +424,7 @@ static void resolve_song(struct char_data *ch) {
                 if ((ch->getCurKI()) <= 0) {
                     send_to_char(ch, "You no longer have the ki necessary to play your song.\r\n");
                     act("@c$n@C stops playing $s song.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                    ch->setInt(CharInt::MysticMelody, 0);
+                    ch->set(CharNum::MysticMelody, 0);
                     return;
                 }
                 break;
@@ -476,7 +473,7 @@ static void resolve_song(struct char_data *ch) {
                 if ((ch->getCurKI()) <= 0) {
                     send_to_char(ch, "You no longer have the ki necessary to play your song.\r\n");
                     act("@c$n@C stops playing $s song.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                    ch->setInt(CharInt::MysticMelody, 0);
+                    ch->set(CharNum::MysticMelody, 0);
                     return;
                 }
             }
@@ -655,7 +652,7 @@ static void resolve_song(struct char_data *ch) {
                 if ((ch->getCurKI()) <= 0) {
                     send_to_char(ch, "You no longer have the ki necessary to play your song.\r\n");
                     act("@c$n@C stops playing $s song.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                    ch->setInt(CharInt::MysticMelody, 0);
+                    ch->set(CharNum::MysticMelody, 0);
                     return;
                 }
                 break;
@@ -664,60 +661,60 @@ static void resolve_song(struct char_data *ch) {
 
 
     if (GET_SONG(ch) >= 4 && skill > diceroll) {
-        switch (GET_SONG(ch)) {
+        switch ((int)GET_SONG(ch)) {
             case SONG_TELEPORT_EARTH:
                 char_from_room(ch);
                 char_to_room(ch, real_room(300));
-                ch->setInt(CharInt::MysticMelody, 0);
+                ch->set(CharNum::MysticMelody, 0);
                 act("@CFinally as the last of your comrades has been teleported you teleport yourself to Earth and stop your song.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 break;
             case SONG_TELEPORT_VEGETA:
                 char_from_room(ch);
                 char_to_room(ch, real_room(2234));
-                ch->setInt(CharInt::MysticMelody, 0);
+                ch->set(CharNum::MysticMelody, 0);
                 act("@CFinally as the last of your comrades has been teleported you teleport yourself to Vegeta and stop your song.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 break;
             case SONG_TELEPORT_FRIGID:
                 char_from_room(ch);
                 char_to_room(ch, real_room(4047));
-                ch->setInt(CharInt::MysticMelody, 0);
+                ch->set(CharNum::MysticMelody, 0);
                 act("@CFinally as the last of your comrades has been teleported you teleport yourself to Frigid and stop your song.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 break;
             case SONG_TELEPORT_NAMEK:
                 char_from_room(ch);
                 char_to_room(ch, real_room(10182));
-                ch->setInt(CharInt::MysticMelody, 0);
+                ch->set(CharNum::MysticMelody, 0);
                 act("@CFinally as the last of your comrades has been teleported you teleport yourself to Namek and stop your song.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 break;
             case SONG_TELEPORT_KANASSA:
                 char_from_room(ch);
                 char_to_room(ch, real_room(14910));
-                ch->setInt(CharInt::MysticMelody, 0);
+                ch->set(CharNum::MysticMelody, 0);
                 act("@CFinally as the last of your comrades has been teleported you teleport yourself to Kanassa and stop your song.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 break;
             case SONG_TELEPORT_AETHER:
                 char_from_room(ch);
                 char_to_room(ch, real_room(12025));
-                ch->setInt(CharInt::MysticMelody, 0);
+                ch->set(CharNum::MysticMelody, 0);
                 act("@CFinally as the last of your comrades has been teleported you teleport yourself to Aether and stop your song.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 break;
             case SONG_TELEPORT_ARLIA:
                 char_from_room(ch);
                 char_to_room(ch, real_room(16087));
-                ch->setInt(CharInt::MysticMelody, 0);
+                ch->set(CharNum::MysticMelody, 0);
                 act("@CFinally as the last of your comrades has been teleported you teleport yourself to Arlia and stop your song.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 break;
             case SONG_TELEPORT_KONACK:
                 char_from_room(ch);
                 char_to_room(ch, real_room(8003));
-                ch->setInt(CharInt::MysticMelody, 0);
+                ch->set(CharNum::MysticMelody, 0);
                 act("@CFinally as the last of your comrades has been teleported you teleport yourself to Konack and stop your song.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 break;
@@ -750,7 +747,7 @@ ACMD(do_song) {
     if (GET_SONG(ch)) {
         act("@cYou stop playing your ocarina.@n", true, ch, nullptr, nullptr, TO_CHAR);
         act("@c$n stops playing their ocarina.@n", true, ch, nullptr, nullptr, TO_ROOM);
-        ch->setInt(CharInt::MysticMelody, 0);
+        ch->set(CharNum::MysticMelody, 0);
         return;
     } else {
 
@@ -796,7 +793,7 @@ ACMD(do_song) {
                     true, ch, nullptr, nullptr, TO_CHAR);
                 act("@c$n@C begins to play a song on $s ocarina. The music seems to be some sort of lullaby.@n", true,
                     ch, nullptr, nullptr, TO_ROOM);
-                ch->setInt(CharInt::MysticMelody, SONG_SAFETY);
+                ch->set(CharNum::MysticMelody, SONG_SAFETY);
                 ch->decCurKI(cost);
                 return;
             } else if (modifier == 8 && (ch->getCurKI()) < cost) {
@@ -810,7 +807,7 @@ ACMD(do_song) {
                     true, ch, nullptr, nullptr, TO_CHAR);
                 act("@c$n@C begins to play a song on $s ocarina. Depressing low toned music issues forth from the ocarina.@n",
                     true, ch, nullptr, nullptr, TO_ROOM);
-                ch->setInt(CharInt::MysticMelody, SONG_SHADOW_STITCH);
+                ch->set(CharNum::MysticMelody, SONG_SHADOW_STITCH);
                 ch->decCurKI(cost);
                 return;
             } else if (modifier == 50 && (ch->getCurKI()) < cost) {
@@ -828,21 +825,21 @@ ACMD(do_song) {
                     send_to_char(ch, "Not while you're dead!\r\n");
                     return;
                 } else if (!strcasecmp(arg2, "earth")) {
-                    ch->setInt(CharInt::MysticMelody, SONG_TELEPORT_EARTH);
+                    ch->set(CharNum::MysticMelody, SONG_TELEPORT_EARTH);
                 } else if (!strcasecmp(arg2, "frigid")) {
-                    ch->setInt(CharInt::MysticMelody, SONG_TELEPORT_FRIGID);
+                    ch->set(CharNum::MysticMelody, SONG_TELEPORT_FRIGID);
                 } else if (!strcasecmp(arg2, "vegeta")) {
-                    ch->setInt(CharInt::MysticMelody, SONG_TELEPORT_VEGETA);
+                    ch->set(CharNum::MysticMelody, SONG_TELEPORT_VEGETA);
                 } else if (!strcasecmp(arg2, "namek")) {
-                    ch->setInt(CharInt::MysticMelody, SONG_TELEPORT_NAMEK);
+                    ch->set(CharNum::MysticMelody, SONG_TELEPORT_NAMEK);
                 } else if (!strcasecmp(arg2, "arlia")) {
-                    ch->setInt(CharInt::MysticMelody, SONG_TELEPORT_ARLIA);
+                    ch->set(CharNum::MysticMelody, SONG_TELEPORT_ARLIA);
                 } else if (!strcasecmp(arg2, "kanassa")) {
-                    ch->setInt(CharInt::MysticMelody, SONG_TELEPORT_KANASSA);
+                    ch->set(CharNum::MysticMelody, SONG_TELEPORT_KANASSA);
                 } else if (!strcasecmp(arg2, "konack")) {
-                    ch->setInt(CharInt::MysticMelody, SONG_TELEPORT_KONACK);
+                    ch->set(CharNum::MysticMelody, SONG_TELEPORT_KONACK);
                 } else if (!strcasecmp(arg2, "aether")) {
-                    ch->setInt(CharInt::MysticMelody, SONG_TELEPORT_AETHER);
+                    ch->set(CharNum::MysticMelody, SONG_TELEPORT_AETHER);
                 } else {
                     send_to_char(ch,
                                  "Syntax: song teleport (earth | vegeta | namek | aether | konack | kanassa | arlia | frigid)\r\n");
@@ -865,7 +862,7 @@ ACMD(do_song) {
                     true, ch, nullptr, nullptr, TO_CHAR);
                 act("@c$n@C begins to play a song on $s ocarina. A triumphant song full of soaring sounds from the ocarina as it is played.@n",
                     true, ch, nullptr, nullptr, TO_ROOM);
-                ch->setInt(CharInt::MysticMelody, SONG_SHIELDING);
+                ch->set(CharNum::MysticMelody, SONG_SHIELDING);
                 ch->decCurKI(cost);
                 return;
             }
@@ -2256,8 +2253,8 @@ ACMD(do_scry) {
 
         send_to_char(vict,
                      "Your Powerlevel, Ki, and Stamina have improved drastically! On top of that your Intelligence and Wisdom have improved permanantly!\r\n");
-        vict->modAttribute(CharAttribute::Intelligence, 2);
-        vict->modAttribute(CharAttribute::Wisdom, 2);
+        vict->mod(CharAttribute::Intelligence, 2);
+        vict->mod(CharAttribute::Wisdom, 2);
         ch->modPractices(-2000);
         if (GET_LEVEL(ch) < 100) {
             send_to_char(ch, "@D[@mPractice Sessions@D:@R -2000@D]@n\r\n");

@@ -1172,7 +1172,7 @@ void handle_study(struct char_data *keeper, int guild_nr, struct char_data *ch, 
         return;
 
     GET_EXP(ch) -= expcost;
-    GET_GOLD(ch) -= goldcost;
+    ch->mod(CharMoney::Carried, -goldcost);
     ch->modPractices(25);
 
     act("@c$N@W spends time lecturing you on various subjects.@n", true, ch, nullptr, keeper, TO_CHAR);

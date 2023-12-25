@@ -62,7 +62,7 @@ SPECIAL(dump) {
         if (GET_LEVEL(ch) < 3)
             gain_exp(ch, value);
         else
-            GET_GOLD(ch) += value;
+            ch->mod(CharMoney::Carried, value);
     }
     return (true);
 }
@@ -514,8 +514,8 @@ void npc_steal(struct char_data *ch, struct char_data *victim) {
         /* Steal some gold coins */
         gold = (GET_GOLD(victim) * rand_number(1, 10)) / 100;
         if (gold > 0) {
-            GET_GOLD(ch) += gold;
-            GET_GOLD(victim) -= gold;
+            ch->mod(CharMoney::Carried, gold);
+            victim->mod(CharMoney::Carried, -gold);
         }
     }
 }
@@ -823,7 +823,7 @@ SPECIAL(pet_shops) {
             send_to_char(ch, "You don't have enough zenni!\r\n");
             return (true);
         }
-        GET_GOLD(ch) -= PET_PRICE(pet);
+        ch->mod(CharMoney::Carried, -PET_PRICE(pet));
 
         pet = read_mobile(GET_MOB_RNUM(pet), REAL);
         GET_EXP(pet) = 0;
@@ -938,7 +938,7 @@ SPECIAL(auction) {
                     continue;
                 }
 
-                GET_GOLD(ch) -= GET_BID(obj2);
+                ch->mod(CharMoney::Carried, -GET_BID(obj2));
                 obj_from_room(obj2);
                 obj_to_char(obj2, ch);
                 send_to_char(ch, "You pay %s zenni and receive the item.\r\n", add_commas(GET_BID(obj2)).c_str());
@@ -951,7 +951,7 @@ SPECIAL(auction) {
                         continue;
                     if (GET_IDNUM(d->character) == GET_AUCTER(obj2)) {
                         founded = true;
-                        GET_BANK_GOLD(d->character) += GET_BID(obj2);
+                        d->character->mod(CharMoney::Carried, GET_BID(obj2));
                         if (GET_EQ(d->character, WEAR_EYE)) {
                             send_to_char(d->character,
                                          "@RScouter Auction News@D: @GSomeone has purchased your @w%s@G and you had the money put in your bank account.\r\n",
@@ -970,7 +970,7 @@ SPECIAL(auction) {
                     auto vict = findPlayer(blam);
                     if(!vict) continue;
 
-                    GET_BANK_GOLD(vict) += GET_BID(obj2);
+                    vict->mod(CharMoney::Bank, GET_BID(obj2));
                 }
 
             }
@@ -1163,12 +1163,12 @@ SPECIAL(augmenter) {
     one_argument(argument, arg);
 
     if (CMD_IS("augment")) {
-        int strength = ch->getAttribute(CharAttribute::Strength, true);
-        int intel = ch->getAttribute(CharAttribute::Intelligence, true);
-        int wisdom = ch->getAttribute(CharAttribute::Wisdom, true);
-        int speed = ch->getAttribute(CharAttribute::Speed, true);
-        int consti = ch->getAttribute(CharAttribute::Constitution, true);
-        int agility = ch->getAttribute(CharAttribute::Agility, true);
+        int strength = ch->get(CharAttribute::Strength, true);
+        int intel = ch->get(CharAttribute::Intelligence, true);
+        int wisdom = ch->get(CharAttribute::Wisdom, true);
+        int speed = ch->get(CharAttribute::Speed, true);
+        int consti = ch->get(CharAttribute::Constitution, true);
+        int agility = ch->get(CharAttribute::Agility, true);
 
         int strcost = strength * 1200;
         int intcost = intel * 1200;
@@ -1203,8 +1203,8 @@ SPECIAL(augmenter) {
                     true, ch, nullptr, nullptr, TO_CHAR);
                 act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch,
                     nullptr, nullptr, TO_ROOM);
-                ch->modAttribute(CharAttribute::Strength, 1);
-                GET_GOLD(ch) -= strcost;
+                ch->mod(CharAttribute::Strength, 1);
+                ch->mod(CharMoney::Carried, -strcost);
             }
         } else if (!strcasecmp("intelligence", arg) || !strcasecmp("int", arg)) {
             if (intel >= 100)
@@ -1216,8 +1216,8 @@ SPECIAL(augmenter) {
                     true, ch, nullptr, nullptr, TO_CHAR);
                 act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch,
                     nullptr, nullptr, TO_ROOM);
-                ch->modAttribute(CharAttribute::Intelligence, 1);
-                GET_GOLD(ch) -= intcost;
+                ch->mod(CharAttribute::Intelligence, 1);
+                ch->mod(CharMoney::Carried, -intcost);
             }
         } else if (!strcasecmp("constitution", arg) || !strcasecmp("con", arg)) {
             if (consti >= 100)
@@ -1229,8 +1229,8 @@ SPECIAL(augmenter) {
                     true, ch, nullptr, nullptr, TO_CHAR);
                 act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch,
                     nullptr, nullptr, TO_ROOM);
-                ch->modAttribute(CharAttribute::Constitution, 1);
-                GET_GOLD(ch) -= concost;
+                ch->mod(CharAttribute::Constitution, 1);
+                ch->mod(CharMoney::Carried, -concost);
             }
         } else if (!strcasecmp("speed", arg) || !strcasecmp("spe", arg)) {
             if (speed >= 100)
@@ -1242,9 +1242,8 @@ SPECIAL(augmenter) {
                     true, ch, nullptr, nullptr, TO_CHAR);
                 act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch,
                     nullptr, nullptr, TO_ROOM);
-                ch->modAttribute(CharAttribute::Speed, 1);
-                GET_GOLD(ch) -= specost;
-                ch->save();
+                ch->mod(CharAttribute::Speed, 1);
+                ch->mod(CharMoney::Carried, -specost);
             }
         } else if (!strcasecmp("agility", arg) || !strcasecmp("agi", arg)) {
             if (agility >= 100)
@@ -1256,9 +1255,8 @@ SPECIAL(augmenter) {
                     true, ch, nullptr, nullptr, TO_CHAR);
                 act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch,
                     nullptr, nullptr, TO_ROOM);
-                ch->modAttribute(CharAttribute::Agility, 1);
-                GET_GOLD(ch) -= agicost;
-                ch->save();
+                ch->mod(CharAttribute::Agility, 1);
+                ch->mod(CharMoney::Carried, -agicost);
             }
         } else if (!strcasecmp("wisdom", arg) || !strcasecmp("wis", arg)) {
             if (wisdom >= 100)
@@ -1270,13 +1268,13 @@ SPECIAL(augmenter) {
                     true, ch, nullptr, nullptr, TO_CHAR);
                 act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch,
                     nullptr, nullptr, TO_ROOM);
-                ch->modAttribute(CharAttribute::Wisdom, 1);
-                GET_GOLD(ch) -= wiscost;
-                ch->save();
+                ch->mod(CharAttribute::Wisdom, 1);
+                ch->mod(CharMoney::Carried, -wiscost);
             }
         } else {
             send_to_char(ch, "Syntax: augment [str | con | int | wis | agi | spe]\r\n");
         }
+        ch->save();
         return (true);
     } else { /* They are not using the right command, ignore them. */
         return (false);
@@ -1456,14 +1454,14 @@ SPECIAL(bank) {
                 send_to_char(ch, "You can not transfer money to your own offline characters...");
                 return (true);
             }
-            GET_BANK_GOLD(vict) += amount;
-            GET_BANK_GOLD(ch) -= amount + (amount / 100);
+            vict->mod(CharMoney::Bank, amount);
+            ch->mod(CharMoney::Bank, -(amount + (amount / 100)));
             mudlog(NRM, MAX(ADMLVL_IMPL, GET_INVIS_LEV(ch)), true, "EXCHANGE: %s gave %s zenni to user %s",
                    GET_NAME(ch), add_commas(amount).c_str(), GET_NAME(vict));
             vict->save();
         } else {
-            GET_BANK_GOLD(vict) += amount;
-            GET_BANK_GOLD(ch) -= amount + (amount / 100);
+            vict->mod(CharMoney::Bank, amount);
+            ch->mod(CharMoney::Bank, -(amount + (amount / 100)));
             send_to_char(vict, "@WYou have just had @Y%s@W zenni wired into your bank account.@n\r\n",
                          add_commas(amount).c_str());
         }
@@ -1485,8 +1483,8 @@ SPECIAL(bank) {
             send_to_char(ch, "You don't have that much zenni!\r\n");
             return (true);
         }
-        GET_GOLD(ch) -= amount;
-        GET_BANK_GOLD(ch) += amount;
+        ch->mod(CharMoney::Carried, -amount);
+        ch->mod(CharMoney::Bank, amount);
         send_to_char(ch, "You deposit %d zenni.\r\n", amount);
         act("$n makes a bank transaction.", true, ch, nullptr, nullptr, TO_ROOM);
         return (true);
@@ -1518,25 +1516,25 @@ SPECIAL(bank) {
         if (GET_GOLD(ch) + amount > GOLD_CARRY(ch)) {
             send_to_char(ch, "You can only carry %s zenni, you left the rest.\r\n", add_commas(GOLD_CARRY(ch)).c_str());
             int diff = (GET_GOLD(ch) + amount) - GOLD_CARRY(ch);
-            ch->setInt(CharInt::Zeni, GOLD_CARRY(ch));
+            ch->set(CharMoney::Carried, GOLD_CARRY(ch));
             amount -= diff;
             if (amount >= 100) {
                 num = amount / 100;
-                GET_BANK_GOLD(ch) -= amount + num;
+                ch->mod(CharMoney::Bank, -(amount + num));
             } else if (amount < 100) {
-                GET_BANK_GOLD(ch) -= amount + 1;
+                ch->mod(CharMoney::Bank, -(amount + 1));
             }
             send_to_char(ch, "You withdraw %s zenni,  and pay %s in withdraw fees.\r\n.\r\n", add_commas(amount).c_str(),
                          add_commas(num).c_str());
             act("$n makes a bank transaction.", true, ch, nullptr, nullptr, TO_ROOM);
             return (true);
         }
-        GET_GOLD(ch) += amount;
+        ch->mod(CharMoney::Carried, amount);
         if (amount >= 100) {
             num = amount / 100;
-            GET_BANK_GOLD(ch) -= amount + num;
+            ch->mod(CharMoney::Bank, -(amount + num));
         } else if (amount < 100) {
-            GET_BANK_GOLD(ch) -= amount + 1;
+            ch->mod(CharMoney::Bank, -(amount + 1));
         }
         send_to_char(ch, "You withdraw %s zenni, and pay %s in withdraw fees.\r\n", add_commas(amount).c_str(),
                      add_commas(num).c_str());

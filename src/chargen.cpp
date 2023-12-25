@@ -182,15 +182,15 @@ namespace net {
         int powerlevel = 0, ki = 1, stamina = 2;
 
         if (type == powerlevel) {
-            auto base = ch->getAttribute(CharAttribute::Strength, true);
+            auto base = ch->get(CharAttribute::Strength, true);
             base_num = base * 3;
             max_num = base * 5;
         } else if (type == ki) {
-            auto base = ch->getAttribute(CharAttribute::Intelligence, true);
+            auto base = ch->get(CharAttribute::Intelligence, true);
             base_num = base * 3;
             max_num = base * 5;
         } else if (type == stamina) {
-            auto base = ch->getAttribute(CharAttribute::Constitution, true);
+            auto base = ch->get(CharAttribute::Constitution, true);
             base_num = base * 3;
             max_num = base * 5;
         }
@@ -687,7 +687,7 @@ namespace net {
                     sendText("@w\r\nMake a selection:@n\r\n");
                     state = CON_RACIAL;
                 } else if (IS_NAMEK(ch)) {
-                    ch->setInt(CharInt::Sex, SEX_NEUTRAL);
+                    ch->set(CharAppearance::Sex, SEX_NEUTRAL);
                     state = CON_QSEX;
                 } else {
                     sendText("\r\n@wWhat is your sex @W(@BM@W/@MF@W/@GN@W)@w?@n");
@@ -698,17 +698,17 @@ namespace net {
             case CON_RACIAL:
                 switch (arg[0]) {
                     case '1':
-                        ch->setInt(CharInt::RacialPref, 1);
+                        ch->set(CharNum::RacialPref, 1);
                         break;
                     case '2':
-                        ch->setInt(CharInt::RacialPref, 2);
+                        ch->set(CharNum::RacialPref, 2);
                         break;
                     case '3':
                         if (IS_HALFBREED(ch)) {
                             sendText("That is not an acceptable option.\r\n");
                             return;
                         } else {
-                            ch->setInt(CharInt::RacialPref, 3);
+                            ch->set(CharNum::RacialPref, 3);
                         }
                         break;
                     default:
@@ -726,31 +726,31 @@ namespace net {
                     (IS_HOSHIJIN(ch) && IS_FEMALE(ch))) {
                     switch(arg[0]) {
                         case '1':
-                            ch->setInt(CharInt::HairLength, HAIRL_BALD);
-                            ch->setInt(CharInt::HairColor, HAIRC_NONE);
-                            ch->setInt(CharInt::HairStyle, HAIRS_NONE);
+                            ch->set(CharAppearance::HairLength, HAIRL_BALD);
+                            ch->set(CharAppearance::HairColor, HAIRC_NONE);
+                            ch->set(CharAppearance::HairStyle, HAIRS_NONE);
                             break;
                         case '2':
-                            ch->setInt(CharInt::HairLength, HAIRL_SHORT);
+                            ch->set(CharAppearance::HairLength, HAIRL_SHORT);
                             break;
                         case '3':
-                            ch->setInt(CharInt::HairLength, HAIRL_MEDIUM);
+                            ch->set(CharAppearance::HairLength, HAIRL_MEDIUM);
                             break;
                         case '4':
-                            ch->setInt(CharInt::HairLength, HAIRL_LONG);
+                            ch->set(CharAppearance::HairLength, HAIRL_LONG);
                             break;
                         case '5':
-                            ch->setInt(CharInt::HairLength, HAIRL_RLONG);
+                            ch->set(CharAppearance::HairLength, HAIRL_RLONG);
                             break;
                         default:
                             sendText("That is not an acceptable option.\r\n");
                             return;
                     }
                     if(IS_SAIYAN(ch)) {
-                        ch->setInt(CharInt::HairColor, HAIRC_BLACK);
+                        ch->set(CharAppearance::HairColor, HAIRC_BLACK);
                         sendText("Saiyans always have black hair, if not bald.\r\n");
                     }
-                    if (ch->getInt(CharInt::HairLength) == HAIRL_BALD || IS_SAIYAN(ch)) {
+                    if (ch->get(CharAppearance::HairLength) == HAIRL_BALD || IS_SAIYAN(ch)) {
                         sendText("@YSkin color SELECTION menu:\r\n");
                         sendText("@D---------------------------------------@n\r\n");
                         sendText("@B1@W)@C White  @B2@W)@C Black  @B3@W)@C Green\r\n");
@@ -793,7 +793,7 @@ namespace net {
                                 sendText("That is not an acceptable option.\r\n");
                                 return;
                         }
-                        ch->setInt(CharInt::HairLength, hairTo);
+                        ch->set(CharAppearance::HairLength, hairTo);
                         sendText("@YSkin color SELECTION menu:\r\n");
                         sendText("@D---------------------------------------@n\r\n");
                         sendText("@B1@W)@C White  @B2@W)@C Black  @B3@W)@C Green\r\n");
@@ -825,7 +825,7 @@ namespace net {
                                 sendText("That is not an acceptable option.\r\n");
                                 return;
                         }
-                        ch->setInt(CharInt::HairLength, hairTo);
+                        ch->set(CharAppearance::HairLength, hairTo);
                         if (IS_ARLIAN(ch) && IS_FEMALE(ch)) {
                             sendText("@YWing color SELECTION menu:\r\n");
                             sendText("@D---------------------------------------@n\r\n");
@@ -910,7 +910,7 @@ namespace net {
                         sendText("That is not an acceptable option.\r\n");
                         return;
                 }
-                ch->setInt(CharInt::HairColor, hairTo);
+                ch->set(CharAppearance::HairColor, hairTo);
             }
                 if (IS_ARLIAN(ch)) {
                     sendText("@YSkin color SELECTION menu:\r\n");
@@ -979,7 +979,7 @@ namespace net {
                         sendText("That is not an acceptable option.\r\n");
                     return;
                 }
-                ch->setInt(CharInt::HairStyle, hairTo);
+                ch->set(CharAppearance::HairStyle, hairTo);
             }
 
                 sendText("@YSkin color SELECTION menu:\r\n");
@@ -1035,7 +1035,7 @@ namespace net {
                         sendText("That is not an acceptable option.\r\n");
                     return;
                 }
-                ch->setInt(CharInt::SkinColor, skinTo);
+                ch->set(CharAppearance::SkinColor, skinTo);
             }
 
                 sendText("@YEye color SELECTION menu:\r\n");
@@ -1092,7 +1092,7 @@ namespace net {
                     return;
                     break;
                 }
-                ch->setInt(CharInt::EyeColor, eyeTo);
+                ch->set(CharAppearance::EyeColor, eyeTo);
             }
                 sendText("@YWhat do you want to be your most distinguishing feature:\r\n");
                 sendText("@D---------------------------------------@n\r\n");
@@ -1139,7 +1139,7 @@ namespace net {
                     return;
                     break;
                 }
-                ch->setInt(CharInt::DistinguishingFeature, dist);
+                ch->set(CharAppearance::DistinguishingFeature, dist);
             }
 
                 sendText("@YWhat Height/Weight Range do you prefer:\r\n");
@@ -1243,7 +1243,7 @@ namespace net {
                         return;
                         break;
                 }
-                ch->setInt(CharInt::Height, height);
+                ch->set(CharNum::Height, height);
                 ch->weight = weight;
             }
                 sendText("@YAura color SELECTION menu:\r\n");
@@ -1296,48 +1296,52 @@ namespace net {
                 state = CON_QCLASS;
                 break;
 
-            case CON_Q1:
-                ch->basepl = rand_number(30, 50);
-                ch->basest = rand_number(30, 50);
-                ch->baseki = rand_number(30, 50);
+            case CON_Q1: {
+                stat_t basepl = rand_number(30, 50);
+                stat_t basest = rand_number(30, 50);
+                stat_t baseki = rand_number(30, 50);
                 {
                     auto defStats = startAttrRanges.at(ch->race->getID());
                     for(auto &[attr, range] : defStats) {
-                        ch->setAttribute(attr, rand_number(range.first, range.second));
+                        ch->set(attr, rand_number(range.first, range.second));
                     }
                 }
 
                 switch(arg[0]) {
                     case '1':
-                        ch->basepl += roll_stats(5, 25);
-                        ch->basest += roll_stats(8, 50);
-                        ch->baseki += roll_stats(6, 50);
-                        break;
+                        basepl += roll_stats(5, 25);
+                    basest += roll_stats(8, 50);
+                    baseki += roll_stats(6, 50);
+                    break;
                     case '2':
-                        ch->basepl += roll_stats(5, 55);
-                        ch->basest += roll_stats(8, 40);
-                        ch->baseki += roll_stats(6, 40);
-                        break;
+                        basepl += roll_stats(5, 55);
+                    basest += roll_stats(8, 40);
+                    baseki += roll_stats(6, 40);
+                    break;
                     case '3':
-                        ch->basepl += roll_stats(5, 125);
-                        ch->basest += roll_stats(8, 50);
-                        ch->baseki += roll_stats(6, 40);
-                        break;
+                        basepl += roll_stats(5, 125);
+                    basest += roll_stats(8, 50);
+                    baseki += roll_stats(6, 40);
+                    break;
                     case '4':
-                        ch->basepl += roll_stats(5, 65);
-                        ch->basest += roll_stats(8, 65);
-                        ch->baseki += roll_stats(6, 65);
-                        SET_BIT_AR(PLR_FLAGS(ch), PLR_SKILLP);
-                        break;
+                        basepl += roll_stats(5, 65);
+                    basest += roll_stats(8, 65);
+                    baseki += roll_stats(6, 65);
+                    SET_BIT_AR(PLR_FLAGS(ch), PLR_SKILLP);
+                    break;
                     case '5':
-                        ch->basepl += roll_stats(5, 75);
-                        ch->basest += roll_stats(8, 100);
-                        ch->baseki += roll_stats(6, 75);
-                        break;
+                        basepl += roll_stats(5, 75);
+                    basest += roll_stats(8, 100);
+                    baseki += roll_stats(6, 75);
+                    break;
                     default:
                         sendText("That is not an acceptable option.\r\n");
-                        return;
+                    return;
                 }
+                ch->set(CharStat::PowerLevel, basepl);
+                ch->set(CharStat::Stamina, basest);
+                ch->set(CharStat::Ki, baseki);
+            }
                 sendText("\r\n@WQuestion (@G2@W out of @g10@W)\r\n");
                 sendText("@YAnswer the following question:\r\n");
                 sendText("@wYou are faced with the strongest opponent you have ever\r\nfaced in your life. You both have beat each other to the\r\nlimits of both your strengths. A situation has presented \r\nan opportunity to win the fight, what do you do?\r\n");
@@ -1373,7 +1377,7 @@ namespace net {
                         sendText("That is not an acceptable option.\r\n");
                     return;
                 }
-                ch->modInt(CharInt::AlignGoodEvil, align);
+                ch->mod(CharAlign::GoodEvil, align);
             }
 
                 sendText("\r\n@WQuestion (@G3@W out of @g10@W)\r\n");
@@ -1388,37 +1392,41 @@ namespace net {
                 state = CON_Q3;
                 break;
             case CON_Q3: {
-                int align;
+                align_t align;
+                stat_t basepl, basest, baseki;
                 switch(arg[0]) {
                     case '1':
                         align += -100;
-                    ch->basepl += 100;
-                    ch->basest += 80;
-                    ch->baseki += 10;
+                    basepl += 100;
+                    basest += 80;
+                    baseki += 10;
                     break;
                     case '2':
                         align += 10;
-                    ch->basepl += 25;
-                    ch->basest += 25;
-                    ch->baseki += 25;
+                    basepl += 25;
+                    basest += 25;
+                    baseki += 25;
                     break;
                     case '3':
                         align += 50;
-                    ch->basepl += 20;
-                    ch->basest += 20;
-                    ch->baseki += 20;
+                    basepl += 20;
+                    basest += 20;
+                    baseki += 20;
                     break;
                     case '4':
                         align += -200;
-                    ch->basepl += 100;
-                    ch->basest += 100;
-                    ch->baseki += 100;
+                    basepl += 100;
+                    basest += 100;
+                    baseki += 100;
                     break;
                     default:
                         sendText("That is not an acceptable option.\r\n");
                     return;
                 }
-                ch->modInt(CharInt::AlignGoodEvil, align);
+                ch->mod(CharAlign::GoodEvil, align);
+                ch->mod(CharStat::PowerLevel, basepl);
+                ch->mod(CharStat::Stamina, basest);
+                ch->mod(CharStat::Ki, baseki);
             }
 
                 sendText("\r\n@WQuestion (@G4@W out of @g10@W)\r\n");
@@ -1434,37 +1442,41 @@ namespace net {
                 break;
 
             case CON_Q4: {
-                int gold = 0;
+                money_t gold = 0;
+                stat_t basepl, basest, baseki;
                 switch(arg[0]) {
                     case '1':
                         gold += 1000;
-                    ch->basepl -= rand_number(10, 30);
-                    ch->basest -= rand_number(10, 30);
-                    ch->baseki -= rand_number(10, 30);
+                    basepl -= rand_number(10, 30);
+                    basest -= rand_number(10, 30);
+                    baseki -= rand_number(10, 30);
                     break;
                     case '2':
                         gold = 0;
-                    ch->basepl += rand_number(50, 165);
-                    ch->basest += rand_number(50, 165);
-                    ch->baseki += rand_number(50, 165);
+                    basepl += rand_number(50, 165);
+                    basest += rand_number(50, 165);
+                    baseki += rand_number(50, 165);
                     break;
                     case '3':
                         gold = 2500;
-                    ch->basepl -= rand_number(15, 25);
-                    ch->basest -= rand_number(15, 25);
-                    ch->baseki -= rand_number(15, 25);
+                    basepl -= rand_number(15, 25);
+                    basest -= rand_number(15, 25);
+                    baseki -= rand_number(15, 25);
                     break;
                     case '4':
                         gold = 150;
-                    ch->basepl += rand_number(25, 80);
-                    ch->basest += rand_number(25, 80);
-                    ch->baseki += rand_number(25, 80);
+                    basepl += rand_number(25, 80);
+                    basest += rand_number(25, 80);
+                    baseki += rand_number(25, 80);
                     break;
                     default:
                         sendText("That is not an acceptable option.\r\n");
                     return;
                 }
-                if(gold) ch->modInt(CharInt::Zeni, gold);
+                if(gold) ch->mod(CharMoney::Carried, gold);
+                ch->mod(CharStat::PowerLevel, basepl);
+                ch->mod(CharStat::Stamina, basest);
+                ch->mod(CharStat::Ki, baseki);
             }
                 sendText("\r\n@WQuestion (@G5@W out of @g10@W)\r\n");
                 sendText("@YAnswer the following question:\r\n");
@@ -1478,24 +1490,27 @@ namespace net {
                 state = CON_Q5;
                 break;
 
-            case CON_Q5:
+            case CON_Q5: {
+                stat_t pl = 0;
                 switch(arg[0]) {
                     case '1':
-                        ch->basepl += rand_number(0, 40);
-                        break;
+                        pl += rand_number(0, 40);
+                    break;
                     case '2':
-                        ch->basepl += rand_number(-30, 80);
-                        break;
+                        pl += rand_number(-30, 80);
+                    break;
                     case '3':
-                        ch->basepl += rand_number(-25, 60);
-                        break;
+                        pl += rand_number(-25, 60);
+                    break;
                     case '4':
-                        ch->basepl += rand_number(0, 50);
-                        break;
+                        pl += rand_number(0, 50);
+                    break;
                     default:
                         sendText("That is not an acceptable option.\r\n");
-                        return;
+                    return;
                 }
+                ch->mod(CharStat::PowerLevel, pl);
+            }
                 sendText("\r\n@WQuestion (@G6@W out of @g10@W)\r\n");
                 sendText("\r\n@YAnswer the following question:\r\n");
                 sendText("@wYou have an enemy before you, what is your prefered method to attack him?@n\r\n");
@@ -1510,33 +1525,38 @@ namespace net {
                 break;
 
 
-            case CON_Q6:
+            case CON_Q6: {
+                stat_t basepl = 0, basest = 0, baseki = 0;
                 switch(arg[0]) {
                     case '1':
-                        ch->basepl += rand_number(0, 15);
-                        ch->basest += rand_number(0, 15);
-                        ch->choice = 1;
-                        break;
+                        basepl += rand_number(0, 15);
+                    basest += rand_number(0, 15);
+                    ch->choice = 1;
+                    break;
                     case '2':
-                        ch->basepl += rand_number(0, 30);
-                        ch->choice = 2;
-                        break;
+                        basepl += rand_number(0, 30);
+                    ch->choice = 2;
+                    break;
                     case '3':
-                        ch->basepl += rand_number(0, 30);
-                        ch->choice = 3;
-                        break;
+                        basepl += rand_number(0, 30);
+                    ch->choice = 3;
+                    break;
                     case '4':
-                        ch->basepl += rand_number(0, 30);
-                        ch->choice = 4;
-                        break;
+                        basepl += rand_number(0, 30);
+                    ch->choice = 4;
+                    break;
                     case '5':
-                        ch->baseki += rand_number(0, 50);
-                        ch->choice = 5;
-                        break;
+                        baseki += rand_number(0, 50);
+                    ch->choice = 5;
+                    break;
                     default:
                         sendText("That is not an acceptable option.\r\n");
-                        return;
+                    return;
                 }
+                ch->mod(CharStat::PowerLevel, basepl);
+                ch->mod(CharStat::Stamina, basest);
+                ch->mod(CharStat::Ki, baseki);
+            }
                 sendText("\r\n@WQuestion (@G7@W out of @g10@W)\r\n");
                 sendText("\r\n@YAnswer the following question:\r\n");
                 sendText("@wYou are camped out one night in a field, the sky is clear and the\r\nstars visible. Looking at them, what thought crosses your mind?@n\r\n");
@@ -1554,23 +1574,23 @@ namespace net {
                 switch(arg[0]) {
                     case '1':
                         align += -10;
-                    ch->modAttribute(CharAttribute::Strength, 1);
+                    ch->mod(CharAttribute::Strength, 1);
                     break;
                     case '2':
                         align += +10;
-                    ch->modAttribute(CharAttribute::Speed, 1);
+                    ch->mod(CharAttribute::Speed, 1);
                     break;
                     case '3':
-                        ch->modAttribute(CharAttribute::Wisdom, 1);
+                        ch->mod(CharAttribute::Wisdom, 1);
                     break;
                     case '4':
-                        ch->modAttribute(CharAttribute::Intelligence, 1);
+                        ch->mod(CharAttribute::Intelligence, 1);
                     break;
                     default:
                         sendText("That is not an acceptable option.\r\n");
                     return;
                 }
-                ch->modInt(CharInt::AlignGoodEvil, align);
+                ch->mod(CharAlign::GoodEvil, align);
             }
                 sendText("\r\n@WQuestion (@G8@W out of @g10@W)\r\n");
                 sendText("\r\n@YAnswer the following question:\r\n");
@@ -1589,25 +1609,25 @@ namespace net {
                 switch(arg[0]) {
                     case '1':
                         align += +10;
-                    ch->modAttribute(CharAttribute::Speed, 1);
+                    ch->mod(CharAttribute::Speed, 1);
                     break;
                     case '2':
                         align += +20;
-                    ch->modAttribute(CharAttribute::Wisdom, 1);
+                    ch->mod(CharAttribute::Wisdom, 1);
                     break;
                     case '3':
                         align += -10;
-                    ch->modAttribute(CharAttribute::Strength, 1);
+                    ch->mod(CharAttribute::Strength, 1);
                     break;
                     case '4':
                         align += -20;
-                    ch->modAttribute(CharAttribute::Agility, 1);
+                    ch->mod(CharAttribute::Agility, 1);
                     break;
                     default:
                         sendText("That is not an acceptable option.\r\n");
                     return;
                 }
-                ch->modInt(CharInt::AlignGoodEvil, align);
+                ch->mod(CharAlign::GoodEvil, align);
             }
 
                 sendText("\r\n@WQuestion (@G9@W out of @g10@W)\r\n");
@@ -1626,25 +1646,25 @@ namespace net {
                 int align;
                 switch(arg[0]) {
                     case '1':
-                        ch->modAttribute(CharAttribute::Strength, 1);
+                        ch->mod(CharAttribute::Strength, 1);
                     break;
                     case '2':
                         align += -30;
-                    ch->modAttribute(CharAttribute::Wisdom, 1);
+                    ch->mod(CharAttribute::Wisdom, 1);
                     break;
                     case '3':
                         align += -10;
-                    ch->modAttribute(CharAttribute::Speed, 1);
+                    ch->mod(CharAttribute::Speed, 1);
                     break;
                     case '4':
                         align += -5;
-                    ch->modAttribute(CharAttribute::Intelligence, 1);
+                    ch->mod(CharAttribute::Intelligence, 1);
                     break;
                     default:
                         sendText("That is not an acceptable option.\r\n");
                     return;
                 }
-                ch->modInt(CharInt::AlignGoodEvil, align);
+                ch->mod(CharAlign::GoodEvil, align);
             }
                 sendText("\r\n@WQuestion (@G10@W out of @g10@W)\r\n");
                 sendText("\r\n@YAnswer the following question:\r\n");
@@ -1751,7 +1771,7 @@ namespace net {
                         sendText("That is not an acceptable option! Choose again...\r\n");
                     return;
                 }
-                if(align != -1) ch->setInt(CharInt::AlignGoodEvil, align);
+                if(align != -1) ch->set(CharAlign::GoodEvil, align);
             }
 
                 if (moveon == true) {
@@ -1763,17 +1783,17 @@ namespace net {
 
                     switch (roll) {
                         case 1:
-                            ch->modAttribute(CharAttribute::Strength, -1);
+                            ch->mod(CharAttribute::Strength, -1);
                         case 2:
-                            ch->modAttribute(CharAttribute::Constitution, -1);
+                            ch->mod(CharAttribute::Constitution, -1);
                         case 3:
-                            ch->modAttribute(CharAttribute::Wisdom, -1);
+                            ch->mod(CharAttribute::Wisdom, -1);
                         case 4:
-                            ch->modAttribute(CharAttribute::Intelligence, -1);
+                            ch->mod(CharAttribute::Intelligence, -1);
                         case 5:
-                            ch->modAttribute(CharAttribute::Speed, -1);
+                            ch->mod(CharAttribute::Speed, -1);
                         case 6:
-                            ch->modAttribute(CharAttribute::Agility, -1);
+                            ch->mod(CharAttribute::Agility, -1);
                             break;
                     }
                     sendText("@CWould you like to keep skills gained from your sensei/race combo (skills, not abilities)\r\nor would you prefer to keep those skill slots empty? If you choose\r\nto forget then you get 200 PS in exchange.@n\r\n");
@@ -1802,7 +1822,7 @@ namespace net {
                                       "What IS your sex? ");
                             return;
                     }
-                    ch->setInt(CharInt::Sex, setSex);
+                    ch->set(CharAppearance::Sex, setSex);
                 }
                 if (IS_HUMAN(ch) || IS_SAIYAN(ch) || IS_KONATSU(ch) ||
                     IS_MUTANT(ch) || IS_ANDROID(ch) || IS_KAI(ch) ||
@@ -1980,7 +2000,7 @@ namespace net {
                             }
                         }
                         if (num == 3) {
-                            ch->modAttribute(CharAttribute::Agility, 10);
+                            ch->mod(CharAttribute::Agility, 10);
                         }
                         sendText(fmt::format("@CRolling second mutation... Your second mutation is @D[@Y{}@D]@n\r\n",
                                   display_genome[num]));
@@ -2004,7 +2024,7 @@ namespace net {
                             sendText(fmt::format("@CYou have chosen the mutation @D[@Y{}@D]@n\r\n", display_genome[choice]));
                             ch->genome[0] = choice;
                             if (choice == 3) {
-                                ch->modAttribute(CharAttribute::Agility, 10);
+                                ch->mod(CharAttribute::Agility, 10);
                             } else if (choice == 9) {
                                 SET_SKILL(ch, SKILL_TELEPATHY, 50);
                             }
@@ -2162,14 +2182,8 @@ namespace net {
                     state = CON_BONUS;
                 } else if (!strcasecmp(arg.c_str(), "x") || !strcasecmp(arg.c_str(), "X")) {
                     negcount = 0;
-                    if (ch->basepl <= 0) {
-                        ch->basepl = 90;
-                    }
-                    if (ch->baseki <= 0) {
-                        ch->baseki = 90;
-                    }
-                    if (ch->basest <= 0) {
-                        ch->basest = 90;
+                    for(auto c : {CharStat::PowerLevel, CharStat::Ki, CharStat::Stamina}) {
+                        if(ch->get(c) < 90) ch->set(c, 90);
                     }
                     sendText("\r\n@wTo check the bonuses/negatives you have in game use the status command");
                     if (ccpoints > 0) {

@@ -564,7 +564,7 @@ in the vault (vnum: 453) now and then. you can just use
                     else if (!strcasecmp(field, "align")) {
                         if (subfield && *subfield) {
                             int addition = atof(subfield);
-                            c->setInt(CharInt::AlignGoodEvil, std::clamp<int>(addition, -1000, 1000));
+                            c->set(CharAlign::GoodEvil, std::clamp<int>(addition, -1000, 1000));
                         }
                         snprintf(str, slen, "%d", GET_ALIGNMENT(c));
                     }
@@ -572,10 +572,10 @@ in the vault (vnum: 453) now and then. you can just use
                 case 'b':
                     if (!strcasecmp(field, "bank")) {
                         if (subfield && *subfield) {
-                            int addition = atof(subfield);
-                            c->modInt(CharInt::Bank, addition);
+                            int addition = atoll(subfield);
+                            c->mod(CharMoney::Bank, addition);
                         }
-                        snprintf(str, slen, "%ld", GET_BANK_GOLD(c));
+                        snprintf(str, slen, "%lld", GET_BANK_GOLD(c));
                     }
                     break;
                 case 'c':
@@ -602,13 +602,13 @@ in the vault (vnum: 453) now and then. you can just use
                     } else if (!strcasecmp(field, "con")) {
                         if (subfield && *subfield) {
                             int addition = atof(subfield);
-                            c->modAttribute(CharAttribute::Constitution, addition);
+                            c->mod(CharAttribute::Constitution, addition);
                         }
                         snprintf(str, slen, "%d", GET_CON(c));
                     } else if (!strcasecmp(field, "cha")) {
                         if (subfield && *subfield) {
                             int addition = atof(subfield);
-                            c->modAttribute(CharAttribute::Speed, addition);
+                            c->mod(CharAttribute::Speed, addition);
                         }
                         snprintf(str, slen, "%d", GET_CHA(c));
                     }
@@ -624,7 +624,7 @@ in the vault (vnum: 453) now and then. you can just use
                     } else if (!strcasecmp(field, "dex")) {
                         if (subfield && *subfield) {
                             int addition = atoi(subfield);
-                            ch->modAttribute(CharAttribute::Agility, addition);
+                            ch->mod(CharAttribute::Agility, addition);
                         }
                         snprintf(str, slen, "%d", GET_DEX(c));
                     } else if (!strcasecmp(field, "drag")) {
@@ -691,7 +691,7 @@ in the vault (vnum: 453) now and then. you can just use
                     if (!strcasecmp(field, "gold")) {
                         if (subfield && *subfield) {
                             int64_t addition = atof(subfield);
-                            c->modInt(CharInt::Zeni, addition);
+                            c->mod(CharMoney::Carried, addition);
                         }
                         snprintf(str, slen, "%ld", GET_GOLD(c));
                     }
@@ -783,7 +783,7 @@ in the vault (vnum: 453) now and then. you can just use
                     } else if (!strcasecmp(field, "int")) {
                         if (subfield && *subfield) {
                             int addition = atof(subfield);
-                            c->modAttribute(CharAttribute::Intelligence, addition);
+                            c->mod(CharAttribute::Intelligence, addition);
                         }
                         snprintf(str, slen, "%d", GET_INT(c));
                     }
@@ -928,14 +928,14 @@ in the vault (vnum: 453) now and then. you can just use
                     else if (!strcasecmp(field, "str")) {
                         if (subfield && *subfield) {
                             int addition = atof(subfield);
-                            c->modAttribute(CharAttribute::Strength, addition);
+                            c->mod(CharAttribute::Strength, addition);
                         }
                         snprintf(str, slen, "%d", GET_STR(c));
                     } else if (!strcasecmp(field, "size")) {
                         if (subfield && *subfield) {
                             int ns;
                             if ((ns = search_block(subfield, size_names, false)) > -1) {
-                                (c)->setInt(CharInt::Size, ns);
+                                (c)->setSize(ns);
                             }
                         }
                         sprinttype(get_size(c), size_names, str, slen);
@@ -1024,7 +1024,7 @@ in the vault (vnum: 453) now and then. you can just use
                     else if (!strcasecmp(field, "wis")) {
                         if (subfield && *subfield) {
                             int addition = atof(subfield);
-                            c->modAttribute(CharAttribute::Wisdom, addition);
+                            c->mod(CharAttribute::Wisdom, addition);
                         }
                         snprintf(str, slen, "%d", GET_WIS(c));
                     }
@@ -1032,10 +1032,10 @@ in the vault (vnum: 453) now and then. you can just use
                 case 'z':
                     if (!strcasecmp(field, "zenni")) {
                         if (subfield && *subfield) {
-                            int64_t addition = atof(subfield);
-                            c->modInt(CharInt::Zeni, addition);
+                            int64_t addition = atoll(subfield);
+                            c->mod(CharMoney::Carried, addition);
                         }
-                        snprintf(str, slen, "%ld", GET_GOLD(c));
+                        snprintf(str, slen, "%lld", GET_GOLD(c));
                     }
                     break;
             } /* switch *field */

@@ -358,49 +358,50 @@ time_data::time_data(const nlohmann::json &j) : time_data() {
     deserialize(j);
 }
 
-nlohmann::json AttributeData::serialize() {
-    nlohmann::json j;
-    if(base != 10) j["base"] = base;
-    if(train) j["train"] = train;
-
-    return j;
-}
-
-void AttributeData::deserialize(const nlohmann::json &j) {
-    if(j.contains("base")) base = j["base"];
-    if(j.contains("train")) train = j["train"];
-}
-
-AttributeData::AttributeData(const nlohmann::json& j) : AttributeData() {
-    deserialize(j);
-}
-
 
 nlohmann::json char_data::serializeBase() {
     auto j = serializeUnit();
 
-    for(auto cint : charInts) j["charInts"].push_back(cint);
+    for(auto &[id, train] : trains) {
+        if(train) j["trains"].push_back(std::make_pair(id, train));
+    }
+
+    for(auto &[id, attr] : attributes) {
+        if(attr) j["attributes"].push_back(std::make_pair(id, attr));
+    }
+
+    for(auto &[id, mon] : moneys) {
+        if(mon) j["moneys"].push_back(std::make_pair(id, mon));
+    }
+
+    for(auto &[id, align] : aligns) {
+        if(align) j["aligns"].push_back(std::make_pair(id, align));
+    }
+
+    for(auto &[id, app] : appearances) {
+        if(app) j["appearances"].push_back(std::make_pair(id, app));
+    }
+
+    for(auto &[id, app] : stats) {
+        if(app) j["stats"].push_back(std::make_pair(id, app));
+    }
+
+    for(auto &[id, app] : nums) {
+        if(app) j["nums"].push_back(std::make_pair(id, app));
+    }
 
     if(title && strlen(title)) j["title"] = title;
     if(race) j["race"] = race->getID();
-    if(level) j["level"] = level;
-    if(admlevel) j["admlevel"] = admlevel;
+
     if(chclass) j["chclass"] = chclass->getID();
     if(weight != 0.0) j["weight"] = weight;
 
     for(auto i = 0; i < NUM_AFF_FLAGS; i++)
         if(IS_SET_AR(affected_by, i)) j["affected_by"].push_back(i);
 
-    if(basepl) j["basepl"] = basepl;
-    if(baseki) j["baseki"] = baseki;
-    if(basest) j["basest"] = basest;
 
     if(armor) j["armor"] = armor;
     if(damage_mod) j["damage_mod"] = damage_mod;
-
-    for(auto &[cid, attr] : attributes) {
-        j["attributes"].push_back(std::make_pair(cid, attr.serialize()));
-    }
 
     return j;
 }
@@ -408,12 +409,52 @@ nlohmann::json char_data::serializeBase() {
 void char_data::deserializeBase(const nlohmann::json &j) {
     deserializeUnit(j);
 
-    if(j.contains("charInts")) {
-        // this is a list of pairs. the first element is a CharInt enum, the second is an int.
-        for(auto j2 : j["charInts"]) {
-            auto cint = j2[0].get<CharInt>();
-            auto val = j2[1].get<int>();
-            charInts[cint] = val;
+    if(j.contains("trains")) {
+        for(auto j2 : j["trains"]) {
+            auto id = j2[0].get<CharTrain>();
+            trains[id] = j2[1].get<attribute_train_t>();
+        }
+    }
+
+    if(j.contains("attributes")) {
+        for(auto j2 : j["attributes"]) {
+            auto id = j2[0].get<CharAttribute>();
+            attributes[id] = j2[1].get<attribute_t>();
+        }
+    }
+
+    if(j.contains("moneys")) {
+        for(auto j2 : j["moneys"]) {
+            auto id = j2[0].get<CharMoney>();
+            moneys[id] = j2[1].get<money_t>();
+        }
+    }
+
+    if(j.contains("aligns")) {
+        for(auto j2 : j["aligns"]) {
+            auto id = j2[0].get<CharAlign>();
+            aligns[id] = j2[1].get<align_t>();
+        }
+    }
+
+    if(j.contains("appearances")) {
+        for(auto j2 : j["appearances"]) {
+            auto id = j2[0].get<CharAppearance>();
+            appearances[id] = j2[1].get<appearance_t>();
+        }
+    }
+
+    if(j.contains("stats")) {
+        for(auto j2 : j["stats"]) {
+            auto id = j2[0].get<CharStat>();
+            stats[id] = j2[1].get<stat_t>();
+        }
+    }
+
+    if(j.contains("nums")) {
+        for(auto j2 : j["nums"]) {
+            auto id = j2[0].get<CharNum>();
+            nums[id] = j2[1].get<num_t>();
         }
     }
 
@@ -426,27 +467,11 @@ void char_data::deserializeBase(const nlohmann::json &j) {
     if(j.contains("chclass")) c = j["chclass"].get<::sensei::sensei_id>();
     chclass = ::sensei::sensei_map[c];
 
-    if(j.contains("level")) level = j["level"];
-
     if(j.contains("weight")) weight = j["weight"];
 
     if(j.contains("affected_by"))
         for(auto &i : j["affected_by"])
             SET_BIT_AR(affected_by, i.get<int>());
-
-    if(j.contains("basepl")) basepl = j["basepl"];
-    if(j.contains("baseki")) baseki = j["baseki"];
-    if(j.contains("basest")) basest = j["basest"];
-
-    if(j.contains("attributes")) {
-        for(auto attr : j["attributes"]) {
-            // Each attr should be a tuple of (attr_id, json).
-            // We will feed it into this->attributes.emplace().
-            auto attr_id = attr[0].get<CharAttribute>();
-            auto attr_json = attr[1];
-            attributes.emplace(attr_id, attr_json);
-        }
-    }
 
     if(j.contains("armor")) armor = j["armor"];
     if(j.contains("damage_mod")) damage_mod = j["damage_mod"];
@@ -475,7 +500,6 @@ nlohmann::json char_data::serializeInstance() {
     auto j = serializeBase();
     if(generation) j["generation"] = generation;
 
-    if(admlevel) j["admlevel"] = admlevel;
     for(auto i = 0; i < NUM_ADMFLAGS; i++)
         if(IS_SET_AR(admflags, i)) j["admflags"].push_back(i);
 
@@ -483,9 +507,6 @@ nlohmann::json char_data::serializeInstance() {
     if(energy < 1.0) j["energy"] = energy;
     if(stamina < 1.0) j["stamina"] = stamina;
     if(life < 1.0) j["life"] = life;
-
-    if(gold) j["gold"] = gold;
-    if(bank_gold) j["bank_gold"] = bank_gold;
 
     if(exp) j["exp"] = exp;
 
@@ -632,8 +653,6 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
     if(j.contains("generation")) generation = j["generation"];
     check_unique_id(this);
     add_unique_id(this);
-
-    if(j.contains("admlevel")) admlevel = j["admlevel"];
 
     if(j.contains("admflags"))
         for(auto &i : j["admflags"])

@@ -243,7 +243,7 @@ void list_mobiles(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnu
             send_to_char(ch, "@g%4d@n) [@g%-5d@n] @[3]%-*s @C%-9s @c%-9s @y[%4d]@n %s\r\n",
                          vn, get_vnum_count(characterVnumIndex, vn), count_color_chars(m.short_description) + 30,
                          m.short_description, TRUE_RACE(&m), m.chclass->getName().c_str(),
-                         m.level,
+                         m.get(CharNum::Level),
                          sString.c_str());
         }
     }

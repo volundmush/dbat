@@ -900,7 +900,7 @@ char *make_prompt(struct descriptor_data *d) {
                     len += count;
             }
             if (GET_SONG(d->character) > 0) {
-                count = snprintf(prompt + len, sizeof(prompt) - len, "%s - ", song_types[GET_SONG(d->character)]);
+                count = snprintf(prompt + len, sizeof(prompt) - len, "%s - ", song_types[(int)GET_SONG(d->character)]);
                 flagged = true;
                 if (count >= 0)
                     len += count;
@@ -2286,8 +2286,8 @@ void descriptor_data::handle_input() {
     }
 
     if (character && GET_WAIT_STATE(character)) {
-        GET_WAIT_STATE(character) -= 1;
-        if(GET_WAIT_STATE(character) < 0) GET_WAIT_STATE(character) = 0;
+        character->mod(CharNum::Wait, -1);
+        if(GET_WAIT_STATE(character) < 0) character->set(CharNum::Wait, 0);
         if (GET_WAIT_STATE(character)) return;
     }
 
@@ -2305,7 +2305,7 @@ void descriptor_data::handle_input() {
             GET_WAS_IN(character) = NOWHERE;
             act("$n has returned.", true, character, nullptr, nullptr, TO_ROOM);
         }
-        GET_WAIT_STATE(character) = 1;
+        character->set(CharNum::Wait, 1);
     }
     has_prompt = false;
 
