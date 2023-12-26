@@ -498,7 +498,8 @@ ACMD(do_honoo) {
             } else if (GET_BONUS(vict, BONUS_FIREPRONE)) {
                 dmg += dmg * 0.4;
             }
-            SET_BIT_AR(AFF_FLAGS(vict), AFF_ASHED);
+
+            vict->affected_by.set(AFF_ASHED);
             switch (hitspot) {
                 case 1:
                     act("@WYou gather your charged ki and bring it up into your throat while mixing it with the air in your lungs. You grin evily at @c$N@W before unleashing a massive jet of @rf@Rl@Ya@rm@Re@Ys@W from your lips! @c$N@W's body is engulfed!@n",
@@ -569,13 +570,13 @@ ACMD(do_honoo) {
                 !GET_BONUS(vict, BONUS_FIREPROOF)) {
                 send_to_char(vict, "@RYou are burned by the attack!@n\r\n");
                 send_to_char(ch, "@RThey are burned by the attack!@n\r\n");
-                SET_BIT_AR(AFF_FLAGS(vict), AFF_BURNED);
+                vict->affected_by.set(AFF_BURNED);
             } else if (GET_BONUS(vict, BONUS_FIREPROOF) || IS_DEMON(vict)) {
                 send_to_char(ch, "@RThey appear to be fireproof!@n\r\n");
             } else if (GET_BONUS(vict, BONUS_FIREPRONE)) {
                 send_to_char(vict, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
                 send_to_char(ch, "@RThey are easily burned!@n\r\n");
-                SET_BIT_AR(AFF_FLAGS(vict), AFF_BURNED);
+                vict->affected_by.set(AFF_BURNED);
             }
             if (GET_SKILL_PERF(ch, SKILL_HONOO) == 3 && attperc > minimum) {
                 pcost(ch, attperc - 0.05, 0);
@@ -589,7 +590,7 @@ ACMD(do_honoo) {
                 send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates completely away!\r\n");
                 ROOM_EFFECT(IN_ROOM(ch)) = 0;
             }
-            REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ASHED);
+            vict->affected_by.reset(AFF_ASHED);
             return;
         }
     } else if (obj) {
@@ -866,7 +867,7 @@ ACMD(do_psyblast) {
             if (!AFF_FLAGGED(vict, AFF_SHOCKED) && rand_number(1, 4) == 4 && !AFF_FLAGGED(vict, AFF_SANCTUARY)) {
                 act("@MYour mind has been shocked!@n", true, vict, nullptr, nullptr, TO_CHAR);
                 act("@M$n@m's mind has been shocked!@n", true, vict, nullptr, nullptr, TO_ROOM);
-                SET_BIT_AR(AFF_FLAGS(vict), AFF_SHOCKED);
+                vict->affected_by.set(AFF_SHOCKED);
             }
             if (GET_SKILL_PERF(ch, SKILL_PSYBLAST) == 3 && attperc > minimum) {
                 pcost(ch, attperc - 0.05, 0);
@@ -1770,11 +1771,11 @@ ACMD(do_pbarrage) {
                     nullptr, nullptr,
                     TO_CHAR);
                 act("@M$n@m's mind has been damaged by the attack!@n", true, vict, nullptr, nullptr, TO_ROOM);
-                SET_BIT_AR(AFF_FLAGS(vict), AFF_MBREAK);
+                vict->affected_by.set(AFF_MBREAK);
             } else if (!AFF_FLAGGED(vict, AFF_SHOCKED) && rand_number(1, 4) == 4 && !AFF_FLAGGED(vict, AFF_SANCTUARY)) {
                 act("@MYour mind has been shocked!@n", true, vict, nullptr, nullptr, TO_CHAR);
                 act("@M$n@m's mind has been shocked!@n", true, vict, nullptr, nullptr, TO_ROOM);
-                SET_BIT_AR(AFF_FLAGS(vict), AFF_SHOCKED);
+                vict->affected_by.set(AFF_SHOCKED);
             }
             pcost(ch, attperc, 0);
 
@@ -2649,7 +2650,7 @@ ACMD(do_pslash) {
             } else if (GET_BONUS(vict, BONUS_FIREPRONE)) {
                 dmg += dmg * 0.4;
             }
-            SET_BIT_AR(AFF_FLAGS(vict), AFF_ASHED);
+            vict->affected_by.set(AFF_ASHED);
             switch (hitspot) {
                 case 1:
                     act("@WYou pour your charged ki into your sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surround the entire sword in the same instant that you pull the blade back and extend it behind your body. Suddenly you swing the blade forward toward @c$N@W, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards @c$N@W! The Phoenix Slash engulfs $S body in flames a moment later!@n",
@@ -2720,16 +2721,16 @@ ACMD(do_pslash) {
                 !GET_BONUS(vict, BONUS_FIREPROOF)) {
                 send_to_char(vict, "@RYou are burned by the attack!@n\r\n");
                 send_to_char(ch, "@RThey are burned by the attack!@n\r\n");
-                SET_BIT_AR(AFF_FLAGS(vict), AFF_BURNED);
+                vict->affected_by.set(AFF_BURNED);
             } else if (GET_BONUS(vict, BONUS_FIREPROOF) || IS_DEMON(vict)) {
                 send_to_char(ch, "@RThey appear to be fireproof!@n\r\n");
             } else if (GET_BONUS(vict, BONUS_FIREPRONE)) {
                 send_to_char(vict, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
                 send_to_char(ch, "@RThey are easily burned!@n\r\n");
-                SET_BIT_AR(AFF_FLAGS(vict), AFF_BURNED);
+                vict->affected_by.set(AFF_BURNED);
             }
             pcost(ch, attperc, 0);
-            REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ASHED);
+            vict->affected_by.reset(AFF_ASHED);
             return;
         }
     } else if (obj) {
@@ -3619,7 +3620,7 @@ ACMD(do_kakusanha) {
                 act("@C$N@c disappears, avoiding the beam chasing $M!@n", false, ch, nullptr, vict, TO_CHAR);
                 act("@cYou disappear, avoiding the beam chasing you!@n", false, ch, nullptr, vict, TO_VICT);
                 act("@C$N@c disappears, avoiding the beam chasing $M!@n", false, ch, nullptr, vict, TO_NOTVICT);
-                REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
+                vict->affected_by.reset(AFF_ZANZOKEN);
                 pcost(vict, 0, GET_MAX_HIT(vict) / 200);
                 hurt(0, 0, ch, vict, nullptr, 0, 1);
                 continue;
@@ -3897,7 +3898,7 @@ ACMD(do_hellspear) {
                 act("@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", false, ch, nullptr,
                     vict,
                     TO_NOTVICT);
-                REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
+                vict->affected_by.reset(AFF_ZANZOKEN);
                 pcost(vict, 0, GET_MAX_HIT(vict) / 200);
                 continue;
             } else if (dge + rand_number(-10, 5) > skill) {
@@ -5925,7 +5926,7 @@ ACMD(do_baku) {
                 act("@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", false, ch, nullptr,
                     vict,
                     TO_NOTVICT);
-                REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
+                vict->affected_by.reset(AFF_ZANZOKEN);
                 pcost(vict, 0, GET_MAX_HIT(vict) / 200);
                 hurt(0, 0, ch, vict, nullptr, 0, 1);
                 continue;
@@ -6677,7 +6678,7 @@ ACMD(do_blessedhammer) {
             if (!AFF_FLAGGED(vict, AFF_BURNED) && rand_number(1, 4) == 3 && !IS_DEMON(vict)) {
                 send_to_char(vict, "@RYou are burned by the attack!@n\r\n");
                 send_to_char(ch, "@RThey are burned by the attack!@n\r\n");
-                SET_BIT_AR(AFF_FLAGS(vict), AFF_BURNED);
+                vict->affected_by.set(AFF_BURNED);
             }
             pcost(ch, attperc, 0);
 
@@ -6917,7 +6918,7 @@ ACMD(do_kousengan) {
             if (!AFF_FLAGGED(vict, AFF_BURNED) && rand_number(1, 4) == 3 && !IS_DEMON(vict)) {
                 send_to_char(vict, "@RYou are burned by the attack!@n\r\n");
                 send_to_char(ch, "@RThey are burned by the attack!@n\r\n");
-                SET_BIT_AR(AFF_FLAGS(vict), AFF_BURNED);
+                vict->affected_by.set(AFF_BURNED);
             }
             pcost(ch, attperc, 0);
 
@@ -12758,7 +12759,7 @@ ACMD(do_charge) {
         ch->incCurKI(GET_CHARGE(ch));
         GET_CHARGE(ch) = 0;
         GET_CHARGETO(ch) = 0;
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CHARGE);
+        ch->affected_by.reset(PLR_CHARGE);
         return;
     } else if (!strcasecmp("release", arg) && GET_CHARGE(ch) > 0) {
         send_to_char(ch, "You release your pent up energy.\r\n");
@@ -12796,7 +12797,7 @@ ACMD(do_charge) {
                 act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
                 break;
         }
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CHARGE);
+        ch->affected_by.reset(PLR_CHARGE);
         GET_CHARGETO(ch) = 0;
         return;
     } else if (!strcasecmp("cancel", arg) && !PLR_FLAGGED(ch, PLR_CHARGE)) {
@@ -12851,7 +12852,7 @@ ACMD(do_charge) {
             act(bloom, true, ch, nullptr, nullptr, TO_ROOM);
             GET_CHARGETO(ch) = (((GET_MAX_MANA(ch) * 0.01) * amt) + 1);
             GET_CHARGE(ch) += 1;
-            SET_BIT_AR(PLR_FLAGS(ch), PLR_CHARGE);
+            ch->affected_by.reset(PLR_CHARGE);
         }
     } else if (amt < 1 && GET_ROOM_VNUM(IN_ROOM(ch)) != 1562) {
         send_to_char(ch, "You have set it too low!\r\n");
@@ -12863,7 +12864,7 @@ ACMD(do_charge) {
 
 ACMD(do_powerup) {
     if (IS_NPC(ch)) {
-        SET_BIT_AR(MOB_FLAGS(ch), MOB_POWERUP);
+        ch->mobFlags.set(MOB_POWERUP);
         if (GET_MAX_HIT(ch) < 50000) {
             act("@RYou begin to powerup, and air billows outward around you!@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@R$n begins to powerup, and air billows outward around $m!@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -12915,7 +12916,7 @@ ACMD(do_powerup) {
     }
     if (PLR_FLAGGED(ch, PLR_POWERUP)) {
         send_to_char(ch, "@WYou stop powering up.@n");
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_POWERUP);
+        ch->playerFlags.reset(PLR_POWERUP);
         return;
     }
     if (GET_HIT(ch) >= GET_MAX_HIT(ch)) {
@@ -12962,7 +12963,7 @@ ACMD(do_powerup) {
             act("@R$n begins to powerup, and the very air around $m begins to burn!@n", true, ch, nullptr, nullptr,
                 TO_ROOM);
         }
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_POWERUP);
+        ch->playerFlags.set(PLR_POWERUP);
         return;
     }
 }

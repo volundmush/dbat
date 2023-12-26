@@ -1011,12 +1011,12 @@ ACMD(do_twohand) {
     } else if (PLR_FLAGGED(ch, PLR_THANDW)) {
         send_to_char(ch, "You stop wielding your weapon with both hands.\r\n");
         act("$n stops wielding $s weapon with both hands.", true, ch, nullptr, nullptr, TO_ROOM);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_THANDW);
+        ch->playerFlags.reset(PLR_THANDW);
         return;
     } else {
         send_to_char(ch, "You grab your weapon with both hands.\r\n");
         act("$n starts wielding $s weapon with both hands.", true, ch, nullptr, nullptr, TO_ROOM);
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_THANDW);
+        ch->playerFlags.set(PLR_THANDW);
         return;
     }
 }
@@ -2478,7 +2478,7 @@ static void perform_get_from_container(struct char_data *ch, struct obj_data *ob
                     if (GET_BONUS(ch, BONUS_FIREPRONE) > 0)
                         ch->decCurHealthPercent(1, 1);
 
-                    SET_BIT_AR(AFF_FLAGS(ch), AFF_BURNED);
+                    ch->affected_by.set(AFF_BURNED);
                     act("@RYou are burned by it!@n", true, ch, nullptr, nullptr, TO_CHAR);
                     act("@R$n@R is burned by it!@n", true, ch, nullptr, nullptr, TO_ROOM);
                 }
@@ -2571,7 +2571,7 @@ int perform_get_from_room(struct char_data *ch, struct obj_data *obj) {
                 if (GET_BONUS(ch, BONUS_FIREPRONE) > 0)
                     ch->decCurHealthPercent(1, 1);
 
-                SET_BIT_AR(AFF_FLAGS(ch), AFF_BURNED);
+                ch->affected_by.set(AFF_BURNED);
                 act("@RYou are burned by it!@n", true, ch, nullptr, nullptr, TO_CHAR);
                 act("@R$n@R is burned by it!@n", true, ch, nullptr, nullptr, TO_ROOM);
             }
@@ -3113,7 +3113,8 @@ static void perform_give(struct char_data *ch, struct char_data *vict,
             if (GET_BONUS(vict, BONUS_FIREPRONE) > 0)
                 ch->decCurHealthPercent(1, 1);
 
-            SET_BIT_AR(AFF_FLAGS(vict), AFF_BURNED);
+
+            vict->affected_by.set(AFF_BURNED);
             act("@RYou are burned by it!@n", true, vict, nullptr, nullptr, TO_CHAR);
             act("@R$n@R is burned by it!@n", true, vict, nullptr, nullptr, TO_ROOM);
         }
@@ -4364,7 +4365,7 @@ void perform_remove(struct char_data *ch, int pos) {
             return;
 
         if (pos == WEAR_WIELD1 && PLR_FLAGGED(ch, PLR_THANDW)) {
-            REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_THANDW);
+            ch->playerFlags.reset(PLR_THANDW);
         }
         obj_to_char(unequip_char(ch, pos), ch);
         act("You stop using $p.", false, ch, obj, nullptr, TO_CHAR);

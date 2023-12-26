@@ -401,8 +401,8 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define CHECK_PLAYER_SPECIAL(ch, var)	(var)
 #endif
 
-#define MOB_FLAGS(ch)    ((ch)->act)
-#define PLR_FLAGS(ch)    ((ch)->act)
+#define MOB_FLAGS(ch)    ((ch)->mobFlags)
+#define PLR_FLAGS(ch)    ((ch)->playerFlags)
 #define PRF_FLAGS(ch)    ((ch)->pref)
 #define AFF_FLAGS(ch)    ((ch)->affected_by)
 #define ADM_FLAGS(ch)    ((ch)->admflags)
@@ -418,14 +418,14 @@ extern int wield_type(int chsize, const struct obj_data *weap);
  * See http://www.circlemud.org/~greerga/todo/todo.009 to eliminate MOB_ISNPC.
  * IS_MOB() acts as a VALID_MOB_RNUM()-like function.
  */
-#define IS_NPC(ch)    (IS_SET_AR(MOB_FLAGS(ch), MOB_ISNPC))
+#define IS_NPC(ch)    (MOB_FLAGGED((ch), MOB_ISNPC))
 #define IS_MOB(ch)    (IS_NPC(ch) && mob_proto.count(GET_MOB_RNUM(ch)))
 
-#define MOB_FLAGGED(ch, flag) (IS_NPC(ch) && IS_SET_AR(MOB_FLAGS(ch), (flag)))
-#define PLR_FLAGGED(ch, flag) (!IS_NPC(ch) && IS_SET_AR(PLR_FLAGS(ch), (flag)))
-#define AFF_FLAGGED(ch, flag) (IS_SET_AR(AFF_FLAGS(ch), (flag)))
-#define PRF_FLAGGED(ch, flag) (IS_SET_AR(PRF_FLAGS(ch), (flag)))
-#define ADM_FLAGGED(ch, flag) (IS_SET_AR(ADM_FLAGS(ch), (flag)))
+extern bool MOB_FLAGGED(const struct char_data *ch, int flag);
+extern bool PLR_FLAGGED(struct char_data *ch, int flag);
+extern bool AFF_FLAGGED(struct char_data *ch, int flag);
+extern bool PRF_FLAGGED(struct char_data *ch, int flag);
+extern bool ADM_FLAGGED(struct char_data *ch, int flag);
 bool ROOM_FLAGGED(room_vnum loc, int flag);
 
 #define EXIT_FLAGGED(exit, flag) (IS_SET((exit)->exit_info, (flag)))
@@ -583,7 +583,7 @@ extern int GET_SPEEDI(struct char_data *ch);
 #define COMBO(ch)         ((ch)->combo)
 #define LASTATK(ch)       ((ch)->lastattack)
 #define COMBHITS(ch)      ((ch)->combhits)
-#define GET_AURA(ch)      ((ch)->aura)
+#define GET_AURA(ch)      ((ch)->get(CharAppearance::Aura))
 #define GET_RADAR1(ch)    ((ch)->radar1)
 #define GET_RADAR2(ch)    ((ch)->radar2)
 #define GET_RADAR3(ch)    ((ch)->radar3)

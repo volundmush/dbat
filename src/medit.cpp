@@ -166,7 +166,7 @@ ACMD(do_oasis_medit) {
     /** builder and also log it.                                               **/
     /****************************************************************************/
     act("$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
-    SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
+    ch->playerFlags.set(PLR_WRITING);
 
     mudlog(BRF, ADMLVL_IMMORT, true, "OLC: %s starts editing zone %d allowed zone %d",
            GET_NAME(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
@@ -249,7 +249,7 @@ void init_mobile(struct char_data *mob) {
         mob->set(attr, base2);
     }
 
-    SET_BIT_AR(MOB_FLAGS(mob), MOB_ISNPC);
+    mob->mobFlags.set(MOB_ISNPC);
 }
 
 /*-------------------------------------------------------------------*/
@@ -367,7 +367,7 @@ void medit_disp_mob_flags(struct descriptor_data *d) {
         write_to_output(d, "@g%2d@n) %-20.20s  %s", i + 1, action_bits[i],
                         !(++columns % 2) ? "\r\n" : "");
     }
-    sprintbitarray(MOB_FLAGS(OLC_MOB(d)), action_bits, AF_ARRAY_MAX, flags);
+    sprintbitarray(OLC_MOB(d)->mobFlags, action_bits, AF_ARRAY_MAX, flags);
     write_to_output(d, "\r\nCurrent flags : @c%s@n\r\nEnter mob flags (0 to quit) : ",
                     flags);
 }
@@ -484,8 +484,8 @@ void medit_disp_menu(struct descriptor_data *d) {
                     GET_NDD(mob), GET_SDD(mob), GET_HIT(mob), (mob->getCurKI()),
                     (mob->getCurST()), GET_ARMOR(mob), GET_EXP(mob), GET_GOLD(mob)
     );
-    sprintbitarray(MOB_FLAGS(mob), action_bits, AF_ARRAY_MAX, flags);
-    sprintbitarray(AFF_FLAGS(mob), affected_bits, AF_ARRAY_MAX, flag2);
+    sprintbitarray(mob->mobFlags, action_bits, AF_ARRAY_MAX, flags);
+    sprintbitarray(mob->affected_by, affected_bits, AF_ARRAY_MAX, flag2);
     write_to_output(d,
                     "@gI@n) Position   : @y%-10s@n,	 @gJ@n) Default   : @y%-10s\r\n"
                     "@gK@n) Personality: @Y%s@n\r\n"
@@ -536,7 +536,7 @@ void medit_parse(struct descriptor_data *d, char *arg) {
             /*
              * Ensure mob has MOB_ISNPC set or things will go pear shaped.
              */
-            SET_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_ISNPC);
+            OLC_MOB(d)->mobFlags.set(MOB_ISNPC);
             switch (*arg) {
                 case 'y':
                 case 'Y':
@@ -781,7 +781,7 @@ void medit_parse(struct descriptor_data *d, char *arg) {
             if ((i = atoi(arg)) <= 0)
                 break;
             else if (i <= NUM_MOB_FLAGS)
-                TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), i - 1);
+                OLC_MOB(d)->mobFlags.flip(i-1);
             medit_disp_mob_flags(d);
             return;
 /*-------------------------------------------------------------------*/
@@ -799,8 +799,7 @@ void medit_parse(struct descriptor_data *d, char *arg) {
             else if (i <= NUM_AFF_FLAGS)
                 TOGGLE_BIT_AR(AFF_FLAGS(OLC_MOB(d)), i);
             /* Remove unwanted bits right away. */
-            REMOVE_BIT_AR(AFF_FLAGS(OLC_MOB(d)),
-                          AFF_CHARM | AFF_POISON | AFF_GROUP | AFF_SLEEP);
+            for(auto f : {AFF_CHARM, AFF_POISON, AFF_GROUP, AFF_SLEEP}) OLC_MOB(d)->affected_by.reset(f);
             medit_disp_aff_flags(d);
             return;
 /*-------------------------------------------------------------------*/
@@ -815,65 +814,47 @@ void medit_parse(struct descriptor_data *d, char *arg) {
 
         case MEDIT_ACCURACY:
             GET_FISHD(OLC_MOB(d)) = LIMIT(i, 0, 50);
-            if (MOB_FLAGGED(OLC_MOB(d), MOB_AUTOBALANCE)) {
-                TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_AUTOBALANCE);
-            }
+            OLC_MOB(d)->mobFlags.reset(MOB_AUTOBALANCE);
             break;
 
         case MEDIT_DAMAGE:
             GET_DAMAGE_MOD(OLC_MOB(d)) = LIMIT(i, 0, 50);
-            if (MOB_FLAGGED(OLC_MOB(d), MOB_AUTOBALANCE)) {
-                TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_AUTOBALANCE);
-            }
+            OLC_MOB(d)->mobFlags.reset(MOB_AUTOBALANCE);
             break;
 
         case MEDIT_NDD:
             GET_NDD(OLC_MOB(d)) = LIMIT(i, 0, 30);
-            if (MOB_FLAGGED(OLC_MOB(d), MOB_AUTOBALANCE)) {
-                TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_AUTOBALANCE);
-            }
+            OLC_MOB(d)->mobFlags.reset(MOB_AUTOBALANCE);
             break;
 
         case MEDIT_SDD:
             GET_SDD(OLC_MOB(d)) = LIMIT(i, 0, 127);
-            if (MOB_FLAGGED(OLC_MOB(d), MOB_AUTOBALANCE)) {
-                TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_AUTOBALANCE);
-            }
+            OLC_MOB(d)->mobFlags.reset(MOB_AUTOBALANCE);
             break;
 
         case MEDIT_NUM_HP_DICE:
             //GET_HIT(OLC_MOB(d)) = LIMIT(i, 0, CONFIG_LEVEL_CAP);
-            if (MOB_FLAGGED(OLC_MOB(d), MOB_AUTOBALANCE)) {
-                TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_AUTOBALANCE);
-            }
+            OLC_MOB(d)->mobFlags.reset(MOB_AUTOBALANCE);
             break;
 
         case MEDIT_SIZE_HP_DICE:
             //GET_MANA(OLC_MOB(d)) = LIMIT(i, 0, 1000);
-            if (MOB_FLAGGED(OLC_MOB(d), MOB_AUTOBALANCE)) {
-                TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_AUTOBALANCE);
-            }
+            OLC_MOB(d)->mobFlags.reset(MOB_AUTOBALANCE);
             break;
 
         case MEDIT_ADD_HP:
             //GET_MOVE(OLC_MOB(d)) = LIMIT(i, 0, 30000);
-            if (MOB_FLAGGED(OLC_MOB(d), MOB_AUTOBALANCE)) {
-                TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_AUTOBALANCE);
-            }
+            OLC_MOB(d)->mobFlags.reset(MOB_AUTOBALANCE);
             break;
 
         case MEDIT_AC:
             GET_ARMOR(OLC_MOB(d)) = LIMIT(i, 10, 200000);
-            if (MOB_FLAGGED(OLC_MOB(d), MOB_AUTOBALANCE)) {
-                TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_AUTOBALANCE);
-            }
+            OLC_MOB(d)->mobFlags.reset(MOB_AUTOBALANCE);
             break;
 
         case MEDIT_EXP:
             GET_EXP(OLC_MOB(d)) = LIMIT(i, 0, MAX_MOB_EXP);
-            if (MOB_FLAGGED(OLC_MOB(d), MOB_AUTOBALANCE)) {
-                TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_AUTOBALANCE);
-            }
+            OLC_MOB(d)->mobFlags.reset(MOB_AUTOBALANCE);
             break;
 
         case MEDIT_GOLD:

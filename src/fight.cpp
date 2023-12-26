@@ -655,7 +655,7 @@ static void cleanup_arena_watch(struct char_data *ch) {
 
         if (PRF_FLAGGED(d->character, PRF_ARENAWATCH)) {
             if (ARENA_IDNUM(d->character) == GET_IDNUM(ch)) {
-                REMOVE_BIT_AR(PRF_FLAGS(d->character), PRF_ARENAWATCH);
+                d->character->pref.reset(PRF_ARENAWATCH);
                 ARENA_IDNUM(d->character) = -1;
             }
         }
@@ -704,30 +704,22 @@ void remove_limb(struct char_data *vict, int num) {
         case 1:
             snprintf(part, sizeof(part), "@w%s right arm@n", TRUE_RACE(vict));
             snprintf(buf, sizeof(buf), "right arm");
-            if (PLR_FLAGGED(vict, PLR_CRARM)) {
-                REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_CRARM);
-            }
+        vict->pref.reset(PLR_CRARM);
             break;
         case 2:
             snprintf(part, sizeof(part), "@w%s left arm@n", TRUE_RACE(vict));
             snprintf(buf, sizeof(buf), "left arm");
-            if (PLR_FLAGGED(vict, PLR_CLARM)) {
-                REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_CLARM);
-            }
+            vict->pref.reset(PLR_CLARM);
             break;
         case 3:
             snprintf(part, sizeof(part), "@w%s right leg@n", TRUE_RACE(vict));
             snprintf(buf, sizeof(buf), "right leg");
-            if (PLR_FLAGGED(vict, PLR_CRLEG)) {
-                REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_CRLEG);
-            }
+            vict->pref.reset(PLR_CRLEG);
             break;
         case 4:
             snprintf(part, sizeof(part), "@w%s left leg@n", TRUE_RACE(vict));
             snprintf(buf, sizeof(buf), "left leg");
-            if (PLR_FLAGGED(vict, PLR_CLLEG)) {
-                REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_CLLEG);
-            }
+            vict->pref.reset(PLR_CLLEG);
             break;
         case 5:
             snprintf(part, sizeof(part), "@wA %s tail@n", TRUE_RACE(vict));
@@ -817,7 +809,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 act("@g$n@ finishes powering up as $s aura flashes brightly filling the entire area briefly with its light!@n",
                     true, ch, nullptr, nullptr, TO_ROOM);
                 ch->restoreHealth(false);
-                REMOVE_BIT_AR(MOB_FLAGS(ch), MOB_POWERUP);
+                ch->mobFlags.set(MOB_POWERUP);
             } else if (GET_HIT(ch) >= GET_MAX_HIT(ch) / 2) {
                 act("@g$n@G continues powering up as torrents of energy crackle within $s aura.@n", true, ch, nullptr,
                     nullptr, TO_ROOM);
@@ -893,7 +885,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                             TO_CHAR);
                         act("@y$n@Y manages to move into an advantageous position!@n", true, ch, nullptr, nullptr,
                             TO_ROOM);
-                        SET_BIT_AR(AFF_FLAGS(ch), AFF_POSITION);
+                        ch->affected_by.set(AFF_POSITION);
                     } else {
                         struct char_data *vict = FIGHTING(ch);
                         if (roll_balance(ch) > roll_balance(vict)) {
@@ -903,8 +895,8 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                                 nullptr, vict, TO_VICT);
                             act("@y$n@Y struggles to gain a better position than @y$N@Y and succeeds!@n", true, ch,
                                 nullptr, vict, TO_NOTVICT);
-                            REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_POSITION);
-                            SET_BIT_AR(AFF_FLAGS(ch), AFF_POSITION);
+                            vict->affected_by.reset(AFF_POSITION);
+                            ch->affected_by.set(AFF_POSITION);
                         }
                     }
                 }
@@ -913,7 +905,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
             if (roll_balance(ch) < axion_dice(-30) || GET_POS(ch) < POS_STANDING) {
                 act("@YYou are moved out of your position!@n", true, ch, nullptr, nullptr, TO_CHAR);
                 act("@y$n@Y is moved out of $s position!@n", true, ch, nullptr, nullptr, TO_ROOM);
-                REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_POSITION);
+                ch->affected_by.reset(AFF_POSITION);
             }
         }
         if (GRAPPLING(ch) && GRAPTYPE(ch) == 2 && rand_number(1, 11) >= 8) {
@@ -926,7 +918,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 act("@WYou choke @C$N@W, and $E passes out!@n", true, ch, nullptr, GRAPPLING(ch), TO_CHAR);
                 act("@C$n@W chokes YOU@W, and you pass out!@n", true, ch, nullptr, GRAPPLING(ch), TO_VICT);
                 act("@C$n@W chokes @c$N@W, and $E passes out!@n", true, ch, nullptr, GRAPPLING(ch), TO_NOTVICT);
-                SET_BIT_AR(AFF_FLAGS(GRAPPLING(ch)), AFF_KNOCKED);
+                ch->affected_by.set(AFF_KNOCKED);
                 GET_POS(GRAPPLING(ch)) = POS_SLEEPING;
                 GRAPTYPE(GRAPPLING(ch)) = -1;
                 GRAPPLED(GRAPPLING(ch)) = nullptr;
@@ -1017,12 +1009,12 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
         }
         if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_DISGUISED) && GET_SKILL(ch, SKILL_DISGUISE) < rand_number(1, 125)) {
             send_to_char(ch, "Your disguise comes off because of your swift movements!\r\n");
-            REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_DISGUISED);
+            ch->playerFlags.reset(PLR_DISGUISED);
             act("@W$n's@W disguise comes off because of $s swift movements!@n", false, ch, nullptr, nullptr, TO_ROOM);
         }
         if (IS_NPC(ch) && AFF_FLAGGED(ch, AFF_BLIND) && rand_number(1, 200) >= 190) {
             act("@W$n@W is no longer blind.@n", false, ch, nullptr, nullptr, TO_ROOM);
-            REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_BLIND);
+            ch->affected_by.reset(AFF_BLIND);
         }
 
         if (AFF_FLAGGED(ch, AFF_KNOCKED) && rand_number(1, 200) >= 195) {
@@ -1115,7 +1107,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
             }
         }
         if (GET_POS(ch) <= POS_RESTING && PLR_FLAGGED(ch, PLR_POWERUP)) {
-            REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_POWERUP);
+            ch->playerFlags.reset(PLR_POWERUP);
         }
 
         if (GET_BARRIER(ch) > 0) {
@@ -1138,7 +1130,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 send_to_sense(0, "You sense someone stop powering up", ch);
                 sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(GET_HIT(ch)).c_str());
                 send_to_scouter(buf3, ch, 1, 0);
-                REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_POWERUP);
+                ch->playerFlags.reset(PLR_POWERUP);
             } else if (GET_HIT(ch) >= (ch->getEffMaxPL()) && (ch->getCurKI()) >= (GET_MAX_MANA(ch) * 0.0375) + 1 &&
                        GET_PREFERENCE(ch) == PREFERENCE_KI) {
                 if ((ch->getCurKI()) >= (GET_MAX_MANA(ch) * 0.0375) + 1) {
@@ -1153,7 +1145,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 send_to_sense(0, "You sense someone stop powering up", ch);
                 sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(GET_HIT(ch)).c_str());
                 send_to_scouter(buf3, ch, 1, 0);
-                REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_POWERUP);
+                ch->playerFlags.reset(PLR_POWERUP);
             }
             if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 20 && GET_PREFERENCE(ch) != PREFERENCE_KI) {
                 ch->decCurKI(ch->getMaxKI() / 20);
@@ -1162,7 +1154,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 send_to_sense(0, "You sense someone stop powering up", ch);
                 sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(GET_HIT(ch)).c_str());
                 send_to_scouter(buf3, ch, 1, 0);
-                REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_POWERUP);
+                ch->playerFlags.reset(PLR_POWERUP);
             } else if ((ch->getCurKI()) < (GET_MAX_MANA(ch) * 0.0375) + 1 && GET_PREFERENCE(ch) == PREFERENCE_KI) {
                 ch->decCurKI((GET_MAX_MANA(ch) * 0.0375) + 1);
                 act("@RYou have run out of ki.@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -1170,7 +1162,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 send_to_sense(0, "You sense someone stop powering up", ch);
                 sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(GET_HIT(ch)).c_str());
                 send_to_scouter(buf3, ch, 1, 0);
-                REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_POWERUP);
+                ch->playerFlags.reset(PLR_POWERUP);
             }
             if (GET_HIT(ch) < (ch->getEffMaxPL()) && ((GET_PREFERENCE(ch) != PREFERENCE_KI &&
                                                        (ch->getCurKI()) >= GET_MAX_MANA(ch) / 20) ||
@@ -1246,7 +1238,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                     act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
                     break;
             }
-            REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CHARGE);
+            ch->playerFlags.reset(PLR_CHARGE);
             ch->incCurKI(GET_CHARGE(ch));
             GET_CHARGE(ch) = 0;
             GET_CHARGETO(ch) = 0;
@@ -1267,7 +1259,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                     act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
                     break;
             }
-            REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CHARGE);
+            ch->playerFlags.reset(PLR_CHARGE);
             ch->incCurKI(GET_CHARGE(ch));
             GET_CHARGE(ch) = 0;
             GET_CHARGETO(ch) = 0;
@@ -1354,7 +1346,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
             if ((ch->getCurKI()) <= 0) {
                 send_to_char(ch, "You can not charge anymore, you have charged all your energy!\r\n");
                 act("$n@w's aura grows calm.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CHARGE);
+                ch->playerFlags.reset(PLR_CHARGE);
             } else if (((GET_MAX_MANA(ch) * 0.01) * perc) >= (ch->getCurKI())) {
                 send_to_char(ch, "You have charged the last that you can.\r\n");
                 act("$n@w's aura @Yflashes@w spectacularly, rushing upwards in torrents!@n", true, ch, nullptr, nullptr,
@@ -1362,13 +1354,13 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 GET_CHARGE(ch) += (ch->getCurKI());
                 ch->decCurKIPercent(1);
                 GET_CHARGETO(ch) = 0;
-                REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CHARGE);
+                ch->playerFlags.reset(PLR_CHARGE);
             } else {
                 if (GET_CHARGE(ch) >= GET_CHARGETO(ch)) {
                     send_to_char(ch, "You have already reached the maximum that you wished to charge.\r\n");
                     act("$n@w's aura burns steadily.@n", true, ch, nullptr, nullptr, TO_ROOM);
                     GET_CHARGETO(ch) = 0;
-                    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CHARGE);
+                    ch->playerFlags.reset(PLR_CHARGE);
                 } else if (GET_CHARGE(ch) + (((GET_MAX_MANA(ch) * 0.01) * perc) + 1) >= GET_CHARGETO(ch)) {
                     ch->decCurKI(GET_CHARGETO(ch) - GET_CHARGE(ch));
                     GET_CHARGE(ch) = GET_CHARGETO(ch);
@@ -1376,7 +1368,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                     act("$n@w's aura flares up brightly and then burns steadily.@n", true, ch, nullptr, nullptr,
                         TO_ROOM);
                     GET_CHARGETO(ch) = 0;
-                    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CHARGE);
+                    ch->playerFlags.reset(PLR_CHARGE);
                 } else {
                     ch->decCurKI(((GET_MAX_MANA(ch) * 0.01) * perc) + 1);
                     GET_CHARGE(ch) += ((GET_MAX_MANA(ch) * 0.01) * perc) + 1;
@@ -1403,7 +1395,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                         GET_CHARGE(ch) += GET_LEVEL(ch);
                         send_to_char(ch, "You have finished charging!\r\n");
                         act("$n@w's aura burns brightly and then evens out.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CHARGE);
+                        ch->playerFlags.reset(PLR_CHARGE);
                         GET_CHARGETO(ch) = 0;
                     }
                 }
@@ -1419,11 +1411,7 @@ void appear(struct char_data *ch) {
     if (affected_by_spell(ch, SPELL_INVISIBLE))
         affect_from_char(ch, SPELL_INVISIBLE);
 
-    if (AFF_FLAGGED(ch, AFF_INVISIBLE))
-        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_INVISIBLE);
-
-    if (AFF_FLAGGED(ch, AFF_HIDE))
-        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_HIDE);
+    for(auto f : {AFF_INVISIBLE, AFF_HIDE}) ch->affected_by.reset(f);
 
     act("$n slowly fades into existence.", false, ch, nullptr, nullptr, TO_ROOM);
 }
@@ -1500,9 +1488,7 @@ void stop_fighting(struct char_data *ch) {
     REMOVE_FROM_LIST(ch, combat_list, next_fighting, temp);
     ch->next_fighting = nullptr;
     FIGHTING(ch) = nullptr;
-    if (AFF_FLAGGED(ch, AFF_POSITION)) {
-        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_POSITION);
-    }
+    ch->affected_by.reset(AFF_POSITION);
     update_pos(ch);
 }
 
@@ -2104,7 +2090,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
                 make_pcorpse(ch);
                 loadmap(ch);
             } else {
-                REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_ABSORBED);
+                ch->playerFlags.reset(PLR_ABSORBED);
             }
         }
         final_combat_resolve(ch);
@@ -2178,15 +2164,13 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
 
 void die(struct char_data *ch, struct char_data *killer) {
     if (!IS_NPC(ch)) {
-        if (PLR_FLAGGED(ch, PLR_HEALT)) {
-            REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_HEALT);
-        }
+        ch->playerFlags.reset(PLR_HEALT);
         if ((IS_MAJIN(ch) || IS_BIO(ch)) &&
             ((ch->getCurLF()) >= (ch->getMaxLF()) * 0.75 || (PLR_FLAGGED(ch, PLR_SELFD2) &&
                                                              (ch->getCurLF()) >= (ch->getMaxLF()) * 0.5))) {
             ch->decCurLFPercent(2, -1);
             ch->decCurHealthPercent(1, 1);
-            SET_BIT_AR(PLR_FLAGS(ch), PLR_GOOP);
+            ch->playerFlags.set(PLR_GOOP);
             ch->gooptime = 32;
             return;
         }
@@ -2212,11 +2196,8 @@ void die(struct char_data *ch, struct char_data *killer) {
             ch->teleport_to(ch->chclass->senseiStartRoom());
             return;
         }
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_KILLER);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_THIEF);
-        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_KNOCKED);
-        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_SLEEP);
-        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_PARALYZE);
+        for(auto f : {PLR_KILLER, PLR_THIEF}) ch->playerFlags.reset(f);
+        for(auto f : {AFF_KNOCKED, AFF_SLEEP, AFF_PARALYZE}) ch->affected_by.reset(f);
         if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !ROOM_FLAGGED(IN_ROOM(ch), ROOM_PAST) && GET_LEVEL(ch) > 8) {
             if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 2002 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 2011) {
                 GET_DTIME(ch) = time(nullptr);
@@ -2245,7 +2226,7 @@ void die(struct char_data *ch, struct char_data *killer) {
                     GET_DCOUNT(ch) += 1;
                 } else if (killer != nullptr && !IS_NPC(killer)) {
                     GET_DTIME(ch) = time(nullptr) + 1123200;
-                    SET_BIT_AR(PLR_FLAGS(ch), PLR_PDEATH);
+                    ch->playerFlags.set(PLR_PDEATH);
                     GET_DCOUNT(ch) += 1;
                 } else {
                     if (GET_DCOUNT(ch) <= 0) {

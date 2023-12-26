@@ -1257,40 +1257,43 @@ namespace net {
                 state = CON_AURA;
                 break;
 
-            case CON_AURA:
+            case CON_AURA: {
+                appearance_t aura = 0;
                 switch(arg[0]) {
                     case '1':
-                        ch->aura = 0;
-                        break;
+                        aura = 0;
+                    break;
                     case '2':
-                        ch->aura = 1;
-                        break;
+                        aura = 1;
+                    break;
                     case '3':
-                        ch->aura = 2;
-                        break;
+                        aura = 2;
+                    break;
                     case '4':
-                        ch->aura = 3;
-                        break;
+                        aura = 3;
+                    break;
                     case '5':
-                        ch->aura = 4;
-                        break;
+                        aura = 4;
+                    break;
                     case '6':
-                        ch->aura = 5;
-                        break;
+                        aura = 5;
+                    break;
                     case '7':
-                        ch->aura = 6;
-                        break;
+                        aura = 6;
+                    break;
                     case '8':
-                        ch->aura = 7;
-                        break;
+                        aura = 7;
+                    break;
                     case '9':
-                        ch->aura = 8;
-                        break;
+                        aura = 8;
+                    break;
                     default:
                         sendText("That is not an acceptable option.\r\n");
-                        return;
-                        break;
+                    return;
+                    break;
                 }
+                ch->set(CharAppearance::Aura, aura);
+            }
 
                 display_classes();
                 state = CON_QCLASS;
@@ -1327,7 +1330,7 @@ namespace net {
                         basepl += roll_stats(5, 65);
                     basest += roll_stats(8, 65);
                     baseki += roll_stats(6, 65);
-                    SET_BIT_AR(PLR_FLAGS(ch), PLR_SKILLP);
+                    ch->playerFlags.set(PLR_SKILLP);
                     break;
                     case '5':
                         basepl += roll_stats(5, 75);
@@ -1913,14 +1916,14 @@ namespace net {
                 } else if (!strcasecmp(arg.c_str(), "forget")) {
                     if (!IS_BIO(ch) && !IS_MUTANT(ch)) {
                         ch->modPractices(200);
-                        SET_BIT_AR(PLR_FLAGS(ch), PLR_FORGET);
+                        ch->playerFlags.set(PLR_FORGET);
                         display_bonus_menu(0);
                         sendText("@CThis menu (and the Negatives menu) are for selecting various traits about your character.\n");
                         sendText("@wChoose: ");
                         state = CON_BONUS;
                     } else if (IS_MUTANT(ch)) {
                         ch->modPractices(200);
-                        SET_BIT_AR(PLR_FLAGS(ch), PLR_FORGET);
+                        ch->playerFlags.set(PLR_FORGET);
                         sendText("\n@RSelect a mutation. A second will be chosen automatically..\n");
                         sendText("@D--------------------------------------------------------@n\n");
                         sendText("@B 1@W) @CExtreme Speed       @c-+30%s to Speed Index @C@n\n");
@@ -1940,7 +1943,7 @@ namespace net {
                     } else {
 
                         ch->modPractices(200);
-                        SET_BIT_AR(PLR_FLAGS(ch), PLR_FORGET);
+                        ch->playerFlags.set(PLR_FORGET);
                         sendText("\n@RSelect two genomes to be your primary DNA strains.\n");
                         sendText("@D--------------------------------------------------------@n\n");
                         sendText("@B1@W) @CHuman   @c- @CHigher PS gains from fighting@n\n");
@@ -2292,7 +2295,7 @@ namespace net {
             case CON_ANDROID:
                 switch(arg[0]) {
                     case '1':
-                        SET_BIT_AR(PLR_FLAGS(ch), PLR_ABSORB);
+                        ch->playerFlags.set(PLR_ABSORB);
                         sendText("\r\n@RAnswer The following questions carefully, they may construct your alignment in conflict with your trainer, or your stats contrary to your liking.\r\n\r\n");
                         sendText("\r\n@WQuestion (@G1@W out of @g10@W)");
                         sendText("@YAnswer the following question:\r\n");
@@ -2307,7 +2310,7 @@ namespace net {
                         state = CON_Q1;
                         break;
                     case '2':
-                        SET_BIT_AR(PLR_FLAGS(ch), PLR_REPAIR);
+                        ch->playerFlags.set(PLR_REPAIR);
                         sendText("\r\n@RAnswer The following questions carefully, they may construct your alignment in conflict with your trainer, or your stats contrary to your linking.\r\n\r\n");
                         sendText("@YAnswer the following question:\r\n");
                         sendText("@wYou go to train one day, but do not know the best\r\nway to approach it, What do you do?\r\n");
@@ -2321,7 +2324,7 @@ namespace net {
                         state = CON_Q1;
                         break;
                     case '3':
-                        SET_BIT_AR(PLR_FLAGS(ch), PLR_SENSEM);
+                        ch->playerFlags.set(PLR_SENSEM);
                         sendText("\r\n@RAnswer The following questions carefully, they may construct your alignment in conflict with your trainer or your stats contrary to your liking.\r\n\r\n");
                         sendText("@YAnswer the following question:\r\n");
                         sendText("@wYou go to train one day, but do not know the best\r\nway to approach it, What do you do?\r\n");
@@ -2345,7 +2348,7 @@ namespace net {
     void ChargenParser::finish() {
         // CREATE PLAYER ENTRY
         ch->id = nextCharID();
-        SET_BIT_AR(PRF_FLAGS(ch), PRF_COLOR);
+        ch->pref.set(PRF_COLOR);
         ch->generation = time(nullptr);
         check_unique_id(ch);
         add_unique_id(ch);

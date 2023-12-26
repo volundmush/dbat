@@ -85,9 +85,8 @@ void char_data::restore(bool announce) {
 void char_data::resurrect(ResurrectionMode mode) {
     // First, fully heal the character.
     restore(true);
-    REMOVE_BIT_AR(AFF_FLAGS(this), AFF_ETHEREAL);
-    REMOVE_BIT_AR(AFF_FLAGS(this), AFF_SPIRIT);
-    REMOVE_BIT_AR(PLR_FLAGS(this), PLR_PDEATH);
+    for(auto f : {AFF_ETHEREAL, AFF_SPIRIT}) affected_by.reset(f);
+    playerFlags.reset(PLR_PDEATH);
     // Send them to their starting room and have them 'look'.
     char_from_room(this);
     if (GET_DROOM(this) != NOWHERE && GET_DROOM(this) != 0 && GET_DROOM(this) != 1) {
@@ -158,29 +157,13 @@ void char_data::resurrect(ResurrectionMode mode) {
 
 void char_data::ghostify() {
     restore(true);
-    SET_BIT_AR(AFF_FLAGS(this), AFF_SPIRIT);
-    SET_BIT_AR(AFF_FLAGS(this), AFF_ETHEREAL);
+    for(auto f : {AFF_SPIRIT, AFF_ETHEREAL, AFF_KNOCKED, AFF_SLEEP, AFF_PARALYZE}) affected_by.reset(f);
 
     // upon death, ghost-bodies gain new natural limbs... unless they're a
     // cyborg and want to keep their implants.
     if (!PRF_FLAGGED(this, PRF_LKEEP)) {
-        if (PLR_FLAGGED(this, PLR_CLLEG)) {
-            REMOVE_BIT_AR(PLR_FLAGS(this), PLR_CLLEG);
-        }
-        if (PLR_FLAGGED(this, PLR_CRLEG)) {
-            REMOVE_BIT_AR(PLR_FLAGS(this), PLR_CRLEG);
-        }
-        if (PLR_FLAGGED(this, PLR_CRARM)) {
-            REMOVE_BIT_AR(PLR_FLAGS(this), PLR_CRARM);
-        }
-        if (PLR_FLAGGED(this, PLR_CLARM)) {
-            REMOVE_BIT_AR(PLR_FLAGS(this), PLR_CLARM);
-        }
+        for(auto f : {PLR_CLLEG, PLR_CRLEG, PLR_CLARM, PLR_CRARM}) playerFlags.reset(f);
     }
-
-    REMOVE_BIT_AR(AFF_FLAGS(this), AFF_KNOCKED);
-    REMOVE_BIT_AR(AFF_FLAGS(this), AFF_SLEEP);
-    REMOVE_BIT_AR(AFF_FLAGS(this), AFF_PARALYZE);
 
 }
 
@@ -732,11 +715,9 @@ void char_data::restoreStatus(bool announce) {
 }
 
 void char_data::setStatusKnockedOut() {
-    SET_BIT_AR(AFF_FLAGS(this), AFF_KNOCKED);
-    if (AFF_FLAGGED(this, AFF_FLYING)) {
-        REMOVE_BIT_AR(AFF_FLAGS(this), AFF_FLYING);
-        GET_ALT(this) = 0;
-    }
+    affected_by.set(AFF_KNOCKED);
+    affected_by.reset(AFF_FLYING);
+    altitude = 0;
     GET_POS(this) = POS_SLEEPING;
 }
 
@@ -755,7 +736,7 @@ void char_data::cureStatusKnockedOut(bool announce) {
             }
         }
 
-        REMOVE_BIT_AR(AFF_FLAGS(this), AFF_KNOCKED);
+        affected_by.reset(AFF_KNOCKED);
         GET_POS(this) = POS_SITTING;
     }
 }
@@ -766,7 +747,7 @@ void char_data::cureStatusBurn(bool announce) {
             send_to_char(this, "Your burns are healed now.\r\n");
             ::act("$n@w's burns are now healed.@n", true, this, nullptr, nullptr, TO_ROOM);
         }
-        REMOVE_BIT_AR(AFF_FLAGS(this), AFF_BURNED);
+        affected_by.reset(AFF_BURNED);
     }
 }
 
@@ -917,7 +898,7 @@ bool char_data::isWeightedPL() {
 
 void char_data::apply_kaioken(int times, bool announce) {
     GET_KAIOKEN(this) = times;
-    REMOVE_BIT_AR(PLR_FLAGS(this), PLR_POWERUP);
+    playerFlags.reset(PLR_POWERUP);
 
     if (announce) {
         send_to_char(this, "@rA dark red aura bursts up around your body as you achieve Kaioken x %d!@n\r\n", times);
@@ -1110,9 +1091,9 @@ void char_data::login() {
 
     desc->has_prompt = 0;
     /* We've updated to 3.1 - some bits might be set wrongly: */
-    REMOVE_BIT_AR(PRF_FLAGS(this), PRF_BUILDWALK);
+    pref.reset(PRF_BUILDWALK);
     if (!GET_EQ(this, WEAR_WIELD1) && PLR_FLAGGED(this, PLR_THANDW)) {
-        REMOVE_BIT_AR(PLR_FLAGS(this), PLR_THANDW);
+        playerFlags.reset(PLR_THANDW);
     }
 
 }

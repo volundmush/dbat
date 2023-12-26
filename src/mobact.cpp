@@ -68,7 +68,7 @@ void mob_absorb(struct char_data *ch, struct char_data *vict) {
             if (GET_SPEEDI(ch) < GET_SPEEDI(vict)) {
                 zanzo = true;
             } else {
-                REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
+                ch->affected_by.reset(AFF_ZANZOKEN);
             }
         } else {
             zanzo = true;
@@ -78,15 +78,14 @@ void mob_absorb(struct char_data *ch, struct char_data *vict) {
                 TO_VICT);
             act("@R$n@ctries to grab @R$N@c but $E @Czanzokens@c out of the way!@n", true, ch, nullptr, vict,
                 TO_NOTVICT);
-            REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-            REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
+            for(auto c : {ch, vict}) c->affected_by.reset(AFF_ZANZOKEN);
             return;
         } else {
             act("@cYou try to @Czanzoken@c out of @R$n's@c reach, but $e is too fast!@n", true, ch, nullptr, vict,
                 TO_VICT);
             act("@c$N tries to @Czanzoken@c out of @R$n's@c reach, but $e is too fast!@n", true, ch, nullptr, vict,
                 TO_NOTVICT);
-            REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
+            vict->affected_by.reset(AFF_ZANZOKEN);
         }
     }
 
@@ -139,7 +138,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
             if (mob_index[GET_MOB_RNUM(ch)].func == nullptr) {
                 basic_mud_log("SYSERR: %s (#%d): Attempting to call non-existing mob function.",
                     GET_NAME(ch), GET_MOB_VNUM(ch));
-                REMOVE_BIT_AR(MOB_FLAGS(ch), MOB_SPEC);
+                ch->mobFlags.reset(MOB_SPEC);
             } else {
                 char actbuf[MAX_INPUT_LENGTH] = "";
                 if ((mob_index[GET_MOB_RNUM(ch)].func)(ch, ch, 0, actbuf))

@@ -598,7 +598,7 @@ struct char_data : public unit_data {
     appearance_t set(CharAppearance type, appearance_t val);
     appearance_t mod(CharAppearance type, appearance_t val);
 
-    bitvector_t affected_by[AF_ARRAY_MAX]{};/* Bitvector for current affects	*/
+    std::bitset<NUM_AFF_FLAGS> affected_by{};/* Bitvector for current affects	*/
 
     std::unordered_map<CharStat, stat_t> stats;
     stat_t get(CharStat type);
@@ -609,7 +609,7 @@ struct char_data : public unit_data {
     room_vnum in_room{NOWHERE};        /* Location (real room number)		*/
     room_vnum was_in_room{NOWHERE};    /* location for linkdead people		*/
 
-    int admflags[AD_ARRAY_MAX]{};    /* Bitvector for admin privs		*/
+    std::bitset<NUM_ADMFLAGS> admflags{};    /* Bitvector for admin privs		*/
     room_vnum hometown{NOWHERE};        /* PC Hometown / NPC spawn room         */
     struct time_data time{};    /* PC's AGE in days			*/
     struct affected_type *affected{};
@@ -662,7 +662,8 @@ struct char_data : public unit_data {
 
     std::map<uint16_t, skill_data> skill;
 
-    bitvector_t act[PM_ARRAY_MAX]{}; /* act flag for NPC's; player flag for PC's */
+    std::bitset<NUM_PLR_FLAGS> playerFlags{}; /* act flag for NPC's; player flag for PC's */
+    std::bitset<NUM_MOB_FLAGS> mobFlags{};
 
     int bodyparts[AF_ARRAY_MAX]{};  /* Bitvector for current bodyparts      */
     int16_t saving_throw[3]{};    /* Saving throw				*/
@@ -714,7 +715,7 @@ struct char_data : public unit_data {
     short btime{};
     int eavesdir{};
     time_t deathtime{};
-    int rp{};
+
     int64_t suppression{};
     struct char_data *drag{};
     struct char_data *dragged{};
@@ -723,7 +724,6 @@ struct char_data : public unit_data {
     int dcount{};
     char *voice{};                  /* PC's snet voice */
     int limbs[4]{};                 /* 0 Right Arm, 1 Left Arm, 2 Right Leg, 3 Left Leg */
-    int aura{};
     time_t rewtime{};
     struct char_data *grappling{};
     struct char_data *grappled{};
@@ -735,7 +735,7 @@ struct char_data : public unit_data {
     int ping{};
     int starphase{};
     race::Race *mimic{};
-    bool bonuses[MAX_BONUSES]{};
+    std::bitset<MAX_BONUSES> bonuses{};
 
     int cooldown{};
     int death_type{};
@@ -770,7 +770,6 @@ struct char_data : public unit_data {
     struct char_data *defender{};
     struct char_data *defending{};
 
-    int64_t lifeforce{};
     int lifeperc{};
     int gooptime{};
     int blesslvl{};
@@ -812,7 +811,7 @@ struct char_data : public unit_data {
     int8_t freeze_level{};        /* Level of god who froze char, if any	*/
     int16_t invis_level{};        /* level of invisibility		*/
     room_vnum load_room{NOWHERE};        /* Which room to place char in		*/
-    bitvector_t pref[PR_ARRAY_MAX]{};    /* preference flags for PC's.		*/
+    std::bitset<NUM_PRF_FLAGS> pref{};    /* preference flags for PC's.		*/
 
     room_vnum normalizeLoadRoom(room_vnum in);
 

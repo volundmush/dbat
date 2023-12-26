@@ -654,13 +654,13 @@ namespace race {
     const std::map<int, transform_bonus> &Race::getTransMap(const char_data *ch) const {
         switch (r_id) {
             case android:
-                if (PLR_FLAGGED(ch, PLR_SENSEM)) {
+                if (ch->playerFlags.test(PLR_SENSEM)) {
                     return android_trans_bonus_sense;
                 } else {
                     return android_trans_bonus;
                 }
             case saiyan:
-                if (PLR_FLAGGED(ch, PLR_LSSJ)) {
+                if (ch->playerFlags.test(PLR_LSSJ)) {
                     return saiyan_trans_bonus_legendary;
                 } else {
                     return saiyan_trans_bonus;
@@ -1635,13 +1635,13 @@ namespace race {
         switch (r_id) {
             case icer:
             case bio:
-                REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TAIL);
+                ch->playerFlags.reset(PLR_TAIL);
                 remove_limb(ch, 6);
                 GET_TGROWTH(ch) = 0;
                 break;
             case saiyan:
             case halfbreed:
-                REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_STAIL);
+                ch->playerFlags.reset(PLR_STAIL);
                 remove_limb(ch, 5);
                 if (PLR_FLAGGED(ch, PLR_OOZARU)) {
                     oozaru_revert(ch);
@@ -1656,11 +1656,11 @@ namespace race {
         switch (r_id) {
             case icer:
             case bio:
-                SET_BIT_AR(PLR_FLAGS(ch), PLR_TAIL);
+                ch->playerFlags.set(PLR_TAIL);
                 break;
             case saiyan:
             case halfbreed:
-                SET_BIT_AR(PLR_FLAGS(ch), PLR_STAIL);
+                ch->playerFlags.set(PLR_STAIL);
                 if (MOON_OK(ch)) {
                     oozaru_transform(ch);
                 }

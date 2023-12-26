@@ -77,10 +77,10 @@ ACMD(do_tailhide) {
         send_to_char(ch, "You have no need to hide your tail!\r\n");
     }
     if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && !(PLR_FLAGGED(ch, PLR_TAILHIDE))) {
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TAILHIDE);
+        ch->playerFlags.set(PLR_TAILHIDE);
         send_to_char(ch, "You have decided to hide your tail!\r\n");
     } else if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && PLR_FLAGGED(ch, PLR_TAILHIDE)) {
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TAILHIDE);
+        ch->playerFlags.reset(PLR_TAILHIDE);
         send_to_char(ch, "You have decided to display your tail for all to see!\r\n");
     }
 }
@@ -94,10 +94,10 @@ ACMD(do_nogrow) {
         send_to_char(ch, "What do you mean?\r\n");
     }
     if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && !(PLR_FLAGGED(ch, PLR_NOGROW))) {
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_NOGROW);
+        ch->playerFlags.set(PLR_NOGROW);
         send_to_char(ch, "You have decided to halt your tail growth!\r\n");
     } else if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && PLR_FLAGGED(ch, PLR_NOGROW)) {
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_NOGROW);
+        ch->playerFlags.reset(PLR_NOGROW);
         send_to_char(ch, "You have decided to regrow your tail!\r\n");
     }
 }
@@ -642,9 +642,7 @@ static void resolve_song(struct char_data *ch) {
                             if (GET_BARRIER(vict) >= GET_MAX_MANA(vict) * 0.75) {
                                 GET_BARRIER(vict) = GET_MAX_MANA(vict) * 0.75;
                             }
-                            if (!AFF_FLAGGED(vict, AFF_SANCTUARY)) {
-                                SET_BIT_AR(AFF_FLAGS(vict), AFF_SANCTUARY);
-                            }
+                            vict->affected_by.set(AFF_SANCTUARY);
                             ch->incCurKI(ch->getPercentOfMaxKI(.02) + skill);
                         }
                     }
@@ -1000,7 +998,7 @@ ACMD(do_shell) {
         act("@mYou quickly absorb the armor carapace covering your body back inside.@n", true, ch, nullptr, nullptr,
             TO_CHAR);
         act("@M$n's@m armored carapce retreats back to its original size.@n", true, ch, nullptr, nullptr, TO_ROOM);
-        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_SHELL);
+        ch->affected_by.reset(AFF_SHELL);
         return;
     }
 
@@ -1019,7 +1017,7 @@ ACMD(do_shell) {
         act("@M$n@m crouches down and after a few moments of straining $s body's carapace armor starts to grow thicker and extends to cover all parts of $s body!@n",
             true, ch, nullptr, nullptr, TO_ROOM);
         ch->decCurSTPercent(.2);
-        SET_BIT_AR(AFF_FLAGS(ch), AFF_SHELL);
+        ch->affected_by.set(AFF_SHELL);
         return;
     }
 }
@@ -1037,7 +1035,7 @@ ACMD(do_liquefy) {
             true, ch, nullptr, nullptr, TO_ROOM);
         act("@MYou begin to pull the liquid chunks of your body together. Those chunks hover upward and merge into each other until a large ball of goo is formed. Slowly your body emerges as the pieces of your body take on their old form!@n",
             true, ch, nullptr, nullptr, TO_CHAR);
-        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_LIQUEFIED);
+        ch->affected_by.reset(AFF_LIQUEFIED);
         WAIT_STATE(ch, PULSE_3SEC);
         WAIT_STATE(ch, PULSE_3SEC);
         WAIT_STATE(ch, PULSE_3SEC);
@@ -1087,7 +1085,7 @@ ACMD(do_liquefy) {
             act("@m$n@M's body starts to become loose and sag. Much of $s body begins to pour down and scatter around as pools of goo.@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
             ch->decCurKI((GET_MAX_MANA(ch) * .002) + 150);
-            SET_BIT_AR(AFF_FLAGS(ch), AFF_LIQUEFIED);
+            ch->affected_by.set(AFF_LIQUEFIED);
             return;
         }
     } else if (!strcasecmp(arg, "explode")) {
@@ -1167,9 +1165,7 @@ ACMD(do_liquefy) {
                 solo_gain(ch, vict);
             }
             die(vict, ch);
-            SET_BIT_AR(AFF_FLAGS(ch), AFF_LIQUEFIED);
-            WAIT_STATE(ch, PULSE_3SEC);
-            WAIT_STATE(ch, PULSE_3SEC);
+            ch->affected_by.set(AFF_LIQUEFIED);
             WAIT_STATE(ch, PULSE_3SEC);
             handle_cooldown(ch, 9);
             return;
@@ -1289,7 +1285,7 @@ ACMD(do_fish) {
             act("@c$n@C pulls $s arm back and then springs it foward, casting the line of $s fishing pole into the water.@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
             GET_FISHD(ch) = rand_number(30, 80);
-            SET_BIT_AR(PLR_FLAGS(ch), PLR_FISHING);
+            ch->playerFlags.set(PLR_FISHING);
             send_to_char(ch, "@D[@wDistance@D: @Y%d@D]@n\r\n", GET_FISHD(ch));
             return;
         }
@@ -1386,7 +1382,7 @@ ACMD(do_fish) {
             reveal_hiding(ch, 0);
             act("@CYou reel in your line and stop fishing.@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@c$n@C reels in $s fishing line and stops fishing.@n", true, ch, nullptr, nullptr, TO_ROOM);
-            REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_FISHING);
+            ch->playerFlags.reset(PLR_FISHING);
             GET_FISHSTATE(ch) = FISH_NOFISH;
             GET_FISHD(ch) = 0;
             return;
@@ -1451,7 +1447,7 @@ void fish_update(uint64_t heartPulse, double deltaTime) {
                         act("@c$n@C frowns and then begins to reel in $s line.@n", true, ch, nullptr, nullptr, TO_ROOM);
                         GET_FISHD(ch) = 0;
                         GET_FISHSTATE(ch) = FISH_NOFISH;
-                        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_FISHING);
+                        ch->playerFlags.reset(PLR_FISHING);
                         if (has_pole(ch) == true) {
                             struct obj_data *pole = GET_EQ(ch, WEAR_WIELD2);
                             GET_OBJ_VAL(pole, 0) = 0;
@@ -1462,7 +1458,7 @@ void fish_update(uint64_t heartPulse, double deltaTime) {
                         act("@c$n@C frowns and then begins to reel in $s line.@n", true, ch, nullptr, nullptr, TO_ROOM);
                         GET_FISHD(ch) = 0;
                         GET_FISHSTATE(ch) = FISH_NOFISH;
-                        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_FISHING);
+                        ch->playerFlags.reset(PLR_FISHING);
                     } else if (GET_FISHSTATE(ch) == FISH_BITE && rand_number(1, 20) >= 12) {
                         act("@CYou feel as if the fish has stopped biting...@n", true, ch, nullptr, nullptr, TO_CHAR);
                         GET_FISHSTATE(ch) = FISH_NOFISH;
@@ -1475,13 +1471,13 @@ void fish_update(uint64_t heartPulse, double deltaTime) {
                     }
                 } /* End reel section */
             } else if (PLR_FLAGGED(i, PLR_FISHING) && has_pole(i) == false) { /* End of, Is Fishing */
-                REMOVE_BIT_AR(PLR_FLAGS(i), PLR_FISHING);
+                i->playerFlags.reset(PLR_FISHING);
                 GET_FISHD(i) = 0;
                 GET_FISHSTATE(i) = FISH_NOFISH;
             }
         } else { /* Is not in a fishing room */
             if (PLR_FLAGGED(i, PLR_FISHING)) {
-                REMOVE_BIT_AR(PLR_FLAGS(i), PLR_FISHING);
+                i->playerFlags.reset(PLR_FISHING);
                 GET_FISHD(i) = 0;
                 GET_FISHSTATE(i) = FISH_NOFISH;
             }
@@ -1641,7 +1637,7 @@ static void catch_fish(struct char_data *ch, int quality) {
     obj_to_room(fish, IN_ROOM(ch));
     do_get(ch, "fish", 0, 0);
     send_to_char(ch, "@D[@cFish Weight@D: @G%" I64T "@D]@n\r\n", GET_OBJ_WEIGHT(fish));
-    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_FISHING);
+    ch->playerFlags.reset(PLR_FISHING);
     GET_FISHD(ch) = 0;
     GET_FISHSTATE(ch) = FISH_NOFISH;
 }
@@ -2532,7 +2528,7 @@ ACMD(do_healglow) {
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@c$n@C places $s hands on $s body. Slowly a strong blue glow glistens and shines across $s skin!@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
-            SET_BIT_AR(AFF_FLAGS(vict), AFF_HEALGLOW);
+            vict->affected_by.set(AFF_HEALGLOW);
             int duration = (GET_SKILL(ch, SKILL_HEALGLOW) * 0.1);
             if (duration <= 0)
                 duration = 1;
@@ -2681,7 +2677,7 @@ ACMD(do_shimmer) {
 
     if (!IS_NPC(ch)) {
         if (PRF_FLAGGED(ch, PRF_ARENAWATCH)) {
-            REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_ARENAWATCH);
+            ch->pref.set(PRF_ARENAWATCH);
             ARENA_IDNUM(ch) = -1;
             send_to_char(ch, "You stop watching the arena action.\r\n");
         }
@@ -2789,7 +2785,7 @@ ACMD(do_shimmer) {
         act("@w$n@w appears in an instant out of nowhere right next to you!@n", true, ch, nullptr, tar, TO_VICT);
         act("@w$n@w body begins to fade away almost appearing ghost like, before a ripple passes through $s image and $e is gone in an instant!@n",
             true, ch, nullptr, tar, TO_NOTVICT);
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TRANSMISSION);
+        ch->playerFlags.set(PLR_TRANSMISSION);
         handle_teleport(ch, tar, 0);
     } else {
         ch->decCurKI(cost);
@@ -3482,7 +3478,7 @@ ACMD(do_arena) {
         return;
     } else if (!strcasecmp(arg, "stop")) {
         send_to_char(ch, "You stop viewing what's going on in the arena.\r\n");
-        REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_ARENAWATCH);
+        ch->pref.reset(PRF_ARENAWATCH);
         ARENA_IDNUM(ch) = -1;
         return;
     } else if (GET_ROOM_VNUM(IN_ROOM(ch)) != 17875) {
@@ -3546,7 +3542,7 @@ ACMD(do_arena) {
                 act("@wYou start watching the action surrounding that particular fighter in the arena.@n", true, ch,
                     nullptr, nullptr, TO_CHAR);
                 act("@C$n@w starts watching the action in the arena.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                SET_BIT_AR(PRF_FLAGS(ch), PRF_ARENAWATCH);
+                ch->pref.set(PRF_ARENAWATCH);
                 ARENA_IDNUM(ch) = num;
             } else {
                 send_to_char(ch, "A fighter with such a number was not found in the arena.\r\n");
@@ -3617,7 +3613,7 @@ ACMD(do_ensnare) {
             extract_obj(obj);
             WAIT_STATE(ch, PULSE_3SEC);
             improve_skill(ch, SKILL_ENSNARE, 0);
-            REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
+            vict->affected_by.reset(AFF_ZANZOKEN);
         } else if (AFF_FLAGGED(vict, AFF_ZANZOKEN) && AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
             if (GET_SPEEDI(ch) + rand_number(1, 100) < GET_SPEEDI(vict) + rand_number(1, 100)) {
                 act("@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! You both zanzoken! Unfortunately @c$N@W manages to avoid it and you lose the bundle...@n",
@@ -3629,8 +3625,7 @@ ACMD(do_ensnare) {
                 extract_obj(obj);
                 WAIT_STATE(ch, PULSE_3SEC);
                 improve_skill(ch, SKILL_ENSNARE, 0);
-                REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-                REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
+                for(auto c : {vict, ch}) c->affected_by.reset(AFF_ZANZOKEN);
             } else {
                 act("@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! Fortunately you manage to hit $M! You both zanzoken! Quickly you spin around $M and ensnare $S arms with the silk!@n",
                     true, ch, nullptr, vict, TO_CHAR);
@@ -3639,11 +3634,10 @@ ACMD(do_ensnare) {
                 act("@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Unfortunately $e manages to hit $M! They both zanzoken! Quickly $e spins around @c$N@W and ensnares $S arms with the silk!@n",
                     true, ch, nullptr, vict, TO_NOTVICT);
                 extract_obj(obj);
-                SET_BIT_AR(AFF_FLAGS(vict), AFF_ENSNARED);
+                vict->affected_by.set(AFF_ENSNARED);
                 WAIT_STATE(ch, PULSE_3SEC);
                 improve_skill(ch, SKILL_ENSNARE, 0);
-                REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-                REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
+                for(auto c : {vict, ch}) c->affected_by.reset(AFF_ZANZOKEN);
             }
         } else if (AFF_FLAGGED(ch, AFF_ZANZOKEN) && !AFF_FLAGGED(vict, AFF_ZANZOKEN)) {
             act("@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! Fortunately you manage to hit $M! Quickly you zanzoken and spin around $M and ensnare $S arms with the silk!@n",
@@ -3653,10 +3647,10 @@ ACMD(do_ensnare) {
             act("@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Unfortunately $e manages to hit $M! Quickly $e zanzokens and spins around @c$N@W and ensnares $S arms with the silk!@n",
                 true, ch, nullptr, vict, TO_NOTVICT);
             extract_obj(obj);
-            SET_BIT_AR(AFF_FLAGS(vict), AFF_ENSNARED);
+            vict->affected_by.set(AFF_ENSNARED);
             WAIT_STATE(ch, PULSE_3SEC);
             improve_skill(ch, SKILL_ENSNARE, 0);
-            REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
+            ch->affected_by.reset(AFF_ZANZOKEN);
         } else if (GET_SPEEDI(ch) + rand_number(1, 100) < GET_SPEEDI(vict) + rand_number(1, 100)) {
             act("@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! Unfortunately @c$N@W manages to avoid it and you lose the bundle...@n",
                 true, ch, nullptr, vict, TO_CHAR);
@@ -3675,7 +3669,7 @@ ACMD(do_ensnare) {
             act("@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Unfortunately $e manages to hit $M! Quickly $e spins around @c$N@W and ensnares $S arms with the silk!@n",
                 true, ch, nullptr, vict, TO_NOTVICT);
             extract_obj(obj);
-            SET_BIT_AR(AFF_FLAGS(vict), AFF_ENSNARED);
+            vict->affected_by.set(AFF_ENSNARED);
             WAIT_STATE(ch, PULSE_3SEC);
             improve_skill(ch, SKILL_ENSNARE, 0);
         }
@@ -5140,7 +5134,7 @@ ACMD(do_fireshield) {
             true, ch, nullptr, nullptr, TO_ROOM);
         improve_skill(ch, SKILL_FIRESHIELD, 0);
         ch->decCurKI(cost);
-        SET_BIT_AR(AFF_FLAGS(ch), AFF_FIRESHIELD);
+        ch->affected_by.set(AFF_FIRESHIELD);
         return;
     }
 

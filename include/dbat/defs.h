@@ -1929,6 +1929,7 @@ enum class CharAppearance : uint8_t {
  SkinColor = 4,
  EyeColor = 5,
  DistinguishingFeature = 6,
+ Aura = 7
 };
 
 using align_t = int16_t;

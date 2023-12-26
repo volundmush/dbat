@@ -782,7 +782,7 @@ ACMD(do_drive) {
             act("@w$n stands up and stops piloting the ship.", true, ch, nullptr, nullptr, TO_ROOM);
             send_to_char(ch, "@wYou stand up from the pilot's seat.\r\n");
             GET_POS(ch) = POS_STANDING;
-            REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_PILOTING);
+            ch->playerFlags.set(PLR_PILOTING);
             return;
         }
     }
@@ -822,7 +822,7 @@ ACMD(do_drive) {
         }
     }
     if (confirmed == true) {
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_PILOTING);
+        ch->playerFlags.set(PLR_PILOTING);
         act("@w$n sits down and begins piloting the ship.", true, ch, nullptr, nullptr, TO_ROOM);
         GET_POS(ch) = POS_SITTING;
         send_to_char(ch, "@wYou take a seat in the pilot's chair.\r\n");

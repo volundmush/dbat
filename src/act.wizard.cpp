@@ -425,7 +425,7 @@ ACMD(do_approve) {
         send_to_char(ch, "They have already been approved. If this was made in error inform Iovan.\r\n");
         return;
     } else {
-        SET_BIT_AR(PLR_FLAGS(vict), PLR_BIOGR);
+        vict->playerFlags.set(PLR_BIOGR);
         send_to_char(ch, "They have now been approved.\r\n");
         return;
     }
@@ -1672,12 +1672,12 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
     if (IS_NPC(k)) {
         sprinttype(k->mob_specials.default_pos, position_types, buf, sizeof(buf));
         send_to_char(ch, ", Default position: %s\r\n", buf);
-        sprintbitarray(MOB_FLAGS(k), action_bits, PM_ARRAY_MAX, buf);
+        sprintbitarray(k->mobFlags, action_bits, PM_ARRAY_MAX, buf);
         send_to_char(ch, "NPC flags: @c%s@n\r\n", buf);
     } else {
         send_to_char(ch, ", Idle Timer (in tics) [%d]\r\n", k->timer);
 
-        sprintbitarray(PLR_FLAGS(k), player_bits, PM_ARRAY_MAX, buf);
+        sprintbitarray(k->playerFlags, player_bits, PM_ARRAY_MAX, buf);
         send_to_char(ch, "PLR: @c%s@n\r\n", buf);
 
         sprintbitarray(PRF_FLAGS(k), preference_bits, PR_ARRAY_MAX, buf);
@@ -2329,10 +2329,9 @@ ACMD(do_syslog) {
         send_to_char(ch, "Usage: syslog { Off | Brief | Normal | Complete }\r\n");
         return;
     }
-    REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_LOG1);
-    REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_LOG2);
-    if (tp & 1) SET_BIT_AR(PRF_FLAGS(ch), PRF_LOG1);
-    if (tp & 2) SET_BIT_AR(PRF_FLAGS(ch), PRF_LOG2);
+    for(auto f : {PRF_LOG1, PRF_LOG2}) ch->pref.reset(f);
+    if (tp & 1) ch->pref.set(PRF_LOG1);
+    if (tp & 2) ch->pref.set(PRF_LOG2);
 
     send_to_char(ch, "Your syslog is now %s.\r\n", logtypes[tp]);
 }
@@ -2983,21 +2982,20 @@ ACMD(do_wizutil) {
                     send_to_char(ch, "Your victim is not flagged.\r\n");
                     return;
                 }
-                REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_THIEF);
-                REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_KILLER);
+            for(auto f : {PLR_THIEF, PLR_KILLER}) vict->playerFlags.reset(f);
                 send_to_char(ch, "Pardoned.\r\n");
                 send_to_char(vict, "You have been pardoned by the Gods!\r\n");
                 mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s pardoned by %s", GET_NAME(vict),
                        GET_NAME(ch));
                 break;
             case SCMD_NOTITLE:
-                result = PLR_TOG_CHK(vict, PLR_NOTITLE);
+                result = vict->playerFlags.flip(PLR_NOTITLE).test(PLR_NOTITLE);
                 mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) Notitle %s for %s by %s.",
                        ONOFF(result), GET_NAME(vict), GET_NAME(ch));
                 send_to_char(ch, "(GC) Notitle %s for %s by %s.\r\n", ONOFF(result), GET_NAME(vict), GET_NAME(ch));
                 break;
             case SCMD_SQUELCH:
-                result = PLR_TOG_CHK(vict, PLR_NOSHOUT);
+                result = vict->playerFlags.flip(PLR_NOSHOUT).test(PLR_NOSHOUT);
                 mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) Squelch %s for %s by %s.",
                        ONOFF(result), GET_NAME(vict), GET_NAME(ch));
                 send_to_char(ch, "(GC) Mute turned %s for %s by %s.\r\n", ONOFF(result), GET_NAME(vict), GET_NAME(ch));
@@ -3017,7 +3015,7 @@ ACMD(do_wizutil) {
                     send_to_char(ch, "Your victim is already pretty cold.\r\n");
                     return;
                 }
-                SET_BIT_AR(PLR_FLAGS(vict), PLR_FROZEN);
+                vict->playerFlags.set(PLR_FROZEN);
                 GET_FREEZE_LEV(vict) = GET_ADMLEVEL(ch);
                 send_to_char(vict,
                              "A bitter wind suddenly rises and drains every erg of heat from your body!\r\nYou feel frozen!\r\n");
@@ -3038,28 +3036,14 @@ ACMD(do_wizutil) {
                 }
                 mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s un-frozen by %s.", GET_NAME(vict),
                        GET_NAME(ch));
-                REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_FROZEN);
+                vict->playerFlags.reset(PLR_FROZEN);
                 send_to_char(vict,
                              "A fireball suddenly explodes in front of you, melting the ice!\r\nYou feel thawed.\r\n");
                 send_to_char(ch, "Thawed.\r\n");
                 act("A sudden fireball conjured from nowhere thaws $n!", false, vict, nullptr, nullptr, TO_ROOM);
                 break;
             case SCMD_UNAFFECT:
-                if (vict->affected || AFF_FLAGS(vict) || vict->affectedv) {
-                    while (vict->affected)
-                        affect_remove(vict, vict->affected);
-                    for (taeller = 0; taeller < AF_ARRAY_MAX; taeller++)
-                        AFF_FLAGS(ch)[taeller] = 0;
-                    while (vict->affectedv)
-                        affectv_remove(vict, vict->affectedv);
-                    for (taeller = 0; taeller < AF_ARRAY_MAX; taeller++)
-                        AFF_FLAGS(ch)[taeller] = 0;
-                    send_to_char(vict, "There is a brief flash of light!\r\nYou feel slightly different.\r\n");
-                    send_to_char(ch, "All spells removed.\r\n");
-                } else {
-                    send_to_char(ch, "Your victim does not have any affections!\r\n");
-                    return;
-                }
+                send_to_char(ch, "Disabled.\r\n");
                 break;
             default:
                 basic_mud_log("SYSERR: Unknown subcmd %d passed to do_wizutil (%s)", subcmd, __FILE__);
@@ -3482,8 +3466,8 @@ ACMD(do_show) {
 #define NUMBER    2
 
 #define SET_OR_REMOVE(flagset, flags) { \
-    if (on) SET_BIT_AR(flagset, flags); \
-    else if (off) REMOVE_BIT_AR(flagset, flags); }
+    if (on) flagset.set(flags); \
+    else if (off) flagset.reset(flags); }
 
 #define RANGE(low, high) (value = MAX((low), MIN((high), (value))))
 
@@ -3634,9 +3618,9 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
         send_to_char(ch, "%s", CONFIG_OK);
 
     switch (mode) {
-        case 0: SET_OR_REMOVE(PRF_FLAGS(vict), PRF_BRIEF);
+        case 0: SET_OR_REMOVE(vict->pref, PRF_BRIEF);
             break;
-        case 1: SET_OR_REMOVE(PLR_FLAGS(vict), PLR_INVSTART);
+        case 1: SET_OR_REMOVE(vict->playerFlags, PLR_INVSTART);
             break;
         case 2:
             set_title(vict, val_arg);
@@ -3854,12 +3838,12 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             break;
         case 42:
             if (!strcasecmp(val_arg, "off")) {
-                REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_LOADROOM);
+                vict->playerFlags.reset(PLR_LOADROOM);
                 GET_LOADROOM(vict) = NOWHERE;
             } else if (is_number(val_arg)) {
                 rvnum = atoi(val_arg);
                 if (real_room(rvnum) != NOWHERE) {
-                    SET_BIT_AR(PLR_FLAGS(vict), PLR_LOADROOM);
+                    vict->playerFlags.set(PLR_LOADROOM);
                     GET_LOADROOM(vict) = rvnum;
                     send_to_char(ch, "%s will enter at room #%d.\r\n", GET_NAME(vict), GET_LOADROOM(vict));
                 } else {
@@ -4066,7 +4050,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             break;
 
         case 70:
-            GET_AURA(vict) = RANGE(0, 8);
+            vict->set(CharAppearance::Aura, RANGE(0, 8));
             mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set aura for %s.", GET_NAME(ch),
                    GET_NAME(vict));
             log_imm_action("SET: %s has set aura for %s.", GET_NAME(ch), GET_NAME(vict));

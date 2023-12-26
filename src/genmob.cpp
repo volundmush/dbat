@@ -390,6 +390,15 @@ nlohmann::json char_data::serializeBase() {
         if(app) j["nums"].push_back(std::make_pair(id, app));
     }
 
+    for(auto i = 0; i < mobFlags.size(); i++)
+        if(mobFlags.test(i)) j["mobFlags"].push_back(i);
+
+    for(auto i = 0; i < playerFlags.size(); i++)
+        if(playerFlags.test(i)) j["playerFlags"].push_back(i);
+
+    for(auto i = 0; i < pref.size(); i++)
+        if(pref.test(i)) j["pref"].push_back(i);
+
     if(title && strlen(title)) j["title"] = title;
     if(race) j["race"] = race->getID();
 
@@ -471,20 +480,18 @@ void char_data::deserializeBase(const nlohmann::json &j) {
 
     if(j.contains("affected_by"))
         for(auto &i : j["affected_by"])
-            SET_BIT_AR(affected_by, i.get<int>());
+            affected_by.set(i.get<int>());
 
     if(j.contains("armor")) armor = j["armor"];
     if(j.contains("damage_mod")) damage_mod = j["damage_mod"];
     if(j.contains("mob_specials")) mob_specials.deserialize(j["mob_specials"]);
-    if(j.contains("act")) for(auto &i : j["act"]) SET_BIT_AR(act, i.get<int>());
-
+    if(j.contains("mobFlags")) for(auto &i : j["mobFlags"]) mobFlags.set(i.get<int>());
+    if(j.contains("playerFlags")) for(auto &i : j["playerFlags"]) playerFlags.set(i.get<int>());
+    if(j.contains("pref")) for(auto &i : j["pref"]) pref.set(i.get<int>());
 }
 
 nlohmann::json char_data::serializeProto() {
     auto j = serializeBase();
-
-    for(auto i = 0; i < NUM_MOB_FLAGS; i++)
-        if(IS_SET_AR(act, i)) j["act"].push_back(i);
 
     auto ms = mob_specials.serialize();
     if(!ms.empty()) j["mob_specials"] = ms;
@@ -501,7 +508,7 @@ nlohmann::json char_data::serializeInstance() {
     if(generation) j["generation"] = generation;
 
     for(auto i = 0; i < NUM_ADMFLAGS; i++)
-        if(IS_SET_AR(admflags, i)) j["admflags"].push_back(i);
+        if(admflags.test(i)) j["admflags"].push_back(i);
 
     if(health < 1.0) j["health"] = health;
     if(energy < 1.0) j["energy"] = energy;
@@ -529,15 +536,6 @@ nlohmann::json char_data::serializeInstance() {
     if(wimp_level) j["wimp_level"] = wimp_level;
     if(world.contains(load_room)) j["load_room"] = load_room;
     if(world.contains(hometown)) j["hometown"] = hometown;
-
-    if(IS_NPC(this)) {
-        // mob flags.
-        for(auto i = 0; i < NUM_MOB_FLAGS; i++) if(IS_SET_AR(act, i)) j["act"].push_back(i);
-    } else {
-        // player flags.
-        for(auto i = 0; i < NUM_PLR_FLAGS; i++) if(IS_SET_AR(act, i)) j["act"].push_back(i);
-        for(auto i = 0; i < NUM_PRF_FLAGS; i++) if(IS_SET_AR(pref, i)) j["pref"].push_back(i);
-    }
 
     for(auto &[skill_id, s] : skill) {
         auto sk = s.serialize();
@@ -656,7 +654,7 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
 
     if(j.contains("admflags"))
         for(auto &i : j["admflags"])
-            SET_BIT_AR(admflags, i.get<int>());
+            admflags.set(i.get<int>());
 
     if(j.contains("hometown")) hometown = j["hometown"];
 
@@ -805,12 +803,6 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
         deserializeVars(&script->global_vars, j["dgvariables"]);
     }
 
-    if(j.contains("pref")) {
-        for(auto &i : j["pref"]) {
-            SET_BIT_AR(pref, i.get<int>());
-        }
-    }
-
     auto proto = mob_proto.find(vn);
     if(proto != mob_proto.end()) {
         proto_script = proto->second.proto_script;
@@ -852,19 +844,15 @@ char_data::char_data(const nlohmann::json &j) : char_data() {
     deserializeProto(j);
 
     if (!IS_HUMAN(this))
-        if (!AFF_FLAGGED(this, AFF_INFRAVISION))
-            SET_BIT_AR(AFF_FLAGS(this), AFF_INFRAVISION);
+        affected_by.set(AFF_INFRAVISION);
 
     SPEAKING(this) = SKILL_LANG_COMMON;
     set_height_and_weight_by_race(this);
 
-    SET_BIT_AR(act, MOB_ISNPC);
-    if(MOB_FLAGGED(this, MOB_NOTDEADYET)) {
-        REMOVE_BIT_AR(MOB_FLAGS(this), MOB_NOTDEADYET);
-    }
-    if(PLR_FLAGGED(this, PLR_NOTDEADYET)) {
-        REMOVE_BIT_AR(PLR_FLAGS(this), PLR_NOTDEADYET);
-    }
+    mobFlags.set(MOB_ISNPC);
+    mobFlags.reset(MOB_NOTDEADYET);
+
+    playerFlags.reset(PLR_NOTDEADYET);
 
 }
 

@@ -20,10 +20,7 @@ bool tech_handle_zanzoken(char_data *ch, char_data *vict, const std::string &nam
             act(msg.c_str(), true, ch, nullptr, vict, TO_VICT);
             msg = fmt::format("@C$N@c disappears, avoiding @C$n's@c {} before reappearing!@n", name);
             act(msg.c_str(), true, ch, nullptr, vict, TO_NOTVICT);
-            if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-                REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
-            }
-            REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
+            for(auto c : {ch, vict}) c->affected_by.reset(AFF_ZANZOKEN);
             return false;
         } else {
             act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", false, ch, nullptr,
@@ -32,8 +29,7 @@ bool tech_handle_zanzoken(char_data *ch, char_data *vict, const std::string &nam
                 TO_VICT);
             act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", false, ch,
                 nullptr, vict, TO_NOTVICT);
-            REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
-            REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
+            for(auto c : {ch, vict}) c->affected_by.reset(AFF_ZANZOKEN);
         }
     }
     return true;
@@ -107,11 +103,11 @@ void tech_handle_fireshield(char_data *ch, char_data *vict, const std::string &p
         if (GET_BONUS(ch, BONUS_FIREPRONE)) {
             send_to_char(ch, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
             send_to_char(vict, "@RThey are easily burned!@n\r\n");
-            SET_BIT_AR(AFF_FLAGS(ch), AFF_BURNED);
+            ch->affected_by.set(AFF_BURNED);
         } else if (GET_CON(ch) < axion_dice(0)) {
             send_to_char(ch, "@RYou are badly burned!@n\r\n");
             send_to_char(vict, "@RThey are burned!@n\r\n");
-            SET_BIT_AR(AFF_FLAGS(ch), AFF_BURNED);
+            ch->affected_by.set(AFF_BURNED);
         }
     } else if (GET_HIT(vict) > 0 && !AFF_FLAGGED(vict, AFF_SPIRIT) && AFF_FLAGGED(vict, AFF_FIRESHIELD) &&
                (GET_BONUS(ch, BONUS_FIREPROOF) || IS_DEMON(ch))) {
@@ -146,7 +142,7 @@ void tech_handle_crashdown(char_data *ch, char_data *vict) {
         act("@w$N@w is knocked out of the air!@n", true, ch, nullptr, vict, TO_CHAR);
         act("@wYou are knocked out of the air!@n", true, ch, nullptr, vict, TO_VICT);
         act("@w$N@w is knocked out of the air!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_FLYING);
+        vict->affected_by.reset(AFF_FLYING);
         GET_ALT(vict) = 0;
         GET_POS(vict) = POS_SITTING;
     } else {

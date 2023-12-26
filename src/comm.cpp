@@ -144,9 +144,7 @@ void copyover_recover_final() {
         c->desc = d;
 
 		GET_LOADROOM(c) = room;
-        REMOVE_BIT_AR(PLR_FLAGS(c), PLR_WRITING);
-        REMOVE_BIT_AR(PLR_FLAGS(c), PLR_MAILING);
-        REMOVE_BIT_AR(PLR_FLAGS(c), PLR_CRYO);
+        for(auto f : {PLR_WRITING, PLR_MAILING, PLR_CRYO}) c->playerFlags.reset(f);
         auto conns = d->conns;
         for(auto &[cid, con] : conns) {
             d->account->connections.insert(con.get());
@@ -1912,7 +1910,7 @@ int arena_watch(struct char_data *ch) {
     }
 
     if (found == false) {
-        REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_ARENAWATCH);
+        ch->pref.reset(PRF_ARENAWATCH);
         ARENA_IDNUM(ch) = -1;
         return (NOWHERE);
     } else {

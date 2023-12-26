@@ -209,7 +209,7 @@ void oozaru_transform(char_data *ch) {
         true, ch, nullptr, nullptr, TO_CHAR);
     act("@R$n@r looks up at the moon as $s eyes turn red and $s heart starts to beat loudly. Hair starts to grow all over $s body as $e starts screaming. The scream turns into a roar as $s body begins to grow into a giant ape!@n",
         true, ch, nullptr, nullptr, TO_ROOM);
-    SET_BIT_AR(PLR_FLAGS(ch), oozaru.flag);
+    ch->playerFlags.set(oozaru.flag);
 }
 
 void oozaru_add() {
@@ -234,7 +234,7 @@ void oozaru_revert(char_data *ch) {
         true, ch, nullptr, nullptr, TO_ROOM);
     GET_POS(ch) = POS_SLEEPING;
 
-    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_OOZARU);
+    ch->playerFlags.reset(PLR_OOZARU);
 }
 
 void oozaru_drop() {

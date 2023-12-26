@@ -269,11 +269,11 @@ void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *ms
 void affect_modify(struct char_data *ch, int loc, int mod, int spec, long bitv, bool add) {
     if (add) {
         if (bitv != AFF_INFRAVISION || !IS_ANDROID(ch)) {
-            SET_BIT_AR(AFF_FLAGS(ch), bitv);
+            ch->affected_by.set(bitv);
         }
     } else {
         if (bitv != AFF_INFRAVISION || !IS_ANDROID(ch)) {
-            REMOVE_BIT_AR(AFF_FLAGS(ch), bitv);
+            ch->affected_by.reset(bitv);
             mod = -mod;
         }
     }
@@ -290,7 +290,7 @@ void affect_modify_ar(struct char_data *ch, int loc, int mod, int spec, int bitv
             for (j = 0; j < 32; j++)
                 if (IS_SET_AR(bitv, (i * 32) + j)) {
                     if ((i * 32) + j != AFF_INFRAVISION || !IS_ANDROID(ch)) {
-                        SET_BIT_AR(AFF_FLAGS(ch), (i * 32) + j);
+                        ch->affected_by.set((i * 32) + j);
                     }
                 }
     } else {
@@ -298,7 +298,7 @@ void affect_modify_ar(struct char_data *ch, int loc, int mod, int spec, int bitv
             for (j = 0; j < 32; j++)
                 if (IS_SET_AR(bitv, (i * 32) + j)) {
                     if ((i * 32) + j != AFF_INFRAVISION || !IS_ANDROID(ch)) {
-                        REMOVE_BIT_AR(AFF_FLAGS(ch), (i * 32) + j);
+                        ch->affected_by.reset((i * 32) + j);
                     }
                 }
         mod = -mod;
@@ -500,7 +500,7 @@ void char_from_room(struct char_data *ch) {
     if (FIGHTING(ch) != nullptr && !AFF_FLAGGED(ch, AFF_PURSUIT))
         stop_fighting(ch);
     if (AFF_FLAGGED(ch, AFF_PURSUIT) && FIGHTING(ch) == nullptr)
-        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_PURSUIT);
+        ch->affected_by.reset(AFF_PURSUIT);
 
     REMOVE_FROM_LIST(ch, r->people, next_in_room, temp);
     IN_ROOM(ch) = NOWHERE;
@@ -533,7 +533,7 @@ void char_to_room(struct char_data *ch, room_rnum room) {
     }
     if (!IS_NPC(ch)) {
         if (PRF_FLAGGED(ch, PRF_ARENAWATCH)) {
-            REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_ARENAWATCH);
+            ch->pref.reset(PRF_ARENAWATCH);
             ARENA_IDNUM(ch) = -1;
         }
     }
@@ -565,7 +565,7 @@ void obj_to_char(struct obj_data *object, struct char_data *ch) {
             }
         }
         if (!IS_NPC(ch))
-            SET_BIT_AR(PLR_FLAGS(ch), PLR_CRASH);
+            ch->playerFlags.set(PLR_CRASH);
     } else
         basic_mud_log("SYSERR: nullptr obj (%p) or char (%p) passed to obj_to_char.", object, ch);
 }
@@ -583,7 +583,7 @@ void obj_from_char(struct obj_data *object) {
 
     /* set flag for crash-save system, but not on mobs! */
     if (!IS_NPC(object->carried_by))
-        SET_BIT_AR(PLR_FLAGS(object->carried_by), PLR_CRASH);
+        object->carried_by->playerFlags.set(PLR_CRASH);
 
     int64_t previous = (object->carried_by->getEffMaxPL());
 

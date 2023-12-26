@@ -237,80 +237,14 @@ int load_char(const char *name, struct char_data *ch) {
         GET_GAUNTLET(ch) = PFDEF_GAUNTLET;
         ch->energy = 1.0;
         ch->stamina = 1.0;
-
-        GET_RADAR1(ch) = PFDEF_RADAR1;
-        GET_SHIP(ch) = PFDEF_SHIP;
-        GET_LPLAY(ch) = PFDEF_LPLAY;
-        GET_BOOSTS(ch) = PFDEF_DISTFEA;
-        MAJINIZED(ch) = PFDEF_DISTFEA;
-        GET_LINTEREST(ch) = PFDEF_LPLAY;
-        GET_DTIME(ch) = PFDEF_LPLAY;
-        GET_PHASE(ch) = PFDEF_EYE;
         ch->mimic = nullptr;
-        GET_SLOTS(ch) = 0;
-        GET_TGROWTH(ch) = 0;
-        GET_RTIME(ch) = PFDEF_LPLAY;
-        GET_DCOUNT(ch) = PFDEF_EYE;
-        GET_GENOME(ch, 0) = PFDEF_EYE;
-        GET_PREFERENCE(ch) = PFDEF_EYE;
-        GET_GENOME(ch, 1) = PFDEF_EYE;
-        GET_AURA(ch) = PFDEF_SKIN;
-        for (i = 0; i < 52; i++) {
-            GET_BONUS(ch, i) = PFDEF_BOARD;
-        }
 
-        GET_LIMBCOND(ch, 0) = 0;
-        GET_LIMBCOND(ch, 1) = 0;
-        GET_LIMBCOND(ch, 2) = 0;
-        GET_LIMBCOND(ch, 3) = 0;
-        GET_BOARD(ch, 0) = PFDEF_BOARD;
-        GET_BOARD(ch, 1) = PFDEF_BOARD;
-        GET_BOARD(ch, 2) = PFDEF_BOARD;
-        GET_BOARD(ch, 3) = PFDEF_BOARD;
-        GET_BOARD(ch, 4) = PFDEF_BOARD;
-        GET_SHIPROOM(ch) = PFDEF_SHIPROOM;
-        GET_RADAR2(ch) = PFDEF_RADAR2;
-        GET_RADAR3(ch) = PFDEF_RADAR3;
-        GET_DROOM(ch) = PFDEF_DROOM;
-        GET_CRANK(ch) = PFDEF_CRANK;
-        for (i = 0; i < AF_ARRAY_MAX; i++)
-            AFF_FLAGS(ch)[i] = PFDEF_AFFFLAGS;
-        for (i = 0; i < PM_ARRAY_MAX; i++)
-            PLR_FLAGS(ch)[i] = PFDEF_PLRFLAGS;
-        for (i = 0; i < PR_ARRAY_MAX; i++)
-            PRF_FLAGS(ch)[i] = PFDEF_PREFFLAGS;
-        for (i = 0; i < AD_ARRAY_MAX; i++)
-            ADM_FLAGS(ch)[i] = 0;
-        for (i = 0; i < NUM_OF_SAVE_THROWS; i++) {
-            GET_SAVE_MOD(ch, i) = PFDEF_SAVETHROW;
-            GET_SAVE_BASE(ch, i) = PFDEF_SAVETHROW;
-        }
+
         GET_LOADROOM(ch) = PFDEF_LOADROOM;
         GET_INVIS_LEV(ch) = PFDEF_INVISLEV;
         GET_FREEZE_LEV(ch) = PFDEF_FREEZELEV;
         GET_WIMP_LEV(ch) = PFDEF_WIMPLEV;
-        GET_COND(ch, HUNGER) = PFDEF_HUNGER;
-        GET_COND(ch, THIRST) = PFDEF_THIRST;
-        GET_COND(ch, DRUNK) = PFDEF_DRUNK;
-        GET_BACKSTAB_COOL(ch) = 0;
-        GET_COOLDOWN(ch) = 0;
-        GET_SDCOOLDOWN(ch) = 0;
-        GET_ABSORBS(ch) = PFDEF_BANK;
-        GET_INGESTLEARNED(ch) = PFDEF_BANK;
-        GET_UP(ch) = PFDEF_BANK;
-        GET_FORGETING(ch) = PFDEF_BANK;
-        GET_FORGET_COUNT(ch) = PFDEF_BANK;
-        GET_KAIOKEN(ch) = PFDEF_BANK;
-        GET_EXP(ch) = PFDEF_EXP;
-        GET_TRANSCLASS(ch) = PFDEF_EXP;
-        for (i = 0; i < 6; i++)
-            GET_TRANSCOST(ch, i) = false;
-        GET_MOLT_EXP(ch) = PFDEF_EXP;
-        GET_FISHD(ch) = PFDEF_ACCURACY;
-        GET_POLE_BONUS(ch) = PFDEF_ACCURACY;
-        GET_DAMAGE_MOD(ch) = PFDEF_DAMAGE;
-        GET_ARMOR(ch) = PFDEF_AC;
-        SPEAKING(ch) = PFDEF_SPEAKING;
+
         GET_OLC_ZONE(ch) = PFDEF_OLC;
 
         ch->time.birth = ch->time.created = ch->time.maxage = 0;
@@ -319,6 +253,7 @@ int load_char(const char *name, struct char_data *ch) {
         auto &p = players[player_table[id].id];
 
         while (get_line(fl, line)) {
+            bitvector_t flags[4];
             tag_argument(line, tag);
 
             switch (*tag) {
@@ -326,28 +261,37 @@ int load_char(const char *name, struct char_data *ch) {
                     if (!strcmp(tag, "Ac  ")) GET_ARMOR(ch) = atoi(line);
                     else if (!strcmp(tag, "Act ")) {
                         sscanf(line, "%s %s %s %s", f1, f2, f3, f4);
-                        PLR_FLAGS(ch)[0] = asciiflag_conv(f1);
-                        PLR_FLAGS(ch)[1] = asciiflag_conv(f2);
-                        PLR_FLAGS(ch)[2] = asciiflag_conv(f3);
-                        PLR_FLAGS(ch)[3] = asciiflag_conv(f4);
+                        flags[0] = asciiflag_conv(f1);
+                        flags[1] = asciiflag_conv(f2);
+                        flags[2] = asciiflag_conv(f3);
+                        flags[3] = asciiflag_conv(f4);
+                        for(auto f = 0; f < ch->playerFlags.size(); f++) {
+                            if(IS_SET_AR(flags, f)) ch->playerFlags.set(f);
+                        }
                     } else if (!strcmp(tag, "Aff ")) {
                         sscanf(line, "%s %s %s %s", f1, f2, f3, f4);
-                        AFF_FLAGS(ch)[0] = asciiflag_conv(f1);
-                        AFF_FLAGS(ch)[1] = asciiflag_conv(f2);
-                        AFF_FLAGS(ch)[2] = asciiflag_conv(f3);
-                        AFF_FLAGS(ch)[3] = asciiflag_conv(f4);
+                        flags[0] = asciiflag_conv(f1);
+                        flags[1] = asciiflag_conv(f2);
+                        flags[2] = asciiflag_conv(f3);
+                        flags[3] = asciiflag_conv(f4);
+                        for(auto f = 0; f < ch->affected_by.size(); f++) {
+                            if(IS_SET_AR(flags, f)) ch->affected_by.set(f);
+                        }
                     } else if (!strcmp(tag, "Affs")) load_affects(fl, ch, 0);
                     else if (!strcmp(tag, "Affv")) load_affects(fl, ch, 1);
                     else if (!strcmp(tag, "AdmL")) ch->set(CharNum::AdmLevel, atoi(line));
                     else if (!strcmp(tag, "Abso")) GET_ABSORBS(ch) = atoi(line);
                     else if (!strcmp(tag, "AdmF")) {
                         sscanf(line, "%s %s %s %s", f1, f2, f3, f4);
-                        ADM_FLAGS(ch)[0] = asciiflag_conv(f1);
-                        ADM_FLAGS(ch)[1] = asciiflag_conv(f2);
-                        ADM_FLAGS(ch)[2] = asciiflag_conv(f3);
-                        ADM_FLAGS(ch)[3] = asciiflag_conv(f4);
+                        flags[0] = asciiflag_conv(f1);
+                        flags[1] = asciiflag_conv(f2);
+                        flags[2] = asciiflag_conv(f3);
+                        flags[3] = asciiflag_conv(f4);
+                        for(auto f = 0; f < ch->admflags.size(); f++) {
+                            if(IS_SET_AR(flags, f)) ch->admflags.set(f);
+                        }
                     } else if (!strcmp(tag, "Alin")) ch->set(CharAlign::GoodEvil, atoi(line));
-                    else if (!strcmp(tag, "Aura")) GET_AURA(ch) = atoi(line);
+                    else if (!strcmp(tag, "Aura")) ch->set(CharAppearance::Aura, atoi(line));
                     break;
 
                 case 'B':
@@ -484,10 +428,13 @@ int load_char(const char *name, struct char_data *ch) {
                     else if (!strcmp(tag, "Posi")) GET_POS(ch) = atoi(line);
                     else if (!strcmp(tag, "Pref")) {
                         sscanf(line, "%s %s %s %s", f1, f2, f3, f4);
-                        PRF_FLAGS(ch)[0] = asciiflag_conv(f1);
-                        PRF_FLAGS(ch)[1] = asciiflag_conv(f2);
-                        PRF_FLAGS(ch)[2] = asciiflag_conv(f3);
-                        PRF_FLAGS(ch)[3] = asciiflag_conv(f4);
+                        flags[0] = asciiflag_conv(f1);
+                        flags[1] = asciiflag_conv(f2);
+                        flags[2] = asciiflag_conv(f3);
+                        flags[3] = asciiflag_conv(f4);
+                        for(auto f = 0; f < ch->pref.size(); f++) {
+                            if(IS_SET_AR(flags, f)) ch->pref.set(f);
+                        }
                     } else if (!strcmp(tag, "Prff")) GET_PREFERENCE(ch) = atoi(line);
                     break;
 

@@ -133,7 +133,7 @@ ACMD(do_lightgrenade) {
                 TO_VICT);
             act("@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", false, ch, nullptr, vict,
                 TO_NOTVICT);
-            REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
+            ch->affected_by.reset(AFF_ZANZOKEN);
             pcost(vict, 0, GET_MAX_HIT(vict) / 200);
             if (vict == targ) {
                 pcost(ch, attperc, 0);
@@ -209,14 +209,11 @@ ACMD(do_energize) {
             return;
         }
     } else {
-        if (PRF_FLAGGED(ch, PRF_ENERGIZE)) {
-            send_to_char(ch, "You stop focusing ki into your fingertips.\r\n");
-            REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_ENERGIZE);
-            return;
-        } else {
+        ch->pref.flip(PRF_ENERGIZE);
+        if (ch->pref.test(PRF_ENERGIZE)) {
             send_to_char(ch, "You start focusing your latent ki into your fingertips.\r\n");
-            SET_BIT_AR(PRF_FLAGS(ch), PRF_ENERGIZE);
-            return;
+        } else {
+            send_to_char(ch, "You stop focusing ki into your fingertips.\r\n");
         }
     }
 }
@@ -296,13 +293,13 @@ ACMD(do_breath) {
                         !GET_BONUS(vict, BONUS_FIREPROOF)) {
                         send_to_char(vict, "@RYou are burned by the attack!@n\r\n");
                         send_to_char(ch, "@RThey are burned by the attack!@n\r\n");
-                        SET_BIT_AR(AFF_FLAGS(vict), AFF_BURNED);
+                        vict->affected_by.set(AFF_BURNED);
                     } else if (GET_BONUS(vict, BONUS_FIREPROOF) || IS_DEMON(vict)) {
                         send_to_char(ch, "@RThey appear to be fireproof!@n\r\n");
                     } else if (GET_BONUS(vict, BONUS_FIREPRONE)) {
                         send_to_char(vict, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
                         send_to_char(ch, "@RThey are easily burned!@n\r\n");
-                        SET_BIT_AR(AFF_FLAGS(vict), AFF_BURNED);
+                        vict->affected_by.set(AFF_BURNED);
                     }
                     hurt(0, 0, ch, vict, nullptr, dmg, 0);
 
@@ -401,13 +398,13 @@ ACMD(do_breath) {
                 !GET_BONUS(vict, BONUS_FIREPROOF)) {
                 send_to_char(vict, "@RYou are burned by the attack!@n\r\n");
                 send_to_char(ch, "@RThey are burned by the attack!@n\r\n");
-                SET_BIT_AR(AFF_FLAGS(vict), AFF_BURNED);
+                vict->affected_by.set(AFF_BURNED);
             } else if (GET_BONUS(vict, BONUS_FIREPROOF) || IS_DEMON(vict)) {
                 send_to_char(ch, "@RThey appear to be fireproof!@n\r\n");
             } else if (GET_BONUS(vict, BONUS_FIREPRONE)) {
                 send_to_char(vict, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
                 send_to_char(ch, "@RThey are easily burned!@n\r\n");
-                SET_BIT_AR(AFF_FLAGS(vict), AFF_BURNED);
+                vict->affected_by.set(AFF_BURNED);
             }
             return;
         }
@@ -1889,7 +1886,7 @@ ACMD(do_nova) {
                     TO_VICT);
                 act("@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", false, ch, nullptr,
                     vict, TO_NOTVICT);
-                REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
+                vict->affected_by.reset(AFF_ZANZOKEN);
                 pcost(vict, 0, GET_MAX_HIT(vict) / 200);
                 hurt(0, 0, ch, vict, nullptr, 0, 1);
                 continue;
@@ -2771,7 +2768,7 @@ ACMD(do_throw) {
                 COMBO(ch) = -1;
                 COMBHITS(ch) = 0;
                 int stcost = ((GET_MAX_HIT(ch) / 200) + GET_OBJ_WEIGHT(obj));
-                REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
+                vict->affected_by.reset(AFF_ZANZOKEN);
                 pcost(ch, 0, stcost / 2);
                 pcost(vict, 0, GET_MAX_HIT(vict) / 200);
                 obj_from_char(obj);
@@ -2910,7 +2907,7 @@ ACMD(do_throw) {
                     act("@R$N@R is burned by it!@n", true, ch, nullptr, vict, TO_CHAR);
                     act("@RYou are burned by it!@n", true, ch, nullptr, vict, TO_VICT);
                     act("@R$N@R is burned by it!@n", true, ch, nullptr, vict, TO_NOTVICT);
-                    SET_BIT_AR(AFF_FLAGS(vict), AFF_BURNED);
+                    vict->affected_by.set(AFF_BURNED);
                     damage += damage * 0.4;
                 }
             }
@@ -3100,14 +3097,14 @@ ACMD(do_selfd) {
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@R$n's body starts to glow @wwhite@R and flash. The flashes start out slowly but steadilly increase in speed. $n's aura begins to burn around $s body at the same time in a violent fashion!@n",
             true, ch, nullptr, nullptr, TO_ROOM);
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_SELFD);
+        ch->playerFlags.set(PLR_SELFD);
         return;
     } else if (!PLR_FLAGGED(ch, PLR_SELFD2)) {
         act("@wYour body slowly stops flashing. Steam rises from your skin as you slowly let off the energy you built up in a safe manner.@n",
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@w$n's body slowly stops flashing. Steam rises from $s skin as $e slowly lets off the energy $e built up in a safe manner.@n",
             true, ch, nullptr, nullptr, TO_ROOM);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_SELFD);
+        ch->playerFlags.reset(PLR_SELFD);
         return;
     } else if (GRAPPLING(ch) != nullptr && !can_kill(ch, GRAPPLING(ch), nullptr, 3)) {
         act("@wYour body slowly stops flashing. Steam rises from your skin as you slowly let off the energy you built up in a safe manner.@n",
@@ -3115,7 +3112,7 @@ ACMD(do_selfd) {
         act("@w$n's body slowly stops flashing. Steam rises from $s skin as $e slowly lets off the energy $e built up in a safe manner.@n",
             true, ch, nullptr, nullptr, TO_ROOM);
         send_to_char(ch, "You can't kill them, the immortals won't allow it!\r\n");
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_SELFD);
+        ch->playerFlags.reset(PLR_SELFD);
         return;
     } else if (GRAPPLING(ch) != nullptr) {
         tch = GRAPPLING(ch);
@@ -3132,14 +3129,14 @@ ACMD(do_selfd) {
         act("@R$n EXPLODES! The explosion concentrates on @r$N@R, engulfing $M in a sphere of deadly energy!@n", true,
             ch, nullptr, tch, TO_NOTVICT);
         hurt(0, 0, ch, tch, nullptr, dmg, 1);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_SELFD);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_SELFD2);
+        ch->playerFlags.reset(PLR_SELFD);
+        ch->playerFlags.reset(PLR_SELFD2);
         if (PLR_FLAGGED(ch, PLR_IMMORTAL)) {
             GET_SDCOOLDOWN(ch) = 600;
         }
         if ((IS_MAJIN(ch) || IS_BIO(ch)) && ch->getCurLFPercent() > 0.5) {
             ch->decCurLFPercent(2, -1);
-            SET_BIT_AR(PLR_FLAGS(ch), PLR_GOOP);
+            ch->playerFlags.set(PLR_GOOP);
             ch->gooptime = 70;
         } else {
             die(ch, nullptr);
@@ -3184,8 +3181,8 @@ ACMD(do_selfd) {
             GET_SDCOOLDOWN(ch) = 600;
         }
         die(ch, nullptr);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_SELFD);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_SELFD2);
+        ch->playerFlags.reset(PLR_SELFD);
+        ch->playerFlags.reset(PLR_SELFD2);
         int num = rand_number(10, 20) + GET_SKILL(ch, SKILL_SELFD);
         if (GET_SKILL(ch, SKILL_SELFD) + num <= 100) {
             SET_SKILL(ch, SKILL_SELFD, num);
@@ -3932,7 +3929,7 @@ ACMD(do_koteiru) {
                     if (rand_number(1, 4) == 1 && !AFF_FLAGGED(vict, AFF_FROZEN) && !IS_DEMON(vict)) {
                         act("@CYour body completely freezes!@n", true, vict, nullptr, nullptr, TO_CHAR);
                         act("@c$n's@C body completely freezes!@n", true, vict, nullptr, nullptr, TO_ROOM);
-                        SET_BIT_AR(AFF_FLAGS(vict), AFF_FROZEN);
+                        vict->affected_by.set(AFF_FROZEN);
                     }
                 }
             }
@@ -4208,7 +4205,7 @@ ACMD(do_spiral) {
         vict = def;
     }
 
-    SET_BIT_AR(PLR_FLAGS(ch), PLR_SPIRAL);
+    ch->playerFlags.set(PLR_SPIRAL);
     improve_skill(ch, SKILL_SPIRAL, 0);
     act("@mFlying to a spot above your intended target you begin to move so fast all that can be seen of you are trails of color. You focus your movements into a vortex and prepare to attack!@n",
         true, ch, nullptr, nullptr, TO_CHAR);

@@ -3789,16 +3789,14 @@ ACMD(do_autoexit) {
     }
     switch (tp) {
         case EXIT_OFF:
-            REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_AUTOEXIT);
-            REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_FULL_EXIT);
+            for(auto f : {PRF_AUTOEXIT, PRF_FULL_EXIT}) ch->pref.reset(f);
             break;
         case EXIT_NORMAL:
-            SET_BIT_AR(PRF_FLAGS(ch), PRF_AUTOEXIT);
-            REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_FULL_EXIT);
+            ch->pref.set(PRF_AUTOEXIT);
+            ch->pref.reset(PRF_FULL_EXIT);
             break;
         case EXIT_COMPLETE:
-            SET_BIT_AR(PRF_FLAGS(ch), PRF_AUTOEXIT);
-            SET_BIT_AR(PRF_FLAGS(ch), PRF_FULL_EXIT);
+            for(auto f : {PRF_AUTOEXIT, PRF_FULL_EXIT}) ch->pref.set(f);
             break;
     }
     send_to_char(ch, "Your @rautoexit level@n is now %s.\r\n", exitlevels[EXIT_LEV(ch)]);
@@ -5910,7 +5908,7 @@ ACMD(do_inventory) {
     send_to_char(ch, "@w              @YInventory\r\n@D-------------------------------------@w\r\n");
     if (!IS_NPC(ch)) {
         if (PLR_FLAGGED(ch, PLR_STOLEN)) {
-            REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_STOLEN);
+            ch->playerFlags.reset(PLR_STOLEN);
             send_to_char(ch, "@r   --------------------------------------------------@n\n");
             send_to_char(ch, "@R    You notice that you have been robbed sometime recently!\n");
             send_to_char(ch, "@r   --------------------------------------------------@n\n");
@@ -7088,10 +7086,10 @@ ACMD(do_color) {
     }
     switch (tp) {
         case C_OFF:
-            REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_COLOR);
+            ch->pref.reset(PRF_COLOR);
             break;
         case C_ON:
-            SET_BIT_AR(PRF_FLAGS(ch), PRF_COLOR);
+            ch->pref.set(PRF_COLOR);
             break;
     }
     send_to_char(ch, "Your color is now @o%s@n.\r\n", ctypes[tp]);

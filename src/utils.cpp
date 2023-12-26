@@ -1282,7 +1282,7 @@ int roll_pursue(struct char_data *ch, struct char_data *vict) {
                 }
             }
         }
-        REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_PURSUIT);
+        vict->affected_by.reset(AFF_PURSUIT);
         return (true);
     } else {
         send_to_char(ch, "@RYou fail to pursue after them!@n\r\n");
@@ -2036,13 +2036,13 @@ void reveal_hiding(struct char_data *ch, int type) {
         act("@MYou feel as though what you just did may have revealed your hiding spot...@n", true, ch, nullptr,
             nullptr, TO_CHAR);
         act("@M$n moves a little and you notice them!@n", true, ch, nullptr, nullptr, TO_ROOM);
-        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_HIDE);
+        ch->affected_by.reset(AFF_HIDE);
     } else if (type == 1) { /* Their skill at hiding failed, reveal */
         if (GET_SKILL(ch, SKILL_HIDE) + bonus < axion_dice(0)) {
             act("@MYou feel as though what you just did may have revealed your hiding spot...@n", true, ch, nullptr,
                 nullptr, TO_CHAR);
             act("@M$n moves a little and you notice them!@n", true, ch, nullptr, nullptr, TO_ROOM);
-            REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_HIDE);
+            ch->affected_by.reset(AFF_HIDE);
         }
     } else if (type == 2) { /* They were spotted */
         struct descriptor_data *d;
@@ -2059,7 +2059,7 @@ void reveal_hiding(struct char_data *ch, int type) {
                 continue;
 
             if (GET_SKILL(tch, SKILL_SPOT) + rand1 >= GET_SKILL(ch, SKILL_HIDE) + rand2) {
-                REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_HIDE);
+                ch->affected_by.reset(AFF_HIDE);
                 act("@M$N seems to notice you!@n", true, ch, nullptr, tch, TO_CHAR);
                 act("@MYou notice $n's movements reveal $s hiding spot!@n", true, ch, nullptr, tch, TO_VICT);
                 act("@MYou notice $N look keenly somewhere nearby. At that spot you see $n hiding!@n", true, ch,
@@ -2098,7 +2098,7 @@ void reveal_hiding(struct char_data *ch, int type) {
             }
         }
     } else if (type == 4) { /* You were found from search! */
-        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_HIDE);
+        ch->affected_by.reset(AFF_HIDE);
     }
 }
 
@@ -2125,11 +2125,12 @@ int block_calc(struct char_data *ch) {
                 act("You try to leave, but can't outrun $N!", true, ch, nullptr, blocker, TO_CHAR);
                 if (AFF_FLAGGED(ch, AFF_FLYING) && !AFF_FLAGGED(blocker, AFF_FLYING) && GET_ALT(ch) == 1) {
                     send_to_char(blocker, "You're now floating in the air.\r\n");
-                    SET_BIT_AR(AFF_FLAGS(blocker), AFF_FLYING);
+
+                    blocker->affected_by.set(AFF_FLYING);
                     GET_ALT(blocker) = GET_ALT(ch);
                 } else if (AFF_FLAGGED(ch, AFF_FLYING) && !AFF_FLAGGED(blocker, AFF_FLYING) && GET_ALT(ch) == 2) {
                     send_to_char(blocker, "You're now floating high in the sky.\r\n");
-                    SET_BIT_AR(AFF_FLAGS(blocker), AFF_FLYING);
+                    blocker->affected_by.set(AFF_FLYING);
                     GET_ALT(blocker) = GET_ALT(ch);
                 }
                 return (0);
@@ -2507,7 +2508,7 @@ int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech
                     }
                     if (vict->original == ch) {
                         act("@w$n@W says, '@C$N, sure. I'll spar with you.@W'@n", true, vict, nullptr, ch, TO_ROOM);
-                        SET_BIT_AR(MOB_FLAGS(vict), MOB_SPAR);
+                        vict->mobFlags.set(MOB_SPAR);
                         return 0;
                     }
                     if (remember == true) {
@@ -2540,10 +2541,10 @@ int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech
                         if (MOB_FLAGGED(vict, MOB_SPAR)) {
                             act("@w$n@W says, '@C$N, fine our match will wait till later then.@W'@n", true, vict,
                                 nullptr, ch, TO_ROOM);
-                            REMOVE_BIT_AR(MOB_FLAGS(vict), MOB_SPAR);
+                            vict->mobFlags.reset(MOB_SPAR);
                         } else {
                             act("@w$n@W says, '@C$N, sure. I'll spar with you.@W'@n", true, vict, nullptr, ch, TO_ROOM);
-                            SET_BIT_AR(MOB_FLAGS(vict), MOB_SPAR);
+                            vict->mobFlags.set(MOB_SPAR);
                         }
                         return 0;
                     }
@@ -3728,19 +3729,17 @@ void admin_set(struct char_data *ch, int value) {
         while (GET_ADMLEVEL(ch) < value) {
             ch->mod(CharNum::AdmLevel, 1);
             for (i = 0; default_admin_flags[GET_ADMLEVEL(ch)][i] != -1; i++)
-                SET_BIT_AR(ADM_FLAGS(ch), default_admin_flags[GET_ADMLEVEL(ch)][i]);
+                ch->admflags.set(default_admin_flags[GET_ADMLEVEL(ch)][i]);
         }
         run_autowiz();
         if (orig < ADMLVL_IMMORT && value >= ADMLVL_IMMORT) {
-            SET_BIT_AR(PRF_FLAGS(ch), PRF_LOG2);
-            SET_BIT_AR(PRF_FLAGS(ch), PRF_HOLYLIGHT);
-            SET_BIT_AR(PRF_FLAGS(ch), PRF_ROOMFLAGS);
-            SET_BIT_AR(PRF_FLAGS(ch), PRF_AUTOEXIT);
+            for(auto f : {PRF_LOG2, PRF_HOLYLIGHT, PRF_ROOMFLAGS, PRF_AUTOEXIT}) ch->pref.set(f);
+
         }
         if (GET_ADMLEVEL(ch) >= ADMLVL_IMMORT) {
             for (i = 0; i < 3; i++)
                 GET_COND(ch, i) = (char) -1;
-            SET_BIT_AR(PRF_FLAGS(ch), PRF_HOLYLIGHT);
+            ch->pref.set(PRF_HOLYLIGHT);
         }
         return;
     }
@@ -3750,16 +3749,12 @@ void admin_set(struct char_data *ch, int value) {
                admin_level_names[value]);
         while (GET_ADMLEVEL(ch) > value) {
             for (i = 0; default_admin_flags[GET_ADMLEVEL(ch)][i] != -1; i++)
-                REMOVE_BIT_AR(ADM_FLAGS(ch), default_admin_flags[GET_ADMLEVEL(ch)][i]);
+                ch->admflags.reset(default_admin_flags[GET_ADMLEVEL(ch)][i]);
             ch->mod(CharNum::AdmLevel, -1);
         }
         run_autowiz();
         if (orig >= ADMLVL_IMMORT && value < ADMLVL_IMMORT) {
-            REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_LOG1);
-            REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_LOG2);
-            REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_NOHASSLE);
-            REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_HOLYLIGHT);
-            REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_ROOMFLAGS);
+            for(auto f : {PRF_LOG1, PRF_LOG2, PRF_NOHASSLE, PRF_HOLYLIGHT, PRF_ROOMFLAGS}) ch->pref.reset(f);
         }
         return;
     }
@@ -3895,6 +3890,26 @@ bool ROOM_FLAGGED(room_vnum loc, int flag) {
         return room->second.room_flags.test(flag);
     }
     return false;
+}
+
+bool ADM_FLAGGED(struct char_data *ch, int flag) {
+    return ch->admflags.test(flag);
+}
+
+bool PRF_FLAGGED(struct char_data *ch, int flag) {
+    return ch->pref.test(flag);
+}
+
+bool MOB_FLAGGED(const struct char_data *ch, int flag) {
+    return ch->mobFlags.test(flag);
+}
+
+bool PLR_FLAGGED(struct char_data *ch, int flag) {
+    return ch->mobFlags.test(flag);
+}
+
+bool AFF_FLAGGED(struct char_data *ch, int flag) {
+    return ch->affected_by.test(flag);
 }
 
 bool PLANET_FLAGGED(struct char_data *ch, int flag) {

@@ -761,9 +761,9 @@ in the vault (vnum: 453) now and then. you can just use
                     } else if (!strcasecmp(field, "is_killer")) {
                         if (subfield && *subfield) {
                             if (!strcasecmp("on", subfield))
-                                SET_BIT_AR(PLR_FLAGS(c), PLR_KILLER);
+                                c->playerFlags.set(PLR_KILLER);
                             else if (!strcasecmp("off", subfield))
-                                REMOVE_BIT_AR(PLR_FLAGS(c), PLR_KILLER);
+                                c->playerFlags.reset(PLR_KILLER);
                         }
                         if (PLR_FLAGGED(c, PLR_KILLER))
                             strcpy(str, "1");
@@ -772,9 +772,9 @@ in the vault (vnum: 453) now and then. you can just use
                     } else if (!strcasecmp(field, "is_thief")) {
                         if (subfield && *subfield) {
                             if (!strcasecmp("on", subfield))
-                                SET_BIT_AR(PLR_FLAGS(c), PLR_THIEF);
+                                c->playerFlags.set(PLR_THIEF);
                             else if (!strcasecmp("off", subfield))
-                                REMOVE_BIT_AR(PLR_FLAGS(c), PLR_THIEF);
+                                c->playerFlags.reset(PLR_THIEF);
                         }
                         if (PLR_FLAGGED(c, PLR_THIEF))
                             strcpy(str, "1");

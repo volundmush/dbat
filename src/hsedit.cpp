@@ -1101,7 +1101,7 @@ ACMD(do_oasis_hsedit) {
 
 /****************************************************************************/
     act("$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
-    SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
+    ch->playerFlags.set(PLR_WRITING);
 
 
 /****************************************************************************/

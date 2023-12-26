@@ -577,7 +577,7 @@ void clanINFOW(char *name, struct char_data *ch) {
     else {
         char *backstr = nullptr;
         act("$n begins to edit a clan's info.", true, ch, nullptr, nullptr, TO_ROOM);
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
+        ch->playerFlags.set(PLR_WRITING);
         send_editor_help(ch->desc);
         write_to_output(ch->desc, "@rYou are limited to 1000 characters for the clan info.@n\r\n");
         backstr = strdup(S->info);

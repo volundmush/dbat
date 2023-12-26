@@ -784,7 +784,7 @@ static int gen_receptionist(struct char_data *ch, struct char_data *recep,
                 false, recep, nullptr, ch, TO_VICT);
             //Crash_cryosave(ch, cost);
             mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), true, "%s has cryo-rented.", GET_NAME(ch));
-            SET_BIT_AR(PLR_FLAGS(ch), PLR_CRYO);
+            ch->playerFlags.set(PLR_CRYO);
         }
 
         act("$n helps $N into $S private chamber.", false, recep, nullptr, ch, TO_NOTVICT);
@@ -814,7 +814,7 @@ void Crash_save_all(uint64_t heartPulse, double deltaTime) {
         if ((STATE(d) == CON_PLAYING) && !IS_NPC(d->character)) {
             if (PLR_FLAGGED(d->character, PLR_CRASH)) {
                 Crash_crashsave(d->character);
-                REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_CRASH);
+                d->character->playerFlags.reset(PLR_CRASH);
             }
         }
     }

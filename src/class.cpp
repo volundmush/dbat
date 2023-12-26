@@ -386,15 +386,14 @@ void do_start(struct char_data *ch) {
         GET_COND(ch, DRUNK) = 0;
     }
 
-    SET_BIT_AR(PRF_FLAGS(ch), PRF_AUTOEXIT);
-    SET_BIT_AR(PRF_FLAGS(ch), PRF_HINTS);
-    SET_BIT_AR(PRF_FLAGS(ch), PRF_NOMUSIC);
-    SET_BIT_AR(PRF_FLAGS(ch), PRF_DISPHP);
+    for(auto f : {PRF_VIEWORDER, PRF_DISPMOVE, PRF_AUTOEXIT, PRF_HINTS, PRF_NOMUSIC, PRF_DISPHP,
+    PRF_DISPKI, PRF_DISPEXP, PRF_DISPTNL}) ch->pref.set(f);
+
     GET_LIMBCOND(ch, 0) = 100;
     GET_LIMBCOND(ch, 1) = 100;
     GET_LIMBCOND(ch, 2) = 100;
     GET_LIMBCOND(ch, 3) = 100;
-    SET_BIT_AR(PLR_FLAGS(ch), PLR_HEAD);
+    ch->playerFlags.set(PLR_HEAD);
 
     GET_SLOTS(ch) = 30;
 
@@ -424,11 +423,11 @@ void do_start(struct char_data *ch) {
 
     if (GET_RACE(ch) == RACE_SAIYAN || GET_RACE(ch) == RACE_HALFBREED) {
         if (GET_RACE(ch) != RACE_HALFBREED || (GET_RACE(ch) == RACE_HALFBREED && RACIAL_PREF(ch) != 1)) {
-            SET_BIT_AR(PLR_FLAGS(ch), PLR_STAIL);
+            ch->playerFlags.set(PLR_STAIL);
         }
     }
     if (GET_RACE(ch) == RACE_ICER || GET_RACE(ch) == RACE_BIO) {
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_TAIL);
+        ch->playerFlags.set(PLR_TAIL);
     }
     if (GET_RACE(ch) == RACE_MAJIN) {
         GET_ABSORBS(ch) = 0;
@@ -438,11 +437,7 @@ void do_start(struct char_data *ch) {
     if (GET_RACE(ch) == RACE_BIO) {
         GET_ABSORBS(ch) = 3;
     }
-    SET_BIT_AR(PRF_FLAGS(ch), PRF_VIEWORDER);
-    SET_BIT_AR(PRF_FLAGS(ch), PRF_DISPMOVE);
-    SET_BIT_AR(PRF_FLAGS(ch), PRF_DISPKI);
-    SET_BIT_AR(PRF_FLAGS(ch), PRF_DISPEXP);
-    SET_BIT_AR(PRF_FLAGS(ch), PRF_DISPTNL);
+
 
     if (!PLR_FLAGGED(ch, PLR_FORGET)) {
         if (ch->choice == 1) {
@@ -511,7 +506,7 @@ void do_start(struct char_data *ch) {
         SET_SKILL(ch, SKILL_PUNCH, GET_SKILL_BASE(ch, SKILL_PUNCH) + punch);
     } /* End CC skills */
     else {
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_FORGET);
+        ch->playerFlags.reset(PLR_FORGET);
     }
 
     if (IS_KAI(ch) || IS_KANASSAN(ch)) {
@@ -581,7 +576,7 @@ void do_start(struct char_data *ch) {
             SET_SKILL(ch, SKILL_LANG_COMMON, 1);
             break;
         case RACE_ANDROID:
-            SET_BIT_AR(AFF_FLAGS(ch), AFF_INFRAVISION);
+            ch->affected_by.set(AFF_INFRAVISION);
             SET_SKILL(ch, SKILL_LANG_COMMON, 1);
             break;
         default:
@@ -652,10 +647,10 @@ void do_start(struct char_data *ch) {
     GET_TRANSCLASS(ch) = rand_number(1, 3);
 
     if (CONFIG_SITEOK_ALL)
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_SITEOK);
+        ch->playerFlags.set(PLR_SITEOK);
 
     if (GET_RACE(ch) == RACE_SAIYAN && rand_number(1, 100) >= 95) {
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_LSSJ);
+        ch->playerFlags.set(PLR_LSSJ);
         write_to_output(ch->desc, "@GYou were one of the few born a Legendary Super Saiyan!@n\r\n");
     }
     ch->restoreVitals();
@@ -1100,7 +1095,7 @@ void advance_level(struct char_data *ch, int whichclass) {
 
         add_prac = 5;
         if (PLR_FLAGGED(ch, PLR_SKILLP)) {
-            REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_SKILLP);
+            ch->playerFlags.reset(PLR_SKILLP);
             add_prac *= 5;
         } else {
             add_prac *= 2;
@@ -1146,7 +1141,7 @@ void advance_level(struct char_data *ch, int whichclass) {
     if (GET_ADMLEVEL(ch) >= ADMLVL_IMMORT) {
         for (i = 0; i < 3; i++)
             GET_COND(ch, i) = (char) -1;
-        SET_BIT_AR(PRF_FLAGS(ch), PRF_HOLYLIGHT);
+        ch->pref.set(PRF_HOLYLIGHT);
     }
 
     sprintf(buf, "@D[@YGain@D: @RPl@D(@G%s@D) @gSt@D(@G%s@D) @CKi@D(@G%s@D) @bPS@D(@G%s@D)]", add_commas(add_hp).c_str(),

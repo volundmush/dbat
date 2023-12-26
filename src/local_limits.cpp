@@ -119,11 +119,11 @@ static void healthy_check(struct char_data *ch) {
     int chance = 70, roll = rand_number(1, 100), change = false;
 
     if (AFF_FLAGGED(ch, AFF_SHOCKED) && roll >= chance) {
-        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_SHOCKED);
+        ch->affected_by.reset(AFF_SHOCKED);
         change = true;
     }
     if (AFF_FLAGGED(ch, AFF_MBREAK) && roll >= chance) {
-        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_MBREAK);
+        ch->affected_by.reset(AFF_MBREAK);
         change = true;
     }
     if (AFF_FLAGGED(ch, AFF_WITHER) && roll >= chance) {
@@ -131,7 +131,7 @@ static void healthy_check(struct char_data *ch) {
         change = true;
     }
     if (AFF_FLAGGED(ch, AFF_CURSE) && roll >= chance) {
-        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_CURSE);
+        ch->affected_by.reset(AFF_CURSE);
         change = true;
     }
     if (AFF_FLAGGED(ch, AFF_POISON) && roll >= chance) {
@@ -155,7 +155,7 @@ static void healthy_check(struct char_data *ch) {
         change = true;
     }
     if (AFF_FLAGGED(ch, AFF_KNOCKED) && roll >= chance) {
-        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_KNOCKED);
+        ch->affected_by.reset(AFF_KNOCKED);
         GET_POS(ch) = POS_SITTING;
         change = true;
     }
@@ -490,7 +490,7 @@ int64_t hit_gain(struct char_data *ch) {
 
     if (PLR_FLAGGED(ch, PLR_FURY)) {
         send_to_char(ch, "Your fury subsides for now. Next time try to take advantage of it before you calm down.\r\n");
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_FURY);
+        ch->playerFlags.reset(PLR_FURY);
     }
 
     /* Fury Mode Loss for halfbreeds */
@@ -662,15 +662,15 @@ static void update_flags(struct char_data *ch) {
 
     if (AFF_FLAGGED(ch, AFF_FIRESHIELD) && !FIGHTING(ch) && rand_number(1, 101) > GET_SKILL(ch, SKILL_FIRESHIELD)) {
         send_to_char(ch, "Your fireshield disappears.\r\n");
-        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FIRESHIELD);
+        ch->affected_by.reset(AFF_FIRESHIELD);
     }
     if (AFF_FLAGGED(ch, AFF_ZANZOKEN) && !FIGHTING(ch) && rand_number(1, 3) == 2) {
         send_to_char(ch, "You lose concentration and no longer are ready to zanzoken.\r\n");
-        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
+        ch->affected_by.reset(AFF_ZANZOKEN);
     }
     if (AFF_FLAGGED(ch, AFF_ENSNARED) && rand_number(1, 3) == 2) {
         send_to_char(ch, "The silk ensnaring your arms disolves enough for you to break it!\r\n");
-        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ENSNARED);
+        ch->affected_by.reset(AFF_ENSNARED);
     }
 
     if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && PLR_FLAGGED(ch, PLR_TRANS1) && !PLR_FLAGGED(ch, PLR_FPSSJ)) {
@@ -678,7 +678,7 @@ static void update_flags(struct char_data *ch) {
         if (GET_ABSORBS(ch) >= 300) {
             send_to_char(ch,
                          "You have mastered the base Super Saiyan transformation and achieved Full Power Super Saiyan! Super Saiyan First can now be maintained effortlessly.\r\n");
-            SET_BIT_AR(PLR_FLAGS(ch), PLR_FPSSJ);
+            ch->playerFlags.set(PLR_FPSSJ);
             GET_ABSORBS(ch) = 0;
         }
     }
@@ -708,7 +708,7 @@ static void update_flags(struct char_data *ch) {
     }
     if (AFF_FLAGGED(ch, AFF_MBREAK) && rand_number(1, 3 + sick_fail) == 2) {
         send_to_char(ch, "@wYour mind is no longer in turmoil, you can charge ki again.@n\r\n");
-        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_MBREAK);
+        ch->affected_by.reset(AFF_MBREAK);
         if (GET_SKILL(ch, SKILL_TELEPATHY) <= 0) {
             bool condition1 = rand_number(1, 2) == 2;
             bool condition2 = rand_number(1, 20) == 1;
@@ -733,12 +733,12 @@ static void update_flags(struct char_data *ch) {
             if (skill < GET_SKILL(ch, SKILL_TELEPATHY))
                 send_to_char(ch, "Your mental damage and recovery has taught you things about your own mind.\r\n");
         }
-        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_SHOCKED);
+        ch->affected_by.reset(AFF_SHOCKED);
     }
     if (AFF_FLAGGED(ch, AFF_FROZEN) && rand_number(1, 2) == 2) {
         send_to_char(ch, "@wYou realize you have thawed enough and break out of the ice holding you prisoner!\r\n");
         act("$n@W breaks out of the ice holding $m prisoner!", true, ch, nullptr, nullptr, TO_ROOM);
-        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FROZEN);
+        ch->affected_by.reset(AFF_FROZEN);
     }
     if (AFF_FLAGGED(ch, AFF_WITHER) && rand_number(1, 6 + sick_fail) == 2) {
         send_to_char(ch, "@wYour body returns to normal and you beat the withering that plagued you.\r\n");
@@ -746,7 +746,7 @@ static void update_flags(struct char_data *ch) {
         null_affect(ch, AFF_WITHER);
     }
     if (wearing_stardust(ch) == 1) {
-        SET_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
+        ch->affected_by.set(AFF_ZANZOKEN);
         send_to_char(ch, "The stardust armor blesses you with a free zanzoken when you next need it.\r\n");
     }
 
@@ -988,7 +988,7 @@ void gain_condition(struct char_data *ch, int condition, int value) {
                                 true, ch, nullptr, nullptr, TO_CHAR);
                             act("@m@6$n@r@6 retches violently! It seems $e stuffed $mself too much!@n", true, ch,
                                 nullptr, nullptr, TO_ROOM);
-                            SET_BIT_AR(AFF_FLAGS(ch), AFF_PUKED);
+                            ch->affected_by.set(AFF_PUKED);
                             if (!IS_NAMEK(ch)) {
                                 GET_COND(ch, HUNGER) -= 40;
                                 if (GET_COND(ch, HUNGER) < 0)
@@ -1010,7 +1010,7 @@ void gain_condition(struct char_data *ch, int condition, int value) {
                                 ch, nullptr, nullptr, TO_CHAR);
                             act("@m@6$n@r@6 pukes violently! It seems $e stuffed $mself too much!@n", true, ch, nullptr,
                                 nullptr, TO_ROOM);
-                            SET_BIT_AR(AFF_FLAGS(ch), AFF_PUKED);
+                            ch->affected_by.set(AFF_PUKED);
                             if (!IS_NAMEK(ch)) {
                                 GET_COND(ch, HUNGER) -= 20;
                                 if (GET_COND(ch, HUNGER) < 0)
@@ -1030,7 +1030,7 @@ void gain_condition(struct char_data *ch, int condition, int value) {
                                 ch, nullptr, nullptr, TO_CHAR);
                             act("@m@6$n@r@6 pukes a little! It seems $e stuffed $mself too much!@n", true, ch, nullptr,
                                 nullptr, TO_ROOM);
-                            SET_BIT_AR(AFF_FLAGS(ch), AFF_PUKED);
+                            ch->affected_by.set(AFF_PUKED);
                             if (!IS_NAMEK(ch)) {
                                 GET_COND(ch, HUNGER) -= 8;
                                 if (GET_COND(ch, HUNGER) < 0)
@@ -1057,9 +1057,7 @@ void gain_condition(struct char_data *ch, int condition, int value) {
             (!GET_SKILL(ch, SKILL_SURVIVAL) || (GET_SKILL(ch, SKILL_SURVIVAL) < rand_number(1, 140)))) {
             if (value <= 0) {
                 if (GET_COND(ch, condition) >= 0) {
-                    if (AFF_FLAGGED(ch, AFF_PUKED)) {
-                        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_PUKED);
-                    }
+                    ch->affected_by.reset(AFF_PUKED);
                     if (GET_COND(ch, condition) + value < 0) {
                         GET_COND(ch, condition) = 0;
                     } else {
@@ -1340,7 +1338,7 @@ static void heal_limb(struct char_data *ch) {
     }
 
     if (PLR_FLAGGED(ch, PLR_BANDAGED) && recovered == true) {
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_BANDAGED);
+        ch->playerFlags.reset(PLR_BANDAGED);
         send_to_char(ch, "You remove your bandages.\r\n");
         return;
     }
@@ -1405,7 +1403,7 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                 } else {
                     send_to_char(i, "You don't have enough energy to keep the aura active.\r\n");
                     act("$n's aura slowly stops shining and fades.\r\n", true, i, nullptr, nullptr, TO_ROOM);
-                    REMOVE_BIT_AR(PLR_FLAGS(i), PLR_AURALIGHT);
+                    i->playerFlags.reset(PLR_AURALIGHT);
                 }
             }
             if (IS_MUTANT(i) && (GET_GENOME(i, 0) == 6 || GET_GENOME(i, 1) == 6)) {
@@ -1434,7 +1432,7 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                 if (rand_number(1, 5) >= 4) {
                     send_to_char(i, "Your burns are healed now.\r\n");
                     act("$n@w's burns are now healed.@n", true, i, nullptr, nullptr, TO_ROOM);
-                    REMOVE_BIT_AR(AFF_FLAGS(i), AFF_BURNED);
+                    i->affected_by.reset(AFF_BURNED);
                 }
             }
 
@@ -1517,19 +1515,19 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                         send_to_char(i, "@wThe healing tank is now too low on energy to heal you.\r\n");
                         act("You step out of the now empty healing tank.", true, i, nullptr, nullptr, TO_CHAR);
                         act("@C$n@w steps out of the now empty healing tank.@n", true, i, nullptr, nullptr, TO_ROOM);
-                        REMOVE_BIT_AR(PLR_FLAGS(i), PLR_HEALT);
+                        i->playerFlags.reset(PLR_HEALT);
                         SITTING(SITS(i)) = nullptr;
                         SITS(i) = nullptr;
                     } else if (i->isFullVitals()) {
                         send_to_char(i, "@wYou are fully recovered now.\r\n");
                         act("You step out of the now empty healing tank.", true, i, nullptr, nullptr, TO_CHAR);
                         act("@C$n@w steps out of the now empty healing tank.@n", true, i, nullptr, nullptr, TO_ROOM);
-                        REMOVE_BIT_AR(PLR_FLAGS(i), PLR_HEALT);
+                        i->playerFlags.reset(PLR_HEALT);
                         SITTING(SITS(i)) = nullptr;
                         SITS(i) = nullptr;
                     }
                 } else if (PLR_FLAGGED(i, PLR_HEALT) && SITS(i) == nullptr) {
-                    REMOVE_BIT_AR(PLR_FLAGS(i), PLR_HEALT);
+                    i->playerFlags.reset(PLR_HEALT);
                 } else if (GET_POS(i) == POS_SLEEPING) {
                     send_to_char(i, "@wYour sleep does you some good.@n\r\n");
                     if (!IS_ANDROID(i) && !FIGHTING(i))

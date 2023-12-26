@@ -242,7 +242,8 @@ ASPELL(spell_charm) {
 
         act("Isn't $n just such a nice fellow?", false, ch, nullptr, victim, TO_VICT);
         if (IS_NPC(victim))
-            REMOVE_BIT_AR(MOB_FLAGS(victim), MOB_SPEC);
+            victim->mobFlags.reset(MOB_SPEC);
+
     }
 }
 

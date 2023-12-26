@@ -2054,8 +2054,7 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
     /* GET_CLASS_RANKS(ch, t[3]) = GET_LEVEL(ch); */
 
     if (!IS_HUMAN(ch))
-        if (!AFF_FLAGGED(ch, AFF_INFRAVISION))
-            SET_BIT_AR(AFF_FLAGS(ch), AFF_INFRAVISION);
+        ch->affected_by.set(AFF_INFRAVISION);
 
     SPEAKING(ch) = SKILL_LANG_COMMON;
 
@@ -2322,11 +2321,11 @@ int parse_mobile_from_file(FILE *mob_f, struct char_data *ch) {
         exit(1);
     }
 
-    SET_BIT_AR(MOB_FLAGS(ch), MOB_ISNPC);
+    ch->mobFlags.set(MOB_ISNPC);
     if (MOB_FLAGGED(ch, MOB_NOTDEADYET)) {
         /* Rather bad to load mobiles with this bit already set. */
         basic_mud_log("SYSERR: Mob #%d has reserved bit MOB_NOTDEADYET set.", nr);
-        REMOVE_BIT_AR(MOB_FLAGS(ch), MOB_NOTDEADYET);
+        ch->mobFlags.reset(MOB_NOTDEADYET);
     }
 
     /* AGGR_TO_ALIGN is ignored if the mob is AGGRESSIVE.
@@ -3512,10 +3511,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     MOB_LOADROOM(mob) = NOWHERE;
 
     if (IS_HUMANOID(mob)) {
-        SET_BIT_AR(MOB_FLAGS(mob), MOB_RARM);
-        SET_BIT_AR(MOB_FLAGS(mob), MOB_LARM);
-        SET_BIT_AR(MOB_FLAGS(mob), MOB_RLEG);
-        SET_BIT_AR(MOB_FLAGS(mob), MOB_LLEG);
+        for(auto f : {MOB_RARM, MOB_LARM, MOB_RLEG, MOB_LLEG}) mob->mobFlags.set(f);
     }
 
     copy_proto_script(&proto->second, mob, MOB_TRIGGER);

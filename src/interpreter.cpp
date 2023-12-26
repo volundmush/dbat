@@ -1178,9 +1178,8 @@ int perform_dupe_check(struct descriptor_data *d) {
     d->character->desc = d;
     d->original = nullptr;
     d->character->timer = 0;
-    REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_MAILING);
-    REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_WRITING);
-    REMOVE_BIT_AR(AFF_FLAGS(d->character), AFF_GROUP);
+    for(auto f : {PLR_MAILING, PLR_WRITING}) d->character->pref.reset(f);
+    d->character->affected_by.reset(AFF_GROUP);
     STATE(d) = CON_PLAYING;
 
     switch (mode) {
@@ -1330,22 +1329,6 @@ void enter_player_game(struct descriptor_data *d) {
             AFF_FLAGGED(check, AFF_CHARM) && !circle_follow(check, d->character))
             add_follower(check, d->character);
 
-    if (PLR_FLAGGED(d->character, PLR_RARM)) {
-        GET_LIMBCOND(d->character, 0) = 100;
-        REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_RARM);
-    }
-    if (PLR_FLAGGED(d->character, PLR_LARM)) {
-        GET_LIMBCOND(d->character, 1) = 100;
-        REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_LARM);
-    }
-    if (PLR_FLAGGED(d->character, PLR_LLEG)) {
-        GET_LIMBCOND(d->character, 3) = 100;
-        REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_LLEG);
-    }
-    if (PLR_FLAGGED(d->character, PLR_RLEG)) {
-        GET_LIMBCOND(d->character, 2) = 100;
-        REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_RLEG);
-    }
     GET_COMBINE(d->character) = -1;
     GET_SLEEPT(d->character) = 8;
     GET_FOODR(d->character) = 2;
@@ -1354,21 +1337,14 @@ void enter_player_game(struct descriptor_data *d) {
     } else {
         GET_ALT(d->character) = 0;
     }
-    if (AFF_FLAGGED(d->character, AFF_POSITION)) {
-        REMOVE_BIT_AR(AFF_FLAGS(d->character), AFF_POSITION);
-    }
-    if (AFF_FLAGGED(d->character, AFF_SANCTUARY)) {
-        REMOVE_BIT_AR(AFF_FLAGS(d->character), AFF_SANCTUARY);
-    }
-    if (AFF_FLAGGED(d->character, AFF_ZANZOKEN)) {
-        REMOVE_BIT_AR(AFF_FLAGS(d->character), AFF_ZANZOKEN);
-    }
-    if (PLR_FLAGGED(d->character, PLR_KNOCKED)) {
-        REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_KNOCKED);
-    }
+
+    for(auto f : {AFF_POSITION, AFF_SANCTUARY, AFF_ZANZOKEN}) d->character->affected_by.reset(f);
+    d->character->playerFlags.reset(PLR_KNOCKED);
+
     if (IS_ANDROID(d->character) && !AFF_FLAGGED(d->character, AFF_INFRAVISION)) {
-        SET_BIT_AR(AFF_FLAGS(d->character), AFF_INFRAVISION);
+        d->character->affected_by.set(AFF_INFRAVISION);
     }
+
     ABSORBING(d->character) = nullptr;
     ABSORBBY(d->character) = nullptr;
     SITS(d->character) = nullptr;
@@ -1378,9 +1354,7 @@ void enter_player_game(struct descriptor_data *d) {
     GET_SPAM(d->character) = 0;
     GET_RMETER(d->character) = 0;
     if (!d->character->affected) {
-        if (AFF_FLAGGED(d->character, AFF_HEALGLOW)) {
-            REMOVE_BIT_AR(AFF_FLAGS(d->character), AFF_HEALGLOW);
-        }
+        d->character->affected_by.reset(AFF_HEALGLOW);
     }
     if (AFF_FLAGGED(d->character, AFF_HAYASA)) {
         GET_SPEEDBOOST(d->character) = GET_SPEEDCALC(d->character) * 0.5;
@@ -1392,9 +1366,7 @@ void enter_player_game(struct descriptor_data *d) {
         GET_COND(d->character, HUNGER) = -1;
     }
 
-    if (PLR_FLAGGED(d->character, PLR_HEALT)) {
-        REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_HEALT);
-    }
+    d->character->playerFlags.reset(PLR_HEALT);
 
     if (GET_ADMLEVEL(d->character) > 0) {
         d->level = 1;

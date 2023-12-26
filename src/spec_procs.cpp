@@ -827,7 +827,7 @@ SPECIAL(pet_shops) {
 
         pet = read_mobile(GET_MOB_RNUM(pet), REAL);
         GET_EXP(pet) = 0;
-        SET_BIT_AR(AFF_FLAGS(pet), AFF_CHARM);
+        pet->affected_by.set(AFF_CHARM);
 
         if (*pet_name) {
             snprintf(buf, sizeof(buf), "%s %s", pet->name, pet_name);
@@ -1106,14 +1106,14 @@ SPECIAL(healtank) {
                 return (true);
             } else {
                 GET_CHARGE(ch) = 0;
-                REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CHARGE);
+                ch->playerFlags.reset(PLR_CHARGE);
                 GET_CHARGETO(ch) = 0;
                 GET_BARRIER(ch) = 0;
                 act("@wYou step inside the healing tank and put on its breathing mask. A water like solution pours over your body until the tank is full.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 act("@C$n@w steps inside the healing tank and puts on its breathing mask. A water like solution pours over $s body until the tank is full.@n",
                     true, ch, nullptr, nullptr, TO_ROOM);
-                SET_BIT_AR(PLR_FLAGS(ch), PLR_HEALT);
+                ch->playerFlags.set(PLR_HEALT);
                 SITS(ch) = htank;
                 SITTING(htank) = ch;
                 return (true);
@@ -1128,7 +1128,7 @@ SPECIAL(healtank) {
             } else {
                 act("@wThe healing tank drains and you exit it shortly after.", true, ch, nullptr, nullptr, TO_CHAR);
                 act("@C$n@w exits the healing tank after letting it drain.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_HEALT);
+                ch->playerFlags.reset(PLR_HEALT);
                 SITTING(htank) = nullptr;
                 SITS(ch) = nullptr;
                 return (true);

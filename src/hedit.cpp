@@ -88,7 +88,7 @@ ACMD(do_oasis_hedit) {
     /*send_to_room(IN_ROOM(ch), "%s starts using OLC.\r\n", GET_NAME(ch));*/
     act("$n starts using OLC.", true, ch, nullptr, nullptr, TO_ROOM);
     HEDITS = true;
-    SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
+    ch->playerFlags.set(PLR_WRITING);
     mudlog(CMP, ADMLVL_IMMORT, true, "OLC: %s starts editing help files.", GET_NAME(ch));
 }
 
