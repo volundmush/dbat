@@ -338,8 +338,7 @@ OCMD(do_otransform) {
 
 OCMD(do_dupe) {
 
-    SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_DUPLICATE);
-
+    obj->extra_flags.set(ITEM_DUPLICATE);
 }
 
 /* purge all objects an npcs in room, or specified object or mob */

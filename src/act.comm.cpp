@@ -1312,7 +1312,7 @@ ACMD(do_write) {
 
         /* we can write - hooray! */
         act("$n begins to jot down a note.", true, ch, nullptr, nullptr, TO_ROOM);
-        SET_BIT_AR(GET_OBJ_EXTRA(paper), ITEM_UNIQUE_SAVE);
+        paper->extra_flags.set(ITEM_UNIQUE_SAVE);
         send_editor_help(ch->desc);
         string_write(ch->desc, &paper->look_description, MAX_NOTE_LENGTH, 0, backstr);
     }

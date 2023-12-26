@@ -3151,23 +3151,23 @@ static void boost_obj(struct obj_data *obj, struct char_data *ch, int type) {
         case 1: /* This object is a weapon. */
             switch (boost) {
                 case 30:
-                    SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_WEAPLVL2);
+                    obj->extra_flags.set(ITEM_WEAPLVL2);
                     break;
                 case 40:
                 case 50:
-                    SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_WEAPLVL3);
+                    obj->extra_flags.set(ITEM_WEAPLVL3);
                     break;
                 case 60:
                 case 70:
                 case 80:
                 case 90:
-                    SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_WEAPLVL4);
+                    obj->extra_flags.set(ITEM_WEAPLVL4);
                     break;
                 case 100:
-                    SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_WEAPLVL5);
+                    obj->extra_flags.set(ITEM_WEAPLVL5);
                     break;
                 default:
-                    SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_WEAPLVL1);
+                    obj->extra_flags.set(ITEM_WEAPLVL1);
                     break;
             }
             if (boost != 0) {
@@ -3601,8 +3601,7 @@ ACMD(do_form) {
         } else {
             obj = read_object(19053, VIRTUAL);
             obj_to_char(obj, ch);
-            SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_NORENT);
-            SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_NOSELL);
+            for(auto f : {ITEM_NORENT, ITEM_NOSELL}) obj->extra_flags.set(f);
             GET_OBJ_SIZE(obj) = get_size(ch);
             reveal_hiding(ch, 0);
             GET_COOLDOWN(ch) = 10;
@@ -3883,9 +3882,7 @@ ACMD(do_srepair) {
                             if (GET_OBJ_VAL(GET_EQ(ch, i), VAL_ALL_HEALTH) > 100) {
                                 GET_OBJ_VAL(GET_EQ(ch, i), VAL_ALL_HEALTH) = 100;
                             }
-                            if (OBJ_FLAGGED(GET_EQ(ch, i), ITEM_BROKEN)) {
-                                REMOVE_BIT_AR(GET_OBJ_EXTRA(GET_EQ(ch, i)), ITEM_BROKEN);
-                            }
+                            GET_EQ(ch, i)->extra_flags.reset(ITEM_BROKEN);
                             repaired = true;
                         }
                     }
@@ -6206,7 +6203,7 @@ ACMD(do_forgery) {
     obj_to_char(obj3, ch);
 
     /* Set Object Variables */
-    SET_BIT_AR(GET_OBJ_EXTRA(obj3), ITEM_FORGED);
+    obj3->extra_flags.set(ITEM_FORGED);
     GET_OBJ_WEIGHT(obj3) = rand_number(GET_OBJ_WEIGHT(obj3) / 2, GET_OBJ_WEIGHT(obj3));
 
     obj_from_char(obj4);
@@ -10744,12 +10741,12 @@ ACMD(do_fix) {
             send_to_char(ch, "You repair %s a bit.\r\n", obj->short_description);
             act("$n repairs $p a bit.", false, ch, obj, nullptr, TO_ROOM);
             GET_OBJ_VAL(obj, VAL_ALL_HEALTH) += GET_SKILL(ch, SKILL_REPAIR);
-            REMOVE_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_BROKEN);
+            obj->extra_flags.reset(ITEM_BROKEN);
         } else {
             send_to_char(ch, "You repair %s completely.\r\n", obj->short_description);
             act("$n repairs $p completely.", false, ch, obj, nullptr, TO_ROOM);
             GET_OBJ_VAL(obj, VAL_ALL_HEALTH) = 100;
-            REMOVE_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_BROKEN);
+            obj->extra_flags.reset(ITEM_BROKEN);
         }
         if (obj->carried_by == nullptr && !PLR_FLAGGED(ch, PLR_REPLEARN) &&
             (level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0 || GET_LEVEL(ch) >= 100)) {

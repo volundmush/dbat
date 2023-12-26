@@ -324,7 +324,7 @@ static void search_room(struct char_data *ch) {
         if (OBJ_FLAGGED(obj, ITEM_BURIED) && perc * bonus > rand_number(50, 200)) {
             act("@YYou uncover @y$p@Y, which had been burried here.@n", true, ch, obj, nullptr, TO_CHAR);
             act("@y$n@Y uncovers @y$p@Y, which had burried here.@n", true, ch, obj, nullptr, TO_ROOM);
-            REMOVE_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_BURIED);
+            obj->extra_flags.reset(ITEM_BURIED);
             found++;
         }
     }

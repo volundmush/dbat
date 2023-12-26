@@ -1107,7 +1107,7 @@ int Crash_load(struct char_data *ch) {
                 }
                 if (GET_OBJ_VNUM(temp) == 20099 || GET_OBJ_VNUM(temp) == 20098)
                     if (OBJ_FLAGGED(temp, ITEM_UNBREAKABLE))
-                        REMOVE_BIT_AR(GET_OBJ_EXTRA(temp), ITEM_UNBREAKABLE);
+                        temp->extra_flags.reset(ITEM_UNBREAKABLE);
                 auto_equip(ch, temp, locate);
             } else {
                 continue;

@@ -2433,21 +2433,25 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
     }
     if ((retval = sscanf(line, " %d %s %s %s %s %s %s %s %s %s %s %s %s", t, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10,
                                 f11, f12)) == 13) {
+        bitvector_t extraFlags[4], wearFlags[4], permFlags[4];
 
-        GET_OBJ_EXTRA(&o)[0] = asciiflag_conv(f1);
-        GET_OBJ_EXTRA(&o)[1] = asciiflag_conv(f2);
-        GET_OBJ_EXTRA(&o)[2] = asciiflag_conv(f3);
-        GET_OBJ_EXTRA(&o)[3] = asciiflag_conv(f4);
+        extraFlags[0] = asciiflag_conv(f1);
+        extraFlags[1] = asciiflag_conv(f2);
+        extraFlags[2] = asciiflag_conv(f3);
+        extraFlags[3] = asciiflag_conv(f4);
+        for(auto i = 0; i < o.extra_flags.size(); i++) if(IS_SET_AR(extraFlags, i)) o.extra_flags.set(i);
 
-        GET_OBJ_WEAR(&o)[0] = asciiflag_conv(f5);
-        GET_OBJ_WEAR(&o)[1] = asciiflag_conv(f6);
-        GET_OBJ_WEAR(&o)[2] = asciiflag_conv(f7);
-        GET_OBJ_WEAR(&o)[3] = asciiflag_conv(f8);
+        wearFlags[0] = asciiflag_conv(f5);
+        wearFlags[1] = asciiflag_conv(f6);
+        wearFlags[2] = asciiflag_conv(f7);
+        wearFlags[3] = asciiflag_conv(f8);
+        for(auto i = 0; i < o.wear_flags.size(); i++) if(IS_SET_AR(wearFlags, i)) o.wear_flags.set(i);
 
-        GET_OBJ_PERM(&o)[0] = asciiflag_conv(f9);
-        GET_OBJ_PERM(&o)[1] = asciiflag_conv(f10);
-        GET_OBJ_PERM(&o)[2] = asciiflag_conv(f11);
-        GET_OBJ_PERM(&o)[3] = asciiflag_conv(f12);
+        permFlags[0] = asciiflag_conv(f9);
+        permFlags[1] = asciiflag_conv(f10);
+        permFlags[2] = asciiflag_conv(f11);
+        permFlags[3] = asciiflag_conv(f12);
+        for(auto i = 0; i < o.bitvector.size(); i++) if(IS_SET_AR(permFlags, i)) o.bitvector.set(i);
 
     } else {
         basic_mud_log("SYSERR: Format error in first numeric line (expecting 13 args, got %d), %s", retval, buf2);
@@ -2628,7 +2632,7 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
                 /* Objects that set CHARM on players are bad. */
                 if (OBJAFF_FLAGGED(&o, AFF_CHARM)) {
                     basic_mud_log("SYSERR: Object #%d has reserved bit AFF_CHARM set.", nr);
-                    REMOVE_BIT_AR(GET_OBJ_PERM(&o), AFF_CHARM);
+                    o.bitvector.reset(AFF_CHARM);
                 }
                 check_object(&o);
                 return (line);

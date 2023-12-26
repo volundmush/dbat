@@ -744,8 +744,8 @@ void remove_limb(struct char_data *vict, int num) {
     body_part->short_description = strdup(part);
 
     GET_OBJ_TYPE(body_part) = ITEM_OTHER;
-    SET_BIT_AR(GET_OBJ_WEAR(body_part), ITEM_WEAR_TAKE);
-    SET_BIT_AR(GET_OBJ_EXTRA(body_part), ITEM_UNIQUE_SAVE);
+    body_part->wear_flags.set(ITEM_WEAR_TAKE);
+    body_part->extra_flags.set(ITEM_UNIQUE_SAVE);
     GET_OBJ_VAL(body_part, 0) = 0;
     GET_OBJ_VAL(body_part, 1) = 0;
     GET_OBJ_VAL(body_part, 2) = 0;
@@ -1537,15 +1537,14 @@ static void make_pcorpse(struct char_data *ch) {
             corpse->wear_flags[y] = 0;
     }
 
-    SET_BIT_AR(GET_OBJ_WEAR(corpse), ITEM_WEAR_TAKE);
-    SET_BIT_AR(GET_OBJ_EXTRA(corpse), ITEM_NODONATE);
+    corpse->wear_flags.set(ITEM_WEAR_TAKE);
+    for(auto f : {ITEM_NODONATE, ITEM_UNIQUE_SAVE}) corpse->extra_flags.set(f);
     GET_OBJ_VAL(corpse, VAL_CONTAINER_CAPACITY) = 0;      /* You can't store stuff in a corpse */
     GET_OBJ_VAL(corpse, VAL_CONTAINER_CORPSE) = 1;        /* corpse identifier */
     GET_OBJ_VAL(corpse, VAL_CONTAINER_OWNER) = ch->id;  /* corpse identifier */
     GET_OBJ_WEIGHT(corpse) = ch->getTotalWeight();
     GET_OBJ_RENT(corpse) = 100000;
     GET_OBJ_TIMER(corpse) = CONFIG_MAX_PC_CORPSE_TIME;
-    SET_BIT_AR(GET_OBJ_EXTRA(corpse), ITEM_UNIQUE_SAVE);
 
 
     struct obj_data *obj, *next_obj;
@@ -1757,8 +1756,9 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
         if (y < TW_ARRAY_MAX)
             corpse->wear_flags[y] = 0;
     }
-    SET_BIT_AR(GET_OBJ_WEAR(corpse), ITEM_WEAR_TAKE);
-    SET_BIT_AR(GET_OBJ_EXTRA(corpse), ITEM_NODONATE);
+
+    corpse->wear_flags.set(ITEM_WEAR_TAKE);
+    for(auto f : {ITEM_NODONATE, ITEM_UNIQUE_SAVE}) corpse->extra_flags.set(f);
     GET_OBJ_VAL(corpse, VAL_CONTAINER_CAPACITY) = 0;    /* You can't store stuff in a corpse */
     GET_OBJ_VAL(corpse, VAL_CONTAINER_CORPSE) = 1;    /* corpse identifier */
     GET_OBJ_VAL(corpse, VAL_CONTAINER_OWNER) = -1;    /* corpse identifier */
@@ -1768,7 +1768,6 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
         GET_OBJ_TIMER(corpse) = CONFIG_MAX_NPC_CORPSE_TIME;
     else
         GET_OBJ_TIMER(corpse) = rand_number(CONFIG_MAX_PC_CORPSE_TIME / 2, CONFIG_MAX_PC_CORPSE_TIME);
-    SET_BIT_AR(GET_OBJ_EXTRA(corpse), ITEM_UNIQUE_SAVE);
 
     if (MOB_FLAGGED(ch, MOB_HUSK)) {
         for (obj = ch->contents; obj; obj = next_obj) {

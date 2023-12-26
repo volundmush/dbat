@@ -282,25 +282,12 @@ void affect_modify(struct char_data *ch, int loc, int mod, int spec, long bitv, 
 }
 
 
-void affect_modify_ar(struct char_data *ch, int loc, int mod, int spec, int bitv[], bool add) {
+void affect_modify_ar(struct char_data *ch, int loc, int mod, int spec, const std::bitset<NUM_AFF_FLAGS>& bitv, bool add) {
     int i, j;
 
-    if (add) {
-        for (i = 0; i < AF_ARRAY_MAX; i++)
-            for (j = 0; j < 32; j++)
-                if (IS_SET_AR(bitv, (i * 32) + j)) {
-                    if ((i * 32) + j != AFF_INFRAVISION || !IS_ANDROID(ch)) {
-                        ch->affected_by.set((i * 32) + j);
-                    }
-                }
-    } else {
-        for (i = 0; i < AF_ARRAY_MAX; i++)
-            for (j = 0; j < 32; j++)
-                if (IS_SET_AR(bitv, (i * 32) + j)) {
-                    if ((i * 32) + j != AFF_INFRAVISION || !IS_ANDROID(ch)) {
-                        ch->affected_by.reset((i * 32) + j);
-                    }
-                }
+    if (add) for (i = 0; i < bitv.size(); i++) if(bitv.test(i)) ch->affected_by.set(i);
+    else {
+        for (i = 0; i < bitv.size(); i++) if(bitv.test(i)) ch->affected_by.reset(i);
         mod = -mod;
     }
 
@@ -824,7 +811,7 @@ void obj_to_room(struct obj_data *object, room_rnum room) {
 
     if (GET_OBJ_TYPE(object) == ITEM_VEHICLE && !OBJ_FLAGGED(object, ITEM_UNBREAKABLE) &&
         GET_OBJ_VNUM(object) > 19199) {
-        SET_BIT_AR(GET_OBJ_EXTRA(object), ITEM_UNBREAKABLE);
+        object->extra_flags.set(ITEM_UNBREAKABLE);
     }
 
     // This section is now only going to be called during migrations.
@@ -1690,7 +1677,7 @@ struct obj_data *create_money(int amount) {
     GET_OBJ_VAL(obj, VAL_ALL_HEALTH) = 100;
     for (y = 0; y < TW_ARRAY_MAX; y++)
         obj->wear_flags[y] = 0;
-    SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_TAKE);
+    obj->wear_flags.set(ITEM_WEAR_TAKE);
     GET_OBJ_VAL(obj, VAL_MONEY_SIZE) = amount;
     GET_OBJ_COST(obj) = amount;
     obj->vn = NOTHING;

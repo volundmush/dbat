@@ -1134,7 +1134,7 @@ in the vault (vnum: 453) now and then. you can just use
                             int addition = atof(subfield);
                             GET_OBJ_VAL(o, VAL_ALL_HEALTH) = std::max<int>(1, addition + GET_OBJ_VAL(o, VAL_ALL_HEALTH));
                             if (OBJ_FLAGGED(o, ITEM_BROKEN) && GET_OBJ_VAL(o, VAL_ALL_HEALTH) >= 100)
-                                REMOVE_BIT_AR(GET_OBJ_EXTRA(o), ITEM_BROKEN);
+                                o->extra_flags.reset(ITEM_BROKEN);
                         }
                         snprintf(str, slen, "%d", GET_OBJ_VAL(o, VAL_ALL_HEALTH));
                     }

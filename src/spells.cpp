@@ -259,7 +259,7 @@ ASPELL(spell_identify) {
         sprinttype(GET_OBJ_TYPE(obj), item_types, bitbuf, sizeof(bitbuf));
         send_to_char(ch, "You feel informed:\r\nObject '%s', Item type: %s\r\n", obj->short_description, bitbuf);
 
-        if (GET_OBJ_PERM(obj)) {
+        if (obj->bitvector.any()) {
             sprintbitarray(GET_OBJ_PERM(obj), affected_bits, AF_ARRAY_MAX, bitbuf);
             send_to_char(ch, "Item will give you following abilities:  %s\r\n", bitbuf);
         }
@@ -362,7 +362,7 @@ ASPELL(spell_enchant_weapon) {
         if (obj->affected[i].location != APPLY_NONE)
             return;
 
-    SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_MAGIC);
+    obj->extra_flags.set(ITEM_MAGIC);
 
     for (i = 0; i < MAX_OBJ_AFFECT; i++) {
         if (obj->affected[i].location == APPLY_NONE) {
@@ -381,10 +381,10 @@ ASPELL(spell_enchant_weapon) {
     }
 
     if (IS_GOOD(ch)) {
-        SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_ANTI_EVIL);
+        obj->extra_flags.set(ITEM_ANTI_EVIL);
         act("$p glows blue.", false, ch, obj, nullptr, TO_CHAR);
     } else if (IS_EVIL(ch)) {
-        SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_ANTI_GOOD);
+        obj->extra_flags.set(ITEM_ANTI_GOOD);
         act("$p glows red.", false, ch, obj, nullptr, TO_CHAR);
     } else
         act("$p glows yellow.", false, ch, obj, nullptr, TO_CHAR);

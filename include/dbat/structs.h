@@ -224,15 +224,15 @@ struct obj_data : public unit_data {
     int64_t value[NUM_OBJ_VAL_POSITIONS]{};   /* Values of the item (see list)    */
     int8_t type_flag{};      /* Type of item                        */
     int level{}; /* Minimum level of object.            */
-    bitvector_t wear_flags[TW_ARRAY_MAX]{}; /* Where you can wear it     */
-    bitvector_t extra_flags[EF_ARRAY_MAX]{}; /* If it hums, glows, etc.  */
+    std::bitset<NUM_ITEM_WEARS> wear_flags{}; /* Where you can wear it     */
+    std::bitset<NUM_ITEM_FLAGS> extra_flags{}; /* If it hums, glows, etc.  */
     weight_t weight{};         /* Weight what else                     */
     weight_t getWeight();
     weight_t getTotalWeight();
     int cost{};           /* Value when sold (gp.)               */
     int cost_per_day{};   /* Cost to keep pr. real day           */
     int timer{};          /* Timer for object                    */
-    bitvector_t bitvector[AF_ARRAY_MAX]{}; /* To set chars bits          */
+    std::bitset<NUM_AFF_FLAGS> bitvector{}; /* To set chars bits          */
     int size{SIZE_MEDIUM};           /* Size class of object                */
 
     struct obj_affected_type affected[MAX_OBJ_AFFECT]{};  /* affects */

@@ -293,18 +293,18 @@ nlohmann::json obj_data::serializeBase() {
     if(type_flag) j["type_flag"] = type_flag;
     if(level) j["level"] = level;
 
-    for(auto i = 0; i < NUM_ITEM_WEARS; i++)
-        if(IS_SET_AR(wear_flags, i)) j["wear_flags"].push_back(i);
+    for(auto i = 0; i < wear_flags.size(); i++)
+        if(wear_flags.test(i)) j["wear_flags"].push_back(i);
 
-    for(auto i = 0; i < NUM_ITEM_FLAGS; i++)
-        if(IS_SET_AR(extra_flags, i)) j["extra_flags"].push_back(i);
+    for(auto i = 0; i < extra_flags.size(); i++)
+        if(extra_flags.test(i)) j["extra_flags"].push_back(i);
 
     if(weight != 0.0) j["weight"] = weight;
     if(cost) j["cost"] = cost;
     if(cost_per_day) j["cost_per_day"] = cost_per_day;
 
-    for(auto i = 0; i < NUM_AFF_FLAGS; i++)
-        if(IS_SET_AR(bitvector, i)) j["bitvector"].push_back(i);
+    for(auto i = 0; i < bitvector.size(); i++)
+        if(bitvector.test(i)) j["bitvector"].push_back(i);
 
     for(auto & i : affected) {
         if(i.location == APPLY_NONE) continue;
@@ -358,13 +358,13 @@ void obj_data::deserializeBase(const nlohmann::json &j) {
 
     if(j.contains("wear_flags")) {
         for(auto & i : j["wear_flags"]) {
-            SET_BIT_AR(wear_flags, i.get<int>());
+            wear_flags.set(i.get<int>());
         }
     }
 
     if(j.contains("extra_flags")) {
         for(auto & i : j["extra_flags"]) {
-            SET_BIT_AR(extra_flags, i.get<int>());
+            extra_flags.set(i.get<int>());
         }
     }
 
@@ -374,7 +374,7 @@ void obj_data::deserializeBase(const nlohmann::json &j) {
 
     if(j.contains("bitvector")) {
         for(auto & i : j["bitvector"]) {
-            SET_BIT_AR(bitvector, i.get<int>());
+            bitvector.set(i.get<int>());
         }
     }
 

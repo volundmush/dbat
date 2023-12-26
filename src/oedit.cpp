@@ -202,7 +202,7 @@ void oedit_setup_new(struct descriptor_data *d) {
     OLC_OBJ(d)->name = strdup("unfinished object");
     OLC_OBJ(d)->room_description = strdup("An unfinished object is lying here.");
     OLC_OBJ(d)->short_description = strdup("an unfinished object");
-    SET_BIT_AR(GET_OBJ_WEAR(OLC_OBJ(d)), ITEM_WEAR_TAKE);
+    OLC_OBJ(d)->wear_flags.set(ITEM_WEAR_TAKE);
     OLC_VAL(d) = 0;
     OLC_ITEM_TYPE(d) = OBJ_TRIGGER;
     GET_OBJ_TYPE(OLC_OBJ(d)) = ITEM_WORN;
@@ -957,7 +957,7 @@ void oedit_disp_menu(struct descriptor_data *d) {
                     GET_OBJ_VAL(obj, 5), GET_OBJ_VAL(obj, 6), GET_OBJ_VAL(obj, 7),
                     GET_OBJ_VAL(obj, 8), GET_OBJ_VAL(obj, 9), GET_OBJ_VAL(obj, 10),
                     GET_OBJ_VAL(obj, 11), GET_OBJ_VAL(obj, 12), GET_OBJ_VAL(obj, 13),
-                    GET_OBJ_VAL(obj, 14), GET_OBJ_VAL(obj, 15), GET_OBJ_EXTRA(obj) ? "Set." : "Not Set.",
+                    GET_OBJ_VAL(obj, 14), GET_OBJ_VAL(obj, 15), obj->extra_flags.any() ? "Set." : "Not Set.",
                     GET_OBJ_LEVEL(obj), material_names[(int) GET_OBJ_MATERIAL(obj)],
                     ebitbuf, !OLC_SCRIPT(d).empty() ? "Set." : "Not Set.",
                     size_names[GET_OBJ_SIZE(obj)]
@@ -1071,7 +1071,7 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
                             copy_proto_script(&obj_proto[robj], obj, OBJ_TRIGGER);
                             assign_triggers(obj, OBJ_TRIGGER);
                         }
-                        SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_UNIQUE_SAVE);
+                        obj->extra_flags.set(ITEM_UNIQUE_SAVE);
                         /* Xap - ought to save the old pointer, free after assignment I suppose */
                         mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), true,
                                "OLC: %s iedit a unique #%d", GET_NAME(d->character), GET_OBJ_VNUM(obj));
@@ -1776,7 +1776,7 @@ ACMD(do_iedit) {
 
     /* set up here */
     CREATE(OLC(ch->desc), struct oasis_olc_data, 1);
-    SET_BIT_AR(GET_OBJ_EXTRA(k), ITEM_UNIQUE_SAVE);
+    k->extra_flags.set(ITEM_UNIQUE_SAVE);
 
     ch->playerFlags.set(PLR_WRITING);
     iedit_setup_existing(ch->desc, k);

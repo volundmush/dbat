@@ -598,8 +598,7 @@ void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman,
         GET_OBJ_TYPE(obj) = ITEM_NOTE;
         for (y = 0; y < TW_ARRAY_MAX; y++)
             obj->wear_flags[y] = 0;
-        SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_TAKE);
-        SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_HOLD);
+        for(auto f : {ITEM_WEAR_TAKE, ITEM_WEAR_HOLD}) obj->wear_flags.set(f);
         GET_OBJ_WEIGHT(obj) = 1;
         GET_OBJ_COST(obj) = 30;
         GET_OBJ_RENT(obj) = 10;
@@ -613,7 +612,7 @@ void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman,
         obj->name = strdup(bla);
         *bla = '\0';
         *blm = '\0';
-        SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_UNIQUE_SAVE);
+        obj->extra_flags.set(ITEM_UNIQUE_SAVE);
 
         GET_OBJ_MATERIAL(obj) = MATERIAL_PAPER;
         GET_OBJ_VAL(obj, VAL_NOTE_HEALTH) = 100;
@@ -624,7 +623,7 @@ void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman,
                     strdup("Mail system error - please report.  Error #11.\r\n");
 
         /* so it saves */
-        SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_UNIQUE_SAVE);
+        obj->extra_flags.set(ITEM_UNIQUE_SAVE);
 
         if (IS_PLAYING(ch->desc) && mailman != nullptr) {
             obj_to_char(obj, ch);

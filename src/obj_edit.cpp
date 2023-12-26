@@ -219,7 +219,7 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
                     d->obj_editflag = EDIT_NONE;
                     d->obj_editval = EDIT_NONE;
                     d->character->mod(CharMoney::Carried,  -5000);
-                    SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_RESTRING);
+                    obj->extra_flags.set(ITEM_RESTRING);
                     write_to_output(d, "Purchase complete.");
                     send_to_imm("Restring Eq: %s has bought: %s, which was %s.", GET_NAME(d->character),
                                 obj->short_description, d->obj_was);
@@ -432,49 +432,49 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
                         obj_to_char(obj, d->character);
                         switch (d->obj_type) {
                             case 1:
-                                SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_BODY);
+                                obj->wear_flags.set(ITEM_WEAR_BODY);
                                 break;
                             case 2:
-                                SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_ABOUT);
+                                obj->wear_flags.set(ITEM_WEAR_ABOUT);
                                 break;
                             case 3:
-                                SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_WRIST);
+                                obj->wear_flags.set(ITEM_WEAR_WRIST);
                                 break;
                             case 4:
-                                SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_EAR);
+                                obj->wear_flags.set(ITEM_WEAR_EAR);
                                 break;
                             case 5:
-                                SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_FINGER);
+                                obj->wear_flags.set(ITEM_WEAR_FINGER);
                                 break;
                             case 6:
-                                SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_EYE);
+                                obj->wear_flags.set(ITEM_WEAR_EYE);
                                 break;
                             case 7:
-                                SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_HANDS);
+                                obj->wear_flags.set(ITEM_WEAR_HANDS);
                                 break;
                             case 8:
-                                SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_FEET);
+                                obj->wear_flags.set(ITEM_WEAR_FEET);
                                 break;
                             case 9:
-                                SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_WAIST);
+                                obj->wear_flags.set(ITEM_WEAR_WAIST);
                                 break;
                             case 10:
-                                SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_LEGS);
+                                obj->wear_flags.set(ITEM_WEAR_LEGS);
                                 break;
                             case 11:
-                                SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_ARMS);
+                                obj->wear_flags.set(ITEM_WEAR_ARMS);
                                 break;
                             case 12:
-                                SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_HEAD);
+                                obj->wear_flags.set(ITEM_WEAR_HEAD);
                                 break;
                             case 13:
-                                SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_NECK);
+                                obj->wear_flags.set(ITEM_WEAR_NECK);
                                 break;
                             case 14:
-                                SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_PACK);
+                                obj->wear_flags.set(ITEM_WEAR_PACK);
                                 break;
                             case 15:
-                                SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_SH);
+                                obj->wear_flags.set(ITEM_WEAR_SH);
                                 break;
                         }
                         *buf = '\0';
@@ -520,12 +520,11 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
                         }
                         GET_OBJ_LEVEL(obj) = 20;
                     }
-                    SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_SLOT2);
+                    for(auto f : {ITEM_SLOT2, ITEM_CUSTOM}) obj->extra_flags.set(f);
                     d->obj_editflag = EDIT_NONE;
                     d->obj_editval = EDIT_NONE;
                     d->character->modRPP(-20);
                     GET_OBJ_SIZE(obj) = get_size(d->character);
-                    SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_CUSTOM);
                     send_to_imm("Custom Eq: %s has bought: %s.", GET_NAME(d->character), obj->short_description);
                     d->account->customs.emplace_back(obj->short_description);
                     dirty_accounts.insert(d->account->vn);

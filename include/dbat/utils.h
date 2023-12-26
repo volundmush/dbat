@@ -429,10 +429,10 @@ extern bool ADM_FLAGGED(struct char_data *ch, int flag);
 bool ROOM_FLAGGED(room_vnum loc, int flag);
 
 #define EXIT_FLAGGED(exit, flag) (IS_SET((exit)->exit_info, (flag)))
-#define OBJAFF_FLAGGED(obj, flag) (IS_SET_AR(GET_OBJ_PERM(obj), (flag)))
+extern bool OBJAFF_FLAGGED(struct obj_data *obj, int flag);
 #define OBJVAL_FLAGGED(obj, flag) (IS_SET(GET_OBJ_VAL((obj), VAL_CONTAINER_FLAGS), (flag)))
-#define OBJWEAR_FLAGGED(obj, flag) (IS_SET_AR(GET_OBJ_WEAR(obj), (flag)))
-#define OBJ_FLAGGED(obj, flag) (IS_SET_AR(GET_OBJ_EXTRA(obj), (flag)))
+extern bool OBJWEAR_FLAGGED(struct obj_data *obj, int flag);
+extern bool OBJ_FLAGGED(struct obj_data *obj, int flag);
 #define BODY_FLAGGED(ch, flag) (IS_SET_AR(BODY_PARTS(ch), (flag)))
 #define ZONE_FLAGGED(rnum, flag)   (IS_SET_AR(zone_table[(rnum)].zone_flags, flag))
 #define HAS_SPELL_ROUTINE(spl, flag) (IS_SET(SPELL_ROUTINES(spl), (flag)))

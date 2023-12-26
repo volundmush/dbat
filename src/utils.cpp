@@ -1619,9 +1619,9 @@ void randomize_eq(struct obj_data *obj) {
         }
         int dice = rand_number(2, 12);
         if (dice >= 10) {
-            SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_SLOT2);
+            obj->extra_flags.set(ITEM_SLOT2);
         } else if (dice >= 7) {
-            SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_SLOT1);
+            obj->extra_flags.set(ITEM_SLOT1);
         }
     }
 }
@@ -3882,6 +3882,18 @@ void SET_SKILL_BONUS(struct char_data *ch, uint16_t skill, int16_t val) {
 void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val) {
     auto &s = ch->skill[skill];
     s.perfs = val;
+}
+
+bool OBJWEAR_FLAGGED(struct obj_data *obj, int flag) {
+    return obj->wear_flags.test(flag);
+}
+
+bool OBJ_FLAGGED(struct obj_data *obj, int flag) {
+    return obj->extra_flags.test(flag);
+}
+
+bool OBJAFF_FLAGGED(struct obj_data *obj, int flag) {
+    return obj->bitvector.test(flag);
 }
 
 bool ROOM_FLAGGED(room_vnum loc, int flag) {
