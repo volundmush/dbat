@@ -385,8 +385,8 @@ nlohmann::json char_data::serializeBase() {
     if(chclass) j["chclass"] = chclass->getID();
     if(weight != 0.0) j["weight"] = weight;
 
-    for(auto i = 0; i < NUM_AFF_FLAGS; i++)
-        if(IS_SET_AR(affected_by, i)) j["affected_by"].push_back(i);
+    for(auto i = 0; i < affected_by.size(); i++)
+        if(affected_by.test(i)) j["affected_by"].push_back(i);
 
 
     if(armor) j["armor"] = armor;

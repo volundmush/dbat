@@ -85,3 +85,10 @@ extern const char *npc_personality[MAX_PERSONALITIES + 1];
 extern const char *song_types[];
 extern const char *list_bonus[];
 extern const int list_bonus_cost[];
+
+extern const std::unordered_map<std::string, CharAttribute> CharAttributeNames;
+extern const std::unordered_map<std::string, CharTrain> CharTrainNames;
+extern const std::unordered_map<std::string, CharAppearance> CharAppearanceNames;
+extern const std::unordered_map<std::string, CharAlign> CharAlignNames;
+extern const std::unordered_map<std::string, CharMoney> CharMoneyNames;
+extern const std::unordered_map<std::string, CharStat> CharStatNames;

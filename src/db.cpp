@@ -2010,6 +2010,8 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
         return 0;
     }
 
+    ch->set(CharNum::Level, t[0]);
+
     GET_ARMOR(ch) = 10 * (10 - t[2]);
 
     /* max hit = 0 is a flag that H, M, V is xdy+z */

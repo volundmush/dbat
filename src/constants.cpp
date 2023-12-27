@@ -1814,3 +1814,48 @@ const int list_bonus_cost[] = {
         2, /* Negative 50 */
         6, /* Negative 51 */
 };
+
+const std::unordered_map<std::string, CharAttribute> CharAttributeNames = {
+        {"Strength", CharAttribute::Strength},
+        {"Agility", CharAttribute::Agility},
+        {"Constitution", CharAttribute::Constitution},
+        {"Intelligence", CharAttribute::Intelligence},
+        {"Speed", CharAttribute::Speed},
+        {"Wisdom", CharAttribute::Wisdom}
+};
+
+const std::unordered_map<std::string, CharTrain> CharTrainNames = {
+        {"Strength", CharTrain::Strength},
+        {"Agility", CharTrain::Agility},
+        {"Constitution", CharTrain::Constitution},
+        {"Intelligence", CharTrain::Intelligence},
+        {"Speed", CharTrain::Speed},
+        {"Wisdom", CharTrain::Wisdom}
+};
+
+const std::unordered_map<std::string, CharAppearance> CharAppearanceNames = {
+        {"Sex", CharAppearance::Sex},
+        {"HairLength", CharAppearance::HairLength},
+        {"HairStyle", CharAppearance::HairStyle},
+        {"HairColor", CharAppearance::HairColor},
+        {"SkinColor", CharAppearance::SkinColor},
+        {"EyeColor", CharAppearance::EyeColor},
+        {"DistinguishingFeature", CharAppearance::DistinguishingFeature},
+        {"Aura", CharAppearance::Aura}
+};
+
+const std::unordered_map<std::string, CharAlign> CharAlignNames = {
+        {"GoodEvil", CharAlign::GoodEvil},
+        {"LawChaos", CharAlign::LawChaos}
+};
+
+const std::unordered_map<std::string, CharMoney> CharMoneyNames = {
+        {"Carried", CharMoney::Carried},
+        {"Bank", CharMoney::Bank}
+};
+
+const std::unordered_map<std::string, CharStat> CharStatNames = {
+        {"PowerLevel", CharStat::PowerLevel},
+        {"Ki", CharStat::Ki},
+        {"Stamina", CharStat::Stamina}
+};
