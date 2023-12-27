@@ -6,10 +6,8 @@
 #include "dbat/spells.h"
 #include "dbat/comm.h"
 #include "dbat/constants.h"
-#include "dbat/oasis.h"
 #include "dbat/charmenu.h"
 #include "dbat/players.h"
-#include "dbat/dg_comm.h"
 
 static     const std::map<race::race_id, std::map<CharAttribute, std::pair<int, int>>> startAttrRanges = {
         {
@@ -854,7 +852,7 @@ namespace net {
 
             case CON_HAIRC:     /* query hair color */ {
                 int hairTo;
-                 switch(arg[0]) {
+                 switch(std::toupper(arg[0])) {
                     case '1':
                         hairTo = HAIRC_BLACK;
                         break;
@@ -885,25 +883,13 @@ namespace net {
                     case 'A':
                         hairTo = HAIRC_PURPLE;
                         break;
-                    case 'a':
-                        hairTo = HAIRC_PURPLE;
-                        break;
                     case 'B':
-                        hairTo = HAIRC_SILVER;
-                        break;
-                    case 'b':
                         hairTo = HAIRC_SILVER;
                         break;
                     case 'C':
                         hairTo = HAIRC_CRIMSON;
                         break;
-                    case 'c':
-                        hairTo = HAIRC_CRIMSON;
-                        break;
                     case 'D':
-                        hairTo = HAIRC_WHITE;
-                        break;
-                    case 'd':
                         hairTo = HAIRC_WHITE;
                         break;
                     default:
@@ -935,7 +921,7 @@ namespace net {
 
             case CON_HAIRS: {
                 int hairTo;
-                switch(arg[0]) {
+                switch(std::toupper(arg[0])) {
                     case '1':
                         hairTo = HAIRS_PLAIN;
                     break;
@@ -966,13 +952,7 @@ namespace net {
                     case 'A':
                         hairTo = HAIRS_FEATHERED;
                     break;
-                    case 'a':
-                        hairTo = HAIRS_FEATHERED;
-                    break;
                     case 'B':
-                        hairTo = HAIRS_DRED;
-                    break;
-                    case 'b':
                         hairTo = HAIRS_DRED;
                     break;
                     default:
@@ -1359,7 +1339,7 @@ namespace net {
                 break;
 
             case CON_Q2: {
-                int align;
+                align_t align = 0;
                 switch(arg[0]) {
                     case '1':
                         align += -200;
@@ -1395,8 +1375,8 @@ namespace net {
                 state = CON_Q3;
                 break;
             case CON_Q3: {
-                align_t align;
-                stat_t basepl, basest, baseki;
+                align_t align = 0;
+                stat_t basepl = 0, basest = 0, baseki = 0;
                 switch(arg[0]) {
                     case '1':
                         align += -100;
@@ -1446,7 +1426,7 @@ namespace net {
 
             case CON_Q4: {
                 money_t gold = 0;
-                stat_t basepl, basest, baseki;
+                stat_t basepl = 0, basest = 0, baseki = 0;
                 switch(arg[0]) {
                     case '1':
                         gold += 1000;
@@ -1573,7 +1553,7 @@ namespace net {
                 break;
 
             case CON_Q7: {
-                int align;
+                align_t align = 0;
                 switch(arg[0]) {
                     case '1':
                         align += -10;
@@ -1608,7 +1588,7 @@ namespace net {
                 break;
 
             case CON_Q8: {
-                int align;
+                align_t align = 0;
                 switch(arg[0]) {
                     case '1':
                         align += +10;
@@ -1646,7 +1626,7 @@ namespace net {
                 break;
 
             case CON_Q9: {
-                int align;
+                align_t align = 0;
                 switch(arg[0]) {
                     case '1':
                         ch->mod(CharAttribute::Strength, 1);
@@ -1729,7 +1709,7 @@ namespace net {
             case CON_ALIGN:
                 sendText("Choose: \r\n");
             {
-                int align = -1;
+                align_t align = -1;
                 switch(toupper(arg[0])) {
                     case 'K':
                         moveon = true;

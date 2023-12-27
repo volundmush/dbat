@@ -592,10 +592,12 @@ int House_load(room_vnum rvnum) {
             GET_OBJ_VAL(temp, 5) = t[6];
             GET_OBJ_VAL(temp, 6) = t[7];
             GET_OBJ_VAL(temp, 7) = t[8];
-            GET_OBJ_EXTRA(temp)[0] = asciiflag_conv(f1);
-            GET_OBJ_EXTRA(temp)[1] = asciiflag_conv(f2);
-            GET_OBJ_EXTRA(temp)[2] = asciiflag_conv(f3);
-            GET_OBJ_EXTRA(temp)[3] = asciiflag_conv(f3);
+            bitvector_t ex[4];
+            ex[0] = asciiflag_conv(f1);
+            ex[1] = asciiflag_conv(f2);
+            ex[2] = asciiflag_conv(f3);
+            ex[3] = asciiflag_conv(f4);
+            for(auto i = 0; i < temp->extra_flags.size(); i++) temp->extra_flags.set(i, IS_SET_AR(ex, i));
             GET_OBJ_VAL(temp, 8) = t[13];
             GET_OBJ_VAL(temp, 9) = t[14];
             GET_OBJ_VAL(temp, 10) = t[15];
@@ -635,10 +637,12 @@ int House_load(room_vnum rvnum) {
                     return 0;
                 }
                 temp->type_flag = t[0];
-                temp->wear_flags[0] = t[1];
-                temp->wear_flags[1] = t[2];
-                temp->wear_flags[2] = t[3];
-                temp->wear_flags[3] = t[4];
+                bitvector_t wear[4];
+                wear[0] = t[1];
+                wear[1] = t[2];
+                wear[2] = t[3];
+                wear[3] = t[4];
+                for(auto i = 0; i < temp->wear_flags.size(); i++) temp->wear_flags.set(i, IS_SET_AR(wear, i));
                 temp->weight = t[5];
                 temp->cost = t[6];
                 temp->cost_per_day = t[7];

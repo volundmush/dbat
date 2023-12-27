@@ -1175,8 +1175,10 @@ attribute_t char_data::get(CharAttribute attr, bool base) {
     }
     if(!base) {
         val += getAffectModifier((int)attr+1) + getAffectModifier(APPLY_ALL_STATS);
+        return std::clamp<attribute_t>(val, 5, 120);
     }
-    return std::clamp<attribute_t>(val, 5, 120);
+    return val;
+
 }
 
 attribute_t char_data::set(CharAttribute attr, attribute_t val) {

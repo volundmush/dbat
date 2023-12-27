@@ -2299,17 +2299,21 @@ int parse_mobile_from_file(FILE *mob_f, struct char_data *ch) {
     if ((retval = sscanf(line, "%s %s %s %s %s %s %s %s %d %c", f1, f2, f3, f4, f5, f6, f7, f8, t + 2, &letter)) == 10) {
         int taeller;
 
-        MOB_FLAGS(ch)[0] = asciiflag_conv(f1);
-        MOB_FLAGS(ch)[1] = asciiflag_conv(f2);
-        MOB_FLAGS(ch)[2] = asciiflag_conv(f3);
-        MOB_FLAGS(ch)[3] = asciiflag_conv(f4);
+        bitvector_t mf[4], aff[4];
+
+        mf[0] = asciiflag_conv(f1);
+        mf[1] = asciiflag_conv(f2);
+        mf[2] = asciiflag_conv(f3);
+        mf[3] = asciiflag_conv(f4);
         for (taeller = 0; taeller < AF_ARRAY_MAX; taeller++)
             check_bitvector_names(MOB_FLAGS(ch)[taeller], action_bits_count, buf2, "mobile");
+        for(auto i = 0; i < ch->mobFlags.size(); i++) ch->mobFlags.set(i, IS_SET_AR(mf, i));
 
-        AFF_FLAGS(ch)[0] = asciiflag_conv(f5);
-        AFF_FLAGS(ch)[1] = asciiflag_conv(f6);
-        AFF_FLAGS(ch)[2] = asciiflag_conv(f7);
-        AFF_FLAGS(ch)[3] = asciiflag_conv(f8);
+        aff[0] = asciiflag_conv(f5);
+        aff[1] = asciiflag_conv(f6);
+        aff[2] = asciiflag_conv(f7);
+        aff[3] = asciiflag_conv(f8);
+        for(auto i = 0; i < ch->affected_by.size(); i++) ch->affected_by.set(i, IS_SET_AR(aff, i));
 
         ch->set(CharAlign::GoodEvil, t[2]);
 
