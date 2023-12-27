@@ -3763,6 +3763,7 @@ void reset_zone(zone_rnum zone) {
     auto &z = zone_table[zone];
 
     if (pre_reset(z.number) == false) {
+
         for (auto &c : z.cmd) {
             if(c.command == 'S') break;
 
@@ -3779,7 +3780,8 @@ void reset_zone(zone_rnum zone) {
      *  the list of commands in load_zone() so that the counting
      *  will still be correct. - ae.
      */
-            switch (c.command) {
+            try {
+                switch (c.command) {
                 case '*':            /* ignore command */
                     last_cmd = 0;
                     break;
@@ -4045,6 +4047,10 @@ void reset_zone(zone_rnum zone) {
                 default: ZONE_ERROR("unknown cmd in reset table; cmd disabled");
                     c.command = '*';
                     break;
+            }
+            } catch (const std::exception &e) {
+                logger->critical("Exception thrown in reset_zone '{}' line {}", zone, c.line);
+                shutdown_game(1);
             }
         }
 

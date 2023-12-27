@@ -4255,11 +4255,11 @@ ACMD(do_ingest) {
             } else if (rand_number(1, 3) == 3) {
                 send_to_char(ch, "%s changes your height.\r\n", GET_NAME(vict));
                 if (GET_PC_HEIGHT(ch) > GET_PC_HEIGHT(vict)) {
-                    ch->mod(CharNum::Height, -((GET_PC_HEIGHT(ch) - GET_PC_HEIGHT(vict)) / 2));
+                    ch->modHeight(-((GET_PC_HEIGHT(ch) - GET_PC_HEIGHT(vict)) / 2));
                 } else if (GET_PC_HEIGHT(ch) < GET_PC_HEIGHT(vict)) {
-                    ch->mod(CharNum::Height, ((GET_PC_HEIGHT(vict) - GET_PC_HEIGHT(ch)) / 2));
+                    ch->modHeight(((GET_PC_HEIGHT(vict) - GET_PC_HEIGHT(ch)) / 2));
                 } else {
-                    ch->set(CharNum::Height, GET_PC_HEIGHT(vict));
+                    ch->setHeight(GET_PC_HEIGHT(vict));
                 }
             } else if (rand_number(1, 3) == 3) {
                 send_to_char(ch, "%s changes your weight.\r\n", GET_NAME(vict));

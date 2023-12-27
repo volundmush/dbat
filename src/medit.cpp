@@ -237,7 +237,7 @@ void init_mobile(struct char_data *mob) {
     mob->chclass = sensei::sensei_map[sensei::commoner];
 
     GET_WEIGHT(mob) = rand_number(100, 200);
-    mob->set(CharNum::Height, rand_number(100, 200));
+    mob->setHeight(rand_number(100, 200));
 
     auto base1 = rand_number(8, 16);
     auto base2 = rand_number(8, 16);

@@ -433,7 +433,7 @@ extern bool OBJAFF_FLAGGED(struct obj_data *obj, int flag);
 #define OBJVAL_FLAGGED(obj, flag) (IS_SET(GET_OBJ_VAL((obj), VAL_CONTAINER_FLAGS), (flag)))
 extern bool OBJWEAR_FLAGGED(struct obj_data *obj, int flag);
 extern bool OBJ_FLAGGED(struct obj_data *obj, int flag);
-#define BODY_FLAGGED(ch, flag) (IS_SET_AR(BODY_PARTS(ch), (flag)))
+#define BODY_FLAGGED(ch, flag) ((ch)->bodyparts.test(flag))
 #define ZONE_FLAGGED(rnum, flag)   (IS_SET_AR(zone_table[(rnum)].zone_flags, flag))
 #define HAS_SPELL_ROUTINE(spl, flag) (IS_SET(SPELL_ROUTINES(spl), (flag)))
 
@@ -506,7 +506,7 @@ extern bool OBJ_FLAGGED(struct obj_data *obj, int flag);
 #define GET_DISTFEA(ch) ((ch)->get(CharAppearance::DistinguishingFeature))
 #define GET_HOME(ch)    ((ch)->hometown)
 #define GET_WEIGHT(ch)  ((ch)->weight)
-#define GET_HEIGHT(ch)  ((ch)->get(CharNum::Height))
+#define GET_HEIGHT(ch)  ((ch)->getHeight())
 #define GET_PC_HEIGHT(ch)    GET_HEIGHT(ch)
 #define GET_PC_WEIGHT(ch)    GET_WEIGHT(ch)
 #define GET_SEX(ch)    ((ch)->get(CharAppearance::Sex))
@@ -692,8 +692,6 @@ int16_t GET_SKILL(struct char_data *ch, uint16_t skill);
 void SET_SKILL(struct char_data *ch, uint16_t skill, int16_t val);
 void SET_SKILL_BONUS(struct char_data *ch, uint16_t skill, int16_t val);
 void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val);
-
-#define BODY_PARTS(ch)  ((ch)->bodyparts)
 
 #define GET_EQ(ch, i)        ((ch)->equipment[i])
 

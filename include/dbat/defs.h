@@ -1962,3 +1962,5 @@ enum class CharNum : uint8_t {
  GroupKills = 6,
 
 };
+
+using effect_t = uint16_t;

@@ -3917,7 +3917,7 @@ bool MOB_FLAGGED(const struct char_data *ch, int flag) {
 }
 
 bool PLR_FLAGGED(struct char_data *ch, int flag) {
-    return ch->mobFlags.test(flag);
+    return ch->playerFlags.test(flag);
 }
 
 bool AFF_FLAGGED(struct char_data *ch, int flag) {

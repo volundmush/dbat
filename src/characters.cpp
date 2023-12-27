@@ -1322,3 +1322,18 @@ room_vnum char_data::normalizeLoadRoom(room_vnum in) {
     return CONFIG_MORTAL_START;
 
 }
+
+std::map<int, obj_data *> char_data::getEquipment() {
+    std::map<int, obj_data*> out;
+    for(auto i = 0; i < NUM_WEARS; i++) {
+        if(auto eq = GET_EQ(this, i); eq) {
+            out[i] = eq;
+        }
+    }
+    return out;
+}
+
+obj_data* char_data::getEquipSlot(int slot) {
+    if(slot < 0 || slot > NUM_WEARS-1) return nullptr;
+    return GET_EQ(this, slot);
+}

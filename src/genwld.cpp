@@ -449,3 +449,11 @@ std::optional<room_vnum> room_data::getLaunchDestination() {
     auto &a = areas[area.value()];
     return a.getLaunchDestination();
 }
+
+std::list<char_data *> room_data::getPeople() {
+    std::list<struct char_data*> out;
+    for(auto c = people; c; c = c->next_in_room) {
+        out.push_back(c);
+    }
+    return out;
+}

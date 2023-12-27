@@ -208,7 +208,7 @@ void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *ms
             break;
 
         case APPLY_CHAR_HEIGHT:
-            ch->mod(CharNum::Height, mod);
+            ch->modHeight(mod);
             break;
 
         case APPLY_AC:

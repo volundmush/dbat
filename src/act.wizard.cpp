@@ -3895,7 +3895,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             break;
 
         case 49:    /* Blame/Thank Rick Glover. :) */
-            vict->set(CharNum::Height, value);
+            vict->setHeight(value);
             affect_total(vict);
             break;
 

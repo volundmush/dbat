@@ -2,6 +2,13 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/utils.h"
 
+std::list<obj_data *> unit_data::getContents() {
+    std::list<obj_data*> out;
+    for(auto o = contents; o; o = o->next_content) out.push_back(o);
+    return out;
+}
+
+
 nlohmann::json unit_data::serializeUnit() {
     nlohmann::json j;
 

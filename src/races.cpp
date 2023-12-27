@@ -213,7 +213,7 @@ void set_height_and_weight_by_race(struct char_data *ch) {
     }
 
     mod = dice(2, hw_info[race].heightdie);
-    ch->set(CharNum::Height,  hw_info[race].height[sex] + mod);
+    ch->setHeight( hw_info[race].height[sex] + mod);
     mod *= hw_info[race].weightfac;
     mod /= 100;
     GET_WEIGHT(ch) = hw_info[race].weight[sex] + mod;
@@ -347,15 +347,11 @@ int race_bodyparts[NUM_RACES][NUM_WEARS] = {
 };
 
 void racial_body_parts(struct char_data *ch) {
-    int i;
 
-    for (i = 1; i < NUM_WEARS; i++) {
-        if (race_bodyparts[GET_RACE(ch)][i]) {
-            SET_BIT_AR(BODY_PARTS(ch), i);
-        } else {
-            if (BODY_FLAGGED(ch, i))
-                REMOVE_BIT_AR(BODY_PARTS(ch), i);
-        }
+    auto parts = race_bodyparts[GET_RACE(ch)];
+
+    for (auto i = 1; i < NUM_WEARS; i++) {
+        ch->bodyparts.set(i, parts[i]);
     }
 }
 

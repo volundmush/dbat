@@ -457,7 +457,7 @@ zone_data::zone_data(const nlohmann::json &j) : zone_data() {
         int line = 1;
         cmd.reserve(j["cmd"].size());
         for(auto &c : j["cmd"]) {
-           auto cm = cmd.emplace_back(c);
+           auto &cm = cmd.emplace_back(c);
            cm.line = line++;
         }
     }

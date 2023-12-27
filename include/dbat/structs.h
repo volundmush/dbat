@@ -153,6 +153,8 @@ struct unit_data {
     weight_t getInventoryWeight();
     int64_t getInventoryCount();
 
+    std::list<struct obj_data*> getContents();
+
     int64_t id{NOTHING}; /* used by DG triggers	*/
     time_t generation{};             /* creation time for dupe check     */
 
@@ -343,6 +345,8 @@ struct room_data : public unit_data {
 
     std::optional<room_vnum> getLaunchDestination();
 
+    std::list<struct char_data*> getPeople();
+
 };
 /* ====================================================================== */
 
@@ -400,21 +404,6 @@ struct pclean_criteria_data {
 };
 
 
-/* Char's abilities. */
-struct abil_data {
-    abil_data() = default;
-    explicit abil_data(const nlohmann::json &j);
-    nlohmann::json serialize();
-    void deserialize(const nlohmann::json& j);
-    int8_t str;            /* New stats can go over 18 freely, no more /xx */
-    int8_t intel;
-    int8_t wis;
-    int8_t dex;
-    int8_t con;
-    int8_t cha;
-};
-
-
 /*
  * Specials needed only by PCs, not NPCs.  Space for this structure is
  * not allocated in memory for NPCs, but it is for PCs. This structure
@@ -455,7 +444,6 @@ struct mob_special_data {
     int8_t damsizedice{};        /* The size of the damage dice's           */
     bool newitem{};             /* Check if mob has new inv item       */
 };
-
 
 /* An affect structure. */
 struct affected_type {
@@ -555,12 +543,14 @@ struct char_data : public unit_data {
 
     char_ref ref() { return char_ref{id, generation}; }
 
-    // Prototype-relevant fields below...
-    char *title{};            /* PC / NPC's title                     */
-    race::Race *race{};
 
-    sensei::Sensei *chclass{};        /* Last class taken                     */
-    double weight{};        /* PC / NPC's weight                    */
+    char *title{};
+    race::Race *race{};
+    sensei::Sensei *chclass{};
+
+
+    /* PC / NPC's weight                    */
+    double weight{};
     weight_t getWeight(bool base = false);
     weight_t getTotalWeight();
     weight_t getCurrentBurden();
@@ -570,6 +560,8 @@ struct char_data : public unit_data {
     bool canCarryWeight(weight_t val);
 
     int getHeight(bool base = false);
+    int setHeight(int val);
+    int modHeight(int val);
 
     std::unordered_map<CharNum, num_t> nums{};
 
@@ -621,6 +613,9 @@ struct char_data : public unit_data {
     /* Equipment array			*/
     struct obj_data *equipment[NUM_WEARS]{};
 
+    std::map<int, struct obj_data*> getEquipment();
+    struct obj_data* getEquipSlot(int slot);
+
     struct descriptor_data *desc{};    /* nullptr for mobiles			*/
 
     struct script_memory *memory{};    /* for mob memory triggers		*/
@@ -665,7 +660,7 @@ struct char_data : public unit_data {
     std::bitset<NUM_PLR_FLAGS> playerFlags{}; /* act flag for NPC's; player flag for PC's */
     std::bitset<NUM_MOB_FLAGS> mobFlags{};
 
-    int bodyparts[AF_ARRAY_MAX]{};  /* Bitvector for current bodyparts      */
+    std::bitset<NUM_WEARS> bodyparts{};  /* Bitvector for current bodyparts      */
     int16_t saving_throw[3]{};    /* Saving throw				*/
     int16_t apply_saving_throw[3]{};    /* Saving throw bonuses			*/
 
@@ -1079,8 +1074,6 @@ struct char_data : public unit_data {
 
     bool isProvidingLight();
     double currentGravity();
-
-
 
 };
 

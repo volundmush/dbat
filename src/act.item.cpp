@@ -4187,6 +4187,10 @@ int find_eq_pos(struct char_data *ch, struct obj_data *obj, char *arg) {
         send_to_char(ch, "'%s'?  What part of your body is THAT?\r\n", arg);
         return -1;
     }
+    if(where == -1) {
+        send_to_char(ch, "You're having a hard time figuring out how to use this...\r\n");
+    }
+
     return (where);
 }
 

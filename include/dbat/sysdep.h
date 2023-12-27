@@ -199,3 +199,4 @@ std::list<T*> get_vnum_list(const VnumIndex<T>& index, vnum vn) {
 }
 
 using StatValue = std::variant<int64_t, double, std::string>;
+using UID = std::variant<struct room_data*, struct obj_data*, struct char_data*>;

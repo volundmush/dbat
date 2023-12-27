@@ -359,7 +359,7 @@ int load_char(const char *name, struct char_data *ch) {
 
                 case 'H':
                     if (!strcmp(tag, "Hit ")) load_HMVS(ch, line, LOAD_HIT);
-                    else if (!strcmp(tag, "Hite")) ch->set(CharNum::Height, atoi(line));
+                    else if (!strcmp(tag, "Hite")) ch->setHeight(atoi(line));
                     else if (!strcmp(tag, "Home")) GET_HOME(ch) = atoi(line);
                     else if (!strcmp(tag, "Host")) {}
                     else if (!strcmp(tag, "Hrc ")) ch->set(CharAppearance::HairColor, atoi(line));

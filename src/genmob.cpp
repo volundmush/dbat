@@ -306,31 +306,8 @@ mob_special_data::mob_special_data(const nlohmann::json &j) : mob_special_data()
     deserialize(j);
 }
 
-nlohmann::json abil_data::serialize() {
-    nlohmann::json j;
 
-    if(str) j["str"] = str;
-    if(intel) j["intel"] = intel;
-    if(wis) j["wis"] = wis;
-    if(dex) j["dex"] = dex;
-    if(con) j["con"] = con;
-    if(cha) j["cha"] = cha;
 
-    return j;
-}
-
-void abil_data::deserialize(const nlohmann::json &j) {
-    if(j.contains("str")) str = j["str"];
-    if(j.contains("intel")) intel = j["intel"];
-    if(j.contains("wis")) wis = j["wis"];
-    if(j.contains("dex")) dex = j["dex"];
-    if(j.contains("con")) con = j["con"];
-    if(j.contains("cha")) cha = j["cha"];
-}
-
-abil_data::abil_data(const nlohmann::json &j) : abil_data() {
-    deserialize(j);
-}
 
 nlohmann::json time_data::serialize() {
     nlohmann::json j;
@@ -398,6 +375,9 @@ nlohmann::json char_data::serializeBase() {
 
     for(auto i = 0; i < pref.size(); i++)
         if(pref.test(i)) j["pref"].push_back(i);
+
+    for(auto i = 0; i < bodyparts.size(); i++)
+        if(bodyparts.test(i)) j["bodyparts"].push_back(i);
 
     if(title && strlen(title)) j["title"] = title;
     if(race) j["race"] = race->getID();
@@ -488,6 +468,7 @@ void char_data::deserializeBase(const nlohmann::json &j) {
     if(j.contains("mobFlags")) for(auto &i : j["mobFlags"]) mobFlags.set(i.get<int>());
     if(j.contains("playerFlags")) for(auto &i : j["playerFlags"]) playerFlags.set(i.get<int>());
     if(j.contains("pref")) for(auto &i : j["pref"]) pref.set(i.get<int>());
+    if(j.contains("bodyparts")) for(auto &i : j["bodyparts"]) bodyparts.set(i.get<int>());
 }
 
 nlohmann::json char_data::serializeProto() {
@@ -1101,7 +1082,7 @@ weight_t char_data::getWeight(bool base) {
 }
 
 int char_data::getHeight(bool base) {
-    int total = GET_HEIGHT(this);
+    int total = get(CharNum::Height);
 
     if(!base) {
         total += getAffectModifier(APPLY_CHAR_HEIGHT);
@@ -1121,6 +1102,16 @@ int char_data::getHeight(bool base) {
 
     return total;
 }
+
+int char_data::setHeight(int val) {
+    return set(CharNum::Height, std::max(0, val));
+}
+
+int char_data::modHeight(int val) {
+    return setHeight(getHeight(true) + val);
+}
+
+
 
 double char_data::getTotalWeight() {
     return getWeight() + getCarriedWeight();

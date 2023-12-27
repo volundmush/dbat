@@ -1243,7 +1243,7 @@ namespace net {
                         return;
                         break;
                 }
-                ch->set(CharNum::Height, height);
+                ch->setHeight(height);
                 ch->weight = weight;
             }
                 sendText("@YAura color SELECTION menu:\r\n");

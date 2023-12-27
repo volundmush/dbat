@@ -113,7 +113,7 @@
 
 
 // global variables
-using UID = std::variant<struct room_data*, struct obj_data*, struct char_data*>;
+
 bool isUID(const std::string& uid);
 std::optional<UID> resolveUID(const std::string& uid);
 
