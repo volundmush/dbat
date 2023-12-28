@@ -274,7 +274,7 @@ int print_skills_by_type(struct char_data *ch, char *buf, int maxsz, int sktype,
         }
         auto sklevel = GET_SKILL(ch, i);
         auto bonus = GET_SKILL_BONUS(ch, i);
-        if (!(sklevel >= 0 || bonus >= 0)) {
+        if (sklevel == 0 && bonus == 0) {
             continue;
         }
         if (*arg) {
@@ -1336,15 +1336,17 @@ void assign_the_guilds() {
     cmd_say = find_command("say");
     cmd_tell = find_command("tell");
 
-    for (auto &g : guild_index) {
-        gdindex = g.first;
-        if (g.second.gm == NOBODY)
+    for (auto &[vn, g] : guild_index) {
+        if (g.gm == NOBODY)
             continue;
 
-        if (mob_index[g.second.gm].func && mob_index[g.second.gm].func != guild)
-            g.second.func = mob_index[g.second.gm].func;
+        auto &gm = mob_index[g.gm];
+        auto &p = mob_proto[g.gm];
 
-        mob_index[g.second.gm].func = guild;
+        if (gm.func && gm.func != guild)
+            g.func = gm.func;
+
+        gm.func = guild;
     }
 }
 

@@ -3687,12 +3687,12 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
         chance -= chance * 0.2;
     }
 
-    auto ratio = ch->getBurdenRatio();
     gmult = (GET_LEVEL(ch) * 6);
+
+    auto ratio = ch->getBurdenRatio();
     gmult += gmult * ratio;
 
-    if (GET_EQ(ch, WEAR_SH)) {
-        struct obj_data *obj = GET_EQ(ch, WEAR_SH);
+    if (auto obj = GET_EQ(ch, WEAR_SH); obj) {
         if (GET_OBJ_VNUM(obj) == 1127) {
             gmult *= 4;
         }
@@ -3709,15 +3709,11 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
         }
         pl = large_rand(gmult * .8, gmult * 1.2);
         ki = large_rand(gmult * .8, gmult * 1.2);
+        st = large_rand(gmult * .8, gmult * 1.2);
     } else {
         pl = large_rand(gmult * .4, gmult * .8);
         ki = large_rand(gmult * .4, gmult * .8);
-    }
-    if (level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) < 0 && GET_LEVEL(ch) < 100) {
-        pl = 0;
-    }
-    if (level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) < 0 && GET_LEVEL(ch) < 100) {
-        ki = 0;
+        st = large_rand(gmult * .4, gmult * .8);
     }
 
     if (chance >= rand_number(60, 75)) {
@@ -3808,23 +3804,34 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
             }
         }
         gain = gear_exp(ch, gaincalc);
-        if (GET_PRACTICES(ch) >= pscost) {
-            ch->modPractices(-pscost);
-            gain = gain * bonus;
-            gain_exp(ch, gain);
-            send_to_char(ch, "@D[@Y+ @G%s @mExp@D]@n ", add_commas(gain).c_str());
-            if (type == 0 && rand_number(1, 5) >= 4) {
-                send_to_char(ch, "@D[@Y+ @R%s @rPL@D]@n ", pl > 0 ? add_commas(pl).c_str() : "SOFT-CAP");
-                ch->gainBasePL(pl);
-            } else if (type == 1 && rand_number(1, 5) >= 4) {
-                send_to_char(ch, "@D[@Y+ @C%s @cKi@D]@n ", ki > 0 ? add_commas(ki).c_str() : "SOFT-CAP");
-                ch->gainBaseKI(ki);
+        gain = gain * bonus;
+        gain_exp(ch, gain);
+        send_to_char(ch, "@D[@Y+ @G%s @mExp@D]@n ", add_commas(gain).c_str());
+
+        std::vector<int64_t> stats;
+        for (const auto stat: {0, 1, 2}) {
+            if (!ch->is_soft_cap(stat, 1.0))
+                stats.push_back(stat);
+        }
+
+        if(!stats.empty() && rand_number(1, 5) >= 4) {
+
+            auto itr = Random::get(stats);
+
+            switch(*itr) {
+                case 0:
+                    send_to_char(ch, "@D[@Y+ @R%s @rPL@D]@n ", add_commas(pl).c_str());
+                    ch->gainBasePL(pl);
+                    break;
+                case 1:
+                    send_to_char(ch, "@D[@Y+ @C%s @cKI@D]@n ", add_commas(ki).c_str());
+                    ch->gainBaseKI(ki);
+                    break;
+                case 2:
+                    send_to_char(ch, "@D[@Y+ @C%s @cST@D]@n ", add_commas(st).c_str());
+                    ch->gainBaseST(st);
+                    break;
             }
-            send_to_char(ch, "@D[@R- @M%d @mPS@D]@n ", pscost);
-            send_to_char(ch, "\r\n");
-        } else {
-            send_to_char(ch, "@RYou need at least %d Practice Sessions in order to gain while sparring here.@n\r\n",
-                         pscost);
         }
     }
 }
@@ -4899,12 +4906,15 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         if (is_sparring(ch) && is_sparring(vict) && LASTATK(ch) != -1) {
             spar_gain(ch, vict, type, dmg);
         }
-        if ((IS_SAIYAN(ch) || (IS_BIO(ch) && (GET_GENOME(ch, 0) == 2 || GET_GENOME(ch, 1) == 2))) && !IS_NPC(ch) &&
-            ((is_sparring(ch) && is_sparring(vict)) || (!is_sparring(ch) && !is_sparring(vict)))) {
-            if (GET_POS(ch) != POS_RESTING && GET_POS(vict) != POS_RESTING && dmg > 1) {
-                saiyan_gain(ch, vict);
+
+        if(dmg > 0 && !IS_NPC(ch)) {
+            if((IS_SAIYAN(ch) || (IS_BIO(ch) && (GET_GENOME(ch, 0) == 2 || GET_GENOME(ch, 1) == 2)))) {
+                if (GET_POS(ch) != POS_RESTING && GET_POS(vict) != POS_RESTING) {
+                    saiyan_gain(ch, vict);
+                }
             }
         }
+
         if (IS_ARLIAN(vict) && dead != true && !is_sparring(vict) && !is_sparring(ch)) {
             handle_evolution(vict, dmg);
         }

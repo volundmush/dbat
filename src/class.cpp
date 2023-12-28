@@ -365,7 +365,7 @@ void do_start(struct char_data *ch) {
     int punch;
     struct obj_data *obj;
 
-
+    ch->set(CharNum::Level, 1);
     GET_EXP(ch) = 1;
 
     if (IS_ANDROID(ch)) {

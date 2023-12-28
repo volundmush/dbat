@@ -1009,40 +1009,42 @@ int find_command(const char *command) {
 
 
 int special(struct char_data *ch, int cmd, char *arg) {
-    struct obj_data *i;
-    struct char_data *k;
-    int j;
-
     /* special in room? */
-    if (GET_ROOM_SPEC(IN_ROOM(ch)) != nullptr)
-        if (GET_ROOM_SPEC(IN_ROOM(ch))(ch, ch->getRoom(), cmd, arg))
-            return (1);
+    auto room = ch->getRoom();
+
+    if (room && room->func)
+        if (room->func(ch, ch->getRoom(), cmd, arg))
+            return 1;
 
     /* special in equipment list? */
-    for (j = 0; j < NUM_WEARS; j++)
-        if (GET_EQ(ch, j) && GET_OBJ_SPEC(GET_EQ(ch, j)) != nullptr)
-            if (GET_OBJ_SPEC(GET_EQ(ch, j))(ch, GET_EQ(ch, j), cmd, arg))
-                return (1);
+    for (auto j = 0; j < NUM_WEARS; j++) {
+        if(auto obj = GET_EQ(ch, j); obj)
+            if(auto func = GET_OBJ_SPEC(obj); func)
+                if (func(ch, obj, cmd, arg))
+                    return 1;
+    }
 
     /* special in inventory? */
-    for (i = ch->contents; i; i = i->next_content)
-        if (GET_OBJ_SPEC(i) != nullptr)
-            if (GET_OBJ_SPEC(i)(ch, i, cmd, arg))
-                return (1);
+    for (auto obj : ch->getContents())
+        if (auto func = GET_OBJ_SPEC(obj))
+            if (func(ch, obj, cmd, arg))
+                return 1;
 
     /* special in mobile present? */
-    for (k = ch->getRoom()->people; k; k = k->next_in_room)
-        if (!MOB_FLAGGED(k, MOB_NOTDEADYET))
-            if (GET_MOB_SPEC(k) && GET_MOB_SPEC(k)(ch, k, cmd, arg))
-                return (1);
+    if(room) {
+        for (auto mob : room->getPeople())
+            if (IS_NPC(mob) && !MOB_FLAGGED(mob, MOB_NOTDEADYET))
+                if (auto func = GET_MOB_SPEC(mob); func)
+                    if(func(ch, mob, cmd, arg))
+                        return 1;
 
-    /* special in object present? */
-    for (i = ch->getRoom()->contents; i; i = i->next_content)
-        if (GET_OBJ_SPEC(i) != nullptr)
-            if (GET_OBJ_SPEC(i)(ch, i, cmd, arg))
-                return (1);
+        for (auto obj : room->getContents())
+            if(auto func = GET_OBJ_SPEC(obj); func)
+                if (func(ch, obj, cmd, arg))
+                    return 1;
+    }
 
-    return (0);
+    return 0;
 }
 
 

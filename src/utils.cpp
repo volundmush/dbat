@@ -2337,6 +2337,26 @@ void mob_talk(struct char_data *ch, const char *speech) {
     } /* End for loop */
 } /* End Mob Talk */
 
+bool spar_friendly(struct char_data *ch, struct char_data *npc) {
+    if(!IS_NPC(npc)) return false;
+
+    if(!IS_HUMANOID(npc)) return false;
+
+    if (npc->original == ch) {
+        return true;
+    }
+
+    for (auto names = MEMORY(npc); names; names = names->next) {
+        if (names->id != GET_IDNUM(ch))
+            return false;
+    }
+
+    for(auto f : {MOB_AGGRESSIVE, MOB_DUMMY}) if(npc->mobFlags.test(f)) return false;
+
+    return true;
+
+}
+
 int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech) {
     if (ch != nullptr && vict != nullptr) {
         if (!IS_NPC(ch) && IS_NPC(vict)) {
@@ -2494,69 +2514,6 @@ int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech
                 }
             } /* End Hello Section */
 
-            if ((strstr(speech, "spar") || strstr(speech, "Spar")) && !FIGHTING(vict)) {
-                send_to_room(IN_ROOM(vict), "\r\n");
-                if (GET_LEVEL(vict) > 4 && GET_ALIGNMENT(vict) >= 0) {
-                    memory_rec *names;
-                    int remember = false;
-
-                    for (names = MEMORY(vict); names && !remember; names = names->next) {
-                        if (names->id != GET_IDNUM(ch))
-                            continue;
-
-                        remember = true;
-                    }
-                    if (vict->original == ch) {
-                        act("@w$n@W says, '@C$N, sure. I'll spar with you.@W'@n", true, vict, nullptr, ch, TO_ROOM);
-                        vict->mobFlags.set(MOB_SPAR);
-                        return 0;
-                    }
-                    if (remember == true) {
-                        act("@w$n@W says, '@C$N you will die by my hand!@W'@n", true, vict, nullptr, ch, TO_ROOM);
-                        return 1;
-                    } else if (MOB_FLAGGED(vict, MOB_NOKILL)) {
-                        act("@w$n@W says, '@C$N, I have no need to spar with you.@W'@n", true, vict, nullptr, ch,
-                            TO_ROOM);
-                        return 1;
-                    } else if (MOB_FLAGGED(vict, MOB_AGGRESSIVE)) {
-                        act("@w$n@W says, '@C$N, I will kill you instead.@W'@n", true, vict, nullptr, ch, TO_ROOM);
-                        return 1;
-                    } else if (MOB_FLAGGED(vict, MOB_DUMMY)) {
-                        act("@w$n@W says, '@C...@W'@n", true, vict, nullptr, ch, TO_ROOM);
-                        return 1;
-                    } else if (GET_MAX_HIT(ch) > GET_MAX_HIT(vict) * 2) {
-                        act("@w$n@W says, '@C$N, no way will I spar. I already know I would lose badly.@W'@n", true,
-                            vict, nullptr, ch, TO_ROOM);
-                        return 1;
-                    } else if (GET_MAX_HIT(vict) > GET_MAX_HIT(ch) * 2) {
-                        act("@w$n@W says, '@C$N, you wouldn't last very long.@W'@n", true, vict, nullptr, ch, TO_ROOM);
-                        return 1;
-                    } else if (GET_HIT(vict) < GET_MAX_HIT(vict) * .8) {
-                        act("@w$n@W says, '@C$N, I need to recover first.@W'@n", true, vict, nullptr, ch, TO_ROOM);
-                        return 1;
-                    } else if (rand_number(1, 50) >= 40 && !MOB_FLAGGED(vict, MOB_SPAR)) {
-                        act("@w$n@W says, '@C$N, maybe in a bit.@W'@n", true, vict, nullptr, ch, TO_ROOM);
-                        return 1;
-                    } else {
-                        if (MOB_FLAGGED(vict, MOB_SPAR)) {
-                            act("@w$n@W says, '@C$N, fine our match will wait till later then.@W'@n", true, vict,
-                                nullptr, ch, TO_ROOM);
-                            vict->mobFlags.reset(MOB_SPAR);
-                        } else {
-                            act("@w$n@W says, '@C$N, sure. I'll spar with you.@W'@n", true, vict, nullptr, ch, TO_ROOM);
-                            vict->mobFlags.set(MOB_SPAR);
-                        }
-                        return 0;
-                    }
-                } else if (GET_LEVEL(vict) > 4 && GET_ALIGNMENT(vict) < 0) {
-                    act("@w$n@W says, '@CSpar? I don't play games, I play for blood...@W'@n", true, vict, nullptr, ch,
-                        TO_ROOM);
-                    return 1;
-                } else {
-                    act("@w$n@W says, '@CSpar? I prefer not to thank you...@W'@n", true, vict, nullptr, ch, TO_ROOM);
-                    return 1;
-                }
-            } /* End challenge section */
             if (strstr(speech, "goodbye") || strstr(speech, "Goodbye") || strstr(speech, "bye") ||
                 strstr(speech, "Bye")) {
                 send_to_room(IN_ROOM(vict), "\r\n");
@@ -2651,13 +2608,13 @@ int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech
 
 bool is_sparring(struct char_data *ch) {
 
-    if (IS_NPC(ch) && MOB_FLAGGED(ch, MOB_SPAR)) {
-        return true;
+    if(IS_NPC(ch)) {
+        auto opponent = ch->fighting;
+        if(!opponent) return false;
+        return IS_NPC(opponent) ? false : opponent->playerFlags.test(PLR_SPAR) && spar_friendly(opponent, ch);
     }
-    if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_SPAR)) {
-        return true;
-    }
-    return false;
+
+    return ch->playerFlags.test(PLR_SPAR);
 }
 
 char *introd_calc(struct char_data *ch) {
