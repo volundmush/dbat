@@ -383,7 +383,7 @@ int load_char(const char *name, struct char_data *ch) {
                 case 'L':
                     if (!strcmp(tag, "Last")) ch->time.logon = atol(line);
                     else if (!strcmp(tag, "Lern")) ch->modPractices(atoi(line));
-                        /* else if (!strcmp(tag, "LevD"))  read_level_data(ch, fl);*/
+                    else if (!strcmp(tag, "Levl")) ch->set(CharNum::Level, atoi(line));
                     else if (!strcmp(tag, "LF  ")) load_BASE(ch, line, LOAD_LIFE);
                     else if (!strcmp(tag, "LFPC")) GET_LIFEPERC(ch) = atoi(line);
                     else if (!strcmp(tag, "Lila")) GET_LIMBCOND(ch, 1) = atoi(line);
@@ -392,6 +392,7 @@ int load_char(const char *name, struct char_data *ch) {
                     else if (!strcmp(tag, "Lirl")) GET_LIMBCOND(ch, 2) = atoi(line);
                     else if (!strcmp(tag, "Lint")) GET_LINTEREST(ch) = atoi(line);
                     else if (!strcmp(tag, "Lpla")) GET_LPLAY(ch) = atoi(line);
+
                     break;
 
                 case 'M':

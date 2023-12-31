@@ -3698,7 +3698,6 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
         }
     }
 
-
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT) || (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC))) {
         if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
             gmult *= 1.75;
@@ -3775,7 +3774,7 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
                 gaincalc = gaincalc * 0.50;
             }
             if (!IS_NPC(vict) && !IS_NPC(ch)) {
-                if (PRF_FLAGGED(vict, PRF_INSTRUCT)) {
+                if (!IS_NPC(ch) && PRF_FLAGGED(vict, PRF_INSTRUCT)) {
                     if (GET_PRACTICES(vict) > 10) {
                         send_to_char(vict, "You instruct them in proper fighting techniques and strategies.\r\n");
                         act("You take $N's instruction to heart and gain more experience.\r\n", false, ch, nullptr,
@@ -3820,18 +3819,20 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
 
             switch(*itr) {
                 case 0:
-                    send_to_char(ch, "@D[@Y+ @R%s @rPL@D]@n ", add_commas(pl).c_str());
+                    send_to_char(ch, "@D[@Y+ @R%s @rPL@D]@n\r\n", add_commas(pl).c_str());
                     ch->gainBasePL(pl);
                     break;
                 case 1:
-                    send_to_char(ch, "@D[@Y+ @C%s @cKI@D]@n ", add_commas(ki).c_str());
+                    send_to_char(ch, "@D[@Y+ @C%s @cKI@D]@n\r\n", add_commas(ki).c_str());
                     ch->gainBaseKI(ki);
                     break;
                 case 2:
-                    send_to_char(ch, "@D[@Y+ @C%s @cST@D]@n ", add_commas(st).c_str());
+                    send_to_char(ch, "@D[@Y+ @C%s @cST@D]@n\r\n", add_commas(st).c_str());
                     ch->gainBaseST(st);
                     break;
             }
+        } else {
+            send_to_char(ch, "\r\n");
         }
     }
 }
@@ -4903,7 +4904,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
 
         /* Ends GET_FURY increase for halfbreeds who got damaged */
 
-        if (is_sparring(ch) && is_sparring(vict) && LASTATK(ch) != -1) {
+        if (LASTATK(ch) != -1) {
             spar_gain(ch, vict, type, dmg);
         }
 

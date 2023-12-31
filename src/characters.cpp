@@ -1106,8 +1106,8 @@ int char_data::getAffectModifier(int location, int specific) {
         total += a->modifier;
     }
     for(auto i = 0; i < NUM_WEARS; i++) {
-        if(!GET_EQ(this, i)) continue;
-        total += GET_EQ(this, i)->getAffectModifier(location, specific);
+        if(auto obj = GET_EQ(this, i); obj)
+        total += obj->getAffectModifier(location, specific);
     }
     return total;
 }
@@ -1175,14 +1175,14 @@ attribute_t char_data::get(CharAttribute attr, bool base) {
     }
     if(!base) {
         val += getAffectModifier((int)attr+1) + getAffectModifier(APPLY_ALL_STATS);
-        return std::clamp<attribute_t>(val, 5, 120);
+        return std::clamp<attribute_t>(val, 5, 100);
     }
     return val;
 
 }
 
 attribute_t char_data::set(CharAttribute attr, attribute_t val) {
-    return attributes[attr] = std::clamp<attribute_t>(val, 0, 100);
+    return attributes[attr] = std::clamp<attribute_t>(val, 0, 80);
 }
 
 attribute_t char_data::mod(CharAttribute attr, attribute_t val) {

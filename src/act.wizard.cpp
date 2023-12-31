@@ -792,15 +792,15 @@ ACMD(do_echo) {
     if (!*argument)
         send_to_char(ch, "Yes.. but what?\r\n");
     else {
-        char buf[MAX_INPUT_LENGTH + 4];
+        char buf[8096];
         char name[128];
         int found = false, trunc = 0;
         struct char_data *vict = nullptr, *next_v = nullptr, *tch = nullptr;
 
-        if (strlen(argument) > 1000) {
-            trunc = strlen(argument) - 1000;
+        if (strlen(argument) > 7000) {
+            trunc = strlen(argument) - 7000;
             argument[strlen(argument) - trunc] = '\0';
-            sprintf(argument, "%s\n@D(@gMessage truncated to 1000 characters@D)@n\n", argument);
+            sprintf(argument, "%s\n@D(@gMessage truncated to 7000 characters@D)@n\n", argument);
         }
 
         for (vict = ch->getRoom()->people; vict; vict = next_v) {

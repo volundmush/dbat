@@ -205,7 +205,7 @@ struct obj_data : public unit_data {
 
     void deactivate();
 
-    int getAffectModifier(int location, int specific);
+    int getAffectModifier(int location, int specific = -1);
 
     std::string getUID(bool active = true) override;
     bool active{false};

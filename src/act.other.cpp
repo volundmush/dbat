@@ -10044,9 +10044,9 @@ ACMD(do_display) {
         PRF_DISHUTH, PRF_DISPERC};
 
     if (!strcasecmp(argument, "on") || !strcasecmp(argument, "all")) {
-        for(auto f : allPrefs) ch->playerFlags.set(f);
+        for(auto f : allPrefs) ch->pref.set(f);
     } else if (!strcasecmp(argument, "off") || !strcasecmp(argument, "none")) {
-        for(auto f : allPrefs) ch->playerFlags.reset(f);
+        for(auto f : allPrefs) ch->pref.reset(f);
     } else {
         /*REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_DISPHP);
     REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_DISPMOVE);
@@ -10056,37 +10056,37 @@ ACMD(do_display) {
         for (i = 0; i < strlen(argument); i++) {
             switch (LOWER(argument[i])) {
                 case 'p':
-                    TOGGLE_BIT_AR(PRF_FLAGS(ch), PRF_DISPHP);
+                    ch->pref.flip(PRF_DISPHP);
                     break;
                 case 's':
-                    TOGGLE_BIT_AR(PRF_FLAGS(ch), PRF_DISPMOVE);
+                    ch->pref.flip(PRF_DISPMOVE);
                     break;
                 case 'k':
-                    TOGGLE_BIT_AR(PRF_FLAGS(ch), PRF_DISPKI);
+                    ch->pref.flip(PRF_DISPKI);
                     break;
                 case 't':
-                    TOGGLE_BIT_AR(PRF_FLAGS(ch), PRF_DISPTNL);
+                    ch->pref.flip(PRF_DISPTNL);
                     break;
                 case 'h':
-                    TOGGLE_BIT_AR(PRF_FLAGS(ch), PRF_DISTIME);
+                    ch->pref.flip(PRF_DISTIME);
                     break;
                 case 'g':
-                    TOGGLE_BIT_AR(PRF_FLAGS(ch), PRF_DISGOLD);
+                    ch->pref.flip(PRF_DISGOLD);
                     break;
                 case 'l':
-                    TOGGLE_BIT_AR(PRF_FLAGS(ch), PRF_DISPRAC);
+                    ch->pref.flip(PRF_DISPRAC);
                     break;
                 case 'c':
-                    TOGGLE_BIT_AR(PRF_FLAGS(ch), PRF_DISPERC);
+                    ch->pref.flip(PRF_DISPERC);
                     break;
                 case 'm':
-                    TOGGLE_BIT_AR(PRF_FLAGS(ch), PRF_DISHUTH);
+                    ch->pref.flip(PRF_DISHUTH);
                     break;
                 case 'f':
                     if (!IS_HALFBREED(ch)) {
                         send_to_char(ch, "Only halfbreeds use fury.\r\n");
                     }
-                    TOGGLE_BIT_AR(PRF_FLAGS(ch), PRF_FURY);
+                    ch->pref.flip(PRF_FURY);
                     break;
                 default:
                     send_to_char(ch, "Usage: prompt { P | K | T | S | F | H | G | L | all/on | none/off }\r\n");

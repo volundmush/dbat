@@ -440,10 +440,10 @@ extern bool OBJ_FLAGGED(struct obj_data *obj, int flag);
 /* IS_AFFECTED for backwards compatibility */
 #define IS_AFFECTED(ch, skill) (AFF_FLAGGED((ch), (skill)))
 
-#define PLR_TOG_CHK(ch, flag) ((TOGGLE_BIT_AR(PLR_FLAGS(ch), (flag))) & Q_BIT(flag))
-#define PRF_TOG_CHK(ch, flag) ((TOGGLE_BIT_AR(PRF_FLAGS(ch), (flag))) & Q_BIT(flag))
-#define ADM_TOG_CHK(ch, flag) ((TOGGLE_BIT_AR(ADM_FLAGS(ch), (flag))) & Q_BIT(flag))
-#define AFF_TOG_CHK(ch, flag) ((TOGGLE_BIT_AR(AFF_FLAGS(ch), (flag))) & Q_BIT(flag))
+#define PLR_TOG_CHK(ch, flag) ((ch)->playerFlags.flip(flag).test(flag))
+#define PRF_TOG_CHK(ch, flag) ((ch)->pref.flip(flag).test(flag))
+#define ADM_TOG_CHK(ch, flag) ((ch)->admflags.flip(flag).test(flag))
+#define AFF_TOG_CHK(ch, flag) ((ch)->affected_by.flip(flag).test(flag))
 
 /* new define for quick check */
 #define DEAD(ch) (PLR_FLAGGED((ch), PLR_NOTDEADYET) || MOB_FLAGGED((ch), MOB_NOTDEADYET))
