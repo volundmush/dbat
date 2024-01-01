@@ -1218,5 +1218,5 @@ void char_data::ageBy(double addedTime) {
 }
 
 void char_data::setAge(double newAge) {
-    this->time.secondsAged = newAge / SECS_PER_GAME_YEAR;
+    this->time.secondsAged = newAge * SECS_PER_GAME_YEAR;
 }

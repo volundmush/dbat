@@ -45,9 +45,9 @@ nlohmann::json account_data::serialize() {
     if(totalPlayTime != 0.0) j["totalPlayTime"] = totalPlayTime;
     if(!disabledReason.empty()) j["disabledReason"] = disabledReason;
     if(disabledUntil) j["disabledUntil"] = disabledUntil;
-    if(adminLevel) j["adminLevel"] = adminLevel;
     if(rpp) j["rpp"] = rpp;
     if(slots != 3) j["slots"] = slots;
+    if(adminLevel) j["adminLevel"] = adminLevel;
     for(auto c : characters) j["characters"].push_back(c);
 
     return j;
@@ -65,9 +65,9 @@ void account_data::deserialize(const nlohmann::json& j) {
     if(j.contains("totalPlayTime")) totalPlayTime = j["totalPlayTime"];
     if(j.contains("disabledReason")) disabledReason = j["disabledReason"];
     if(j.contains("disabledUntil")) disabledUntil = j["disabledUntil"];
-    if(j.contains("adminLevel")) adminLevel = j["adminLevel"];
     if(j.contains("rpp")) rpp = j["rpp"];
     if(j.contains("slots")) slots = j["slots"];
+    if(j.contains("adminLevel")) adminLevel = j["adminLevel"];
     if(j.contains("characters")) {
         for(auto c : j["characters"]) {
             characters.push_back(c);

@@ -1287,9 +1287,6 @@ void advance_level(struct char_data *ch, int whichclass) {
         }
     }
 
-    if (GET_LEVEL(ch) == 1) {
-        GET_ARMOR(ch) = 0;
-    }
 
     snoop_check(ch);
     ch->save();

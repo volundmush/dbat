@@ -1207,6 +1207,9 @@ void gain_condition(struct char_data *ch, int condition, int value) {
 }
 
 static void check_idling(struct char_data *ch) {
+
+    /*
+
     if (!dball_count(ch).empty()) {
         return;
     }
@@ -1228,6 +1231,8 @@ static void check_idling(struct char_data *ch) {
             extract_char(ch);
         }
     }
+
+    */
 }
 
 static void heal_limb(struct char_data *ch) {

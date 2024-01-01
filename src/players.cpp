@@ -258,7 +258,7 @@ int load_char(const char *name, struct char_data *ch) {
 
             switch (*tag) {
                 case 'A':
-                    if (!strcmp(tag, "Ac  ")) GET_ARMOR(ch) = atoi(line);
+                    if (!strcmp(tag, "Ac  ")) ;
                     else if (!strcmp(tag, "Act ")) {
                         sscanf(line, "%s %s %s %s", f1, f2, f3, f4);
                         flags[0] = asciiflag_conv(f1);

@@ -273,6 +273,7 @@ void migrate_grid() {
         auto &t = areaDefs["Tiranoc City"];
         t.roomIDs.insert(86);
         t.roomIDs.insert(181);
+        t.roomIDs.insert(19004);
     }
 
     {
@@ -282,6 +283,8 @@ void migrate_grid() {
         auto &s = areaDefs["Senzu Village"];
         s.roomIDs.insert(84);
         s.roomIDs.insert(182);
+        auto &e = areaDefs["Elder Village"];
+        e.roomIDs.insert(19006);
     }
 
     {
@@ -431,6 +434,7 @@ void migrate_grid() {
     for(auto &[r, room] : world) {
         if(boost::icontains(stripAnsi(room.name), "Black Omen")) bodef.roomIDs.insert(r);
     }
+    bodef.roomIDs.insert(19050);
     bodef.type = AreaType::Vehicle;
     auto black_omen = assembleArea(bodef);
 
@@ -1254,7 +1258,7 @@ void migrate_grid() {
     auto mountain_fortress = assembleArea(mountainFortress);
 
     // Personal Ships / Pods...
-    for(auto vn = 45000; vn <= 45150; vn++) {
+    for(auto vn = 45000; vn <= 45199; vn++) {
         auto ovn = vn + 1000;
         auto o = obj_proto.find(ovn);
         if(o == obj_proto.end()) continue;
@@ -1271,15 +1275,42 @@ void migrate_grid() {
     sphouses.parent = structures;
     auto small_player_houses = assembleArea(sphouses);
 
+    int count = 1;
+    for(auto i = 18800; i != 18896; i += 4) {
+        AreaDef house;
+        house.name = fmt::format("Small Player House {}", count++);
+        house.roomRanges.emplace_back(i, i+3);
+        house.parent = small_player_houses;
+        assembleArea(house);
+    }
+
     AreaDef mdhouses;
     mdhouses.name = "Deluxe Player Houses";
     mdhouses.parent = structures;
     auto medium_player_houses = assembleArea(mdhouses);
 
+    count = 1;
+    for(auto i = 18900; i != 18995; i += 5) {
+        AreaDef house;
+        house.name = fmt::format("Deluxe Player House {}", count++);
+        house.roomRanges.emplace_back(i, i+4);
+        house.parent = medium_player_houses;
+        assembleArea(house);
+    }
+
     AreaDef lphouses;
     lphouses.name = "Excellent Player Houses";
     lphouses.parent = structures;
     auto large_player_houses = assembleArea(lphouses);
+
+    count = 1;
+    for(auto i = 19100; i != 19195; i += 5) {
+        AreaDef house;
+        house.name = fmt::format("Excellent Player House {}", count++);
+        house.roomRanges.emplace_back(i, i+4);
+        house.parent = large_player_houses;
+        assembleArea(house);
+    }
 
     AreaDef pdimen;
     pdimen.name = "Personal Pocket Dimensions";

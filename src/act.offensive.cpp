@@ -12759,7 +12759,7 @@ ACMD(do_charge) {
         ch->incCurKI(GET_CHARGE(ch));
         GET_CHARGE(ch) = 0;
         GET_CHARGETO(ch) = 0;
-        ch->affected_by.reset(PLR_CHARGE);
+        ch->playerFlags.reset(PLR_CHARGE);
         return;
     } else if (!strcasecmp("release", arg) && GET_CHARGE(ch) > 0) {
         send_to_char(ch, "You release your pent up energy.\r\n");
@@ -12797,7 +12797,7 @@ ACMD(do_charge) {
                 act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
                 break;
         }
-        ch->affected_by.reset(PLR_CHARGE);
+        ch->playerFlags.reset(PLR_CHARGE);
         GET_CHARGETO(ch) = 0;
         return;
     } else if (!strcasecmp("cancel", arg) && !PLR_FLAGGED(ch, PLR_CHARGE)) {
@@ -12852,7 +12852,7 @@ ACMD(do_charge) {
             act(bloom, true, ch, nullptr, nullptr, TO_ROOM);
             GET_CHARGETO(ch) = (((GET_MAX_MANA(ch) * 0.01) * amt) + 1);
             GET_CHARGE(ch) += 1;
-            ch->affected_by.reset(PLR_CHARGE);
+            ch->playerFlags.set(PLR_CHARGE);
         }
     } else if (amt < 1 && GET_ROOM_VNUM(IN_ROOM(ch)) != 1562) {
         send_to_char(ch, "You have set it too low!\r\n");

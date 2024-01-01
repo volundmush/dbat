@@ -1988,7 +1988,7 @@ static void mob_autobalance(struct char_data *ch) {
     //GET_MANA(ch) = 0;
     //GET_MOVE(ch) = 0;
     GET_EXP(ch) = 0;
-    GET_ARMOR(ch) = 0;
+
     GET_NDD(ch) = 0;
     GET_SDD(ch) = 0;
     GET_DAMAGE_MOD(ch) = 0;
@@ -2011,8 +2011,6 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
     }
 
     ch->set(CharNum::Level, t[0]);
-
-    GET_ARMOR(ch) = 10 * (10 - t[2]);
 
     /* max hit = 0 is a flag that H, M, V is xdy+z */
     ch->set(CharStat::PowerLevel, t[3]);
@@ -4390,7 +4388,6 @@ void init_char(struct char_data *ch) {
     ch->time.played = 0.0;
 
     GET_HOME(ch) = 1;
-    GET_ARMOR(ch) = 0;
 
     set_height_and_weight_by_race(ch);
 

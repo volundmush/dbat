@@ -563,6 +563,8 @@ struct char_data : public unit_data {
     int setHeight(int val);
     int modHeight(int val);
 
+    int getArmor();
+
     std::unordered_map<CharNum, num_t> nums{};
 
     num_t get(CharNum stat);

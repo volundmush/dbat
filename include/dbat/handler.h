@@ -69,6 +69,7 @@ struct obj_data *unequip_char(struct char_data *ch, int pos);
 
 extern int invalid_align(struct char_data *ch, struct obj_data *obj);
 
+extern void obj_to_room(struct obj_data *object, struct room_data *room);
 extern void obj_to_room(struct obj_data *object, room_rnum room);
 
 extern void obj_from_room(struct obj_data *object);
@@ -89,6 +90,7 @@ struct char_data *get_char_num(mob_rnum nr);
 
 extern void char_from_room(struct char_data *ch);
 
+extern void char_to_room(struct char_data *ch, struct room_data *room);
 extern void char_to_room(struct char_data *ch, room_rnum room);
 
 extern void extract_char(struct char_data *ch);

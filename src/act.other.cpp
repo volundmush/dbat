@@ -318,10 +318,14 @@ ACMD(do_rpp) {
                         send_to_char(ch, "You can't because that stat maxes at 45 due to a trait negative.\r\n");
                         return;
                     }
-                    if (base >= 100) {
-                        send_to_char(ch, "100 is the maximum base for any stat.\r\n");
+                    if (base >= 80) {
+                        send_to_char(ch, "80 is the maximum base for any stat.\r\n");
                         return;
                     }
+
+                    ch->mod(attribute, 2);
+                    if(ch->get(attribute, true) < 80)
+                        pay--;
 
                 } else {
                     send_to_char(ch, "Invalid stat.\r\n");

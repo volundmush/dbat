@@ -848,7 +848,6 @@ void medit_parse(struct descriptor_data *d, char *arg) {
             break;
 
         case MEDIT_AC:
-            GET_ARMOR(OLC_MOB(d)) = LIMIT(i, 10, 200000);
             OLC_MOB(d)->mobFlags.reset(MOB_AUTOBALANCE);
             break;
 

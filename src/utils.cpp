@@ -2275,10 +2275,7 @@ void handle_evolution(struct char_data *ch, int64_t dmg) {
             armorgain = armor_evolve(ch);
             ch->gainBasePL(plgain);
             ch->gainBaseST(stamgain);
-            GET_ARMOR(ch) += armorgain;
-            if (GET_ARMOR(ch) > 50000) {
-                GET_ARMOR(ch) = 50000;
-            }
+
             act("@gYour @De@Wx@wo@Ds@Wk@we@Dl@We@wt@Do@Wn@g begins to crack. You quickly shed it and reveal a stronger version that was growing beneath it! At the same time you feel your adrenal sacs to be more efficient@n",
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@G$n's@g @De@Wx@wo@Ds@Wk@we@Dl@We@wt@Do@Wn@g begins to crack. Suddenly $e sheds the damaged @De@Wx@wo@Ds@Wk@we@Dl@We@wt@Do@Wn and reveals a stronger version that had been growing underneath!@n",
@@ -3677,6 +3674,8 @@ void admin_set(struct char_data *ch, int value) {
     int i;
     int orig = GET_ADMLEVEL(ch);
 
+    value = std::clamp(value, 0, ADMLVL_IMPL);
+
     if (GET_ADMLEVEL(ch) == value)
         return;
     if (GET_ADMLEVEL(ch) < value) { /* Promotion */
@@ -3861,6 +3860,11 @@ bool ROOM_FLAGGED(room_vnum loc, int flag) {
     return false;
 }
 
+bool ROOM_FLAGGED(struct room_data *loc, int flag) {
+    if(!loc) return false;
+    return loc->room_flags.test(flag);
+}
+
 bool ADM_FLAGGED(struct char_data *ch, int flag) {
     return ch->admflags.test(flag);
 }
@@ -3878,7 +3882,11 @@ bool PLR_FLAGGED(struct char_data *ch, int flag) {
 }
 
 bool AFF_FLAGGED(struct char_data *ch, int flag) {
-    return ch->affected_by.test(flag);
+    if(ch->affected_by.test(flag)) return true;
+    for(auto i = 0; i < NUM_WEARS; i++)
+        if(auto eq = GET_EQ(ch, i); eq)
+            if(eq->bitvector.test(flag)) return true;
+    return false;
 }
 
 bool PLANET_FLAGGED(struct char_data *ch, int flag) {

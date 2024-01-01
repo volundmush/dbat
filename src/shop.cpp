@@ -468,10 +468,10 @@ int shop_producing(struct obj_data *item, vnum shop_nr) {
         return (false);
     auto &shop = shop_index[shop_nr];
 
-    for (auto &product : shop.type)
-        if (same_obj(item, &obj_proto[product.type]))
-            return (true);
-    return (false);
+    auto find = std::ranges::find_if(shop.producing, [&](const auto &product) {
+        return (product == item->vn);
+    });
+    return (find != shop.producing.end());
 }
 
 static int transaction_amt(char *arg) {

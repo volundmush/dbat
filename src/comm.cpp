@@ -2293,8 +2293,9 @@ void descriptor_data::handle_input() {
     auto command = input_queue.front();
     input_queue.pop_front();
 
+    /* Reset the idle timer & pull char back from void if necessary
+
     if (character) {
-        /* Reset the idle timer & pull char back from void if necessary */
         character->timer = 0;
         if (STATE(this) == CON_PLAYING && GET_WAS_IN(character) != NOWHERE) {
             if (IN_ROOM(character) != NOWHERE)
@@ -2305,6 +2306,9 @@ void descriptor_data::handle_input() {
         }
         character->set(CharNum::Wait, 1);
     }
+    */
+
+
     has_prompt = false;
 
     auto comm = (char*)command.c_str();

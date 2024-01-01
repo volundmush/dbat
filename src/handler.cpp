@@ -212,7 +212,6 @@ void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *ms
             break;
 
         case APPLY_AC:
-            GET_ARMOR(ch) += mod;
             break;
 
         case APPLY_ACCURACY:
@@ -496,22 +495,13 @@ void char_from_room(struct char_data *ch) {
     if(!gameIsLoading) ch->save();
 }
 
-
 /* place a character in a room */
-void char_to_room(struct char_data *ch, room_rnum room) {
+void char_to_room(struct char_data *ch, struct room_data* room) {
     int i;
 
-    if (!ch || !world.count(room)) {
-        basic_mud_log("SYSERR: Illegal value(s) passed to char_to_room. (Room: %d, Ch: %p",
-                      room, ch);
-        return;
-    }
-    
-    auto &r = world[room];
-    
-    ch->next_in_room = r.people;
-    r.people = ch;
-    IN_ROOM(ch) = room;
+    ch->next_in_room = room->people;
+    room->people = ch;
+    IN_ROOM(ch) = room->vn;
 
     /* Stop fighting now, if we left. */
     if (FIGHTING(ch) && IN_ROOM(ch) != IN_ROOM(FIGHTING(ch)) && !AFF_FLAGGED(ch, AFF_PURSUIT)) {
@@ -524,7 +514,13 @@ void char_to_room(struct char_data *ch, room_rnum room) {
             ARENA_IDNUM(ch) = -1;
         }
     }
-    
+
+}
+
+/* place a character in a room */
+void char_to_room(struct char_data *ch, room_rnum room) {
+    if(!world.count(room)) return;
+    char_to_room(ch, &world[room]);
 }
 
 
@@ -662,9 +658,6 @@ void equip_char(struct char_data *ch, struct obj_data *obj, int pos) {
     obj->worn_by = ch;
     obj->worn_on = pos;
 
-    if (GET_OBJ_TYPE(obj) == ITEM_ARMOR)
-        GET_ARMOR(ch) += apply_ac(ch, pos);
-
     for (j = 0; j < MAX_OBJ_AFFECT; j++)
         affect_modify_ar(ch, obj->affected[j].location,
                          obj->affected[j].modifier,
@@ -687,9 +680,6 @@ struct obj_data *unequip_char(struct char_data *ch, int pos) {
     obj = GET_EQ(ch, pos);
     obj->worn_by = nullptr;
     obj->worn_on = -1;
-
-    if (GET_OBJ_TYPE(obj) == ITEM_ARMOR)
-        GET_ARMOR(ch) -= apply_ac(ch, pos);
 
     GET_EQ(ch, pos) = nullptr;
 
@@ -779,15 +769,9 @@ struct char_data *get_char_num(mob_rnum nr) {
 }
 
 
-/* put an object in a room */
-void obj_to_room(struct obj_data *object, room_rnum room) {
+void obj_to_room(struct obj_data *object, struct room_data *room) {
     struct obj_data *vehicle = nullptr;
 
-    if (!object || !world.count(room)) {
-        basic_mud_log("SYSERR: Illegal value(s) passed to obj_to_room. (Room #%d, obj %p)",
-            room, object);
-        return;
-    }
     if (ROOM_FLAGGED(room, ROOM_GARDEN1) || ROOM_FLAGGED(room, ROOM_GARDEN2)) {
         if (GET_OBJ_TYPE(object) != ITEM_PLANT) {
             send_to_room(room,
@@ -797,15 +781,13 @@ void obj_to_room(struct obj_data *object, room_rnum room) {
             return;
         }
     }
-    if (room == real_room(80)) {
+    if (room->vn == real_room(80)) {
         auc_load(object);
     }
 
-    auto &r = world[room];
-
-    object->next_content = r.contents;
-    r.contents = object;
-    IN_ROOM(object) = room;
+    object->next_content = room->contents;
+    room->contents = object;
+    IN_ROOM(object) = room->vn;
     object->carried_by = nullptr;
     GET_LAST_LOAD(object) = time(nullptr);
 
@@ -885,6 +867,13 @@ void obj_to_room(struct obj_data *object, room_rnum room) {
             object->level = GET_OBJ_VAL(object, 0);
         }
     }
+}
+
+
+/* put an object in a room */
+void obj_to_room(struct obj_data *object, room_rnum room) {
+    if(world.count(room)) return;
+    obj_to_room(object, &world[room]);
 }
 
 

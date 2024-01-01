@@ -427,6 +427,7 @@ extern bool AFF_FLAGGED(struct char_data *ch, int flag);
 extern bool PRF_FLAGGED(struct char_data *ch, int flag);
 extern bool ADM_FLAGGED(struct char_data *ch, int flag);
 bool ROOM_FLAGGED(room_vnum loc, int flag);
+bool ROOM_FLAGGED(struct room_data *loc, int flag);
 
 #define EXIT_FLAGGED(exit, flag) (IS_SET((exit)->exit_info, (flag)))
 extern bool OBJAFF_FLAGGED(struct obj_data *obj, int flag);
@@ -557,7 +558,7 @@ extern int GET_SPEEDI(struct char_data *ch);
 #define GET_ALT(ch)       ((ch)->altitude)
 #define GET_CHARGE(ch)    ((ch)->charge)
 #define GET_CHARGETO(ch)  ((ch)->chargeto)
-#define GET_ARMOR(ch)     ((ch)->armor)
+#define GET_ARMOR(ch)     ((ch)->getArmor())
 #define GET_ARMOR_LAST(ch) ((ch)->armor_last)
 #define GET_HIT(ch)      ((ch)->getCurPL())
 #define GET_MAX_HIT(ch)      ((ch)->getEffMaxPL())
@@ -1280,16 +1281,14 @@ void send_to_planet(int type, int planet, fmt::string_view format, Args&&... arg
 }
 
 template<typename... Args>
-void send_to_room(room_rnum room, fmt::string_view format, Args&&... args) {
-    if(!world.contains(room)) return;
+void send_to_room(struct room_data *room, fmt::string_view format, Args&&... args) {
+    if(!room) return;
 
     try {
         std::string formatted_string = fmt::sprintf(format, std::forward<Args>(args)...);
         if(formatted_string.empty()) return;
 
-        auto &r = world[room];
-
-        for(auto i = r.people; i; i = i->next_in_room) {
+        for(auto i = room->people; i; i = i->next_in_room) {
             if(!i->desc) continue;
             i->desc->output += formatted_string;
         }
@@ -1299,14 +1298,14 @@ void send_to_room(room_rnum room, fmt::string_view format, Args&&... args) {
                 continue;
 
             if (PRF_FLAGGED(d->character, PRF_ARENAWATCH)) {
-                if (arena_watch(d->character) == room) {
+                if (arena_watch(d->character) == room->vn) {
                     d->output += "@c-----@CArena@c-----@n\r\n%s\r\n@c-----@CArena@c-----@n\r\n";
                     d->output += formatted_string;
                 }
             }
             if (GET_EAVESDROP(d->character) > 0) {
                 int roll = rand_number(1, 101);
-                if (GET_EAVESDROP(d->character) == room && GET_SKILL(d->character, SKILL_EAVESDROP) > roll) {
+                if (GET_EAVESDROP(d->character) == room->vn && GET_SKILL(d->character, SKILL_EAVESDROP) > roll) {
                     d->output += "@c-----Eavesdrop-----@n\r\n%s\r\n@c-----Eavesdrop-----@n\r\n";
                     d->output += formatted_string;
                 }
@@ -1318,6 +1317,13 @@ void send_to_room(room_rnum room, fmt::string_view format, Args&&... args) {
         basic_mud_log("SYSERR: Format error in send_to_room: %s", e.what());
         basic_mud_log("Template was: %s", format.data());
     }
+}
+
+template<typename... Args>
+void send_to_room(room_rnum room, fmt::string_view format, Args&&... args) {
+    if(!world.contains(room)) return;
+    auto r = &world[room];
+    send_to_room(r, format, std::forward<Args>(args)...);
 }
 
 template<typename... Args>

@@ -4106,8 +4106,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             break;
 
         case 82:
-            GET_ARMOR(vict) = RANGE(0, 1000000);
-            send_to_char(ch, "Done.\r\n");
+            send_to_char(ch, "Can't set that!\r\n");
             break;
 
         default:

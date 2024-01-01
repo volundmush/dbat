@@ -782,7 +782,7 @@ ACMD(do_drive) {
             act("@w$n stands up and stops piloting the ship.", true, ch, nullptr, nullptr, TO_ROOM);
             send_to_char(ch, "@wYou stand up from the pilot's seat.\r\n");
             GET_POS(ch) = POS_STANDING;
-            ch->playerFlags.set(PLR_PILOTING);
+            ch->playerFlags.reset(PLR_PILOTING);
             return;
         }
     }

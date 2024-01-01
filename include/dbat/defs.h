@@ -1960,6 +1960,7 @@ enum class CharNum : uint8_t {
  RacialPref = 4,
  MysticMelody = 5,
  GroupKills = 6,
+ ArmorWishes = 7
 
 };
 

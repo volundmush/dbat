@@ -856,7 +856,7 @@ void char_data::loseBaseAllPercent(double amt, bool trans_mult) {
 
 
 double char_data::getMaxCarryWeight() {
-    return (getWeight() + 100.0) + (getMaxPL() / 200.0) + (GET_STR(this) * 50) + IS_BARDOCK(this) ? 10000.0 : 0.0;
+    return (getWeight() + 100.0) + (getMaxPL() / 200.0) + (GET_STR(this) * 50) + (IS_BARDOCK(this) ? 10000.0 : 0.0);
 }
 
 double char_data::getEquippedWeight() {
@@ -1338,4 +1338,14 @@ std::map<int, obj_data *> char_data::getEquipment() {
 obj_data* char_data::getEquipSlot(int slot) {
     if(slot < 0 || slot > NUM_WEARS-1) return nullptr;
     return GET_EQ(this, slot);
+}
+
+
+int char_data::getArmor() {
+    int out = get(CharNum::ArmorWishes) * 5000;
+    for(auto i = 0; i < NUM_WEARS; i++) {
+        if(auto obj = GET_EQ(this, i); obj)
+            out += obj->getAffectModifier(APPLY_AC, -1);
+    }
+    return out;
 }
