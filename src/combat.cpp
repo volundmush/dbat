@@ -3838,6 +3838,13 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
 }
 
 void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t dmg) {
+    for(auto c : {ch, vict}) {
+        if(GET_POS(c) < POS_FIGHTING) return;
+        for(auto a : {AFF_SLEEP, AFF_PARALYZE, AFF_STUNNED, AFF_KNOCKED, AFF_PARA, AFF_FROZEN}) if(AFF_FLAGGED(c, a)) return;
+    }
+
+    if(AFF_FLAGGED(ch, AFF_FLYING) != AFF_FLAGGED(vict, AFF_FLYING)) return;
+
     spar_helper(ch, vict, type, dmg);
     spar_helper(vict, ch, type, dmg);
 }

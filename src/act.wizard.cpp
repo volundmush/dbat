@@ -3925,7 +3925,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
                 chosen_race = race::find_race_map(val_arg, race::valid_for_sex_pc(GET_SEX(ch)));
             }
             if (!chosen_race) {
-                send_to_char(ch, "That is not a valid race for them.\r\n");
+                send_to_char(ch, "That is not a valid race for them. Try changing sex first.\r\n");
                 return (0);
             }
             vict->race = chosen_race;

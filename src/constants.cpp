@@ -752,6 +752,12 @@ const char *affected_bits[NUM_AFF_FLAGS + 1] =
                 "SHELLED",
                 "IMMUNITY",
                 "SPIRITCONTROL",
+                "FIGHTINGPOSE",
+                "KYODAIKA",
+                "SHADOWSTITCH",
+                "ETHEREALCHAINS_DEBUFF",
+                "STARPHASE",
+                "MINDBREAK_DEBUFF",
                 "\n"
         };
 

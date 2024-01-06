@@ -713,9 +713,8 @@ static void update_flags(struct char_data *ch) {
             bool condition1 = rand_number(1, 2) == 2;
             bool condition2 = rand_number(1, 20) == 1;
             if (condition1 || condition2) {
-                ch->mod(CharAttribute::Intelligence, -1);
-                ch->mod(CharAttribute::Wisdom, -1);
-                send_to_char(ch, "@RDue to the stress you've lost 1 Intelligence and Wisdom!@n\r\n");
+                send_to_char(ch, "@RYour senses are still a little addled... (-2 Int and Wis for 6 game hours.)@n\r\n");
+                assign_affect(ch, AFF_MBREAK_DEBUFF, 0, 6, 0, 0, -2, 0, -2, 0);
             }
         }
     }

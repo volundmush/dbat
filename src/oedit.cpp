@@ -1272,7 +1272,7 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
             } else if (number == 0)
                 break;
             else {
-                TOGGLE_BIT_AR(GET_OBJ_EXTRA(OLC_OBJ(d)), number - 1);
+                OLC_OBJ(d)->extra_flags.flip(number-1);
                 oedit_disp_extra_menu(d);
                 return;
             }
@@ -1286,7 +1286,7 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
             } else if (number == 0)    /* Quit. */
                 break;
             else {
-                TOGGLE_BIT_AR(GET_OBJ_WEAR(OLC_OBJ(d)), (number - 1));
+                OLC_OBJ(d)->wear_flags.flip(number-1);
                 oedit_disp_wear_menu(d);
                 return;
             }
@@ -1329,7 +1329,7 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
             if (number > 0 && number <= NUM_AFF_FLAGS) {
                 /* Setting AFF_CHARM on objects like this is dangerous. */
                 if (number != AFF_CHARM) {
-                    TOGGLE_BIT_AR(GET_OBJ_PERM(OLC_OBJ(d)), number);
+                    OLC_OBJ(d)->bitvector.flip(number);
                 }
             }
             oedit_disp_perm_menu(d);

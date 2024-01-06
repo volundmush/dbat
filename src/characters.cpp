@@ -250,27 +250,18 @@ bool char_data::is_soft_cap(int64_t type, long double mult) {
 
     int64_t against = 0;
 
-    switch (race->getSoftType(this)) {
-        case race::Fixed:
-            switch (type) {
-                case 0:
-                    against = (getBasePL());
-                    break;
-                case 1:
-                    against = (getBaseKI());
-                    break;
-                case 2:
-                    against = (getBaseST());
-                    break;
-            }
+    switch (type) {
+        case 0:
+            against = (getBasePL());
             break;
-        case race::Variable:
-            against = (getBasePL()) + (getBaseKI()) + (getBaseST());
-            if (IS_ANDROID(this) && type > 0) {
-                cur_cap += type;
-            }
+        case 1:
+            against = (getBaseKI());
+            break;
+        case 2:
+            against = (getBaseST());
             break;
     }
+
     return against >= cur_cap;
 }
 

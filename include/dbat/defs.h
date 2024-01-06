@@ -902,8 +902,9 @@
 #define AFF_SHADOWSTITCH       77
 #define AFF_ECHAINS_DEBUFF     78
 #define AFF_STARPHASE          79
+#define AFF_MBREAK_DEBUFF      80
 
-#define NUM_AFF_FLAGS 80
+#define NUM_AFF_FLAGS 81
 
 /* Modes of connectedness: used by descriptor_data.state */
 #define CON_PLAYING     0    /* Playing - Nominal state		*/

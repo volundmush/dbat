@@ -5443,6 +5443,11 @@ ACMD(do_kienzan) {
         return;
     }
 
+    if(ch->playerFlags.test(PLR_SPAR) || ch->mobFlags.test(MOB_SPAR)) {
+        send_to_char(ch, "That technique is a little too lethal for a spar, don't you think?\r\n");
+        return;
+    }
+
     if (!limb_ok(ch, 0)) {
         return;
     }

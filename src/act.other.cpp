@@ -7603,10 +7603,6 @@ ACMD(do_situp) {
 
     if(!can_grav(ch)) return;
 
-    if (PLR_FLAGGED(ch, PLR_SPAR)) {
-        send_to_char(ch, "You shouldn't be sparring if you want to work out, it could be dangerous.\r\n");
-        return;
-    }
     if (FIGHTING(ch)) {
         send_to_char(ch, "You are fighting you moron!\r\n");
         return;
@@ -7738,11 +7734,6 @@ ACMD(do_meditate) {
 
     if (DRAGGING(ch)) {
         send_to_char(ch, "You are dragging someone!\r\n");
-        return;
-    }
-
-    if (PLR_FLAGGED(ch, PLR_SPAR)) {
-        send_to_char(ch, "You shouldn't be sparring if you want to work out, it could be dangerous.\r\n");
         return;
     }
 
@@ -7951,10 +7942,6 @@ ACMD(do_pushup) {
 
     if(!can_grav(ch)) return;
 
-    if (PLR_FLAGGED(ch, PLR_SPAR)) {
-        send_to_char(ch, "You shouldn't be sparring if you want to work out, it could be dangerous.\r\n");
-        return;
-    }
     if (FIGHTING(ch)) {
         send_to_char(ch, "You are fighting you moron!\r\n");
         return;
@@ -8059,16 +8046,14 @@ ACMD(do_pushup) {
 ACMD(do_spar) {
     if (IS_NPC(ch)) {
         return;
-    } else {
-        if (PLR_FLAGGED(ch, PLR_SPAR)) {
-            act("@wYou cease your sparring stance.@n", false, ch, nullptr, nullptr, TO_CHAR);
-            act("@C$n@w ceases $s sparring stance.@n", false, ch, nullptr, nullptr, TO_ROOM);
-        }
-        if (!PLR_FLAGGED(ch, PLR_SPAR)) {
-            act("@wYou move into your sparring stance.@n", false, ch, nullptr, nullptr, TO_CHAR);
-            act("@C$n@w moves into $s sparring stance.@n", false, ch, nullptr, nullptr, TO_ROOM);
-        }
-        ch->playerFlags.flip(PLR_SPAR);
+    }
+    if (ch->playerFlags.flip(PLR_SPAR).test(PLR_SPAR)) {
+        act("@wYou cease your sparring stance.@n", false, ch, nullptr, nullptr, TO_CHAR);
+        act("@C$n@w ceases $s sparring stance.@n", false, ch, nullptr, nullptr, TO_ROOM);
+    }
+    else {
+        act("@wYou move into your sparring stance.@n", false, ch, nullptr, nullptr, TO_CHAR);
+        act("@C$n@w moves into $s sparring stance.@n", false, ch, nullptr, nullptr, TO_ROOM);
     }
 }
 
@@ -10393,7 +10378,7 @@ ACMD(do_gen_tog) {
             break;
         case SCMD_TEST:
             if (GET_ADMLEVEL(ch) >= 1) {
-                TOGGLE_BIT_AR(PRF_FLAGS(ch), PRF_TEST);
+                ch->pref.flip(PRF_TEST);
                 send_to_char(ch, "Okay. Testing is now: %s\r\n", PRF_FLAGGED(ch, PRF_TEST) ? "On" : "Off");
                 if (PRF_FLAGGED(ch, PRF_TEST)) {
                     send_to_char(ch, "Make sure to remove nohassle as well.\r\n");
@@ -10656,7 +10641,7 @@ ACMD(do_break) {
     send_to_char(ch, "You ruin %s.\r\n", obj->short_description);
     act("$n ruins $p.", false, ch, obj, nullptr, TO_ROOM);
     GET_OBJ_VAL(obj, VAL_ALL_HEALTH) = 0;
-    TOGGLE_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_BROKEN);
+    obj->extra_flags.set(ITEM_BROKEN);
 
     return;
 }

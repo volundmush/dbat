@@ -4260,14 +4260,14 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
                 }
                 break;
-            case 8:
-                if (!ch->canCarryWeight(10000000)) {
+            case 8: {
+                auto &o = obj_proto[1126];
+                if (!ch->canCarryWeight(o.weight)) {
                     send_to_char(ch, "You can not carry that much weight at this moment.\r\n");
                 } else if (IS_CARRYING_N(ch) + 1 > CAN_CARRY_N(ch)) {
                     send_to_char(ch, "You have too many items on you to carry anymore at this moment.\r\n");
                 } else {
                     obj = read_object(1126, VIRTUAL);
-                    GET_OBJ_WEIGHT(obj) = 10000000;
                     obj_to_char(obj, ch);
                     GET_OBJ_SIZE(obj) = get_size(ch);
                     ch->modRPP(-cost);
@@ -4275,6 +4275,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
                 }
+            }
                 break;
             case 9:
                 if (!ch->canCarryWeight(2)) {

@@ -2477,6 +2477,7 @@ void group_gain(struct char_data *ch, struct char_data *victim) {
 
 
 void solo_gain(struct char_data *ch, struct char_data *victim) {
+    return; // disabled for now.
 
     if (IS_NPC(ch)) {
         if (GET_ORIGINAL(ch)) {
@@ -2484,6 +2485,8 @@ void solo_gain(struct char_data *ch, struct char_data *victim) {
         }
     }
     int64_t exp = MIN(2000000, GET_EXP(victim));
+
+    exp *= 0.25;
 
 
     /* Calculate level-difference penalty */

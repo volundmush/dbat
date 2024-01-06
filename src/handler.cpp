@@ -519,6 +519,7 @@ void char_to_room(struct char_data *ch, struct room_data* room) {
 
 /* place a character in a room */
 void char_to_room(struct char_data *ch, room_rnum room) {
+    if(!ch) return;
     if(!world.count(room)) return;
     char_to_room(ch, &world[room]);
 }
@@ -872,7 +873,8 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
 
 /* put an object in a room */
 void obj_to_room(struct obj_data *object, room_rnum room) {
-    if(world.count(room)) return;
+    if(!object) return;
+    if(!world.count(room)) return;
     obj_to_room(object, &world[room]);
 }
 

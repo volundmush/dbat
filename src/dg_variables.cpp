@@ -1204,7 +1204,7 @@ in the vault (vnum: 453) now and then. you can just use
                             int ns;
                             if ((ns = check_flags_by_name_ar(GET_OBJ_PERM(o), NUM_AFF_FLAGS, subfield, affected_bits)) >
                                 0) {
-                                TOGGLE_BIT_AR(GET_OBJ_PERM(o), ns);
+                                o->bitvector.flip(ns);
                                 snprintf(str, slen, "1");
                             }
                         }
@@ -1213,7 +1213,7 @@ in the vault (vnum: 453) now and then. you can just use
                             int ns;
                             if ((ns = check_flags_by_name_ar(GET_OBJ_EXTRA(o), NUM_ITEM_FLAGS, subfield, extra_bits)) >
                                 0) {
-                                TOGGLE_BIT_AR(GET_OBJ_EXTRA(o), ns);
+                                o->extra_flags.flip(ns);
                                 snprintf(str, slen, "1");
                             }
                         }
