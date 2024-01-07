@@ -297,7 +297,7 @@ struct zone_data {
     char *builders{};          /* namelist of builders allowed to    */
     /* modify this zone.		  */
     int lifespan{};           /* how long between resets (minutes)  */
-    int age{};                /* current age of this zone (minutes) */
+    double age{};                /* current age of this zone (minutes) */
     vnum bot{};           /* starting room number for this zone */
     vnum top{};           /* upper limit for rooms in this zone */
 

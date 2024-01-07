@@ -3693,51 +3693,36 @@ struct obj_data *read_object(obj_vnum nr, int type, bool activate) /* and obj_rn
 
 /* update zone ages, queue for reset if necessary, and dequeue when possible */
 void zone_update(uint64_t heartPulse, double deltaTime) {
-    int i;
-    struct reset_q_element *update_u, *temp;
-    static int timer = 0;
 
-    /* jelson 10/22/92 */
-    if (((++timer * PULSE_ZONE) / PASSES_PER_SEC) >= 60) {
-        /* one minute has passed */
-        /*
-     * NOT accurate unless PULSE_ZONE is a multiple of PASSES_PER_SEC or a
-     * factor of 60
-     */
+    for (auto &[vn, z] : zone_table) {
+        z.age += deltaTime;
+        auto secs = (z.lifespan * 60);
+        if(z.age < secs) continue;
+        z.age -= secs;
 
-        timer = 0;
-
-        /* since one minute has passed, increment zone ages */
-        for (auto &z : zone_table) {
-            if (z.second.age < z.second.lifespan && z.second.reset_mode)
-                z.second.age++;
-
-            if (z.second.age >= z.second.lifespan &&
-                    z.second.age < ZO_DEAD && z.second.reset_mode) {
-                /* enqueue zone */
-                zone_reset_queue.insert(z.first);
-
-                z.second.age = ZO_DEAD;
-            }
-        }
-    }    /* end - one minute has passed */
-
-
-    /* dequeue zones (if possible) and reset */
-    /* this code is executed every 10 seconds (i.e. PULSE_ZONE) */
-    auto zr = zone_reset_queue;
-    for (auto z : zr) {
-        auto &zo = zone_table[z];
-        if (zo.reset_mode == 2 || is_empty(z)) {
-            reset_zone(z);
-            mudlog(CMP, ADMLVL_GOD, false, "Auto zone reset: %s (Zone %d)",
-                   zo.name, zo.number);
-            /* dequeue */
-            zone_reset_queue.erase(z);
+        bool doReset = false;
+        switch(z.reset_mode) {
+            case 0:
+                // Never reset.
             break;
+            case 1:
+                // reset only if zone is empty.
+                if(is_empty(vn)) doReset = true;
+            break;
+            case 2:
+                // Always reset.
+                doReset = true;
+            break;
+            default:
+                // This shouldn't happen.
+                    break;
+        }
+        if(doReset) {
+            reset_zone(vn);
+            mudlog(CMP, ADMLVL_GOD, false, "Auto zone reset: %s (Zone %d)",
+               z.name, vn);
         }
     }
-
 }
 
 static void log_zone_error(zone_rnum zone, int cmd_no, const char *message) {

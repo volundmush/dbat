@@ -287,7 +287,7 @@ static void deathTrapWrapper(uint64_t heartBeat, double deltaTime) {
 static std::vector<GameSystem> gameSystems = {
         GameSystem("event_process", 0.0, event_process),
         GameSystem("script_trigger_check", 13.0, script_trigger_check),
-        GameSystem("zone_update", 10.0, zone_update),
+        GameSystem("zone_update", 0.0, zone_update),
         GameSystem("dball_load", 1.0, dball_load),
         GameSystem("base_update", 2.0, base_update),
         GameSystem("fish_update", 2.0, fish_update),

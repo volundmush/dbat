@@ -4086,21 +4086,24 @@ static void look_in_direction(struct char_data *ch, int dir) {
 
     if (d->general_description)
         send_to_char(ch, "%s", d->general_description);
-    else {
-        auto obj = ch->findObjectVnum(17, false);
-        if (!obj) {
-            send_to_char(ch, "You were unable to discern anything about that direction. Try looking again...\r\n");
-            obj = read_object(17, VIRTUAL);
-            obj_to_char(obj, ch);
-        }
-    }
+
+    bool canSeeRoom = false;
 
     if (EXIT_FLAGGED(d, EX_ISDOOR) && d->keyword) {
         if (!EXIT_FLAGGED(d, EX_SECRET) &&
             EXIT_FLAGGED(d, EX_CLOSED))
             send_to_char(ch, "The %s is closed.\r\n", fname(d->keyword));
-        else if (!EXIT_FLAGGED(d, EX_CLOSED))
+        else if (!EXIT_FLAGGED(d, EX_CLOSED)) {
             send_to_char(ch, "The %s is open.\r\n", fname(d->keyword));
+            canSeeRoom = true;
+        }
+    } else {
+        canSeeRoom = true;
+    }
+
+    if(canSeeRoom) {
+        send_to_char(ch, "You peek over and see:\r\n");
+        look_at_room(dest, ch, 0);
     }
 }
 

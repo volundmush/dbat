@@ -1818,11 +1818,7 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
 
 
 void loadmap(struct char_data *ch) {
-    struct obj_data *obj;
-    if (!IS_NPC(ch)) {
-        obj = read_object(17, VIRTUAL);
-        obj_to_char(obj, ch);
-    }
+
 }
 
 

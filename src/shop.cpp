@@ -774,7 +774,7 @@ static void shopping_app(char *arg, struct char_data *ch, struct char_data *keep
         for (i = 0; i < MAX_OBJ_AFFECT; i++) {
             if (obj->affected[i].modifier) {
                 sprinttype(obj->affected[i].location, apply_types, buf, sizeof(buf));
-                send_to_char(ch, "%s %+d to %s", found++ ? "," : "", obj->affected[i].modifier, buf);
+                send_to_char(ch, "%s %+f to %s", found++ ? "," : "", obj->affected[i].modifier, buf);
                 switch (obj->affected[i].location) {
                     case APPLY_FEAT:
                         send_to_char(ch, " (%s)", feat_list[obj->affected[i].specific].name);
