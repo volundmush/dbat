@@ -3965,7 +3965,7 @@ int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj,
         } else if (ABSORBBY(ch)) {
             send_to_char(ch, "You are too busy being absorbed by %s!\r\n", GET_NAME(ABSORBBY(ch)));
             return 0;
-        } else if ((GET_ALT(vict) - 1 > GET_ALT(ch) || GET_ALT(vict) < GET_ALT(ch) - 1) && IS_NAMEK(ch)) {
+        } else if ((std::abs(GET_ALT(vict) - GET_ALT(ch)) == 1) && (IS_NAMEK(ch) || (IS_BIO(ch) && (GET_GENOME(ch, 0) == 3 || GET_GENOME(ch, 1) == 3)))) {
             act("@GYou stretch your limbs toward @g$N@G in an attempt to hit $M!@n", true, ch, nullptr, vict, TO_CHAR);
             act("@g$n@G stretches $s limbs toward @RYOU@G in an attempt to land a hit!@n", true, ch, nullptr, vict,
                 TO_VICT);
