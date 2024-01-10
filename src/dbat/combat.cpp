@@ -4618,7 +4618,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         if (GET_POS(vict) == POS_SITTING && IS_NPC(vict) && vict->getCurHealth() >= ((vict->getEffMaxPL())) * .98) {
             do_stand(vict, nullptr, 0, 0);
         }
-        int suppresso = false;
+        int suppresso = GET_SUPPRESS(vict) > 0;
         if (is_sparring(ch) && is_sparring(vict) && (GET_SUPPRESS(vict) + vict->getCurHealth()) - dmg <= 0) {
             if (!IS_NPC(vict)) {
                 act("@c$N@w falls down unconscious, and you stop sparring with $M.@n", true, ch, nullptr, vict,
@@ -4744,7 +4744,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
             hurt(0, 0, ch, GRAPPLED(vict), nullptr, maindmg, 3);
         }
         if (!is_sparring(ch) && !PLR_FLAGGED(vict, PLR_IMMORTAL) && GET_HIT(vict) - dmg <= 0) {
-            if (GET_HIT(vict) - dmg <= 0 && suppresso == false) {
+            if ((GET_HIT(vict) - dmg <= 0 && suppresso == false) || (suppresso == true && (GET_HIT(vict) * GET_SUPPRESS(ch)) - dmg <= 0)) {
                 vict->decCurHealthPercent(1, 0);
                 if (!IS_NPC(vict) && (vict->getCurLF()) - (dmg - GET_HIT(vict)) >= 0) {
                     act("@c$N@w barely clings to life!@n", true, ch, nullptr, vict, TO_CHAR);
@@ -4896,6 +4896,10 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     send_to_char(ch, "@D[@GDamage@W: @R%s@D]@n", add_commas(dmg).c_str());
                     send_to_char(vict, "@D[@rDamage@W: @R%s @c-Suppression-@D]@n\r\n", add_commas(dmg).c_str());
                     //int64_t healhp = GET_HIT(vict) * 0.12;
+                    //Translate the damage into a percentage of max LF, remove that from the player instead
+                    int percentageDamage = GET_MAX_HIT(vict) / dmg;
+                    vict->decCurLFPercent(percentageDamage);
+
                     if (GET_EQ(ch, WEAR_EYE) && vict && !PRF_FLAGGED(ch, PRF_NODEC)) {
                         if (IS_ANDROID(vict)) {
                             send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
