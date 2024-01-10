@@ -3761,16 +3761,21 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
         if (vict != nullptr && IS_NPC(vict)) {
 			//Work out how challenging of an npc to fight this is, if the victim is stronger we want to give more xp. This doesn't affect attributes.
 			float plRatio = GET_MAX_HIT(vict) / GET_MAX_HIT(ch);
-			//Cap the ratio at 10 to prevent truly ridiculous amounts of xp
-			if (plRatio > 10) {
-				plRatio = 10;
-			}
+            float plGain;
+
+            //The lowest you can get from a fight is 0.5 times the xp, so long as they aren't 5x weaker than you
+            if (plRatio > 0.2) {
+                plGain = 0.5 + plRatio / 2;
+            }
+            else {
+                send_to_char(ch, "This foe is not strong enough for you to learn anything.\r\n");
+                plGain = 0;
+            }
 
 			//Rewarded if your opponent is fighting for the kill
-			float deadlyBonus = isLethal ? 1.5 : 1;
+			float deadlyBonus = isLethal ? 1.2 : 1;
 
-            num = num * 0.7 * plRatio * deadlyBonus;
-            gaincalc = num * 1.5 * plRatio * deadlyBonus;
+            gaincalc = num * plGain * deadlyBonus;
             type = 3;
         } else if (vict != nullptr && !IS_NPC(vict)) {
 			//Fighting against players has randomised gains. Does not get a bonus for higher power level in spars
@@ -3778,7 +3783,7 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
 			//Rewarded if your opponent is fighting for the kill
 			float deadlyBonus = isLethal ? 2 : 1;
 
-            gaincalc = large_rand(num * .7 * deadlyBonus, num * deadlyBonus);
+            gaincalc = large_rand(num * deadlyBonus, 1.4 * num * deadlyBonus);
             if (GET_LEVEL(ch) > GET_LEVEL(vict))
                 difference = GET_LEVEL(ch) - GET_LEVEL(vict);
             else if (GET_LEVEL(ch) < GET_LEVEL(vict))
@@ -3816,13 +3821,13 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
 
 		//Saiyan's and Halfies get boosted gains from sparring, Icers and Bio's with the same gene get a debuff
         if (IS_SAIYAN(ch)) {
-            gaincalc = gaincalc + (gaincalc * .25);
+            gaincalc = gaincalc * 1.25;
         }
         if (IS_HALFBREED(ch)) {
-            gaincalc = gaincalc + (gaincalc * .20);
+            gaincalc = gaincalc * 1.2;
         }
         if (IS_ICER(ch) || (IS_BIO(ch) && (GET_GENOME(ch, 0) == 4 || GET_GENOME(ch, 1) == 4))) {
-            gaincalc = gaincalc - (gaincalc * .10);
+            gaincalc = gaincalc * 0.9;
         }
 		//Room bonuses to xp gain
         if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT) || (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC))) {
