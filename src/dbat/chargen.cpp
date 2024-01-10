@@ -1882,7 +1882,7 @@ namespace net {
                         sendText("@D--------------------------------------------------------@n\n");
                         sendText("@B1@W) @CHuman   @c- @CHigher PS gains from fighting@n\n");
                         sendText("@B2@W) @CSaiyan  @c- @CSaiyan fight gains (halved)@n\n");
-                        sendText("@B3@W) @CNamek   @c- @CNo food needed@n\n");
+                        sendText("@B3@W) @CNamek   @c- @CStretchy arms that allow greater reach@n\n");
                         sendText("@B4@W) @CIcer    @c- @C+20%s damage for Tier 4 attacks@n\n");
                         sendText("@B5@W) @CTruffle @c- @CGrant Truffle Auto-train bonus@n\n");
                         sendText("@B6@W) @CArlian  @c- @CGrants Arlian Adrenaline ability@n\n\n");
