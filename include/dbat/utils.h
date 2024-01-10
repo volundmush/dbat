@@ -1231,7 +1231,10 @@ void send_to_outdoor(fmt::string_view format, Args&&... args) {
 
         for(auto i = descriptor_list; i; i = i->next) {
             if(STATE(i) != CON_PLAYING || !(i->character)) continue;
-            i->output += formatted_string;
+            //If the character's current room isn't set as indoors, then send the message
+            if (!(ROOM_FLAGGED((get_room(i->character)), ROOM_INDOORS))) {
+                i->output += formatted_string;
+            }
         }
     }
     catch(const std::exception &e) {

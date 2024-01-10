@@ -5836,7 +5836,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
         COMBHITS(ch) += 1;
         send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Combo FINISHED for massive damage@G!@n\r\n", COMBHITS(ch));
     } else if (COMBO(ch) != LASTATK(ch) && COMBO(ch) > -1) {
-        send_to_char(ch, "@GCombo failed! Try harder next time!@n\r\n");
+        send_to_char(ch, "@GCombo failed!@n\r\n");
         COMBO(ch) = -1;
         COMBHITS(ch) = 0;
         return 0;

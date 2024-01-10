@@ -1696,7 +1696,7 @@ static void handle_corpse_condition(struct obj_data *corpse, struct char_data *c
 static void make_corpse(struct char_data *ch, struct char_data *tch) {
     struct obj_data *corpse, *o;
     struct obj_data *money;
-    struct obj_data *obj, *next_obj, *meat;
+    struct obj_data *obj, *next_obj;
     int i, x, y;
 
     corpse = create_obj();
@@ -1733,17 +1733,46 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
         if (!IS_NPC(tch) && GET_SKILL(tch, SKILL_SURVIVAL)) {
             int skill = GET_SKILL(tch, SKILL_SURVIVAL);
             if (!IS_HUMANOID(ch) && PRF_FLAGGED(tch, PRF_CARVE) && axion_dice(0) < skill) {
-                send_to_char(tch, "The choice edible meat is preserved because of your skill.\r\n");
-                meat = read_object(1612, VIRTUAL);
-                obj_to_char(meat, ch);
-                char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH], nick3[MAX_INPUT_LENGTH];
-                sprintf(nick, "@RRaw %s@R Steak@n", GET_NAME(ch));
-                sprintf(nick2, "Raw %s Steak", ch->name);
-                sprintf(nick3, "@wA @Rraw %s@R steak@w is lying here@n", GET_NAME(ch));
-                meat->short_description = strdup(nick);
-                meat->name = strdup(nick2);
-                meat->room_description = strdup(nick3);
-                GET_OBJ_MATERIAL(meat) = 14;
+                bool chance = false;
+                int repeats = 0;
+
+                if (skill < 25) {
+                    chance = true;
+                }
+                else if (skill < 50) {
+                    repeats = 1;
+                }
+                else if (skill < 75) {
+                    chance = true;
+                    repeats = 1;
+                }
+                else if (skill < 100) {
+                    repeats = 2;
+                }
+                else if (skill == 100) {
+                    chance = true;
+                    repeats = 2;
+                }
+
+                if (chance && rand_number(1, 10) > 5) {
+                    repeats += 1;
+                }
+
+                for (int ind = 0; ind < repeats; ind++) {
+                    struct obj_data *meat;
+                    send_to_char(tch, "The choice edible meat is preserved because of your skill.\r\n");
+                    meat = read_object(1612, VIRTUAL);
+                    obj_to_char(meat, ch);
+                    char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH], nick3[MAX_INPUT_LENGTH];
+                    sprintf(nick, "@RRaw %s@R Steak@n", GET_NAME(ch));
+                    sprintf(nick2, "Raw %s Steak", ch->name);
+                    sprintf(nick3, "@wA @Rraw %s@R steak@w is lying here@n", GET_NAME(ch));
+                    meat->short_description = strdup(nick);
+                    meat->name = strdup(nick2);
+                    meat->room_description = strdup(nick3);
+                    GET_OBJ_MATERIAL(meat) = 14;
+                }
+
             }
         }
     }

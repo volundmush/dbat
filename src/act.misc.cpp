@@ -4944,7 +4944,8 @@ ACMD(do_cook) {
             pass = true;
         }
         if (pass == true) {
-            if (skill < prob) {
+            //Calculate failure chance, above level 80 there is no chance to fail
+            if (80 + (skill / 2) < prob) {
                 act("@wYou screw up the preparation of the recipe and end up wasting the ingredients!@n", true, ch,
                     nullptr, nullptr, TO_CHAR);
                 act("@C$n@w starts to prepare some food, but ends up ruining the ingredients instead!@n", true, ch,
@@ -5072,13 +5073,14 @@ ACMD(do_cook) {
             act("@C$n@w carefully prepares some ingredients and starts cooking them. After a while of patience and skillful care $e succeeds in making @D'@C$p@D'@w!@n",
                 true, ch, meal, nullptr, TO_ROOM);
             improve_skill(ch, SKILL_COOKING, 0);
-
+            //Calculate psbonus and expbonus to add to the food, skill level is significantly important in both
+            float masterBonus = (skill == 100) ? 1.2 : 1;
             if (psbonus > 0) {
                 if (skill * 0.10 > 0)
-                    psbonus = (skill * 0.10) * psbonus;
+                    psbonus = (skill * 0.10) * psbonus * masterBonus;
             }
             if (expbonus > 0) {
-                expbonus = skill * expbonus;
+                expbonus = skill * expbonus * masterBonus;
             }
 
             GET_OBJ_VAL(meal, 1) = psbonus;

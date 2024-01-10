@@ -1270,7 +1270,7 @@ void mag_assign_spells() {
 
     spello(SKILL_GENIUS, "genius", 25, 10, 1, POS_STANDING,
            TAR_CHAR_ROOM | TAR_NOT_SELF, true, MAG_ACTION_FULL | MAG_AFFECTSV, MAGSAVE_FORT | MAGSAVE_NONE, 0,
-           "You am dumb dumbner now.",
+           "Your thoughts feel less cohesive.",
            2, SCHOOL_TRANSMUTATION, DOMAIN_UNDEFINED);
 
     spello(SKILL_FLEX, "flex", 25, 10, 1, POS_STANDING,

@@ -949,6 +949,7 @@ void gain_exp_regardless(struct char_data *ch, int gain) {
 void gain_condition(struct char_data *ch, int condition, int value) {
     bool intoxicated;
 
+    //Set-ups for when you cannot gain sustenance
     if (IS_NPC(ch))
         return;
     else if (IS_ANDROID(ch)) {
@@ -969,94 +970,19 @@ void gain_condition(struct char_data *ch, int condition, int value) {
 
     else {
         intoxicated = (GET_COND(ch, DRUNK) > 0);
+
+        //If there is a food value, restore that much hunger
         if (value > 0) {
             if (GET_COND(ch, condition) >= 0) {
-                if (GET_COND(ch, condition) + value > 48) {
-                    int prior = GET_COND(ch, condition);
-                    GET_COND(ch, condition) = 48;
-                    if (condition != DRUNK && prior >= 48 && !IS_MAJIN(ch)) {
-                        int pukeroll = axion_dice(0);
-                        int ocond = condition;
-                        if (condition == HUNGER)
-                            ocond = THIRST;
-                        else if (condition == THIRST)
-                            ocond = HUNGER;
-
-                        if (pukeroll > GET_CON(ch) + 19) {
-                            act("@r@6You retch violently until your stomach is empty! Your constitution couldn't handle being that stuffed!@n",
-                                true, ch, nullptr, nullptr, TO_CHAR);
-                            act("@m@6$n@r@6 retches violently! It seems $e stuffed $mself too much!@n", true, ch,
-                                nullptr, nullptr, TO_ROOM);
-                            ch->affected_by.set(AFF_PUKED);
-                            if (!IS_NAMEK(ch)) {
-                                GET_COND(ch, HUNGER) -= 40;
-                                if (GET_COND(ch, HUNGER) < 0)
-                                    GET_COND(ch, HUNGER) = 0;
-                                if (IS_BIO(ch) && (GET_GENOME(ch, 0) == 3 || GET_GENOME(ch, 1) == 3))
-                                    GET_COND(ch, HUNGER) = -1;
-                            }
-                            if (!IS_KANASSAN(ch)) {
-                                GET_COND(ch, THIRST) -= 30;
-                                if (GET_COND(ch, THIRST) < 0)
-                                    GET_COND(ch, THIRST) = 0;
-                            } else {
-                                send_to_char(ch,
-                                             "Through your mastery of your bodily fluids you manage to retain your hydration.\r\n");
-                                return;
-                            }
-                        } else if (pukeroll > GET_CON(ch) + 9) {
-                            act("@r@6You puke violently! Your constitution couldn't handle being that stuffed!@n", true,
-                                ch, nullptr, nullptr, TO_CHAR);
-                            act("@m@6$n@r@6 pukes violently! It seems $e stuffed $mself too much!@n", true, ch, nullptr,
-                                nullptr, TO_ROOM);
-                            ch->affected_by.set(AFF_PUKED);
-                            if (!IS_NAMEK(ch)) {
-                                GET_COND(ch, HUNGER) -= 20;
-                                if (GET_COND(ch, HUNGER) < 0)
-                                    GET_COND(ch, HUNGER) = 0;
-                            }
-                            if (!IS_KANASSAN(ch)) {
-                                GET_COND(ch, THIRST) -= 15;
-                                if (GET_COND(ch, THIRST) < 0)
-                                    GET_COND(ch, THIRST) = 0;
-                            } else {
-                                send_to_char(ch,
-                                             "Through your mastery of your bodily fluids you manage to retain your hydration.\r\n");
-                                return;
-                            }
-                        } else if (pukeroll > GET_CON(ch)) {
-                            act("@r@6You puke a little! Your constitution couldn't handle being that stuffed!@n", true,
-                                ch, nullptr, nullptr, TO_CHAR);
-                            act("@m@6$n@r@6 pukes a little! It seems $e stuffed $mself too much!@n", true, ch, nullptr,
-                                nullptr, TO_ROOM);
-                            ch->affected_by.set(AFF_PUKED);
-                            if (!IS_NAMEK(ch)) {
-                                GET_COND(ch, HUNGER) -= 8;
-                                if (GET_COND(ch, HUNGER) < 0)
-                                    GET_COND(ch, HUNGER) = 0;
-                            }
-                            if (!IS_KANASSAN(ch)) {
-                                GET_COND(ch, THIRST) -= 8;
-                                if (GET_COND(ch, THIRST) < 0)
-                                    GET_COND(ch, THIRST) = 0;
-                            } else {
-                                send_to_char(ch,
-                                             "Through your mastery of your bodily fluids you manage to retain your hydration.\r\n");
-                                return;
-                            }
-                        }
-                    }
-                } else {
-                    GET_COND(ch, condition) += value;
-                }
+                GET_COND(ch, condition) += value;
             }
         }
 
+        //For food with a negative value we roll survival. On a success it cannot reduce the condition below 0
         if (!AFF_FLAGGED(ch, AFF_SPIRIT) &&
             (!GET_SKILL(ch, SKILL_SURVIVAL) || (GET_SKILL(ch, SKILL_SURVIVAL) < rand_number(1, 140)))) {
             if (value <= 0) {
                 if (GET_COND(ch, condition) >= 0) {
-                    ch->affected_by.reset(AFF_PUKED);
                     if (GET_COND(ch, condition) + value < 0) {
                         GET_COND(ch, condition) = 0;
                     } else {
@@ -1064,6 +990,7 @@ void gain_condition(struct char_data *ch, int condition, int value) {
                     }
                 }
             }
+            //Send out hunger and thirst messages
             switch (condition) {
                 case HUNGER:
                     switch (GET_COND(ch, condition)) {
@@ -1179,6 +1106,7 @@ void gain_condition(struct char_data *ch, int condition, int value) {
                 default:
                     break;
             }
+            //If you starve or dehydrate, die and reset your conditions
             if (GET_HIT(ch) <= 0 && GET_COND(ch, HUNGER) == 0) {
                 send_to_char(ch, "You have starved to death!\r\n");
                 ch->decCurSTPercent(1, 0);
