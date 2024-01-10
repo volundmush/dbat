@@ -95,12 +95,40 @@ namespace portal::telnet {
         toGame(ex) {
 
         capabilities.tls = tls;
+
+        // initialize options here.
+
+
+        // start up all options.
+        for (auto &[code, op] : options) {
+            op->start();
+        }
+
     }
+
+    awaitable<void> TelnetConnection::runGameLink() {
+
+        co_return;
+    }
+
+
+    awaitable<void> TelnetConnection::runNegotiation() {
+        // first let's wait for the connection to negotiate.
+        // This should take about 300ms at most. We will need to
+        // wait asynchronously using an asio timer.
+        auto ex = co_await this_coro::executor;
+        boost::asio::steady_timer timer(ex, std::chrono::milliseconds(300));
+        co_await timer.async_wait(use_awaitable);
+
+        co_await runGameLink();
+        co_return;
+    }
+
 
     awaitable<void> TelnetConnection::run() {
         auto ex = co_await this_coro::executor;
-        co_spawn(ex, runNegotiation(), boost::asio::detached);
-        co_await (runReader() || runWriter());
+        // The below should never close until either the connection does, or there's an error.
+        co_await (runNegotiation() || runReader() || runWriter());
         co_return;
     }
 
@@ -310,18 +338,20 @@ namespace portal::telnet {
             case DO:
                 sendNegotiate(WONT, option);
                 break;
+            default:
+                break;
         }
         co_return;
 
     }
 
-    awaitable<void> TelnetConnection::handleApplicationData(const std::vector<uint8_t>& data) {
+    awaitable<void> TelnetConnection::handleApplicationData(const std::vector<uint8_t>& bytes) {
         // first, we copy data into appbuf.
-        appbuf.reserve(appbuf.size() + data.size());
-        appbuf.commit(boost::asio::buffer_copy(appbuf.prepare(data.size()), boost::asio::buffer(data)));
+        appbuf.reserve(appbuf.size() + bytes.size());
+        appbuf.commit(boost::asio::buffer_copy(appbuf.prepare(bytes.size()), boost::asio::buffer(bytes)));
 
-        auto data = static_cast<const char*>(appbuf.data().data());
-        auto size = appbuf.size();
+        const auto data = static_cast<const char*>(appbuf.data().data());
+        const auto size = appbuf.size();
 
         if (size == 0) {
             co_return;
@@ -349,7 +379,10 @@ namespace portal::telnet {
             std::string line(data + start, data + end);
 
             // Send the line for further processing
-            co_await handleLine(std::move(line));
+            net::GameMessage gmsg;
+            gmsg.type = net::GameMessageType::Command;
+            gmsg.data = line;
+            co_await toGame.async_send(boost::system::error_code{}, gmsg, use_awaitable);
 
             // Move start position past the \r\n
             start = end + 2;
@@ -364,10 +397,6 @@ namespace portal::telnet {
 
     void TelnetConnection::changeCapabilities(const nlohmann::json& j) {
         capabilities.deserialize(j);
-    }
-
-    awaitable<void> TelnetConnection::processAppData() {
-
     }
 
 

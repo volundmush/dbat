@@ -70,12 +70,12 @@ namespace portal::telnet {
         awaitable<void> runNegotiation();
         awaitable<bool> parseTelnet();
 
-        awaitable<void> handleApplicationData(const std::vector<uint8_t> &data);
+        awaitable<void> runGameLink();
+
+        awaitable<void> handleApplicationData(const std::vector<uint8_t> &bytes);
         awaitable<void> handleCommand(uint8_t command);
         awaitable<void> handleNegotiation(uint8_t negotiate, uint8_t option);
         awaitable<void> handleSubnegotiation(uint8_t option, const std::vector<uint8_t> &data);
-
-        awaitable<void> processAppData();
 
         std::unordered_map<uint8_t, std::unique_ptr<TelnetOption>> options;
         StreamType stream;
