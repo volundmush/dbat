@@ -8047,13 +8047,15 @@ ACMD(do_spar) {
     if (IS_NPC(ch)) {
         return;
     }
+    //Will return true when you have PLR_SPAR flagged
     if (ch->playerFlags.flip(PLR_SPAR).test(PLR_SPAR)) {
-        act("@wYou cease your sparring stance.@n", false, ch, nullptr, nullptr, TO_CHAR);
-        act("@C$n@w ceases $s sparring stance.@n", false, ch, nullptr, nullptr, TO_ROOM);
-    }
-    else {
         act("@wYou move into your sparring stance.@n", false, ch, nullptr, nullptr, TO_CHAR);
         act("@C$n@w moves into $s sparring stance.@n", false, ch, nullptr, nullptr, TO_ROOM);
+    }
+    else {
+        
+        act("@wYou cease your sparring stance.@n", false, ch, nullptr, nullptr, TO_CHAR);
+        act("@C$n@w ceases $s sparring stance.@n", false, ch, nullptr, nullptr, TO_ROOM);
     }
 }
 

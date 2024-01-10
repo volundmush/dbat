@@ -3578,6 +3578,7 @@ ACMD(do_eat) {
 
     one_argument(argument, arg);
 
+    //Set up the conditions in which you cannot eat
     if (IS_NPC(ch))    /* Cannot use GET_COND() on mobs. */
         return;
 
@@ -3615,6 +3616,15 @@ ACMD(do_eat) {
         return;
     }
 
+    //Base how much a player can eat on their con
+    float maxCapacity = 48 * ((GET_CON(ch) / 50) + 1);
+
+    //If they're over the limit and not majin they can no longer eat
+    if (GET_COND(ch, HUNGER) >= maxCapacity && !IS_MAJIN(ch)) {
+        send_to_char(ch, "You can't stomach to eat any more!\r\n");
+        return;
+    }
+
     if (!consume_otrigger(food, ch, OCMD_EAT))  /* check trigger */
         return;
 
@@ -3632,7 +3642,8 @@ ACMD(do_eat) {
         }
     }
 
-    int foob = 48 - GET_COND(ch, HUNGER);
+    //Calculate how much hunger the character has left
+    int foob = maxCapacity - GET_COND(ch, HUNGER);
     amount = (subcmd == SCMD_EAT ? GET_OBJ_VAL(food, VAL_FOOD_FOODVAL) : 1);
 
     gain_condition(ch, HUNGER, amount);
@@ -3645,7 +3656,8 @@ ACMD(do_eat) {
         send_to_char(ch, "You feel rejuvinated by it.\r\n");
     }
 
-    if (GET_OBJ_VNUM(food) >= MEAL_START && GET_OBJ_VNUM(food) <= MEAL_LAST && GET_COND(ch, HUNGER) < 48 &&
+    //Logic for food that will give PS or Exp
+    if (GET_OBJ_VNUM(food) >= MEAL_START && GET_OBJ_VNUM(food) <= MEAL_LAST && 
         (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL) && !ROOM_FLAGGED(IN_ROOM(ch), ROOM_RHELL))) {
         if (subcmd != SCMD_TASTE) {
             int psbonus = GET_OBJ_VAL(food, 1);
@@ -3654,27 +3666,24 @@ ACMD(do_eat) {
             if (level_exp(ch, GET_LEVEL(ch) + 1) - (GET_EXP(ch)) <= 0 && GET_LEVEL(ch) < 100) {
                 expbonus = 1;
                 capped = true;
-            } else if (expbonus > GET_LEVEL(ch) * 1500 && GET_LEVEL(ch) < 100) {
+            } else if (expbonus > GET_LEVEL(ch) * 1500) {
                 expbonus = GET_LEVEL(ch) * 1000;
             }
-            if (GET_PRACTICES(ch) >= 500) {
+            if (GET_PRACTICES(ch) >= 1000) {
                 psbonus = 0;
                 pscapped = true;
             }
-            if (!AFF_FLAGGED(ch, AFF_PUKED)) {
-                gain_exp(ch, expbonus);
-                ch->modPractices(psbonus);
-                send_to_char(ch, "That was exceptionally delicious! @D[@mPS@D: @C+%d@D] [@gEXP@D: @G+%s@D]@n\r\n",
-                             psbonus, add_commas(expbonus).c_str());
-                if (capped == true)
-                    send_to_char(ch, "Experience capped due to negative TNL.\r\n");
-                if (pscapped == true)
-                    send_to_char(ch, "Practice Sessions capped for food at 500 PS.\r\n");
-            } else {
-                send_to_char(ch,
-                             "You have recently puked. You must wait a while for your body to adjust before excellent food gives you any bonuses.\r\n");
-            }
+
+            gain_exp(ch, expbonus);
+            ch->modPractices(psbonus);
+            send_to_char(ch, "That was exceptionally delicious! @D[@mPS@D: @C+%d@D] [@gEXP@D: @G+%s@D]@n\r\n",
+                         psbonus, add_commas(expbonus).c_str());
+            if (capped == true)
+                send_to_char(ch, "Experience capped due to negative TNL.\r\n");
+            if (pscapped == true)
+                send_to_char(ch, "Practice Sessions capped for food at 500 PS.\r\n");
         }
+        //Good food can heal you
         if (!GET_OBJ_VAL(food, VAL_FOOD_POISON) && GET_HIT(ch) < (ch->getEffMaxPL()) && subcmd != SCMD_TASTE) {
             int64_t suppress = ((ch->getEffMaxPL()) * 0.01) * GET_SUPPRESS(ch);
             if (GET_WEIGHT(food) < 6) {
@@ -3689,9 +3698,6 @@ ACMD(do_eat) {
             send_to_char(ch, "@MYou feel some of your strength return!@n\r\n");
         }
     }
-
-    if (GET_COND(ch, HUNGER) >= 48 && !IS_MAJIN(ch))
-        send_to_char(ch, "You are full, but may continue to stuff yourself.\r\n");
 
     if (GET_OBJ_VAL(food, VAL_FOOD_POISON) && !ADM_FLAGGED(ch, ADM_NOPOISON)) {
         /* The crap was poisoned ! */
