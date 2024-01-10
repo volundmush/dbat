@@ -479,7 +479,7 @@ void medit_disp_menu(struct descriptor_data *d) {
                     "@gF@n) Armor Class: [@c%4d@n],  @gG@n) Exp:      [@c%" I64T "@n],  @gH@n) Gold:  [@c%8d@n]\r\n",
 
                     OLC_NUM(d), genders[(int) GET_SEX(mob)], GET_ALIAS(mob),
-                    GET_SDESC(mob), GET_LDESC(mob), GET_DDESC(mob), 0,
+                    GET_SDESC(mob), GET_LDESC(mob), GET_DDESC(mob), GET_LEVEL(mob),
                     GET_ALIGNMENT(mob), GET_FISHD(mob), GET_DAMAGE_MOD(mob),
                     GET_NDD(mob), GET_SDD(mob), GET_HIT(mob), (mob->getCurKI()),
                     (mob->getCurST()), GET_ARMOR(mob), GET_EXP(mob), GET_GOLD(mob)
