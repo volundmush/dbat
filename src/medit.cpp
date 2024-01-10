@@ -882,11 +882,14 @@ void medit_parse(struct descriptor_data *d, char *arg) {
             break;
 
         case MEDIT_CLASS:
-            if (!OLC_MOB(d)->chclass) {
-                OLC_MOB(d)->chclass = sensei::sensei_map[sensei::commoner];
-            };
-            /* Change size HP dice based on class choice. */
-            //GET_MANA(OLC_MOB(d)) = class_hit_die_size[GET_CLASS(OLC_MOB(d))];
+            //Check if the sensei requested exists
+            if (sensei::find_sensei_map_id(i, sensei::sensei_map) != nullptr) {
+                //Set the mob's Sensei to the chosen sensei
+                OLC_MOB(d)->chclass = sensei::find_sensei_map_id(i, sensei::sensei_map);
+            }
+            else {
+                write_to_output(d, "Couldn't find the requested Sensei!\r\n");
+            }
             break;
 
         case MEDIT_COPY:
