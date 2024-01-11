@@ -985,7 +985,7 @@
 #define CON_LOGIN        75
 #define CON_QUITGAME     76
 
-#define NUM_CON_TYPES 76
+#define NUM_CON_TYPES 77
 
 /* Colors that the player can define */
 #define COLOR_NORMAL            0
