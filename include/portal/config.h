@@ -8,7 +8,7 @@ namespace portal::config {
     extern uint16_t listenPort;
 
     extern std::string serverAddress;
-    extern uint16_t serverPort;
-
-    extern std::string certPath, keyPath;
+    extern std::string serverPort;
+    extern std::string serverPath;
+    extern bool serverSecure;
 }

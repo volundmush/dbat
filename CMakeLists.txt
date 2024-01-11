@@ -82,8 +82,6 @@ set(CIRCLE_LINK_LIBRARIES
 
 set(PORTAL_LINK_LIBRARIES
         fmt::fmt ${Boost_LIBRARIES}
-        ssl
-        crypto
 )
 
 add_library(shared_lib ${SHARED_INCLUDE} ${SHARED_SRC})

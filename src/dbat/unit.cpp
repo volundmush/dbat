@@ -47,10 +47,22 @@ nlohmann::json unit_data::serializeContents() {
 
 void unit_data::deserializeUnit(const nlohmann::json& j) {
     if(j.contains("vn")) vn = j["vn"];
-    if(j.contains("name")) name = strdup(j["name"].get<std::string>().c_str());
-    if(j.contains("room_description")) room_description = strdup(j["room_description"].get<std::string>().c_str());
-    if(j.contains("look_description")) look_description = strdup(j["look_description"].get<std::string>().c_str());
-    if(j.contains("short_description")) short_description = strdup(j["short_description"].get<std::string>().c_str());
+    if(j.contains("name")) {
+        if(name) free(name);
+        name = strdup(j["name"].get<std::string>().c_str());
+    }
+    if(j.contains("room_description")) {
+        if(room_description) free(room_description);
+        room_description = strdup(j["room_description"].get<std::string>().c_str());
+    }
+    if(j.contains("look_description")) {
+        if(look_description) free(look_description);
+        look_description = strdup(j["look_description"].get<std::string>().c_str());
+    }
+    if(j.contains("short_description")) {
+        if(short_description) free(short_description);
+        short_description = strdup(j["short_description"].get<std::string>().c_str());
+    }
 
     if(j.contains("ex_description")) {
         auto &e = j["ex_description"];

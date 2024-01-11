@@ -3,9 +3,6 @@
 
 namespace portal {
 
-
-    extern bool tlsEnabled;
-
     void run();
 
 }

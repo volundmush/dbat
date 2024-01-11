@@ -1,7 +1,16 @@
 #pragma once
 #include "portal/sysdep.h"
+#include <boost/beast.hpp>
+#include <boost/beast/websocket.hpp>
 
 namespace portal::telnet {
+    using namespace boost;
+    using namespace boost::beast;
+    using namespace boost::beast::http;
+
+    using WsStream = std::variant<websocket::stream<tcp_stream>, websocket::stream<ssl_stream<tcp_stream>>>;
+
+
     namespace codes {
         constexpr uint8_t NUL = 0, BEL = 7, CR = 13, LF = 10, SGA = 3, TELOPT_EOR = 25, NAWS = 31;
         constexpr uint8_t LINEMODE = 34, EOR = 239, SE = 240, NOP = 241, GA = 249, SB = 250;
@@ -51,7 +60,7 @@ namespace portal::telnet {
 
     class TelnetConnection {
     public:
-        TelnetConnection(StreamType stream, bool tls, boost::beast::flat_buffer buf, const any_io_executor& ex);
+        TelnetConnection(ip::tcp::socket stream, const any_io_executor& ex);
 
         awaitable<void> run();
 
@@ -64,13 +73,14 @@ namespace portal::telnet {
         void changeCapabilities(const nlohmann::json& j);
 
     protected:
-        net::ProtocolCapabilities capabilities;
+        ::net::ProtocolCapabilities capabilities;
         awaitable<void> runReader();
         awaitable<void> runWriter();
         awaitable<void> runNegotiation();
         awaitable<bool> parseTelnet();
 
         awaitable<void> runGameLink();
+        awaitable<void> runWebSocket(WsStream ws);
 
         awaitable<void> handleApplicationData(const std::vector<uint8_t> &bytes);
         awaitable<void> handleCommand(uint8_t command);
@@ -78,11 +88,11 @@ namespace portal::telnet {
         awaitable<void> handleSubnegotiation(uint8_t option, const std::vector<uint8_t> &data);
 
         std::unordered_map<uint8_t, std::unique_ptr<TelnetOption>> options;
-        StreamType stream;
+        boost::asio::ip::tcp::socket stream;
         bool tls;
-        boost::beast::flat_buffer readbuf, writebuf, appbuf;
+        boost::asio::streambuf readbuf, writebuf, appbuf;
         Channel<TelnetMessage> outMessage;
-        Channel<net::GameMessage> toGame;
+        Channel<::net::GameMessage> toGame;
 
         bool started{false};
     };

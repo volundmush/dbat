@@ -15,8 +15,8 @@ int main(int argc, char* argv[]) {
             ("help", "produce help message")
             ("listen", po::value<std::string>(), "address and port to listen on (format: addr:port)")
             ("server", po::value<std::string>(), "address and port of the server (format: addr:port)")
-            ("cert", po::value<std::string>(), "path to the TLS certificate file")
-            ("key", po::value<std::string>(), "path to the TLS key file");
+            ("path", po::value<std::string>(), "relative url path to websocket. Default: /ws")
+            ("secure", po::value<bool>(), "use secure websocket. Default: false");
 
         po::variables_map vm;
         po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -41,27 +41,22 @@ int main(int argc, char* argv[]) {
             auto pos = addr.find(':');
             if (pos != std::string::npos) {
                 serverAddress = addr.substr(0, pos);
-                serverPort = static_cast<uint16_t>(std::stoi(addr.substr(pos + 1)));
+                serverPort = addr.substr(pos + 1);
             }
         }
 
-        if (vm.count("cert")) {
-            certPath = vm["cert"].as<std::string>();
+        if(vm.count("path")) {
+            serverPath = vm["path"].as<std::string>();
         }
 
-        if (vm.count("key")) {
-            keyPath = vm["key"].as<std::string>();
+        if(vm.count("secure")) {
+            serverSecure = vm["secure"].as<bool>();
         }
+
 
         // Display the configuration for verification
         std::cout << "Listening on: " << listenAddress << ":" << listenPort << std::endl;
-        std::cout << "Server: " << serverAddress << ":" << serverPort << std::endl;
-        if (!certPath.empty()) {
-            std::cout << "TLS certificate: " << certPath << std::endl;
-        }
-        if (!keyPath.empty()) {
-            std::cout << "TLS key: " << keyPath << std::endl;
-        }
+        std::cout << "Server: " << serverAddress << std::endl;
 
         // ... Continue with the rest of your program ...
 

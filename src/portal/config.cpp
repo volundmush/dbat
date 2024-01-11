@@ -5,7 +5,7 @@ namespace portal::config {
     uint16_t listenPort{1280};
 
     std::string serverAddress{"127.0.0.1"};
-    uint16_t serverPort{8000};
-
-    std::string certPath, keyPath;
-}
+    std::string serverPort("8000");
+    std::string serverPath{"/ws"};
+    bool serverSecure{false};
+}boost::asio::ssl::context ssl_context(boost::asio::ssl::context::tlsv12_client);

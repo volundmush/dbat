@@ -1,6 +1,10 @@
 #include "portal/telnet.h"
+#include "portal/config.h"
+
 
 namespace portal::telnet {
+    boost::asio::ssl::context ssl_context(boost::asio::ssl::context::tlsv13_client);
+
     // Telnet Options
     void TelnetOption::sendNegotiate(uint8_t code) {
         conn.sendBytes({codes::IAC, code, getCode()});
@@ -90,8 +94,8 @@ namespace portal::telnet {
 
     // TelnetConnection
 
-    TelnetConnection::TelnetConnection(StreamType stream, bool tls, boost::beast::flat_buffer buf,
-        const any_io_executor &ex) : stream(std::move(stream)), tls(tls), readbuf(std::move(buf)), outMessage(ex),
+    TelnetConnection::TelnetConnection(ip::tcp::socket stream,
+        const any_io_executor &ex) : stream(std::move(stream)), outMessage(ex),
         toGame(ex) {
 
         capabilities.tls = tls;
@@ -106,7 +110,57 @@ namespace portal::telnet {
 
     }
 
+    awaitable<void> TelnetConnection::runWebSocket(WsStream ws) {
+
+    }
+
+
     awaitable<void> TelnetConnection::runGameLink() {
+
+        beast::error_code ec;
+
+        // Resolver and Stream
+        tcp::resolver resolver(ioc);
+        // Look up the domain name
+        auto const results = co_await resolver.async_resolve(config::serverAddress, config::serverPort, use_awaitable);
+
+        while(true) {
+            try {
+                if(config::serverSecure) {
+                    websocket::stream<ssl_stream<tcp_stream>> ws(ioc, ssl_context);
+                    // Set a timeout on the operation
+                    beast::get_lowest_layer(ws).expires_after(std::chrono::seconds(30));
+                    // Make the connection on the IP address we get from a lookup
+                    auto ep = co_await beast::get_lowest_layer(ws).async_connect(results, use_awaitable);
+
+                    // Perform the SSL handshake
+                    co_await ws.next_layer().async_handshake(ssl::stream_base::client, use_awaitable);
+
+                    // Set a timeout on the operation
+                    ws.set_option(websocket::stream_base::timeout::suggested(beast::role_type::client));
+
+                    // Perform the WebSocket handshake
+                    co_await ws.async_handshake(config::serverAddress, "/ws", use_awaitable);
+                    co_await runWebSocket(std::move(ws));
+                } else {
+                    websocket::stream<tcp_stream> ws(ioc);
+                    // Set a timeout on the operation
+                    beast::get_lowest_layer(ws).expires_after(std::chrono::seconds(30));
+                    // Make the connection on the IP address we get from a lookup
+                    auto ep = co_await beast::get_lowest_layer(ws).async_connect(results, use_awaitable);
+
+                    // Set a timeout on the operation
+                    ws.set_option(websocket::stream_base::timeout::suggested(beast::role_type::client));
+
+                    // Perform the WebSocket handshake
+                    co_await ws.async_handshake(config::serverAddress, "/ws", use_awaitable);
+                    co_await runWebSocket(std::move(ws));
+                }
+            }
+            catch(...) {
+
+            }
+        }
 
         co_return;
     }
@@ -164,18 +218,9 @@ namespace portal::telnet {
             }
 
             // the sendBytes function put the bytes in writebuf. We need to flush it.
-            if(stream.index()) {
-                auto &tls = std::get<1>(stream);
-                while(writebuf.size()) {
-                    auto results = co_await tls.async_write_some(writebuf.data(), use_awaitable);
-                    writebuf.consume(results);
-                }
-            } else {
-                auto &tcp = std::get<0>(stream);
-                while(writebuf.size()) {
-                    auto results = co_await tcp.async_write_some(writebuf.data(), use_awaitable);
-                    writebuf.consume(results);
-                }
+            while(writebuf.size()) {
+                const auto results = co_await stream.async_write_some(writebuf.data(), use_awaitable);
+                writebuf.consume(results);
             }
 
         }
@@ -185,22 +230,16 @@ namespace portal::telnet {
 
     void TelnetConnection::sendBytes(const std::vector<uint8_t>& bytes) {
         // flush bytes to writebuf.
-        writebuf.reserve(writebuf.size() + bytes.size());
-        writebuf.commit(boost::asio::buffer_copy(writebuf.prepare(bytes.size()), boost::asio::buffer(bytes)));
+        auto prepare = writebuf.prepare(bytes.size());
+        boost::asio::buffer_copy(prepare, boost::asio::buffer(bytes));
+        writebuf.commit(bytes.size());
     }
 
 
     awaitable<void> TelnetConnection::runReader() {
         while(true) {
-            if(stream.index()) {
-                auto &tls = std::get<1>(stream);
-                auto results = co_await tls.async_read_some(readbuf.prepare(1024), use_awaitable);
-                readbuf.commit(results);
-            } else {
-                auto &tcp = std::get<0>(stream);
-                auto results = co_await tcp.async_read_some(readbuf.prepare(1024), use_awaitable);
-                readbuf.commit(results);
-            }
+            auto results = co_await stream.async_read_some(readbuf.prepare(1024), use_awaitable);
+            readbuf.commit(results);
 
             while(co_await parseTelnet()) {
 
@@ -347,8 +386,9 @@ namespace portal::telnet {
 
     awaitable<void> TelnetConnection::handleApplicationData(const std::vector<uint8_t>& bytes) {
         // first, we copy data into appbuf.
-        appbuf.reserve(appbuf.size() + bytes.size());
-        appbuf.commit(boost::asio::buffer_copy(appbuf.prepare(bytes.size()), boost::asio::buffer(bytes)));
+        auto prepare = appbuf.prepare(bytes.size());
+        boost::asio::buffer_copy(prepare, boost::asio::buffer(bytes));
+        appbuf.commit(bytes.size());
 
         const auto data = static_cast<const char*>(appbuf.data().data());
         const auto size = appbuf.size();
@@ -379,8 +419,8 @@ namespace portal::telnet {
             std::string line(data + start, data + end);
 
             // Send the line for further processing
-            net::GameMessage gmsg;
-            gmsg.type = net::GameMessageType::Command;
+            ::net::GameMessage gmsg;
+            gmsg.type = ::net::GameMessageType::Command;
             gmsg.data = line;
             co_await toGame.async_send(boost::system::error_code{}, gmsg, use_awaitable);
 
