@@ -3666,9 +3666,10 @@ ACMD(do_eat) {
             if (level_exp(ch, GET_LEVEL(ch) + 1) - (GET_EXP(ch)) <= 0 && GET_LEVEL(ch) < 100) {
                 expbonus = 1;
                 capped = true;
-            } else if (expbonus > GET_LEVEL(ch) * 1500) {
+            } else {
                 expbonus = GET_LEVEL(ch) * 1000;
             }
+
             if (GET_PRACTICES(ch) >= 1000) {
                 psbonus = 0;
                 pscapped = true;
@@ -3681,7 +3682,7 @@ ACMD(do_eat) {
             if (capped == true)
                 send_to_char(ch, "Experience capped due to negative TNL.\r\n");
             if (pscapped == true)
-                send_to_char(ch, "Practice Sessions capped for food at 500 PS.\r\n");
+                send_to_char(ch, "Practice Sessions capped for food at 1000 PS.\r\n");
         }
         //Good food can heal you
         if (!GET_OBJ_VAL(food, VAL_FOOD_POISON) && GET_HIT(ch) < (ch->getEffMaxPL()) && subcmd != SCMD_TASTE) {

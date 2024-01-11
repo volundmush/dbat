@@ -1364,10 +1364,6 @@ void enter_player_game(struct descriptor_data *d) {
         GET_SPEEDBOOST(d->character) = 0;
     }
 
-    if (IS_NAMEK(d->character) && GET_COND(d->character, HUNGER) >= 0) {
-        GET_COND(d->character, HUNGER) = -1;
-    }
-
     d->character->playerFlags.reset(PLR_HEALT);
 
     if (GET_ADMLEVEL(d->character) > 0) {

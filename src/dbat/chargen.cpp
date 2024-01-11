@@ -1122,110 +1122,61 @@ namespace net {
                 ch->set(CharAppearance::DistinguishingFeature, dist);
             }
 
-                sendText("@YWhat Height/Weight Range do you prefer:\r\n");
+                sendText("@YWhat Height should your character be?:\r\n");
                 sendText("@D---------------------------------------@n\r\n");
-                if (!IS_TRUFFLE(ch) && !IS_ICER(ch)) {
-                    sendText("@B1@W)@C 100-120cm, 25-30kg@n\r\n");
-                    sendText("@B2@W)@C 120-140cm, 30-35kg@n\r\n");
-                    sendText("@B3@W)@C 140-160cm, 35-45kg@n\r\n");
-                    sendText("@B4@W)@C 160-180cm, 45-60kg@n\r\n");
-                    sendText("@B5@W)@C 180-200cm, 60-80kg@n\r\n");
-                    sendText("@B6@W)@C 200-220cm, 80-100kg@n\r\n");
-                } else if (IS_ICER(ch)) {
-                    sendText("@B1@W)@C 100-120cm, 25-30kg@n\r\n");
-                    sendText("@B2@W)@C 120-140cm, 30-35kg@n\r\n");
-                    sendText("@B3@W)@C 140-160cm, 35-45kg@n\r\n");
+                if (!IS_TRUFFLE(ch)) {
+                    sendText("@C Please enter a number between 80 and 300, height is in cm.\r\n");
                 } else {
-                    sendText("@B1@W)@C 20-35cm, 5-8kg@n\r\n");
-                    sendText("@B2@W)@C 35-40cm, 8-10kg@n\r\n");
-                    sendText("@B3@W)@C 40-50cm, 10-12kg@n\r\n");
-                    sendText("@B4@W)@C 50-60cm, 12-15kg@n\r\n");
-                    sendText("@B5@W)@C 60-70cm, 15-18kg@n\r\n");
+                    sendText("@C Please enter a number between 20 and 150, height is in cm.\r\n");
                 }
-                sendText("\n@WMake a selection:@n ");
-                state = CON_HW;
+                state = CON_HEIGHT;
                 break;
 
-            case CON_HW: {
-                int height, weight;
-                switch(arg[0]) {
-                    case '1':
-                        if (!IS_TRUFFLE(ch) && !IS_ICER(ch)) {
-                            height = rand_number(100, 120);
-                            weight = rand_number(25, 30);
-                        } else if (IS_ICER(ch)) {
-                            height = rand_number(100, 120);
-                            weight = rand_number(25, 30);
-                        } else {
-                            height = rand_number(20, 35);
-                            weight = rand_number(5, 8);
-                        }
-                        break;
-                    case '2':
-                        if (!IS_TRUFFLE(ch) && !IS_ICER(ch)) {
-                            height = rand_number(120, 140);
-                            weight = rand_number(30, 35);
-                        } else if (IS_ICER(ch)) {
-                            height = rand_number(120, 140);
-                            weight = rand_number(30, 35);
-                        } else {
-                            height = rand_number(35, 40);
-                            weight = rand_number(8, 10);
-                        }
-                        break;
-                    case '3':
-                        if (!IS_TRUFFLE(ch) && !IS_ICER(ch)) {
-                            height = rand_number(140, 160);
-                            weight = rand_number(35, 45);
-                        } else if (IS_ICER(ch)) {
-                            height = rand_number(140, 160);
-                            weight = rand_number(35, 45);
-                        } else {
-                            height = rand_number(40, 50);
-                            weight = rand_number(10, 12);
-                        }
-                        break;
-                    case '4':
-                        if (!IS_TRUFFLE(ch) && !IS_ICER(ch)) {
-                            height = rand_number(160, 180);
-                            weight = rand_number(45, 60);
-                        } else if (IS_ICER(ch)) {
-                            sendText("That is not an acceptable option.\r\n");
-                            return;
-                        } else {
-                            height = rand_number(50, 60);
-                            weight = rand_number(12, 15);
-                        }
-                        break;
-                    case '5':
-                        if (!IS_TRUFFLE(ch) && !IS_ICER(ch)) {
-                            height = rand_number(180, 200);
-                            weight = rand_number(60, 80);
-                        } else if (IS_ICER(ch)) {
-                            sendText("That is not an acceptable option.\r\n");
-                            return;
-                        } else {
-                            height = rand_number(60, 70);
-                            weight = rand_number(15, 18);
-                        }
-                        break;
-                    case '6':
-                        if (!IS_TRUFFLE(ch) && !IS_ICER(ch)) {
-                            height = rand_number(200, 220);
-                            weight = rand_number(80, 100);
-                        } else {
-                            sendText("That is not an acceptable option.\r\n");
-                            return;
-                        }
-                        break;
-                    default:
-                        sendText("That is not an acceptable option.\r\n");
-                        return;
-                        break;
+            case CON_HEIGHT: {
+                int height;
+                if (IS_TRUFFLE(ch) && (arg[0] <= 20 || arg [0] > 150)) {
+                    sendText("That is not an option. For Tuffles, please keep height above 20cm, and below 150cm.\r\n");
+                    return;
                 }
-                ch->setHeight(height);
-                ch->weight = weight;
+                else if (arg[0] <= 80 || arg[0] > 300) {
+                    sendText("That is not an option. Please keep height above 80cm, and below 300cm.\r\n");
+                    return;
+                }
+                else {
+                    ch->setHeight(height);
+                }
+                break;
+
             }
+
+                sendText("@YWhat Weight should your character be?:\r\n");
+                sendText("@D---------------------------------------@n\r\n");
+                if (!IS_TRUFFLE(ch)) {
+                     sendText("@C Please enter a number between 25 and 150, weight is in kg.\r\n");
+                } else {
+                     sendText("@C Please enter a number between 3 and 40, height is in kg.\r\n");
+                }
+                state = CON_WEIGHT;
+                break;
+
+            case CON_WEIGHT: {
+                int weight;
+                if (IS_TRUFFLE(ch) && (arg[0] <= 3 || arg[0] >= 40)) {
+                    sendText("That is not an option. For Tuffles, please keep height above 3kg, and below 40kg.\r\n");
+                    return;
+                }
+                else if (arg[0] <= 25 || arg[0] >= 150) {
+                    sendText("That is not an option. Please keep height above 25kg, and below 150kg.\r\n");
+                    return;
+                }
+                else {
+                    ch->weight = weight;
+                }
+                break;
+                
+            }
+
+
                 sendText("@YAura color SELECTION menu:\r\n");
                 sendText("@D---------------------------------------@n\r\n");
                 sendText("@B1@W)@C White  @B2@W)@C Blue@n\r\n");
@@ -1882,7 +1833,7 @@ namespace net {
                         sendText("@D--------------------------------------------------------@n\n");
                         sendText("@B1@W) @CHuman   @c- @CHigher PS gains from fighting@n\n");
                         sendText("@B2@W) @CSaiyan  @c- @CSaiyan fight gains (halved)@n\n");
-                        sendText("@B3@W) @CNamek   @c- @CNo food needed@n\n");
+                        sendText("@B3@W) @CNamek   @c- @CStretchy arms that allow greater reach@n\n");
                         sendText("@B4@W) @CIcer    @c- @C+20%s damage for Tier 4 attacks@n\n");
                         sendText("@B5@W) @CTruffle @c- @CGrant Truffle Auto-train bonus@n\n");
                         sendText("@B6@W) @CArlian  @c- @CGrants Arlian Adrenaline ability@n\n\n");

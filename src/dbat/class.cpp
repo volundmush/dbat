@@ -372,14 +372,6 @@ void do_start(struct char_data *ch) {
         GET_COND(ch, HUNGER) = -1;
         GET_COND(ch, THIRST) = -1;
         GET_COND(ch, DRUNK) = -1;
-    } else if (IS_BIO(ch) && (GET_GENOME(ch, 0) == 3 || GET_GENOME(ch, 1) == 3)) {
-        GET_COND(ch, HUNGER) = -1;
-        GET_COND(ch, DRUNK) = 0;
-        GET_COND(ch, THIRST) = 48;
-    } else if (IS_NAMEK(ch)) {
-        GET_COND(ch, HUNGER) = -1;
-        GET_COND(ch, DRUNK) = 0;
-        GET_COND(ch, THIRST) = 48;
     } else {
         GET_COND(ch, THIRST) = 48;
         GET_COND(ch, HUNGER) = 48;

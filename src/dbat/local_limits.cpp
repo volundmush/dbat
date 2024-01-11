@@ -991,57 +991,62 @@ void gain_condition(struct char_data *ch, int condition, int value) {
                 }
             }
             //Send out hunger and thirst messages
+            bool getsHungry = !(IS_NAMEK(ch));
+
             switch (condition) {
                 case HUNGER:
-                    switch (GET_COND(ch, condition)) {
-                        case 0:
-                            if ((ch->getCurST()) >= GET_MAX_MOVE(ch) / 3) {
-                                send_to_char(ch, "@RYou are starving to death!@n\r\n");
-                                ch->decCurSTPercent(.33);
-                            } else if ((ch->getCurST()) < GET_MAX_MOVE(ch) / 3) {
-                                send_to_char(ch, "@RYou are starving to death!@n\r\n");
-                                ch->decCurSTPercent(1, 0);
-                                ch->decCurHealthPercent(.34);
-                            }
-                            break;
-                        case 1:
-                            send_to_char(ch, "You are extremely hungry!\r\n");
-                            break;
-                        case 2:
-                            send_to_char(ch, "You are very hungry!\r\n");
-                            break;
-                        case 3:
-                            send_to_char(ch, "You are pretty hungry!\r\n");
-                            break;
-                        case 4:
-                            send_to_char(ch, "You are hungry!\r\n");
-                            break;
-                        case 5:
-                        case 6:
-                        case 7:
-                        case 8:
-                            send_to_char(ch, "Your stomach is growling!\r\n");
-                            break;
-                        case 9:
-                        case 10:
-                        case 11:
-                            send_to_char(ch, "You could use something to eat.\r\n");
-                            break;
-                        case 12:
-                        case 13:
-                        case 14:
-                        case 15:
-                        case 16:
-                        case 17:
-                            send_to_char(ch, "You could use a bite to eat.\r\n");
-                            break;
-                        case 18:
-                        case 19:
-                        case 20:
-                            send_to_char(ch, "You could use a snack.\r\n");
-                            break;
-                        default:
-                            break;
+                    if (getsHungry) {
+                        switch (GET_COND(ch, condition)) {
+                            case 0:
+                                if ((ch->getCurST()) >= GET_MAX_MOVE(ch) / 3) {
+                                    send_to_char(ch, "@RYou are starving to death!@n\r\n");
+                                    ch->decCurSTPercent(.33);
+                                }
+                                else if ((ch->getCurST()) < GET_MAX_MOVE(ch) / 3) {
+                                    send_to_char(ch, "@RYou are starving to death!@n\r\n");
+                                    ch->decCurSTPercent(1, 0);
+                                    ch->decCurHealthPercent(.34);
+                                }
+                                break;
+                            case 1:
+                                send_to_char(ch, "You are extremely hungry!\r\n");
+                                break;
+                            case 2:
+                                send_to_char(ch, "You are very hungry!\r\n");
+                                break;
+                            case 3:
+                                send_to_char(ch, "You are pretty hungry!\r\n");
+                                break;
+                            case 4:
+                                send_to_char(ch, "You are hungry!\r\n");
+                                break;
+                            case 5:
+                            case 6:
+                            case 7:
+                            case 8:
+                                send_to_char(ch, "Your stomach is growling!\r\n");
+                                break;
+                            case 9:
+                            case 10:
+                            case 11:
+                                send_to_char(ch, "You could use something to eat.\r\n");
+                                break;
+                            case 12:
+                            case 13:
+                            case 14:
+                            case 15:
+                            case 16:
+                            case 17:
+                                send_to_char(ch, "You could use a bite to eat.\r\n");
+                                break;
+                            case 18:
+                            case 19:
+                            case 20:
+                                send_to_char(ch, "You could use a snack.\r\n");
+                                break;
+                            default:
+                                break;
+                        }
                     }
                     break;
                 case THIRST:

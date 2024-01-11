@@ -969,22 +969,23 @@
 #define CON_UMENU        59
 #define CON_USER_CONF    60
 #define CON_DISTFEA      61
-#define CON_HW           62
-#define CON_AURA         63
-#define CON_BONUS        64
-#define CON_NEGATIVE     65
-#define CON_NEWSEDIT     66
-#define CON_RACIAL       67
-#define CON_POBJ         68
-#define CON_ALIGN        69
-#define CON_SKILLS       70
-#define CON_USER_TITLE   71
-#define CON_GENOME       72
-#define CON_COPYOVER     73
-#define CON_LOGIN        74
-#define CON_QUITGAME     75
+#define CON_HEIGHT       62
+#define CON_WEIGHT       63
+#define CON_AURA         64
+#define CON_BONUS        65
+#define CON_NEGATIVE     66
+#define CON_NEWSEDIT     67
+#define CON_RACIAL       68
+#define CON_POBJ         69
+#define CON_ALIGN        70
+#define CON_SKILLS       71
+#define CON_USER_TITLE   72
+#define CON_GENOME       73
+#define CON_COPYOVER     74
+#define CON_LOGIN        75
+#define CON_QUITGAME     76
 
-#define NUM_CON_TYPES 76
+#define NUM_CON_TYPES 77
 
 /* Colors that the player can define */
 #define COLOR_NORMAL            0
