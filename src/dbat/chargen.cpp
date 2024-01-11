@@ -1133,12 +1133,13 @@ namespace net {
                 break;
 
             case CON_HEIGHT: {
-                int height;
-                if (IS_TRUFFLE(ch) && (arg[0] <= 20 || arg [0] > 150)) {
+                int height = atoi(arg.c_str());
+
+                if (IS_TRUFFLE(ch) && (height <= 20 || height >= 150)) {
                     sendText("That is not an option. For Tuffles, please keep height above 20cm, and below 150cm.\r\n");
                     return;
                 }
-                else if (arg[0] <= 80 || arg[0] > 300) {
+                else if (height <= 80 || height >= 300) {
                     sendText("That is not an option. Please keep height above 80cm, and below 300cm.\r\n");
                     return;
                 }
@@ -1160,12 +1161,13 @@ namespace net {
                 break;
 
             case CON_WEIGHT: {
-                int weight;
-                if (IS_TRUFFLE(ch) && (arg[0] <= 3 || arg[0] >= 40)) {
+                int weight = atoi(arg.c_str());
+
+                if (IS_TRUFFLE(ch) && (weight <= 3 || weight >= 40)) {
                     sendText("That is not an option. For Tuffles, please keep height above 3kg, and below 40kg.\r\n");
                     return;
                 }
-                else if (arg[0] <= 25 || arg[0] >= 150) {
+                else if (weight <= 25 || weight >= 150) {
                     sendText("That is not an option. Please keep height above 25kg, and below 150kg.\r\n");
                     return;
                 }
