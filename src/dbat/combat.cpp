@@ -3725,19 +3725,19 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
     if (chance >= rand_number(60, 75)) {
         int64_t num = 0, maxnum = 500000;
         if (GET_LEVEL(ch) >= 70) {
-            num += GET_LEVEL(ch) * 5000;
+            num += GET_LEVEL(ch) * 2250;
         } else if (GET_LEVEL(ch) >= 60) {
-            num += GET_LEVEL(ch) * 3750;
+            num += GET_LEVEL(ch) * 2000;
         } else if (GET_LEVEL(ch) >= 50) {
-            num += GET_LEVEL(ch) * 3000;
-        } else if (GET_LEVEL(ch) >= 45) {
-            num += GET_LEVEL(ch) * 2500;
-        } else if (GET_LEVEL(ch) >= 40) {
             num += GET_LEVEL(ch) * 1750;
-        } else if (GET_LEVEL(ch) >= 35) {
+        } else if (GET_LEVEL(ch) >= 45) {
+            num += GET_LEVEL(ch) * 1500;
+        } else if (GET_LEVEL(ch) >= 40) {
             num += GET_LEVEL(ch) * 1250;
-        } else if (GET_LEVEL(ch) >= 30) {
+        } else if (GET_LEVEL(ch) >= 35) {
             num += GET_LEVEL(ch) * 1000;
+        } else if (GET_LEVEL(ch) >= 30) {
+            num += GET_LEVEL(ch) * 750;
         } else if (GET_LEVEL(ch) >= 25) {
             num += GET_LEVEL(ch) * 550;
         } else if (GET_LEVEL(ch) >= 20) {
@@ -3760,12 +3760,13 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
 		//Check if victim is NPC or Player, both have different logic here.
         if (vict != nullptr && IS_NPC(vict)) {
 			//Work out how challenging of an npc to fight this is, if the victim is stronger we want to give more xp. This doesn't affect attributes.
-			float plRatio = GET_MAX_HIT(vict) / GET_MAX_HIT(ch);
-            float plGain;
+			float plRatio = vict->getMaxPLTrans() / ch->getMaxPLTrans();
+            float plGain = 1;
 
             //The lowest you can get from a fight is 0.5 times the xp, so long as they aren't 5x weaker than you
             if (plRatio > 0.2) {
                 plGain = 0.5 + plRatio / 2;
+                if (plGain > 3) plGain = 3;
             }
             else {
                 send_to_char(ch, "This foe is not strong enough for you to learn anything.\r\n");
@@ -3775,7 +3776,10 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
 			//Rewarded if your opponent is fighting for the kill
 			float deadlyBonus = isLethal ? 1.2 : 1;
 
-            gaincalc = num * plGain * deadlyBonus;
+            //Average out the bonus to limit the exponential gain
+            gaincalc = (plGain + gear_exp(ch, 1)) / 2;
+
+            gaincalc = num * gaincalc * deadlyBonus;
             type = 3;
         } else if (vict != nullptr && !IS_NPC(vict)) {
 			//Fighting against players has randomised gains. Does not get a bonus for higher power level in spars
@@ -3784,6 +3788,7 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
 			float deadlyBonus = isLethal ? 2 : 1;
 
             gaincalc = large_rand(num * deadlyBonus, 1.4 * num * deadlyBonus);
+            gaincalc = gear_exp(ch, gaincalc);
             if (GET_LEVEL(ch) > GET_LEVEL(vict))
                 difference = GET_LEVEL(ch) - GET_LEVEL(vict);
             else if (GET_LEVEL(ch) < GET_LEVEL(vict))
@@ -3837,8 +3842,7 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
                 gaincalc *= 1.25;
             }
         }
-		//Multiply by the weight ratio
-        gain = gear_exp(ch, gaincalc);
+        gain = gain * Random::get<double>(0.8, 1.2);
         gain = gain * bonus;
 		//Gain the xp
         gain_exp(ch, gain);
