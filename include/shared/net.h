@@ -16,7 +16,7 @@ namespace net {
     struct GameMessage {
         GameMessage() = default;
         explicit GameMessage(const nlohmann::json& j);
-        GameMessageType type;
+        GameMessageType type{GameMessageType::Connect};
         nlohmann::json data;
         [[nodiscard]] nlohmann::json serialize() const;
     };

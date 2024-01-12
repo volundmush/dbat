@@ -81,6 +81,18 @@ namespace portal::telnet {
 
         awaitable<void> runGameLink();
         awaitable<void> runWebSocket(WsStream ws);
+        awaitable<void> wsRunReader(WsStream &ws);
+        awaitable<void> wsRunWriter(WsStream &ws);
+        awaitable<void> wsRunPinger(WsStream &ws);
+        awaitable<void> wsHandleText(const std::string& msg);
+        awaitable<void> wsHandleBinary(const beast::flat_buffer &buf);
+        awaitable<void> wsHandleMessage(const ::net::GameMessage &msg);
+
+        awaitable<void> wsHandleCommand(const ::net::GameMessage &msg);
+        awaitable<void> wsHandleGMCP(const ::net::GameMessage &msg);
+        awaitable<void> wsHandleGMCPCommand(const std::string& cmd, const nlohmann::json& data);
+        awaitable<void> wsHandleMSSP(const ::net::GameMessage &msg);
+        awaitable<void> wsHandleDisconnect(const ::net::GameMessage &msg);
 
         awaitable<void> handleApplicationData(const std::vector<uint8_t> &bytes);
         awaitable<void> handleCommand(uint8_t command);

@@ -110,8 +110,194 @@ namespace portal::telnet {
 
     }
 
-    awaitable<void> TelnetConnection::runWebSocket(WsStream ws) {
+    awaitable<void> TelnetConnection::wsRunPinger(WsStream& ws) {
+        // Gimme a 100ms steady timer...
+        auto ex = co_await this_coro::executor;
+        boost::asio::steady_timer timer(ex, std::chrono::milliseconds(100));
 
+        // Now, every 100ms, send an async_ping.
+        if(ws.index()) {
+            auto &wss = std::get<1>(ws);
+            while(true) {
+                co_await timer.async_wait(use_awaitable);
+                if(wss.is_open()) {
+                    co_await wss.async_ping({}, use_awaitable);
+                }
+                timer.expires_after(std::chrono::milliseconds(100));
+            }
+        } else {
+            auto &w = std::get<0>(ws);
+            co_await timer.async_wait(use_awaitable);
+            if(w.is_open()) {
+                co_await w.async_ping({}, use_awaitable);
+            }
+            timer.expires_after(std::chrono::milliseconds(100));
+        }
+
+        co_return;
+    }
+
+    awaitable<void> TelnetConnection::wsHandleBinary(const beast::flat_buffer& buf) {
+
+        co_return;
+    }
+
+    awaitable<void> TelnetConnection::wsHandleText(const std::string& msg) {
+
+        // every message SHOULD be parseable as json...
+        try {
+            auto j = nlohmann::json::parse(msg);
+            if(j.contains("type")) {
+                // this is a ::net::GameMessage.
+                auto gmsg = ::net::GameMessage(j);
+                co_await wsHandleMessage(gmsg);
+            }
+        }
+        catch(...) {
+
+        }
+
+
+        co_return;
+    }
+
+    awaitable<void> TelnetConnection::wsHandleCommand(const ::net::GameMessage& msg) {
+        auto text = msg.data.get<std::string>();
+        if(!text.empty()) {
+            // encode the text into a std::vector<uint8_t> bytes, and send it as appdata.
+            const std::vector<uint8_t> bytes(text.begin(), text.end());
+            sendAppData(bytes);
+        }
+
+        co_return;
+    }
+
+    awaitable<void> TelnetConnection::wsHandleGMCPCommand(const std::string& cmd, const nlohmann::json& data) {
+
+        co_return;
+    }
+
+
+    awaitable<void> TelnetConnection::wsHandleGMCP(const ::net::GameMessage& msg) {
+        // For GMCP, msg.data is an array of strings. The first element is the GMCP command (which contains no spaces,
+        // and is separated by packages via dots. like Core.Auth). The second element, if present, is the data, which
+        // is a JSON object.
+
+        if(msg.data.size() == 0) {
+            // this is an error.
+            co_return;
+        }
+
+        auto cmd = msg.data[0].get<std::string>();
+        auto j = (msg.data.size() > 1) ? msg.data[0] : nlohmann::json();
+
+        co_await wsHandleGMCPCommand(cmd, j);
+
+        co_return;
+    }
+
+    awaitable<void> TelnetConnection::wsHandleMSSP(const ::net::GameMessage& msg) {
+
+        co_return;
+    }
+
+    awaitable<void> TelnetConnection::wsHandleDisconnect(const ::net::GameMessage& msg) {
+
+        co_return;
+    }
+
+
+    awaitable<void> TelnetConnection::wsHandleMessage(const ::net::GameMessage& msg) {
+
+        switch(msg.type) {
+            case ::net::GameMessageType::Command:
+                // on the portal-side, Command represents ANSI text that should be output to the client directly.
+                    break;
+            case ::net::GameMessageType::GMCP:
+                // special data that should be handled by the portal and/or sent to the client depending on what it is.
+                    break;
+            case ::net::GameMessageType::MSSP:
+                // This is Mud Server Status Protocol data that should be sent out over IAC subnegotiation if the client supports it.
+                    break;
+            case ::net::GameMessageType::Disconnect:
+                // the server has indicated that the client has been disconnected. kill the portal-side connection.
+                    break;
+            default:
+                // Other types are not supported. Connect, Update, and Timeout have no meaning on the portal side.
+                    break;
+        }
+
+        co_return;
+    }
+
+
+    awaitable<void> TelnetConnection::wsRunReader(WsStream& ws) {
+        boost::beast::flat_buffer buf;
+
+        if(ws.index()) {
+            auto &wss = std::get<1>(ws);
+            while(true) {
+                auto results = co_await wss.async_read(buf, use_awaitable);
+                if(wss.got_text()) {
+                    auto buf_to_string = boost::beast::buffers_to_string(buf.data());
+                    co_await wsHandleText(buf_to_string);
+                } else if(wss.got_binary()) {
+                    co_await wsHandleBinary(buf);
+                }
+                buf.clear();
+            }
+
+        } else {
+            auto &w = std::get<0>(ws);
+            while(true) {
+                auto results = co_await w.async_read(buf, use_awaitable);
+                if(w.got_text()) {
+                    auto buf_to_string = boost::beast::buffers_to_string(buf.data());
+                    co_await wsHandleText(buf_to_string);
+                } else if(w.got_binary()) {
+                    co_await wsHandleBinary(buf);
+                }
+                buf.clear();
+            }
+        }
+
+        co_return;
+    }
+
+    awaitable<void> TelnetConnection::wsRunWriter(WsStream& ws) {
+        if(ws.index()) {
+            auto &wss = std::get<1>(ws);
+            while(true) {
+                auto message = co_await toGame.async_receive(use_awaitable);
+
+                auto serialized = message.serialize();
+                auto dumped = serialized.dump(4, ' ', false, nlohmann::json::error_handler_t::ignore);
+                co_await wss.async_write(boost::asio::buffer(dumped), use_awaitable);
+            }
+
+        } else {
+            auto &w = std::get<0>(ws);
+
+            while(true) {
+                auto message = co_await toGame.async_receive(use_awaitable);
+                auto serialized = message.serialize();
+                auto dumped = serialized.dump(4, ' ', false, nlohmann::json::error_handler_t::ignore);
+                co_await w.async_write(boost::asio::buffer(dumped), use_awaitable);
+            }
+        }
+        co_return;
+    }
+
+
+    awaitable<void> TelnetConnection::runWebSocket(WsStream ws) {
+        try {
+            co_await (wsRunPinger(ws) || wsRunReader(ws) || wsRunWriter(ws));
+        }
+        catch(...) {
+            // handle this here...
+        }
+
+        co_return;
     }
 
 

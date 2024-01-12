@@ -118,10 +118,11 @@ int64_t unit_data::getInventoryCount() {
 
 struct obj_data* unit_data::findObject(const std::function<bool(struct obj_data*)> &func, bool working) {
     for(auto obj = contents; obj; obj = obj->next_content) {
-        if(working && !obj->isWorking()) continue;
-        if(func(obj)) return obj;
-        auto p = obj->findObject(func, working);
-        if(p) return p;
+        if(func(obj)) {
+            if(working && !obj->isWorking()) continue;
+            return obj;
+        }
+        if(auto p = obj->findObject(func, working); p) return p;
     }
     return nullptr;
 }
@@ -133,8 +134,10 @@ struct obj_data* unit_data::findObjectVnum(obj_vnum objVnum, bool working) {
 std::set<struct obj_data*> unit_data::gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working) {
     std::set<struct obj_data*> out;
     for(auto obj = contents; obj; obj = obj->next_content) {
-        if(working && !obj->isWorking()) continue;
-        if(func(obj)) out.insert(obj);
+        if(func(obj)) {
+            if(working && !obj->isWorking()) continue;
+            out.insert(obj);
+        }
         auto contents = obj->gatherObjects(func, working);
         out.insert(contents.begin(), contents.end());
     }
