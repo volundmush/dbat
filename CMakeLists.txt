@@ -82,6 +82,8 @@ set(CIRCLE_LINK_LIBRARIES
 
 set(PORTAL_LINK_LIBRARIES
         fmt::fmt ${Boost_LIBRARIES}
+        ssl
+        crypto
 )
 
 add_library(shared_lib ${SHARED_INCLUDE} ${SHARED_SRC})
@@ -98,9 +100,9 @@ add_executable(circle apps/circle.cpp)
 target_link_libraries(circle circlemud shared_lib ${CIRCLE_LINK_LIBRARIES})
 target_include_directories(circle PUBLIC ${CIRCLE_INCLUDE_DIRS})
 
-add_executable(analyze apps/analyze.cpp)
-target_link_libraries(analyze circlemud shared_lib ${CIRCLE_LINK_LIBRARIES})
-target_include_directories(analyze PUBLIC ${CIRCLE_INCLUDE_DIRS})
+#add_executable(analyze apps/analyze.cpp)
+#target_link_libraries(analyze circlemud shared_lib ${CIRCLE_LINK_LIBRARIES})
+#target_include_directories(analyze PUBLIC ${CIRCLE_INCLUDE_DIRS})
 
 add_executable(migrate apps/migrate.cpp)
 target_link_libraries(migrate circlemud shared_lib ${CIRCLE_LINK_LIBRARIES})
