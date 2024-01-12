@@ -1,8 +1,6 @@
 FROM ubuntu:22.04
 
 ARG BOOST_VERSION=1.84.0
-ARG CMAKE_VERSION=3.28.1
-ARG NUM_JOBS_ARG
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -19,6 +17,7 @@ RUN apt-get update && \
         libssl-dev \
         libbsd-dev \
         libsqlite3-dev \
+        cmake \
         wget \
         git \
         curl \
@@ -36,17 +35,6 @@ RUN apt-get update && \
 ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
-
-# Install CMake
-RUN NUM_JOBS=${NUM_JOBS_ARG:-$(nproc)} && \
-    cd /tmp && \
-    wget https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}.tar.gz && \
-    tar xzf cmake-${CMAKE_VERSION}.tar.gz && \
-    cd cmake-${CMAKE_VERSION} && \
-    ./bootstrap && \
-    make -j${NUM_JOBS} && \
-    make install && \
-    rm -rf /tmp/*
 
 # Install Boost
 # https://www.boost.org/doc/libs/${BOOST_VERSION}/more/getting_started/unix-variants.html

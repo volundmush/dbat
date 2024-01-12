@@ -44,6 +44,7 @@
 #include <iostream>
 #include <mutex>
 #include <bitset>
+#include <variant>
 
 // non-standard libraries
 #include "fmt/core.h"
@@ -198,5 +199,5 @@ std::list<T*> get_vnum_list(const VnumIndex<T>& index, vnum vn) {
     return {};
 }
 
-using StatValue = std::variant<int64_t, double, std::string>;
+
 using UID = std::variant<struct room_data*, struct obj_data*, struct char_data*>;
