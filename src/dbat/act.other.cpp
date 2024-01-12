@@ -146,15 +146,12 @@ void bring_to_cap(struct char_data *ch) {
     auto p_trans = (ch->race->raceCanTransform() && !ch->race->raceCanRevert());
     auto cap = ch->calc_soft_cap();
 
-    switch (ch->race->getSoftType(ch)) {
-        case race::Fixed:
-            if (ch->getBasePL() < cap)
-                ch->gainBasePL(cap - ch->getBasePL() - 1, p_trans);
-            if (ch->getBaseKI() < cap)
-                ch->gainBaseKI(cap - ch->getBaseKI() - 1, p_trans);
-            if (ch->getBaseST() < cap)
-                ch->gainBaseST(cap - ch->getBaseST() - 1, p_trans);
-    }
+    if (ch->getBasePL() < cap)
+        ch->gainBasePL(cap - ch->getBasePL() - 1, p_trans);
+    if (ch->getBaseKI() < cap)
+        ch->gainBaseKI(cap - ch->getBaseKI() - 1, p_trans);
+    if (ch->getBaseST() < cap)
+        ch->gainBaseST(cap - ch->getBaseST() - 1, p_trans);
 }
 
 /* Let's Reward Those Roleplayers! - Iovan*/
@@ -7555,7 +7552,7 @@ ACMD(do_transform) {
 
     // Announce noisy transformations in the zone.
     int zone = 0;
-    if (ch->race->raceHasNoisyTransformations()) {
+    if (ch->race->raceCanBeSensed()) {
         if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
             send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
         };

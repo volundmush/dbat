@@ -421,6 +421,7 @@ void do_start(struct char_data *ch) {
     if (GET_RACE(ch) == RACE_ICER || GET_RACE(ch) == RACE_BIO) {
         ch->playerFlags.set(PLR_TAIL);
     }
+
     if (GET_RACE(ch) == RACE_MAJIN) {
         GET_ABSORBS(ch) = 0;
         GET_INGESTLEARNED(ch) = 0;
@@ -1887,20 +1888,20 @@ namespace sensei {
         return style;
     }
 
-    bool Sensei::senseiAvailableForRace(race::race_id r_id) const {
+    bool Sensei::senseiAvailableForRace(race::RaceID r_id) const {
         switch (s_id) {
             case sixteen:
-                return r_id == race::android;
+                return r_id == race::Android;
             case dabura:
-                return r_id == race::demon;
+                return r_id == race::Demon;
             case tsuna:
-                return r_id == race::kanassan;
+                return r_id == race::Kanassan;
             case kurzak:
-                return r_id == race::arlian;
+                return r_id == race::Arlian;
             case jinto:
-                return r_id == race::hoshijin;
+                return r_id == race::Hoshijin;
             default:
-                return r_id != race::android;
+                return r_id != race::Android;
         }
     }
 
@@ -1992,10 +1993,10 @@ namespace sensei {
         }
     }
 
-    int Sensei::getRPPCost(race::race_id rid) const {
+    int Sensei::getRPPCost(race::RaceID rid) const {
         switch (s_id) {
             case kibito:
-                if (rid != race::kai) {
+                if (rid != race::Kai) {
                     return 10;
                 } else {
                     return 0;

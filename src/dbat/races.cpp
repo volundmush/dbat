@@ -68,74 +68,6 @@ const char *race_display[NUM_RACES] = {
         "@B24@W) @MSpirit\r\n",
 };
 
-/* Taken from the SRD under OGL, see ../doc/srd.txt for information */
-int racial_ability_mods[][6] = {
-/*                      Str,Con,Int,Wis,Dex,Cha */
-/* RACE_HUMAN       */ {0,  0,  0,  0,  0,  0},
-/* RACE_SAIYAN      */
-                       {0,  -2, 0,  0,  2,  0},
-/* RACE_ICER        */
-                       {-2, 2,  0,  0,  0,  0},
-/* RACE_KONATSU     */
-                       {0,  2,  0,  0,  0,  -2},
-/* RACE_NAMEK       */
-                       {0,  0,  0,  0,  0,  0},
-/* RACE_MUTANT      */
-                       {-2, 0,  0,  0,  2,  0},
-/* RACE_KANASSAN    */
-                       {0,  -2, 2,  0,  2,  2},
-/* RACE_HALFBREED   */
-                       {2,  0,  -2, 0,  0,  -2},
-/* RACE_BIO         */
-                       {0,  0,  0,  0,  0,  0},
-/* RACE_ANDROID     */
-                       {0,  0,  0,  0,  0,  0},
-/* RACE_DEMON       */
-                       {0,  0,  0,  0,  0,  0},
-/* RACE_MAJIN       */
-                       {0,  0,  0,  0,  0,  0},
-/* RACE_KAI         */
-                       {0,  0,  0,  0,  0,  0},
-/* RACE_TRUFFLE     */
-                       {14, 8,  -4, 0,  -2, -4},
-/* RACE_GOBLIN      */
-                       {-2, 0,  0,  0,  2,  -2},
-/* RACE_ANIMAL      */
-                       {0,  0,  0,  0,  0,  0},
-/* RACE_ORC         */
-                       {4,  0,  -2, -2, 0,  -2},
-/* RACE_SNAKE       */
-                       {0,  0,  0,  0,  0,  0},
-/* RACE_TROLL       */
-                       {12, 12, -4, -2, 4,  -4},
-/* RACE_MINOTAUR    */
-                       {8,  4,  -4, 0,  0,  -2},
-/* RACE_KOBOLD      */
-                       {-4, -2, 0,  0,  2,  0},
-/* RACE_LIZARDFOLK  */
-                       {0,  0,  0,  0,  0,  0},
-/* RACE_WARHOST     */
-                       {0,  0,  0,  0,  0,  0},
-/* RACE_FAERIE      */
-                       {0,  0,  0,  0,  0,  0},
-                       {0,  0,  0,  0,  0}
-};
-
-void racial_ability_modifiers(struct char_data *ch) {
-    int chrace = 0;
-    if (GET_RACE(ch) >= NUM_RACES || GET_RACE(ch) < 0) {
-        basic_mud_log("SYSERR: Unknown race %d in racial_ability_modifiers", GET_RACE(ch));
-    } else {
-        chrace = GET_RACE(ch);
-    }
-
-    /*ch->real_abils.str += racial_ability_mods[chrace][0];
-    ch->real_abils.con += racial_ability_mods[chrace][1];
-    ch->real_abils.intel += racial_ability_mods[chrace][2];
-    ch->real_abils.wis += racial_ability_mods[chrace][3];
-    ch->real_abils.dex += racial_ability_mods[chrace][4];*/
-}
-
 
 /* Converted into metric units: cm and kg; SRD has english units. */
 struct {
@@ -206,10 +138,6 @@ void set_height_and_weight_by_race(struct char_data *ch) {
     if (sex < SEX_NEUTRAL || sex >= NUM_SEX) {
         basic_mud_log("Invalid gender in set_height_and_weight_by_race: %d", sex);
         sex = SEX_NEUTRAL;
-    }
-    if (race <= RACE_UNDEFINED || race >= NUM_RACES) {
-        basic_mud_log("Invalid gender in set_height_and_weight_by_race: %d", GET_SEX(ch));
-        race = RACE_UNDEFINED + 1; /* first defined race */
     }
 
     mod = dice(2, hw_info[race].heightdie);
@@ -360,7 +288,7 @@ namespace race {
     transform_bonus base_form = {0, 1, 0, 0};
     transform_bonus oozaru = {.bonus = 10000, .mult=2, .drain=0, .flag=PLR_OOZARU};
 
-    Race::Race(race_id rid, const std::string &name, std::string abbr, int size, bool pc) {
+    Race::Race(RaceID rid, const std::string &name, std::string abbr, int size, bool pc) {
         this->r_id = rid;
         this->name = name;
         this->lower_name = name;
@@ -372,7 +300,7 @@ namespace race {
         race_size = size;
     }
 
-    race_id Race::getID() const {
+    RaceID Race::getID() const {
         return r_id;
     }
 
@@ -402,7 +330,7 @@ namespace race {
 
     bool Race::isValidSex(int sex_id) const {
         switch (r_id) {
-            case namekian:
+            case Namekian:
                 return sex_id == SEX_NEUTRAL;
             default:
                 return true;
@@ -411,13 +339,13 @@ namespace race {
 
     bool Race::raceCanBeMimiced() const {
         switch (r_id) {
-            case icer:
-            case namekian:
-            case bio:
-            case demon:
-            case majin:
-            case hoshijin:
-            case arlian:
+            case Icer:
+            case Namekian:
+            case BioAndroid:
+            case Demon:
+            case Majin:
+            case Hoshijin:
+            case Arlian:
                 return false;
             default:
                 return isPcOk();
@@ -426,13 +354,13 @@ namespace race {
 
     int Race::getRPPCost() const {
         switch (r_id) {
-            case saiyan:
+            case Saiyan:
                 return 60;
-            case bio:
+            case BioAndroid:
                 return 35;
-            case majin:
+            case Majin:
                 return 55;
-            case hoshijin:
+            case Hoshijin:
                 return 14;
             default:
                 return 0;
@@ -441,18 +369,18 @@ namespace race {
 
     bool Race::raceCanTransform() const {
         switch (r_id) {
-            case human:
-            case kai:
-            case truffle:
-            case konatsu:
-            case mutant:
-            case icer:
-            case halfbreed:
-            case namekian:
-            case saiyan:
-            case bio:
-            case majin:
-            case android:
+            case Human:
+            case Kai:
+            case Tuffle:
+            case Konatsu:
+            case Mutant:
+            case Icer:
+            case Halfbreed:
+            case Namekian:
+            case Saiyan:
+            case BioAndroid:
+            case Majin:
+            case Android:
                 return true;
             default:
                 return false;
@@ -465,10 +393,10 @@ namespace race {
             return false;
         }
         switch (r_id) {
-            case majin:
-            case android:
-            case bio:
-            case truffle:
+            case Majin:
+            case Android:
+            case BioAndroid:
+            case Tuffle:
                 return false;
             default:
                 return true;
@@ -494,25 +422,25 @@ namespace race {
 
     int Race::getMaxTransformTier(char_data *ch) const {
         switch (r_id) {
-            case saiyan:
+            case Saiyan:
                 if (PLR_FLAGGED(ch, PLR_LSSJ)) {
                     return 2;
                 } else {
                     return 4;
                 }
-            case human:
-            case icer:
-            case namekian:
-            case bio:
+            case Human:
+            case Icer:
+            case Namekian:
+            case BioAndroid:
                 return 4;
-            case truffle:
-            case mutant:
-            case halfbreed:
-            case majin:
-            case kai:
-            case konatsu:
+            case Tuffle:
+            case Mutant:
+            case Halfbreed:
+            case Majin:
+            case Kai:
+            case Konatsu:
                 return 3;
-            case android:
+            case Android:
                 return 6;
             default:
                 return 0;
@@ -649,37 +577,37 @@ namespace race {
 
     const std::map<int, transform_bonus> &Race::getTransMap(const char_data *ch) const {
         switch (r_id) {
-            case android:
+            case Android:
                 if (ch->playerFlags.test(PLR_SENSEM)) {
                     return android_trans_bonus_sense;
                 } else {
                     return android_trans_bonus;
                 }
-            case saiyan:
+            case Saiyan:
                 if (ch->playerFlags.test(PLR_LSSJ)) {
                     return saiyan_trans_bonus_legendary;
                 } else {
                     return saiyan_trans_bonus;
                 }
-            case human:
+            case Human:
                 return human_trans_bonus;
-            case namekian:
+            case Namekian:
                 return namekian_trans_bonus;
-            case icer:
+            case Icer:
                 return icer_trans_bonus;
-            case konatsu:
+            case Konatsu:
                 return konatsu_trans_bonus;
-            case mutant:
+            case Mutant:
                 return mutant_trans_bonus;
-            case halfbreed:
+            case Halfbreed:
                 return halfbreed_trans_bonus;
-            case bio:
+            case BioAndroid:
                 return bio_trans_bonus;
-            case majin:
+            case Majin:
                 return majin_trans_bonus;
-            case kai:
+            case Kai:
                 return kai_trans_bonus;
-            case truffle:
+            case Tuffle:
                 return truffle_trans_bonus;
             default:
                 return no_trans_bonus;
@@ -689,11 +617,11 @@ namespace race {
 
     const std::unordered_map<std::string, int> &Race::getTierMap(char_data *ch) const {
         switch (r_id) {
-            case android:
+            case Android:
                 return android_form_map;
-            case bio:
+            case BioAndroid:
                 return bio_form_map;
-            case majin:
+            case Majin:
                 return majin_form_map;
             default:
                 switch (getMaxTransformTier(ch)) {
@@ -763,16 +691,7 @@ namespace race {
 
     bool Race::raceCanBeSensed() const {
         switch (r_id) {
-            case android:
-                return false;
-            default:
-                return true;
-        }
-    }
-
-    bool Race::raceHasNoisyTransformations() const {
-        switch (r_id) {
-            case android:
+            case Android:
                 return false;
             default:
                 return true;
@@ -806,13 +725,13 @@ namespace race {
     bool Race::checkTransUnlock(char_data *ch, int tier) const {
         // First, check for special requirements which are not 'paid'.
         switch (r_id) {
-            case bio:
+            case BioAndroid:
                 if (tier > 3 - GET_ABSORBS(ch)) {
                     send_to_char(ch, "You need to absorb something to transform!\r\n");
                     return false;
                 }
                 break;
-            case majin:
+            case Majin:
                 switch (tier) {
                     case 2:
                         if (GET_ABSORBS(ch) > 0) {
@@ -830,7 +749,7 @@ namespace race {
 
         // Second, check for RPP requirements.
         switch (r_id) {
-            case android:
+            case Android:
                 switch (tier) {
                     case 1:
                         break; // free for androids. They pay PS instead.
@@ -842,7 +761,7 @@ namespace race {
                         break;
                 }
                 break;
-            case majin:
+            case Majin:
                 switch (tier) {
                     case 1:
                         rpp_cost = 1;
@@ -878,7 +797,7 @@ namespace race {
         // Android upgrades cost PS instead of RPP. But this system has now been standardized so anything can.
         int ps_cost = 0;
         switch (r_id) {
-            case android:
+            case Android:
                 switch (tier) {
                     case 1:
                         ps_cost = 50;
@@ -909,7 +828,7 @@ namespace race {
     void Race::displayForms(char_data *ch) const {
 
         switch (r_id) {
-            case human:
+            case Human:
                 send_to_char(ch, "              @YSuper @CHuman@n\r\n");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 send_to_char(ch, "@YSuper @CHuman @WFirst  @R-@G %s BPL Req\r\n",
@@ -926,7 +845,7 @@ namespace race {
                                                                             : "??????????");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 break;
-            case saiyan:
+            case Saiyan:
                 if (PLR_FLAGGED(ch, PLR_LSSJ)) {
                     send_to_char(ch, "                @YSuper @CSaiyan@n\r\n");
                     send_to_char(ch, "@b-------------------------------------------------@n\r\n");
@@ -955,7 +874,7 @@ namespace race {
                     send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 }
                 break;
-            case icer:
+            case Icer:
                 send_to_char(ch, "              @YTransform@n\r\n");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 send_to_char(ch, "@YTransform @WFirst  @R-@G %s BPL Req\r\n",
@@ -972,7 +891,7 @@ namespace race {
                                                                             : "??????????");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 break;
-            case konatsu:
+            case Konatsu:
                 send_to_char(ch, "              @YShadow@n\r\n");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 send_to_char(ch, "@YShadow @WFirst  @R-@G %s BPL Req\r\n",
@@ -986,7 +905,7 @@ namespace race {
                                                                             : "??????????");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 break;
-            case namekian:
+            case Namekian:
                 send_to_char(ch, "              @YSuper @CNamek@n\r\n");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 send_to_char(ch, "@YSuper @CNamek @WFirst  @R-@G %s BPL Req\r\n",
@@ -1003,7 +922,7 @@ namespace race {
                                                                             : "??????????");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 break;
-            case mutant:
+            case Mutant:
                 send_to_char(ch, "              @YMutate@n\r\n");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 send_to_char(ch, "@YMutate @WFirst  @R-@G %s BPL Req\r\n",
@@ -1017,7 +936,7 @@ namespace race {
                                                                             : "??????????");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 break;
-            case halfbreed:
+            case Halfbreed:
                 send_to_char(ch, "              @YSuper @CSaiyan@n\r\n");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 send_to_char(ch, "@YSuper @CSaiyan @WFirst  @R-@G %s BPL Req\r\n",
@@ -1031,7 +950,7 @@ namespace race {
                                                                             : "??????????");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 break;
-            case bio:
+            case BioAndroid:
                 send_to_char(ch, "              @YPerfection@n\r\n");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 send_to_char(ch, "@YMature        @R-@G %s BPL Req\r\n",
@@ -1048,7 +967,7 @@ namespace race {
                                                                             : "??????????");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 break;
-            case android:
+            case Android:
                 send_to_char(ch, "              @YUpgrade@n\r\n");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 send_to_char(ch, "@Y1.0 @R-@G %s BPL Req\r\n",
@@ -1071,7 +990,7 @@ namespace race {
                                                                             : "??????????");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 break;
-            case majin:
+            case Majin:
                 send_to_char(ch, "              @YMorph@n\r\n");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 send_to_char(ch, "@YMorph @WAffinity @R-@G %s BPL Req\r\n",
@@ -1085,7 +1004,7 @@ namespace race {
                                                                             : "??????????");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 break;
-            case kai:
+            case Kai:
                 send_to_char(ch, "              @YMystic@n\r\n");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 send_to_char(ch, "@YMystic @WFirst     @R-@G %s BPL Req\r\n",
@@ -1099,7 +1018,7 @@ namespace race {
                                                                             : "??????????");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 break;
-            case truffle:
+            case Tuffle:
                 send_to_char(ch, "              @YAscend@n\r\n");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
                 send_to_char(ch, "@YAscend @WFirst  @R-@G %s BPL Req\r\n",
@@ -1136,7 +1055,7 @@ namespace race {
 
     void Race::echoTransform(char_data *ch, int tier) const {
         switch (r_id) {
-            case human:
+            case Human:
                 switch (tier) {
                     case 1:
                         act("@WYou spread your feet out and crouch slightly as a bright white aura bursts around your body. Torrents of white and blue energy burn upwards around your body while your muscles grow and become more defined at the same time. In a sudden rush of power you achieve @CSuper @cHuman @GFirst@W sending surrounding debris high into the sky!",
@@ -1165,7 +1084,7 @@ namespace race {
                     default:
                         return;
                 }
-            case icer:
+            case Icer:
                 switch (tier) {
                     case 1:
                         act("@WYou yell with pain as your body begins to grow and power surges within! Your legs expand outward to triple their previous length. Soon after your arms, chest, and head follow. Your horns grow longer and curve upwards while lastly your tail expands. You are left confidently standing, having completed your @GFirst @cTransformation@W.@n",
@@ -1192,7 +1111,7 @@ namespace race {
                             true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                 }
-            case konatsu:
+            case Konatsu:
                 switch (tier) {
                     case 1:
                         act("@WA dark shadowy aura with flecks of white energy begins to burn around your body! Strength and agility can be felt rising up within as your form becomes blurred and ethereal looking. You smile as you realize your @GFirst @DShadow @BForm@W!@n",
@@ -1213,7 +1132,7 @@ namespace race {
                             true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                 }
-            case namekian:
+            case Namekian:
                 switch (tier) {
                     case 1:
                         act("@WYou crouch down and clench your fists as your muscles begin to bulge! Sweat pours down your body as the ground beneath your feet cracks and warps under the pressure of your rising ki! With a sudden burst that sends debris flying you realize a new plateau in your power, having achieved @CSuper @gNamek @GFirst@W!@n",
@@ -1240,7 +1159,7 @@ namespace race {
                             true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                 }
-            case mutant:
+            case Mutant:
                 switch (tier) {
                     case 1:
                         act("@WYour flesh grows tougher as power surges up from within. Your fingernails grow longer, sharper, and more claw-like. Lastly your muscles double in size as you achieve your @GFirst @mMutation@W!@n",
@@ -1261,8 +1180,8 @@ namespace race {
                             true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                 }
-            case halfbreed:
-            case saiyan:
+            case Halfbreed:
+            case Saiyan:
                 switch (tier) {
                     case 1:
                         act("@WSomething inside your mind snaps as your rage spills over! Lightning begins to strike the ground all around you as you feel torrents of power rushing through every fiber of your being. Your hair suddenly turns golden as your eyes change to the color of emeralds. In a final rush of power a golden aura rushes up around your body! You have become a @CSuper @YSaiyan@W!@n",
@@ -1297,7 +1216,7 @@ namespace race {
                             true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                 }
-            case bio:
+            case BioAndroid:
                 switch (tier) {
                     case 1:
                         act("@gYou bend over as @rpain@g wracks your body! Your limbs begin to grow out, becoming more defined and muscular. As your limbs finish growing outward you feel a painful sensation coming from your back as a long tail with a spike grows out of your back! As the pain subsides you stand up straight and a current of power shatters part of the ground beneath you. You have @rmatured@g beyond your @Gl@ga@Dr@gv@Ga@ge stage!@n",
@@ -1324,7 +1243,7 @@ namespace race {
                             true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                 }
-            case android:
+            case Android:
                 switch (tier) {
                     case 1:
                         act("@WYou stop for a moment as the nano-machines within your body reprogram and restructure you. You are now more powerful and efficient!@n",
@@ -1363,7 +1282,7 @@ namespace race {
                             true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                 }
-            case majin:
+            case Majin:
                 switch (tier) {
                     case 1:
                         act("@WA dark pink aura bursts up around your body as images of good and evil fill your mind! You feel the power within your body growing intensely, reflecting your personal alignment as your body changes!@n",
@@ -1384,7 +1303,7 @@ namespace race {
                             true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                 }
-            case kai:
+            case Kai:
                 switch (tier) {
                     case 1:
                         act("@WThoughts begin to flow through your mind of events throughout your life. The progression leads up to more recent events and finally to this very moment. All of it's significance overwhelms you momentarily and your motivation and drive increase. As your attention is drawn back to your surroundings, you feel as though your thinking, senses, and reflexes have sharpened dramatically.  At the core of your being, a greater depth of power can be felt.@n",
@@ -1405,7 +1324,7 @@ namespace race {
                             true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                 }
-            case truffle:
+            case Tuffle:
                 switch (tier) {
                     case 1:
                         act("@WYour mind accelerates working through the mysteries of the universe while at the same time your body begins to change! Innate nano-technology within your body begins to activate, forming flexible metal plating across parts of your skin!@n",
@@ -1435,7 +1354,7 @@ namespace race {
 
     void Race::echoRevert(char_data *ch, int tier) const {
         switch (r_id) {
-            case human:
+            case Human:
                 switch (tier) {
                     case 1:
                         act("@wYou revert from @CSuper @cHuman @GFirst@w.@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -1455,8 +1374,8 @@ namespace race {
                         return;
                 }
                 break;
-            case saiyan:
-            case halfbreed:
+            case Saiyan:
+            case Halfbreed:
                 switch (tier) {
                     case 4:
                         act("@wYou revert from @CSuper @cSaiyan @GFourth@w.@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -1485,7 +1404,7 @@ namespace race {
                         act("@w$n@w reverts from @CSuper @cSaiyan @GFirst.@n", true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                 }
-            case icer:
+            case Icer:
                 switch (tier) {
                     case 4:
                         act("@wYou revert from @CTransform @GFourth@w.@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -1504,7 +1423,7 @@ namespace race {
                         act("@w$n@w reverts from @CTransform @GFirst.@n", true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                 }
-            case konatsu:
+            case Konatsu:
                 switch (tier) {
                     case 3:
                         act("@wYou revert from @CShadow @GThird@w.@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -1519,7 +1438,7 @@ namespace race {
                         act("@w$n@w reverts from @CShadow @GFirst.@n", true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                 }
-            case namekian:
+            case Namekian:
                 switch (tier) {
                     case 4:
                         act("@wYou revert from @CSuper @cNamek @GFourth@w.@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -1539,7 +1458,7 @@ namespace race {
                         return;
                 }
                 break;
-            case mutant:
+            case Mutant:
                 switch (tier) {
                     case 3:
                         act("@wYou revert from @CMutate @GThird@w.@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -1554,7 +1473,7 @@ namespace race {
                         act("@w$n@w reverts from @CMutate @GFirst.@n", true, ch, nullptr, nullptr, TO_ROOM);
                         return;
                 }
-            case kai:
+            case Kai:
                 switch (tier) {
                     case 3:
                         act("@wYou revert from @CMystic @GThird@w.@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -1574,13 +1493,13 @@ namespace race {
 
     int Race::getRPPRefund() const {
         switch (r_id) {
-            case majin:
+            case Majin:
                 return 35;
-            case hoshijin:
+            case Hoshijin:
                 return 15;
-            case saiyan:
+            case Saiyan:
                 return 40;
-            case bio:
+            case BioAndroid:
                 return 20;
             default:
                 return 0;
@@ -1589,10 +1508,10 @@ namespace race {
 
     bool Race::raceIsPeople() const {
         switch (r_id) {
-            case animal:
-            case saiba:
-            case mechanical:
-            case spirit:
+            case Animal:
+            case Saiba:
+            case Mechanical:
+            case Spirit:
                 return false;
             default:
                 return true;
@@ -1601,10 +1520,10 @@ namespace race {
 
     bool Race::raceHasTail() const {
         switch (r_id) {
-            case icer:
-            case bio:
-            case saiyan:
-            case halfbreed:
+            case Icer:
+            case BioAndroid:
+            case Saiyan:
+            case Halfbreed:
                 return true;
             default:
                 return false;
@@ -1615,11 +1534,11 @@ namespace race {
         if (!raceHasTail())
             return false;
         switch (r_id) {
-            case icer:
-            case bio:
+            case Icer:
+            case BioAndroid:
                 return PLR_FLAGGED(ch, PLR_TAIL);
-            case saiyan:
-            case halfbreed:
+            case Saiyan:
+            case Halfbreed:
                 return PLR_FLAGGED(ch, PLR_STAIL);
             default:
                 return false;
@@ -1629,14 +1548,14 @@ namespace race {
     void Race::loseTail(char_data *ch) const {
         if (!hasTail(ch)) return;
         switch (r_id) {
-            case icer:
-            case bio:
+            case Icer:
+            case BioAndroid:
                 ch->playerFlags.reset(PLR_TAIL);
                 remove_limb(ch, 6);
                 GET_TGROWTH(ch) = 0;
                 break;
-            case saiyan:
-            case halfbreed:
+            case Saiyan:
+            case Halfbreed:
                 ch->playerFlags.reset(PLR_STAIL);
                 remove_limb(ch, 5);
                 if (PLR_FLAGGED(ch, PLR_OOZARU)) {
@@ -1650,12 +1569,12 @@ namespace race {
     void Race::gainTail(char_data *ch, bool announce) const {
         if (hasTail(ch)) return;
         switch (r_id) {
-            case icer:
-            case bio:
+            case Icer:
+            case BioAndroid:
                 ch->playerFlags.set(PLR_TAIL);
                 break;
-            case saiyan:
-            case halfbreed:
+            case Saiyan:
+            case Halfbreed:
                 ch->playerFlags.set(PLR_STAIL);
                 if (MOON_OK(ch)) {
                     oozaru_transform(ch);
@@ -1664,19 +1583,8 @@ namespace race {
         }
     }
 
-    static std::map<int, int64_t> soft_cap_variable = {
-            {0, 1500},
-            {1, 4500},
-            {2, 15000},
-            {3, 45000},
-            {4, 60000},
-            {5, 240000},
-            {6, 600000},
-            {7, 750000},
-            {8, 2400000},
-            {9, 4500000}
-    };
 
+    // f(x) = 500 x 1.1357^x
     static std::map<int, int64_t> soft_cap_fixed = {
             {0, 500},
             {1, 1500},
@@ -1690,6 +1598,7 @@ namespace race {
             {9, 1500000}
     };
 
+    // f(x) = 500 * 1.1390^x
     static std::map<int, int64_t> soft_cap_demon = {
             {0, 500},
             {1, 1500},
@@ -1705,8 +1614,8 @@ namespace race {
 
     const std::map<int, int64_t> &Race::getSoftMap(const char_data *ch) const {
         switch (r_id) {
-            case demon:
-            case kanassan:
+            case Demon:
+            case Kanassan:
                 return soft_cap_demon;
             default:
                 return soft_cap_fixed;
@@ -1775,33 +1684,251 @@ namespace race {
     void load_races() {
         if (!race_map.empty())
             return;
-        race_map[race_id::human] = new Race(race_id::human, "Human", "Hum", SIZE_MEDIUM, true);
-        race_map[race_id::saiyan] = new Race(race_id::saiyan, "Saiyan", "Sai", SIZE_MEDIUM, true);
-        race_map[race_id::icer] = new Race(race_id::icer, "Icer", "Ice", SIZE_MEDIUM, true);
-        race_map[race_id::konatsu] = new Race(race_id::konatsu, "Konatsu", "kon", SIZE_MEDIUM, true);
-        race_map[race_id::namekian] = new Race(race_id::namekian, "Namekian", "Nam", SIZE_MEDIUM, true);
-        race_map[race_id::mutant] = new Race(race_id::mutant, "Mutant", "Mut", SIZE_MEDIUM, true);
-        race_map[race_id::kanassan] = new Race(race_id::kanassan, "Kanassan", "Kan", SIZE_MEDIUM, true);
-        race_map[race_id::halfbreed] = new Race(race_id::halfbreed, "Halfbreed", "H-B", SIZE_MEDIUM, true);
-        race_map[race_id::bio] = new Race(race_id::bio, "BioAndroid", "Bio", SIZE_MEDIUM, true);
-        race_map[race_id::android] = new Race(race_id::android, "Android", "And", SIZE_MEDIUM, true);
-        race_map[race_id::demon] = new Race(race_id::demon, "Demon", "Dem", SIZE_MEDIUM, true);
-        race_map[race_id::majin] = new Race(race_id::majin, "Majin", "Maj", SIZE_MEDIUM, true);
-        race_map[race_id::kai] = new Race(race_id::kai, "Kai", "Kai", SIZE_MEDIUM, true);
-        race_map[race_id::truffle] = new Race(race_id::truffle, "Truffle", "Tru", SIZE_SMALL, true);
-        race_map[race_id::hoshijin] = new Race(race_id::hoshijin, "Hoshijin", "Hos", SIZE_MEDIUM, true);
-        race_map[race_id::animal] = new Race(race_id::animal, "Animal", "Ict", SIZE_FINE, false);
-        race_map[race_id::saiba] = new Race(race_id::saiba, "Saiba", "Sab", SIZE_LARGE, false);
-        race_map[race_id::serpent] = new Race(race_id::serpent, "Serpent", "Ser", SIZE_MEDIUM, false);
-        race_map[race_id::ogre] = new Race(race_id::ogre, "Ogre", "Ogr", SIZE_LARGE, false);
-        race_map[race_id::yardratian] = new Race(race_id::yardratian, "Yardratian", "Yar", SIZE_MEDIUM, false);
-        race_map[race_id::arlian] = new Race(race_id::arlian, "Arlian", "Arl", SIZE_MEDIUM, true);
-        race_map[race_id::dragon] = new Race(race_id::dragon, "Dragon", "Drg", SIZE_MEDIUM, false);
-        race_map[race_id::mechanical] = new Race(race_id::mechanical, "Mechanical", "Mec", SIZE_MEDIUM, false);
-        race_map[race_id::spirit] = new Race(race_id::spirit, "Spirit", "Spi", SIZE_TINY, false);
+        race_map[RaceID::Human] = new Race(RaceID::Human, "Human", "Hum", SIZE_MEDIUM, true);
+        race_map[RaceID::Saiyan] = new Race(RaceID::Saiyan, "Saiyan", "Sai", SIZE_MEDIUM, true);
+        race_map[RaceID::Icer] = new Race(RaceID::Icer, "Icer", "Ice", SIZE_MEDIUM, true);
+        race_map[RaceID::Konatsu] = new Race(RaceID::Konatsu, "Konatsu", "kon", SIZE_MEDIUM, true);
+        race_map[RaceID::Namekian] = new Race(RaceID::Namekian, "Namekian", "Nam", SIZE_MEDIUM, true);
+        race_map[RaceID::Mutant] = new Race(RaceID::Mutant, "Mutant", "Mut", SIZE_MEDIUM, true);
+        race_map[RaceID::Kanassan] = new Race(RaceID::Kanassan, "Kanassan", "Kan", SIZE_MEDIUM, true);
+        race_map[RaceID::Halfbreed] = new Race(RaceID::Halfbreed, "Halfbreed", "H-B", SIZE_MEDIUM, true);
+        race_map[RaceID::BioAndroid] = new Race(RaceID::BioAndroid, "BioAndroid", "Bio", SIZE_MEDIUM, true);
+        race_map[RaceID::Android] = new Race(RaceID::Android, "Android", "And", SIZE_MEDIUM, true);
+        race_map[RaceID::Demon] = new Race(RaceID::Demon, "Demon", "Dem", SIZE_MEDIUM, true);
+        race_map[RaceID::Majin] = new Race(RaceID::Majin, "Majin", "Maj", SIZE_MEDIUM, true);
+        race_map[RaceID::Kai] = new Race(RaceID::Kai, "Kai", "Kai", SIZE_MEDIUM, true);
+        race_map[RaceID::Tuffle] = new Race(RaceID::Tuffle, "Truffle", "Tru", SIZE_SMALL, true);
+        race_map[RaceID::Hoshijin] = new Race(RaceID::Hoshijin, "Hoshijin", "Hos", SIZE_MEDIUM, true);
+        race_map[RaceID::Animal] = new Race(RaceID::Animal, "Animal", "Ict", SIZE_FINE, false);
+        race_map[RaceID::Saiba] = new Race(RaceID::Saiba, "Saiba", "Sab", SIZE_LARGE, false);
+        race_map[RaceID::Serpent] = new Race(RaceID::Serpent, "Serpent", "Ser", SIZE_MEDIUM, false);
+        race_map[RaceID::Ogre] = new Race(RaceID::Ogre, "Ogre", "Ogr", SIZE_LARGE, false);
+        race_map[RaceID::Yardratian] = new Race(RaceID::Yardratian, "Yardratian", "Yar", SIZE_MEDIUM, false);
+        race_map[RaceID::Arlian] = new Race(RaceID::Arlian, "Arlian", "Arl", SIZE_MEDIUM, true);
+        race_map[RaceID::Dragon] = new Race(RaceID::Dragon, "Dragon", "Drg", SIZE_MEDIUM, false);
+        race_map[RaceID::Mechanical] = new Race(RaceID::Mechanical, "Mechanical", "Mec", SIZE_MEDIUM, false);
+        race_map[RaceID::Spirit] = new Race(RaceID::Spirit, "Spirit", "Spi", SIZE_TINY, false);
 
     }
 
+    static std::unordered_map<RaceID, int> race_sizes = {
+        {RaceID::Tuffle, SIZE_SMALL},
+        {RaceID::Animal, SIZE_FINE},
+        {RaceID::Saiba, SIZE_LARGE},
+        {RaceID::Ogre, SIZE_LARGE},
+        {RaceID::Spirit, SIZE_TINY}
+    };
 
+    int getSize(RaceID id) {
+        if(const auto found = race_sizes.find(id); found != race_sizes.end()) return found->second;
+        return SIZE_MEDIUM;
+    }
+
+    static std::set<RaceID> playable = {RaceID::Human, RaceID::Saiyan, RaceID::Icer, RaceID::Konatsu, RaceID::Namekian,
+    RaceID::Mutant, RaceID::Kanassan, RaceID::Halfbreed, RaceID::BioAndroid, RaceID::Android, RaceID::Demon, RaceID::Majin,
+    RaceID::Kai, RaceID::Tuffle, RaceID::Animal};
+
+    bool isPlayable(RaceID id) {
+        return playable.contains(id);
+    }
+
+    static std::vector<RaceID> all_races = {
+        RaceID::Human, RaceID::Saiyan, RaceID::Icer, RaceID::Konatsu, RaceID::Namekian, RaceID::Mutant,
+        RaceID::Kanassan, RaceID::Halfbreed, RaceID::BioAndroid, RaceID::Android, RaceID::Demon, RaceID::Majin,
+        RaceID::Kai, RaceID::Tuffle, RaceID::Hoshijin, RaceID::Animal, RaceID::Saiba, RaceID::Serpent, RaceID::Ogre,
+        RaceID::Yardratian, RaceID::Arlian, RaceID::Dragon, RaceID::Mechanical, RaceID::Spirit
+    };
+
+    std::vector<RaceID> getAll() {
+        return all_races;
+    }
+
+    std::vector<RaceID> getPlayable() {
+        std::vector<RaceID> out;
+        std::copy_if(all_races.begin(), all_races.end(), out, [&](const auto &r) {
+            return isPlayable(r);
+        });
+        return out;
+    }
+
+    std::set<int> getValidSexes(RaceID id) {
+        switch(id) {
+            case RaceID::Namekian:
+                return {SEX_NEUTRAL};
+            default:
+                return {SEX_NEUTRAL, SEX_MALE, SEX_FEMALE};
+        }
+    }
+
+
+
+    static std::map<RaceID, std::string> race_names = {
+        {RaceID::Human, "Human"},
+        {RaceID::Saiyan, "Saiyan"},
+        {RaceID::Icer, "Icer"},
+        {RaceID::Konatsu, "Konatsu"},
+        {RaceID::Namekian, "Namekian"},
+        {RaceID::Mutant, "Mutant"},
+        {RaceID::Kanassan, "Kanassan"},
+        {RaceID::Halfbreed, "Halfbreed"},
+        {RaceID::BioAndroid, "BioAndroid"},
+        {RaceID::Android, "Android"},
+        {RaceID::Demon, "Demon"},
+        {RaceID::Majin, "Majin"},
+        {RaceID::Kai, "Kai"},
+        {RaceID::Tuffle, "Truffle"},
+        {RaceID::Hoshijin, "Hoshijin"},
+        {RaceID::Animal, "Animal"},
+        {RaceID::Saiba, "Saiba"},
+        {RaceID::Serpent, "Serpent"},
+        {RaceID::Ogre, "Ogre"},
+        {RaceID::Yardratian, "Yardratian"},
+        {RaceID::Arlian, "Arlian"},
+        {RaceID::Dragon, "Dragon"},
+        {RaceID::Mechanical, "Mechanical"},
+        {RaceID::Spirit, "Spirit"}
+    };
+
+    std::string getName(RaceID id) {
+        if(const auto found = race_names.find(id); found != race_names.end()) return found->second;
+        return "Unknown";
+    }
+
+    static std::map<RaceID, std::string> race_abbr = {
+        {RaceID::Human, "Hum"},
+        {RaceID::Saiyan, "Sai"},
+        {RaceID::Icer, "Ice"},
+        {RaceID::Konatsu, "kon"},
+        {RaceID::Namekian, "Nam"},
+        {RaceID::Mutant, "Mut"},
+        {RaceID::Kanassan, "Kan"},
+        {RaceID::Halfbreed, "H-B"},
+        {RaceID::BioAndroid, "Bio"},
+        {RaceID::Android, "And"},
+        {RaceID::Demon, "Dem"},
+        {RaceID::Majin, "Maj"},
+        {RaceID::Kai, "Kai"},
+        {RaceID::Tuffle, "Tru"},
+        {RaceID::Hoshijin, "Hos"},
+        {RaceID::Animal, "Ict"},
+        {RaceID::Saiba, "Sab"},
+        {RaceID::Serpent, "Ser"},
+        {RaceID::Ogre, "Ogr"},
+        {RaceID::Yardratian, "Yar"},
+        {RaceID::Arlian, "Arl"},
+        {RaceID::Dragon, "Drg"},
+        {RaceID::Mechanical, "Mec"},
+        {RaceID::Spirit, "Spi"}
+    };
+
+    std::string getAbbr(RaceID id) {
+        if(const auto found = race_abbr.find(id); found != race_abbr.end()) return found->second;
+        return "N/A";
+    }
+
+    bool isPeople(RaceID id) {
+        switch (id) {
+            case Animal:
+            case Saiba:
+            case Mechanical:
+            case Spirit:
+                return false;
+            default:
+                return true;
+        }
+    }
+
+    bool hasTail(RaceID id) {
+        switch (id) {
+            case Icer:
+            case BioAndroid:
+            case Saiyan:
+            case Halfbreed:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    bool isValidMimic(RaceID id) {
+        switch (id) {
+            case Icer:
+            case Namekian:
+            case BioAndroid:
+            case Demon:
+            case Majin:
+            case Hoshijin:
+            case Arlian:
+                return false;
+            default:
+                return isPlayable(id);
+        }
+    }
+
+    int getRPPCost(RaceID id) {
+        switch (id) {
+            case Saiyan:
+                return 60;
+            case BioAndroid:
+                return 35;
+            case Majin:
+                return 55;
+            case Hoshijin:
+                return 14;
+            default:
+                return 0;
+        }
+    }
+
+    int getRPPRefund(RaceID id) {
+        switch (id) {
+            case Majin:
+                return 35;
+            case Hoshijin:
+                return 15;
+            case Saiyan:
+                return 40;
+            case BioAndroid:
+                return 20;
+            default:
+                return 0;
+        }
+    }
+
+    int64_t getSoftCap(RaceID id, int level) {
+        switch(id) {
+            case Kanassan:
+            case Demon:
+                return 500 * pow(1.1390, level);
+            default:
+                return 500 * pow(1.1357, level);
+        }
+    }
+
+    bool isSenseable(RaceID id) {
+        return id != Android;
+    }
+
+    int getMaxTransformTier(RaceID id) {
+        switch (id) {
+            case Saiyan:
+            case Human:
+            case Icer:
+            case Namekian:
+            case BioAndroid:
+                return 4;
+            case Tuffle:
+            case Mutant:
+            case Halfbreed:
+            case Majin:
+            case Kai:
+            case Konatsu:
+                return 3;
+            case Android:
+                return 6;
+            default:
+                return 0;
+        }
+    }
 
 }

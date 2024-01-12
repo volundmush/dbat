@@ -2040,7 +2040,7 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
     GET_EXP(ch) = 0;
     ch->race = race::find_race_map_id(t[2], race::race_map);
     if (!ch->race) {
-        ch->race = race::race_map[race::human];
+        ch->race = race::race_map[race::Human];
     }
 
     ch->chclass = sensei::find_sensei_map_id(t[3], sensei::sensei_map);

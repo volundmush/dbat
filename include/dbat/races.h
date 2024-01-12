@@ -16,33 +16,6 @@ extern int invalid_race(struct char_data *ch, struct obj_data *obj);
 
 namespace race {
 
-    enum race_id : uint8_t {
-        human = 0,
-        saiyan = 1,
-        icer = 2,
-        konatsu = 3,
-        namekian = 4,
-        mutant = 5,
-        kanassan = 6,
-        halfbreed = 7,
-        bio = 8,
-        android = 9,
-        demon = 10,
-        majin = 11,
-        kai = 12,
-        truffle = 13,
-        hoshijin = 14,
-        animal = 15,
-        saiba = 16,
-        serpent = 17,
-        ogre = 18,
-        yardratian = 19,
-        arlian = 20,
-        dragon = 21,
-        mechanical = 22,
-        spirit = 23
-    };
-
     struct transform_bonus {
         int64_t bonus;
         long double mult, drain;
@@ -54,7 +27,7 @@ namespace race {
 
     class Race;
 
-    typedef std::map<race_id, Race *> RaceMap;
+    typedef std::map<RaceID, Race *> RaceMap;
     extern RaceMap race_map;
 
     enum SoftCapType : uint8_t {
@@ -62,10 +35,25 @@ namespace race {
         Variable = 1
     };
 
+    extern std::string getName(RaceID id);
+    extern std::string getAbbr(RaceID id);
+    extern bool isPlayable(RaceID id);
+    extern std::vector<RaceID> getAll();
+    extern std::vector<RaceID> getPlayable();
+    extern std::set<int> getValidSexes(RaceID id);
+    extern bool isValidMimic(RaceID id);
+    extern bool isPeople(RaceID id);
+    extern bool hasTail(RaceID id);
+    extern int getRPPCost(RaceID id);
+    extern int getRPPRefund(RaceID id);
+    extern int64_t getSoftCap(RaceID id, int level);
+    extern bool isSenseable(RaceID id);
+    extern int getMaxTransformTier(RaceID id);
+
     class Race {
     public:
-        Race(race_id rid, const std::string &name, std::string abbr, int size, bool pc);
-        race_id getID() const;
+        Race(RaceID rid, const std::string &name, std::string abbr, int size, bool pc);
+        RaceID getID() const;
 
         const std::string &getName() const;
 
@@ -93,7 +81,7 @@ namespace race {
 
         bool raceIsPeople() const;
 
-        // limts stuff
+        // limits stuff
 
         bool raceHasTail() const;
 
@@ -135,14 +123,12 @@ namespace race {
 
         void displayForms(char_data *ch) const;
 
-        bool raceHasNoisyTransformations() const;
-
         void echoTransform(char_data *ch, int tier) const;
 
         void echoRevert(char_data *ch, int tier) const;
 
     protected:
-        race_id r_id;
+        RaceID r_id;
         std::string name, lower_name, race_abbr, disg;
         int race_size;
         bool pc_check;

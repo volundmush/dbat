@@ -9,9 +9,9 @@
 #include "dbat/charmenu.h"
 #include "dbat/players.h"
 
-static     const std::map<race::race_id, std::map<CharAttribute, std::pair<int, int>>> startAttrRanges = {
+static     const std::map<race::RaceID, std::map<CharAttribute, std::pair<int, int>>> startAttrRanges = {
         {
-            race::race_id::saiyan, {
+            race::RaceID::Saiyan, {
                 {CharAttribute::Strength, {12, 18}},
                 {CharAttribute::Constitution, {12, 18}},
                 {CharAttribute::Wisdom, {8, 16}},
@@ -21,7 +21,7 @@ static     const std::map<race::race_id, std::map<CharAttribute, std::pair<int, 
             }
         },
         {
-            race::race_id::halfbreed, {
+            race::RaceID::Halfbreed, {
                 {CharAttribute::Strength, {10, 18}},
                 {CharAttribute::Constitution, {10, 18}},
                 {CharAttribute::Wisdom, {8, 18}},
@@ -31,7 +31,7 @@ static     const std::map<race::race_id, std::map<CharAttribute, std::pair<int, 
             }
         },
         {
-            race::race_id::human, {
+            race::RaceID::Human, {
                 {CharAttribute::Strength, {8, 18}},
                 {CharAttribute::Constitution, {8, 18}},
                 {CharAttribute::Wisdom, {10, 18}},
@@ -41,7 +41,7 @@ static     const std::map<race::race_id, std::map<CharAttribute, std::pair<int, 
             }
         },
         {
-            race::race_id::hoshijin, {
+            race::RaceID::Hoshijin, {
                 {CharAttribute::Strength, {10, 18}},
                 {CharAttribute::Constitution, {9, 18}},
                 {CharAttribute::Wisdom, {9, 18}},
@@ -51,7 +51,7 @@ static     const std::map<race::race_id, std::map<CharAttribute, std::pair<int, 
             }
         },
         {
-            race::race_id::namekian, {
+            race::RaceID::Namekian, {
                 {CharAttribute::Strength, {9, 18}},
                 {CharAttribute::Constitution, {9, 18}},
                 {CharAttribute::Wisdom, {12, 18}},
@@ -61,7 +61,7 @@ static     const std::map<race::race_id, std::map<CharAttribute, std::pair<int, 
             }
         },
         {
-            race::race_id::arlian, {
+            race::RaceID::Arlian, {
                 {CharAttribute::Strength, {15, 20}},
                 {CharAttribute::Constitution, {15, 20}},
                 {CharAttribute::Wisdom, {8, 16}},
@@ -71,7 +71,7 @@ static     const std::map<race::race_id, std::map<CharAttribute, std::pair<int, 
             }
         },
         {
-            race::race_id::android, {
+            race::RaceID::Android, {
                 {CharAttribute::Strength, {12, 18}},
                 {CharAttribute::Constitution, {8, 18}},
                 {CharAttribute::Wisdom, {8, 16}},
@@ -81,7 +81,7 @@ static     const std::map<race::race_id, std::map<CharAttribute, std::pair<int, 
             }
         },
         {
-            race::race_id::bio, {
+            race::RaceID::BioAndroid, {
                 {CharAttribute::Strength, {14, 18}},
                 {CharAttribute::Constitution, {8, 18}},
                 {CharAttribute::Wisdom, {8, 18}},
@@ -91,7 +91,7 @@ static     const std::map<race::race_id, std::map<CharAttribute, std::pair<int, 
             }
         },
         {
-            race::race_id::majin, {
+            race::RaceID::Majin, {
                 {CharAttribute::Strength, {11, 18}},
                 {CharAttribute::Constitution, {14, 18}},
                 {CharAttribute::Wisdom, {8, 14}},
@@ -101,7 +101,7 @@ static     const std::map<race::race_id, std::map<CharAttribute, std::pair<int, 
             }
         },
         {
-            race::race_id::truffle, {
+            race::RaceID::Tuffle, {
                 {CharAttribute::Strength, {8, 14}},
                 {CharAttribute::Constitution, {8, 14}},
                 {CharAttribute::Wisdom, {8, 18}},
@@ -111,7 +111,7 @@ static     const std::map<race::race_id, std::map<CharAttribute, std::pair<int, 
             }
         },
         {
-            race::race_id::kai, {
+            race::RaceID::Kai, {
                 {CharAttribute::Strength, {9, 18}},
                 {CharAttribute::Constitution, {8, 18}},
                 {CharAttribute::Wisdom, {14, 18}},
@@ -121,7 +121,7 @@ static     const std::map<race::race_id, std::map<CharAttribute, std::pair<int, 
             }
         },
         {
-            race::race_id::icer, {
+            race::RaceID::Icer, {
                 {CharAttribute::Strength, {10, 18}},
                 {CharAttribute::Constitution, {12, 18}},
                 {CharAttribute::Wisdom, {8, 18}},
@@ -131,7 +131,7 @@ static     const std::map<race::race_id, std::map<CharAttribute, std::pair<int, 
             }
         },
         {
-            race::race_id::mutant, {
+            race::RaceID::Mutant, {
                 {CharAttribute::Strength, {9, 18}},
                 {CharAttribute::Constitution, {9, 18}},
                 {CharAttribute::Wisdom, {9, 18}},
@@ -141,7 +141,7 @@ static     const std::map<race::race_id, std::map<CharAttribute, std::pair<int, 
             }
         },
         {
-            race::race_id::kanassan, {
+            race::RaceID::Kanassan, {
                 {CharAttribute::Strength, {8, 16}},
                 {CharAttribute::Constitution, {8, 16}},
                 {CharAttribute::Wisdom, {12, 18}},
@@ -151,7 +151,7 @@ static     const std::map<race::race_id, std::map<CharAttribute, std::pair<int, 
             }
         },
         {
-            race::race_id::demon, {
+            race::RaceID::Demon, {
                 {CharAttribute::Strength, {11, 18}},
                 {CharAttribute::Constitution, {8, 18}},
                 {CharAttribute::Wisdom, {10, 18}},
@@ -161,7 +161,7 @@ static     const std::map<race::race_id, std::map<CharAttribute, std::pair<int, 
             }
         },
         {
-            race::race_id::konatsu, {
+            race::RaceID::Konatsu, {
                 {CharAttribute::Strength, {10, 14}},
                 {CharAttribute::Constitution, {10, 14}},
                 {CharAttribute::Wisdom, {10, 16}},

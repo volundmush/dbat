@@ -26,26 +26,26 @@ const std::string &char_data::juggleRaceName(bool capitalized) {
     race::Race *apparent = race;
 
     switch (apparent->getID()) {
-        case race::hoshijin:
+        case Hoshijin:
             if (mimic) apparent = mimic;
             break;
-        case race::halfbreed:
-            switch ((int)RACIAL_PREF(this)) {
+        case Halfbreed:
+            switch (RACIAL_PREF(this)) {
                 case 1:
-                    apparent = race::race_map[race::human];
+                    apparent = race::race_map[Human];
                     break;
                 case 2:
-                    apparent = race::race_map[race::saiyan];
+                    apparent = race::race_map[Saiyan];
                     break;
             }
             break;
-        case race::android:
-            switch ((int)RACIAL_PREF(this)) {
+        case Android:
+            switch (RACIAL_PREF(this)) {
                 case 1:
-                    apparent = race::race_map[race::android];
+                    apparent = race::race_map[Android];
                     break;
                 case 2:
-                    apparent = race::race_map[race::human];
+                    apparent = race::race_map[Human];
                     break;
                 case 3:
                     if (capitalized) {
@@ -55,9 +55,9 @@ const std::string &char_data::juggleRaceName(bool capitalized) {
                     }
             }
             break;
-        case race::saiyan:
+        case Saiyan:
             if (PLR_FLAGGED(this, PLR_TAILHIDE)) {
-                apparent = race::race_map[race::human];
+                apparent = race::race_map[Human];
             }
             break;
     }

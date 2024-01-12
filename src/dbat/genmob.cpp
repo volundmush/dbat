@@ -448,8 +448,8 @@ void char_data::deserializeBase(const nlohmann::json &j) {
     }
 
     if(j.contains("title")) title = strdup(j["title"].get<std::string>().c_str());
-    ::race::race_id r = ::race::human;
-    if(j.contains("race")) r = j["race"].get<::race::race_id>();
+    ::race::RaceID r = ::race::Human;
+    if(j.contains("race")) r = j["race"].get<::race::RaceID>();
     race = ::race::race_map[r];
 
     ::sensei::sensei_id c = ::sensei::commoner;
@@ -735,7 +735,7 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
     if(j.contains("majinize")) majinize = j["majinize"];
     if(j.contains("majinizer")) majinizer = j["majinizer"];
     if(j.contains("mimic")) {
-        auto rid = j["mimic"].get<::race::race_id>();
+        auto rid = j["mimic"].get<::race::RaceID>();
         mimic = ::race::race_map[rid];
     }
     if(j.contains("olc_zone")) olc_zone = j["olc_zone"];

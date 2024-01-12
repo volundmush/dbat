@@ -41,8 +41,32 @@
  * NOTE: This will likely be unconditionally unsigned later.
  */
 
-
-
+enum RaceID : uint8_t {
+ Human = 0,
+ Saiyan = 1,
+ Icer = 2,
+ Konatsu = 3,
+ Namekian = 4,
+ Mutant = 5,
+ Kanassan = 6,
+ Halfbreed = 7,
+ BioAndroid = 8,
+ Android = 9,
+ Demon = 10,
+ Majin = 11,
+ Kai = 12,
+ Tuffle = 13,
+ Hoshijin = 14,
+ Animal = 15,
+ Saiba = 16,
+ Serpent = 17,
+ Ogre = 18,
+ Yardratian = 19,
+ Arlian = 20,
+ Dragon = 21,
+ Mechanical = 22,
+ Spirit = 23
+};
 
 
 #define SG_MIN        2 /* Skill gain check must be less than this
@@ -515,31 +539,30 @@
 #define PHASE_STRENGTH          6
 
 /* Races */
-#define RACE_UNDEFINED        (-1)
-#define RACE_HUMAN        0
-#define RACE_SAIYAN        1
-#define RACE_ICER        2
-#define RACE_KONATSU        3
-#define RACE_NAMEK        4
-#define RACE_MUTANT        5
-#define RACE_KANASSAN        6
-#define RACE_HALFBREED        7
-#define RACE_BIO        8
-#define RACE_ANDROID        9
-#define RACE_DEMON        10
-#define RACE_MAJIN        11
-#define RACE_KAI        12
-#define RACE_TRUFFLE        13
-#define RACE_GOBLIN        14
-#define RACE_ANIMAL        15
-#define RACE_SAIBA        16
-#define RACE_SERPENT        17
-#define RACE_OGRE        18
-#define RACE_YARDRATIAN        19
-#define RACE_ARLIAN        20
-#define RACE_DRAGON        21
-#define RACE_MECHANICAL        22
-#define RACE_FAERIE        23
+#define RACE_HUMAN        RaceID::Human
+#define RACE_SAIYAN        RaceID::Saiyan
+#define RACE_ICER        RaceID::Icer
+#define RACE_KONATSU        RaceID::Konatsu
+#define RACE_NAMEK        RaceID::Namekian
+#define RACE_MUTANT        RaceID::Mutant
+#define RACE_KANASSAN        RaceID::Kanassan
+#define RACE_HALFBREED        RaceID::Halfbreed
+#define RACE_BIO        RaceID::BioAndroid
+#define RACE_ANDROID        RaceID::Android
+#define RACE_DEMON        RaceID::Demon
+#define RACE_MAJIN        RaceID::Majin
+#define RACE_KAI        RaceID::Kai
+#define RACE_TRUFFLE        RaceID::Tuffle
+#define RACE_GOBLIN        RaceID::Hoshijin
+#define RACE_ANIMAL        RaceID::Animal
+#define RACE_SAIBA        RaceID::Saiba
+#define RACE_SERPENT        RaceID::Serpent
+#define RACE_OGRE        RaceID::Ogre
+#define RACE_YARDRATIAN        RaceID::Yardratian
+#define RACE_ARLIAN        RaceID::Arlian
+#define RACE_DRAGON        RaceID::Dragon
+#define RACE_MECHANICAL    RaceID::Mechanical
+#define RACE_FAERIE        RaceID::Spirit
 
 #define NUM_RACES        24
 
