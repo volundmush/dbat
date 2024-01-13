@@ -68,6 +68,24 @@ enum class RaceID : uint8_t {
  Spirit = 23
 };
 
+enum class SenseiID : uint8_t {
+    Roshi = 0,
+    Piccolo = 1,
+    Krane = 2,
+    Nail = 3,
+    Bardock = 4,
+    Ginyu = 5,
+    Frieza = 6,
+    Tapion = 7,
+    Sixteen = 8,
+    Dabura = 9,
+    Kibito = 10,
+    Jinto = 11,
+    Tsuna = 12,
+    Kurzak = 13,
+    Commoner = 255
+};
+
 enum class FormID : uint8_t {
  // Universal,
  Base = 0,
@@ -413,21 +431,20 @@ enum class FormID : uint8_t {
 
 /* PC classes */
 /* Taken from the SRD under OGL, see ../doc/srd.txt for information */
-#define CLASS_UNDEFINED            (-1)
-#define CLASS_ROSHI             0
-#define CLASS_PICCOLO           1
-#define CLASS_KRANE             2
-#define CLASS_NAIL              3
-#define CLASS_BARDOCK           4
-#define CLASS_GINYU             5
-#define CLASS_FRIEZA            6
-#define CLASS_TAPION            7
-#define CLASS_ANDSIX            8
-#define CLASS_DABURA            9
-#define CLASS_KABITO            10
-#define CLASS_JINTO             11
-#define CLASS_TSUNA             12
-#define CLASS_KURZAK            13
+#define CLASS_ROSHI             SenseiID::Roshi
+#define CLASS_PICCOLO           SenseiID::Piccolo
+#define CLASS_KRANE             SenseiID::Krane
+#define CLASS_NAIL              SenseiID::Nail
+#define CLASS_BARDOCK           SenseiID::Bardock
+#define CLASS_GINYU             SenseiID::Ginyu
+#define CLASS_FRIEZA            SenseiID::Frieza
+#define CLASS_TAPION            SenseiID::Tapion
+#define CLASS_ANDSIX            SenseiID::Sixteen
+#define CLASS_DABURA            SenseiID::Dabura
+#define CLASS_KABITO            SenseiID::Kibito
+#define CLASS_JINTO             SenseiID::Jinto
+#define CLASS_TSUNA             SenseiID::Tsuna
+#define CLASS_KURZAK            SenseiID::Kurzak
 #define CLASS_ASSASSIN          14
 #define CLASS_BLACKGUARD        15
 #define CLASS_DRAGON_DISCIPLE   16

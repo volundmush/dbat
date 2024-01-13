@@ -234,7 +234,7 @@ void init_mobile(struct char_data *mob) {
     //GET_MAX_MANA(mob) = 0;
     GET_NDD(mob) = 0;
     mob->set(CharAppearance::Sex, SEX_MALE);
-    mob->chclass = sensei::sensei_map[sensei::commoner];
+    mob->chclass = sensei::sensei_map[sensei::Commoner];
 
     GET_WEIGHT(mob) = rand_number(100, 200);
     mob->setHeight(rand_number(100, 200));

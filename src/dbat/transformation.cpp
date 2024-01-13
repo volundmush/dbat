@@ -1118,16 +1118,22 @@ namespace trans {
             send_to_char(ch, "Available Forms: @W%s@n\r\n", names.c_str());
         }
 
-        switch (GET_TRANSCLASS(ch)) {
-            case 1:
-                send_to_char(ch, "\r\n@RYou have @rterrible@R transformation BPL Requirements.@n\r\n");
-                break;
-            case 2:
-                send_to_char(ch, "\r\n@CYou have @caverage@C transformation BPL Requirements.@n\r\n");
-                break;
-            case 3:
-                send_to_char(ch, "\r\n@GYou have @gGREAT@G transformation BPL Requirements.@n\r\n");
-                break;
+        const double epsilon = 0.05;  // A small tolerance value for floating point comparison
+
+        if (ch->transBonus <= -0.3 + epsilon) {
+            send_to_char(ch, "\r\n@WYou have @wGREAT@W transformation BPL Requirements.@n\r\n");
+        } else if (ch->transBonus <= -0.2 + epsilon) {
+            send_to_char(ch, "\r\n@MYou have @mabove average@M transformation BPL Requirements.@n\r\n");
+        } else if (ch->transBonus <= -0.1 + epsilon) {
+            send_to_char(ch, "\r\n@BYou have @bslightly above average@B transformation BPL Requirements.@n\r\n");
+        } else if (ch->transBonus < 0.1 - epsilon) {
+            send_to_char(ch, "\r\n@GYou have @gaverage@G transformation BPL Requirements.@n\r\n");
+        } else if (ch->transBonus < 0.2 - epsilon) {
+            send_to_char(ch, "\r\n@YYou have @yslightly below average@Y transformation BPL Requirements.@n\r\n");
+        } else if (ch->transBonus < 0.3 - epsilon) {
+            send_to_char(ch, "\r\n@CYou have @cbelow average@C transformation BPL Requirements.@n\r\n");
+        } else {
+            send_to_char(ch, "\r\n@RYou have @rterrible@R transformation BPL Requirements.@n\r\n");
         }
     }
 

@@ -2179,13 +2179,13 @@ namespace net {
                                 chosen_sensei = nullptr;
                                 return;
                             case CON_QCLASS:
-                                if (chosen_sensei->getID() == sensei::kibito && !IS_KAI(ch) &&
+                                if (chosen_sensei->getID() == sensei::Kibito && !IS_KAI(ch) &&
                                     conn->account->rpp < 10) {
                                     sendText("\r\nIt costs 10 RPP to select Kibito unless you are a Kai.\r\nSensei: ");
                                     return;
                                 } else {
                                     ch->chclass = chosen_sensei;
-                                    if (chosen_sensei->getID() == sensei::kibito && !IS_KAI(ch)) {
+                                    if (chosen_sensei->getID() == sensei::Kibito && !IS_KAI(ch)) {
                                         if (conn->account->rpp >= 10)
                                             conn->account->rpp -= 10;
                                         else

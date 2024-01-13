@@ -3547,7 +3547,7 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent) {
             dam = dam * 0.60;
         }
 
-        if (GET_CLASS(ch) != CLASS_NPC_COMMONER) {
+        if (GET_CLASS(ch) != SenseiID::Commoner) {
             dam += dam * 0.3;
         }
     }

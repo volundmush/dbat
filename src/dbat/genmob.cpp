@@ -450,8 +450,8 @@ void char_data::deserializeBase(const nlohmann::json &j) {
     if(j.contains("title")) title = strdup(j["title"].get<std::string>().c_str());
     if(j.contains("race")) race = j["race"].get<RaceID>();
 
-    ::sensei::sensei_id c = ::sensei::commoner;
-    if(j.contains("chclass")) c = j["chclass"].get<::sensei::sensei_id>();
+    ::sensei::SenseiID c = ::sensei::Commoner;
+    if(j.contains("chclass")) c = j["chclass"].get<::sensei::SenseiID>();
     chclass = ::sensei::sensei_map[c];
 
     if(j.contains("weight")) weight = j["weight"];

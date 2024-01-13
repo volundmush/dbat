@@ -19,88 +19,28 @@ extern int load_levels();
 
 extern void cedit_creation(struct char_data *ch);
 
-extern void advance_level(struct char_data *ch, int whichclass);
+extern void advance_level(struct char_data *ch);
 
 extern int8_t ability_mod_value(int abil);
 
 extern int8_t dex_mod_capped(const struct char_data *ch);
 
-extern char *class_desc_str(struct char_data *ch, int howlong, int wantthe);
-
 extern int total_skill_levels(struct char_data *ch, int skill);
 
 extern int highest_skill_value(int level, int type);
 
-extern int calc_penalty_exp(struct char_data *ch, int gain);
-
 extern time_t birth_age(struct char_data *ch);
 
-extern time_t max_age(struct char_data *ch);
-
 namespace sensei {
-    enum sensei_id : uint8_t {
-        roshi = 0,
-        piccolo = 1,
-        krane = 2,
-        nail = 3,
-        bardock = 4,
-        ginyu = 5,
-        frieza = 6,
-        tapion = 7,
-        sixteen = 8,
-        dabura = 9,
-        kibito = 10,
-        jinto = 11,
-        tsuna = 12,
-        kurzak = 13,
-        commoner = 255
-    };
 
-    class Sensei;
+    extern std::string getName(SenseiID id);
+    extern std::string getAbbr(SenseiID id);
+    extern std::string getStyle(SenseiID id);
+    extern bool isValidSenseiForRace(SenseiID id, RaceID race);
+    extern bool isPlayable(SenseiID id);
+    extern room_vnum getStartRoom(SenseiID id);
+    extern room_vnum getLocation(SenseiID id);
 
-    typedef std::map<sensei_id, Sensei *> SenseiMap;
-    extern SenseiMap sensei_map;
+    extern double getModifier(struct char_data *ch, int location, int specific = 0);
 
-
-    class Sensei {
-    public:
-        Sensei(sensei_id sid, const std::string &name, std::string abbr, std::string style);
-
-        sensei_id getID() const;
-
-        const std::string &getName() const;
-
-        const std::string &getNameLower() const;
-
-        const std::string &getAbbr() const;
-
-        const std::string &getStyleName() const;
-
-        // stats stuff
-        int getRPPCost(RaceID rid) const;
-
-        bool senseiAvailableForRace(RaceID r_id) const;
-
-        int getGravTolerance() const;
-
-        bool senseiIsPcOk() const;
-
-        room_vnum senseiStartRoom() const;
-
-        room_vnum senseiLocationID() const;
-
-    protected:
-        sensei_id s_id;
-        std::string name, lower_name, abbr, style;
-    };
-
-    void load_sensei();
-
-    Sensei *find_sensei(const std::string &arg);
-
-    Sensei *find_sensei_map(const std::string &arg, const SenseiMap &s_map);
-
-    Sensei *find_sensei_map_id(int id, const SenseiMap &s_map);
-
-    SenseiMap valid_for_race_pc(char_data *ch);
 }

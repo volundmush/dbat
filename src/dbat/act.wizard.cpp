@@ -1593,11 +1593,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
         send_to_char(ch, "Title: %s\r\n", k->title ? k->title : "<None>");
 
     send_to_char(ch, "L-Des: %s@n", k->room_description ? k->room_description : "<None>\r\n");
-    if (CONFIG_ALLOW_MULTICLASS) {
-        strncpy(buf, class_desc_str(k, 1, 0), sizeof(buf));
-    } else {
-        snprintf(buf, sizeof(buf), "%s", k->chclass->getName().c_str());
-    }
+    snprintf(buf, sizeof(buf), "%s", sensei::getName(k->chclass).c_str());
     snprintf(buf2, sizeof(buf2), "%s", race::getName(k->race).c_str());
     send_to_char(ch, "Class: %s, Race: %s, Lev: [@y%2d@n], XP: [@y%" I64T "@n]\r\n",
                  buf, buf2, GET_LEVEL(k), GET_EXP(k));
@@ -3207,8 +3203,6 @@ ACMD(do_show) {
             send_to_char(ch, "Au: %-8d  Bal: %-8d  Exp: %" I64T "  Align: %-5d  Ethic: %-5d\r\n",
                          GET_GOLD(vict), GET_BANK_GOLD(vict), GET_EXP(vict),
                          GET_ALIGNMENT(vict), GET_ETHIC_ALIGNMENT(vict));
-            if (CONFIG_ALLOW_MULTICLASS)
-                send_to_char(ch, "Class ranks: %s\r\n", class_desc_str(vict, 1, 0));
 
             /* ctime() uses static buffer: do not combine. */
             send_to_char(ch, "Started: %-20.16s  ", ctime(&vict->time.created));

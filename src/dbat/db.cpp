@@ -2038,7 +2038,7 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
 
     ch->chclass = sensei::find_sensei_map_id(t[3], sensei::sensei_map);
     if (!ch->chclass) {
-        ch->chclass = sensei::sensei_map[sensei::commoner];
+        ch->chclass = sensei::sensei_map[sensei::Commoner];
     }
     GET_SAVE_BASE(ch, SAVING_FORTITUDE) = 0;
     GET_SAVE_BASE(ch, SAVING_REFLEX) = 0;
@@ -3479,7 +3479,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
         } else if (GET_CLASS(mob) == CLASS_SHADOWDANCER) {
             GET_EXP(mob) *= 2;
         }
-        if (GET_CLASS(mob) == CLASS_NPC_COMMONER && IS_HUMANOID(mob) && !IS_DRAGON(mob)) {
+        if (GET_CLASS(mob) == SenseiID::Commoner && IS_HUMANOID(mob) && !IS_DRAGON(mob)) {
             if (!IS_ANDROID(mob) && !IS_SAIYAN(mob) && !IS_BIO(mob) && !IS_MAJIN(mob)) {
                 GET_EXP(mob) *= 0.75;
             }

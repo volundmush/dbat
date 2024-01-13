@@ -546,7 +546,7 @@ struct char_data : public unit_data {
 
     char *title{};
     RaceID race{RaceID::Spirit};
-    sensei::Sensei *chclass{};
+    SenseiID chclass{SenseiID::Commoner};
 
 
     /* PC / NPC's weight                    */
@@ -750,8 +750,7 @@ struct char_data : public unit_data {
     int tail_growth{};
     int rage_meter{};
     char *feature{};
-    int transclass{};
-    int transcost[6]{};
+
     int armor_last{};
     int forgeting{};
     int forgetcount{};

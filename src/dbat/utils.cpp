@@ -580,49 +580,6 @@ int sec_roll_check(struct char_data *ch) {
 
 }
 
-int get_measure(struct char_data *ch, int height, int weight) {
-    int amt = 0;
-    if (!PLR_FLAGGED(ch, PLR_OOZARU) && (!IS_ICER(ch) || !IS_TRANSFORMED(ch)) && GET_GENOME(ch, 0) < 9) {
-        if (height > 0) {
-            amt = height;
-        } else if (weight > 0) {
-            amt = weight;
-        }
-    } else if (IS_ICER(ch) && PLR_FLAGGED(ch, PLR_TRANS1)) {
-        if (height > 0) {
-            amt = height * 3;
-        } else if (weight > 0) {
-            amt = weight * 4;
-        }
-    } else if (IS_ICER(ch) && PLR_FLAGGED(ch, PLR_TRANS2)) {
-        if (height > 0) {
-            amt = height * 3;
-        } else if (weight > 0) {
-            amt = weight * 5;
-        }
-    } else if (IS_ICER(ch) && PLR_FLAGGED(ch, PLR_TRANS3)) {
-        if (height > 0) {
-            amt = height * 1.5;
-        } else if (weight > 0) {
-            amt = weight * 2;
-        }
-    } else if (IS_ICER(ch) && PLR_FLAGGED(ch, PLR_TRANS4)) {
-        if (height > 0) {
-            amt = height * 2;
-        } else if (weight > 0) {
-            amt = weight * 3;
-        }
-    } else if (PLR_FLAGGED(ch, PLR_OOZARU) || GET_GENOME(ch, 0) == 9) {
-        if (height > 0) {
-            amt = height * 10;
-        } else if (weight > 0) {
-            amt = weight * 50;
-        }
-    }
-
-    return (amt);
-}
-
 
 int64_t physical_cost(struct char_data *ch, int skill) {
 

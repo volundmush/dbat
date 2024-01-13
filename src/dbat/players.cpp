@@ -216,7 +216,7 @@ int load_char(const char *name, struct char_data *ch) {
             SET_SKILL_PERF(ch, i, 0);
         }
 
-        ch->chclass = sensei::sensei_map[sensei::roshi];
+        ch->chclass = sensei::sensei_map[sensei::Roshi];
         GET_LOG_USER(ch) = strdup("NOUSER");
         GET_SUPPRESS(ch) = PFDEF_SKIN;
         GET_FURY(ch) = PFDEF_HAIRL;

@@ -444,7 +444,7 @@ ACMD(do_kyodaika) {
         return;
     }
 
-    if (GET_GENOME(ch, 0) == 0) {
+    if (!AFF_FLAGGED(ch, AFF_KYODAIKA)) {
         act("@GYou growl as your body grows to ten times its normal size!@n", true, ch, nullptr, nullptr, TO_CHAR);
         act("@g$n@G growls as $s body grows to ten times its normal size!@n", true, ch, nullptr, nullptr, TO_ROOM);
         send_to_char(ch, "@cStrength@D: @C+5\r\n@cSpeed@D: @c-2@n\r\n");
@@ -3091,16 +3091,6 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
                     } else {
                         height = strdup("short");
                     }
-                } else if (PLR_FLAGGED(i, PLR_OOZARU) || GET_GENOME(i, 0) == 11) {
-                    if (GET_PC_HEIGHT(i) * 10 > 2000) {
-                        height = strdup("very tall");
-                    } else if (GET_PC_HEIGHT(i) * 10 > 1800) {
-                        height = strdup("tall");
-                    } else if (GET_PC_HEIGHT(i) * 10 > 1500) {
-                        height = strdup("average height");
-                    } else {
-                        height = strdup("short");
-                    }
                 } else {
                     if (GET_PC_HEIGHT(i) > 200) {
                         height = strdup("very tall");
@@ -3128,18 +3118,6 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
                         height = strdup("heavy");
                     } else if (w > 15) {
                         height = strdup("average weight");
-                    } else {
-                        height = strdup("welterweight");
-                    }
-                } else if (PLR_FLAGGED(i, PLR_OOZARU) || GET_GENOME(i, 0) == 11) {
-                    if (w * 50 > 6000) {
-                        height = strdup("very heavy");
-                    } else if (w * 50 > 5000) {
-                        height = strdup("heavy");
-                    } else if (w * 50 > 4000) {
-                        height = strdup("average weight");
-                    } else if (w * 50 > 3000) {
-                        height = strdup("lightweight");
                     } else {
                         height = strdup("welterweight");
                     }
@@ -3359,15 +3337,15 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
         sprintf(aura, "@w...$e has a @Ybright@w %s aura around $s body!", aura_types[GET_AURA(i)]);
         act(aura, true, i, nullptr, ch, TO_VICT);
     }
-    if (!PLR_FLAGGED(i, PLR_OOZARU) && !GET_CHARGE(i) && IS_TRANSFORMED(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
+    if (i->form != FormID::Oozaru && !GET_CHARGE(i) && IS_TRANSFORMED(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
         act("@w...$e has energy crackling around $s body!", true, i, nullptr, ch, TO_VICT);
-    if (PLR_FLAGGED(i, PLR_OOZARU) && GET_CHARGE(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
+    if (i->form == FormID::Oozaru && GET_CHARGE(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
         act("@w...$e is in the form of a @rgreat ape@w!", true, i, nullptr, ch, TO_VICT);
-    if (GET_GENOME(i, 0) == 11)
+    if (AFF_FLAGGED(ch, AFF_KYODAIKA))
         act("@w...$e has expanded $s body size@w!", true, i, nullptr, ch, TO_VICT);
     if (AFF_FLAGGED(i, AFF_HAYASA))
         act("@w...$e has a soft @cblue@w glow around $s body!", false, i, nullptr, ch, TO_VICT);
-    if (PLR_FLAGGED(i, PLR_OOZARU) && !GET_CHARGE(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
+    if (i->form == FormID::Oozaru && !GET_CHARGE(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
         act("@w...$e has energy crackling around $s @rgreat ape@w body!", true, i, nullptr, ch, TO_VICT);
     if (GET_FEATURE(i)) {
         char woo[MAX_STRING_LENGTH];
@@ -4888,8 +4866,8 @@ ACMD(do_score) {
         send_to_char(ch, "  @D|  @CRace@D: @W%10s@D,  @CSensei@D: @W%15s@D,     @CArt@D: @W%-17s@D|@n\n", race::getName(ch->race),
                      ch->chclass->getName().c_str(), ch->chclass->getStyleName().c_str());
         char hei[300], wei[300];
-        sprintf(hei, "%dcm", get_measure(ch, GET_PC_HEIGHT(ch), 0));
-        sprintf(wei, "%dkg", get_measure(ch, 0, ch->getWeight()));
+        sprintf(hei, "%dcm", ch->getHeight());
+        sprintf(wei, "%dkg", (int)ch->getWeight());
         send_to_char(ch, "  @D|   @CAge@D: @W%10s@D,  @CHeight@D: @W%15s@D,  @CWeight@D: @W%-17s@D|@n\n",
                      add_commas(GET_AGE(ch)).c_str(), hei, wei);
         send_to_char(ch, "  @D|@CGender@D: @W%10s@D,  @C  Size@D: @W%15s@D,  @C Align@D: @W%-17s@D|@n\n",

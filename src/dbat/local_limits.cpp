@@ -764,12 +764,10 @@ void set_title(struct char_data *ch, char *title) {
 }
 
 void gain_level(struct char_data *ch, int whichclass) {
-    if (whichclass < 0)
-        whichclass = GET_CLASS(ch);
     if (GET_LEVEL(ch) < 100 && GET_EXP(ch) >= level_exp(ch, GET_LEVEL(ch) + 1)) {
         ch->mod(CharNum::Level, 1);
         //GET_CLASS(ch) = whichclass; /* Now tracks latest class instead of highest */
-        advance_level(ch, whichclass);
+        advance_level(ch);
         mudlog(BRF, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), true, "%s advanced level to level %d.",
                GET_NAME(ch), GET_LEVEL(ch));
         send_to_char(ch, "You rise a level!\r\n");
@@ -919,7 +917,7 @@ void gain_exp_regardless(struct char_data *ch, int gain) {
         while (GET_LEVEL(ch) < CONFIG_LEVEL_CAP - 1 && GET_EXP(ch) >= level_exp(ch, GET_LEVEL(ch) + 1)) {
             ch->mod(CharNum::Level, 1);
             num_levels++;
-            advance_level(ch, GET_CLASS(ch));
+            advance_level(ch);
             is_altered = true;
         }
 
