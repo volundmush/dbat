@@ -693,7 +693,7 @@ static void update_flags(struct char_data *ch) {
         if (GET_TGROWTH(ch) >= 10) {
             send_to_char(ch, "@wYour tail grows back.@n\r\n");
             act("$n@w's tail grows back.@n", true, ch, nullptr, nullptr, TO_ROOM);
-            ch->race->gainTail(ch);
+            ch->gainTail(ch);
             GET_TGROWTH(ch) = 0;
         }
     }
@@ -702,7 +702,7 @@ static void update_flags(struct char_data *ch) {
         if (GET_TGROWTH(ch) >= 10) {
             send_to_char(ch, "@wYour tail grows back.@n\r\n");
             act("$n@w's tail grows back.@n", true, ch, nullptr, nullptr, TO_ROOM);
-            ch->race->gainTail(ch);
+            ch->gainTail(ch);
             GET_TGROWTH(ch) = 0;
         }
     }

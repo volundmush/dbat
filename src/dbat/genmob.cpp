@@ -1054,28 +1054,11 @@ affected_type::affected_type(const nlohmann::json &j) {
 }
 
 weight_t char_data::getWeight(bool base) {
-    weight_t total = 0;
-    if(!IS_NPC(this)) {
-        total += GET_PC_WEIGHT(this);
-
-    } else {
-        total += weight;
-    }
+    auto total = weight;
 
     if(!base) {
         total += getAffectModifier(APPLY_CHAR_WEIGHT);
-        if(!IS_NPC(this)) {
-            if(PLR_FLAGGED(this, PLR_OOZARU) || GET_GENOME(this, 0) == 1) total *= 50;
-            if(IS_ICER(this)) {
-                if(PLR_FLAGGED(this, PLR_TRANS1) || PLR_FLAGGED(this, PLR_TRANS2)) {
-                    total *= 4;
-                } else if(PLR_FLAGGED(this, PLR_TRANS3)) {
-                    total *= 2;
-                } else if(PLR_FLAGGED(this, PLR_TRANS4)) {
-                    total *= 3;
-                }
-            }
-        }
+        total *= (1.0 + getAffectModifier(APPLY_WEIGHT_MULT));
     }
 
     return total;
@@ -1086,18 +1069,7 @@ int char_data::getHeight(bool base) {
 
     if(!base) {
         total += getAffectModifier(APPLY_CHAR_HEIGHT);
-        if(!IS_NPC(this)) {
-            if(PLR_FLAGGED(this, PLR_OOZARU) || GET_GENOME(this, 0) == 1) total *= 10;
-            if(IS_ICER(this)) {
-                if(PLR_FLAGGED(this, PLR_TRANS1) || PLR_FLAGGED(this, PLR_TRANS2)) {
-                    total *= 3;
-                } else if(PLR_FLAGGED(this, PLR_TRANS3)) {
-                    total *= 1.5;
-                } else if(PLR_FLAGGED(this, PLR_TRANS4)) {
-                    total *= 2;
-                }
-            }
-        }
+        total *= (1.0 + getAffectModifier(APPLY_HEIGHT_MULT));
     }
 
     return total;

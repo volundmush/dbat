@@ -545,12 +545,12 @@ struct char_data : public unit_data {
 
 
     char *title{};
-    race::Race *race{};
+    RaceID race{RaceID::Spirit};
     sensei::Sensei *chclass{};
 
 
     /* PC / NPC's weight                    */
-    double weight{};
+    weight_t weight{0};
     weight_t getWeight(bool base = false);
     weight_t getTotalWeight();
     weight_t getCurrentBurden();
@@ -595,7 +595,7 @@ struct char_data : public unit_data {
     std::bitset<NUM_AFF_FLAGS> affected_by{};/* Bitvector for current affects	*/
 
     std::unordered_map<CharStat, stat_t> stats;
-    stat_t get(CharStat type);
+    stat_t get(CharStat type, bool base = true);
     stat_t set(CharStat type, stat_t val);
     stat_t mod(CharStat type, stat_t val);
 
@@ -668,12 +668,14 @@ struct char_data : public unit_data {
 
     int armor{0};        /* Internally stored *10		*/
 
-
     int64_t exp{};            /* The experience of the player		*/
 
     int accuracy{};            /* Base hit accuracy			*/
     int accuracy_mod{};        /* Any bonus or penalty to the accuracy	*/
     int damage_mod{};        /* Any bonus or penalty to the damage	*/
+
+    FormID form{FormID::Base};        /* Current form of the character		*/
+    double transBonus{0.0};   // Varies from -0.3 to 0.3
 
     int16_t spellfail{};        /* Total spell failure %                 */
     int16_t armorcheck{};        /* Total armorcheck penalty with proficiency forgiveness */
@@ -731,7 +733,7 @@ struct char_data : public unit_data {
     int combhits{};
     int ping{};
     int starphase{};
-    race::Race *mimic{};
+    std::optional<RaceID> mimic{};
     std::bitset<MAX_BONUSES> bonuses{};
 
     int cooldown{};
@@ -812,7 +814,7 @@ struct char_data : public unit_data {
 
     room_vnum normalizeLoadRoom(room_vnum in);
 
-    int getAffectModifier(int location, int specific = -1);
+    double getAffectModifier(int location, int specific = -1);
 
     std::unordered_map<CharAttribute, attribute_t> attributes;
     attribute_t get(CharAttribute attr, bool base = false);
@@ -825,13 +827,17 @@ struct char_data : public unit_data {
     attribute_train_t mod(CharTrain attr, attribute_train_t val);
 
     // C++ reworking
-    const std::string &juggleRaceName(bool capitalized);
+    std::string juggleRaceName(bool capitalized);
 
     void restore(bool announce);
 
     void ghostify();
 
     void restore_by(char_data *ch);
+
+    void gainTail(bool announce = true);
+    void loseTail();
+    bool hasTail();
 
     void resurrect(ResurrectionMode mode);
 

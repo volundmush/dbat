@@ -199,17 +199,16 @@ static void weather_change() {
     }
 }
 
-static race::transform_bonus oozaru = {.bonus = 10000, .mult=2, .drain=0, .flag=PLR_OOZARU};
 
 void oozaru_transform(char_data *ch) {
-    if (PLR_FLAGGED(ch, PLR_OOZARU))
+    if (ch->form == FormID::Oozaru)
         return;
 
     act("@rLooking up at the moon your heart begins to beat loudly. Sudden rage begins to fill your mind while your body begins to grow. Hair sprouts  all over your body and your teeth become sharp as your body takes on the Oozaru form!@n",
         true, ch, nullptr, nullptr, TO_CHAR);
     act("@R$n@r looks up at the moon as $s eyes turn red and $s heart starts to beat loudly. Hair starts to grow all over $s body as $e starts screaming. The scream turns into a roar as $s body begins to grow into a giant ape!@n",
         true, ch, nullptr, nullptr, TO_ROOM);
-    ch->playerFlags.set(oozaru.flag);
+    ch->form = FormID::Oozaru;
 }
 
 void oozaru_add() {
@@ -217,7 +216,7 @@ void oozaru_add() {
         if (!IS_PLAYING(d)) {
             continue;
         }
-        if (MOON_OK(d->character) && !PLR_FLAGGED(d->character, PLR_OOZARU)) {
+        if (MOON_OK(d->character)) {
             oozaru_transform(d->character);
         }
 
@@ -225,7 +224,7 @@ void oozaru_add() {
 }
 
 void oozaru_revert(char_data *ch) {
-    if (!PLR_FLAGGED(ch, PLR_OOZARU))
+    if (ch->form != FormID::Oozaru)
         return;
 
     act("@CYour body begins to shrink back to its normal form as the power of the Oozaru leaves you. You fall asleep shortly after returning to normal!@n",
@@ -233,8 +232,8 @@ void oozaru_revert(char_data *ch) {
     act("@c$n@C's body begins to shrink and return to normal. Their giant ape features fading back into humanoid features until $e is left normal and asleep.@n",
         true, ch, nullptr, nullptr, TO_ROOM);
     GET_POS(ch) = POS_SLEEPING;
+    ch->form = FormID::Base;
 
-    ch->playerFlags.reset(PLR_OOZARU);
 }
 
 void oozaru_drop() {
@@ -356,15 +355,18 @@ static void phase_powerup(struct char_data *ch, int type, int phase) {
     }
 
     int bonus = 0;
+    double mult = 0.0;
 
     switch (phase) {
         case 0:
             return;
         case 1:
             bonus = 5;
+            mult = 1.0;
             break;
         case 2:
             bonus = 8;
+            mult = 2.0;
             break;
         default:
             send_to_imm("Error: phase_powerup called with GET_PHASE equal to zero by: %s", GET_NAME(ch));
@@ -374,8 +376,16 @@ static void phase_powerup(struct char_data *ch, int type, int phase) {
     if (type == 0) { // Drop their stats
         null_affect(ch, AFF_STARPHASE);
         GET_PHASE(ch) = 0;
-    } else { // Raise their stats
+    } else { // Alter their stats
         assign_affect(ch, AFF_STARPHASE, 0, -1, bonus, 0, 0, 0, 0, bonus);
+        if (IN_ROOM(ch) != NOWHERE && ETHER_STREAM(ch))
+            mult += .5;
+
+        struct affected_type aff;
+        aff.location = APPLY_VITALS_MULT;
+        aff.modifier = mult;
+        aff.bitvector = AFF_STARPHASE;
+        affect_join(ch, &aff, false, false, false, false);
         GET_PHASE(ch) = phase;
     }
 }

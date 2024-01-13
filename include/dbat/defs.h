@@ -41,7 +41,7 @@
  * NOTE: This will likely be unconditionally unsigned later.
  */
 
-enum RaceID : uint8_t {
+enum class RaceID : uint8_t {
  Human = 0,
  Saiyan = 1,
  Icer = 2,
@@ -66,6 +66,92 @@ enum RaceID : uint8_t {
  Dragon = 21,
  Mechanical = 22,
  Spirit = 23
+};
+
+enum class FormID : uint8_t {
+ // Universal,
+ Base = 0,
+ Custom1 = 1,
+ Custom2 = 2,
+ Custom3 = 3,
+ Custom4 = 4,
+ Custom5 = 5,
+ Custom6 = 6,
+ Custom7 = 7,
+ Custom8 = 8,
+ Custom9 = 9,
+
+ // Saiyan'y forms.
+ Oozaru = 10,
+ GoldenOozaru = 11,
+ SuperSaiyan = 12,
+ SuperSaiyan2 = 13,
+ SuperSaiyan3 = 14,
+ SuperSaiyan4 = 15,
+ SuperSaiyanGod = 16,
+ SuperSaiyanBlue = 17,
+
+ // Human'y Forms
+ SuperHuman = 18,
+ SuperHuman2 = 19,
+ SuperHuman3 = 20,
+ SuperHuman4 = 21,
+
+
+ // Icer'y Forms
+ IcerFirst = 22,
+ IcerSecond = 23,
+ IcerThird = 24,
+ IcerFourth = 25,
+ IcerMetal = 26,
+ IcerGolden = 27,
+ IcerBlack = 28,
+
+ // Konatsu
+ ShadowFirst = 29,
+ ShadowSecond = 30,
+ ShadowThird = 31,
+
+ // Namekian
+ SuperNamekian = 32,
+ SuperNamekian2 = 33,
+ SuperNamekian3 = 34,
+ SuperNamekian4 = 35,
+
+ // Mutant
+ MutateFirst = 36,
+ MutateSecond = 37,
+ MutateThird = 38,
+
+ // BioAndroid
+ BioMature = 39,
+ BioSemiPerfect = 40,
+ BioPerfect = 41,
+ BioSuperPerfect = 42,
+
+ // Android
+ Android10 = 43,
+ Android20 = 44,
+ Android30 = 45,
+ Android40 = 46,
+ Android50 = 47,
+ Android60 = 48,
+
+ // Majin
+ MajAffinity = 49,
+ MajSuper = 50,
+ MajTrue = 51,
+
+
+ // Kai
+ MysticFirst = 52,
+ MysticSecond = 53,
+ MysticThird = 54,
+
+ // Tuffle
+ AscendFirst = 55,
+ AscendSecond = 56,
+ AscendThird = 57
 };
 
 
@@ -1335,15 +1421,15 @@ enum RaceID : uint8_t {
 #define APPLY_REGEN           20    /* Regen Rate Buffed            */
 #define APPLY_TRAIN           21    /* Skill training rate buffed   */
 #define APPLY_LIFEMAX           22    /* Life Force max buffed        */
-#define APPLY_UNUSED3           23    /* Unused			*/
-#define APPLY_UNUSED4           24    /* Unused			*/
-#define APPLY_RACE             25       /* Apply to race                */
-#define APPLY_TURN_LEVEL       26       /* Apply to turn undead         */
-#define APPLY_SPELL_LVL_0      27       /* Apply to spell cast per day  */
-#define APPLY_SPELL_LVL_1      28       /* Apply to spell cast per day  */
-#define APPLY_SPELL_LVL_2      29       /* Apply to spell cast per day  */
-#define APPLY_SPELL_LVL_3      30       /* Apply to spell cast per day  */
-#define APPLY_SPELL_LVL_4      31       /* Apply to spell cast per day  */
+#define APPLY_DAMAGE_BONUS     23    /* Modify damage inflicted by -/+%			*/
+#define APPLY_DEFENSE_BONUS    24    /* -/+% damage resistance.		*/
+#define APPLY_PL_MULT             25       /* Apply to race                */
+#define APPLY_KI_MULT       26       /* Apply to turn undead         */
+#define APPLY_ST_MULT      27       /* Apply to spell cast per day  */
+#define APPLY_LF_MULT      28       /* Apply to spell cast per day  */
+#define APPLY_VITALS_MULT      29       /* Apply to spell cast per day  */
+#define APPLY_WEIGHT_MULT      30       /* Apply to spell cast per day  */
+#define APPLY_HEIGHT_MULT      31       /* Apply to spell cast per day  */
 #define APPLY_SPELL_LVL_5      32       /* Apply to spell cast per day  */
 #define APPLY_SPELL_LVL_6      33       /* Apply to spell cast per day  */
 #define APPLY_SPELL_LVL_7      34       /* Apply to spell cast per day  */
@@ -1358,8 +1444,9 @@ enum RaceID : uint8_t {
 #define APPLY_ALLSAVES         43       /* Apply to all 3 save types 	*/
 #define APPLY_RESISTANCE       44       /* Apply to resistance	 	*/
 #define APPLY_ALL_STATS        45       /* Apply to all attributes	*/
+#define APPLY_ALL_VITALS         46       // Apply to all CharStats base.
 
-#define NUM_APPLIES 46
+#define NUM_APPLIES 47
 
 /* Container flags - value[1] */
 #define CONT_CLOSEABLE      (1 << 0)    /* Container can be closed	*/

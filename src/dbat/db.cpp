@@ -1185,7 +1185,6 @@ void destroy_db() {
 /* body of the booting system */
 void boot_db() {
     zone_rnum i;
-    race::load_races();
     sensei::load_sensei();
 
     basic_mud_log("Boot db -- BEGIN.");
@@ -2581,7 +2580,7 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
                     }
                 }
 
-                if (t[0] >= APPLY_UNUSED3 && t[0] <= APPLY_UNUSED4) {
+                if (t[0] >= APPLY_DAMAGE_BONUS && t[0] <= APPLY_DEFENSE_BONUS) {
                     basic_mud_log("Warning: object #%d (%s) uses deprecated saving throw applies",
                         nr, GET_OBJ_SHORT(&o));
                 }

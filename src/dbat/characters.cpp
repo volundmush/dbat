@@ -16,36 +16,38 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/interpreter.h"
 #include "dbat/players.h"
+#include "dbat/transformation.h"
+#include "dbat/weather.h"
 
 static std::string robot = "Robotic-Humanoid", robot_lower = "robotic-humanoid", unknown = "UNKNOWN";
 
 
-const std::string &char_data::juggleRaceName(bool capitalized) {
+std::string char_data::juggleRaceName(bool capitalized) {
     if (!race) return unknown;
 
-    race::Race *apparent = race;
+    auto apparent = race;
 
-    switch (apparent->getID()) {
+    switch (apparent) {
         case Hoshijin:
-            if (mimic) apparent = mimic;
+            if (mimic) apparent = *mimic;
             break;
         case Halfbreed:
             switch (RACIAL_PREF(this)) {
                 case 1:
-                    apparent = race::race_map[Human];
+                    apparent = Human;
                     break;
                 case 2:
-                    apparent = race::race_map[Saiyan];
+                    apparent = Saiyan;
                     break;
             }
             break;
         case Android:
             switch (RACIAL_PREF(this)) {
                 case 1:
-                    apparent = race::race_map[Android];
+                    apparent = Android;
                     break;
                 case 2:
-                    apparent = race::race_map[Human];
+                    apparent = Human;
                     break;
                 case 3:
                     if (capitalized) {
@@ -57,15 +59,15 @@ const std::string &char_data::juggleRaceName(bool capitalized) {
             break;
         case Saiyan:
             if (PLR_FLAGGED(this, PLR_TAILHIDE)) {
-                apparent = race::race_map[Human];
+                apparent = Human;
             }
             break;
     }
 
     if (capitalized) {
-        return apparent->getName();
+        return race::getName(apparent);
     } else {
-        return apparent->getNameLower();
+        return boost::to_lower_copy(race::getName(apparent));
     }
 }
 
@@ -228,10 +230,8 @@ int char_data::calcTier() {
 
 int64_t char_data::calc_soft_cap() {
     auto level = get(CharNum::Level);
-    if(level >= 100) return 50e9;
-    auto tier = calcTier();
-    auto softmap = race->getSoftMap(this);
-    return level * softmap[tier];
+    if(level >= 100) return 50e12;
+    return race::getSoftCap(race, level);
 }
 
 bool char_data::is_soft_cap(int64_t type) {
@@ -375,13 +375,9 @@ void char_data::restoreHealth(bool announce) {
 }
 
 int64_t char_data::getMaxPLTrans() {
-    auto form = race->getCurForm(this);
-    int64_t total = 0;
-    if (form.flag) {
-        total = (form.bonus + getEffBasePL()) * form.mult;
-    } else {
-        total = getEffBasePL() * form.mult;
-    }
+    auto total = getEffBasePL();
+    total += (getAffectModifier(APPLY_ALL_VITALS) + getAffectModifier(APPLY_HIT));
+    total *= (1.0 + getAffectModifier(APPLY_VITALS_MULT) + getAffectModifier(APPLY_PL_MULT));
     return total;
 }
 
@@ -406,6 +402,7 @@ int64_t char_data::getCurPL() {
 
 int64_t char_data::getEffBasePL() {
     if (original) return original->getEffBasePL();
+
     if (!clones.empty()) {
         return getBasePL() / (clones.size() + 1);
     } else {
@@ -438,12 +435,10 @@ int64_t char_data::getCurKI() {
 }
 
 int64_t char_data::getMaxKI() {
-    auto form = race->getCurForm(this);
-    if (form.flag) {
-        return (form.bonus + getEffBaseKI()) * form.mult;
-    } else {
-        return getEffBaseKI();
-    }
+    auto total = getEffBaseKI();
+    total += (getAffectModifier(APPLY_ALL_VITALS) + getAffectModifier(APPLY_MANA));
+    total *= (1.0 + getAffectModifier(APPLY_VITALS_MULT) + getAffectModifier(APPLY_KI_MULT));
+    return total;
 }
 
 int64_t char_data::getEffBaseKI() {
@@ -528,12 +523,10 @@ int64_t char_data::getCurST() {
 }
 
 int64_t char_data::getMaxST() {
-    auto form = race->getCurForm(this);
-    if (form.flag) {
-        return (form.bonus + getEffBaseST()) * form.mult;
-    } else {
-        return getEffBaseST();
-    }
+    auto total = getEffBaseST();
+    total += (getAffectModifier(APPLY_ALL_VITALS) + getAffectModifier(APPLY_MOVE));
+    total *= (1.0 + getAffectModifier(APPLY_VITALS_MULT) + getAffectModifier(APPLY_ST_MULT));
+    return total;
 }
 
 int64_t char_data::getEffBaseST() {
@@ -770,8 +763,53 @@ void char_data::restoreLimbs(bool announce) {
     }
 
     // and lastly, tail.
-    this->race->gainTail(this, announce);
+    this->gainTail(announce);
 }
+
+
+void char_data::gainTail(bool announce) {
+    if (!race::hasTail(race)) return;
+    switch (race) {
+        case Icer:
+        case BioAndroid:
+            playerFlags.set(PLR_TAIL);
+        break;
+        case Saiyan:
+        case Halfbreed:
+            playerFlags.set(PLR_STAIL);
+        if (MOON_OK(this)) {
+            oozaru_transform(this);
+        }
+        break;
+    }
+}
+
+void char_data::loseTail() {
+    if (!race::hasTail(race)) return;
+    switch (race) {
+        case Icer:
+        case BioAndroid:
+            playerFlags.reset(PLR_TAIL);
+        remove_limb(this, 6);
+        GET_TGROWTH(this) = 0;
+        break;
+        case Saiyan:
+        case Halfbreed:
+            playerFlags.reset(PLR_STAIL);
+        remove_limb(this, 5);
+        if (playerFlags.test(PLR_OOZARU)) {
+            oozaru_revert(this);
+        }
+        GET_TGROWTH(this) = 0;
+        break;
+    }
+}
+
+bool char_data::hasTail() {
+    if(!race::hasTail(race)) return false;
+    return playerFlags.test(PLR_TAIL) || playerFlags.test(PLR_STAIL);
+}
+
 
 int64_t char_data::gainBasePL(int64_t amt, bool trans_mult) {
     return mod(CharStat::PowerLevel, amt);
@@ -1089,8 +1127,8 @@ void char_data::login() {
 
 }
 
-int char_data::getAffectModifier(int location, int specific) {
-    int total = 0;
+double char_data::getAffectModifier(int location, int specific) {
+    double total = 0;
     for(auto a = affected; a; a = a->next) {
         if(location != a->location) continue;
         if(specific != -1 && specific != a->specific) continue;
@@ -1100,6 +1138,10 @@ int char_data::getAffectModifier(int location, int specific) {
         if(auto obj = GET_EQ(this, i); obj)
         total += obj->getAffectModifier(location, specific);
     }
+
+    total += race::getModifier(this, location, specific);
+    total += trans::getModifier(this, location, specific);
+
     return total;
 }
 
@@ -1139,7 +1181,7 @@ int char_data::setSize(int val) {
 }
 
 int char_data::getSize() {
-    return get_size(this);
+    return size != SIZE_UNDEFINED ? size : race::getSize(race);
 }
 
 
@@ -1219,7 +1261,7 @@ stat_t char_data::mod(CharStat type, stat_t val) {
     return set(type, get(type) + val);
 }
 
-stat_t char_data::get(CharStat type) {
+stat_t char_data::get(CharStat type, bool base) {
     if(auto st = stats.find(type); st != stats.end()) {
         return st->second;
     }

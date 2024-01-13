@@ -4381,64 +4381,6 @@ static const struct zcheck_armor {
 #define MAX_APPLIES_LIMIT        1     /* toggle - is there a limit at all?  */
 #define CHECK_ITEM_RENT          0     /* do we check for rent cost == 0 ?   */
 #define CHECK_ITEM_COST          0     /* do we check for item cost == 0 ?   */
-/*
-  Applies limits
-  !! Very Important:  Keep these in the same order as in Structs.h
-  To ignore an apply, set max_aff to -99.
-  These will be ignored if MAX_APPLIES_LIMIT = 0
-*/
-static const struct zcheck_affs {
-    int aff_type;    /*from Structs.h*/
-    int min_aff;     /*min. allowed value*/
-    int max_aff;     /*max. allowed value*/
-    char *message;   /*phrase for error message*/
-} zaffs[] = {
-        {APPLY_NONE,        0,   -99, "unused0"},
-        {APPLY_STR,         -6,  6,   "strength"},
-        {APPLY_DEX,         -6,  6,   "dexterity"},
-        {APPLY_INT,         -6,  6,   "intelligence"},
-        {APPLY_WIS,         -6,  6,   "wisdom"},
-        {APPLY_CON,         -6,  6,   "constitution"},
-        {APPLY_CHA,         -6,  6,   "charisma"},
-        {APPLY_SPI,         0,   0,   "spirit"},
-        {APPLY_LEVEL,       0,   0,   "level"},
-        {APPLY_AGE,         -10, 10,  "age"},
-        {APPLY_CHAR_WEIGHT, -50, 50,  "character weight"},
-        {APPLY_CHAR_HEIGHT, -50, 50,  "character height"},
-        {APPLY_MANA,        -50, 50,  "mana"},
-        {APPLY_HIT,         -50, 50,  "hit points"},
-        {APPLY_MOVE,        -50, 50,  "movement"},
-        {APPLY_GOLD,        0,   0,   "gold"},
-        {APPLY_EXP,         0,   0,   "experience"},
-        {APPLY_AC,          -10, 10,  "magical AC"},
-        {APPLY_ACCURACY,    0,   -99, "accuracy"},
-        {APPLY_DAMAGE,      0,   -99, "damage"},
-        {APPLY_REGEN,       0,   0,   "regen"},
-        {APPLY_TRAIN,       0,   0,   "train"},
-        {APPLY_LIFEMAX,     0,   0,   "lifemax"},
-        {APPLY_UNUSED3,     0,   0,   "unused"},
-        {APPLY_UNUSED4,     0,   0,   "unused"},
-        {APPLY_RACE,        0,   0,   "race"},
-        {APPLY_TURN_LEVEL,  -6,  6,   "turn level"},
-        {APPLY_SPELL_LVL_0, 0,   0,   "spell level 0"},
-        {APPLY_SPELL_LVL_1, 0,   0,   "spell level 1"},
-        {APPLY_SPELL_LVL_2, 0,   0,   "spell level 2"},
-        {APPLY_SPELL_LVL_3, 0,   0,   "spell level 3"},
-        {APPLY_SPELL_LVL_4, 0,   0,   "spell level 4"},
-        {APPLY_SPELL_LVL_5, 0,   0,   "spell level 5"},
-        {APPLY_SPELL_LVL_6, 0,   0,   "spell level 6"},
-        {APPLY_SPELL_LVL_7, 0,   0,   "spell level 7"},
-        {APPLY_SPELL_LVL_8, 0,   0,   "spell level 8"},
-        {APPLY_SPELL_LVL_9, 0,   0,   "spell level 9"},
-        {APPLY_KI,          0,   0,   "ki"},
-        {APPLY_FORTITUDE,   -4,  4,   "fortitude"},
-        {APPLY_REFLEX,      -4,  4,   "reflex"},
-        {APPLY_WILL,        -4,  4,   "will"},
-        {APPLY_SKILL,       -10, 10,  "skill"},
-        {APPLY_FEAT,        -10, 10,  "feat"},
-        {APPLY_ALLSAVES,    -4,  4,   "all 3 save types"},
-        {APPLY_RESISTANCE,  -4,  4,   "resistance"}
-};
 
 /* These are ABS() values. */
 #define MAX_APPLY_ACCURCY_MOD_TOTAL    5

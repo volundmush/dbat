@@ -498,7 +498,7 @@ extern bool OBJ_FLAGGED(struct obj_data *obj, int flag);
 
 #define GET_CLASS(ch)   ((ch)->chclass ? (ch)->chclass->getID() : 0)
 
-#define GET_RACE(ch)    ((ch)->race->getID())
+#define GET_RACE(ch)    ((ch)->race)
 #define GET_HAIRL(ch)   ((ch)->get(CharAppearance::HairLength))
 #define GET_HAIRC(ch)   ((ch)->get(CharAppearance::HairColor))
 #define GET_HAIRS(ch)   ((ch)->get(CharAppearance::HairStyle))

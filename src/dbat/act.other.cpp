@@ -25,7 +25,7 @@
 #include "dbat/spells.h"
 #include "dbat/interpreter.h"
 #include "dbat/fight.h"
-#include "dbat/races.h"
+#include "dbat/transformation.h"
 #include "dbat/class.h"
 #include "dbat/constants.h"
 #include "dbat/shop.h"
@@ -143,15 +143,13 @@ void log_custom(struct descriptor_data *d, struct obj_data *obj) {
 /* Used by do_rpp for soft-cap */
 void bring_to_cap(struct char_data *ch) {
 
-    auto p_trans = (ch->race->raceCanTransform() && !ch->race->raceCanRevert());
     auto cap = ch->calc_soft_cap();
 
-    if (ch->getBasePL() < cap)
-        ch->gainBasePL(cap - ch->getBasePL() - 1, p_trans);
-    if (ch->getBaseKI() < cap)
-        ch->gainBaseKI(cap - ch->getBaseKI() - 1, p_trans);
-    if (ch->getBaseST() < cap)
-        ch->gainBaseST(cap - ch->getBaseST() - 1, p_trans);
+    for(auto stat : {CharStat::PowerLevel, CharStat::Stamina, CharStat::Ki}) {
+        if(auto diff = cap - ch->get(stat); diff > 0) {
+            ch->mod(stat, diff);
+        }
+    }
 }
 
 /* Let's Reward Those Roleplayers! - Iovan*/
@@ -1630,7 +1628,7 @@ ACMD(do_rip) {
                     nullptr, vict, TO_VICT);
                 act("@R$n@R rushes at @R$N@r and grab $S tail! With a powerful tug $e pulls it off!@n", true, ch,
                     nullptr, vict, TO_NOTVICT);
-                vict->race->loseTail(vict);
+                vict->loseTail();
                 return;
             } else {
                 reveal_hiding(ch, 0);
@@ -1654,7 +1652,7 @@ ACMD(do_rip) {
         reveal_hiding(ch, 0);
         act("@rYou grab your own tail and yank it off!@n", true, ch, nullptr, nullptr, TO_CHAR);
         act("@R$n@r grabs $s own tail and yanks it off!@n", true, ch, nullptr, nullptr, TO_ROOM);
-        vict->race->loseTail(vict);
+        vict->loseTail();
     } else {
         if ((ch->getCurST()) < GET_MAX_MOVE(ch) / 20) {
             send_to_char(ch, "You are too tired to manage to grab their tail!\r\n");
@@ -1667,7 +1665,7 @@ ACMD(do_rip) {
         act("@RYou feel your tail pulled off!@n", true, ch, nullptr, vict, TO_VICT);
         act("@R$n@R reaches and grabs @R$N's@r tail! With a powerful tug $e pulls it off!@n", true, ch, nullptr, vict,
             TO_NOTVICT);
-        vict->race->loseTail(vict);
+        vict->loseTail();
         return;
     }
 }
@@ -2766,7 +2764,7 @@ ACMD(do_telepathy) {
                 send_to_char(ch, "@wYou peer into their mind:\r\n");
                 ch->decCurKI(ch->getMaxKI() / 40);
                 send_to_char(ch, "@GName      @D: @W%s@n\r\n", GET_NAME(vict));
-                send_to_char(ch, "@GRace      @D: @W%s@n\r\n", TRUE_RACE(vict));
+                send_to_char(ch, "@GRace      @D: @W%s@n\r\n", race::getName(vict->race).c_str());
                 send_to_char(ch, "@GSensei    @D: @W%s@n\r\n", vict->chclass->getName().c_str());
                 send_to_char(ch, "@GStr       @D: @W%d@n\r\n", GET_STR(vict));
                 send_to_char(ch, "@GCon       @D: @W%d@n\r\n", GET_CON(vict));
@@ -7450,11 +7448,6 @@ ACMD(do_transform) {
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
     char buf3[MAX_INPUT_LENGTH];
 
-    if (!ch->race->raceCanTransform()) {
-        send_to_char(ch, "You do not have a transformation.\r\n");
-        return;
-    }
-
     auto npc = IS_NPC(ch);
 
     /*R: Hidden transformation stuff following this*/
@@ -7468,91 +7461,85 @@ ACMD(do_transform) {
 
     /* Called with no argument - display transformation information */
     if (!*arg) {
-        ch->race->displayForms(ch);
-        if (trans_req(ch, 1) > 0) {
-            ch->race->displayTransReq(ch);
-        }
+        trans::displayForms(ch);
         return;
     }/* End of No Argument */
 
-    auto cur_form = ch->race->getCurForm(ch);
-    auto can_revert = ch->race->raceCanRevert();
+    auto cur_form = ch->form;
 
     // If we are in kaioken or something weird like that, prevent transforming.
-    if (!ch->race->checkCanTransform(ch)) {
+    if (PLR_FLAGGED(ch, PLR_OOZARU)) {
+        send_to_char(ch, "You are the great Oozaru right now and can't transform!\r\n");
+        return;
+    }
+
+    if (GET_KAIOKEN(ch) > 0) {
+        send_to_char(ch, "You are in kaioken right now and can't transform!\r\n");
         return;
     }
 
     // check for revert.
     if (!strcasecmp("revert", arg)) {
-        if (!can_revert) {
-            send_to_char(ch, "That would be unthinkable.\r\n");
-            return;
-        }
-        if (!cur_form.flag) {
+        // Check if we can revert.
+        if (cur_form == FormID::Base) {
             send_to_char(ch, "You are not transformed.\r\n");
             return;
         }
+
+        if (trans::blockRevertDisallowed(ch, FormID::Base)) {
+            send_to_char(ch, "That would be unthinkable.\r\n");
+            return;
+        }
+
         // We are all clear to revert.
         if ((GET_CHARGE(ch) > 0)) {
             do_charge(ch, "release", 0, 0);
         }
-        ch->race->echoRevert(ch, ch->race->flagToTier(cur_form.flag));
-        ch->playerFlags.reset(cur_form.flag);
 
-        if (*arg2) {
-            do_transform(ch, arg2, 0, 0);
-        }
+        trans::handleEchoRevert(ch, ch->form);
+        ch->form = FormID::Base;
+
         return;
     }
 
     // Search for available transformations. Error out if we can't find one.
-    auto trans_maybe = ch->race->findForm(ch, arg);
+    auto trans_maybe = trans::findForm(ch, arg);
     if (!trans_maybe) {
         send_to_char(ch, "You don't have that form.\r\n");
         return;
     }
     auto trans = trans_maybe.value();
 
-    auto to_tier = ch->race->flagToTier(trans.flag);
-
-    if (PLR_FLAGGED(ch, trans.flag)) {
+    if (cur_form == trans) {
         send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
         return;
     }
 
-    if (!npc && (ch->getBasePL()) < trans_req(ch, to_tier)) {
+    if (!npc && (trans::getRequiredPL(ch, trans) > ch->getBasePL())) {
         send_to_char(ch, "You are not strong enough to handle that transformation!\r\n");
         return;
     }
 
-    if (!npc && (ch->getCurST()) <= GET_MAX_MOVE(ch) * trans.drain) {
+    if (!npc && (ch->getCurST()) <= GET_MAX_MOVE(ch) * trans::getStaminaDrain(ch, trans)) {
         send_to_char(ch, "You do not have enough stamina!");
         return;
     }
 
     if (!npc) {
         // Pay the price to unlock form if necessary.
-        if (!ch->race->checkTransUnlock(ch, to_tier)) {
+        if (!trans::unlock(ch, trans)) {
             return;
         }
     }
 
-
-    // revert current form's flag.
-    if (cur_form.flag) ch->playerFlags.reset(cur_form.flag);
-    // The stats are applied automatically in the new system just by having the flag.
-    ch->playerFlags.set(trans.flag);
-
-    // Custom racial messages displayed.
-    ch->race->echoTransform(ch, to_tier);
-
+    ch->form = trans;
     // No way is this a stealthy process...
     reveal_hiding(ch, 0);
+    trans::handleEchoTransform(ch, trans);
 
     // Announce noisy transformations in the zone.
     int zone = 0;
-    if (ch->race->raceCanBeSensed()) {
+    if (race::isSenseable(ch->race)) {
         if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
             send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
         };
@@ -9544,13 +9531,13 @@ static void print_group(struct char_data *ch) {
                 snprintf(buf, sizeof(buf),
                          "@gL@D: @w$N @W- @D[@RPL@Y: @c%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]@n",
                          add_commas(GET_HIT(k)).c_str(), add_commas((k->getCurKI())).c_str(), add_commas((k->getCurST())).c_str(), GET_LEVEL(k),
-                         CLASS_ABBR(k), RACE_ABBR(k));
+                         CLASS_ABBR(k), race::getAbbr(k->race));
             }
             if (GET_HIT(k) <= (GET_MAX_HIT(k) - (k->getCarriedWeight())) / 10) {
                 snprintf(buf, sizeof(buf),
                          "@gL@D: @w$N @W- @D[@RPL@Y: @r%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]@n",
                          add_commas(GET_HIT(k)).c_str(), add_commas((k->getCurKI())).c_str(), add_commas((k->getCurST())).c_str(), GET_LEVEL(k),
-                         CLASS_ABBR(k), RACE_ABBR(k));
+                         CLASS_ABBR(k), race::getAbbr(k->race));
             }
             act(buf, false, ch, nullptr, k, TO_CHAR);
         }
@@ -9564,14 +9551,14 @@ static void print_group(struct char_data *ch) {
                          "@gF@D: @w$N @W- @D[@RPL@Y: @c%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]",
                          add_commas(GET_HIT(f->follower)).c_str(), add_commas((f->follower->getCurKI())).c_str(), add_commas(
                                 (f->follower->getCurST())).c_str(),
-                         GET_LEVEL(f->follower), CLASS_ABBR(f->follower), RACE_ABBR(f->follower));
+                         GET_LEVEL(f->follower), CLASS_ABBR(f->follower), race::getAbbr(f->follower->race));
             }
             if (GET_HIT(f->follower) <= (GET_MAX_HIT(f->follower) - (f->follower->getCarriedWeight())) / 10) {
                 snprintf(buf, sizeof(buf),
                          "@gF@D: @w$N @W- @D[@RPL@Y: @r%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]",
                          add_commas(GET_HIT(f->follower)).c_str(), add_commas((f->follower->getCurKI())).c_str(), add_commas(
                                 (f->follower->getCurST())).c_str(),
-                         GET_LEVEL(f->follower), CLASS_ABBR(f->follower), RACE_ABBR(f->follower));
+                         GET_LEVEL(f->follower), CLASS_ABBR(f->follower), race::getAbbr(f->follower->race));
             }
             act(buf, false, ch, nullptr, f->follower, TO_CHAR);
         }
