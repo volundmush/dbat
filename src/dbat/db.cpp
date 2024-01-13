@@ -1164,8 +1164,6 @@ void destroy_db() {
     basic_mud_log("Freeing Assemblies.");
     free_assemblies();
 
-    for(auto &s : sensei::sensei_map) delete s.second;
-    sensei::sensei_map.clear();
 }
 
 
@@ -1182,7 +1180,6 @@ void destroy_db() {
 /* body of the booting system */
 void boot_db() {
     zone_rnum i;
-    sensei::load_sensei();
 
     basic_mud_log("Boot db -- BEGIN.");
 
@@ -2036,10 +2033,7 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
     GET_EXP(ch) = 0;
     ch->race = static_cast<RaceID>(t[2]);
 
-    ch->chclass = sensei::find_sensei_map_id(t[3], sensei::sensei_map);
-    if (!ch->chclass) {
-        ch->chclass = sensei::sensei_map[sensei::Commoner];
-    }
+    ch->chclass = static_cast<SenseiID>(t[3]);
     GET_SAVE_BASE(ch, SAVING_FORTITUDE) = 0;
     GET_SAVE_BASE(ch, SAVING_REFLEX) = 0;
     GET_SAVE_BASE(ch, SAVING_WILL) = 0;
@@ -3476,8 +3470,6 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
             GET_EXP(mob) *= 1.25;
         } else if (IS_DEMON(mob)) {
             GET_EXP(mob) *= 1.1;
-        } else if (GET_CLASS(mob) == CLASS_SHADOWDANCER) {
-            GET_EXP(mob) *= 2;
         }
         if (GET_CLASS(mob) == SenseiID::Commoner && IS_HUMANOID(mob) && !IS_DRAGON(mob)) {
             if (!IS_ANDROID(mob) && !IS_SAIYAN(mob) && !IS_BIO(mob) && !IS_MAJIN(mob)) {

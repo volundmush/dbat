@@ -159,10 +159,10 @@ const char *class_display[NUM_CLASSES] = {
 const struct guild_info_type guild_info[6] = {
 
 /* Kortaal */
-        {CLASS_ROSHI,     3017, SCMD_EAST},
-        {CLASS_PICCOLO,   3004, SCMD_NORTH},
-        {CLASS_KRANE,     3027, SCMD_EAST},
-        {CLASS_NAIL,      3021, SCMD_EAST},
+        {(int)CLASS_ROSHI,     3017, SCMD_EAST},
+        {(int)CLASS_PICCOLO,   3004, SCMD_NORTH},
+        {(int)CLASS_KRANE,     3027, SCMD_EAST},
+        {(int)CLASS_NAIL,      3021, SCMD_EAST},
 
 /* Brass Dragon */
         {-999 /* all */ , 5065, SCMD_WEST},
@@ -1653,157 +1653,180 @@ time_t birth_age(struct char_data *ch) {
 
 namespace sensei {
 
-    Sensei::Sensei(SenseiID sid, const std::string &name, std::string abbr, std::string style) {
-        this->s_id = sid;
-        this->abbr = std::move(abbr);
-        this->name = name;
-        this->lower_name = name;
-        this->style = std::move(style);
-        std::transform(lower_name.begin(), lower_name.end(), lower_name.begin(), ::tolower);
-    }
-
-    SenseiID Sensei::getID() const {
-        return s_id;
-    }
-
-    const std::string &Sensei::getAbbr() const {
-        return abbr;
-    }
-
-    const std::string &Sensei::getName() const {
-        return name;
-    }
-
-    const std::string &Sensei::getNameLower() const {
-        return lower_name;
-    }
-
-    const std::string &Sensei::getStyleName() const {
-        return style;
-    }
-
-    bool Sensei::senseiAvailableForRace(RaceID r_id) const {
-        switch (s_id) {
-            case Sixteen:
-                return r_id == RaceID::Android;
-            case Dabura:
-                return r_id == RaceID::Demon;
-            case Tsuna:
-                return r_id == RaceID::Kanassan;
-            case Kurzak:
-                return r_id == RaceID::Arlian;
-            case Jinto:
-                return r_id == RaceID::Hoshijin;
+    bool isValidSenseiForRace(SenseiID id, RaceID race) {
+        switch (id) {
+            case SenseiID::Sixteen:
+                return race == RaceID::Android;
+            case SenseiID::Dabura:
+                return race == RaceID::Demon;
+            case SenseiID::Tsuna:
+                return race == RaceID::Kanassan;
+            case SenseiID::Kurzak:
+                return race == RaceID::Arlian;
+            case SenseiID::Jinto:
+                return race == RaceID::Hoshijin;
             default:
-                return r_id != RaceID::Android;
+                return race != RaceID::Android;
         }
     }
 
-    IDXTYPE Sensei::senseiLocationID() const {
-        switch (s_id) {
-            case Roshi:
-                return 1131;
-            case Kibito:
-                return 12098;
-            case Nail:
-                return 11683;
-            case Bardock:
-                return 2267;
-            case Krane:
-                return 13012;
-            case Tapion:
-                return 8233;
-            case Piccolo:
-                return 1662;
-            case Sixteen:
-                return 1714;
-            case Dabura:
-                return 6487;
-            case Frieza:
-                return 4283;
-            case Ginyu:
-                return 4290;
-            case Jinto:
-                return 3499;
-            case Kurzak:
-                return 16100;
-            case Tsuna:
-                return 15009;
-            case Commoner:
-                return 300;
+    static const std::vector<SenseiID> all_senseis = {
+            SenseiID::Roshi, SenseiID::Piccolo, SenseiID::Krane,
+            SenseiID::Nail, SenseiID::Bardock, SenseiID::Ginyu,
+            SenseiID::Frieza, SenseiID::Tapion, SenseiID::Sixteen,
+            SenseiID::Dabura, SenseiID::Kibito, SenseiID::Jinto,
+            SenseiID::Tsuna, SenseiID::Kurzak, SenseiID::Commoner
+    };
+
+    bool exists(SenseiID id) {
+        auto found = std::find(all_senseis.begin(), all_senseis.end(), id);
+        return found != all_senseis.end();
+    }
+
+    std::vector<SenseiID> filterSenseis(std::function<bool(SenseiID)> func) {
+        std::vector<SenseiID> out;
+        std::copy_if(all_senseis.begin(), all_senseis.end(), std::back_inserter(out), std::move(func));
+        return out;
+    }
+
+    std::optional<SenseiID> findSensei(const std::string& arg, const std::function<bool(SenseiID)>& func) {
+        for(auto s : all_senseis) {
+            if(!func(s)) continue;
+            if(boost::iequals(arg, getName(s))) return s;
         }
+
+        return {};
     }
 
-    room_vnum Sensei::senseiStartRoom() const {
-        switch (s_id) {
-            case Roshi:
-                return 1130;
-            case Kibito:
-                return 12098;
-            case Nail:
-                return 11683;
-            case Bardock:
-                return 2268;
-            case Krane:
-                return 13009;
-            case Tapion:
-                return 8231;
-            case Piccolo:
-                return 1659;
-            case Sixteen:
-                return 1713;
-            case Dabura:
-                return 6486;
-            case Frieza:
-                return 4282;
-            case Ginyu:
-                return 4289;
-            case Jinto:
-                return 3499;
-            case Kurzak:
-                return 16100;
-            case Tsuna:
-                return 15009;
-            case Commoner:
-                return 300;
+    static const std::unordered_map<SenseiID, room_vnum> sensei_start = {
+            {SenseiID::Roshi, 1130},
+            {SenseiID::Kibito, 12098},
+            {SenseiID::Nail, 11683},
+            {SenseiID::Bardock, 2268},
+            {SenseiID::Krane, 13009},
+            {SenseiID::Tapion, 8231},
+            {SenseiID::Piccolo, 1659},
+            {SenseiID::Sixteen, 1713},
+            {SenseiID::Dabura, 6486},
+            {SenseiID::Frieza, 4282},
+            {SenseiID::Ginyu, 4289},
+            {SenseiID::Jinto, 3499},
+            {SenseiID::Kurzak, 16100},
+            {SenseiID::Tsuna, 15009},
+            {SenseiID::Commoner, 300}
+    };
+
+    room_vnum getStartRoom(SenseiID id) {
+        if(auto found = sensei_start.find(id); found != sensei_start.end()) {
+            return found->second;
         }
+        return 300;
     }
 
-    int Sensei::getGravTolerance() const {
-        switch (s_id) {
-            case Bardock:
-                return 10;
-            default:
-                return 0;
+    static const std::unordered_map<SenseiID, room_vnum> sensei_location = {
+            {SenseiID::Roshi, 1131},
+            {SenseiID::Kibito, 12098},
+            {SenseiID::Nail, 11683},
+            {SenseiID::Bardock, 2267},
+            {SenseiID::Krane, 13012},
+            {SenseiID::Tapion, 8233},
+            {SenseiID::Piccolo, 1662},
+            {SenseiID::Sixteen, 1714},
+            {SenseiID::Dabura, 6487},
+            {SenseiID::Frieza, 4283},
+            {SenseiID::Ginyu, 4290},
+            {SenseiID::Jinto, 3499},
+            {SenseiID::Kurzak, 16100},
+            {SenseiID::Tsuna, 15009},
+            {SenseiID::Commoner, 300}
+    };
+
+    room_vnum getLocation(SenseiID id) {
+        if(auto found = sensei_location.find(id); found != sensei_location.end()) {
+            return found->second;
         }
+        return 300;
     }
 
-    bool Sensei::senseiIsPcOk() const {
-        switch (s_id) {
-            case Commoner:
-                return false;
-            default:
-                return true;
+    static const std::unordered_map<SenseiID, std::string> sensei_name = {
+            {SenseiID::Roshi, "Roshi"},
+            {SenseiID::Piccolo, "Piccolo"},
+            {SenseiID::Krane, "Krane"},
+            {SenseiID::Nail, "Nail"},
+            {SenseiID::Bardock, "Bardock"},
+            {SenseiID::Ginyu, "Ginyu"},
+            {SenseiID::Frieza, "Frieza"},
+            {SenseiID::Tapion, "Tapion"},
+            {SenseiID::Sixteen, "Android 16"},
+            {SenseiID::Dabura, "Dabura"},
+            {SenseiID::Kibito, "Kibito"},
+            {SenseiID::Jinto, "Jinto"},
+            {SenseiID::Tsuna, "Tsuna"},
+            {SenseiID::Kurzak, "Kurzak"},
+            {SenseiID::Commoner, "Commoner"}
+    };
+
+    static const std::unordered_map<SenseiID, std::string> sensei_abbr = {
+            {SenseiID::Roshi, "Ro"},
+            {SenseiID::Piccolo, "Pi"},
+            {SenseiID::Krane, "Kr"},
+            {SenseiID::Nail, "Na"},
+            {SenseiID::Bardock, "Ba"},
+            {SenseiID::Ginyu, "Gi"},
+            {SenseiID::Frieza, "Fr"},
+            {SenseiID::Tapion, "Ta"},
+            {SenseiID::Sixteen, "16"},
+            {SenseiID::Dabura, "Da"},
+            {SenseiID::Kibito, "Ki"},
+            {SenseiID::Jinto, "Ji"},
+            {SenseiID::Tsuna, "Ts"},
+            {SenseiID::Kurzak, "Ku"},
+            {SenseiID::Commoner, "--"}
+    };
+
+    static const std::unordered_map<SenseiID, std::string> sensei_arts = {
+            {SenseiID::Roshi, "Kame Arts"},
+            {SenseiID::Piccolo, "Demon Taijutsu"},
+            {SenseiID::Krane, "Crane Arts"},
+            {SenseiID::Nail, "Tranquil Palm"},
+            {SenseiID::Bardock, "Brutal Beast"},
+            {SenseiID::Ginyu, "Flaunted Style"},
+            {SenseiID::Frieza, "Frozen Fist"},
+            {SenseiID::Tapion, "Shadow Grappling"},
+            {SenseiID::Sixteen, "Iron Hand"},
+            {SenseiID::Dabura, "Devil Dance"},
+            {SenseiID::Kibito, "Gentle Fist"},
+            {SenseiID::Jinto, "Star's Radiance"},
+            {SenseiID::Tsuna, "Sacred Tsunami"},
+            {SenseiID::Kurzak, "Adaptive Taijutsu"},
+            {SenseiID::Commoner, "Like a Bum"}
+    };
+
+    std::string getName(SenseiID id) {
+        if(auto found = sensei_name.find(id); found != sensei_name.end()) {
+            return found->second;
         }
+        return "Unknown";
     }
 
-    void load_sensei() {
-        sensei_map[Roshi] = new Sensei(Roshi, "Roshi", "Ro", "Kame Arts");
-        sensei_map[Piccolo] = new Sensei(Piccolo, "Piccolo", "Pi", "Demon Taijutsu");
-        sensei_map[Krane] = new Sensei(Krane, "Krane", "Kr", "Crane Arts");
-        sensei_map[Nail] = new Sensei(Nail, "Nail", "Na", "Tranquil Palm");
-        sensei_map[Bardock] = new Sensei(Bardock, "Bardock", "Ba", "Brutal Beast");
-        sensei_map[Ginyu] = new Sensei(Ginyu, "Ginyu", "Gi", "Flaunted Style");
-        sensei_map[Frieza] = new Sensei(Frieza, "Frieza", "Fr", "Frozen Fist");
-        sensei_map[Tapion] = new Sensei(Tapion, "Tapion", "Ta", "Shadow Grappling");
-        sensei_map[Sixteen] = new Sensei(Sixteen, "Android 16", "16", "Iron Hand");
-        sensei_map[Dabura] = new Sensei(Dabura, "Dabura", "Da", "Devil Dance");
-        sensei_map[Kibito] = new Sensei(Kibito, "Kibito", "Ki", "Gentle Fist");
-        sensei_map[Jinto] = new Sensei(Jinto, "Jinto", "Ji", "Star's Radiance");
-        sensei_map[Tsuna] = new Sensei(Tsuna, "Tsuna", "Ts", "Sacred Tsunami");
-        sensei_map[Kurzak] = new Sensei(Kurzak, "Kurzak", "Ku", "Adaptive Taijutsu");
-
-        sensei_map[Commoner] = new Sensei(Commoner, "Commoner", "--", "Like a Bum");
+    std::string getAbbr(SenseiID id) {
+        if(auto found = sensei_abbr.find(id); found != sensei_abbr.end()) {
+            return found->second;
+        }
+        return "Unknown";
     }
+
+    std::string getStyle(SenseiID id) {
+        if(auto found = sensei_arts.find(id); found != sensei_arts.end()) {
+            return found->second;
+        }
+        return "Unknown";
+    }
+
+    bool isPlayable(SenseiID id) {
+        return id != SenseiID::Commoner;
+    }
+
+
 
 }

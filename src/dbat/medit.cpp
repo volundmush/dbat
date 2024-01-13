@@ -234,7 +234,7 @@ void init_mobile(struct char_data *mob) {
     //GET_MAX_MANA(mob) = 0;
     GET_NDD(mob) = 0;
     mob->set(CharAppearance::Sex, SEX_MALE);
-    mob->chclass = sensei::sensei_map[sensei::Commoner];
+    mob->chclass = SenseiID::Commoner;
 
     GET_WEIGHT(mob) = rand_number(100, 200);
     mob->setHeight(rand_number(100, 200));
@@ -412,9 +412,10 @@ void medit_disp_class(struct descriptor_data *d) {
     int i;
     char buf[MAX_INPUT_LENGTH];
     clear_screen(d);
+    auto check = [](SenseiID id) {return true;};
 
-    for (const auto cl: sensei::sensei_map) {
-        sprintf(buf, "@g%2d@n) %s\r\n", cl.first, cl.second->getName().c_str());
+    for (const auto cl: sensei::filterSenseis(check)) {
+        sprintf(buf, "@g%2d@n) %s\r\n", cl, sensei::getName(cl).c_str());
         write_to_output(d, buf);
     }
     write_to_output(d, "Enter class number : ");
@@ -503,7 +504,7 @@ void medit_disp_menu(struct descriptor_data *d) {
                     position_types[(int) GET_POS(mob)],
                     position_types[(int) GET_DEFAULT_POS(mob)],
                     npc_personality[GET_PERSONALITY(mob)],
-                    flags, flag2, mob->chclass->getName().c_str(),
+                    flags, flag2, sensei::getName(mob->chclass).c_str(),
                     race::getName(mob->race).c_str(),
                     !OLC_SCRIPT(d).empty() ? "Set." : "Not Set.", size_names[get_size(mob)]
     );
@@ -881,15 +882,17 @@ void medit_parse(struct descriptor_data *d, char *arg) {
             OLC_MOB(d)->set(CharAlign::GoodEvil, LIMIT(i, -1000, 1000));
             break;
 
-        case MEDIT_CLASS:
+        case MEDIT_CLASS: {
+            auto sensei = static_cast<SenseiID>(i);
             //Check if the sensei requested exists
-            if (sensei::find_sensei_map_id(i, sensei::sensei_map) != nullptr) {
+            if (sensei::exists(sensei)) {
                 //Set the mob's Sensei to the chosen sensei
-                OLC_MOB(d)->chclass = sensei::find_sensei_map_id(i, sensei::sensei_map);
+                OLC_MOB(d)->chclass = sensei;
             }
             else {
                 write_to_output(d, "Couldn't find the requested Sensei!\r\n");
             }
+        }
             break;
 
         case MEDIT_COPY:

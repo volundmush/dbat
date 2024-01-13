@@ -534,15 +534,15 @@ namespace net {
         sendText("\n@WRace: @n");
     }
 
-    sensei::SenseiMap ChargenParser::valid_classes() {
-        return sensei::valid_for_race_pc(ch);
+    std::vector<SenseiID> ChargenParser::valid_classes() {
+        auto check = [&](SenseiID id) {return sensei::isPlayable(id) && sensei::isValidSenseiForRace(id, ch->race);};
+        return sensei::filterSenseis(check);
     }
 
     void ChargenParser::display_classes_sub() {
-        auto v_classes = valid_classes();
         int i = 0;
-        for (const auto &s: v_classes)
-            sendText(fmt::format("@C{}@n{}", s.second->getName().c_str(), !(++i % 2) ? "\r\n" : "	"));
+        for (const auto &s: valid_classes())
+            sendText(fmt::format("@C{}@n{}", sensei::getName(s).c_str(), !(++i % 2) ? "\r\n" : "	"));
     }
 
     void ChargenParser::display_classes() {
@@ -572,8 +572,7 @@ namespace net {
 
     void ChargenParser::parse(const std::string &arg) {
         std::optional<RaceID> chosen_race;
-        sensei::Sensei *chosen_sensei;
-        sensei::SenseiMap v_sensei;
+        std::optional<SenseiID> chosen_sensei;
         bool penalty = false, moveon = false;
         int roll = rand_number(1, 6);
         int value;
@@ -2166,36 +2165,26 @@ namespace net {
                                 return;
                         }
                         break;
-                    default:
-                        chosen_sensei = sensei::find_sensei_map(arg, valid_classes());
+                    default: {
+                        auto check = [&](SenseiID id) {return sensei::isPlayable(id) && sensei::isValidSenseiForRace(id, ch->race);};
+                        chosen_sensei = sensei::findSensei(arg, check);
                         if (!chosen_sensei) {
                             sendText("\r\nThat's not a sensei.\r\nSensei: ");
                             return;
                         }
 
+                        auto sensei = chosen_sensei.value();
+
                         switch (state) {
                             case CON_CLASS_HELP:
-                                show_help(conn, chosen_sensei->getName().c_str());
-                                chosen_sensei = nullptr;
+                                show_help(conn, sensei::getName(sensei).c_str());
+                                chosen_sensei.reset();
                                 return;
                             case CON_QCLASS:
-                                if (chosen_sensei->getID() == sensei::Kibito && !IS_KAI(ch) &&
-                                    conn->account->rpp < 10) {
-                                    sendText("\r\nIt costs 10 RPP to select Kibito unless you are a Kai.\r\nSensei: ");
-                                    return;
-                                } else {
-                                    ch->chclass = chosen_sensei;
-                                    if (chosen_sensei->getID() == sensei::Kibito && !IS_KAI(ch)) {
-                                        if (conn->account->rpp >= 10)
-                                            conn->account->rpp -= 10;
-                                        else
-                                            conn->account->rpp -= 10;
-
-                                        sendText("\r\n10 RPP deducted from your bank since you are not a kai.\n");
-                                    }
-                                }
+                                ch->chclass = sensei;
                                 break;
                         }
+                    }
                 }
 
                 if (IS_ANDROID(ch)) {

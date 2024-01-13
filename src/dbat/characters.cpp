@@ -93,7 +93,7 @@ void char_data::resurrect(ResurrectionMode mode) {
     if (GET_DROOM(this) != NOWHERE && GET_DROOM(this) != 0 && GET_DROOM(this) != 1) {
         char_to_room(this, real_room(GET_DROOM(this)));
     } else {
-        char_to_room(this, real_room(this->chclass->senseiStartRoom()));
+        char_to_room(this, real_room(sensei::getStartRoom(chclass)));
     }
     look_at_room(in_room, this, 0);
 
@@ -206,26 +206,6 @@ static std::map<int, uint16_t> grav_threshold = {
         {5000,  100000000},
         {10000, 200000000}
 };
-
-bool char_data::can_tolerate_gravity(int grav) {
-    if (IS_NPC(this)) return true;
-    int tolerance = 0;
-    tolerance = std::max(tolerance, this->chclass->getGravTolerance());
-    if (tolerance >= grav)
-        return true;
-    return GET_MAX_HIT(this) >= grav_threshold[grav];
-}
-
-
-int char_data::calcTier() {
-    auto level = get(CharNum::Level);
-    int tier = level / 10;
-    if ((level % 10) == 0)
-        tier--;
-    tier = std::max(tier, 0);
-    tier = std::min(tier, 9);
-    return tier;
-}
 
 int64_t char_data::calc_soft_cap() {
     auto level = get(CharNum::Level);
@@ -1326,7 +1306,7 @@ room_vnum char_data::normalizeLoadRoom(room_vnum in) {
             lroom = 100;
             GET_EXP(this) = 0;
         } else {
-            lroom = chclass->senseiStartRoom();
+            lroom = sensei::getStartRoom(chclass);
         }
     }
     else {

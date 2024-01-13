@@ -115,28 +115,11 @@ int mag_manacost(struct char_data *ch, int spellnum) {
 
 
 int mag_kicost(struct char_data *ch, int spellnum) {
-    int whichclass, i, min, tval;
-    if (CONFIG_ALLOW_MULTICLASS) {
-        /* find the cheapest class to cast it */
-        min = MAX(SINFO.ki_max - (SINFO.ki_change *
-                                  (GET_LEVEL(ch) - SINFO.min_level[(int) GET_LEVEL(ch)])),
-                  SINFO.ki_min);
-        whichclass = GET_CLASS(ch);
-        for (i = 0; i < NUM_CLASSES; i++) {
-            tval = MAX(SINFO.ki_max - (SINFO.ki_change *
-                                       (GET_LEVEL(ch) - SINFO.min_level[i])),
-                       SINFO.ki_min);
-            if (tval < min) {
-                min = tval;
-                whichclass = i;
-            }
-        }
-        return min;
-    } else {
-        return MAX(SINFO.ki_max - (SINFO.ki_change *
-                                   (GET_LEVEL(ch) - SINFO.min_level[(int) GET_CLASS(ch)])),
-                   SINFO.ki_min);
-    }
+    int i, min, tval;
+    SenseiID whichclass;
+    return MAX(SINFO.ki_max - (SINFO.ki_change *
+                               (GET_LEVEL(ch) - SINFO.min_level[(int) GET_CLASS(ch)])),
+               SINFO.ki_min);
 }
 
 

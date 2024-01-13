@@ -650,7 +650,7 @@ SPECIAL(guild_guard) {
             continue;
 
         /* Allow the people of the guild through. */
-        if (!IS_NPC(ch) && ch->chclass->getID() != i)
+        if (!IS_NPC(ch) && (int)ch->chclass != i)
             continue;
 
         send_to_char(ch, "%s", buf);

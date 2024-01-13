@@ -83,7 +83,7 @@ enum class SenseiID : uint8_t {
     Jinto = 11,
     Tsuna = 12,
     Kurzak = 13,
-    Commoner = 255
+    Commoner = 14
 };
 
 enum class FormID : uint8_t {

@@ -887,7 +887,7 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
 
     skill_num = find_skill_num(argument, SKTYPE_SKILL);
 
-    if (strstr(sensei_style[GET_CLASS(ch)], argument)) {
+    if (strstr(sensei::getStyle(ch->chclass).c_str(), argument)) {
         skill_num = 539;
     }
 
@@ -984,7 +984,7 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
                         if (skill_num != 539)
                             send_to_char(ch, "You practice and master the basics!\r\n");
                         else
-                            send_to_char(ch, "You practice the basics of %s\r\n", sensei_style[GET_CLASS(ch)]);
+                            send_to_char(ch, "You practice the basics of %s\r\n", sensei::getStyle(ch->chclass));
                         SET_SKILL(ch, skill_num, GET_SKILL_BASE(ch, skill_num) + rand_number(10, 25));
                         ch->modPractices(-pointcost);
                         if (GET_FORGETING(ch) != 0 && GET_SKILL_BASE(ch, GET_FORGETING(ch)) < 30) {
@@ -1010,7 +1010,7 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
                         send_to_char(ch, "You practice for a while and manage to advance your technique. +1 (%d/%d)\r\n",
                                      GET_SKILL_BASE(ch, skill_num) + 1, highest);
                     else
-                        send_to_char(ch, "You practice the basics of %s. +1 (%d/%d)\r\n", sensei_style[GET_CLASS(ch)],
+                        send_to_char(ch, "You practice the basics of %s. +1 (%d/%d)\r\n", sensei::getStyle(ch->chclass),
                                      GET_SKILL_BASE(ch, skill_num) + 1, highest);
                     SET_SKILL(ch, skill_num, GET_SKILL_BASE(ch, skill_num) + 1);
                     ch->modPractices(-pointcost);
@@ -1051,8 +1051,6 @@ void handle_train(struct char_data *keeper, int guild_nr, struct char_data *ch, 
 
 
 void handle_gain(struct char_data *keeper, int guild_nr, struct char_data *ch, char *argument) {
-    int whichclass = GET_CLASS(ch);
-
     skip_spaces(&argument);
     auto rpp_cost = rpp_to_level(ch);
 
@@ -1062,9 +1060,9 @@ void handle_gain(struct char_data *keeper, int guild_nr, struct char_data *ch, c
         } else if (rpp_cost <= GET_RP(ch)) {
             ch->modRPP(-rpp_cost);
             send_to_char(ch, "@D(@cRPP@W: @w-%d@D)@n\n\n", rpp_cost);
-            gain_level(ch, whichclass);
+            gain_level(ch);
         } else {
-            gain_level(ch, whichclass);
+            gain_level(ch);
         }
     } else {
         send_to_char(ch, "You are not yet ready for further advancement.\r\n");

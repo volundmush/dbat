@@ -1224,9 +1224,11 @@ ACMD(do_train) {
         total += total * 0.15;
     }
 
-    int sensei = -1;
+    auto sensei = ch->chclass;
+    bool senseiPresent = false;
 
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) == ch->chclass->senseiLocationID()) {
+    if (GET_ROOM_VNUM(IN_ROOM(ch)) == sensei::getLocation(sensei)) {
+        senseiPresent = true;
         if (!(GET_GOLD(ch) >= 8 && GET_PRACTICES(ch) >= 1)) {
             send_to_char(ch, "It costs 8 Zenni and 1 PS to train with your sensei.\r\n");
             return;
@@ -1242,8 +1244,7 @@ ACMD(do_train) {
             total *= 300;
         else if (GET_LEVEL(ch) >= 10)
             total *= 150;
-        sensei = ch->chclass->getID();
-        send_to_char(ch, "@G%s begins to instruct you in training technique.@n\r\n", ch->chclass->getName().c_str());
+        send_to_char(ch, "@G%s begins to instruct you in training technique.@n\r\n", sensei::getName(sensei).c_str());
     }
 
     if (total > GET_MAX_HIT(ch) * 2) {
@@ -1258,7 +1259,7 @@ ACMD(do_train) {
         bonus = 1;
     }
 
-    if (sensei < 0)
+    if (!senseiPresent)
         cost = ((total / 20) + (GET_MAX_MOVE(ch) / 50));
     else
         cost = ((total / 25) + (GET_MAX_MOVE(ch) / 60));
@@ -1532,7 +1533,7 @@ ACMD(do_train) {
     if (GET_BONUS(ch, BONUS_LONER)) {
         plus += plus * 0.05;
     }
-    if (sensei > -1) {
+    if (senseiPresent) {
         plus += plus * 0.2;
     }
 
@@ -1571,7 +1572,7 @@ ACMD(do_train) {
             break;
     }
 
-    if (sensei > -1) {
+    if (senseiPresent) {
         ch->mod(CharMoney::Carried, -8);
         ch->modPractices(-1);
     }
@@ -2765,7 +2766,7 @@ ACMD(do_telepathy) {
                 ch->decCurKI(ch->getMaxKI() / 40);
                 send_to_char(ch, "@GName      @D: @W%s@n\r\n", GET_NAME(vict));
                 send_to_char(ch, "@GRace      @D: @W%s@n\r\n", race::getName(vict->race).c_str());
-                send_to_char(ch, "@GSensei    @D: @W%s@n\r\n", vict->chclass->getName().c_str());
+                send_to_char(ch, "@GSensei    @D: @W%s@n\r\n", sensei::getName(vict->chclass).c_str());
                 send_to_char(ch, "@GStr       @D: @W%d@n\r\n", GET_STR(vict));
                 send_to_char(ch, "@GCon       @D: @W%d@n\r\n", GET_CON(vict));
                 send_to_char(ch, "@GInt       @D: @W%d@n\r\n", GET_INT(vict));

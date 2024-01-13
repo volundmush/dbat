@@ -382,7 +382,7 @@ nlohmann::json char_data::serializeBase() {
     if(title && strlen(title)) j["title"] = title;
     j["race"] = race;
 
-    if(chclass) j["chclass"] = chclass->getID();
+    j["chclass"] = chclass;
     if(weight != 0.0) j["weight"] = weight;
 
     for(auto i = 0; i < affected_by.size(); i++)
@@ -450,9 +450,7 @@ void char_data::deserializeBase(const nlohmann::json &j) {
     if(j.contains("title")) title = strdup(j["title"].get<std::string>().c_str());
     if(j.contains("race")) race = j["race"].get<RaceID>();
 
-    ::sensei::SenseiID c = ::sensei::Commoner;
-    if(j.contains("chclass")) c = j["chclass"].get<::sensei::SenseiID>();
-    chclass = ::sensei::sensei_map[c];
+    if(j.contains("chclass")) chclass = static_cast<SenseiID>(std::min(14, j["chclass"].get<int>()));
 
     if(j.contains("weight")) weight = j["weight"];
 
@@ -588,9 +586,7 @@ nlohmann::json char_data::serializeInstance() {
     if(stupidkiss) j["stupidkiss"] = stupidkiss;
     if(suppression) j["suppression"] = suppression;
     if(tail_growth) j["tail_growth"] = tail_growth;
-    for(auto i = 0; i < 6; i++) {
-        if(transcost[i]) j["transcost"].push_back(std::make_pair(i, transcost[i]));
-    }
+
     for(auto i = 0; i < 3; i++) {
         if(saving_throw[i]) j["saving_throw"].push_back(std::make_pair(i, saving_throw[i]));
     }
@@ -611,7 +607,7 @@ nlohmann::json char_data::serializeInstance() {
     if (poofout && strlen(poofout)) j["poofout"] = poofout;
     if(players.contains(last_tell)) j["last_tell"] = last_tell;
 
-    if(transclass) j["transclass"] = transclass;
+    j["transBonus"] = transBonus;
 
     return j;
 }
@@ -752,11 +748,7 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
     if(j.contains("stupidkiss")) stupidkiss = j["stupidkiss"];
     if(j.contains("suppression")) suppression = j["suppression"];
     if(j.contains("tail_growth")) tail_growth = j["tail_growth"];
-    if(j.contains("transcost")) {
-        for(auto t : j["transcost"]) {
-            transcost[t[0].get<int>()] = t[1];
-        }
-    }
+
     if(j.contains("saving_throw")) {
         for(auto t : j["saving_throw"]) {
             saving_throw[t[0].get<int>()] = t[1];

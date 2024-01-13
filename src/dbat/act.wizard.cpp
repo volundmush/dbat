@@ -3565,8 +3565,6 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
     int64_t value = 0;
     room_rnum rnum;
     room_vnum rvnum;
-    sensei::SenseiMap v_sensei;
-    sensei::Sensei *chosen_sensei;
 
     /* Check to make sure all the levels are correct */
     if (GET_ADMLEVEL(ch) != ADMLVL_IMPL) {
@@ -3817,12 +3815,15 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             break;
         case 38: SET_OR_REMOVE(PLR_FLAGS(vict), PLR_DELETED);
             break;
-        case 39:
-            if (!(chosen_sensei = sensei::find_sensei(val_arg))) {
-                send_to_char(ch, "That is not a class.\r\n");
+        case 39: {
+            auto check = [&](SenseiID id) {return sensei::isPlayable(id) && sensei::isValidSenseiForRace(id, vict->race);};
+            auto chosen_sensei = sensei::findSensei(val_arg, check);
+            if (!chosen_sensei) {
+                send_to_char(ch, "That is not a sensei. Or, it is invalid for the target's race.\r\n");
                 return (0);
             }
-            vict->chclass = chosen_sensei;
+            vict->chclass = chosen_sensei.value();
+        }
             break;
         case 40: SET_OR_REMOVE(PLR_FLAGS(vict), PLR_NOWIZLIST);
             break;

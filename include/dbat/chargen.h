@@ -25,7 +25,7 @@ namespace net {
         std::vector<RaceID> valid_races();
         void display_races();
         void display_races_sub();
-        sensei::SenseiMap valid_classes();
+        std::vector<SenseiID> valid_classes();
         void display_classes_sub();
         void display_classes();
         void display_races_help();

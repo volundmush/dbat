@@ -4864,7 +4864,7 @@ ACMD(do_score) {
             send_to_char(ch, "  @D|  @CClan@D: @W%-64s@D|@n\n", GET_CLAN(ch));
         }
         send_to_char(ch, "  @D|  @CRace@D: @W%10s@D,  @CSensei@D: @W%15s@D,     @CArt@D: @W%-17s@D|@n\n", race::getName(ch->race),
-                     ch->chclass->getName().c_str(), ch->chclass->getStyleName().c_str());
+                     sensei::getName(ch->chclass).c_str(), sensei::getStyle(ch->chclass).c_str());
         char hei[300], wei[300];
         sprintf(hei, "%dcm", ch->getHeight());
         sprintf(wei, "%dkg", (int)ch->getWeight());
@@ -6169,8 +6169,6 @@ ACMD(do_who) {
             }
             if (who_room && (IN_ROOM(tch) != IN_ROOM(ch)))
                 continue;
-            if (showclass && !(showclass & (1 << GET_CLASS(tch))))
-                continue;
             if (showgroup && (!tch->master || !AFF_FLAGGED(tch, AFF_GROUP)))
                 continue;
             for (i = 0; i < num_ranks; i++)
@@ -6215,8 +6213,6 @@ ACMD(do_who) {
                 continue;
             if (PRF_FLAGGED(tch, PRF_HIDE) && tch != ch && GET_ADMLEVEL(ch) < ADMLVL_IMMORT)
                 continue;
-            if (showclass && !(showclass & (1 << GET_CLASS(tch))))
-                continue;
             if (showgroup && (!tch->master || !AFF_FLAGGED(tch, AFF_GROUP)))
                 continue;
             if (showleader && (!tch->followers || !AFF_FLAGGED(tch, AFF_GROUP)))
@@ -6224,7 +6220,7 @@ ACMD(do_who) {
 
             if (short_list) {
                 send_to_char(ch, "               @B[@W%3d @Y%s @C%s@B]@W %-12.12s@n%s@n",
-                             GET_LEVEL(tch), race::getAbbr(tch->race), tch->chclass->getAbbr().c_str(), GET_NAME(tch),
+                             GET_LEVEL(tch), race::getAbbr(tch->race), sensei::getAbbr(tch->chclass).c_str(), GET_NAME(tch),
                              ((!(++num_can_see % 4)) ? "\r\n" : ""));
             } else {
                 num_can_see++;
@@ -6421,10 +6417,6 @@ ACMD(do_users) {
             }
             if (outlaws && !PLR_FLAGGED(tch, PLR_KILLER) &&
                 !PLR_FLAGGED(tch, PLR_THIEF))
-                continue;
-            if (showclass && !(showclass & (1 << GET_CLASS(tch))))
-                continue;
-            if (showrace && !(showrace & (1 << (int)GET_RACE(tch))))
                 continue;
             if (GET_INVIS_LEV(tch) > GET_ADMLEVEL(ch))
                 continue;
@@ -7615,7 +7607,7 @@ ACMD(do_whois) {
     } else {
         send_to_char(ch,
                      "@cName  @D: @w%s\r\n@cSensei@D: @w%s\r\n@cRace  @D: @w%s\r\n@cTitle @D: @w%s@n\r\n@cClan  @D: @w%s@n\r\n",
-                     GET_NAME(victim), victim->chclass->getName(), race::getName(victim->race),
+                     GET_NAME(victim), sensei::getName(victim->chclass), race::getName(victim->race),
                      GET_TITLE(victim), clan ? buf : "None.");
         if (clan == true && !strstr(GET_CLAN(victim), "Applying")) {
             if (checkCLAN(victim) == true) {

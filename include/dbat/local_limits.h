@@ -16,7 +16,7 @@ extern void mutant_limb_regen(struct char_data *ch);
 
 extern void set_title(struct char_data *ch, char *title);
 
-extern void gain_level(struct char_data *ch, int whichclass);
+extern void gain_level(struct char_data *ch);
 
 extern void gain_exp(struct char_data *ch, int64_t gain);
 
