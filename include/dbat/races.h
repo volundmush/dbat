@@ -30,6 +30,7 @@ namespace race {
     extern int64_t getSoftCap(RaceID id, int level);
     extern bool isSenseable(RaceID id);
     extern int getSize(RaceID id);
+    extern bool exists(RaceID id);
 
     extern double getModifier(struct char_data *ch, int location, int specific = 0);
 

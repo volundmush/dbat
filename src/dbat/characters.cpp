@@ -23,31 +23,30 @@ static std::string robot = "Robotic-Humanoid", robot_lower = "robotic-humanoid",
 
 
 std::string char_data::juggleRaceName(bool capitalized) {
-    if (!race) return unknown;
 
     auto apparent = race;
 
     switch (apparent) {
-        case Hoshijin:
+        case RaceID::Hoshijin:
             if (mimic) apparent = *mimic;
             break;
-        case Halfbreed:
+        case RaceID::Halfbreed:
             switch (RACIAL_PREF(this)) {
                 case 1:
-                    apparent = Human;
+                    apparent = RaceID::Human;
                     break;
                 case 2:
-                    apparent = Saiyan;
+                    apparent = RaceID::Saiyan;
                     break;
             }
             break;
-        case Android:
+        case RaceID::Android:
             switch (RACIAL_PREF(this)) {
                 case 1:
-                    apparent = Android;
+                    apparent = RaceID::Android;
                     break;
                 case 2:
-                    apparent = Human;
+                    apparent = RaceID::Human;
                     break;
                 case 3:
                     if (capitalized) {
@@ -57,9 +56,9 @@ std::string char_data::juggleRaceName(bool capitalized) {
                     }
             }
             break;
-        case Saiyan:
+        case RaceID::Saiyan:
             if (PLR_FLAGGED(this, PLR_TAILHIDE)) {
-                apparent = Human;
+                apparent = RaceID::Human;
             }
             break;
     }
@@ -769,45 +768,28 @@ void char_data::restoreLimbs(bool announce) {
 
 void char_data::gainTail(bool announce) {
     if (!race::hasTail(race)) return;
-    switch (race) {
-        case Icer:
-        case BioAndroid:
-            playerFlags.set(PLR_TAIL);
-        break;
-        case Saiyan:
-        case Halfbreed:
-            playerFlags.set(PLR_STAIL);
-        if (MOON_OK(this)) {
-            oozaru_transform(this);
-        }
-        break;
+    playerFlags.set(PLR_TAIL);
+    if(announce) {
+        send_to_char(this, "@wYour tail grows back.@n\r\n");
+        act("$n@w's tail grows back.@n", true, this, nullptr, nullptr, TO_ROOM);
+    }
+
+    if (MOON_OK(this)) {
+        oozaru_transform(this);
     }
 }
 
 void char_data::loseTail() {
     if (!race::hasTail(race)) return;
-    switch (race) {
-        case Icer:
-        case BioAndroid:
-            playerFlags.reset(PLR_TAIL);
-        remove_limb(this, 6);
-        GET_TGROWTH(this) = 0;
-        break;
-        case Saiyan:
-        case Halfbreed:
-            playerFlags.reset(PLR_STAIL);
-        remove_limb(this, 5);
-        if (playerFlags.test(PLR_OOZARU)) {
-            oozaru_revert(this);
-        }
-        GET_TGROWTH(this) = 0;
-        break;
-    }
+    playerFlags.reset(PLR_TAIL);
+    remove_limb(this, 6);
+    GET_TGROWTH(this) = 0;
+    oozaru_revert(this);
 }
 
 bool char_data::hasTail() {
     if(!race::hasTail(race)) return false;
-    return playerFlags.test(PLR_TAIL) || playerFlags.test(PLR_STAIL);
+    return playerFlags.test(PLR_TAIL);
 }
 
 

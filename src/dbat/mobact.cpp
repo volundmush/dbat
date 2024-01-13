@@ -340,7 +340,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
                 next_v = vict->next_in_room;
                 if (vict == ch)
                     continue;
-                if (IS_NPC(vict) && vict->race->raceIsPeople() && FIGHTING(vict) && done == false) {
+                if (IS_NPC(vict) && race::isPeople(vict->race) && FIGHTING(vict) && done == false) {
                     if (!is_sparring(vict) && !is_sparring(ch) && GET_HIT(vict) < GET_HIT(ch) * 0.6 &&
                         axion_dice(0) >= 90) {
                         act("@c$n@C rushes to @c$N's@C aid!@n", true, ch, nullptr, vict, TO_ROOM);
@@ -377,7 +377,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
                 next_v = vict->next_in_room;
                 if (vict == ch)
                     continue;
-                if (IS_NPC(vict) && vict->race->raceIsPeople() && FIGHTING(vict) && done == false) {
+                if (IS_NPC(vict) && race::isPeople(vict->race) && FIGHTING(vict) && done == false) {
                     if (!is_sparring(vict) && !is_sparring(ch) && GET_HIT(vict) < GET_HIT(ch) * 0.6 &&
                         axion_dice(0) >= 70) {
                         act("@c$n@C rushes to @c$N's@C aid!@n", true, ch, nullptr, vict, TO_ROOM);

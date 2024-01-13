@@ -673,7 +673,7 @@ static void update_flags(struct char_data *ch) {
         ch->affected_by.reset(AFF_ENSNARED);
     }
 
-    if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && PLR_FLAGGED(ch, PLR_TRANS1) && !PLR_FLAGGED(ch, PLR_FPSSJ)) {
+    if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && (ch->form == FormID::SuperSaiyan) && !PLR_FLAGGED(ch, PLR_FPSSJ)) {
         GET_ABSORBS(ch) += 1;
         if (GET_ABSORBS(ch) >= 300) {
             send_to_char(ch,
@@ -683,29 +683,19 @@ static void update_flags(struct char_data *ch) {
         }
     }
 
-    if (!IS_NPC(ch) && !PLR_FLAGGED(ch, PLR_STAIL) && !PLR_FLAGGED(ch, PLR_NOGROW) &&
-        (IS_SAIYAN(ch) || IS_HALFBREED(ch))) {
-        if (RACIAL_PREF(ch) == 1 && rand_number(1, 50) >= 40) {
-            GET_TGROWTH(ch) += 1;
-        } else if (RACIAL_PREF(ch) != 1 || IS_SAIYAN(ch)) {
-            GET_TGROWTH(ch) += 1;
-        }
-        if (GET_TGROWTH(ch) >= 10) {
-            send_to_char(ch, "@wYour tail grows back.@n\r\n");
-            act("$n@w's tail grows back.@n", true, ch, nullptr, nullptr, TO_ROOM);
-            ch->gainTail(ch);
-            GET_TGROWTH(ch) = 0;
+    if(race::hasTail(ch->race) && !PLR_FLAGGED(ch, PLR_TAIL) && !PLR_FLAGGED(ch, PLR_NOGROW)) {
+        int growth = 0;
+        if(IS_HALFBREED(ch) && RACIAL_PREF(ch) == 1)
+            growth = 1 ? rand_number(1, 50) >= 40 : 0;
+        else
+            growth = 1;
+        ch->tail_growth += growth;
+        if(ch->tail_growth >= 10) {
+            ch->gainTail(true);
+            ch->tail_growth = 0;
         }
     }
-    if (!IS_NPC(ch) && !PLR_FLAGGED(ch, PLR_TAIL) && (IS_ICER(ch) || IS_BIO(ch))) {
-        GET_TGROWTH(ch) += 1;
-        if (GET_TGROWTH(ch) >= 10) {
-            send_to_char(ch, "@wYour tail grows back.@n\r\n");
-            act("$n@w's tail grows back.@n", true, ch, nullptr, nullptr, TO_ROOM);
-            ch->gainTail(ch);
-            GET_TGROWTH(ch) = 0;
-        }
-    }
+
     if (AFF_FLAGGED(ch, AFF_MBREAK) && rand_number(1, 3 + sick_fail) == 2) {
         send_to_char(ch, "@wYour mind is no longer in turmoil, you can charge ki again.@n\r\n");
         ch->affected_by.reset(AFF_MBREAK);

@@ -3512,7 +3512,6 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
 
     mob->setAge(birth_age(mob));
     mob->time.created = mob->time.logon = time(nullptr); /* why not */
-    mob->time.maxage = max_age(mob);
     mob->time.played = 0.0;
     mob->time.logon = time(nullptr);
     MOB_LOADROOM(mob) = NOWHERE;
@@ -4368,7 +4367,6 @@ void init_char(struct char_data *ch) {
 
     /*ch->time.birth = time(0) - birth_age(ch);*/
     ch->time.logon = ch->time.created = time(nullptr);
-    ch->time.maxage = ch->time.birth + max_age(ch);
     ch->time.played = 0.0;
 
     GET_HOME(ch) = 1;

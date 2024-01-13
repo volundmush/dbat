@@ -9,9 +9,9 @@
 #include "dbat/charmenu.h"
 #include "dbat/players.h"
 
-static     const std::map<race::RaceID, std::map<CharAttribute, std::pair<int, int>>> startAttrRanges = {
+static const std::map<RaceID, std::map<CharAttribute, std::pair<int, int>>> startAttrRanges = {
         {
-            race::RaceID::Saiyan, {
+            RaceID::Saiyan, {
                 {CharAttribute::Strength, {12, 18}},
                 {CharAttribute::Constitution, {12, 18}},
                 {CharAttribute::Wisdom, {8, 16}},
@@ -21,7 +21,7 @@ static     const std::map<race::RaceID, std::map<CharAttribute, std::pair<int, i
             }
         },
         {
-            race::RaceID::Halfbreed, {
+            RaceID::Halfbreed, {
                 {CharAttribute::Strength, {10, 18}},
                 {CharAttribute::Constitution, {10, 18}},
                 {CharAttribute::Wisdom, {8, 18}},
@@ -31,7 +31,7 @@ static     const std::map<race::RaceID, std::map<CharAttribute, std::pair<int, i
             }
         },
         {
-            race::RaceID::Human, {
+            RaceID::Human, {
                 {CharAttribute::Strength, {8, 18}},
                 {CharAttribute::Constitution, {8, 18}},
                 {CharAttribute::Wisdom, {10, 18}},
@@ -41,7 +41,7 @@ static     const std::map<race::RaceID, std::map<CharAttribute, std::pair<int, i
             }
         },
         {
-            race::RaceID::Hoshijin, {
+            RaceID::Hoshijin, {
                 {CharAttribute::Strength, {10, 18}},
                 {CharAttribute::Constitution, {9, 18}},
                 {CharAttribute::Wisdom, {9, 18}},
@@ -51,7 +51,7 @@ static     const std::map<race::RaceID, std::map<CharAttribute, std::pair<int, i
             }
         },
         {
-            race::RaceID::Namekian, {
+            RaceID::Namekian, {
                 {CharAttribute::Strength, {9, 18}},
                 {CharAttribute::Constitution, {9, 18}},
                 {CharAttribute::Wisdom, {12, 18}},
@@ -61,7 +61,7 @@ static     const std::map<race::RaceID, std::map<CharAttribute, std::pair<int, i
             }
         },
         {
-            race::RaceID::Arlian, {
+            RaceID::Arlian, {
                 {CharAttribute::Strength, {15, 20}},
                 {CharAttribute::Constitution, {15, 20}},
                 {CharAttribute::Wisdom, {8, 16}},
@@ -71,7 +71,7 @@ static     const std::map<race::RaceID, std::map<CharAttribute, std::pair<int, i
             }
         },
         {
-            race::RaceID::Android, {
+            RaceID::Android, {
                 {CharAttribute::Strength, {12, 18}},
                 {CharAttribute::Constitution, {8, 18}},
                 {CharAttribute::Wisdom, {8, 16}},
@@ -81,7 +81,7 @@ static     const std::map<race::RaceID, std::map<CharAttribute, std::pair<int, i
             }
         },
         {
-            race::RaceID::BioAndroid, {
+            RaceID::BioAndroid, {
                 {CharAttribute::Strength, {14, 18}},
                 {CharAttribute::Constitution, {8, 18}},
                 {CharAttribute::Wisdom, {8, 18}},
@@ -91,7 +91,7 @@ static     const std::map<race::RaceID, std::map<CharAttribute, std::pair<int, i
             }
         },
         {
-            race::RaceID::Majin, {
+            RaceID::Majin, {
                 {CharAttribute::Strength, {11, 18}},
                 {CharAttribute::Constitution, {14, 18}},
                 {CharAttribute::Wisdom, {8, 14}},
@@ -101,7 +101,7 @@ static     const std::map<race::RaceID, std::map<CharAttribute, std::pair<int, i
             }
         },
         {
-            race::RaceID::Tuffle, {
+            RaceID::Tuffle, {
                 {CharAttribute::Strength, {8, 14}},
                 {CharAttribute::Constitution, {8, 14}},
                 {CharAttribute::Wisdom, {8, 18}},
@@ -111,7 +111,7 @@ static     const std::map<race::RaceID, std::map<CharAttribute, std::pair<int, i
             }
         },
         {
-            race::RaceID::Kai, {
+            RaceID::Kai, {
                 {CharAttribute::Strength, {9, 18}},
                 {CharAttribute::Constitution, {8, 18}},
                 {CharAttribute::Wisdom, {14, 18}},
@@ -121,7 +121,7 @@ static     const std::map<race::RaceID, std::map<CharAttribute, std::pair<int, i
             }
         },
         {
-            race::RaceID::Icer, {
+            RaceID::Icer, {
                 {CharAttribute::Strength, {10, 18}},
                 {CharAttribute::Constitution, {12, 18}},
                 {CharAttribute::Wisdom, {8, 18}},
@@ -131,7 +131,7 @@ static     const std::map<race::RaceID, std::map<CharAttribute, std::pair<int, i
             }
         },
         {
-            race::RaceID::Mutant, {
+            RaceID::Mutant, {
                 {CharAttribute::Strength, {9, 18}},
                 {CharAttribute::Constitution, {9, 18}},
                 {CharAttribute::Wisdom, {9, 18}},
@@ -141,7 +141,7 @@ static     const std::map<race::RaceID, std::map<CharAttribute, std::pair<int, i
             }
         },
         {
-            race::RaceID::Kanassan, {
+            RaceID::Kanassan, {
                 {CharAttribute::Strength, {8, 16}},
                 {CharAttribute::Constitution, {8, 16}},
                 {CharAttribute::Wisdom, {12, 18}},
@@ -151,7 +151,7 @@ static     const std::map<race::RaceID, std::map<CharAttribute, std::pair<int, i
             }
         },
         {
-            race::RaceID::Demon, {
+            RaceID::Demon, {
                 {CharAttribute::Strength, {11, 18}},
                 {CharAttribute::Constitution, {8, 18}},
                 {CharAttribute::Wisdom, {10, 18}},
@@ -161,7 +161,7 @@ static     const std::map<race::RaceID, std::map<CharAttribute, std::pair<int, i
             }
         },
         {
-            race::RaceID::Konatsu, {
+            RaceID::Konatsu, {
                 {CharAttribute::Strength, {10, 14}},
                 {CharAttribute::Constitution, {10, 14}},
                 {CharAttribute::Wisdom, {10, 16}},
@@ -514,16 +514,15 @@ namespace net {
     }
 
 
-    race::RaceMap ChargenParser::valid_races() {
-        return race::valid_for_sex_pc(GET_SEX(ch));
+    std::vector<RaceID> ChargenParser::valid_races() {
+        auto check = [&](RaceID id) {return race::getValidSexes(id).contains(GET_SEX(ch)) && race::isPlayable(id);};
+        return race::filterRaces(check);
     }
 
     void ChargenParser::display_races_sub() {
-        auto v_races = valid_races();
         int i = 0;
-        for (const auto &r: v_races)
-            sendText(fmt::format("@C{:^15}@D[@R{} RPP@D]@n{}", r.second->getName(), r.second->getRPPCost(),
-                      !(++i % 2) ? "\r\n" : "   "));
+        for (const auto &r: valid_races())
+            sendText(fmt::format("@C{:^15}@n{}", race::getName(r), !(++i % 2) ? "\r\n" : "   "));
     }
 
     void ChargenParser::display_races() {
@@ -572,8 +571,7 @@ namespace net {
     }
 
     void ChargenParser::parse(const std::string &arg) {
-        race::Race *chosen_race;
-        race::RaceMap v_races;
+        std::optional<RaceID> chosen_race;
         sensei::Sensei *chosen_sensei;
         sensei::SenseiMap v_sensei;
         bool penalty = false, moveon = false;
@@ -649,27 +647,26 @@ namespace net {
                                 return;
                         }
                         break;
-                    default:
-                        v_races = valid_races();
-                        chosen_race = race::find_race_map(arg, v_races);
+                    default: {
+                        auto check = [&](RaceID id) {return race::getValidSexes(id).contains(GET_SEX(ch)) && race::isPlayable(id);};
+                        chosen_race = race::findRace(arg, check);
                         if (!chosen_race) {
                             sendText("\r\nThat's not a race.\r\nRace: ");
                             return;
                         }
 
+                        auto race = chosen_race.value();
+
                         switch (state) {
                             case CON_QRACE:
-                                if (chosen_race->getRPPCost()) {
-                                    sendText(fmt::format("\r\n{} RPP will be paid upon your first level up.\r\n",
-                                              chosen_race->getRPPCost()));
-                                }
-                                ch->race = chosen_race;
-                                break;
+                                ch->race = race;
+                            break;
                             case CON_RACE_HELP:
-                                show_help(conn, chosen_race->getName().c_str());
-                                chosen_sensei = nullptr;
-                                return;
+                                show_help(conn, race::getName(race).c_str());
+                            chosen_race.reset();
+                            return;
                         }
+                    }
                 }
                 if (IS_HALFBREED(ch)) {
                     sendText("@YWhat race do you prefer to by identified with?\r\n");
@@ -1237,7 +1234,7 @@ namespace net {
                 stat_t basest = rand_number(30, 50);
                 stat_t baseki = rand_number(30, 50);
                 {
-                    auto defStats = startAttrRanges.at(ch->race->getID());
+                    auto defStats = startAttrRanges.at(ch->race);
                     for(auto &[attr, range] : defStats) {
                         ch->set(attr, rand_number(range.first, range.second));
                     }

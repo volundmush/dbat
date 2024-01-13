@@ -148,20 +148,27 @@ void set_height_and_weight_by_race(struct char_data *ch) {
 }
 
 
+struct race_flags {
+    int anti;
+    int only;
+};
+
+static const std::unordered_map<RaceID, race_flags> race_check = {
+    {RaceID::Human, {ITEM_ANTI_HUMAN, ITEM_ONLY_HUMAN}},
+    {RaceID::Saiyan, {ITEM_ANTI_SAIYAN, ITEM_ONLY_SAIYAN}},
+    {RaceID::Icer, {ITEM_ANTI_ICER, ITEM_ONLY_ICER}},
+    {RaceID::Konatsu, {ITEM_ANTI_KONATSU, ITEM_ONLY_KONATSU}},
+};
+
+
 int invalid_race(struct char_data *ch, struct obj_data *obj) {
     if (GET_ADMLEVEL(ch) >= ADMLVL_IMMORT)
         return false;
 
-    for(auto &[flag, race] : {{ITEM_ANTI_HUMAN, RaceID::Human},
-    {ITEM_ANTI_SAIYAN, RaceID::Saiyan}, {ITEM_ANTI_ICER, RaceID::Icer},
-    {ITEM_ANTI_KONATSU, RaceID::Konatsu}})
-        if(OBJ_FLAGGED(obj, flag) && ch->race == race) return true;
-
-    
-    for(auto &[flag, race] : {{ITEM_ONLY_HUMAN, RaceID::Human},
-    {ITEM_ONLY_SAIYAN, RaceID::Saiyan}, {ITEM_ONLY_ICER, RaceID::Icer},
-    {ITEM_ONLY_KONATSU, RaceID::Konatsu}})
-        if(OBJ_FLAGGED(obj, flag) && ch->race != race) return true;
+    for(auto &[rid, check] : race_check) {
+        if(OBJ_FLAGGED(obj, check.anti) && ch->race == rid) return true;
+        if(OBJ_FLAGGED(obj, check.only) && ch->race != rid) return true;
+    }
 
     return false;
 }
@@ -299,6 +306,11 @@ namespace race {
         RaceID::Kai, RaceID::Tuffle, RaceID::Hoshijin, RaceID::Animal, RaceID::Saiba, RaceID::Serpent, RaceID::Ogre,
         RaceID::Yardratian, RaceID::Arlian, RaceID::Dragon, RaceID::Mechanical, RaceID::Spirit
     };
+
+    bool exists(RaceID id) {
+        auto find = std::find(all_races.begin(), all_races.end(), id);
+        return find != all_races.end();
+    }
 
     std::vector<RaceID> getAll() {
         return all_races;

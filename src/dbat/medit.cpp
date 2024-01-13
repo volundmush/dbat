@@ -188,7 +188,7 @@ void medit_setup_new(struct descriptor_data *d) {
     GET_SDESC(mob) = strdup("the unfinished mob");
     GET_LDESC(mob) = strdup("An unfinished mob stands here.\r\n");
     GET_DDESC(mob) = strdup("It looks unfinished.\r\n");
-    mob->race = race::race_map[race::Human];
+    mob->race = RaceID::Human;
     SCRIPT(mob) = nullptr;
     mob->proto_script.clear();
     OLC_SCRIPT(d).clear();
@@ -428,8 +428,9 @@ void medit_disp_race(struct descriptor_data *d) {
     char buf[MAX_INPUT_LENGTH];
 
     clear_screen(d);
-    for (const auto &r: race::race_map) {
-        sprintf(buf, "@g%2d@n) %-20.20s  %s", r.first, r.second->getName().c_str(),
+    auto check = [](RaceID id) {return true;};
+    for (const auto &r: race::filterRaces(check)) {
+        sprintf(buf, "@g%2d@n) %-20.20s  %s", r, race::getName(r).c_str(),
                 !(++columns % 2) ? "\r\n" : "");
         write_to_output(d, buf);
     }
@@ -503,7 +504,7 @@ void medit_disp_menu(struct descriptor_data *d) {
                     position_types[(int) GET_DEFAULT_POS(mob)],
                     npc_personality[GET_PERSONALITY(mob)],
                     flags, flag2, mob->chclass->getName().c_str(),
-                    TRUE_RACE(mob),
+                    race::getName(mob->race).c_str(),
                     !OLC_SCRIPT(d).empty() ? "Set." : "Not Set.", size_names[get_size(mob)]
     );
 
@@ -517,7 +518,6 @@ void medit_disp_menu(struct descriptor_data *d) {
 void medit_parse(struct descriptor_data *d, char *arg) {
     int i = -1;
     char *oldtext = nullptr;
-    race::Race *chosen_race;
 
     if (OLC_MODE(d) > MEDIT_NUMERICAL_RESPONSE) {
         i = atoi(arg);
@@ -916,15 +916,16 @@ void medit_parse(struct descriptor_data *d, char *arg) {
                 write_to_output(d, "Please answer 'Y' or 'N': ");
             break;
 
-        case MEDIT_RACE:
-            chosen_race = race::find_race_map_id(i, race::race_map);
-            if (!chosen_race) {
+        case MEDIT_RACE: {
+            auto chosen_race = static_cast<RaceID>(i);
+            if (!race::exists(chosen_race)) {
                 write_to_output(d, "That's not a race!");
                 break;
             }
             OLC_MOB(d)->race = chosen_race;
             /*  Change racial size based on race choice. */
-            OLC_MOB(d)->setSize(OLC_MOB(d)->race->getSize());
+            OLC_MOB(d)->setSize(race::getSize(OLC_MOB(d)->race));
+        }
             break;
 
         case MEDIT_SIZE:

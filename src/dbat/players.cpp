@@ -218,7 +218,6 @@ int load_char(const char *name, struct char_data *ch) {
 
         ch->chclass = sensei::sensei_map[sensei::roshi];
         GET_LOG_USER(ch) = strdup("NOUSER");
-        ch->race = race::find_race_map_id(PFDEF_RACE, race::race_map);
         GET_SUPPRESS(ch) = PFDEF_SKIN;
         GET_FURY(ch) = PFDEF_HAIRL;
         GET_CLAN(ch) = strdup("None.");
@@ -237,7 +236,6 @@ int load_char(const char *name, struct char_data *ch) {
         GET_GAUNTLET(ch) = PFDEF_GAUNTLET;
         ch->energy = 1.0;
         ch->stamina = 1.0;
-        ch->mimic = nullptr;
 
 
         GET_LOADROOM(ch) = PFDEF_LOADROOM;
@@ -405,7 +403,7 @@ int load_char(const char *name, struct char_data *ch) {
                     } else if (!strcmp(tag, "Maji")) MAJINIZED(ch) = atoi(line);
                     else if (!strcmp(tag, "Majm")) load_majin(ch, line);
                     else if (!strcmp(tag, "Mimi"))
-                        ch->mimic = race::find_race_map_id(atoi(line), race::race_map);
+                        ch->mimic = (RaceID)atoi(line);
                     else if (!strcmp(tag, "MxAg")) ch->time.maxage = atol(line);
                     break;
 
@@ -440,7 +438,7 @@ int load_char(const char *name, struct char_data *ch) {
                     break;
 
                 case 'R':
-                    if (!strcmp(tag, "Race")) ch->race = race::find_race_map_id(atoi(line), race::race_map);
+                    if (!strcmp(tag, "Race")) ch->race = (RaceID)atoi(line);
                     else if (!strcmp(tag, "Raci")) ch->set(CharNum::RacialPref, atoi(line));
                     else if (!strcmp(tag, "rDis")) GET_RDISPLAY(ch) = strdup(line);
                     else if (!strcmp(tag, "Rela")) GET_RELAXCOUNT(ch) = atoi(line);
@@ -546,13 +544,6 @@ int load_char(const char *name, struct char_data *ch) {
         basic_mud_log("No birthday for user %s, using standard starting age determination", GET_NAME(ch));
         ch->time.birth = time(nullptr) - birth_age(ch);
     }
-
-    if (!ch->time.maxage) {
-        basic_mud_log("No max age for user %s, using standard max age determination", GET_NAME(ch));
-        ch->time.maxage = ch->time.birth + max_age(ch);
-    }
-
-    affect_total(ch);
 
     /* initialization for imms */
     if (GET_ADMLEVEL(ch) >= ADMLVL_IMMORT) {

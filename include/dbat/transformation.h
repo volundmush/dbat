@@ -11,7 +11,7 @@ namespace trans {
 
     extern double getModifier(struct char_data *ch, int location, int specific = 0);
 
-    extern double getStaminaDrain(struct char_data *ch, FormID form);
+    extern double getStaminaDrain(struct char_data *ch, FormID form, bool fighting = false);
 
     extern std::optional<int> getAppearanceMod(struct char_data *ch, FormID form, CharAppearance mode);
 

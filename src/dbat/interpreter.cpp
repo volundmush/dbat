@@ -904,27 +904,6 @@ char *three_arguments(char *argument, char *first_arg, char *second_arg, char *t
     return (one_argument(one_argument(one_argument(argument, first_arg), second_arg), third_arg)); /* >.> */
 }
 
-static race::RaceMap valid_races(descriptor_data *d) {
-    return race::valid_for_sex_pc(GET_SEX(d->character));
-}
-
-static void display_races_sub(descriptor_data *d) {
-    auto v_races = valid_races(d);
-    int i = 0;
-    for (const auto &r: v_races)
-        send_to_char(d->character, "@C%-15s@D[@R%i RPP@D]@n%s", r.second->getName().c_str(), r.second->getRPPCost(),
-                     !(++i % 2) ? "\r\n" : "   ");
-}
-
-void display_races(struct descriptor_data *d) {
-    send_to_char(d->character, "\r\n@YRace SELECTION menu:\r\n@D---------------------------------------\r\n@n");
-    display_races_sub(d);
-
-    send_to_char(d->character, "\n @BR@W) @CRandom Race Selection!\r\n@n");
-    send_to_char(d->character, "\n @BT@W) @CToggle between SELECTION/HELP Menu\r\n@n");
-    send_to_char(d->character, "\n@WRace: @n");
-}
-
 static sensei::SenseiMap valid_classes(descriptor_data *d) {
     return sensei::valid_for_race_pc(d->character);
 }
@@ -945,13 +924,6 @@ void display_classes(struct descriptor_data *d) {
     send_to_char(d->character, "\n@WSensei: @n");
 }
 
-void display_races_help(struct descriptor_data *d) {
-    send_to_char(d->character, "\r\n@YRace HELP menu:\r\n@G--------------------------------------------\r\n@n");
-    display_races_sub(d);
-
-    send_to_char(d->character, "\n @BT@W) @CToggle between SELECTION/HELP Menu\r\n@n");
-    send_to_char(d->character, "\n@WHelp on Race #: @n");
-}
 
 void display_classes_help(struct descriptor_data *d) {
     send_to_char(d->character, "\r\n@YClass HELP menu:\r\n@G-------------------------------------------\r\n@n");

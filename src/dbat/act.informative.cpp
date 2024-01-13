@@ -1074,7 +1074,7 @@ static void bringdesc(struct char_data *ch, struct char_data *tch) {
                     send_to_char(ch, "            @D[@cHair Color  @D: @WWhite.        @D]@n\r\n");
                 }
             } else if (IS_SAIYAN(tch) || IS_HALFBREED(tch)) {
-                if (PLR_FLAGGED(tch, PLR_TRANS1)) {
+                if (tch->form == FormID::SuperSaiyan) {
                     if (GET_HAIRL(tch) == HAIRL_LONG) {
                         send_to_char(ch, "            @D[@cHair Length @D: @WLong.         @D]@n\r\n");
                     } else if (GET_HAIRL(tch) == HAIRL_BALD) {
@@ -1089,7 +1089,7 @@ static void bringdesc(struct char_data *ch, struct char_data *tch) {
                     send_to_char(ch, "            @D[@cHair Style  @D: @WSpiky.        @D]@n\r\n");
                     send_to_char(ch, "            @D[@cHair Color  @D: @WGolden.       @D]@n\r\n");
                     send_to_char(ch, "            @D[@cEye Color   @D: @WEmerald.      @D]@n\r\n");
-                } else if (PLR_FLAGGED(tch, PLR_TRANS2)) {
+                } else if (tch->form == FormID::SuperSaiyan2) {
                     if (GET_HAIRL(tch) == HAIRL_LONG) {
                         send_to_char(ch, "            @D[@cHair Length @D: @WLong.         @D]@n\r\n");
                     } else if (GET_HAIRL(tch) == HAIRL_BALD) {
@@ -1104,12 +1104,12 @@ static void bringdesc(struct char_data *ch, struct char_data *tch) {
                     send_to_char(ch, "            @D[@cHair Style  @D: @WSharp Spikes. @D]@n\r\n");
                     send_to_char(ch, "            @D[@cHair Color  @D: @WGolden.       @D]@n\r\n");
                     send_to_char(ch, "            @D[@cEye Color   @D: @WEmerald.      @D]@n\r\n");
-                } else if (PLR_FLAGGED(tch, PLR_TRANS3)) {
+                } else if (tch->form == FormID::SuperSaiyan3) {
                     send_to_char(ch, "            @D[@cHair Length @D: @WReally Long.  @D]@n\r\n");
                     send_to_char(ch, "            @D[@cHair Style  @D: @WSpiky.        @D]@n\r\n");
                     send_to_char(ch, "            @D[@cHair Color  @D: @WGolden.       @D]@n\r\n");
                     send_to_char(ch, "            @D[@cEye Color   @D: @WAqua Green.   @D]@n\r\n");
-                } else if (PLR_FLAGGED(tch, PLR_TRANS4)) {
+                } else if (tch->form == FormID::SuperSaiyan4) {
                     send_to_char(ch, "            @D[@cHair Length @D: @WLong.        @D]@n\r\n");
                     send_to_char(ch, "            @D[@cHair Style  @D: @WSoft Spikes. @D]@n\r\n");
                     send_to_char(ch, "            @D[@cHair Color  @D: @WBlack.       @D]@n\r\n");
@@ -2770,17 +2770,11 @@ static void look_at_char(struct char_data *i, struct char_data *ch) {
         if (!PLR_FLAGGED(i, PLR_HEAD)) {
             send_to_char(ch, "            @D[@cHead        @D: @rMissing.             @D]@n\r\n");
         }
-        if (((IS_SAIYAN(i) || IS_HALFBREED(i)) && PLR_FLAGGED(i, PLR_STAIL)) && !PLR_FLAGGED(i, PLR_TAILHIDE)) {
-            send_to_char(ch, "            @D[@cTail        @D: @GHas.                 @D]@n\r\n");
-        }
-        if ((IS_SAIYAN(i) || IS_HALFBREED(i)) && (!PLR_FLAGGED(i, PLR_STAIL)) && (!PLR_FLAGGED(i, PLR_TAILHIDE))) {
-            send_to_char(ch, "            @D[@cTail        @D: @rMissing.             @D]@n\r\n");
-        }
-        if ((IS_ICER(i) || IS_BIO(i)) && PLR_FLAGGED(i, PLR_TAIL)) {
-            send_to_char(ch, "            @D[@cTail        @D: @GHas.                 @D]@n\r\n");
-        }
-        if ((IS_ICER(i) || IS_BIO(i)) && !PLR_FLAGGED(i, PLR_TAIL)) {
-            send_to_char(ch, "            @D[@cTail        @D: @rMissing.             @D]@n\r\n");
+        if (race::hasTail(i->race) && !PLR_FLAGGED(i, PLR_TAILHIDE)) {
+            if(PLR_FLAGGED(i, PLR_TAIL))
+                send_to_char(ch, "            @D[@cTail        @D: @GHas.                 @D]@n\r\n");
+            else
+                send_to_char(ch, "            @D[@cTail        @D: @rMissing.             @D]@n\r\n");
         }
     }
     send_to_char(ch, "\r\n");
@@ -5238,18 +5232,13 @@ ACMD(do_status) {
             send_to_char(ch, "            @D[@cLeft Leg    @D: @rMissing.         @D]@n\r\n");
         }
 
-        if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && PLR_FLAGGED(ch, PLR_STAIL)) {
-            send_to_char(ch, "            @D[@cTail        @D: @GHave.            @D]@n\r\n");
+        if(race::hasTail(ch->race) && !PLR_FLAGGED(ch, PLR_TAILHIDE)) {
+            if(PLR_FLAGGED(ch, PLR_TAIL))
+                send_to_char(ch, "            @D[@cTail        @D: @GHave.            @D]@n\r\n");
+            else
+                send_to_char(ch, "            @D[@cTail        @D: @rMissing.         @D]@n\r\n");
         }
-        if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && !PLR_FLAGGED(ch, PLR_STAIL)) {
-            send_to_char(ch, "            @D[@cTail        @D: @rMissing.         @D]@n\r\n");
-        }
-        if ((IS_ICER(ch) || IS_BIO(ch)) && PLR_FLAGGED(ch, PLR_TAIL)) {
-            send_to_char(ch, "            @D[@cTail        @D: @GHave.            @D]@n\r\n");
-        }
-        if ((IS_ICER(ch) || IS_BIO(ch)) && !PLR_FLAGGED(ch, PLR_TAIL)) {
-            send_to_char(ch, "            @D[@cTail        @D: @rMissing.         @D]@n\r\n");
-        }
+
         send_to_char(ch, "\r\n");
 
         send_to_char(ch, "         @D-----------------@YHunger@D/@yThirst@D-----------------@n\r\n");

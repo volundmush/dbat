@@ -26,6 +26,7 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/objsave.h"
 #include "dbat/act.informative.h"
+#include "dbat/transformation.h"
 
 /* Structures */
 struct char_data *combat_list = nullptr;    /* head of l-list of fighting chars */
@@ -946,52 +947,17 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
             }
         }
 
-        if (!IS_NPC(ch) && IS_TRANSFORMED(ch) && !IS_ICER(ch) && IS_NONPTRANS(ch)) {
-            auto tier = ch->race->getCurrentTransTier(ch);
-
-            if (ch->getCurST() < GET_MAX_MOVE(ch) / 60) {
-                if (!(tier == 1 && PLR_FLAGGED(ch, PLR_FPSSJ))) {
+        if (auto drain = trans::getStaminaDrain(ch, ch->form, true); drain > 0) {
+            if(ch->decCurSTPercent(drain) == 0) {
+                if(!trans::blockRevertDisallowed(ch, FormID::Base)) {
                     act("@mExhausted of stamina, your body forcibly reverts from its form.@n", true, ch, nullptr,
                         nullptr, TO_CHAR);
                     act("@C$n @wbreathing heavily, reverts from $s form, returning to normal.@n", true, ch, nullptr,
                         nullptr, TO_ROOM);
-                    if (GET_KAIOKEN(ch) < 1)
-                        do_kaioken(ch, "0", 0, 0);
-                    do_transform(ch, "revert", 0, 0);
+                    ch->form = FormID::Base;
+                    ch->remove_kaioken(true);
                 }
             }
-
-            if (ch->getCurST() >= GET_MAX_MOVE(ch) / 800 && PLR_FLAGGED(ch, PLR_TRANS1)) {
-                if (!PLR_FLAGGED(ch, PLR_FPSSJ)) {
-                    if (IS_SAIYAN(ch) && (ch->getCurLF()) >= (ch->getMaxLF()) * 0.7) {
-                        ch->decCurST(ch->getMaxST() / 900);
-                    } else
-                        ch->decCurST(ch->getMaxST() / 800);
-                }
-            } else if (ch->getCurST() >= GET_MAX_MOVE(ch) / 600 && PLR_FLAGGED(ch, PLR_TRANS2) && !IS_KONATSU(ch) &&
-                       !IS_KAI(ch) && !IS_NAMEK(ch)) {
-                if (IS_SAIYAN(ch) && (ch->getCurLF()) >= (ch->getMaxLF()) * 0.7) {
-                    ch->decCurST(ch->getMaxST() / 700);
-                } else
-                    ch->decCurST(ch->getMaxST() / 600);
-            } else if (ch->getCurST() >= GET_MAX_MOVE(ch) / 500 && PLR_FLAGGED(ch, PLR_TRANS2)) {
-                ch->decCurST(ch->getMaxST() / 500);
-            } else if (ch->getCurST() >= GET_MAX_MOVE(ch) / 400 && PLR_FLAGGED(ch, PLR_TRANS3) && !IS_SAIYAN(ch)) {
-                ch->decCurST(ch->getMaxST() / 400);
-            } else if (ch->getCurST() >= GET_MAX_MOVE(ch) / 250 && PLR_FLAGGED(ch, PLR_TRANS3)) {
-                if (IS_SAIYAN(ch) && (ch->getCurLF()) >= (ch->getMaxLF()) * 0.7) {
-                    ch->decCurST(ch->getMaxST() / 300);
-                } else
-                    ch->decCurST(ch->getMaxST() / 250);
-            } else if (ch->getCurST() >= GET_MAX_MOVE(ch) / 200 && PLR_FLAGGED(ch, PLR_TRANS4) && !IS_SAIYAN(ch)) {
-                ch->decCurST(ch->getMaxST() / 200);
-            } else if (ch->getCurST() >= GET_MAX_MOVE(ch) / 170 && PLR_FLAGGED(ch, PLR_TRANS4)) {
-                if (IS_SAIYAN(ch) && (ch->getCurLF()) >= (ch->getMaxLF()) * 0.7) {
-                    ch->decCurST(ch->getMaxST() / 240);
-                } else
-                    ch->decCurST(ch->getMaxST() / 170);
-            }
-
         }
 
         if (!IS_NPC(ch) && GET_WIMP_LEV(ch) && GET_HIT(ch) < GET_WIMP_LEV(ch) && GET_HIT(ch) > 0 && FIGHTING(ch)) {

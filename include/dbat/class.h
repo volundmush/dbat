@@ -77,9 +77,9 @@ namespace sensei {
         const std::string &getStyleName() const;
 
         // stats stuff
-        int getRPPCost(race::RaceID rid) const;
+        int getRPPCost(RaceID rid) const;
 
-        bool senseiAvailableForRace(race::RaceID r_id) const;
+        bool senseiAvailableForRace(RaceID r_id) const;
 
         int getGravTolerance() const;
 

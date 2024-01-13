@@ -645,14 +645,22 @@ namespace trans {
 
     };
 
-    double getStaminaDrain(char_data* ch, FormID form) {
+    double getStaminaDrain(char_data* ch, FormID form, bool fighting) {
         if (ch->form == FormID::Base) return 0.0;
 
+        double drain = 0.0;
+
         if (auto found = trans_drain.find(form); found != trans_drain.end()) {
-            return found->second;
+            drain = found->second;
         }
 
-        return 0.0;
+        if(form == FormID::SuperSaiyan && PLR_FLAGGED(ch, PLR_FPSSJ)) drain *= 0.5;
+
+        if(fighting) {
+            drain *= 0.2;
+            if(ch->race == RaceID::Icer) drain = 0.0;
+        }
+        return drain;
     }
 
     struct trans_echo {

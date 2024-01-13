@@ -2295,7 +2295,7 @@ int limb_ok(struct char_data *ch, int type) {
 
     // tail
     if(type == 3) {
-        if(!(PLR_FLAGGED(ch, PLR_TAIL) || PLR_FLAGGED(ch, PLR_STAIL))) {
+        if(!ch->hasTail()) {
             send_to_char(ch, "You have no tail!\r\n");
             return false;
         }
@@ -4186,7 +4186,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
     /* If a character is trageted */
 
     if (type <= 0) {
-        if (IS_SAIYAN(ch) && PLR_FLAGGED(ch, PLR_STAIL)) {
+        if (IS_SAIYAN(ch) && PLR_FLAGGED(ch, PLR_TAIL)) {
             dmg += dmg * .15;
         }
         if (IS_NAMEK(ch) && !GET_EQ(ch, WEAR_HEAD)) {

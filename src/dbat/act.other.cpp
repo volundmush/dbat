@@ -1609,7 +1609,7 @@ ACMD(do_rip) {
         return;
     }
 
-    if (!PLR_FLAGGED(vict, PLR_TAIL) && !PLR_FLAGGED(vict, PLR_STAIL)) {
+    if (!vict->hasTail()) {
         send_to_char(ch, "They do not have a tail to rip off!\r\n");
         return;
     }
@@ -6818,12 +6818,7 @@ ACMD(do_heal) {
         GET_LIMBCOND(vict, 1) = 100;
         GET_LIMBCOND(vict, 2) = 100;
         GET_LIMBCOND(vict, 3) = 100;
-        if (!PLR_FLAGGED(vict, PLR_TAIL) && (IS_BIO(vict) || IS_ICER(vict))) {
-            vict->playerFlags.set(PLR_TAIL);
-        }
-        if (!PLR_FLAGGED(vict, PLR_STAIL) && (IS_SAIYAN(vict) || IS_HALFBREED(vict))) {
-            vict->playerFlags.set(PLR_STAIL);
-        }
+        vict->gainTail();
         improve_skill(ch, SKILL_HEAL, 0);
         WAIT_STATE(ch, PULSE_2SEC);
     }

@@ -412,15 +412,7 @@ void do_start(struct char_data *ch) {
     if (GET_BONUS(ch, BONUS_BMEMORY))
         GET_SLOTS(ch) -= 5;
 
-
-    if (GET_RACE(ch) == RACE_SAIYAN || GET_RACE(ch) == RACE_HALFBREED) {
-        if (GET_RACE(ch) != RACE_HALFBREED || (GET_RACE(ch) == RACE_HALFBREED && RACIAL_PREF(ch) != 1)) {
-            ch->playerFlags.set(PLR_STAIL);
-        }
-    }
-    if (GET_RACE(ch) == RACE_ICER || GET_RACE(ch) == RACE_BIO) {
-        ch->playerFlags.set(PLR_TAIL);
-    }
+    ch->gainTail(false);
 
     if (GET_RACE(ch) == RACE_MAJIN) {
         GET_ABSORBS(ch) = 0;
@@ -1807,17 +1799,7 @@ time_t birth_age(struct char_data *ch) {
 }
 
 time_t max_age(struct char_data *ch) {
-    struct aging_data *aging;
-    size_t tmp;
-
-    if (ch->time.maxage)
-        return ch->time.maxage - ch->time.birth;
-
-    aging = racial_aging_data + GET_RACE(ch);
-
-    tmp = 120;
-
-    return tmp;
+    return 0;
 }
 
 static const int class_feats_wizard[] = {
@@ -1888,20 +1870,20 @@ namespace sensei {
         return style;
     }
 
-    bool Sensei::senseiAvailableForRace(race::RaceID r_id) const {
+    bool Sensei::senseiAvailableForRace(RaceID r_id) const {
         switch (s_id) {
             case sixteen:
-                return r_id == race::Android;
+                return r_id == RaceID::Android;
             case dabura:
-                return r_id == race::Demon;
+                return r_id == RaceID::Demon;
             case tsuna:
-                return r_id == race::Kanassan;
+                return r_id == RaceID::Kanassan;
             case kurzak:
-                return r_id == race::Arlian;
+                return r_id == RaceID::Arlian;
             case jinto:
-                return r_id == race::Hoshijin;
+                return r_id == RaceID::Hoshijin;
             default:
-                return r_id != race::Android;
+                return r_id != RaceID::Android;
         }
     }
 
@@ -1940,7 +1922,7 @@ namespace sensei {
         }
     }
 
-    IDXTYPE Sensei::senseiStartRoom() const {
+    room_vnum Sensei::senseiStartRoom() const {
         switch (s_id) {
             case roshi:
                 return 1130;
@@ -1993,18 +1975,6 @@ namespace sensei {
         }
     }
 
-    int Sensei::getRPPCost(race::RaceID rid) const {
-        switch (s_id) {
-            case kibito:
-                if (rid != race::Kai) {
-                    return 10;
-                } else {
-                    return 0;
-                }
-            default:
-                return 0;
-        }
-    }
 
     SenseiMap sensei_map;
 
@@ -2055,7 +2025,7 @@ namespace sensei {
     SenseiMap valid_for_race_pc(char_data *ch) {
         SenseiMap out;
         for (const auto &s: sensei_map) {
-            if (s.second->senseiIsPcOk() && s.second->senseiAvailableForRace(ch->race->getID())) {
+            if (s.second->senseiIsPcOk() && s.second->senseiAvailableForRace(ch->race)) {
                 out[s.first] = s.second;
             }
         }
