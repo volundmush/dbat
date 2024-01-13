@@ -1146,7 +1146,6 @@ namespace net {
                 else {
                     ch->setHeight(height);
                 }
-                break;
 
             }
 
@@ -1174,7 +1173,6 @@ namespace net {
                 else {
                     ch->weight = weight;
                 }
-                break;
                 
             }
 
