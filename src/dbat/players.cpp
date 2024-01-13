@@ -490,7 +490,7 @@ int load_char(const char *name, struct char_data *ch) {
                     }
                     else if (!strcmp(tag, "Tcos")) {
                         sscanf(line, "%d %d", &num2, &num3);
-                        GET_TRANSCOST(ch, num2) = num3;
+                        //GET_TRANSCOST(ch, num2) = num3;
                     } else if (!strcmp(tag, "Thir")) GET_COND(ch, THIRST) = atoi(line);
                     else if (!strcmp(tag, "Thr1")) GET_SAVE_MOD(ch, 0) = atoi(line);
                     else if (!strcmp(tag, "Thr2")) GET_SAVE_MOD(ch, 1) = atoi(line);

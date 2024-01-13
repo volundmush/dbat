@@ -787,7 +787,7 @@ void handle_forget(struct char_data *keeper, int guild_nr, struct char_data *ch,
     if (GET_SKILL_BASE(ch, skill_num) > 30) {
         send_to_char(ch, "@MYou can not forget that skill, you know too much about it.@n\r\n");
         return;
-    } else if (skill_num == SKILL_MIMIC && GET_MIMIC(ch) > 0) {
+    } else if (skill_num == SKILL_MIMIC && ch->mimic) {
         send_to_char(ch, "@MYou can not forget mimic while you are using it!\r\n");
     } else if (skill_num == SKILL_FOCUS) {
         send_to_char(ch, "@MYou can not forget such a fundamental skill!@n\r\n");
@@ -1076,7 +1076,7 @@ int rpp_to_level(struct char_data *ch) {
     switch (GET_LEVEL(ch)) {
         case 2:
             // charge the RPP races to level for the first time.
-            return ch->race->getRPPCost();
+            return 0;
         case 91:
         case 92:
         case 93:

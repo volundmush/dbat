@@ -703,34 +703,34 @@ void remove_limb(struct char_data *vict, int num) {
             snprintf(buf, sizeof(buf), "%s bloody head", GET_NAME(vict));
             break;
         case 1:
-            snprintf(part, sizeof(part), "@w%s right arm@n", TRUE_RACE(vict));
+            snprintf(part, sizeof(part), "@w%s right arm@n", race::getName(vict->race).c_str());
             snprintf(buf, sizeof(buf), "right arm");
         vict->pref.reset(PLR_CRARM);
             break;
         case 2:
-            snprintf(part, sizeof(part), "@w%s left arm@n", TRUE_RACE(vict));
+            snprintf(part, sizeof(part), "@w%s left arm@n", race::getName(vict->race).c_str());
             snprintf(buf, sizeof(buf), "left arm");
             vict->pref.reset(PLR_CLARM);
             break;
         case 3:
-            snprintf(part, sizeof(part), "@w%s right leg@n", TRUE_RACE(vict));
+            snprintf(part, sizeof(part), "@w%s right leg@n", race::getName(vict->race).c_str());
             snprintf(buf, sizeof(buf), "right leg");
             vict->pref.reset(PLR_CRLEG);
             break;
         case 4:
-            snprintf(part, sizeof(part), "@w%s left leg@n", TRUE_RACE(vict));
+            snprintf(part, sizeof(part), "@w%s left leg@n", race::getName(vict->race).c_str());
             snprintf(buf, sizeof(buf), "left leg");
             vict->pref.reset(PLR_CLLEG);
             break;
         case 5:
-            snprintf(part, sizeof(part), "@wA %s tail@n", TRUE_RACE(vict));
+            snprintf(part, sizeof(part), "@wA %s tail@n", race::getName(vict->race).c_str());
             snprintf(buf, sizeof(buf), "tail");
             break;
         case 6:
             snprintf(buf, sizeof(buf), "tail");
             break;
         default:
-            snprintf(part, sizeof(part), "@w%s body part@n", TRUE_RACE(vict));
+            snprintf(part, sizeof(part), "@w%s body part@n", race::getName(vict->race).c_str());
             snprintf(buf, sizeof(buf), "body part");
             break;
     }

@@ -1166,9 +1166,6 @@ void destroy_db() {
 
     for(auto &s : sensei::sensei_map) delete s.second;
     sensei::sensei_map.clear();
-    for(auto &r : race::race_map) delete r.second;
-    race::race_map.clear();
-
 }
 
 
@@ -2037,10 +2034,7 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
 
     ch->set(CharMoney::Carried, t[0]);
     GET_EXP(ch) = 0;
-    ch->race = race::find_race_map_id(t[2], race::race_map);
-    if (!ch->race) {
-        ch->race = race::race_map[race::Human];
-    }
+    ch->race = static_cast<RaceID>(t[2]);
 
     ch->chclass = sensei::find_sensei_map_id(t[3], sensei::sensei_map);
     if (!ch->chclass) {

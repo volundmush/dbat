@@ -312,17 +312,6 @@ namespace race {
         return find != all_races.end();
     }
 
-    std::vector<RaceID> getAll() {
-        return all_races;
-    }
-
-    std::vector<RaceID> getPlayable() {
-        std::vector<RaceID> out;
-        std::copy_if(all_races.begin(), all_races.end(), out, [&](const auto &r) {
-            return isPlayable(r);
-        });
-        return out;
-    }
 
     std::set<int> getValidSexes(RaceID id) {
         switch(id) {
@@ -474,6 +463,22 @@ namespace race {
 
 
         return 0.0;
+    }
+
+    std::vector<RaceID> filterRaces(std::function<bool(RaceID)> func) {
+        std::vector<RaceID> out;
+        std::copy_if(all_races.begin(), all_races.end(), std::back_inserter(out), func);
+
+        return out;
+    };
+
+    std::optional<RaceID> findRace(const std::string& arg, std::function<bool(RaceID)> func) {
+        for(auto r : all_races) {
+            if(!func(r)) continue;
+            if(boost::iequals(arg, getName(r))) return r;
+        }
+        return {};
+
     }
 
 }

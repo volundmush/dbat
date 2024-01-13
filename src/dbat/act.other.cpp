@@ -9526,13 +9526,13 @@ static void print_group(struct char_data *ch) {
                 snprintf(buf, sizeof(buf),
                          "@gL@D: @w$N @W- @D[@RPL@Y: @c%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]@n",
                          add_commas(GET_HIT(k)).c_str(), add_commas((k->getCurKI())).c_str(), add_commas((k->getCurST())).c_str(), GET_LEVEL(k),
-                         CLASS_ABBR(k), race::getAbbr(k->race));
+                         CLASS_ABBR(k), race::getAbbr(k->race).c_str());
             }
             if (GET_HIT(k) <= (GET_MAX_HIT(k) - (k->getCarriedWeight())) / 10) {
                 snprintf(buf, sizeof(buf),
                          "@gL@D: @w$N @W- @D[@RPL@Y: @r%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]@n",
                          add_commas(GET_HIT(k)).c_str(), add_commas((k->getCurKI())).c_str(), add_commas((k->getCurST())).c_str(), GET_LEVEL(k),
-                         CLASS_ABBR(k), race::getAbbr(k->race));
+                         CLASS_ABBR(k), race::getAbbr(k->race).c_str());
             }
             act(buf, false, ch, nullptr, k, TO_CHAR);
         }
@@ -9546,14 +9546,14 @@ static void print_group(struct char_data *ch) {
                          "@gF@D: @w$N @W- @D[@RPL@Y: @c%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]",
                          add_commas(GET_HIT(f->follower)).c_str(), add_commas((f->follower->getCurKI())).c_str(), add_commas(
                                 (f->follower->getCurST())).c_str(),
-                         GET_LEVEL(f->follower), CLASS_ABBR(f->follower), race::getAbbr(f->follower->race));
+                         GET_LEVEL(f->follower), CLASS_ABBR(f->follower), race::getAbbr(f->follower->race).c_str());
             }
             if (GET_HIT(f->follower) <= (GET_MAX_HIT(f->follower) - (f->follower->getCarriedWeight())) / 10) {
                 snprintf(buf, sizeof(buf),
                          "@gF@D: @w$N @W- @D[@RPL@Y: @r%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]",
                          add_commas(GET_HIT(f->follower)).c_str(), add_commas((f->follower->getCurKI())).c_str(), add_commas(
                                 (f->follower->getCurST())).c_str(),
-                         GET_LEVEL(f->follower), CLASS_ABBR(f->follower), race::getAbbr(f->follower->race));
+                         GET_LEVEL(f->follower), CLASS_ABBR(f->follower), race::getAbbr(f->follower->race).c_str());
             }
             act(buf, false, ch, nullptr, f->follower, TO_CHAR);
         }

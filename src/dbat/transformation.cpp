@@ -1250,4 +1250,8 @@ namespace trans {
 
         return {};
     }
+
+    bool unlock(struct char_data *ch, FormID form) {
+        return true;
+    }
 }

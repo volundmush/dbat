@@ -364,27 +364,22 @@ ACMD(do_mimic) {
     int count = 0, x = 0;
 
     // generate a list of mimic'able races.
-    race::RaceMap r_map;
-    for (const auto &r: race::race_map) {
-        if (r.second->raceCanBeMimiced() && r.second->isValidSex(GET_SEX(ch))) {
-            r_map[r.first] = r.second;
-        }
-    }
-
+    auto check = [&](RaceID id) {return race::getValidSexes(id).contains(GET_SEX(ch)) && race::isValidMimic(id);};
+    auto races = race::filterRaces(check);
     if (!*arg) {
         send_to_char(ch, "@CMimic Menu\n@c--------------------@W\r\n");
-        for (const auto &r: r_map) {
+        for (const auto &r: races) {
             if (count == 2) {
-                send_to_char(ch, "%s\n", r.second->getName().c_str());
+                send_to_char(ch, "%s\n", race::getName(r).c_str());
                 count = 0;
             } else {
-                send_to_char(ch, "%s\n", r.second->getName().c_str());
+                send_to_char(ch, "%s\n", race::getName(r).c_str());
                 count++;
             }
         }
         send_to_char(ch, "Stop@n\r\n");
         if (ch->mimic) {
-            send_to_char(ch, "You currently Mimic a %s", ch->mimic->getName().c_str());
+            send_to_char(ch, "You currently Mimic a %s", race::getName(ch->mimic.value()).c_str());
         }
 
         return;
@@ -399,15 +394,16 @@ ACMD(do_mimic) {
             nullptr, nullptr, TO_CHAR);
         act("@M$n@m concentrates for a moment and SUDDENLY $s appearance changes some what!@n", true, ch, nullptr,
             nullptr, TO_ROOM);
-        ch->mimic = nullptr;
+        ch->mimic.reset();
     }
 
-    auto race = race::find_race_map(arg, r_map);
-    if (!race) {
+    auto chosen_race = race::findRace(arg, check);
+    if (!chosen_race) {
         send_to_char(ch,
                      "That is not a race you can change into. Enter mimic without arugments for the mimic menu.\r\n");
         return;
     }
+    auto race = chosen_race.value();
 
     int prob = GET_SKILL(ch, SKILL_MIMIC), perc = axion_dice(0);
     double mult = 1 / prob;
@@ -416,10 +412,10 @@ ACMD(do_mimic) {
     if (race == ch->mimic) {
         send_to_char(ch, "You are already mimicing that race. To stop enter 'mimic stop'\r\n");
         return;
-    } else if (race && (ch->getCurKI()) < cost) {
+    } else if (ch->getCurKI() < cost) {
         send_to_char(ch, "You do not have enough ki to perform the technique.\r\n");
         return;
-    } else if (race && prob < perc) {
+    } else if (prob < perc) {
         ch->decCurKI(cost);
         act("@mYou concentrate and attempt to create an illusion to obscure your racial features. However you frown as you realize you have failed.@n",
             true, ch, nullptr, nullptr, TO_CHAR);
@@ -4889,7 +4885,7 @@ ACMD(do_score) {
         if (GET_CLAN(ch) != nullptr) {
             send_to_char(ch, "  @D|  @CClan@D: @W%-64s@D|@n\n", GET_CLAN(ch));
         }
-        send_to_char(ch, "  @D|  @CRace@D: @W%10s@D,  @CSensei@D: @W%15s@D,     @CArt@D: @W%-17s@D|@n\n", TRUE_RACE(ch),
+        send_to_char(ch, "  @D|  @CRace@D: @W%10s@D,  @CSensei@D: @W%15s@D,     @CArt@D: @W%-17s@D|@n\n", race::getName(ch->race),
                      ch->chclass->getName().c_str(), ch->chclass->getStyleName().c_str());
         char hei[300], wei[300];
         sprintf(hei, "%dcm", get_measure(ch, GET_PC_HEIGHT(ch), 0));
@@ -5006,7 +5002,7 @@ static void trans_check(struct char_data *ch, struct char_data *vict) {
             send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
         }
     } else if (IS_HOSHIJIN(vict)) {
-        if (GET_MIMIC(vict) == 0 || vict == ch) {
+        if (!vict->mimic || vict == ch) {
             if (GET_PHASE(vict) == 1) {
                 send_to_char(ch, "         @cCurrent Transformation@D: @CBirth Phase@n\r\n");
             } else if (GET_PHASE(vict) == 2) {
@@ -5443,7 +5439,7 @@ ACMD(do_status) {
             send_to_char(ch, "You are a bit at ease and your training suffers. Get out of the house more often.\r\n");
         }
 
-        if (GET_MIMIC(ch) > 0) {
+        if (ch->mimic) {
             send_to_char(ch, "You are mimicing the general appearance of %s %s\r\n", AN(LRACE(ch)), LRACE(ch));
         }
         if (IS_MUTANT(ch)) {
@@ -6250,7 +6246,7 @@ ACMD(do_who) {
 
             if (short_list) {
                 send_to_char(ch, "               @B[@W%3d @Y%s @C%s@B]@W %-12.12s@n%s@n",
-                             GET_LEVEL(tch), RACE_ABBR(tch), tch->chclass->getAbbr().c_str(), GET_NAME(tch),
+                             GET_LEVEL(tch), race::getAbbr(tch->race), tch->chclass->getAbbr().c_str(), GET_NAME(tch),
                              ((!(++num_can_see % 4)) ? "\r\n" : ""));
             } else {
                 num_can_see++;
@@ -6450,7 +6446,7 @@ ACMD(do_users) {
                 continue;
             if (showclass && !(showclass & (1 << GET_CLASS(tch))))
                 continue;
-            if (showrace && !(showrace & (1 << GET_RACE(tch))))
+            if (showrace && !(showrace & (1 << (int)GET_RACE(tch))))
                 continue;
             if (GET_INVIS_LEV(tch) > GET_ADMLEVEL(ch))
                 continue;
@@ -7641,7 +7637,7 @@ ACMD(do_whois) {
     } else {
         send_to_char(ch,
                      "@cName  @D: @w%s\r\n@cSensei@D: @w%s\r\n@cRace  @D: @w%s\r\n@cTitle @D: @w%s@n\r\n@cClan  @D: @w%s@n\r\n",
-                     GET_NAME(victim), victim->chclass->getName().c_str(), victim->race->getName().c_str(),
+                     GET_NAME(victim), victim->chclass->getName(), race::getName(victim->race),
                      GET_TITLE(victim), clan ? buf : "None.");
         if (clan == true && !strstr(GET_CLAN(victim), "Applying")) {
             if (checkCLAN(victim) == true) {

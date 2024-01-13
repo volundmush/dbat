@@ -56,10 +56,6 @@ extern int get_measure(struct char_data *ch, int height, int weight);
 
 extern int64_t physical_cost(struct char_data *ch, int skill);
 
-extern int trans_cost(struct char_data *ch, int trans);
-
-extern int trans_req(struct char_data *ch, int trans);
-
 extern int axion_dice(int adjust);
 
 const char *disp_align(struct char_data *ch);
@@ -906,7 +902,7 @@ void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val);
 
 #define RACE(ch)      ((ch)->juggleRaceName(true).c_str())
 #define LRACE(ch)     ((ch)->juggleRaceName(false).c_str())
-#define TRUE_RACE(ch) ((ch)->race->getName().c_str())
+#define TRUE_RACE(ch) (race::getName((ch)->race).c_str())
 
 #define CLASS_ABBR(ch) ((ch)->chclass->getAbbr().c_str())
 #define RACE_ABBR(ch) ((ch)->race->getAbbr().c_str())
@@ -941,15 +937,10 @@ void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val);
 #define CHEAP_RACE(ch)          (IS_TRUFFLE(ch) || IS_MUTANT(ch) || IS_KONATSU(ch) || IS_DEMON(ch) || IS_KANASSAN(ch))
 #define SPAR_TRAIN(ch)          (FIGHTING(ch) && !IS_NPC(ch) && PLR_FLAGGED(ch, PLR_SPAR) &&\
                                  !IS_NPC(FIGHTING(ch)) && PLR_FLAGGED(FIGHTING(ch), PLR_SPAR))
-#define IS_NONPTRANS(ch)        (IS_HUMAN(ch) || ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && !IS_FULLPSSJ(ch) && !PLR_FLAGGED(ch, PLR_LSSJ) && !PLR_FLAGGED(ch, PLR_OOZARU)) ||\
-                                 IS_NAMEK(ch) || IS_MUTANT(ch) || IS_ICER(ch) ||\
-                                 IS_KAI(ch) || IS_KONATSU(ch) || IS_DEMON(ch) || IS_KANASSAN(ch))
+#define IS_PTRANS(ch)           (IS_ANDROID(ch) || IS_TRUFFLE(ch) || IS_BIO(ch) || IS_MAJIN(ch))
+#define IS_NONPTRANS(ch)        (!IS_PTRANS(ch))
 #define OOZARU_RACE(ch)         (IS_SAIYAN(ch) || IS_HALFBREED(ch))
-#define IS_FULLPSSJ(ch)         (OOZARU_RACE(ch) && PLR_FLAGGED(ch, PLR_FPSSJ) && PLR_FLAGGED(ch, PLR_TRANS1))
-#define IS_TRANSFORMED(ch)      (PLR_FLAGGED(ch, PLR_TRANS1) || PLR_FLAGGED(ch, PLR_TRANS2) ||\
-                                 PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4) ||\
-                                 PLR_FLAGGED(ch, PLR_TRANS5) || PLR_FLAGGED(ch, PLR_TRANS6) ||\
-                                 PLR_FLAGGED(ch, PLR_OOZARU))
+#define IS_TRANSFORMED(ch)      ((ch)->form != FormID::Base)
 #define BIRTH_PHASE             (time_info.day <= 15)
 #define LIFE_PHASE              (!BIRTH_PHASE && time_info.day <= 22)
 #define DEATH_PHASE             (!BIRTH_PHASE && !LIFE_PHASE)
